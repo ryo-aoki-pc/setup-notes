@@ -9,7 +9,7 @@
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
-| [WireGuard 拠点間 VPN 構築手順](docs/wireguard-site-to-site.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続（wg-quick + systemd）。firewalld の専用ゾーン + policy による転送制御、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload の落とし穴を含む。network namespace で模擬検証 |
+| [WireGuard 拠点間 VPN 構築手順](docs/wireguard-site-to-site.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続（wg-quick + systemd）。firewalld の専用ゾーン + policy による転送制御、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload の落とし穴を含む。network namespace で模擬検証。値を `site.env` に書いて手順を実行するスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可、ドライランまで検証）付き |
 
 ## 記法の約束
 

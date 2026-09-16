@@ -4,6 +4,7 @@
 - **構成**: 各拠点で、既存ルーターの配下にある AlmaLinux 1 台を WireGuard ホストにする（ルーターの置き換えはしない）
 - **設定方式**: `wg-quick` + systemd（`/etc/wireguard/wg0.conf` / `wg-quick@wg0.service`）、firewalld の policy で転送を制御
 - **状態**: 1 台のマシン上に network namespace で 2 拠点を模擬して動作確認済み（[付録](#付録-network-namespace-による模擬検証)）。**実際に 2 拠点をインターネット越しに結んでの確認はまだしていない**
+- **スクリプト**: プレースホルダの値を 1 ファイルに書いて手順 1〜6 を実行する [`scripts/wireguard-site-to-site/`](../scripts/wireguard-site-to-site/) を用意した（[スクリプトで一括実行する場合](#スクリプトで一括実行する場合)）。**ドライランと事前検査までの確認で、実際の適用はまだ試していない**
 
 | 項目 | 値 |
 |---|---|
@@ -85,6 +86,49 @@
 ---
 
 ## 構築手順
+
+### スクリプトで一括実行する場合
+
+以下の手順 1〜6 は、[`scripts/wireguard-site-to-site/wg-s2s.sh`](../scripts/wireguard-site-to-site/wg-s2s.sh) でまとめて実行できる。値は [`site.env.example`](../scripts/wireguard-site-to-site/site.env.example) を `site.env` にコピーして書く。変数名はこの文書のプレースホルダと同じで、**両拠点で同じ `site.env` を使う**（`site.env` は `.gitignore` で除外している）。
+
+```bash
+cd scripts/wireguard-site-to-site
+cp site.env.example site.env && vi site.env
+
+# 新しく conf を作る場合
+sudo ./wg-s2s.sh keygen A                 # 手順 1〜2。表示された公開鍵を site.env の SITE_A_PUBKEY に書く（拠点 B でも同様）
+sudo ./wg-s2s.sh --dry-run apply A        # 実行予定の内容を確認（秘密鍵は (hidden) と表示）
+sudo ./wg-s2s.sh apply A                  # 手順 3〜6 + ルーターに入れる値を表示
+
+# 既存の wg0.conf を使う場合（conf は書き換えない。公開鍵の変数と keygen は不要）
+sudo ./wg-s2s.sh --use-existing-conf --dry-run apply A
+sudo ./wg-s2s.sh --use-existing-conf apply A      # site.env に WG_USE_EXISTING_CONF=1 と書いても同じ
+
+./wg-s2s.sh router A                      # 手順 7 の値だけを表示
+sudo ./wg-s2s.sh status
+sudo ./wg-s2s.sh remove A                 # ロールバック（--purge で conf と鍵も削除）
+```
+
+`apply` の動作:
+
+- **何かを変更する前に、次を検査する。** 1 つでも失敗したら何も変更せずに止まる
+  - アドレスの形式
+  - LAN・トンネル網の重複
+  - `WG_x_LAN_IP` がこのホストにあるか（A/B の取り違えを防ぐ）
+  - 公開鍵の形式
+- **conf を生成する場合**: `PrivateKey` を直接書く（[落とし穴 1](#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）。既存の conf と内容が違えば、`.bak-日時` に退避してから書く
+- **既存の conf を使う場合**: conf を読むだけで、次の整合チェックを行う
+  - `Address` に `WG_x_TUN_IP` が無い、または相手 LAN を `AllowedIPs` に含む `[Peer]` が無い → **停止**
+  - `ListenPort` が `WG_PORT` と違う → **警告**して conf の値を使う
+  - `PrivateKey` を `PostUp` で読み込んでいる、パーミッションが 600 でない → **警告**
+- **firewalld**: 設定が既にあるかを確かめてから追加するので、再実行しても設定が重複しない
+- **サービス**: 最後は常に `systemctl restart` する（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)）
+- **LAN_ZONE**: 空なら `WG_x_LAN_IP` を持つ NIC のゾーンを自動で使う
+- **CGNAT 構成**: `SITE_x_PUBLIC` を空にすると、その拠点に向けた `Endpoint` を書かない（[CGNAT の構成](#片側がグローバル-ip-を持たない場合cgnat-など)）
+
+スクリプトの検証範囲は[付録](#スクリプトの検証ドライランのみ)を参照。
+
+### 手動で実施する場合
 
 **手順 1〜6 は両拠点の WG ホストで実施する。** コマンドは拠点 A 用に書いてある。拠点 B では A と B を入れ替える。
 
@@ -589,3 +633,26 @@ ip netns exec wgB wg set wg0 peer <SITE_A_PUBKEY> endpoint 198.51.100.1:51821
 ### 後片付け
 
 namespace・ブリッジ・経路を削除し、[ロールバック](#ロールバック)の手順で wg-quick・鍵・sysctl・firewalld を戻した。`/etc/firewalld` を作業前のバックアップと `diff -r` で比べ、差分が無いことを確認した（削除で生成された `*.xml.old` は手で消した）。`wireguard-tools` と `systemd-resolved` はインストールしたまま残している。
+
+## スクリプトの検証（ドライランのみ）
+
+`wg-s2s.sh` は、**実際の適用（`apply` / `remove` の本実行）をまだ試していない**。途中で、検証に使っていたマシンが実運用向けの WireGuard 設定（別途作成した `wg0.conf`・sysctl・firewalld）を持つ環境だとわかった。そのため、既存の設定を変える操作は取りやめ、読み取りだけで済む範囲で確認した。
+
+| 確認項目 | 結果 |
+|---|---|
+| `bash -n` | OK（shellcheck は未導入のため未実施） |
+| root 以外で `apply` | `root で実行してください` で停止 |
+| `keygen` | 鍵を生成して公開鍵を表示。再実行しても既存の鍵を上書きしない。拠点指定を誤ると停止 |
+| `apply A --dry-run`（conf 生成、netns 環境） | 生成予定の conf が手動手順の conf と同じ内容（`PrivateKey = (hidden)`）。firewalld は、未設定の項目だけが実行予定として表示された |
+| 相手の公開鍵が空 | `SITE_B_PUBKEY（相手拠点の公開鍵）が空です` で停止 |
+| `--use-existing-conf --dry-run apply A`（実機の既存 conf） | 整合チェックを通過。conf は生成しない。firewalld は、既に設定済みのポート・ゾーン・interface を飛ばし、足りない rich rule と逆方向の policy だけが表示された |
+| 既存 conf: `Address` 不一致 | `Address（…）に自拠点のトンネル IP … がありません` で停止 |
+| 既存 conf: 相手 LAN が `AllowedIPs` に無い | `相手拠点 LAN … を AllowedIPs に含む [Peer] がありません` で停止 |
+| 既存 conf: ファイルが無い | `既存の設定ファイルがありません` で停止 |
+| 既存 conf: `ListenPort` ≠ `WG_PORT` | 警告を出し、conf の値を使って続行 |
+| 既存 conf: 相手 peer に `Endpoint` が無い | 警告を出して続行 |
+| A/B の取り違え | `このホストは拠点 A の WG ホスト（…）です` で停止 |
+| 両拠点の LAN が重複 | `… と … が重複しています` で停止 |
+| 実行前後の比較 | 既存 conf の sha256 が一致。`/etc/firewalld` はバックアップと `diff -r` で差分なし。`ip_forward` も変化なし |
+
+未確認: `apply` と `remove` の本実行、適用後の疎通、再実行したときに設定が重複しないこと、conf のパーミッション警告（対象ファイルが既に 600 だったため）。
