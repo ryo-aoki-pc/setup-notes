@@ -1,0 +1,2 @@
+# 環境固有の値を書く設定ファイル（site.env.example をコピーして使う）
+scripts/wireguard-site-to-site/site.env
