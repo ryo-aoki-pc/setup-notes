@@ -1,0 +1,12 @@
+# リモートクライアントの登録簿（docs/wireguard-remote-clients.md）
+#
+# 通常は `wg-s2s.sh client add A|B NAME` が clients.list に追記する。手で書く場合はこの形式にする。
+#   NAME       : 英数字・-・_ のみ。クライアント用 conf のファイル名（<NAME>.conf）にもなる
+#   SITE       : クライアントが接続する拠点（A または B）
+#   TUNNEL_IP  : WG_<SITE>_CLIENT_NET の中のアドレス（ネットワーク/ブロードキャストを除く）
+#   PUBLIC_KEY : クライアントの WireGuard 公開鍵
+# 空白区切り、# 以降はコメント。clients.list は .gitignore で除外している。
+#
+# NAME       SITE TUNNEL_IP       PUBLIC_KEY
+laptop       A    10.99.1.1       <CLIENT_PUBKEY>
+phone        A    10.99.1.2       <CLIENT_PUBKEY>
