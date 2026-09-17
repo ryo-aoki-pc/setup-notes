@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
-# WireGuard 拠点間 VPN（docs/wireguard-site-to-site.md）の手順を site.env の値で実行する。
+# WireGuard 拠点間 VPN（docs/wireguard-site-to-site.md）と、そこへのリモートクライアント追加
+# （docs/wireguard-remote-clients.md）の手順を site.env の値で実行する。
 #
-#   sudo ./wg-s2s.sh [options] keygen [A|B]   手順 1〜2: wireguard-tools 導入と鍵生成
-#   sudo ./wg-s2s.sh [options] apply  A|B     手順 3〜6: wg0.conf・sysctl・firewalld・サービス
-#        ./wg-s2s.sh [options] router A|B     手順 7: ルーターに入れる値を表示
-#   sudo ./wg-s2s.sh [options] status         状態確認
-#   sudo ./wg-s2s.sh [options] remove A|B     ロールバック
+#   sudo ./wg-s2s.sh [options] keygen [A|B]          手順 1〜2: wireguard-tools 導入と鍵生成
+#   sudo ./wg-s2s.sh [options] apply  A|B            手順 3〜6: wg0.conf・sysctl・firewalld・サービス
+#        ./wg-s2s.sh [options] router A|B            手順 7: ルーターに入れる値を表示
+#   sudo ./wg-s2s.sh [options] status                状態確認
+#   sudo ./wg-s2s.sh [options] remove A|B            ロールバック
+#   sudo ./wg-s2s.sh [options] client add A|B NAME   クライアントを登録し、鍵とクライアント用 conf を生成する
+#   sudo ./wg-s2s.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する
+#   sudo ./wg-s2s.sh [options] client show NAME      クライアント用 conf を表示する
+#        ./wg-s2s.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）
+#   client add / remove の後は、その拠点で apply を実行してホストに反映する。
 #
 # options:
 #   -e, --env FILE          設定ファイル（既定: スクリプトと同じディレクトリの site.env）
 #   -n, --dry-run           変更せず、実行予定の内容だけを表示する
 #   --use-existing-conf     既存の wg0.conf を使い、生成しない（site.env の WG_USE_EXISTING_CONF=1 と同じ）
-#   --purge                 remove で wg0.conf と鍵ファイルも削除する
+#   --purge                 remove で wg0.conf・鍵ファイル・クライアント用 conf も削除する
+#   --pubkey KEY            client add: クライアント側で生成した公開鍵を登録する（秘密鍵をホストで作らない）
+#   --ip ADDR               client add: トンネル IP を指定する（既定: 帯の中で最小の空きアドレス）
+#   --qr                    client show: QR コードで表示する（qrencode が必要）
 #   -h, --help              このヘルプ
 set -euo pipefail
 
@@ -20,7 +29,16 @@ ENV_FILE="$SCRIPT_DIR/site.env"
 DRY_RUN=0
 OPT_USE_EXISTING=0
 PURGE=0
+OPT_PUBKEY=""
+OPT_IP=""
+OPT_QR=0
 SYSCTL_FILE=/etc/sysctl.d/90-wireguard.conf
+# --pubkey で登録したクライアントの conf に書く PrivateKey の仮の値
+CLIENT_KEY_PLACEHOLDER="<CLIENT_PRIVATE_KEY>"
+# status で表示する policy（両拠点分。apply が作りうる名前すべて）
+ALL_POLICIES=(siteA-to-siteB siteB-to-siteA
+              clientsA-to-siteA siteA-to-clientsA clientsA-to-siteB siteB-to-clientsA
+              clientsB-to-siteB siteB-to-clientsB clientsB-to-siteA siteA-to-clientsB)
 
 die()  { echo "ERROR: $*" >&2; exit 1; }
 warn() { echo "WARN:  $*" >&2; }
@@ -52,6 +70,11 @@ load_env() {
   WG_KEEPALIVE=${WG_KEEPALIVE:-25}
   WG_MTU=${WG_MTU:-}
   LAN_ZONE=${LAN_ZONE:-}
+  WG_A_CLIENT_NET=${WG_A_CLIENT_NET:-}
+  WG_B_CLIENT_NET=${WG_B_CLIENT_NET:-}
+  WG_CLIENT_DNS=${WG_CLIENT_DNS:-}
+  CLIENTS_FILE=${WG_CLIENTS_FILE:-$(dirname "$ENV_FILE")/clients.list}
+  CLIENT_DIR=${WG_CLIENT_DIR:-/etc/wireguard/clients}
   CONF=/etc/wireguard/$WG_IFACE.conf
   KEY=/etc/wireguard/$WG_IFACE.key
   PUB=/etc/wireguard/$WG_IFACE.pub
@@ -74,30 +97,55 @@ select_site() {
     [[ -n ${!v:-} ]] || die "site.env の $v が空です"
   done
   local n
-  n=SITE_${L}_LAN;      MY_LAN=${!n}
-  n=SITE_${P}_LAN;      PEER_LAN=${!n}
-  n=WG_${L}_LAN_IP;     MY_LAN_IP=${!n}
-  n=WG_${P}_LAN_IP;     PEER_LAN_IP=${!n}
-  n=WG_${L}_TUN_IP;     MY_TUN=${!n}
-  n=WG_${P}_TUN_IP;     PEER_TUN=${!n}
-  n=SITE_${L}_PUBLIC;   MY_PUBLIC=${!n:-}
-  n=SITE_${P}_PUBLIC;   PEER_PUBLIC=${!n:-}
-  n=SITE_${L}_PUBKEY;   MY_PUBKEY=${!n:-}
-  n=SITE_${P}_PUBKEY;   PEER_PUBKEY=${!n:-}
-  n=ROUTER_${L}_LAN_IP; MY_ROUTER=${!n:-}
+  n=SITE_${L}_LAN;       MY_LAN=${!n}
+  n=SITE_${P}_LAN;       PEER_LAN=${!n}
+  n=WG_${L}_LAN_IP;      MY_LAN_IP=${!n}
+  n=WG_${P}_LAN_IP;      PEER_LAN_IP=${!n}
+  n=WG_${L}_TUN_IP;      MY_TUN=${!n}
+  n=WG_${P}_TUN_IP;      PEER_TUN=${!n}
+  n=SITE_${L}_PUBLIC;    MY_PUBLIC=${!n:-}
+  n=SITE_${P}_PUBLIC;    PEER_PUBLIC=${!n:-}
+  n=SITE_${L}_PUBKEY;    MY_PUBKEY=${!n:-}
+  n=SITE_${P}_PUBKEY;    PEER_PUBKEY=${!n:-}
+  n=ROUTER_${L}_LAN_IP;  MY_ROUTER=${!n:-}
+  n=WG_${L}_CLIENT_NET;  MY_CLIENT_NET=${!n:-}
+  n=WG_${P}_CLIENT_NET;  PEER_CLIENT_NET=${!n:-}
   POLICY_OUT="site${L}-to-site${P}"
   POLICY_IN="site${P}-to-site${L}"
   PORT=$WG_PORT
+  # クライアント用 policy。"名前 ingress egress 送信元 宛先"（wg = WG_FW_ZONE、lan = LAN_ZONE）。
+  # 帯が設定されている分だけ apply で作る。remove は帯の有無にかかわらず SITE_POLICIES をすべて消す
+  CLIENT_POLICIES=()
+  if [[ -n $MY_CLIENT_NET ]]; then
+    CLIENT_POLICIES+=(
+      "clients${L}-to-site${L} wg  lan $MY_CLIENT_NET $MY_LAN"      # 自拠点のクライアント → 自拠点 LAN
+      "site${L}-to-clients${L} lan wg  $MY_LAN $MY_CLIENT_NET"      # 自拠点 LAN → 自拠点のクライアント
+      "clients${L}-to-site${P} wg  wg  $MY_CLIENT_NET $PEER_LAN"    # 自拠点のクライアント → 相手拠点 LAN（トンネルへ折り返す）
+      "site${P}-to-clients${L} wg  wg  $PEER_LAN $MY_CLIENT_NET"    # 相手拠点 LAN → 自拠点のクライアント
+    )
+  fi
+  if [[ -n $PEER_CLIENT_NET ]]; then
+    CLIENT_POLICIES+=(
+      "clients${P}-to-site${L} wg  lan $PEER_CLIENT_NET $MY_LAN"    # 相手拠点のクライアント → 自拠点 LAN
+      "site${L}-to-clients${P} lan wg  $MY_LAN $PEER_CLIENT_NET"    # 自拠点 LAN → 相手拠点のクライアント
+    )
+  fi
+  SITE_POLICIES=("$POLICY_OUT" "$POLICY_IN"
+                 "clients${L}-to-site${L}" "site${L}-to-clients${L}"
+                 "clients${L}-to-site${P}" "site${P}-to-clients${L}"
+                 "clients${P}-to-site${L}" "site${L}-to-clients${P}")
 }
 
-# アドレス類の形式・包含関係・重複を検査する
+# アドレス類の形式・包含関係・重複と、クライアント登録簿の内容を検査する
 validate_addresses() {
   local out
   out=$(python3 - "$SITE_A_LAN" "$SITE_B_LAN" "$WG_TUNNEL_NET" \
       "$WG_A_LAN_IP" "$WG_B_LAN_IP" "$WG_A_TUN_IP" "$WG_B_TUN_IP" \
-      "${ROUTER_A_LAN_IP:-}" "${ROUTER_B_LAN_IP:-}" "$WG_PORT" "$WG_KEEPALIVE" "$WG_MTU" <<'PY'
-import ipaddress as ip, sys
-a_lan, b_lan, tun, a_ip, b_ip, a_tun, b_tun, a_rt, b_rt, port, ka, mtu = sys.argv[1:]
+      "${ROUTER_A_LAN_IP:-}" "${ROUTER_B_LAN_IP:-}" "$WG_PORT" "$WG_KEEPALIVE" "$WG_MTU" \
+      "$WG_A_CLIENT_NET" "$WG_B_CLIENT_NET" "$CLIENTS_FILE" <<'PY'
+import ipaddress as ip, os, re, sys
+(a_lan, b_lan, tun, a_ip, b_ip, a_tun, b_tun, a_rt, b_rt, port, ka, mtu,
+ a_cl, b_cl, clients_file) = sys.argv[1:]
 errs = []
 def net(name, v):
     try:
@@ -114,12 +162,16 @@ ia, ib = addr("WG_A_LAN_IP", a_ip), addr("WG_B_LAN_IP", b_ip)
 ta, tb = addr("WG_A_TUN_IP", a_tun), addr("WG_B_TUN_IP", b_tun)
 ra = addr("ROUTER_A_LAN_IP", a_rt) if a_rt else None
 rb = addr("ROUTER_B_LAN_IP", b_rt) if b_rt else None
+ca = net("WG_A_CLIENT_NET", a_cl) if a_cl else None
+cb = net("WG_B_CLIENT_NET", b_cl) if b_cl else None
 if not errs:
-    for (x, xn), (y, yn) in [((na, "SITE_A_LAN"), (nb, "SITE_B_LAN")),
-                             ((na, "SITE_A_LAN"), (nt, "WG_TUNNEL_NET")),
-                             ((nb, "SITE_B_LAN"), (nt, "WG_TUNNEL_NET"))]:
-        if x.overlaps(y):
-            errs.append(f"{xn}={x} と {yn}={y} が重複しています")
+    nets = [(na, "SITE_A_LAN"), (nb, "SITE_B_LAN"), (nt, "WG_TUNNEL_NET")]
+    nets += [(ca, "WG_A_CLIENT_NET")] if ca else []
+    nets += [(cb, "WG_B_CLIENT_NET")] if cb else []
+    for i, (x, xn) in enumerate(nets):
+        for y, yn in nets[i + 1:]:
+            if x.overlaps(y):
+                errs.append(f"{xn}={x} と {yn}={y} が重複しています")
     for i, n, iname, nname in [(ia, na, "WG_A_LAN_IP", "SITE_A_LAN"), (ib, nb, "WG_B_LAN_IP", "SITE_B_LAN"),
                                (ta, nt, "WG_A_TUN_IP", "WG_TUNNEL_NET"), (tb, nt, "WG_B_TUN_IP", "WG_TUNNEL_NET"),
                                (ra, na, "ROUTER_A_LAN_IP", "SITE_A_LAN"), (rb, nb, "ROUTER_B_LAN_IP", "SITE_B_LAN")]:
@@ -130,6 +182,51 @@ if not errs:
     for i, n in [(ta, nt), (tb, nt)]:
         if n.num_addresses > 2 and i in (n.network_address, n.broadcast_address):
             errs.append(f"{i} は {n} のネットワーク/ブロードキャストアドレスです")
+    for n, nname in [(ca, "WG_A_CLIENT_NET"), (cb, "WG_B_CLIENT_NET")]:
+        if n is not None and n.num_addresses < 4:
+            errs.append(f"{nname}={n}: クライアント用の帯は /30 より広くしてください")
+    # クライアント登録簿（NAME SITE TUNNEL_IP PUBLIC_KEY）
+    cnets = {"A": ca, "B": cb}
+    seen_name, seen_ip, seen_key = {}, {}, {}
+    lines = open(clients_file, encoding="utf-8").read().splitlines() if os.path.exists(clients_file) else []
+    for lineno, raw in enumerate(lines, 1):
+        where = f"{clients_file}:{lineno}"
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        f = line.split()
+        if len(f) != 4:
+            errs.append(f"{where}: 4 列（NAME SITE TUNNEL_IP PUBLIC_KEY）ではありません")
+            continue
+        name, site, cip, key = f
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
+            errs.append(f"{where}: クライアント名 {name} は英数字・-・_ だけで指定してください")
+        if name in seen_name:
+            errs.append(f"{where}: クライアント名 {name} が {seen_name[name]} 行目と重複しています")
+        seen_name.setdefault(name, lineno)
+        if site not in cnets:
+            errs.append(f"{where}: SITE={site} は A か B で指定してください")
+            continue
+        try:
+            i = ip.ip_address(cip)
+        except ValueError:
+            errs.append(f"{where}: {cip} は IP アドレスとして不正です")
+            continue
+        n = cnets[site]
+        if n is None:
+            errs.append(f"{where}: クライアント {name} は拠点 {site} ですが WG_{site}_CLIENT_NET が空です")
+        elif i not in n:
+            errs.append(f"{where}: {i} が WG_{site}_CLIENT_NET={n} に含まれていません")
+        elif i in (n.network_address, n.broadcast_address):
+            errs.append(f"{where}: {i} は {n} のネットワーク/ブロードキャストアドレスです")
+        if i in seen_ip:
+            errs.append(f"{where}: {i} が {seen_ip[i]} 行目と重複しています")
+        seen_ip.setdefault(i, lineno)
+        if not re.fullmatch(r"[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=", key):
+            errs.append(f"{where}: 公開鍵が WireGuard の公開鍵の形式ではありません")
+        elif key in seen_key:
+            errs.append(f"{where}: 公開鍵が {seen_key[key]} 行目と重複しています")
+        seen_key.setdefault(key, lineno)
 if not port.isdigit() or not 1 <= int(port) <= 65535:
     errs.append(f"WG_PORT={port}: 1〜65535 で指定してください")
 if not ka.isdigit():
@@ -186,6 +283,62 @@ install_tools() {
   fi
 }
 
+# --- クライアント登録簿 ------------------------------------------------------------
+# clients.list（NAME SITE TUNNEL_IP PUBLIC_KEY、# 以降はコメント）を読み、
+# 拠点 $1（空なら全拠点）の行を CL_NAMES / CL_SITES / CL_IPS / CL_PUBS に入れる。
+# 形式の検査は validate_addresses が行うので、先にそちらを呼ぶ
+read_clients() {
+  local site=${1:-} name s cip key
+  CL_NAMES=(); CL_SITES=(); CL_IPS=(); CL_PUBS=()
+  [[ -f $CLIENTS_FILE ]] || return 0
+  while read -r name s cip key _; do
+    [[ -n $name && $name != \#* ]] || continue
+    [[ -z $site || $s == "$site" ]] || continue
+    CL_NAMES+=("$name"); CL_SITES+=("$s"); CL_IPS+=("$cip"); CL_PUBS+=("$key")
+  done <"$CLIENTS_FILE"
+}
+
+# 登録済みクライアント $1 の添字を CL_INDEX に入れる（無ければ偽）
+find_client() {
+  local i
+  for i in "${!CL_NAMES[@]}"; do
+    if [[ ${CL_NAMES[i]} == "$1" ]]; then CL_INDEX=$i; return 0; fi
+  done
+  return 1
+}
+
+# 帯 $1 の中で使えるアドレスを返す。$2 が空なら最小の空き、指定があればそれを検査する。残りは使用中の IP
+alloc_client_ip() {
+  python3 - "$@" <<'PY'
+import ipaddress as ip, sys
+net, want, *used = sys.argv[1:]
+n = ip.ip_network(net)
+used = {ip.ip_address(u) for u in used}
+def fail(msg):
+    print(f"ERROR: {msg}", file=sys.stderr)
+    sys.exit(1)
+if want:
+    try:
+        a = ip.ip_address(want)
+    except ValueError:
+        fail(f"--ip {want}: IP アドレスとして不正です")
+    if a not in n:
+        fail(f"--ip {a} が WG_CLIENT_NET={n} に含まれていません")
+    if a in (n.network_address, n.broadcast_address):
+        fail(f"--ip {a} は {n} のネットワーク/ブロードキャストアドレスです")
+    if a in used:
+        fail(f"--ip {a} は既に別のクライアントに割り当てられています")
+    print(a)
+else:
+    for h in n.hosts():
+        if h not in used:
+            print(h)
+            break
+    else:
+        fail(f"{n} に空きアドレスがありません")
+PY
+}
+
 # --- 既存 conf の検査 ------------------------------------------------------------
 # 停止すべき不一致は ERROR、続行できるものは WARN を出す。ListenPort が書かれていれば PORT をそれに合わせる
 check_existing_conf() {
@@ -193,9 +346,9 @@ check_existing_conf() {
   local mode out rc=0
   mode=$(stat -c %a "$CONF")
   [[ $mode == 600 ]] || warn "$CONF のパーミッションが $mode です（600 を推奨）"
-  out=$(python3 - "$CONF" "$MY_TUN" "$PEER_TUN" "$PEER_LAN" "$WG_PORT" <<'PY'
+  out=$(python3 - "$CONF" "$MY_TUN" "$PEER_TUN" "$PEER_LAN" "$WG_PORT" "$PEER_CLIENT_NET" <<'PY'
 import ipaddress as ip, re, sys
-path, my_tun, peer_tun, peer_lan, port = sys.argv[1:]
+path, my_tun, peer_tun, peer_lan, port, peer_clients = sys.argv[1:]
 iface, peers, cur = {}, [], None
 for raw in open(path, encoding="utf-8"):
     line = raw.split("#", 1)[0].strip()
@@ -245,6 +398,10 @@ else:
         warns.append(f"相手 peer の AllowedIPs に相手のトンネル IP {peer_tun} が含まれていません")
     if not p.get("endpoint"):
         warns.append("相手 peer に Endpoint がありません（相手側からトンネルを張る構成でなければ接続できません）")
+    if peer_clients:
+        cn = ip.ip_network(peer_clients)
+        if not any(cn.version == n.version and cn.subnet_of(n) for n in nets(p)):
+            warns.append(f"相手 peer の AllowedIPs に相手拠点のクライアント帯 {peer_clients} が含まれていません（相手拠点のクライアントからこの拠点へは届きません）")
 lp = iface.get("listenport", [])
 if not lp:
     warns.append(f"[Interface] に ListenPort がありません（ランダムなポートになり、ポート転送できません）。firewalld には WG_PORT={port} を使います")
@@ -276,15 +433,32 @@ PY
 }
 
 # --- conf 生成 ---------------------------------------------------------------------
-render_conf() {  # $1 = PrivateKey の値
-  local endpoint=""
-  if [[ -n $PEER_PUBLIC ]]; then
-    if [[ $PEER_PUBLIC == *:* && $PEER_PUBLIC != \[* ]]; then
-      endpoint="[$PEER_PUBLIC]:$PORT"
-    else
-      endpoint="$PEER_PUBLIC:$PORT"
-    fi
+# Endpoint の値（IPv6 リテラルは [] で囲む）
+format_endpoint() {
+  if [[ $1 == *:* && $1 != \[* ]]; then
+    echo "[$1]:$PORT"
+  else
+    echo "$1:$PORT"
   fi
+}
+
+# 自拠点のクライアント（read_clients "$L" の結果）の [Peer] ブロック
+render_client_peers() {
+  local i
+  for i in "${!CL_NAMES[@]}"; do
+    echo
+    echo "[Peer]"
+    echo "# Client ${CL_NAMES[i]}"
+    echo "PublicKey = ${CL_PUBS[i]}"
+    echo "AllowedIPs = ${CL_IPS[i]}/32"
+  done
+}
+
+render_conf() {  # $1 = PrivateKey の値
+  local endpoint="" allowed="$PEER_TUN/32, $PEER_LAN"
+  [[ -z $PEER_PUBLIC ]] || endpoint=$(format_endpoint "$PEER_PUBLIC")
+  # 相手拠点のクライアントは相手拠点ホストの向こうにいるので、その帯も相手 peer に載せる
+  [[ -z $PEER_CLIENT_NET ]] || allowed+=", $PEER_CLIENT_NET"
   echo "[Interface]"
   echo "Address = $MY_TUN/$TUN_PREFIX"
   echo "ListenPort = $PORT"
@@ -295,8 +469,31 @@ render_conf() {  # $1 = PrivateKey の値
   echo "# Site $P"
   echo "PublicKey = $PEER_PUBKEY"
   [[ -z $endpoint ]] || echo "Endpoint = $endpoint"
-  echo "AllowedIPs = $PEER_TUN/32, $PEER_LAN"
+  echo "AllowedIPs = $allowed"
   (( WG_KEEPALIVE == 0 )) || echo "PersistentKeepalive = $WG_KEEPALIVE"
+  render_client_peers
+}
+
+# クライアント用 conf。$1 = クライアント名、$2 = トンネル IP、$3 = PrivateKey の値。SITE_PUBKEY は resolve_my_pubkey で決める
+render_client_conf() {
+  echo "[Interface]"
+  echo "# Client $1 (site $L)"
+  echo "Address = $2/32"
+  echo "PrivateKey = $3"
+  [[ -z $WG_CLIENT_DNS ]] || echo "DNS = $WG_CLIENT_DNS"
+  echo
+  echo "[Peer]"
+  echo "# Site $L"
+  echo "PublicKey = $SITE_PUBKEY"
+  echo "Endpoint = $(format_endpoint "$MY_PUBLIC")"
+  echo "AllowedIPs = $SITE_A_LAN, $SITE_B_LAN, $WG_TUNNEL_NET"
+  (( WG_KEEPALIVE == 0 )) || echo "PersistentKeepalive = $WG_KEEPALIVE"
+}
+
+# このホストの鍵ファイルから公開鍵を算出する（鍵が無ければ空）
+derive_my_pubkey() {
+  [[ -f $KEY ]] || { echo ""; return 0; }
+  wg pubkey <"$KEY" || die "$KEY から公開鍵を算出できません"
 }
 
 check_keys() {
@@ -304,11 +501,28 @@ check_keys() {
   is_pubkey "$PEER_PUBKEY" || die "SITE_${P}_PUBKEY が WireGuard の公開鍵の形式ではありません"
   [[ -f $KEY ]] || die "秘密鍵 $KEY がありません。先に keygen を実行してください"
   local derived
-  derived=$(wg pubkey <"$KEY") || die "$KEY から公開鍵を算出できません"
+  derived=$(derive_my_pubkey)
   if [[ -n $MY_PUBKEY && $MY_PUBKEY != "$derived" ]]; then
     die "SITE_${L}_PUBKEY がこのホストの鍵（$derived）と一致しません"
   fi
   [[ $PEER_PUBKEY != "$derived" ]] || die "SITE_${P}_PUBKEY が自拠点の公開鍵と同じです"
+}
+
+# クライアント conf に書く自拠点の公開鍵を SITE_PUBKEY に決める（site.env の値を優先し、鍵ファイルと食い違えば止まる）
+resolve_my_pubkey() {
+  local derived=""
+  if [[ -f $KEY ]] && command -v wg >/dev/null; then
+    derived=$(derive_my_pubkey)
+  fi
+  if [[ -n $MY_PUBKEY ]]; then
+    is_pubkey "$MY_PUBKEY" || die "SITE_${L}_PUBKEY が WireGuard の公開鍵の形式ではありません"
+    [[ -z $derived || $derived == "$MY_PUBKEY" ]] || die "SITE_${L}_PUBKEY がこのホストの鍵（$derived）と一致しません"
+    SITE_PUBKEY=$MY_PUBKEY
+  elif [[ -n $derived ]]; then
+    SITE_PUBKEY=$derived
+  else
+    die "拠点 $L の公開鍵がわかりません。site.env に SITE_${L}_PUBKEY を書くか、先に keygen を実行してください"
+  fi
 }
 
 write_conf() {
@@ -368,6 +582,11 @@ ensure_policy() {  # name ingress egress src dst
   fw --policy="$name" --query-rich-rule="$rule" || run firewall-cmd --permanent --policy="$name" --add-rich-rule="$rule"
 }
 
+# CLIENT_POLICIES の wg / lan をゾーン名にする
+zone_of() {
+  if [[ $1 == wg ]]; then echo "$WG_FW_ZONE"; else echo "$LAN_ZONE"; fi
+}
+
 setup_firewalld() {
   systemctl is-active --quiet firewalld || die "firewalld が起動していません"
   resolve_lan_zone
@@ -383,6 +602,12 @@ setup_firewalld() {
   [[ $cur == "$WG_FW_ZONE" ]] || run firewall-cmd --permanent --zone="$WG_FW_ZONE" --add-interface="$WG_IFACE"
   ensure_policy "$POLICY_OUT" "$LAN_ZONE" "$WG_FW_ZONE" "$MY_LAN" "$PEER_LAN"
   ensure_policy "$POLICY_IN" "$WG_FW_ZONE" "$LAN_ZONE" "$PEER_LAN" "$MY_LAN"
+  # クライアント用（wg → wg は、クライアントから届いた通信を同じ wg0 から相手拠点へ折り返すための policy）
+  local spec name in out src dst
+  for spec in "${CLIENT_POLICIES[@]}"; do
+    read -r name in out src dst <<<"$spec"
+    ensure_policy "$name" "$(zone_of "$in")" "$(zone_of "$out")" "$src" "$dst"
+  done
   run firewall-cmd --reload
 }
 
@@ -415,11 +640,19 @@ cmd_apply() {
   load_env 1
   select_site "${1:-}"
   validate_addresses
+  read_clients "$L"
   [[ -n $MY_PUBLIC || -n $PEER_PUBLIC ]] || die "SITE_A_PUBLIC と SITE_B_PUBLIC の両方が空です（どちらからもトンネルを張れません）"
+  if [[ -n $MY_CLIENT_NET && -z $MY_PUBLIC ]]; then
+    warn "WG_${L}_CLIENT_NET が設定されていますが SITE_${L}_PUBLIC が空です（この拠点は着信を受けられないので、クライアントは接続できません）"
+  fi
   check_host_is_site
   install_tools
   if (( USE_EXISTING )); then
     check_existing_conf
+    if (( ${#CL_NAMES[@]} )); then
+      warn "既存の conf を使うため、拠点 $L のクライアント ${#CL_NAMES[@]} 台の [Peer] は書き込みません。必要なら次を $CONF に追加してください:"
+      render_client_peers | sed 's/^/    /' >&2
+    fi
   else
     if (( DRY_RUN )) && ! command -v wg >/dev/null; then
       warn "wireguard-tools が未導入のため、鍵の検査は省略します"
@@ -433,7 +666,7 @@ cmd_apply() {
   setup_sysctl
   setup_firewalld
   run systemctl enable "wg-quick@$WG_IFACE"
-  # AllowedIPs・Address の変更は reload では経路に反映されないので、常に restart する（落とし穴 2）
+  # AllowedIPs・Address の変更（クライアントの追加・削除を含む）は reload では経路に反映されないので、常に restart する（落とし穴 2）
   run systemctl restart "wg-quick@$WG_IFACE"
   (( DRY_RUN )) || info "wg-quick@$WG_IFACE を起動しました"
   echo
@@ -448,6 +681,8 @@ print_router() {
     echo "ポート転送 : 不要（SITE_${L}_PUBLIC が空。この拠点からトンネルを張る）"
   fi
   echo "静的経路   : 宛先 $PEER_LAN → ゲートウェイ $MY_LAN_IP"
+  [[ -z $MY_CLIENT_NET ]]   || echo "静的経路   : 宛先 $MY_CLIENT_NET → ゲートウェイ $MY_LAN_IP（拠点 $L のクライアント）"
+  [[ -z $PEER_CLIENT_NET ]] || echo "静的経路   : 宛先 $PEER_CLIENT_NET → ゲートウェイ $MY_LAN_IP（拠点 $P のクライアント）"
   echo "DHCP 予約  : $MY_LAN_IP をこの WG ホストに固定"
   [[ -z $MY_ROUTER ]] || echo "（ルーターの LAN 側 IP: $MY_ROUTER）"
 }
@@ -471,12 +706,17 @@ cmd_status() {
   echo "$sep firewalld";                    firewall-cmd --get-active-zones
   local p
   # 未 reload の変更も見えるよう permanent 側を表示する
-  for p in siteA-to-siteB siteB-to-siteA; do
+  for p in "${ALL_POLICIES[@]}"; do
     if firewall-cmd --permanent --get-policies | has_word "$p"; then
       echo "$sep policy $p (permanent)"
       firewall-cmd --permanent --info-policy="$p"
     fi
   done
+  if [[ -f $CLIENTS_FILE ]]; then
+    echo "$sep clients ($CLIENTS_FILE)"
+    read_clients ""
+    print_client_list
+  fi
   return 0
 }
 
@@ -496,7 +736,7 @@ cmd_remove() {
     run systemctl disable --now "wg-quick@$WG_IFACE"
   fi
   local p name
-  for p in "$POLICY_OUT" "$POLICY_IN"; do
+  for p in "${SITE_POLICIES[@]}"; do
     firewall-cmd --permanent --get-policies | has_word "$p" && run firewall-cmd --permanent --delete-policy="$p"
   done
   if firewall-cmd --permanent --get-zones | has_word "$WG_FW_ZONE"; then
@@ -505,19 +745,164 @@ cmd_remove() {
   fw --zone="$LAN_ZONE" --query-port="$PORT/udp" && run firewall-cmd --permanent --zone="$LAN_ZONE" --remove-port="$PORT/udp"
   run firewall-cmd --reload
   # 削除時に firewalld が残す *.xml.old を片付ける（このスクリプトが作ったものだけ）
-  for name in "policies/$POLICY_OUT" "policies/$POLICY_IN" "zones/$WG_FW_ZONE"; do
-    [[ ! -f /etc/firewalld/$name.xml.old ]] || run rm -f "/etc/firewalld/$name.xml.old"
+  for p in "${SITE_POLICIES[@]}"; do
+    [[ ! -f /etc/firewalld/policies/$p.xml.old ]] || run rm -f "/etc/firewalld/policies/$p.xml.old"
   done
+  name="zones/$WG_FW_ZONE"
+  [[ ! -f /etc/firewalld/$name.xml.old ]] || run rm -f "/etc/firewalld/$name.xml.old"
   if [[ -f $SYSCTL_FILE ]]; then
     run rm -f "$SYSCTL_FILE"
     run sysctl -q -w net.ipv4.ip_forward=0
   fi
   if (( PURGE )); then
     run rm -f "$CONF" "$KEY" "$PUB"
+    # クライアント用 conf は登録簿にあるものだけ消す（登録簿 clients.list は残す）
+    read_clients ""
+    local i
+    for i in "${!CL_NAMES[@]}"; do
+      [[ ! -f $CLIENT_DIR/${CL_NAMES[i]}.conf ]] || run rm -f "$CLIENT_DIR/${CL_NAMES[i]}.conf"
+    done
+    [[ ! -d $CLIENT_DIR ]] || run rmdir --ignore-fail-on-non-empty "$CLIENT_DIR"
+    [[ ! -f $CLIENTS_FILE ]] || info "$CLIENTS_FILE は残しています（不要なら手で削除）"
   else
-    info "$CONF と鍵ファイルは残しています（削除するには --purge）"
+    info "$CONF・鍵ファイル・クライアント用 conf は残しています（削除するには --purge）"
   fi
   echo "ルーターのポート転送と静的経路は手動で削除してください。"
+}
+
+# --- client commands -------------------------------------------------------------
+cmd_client_add() {
+  need_root
+  load_env 1
+  local site=${1:-} name=${2:-}
+  [[ -n $name ]] || die "使い方: client add A|B NAME"
+  [[ $name =~ ^[A-Za-z0-9_-]+$ ]] || die "クライアント名は英数字・-・_ だけで指定してください: $name"
+  select_site "$site"
+  validate_addresses
+  [[ -n $MY_CLIENT_NET ]] || die "site.env の WG_${L}_CLIENT_NET（拠点 $L のクライアント用アドレス帯）が空です"
+  [[ -n $MY_PUBLIC ]] || die "SITE_${L}_PUBLIC が空です（この拠点は着信を受けられないので、クライアントは接続できません）"
+  check_host_is_site
+  install_tools
+  read_clients ""
+  if find_client "$name"; then
+    die "クライアント $name は既に登録されています（拠点 ${CL_SITES[CL_INDEX]}、${CL_IPS[CL_INDEX]}）"
+  fi
+  local cip
+  cip=$(alloc_client_ip "$MY_CLIENT_NET" "$OPT_IP" "${CL_IPS[@]}") || exit 1
+  resolve_my_pubkey
+  local priv pub i
+  if [[ -n $OPT_PUBKEY ]]; then
+    is_pubkey "$OPT_PUBKEY" || die "--pubkey が WireGuard の公開鍵の形式ではありません"
+    for i in "${!CL_PUBS[@]}"; do
+      [[ ${CL_PUBS[i]} != "$OPT_PUBKEY" ]] || die "その公開鍵はクライアント ${CL_NAMES[i]} に登録済みです"
+    done
+    [[ $OPT_PUBKEY != "$SITE_PUBKEY" ]] || die "--pubkey が拠点 $L の公開鍵と同じです"
+    pub=$OPT_PUBKEY
+    priv=$CLIENT_KEY_PLACEHOLDER
+  elif (( DRY_RUN )); then
+    pub="(generated)"
+    priv="(hidden)"
+  else
+    priv=$(wg genkey) || die "鍵を生成できません"
+    pub=$(wg pubkey <<<"$priv") || die "公開鍵を算出できません"
+  fi
+  local conf="$CLIENT_DIR/$name.conf" line
+  line=$(printf '%-12s %-4s %-15s %s' "$name" "$L" "$cip" "$pub")
+  if (( DRY_RUN )); then
+    info "dry-run: $conf に書き込む内容:"
+    render_client_conf "$name" "$cip" "$priv" | sed 's/^/    /'
+    info "dry-run: $CLIENTS_FILE に追記する行:"
+    echo "    $line"
+    return
+  fi
+  [[ ! -e $conf ]] || die "$conf が既にあります（登録簿に無い古い conf）。内容を確認して削除してから実行してください"
+  [[ -d $CLIENT_DIR ]] || (umask 077; mkdir -p "$CLIENT_DIR")
+  (umask 077; render_client_conf "$name" "$cip" "$priv" >"$conf")
+  restorecon "$conf" 2>/dev/null || true
+  if [[ ! -f $CLIENTS_FILE ]]; then
+    printf '# %-10s %-4s %-15s %s\n' NAME SITE TUNNEL_IP PUBLIC_KEY >"$CLIENTS_FILE"
+  fi
+  echo "$line" >>"$CLIENTS_FILE"
+  info "クライアント $name を登録しました（拠点 $L、$cip）: $CLIENTS_FILE"
+  info "クライアント用 conf を書き込みました: $conf"
+  echo
+  if [[ -n $OPT_PUBKEY ]]; then
+    echo "conf の PrivateKey は $CLIENT_KEY_PLACEHOLDER のままです。クライアント側で秘密鍵に置き換えてください。"
+  else
+    echo "conf にはクライアントの秘密鍵が入っています。端末に取り込んだら削除してください。"
+  fi
+  echo "表示するには        : sudo $0 client show $name [--qr]"
+  echo "ホストに反映するには: sudo $0 apply $L"
+}
+
+cmd_client_remove() {
+  need_root
+  load_env 1
+  local name=${1:-}
+  [[ -n $name ]] || die "使い方: client remove NAME"
+  read_clients ""
+  find_client "$name" || die "クライアント $name は登録されていません（$CLIENTS_FILE）"
+  local site=${CL_SITES[CL_INDEX]} conf="$CLIENT_DIR/$name.conf"
+  if (( DRY_RUN )); then
+    echo "[dry-run] $CLIENTS_FILE から $name の行を削除する"
+    [[ ! -f $conf ]] || echo "[dry-run] rm -f $conf"
+  else
+    local tmp
+    tmp=$(mktemp "$CLIENTS_FILE.XXXXXX")
+    awk -v n="$name" '{ line = $0; sub(/#.*/, "", line); split(line, f) } f[1] != n { print }' "$CLIENTS_FILE" >"$tmp"
+    chmod --reference="$CLIENTS_FILE" "$tmp"
+    mv "$tmp" "$CLIENTS_FILE"
+    [[ ! -f $conf ]] || rm -f "$conf"
+    info "クライアント $name を削除しました"
+  fi
+  echo "ホストに反映するには: sudo $0 apply $site"
+}
+
+cmd_client_show() {
+  need_root
+  load_env 1
+  local name=${1:-}
+  [[ -n $name ]] || die "使い方: client show NAME [--qr]"
+  read_clients ""
+  find_client "$name" || die "クライアント $name は登録されていません（$CLIENTS_FILE）"
+  local conf="$CLIENT_DIR/$name.conf"
+  [[ -f $conf ]] || die "$conf がありません（取り込み後に削除した場合は、client remove して add し直してください）"
+  if (( OPT_QR )); then
+    command -v qrencode >/dev/null || die "qrencode がありません（dnf install qrencode。EPEL が必要な場合があります）"
+    qrencode -t ansiutf8 <"$conf"
+  else
+    cat "$conf"
+  fi
+}
+
+# read_clients 済みの一覧を表示する。root で wg が動いていれば最終ハンドシェイクを付ける
+print_client_list() {
+  if (( ${#CL_NAMES[@]} == 0 )); then
+    echo "登録済みクライアントはありません"
+    return 0
+  fi
+  local -A hs=()
+  local k t
+  if [[ $EUID -eq 0 ]] && command -v wg >/dev/null; then
+    while read -r k t; do hs[$k]=$t; done < <(wg show "$WG_IFACE" latest-handshakes 2>/dev/null || true)
+  fi
+  local now i st
+  now=$(date +%s)
+  printf '%-12s %-4s %-15s %-44s %s\n' NAME SITE TUNNEL_IP PUBLIC_KEY LAST_HANDSHAKE
+  for i in "${!CL_NAMES[@]}"; do
+    t=${hs[${CL_PUBS[i]}]:-}
+    if [[ -z $t ]]; then st="-"          # wg が動いていない、この拠点の peer ではない、または root ではない
+    elif (( t == 0 )); then st="なし"     # peer は登録済みだが一度も接続していない
+    else st="$(( now - t )) 秒前"
+    fi
+    printf '%-12s %-4s %-15s %-44s %s\n' "${CL_NAMES[i]}" "${CL_SITES[i]}" "${CL_IPS[i]}" "${CL_PUBS[i]}" "$st"
+  done
+}
+
+cmd_client_list() {
+  load_env 1
+  read_clients ""
+  print_client_list
 }
 
 # --- main ------------------------------------------------------------------------
@@ -528,6 +913,9 @@ while (( $# )); do
     -n|--dry-run) DRY_RUN=1 ;;
     --use-existing-conf) OPT_USE_EXISTING=1 ;;
     --purge) PURGE=1 ;;
+    --pubkey) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_PUBKEY=$2; shift ;;
+    --ip) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_IP=$2; shift ;;
+    --qr) OPT_QR=1 ;;
     -h|--help) usage; exit 0 ;;
     -*) die "不明なオプション: $1" ;;
     *) args+=("$1") ;;
@@ -542,5 +930,14 @@ case ${1:-} in
   router) shift; cmd_router "$@" ;;
   status) shift; cmd_status ;;
   remove) shift; cmd_remove "$@" ;;
+  client)
+    shift
+    case ${1:-} in
+      add)    shift; cmd_client_add "$@" ;;
+      remove) shift; cmd_client_remove "$@" ;;
+      show)   shift; cmd_client_show "$@" ;;
+      list)   shift; cmd_client_list ;;
+      *) usage; exit 1 ;;
+    esac ;;
   *) usage; exit 1 ;;
 esac

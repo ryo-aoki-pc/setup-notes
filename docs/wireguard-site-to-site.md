@@ -5,6 +5,7 @@
 - **設定方式**: `wg-quick` + systemd（`/etc/wireguard/wg0.conf` / `wg-quick@wg0.service`）、firewalld の policy で転送を制御
 - **状態**: 1 台のマシン上に network namespace で 2 拠点を模擬して動作確認済み（[付録](#付録-network-namespace-による模擬検証)）。**実際に 2 拠点をインターネット越しに結んでの確認はまだしていない**
 - **スクリプト**: プレースホルダの値を 1 ファイルに書いて手順 1〜6 を実行する [`scripts/wireguard-site-to-site/`](../scripts/wireguard-site-to-site/) を用意した（[スクリプトで一括実行する場合](#スクリプトで一括実行する場合)）。**ドライランと事前検査までの確認で、実際の適用はまだ試していない**
+- **拡張**: 外出先の PC・スマートフォンなど任意の台数のクライアントをこの VPN に追加する手順は [WireGuard リモートクライアント追加手順](wireguard-remote-clients.md)。同じスクリプトの `client` コマンドで行う
 
 | 項目 | 値 |
 |---|---|
@@ -107,6 +108,9 @@ sudo ./wg-s2s.sh --use-existing-conf apply A      # site.env に WG_USE_EXISTING
 ./wg-s2s.sh router A                      # 手順 7 の値だけを表示
 sudo ./wg-s2s.sh status
 sudo ./wg-s2s.sh remove A                 # ロールバック（--purge で conf と鍵も削除）
+
+# リモートクライアントの追加（site.env の WG_A_CLIENT_NET などを設定してから。詳細は wireguard-remote-clients.md）
+sudo ./wg-s2s.sh client add A laptop && sudo ./wg-s2s.sh apply A
 ```
 
 `apply` の動作:
@@ -125,6 +129,7 @@ sudo ./wg-s2s.sh remove A                 # ロールバック（--purge で con
 - **サービス**: 最後は常に `systemctl restart` する（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)）
 - **LAN_ZONE**: 空なら `WG_x_LAN_IP` を持つ NIC のゾーンを自動で使う
 - **CGNAT 構成**: `SITE_x_PUBLIC` を空にすると、その拠点に向けた `Endpoint` を書かない（[CGNAT の構成](#片側がグローバル-ip-を持たない場合cgnat-など)）
+- **リモートクライアント**: `WG_A_CLIENT_NET` / `WG_B_CLIENT_NET` を設定すると、相手 peer の `AllowedIPs` にその帯を加え、`clients.list` に登録したクライアントの `[Peer]` とクライアント用の policy も作る（[リモートクライアント追加手順](wireguard-remote-clients.md)）。空なら本書の構成と同じ
 
 スクリプトの検証範囲は[付録](#スクリプトの検証ドライランのみ)を参照。
 
@@ -656,3 +661,5 @@ namespace・ブリッジ・経路を削除し、[ロールバック](#ロール�
 | 実行前後の比較 | 既存 conf の sha256 が一致。`/etc/firewalld` はバックアップと `diff -r` で差分なし。`ip_forward` も変化なし |
 
 未確認: `apply` と `remove` の本実行、適用後の疎通、再実行したときに設定が重複しないこと、conf のパーミッション警告（対象ファイルが既に 600 だったため）。
+
+その後、リモートクライアント対応を加えた版は、`firewall-cmd` などを模したスタブ環境で `apply` / `remove` の本実行と再実行（設定が重複しないこと）まで確認した（[リモートクライアント追加手順の付録](wireguard-remote-clients.md#付録-スクリプトの検証スタブ環境)）。実機での適用は引き続き未確認。

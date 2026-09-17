@@ -9,7 +9,8 @@
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
-| [WireGuard 拠点間 VPN 構築手順](docs/wireguard-site-to-site.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続（wg-quick + systemd）。firewalld の専用ゾーン + policy による転送制御、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload の落とし穴を含む。network namespace で模擬検証。値を `site.env` に書いて手順を実行するスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可、ドライランまで検証）付き |
+| [WireGuard 拠点間 VPN 構築手順](docs/wireguard-site-to-site.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続（wg-quick + systemd）。firewalld の専用ゾーン + policy による転送制御、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload の落とし穴を含む。network namespace で模擬検証。値を `site.env` に書いて手順を実行するスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可、リモートクライアントの追加にも対応）付き |
+| [WireGuard リモートクライアント追加手順](docs/wireguard-remote-clients.md) | 同上（拠点間 VPN の拡張） | 拠点間 VPN に、外出先の PC・スマートフォンなど任意の台数のクライアントを追加して両拠点の LAN に到達させる。拠点ごとのクライアント用アドレス帯、相手拠点 peer の `AllowedIPs` の追加、`wg0 → wg0` 折り返しの policy、ルーターの静的経路、クライアント conf の生成と QR 表示（`client add` / `show` / `list` / `remove`）。**実機では未検証**（スタブ環境でスクリプトの動作のみ確認） |
 
 ## 記法の約束
 
@@ -40,3 +41,12 @@
 - **待ち受けポートの開け忘れは、自拠点から張ると気づかない** — 自分から送ったハンドシェイクへの応答は conntrack で通る。相手側から張り直すときに初めて失敗する
 - **WG ホスト自身から相手 LAN へは、送信元がトンネル IP になる** — 相手 LAN がトンネル網への経路を知らないと応答が戻らない。クライアント同士の通信は問題ないため、見落としやすい
 - **ルーター配下に置いた VPN ホストはヘアピン（非対称経路）になる** — Linux ルーターでは ICMP Redirect の有無にかかわらず通ったが、状態追跡をするルーターでは TCP が切られる可能性がある
+
+### [WireGuard リモートクライアント追加](docs/wireguard-remote-clients.md)（設計上の知見。実機未検証）
+
+- **`AllowedIPs` は 1 インターフェース内で peer ごとに排他** — 1 つのアドレスを 2 つの peer に対応づけられない（cryptokey routing）。クライアントは拠点に所属させ、拠点ごとに帯を分ければ、相手拠点のホストには「その帯は拠点 peer の向こう」と 1 行書くだけで済み、クライアントを増やしても相手拠点の設定は変わらない
+- **相手拠点のホストの `AllowedIPs` にクライアント帯が無いと、黙って捨てられる** — WireGuard は送信元が `AllowedIPs` 外のパケットを ICMP なしで捨てる。ハンドシェイクも転送も正常に見えたまま届かない
+- **NAT しない構成では、ルーターにクライアント帯の静的経路も要る** — LAN 側ホストの返事はデフォルトゲートウェイに向かう。相手拠点のルーターにも要る。トンネル網とクライアント帯を 1 つの大きな帯に取っておけば、静的経路は 1 本で済む
+- **新しい peer の経路も reload では入らない** — 落とし穴 2 と同じ機構。クライアントを足したら restart。まとめて登録して 1 回で済ませる
+- **firewalld の policy は ingress と egress に同じゾーンを指定できる** — `wg0` から入って `wg0` へ折り返す転送（クライアント → 相手拠点 LAN）を rich rule で絞れる。ゾーンの `forward` オプションだと `wg0` 内の転送がすべて通る。ソース（`core/io/policy.py`）に同一ゾーンを拒否する検証は無く、policy 名の上限は 128 文字（2.4.3）
+- **クライアント conf の `AllowedIPs` にはトンネル網も入れる** — WG ホスト自身がクライアントに送るパケットの送信元は `wg0` のアドレスになる。無いとクライアント側で捨てられる
