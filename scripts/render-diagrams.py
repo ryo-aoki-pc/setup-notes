@@ -9,9 +9,14 @@ nwdiag（blockdiag 3.0.0）は Pillow 10 で削除された API を呼ぶので�
 
 フォントは、Latin と日本語の両方の字形を持つものを指定する必要がある。
 指定しないと blockdiag の自動検出は候補を見つけられず、豆腐になる。
+
+生成後に背景の矩形を差し込む。blockdiag の SVG は背景が透明で線と文字が黒
+なので、そのままでは GitHub のダークテーマで図が沈んで見えなくなる。
+nwdiag の --no-transparency は PNG 専用で SVG には効かない。
 """
 import os
 import pathlib
+import re
 import sys
 
 from PIL import Image, ImageFont
@@ -30,6 +35,67 @@ from nwdiag.command import main as nwdiag_main  # noqa: E402  (shim を当てて
 
 DEFAULT_FONT = "/usr/share/fonts/google-noto-sans-cjk-vf-fonts/NotoSansCJK-VF.ttc"
 DIAGRAM_DIR = pathlib.Path(__file__).resolve().parent.parent / "docs" / "diagrams"
+BACKGROUND = '<rect x="0" y="0" width="100%" height="100%" fill="#ffffff" />'
+
+# blockdiag は font-family="sans-serif" としか書かない。フォント fallback をしない
+# レンダラ（cairosvg など）ではそれが Latin 専用フォントに解決され、日本語が
+# 消えることがある。CJK を持つ family を先に並べておく。
+FONT_FAMILY_FROM = 'font-family="sans-serif"'
+FONT_FAMILY_TO = 'font-family="Noto Sans CJK JP,Noto Sans,sans-serif"'
+
+
+def _text_extents(svg_text):
+    """<text> の左右端を、x / textLength / text-anchor から求める。"""
+    for m in re.finditer(r"<text\b[^>]*>", svg_text):
+        tag = m.group(0)
+        x = re.search(r'\bx="([\d.-]+)"', tag)
+        length = re.search(r'\btextLength="([\d.-]+)"', tag)
+        if not x or not length:
+            continue
+        x, length = float(x.group(1)), float(length.group(1))
+        anchor = re.search(r'\btext-anchor="(\w+)"', tag)
+        anchor = anchor.group(1) if anchor else "start"
+        if anchor == "middle":
+            yield x - length / 2, x + length / 2
+        elif anchor == "end":
+            yield x - length, x
+        else:
+            yield x, x + length
+
+
+def fit_canvas(svg_text):
+    """はみ出したラベルが切れないように viewBox の幅を広げる。
+
+    blockdiag はノードの位置だけでキャンバス幅を決めるので、右端のノードに
+    付く長いアドレス文字列が canvas の外に出ることがある（実測）。
+    """
+    m = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg_text)
+    if not m:
+        return svg_text
+    width, height = float(m.group(1)), float(m.group(2))
+    extents = list(_text_extents(svg_text))
+    if not extents:
+        return svg_text
+    needed = max(right for _, right in extents)
+    leftmost = min(left for left, _ in extents)
+    if leftmost < 0:
+        print(f"  WARN: 左に {abs(leftmost):.0f}px はみ出したテキストがあります", file=sys.stderr)
+    if needed <= width:
+        return svg_text
+    new_width = int(needed) + 8  # 右に少し余白を残す
+    return svg_text.replace(m.group(0), f'viewBox="0 0 {new_width} {int(height)}"', 1)
+
+
+def postprocess(svg_path):
+    """生成された SVG に、背景・フォント指定・キャンバス幅の調整を施す。"""
+    text = svg_path.read_text(encoding="utf-8")
+    text = text.replace(FONT_FAMILY_FROM, FONT_FAMILY_TO)
+    text = fit_canvas(text)
+    if BACKGROUND not in text:
+        text, n = re.subn(r"(<svg\b[^>]*>)", r"\1\n  " + BACKGROUND, text, count=1)
+        if n != 1:
+            sys.exit(f"<svg> 開始タグが見つからず、背景を入れられません: {svg_path}")
+    svg_path.write_text(text, encoding="utf-8")
 
 
 def main():
@@ -52,6 +118,7 @@ def main():
         rc = nwdiag_main(argv)
         if rc:
             sys.exit(f"生成に失敗しました: {src}")
+        postprocess(dst)
         print(f"{src.relative_to(DIAGRAM_DIR.parent.parent)} -> {dst.relative_to(DIAGRAM_DIR.parent.parent)}")
 
 
