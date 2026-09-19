@@ -5,7 +5,7 @@
 - **設定方式**: `wg-quick` + systemd（`/etc/wireguard/wg0.conf` / `wg-quick@wg0.service`）、firewalld の専用ゾーン + policy で転送を制御。クライアントを足すときも既存の `wg0` に `[Peer]` を加えるだけで、インターフェースも待ち受けポートも増やさない
 - **進め方**: **手順 0 で値を 1 度だけ書き、以降のコマンドブロックは編集せずにそのまま貼る。** 値はシェル変数に入れるので、**両拠点の WG ホストで同じコマンド列を実行できる**（拠点 A / B の読み替えは手順 0 が自動で行う）
 - **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認と、実機を持ち出しての確認（モバイル回線・スマートフォンの公式アプリ）はまだしていない**
-- **スクリプト**: 同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard-site-to-site/`](../scripts/wireguard-site-to-site/) もある（拠点間の構築とクライアントの追加の両方に対応。[スクリプトでまとめて実行する場合](#スクリプトでまとめて実行する場合)）
+- **スクリプト**: 同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard-site-to-site/`](../scripts/wireguard-site-to-site/) もある（拠点間の構築、クライアントの追加、鍵と設定のバックアップ・復旧に対応。[スクリプトでまとめて実行する場合](#スクリプトでまとめて実行する場合)）
 
 | 項目 | 値 |
 |---|---|
@@ -155,6 +155,8 @@
 | 11 | クライアントを登録する | クライアントを受ける拠点のホスト | 任意 |
 | 12 | クライアントに conf を渡す | 同上 | 任意 |
 | 13 | クライアント帯の静的経路を追加する | 両拠点のルーター | 任意 |
+
+**OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#バックアップと復旧os-の再インストール)を読む。** 鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる。
 
 ### 0. 値を 1 度だけ書く（変数の定義）
 
@@ -671,6 +673,9 @@ sudo ./wg-s2s.sh -e ~/wg/site.env --use-existing-conf apply A
 ./wg-s2s.sh -e ~/wg/site.env router A                   # 手順 7 の値だけを表示
 sudo ./wg-s2s.sh -e ~/wg/site.env status
 sudo ./wg-s2s.sh -e ~/wg/site.env remove A              # ロールバック（--purge で conf と鍵も削除）
+
+sudo ./wg-s2s.sh -e ~/wg/site.env backup                # 鍵と設定を tar.gz にまとめる
+sudo ./wg-s2s.sh restore ~/wg-backup-<ホスト名>-<日時>.tar.gz   # クリーンインストール後に戻す
 ```
 
 `apply` の動作:
@@ -869,6 +874,7 @@ $ tracepath -n 192.168.120.100
 | クライアントを足したのに届かない。`wg show` には出ている | `reload` で済ませた。`restart` する（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)） |
 | 拠点の LAN からクライアントへ接続できない（逆方向だけ失敗） | ルーターにクライアント帯の静的経路が無い、または `(b)`・`(d)`・`(f)` の policy が無い |
 | クライアントから WG ホスト自身（`${MY_TUN_IP}`）に届かない | クライアント conf の `AllowedIPs` に `${WG_TUNNEL_NET}` が入っていない |
+| OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < "$WG_KEY"` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](#バックアップと復旧os-の再インストール)） |
 | 手順 8 をやり直したらクライアントが全部切れた | conf を作り直したので `[Peer]` が消えた。手順 11 の追記をやり直すか、`wg-s2s.sh apply` を使う |
 
 （下 7 行は手順 8 以降を実施した場合。）
@@ -1142,6 +1148,173 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 
 ---
 
+## バックアップと復旧（OS の再インストール）
+
+OS を入れ直しても、**ホストの秘密鍵が同じなら**、相手拠点の `site.env` も、配布済みのクライアントの conf も、ルーターの設定も**そのまま使える**。逆に鍵を作り直すと、相手拠点の公開鍵の差し替えと、クライアント全台の conf 再発行が連鎖する。
+
+**残しておく価値があるのは「鍵」と「値を書いたファイル」だけ。** `wg0.conf`・sysctl・firewalld は手順 3〜5 で作り直せる。
+
+### 何を保存し、何は手順で作り直せるか
+
+| 対象 | 場所 | バックアップ | 失ったときの代償 |
+|---|---|---|---|
+| **ホストの秘密鍵** `${WG_IFACE}.key` | `/etc/wireguard/` | **必須** | 公開鍵が変わる。**相手拠点の `site.env` と conf の差し替え**、**クライアント全台の conf 再発行**が要る |
+| `site.env` | `~/wg/` | **必須** | 手順 0 の変数表を見ながら書き直す |
+| `clients.list`（スクリプトでクライアントを運用する場合） | `site.env` と同じディレクトリ | **必須** | 各クライアントの公開鍵とトンネル IP を失う。端末側の conf から読み出すか、全台登録し直す |
+| `${WG_IFACE}.conf` | `/etc/wireguard/` | 入れる | 手順 3 で作り直せるが、**クライアントの `[Peer]` は手順 11 で足し直し**になる（`wg-s2s.sh apply` なら `clients.list` から作り直す） |
+| `${WG_IFACE}.pub` | `/etc/wireguard/` | 入れる | なし（`wg pubkey < ${WG_IFACE}.key` で再計算できる） |
+| `~/wg/wg-env.sh` | `~/wg/` | 入れる | なし（手順 0 (b) を貼り直せば同じものができる。環境固有の値は入っていない） |
+| `/etc/sysctl.d/90-wireguard.conf` | — | 入れない | なし（手順 4） |
+| firewalld のゾーン・policy | `/etc/firewalld/` | 入れない | なし（手順 5・9） |
+| クライアントの秘密鍵・クライアント用 conf | **端末側**（ホストからは手順 12 で削除済み） | **入れない** | ホストの鍵が同じなら端末はそのままでよい |
+| `wireguard-tools` | — | 入れない | なし（手順 1） |
+| ルーターのポート転送・静的経路 | 拠点ルーター | 入れない（機器側に残る） | WG ホストの LAN 側 IP が変わったときだけ入れ直す（手順 7・13） |
+
+> **鍵は「拠点の身元」そのもので、ポート転送も静的経路も鍵とは無関係。** だから OS を入れ直しても**ルーターは触らなくてよい**。ただし再インストールで WG ホストの LAN 側 IP が変わった場合は別で、ポート転送の転送先と両拠点の静的経路のゲートウェイを入れ直す（[手順 7](#7-拠点ルーターの設定)・[手順 13](#13-クライアント帯の静的経路を追加する)）。DHCP 予約を入れてあれば変わらない。
+
+### バックアップを取る
+
+**読むだけなので、トンネルを止めずに本番のホストでそのまま実行できる。** 両拠点でそれぞれ取る（鍵は拠点ごとに違う）。
+
+```bash
+. ~/wg/wg-env.sh
+STAGE=$(mktemp -d)                                  # mktemp -d は 0700 で作る
+mkdir "$STAGE/wg-backup"
+
+# /etc/wireguard は 0700 なので sudo で読み出す。リダイレクト先は先に 0600 で作っておく
+for f in key pub conf; do
+  install -m 600 /dev/null "$STAGE/wg-backup/${WG_IFACE}.$f"
+  sudo cat "/etc/wireguard/${WG_IFACE}.$f" > "$STAGE/wg-backup/${WG_IFACE}.$f"
+done
+install -m 600 ~/wg/site.env  "$STAGE/wg-backup/site.env"
+install -m 600 ~/wg/wg-env.sh "$STAGE/wg-backup/wg-env.sh"
+[ -f ~/wg/clients.list ] && install -m 600 ~/wg/clients.list "$STAGE/wg-backup/clients.list"
+
+# 何をどこから取ったかを残す（wg-s2s.sh restore もこの MANIFEST を読む）
+{
+  echo "FORMAT=1"
+  echo "CREATED=$(date -Is)"
+  echo "HOST=$(uname -n | cut -d. -f1)"
+  echo "SITE=$MY_SITE"
+  echo "WG_IFACE=$WG_IFACE"
+  echo "PUBKEY=$MY_PUBKEY"
+  echo "FILE key   ${WG_IFACE}.key  600 $WG_KEY"
+  echo "FILE pub   ${WG_IFACE}.pub  600 $WG_PUB"
+  echo "FILE conf  ${WG_IFACE}.conf 600 $WG_CONF"
+  echo "FILE env   site.env  600 $HOME/wg/site.env"
+  echo "FILE envsh wg-env.sh 600 $HOME/wg/wg-env.sh"
+  [ -f ~/wg/clients.list ] && echo "FILE clients clients.list 644 $HOME/wg/clients.list"
+} > "$STAGE/wg-backup/MANIFEST"
+chmod 600 "$STAGE/wg-backup/MANIFEST"
+
+BACKUP=~/wg-backup-$(uname -n | cut -d. -f1)-$(date +%Y%m%d-%H%M%S).tar.gz
+(umask 077; tar czf "$BACKUP" -C "$STAGE" wg-backup)
+rm -rf "$STAGE"
+ls -l "$BACKUP"; tar tzf "$BACKUP"
+```
+
+- **このアーカイブには秘密鍵が入っている。** `0600` のまま、**リポジトリの中には置かない**（`.gitignore` に `wg-backup-*.tar.gz` を入れてあるが、それに頼らない）。このマシンの外（別のディスク、オフラインのメディア）に保管する
+- `sudo cat "$WG_KEY" > ファイル` の**リダイレクトを開くのはユーザーのシェル**なので、先に `install -m 600 /dev/null` で 0600 のファイルを作っておく（手順 3 と同じ理由）
+- クライアントの秘密鍵入り conf は**入れない**。手順 12 で端末に渡した時点で消してあり、ホストの鍵が同じなら端末側はそのまま動く
+- **このアーカイブは `wg-s2s.sh restore` でもそのまま戻せる。** 逆に `wg-s2s.sh backup` が作ったものを下の手動手順で戻してもよい（中身は同じ `wg-backup/` + `MANIFEST` の形式）
+
+### クリーンインストール後に復旧する
+
+**手順 2（鍵の生成）と手順 3（conf の作成）は実行しない。** 鍵と conf は戻すもので、作り直すものではない。
+
+```bash
+# (a) アーカイブを展開する
+mkdir -p ~/wg && chmod 700 ~/wg
+STAGE=$(mktemp -d)
+tar xzf ~/wg-backup-<ホスト名>-<日時>.tar.gz -C "$STAGE"
+ls -l "$STAGE/wg-backup"
+```
+
+```bash
+# (b) site.env と wg-env.sh を戻す（手順 0 (a)(b) の代わり）
+install -m 600 "$STAGE/wg-backup/site.env"  ~/wg/site.env
+install -m 600 "$STAGE/wg-backup/wg-env.sh" ~/wg/wg-env.sh
+[ -f "$STAGE/wg-backup/clients.list" ] && install -m 600 "$STAGE/wg-backup/clients.list" ~/wg/clients.list
+. ~/wg/wg-env.sh                                   # 手順 0 (c)
+echo "$MY_SITE $MY_LAN_IP $WG_IFACE"               # 手順 0 の読み戻しと同じ確認
+```
+
+```bash
+# (c) 手順 1。/etc/wireguard はここでパッケージが 0700 で作る
+sudo dnf install -y wireguard-tools
+```
+
+```bash
+# (d) 鍵と conf を戻す（手順 2・3 の代わり）
+for f in key pub conf; do
+  sudo install -m 600 -o root -g root "$STAGE/wg-backup/${WG_IFACE}.$f" "/etc/wireguard/${WG_IFACE}.$f"
+done
+sudo restorecon "$WG_KEY" "$WG_PUB" "$WG_CONF"
+rm -rf "$STAGE"
+```
+
+```bash
+# (e) 鍵が元のものか確かめる。ここが復旧できたかの判定点
+sudo wg pubkey < "$WG_KEY"
+echo "$MY_PUBKEY"
+```
+
+```
+fKLlTz2eSaaxzzY9HPml9qwTNQCp44EClUxtAUNoemY=     ← 戻した鍵から算出した公開鍵
+fKLlTz2eSaaxzzY9HPml9qwTNQCp44EClUxtAUNoemY=     ← site.env に書いてある公開鍵
+```
+
+**この 2 つが一致すれば、相手拠点もクライアント端末も設定変更は要らない。** ここから先は通常の構築と同じで、[手順 4](#4-ip-フォワーディングの有効化)（sysctl）→ [手順 5](#5-firewalld-の設定)（firewalld）→ [手順 6](#6-サービスの有効化起動)（`systemctl enable --now`）を順に実行する。クライアントを使っているなら、あわせて [手順 9](#9-firewalld-にクライアント用の-policy-を足す)（クライアント用 policy）と [手順 10](#10-サービスの再起動)（restart）も実行する。
+
+- **[手順 3](#3-wg0conf-の作成) は貼らない。** conf を戻したので不要であり、貼ると**登録済みクライアントの `[Peer]` が消える**（手順 8 と同じ罠）。conf を戻さずに手順 3 で作り直した場合は、[手順 11](#11-クライアントを登録する) の `[Peer]` 追記を登録済みの台数ぶん繰り返す
+- **[手順 2](#2-鍵ペアの生成) も貼らない。** `wg genkey` を実行すると別の鍵ができ、復旧の意味が無くなる
+- **`wg-quick@${WG_IFACE}` の `enable` は手順 6 でやり直す。** 鍵と conf を戻しただけでは、再起動時に上がらない
+- **`/etc/wireguard` の外から持ってきたファイルは `install`（新規作成）で置き、`restorecon` をかける。** `mv` で持ち込むと SELinux のコンテキスト（`user_tmp_t` など）を持ち越し、`wg-quick` が鍵を読めなくなることがある
+- **相手拠点は何もしなくてよい。** 公開鍵が同じなので相手の conf も `site.env` も変更不要。トンネルは `PersistentKeepalive`（既定 25 秒）で張り直される
+- **配布済みのクライアント conf もそのまま。** クライアント側の `[Peer] PublicKey` はホストの公開鍵で、これが変わっていない
+
+### スクリプトで復旧する場合
+
+```bash
+cd scripts/wireguard-site-to-site
+
+# バックアップ（読むだけ。トンネルは止まらない）
+sudo ./wg-s2s.sh -e ~/wg/site.env --dry-run backup          # まとめる内容を表示するだけ
+sudo ./wg-s2s.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホスト名>-<日時>.tar.gz（0600）
+sudo ./wg-s2s.sh -e ~/wg/site.env -o /mnt/usb/wgb.tar.gz backup
+
+# 復旧（新しい OS で。手順 1 の dnf も restore が行う）
+sudo ./wg-s2s.sh --dry-run restore ~/wg-backup-<ホスト名>-<日時>.tar.gz
+sudo ./wg-s2s.sh restore ~/wg-backup-<ホスト名>-<日時>.tar.gz
+sudo ./wg-s2s.sh -e ~/wg/site.env apply B                   # 手順 4〜6（+ クライアント用 policy）
+```
+
+- **拠点（A/B）は鍵から判定する。** `backup` に `A|B` を付けてもよいが、付けなくても `site.env` の `SITE_x_PUBKEY` と突き合わせて決まる。LAN 側 IP には依存しないので、NIC 名や IP が変わったホストでもバックアップできる
+- **`restore` は `-e` を付けなければ、アーカイブに記録された元の場所**（`~/wg/site.env` など）**に戻す。** 別の場所にしたいときだけ `-e` を付ける。`wg-env.sh` と `clients.list` は `site.env` と同じディレクトリに置かれる
+- **何かを置く前に検査し、1 つでも失敗したら何も変更せずに止まる**
+  - アーカイブの形式（`MANIFEST` の有無・`FORMAT`・絶対パスや `..` を含むエントリ）
+  - 鍵から算出した公開鍵が `MANIFEST` および `site.env` の `SITE_x_PUBKEY` と一致するか
+  - 復旧先が**相手拠点のホスト**でないか（両拠点が同じ鍵になる事故を止める）
+  - どちらの拠点の LAN 側 IP もこのホストに無い場合は**警告にとどめて続行**する（再インストール直後はありうるため）
+- 既にあるファイルは `.bak-日時` に退避してから置き換える（内容が同じなら「変更なし」で触らない）
+- **パーミッションは `MANIFEST` の値をそのまま使わない。** 鍵・conf・`site.env` は 600 に固定して置く（細工したアーカイブで秘密鍵が 0644 になるのを防ぐ）
+- `site.env` と `clients.list` は**置き先ディレクトリの所有者**で置く。`sudo` で実行しても `~/wg` 配下なら自分の所有のままなので、`client list` と `router` を非 root で実行できる
+- **`restore` はサービスを起動しない。** 続けて `apply` を実行する。`wg0.conf` は `clients.list` から作り直されるので、クライアントの `[Peer]` も戻る
+- クライアントの秘密鍵入り conf（`/etc/wireguard/clients/*.conf`）は**含めない**。ホストに残っていれば警告する
+
+### 鍵を失った場合
+
+鍵を失ったら、その拠点の身元を作り直すことになる。手順は多いが決まっている。
+
+1. [手順 2](#2-鍵ペアの生成) で新しい鍵を作り、新しい公開鍵を**両拠点の `site.env`** の `SITE_x_PUBKEY` に書く
+2. **相手拠点**でも [手順 3](#3-wg0conf-の作成)（conf の作り直し）と [手順 6](#6-サービスの有効化起動)（restart）を行う。相手拠点も一度止まる
+3. **クライアント全台**の conf の `[Peer] PublicKey` を書き換えて配り直す（[手順 11](#11-クライアントを登録する)・[手順 12](#12-クライアントに-conf-を渡す)）。QR で配っている場合も全台やり直し
+4. クライアントの**秘密鍵**は変わらないので、`clients.list` が残っていれば `[Peer]` の作り直しは不要（`wg-s2s.sh apply` が `clients.list` から作り直す）
+
+`clients.list` も失った場合は、各クライアントの公開鍵を端末側の conf から読み出すか、全台を登録し直す。
+
+---
+
 ## ロールバック
 
 ### クライアント 1 台だけ削除する
@@ -1186,6 +1359,8 @@ sudo systemctl restart "wg-quick@$WG_IFACE"
 - ルーターのクライアント帯の静的経路も削除する
 
 ### 拠点間 VPN ごと全部消す
+
+> **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](#バックアップを取る)を取る。鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
 
 各拠点の WG ホストで（クライアント用の policy もまとめて消える）:
 
@@ -1404,6 +1579,29 @@ namespace・ブリッジ・経路を削除し、[ロールバック](#ロール�
 | 実行前後の比較 | 既存 conf の sha256 が一致。`/etc/firewalld` はバックアップと `diff -r` で差分なし。`ip_forward` も変化なし |
 
 未確認: `apply` と `remove` の本実行、適用後の疎通、再実行したときに設定が重複しないこと、conf のパーミッション警告（対象ファイルが既に 600 だったため）。
+
+### `backup` / `restore` の検証（2026-09-19、実機）
+
+`backup` は**読み取りしか行わない**ので、稼働中の拠点 B の WG ホスト（`wg-quick@wg0` が active）で**本実行して確認した**。`restore` は、`/etc/wireguard` を mount namespace 内の tmpfs に差し替え（`unshare -m` + `mount -t tmpfs`）、実機の設定に触れずに**本実行**まで確認した。
+
+| 確認項目 | 結果 |
+|---|---|
+| `bash -n` | OK（`shellcheck` はこのマシンに無いため未実施） |
+| `--dry-run backup` | まとめる予定のファイルと元のパスだけを表示。何も作らない |
+| `backup`（本実行） | `~/wg-backup-<ホスト名>-<日時>.tar.gz` が 0600・実行ユーザー所有で作られる。中身は `MANIFEST` と `wg0.key` / `wg0.pub` / `wg0.conf` / `site.env` / `wg-env.sh`。**クライアント用 conf は入らない** |
+| `backup` 前後の実機 | `/etc/wireguard` の `ls -l` と `wg show` に差分なし（トンネルは張られたまま） |
+| 拠点の判定 | `A`/`B` を付けなくても、鍵から算出した公開鍵と `site.env` の `SITE_x_PUBKEY` を突き合わせて `SITE=B` と記録された。LAN 側 IP には依存しない |
+| `--dry-run restore`（同じ内容） | 公開鍵の照合まで通り、全ファイルが「変更なし」。何も書かない |
+| `restore` 本実行（namespace 内の空の `/etc/wireguard` へ） | 5 ファイルが戻り、公開鍵が退避前と一致。`/etc/wireguard/*` は `root:root 0600`、`site.env` と `wg-env.sh` は**実行ユーザー所有**（`sudo` で実行しても root 所有にならない） |
+| 往復（`keygen` → `client add` → `backup` → 全消し → `restore` → `apply --dry-run`） | `apply` が生成する `wg0.conf` が退避前と**バイト単位で一致**。`clients.list` からクライアントの `[Peer]` も復元され、非 root の `client list` が読めた |
+| `-e` の指定あり / なし | あり → `-e` の位置に戻し、元の場所との違いを表示。なし → `MANIFEST` に記録された元の場所（`~/wg/site.env`）に戻る |
+| 手動手順で作ったアーカイブ | [バックアップを取る](#バックアップを取る)のブロックをそのまま実行して作ったアーカイブを、`wg-s2s.sh restore` がそのまま受理した（形式が同じ） |
+| 手動手順での復旧 | [クリーンインストール後に復旧する](#クリーンインストール後に復旧する)の (a)〜(e) を namespace 内でそのまま実行し、`wg pubkey` の出力が `MY_PUBKEY` と一致した |
+| 異常系 | `MANIFEST` 無し / ディレクトリ名が違う / 絶対パスを含む tar / 未知の `FORMAT` / 鍵と `MANIFEST` の公開鍵が不一致 / 鍵が `site.env` の `SITE_x_PUBKEY` のどちらとも不一致 / `site.env` の `WG_IFACE` と不一致 / `MANIFEST` のパーミッション欄が 8 進数でない — いずれも `ERROR:` を出して**何も書かずに**停止 |
+| 相手拠点のホストへの復旧 | `このホストは拠点 A の WG ホスト（…）です。拠点 B の鍵を戻すと両拠点が同じ鍵になります` で停止 |
+| どちらの拠点の LAN 側 IP も無いホスト | 警告を出して続行（再インストール直後を想定） |
+
+未確認: 実機の `/etc/wireguard` に対する `restore` の本実行（namespace で代替した）、実際に OS を入れ直した後の復旧と復旧後の疎通、SELinux のラベルが `restorecon` で正しく付くこと。
 
 その後、リモートクライアント対応を加えた版は、`firewall-cmd` などを模したスタブ環境で `apply` / `remove` の本実行と再実行（設定が重複しないこと）まで確認した（[スタブ環境での本実行](#スタブ環境での本実行)）。実機での適用は引き続き未確認。
 

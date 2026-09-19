@@ -2,3 +2,8 @@
 scripts/wireguard-site-to-site/site.env
 # リモートクライアントの登録簿（client add が作る。公開鍵と割り当て IP を含む）
 scripts/wireguard-site-to-site/clients.list
+# 鍵入りのバックアップ（backup が作る。既定の出力先はリポジトリ外だが、置かれてもコミットさせない）
+wg-backup-*.tar.gz
+# restore が作る退避ファイル（上の site.env / clients.list の行では除外されない）
+scripts/wireguard-site-to-site/site.env.bak-*
+scripts/wireguard-site-to-site/clients.list.bak-*
