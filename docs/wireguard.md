@@ -405,6 +405,7 @@ success
 - `wg0` はまだ存在しなくても `--add-interface` できる。wg-quick が `wg0` を作り直しても（`systemctl restart` 後も、`--complete-reload` 後も）`wireguard` ゾーンに入ったままだった（実測）
 - 片方向だけ許可したい場合（例: 拠点 A から B へは接続できるが、B から A へは接続させない）は (d) を作らない。戻りのパケットは conntrack で許可されるので、A から始めた通信は成立する
 - 相手 LAN のうち特定ホスト・ポートだけに絞る場合は、rich rule の `destination address` を `/32` にする、`port port=... protocol=tcp` を付けるなどで調整する
+- **このゾーンは何も開けない。** WireGuard の待ち受けポートは (a) の LAN 側ゾーンで開ける。トンネル越しにこのホスト自身の ssh や Cockpit へ入りたい場合だけ、[注意点](#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)のとおりゾーンにサービスを足す
 
 **(a) はトンネルを相手側から張るときに必要。** 自拠点側から張ったトンネルなら (a) が無くても（conntrack により戻りの UDP として）通ってしまうため、開け忘れに気づきにくい。相手側から張り直すときに初めて失敗する（[付録の実測](#待ち受けポートを開け忘れた場合)）。
 
@@ -858,6 +859,7 @@ $ tracepath -n 192.168.120.100
 | WG ホスト自身から相手 LAN へ ping できないのに、クライアント同士は通る | 下記「[WG ホスト自身から相手 LAN へ送る場合](#wg-ホスト自身から相手-lan-へ送る場合)」 |
 | クライアントから相手の**トンネル IP** へ ping すると `Destination Net Unreachable`（送信元は自拠点ルーター） | ルーターに `${WG_TUNNEL_NET}` の経路が無いため。クライアント同士の通信には不要 |
 | 自拠点から張ったトンネルは動くのに、相手側から張ろうとすると失敗する | 自拠点の firewalld で `${WG_PORT}/udp` を開け忘れている、またはルーターのポート転送が無い |
+| トンネル越しに WG ホスト自身の ssh / Cockpit に `No route to host`。**同じ宛先に ping は通る** | `${WG_FW_ZONE}` ゾーンに ssh / cockpit を開けていない。policy は転送用なのでホスト自身宛てには効かない（[トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合](#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)） |
 | `--info-policy` の rich rule に `$MY_LAN` のような文字列が入っている | rich rule を単一引用符で書いた（[落とし穴 3](#落とし穴-3-rich-rule-を単一引用符で書くと変数が展開されない)） |
 | コマンドが `--add-port=/udp` のように空の値で失敗する | `. ~/wg/wg-env.sh` を実行していないシェルでコマンドを貼った（[新しいシェルでは](#新しいシェルでは--wgwg-envsh-を先に実行する)） |
 | `wg-quick up` が ``Name or service not known: `:51820'`` と `Configuration parsing error` で失敗する | `wg0.conf` の `Endpoint` にホストが無い（`Endpoint = :${WG_PORT}`）。相手拠点の `SITE_x_PUBLIC` が空のまま、`Endpoint` 行を必ず書いていた頃の手順 3 を貼った（[片側がグローバル IP を持たない場合](#片側がグローバル-ip-を持たない場合cgnat-など)） |
@@ -994,8 +996,65 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 
 **クライアント同士の通信には影響しない。** WG ホスト自身からも相手 LAN を使いたい場合は、次のどちらかにする。
 
-- 相手ルーターに `${WG_TUNNEL_NET}` via `${WG_x_LAN_IP}` の静的経路も追加する（検証で通ることを確認した）
-- 送信元を LAN 側 IP にする（`ping -I`、アプリ側での bind など）
+- **送信元を LAN 側 IP にする**（`ping -I`、アプリ側での bind など）。設定変更が要らないので簡単
+- 相手ルーターに `${WG_TUNNEL_NET}` via `${WG_x_LAN_IP}` の静的経路を追加し、**あわせて両拠点の policy にトンネル網を送信元とする rich rule を足す**（下記のとおり、静的経路だけでは足りないことがある）
+
+> **失敗の仕方は 2 通りある。** 実機（2026-09-19、拠点 B のホストから拠点 A のルーター宛て。アドレスは本書の例に合わせて書き換えてある）では、policy の rich rule が `source address` を相手拠点 LAN に限定しているため、**トンネル IP を送信元とするパケットが相手ホストの firewalld で拒否**された。ルーターには届いていない。
+>
+> ```
+> $ ip route get 192.168.110.1
+> 192.168.110.1 dev wg0 src 10.99.0.2           ← 送信元がトンネル IP になる
+> $ ping -c2 -W2 192.168.110.1
+> From 10.99.0.1 icmp_seq=1 Packet filtered     ← 相手 WG ホストの wg0 が ICMP admin-prohibited を返す
+> $ ping -c2 -W2 -I 192.168.120.2 192.168.110.1 ← 送信元を LAN 側 IP にすると通る
+> 2 packets transmitted, 2 received, 0% packet loss
+> ```
+>
+> policy を通した場合でも、相手拠点のホストが `${WG_TUNNEL_NET}` への経路を持たなければ戻りが届かず、今度は**無応答**になる（上のラボの例）。`Packet filtered` なら policy、無応答なら経路を疑う。
+
+### トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合
+
+`wg0` を入れた `${WG_FW_ZONE}` ゾーンは**何も開いていない**（手順 5 の (b)。WireGuard の待ち受けポートは LAN 側ゾーンで開けるので、このゾーンには何も要らない）。そのため、トンネル越しに **WG ホスト自身**の ssh や Cockpit へ接続すると firewalld が拒否し、クライアントには `No route to host` と出る（ICMP admin-prohibited を受けて `connect()` が `EHOSTUNREACH` を返すため。ポートが閉じているときの `Connection refused` とは違う）。
+
+**`ping` は通る。** firewalld はゾーンで ICMP echo を既定ではブロックしないので、「ping は通るのに ssh だけ入れない」という見え方になる。
+
+手順 5 の policy は**転送**を制御するもので、**ホスト自身宛ての通信には効かない**。相手拠点 LAN の他のホストへは通るのに WG ホストにだけ入れないのは、このため。
+
+実測（拠点 B のホストから拠点 A へ。2026-09-19）:
+
+| 宛先 | 種別 | 結果 |
+|---|---|---|
+| `ping ${WG_A_LAN_IP}`（WG ホスト A 自身） | 入力 | 応答あり（ICMP は既定で通る） |
+| `ssh ${WG_A_LAN_IP}` | 入力 | `No route to host`（送信元が LAN 側 IP でもトンネル IP でも同じ） |
+| `http://${ROUTER_A_LAN_IP}/`（ルーター A） | 転送 | 通る（policy に一致する送信元なら） |
+
+入れるようにするには、**入られる側のホストで**次を実行する。`${WG_FW_ZONE}` に届くのは WireGuard の鍵で認証を通った通信だけなので、ゾーンごと開ければ相手拠点の LAN からも、リモートクライアント（手順 8 以降）からも入れる。
+
+```bash
+sudo firewall-cmd --permanent --zone="$WG_FW_ZONE" --add-service=ssh --add-service=cockpit
+sudo firewall-cmd --reload
+sudo firewall-cmd --info-zone="$WG_FW_ZONE"        # services: cockpit ssh
+```
+
+送信元を絞りたい場合は、ゾーンに rich rule を入れる（相手拠点 LAN・トンネル網・クライアント帯のうち、値のあるものだけ）。
+
+```bash
+for s in ssh cockpit; do
+  for net in "$PEER_LAN" "$WG_TUNNEL_NET" "$MY_CLIENT_NET" "$PEER_CLIENT_NET"; do
+    [ -n "$net" ] || continue
+    sudo firewall-cmd --permanent --zone="$WG_FW_ZONE" \
+      --add-rich-rule="rule family=ipv4 source address=$net service name=$s accept"
+  done
+done
+sudo firewall-cmd --reload
+sudo firewall-cmd --zone="$WG_FW_ZONE" --list-rich-rules
+```
+
+- **両拠点で入れるようにしたいなら、両拠点で実行する。** 片方だけだと、その向きにしか入れない
+- rich rule 版は、あとでクライアント帯を足したときに**その帯も追加する**（ゾーンごと開ける版なら不要）
+- Cockpit は `9090/tcp`（firewalld の `cockpit` サービス）。ホスト側で動いているかは `systemctl is-active cockpit.socket` で確認する。ブラウザからは `https://${WG_x_LAN_IP}:9090`
+- `wg0` はゾーンに**永続**で入っているので、`--reload` しても `${WG_FW_ZONE}` から外れない（実測）
+- ssh を開けると、トンネルの向こう側全体から届くようになる。公開鍵認証のみにする（`PasswordAuthentication no`）などの対策は別途行う
 
 ### 片側がグローバル IP を持たない場合（CGNAT など）
 
