@@ -1,0 +1,37 @@
+// 拠点間 VPN の構成（docs/wireguard.md の「## 構成」）
+// 再生成コマンドは docs/wireguard.md の「## 構成図の再生成」を参照
+nwdiag {
+  network lan_a {
+    label = "拠点 A LAN";
+    address = "${SITE_A_LAN}";
+
+    client_a [label = "Client A",  address = "${SITE_A_LAN}.100"];
+    wg_a     [label = "WG host A", address = "${WG_A_LAN_IP}"];
+    router_a [label = "Router A",  address = "${ROUTER_A_LAN_IP}"];
+  }
+
+  network internet {
+    label = "Internet";
+    address = "UDP ${WG_PORT}";
+
+    router_a [address = "${SITE_A_PUBLIC}"];
+    router_b [address = "${SITE_B_PUBLIC}"];
+  }
+
+  network lan_b {
+    label = "拠点 B LAN";
+    address = "${SITE_B_LAN}";
+
+    router_b [label = "Router B",  address = "${ROUTER_B_LAN_IP}"];
+    wg_b     [label = "WG host B", address = "${WG_B_LAN_IP}"];
+    client_b [label = "Client B",  address = "${SITE_B_LAN}.100"];
+  }
+
+  network tunnel {
+    label = "WireGuard トンネル";
+    address = "${WG_TUNNEL_NET}";
+
+    wg_a [address = "wg0 ${WG_A_TUN_IP}"];
+    wg_b [address = "wg0 ${WG_B_TUN_IP}"];
+  }
+}
