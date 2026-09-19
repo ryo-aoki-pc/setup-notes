@@ -48,24 +48,13 @@
 
 ## 構成
 
-```
-                 拠点 A                                                     拠点 B
- [Client A]                                                                          [Client B]
- ${SITE_A_LAN}.100 ─┐                                                           ┌─ ${SITE_B_LAN}.100
-                    ├─ [Router A] ══ Internet (UDP ${WG_PORT}) ══ [Router B] ───┤
- [WG host A] ───────┘  ${SITE_A_PUBLIC}                       ${SITE_B_PUBLIC}  └────── [WG host B]
- ${WG_A_LAN_IP}                                                                    ${WG_B_LAN_IP}
-   wg0 ${WG_A_TUN_IP}  ←────────── WireGuard トンネル ${WG_TUNNEL_NET} ──────────→  wg0 ${WG_B_TUN_IP}
-```
+![拠点間 VPN の構成](diagrams/wireguard-site-to-site.svg)
+
+拠点ルーターの配下に WG ホストを 1 台ずつ置き、`wg0` 同士をトンネルで結ぶ。ルーターには**ポート転送**（WAN の `${WG_PORT}/udp` → WG ホスト）と、**相手拠点 LAN 宛ての静的経路**（via 自拠点の WG ホスト）が要る（[手順 7](#7-拠点ルーターの設定)）。
 
 ### リモートクライアントを加えた場合
 
-```
-  外出先                                   拠点 A                                            拠点 B
- [Remote client] ═══ Internet ═══ [Router A] ─┬─ [WG host A] ══ 拠点間トンネル ${WG_TUNNEL_NET} ══ [WG host B] ─┬─ [Router B]
- ${CLIENT_TUN_IP}   (UDP ${WG_PORT},          │   wg0 ${WG_A_TUN_IP}                         wg0 ${WG_B_TUN_IP}  │
- ∈ ${WG_A_CLIENT_NET}  ポート転送は拠点間と共用)└─ [Client A] ${SITE_A_LAN}                 ${SITE_B_LAN} [Client B] ─┘
-```
+![外出先クライアントを加えた構成](diagrams/wireguard-remote-client.svg)
 
 外出先のクライアントは、拠点間トンネルのためにルーター A に入れたポート転送（`${WG_PORT}/udp` → WG host A）をそのまま使って WG host A に接続する。WG host A から見ると、拠点 B の peer とクライアントの peer が同じ `wg0` に並ぶ。
 
@@ -1166,6 +1155,7 @@ sudo dnf remove wireguard-tools systemd-resolved   # 不要なら
 - [WireGuard: Conceptual Overview](https://www.wireguard.com/#cryptokey-routing)
 - [firewalld: Policy Objects](https://firewalld.org/2020/09/policy-objects-introduction)
 - [firewalld ソース `src/firewall/core/io/policy.py`](https://github.com/firewalld/firewalld/blob/v2.4.3/src/firewall/core/io/policy.py) — ingress/egress ゾーンの検証（同一ゾーンを拒否する規則は無い。policy 名の上限は 128 文字）
+- [nwdiag](http://blockdiag.com/en/nwdiag/) — 本書の構成図の記述に使っている（[付録: 構成図の再生成](#付録-構成図の再生成)）
 
 ---
 
@@ -1380,3 +1370,29 @@ namespace・ブリッジ・経路を削除し、[ロールバック](#ロール�
 | 異常系 | 名前の重複 / `--ip` が帯の外・ネットワークアドレス・使用中・不正 / `--pubkey` が不正・拠点の鍵と同じ・登録済み / 名前に空白 / 拠点 B のクライアントを拠点 A のホストで登録 / 帯が空の拠点への登録 / `SITE_A_PUBLIC` が空 / 帯が LAN と重複・帯同士が重複・帯が `/31` / `clients.list` の列不足・拠点 C・IP と公開鍵の重複・不正な IP — いずれも `ERROR:` を出して何も変更せずに停止（複数の誤りは一度に列挙） |
 
 このスタブ検証で未確認だった「実機での `firewall-cmd`（ingress と egress が同じゾーンの policy）」「`wg-quick` がクライアント peer の `/32` 経路を追加すること」「クライアントからの疎通」は、2026-09-19 の network namespace 検証で確認した（[リモートクライアントの検証](#リモートクライアントの検証2026-09-19)）。スクリプト自体の実機での `apply` 本実行は引き続き未確認。
+
+---
+
+# 付録: 構成図の再生成
+
+`## 構成` の図 2 枚は [nwdiag](http://blockdiag.com/en/nwdiag/) のソースから生成している。**原本は `docs/diagrams/*.diag`、`*.svg` は生成物。** 図を直すときは `.diag` を直して再生成する。
+
+```bash
+sudo dnf install -y google-noto-sans-cjk-vf-fonts   # Latin と日本語の両方を持つフォント
+python3 -m ensurepip --user                         # pip が無い場合
+python3 -m pip install --user nwdiag                # blockdiag / Pillow などが一緒に入る
+
+python3 scripts/render-diagrams.py                  # docs/diagrams/*.diag → *.svg
+```
+
+`nwdiag` を直接呼ばずに [`scripts/render-diagrams.py`](../scripts/render-diagrams.py) を通すのは、**nwdiag 3.0.0 が Pillow 10 以降で動かない**ため。`ImageFont.getsize()` と `Image.ANTIALIAS` が Pillow 10 で削除されており、そのまま実行すると次で止まる（実測）。
+
+```
+ERROR: 'FreeTypeFont' object has no attribute 'getsize'
+```
+
+Pillow を 10 未満に固定する回避策は取れない。`getsize` が残っている最後の Pillow 9.5.0 は Python 3.12 に対応しておらず、**両方を満たすバージョンが存在しない**。スクリプトは削除された 2 つの API を呼び出し前に補うだけで、site-packages には手を加えない。
+
+フォントの指定も必須。**blockdiag の自動検出は IPAfont・VL Gothic・DejaVu などのパスを決め打ちで探す**ので、このマシンのフォントは見つからず、指定しないとラベルが豆腐になる。別のフォントを使う場合は `WG_DIAG_FONT` で渡す。
+
+> 検証環境に最初から入っていた日本語フォント（Droid 系 2 つ）は、**どちらも Latin の字形を持たない**。`Client A` や `${SITE_A_LAN}` が豆腐になるため、Latin と日本語の両方を持つ Noto Sans CJK を入れている。
