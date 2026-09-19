@@ -315,16 +315,17 @@ printf '%-12s = %s\n' MY_PUBKEY "$MY_PUBKEY" PEER_PUBKEY "$PEER_PUBKEY"
 
 ```bash
 sudo install -m 600 /dev/null "$WG_CONF"
-cat <<EOF | sudo tee "$WG_CONF" >/dev/null
+cat <<EOF | sed -E '/^(Endpoint|MTU) = *$/d' | sudo tee "$WG_CONF" >/dev/null
 [Interface]
 Address = ${MY_TUN_IP}/30
 ListenPort = ${WG_PORT}
 PrivateKey = $(sudo cat "$WG_KEY")
+MTU = ${WG_MTU}
 
 [Peer]
 # Site ${PEER_SITE}
 PublicKey = ${PEER_PUBKEY}
-Endpoint = ${PEER_PUBLIC}:${WG_PORT}
+Endpoint = ${PEER_PUBLIC:+${PEER_PUBLIC}:${WG_PORT}}
 AllowedIPs = ${PEER_ALLOWED}
 PersistentKeepalive = ${WG_KEEPALIVE}
 EOF
@@ -345,6 +346,7 @@ PersistentKeepalive = 25
 ```
 
 - **ヒアドキュメントの区切り語 `EOF` は引用しない。** `<<'EOF'` と書くと変数が展開されず、`${MY_TUN_IP}` がそのまま conf に入る
+- **`Endpoint` と `MTU` は値が空なら行ごと落ちる。** `${PEER_PUBLIC:+...}` は `PEER_PUBLIC` が空なら何も書かず、`sed` が値の空いた `Endpoint` / `MTU` の行を削る。CGNAT などで相手拠点の `SITE_x_PUBLIC` を空にした場合（[注意点](#片側がグローバル-ip-を持たない場合cgnat-など)）や `WG_MTU` を使わない場合も、**ブロックを編集せずにそのまま貼れる**。この 2 行以外は空にならない前提なので `sed` の対象にしていない（`PrivateKey` が空なら `wg-quick` がエラーにする）
 - 秘密鍵は `$(sudo cat "$WG_KEY")` をシェルが展開して書き込むので、**画面には出ない**
 - `install -m 600 /dev/null` で先に `0600` のファイルを作る。`tee` は中身を入れ替えるだけなのでパーミッションは保たれる
 - `PEER_ALLOWED` は手順 0 が組み立てる。相手拠点のクライアント帯（[手順 8](#8-クライアント用の帯を決めて-conf-を作り直す)）を `site.env` に書けば、ここに自動で入る
@@ -858,6 +860,7 @@ $ tracepath -n 192.168.120.100
 | 自拠点から張ったトンネルは動くのに、相手側から張ろうとすると失敗する | 自拠点の firewalld で `${WG_PORT}/udp` を開け忘れている、またはルーターのポート転送が無い |
 | `--info-policy` の rich rule に `$MY_LAN` のような文字列が入っている | rich rule を単一引用符で書いた（[落とし穴 3](#落とし穴-3-rich-rule-を単一引用符で書くと変数が展開されない)） |
 | コマンドが `--add-port=/udp` のように空の値で失敗する | `. ~/wg/wg-env.sh` を実行していないシェルでコマンドを貼った（[新しいシェルでは](#新しいシェルでは--wgwg-envsh-を先に実行する)） |
+| `wg-quick up` が ``Name or service not known: `:51820'`` と `Configuration parsing error` で失敗する | `wg0.conf` の `Endpoint` にホストが無い（`Endpoint = :${WG_PORT}`）。相手拠点の `SITE_x_PUBLIC` が空のまま、`Endpoint` 行を必ず書いていた頃の手順 3 を貼った（[片側がグローバル IP を持たない場合](#片側がグローバル-ip-を持たない場合cgnat-など)） |
 | クライアントの ping に `From ${MY_TUN_IP} ... Packet filtered` で、宛先が**相手拠点 LAN のときだけ**失敗する | `wg0 → wg0` の policy（`clientsA-to-siteB`）が無い。検証では、この policy を外すと自拠点 LAN への ping は通ったまま相手拠点 LAN だけが落ちた |
 | クライアントの ping に `From ${MY_LAN_IP} ... Packet filtered` | 自拠点 LAN 向けの policy（`clientsA-to-siteA`）が無い |
 | ハンドシェイクは成立するのに、相手拠点 LAN へ**まったく応答が無い**（ICMP も返らない） | 相手拠点のホストの `AllowedIPs` にクライアント帯が無い。WireGuard は範囲外の送信元を黙って捨てる。手順 8 を相手拠点でも実行したか確認する |
@@ -1005,7 +1008,16 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 | ルーターのポート転送 | 不要 | **必須** |
 | firewalld の `${WG_PORT}/udp` | 不要 | **必須** |
 
-手順 3 のヒアドキュメントは `Endpoint` 行を必ず書くので、`PEER_PUBLIC` が空の側では**その行を消してから貼る**（あるいはスクリプトを使う。`SITE_x_PUBLIC` が空なら `Endpoint` を書かない）。
+手順 3 のヒアドキュメントは、`PEER_PUBLIC`（= 相手拠点の `SITE_x_PUBLIC`）が空なら `Endpoint` 行を書かない。**ブロックはそのまま貼ってよい**（スクリプトも同じ扱い）。
+
+> **`Endpoint = :51820` になったとき。** `SITE_x_PUBLIC` を空にしたまま、`Endpoint` 行を必ず書いていた頃の手順 3 を貼ると、`wg-quick up` が次で止まる（実測）。
+>
+> ```
+> wg-quick[20346]: Name or service not known: `:51820'
+> wg-quick[20346]: Configuration parsing error
+> ```
+>
+> `sudo grep Endpoint /etc/wireguard/wg0.conf` で確認し、`Endpoint = :${WG_PORT}` になっていたら**その行を消して** `sudo systemctl start wg-quick@wg0` し直す（相手拠点に本当はグローバル IP があるなら、`site.env` の `SITE_x_PUBLIC` を埋めて手順 3 を貼り直す）。
 
 WireGuard は、正しく認証できたパケットの送信元を peer の endpoint として覚える。そのため、`Endpoint` を書いていない側もハンドシェイクを受けた後は返信先がわかる。付録の検証では、`Endpoint` を持たない側の `wg show` に、相手の endpoint が表示された（[付録](#待ち受けポートを開け忘れた場合)）。ただし、**着信を受けた側から先に通信を始めることはできない**。A の keepalive でトンネルが維持されている間だけ、B 側のクライアントから A 側へ接続できる。**両側とも `Endpoint` を省略すると、どちらからもトンネルを張れない。**
 
@@ -1048,7 +1060,7 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 ### MTU
 
-wg-quick は wg0 の MTU を既定で **1420** にする（IPv4/IPv6 の外側ヘッダー分を引いた値）。PPPoE（MTU 1454 / 1492 など）の回線では、トンネル内の最大サイズの通信だけが通らないことがある（ping は通るが、大きなファイル転送や一部の HTTPS が止まる）。その場合は `site.env` の `WG_MTU` に `1380` などと書き、手順 3 のヒアドキュメントの `[Interface]` に `MTU = ${WG_MTU}` の行を足してから貼り直し、`systemctl restart wg-quick@wg0` する。外出先のクライアントでも、モバイル回線によっては同じことが起きる（クライアント conf の `[Interface]` に `MTU =` を書く）。本書の検証環境（MTU 1500 の veth）ではこの問題は起きていない。
+wg-quick は wg0 の MTU を既定で **1420** にする（IPv4/IPv6 の外側ヘッダー分を引いた値）。PPPoE（MTU 1454 / 1492 など）の回線では、トンネル内の最大サイズの通信だけが通らないことがある（ping は通るが、大きなファイル転送や一部の HTTPS が止まる）。その場合は `site.env` の `WG_MTU` に `1380` などと書き、`. ~/wg/wg-env.sh` で読み直してから手順 3 のヒアドキュメントを貼り直し（`MTU =` の行は `WG_MTU` が空なら落ち、書いてあれば入る）、`systemctl restart wg-quick@wg0` する。外出先のクライアントでも、モバイル回線によっては同じことが起きる（クライアント conf の `[Interface]` に `MTU =` を書く）。本書の検証環境（MTU 1500 の veth）ではこの問題は起きていない。
 
 ### LAN サブネットの重複
 
