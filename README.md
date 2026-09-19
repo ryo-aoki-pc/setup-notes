@@ -9,7 +9,7 @@
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
-| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、さらに外出先の PC・スマートフォンを任意の台数追加して両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、以降は編集せずにコピペで実行できる**手順書（手順 0〜7 が拠点間、8〜13 がクライアント追加。拠点 A / B の読み替えは自動）。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。同じ `site.env` を読むスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可）付き |
+| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、さらに外出先の PC・スマートフォンを任意の台数追加して両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、以降は編集せずにコピペで実行できる**手順書（手順 0〜7 が拠点間、8〜13 がクライアント追加。拠点 A / B の読み替えは自動）。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。同じ `site.env` を読むスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可）付き。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
 
 ## 記法の約束
 
@@ -51,4 +51,8 @@
 - **相手拠点のホストの `AllowedIPs` にクライアント帯が無いと、黙って捨てられる** — WireGuard は送信元が `AllowedIPs` 外のパケットを ICMP なしで捨てる。ハンドシェイクも転送も正常に見えたまま届かない
 - **NAT しない構成では、ルーターにクライアント帯の静的経路も要る** — LAN 側ホストの返事はデフォルトゲートウェイに向かう。相手拠点のルーターにも要る。トンネル網とクライアント帯を 1 つの大きな帯に取っておけば、静的経路は 1 本で済む
 - **firewalld の policy は ingress と egress に同じゾーンを指定でき、実際に効く** — `wg0` から入って `wg0` へ折り返す転送（クライアント → 相手拠点 LAN）を rich rule で絞れる。ゾーンの `forward` オプションだと `wg0` 内の転送がすべて通る。network namespace のラボで、その policy を外すと折り返しだけが `Packet filtered` になることを確認した（2.4.3）
+- **VPN ホストの再構築で本当に要るのは「鍵 1 本と値のファイル」だけ** — 秘密鍵さえ同じなら、相手拠点の設定も、配布済みのクライアント conf も、ルーターのポート転送・静的経路も**一切変更せずに**戻せる。鍵は「拠点の身元」そのもので、経路や NAT の設定とは無関係だから。逆に鍵を作り直すと、相手拠点の公開鍵差し替えと全クライアントの conf 再発行が連鎖する。conf・sysctl・firewalld は手順で作り直せるので、退避すべきは鍵・`site.env`・クライアント登録簿の 3 つに絞れる
+- **`sudo` で復元したファイルの所有者に注意** — `sudo` 下の `~` は `/root` を指し、root で置いたファイルは `root:root` になる。非 root でも読むファイル（このリポジトリでは `site.env` と `clients.list`）は、**置き先ディレクトリの所有者**に合わせ直す必要がある。「既にある同名ファイルの所有者を引き継ぐ」実装にすると、一度 root 所有で置かれたものが直らなくなる。書き込み自体は成功するので、後から「非 root で読めない」と気づく
+- **`/tmp` 経由で持ち込んだファイルは SELinux のコンテキストを持ち越す** — `mv` ではなく `install`（新規作成）で置き、`restorecon` をかける。同じディレクトリ内の `mktemp` → `mv` なら型変換が効くので問題ない
+- **退避ファイルは `.gitignore` の既存パターンから漏れる** — `site.env` を除外していても `site.env.bak-20260919-212000` は一致しない。`.bak-日時` を作る仕組みを入れるなら、除外パターンも同時に足す
 - **クライアント conf の `AllowedIPs` にはトンネル網も入れる** — WG ホスト自身がクライアントに送るパケットの送信元は `wg0` のアドレスになる。無いとクライアント側で捨てられる

@@ -13,6 +13,11 @@
 #        ./wg-s2s.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）
 #   client add / remove の後は、その拠点で apply を実行してホストに反映する。
 #
+#   sudo ./wg-s2s.sh [options] backup  [A|B]         鍵・site.env・clients.list を tar.gz に退避する
+#   sudo ./wg-s2s.sh [options] restore FILE          退避したものを元の場所に戻す
+#   クリーンインストール後は restore してから apply すると、同じ鍵のまま復旧できる
+#   （相手拠点の設定とクライアント端末の conf は変更不要）。
+#
 # options:
 #   -e, --env FILE          設定ファイル（既定: スクリプトと同じディレクトリの site.env）
 #   -n, --dry-run           変更せず、実行予定の内容だけを表示する
@@ -21,6 +26,7 @@
 #   --pubkey KEY            client add: クライアント側で生成した公開鍵を登録する（秘密鍵をホストで作らない）
 #   --ip ADDR               client add: トンネル IP を指定する（既定: 帯の中で最小の空きアドレス）
 #   --qr                    client show: QR コードで表示する（qrencode が必要）
+#   -o, --output FILE       backup: 出力先（既定: ~/wg-backup-<ホスト名>-<日時>.tar.gz）
 #   -h, --help              このヘルプ
 set -euo pipefail
 
@@ -32,6 +38,13 @@ PURGE=0
 OPT_PUBKEY=""
 OPT_IP=""
 OPT_QR=0
+OPT_OUTPUT=""
+# -e が明示されたか（restore で site.env の戻し先を決めるのに使う）
+ENV_FILE_SET=0
+# load_env が設定ファイルを読めたか（復旧直後はまだ無い）
+ENV_LOADED=0
+# make_tmpdir が作る作業用ディレクトリ
+TMP_WORK=""
 SYSCTL_FILE=/etc/sysctl.d/90-wireguard.conf
 # --pubkey で登録したクライアントの conf に書く PrivateKey の仮の値
 CLIENT_KEY_PLACEHOLDER="<CLIENT_PRIVATE_KEY>"
@@ -62,6 +75,7 @@ load_env() {
   if [[ -f $ENV_FILE ]]; then
     # shellcheck disable=SC1090
     source "$ENV_FILE"
+    ENV_LOADED=1
   elif (( required )); then
     die "設定ファイルがありません: $ENV_FILE（site.env.example をコピーして作成）"
   fi
@@ -611,6 +625,88 @@ setup_firewalld() {
   run firewall-cmd --reload
 }
 
+# --- バックアップ / 復旧 ------------------------------------------------------------
+# アーカイブは wg-backup/ の下に平らに並べ、MANIFEST に
+# 「FILE 種別 アーカイブ内の名前 パーミッション 元のパス」を残す。restore はそれを見て元の場所へ戻す
+BACKUP_DIR_NAME=wg-backup
+# MANIFEST の形式。restore は知らない値を拒否する
+BACKUP_FORMAT=1
+
+short_host() { hostname -s 2>/dev/null || uname -n; }
+
+# sudo の呼び出しユーザーのホーム（無ければ root のもの）
+user_home() {
+  local h=""
+  [[ -z ${SUDO_USER:-} ]] || h=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+  echo "${h:-$HOME}"
+}
+
+# site.env から 1 変数の値を読む（source せずに読む。# 以降と前後の空白・二重引用符を落とす）
+env_value() {  # $1 = ファイル, $2 = 変数名
+  [[ -f $1 ]] || return 0
+  awk -v k="$2" '
+    { line = $0; sub(/^[ \t]*/, "", line) }
+    index(line, k "=") == 1 {
+      v = substr(line, length(k) + 2)
+      sub(/#.*/, "", v)
+      gsub(/^[ \t]+|[ \t]+$/, "", v)
+      gsub(/^"|"$/, "", v)
+      val = v
+    }
+    END { if (val != "") print val }
+  ' "$1"
+}
+
+# 作業用ディレクトリ（終了時に消す）
+make_tmpdir() {
+  TMP_WORK=$(umask 077; mktemp -d "${TMPDIR:-/tmp}/wg-s2s.XXXXXX") || die "作業用ディレクトリを作れません"
+  trap 'rm -rf "$TMP_WORK"' EXIT
+}
+
+# SELinux のラベルを付け直す（restorecon が無い環境でも止めない）
+relabel() {
+  if (( DRY_RUN )); then
+    printf '[dry-run] '; printf '%q ' restorecon "$1"; echo
+  else
+    restorecon "$1" >/dev/null 2>&1 || true
+  fi
+}
+
+# root で戻したファイルの所有者を、置き先ディレクトリ → sudo の呼び出しユーザー の順で決める。
+# site.env と clients.list を root 所有のままにすると、非 root で動く client list / router が読めなくなる。
+# 「既にある同名ファイルの所有者」を優先しないのは、一度 root 所有で置かれたものが直らなくなるため
+fix_owner() {  # $1 = パス
+  local p=$1 owner
+  owner=$(stat -c %U "$(dirname "$p")" 2>/dev/null || echo root)
+  if [[ $owner == root && -n ${SUDO_USER:-} ]]; then
+    owner=$SUDO_USER
+  fi
+  [[ $owner == root ]] || run chown "$owner:" "$p"
+}
+
+# アーカイブ内の 1 ファイルを戻す。既存のものは write_conf と同じく .bak-日時 に退避する
+restore_file() {  # $1 = アーカイブ内のファイル, $2 = 戻し先, $3 = パーミッション, $4 = 1 なら所有者を合わせる
+  local src=$1 dst=$2 mode=$3 own=$4 dir
+  [[ -f $src ]] || return 0
+  dir=$(dirname "$dst")
+  if [[ ! -d $dir ]]; then
+    run install -d -m 700 "$dir"
+    (( own == 0 )) || fix_owner "$dir"
+  fi
+  if [[ -f $dst ]] && cmp -s "$src" "$dst"; then
+    info "$dst は変更なし"
+    return 0
+  fi
+  if [[ -f $dst ]]; then
+    run cp -p "$dst" "$dst.bak-$(date +%Y%m%d-%H%M%S)"
+    (( DRY_RUN )) || info "既存の $dst を退避しました"
+  fi
+  run install -m "$mode" "$src" "$dst"
+  relabel "$dst"
+  (( own == 0 )) || fix_owner "$dst"
+  (( DRY_RUN )) || info "$dst を戻しました"
+}
+
 # --- commands --------------------------------------------------------------------
 cmd_keygen() {
   need_root
@@ -770,6 +866,250 @@ cmd_remove() {
   echo "ルーターのポート転送と静的経路は手動で削除してください。"
 }
 
+# --- backup / restore ------------------------------------------------------------
+cmd_backup() {
+  need_root
+  load_env 1
+  [[ -f $KEY ]] || die "秘密鍵 $KEY がありません。この拠点の WG ホストで実行してください"
+  # 拠点は LAN 側 IP ではなく鍵で判定する（IP は再インストールや NIC の都合で変わりうる）
+  local pub="" site="" a_pub b_pub
+  if command -v wg >/dev/null; then
+    pub=$(derive_my_pubkey)
+  else
+    warn "wireguard-tools が未導入のため、MANIFEST に公開鍵を書けません"
+  fi
+  if [[ -n $pub ]]; then
+    a_pub=$(env_value "$ENV_FILE" SITE_A_PUBKEY)
+    b_pub=$(env_value "$ENV_FILE" SITE_B_PUBKEY)
+    if   [[ -n $a_pub && $a_pub == "$pub" ]]; then site=A
+    elif [[ -n $b_pub && $b_pub == "$pub" ]]; then site=B
+    fi
+  fi
+  if [[ -n ${1:-} ]]; then
+    select_site "$1"
+    [[ -z $site || $site == "$L" ]] || die "拠点 $1 を指定しましたが、$KEY は拠点 $site の鍵です"
+    site=$L
+  fi
+  [[ -n $site ]] || warn "拠点（A/B）を判定できません。MANIFEST の SITE は空になります"
+
+  local envsh
+  envsh="$(dirname "$ENV_FILE")/wg-env.sh"
+  # 種別 アーカイブ内の名前 元のパス。無いものは飛ばす
+  local -a cand=(
+    "key     $WG_IFACE.key  $KEY"
+    "pub     $WG_IFACE.pub  $PUB"
+    "conf    $WG_IFACE.conf $CONF"
+    "env     site.env       $ENV_FILE"
+    "envsh   wg-env.sh      $envsh"
+    "clients clients.list   $CLIENTS_FILE"
+  )
+  local -a items=()
+  local spec kind name path mode
+  for spec in "${cand[@]}"; do
+    read -r kind name path <<<"$spec"
+    [[ -f $path ]] || continue
+    mode=$(stat -c %a "$path") || die "$path の情報を取得できません"
+    items+=("$kind $name $mode $path")
+  done
+
+  local out=$OPT_OUTPUT
+  [[ -n $out ]] || out="$(user_home)/wg-backup-$(short_host)-$(date +%Y%m%d-%H%M%S).tar.gz"
+
+  if (( DRY_RUN )); then
+    info "$out に入れる内容:"
+    for spec in "${items[@]}"; do
+      read -r kind name mode path <<<"$spec"
+      printf '    %-13s (%s) <- %s\n' "$name" "$mode" "$path"
+    done
+    echo "    MANIFEST"
+    return
+  fi
+
+  [[ ! -e $out ]] || die "$out が既にあります（-o で別の名前を指定してください）"
+  make_tmpdir
+  local stage="$TMP_WORK/$BACKUP_DIR_NAME"
+  mkdir -p "$stage"
+  for spec in "${items[@]}"; do
+    read -r kind name mode path <<<"$spec"
+    cp -p "$path" "$stage/$name"
+  done
+  {
+    echo "# wg-s2s.sh backup（docs/wireguard.md「バックアップと復旧」）"
+    echo "FORMAT=$BACKUP_FORMAT"
+    echo "CREATED=$(date -Is)"
+    echo "HOST=$(short_host)"
+    echo "SITE=$site"
+    echo "WG_IFACE=$WG_IFACE"
+    echo "PUBKEY=$pub"
+    for spec in "${items[@]}"; do
+      echo "FILE $spec"
+    done
+  } >"$stage/MANIFEST"
+
+  (umask 077; tar czf "$out" --owner=0 --group=0 --numeric-owner -C "$TMP_WORK" "$BACKUP_DIR_NAME") || die "アーカイブを作れません: $out"
+  chmod 600 "$out"
+  [[ -z ${SUDO_USER:-} ]] || chown "$SUDO_USER:" "$out" 2>/dev/null || true
+  info "バックアップを作成しました: $out"
+  tar tzf "$out" | sed 's/^/    /'
+  if compgen -G "$CLIENT_DIR/*.conf" >/dev/null; then
+    warn "$CLIENT_DIR にクライアント用 conf（秘密鍵入り）が残っています。バックアップには含めていません。端末に取り込み済みなら削除してください"
+  fi
+  echo
+  echo "このファイルには拠点の秘密鍵が入っている。リポジトリに入れず、0600 のままオフラインの安全な場所に置く。"
+  echo "復旧するには: sudo $0 restore $out"
+}
+
+cmd_restore() {
+  need_root
+  local file=${1:-}
+  [[ -n $file ]] || die "使い方: restore FILE（backup で作ったアーカイブ）"
+  [[ -f $file ]] || die "ファイルがありません: $file"
+  load_env 0
+
+  # 展開する前に中身を検査する
+  local listing e
+  listing=$(tar tzf "$file") || die "アーカイブを読めません: $file"
+  while IFS= read -r e; do
+    [[ -n $e ]] || continue
+    case $e in
+      /*)   die "アーカイブに絶対パスのエントリがあります: $e" ;;
+      *..*) die "アーカイブに .. を含むエントリがあります: $e" ;;
+      "$BACKUP_DIR_NAME"|"$BACKUP_DIR_NAME"/|"$BACKUP_DIR_NAME"/*) ;;
+      *)    die "このスクリプトが作ったバックアップではありません（$e）" ;;
+    esac
+  done <<<"$listing"
+  has_word "$BACKUP_DIR_NAME/MANIFEST" <<<"$listing" \
+    || die "MANIFEST がありません。このスクリプトが作ったバックアップではありません"
+
+  make_tmpdir
+  tar xzf "$file" -C "$TMP_WORK" || die "アーカイブを展開できません: $file"
+  local stage="$TMP_WORK/$BACKUP_DIR_NAME"
+
+  local m_iface="" m_site="" m_pubkey="" m_host="" m_created="" m_format="" line
+  local -a items=()
+  while IFS= read -r line; do
+    case $line in
+      FORMAT=*)   m_format=${line#FORMAT=} ;;
+      CREATED=*)  m_created=${line#CREATED=} ;;
+      HOST=*)     m_host=${line#HOST=} ;;
+      SITE=*)     m_site=${line#SITE=} ;;
+      WG_IFACE=*) m_iface=${line#WG_IFACE=} ;;
+      PUBKEY=*)   m_pubkey=${line#PUBKEY=} ;;
+      "FILE "*)   items+=("${line#FILE }") ;;
+    esac
+  done <"$stage/MANIFEST"
+  [[ -n $m_format ]] || die "MANIFEST に FORMAT がありません。このスクリプトが作ったバックアップではありません"
+  [[ $m_format == "$BACKUP_FORMAT" ]] || die "バックアップの形式（FORMAT=$m_format）を扱えません。新しい版の wg-s2s.sh を使ってください"
+  [[ -n $m_iface ]] || die "MANIFEST に WG_IFACE がありません"
+  info "バックアップ: ${m_host:-不明} / 拠点 ${m_site:-不明} / $m_iface / ${m_created:-日時不明}"
+
+  # 復旧直後は site.env がまだ無いので、その場合はバックアップのインターフェース名を採用する
+  if (( ENV_LOADED )); then
+    [[ $m_iface == "$WG_IFACE" ]] \
+      || die "バックアップのインターフェース名（$m_iface）が site.env の WG_IFACE=$WG_IFACE と違います"
+  else
+    WG_IFACE=$m_iface
+    CONF=/etc/wireguard/$WG_IFACE.conf
+    KEY=/etc/wireguard/$WG_IFACE.key
+    PUB=/etc/wireguard/$WG_IFACE.pub
+  fi
+  install_tools
+
+  # 戻し先を決める。site.env は -e があればそちらを優先し、wg-env.sh と clients.list はその隣に置く
+  local spec kind name mode path
+  local key_name="" env_name="" env_target="" env_dir=""
+  for spec in "${items[@]}"; do
+    read -r kind name mode path <<<"$spec"
+    case $kind in
+      key) key_name=$name ;;
+      env) env_name=$name; env_target=$path ;;
+    esac
+  done
+  # MANIFEST のファイル名は展開先のファイル名そのもの。/ を含むと展開先の外を指せてしまう
+  for spec in "${items[@]}"; do
+    read -r kind name mode path <<<"$spec"
+    [[ $name != */* && $name != . && $name != .. ]] \
+      || die "MANIFEST のファイル名が不正です: $name"
+  done
+  [[ -n $key_name && -f $stage/$key_name ]] || die "アーカイブに秘密鍵がありません"
+  if [[ -n $env_target ]] && (( ENV_FILE_SET )) && [[ $ENV_FILE != "$env_target" ]]; then
+    info "site.env の戻し先を $env_target から $ENV_FILE に変更します（-e の指定）"
+    env_target=$ENV_FILE
+  fi
+  [[ -z $env_target ]] || env_dir=$(dirname "$env_target")
+
+  # 何も書く前に、鍵と site.env が噛み合っているかを確かめる
+  local derived=""
+  if command -v wg >/dev/null; then
+    derived=$(wg pubkey <"$stage/$key_name") || die "バックアップの鍵から公開鍵を算出できません"
+  else
+    warn "wireguard-tools が未導入のため、鍵の照合は省略します"
+  fi
+  if [[ -n $derived ]]; then
+    [[ -z $m_pubkey || $m_pubkey == "$derived" ]] \
+      || die "鍵ファイルが MANIFEST の公開鍵と一致しません（アーカイブが壊れています）"
+    local envsrc="$stage/${env_name:-site.env}" a_pub b_pub found=""
+    a_pub=$(env_value "$envsrc" SITE_A_PUBKEY)
+    b_pub=$(env_value "$envsrc" SITE_B_PUBKEY)
+    if   [[ -n $a_pub && $a_pub == "$derived" ]]; then found=A
+    elif [[ -n $b_pub && $b_pub == "$derived" ]]; then found=B
+    fi
+    if [[ -n $found ]]; then
+      [[ -z $m_site || $m_site == "$found" ]] \
+        || warn "MANIFEST の拠点（$m_site）と、公開鍵から判定した拠点（$found）が違います"
+      m_site=$found
+      info "鍵と site.env は一致しています（拠点 $found の公開鍵 $derived）"
+    elif [[ -z $a_pub && -z $b_pub ]]; then
+      warn "site.env に公開鍵が書かれていないため、鍵との照合はできません（この鍵の公開鍵: $derived）"
+    else
+      die "バックアップの鍵の公開鍵（$derived）が site.env の SITE_A_PUBKEY / SITE_B_PUBKEY のどちらとも一致しません"
+    fi
+    if [[ -n $m_site ]]; then
+      local other my_ip peer_ip
+      if [[ $m_site == A ]]; then other=B; else other=A; fi
+      my_ip=$(env_value "$envsrc" "WG_${m_site}_LAN_IP")
+      peer_ip=$(env_value "$envsrc" "WG_${other}_LAN_IP")
+      # 相手拠点のホストに戻すと両拠点が同じ鍵になるので、これは止める
+      if [[ -n $peer_ip && -n $(iface_of_ip "$peer_ip") ]]; then
+        die "このホストは拠点 $other の WG ホスト（$peer_ip）です。拠点 $m_site の鍵を戻すと両拠点が同じ鍵になります"
+      fi
+      # どちらの IP も無いのは再インストール直後にありうるので、警告にとどめる
+      if [[ -n $my_ip && -z $(iface_of_ip "$my_ip") ]]; then
+        warn "このホストに WG_${m_site}_LAN_IP=$my_ip がありません。LAN 側 IP を変えた場合は site.env と、ルーターのポート転送の宛先も直してください"
+      fi
+    fi
+  fi
+
+  # パーミッションは MANIFEST の値をそのまま使わない。細工されたアーカイブで
+  # 秘密鍵が 0644 で置かれるのを防ぐため、秘密を含むものは 600 に固定する
+  for spec in "${items[@]}"; do
+    read -r kind name mode path <<<"$spec"
+    [[ $mode =~ ^[0-7]{3,4}$ ]] || die "MANIFEST のパーミッションが不正です: $kind $mode"
+    case $kind in
+      key)     restore_file "$stage/$name" "$KEY"  600 0 ;;
+      pub)     restore_file "$stage/$name" "$PUB"  600 0 ;;
+      conf)    restore_file "$stage/$name" "$CONF" 600 0 ;;
+      env)     restore_file "$stage/$name" "$env_target" 600 1 ;;
+      envsh)   restore_file "$stage/$name" "${env_dir:-$(dirname "$path")}/$(basename "$path")" 600 1 ;;
+      clients) restore_file "$stage/$name" "${env_dir:-$(dirname "$path")}/$(basename "$path")" "$mode" 1 ;;
+      *)       warn "MANIFEST の未知の種別を無視します: $kind" ;;
+    esac
+  done
+
+  local envopt=""
+  [[ -z $env_target || $env_target == "$SCRIPT_DIR/site.env" ]] || envopt="-e $env_target "
+  echo
+  echo "---- 次にすること ----"
+  echo "1. 値を確認する        : ${env_target:-site.env}"
+  echo "2. 設定を作り直して起動: sudo $0 ${envopt}apply ${m_site:-A|B}"
+  echo "   （手動手順で進める場合は . ${env_dir:-~/wg}/wg-env.sh を読み込んでから手順 4 以降。"
+  echo "     conf を戻してあるので手順 2・3 は実行しない。手順 3 を貼るとクライアントの [Peer] が消える）"
+  echo "3. ルーターのポート転送と静的経路は鍵に依存しないので変更不要"
+  echo "   （WG ホストの LAN 側 IP を変えた場合だけ、ポート転送の宛先を直す）"
+  echo
+  echo "相手拠点とクライアント端末の設定は、同じ鍵に戻したので変更は要らない。"
+}
+
 # --- client commands -------------------------------------------------------------
 cmd_client_add() {
   need_root
@@ -909,13 +1249,14 @@ cmd_client_list() {
 args=()
 while (( $# )); do
   case $1 in
-    -e|--env) [[ $# -ge 2 ]] || die "$1 には値が必要です"; ENV_FILE=$2; shift ;;
+    -e|--env) [[ $# -ge 2 ]] || die "$1 には値が必要です"; ENV_FILE=$2; ENV_FILE_SET=1; shift ;;
     -n|--dry-run) DRY_RUN=1 ;;
     --use-existing-conf) OPT_USE_EXISTING=1 ;;
     --purge) PURGE=1 ;;
     --pubkey) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_PUBKEY=$2; shift ;;
     --ip) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_IP=$2; shift ;;
     --qr) OPT_QR=1 ;;
+    -o|--output) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_OUTPUT=$2; shift ;;
     -h|--help) usage; exit 0 ;;
     -*) die "不明なオプション: $1" ;;
     *) args+=("$1") ;;
@@ -930,6 +1271,8 @@ case ${1:-} in
   router) shift; cmd_router "$@" ;;
   status) shift; cmd_status ;;
   remove) shift; cmd_remove "$@" ;;
+  backup) shift; cmd_backup "$@" ;;
+  restore) shift; cmd_restore "$@" ;;
   client)
     shift
     case ${1:-} in
