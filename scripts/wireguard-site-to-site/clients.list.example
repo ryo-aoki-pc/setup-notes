@@ -1,4 +1,4 @@
-# リモートクライアントの登録簿（docs/wireguard-remote-clients.md）
+# リモートクライアントの登録簿（docs/wireguard.md の手順 8 以降）
 #
 # 通常は `wg-s2s.sh client add A|B NAME` が clients.list に追記する。手で書く場合はこの形式にする。
 #   NAME       : 英数字・-・_ のみ。クライアント用 conf のファイル名（<NAME>.conf）にもなる

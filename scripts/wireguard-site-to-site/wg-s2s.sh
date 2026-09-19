@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# WireGuard 拠点間 VPN（docs/wireguard-site-to-site.md）と、そこへのリモートクライアント追加
-# （docs/wireguard-remote-clients.md）の手順を site.env の値で実行する。
+# WireGuard 拠点間 VPN と、そこへのリモートクライアント追加
+# （docs/wireguard.md）の手順を site.env の値で実行する。
 #
 #   sudo ./wg-s2s.sh [options] keygen [A|B]          手順 1〜2: wireguard-tools 導入と鍵生成
 #   sudo ./wg-s2s.sh [options] apply  A|B            手順 3〜6: wg0.conf・sysctl・firewalld・サービス
