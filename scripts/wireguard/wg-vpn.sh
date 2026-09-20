@@ -2,12 +2,12 @@
 # WireGuard 拠点間 VPN と、そこへのリモートクライアント追加
 # （docs/wireguard.md）の手順を site.env の値で実行する。
 #
-#   sudo ./wg-vpn.sh [options] keygen [A|B]          手順 1〜2: wireguard-tools 導入と鍵生成
-#   sudo ./wg-vpn.sh [options] apply  A|B            手順 3〜6: wg0.conf・sysctl・firewalld・サービス
-#        ./wg-vpn.sh [options] router A|B            手順 7: ルーターに入れる値を表示
-#   sudo ./wg-vpn.sh [options] status                状態確認
+#   sudo ./wg-vpn.sh [options] keygen [A|B]          手順 2: wireguard-tools 導入と鍵生成
+#   sudo ./wg-vpn.sh [options] apply  A|B            手順 3: wg0.conf・sysctl・firewalld・サービス
+#        ./wg-vpn.sh [options] router A|B            ルーターに入れる値を表示（apply の末尾と同じ。補足「ルーターの設定」）
+#   sudo ./wg-vpn.sh [options] status                手順 5: 状態確認
 #   sudo ./wg-vpn.sh [options] remove A|B            ロールバック
-#   sudo ./wg-vpn.sh [options] client add A|B NAME   クライアントを登録し、鍵とクライアント用 conf を生成する
+#   sudo ./wg-vpn.sh [options] client add A|B NAME   手順 4: クライアントを登録し、鍵とクライアント用 conf を生成する
 #   sudo ./wg-vpn.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する
 #   sudo ./wg-vpn.sh [options] client show NAME      クライアント用 conf を表示する
 #        ./wg-vpn.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）
@@ -1102,8 +1102,8 @@ cmd_restore() {
   echo "---- 次にすること ----"
   echo "1. 値を確認する        : ${env_target:-site.env}"
   echo "2. 設定を作り直して起動: sudo $0 ${envopt}apply ${m_site:-A|B}"
-  echo "   （手動手順で進める場合は . ${env_dir:-~/wg}/wg-env.sh を読み込んでから手順 4 以降。"
-  echo "     conf を戻してあるので手順 2・3 は実行しない。手順 3 を貼るとクライアントの [Peer] が消える）"
+  echo "   （手動手順で進める場合は . ${env_dir:-~/wg}/wg-env.sh を読み込んでから手動手順 4 以降。"
+  echo "     conf を戻してあるので手動手順 2・3 は実行しない。手動手順 3 を貼るとクライアントの [Peer] が消える）"
   echo "3. ルーターのポート転送と静的経路は鍵に依存しないので変更不要"
   echo "   （WG ホストの LAN 側 IP を変えた場合だけ、ポート転送の宛先を直す）"
   echo
