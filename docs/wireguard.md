@@ -75,6 +75,9 @@ chmod 600 ~/wg/site.env
 vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
 ```
 
+<details>
+<summary>(b) `~/wg/wg-env.sh` を作るブロック（63 行。内容は両拠点で同一）</summary>
+
 ```bash
 # (b) このホスト視点の変数を組み立てる定義を置く（内容は両拠点で同一）
 cat > ~/wg/wg-env.sh <<'EOF'
@@ -141,6 +144,8 @@ EOF
 chmod 600 ~/wg/wg-env.sh
 ```
 
+</details>
+
 ```bash
 # (c) 読み込む。新しいシェルを開いたら、以降はこの 1 行だけでよい
 . ~/wg/wg-env.sh
@@ -156,6 +161,9 @@ for v in MY_SITE MY_NIC MY_LAN MY_LAN_IP MY_TUN_IP MY_PUBLIC MY_CLIENT_NET \
   printf '%-16s = %s\n' "$v" "${!v}"
 done
 ```
+
+<details>
+<summary>読み戻しの出力例（拠点 A、25 行）</summary>
 
 ```
 MY_SITE          = A              ← 自動判定。拠点 B のホストでは B になる
@@ -184,6 +192,8 @@ POL_PEER_MYCL    = siteB-to-clientsA
 POL_PEERCL_IN    = clientsB-to-siteA
 POL_PEERCL_OUT   = siteA-to-clientsB
 ```
+
+</details>
 
 > **`MY_SITE` が想定と違う、`MY_NIC` が空、`LAN_ZONE` が空のいずれかなら、ここで止めて `site.env` を直す。**
 
@@ -274,6 +284,9 @@ sysctl net.ipv4.ip_forward            # = 1
 
 ### 5. firewalld の設定
 
+<details>
+<summary>(a)〜(g) firewalld の設定ブロック（34 行）</summary>
+
 ```bash
 # (a) WireGuard の待ち受けポートを LAN 側ゾーンで開ける
 sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-port="$WG_PORT/udp"
@@ -310,6 +323,8 @@ mkpol "$POL_IN"  "$WG_FW_ZONE" "$LAN_ZONE"   "$PEER_LAN" "$MY_LAN"
 sudo firewall-cmd --reload
 sudo firewall-cmd --get-policies | tr ' ' '\n' | grep -E 'clients|site[AB]'
 ```
+
+</details>
 
 ```
 clientsA-to-siteA
@@ -376,6 +391,9 @@ CLIENT_TUN_IP=10.99.1.1                 # ${MY_CLIENT_NET} の中の空きアド
 sudo grep -q "AllowedIPs = ${CLIENT_TUN_IP}/32" "$WG_CONF" && echo "使用済み: 別の IP にする" || echo "未使用: 進める"
 ```
 
+<details>
+<summary>鍵の生成 → クライアント用 conf → `wg0.conf` への追記 → restart（30 行）</summary>
+
 ```bash
 # 鍵を作り、クライアント用 conf を書く（秘密鍵は画面に出ない）
 sudo install -d -m 700 /etc/wireguard/clients
@@ -408,6 +426,8 @@ EOF
 sudo systemctl restart "wg-quick@$WG_IFACE"
 ip route show dev "$WG_IFACE"           # ${CLIENT_TUN_IP} の /32 経路が増えている
 ```
+
+</details>
 
 ```
 10.99.0.0/30 proto kernel scope link src 10.99.0.1
@@ -469,6 +489,9 @@ tracepath -n <相手拠点の LAN のホスト>
 
 手順 1〜9 は [`scripts/wireguard-site-to-site/wg-s2s.sh`](../scripts/wireguard-site-to-site/wg-s2s.sh) でまとめて実行できる。**手順 0 で作った `~/wg/site.env` をそのまま読む**ので、途中からスクリプトに切り替えてもよい。
 
+<details>
+<summary>`wg-s2s.sh` のコマンド一覧（25 行）</summary>
+
 ```bash
 cd scripts/wireguard-site-to-site
 
@@ -496,6 +519,8 @@ sudo ./wg-s2s.sh -e ~/wg/site.env remove A              # ロールバック（�
 sudo ./wg-s2s.sh -e ~/wg/site.env backup                # 鍵と設定を tar.gz にまとめる
 sudo ./wg-s2s.sh restore ~/wg-backup-<ホスト名>-<日時>.tar.gz   # クリーンインストール後に戻す
 ```
+
+</details>
 
 → [スクリプトの動作](#スクリプトの動作)
 
@@ -527,6 +552,9 @@ OS を入れ直しても、**ホストの秘密鍵が同じなら**、相手拠�
 ### バックアップを取る
 
 **読むだけなので、トンネルを止めずに本番のホストでそのまま実行できる。** 両拠点でそれぞれ取る（鍵は拠点ごとに違う）。
+
+<details>
+<summary>バックアップを作るブロック（34 行）</summary>
 
 ```bash
 . ~/wg/wg-env.sh
@@ -564,6 +592,8 @@ BACKUP=~/wg-backup-$(uname -n | cut -d. -f1)-$(date +%Y%m%d-%H%M%S).tar.gz
 rm -rf "$STAGE"
 ls -l "$BACKUP"; tar tzf "$BACKUP"
 ```
+
+</details>
 
 - **このアーカイブには秘密鍵が入っている。** `0600` のまま、**リポジトリの中には置かない**（`.gitignore` に `wg-backup-*.tar.gz` を入れてあるが、それに頼らない）。このマシンの外（別のディスク、オフラインのメディア）に保管する
 
@@ -645,6 +675,9 @@ sudo ./wg-s2s.sh -e ~/wg/site.env apply B                   # 手順 4〜6（+ �
 
 各拠点の WG ホストで（クライアント用の policy もまとめて消える）:
 
+<details>
+<summary>全部消すブロック（20 行）</summary>
+
 ```bash
 . ~/wg/wg-env.sh
 
@@ -667,6 +700,8 @@ sudo sysctl -w net.ipv4.ip_forward=0
 rm -rf ~/wg                                        # site.env と wg-env.sh
 sudo dnf remove wireguard-tools systemd-resolved   # 不要なら
 ```
+
+</details>
 
 - **policy はゾーンより先に消す。** 順序が逆だと `--reload` が `INVALID_ZONE` で失敗し、firewalld の設定が壊れる
 - ルーター側のポート転送と静的経路も削除する
@@ -920,6 +955,9 @@ $ tracepath -n 192.168.120.100
 
 ### 完了時点の状態（拠点 A、クライアント 1 台）
 
+<details>
+<summary>`wg show` / `ip route` / `firewall-cmd` などの出力（45 行）</summary>
+
 ```
 $ sudo wg show
 interface: wg0
@@ -967,6 +1005,8 @@ enabled
 $ nmcli -f DEVICE,TYPE,STATE dev | grep wg0
 wg0      wireguard  connected (externally)
 ```
+
+</details>
 
 ### 注意点
 
@@ -1351,6 +1391,9 @@ root ns (= WG host A)                     netns                                 
 
 #### 構築スクリプト（抜粋）
 
+<details>
+<summary>namespace の構築スクリプト（21 行）</summary>
+
 ```bash
 for n in routerA clientA routerB wgB clientB; do ip netns add $n; ip -n $n link set lo up; done
 # LAN A（root ns のブリッジ = WG host A の LAN 側 NIC）
@@ -1374,6 +1417,8 @@ ip netns exec routerA nft add rule ip nat pre  iifname wan0 udp dport 51820 dnat
 ip netns exec routerA nft add rule ip nat post oifname wan0 ip saddr 192.168.110.0/24 masquerade
 ip -n routerA route add 192.168.120.0/24 via 192.168.110.2
 ```
+
+</details>
 
 > nftables のルールを `nft -f -` のヒアドキュメントで 1 行ずつ `chain pre { type ...; rule }` と書いたところ、`syntax error, unexpected end of file` になった。上記のように `nft add` を分けて実行すれば問題ない。
 
