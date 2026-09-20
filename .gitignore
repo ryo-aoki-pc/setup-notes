@@ -1,9 +1,9 @@
 # 環境固有の値を書く設定ファイル（site.env.example をコピーして使う）
-scripts/wireguard-site-to-site/site.env
+scripts/wireguard/site.env
 # リモートクライアントの登録簿（client add が作る。公開鍵と割り当て IP を含む）
-scripts/wireguard-site-to-site/clients.list
+scripts/wireguard/clients.list
 # 鍵入りのバックアップ（backup が作る。既定の出力先はリポジトリ外だが、置かれてもコミットさせない）
 wg-backup-*.tar.gz
 # restore が作る退避ファイル（上の site.env / clients.list の行では除外されない）
-scripts/wireguard-site-to-site/site.env.bak-*
-scripts/wireguard-site-to-site/clients.list.bak-*
+scripts/wireguard/site.env.bak-*
+scripts/wireguard/clients.list.bak-*
