@@ -75,76 +75,13 @@ chmod 600 ~/wg/site.env
 vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
 ```
 
-<details>
-<summary>(b) `~/wg/wg-env.sh` を作るブロック（63 行。内容は両拠点で同一）</summary>
-
 ```bash
-# (b) このホスト視点の変数を組み立てる定義を置く（内容は両拠点で同一）
-cat > ~/wg/wg-env.sh <<'EOF'
-# ~/wg/site.env を読み、このホスト視点の変数（MY_* / PEER_*）を作る
-set -a
-. ~/wg/site.env
-
-# このホストがどちらの拠点かを LAN 側 IP から判定する（A/B の取り違え防止）
-host_has_ip() { ip -o -4 addr show | awk -v ip="$1" '$4 ~ "^"ip"/" {f=1} END {exit !f}'; }
-if   host_has_ip "$WG_A_LAN_IP"; then MY_SITE=A
-elif host_has_ip "$WG_B_LAN_IP"; then MY_SITE=B
-else echo "WARN: WG_A_LAN_IP / WG_B_LAN_IP のどちらもこのホストに無い。MY_SITE を手で設定する" >&2
-fi
-
-if [ "$MY_SITE" = A ]; then
-  PEER_SITE=B
-  MY_LAN=$SITE_A_LAN;             PEER_LAN=$SITE_B_LAN
-  MY_LAN_IP=$WG_A_LAN_IP;         PEER_LAN_IP=$WG_B_LAN_IP
-  MY_TUN_IP=$WG_A_TUN_IP;         PEER_TUN_IP=$WG_B_TUN_IP
-  MY_PUBLIC=$SITE_A_PUBLIC;       PEER_PUBLIC=$SITE_B_PUBLIC
-  MY_PUBKEY=$SITE_A_PUBKEY;       PEER_PUBKEY=$SITE_B_PUBKEY
-  MY_CLIENT_NET=$WG_A_CLIENT_NET; PEER_CLIENT_NET=$WG_B_CLIENT_NET
-  MY_ROUTER_IP=$ROUTER_A_LAN_IP;  PEER_ROUTER_IP=$ROUTER_B_LAN_IP
-else
-  PEER_SITE=A
-  MY_LAN=$SITE_B_LAN;             PEER_LAN=$SITE_A_LAN
-  MY_LAN_IP=$WG_B_LAN_IP;         PEER_LAN_IP=$WG_A_LAN_IP
-  MY_TUN_IP=$WG_B_TUN_IP;         PEER_TUN_IP=$WG_A_TUN_IP
-  MY_PUBLIC=$SITE_B_PUBLIC;       PEER_PUBLIC=$SITE_A_PUBLIC
-  MY_PUBKEY=$SITE_B_PUBKEY;       PEER_PUBKEY=$SITE_A_PUBKEY
-  MY_CLIENT_NET=$WG_B_CLIENT_NET; PEER_CLIENT_NET=$WG_A_CLIENT_NET
-  MY_ROUTER_IP=$ROUTER_B_LAN_IP;  PEER_ROUTER_IP=$ROUTER_A_LAN_IP
-fi
-
-WG_CONF=/etc/wireguard/$WG_IFACE.conf
-WG_KEY=/etc/wireguard/$WG_IFACE.key
-WG_PUB=/etc/wireguard/$WG_IFACE.pub
-# 自拠点の公開鍵が site.env に無ければ鍵ファイルから読む（/etc/wireguard は 0700 なので sudo が要る）
-[ -z "$MY_PUBKEY" ] && MY_PUBKEY=$(sudo cat "$WG_PUB" 2>/dev/null)
-
-# 相手 peer の AllowedIPs。相手拠点のクライアント帯があれば自動で加わる
-PEER_ALLOWED="$PEER_TUN_IP/32, $PEER_LAN"
-[ -n "$PEER_CLIENT_NET" ] && PEER_ALLOWED="$PEER_ALLOWED, $PEER_CLIENT_NET"
-
-# LAN 側 NIC とそのゾーン。ゾーン未割り当ての NIC では --get-zone-of-interface は
-# "no zone" を stderr に出して 2 を返すので、文字列ではなく終了コードで判定する
-MY_NIC=$(ip -o -4 addr show | awk -v ip="$MY_LAN_IP" '$4 ~ "^"ip"/" {print $2; exit}')
-if [ -z "$LAN_ZONE" ]; then
-  LAN_ZONE=$(sudo firewall-cmd --get-zone-of-interface="$MY_NIC" 2>/dev/null) ||
-    LAN_ZONE=$(sudo firewall-cmd --get-default-zone)
-fi
-
-# policy 名（通信の向きで命名する。ゾーンの対応はホストごとに違う）
-POL_OUT=site$MY_SITE-to-site$PEER_SITE           # 自拠点 LAN → 相手拠点 LAN
-POL_IN=site$PEER_SITE-to-site$MY_SITE            # 相手拠点 LAN → 自拠点 LAN
-POL_MYCL_IN=clients$MY_SITE-to-site$MY_SITE      # 自拠点のクライアント → 自拠点 LAN
-POL_MYCL_OUT=site$MY_SITE-to-clients$MY_SITE     # 自拠点 LAN → 自拠点のクライアント
-POL_MYCL_PEER=clients$MY_SITE-to-site$PEER_SITE  # 自拠点のクライアント → 相手拠点 LAN
-POL_PEER_MYCL=site$PEER_SITE-to-clients$MY_SITE  # 相手拠点 LAN → 自拠点のクライアント
-POL_PEERCL_IN=clients$PEER_SITE-to-site$MY_SITE  # 相手拠点のクライアント → 自拠点 LAN
-POL_PEERCL_OUT=site$MY_SITE-to-clients$PEER_SITE # 自拠点 LAN → 相手拠点のクライアント
-set +a
-EOF
+# (b) このホスト視点の変数を組み立てる定義を置く（内容は両拠点で同一。編集しない）
+cp <このリポジトリ>/scripts/wireguard-site-to-site/wg-env.sh ~/wg/wg-env.sh
 chmod 600 ~/wg/wg-env.sh
 ```
 
-</details>
+`wg-env.sh` の中身は [`scripts/wireguard-site-to-site/wg-env.sh`](../scripts/wireguard-site-to-site/wg-env.sh)。`~/wg/site.env` を読み、このホストがどちらの拠点かを LAN 側 IP から判定して `MY_*` / `PEER_*` と policy 名を組み立てる。
 
 ```bash
 # (c) 読み込む。新しいシェルを開いたら、以降はこの 1 行だけでよい
@@ -789,7 +726,7 @@ sudo dnf remove wireguard-tools systemd-resolved   # 不要なら
 
 クライアントは拠点 A / B のどちらか（または両方）で受ける。受けない拠点の `${WG_x_CLIENT_NET}` は空にする（その拠点向けのクライアント用 policy と静的経路は作られない）。検証では拠点 A だけで受けた。
 
-`site.env` は [`scripts/wireguard-site-to-site/site.env.example`](../scripts/wireguard-site-to-site/site.env.example) をそのまま使う。同じファイルをスクリプトも読むので、手動で進めても後からスクリプトに切り替えられる。WG ホストにリポジトリを置かない場合は、`site.env.example` の中身を貼って作ってもよい（変数名と値だけのファイルなので、上の変数表があれば書ける）。
+`site.env` は [`scripts/wireguard-site-to-site/site.env.example`](../scripts/wireguard-site-to-site/site.env.example) をそのまま使う。同じファイルをスクリプトも読むので、手動で進めても後からスクリプトに切り替えられる。WG ホストにリポジトリを置かない場合は、`site.env.example` の中身を貼って作ってもよい（変数名と値だけのファイルなので、上の変数表があれば書ける）。`wg-env.sh` も同様に、GitHub 上のファイルを開いて中身を貼れば作れる。
 
 読み戻した値が合っていれば、以降のコマンドは編集不要で通る。`LAN_ZONE` は `site.env` に直接書いてもよい（書いてあれば検出しない）。クライアント帯が LAN・`${WG_TUNNEL_NET}`・もう一方の帯と重なっていないかも、ここで値を見て確かめる（`${WG_TUNNEL_NET}` の `/30` は変えない）。
 
@@ -1275,7 +1212,7 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 
 ### スクリプトの動作
 
-手順 1〜8 は [`scripts/wireguard-site-to-site/wg-s2s.sh`](../scripts/wireguard-site-to-site/wg-s2s.sh) でまとめて実行できる。**手順 0 で作った `~/wg/site.env` をそのまま読む**ので、途中からスクリプトに切り替えてもよい。クライアントの登録簿 `clients.list`（[`clients.list.example`](../scripts/wireguard-site-to-site/clients.list.example)）は `client add` が `site.env` と同じディレクトリに作る（クライアントを受ける拠点のホストにあればよい）。どちらも `.gitignore` で除外している。
+手順 1〜9 は [`scripts/wireguard-site-to-site/wg-s2s.sh`](../scripts/wireguard-site-to-site/wg-s2s.sh) でまとめて実行できる。**手順 0 で作った `~/wg/site.env` をそのまま読む**ので、途中からスクリプトに切り替えてもよい。クライアントの登録簿 `clients.list`（[`clients.list.example`](../scripts/wireguard-site-to-site/clients.list.example)）は `client add` が `site.env` と同じディレクトリに作る（クライアントを受ける拠点のホストにあればよい）。どちらも `.gitignore` で除外している。
 
 `apply` の動作:
 
@@ -1306,7 +1243,7 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 | `clients.list`（スクリプトでクライアントを運用する場合） | `site.env` と同じディレクトリ | **必須** | 各クライアントの公開鍵とトンネル IP を失う。端末側の conf から読み出すか、全台登録し直す |
 | `${WG_IFACE}.conf` | `/etc/wireguard/` | 入れる | 手順 3 で作り直せるが、**クライアントの `[Peer]` は手順 8 で足し直し**になる（`wg-s2s.sh apply` なら `clients.list` から作り直す） |
 | `${WG_IFACE}.pub` | `/etc/wireguard/` | 入れる | なし（`wg pubkey < ${WG_IFACE}.key` で再計算できる） |
-| `~/wg/wg-env.sh` | `~/wg/` | 入れる | なし（手順 0 (b) を貼り直せば同じものができる。環境固有の値は入っていない） |
+| `~/wg/wg-env.sh` | `~/wg/` | 入れる | なし（リポジトリの `wg-env.sh` をコピーし直せば同じものができる。環境固有の値は入っていない） |
 | `/etc/sysctl.d/90-wireguard.conf` | — | 入れない | なし（手順 4） |
 | firewalld のゾーン・policy | `/etc/firewalld/` | 入れない | なし（手順 5） |
 | クライアントの秘密鍵・クライアント用 conf | **端末側**（ホストからは手順 9 で削除済み） | **入れない** | ホストの鍵が同じなら端末はそのままでよい |
