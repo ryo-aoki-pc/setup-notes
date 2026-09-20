@@ -1,8 +1,8 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）
 
 - **目的**: 2 拠点の LAN を WireGuard で結び、**拠点 A の LAN 上のクライアントと拠点 B の LAN 上のクライアントが双方向に通信できる**ようにする。あわせて、外出先のノート PC やスマートフォンなど**任意の台数のクライアント**を足して、そこから両拠点の LAN に到達できるようにする
-- **進め方**: **`site.env` に値を 1 度だけ書き、両拠点の WG ホストに同じファイルを置いて、`wg-vpn.sh` に `-e` で渡して実行する。** 拠点 A / B は引数で指定し、スクリプトがこのホストの LAN 側 IP と照合する（取り違えると何も変更せずに止まる）。1 コマンドずつ手動で行う手順は[補足](#手動で行う場合)にある
-- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認と、実機を持ち出しての確認（モバイル回線・スマートフォンの公式アプリ）はまだしていない**。**スクリプト（`wg-vpn.sh`）の `apply` / `remove` は、スタブ環境での本実行と実機での `--dry-run` までで、実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。手動手順は namespace で検証済み
+- **進め方**: **`site.env` に値を 1 度だけ書き、両拠点の WG ホストに同じファイルを置いて、`wg-vpn.sh` に `-e` で渡して実行する。** 拠点 A / B は引数で指定し、スクリプトがこのホストの LAN 側 IP と照合する（取り違えると何も変更せずに止まる）
+- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認と、実機を持ち出しての確認（モバイル回線・スマートフォンの公式アプリ）はまだしていない**。**スクリプト（`wg-vpn.sh`）の `apply` / `remove` は、スタブ環境での本実行と実機での `--dry-run` までで、実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。namespace での検証は、同じ設定を手で入れて行った
 
 | 項目 | 値 |
 |---|---|
@@ -44,13 +44,13 @@
 
 **手順 1〜3 は両拠点の WG ホストで、手順 4 はクライアントを受ける拠点のホストで行う。** コマンドはすべて `<このリポジトリ>/scripts/wireguard` で実行し、`-e ~/wg/site.env` で値を渡す。拠点 B のホストでは引数の `A` を `B` に読み替える。
 
-| 手順 | 内容 | 実施場所 | 手動手順との対応 |
-|---|---|---|---|
-| [1. site.env を書く](#1-siteenv-を書く) | 値を 1 度だけ書く（クライアント帯もここで決める） | 両拠点の WG ホスト | 手動手順 0 |
-| [2. 鍵の生成と公開鍵の交換](#2-鍵の生成と公開鍵の交換) | `keygen`。公開鍵を `site.env` に書いて両拠点でそろえる | 同上 | 手動手順 1〜2 |
-| [3. 適用](#3-適用) | `apply`。`wg0.conf`・IP フォワーディング・firewalld・サービス | 同上 | 手動手順 3〜6 |
-| [4. クライアントの登録](#4-クライアントの登録) | `client add` → `apply` → `client show` | クライアントを受ける拠点のホスト | 手動手順 8〜9 |
-| [5. 疎通確認](#5-疎通確認) | `status` と ping / tracepath | WG ホストと各クライアント | 手動手順 10 |
+| 手順 | 内容 | 実施場所 |
+|---|---|---|
+| [1. site.env を書く](#1-siteenv-を書く) | 値を 1 度だけ書く（クライアント帯もここで決める） | 両拠点の WG ホスト |
+| [2. 鍵の生成と公開鍵の交換](#2-鍵の生成と公開鍵の交換) | `keygen`。公開鍵を `site.env` に書いて両拠点でそろえる | 同上 |
+| [3. 適用](#3-適用) | `apply`。`wg0.conf`・IP フォワーディング・firewalld・サービス | 同上 |
+| [4. クライアントの登録](#4-クライアントの登録) | `client add` → `apply` → `client show` | クライアントを受ける拠点のホスト |
+| [5. 疎通確認](#5-疎通確認) | `status` と ping / tracepath | WG ホストと各クライアント |
 
 **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#バックアップと復旧os-の再インストール)を読む。** 鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる。
 
@@ -64,8 +64,6 @@ cp <このリポジトリ>/scripts/wireguard/site.env.example ~/wg/site.env
 chmod 600 ~/wg/site.env
 vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
 ```
-
-→ [手動手順 0 の補足](#手動手順-0-の補足)
 
 ### 2. 鍵の生成と公開鍵の交換
 
@@ -87,9 +85,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 vi ~/wg/site.env                      # SITE_A_PUBKEY と SITE_B_PUBKEY を埋める
 ```
 
-**相手拠点の公開鍵は必須**（空のまま `apply` すると、何も変更せずに止まる）。
-
-→ [手動手順 2 の補足](#手動手順-2-の補足)
+**相手拠点の公開鍵は必須**（空のまま `apply` すると、何も変更せずに止まる）。相手に渡すのは公開鍵だけで、秘密鍵（`/etc/wireguard/wg0.key`）は拠点の外に出さない。
 
 ### 3. 適用
 
@@ -126,7 +122,7 @@ sudo rm /etc/wireguard/clients/laptop.conf                 # 取り込んだら�
 - `--pubkey` で登録した conf の `PrivateKey` は `<CLIENT_PRIVATE_KEY>` のままなので、端末側で自分の秘密鍵に置き換える
 - どちらか片方の拠点で登録すれば、そのクライアントは**両拠点の LAN に届く**（両拠点で `apply` 済みで、両拠点のルーターにクライアント帯の静的経路がある前提。[パケットの流れ](#パケットの流れremote-client--各拠点)）。同じクライアントを両拠点に登録することはできない（[理由](#1-台のクライアントは-1-つの拠点にしか接続できない)）
 
-→ [手動手順 8 の補足](#手動手順-8-の補足)
+→ [スクリプトの動作](#スクリプトの動作)
 
 ### 5. 疎通確認
 
@@ -207,7 +203,7 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply B                   # sysctl・firewalld
 ```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env remove A            # サービス停止、policy・ゾーン・ポートの削除、sysctl を戻す（conf・鍵・クライアント用 conf は残す）
 sudo ./wg-vpn.sh -e ~/wg/site.env remove A --purge    # conf・鍵・クライアント用 conf も消す（clients.list は残る）
-rm -rf ~/wg                                           # site.env・wg-env.sh・clients.list（不要なら）
+rm -rf ~/wg                                           # site.env・clients.list（不要なら）
 sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 ```
 
@@ -225,9 +221,9 @@ sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 
 - **構成**: 各拠点で、既存ルーターの配下にある AlmaLinux 1 台を WireGuard ホストにする（ルーターの置き換えはしない）。外出先のクライアントは、どちらかの拠点のホストに接続する
 - **設定方式**: `wg-quick` + systemd（`/etc/wireguard/wg0.conf` / `wg-quick@wg0.service`）、firewalld の専用ゾーン + policy で転送を制御。クライアントを足すときも既存の `wg0` に `[Peer]` を加えるだけで、インターフェースも待ち受けポートも増やさない
-- **スクリプト**: 本書のメインの手順は、同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard/wg-vpn.sh`](../scripts/wireguard/wg-vpn.sh) を使う（拠点間の構築、クライアントの追加、鍵と設定のバックアップ・復旧に対応。[手順の流れ](#手順の流れ)）。1 コマンドずつ行う手順は[手動で行う場合](#手動で行う場合)
+- **スクリプト**: 本書のメインの手順は、同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard/wg-vpn.sh`](../scripts/wireguard/wg-vpn.sh) を使う（拠点間の構築、クライアントの追加、鍵と設定のバックアップ・復旧に対応。[手順の流れ](#手順の流れ)）
 
-拠点ルーターの配下に WG ホストを 1 台ずつ置き、`wg0` 同士をトンネルで結ぶ。外出先のクライアントは、どちらかの拠点の WG ホストに接続する（図は拠点 A で受ける場合）。WG host A から見ると、拠点 B の peer とクライアントの peer が同じ `wg0` に並ぶ。ルーターには**ポート転送**（WAN の `${WG_PORT}/udp` → WG ホスト。拠点間トンネルとクライアントの両方がこれを使う）と、**相手拠点 LAN とクライアント帯宛ての静的経路**（via 自拠点の WG ホスト）が要る（[手動手順 7](#手動手順-7-拠点ルーターの設定)）。
+拠点ルーターの配下に WG ホストを 1 台ずつ置き、`wg0` 同士をトンネルで結ぶ。外出先のクライアントは、どちらかの拠点の WG ホストに接続する（図は拠点 A で受ける場合）。WG host A から見ると、拠点 B の peer とクライアントの peer が同じ `wg0` に並ぶ。ルーターには**ポート転送**（WAN の `${WG_PORT}/udp` → WG ホスト。拠点間トンネルとクライアントの両方がこれを使う）と、**相手拠点 LAN とクライアント帯宛ての静的経路**（via 自拠点の WG ホスト）が要る（[ルーターの設定](#ルーターの設定)）。
 
 #### パケットの流れ（Client A → Client B）
 
@@ -268,7 +264,7 @@ sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 ### 選択した方針
 
 - **wg-quick + systemd** — 設定が 1 ファイルで完結し、情報も多い。NetworkManager は wg-quick が作った `wg0` を `connected (externally)` として扱うだけで干渉しなかった（実測）
-- **値はシェル変数に集約し、両拠点で同じコマンドを実行する** — `site.env` は A/B 両拠点の値を並べて持つ。手動手順 0 が**このホストがどちらの拠点か**を LAN 側 IP から自動判定し、`MY_*` / `PEER_*` を組み立てる。拠点ごとに手順を書き分けないので、**A/B の取り違えが起きない**
+- **値は `site.env` に集約し、両拠点で同じファイルを使う** — `site.env` は A/B 両拠点の値を並べて持つ。スクリプトは指定された拠点を**このホストの LAN 側 IP** と照合してから、自拠点・相手拠点の値を組み立てる。拠点ごとに手順を書き分けないので、**A/B の取り違えが起きない**
 - **秘密鍵は `wg0.conf` に直接書く** — `PostUp` で別ファイルから読み込む書き方もできるが、`systemctl reload` で**秘密鍵が消えてトンネルが止まる**ことを実測で確認した（[落とし穴 1](#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）
 - **firewalld は wg0 専用ゾーン + policy** — `wg0` を `trusted` や `internal` に入れると、firewalld 2.4 に同梱の `gateway-lan-to-world` policy（`internal home trusted` → `external public` を ACCEPT）が効いてしまい、意図しない範囲まで転送が通る。専用ゾーンを作り、policy の rich rule で**必要な組み合わせ（`拠点 A LAN ⇔ 拠点 B LAN`、`クライアント帯 ⇔ 各拠点 LAN`）だけ**を許可する
 - **トンネルも、クライアントの通信も NAT しない** — 送信元 IP がそのまま相手拠点の LAN に届くので、相手側でアクセス元を識別・制限できる。その代わり、**両拠点のルーターに相手 LAN とクライアント帯の静的経路が要る**（[注意点](#ルーターにはクライアント帯の静的経路も要る)）
@@ -278,17 +274,6 @@ sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 - **クライアントの conf はホスト側で生成し、QR コードかファイルで渡す** — スマートフォンではこれが実用的。秘密鍵を拠点の外で作りたい場合は、クライアント側で鍵を作って公開鍵だけを渡す
 - **反映は restart で行う** — 新しい peer の `AllowedIPs` に対する経路は reload では追加されない（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない) と同じ機構。実測）。まとめて登録してから 1 回 restart する運用にする
 - **クライアント同士の通信と、全トラフィックの VPN 経由（`0.0.0.0/0`）は対象外** — 必要なら[注意点](#クライアント同士を通す場合)を参照
-
-### 実施前の状態（WG ホスト A として使ったマシン）
-
-| 項目 | 状態 |
-|---|---|
-| `wireguard-tools` | 未インストール |
-| `wireguard.ko` | 標準カーネルに同梱（`modinfo wireguard` で確認）。追加のカーネルモジュールは不要 |
-| `net.ipv4.ip_forward` | `0` |
-| `net.ipv4.conf.default.rp_filter` | `1`（新しく作られるインターフェースは strict） |
-| firewalld | active、LAN 側 NIC は `public` ゾーン、ユーザー定義の policy なし |
-| SELinux | Enforcing |
 
 ### ルーターの設定
 
@@ -322,23 +307,25 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 ### スクリプトの動作
 
-[`scripts/wireguard/wg-vpn.sh`](../scripts/wireguard/wg-vpn.sh) は、手動手順 1〜9 に相当する作業を `site.env` の値で実行する。**手動手順と同じ `~/wg/site.env` を読む**ので、手動で進めた途中からスクリプトに切り替えてもよい。クライアントの登録簿 `clients.list`（[`clients.list.example`](../scripts/wireguard/clients.list.example)）は `client add` が `site.env` と同じディレクトリに作る（クライアントを受ける拠点のホストにあればよい）。どちらも `.gitignore` で除外している。
+[`scripts/wireguard/wg-vpn.sh`](../scripts/wireguard/wg-vpn.sh) は、パッケージの導入からクライアントの登録までを `site.env` の値で実行する。クライアントの登録簿 `clients.list`（[`clients.list.example`](../scripts/wireguard/clients.list.example)）は `client add` が `site.env` と同じディレクトリに作る（クライアントを受ける拠点のホストにあればよい）。どちらも `.gitignore` で除外している。
 
 `apply` の動作:
 
 - **何かを変更する前に、次を検査する。** 1 つでも失敗したら何も変更せずに止まる
   - アドレスの形式、LAN・トンネル網・クライアント帯の重複、公開鍵の形式
-  - `WG_x_LAN_IP` がこのホストにあるか（A/B の取り違えを防ぐ。手動手順 0 の `MY_SITE` 判定と同じ考え方）
+  - `WG_x_LAN_IP` がこのホストにあるか（A/B の取り違えを防ぐ）
 - **conf を生成する場合**: `PrivateKey` を直接書く（[落とし穴 1](#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）。既存の conf と内容が違えば、`.bak-日時` に退避してから書く。相手 peer の `AllowedIPs` には相手拠点のクライアント帯が、その後ろには `clients.list` に登録したクライアントの `[Peer]` が入る
 - **既存の conf を使う場合**: `Address` に `WG_x_TUN_IP` が無い、または相手 LAN を `AllowedIPs` に含む `[Peer]` が無ければ**停止**。`ListenPort` の不一致、`PostUp` での秘密鍵読み込み、パーミッション、相手 peer にクライアント帯が無いことは**警告**
 - **firewalld**: 設定が既にあるかを確かめてから追加するので、再実行しても設定が重複しない。クライアント用の policy は帯が設定されている分だけ作る
+- **sysctl**: `ip_forward` だけを有効にする。`rp_filter` は strict（1）のままで動く（相手 LAN への経路が `wg0` を向いているので、逆経路チェックを通る）
 - **サービス**: 最後は常に `systemctl restart` する（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)）。クライアントを追加・削除したときも `apply` で反映する
-- **LAN_ZONE**: 空なら `WG_x_LAN_IP` を持つ NIC のゾーンを自動で使う（手動手順 0 と同じ）
+- **LAN_ZONE**: 空なら `WG_x_LAN_IP` を持つ NIC のゾーンを自動で使う
 - **CGNAT 構成**: `SITE_x_PUBLIC` を空にすると、その拠点に向けた `Endpoint` を書かない
+- **`client add` が作る conf**: ホスト側の `[Peer]` に `Endpoint` は書かず、ハンドシェイクを受けた送信元を endpoint として覚える（`PersistentKeepalive` もクライアント側にだけ書く）。クライアント側の `AllowedIPs` に `${WG_TUNNEL_NET}` を入れるのは、WG ホスト自身がクライアントに送るパケットの送信元が `wg0` のアドレスになるため。無いとクライアント側で捨てられる
 
-手動手順との違いは、`clients.list` に登録を残すので **`apply` を何度実行しても同じ conf が組み立て直される**こと（手動手順 3 を貼り直してもクライアントの `[Peer]` が消えない）。`client add` は、帯の重複・名前や IP の重複・拠点の取り違えなどを**何かを書く前に**検査する。トンネル IP は `--ip` が無ければ帯の中で最小の空きを割り当てる。`remove A` はクライアント用の policy も削除し、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）。
+`clients.list` に登録を残すので、**`apply` を何度実行しても同じ conf が組み立て直される**。`client add` は、帯の重複・名前や IP の重複・拠点の取り違えなどを**何かを書く前に**検査する。トンネル IP は `--ip` が無ければ帯の中で最小の空きを割り当てる。`remove A` はクライアント用の policy も削除し、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）。
 
-手動手順とスクリプトが同じ conf を作ることは、検証で `diff` して確認した（[付録](#変数形コマンドの再検証2026-09-19)）。スクリプトの検証範囲は[付録](#付録-スクリプトの検証)を参照。
+手で作った conf とスクリプトが作る conf が一致することは、検証で `diff` して確認した（[付録](#変数形コマンドの再検証2026-09-19)）。スクリプトの検証範囲は[付録](#付録-スクリプトの検証)を参照。
 
 `keygen` の動作: `wireguard-tools` が無ければ dnf で入れ、鍵が無ければ生成する。**既存の鍵は上書きしない**（公開鍵だけ表示し直す）。
 
@@ -358,643 +345,6 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 - クライアントの秘密鍵入り conf（`/etc/wireguard/clients/*.conf`）は**含めない**。ホストに残っていれば警告する
 
 `remove` の動作: サービスを `disable --now` し、policy → ゾーン → 待ち受けポートの順に削除して reload する（削除で残る `*.xml.old` も消す）。`/etc/sysctl.d/90-wireguard.conf` を消して `ip_forward` を 0 に戻す。`--purge` を付けたときだけ `wg0.conf`・鍵・`clients.list` にあるクライアント用 conf を消す。`clients.list`・`~/wg`・パッケージは残し、ルーター側は手で戻す。
-
-### 手動で行う場合
-
-スクリプトが行うことを 1 コマンドずつ実行する手順。値は同じ `~/wg/site.env` を使い、このホスト視点の変数（`MY_*` / `PEER_*`）は `wg-env.sh` が組み立てる。両拠点で同じコマンドを貼れる。network namespace で検証したのはこの手順（[付録](#付録-network-namespace-による検証)）。
-
-手動手順だけで使う変数:
-
-| 変数 | 意味 | 例（検証時の値） |
-|---|---|---|
-| `${CLIENT_NAME}` | クライアントの名前（英数字・`-`・`_`） | `laptop` |
-| `${CLIENT_TUN_IP}` | クライアントのトンネル IP（`${WG_x_CLIENT_NET}` の中） | `10.99.1.1` |
-| `${CLIENT_PUBKEY}` | クライアントの公開鍵（手動手順 8 が鍵ファイルから読む） | （`wg pubkey` の出力） |
-
-#### 手動手順の流れ
-
-**手動手順 0〜6 は両拠点の WG ホストで実施する。** 手動手順 0 で値を書いたあとは、**どちらの拠点でもまったく同じコマンドを貼る**（拠点 A / B の違いは手動手順 0 が変数に吸収する）。手動手順 7 は両拠点のルーターで行う。**手動手順 8〜9 はクライアントを受ける拠点のホストで、クライアント 1 台ごとに行う**（後から台数を足すときも、この 2 手順を繰り返すだけ）。
-
-| 手順 | 内容 | 実施場所 |
-|---|---|---|
-| 0 | 値を 1 度だけ書く（変数の定義。クライアント帯もここで決める） | 両拠点の WG ホスト |
-| 1 | パッケージのインストール | 同上 |
-| 2 | 鍵ペアの生成、公開鍵の交換 | 同上 |
-| 3 | `wg0.conf` の作成 | 同上 |
-| 4 | IP フォワーディングの有効化 | 同上 |
-| 5 | firewalld の設定（拠点間とクライアント用の policy） | 同上 |
-| 6 | サービスの有効化・起動 | 同上 |
-| 7 | ポート転送と静的経路（相手拠点 LAN・クライアント帯） | 両拠点のルーター |
-| 8 | クライアントを登録する | クライアントを受ける拠点のホスト |
-| 9 | クライアントに conf を渡す | 同上 |
-| 10 | 疎通確認 | WG ホストと各クライアント |
-
-**OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップを取る（手動）](#バックアップを取る手動)と[クリーンインストール後に復旧する（手動）](#クリーンインストール後に復旧する手動)を読む。** 鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる。
-
-#### 手動手順 0. 値を 1 度だけ書く（変数の定義）
-
-**編集するのは `~/wg/site.env` だけ。** 以降の手順のコマンドは、この変数を参照するので書き換えない。
-
-```bash
-# (a) 値を書く。両拠点の WG ホストに同じ内容を置く
-mkdir -p ~/wg && chmod 700 ~/wg
-cp <このリポジトリ>/scripts/wireguard/site.env.example ~/wg/site.env
-chmod 600 ~/wg/site.env
-vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
-```
-
-```bash
-# (b) このホスト視点の変数を組み立てる定義を置く（内容は両拠点で同一。編集しない）
-cp <このリポジトリ>/scripts/wireguard/wg-env.sh ~/wg/wg-env.sh
-chmod 600 ~/wg/wg-env.sh
-```
-
-`wg-env.sh` の中身は [`scripts/wireguard/wg-env.sh`](../scripts/wireguard/wg-env.sh)。`~/wg/site.env` を読み、このホストがどちらの拠点かを LAN 側 IP から判定して `MY_*` / `PEER_*` と policy 名を組み立てる。
-
-```bash
-# (c) 読み込む。新しいシェルを開いたら、以降はこの 1 行だけでよい
-. ~/wg/wg-env.sh
-```
-
-**何も変更する前に、組み立てられた値を読み戻して目で確かめる。**
-
-```bash
-for v in MY_SITE MY_NIC MY_LAN MY_LAN_IP MY_TUN_IP MY_PUBLIC MY_CLIENT_NET \
-         PEER_SITE PEER_LAN PEER_LAN_IP PEER_TUN_IP PEER_PUBLIC PEER_CLIENT_NET \
-         PEER_ALLOWED WG_IFACE WG_PORT LAN_ZONE POL_OUT POL_IN \
-         POL_MYCL_IN POL_MYCL_OUT POL_MYCL_PEER POL_PEER_MYCL POL_PEERCL_IN POL_PEERCL_OUT; do
-  printf '%-16s = %s\n' "$v" "${!v}"
-done
-```
-
-<details>
-<summary>読み戻しの出力例（拠点 A、25 行）</summary>
-
-```
-MY_SITE          = A              ← 自動判定。拠点 B のホストでは B になる
-MY_NIC           = end0
-MY_LAN           = 192.168.110.0/24
-MY_LAN_IP        = 192.168.110.2
-MY_TUN_IP        = 10.99.0.1
-MY_PUBLIC        = 198.51.100.1
-MY_CLIENT_NET    = 10.99.1.0/24
-PEER_SITE        = B
-PEER_LAN         = 192.168.120.0/24
-PEER_LAN_IP      = 192.168.120.2
-PEER_TUN_IP      = 10.99.0.2
-PEER_PUBLIC      = 198.51.100.2
-PEER_CLIENT_NET  =                                 ← 拠点 B ではクライアントを受けない構成
-PEER_ALLOWED     = 10.99.0.2/32, 192.168.120.0/24  ← 相手拠点に帯があれば自動で加わる
-WG_IFACE         = wg0
-WG_PORT          = 51820
-LAN_ZONE         = public
-POL_OUT          = siteA-to-siteB
-POL_IN           = siteB-to-siteA
-POL_MYCL_IN      = clientsA-to-siteA
-POL_MYCL_OUT     = siteA-to-clientsA
-POL_MYCL_PEER    = clientsA-to-siteB
-POL_PEER_MYCL    = siteB-to-clientsA
-POL_PEERCL_IN    = clientsB-to-siteA
-POL_PEERCL_OUT   = siteA-to-clientsB
-```
-
-</details>
-
-> **`MY_SITE` が想定と違う、`MY_NIC` が空、`LAN_ZONE` が空のいずれかなら、ここで止めて `site.env` を直す。**
-
-→ [手動手順 0 の補足](#手動手順-0-の補足)
-
-#### 手動手順 1. パッケージのインストール
-
-```bash
-sudo dnf install -y wireguard-tools
-```
-
-→ [手動手順 1 の補足](#手動手順-1-の補足)
-
-#### 手動手順 2. 鍵ペアの生成
-
-```bash
-sudo bash -c "umask 077; wg genkey | tee $WG_KEY | wg pubkey > $WG_PUB"
-sudo cat "$WG_PUB"                    # この公開鍵を相手拠点に渡す
-```
-
-> **`sudo bash -c` は二重引用符で書く。** 単一引用符にすると `$WG_KEY` が展開されず、`/etc/wireguard/$WG_IFACE.key` という名前のファイルができてしまう。
-
-両拠点で鍵を作ったら、**それぞれの公開鍵を `site.env` に書き、両拠点の `site.env` を同じ内容にそろえる。**
-
-```bash
-vi ~/wg/site.env                      # SITE_A_PUBKEY と SITE_B_PUBKEY を埋める
-. ~/wg/wg-env.sh                      # 書き換えたら読み直す
-printf '%-12s = %s\n' MY_PUBKEY "$MY_PUBKEY" PEER_PUBKEY "$PEER_PUBKEY"
-```
-
-**相手拠点の公開鍵は必須**（空のまま進むと peer が成立しない）。
-
-→ [手動手順 2 の補足](#手動手順-2-の補足)
-
-#### 手動手順 3. `wg0.conf` の作成
-
-**拠点 A / B で同じブロックを貼る。** 中身は手動手順 0 の変数で決まる。
-
-```bash
-sudo install -m 600 /dev/null "$WG_CONF"
-cat <<EOF | sed -E '/^(Endpoint|MTU) = *$/d' | sudo tee "$WG_CONF" >/dev/null
-[Interface]
-Address = ${MY_TUN_IP}/30
-ListenPort = ${WG_PORT}
-PrivateKey = $(sudo cat "$WG_KEY")
-MTU = ${WG_MTU}
-
-[Peer]
-# Site ${PEER_SITE}
-PublicKey = ${PEER_PUBKEY}
-Endpoint = ${PEER_PUBLIC:+${PEER_PUBLIC}:${WG_PORT}}
-AllowedIPs = ${PEER_ALLOWED}
-PersistentKeepalive = ${WG_KEEPALIVE}
-EOF
-sudo grep -v '^PrivateKey' "$WG_CONF"   # 秘密鍵以外を目視確認
-```
-
-```
-[Interface]
-Address = 10.99.0.1/30
-ListenPort = 51820
-
-[Peer]
-# Site B
-PublicKey = <SITE_B_PUBKEY>
-Endpoint = 198.51.100.2:51820
-AllowedIPs = 10.99.0.2/32, 192.168.120.0/24
-PersistentKeepalive = 25
-```
-
-- **ヒアドキュメントの区切り語 `EOF` は引用しない。** `<<'EOF'` と書くと変数が展開されず、`${MY_TUN_IP}` がそのまま conf に入る
-
-> **このブロックを後で貼り直すと（MTU の変更など）、[手動手順 8](#手動手順-8-クライアントを登録する) で足したクライアントの `[Peer]` は消える。** 貼り直したら手動手順 8 の `[Peer]` を足し直す（または `wg-vpn.sh apply` を使う。こちらは `clients.list` から毎回組み立てる）。
-
-→ [手動手順 3 の補足](#手動手順-3-の補足)
-
-#### 手動手順 4. IP フォワーディングの有効化
-
-```bash
-echo 'net.ipv4.ip_forward = 1' | sudo tee /etc/sysctl.d/90-wireguard.conf
-sudo sysctl --system
-sysctl net.ipv4.ip_forward            # = 1
-```
-
-**両拠点で実施する。** 片方だけ有効にすると、ハンドシェイクは成立するのにクライアント同士が通らない（検証中に実際に踏んだ）。
-
-→ [手動手順 4 の補足](#手動手順-4-の補足)
-
-#### 手動手順 5. firewalld の設定
-
-<details>
-<summary>(a)〜(g) firewalld の設定ブロック（34 行）</summary>
-
-```bash
-# (a) WireGuard の待ち受けポートを LAN 側ゾーンで開ける
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-port="$WG_PORT/udp"
-
-# (b) wg0 専用ゾーン
-sudo firewall-cmd --permanent --new-zone="$WG_FW_ZONE"
-sudo firewall-cmd --permanent --zone="$WG_FW_ZONE" --add-interface="$WG_IFACE"
-
-# (c) policy を作る関数（新規 policy → ingress/egress ゾーン → rich rule）
-mkpol() { # $1=policy 名 $2=ingress $3=egress $4=送信元 $5=宛先
-  sudo firewall-cmd --permanent --new-policy="$1"
-  sudo firewall-cmd --permanent --policy="$1" --add-ingress-zone="$2"
-  sudo firewall-cmd --permanent --policy="$1" --add-egress-zone="$3"
-  sudo firewall-cmd --permanent --policy="$1" \
-    --add-rich-rule="rule family=ipv4 source address=$4 destination address=$5 accept"
-}
-
-# (d) 拠点間: 自拠点 LAN ⇔ 相手拠点 LAN
-mkpol "$POL_OUT" "$LAN_ZONE"   "$WG_FW_ZONE" "$MY_LAN"   "$PEER_LAN"
-mkpol "$POL_IN"  "$WG_FW_ZONE" "$LAN_ZONE"   "$PEER_LAN" "$MY_LAN"
-
-# (e) 自拠点のクライアント ⇔ 自拠点 LAN
-[ -n "$MY_CLIENT_NET" ] && mkpol "$POL_MYCL_IN"  "$WG_FW_ZONE" "$LAN_ZONE"   "$MY_CLIENT_NET" "$MY_LAN"
-[ -n "$MY_CLIENT_NET" ] && mkpol "$POL_MYCL_OUT" "$LAN_ZONE"   "$WG_FW_ZONE" "$MY_LAN"        "$MY_CLIENT_NET"
-
-# (f) 自拠点のクライアント ⇔ 相手拠点 LAN（wg0 から入って wg0 へ折り返す）
-[ -n "$MY_CLIENT_NET" ] && mkpol "$POL_MYCL_PEER" "$WG_FW_ZONE" "$WG_FW_ZONE" "$MY_CLIENT_NET" "$PEER_LAN"
-[ -n "$MY_CLIENT_NET" ] && mkpol "$POL_PEER_MYCL" "$WG_FW_ZONE" "$WG_FW_ZONE" "$PEER_LAN"      "$MY_CLIENT_NET"
-
-# (g) 相手拠点のクライアント ⇔ 自拠点 LAN（自分は中継側なのでゾーンが違う）
-[ -n "$PEER_CLIENT_NET" ] && mkpol "$POL_PEERCL_IN"  "$WG_FW_ZONE" "$LAN_ZONE"   "$PEER_CLIENT_NET" "$MY_LAN"
-[ -n "$PEER_CLIENT_NET" ] && mkpol "$POL_PEERCL_OUT" "$LAN_ZONE"   "$WG_FW_ZONE" "$MY_LAN"          "$PEER_CLIENT_NET"
-
-sudo firewall-cmd --reload
-sudo firewall-cmd --get-policies | tr ' ' '\n' | grep -E 'clients|site[AB]'
-```
-
-</details>
-
-```
-clientsA-to-siteA
-clientsA-to-siteB
-siteA-to-clientsA
-siteA-to-siteB
-siteB-to-clientsA
-siteB-to-siteA
-```
-
-> **rich rule は二重引用符で書く。** 解説記事では `--add-rich-rule='rule family=ipv4 ...'` と単一引用符で書かれていることが多いが、**単一引用符だと変数が展開されず、`$MY_LAN` という文字列がそのまま rich rule に登録される**。firewalld はそれを受理してしまい、`--list-all-policies` を見るまで気づかない（[落とし穴 3](#落とし穴-3-rich-rule-を単一引用符で書くと変数が展開されない)）。
-
-**(a) はトンネルを相手側から張るときに必要。** 自拠点側から張ったトンネルなら (a) が無くても（conntrack により戻りの UDP として）通ってしまうため、開け忘れに気づきにくい。相手側から張り直すときに初めて失敗する（[付録の実測](#待ち受けポートを開け忘れた場合)）。
-
-→ [手動手順 5 の補足](#手動手順-5-の補足)
-
-#### 手動手順 6. サービスの有効化・起動
-
-```bash
-sudo systemctl enable --now "wg-quick@$WG_IFACE"
-sudo journalctl -u "wg-quick@$WG_IFACE" --no-pager | tail -8
-```
-
-```
-systemd[1]: Starting wg-quick@wg0.service - WireGuard via wg-quick(8) for wg0...
-wg-quick[13990]: [#] ip link add dev wg0 type wireguard
-wg-quick[13990]: [#] wg setconf wg0 /dev/fd/63
-wg-quick[13990]: [#] ip -4 address add 10.99.0.1/30 dev wg0
-wg-quick[13990]: [#] ip link set mtu 1420 up dev wg0
-wg-quick[13990]: [#] ip -4 route add 192.168.120.0/24 dev wg0      ← AllowedIPs の相手 LAN
-systemd[1]: Finished wg-quick@wg0.service - WireGuard via wg-quick(8) for wg0.
-```
-
-→ [手動手順 6 の補足](#手動手順-6-の補足)
-
-#### 手動手順 7. 拠点ルーターの設定
-
-機種ごとに画面は違うので、要件だけを書く。**両拠点のルーターで実施する。** 入力する値は次で印字できる（クライアント帯の行は、帯が設定されているものだけ出る）。
-
-```bash
-echo "ポート転送 : WAN（${MY_PUBLIC}）の ${WG_PORT}/udp → ${MY_LAN_IP}:${WG_PORT}"
-echo "静的経路   : 宛先 ${PEER_LAN} → ゲートウェイ ${MY_LAN_IP}"
-[ -n "$MY_CLIENT_NET" ]   && echo "静的経路   : 宛先 ${MY_CLIENT_NET} → ゲートウェイ ${MY_LAN_IP}（自拠点のクライアント帯）"
-[ -n "$PEER_CLIENT_NET" ] && echo "静的経路   : 宛先 ${PEER_CLIENT_NET} → ゲートウェイ ${MY_LAN_IP}（相手拠点のクライアント帯）"
-echo "DHCP 予約  : ${MY_LAN_IP} をこの WG ホストに固定"
-echo "（ルーターの LAN 側 IP: ${MY_ROUTER_IP}）"
-```
-
-- クライアント帯の静的経路は**両拠点のルーターに、両拠点の帯とも**入れる（[理由](#ルーターにはクライアント帯の静的経路も要る)）
-
-拠点間の疎通は、ここまでで確認できる（[手動手順 10](#手動手順-10-疎通確認)）。
-
-→ [ルーターの設定](#ルーターの設定)
-
-#### 手動手順 8. クライアントを登録する
-
-**クライアントを受ける拠点のホストで実施する。編集するのは最初の 2 行だけ。** 台数分繰り返す（まとめて登録して、最後に 1 回だけ restart してもよい）。後からクライアントを足すときも、この手順と[手動手順 9](#手動手順-9-クライアントに-conf-を渡す)だけでよい。
-
-```bash
-CLIENT_NAME=laptop
-CLIENT_TUN_IP=10.99.1.1                 # ${MY_CLIENT_NET} の中の空きアドレス
-
-# 使用済みでないことを確かめる
-sudo grep -q "AllowedIPs = ${CLIENT_TUN_IP}/32" "$WG_CONF" && echo "使用済み: 別の IP にする" || echo "未使用: 進める"
-```
-
-<details>
-<summary>鍵の生成 → クライアント用 conf → `wg0.conf` への追記 → restart（30 行）</summary>
-
-```bash
-# 鍵を作り、クライアント用 conf を書く（秘密鍵は画面に出ない）
-sudo install -d -m 700 /etc/wireguard/clients
-sudo bash -c "umask 077; wg genkey | tee /etc/wireguard/clients/$CLIENT_NAME.key | wg pubkey > /etc/wireguard/clients/$CLIENT_NAME.pub"
-CLIENT_PUBKEY=$(sudo cat "/etc/wireguard/clients/$CLIENT_NAME.pub")
-
-sudo install -m 600 /dev/null "/etc/wireguard/clients/$CLIENT_NAME.conf"
-cat <<EOF | sudo tee "/etc/wireguard/clients/$CLIENT_NAME.conf" >/dev/null
-[Interface]
-Address = ${CLIENT_TUN_IP}/32
-PrivateKey = $(sudo cat "/etc/wireguard/clients/$CLIENT_NAME.key")
-
-[Peer]
-# Site ${MY_SITE}
-PublicKey = ${MY_PUBKEY}
-Endpoint = ${MY_PUBLIC}:${WG_PORT}
-AllowedIPs = ${MY_LAN}, ${PEER_LAN}, ${WG_TUNNEL_NET}
-PersistentKeepalive = ${WG_KEEPALIVE}
-EOF
-
-# WG ホストの wg0.conf にこのクライアントの [Peer] を足す
-cat <<EOF | sudo tee -a "$WG_CONF" >/dev/null
-
-[Peer]
-# Client ${CLIENT_NAME}
-PublicKey = ${CLIENT_PUBKEY}
-AllowedIPs = ${CLIENT_TUN_IP}/32
-EOF
-
-sudo systemctl restart "wg-quick@$WG_IFACE"
-ip route show dev "$WG_IFACE"           # ${CLIENT_TUN_IP} の /32 経路が増えている
-```
-
-</details>
-
-```
-10.99.0.0/30 proto kernel scope link src 10.99.0.1
-10.99.1.1 scope link                                ← 登録したクライアント
-192.168.120.0/24 scope link
-```
-
-- 鍵をクライアント側で作りたい場合は、クライアントで `wg genkey | tee client.key | wg pubkey` として**公開鍵だけ**をホストに渡し、`CLIENT_PUBKEY=<渡された公開鍵>` としてから上の後半（`wg0.conf` への追記）だけを実行する
-
-→ [手動手順 8 の補足](#手動手順-8-の補足)
-
-#### 手動手順 9. クライアントに conf を渡す
-
-```bash
-sudo cat "/etc/wireguard/clients/$CLIENT_NAME.conf"        # PC にはこの内容をコピーする
-sudo dnf install -y qrencode                               # スマートフォン用（EL10 では epel-release が要る場合がある）
-sudo cat "/etc/wireguard/clients/$CLIENT_NAME.conf" | qrencode -t ansiutf8
-sudo rm -f "/etc/wireguard/clients/$CLIENT_NAME.conf" "/etc/wireguard/clients/$CLIENT_NAME.key"
-```
-
-**取り込んだら、秘密鍵入りの conf と鍵をホストに残さない。** 公開鍵（`.pub`）は残しておくと、後で `wg0.conf` の `[Peer]` と突き合わせられる。
-
-#### 手動手順 10. 疎通確認
-
-**WG ホストで:**
-
-```bash
-. ~/wg/wg-env.sh                                  # 新しいシェルならまずこれ
-sudo wg show                                      # latest handshake が 2 分以内、transfer が増えている。クライアントの peer には endpoint も出る
-ip route show dev "$WG_IFACE"                     # 相手 LAN、クライアントの /32、相手拠点のクライアント帯への経路がある
-sysctl net.ipv4.ip_forward                        # = 1
-sudo firewall-cmd --get-active-zones              # wg0 が wireguard ゾーン
-sudo firewall-cmd --info-policy="$POL_OUT"        # rich rule に実際の IP が入っている（$ が残っていない）
-sudo firewall-cmd --info-policy="$POL_MYCL_PEER"  # ingress・egress とも wireguard（クライアントを受ける拠点）
-```
-
-**拠点の LAN 上のクライアント同士**（Client A から）:
-
-```bash
-ping <Client B の IP>
-tracepath -n <Client B の IP>
-```
-
-**外出先のクライアントから:**
-
-```bash
-ping <接続先拠点の LAN のホスト>     # 例: 192.168.110.100
-ping <相手拠点の LAN のホスト>       # 例: 192.168.120.100
-tracepath -n <相手拠点の LAN のホスト>
-```
-
-**逆方向（Client B → Client A、拠点の LAN → クライアント）も必ず確認する。** 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](#症状と原因の対応実測) を見る。
-
-→ [疎通確認の補足](#疎通確認の補足)
-
-#### クライアントを削除する（手動）
-
-クライアントを受ける拠点のホストで:
-
-```bash
-. ~/wg/wg-env.sh
-CLIENT_NAME=laptop
-sudo python3 -c "
-import re,sys
-p=sys.argv[1]; s=open(p).read()
-s=re.sub(r'\n\[Peer\]\n# Client $CLIENT_NAME\n[^\[]*', '\n', s)
-open(p,'w').write(s.rstrip()+'\n')
-" "$WG_CONF"
-sudo rm -f "/etc/wireguard/clients/$CLIENT_NAME."{key,pub,conf}
-sudo systemctl restart "wg-quick@$WG_IFACE"
-```
-
-#### バックアップを取る（手動）
-
-**読むだけなので、トンネルを止めずに本番のホストでそのまま実行できる。** 両拠点でそれぞれ取る（鍵は拠点ごとに違う）。
-
-<details>
-<summary>バックアップを作るブロック（34 行）</summary>
-
-```bash
-. ~/wg/wg-env.sh
-STAGE=$(mktemp -d)                                  # mktemp -d は 0700 で作る
-mkdir "$STAGE/wg-backup"
-
-# /etc/wireguard は 0700 なので sudo で読み出す。リダイレクト先は先に 0600 で作っておく
-for f in key pub conf; do
-  install -m 600 /dev/null "$STAGE/wg-backup/${WG_IFACE}.$f"
-  sudo cat "/etc/wireguard/${WG_IFACE}.$f" > "$STAGE/wg-backup/${WG_IFACE}.$f"
-done
-install -m 600 ~/wg/site.env  "$STAGE/wg-backup/site.env"
-install -m 600 ~/wg/wg-env.sh "$STAGE/wg-backup/wg-env.sh"
-[ -f ~/wg/clients.list ] && install -m 600 ~/wg/clients.list "$STAGE/wg-backup/clients.list"
-
-# 何をどこから取ったかを残す（wg-vpn.sh restore もこの MANIFEST を読む）
-{
-  echo "FORMAT=1"
-  echo "CREATED=$(date -Is)"
-  echo "HOST=$(uname -n | cut -d. -f1)"
-  echo "SITE=$MY_SITE"
-  echo "WG_IFACE=$WG_IFACE"
-  echo "PUBKEY=$MY_PUBKEY"
-  echo "FILE key   ${WG_IFACE}.key  600 $WG_KEY"
-  echo "FILE pub   ${WG_IFACE}.pub  600 $WG_PUB"
-  echo "FILE conf  ${WG_IFACE}.conf 600 $WG_CONF"
-  echo "FILE env   site.env  600 $HOME/wg/site.env"
-  echo "FILE envsh wg-env.sh 600 $HOME/wg/wg-env.sh"
-  [ -f ~/wg/clients.list ] && echo "FILE clients clients.list 644 $HOME/wg/clients.list"
-} > "$STAGE/wg-backup/MANIFEST"
-chmod 600 "$STAGE/wg-backup/MANIFEST"
-
-BACKUP=~/wg-backup-$(uname -n | cut -d. -f1)-$(date +%Y%m%d-%H%M%S).tar.gz
-(umask 077; tar czf "$BACKUP" -C "$STAGE" wg-backup)
-rm -rf "$STAGE"
-ls -l "$BACKUP"; tar tzf "$BACKUP"
-```
-
-</details>
-
-- **このアーカイブには秘密鍵が入っている。** `0600` のまま、**リポジトリの中には置かない**（`.gitignore` に `wg-backup-*.tar.gz` を入れてあるが、それに頼らない）。このマシンの外（別のディスク、オフラインのメディア）に保管する
-
-→ [バックアップと復旧の補足](#バックアップと復旧の補足)
-
-#### クリーンインストール後に復旧する（手動）
-
-**手動手順 2（鍵の生成）と手動手順 3（conf の作成）は実行しない。** 鍵と conf は戻すもので、作り直すものではない。
-
-```bash
-# (a) アーカイブを展開する
-mkdir -p ~/wg && chmod 700 ~/wg
-STAGE=$(mktemp -d)
-tar xzf ~/wg-backup-<ホスト名>-<日時>.tar.gz -C "$STAGE"
-ls -l "$STAGE/wg-backup"
-```
-
-```bash
-# (b) site.env と wg-env.sh を戻す（手順 0 (a)(b) の代わり）
-install -m 600 "$STAGE/wg-backup/site.env"  ~/wg/site.env
-install -m 600 "$STAGE/wg-backup/wg-env.sh" ~/wg/wg-env.sh
-[ -f "$STAGE/wg-backup/clients.list" ] && install -m 600 "$STAGE/wg-backup/clients.list" ~/wg/clients.list
-. ~/wg/wg-env.sh                                   # 手順 0 (c)
-echo "$MY_SITE $MY_LAN_IP $WG_IFACE"               # 手順 0 の読み戻しと同じ確認
-```
-
-```bash
-# (c) 手順 1。/etc/wireguard はここでパッケージが 0700 で作る
-sudo dnf install -y wireguard-tools
-```
-
-```bash
-# (d) 鍵と conf を戻す（手順 2・3 の代わり）
-for f in key pub conf; do
-  sudo install -m 600 -o root -g root "$STAGE/wg-backup/${WG_IFACE}.$f" "/etc/wireguard/${WG_IFACE}.$f"
-done
-sudo restorecon "$WG_KEY" "$WG_PUB" "$WG_CONF"
-rm -rf "$STAGE"
-```
-
-```bash
-# (e) 鍵が元のものか確かめる。ここが復旧できたかの判定点
-sudo wg pubkey < "$WG_KEY"
-echo "$MY_PUBKEY"
-```
-
-```
-<SITE_B_PUBKEY>     ← 戻した鍵から算出した公開鍵
-<SITE_B_PUBKEY>     ← site.env に書いてある公開鍵
-```
-
-**この 2 つが一致すれば、相手拠点もクライアント端末も設定変更は要らない。** ここから先は通常の構築と同じで、[手動手順 4](#手動手順-4-ip-フォワーディングの有効化)（sysctl）→ [手動手順 5](#手動手順-5-firewalld-の設定)（firewalld）→ [手動手順 6](#手動手順-6-サービスの有効化起動)（`systemctl enable --now`）を順に実行する。手動手順 5 にはクライアント用の policy も含まれ、戻した conf にはクライアントの `[Peer]` が入っているので、これで完了する。
-
-→ [バックアップと復旧の補足](#バックアップと復旧の補足)
-
-#### 全部消す（手動）
-
-> **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](#バックアップを取る手動)を取る。鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
-
-各拠点の WG ホストで（クライアント用の policy もまとめて消える）:
-
-<details>
-<summary>全部消すブロック（20 行）</summary>
-
-```bash
-. ~/wg/wg-env.sh
-
-sudo systemctl disable --now "wg-quick@$WG_IFACE"
-sudo rm -f "$WG_CONF" "$WG_KEY" "$WG_PUB"
-
-# policy はゾーンより先に消す（順序が逆だと下記の INVALID_ZONE になる）
-for p in "$POL_OUT" "$POL_IN" "$POL_MYCL_IN" "$POL_MYCL_OUT" "$POL_MYCL_PEER" \
-         "$POL_PEER_MYCL" "$POL_PEERCL_IN" "$POL_PEERCL_OUT"; do
-  sudo firewall-cmd --permanent --info-policy="$p" >/dev/null 2>&1 &&
-    sudo firewall-cmd --permanent --delete-policy="$p"
-done
-sudo firewall-cmd --permanent --delete-zone="$WG_FW_ZONE"
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" --remove-port="$WG_PORT/udp"
-sudo firewall-cmd --reload
-
-sudo rm -f /etc/sysctl.d/90-wireguard.conf
-sudo sysctl -w net.ipv4.ip_forward=0
-
-rm -rf ~/wg                                        # site.env と wg-env.sh
-sudo dnf remove wireguard-tools systemd-resolved   # 不要なら
-```
-
-</details>
-
-- **policy はゾーンより先に消す。** 順序が逆だと `--reload` が `INVALID_ZONE` で失敗し、firewalld の設定が壊れる
-- ルーター側のポート転送と静的経路も削除する
-
-→ [全部消すときの補足](#全部消すときの補足)
-
-### 手動手順 0 の補足
-
-変数表の値に加えて、手動手順 0 が**このホストから見た** `MY_*` / `PEER_*`（`${MY_LAN}`・`${PEER_LAN}`・`${MY_CLIENT_NET}` など）と、firewalld の policy 名（`${POL_OUT}`・`${POL_MYCL_IN}` など）を組み立てる。手動手順 1〜9 のコマンドがこれを使うので、**両拠点で同じコマンドが通る**。
-
-クライアントは拠点 A / B のどちらか（または両方）で受ける。受けない拠点の `${WG_x_CLIENT_NET}` は空にする（その拠点向けのクライアント用 policy と静的経路は作られない）。検証では拠点 A だけで受けた。
-
-`site.env` は [`scripts/wireguard/site.env.example`](../scripts/wireguard/site.env.example) をそのまま使う。同じファイルをスクリプトも読むので、手動で進めても後からスクリプトに切り替えられる。WG ホストにリポジトリを置かない場合は、`site.env.example` の中身を貼って作ってもよい（変数名と値だけのファイルなので、上の変数表があれば書ける）。`wg-env.sh` も同様に、GitHub 上のファイルを開いて中身を貼れば作れる。
-
-読み戻した値が合っていれば、以降のコマンドは編集不要で通る。`LAN_ZONE` は `site.env` に直接書いてもよい（書いてあれば検出しない）。クライアント帯が LAN・`${WG_TUNNEL_NET}`・もう一方の帯と重なっていないかも、ここで値を見て確かめる（`${WG_TUNNEL_NET}` の `/30` は変えない）。
-
-### 手動手順 1 の補足
-
-`wireguard-tools` の依存関係として `systemd-resolved` も一緒に入る（`wg-quick` は `DNS =` を設定したときに `resolvconf` コマンドを使い、EL10 ではそれを `systemd-resolved` が提供する）。本書の構成では `DNS =` を使わない。**インストールされるだけで、無効（disabled / inactive）のままなので `/etc/resolv.conf` は変わらない**（実測）。
-
-```
-Installed:
-  systemd-resolved-257-23.el10_2.2.alma.1.aarch64
-  wireguard-tools-1.0.20250521-1.el10.aarch64
-```
-
-### 手動手順 2 の補足
-
-- `/etc/wireguard` はパッケージが `0700` で作る。`umask 077` で鍵ファイルも `0600` になる。**ディレクトリが `0700` なので、公開鍵を読むのにも `sudo` が要る**
-- 相手に渡すのは **`wg0.pub`（公開鍵）だけ**。`wg0.key` は拠点の外に出さない
-
-自拠点の分を `site.env` に書き忘れても、`wg-env.sh` が `$WG_PUB` から読む。**相手拠点の公開鍵は必須**（空のまま進むと peer が成立しない）。
-
-### 手動手順 3 の補足
-
-- **`Endpoint` と `MTU` は値が空なら行ごと落ちる。** `${PEER_PUBLIC:+...}` は `PEER_PUBLIC` が空なら何も書かず、`sed` が値の空いた `Endpoint` / `MTU` の行を削る。CGNAT などで相手拠点の `SITE_x_PUBLIC` を空にした場合（[注意点](#片側がグローバル-ip-を持たない場合cgnat-など)）や `WG_MTU` を使わない場合も、**ブロックを編集せずにそのまま貼れる**。この 2 行以外は空にならない前提なので `sed` の対象にしていない（`PrivateKey` が空なら `wg-quick` がエラーにする）
-- 秘密鍵は `$(sudo cat "$WG_KEY")` をシェルが展開して書き込むので、**画面には出ない**
-- `install -m 600 /dev/null` で先に `0600` のファイルを作る。`tee` は中身を入れ替えるだけなのでパーミッションは保たれる
-- `PEER_ALLOWED` は手動手順 0 が組み立てる。相手拠点にクライアント帯があれば、ここに自動で入る（下の例）
-- `Endpoint` を書かない構成（CGNAT など）、`MTU`、`PersistentKeepalive` を書かない場合は[注意点](#片側がグローバル-ip-を持たない場合cgnat-など)を参照
-
-拠点 B のホストで実行すると、拠点 A の peer に拠点 A のクライアント帯が入る（実測）。
-
-```
-[Peer]
-# Site A
-PublicKey = <SITE_A_PUBKEY>
-Endpoint = 198.51.100.1:51820
-AllowedIPs = 10.99.0.1/32, 192.168.110.0/24, 10.99.1.0/24
-PersistentKeepalive = 25
-```
-
-### 手動手順 4 の補足
-
-`rp_filter` は変更不要（strict = 1 のまま動いた。相手 LAN への経路が `wg0` を向いているので、`wg0` から届く相手 LAN 発のパケットは逆経路チェックを通る）。
-
-### 手動手順 5 の補足
-
-拠点間の policy 2 つと、クライアント用の policy（自拠点のクライアント用 4 つ、相手拠点のクライアント用 2 つ）を一度に作る。作り方はどれも同じ（新規 policy → ingress/egress ゾーン → rich rule）なので関数 `mkpol` にまとめ、帯が設定されている分だけ作る。
-
-`mkpol` の中で実行される rich rule のコマンドは、`set -x` を有効にしておけば展開結果を確認できる（実測。直接実行したときの例）。
-
-```
-$ sudo firewall-cmd --permanent --policy=siteA-to-siteB --add-rich-rule="rule family=ipv4 source address=$MY_LAN destination address=$PEER_LAN accept"
-++ sudo firewall-cmd --permanent --policy=siteA-to-siteB '--add-rich-rule=rule family=ipv4 source address=192.168.110.0/24 destination address=192.168.120.0/24 accept'
-success
-```
-
-- policy 名（`siteA-to-siteB`、`clientsA-to-siteB` など）は手動手順 0 が組み立てる。**通信の向きで命名してあるので両拠点で同じ名前**になり、ingress / egress ゾーンの対応だけがホストごとに変わる（`clientsA-to-siteB` は、拠点 A では `wireguard → wireguard`、拠点 B では `wireguard → ${LAN_ZONE}`）
-- **`mkpol` はこのブロックの中で定義する**（`wg-env.sh` には入れない）。手順を 1 ブロックで完結させるため
-- 帯を設定していない拠点では、対応する policy は作られない（上の `[ -n ... ]`）。検証では拠点 B の帯が空なので (g) は作られず、出力例は 6 つになっている
-- `wg0` はまだ存在しなくても `--add-interface` できる。wg-quick が `wg0` を作り直しても（`systemctl restart` 後も、`--complete-reload` 後も）`wireguard` ゾーンに入ったままだった（実測）
-- 片方向だけ許可したい場合（例: 拠点 A から B へは接続できるが B から A へは接続させない、クライアントからは拠点に入れるが拠点からクライアントへは接続させない）は、(d) の `$POL_IN` と (e)〜(g) の各 2 行目（LAN → クライアント）を作らない。戻りのパケットは conntrack で許可されるので、許可した側から始めた通信は成立する
-- 相手 LAN のうち特定ホスト・ポートだけに絞る場合は、rich rule の `destination address` を `/32` にする、`port port=... protocol=tcp` を付けるなどで調整する
-- **このゾーンは何も開けない。** WireGuard の待ち受けポートは (a) の LAN 側ゾーンで開ける（拠点間トンネルもクライアントも同じポートに接続する）。トンネル越しにこのホスト自身の ssh や Cockpit へ入りたい場合だけ、[注意点](#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)のとおりゾーンにサービスを足す
-
-### 手動手順 6 の補足
-
-SELinux (Enforcing) で AVC 拒否は出なかった（`ausearch -m avc` で確認）。
-
-拠点 B のホスト（相手拠点にクライアント帯がある側）では、その帯への経路も `wg0` に入る（実測）。
-
-```bash
-ip route show dev "$WG_IFACE"
-```
-
-```
-10.99.0.0/30 proto kernel scope link src 10.99.0.2
-10.99.1.0/24 scope link                             ← 拠点 A のクライアント帯
-192.168.110.0/24 scope link
-```
-
-### 手動手順 8 の補足
-
-- **WG ホスト側の `[Peer]` に `Endpoint` は書かない。** クライアントの場所は変わるので、ハンドシェイクを受けた送信元を endpoint として覚える（`wg show` に出る）。`PersistentKeepalive` もクライアント側にだけ書く
-- クライアント側 `AllowedIPs` に `${WG_TUNNEL_NET}` を入れるのは、WG ホスト自身がクライアントに送るパケットの送信元が `wg0` のアドレス（`${MY_TUN_IP}`）になるため。無いとクライアント側で捨てられ、WG ホストからの ping や、ホストで動くサービスへの接続ができない
-- `DNS =` を書きたい場合は[注意点](#dns--を書く場合)を参照
 
 ### 疎通確認の補足
 
@@ -1037,84 +387,25 @@ $ tracepath -n 192.168.120.100
      Resume: pmtu 1420 hops 3 back 3
 ```
 
-**逆方向（拠点の LAN → クライアント）も確認する。** ルーターの静的経路か `(b)`・`(d)`・`(f)` の policy が抜けていると、片方向だけ失敗する。
+**逆方向（拠点の LAN → クライアント）も確認する。** ルーターの静的経路か クライアント用の policy が抜けていると、片方向だけ失敗する。
 
 ### 症状と原因の対応（実測）
 
 | 症状 | 原因 |
 |---|---|
 | クライアントの ping に `From ${WG_A_LAN_IP} ... Packet filtered` | WG ホストの firewalld が転送を拒否している（policy 未設定、rich rule のサブネット誤り） |
-| `wg show` の handshake は成立しているのに、クライアントの ping が無応答 | 相手側の firewalld policy、相手ルーターの静的経路、**相手の `ip_forward`** のいずれか。手動手順 4 を両拠点で実施したか確認する |
+| `wg show` の handshake は成立しているのに、クライアントの ping が無応答 | 相手側の firewalld policy、相手ルーターの静的経路、**相手の `ip_forward`** のいずれか。両拠点で `apply` したか確認する |
 | WG ホスト自身から相手 LAN へ ping できないのに、クライアント同士は通る | 下記「[WG ホスト自身から相手 LAN へ送る場合](#wg-ホスト自身から相手-lan-へ送る場合)」 |
 | クライアントから相手の**トンネル IP** へ ping すると `Destination Net Unreachable`（送信元は自拠点ルーター） | ルーターに `${WG_TUNNEL_NET}` の経路が無いため。クライアント同士の通信には不要 |
 | 自拠点から張ったトンネルは動くのに、相手側から張ろうとすると失敗する | 自拠点の firewalld で `${WG_PORT}/udp` を開け忘れている、またはルーターのポート転送が無い |
 | トンネル越しに WG ホスト自身の ssh / Cockpit に `No route to host`。**同じ宛先に ping は通る** | `${WG_FW_ZONE}` ゾーンに ssh / cockpit を開けていない。policy は転送用なのでホスト自身宛てには効かない（[トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合](#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)） |
-| `--info-policy` の rich rule に `$MY_LAN` のような文字列が入っている | rich rule を単一引用符で書いた（[落とし穴 3](#落とし穴-3-rich-rule-を単一引用符で書くと変数が展開されない)） |
-| コマンドが `--add-port=/udp` のように空の値で失敗する | `. ~/wg/wg-env.sh` を実行していないシェルでコマンドを貼った（[新しいシェルでは](#新しいシェルでは--wgwg-envsh-を先に実行する)） |
-| `wg-quick up` が ``Name or service not known: `:51820'`` と `Configuration parsing error` で失敗する | `wg0.conf` の `Endpoint` にホストが無い（`Endpoint = :${WG_PORT}`）。相手拠点の `SITE_x_PUBLIC` が空のまま、`Endpoint` 行を必ず書いていた頃の手動手順 3 を貼った（[片側がグローバル IP を持たない場合](#片側がグローバル-ip-を持たない場合cgnat-など)） |
 | クライアントの ping に `From ${MY_TUN_IP} ... Packet filtered` で、宛先が**相手拠点 LAN のときだけ**失敗する | `wg0 → wg0` の policy（`clientsA-to-siteB`）が無い。検証では、この policy を外すと自拠点 LAN への ping は通ったまま相手拠点 LAN だけが落ちた |
 | クライアントの ping に `From ${MY_LAN_IP} ... Packet filtered` | 自拠点 LAN 向けの policy（`clientsA-to-siteA`）が無い |
-| ハンドシェイクは成立するのに、相手拠点 LAN へ**まったく応答が無い**（ICMP も返らない） | 相手拠点のホストの `AllowedIPs` にクライアント帯が無い。WireGuard は範囲外の送信元を黙って捨てる。手動手順 0 で両拠点の `site.env` に帯を書き、手動手順 3 を両拠点で実行したか確認する |
+| ハンドシェイクは成立するのに、相手拠点 LAN へ**まったく応答が無い**（ICMP も返らない） | 相手拠点のホストの `AllowedIPs` にクライアント帯が無い。WireGuard は範囲外の送信元を黙って捨てる。両拠点の `site.env` に帯を書いて両拠点で `apply` したか確認する |
 | クライアントを足したのに届かない。`wg show` には出ている | `reload` で済ませた。`restart` する（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)） |
-| 拠点の LAN からクライアントへ接続できない（逆方向だけ失敗） | ルーターにクライアント帯の静的経路が無い、または `(b)`・`(d)`・`(f)` の policy が無い |
+| 拠点の LAN からクライアントへ接続できない（逆方向だけ失敗） | ルーターにクライアント帯の静的経路が無い、または クライアント用の policy が無い |
 | クライアントから WG ホスト自身（`${MY_TUN_IP}`）に届かない | クライアント conf の `AllowedIPs` に `${WG_TUNNEL_NET}` が入っていない |
-| OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < "$WG_KEY"` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](#バックアップと復旧os-の再インストール)） |
-| 手動手順 3 を貼り直したらクライアントが全部切れた | conf を作り直したので `[Peer]` が消えた。手動手順 8 の追記をやり直すか、`wg-vpn.sh apply` を使う |
-
-### 完了時点の状態（拠点 A、クライアント 1 台）
-
-<details>
-<summary>`wg show` / `ip route` / `firewall-cmd` などの出力（45 行）</summary>
-
-```
-$ sudo wg show
-interface: wg0
-  public key: ${SITE_A_PUBKEY}
-  private key: (hidden)
-  listening port: 51820
-
-peer: ${CLIENT_PUBKEY}
-  endpoint: 198.51.100.3:37301                    ← ハンドシェイクで覚えた（conf には書いていない）
-  allowed ips: 10.99.1.1/32
-  latest handshake: 19 seconds ago
-  transfer: 7.89 KiB received, 3.68 KiB sent
-
-peer: ${SITE_B_PUBKEY}
-  endpoint: 198.51.100.2:51820
-  allowed ips: 10.99.0.2/32, 192.168.120.0/24
-  latest handshake: 37 seconds ago
-  transfer: 2.37 KiB received, 4.93 KiB sent
-  persistent keepalive: every 25 seconds
-
-$ ip route show dev wg0
-10.99.0.0/30 proto kernel scope link src 10.99.0.1
-10.99.1.1 scope link
-192.168.120.0/24 scope link
-
-$ sudo firewall-cmd --get-active-zones
-public (default)
-  interfaces: end0
-wireguard
-  interfaces: wg0
-
-$ sudo firewall-cmd --info-policy=siteA-to-siteB
-siteA-to-siteB (active)
-  disable: no
-  priority: -1
-  target: CONTINUE
-  ingress-zones: public
-  egress-zones: wireguard
-  ...
-  rich rules:
-	rule family="ipv4" source address="192.168.110.0/24" destination address="192.168.120.0/24" accept
-
-$ systemctl is-enabled wg-quick@wg0
-enabled
-$ nmcli -f DEVICE,TYPE,STATE dev | grep wg0
-wg0      wireguard  connected (externally)
-```
-
-</details>
+| OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < /etc/wireguard/wg0.key` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](#バックアップと復旧os-の再インストール)） |
 
 ### 注意点
 
@@ -1172,21 +463,9 @@ $ ip route show dev wg0
 
 `AllowedIPs`・`Address` を変えたときは **`systemctl restart wg-quick@wg0`** を使う（一瞬トンネルが切れる）。reload で済むのは、鍵・Endpoint・keepalive だけを変えたときに限られる。
 
-#### 落とし穴 3: rich rule を単一引用符で書くと変数が展開されない
+#### 転送を片方向だけ・特定ホストだけに絞る場合
 
-firewalld の解説では `--add-rich-rule='rule family=ipv4 ...'` と**単一引用符**で書かれていることが多い。rich rule には空白が含まれるので引用は必要だが、**単一引用符の中ではシェル変数が展開されない**。本書のように値を変数で持つ場合は、必ず**二重引用符**にする。
-
-```bash
-# 誤り: $MY_LAN という文字列がそのまま登録される
-sudo firewall-cmd --permanent --policy="$POL_OUT" \
-  --add-rich-rule='rule family=ipv4 source address=$MY_LAN destination address=$PEER_LAN accept'
-
-# 正しい
-sudo firewall-cmd --permanent --policy="$POL_OUT" \
-  --add-rich-rule="rule family=ipv4 source address=$MY_LAN destination address=$PEER_LAN accept"
-```
-
-厄介なのは、**firewalld が誤ったほうも `success` で受理する**こと。転送が通らないのに `firewall-cmd` はエラーを出さないので、`--info-policy` か `--list-all-policies` で中身を見るまで気づかない。貼る前に確認したい場合は `set -x` を有効にして、展開後のコマンドを見る。
+`apply` が作る policy は双方向（拠点 A → B と B → A、クライアント → LAN と LAN → クライアント）。片方向だけ許可したい場合（例: 拠点 A から B へは接続できるが B から A へは接続させない）は、逆向きの policy（`siteB-to-siteA` など）を `sudo firewall-cmd --permanent --delete-policy=<名前>` で消して `--reload` する。戻りのパケットは conntrack で許可されるので、許可した側から始めた通信は成立する。相手 LAN のうち特定ホスト・ポートだけに絞る場合は、policy の rich rule の `destination address` を `/32` にする、`port port=... protocol=tcp` を付けるなどで調整する。
 
 #### `AllowedIPs` が cryptokey routing の要
 
@@ -1195,7 +474,7 @@ sudo firewall-cmd --permanent --policy="$POL_OUT" \
 - **受信時**: トンネルから届いたパケットの送信元がこの範囲外なら捨てる
 - **送信時**: この範囲宛てのパケットをこの peer に送る。**wg-quick はこの範囲をそのまま `wg0` への経路としても追加する**
 
-そのため、相手の**トンネル IP だけでなく相手の LAN も**書く。クライアント帯を使う場合はそれも入る。本書では手動手順 0 の `PEER_ALLOWED` がこれを組み立てる。wg-quick 起動時のログで経路が追加されるのを確認できる（[手動手順 6](#手動手順-6-サービスの有効化起動) の出力）。
+そのため、相手の**トンネル IP だけでなく相手の LAN も**書く。クライアント帯を使う場合はそれも入る。スクリプトが相手 peer の `AllowedIPs` にこれを組み立てる。`journalctl -u wg-quick@wg0` で、起動時に経路が追加されるのを確認できる。
 
 この対応表は **1 インターフェース内で peer ごとに排他**で、1 つのアドレスを 2 つの peer に対応づけることはできない。だからクライアントは拠点に所属させ、拠点ごとに帯を分ける（[選択した方針](#選択した方針)）。
 
@@ -1220,7 +499,7 @@ NAT をしない構成なので、LAN 側ホストの返事はデフォルトゲ
 
 #### 相手拠点のホストが帯を知らないと黙って捨てる
 
-WireGuard は、`AllowedIPs` の範囲外から届いたパケットを **ICMP も返さずに**捨てる。相手拠点のホストの `AllowedIPs` にクライアント帯が入っていないと、ハンドシェイクも転送も正常に見えたまま届かない。手動手順 0 で**両拠点の** `site.env` に帯を書き、手動手順 3 を両拠点で実行すること。
+WireGuard は、`AllowedIPs` の範囲外から届いたパケットを **ICMP も返さずに**捨てる。相手拠点のホストの `AllowedIPs` にクライアント帯が入っていないと、ハンドシェイクも転送も正常に見えたまま届かない。**両拠点の** `site.env` に帯を書き、両拠点で `apply` すること。
 
 #### WG ホスト自身から相手 LAN へ送る場合
 
@@ -1255,11 +534,11 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 
 #### トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合
 
-`wg0` を入れた `${WG_FW_ZONE}` ゾーンは**何も開いていない**（手動手順 5 の (b)。WireGuard の待ち受けポートは LAN 側ゾーンで開けるので、このゾーンには何も要らない）。そのため、トンネル越しに **WG ホスト自身**の ssh や Cockpit へ接続すると firewalld が拒否し、クライアントには `No route to host` と出る（ICMP admin-prohibited を受けて `connect()` が `EHOSTUNREACH` を返すため。ポートが閉じているときの `Connection refused` とは違う）。
+`wg0` を入れた `${WG_FW_ZONE}` ゾーンは**何も開いていない**（スクリプトはこのゾーンに何も開けない。WireGuard の待ち受けポートは LAN 側ゾーンで開けるので、このゾーンには何も要らない）。そのため、トンネル越しに **WG ホスト自身**の ssh や Cockpit へ接続すると firewalld が拒否し、クライアントには `No route to host` と出る（ICMP admin-prohibited を受けて `connect()` が `EHOSTUNREACH` を返すため。ポートが閉じているときの `Connection refused` とは違う）。
 
 **`ping` は通る。** firewalld はゾーンで ICMP echo を既定ではブロックしないので、「ping は通るのに ssh だけ入れない」という見え方になる。
 
-手動手順 5 の policy は**転送**を制御するもので、**ホスト自身宛ての通信には効かない**。相手拠点 LAN の他のホストへは通るのに WG ホストにだけ入れないのは、このため。
+転送用の policy は**転送**を制御するもので、**ホスト自身宛ての通信には効かない**。相手拠点 LAN の他のホストへは通るのに WG ホストにだけ入れないのは、このため。
 
 実測（拠点 B のホストから拠点 A へ。2026-09-19）:
 
@@ -1308,16 +587,7 @@ sudo firewall-cmd --zone="$WG_FW_ZONE" --list-rich-rules
 | ルーターのポート転送 | 不要 | **必須** |
 | firewalld の `${WG_PORT}/udp` | 不要 | **必須** |
 
-手動手順 3 のヒアドキュメントは、`PEER_PUBLIC`（= 相手拠点の `SITE_x_PUBLIC`）が空なら `Endpoint` 行を書かない。**ブロックはそのまま貼ってよい**（スクリプトも同じ扱い）。
-
-> **`Endpoint = :51820` になったとき。** `SITE_x_PUBLIC` を空にしたまま、`Endpoint` 行を必ず書いていた頃の手動手順 3 を貼ると、`wg-quick up` が次で止まる（実測）。
->
-> ```
-> wg-quick[20346]: Name or service not known: `:51820'
-> wg-quick[20346]: Configuration parsing error
-> ```
->
-> `sudo grep Endpoint /etc/wireguard/wg0.conf` で確認し、`Endpoint = :${WG_PORT}` になっていたら**その行を消して** `sudo systemctl start wg-quick@wg0` し直す（相手拠点に本当はグローバル IP があるなら、`site.env` の `SITE_x_PUBLIC` を埋めて手動手順 3 を貼り直す）。
+スクリプトは、相手拠点の `SITE_x_PUBLIC` が空なら `Endpoint` 行を書かない。
 
 WireGuard は、正しく認証できたパケットの送信元を peer の endpoint として覚える。そのため、`Endpoint` を書いていない側もハンドシェイクを受けた後は返信先がわかる。付録の検証では、`Endpoint` を持たない側の `wg show` に、相手の endpoint が表示された（[付録](#待ち受けポートを開け忘れた場合)）。ただし、**着信を受けた側から先に通信を始めることはできない**。A の keepalive でトンネルが維持されている間だけ、B 側のクライアントから A 側へ接続できる。**両側とも `Endpoint` を省略すると、どちらからもトンネルを張れない。**
 
@@ -1335,7 +605,7 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### クライアントの秘密鍵の扱い
 
-ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手動手順 9）。より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す。
+ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手順 4 の最後の `rm`）。より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す。
 
 #### `DNS =` を書く場合
 
@@ -1360,22 +630,11 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### MTU
 
-wg-quick は wg0 の MTU を既定で **1420** にする（IPv4/IPv6 の外側ヘッダー分を引いた値）。PPPoE（MTU 1454 / 1492 など）の回線では、トンネル内の最大サイズの通信だけが通らないことがある（ping は通るが、大きなファイル転送や一部の HTTPS が止まる）。その場合は `site.env` の `WG_MTU` に `1380` などと書き、`. ~/wg/wg-env.sh` で読み直してから手動手順 3 のヒアドキュメントを貼り直し（`MTU =` の行は `WG_MTU` が空なら落ち、書いてあれば入る。貼り直すと手動手順 8 で足したクライアントの `[Peer]` が消えるので足し直す）、`systemctl restart wg-quick@wg0` する。外出先のクライアントでも、モバイル回線によっては同じことが起きる（クライアント conf の `[Interface]` に `MTU =` を書く）。本書の検証環境（MTU 1500 の veth）ではこの問題は起きていない。
+wg-quick は wg0 の MTU を既定で **1420** にする（IPv4/IPv6 の外側ヘッダー分を引いた値）。PPPoE（MTU 1454 / 1492 など）の回線では、トンネル内の最大サイズの通信だけが通らないことがある（ping は通るが、大きなファイル転送や一部の HTTPS が止まる）。その場合は `site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す（`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）。外出先のクライアントでも、モバイル回線によっては同じことが起きる（クライアント conf の `[Interface]` に `MTU =` を書く）。本書の検証環境（MTU 1500 の veth）ではこの問題は起きていない。
 
 #### LAN サブネットの重複
 
 両拠点の LAN が同じサブネット（例: どちらも `192.168.1.0/24`）だと経路を区別できないので、この構成は成立しない。家庭用ルーターの初期値のままの拠点同士を結ぶ場合は、どちらかの LAN のアドレスを変える必要がある。
-
-#### 新しいシェルでは `. ~/wg/wg-env.sh` を先に実行する
-
-本書のコマンドは手動手順 0 で作った変数に依存する。**読み込んでいないシェルで貼ると、変数が空のまま実行される。** 空の値でも firewalld がエラーを返すとは限らず、`--add-port=/udp` のように失敗するものもあれば、意図しない設定が入るものもある。SSH を張り直したあと、別の端末を開いたあと、再起動後は必ず次を実行する。
-
-```bash
-. ~/wg/wg-env.sh
-echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめる
-```
-
-`~/.bashrc` に書いてしまう手もあるが、`wg-env.sh` は `sudo firewall-cmd` を呼ぶので、ログインのたびに sudo が走る。手順の前に手で読み込むほうがよい。
 
 #### 再起動後の自動起動
 
@@ -1383,37 +642,31 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 
 ### バックアップと復旧の補足
 
-**残しておく価値があるのは「鍵」と「値を書いたファイル」だけ。** `wg0.conf`・sysctl・firewalld は手動手順 3〜5 で作り直せる。
+**残しておく価値があるのは「鍵」と「値を書いたファイル」だけ。** `wg0.conf`・sysctl・firewalld は `apply` で作り直せる。
 
 #### 何を保存し、何は手順で作り直せるか
 
 | 対象 | 場所 | バックアップ | 失ったときの代償 |
 |---|---|---|---|
 | **ホストの秘密鍵** `${WG_IFACE}.key` | `/etc/wireguard/` | **必須** | 公開鍵が変わる。**相手拠点の `site.env` と conf の差し替え**、**クライアント全台の conf 再発行**が要る |
-| `site.env` | `~/wg/` | **必須** | 手動手順 0 の変数表を見ながら書き直す |
+| `site.env` | `~/wg/` | **必須** | 変数表を見ながら書き直す |
 | `clients.list`（スクリプトでクライアントを運用する場合） | `site.env` と同じディレクトリ | **必須** | 各クライアントの公開鍵とトンネル IP を失う。端末側の conf から読み出すか、全台登録し直す |
-| `${WG_IFACE}.conf` | `/etc/wireguard/` | 入れる | 手動手順 3 で作り直せるが、**クライアントの `[Peer]` は手動手順 8 で足し直し**になる（`wg-vpn.sh apply` なら `clients.list` から作り直す） |
+| `${WG_IFACE}.conf` | `/etc/wireguard/` | 入れる | `apply` が `clients.list` から作り直す |
 | `${WG_IFACE}.pub` | `/etc/wireguard/` | 入れる | なし（`wg pubkey < ${WG_IFACE}.key` で再計算できる） |
-| `~/wg/wg-env.sh` | `~/wg/` | 入れる | なし（リポジトリの `wg-env.sh` をコピーし直せば同じものができる。環境固有の値は入っていない） |
-| `/etc/sysctl.d/90-wireguard.conf` | — | 入れない | なし（手動手順 4） |
-| firewalld のゾーン・policy | `/etc/firewalld/` | 入れない | なし（手動手順 5） |
-| クライアントの秘密鍵・クライアント用 conf | **端末側**（ホストからは手動手順 9 で削除済み） | **入れない** | ホストの鍵が同じなら端末はそのままでよい |
-| `wireguard-tools` | — | 入れない | なし（手動手順 1） |
-| ルーターのポート転送・静的経路 | 拠点ルーター | 入れない（機器側に残る） | WG ホストの LAN 側 IP が変わったときだけ入れ直す（手動手順 7） |
+| `/etc/sysctl.d/90-wireguard.conf` | — | 入れない | なし（`apply`） |
+| firewalld のゾーン・policy | `/etc/firewalld/` | 入れない | なし（`apply`） |
+| クライアントの秘密鍵・クライアント用 conf | **端末側**（ホストからは手順 4 で削除済み） | **入れない** | ホストの鍵が同じなら端末はそのままでよい |
+| `wireguard-tools` | — | 入れない | なし（`keygen` / `apply` が入れる） |
+| ルーターのポート転送・静的経路 | 拠点ルーター | 入れない（機器側に残る） | WG ホストの LAN 側 IP が変わったときだけ入れ直す（[ルーターの設定](#ルーターの設定)） |
 
-> **鍵は「拠点の身元」そのもので、ポート転送も静的経路も鍵とは無関係。** だから OS を入れ直しても**ルーターは触らなくてよい**。ただし再インストールで WG ホストの LAN 側 IP が変わった場合は別で、ポート転送の転送先と両拠点の静的経路のゲートウェイを入れ直す（[手動手順 7](#手動手順-7-拠点ルーターの設定)）。DHCP 予約を入れてあれば変わらない。
+> **鍵は「拠点の身元」そのもので、ポート転送も静的経路も鍵とは無関係。** だから OS を入れ直しても**ルーターは触らなくてよい**。ただし再インストールで WG ホストの LAN 側 IP が変わった場合は別で、ポート転送の転送先と両拠点の静的経路のゲートウェイを入れ直す（[ルーターの設定](#ルーターの設定)）。DHCP 予約を入れてあれば変わらない。
 
 **バックアップを取るときの注意:**
 
-- `sudo cat "$WG_KEY" > ファイル` の**リダイレクトを開くのはユーザーのシェル**なので、先に `install -m 600 /dev/null` で 0600 のファイルを作っておく（手動手順 3 と同じ理由）
-- クライアントの秘密鍵入り conf は**入れない**。手動手順 9 で端末に渡した時点で消してあり、ホストの鍵が同じなら端末側はそのまま動く
-- **このアーカイブは `wg-vpn.sh restore` でもそのまま戻せる。** 逆に `wg-vpn.sh backup` が作ったものを下の手動手順で戻してもよい（中身は同じ `wg-backup/` + `MANIFEST` の形式）
+- クライアントの秘密鍵入り conf は**入れない**。手順 4 で端末に渡した時点で消してあり、ホストの鍵が同じなら端末側はそのまま動く
 
 **クリーンインストール後に復旧するときの注意:**
 
-- **[手動手順 3](#手動手順-3-wg0conf-の作成) は貼らない。** conf を戻したので不要であり、貼ると**登録済みクライアントの `[Peer]` が消える**（手動手順 3 の注記のとおり）。conf を戻さずに手動手順 3 で作り直した場合は、[手動手順 8](#手動手順-8-クライアントを登録する) の `[Peer]` 追記を登録済みの台数ぶん繰り返す
-- **[手動手順 2](#手動手順-2-鍵ペアの生成) も貼らない。** `wg genkey` を実行すると別の鍵ができ、復旧の意味が無くなる
-- **`wg-quick@${WG_IFACE}` の `enable` は手動手順 6 でやり直す。** 鍵と conf を戻しただけでは、再起動時に上がらない
 - **`/etc/wireguard` の外から持ってきたファイルは `install`（新規作成）で置き、`restorecon` をかける。** `mv` で持ち込むと SELinux のコンテキスト（`user_tmp_t` など）を持ち越し、`wg-quick` が鍵を読めなくなることがある
 - **相手拠点は何もしなくてよい。** 公開鍵が同じなので相手の conf も `site.env` も変更不要。トンネルは `PersistentKeepalive`（既定 25 秒）で張り直される
 - **配布済みのクライアント conf もそのまま。** クライアント側の `[Peer] PublicKey` はホストの公開鍵で、これが変わっていない
@@ -1422,9 +675,9 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 
 鍵を失ったら、その拠点の身元を作り直すことになる。手順は多いが決まっている。
 
-1. [手動手順 2](#手動手順-2-鍵ペアの生成) で新しい鍵を作り、新しい公開鍵を**両拠点の `site.env`** の `SITE_x_PUBKEY` に書く
-2. **相手拠点**でも [手動手順 3](#手動手順-3-wg0conf-の作成)（conf の作り直し）と [手動手順 6](#手動手順-6-サービスの有効化起動)（restart）を行う。相手拠点も一度止まる
-3. **クライアント全台**の conf の `[Peer] PublicKey` を書き換えて配り直す（[手動手順 8](#手動手順-8-クライアントを登録する)・[手動手順 9](#手動手順-9-クライアントに-conf-を渡す)）。QR で配っている場合も全台やり直し
+1. 鍵ファイル（`/etc/wireguard/wg0.key`・`.pub`）を消して `keygen` し直し、新しい公開鍵を**両拠点の `site.env`** の `SITE_x_PUBKEY` に書く
+2. **相手拠点**でも `apply`（conf の作り直しと restart）を行う。相手拠点も一度止まる
+3. **クライアント全台**の conf の `[Peer] PublicKey` を書き換えて配り直す（端末側の conf の `[Peer] PublicKey` を書き換えるだけでもよい）。QR で配っている場合も全台やり直し
 4. クライアントの**秘密鍵**は変わらないので、`clients.list` が残っていれば `[Peer]` の作り直しは不要（`wg-vpn.sh apply` が `clients.list` から作り直す）
 
 `clients.list` も失った場合は、各クライアントの公開鍵を端末側の conf から読み出すか、全台を登録し直す。
@@ -1445,6 +698,8 @@ echo "$MY_SITE $MY_LAN $PEER_LAN $LAN_ZONE"    # 空でないことを確かめ�
 - [nwdiag](http://blockdiag.com/en/nwdiag/) — 本書の構成図の記述に使っている（[付録: 構成図の再生成](#付録-構成図の再生成)）
 
 ### 付録: network namespace による検証
+
+> 検証当時の手順書は、1 コマンドずつ貼る手動手順（手動手順 0〜10）だった。その本文はこのリポジトリの履歴（コミット `e26df03` 以前の `docs/wireguard.md`）にある。この付録と次の付録の「手動手順 N」はそれを指す。
 
 #### ラボの構成
 
@@ -1568,7 +823,7 @@ ip netns exec wgB wg set wg0 peer ${SITE_A_PUBKEY} endpoint 198.51.100.1:51821
 | `LAN_ZONE` が空になる | `firewall-cmd --get-zone-of-interface` は、ゾーン未割り当ての NIC に対して `no zone` を **stderr** に出し、終了コード **2** を返す。stdout を見て `"no zone"` と比較する書き方では検出できない。終了コードで判定する |
 | policy がすべて削除されない | firewalld 2.4.3 に `--query-policy` は**存在しない**（`unrecognized arguments`、終了コード 2）。存在確認には `--info-policy` を使う |
 | `--reload` が `INVALID_ZONE` で失敗 | policy より先に `wireguard` ゾーンを削除すると、ゾーンを参照する policy が残って reload が壊れる。policy → ゾーンの順に消す |
-| rich rule に `$MY_LAN` が入る | 単一引用符で書いた場合。firewalld は `success` を返すので気づきにくい（[落とし穴 3](#落とし穴-3-rich-rule-を単一引用符で書くと変数が展開されない)） |
+| rich rule に `$MY_LAN` が入る | 単一引用符で書いた場合。firewalld は `success` を返すので気づきにくい（当時の手順書の落とし穴 3） |
 
 #### リモートクライアントの検証（2026-09-19）
 
@@ -1595,7 +850,7 @@ WG host A は実機の root namespace なので、**firewalld の policy は実�
 
 #### 後片付け
 
-namespace・ブリッジ・経路を削除し、[ロールバック](#全部消す手動)の手順で wg-quick・鍵・sysctl・firewalld を戻した。`/etc/firewalld` を作業前のバックアップと `diff -r` で比べ、差分が無いことを確認した（削除で生成された `*.xml.old` は手で消した）。`wireguard-tools` と `systemd-resolved` はインストールしたまま残している。
+namespace・ブリッジ・経路を削除し、当時の手動手順のロールバックの手順で wg-quick・鍵・sysctl・firewalld を戻した。`/etc/firewalld` を作業前のバックアップと `diff -r` で比べ、差分が無いことを確認した（削除で生成された `*.xml.old` は手で消した）。`wireguard-tools` と `systemd-resolved` はインストールしたまま残している。
 
 ### 付録: スクリプトの検証
 
@@ -1637,8 +892,8 @@ namespace・ブリッジ・経路を削除し、[ロールバック](#全部消�
 | `restore` 本実行（namespace 内の空の `/etc/wireguard` へ） | 5 ファイルが戻り、公開鍵が退避前と一致。`/etc/wireguard/*` は `root:root 0600`、`site.env` と `wg-env.sh` は**実行ユーザー所有**（`sudo` で実行しても root 所有にならない） |
 | 往復（`keygen` → `client add` → `backup` → 全消し → `restore` → `apply --dry-run`） | `apply` が生成する `wg0.conf` が退避前と**バイト単位で一致**。`clients.list` からクライアントの `[Peer]` も復元され、非 root の `client list` が読めた |
 | `-e` の指定あり / なし | あり → `-e` の位置に戻し、元の場所との違いを表示。なし → `MANIFEST` に記録された元の場所（`~/wg/site.env`）に戻る |
-| 手動手順で作ったアーカイブ | [バックアップを取る（手動）](#バックアップを取る手動)のブロックをそのまま実行して作ったアーカイブを、`wg-vpn.sh restore` がそのまま受理した（形式が同じ） |
-| 手動手順での復旧 | [クリーンインストール後に復旧する（手動）](#クリーンインストール後に復旧する手動)の (a)〜(e) を namespace 内でそのまま実行し、`wg pubkey` の出力が `MY_PUBKEY` と一致した |
+| 手動手順で作ったアーカイブ | 当時の手動手順「バックアップを取る」のブロックをそのまま実行して作ったアーカイブを、`wg-vpn.sh restore` がそのまま受理した（形式が同じ） |
+| 手動手順での復旧 | 当時の手動手順「クリーンインストール後に復旧する」の (a)〜(e) を namespace 内でそのまま実行し、`wg pubkey` の出力が `MY_PUBKEY` と一致した |
 | 異常系 | `MANIFEST` 無し / ディレクトリ名が違う / 絶対パスを含む tar / 未知の `FORMAT` / 鍵と `MANIFEST` の公開鍵が不一致 / 鍵が `site.env` の `SITE_x_PUBKEY` のどちらとも不一致 / `site.env` の `WG_IFACE` と不一致 / `MANIFEST` のパーミッション欄が 8 進数でない — いずれも `ERROR:` を出して**何も書かずに**停止 |
 | 相手拠点のホストへの復旧 | `このホストは拠点 A の WG ホスト（…）です。拠点 B の鍵を戻すと両拠点が同じ鍵になります` で停止 |
 | どちらの拠点の LAN 側 IP も無いホスト | 警告を出して続行（再インストール直後を想定） |
