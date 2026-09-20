@@ -2,19 +2,19 @@
 # WireGuard 拠点間 VPN と、そこへのリモートクライアント追加
 # （docs/wireguard.md）の手順を site.env の値で実行する。
 #
-#   sudo ./wg-s2s.sh [options] keygen [A|B]          手順 1〜2: wireguard-tools 導入と鍵生成
-#   sudo ./wg-s2s.sh [options] apply  A|B            手順 3〜6: wg0.conf・sysctl・firewalld・サービス
-#        ./wg-s2s.sh [options] router A|B            手順 7: ルーターに入れる値を表示
-#   sudo ./wg-s2s.sh [options] status                状態確認
-#   sudo ./wg-s2s.sh [options] remove A|B            ロールバック
-#   sudo ./wg-s2s.sh [options] client add A|B NAME   クライアントを登録し、鍵とクライアント用 conf を生成する
-#   sudo ./wg-s2s.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する
-#   sudo ./wg-s2s.sh [options] client show NAME      クライアント用 conf を表示する
-#        ./wg-s2s.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）
+#   sudo ./wg-vpn.sh [options] keygen [A|B]          手順 1〜2: wireguard-tools 導入と鍵生成
+#   sudo ./wg-vpn.sh [options] apply  A|B            手順 3〜6: wg0.conf・sysctl・firewalld・サービス
+#        ./wg-vpn.sh [options] router A|B            手順 7: ルーターに入れる値を表示
+#   sudo ./wg-vpn.sh [options] status                状態確認
+#   sudo ./wg-vpn.sh [options] remove A|B            ロールバック
+#   sudo ./wg-vpn.sh [options] client add A|B NAME   クライアントを登録し、鍵とクライアント用 conf を生成する
+#   sudo ./wg-vpn.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する
+#   sudo ./wg-vpn.sh [options] client show NAME      クライアント用 conf を表示する
+#        ./wg-vpn.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）
 #   client add / remove の後は、その拠点で apply を実行してホストに反映する。
 #
-#   sudo ./wg-s2s.sh [options] backup  [A|B]         鍵・site.env・clients.list を tar.gz に退避する
-#   sudo ./wg-s2s.sh [options] restore FILE          退避したものを元の場所に戻す
+#   sudo ./wg-vpn.sh [options] backup  [A|B]         鍵・site.env・clients.list を tar.gz に退避する
+#   sudo ./wg-vpn.sh [options] restore FILE          退避したものを元の場所に戻す
 #   クリーンインストール後は restore してから apply すると、同じ鍵のまま復旧できる
 #   （相手拠点の設定とクライアント端末の conf は変更不要）。
 #
@@ -659,7 +659,7 @@ env_value() {  # $1 = ファイル, $2 = 変数名
 
 # 作業用ディレクトリ（終了時に消す）
 make_tmpdir() {
-  TMP_WORK=$(umask 077; mktemp -d "${TMPDIR:-/tmp}/wg-s2s.XXXXXX") || die "作業用ディレクトリを作れません"
+  TMP_WORK=$(umask 077; mktemp -d "${TMPDIR:-/tmp}/wg-vpn.XXXXXX") || die "作業用ディレクトリを作れません"
   trap 'rm -rf "$TMP_WORK"' EXIT
 }
 
@@ -934,7 +934,7 @@ cmd_backup() {
     cp -p "$path" "$stage/$name"
   done
   {
-    echo "# wg-s2s.sh backup（docs/wireguard.md「バックアップと復旧」）"
+    echo "# wg-vpn.sh backup（docs/wireguard.md「バックアップと復旧」）"
     echo "FORMAT=$BACKUP_FORMAT"
     echo "CREATED=$(date -Is)"
     echo "HOST=$(short_host)"
@@ -999,7 +999,7 @@ cmd_restore() {
     esac
   done <"$stage/MANIFEST"
   [[ -n $m_format ]] || die "MANIFEST に FORMAT がありません。このスクリプトが作ったバックアップではありません"
-  [[ $m_format == "$BACKUP_FORMAT" ]] || die "バックアップの形式（FORMAT=$m_format）を扱えません。新しい版の wg-s2s.sh を使ってください"
+  [[ $m_format == "$BACKUP_FORMAT" ]] || die "バックアップの形式（FORMAT=$m_format）を扱えません。新しい版の wg-vpn.sh を使ってください"
   [[ -n $m_iface ]] || die "MANIFEST に WG_IFACE がありません"
   info "バックアップ: ${m_host:-不明} / 拠点 ${m_site:-不明} / $m_iface / ${m_created:-日時不明}"
 
