@@ -19,7 +19,7 @@
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの IP アドレス | `192.168.10.100` |
-> | `${LAN_SUBNET}` | LAN のサブネット（接続元を LAN に絞る場合だけ使う） | `192.168.10.0/24` |
+> | `${LAN_SUBNET}` | LAN のサブネット。接続元を LAN に絞る場合だけ使う（絞らないなら空のまま） | `192.168.10.0/24` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | サーバーのホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-server` / `my-server.lan` |
 > | `${CERTDIR}` | TLS 証明書・鍵の置き場所（固定値。変更不要） | `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` |
 >
@@ -62,11 +62,11 @@
 
 ### 0. 変数を設定する
 
-**編集するのは `SERVER_IP`（と、接続元を LAN に絞るなら `LAN_SUBNET`）だけ。** 以降のコマンドはすべてこの変数を参照する。**新しいシェルを開いたら（SSH を張り直したあと、別の端末を開いたあとも）先にこのブロックを貼り直す。**
+**編集するのは `SERVER_IP` だけ。** 接続元を LAN に絞る場合だけ `LAN_SUBNET` も書く。**接続元を制限しない場合は `LAN_SUBNET` は空のままでよい**（手順 4 で public ゾーンに `rdp` サービスを開放した状態が完成形で、`LAN_SUBNET` は[注意点](#注意点)の rich rule でしか使わない）。以降のコマンドはすべてこの変数を参照する。**新しいシェルを開いたら（SSH を張り直したあと、別の端末を開いたあとも）先にこのブロックを貼り直す。**
 
 ```bash
 SERVER_IP=192.168.10.100            # クライアントが接続に使う IP。<SERVER_IP>
-LAN_SUBNET=192.168.10.0/24          # 接続元を LAN に絞る場合だけ使う。<LAN_SUBNET>
+LAN_SUBNET=                         # 接続元を LAN に絞る場合だけ書く（例: 192.168.10.0/24）。絞らないなら空のまま。<LAN_SUBNET>
 SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
 SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
 CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates   # 固定。変更不要
@@ -80,7 +80,7 @@ for v in SERVER_IP LAN_SUBNET SERVER_NAME SERVER_FQDN CERTDIR; do
 done
 ```
 
-> **`SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す。** 空のまま進むと、手順 1 の `openssl` が SAN の空エントリでエラーになる。`SERVER_NAME` と `SERVER_FQDN` が同じ値でも問題ない（[手順 1](#1-tls-証明書鍵の生成openssl) の注記）。
+> **`SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す。** `LAN_SUBNET` は接続元を絞らないなら空で構わない。 空のまま進むと、手順 1 の `openssl` が SAN の空エントリでエラーになる。`SERVER_NAME` と `SERVER_FQDN` が同じ値でも問題ない（[手順 1](#1-tls-証明書鍵の生成openssl) の注記）。
 
 ### 1. TLS 証明書・鍵の生成（openssl）
 
@@ -382,7 +382,7 @@ journalctl -u gdm -f
 - **既存ローカルセッションとの併存**: リモートログインは常に**新規セッション**を作るため、ローカルでログイン中のユーザーと同一ユーザーで接続すると GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある。既存デスクトップをそのまま見たい場合は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）が必要 — 今回は採用していない。
 - **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は手順 1〜3 でそちらのパスを指定する。
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す。**クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある。差し替え後は `sudo systemctl restart gnome-remote-desktop.service` を実行する（接続中の RDP セッションは切断されるので、利用者がいないタイミングで行う）。
-- **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。LAN 限定に絞る場合は後から次に変更できる（手順 0 の `LAN_SUBNET` を使う）。
+- **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。**接続元を制限しない場合は手順 4 の状態のままでよく、以下は不要。** LAN 限定に絞る場合は後から次に変更できる（手順 0 の `LAN_SUBNET` に値を入れておく）。
 
   ```bash
   sudo firewall-cmd --permanent --remove-service=rdp
