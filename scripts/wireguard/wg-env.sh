@@ -1,6 +1,6 @@
 # ~/wg/site.env を読み、このホスト視点の変数（MY_* / PEER_*）を作る
 #
-# 使い方（docs/wireguard.md 手順 0）:
+# 使い方（docs/wireguard.md 手動手順 0）:
 #   cp <このリポジトリ>/scripts/wireguard/wg-env.sh ~/wg/wg-env.sh
 #   . ~/wg/wg-env.sh          # 実行ではなく source する。新しいシェルを開くたびに読み直す
 # 環境固有の値は入っていない（すべて site.env から読む）。両拠点で同じファイルを使う。
