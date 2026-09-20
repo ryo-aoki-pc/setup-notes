@@ -9,7 +9,7 @@
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
-| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、さらに外出先の PC・スマートフォンを任意の台数追加して両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、以降は編集せずにコピペで実行できる**手順書（手順 0〜7 が拠点間、8〜13 がクライアント追加。拠点 A / B の読み替えは自動）。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。同じ `site.env` を読むスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可）付き。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
+| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、以降は編集せずにコピペで実行できる**手順書（手順 0〜9。拠点 A / B の読み替えは自動）。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。同じ `site.env` を読むスクリプト（[`scripts/wireguard-site-to-site/`](scripts/wireguard-site-to-site/)、既存 conf の流用可）付き。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
 
 ## 記法の約束
 

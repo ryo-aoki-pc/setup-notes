@@ -1,4 +1,4 @@
-// 外出先クライアントを加えた構成（docs/wireguard.md の「### リモートクライアントを加えた場合」）
+// 構成図（docs/wireguard.md の「## 構成」）。拠点間トンネルと、拠点 A で受ける外出先クライアント
 // 再生成コマンドは docs/wireguard.md の「## 構成図の再生成」を参照
 nwdiag {
   network lan_a {
