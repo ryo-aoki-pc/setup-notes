@@ -8,7 +8,7 @@
 
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
-| [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。**冒頭の変数ブロックに値を 1 度書けば、以降のコマンドはそのまま貼れる。** openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
+| [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。**冒頭の変数ブロックに値を 1 度書けば、以降のコマンドはそのまま貼れる。前半は実行するコマンドだけで、理由・実測・落とし穴は後半の補足にまとめてある。** openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
 | [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、`wg-vpn.sh` の `keygen` → `apply` → `router` → `client add` で構築できる**手順書。firewalld は `wg0` を LAN 側ゾーンに入れてゾーン内転送で通す（policy 無し。絞るのは宛先ホスト側。旧レイアウトからは `apply` が自動で移行）、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。スクリプトは [`scripts/wireguard/`](scripts/wireguard/)（既存 conf の流用可）。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
 
 ## 記法の約束
