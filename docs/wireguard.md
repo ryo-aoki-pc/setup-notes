@@ -2,7 +2,7 @@
 
 - **目的**: 2 拠点の LAN を WireGuard で結び、**拠点 A の LAN 上のクライアントと拠点 B の LAN 上のクライアントが双方向に通信できる**ようにする。あわせて、外出先のノート PC やスマートフォンなど**任意の台数のクライアント**を足して、そこから両拠点の LAN に到達できるようにする
 - **進め方**: **`site.env` に値を 1 度だけ書き、両拠点の WG ホストに同じファイルを置いて、`wg-vpn.sh` に `-e` で渡して実行する。** 拠点 A / B は引数で指定し、スクリプトがこのホストの LAN 側 IP と照合する（取り違えると何も変更せずに止まる）
-- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認と、実機を持ち出しての確認（モバイル回線・スマートフォンの公式アプリ）はまだしていない**。**スクリプト（`wg-vpn.sh`）の `apply` / `remove` は、スタブ環境での本実行と実機での `--dry-run` までで、実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。namespace での検証は、同じ設定を手で入れて行った。**firewalld は 2026-09-20 に「`wg0` を LAN 側ゾーンに入れてゾーン内転送で通す」方式に変えた**（policy を作らない）。この方式はスタブ環境で `apply` / `remove`（旧レイアウトからの移行を含む）を確認したのみで、**実機・ラボでの疎通は未確認**（[付録](#lan-側ゾーン--forward-版のスタブ検証2026-09-20)）
+- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認と、実機を持ち出しての確認（モバイル回線・スマートフォンの公式アプリ）はまだしていない**。**スクリプト（`wg-vpn.sh`）の `apply` は 2026-09-20 に拠点 B の実機で本実行した（旧 firewalld レイアウトからの移行）。`remove` の実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。namespace での検証は、同じ設定を手で入れて行った。**firewalld は 2026-09-20 に「`wg0` を LAN 側ゾーンに入れてゾーン内転送で通す」方式に変えた**（policy を作らない）。この方式はスタブ環境で `apply` / `remove` を確認したうえで、**拠点 B の実機で `apply` を本実行して旧レイアウトから移行し、拠点間の疎通が維持されることを確認した**（[付録](#実機での移行2026-09-20拠点-b)）。**拠点 A の実機はまだ旧レイアウトのまま**で、クライアント経由の疎通（折り返し・クライアント同士）は未確認
 
 | 項目 | 値 |
 |---|---|
@@ -694,7 +694,7 @@ sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface=wg0 --add-port=
 sudo firewall-cmd --reload
 ```
 
-実機（拠点 B。`public` に `end0`、`wireguard` に `wg0`、policy 6 本）での移行は**未実施**。スタブ環境で、上の順序どおりに削除・追加されることを確認した（[付録](#lan-側ゾーン--forward-版のスタブ検証2026-09-20)）。
+拠点 B の実機（`public` に `end0`、`wireguard` に `wg0`、policy 6 本）では、この `apply` で移行済み（2026-09-20。[付録](#実機での移行2026-09-20拠点-b)）。**移行は両拠点で行う。** 片方だけだと、未移行の側の policy が rich rule で送信元を相手拠点 LAN に限定したままなので、トンネル IP を送信元とする通信（WG ホスト自身から相手 LAN へ）がそちらで `Packet filtered` になる（拠点 B 移行後、未移行の拠点 A に対して実測）。
 
 #### `gateway-lan-to-world` について（LAN 側ゾーンが `internal` / `home` / `trusted` の場合）
 
@@ -974,7 +974,23 @@ firewalld の方式を「`wg0` を LAN 側ゾーンに入れてゾーン内転�
 | `client add B carol` → `apply B` → `remove B --purge` | `[Peer]` が増え、firewalld は `--reload` だけ。purge で conf・鍵・`clients/` が消え `clients.list` は残る |
 | `--use-existing-conf --dry-run apply B` | 変更前と同じ挙動（conf は生成せず、firewalld は `--reload` のみ） |
 
-未確認: 新方式での実際の nftables 挙動（`wg0 → wg0` の折り返し、トンネル越しの WG ホスト自身への ssh / Cockpit、クライアント同士）と、実機での移行（`apply` 本実行）。root での実機作業か network namespace ラボが要る。
+未確認（このスタブ検証の時点）: 新方式での実際の nftables 挙動と、実機での移行。次の節で拠点 B の実機について確認した。
+
+#### 実機での移行（2026-09-20、拠点 B）
+
+稼働中の拠点 B の WG ホスト（旧レイアウト: `public` に `end0`、`wireguard` に `wg0`、policy 6 本。拠点 A は CGNAT で常にこちらへ張りに来る）で、`apply B` を本実行して移行した。作業は LAN 側からの ssh で行い（トンネル越しではない）、事前に `/etc/firewalld` を `cp -a` で退避した。
+
+| 確認項目 | 結果 |
+|---|---|
+| `--dry-run apply B` | 生成予定の `wg0.conf` が稼働中の conf と**一致**（秘密鍵行をマスクして `diff`。peer は拠点 A と クライアント 1 台）。firewalld は policy 6 本の削除 → `wireguard` ゾーンの削除 → `--zone=public --add-interface=wg0` → `--reload` の順で表示。`51820/udp` と forward は `public` に既にあるので追加されない |
+| `apply B` 本実行 | `wg0.conf は変更なし`、firewalld の各コマンドが `success`、`旧レイアウト（ゾーン wireguard と policy）を削除しました`、`wg-quick@wg0` restart。終了コード 0。firewalld のジャーナルに警告なし |
+| 移行後の firewalld | `--get-active-zones`: `public` に `wg0 end0`。`--get-active-policies`: 同梱の `allow-host-ipv6` だけ。permanent 側からも `wireguard` ゾーンと 6 policy が消え、`/etc/firewalld/policies/` は空、`zones/wireguard.xml.old` も無い（`public.xml.old` は残る） |
+| nftables | `filter_FWD_public_allow` に `oifname "wg0" accept` と `oifname "end0" accept` が入った（`wg0` から入って `wg0` へ出る折り返しもこれで通る） |
+| トンネルの復旧 | restart から約 40 秒で拠点 A（CGNAT 側、keepalive 25 秒）とのハンドシェイクが再成立。`wg0` の経路（相手トンネル IP・相手 LAN・クライアント `/32`）も戻った |
+| 拠点間の疎通 | WG ホスト B から拠点 A のトンネル IP と Router A へ `ping -I ${WG_B_LAN_IP}` が 3/3 応答 |
+| 送信元がトンネル IP の場合 | `ping ${ROUTER_A_LAN_IP}`（送信元 `${WG_B_TUN_IP}`）は `From ${WG_A_TUN_IP} Packet filtered`。**未移行の拠点 A** の policy が rich rule で送信元を拠点 B LAN に限定しているため。拠点 A を移行すれば消える見込み |
+
+未確認: 拠点 A の実機での移行、リモートクライアント経由の疎通（`wg0 → wg0` の折り返し、クライアント同士）、トンネル越しの WG ホスト自身への ssh / Cockpit。
 
 ### 付録: 構成図の再生成
 
