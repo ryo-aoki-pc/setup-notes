@@ -1,6 +1,6 @@
 # リモートクライアントの登録簿（docs/wireguard.md の手順 8）
 #
-# 通常は `wg-s2s.sh client add A|B NAME` が clients.list に追記する。手で書く場合はこの形式にする。
+# 通常は `wg-vpn.sh client add A|B NAME` が clients.list に追記する。手で書く場合はこの形式にする。
 #   NAME       : 英数字・-・_ のみ。クライアント用 conf のファイル名（<NAME>.conf）にもなる
 #   SITE       : クライアントが接続する拠点（A または B）
 #   TUNNEL_IP  : WG_<SITE>_CLIENT_NET の中のアドレス（ネットワーク/ブロードキャストを除く）
