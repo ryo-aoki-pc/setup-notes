@@ -9,12 +9,12 @@
 | ドキュメント | 対象 | 概要 |
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
-| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、`wg-vpn.sh` の `keygen` → `apply` → `router` → `client add` で構築できる**手順書。1 コマンドずつ手動で行う手順（手動手順 0〜10。拠点 A / B の読み替えは自動）も補足に収録。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。スクリプトは [`scripts/wireguard/`](scripts/wireguard/)（既存 conf の流用可。手動手順用の `wg-env.sh` も同梱）。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
+| [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、`wg-vpn.sh` の `keygen` → `apply` → `router` → `client add` で構築できる**手順書。firewalld の専用ゾーン + policy による転送制御、`wg0 → wg0` 折り返しの policy、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。スクリプトは [`scripts/wireguard/`](scripts/wireguard/)（既存 conf の流用可）。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
 
 ## 記法の約束
 
 - **環境固有の値はプレースホルダで書く。** `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<LAN_SUBNET>` / `<USER>` など。各ドキュメントの冒頭に対応表を置く
-- **コピペで実行できる手順書は、プレースホルダの代わりにシェル変数を使う。** WireGuard の手順書は `${SITE_A_LAN}` の形で書き、値は `site.env` 1 ファイルに集約して冒頭で読み込む。読者が編集するのはその 1 ファイルだけで、コマンドブロックは書き換えない
+- **環境固有の値が多い手順書は、値を 1 ファイルに集約する。** WireGuard の手順書は値を `site.env` にまとめ、本文では `${SITE_A_LAN}` の形で参照する。読者が編集するのはその 1 ファイルだけ
 - **検証した環境のバージョンを明記する。** ディストリビューション、対象パッケージ、関連ツールのバージョンを冒頭に書く
 - **コマンドは実際に実行したものを載せる。** 出力やログも、切り分けの根拠になるものは引用する
 - **構成図は nwdiag のソースから生成する。** `docs/diagrams/*.diag` が原本で、同名の `*.svg` は生成物。図を直すときはソースを直して `python3 scripts/render-diagrams.py` で作り直す（前提は手順書の[付録](docs/wireguard.md#付録-構成図の再生成)）

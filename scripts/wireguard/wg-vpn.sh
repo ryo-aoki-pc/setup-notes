@@ -1102,8 +1102,6 @@ cmd_restore() {
   echo "---- 次にすること ----"
   echo "1. 値を確認する        : ${env_target:-site.env}"
   echo "2. 設定を作り直して起動: sudo $0 ${envopt}apply ${m_site:-A|B}"
-  echo "   （手動手順で進める場合は . ${env_dir:-~/wg}/wg-env.sh を読み込んでから手動手順 4 以降。"
-  echo "     conf を戻してあるので手動手順 2・3 は実行しない。手動手順 3 を貼るとクライアントの [Peer] が消える）"
   echo "3. ルーターのポート転送と静的経路は鍵に依存しないので変更不要"
   echo "   （WG ホストの LAN 側 IP を変えた場合だけ、ポート転送の宛先を直す）"
   echo
