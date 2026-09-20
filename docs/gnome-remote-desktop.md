@@ -14,15 +14,16 @@
 | 証明書 | 当初 `winpr-makecert` → 後に openssl 製へ差し替え | 最初から本書の openssl 手順で構築 |
 | 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（下記「検証方法」） |
 
-> **注記**: 環境固有の値はプレースホルダに置換してある。自環境の値に読み替えること。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
-> | プレースホルダ | 意味 | 例 |
+> | 変数 | 意味 | 例 |
 > |---|---|---|
-> | `<HOSTNAME>` | サーバーのホスト名 | `my-server` |
-> | `<HOSTNAME>.<DOMAIN>` | サーバーの FQDN | `my-server.lan` |
-> | `<SERVER_IP>` | サーバーの IP アドレス | `192.168.10.100` |
-> | `<LAN_SUBNET>` | LAN のサブネット | `192.168.10.0/24` |
-> | `<USER>` | OS アカウント名 | `alice` |
+> | `${SERVER_IP}` | クライアントが接続に使うサーバーの IP アドレス | `192.168.10.100` |
+> | `${LAN_SUBNET}` | LAN のサブネット（接続元を LAN に絞る場合だけ使う） | `192.168.10.0/24` |
+> | `${SERVER_NAME}` / `${SERVER_FQDN}` | サーバーのホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-server` / `my-server.lan` |
+> | `${CERTDIR}` | TLS 証明書・鍵の置き場所（固定値。変更不要） | `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` |
+>
+> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>`（OS アカウント名）のプレースホルダで書いてある。サーバー以外のマシンで実行するコマンド（[クライアントからのログイン](#クライアントからのログイン)）も変数が無いので `<SERVER_IP>` のままにしてあり、値に読み替える。
 >
 > TLS fingerprint は実際に生成された自己署名証明書のものをそのまま残してある（秘密情報ではない）。**値は証明書を生成するたびに変わる**ので、自環境では `grdctl --system status` の表示を正とすること。
 
@@ -59,28 +60,44 @@
 
 ## 実施した手順
 
-以降のコマンドは共通して次の変数を使う。
+### 0. 変数を設定する
+
+**編集するのは `SERVER_IP`（と、接続元を LAN に絞るなら `LAN_SUBNET`）だけ。** 以降のコマンドはすべてこの変数を参照する。**新しいシェルを開いたら（SSH を張り直したあと、別の端末を開いたあとも）先にこのブロックを貼り直す。**
 
 ```bash
-CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
+SERVER_IP=192.168.10.100            # クライアントが接続に使う IP。<SERVER_IP>
+LAN_SUBNET=192.168.10.0/24          # 接続元を LAN に絞る場合だけ使う。<LAN_SUBNET>
+SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
+SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
+CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates   # 固定。変更不要
 ```
+
+**何も変更する前に、値を読み戻して目で確かめる。**
+
+```bash
+for v in SERVER_IP LAN_SUBNET SERVER_NAME SERVER_FQDN CERTDIR; do
+  printf '%-12s = %s\n' "$v" "${!v}"
+done
+```
+
+> **`SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す。** 空のまま進むと、手順 1 の `openssl` が SAN の空エントリでエラーになる。`SERVER_NAME` と `SERVER_FQDN` が同じ値でも問題ない（[手順 1](#1-tls-証明書鍵の生成openssl) の注記）。
 
 ### 1. TLS 証明書・鍵の生成（openssl）
 
 `gnome-remote-desktop` ユーザー自身として生成し、所有権を最初から正しくする。
 
 ```bash
-sudo -u gnome-remote-desktop mkdir -p "$CERTDIR"
+sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
 sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
-  -subj "/CN=$(hostname)" \
-  -addext "subjectAltName=DNS:$(hostname),DNS:$(hostname -f),DNS:<SERVER_IP>,IP:<SERVER_IP>" \
+  -subj "/CN=${SERVER_NAME}" \
+  -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
   -addext "extendedKeyUsage=serverAuth" \
-  -keyout "$CERTDIR/rdp-tls.key" \
-  -out    "$CERTDIR/rdp-tls.crt"
+  -keyout "${CERTDIR}/rdp-tls.key" \
+  -out    "${CERTDIR}/rdp-tls.crt"
 ```
 
 > OpenSSL 3.x では `-nodes` は deprecated。`-noenc` を使う。
-> `hostname` と `hostname -f` が同じ値を返す環境（環境 2）では SAN に同じ DNS エントリが 2 つ入るが、エラーにはならず動作にも影響しない。
+> `hostname` と `hostname -f` が同じ値を返す環境（環境 2。`SERVER_NAME` = `SERVER_FQDN`）では SAN に同じ DNS エントリが 2 つ入るが、エラーにはならず動作にも影響しない。
 
 生成物:
 
@@ -92,7 +109,7 @@ sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 365
 環境 2 で生成された証明書の内容:
 
 ```
-$ sudo openssl x509 -in "$CERTDIR/rdp-tls.crt" -noout -subject -dates -ext subjectAltName,extendedKeyUsage
+$ sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -subject -dates -ext subjectAltName,extendedKeyUsage
 subject=CN=<HOSTNAME>
 notBefore=Sep 16 16:02:07 2026 GMT
 notAfter=Sep 13 16:02:07 2036 GMT
@@ -117,9 +134,9 @@ X509v3 Extended Key Usage:
 
 #### 落とし穴: FreeRDP は SAN の `IP:` を見ない
 
-**FreeRDP 3.10 は SAN の DNS エントリしか照合せず、`IP:` エントリを無視する。** IP アドレスで接続する運用なら、IP を **DNS エントリとしても併記**する必要がある（上記コマンドの `DNS:<SERVER_IP>`）。
+**FreeRDP 3.10 は SAN の DNS エントリしか照合せず、`IP:` エントリを無視する。** IP アドレスで接続する運用なら、IP を **DNS エントリとしても併記**する必要がある（上記コマンドの `DNS:${SERVER_IP}`）。
 
-`DNS:<SERVER_IP>` を入れずに `IP:<SERVER_IP>` だけにした場合、`<SERVER_IP>` で接続すると:
+`DNS:${SERVER_IP}` を入れずに `IP:${SERVER_IP}` だけにした場合、`${SERVER_IP}` で接続すると:
 
 ```
 @           WARNING: CERTIFICATE NAME MISMATCH!           @
@@ -132,15 +149,15 @@ Alternative names:
 	 <HOSTNAME>.<DOMAIN>          ← IP エントリが列挙されていない
 ```
 
-`DNS:<SERVER_IP>` を追加すると警告は消える（環境 1 で実測）。
+`DNS:${SERVER_IP}` を追加すると警告は消える（環境 1 で実測）。
 
 ### 2. パーミッションと SELinux コンテキストの調整
 
 ```bash
-sudo chmod 600 "$CERTDIR/rdp-tls.key"
-sudo chmod 644 "$CERTDIR/rdp-tls.crt"
+sudo chmod 600 "${CERTDIR}/rdp-tls.key"
+sudo chmod 644 "${CERTDIR}/rdp-tls.crt"
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
-sudo ls -lZ "$CERTDIR"
+sudo ls -lZ "${CERTDIR}"
 ```
 
 `restorecon` は両環境とも差分なし。コンテキストは元から `gnome_remote_desktop_var_lib_t` で正しい状態だった。
@@ -153,8 +170,8 @@ sudo ls -lZ "$CERTDIR"
 ### 3. grdctl でシステムデーモンを設定
 
 ```bash
-sudo grdctl --system rdp set-tls-key  "$CERTDIR/rdp-tls.key"
-sudo grdctl --system rdp set-tls-cert "$CERTDIR/rdp-tls.crt"
+sudo grdctl --system rdp set-tls-key  "${CERTDIR}/rdp-tls.key"
+sudo grdctl --system rdp set-tls-cert "${CERTDIR}/rdp-tls.crt"
 sudo grdctl --system rdp enable
 ```
 
@@ -239,8 +256,8 @@ firewall-cmd --list-services             # rdp が含まれる
 ### 鍵と証明書が対応しているか
 
 ```bash
-sudo openssl x509 -in "$CERTDIR/rdp-tls.crt" -noout -modulus | openssl sha256
-sudo openssl rsa  -in "$CERTDIR/rdp-tls.key" -noout -modulus | openssl sha256
+sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -modulus | openssl sha256
+sudo openssl rsa  -in "${CERTDIR}/rdp-tls.key" -noout -modulus | openssl sha256
 ```
 
 2 つのハッシュが一致すればペアとして正しい（環境 2 で一致を確認）。
@@ -249,9 +266,10 @@ sudo openssl rsa  -in "$CERTDIR/rdp-tls.key" -noout -modulus | openssl sha256
 
 ### TLS ハンドシェイクと提示される証明書（FreeRDP 不要）
 
-RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に始まるため、`openssl s_client` では確認できない。サーバーに FreeRDP クライアントが無い環境（環境 2）では、Python 標準ライブラリだけで書いた次のスクリプトで確認できる。RDP のパスワードは不要。
+RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に始まるため、`openssl s_client` では確認できない。サーバーに FreeRDP クライアントが無い環境（環境 2）では、Python 標準ライブラリだけで書いた次のスクリプトで確認できる。RDP のパスワードは不要。ブロックごと貼ると `~/rdp_tls_probe.py` に書き出して `${SERVER_IP}` に対して実行する。
 
-```python
+```bash
+cat > ~/rdp_tls_probe.py <<'PY'
 #!/usr/bin/env python3
 # usage: python3 rdp_tls_probe.py <host> [port]
 import socket, ssl, struct, sys, hashlib, subprocess
@@ -274,12 +292,14 @@ print("fingerprint:", ':'.join(f'{b:02x}' for b in hashlib.sha256(der).digest())
 pem = ssl.DER_cert_to_PEM_cert(der)
 print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
 ts.close()
+PY
+python3 ~/rdp_tls_probe.py "${SERVER_IP}"
 ```
 
-環境 2 での結果（`127.0.0.1` と `<SERVER_IP>` の両方で同じ）:
+環境 2 での結果（`127.0.0.1` と `${SERVER_IP}` の両方で同じ）:
 
 ```
-$ python3 rdp_tls_probe.py <SERVER_IP>
+$ python3 ~/rdp_tls_probe.py "${SERVER_IP}"
 negotiation: type=0x02 (RESPONSE) selectedProtocol=0x2
 tls: TLSv1.3 TLS_AES_256_GCM_SHA384
 fingerprint: 3f:90:21:52:e7:af:35:1f:20:72:8c:77:1e:89:58:aa:29:24:53:b5:84:c8:3a:66:05:fe:8f:b1:88:9a:fc:f3
@@ -323,13 +343,13 @@ sudo journalctl -u gnome-remote-desktop --since "-1min" --no-pager \
 クライアントに届く証明書: `/cert:ignore` を付けずに実行すると、実際に提示された証明書の詳細が表示される。Thumbprint が TLS fingerprint と一致し、`CERTIFICATE NAME MISMATCH` が出ないことを確認する。
 
 ```bash
-echo "n" | timeout 20 xfreerdp /v:<SERVER_IP>:3389 /u:__probe__ /p:__probe__ /auth-only 2>&1 \
+echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /auth-only 2>&1 \
   | grep -iE "Common Name|Subject:|Issuer:|Thumbprint|MISMATCH"
 ```
 
 ### クライアントからのログイン
 
-LAN 内の別マシンから:
+LAN 内の別マシンから（手順 0 の変数は無いので、`<SERVER_IP>` は値に読み替える）:
 
 ```bash
 xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>
@@ -362,13 +382,16 @@ journalctl -u gdm -f
 - **既存ローカルセッションとの併存**: リモートログインは常に**新規セッション**を作るため、ローカルでログイン中のユーザーと同一ユーザーで接続すると GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある。既存デスクトップをそのまま見たい場合は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）が必要 — 今回は採用していない。
 - **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は手順 1〜3 でそちらのパスを指定する。
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す。**クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある。差し替え後は `sudo systemctl restart gnome-remote-desktop.service` を実行する（接続中の RDP セッションは切断されるので、利用者がいないタイミングで行う）。
-- **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。LAN 限定に絞る場合は後から次に変更できる。
+- **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。LAN 限定に絞る場合は後から次に変更できる（手順 0 の `LAN_SUBNET` を使う）。
 
   ```bash
   sudo firewall-cmd --permanent --remove-service=rdp
-  sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=<LAN_SUBNET> port port=3389 protocol=tcp accept'
+  sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
   sudo firewall-cmd --reload
+  sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
   ```
+
+  rich rule は**二重引用符**で囲む。単一引用符だと `${LAN_SUBNET}` が展開されず、firewalld は `$LAN_SUBNET` という文字列のままの rule を `success` で受理してしまう。
 
 ---
 
@@ -384,8 +407,8 @@ sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
 証明書だけを差し替え前に戻す場合は、旧ファイルを消さずに残しておき、パスを戻して再起動する:
 
 ```bash
-sudo grdctl --system rdp set-tls-key  "$CERTDIR/<旧ファイル>.key"
-sudo grdctl --system rdp set-tls-cert "$CERTDIR/<旧ファイル>.crt"
+sudo grdctl --system rdp set-tls-key  "${CERTDIR}/<旧ファイル>.key"
+sudo grdctl --system rdp set-tls-cert "${CERTDIR}/<旧ファイル>.crt"
 sudo systemctl restart gnome-remote-desktop.service
 ```
 
@@ -600,11 +623,12 @@ sudo dnf install -y freerdp
 
 → `freerdp-2:3.10.3-12.el10_2.10.x86_64` をインストール。
 
+[手順 0](#0-変数を設定する) の変数を設定したうえで:
+
 ```bash
-CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
-sudo -u gnome-remote-desktop mkdir -p "$CERTDIR"
-sudo -u gnome-remote-desktop winpr-makecert -silent -rdp -path "$CERTDIR" rdp-tls
-sudo chmod 600 "$CERTDIR/rdp-tls.key"
+sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
+sudo -u gnome-remote-desktop winpr-makecert -silent -rdp -path "${CERTDIR}" rdp-tls
+sudo chmod 600 "${CERTDIR}/rdp-tls.key"
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
 ```
 
@@ -616,24 +640,23 @@ sudo restorecon -Rv /var/lib/gnome-remote-desktop
 
 ## 方式 2: podman コンテナで winpr-makecert を使う
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。[手順 0](#0-変数を設定する) の変数を設定したうえで:
 
 ```bash
 OUT=$(mktemp -d)
-podman run --rm --hostname "$(hostname)" -v "$OUT:/out:Z" \
+podman run --rm --hostname "${SERVER_NAME}" -v "${OUT}:/out:Z" \
   docker.io/library/almalinux:10 \
   bash -c 'dnf install -y freerdp >/dev/null 2>&1 && winpr-makecert -silent -rdp -path /out rdp-tls'
 
-CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
-sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 644 "$OUT/rdp-tls.crt" "$CERTDIR/"
-sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 600 "$OUT/rdp-tls.key" "$CERTDIR/"
+sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 644 "${OUT}/rdp-tls.crt" "${CERTDIR}/"
+sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 600 "${OUT}/rdp-tls.key" "${CERTDIR}/"
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
-rm -rf "$OUT"
+rm -rf "${OUT}"
 ```
 
 ### 注意点（すべて実測で確認）
 
-- **`--hostname "$(hostname)"` は必須。** 渡さないとコンテナのランダム ID が CN になる:
+- **`--hostname "${SERVER_NAME}"` は必須。** 渡さないとコンテナのランダム ID が CN になる:
   ```
   subject=CN=f4fd0ab7095a        ← --hostname なしの場合
   subject=CN=<HOSTNAME>       ← --hostname あり
