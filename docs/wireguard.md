@@ -42,7 +42,7 @@
 
 ## 手順の流れ
 
-**手順 1〜3 は両拠点の WG ホストで、手順 4 はクライアントを受ける拠点のホストで行う。** コマンドはすべて `<このリポジトリ>/scripts/wireguard` で実行し、`-e ~/wg/site.env` で値を渡す。拠点 B のホストでは引数の `A` を `B` に読み替える。
+**手順 1〜3 は両拠点の WG ホストで、手順 4 はクライアントを受ける拠点のホストで行う。** コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す。拠点 B のホストでは引数の `A` を `B` に読み替える。
 
 | 手順 | 内容 | 実施場所 |
 |---|---|---|
@@ -59,8 +59,9 @@
 **編集するのは `~/wg/site.env` だけ。** 両拠点の WG ホストに同じ内容を置く。
 
 ```bash
+REPO=~/setup-notes                    # このリポジトリを clone した場所に合わせる。新しいシェルを開いたら設定し直す
 mkdir -p ~/wg && chmod 700 ~/wg
-cp <このリポジトリ>/scripts/wireguard/site.env.example ~/wg/site.env
+cp "${REPO:?このリポジトリの場所を REPO に入れてから貼る}/scripts/wireguard/site.env.example" ~/wg/site.env
 chmod 600 ~/wg/site.env
 vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
 ```
@@ -70,7 +71,7 @@ vi ~/wg/site.env                      # 上の変数表のとおりに埋める�
 **両拠点の WG ホストで実施する。** `wireguard-tools` を導入し、鍵ペアを生成する（既存の鍵があれば上書きしない）。
 
 ```bash
-cd <このリポジトリ>/scripts/wireguard
+cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
 sudo ./wg-vpn.sh -e ~/wg/site.env keygen A        # 拠点 B のホストでは B
 ```
 
@@ -170,20 +171,22 @@ OS を入れ直しても、**ホストの秘密鍵が同じなら**、相手拠�
 **バックアップを取る**（読むだけなので、トンネルを止めずに稼働中のホストで実行できる。両拠点でそれぞれ取る）:
 
 ```bash
-cd <このリポジトリ>/scripts/wireguard
-sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run backup          # まとめる内容を表示するだけ
+cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run backup &&       # まとめる内容を表示するだけ
 sudo ./wg-vpn.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホスト名>-<日時>.tar.gz（0600）
-sudo ./wg-vpn.sh -e ~/wg/site.env -o /mnt/usb/wgb.tar.gz backup
 ```
+
+出力先を変えるときは `backup` の前に `-o /mnt/usb/wgb.tar.gz` のように付ける。
 
 - **このアーカイブには秘密鍵が入っている。** `0600` のまま、リポジトリの中には置かず、このマシンの外（別のディスク、オフラインのメディア）に保管する
 
 **クリーンインストール後に復旧する**（`keygen` は実行しない。別の鍵ができ、復旧の意味が無くなる）:
 
 ```bash
-cd <このリポジトリ>/scripts/wireguard
-sudo ./wg-vpn.sh --dry-run restore ~/wg-backup-<ホスト名>-<日時>.tar.gz
-sudo ./wg-vpn.sh restore ~/wg-backup-<ホスト名>-<日時>.tar.gz    # wireguard-tools の導入。鍵・conf・site.env・clients.list を元の場所へ戻す
+BACKUP=                              # 復旧に使うアーカイブ（例: ~/wg-backup-<ホスト名>-<日時>.tar.gz）。空のまま貼ると下は実行されない
+cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}" &&
+sudo ./wg-vpn.sh restore "${BACKUP}" &&                     # wireguard-tools の導入。鍵・conf・site.env・clients.list を元の場所へ戻す
 sudo ./wg-vpn.sh -e ~/wg/site.env apply B                   # sysctl・firewalld・サービス。クライアントの [Peer] も clients.list から戻る
 ```
 

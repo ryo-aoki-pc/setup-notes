@@ -23,7 +23,7 @@
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | サーバーのホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-server` / `my-server.lan` |
 > | `${CERTDIR}` | TLS 証明書・鍵の置き場所（固定値。変更不要） | `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` |
 >
-> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>`（OS アカウント名）のプレースホルダで書いてある。サーバー以外のマシンで実行するコマンド（[クライアントからのログイン](#クライアントからのログイン)）も変数が無いので `<SERVER_IP>` のままにしてあり、値に読み替える。
+> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>`（OS アカウント名）のプレースホルダで書いてある。**`<...>` を含むコマンドは bash のコードブロックには置かない**（本文中のインラインコードで示し、値に読み替える）。読者が値を入れる必要があるコードブロックは、先頭で変数が空なら中断するようにしてあり、値を入れずに貼っても何も実行されない。
 >
 > TLS fingerprint は実際に生成された自己署名証明書のものをそのまま残してある（秘密情報ではない）。**値は証明書を生成するたびに変わる**ので、自環境では `grdctl --system status` の表示を正とすること。
 
@@ -182,11 +182,7 @@ python3 ~/rdp_tls_probe.py "${SERVER_IP}"
 - `selectedProtocol=0x2` でネゴシエーションが成立し、`fingerprint` が `grdctl --system status` の TLS fingerprint と**完全一致**し、SAN に接続に使う名前が `DNS:` エントリとして含まれていればよい
 - サーバー側には `nla_recv() error` などのログが出るが、プローブが TLS 直後に切断しただけで正常（[検証の補足](#tls-プローブ)）
 
-**クライアントからのログイン**（LAN 内の別マシンから。手順 0 の変数は無いので `<SERVER_IP>` は値に読み替える）:
-
-```bash
-xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>
-```
+**クライアントからのログイン**（LAN 内の別マシンから）: `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する。手順 0 の変数は無いので `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える。
 
 システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする。問題があればサーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る。
 
@@ -199,11 +195,15 @@ xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>
 手順 4 は public ゾーンに属するすべての NIC で 3389/tcp を開く。**接続元を制限しない場合はそのままでよく、この節は不要。** LAN に絞るなら、手順 0 の `LAN_SUBNET` に値を入れたうえで:
 
 ```bash
+if [ -z "${LAN_SUBNET}" ]; then echo '中断: 手順 0 の LAN_SUBNET が空のまま。値を入れて貼り直す' >&2; else
 sudo firewall-cmd --permanent --remove-service=rdp
 sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
 sudo firewall-cmd --reload
 sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
+fi
 ```
+
+先頭の `if` は、`LAN_SUBNET` が空のままブロックを貼ったときに `rdp` サービスだけ消えて rich rule が空アドレスで入るのを防ぐためのもの。
 
 rich rule は**二重引用符**で囲む。単一引用符だと `${LAN_SUBNET}` が展開されず、firewalld は `$LAN_SUBNET` という文字列のままの rule を `success` で受理してしまう。
 
@@ -218,12 +218,15 @@ sudo grdctl --system rdp clear-credentials
 sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
 ```
 
-証明書だけを差し替え前に戻す場合は、旧ファイルを消さずに残しておき、パスを戻して再起動する:
+証明書だけを差し替え前に戻す場合は、旧ファイルを消さずに残しておき、`OLD_BASENAME` に旧ファイル名（拡張子なし）を入れてパスを戻し、再起動する。`OLD_BASENAME` が空のまま、または手順 0 の `CERTDIR` が無い状態で貼ると先頭の `if` で中断し、`grdctl` は実行されない:
 
 ```bash
-sudo grdctl --system rdp set-tls-key  "${CERTDIR}/<旧ファイル>.key"
-sudo grdctl --system rdp set-tls-cert "${CERTDIR}/<旧ファイル>.crt"
+OLD_BASENAME=                        # 差し替え前の証明書・鍵のファイル名（拡張子なし）。空のまま貼ると下は実行されない
+if [ -z "${OLD_BASENAME}" ] || [ -z "${CERTDIR}" ]; then echo '中断: OLD_BASENAME と手順 0 の CERTDIR を設定してから貼り直す' >&2; else
+sudo grdctl --system rdp set-tls-key  "${CERTDIR}/${OLD_BASENAME}.key"
+sudo grdctl --system rdp set-tls-cert "${CERTDIR}/${OLD_BASENAME}.crt"
 sudo systemctl restart gnome-remote-desktop.service
+fi
 ```
 
 ---
@@ -505,15 +508,13 @@ sudo grdctl --system rdp set-credentials
 printf 'user\npass\n' | sudo grdctl --system rdp set-credentials
 ```
 
-対処は次のいずれか:
+対処は、本物の端末エミュレータ上で対話入力する（パスワードが記録に残らないため推奨）:
 
 ```bash
-# OK: 本物の端末エミュレータ上で対話入力（パスワードが記録に残らないため推奨）
 sudo grdctl --system rdp set-credentials
-
-# OK: 引数で渡す（履歴・ps・会話ログに残る点に注意）
-sudo grdctl --system rdp set-credentials <username> <password>
 ```
+
+引数で渡す形（`sudo grdctl --system rdp set-credentials <username> <password>`）でも設定できるが、シェル履歴・`ps`・会話ログに残る。
 
 設定できたかは次で確認する。`(empty)` / `(null)` なら未設定、`(hidden)` なら設定済み:
 
