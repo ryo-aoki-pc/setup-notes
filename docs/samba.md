@@ -86,7 +86,7 @@ rpm -q samba samba-client cifs-utils
 sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
 sudo tee /etc/samba/smb.conf >/dev/null <<EOF
 [global]
-	workgroup = ${WORKGROUP}
+	workgroup = ${WORKGROUP:?手順 0 の WORKGROUP が空のまま。値を入れて貼り直す}
 	security = user
 	passdb backend = tdbsam
 	server smb transports = tcp
@@ -211,24 +211,29 @@ WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み�
 手順 4 は public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く。**接続元を制限しない場合はそのままでよく、この節は不要。** 絞るなら、手順 0 の `ALLOW_FROM` に送信元サブネットを空白区切りで入れたうえで:
 
 ```bash
-[ -n "${ALLOW_FROM}" ] || { echo "ALLOW_FROM is empty"; false; }
+if [ -z "${ALLOW_FROM}" ]; then echo '中断: 手順 0 の ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
 sudo firewall-cmd --permanent --remove-port=445/tcp
 for src in ${ALLOW_FROM}; do
   sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
 done
 sudo firewall-cmd --reload
 sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
+fi
 ```
+
+先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに 445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐためのもの。
 
 rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう。
 
 元の「public ゾーン全体で 445/tcp」に戻すには:
 
 ```bash
+if [ -z "${ALLOW_FROM}" ]; then echo '中断: 手順 0 の ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
 for src in ${ALLOW_FROM}; do
   sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
 done
 sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+fi
 ```
 
 → [補足](#接続元を絞るときの補足)
@@ -473,6 +478,7 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - `ALLOW_FROM` の各サブネットについて rich rule を 1 本ずつ足す。LAN と VPN の両方から使うなら LAN のサブネットとトンネル網（`site.env` の `WG_TUNNEL_NET`。外出先クライアントも受けるならクライアント帯も）を並べる
 - 実測（[付録](#接続元を絞る節の検証)）: `192.168.1.0/24 10.99.0.0/30` で絞った状態では、どちらにも属さない network namespace（192.168.250.0/24）からの接続が `NT_STATUS_HOST_UNREACHABLE` で落ち、そのサブネットの rich rule を足すと通った
 - 手順 4 の `--add-port=445/tcp` を残したままだと rich rule が無意味になるので、先に外す。戻すときは逆順
+- 実機での検証は、先頭の `if` を付ける前の形（`[ -n "${ALLOW_FROM}" ] || ...`）で行った。`if` 付きの形は、`sudo` をスタブに置き換えて「空のときは何も呼ばれず、値を入れると同じコマンドが呼ばれる」ことだけ確認している
 
 ### 注意点
 

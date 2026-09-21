@@ -32,6 +32,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `README.md` — 手順書一覧の表と「記法の約束」、各手順書から抜き出した「再利用価値の高い知見」。手順書を足す・大きく変えるときはここも更新する
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
+- `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
 - `docs/samba.md` — `[homes]` 共有でホームディレクトリを公開する手順書。gnome-remote-desktop.md と同じ変数ブロック方式。実機（拠点 B の WG ホスト）で公開を継続中
 - `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
@@ -47,7 +48,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 4. `## ロールバック`（または「全部消す」）
 5. `## 補足` に「実施前の状態」「選択した方針」「注意点」「参照」「付録（検証記録）」。説明はすべてここへ
 
-出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` などのプレースホルダで書き、実測出力は変数に置き換えない。コマンドは実際に実行したものを載せる。パスワード・鍵・トークンは private でも書かない。
+出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` などのプレースホルダで書き、実測出力は変数に置き換えない。`<...>` を含むコマンドは bash のコードブロックに置かず、読者が値を入れるブロックは先頭で変数が空なら中断させる（README「記法の約束」）。手順書のコードブロックは検証目的でも実機で機械的に実行しない。コマンドは実際に実行したものを載せる。パスワード・鍵・トークンは private でも書かない。
 
 ### wg-vpn.sh の設計
 
