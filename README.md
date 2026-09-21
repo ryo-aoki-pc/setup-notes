@@ -11,11 +11,12 @@
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。**冒頭の変数ブロックに値を 1 度書けば、以降のコマンドはそのまま貼れる。前半は実行するコマンドだけで、理由・実測・落とし穴は後半の補足にまとめてある。** openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
 | [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、`wg-vpn.sh` の `keygen` → `apply` → `router` → `client add` で構築できる**手順書。firewalld は `wg0` を LAN 側ゾーンに入れてゾーン内転送で通す（policy 無し。絞るのは宛先ホスト側。旧レイアウトからは `apply` が自動で移行）、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。スクリプトは [`scripts/wireguard/`](scripts/wireguard/)（既存 conf の流用可）。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
 | [WezTerm Nightly インストール手順](docs/wezterm-nightly.md) | AlmaLinux 10.2 (x86_64) / dnf-plugins-core 4.7.0 / WezTerm nightly (COPR `rhel-9` ビルド) | 公式 COPR `wezfurlong/wezterm-nightly` に EL10 向けが無いので、**chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドを `dnf install wezterm` で入れる**。EL9 ビルドが EL10 で依存解決できる根拠、chroot 未指定時のエラー、GitHub rpm / AppImage / Flathub / ソースビルドを選ばなかった理由、AppImage の glibc 要件の実測、設定ファイルの置き場所と探索順序の実測（公式の図と `~/.wezterm.lua` の優先度が逆）を含む。Wayland セッションでの起動確認まで実施 |
+| [Samba でホームディレクトリを公開する手順](docs/samba.md) | AlmaLinux 10.2 (aarch64) / samba 4.23.5 / firewalld 2.4.3 | ローカルユーザーが自分のホームディレクトリに LAN と WireGuard 越しの両方から SMB3 で読み書きできるようにする。`[homes]` だけの最小 `smb.conf`（印刷・NetBIOS 無し、445/tcp のみ）、SELinux boolean 1 つ、firewalld は public ゾーンに 445/tcp。**冒頭の変数ブロックに値を 1 度書けば、以降のコマンドはそのまま貼れる。** サーバー自身からの `smbclient` / `mount.cifs` と network namespace から firewalld 越しの到達を検証済み。SELinux boolean 無しの失敗の署名（AVC が出ない）、`create mask` 無しで x ビットが付く実測、`smbpasswd` の TTY の挙動を含む。実クライアントからの接続は未検証 |
 
 ## 記法の約束
 
 - **環境固有の値はシェル変数で書き、手順書の冒頭で 1 度だけ設定する。** 本文のコマンドは `${SERVER_IP}` / `${SITE_A_LAN}` の形で参照し、値を書き換えずにそのまま貼れるようにする。各ドキュメントの冒頭に変数の対応表を置く
-- **値の置き場所は手順書ごとに 1 か所。** GNOME Remote Desktop と WezTerm は本文冒頭の変数ブロック、WireGuard は `site.env` 1 ファイル。読者が編集するのはそこだけ
+- **値の置き場所は手順書ごとに 1 か所。** GNOME Remote Desktop・WezTerm・Samba は本文冒頭の変数ブロック、WireGuard は `site.env` 1 ファイル。読者が編集するのはそこだけ
 - **出力例・ログ・表の中の値はプレースホルダで書く。** `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>` など。実測出力は変数に置き換えない
 - **`<...>` プレースホルダを含むコマンドは bash のコードブロックに置かない。** インラインコードか説明文で示す。読者が値を入れるコードブロックは値を変数にし、先頭で `${VAR:?メッセージ}` か `if [ -z "${VAR}" ]` を使って、空のまま貼っても（機械的に実行されても）何も変更しないようにする。ロールバック節の `<旧ファイル>` がそのまま `grdctl --system rdp set-tls-cert` に渡って設定を壊し、次の再起動で RDP が起動しなくなった実例がある
 - **検証した環境のバージョンを明記する。** ディストリビューション、対象パッケージ、関連ツールのバージョンを冒頭に書く
@@ -70,3 +71,14 @@
 - **AppImage は「ビルド元ディストリの glibc 以上」を要求する** — `Ubuntu26.04` 版は `GLIBC_2.42 not found` で EL10（2.39）では起動しない。EL で使うなら glibc が同じか古い Ubuntu 版を選ぶ。ファイル名の Ubuntu バージョンが実質的な最低 glibc 要件
 - **WezTerm は `~/.wezterm.lua` を `~/.config/wezterm/wezterm.lua` より先に読む** — 公式ドキュメントのフロー図は逆順に見えるが、`main` のコードは `~/.wezterm.lua` を候補の先頭に置く。読まれるのは最初に見つかった 1 つだけなので、両方あると `.config` 側の変更が効かない。どのファイルを読んだかは `strace -f -o /tmp/st wezterm ls-fonts` で `openat(... wezterm.lua) = 3` を探すと確実。一時ディレクトリを `HOME` にすれば実際のホームを汚さずに試せる
 - **ディスプレイの無いシェルから GUI アプリの起動試験ができる** — `env -i` で環境を空にし、ログイン中の GNOME セッションの `WAYLAND_DISPLAY` / `XDG_RUNTIME_DIR`（`/proc/<gnome-shell の pid>/environ` から取れる）を渡して、子プロセスが即終了するコマンドで起動する。`timeout` を付けておけばウィンドウが残っても戻ってくる
+
+### [Samba](docs/samba.md)
+
+- **`samba_enable_home_dirs` が off のときの拒否は監査ログに出ない** — 認証は通り `smbclient -L` の一覧にも出るのに、`ls` だけが `NT_STATUS_ACCESS_DENIED listing \*` になる。`ausearch -m AVC` は `<no matches>`（dontaudit）なので、SELinux を疑う根拠がログに無い。boolean を on にすれば smbd の再起動なしで直後から通る
+- **SMB 経由で作ったファイルには owner の x ビットが付く** — 既定の `create mask = 0744` と `map archive = Yes` の組み合わせで、DOS の archive 属性が owner の x に写る。`smbclient` の `put` でも `mount.cifs` 上の `touch` でも `-rwxr--r--` になった。`[homes]` に `create mask = 0644` を書く
+- **`smbpasswd` は TTY が無いと exit 1 で止まる** — `grdctl` と違って黙って成功扱いにはならない（`Unable to get new password.`）。非対話で登録するなら `-s` で stdin から 2 行渡す。Samba ユーザーの追加・削除・パスワード変更は smbd の再起動なしで次の接続から効く
+- **`testparm -s` は既定と同じ値を表示しない** — `workgroup = WORKGROUP` や `read only = No` を書いても出力に現れない。書き漏れかどうかは `testparm -sv` で見る。存在しないファイルの `include` も警告なしに通る
+- **自ホストからの接続は firewalld を通らない** — `filter_INPUT` の `iifname "lo" accept` が先に効くため、`smbclient //localhost/` はもちろん `//<自分の LAN IP>/` でも 445 の開け忘れを検出できない。veth で結んだ network namespace（ゾーン未割り当ての veth は既定ゾーン扱い）から接続すると、閉じているときは `NT_STATUS_HOST_UNREACHABLE` になって区別がつく
+- **`smbstatus` で交渉されたプロトコル・暗号化・署名がサーバー側から分かる** — `mount.cifs` の既定は SMB 3.1.1、署名は `partial(AES-128-CMAC)`、暗号化は `-`（LAN 上は平文）。クライアント側では見えにくい
+- **`server smb transports = tcp` で 139 を listen しなくなる** — nmbd を起動せず firewalld も 445/tcp だけで済む。4.23 では `smb ports` はこの同義語。`smb.service` は `nmb.service` を `Wants` していないので単独で動く
+- **`NT_STATUS_ACCESS_DENIED` は出る段階で原因が分かる** — `tree connect failed:` なら `valid users` で弾かれた（他人のホーム）、`listing \*` なら共有には入れたがファイルシステムで拒否された（SELinux）。`NT_STATUS_LOGON_FAILURE` はユーザー名違いもパスワード違いも同じ
