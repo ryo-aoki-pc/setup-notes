@@ -32,6 +32,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `README.md` — 手順書一覧の表と「記法の約束」、各手順書から抜き出した「再利用価値の高い知見」。手順書を足す・大きく変えるときはここも更新する
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
+- `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
 - `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
