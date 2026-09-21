@@ -10,7 +10,7 @@
 |---|---|---|
 | [GNOME Remote Desktop 有効化手順](docs/gnome-remote-desktop.md) | AlmaLinux 10.2 (x86_64 / aarch64) / gnome-remote-desktop 49.3 | リモートログイン方式（システムデーモン）の CLI 設定。**冒頭の変数ブロックに値を 1 度書けば、以降のコマンドはそのまま貼れる。前半は実行するコマンドだけで、理由・実測・落とし穴は後半の補足にまとめてある。** openssl による TLS 証明書生成（SAN 付き）、FreeRDP 無しでの TLS 検証、ログイン失敗の原因調査、winpr-makecert との比較を含む |
 | [WireGuard VPN 構築手順](docs/wireguard.md) | AlmaLinux 10.2 (aarch64) / wireguard-tools 1.0.20250521 / firewalld 2.4.3 | ルーター配下の WG ホスト同士で 2 拠点の LAN を相互接続し（wg-quick + systemd）、外出先の PC・スマートフォンも任意の台数つないで両拠点の LAN に到達させる。**値を `site.env` に 1 度書けば、`wg-vpn.sh` の `keygen` → `apply` → `router` → `client add` で構築できる**手順書。firewalld は `wg0` を LAN 側ゾーンに入れてゾーン内転送で通す（policy 無し。絞るのは宛先ホスト側。旧レイアウトからは `apply` が自動で移行）、ルーター側の要件（ポート転送・静的経路・ヘアピン）、reload と引用符の落とし穴を含む。network namespace で両拠点とクライアントの疎通まで確認。スクリプトは [`scripts/wireguard/`](scripts/wireguard/)（既存 conf の流用可）。**OS をクリーンインストールしても同じ鍵で復旧できる**バックアップ・復旧手順も収録 |
-| [WezTerm Nightly インストール手順](docs/wezterm-nightly.md) | AlmaLinux 10.2 (x86_64) / dnf-plugins-core 4.7.0 / WezTerm nightly (COPR `rhel-9` ビルド) | 公式 COPR `wezfurlong/wezterm-nightly` に EL10 向けが無いので、**chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドを `dnf install wezterm` で入れる**。EL9 ビルドが EL10 で依存解決できる根拠、chroot 未指定時のエラー、GitHub rpm / AppImage / Flathub / ソースビルドを選ばなかった理由、AppImage の glibc 要件の実測を含む。Wayland セッションでの起動確認まで実施 |
+| [WezTerm Nightly インストール手順](docs/wezterm-nightly.md) | AlmaLinux 10.2 (x86_64) / dnf-plugins-core 4.7.0 / WezTerm nightly (COPR `rhel-9` ビルド) | 公式 COPR `wezfurlong/wezterm-nightly` に EL10 向けが無いので、**chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドを `dnf install wezterm` で入れる**。EL9 ビルドが EL10 で依存解決できる根拠、chroot 未指定時のエラー、GitHub rpm / AppImage / Flathub / ソースビルドを選ばなかった理由、AppImage の glibc 要件の実測、設定ファイルの置き場所と探索順序の実測（公式の図と `~/.wezterm.lua` の優先度が逆）を含む。Wayland セッションでの起動確認まで実施 |
 
 ## 記法の約束
 
@@ -66,4 +66,5 @@
 - **EL9 向けバイナリは EL10 でそのまま動くことが多い** — glibc 2.34 → 2.39、OpenSSL は `libssl.so.3` の soname が同じで `OPENSSL_3.0.0` のシンボルバージョンも提供されている。入れる前に `dnf install --assumeno --repofrompath=<name>,<url> <pkg>` で依存解決だけ試せば、何も変えずに可否がわかる
 - **`dnf repoquery --requires` は同名 SRPM の BuildRequires も混ぜて表示する** — メタパッケージに `gcc` / `*-devel` が要るように見えて驚くが、`--assumeno` のトランザクション表を見れば実際に入るものがわかる
 - **AppImage は「ビルド元ディストリの glibc 以上」を要求する** — `Ubuntu26.04` 版は `GLIBC_2.42 not found` で EL10（2.39）では起動しない。EL で使うなら glibc が同じか古い Ubuntu 版を選ぶ。ファイル名の Ubuntu バージョンが実質的な最低 glibc 要件
+- **WezTerm は `~/.wezterm.lua` を `~/.config/wezterm/wezterm.lua` より先に読む** — 公式ドキュメントのフロー図は逆順に見えるが、`main` のコードは `~/.wezterm.lua` を候補の先頭に置く。読まれるのは最初に見つかった 1 つだけなので、両方あると `.config` 側の変更が効かない。どのファイルを読んだかは `strace -f -o /tmp/st wezterm ls-fonts` で `openat(... wezterm.lua) = 3` を探すと確実。一時ディレクトリを `HOME` にすれば実際のホームを汚さずに試せる
 - **ディスプレイの無いシェルから GUI アプリの起動試験ができる** — `env -i` で環境を空にし、ログイン中の GNOME セッションの `WAYLAND_DISPLAY` / `XDG_RUNTIME_DIR`（`/proc/<gnome-shell の pid>/environ` から取れる）を渡して、子プロセスが即終了するコマンドで起動する。`timeout` を付けておけばウィンドウが残っても戻ってくる

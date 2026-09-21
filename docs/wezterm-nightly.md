@@ -1,7 +1,7 @@
 # WezTerm Nightly インストール手順（AlmaLinux 10 / 公式 COPR の EL9 ビルドを流用）
 
 - **目的**: AlmaLinux 10 に [WezTerm](https://wezterm.org/) の nightly ビルドを **dnf 管理で**入れ、以後は `dnf upgrade` で追従できるようにする
-- **進め方**: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる。**読者が書き換えるのは冒頭の変数ブロックだけ**（実際には `uname -m` から自動で入る）
+- **進め方**: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる。**読者が書き換えるのは冒頭の変数ブロックだけ**（実際には `uname -m` から自動で入る）。設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（[設定ファイル](#設定ファイル)）
 - **状態**: 2026-09-21 にこのホスト（x86_64 / GNOME 49 Wayland）で**本実行済み**。ウィンドウの起動・終了まで確認した。**aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので同じ手順で通る見込み）。EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](#注意点)を見る
 
 | 項目 | 値 |
@@ -36,7 +36,7 @@
 | [2. インストールする](#2-インストールする) | `dnf install wezterm`（サブパッケージ 3 つが付いてくる） |
 | [3. 検証する](#3-検証する) | バージョン、ライブラリ解決、Wayland でウィンドウを開いて閉じる |
 
-以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
 ### 0. 変数を設定する
 
@@ -85,6 +85,36 @@ env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
 ```
 
 `rc=0` ならウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）。アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）。
+
+---
+
+## 設定ファイル
+
+パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く。置き場所は次の順で探し、**最初に見つかった 1 つだけ**を読む（[補足: 設定ファイルの探索順序](#設定ファイルの探索順序実測)）。
+
+| 優先 | 場所 | 用途 |
+|---|---|---|
+| 1 | `wezterm --config-file <path>` | 一時的に別の設定で起動する |
+| 2 | 環境変数 `WEZTERM_CONFIG_FILE` | 同上（環境ごとに切り替える） |
+| 3 | `~/.wezterm.lua` | **1 ファイルで済む設定はここ**（公式の推奨） |
+| 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
+| 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
+
+最小の例（`~/.config/wezterm/` に置く場合。**`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする）。ファイルを作って保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` 既定 true。効かなければ `Ctrl+Shift+R`）:
+
+```bash
+mkdir -p ~/.config/wezterm
+cat > ~/.config/wezterm/wezterm.lua <<'LUA'
+local wezterm = require 'wezterm'
+local config = wezterm.config_builder()
+config.font = wezterm.font 'Noto Sans Mono'
+config.font_size = 12
+return config
+LUA
+wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れば読めている
+```
+
+Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）。`wezterm -n`（`--skip-config`）で設定を読まずに起動できる。`wezterm --config 'font_size=14'` のように 1 項目だけ上書きもできる。
 
 ---
 
@@ -244,6 +274,30 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる。既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ。`| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
 - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）。COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
 
+### 設定ファイルの探索順序（実測）
+
+一時ディレクトリを `HOME` にして候補ファイルを組み合わせ、`wezterm ls-fonts` の `Primary font` にどのファイルの `font` が出るかで判定した（実際のホームには何も置いていない）。`strace -f -o ... wezterm ls-fonts` で `wezterm.lua` を含む `openat` を拾うと、試した順番もわかる。
+
+| 置いたファイル | 読まれたもの |
+|---|---|
+| `~/.config/wezterm/wezterm.lua` のみ | それ |
+| `~/.config/wezterm/wezterm.lua` + `~/.wezterm.lua` | **`~/.wezterm.lua`**（`.config` 側は `openat` すらされない） |
+| `~/.config/wezterm/wezterm.lua` + `${XDG_CONFIG_HOME}/wezterm/wezterm.lua` | **`XDG_CONFIG_HOME` 側**（`~/.config` 側は試されない） |
+| 上 2 つ + `~/.wezterm.lua` | `~/.wezterm.lua` |
+| + 環境変数 `WEZTERM_CONFIG_FILE` | その環境変数のファイル |
+| + `--config-file` | その引数のファイル |
+| 何も無し / `-n` | 組み込み既定値（`JetBrains Mono`） |
+| `~/.wezterm.lua` が文法エラー | `ERROR ... syntax error` を出して組み込み既定値 |
+
+`strace` の抜粋（`~/.wezterm.lua` が無く、`XDG_CONFIG_HOME` を設定した場合）:
+
+```
+"$HOME/.wezterm.lua", O_RDONLY|O_CLOEXEC) = -1
+"$XDG_CONFIG_HOME/wezterm/wezterm.lua", O_RDONLY|O_CLOEXEC) = 3
+```
+
+**公式ドキュメントのフロー図とは順序が逆**。[Configuration Files](https://wezterm.org/config/files.html) の図は `$XDG_CONFIG_HOME/wezterm/wezterm.lua` → `~/.config/wezterm/wezterm.lua` → `~/.wezterm.lua` の順に見えるが、`main` ブランチの `config/src/config.rs`（`load_with_overrides`）は `~/.wezterm.lua` を先頭に置き、その後に `CONFIG_DIRS`（`XDG_CONFIG_HOME` があればそれ、無ければ `~/.config`）を並べている。両方に置いてある環境で「`.config` 側を直したのに反映されない」ときはこれが原因。
+
 ### 注意点
 
 - **EL9 向けバイナリを EL10 で使っている。** 作者はこの組み合わせを保証していない。いまは EL9/EL10 のライブラリ soname がすべて一致しているので動くが、将来 COPR 側のビルド環境（EL9）と EL10 の間で soname が食い違えば、`dnf upgrade` が依存関係で止まるか、入っても起動しなくなる。止まったときは `dnf upgrade --exclude='wezterm*'` で他を先に上げ、COPR に `epel-10` chroot が追加されていないか[プロジェクトページ](https://copr.fedorainfracloud.org/coprs/wezfurlong/wezterm-nightly/)を見る。追加されていたら `sudo dnf copr remove wezfurlong/wezterm-nightly` → `sudo dnf copr enable wezfurlong/wezterm-nightly`（chroot 省略）で乗り換えられる
@@ -266,6 +320,8 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [wezfurlong/wezterm-nightly — Copr](https://copr.fedorainfracloud.org/coprs/wezfurlong/wezterm-nightly/) — 対応 chroot の一覧
 - [wezterm/wezterm Releases: nightly](https://github.com/wezterm/wezterm/releases/tag/nightly) — centos9 rpm / AppImage / deb
 - [dnf-copr(8)](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html) — `enable name/project [chroot]`
+- [Configuration Files — WezTerm](https://wezterm.org/config/files.html) — 設定ファイルの探索順序（本書の実測とは `~/.wezterm.lua` の優先度が異なる）
+- [wezterm/wezterm config/src/config.rs `load_with_overrides`](https://github.com/wezterm/wezterm/blob/main/config/src/config.rs) — 実際の探索順序
 
 ---
 
