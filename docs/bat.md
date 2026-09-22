@@ -4,12 +4,13 @@
 
 **すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.config` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
+**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+
 | 手順 | 内容 |
 |---|---|
 | [0. 変数を設定する](#0-変数を設定する) | 設定ファイルの場所とテーマ名を決める |
-| [1. Homebrew を用意する](#1-homebrew-を用意する) | 未導入なら公式インストーラで入れる |
-| [2. bat を入れる](#2-bat-を入れる) | `brew install bat`（`libgit2` / `oniguruma` も入る） |
-| [3. 検証する](#3-検証する) | 版の確認と、色・行番号が付くか |
+| [1. bat を入れる](#1-bat-を入れる) | `brew install bat`（`libgit2` / `oniguruma` も入る） |
+| [2. 検証する](#2-検証する) | 版の確認と、色・行番号が付くか |
 
 設定を書く場所は[設定ファイル](#設定ファイル)。`man` や `fzf` のプレビューに使うなら[ページャに使う（任意）](#ページャに使う任意)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
@@ -30,39 +31,7 @@ for v in BAT_CONFIG BAT_THEME_NAME; do printf '%-15s = %s\n' "$v" "${!v}"; done
 
 → [補足](#手順-0-変数について)
 
-### 1. Homebrew を用意する
-
-まず入っているか見る。バージョンが出れば[手順 2](#2-bat-を入れる) へ飛ぶ。
-
-```bash
-command -v brew && brew --version
-```
-
-無ければ入れる。
-
-```bash
-sudo dnf install -y procps-ng curl file git
-```
-
-`sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く。**次のブロックは、終わってから貼る。**
-
-```bash
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-brew --version
-```
-
-PATH に入れる 3 行で、インストーラが最後に表示する「Next steps」と同じ内容。
-
-→ [補足](#手順-1-homebrew-の導入)
-
-### 2. bat を入れる
+### 1. bat を入れる
 
 ```bash
 brew install bat
@@ -70,9 +39,9 @@ brew install bat
 
 aarch64 でもビルド済みのボトル（`bat--0.26.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存の `libgit2` と `oniguruma`、さらにその先の `openssl@3` などもまとめて入る。
 
-→ [補足](#手順-2-一緒に入る依存)
+→ [補足](#手順-1-一緒に入る依存)
 
-### 3. 検証する
+### 2. 検証する
 
 ```bash
 bat --version
@@ -88,7 +57,7 @@ bat --color=always --style=numbers /etc/os-release | head -5
 
 行番号付きで `NAME="AlmaLinux"` から 5 行出る。**`--color=always` を外してパイプに繋ぐと装飾のない `cat` と同じ出力になる**ので、この確認では明示的に付けている。
 
-→ [補足](#手順-3-tty-かどうかで出力が変わる)
+→ [補足](#手順-2-tty-かどうかで出力が変わる)
 
 ---
 
@@ -104,7 +73,7 @@ EOF
 printf '%s\n' "${MANPAGER}"
 ```
 
-`fzf` を入れてあるなら、ファイル選択のプレビューにも使える（`fzf` の導入は [yazi.md](yazi.md#2-yazi-と依存ツールを入れる) 参照）:
+`fzf` を入れてあるなら、ファイル選択のプレビューにも使える（`fzf` の導入は [yazi.md](yazi.md#1-yazi-を入れる) 参照）:
 
 ```bash
 fzf --preview 'bat --color=always --style=numbers {}'
@@ -163,7 +132,7 @@ sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた�
 
 - **目的**: AlmaLinux 10 に [bat](https://github.com/sharkdp/bat)（シンタックスハイライトと git 連携が付いた `cat`）の最新版を入れる。**EPEL には 0.24.0 があるが 2 マイナー古い**
 - **進め方**: Homebrew で入れ、必要なら `~/.config/bat/config` を置く。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 1〜3 と[設定ファイル](#設定ファイル)の節を通し、`arm64_linux` のボトルが降りること・`bat 0.26.1` が入ること・`--color=always --style=numbers` で行番号と色が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、ページャとしての表示（`man` / `fzf --preview`）は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節を通し、`arm64_linux` のボトルが降りること・`bat 0.26.1` が入ること・`--color=always --style=numbers` で行番号と色が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、ページャとしての表示（`man` / `fzf --preview`）は確認していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -225,11 +194,7 @@ $ dnf -q repoquery -l bat | grep bin/
 
 `ansi` は「端末が設定している 16 色をそのまま使う」テーマで、端末の配色を変えたときに追従する。固定の配色にしたいなら `bat --list-themes` から選ぶ。
 
-#### 手順 1: Homebrew の導入
-
-公式インストーラは `/home/linuxbrew/.linuxbrew` に入れる（このパスに入る場合だけボトルが使える）。**root で実行してはいけない**。詳しくは [yazi.md の同じ手順](yazi.md#手順-1-homebrew-の導入)。
-
-#### 手順 2: 一緒に入る依存
+#### 手順 1: 一緒に入る依存
 
 bat が直接要求するのは `libgit2`（変更行の `changes` 表示に使う）と `oniguruma`（正規表現）の 2 つだが、`libgit2` がさらに 6 つを引く。コンテナでの `brew deps --tree bat`:
 
@@ -252,7 +217,7 @@ bat
 
 この依存は [eza](eza.md)（`libgit2`）と [git-delta](git-delta.md)（`libgit2` / `oniguruma`）と共通なので、3 つとも入れる場合は 2 本目以降の取得がほとんど無くなる。
 
-#### 手順 3: TTY かどうかで出力が変わる
+#### 手順 2: TTY かどうかで出力が変わる
 
 bat は出力先が端末かどうかで既定の挙動を変える。**パイプやリダイレクトに繋ぐと、色も行番号もページャも自動的に切れて素の `cat` と同じになる**。コンテナ（端末なし）での実測:
 
@@ -306,19 +271,19 @@ $ cat ~/.config/bat/config
 - [sharkdp/bat — README](https://github.com/sharkdp/bat) — 使い方、テーマ、`MANPAGER` や `fzf` との組み合わせ、他ツールとの連携例
 - [bat — Customization](https://github.com/sharkdp/bat#customization) — 設定ファイルの書式、テーマとシンタックスの追加手順
 - `bat --help` / `bat --list-themes` / `bat --list-languages` — フラグとテーマ・言語の一覧
-- [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) — `/home/linuxbrew/.linuxbrew` に入れる理由とボトルの条件
+- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 
 ---
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜3 と[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) も続けて入れている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) も続けて入れている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. Homebrew | `dnf install -y procps-ng curl file git` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` |
-| 2. bat | `Pouring bat--0.26.1.arm64_linux.bottle.tar.gz` → `15 files, 5.4MB`。依存 9 つ（`ca-certificates` / `openssl@3` / `zlib-ng-compat` / `libssh2` / `llhttp` / `bzip2` / `pcre2` / `libgit2` / `oniguruma`）もすべてボトル。ソースビルドは発生しない |
-| 3. 検証 | `bat --version` → `bat 0.26.1`。`bat --color=always --style=numbers /etc/os-release` は行番号と ANSI エスケープ付きで出た。`--color` を外してパイプに繋ぐと素の出力になることも確認 |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
+| 1. bat | `Pouring bat--0.26.1.arm64_linux.bottle.tar.gz` → `15 files, 5.4MB`。依存 9 つ（`ca-certificates` / `openssl@3` / `zlib-ng-compat` / `libssh2` / `llhttp` / `bzip2` / `pcre2` / `libgit2` / `oniguruma`）もすべてボトル。ソースビルドは発生しない |
+| 2. 検証 | `bat --version` → `bat 0.26.1`。`bat --color=always --style=numbers /etc/os-release` は行番号と ANSI エスケープ付きで出た。`--color` を外してパイプに繋ぐと素の出力になることも確認 |
 | 設定ファイル | `~/.config/bat/config` を置いて `bat --config-file` が同じパスを返し、`--style=numbers` が効くことを確認 |
 | `MANPAGER` | **確認できず**。コンテナに `man ls` のページが無く（`coreutils-common` 未導入）、`man-db` を入れて `man man` を試しても**パイプ越しでは man 自体がページャを呼ばない**ため、色が付くかは判定できなかった |
 | RPM 経路 | `dnf -q list --showduplicates bat` → `0.24.0-13.el10_2 epel`。`dnf -q repoquery -l bat \| grep bin/` → `/usr/bin/bat` |

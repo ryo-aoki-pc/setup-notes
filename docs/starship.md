@@ -4,13 +4,14 @@
 
 **すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.bashrc` と `~/.config` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
+**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+
 | 手順 | 内容 |
 |---|---|
 | [0. 変数を設定する](#0-変数を設定する) | 設定ファイルの場所と、当てるプリセットを決める |
-| [1. Homebrew を用意する](#1-homebrew-を用意する) | 未導入なら公式インストーラで入れる |
-| [2. starship を入れる](#2-starship-を入れる) | `brew install starship`（`dbus` も入る） |
-| [3. シェルに初期化を書く](#3-シェルに初期化を書く) | `~/.bashrc` の**いちばん最後**に `eval "$(starship init bash)"` |
-| [4. 検証する](#4-検証する) | プロンプト文字列が生成されるか |
+| [1. starship を入れる](#1-starship-を入れる) | `brew install starship`（`dbus` も入る） |
+| [2. シェルに初期化を書く](#2-シェルに初期化を書く) | `~/.bashrc` の**いちばん最後**に `eval "$(starship init bash)"` |
+| [3. 検証する](#3-検証する) | プロンプト文字列が生成されるか |
 
 見た目を変えるなら[プリセットを当てる（任意）](#プリセットを当てる任意)。細かい調整は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
@@ -31,39 +32,7 @@ for v in STARSHIP_CONFIG STARSHIP_PRESET; do printf '%-16s = %s\n' "$v" "${!v}";
 
 → [補足](#手順-0-変数について)
 
-### 1. Homebrew を用意する
-
-まず入っているか見る。バージョンが出れば[手順 2](#2-starship-を入れる) へ飛ぶ。
-
-```bash
-command -v brew && brew --version
-```
-
-無ければ入れる。
-
-```bash
-sudo dnf install -y procps-ng curl file git
-```
-
-`sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く。**次のブロックは、終わってから貼る。**
-
-```bash
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-brew --version
-```
-
-PATH に入れる 3 行で、インストーラが最後に表示する「Next steps」と同じ内容。
-
-→ [補足](#手順-1-homebrew-の導入)
-
-### 2. starship を入れる
+### 1. starship を入れる
 
 ```bash
 brew install starship
@@ -71,7 +40,7 @@ brew install starship
 
 aarch64 でもビルド済みのボトル（`starship--1.26.0.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存の `dbus`（とその先の `expat`）、`zlib-ng-compat` も同時に入る。
 
-### 3. シェルに初期化を書く
+### 2. シェルに初期化を書く
 
 **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）。`~/.bashrc` の**いちばん最後**に置く。
 
@@ -81,9 +50,9 @@ echo 'eval "$(starship init bash)"' >> ~/.bashrc
 tail -1 ~/.bashrc
 ```
 
-`~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く。順序と、WezTerm のシェル統合との相性については[補足](#手順-3-bashrc-の並びと-wezterm-シェル統合)を読む。
+`~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く。順序と、WezTerm のシェル統合との相性については[補足](#手順-2-bashrc-の並びと-wezterm-シェル統合)を読む。
 
-### 4. 検証する
+### 3. 検証する
 
 ```bash
 starship --version
@@ -101,7 +70,7 @@ starship explain
 
 `starship prompt` は改行とカレントディレクトリとプロンプト記号を含む文字列を出す。`starship explain` は今のプロンプトに出ている各部分の意味を 1 行ずつ説明する。
 
-→ [補足](#手順-4-端末が無くても確かめられる)
+→ [補足](#手順-3-端末が無くても確かめられる)
 
 ---
 
@@ -185,7 +154,7 @@ rm -rf ~/.cache/starship                   # キャッシュも消す場合
 
 - **目的**: AlmaLinux 10 のシェルプロンプトを [starship](https://starship.rs/)（git の状態・言語バージョン・終了コードなどを自動で出すプロンプト）に置き換える。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、`~/.bashrc` に初期化の 1 行を足す。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 1〜4 と[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通し、`arm64_linux` のボトルが降りること・`starship 1.26.0` が入ること・`starship prompt` / `module` / `explain` / `timings` が端末なしでも文字列を返すこと・`~/.bashrc` への追記が読み込めることを確認した。**実機（Raspberry Pi 5）では本実行していない**（実機の `~/.bashrc` は 38 行のまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、実際のプロンプト表示と、WezTerm のシェル統合との相性は確認していない**（[手順 3 の補足](#手順-3-bashrc-の並びと-wezterm-シェル統合)）
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 1〜3、[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通し、`arm64_linux` のボトルが降りること・`starship 1.26.0` が入ること・`starship prompt` / `module` / `explain` / `timings` が端末なしでも文字列を返すこと・`~/.bashrc` への追記が読み込めることを確認した。**実機（Raspberry Pi 5）では本実行していない**（実機の `~/.bashrc` は 38 行のまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、実際のプロンプト表示と、WezTerm のシェル統合との相性は確認していない**（[手順 2 の補足](#手順-2-bashrc-の並びと-wezterm-シェル統合)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -194,7 +163,7 @@ rm -rf ~/.cache/starship                   # キャッシュも消す場合
 | Homebrew | 7.0.6（`/home/linuxbrew/.linuxbrew`） | 7.0.6（同じ場所に新規導入） |
 | starship | **未導入** | `starship 1.26.0`（`arm64_linux` ボトル） |
 | 一緒に入る依存 | — | `expat` / `dbus` / `zlib-ng-compat` |
-| `~/.bashrc` | 38 行。26 行 `brew shellenv` / 27-33 行 yazi の `y()` / 34 行 `zoxide init` / 36-38 行 WezTerm シェル統合 | 手順 3 で `starship init` を末尾に追記 |
+| `~/.bashrc` | 38 行。26 行 `brew shellenv` / 27-33 行 yazi の `y()` / 34 行 `zoxide init` / 36-38 行 WezTerm シェル統合 | 手順 2 で `starship init` を末尾に追記 |
 | Nerd Font | `font-symbols-only-nerd-font 3.5.1`（Homebrew、[yazi.md](yazi.md)） | 無し |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)。OSC 133 のシェル統合あり） | 無し（pty を与えずに実行） |
 
@@ -239,11 +208,7 @@ AlmaLinux 10 aarch64 で starship を入れる経路を比べた（2026-09-22 �
 
 `${STARSHIP_PRESET}` は[プリセットを当てる（任意）](#プリセットを当てる任意)でしか使わない。既定を `plain-text-symbols` にしてあるのは、Nerd Font が無い環境でも文字化けしないため。
 
-#### 手順 1: Homebrew の導入
-
-公式インストーラは `/home/linuxbrew/.linuxbrew` に入れる（このパスに入る場合だけボトルが使える）。**root で実行してはいけない**。詳しくは [yazi.md の同じ手順](yazi.md#手順-1-homebrew-の導入)。
-
-#### 手順 3: `~/.bashrc` の並びと WezTerm シェル統合
+#### 手順 2: `~/.bashrc` の並びと WezTerm シェル統合
 
 `starship init bash` が出すのは 1 行だけで、中身はさらに長い初期化を読み込む `eval` になっている:
 
@@ -271,7 +236,7 @@ eval -- "$(/home/linuxbrew/.linuxbrew/bin/starship init bash --print-full-init)"
 
 並び順については、**zoxide より後ろ、WezTerm シェル統合より後ろ**に置くのが安全。zoxide も starship も「`~/.bashrc` の最後に置け」と案内しているが、両者の `PROMPT_COMMAND` の扱い方が違う（zoxide は自分のフックを足すだけ、starship は既存を退避して呼ぶ）ので、starship を後にすると zoxide のフックが退避側に入って呼ばれ続ける。
 
-#### 手順 4: 端末が無くても確かめられる
+#### 手順 3: 端末が無くても確かめられる
 
 starship は「プロンプト文字列を標準出力に出す」だけのコマンドなので、**pty が無い環境でも動作確認ができる**。コンテナでの実測（ANSI エスケープは除いてある）:
 
@@ -327,7 +292,7 @@ $ wc -l ~/.config/starship.toml
 ### 注意点
 
 - **初期化の 1 行が本体**: `brew install` だけではプロンプトは変わらない。`~/.bashrc` に `eval "$(starship init bash)"` を書いて初めて効く
-- **WezTerm のシェル統合の一部が失われる見込み**: `PS1` が毎回作り直されるため、OSC 133 の `A` / `B` マーカーが消える。[手順 3 の補足](#手順-3-bashrc-の並びと-wezterm-シェル統合)。**未検証**
+- **WezTerm のシェル統合の一部が失われる見込み**: `PS1` が毎回作り直されるため、OSC 133 の `A` / `B` マーカーが消える。[手順 2 の補足](#手順-2-bashrc-の並びと-wezterm-シェル統合)。**未検証**
 - **アンインストール時に行を消し忘れると毎回エラーが出る**: [ロールバック](#ロールバック)の `sed` を忘れない
 - **プロンプトごとに外部プロセスが起動する**: git の状態を調べるので、大きなリポジトリや遅いストレージ（Raspberry Pi の microSD）では体感できるほど遅くなることがある。`starship timings` で犯人を探し、要らないモジュールは `disabled = true` で切る
 - **記号には Nerd Font が要るものがある**: 既定のプロンプト記号 `❯` は普通のフォントでも出るが、プリセットによっては Nerd Font 前提。無い端末では `plain-text-symbols` / `no-nerd-font` を当てる
@@ -340,22 +305,22 @@ $ wc -l ~/.config/starship.toml
 - [starship — Configuration](https://starship.rs/config/) — `starship.toml` の全モジュールと項目
 - [starship — Presets](https://starship.rs/presets/) — プリセット一覧とスクリーンショット、Nerd Font が要るかどうか
 - `starship --help` / `starship init bash --print-full-init` — サブコマンドと、シェルに入る初期化の中身
-- [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) — `/home/linuxbrew/.linuxbrew` に入れる理由とボトルの条件
+- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 
 ---
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜4 と[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](bat.md) / [git-delta](git-delta.md) / [eza](eza.md) / [gdu](gdu.md) を先に入れた同じコンテナで続けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜3、[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](bat.md) / [git-delta](git-delta.md) / [eza](eza.md) / [gdu](gdu.md) を先に入れた同じコンテナで続けている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` |
-| 2. starship | `Pouring expat--2.8.5` → `dbus--1.16.2_1` → `starship--1.26.0.arm64_linux.bottle.tar.gz` の順に降り、`12 files, 11MB`。ソースビルドは発生しない |
-| 3. 初期化 | `~/.bashrc` に `eval "$(starship init bash)"` を追記して読み込み直し、エラーなく通った（非対話シェルなのでプロンプト自体は描画されない） |
-| 4. 検証 | `starship --version` → `1.26.0`（`build_env` に `rustc 1.96.0 ... (Homebrew)`）。`starship prompt` / `module directory` / `explain` / `timings` がいずれも文字列を返した |
+| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
+| 1. starship | `Pouring expat--2.8.5` → `dbus--1.16.2_1` → `starship--1.26.0.arm64_linux.bottle.tar.gz` の順に降り、`12 files, 11MB`。ソースビルドは発生しない |
+| 2. 初期化 | `~/.bashrc` に `eval "$(starship init bash)"` を追記して読み込み直し、エラーなく通った（非対話シェルなのでプロンプト自体は描画されない） |
+| 3. 検証 | `starship --version` → `1.26.0`（`build_env` に `rustc 1.96.0 ... (Homebrew)`）。`starship prompt` / `module directory` / `explain` / `timings` がいずれも文字列を返した |
 | プリセット | `starship preset --list` で 12 個（`bracketed-segments` / `catppuccin-powerline` / `gruvbox-rainbow` / `jetpack` / `nerd-font-symbols` / `no-empty-icons` / `no-nerd-font` / `no-runtime-versions` / `pastel-powerline` / `plain-text-symbols` / `pure-preset` / `tokyo-night`）。`plain-text-symbols` を `-o` で書き出して 335 行の `starship.toml` が生成され、`starship explain` のプロンプト記号が `❯` から `>` に変わることを確認 |
-| 初期化の中身 | `starship init bash --print-full-init` を読み、`PS1` を毎回組み立て直すこと・既存の `PROMPT_COMMAND` を `STARSHIP_PROMPT_COMMAND` に退避して呼ぶこと・`PS0` には前置きすることを確認（[手順 3 の補足](#手順-3-bashrc-の並びと-wezterm-シェル統合)の根拠） |
+| 初期化の中身 | `starship init bash --print-full-init` を読み、`PS1` を毎回組み立て直すこと・既存の `PROMPT_COMMAND` を `STARSHIP_PROMPT_COMMAND` に退避して呼ぶこと・`PS0` には前置きすることを確認（[手順 2 の補足](#手順-2-bashrc-の並びと-wezterm-シェル統合)の根拠） |
 | RPM 経路 | `dnf list --available starship` → `Error: No matching Packages to list`（EPEL を有効にした状態で） |
 
 #### 未確認事項

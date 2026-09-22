@@ -15,6 +15,7 @@
 | [Firefox](docs/firefox.md) | Mozilla 公式 RPM リポジトリから最新版を入れる（標準は ESR 140） | AlmaLinux 10.2 / aarch64 |
 | [Claude Code](docs/claude-code.md) | 公式 dnf リポジトリから CLI を入れる | AlmaLinux 10.2 / aarch64 |
 | [GitHub CLI](docs/gh.md) | 公式 dnf リポジトリから gh を入れる（EPEL 版より新しい） | AlmaLinux 10.2 / aarch64 |
+| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 9 本の前提） | AlmaLinux 10.2 / aarch64 |
 | [yazi](docs/yazi.md) | ターミナルファイルマネージャを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [lazygit](docs/lazygit.md) | git の TUI クライアントを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [Neovim](docs/neovim.md) | 最新版を Homebrew で入れる（EPEL 版は 0.10 系） | AlmaLinux 10.2 / aarch64 |
@@ -34,4 +35,5 @@
 - 対象・検証環境、採用理由、実測、落とし穴は後半の「補足」にまとめる
 - コマンドは実行済みのものを載せ、未検証事項は明記する
 - 実機で本実行していない手順書は、一覧の検証環境に「コンテナのみ」と書く
+- 複数の手順書が共有する前提（Homebrew など）は独立した手順書にし、各手順書の冒頭から参照する
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない

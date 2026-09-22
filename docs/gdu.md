@@ -4,12 +4,13 @@
 
 **すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、エイリアスも自分の `~/.bashrc` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
+**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+
 | 手順 | 内容 |
 |---|---|
 | [0. 変数を設定する](#0-変数を設定する) | エイリアスに付ける名前を決める |
-| [1. Homebrew を用意する](#1-homebrew-を用意する) | 未導入なら公式インストーラで入れる |
-| [2. gdu を入れる](#2-gdu-を入れる) | `brew install gdu`。**入るコマンドは `gdu-go`** |
-| [3. 検証する](#3-検証する) | 版の確認と、非対話モードでの走査 |
+| [1. gdu を入れる](#1-gdu-を入れる) | `brew install gdu`。**入るコマンドは `gdu-go`** |
+| [2. 検証する](#2-検証する) | 版の確認と、非対話モードでの走査 |
 
 `gdu` という名前で呼びたいなら[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
@@ -29,39 +30,7 @@ printf 'GDU_ALIAS = %s\n' "${GDU_ALIAS}"
 
 → [補足](#手順-0-変数について)
 
-### 1. Homebrew を用意する
-
-まず入っているか見る。バージョンが出れば[手順 2](#2-gdu-を入れる) へ飛ぶ。
-
-```bash
-command -v brew && brew --version
-```
-
-無ければ入れる。
-
-```bash
-sudo dnf install -y procps-ng curl file git
-```
-
-`sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く。**次のブロックは、終わってから貼る。**
-
-```bash
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-brew --version
-```
-
-PATH に入れる 3 行で、インストーラが最後に表示する「Next steps」と同じ内容。
-
-→ [補足](#手順-1-homebrew-の導入)
-
-### 2. gdu を入れる
+### 1. gdu を入れる
 
 ```bash
 brew install gdu
@@ -76,9 +45,9 @@ aarch64 でもビルド済みのボトル（`gdu--5.37.0.arm64_linux.bottle.tar.
 To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.
 ```
 
-→ [補足](#手順-2-なぜ-gdu-go-になるのか)
+→ [補足](#手順-1-なぜ-gdu-go-になるのか)
 
-### 3. 検証する
+### 2. 検証する
 
 ```bash
 gdu-go --version
@@ -97,7 +66,7 @@ gdu-go -n /usr/share | tail -5
 
 サイズの大きい順に並んだ一覧が出る。**TUI で使うときは引数にディレクトリを渡すだけ**（`gdu-go ~` など。`q` で終了）。
 
-→ [補足](#手順-3-非対話モード)
+→ [補足](#手順-2-非対話モード)
 
 ---
 
@@ -152,7 +121,7 @@ rm -f ~/.gdu.yaml                         # 設定ファイルを作っていた
 
 - **目的**: AlmaLinux 10 に [gdu](https://github.com/dundee/gdu)（ディスク使用量を見る TUI。`ncdu` と同じ用途で、並列処理で速い）を入れる
 - **進め方**: Homebrew で入れる。**実行ファイル名が `gdu-go` になる**のが唯一の引っかかりどころ。読者が書き換えるのは冒頭の変数ブロックだけ
-- **状態**: **コンテナでのみ通し検証済み（2026-09-22）。** ただし**実機には本書と同じ経路のもの（`brew install gdu` による `gdu 5.37.0`）が 2026-09-21 から入っている**。これは [yazi](yazi.md) 周辺のツールをまとめて入れた流れで導入したもので、**本書の手順を順に実行した結果ではない**。実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](#gdu-の名前で呼ぶ任意)も実機には入れていない。コンテナでは手順 1〜3 と[エイリアス](#gdu-の名前で呼ぶ任意)を通し、`arm64_linux` のボトルが降りること・`gdu-go --version` が `v5.37.0` を返すこと・`gdu-go -n` の非対話モードが走ることを確認した。**TUI の起動、EPEL 版（5.32.0）との併用、シンボリックリンク方式は未確認**
+- **状態**: **コンテナでのみ通し検証済み（2026-09-22）。** ただし**実機には本書と同じ経路のもの（`brew install gdu` による `gdu 5.37.0`）が 2026-09-21 から入っている**。これは [yazi](yazi.md) 周辺のツールをまとめて入れた流れで導入したもので、**本書の手順を順に実行した結果ではない**。実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](#gdu-の名前で呼ぶ任意)も実機には入れていない。コンテナでは[Homebrew の導入](homebrew.md)と手順 1〜2、[エイリアス](#gdu-の名前で呼ぶ任意)を通し、`arm64_linux` のボトルが降りること・`gdu-go --version` が `v5.37.0` を返すこと・`gdu-go -n` の非対話モードが走ることを確認した。**TUI の起動、EPEL 版（5.32.0）との併用、シンボリックリンク方式は未確認**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -190,7 +159,7 @@ AlmaLinux 10 aarch64 で gdu を入れる経路を比べた（2026-09-22 時点�
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
-| **Homebrew** | `gdu 5.37.0` の `arm64_linux` ボトルがある。upstream の最新と一致。**ただし入るコマンドは `gdu-go`**（formula 側の都合。[手順 2 の補足](#手順-2-なぜ-gdu-go-になるのか)） | **採用**（実機もこの経路） |
+| **Homebrew** | `gdu 5.37.0` の `arm64_linux` ボトルがある。upstream の最新と一致。**ただし入るコマンドは `gdu-go`**（formula 側の都合。[手順 1 の補足](#手順-1-なぜ-gdu-go-になるのか)） | **採用**（実機もこの経路） |
 | EPEL の `gdu` | `gdu.aarch64 5.32.0-1.el10_2`。コマンド名は素直に `/usr/bin/gdu` で、dnf 管理なので root でも使えて `dnf upgrade` に乗る。ただし **5 マイナー古い** | 不採用。**名前を優先するならこちら** |
 | GitHub Releases のバイナリ | `linux-arm64` の tar がある。展開して PATH に置くだけで名前も自由だが、更新は手作業 | 不採用（Homebrew に揃える） |
 | `go install github.com/dundee/gdu/...` | Go toolchain が要る（AppStream に `golang` あり） | 不採用 |
@@ -210,13 +179,9 @@ $ dnf -q repoquery -l gdu | grep bin/
 
 #### 手順 0: 変数について
 
-`${GDU_ALIAS}` は[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)でしか使わない。エイリアスを作らないなら手順 1〜3 は `gdu-go` のまま通る。
+`${GDU_ALIAS}` は[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)でしか使わない。エイリアスを作らないなら手順 1〜2 は `gdu-go` のまま通る。
 
-#### 手順 1: Homebrew の導入
-
-公式インストーラは `/home/linuxbrew/.linuxbrew` に入れる（このパスに入る場合だけボトルが使える）。**root で実行してはいけない**。詳しくは [yazi.md の同じ手順](yazi.md#手順-1-homebrew-の導入)。
-
-#### 手順 2: なぜ `gdu-go` になるのか
+#### 手順 1: なぜ `gdu-go` になるのか
 
 GNU coreutils には `gdu` という名前のコマンドがある（macOS などで GNU 版 `du` を `g` 付きで入れるときの名前）。Homebrew の `coreutils` formula がこれを置くため、**衝突を避けて gdu 側の名前を変えている**。`brew info gdu` の実出力:
 
@@ -235,7 +200,7 @@ $ ls -l /home/linuxbrew/.linuxbrew/bin/gdu*
 lrwxrwxrwx. 1 <USER> <USER> 31 Sep 21 09:41 /home/linuxbrew/.linuxbrew/bin/gdu-go -> ../Cellar/gdu/5.37.0/bin/gdu-go
 ```
 
-#### 手順 3: 非対話モード
+#### 手順 2: 非対話モード
 
 `-n` / `--non-interactive` を付けると TUI を起動せず、走査結果を標準出力に流す。**端末が無い場所（スクリプト、コンテナ、`podman exec`）でも動く数少ないモード**なので、本書の検証はここで実動作を確かめている。コンテナでの実測:
 
@@ -292,19 +257,19 @@ alias gdu='gdu-go'
 - [gdu — Configuration](https://github.com/dundee/gdu/blob/master/docs/configuration.md) — `~/.gdu.yaml` の項目
 - `gdu-go --help` — 全フラグ（非対話モード、除外、データベース出力など）
 - [Homebrew の gdu formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/g/gdu.rb) — `gdu-go` にリネームしている箇所
-- [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) — `/home/linuxbrew/.linuxbrew` に入れる理由とボトルの条件
+- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 
 ---
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜3 と[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜2、[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` |
-| 2. gdu | `Pouring gdu--5.37.0.arm64_linux.bottle.tar.gz` → `7 files, 20.6MB`。**依存は 0**（`brew deps --tree gdu` の出力が `gdu` の 1 行だけ）。caveat が本文に引用したとおり出た |
-| 3. 検証 | `gdu-go --version` → `v5.37.0`（ビルドは 2026-08-18、`Built user: linuxbrew`）。`command -v gdu` は空。`gdu-go -n /usr/share` でサイズ順の一覧が出た |
+| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
+| 1. gdu | `Pouring gdu--5.37.0.arm64_linux.bottle.tar.gz` → `7 files, 20.6MB`。**依存は 0**（`brew deps --tree gdu` の出力が `gdu` の 1 行だけ）。caveat が本文に引用したとおり出た |
+| 2. 検証 | `gdu-go --version` → `v5.37.0`（ビルドは 2026-08-18、`Built user: linuxbrew`）。`command -v gdu` は空。`gdu-go -n /usr/share` でサイズ順の一覧が出た |
 | エイリアス | `~/.bashrc` に `alias gdu=gdu-go` を追記して読み込み直し、`alias gdu` で展開を確認。**`type -t gdu` は非対話シェルでは失敗する**ことも確認した（`bash -i` 越しなら `alias` を返す） |
 | RPM 経路 | `dnf -q list --showduplicates gdu` → `5.32.0-1.el10_2 epel`。`dnf -q repoquery -l gdu \| grep bin/` → `/usr/bin/gdu` |
 
