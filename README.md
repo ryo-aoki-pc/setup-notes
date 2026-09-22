@@ -19,6 +19,12 @@
 | [lazygit](docs/lazygit.md) | git の TUI クライアントを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [Neovim](docs/neovim.md) | 最新版を Homebrew で入れる（EPEL 版は 0.10 系） | AlmaLinux 10.2 / aarch64 |
 | [zoxide](docs/zoxide.md) | ディレクトリ移動を学習するツールを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
+| [bat](docs/bat.md) | 色付きの `cat` を Homebrew で入れる（EPEL 版は 0.24 系） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
+| [eza](docs/eza.md) | `ls` の代わりになる一覧表示を Homebrew で入れる（RPM が無い） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
+| [git-delta](docs/git-delta.md) | git の差分表示を delta に置き換える（設定は `~/.gitconfig`） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
+| [gdu](docs/gdu.md) | ディスク使用量を見る TUI を Homebrew で入れる（コマンド名は `gdu-go`） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
+| [btop](docs/btop.md) | リソースモニタを EPEL の dnf で入れる（Homebrew と同じ 1.4.7） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
+| [starship](docs/starship.md) | シェルプロンプトを Homebrew で入れる（`~/.bashrc` に 1 行） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
 
 ## 記法
 
@@ -27,4 +33,5 @@
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 対象・検証環境、採用理由、実測、落とし穴は後半の「補足」にまとめる
 - コマンドは実行済みのものを載せ、未検証事項は明記する
+- 実機で本実行していない手順書は、一覧の検証環境に「コンテナのみ」と書く
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない
