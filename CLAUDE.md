@@ -35,6 +35,13 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
 - `docs/samba.md` — `[homes]` 共有でホームディレクトリを公開する手順書。gnome-remote-desktop.md と同じ変数ブロック方式。実機（拠点 B の WG ホスト）で公開を継続中
 - `docs/wireguard-road-warrior.md` — 外出先の AlmaLinux 10 PC を WG クライアントにする手順書。鍵は PC 側で生成し、ホストの `client add --pubkey` → `client show` の conf を `nmcli connection import` で取り込む。samba.md と同じ変数ブロック方式。未検証（NetworkManager の挙動で「要確認」と付けた項目は実機の結果で更新する）
+- `docs/firefox.md` — Mozilla 公式 RPM リポジトリ（`packages.mozilla.org/rpm/firefox`）で最新版の Firefox を入れる手順書。AppStream の ESR 140 から `dnf install` 1 本で載せ替える。実機で本実行済み、手順は AlmaLinux 10 コンテナで再実行して確認
+- `docs/claude-code.md` — 公式 dnf リポジトリ（`downloads.claude.ai/claude-code/rpm/stable`）から Claude Code を入れる手順書。Node.js 不要。実機で本実行済み（認証も済み）、手順 1〜3 はコンテナで再実行
+- `docs/gh.md` — 公式 dnf リポジトリ（`cli.github.com/packages/rpm`）から gh を入れる手順書。EPEL 版は 2.97.0 と古い。実機で本実行済み、手順 1〜3 はコンテナで再実行
+- `docs/yazi.md` — yazi を Homebrew で入れる手順書。COPR `lihaohong/yazi` を実機で一度入れて外した経緯と、プレビュー依存（ffmpeg など）が EL10 に揃わないことを補足に残す。`y()` シェル関数まで含む
+- `docs/lazygit.md` — lazygit を Homebrew で入れる手順書。COPR（`dejan` / `atim`）は `epel-10-aarch64` の repomd が 403 で入らないことを実機とコンテナの両方で確認して不採用にしている
+- `docs/neovim.md` — Neovim を Homebrew で入れる手順書（EPEL は 0.10.1 と古い）。`:checkhealth` の読み方と、`sudo nvim` が使えない理由を補足に置く
+- `docs/zoxide.md` — zoxide を Homebrew で入れる手順書。EPEL にも AppStream にも RPM が無い。`~/.bashrc` の `eval "$(zoxide init bash)"` が本体で、`--cmd cd` の影響範囲も補足に書く
 - `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
