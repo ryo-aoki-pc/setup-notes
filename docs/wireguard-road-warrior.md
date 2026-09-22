@@ -21,20 +21,34 @@
 
 ### 0. 変数を設定する
 
-**編集するのは接続先拠点の 4 つの IP。** `WG_DIR` は既定のままでよい。**`sudo -i` した root のシェルではなく、自分のシェルで貼る**（`~` が自分のホームになるため）。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+**編集が必須なのは、1 行ずつのブロックにした接続先拠点の 4 つの IP。** 最後のまとめてあるブロックは既定のまま貼ってよい。**`sudo -i` した root のシェルではなく、自分のシェルで貼る**（`~` が自分のホームになるため）。**新しいシェルを開いたら（SSH を張り直したあとも）先にすべてのブロックを貼り直す。**
+
+```bash
+WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
+```
+
+```bash
+WG_HOST_LAN_IP=192.168.110.2         # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
+```
+
+```bash
+ROUTER_LAN_IP=192.168.110.1          # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
+```
+
+```bash
+PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
+```
+
+鍵と conf の一時置き場は既定のままでよい:
 
 ```bash
 WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（手順 9 で秘密鍵と conf を消す）
-WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
-WG_HOST_LAN_IP=192.168.110.2         # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
-ROUTER_LAN_IP=192.168.110.1          # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
-PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
 ```
 
 **値を読み戻して確かめる。** 拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること。
 
 ```bash
-for v in WG_DIR WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP; do
+for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
   printf '%-15s = %s\n' "$v" "${!v}"
 done
 ```
@@ -69,13 +83,24 @@ fi
 
 ### 3. WG ホストに公開鍵を登録する（WG ホストで実行）
 
-**ここだけ WG ホストのシェルで実行する**（[wireguard.md の手順 1](wireguard.md#1-siteenv-を書く) の `REPO` と `~/wg/site.env` がある前提）。別のシェルなので先頭で変数を設定する。
+**ここだけ WG ホストのシェルで実行する**（[wireguard.md の手順 1](wireguard.md#1-siteenv-を書く) の `REPO` と `~/wg/site.env` がある前提）。別のシェルなので先頭で変数を設定する。**編集が必須なのは、1 行ずつの 3 ブロック。**
+
+```bash
+SITE=A                               # クライアントを受ける拠点（A または B）
+```
+
+```bash
+CLIENT_NAME=laptop                   # 登録簿（clients.list）に載せる名前。英数字・-・_ のみ
+```
+
+```bash
+CLIENT_PUBKEY=                       # 手順 2 で PC に表示された公開鍵（44 文字）を貼る
+```
+
+clone 先が `~/setup-notes` なら既定のままでよい:
 
 ```bash
 REPO=~/setup-notes                   # WG ホスト上でこのリポジトリを clone した場所（wireguard.md の手順 1 と同じ）
-SITE=A                               # クライアントを受ける拠点（A または B）
-CLIENT_NAME=laptop                   # 登録簿（clients.list）に載せる名前。英数字・-・_ のみ
-CLIENT_PUBKEY=                       # 手順 2 で PC に表示された公開鍵（44 文字）を貼る
 ```
 
 登録済みのクライアントを確認する。**同じ名前が既にある（ホスト側で鍵を作って登録したものなど）なら先に消す**（登録簿は名前で一意。→ [クライアントを削除する](wireguard.md#クライアントを削除する)。`apply` は次のブロックでまとめて行う）:

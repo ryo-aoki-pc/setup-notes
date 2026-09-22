@@ -18,10 +18,15 @@
 
 ### 0. 変数を設定する
 
-**編集するのは `SERVER_IP` だけ。** 接続元を LAN に絞る場合だけ `LAN_SUBNET` も書く（絞らないなら空のまま）。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+**編集が必須なのは、1 行だけのブロック。** まとめてあるブロックは既定のまま貼ってよい。**新しいシェルを開いたら（SSH を張り直したあとも）先に両方のブロックを貼り直す。**
 
 ```bash
 SERVER_IP=192.168.10.100            # クライアントが接続に使う IP。<SERVER_IP>
+```
+
+残りは既定のままでよい。接続元を LAN に絞る場合だけ `LAN_SUBNET` も書く（絞らないなら空のまま）:
+
+```bash
 LAN_SUBNET=                         # 接続元を LAN に絞る場合だけ書く（例: 192.168.10.0/24）。絞らないなら空のまま。<LAN_SUBNET>
 SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
 SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
@@ -189,10 +194,15 @@ sudo grdctl --system rdp clear-credentials
 sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
 ```
 
-証明書だけを差し替え前に戻す場合は、旧ファイルを消さずに残しておき、`OLD_BASENAME` に旧ファイル名（拡張子なし）を入れてパスを戻し、再起動する。`OLD_BASENAME` が空のまま、または手順 0 の `CERTDIR` が無い状態で貼ると先頭の `if` で中断し、`grdctl` は実行されない:
+証明書だけを差し替え前に戻す場合は、旧ファイルを消さずに残しておき、`OLD_BASENAME` に旧ファイル名（拡張子なし）を入れてパスを戻し、再起動する:
 
 ```bash
-OLD_BASENAME=                        # 差し替え前の証明書・鍵のファイル名（拡張子なし）。空のまま貼ると下は実行されない
+OLD_BASENAME=                        # 差し替え前の証明書・鍵のファイル名（拡張子なし）
+```
+
+`OLD_BASENAME` が空のまま、または手順 0 の `CERTDIR` が無い状態で貼ると先頭の `if` で中断し、`grdctl` は実行されない:
+
+```bash
 if [ -z "${OLD_BASENAME}" ] || [ -z "${CERTDIR}" ]; then echo '中断: OLD_BASENAME と手順 0 の CERTDIR を設定してから貼り直す' >&2; else
 sudo grdctl --system rdp set-tls-key  "${CERTDIR}/${OLD_BASENAME}.key"
 sudo grdctl --system rdp set-tls-cert "${CERTDIR}/${OLD_BASENAME}.crt"
@@ -270,7 +280,7 @@ fi
 
 - `LAN_SUBNET` は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の rich rule でしか使わない。接続元を制限しない場合は、手順 4 で public ゾーンに `rdp` サービスを開放した状態が完成形なので、空のままでよい
 - `SERVER_IP` が空のまま進むと、手順 1 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
-- 変数はそのシェルの中だけで有効。読み込んでいないシェルで手順のコマンドを貼ると、`"${CERTDIR}"` が空文字で展開されたまま実行される。SSH を張り直したあと、別の端末を開いたあとは手順 0 のブロックを貼り直す
+- 変数はそのシェルの中だけで有効。読み込んでいないシェルで手順のコマンドを貼ると、`"${CERTDIR}"` が空文字で展開されたまま実行される。SSH を張り直したあと、別の端末を開いたあとは手順 0 のブロックをすべて貼り直す
 
 #### 手順 1: 証明書
 

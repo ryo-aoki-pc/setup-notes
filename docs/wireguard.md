@@ -16,10 +16,13 @@
 
 ### 1. site.env を書く
 
-**編集するのは `~/wg/site.env` だけ。** 両拠点の WG ホストに同じ内容を置く。
+**編集するのは `~/wg/site.env` だけ。** 両拠点の WG ホストに同じ内容を置く。`REPO` は clone 先が `~/setup-notes` なら既定のままでよい:
 
 ```bash
 REPO=~/setup-notes                    # このリポジトリを clone した場所に合わせる。新しいシェルを開いたら設定し直す
+```
+
+```bash
 mkdir -p ~/wg && chmod 700 ~/wg
 cp "${REPO:?このリポジトリの場所を REPO に入れてから貼る}/scripts/wireguard/site.env.example" ~/wg/site.env
 chmod 600 ~/wg/site.env
@@ -143,7 +146,12 @@ sudo ./wg-vpn.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホ�
 **クリーンインストール後に復旧する**（`keygen` は実行しない。別の鍵ができ、復旧の意味が無くなる）:
 
 ```bash
-BACKUP=                              # 復旧に使うアーカイブ（例: ~/wg-backup-<ホスト名>-<日時>.tar.gz）。空のまま貼ると下は実行されない
+BACKUP=                              # 復旧に使うアーカイブ（例: ~/wg-backup-<ホスト名>-<日時>.tar.gz）
+```
+
+`BACKUP` が空のまま貼ると、次のブロックは `${BACKUP:?…}` で中断して何も戻さない:
+
+```bash
 cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
 sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}" &&
 sudo ./wg-vpn.sh restore "${BACKUP}" &&                     # wireguard-tools の導入。鍵・conf・site.env・clients.list を元の場所へ戻す
