@@ -4,13 +4,14 @@
 
 **すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
+**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+
 | 手順 | 内容 |
 |---|---|
 | [0. 変数を設定する](#0-変数を設定する) | プレビュー用に一緒に入れるツールを決める |
-| [1. Homebrew を用意する](#1-homebrew-を用意する) | 未導入なら公式インストーラで入れる |
-| [2. yazi を入れる](#2-yazi-を入れる) | `brew install yazi` と依存ツール |
-| [3. シェル関数 `y` を書く](#3-シェル関数-y-を書く) | 終了時に移動先へ `cd` させる（`~/.bashrc`） |
-| [4. 検証する](#4-検証する) | バージョン、起動、プレビュー |
+| [1. yazi を入れる](#1-yazi-を入れる) | `brew install yazi` と依存ツール |
+| [2. シェル関数 `y` を書く](#2-シェル関数-y-を書く) | 終了時に移動先へ `cd` させる（`~/.bashrc`） |
+| [3. 検証する](#3-検証する) | バージョン、起動、プレビュー |
 
 設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
@@ -30,32 +31,7 @@ printf 'YAZI_EXTRAS = %s\n' "${YAZI_EXTRAS}"
 
 → [補足](#手順-0-変数について)
 
-### 1. Homebrew を用意する
-
-まず入っているか見る。バージョンが出れば[手順 2](#2-yazi-を入れる) へ飛ぶ。
-
-```bash
-command -v brew && brew --version
-```
-
-無ければ入れる。インストーラは途中で `sudo` のパスワードを聞く。
-
-```bash
-sudo dnf install -y procps-ng curl file git
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-終わったら PATH に入れる（インストーラが最後に表示する「Next steps」と同じ内容）:
-
-```bash
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-brew --version
-```
-
-→ [補足](#手順-1-homebrew-の導入)
-
-### 2. yazi を入れる
+### 1. yazi を入れる
 
 ```bash
 brew install yazi ${YAZI_EXTRAS}
@@ -63,9 +39,9 @@ brew install yazi ${YAZI_EXTRAS}
 
 aarch64 でもビルド済みのボトル（`yazi--26.9.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。
 
-→ [補足](#手順-2-依存ツールの役割)
+→ [補足](#手順-1-依存ツールの役割)
 
-### 3. シェル関数 `y` を書く
+### 2. シェル関数 `y` を書く
 
 yazi をそのまま終了しても、シェルのディレクトリは動かない。公式が案内している関数を入れると、`q` で終了したときに移動先へ `cd` する（元の場所で終わりたいときは `Q`）。
 
@@ -82,9 +58,9 @@ EOF
 . ~/.bashrc
 ```
 
-→ [補足](#手順-3-y-関数)
+→ [補足](#手順-2-y-関数)
 
-### 4. 検証する
+### 3. 検証する
 
 ```bash
 yazi --version
@@ -94,13 +70,13 @@ brew list --versions yazi
 
 `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る。`ya` は付属のプラグイン管理コマンド。
 
-起動して確認する（`q` で終了。`y` で起動すれば終了時にそのディレクトリへ移動する）:
+起動して確認する。
 
 ```bash
 y
 ```
 
-プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る。画像プレビューは端末側の対応が要る（[注意点](#注意点)）。
+画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると yazi への操作として食われる）。`y` で起動したときは、終了時にそのディレクトリへ移動する。プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る。画像プレビューは端末側の対応が要る（[注意点](#注意点)）。
 
 ---
 
@@ -146,7 +122,7 @@ brew uninstall yazi
 
 - **目的**: AlmaLinux 10 にターミナルファイルマネージャ [yazi](https://yazi-rs.github.io/) の最新版を入れ、プレビューと検索が効く状態にする
 - **進め方**: Homebrew で本体と依存ツールをまとめて入れる。**読者が書き換えるのは冒頭の変数ブロック（依存ツールの一覧）だけ**。RPM（COPR）経路も試したうえで採らなかった（[選択した方針](#選択した方針)）
-- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数も同じ形で入っている。手順 1・2・4 は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し（`YAZI_EXTRAS` は空）、ボトルが降りること・`yazi --version` / `ya --version` が出ることを確認した。**コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）。**画像プレビュー（端末側の対応）とプラグインは未検証**
+- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数も同じ形で入っている。[Homebrew の導入](homebrew.md)と手順 1・3 は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し（`YAZI_EXTRAS` は空）、ボトルが降りること・`yazi --version` / `ya --version` が出ることを確認した。**コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）。**画像プレビュー（端末側の対応）とプラグインは未検証**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -208,27 +184,9 @@ Total download size: 63 M
 
 #### 手順 0: 変数について
 
-`YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は[手順 2 の補足](#手順-2-依存ツールの役割)にまとめた。`ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）。最小構成でよければ空にする。
+`YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は[手順 1 の補足](#手順-1-依存ツールの役割)にまとめた。`ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）。最小構成でよければ空にする。
 
-#### 手順 1: Homebrew の導入
-
-公式インストーラは `/home/linuxbrew/.linuxbrew` に入れる（このパスに入る場合だけボトルが使える。別の場所に入れるとすべてソースビルドになる）。**root で実行してはいけない**。実行するユーザーが `sudo` できる必要がある。
-
-インストーラが最後に出す案内（実測）:
-
-```
-==> Next steps:
-- Run these commands in your terminal to add Homebrew to your PATH:
-    echo >> /home/<USER>/.bashrc
-    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> /home/<USER>/.bashrc
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-- Install Homebrew's dependencies if you have sudo access:
-    sudo dnf group install development-tools
-```
-
-`development-tools` グループはソースビルドに要るもので、ボトルだけ使うなら必須ではない（実機では別の目的で導入済み）。
-
-#### 手順 2: 依存ツールの役割
+#### 手順 1: 依存ツールの役割
 
 | formula | yazi での役割 |
 |---|---|
@@ -257,7 +215,7 @@ Bash completion has been installed to:
   /home/linuxbrew/.linuxbrew/etc/bash_completion.d
 ```
 
-#### 手順 3: `y` 関数
+#### 手順 2: `y` 関数
 
 yazi は終了時に `--cwd-file` で指定したファイルへ最後のディレクトリを書き出す。シェル側の関数がそれを読んで `cd` する、という作り（プロセスは親シェルのディレクトリを変えられないため）。関数名を `y` にしているのは公式の例に合わせたもので、`command yazi` と書いているのは関数と実体を取り違えないため。
 
@@ -294,19 +252,19 @@ $ command -v yazi
 - [Installation — Yazi](https://yazi-rs.github.io/docs/installation/) — 経路一覧と依存ツール（ffmpeg / 7-Zip / jq / poppler / fd / ripgrep / fzf / zoxide / ImageMagick）
 - [Quick Start — Yazi](https://yazi-rs.github.io/docs/quick-start/) — `y` シェル関数（`--cwd-file`）の原典
 - [Configuration — Yazi](https://yazi-rs.github.io/docs/configuration/overview/) — `yazi.toml` / `keymap.toml` / `theme.toml`
-- [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) — `/home/linuxbrew/.linuxbrew` に入れる理由とボトルの条件
+- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 
 ---
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って手順 1・2・4 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `y` の 1 行と、`YAZI_EXTRAS` の中身（空にした）だけ除いている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 1・3 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `y` の 1 行と、`YAZI_EXTRAS` の中身（空にした）だけ除いている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` が `/home/linuxbrew/.linuxbrew` に入った |
-| 2. yazi | `brew install yazi` → `Pouring yazi--26.9.1.arm64_linux.bottle.tar.gz`（17 files, 32.5MB）。ソースビルドは発生しない |
-| 4. 検証 | `yazi --version` / `ya --version` ともに `26.9.1 (Homebrew 2026-09-01)`、`Triple: aarch64-unknown-linux-gnu` |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` が `/home/linuxbrew/.linuxbrew` に入った（[homebrew.md](homebrew.md)） |
+| 1. yazi | `brew install yazi` → `Pouring yazi--26.9.1.arm64_linux.bottle.tar.gz`（17 files, 32.5MB）。ソースビルドは発生しない |
+| 3. 検証 | `yazi --version` / `ya --version` ともに `26.9.1 (Homebrew 2026-09-01)`、`Triple: aarch64-unknown-linux-gnu` |
 | 依存ツール | `ffmpeg` / `sevenzip` / `jq` / `poppler` / `fd` / `ripgrep` / `fzf` / `resvg` / `imagemagick` / `font-symbols-only-nerd-font` の formula がすべて存在することを `brew info` で確認（インストールはしていない。実機には `-full` 版が入っている） |
 | 設定ファイル | 配布物に既定の `*.toml` は含まれない（`brew list yazi` の `.toml` は `.crates.toml` のみ） |
 | RPM 経路 | COPR `lihaohong/yazi` を有効化して `dnf install --assumeno yazi` → 115 パッケージ・63 MB に解決。EPEL の `ffmpeg-free 7.1.2` / `fd-find 10.4.2` / `ripgrep 14.1.1` / `fzf 0.58.0` はいずれも Homebrew 版より古い |

@@ -4,13 +4,14 @@
 
 **すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.bashrc` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
+**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+
 | 手順 | 内容 |
 |---|---|
 | [0. 変数を設定する](#0-変数を設定する) | 定義するコマンド名（`z` か `cd`）を決める |
-| [1. Homebrew を用意する](#1-homebrew-を用意する) | 未導入なら公式インストーラで入れる |
-| [2. zoxide を入れる](#2-zoxide-を入れる) | `brew install zoxide`（`fzf` も入れると `zi` が使える） |
-| [3. シェルに初期化を書く](#3-シェルに初期化を書く) | `~/.bashrc` に `eval "$(zoxide init bash)"` |
-| [4. 検証する](#4-検証する) | `z` / `zi` の動作、データベースの中身 |
+| [1. zoxide を入れる](#1-zoxide-を入れる) | `brew install zoxide`（`fzf` も入れると `zi` が使える） |
+| [2. シェルに初期化を書く](#2-シェルに初期化を書く) | `~/.bashrc` に `eval "$(zoxide init bash)"` |
+| [3. 検証する](#3-検証する) | `z` / `zi` の動作、データベースの中身 |
 
 以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
@@ -30,32 +31,7 @@ printf 'ZOXIDE_CMD = %s\n' "${ZOXIDE_CMD}"
 
 → [補足](#手順-0-変数について)
 
-### 1. Homebrew を用意する
-
-まず入っているか見る。バージョンが出れば[手順 2](#2-zoxide-を入れる) へ飛ぶ。
-
-```bash
-command -v brew && brew --version
-```
-
-無ければ入れる。インストーラは途中で `sudo` のパスワードを聞く。
-
-```bash
-sudo dnf install -y procps-ng curl file git
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-終わったら PATH に入れる（インストーラが最後に表示する「Next steps」と同じ内容）:
-
-```bash
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
-brew --version
-```
-
-→ [補足](#手順-1-homebrew-の導入)
-
-### 2. zoxide を入れる
+### 1. zoxide を入れる
 
 ```bash
 brew install zoxide fzf
@@ -63,7 +39,7 @@ brew install zoxide fzf
 
 `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える。aarch64 でもビルド済みのボトルが降ってくる。
 
-### 3. シェルに初期化を書く
+### 2. シェルに初期化を書く
 
 **この 1 行を書かないと `z` は使えない**（zoxide 本体はシェル関数を出力するだけで、`zoxide` コマンド自体では移動できない）。`~/.bashrc` の**いちばん最後**に置く。
 
@@ -75,16 +51,16 @@ type -t "${ZOXIDE_CMD}"
 
 `function` と出れば読み込めている。
 
-→ [補足](#手順-3-init-の中身)
+→ [補足](#手順-2-init-の中身)
 
-### 4. 検証する
+### 3. 検証する
 
 ```bash
 zoxide --version
 brew list --versions zoxide
 ```
 
-いくつかディレクトリを移動してから、データベースに溜まっているか確認する。**対話シェル（端末に貼る）で実行する**こと。スクリプトの中では記録されない（[補足](#手順-4-データベース)）:
+いくつかディレクトリを移動してから、データベースに溜まっているか確認する。**対話シェル（端末に貼る）で実行する**こと。スクリプトの中では記録されない（[補足](#手順-3-データベース)）:
 
 ```bash
 cd /tmp && cd /usr/share && cd ~
@@ -93,7 +69,7 @@ zoxide query --list
 
 移動したディレクトリが並べば動いている。以後は `z share` のように末尾の一部を書けば `/usr/share` に飛ぶ。`fzf` を入れた場合は `zi` で候補を対話的に選べる。
 
-→ [補足](#手順-4-データベース)
+→ [補足](#手順-3-データベース)
 
 ---
 
@@ -112,7 +88,12 @@ brew upgrade zoxide
 ```bash
 brew uninstall zoxide
 sed -i '/zoxide init/d' ~/.bashrc          # ~/.bashrc に書いた 1 行を消す
-rm -rf ~/.local/share/zoxide               # 学習したディレクトリの履歴も消す場合
+```
+
+学習したディレクトリの履歴（`~/.local/share/zoxide/db.zo`）も捨てるなら、次のブロックも貼る。**残しておけば、入れ直したときにそのまま使える。**
+
+```bash
+rm -rf ~/.local/share/zoxide
 ```
 
 `~/.bashrc` から `zoxide init` の行を消し忘れると、新しいシェルを開くたびに `zoxide: command not found` が出る（`ZOXIDE_CMD=cd` にしていた場合は `cd` が壊れたように見える）。
@@ -127,7 +108,7 @@ rm -rf ~/.local/share/zoxide               # 学習したディレクトリの�
 
 - **目的**: AlmaLinux 10 に [zoxide](https://github.com/ajeetdsouza/zoxide)（よく行くディレクトリを覚えて短い入力で移動するツール）の最新版を入れる。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、`~/.bashrc` に初期化の 1 行を足す。**読者が書き換えるのは冒頭の変数ブロック（コマンド名）だけ**
-- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `brew install zoxide` を実行し、`~/.bashrc` に `eval "$(zoxide init bash)"` を書いて常用中（データベースに 5 エントリ）。手順 1〜4 は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`~/.bashrc` に書いた初期化で `z` 関数が定義されること（`type -t z` → `function`）を確認した。ただし**非対話シェルでは `cd` が記録されない**ため、手順 4 の `zoxide query --list` は空だった（[補足](#手順-4-データベース)）。**実機の初期化は `--cmd` 無し（コマンド名 `z`）で入れてある**。`ZOXIDE_CMD=cd` の形と `zi`（fzf 連携）の実動作は**未検証**
+- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `brew install zoxide` を実行し、`~/.bashrc` に `eval "$(zoxide init bash)"` を書いて常用中（データベースに 5 エントリ）。[Homebrew の導入](homebrew.md)と手順 1〜3 は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`~/.bashrc` に書いた初期化で `z` 関数が定義されること（`type -t z` → `function`）を確認した。ただし**非対話シェルでは `cd` が記録されない**ため、手順 3 の `zoxide query --list` は空だった（[補足](#手順-3-データベース)）。**実機の初期化は `--cmd` 無し（コマンド名 `z`）で入れてある**。`ZOXIDE_CMD=cd` の形と `zi`（fzf 連携）の実動作は**未検証**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -175,11 +156,7 @@ AlmaLinux 10 aarch64 で zoxide を入れる経路を比べた（2026-09-22 時�
 
 `--cmd cd` を渡すと `cd` 自体が zoxide の関数に置き換わり、`cd foo` が「まず実在するディレクトリ、無ければ履歴から推測」という動きになる。便利な反面、**スクリプトやツールが呼ぶ `cd` の挙動まで変わる**ので、本書の既定は `z`（`cd` はそのまま）にしてある。実機も `--cmd` 無し（＝ `z`）で入れてある。
 
-#### 手順 1: Homebrew の導入
-
-公式インストーラは `/home/linuxbrew/.linuxbrew` に入れる（このパスに入る場合だけボトルが使える）。**root で実行してはいけない**。詳しくは [yazi.md の同じ手順](yazi.md#手順-1-homebrew-の導入)。
-
-#### 手順 3: init の中身
+#### 手順 2: init の中身
 
 `zoxide init bash` は**シェル関数の定義を標準出力に吐くだけ**のコマンドで、`eval` しなければ何も起こらない。実機での出力は 181 行あり、先頭は次のようになっている:
 
@@ -202,7 +179,7 @@ function __zoxide_pwd() {
 
 `zi` は内部で `fzf` を呼ぶので、`fzf` が無いとそのサブコマンドだけ失敗する（`z` は動く）。
 
-#### 手順 4: データベース
+#### 手順 3: データベース
 
 学習結果は `~/.local/share/zoxide/db.zo`（バイナリ）に入る。中身は `zoxide query --list`（パスの一覧）や `zoxide query --list --score`（スコア付き）で読める。実機は 5 エントリ、287 バイト:
 
@@ -215,7 +192,7 @@ $ zoxide query --list | wc -l
 
 特定のパスを忘れさせるには `zoxide remove`（引数はパス）。
 
-**記録されるのは対話シェルだけ**。`zoxide init` が仕込むのは `PROMPT_COMMAND` のフックで、これはプロンプトを出すときにしか走らない。非対話シェル（スクリプトや `bash -c`）で `cd` してもデータベースは増えない。検証コンテナで手順 4 のブロックをスクリプトとして流したときは、`zoxide query --list` の出力が空になった。
+**記録されるのは対話シェルだけ**。`zoxide init` が仕込むのは `PROMPT_COMMAND` のフックで、これはプロンプトを出すときにしか走らない。非対話シェル（スクリプトや `bash -c`）で `cd` してもデータベースは増えない。検証コンテナで手順 3 のブロックをスクリプトとして流したときは、`zoxide query --list` の出力が空になった。
 
 ### 完了時点の状態
 
@@ -248,20 +225,20 @@ $ grep -n 'zoxide init' ~/.bashrc
 - [ajeetdsouza/zoxide — README](https://github.com/ajeetdsouza/zoxide) — 各 OS のインストール方法、シェルごとの `zoxide init` の書き方、`--cmd` の説明
 - [zoxide — Installation](https://github.com/ajeetdsouza/zoxide#installation) — 公式 install.sh と各ディストリビューションの状況
 - `zoxide --help` / `zoxide query --help` — `query --list` / `--score`、`remove`
-- [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) — `/home/linuxbrew/.linuxbrew` に入れる理由とボトルの条件
+- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 
 ---
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って手順 1〜4 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 1〜3 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` |
-| 2. zoxide | `Pouring zoxide--0.10.0.arm64_linux.bottle.tar.gz`。ソースビルドは発生しない |
-| 3. 初期化 | `~/.bashrc` に `eval "$(zoxide init bash --cmd z)"` を追記して読み込み直し、`type -t z` → `function` |
-| 4. 検証 | `zoxide --version` → `zoxide 0.10.0`。`cd` を 3 回してからの `zoxide query --list` は**空**（非対話シェルでは `PROMPT_COMMAND` のフックが走らないため） |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
+| 1. zoxide | `Pouring zoxide--0.10.0.arm64_linux.bottle.tar.gz`。ソースビルドは発生しない |
+| 2. 初期化 | `~/.bashrc` に `eval "$(zoxide init bash --cmd z)"` を追記して読み込み直し、`type -t z` → `function` |
+| 3. 検証 | `zoxide --version` → `zoxide 0.10.0`。`cd` を 3 回してからの `zoxide query --list` は**空**（非対話シェルでは `PROMPT_COMMAND` のフックが走らないため） |
 | fzf | `brew install zoxide fzf` で `fzf 0.74.4` と依存の `ncurses 6.6` も入った |
 | RPM 経路 | EPEL を有効にしても `dnf list --available zoxide` は `Error: No matching Packages to list` |
 
