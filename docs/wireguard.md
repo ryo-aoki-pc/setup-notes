@@ -16,22 +16,27 @@
 
 ### 1. site.env を書く
 
-**編集するのは `~/wg/site.env` だけ。** 両拠点の WG ホストに同じ内容を置く。`REPO` は clone 先が `~/setup-notes` なら既定のままでよい:
+clone 先が `~/setup-notes` なら、このブロックは既定のままでよい:
 
 ```bash
 REPO=~/setup-notes                    # このリポジトリを clone した場所に合わせる。新しいシェルを開いたら設定し直す
 ```
 
+`~/wg/site.env` を作って編集する:
+
 ```bash
 mkdir -p ~/wg && chmod 700 ~/wg
 cp "${REPO:?このリポジトリの場所を REPO に入れてから貼る}/scripts/wireguard/site.env.example" ~/wg/site.env
 chmod 600 ~/wg/site.env
-vi ~/wg/site.env                      # 上の変数表のとおりに埋める（クライアント帯は受ける拠点だけ）。公開鍵は手順 2 で書き足す
+vi ~/wg/site.env                      # 公開鍵は手順 2 で書き足す
 ```
+
+- **編集するのは `~/wg/site.env` だけ。** 埋める値は[補足の変数表](#対象と検証環境)にある（クライアント帯は、クライアントを受ける拠点にだけ書く）
+- 書けたら、同じ内容を両拠点の WG ホストに置く
 
 ### 2. 鍵の生成と公開鍵の交換
 
-**両拠点の WG ホストで実施する。** `wireguard-tools` を導入し、鍵ペアを生成する（既存の鍵があれば上書きしない）。
+**両拠点の WG ホストで実施する。** `wireguard-tools` を導入して鍵ペアを生成する（既存の鍵があれば上書きしない）:
 
 ```bash
 cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
@@ -53,16 +58,23 @@ vi ~/wg/site.env                      # SITE_A_PUBKEY と SITE_B_PUBKEY を埋�
 
 ### 3. 適用
 
-**両拠点の WG ホストで実施する。** `wg0.conf` の生成、IP フォワーディング、firewalld（LAN 側ゾーンに `${WG_PORT}/udp` と `wg0` を追加し、ゾーン内転送を有効にする。旧レイアウトの専用ゾーンと policy が残っていれば先に消す）、`wg-quick@wg0` の有効化と起動をまとめて行い、最後にルーターへ入れる値を表示する。
+**両拠点の WG ホストで実施する。** まず実行予定の内容を見る:
 
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 実行予定の内容を確認する（秘密鍵は (hidden) と表示）
-sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 適用する
+sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
 ```
 
+表示された内容でよければ、適用する:
+
+```bash
+sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 拠点 B のホストでは B
+```
+
+- **`apply` の末尾に表示される値（ポート転送と静的経路）を、両拠点のルーターに入れる。** これが無いとトンネルは張れない（→ [補足: ルーターの設定](#ルーターの設定)）
+- **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)。切り離して実行する方法もそこにある）
+- `apply` が行うのは、`wg0.conf` の生成、IP フォワーディング、firewalld（LAN 側ゾーンに `${WG_PORT}/udp` と `wg0` を追加し、ゾーン内転送を有効にする）、`wg-quick@wg0` の有効化と起動。旧レイアウトの専用ゾーンと policy が残っていれば先に消す
 - 拠点の指定（`A` / `B`）はこのホストの LAN 側 IP（`WG_x_LAN_IP`）と照合され、違えば何も変更せずに止まる
 - 再実行しても設定は重複しない。`site.env` を変えたときやクライアントを足したときも、この `apply` で反映する（最後に必ず restart する）
-- **`apply` の末尾に表示される値（ポート転送と静的経路）を、両拠点のルーターに入れる。** これが無いとトンネルは張れない（→ [補足: ルーターの設定](#ルーターの設定)）
 
 拠点間の疎通は、ここまでで確認できる（[疎通確認](#5-疎通確認)）。
 
@@ -70,18 +82,46 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 適用する
 
 ### 4. クライアントの登録
 
-**クライアントを受ける拠点のホストで実施する。** 台数分繰り返す（まとめて登録して、最後に 1 回だけ `apply` してもよい）。後から台数を足すときも同じ。
+**クライアントを受ける拠点のホストで実施する。** 下のブロックは上から順に貼るものではなく、**鍵をどちらで作るかで 1 か 2 のどちらかを選ぶ**（`laptop` / `phone` は自分の名前に、`A` は自分の拠点に読み替える）。
+
+**1. 鍵をホストで作る場合:**
 
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env client add A laptop      # 鍵を生成し、/etc/wireguard/clients/laptop.conf を書く（トンネル IP は帯の中で最小の空き。--ip で指定できる）
-sudo ./wg-vpn.sh -e ~/wg/site.env client add A phone --pubkey 'クライアントから受け取った公開鍵'   # 鍵をクライアント側で作った場合（AlmaLinux 10 の PC なら wireguard-road-warrior.md の手順 2〜3）
+sudo ./wg-vpn.sh -e ~/wg/site.env client add A laptop
+```
+
+**2. 鍵をクライアント側で作った場合**（AlmaLinux 10 の PC なら [road-warrior の手順 2〜3](wireguard-road-warrior.md#2-鍵ペアの生成)）**:** 公開鍵をシングルクォートの中に貼ってから実行する。
+
+```bash
+sudo ./wg-vpn.sh -e ~/wg/site.env client add A phone --pubkey 'クライアントから受け取った公開鍵'
+```
+
+台数分繰り返したら、まとめて反映する:
+
+```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env apply A                  # 登録した [Peer] を wg0.conf に書いて restart
-sudo ./wg-vpn.sh -e ~/wg/site.env client show laptop       # PC にはこの内容をコピーする（AlmaLinux 10 の PC で NetworkManager に取り込む手順は wireguard-road-warrior.md）
-sudo ./wg-vpn.sh -e ~/wg/site.env client show phone --qr   # スマートフォンのアプリで読み取る（qrencode が必要。EL10 では epel-release が要る場合がある）
-sudo rm /etc/wireguard/clients/laptop.conf                 # 取り込んだら、秘密鍵入りの conf をホストに残さない
+```
+
+クライアント用 conf を表示する（PC はこの内容をコピー、スマートフォンは `--qr` で読み取る）:
+
+```bash
+sudo ./wg-vpn.sh -e ~/wg/site.env client show laptop
+```
+
+```bash
+sudo ./wg-vpn.sh -e ~/wg/site.env client show phone --qr   # qrencode が必要。EL10 では epel-release が要る場合がある
+```
+
+**クライアントに取り込んでから**、秘密鍵入りの conf をホストから消す:
+
+```bash
+sudo rm /etc/wireguard/clients/laptop.conf
 ```
 
 - **反映は `apply`（restart）で行う。** `reload` では新しい peer の経路が入らない（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)）
+- **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
+- 取り込む前に conf を消すと再発行が必要になる（`client remove` してから登録し直す）
+- トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）。AlmaLinux 10 の PC で NetworkManager に取り込む手順は [wireguard-road-warrior.md](wireguard-road-warrior.md)
 - 登録は `~/wg/clients.list` に残り、`apply` のたびに同じ conf が組み立て直される
 - `--pubkey` で登録した conf の `PrivateKey` は `<CLIENT_PRIVATE_KEY>` のままなので、端末側で自分の秘密鍵に置き換える
 - どちらか片方の拠点で登録すれば、そのクライアントは**両拠点の LAN に届く**（両拠点で `apply` 済みで、両拠点のルーターにクライアント帯の静的経路がある前提。[パケットの流れ](#パケットの流れremote-client--各拠点)）。同じクライアントを両拠点に登録することはできない（[理由](#1-台のクライアントは-1-つの拠点にしか接続できない)）
@@ -93,19 +133,21 @@ sudo rm /etc/wireguard/clients/laptop.conf                 # 取り込んだら�
 **WG ホストで:**
 
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env status     # wg show（latest handshake が 2 分以内）、wg0 の経路、サービス、ip_forward、wg0 が属するゾーンの内容（interfaces / ports / forward）、クライアントの最終ハンドシェイク
+sudo ./wg-vpn.sh -e ~/wg/site.env status
 ```
 
-**拠点の LAN 上のクライアント同士**（Client A から）:
+`wg show`（`latest handshake` が 2 分以内）、`wg0` の経路、サービス、`ip_forward`、`wg0` が属するゾーンの内容（interfaces / ports / forward）、クライアントの最終ハンドシェイクが出る。
 
-```bash
+**拠点の LAN 上のクライアント同士**（Client A から。`<...>` は値に読み替える）:
+
+```
 ping <Client B の IP>
 tracepath -n <Client B の IP>
 ```
 
-**外出先のクライアントから:**
+**外出先のクライアントから**（同じく値に読み替える）:
 
-```bash
+```
 ping <接続先拠点の LAN のホスト>     # 例: 192.168.110.100
 ping <相手拠点の LAN のホスト>       # 例: 192.168.120.100
 tracepath -n <相手拠点の LAN のホスト>
@@ -119,11 +161,15 @@ tracepath -n <相手拠点の LAN のホスト>
 
 ## クライアントを削除する
 
-クライアントを受ける拠点のホストで。登録簿とクライアント用 conf を消し、`apply` で `[Peer]` を外して restart する。
+クライアントを受ける拠点のホストで、登録簿とクライアント用 conf を消して `apply` で反映する。
 
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env client remove laptop && sudo ./wg-vpn.sh -e ~/wg/site.env apply A
+cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+sudo ./wg-vpn.sh -e ~/wg/site.env client remove laptop &&     # laptop は消したいクライアントの名前
+sudo ./wg-vpn.sh -e ~/wg/site.env apply A                     # 拠点 B のホストでは B
 ```
+
+**トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）。
 
 ---
 
@@ -131,7 +177,7 @@ sudo ./wg-vpn.sh -e ~/wg/site.env client remove laptop && sudo ./wg-vpn.sh -e ~/
 
 OS を入れ直しても、**ホストの秘密鍵が同じなら**、相手拠点の `site.env` も、配布済みのクライアントの conf も、ルーターの設定も**そのまま使える**。逆に鍵を作り直すと、相手拠点の公開鍵の差し替えと、クライアント全台の conf 再発行が連鎖する。
 
-**バックアップを取る**（読むだけなので、トンネルを止めずに稼働中のホストで実行できる。両拠点でそれぞれ取る）:
+**バックアップを取る**（両拠点でそれぞれ）:
 
 ```bash
 cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
@@ -139,24 +185,31 @@ sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run backup &&       # まとめる内容
 sudo ./wg-vpn.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホスト名>-<日時>.tar.gz（0600）
 ```
 
-出力先を変えるときは `backup` の前に `-o /mnt/usb/wgb.tar.gz` のように付ける。
+読むだけなので、トンネルを止めずに稼働中のホストで実行できる。出力先を変えるときは `backup` の前に `-o /mnt/usb/wgb.tar.gz` のように付ける。
 
 - **このアーカイブには秘密鍵が入っている。** `0600` のまま、リポジトリの中には置かず、このマシンの外（別のディスク、オフラインのメディア）に保管する
 
 **クリーンインストール後に復旧する**（`keygen` は実行しない。別の鍵ができ、復旧の意味が無くなる）:
 
 ```bash
-BACKUP=                              # 復旧に使うアーカイブ（例: ~/wg-backup-<ホスト名>-<日時>.tar.gz）
+BACKUP=                              # ← 復旧に使うアーカイブ（例: ~/wg-backup-<ホスト名>-<日時>.tar.gz）
 ```
 
-`BACKUP` が空のまま貼ると、次のブロックは `${BACKUP:?…}` で中断して何も戻さない:
+まず戻す内容を見る:
 
 ```bash
 cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
-sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}" &&
-sudo ./wg-vpn.sh restore "${BACKUP}" &&                     # wireguard-tools の導入。鍵・conf・site.env・clients.list を元の場所へ戻す
-sudo ./wg-vpn.sh -e ~/wg/site.env apply B                   # sysctl・firewalld・サービス。クライアントの [Peer] も clients.list から戻る
+sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}"
 ```
+
+表示された内容でよければ、戻して適用する:
+
+```bash
+sudo ./wg-vpn.sh restore "${BACKUP}" &&                     # wireguard-tools の導入。鍵・conf・site.env・clients.list を元の場所へ戻す
+sudo ./wg-vpn.sh -e ~/wg/site.env apply B                   # このホストの拠点に読み替える（例は拠点 B）
+```
+
+`BACKUP` が空のまま貼ると `${BACKUP:?…}` で中断し、何も戻さない。
 
 - `restore` は、鍵から算出した公開鍵が `site.env` の `SITE_x_PUBKEY` と一致することを確かめてから置く。一致すれば**相手拠点もクライアント端末も設定変更は要らない**
 - ルーターのポート転送と静的経路は鍵に依存しないので変更不要（WG ホストの LAN 側 IP が変わった場合だけ入れ直す）
@@ -169,13 +222,31 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply B                   # sysctl・firewalld
 
 > **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](#バックアップと復旧os-の再インストール)を取る。鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
 
-各拠点の WG ホストで:
+各拠点の WG ホストで、**必要なところまで**貼る（下に行くほど戻しにくい）。
+
+まずサービスを止めて firewalld と sysctl を戻す（conf・鍵・クライアント用 conf は残るので、ここまでなら `apply` でやり直せる）:
 
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env remove A            # サービス停止、wg0 と待ち受けポートを LAN 側ゾーンから外す（forward は戻さない）、sysctl を戻す（conf・鍵・クライアント用 conf は残す）
+cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+sudo ./wg-vpn.sh -e ~/wg/site.env remove A            # 拠点 B のホストでは B
+```
+
+**ここから先は戻せない。** 鍵も消すなら:
+
+```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env remove A --purge    # conf・鍵・クライアント用 conf も消す（clients.list は残る）
-rm -rf ~/wg                                           # site.env・clients.list（不要なら）
-sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
+```
+
+`site.env` と `clients.list` も要らないなら:
+
+```bash
+rm -rf ~/wg
+```
+
+パッケージも要らないなら:
+
+```bash
+sudo dnf remove wireguard-tools systemd-resolved
 ```
 
 - ルーター側のポート転送と静的経路は手で削除する
@@ -478,7 +549,7 @@ $ ip route show dev wg0
 
 `apply` は `clients.list` からクライアントの `[Peer]` を**毎回組み立て直す**。手で `wg0.conf` に書いた `[Peer]` は、登録簿に無ければ書き換えのときに消える。手で組んだ構成から `wg-vpn.sh` に移るときは、`apply` の前に既存のクライアントを登録簿へ写す:
 
-```bash
+```
 sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
   --pubkey <クライアントの公開鍵> --ip <そのクライアントのトンネル IP>
 ```

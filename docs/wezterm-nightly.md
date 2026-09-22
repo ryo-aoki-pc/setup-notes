@@ -15,19 +15,25 @@
 
 ### 0. 変数を設定する
 
-**編集するものは無い。** `uname -m` から chroot 名を組み立てるだけ。新しいシェルを開いたら先にこのブロックを貼り直す。
+**編集するものは無い。**
 
 ```bash
 WZ_CHROOT="rhel-9-$(uname -m)"     # COPR に EL10 向けが無いので EL9 向けを使う。<WZ_CHROOT>
 echo "${WZ_CHROOT}"
 ```
 
-`rhel-9-x86_64` または `rhel-9-aarch64` になっていることを確認する。それ以外（`rhel-9-` で終わる、など）なら止める。
+- `rhel-9-x86_64` または `rhel-9-aarch64` になっていることを確認する。それ以外（`rhel-9-` で終わる、など）なら止める
+- 変数はそのシェルの中だけで有効。新しいシェルを開いたら、このブロックを貼り直してから先へ進む
 
 ### 1. COPR を有効化する
 
 ```bash
 sudo dnf copr enable wezfurlong/wezterm-nightly "${WZ_CHROOT}"
+```
+
+有効化してよいか `[y/N]` で聞かれる。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+
+```bash
 cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
 ```
 
@@ -51,7 +57,9 @@ ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 
 wezterm ls-fonts | head -5
 ```
 
-GUI をデスクトップ上で開く。**GNOME にログイン済みの端末（GNOME 端末や ssh 越しではなく実セッション）から** `wezterm` を起動すればウィンドウが開く。ssh などグラフィカルでないシェルから確認する場合は、ログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる:
+GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く。
+
+ssh などグラフィカルでないシェルから確かめる場合は、次のブロックでログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる:
 
 ```bash
 env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
@@ -75,7 +83,9 @@ env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
 | 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
 | 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
 
-最小の例（`~/.config/wezterm/` に置く場合。**`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする）。ファイルを作って保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` 既定 true。効かなければ `Ctrl+Shift+R`）:
+最小の例を `~/.config/wezterm/wezterm.lua` に書く。
+
+**`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする。次のブロックは既存の `~/.config/wezterm/wezterm.lua` を上書きするので、自分の設定がある人は貼らない。
 
 ```bash
 mkdir -p ~/.config/wezterm
@@ -88,6 +98,8 @@ return config
 LUA
 wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れば読めている
 ```
+
+保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` の既定が true。効かなければ `Ctrl+Shift+R`）。
 
 Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）。`wezterm -n`（`--skip-config`）で設定を読まずに起動できる。`wezterm --config 'font_size=14'` のように 1 項目だけ上書きもできる。
 
@@ -105,14 +117,21 @@ sudo dnf upgrade wezterm
 
 ## ロールバック
 
+本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのが下の 4 パッケージだけであることまで確認した）。
+
 ```bash
 sudo dnf remove wezterm wezterm-common wezterm-gui wezterm-mux-server
+```
+
+トランザクション表を見て `[y/N]` に答えてから、次のブロックを貼る。
+
+```bash
 sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消す
 ```
 
 `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す。COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）。消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`。
 
-本書ではロールバックは**本実行していない**。`dnf remove --assumeno` で、消えるのが上記 4 パッケージだけ（巻き添えの依存パッケージ無し）であることは確認した。
+消えるのは上記 4 パッケージだけで、巻き添えの依存パッケージは無い。
 
 ---
 
