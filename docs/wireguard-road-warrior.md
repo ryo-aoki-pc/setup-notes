@@ -21,7 +21,7 @@
 
 ### 0. 変数を設定する
 
-**編集が必須なのは、1 行ずつのブロックにした接続先拠点の 4 つの IP。** 最後のまとめてあるブロックは既定のまま貼ってよい。**`sudo -i` した root のシェルではなく、自分のシェルで貼る**（`~` が自分のホームになるため）。**新しいシェルを開いたら（SSH を張り直したあとも）先にすべてのブロックを貼り直す。**
+編集が必須なのは次の 1 行ずつの 4 ブロック（**`sudo -i` した root のシェルではなく、自分のシェルで貼る**。`~` が自分のホームになるため）。
 
 ```bash
 WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
@@ -45,13 +45,17 @@ PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 I
 WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（手順 9 で秘密鍵と conf を消す）
 ```
 
-**値を読み戻して確かめる。** 拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること。
+値を読み戻して確かめる。
 
 ```bash
 for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
   printf '%-15s = %s\n' "$v" "${!v}"
 done
 ```
+
+- 例の値は拠点 A がクライアントを受ける構成のもの。拠点 B が受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること
+- **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
+- 変数はそのシェルの中だけで有効。新しいシェルを開いたら（SSH を張り直したあとも）、上のブロックを貼り直してから先へ進む
 
 → [補足](#手順-0-変数について)
 
@@ -68,7 +72,7 @@ modinfo -n wireguard                          # カーネル同梱のモジュ�
 
 ### 2. 鍵ペアの生成
 
-秘密鍵は `wg0.key` に書き、端末には表示しない。公開鍵（44 文字）だけを手順 3 で WG ホストに渡す。
+秘密鍵は `wg0.key` に書き、端末には表示しない。
 
 ```bash
 if [ -e "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.key" ]; then echo '中断: wg0.key が既にある（作り直すなら先に消す。WG ホストに登録済みの公開鍵と対応しなくなる）' >&2; else
@@ -79,11 +83,13 @@ if [ -e "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.key" ]; then echo '�
 fi
 ```
 
+表示された公開鍵（44 文字）だけを手順 3 で WG ホストに渡す。
+
 → [補足](#手順-2-鍵ペア)
 
 ### 3. WG ホストに公開鍵を登録する（WG ホストで実行）
 
-**ここだけ WG ホストのシェルで実行する**（[wireguard.md の手順 1](wireguard.md#1-siteenv-を書く) の `REPO` と `~/wg/site.env` がある前提）。別のシェルなので先頭で変数を設定する。**編集が必須なのは、1 行ずつの 3 ブロック。**
+**ここだけ WG ホストのシェルで実行する。** 別のシェルなので、先頭で変数を設定し直す（編集が必須なのは 1 行ずつの 3 ブロック。[wireguard.md の手順 1](wireguard.md#1-siteenv-を書く) の `REPO` と `~/wg/site.env` がある前提）。
 
 ```bash
 SITE=A                               # クライアントを受ける拠点（A または B）
@@ -103,14 +109,16 @@ clone 先が `~/setup-notes` なら既定のままでよい:
 REPO=~/setup-notes                   # WG ホスト上でこのリポジトリを clone した場所（wireguard.md の手順 1 と同じ）
 ```
 
-登録済みのクライアントを確認する。**同じ名前が既にある（ホスト側で鍵を作って登録したものなど）なら先に消す**（登録簿は名前で一意。→ [クライアントを削除する](wireguard.md#クライアントを削除する)。`apply` は次のブロックでまとめて行う）:
+登録済みのクライアントを確認する:
 
 ```bash
 cd "${REPO:?REPO が空のまま}/scripts/wireguard" && ./wg-vpn.sh -e ~/wg/site.env client list
 ```
 
+登録簿は名前で一意なので、**`CLIENT_NAME` と同じ名前が一覧にあるときだけ**次のブロックを貼って消す（無ければ「登録されていません」で止まる。`apply` は次のブロックでまとめて行う）。
+
 ```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME:?CLIENT_NAME が空のまま}"   # 同名の登録があるときだけ。無ければ「登録されていません」で止まる
+sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME:?CLIENT_NAME が空のまま}"
 ```
 
 公開鍵で登録し、ホストに反映して、クライアント用 conf を表示する:
@@ -123,6 +131,8 @@ if [ -z "${CLIENT_PUBKEY}" ]; then echo '中断: CLIENT_PUBKEY が空のまま�
   sudo ./wg-vpn.sh -e ~/wg/site.env client show "${CLIENT_NAME}"      # この出力を PC へ持っていく（秘密鍵は含まれない）
 fi
 ```
+
+**トンネル越しに WG ホストへ ssh して作業している場合、`apply` の restart で自分のセッションが切れる**（→ [落とし穴](#落とし穴-apply-は作業中の-ssh-経路そのものを切る)。切り離して実行する方法もそこにある）。
 
 `client show` が表示する内容（`PrivateKey` はプレースホルダのままなので**秘密情報を含まない**。端末からコピーして PC に持っていく）:
 
@@ -144,13 +154,16 @@ PersistentKeepalive = 25
 
 ### 4. conf を PC に置き、秘密鍵を入れる
 
-手順 3 の出力を PC に持ってくる。端末からコピーして下の `vi` に貼るのが簡単。ファイルで渡すなら、WG ホストで `client show` の出力をファイルに書き出し（秘密鍵は入っていないので平文でよい）、`scp` で `${WG_DIR}/wg0.conf` に置く。**ファイル名は `wg0.conf` にする**（NetworkManager がファイル名から接続名とインターフェース名を決める。実測で確認 → [補足](#手順-4-conf-と秘密鍵)）。
+手順 3 の `client show` の出力を、端末からコピーして `vi` に貼る。
 
 ```bash
 ( umask 077; vi "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.conf" )    # 手順 3 の client show の出力をそのまま貼って保存する
 ```
 
-`PrivateKey` 行だけを手順 2 の秘密鍵に置き換える（`PrivateKey` 行がちょうど 1 行でなければ何もしない。鍵は表示しない）:
+- **ファイル名は `wg0.conf` にする。** NetworkManager がファイル名から接続名とインターフェース名を決める（実測で確認 → [補足](#手順-4-conf-と秘密鍵)）
+- ファイルで渡すなら、WG ホストで `client show` の出力をファイルに書き出し（秘密鍵は入っていないので平文でよい）、`scp` で `${WG_DIR}/wg0.conf` に置く
+
+`PrivateKey` 行だけを手順 2 の秘密鍵に置き換える（鍵は表示しない）:
 
 ```bash
 if [ "$(grep -c '^PrivateKey *=' "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.conf" 2>/dev/null)" != 1 ] || [ ! -s "${WG_DIR}/wg0.key" ]; then
@@ -166,13 +179,17 @@ fi
 
 ### 5. NetworkManager に取り込む
 
-取り込んだ直後に NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため。実測で `activating` → `activated` になり、`AllowedIPs` の 3 経路が入った）。**この手順から拠点の LAN の外で行う**こと。張られた時点で拠点 LAN 宛ての経路が入れ替わるので、LAN 内だとそこで通信が切れる。2 つ目のブロックで即座に切る。
+**この手順から拠点の LAN の外で行う。**
 
 ```bash
 sudo nmcli connection import type wireguard file "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.conf" &&
 sudo nmcli connection modify wg0 connection.autoconnect no &&
 nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
 ```
+
+`import` した直後に NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わるので、**LAN 内で貼ってしまうと、そこで通信が切れて次のブロックを貼れなくなる**（その場合は PC のコンソールで `sudo nmcli connection down wg0`）。
+
+次のブロックで即座に切る:
 
 ```bash
 nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（手順 6 で改めて張る）
@@ -212,7 +229,7 @@ sudo ausearch -m AVC -ts recent                # <no matches>
 
 ### 7. 疎通確認
 
-**PC で。** トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に試す。どこで止まるかで疑う場所が変わる（→ [補足](#手順-7-疎通確認)）。
+**PC で。** トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に試す。
 
 ```bash
 for h in "${WG_HOST_TUN_IP:?手順 0 の変数が空のまま}" "${WG_HOST_LAN_IP:?}" "${ROUTER_LAN_IP:?}" "${PEER_WG_LAN_IP:?}"; do
@@ -222,6 +239,8 @@ tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_L
 ```
 
 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい。
+
+どこで止まるかで疑う場所が変わる（→ [補足](#手順-7-疎通確認)）。
 
 **WG ホストで**（手順 3 のシェル）。ハンドシェイクと、**逆方向**（拠点 → PC）を確認する:
 
@@ -262,13 +281,15 @@ ls -l "${WG_DIR}"                                       # wg0.pub だけ残る
 
 ## ロールバック
 
-PC で。`rm -rf` は使わない（`WG_DIR` を WG ホストの `~/wg` と取り違えて貼っても登録簿を消さないため）:
+**PC で、手順 0 の変数を設定したシェルで貼る**（`WG_DIR` が空だと `${WG_DIR:?…}` で止まる）。
 
 ```bash
 sudo nmcli connection down wg0 2>/dev/null; sudo nmcli connection delete wg0
 rm -f "${WG_DIR:?手順 0 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
 sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
 ```
+
+`rm -rf` を使わないのは、`WG_DIR` を WG ホストの `~/wg` と取り違えて貼っても登録簿を消さないため。
 
 パッケージも消すなら:
 
