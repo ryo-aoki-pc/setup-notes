@@ -13,7 +13,7 @@
 | firewalld | 2.4.3 |
 | NetworkManager | 1.56.0 |
 | SELinux | Enforcing |
-| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定 |
+| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定。AlmaLinux 10 の PC を NetworkManager でつなぐ手順は [wireguard-road-warrior.md](wireguard-road-warrior.md)（未検証） |
 
 ![構成](diagrams/wireguard-remote-client.svg)
 
@@ -111,9 +111,9 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 適用する
 
 ```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env client add A laptop      # 鍵を生成し、/etc/wireguard/clients/laptop.conf を書く（トンネル IP は帯の中で最小の空き。--ip で指定できる）
-sudo ./wg-vpn.sh -e ~/wg/site.env client add A phone --pubkey 'クライアントから受け取った公開鍵'   # 鍵をクライアント側で作った場合
+sudo ./wg-vpn.sh -e ~/wg/site.env client add A phone --pubkey 'クライアントから受け取った公開鍵'   # 鍵をクライアント側で作った場合（AlmaLinux 10 の PC なら wireguard-road-warrior.md の手順 2〜3）
 sudo ./wg-vpn.sh -e ~/wg/site.env apply A                  # 登録した [Peer] を wg0.conf に書いて restart
-sudo ./wg-vpn.sh -e ~/wg/site.env client show laptop       # PC にはこの内容をコピーする
+sudo ./wg-vpn.sh -e ~/wg/site.env client show laptop       # PC にはこの内容をコピーする（AlmaLinux 10 の PC で NetworkManager に取り込む手順は wireguard-road-warrior.md）
 sudo ./wg-vpn.sh -e ~/wg/site.env client show phone --qr   # スマートフォンのアプリで読み取る（qrencode が必要。EL10 では epel-release が要る場合がある）
 sudo rm /etc/wireguard/clients/laptop.conf                 # 取り込んだら、秘密鍵入りの conf をホストに残さない
 ```
@@ -597,15 +597,15 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### クライアントが拠点の LAN 内にいるとき
 
-ノート PC を持ち帰って拠点 A の LAN 内で VPN を張ると、`${SITE_A_PUBLIC}` 宛ての通信が自拠点のルーターに出て折り返す（ヘアピン）。ルーターが対応していないと接続できない。LAN 内では VPN を切る運用にするのが簡単。
+ノート PC を持ち帰って拠点 A の LAN 内で VPN を張ると、`${SITE_A_PUBLIC}` 宛ての通信が自拠点のルーターに出て折り返す（ヘアピン）。ルーターが対応していないと接続できない。LAN 内では VPN を切る運用にするのが簡単。NetworkManager で張る PC では、これに加えて LAN 宛ての経路が `wg0` 側（metric 50、要確認）に奪われる（[Road Warrior 手順書の注意点](wireguard-road-warrior.md#注意点)）。
 
 #### クライアントの秘密鍵の扱い
 
-ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手順 4 の最後の `rm`）。より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す。
+ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手順 4 の最後の `rm`）。より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す。AlmaLinux 10 の PC でその流れにするなら [Road Warrior 手順書](wireguard-road-warrior.md)の手順 2〜3。
 
 #### `DNS =` を書く場合
 
-クライアント conf の `[Interface]` に `DNS = ${WG_CLIENT_DNS}` を書くと、VPN 接続中の名前解決を拠点側の DNS に向けられる。Linux の `wg-quick` はこのとき `resolvconf` を呼ぶので、`systemd-resolved` が有効である必要がある（EL10 では `wireguard-tools` の依存で入るが **disabled のまま**なので、使うなら `systemctl enable --now systemd-resolved`）。公式アプリ（Windows / macOS / iOS / Android）では追加の設定は要らない。本書の検証では `DNS =` を使っていない。
+クライアント conf の `[Interface]` に `DNS = ${WG_CLIENT_DNS}` を書くと、VPN 接続中の名前解決を拠点側の DNS に向けられる。Linux の `wg-quick` はこのとき `resolvconf` を呼ぶので、`systemd-resolved` が有効である必要がある（EL10 では `wireguard-tools` の依存で入るが **disabled のまま**なので、使うなら `systemctl enable --now systemd-resolved`）。公式アプリ（Windows / macOS / iOS / Android）では追加の設定は要らない。NetworkManager に `nmcli connection import` で取り込む場合は `DNS =` が `ipv4.dns` になり resolv.conf は NetworkManager が書くので、`systemd-resolved` は要らないはず（要確認。[Road Warrior 手順書](wireguard-road-warrior.md#注意点)）。本書の検証では `DNS =` を使っていない。
 
 #### 全トラフィックを VPN 経由にする場合（対象外）
 
