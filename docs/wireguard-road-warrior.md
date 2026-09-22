@@ -1,48 +1,8 @@
 # WireGuard Road Warrior 設定手順（AlmaLinux 10 クライアント / NetworkManager + nmcli）
 
-- **目的**: [WireGuard VPN 構築手順](wireguard.md)で建てた拠点の WG ホストに、外出先の AlmaLinux 10 ノート PC から接続し、両拠点の LAN に届くようにする。鍵は PC で作り、**公開鍵だけ**を WG ホストに登録する。トンネルは NetworkManager のプロファイル `wg0` として持ち、`nmcli connection up wg0` / `down wg0` で張る・切る（`wg-quick` は使わない。→ [代替](#代替-wg-quick-で張る場合)）
-- **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る。** 手順 3 と手順 7 の後半だけは WG ホスト上で実行する（そのブロックの先頭にも変数がある）。WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 4](wireguard.md#4-クライアントの登録) と同じ
-- **状態**: **実機で本実行済み（2026-09-22）。** 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 0〜9 を通した。両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping まで確認している。NetworkManager の挙動として推定で書いていた項目は 1〜9 が実測で確定し、残るのはサスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）。**拠点の LAN の中からトンネルを張ることは意図的に試していない**（[注意点](#注意点)のとおり LAN の経路を奪うため）。実測の記録は[付録](#付録-実機での検証記録)
+## 実施手順
 
-下表は実機（PC 側）で採取した値。
-
-| 項目 | 値 |
-|---|---|
-| 実施日 | 2026-09-22 |
-| OS | AlmaLinux 10.2 (Lavender Lion) x86_64 |
-| カーネル | 6.12.0-211.56.1.el10_2.x86_64（`wireguard.ko` を同梱） |
-| NetworkManager | 1.56.0-2.el10_2（Wi-Fi を NetworkManager が管理） |
-| `wireguard-tools` | 1.0.20250521-1.el10（appstream。依存で `systemd-resolved` 257-23.el10_2.2.alma.1 が入るが `disabled` / `inactive` のまま） |
-| firewalld | 2.4.3-4.el10_2（既定ゾーン `public`） |
-| SELinux | Enforcing |
-| 接続時の回線 | スマートフォンのテザリング（`<TETHER_NET>` を受領。両拠点の LAN・トンネル網と重ならないことを確認してから張った） |
-| WG ホスト側 | [wireguard.md](wireguard.md) の構成（`wg-vpn.sh`。AlmaLinux 10.2 aarch64、カーネル 6.12 系）。**実測では拠点 B がクライアントを受ける**（`WG_B_CLIENT_NET` を設定、`WG_A_CLIENT_NET` は空）。本文の例の値は `site.env.example`（拠点 A が受ける構成）のままにしてある |
-
-![構成](diagrams/wireguard-remote-client.svg)
-
-図の Remote client が本書の PC。接続先拠点（図では拠点 A）の WG ホストにトンネルを張り、拠点 A・B の LAN に届く（→ [パケットの流れ](wireguard.md#パケットの流れremote-client--各拠点)）。
-
-> **注記**: 環境固有の値は**シェル変数**で書いてある。PC 側は[手順 0](#0-変数を設定する)、WG ホスト側は[手順 3](#3-wg-ホストに公開鍵を登録するwg-ホストで実行)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。
->
-> | 変数 | 設定する場所 | 意味 | 例 |
-> |---|---|---|---|
-> | `${WG_DIR}` | PC | 鍵と conf の一時置き場。取り込んだら秘密鍵と conf は消す（手順 9）。WG ホストの `~/wg` と取り違えないよう別の名前にしてある | `~/wg-client` |
-> | `${WG_HOST_TUN_IP}` | PC | 接続先拠点の WG ホストの `wg0` アドレス（`site.env` の `WG_A_TUN_IP`） | `10.99.0.1` |
-> | `${WG_HOST_LAN_IP}` | PC | 同じホストの LAN 側 IP（`WG_A_LAN_IP`） | `192.168.110.2` |
-> | `${ROUTER_LAN_IP}` | PC | 接続先拠点のルーターの LAN 側 IP（`ROUTER_A_LAN_IP`） | `192.168.110.1` |
-> | `${PEER_WG_LAN_IP}` | PC | 相手拠点の WG ホストの LAN 側 IP（`WG_B_LAN_IP`） | `192.168.120.2` |
-> | `${REPO}` / `${SITE}` | WG ホスト | このリポジトリの clone 先 / クライアントを受ける拠点（`A` か `B`） | `~/setup-notes` / `A` |
-> | `${CLIENT_NAME}` / `${CLIENT_PUBKEY}` | WG ホスト | 登録簿（`clients.list`）に載せる名前 / 手順 2 で PC に表示された公開鍵 | `laptop` /（`wg pubkey` の出力） |
->
-> 出力例・表の中の値は `<CLIENT_NAME>` / `<CLIENT_TUN_IP>`（ホストが割り当てるトンネル IP）/ `<CLIENT_PUBKEY>` / `<SITE_A_PUBKEY>` / `<SITE_A_PUBLIC>` / `<WG_PORT>` / `<WG_HOST_TUN_IP>` などのプレースホルダで書いてある。**`<...>` を含むコマンドは bash のコードブロックには置かない**（本文中のインラインコードで示し、値に読み替える）。読者が値を入れる必要があるコードブロックは、先頭で変数が空なら中断するようにしてあり、値を入れずに貼っても何も実行されない。
->
-> 秘密鍵はこの文書に載せず、手順の中でも端末に表示しない。公開鍵も検証用の使い捨ての値なので載せない。
-
----
-
-## 手順の流れ
-
-**PC で実行する。手順 3 と手順 7 の後半だけ WG ホストで実行する。** **手順 5 以降は拠点の LAN の外**（スマートフォンのテザリングなど）で行う。`import` した瞬間に NetworkManager がトンネルを張り、拠点 LAN 宛ての経路（metric 50）が Wi-Fi の直結経路（metric 600）を奪うため（実測。→ [注意点](#注意点)）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**PC で実行する。手順 3 と手順 7 の後半だけ WG ホストで実行する。** **手順 5 以降は拠点の LAN の外**（スマートフォンのテザリングなど）で行う。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 | 手順 | 内容 | 実施場所 |
 |---|---|---|
@@ -304,6 +264,46 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?SITE が空のまま}"
 ---
 
 ## 補足
+
+### 対象と検証環境
+
+- **目的**: [WireGuard VPN 構築手順](wireguard.md)で建てた拠点の WG ホストに、外出先の AlmaLinux 10 ノート PC から接続し、両拠点の LAN に届くようにする。鍵は PC で作り、**公開鍵だけ**を WG ホストに登録する。トンネルは NetworkManager のプロファイル `wg0` として持ち、`nmcli connection up wg0` / `down wg0` で張る・切る（`wg-quick` は使わない。→ [代替](#代替-wg-quick-で張る場合)）
+- **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る。** 手順 3 と手順 7 の後半だけは WG ホスト上で実行する（そのブロックの先頭にも変数がある）。WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 4](wireguard.md#4-クライアントの登録) と同じ
+- **状態**: **実機で本実行済み（2026-09-22）。** 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 0〜9 を通した。両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping まで確認している。NetworkManager の挙動として推定で書いていた項目は 1〜9 が実測で確定し、残るのはサスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）。**拠点の LAN の中からトンネルを張ることは意図的に試していない**（[注意点](#注意点)のとおり LAN の経路を奪うため）。実測の記録は[付録](#付録-実機での検証記録)
+
+下表は実機（PC 側）で採取した値。
+
+| 項目 | 値 |
+|---|---|
+| 実施日 | 2026-09-22 |
+| OS | AlmaLinux 10.2 (Lavender Lion) x86_64 |
+| カーネル | 6.12.0-211.56.1.el10_2.x86_64（`wireguard.ko` を同梱） |
+| NetworkManager | 1.56.0-2.el10_2（Wi-Fi を NetworkManager が管理） |
+| `wireguard-tools` | 1.0.20250521-1.el10（appstream。依存で `systemd-resolved` 257-23.el10_2.2.alma.1 が入るが `disabled` / `inactive` のまま） |
+| firewalld | 2.4.3-4.el10_2（既定ゾーン `public`） |
+| SELinux | Enforcing |
+| 接続時の回線 | スマートフォンのテザリング（`<TETHER_NET>` を受領。両拠点の LAN・トンネル網と重ならないことを確認してから張った） |
+| WG ホスト側 | [wireguard.md](wireguard.md) の構成（`wg-vpn.sh`。AlmaLinux 10.2 aarch64、カーネル 6.12 系）。**実測では拠点 B がクライアントを受ける**（`WG_B_CLIENT_NET` を設定、`WG_A_CLIENT_NET` は空）。本文の例の値は `site.env.example`（拠点 A が受ける構成）のままにしてある |
+
+![構成](diagrams/wireguard-remote-client.svg)
+
+図の Remote client が本書の PC。接続先拠点（図では拠点 A）の WG ホストにトンネルを張り、拠点 A・B の LAN に届く（→ [パケットの流れ](wireguard.md#パケットの流れremote-client--各拠点)）。
+
+> **注記**: 環境固有の値は**シェル変数**で書いてある。PC 側は[手順 0](#0-変数を設定する)、WG ホスト側は[手順 3](#3-wg-ホストに公開鍵を登録するwg-ホストで実行)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。
+>
+> | 変数 | 設定する場所 | 意味 | 例 |
+> |---|---|---|---|
+> | `${WG_DIR}` | PC | 鍵と conf の一時置き場。取り込んだら秘密鍵と conf は消す（手順 9）。WG ホストの `~/wg` と取り違えないよう別の名前にしてある | `~/wg-client` |
+> | `${WG_HOST_TUN_IP}` | PC | 接続先拠点の WG ホストの `wg0` アドレス（`site.env` の `WG_A_TUN_IP`） | `10.99.0.1` |
+> | `${WG_HOST_LAN_IP}` | PC | 同じホストの LAN 側 IP（`WG_A_LAN_IP`） | `192.168.110.2` |
+> | `${ROUTER_LAN_IP}` | PC | 接続先拠点のルーターの LAN 側 IP（`ROUTER_A_LAN_IP`） | `192.168.110.1` |
+> | `${PEER_WG_LAN_IP}` | PC | 相手拠点の WG ホストの LAN 側 IP（`WG_B_LAN_IP`） | `192.168.120.2` |
+> | `${REPO}` / `${SITE}` | WG ホスト | このリポジトリの clone 先 / クライアントを受ける拠点（`A` か `B`） | `~/setup-notes` / `A` |
+> | `${CLIENT_NAME}` / `${CLIENT_PUBKEY}` | WG ホスト | 登録簿（`clients.list`）に載せる名前 / 手順 2 で PC に表示された公開鍵 | `laptop` /（`wg pubkey` の出力） |
+>
+> 出力例・表の中の値は `<CLIENT_NAME>` / `<CLIENT_TUN_IP>`（ホストが割り当てるトンネル IP）/ `<CLIENT_PUBKEY>` / `<SITE_A_PUBKEY>` / `<SITE_A_PUBLIC>` / `<WG_PORT>` / `<WG_HOST_TUN_IP>` などのプレースホルダで書いてある。**`<...>` を含むコマンドは bash のコードブロックには置かない**（本文中のインラインコードで示し、値に読み替える）。読者が値を入れる必要があるコードブロックは、先頭で変数が空なら中断するようにしてあり、値を入れずに貼っても何も実行されない。
+>
+> 秘密鍵はこの文書に載せず、手順の中でも端末に表示しない。公開鍵も検証用の使い捨ての値なので載せない。
 
 手順の理由・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
 
