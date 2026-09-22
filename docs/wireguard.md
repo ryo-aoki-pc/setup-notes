@@ -2,7 +2,7 @@
 
 - **目的**: 2 拠点の LAN を WireGuard で結び、**拠点 A の LAN 上のクライアントと拠点 B の LAN 上のクライアントが双方向に通信できる**ようにする。あわせて、外出先のノート PC やスマートフォンなど**任意の台数のクライアント**を足して、そこから両拠点の LAN に到達できるようにする
 - **進め方**: **`site.env` に値を 1 度だけ書き、両拠点の WG ホストに同じファイルを置いて、`wg-vpn.sh` に `-e` で渡して実行する。** 拠点 A / B は引数で指定し、スクリプトがこのホストの LAN 側 IP と照合する（取り違えると何も変更せずに止まる）
-- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認はまだしていない**。**外出先のスマートフォン（公式アプリ・モバイル回線）から拠点 B の LAN への疎通は、2026-09-21 に実機で確認した**（[付録](#登録簿に無い-peer-の消失2026-09-21拠点-b)）。**スクリプト（`wg-vpn.sh`）の `apply` は 2026-09-20 に拠点 B の実機で本実行した（旧 firewalld レイアウトからの移行）。`remove` の実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。namespace での検証は、同じ設定を手で入れて行った。**firewalld は 2026-09-20 に「`wg0` を LAN 側ゾーンに入れてゾーン内転送で通す」方式に変えた**（policy を作らない）。この方式はスタブ環境で `apply` / `remove` を確認したうえで、**拠点 B の実機で `apply` を本実行して旧レイアウトから移行し、拠点間の疎通が維持されることを確認した**（[付録](#実機での移行2026-09-20拠点-b)）。**拠点 A の実機はまだ旧レイアウトのまま**で、クライアントから拠点 A の LAN への折り返しとクライアント同士の疎通は未確認
+- **状態**: 1 台のマシン上に network namespace で 2 拠点と外出先クライアントを模擬して動作確認済み（[付録](#付録-network-namespace-による検証)）。**実際に 2 拠点をインターネット越しに結んでの確認はまだしていない**。**外出先のスマートフォン（公式アプリ・モバイル回線）から拠点 B の LAN への疎通は、2026-09-21 に実機で確認した**（[付録](#登録簿に無い-peer-の消失2026-09-21拠点-b)）。**スクリプト（`wg-vpn.sh`）の `apply` は 2026-09-20 に拠点 B の実機で本実行した（旧 firewalld レイアウトからの移行）。`remove` の実機での本実行は未確認**（[付録](#付録-スクリプトの検証)）。namespace での検証は、同じ設定を手で入れて行った。**firewalld は 2026-09-20 に「`wg0` を LAN 側ゾーンに入れてゾーン内転送で通す」方式に変えた**（policy を作らない）。この方式はスタブ環境で `apply` / `remove` を確認したうえで、**拠点 B の実機で `apply` を本実行して旧レイアウトから移行し、拠点間の疎通が維持されることを確認した**（[付録](#実機での移行2026-09-20拠点-b)）。**拠点 A の実機はまだ旧レイアウトのまま**。**AlmaLinux 10 の PC クライアント（拠点 B に接続）から拠点 A の LAN への折り返しは、2026-09-22 に実機で確認した**（→ [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)）。クライアント同士の疎通は未確認
 
 | 項目 | 値 |
 |---|---|
@@ -13,7 +13,7 @@
 | firewalld | 2.4.3 |
 | NetworkManager | 1.56.0 |
 | SELinux | Enforcing |
-| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定。AlmaLinux 10 の PC を NetworkManager でつなぐ手順は [wireguard-road-warrior.md](wireguard-road-warrior.md)（未検証） |
+| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定。AlmaLinux 10 の PC を NetworkManager でつなぐ手順は [wireguard-road-warrior.md](wireguard-road-warrior.md)（2026-09-22 に実機で本実行） |
 
 ![構成](diagrams/wireguard-remote-client.svg)
 
@@ -252,7 +252,7 @@ sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 3. WG host B は LAN 側に転送する
 4. 戻りは Client B → Router B → **静的経路 `${WG_A_CLIENT_NET}` via `${WG_B_LAN_IP}`** → WG host B（`${WG_A_CLIENT_NET}` の経路は `wg0` 向き）→ 拠点間トンネル → WG host A（`${CLIENT_TUN_IP}/32` の経路は `wg0` 向き）→ クライアント
 
-この折り返し（`wg0` から入って `wg0` へ出る転送）が成立することは、ラボで確認した（[付録](#リモートクライアントの検証2026-09-19)。当時は policy で許可していた）。ゾーンの forward は、ゾーン内の**すべての** interface について `oifname <iface> accept` を入れる（firewalld 2.4.3 の `firewall/core/nftables.py`、`build_zone_forward_rules`）ので、`wg0` から入って `wg0` へ出る転送も同じ経路で通る。forward 方式でのラボ再検証は未実施。
+この折り返し（`wg0` から入って `wg0` へ出る転送）が成立することは、ラボで確認した（[付録](#リモートクライアントの検証2026-09-19)。当時は policy で許可していた）。ゾーンの forward は、ゾーン内の**すべての** interface について `oifname <iface> accept` を入れる（firewalld 2.4.3 の `firewall/core/nftables.py`、`build_zone_forward_rules`）ので、`wg0` から入って `wg0` へ出る転送も同じ経路で通る。forward 方式でも、2026-09-22 に拠点 B のホストで実機確認した。PC クライアントから相手拠点（拠点 A）の LAN へ届き、これが `wg0` から入って `wg0` へ出る転送にあたる（→ [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)）。
 
 したがって、必要な設定は次のとおり。
 
@@ -274,7 +274,7 @@ sudo dnf remove wireguard-tools systemd-resolved      # 不要なら
 - **両拠点とも `Endpoint` と `PersistentKeepalive` を設定** — どちらからでもトンネルを張り直せる。片側がグローバル IP を持たない場合は[注意点](#片側がグローバル-ip-を持たない場合cgnat-など)を参照
 - **クライアントは拠点に所属させ、拠点ごとにアドレス帯を分ける** — WireGuard はインターフェースごとに「この宛先はこの peer」という対応表（cryptokey routing）を持ち、**1 つのアドレスを 2 つの peer に対応づけることはできない**。WG host B から見ると拠点 A のクライアントはすべて拠点 A の peer の向こうにいるので、帯をまとめて `AllowedIPs` に 1 行書けばよく、クライアントを追加しても拠点 B 側の設定は変わらない。同じクライアントを両拠点に直接つなげる構成にすると、各ホストでそのクライアントの IP を「直接の peer」と「相手拠点の peer」の両方に書くことになり成立しない。片方の拠点だけで受けたい場合は、もう一方の帯を空にする
 - **クライアントの conf はホスト側で生成し、QR コードかファイルで渡す** — スマートフォンではこれが実用的。秘密鍵を拠点の外で作りたい場合は、クライアント側で鍵を作って公開鍵だけを渡す
-- **反映は restart で行う** — 新しい peer の `AllowedIPs` に対する経路は reload では追加されない（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない) と同じ機構。実測）。まとめて登録してから 1 回 restart する運用にする
+- **反映は restart で行う** — 新しい peer の `AllowedIPs` に対する経路は reload では追加されない（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない) と同じ機構。実測）。まとめて登録してから 1 回 restart する運用にする。**トンネル越しに WG ホストへ ssh して作業しているときは、この restart が自分のセッションの足元を切る**（切り離して実行する方法は [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
 - **クライアント同士の通信は通る（隔離しない）。全トラフィックの VPN 経由（`0.0.0.0/0`）は対象外** — [注意点](#クライアント同士を通す場合)を参照
 
 ### ルーターの設定
@@ -597,7 +597,7 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### クライアントが拠点の LAN 内にいるとき
 
-ノート PC を持ち帰って拠点 A の LAN 内で VPN を張ると、`${SITE_A_PUBLIC}` 宛ての通信が自拠点のルーターに出て折り返す（ヘアピン）。ルーターが対応していないと接続できない。LAN 内では VPN を切る運用にするのが簡単。NetworkManager で張る PC では、これに加えて LAN 宛ての経路が `wg0` 側（metric 50、要確認）に奪われる（[Road Warrior 手順書の注意点](wireguard-road-warrior.md#注意点)）。
+ノート PC を持ち帰って拠点 A の LAN 内で VPN を張ると、`${SITE_A_PUBLIC}` 宛ての通信が自拠点のルーターに出て折り返す（ヘアピン）。ルーターが対応していないと接続できない。LAN 内では VPN を切る運用にするのが簡単。NetworkManager で張る PC では、これに加えて LAN 宛ての経路が `wg0` 側（**metric 50**。2026-09-22 に実測）に奪われる。しかも NetworkManager は `import` した時点でトンネルを張るので、`up` する前から起きる（[Road Warrior 手順書の注意点](wireguard-road-warrior.md#注意点)）。
 
 #### クライアントの秘密鍵の扱い
 
@@ -613,7 +613,7 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### クライアント同士を通す場合
 
-クライアント A → クライアント B は、どちらも同じ `wg0` にぶら下がる `wg0 → wg0` の転送になる。ゾーンの forward はこれも通すので、**現在の方式では追加設定なしで通る**（未検証）。隔離したい場合は、LAN 側ゾーンに rich rule を足す（例: `rule family=ipv4 source address=$WG_A_CLIENT_NET destination address=$WG_A_CLIENT_NET reject`）。旧レイアウトでは policy を作らない限り通らなかった。
+クライアント A → クライアント B は、どちらも同じ `wg0` にぶら下がる `wg0 → wg0` の転送になる。ゾーンの forward はこれも通すので、**現在の方式では追加設定なしで通る**（未検証。2026-09-22 の実機検証でも、同時に接続していたクライアントは 1 台だけだった）。隔離したい場合は、LAN 側ゾーンに rich rule を足す（例: `rule family=ipv4 source address=$WG_A_CLIENT_NET destination address=$WG_A_CLIENT_NET reject`）。旧レイアウトでは policy を作らない限り通らなかった。
 
 #### Endpoint に DDNS 名を書く場合
 
@@ -1011,7 +1011,7 @@ firewalld の方式を「`wg0` を LAN 側ゾーンに入れてゾーン内転�
 | 拠点間の疎通 | WG ホスト B から拠点 A のトンネル IP と Router A へ `ping -I ${WG_B_LAN_IP}` が 3/3 応答 |
 | 送信元がトンネル IP の場合 | `ping ${ROUTER_A_LAN_IP}`（送信元 `${WG_B_TUN_IP}`）は `From ${WG_A_TUN_IP} Packet filtered`。**未移行の拠点 A** の policy が rich rule で送信元を拠点 B LAN に限定しているため。拠点 A を移行すれば消える見込み |
 
-未確認: 拠点 A の実機での移行、リモートクライアント経由の疎通（`wg0 → wg0` の折り返し、クライアント同士）、トンネル越しの WG ホスト自身への ssh / Cockpit。
+未確認: 拠点 A の実機での移行、クライアント同士の疎通、トンネル越しの Cockpit。**`wg0 → wg0` の折り返しと、トンネル越しの WG ホスト自身への ssh は、2026-09-22 に PC クライアントから確認した**（→ [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)）。
 
 #### 登録簿に無い peer の消失（2026-09-21、拠点 B）
 
@@ -1052,7 +1052,7 @@ firewalld の方式を「`wg0` を LAN 側ゾーンに入れてゾーン内転�
 | `wg show` | その端末の `[Peer]` の `latest handshake` が 1 分前、`transfer` は受信・送信とも増える（endpoint はモバイル回線のグローバル IP） |
 | 端末からの疎通 | 拠点 B の LAN（`<ROUTER_B_LAN_IP>` と `<WG_B_LAN_IP>`）に到達 |
 
-これで**スマートフォンの公式アプリ + モバイル回線**という組み合わせが実機で通ることも確認できた。未確認: この端末から拠点 A の LAN への折り返し（拠点 A が旧レイアウトのままのため）。
+これで**スマートフォンの公式アプリ + モバイル回線**という組み合わせが実機で通ることも確認できた。未確認: この端末（スマートフォン）から拠点 A の LAN への折り返し。ただし**別の PC クライアントからは 2026-09-22 に届くことを確認した**（拠点 A は旧レイアウトのまま）（→ [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)）。
 
 ### 付録: 構成図の再生成
 
