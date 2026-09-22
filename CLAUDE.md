@@ -29,7 +29,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 
 ## 構成
 
-- `README.md` — 手順書一覧の表と「記法の約束」、各手順書から抜き出した「再利用価値の高い知見」。手順書を足す・大きく変えるときはここも更新する
+- `README.md` — 手順書を選ぶための簡潔な一覧と記法。詳しい知見は各手順書の「補足」に置き、手順書を足す・対象環境を変えるときは一覧も更新する
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
 - `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
