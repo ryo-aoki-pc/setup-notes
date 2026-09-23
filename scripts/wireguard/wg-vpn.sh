@@ -22,6 +22,7 @@
 #   -e, --env FILE          設定ファイル（既定: スクリプトと同じディレクトリの site.env）
 #   -n, --dry-run           変更せず、実行予定の内容だけを表示する
 #   --use-existing-conf     既存の wg0.conf を使い、生成しない（site.env の WG_USE_EXISTING_CONF=1 と同じ）
+#   --drop-unknown-peers    apply: 登録簿に無い [Peer] が既存の conf にあっても止めずに消す
 #   --purge                 remove で wg0.conf・鍵ファイル・クライアント用 conf も削除する
 #   --pubkey KEY            client add: クライアント側で生成した公開鍵を登録する（秘密鍵をホストで作らない）
 #   --ip ADDR               client add: トンネル IP を指定する（既定: 帯の中で最小の空きアドレス）
@@ -34,6 +35,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="$SCRIPT_DIR/site.env"
 DRY_RUN=0
 OPT_USE_EXISTING=0
+DROP_UNKNOWN=0
 PURGE=0
 OPT_PUBKEY=""
 OPT_IP=""
@@ -109,7 +111,6 @@ select_site() {
     [[ -n ${!v:-} ]] || die "site.env の $v が空です"
   done
   local n
-  n=SITE_${L}_LAN;       MY_LAN=${!n}
   n=SITE_${P}_LAN;       PEER_LAN=${!n}
   n=WG_${L}_LAN_IP;      MY_LAN_IP=${!n}
   n=WG_${P}_LAN_IP;      PEER_LAN_IP=${!n}
@@ -516,6 +517,46 @@ resolve_my_pubkey() {
   fi
 }
 
+# 作り直す conf に載らない [Peer] が既存の conf にあれば列挙する。
+# apply は clients.list からクライアントの [Peer] を毎回組み立て直すので、登録簿に無い peer は
+# 黙って消える（手で足した peer を残したまま移行するとこれで失う）。消す前に止める
+check_unknown_peers() {
+  [[ -f $CONF ]] || return 0
+  local known=("$PEER_PUBKEY" "${CL_PUBS[@]}")
+  [[ -z ${MY_PUBKEY:-} ]] || known+=("$MY_PUBKEY")
+  [[ ! -r $PUB ]] || known+=("$(cat "$PUB")")
+  local -a unknown=()
+  local line key label="" lineno=0 k found
+  while IFS= read -r line || [[ -n $line ]]; do
+    lineno=$((lineno + 1))
+    case $line in
+      \[*) label="" ; continue ;;
+      \#*) label=${line#\#}; label=${label## } ; continue ;;
+    esac
+    [[ $line =~ ^[[:space:]]*[Pp]ublic[Kk]ey[[:space:]]*=[[:space:]]*([^[:space:]#]+) ]] || continue
+    key=${BASH_REMATCH[1]}
+    found=0
+    for k in "${known[@]}"; do
+      [[ $k != "$key" ]] || { found=1; break; }
+    done
+    (( found )) || unknown+=("$(printf '%s:%s  %-16s %s' "$CONF" "$lineno" "${label:-（名前なし）}" "$key")")
+  done <"$CONF"
+  (( ${#unknown[@]} )) || return 0
+  local head="既存の $CONF に、登録簿（$CLIENTS_FILE）に無い [Peer] が ${#unknown[@]} 個あります"
+  if (( DROP_UNKNOWN )); then
+    warn "$head。--drop-unknown-peers が指定されているので、消して続行します:"
+    printf '       %s\n' "${unknown[@]}" >&2
+    return 0
+  fi
+  echo "ERROR: $head。このまま apply すると消えます:" >&2
+  printf '       %s\n' "${unknown[@]}" >&2
+  echo "       残すなら、登録簿に取り込んでから apply し直してください:" >&2
+  echo "         sudo $0 client add $L <名前> --pubkey <公開鍵> --ip <トンネル IP>" >&2
+  echo "         （トンネル IP は $CONF のその [Peer] の AllowedIPs の値）" >&2
+  echo "       消してよいなら --drop-unknown-peers を付けて実行してください。" >&2
+  exit 1
+}
+
 write_conf() {
   if (( DRY_RUN )); then
     info "$CONF に書き込む内容:"
@@ -718,6 +759,7 @@ cmd_apply() {
     warn "WG_${L}_CLIENT_NET が設定されていますが SITE_${L}_PUBLIC が空です（この拠点は着信を受けられないので、クライアントは接続できません）"
   fi
   check_host_is_site
+  (( USE_EXISTING )) || check_unknown_peers
   install_tools
   if (( USE_EXISTING )); then
     check_existing_conf
@@ -1222,6 +1264,7 @@ while (( $# )); do
     -e|--env) [[ $# -ge 2 ]] || die "$1 には値が必要です"; ENV_FILE=$2; ENV_FILE_SET=1; shift ;;
     -n|--dry-run) DRY_RUN=1 ;;
     --use-existing-conf) OPT_USE_EXISTING=1 ;;
+    --drop-unknown-peers) DROP_UNKNOWN=1 ;;
     --purge) PURGE=1 ;;
     --pubkey) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_PUBKEY=$2; shift ;;
     --ip) [[ $# -ge 2 ]] || die "$1 には値が必要です"; OPT_IP=$2; shift ;;
