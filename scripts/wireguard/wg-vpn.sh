@@ -111,7 +111,6 @@ select_site() {
     [[ -n ${!v:-} ]] || die "site.env の $v が空です"
   done
   local n
-  n=SITE_${L}_LAN;       MY_LAN=${!n}
   n=SITE_${P}_LAN;       PEER_LAN=${!n}
   n=WG_${L}_LAN_IP;      MY_LAN_IP=${!n}
   n=WG_${P}_LAN_IP;      PEER_LAN_IP=${!n}
