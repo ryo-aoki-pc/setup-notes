@@ -19,9 +19,9 @@ shellcheck -x scripts/wireguard/wg-vpn.sh
 sudo scripts/wireguard/wg-vpn.sh -e scripts/wireguard/site.env --dry-run apply A
 scripts/wireguard/wg-vpn.sh --help
 
-# 構成図の再生成（docs/diagrams/*.diag → *.svg）。nwdiag を直接呼ばない
+# 図の再生成（docs/diagrams/*.diag → *.svg）。nwdiag / seqdiag を直接呼ばない
 sudo dnf install -y google-noto-sans-cjk-vf-fonts
-python3 -m pip install --user nwdiag
+python3 -m pip install --user nwdiag seqdiag
 python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
 ```
 
@@ -32,8 +32,8 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `README.md` — 手順書一覧の表と「記法の約束」、各手順書から抜き出した「再利用価値の高い知見」。手順書を足す・大きく変えるときはここも更新する
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
-- `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
-- `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
+- `docs/diagrams/*.diag` — nwdiag（構成図）と seqdiag（パケットの流れ）の原本。`*.svg` は生成物なので直接編集しない
+- `scripts/render-diagrams.py` — 先頭のキーワードで方言（nwdiag / seqdiag）を選び、blockdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
 
 ### 手順書の構造

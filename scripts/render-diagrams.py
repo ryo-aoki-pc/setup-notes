@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""docs/diagrams/*.diag を nwdiag で SVG にする。
+"""docs/diagrams/*.diag を nwdiag / seqdiag で SVG にする。
 
-nwdiag（blockdiag 3.0.0）は Pillow 10 で削除された API を呼ぶので、
-そのままでは動かない。ここで 2 つだけ補ってから nwdiag を呼ぶ。
+方言は各ファイルの先頭（コメントを除く）のキーワード `nwdiag {` / `seqdiag {` で決める。
+どちらも blockdiag 3.0.0 の上に載っていて、Pillow 10 で削除された API を呼ぶので、
+そのままでは動かない。ここで 2 つだけ補ってから描画ツールを呼ぶ。
 
   - ImageFont.getsize()  … Pillow 10 で削除。getbbox() で代替する
   - Image.ANTIALIAS      … Pillow 10 で削除。LANCZOS に読み替える（PNG 出力時のみ使われる）
@@ -14,6 +15,7 @@ nwdiag（blockdiag 3.0.0）は Pillow 10 で削除された API を呼ぶので�
 なので、そのままでは GitHub のダークテーマで図が沈んで見えなくなる。
 nwdiag の --no-transparency は PNG 専用で SVG には効かない。
 """
+import importlib
 import os
 import pathlib
 import re
@@ -31,8 +33,7 @@ if not hasattr(ImageFont.FreeTypeFont, "getsize"):
 if not hasattr(Image, "ANTIALIAS"):
     Image.ANTIALIAS = Image.LANCZOS
 
-from nwdiag.command import main as nwdiag_main  # noqa: E402  (shim を当ててから import する)
-
+KINDS = ("nwdiag", "seqdiag")
 DEFAULT_FONT = "/usr/share/fonts/google-noto-sans-cjk-vf-fonts/NotoSansCJK-VF.ttc"
 DIAGRAM_DIR = pathlib.Path(__file__).resolve().parent.parent / "docs" / "diagrams"
 BACKGROUND = '<rect x="0" y="0" width="100%" height="100%" fill="#ffffff" />'
@@ -86,6 +87,28 @@ def fit_canvas(svg_text):
     return svg_text.replace(m.group(0), f'viewBox="0 0 {new_width} {int(height)}"', 1)
 
 
+def diagram_kind(src):
+    """先頭の（コメントでない）行の最初の語で方言を決める。"""
+    for line in src.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith(("//", "#")):
+            continue
+        head = stripped.split("{", 1)[0].split()
+        kind = head[0] if head else ""
+        if kind not in KINDS:
+            sys.exit(f"未対応の方言です: {kind!r} ({src})。先頭は {' / '.join(KINDS)} のどれか")
+        return kind
+    sys.exit(f"方言のキーワードが見つかりません: {src}")
+
+
+def renderer(kind):
+    """<kind>.command.main を返す。shim を当てた後に import する必要がある。"""
+    try:
+        return importlib.import_module(f"{kind}.command").main
+    except ModuleNotFoundError:
+        sys.exit(f"{kind} が入っていません: python3 -m pip install --user {' '.join(KINDS)}")
+
+
 def postprocess(svg_path):
     """生成された SVG に、背景・フォント指定・キャンバス幅の調整を施す。"""
     text = svg_path.read_text(encoding="utf-8")
@@ -115,7 +138,7 @@ def main():
     for src in sources:
         dst = src.with_suffix(".svg")
         argv = ["-f", font, "-T", "svg", "-o", str(dst), str(src)]
-        rc = nwdiag_main(argv)
+        rc = renderer(diagram_kind(src))(argv)
         if rc:
             sys.exit(f"生成に失敗しました: {src}")
         postprocess(dst)

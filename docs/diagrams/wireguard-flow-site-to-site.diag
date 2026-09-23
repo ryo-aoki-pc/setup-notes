@@ -1,0 +1,32 @@
+// パケットの流れ: Client A → Client B と、その戻り（docs/wireguard.md の「#### パケットの流れ（Client A → Client B）」）
+// 実線 = 平文のホップ、破線 = 暗号化された UDP のホップ。行きの番号は本文の箇条書きに対応する
+// 再生成コマンドは docs/wireguard.md の「### 付録: 構成図の再生成」を参照
+seqdiag {
+  activation = none;   // 呼び出しの活性区間は使わない
+  edge_length = 200;   // ライフラインの中心間隔（px）。ラベルはこの幅の中に収める
+  node_width = 96;
+  span_width = 16;
+  span_height = 20;
+
+  // 左から右へ、冒頭の構成図と同じ並び
+  client_a [label = "Client A"];
+  wg_a     [label = "WG host A"];
+  router_a [label = "Router A"];
+  router_b [label = "Router B"];
+  wg_b     [label = "WG host B"];
+  client_b [label = "Client B"];
+
+  === 行き: Client A → Client B ===
+  client_a -> router_a  [label = "1. 宛先 ${SITE_B_LAN} は\nデフォルトゲートウェイへ"];
+  router_a -> wg_a      [label = "2. 静的経路 ${SITE_B_LAN}\nvia ${WG_A_LAN_IP}"];
+  wg_a     --> router_b [label = "3. wg0 の経路（AllowedIPs）に当たり暗号化。\nUDP で ${SITE_B_PUBLIC}:${WG_PORT} へ（Router A を経由）"];
+  router_b --> wg_b     [label = "4. ポート転送\n${WG_B_LAN_IP}:${WG_PORT}"];
+  wg_b     -> client_b  [label = "5. 復号して LAN へ転送\n（NAT なし）"];
+
+  === 6. 戻り: Client B → Client A（逆順） ===
+  client_b -> router_b  [label = "デフォルトゲートウェイへ"];
+  router_b -> wg_b      [label = "静的経路 ${SITE_A_LAN}\nvia ${WG_B_LAN_IP}"];
+  wg_b     --> router_a [label = "暗号化して UDP で ${SITE_A_PUBLIC}:${WG_PORT} へ\n（Router B を経由）"];
+  router_a --> wg_a     [label = "ポート転送\n${WG_A_LAN_IP}:${WG_PORT}"];
+  wg_a     -> client_a  [label = "復号。Client A へ直接届く\n（Router A を通らない）"];
+}
