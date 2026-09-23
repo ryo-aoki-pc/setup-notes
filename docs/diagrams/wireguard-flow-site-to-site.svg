@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg viewBox="0 0 1128 862" xmlns="http://www.w3.org/2000/svg" xmlns:inkspace="http://www.inkscape.org/namespaces/inkscape" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect x="0" y="0" width="100%" height="100%" fill="#ffffff" />
+  <defs id="defs_block">
+    <filter height="1.504" id="filter_blur" inkspace:collect="always" width="1.1575" x="-0.07875" y="-0.252">
+      <feGaussianBlur id="feGaussianBlur3780" inkspace:collect="always" stdDeviation="4.2" />
+    </filter>
+  </defs>
+  <title>blockdiag</title>
+  <desc>// パケットの流れ: Client A → Client B と、その戻り（docs/wireguard.md の「#### パケットの流れ（Client A → Client B）」）
+// 実線 = 平文のホップ、破線 = 暗号化された UDP のホップ。行きの番号は本文の箇条書きに対応する
+// 再生成コマンドは docs/wireguard.md の「### 付録: 構成図の再生成」を参照
+seqdiag {
+  activation = none;   // 呼び出しの活性区間は使わない
+  edge_length = 200;   // ライフラインの中心間隔（px）。ラベルはこの幅の中に収める
+  node_width = 96;
+  span_width = 16;
+  span_height = 20;
+
+  // 左から右へ、冒頭の構成図と同じ並び
+  client_a [label = "Client A"];
+  wg_a     [label = "WG host A"];
+  router_a [label = "Router A"];
+  router_b [label = "Router B"];
+  wg_b     [label = "WG host B"];
+  client_b [label = "Client B"];
+
+  === 行き: Client A → Client B ===
+  client_a -&gt; router_a  [label = "1. 宛先 ${SITE_B_LAN} は\nデフォルトゲートウェイへ"];
+  router_a -&gt; wg_a      [label = "2. 静的経路 ${SITE_B_LAN}\nvia ${WG_A_LAN_IP}"];
+  wg_a     --&gt; router_b [label = "3. wg0 の経路（AllowedIPs）に当たり暗号化。\nUDP で ${SITE_B_PUBLIC}:${WG_PORT} へ（Router A を経由）"];
+  router_b --&gt; wg_b     [label = "4. ポート転送\n${WG_B_LAN_IP}:${WG_PORT}"];
+  wg_b     -&gt; client_b  [label = "5. 復号して LAN へ転送\n（NAT なし）"];
+
+  === 6. 戻り: Client B → Client A（逆順） ===
+  client_b -&gt; router_b  [label = "デフォルトゲートウェイへ"];
+  router_b -&gt; wg_b      [label = "静的経路 ${SITE_A_LAN}\nvia ${WG_B_LAN_IP}"];
+  wg_b     --&gt; router_a [label = "暗号化して UDP で ${SITE_A_PUBLIC}:${WG_PORT} へ\n（Router B を経由）"];
+  router_a --&gt; wg_a     [label = "ポート転送\n${WG_A_LAN_IP}:${WG_PORT}"];
+  wg_a     -&gt; client_a  [label = "復号。Client A へ直接届く\n（Router A を通らない）"];
+}
+</desc>
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="19" y="26" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="219" y="26" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="419" y="26" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="619" y="26" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="819" y="26" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="96" x="1019" y="26" />
+  <path d="M 64 60 L 64 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <path d="M 264 60 L 264 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <path d="M 464 60 L 464 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <path d="M 664 60 L 664 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <path d="M 864 60 L 864 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <path d="M 1064 60 L 1064 860" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="16" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="38" x="64.0" y="47">Client A</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="216" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="49" x="264.5" y="47">WG host A</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="416" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="42" x="464.0" y="47">Router A</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="616" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="42" x="664.0" y="47">Router B</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="816" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="49" x="864.5" y="47">WG host B</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="96" x="1016" y="20" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="38" x="1064.0" y="47">Client B</text>
+  <path d="M 72 175 L 456 175" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="448,171 456,175 448,179" stroke="rgb(0,0,0)" />
+  <path d="M 272 241 L 456 241" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="280,237 272,241 280,245" stroke="rgb(0,0,0)" />
+  <path d="M 272 308 L 656 308" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="648,304 656,308 648,312" stroke="rgb(0,0,0)" />
+  <path d="M 672 373 L 856 373" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="848,369 856,373 848,377" stroke="rgb(0,0,0)" />
+  <path d="M 872 438 L 1056 438" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1048,434 1056,438 1048,442" stroke="rgb(0,0,0)" />
+  <path d="M 672 546 L 1056 546" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="680,542 672,546 680,550" stroke="rgb(0,0,0)" />
+  <path d="M 672 612 L 856 612" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="848,608 856,612 848,616" stroke="rgb(0,0,0)" />
+  <path d="M 472 678 L 856 678" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="480,674 472,678 480,682" stroke="rgb(0,0,0)" />
+  <path d="M 272 743 L 456 743" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="280,739 272,743 280,747" stroke="rgb(0,0,0)" />
+  <path d="M 72 808 L 256 808" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="80,804 72,808 80,812" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="121" x="140.5" y="155">1. 宛先 ${SITE_B_LAN} は</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="132" x="146.0" y="171">デフォルトゲートウェイへ</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="130" x="387.0" y="220">2. 静的経路 ${SITE_B_LAN}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="98" x="403.0" y="237">via ${WG_A_LAN_IP}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="229" x="394.5" y="287">3. wg0 の経路（AllowedIPs）に当たり暗号化。</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="303" x="431.5" y="304">UDP で ${SITE_B_PUBLIC}:${WG_PORT} へ（Router A を経由）</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="66" x="713.0" y="352">4. ポート転送</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="147" x="753.5" y="369">${WG_B_LAN_IP}:${WG_PORT}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="112" x="936.0" y="417">5. 復号して LAN へ転送</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="66" x="913.0" y="434">（NAT なし）</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="132" x="986.0" y="542">デフォルトゲートウェイへ</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="118" x="739.0" y="591">静的経路 ${SITE_A_LAN}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="99" x="729.5" y="608">via ${WG_B_LAN_IP}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="261" x="721.5" y="657">暗号化して UDP で ${SITE_A_PUBLIC}:${WG_PORT} へ</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="99" x="802.5" y="674">（Router B を経由）</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="55" x="424.5" y="722">ポート転送</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="147" x="378.5" y="739">${WG_A_LAN_IP}:${WG_PORT}</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="127" x="188.5" y="787">復号。Client A へ直接届く</text>
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="120" x="192.0" y="804">（Router A を通らない）</text>
+  <path d="M -8 98 L 495 98" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M -8 102 L 495 102" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 632 98 L 1136 98" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 632 102 L 1136 102" fill="none" stroke="rgb(0,0,0)" />
+  <rect fill="rgb(208,208,208)" height="22" stroke="rgb(0,0,0)" width="137" x="495" y="89" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="117" x="563.5" y="107">行き: Client A → Client B</text>
+  <path d="M -8 485 L 468 485" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M -8 489 L 468 489" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 660 485 L 1136 485" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 660 489 L 1136 489" fill="none" stroke="rgb(0,0,0)" />
+  <rect fill="rgb(208,208,208)" height="23" stroke="rgb(0,0,0)" width="192" x="468" y="476" />
+  <text fill="rgb(0,0,0)" font-family="Noto Sans CJK JP,Noto Sans,sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="172" x="564.0" y="495">6. 戻り: Client B → Client A（逆順）</text>
+</svg>

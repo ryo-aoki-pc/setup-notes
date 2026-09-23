@@ -295,6 +295,8 @@ sudo dnf remove wireguard-tools systemd-resolved
 > | `${WG_A_CLIENT_NET}` / `${WG_B_CLIENT_NET}` | 各拠点に接続するクライアントに割り当てるトンネル内のアドレス帯（**LAN・`${WG_TUNNEL_NET}`・互いに重複不可**、`/30` より広く。クライアントを受けない拠点は空） | `10.99.1.0/24` / （空） |
 > | `${WG_CLIENT_DNS}` | クライアント用 conf に書く DNS サーバー（任意） | （空） |
 >
+> 図と補足に出てくる `${CLIENT_TUN_IP}` は、`client add` がクライアントに割り当てるトンネル IP（`${WG_A_CLIENT_NET}` の中の 1 つ。クライアント conf の `Address`。検証では `10.99.1.1`）。`site.env` の変数ではない。
+>
 > 秘密鍵はこの文書に載せない。公開鍵は秘密情報ではないが、検証用に作った使い捨ての値なので載せていない。
 
 手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
@@ -309,15 +311,33 @@ sudo dnf remove wireguard-tools systemd-resolved
 
 #### パケットの流れ（Client A → Client B）
 
+![Client A → Client B のパケットの流れ](diagrams/wireguard-flow-site-to-site.svg)
+
+実線は平文のホップ、破線は暗号化された UDP（宛先ポート `${WG_PORT}`）のホップ。番号は次の箇条書きに対応する。
+
 1. Client A は宛先 `${SITE_B_LAN}` を知らないので、デフォルトゲートウェイの **Router A** に送る
 2. Router A の**静的経路**（`${SITE_B_LAN}` via `${WG_A_LAN_IP}`）で **WG host A** に転送される
-3. WG host A は `wg0` の経路（`AllowedIPs` から wg-quick が自動で追加する）で暗号化し、Router B のグローバル IP へ UDP で送る
-4. Router B の**ポート転送**で WG host B に届き、復号されて LAN B の Client B へ
-5. 戻りは逆順（Client B → Router B → WG host B → トンネル → WG host A → Client A）
+3. WG host A は `wg0` の経路（`AllowedIPs` から wg-quick が自動で追加する）で暗号化し、Router B のグローバル IP（`Endpoint` の `${SITE_B_PUBLIC}:${WG_PORT}`）へ UDP で送る。この UDP は WG host A のデフォルトゲートウェイである Router A を通って出て行く
+4. Router B の**ポート転送**（WAN の `${WG_PORT}/udp` → `${WG_B_LAN_IP}:${WG_PORT}`）で WG host B に届く
+5. WG host B で復号され、LAN B の Client B へ転送される（NAT しないので送信元は Client A のまま）
+6. 戻りは逆順（Client B → Router B → WG host B → トンネル → WG host A → Client A）。最後の WG host A → Client A は同じ LAN 内なので Router A を通らない（[ヘアピン](#ルーターの静的経路とヘアピン非対称経路)）
+
+ヘッダの書き換わり方（行き）。WG ホストは NAT しないので、**内側の送信元・宛先は端から端まで変わらない**。書き換わるのは外側の UDP だけで、それをするのはルーターである（[選択した方針](#選択した方針)）。
+
+| ホップ | 外側（UDP。ルーターが書き換える） | 内側（元のパケット） |
+|---|---|---|
+| 1〜2（LAN A 内） | なし（平文） | `${SITE_A_LAN}.100` → `${SITE_B_LAN}.100` |
+| 3（WG host A → Router B） | 送信元 `${WG_A_LAN_IP}`・宛先 `${SITE_B_PUBLIC}:${WG_PORT}`。Router A を出るとき送信元が `${SITE_A_PUBLIC}` に書き換わる（LAN → WAN の通常の NAPT） | 暗号化されて UDP のペイロードに入る。内容は変わらない |
+| 4（Router B → WG host B） | ポート転送で宛先が `${WG_B_LAN_IP}:${WG_PORT}` に書き換わる | 同上 |
+| 5（LAN B 内） | なし（復号済み） | `${SITE_A_LAN}.100` → `${SITE_B_LAN}.100`（そのまま） |
 
 #### パケットの流れ（Remote client → 各拠点）
 
 **Remote client → Client A（接続先拠点の LAN）**
+
+![Remote client → Client A のパケットの流れ](diagrams/wireguard-flow-remote-to-site-a.svg)
+
+実線・破線の意味は上の図と同じ。番号は次の箇条書きに対応する。
 
 1. クライアントは宛先 `${SITE_A_LAN}` を `AllowedIPs` に持つので、暗号化して `${SITE_A_PUBLIC}:${WG_PORT}` へ送る
 2. Router A のポート転送で WG host A に届き、復号される。送信元 `${CLIENT_TUN_IP}` はそのクライアントの `[Peer]` の `AllowedIPs` に含まれるので受け入れられる
@@ -326,10 +346,16 @@ sudo dnf remove wireguard-tools systemd-resolved
 
 **Remote client → Client B（もう一方の拠点の LAN）**
 
-1. WG host A で復号された後、宛先 `${SITE_B_LAN}` は `wg0` 向きの経路（拠点 B の peer の `AllowedIPs`）に当たるので、**同じ `wg0` から**拠点 B の peer へ再び暗号化して出て行く（`wg0` → `wg0` の折り返し。ゾーンの forward はこれも通す）
-2. WG host B で復号される。送信元 `${CLIENT_TUN_IP}` は**拠点 A の peer の `AllowedIPs` に `${WG_A_CLIENT_NET}` が入っていて初めて**受け入れられる。入っていなければ、WireGuard は ICMP も返さず黙って捨てる
-3. WG host B は LAN 側に転送する
-4. 戻りは Client B → Router B → **静的経路 `${WG_A_CLIENT_NET}` via `${WG_B_LAN_IP}`** → WG host B（`${WG_A_CLIENT_NET}` の経路は `wg0` 向き）→ 拠点間トンネル → WG host A（`${CLIENT_TUN_IP}/32` の経路は `wg0` 向き）→ クライアント
+![Remote client → Client B のパケットの流れ](diagrams/wireguard-flow-remote-to-site-b.svg)
+
+WG host A に届くまでは上の図の 1〜2 と同じなので、Router A は省いている。番号は次の箇条書きに対応する。
+
+1. クライアントは宛先 `${SITE_B_LAN}` も `AllowedIPs` に持つので、同じように暗号化して `${SITE_A_PUBLIC}:${WG_PORT}` へ送り、Router A のポート転送で WG host A に届く（クライアントの peer は WG host A だけ）
+2. WG host A で復号された後、宛先 `${SITE_B_LAN}` は `wg0` 向きの経路（拠点 B の peer の `AllowedIPs`）に当たるので、**同じ `wg0` から**拠点 B の peer へ再び暗号化して出て行く（`wg0` → `wg0` の折り返し。ゾーンの forward はこれも通す）
+3. 拠点間トンネルと同じく、`${SITE_B_PUBLIC}:${WG_PORT}` 宛ての UDP として Router A を通ってインターネットへ出る
+4. Router B のポート転送で WG host B に届く
+5. WG host B で復号される。送信元 `${CLIENT_TUN_IP}` は**拠点 A の peer の `AllowedIPs` に `${WG_A_CLIENT_NET}` が入っていて初めて**受け入れられる。入っていなければ、WireGuard は ICMP も返さず黙って捨てる。受け入れられれば LAN 側に転送する
+6. 戻りは Client B → Router B → **静的経路 `${WG_A_CLIENT_NET}` via `${WG_B_LAN_IP}`** → WG host B（`${WG_A_CLIENT_NET}` の経路は `wg0` 向き）→ 拠点間トンネル → WG host A（`${CLIENT_TUN_IP}/32` の経路は `wg0` 向き。ここでも折り返す）→ クライアント
 
 この折り返し（`wg0` から入って `wg0` へ出る転送）が成立することは、ラボで確認した（[付録](#リモートクライアントの検証2026-09-19)。当時は policy で許可していた）。ゾーンの forward は、ゾーン内の**すべての** interface について `oifname <iface> accept` を入れる（firewalld 2.4.3 の `firewall/core/nftables.py`、`build_zone_forward_rules`）ので、`wg0` から入って `wg0` へ出る転送も同じ経路で通る。forward 方式でも、2026-09-22 に拠点 B のホストで実機確認した。PC クライアントから相手拠点（拠点 A）の LAN へ届き、これが `wg0` から入って `wg0` へ出る転送にあたる（→ [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)）。
 
@@ -809,7 +835,8 @@ firewalld 2.4 には `gateway-lan-to-world`（`internal` / `home` / `trusted` �
 - [WireGuard: Conceptual Overview](https://www.wireguard.com/#cryptokey-routing)
 - [firewalld: Policy Objects](https://firewalld.org/2020/09/policy-objects-introduction)
 - [firewalld ソース `src/firewall/core/io/policy.py`](https://github.com/firewalld/firewalld/blob/v2.4.3/src/firewall/core/io/policy.py) — ingress/egress ゾーンの検証（同一ゾーンを拒否する規則は無い。policy 名の上限は 128 文字）
-- [nwdiag](http://blockdiag.com/en/nwdiag/) — 本書の構成図の記述に使っている（[付録: 構成図の再生成](#付録-構成図の再生成)）
+- [nwdiag](http://blockdiag.com/en/nwdiag/) — 冒頭の構成図の記述に使っている（[付録: 構成図の再生成](#付録-構成図の再生成)）
+- [seqdiag](http://blockdiag.com/en/seqdiag/) — [構成とパケットの流れ](#構成とパケットの流れ)の 3 つの図（パケットの流れ）の記述に使っている（同上）
 
 ### 付録: network namespace による検証
 
@@ -1135,17 +1162,17 @@ firewalld の方式を「`wg0` を LAN 側ゾーンに入れてゾーン内転�
 
 ### 付録: 構成図の再生成
 
-`## 構成` の図は [nwdiag](http://blockdiag.com/en/nwdiag/) のソースから生成している。**原本は `docs/diagrams/*.diag`、`*.svg` は生成物。** 図を直すときは `.diag` を直して再生成する。
+冒頭の構成図は [nwdiag](http://blockdiag.com/en/nwdiag/)、[構成とパケットの流れ](#構成とパケットの流れ)の 3 つの図は [seqdiag](http://blockdiag.com/en/seqdiag/) のソースから生成している（どちらも blockdiag 系で、同じスクリプトで扱う）。**原本は `docs/diagrams/*.diag`、`*.svg` は生成物。** 図を直すときは `.diag` を直して再生成する。方言は各 `.diag` の先頭のキーワード（`nwdiag {` / `seqdiag {`）でスクリプトが判別する。
 
 ```bash
 sudo dnf install -y google-noto-sans-cjk-vf-fonts   # Latin と日本語の両方を持つフォント
 python3 -m ensurepip --user                         # pip が無い場合
-python3 -m pip install --user nwdiag                # blockdiag / Pillow などが一緒に入る
+python3 -m pip install --user nwdiag seqdiag        # blockdiag / Pillow などが一緒に入る
 
 python3 scripts/render-diagrams.py                  # docs/diagrams/*.diag → *.svg
 ```
 
-`nwdiag` を直接呼ばずに [`scripts/render-diagrams.py`](../scripts/render-diagrams.py) を通すのは、**nwdiag 3.0.0 が Pillow 10 以降で動かない**ため。`ImageFont.getsize()` と `Image.ANTIALIAS` が Pillow 10 で削除されており、そのまま実行すると次で止まる（実測）。
+`nwdiag` / `seqdiag` を直接呼ばずに [`scripts/render-diagrams.py`](../scripts/render-diagrams.py) を通すのは、**両方が載っている blockdiag 3.0.0 が Pillow 10 以降で動かない**ため。`ImageFont.getsize()` と `Image.ANTIALIAS` が Pillow 10 で削除されており、そのまま実行するとどちらも次で止まる（実測。seqdiag は Pillow 12.3 で確認）。
 
 ```
 ERROR: 'FreeTypeFont' object has no attribute 'getsize'
@@ -1153,7 +1180,7 @@ ERROR: 'FreeTypeFont' object has no attribute 'getsize'
 
 Pillow を 10 未満に固定する回避策は取れない。`getsize` が残っている最後の Pillow 9.5.0 は Python 3.12 に対応しておらず、**両方を満たすバージョンが存在しない**。スクリプトは削除された 2 つの API を呼び出し前に補うだけで、site-packages には手を加えない。
 
-フォントの指定も必須。**blockdiag の自動検出は IPAfont・VL Gothic・DejaVu などのパスを決め打ちで探す**ので、このマシンのフォントは見つからず、指定しないとラベルが豆腐になる。別のフォントを使う場合は `WG_DIAG_FONT` で渡す。
+フォントの指定も必須。**blockdiag の自動検出は IPAfont・VL Gothic・DejaVu などのパスを決め打ちで探す**ので、このマシンのフォントは見つからず、指定しないとラベルが豆腐になる。別のフォントを使う場合は `WG_DIAG_FONT` で渡す。Ubuntu 24.04 の `fonts-noto-cjk`（静的版 `NotoSansCJK-Regular.ttc`）でも生成できるが、字幅の計測値が可変フォント版とわずかに違い、再生成のたびに `textLength` と `viewBox` に数 px の差分が出る。差分を出さないには、AlmaLinux のパッケージと同じ可変フォント（[noto-cjk](https://github.com/notofonts/noto-cjk) の `Sans/Variable/OTC/NotoSansCJK-VF.otf.ttc`）を `WG_DIAG_FONT` で渡す（パケットの流れの図はこれで生成した。既存の構成図を描き直しても `<desc>` のコメント以外に差分が出ないことを確認している）。
 
 スクリプトは生成後の SVG に次の 3 つの後処理も行う。いずれも blockdiag の出力そのままでは不都合があるため。
 

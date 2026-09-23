@@ -1,0 +1,32 @@
+// パケットの流れ: Remote client → Client B（もう一方の拠点の LAN）と、その戻り
+// （docs/wireguard.md の「#### パケットの流れ（Remote client → 各拠点）」）
+// WG host A に届くまでは「Remote client → Client A」の図と同じなので、Router A は省いている
+// 実線 = 平文のホップ、破線 = 暗号化された UDP のホップ。行きの番号は本文の箇条書きに対応する
+// 再生成コマンドは docs/wireguard.md の「### 付録: 構成図の再生成」を参照
+seqdiag {
+  activation = none;
+  edge_length = 256;   // 自己メッセージ（折り返し）のラベル幅は edge_length - node_width になる
+  node_width = 96;
+  span_width = 16;
+  span_height = 20;
+
+  remote   [label = "Remote client"];
+  wg_a     [label = "WG host A"];
+  router_b [label = "Router B"];
+  wg_b     [label = "WG host B"];
+  client_b [label = "Client B"];
+
+  === 行き: Remote client → Client B ===
+  remote   --> wg_a     [label = "1. 宛先 ${SITE_B_LAN} も\nAllowedIPs 内。暗号化して UDP で\n${SITE_A_PUBLIC}:${WG_PORT} へ\n（Router A のポート転送で届く）"];
+  wg_a     -> wg_a      [label = "2. 復号。宛先は\n${SITE_B_LAN} なので\n拠点 B の peer の\nAllowedIPs に当たる\n→ 同じ wg0 から\n再び暗号化（折り返し）"];
+  wg_a     --> router_b [label = "3. UDP で\n${SITE_B_PUBLIC}:${WG_PORT} へ\n（Router A を経由）"];
+  router_b --> wg_b     [label = "4. ポート転送\n${WG_B_LAN_IP}:${WG_PORT}"];
+  wg_b     -> client_b  [label = "5. 復号。送信元 ${CLIENT_TUN_IP} は\n拠点 A の peer の AllowedIPs に\n${WG_A_CLIENT_NET} があるので受理\n→ LAN へ転送"];
+
+  === 6. 戻り: Client B → Remote client ===
+  client_b -> router_b  [label = "宛先 ${CLIENT_TUN_IP} はデフォルトゲートウェイへ"];
+  router_b -> wg_b      [label = "静的経路 ${WG_A_CLIENT_NET}\nvia ${WG_B_LAN_IP}"];
+  wg_b     --> wg_a     [label = "${WG_A_CLIENT_NET} の経路は wg0 向き → 暗号化して\nUDP で ${SITE_A_PUBLIC}:${WG_PORT} へ（Router B → Router A のポート転送）"];
+  wg_a     -> wg_a      [label = "復号。宛先は\n${CLIENT_TUN_IP}/32\n→ 経路は wg0 向き\n→ 再び暗号化（折り返し）"];
+  wg_a     --> remote   [label = "覚えた endpoint へ\n（Router A を経由）"];
+}
