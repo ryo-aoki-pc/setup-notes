@@ -19,9 +19,9 @@ shellcheck -x scripts/wireguard/wg-vpn.sh
 sudo scripts/wireguard/wg-vpn.sh -e scripts/wireguard/site.env --dry-run apply A
 scripts/wireguard/wg-vpn.sh --help
 
-# 構成図の再生成（docs/diagrams/*.diag → *.svg）。nwdiag を直接呼ばない
+# 図の再生成（docs/diagrams/*.diag → *.svg）。nwdiag / seqdiag を直接呼ばない
 sudo dnf install -y google-noto-sans-cjk-vf-fonts
-python3 -m pip install --user nwdiag
+python3 -m pip install --user nwdiag seqdiag
 python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
 ```
 
@@ -51,8 +51,8 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/shellcheck.md` — ShellCheck と shfmt を Homebrew で入れる手順書。**この CLAUDE.md の「よく使うコマンド」が前提にしている `shellcheck` の導入元**。EPEL にも 0.10.0 があるが**パッケージ名が大文字の `ShellCheck`** で 1 マイナー古く、shfmt は RPM がどこにも無いので両方 Homebrew に揃えた。`wg-vpn.sh` を 0.11.0 で検査した実測を補足に置く（**SC2034 が 1 件出たので同じ変更で `wg-vpn.sh` の未使用変数 `MY_LAN` を消して 0 件にした**。`-x` はこのスクリプトでは結果を変えない）。`shfmt -w` はリポジトリのファイルに掛けず、一時ディレクトリの複製で確認している。実機で本実行済み、手順はコンテナで再実行
 - `docs/vscode.md` — Microsoft 公式 dnf リポジトリ（`packages.microsoft.com/yumrepos/vscode`）から VS Code を入れる手順書。rpm の release は `.el8` 固定だが、これは**MS が EL 共通に 1 本だけ出している**ためで WezTerm の EL9 流用とは事情が違う。`~/.config/code-flags.conf` が読まれないことも実測で書いた。実機で本実行済みで、デスクトップの端末からの GUI 起動まで確認した。**ただし TTY もディスプレイも無いシェルからは 6 通り試して起動できず**、その記録を付録に残してある。コンテナでは依存解決のみ
 - `docs/starship.md` — プロンプトを starship にする手順書。`~/.bashrc` の `eval "$(starship init bash)"` が本体。zoxide の初期化より後ろに置き、WezTerm のシェル統合が `PS1` に足す OSC 133 の A/B マーカーは starship に上書きされる（init スクリプトを読んだ上での推定、実挙動は未検証）。**コンテナのみで検証**
-- `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
-- `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
+- `docs/diagrams/*.diag` — nwdiag（構成図）と seqdiag（パケットの流れ）の原本。`*.svg` は生成物なので直接編集しない
+- `scripts/render-diagrams.py` — 先頭のキーワードで方言（nwdiag / seqdiag）を選び、blockdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
 
 ### 手順書の構造
