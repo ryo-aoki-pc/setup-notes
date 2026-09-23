@@ -49,6 +49,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/gdu.md` — gdu を Homebrew で入れる手順書。**brew 版の実行ファイルは `gdu-go`**（coreutils との衝突回避）。EPEL には 5.32.0 の `gdu` がある。実機には同じ brew 版 5.37.0 が 2026-09-21 から入っているが、本書の通し検証はコンテナのみ
 - `docs/btop.md` — btop を EPEL の dnf で入れる手順書。**このリポジトリで唯一 Homebrew を選ばなかったツール**（EPEL と Homebrew がどちらも 1.4.7）。手順 1 は EPEL の有効化で、鍵は `epel-release` が置くローカルファイルから入る。**コンテナのみで検証**
 - `docs/shellcheck.md` — ShellCheck と shfmt を Homebrew で入れる手順書。**この CLAUDE.md の「よく使うコマンド」が前提にしている `shellcheck` の導入元**。EPEL にも 0.10.0 があるが**パッケージ名が大文字の `ShellCheck`** で 1 マイナー古く、shfmt は RPM がどこにも無いので両方 Homebrew に揃えた。`wg-vpn.sh`（1,300 行）を 0.11.0 で検査した実測（SC2034 が 1 件、`-x` は結果を変えない）を補足に置く。`shfmt -w` はリポジトリのファイルに掛けず、一時ディレクトリの複製で確認している。実機で本実行済み、手順はコンテナで再実行
+- `docs/vscode.md` — Microsoft 公式 dnf リポジトリ（`packages.microsoft.com/yumrepos/vscode`）から VS Code を入れる手順書。rpm の release は `.el8` 固定だが、これは**MS が EL 共通に 1 本だけ出している**ためで WezTerm の EL9 流用とは事情が違う。`~/.config/code-flags.conf` が読まれないことも実測で書いた。**手順 1〜4 は実機で本実行済みだが、GUI の起動は確認できていない**（headless な RDP セッションにウィンドウを出せず、6 通りの試行を付録に残した）。コンテナでは依存解決のみ
 - `docs/starship.md` — プロンプトを starship にする手順書。`~/.bashrc` の `eval "$(starship init bash)"` が本体。zoxide の初期化より後ろに置き、WezTerm のシェル統合が `PS1` に足す OSC 133 の A/B マーカーは starship に上書きされる（init スクリプトを読んだ上での推定、実挙動は未検証）。**コンテナのみで検証**
 - `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする

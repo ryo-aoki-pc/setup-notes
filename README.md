@@ -27,6 +27,7 @@
 | [btop](docs/btop.md) | リソースモニタを EPEL の dnf で入れる（Homebrew と同じ 1.4.7） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
 | [starship](docs/starship.md) | シェルプロンプトを Homebrew で入れる（`~/.bashrc` に 1 行） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形を Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
+| [VS Code](docs/vscode.md) | Microsoft 公式 dnf リポジトリからエディタを入れる（GUI の起動は未確認） | AlmaLinux 10.2 / aarch64 |
 
 ## 記法
 
