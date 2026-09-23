@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## よく使うコマンド
 
 ```bash
-# シェルスクリプトの静的検査（手順書の付録で「警告なし」を記録している）
+# シェルスクリプトの静的検査（導入は docs/shellcheck.md。最新の実測は同書の「手順 3 の検査結果」）
 bash -n scripts/wireguard/wg-vpn.sh
 shellcheck -x scripts/wireguard/wg-vpn.sh
 
@@ -38,7 +38,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/firefox.md` — Mozilla 公式 RPM リポジトリ（`packages.mozilla.org/rpm/firefox`）で最新版の Firefox を入れる手順書。AppStream の ESR 140 から `dnf install` 1 本で載せ替える。実機で本実行済み、手順は AlmaLinux 10 コンテナで再実行して確認
 - `docs/claude-code.md` — 公式 dnf リポジトリ（`downloads.claude.ai/claude-code/rpm/stable`）から Claude Code を入れる手順書。Node.js 不要。実機で本実行済み（認証も済み）、手順 1〜3 はコンテナで再実行
 - `docs/gh.md` — 公式 dnf リポジトリ（`cli.github.com/packages/rpm`）から gh を入れる手順書。EPEL 版は 2.97.0 と古い。実機で本実行済み、手順 1〜3 はコンテナで再実行
-- `docs/homebrew.md` — Homebrew 本体を入れる手順書。以降の Homebrew 系 9 本の前提で、各手順書は `## 実施手順` のリード文からここへ誘導し、手順 1 は各ツールの導入から始まる。インストーラの `Next steps` の実測と `brew` の基本操作もここに集約した。実機で本実行済み（2026-09-20）、手順はコンテナで再実行
+- `docs/homebrew.md` — Homebrew 本体を入れる手順書。以降の Homebrew 系 10 本の前提で、各手順書は `## 実施手順` のリード文からここへ誘導し、手順 1 は各ツールの導入から始まる。インストーラの `Next steps` の実測と `brew` の基本操作もここに集約した。実機で本実行済み（2026-09-20）、手順はコンテナで再実行
 - `docs/yazi.md` — yazi を Homebrew で入れる手順書。COPR `lihaohong/yazi` を実機で一度入れて外した経緯と、プレビュー依存（ffmpeg など）が EL10 に揃わないことを補足に残す。`y()` シェル関数まで含む
 - `docs/lazygit.md` — lazygit を Homebrew で入れる手順書。COPR（`dejan` / `atim`）は `epel-10-aarch64` の repomd が 403 で入らないことを実機とコンテナの両方で確認して不採用にしている
 - `docs/neovim.md` — Neovim を Homebrew で入れる手順書（EPEL は 0.10.1 と古い）。`:checkhealth` の読み方と、`sudo nvim` が使えない理由を補足に置く
@@ -48,6 +48,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/git-delta.md` — git の差分表示を delta にする手順書。formula 名は `git-delta`、バイナリは `delta`。設定は `git config --global` で `~/.gitconfig` に書く（git がキー名を小文字に正規化するので読み戻しの正規表現に注意）。lazygit の `git.paging` 連携は任意節。**コンテナのみで検証**
 - `docs/gdu.md` — gdu を Homebrew で入れる手順書。**brew 版の実行ファイルは `gdu-go`**（coreutils との衝突回避）。EPEL には 5.32.0 の `gdu` がある。実機には同じ brew 版 5.37.0 が 2026-09-21 から入っているが、本書の通し検証はコンテナのみ
 - `docs/btop.md` — btop を EPEL の dnf で入れる手順書。**このリポジトリで唯一 Homebrew を選ばなかったツール**（EPEL と Homebrew がどちらも 1.4.7）。手順 1 は EPEL の有効化で、鍵は `epel-release` が置くローカルファイルから入る。**コンテナのみで検証**
+- `docs/shellcheck.md` — ShellCheck と shfmt を Homebrew で入れる手順書。**この CLAUDE.md の「よく使うコマンド」が前提にしている `shellcheck` の導入元**。EPEL にも 0.10.0 があるが**パッケージ名が大文字の `ShellCheck`** で 1 マイナー古く、shfmt は RPM がどこにも無いので両方 Homebrew に揃えた。`wg-vpn.sh`（1,300 行）を 0.11.0 で検査した実測（SC2034 が 1 件、`-x` は結果を変えない）を補足に置く。`shfmt -w` はリポジトリのファイルに掛けず、一時ディレクトリの複製で確認している。実機で本実行済み、手順はコンテナで再実行
 - `docs/starship.md` — プロンプトを starship にする手順書。`~/.bashrc` の `eval "$(starship init bash)"` が本体。zoxide の初期化より後ろに置き、WezTerm のシェル統合が `PS1` に足す OSC 133 の A/B マーカーは starship に上書きされる（init スクリプトを読んだ上での推定、実挙動は未検証）。**コンテナのみで検証**
 - `docs/diagrams/*.diag` — nwdiag の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — nwdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
@@ -61,7 +62,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 2. 環境固有の値は手順冒頭の変数ブロックまたは `site.env` だけで設定する（`${SERVER_IP}` 形式。値の置き場所は手順書ごとに 1 か所）。**変更が必須の変数は 1 変数ずつのコードブロックに分け、変更が任意の変数（既定のままでよい・自動で入る・固定）は 1 つのブロックにまとめて必須ブロックの後に置く。** シェルに貼って編集する手間を減らすため
 3. 動作確認、任意設定、`## ロールバック`（または「全部消す」）までを前半に置く
 4. `## 補足` に「対象と検証環境」「実施前の状態」「選択した方針」「注意点」「参照」「付録（検証記録）」を置く。目的、環境表、変数の詳しい説明を含む背景説明はすべてここへ
-5. **複数の手順書が共有する前提は独立した手順書にし、各手順書は手順に含めず冒頭のリード文から参照する。** 手順 1 はその手順書の主題（ツールの導入）から始める。Homebrew 系 9 本が `docs/homebrew.md` を参照しているのがこの形
+5. **複数の手順書が共有する前提は独立した手順書にし、各手順書は手順に含めず冒頭のリード文から参照する。** 手順 1 はその手順書の主題（ツールの導入）から始める。Homebrew 系 10 本が `docs/homebrew.md` を参照しているのがこの形
 6. 対話入力（パスワード、`[y/N]`、TUI の起動）があるコマンドは**単独のコードブロック**にし、直後に「次のブロックは〜してから貼る」と書く。続けて貼ると後続行が入力として食われるため
 
 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` などのプレースホルダで書き、実測出力は変数に置き換えない。`<...>` を含むコマンドは bash のコードブロックに置かず、読者が値を入れるブロックは先頭で変数が空なら中断させる（README「記法の約束」）。手順書のコードブロックは検証目的でも実機で機械的に実行しない。コマンドは実際に実行したものを載せる。パスワード・鍵・トークンは private でも書かない。
