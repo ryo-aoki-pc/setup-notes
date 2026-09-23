@@ -122,7 +122,9 @@ code --list-extensions
 
 初回起動で `~/.config/Code`（設定と履歴）ができる。`~/.vscode` は起動を試みた時点で `argv.json` だけ作られる。拡張を入れていなければ `code --list-extensions` は何も返さない。
 
-> **本書ではこの手順を確認できていない。** 執筆時の実機はデスクトップに人がログインしていない状態（gnome-remote-desktop の headless セッション）で、TTY もディスプレイも無いシェルから起動を試みたが**ウィンドウは開かなかった**。試した内容と結果は[付録: 実機での GUI 起動試験](#付録-実機での-gui-起動試験2026-09-23)にそのまま残してある。**手順 1〜4 までは実機で確認済み**。
+**この手順は実機で確認した**（2026-09-23、gnome-remote-desktop の RDP セッションのデスクトップから）。`~/.config/Code` が作られ、`logs/<日時>/main.log` に正常な起動が記録された。
+
+> **一方、TTY もディスプレイも無いシェルから起動することはできなかった。** ssh や自動化から `env -i` でセッションの値を渡す方法を 6 通り試したが、いずれも子プロセスが立つだけでウィンドウもログも出なかった。**この手順はデスクトップの端末から実行すること。** 試した内容は[付録: 実機での GUI 起動試験](#付録-実機での-gui-起動試験2026-09-23)に残してある。
 
 ---
 
@@ -177,16 +179,16 @@ Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm 
 
 - **目的**: AlmaLinux 10 に [Visual Studio Code](https://code.visualstudio.com/) を Microsoft 公式の dnf リポジトリから入れる。**aarch64 のパッケージが公式に用意されている**
 - **進め方**: 鍵を照合して取り込み、repo ファイルを置いて `dnf install`。**読者が書き換える変数は無い**
-- **状態**: **手順 1〜4 は実機で本実行済み（2026-09-23）。ただし GUI の起動は確認できていない。** 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）。`code --version` が `1.138.0` / `arm64` を返し、`ldd /usr/share/code/code` の未解決ライブラリが 0 であることまで確認した。**[手順 5](#5-gui-を起動する) のウィンドウ起動は確認できていない**: 実機のデスクトップには人がログインしておらず、gnome-remote-desktop の headless な Wayland セッションに対して TTY の無いシェルから 5 通りの方法で起動を試みたが、いずれも子プロセスが立つだけでウィンドウもログも出なかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）。**VS Code は実機に入れたまま残してある。** 手順 1〜3 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）。**拡張機能・`code-insiders`・Wayland ネイティブでの常用は未検証**
+- **状態**: **実機で本実行済み（2026-09-23）。GUI の起動まで確認した。** 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）。`code --version` が `1.138.0` / `arm64` を返し、`ldd /usr/share/code/code` の未解決ライブラリが 0 であることまで確認した。**[手順 5](#5-gui-を起動する) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた。**ただし TTY もディスプレイも無いシェルからの起動は 6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）。**VS Code は実機に入れたまま残してある。** 手順 1〜3 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）。**拡張機能・`code-insiders`・Wayland ネイティブでの常用は未検証**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | 2026-09-23 | 2026-09-23 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| デスクトップ | GNOME Shell 49.4 / Wayland。**ただし gnome-remote-desktop 経由の headless セッションで、画面に誰もログインしていない** | 無し |
+| デスクトップ | GNOME Shell 49.4 / Wayland（gnome-remote-desktop 経由の RDP セッション） | 無し |
 | 入った VS Code | `code-1.138.0-1789458729.el8.aarch64`（318 MB / 展開後 953 MB） | **入れていない**（`--assumeno` で解決だけ確認） |
 | 弱い依存 | `socat 1.7.4.4-8.el10`（appstream） | 同じ解決結果 |
-| GUI 起動 | **確認できず**（[付録](#付録-実機での-gui-起動試験2026-09-23)） | 不可（GUI が無い） |
+| GUI 起動 | **デスクトップの端末からは成功**。TTY の無いシェルからは 6 通りとも失敗（[付録](#付録-実機での-gui-起動試験2026-09-23)） | 不可（GUI が無い） |
 | SELinux | Enforcing | — |
 
 > **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -346,7 +348,19 @@ $ ls /usr/share/applications/code*.desktop
 /usr/share/applications/code.desktop
 ```
 
-`~/.config/Code` は**作られていない**（GUI が起動していないため）。`~/.vscode/argv.json` だけは起動を試みた時点で作られた。
+デスクトップから起動した後は `~/.config/Code` も作られている:
+
+```
+$ stat -c '%y' ~/.config/Code
+2026-09-23 07:15:49
+$ ls ~/.config/Code/logs
+20260923T071413
+20260923T071537
+$ ls ~/.vscode
+argv.json  extensions
+$ code --list-extensions
+（何も出ない。拡張は入れていない）
+```
 
 ### 注意点
 
@@ -357,7 +371,7 @@ $ ls /usr/share/applications/code*.desktop
 - **`code-insiders` と併存できる**: コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別。ただし本書では未検証
 - **Electron なので X11 のライブラリを要求する**: `libX11` / `libXcomposite` などが rpm の requires に並ぶ。これは XWayland 経由でも動くようにするためで、**ライブラリが入っていることは「X11 で動いている」ことを意味しない**
 - **root では起動できない**: ラッパーが `--user-data-dir` の指定を要求する。そもそも root で使うものではない
-- **GUI の起動はこの文書では確認できていない**: [付録](#付録-実機での-gui-起動試験2026-09-23)に試したことと結果をそのまま残した
+- **TTY もディスプレイも無いシェルからは GUI を起動できなかった**: デスクトップの端末からは起動するが、ssh や自動化から `env -i` でセッションの値を渡す方法は 6 通り試して 1 つも成功しなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）。原因は特定できていない
 
 ### 参照
 
@@ -371,9 +385,25 @@ $ ls /usr/share/applications/code*.desktop
 
 ### 付録: 実機での GUI 起動試験（2026-09-23）
 
-**ウィンドウは開かなかった。** 試したことをそのまま残す。
+**結論から書くと、デスクトップの端末からは起動でき、TTY もディスプレイも無いシェルからは 6 通り試して 1 つも起動できなかった。**
 
-実機のデスクトップには人がログインしておらず、生きているのは gnome-remote-desktop 経由の headless セッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）だけだった。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md の付録](wezterm-nightly.md#付録-appimage-の実測)と同じく `env -i` で環境を空にしてから、そのセッションの値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
+うまくいったほう（デスクトップの端末で `code`）の証跡:
+
+```
+$ stat -c '%y' ~/.config/Code
+2026-09-23 07:15:49
+$ ls -d ~/.config/Code/logs/*
+/home/almalinux/.config/Code/logs/20260923T071413
+/home/almalinux/.config/Code/logs/20260923T071537
+$ head -3 ~/.config/Code/logs/20260923T071537/main.log
+2026-09-23 07:14:14.067 [info] StorageMainService: creating application shared storage
+2026-09-23 07:14:14.910 [info] [shared storage] Creating shared storage database at ...
+2026-09-23 07:14:16.834 [info] update#setState idle
+```
+
+`~/.config/Code/GPUCache/` も作られているので、GPU プロセスは動いている。**ただしログに表示バックエンドは記録されないので、Wayland ネイティブか XWayland 経由かはこれでは分からない**（[未確認事項](#未確認事項)）。
+
+以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md の付録](wezterm-nightly.md#付録-appimage-の実測)と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
 
 | # | 渡したもの | 待った時間 | 結果 |
 |---|---|---|---|
@@ -391,9 +421,9 @@ $ ls /usr/share/applications/code*.desktop
 - `gdbus` で GNOME Shell にウィンドウ一覧を問い合わせる方法（`org.gnome.Shell.Eval`）は、最近の GNOME では既定で無効化されていて `(false, '')` しか返らず、確認に使えなかった
 - 動いている Xwayland（pid 1295、`:1024`）は **gdm（uid 42）のもの**で、このユーザーのセッションのものではない
 
-**この結果は「VS Code が EL10 の aarch64 で動かない」ことを意味しない。** 確かめられたのは「TTY もディスプレイも無いシェルから、人がログインしていない headless な RDP セッションに対してウィンドウを出すことはできなかった」までで、**デスクトップに実際にログインした端末から `code` と打った場合は試していない**。
+**同じホスト・同じセッションでも、デスクトップの端末から `code` と打てば起動する。** 失敗しているのは「TTY もディスプレイも無いシェルから `env -i` でウィンドウを出す」経路だけで、VS Code そのものの問題ではない。原因は特定できていない（[未確認事項](#未確認事項)）。**自動化やリモートから GUI を上げたい場合は、この方法は当てにしないこと。**
 
-毎回 `kill -TERM -<プロセスグループ>` → `kill -KILL` で終了させ、一時ディレクトリを消し、最後に `code` のプロセスが 0 件であること・`~/.config/Code` が作られていないこと・GNOME のセッションが `Active=yes` のままであることを確認している。
+失敗した試行では毎回 `kill -TERM -<プロセスグループ>` → `kill -KILL` で終了させ、一時ディレクトリを消し、`code` のプロセスが 0 件であること・`~/.config/Code` が作られていないこと・GNOME のセッションが `Active=yes` のままであることを確認している（`~/.config/Code` はその後、デスクトップからの起動で作られた）。
 
 ---
 
@@ -411,8 +441,8 @@ $ ls /usr/share/applications/code*.desktop
 
 #### 未確認事項
 
-- **[手順 5](#5-gui-を起動する) の GUI 起動**（デスクトップにログインした端末から `code` と打つ経路。[付録](#付録-実機での-gui-起動試験2026-09-23)の 6 通りはいずれもウィンドウが出なかった）
-- Wayland ネイティブで動くか、XWayland 経由になるか（`ELECTRON_OZONE_PLATFORM_HINT=auto` / `--ozone-platform=wayland` の効果）
+- **TTY もディスプレイも無いシェルから GUI を起動できない原因**（[付録](#付録-実機での-gui-起動試験2026-09-23)の 6 通りはいずれもログを 1 バイトも書かずに止まった）
+- **Wayland ネイティブで動くか、XWayland 経由になるか**（起動は確認できたが、VS Code のログに表示バックエンドは記録されない。`ELECTRON_OZONE_PLATFORM_HINT=auto` / `--ozone-platform=wayland` の効果も未確認）
 - `~/.config/environment.d/` と `~/.local/share/applications/code.desktop` によるフラグの恒久化
 - 拡張機能の導入（`code --install-extension timonwong.shellcheck` など）
 - `code-insiders` の併存
