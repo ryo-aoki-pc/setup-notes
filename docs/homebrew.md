@@ -14,7 +14,7 @@
 
 日々の操作は[使い方の基本](#使い方の基本)。以後の更新は[更新](#更新)、消すときは[ロールバック](#ロールバック)。
 
-この手順書を通すと、[yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) の 9 本が使えるようになる。
+この手順書を通すと、[yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck / shfmt](shellcheck.md) の 10 本が使えるようになる。
 
 ### 0. 変数を設定する
 
@@ -153,7 +153,7 @@ rm -f /tmp/uninstall.sh
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
 - **進め方**: 公式インストーラで `/home/linuxbrew/.linuxbrew` に入れ、`~/.bashrc` に 1 行足す。**読者が書き換える変数は無い**
-- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中。**このリポジトリの Homebrew 系 9 本のツールはすべてこの上に載っている**（`brew leaves` が 15 件）。本書の手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、`Homebrew 7.0.6` が同じ場所に入ること・`brew config` の `HOMEBREW_PREFIX` が一致すること・`brew install jq` がボトルで入ることを確認した。**ロールバック（`uninstall.sh` の本実行）は実機でもコンテナでも実行していない**（`--help` を見ただけ）。**実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[補足](#手順-3-bashrc-に書く-1-行)）
+- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中。**このリポジトリの Homebrew 系 10 本のツールはすべてこの上に載っている**（記録時点の `brew leaves` は 15 件）。本書の手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、`Homebrew 7.0.6` が同じ場所に入ること・`brew config` の `HOMEBREW_PREFIX` が一致すること・`brew install jq` がボトルで入ることを確認した。**ロールバック（`uninstall.sh` の本実行）は実機でもコンテナでも実行していない**（`--help` を見ただけ）。**実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[補足](#手順-3-bashrc-に書く-1-行)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -161,7 +161,7 @@ rm -f /tmp/uninstall.sh
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
 | Homebrew | `7.0.6`（`/home/linuxbrew/.linuxbrew`、`Branch: stable`） | 同じ（`7.0.6`、同じ場所に新規導入） |
 | `~/.bashrc` の行 | `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"`（**引数なし**） | `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"`（本書どおり） |
-| 入れたもの | `brew leaves` が 15 件（`fd` / `ffmpeg-full` / `fzf` / `gdu` / `imagemagick-full` / `jq` / `lazygit` / `neovim` / `poppler` / `resvg` / `ripgrep` / `sevenzip` / `tree-sitter-cli` / `yazi` / `zoxide`） | `jq` 1 件のみ（動作確認用） |
+| 入れたもの | `brew leaves` が 15 件（`fd` / `ffmpeg-full` / `fzf` / `gdu` / `imagemagick-full` / `jq` / `lazygit` / `neovim` / `poppler` / `resvg` / `ripgrep` / `sevenzip` / `tree-sitter-cli` / `yazi` / `zoxide`）。その後 2026-09-23 に [ShellCheck / shfmt](shellcheck.md) を足して 17 件 | `jq` 1 件のみ（動作確認用） |
 | 占有サイズ | 2.8 GB | 216 MB |
 | git | RPM の `git 2.52.0`（`/bin/git`） | 同じ |
 
@@ -193,10 +193,10 @@ AlmaLinux 10 aarch64 で「EPEL / AppStream に無い、または古い CLI ツ�
 | **Homebrew** | `arm64_linux` のボトルが揃っていて**ソースビルドが要らない**。root 権限なしで upstream の最新版を追え、1 つの `brew upgrade` でまとめて上がる。占有は大きい（実機で 2.8 GB） | **採用** |
 | EPEL / AppStream / CRB の RPM | root 権限で `dnf` に乗るのが利点。ただし目的のツールが**無い**（`eza` / `git-delta` / `starship` / `zoxide`）か、**古い**（`bat 0.24.0` / `neovim 0.10.1` / `fzf 0.58.0`）ことが多い。同版なら RPM を選ぶ（[btop.md](btop.md) が唯一の例） | 併用（無い・古いときだけ Homebrew） |
 | COPR | EL10 向けの chroot があるとは限らず、`epel-10-aarch64` の repomd が 403 になる例を実測している（[lazygit.md](lazygit.md)）。EL9 向けを流用した例は [wezterm-nightly.md](wezterm-nightly.md) | 不採用（ツールごとに当たり外れが大きい） |
-| 各ツールの公式インストーラ / GitHub Releases | バイナリ 1 つで軽いが、**ツールごとに更新方法が違う**。9 本ぶん覚えることになる | 不採用（Homebrew に揃える） |
+| 各ツールの公式インストーラ / GitHub Releases | バイナリ 1 つで軽いが、**ツールごとに更新方法が違う**。10 本ぶん覚えることになる | 不採用（Homebrew に揃える） |
 | `cargo install` / `go install` | toolchain が要り、Raspberry Pi ではビルドに時間がかかる | 不採用 |
 
-**Homebrew に揃える判断の実質は「更新の一元化」**。`brew upgrade` 1 本で 9 本とも上がる。
+**Homebrew に揃える判断の実質は「更新の一元化」**。`brew upgrade` 1 本で 10 本とも上がる。
 
 ### 手順の補足
 
