@@ -67,6 +67,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](vscode.md) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
+| HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
 
 ---
 

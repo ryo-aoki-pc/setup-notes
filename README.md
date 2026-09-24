@@ -18,7 +18,7 @@
 | [Firefox](docs/firefox.md) | Mozilla 公式 RPM リポジトリから最新版を入れる（標準は ESR 140） | AlmaLinux 10.2 / aarch64 |
 | [Claude Code](docs/claude-code.md) | 公式 dnf リポジトリから CLI を入れる | AlmaLinux 10.2 / aarch64 |
 | [GitHub CLI](docs/gh.md) | 公式 dnf リポジトリから gh を入れる（EPEL 版より新しい） | AlmaLinux 10.2 / aarch64 |
-| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 11 本の前提） | AlmaLinux 10.2 / aarch64 |
+| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 12 本の前提） | AlmaLinux 10.2 / aarch64 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリの配布元 Flathub を登録する（一覧の GUI アプリの前提） | AlmaLinux 10.2 / x86_64（コンテナのみ） |
 | [yazi](docs/yazi.md) | ターミナルファイルマネージャを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [lazygit](docs/lazygit.md) | git の TUI クライアントを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
@@ -32,6 +32,7 @@
 | [starship](docs/starship.md) | シェルプロンプトを Homebrew で入れる（`~/.bashrc` に 1 行） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形を Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [VS Code](docs/vscode.md) | Microsoft 公式 dnf リポジトリからエディタを入れる（GUI） | AlmaLinux 10.2 / aarch64 |
+| [HackGen Console NF](docs/hackgen.md) | 日本語と Nerd Fonts のアイコンを含むプログラミング用フォントを Homebrew の cask で入れる | AlmaLinux 10.2 / x86_64（コンテナのみ） |
 
 ## 記法
 
