@@ -48,10 +48,12 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/eza.md` — eza を Homebrew で入れる手順書。EPEL にも AppStream にも RPM が無い（`exa` も無い）。`ls` は置き換えず `ll` / `la` / `lt` を足す形にしてある。非対話シェルでは `type -t` がエイリアスを見つけられないことも補足に書く。**コンテナのみで検証**
 - `docs/git-delta.md` — git の差分表示を delta にする手順書。formula 名は `git-delta`、バイナリは `delta`。設定は `git config --global` で `~/.gitconfig` に書く（git がキー名を小文字に正規化するので読み戻しの正規表現に注意）。lazygit の `git.paging` 連携は任意節。**コンテナのみで検証**
 - `docs/gdu.md` — gdu を Homebrew で入れる手順書。**brew 版の実行ファイルは `gdu-go`**（coreutils との衝突回避）。EPEL には 5.32.0 の `gdu` がある。実機には同じ brew 版 5.37.0 が 2026-09-21 から入っているが、本書の通し検証はコンテナのみ
-- `docs/btop.md` — btop を EPEL の dnf で入れる手順書。**このリポジトリで唯一 Homebrew を選ばなかったツール**（EPEL と Homebrew がどちらも 1.4.7）。変数の設定（手順 1）の次の手順 2 が EPEL の有効化で、鍵は `epel-release` が置くローカルファイルから入る。**コンテナのみで検証**
+- `docs/btop.md` — btop を EPEL の dnf で入れる手順書。**手順書では唯一 Homebrew を選ばなかったツール**（EPEL と Homebrew がどちらも 1.4.7。`docs/tool-catalog.md` では fastfetch などもこの規則で EPEL にしている）。変数の設定（手順 1）の次の手順 2 が EPEL の有効化で、鍵は `epel-release` が置くローカルファイルから入る。**コンテナのみで検証**
 - `docs/shellcheck.md` — ShellCheck と shfmt を Homebrew で入れる手順書。**この CLAUDE.md の「よく使うコマンド」が前提にしている `shellcheck` の導入元**。EPEL にも 0.10.0 があるが**パッケージ名が大文字の `ShellCheck`** で 1 マイナー古く、shfmt は RPM がどこにも無いので両方 Homebrew に揃えた。`wg-vpn.sh` を 0.11.0 で検査した実測を手順 4 の補足に置く（**SC2034 が 1 件出たので同じ変更で `wg-vpn.sh` の未使用変数 `MY_LAN` を消して 0 件にした**。`-x` はこのスクリプトでは結果を変えない）。`shfmt -w` はリポジトリのファイルに掛けず、一時ディレクトリの複製で確認している。実機で本実行済み、手順はコンテナで再実行
 - `docs/vscode.md` — Microsoft 公式 dnf リポジトリ（`packages.microsoft.com/yumrepos/vscode`）から VS Code を入れる手順書。rpm の release は `.el8` 固定だが、これは**MS が EL 共通に 1 本だけ出している**ためで WezTerm の EL9 流用とは事情が違う。`~/.config/code-flags.conf` が読まれないことも実測で書いた。実機で本実行済みで、デスクトップの端末からの GUI 起動まで確認した。**ただし TTY もディスプレイも無いシェルからは 6 通り試して起動できず**、その記録を付録に残してある。コンテナでは依存解決のみ
 - `docs/starship.md` — プロンプトを starship にする手順書。`~/.bashrc` の `eval "$(starship init bash)"` が本体。zoxide の初期化より後ろに置き、WezTerm のシェル統合が `PS1` に足す OSC 133 の A/B マーカーは starship に上書きされる（init スクリプトを読んだ上での推定、実挙動は未検証）。**コンテナのみで検証**
+- `docs/flatpak.md` — AppStream の flatpak に Flathub を system で登録する手順書。**GUI アプリにとっての `docs/homebrew.md`** で、今のところ `docs/tool-catalog.md` の GUI の Flathub 行だけがこれを前提にしている（Firefox / VS Code は Flathub を採らず RPM）。入れた直後の `flatpak remotes` がエラーを出すこと、確認が 2 回あること、最初の 1 本で `/var/lib/flatpak` が 2.5 GB になることを書いた。**x86_64 のコンテナのみで検証**（クラウドホスト上の Docker、`--privileged`。これまでの「実機上の podman」とは別の環境）。画面の表示は未確認
+- `docs/tool-catalog.md` — **手順書ではなく一覧**。CLI・GUI 約 50 本の推奨導入元・版・導入コマンド・ほかの経路・aarch64 での提供を 1 行ずつ比べ、個別の手順書があるものはそこへ誘導する。選び方は CLI が「RPM が Homebrew と同版以上なら RPM」（podman と組むものは RPM）、GUI が「ベンダーの dnf → AppStream/EPEL → Flathub の検証済み」。x86_64 はコンテナで表の導入コマンドを実行済み、aarch64 は `dnf --forcearch` / Homebrew の JSON / `flatpak remote-ls --arch` のメタデータのみ。版は調査日（2026-09-24）の値なので、更新するときは状態行・表・付録の調査日をまとめて直す
 - `docs/diagrams/*.diag` — nwdiag（構成図）と seqdiag（パケットの流れ）の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — 先頭のキーワードで方言（nwdiag / seqdiag）を選び、blockdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
@@ -67,6 +69,8 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 1. `## 補足` には手順書全体にかかわるものだけを置く: 「対象と検証環境」「実施前の状態」「選択した方針」「完了時点の状態」「注意点」「参照」「付録（検証記録）」。目的、環境表、変数表（「対象と検証環境」の注記）などの背景説明、任意節の補足、複数の手順にまたがる説明（wireguard.md の「スクリプトの動作」など）もここへ。`### 手順の補足` は作らない（1 つの手順だけにかかわる補足は、変数ブロックの補足も含めてその項目の折り畳みへ）
 1. **複数の手順書が共有する前提は独立した手順書にし、各手順書は手順に含めず冒頭のリード文から参照する。** 変数の設定（手順 1）の次の手順 2 はその手順書の主題（ツールの導入）から始める。Homebrew 系 11 本が `docs/homebrew.md` を参照しているのがこの形
 1. 対話入力（パスワード、`[y/N]`、TUI の起動）があるコマンドは**単独のコードブロック**にし、直後に「次のブロックは〜してから貼る」と書く。続けて貼ると後続行が入力として食われるため
+
+`docs/tool-catalog.md` は手順書ではなく一覧なので、この骨格（`## 実施手順`・変数ブロック・手順ごとの折り畳み）に従わない。冒頭に状態行と調査日を置き、表の各行に確認の深さ（起動 / 導入 / メタデータ）を書く。表に載せる導入コマンドはコンテナなどで実行したものだけにし、実行していない行はコマンドを書かない。プレースホルダと秘密情報の規則はそのまま適用する。
 
 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` などのプレースホルダで書き、実測出力は変数に置き換えない。`<...>` を含むコマンドは bash のコードブロックに置かず、読者が値を入れるブロックは先頭で変数が空なら中断させる（README「記法の約束」）。手順書のコードブロックは検証目的でも実機で機械的に実行しない。コマンドは実際に実行したものを載せる。パスワード・鍵・トークンは private でも書かない。
 
