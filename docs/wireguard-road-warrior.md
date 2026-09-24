@@ -467,7 +467,7 @@ conf を import せず、値を手で写す方式（未検証）。`nmcli connec
 
 ### 注意点
 
-- **拠点の LAN 内では切る**: `Endpoint` 宛ての通信がルーターで折り返す[ヘアピン](wireguard.md#クライアントが拠点の-lan-内にいるとき)に加えて、NetworkManager が入れる拠点 LAN の経路（**metric 50**。実測）が Wi-Fi の直結経路（metric 600）に勝ち、LAN 宛ての通信がすべてトンネルに入る。`AllowedIPs` には**両拠点の LAN**が入るので、接続先ではない方の拠点の LAN にいるときも同じことが起きる（その LAN のデフォルトゲートウェイに届かなくなり、`Endpoint` 自体も見えなくなってトンネルごと死ぬ）。手順 7 以降は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので（実測）すぐ切る
+- **拠点の LAN 内では切る**: `Endpoint` 宛ての通信がルーターで折り返す[ヘアピン](wireguard.md#クライアントが拠点の-lan-内にいるとき)に加えて、NetworkManager が入れる拠点 LAN の経路（**metric 50**。実測）が Wi-Fi の直結経路（metric 600）に勝ち、LAN 宛ての通信がすべてトンネルに入る。`AllowedIPs` には**両拠点の LAN**が入るので、接続先ではない方の拠点の LAN にいるときも同じことが起きる（その LAN のデフォルトゲートウェイに届かなくなり、`Endpoint` 自体も見えなくなってトンネルごと死ぬ）。手順 6 以降は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので（実測）すぐ切る
 - **`DNS =` の扱いが wg-quick と違う**: NetworkManager では `ipv4.dns` になり、接続中は resolv.conf を NetworkManager が書き換えるので `systemd-resolved` は要らない（未確認。2026-09-22 の実機は `DNS =` 無しの構成で、`ipv4.dns` は `--`、接続中も `/etc/resolv.conf` は変わらなかった）。wg-quick は `resolvconf` 経由で resolved が要る（→ [wireguard.md](wireguard.md#dns--を書く場合)）。本書は `DNS =` 無し
 - **MTU**: `wireguard.mtu 0` のときカーネル既定の 1420（実測）。PPPoE やモバイル回線で大きい通信だけ止まるなら `sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（→ [wireguard.md: MTU](wireguard.md#mtu)）
 - **全トラフィックを VPN に通す構成は対象外**: NetworkManager 側は `wireguard.ip4-auto-default-route`（`/0` の peer で自動有効）、拠点側は NAT が要る（→ [wireguard.md](wireguard.md#全トラフィックを-vpn-経由にする場合対象外)）
@@ -496,7 +496,7 @@ conf を import せず、値を手で写す方式（未検証）。`nmcli connec
 実施時の位置関係が手順書の書きぶりと違う点を先に書く:
 
 - PC は**拠点 A の LAN**にいた。拠点 B の WG ホストへは拠点間トンネル越しに ssh で届く状態だった
-- クライアント conf の `AllowedIPs` には**両拠点の LAN** が入るので、拠点 A の LAN にいるままトンネルを張ると自分の LAN 経路を奪う。そこで**手順 6 の前に**スマートフォンのテザリング回線へ移した（手順書は「手順 7 以降は LAN の外で」としているが、import 直後に自動で張られるので 1 手順早く移す方が安全）
+- クライアント conf の `AllowedIPs` には**両拠点の LAN** が入るので、拠点 A の LAN にいるままトンネルを張ると自分の LAN 経路を奪う。そこで**手順 6 の前に**スマートフォンのテザリング回線へ移した（検証時の手順書は「トンネルを張る手順（今の手順 7）以降は LAN の外で」としていたが、import 直後に自動で張られるので 1 手順早く移す方が安全。今の手順書はこれに合わせて手順 6 から LAN の外にしている）
 - 拠点 B がクライアントを受ける構成（`WG_B_CLIENT_NET` を設定、`WG_A_CLIENT_NET` は空）なので、手順 1 の変数には `WG_B_TUN_IP` / `WG_B_LAN_IP` / `ROUTER_B_LAN_IP` / `WG_A_LAN_IP` を入れ、手順 4 の `SITE` は `B` にした
 
 #### 手順書から変えて実行した点

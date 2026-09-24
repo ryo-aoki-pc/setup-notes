@@ -399,7 +399,7 @@ $ head -3 ~/.config/Code/logs/20260923T071537/main.log
 
 `~/.config/Code/GPUCache/` も作られているので、GPU プロセスは動いている。**ただしログに表示バックエンドは記録されないので、Wayland ネイティブか XWayland 経由かはこれでは分からない**（[未確認事項](#未確認事項)）。
 
-以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md の付録](wezterm-nightly.md#付録-appimage-の実測)と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
+以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md 手順 4](wezterm-nightly.md#実施手順)（検証する）と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
 
 | # | 渡したもの | 待った時間 | 結果 |
 |---|---|---|---|
