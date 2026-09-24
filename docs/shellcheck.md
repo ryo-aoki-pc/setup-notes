@@ -2,104 +2,228 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
 
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | 検査するスクリプトのパスを決める |
-| [1. ShellCheck と shfmt を入れる](#1-shellcheck-と-shfmt-を入れる) | `brew install shellcheck shfmt` |
-| [2. 検証する](#2-検証する) | 版の確認と、わざと欠陥のあるコードを流して検出させる |
-| [3. スクリプトを検査する](#3-スクリプトを検査する) | `bash -n` → `shellcheck -x` |
-
 整形は[shfmt で整形を確かめる（任意）](#shfmt-で整形を確かめる任意)、警告の抑制は[検査を調整する（任意）](#検査を調整する任意)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**編集が必須なのは、1 行ずつのブロックにした検査対象のパス。** 自分のリポジトリのスクリプトに変える。**新しいシェルを開いたら（SSH を張り直したあとも）先にすべてのブロックを貼り直す。**
+   **編集が必須なのは、1 行ずつのブロックにした検査対象のパス。** 自分のリポジトリのスクリプトに変える。**新しいシェルを開いたら（SSH を張り直したあとも）先にすべてのブロックを貼り直す。**
 
-```bash
-SC_TARGET=scripts/wireguard/wg-vpn.sh   # 検査するスクリプト。自分のパスに変える。<SC_TARGET>
-```
+   ```bash
+   SC_TARGET=scripts/wireguard/wg-vpn.sh   # 検査するスクリプト。自分のパスに変える。<SC_TARGET>
+   ```
 
-残りは既定のままでよい:
+   残りは既定のままでよい:
 
-```bash
-SC_SEVERITY=style        # -S に渡す最低重大度。style だと全部出る。error / warning / info / style。<SC_SEVERITY>
-SHFMT_INDENT=2           # shfmt -i のインデント幅。0 ならタブ。<SHFMT_INDENT>
-```
+   ```bash
+   SC_SEVERITY=style        # -S に渡す最低重大度。style だと全部出る。error / warning / info / style。<SC_SEVERITY>
+   SHFMT_INDENT=2           # shfmt -i のインデント幅。0 ならタブ。<SHFMT_INDENT>
+   ```
 
-**値を読み戻して確かめる。**
+   **値を読み戻して確かめる。**
 
-```bash
-for v in SC_TARGET SC_SEVERITY SHFMT_INDENT; do printf '%-13s = %s\n' "$v" "${!v}"; done
-```
+   ```bash
+   for v in SC_TARGET SC_SEVERITY SHFMT_INDENT; do printf '%-13s = %s\n' "$v" "${!v}"; done
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. ShellCheck と shfmt を入れる
+   `${SC_TARGET}` だけが環境固有で、それ以外は好みの値。`${SC_SEVERITY}` の既定 `style` は**いちばん緩い設定で、error / warning / info / style のすべてが出る**（`-S` は「この重大度以上を出す」という意味）。実害のあるものだけ見たいなら `error`。
 
-```bash
-brew install shellcheck shfmt
-```
+   `${SHFMT_INDENT}` の既定を `2` にしてあるのは、`wg-vpn.sh` が**スペース 2 インデントで書かれている**のを実測したため（タブは 0 行）。shfmt 自身の既定は**タブ**なので、`-i` を渡さないと全行が差分になる。
 
-aarch64 でもビルド済みのボトル（`shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz` / `shfmt--3.14.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。ShellCheck は `gmp` と `libffi` を要求する（Haskell 製のため）。shfmt に依存は無い。
+   </details>
 
-→ [補足](#手順-1-ボトルと依存)
+1. **ShellCheck と shfmt を入れる**
 
-### 2. 検証する
+   ```bash
+   brew install shellcheck shfmt
+   ```
 
-```bash
-shellcheck --version
-shfmt --version
-command -v shellcheck shfmt
-brew list --versions shellcheck shfmt
-```
+   aarch64 でもビルド済みのボトル（`shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz` / `shfmt--3.14.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。ShellCheck は `gmp` と `libffi` を要求する（Haskell 製のため）。shfmt に依存は無い。
 
-`version: 0.11.0` と `3.14.1` が出る。次に、**わざと欠陥のあるコードを標準入力に流して**、本当に検出できることを確かめる（ファイルは作らない）。
+   <details>
+   <summary>補足: ボトルと依存</summary>
 
-```bash
-printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
-echo "rc=$?"
-```
+   ShellCheck は Haskell 製で、`gmp`（多倍長整数）と `libffi` を要求する。実機はどちらも他の formula の依存で入っていたため、取得されたのは本体だけだった。実測:
 
-`SC2086 (info): Double quote to prevent globbing and word splitting.` が 1 件出て **`rc=1`** になる。shfmt も同じように確かめる。
+   ```
+   $ brew deps --tree shellcheck
+   shellcheck
+   ├── gmp
+   └── libffi
+   $ brew deps --tree shfmt
+   shfmt
+   ```
 
-```bash
-printf '#!/bin/bash\nif true; then\necho a\nfi\n' | shfmt -i 2 -d -
-echo "rc=$?"
-```
+   導入にかかった時間は 8 秒（依存が揃っていたため）。実体のサイズは **ShellCheck が 47 MB、shfmt が 3.3 MB**。ShellCheck が大きいのは Haskell のランタイムを静的に抱えているため。
 
-字下げを足す差分が出て `rc=1` になる。**どちらも「指摘があれば `rc=1`」** で、`rc=0` は「指摘なし」を意味する。
+   </details>
 
-→ [補足](#手順-2-終了コードの意味)
+1. **検証する**
 
-### 3. スクリプトを検査する
+   ```bash
+   shellcheck --version
+   shfmt --version
+   command -v shellcheck shfmt
+   brew list --versions shellcheck shfmt
+   ```
 
-まず bash の構文チェック。
+   `version: 0.11.0` と `3.14.1` が出る。次に、**わざと欠陥のあるコードを標準入力に流して**、本当に検出できることを確かめる（ファイルは作らない）。
 
-```bash
-bash -n "${SC_TARGET:?手順 0 の SC_TARGET が空のまま。値を入れて貼り直す}"
-echo "rc=$?"
-```
+   ```bash
+   printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
+   echo "rc=$?"
+   ```
 
-`rc=0` なら構文としては通っている。次に ShellCheck を掛ける。
+   `SC2086 (info): Double quote to prevent globbing and word splitting.` が 1 件出て **`rc=1`** になる。shfmt も同じように確かめる。
 
-```bash
-shellcheck -x "${SC_TARGET}"
-echo "rc=$?"
-```
+   ```bash
+   printf '#!/bin/bash\nif true; then\necho a\nfi\n' | shfmt -i 2 -d -
+   echo "rc=$?"
+   ```
 
-**警告が 0 件なら何も出ずに `rc=0` で終わる。** 出たときは[補足](#手順-3-wg-vpnsh-の検査結果実測)に読み方と実測がある。件数だけ見たいときと、重大度で絞りたいときは次を使う。
+   字下げを足す差分が出て `rc=1` になる。**どちらも「指摘があれば `rc=1`」** で、`rc=0` は「指摘なし」を意味する。
 
-```bash
-shellcheck -x -f json "${SC_TARGET}" | jq 'length'
-shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
-shellcheck -x -S "${SC_SEVERITY:?手順 0 の SC_SEVERITY が空のまま。値を入れて貼り直す}" "${SC_TARGET}" | head -20
-```
+   <details>
+   <summary>補足: 終了コードの意味</summary>
 
-→ [補足](#手順-3-wg-vpnsh-の検査結果実測)
+   どちらも**指摘が 1 件でもあると `rc=1`** を返す。`set -e` を書いたスクリプトや CI に組み込むときの前提になる。
+
+   ```
+   $ printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
+
+   In - line 3:
+   echo $x
+        ^-- SC2086 (info): Double quote to prevent globbing and word splitting.
+
+   Did you mean:
+   echo "$x"
+
+   For more information:
+     https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...
+   rc=1
+   ```
+
+   **`x=1` のような単純な代入では SC2086 は出ない。** 0.11.0 は「その変数に空白や glob が入り得るか」を追跡していて、リテラルを代入しただけの変数は安全だと判断する。上の例で `$(ls)` を使っているのはこのため。
+
+   `-f` で出力形式を変えられる: `tty`（既定）/ `gcc`（エディタや CI が読む 1 行 1 件の形式）/ `json` / `json1` / `checkstyle` / `diff`（`git apply` できる修正パッチ）/ `quiet`（何も出さず終了コードだけ）。
+
+   </details>
+
+1. **スクリプトを検査する**
+
+   まず bash の構文チェック。
+
+   ```bash
+   bash -n "${SC_TARGET:?手順 1 の SC_TARGET が空のまま。値を入れて貼り直す}"
+   echo "rc=$?"
+   ```
+
+   `rc=0` なら構文としては通っている。次に ShellCheck を掛ける。
+
+   ```bash
+   shellcheck -x "${SC_TARGET}"
+   echo "rc=$?"
+   ```
+
+   **警告が 0 件なら何も出ずに `rc=0` で終わる。** 出たときはこの手順の補足に読み方と実測がある。件数だけ見たいときと、重大度で絞りたいときは次を使う。
+
+   ```bash
+   shellcheck -x -f json "${SC_TARGET}" | jq 'length'
+   shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
+   shellcheck -x -S "${SC_SEVERITY:?手順 1 の SC_SEVERITY が空のまま。値を入れて貼り直す}" "${SC_TARGET}" | head -20
+   ```
+
+   <details>
+   <summary>補足: <code>wg-vpn.sh</code> の検査結果（実測）</summary>
+
+   実機で `scripts/wireguard/wg-vpn.sh` を検査した結果。**この補足の行数と差分の数値は、下記の修正を入れる前のもの**（当時 1,300 行、修正後は 1,299 行）。
+
+   ```
+   $ bash -n scripts/wireguard/wg-vpn.sh
+   rc=0
+   $ shellcheck -x scripts/wireguard/wg-vpn.sh
+
+   In scripts/wireguard/wg-vpn.sh line 114:
+     n=SITE_${L}_LAN;       MY_LAN=${!n}
+                            ^----^ SC2034 (warning): MY_LAN appears unused. Verify use (or export if used externally).
+
+   For more information:
+     https://www.shellcheck.net/wiki/SC2034 -- MY_LAN appears unused. Verify use...
+   rc=1
+   ```
+
+   **指摘は 1 件だけ。** 重大度で絞った件数:
+
+   | `-S` | 件数 |
+   |---|---|
+   | `error` | 0 |
+   | `warning` | 1 |
+   | `info` | 1 |
+   | `style` | 1 |
+
+   **この SC2034 は誤検出ではなかった。** `MY_LAN` は 114 行目で代入されるだけで、ほかのどこでも読まれていない（`grep -cw MY_LAN` が `1`）。`select_site` が組み立てる 13 個の `MY_*` / `PEER_*` のうち、読まれていないのは `MY_LAN` だけだった（対になる `PEER_LAN` は 3 か所で使われている）。
+
+   **使うはずだった場所は無い。** 拠点の LAN を両方まとめて必要とする箇所（`validate_addresses` の Python、クライアント conf の `AllowedIPs`）は `SITE_A_LAN` / `SITE_B_LAN` を直接読んでいて、`MY_LAN` を経由していない。`MY_LAN` を参照していた rich rule は、firewalld を「LAN 側ゾーン + forward」方式に変えたときに無くなっている（[wireguard.md](wireguard.md#付録-スクリプトの検証)の落とし穴の記録に当時の `$MY_LAN` が残っている）。**代入だけが取り残されていた。**
+
+   **直した。** この変更で 114 行目を削除し、警告は 0 件になった:
+
+   ```
+   $ shellcheck -x scripts/wireguard/wg-vpn.sh
+   rc=0
+   $ bash -n scripts/wireguard/wg-vpn.sh
+   rc=0
+   ```
+
+   削除が無害であることは、変更前後のスクリプトを並べて確かめた。`select_site` を通る **root が要らないサブコマンド**（`router A` / `router B` / `client list`）と `--help`、および異常系（`router C` / 引数なし / `client bogus`）の計 10 通りで、**標準出力・標準エラー・終了コードがすべて一致した**。`MY_LAN` を読む箇所が無い以上これは当然だが、`select_site` は `apply` / `remove` / `client add` など root が要る経路もすべて通るので、実際に値を組み立てる関数の出力が変わらないことを確認しておく意味がある。
+
+   **`-x` はこのスクリプトでは結果を変えない。** `-x` あり / なしの出力を比べると完全に同一だった:
+
+   ```
+   $ shellcheck -x scripts/wireguard/wg-vpn.sh > /tmp/a.txt 2>&1
+   $ shellcheck    scripts/wireguard/wg-vpn.sh > /tmp/b.txt 2>&1
+   $ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
+   差分なし
+   ```
+
+   理由は 2 つ。`source` しているのは 77 行目の `source "$ENV_FILE"` の 1 か所だけで、**パスが変数なので `-x` でも追跡先を決められない**。しかもその直前に `# shellcheck disable=SC1090` が置いてあり、追跡できないこと自体の警告は既に黙らせてある。追跡させたいなら `# shellcheck source=...` で実ファイルを名指しするか、`.shellcheckrc` に `source-path=` を書く。
+
+   **shfmt の差分は大きい。** `wg-vpn.sh` は shfmt の整形規則とは別の書き方（1 行関数、`(( DRY_RUN ))` の内側の空白など）をしているため:
+
+   | 設定 | 差分の行数 |
+   |---|---|
+   | `-i 0`（タブ。shfmt の既定） | 2,057 |
+   | `-i 2` | 892 |
+   | `-i 4` | 2,049 |
+   | `-i 2 -ci` | 872 |
+
+   `-i 2` がいちばん小さいことが、このスクリプトがスペース 2 インデントである裏付けになっている。それでも 892 行が差分に出る。一時ディレクトリの複製に `shfmt -i 2 -w` を掛けると **1,300 行 → 1,450 行**（+150 行）になった。主な変換はこの形:
+
+   ```
+   -die()  { echo "ERROR: $*" >&2; exit 1; }
+   +die() {
+   +  echo "ERROR: $*" >&2
+   +  exit 1
+   +}
+   ```
+
+   ```
+   -  if (( DRY_RUN )); then
+   -    printf '[dry-run] '; printf '%q ' "$@"; echo
+   +  if ((DRY_RUN)); then
+   +    printf '[dry-run] '
+   +    printf '%q ' "$@"
+   +    echo
+   ```
+
+   どちらも**書き方の好みの問題で、壊れているわけではない**。このリポジトリは 1 行関数と `(( ))` の内側の空白を意図して使っているので、**`wg-vpn.sh` に `-w` は掛けていない**（[未確認事項](#未確認事項)）。
+
+   </details>
 
 ---
 
@@ -108,7 +232,7 @@ shellcheck -x -S "${SC_SEVERITY:?手順 0 の SC_SEVERITY が空のまま。値�
 **`-d` は差分を出すだけでファイルを変えない。** まず今の書き方とどれだけ違うかを見る。
 
 ```bash
-shfmt -i "${SHFMT_INDENT:?手順 0 の SHFMT_INDENT が空のまま。値を入れて貼り直す}" -d "${SC_TARGET}" | wc -l
+shfmt -i "${SHFMT_INDENT:?手順 1 の SHFMT_INDENT が空のまま。値を入れて貼り直す}" -d "${SC_TARGET}" | wc -l
 shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
 ```
 
@@ -129,7 +253,7 @@ diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
 rm -rf "${SHFMT_TMP}"
 ```
 
-行数がどれだけ増減するかが出る。**差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[補足](#手順-3-wg-vpnsh-の検査結果実測)の shfmt の項を見る）。
+行数がどれだけ増減するかが出る。**差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[手順 4 の補足](#実施手順)の shfmt の項を見る）。
 
 よく使うオプション:
 
@@ -199,7 +323,7 @@ brew uninstall shellcheck shfmt
 
 - **目的**: AlmaLinux 10 に [ShellCheck](https://www.shellcheck.net/)（シェルスクリプトの静的検査）と [shfmt](https://github.com/mvdan/sh)（整形）を入れる。**このリポジトリの `CLAUDE.md` が「よく使うコマンド」として `shellcheck -x scripts/wireguard/wg-vpn.sh` を挙げているのに、実機に入っていなかった**のが動機
 - **進め方**: Homebrew で 2 つ同時に入れ、`scripts/wireguard/wg-vpn.sh` を実際に検査する。**読者が書き換えるのは冒頭の変数ブロック（検査対象のパス）だけ**
-- **状態**: **実機で本実行済み（2026-09-23）。** 下表のホストで `brew install shellcheck shfmt` を実行し、`shellcheck 0.11.0` と `shfmt 3.14.1` が入って常用中。**`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 3 の補足](#手順-3-wg-vpnsh-の検査結果実測)）。手順 1〜2 と[検査を調整する（任意）](#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は 2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・スモークテストが同じ結果になること・EPEL 版の版と名前を確認した。**コンテナでは手順 3（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
+- **状態**: **実機で本実行済み（2026-09-23）。** 下表のホストで `brew install shellcheck shfmt` を実行し、`shellcheck 0.11.0` と `shfmt 3.14.1` が入って常用中。**`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](#実施手順)）。手順 2〜3 と[検査を調整する（任意）](#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は 2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・スモークテストが同じ結果になること・EPEL 版の版と名前を確認した。**コンテナでは手順 4（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -212,7 +336,7 @@ brew uninstall shellcheck shfmt
 | 検査対象 | `scripts/wireguard/wg-vpn.sh`（検査時点で 1,300 行、スペース 2 インデント） | 無し |
 | jq | `jq 1.7.1`（RPM。`--format json` の集計に使う） | 無し（集計はしていない） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -222,7 +346,7 @@ brew uninstall shellcheck shfmt
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.11.0` / `3.14.1`）は実行日によって変わる。
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -258,135 +382,6 @@ AlmaLinux 10 aarch64 で ShellCheck を入れる経路を比べた（2026-09-23 
 | `go install mvdan.cc/sh/v3/cmd/shfmt@latest` | Go toolchain が要る（このホストに `golang` は未導入） | 不採用 |
 
 **2 つとも Homebrew に揃えたのは、shfmt に RPM が無いため。** ShellCheck だけ EPEL にすると 1 つの文書に dnf 経路と Homebrew 経路が同居し、更新も `dnf upgrade` と `brew upgrade` の 2 本立てになる。
-
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`${SC_TARGET}` だけが環境固有で、それ以外は好みの値。`${SC_SEVERITY}` の既定 `style` は**いちばん緩い設定で、error / warning / info / style のすべてが出る**（`-S` は「この重大度以上を出す」という意味）。実害のあるものだけ見たいなら `error`。
-
-`${SHFMT_INDENT}` の既定を `2` にしてあるのは、`wg-vpn.sh` が**スペース 2 インデントで書かれている**のを実測したため（タブは 0 行）。shfmt 自身の既定は**タブ**なので、`-i` を渡さないと全行が差分になる。
-
-#### 手順 1: ボトルと依存
-
-ShellCheck は Haskell 製で、`gmp`（多倍長整数）と `libffi` を要求する。実機はどちらも他の formula の依存で入っていたため、取得されたのは本体だけだった。実測:
-
-```
-$ brew deps --tree shellcheck
-shellcheck
-├── gmp
-└── libffi
-$ brew deps --tree shfmt
-shfmt
-```
-
-導入にかかった時間は 8 秒（依存が揃っていたため）。実体のサイズは **ShellCheck が 47 MB、shfmt が 3.3 MB**。ShellCheck が大きいのは Haskell のランタイムを静的に抱えているため。
-
-#### 手順 2: 終了コードの意味
-
-どちらも**指摘が 1 件でもあると `rc=1`** を返す。`set -e` を書いたスクリプトや CI に組み込むときの前提になる。
-
-```
-$ printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
-
-In - line 3:
-echo $x
-     ^-- SC2086 (info): Double quote to prevent globbing and word splitting.
-
-Did you mean:
-echo "$x"
-
-For more information:
-  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...
-rc=1
-```
-
-**`x=1` のような単純な代入では SC2086 は出ない。** 0.11.0 は「その変数に空白や glob が入り得るか」を追跡していて、リテラルを代入しただけの変数は安全だと判断する。上の例で `$(ls)` を使っているのはこのため。
-
-`-f` で出力形式を変えられる: `tty`（既定）/ `gcc`（エディタや CI が読む 1 行 1 件の形式）/ `json` / `json1` / `checkstyle` / `diff`（`git apply` できる修正パッチ）/ `quiet`（何も出さず終了コードだけ）。
-
-#### 手順 3: `wg-vpn.sh` の検査結果（実測）
-
-実機で `scripts/wireguard/wg-vpn.sh` を検査した結果。**この節の行数と差分の数値は、下記の修正を入れる前のもの**（当時 1,300 行、修正後は 1,299 行）。
-
-```
-$ bash -n scripts/wireguard/wg-vpn.sh
-rc=0
-$ shellcheck -x scripts/wireguard/wg-vpn.sh
-
-In scripts/wireguard/wg-vpn.sh line 114:
-  n=SITE_${L}_LAN;       MY_LAN=${!n}
-                         ^----^ SC2034 (warning): MY_LAN appears unused. Verify use (or export if used externally).
-
-For more information:
-  https://www.shellcheck.net/wiki/SC2034 -- MY_LAN appears unused. Verify use...
-rc=1
-```
-
-**指摘は 1 件だけ。** 重大度で絞った件数:
-
-| `-S` | 件数 |
-|---|---|
-| `error` | 0 |
-| `warning` | 1 |
-| `info` | 1 |
-| `style` | 1 |
-
-**この SC2034 は誤検出ではなかった。** `MY_LAN` は 114 行目で代入されるだけで、ほかのどこでも読まれていない（`grep -cw MY_LAN` が `1`）。`select_site` が組み立てる 13 個の `MY_*` / `PEER_*` のうち、読まれていないのは `MY_LAN` だけだった（対になる `PEER_LAN` は 3 か所で使われている）。
-
-**使うはずだった場所は無い。** 拠点の LAN を両方まとめて必要とする箇所（`validate_addresses` の Python、クライアント conf の `AllowedIPs`）は `SITE_A_LAN` / `SITE_B_LAN` を直接読んでいて、`MY_LAN` を経由していない。`MY_LAN` を参照していた rich rule は、firewalld を「LAN 側ゾーン + forward」方式に変えたときに無くなっている（[wireguard.md](wireguard.md#付録-スクリプトの検証)の落とし穴の記録に当時の `$MY_LAN` が残っている）。**代入だけが取り残されていた。**
-
-**直した。** この変更で 114 行目を削除し、警告は 0 件になった:
-
-```
-$ shellcheck -x scripts/wireguard/wg-vpn.sh
-rc=0
-$ bash -n scripts/wireguard/wg-vpn.sh
-rc=0
-```
-
-削除が無害であることは、変更前後のスクリプトを並べて確かめた。`select_site` を通る **root が要らないサブコマンド**（`router A` / `router B` / `client list`）と `--help`、および異常系（`router C` / 引数なし / `client bogus`）の計 10 通りで、**標準出力・標準エラー・終了コードがすべて一致した**。`MY_LAN` を読む箇所が無い以上これは当然だが、`select_site` は `apply` / `remove` / `client add` など root が要る経路もすべて通るので、実際に値を組み立てる関数の出力が変わらないことを確認しておく意味がある。
-
-**`-x` はこのスクリプトでは結果を変えない。** `-x` あり / なしの出力を比べると完全に同一だった:
-
-```
-$ shellcheck -x scripts/wireguard/wg-vpn.sh > /tmp/a.txt 2>&1
-$ shellcheck    scripts/wireguard/wg-vpn.sh > /tmp/b.txt 2>&1
-$ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
-差分なし
-```
-
-理由は 2 つ。`source` しているのは 77 行目の `source "$ENV_FILE"` の 1 か所だけで、**パスが変数なので `-x` でも追跡先を決められない**。しかもその直前に `# shellcheck disable=SC1090` が置いてあり、追跡できないこと自体の警告は既に黙らせてある。追跡させたいなら `# shellcheck source=...` で実ファイルを名指しするか、`.shellcheckrc` に `source-path=` を書く。
-
-**shfmt の差分は大きい。** `wg-vpn.sh` は shfmt の整形規則とは別の書き方（1 行関数、`(( DRY_RUN ))` の内側の空白など）をしているため:
-
-| 設定 | 差分の行数 |
-|---|---|
-| `-i 0`（タブ。shfmt の既定） | 2,057 |
-| `-i 2` | 892 |
-| `-i 4` | 2,049 |
-| `-i 2 -ci` | 872 |
-
-`-i 2` がいちばん小さいことが、このスクリプトがスペース 2 インデントである裏付けになっている。それでも 892 行が差分に出る。一時ディレクトリの複製に `shfmt -i 2 -w` を掛けると **1,300 行 → 1,450 行**（+150 行）になった。主な変換はこの形:
-
-```
--die()  { echo "ERROR: $*" >&2; exit 1; }
-+die() {
-+  echo "ERROR: $*" >&2
-+  exit 1
-+}
-```
-
-```
--  if (( DRY_RUN )); then
--    printf '[dry-run] '; printf '%q ' "$@"; echo
-+  if ((DRY_RUN)); then
-+    printf '[dry-run] '
-+    printf '%q ' "$@"
-+    echo
-```
-
-どちらも**書き方の好みの問題で、壊れているわけではない**。このリポジトリは 1 行関数と `(( ))` の内側の空白を意図して使っているので、**`wg-vpn.sh` に `-w` は掛けていない**（[未確認事項](#未確認事項)）。
 
 ### shfmt と `.editorconfig` の優先順位（実測）
 
@@ -428,13 +423,13 @@ $ brew leaves | wc -l
 
 ### 注意点
 
-- **`docs/wireguard.md` の「`shellcheck -x` → 警告なし」は 2026-09-16 時点の記録**: 同じ文書の 2026-09-19 / 2026-09-20 の付録には「`shellcheck` はこのマシンに無いため未実施」と書いてあり、**その後スクリプトは変更されている**。本書の[手順 3 の実測](#手順-3-wg-vpnsh-の検査結果実測)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
+- **`docs/wireguard.md` の「`shellcheck -x` → 警告なし」は 2026-09-16 時点の記録**: 同じ文書の 2026-09-19 / 2026-09-20 の付録には「`shellcheck` はこのマシンに無いため未実施」と書いてあり、**その後スクリプトは変更されている**。本書の[手順 4 の実測](#実施手順)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
 - **`shfmt -w` は元ファイルを上書きする**: git 管理下で、差分を確認できる状態でだけ使う。`-d` で先に差分を見る習慣にしておくと事故らない
 - **shfmt の既定はタブ**: `-i` を渡さないとスペース系のスクリプトは全行が差分になる。プロジェクトで揃えるなら `.editorconfig` を置き、コマンドラインでは `-i` を**渡さない**（渡すと `.editorconfig` が無視される）
 - **EPEL 版と brew 版を両方入れない**: どちらもコマンド名は `shellcheck` で、PATH の先頭にある Homebrew 版が勝つ。EPEL のパッケージ名だけ大文字の `ShellCheck` なので、`rpm -q shellcheck` では見つからない
 - **指摘があると `rc=1`**: CI に組むときはこれが期待どおりだが、`set -e` のスクリプトの途中で呼ぶと止まる。件数だけ欲しいなら `-f quiet` か `|| true`
 - **PATH の先頭が Homebrew になる**: `sudo shellcheck` は使えない（root の PATH に Homebrew が無い）。root で走らせるならフルパスか EPEL 版
-- **コメントの中の `shellcheck` という語がディレクティブと誤認される**: 行末コメントを `# shellcheck -S に渡す…` のように書くと、**SC1126（error）「Place shellcheck directives before commands, not after.」**が出る。本書の手順 0 の行末コメントは、これを踏んだので `shellcheck` を外した書き方に直してある
+- **コメントの中の `shellcheck` という語がディレクティブと誤認される**: 行末コメントを `# shellcheck -S に渡す…` のように書くと、**SC1126（error）**「Place shellcheck directives before commands, not after.」が出る。本書の手順 1 の行末コメントは、これを踏んだので `shellcheck` を外した書き方に直してある
 - **SC2034 は誤検出も出やすい**: 外部から `source` される変数や、`export` せずに使う設定ファイルの変数は「未使用」に見える。個別に潰すならディレクティブ、全体で切るなら `.shellcheckrc`
 
 ### 参照
@@ -450,16 +445,16 @@ $ brew leaves | wc -l
 
 ### 付録: コンテナでの検証記録（2026-09-23）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜2、[検査を調整する（任意）](#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 2〜3、[検査を調整する（任意）](#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 1. 導入 | `Pouring shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz`（49.1 MB）と `shfmt--3.14.1.arm64_linux.bottle.tar.gz`（3.4 MB）。**依存の `gmp` / `libffi` はこちらでは新規に取得された**（実機は導入済みだった）。ソースビルドは発生しない |
-| 2. 検証 | `version: 0.11.0` / `3.14.1`。スモークテストは実機と同じく SC2086 が 1 件・`rc=1`、shfmt も差分が出て `rc=1` |
+| 2. 導入 | `Pouring shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz`（49.1 MB）と `shfmt--3.14.1.arm64_linux.bottle.tar.gz`（3.4 MB）。**依存の `gmp` / `libffi` はこちらでは新規に取得された**（実機は導入済みだった）。ソースビルドは発生しない |
+| 3. 検証 | `version: 0.11.0` / `3.14.1`。スモークテストは実機と同じく SC2086 が 1 件・`rc=1`、shfmt も差分が出て `rc=1` |
 | 検査を調整する | `mktemp -d` に `.shellcheckrc`（`disable=SC2034`）を置くと該当の指摘が消えて `rc` が `1` → `0` に変わることを確認 |
 | `.editorconfig` | 既定=タブ / `indent_size=2` で 2 / `-i 4` を渡すと 4（`.editorconfig` は無視）の 3 通りを確認 |
-| 3. スクリプトの検査 | **実行していない**（コンテナにリポジトリを置いていない。`wg-vpn.sh` の結果は実機の記録） |
+| 4. スクリプトの検査 | **実行していない**（コンテナにリポジトリを置いていない。`wg-vpn.sh` の結果は実機の記録） |
 | RPM 経路 | `dnf -q list --showduplicates ShellCheck` → `0.10.0-3.el10_0 epel`。`dnf list --available shfmt` → `Error: No matching Packages to list` |
 
 #### 未確認事項

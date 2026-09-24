@@ -2,94 +2,138 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で実行する。** 手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
-
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | 設定ディレクトリを確認する（編集不要） |
-| [1. EPEL を有効にする](#1-epel-を有効にする) | 未設定なら `dnf install epel-release` |
-| [2. btop を入れる](#2-btop-を入れる) | `dnf install btop`。EPEL の鍵を照合する |
-| [3. 検証する](#3-検証する) | 版の確認と、起動して `q` で終了 |
+**すべて対象ホスト上で実行する。** 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**編集するものは無い。** btop が設定とテーマを置く場所を変数にしてあるだけで、既定の場所そのまま。新しいシェルを開いたら先にこのブロックを貼り直す。
+   **編集するものは無い。** btop が設定とテーマを置く場所を変数にしてあるだけで、既定の場所そのまま。新しいシェルを開いたら先にこのブロックを貼り直す。
 
-```bash
-BTOP_CONFIG=~/.config/btop      # btop.conf とユーザーテーマの置き場所。既定。<BTOP_CONFIG>
-printf 'BTOP_CONFIG = %s\n' "${BTOP_CONFIG}"
-```
+   ```bash
+   BTOP_CONFIG=~/.config/btop      # btop.conf とユーザーテーマの置き場所。既定。<BTOP_CONFIG>
+   printf 'BTOP_CONFIG = %s\n' "${BTOP_CONFIG}"
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. EPEL を有効にする
+   `${BTOP_CONFIG}` は**この文書の中だけで使うシェル変数**で、btop 自身が読む環境変数ではない。別の場所に置きたいときは起動時に `btop -c <ファイル>` を渡す。
 
-まず有効になっているか見る。`epel` の行が出れば[手順 2](#2-btop-を入れる) へ飛ぶ。
+   </details>
 
-```bash
-dnf repolist enabled | grep -E '^epel' || echo 'EPEL は未設定'
-```
+1. **EPEL を有効にする**
 
-無ければ入れる。AlmaLinux の `extras` リポジトリに入っているので、追加のリポジトリ設定は要らない。
+   まず有効になっているか見る。`epel` の行が出れば手順 3 へ飛ぶ。
 
-```bash
-sudo dnf install -y epel-release
-```
+   ```bash
+   dnf repolist enabled | grep -E '^epel' || echo 'EPEL は未設定'
+   ```
 
-`sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+   無ければ入れる。AlmaLinux の `extras` リポジトリに入っているので、追加のリポジトリ設定は要らない。
 
-```bash
-rpm -q epel-release
-dnf repolist enabled | grep -E '^epel'
-```
+   ```bash
+   sudo dnf install -y epel-release
+   ```
 
-`epel-release` の版と、`epel` の行が出れば有効になっている。インストールの最後には「CRB を有効にすることを推奨」というメッセージが出る。btop には CRB は要らないが、他の EPEL パッケージのために有効にしておくなら `sudo /usr/bin/crb enable`。
+   `sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
 
-→ [補足](#手順-1-epel-の鍵はローカルファイルから入る)
+   ```bash
+   rpm -q epel-release
+   dnf repolist enabled | grep -E '^epel'
+   ```
 
-### 2. btop を入れる
+   `epel-release` の版と、`epel` の行が出れば有効になっている。インストールの最後には「CRB を有効にすることを推奨」というメッセージが出る。btop には CRB は要らないが、他の EPEL パッケージのために有効にしておくなら `sudo /usr/bin/crb enable`。
 
-入手できる版を先に見る。
+   <details>
+   <summary>補足: EPEL の鍵はローカルファイルから入る</summary>
 
-```bash
-dnf -q list --showduplicates btop
-```
+   EPEL は AlmaLinux の `extras` リポジトリにある `epel-release` パッケージを入れるだけで有効になる。**[gh.md](gh.md) や [firefox.md](firefox.md) のように、公開鍵を HTTPS で取りに行く手順は要らない。** `epel-release` が `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` を置き、そのローカルファイルから取り込まれる。コンテナでの実測（手順 3 の `dnf install btop` の途中）:
 
-`btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る。入れる:
+   ```
+   Extra Packages for Enterprise Linux 10 - aarch6 1.6 MB/s | 1.6 kB     00:00
+   Importing GPG key 0xE37ED158:
+    Userid     : "Fedora (epel10) <epel@fedoraproject.org>"
+    Fingerprint: 7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158
+    From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10
+   Key imported successfully
+   ```
 
-```bash
-sudo dnf install btop
-```
+   `epel-release` の導入時には、弱い依存として `dnf-plugins-core` も一緒に入る。最後に scriptlet がこのメッセージを出す:
 
-**EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる。** fingerprint が次の値であることを目で確かめてから `y` と答える。違っていれば `N` で中断する。
+   ```
+   Many EPEL packages require the CodeReady Builder (CRB) repository.
+   It is recommended that you run /usr/bin/crb enable to enable the CRB repository.
+   ```
 
-- `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）
+   btop は CRB を使わないので、この手順では有効化していない（実機ではもともと CRB が有効）。
 
-依存として `hicolor-icon-theme`（デスクトップエントリのアイコン用）が一緒に入る。トランザクション表の `[y/N]` と鍵の確認に答えるまで終わらないので、**次のブロックはそれから貼る**。
+   なお、コンテナに入った `epel-release` は `10-6.el10`（extras 版）で、実機の `10-8.el10_2` より古い。**一度 EPEL が有効になれば `dnf upgrade` で EPEL 自身の新しい `epel-release` に上がる**ので、差は放っておいてよい。
 
-### 3. 検証する
+   </details>
 
-```bash
-btop --version
-command -v btop
-dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
-```
+1. **btop を入れる**
 
-`btop version: 1.4.7` と `/usr/bin/btop` が出る。次に起動して確認する。
+   入手できる版を先に見る。
 
-```bash
-btop
-```
+   ```bash
+   dnf -q list --showduplicates btop
+   ```
 
-画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると btop への操作として食われる）。初回の起動時に `${BTOP_CONFIG}/btop.conf` が作られるので、作られたか見る:
+   `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る。入れる:
 
-```bash
-ls -l "${BTOP_CONFIG:?手順 0 の BTOP_CONFIG が空のまま。値を入れて貼り直す}"
-```
+   ```bash
+   sudo dnf install btop
+   ```
 
-→ [補足](#手順-3-設定は初回起動まで作られない)
+   **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる。** fingerprint が次の値であることを目で確かめてから `y` と答える。違っていれば `N` で中断する。
+
+   - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）
+
+   依存として `hicolor-icon-theme`（デスクトップエントリのアイコン用）が一緒に入る。トランザクション表の `[y/N]` と鍵の確認に答えるまで終わらないので、**次のブロックはそれから貼る**。
+
+1. **検証する**
+
+   ```bash
+   btop --version
+   command -v btop
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
+   ```
+
+   `btop version: 1.4.7` と `/usr/bin/btop` が出る。次に起動して確認する。
+
+   ```bash
+   btop
+   ```
+
+   画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると btop への操作として食われる）。初回の起動時に `${BTOP_CONFIG}/btop.conf` が作られるので、作られたか見る:
+
+   ```bash
+   ls -l "${BTOP_CONFIG:?手順 1 の BTOP_CONFIG が空のまま。値を入れて貼り直す}"
+   ```
+
+   <details>
+   <summary>補足: 設定は初回起動まで作られない</summary>
+
+   `dnf install` の直後は `~/.config/btop` が存在しない。**1 回起動して初めて** `btop.conf` と空の `themes/` が作られる。コンテナで `script` を使って pty を与え、5 秒で切った実測:
+
+   ```
+   $ timeout 5 script -qec "btop" /dev/null >/dev/null 2>&1
+   $ ls -l ~/.config/btop/
+   total 16
+   -rw-r--r--. 1 <USER> <USER> 9819 Sep 22 20:46 btop.conf
+   drwxr-xr-x. 2 <USER> <USER> 4096 Sep 22 20:46 themes
+   $ head -6 ~/.config/btop/btop.conf
+   #? Config file for btop v.1.4.7
+
+   #* Name of a btop++/bpytop/bashtop formatted ".theme" file, "Default" and "TTY" for builtin themes.
+   #* Themes should be placed in "../share/btop/themes" relative to binary or "$HOME/.config/btop/themes"
+   color_theme = "Default"
+   ```
+
+   **この確認で分かるのは「起動してファイルが作られた」ところまで**で、画面がどう描画されたかは見ていない（`script` の出力は捨てている）。
+
+   </details>
 
 ---
 
@@ -161,19 +205,19 @@ rm -rf ~/.config/btop        # 設定とユーザーテーマも消す場合
 
 - **目的**: AlmaLinux 10 に [btop](https://github.com/aristocratos/btop)（CPU・メモリ・ディスク・ネットワーク・プロセスをまとめて見る TUI。`htop` の後継的な位置づけ）を入れる
 - **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](#選択した方針)）。読者が編集する変数は無い
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 1〜3（EPEL の有効化を含む）を通し、`epel-release` が `extras` から入ること・`btop 1.4.7-1.el10_2` が EPEL から解決されること・署名鍵の fingerprint が本文の値と一致すること・pty を与えた起動で `btop.conf` が生成されることを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには本物の端末が無いため、画面の描画内容・操作・テーマの見え方は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 2〜4（EPEL の有効化を含む）を通し、`epel-release` が `extras` から入ること・`btop 1.4.7-1.el10_2` が EPEL から解決されること・署名鍵の fingerprint が本文の値と一致すること・pty を与えた起動で `btop.conf` が生成されることを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには本物の端末が無いため、画面の描画内容・操作・テーマの見え方は確認していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-22 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| EPEL | **有効**（`epel-release 10-8.el10_2`。手順 1 は不要） | 未設定 → 手順 1 で `epel-release 10-6.el10` を導入 |
+| EPEL | **有効**（`epel-release 10-8.el10_2`。手順 2 は不要） | 未設定 → 手順 2 で `epel-release 10-6.el10` を導入 |
 | 有効なリポジトリ | baseos / appstream / crb / extras / epel / raspberrypi ほか | baseos / appstream / crb / extras（→ epel を追加） |
 | btop | **未導入** | `btop 1.4.7-1.el10_2`（epel） |
 | 一緒に入る依存 | — | `hicolor-icon-theme 0.17-20.el10`（appstream） |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し（`script` で pty を与えた起動のみ） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -181,7 +225,7 @@ rm -rf ~/.config/btop        # 設定とユーザーテーマも消す場合
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`1.4.7-1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。**
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -218,56 +262,6 @@ $ brew info btop | head -2
 Resource monitor that shows usage and stats for processor, memory, disks, network and processes
 ```
 
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`${BTOP_CONFIG}` は**この文書の中だけで使うシェル変数**で、btop 自身が読む環境変数ではない。別の場所に置きたいときは起動時に `btop -c <ファイル>` を渡す。
-
-#### 手順 1: EPEL の鍵はローカルファイルから入る
-
-EPEL は AlmaLinux の `extras` リポジトリにある `epel-release` パッケージを入れるだけで有効になる。**[gh.md](gh.md) や [firefox.md](firefox.md) のように、公開鍵を HTTPS で取りに行く手順は要らない。** `epel-release` が `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` を置き、そのローカルファイルから取り込まれる。コンテナでの実測（手順 2 の `dnf install btop` の途中）:
-
-```
-Extra Packages for Enterprise Linux 10 - aarch6 1.6 MB/s | 1.6 kB     00:00
-Importing GPG key 0xE37ED158:
- Userid     : "Fedora (epel10) <epel@fedoraproject.org>"
- Fingerprint: 7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158
- From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10
-Key imported successfully
-```
-
-`epel-release` の導入時には、弱い依存として `dnf-plugins-core` も一緒に入る。最後に scriptlet がこのメッセージを出す:
-
-```
-Many EPEL packages require the CodeReady Builder (CRB) repository.
-It is recommended that you run /usr/bin/crb enable to enable the CRB repository.
-```
-
-btop は CRB を使わないので、この手順では有効化していない（実機ではもともと CRB が有効）。
-
-なお、コンテナに入った `epel-release` は `10-6.el10`（extras 版）で、実機の `10-8.el10_2` より古い。**一度 EPEL が有効になれば `dnf upgrade` で EPEL 自身の新しい `epel-release` に上がる**ので、差は放っておいてよい。
-
-#### 手順 3: 設定は初回起動まで作られない
-
-`dnf install` の直後は `~/.config/btop` が存在しない。**1 回起動して初めて** `btop.conf` と空の `themes/` が作られる。コンテナで `script` を使って pty を与え、5 秒で切った実測:
-
-```
-$ timeout 5 script -qec "btop" /dev/null >/dev/null 2>&1
-$ ls -l ~/.config/btop/
-total 16
--rw-r--r--. 1 <USER> <USER> 9819 Sep 22 20:46 btop.conf
-drwxr-xr-x. 2 <USER> <USER> 4096 Sep 22 20:46 themes
-$ head -6 ~/.config/btop/btop.conf
-#? Config file for btop v.1.4.7
-
-#* Name of a btop++/bpytop/bashtop formatted ".theme" file, "Default" and "TTY" for builtin themes.
-#* Themes should be placed in "../share/btop/themes" relative to binary or "$HOME/.config/btop/themes"
-color_theme = "Default"
-```
-
-**この確認で分かるのは「起動してファイルが作られた」ところまで**で、画面がどう描画されたかは見ていない（`script` の出力は捨てている）。
-
 ### 完了時点の状態
 
 **検証コンテナでの出力**（実機では本実行していない）:
@@ -303,7 +297,7 @@ ayu.theme
 - **EPEL が遅れると版が止まる**: 今は upstream と同じ 1.4.7 だが、EPEL の更新が止まれば古いままになる。そのときは Homebrew 版に移せる。**ただし `/usr/bin/btop` と Homebrew 版を両方入れると、PATH の先頭にある Homebrew 版が勝ち、`dnf upgrade` で上がるのは使われないほうになる。片方だけにする**
 - **表示は端末の UTF-8 とカラーに依存する**: 記号が崩れるときは `--force-utf`、色がおかしいときは `-l`（256 色）や `-t`（TTY モード）を試す
 - **root で起動しなくても動く**: ただし他ユーザーのプロセスの詳細（コマンドライン全体など）は見えないことがある。全部見たいなら `sudo btop`（RPM なので root の PATH にも入っている。ここが Homebrew 版との違い）
-- **設定は初回起動まで作られない**: [手順 3 の補足](#手順-3-設定は初回起動まで作られない)
+- **設定は初回起動まで作られない**: [手順 4 の補足](#実施手順)
 - **`htop` とは別物**: 同時に入れても衝突しない
 
 ### 参照
@@ -317,13 +311,13 @@ ayu.theme
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜3 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 2〜4 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
 
 | 手順 | 結果 |
 |---|---|
-| 1. EPEL | 導入前の `dnf repolist enabled` は baseos / appstream / crb / extras の 4 つで、`dnf list --available btop` は `Error: No matching Packages to list`。`dnf install -y epel-release` で `epel-release-10-6.el10`（extras）と弱い依存の `dnf-plugins-core-4.7.0-10.el10`（baseos）が入り、`epel` が有効になった |
-| 2. btop | `dnf -q list --showduplicates btop` → `1.4.7-1.el10_2 epel` の 1 行だけ。`dnf install` で EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）を `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` から取り込み、`btop` と `hicolor-icon-theme` の 2 つを導入（597 KB / 展開後 1.4 MB） |
-| 3. 検証 | `btop --version` → `1.4.7`、`GPU_SUPPORT=false`。`command -v btop` → `/usr/bin/btop`。`repoquery --installed` の `from_repo` が `epel` |
+| 2. EPEL | 導入前の `dnf repolist enabled` は baseos / appstream / crb / extras の 4 つで、`dnf list --available btop` は `Error: No matching Packages to list`。`dnf install -y epel-release` で `epel-release-10-6.el10`（extras）と弱い依存の `dnf-plugins-core-4.7.0-10.el10`（baseos）が入り、`epel` が有効になった |
+| 3. btop | `dnf -q list --showduplicates btop` → `1.4.7-1.el10_2 epel` の 1 行だけ。`dnf install` で EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）を `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` から取り込み、`btop` と `hicolor-icon-theme` の 2 つを導入（597 KB / 展開後 1.4 MB） |
+| 4. 検証 | `btop --version` → `1.4.7`、`GPU_SUPPORT=false`。`command -v btop` → `/usr/bin/btop`。`repoquery --installed` の `from_repo` が `epel` |
 | 起動 | `script` で pty を与えて 5 秒で切ったところ、`~/.config/btop/btop.conf`（9819 バイト）と `themes/` が生成された。**画面の内容は確認していない**（出力は捨てている） |
 | テーマ | `/usr/share/btop/themes/` に 30 個以上の `.theme` が入ることを確認 |
 | Homebrew 側 | 別コンテナの `brew info btop` は `stable 1.4.7 (bottled)`、依存なし。**EPEL と同版** |

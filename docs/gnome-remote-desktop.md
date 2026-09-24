@@ -2,178 +2,341 @@
 
 ## 実施手順
 
-**すべてサーバー上で実行する**（手順 6 の最後の「クライアントからのログイン」だけ別マシン）。手順 5 は対話入力なので、そのブロックだけ続けて貼らない。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
-
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | `SERVER_IP` を書き、読み戻す（`LAN_SUBNET` は使う節で設定する） |
-| [1. TLS 証明書・鍵の生成](#1-tls-証明書鍵の生成openssl) | openssl で自己署名証明書を作る（SAN 付き、10 年） |
-| [2. パーミッションと SELinux](#2-パーミッションと-selinux-コンテキストの調整) | 鍵 600 / 証明書 644、`restorecon` |
-| [3. grdctl](#3-grdctl-でシステムデーモンを設定) | 鍵と証明書のパスを登録し、RDP を有効化 |
-| [4. サービスとファイアウォール](#4-サービスの有効化とファイアウォール開放) | `enable --now`、`rdp` サービスを開放 |
-| [5. RDP 資格情報](#5-システム共通-rdp-資格情報の設定) | 端末で対話入力し、再起動 |
-| [6. 検証](#6-検証) | 状態確認、鍵ペア、TLS プローブ、クライアントからログイン |
+**すべてサーバー上で実行する**（手順 7 の最後の「クライアントからのログイン」だけ別マシン）。手順 6 は対話入力なので、そのブロックだけ続けて貼らない。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 接続元を LAN に絞る場合は最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**編集が必須なのは、次の 1 行だけ。**
+   **編集が必須なのは、次の 1 行だけ。**
 
-```bash
-SERVER_IP=192.168.10.100            # ← 自分の値に書き換える。クライアントが接続に使う IP。<SERVER_IP>
-```
+   ```bash
+   SERVER_IP=192.168.10.100            # ← 自分の値に書き換える。クライアントが接続に使う IP。<SERVER_IP>
+   ```
 
-残りは既定のままでよい:
+   残りは既定のままでよい:
 
-```bash
-SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
-SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
-CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates   # 固定。変更不要
-```
+   ```bash
+   SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
+   SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
+   CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates   # 固定。変更不要
+   ```
 
-値を読み戻して確かめる。
+   値を読み戻して確かめる。
 
-```bash
-for v in SERVER_IP SERVER_NAME SERVER_FQDN CERTDIR; do
-  printf '%-12s = %s\n' "$v" "${!v}"
-done
-```
+   ```bash
+   for v in SERVER_IP SERVER_NAME SERVER_FQDN CERTDIR; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
 
-- `SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す
-- 変数はそのシェルの中だけで有効。新しいシェルを開いたら（SSH を張り直したあとも）、上の 2 つのブロックを貼り直してから先へ進む
+   - `SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す
+   - 変数はそのシェルの中だけで有効。新しいシェルを開いたら（SSH を張り直したあとも）、上の 2 つのブロックを貼り直してから先へ進む
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. TLS 証明書・鍵の生成（openssl）
+   - `LAN_SUBNET` は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する。接続元を制限しない場合は、手順 5 で public ゾーンに `rdp` サービスを開放した状態が完成形
+   - `SERVER_IP` が空のまま進むと、手順 2 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
+   - 変数はそのシェルの中だけで有効。読み込んでいないシェルで手順のコマンドを貼ると、`"${CERTDIR}"` が空文字で展開されたまま実行される。SSH を張り直したあと、別の端末を開いたあとは手順 1 のブロックをすべて貼り直す
 
-`gnome-remote-desktop` ユーザー自身として生成し、所有権を最初から正しくする。
+   </details>
 
-```bash
-sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
-sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
-  -subj "/CN=${SERVER_NAME}" \
-  -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
-  -addext "extendedKeyUsage=serverAuth" \
-  -keyout "${CERTDIR}/rdp-tls.key" \
-  -out    "${CERTDIR}/rdp-tls.crt"
-```
+1. **TLS 証明書・鍵の生成（openssl）**
 
-→ [補足](#手順-1-証明書)
+   `gnome-remote-desktop` ユーザー自身として生成し、所有権を最初から正しくする。
 
-### 2. パーミッションと SELinux コンテキストの調整
+   ```bash
+   sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
+   sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
+     -subj "/CN=${SERVER_NAME}" \
+     -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
+     -addext "extendedKeyUsage=serverAuth" \
+     -keyout "${CERTDIR}/rdp-tls.key" \
+     -out    "${CERTDIR}/rdp-tls.crt"
+   ```
 
-```bash
-sudo chmod 600 "${CERTDIR}/rdp-tls.key"
-sudo chmod 644 "${CERTDIR}/rdp-tls.crt"
-sudo restorecon -Rv /var/lib/gnome-remote-desktop
-sudo ls -lZ "${CERTDIR}"
-```
+   <details>
+   <summary>補足: 証明書</summary>
 
-→ [補足](#手順-2-selinux-コンテキスト)
+   > OpenSSL 3.x では `-nodes` は deprecated。`-noenc` を使う。
+   > `hostname` と `hostname -f` が同じ値を返す環境（環境 2。`SERVER_NAME` = `SERVER_FQDN`）では SAN に同じ DNS エントリが 2 つ入るが、エラーにはならず動作にも影響しない。
 
-### 3. grdctl でシステムデーモンを設定
+   生成物:
 
-```bash
-sudo grdctl --system rdp set-tls-key  "${CERTDIR}/rdp-tls.key"
-sudo grdctl --system rdp set-tls-cert "${CERTDIR}/rdp-tls.crt"
-sudo grdctl --system rdp enable
-```
+   ```
+   /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+   ```
 
-- `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 6 で使う）
-- `rdp enable` はデーモンも起動する。このため、この後に設定する資格情報は再起動するまで反映されない（手順 5 で再起動する）
+   環境 2 で生成された証明書の内容:
 
-→ [補足](#手順-3-grdctl)
+   ```
+   $ sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -subject -dates -ext subjectAltName,extendedKeyUsage
+   subject=CN=<HOSTNAME>
+   notBefore=Sep 16 16:02:07 2026 GMT
+   notAfter=Sep 13 16:02:07 2036 GMT
+   X509v3 Subject Alternative Name:
+       DNS:<HOSTNAME>, DNS:<HOSTNAME>, DNS:<SERVER_IP>, IP Address:<SERVER_IP>
+   X509v3 Extended Key Usage:
+       TLS Web Server Authentication
+   ```
 
-### 4. サービスの有効化とファイアウォール開放
+   **GRD が証明書に要求するもの**
 
-```bash
-sudo systemctl enable --now gnome-remote-desktop.service
-sudo firewall-cmd --permanent --add-service=rdp
-sudo firewall-cmd --reload
-```
+   特殊な拡張や独自形式の要求は無く、要件は 3 つだけ:
 
-→ [補足](#手順-4-サービスとファイアウォール)
+   - **PEM 形式**であること（OpenSSH 形式の鍵は不可。`grdctl status` が `[x509_utils_from_pem]: BIO_new failed` を出す）
+   - システムデーモン用は **`gnome-remote-desktop` ユーザー/グループ所有**で読めること
+   - SELinux コンテキストが `gnome_remote_desktop_var_lib_t`（`/var/lib/gnome-remote-desktop` 配下に置けば自動で付く）
 
-### 5. システム共通 RDP 資格情報の設定
+   **SAN と有効期間を指定している理由**
 
-**本物の端末上で**引数なしで対話入力する。
+   - **SAN を付与** — 付けないと CN だけで照合され、IP アドレスで接続したときにクライアントで毎回「名前が一致しない」警告が出る
+   - **有効期間 10 年** — 自己署名証明書を毎年更新する手間を避ける
 
-```bash
-sudo grdctl --system rdp set-credentials
-```
+   **落とし穴: FreeRDP は SAN の `IP:` を見ない**
 
-ユーザー名とパスワードを聞かれる。**次のブロックは、入力し終えてから貼る**（続けて貼ると入力として食われる）。
+   **FreeRDP 3.10 は SAN の DNS エントリしか照合せず、`IP:` エントリを無視する。** IP アドレスで接続する運用なら、IP を **DNS エントリとしても併記**する必要がある（上記コマンドの `DNS:${SERVER_IP}`）。
 
-```bash
-sudo systemctl restart gnome-remote-desktop.service
-```
+   `DNS:${SERVER_IP}` を入れずに `IP:${SERVER_IP}` だけにした場合、`${SERVER_IP}` で接続すると:
 
-- 引数なしで打つのは、パスワードをシェル履歴・ログに残さないため
-- 対話入力は TTY 必須。スクリプトやパイプ、Claude Code の `!` 実行では**何も設定されないまま exit 0 で終わる**（[落とし穴 1](#落とし穴-1-grdctl-の対話入力は-tty-必須)）
-- 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
+   ```
+   @           WARNING: CERTIFICATE NAME MISMATCH!           @
+   The hostname used for this connection (<SERVER_IP>:3389)
+   does not match any of the names given in the certificate:
+   Common Name (CN):
+   	<HOSTNAME>
+   Alternative names:
+   	 <HOSTNAME>
+   	 <HOSTNAME>.<DOMAIN>          ← IP エントリが列挙されていない
+   ```
 
-→ [補足](#手順-5-資格情報)
+   `DNS:${SERVER_IP}` を追加すると警告は消える（環境 1 で実測）。
 
-### 6. 検証
+   </details>
 
-**サーバー側の状態:**
+1. **パーミッションと SELinux コンテキストの調整**
 
-```bash
-sudo grdctl --system status              # Status: enabled / Username: (hidden)
-systemctl status gnome-remote-desktop    # active (running)
-ss -lntp | grep 3389                     # *:3389 で LISTEN
-firewall-cmd --list-services             # rdp が含まれる
-```
+   ```bash
+   sudo chmod 600 "${CERTDIR}/rdp-tls.key"
+   sudo chmod 644 "${CERTDIR}/rdp-tls.crt"
+   sudo restorecon -Rv /var/lib/gnome-remote-desktop
+   sudo ls -lZ "${CERTDIR}"
+   ```
 
-**鍵と証明書が対応しているか:**
+   <details>
+   <summary>補足: SELinux コンテキスト</summary>
 
-```bash
-sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -modulus | openssl sha256
-sudo openssl rsa  -in "${CERTDIR}/rdp-tls.key" -noout -modulus | openssl sha256
-```
+   `restorecon` は両環境とも差分なし。コンテキストは元から `gnome_remote_desktop_var_lib_t` で正しい状態だった。
 
-2 つのハッシュが一致すればペアとして正しい。
+   ```
+   -rw-r--r--. 1 gnome-remote-desktop gnome-remote-desktop unconfined_u:object_r:gnome_remote_desktop_var_lib_t:s0 1249 Sep 16 16:02 rdp-tls.crt
+   -rw-------. 1 gnome-remote-desktop gnome-remote-desktop unconfined_u:object_r:gnome_remote_desktop_var_lib_t:s0 1704 Sep 16 16:02 rdp-tls.key
+   ```
 
-**TLS ハンドシェイクと提示される証明書:** 次のブロックは `~/rdp_tls_probe.py` を書き出して `${SERVER_IP}` に対して実行する（FreeRDP も RDP のパスワードも要らない）。
+   </details>
 
-```bash
-cat > ~/rdp_tls_probe.py <<'PY'
-#!/usr/bin/env python3
-# usage: python3 rdp_tls_probe.py <host> [port]
-import socket, ssl, struct, sys, hashlib, subprocess
-host = sys.argv[1]; port = int(sys.argv[2]) if len(sys.argv) > 2 else 3389
-# X.224 Connection Request + RDP_NEG_REQ (PROTOCOL_SSL|PROTOCOL_HYBRID)
-neg = struct.pack('<BBHI', 0x01, 0x00, 8, 0x00000003)
-x224 = bytes([len(neg) + 6, 0xE0, 0, 0, 0, 0, 0]) + neg
-tpkt = struct.pack('>BBH', 3, 0, 4 + len(x224)) + x224
-s = socket.create_connection((host, port), timeout=10)
-s.sendall(tpkt)
-resp = s.recv(1024)
-t, flags, length, proto = struct.unpack('<BBHI', resp[11:19])
-print(f"negotiation: type=0x{t:02x} ({'RESPONSE' if t == 2 else 'FAILURE'}) selectedProtocol=0x{proto:x}")
-if t != 2: sys.exit(1)
-ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
-ts = ctx.wrap_socket(s, server_hostname=host)
-der = ts.getpeercert(binary_form=True)
-print("tls:", ts.version(), ts.cipher()[0])
-print("fingerprint:", ':'.join(f'{b:02x}' for b in hashlib.sha256(der).digest()))
-pem = ssl.DER_cert_to_PEM_cert(der)
-print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
-ts.close()
-PY
-python3 ~/rdp_tls_probe.py "${SERVER_IP}"
-```
+1. **grdctl でシステムデーモンを設定**
 
-- 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい（この手順書が作る唯一の作業ファイル）
-- `selectedProtocol=0x2` でネゴシエーションが成立し、`fingerprint` が `grdctl --system status` の TLS fingerprint と**完全一致**し、SAN に接続に使う名前が `DNS:` エントリとして含まれていればよい
-- サーバー側には `nla_recv() error` などのログが出るが、プローブが TLS 直後に切断しただけで正常（[検証の補足](#tls-プローブ)）
+   ```bash
+   sudo grdctl --system rdp set-tls-key  "${CERTDIR}/rdp-tls.key"
+   sudo grdctl --system rdp set-tls-cert "${CERTDIR}/rdp-tls.crt"
+   sudo grdctl --system rdp enable
+   ```
 
-**クライアントからのログイン**（LAN 内の別マシンから）: `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する。手順 0 の変数は無いので `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える。
+   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 7 で使う）
+   - `rdp enable` はデーモンも起動する。このため、この後に設定する資格情報は再起動するまで反映されない（手順 6 で再起動する）
 
-システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする。問題があればサーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る。
+   <details>
+   <summary>補足: grdctl</summary>
 
-→ [検証の補足](#検証の補足)
+   > **`grdctl --system rdp enable` / `disable` はサービスの起動・停止も行う**（環境 2 で確認。`disable` 後は `inactive`、`enable` 後は `active` になる）。このため、この時点でデーモンが起動し、**後から設定する資格情報は再起動するまで反映されない**（手順 6）。
+
+   </details>
+
+1. **サービスの有効化とファイアウォール開放**
+
+   ```bash
+   sudo systemctl enable --now gnome-remote-desktop.service
+   sudo firewall-cmd --permanent --add-service=rdp
+   sudo firewall-cmd --reload
+   ```
+
+   <details>
+   <summary>補足: サービスとファイアウォール</summary>
+
+   `gdm` は両環境とも既に active、`systemctl get-default` も既に `graphical.target` だったため、RHEL 標準手順にある `systemctl enable --now gdm` / `systemctl set-default graphical.target` は不要だった。
+
+   `--add-service=rdp` は firewalld 定義済みサービスで 3389/tcp を開放する（`--add-port=3389/tcp` と等価）。
+
+   </details>
+
+1. **システム共通 RDP 資格情報の設定**
+
+   **本物の端末上で**引数なしで対話入力する。
+
+   ```bash
+   sudo grdctl --system rdp set-credentials
+   ```
+
+   ユーザー名とパスワードを聞かれる。**次のブロックは、入力し終えてから貼る**（続けて貼ると入力として食われる）。
+
+   ```bash
+   sudo systemctl restart gnome-remote-desktop.service
+   ```
+
+   - 引数なしで打つのは、パスワードをシェル履歴・ログに残さないため
+   - 対話入力は TTY 必須。スクリプトやパイプ、Claude Code の `!` 実行では**何も設定されないまま exit 0 で終わる**（[落とし穴 1](#落とし穴-1-grdctl-の対話入力は-tty-必須)）
+   - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
+
+   <details>
+   <summary>補足: 資格情報</summary>
+
+   環境 2 では資格情報を `systemctl enable --now` の**前**に設定したが、手順 4 の `rdp enable` で既にデーモンが起動していたため、やはり再起動するまで反映されなかった。落とし穴の詳細は[付録の調査記録](#落とし穴-1-grdctl-の対話入力は-tty-必須)。
+
+   </details>
+
+1. **検証**
+
+   **サーバー側の状態:**
+
+   ```bash
+   sudo grdctl --system status              # Status: enabled / Username: (hidden)
+   systemctl status gnome-remote-desktop    # active (running)
+   ss -lntp | grep 3389                     # *:3389 で LISTEN
+   firewall-cmd --list-services             # rdp が含まれる
+   ```
+
+   **鍵と証明書が対応しているか:**
+
+   ```bash
+   sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -modulus | openssl sha256
+   sudo openssl rsa  -in "${CERTDIR}/rdp-tls.key" -noout -modulus | openssl sha256
+   ```
+
+   2 つのハッシュが一致すればペアとして正しい。
+
+   **TLS ハンドシェイクと提示される証明書:** 次のブロックは `~/rdp_tls_probe.py` を書き出して `${SERVER_IP}` に対して実行する（FreeRDP も RDP のパスワードも要らない）。
+
+   ```bash
+   cat > ~/rdp_tls_probe.py <<'PY'
+   #!/usr/bin/env python3
+   # usage: python3 rdp_tls_probe.py <host> [port]
+   import socket, ssl, struct, sys, hashlib, subprocess
+   host = sys.argv[1]; port = int(sys.argv[2]) if len(sys.argv) > 2 else 3389
+   # X.224 Connection Request + RDP_NEG_REQ (PROTOCOL_SSL|PROTOCOL_HYBRID)
+   neg = struct.pack('<BBHI', 0x01, 0x00, 8, 0x00000003)
+   x224 = bytes([len(neg) + 6, 0xE0, 0, 0, 0, 0, 0]) + neg
+   tpkt = struct.pack('>BBH', 3, 0, 4 + len(x224)) + x224
+   s = socket.create_connection((host, port), timeout=10)
+   s.sendall(tpkt)
+   resp = s.recv(1024)
+   t, flags, length, proto = struct.unpack('<BBHI', resp[11:19])
+   print(f"negotiation: type=0x{t:02x} ({'RESPONSE' if t == 2 else 'FAILURE'}) selectedProtocol=0x{proto:x}")
+   if t != 2: sys.exit(1)
+   ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+   ts = ctx.wrap_socket(s, server_hostname=host)
+   der = ts.getpeercert(binary_form=True)
+   print("tls:", ts.version(), ts.cipher()[0])
+   print("fingerprint:", ':'.join(f'{b:02x}' for b in hashlib.sha256(der).digest()))
+   pem = ssl.DER_cert_to_PEM_cert(der)
+   print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
+   ts.close()
+   PY
+   python3 ~/rdp_tls_probe.py "${SERVER_IP}"
+   ```
+
+   - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい（この手順書が作る唯一の作業ファイル）
+   - `selectedProtocol=0x2` でネゴシエーションが成立し、`fingerprint` が `grdctl --system status` の TLS fingerprint と**完全一致**し、SAN に接続に使う名前が `DNS:` エントリとして含まれていればよい
+   - サーバー側には `nla_recv() error` などのログが出るが、プローブが TLS 直後に切断しただけで正常（この手順の補足の「TLS プローブ」）
+
+   **クライアントからのログイン**（LAN 内の別マシンから）: `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する。手順 1 の変数は無いので `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える。
+
+   システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする。問題があればサーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る。
+
+   <details>
+   <summary>補足: 検証</summary>
+
+   **サーバー側の状態**
+
+   > `Unit status: active` なのに `Status: disabled` で 3389 が LISTEN していない場合は、後半の補足「注意点」の**設定レイヤーの食い違い**を疑う。
+
+   **鍵と証明書**
+
+   環境 2 で一致を確認。
+
+   > `openssl pkey` には `-modulus` が無い（OpenSSL 3.5 で確認）。鍵側は `openssl rsa` を使う。
+
+   **TLS プローブ**
+
+   RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に始まるため、`openssl s_client` では確認できない。手順 7 の `rdp_tls_probe.py` は Python 標準ライブラリだけで書いてあり、X.224 のネゴシエーションを済ませてから TLS を張り、提示された証明書の fingerprint と SAN を表示する。サーバーに FreeRDP クライアントが無い環境（環境 2）でも使え、RDP のパスワードは不要。
+
+   環境 2 での結果（`127.0.0.1` と `${SERVER_IP}` の両方で同じ）:
+
+   ```
+   $ python3 ~/rdp_tls_probe.py "${SERVER_IP}"
+   negotiation: type=0x02 (RESPONSE) selectedProtocol=0x2
+   tls: TLSv1.3 TLS_AES_256_GCM_SHA384
+   fingerprint: <FINGERPRINT>
+   subject=CN=<HOSTNAME>
+   X509v3 Subject Alternative Name:
+       DNS:<HOSTNAME>, DNS:<HOSTNAME>, DNS:<SERVER_IP>, IP Address:<SERVER_IP>
+   ```
+
+   確認するポイント:
+
+   - `selectedProtocol=0x2`（HYBRID = NLA）でネゴシエーションが成立する
+   - TLS ハンドシェイクが完了し、**fingerprint が `grdctl --system status` の TLS fingerprint と完全一致**する
+   - SAN に接続に使う名前が DNS エントリとして含まれている
+
+   スクリプトは TLS 確立直後に切断するため、サーバー側には次のログが出るが正常（NLA の途中でクライアントが切断しただけ）:
+
+   ```
+   [ERROR][com.freerdp.core.nla] - [nla_server_recv_stream]: nla_recv() error: -1
+   [ERROR][com.freerdp.core.transport] - [transport_accept_nla]: client authentication failure
+   [RDP] Network or intentional disconnect, stopping session
+   ```
+
+   逆に、次が出る場合はプローブの前段で失敗している:
+
+   | ログ | 意味 |
+   |---|---|
+   | `[RDP] Credentials are not set, denying client` | 資格情報が未設定／未反映。ネゴシエーション前に切断される（スクリプトは `Connection reset by peer`） |
+   | `BIO_do_handshake failed` | TLS 失敗（証明書・鍵の不備） |
+   | `[x509_utils_from_pem]: BIO_new failed` | 証明書／鍵が PEM として読めない |
+
+   **FreeRDP クライアントがある場合の検証**
+
+   TLS の可否: **存在しないユーザー名**でループバック接続する。TLS が正常なら NLA 段階まで到達して `Could not find user in SAM database` が出る。TLS が壊れていればその手前の `BIO_do_handshake failed` で止まる。
+
+   ```bash
+   timeout 20 xfreerdp /v:127.0.0.1:3389 /u:__probe__ /p:__probe__ /cert:ignore /auth-only >/dev/null 2>&1
+   sudo journalctl -u gnome-remote-desktop --since "-1min" --no-pager \
+     | grep -E "SAM database|BIO_do_handshake"
+   ```
+
+   クライアントに届く証明書: `/cert:ignore` を付けずに実行すると、実際に提示された証明書の詳細が表示される。Thumbprint が TLS fingerprint と一致し、`CERTIFICATE NAME MISMATCH` が出ないことを確認する。
+
+   ```bash
+   echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /auth-only 2>&1 \
+     | grep -iE "Common Name|Subject:|Issuer:|Thumbprint|MISMATCH"
+   ```
+
+   **クライアントからのログイン**
+
+   1. システム共通パスワードで RDP 認証を通過
+   1. GDM ログイン画面が表示される
+   1. `<USER>` などの OS アカウントでログイン → 新規 GNOME セッションが起動
+
+   問題があれば以下を並行して確認する:
+
+   ```bash
+   journalctl -u gnome-remote-desktop -f
+   journalctl -u gdm -f
+   ```
+
+   </details>
 
 ---
 
@@ -181,7 +344,7 @@ python3 ~/rdp_tls_probe.py "${SERVER_IP}"
 
 **接続元を制限しないなら、この節は不要。**
 
-手順 4 は public ゾーンに属するすべての NIC で 3389/tcp を開く。LAN に絞るなら、まず送信元サブネットを入れる:
+手順 5 は public ゾーンに属するすべての NIC で 3389/tcp を開く。LAN に絞るなら、まず送信元サブネットを入れる:
 
 ```bash
 LAN_SUBNET=192.168.10.0/24           # ← 自分の値に書き換える。<LAN_SUBNET>
@@ -219,19 +382,19 @@ sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
 OLD_BASENAME=                        # ← 差し替え前の証明書・鍵のファイル名（拡張子なし）
 ```
 
-差し替えのときに旧ファイルを消していると戻せない（手順 1 は同じ名前で上書きするので、残すなら先にコピーしておく）。
+差し替えのときに旧ファイルを消していると戻せない（手順 2 は同じ名前で上書きするので、残すなら先にコピーしておく）。
 
 続けてパスを戻し、再起動する:
 
 ```bash
-if [ -z "${OLD_BASENAME}" ] || [ -z "${CERTDIR}" ]; then echo '中断: OLD_BASENAME と手順 0 の CERTDIR を設定してから貼り直す' >&2; else
+if [ -z "${OLD_BASENAME}" ] || [ -z "${CERTDIR}" ]; then echo '中断: OLD_BASENAME と手順 1 の CERTDIR を設定してから貼り直す' >&2; else
 sudo grdctl --system rdp set-tls-key  "${CERTDIR}/${OLD_BASENAME}.key"
 sudo grdctl --system rdp set-tls-cert "${CERTDIR}/${OLD_BASENAME}.crt"
 sudo systemctl restart gnome-remote-desktop.service
 fi
 ```
 
-`OLD_BASENAME` が空のまま、または手順 0 の `CERTDIR` が無い状態で貼ると先頭の `if` で中断し、`grdctl` は実行されない。
+`OLD_BASENAME` が空のまま、または手順 1 の `CERTDIR` が無い状態で貼ると先頭の `if` で中断し、`grdctl` は実行されない。
 
 ---
 
@@ -251,9 +414,9 @@ fi
 | `gdm` | 47.0-22.el10_2 | 47.0-22.el10_2 |
 | OpenSSL | 3.5 | 3.5.8 |
 | 証明書 | 当初 `winpr-makecert` → 後に openssl 製へ差し替え | 最初から本書の openssl 手順で構築 |
-| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（下記「検証方法」） |
+| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（[手順 7 の補足](#実施手順)） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -266,7 +429,7 @@ fi
 >
 > TLS fingerprint は実際に生成された自己署名証明書のものをそのまま残してある（秘密情報ではない）。**値は証明書を生成するたびに変わる**ので、自環境では `grdctl --system status` の表示を正とすること。
 
-手順の理由・実測・落とし穴・調査記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と調査記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -293,97 +456,9 @@ fi
 #### 認証は 2 段構え
 
 1. **システム共通の RDP 資格情報**（`grdctl --system rdp set-credentials`）— GDM ログイン画面へ到達するためのゲートウェイ認証。RDP クライアントの接続時に入力する。ユーザー名は OS アカウントと一致していなくてよい。
-2. **各ユーザーの OS 資格情報** — GDM のログイン画面で入力する。
+1. **各ユーザーの OS 資格情報** — GDM のログイン画面で入力する。
 
 ---
-
-### 手順の補足
-
-#### 手順 0: 変数について
-
-- `LAN_SUBNET` は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の rich rule でしか使わないので、手順 0 ではなくその節の冒頭で設定する。接続元を制限しない場合は、手順 4 で public ゾーンに `rdp` サービスを開放した状態が完成形
-- `SERVER_IP` が空のまま進むと、手順 1 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
-- 変数はそのシェルの中だけで有効。読み込んでいないシェルで手順のコマンドを貼ると、`"${CERTDIR}"` が空文字で展開されたまま実行される。SSH を張り直したあと、別の端末を開いたあとは手順 0 のブロックをすべて貼り直す
-
-#### 手順 1: 証明書
-
-> OpenSSL 3.x では `-nodes` は deprecated。`-noenc` を使う。
-> `hostname` と `hostname -f` が同じ値を返す環境（環境 2。`SERVER_NAME` = `SERVER_FQDN`）では SAN に同じ DNS エントリが 2 つ入るが、エラーにはならず動作にも影響しない。
-
-生成物:
-
-```
-/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-```
-
-環境 2 で生成された証明書の内容:
-
-```
-$ sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -subject -dates -ext subjectAltName,extendedKeyUsage
-subject=CN=<HOSTNAME>
-notBefore=Sep 16 16:02:07 2026 GMT
-notAfter=Sep 13 16:02:07 2036 GMT
-X509v3 Subject Alternative Name:
-    DNS:<HOSTNAME>, DNS:<HOSTNAME>, DNS:<SERVER_IP>, IP Address:<SERVER_IP>
-X509v3 Extended Key Usage:
-    TLS Web Server Authentication
-```
-
-##### GRD が証明書に要求するもの
-
-特殊な拡張や独自形式の要求は無く、要件は 3 つだけ:
-
-- **PEM 形式**であること（OpenSSH 形式の鍵は不可。`grdctl status` が `[x509_utils_from_pem]: BIO_new failed` を出す）
-- システムデーモン用は **`gnome-remote-desktop` ユーザー/グループ所有**で読めること
-- SELinux コンテキストが `gnome_remote_desktop_var_lib_t`（`/var/lib/gnome-remote-desktop` 配下に置けば自動で付く）
-
-##### SAN と有効期間を指定している理由
-
-- **SAN を付与** — 付けないと CN だけで照合され、IP アドレスで接続したときにクライアントで毎回「名前が一致しない」警告が出る
-- **有効期間 10 年** — 自己署名証明書を毎年更新する手間を避ける
-
-##### 落とし穴: FreeRDP は SAN の `IP:` を見ない
-
-**FreeRDP 3.10 は SAN の DNS エントリしか照合せず、`IP:` エントリを無視する。** IP アドレスで接続する運用なら、IP を **DNS エントリとしても併記**する必要がある（上記コマンドの `DNS:${SERVER_IP}`）。
-
-`DNS:${SERVER_IP}` を入れずに `IP:${SERVER_IP}` だけにした場合、`${SERVER_IP}` で接続すると:
-
-```
-@           WARNING: CERTIFICATE NAME MISMATCH!           @
-The hostname used for this connection (<SERVER_IP>:3389)
-does not match any of the names given in the certificate:
-Common Name (CN):
-	<HOSTNAME>
-Alternative names:
-	 <HOSTNAME>
-	 <HOSTNAME>.<DOMAIN>          ← IP エントリが列挙されていない
-```
-
-`DNS:${SERVER_IP}` を追加すると警告は消える（環境 1 で実測）。
-
-#### 手順 2: SELinux コンテキスト
-
-`restorecon` は両環境とも差分なし。コンテキストは元から `gnome_remote_desktop_var_lib_t` で正しい状態だった。
-
-```
--rw-r--r--. 1 gnome-remote-desktop gnome-remote-desktop unconfined_u:object_r:gnome_remote_desktop_var_lib_t:s0 1249 Sep 16 16:02 rdp-tls.crt
--rw-------. 1 gnome-remote-desktop gnome-remote-desktop unconfined_u:object_r:gnome_remote_desktop_var_lib_t:s0 1704 Sep 16 16:02 rdp-tls.key
-```
-
-#### 手順 3: grdctl
-
-> **`grdctl --system rdp enable` / `disable` はサービスの起動・停止も行う**（環境 2 で確認。`disable` 後は `inactive`、`enable` 後は `active` になる）。このため、この時点でデーモンが起動し、**後から設定する資格情報は再起動するまで反映されない**（手順 5）。
-
-#### 手順 4: サービスとファイアウォール
-
-`gdm` は両環境とも既に active、`systemctl get-default` も既に `graphical.target` だったため、RHEL 標準手順にある `systemctl enable --now gdm` / `systemctl set-default graphical.target` は不要だった。
-
-`--add-service=rdp` は firewalld 定義済みサービスで 3389/tcp を開放する（`--add-port=3389/tcp` と等価）。
-
-#### 手順 5: 資格情報
-
-環境 2 では資格情報を `systemctl enable --now` の**前**に設定したが、手順 3 の `rdp enable` で既にデーモンが起動していたため、やはり再起動するまで反映されなかった。落とし穴の詳細は[付録の調査記録](#落とし穴-1-grdctl-の対話入力は-tty-必須)。
 
 ### 完了時点の状態
 
@@ -420,86 +495,6 @@ gnome-remote-de[2415]: RDP server started
 
 ---
 
-### 検証の補足
-
-#### サーバー側の状態
-
-> `Unit status: active` なのに `Status: disabled` で 3389 が LISTEN していない場合は、下記「注意点」の**設定レイヤーの食い違い**を疑う。
-
-#### 鍵と証明書
-
-環境 2 で一致を確認。
-
-> `openssl pkey` には `-modulus` が無い（OpenSSL 3.5 で確認）。鍵側は `openssl rsa` を使う。
-
-#### TLS プローブ
-
-RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に始まるため、`openssl s_client` では確認できない。手順 6 の `rdp_tls_probe.py` は Python 標準ライブラリだけで書いてあり、X.224 のネゴシエーションを済ませてから TLS を張り、提示された証明書の fingerprint と SAN を表示する。サーバーに FreeRDP クライアントが無い環境（環境 2）でも使え、RDP のパスワードは不要。
-
-環境 2 での結果（`127.0.0.1` と `${SERVER_IP}` の両方で同じ）:
-
-```
-$ python3 ~/rdp_tls_probe.py "${SERVER_IP}"
-negotiation: type=0x02 (RESPONSE) selectedProtocol=0x2
-tls: TLSv1.3 TLS_AES_256_GCM_SHA384
-fingerprint: <FINGERPRINT>
-subject=CN=<HOSTNAME>
-X509v3 Subject Alternative Name:
-    DNS:<HOSTNAME>, DNS:<HOSTNAME>, DNS:<SERVER_IP>, IP Address:<SERVER_IP>
-```
-
-確認するポイント:
-
-- `selectedProtocol=0x2`（HYBRID = NLA）でネゴシエーションが成立する
-- TLS ハンドシェイクが完了し、**fingerprint が `grdctl --system status` の TLS fingerprint と完全一致**する
-- SAN に接続に使う名前が DNS エントリとして含まれている
-
-スクリプトは TLS 確立直後に切断するため、サーバー側には次のログが出るが正常（NLA の途中でクライアントが切断しただけ）:
-
-```
-[ERROR][com.freerdp.core.nla] - [nla_server_recv_stream]: nla_recv() error: -1
-[ERROR][com.freerdp.core.transport] - [transport_accept_nla]: client authentication failure
-[RDP] Network or intentional disconnect, stopping session
-```
-
-逆に、次が出る場合はプローブの前段で失敗している:
-
-| ログ | 意味 |
-|---|---|
-| `[RDP] Credentials are not set, denying client` | 資格情報が未設定／未反映。ネゴシエーション前に切断される（スクリプトは `Connection reset by peer`） |
-| `BIO_do_handshake failed` | TLS 失敗（証明書・鍵の不備） |
-| `[x509_utils_from_pem]: BIO_new failed` | 証明書／鍵が PEM として読めない |
-
-#### FreeRDP クライアントがある場合の検証
-
-TLS の可否: **存在しないユーザー名**でループバック接続する。TLS が正常なら NLA 段階まで到達して `Could not find user in SAM database` が出る。TLS が壊れていればその手前の `BIO_do_handshake failed` で止まる。
-
-```bash
-timeout 20 xfreerdp /v:127.0.0.1:3389 /u:__probe__ /p:__probe__ /cert:ignore /auth-only >/dev/null 2>&1
-sudo journalctl -u gnome-remote-desktop --since "-1min" --no-pager \
-  | grep -E "SAM database|BIO_do_handshake"
-```
-
-クライアントに届く証明書: `/cert:ignore` を付けずに実行すると、実際に提示された証明書の詳細が表示される。Thumbprint が TLS fingerprint と一致し、`CERTIFICATE NAME MISMATCH` が出ないことを確認する。
-
-```bash
-echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /auth-only 2>&1 \
-  | grep -iE "Common Name|Subject:|Issuer:|Thumbprint|MISMATCH"
-```
-
-#### クライアントからのログイン
-
-1. システム共通パスワードで RDP 認証を通過
-2. GDM ログイン画面が表示される
-3. `<USER>` などの OS アカウントでログイン → 新規 GNOME セッションが起動
-
-問題があれば以下を並行して確認する:
-
-```bash
-journalctl -u gnome-remote-desktop -f
-journalctl -u gdm -f
-```
-
 ### 注意点
 
 - **TPM 警告**: `grdctl --system` 実行時と service 起動時に毎回
@@ -512,7 +507,7 @@ journalctl -u gdm -f
   ```
 
 - **既存ローカルセッションとの併存**: リモートログインは常に**新規セッション**を作るため、ローカルでログイン中のユーザーと同一ユーザーで接続すると GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある。既存デスクトップをそのまま見たい場合は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）が必要 — 今回は採用していない。
-- **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は手順 1〜3 でそちらのパスを指定する。
+- **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は手順 2〜4 でそちらのパスを指定する。
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す。**クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある。差し替え後は `sudo systemctl restart gnome-remote-desktop.service` を実行する（接続中の RDP セッションは切断されるので、利用者がいないタイミングで行う）。
 - **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。接続元を制限しない場合はそのままでよい。LAN 限定に絞る手順は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)。
 
@@ -687,9 +682,9 @@ sudo systemctl show gnome-remote-desktop -p Environment   # 空であること�
 ログの署名を最初に確認していれば早く切り分けられた。順に:
 
 1. `Credentials are not set` → 未設定、または設定後にデーモンを再起動していない
-2. `Could not find user in SAM database` → **ユーザー名**が違う
-3. `SEC_E_MESSAGE_ALTERED` → **パスワード**が違う
-4. `Sending server redirection` → 認証成功
+1. `Could not find user in SAM database` → **ユーザー名**が違う
+1. `SEC_E_MESSAGE_ALTERED` → **パスワード**が違う
+1. `Sending server redirection` → 認証成功
 
 今回は一貫して 2 が出ていた（3 は一度も出ていない）ため、パスワードの再設定を繰り返しても解決しなかった。
 
@@ -723,7 +718,7 @@ sudo dnf install -y freerdp
 
 → `freerdp-2:3.10.3-12.el10_2.10.x86_64` をインストール。
 
-[手順 0](#0-変数を設定する) の変数を設定したうえで:
+[手順 1](#実施手順) の変数を設定したうえで:
 
 ```bash
 sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
@@ -732,7 +727,7 @@ sudo chmod 600 "${CERTDIR}/rdp-tls.key"
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
 ```
 
-以降はメイン手順 3〜5 と同じ。
+以降はメイン手順 4〜6 と同じ。
 
 - `winpr-makecert` が生成した秘密鍵は **0644** だったため 0600 に絞った（親ディレクトリ `/var/lib/gnome-remote-desktop` が 0700 のため実害はないが念のため）
 - このとき生成された証明書の TLS fingerprint: `<FINGERPRINT>`
@@ -740,7 +735,7 @@ sudo restorecon -Rv /var/lib/gnome-remote-desktop
 
 #### 方式 2: podman コンテナで winpr-makecert を使う
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。[手順 0](#0-変数を設定する) の変数を設定したうえで:
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。[手順 1](#実施手順) の変数を設定したうえで:
 
 ```bash
 OUT=$(mktemp -d)
