@@ -2,15 +2,26 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.bashrc` と `~/.config` に書くため）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **すべて対象ホスト上で、自分のシェルで実行する。** `sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、設定も自分の `~/.bashrc` と `~/.config` に書くため）
+> - **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す
 
-**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・実測出力・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
 
-見た目を変えるなら[プリセットを当てる（任意）](#プリセットを当てる任意)。細かい調整は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+関連する節:
+
+- 見た目を変える: [プリセットを当てる（任意）](#プリセットを当てる任意)
+- 細かい調整: [設定ファイル](#設定ファイル)
+- 以後の更新: [更新](#更新)
+- 元に戻す: [ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** 既定のままなら starship の組み込みの見た目になり、設定ファイルは作られない。[プリセットを当てる（任意）](#プリセットを当てる任意)まで進むときだけ `STARSHIP_PRESET` を選び直す（候補は `starship preset --list` で出る）。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集必須の変数は無い。** 既定のままなら starship の組み込みの見た目になり、設定ファイルは作られない
+   - [プリセットを当てる（任意）](#プリセットを当てる任意)まで進むときだけ `STARSHIP_PRESET` を選び直す（候補は `starship preset --list` で出る）
+   - **新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す**
 
    ```bash
    STARSHIP_CONFIG=~/.config/starship.toml   # 設定ファイル。既定の場所。<STARSHIP_CONFIG>
@@ -38,11 +49,13 @@
    brew install starship
    ```
 
-   aarch64 でもビルド済みのボトル（`starship--1.26.0.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存の `dbus`（とその先の `expat`）、`zlib-ng-compat` も同時に入る。
+   - aarch64 でもビルド済みのボトル（`starship--1.26.0.arm64_linux.bottle.tar.gz`）が降り、ソースからのビルドにはならない
+   - 依存の `dbus`（とその先の `expat`）、`zlib-ng-compat` も同時に入る
 
 1. **シェルに初期化を書く**
 
-   **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）。`~/.bashrc` の**いちばん最後**に置く。
+   - **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）
+   - `~/.bashrc` の**いちばん最後**に置く
 
    ```bash
    echo 'eval "$(starship init bash)"' >> ~/.bashrc
@@ -50,7 +63,8 @@
    tail -1 ~/.bashrc
    ```
 
-   `~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く。順序と、WezTerm のシェル統合との相性についてはこの手順の補足を読む。
+   - `~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く
+   - 順序と、WezTerm のシェル統合との相性についてはこの手順の補足を読む
 
    <details>
    <summary>補足: <code>~/.bashrc</code> の並びと WezTerm シェル統合</summary>
@@ -91,7 +105,8 @@
    command -v starship
    ```
 
-   `starship 1.26.0` と、ビルド情報が数行出る。次に、プロンプト文字列が実際に生成されるか見る（**端末でなくても動く**）。
+   - `starship 1.26.0` と、ビルド情報が数行出る
+   - 次に、プロンプト文字列が実際に生成されるか見る（**端末でなくても動く**。この手順の補足）
 
    ```bash
    starship prompt
@@ -99,7 +114,8 @@
    starship explain
    ```
 
-   `starship prompt` は改行とカレントディレクトリとプロンプト記号を含む文字列を出す。`starship explain` は今のプロンプトに出ている各部分の意味を 1 行ずつ説明する。
+   - `starship prompt` は改行とカレントディレクトリとプロンプト記号を含む文字列を出す
+   - `starship explain` は今のプロンプトに出ている各部分の意味を 1 行ずつ説明する
 
    <details>
    <summary>補足: 端末が無くても確かめられる</summary>
@@ -138,7 +154,10 @@
 
 ## プリセットを当てる（任意）
 
-公式が配っている設定一式を `${STARSHIP_CONFIG}` に書き出す。**既存の設定は上書きされる**ので、自分で書いたものがあれば先に退避する。
+公式が配っている設定一式を `${STARSHIP_CONFIG}` に書き出す。
+
+> [!WARNING]
+> **既存の設定は上書きされる**ので、自分で書いたものがあれば先に退避する。
 
 ```bash
 starship preset --list
@@ -152,7 +171,8 @@ wc -l "${STARSHIP_CONFIG}"
 starship prompt
 ```
 
-`plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える。`nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る（実機には `font-symbols-only-nerd-font` が入っている。[yazi.md](yazi.md) 参照）。
+- `plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える
+- `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る（実機には `font-symbols-only-nerd-font` が入っている。[yazi.md](yazi.md) 参照）
 
 ---
 
@@ -172,7 +192,8 @@ EOF
 starship prompt
 ```
 
-`starship config` で `$EDITOR` が開く。設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する（手順 1 の変数は `export` していないので、既定の場所が使われる）。
+- `starship config` で `$EDITOR` が開く
+- 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する（手順 1 の変数は `export` していないので、既定の場所が使われる）
 
 調べるときに使うサブコマンド:
 
@@ -206,7 +227,8 @@ rm -rf ~/.cache/starship                   # キャッシュも消す場合
 
 **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびに `starship: command not found` が出る**（[zoxide](zoxide.md#ロールバック) と同じ落とし穴）。
 
-本書ではロールバックは**本実行していない**。
+> [!WARNING]
+> 本書ではロールバックを**本実行していない**。
 
 ---
 
@@ -216,7 +238,11 @@ rm -rf ~/.cache/starship                   # キャッシュも消す場合
 
 - **目的**: AlmaLinux 10 のシェルプロンプトを [starship](https://starship.rs/)（git の状態・言語バージョン・終了コードなどを自動で出すプロンプト）に置き換える。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、`~/.bashrc` に初期化の 1 行を足す。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜4、[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通し、`arm64_linux` のボトルが降りること・`starship 1.26.0` が入ること・`starship prompt` / `module` / `explain` / `timings` が端末なしでも文字列を返すこと・`~/.bashrc` への追記が読み込めることを確認した。**実機（Raspberry Pi 5）では本実行していない**（実機の `~/.bashrc` は 38 行のまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、実際のプロンプト表示と、WezTerm のシェル統合との相性は確認していない**（[手順 3 の補足](#実施手順)）
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない**
+  - 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**、[Homebrew の導入](homebrew.md)・手順 2〜4・[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通した
+  - 確認したこと: `arm64_linux` のボトルが降りる / `starship 1.26.0` が入る / `starship prompt` / `module` / `explain` / `timings` が端末なしでも文字列を返す / `~/.bashrc` への追記が読み込める
+  - **実機（Raspberry Pi 5）では本実行していない**（実機の `~/.bashrc` は 38 行のまま）。下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**
+  - **コンテナには端末が無いため、実際のプロンプト表示と、WezTerm のシェル統合との相性は確認していない**（[手順 3 の補足](#実施手順)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -229,7 +255,8 @@ rm -rf ~/.cache/starship                   # キャッシュも消す場合
 | Nerd Font | `font-symbols-only-nerd-font 3.5.1`（Homebrew、[yazi.md](yazi.md)） | 無し |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)。OSC 133 のシェル統合あり） | 無し（pty を与えずに実行） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|

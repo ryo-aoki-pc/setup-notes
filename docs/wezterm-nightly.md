@@ -2,9 +2,18 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で実行する。** 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> **すべて対象ホスト上で実行する。**
 
-設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・実測出力・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
+
+関連する節:
+
+- 設定を書く: [設定ファイル](#設定ファイル)
+- 以後の更新: [更新](#更新)
+- 元に戻す: [ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
@@ -73,7 +82,8 @@
    sudo dnf install wezterm
    ```
 
-   途中で COPR の GPG 鍵の取り込みを聞かれる。fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）。
+   - 途中で COPR の GPG 鍵の取り込みを聞かれる
+   - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
 
    <details>
    <summary>補足: <code>wezterm</code> はメタパッケージ</summary>
@@ -111,7 +121,8 @@
        timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
    ```
 
-   `rc=0` ならウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）。アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）。
+   - `rc=0` ならウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）
+   - アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）
 
    <details>
    <summary>補足: 検証</summary>
@@ -126,7 +137,8 @@
 
 ## 設定ファイル
 
-パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く。置き場所は次の順で探し、**最初に見つかった 1 つだけ**を読む（[補足: 設定ファイルの探索順序](#設定ファイルの探索順序実測)）。
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
+- 置き場所は次の順で探し、**最初に見つかった 1 つだけ**を読む（[補足: 設定ファイルの探索順序](#設定ファイルの探索順序実測)）
 
 | 優先 | 場所 | 用途 |
 |---|---|---|
@@ -138,7 +150,9 @@
 
 最小の例を `~/.config/wezterm/wezterm.lua` に書く。
 
-**`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする。次のブロックは既存の `~/.config/wezterm/wezterm.lua` を上書きするので、自分の設定がある人は貼らない。
+> [!WARNING]
+> - **`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする
+> - 次のブロックは既存の `~/.config/wezterm/wezterm.lua` を上書きするので、自分の設定がある人は貼らない
 
 ```bash
 mkdir -p ~/.config/wezterm
@@ -154,7 +168,9 @@ wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れ�
 
 保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` の既定が true。効かなければ `Ctrl+Shift+R`）。
 
-Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）。`wezterm -n`（`--skip-config`）で設定を読まずに起動できる。`wezterm --config 'font_size=14'` のように 1 項目だけ上書きもできる。
+- Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）
+- `wezterm -n`（`--skip-config`）で設定を読まずに起動できる
+- `wezterm --config 'font_size=14'` のように 1 項目だけ上書きもできる
 
 ---
 
@@ -170,7 +186,8 @@ sudo dnf upgrade wezterm
 
 ## ロールバック
 
-本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのが下の 4 パッケージだけであることまで確認した）。
+> [!WARNING]
+> 本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのが下の 4 パッケージだけであることまで確認した）。
 
 ```bash
 sudo dnf remove wezterm wezterm-common wezterm-gui wezterm-mux-server
@@ -182,7 +199,9 @@ sudo dnf remove wezterm wezterm-common wezterm-gui wezterm-mux-server
 sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消す
 ```
 
-`~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す。COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）。消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`。
+- `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す
+- COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
+- 鍵も消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`
 
 消えるのは上記 4 パッケージだけで、巻き添えの依存パッケージは無い。
 
@@ -194,7 +213,10 @@ sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消�
 
 - **目的**: AlmaLinux 10 に [WezTerm](https://wezterm.org/) の nightly ビルドを **dnf 管理で**入れ、以後は `dnf upgrade` で追従できるようにする
 - **進め方**: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる。**読者が書き換えるのは冒頭の変数ブロックだけ**（実際には `uname -m` から自動で入る）。設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（[設定ファイル](#設定ファイル)）
-- **状態**: 2026-09-21 にこのホスト（x86_64 / GNOME 49 Wayland）で**本実行済み**。ウィンドウの起動・終了まで確認した。**aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので同じ手順で通る見込み）。EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](#注意点)を見る
+- **状態**: 2026-09-21 にこのホスト（x86_64 / GNOME 49 Wayland）で**本実行済み**
+  - ウィンドウの起動・終了まで確認した
+  - **aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので同じ手順で通る見込み）
+  - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](#注意点)を見る
 
 | 項目 | 値 |
 |---|---|
@@ -207,7 +229,8 @@ sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消�
 | 入った WezTerm | `wezterm-20260921_051727_5eb03b23-0.x86_64`（COPR `rhel-9-x86_64` ビルド） |
 | SELinux | Enforcing |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -256,7 +279,11 @@ Installing dependencies:
 Install  4 Packages
 ```
 
-`wezterm-gui` が要求するのは `libc.so.6(GLIBC_2.34)`、`libssl.so.3(OPENSSL_3.0.0)` / `libcrypto.so.3`、`libwayland-client.so.0` / `libwayland-egl.so.1`、`libxkbcommon.so.0(V_0.6.0)` / `libxkbcommon-x11.so.0`、`libxcb.so.1` / `libxcb-image.so.0` / `libxcb-util.so.1`、`libX11.so.6` / `libX11-xcb.so.1`、`libfontconfig.so.1`、`mesa-libEGL`、`dbus`（`dnf repoquery --requires wezterm-gui`）。EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0` シンボルバージョンを両方提供）なので、EL9 向けバイナリがそのまま動く。インストール後の `ldd` でも `not found` は 0 だった。追加で入ったパッケージは無い（4 パッケージのみ）。
+`wezterm-gui` が要求するのは `libc.so.6(GLIBC_2.34)`、`libssl.so.3(OPENSSL_3.0.0)` / `libcrypto.so.3`、`libwayland-client.so.0` / `libwayland-egl.so.1`、`libxkbcommon.so.0(V_0.6.0)` / `libxkbcommon-x11.so.0`、`libxcb.so.1` / `libxcb-image.so.0` / `libxcb-util.so.1`、`libX11.so.6` / `libX11-xcb.so.1`、`libfontconfig.so.1`、`mesa-libEGL`、`dbus`（`dnf repoquery --requires wezterm-gui`）。
+
+- EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0` シンボルバージョンを両方提供）なので、EL9 向けバイナリがそのまま動く
+- インストール後の `ldd` でも `not found` は 0 だった
+- 追加で入ったパッケージは無い（4 パッケージのみ）
 
 ### 完了時点の状態
 
@@ -319,7 +346,10 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 
 ### 注意点
 
-- **EL9 向けバイナリを EL10 で使っている。** 作者はこの組み合わせを保証していない。いまは EL9/EL10 のライブラリ soname がすべて一致しているので動くが、将来 COPR 側のビルド環境（EL9）と EL10 の間で soname が食い違えば、`dnf upgrade` が依存関係で止まるか、入っても起動しなくなる。止まったときは `dnf upgrade --exclude='wezterm*'` で他を先に上げ、COPR に `epel-10` chroot が追加されていないか[プロジェクトページ](https://copr.fedorainfracloud.org/coprs/wezfurlong/wezterm-nightly/)を見る。追加されていたら `sudo dnf copr remove wezfurlong/wezterm-nightly` → `sudo dnf copr enable wezfurlong/wezterm-nightly`（chroot 省略）で乗り換えられる
+- **EL9 向けバイナリを EL10 で使っている。** 作者はこの組み合わせを保証していない
+  - いまは EL9/EL10 のライブラリ soname がすべて一致しているので動くが、将来 COPR 側のビルド環境（EL9）と EL10 の間で soname が食い違えば、`dnf upgrade` が依存関係で止まるか、入っても起動しなくなる
+  - 止まったときは `dnf upgrade --exclude='wezterm*'` で他を先に上げ、COPR に `epel-10` chroot が追加されていないか[プロジェクトページ](https://copr.fedorainfracloud.org/coprs/wezfurlong/wezterm-nightly/)を見る
+  - 追加されていたら `sudo dnf copr remove wezfurlong/wezterm-nightly` → `sudo dnf copr enable wezfurlong/wezterm-nightly`（chroot 省略）で乗り換えられる
 - **nightly は毎日変わる。** `dnf upgrade` のたびに WezTerm も更新される。安定版に固定したければ、COPR ではなく GitHub Releases の安定版 rpm（`wezterm-<version>-1.centos9.rpm`、こちらも EL10 向けは無い）か Flathub を使う
 - **`TERM` は既定の `xterm-256color` のまま**。EL10 の `ncurses-base` に `wezterm` の terminfo は無い（`infocmp wezterm` → rc=1、`ncurses-term` も未導入）。設定で `term = "wezterm"` にするなら、先に公式ドキュメントの手順で terminfo を入れる（本書では**未実行**）:
 
