@@ -2,59 +2,87 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
 
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | 設定の置き場所を確認する（編集不要） |
-| [1. Neovim を入れる](#1-neovim-を入れる) | `brew install neovim` |
-| [2. 検証する](#2-検証する) | バージョン、`:checkhealth` |
-
 既定のエディタにするなら[既定のエディタにする（任意）](#既定のエディタにする任意)。設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**このブロックは編集必須の変数が無い。** 設定の置き場所を変えたいときだけ書き換える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   **このブロックは編集必須の変数が無い。** 設定の置き場所を変えたいときだけ書き換える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
 
-```bash
-NVIM_CONFIG=~/.config/nvim      # 設定の置き場所（既定）。<NVIM_CONFIG>
-```
+   ```bash
+   NVIM_CONFIG=~/.config/nvim      # 設定の置き場所（既定）。<NVIM_CONFIG>
+   ```
 
-**値を読み戻して確かめる。**
+   **値を読み戻して確かめる。**
 
-```bash
-printf 'NVIM_CONFIG = %s\n' "${NVIM_CONFIG}"
-```
+   ```bash
+   printf 'NVIM_CONFIG = %s\n' "${NVIM_CONFIG}"
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. Neovim を入れる
+   `NVIM_CONFIG` は[設定ファイル](#設定ファイル)の節でだけ使う。Neovim 自身は `$XDG_CONFIG_HOME/nvim`（未設定なら `~/.config/nvim`）を見るので、変数を変えただけでは読み込み先は変わらない。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する。
 
-```bash
-brew install neovim
-```
+   </details>
 
-aarch64 でもビルド済みのボトルが降ってくるので、ソースからのビルドにはならない。依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る。
+1. **Neovim を入れる**
 
-### 2. 検証する
+   ```bash
+   brew install neovim
+   ```
 
-```bash
-nvim --version | head -3
-brew list --versions neovim
-command -v nvim
-```
+   aarch64 でもビルド済みのボトルが降ってくるので、ソースからのビルドにはならない。依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る。
 
-`NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている。起動して健全性を確認する。
+   <details>
+   <summary>補足: ボトルが降りること</summary>
 
-```bash
-nvim -c 'checkhealth' -c 'only'
-```
+   ボトルが降りたことの確認（実測、コンテナ）:
 
-画面が出たら **`:q` で終了する。次のブロックは終了してから貼る**（続けて貼ると Neovim への入力として食われる）。`vim.provider` の node / perl / python / ruby が `WARNING` になるのは、それぞれの言語のプロバイダを入れていないため（[注意点](#注意点)）。
+   ```
+   ==> Installing neovim dependency: luajit
+   ==> Pouring luajit--2.1.1788856981.arm64_linux.bottle.tar.gz
+   ==> Installing neovim dependency: tree-sitter
+   ==> Pouring tree-sitter--0.27.0.arm64_linux.bottle.tar.gz
+   ==> Installing neovim
+   ==> Pouring neovim--0.12.5_1.arm64_linux.bottle.tar.gz
+   ```
 
-→ [補足](#手順-2-checkhealth-の読み方)
+   `brew deps neovim` は `libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` を返す（実際の導入時は `unibilium` と `utf8proc` も入る）。
+
+   </details>
+
+1. **検証する**
+
+   ```bash
+   nvim --version | head -3
+   brew list --versions neovim
+   command -v nvim
+   ```
+
+   `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている。起動して健全性を確認する。
+
+   ```bash
+   nvim -c 'checkhealth' -c 'only'
+   ```
+
+   画面が出たら **`:q` で終了する。次のブロックは終了してから貼る**（続けて貼ると Neovim への入力として食われる）。`vim.provider` の node / perl / python / ruby が `WARNING` になるのは、それぞれの言語のプロバイダを入れていないため（[注意点](#注意点)）。
+
+   <details>
+   <summary>補足: <code>:checkhealth</code> の読み方</summary>
+
+   `:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
+
+   - `vim.provider`: node / perl / python3 / ruby のプロバイダが無い。それぞれの言語で書かれたプラグインを使わないなら無視してよい（`vim.g.loaded_node_provider = 0` などで黙らせられる）
+   - `vim.deprecated`: プラグインが古い API を使っている
+   - ツールの不足: `rg`（ripgrep）、`fd`、`git`、`tree-sitter` など。このホストでは `rg` / `fd` / `git` は入っている（[yazi.md](yazi.md) の依存ツール、および RPM の git）
+
+   `ERROR` が出ていなければ、日常の編集には支障がない。
+
+   </details>
 
 ---
 
@@ -83,7 +111,7 @@ printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
 最小の例:
 
 ```bash
-mkdir -p "${NVIM_CONFIG:?手順 0 の NVIM_CONFIG が空のまま。値を入れて貼り直す}"
+mkdir -p "${NVIM_CONFIG:?手順 1 の NVIM_CONFIG が空のまま。値を入れて貼り直す}"
 cat > "${NVIM_CONFIG}/init.lua" <<'EOF'
 vim.opt.number = true
 vim.opt.expandtab = true
@@ -124,7 +152,7 @@ brew uninstall neovim
 
 - **目的**: AlmaLinux 10 に [Neovim](https://neovim.io/) の最新版（0.12 系）を入れる。EPEL の `neovim` は 0.10.1 で 2 マイナーぶん古い
 - **進め方**: Homebrew で入れる。**読者が書き換える値は実質無い**
-- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストで `brew install neovim` を実行し、`neovim 0.12.5_1` が入って常用中。[Homebrew の導入](homebrew.md)と手順 1〜2、[既定のエディタにする](#既定のエディタにする任意)・[設定ファイル](#設定ファイル)の節は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`nvim --version` が出ること・`EDITOR` / `VISUAL` が `nvim` になること・`init.lua` を置いた状態で `has("nvim")` が `1` を返すことを確認した。**コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）。**実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
+- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストで `brew install neovim` を実行し、`neovim 0.12.5_1` が入って常用中。[Homebrew の導入](homebrew.md)と手順 2〜3、[既定のエディタにする](#既定のエディタにする任意)・[設定ファイル](#設定ファイル)の節は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`nvim --version` が出ること・`EDITOR` / `VISUAL` が `nvim` になること・`init.lua` を置いた状態で `has("nvim")` が `1` を返すことを確認した。**コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）。**実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -135,7 +163,7 @@ brew uninstall neovim
 | 一緒に入る依存 | `libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc` | 同左 |
 | 追加で入れたもの | `tree-sitter-cli 0.27.0`（任意。パーサをソースからビルドする場合に使う） | 無し |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -143,7 +171,7 @@ brew uninstall neovim
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.12.5`）は実行日によって変わる。
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -173,37 +201,6 @@ $ dnf -q list --available neovim
 Available Packages
 neovim.aarch64                       0.10.1-4.el10_0                        epel
 ```
-
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`NVIM_CONFIG` は[設定ファイル](#設定ファイル)の節でだけ使う。Neovim 自身は `$XDG_CONFIG_HOME/nvim`（未設定なら `~/.config/nvim`）を見るので、変数を変えただけでは読み込み先は変わらない。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する。
-
-#### 手順 1: ボトルが降りること
-
-ボトルが降りたことの確認（実測、コンテナ）:
-
-```
-==> Installing neovim dependency: luajit
-==> Pouring luajit--2.1.1788856981.arm64_linux.bottle.tar.gz
-==> Installing neovim dependency: tree-sitter
-==> Pouring tree-sitter--0.27.0.arm64_linux.bottle.tar.gz
-==> Installing neovim
-==> Pouring neovim--0.12.5_1.arm64_linux.bottle.tar.gz
-```
-
-`brew deps neovim` は `libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` を返す（実際の導入時は `unibilium` と `utf8proc` も入る）。
-
-#### 手順 2: `:checkhealth` の読み方
-
-`:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
-
-- `vim.provider`: node / perl / python3 / ruby のプロバイダが無い。それぞれの言語で書かれたプラグインを使わないなら無視してよい（`vim.g.loaded_node_provider = 0` などで黙らせられる）
-- `vim.deprecated`: プラグインが古い API を使っている
-- ツールの不足: `rg`（ripgrep）、`fd`、`git`、`tree-sitter` など。このホストでは `rg` / `fd` / `git` は入っている（[yazi.md](yazi.md) の依存ツール、および RPM の git）
-
-`ERROR` が出ていなければ、日常の編集には支障がない。
 
 ### 完了時点の状態
 
@@ -245,13 +242,13 @@ tree-sitter
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 1〜2、[既定のエディタにする](#既定のエディタにする任意)・[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `nvim -c 'checkhealth' -c 'only'` の 1 行だけ除いている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 2〜3、[既定のエディタにする](#既定のエディタにする任意)・[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `nvim -c 'checkhealth' -c 'only'` の 1 行だけ除いている。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 1. Neovim | `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc` / `neovim` の順に `arm64_linux` ボトルを `Pouring`。ソースビルドは発生しない |
-| 2. 検証 | `nvim --version` → `NVIM v0.12.5` / `Build type: Release` / `LuaJIT 2.1.1788856981` |
+| 2. Neovim | `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc` / `neovim` の順に `arm64_linux` ボトルを `Pouring`。ソースビルドは発生しない |
+| 3. 検証 | `nvim --version` → `NVIM v0.12.5` / `Build type: Release` / `LuaJIT 2.1.1788856981` |
 | 既定のエディタ | `~/.bashrc` に追記して読み込み直し、`EDITOR` / `VISUAL` ともに `nvim` |
 | 設定ファイル | `~/.config/nvim/init.lua` を置いて `nvim -c 'echo has("nvim")' -c 'q'` → `1` |
 | EPEL との比較 | `dnf list --available neovim` → `0.10.1-4.el10_0`（EPEL）。Homebrew 版と 2 マイナーぶんの差 |

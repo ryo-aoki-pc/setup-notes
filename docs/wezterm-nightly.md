@@ -2,72 +2,125 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で実行する。** 手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
-
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | `WZ_CHROOT` を確認する |
-| [1. COPR を有効化する](#1-copr-を有効化する) | chroot を明示して `dnf copr enable` |
-| [2. インストールする](#2-インストールする) | `dnf install wezterm`（サブパッケージ 3 つが付いてくる） |
-| [3. 検証する](#3-検証する) | バージョン、ライブラリ解決、Wayland でウィンドウを開いて閉じる |
+**すべて対象ホスト上で実行する。** 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**編集するものは無い。**
+   **編集するものは無い。**
 
-```bash
-WZ_CHROOT="rhel-9-$(uname -m)"     # COPR に EL10 向けが無いので EL9 向けを使う。<WZ_CHROOT>
-echo "${WZ_CHROOT}"
-```
+   ```bash
+   WZ_CHROOT="rhel-9-$(uname -m)"     # COPR に EL10 向けが無いので EL9 向けを使う。<WZ_CHROOT>
+   echo "${WZ_CHROOT}"
+   ```
 
-- `rhel-9-x86_64` または `rhel-9-aarch64` になっていることを確認する。それ以外（`rhel-9-` で終わる、など）なら止める
-- 変数はそのシェルの中だけで有効。新しいシェルを開いたら、このブロックを貼り直してから先へ進む
+   - `rhel-9-x86_64` または `rhel-9-aarch64` になっていることを確認する。それ以外（`rhel-9-` で終わる、など）なら止める
+   - 変数はそのシェルの中だけで有効。新しいシェルを開いたら、このブロックを貼り直してから先へ進む
 
-### 1. COPR を有効化する
+1. **COPR を有効化する**
 
-```bash
-sudo dnf copr enable wezfurlong/wezterm-nightly "${WZ_CHROOT}"
-```
+   ```bash
+   sudo dnf copr enable wezfurlong/wezterm-nightly "${WZ_CHROOT}"
+   ```
 
-有効化してよいか `[y/N]` で聞かれる。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+   有効化してよいか `[y/N]` で聞かれる。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
 
-```bash
-cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
-```
+   ```bash
+   cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
+   ```
 
-`baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい。
+   `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい。
 
-### 2. インストールする
+   <details>
+   <summary>補足: chroot を明示する理由</summary>
 
-```bash
-sudo dnf install wezterm
-```
+   `dnf copr enable` は chroot を省略すると `/etc/os-release` から推定する。EL 系は `epel-<major>-<arch>` になる（`/usr/lib/python3.12/site-packages/dnf-plugins/copr.py` の `_guess_chroot`）。このプロジェクトに `epel-10-x86_64` は無いので失敗する:
 
-途中で COPR の GPG 鍵の取り込みを聞かれる。fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）。
+   ```
+   $ sudo dnf copr enable wezfurlong/wezterm-nightly
+   Error: It wasn't possible to enable this project.
+   Repository 'epel-10-x86_64' does not exist in project 'wezfurlong/wezterm-nightly'.
+   Available repositories: 'centos-stream-9-x86_64', 'fedora-43-aarch64', 'opensuse-tumbleweed-x86_64', 'fedora-44-aarch64', 'opensuse-tumbleweed-aarch64', 'rhel-9-x86_64', 'fedora-43-x86_64', 'fedora-rawhide-aarch64', 'fedora-42-x86_64', 'fedora-45-x86_64', 'rhel-9-aarch64', 'fedora-45-aarch64', 'fedora-rawhide-x86_64', 'fedora-44-x86_64', 'rhel-8-aarch64', 'centos-stream-9-aarch64', 'rhel-8-x86_64', 'fedora-42-aarch64'
 
-### 3. 検証する
+   If you want to enable a non-default repository, use the following command:
+     'dnf copr enable wezfurlong/wezterm-nightly <repository>'
+   But note that the installed repo file will likely need a manual modification.
+   ```
 
-```bash
-rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
-dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
-wezterm --version
-ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
-wezterm ls-fonts | head -5
-```
+   エラーメッセージの言うとおり第 2 引数に chroot を渡せば通る。「repo ファイルの手直しが要るかも」とあるが、生成された repo ファイルは `baseurl` が `rhel-9-$basearch` を指すだけで、そのまま使えた:
 
-GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く。
+   ```
+   [copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly]
+   name=Copr repo for wezterm-nightly owned by wezfurlong
+   baseurl=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/rhel-9-$basearch/
+   type=rpm-md
+   skip_if_unavailable=True
+   gpgcheck=1
+   gpgkey=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
+   repo_gpgcheck=0
+   enabled=1
+   enabled_metadata=1
+   ```
 
-ssh などグラフィカルでないシェルから確かめる場合は、次のブロックでログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる:
+   公式ドキュメントの openSUSE 向け手順が同じ `dnf copr enable wezfurlong/wezterm-nightly <repository>` の形なので、想定内の使い方ではある。
 
-```bash
-env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
-    WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR="/run/user/$(id -u)" XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=GNOME \
-    timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
-```
+   </details>
 
-`rc=0` ならウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）。アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）。
+1. **インストールする**
+
+   ```bash
+   sudo dnf install wezterm
+   ```
+
+   途中で COPR の GPG 鍵の取り込みを聞かれる。fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）。
+
+   <details>
+   <summary>補足: <code>wezterm</code> はメタパッケージ</summary>
+
+   `wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は `wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ。`dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているためで、x86_64 パッケージには入っていない（`--assumeno` の結果が 4 パッケージだけであることで確認）。
+
+   GPG 鍵はインストール時に COPR の `pubkey.gpg` から取り込まれる:
+
+   ```
+   Importing GPG key 0xCEA2757D:
+    Userid     : "wezfurlong_wezterm-nightly (None) <wezfurlong#wezterm-nightly@copr.fedorahosted.org>"
+    Fingerprint: FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D
+    From       : https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
+   ```
+
+   </details>
+
+1. **検証する**
+
+   ```bash
+   rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
+   dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
+   wezterm --version
+   ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
+   wezterm ls-fonts | head -5
+   ```
+
+   GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く。
+
+   ssh などグラフィカルでないシェルから確かめる場合は、次のブロックでログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる:
+
+   ```bash
+   env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
+       WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR="/run/user/$(id -u)" XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=GNOME \
+       timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
+   ```
+
+   `rc=0` ならウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）。アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）。
+
+   <details>
+   <summary>補足: 検証</summary>
+
+   - **Wayland セッションでの起動試験**: この検証は Claude Code のシェル（TTY もディスプレイも無い）から行ったので、`env -i` で環境を空にしてから、ログイン中の GNOME セッションの `WAYLAND_DISPLAY=wayland-0` と `XDG_RUNTIME_DIR` を渡した。値は `/proc/$(pgrep -u "$USER" -x gnome-shell)/environ` から取れる。`wezterm start -- sh -c 'exit 0'` はウィンドウを開いて `sh` を走らせ、終了と同時にウィンドウを閉じる。結果 `rc=0`。`timeout 30` は、描画に失敗してウィンドウが残った場合の保険
+   - **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる。既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ。`| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
+   - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）。COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
+
+   </details>
 
 ---
 
@@ -154,7 +207,7 @@ sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消�
 | 入った WezTerm | `wezterm-20260921_051727_5eb03b23-0.x86_64`（COPR `rhel-9-x86_64` ビルド） |
 | SELinux | Enforcing |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -162,7 +215,7 @@ sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消�
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。パッケージのバージョン（`20260921_051727_5eb03b23`）は実行日によって変わる。
 
-手順の理由・実測・落とし穴・調査記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と調査記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -205,53 +258,6 @@ Install  4 Packages
 
 `wezterm-gui` が要求するのは `libc.so.6(GLIBC_2.34)`、`libssl.so.3(OPENSSL_3.0.0)` / `libcrypto.so.3`、`libwayland-client.so.0` / `libwayland-egl.so.1`、`libxkbcommon.so.0(V_0.6.0)` / `libxkbcommon-x11.so.0`、`libxcb.so.1` / `libxcb-image.so.0` / `libxcb-util.so.1`、`libX11.so.6` / `libX11-xcb.so.1`、`libfontconfig.so.1`、`mesa-libEGL`、`dbus`（`dnf repoquery --requires wezterm-gui`）。EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0` シンボルバージョンを両方提供）なので、EL9 向けバイナリがそのまま動く。インストール後の `ldd` でも `not found` は 0 だった。追加で入ったパッケージは無い（4 パッケージのみ）。
 
-### 手順の補足
-
-#### 手順 1: chroot を明示する理由
-
-`dnf copr enable` は chroot を省略すると `/etc/os-release` から推定する。EL 系は `epel-<major>-<arch>` になる（`/usr/lib/python3.12/site-packages/dnf-plugins/copr.py` の `_guess_chroot`）。このプロジェクトに `epel-10-x86_64` は無いので失敗する:
-
-```
-$ sudo dnf copr enable wezfurlong/wezterm-nightly
-Error: It wasn't possible to enable this project.
-Repository 'epel-10-x86_64' does not exist in project 'wezfurlong/wezterm-nightly'.
-Available repositories: 'centos-stream-9-x86_64', 'fedora-43-aarch64', 'opensuse-tumbleweed-x86_64', 'fedora-44-aarch64', 'opensuse-tumbleweed-aarch64', 'rhel-9-x86_64', 'fedora-43-x86_64', 'fedora-rawhide-aarch64', 'fedora-42-x86_64', 'fedora-45-x86_64', 'rhel-9-aarch64', 'fedora-45-aarch64', 'fedora-rawhide-x86_64', 'fedora-44-x86_64', 'rhel-8-aarch64', 'centos-stream-9-aarch64', 'rhel-8-x86_64', 'fedora-42-aarch64'
-
-If you want to enable a non-default repository, use the following command:
-  'dnf copr enable wezfurlong/wezterm-nightly <repository>'
-But note that the installed repo file will likely need a manual modification.
-```
-
-エラーメッセージの言うとおり第 2 引数に chroot を渡せば通る。「repo ファイルの手直しが要るかも」とあるが、生成された repo ファイルは `baseurl` が `rhel-9-$basearch` を指すだけで、そのまま使えた:
-
-```
-[copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly]
-name=Copr repo for wezterm-nightly owned by wezfurlong
-baseurl=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/rhel-9-$basearch/
-type=rpm-md
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
-repo_gpgcheck=0
-enabled=1
-enabled_metadata=1
-```
-
-公式ドキュメントの openSUSE 向け手順が同じ `dnf copr enable wezfurlong/wezterm-nightly <repository>` の形なので、想定内の使い方ではある。
-
-#### 手順 2: `wezterm` はメタパッケージ
-
-`wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は `wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ。`dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているためで、x86_64 パッケージには入っていない（`--assumeno` の結果が 4 パッケージだけであることで確認）。
-
-GPG 鍵はインストール時に COPR の `pubkey.gpg` から取り込まれる:
-
-```
-Importing GPG key 0xCEA2757D:
- Userid     : "wezfurlong_wezterm-nightly (None) <wezfurlong#wezterm-nightly@copr.fedorahosted.org>"
- Fingerprint: FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D
- From       : https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
-```
-
 ### 完了時点の状態
 
 ```
@@ -286,12 +292,6 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 | `wezterm-common` | `/usr/bin/wezterm`、`/usr/bin/strip-ansi-escapes`、`/etc/profile.d/wezterm.sh`（bash / zsh のシェル統合。OSC 7 / OSC 133 / user var を出す）、`/etc/bash_completion.d/wezterm`、`/usr/share/zsh/site-functions/_wezterm` |
 | `wezterm-gui` | `/usr/bin/wezterm-gui`、`/usr/bin/open-wezterm-here`、`/usr/share/applications/org.wezfurlong.wezterm.desktop`（`Exec=wezterm start --cwd .`）、`/usr/share/icons/hicolor/128x128/apps/org.wezfurlong.wezterm.png`、`/usr/share/nautilus-python/extensions/wezterm-nautilus.py`（`nautilus-python` が無いので効かない） |
 | `wezterm-mux-server` | `/usr/bin/wezterm-mux-server` |
-
-### 検証の補足
-
-- **Wayland セッションでの起動試験**: この検証は Claude Code のシェル（TTY もディスプレイも無い）から行ったので、`env -i` で環境を空にしてから、ログイン中の GNOME セッションの `WAYLAND_DISPLAY=wayland-0` と `XDG_RUNTIME_DIR` を渡した。値は `/proc/$(pgrep -u "$USER" -x gnome-shell)/environ` から取れる。`wezterm start -- sh -c 'exit 0'` はウィンドウを開いて `sh` を走らせ、終了と同時にウィンドウを閉じる。結果 `rc=0`。`timeout 30` は、描画に失敗してウィンドウが残った場合の保険
-- **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる。既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ。`| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
-- **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）。COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
 
 ### 設定ファイルの探索順序（実測）
 

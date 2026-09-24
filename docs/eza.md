@@ -2,59 +2,83 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、エイリアスも自分の `~/.bashrc` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、エイリアスも自分の `~/.bashrc` に書くため）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
 
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | エイリアスに付ける既定のオプションを決める |
-| [1. eza を入れる](#1-eza-を入れる) | `brew install eza`（`libgit2` も入る） |
-| [2. 検証する](#2-検証する) | 版の確認と、`--git` 列が出るか |
-
 普段使いにするなら[エイリアスを足す（任意）](#エイリアスを足す任意)。列や時刻の書式は[表示を調整する](#表示を調整する)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**このブロックは編集必須の変数が無い。** [エイリアスを足す（任意）](#エイリアスを足す任意)で `ll` / `la` に付ける共通オプションを決めるだけで、既定のままでよい。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   **このブロックは編集必須の変数が無い。** [エイリアスを足す（任意）](#エイリアスを足す任意)で `ll` / `la` に付ける共通オプションを決めるだけで、既定のままでよい。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
 
-```bash
-EZA_OPTS="--git --group-directories-first"   # ll / la に共通で付けるオプション。<EZA_OPTS>
-```
+   ```bash
+   EZA_OPTS="--git --group-directories-first"   # ll / la に共通で付けるオプション。<EZA_OPTS>
+   ```
 
-**値を読み戻して確かめる。**
+   **値を読み戻して確かめる。**
 
-```bash
-printf 'EZA_OPTS = %s\n' "${EZA_OPTS}"
-```
+   ```bash
+   printf 'EZA_OPTS = %s\n' "${EZA_OPTS}"
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. eza を入れる
+   `${EZA_OPTS}` は[エイリアスを足す（任意）](#エイリアスを足す任意)でしか使わない。エイリアスを作らないなら空のままでも手順 2〜3 は通る。`--group-directories-first` は GNU `ls` の同名オプションと同じ意味で、`--git` は git 管理下でだけ `Git` 列を足す。
 
-```bash
-brew install eza
-```
+   </details>
 
-aarch64 でもビルド済みのボトル（`eza--0.23.5.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存は `libgit2` 1 つだけ（`--git` 列のため）。
+1. **eza を入れる**
 
-### 2. 検証する
+   ```bash
+   brew install eza
+   ```
 
-```bash
-eza --version
-brew list --versions eza
-command -v eza
-```
+   aarch64 でもビルド済みのボトル（`eza--0.23.5.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存は `libgit2` 1 つだけ（`--git` 列のため）。
 
-`v0.23.5 [+git]` を含む 3 行が出る。`[+git]` が付いていれば git 連携込みでビルドされている。次に、git 管理下のディレクトリで `Git` 列が出ることを確かめる（`cd` する先は自分のリポジトリでよい）。
+1. **検証する**
 
-```bash
-eza -l --git --header .
-```
+   ```bash
+   eza --version
+   brew list --versions eza
+   command -v eza
+   ```
 
-`Permissions Size User Date Modified Git Name` という見出しが出て、変更したファイルの `Git` 列に `-M` が付く。**git 管理下でないディレクトリでは `Git` 列そのものが出ない**。
+   `v0.23.5 [+git]` を含む 3 行が出る。`[+git]` が付いていれば git 連携込みでビルドされている。次に、git 管理下のディレクトリで `Git` 列が出ることを確かめる（`cd` する先は自分のリポジトリでよい）。
 
-→ [補足](#手順-2-git-列の読み方)
+   ```bash
+   eza -l --git --header .
+   ```
+
+   `Permissions Size User Date Modified Git Name` という見出しが出て、変更したファイルの `Git` 列に `-M` が付く。**git 管理下でないディレクトリでは `Git` 列そのものが出ない**。
+
+   <details>
+   <summary>補足: <code>Git</code> 列の読み方</summary>
+
+   `--git` は **git 管理下のディレクトリでしか列を出さない**。コンテナで使い捨てのリポジトリを作って確かめた実測:
+
+   ```
+   $ eza -l --git --header .
+   Permissions Size User   Date Modified Git Name
+   .rw-r--r--@    8 <USER> 22 Sep 20:47   -M f.txt
+   $ eza -la --git --group-directories-first .
+   drwxr-xr-x@ - <USER> 22 Sep 20:47  -I .git
+   .rw-r--r--@ 8 <USER> 22 Sep 20:47  -M f.txt
+   ```
+
+   `Git` 列は 2 文字で、左がインデックスの状態、右が作業ツリーの状態。`-M` は「インデックスは変更なし・作業ツリーで変更あり」、`-I` は ignore されているもの。git 管理下でない `/etc` では列自体が出ない:
+
+   ```
+   $ eza -l --git /etc | head -3
+   .rw-r--r--@   16 root  2 Sep 10:54 adjtime
+   .rw-r--r--@   12 root 15 Jan 00:00 adjtime.rpmnew
+   .rw-r--r--@ 1.5k root 29 Nov  2023 aliases
+   ```
+
+   パーミッション欄の末尾に付く `@` は拡張属性があることを示す（`-@` / `--extended` で中身が見られる）。SELinux を使う AlmaLinux では多くのファイルに付く。
+
+   </details>
 
 ---
 
@@ -64,12 +88,12 @@ eza -l --git --header .
 
 ```bash
 printf 'alias ll="eza -l %s"\nalias la="eza -la %s"\nalias lt="eza --tree --level=2"\n' \
-  "${EZA_OPTS:?手順 0 の EZA_OPTS が空のまま。値を入れて貼り直す}" "${EZA_OPTS}" >> ~/.bashrc
+  "${EZA_OPTS:?手順 1 の EZA_OPTS が空のまま。値を入れて貼り直す}" "${EZA_OPTS}" >> ~/.bashrc
 . ~/.bashrc
 alias ll la lt
 ```
 
-`alias ll='eza -l --git --group-directories-first'` のように 3 行出れば入っている。**`alias` の確認に `type -t` は使えない**（非対話シェルではエイリアスが展開されず `type` が見つけられない。[補足](#手順-2-git-列の読み方)の下にある[注意点](#注意点)を参照）。
+`alias ll='eza -l --git --group-directories-first'` のように 3 行出れば入っている。**`alias` の確認に `type -t` は使えない**（非対話シェルではエイリアスが展開されず `type` が見つけられない。[補足](#補足)の[注意点](#注意点)を参照）。
 
 ---
 
@@ -120,7 +144,7 @@ sed -i '/alias l[lat]=.*eza/d' ~/.bashrc     # エイリアスを足していた
 
 - **目的**: AlmaLinux 10 に [eza](https://github.com/eza-community/eza)（`ls` の代わりになる一覧表示。git 連携・ツリー表示・色分けが付く）を入れる。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、必要なら `~/.bashrc` にエイリアスを足す。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 1〜2 を通し、`arm64_linux` のボトルが降りること・`v0.23.5 [+git]` が出ること・git リポジトリで `Git` 列に `-M` / `-I` が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、色分けの見え方とアイコン（`--icons`）は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜3 を通し、`arm64_linux` のボトルが降りること・`v0.23.5 [+git]` が出ること・git リポジトリで `Git` 列に `-M` / `-I` が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、色分けの見え方とアイコン（`--icons`）は確認していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -132,7 +156,7 @@ sed -i '/alias l[lat]=.*eza/d' ~/.bashrc     # エイリアスを足していた
 | Nerd Font | `font-symbols-only-nerd-font 3.5.1`（Homebrew、[yazi.md](yazi.md)） | 無し |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し（pty を与えずに実行） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -140,7 +164,7 @@ sed -i '/alias l[lat]=.*eza/d' ~/.bashrc     # エイリアスを足していた
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.23.5`）は実行日によって変わる。
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -172,36 +196,6 @@ Error: No matching Packages to list
 ```
 
 （この 1 回の実行で eza / exa / delta / git-delta / starship のどれも無いことを確かめている。[git-delta.md](git-delta.md) と [starship.md](starship.md) でも同じ出力を使っている。）
-
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`${EZA_OPTS}` は[エイリアスを足す（任意）](#エイリアスを足す任意)でしか使わない。エイリアスを作らないなら空のままでも手順 1〜2 は通る。`--group-directories-first` は GNU `ls` の同名オプションと同じ意味で、`--git` は git 管理下でだけ `Git` 列を足す。
-
-#### 手順 2: `Git` 列の読み方
-
-`--git` は **git 管理下のディレクトリでしか列を出さない**。コンテナで使い捨てのリポジトリを作って確かめた実測:
-
-```
-$ eza -l --git --header .
-Permissions Size User   Date Modified Git Name
-.rw-r--r--@    8 <USER> 22 Sep 20:47   -M f.txt
-$ eza -la --git --group-directories-first .
-drwxr-xr-x@ - <USER> 22 Sep 20:47  -I .git
-.rw-r--r--@ 8 <USER> 22 Sep 20:47  -M f.txt
-```
-
-`Git` 列は 2 文字で、左がインデックスの状態、右が作業ツリーの状態。`-M` は「インデックスは変更なし・作業ツリーで変更あり」、`-I` は ignore されているもの。git 管理下でない `/etc` では列自体が出ない:
-
-```
-$ eza -l --git /etc | head -3
-.rw-r--r--@   16 root  2 Sep 10:54 adjtime
-.rw-r--r--@   12 root 15 Jan 00:00 adjtime.rpmnew
-.rw-r--r--@ 1.5k root 29 Nov  2023 aliases
-```
-
-パーミッション欄の末尾に付く `@` は拡張属性があることを示す（`-@` / `--extended` で中身が見られる）。SELinux を使う AlmaLinux では多くのファイルに付く。
 
 ### 完了時点の状態
 
@@ -244,13 +238,13 @@ alias lt='eza --tree --level=2'
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜2、[エイリアスを足す（任意）](#エイリアスを足す任意)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](bat.md) を先に入れた同じコンテナなので、依存の `libgit2` は取得済みだった。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 2〜3、[エイリアスを足す（任意）](#エイリアスを足す任意)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](bat.md) を先に入れた同じコンテナなので、依存の `libgit2` は取得済みだった。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 1. eza | `Pouring eza--0.23.5.arm64_linux.bottle.tar.gz` → `15 files, 2MB`。**依存は取得されなかった**（`libgit2` は bat で導入済みのため）。単独で入れた場合の依存は `brew deps --tree eza` で `libgit2` とその先 7 つ |
-| 2. 検証 | `eza --version` → `v0.23.5 [+git]`。`eza -l --git --header` で `Git` 列が出て、変更ファイルに `-M`、`.git` に `-I` が付いた。`/etc`（git 管理外）では `Git` 列が出ないことも確認 |
+| 2. eza | `Pouring eza--0.23.5.arm64_linux.bottle.tar.gz` → `15 files, 2MB`。**依存は取得されなかった**（`libgit2` は bat で導入済みのため）。単独で入れた場合の依存は `brew deps --tree eza` で `libgit2` とその先 7 つ |
+| 3. 検証 | `eza --version` → `v0.23.5 [+git]`。`eza -l --git --header` で `Git` 列が出て、変更ファイルに `-M`、`.git` に `-I` が付いた。`/etc`（git 管理外）では `Git` 列が出ないことも確認 |
 | エイリアス | `~/.bashrc` に 3 行追記して読み込み直し、`alias ll la lt` で 3 つとも展開されることを確認。**`type -t ll` は非対話シェルでは失敗する**ことも確認した |
 | 表示オプション | `--header` / `--octal-permissions` / `--tree --level=2` / `--icons=always` が動作。`EZA_COLORS=... eza -l --color=always` もエラーなく実行できたが、**色の正しさは判定していない** |
 | RPM 経路 | `dnf list --available eza exa` → `Error: No matching Packages to list`（EPEL を有効にした状態で） |
