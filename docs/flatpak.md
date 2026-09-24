@@ -2,15 +2,26 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **すべて対象ホスト上で、自分のシェルで実行する。** `sudo -i` した root のシェルでは行わない（アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）
 
-日々の操作は[使い方の基本](#使い方の基本)。以後の更新は[更新](#更新)、消すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・実測出力・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
+
+関連する節:
+
+- 日々の操作: [使い方の基本](#使い方の基本)
+- 以後の更新: [更新](#更新)
+- 消す: [ロールバック](#ロールバック)
 
 この手順書を通すと、[ツール一覧](tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](firefox.md) と [VS Code](vscode.md) は Flathub を使わず RPM で入れている（理由はそれぞれの「選択した方針」）。
 
 1. **変数を設定する**
 
-   **編集するものは無い。** Flathub の登録ファイルの URL は固定で、動作確認に入れるアプリは小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール。手順 5 の補足）にしてある。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集するものは無い。** Flathub の登録ファイルの URL は固定
+   - 動作確認に入れるアプリは小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール。手順 5 の補足）にしてある
+   - **新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す**
 
    ```bash
    FLATHUB_REPO_URL=https://dl.flathub.org/repo/flathub.flatpakrepo   # Flathub の登録ファイル。固定。<FLATHUB_REPO_URL>
@@ -46,7 +57,11 @@
    flatpak remotes --show-details
    ```
 
-   `Flatpak 1.16.0` のように出る。**入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**（リモートがまだ 1 つも無く、置き場所も作られていない。この手順の補足）。何も出ない場合もリモートが無い状態。**`flathub` の行が既にあれば手順 4 は何もしない**（`--if-not-exists` のため）。
+   `Flatpak 1.16.0` のように出る。
+
+   - **入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**（リモートがまだ 1 つも無く、置き場所も作られていない。この手順の補足）
+   - 何も出ない場合もリモートが無い状態
+   - **`flathub` の行が既にあれば手順 4 は何もしない**（`--if-not-exists` のため）
 
    <details>
    <summary>補足: AlmaLinux 10 の flatpak にはリモートが無い</summary>
@@ -121,7 +136,12 @@
    sudo flatpak install flathub "${FP_TEST_APP:?手順 1 の FP_TEST_APP が空のまま。値を入れて貼り直す}"
    ```
 
-   **確認を 2 回聞かれる。** 1 回目は runtime を入れるか（`Do you want to install it? [Y/n]`）、2 回目はアプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）。どちらも `y` で進める。**次のブロックは、完了してから貼る。**
+   **確認を 2 回聞かれる。** どちらも `y` で進める。
+
+   - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
+   - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
+
+   **次のブロックは、完了してから貼る。**
 
    <details>
    <summary>補足: 一緒に入る runtime</summary>
@@ -166,9 +186,9 @@
    ls /var/lib/flatpak/exports/share/applications/
    ```
 
-   `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出て、`sandbox OK` が出れば、アプリのサンドボックスが起動できている。最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている。
-
-   **メニューに載るのはログインし直してから**（この手順の補足）。
+   - `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出て、`sandbox OK` が出れば、アプリのサンドボックスが起動できている
+   - 最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている
+   - **メニューに載るのはログインし直してから**（この手順の補足）
 
    <details>
    <summary>補足: メニューに出るまで</summary>
@@ -206,7 +226,9 @@
 
 `flatpak` の読み取り系（`search` / `list` / `info` / `remote-ls`）は `sudo` 無しで動く。
 
-Flathub を登録しただけの状態では `flatpak search flatseal` が `No matches found` を返した（`/var/lib/flatpak/appstream/` がまだ無い）。`sudo flatpak update --appstream` の後は `Flatseal  Manage Flatpak permissions  com.github.tchx84.Flatseal  2.4.1  stable  flathub` が出た（どちらもコンテナで確認）。`sudo flatpak update` を 1 度実行したあとも同じように検索できるようになる。
+- Flathub を登録しただけの状態では `flatpak search flatseal` が `No matches found` を返した（`/var/lib/flatpak/appstream/` がまだ無い）
+- `sudo flatpak update --appstream` の後は `Flatseal  Manage Flatpak permissions  com.github.tchx84.Flatseal  2.4.1  stable  flathub` が出た（どちらもコンテナで確認）
+- `sudo flatpak update` を 1 度実行したあとも同じように検索できるようになる
 
 ---
 
@@ -231,7 +253,10 @@ sudo flatpak uninstall --unused
 
 どちらも消す前に `[Y/n]` で聞かれる。**次のブロックは、答えて完了してから貼る。**
 
-Flathub の登録自体を消す。**Flathub から入れたアプリが残っていると消せない**ので、先に `flatpak list --app --columns=application,origin` で `flathub` のものが無いことを確かめる。
+Flathub の登録自体を消す。
+
+> [!IMPORTANT]
+> **Flathub から入れたアプリが残っていると消せない**ので、先に `flatpak list --app --columns=application,origin` で `flathub` のものが無いことを確かめる。
 
 ```bash
 flatpak list --app --columns=application,origin
@@ -241,9 +266,8 @@ flatpak remotes --show-details
 
 最後の `flatpak remotes --show-details` が何も出さなければ、リモートが無い状態に戻っている。
 
-アプリが自分のホームに作ったデータ（`~/.var/app/<ID>`）は `uninstall` では消えない。要らなければ手で消す。
-
-`flatpak` パッケージ自体は消さない（GNOME のデスクトップでは `gnome-software` が依存している）。
+- アプリが自分のホームに作ったデータ（`~/.var/app/<ID>`）は `uninstall` では消えない。要らなければ手で消す
+- `flatpak` パッケージ自体は消さない（GNOME のデスクトップでは `gnome-software` が依存している）
 
 コンテナでの実測では、1 行目の `uninstall` が Flatseal 1 つを、`--unused` が runtime と拡張の 5 つ（`GL.default` の 2 つ・`org.gnome.Platform`・その `Locale`・`codecs-extra`）を消した。どちらも確認に答えてから消える。
 
@@ -255,7 +279,13 @@ flatpak remotes --show-details
 
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
-- **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 2〜6・[更新](#更新)・[ロールバック](#ロールバック)を通した。確認の問い合わせ（手順 5 とロールバックの `[Y/n]`）には端末（pty）越しに `y` を送って答えており、コマンドに `-y` は足していない。Flathub の追加・鍵の fingerprint・Flatseal の導入・サンドボックスの起動（`--command=true`）・`.desktop` の書き出し・ロールバックで元に戻ることを確認した。**コンテナに画面が無いため、デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示は確認していない。** 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）。**これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
+- **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない**
+  - 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**、手順 2〜6・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 確認の問い合わせ（手順 5 とロールバックの `[Y/n]`）には端末（pty）越しに `y` を送って答えており、コマンドに `-y` は足していない
+  - 確認したこと: Flathub の追加 / 鍵の fingerprint / Flatseal の導入 / サンドボックスの起動（`--command=true`）/ `.desktop` の書き出し / ロールバックで元に戻ること
+  - **コンテナに画面が無いため、デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示は確認していない**
+  - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）
+  - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
 
 | 項目 | 実機（Raspberry Pi 5） | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|---|
@@ -266,7 +296,8 @@ flatpak remotes --show-details
 
 実機の 2 列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**。Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](syncthing.md)）ので、今の状態は確かめていない。
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|

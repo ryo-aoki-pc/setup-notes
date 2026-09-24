@@ -2,13 +2,22 @@
 
 ## 実施手順
 
-**PC で実行する。手順 4 と手順 8 の後半だけ WG ホストで実行する。** **手順 6 以降は拠点の LAN の外**（スマートフォンのテザリングなど）で行う。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **PC で実行する。手順 4 と手順 8 の後半だけ WG ホストで実行する**
+> - **手順 6 以降は拠点の LAN の外**（スマートフォンのテザリングなど）で行う
 
-戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
+
+関連する節:
+
+- 元に戻す: [ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   編集が必須なのは次の 1 行ずつの 4 ブロック（**`sudo -i` した root のシェルではなく、自分のシェルで貼る**。`~` が自分のホームになるため）。
+   - 編集が必須なのは次の 1 行ずつの 4 ブロック
+   - **`sudo -i` した root のシェルではなく、自分のシェルで貼る**（`~` が自分のホームになるため）
 
    ```bash
    WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
@@ -91,7 +100,9 @@
 
 1. **WG ホストに公開鍵を登録する（WG ホストで実行）**
 
-   **ここだけ WG ホストのシェルで実行する。** 別のシェルなので、先頭で変数を設定し直す（編集が必須なのは 1 行ずつの 3 ブロック。[wireguard.md の手順 1](wireguard.md#実施手順) の `REPO` と `~/wg/site.env` がある前提）。
+   - **ここだけ WG ホストのシェルで実行する**
+   - 別のシェルなので、先頭で変数を設定し直す（編集が必須なのは 1 行ずつの 3 ブロック）
+   - [wireguard.md の手順 1](wireguard.md#実施手順) の `REPO` と `~/wg/site.env` がある前提
 
    ```bash
    SITE=A                               # クライアントを受ける拠点（A または B）
@@ -117,7 +128,8 @@
    cd "${REPO:?REPO が空のまま}/scripts/wireguard" && ./wg-vpn.sh -e ~/wg/site.env client list
    ```
 
-   登録簿は名前で一意なので、**`CLIENT_NAME` と同じ名前が一覧にあるときだけ**次のブロックを貼って消す（無ければ「登録されていません」で止まる。`apply` は次のブロックでまとめて行う）。
+   - 登録簿は名前で一意なので、**`CLIENT_NAME` と同じ名前が一覧にあるときだけ**次のブロックを貼って消す
+   - 無ければ「登録されていません」で止まる。`apply` は次のブロックでまとめて行う
 
    ```bash
    sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME:?CLIENT_NAME が空のまま}"
@@ -202,7 +214,8 @@
    nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
    ```
 
-   `import` した直後に NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わるので、**LAN 内で貼ってしまうと、そこで通信が切れて次のブロックを貼れなくなる**（その場合は PC のコンソールで `sudo nmcli connection down wg0`）。
+   - `import` した直後に NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため）
+   - 張られた時点で拠点 LAN 宛ての経路が入れ替わるので、**LAN 内で貼ってしまうと、そこで通信が切れて次のブロックを貼れなくなる**（その場合は PC のコンソールで `sudo nmcli connection down wg0`）
 
    次のブロックで即座に切る:
 
@@ -217,7 +230,14 @@
    sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
    ```
 
-   見るところ: `ipv4.method` が `manual`、`ipv4.addresses` が `<CLIENT_TUN_IP>/32`、`ipv4.dns` が `--`、`wireguard.private-key` が `<hidden>`、`wireguard.peer-routes` が `yes`、`wireguard.peers` に接続先拠点の公開鍵。
+   見るところ:
+
+   - `ipv4.method` が `manual`
+   - `ipv4.addresses` が `<CLIENT_TUN_IP>/32`
+   - `ipv4.dns` が `--`
+   - `wireguard.private-key` が `<hidden>`
+   - `wireguard.peer-routes` が `yes`
+   - `wireguard.peers` に接続先拠点の公開鍵
 
    <details>
    <summary>補足: import</summary>
@@ -269,9 +289,8 @@
    tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_LAN_IP> の順に出る
    ```
 
-   相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい。
-
-   どこで止まるかで疑う場所が変わる（→ この手順の補足）。
+   - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
+   - どこで止まるかで疑う場所が変わる（→ この手順の補足）
 
    **WG ホストで**（手順 4 のシェル）。ハンドシェイクと、**逆方向**（拠点 → PC）を確認する:
 
@@ -282,7 +301,8 @@
    ping -c 3 "${CLIENT_TUN_IP:?clients.list にその名前が無い}"                              # 拠点 → PC（PC の public ゾーンは ping に応答する）
    ```
 
-   接続先拠点の LAN 上の別のホストから `ping <CLIENT_TUN_IP>` も通る（ルーターにクライアント帯の静的経路がある前提）。片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](wireguard.md#症状と原因の対応実測)。
+   - 接続先拠点の LAN 上の別のホストから `ping <CLIENT_TUN_IP>` も通る（ルーターにクライアント帯の静的経路がある前提）
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](wireguard.md#症状と原因の対応実測)
 
    <details>
    <summary>補足: 疎通確認</summary>
@@ -298,7 +318,8 @@
    nmcli device status | grep -E '^(DEVICE|wg0 )'         # wg0 の行が消える
    ```
 
-   日常は、外出先で `sudo nmcli connection up wg0`、拠点に戻る前に `sudo nmcli connection down wg0`。autoconnect を無効にしてあるので、再起動しても勝手には張られない。
+   - 日常は、外出先で `sudo nmcli connection up wg0`、拠点に戻る前に `sudo nmcli connection down wg0`
+   - autoconnect を無効にしてあるので、再起動しても勝手には張られない
 
    <details>
    <summary>補足: down と日常の使い方</summary>
@@ -337,7 +358,8 @@ rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.co
 sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
 ```
 
-`rm -rf` を使わないのは、`WG_DIR` を WG ホストの `~/wg` と取り違えて貼っても登録簿を消さないため。
+> [!WARNING]
+> `rm -rf` を使わないのは、`WG_DIR` を WG ホストの `~/wg` と取り違えて貼っても登録簿を消さないため。
 
 パッケージも消すなら:
 
@@ -363,7 +385,12 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?SITE が空のまま}"
 
 - **目的**: [WireGuard VPN 構築手順](wireguard.md)で建てた拠点の WG ホストに、外出先の AlmaLinux 10 ノート PC から接続し、両拠点の LAN に届くようにする。鍵は PC で作り、**公開鍵だけ**を WG ホストに登録する。トンネルは NetworkManager のプロファイル `wg0` として持ち、`nmcli connection up wg0` / `down wg0` で張る・切る（`wg-quick` は使わない。→ [代替](#代替-wg-quick-で張る場合)）
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る。** 手順 4 と手順 8 の後半だけは WG ホスト上で実行する（そのブロックの先頭にも変数がある）。WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 4](wireguard.md#実施手順) と同じ
-- **状態**: **実機で本実行済み（2026-09-22）。** 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 1〜10 を通した。両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping まで確認している。NetworkManager の挙動として推定で書いていた項目は 1〜9 が実測で確定し、残るのはサスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）。**拠点の LAN の中からトンネルを張ることは意図的に試していない**（[注意点](#注意点)のとおり LAN の経路を奪うため）。実測の記録は[付録](#付録-実機での検証記録)
+- **状態**: **実機で本実行済み（2026-09-22）**
+  - 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 1〜10 を通した
+  - 確認したこと: 両拠点の LAN への ping / トンネル越しの ssh / 拠点側からの逆方向 ping
+  - NetworkManager の挙動として推定で書いていた項目は 1〜9 が実測で確定した。残るのはサスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）
+  - **拠点の LAN の中からトンネルを張ることは意図的に試していない**（[注意点](#注意点)のとおり LAN の経路を奪うため）
+  - 実測の記録は[付録](#付録-実機での検証記録)
 
 下表は実機（PC 側）で採取した値。
 
@@ -383,7 +410,8 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?SITE が空のまま}"
 
 図の Remote client が本書の PC。接続先拠点（図では拠点 A）の WG ホストにトンネルを張り、拠点 A・B の LAN に届く（→ [パケットの流れ](wireguard.md#パケットの流れremote-client--各拠点)）。
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。PC 側は[手順 1](#実施手順)、WG ホスト側は[手順 4](#実施手順)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。PC 側は[手順 1](#実施手順)、WG ホスト側は[手順 4](#実施手順)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。
 >
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
@@ -444,7 +472,11 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?SITE が空のまま}"
 
 ### 代替: wg-quick で張る場合
 
-NetworkManager を使わない場合（未検証）。手順 5 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る。NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）。
+> [!NOTE]
+> NetworkManager を使わない場合（未検証）。
+
+- 手順 5 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
+- NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）
 
 ```bash
 sudo install -m 600 -o root -g root "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.conf" /etc/wireguard/wg0.conf &&
@@ -459,11 +491,20 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 
 ### 代替: WG ホスト側で鍵を作る場合
 
-wireguard.md 手順 4 の元の流れ。ホストで `client add A NAME`（`--pubkey` 無し）→ `client show NAME` の出力に秘密鍵が入っているので、LAN 内の `scp` など安全な経路で PC の `${WG_DIR}/wg0.conf` に置き（手順 5 の `sed` は不要）、手順 6 以降は同じ。取り込んだらホストで `sudo rm /etc/wireguard/clients/NAME.conf`（→ [wireguard.md 手順 4](wireguard.md#実施手順)、[秘密鍵の扱い](wireguard.md#クライアントの秘密鍵の扱い)）。端末のスクロールバックとクリップボードに鍵が残る点に注意。スマートフォンは `client show NAME --qr` でこちらの流れになる。
+wireguard.md 手順 4 の元の流れ。
+
+- ホストで `client add A NAME`（`--pubkey` 無し）→ `client show NAME` の出力に秘密鍵が入っているので、LAN 内の `scp` など安全な経路で PC の `${WG_DIR}/wg0.conf` に置く（手順 5 の `sed` は不要）
+- 手順 6 以降は同じ
+- 取り込んだらホストで `sudo rm /etc/wireguard/clients/NAME.conf`（→ [wireguard.md 手順 4](wireguard.md#実施手順)、[秘密鍵の扱い](wireguard.md#クライアントの秘密鍵の扱い)）
+- 端末のスクロールバックとクリップボードに鍵が残る点に注意
+- スマートフォンは `client show NAME --qr` でこちらの流れになる
 
 ### 代替: nmcli connection add で組む場合（RHEL のドキュメントの方式）
 
-conf を import せず、値を手で写す方式（未検証）。`nmcli connection add type wireguard con-name wg0 ifname wg0 autoconnect no` → `nmcli connection modify wg0 ipv4.method manual ipv4.addresses <CLIENT_TUN_IP>/32` → `wireguard.private-key`（秘密鍵）→ `wireguard.peers '<SITE_A_PUBKEY> endpoint=<SITE_A_PUBLIC>:<WG_PORT> allowed-ips=<SITE_A_LAN>;<SITE_B_LAN>;<WG_TUNNEL_NET> persistent-keepalive=25'`（`allowed-ips` は `;` 区切り。`nm-settings-nmcli(5)`）→ `nmcli connection up wg0`。最初から `autoconnect no` にできるのが利点。
+> [!NOTE]
+> conf を import せず、値を手で写す方式（未検証）。
+
+`nmcli connection add type wireguard con-name wg0 ifname wg0 autoconnect no` → `nmcli connection modify wg0 ipv4.method manual ipv4.addresses <CLIENT_TUN_IP>/32` → `wireguard.private-key`（秘密鍵）→ `wireguard.peers '<SITE_A_PUBKEY> endpoint=<SITE_A_PUBLIC>:<WG_PORT> allowed-ips=<SITE_A_LAN>;<SITE_B_LAN>;<WG_TUNNEL_NET> persistent-keepalive=25'`（`allowed-ips` は `;` 区切り。`nm-settings-nmcli(5)`）→ `nmcli connection up wg0`。最初から `autoconnect no` にできるのが利点。
 
 ### 注意点
 

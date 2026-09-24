@@ -2,15 +2,26 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.gitconfig` に書くため）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **すべて対象ホスト上で、自分のシェルで実行する。** `sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、設定も自分の `~/.gitconfig` に書くため）
+> - **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す
 
-**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・実測出力・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
 
-lazygit を使っているなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)。設定項目の一覧は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+関連する節:
+
+- lazygit を使っている: [lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)
+- 設定項目の一覧: [設定ファイル](#設定ファイル)
+- 以後の更新: [更新](#更新)
+- 元に戻す: [ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** 3 つとも表示の好みなので、既定のままで進められる。広い画面で左右に並べたいなら `DELTA_SIDE_BY_SIDE=true` にする。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集必須の変数は無い。** 3 つとも表示の好みなので、既定のままで進められる
+   - 広い画面で左右に並べたいなら `DELTA_SIDE_BY_SIDE=true` にする
+   - **新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す**
 
    ```bash
    DELTA_NAVIGATE=true       # ページャ内で n / N を「次の変更・前の変更」にする。<DELTA_NAVIGATE>
@@ -37,7 +48,8 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    brew install git-delta
    ```
 
-   aarch64 でもビルド済みのボトル（`git-delta--0.19.2.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。**formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）。
+   - aarch64 でもビルド済みのボトル（`git-delta--0.19.2.arm64_linux.bottle.tar.gz`）が降り、ソースからのビルドにはならない
+   - **formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）
 
 1. **git の設定を書く**
 
@@ -58,9 +70,10 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    git config --global --get-regexp '^(core\.pager|interactive\.|delta\.|merge\.conflictstyle)'
    ```
 
-   6 行出る。**`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）。
-
-   `merge.conflictstyle zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）。delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている。
+   - 6 行出る
+   - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま。この手順の補足）
+   - `merge.conflictstyle zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
+   - `merge.conflictstyle` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
 
    <details>
    <summary>補足: キー名は小文字に正規化される</summary>
@@ -109,7 +122,8 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    git diff | delta --paging=never | head -20
    ```
 
-   ファイル名のヘッダと、行ごとに背景色の付いた差分が出る。**`git diff` を単体で打ったときは端末に直接出る場合だけ delta を通る**（`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る）。
+   - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
+   - **`git diff` を単体で打ったときは端末に直接出る場合だけ delta を通る**（`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る。この手順の補足）
 
    <details>
    <summary>補足: パイプに繋ぐとページャは働かない</summary>
@@ -162,9 +176,11 @@ git:
     pager: delta --dark --paging=never
 ```
 
-**`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。現在の中身は `lazygit --print-config-dir` で場所を確かめてから開く。
+- **`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる
+- 現在の中身は `lazygit --print-config-dir` で場所を確かめてから開く
 
-この節はコンテナで検証していない（[未確認事項](#未確認事項)）。
+> [!NOTE]
+> この節はコンテナで検証していない（[未確認事項](#未確認事項)）。
 
 ---
 
@@ -180,7 +196,8 @@ git:
 | `true-color` | 24 bit 色を使うか（既定は端末から自動判定） |
 | `file-style` / `minus-style` / `plus-style` | ファイル名行・削除行・追加行の色 |
 
-今の実効値は `delta --show-config` で全部出る。`delta --help` にはオプションとして同じ名前が並んでおり、コマンドラインで一時的に上書きできる。
+- 今の実効値は `delta --show-config` で全部出る
+- `delta --help` にはオプションとして同じ名前が並んでおり、コマンドラインで一時的に上書きできる
 
 ---
 
@@ -205,9 +222,11 @@ git config --global --unset merge.conflictstyle     # zdiff3 も戻す場合
 git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何も出なければ消えている
 ```
 
-**`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる。** lazygit の `git.paging` を足していた場合は `~/.config/lazygit/config.yml` からも消す。
+- **`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる**
+- lazygit の `git.paging` を足していた場合は `~/.config/lazygit/config.yml` からも消す
 
-本書ではロールバックは**本実行していない**。
+> [!WARNING]
+> 本書ではロールバックを**本実行していない**。
 
 ---
 
@@ -217,7 +236,11 @@ git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何�
 
 - **目的**: AlmaLinux 10 で `git diff` / `git show` / `git log -p` の表示を [delta](https://github.com/dandavison/delta)（シンタックスハイライト付きのページャ）に置き換える。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、`git config --global` で `~/.gitconfig` に書く。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜4 を通し、`arm64_linux` のボトルが降りること・`delta 0.19.2` が入ること・使い捨てリポジトリの `git diff | delta --paging=never` が色付きで出ること・`git config --global --get-regexp` で 6 項目が読み戻せることを確認した。**実機（Raspberry Pi 5）では本実行していない**（実機の `~/.gitconfig` は `[core] autocrlf` と `[user]` だけのまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、`core.pager` 経由のページャ起動（`git diff` を素で打ったときの表示）と `navigate` の `n` / `N` は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない**
+  - 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**、[Homebrew の導入](homebrew.md)と手順 2〜4 を通した
+  - 確認したこと: `arm64_linux` のボトルが降りる / `delta 0.19.2` が入る / 使い捨てリポジトリの `git diff | delta --paging=never` が色付きで出る / `git config --global --get-regexp` で 6 項目が読み戻せる
+  - **実機（Raspberry Pi 5）では本実行していない**（実機の `~/.gitconfig` は `[core] autocrlf` と `[user]` だけのまま）。下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**
+  - **コンテナには端末が無いため、`core.pager` 経由のページャ起動（`git diff` を素で打ったときの表示）と `navigate` の `n` / `N` は確認していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -230,7 +253,8 @@ git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何�
 | lazygit | `lazygit 0.65.1`（Homebrew、[lazygit.md](lazygit.md)）。`git.paging` は未設定 | 未導入 |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し（pty を与えずに実行） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|

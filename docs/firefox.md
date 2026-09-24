@@ -2,13 +2,23 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で実行する。** 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> **すべて対象ホスト上で実行する。**
 
-以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾に折り畳んだ「補足」の中のブロックは、手順を進めるためには貼らなくてよい
+- 理由・実測出力・落とし穴は各手順の「補足」と後半の[補足](#補足)にある。実行するだけなら読まなくてよい
+
+関連する節:
+
+- 以後の更新: [更新](#更新)
+- 元に戻す: [ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** 最新版（Rapid Release）を入れるなら既定のままでよい。ESR や Beta にしたいときだけ `FF_PKG` を変える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集必須の変数は無い。** 最新版（Rapid Release）を入れるなら既定のままでよい
+   - ESR や Beta にしたいときだけ `FF_PKG` を変える
+   - **新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す**
 
    ```bash
    FF_PKG=firefox                  # 入れるチャンネル。firefox（最新版）/ firefox-esr / firefox-beta。<FF_PKG>
@@ -48,14 +58,16 @@
    curl -fsSL https://packages.mozilla.org/rpm/firefox/signing-key.gpg | gpg --show-keys
    ```
 
-   `pub` 行の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353`、uid が `Mozilla Software Releases <release@mozilla.com>` であることを**目で確かめてから**取り込む。違っていればここで止める。
+   - `pub` 行の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353`、uid が `Mozilla Software Releases <release@mozilla.com>` であることを**目で確かめてから**取り込む
+   - 違っていればここで止める
 
    ```bash
    sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
    rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
    ```
 
-   `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る。期限切れの副鍵についての warning が一緒に出るが、署名に使う副鍵は別にあるので問題ない（この手順の補足）。
+   - `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る
+   - 期限切れの副鍵についての warning が一緒に出るが、署名に使う副鍵は別にあるので問題ない（この手順の補足）
 
    <details>
    <summary>補足: 鍵の警告</summary>
@@ -102,7 +114,8 @@
    dnf -q list --showduplicates "${FF_PKG}" | tail -6
    ```
 
-   一覧の下のほうに `mozilla` リポジトリ提供の版が出る。このリポジトリは `baseurl` にアーキテクチャを含まないので、`x86_64` の行も一緒に並ぶ（この手順の補足）。
+   - 一覧の下のほうに `mozilla` リポジトリ提供の版が出る
+   - このリポジトリは `baseurl` にアーキテクチャを含まないので、`x86_64` の行も一緒に並ぶ（この手順の補足）
 
    <details>
    <summary>補足: priority は保険</summary>
@@ -173,7 +186,9 @@
 
    `from_repo` が `mozilla`、`Vendor` が `Mozilla` なら Mozilla 公式のビルドが入っている。
 
-   GUI はデスクトップセッションから起動する。`about:support` の「更新チャンネル」が `release`（ESR なら `esr`）、「アプリケーションのバイナリ」が `/usr/lib64/firefox/firefox` であることを確認する。日本語パックを入れた場合は `about:preferences` の言語で日本語を選べる。
+   - GUI はデスクトップセッションから起動する
+   - `about:support` の「更新チャンネル」が `release`（ESR なら `esr`）、「アプリケーションのバイナリ」が `/usr/lib64/firefox/firefox` であることを確認する
+   - 日本語パックを入れた場合は `about:preferences` の言語で日本語を選べる
 
 ---
 
@@ -185,7 +200,8 @@
 sudo dnf upgrade "${FF_PKG}" ${FF_L10N}
 ```
 
-Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib64/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う。本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる。
+- Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib64/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
+- 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
 
 ---
 
@@ -205,7 +221,11 @@ sudo dnf distro-sync "${FF_PKG}"              # 140 系へダウングレード�
 sudo rpm -e gpg-pubkey-d98f0353-55a94004
 ```
 
-プロファイル（`~/.mozilla/firefox`）はどちらの操作でも消えない。**ダウングレードした Firefox は、新しいプロファイルを読めないことがある**（[注意点](#注意点)）。本書ではロールバックは**本実行していない**。`dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した。
+- プロファイル（`~/.mozilla/firefox`）はどちらの操作でも消えない
+- **ダウングレードした Firefox は、新しいプロファイルを読めないことがある**（[注意点](#注意点)）
+
+> [!WARNING]
+> 本書ではロールバックを**本実行していない**。`dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した。
 
 ---
 
@@ -215,7 +235,12 @@ sudo rpm -e gpg-pubkey-d98f0353-55a94004
 
 - **目的**: AlmaLinux 10 に Firefox の**最新版（Rapid Release）**を dnf 管理で入れる。標準リポジトリ（AppStream）の `firefox` は ESR 140 系で、最新版より 16 メジャー古い
 - **進め方**: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` するだけ。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
-- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している。本書の手順（鍵の照合 → repo → install → 検証）は 2026-09-22 に同じ OS のコンテナで通し直し、`156.0.1-1` が入ること・ESR からの載せ替えが `Upgrading` として解決されること・ロールバックが `Downgrading` に解決されることを確認した。**コンテナでは GUI を起動していない**（実機では 156.0 が動作中）。**ESR / Beta チャンネルと言語パック以外の l10n は未検証**
+- **状態**: **実機で本実行済み（2026-09-21）**
+  - 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している
+  - 本書の手順（鍵の照合 → repo → install → 検証）は 2026-09-22 に同じ OS のコンテナで通し直した
+  - 確認したこと: `156.0.1-1` が入る / ESR からの載せ替えが `Upgrading` として解決される / ロールバックが `Downgrading` に解決される
+  - **コンテナでは GUI を起動していない**（実機では 156.0 が動作中）
+  - **ESR / Beta チャンネルと言語パック以外の l10n は未検証**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -228,7 +253,8 @@ sudo rpm -e gpg-pubkey-d98f0353-55a94004
 | デスクトップ | GNOME 49 / Wayland | 無し（`--version` まで） |
 | SELinux | Enforcing | コンテナ側は無効 |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
