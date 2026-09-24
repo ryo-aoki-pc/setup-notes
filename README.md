@@ -5,6 +5,8 @@
 
 ## 手順書
 
+ツールをどこから入れるか（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る。CLI・GUI の約 50 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）。
+
 | 手順書 | 用途 | 検証環境 |
 |---|---|---|
 | [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | システムデーモン方式のリモートログインを有効化する | AlmaLinux 10.2 / x86_64・aarch64 |
@@ -16,7 +18,8 @@
 | [Firefox](docs/firefox.md) | Mozilla 公式 RPM リポジトリから最新版を入れる（標準は ESR 140） | AlmaLinux 10.2 / aarch64 |
 | [Claude Code](docs/claude-code.md) | 公式 dnf リポジトリから CLI を入れる | AlmaLinux 10.2 / aarch64 |
 | [GitHub CLI](docs/gh.md) | 公式 dnf リポジトリから gh を入れる（EPEL 版より新しい） | AlmaLinux 10.2 / aarch64 |
-| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 11 本の前提） | AlmaLinux 10.2 / aarch64 |
+| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 12 本の前提） | AlmaLinux 10.2 / aarch64 |
+| [Flatpak / Flathub](docs/flatpak.md) | GUI アプリの配布元 Flathub を登録する（一覧の GUI アプリの前提） | AlmaLinux 10.2 / x86_64（コンテナのみ） |
 | [yazi](docs/yazi.md) | ターミナルファイルマネージャを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [lazygit](docs/lazygit.md) | git の TUI クライアントを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [Neovim](docs/neovim.md) | 最新版を Homebrew で入れる（EPEL 版は 0.10 系） | AlmaLinux 10.2 / aarch64 |
@@ -29,6 +32,7 @@
 | [starship](docs/starship.md) | シェルプロンプトを Homebrew で入れる（`~/.bashrc` に 1 行） | AlmaLinux 10.2 / aarch64（コンテナのみ） |
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形を Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [VS Code](docs/vscode.md) | Microsoft 公式 dnf リポジトリからエディタを入れる（GUI） | AlmaLinux 10.2 / aarch64 |
+| [HackGen Console NF](docs/hackgen.md) | 日本語と Nerd Fonts のアイコンを含むプログラミング用フォントを Homebrew の cask で入れる | AlmaLinux 10.2 / x86_64（コンテナのみ） |
 
 ## 記法
 
@@ -40,5 +44,6 @@
 - コマンドは実行済みのものを載せ、未検証事項は明記する
 - 実機で本実行していない手順書は、一覧の検証環境に「コンテナのみ」と書く
 - 複数の手順書が共有する前提（Homebrew など）は独立した手順書にし、各手順書の冒頭から参照する
+- [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。冒頭に状態と調査日を置き、表の各行に確認の深さ（起動 / 導入 / メタデータ）を書く
 - 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない
