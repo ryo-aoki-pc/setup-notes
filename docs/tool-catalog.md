@@ -29,7 +29,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [btop.md](btop.md) |
 | EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream などと合わせて 61 パッケージ）はすべて x86_64 と同じ版 | Chromium・VLC・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 2](btop.md#実施手順) |
 | RPM Fusion（EL10） | 本書では有効にしていない | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `discord`（x86_64 のみ）と `steam`（i686）。**VLC・OBS・mpv は無い** | [注意点](#注意点) |
-| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・Brave・Sublime Text・mise は両方、Edge は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない**（Sublime Text で実測） | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md) |
+| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・Brave・Sublime Text・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない**（Sublime Text で実測） | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md) |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | root では動かない。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
 | Flathub | [flatpak.md](flatpak.md) | 上流の最新 | アプリ次第。調べた 31 本のうち 7 本は x86_64 のみ | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [flatpak.md](flatpak.md) |
@@ -66,6 +66,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Firefox | Mozilla 公式 dnf リポジトリ | [firefox.md](firefox.md) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](vscode.md) |
+| VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](virtualbox.md) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
 
@@ -278,6 +279,7 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 | Zoom | Flathub `us.zoom.Zoom` 7.1.5.4332（未検証） | 無い |
 | Spotify | Flathub `com.spotify.Client` 1.2.95（未検証） | 無い |
 | Thunderbird（Flathub 版） | Flathub `org.mozilla.thunderbird` 156.0.1 / `org.mozilla.thunderbird_esr` 153.3.1esr | Flathub には無い。**AppStream の Thunderbird（140.14.0esr）は aarch64 にもある** |
+| VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[virtualbox.md](virtualbox.md)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
 
 ---
 
