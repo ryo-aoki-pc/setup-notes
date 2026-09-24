@@ -11,11 +11,12 @@
 | [WireGuard VPN](docs/wireguard.md) | 2 拠点の LAN と外出先クライアントを接続する | AlmaLinux 10.2 / aarch64 |
 | [WireGuard Road Warrior](docs/wireguard-road-warrior.md) | AlmaLinux PC から拠点の WireGuard VPN へ接続する | AlmaLinux 10.2 / x86_64 |
 | [Samba](docs/samba.md) | ホームディレクトリを LAN・WireGuard 越しに公開する | AlmaLinux 10.2 / aarch64 |
+| [Syncthing](docs/syncthing.md) | ファイル同期デーモンを Homebrew で入れ、ユーザーサービスで常駐させる | AlmaLinux 10.2 / aarch64 |
 | [WezTerm Nightly](docs/wezterm-nightly.md) | 公式 COPR の EL9 ビルドを AlmaLinux 10 に導入する | AlmaLinux 10.2 / x86_64 |
 | [Firefox](docs/firefox.md) | Mozilla 公式 RPM リポジトリから最新版を入れる（標準は ESR 140） | AlmaLinux 10.2 / aarch64 |
 | [Claude Code](docs/claude-code.md) | 公式 dnf リポジトリから CLI を入れる | AlmaLinux 10.2 / aarch64 |
 | [GitHub CLI](docs/gh.md) | 公式 dnf リポジトリから gh を入れる（EPEL 版より新しい） | AlmaLinux 10.2 / aarch64 |
-| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 10 本の前提） | AlmaLinux 10.2 / aarch64 |
+| [Homebrew](docs/homebrew.md) | パッケージマネージャを入れる（以降 11 本の前提） | AlmaLinux 10.2 / aarch64 |
 | [yazi](docs/yazi.md) | ターミナルファイルマネージャを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [lazygit](docs/lazygit.md) | git の TUI クライアントを Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [Neovim](docs/neovim.md) | 最新版を Homebrew で入れる（EPEL 版は 0.10 系） | AlmaLinux 10.2 / aarch64 |
