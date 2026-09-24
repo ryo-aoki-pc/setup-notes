@@ -6,7 +6,7 @@
 
 日々の操作は[使い方の基本](#使い方の基本)。以後の更新は[更新](#更新)、消すときは[ロールバック](#ロールバック)。
 
-この手順書を通すと、[yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck / shfmt](shellcheck.md) の 10 本が使えるようになる。
+この手順書を通すと、[yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck / shfmt](shellcheck.md) / [Syncthing](syncthing.md) の 11 本が使えるようになる。
 
 1. **変数を設定する**
 

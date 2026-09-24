@@ -35,10 +35,11 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
 - `docs/samba.md` — `[homes]` 共有でホームディレクトリを公開する手順書。gnome-remote-desktop.md と同じ変数ブロック方式。実機（拠点 B の WG ホスト）で公開を継続中
 - `docs/wireguard-road-warrior.md` — 外出先の AlmaLinux 10 PC を WG クライアントにする手順書。鍵は PC 側で生成し、ホストの `client add --pubkey` → `client show` の conf を `nmcli connection import` で取り込む。samba.md と同じ変数ブロック方式。未検証（NetworkManager の挙動で「要確認」と付けた項目は実機の結果で更新する）
+- `docs/syncthing.md` — Syncthing を Homebrew（2.1.5、上流最新と同版）で入れ、`brew services` の systemd ユーザーサービス + `loginctl enable-linger` で常駐させる手順書。EPEL 10 は 2.1.3 で、公式の RPM リポジトリは存在しない（公式は apt のみ）。GUI の認証を入れてから待ち受けを LAN に広げ、firewalld の定義済みサービス `syncthing` / `syncthing-gui` を開ける順にしてある。実機で本実行済み（2026-09-24）。firewalld 越しの到達は samba.md と同じ network namespace の手法で確認したが、**別デバイスとの実同期と再起動後の自動起動は未検証**
 - `docs/firefox.md` — Mozilla 公式 RPM リポジトリ（`packages.mozilla.org/rpm/firefox`）で最新版の Firefox を入れる手順書。AppStream の ESR 140 から `dnf install` 1 本で載せ替える。実機で本実行済み、手順は AlmaLinux 10 コンテナで再実行して確認
 - `docs/claude-code.md` — 公式 dnf リポジトリ（`downloads.claude.ai/claude-code/rpm/stable`）から Claude Code を入れる手順書。Node.js 不要。実機で本実行済み（認証も済み）、手順 2〜4 はコンテナで再実行
 - `docs/gh.md` — 公式 dnf リポジトリ（`cli.github.com/packages/rpm`）から gh を入れる手順書。EPEL 版は 2.97.0 と古い。実機で本実行済み、手順 2〜4 はコンテナで再実行
-- `docs/homebrew.md` — Homebrew 本体を入れる手順書。以降の Homebrew 系 10 本の前提で、各手順書は `## 実施手順` のリード文からここへ誘導し、変数の設定（手順 1）の次の手順 2 から各ツールの導入が始まる。インストーラの `Next steps` の実測と `brew` の基本操作もここに集約した。実機で本実行済み（2026-09-20）、手順はコンテナで再実行
+- `docs/homebrew.md` — Homebrew 本体を入れる手順書。以降の Homebrew 系 11 本の前提で、各手順書は `## 実施手順` のリード文からここへ誘導し、変数の設定（手順 1）の次の手順 2 から各ツールの導入が始まる。インストーラの `Next steps` の実測と `brew` の基本操作もここに集約した。実機で本実行済み（2026-09-20）、手順はコンテナで再実行
 - `docs/yazi.md` — yazi を Homebrew で入れる手順書。COPR `lihaohong/yazi` を実機で一度入れて外した経緯と、プレビュー依存（ffmpeg など）が EL10 に揃わないことを補足に残す。`y()` シェル関数まで含む
 - `docs/lazygit.md` — lazygit を Homebrew で入れる手順書。COPR（`dejan` / `atim`）は `epel-10-aarch64` の repomd が 403 で入らないことを実機とコンテナの両方で確認して不採用にしている
 - `docs/neovim.md` — Neovim を Homebrew で入れる手順書（EPEL は 0.10.1 と古い）。`:checkhealth` の読み方と、`sudo nvim` が使えない理由を補足に置く
@@ -64,7 +65,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 1. 環境固有の値は手順冒頭の変数ブロックまたは `site.env` だけで設定する（`${SERVER_IP}` 形式。値の置き場所は手順書ごとに 1 か所）。**変更が必須の変数は 1 変数ずつのコードブロックに分け、変更が任意の変数（既定のままでよい・自動で入る・固定）は 1 つのブロックにまとめて必須ブロックの後に置く。** シェルに貼って編集する手間を減らすため
 1. 動作確認を含む実行手順を番号付きの手順にし、任意設定・更新・`## ロールバック`（または「全部消す」）は `## 実施手順` の後ろに番号の無い `##` 見出しで置く。ここまでが前半
 1. `## 補足` には手順書全体にかかわるものだけを置く: 「対象と検証環境」「実施前の状態」「選択した方針」「完了時点の状態」「注意点」「参照」「付録（検証記録）」。目的、環境表、変数表（「対象と検証環境」の注記）などの背景説明、任意節の補足、複数の手順にまたがる説明（wireguard.md の「スクリプトの動作」など）もここへ。`### 手順の補足` は作らない（1 つの手順だけにかかわる補足は、変数ブロックの補足も含めてその項目の折り畳みへ）
-1. **複数の手順書が共有する前提は独立した手順書にし、各手順書は手順に含めず冒頭のリード文から参照する。** 変数の設定（手順 1）の次の手順 2 はその手順書の主題（ツールの導入）から始める。Homebrew 系 10 本が `docs/homebrew.md` を参照しているのがこの形
+1. **複数の手順書が共有する前提は独立した手順書にし、各手順書は手順に含めず冒頭のリード文から参照する。** 変数の設定（手順 1）の次の手順 2 はその手順書の主題（ツールの導入）から始める。Homebrew 系 11 本が `docs/homebrew.md` を参照しているのがこの形
 1. 対話入力（パスワード、`[y/N]`、TUI の起動）があるコマンドは**単独のコードブロック**にし、直後に「次のブロックは〜してから貼る」と書く。続けて貼ると後続行が入力として食われるため
 
 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` などのプレースホルダで書き、実測出力は変数に置き換えない。`<...>` を含むコマンドは bash のコードブロックに置かず、読者が値を入れるブロックは先頭で変数が空なら中断させる（README「記法の約束」）。手順書のコードブロックは検証目的でも実機で機械的に実行しない。コマンドは実際に実行したものを載せる。パスワード・鍵・トークンは private でも書かない。
