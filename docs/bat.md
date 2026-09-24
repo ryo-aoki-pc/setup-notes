@@ -2,62 +2,104 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.config` に書くため）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.config` に書くため）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
 
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | 設定ファイルの場所とテーマ名を決める |
-| [1. bat を入れる](#1-bat-を入れる) | `brew install bat`（`libgit2` / `oniguruma` も入る） |
-| [2. 検証する](#2-検証する) | 版の確認と、色・行番号が付くか |
-
 設定を書く場所は[設定ファイル](#設定ファイル)。`man` や `fzf` のプレビューに使うなら[ページャに使う（任意）](#ページャに使う任意)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**このブロックは編集必須の変数が無い。** どちらも既定のまま進められる。端末の配色に合わせたいときだけ `BAT_THEME_NAME` を変える（候補は[設定ファイル](#設定ファイル)の `bat --list-themes` で出る）。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   **このブロックは編集必須の変数が無い。** どちらも既定のまま進められる。端末の配色に合わせたいときだけ `BAT_THEME_NAME` を変える（候補は[設定ファイル](#設定ファイル)の `bat --list-themes` で出る）。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
 
-```bash
-BAT_CONFIG=~/.config/bat/config   # bat の設定ファイル。既定の場所。<BAT_CONFIG>
-BAT_THEME_NAME=ansi               # 使うテーマ。ansi は端末の 16 色にそのまま従う。<BAT_THEME_NAME>
-```
+   ```bash
+   BAT_CONFIG=~/.config/bat/config   # bat の設定ファイル。既定の場所。<BAT_CONFIG>
+   BAT_THEME_NAME=ansi               # 使うテーマ。ansi は端末の 16 色にそのまま従う。<BAT_THEME_NAME>
+   ```
 
-**値を読み戻して確かめる。**
+   **値を読み戻して確かめる。**
 
-```bash
-for v in BAT_CONFIG BAT_THEME_NAME; do printf '%-15s = %s\n' "$v" "${!v}"; done
-```
+   ```bash
+   for v in BAT_CONFIG BAT_THEME_NAME; do printf '%-15s = %s\n' "$v" "${!v}"; done
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. bat を入れる
+   `${BAT_CONFIG}` は**この文書の中だけで使うシェル変数**で、bat 自身が読む環境変数（`BAT_CONFIG_PATH`）ではない。既定の場所に置く限り bat は自分で見つけるので、`export` する必要はない。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する。
 
-```bash
-brew install bat
-```
+   `ansi` は「端末が設定している 16 色をそのまま使う」テーマで、端末の配色を変えたときに追従する。固定の配色にしたいなら `bat --list-themes` から選ぶ。
 
-aarch64 でもビルド済みのボトル（`bat--0.26.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存の `libgit2` と `oniguruma`、さらにその先の `openssl@3` などもまとめて入る。
+   </details>
 
-→ [補足](#手順-1-一緒に入る依存)
+1. **bat を入れる**
 
-### 2. 検証する
+   ```bash
+   brew install bat
+   ```
 
-```bash
-bat --version
-brew list --versions bat
-command -v bat
-```
+   aarch64 でもビルド済みのボトル（`bat--0.26.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。依存の `libgit2` と `oniguruma`、さらにその先の `openssl@3` などもまとめて入る。
 
-`bat 0.26.1` のように出る。次に、色と行番号が付くことを確かめる。
+   <details>
+   <summary>補足: 一緒に入る依存</summary>
 
-```bash
-bat --color=always --style=numbers /etc/os-release | head -5
-```
+   bat が直接要求するのは `libgit2`（変更行の `changes` 表示に使う）と `oniguruma`（正規表現）の 2 つだが、`libgit2` がさらに 6 つを引く。コンテナでの `brew deps --tree bat`:
 
-行番号付きで `NAME="AlmaLinux"` から 5 行出る。**`--color=always` を外してパイプに繋ぐと装飾のない `cat` と同じ出力になる**ので、この確認では明示的に付けている。
+   ```
+   bat
+   ├── libgit2
+   │   ├── libssh2
+   │   │   ├── openssl@3
+   │   │   │   └── ca-certificates
+   │   │   └── zlib-ng-compat
+   │   ├── llhttp
+   │   ├── openssl@3
+   │   │   └── ca-certificates
+   │   ├── pcre2
+   │   │   ├── zlib-ng-compat
+   │   │   └── bzip2
+   │   └── zlib-ng-compat
+   └── oniguruma
+   ```
 
-→ [補足](#手順-2-tty-かどうかで出力が変わる)
+   この依存は [eza](eza.md)（`libgit2`）と [git-delta](git-delta.md)（`libgit2` / `oniguruma`）と共通なので、3 つとも入れる場合は 2 本目以降の取得がほとんど無くなる。
+
+   </details>
+
+1. **検証する**
+
+   ```bash
+   bat --version
+   brew list --versions bat
+   command -v bat
+   ```
+
+   `bat 0.26.1` のように出る。次に、色と行番号が付くことを確かめる。
+
+   ```bash
+   bat --color=always --style=numbers /etc/os-release | head -5
+   ```
+
+   行番号付きで `NAME="AlmaLinux"` から 5 行出る。**`--color=always` を外してパイプに繋ぐと装飾のない `cat` と同じ出力になる**ので、この確認では明示的に付けている。
+
+   <details>
+   <summary>補足: TTY かどうかで出力が変わる</summary>
+
+   bat は出力先が端末かどうかで既定の挙動を変える。**パイプやリダイレクトに繋ぐと、色も行番号もページャも自動的に切れて素の `cat` と同じになる**。コンテナ（端末なし）での実測:
+
+   ```
+   $ bat /etc/os-release | head -3
+   NAME="AlmaLinux"
+   VERSION="10.2 (Lavender Lion)"
+   RELEASE_TYPE=stable
+   $ bat --color=always --style=numbers /etc/os-release | head -2
+      1 NAME="AlmaLinux"
+      2 VERSION="10.2 (Lavender Lion)"
+   ```
+
+   この切り替えのおかげで、`bat` をスクリプトの中で `cat` の代わりに使っても壊れにくい。強制したいときは `--color=always` と `--paging=never`（または `-p`）を明示する。
+
+   </details>
 
 ---
 
@@ -73,7 +115,7 @@ EOF
 printf '%s\n' "${MANPAGER}"
 ```
 
-`fzf` を入れてあるなら、ファイル選択のプレビューにも使える（`fzf` の導入は [yazi.md](yazi.md#1-yazi-を入れる) 参照）:
+`fzf` を入れてあるなら、ファイル選択のプレビューにも使える（`fzf` の導入は [yazi.md 手順 2](yazi.md#実施手順) 参照）:
 
 ```bash
 fzf --preview 'bat --color=always --style=numbers {}'
@@ -88,9 +130,9 @@ fzf --preview 'bat --color=always --style=numbers {}'
 パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く。置き場所は `bat --config-file` で確認できる。よく変える 3 つだけ書く最小の例:
 
 ```bash
-mkdir -p "$(dirname "${BAT_CONFIG:?手順 0 の BAT_CONFIG が空のまま。値を入れて貼り直す}")"
+mkdir -p "$(dirname "${BAT_CONFIG:?手順 1 の BAT_CONFIG が空のまま。値を入れて貼り直す}")"
 cat > "${BAT_CONFIG}" <<EOF
---theme="${BAT_THEME_NAME:?手順 0 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
+--theme="${BAT_THEME_NAME:?手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
 --style="numbers,changes,header"
 --paging=never
 EOF
@@ -132,7 +174,7 @@ sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた�
 
 - **目的**: AlmaLinux 10 に [bat](https://github.com/sharkdp/bat)（シンタックスハイライトと git 連携が付いた `cat`）の最新版を入れる。**EPEL には 0.24.0 があるが 2 マイナー古い**
 - **進め方**: Homebrew で入れ、必要なら `~/.config/bat/config` を置く。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節を通し、`arm64_linux` のボトルが降りること・`bat 0.26.1` が入ること・`--color=always --style=numbers` で行番号と色が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、ページャとしての表示（`man` / `fzf --preview`）は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節を通し、`arm64_linux` のボトルが降りること・`bat 0.26.1` が入ること・`--color=always --style=numbers` で行番号と色が付くことを確認した。**実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、ページャとしての表示（`man` / `fzf --preview`）は確認していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -143,7 +185,7 @@ sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた�
 | 一緒に入る依存 | — | `libgit2` / `oniguruma` とその先 7 つ |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し（pty を与えずに実行） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -152,7 +194,7 @@ sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた�
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.26.1`）は実行日によって変わる。
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -185,53 +227,6 @@ $ dnf -q repoquery -l bat | grep bin/
 ```
 
 **名前が `bat` で衝突するので、EPEL 版と Homebrew 版を両方入れてはいけない。** 両方入っていると PATH の先頭にある Homebrew 版が勝ち、`dnf upgrade` で上がるのは使われないほうになる。
-
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`${BAT_CONFIG}` は**この文書の中だけで使うシェル変数**で、bat 自身が読む環境変数（`BAT_CONFIG_PATH`）ではない。既定の場所に置く限り bat は自分で見つけるので、`export` する必要はない。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する。
-
-`ansi` は「端末が設定している 16 色をそのまま使う」テーマで、端末の配色を変えたときに追従する。固定の配色にしたいなら `bat --list-themes` から選ぶ。
-
-#### 手順 1: 一緒に入る依存
-
-bat が直接要求するのは `libgit2`（変更行の `changes` 表示に使う）と `oniguruma`（正規表現）の 2 つだが、`libgit2` がさらに 6 つを引く。コンテナでの `brew deps --tree bat`:
-
-```
-bat
-├── libgit2
-│   ├── libssh2
-│   │   ├── openssl@3
-│   │   │   └── ca-certificates
-│   │   └── zlib-ng-compat
-│   ├── llhttp
-│   ├── openssl@3
-│   │   └── ca-certificates
-│   ├── pcre2
-│   │   ├── zlib-ng-compat
-│   │   └── bzip2
-│   └── zlib-ng-compat
-└── oniguruma
-```
-
-この依存は [eza](eza.md)（`libgit2`）と [git-delta](git-delta.md)（`libgit2` / `oniguruma`）と共通なので、3 つとも入れる場合は 2 本目以降の取得がほとんど無くなる。
-
-#### 手順 2: TTY かどうかで出力が変わる
-
-bat は出力先が端末かどうかで既定の挙動を変える。**パイプやリダイレクトに繋ぐと、色も行番号もページャも自動的に切れて素の `cat` と同じになる**。コンテナ（端末なし）での実測:
-
-```
-$ bat /etc/os-release | head -3
-NAME="AlmaLinux"
-VERSION="10.2 (Lavender Lion)"
-RELEASE_TYPE=stable
-$ bat --color=always --style=numbers /etc/os-release | head -2
-   1 NAME="AlmaLinux"
-   2 VERSION="10.2 (Lavender Lion)"
-```
-
-この切り替えのおかげで、`bat` をスクリプトの中で `cat` の代わりに使っても壊れにくい。強制したいときは `--color=always` と `--paging=never`（または `-p`）を明示する。
 
 ### 完了時点の状態
 
@@ -277,13 +272,13 @@ $ cat ~/.config/bat/config
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) も続けて入れている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) も続けて入れている。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `dnf install -y procps-ng curl file git` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 1. bat | `Pouring bat--0.26.1.arm64_linux.bottle.tar.gz` → `15 files, 5.4MB`。依存 9 つ（`ca-certificates` / `openssl@3` / `zlib-ng-compat` / `libssh2` / `llhttp` / `bzip2` / `pcre2` / `libgit2` / `oniguruma`）もすべてボトル。ソースビルドは発生しない |
-| 2. 検証 | `bat --version` → `bat 0.26.1`。`bat --color=always --style=numbers /etc/os-release` は行番号と ANSI エスケープ付きで出た。`--color` を外してパイプに繋ぐと素の出力になることも確認 |
+| 2. bat | `Pouring bat--0.26.1.arm64_linux.bottle.tar.gz` → `15 files, 5.4MB`。依存 9 つ（`ca-certificates` / `openssl@3` / `zlib-ng-compat` / `libssh2` / `llhttp` / `bzip2` / `pcre2` / `libgit2` / `oniguruma`）もすべてボトル。ソースビルドは発生しない |
+| 3. 検証 | `bat --version` → `bat 0.26.1`。`bat --color=always --style=numbers /etc/os-release` は行番号と ANSI エスケープ付きで出た。`--color` を外してパイプに繋ぐと素の出力になることも確認 |
 | 設定ファイル | `~/.config/bat/config` を置いて `bat --config-file` が同じパスを返し、`--style=numbers` が効くことを確認 |
 | `MANPAGER` | **確認できず**。コンテナに `man ls` のページが無く（`coreutils-common` 未導入）、`man-db` を入れて `man man` を試しても**パイプ越しでは man 自体がページャを呼ばない**ため、色が付くかは判定できなかった |
 | RPM 経路 | `dnf -q list --showduplicates bat` → `0.24.0-13.el10_2 epel`。`dnf -q repoquery -l bat \| grep bin/` → `/usr/bin/bat` |

@@ -2,53 +2,75 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 0 で変数を設定したシェルで、上から順にコードブロックを貼る。理由・実測出力・落とし穴は[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
 
 **前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
 
-| 手順 | 内容 |
-|---|---|
-| [0. 変数を設定する](#0-変数を設定する) | lazygit から開くエディタを決める |
-| [1. lazygit を入れる](#1-lazygit-を入れる) | `brew install lazygit` |
-| [2. 検証する](#2-検証する) | バージョン、git リポジトリで起動 |
-
 設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
 
-### 0. 変数を設定する
+1. **変数を設定する**
 
-**このブロックは編集必須の変数が無い。** `e` キーで開くエディタを変えたいときだけ書き換える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   **このブロックは編集必須の変数が無い。** `e` キーで開くエディタを変えたいときだけ書き換える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
 
-```bash
-LG_EDITOR=nvim                  # lazygit の e キーで開くエディタ。vim / code など。<LG_EDITOR>
-```
+   ```bash
+   LG_EDITOR=nvim                  # lazygit の e キーで開くエディタ。vim / code など。<LG_EDITOR>
+   ```
 
-**値を読み戻して確かめる。**
+   **値を読み戻して確かめる。**
 
-```bash
-printf 'LG_EDITOR = %s\n' "${LG_EDITOR}"
-```
+   ```bash
+   printf 'LG_EDITOR = %s\n' "${LG_EDITOR}"
+   ```
 
-→ [補足](#手順-0-変数について)
+   <details>
+   <summary>補足: 変数について</summary>
 
-### 1. lazygit を入れる
+   `LG_EDITOR` を使うのは[設定ファイル](#設定ファイル)の節だけ。lazygit は設定が無ければ `EDITOR` 環境変数を見るので、`~/.bashrc` に `export EDITOR=nvim` があれば設定ファイルは要らない。
 
-```bash
-brew install lazygit
-```
+   </details>
 
-aarch64 でもビルド済みのボトル（`lazygit--0.65.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。
+1. **lazygit を入れる**
 
-### 2. 検証する
+   ```bash
+   brew install lazygit
+   ```
 
-```bash
-lazygit --version
-brew list --versions lazygit
-command -v lazygit
-```
+   aarch64 でもビルド済みのボトル（`lazygit--0.65.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。
 
-`build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る。次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）。git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる。
+   <details>
+   <summary>補足: ボトルが降りること</summary>
 
-→ [補足](#手順-2-起動時の注意)
+   ボトルが降りたことの確認（実測、コンテナ）:
+
+   ```
+   ==> Downloading bottle manifests
+   ✔︎ Bottle Manifest lazygit (0.65.1)
+   ==> Fetching downloads for: lazygit
+   ✔︎ Bottle lazygit (0.65.1)
+   ==> Pouring lazygit--0.65.1.arm64_linux.bottle.tar.gz
+   🍺  /home/linuxbrew/.linuxbrew/Cellar/lazygit/0.65.1: 6 files, 18.8MB
+   ```
+
+   </details>
+
+1. **検証する**
+
+   ```bash
+   lazygit --version
+   brew list --versions lazygit
+   command -v lazygit
+   ```
+
+   `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る。次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）。git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる。
+
+   <details>
+   <summary>補足: 起動時の注意</summary>
+
+   `lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。**git が入っていないと lazygit は起動しない**（Homebrew 版は git を依存に持たないので、RPM の git か `brew install git` のどちらかが要る）。このホストは RPM の git 2.52.0 を使っている。
+
+   git 管理下でないディレクトリで起動すると `Would you like to create a new repository?` と聞かれる。意図せず `.git` を作らないよう、リポジトリのルートで起動する。
+
+   </details>
 
 ---
 
@@ -60,7 +82,7 @@ command -v lazygit
 mkdir -p ~/.config/lazygit
 cat >> ~/.config/lazygit/config.yml <<EOF
 os:
-  edit: '${LG_EDITOR:?手順 0 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
+  edit: '${LG_EDITOR:?手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
 EOF
 lazygit --print-config-dir
 ```
@@ -97,7 +119,7 @@ brew uninstall lazygit
 
 - **目的**: AlmaLinux 10 に git の TUI クライアント [lazygit](https://github.com/jesseduffield/lazygit) の最新版を入れる
 - **進め方**: Homebrew で入れる。**読者が書き換えるのは冒頭の変数ブロック（エディタ）だけ**。RPM（COPR）経路は実機でもコンテナでも通らなかった（[選択した方針](#選択した方針)）
-- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストで `brew install lazygit` を実行し、`lazygit 0.65.1` が入って常用中。[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`lazygit --version` が出ること・`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返すことを確認した。**コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）。**実機には設定ファイルを置いていない**
+- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストで `brew install lazygit` を実行し、`lazygit 0.65.1` が入って常用中。[Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`lazygit --version` が出ること・`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返すことを確認した。**コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）。**実機には設定ファイルを置いていない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -107,7 +129,7 @@ brew uninstall lazygit
 | 入った lazygit | `lazygit 0.65.1`（`arm64_linux` ボトル、6 ファイル / 18.8 MB） | 同じ（`0.65.1`） |
 | git | `git-2.52.0-1.el10.aarch64`（RPM） | `git 2.52.0`（依存で導入） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 0](#0-変数を設定する) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -115,7 +137,7 @@ brew uninstall lazygit
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.65.1`）は実行日によって変わる。`<git リポジトリ>` のような `<...>` を含むコマンドは bash のコードブロックに置いていない。
 
-手順の理由・実測・落とし穴・検証記録。手順を実行するだけなら読まなくてよい。
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
 
@@ -156,31 +178,6 @@ Error: Unable to find a match: lazygit
 
 `atim/lazygit` でも同じ 403。dnf を介さず `curl -L` で `repomd.xml` を取っても同じで、COPR の配信元（`download.copr.fedorainfracloud.org`）が S3 の署名付き URL にリダイレクトし、その署名が期限切れになっている。一方で COPR 全体が落ちているわけではなく、同じ日に `lihaohong/yazi` の `epel-10-aarch64` はメタデータを取得できている（[yazi.md](yazi.md)）。**プロジェクトごとの問題で、いずれ直る可能性がある**。
 
-### 手順の補足
-
-#### 手順 0: 変数について
-
-`LG_EDITOR` を使うのは[設定ファイル](#設定ファイル)の節だけ。lazygit は設定が無ければ `EDITOR` 環境変数を見るので、`~/.bashrc` に `export EDITOR=nvim` があれば設定ファイルは要らない。
-
-#### 手順 1: ボトルが降りること
-
-ボトルが降りたことの確認（実測、コンテナ）:
-
-```
-==> Downloading bottle manifests
-✔︎ Bottle Manifest lazygit (0.65.1)
-==> Fetching downloads for: lazygit
-✔︎ Bottle lazygit (0.65.1)
-==> Pouring lazygit--0.65.1.arm64_linux.bottle.tar.gz
-🍺  /home/linuxbrew/.linuxbrew/Cellar/lazygit/0.65.1: 6 files, 18.8MB
-```
-
-#### 手順 2: 起動時の注意
-
-`lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。**git が入っていないと lazygit は起動しない**（Homebrew 版は git を依存に持たないので、RPM の git か `brew install git` のどちらかが要る）。このホストは RPM の git 2.52.0 を使っている。
-
-git 管理下でないディレクトリで起動すると `Would you like to create a new repository?` と聞かれる。意図せず `.git` を作らないよう、リポジトリのルートで起動する。
-
 ### 完了時点の状態
 
 ```
@@ -212,13 +209,13 @@ $ command -v lazygit
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 1〜2、[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 1. lazygit | `Pouring lazygit--0.65.1.arm64_linux.bottle.tar.gz`（6 files, 18.8MB）。ソースビルドは発生しない |
-| 2. 検証 | `lazygit --version` → `build source=Homebrew, version=0.65.1, os=linux, arch=arm64, git version=2.52.0` |
+| 2. lazygit | `Pouring lazygit--0.65.1.arm64_linux.bottle.tar.gz`（6 files, 18.8MB）。ソースビルドは発生しない |
+| 3. 検証 | `lazygit --version` → `build source=Homebrew, version=0.65.1, os=linux, arch=arm64, git version=2.52.0` |
 | 設定ファイル | `config.yml` を書いたあと `lazygit --print-config-dir` → `/home/<USER>/.config/lazygit` |
 | COPR（`dejan`） | `copr enable` は成功。`dnf install lazygit` はメタデータ 403 → `No match for argument: lazygit` |
 | COPR（`atim`） | 同上（403） |
