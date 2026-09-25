@@ -33,6 +33,7 @@
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形を Homebrew で入れる | AlmaLinux 10.2 / aarch64 |
 | [VS Code](docs/vscode.md) | Microsoft 公式 dnf リポジトリからエディタを入れる（GUI） | AlmaLinux 10.2 / aarch64 |
 | [HackGen Console NF](docs/hackgen.md) | 日本語と Nerd Fonts のアイコンを含むプログラミング用フォントを Homebrew の cask で入れる | AlmaLinux 10.2 / x86_64（コンテナのみ） |
+| [VirtualBox](docs/virtualbox.md) | Oracle 公式 dnf リポジトリから仮想化ソフトを入れる（x86_64 のみ。EPEL が要る） | AlmaLinux 10.2 / x86_64（コンテナのみ） |
 
 ## 記法
 
