@@ -2,15 +2,21 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。**Homebrew は root で動かない**。ただし実行するユーザーが `sudo` できる必要がある）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **実行するユーザーは `sudo` できる必要がある**（手順 2・3 で使う）
+> - **手順 3 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。そのブロックだけ続けて貼らない
 
-日々の操作は[使い方の基本](#使い方の基本)。以後の更新は[更新](#更新)、消すときは[ロールバック](#ロールバック)。
-
-この手順書を通すと、[yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck / shfmt](shellcheck.md) / [Syncthing](syncthing.md) / [HackGen Console NF](hackgen.md) の 12 本が使えるようになる。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 通すと使えるようになる 12 本: [yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[zoxide](zoxide.md)、[bat](bat.md)、[eza](eza.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[starship](starship.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)
 
 1. **変数を設定する**
 
-   **編集するものは無い。** 導入先は固定で、**この場所に入る場合だけビルド済みのボトルが使える**（変えるとすべてソースビルドになる。手順 3 の補足）。新しいシェルを開いたら先にこのブロックを貼り直す。
+   - **編集するものは無い**。導入先は固定
+   - **この場所に入る場合だけ、ビルド済みのボトルが使える**（変えるとすべてソースビルドになる。手順 3 の補足）
+   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
 
    ```bash
    BREW_PREFIX=/home/linuxbrew/.linuxbrew   # Homebrew の導入先。固定。<BREW_PREFIX>
@@ -20,7 +26,8 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   `${BREW_PREFIX}` は**この文書の中だけで使うシェル変数**で、Homebrew が読む環境変数ではない（Homebrew 自身は `HOMEBREW_PREFIX` を使い、`brew shellenv` が設定する）。手順 5 の確認にだけ使う。
+   - `${BREW_PREFIX}` は**この文書の中だけで使うシェル変数**で、Homebrew が読む環境変数ではない（Homebrew 自身は `HOMEBREW_PREFIX` を使い、`brew shellenv` が設定する）
+   - 手順 5 の確認にだけ使う
 
    </details>
 
@@ -56,7 +63,8 @@
 
    インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く（`/home/linuxbrew` を作るため）。**次のブロックは、終わってから貼る。**
 
-   終わりに `==> Installation successful!` と、PATH の通し方を書いた `==> Next steps:` が出る。次の手順はその案内と同じ内容（この手順の補足に実測を載せた）。
+   - 終わりに `==> Installation successful!` と、PATH の通し方を書いた `==> Next steps:` が出る
+   - 次の手順は、その案内と同じ内容（この手順の補足に実測を載せた）
 
    <details>
    <summary>補足: 導入先を変えてはいけない</summary>
@@ -102,7 +110,8 @@
    brew --version
    ```
 
-   `Homebrew 7.0.6` のように出れば通っている。1 行目で `~/.bashrc` に書き、2 行目で今のシェルにも即時に反映している。
+   - `Homebrew 7.0.6` のように出れば通っている
+   - 1 行目で `~/.bashrc` に書き、2 行目で今のシェルにも即時に反映している
 
    <details>
    <summary>補足: <code>~/.bashrc</code> に書く 1 行</summary>
@@ -133,7 +142,8 @@
    brew config | head -12
    ```
 
-   `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返し、`brew config` の `HOMEBREW_PREFIX` が `${BREW_PREFIX}` と一致していればよい。
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
+   - `brew config` の `HOMEBREW_PREFIX` が `${BREW_PREFIX}` と一致していればよい
 
    <details>
    <summary>補足: <code>brew config</code> の読み方</summary>
@@ -156,7 +166,13 @@
    Git: 2.52.0 => /bin/git
    ```
 
-   見るところは 3 つ。**`HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew`**（ここが違うとボトルが使えない）、**`Branch: stable`**、**`CPU` が `arm`**（`arm64_linux` のボトルが降りる）。`Core tap: N/A` と `Clang: N/A` は異常ではない（formula は API 経由で取得し、ボトルだけ使うならコンパイラは要らない）。
+   見るところは 3 つ:
+
+   - **`HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew`**（ここが違うとボトルが使えない）
+   - **`Branch: stable`**
+   - **`CPU` が `arm`**（`arm64_linux` のボトルが降りる）
+
+   `Core tap: N/A` と `Clang: N/A` は異常ではない（formula は API 経由で取得し、ボトルだけ使うならコンパイラは要らない）。
 
    パスだけ知りたいときは `brew --prefix` / `brew --cellar` / `brew --repository`。
 
@@ -196,15 +212,15 @@ brew outdated
 brew upgrade
 ```
 
-`brew update` が `Already up-to-date.` を返し `brew outdated` が無出力なら、上げるものは無い。特定のものだけなら `brew upgrade <formula>`。
-
-**`brew install` / `brew upgrade` は既定で自動更新が走る**ので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）。
+- `brew update` が `Already up-to-date.` を返し、`brew outdated` が無出力なら、上げるものは無い
+- 特定のものだけなら `brew upgrade <formula>`
+- **`brew install` / `brew upgrade` は既定で自動更新が走る**ので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）
 
 ---
 
 ## ロールバック
 
-**これを実行すると、Homebrew で入れたものが全部消える。** [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) 以下、`brew leaves` に出るものはすべて使えなくなる。先に何が消えるか見る:
+本実行の前に、何が消えるか見る:
 
 ```bash
 brew leaves
@@ -217,6 +233,9 @@ brew list --versions | wc -l
 curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh -o /tmp/uninstall.sh
 bash /tmp/uninstall.sh --dry-run
 ```
+
+> [!CAUTION]
+> **本実行すると、Homebrew で入れたものが全部消える。** [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) 以下、`brew leaves` に出るものはすべて使えなくなる。
 
 内容を確かめてから本実行する。`sudo` のパスワードと確認を聞かれる。
 
@@ -231,9 +250,9 @@ sed -i '/brew shellenv/d' ~/.bashrc
 rm -f /tmp/uninstall.sh
 ```
 
-各ツールが `~/.bashrc` や `~/.config` に書いた設定は残るので、それぞれの手順書のロールバックも見る。`/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）。
-
-本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）。
+- 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
+- `/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）
+- 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
 
 ---
 
@@ -243,7 +262,13 @@ rm -f /tmp/uninstall.sh
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
 - **進め方**: 公式インストーラで `/home/linuxbrew/.linuxbrew` に入れ、`~/.bashrc` に 1 行足す。**読者が書き換える変数は無い**
-- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中。**このリポジトリの Homebrew 系 10 本のツールはすべてこの上に載っている**（記録時点の `brew leaves` は 15 件）。本書の手順 2〜5 と[使い方の基本](#使い方の基本)・[更新](#更新)は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、`Homebrew 7.0.6` が同じ場所に入ること・`brew config` の `HOMEBREW_PREFIX` が一致すること・`brew install jq` がボトルで入ることを確認した。**ロールバック（`uninstall.sh` の本実行）は実機でもコンテナでも実行していない**（`--help` を見ただけ）。**実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[手順 4 の補足](#実施手順)）
+- **状態**: **実機で本実行済み（2026-09-20）**
+  - 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中
+  - **このリポジトリの Homebrew 系 10 本のツールは、すべてこの上に載っている**（記録時点の `brew leaves` は 15 件）
+  - 本書の手順 2〜5 と[使い方の基本](#使い方の基本)・[更新](#更新)は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - 確認したこと: `Homebrew 7.0.6` が同じ場所に入る、`brew config` の `HOMEBREW_PREFIX` が一致する、`brew install jq` がボトルで入る
+  - **本実行していないこと**: ロールバック（`uninstall.sh` の本実行）。実機でもコンテナでも実行していない（`--help` を見ただけ）
+  - **実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[手順 4 の補足](#実施手順)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -255,7 +280,8 @@ rm -f /tmp/uninstall.sh
 | 占有サイズ | 2.8 GB | 216 MB |
 | git | RPM の `git 2.52.0`（`/bin/git`） | 同じ |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
