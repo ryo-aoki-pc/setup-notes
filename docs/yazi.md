@@ -2,15 +2,20 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **手順 4 で TUI が開く**。`q` で終了してから次のブロックを貼る
 
-**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
-
-設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** プレビュー・検索用のツールを一緒に入れる想定になっている。最小構成にするなら `YAZI_EXTRAS` を空にする。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集が必須の変数は無い**。プレビュー・検索用のツールを一緒に入れる想定になっている
+   - 最小構成にするなら、`YAZI_EXTRAS` を空にする
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    ```bash
    YAZI_EXTRAS="ffmpeg-full sevenzip jq poppler fd ripgrep fzf resvg imagemagick-full font-symbols-only-nerd-font"   # プレビューと検索に使う。空にすると yazi 本体だけ
@@ -25,7 +30,8 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   `YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は手順 2 の補足にまとめた。`ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）。最小構成でよければ空にする。
+   - `YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は手順 2 の補足にまとめた
+   - `ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）
 
    </details>
 
@@ -35,10 +41,12 @@
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   aarch64 でもビルド済みのボトル（`yazi--26.9.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。
+   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
    <details>
-   <summary>補足: 依存ツールの役割</summary>
+   <summary>補足: ボトルと、依存ツールの役割</summary>
+
+   aarch64 で降ってくるボトルは `yazi--26.9.1.arm64_linux.bottle.tar.gz`。
 
    | formula | yazi での役割 |
    |---|---|
@@ -71,7 +79,10 @@
 
 1. **シェル関数 `y` を書く**
 
-   yazi をそのまま終了しても、シェルのディレクトリは動かない。公式が案内している関数を入れると、`q` で終了したときに移動先へ `cd` する（元の場所で終わりたいときは `Q`）。
+   yazi をそのまま終了しても、シェルのディレクトリは動かない。公式が案内している関数を入れると:
+
+   - `q` で終了したときに、移動先へ `cd` する
+   - 元の場所で終わりたいときは `Q`
 
    ```bash
    cat >> ~/.bashrc <<'EOF'
@@ -89,7 +100,10 @@
    <details>
    <summary>補足: <code>y</code> 関数</summary>
 
-   yazi は終了時に `--cwd-file` で指定したファイルへ最後のディレクトリを書き出す。シェル側の関数がそれを読んで `cd` する、という作り（プロセスは親シェルのディレクトリを変えられないため）。関数名を `y` にしているのは公式の例に合わせたもので、`command yazi` と書いているのは関数と実体を取り違えないため。
+   yazi は終了時に `--cwd-file` で指定したファイルへ最後のディレクトリを書き出す。シェル側の関数がそれを読んで `cd` する、という作り（プロセスは親シェルのディレクトリを変えられないため）。
+
+   - 関数名を `y` にしているのは、公式の例に合わせたもの
+   - `command yazi` と書いているのは、関数と実体を取り違えないため
 
    </details>
 
@@ -101,7 +115,8 @@
    brew list --versions yazi
    ```
 
-   `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る。`ya` は付属のプラグイン管理コマンド。
+   - `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る
+   - `ya` は付属のプラグイン管理コマンド
 
    起動して確認する。
 
@@ -109,21 +124,29 @@
    y
    ```
 
-   画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると yazi への操作として食われる）。`y` で起動したときは、終了時にそのディレクトリへ移動する。プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る。画像プレビューは端末側の対応が要る（[注意点](#注意点)）。
+   画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると yazi への操作として食われる）。
+
+   - `y` で起動したときは、終了時にそのディレクトリへ移動する
+   - プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る
+   - 画像プレビューは端末側の対応が要る（[注意点](#注意点)）
 
 ---
 
 ## 設定ファイル
 
-パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く。置き場所は `~/.config/yazi/` で、ファイル名は `yazi.toml`（全般）/ `keymap.toml`（キー割り当て）/ `theme.toml`（配色）。
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
+- 置き場所は `~/.config/yazi/` で、ファイル名は `yazi.toml`（全般）/ `keymap.toml`（キー割り当て）/ `theme.toml`（配色）
+- **既定値のファイルは配布物に入っていない**（実測: `brew list yazi` に含まれる `.toml` は `.crates.toml` だけ）
+- 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 
-**既定値のファイルは配布物に入っていない**（実測: `brew list yazi` に含まれる `.toml` は `.crates.toml` だけ）。既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る。書くときは空のディレクトリを作って、変更したい項目だけ書く:
+書くときは空のディレクトリを作って、変更したい項目だけ書く:
 
 ```bash
 mkdir -p ~/.config/yazi
 ```
 
-プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される。本書ではプラグインは扱っていない。
+- プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
+- 本書ではプラグインは扱っていない
 
 ---
 
@@ -133,7 +156,8 @@ mkdir -p ~/.config/yazi
 brew upgrade yazi
 ```
 
-すべてまとめて上げるなら `brew upgrade`。`brew outdated` で先に確認できる。
+- すべてまとめて上げるなら `brew upgrade`
+- `brew outdated` で先に確認できる
 
 ---
 
@@ -143,9 +167,9 @@ brew upgrade yazi
 brew uninstall yazi
 ```
 
-依存ツール（`YAZI_EXTRAS` で入れたもの）は他でも使うので、消すなら個別に指定する。`~/.bashrc` に書いた `y()` 関数と `~/.config/yazi/` は残るので、要らなければ手で消す。
-
-本書ではロールバックは**本実行していない**。
+- 依存ツール（`YAZI_EXTRAS` で入れたもの）は他でも使うので、消すなら個別に指定する
+- `~/.bashrc` に書いた `y()` 関数と `~/.config/yazi/` は残るので、要らなければ手で消す
+- 本書ではロールバックは**本実行していない**
 
 ---
 
@@ -154,8 +178,15 @@ brew uninstall yazi
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 にターミナルファイルマネージャ [yazi](https://yazi-rs.github.io/) の最新版を入れ、プレビューと検索が効く状態にする
-- **進め方**: Homebrew で本体と依存ツールをまとめて入れる。**読者が書き換えるのは冒頭の変数ブロック（依存ツールの一覧）だけ**。RPM（COPR）経路も試したうえで採らなかった（[選択した方針](#選択した方針)）
-- **状態**: **実機で本実行済み（2026-09-21）。** 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数も同じ形で入っている。[Homebrew の導入](homebrew.md)と手順 2・4 は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し（`YAZI_EXTRAS` は空）、ボトルが降りること・`yazi --version` / `ya --version` が出ることを確認した。**コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）。**画像プレビュー（端末側の対応）とプラグインは未検証**
+- **進め方**: Homebrew で本体と依存ツールをまとめて入れる
+  - **読者が書き換えるのは冒頭の変数ブロック（依存ツールの一覧）だけ**
+  - RPM（COPR）経路も試したうえで採らなかった（[選択した方針](#選択した方針)）
+- **状態**: **実機で本実行済み（2026-09-21）**
+  - 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数も同じ形で入っている
+  - [Homebrew の導入](homebrew.md)と手順 2・4 は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した（`YAZI_EXTRAS` は空）
+  - 確認したこと: ボトルが降りる、`yazi --version` / `ya --version` が出る
+  - **コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）
+  - **画像プレビュー（端末側の対応）とプラグインは未検証**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -166,7 +197,8 @@ brew uninstall yazi
 | 依存ツール | `ffmpeg-full 9.0.2` / `sevenzip 26.03` / `jq 1.8.2` / `poppler 26.09.0` / `fd 10.5.0` / `ripgrep 15.2.0` / `fzf 0.74.4` / `resvg 0.48.1` / `imagemagick-full 7.1.2-31` / `font-symbols-only-nerd-font 3.5.1` | 本体のみ（formula の存在確認だけ実施） |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -197,7 +229,12 @@ AlmaLinux 10 aarch64 で yazi の最新版を入れる経路を比べた（2026-
 | GitHub Releases のバイナリ | `aarch64-unknown-linux-gnu` / `musl` のビルドがある。展開して PATH に置くだけだが、更新は手作業 | 不採用 |
 | EPEL / AppStream | `yazi` は無い（`dnf list yazi` → `No matching Packages to list`） | 使えない |
 
-**COPR 版を外した理由**（実機の記録）: 2026-09-20 18:56 に `dnf copr enable lihaohong/yazi` → `dnf install yazi` で `yazi-26.9.1-1.el10.aarch64` を導入（同時に入ったのは `resvg-0.47.0-1.el10` と `poppler-utils-24.02.0-7.el10_2.2` の 2 つだけ）。翌朝 09:29 に `dnf remove yazi-26.9.1-1.el10.aarch64` で 3 パッケージとも削除し、Homebrew 版に入れ替えている。RPM 側ではプレビュー用のツールを別々に集める必要があり、`ffmpeg` に至っては EL10 の標準リポジトリにも EPEL にも無い（`ffmpeg-free` のみ）。
+**COPR 版を外した理由**（実機の記録）:
+
+- 2026-09-20 18:56 に `dnf copr enable lihaohong/yazi` → `dnf install yazi` で `yazi-26.9.1-1.el10.aarch64` を導入
+  - 同時に入ったのは `resvg-0.47.0-1.el10` と `poppler-utils-24.02.0-7.el10_2.2` の 2 つだけ
+- 翌朝 09:29 に `dnf remove yazi-26.9.1-1.el10.aarch64` で 3 パッケージとも削除し、Homebrew 版に入れ替えている
+- RPM 側ではプレビュー用のツールを別々に集める必要があり、`ffmpeg` に至っては EL10 の標準リポジトリにも EPEL にも無い（`ffmpeg-free` のみ）
 
 EPEL を有効にした状態で COPR 版の依存解決を採ると、EPEL 側のツールを巻き込んで 115 パッケージ・63 MB になる:
 
@@ -235,7 +272,8 @@ $ command -v yazi
 
 ### 注意点
 
-- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置くので、同名のコマンドは RPM 版より Homebrew 版が勝つ。RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
+- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置くので、同名のコマンドは RPM 版より Homebrew 版が勝つ
+  - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **画像プレビューは端末に依存する**: Kitty / WezTerm / foot などのグラフィックプロトコル、または Überzug++ が要る。GNOME 端末では文字ベースの表示になる
 - **`q` と `Q`**: `y` 関数経由なら `q` で終了時にそのディレクトリへ移動し、`Q` なら移動しない
 - **Homebrew の更新は自分の責任で**: `brew upgrade` は指定しなければ全 formula を上げる。yazi だけ上げるなら `brew upgrade yazi`

@@ -2,15 +2,22 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かず、設定も自分の `~/.gitconfig` に書くため）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、設定も自分の `~/.gitconfig` に書くため）
 
-**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: lazygit を使っているなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)。設定項目の一覧は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-lazygit を使っているなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)。設定項目の一覧は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+> [!WARNING]
+> **コンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** 3 つとも表示の好みなので、既定のままで進められる。広い画面で左右に並べたいなら `DELTA_SIDE_BY_SIDE=true` にする。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集が必須の変数は無い**。3 つとも表示の好みなので、既定のままで進められる
+   - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    ```bash
    DELTA_NAVIGATE=true       # ページャ内で n / N を「次の変更・前の変更」にする。<DELTA_NAVIGATE>
@@ -27,7 +34,8 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    <details>
    <summary>補足: 変数について</summary>
 
-   3 つとも `~/.gitconfig` の `[delta]` に書かれる値で、後から `git config --global delta.side-by-side true` で変えられる。`navigate` を `true` にすると、ページャ（`less`）の中で `n` が「次の変更へ」になる。delta が `less` に渡すオプションで実現しているので、`core.pager` 経由で起動したときだけ効く。
+   - 3 つとも `~/.gitconfig` の `[delta]` に書かれる値で、後から `git config --global delta.side-by-side true` で変えられる
+   - `navigate` を `true` にすると、ページャ（`less`）の中で `n` が「次の変更へ」になる。delta が `less` に渡すオプションで実現しているので、`core.pager` 経由で起動したときだけ効く
 
    </details>
 
@@ -37,7 +45,15 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    brew install git-delta
    ```
 
-   aarch64 でもビルド済みのボトル（`git-delta--0.19.2.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。**formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）。
+   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+   - **formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）
+
+   <details>
+   <summary>補足: 降ってくるボトル</summary>
+
+   aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar.gz`。
+
+   </details>
 
 1. **git の設定を書く**
 
@@ -58,9 +74,10 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    git config --global --get-regexp '^(core\.pager|interactive\.|delta\.|merge\.conflictstyle)'
    ```
 
-   6 行出る。**`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）。
-
-   `merge.conflictstyle zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）。delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている。
+   - 6 行出る
+   - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）
+   - `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
+   - `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
 
    <details>
    <summary>補足: キー名は小文字に正規化される</summary>
@@ -91,7 +108,8 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    	conflictstyle = zdiff3
    ```
 
-   ファイルの中では `diffFilter` のまま残る（git が書き込むときは指定した綴りを使う）。値を 1 つだけ取るなら `git config --global --get interactive.diffFilter` は大文字のままでも通る（こちらは正規表現ではなくキー名の照合で、大小を区別しないため）。
+   - ファイルの中では `diffFilter` のまま残る（git が書き込むときは指定した綴りを使う）
+   - 値を 1 つだけ取るなら、`git config --global --get interactive.diffFilter` は大文字のままでも通る（こちらは正規表現ではなくキー名の照合で、大小を区別しないため）
 
    </details>
 
@@ -109,7 +127,8 @@ lazygit を使っているなら[lazygit と組み合わせる（任意）](#laz
    git diff | delta --paging=never | head -20
    ```
 
-   ファイル名のヘッダと、行ごとに背景色の付いた差分が出る。**`git diff` を単体で打ったときは端末に直接出る場合だけ delta を通る**（`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る）。
+   - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
+   - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
 
    <details>
    <summary>補足: パイプに繋ぐとページャは働かない</summary>
@@ -162,9 +181,11 @@ git:
     pager: delta --dark --paging=never
 ```
 
-**`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。現在の中身は `lazygit --print-config-dir` で場所を確かめてから開く。
+> [!WARNING]
+> **`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。
 
-この節はコンテナで検証していない（[未確認事項](#未確認事項)）。
+- 現在の中身は、`lazygit --print-config-dir` で場所を確かめてから開く
+- この節はコンテナで検証していない（[未確認事項](#未確認事項)）
 
 ---
 
@@ -180,7 +201,8 @@ git:
 | `true-color` | 24 bit 色を使うか（既定は端末から自動判定） |
 | `file-style` / `minus-style` / `plus-style` | ファイル名行・削除行・追加行の色 |
 
-今の実効値は `delta --show-config` で全部出る。`delta --help` にはオプションとして同じ名前が並んでおり、コマンドラインで一時的に上書きできる。
+- 今の実効値は `delta --show-config` で全部出る
+- `delta --help` にはオプションとして同じ名前が並んでおり、コマンドラインで一時的に上書きできる
 
 ---
 
@@ -205,9 +227,9 @@ git config --global --unset merge.conflictstyle     # zdiff3 も戻す場合
 git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何も出なければ消えている
 ```
 
-**`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる。** lazygit の `git.paging` を足していた場合は `~/.config/lazygit/config.yml` からも消す。
-
-本書ではロールバックは**本実行していない**。
+- **`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる**
+- lazygit の `git.paging` を足していた場合は、`~/.config/lazygit/config.yml` からも消す
+- 本書ではロールバックは**本実行していない**
 
 ---
 
@@ -217,7 +239,11 @@ git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何�
 
 - **目的**: AlmaLinux 10 で `git diff` / `git show` / `git log -p` の表示を [delta](https://github.com/dandavison/delta)（シンタックスハイライト付きのページャ）に置き換える。**EPEL にも AppStream にも RPM が無い**
 - **進め方**: Homebrew で入れ、`git config --global` で `~/.gitconfig` に書く。**読者が書き換えるのは冒頭の変数ブロックだけ**
-- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜4 を通し、`arm64_linux` のボトルが降りること・`delta 0.19.2` が入ること・使い捨てリポジトリの `git diff | delta --paging=never` が色付きで出ること・`git config --global --get-regexp` で 6 項目が読み戻せることを確認した。**実機（Raspberry Pi 5）では本実行していない**（実機の `~/.gitconfig` は `[core] autocrlf` と `[user]` だけのまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある。**コンテナには端末が無いため、`core.pager` 経由のページャ起動（`git diff` を素で打ったときの表示）と `navigate` の `n` / `N` は確認していない**
+- **状態**: **コンテナでのみ検証済み（2026-09-22）。実機には入れていない**
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2〜4 を通した
+  - 確認したこと: `arm64_linux` のボトルが降りる、`delta 0.19.2` が入る、使い捨てリポジトリの `git diff | delta --paging=never` が色付きで出る、`git config --global --get-regexp` で 6 項目が読み戻せる
+  - **確認していないこと**: `core.pager` 経由のページャ起動（`git diff` を素で打ったときの表示）と、`navigate` の `n` / `N`。コンテナには端末が無いため
+  - **実機（Raspberry Pi 5）では本実行していない**（実機の `~/.gitconfig` は `[core] autocrlf` と `[user]` だけのまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -230,7 +256,8 @@ git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何�
 | lazygit | `lazygit 0.65.1`（Homebrew、[lazygit.md](lazygit.md)）。`git.paging` は未設定 | 未導入 |
 | 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し（pty を与えずに実行） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -290,7 +317,9 @@ merge.conflictstyle zdiff3
 
 ### 注意点
 
-- **`core.pager` は PATH に `delta` がある文脈でしか動かない**: Homebrew の PATH は `~/.bashrc` の `brew shellenv` で通っているので、`~/.bashrc` を読まない文脈（cron、一部の非対話シェル、他ユーザー、`sudo -i` しない root）で `git diff` を打つと `delta: command not found` になる。固くしたいならフルパスで指定する: `git config --global core.pager /home/linuxbrew/.linuxbrew/bin/delta`
+- **`core.pager` は PATH に `delta` がある文脈でしか動かない**
+  - Homebrew の PATH は `~/.bashrc` の `brew shellenv` で通っているので、`~/.bashrc` を読まない文脈（cron、一部の非対話シェル、他ユーザー、`sudo -i` しない root）で `git diff` を打つと `delta: command not found` になる
+  - 固くしたいなら、フルパスで指定する: `git config --global core.pager /home/linuxbrew/.linuxbrew/bin/delta`
 - **表示だけを変える。差分の中身は変わらない**: `git diff > patch.diff` はページャを通らないので従来どおりのパッチが出る。`git apply` や CI の挙動には影響しない
 - **`sudo git` には効かない**: root は root の `~/.gitconfig` を読むので、この設定は入っていない
 - **`interactive.diffFilter` が変えるのは `git add -p` の表示だけ**: 選択の操作自体は git のまま
@@ -315,7 +344,7 @@ merge.conflictstyle zdiff3
 |---|---|
 | 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
 | 2. git-delta | `Pouring git-delta--0.19.2.arm64_linux.bottle.tar.gz` → `12 files, 7.4MB`。**依存は取得されなかった**（`libgit2` / `oniguruma` / `zlib-ng-compat` は bat で導入済み）。`brew info git-delta` に `Aliases: delta` と出る |
-| 3. git の設定 | 6 項目を `git config --global` で設定。読み戻しで**`interactive.difffilter` と小文字化される**ことが分かり、当初書いていた `interactive\.diffFilter` を含む正規表現では 1 行も出なかったため、本文の正規表現を `interactive\.` に直した |
+| 3. git の設定 | 6 項目を `git config --global` で設定。**読み戻しで`interactive.difffilter` と小文字化される**ことが分かり、当初書いていた `interactive\.diffFilter` を含む正規表現では 1 行も出なかったため、本文の正規表現を `interactive\.` に直した |
 | 4. 検証 | `delta --version` → `delta 0.19.2`。`git diff \| delta --paging=never` でファイル名ヘッダ・行番号・背景色付きの差分を確認。`git diff \| head`（パイプ）では素の unified diff になることも確認 |
 | 設定の確認 | `delta --show-config` で実効値（`true-color = false` など）が出ること、`delta --list-syntax-themes` が `dark` / `light` 別に並ぶことを確認 |
 | RPM 経路 | `dnf list --available delta git-delta` → `Error: No matching Packages to list`（EPEL を有効にした状態で） |

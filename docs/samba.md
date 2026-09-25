@@ -2,9 +2,13 @@
 
 ## 実施手順
 
-**すべてサーバー上で実行する**（手順 8 の最後の「クライアントからの接続」だけ別マシン）。手順 6 と手順 8 には対話入力があり、そのブロックだけ続けて貼らない。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **すべてサーバー上で実行する**。手順 8 の最後の「クライアントからの接続」だけ別マシン
+> - **手順 6 と手順 8 には対話入力がある**。そのブロックだけ続けて貼らない
 
-接続元を絞る場合は最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
@@ -25,15 +29,15 @@
    ```
 
    - `SMB_USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
-   - 変数はそのシェルの中だけで有効。新しいシェルを開いたら（SSH を張り直したあとも）、上の 2 つのブロックを貼り直してから先へ進む
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、上の 2 つのブロックを貼り直してから先へ進む
 
    <details>
    <summary>補足: 変数について</summary>
 
-   - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）。間違っていても手順 8 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
+   - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
+   - `SERVER_IP` が間違っていても、手順 8 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
    - `SMB_USER` は `$USER` から入るので、`sudo -i` した root のシェルで貼ると `root` になる。手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
    - `ALLOW_FROM` は[接続元を絞る](#接続元を絞る任意)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
-   - 変数はそのシェルの中だけで有効。SSH を張り直したあと、別の端末を開いたあとは手順 1 のブロックを貼り直す
 
    </details>
 
@@ -85,7 +89,7 @@
    testparm -s
    ```
 
-   `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出ればよい。
+   - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出ればよい
 
    <details>
    <summary>補足: smb.conf</summary>
@@ -108,7 +112,8 @@
    <details>
    <summary>補足: SELinux</summary>
 
-   - boolean が off のままだと、認証は通り共有一覧にも出るのに、`ls` で `NT_STATUS_ACCESS_DENIED listing \*` になる。**このとき `ausearch -m AVC` には何も出ない**（dontaudit されている）ので、監査ログから原因にたどり着けない。[付録](#selinux-boolean-が-off-のときの失敗の署名)
+   - boolean が off のままだと、認証は通り共有一覧にも出るのに、`ls` で `NT_STATUS_ACCESS_DENIED listing \*` になる
+   - **このとき `ausearch -m AVC` には何も出ない**（dontaudit されている）ので、監査ログから原因にたどり着けない。[付録](#selinux-boolean-が-off-のときの失敗の署名)
    - `setsebool -P` は即時反映で、smbd の再起動は不要（実測: 起動中の smbd に対して on にした直後の `ls` が通った）
 
    </details>
@@ -124,7 +129,8 @@
    <summary>補足: firewalld</summary>
 
    - 445/tcp は public ゾーンの全 NIC で開く。この環境では `end0`（LAN）と `wg0`（VPN）
-   - 自ホストからの `smbclient //localhost/...` や `//${SERVER_IP}/...` は `lo` を通るため、**firewalld の設定を通らない**（`filter_INPUT` の `iifname "lo" accept` で先に受理される）。開け忘れはサーバー上の検証では見つからない。[付録](#network-namespace-から-firewalld-越しに到達する)
+   - 自ホストからの `smbclient //localhost/...` や `//${SERVER_IP}/...` は `lo` を通るため、**firewalld の設定を通らない**（`filter_INPUT` の `iifname "lo" accept` で先に受理される）
+   - 開け忘れはサーバー上の検証では見つからない。[付録](#network-namespace-から-firewalld-越しに到達する)
 
    </details>
 
@@ -152,7 +158,8 @@
    <summary>補足: Samba ユーザー</summary>
 
    - Samba のパスワードは OS のパスワードとは別で、`/var/lib/samba/private/passdb.tdb` に保存される。OS のアカウントは存在が必須（`id` で確認）
-   - `smbpasswd -a` は既定で `/dev/tty` から読む。**TTY が無いと `Unable to get new password.` で終了コード 1**（`grdctl set-credentials` のように exit 0 で黙って何もしない、ということはない）。パイプで渡すなら `-s`（stdin から新パスワード・確認の 2 行を読む）。[付録](#smbpasswd-を-tty-無しで実行したとき)
+   - `smbpasswd -a` は既定で `/dev/tty` から読む。**TTY が無いと `Unable to get new password.` で終了コード 1**（`grdctl set-credentials` のように exit 0 で黙って何もしない、ということはない）
+   - パイプで渡すなら `-s`（stdin から新パスワード・確認の 2 行を読む）。[付録](#smbpasswd-を-tty-無しで実行したとき)
    - `-a` で作った直後から有効（`pdbedit -Lv` の `Account Flags: [U ]`）。`smbpasswd -e` は要らない
    - **smbd の再起動は不要**。起動中に `smbpasswd -x` → `-a` し直すと、その次の接続から効く（実測）。パスワード変更も同様
 
@@ -190,7 +197,8 @@
    ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
    ```
 
-   パスワードをコマンドラインに書かないのは `ps` に見えるため。このファイルを `smbclient` と `mount.cifs` の両方で使う。
+   - このファイルを、`smbclient` と `mount.cifs` の両方で使う
+   - パスワードをコマンドラインに書かないのは、`ps` に見えるため
 
    **共有の一覧と読み書き**（`smbclient`）:
 
@@ -239,7 +247,9 @@
    <details>
    <summary>補足: 検証</summary>
 
-   - パスワードは `-U user%pass` で渡すと `ps` に見える。`smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う。`/run/user/<uid>/` は tmpfs でユーザー専用（0700）
+   - パスワードは `-U user%pass` で渡すと `ps` に見える
+   - `smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う
+   - `/run/user/<uid>/` は tmpfs でユーザー専用（0700）
    - `smbclient -L` に出るのは `IPC$` と `<USER>` の 2 つ。`homes` / `printers` / `print$` は出ない
    - `mount.cifs` の既定は SMB 3.1.1（`vers=3.1.1`）。`uid=` / `gid=` を渡さないとマウント側のファイルが root 所有に見える
    - マウント側の `ls -Z` は `cifs_t`、サーバー側は `user_home_t`（`user_home_dir_t` 配下の type transition。`restorecon` していないのにこうなる）
@@ -254,7 +264,7 @@
 
 **接続元を制限しないなら、この節は不要。**
 
-手順 5 は public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く。絞るなら、まず送信元サブネットを空白区切りで入れる:
+手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く。絞るなら、まず送信元サブネットを空白区切りで入れる:
 
 ```bash
 ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ALLOW_FROM>
@@ -273,9 +283,8 @@ sudo firewall-cmd --list-rich-rules        # source address に実際のサブ�
 fi
 ```
 
-先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに 445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐためのもの。
-
-rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう。
+- 先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに、445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
+- rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう
 
 元の「public ゾーン全体で 445/tcp」に戻すには、絞ったときと同じ `ALLOW_FROM` を入れてから:
 
@@ -315,7 +324,12 @@ sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
 sudo dnf remove -y samba samba-client cifs-utils
 ```
 
-`dnf remove` 後も `/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る。完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`。
+- `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
+
+> [!CAUTION]
+> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。手順 6 の補足）。消すと、中の登録は取り戻せない。
+
+完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`。
 
 ---
 
@@ -323,9 +337,15 @@ sudo dnf remove -y samba samba-client cifs-utils
 
 ### 対象と検証環境
 
-- **目的**: ローカルユーザーが**自分のホームディレクトリ**に、LAN と WireGuard 越し（`wg0`）の両方から SMB3 で読み書きできるようにする。共有は Samba の `[homes]` 機構（ユーザー名と同じ名前の共有が自動で現れ、本人しか入れない）だけを使い、印刷・NetBIOS・ゲストアクセスは持たない
-- **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**。読者が編集するのは `WORKGROUP` と、接続元を絞る場合の `ALLOW_FROM` だけ。`smb.conf` は既定ファイルを退避したうえで最小構成に置き換える
-- **状態**: 2026-09-21 に下表の実機で本実行し、そのまま公開を継続中。検証は**サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）まで。**Windows / macOS / Android の実クライアントからの接続はまだ確認していない**
+- **目的**: ローカルユーザーが**自分のホームディレクトリ**に、LAN と WireGuard 越し（`wg0`）の両方から SMB3 で読み書きできるようにする
+  - 共有は Samba の `[homes]` 機構（ユーザー名と同じ名前の共有が自動で現れ、本人しか入れない）だけを使う
+  - 印刷・NetBIOS・ゲストアクセスは持たない
+- **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
+  - 読者が編集するのは `WORKGROUP` と、接続元を絞る場合の `ALLOW_FROM` だけ
+  - `smb.conf` は既定ファイルを退避したうえで、最小構成に置き換える
+- **状態**: **2026-09-21 に下表の実機で本実行し、そのまま公開を継続中**
+  - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
+  - **確認していないこと**: Windows / macOS / Android の実クライアントからの接続
 
 | 項目 | 値 |
 |---|---|
@@ -339,7 +359,8 @@ sudo dnf remove -y samba samba-client cifs-utils
 | NIC | `end0` = <SERVER_IP>/24、`wg0` = <WG_IP>/30（ともに public ゾーン） |
 | クライアント | 検証は Linux の `smbclient` 4.23.5 と `mount.cifs`（SMB 3.1.1）。Windows / macOS / Android は未確認 |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -404,13 +425,30 @@ sudo dnf remove -y samba samba-client cifs-utils
 
 ### 選択した方針
 
-- **`[homes]` 共有だけを公開する** — ユーザー名と同じ名前の共有が自動で現れ、`valid users = %S`（`%S` = 共有名）で本人以外は入れない。共有ごとに `path` を書かないので、ユーザーを増やしても `smb.conf` は変わらない
-- **既定の `smb.conf` は丸ごと置き換える** — `smb.conf` には drop-in ディレクトリが無く、印刷まわりを止めるには本体を編集するしかない。差分方式は成立しないので、原本を `.orig` に退避して最小構成にした。`smb.conf` は `%config(noreplace)` なのでパッケージ更新で上書きされず、新しい既定は `smb.conf.rpmnew` に置かれる
-- **NetBIOS（`nmb.service`、139/tcp、137/138/udp）は使わない** — SMB2 以降のクライアントは 445/tcp に直接つなぎ、IP アドレスか DNS 名で指定する。`server smb transports = tcp` で 139 を listen しなくなり、firewalld も 445/tcp だけで済む。RHEL のドキュメントは `--add-service=samba`（139/tcp + 445/tcp + `samba-client` の 137/138/udp）を開けるが、nmbd を動かさないなら 137〜139 は誰も受けない
-- **SELinux boolean は `samba_enable_home_dirs` の 1 つだけ** — smbd に `user_home_dir_t` / `user_home_t` のアクセスを許す boolean。ホームディレクトリのラベルは変えないので `restorecon` は不要。`samba_export_all_rw` は全ファイルへの書き込みを許す粗い boolean なので使わない。`use_samba_home_dirs` は「ホームが CIFS マウントされているクライアント側」のための boolean で、サーバーには関係ない
-- **接続元の制限は `smb.conf` の `hosts allow` ではなく firewalld で行う** — GNOME Remote Desktop の手順書と同じ方式にし、変数の扱いと二重引用符の落とし穴を共通にした。`hosts allow` で二重に絞ることもできるが、設定場所が 2 つになるのでやらない
-- **SMB の暗号化は既定（`server smb encrypt = default`）のまま** — LAN 上の通信は署名（AES-128-CMAC）だけで暗号化されない。WireGuard 越しはトンネルが暗号化する。LAN 上でも暗号化したいなら `server smb encrypt = required` を `[global]` に足す（未検証）
-- **Windows のエクスプローラー「ネットワーク」への一覧表示（WS-Discovery）は範囲外** — 必要なら EPEL の `wsdd`（本機に導入済みだが無効）を起動し、5357/tcp と 3702/udp を開ける。本手順は `\\<SERVER_IP>\<USER>` を直接指定して接続する前提
+- **`[homes]` 共有だけを公開する**
+  - ユーザー名と同じ名前の共有が自動で現れ、`valid users = %S`（`%S` = 共有名）で本人以外は入れない
+  - 共有ごとに `path` を書かないので、ユーザーを増やしても `smb.conf` は変わらない
+- **既定の `smb.conf` は丸ごと置き換える**
+  - `smb.conf` には drop-in ディレクトリが無く、印刷まわりを止めるには本体を編集するしかない
+  - 差分方式は成立しないので、原本を `.orig` に退避して最小構成にした
+  - `smb.conf` は `%config(noreplace)` なので、パッケージ更新で上書きされず、新しい既定は `smb.conf.rpmnew` に置かれる
+- **NetBIOS（`nmb.service`、139/tcp、137/138/udp）は使わない**
+  - SMB2 以降のクライアントは 445/tcp に直接つなぎ、IP アドレスか DNS 名で指定する
+  - `server smb transports = tcp` で 139 を listen しなくなり、firewalld も 445/tcp だけで済む
+  - RHEL のドキュメントは `--add-service=samba`（139/tcp + 445/tcp + `samba-client` の 137/138/udp）を開けるが、nmbd を動かさないなら 137〜139 は誰も受けない
+- **SELinux boolean は `samba_enable_home_dirs` の 1 つだけ** — smbd に `user_home_dir_t` / `user_home_t` のアクセスを許す boolean
+  - ホームディレクトリのラベルは変えないので、`restorecon` は不要
+  - `samba_export_all_rw` は全ファイルへの書き込みを許す粗い boolean なので使わない
+  - `use_samba_home_dirs` は「ホームが CIFS マウントされているクライアント側」のための boolean で、サーバーには関係ない
+- **接続元の制限は `smb.conf` の `hosts allow` ではなく firewalld で行う**
+  - GNOME Remote Desktop の手順書と同じ方式にし、変数の扱いと二重引用符の落とし穴を共通にした
+  - `hosts allow` で二重に絞ることもできるが、設定場所が 2 つになるのでやらない
+- **SMB の暗号化は既定（`server smb encrypt = default`）のまま**
+  - LAN 上の通信は署名（AES-128-CMAC）だけで、暗号化されない。WireGuard 越しはトンネルが暗号化する
+  - LAN 上でも暗号化したいなら、`server smb encrypt = required` を `[global]` に足す（未検証）
+- **Windows のエクスプローラー「ネットワーク」への一覧表示（WS-Discovery）は範囲外**
+  - 本手順は `\\<SERVER_IP>\<USER>` を直接指定して接続する前提
+  - 必要なら EPEL の `wsdd`（本機に導入済みだが無効）を起動し、5357/tcp と 3702/udp を開ける
 
 #### smb.conf の各行の根拠
 
@@ -508,10 +546,12 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 
 ### 接続元を絞るときの補足
 
-- `ALLOW_FROM` の各サブネットについて rich rule を 1 本ずつ足す。LAN と VPN の両方から使うなら LAN のサブネットとトンネル網（`site.env` の `WG_TUNNEL_NET`。外出先クライアントも受けるならクライアント帯も）を並べる
+- `ALLOW_FROM` の各サブネットについて、rich rule を 1 本ずつ足す
+- LAN と VPN の両方から使うなら、LAN のサブネットとトンネル網（`site.env` の `WG_TUNNEL_NET`。外出先クライアントも受けるならクライアント帯も）を並べる
 - 実測（[付録](#接続元を絞る節の検証)）: `192.168.1.0/24 10.99.0.0/30` で絞った状態では、どちらにも属さない network namespace（192.168.250.0/24）からの接続が `NT_STATUS_HOST_UNREACHABLE` で落ち、そのサブネットの rich rule を足すと通った
 - 手順 5 の `--add-port=445/tcp` を残したままだと rich rule が無意味になるので、先に外す。戻すときは逆順
-- 実機での検証は、先頭の `if` を付ける前の形（`[ -n "${ALLOW_FROM}" ] || ...`）で行った。`if` 付きの形は、`sudo` をスタブに置き換えて「空のときは何も呼ばれず、値を入れると同じコマンドが呼ばれる」ことだけ確認している
+- 実機での検証は、先頭の `if` を付ける前の形（`[ -n "${ALLOW_FROM}" ] || ...`）で行った
+- `if` 付きの形は、`sudo` をスタブに置き換えて「空のときは何も呼ばれず、値を入れると同じコマンドが呼ばれる」ことだけ確認している
 
 ### 注意点
 
@@ -519,7 +559,9 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - **LAN 上の通信は暗号化されない**: 署名だけ（`smbstatus` の `Encryption` 欄が `-`）。VPN 越しは WireGuard が暗号化する
 - **自ホストからの検証は firewalld を通らない**: 445 の開け忘れは、別ホストか network namespace から接続して初めて分かる
 - **Samba のパスワードは OS と別**: OS のパスワードを変えても Samba 側は変わらない。変えるときは `sudo smbpasswd "${SMB_USER}"`
-- **ユーザー名は OS アカウントと一致が必須**: 存在しないユーザー、間違ったパスワードはどちらも `NT_STATUS_LOGON_FAILURE`。他人のホーム（`//<SERVER_IP>/root` など）は認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`
+- **ユーザー名は OS アカウントと一致が必須**
+  - 存在しないユーザー、間違ったパスワードは、どちらも `NT_STATUS_LOGON_FAILURE`
+  - 他人のホーム（`//<SERVER_IP>/root` など）は、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`
 - **`create mask` を変えても既存ファイルのモードは変わらない**: 手順 3 の前にホームに置いていたファイルのモードはそのまま
 - **`nmb` を起動しない構成なので、Windows のエクスプローラーで「ネットワーク」から見つけることはできない**: `\\<SERVER_IP>\<USER>` を直接入力する。一覧に出したいなら `wsdd`
 

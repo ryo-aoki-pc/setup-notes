@@ -2,13 +2,20 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で実行する。** 手順 6 の GUI 起動だけデスクトップが要る。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **すべて対象ホスト上で実行する**。デスクトップが要るのは手順 6（GUI の起動）だけ
+> - **手順 6 は、デスクトップにログインした端末から実行する**。TTY もディスプレイも無いシェル（ssh や自動化）からは、6 通り試して 1 つも起動できなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）
+> - **手順 4 と手順 6 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。そのブロックだけ続けて貼らない
 
-拡張機能は[拡張機能を入れる（任意）](#拡張機能を入れる任意)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 拡張機能は[拡張機能を入れる（任意）](#拡張機能を入れる任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **編集するものは無い。** 安定版を入れる。毎日更新される Insiders 版を使うときだけ `code-insiders` にする（併存できる）。新しいシェルを開いたら先にこのブロックを貼り直す。
+   - **編集するものは無い**。安定版を入れる
+   - 毎日更新される Insiders 版を使うときだけ、`code-insiders` にする（併存できる）
+   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
 
    ```bash
    VSC_PKG=code                    # 入れるチャンネル。code（安定版）/ code-insiders。固定。<VSC_PKG>
@@ -18,7 +25,9 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   `${VSC_PKG}` は**パッケージ名がそのままチャンネル名**になっている。`code-insiders` は `code` と同時に入れられ、コマンドは `code-insiders`、設定は `~/.config/Code - Insiders` と別になる。`code-exploration` も同じリポジトリにあるが本書では扱わない。
+   - `${VSC_PKG}` は**パッケージ名がそのままチャンネル名**になっている
+   - `code-insiders` は `code` と同時に入れられ、コマンドは `code-insiders`、設定は `~/.config/Code - Insiders` と別になる
+   - `code-exploration` も同じリポジトリにあるが、本書では扱わない
 
    </details>
 
@@ -54,7 +63,10 @@
    <details>
    <summary>補足: 鍵を先に入れる理由</summary>
 
-   Microsoft の公式手順が「鍵 → repo」の順で、**318 MB を落とし終えた後に鍵の取り込みプロンプトで止まらずに済む**。`gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](gh.md) の「`dnf install` の途中で照合する」形より一歩早い）。実測:
+   - Microsoft の公式手順が「鍵 → repo」の順で、**318 MB を落とし終えた後に鍵の取り込みプロンプトで止まらずに済む**
+   - `gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](gh.md) の「`dnf install` の途中で照合する」形より一歩早い）
+
+   実測:
 
    ```
    $ gpg --show-keys --with-fingerprint /tmp/microsoft.asc
@@ -81,7 +93,7 @@
    cat /etc/yum.repos.d/vscode.repo
    ```
 
-   ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い。
+   - ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い
 
 1. **インストールする**
 
@@ -97,7 +109,10 @@
    sudo dnf install "${VSC_PKG}"
    ```
 
-   トランザクション表を見て `[y/N]` に答えてから、次のブロックを貼る。**318 MB のダウンロードと 953 MB の展開があるので数分かかる**（実測では 1 分 14 秒）。弱い依存として `socat` が一緒に入る。
+   トランザクション表を見て `[y/N]` に答えてから、次のブロックを貼る。
+
+   - **318 MB のダウンロードと 953 MB の展開があるので、数分かかる**（実測では 1 分 14 秒）
+   - 弱い依存として `socat` が一緒に入る
 
    <details>
    <summary>補足: 318 MB と <code>%post</code> の中身</summary>
@@ -139,7 +154,9 @@
    update-mime-database /usr/share/mime &> /dev/null || :
    ```
 
-   手順 3 で書いた `/etc/yum.repos.d/vscode.repo` は、インストールの前後で **md5 も mtime も変わらなかった**。`/etc/yum.repos.d/` に別名のファイルも増えていない。実際にやるのは「古い `/usr/local/bin/code` の削除」と「デスクトップエントリと MIME の登録」だけ。
+   - 手順 3 で書いた `/etc/yum.repos.d/vscode.repo` は、インストールの前後で **md5 も mtime も変わらなかった**
+   - `/etc/yum.repos.d/` に別名のファイルも増えていない
+   - 実際にやるのは「古い `/usr/local/bin/code` の削除」と「デスクトップエントリと MIME の登録」だけ
 
    </details>
 
@@ -153,14 +170,19 @@
    ls /usr/share/applications/code*.desktop
    ```
 
-   `1.138.0` / コミットハッシュ / `arm64` の 3 行が出て、`from_repo` が `vscode`、`Vendor` が `Microsoft Corporation` になる。**`ldd` の `not found` が `0`** なら、必要な共有ライブラリがすべて EL10 側で解決できている。
+   - `1.138.0` / コミットハッシュ / `arm64` の 3 行が出る
+   - `from_repo` が `vscode`、`Vendor` が `Microsoft Corporation` になる
+   - **`ldd` の `not found` が `0`** なら、必要な共有ライブラリがすべて EL10 側で解決できている
 
    <details>
    <summary>補足: <code>.el8</code> タグの rpm が EL10 で解決できる理由</summary>
 
-   入る rpm は `code-1.138.0-1789458729.el8.aarch64` で、release の末尾が **`.el8` に固定されている**。これは「EL8 用のビルドを EL10 に流用している」のではなく、**Microsoft が EL 共通の rpm を 1 本だけ出している**ためで、EL9 / EL10 向けの別ビルドは存在しない。`baseurl` も `yumrepos/vscode` の 1 つだけでディストリ非依存になっている。
+   入る rpm は `code-1.138.0-1789458729.el8.aarch64` で、release の末尾が **`.el8` に固定されている**。
 
-   根拠は依存の下限。aarch64 向けに要求される glibc のうち最も新しいものが **2.28（EL8 の版）**で、EL10 の 2.39 が余裕で満たす:
+   - これは「EL8 用のビルドを EL10 に流用している」のではなく、**Microsoft が EL 共通の rpm を 1 本だけ出している**ためで、EL9 / EL10 向けの別ビルドは存在しない
+   - `baseurl` も `yumrepos/vscode` の 1 つだけで、ディストリ非依存になっている
+
+   根拠は依存の下限。aarch64 向けに要求される glibc のうち最も新しいものが **2.28**（EL8 の版）で、EL10 の 2.39 が余裕で満たす:
 
    ```
    $ dnf -q repoquery --requires code | grep -E 'GLIBC_2\.[0-9]+' | grep -v 'x86\|armhf' | sort -u
@@ -171,13 +193,17 @@
    0
    ```
 
-   つまり **EL8 を最低ラインにして EL8 / EL9 / EL10 を 1 本でカバーする**作りで、Microsoft の公式ドキュメントも RHEL / CentOS / Fedora のすべてでこの同じリポジトリを案内している。[WezTerm](wezterm-nightly.md) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う。dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く。
+   - つまり **EL8 を最低ラインにして EL8 / EL9 / EL10 を 1 本でカバーする**作りで、Microsoft の公式ドキュメントも RHEL / CentOS / Fedora のすべてでこの同じリポジトリを案内している
+   - [WezTerm](wezterm-nightly.md) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
+   - dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く
 
    </details>
 
 1. **GUI を起動する**
 
    **デスクトップにログインした端末から**実行する。アプリ一覧の「Visual Studio Code」からでも同じ。
+
+   - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（冒頭の前提と、この手順の補足）
 
    ```bash
    code
@@ -190,16 +216,18 @@
    code --list-extensions
    ```
 
-   初回起動で `~/.config/Code`（設定と履歴）ができる。`~/.vscode` は起動を試みた時点で `argv.json` だけ作られる。拡張を入れていなければ `code --list-extensions` は何も返さない。
+   - 初回起動で `~/.config/Code`（設定と履歴）ができる
+   - `~/.vscode` は、起動を試みた時点で `argv.json` だけ作られる
+   - 拡張を入れていなければ、`code --list-extensions` は何も返さない
+
+   <details>
+   <summary>補足: 起動を確かめた環境と、<code>~/.config/code-flags.conf</code> は読まれないこと</summary>
 
    **この手順は実機で確認した**（2026-09-23、gnome-remote-desktop の RDP セッションのデスクトップから）。`~/.config/Code` が作られ、`logs/<日時>/main.log` に正常な起動が記録された。
 
-   > **一方、TTY もディスプレイも無いシェルから起動することはできなかった。** ssh や自動化から `env -i` でセッションの値を渡す方法を 6 通り試したが、いずれも子プロセスが立つだけでウィンドウもログも出なかった。**この手順はデスクトップの端末から実行すること。** 試した内容は[付録: 実機での GUI 起動試験](#付録-実機での-gui-起動試験2026-09-23)に残してある。
+   **一方、TTY もディスプレイも無いシェルから起動することはできなかった。** ssh や自動化から `env -i` でセッションの値を渡す方法を 6 通り試したが、いずれも子プロセスが立つだけでウィンドウもログも出なかった。試した内容は[付録: 実機での GUI 起動試験](#付録-実機での-gui-起動試験2026-09-23)に残してある。
 
-   <details>
-   <summary>補足: <code>~/.config/code-flags.conf</code> は読まれない</summary>
-
-   Electron アプリに恒久的なフラグを渡す方法として `~/.config/code-flags.conf` を案内している記事があるが、**あれは Arch Linux のパッケージが持つラッパーの仕組みで、Microsoft の rpm には無い**。実測:
+   **`~/.config/code-flags.conf` は読まれない。** Electron アプリに恒久的なフラグを渡す方法として `~/.config/code-flags.conf` を案内している記事があるが、**あれは Arch Linux のパッケージが持つラッパーの仕組みで、Microsoft の rpm には無い**。実測:
 
    ```
    $ ls -l /usr/bin/code
@@ -227,9 +255,10 @@ CLI から入れられる。入っているものの一覧:
 code --list-extensions --show-versions
 ```
 
-入れるときは `code --install-extension <publisher.name>` の形で ID を渡す。たとえば [ShellCheck](shellcheck.md) をエディタから使うなら `timonwong.shellcheck`、消すときは `code --uninstall-extension <publisher.name>`。
-
-**本書では拡張機能を 1 つも入れていない**（[未確認事項](#未確認事項)）。Settings Sync・Remote-SSH・Marketplace の利用条件は扱わない。
+- 入れるときは `code --install-extension <publisher.name>` の形で ID を渡す。たとえば [ShellCheck](shellcheck.md) をエディタから使うなら `timonwong.shellcheck`
+- 消すときは `code --uninstall-extension <publisher.name>`
+- **本書では拡張機能を 1 つも入れていない**（[未確認事項](#未確認事項)）
+- Settings Sync・Remote-SSH・Marketplace の利用条件は扱わない
 
 ---
 
@@ -241,7 +270,8 @@ VS Code は通常の更新に含まれる。
 sudo dnf upgrade "${VSC_PKG}"
 ```
 
-システム全体なら `sudo dnf upgrade`。**rpm 版では VS Code 内蔵のアップデータは使わない**（dnf が管理しているため。[firefox.md](firefox.md) と同じ論点）。
+- システム全体なら `sudo dnf upgrade`
+- **rpm 版では VS Code 内蔵のアップデータは使わない**（dnf が管理しているため。[firefox.md](firefox.md) と同じ論点）
 
 ---
 
@@ -253,14 +283,18 @@ sudo dnf remove "${VSC_PKG}"
 
 トランザクション表を見て `[y/N]` に答えてから、次のブロックを貼る。
 
+> [!CAUTION]
+> 次のブロックの `rm -rf ~/.config/Code ~/.vscode` は、**VS Code の設定・履歴・拡張機能を消す**。残すなら、その行は貼らない。
+
 ```bash
 sudo rm -f /etc/yum.repos.d/vscode.repo
 rm -rf ~/.config/Code ~/.vscode      # 設定・履歴・拡張機能も消す場合
 ```
 
-Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）。消すなら `sudo rpm -e gpg-pubkey-be1229cf-5631588c`。**ほかに Microsoft のリポジトリを使っていないことを確かめてから**にする。弱い依存で入った `socat` は他でも使うので残してよい。
-
-本書ではロールバックは**本実行していない**。
+- Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
+- 消すなら `sudo rpm -e gpg-pubkey-be1229cf-5631588c`。**ほかに Microsoft のリポジトリを使っていないことを確かめてから**にする
+- 弱い依存で入った `socat` は他でも使うので、残してよい
+- 本書ではロールバックは**本実行していない**
 
 ---
 
@@ -270,7 +304,14 @@ Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm 
 
 - **目的**: AlmaLinux 10 に [Visual Studio Code](https://code.visualstudio.com/) を Microsoft 公式の dnf リポジトリから入れる。**aarch64 のパッケージが公式に用意されている**
 - **進め方**: 鍵を照合して取り込み、repo ファイルを置いて `dnf install`。**読者が書き換える変数は無い**
-- **状態**: **実機で本実行済み（2026-09-23）。GUI の起動まで確認した。** 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）。`code --version` が `1.138.0` / `arm64` を返し、`ldd /usr/share/code/code` の未解決ライブラリが 0 であることまで確認した。**[手順 6](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた。**ただし TTY もディスプレイも無いシェルからの起動は 6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）。**VS Code は実機に入れたまま残してある。** 手順 2〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）。**拡張機能・`code-insiders`・Wayland ネイティブでの常用は未検証**
+- **状態**: **実機で本実行済み（2026-09-23）。GUI の起動まで確認した**
+  - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
+  - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
+  - **[手順 6](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
+  - **ただし TTY もディスプレイも無いシェルからの起動は、6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）
+  - **VS Code は実機に入れたまま残してある**
+  - 手順 2〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
+  - **確認していないこと**: 拡張機能・`code-insiders`・Wayland ネイティブでの常用
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -282,7 +323,8 @@ Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm 
 | GUI 起動 | **デスクトップの端末からは成功**。TTY の無いシェルからは 6 通りとも失敗（[付録](#付録-実機での-gui-起動試験2026-09-23)） | 不可（GUI が無い） |
 | SELinux | Enforcing | — |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -365,9 +407,12 @@ $ code --list-extensions
 - **大きい**: ダウンロード 318 MB、展開後 953 MB。Raspberry Pi の microSD では取得にも展開にも時間がかかる。`sudo dnf clean packages` でキャッシュを消せる
 - **内蔵のアップデータは使わない**: rpm 版は dnf が管理する。VS Code が更新を促してきても `sudo dnf upgrade code` で上げる
 - **`code-insiders` と併存できる**: コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別。ただし本書では未検証
-- **Electron なので X11 のライブラリを要求する**: `libX11` / `libXcomposite` などが rpm の requires に並ぶ。これは XWayland 経由でも動くようにするためで、**ライブラリが入っていることは「X11 で動いている」ことを意味しない**
+- **Electron なので X11 のライブラリを要求する**: `libX11` / `libXcomposite` などが rpm の requires に並ぶ
+  - これは XWayland 経由でも動くようにするためで、**ライブラリが入っていることは「X11 で動いている」ことを意味しない**
 - **root では起動できない**: ラッパーが `--user-data-dir` の指定を要求する。そもそも root で使うものではない
-- **TTY もディスプレイも無いシェルからは GUI を起動できなかった**: デスクトップの端末からは起動するが、ssh や自動化から `env -i` でセッションの値を渡す方法は 6 通り試して 1 つも成功しなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）。原因は特定できていない
+- **TTY もディスプレイも無いシェルからは GUI を起動できなかった**: デスクトップの端末からは起動する
+  - ssh や自動化から `env -i` でセッションの値を渡す方法は、6 通り試して 1 つも成功しなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）
+  - 原因は特定できていない
 
 ### 参照
 

@@ -1,8 +1,17 @@
 # AlmaLinux 10 の CLI / GUI ツール導入元一覧
 
-AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れるか（導入元）**で比べた一覧。この文書は手順書ではない。ツールごとに推奨する導入元・その時点の版・導入コマンド・ほかの経路・aarch64（Raspberry Pi 5）での提供の有無を 1 行にまとめてある。個別の手順書があるツールは[文書化済みのツール](#文書化済みのツール)から手順書へ進む。
+AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れるか**（導入元）で比べた一覧。この文書は手順書ではない。
 
-**状態**: **調査は 2026-09-24（UTC 20:51〜21:20）。** x86_64 は AlmaLinux 10.2 のコンテナで、**表の導入コマンドを実行して入ることを確かめた**。確かめた深さは行ごとの「確認」列に書いてある。**aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない。GUI アプリはどれも画面を出していない。実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない。検証の方法と環境は[補足](#補足)にまとめた。
+- ツールごとに推奨する導入元・その時点の版・導入コマンド・ほかの経路・aarch64（Raspberry Pi 5）での提供の有無を 1 行にまとめてある
+- 個別の手順書があるツールは[文書化済みのツール](#文書化済みのツール)から手順書へ進む
+
+> [!WARNING]
+> **状態**: **調査は 2026-09-24（UTC 20:51〜21:20）**。検証の方法と環境は[補足](#補足)にまとめた。
+>
+> - x86_64 は AlmaLinux 10.2 のコンテナで、**表の導入コマンドを実行して入ることを確かめた**。確かめた深さは行ごとの「確認」列に書いてある
+> - **aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない
+> - GUI アプリはどれも画面を出していない
+> - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
 
 「確認」列の意味:
 
@@ -41,7 +50,8 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 1. RPM（AppStream / BaseOS / EPEL / ベンダーのリポジトリ）が **Homebrew と同じ版か新しい**なら RPM にする。root でも使え、`dnf upgrade` に乗る
 1. RPM が古いか無ければ Homebrew にする
-1. **例外として、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox）は RPM にする。** Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
+1. **例外として、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox）は RPM にする**
+   - Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
 
 **GUI** は、次の順で選んだ。[Firefox](firefox.md) と [VS Code](vscode.md) を RPM にした判断と同じ。
 
@@ -94,7 +104,8 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | glow | Markdown を端末で読む | Homebrew 3.0.0 | `brew install glow` | EPEL 2.1.1 | 有 | 起動 |
 | mosh | 回線が切れても続く SSH | EPEL 1.4.0 | `sudo dnf install -y mosh` | Homebrew 1.4.0（同版） | 有 | 起動 |
 
-「起動」は `--version` が出たことだけを示す。`~/.bashrc` に追記して使うもの（atuin など。[zoxide](zoxide.md) と同じ形）のシェルへの組み込みや、mosh のサーバー側の導入と UDP の許可は試していない。
+- 「起動」は `--version` が出たことだけを示す
+- 試していないこと: `~/.bashrc` に追記して使うもの（atuin など。[zoxide](zoxide.md) と同じ形）のシェルへの組み込み、mosh のサーバー側の導入と UDP の許可
 
 ## CLI: 開発・運用
 
@@ -114,7 +125,10 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | lazydocker | コンテナの TUI | Homebrew 0.25.2 | `brew install lazydocker` | RPM 無し | 有 | 起動 |
 | dive | コンテナイメージの層を調べる | Homebrew 0.13.1 | `brew install dive` | RPM 無し | 有 | 起動 |
 
-EPEL の podman-compose は AppStream の `podman`（5.8.2）を依存に持ち、distrobox は podman か docker を要求する（素のコンテナでは podman が一緒に入った）。podman-tui は podman を依存に持たない（`rpm -q --requires` で確認）。lazydocker と dive は Docker の API を使うツールで、上流の説明では podman の API ソケットを有効にすれば podman でも使える。本書では試していない。
+- EPEL の podman-compose は、AppStream の `podman`（5.8.2）を依存に持つ
+- distrobox は podman か docker を要求する（素のコンテナでは podman が一緒に入った）
+- podman-tui は podman を依存に持たない（`rpm -q --requires` で確認）
+- lazydocker と dive は Docker の API を使うツールで、上流の説明では podman の API ソケットを有効にすれば podman でも使える。本書では試していない
 
 言語処理系は AppStream / BaseOS に Node.js 22.23.2・Python 3.12.14・Go 1.26.7・Rust 1.92.0 がある（どれも両アーキで同じ版。メタデータ）。別の版が要るときに mise を使う。
 
@@ -122,7 +136,8 @@ EPEL の podman-compose は AppStream の `podman`（5.8.2）を依存に持ち�
 
 ## GUI
 
-Flathub の行の「推奨」には、アプリ ID と、使う runtime（GNOME 50 / FDO 25.08 など）を書いてある。同じ runtime のアプリは 2 本目から runtime を落とさない（[注意点](#注意点)に容量）。
+- Flathub の行の「推奨」には、アプリ ID と、使う runtime（GNOME 50 / FDO 25.08 など）を書いてある
+- 同じ runtime のアプリは、2 本目から runtime を落とさない（[注意点](#注意点)に容量）
 
 ### ブラウザ
 
@@ -132,7 +147,10 @@ Flathub の行の「推奨」には、アプリ ID と、使う runtime（GNOME 
 | Brave | ブラウザ | 公式 dnf リポジトリ 1.96.59 | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ) | Flathub `com.brave.Browser`（検証済み） | 有（公式 rpm） | 起動 |
 | Chromium | ブラウザ | EPEL 153.0.8010.52 | `sudo dnf install -y chromium` | Flathub `org.chromium.Chromium` 154.0.8037.57（未検証） | 有 | 起動 |
 
-Chromium は GUI の規則の 4 番目にあたる。調査日の時点で EPEL は 1 メジャー遅れていた。Flathub 版は新しいが公開元が未検証なので、EPEL にした。
+Chromium は GUI の規則の 4 番目にあたる。
+
+- 調査日の時点で、EPEL は 1 メジャー遅れていた
+- Flathub 版は新しいが公開元が未検証なので、EPEL にした
 
 ### 文書・画像・動画
 
@@ -165,7 +183,10 @@ Signal は GUI の規則の 4 番目にあたる。Flathub のほかに EL10 で
 | Podman Desktop | podman の GUI | Flathub `io.podman_desktop.PodmanDesktop` 1.29.3（検証済み、FDO 26.08） | `sudo flatpak install -y flathub io.podman_desktop.PodmanDesktop` | RPM 無し | 有 | 導入 |
 | Meld | 差分・マージ | EPEL 3.22.2 | `sudo dnf install -y meld` | Flathub `org.gnome.meld` 3.24.0（未検証） | 有 | 導入 |
 
-Meld は GUI の規則の 4 番目にあたる。EPEL は 3.22 系で Flathub の 3.24 より古いが、Flathub 版は公開元が未検証。EPEL 版は `/usr/bin/meld` に入るので、ほかのツールから名前で呼べる。
+Meld は GUI の規則の 4 番目にあたる。
+
+- EPEL は 3.22 系で Flathub の 3.24 より古いが、Flathub 版は公開元が未検証
+- EPEL 版は `/usr/bin/meld` に入るので、ほかのツールから名前で呼べる
 
 ### GNOME・システム
 
@@ -182,7 +203,10 @@ Meld は GUI の規則の 4 番目にあたる。EPEL は 3.22 系で Flathub �
 
 ## ベンダーの dnf リポジトリ
 
-上の表で「ベンダーの dnf リポジトリ」を推奨にした 4 つ。**リポジトリの登録から導入まで、x86_64 コンテナでこのとおり実行した。** `dnf config-manager` は `dnf-plugins-core` に入っている（EPEL を入れると一緒に入る）。
+上の表で「ベンダーの dnf リポジトリ」を推奨にした 4 つ。
+
+- **リポジトリの登録から導入まで、x86_64 コンテナでこのとおり実行した**
+- `dnf config-manager` は `dnf-plugins-core` に入っている（EPEL を入れると一緒に入る）
 
 **Google Chrome**（Google は `.repo` ファイルを配っていないので、自分で置く）:
 
@@ -199,7 +223,9 @@ sudo dnf install -y google-chrome-stable
 google-chrome-stable --version
 ```
 
-`google-chrome-stable` の導入時の処理（rpm の scriptlet）は、同じ `/etc/yum.repos.d/google-chrome.repo` を書き直す。導入後のファイルは `baseurl` の `$basearch` がアーキの名前（x86_64 では `.../stable/x86_64`）に置き換わっただけで、ほかは上と同じだった。`/etc/cron.daily/google-chrome` も置かれる。
+- `google-chrome-stable` の導入時の処理（rpm の scriptlet）は、同じ `/etc/yum.repos.d/google-chrome.repo` を書き直す
+- 導入後のファイルは、`baseurl` の `$basearch` がアーキの名前（x86_64 では `.../stable/x86_64`）に置き換わっただけで、ほかは上と同じだった
+- `/etc/cron.daily/google-chrome` も置かれる
 
 **Brave**:
 
@@ -237,7 +263,12 @@ mise --version
 | Sublime Text | Sublime HQ Pty Ltd（2025 年の鍵） | `EBC7 33B7 8AAB 352D C773 BF85 7FE2 FA12 CF6E 38F2` |
 | mise | mise releases | `2485 3EC9 F655 CE80 B48E 6C3A 8B81 C9D1 7413 A06D` |
 
-**Sublime Text の鍵は EL10 で一部しか入らない。** `sublimehq-pub.gpg` には鍵が 3 つ入っている。EL10 の rpm は、2017 年の 2 つを「その時点で有効な結合署名が無い」として拒否し、2025 年の 1 つ（`CF6E38F2`）だけを取り込む。拒否された 2 つは自己署名のハッシュが SHA-1（`gpg --list-packets` で `digest algo 2`）、取り込めた 1 つは SHA-512（`digest algo 10`）だった。**`rpm --import` はエラーを 2 行出して終了コード 2 で終わるが、rpm の署名に使われているのは取り込めた `CF6E38F2` なので、導入はできる。** 一方、`rpm --import` を省いて `dnf install` に鍵の取り込みを任せると、dnf は 1 つ目の鍵で失敗した時点で止まる。
+**Sublime Text の鍵は EL10 で一部しか入らない。** `sublimehq-pub.gpg` には鍵が 3 つ入っている。
+
+- EL10 の rpm は、2017 年の 2 つを「その時点で有効な結合署名が無い」として拒否し、2025 年の 1 つ（`CF6E38F2`）だけを取り込む
+- 拒否された 2 つは自己署名のハッシュが SHA-1（`gpg --list-packets` で `digest algo 2`）、取り込めた 1 つは SHA-512（`digest algo 10`）だった
+- **`rpm --import` はエラーを 2 行出して終了コード 2 で終わるが、rpm の署名に使われているのは取り込めた `CF6E38F2` なので、導入はできる**
+- 一方、`rpm --import` を省いて `dnf install` に鍵の取り込みを任せると、dnf は 1 つ目の鍵で失敗した時点で止まる
 
 ```
 $ sudo rpm -v --import https://download.sublimetext.com/sublimehq-pub.gpg
@@ -313,16 +344,27 @@ sudo flatpak update
 | flatpak | `flatpak-1.16.0-9.el10_2.1`（AppStream） |
 | aarch64 の調べ方 | RPM: `dnf --forcearch=aarch64 repoquery`。Homebrew: formulae.brew.sh の JSON のボトル（`arm64_linux`）。Flathub: `flatpak remote-ls --arch=aarch64` と `flatpak remote-info --arch=aarch64` |
 
-これまでの手順書の「コンテナのみ」の検証は、実機（Raspberry Pi 5）の上の podman で `docker.io/library/almalinux:10` を使っていた。**この一覧は x86_64 のクラウドホスト上の Docker で、`quay.io` の同じ AlmaLinux 10 公式イメージを使っている**（Docker Hub がレート制限を返したため）。
+- これまでの手順書の「コンテナのみ」の検証は、実機（Raspberry Pi 5）の上の podman で `docker.io/library/almalinux:10` を使っていた
+- **この一覧は x86_64 のクラウドホスト上の Docker で、`quay.io` の同じ AlmaLinux 10 公式イメージを使っている**（Docker Hub がレート制限を返したため）
 
 ### 注意点
 
-- **Homebrew の依存がシステムのコマンドを隠す**: `brew install podman-compose` は podman 6.1.2 に加えて `util-linux`・`python@3.14`・`gnupg`・`sqlite` など 41 個を依存として入れる（すべてボトル）。その結果、PATH の先頭で `podman`・`mount`・`gpg`・`python3` が Homebrew のものに置き換わった（`command -v` で確認）。`brew uninstall podman-compose` と `brew autoremove` で元に戻る。**依存の多い formula を入れた後は、`command -v` で主要なコマンドの場所を確かめる**
+- **Homebrew の依存がシステムのコマンドを隠す**: `brew install podman-compose` は podman 6.1.2 に加えて `util-linux`・`python@3.14`・`gnupg`・`sqlite` など 41 個を依存として入れる（すべてボトル）
+  - その結果、PATH の先頭で `podman`・`mount`・`gpg`・`python3` が Homebrew のものに置き換わった（`command -v` で確認）
+  - `brew uninstall podman-compose` と `brew autoremove` で元に戻る
+  - **依存の多い formula を入れた後は、`command -v` で主要なコマンドの場所を確かめる**
 - **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（[bat.md](bat.md) と同じ問題）
-- **Flathub の「検証済み」はアプリの公開元の確認**で、中身の審査ではない。未検証のもの（Chrome・Chromium・VLC・Signal・Slack・Zoom・Spotify など）は、上流ではない第三者が包んでいる場合がある
-- **Flathub は aarch64 の appstream を配っていない**（`flatpak update --appstream --arch=aarch64` が `No such ref 'appstream2/aarch64'` で失敗する）。そのため aarch64 の版は表に書けない。代わりに、aarch64 に提供がある 24 本すべてで、`flatpak remote-info` のコミットの件名が x86_64 と一致することを確かめた（同じ版のビルドと推定できる）
-- **EPEL の VLC は `libavcodec-free`（EPEL の `ffmpeg-free` 7.1.2）にリンクされている**（`vlc-plugin-ffmpeg` の依存）。どの形式を再生できるかは確かめていない。RPM Fusion（EL10）には `ffmpeg` 7.1.5 がある
-- **Flatpak の容量**: 最初の 1 本（Flatseal）で `/var/lib/flatpak` が 2.5 GB になった。GNOME 50 の runtime・その翻訳・GL ドライバ・コーデックの拡張が一緒に入るため。一覧の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統。[付録](#付録-コンテナでの検証記録2026-09-24)）
+- **Flathub の「検証済み」はアプリの公開元の確認**で、中身の審査ではない
+  - 未検証のもの（Chrome・Chromium・VLC・Signal・Slack・Zoom・Spotify など）は、上流ではない第三者が包んでいる場合がある
+- **Flathub は aarch64 の appstream を配っていない**（`flatpak update --appstream --arch=aarch64` が `No such ref 'appstream2/aarch64'` で失敗する）
+  - そのため aarch64 の版は表に書けない
+  - 代わりに、aarch64 に提供がある 24 本すべてで、`flatpak remote-info` のコミットの件名が x86_64 と一致することを確かめた（同じ版のビルドと推定できる）
+- **EPEL の VLC は `libavcodec-free`（EPEL の `ffmpeg-free` 7.1.2）にリンクされている**（`vlc-plugin-ffmpeg` の依存）
+  - どの形式を再生できるかは確かめていない
+  - RPM Fusion（EL10）には `ffmpeg` 7.1.5 がある
+- **Flatpak の容量**: 最初の 1 本（Flatseal）で `/var/lib/flatpak` が 2.5 GB になった
+  - GNOME 50 の runtime・その翻訳・GL ドライバ・コーデックの拡張が一緒に入るため
+  - 一覧の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統。[付録](#付録-コンテナでの検証記録2026-09-24)）
 - **版は日々変わる**: 表の版は調査日のもの。現在の版は `brew info <formula>` / `dnf info <package>` / `flatpak remote-info flathub <ID>` で見る
 - **x86_64_v2 版は見ていない**: AlmaLinux 10 には古い CPU 向けの `x86_64_v2` 版のリポジトリもあるが、本書は通常の x86_64 版だけを調べた
 
