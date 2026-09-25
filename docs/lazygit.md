@@ -2,15 +2,19 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。Homebrew は root で動かない）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **手順 3 で TUI が開く**。`q` で終了してから次のブロックを貼る
 
-**前提: Homebrew が入っていること。** `command -v brew` でバージョンが出なければ、先に [Homebrew](homebrew.md) を通す。
-
-設定を書く場所は[設定ファイル](#設定ファイル)。以後の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. **変数を設定する**
 
-   **このブロックは編集必須の変数が無い。** `e` キーで開くエディタを変えたいときだけ書き換える。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集が必須の変数は無い**。`e` キーで開くエディタを変えたいときだけ書き換える
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    ```bash
    LG_EDITOR=nvim                  # lazygit の e キーで開くエディタ。vim / code など。<LG_EDITOR>
@@ -25,7 +29,8 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   `LG_EDITOR` を使うのは[設定ファイル](#設定ファイル)の節だけ。lazygit は設定が無ければ `EDITOR` 環境変数を見るので、`~/.bashrc` に `export EDITOR=nvim` があれば設定ファイルは要らない。
+   - `LG_EDITOR` を使うのは[設定ファイル](#設定ファイル)の節だけ
+   - lazygit は設定が無ければ `EDITOR` 環境変数を見るので、`~/.bashrc` に `export EDITOR=nvim` があれば設定ファイルは要らない
 
    </details>
 
@@ -35,10 +40,12 @@
    brew install lazygit
    ```
 
-   aarch64 でもビルド済みのボトル（`lazygit--0.65.1.arm64_linux.bottle.tar.gz`）が降ってくるので、ソースからのビルドにはならない。
+   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
    <details>
    <summary>補足: ボトルが降りること</summary>
+
+   aarch64 で降ってくるボトルは `lazygit--0.65.1.arm64_linux.bottle.tar.gz`。
 
    ボトルが降りたことの確認（実測、コンテナ）:
 
@@ -61,12 +68,21 @@
    command -v lazygit
    ```
 
-   `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る。次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）。git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる。
+   `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る。
+
+   次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）。
+
+   - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
 
    <details>
    <summary>補足: 起動時の注意</summary>
 
-   `lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。**git が入っていないと lazygit は起動しない**（Homebrew 版は git を依存に持たないので、RPM の git か `brew install git` のどちらかが要る）。このホストは RPM の git 2.52.0 を使っている。
+   `lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。
+
+   **git が入っていないと lazygit は起動しない。**
+
+   - Homebrew 版は git を依存に持たないので、RPM の git か `brew install git` のどちらかが要る
+   - このホストは RPM の git 2.52.0 を使っている
 
    git 管理下でないディレクトリで起動すると `Would you like to create a new repository?` と聞かれる。意図せず `.git` を作らないよう、リポジトリのルートで起動する。
 
@@ -76,7 +92,10 @@
 
 ## 設定ファイル
 
-パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く。置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）。エディタだけ指定する最小の例:
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
+- 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
+
+エディタだけ指定する最小の例:
 
 ```bash
 mkdir -p ~/.config/lazygit
@@ -87,7 +106,8 @@ EOF
 lazygit --print-config-dir
 ```
 
-既定値の全体は `lazygit --config` で表示できる。アプリ内では `x` でキーバインド一覧が出る。
+- 既定値の全体は `lazygit --config` で表示できる
+- アプリ内では `x` でキーバインド一覧が出る
 
 ---
 
@@ -107,9 +127,8 @@ brew upgrade lazygit
 brew uninstall lazygit
 ```
 
-`~/.config/lazygit/` と `~/.local/state/lazygit/` は残るので、要らなければ手で消す。
-
-本書ではロールバックは**本実行していない**。
+- `~/.config/lazygit/` と `~/.local/state/lazygit/` は残るので、要らなければ手で消す
+- 本書ではロールバックは**本実行していない**
 
 ---
 
@@ -118,8 +137,15 @@ brew uninstall lazygit
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に git の TUI クライアント [lazygit](https://github.com/jesseduffield/lazygit) の最新版を入れる
-- **進め方**: Homebrew で入れる。**読者が書き換えるのは冒頭の変数ブロック（エディタ）だけ**。RPM（COPR）経路は実機でもコンテナでも通らなかった（[選択した方針](#選択した方針)）
-- **状態**: **実機で本実行済み（2026-09-20）。** 下表のホストで `brew install lazygit` を実行し、`lazygit 0.65.1` が入って常用中。[Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節は 2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直し、ボトルが降りること・`lazygit --version` が出ること・`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返すことを確認した。**コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）。**実機には設定ファイルを置いていない**
+- **進め方**: Homebrew で入れる
+  - **読者が書き換えるのは冒頭の変数ブロック（エディタ）だけ**
+  - RPM（COPR）経路は実機でもコンテナでも通らなかった（[選択した方針](#選択した方針)）
+- **状態**: **実機で本実行済み（2026-09-20）**
+  - 下表のホストで `brew install lazygit` を実行し、`lazygit 0.65.1` が入って常用中
+  - [Homebrew の導入](homebrew.md)と手順 2〜3、[設定ファイル](#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - 確認したこと: ボトルが降りる、`lazygit --version` が出る、`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返す
+  - **コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）
+  - **実機には設定ファイルを置いていない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -129,7 +155,8 @@ brew uninstall lazygit
 | 入った lazygit | `lazygit 0.65.1`（`arm64_linux` ボトル、6 ファイル / 18.8 MB） | 同じ（`0.65.1`） |
 | git | `git-2.52.0-1.el10.aarch64`（RPM） | `git 2.52.0`（依存で導入） |
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -176,7 +203,10 @@ No match for argument: lazygit
 Error: Unable to find a match: lazygit
 ```
 
-`atim/lazygit` でも同じ 403。dnf を介さず `curl -L` で `repomd.xml` を取っても同じで、COPR の配信元（`download.copr.fedorainfracloud.org`）が S3 の署名付き URL にリダイレクトし、その署名が期限切れになっている。一方で COPR 全体が落ちているわけではなく、同じ日に `lihaohong/yazi` の `epel-10-aarch64` はメタデータを取得できている（[yazi.md](yazi.md)）。**プロジェクトごとの問題で、いずれ直る可能性がある**。
+- `atim/lazygit` でも同じ 403
+- dnf を介さず `curl -L` で `repomd.xml` を取っても同じ。COPR の配信元（`download.copr.fedorainfracloud.org`）が S3 の署名付き URL にリダイレクトし、その署名が期限切れになっている
+- 一方で COPR 全体が落ちているわけではない。同じ日に `lihaohong/yazi` の `epel-10-aarch64` はメタデータを取得できている（[yazi.md](yazi.md)）
+- **プロジェクトごとの問題で、いずれ直る可能性がある**
 
 ### 完了時点の状態
 
@@ -193,8 +223,10 @@ $ command -v lazygit
 
 ### 注意点
 
-- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置く。RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
-- **COPR 経路は「有効化は成功するのに入らない」**: `dnf copr enable` が通っても、メタデータが取れなければ `dnf install` は `No match for argument` になるだけで、原因は警告行にしか出ない。COPR を使う前に `curl -sS -o /dev/null -w '%{http_code}\n' -L <chroot の repodata/repomd.xml>` で 200 が返るか確かめると早い
+- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置く
+  - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
+- **COPR 経路は「有効化は成功するのに入らない」**: `dnf copr enable` が通っても、メタデータが取れなければ `dnf install` は `No match for argument` になるだけで、原因は警告行にしか出ない
+  - COPR を使う前に `curl -sS -o /dev/null -w '%{http_code}\n' -L <chroot の repodata/repomd.xml>` で 200 が返るか確かめると早い
 - **git が要る**: lazygit は git のラッパーなので、git の設定（`user.name` / `user.email`、認証）はそのまま効く
 - **設定ファイルは自分で作る**: `lazygit --print-config-dir` が返すディレクトリは、初回起動時には空のことがある
 
