@@ -2,15 +2,23 @@
 
 ## 実施手順
 
-**すべて対象ホスト上で、自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない。アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）。手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る（各手順の末尾で折り畳んである「補足」の中のブロックは、手順を進めるためには貼らなくてよい）。理由・実測出力・落とし穴は、手順ごとのものはその手順の「補足」に、全体に関わるものは後半の[補足](#補足)にまとめてあり、実行するだけなら読まなくてよい。
+> [!IMPORTANT]
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）
+> - **手順 5 には対話入力がある**（確認が 2 回）。そのブロックだけ続けて貼らない
 
-日々の操作は[使い方の基本](#使い方の基本)。以後の更新は[更新](#更新)、消すときは[ロールバック](#ロールバック)。
+- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: [ツール一覧](tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- [Firefox](firefox.md) と [VS Code](vscode.md) は Flathub を使わず RPM で入れている（理由はそれぞれの「選択した方針」）
 
-この手順書を通すと、[ツール一覧](tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](firefox.md) と [VS Code](vscode.md) は Flathub を使わず RPM で入れている（理由はそれぞれの「選択した方針」）。
+> [!WARNING]
+> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行しておらず、aarch64 でも通していない。デスクトップのメニュー・アプリの画面・GNOME Software での表示も確かめていない（[対象と検証環境](#対象と検証環境)）。
 
 1. **変数を設定する**
 
-   **編集するものは無い。** Flathub の登録ファイルの URL は固定で、動作確認に入れるアプリは小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール。手順 5 の補足）にしてある。**新しいシェルを開いたら（SSH を張り直したあとも）先にこのブロックを貼り直す。**
+   - **編集するものは無い**。Flathub の登録ファイルの URL は固定
+   - 動作確認に入れるアプリは、小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール。手順 5 の補足）にしてある
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    ```bash
    FLATHUB_REPO_URL=https://dl.flathub.org/repo/flathub.flatpakrepo   # Flathub の登録ファイル。固定。<FLATHUB_REPO_URL>
@@ -21,7 +29,8 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   どちらも**この文書の中だけで使うシェル変数**で、flatpak が読む環境変数ではない。`${FP_TEST_APP}` を別のアプリ ID に変えてもよいが、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）。
+   - どちらも**この文書の中だけで使うシェル変数**で、flatpak が読む環境変数ではない
+   - `${FP_TEST_APP}` を別のアプリ ID に変えてもよいが、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）
 
    </details>
 
@@ -46,7 +55,10 @@
    flatpak remotes --show-details
    ```
 
-   `Flatpak 1.16.0` のように出る。**入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**（リモートがまだ 1 つも無く、置き場所も作られていない。この手順の補足）。何も出ない場合もリモートが無い状態。**`flathub` の行が既にあれば手順 4 は何もしない**（`--if-not-exists` のため）。
+   - `Flatpak 1.16.0` のように出る
+   - **入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**。リモートがまだ無いだけ（この手順の補足）
+   - 何も出ない場合も、リモートが無い状態
+   - **`flathub` の行が既にあれば、手順 4 は何もしない**（`--if-not-exists` のため）
 
    <details>
    <summary>補足: AlmaLinux 10 の flatpak にはリモートが無い</summary>
@@ -62,7 +74,10 @@
    error: While opening repository /var/lib/flatpak/repo: opening repo: opendir(/var/lib/flatpak/repo): No such file or directory
    ```
 
-   素のコンテナでは `dnf install flatpak` が依存込みで 138 パッケージ（ダウンロード 92 MB、展開後 323 MB）を入れた。サンドボックスの `bubblewrap`、`ostree-libs`、`polkit`、`xdg-desktop-portal`、`gnupg2`（手順 3 で使う `gpg`）などが含まれる。デスクトップのあるホストでは依存の多くが既に入っているので、数はこれより少ないはず（未確認）。
+   素のコンテナでは `dnf install flatpak` が依存込みで 138 パッケージ（ダウンロード 92 MB、展開後 323 MB）を入れた。
+
+   - サンドボックスの `bubblewrap`、`ostree-libs`、`polkit`、`xdg-desktop-portal`、`gnupg2`（手順 3 で使う `gpg`）などが含まれる
+   - デスクトップのあるホストでは依存の多くが既に入っているので、数はこれより少ないはず（未確認）
 
    GNOME の `gnome-software` パッケージは `flatpak` に依存し、Flatpak 用のプラグイン（`/usr/lib64/gnome-software/plugins-21/libgs_plugin_flatpak.so`）を含む（`dnf repoquery` で確認）。したがって GNOME のデスクトップには flatpak が最初から入っていることが多い（このリポジトリの 2 台とも入っていた。[実施前の状態](#実施前の状態)）。
 
@@ -109,9 +124,13 @@
    <details>
    <summary>補足: system に入れる理由</summary>
 
-   `sudo` を付けて**システム全体のインストール先（`/var/lib/flatpak`）**に登録している。以後のアプリも同じ場所に入り、ホストの全ユーザーから使える。
+   `sudo` を付けて**システム全体のインストール先**（`/var/lib/flatpak`）に登録している。以後のアプリも同じ場所に入り、ホストの全ユーザーから使える。
 
-   自分のユーザーだけに入れたいなら、`sudo` を外して `--user` を付ける（`flatpak remote-add --user --if-not-exists flathub ...`）。この場合の置き場所は `~/.local/share/flatpak` で、以降の `install` / `update` / `uninstall` にも `--user` を付ける。**system と user に同じアプリを入れると、どちらが起動されるか分かりにくくなる**ので、どちらかに揃える。本書は system だけを検証している。
+   自分のユーザーだけに入れたいなら、`sudo` を外して `--user` を付ける（`flatpak remote-add --user --if-not-exists flathub ...`）。
+
+   - この場合の置き場所は `~/.local/share/flatpak` で、以降の `install` / `update` / `uninstall` にも `--user` を付ける
+   - **system と user に同じアプリを入れると、どちらが起動されるか分かりにくくなる**ので、どちらかに揃える
+   - 本書は system だけを検証している
 
    </details>
 
@@ -121,12 +140,17 @@
    sudo flatpak install flathub "${FP_TEST_APP:?手順 1 の FP_TEST_APP が空のまま。値を入れて貼り直す}"
    ```
 
-   **確認を 2 回聞かれる。** 1 回目は runtime を入れるか（`Do you want to install it? [Y/n]`）、2 回目はアプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）。どちらも `y` で進める。**次のブロックは、完了してから貼る。**
+   **確認を 2 回聞かれる。** どちらも `y` で進める。
+
+   - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
+   - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
+
+   **次のブロックは、完了してから貼る。**
 
    <details>
    <summary>補足: 一緒に入る runtime</summary>
 
-   Flatpak のアプリは**runtime（共通ライブラリの束）**の上で動く。Flatseal は GNOME 50 の runtime（`org.gnome.Platform`）を使うので、**初回はアプリ本体（1 MB 弱）よりも runtime のほうがずっと大きい**。コンテナでの実測（プロンプトに答えた後の表示）:
+   Flatpak のアプリは**runtime**（共通ライブラリの束）の上で動く。Flatseal は GNOME 50 の runtime（`org.gnome.Platform`）を使うので、**初回はアプリ本体（1 MB 弱）よりも runtime のほうがずっと大きい**。コンテナでの実測（プロンプトに答えた後の表示）:
 
    ```
    Required runtime for com.github.tchx84.Flatseal/x86_64/stable (runtime/org.gnome.Platform/x86_64/50) found in remote flathub
@@ -166,14 +190,20 @@
    ls /var/lib/flatpak/exports/share/applications/
    ```
 
-   `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出て、`sandbox OK` が出れば、アプリのサンドボックスが起動できている。最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている。
-
-   **メニューに載るのはログインし直してから**（この手順の補足）。
+   - `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出る
+   - `sandbox OK` が出れば、アプリのサンドボックスが起動できている
+   - 最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている
+   - **メニューに載るのはログインし直してから**（この手順の補足）
 
    <details>
    <summary>補足: メニューに出るまで</summary>
 
-   `flatpak` パッケージは `/etc/profile.d/flatpak.sh` を置き、ログインシェルの `XDG_DATA_DIRS` に `/var/lib/flatpak/exports/share` と `~/.local/share/flatpak/exports/share` を足す。デスクトップはこの変数からアプリの `.desktop` を探すので、**flatpak を入れる前から続いているセッションには、この 2 つが入っていない**。flatpak を新しく入れたときは、1 度ログアウトしてログインし直す。ログインシェルで足されることは次で確かめられる。
+   `flatpak` パッケージは `/etc/profile.d/flatpak.sh` を置き、ログインシェルの `XDG_DATA_DIRS` に `/var/lib/flatpak/exports/share` と `~/.local/share/flatpak/exports/share` を足す。
+
+   - デスクトップはこの変数からアプリの `.desktop` を探すので、**flatpak を入れる前から続いているセッションには、この 2 つが入っていない**
+   - flatpak を新しく入れたときは、1 度ログアウトしてログインし直す
+
+   ログインシェルで足されることは次で確かめられる。
 
    ```bash
    bash -lc 'echo "$XDG_DATA_DIRS"'
@@ -206,7 +236,12 @@
 
 `flatpak` の読み取り系（`search` / `list` / `info` / `remote-ls`）は `sudo` 無しで動く。
 
-Flathub を登録しただけの状態では `flatpak search flatseal` が `No matches found` を返した（`/var/lib/flatpak/appstream/` がまだ無い）。`sudo flatpak update --appstream` の後は `Flatseal  Manage Flatpak permissions  com.github.tchx84.Flatseal  2.4.1  stable  flathub` が出た（どちらもコンテナで確認）。`sudo flatpak update` を 1 度実行したあとも同じように検索できるようになる。
+検索の挙動（どちらもコンテナで確認）:
+
+- Flathub を登録しただけの状態では、`flatpak search flatseal` が `No matches found` を返した（`/var/lib/flatpak/appstream/` がまだ無い）
+- `sudo flatpak update --appstream` の後は、`Flatseal  Manage Flatpak permissions  com.github.tchx84.Flatseal  2.4.1  stable  flathub` が出た
+
+`sudo flatpak update` を 1 度実行したあとも、同じように検索できるようになる。
 
 ---
 
@@ -216,7 +251,8 @@ Flathub を登録しただけの状態では `flatpak search flatseal` が `No m
 sudo flatpak update
 ```
 
-更新が無ければ `Nothing to do.` で終わる。**`dnf upgrade` では Flatpak のアプリは上がらない**（別の仕組み）。
+- 更新が無ければ `Nothing to do.` で終わる
+- **`dnf upgrade` では Flatpak のアプリは上がらない**（別の仕組み）
 
 ---
 
@@ -239,13 +275,12 @@ sudo flatpak remote-delete flathub
 flatpak remotes --show-details
 ```
 
-最後の `flatpak remotes --show-details` が何も出さなければ、リモートが無い状態に戻っている。
-
-アプリが自分のホームに作ったデータ（`~/.var/app/<ID>`）は `uninstall` では消えない。要らなければ手で消す。
-
-`flatpak` パッケージ自体は消さない（GNOME のデスクトップでは `gnome-software` が依存している）。
-
-コンテナでの実測では、1 行目の `uninstall` が Flatseal 1 つを、`--unused` が runtime と拡張の 5 つ（`GL.default` の 2 つ・`org.gnome.Platform`・その `Locale`・`codecs-extra`）を消した。どちらも確認に答えてから消える。
+- 最後の `flatpak remotes --show-details` が何も出さなければ、リモートが無い状態に戻っている
+- アプリが自分のホームに作ったデータ（`~/.var/app/<ID>`）は `uninstall` では消えない。要らなければ手で消す
+- `flatpak` パッケージ自体は消さない（GNOME のデスクトップでは `gnome-software` が依存している）
+- コンテナでの実測では、次のものが消えた。どちらも確認に答えてから消える
+  - 1 行目の `uninstall`: Flatseal 1 つ
+  - `--unused`: runtime と拡張の 5 つ（`GL.default` の 2 つ・`org.gnome.Platform`・その `Locale`・`codecs-extra`）
 
 ---
 
@@ -255,7 +290,13 @@ flatpak remotes --show-details
 
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
-- **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない。** 下表の検証コンテナで**この文書のコードブロックをそのまま貼って**手順 2〜6・[更新](#更新)・[ロールバック](#ロールバック)を通した。確認の問い合わせ（手順 5 とロールバックの `[Y/n]`）には端末（pty）越しに `y` を送って答えており、コマンドに `-y` は足していない。Flathub の追加・鍵の fingerprint・Flatseal の導入・サンドボックスの起動（`--command=true`）・`.desktop` の書き出し・ロールバックで元に戻ることを確認した。**コンテナに画面が無いため、デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示は確認していない。** 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）。**これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
+- **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない**
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜6・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 確認の問い合わせ（手順 5 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
+  - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
+  - **確認していないこと**: デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示。コンテナに画面が無いため
+  - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）
+  - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
 
 | 項目 | 実機（Raspberry Pi 5） | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|---|
@@ -264,9 +305,11 @@ flatpak remotes --show-details
 | flatpak | `flatpak-1.16.0` 導入済み、リモート無し（[firefox.md](firefox.md) の 2026-09-22 の記録） | 導入済み、flathub あり（[wezterm-nightly.md](wezterm-nightly.md) の 2026-09-21 の記録） | 未導入 → `flatpak-1.16.0-9.el10_2.1` |
 | 確認用アプリ | — | — | Flatseal 2.4.1（GNOME 50 の runtime） |
 
-実機の 2 列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**。Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](syncthing.md)）ので、今の状態は確かめていない。
+- 実機の 2 列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**
+- Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](syncthing.md)）ので、今の状態は確かめていない
 
-> **注記**: 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -332,10 +375,15 @@ com.github.tchx84.Flatseal.desktop
 
 ### 注意点
 
-- **容量が大きい**: アプリ 1 つ（1 MB 弱）でも、初回は runtime・翻訳・GL ドライバ・コーデックの拡張で 2.5 GB になる。[ツール一覧](tool-catalog.md#gui)の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統）。`sudo flatpak uninstall --unused` で使われなくなった runtime を消せる
+- **容量が大きい**: アプリ 1 つ（1 MB 弱）でも、初回は runtime・翻訳・GL ドライバ・コーデックの拡張で 2.5 GB になる
+  - [ツール一覧](tool-catalog.md#gui)の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統）
+  - `sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **`dnf upgrade` では上がらない**: [更新](#更新)の `sudo flatpak update` を別に実行する
-- **権限はアプリごとに違う**: 手順 5 の実測のように、入れる前に権限の一覧が出る。入れた後は `flatpak info --show-permissions <ID>` で見られ、Flatseal か `sudo flatpak override` で変えられる
-- **公開元が検証済みかを見る**: Flathub のアプリには、公開元がアプリの作者本人だと確認されたもの（検証済み）と、確認されていないもの（未検証。第三者が包んでいる場合がある）がある。[ツール一覧](tool-catalog.md#gui)の表に書き分けてある
+- **権限はアプリごとに違う**: 手順 5 の実測のように、入れる前に権限の一覧が出る
+  - 入れた後は `flatpak info --show-permissions <ID>` で見られ、Flatseal か `sudo flatpak override` で変えられる
+- **公開元が検証済みかを見る**: Flathub のアプリには次の 2 種類がある。[ツール一覧](tool-catalog.md#gui)の表に書き分けてある
+  - 検証済み: 公開元がアプリの作者本人だと確認されたもの
+  - 未検証: 確認されていないもの。第三者が包んでいる場合がある
 - **aarch64 に無いアプリがある**: OBS・Slack・Discord・Zoom・Spotify・Edge などは Flathub でも x86_64 だけ（[ツール一覧](tool-catalog.md#aarch64-で使えないもの)）
 - **RPM と Flatpak で同じアプリを二重に入れない**: [Firefox](firefox.md) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる（未確認。[firefox.md](firefox.md) の未確認事項と同じ）
 - **`sudo -i` した root のシェルで実行しない**: `flatpak run` はふつうのユーザーで行うもので、root で起動したアプリの設定は root のホームにできる
