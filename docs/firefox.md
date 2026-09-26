@@ -3,30 +3,26 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。手順 5 の GUI の確認だけ、デスクトップセッションで行う
+> - **すべて対象ホスト上で実行する**。手順 7 の GUI の確認だけ、デスクトップセッションで行う
+> - **手順 6 には対話入力がある**（トランザクション表の `[y/N]`）。答えてから手順 7 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。最新版（Rapid Release）を入れるなら既定のままでよい
-   - ESR や Beta にしたいときだけ `FF_PKG` を変える
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    FF_PKG=firefox                  # 入れるチャンネル。firefox（最新版）/ firefox-esr / firefox-beta。<FF_PKG>
    FF_L10N=firefox-l10n-ja         # 日本語 UI の言語パック。要らなければ空にする。<FF_L10N>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    for v in FF_PKG FF_L10N; do printf '%-9s = %s\n' "$v" "${!v}"; done
    ```
 
+   - **編集が必須の変数は無い**。最新版（Rapid Release）を入れるなら既定のままでよい
+   - ESR や Beta にしたいときだけ `FF_PKG` を変える
+   - 最後の行で値を読み戻す
    - `FF_PKG` が空なら、ここで止めて直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -49,24 +45,25 @@
 
    </details>
 
-1. **署名鍵を確かめて取り込む**
+1. 署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
 
    ```bash
    curl -fsSL https://packages.mozilla.org/rpm/firefox/signing-key.gpg | gpg --show-keys
    ```
 
-   次の 2 つを**目で確かめてから**取り込む。違っていればここで止める。
-
    - `pub` 行の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353`
    - uid が `Mozilla Software Releases <release@mozilla.com>`
+   - 違っていればここで止める
+   - **次の手順は、この 2 つを目で確かめてから貼る**
+
+1. 一致したら、鍵を rpm に取り込む。
 
    ```bash
    sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
-   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
    ```
 
-   - `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る
-   - 期限切れの副鍵についての warning が一緒に出るが、署名に使う副鍵は別にあるので問題ない（この手順の補足）
+   - `rpm --import` は期限切れの副鍵についての warning を出すが、署名に使う副鍵は別にあるので問題ない（この手順の補足）
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 鍵の警告</summary>
@@ -97,7 +94,15 @@
 
    </details>
 
-1. **リポジトリを追加する**
+1. 鍵が入ったか確かめる。
+
+   ```bash
+   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
+   ```
+
+   - `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る
+
+1. Mozilla のリポジトリを追加し、入手できる版を見る。
 
    ```bash
    sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
@@ -139,13 +144,14 @@
 
    </details>
 
-1. **インストールする**
+1. Firefox を入れる。
 
    ```bash
    sudo dnf install "${FF_PKG:?手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
    ```
 
    - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが `Upgrading: firefox` として解決される（この手順の補足）
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 言語パックのクォートと、ESR からの載せ替え</summary>
@@ -177,7 +183,7 @@
 
    </details>
 
-1. **検証する**
+1. Mozilla 公式のビルドが入ったか確かめる。
 
    ```bash
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' "${FF_PKG}" ${FF_L10N}
@@ -185,27 +191,26 @@
    rpm -qi "${FF_PKG}" | sed -n '/^Vendor/p;/^Build Date/p'
    ```
 
-   `from_repo` が `mozilla`、`Vendor` が `Mozilla` なら、Mozilla 公式のビルドが入っている。
-
-   GUI はデスクトップセッションから起動する。`about:support` で次を確認する:
-
-   - 「更新チャンネル」が `release`（ESR なら `esr`）
-   - 「アプリケーションのバイナリ」が `/usr/lib64/firefox/firefox`
-
-   日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる。
+   - `from_repo` が `mozilla`、`Vendor` が `Mozilla` なら、Mozilla 公式のビルドが入っている
+   - GUI はデスクトップセッションから起動し、`about:support` で次を確認する
+     - 「更新チャンネル」が `release`（ESR なら `esr`）
+     - 「アプリケーションのバイナリ」が `/usr/lib64/firefox/firefox`
+   - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
 
 ---
 
 ## 更新
 
-通常の `dnf upgrade` に含まれる。Firefox だけ上げるなら:
+- 通常の `dnf upgrade` に含まれる
 
-```bash
-sudo dnf upgrade "${FF_PKG}" ${FF_L10N}
-```
+1. Firefox だけ上げるときは、言語パックと一緒に上げる。
 
-- Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib64/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
-- 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
+   ```bash
+   sudo dnf upgrade "${FF_PKG}" ${FF_L10N}
+   ```
+
+   - Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib64/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
+   - 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
 
 ---
 
@@ -214,23 +219,40 @@ sudo dnf upgrade "${FF_PKG}" ${FF_L10N}
 > [!WARNING]
 > **ダウングレードした Firefox は、新しいプロファイルを読めないことがある**（[注意点](#注意点)）。
 
-AppStream の ESR に戻す:
-
-```bash
-sudo rm -f /etc/yum.repos.d/mozilla.repo
-sudo dnf remove ${FF_L10N}                    # 言語パックは AppStream に無いので先に消す
-sudo dnf distro-sync "${FF_PKG}"              # 140 系へダウングレードされる
-```
-
-鍵も消すなら:
-
-```bash
-sudo rpm -e gpg-pubkey-d98f0353-55a94004
-```
-
-- プロファイル（`~/.mozilla/firefox`）は、どちらの操作でも消えない
+- AppStream の ESR に戻す
+- プロファイル（`~/.mozilla/firefox`）は、この節のどの手順でも消えない
 - 本書ではロールバックは**本実行していない**
-- `dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した
+  - `dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した
+
+1. Mozilla の repo ファイルを消す。
+
+   ```bash
+   sudo rm -f /etc/yum.repos.d/mozilla.repo
+   ```
+
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. AppStream に無い言語パックを、ダウングレードより先に消す。
+
+   ```bash
+   sudo dnf remove ${FF_L10N}                    # 言語パックは AppStream に無いので先に消す
+   ```
+
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. Firefox を AppStream の ESR（140 系）にダウングレードする。
+
+   ```bash
+   sudo dnf distro-sync "${FF_PKG}"              # 140 系へダウングレードされる
+   ```
+
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. 鍵も消すときだけ、Mozilla の署名鍵を消す。
+
+   ```bash
+   sudo rpm -e gpg-pubkey-d98f0353-55a94004
+   ```
 
 ---
 
@@ -345,10 +367,10 @@ gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases <release@mozilla.com> pub
 
 | 手順 | 結果 |
 |---|---|
-| 2. 鍵 | `gpg --show-keys` の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353` と一致。`rpm --import` は期限切れ副鍵の warning を出して成功、`gpg-pubkey-d98f0353-55a94004` が登録された |
-| 3. repo | メタデータ取得に成功。`firefox` は `154.0.1-1` / `155.0-1` / `155.0.1-1` / `156.0-1` / `156.0.1-1` の 5 世代が aarch64・x86_64 の両方で見えた |
-| 4. install | ESR 140.15.0 が入った状態から `dnf upgrade -y firefox` で `156.0.1-1` に載せ替え。追加の依存パッケージ無し |
-| 5. 検証 | `firefox --version` → `Mozilla Firefox 156.0.1`、`rpm -qi` の `Signature` は `Key ID 678e455d76767aa3`（Mozilla の署名用副鍵） |
+| 2〜4. 鍵 | `gpg --show-keys` の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353` と一致。`rpm --import` は期限切れ副鍵の warning を出して成功、`gpg-pubkey-d98f0353-55a94004` が登録された |
+| 5. repo | メタデータ取得に成功。`firefox` は `154.0.1-1` / `155.0-1` / `155.0.1-1` / `156.0-1` / `156.0.1-1` の 5 世代が aarch64・x86_64 の両方で見えた |
+| 6. install | ESR 140.15.0 が入った状態から `dnf upgrade -y firefox` で `156.0.1-1` に載せ替え。追加の依存パッケージ無し |
+| 7. 検証 | `firefox --version` → `Mozilla Firefox 156.0.1`、`rpm -qi` の `Signature` は `Key ID 678e455d76767aa3`（Mozilla の署名用副鍵） |
 | 言語パック | 未導入のコンテナで `dnf install -y firefox firefox-l10n-ja` → `firefox 156.0.1-1 mozilla` と `firefox-l10n-ja 156.0.1-1 mozilla` が入る |
 | ロールバック | repo ファイルを消して `dnf --assumeno distro-sync firefox` → `Downgrading firefox 140.15.0-1.el10_2 appstream` 1 パッケージ |
 

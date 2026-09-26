@@ -5,26 +5,22 @@
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
-> - **手順 3 で TUI が開く**。`:q` で終了してから次のブロックを貼る
+> - **手順 3 で TUI が開く**。`:q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 既定のエディタにするなら[既定のエディタにする（任意）](#既定のエディタにする任意)。設定を書く場所は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。設定の置き場所を変えたいときだけ書き換える
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    NVIM_CONFIG=~/.config/nvim      # 設定の置き場所（既定）。<NVIM_CONFIG>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'NVIM_CONFIG = %s\n' "${NVIM_CONFIG}"
    ```
+
+   - **編集が必須の変数は無い**。設定の置き場所を変えたいときだけ書き換える
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -35,7 +31,7 @@
 
    </details>
 
-1. **Neovim を入れる**
+1. brew で Neovim を入れる。
 
    ```bash
    brew install neovim
@@ -62,23 +58,20 @@
 
    </details>
 
-1. **検証する**
+1. Neovim が入ったか確かめ、起動して健全性を確認する。
 
    ```bash
    nvim --version | head -3
    brew list --versions neovim
    command -v nvim
-   ```
-
-   `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている。起動して健全性を確認する。
-
-   ```bash
    nvim -c 'checkhealth' -c 'only'
    ```
 
-   画面が出たら **`:q` で終了する。次のブロックは終了してから貼る**（続けて貼ると Neovim への入力として食われる）。
-
+   - `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている
+   - 最後の行で起動して、`:checkhealth` で健全性を確認する
    - `vim.provider` の node / perl / python / ruby が `WARNING` になるのは、それぞれの言語のプロバイダを入れていないため（[注意点](#注意点)）
+   - 画面が出たら `:q` で終了する
+   - **ほかのコマンドは、`:q` で終了してから貼る**（続けて貼ると Neovim への入力として食われる）
 
    <details>
    <summary>補足: <code>:checkhealth</code> の読み方</summary>
@@ -97,20 +90,20 @@
 
 ## 既定のエディタにする（任意）
 
-`EDITOR` を見るツール（git、lazygit、`crontab -e` など）で Neovim を開くようにする:
+1. `EDITOR` を見るツール（git、lazygit、`crontab -e` など）で Neovim を開くようにする。
 
-```bash
-cat >> ~/.bashrc <<'EOF'
-export EDITOR=nvim
-export VISUAL=nvim
-alias vi=nvim
-EOF
-. ~/.bashrc
-printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
-```
+   ```bash
+   cat >> ~/.bashrc <<'EOF'
+   export EDITOR=nvim
+   export VISUAL=nvim
+   alias vi=nvim
+   EOF
+   . ~/.bashrc
+   printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
+   ```
 
-- `sudo` 経由のエディタ（`sudoedit`、`visudo`）は root の PATH を使うので、Homebrew 版の `nvim` は見えない
-- 必要なら `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
+   - `sudo` 経由のエディタ（`sudoedit`、`visudo`）は root の PATH を使うので、Homebrew 版の `nvim` は見えない
+   - 必要なら `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
 
 ---
 
@@ -119,43 +112,48 @@ printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値（素の Vim に近い挙動）で動く
 - 置き場所は `${NVIM_CONFIG}`（既定は `~/.config/nvim`）で、読み込まれるのは `init.lua` か `init.vim` のどちらか一方
 
-最小の例:
+1. 最小の例として、`init.lua` を置く。
 
-```bash
-mkdir -p "${NVIM_CONFIG:?手順 1 の NVIM_CONFIG が空のまま。値を入れて貼り直す}"
-cat > "${NVIM_CONFIG}/init.lua" <<'EOF'
-vim.opt.number = true
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 2
-EOF
-nvim -c 'echo has("nvim")' -c 'q'
-```
+   ```bash
+   mkdir -p "${NVIM_CONFIG:?手順 1 の NVIM_CONFIG が空のまま。値を入れて貼り直す}"
+   cat > "${NVIM_CONFIG}/init.lua" <<'EOF'
+   vim.opt.number = true
+   vim.opt.expandtab = true
+   vim.opt.shiftwidth = 2
+   EOF
+   nvim -c 'echo has("nvim")' -c 'q'
+   ```
 
-- 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
-- LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
+   - 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
+   - LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade neovim
-```
+1. brew で Neovim を更新する。
 
-- すべてまとめて上げるなら `brew upgrade`
-- **設定やプラグインは更新に追従しない**ので、メジャー更新のあとは `:checkhealth` で壊れていないか見る
+   ```bash
+   brew upgrade neovim
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
+   - **設定やプラグインは更新に追従しない**ので、メジャー更新のあとは `:checkhealth` で壊れていないか見る
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall neovim
-```
-
-- 依存（`luajit` / `tree-sitter` など）は他の formula も使うので、自動では消えない。まとめて掃除するなら `brew autoremove`
-- `~/.config/nvim`、`~/.local/share/nvim`（プラグイン）、`~/.local/state/nvim`（undo・swap）は残るので、要らなければ手で消す
 - 本書ではロールバックは**本実行していない**
+
+1. brew で Neovim を消す。
+
+   ```bash
+   brew uninstall neovim
+   ```
+
+   - 依存（`luajit` / `tree-sitter` など）は他の formula も使うので、自動では消えない。まとめて掃除するなら `brew autoremove`
+   - `~/.config/nvim`、`~/.local/share/nvim`（プラグイン）、`~/.local/state/nvim`（undo・swap）は残るので、要らなければ手で消す
 
 ---
 

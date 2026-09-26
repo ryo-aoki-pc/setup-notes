@@ -10,21 +10,17 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。既定では `z` コマンドが増えるだけで、`cd` はそのまま残る
-   - `cd` 自体を置き換えたい場合だけ、`ZOXIDE_CMD=cd` にする
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    ZOXIDE_CMD=z                    # zoxide が定義するコマンド名。cd にすると cd を置き換える。<ZOXIDE_CMD>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'ZOXIDE_CMD = %s\n' "${ZOXIDE_CMD}"
    ```
+
+   - **編集が必須の変数は無い**。既定では `z` コマンドが増えるだけで、`cd` はそのまま残る
+   - `cd` 自体を置き換えたい場合だけ、`ZOXIDE_CMD=cd` にする
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -36,7 +32,7 @@
 
    </details>
 
-1. **zoxide を入れる**
+1. brew で zoxide と fzf を入れる。
 
    ```bash
    brew install zoxide fzf
@@ -45,11 +41,7 @@
    - `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える
    - aarch64 でもビルド済みのボトルが降ってくる
 
-1. **シェルに初期化を書く**
-
-   初期化の 1 行を、`~/.bashrc` の**いちばん最後**に置く（理由はこの手順の補足）。
-
-   - **この 1 行を書かないと `z` は使えない**（zoxide 本体はシェル関数を出力するだけで、`zoxide` コマンド自体では移動できない）
+1. `~/.bashrc` のいちばん最後に、zoxide の初期化の 1 行を書く。
 
    ```bash
    printf 'eval "$(zoxide init bash --cmd %s)"\n' "${ZOXIDE_CMD:?手順 1 の ZOXIDE_CMD が空のまま。値を入れて貼り直す}" >> ~/.bashrc
@@ -57,7 +49,9 @@
    type -t "${ZOXIDE_CMD}"
    ```
 
-   `function` と出れば読み込めている。
+   - いちばん最後に置く理由は、この手順の補足
+   - **この 1 行を書かないと `z` は使えない**（zoxide 本体はシェル関数を出力するだけで、`zoxide` コマンド自体では移動できない）
+   - `function` と出れば読み込めている
 
    <details>
    <summary>補足: init の中身</summary>
@@ -91,22 +85,17 @@
 
    </details>
 
-1. **検証する**
+1. zoxide が入ったか確かめ、いくつか移動してからデータベースを見る。
 
    ```bash
    zoxide --version
    brew list --versions zoxide
-   ```
-
-   いくつかディレクトリを移動してから、データベースに溜まっているか確認する。
-
-   - **注意**: 対話シェル（端末に貼る）で実行する。スクリプトの中では記録されない（この手順の補足）
-
-   ```bash
    cd /tmp && cd /usr/share && cd ~
    zoxide query --list
    ```
 
+   - `cd` でいくつかディレクトリを移動してから、`zoxide query --list` でデータベースに溜まっているか確認する
+   - **注意**: 対話シェル（端末に貼る）で実行する。スクリプトの中では記録されない（この手順の補足）
    - 移動したディレクトリが並べば動いている
    - 以後は `z share` のように末尾の一部を書けば `/usr/share` に飛ぶ
    - `fzf` を入れた場合は、`zi` で候補を対話的に選べる
@@ -136,31 +125,39 @@
 
 ## 更新
 
-```bash
-brew upgrade zoxide
-```
+1. brew で zoxide を更新する。
 
-- すべてまとめて上げるなら `brew upgrade`
-- データベース（`~/.local/share/zoxide/db.zo`）は更新で消えない
+   ```bash
+   brew upgrade zoxide
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
+   - データベース（`~/.local/share/zoxide/db.zo`）は更新で消えない
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall zoxide
-sed -i '/zoxide init/d' ~/.bashrc          # ~/.bashrc に書いた 1 行を消す
-```
-
-学習したディレクトリの履歴（`~/.local/share/zoxide/db.zo`）も捨てるなら、次のブロックも貼る。**残しておけば、入れ直したときにそのまま使える。**
-
-```bash
-rm -rf ~/.local/share/zoxide
-```
-
-- `~/.bashrc` から `zoxide init` の行を消し忘れると、新しいシェルを開くたびに `zoxide: command not found` が出る
-  - `ZOXIDE_CMD=cd` にしていた場合は、`cd` が壊れたように見える
 - 本書ではロールバックは**本実行していない**
+
+1. brew で zoxide を消し、`~/.bashrc` から初期化の行を消す。
+
+   ```bash
+   brew uninstall zoxide
+   sed -i '/zoxide init/d' ~/.bashrc          # ~/.bashrc に書いた 1 行を消す
+   ```
+
+   - `~/.bashrc` から `zoxide init` の行を消し忘れると、新しいシェルを開くたびに `zoxide: command not found` が出る
+     - `ZOXIDE_CMD=cd` にしていた場合は、`cd` が壊れたように見える
+
+1. 学習したディレクトリの履歴も捨てるときだけ、`~/.local/share/zoxide` を消す。
+
+   ```bash
+   rm -rf ~/.local/share/zoxide
+   ```
+
+   - 履歴は `~/.local/share/zoxide/db.zo` に入っている
+   - **残しておけば、入れ直したときにそのまま使える**
 
 ---
 

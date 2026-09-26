@@ -13,20 +13,16 @@
 > [!WARNING]
 > **コンテナでのみ通し検証した手順書**で、実機では本書の手順を順に実行していない。実機にある同じ Homebrew 版（5.37.0）は、2026-09-21 に本書とは別の経緯で入れたもの（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)で作るエイリアスの名前を決めるだけで、既定のままでよい
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    GDU_ALIAS=gdu                   # gdu-go に付けるエイリアスの名前。<GDU_ALIAS>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'GDU_ALIAS = %s\n' "${GDU_ALIAS}"
    ```
+
+   - **編集が必須の変数は無い**。[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)で作るエイリアスの名前を決めるだけで、既定のままでよい
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -36,7 +32,7 @@
 
    </details>
 
-1. **gdu を入れる**
+1. brew で gdu を入れる。
 
    ```bash
    brew install gdu
@@ -44,16 +40,18 @@
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - 依存は無い（Go の静的バイナリ 1 つ、約 20 MB）
+   - **入るコマンドは `gdu` ではなく `gdu-go`**
+   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る（出力例はこの手順の補足）
 
-   **入るコマンドは `gdu` ではなく `gdu-go`。** `brew install` の最後に caveat が出る:
+   <details>
+   <summary>補足: ボトルと、<code>gdu-go</code> になる理由</summary>
+
+   **出力例**（`brew install` の最後に出る caveat）:
 
    ```
    ==> Caveats
    To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.
    ```
-
-   <details>
-   <summary>補足: ボトルと、<code>gdu-go</code> になる理由</summary>
 
    aarch64 で降ってくるボトルは `gdu--5.37.0.arm64_linux.bottle.tar.gz`。
 
@@ -76,25 +74,19 @@
 
    </details>
 
-1. **検証する**
+1. `gdu-go` が入ったことと、TUI を起動せずに走査できることを確かめる。
 
    ```bash
    gdu-go --version
    brew list --versions gdu
    command -v gdu-go
    command -v gdu || echo 'gdu という名前のコマンドは無い'
-   ```
-
-   - `Version: v5.37.0` と出る
-   - 最後の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)をやるまでは、これが正しい状態
-
-   次に、TUI を起動せずに走査できることを確かめる。
-
-   ```bash
    gdu-go -n /usr/share | tail -5
    ```
 
-   - サイズの大きい順に並んだ一覧が出る
+   - `Version: v5.37.0` と出る
+   - `command -v gdu` の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)をやるまでは、これが正しい状態
+   - 最後の `gdu-go -n` では、サイズの大きい順に並んだ一覧が出る
    - **TUI で使うときは引数にディレクトリを渡すだけ**（`gdu-go ~` など。`q` で終了）
 
    <details>
@@ -132,51 +124,71 @@
 
 ## gdu の名前で呼ぶ（任意）
 
-エイリアスを足す:
-
-```bash
-printf 'alias %s=gdu-go\n' "${GDU_ALIAS:?手順 1 の GDU_ALIAS が空のまま。値を入れて貼り直す}" >> ~/.bashrc
-. ~/.bashrc
-alias "${GDU_ALIAS}"
-```
-
-- `alias gdu='gdu-go'` と出れば入っている
-- **`alias` の確認に `type -t` は使えない**（[注意点](#注意点)を参照）
-
-**エイリアスが効くのは対話シェルだけ。** スクリプト、`sudo`、他のツールからの呼び出しでは `gdu-go` のままになる。
-
-そちらでも `gdu` で呼びたいなら、シンボリックリンクにする（`~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている）:
-
-```bash
-mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
-```
-
-- リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい
-- ただし **PATH の順序では Homebrew のほうが先**なので、EPEL 版の `/usr/bin/gdu` を同時に入れている場合はどちらが呼ばれるか変わる（[注意点](#注意点)）
 - この節はコンテナでエイリアスのみ検証しており、シンボリックリンクは未検証（[未確認事項](#未確認事項)）
+
+1. `~/.bashrc` に、`gdu-go` のエイリアスを足す。
+
+   ```bash
+   printf 'alias %s=gdu-go\n' "${GDU_ALIAS:?手順 1 の GDU_ALIAS が空のまま。値を入れて貼り直す}" >> ~/.bashrc
+   . ~/.bashrc
+   alias "${GDU_ALIAS}"
+   ```
+
+   - `alias gdu='gdu-go'` と出れば入っている
+   - **`alias` の確認に `type -t` は使えない**（[注意点](#注意点)を参照）
+   - **エイリアスが効くのは対話シェルだけ**。スクリプト、`sudo`、他のツールからの呼び出しでは `gdu-go` のままになる
+
+1. スクリプト・`sudo`・他のツールからも `gdu` で呼びたいときだけ、シンボリックリンクにする。
+
+   ```bash
+   mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
+   ```
+
+   - `~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている
+   - リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい
+   - ただし **PATH の順序では Homebrew のほうが先**なので、EPEL 版の `/usr/bin/gdu` を同時に入れている場合はどちらが呼ばれるか変わる（[注意点](#注意点)）
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade gdu
-```
+1. brew で gdu を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade gdu
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall gdu
-sed -i '/alias .*=gdu-go/d' ~/.bashrc     # エイリアスを足していた場合
-rm -f ~/.local/bin/gdu                    # シンボリックリンクを作っていた場合
-rm -f ~/.gdu.yaml                         # 設定ファイルを作っていた場合
-```
+- 本書ではロールバックは**本実行していない**
 
-本書ではロールバックは**本実行していない**。
+1. brew で gdu を消す。
+
+   ```bash
+   brew uninstall gdu
+   ```
+
+1. エイリアスを足していたときだけ、`~/.bashrc` からその行を消す。
+
+   ```bash
+   sed -i '/alias .*=gdu-go/d' ~/.bashrc     # エイリアスを足していた場合
+   ```
+
+1. シンボリックリンクを作っていたときだけ、`~/.local/bin/gdu` を消す。
+
+   ```bash
+   rm -f ~/.local/bin/gdu                    # シンボリックリンクを作っていた場合
+   ```
+
+1. 設定ファイルを作っていたときだけ、`~/.gdu.yaml` を消す。
+
+   ```bash
+   rm -f ~/.gdu.yaml                         # 設定ファイルを作っていた場合
+   ```
 
 ---
 

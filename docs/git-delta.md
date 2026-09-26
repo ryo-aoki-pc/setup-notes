@@ -13,23 +13,19 @@
 > [!WARNING]
 > **コンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。3 つとも表示の好みなので、既定のままで進められる
-   - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    DELTA_NAVIGATE=true       # ページャ内で n / N を「次の変更・前の変更」にする。<DELTA_NAVIGATE>
    DELTA_LINE_NUMBERS=true   # 差分の左に行番号を出す。<DELTA_LINE_NUMBERS>
    DELTA_SIDE_BY_SIDE=false  # true にすると左右 2 面に分けて表示する。<DELTA_SIDE_BY_SIDE>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    for v in DELTA_NAVIGATE DELTA_LINE_NUMBERS DELTA_SIDE_BY_SIDE; do printf '%-19s = %s\n' "$v" "${!v}"; done
    ```
+
+   - **編集が必須の変数は無い**。3 つとも表示の好みなので、既定のままで進められる
+   - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -39,7 +35,7 @@
 
    </details>
 
-1. **git-delta を入れる**
+1. brew で git-delta を入れる。
 
    ```bash
    brew install git-delta
@@ -55,9 +51,7 @@
 
    </details>
 
-1. **git の設定を書く**
-
-   `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）。
+1. `git config --global` で git の設定を書き、読み戻す。
 
    ```bash
    git config --global core.pager delta
@@ -66,14 +60,11 @@
    git config --global delta.line-numbers "${DELTA_LINE_NUMBERS:?手順 1 の DELTA_LINE_NUMBERS が空のまま。値を入れて貼り直す}"
    git config --global delta.side-by-side "${DELTA_SIDE_BY_SIDE:?手順 1 の DELTA_SIDE_BY_SIDE が空のまま。値を入れて貼り直す}"
    git config --global merge.conflictstyle zdiff3
-   ```
-
-   書けたか読み戻す。
-
-   ```bash
    git config --global --get-regexp '^(core\.pager|interactive\.|delta\.|merge\.conflictstyle)'
    ```
 
+   - `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）
+   - 最後の行で、書けたか読み戻す
    - 6 行出る
    - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）
    - `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
@@ -113,20 +104,17 @@
 
    </details>
 
-1. **検証する**
+1. 変更のあるリポジトリに `cd` してから、delta の版と差分の表示を確かめる。
 
    ```bash
    delta --version
    brew list --versions git-delta
    command -v delta
-   ```
-
-   `delta 0.19.2` / `git-delta 0.19.2` のように出る。次に、変更のあるリポジトリで差分を出す。
-
-   ```bash
    git diff | delta --paging=never | head -20
    ```
 
+   - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
+   - 最後の行で、変更のあるリポジトリの差分を出す
    - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
    - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
 
@@ -139,7 +127,7 @@
    - `git diff | head` → ページャを通らず、素の unified diff が出る
    - `git diff | delta --paging=never` → 明示的に delta に渡しているので色が付く
 
-   検証ブロックで 3 番目の形を使っているのはこのため。コンテナでの実測（ANSI エスケープは除いてある）:
+   この手順で 3 番目の形を使っているのはこのため。コンテナでの実測（ANSI エスケープは除いてある）:
 
    ```
    $ git diff | delta --paging=never | head -12
@@ -172,20 +160,22 @@
 
 ## lazygit と組み合わせる（任意）
 
-lazygit は自前のページャ設定を持っているので、`~/.gitconfig` の `core.pager` は見ない。[lazygit.md](lazygit.md#設定ファイル) の設定ファイルに次を足す:
-
-```yaml
-git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never
-```
+- lazygit は自前のページャ設定を持っているので、`~/.gitconfig` の `core.pager` は見ない
+- この節はコンテナで検証していない（[未確認事項](#未確認事項)）
 
 > [!WARNING]
-> **`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。
+> **この節の手順 1 で、`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。
 
-- 現在の中身は、`lazygit --print-config-dir` で場所を確かめてから開く
-- この節はコンテナで検証していない（[未確認事項](#未確認事項)）
+1. [lazygit.md](lazygit.md#設定ファイル) の設定ファイルに、delta をページャにする設定を足す。
+
+   ```yaml
+   git:
+     paging:
+       colorArg: always
+       pager: delta --dark --paging=never
+   ```
+
+   - 現在の中身は、`lazygit --print-config-dir` で場所を確かめてから開く
 
 ---
 
@@ -208,28 +198,45 @@ git:
 
 ## 更新
 
-```bash
-brew upgrade git-delta
-```
+1. brew で git-delta を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade git-delta
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall git-delta
-git config --global --unset core.pager
-git config --global --unset interactive.diffFilter
-git config --global --remove-section delta
-git config --global --unset merge.conflictstyle     # zdiff3 も戻す場合
-git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何も出なければ消えている
-```
-
-- **`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる**
-- lazygit の `git.paging` を足していた場合は、`~/.config/lazygit/config.yml` からも消す
 - 本書ではロールバックは**本実行していない**
+
+1. brew で git-delta を消し、git から delta の設定を外す。
+
+   ```bash
+   brew uninstall git-delta
+   git config --global --unset core.pager
+   git config --global --unset interactive.diffFilter
+   git config --global --remove-section delta
+   ```
+
+   - **`core.pager` を消し忘れると、`git diff` のたびに `delta: command not found` になる**
+
+1. `zdiff3` も戻すときだけ、`merge.conflictstyle` を外す。
+
+   ```bash
+   git config --global --unset merge.conflictstyle     # zdiff3 も戻す場合
+   ```
+
+1. delta の設定が消えたか確かめる。
+
+   ```bash
+   git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何も出なければ消えている
+   ```
+
+   - 何も出なければ消えている
+   - lazygit の `git.paging` を足していた場合は、`~/.config/lazygit/config.yml` からも消す
 
 ---
 

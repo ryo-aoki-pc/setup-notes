@@ -5,47 +5,42 @@
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、Syncthing も同期するファイルの持ち主として動かすため）
-> - **手順 3 には対話入力がある**。そのブロックだけ続けて貼らない
+> - **手順 3 には対話入力がある**（パスワード）。入力し終えてから手順 4 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 同期するフォルダは[同期フォルダとデバイスを追加する（任意）](#同期フォルダとデバイスを追加する任意)、GUI の接続元を制限するなら[接続元を絞る（任意）](#接続元を絞る任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。Web GUI を LAN にも公開する前提で既定値が入っている
-   - 手元のブラウザからしか開かないなら、`ST_GUI_ADDR` を `127.0.0.1:8384` にする
+1. 変数を設定する。
 
    ```bash
    ST_USER=$(id -un)                   # サービスを動かす OS アカウント（自動）。<USER>
    ST_GUI_USER=$(id -un)               # GUI のログイン名。OS のアカウントとは別物（自動で同じ名前が入る）。<USER>
    ST_GUI_ADDR=0.0.0.0:8384            # GUI の待ち受け。LAN にも公開する。手元だけなら 127.0.0.1:8384
    ST_LAN_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 案内と検証に使う（自動）。<SERVER_IP>
-   ```
-
-   値を読み戻して確かめる。
-
-   ```bash
    for v in ST_USER ST_GUI_USER ST_GUI_ADDR ST_LAN_IP; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
    ```
 
+   - **編集が必須の変数は無い**。Web GUI を LAN にも公開する前提で既定値が入っている
+   - 手元のブラウザからしか開かないなら、`ST_GUI_ADDR` を `127.0.0.1:8384` にする
+   - 最後に値を読み戻して確かめる
    - `ST_USER` が `root` になっている、`ST_LAN_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、上のブロックを貼り直してから先へ進む
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
    <details>
    <summary>補足: 変数について</summary>
 
    - `ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、OS のアカウントとも Samba のユーザーとも無関係。自動で OS と同じ名前が入るだけなので、別の名前にしてもよい
-   - `ST_LAN_IP` は設定には使わず、手順 7 の案内とブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](samba.md) の `SERVER_IP` と同じ扱い）
+   - `ST_LAN_IP` は設定には使わず、手順 9 の案内とブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](samba.md) の `SERVER_IP` と同じ扱い）
    - `ST_GUI_ADDR` を `0.0.0.0:8384` にすると**すべての NIC で待ち受ける**。この環境では `end0`（LAN）と `wg0`（VPN）の両方から開ける
-   - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 6 のままでよい）
+   - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 8 のままでよい）
    - パスワードは変数に置かない。手順 3 でその場で読み取り、設定したら `unset` する
 
    </details>
 
-1. **Syncthing を入れる**
+1. brew で Syncthing を入れる。
 
    ```bash
    brew install syncthing
@@ -80,22 +75,21 @@
    ...
    ```
 
-   - `sh.brew.syncthing.service` は formula の `service do` ブロックから Homebrew が生成したもので、公式が配っている `etc/linux-systemd/user/syncthing.service` ではない（手順 4 の補足）
+   - `sh.brew.syncthing.service` は formula の `service do` ブロックから Homebrew が生成したもので、公式が配っている `etc/linux-systemd/user/syncthing.service` ではない（手順 6 の補足）
    - man は `man syncthing` / `man syncthing-config` / `man syncthing-faq` などが読める
 
    </details>
 
-1. **初期設定と GUI の認証を作る**
-
-   **サービスを起動する前に**鍵・証明書・設定ファイルを作り、GUI のログイン名とパスワードを入れておく。LAN に開いたあとで認証を設定するのでは、その間 GUI が誰でも開ける状態になるため。
-
-   パスワードを読み取る。**入力は画面に出ない。**
+1. GUI のパスワードを読み取る。
 
    ```bash
    read -rsp 'Syncthing GUI のパスワード: ' ST_GUI_PASS; echo
    ```
 
-   **次のブロックは、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）。
+   - **入力は画面に出ない**
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. サービスを起動する前に、鍵・証明書・設定ファイルを作り、GUI のログイン名とパスワードを入れる。
 
    ```bash
    printf '%s' "${ST_GUI_PASS}" | syncthing generate \
@@ -104,6 +98,7 @@
    syncthing device-id
    ```
 
+   - LAN に開いたあとで認証を設定するのでは、その間 GUI が誰でも開ける状態になるため、サービスの起動より先に入れる
    - `Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
    - 最後の `syncthing device-id` が出す 7 桁 x 8 の文字列が、**このホストのデバイス ID**。相手デバイスに教える値で、秘密ではない
 
@@ -129,15 +124,26 @@
 
    </details>
 
-1. **常時起動にしてサービスを開始する**
-
-   linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける。
+1. 常時起動にするため、linger を有効にする。
 
    ```bash
    sudo loginctl enable-linger "${ST_USER:?手順 1 の ST_USER が空のまま。値を入れて貼り直す}"
    ```
 
-   `sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+   - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
+   <details>
+   <summary>補足: linger が要る理由</summary>
+
+   **linger が無いと、SSH を切った時点で Syncthing も止まる。**
+
+   - ユーザーの systemd（`user@1000.service`）はログインセッションが無くなると終了し、その配下のサービスも一緒に落ちるため
+   - `sudo loginctl enable-linger` は `/var/lib/systemd/linger/<USER>` を作り、起動時にユーザーの systemd を立ち上げてこのサービスを開始させる
+
+   </details>
+
+1. linger が有効になったか確かめ、Syncthing のサービスを開始する。
 
    ```bash
    loginctl show-user "$(id -u)" -p Linger                 # Linger=yes
@@ -151,12 +157,7 @@
    - `~/.config/systemd/user/sh.brew.syncthing.service` が置かれる
 
    <details>
-   <summary>補足: linger と、生成される unit</summary>
-
-   **linger が無いと、SSH を切った時点で Syncthing も止まる。**
-
-   - ユーザーの systemd（`user@1000.service`）はログインセッションが無くなると終了し、その配下のサービスも一緒に落ちるため
-   - `sudo loginctl enable-linger` は `/var/lib/systemd/linger/<USER>` を作り、起動時にユーザーの systemd を立ち上げてこのサービスを開始させる
+   <summary>補足: 生成される unit と、システムサービスにする道</summary>
 
    **Homebrew が置く unit は公式のものではない。** formula の `service do` ブロックから生成された次の内容で、`brew services start` のたびに書き直される:
 
@@ -186,24 +187,20 @@
 
    </details>
 
-1. **GUI を LAN からも開けるようにする**
-
-   手順 3 で認証を入れてあるので、ここで待ち受けを広げる。あわせて HTTPS にする。
+1. GUI の待ち受けを LAN に広げて HTTPS にし、再起動して反映する。
 
    ```bash
    syncthing cli config gui raw-address set "${ST_GUI_ADDR:?手順 1 の ST_GUI_ADDR が空のまま。値を入れて貼り直す}"
    syncthing cli config gui raw-use-tls set true
    syncthing cli config gui raw-address get      # 0.0.0.0:8384
    syncthing cli config gui raw-use-tls get      # true
-   ```
-
-   反映には再起動が要る。
-
-   ```bash
    brew services restart syncthing
    sleep 3
    ss -ltnp | grep 8384                          # *:8384 で LISTEN
    ```
+
+   - 手順 3〜4 で認証を入れてあるので、ここで待ち受けを広げる
+   - 反映には再起動が要る
 
    <details>
    <summary>補足: 自己署名証明書と、別のやり方</summary>
@@ -223,7 +220,7 @@
 
    </details>
 
-1. **firewalld を開ける**
+1. firewalld で `syncthing` と `syncthing-gui` を開ける。
 
    ```bash
    sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
@@ -254,7 +251,7 @@
 
    </details>
 
-1. **検証する**
+1. サービスと待ち受けを確かめ、GUI の URL を出す。
 
    ```bash
    brew services list
@@ -262,18 +259,13 @@
    ss -ltunp | grep -E ':(8384|22000|21027)'
    syncthing device-id
    tail -5 /home/linuxbrew/.linuxbrew/var/log/syncthing.log
-   ```
-
-   8384/tcp、22000/tcp、22000/udp、21027/udp が LISTEN していれば動いている。GUI の URL を出す。
-
-   ```bash
    printf 'GUI: https://%s:8384/  （ログイン名 %s）\n' "${ST_LAN_IP}" "${ST_GUI_USER}"
    ```
 
-   LAN 上のブラウザで確かめる:
-
-   - その URL を開き、自己署名証明書の警告を受け入れ、手順 3 で決めたログイン名とパスワードで入る
-   - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
+   - 8384/tcp、22000/tcp、22000/udp、21027/udp が LISTEN していれば動いている
+   - LAN 上のブラウザで確かめる
+     - その URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
+     - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
    - **この時点では同期するフォルダは 1 つも無い**（Syncthing 2.x は既定フォルダを作らない）
 
    <details>
@@ -299,107 +291,113 @@
 
 ## 同期フォルダとデバイスを追加する（任意）
 
-**Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない。** 入れただけでは何も同期しないので、GUI から足す。
-
-1. 相手側のデバイスでも同じように Syncthing を入れ、そのデバイス ID を控える
-1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。相手側にも承認の通知が出るので、双方で承認する
-1. 「フォルダーを追加」でパス（例: `~/Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる
-1. 相手側に「このデバイスがフォルダーを共有しようとしています」と出るので受け入れる
-
-- 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
-- VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000` のように直接書く
+- **Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない**。入れただけでは何も同期しないので、GUI から足す
 
 > [!WARNING]
-> **ホームディレクトリを丸ごと同期対象にしない。** `~/.local/state/syncthing` 自身や `~/.cache` まで同期してしまう。
+> **この節の手順 3 で、ホームディレクトリを丸ごと同期対象にしない。** `~/.local/state/syncthing` 自身や `~/.cache` まで同期してしまう。
 >
 > - 同期したいものを入れる専用のディレクトリを作る
 > - このホストは [Samba](samba.md) でホームを公開しているので、同じ領域を二重に扱うことになる点にも注意する
+
+1. 相手側のデバイスでも同じように Syncthing を入れ、そのデバイス ID を控える。
+
+1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。
+
+   - 相手側にも承認の通知が出るので、双方で承認する
+   - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
+   - VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000` のように直接書く
+
+1. 「フォルダーを追加」でパス（例: `~/Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる。
+
+1. 相手側に「このデバイスがフォルダーを共有しようとしています」と出るので受け入れる。
 
 ---
 
 ## 接続元を絞る（任意）
 
-**接続元を制限しないなら、この節は不要。**
+- **接続元を制限しないなら、この節は不要**
+- 手順 8 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く
+- 同期そのもの（22000）まで絞ると、相手デバイスの側の経路が変わったときに黙って同期が止まる。**絞るのは GUI だけにしておく方が事故が少ない**
 
-手順 6 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く。GUI だけを特定のサブネットに絞るなら、まず送信元を空白区切りで入れる:
+1. GUI だけを特定のサブネットに絞るため、`syncthing-gui` の開放を rich rule に置き換える。
 
-```bash
-ST_ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ST_ALLOW_FROM>
-```
+   ```bash
+   ST_ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ST_ALLOW_FROM>
+   ```
 
-続けて、`syncthing-gui` サービスの開放を rich rule に置き換える:
+   ```bash
+   if [ -z "${ST_ALLOW_FROM}" ]; then echo '中断: ST_ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
+   sudo firewall-cmd --permanent --remove-service=syncthing-gui
+   for src in ${ST_ALLOW_FROM}; do
+     sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
+   done
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
+   fi
+   ```
 
-```bash
-if [ -z "${ST_ALLOW_FROM}" ]; then echo '中断: ST_ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
-sudo firewall-cmd --permanent --remove-service=syncthing-gui
-for src in ${ST_ALLOW_FROM}; do
-  sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
-done
-sudo firewall-cmd --reload
-sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
-fi
-```
+   - `ST_ALLOW_FROM` には、送信元を空白区切りで入れる
+   - 先頭の `if` は、`ST_ALLOW_FROM` が空のままブロックを貼ったときに、`syncthing-gui` の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
+   - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されないまま `success` で受理される（[samba.md](samba.md) と同じ落とし穴）
 
-- 先頭の `if` は、`ST_ALLOW_FROM` が空のままブロックを貼ったときに、`syncthing-gui` の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
-- rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されないまま `success` で受理される（[samba.md](samba.md) と同じ落とし穴）
+1. 元に戻すときは、絞ったときと同じ `ST_ALLOW_FROM` を入れてから、`syncthing-gui` の開放に戻す。
 
-元に戻すには、絞ったときと同じ `ST_ALLOW_FROM` を入れてから:
-
-```bash
-if [ -z "${ST_ALLOW_FROM}" ]; then echo '中断: ST_ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
-for src in ${ST_ALLOW_FROM}; do
-  sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
-done
-sudo firewall-cmd --permanent --add-service=syncthing-gui
-sudo firewall-cmd --reload
-fi
-```
-
-同期そのもの（22000）まで絞ると、相手デバイスの側の経路が変わったときに黙って同期が止まる。**絞るのは GUI だけにしておく方が事故が少ない。**
+   ```bash
+   if [ -z "${ST_ALLOW_FROM}" ]; then echo '中断: ST_ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
+   for src in ${ST_ALLOW_FROM}; do
+     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
+   done
+   sudo firewall-cmd --permanent --add-service=syncthing-gui
+   sudo firewall-cmd --reload
+   fi
+   ```
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade syncthing
-brew services restart syncthing
-syncthing --version
-```
+1. Syncthing を更新し、サービスを再起動する。
 
-- すべてまとめて上げるなら `brew upgrade`
-- **brew 版は自分では更新しない**（`noupgrade` ビルド）ので、放っておいても勝手に版が上がることはない
-- `brew upgrade` は実行ファイルを差し替えるだけなので、**動いているプロセスは古いままになる。再起動まで必ず行う**
+   ```bash
+   brew upgrade syncthing
+   brew services restart syncthing
+   syncthing --version
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
+   - **brew 版は自分では更新しない**（`noupgrade` ビルド）ので、放っておいても勝手に版が上がることはない
+   - `brew upgrade` は実行ファイルを差し替えるだけなので、**動いているプロセスは古いままになる。再起動まで必ず行う**
 
 ---
 
 ## ロールバック
 
-上から順に実行する。
-
-```bash
-brew services stop syncthing
-sudo loginctl disable-linger "${ST_USER:?手順 1 の ST_USER が空のまま。値を入れて貼り直す}"
-sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
-brew uninstall syncthing
-```
-
-- 後日このブロックだけ貼るときは、先に手順 1 の変数ブロックを貼る（`ST_USER` が空だと `${ST_USER:?…}` で止まる）
-- [接続元を絞る（任意）](#接続元を絞る任意)を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先にその節の「元に戻す」ブロックを貼る
-- `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
-- 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
+- 上から順に実行する
+- 接続元を絞る節を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
+- 同期していたファイル自体は、この節のどちらの手順でも消えない
+- 本書ではロールバックは**本実行していない**
 
 > [!CAUTION]
-> 設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残す。
+> **この節の**手順 2 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残す。
 
-完全に消すなら:
+1. サービスを止め、linger とファイアウォールの設定を外して、Syncthing を消す。
 
-```bash
-rm -rf ~/.local/state/syncthing /home/linuxbrew/.linuxbrew/var/log/syncthing.log
-```
+   ```bash
+   brew services stop syncthing
+   sudo loginctl disable-linger "${ST_USER:?手順 1 の ST_USER が空のまま。値を入れて貼り直す}"
+   sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
+   brew uninstall syncthing
+   ```
 
-- 同期していたファイル自体は、どちらの操作でも消えない
-- 本書ではロールバックは**本実行していない**
+   - 後日この手順だけ貼るときは、先に手順 1 の変数ブロックを貼る（`ST_USER` が空だと `${ST_USER:?…}` で止まる）
+   - `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
+   - 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
+
+1. 完全に消すときだけ、設定・鍵・DB とログを消す（取り戻せない）。
+
+   ```bash
+   rm -rf ~/.local/state/syncthing /home/linuxbrew/.linuxbrew/var/log/syncthing.log
+   ```
 
 ---
 
@@ -482,7 +480,7 @@ AlmaLinux 10 / aarch64 で Syncthing を入れる経路を比べた（2026-09-24
   - 同期するのはホームディレクトリ配下なので、ファイルの持ち主として動かすのが素直
   - root 管理の `syncthing@<USER>.service` でも同じことはできるが、Homebrew 版は unit を同梱しないので自分で書くことになる
 - **GUI は LAN に公開し、認証と TLS を先に入れた**
-  - 公開しない構成（`127.0.0.1:8384` のまま、SSH ポートフォワードで開く）なら、手順 5 と `syncthing-gui` の開放が要らない
+  - 公開しない構成（`127.0.0.1:8384` のまま、SSH ポートフォワードで開く）なら、手順 7 と `syncthing-gui` の開放が要らない
   - このホストは GNOME も入っていて、LAN 内の別 PC から触りたいので公開する方を採った
 - **firewalld は定義済みサービス（`syncthing` / `syncthing-gui`）で開けた。** ポート番号を直接書くより意図が読め、上流がポートを足したときにも追従する
 
@@ -515,7 +513,7 @@ $ syncthing cli config folders list
 ```
 
 - `index-v2` が 2.x の SQLite データベース
-- `https-cert.pem` / `https-key.pem` は、手順 5 で TLS を有効にしたときに Syncthing が自分で作った自己署名証明書（`cert.pem` / `key.pem` はデバイス ID のもとになる別物）
+- `https-cert.pem` / `https-key.pem` は、手順 7 で TLS を有効にしたときに Syncthing が自分で作った自己署名証明書（`cert.pem` / `key.pem` はデバイス ID のもとになる別物）
 
 `config.xml` の `<gui>` 節は次の形になっている（パスワードは bcrypt ハッシュ、API キーは伏せた）:
 
@@ -538,7 +536,7 @@ $ syncthing cli config folders list
 - **linger を切ると止まる**: `loginctl disable-linger` すると、ログアウトした時点で同期が止まる。止まっていること自体は GUI を開くまで気付きにくい
 - **公開範囲は public ゾーンの全 NIC**: この環境では `wg0` も public にあるので、**VPN 越しの拠点からも 22000 と 8384 に届く**
   - 同期には好都合だが、GUI まで届くことは意識しておく。絞るなら[接続元を絞る（任意）](#接続元を絞る任意)
-- **GUI の認証は必須**: LAN に開く構成なので、認証を設定しないまま待ち受けを広げると誰でも全設定を触れる。本書は手順 3（認証）→ 手順 5（公開）→ 手順 6（firewalld）の順にしてある
+- **GUI の認証は必須**: LAN に開く構成なので、認証を設定しないまま待ち受けを広げると誰でも全設定を触れる。本書は手順 3〜4（認証）→ 手順 7（公開）→ 手順 8（firewalld）の順にしてある
 - **証明書は自己署名**: ブラウザの警告は消えない。警告を無視する運用に慣れると本物の異常を見逃すので、常用するなら例外として明示的に登録する
 - **API キーはパスワードと同じ重み**: `config.xml` にあり、これ 1 つで GUI の全操作ができる。ログや issue に貼らない
 - **設定と DB は `~/.local/state/syncthing`**: 1.27.0 以降の既定。バックアップを取るならこのディレクトリごと（`cert.pem` / `key.pem` を失うとデバイス ID が変わる）
@@ -661,7 +659,7 @@ sudo ip netns del sttest
 
 #### `syncthing generate` が残す一時ファイル
 
-手順 3 の直後、設定ディレクトリに `config.xml` と同じ大きさの一時ファイルが残っていた:
+手順 4 の直後、設定ディレクトリに `config.xml` と同じ大きさの一時ファイルが残っていた:
 
 ```
 $ ls -la ~/.local/state/syncthing/

@@ -13,20 +13,16 @@
 > [!WARNING]
 > **コンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。[エイリアスを足す（任意）](#エイリアスを足す任意)で `ll` / `la` に付ける共通オプションを決めるだけで、既定のままでよい
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    EZA_OPTS="--git --group-directories-first"   # ll / la に共通で付けるオプション。<EZA_OPTS>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'EZA_OPTS = %s\n' "${EZA_OPTS}"
    ```
+
+   - **編集が必須の変数は無い**。[エイリアスを足す（任意）](#エイリアスを足す任意)で `ll` / `la` に付ける共通オプションを決めるだけで、既定のままでよい
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -37,7 +33,7 @@
 
    </details>
 
-1. **eza を入れる**
+1. brew で eza を入れる。
 
    ```bash
    brew install eza
@@ -53,23 +49,19 @@
 
    </details>
 
-1. **検証する**
+1. git 管理下のディレクトリに `cd` してから、eza の版と `Git` 列を確かめる。
 
    ```bash
    eza --version
    brew list --versions eza
    command -v eza
-   ```
-
-   - `v0.23.5 [+git]` を含む 3 行が出る
-   - `[+git]` が付いていれば、git 連携込みでビルドされている
-
-   次に、git 管理下のディレクトリで `Git` 列が出ることを確かめる（`cd` する先は自分のリポジトリでよい）。
-
-   ```bash
    eza -l --git --header .
    ```
 
+   - `cd` する先は自分のリポジトリでよい
+   - `eza --version` は `v0.23.5 [+git]` を含む 3 行を出す
+   - `[+git]` が付いていれば、git 連携込みでビルドされている
+   - 最後の行で、`Git` 列が出ることを確かめる
    - `Permissions Size User Date Modified Git Name` という見出しが出る
    - 変更したファイルの `Git` 列に `-M` が付く
    - **git 管理下でないディレクトリでは、`Git` 列そのものが出ない**
@@ -108,17 +100,19 @@
 
 ## エイリアスを足す（任意）
 
-**`ls` は置き換えない。** `ll` / `la` / `lt` を足す形にする（理由は[注意点](#注意点)）。
+- **`ls` は置き換えない**。`ll` / `la` / `lt` を足す形にする（理由は[注意点](#注意点)）
 
-```bash
-printf 'alias ll="eza -l %s"\nalias la="eza -la %s"\nalias lt="eza --tree --level=2"\n' \
-  "${EZA_OPTS:?手順 1 の EZA_OPTS が空のまま。値を入れて貼り直す}" "${EZA_OPTS}" >> ~/.bashrc
-. ~/.bashrc
-alias ll la lt
-```
+1. `~/.bashrc` に `ll` / `la` / `lt` のエイリアスを足す。
 
-- `alias ll='eza -l --git --group-directories-first'` のように 3 行出れば入っている
-- **`alias` の確認に `type -t` は使えない**（非対話シェルではエイリアスが展開されず、`type` が見つけられない。[補足](#補足)の[注意点](#注意点)を参照）
+   ```bash
+   printf 'alias ll="eza -l %s"\nalias la="eza -la %s"\nalias lt="eza --tree --level=2"\n' \
+     "${EZA_OPTS:?手順 1 の EZA_OPTS が空のまま。値を入れて貼り直す}" "${EZA_OPTS}" >> ~/.bashrc
+   . ~/.bashrc
+   alias ll la lt
+   ```
+
+   - `alias ll='eza -l --git --group-directories-first'` のように 3 行出れば入っている
+   - **`alias` の確認に `type -t` は使えない**（非対話シェルではエイリアスが展開されず、`type` が見つけられない。[補足](#補足)の[注意点](#注意点)を参照）
 
 ---
 
@@ -143,23 +137,33 @@ alias ll la lt
 
 ## 更新
 
-```bash
-brew upgrade eza
-```
+1. brew で eza を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade eza
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall eza
-sed -i '/alias l[lat]=.*eza/d' ~/.bashrc     # エイリアスを足していた場合
-```
-
-- 依存の `libgit2` は [bat](bat.md) / [git-delta](git-delta.md) も使うので、不要になったものだけ消すなら `brew autoremove`
 - 本書ではロールバックは**本実行していない**
+
+1. brew で eza を消す。
+
+   ```bash
+   brew uninstall eza
+   ```
+
+   - 依存の `libgit2` は [bat](bat.md) / [git-delta](git-delta.md) も使うので、不要になったものだけ消すなら `brew autoremove`
+
+1. エイリアスを足していたときだけ、`~/.bashrc` からその行を消す。
+
+   ```bash
+   sed -i '/alias l[lat]=.*eza/d' ~/.bashrc     # エイリアスを足していた場合
+   ```
 
 ---
 
