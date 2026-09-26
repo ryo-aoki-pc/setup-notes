@@ -10,27 +10,22 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 整形は[shfmt で整形を確かめる（任意）](#shfmt-で整形を確かめる任意)、警告の抑制は[検査を調整する（任意）](#検査を調整する任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須なのは、1 行ずつのブロックにした検査対象のパス**。自分のリポジトリのスクリプトに変える
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にすべてのブロックを貼り直す
+1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
 
    ```bash
    SC_TARGET=scripts/wireguard/wg-vpn.sh   # 検査するスクリプト。自分のパスに変える。<SC_TARGET>
    ```
 
-   残りは既定のままでよい:
-
    ```bash
    SC_SEVERITY=style        # -S に渡す最低重大度。style だと全部出る。error / warning / info / style。<SC_SEVERITY>
    SHFMT_INDENT=2           # shfmt -i のインデント幅。0 ならタブ。<SHFMT_INDENT>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    for v in SC_TARGET SC_SEVERITY SHFMT_INDENT; do printf '%-13s = %s\n' "$v" "${!v}"; done
    ```
+
+   - **編集が必須なのは、検査対象のパス `SC_TARGET` だけ**。自分のリポジトリのスクリプトに変える
+   - 残りは既定のままでよい
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先に手順 1 の 2 つのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -42,7 +37,7 @@
 
    </details>
 
-1. **ShellCheck と shfmt を入れる**
+1. ShellCheck と shfmt を入れる。
 
    ```bash
    brew install shellcheck shfmt
@@ -71,32 +66,23 @@
 
    </details>
 
-1. **検証する**
+1. 2 つが入ったか確かめ、わざと欠陥のあるコードで検出できるかを見る。
 
    ```bash
    shellcheck --version
    shfmt --version
    command -v shellcheck shfmt
    brew list --versions shellcheck shfmt
-   ```
-
-   `version: 0.11.0` と `3.14.1` が出る。次に、**わざと欠陥のあるコードを標準入力に流して**、本当に検出できることを確かめる（ファイルは作らない）。
-
-   ```bash
    printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
    echo "rc=$?"
-   ```
-
-   - `SC2086 (info): Double quote to prevent globbing and word splitting.` が 1 件出て **`rc=1`** になる
-
-   shfmt も同じように確かめる。
-
-   ```bash
    printf '#!/bin/bash\nif true; then\necho a\nfi\n' | shfmt -i 2 -d -
    echo "rc=$?"
    ```
 
-   - 字下げを足す差分が出て `rc=1` になる
+   - `version: 0.11.0` と `3.14.1` が出る
+   - 次に、**わざと欠陥のあるコードを標準入力に流して**、本当に検出できることを確かめる（ファイルは作らない）。shfmt も同じように確かめる
+   - ShellCheck は `SC2086 (info): Double quote to prevent globbing and word splitting.` が 1 件出て **`rc=1`** になる
+   - shfmt は字下げを足す差分が出て `rc=1` になる
    - **どちらも「指摘があれば `rc=1`」** で、`rc=0` は「指摘なし」を意味する
 
    <details>
@@ -131,32 +117,18 @@
 
    </details>
 
-1. **スクリプトを検査する**
-
-   まず bash の構文チェック。
+1. スクリプトを、bash の構文チェックと ShellCheck で検査する。
 
    ```bash
    bash -n "${SC_TARGET:?手順 1 の SC_TARGET が空のまま。値を入れて貼り直す}"
    echo "rc=$?"
-   ```
-
-   `rc=0` なら構文としては通っている。次に ShellCheck を掛ける。
-
-   ```bash
    shellcheck -x "${SC_TARGET}"
    echo "rc=$?"
    ```
 
-   - **警告が 0 件なら何も出ずに `rc=0` で終わる**
+   - まず bash の構文チェック。1 つ目の `rc=0` なら構文としては通っている
+   - 次に ShellCheck を掛ける。**警告が 0 件なら何も出ずに `rc=0` で終わる**
    - 出たときは、この手順の補足に読み方と実測がある
-
-   件数だけ見たいときと、重大度で絞りたいときは次を使う。
-
-   ```bash
-   shellcheck -x -f json "${SC_TARGET}" | jq 'length'
-   shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
-   shellcheck -x -S "${SC_SEVERITY:?手順 1 の SC_SEVERITY が空のまま。値を入れて貼り直す}" "${SC_TARGET}" | head -20
-   ```
 
    <details>
    <summary>補足: <code>wg-vpn.sh</code> の検査結果（実測）</summary>
@@ -262,100 +234,122 @@
 
    </details>
 
+1. 件数だけ見たいときと、重大度で絞りたいときは、JSON で数えて `-S` で絞る。
+
+   ```bash
+   shellcheck -x -f json "${SC_TARGET}" | jq 'length'
+   shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
+   shellcheck -x -S "${SC_SEVERITY:?手順 1 の SC_SEVERITY が空のまま。値を入れて貼り直す}" "${SC_TARGET}" | head -20
+   ```
+
+   - `wg-vpn.sh` を `-S` ごとに数えた実測は、手順 4 の補足にある
+
 ---
 
 ## shfmt で整形を確かめる（任意）
 
-**`-d` は差分を出すだけでファイルを変えない。** まず今の書き方とどれだけ違うかを見る。
-
-```bash
-shfmt -i "${SHFMT_INDENT:?手順 1 の SHFMT_INDENT が空のまま。値を入れて貼り直す}" -d "${SC_TARGET}" | wc -l
-shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
-```
-
-ディレクトリ配下で整形対象になるファイルを一覧する（`-l` は「整形すると変わるファイル」だけを出す）。
-
-```bash
-shfmt -f scripts | head
-shfmt -l -i "${SHFMT_INDENT}" scripts
-```
+- **`-d` は差分を出すだけでファイルを変えない**
 
 > [!WARNING]
-> **`-w` は元のファイルを上書きする。** いきなり本番のスクリプトに掛けない。
+> **`-w` は元のファイルを上書きする。** いきなり本番のスクリプトに掛けない。**この節の**手順 2 は、一時ディレクトリの複製に掛けて挙動を見る。
 
-一時ディレクトリに複製して挙動を見る:
+1. 今の書き方とどれだけ違うかを見て、整形対象になるファイルを一覧する。
 
-```bash
-SHFMT_TMP=$(mktemp -d)
-cp "${SC_TARGET}" "${SHFMT_TMP}/copy.sh"
-shfmt -i "${SHFMT_INDENT}" -w "${SHFMT_TMP}/copy.sh"
-diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
-rm -rf "${SHFMT_TMP}"
-```
+   ```bash
+   shfmt -i "${SHFMT_INDENT:?手順 1 の SHFMT_INDENT が空のまま。値を入れて貼り直す}" -d "${SC_TARGET}" | wc -l
+   shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
+   shfmt -f scripts | head
+   shfmt -l -i "${SHFMT_INDENT}" scripts
+   ```
 
-- 行数がどれだけ増減するかが出る
-- **差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[手順 4 の補足](#実施手順)の shfmt の項を見る）
+   - まず今の書き方とどれだけ違うかを見る
+   - 次に、ディレクトリ配下で整形対象になるファイルを一覧する（`-l` は「整形すると変わるファイル」だけを出す）
 
-よく使うオプション:
+1. 一時ディレクトリに複製して、`-w` の挙動を見る。
 
-| オプション | 意味 |
-|---|---|
-| `-i N` | インデント幅。`0` はタブ（既定） |
-| `-ci` | `case` の分岐を字下げする |
-| `-bn` | 二項演算子の前で改行する |
-| `-sr` | リダイレクトの後に空白を入れる |
-| `-s` | 冗長な書き方を簡略化する |
-| `-d` / `-l` / `-w` | 差分を出す / 対象を列挙する / 上書きする |
-| `-ln bash\|posix\|mksh` | 方言を明示する（既定はシェバンから判定） |
+   ```bash
+   SHFMT_TMP=$(mktemp -d)
+   cp "${SC_TARGET}" "${SHFMT_TMP}/copy.sh"
+   shfmt -i "${SHFMT_INDENT}" -w "${SHFMT_TMP}/copy.sh"
+   diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
+   rm -rf "${SHFMT_TMP}"
+   ```
+
+   - 行数がどれだけ増減するかが出る
+   - **差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[手順 4 の補足](#実施手順)の shfmt の項を見る）
+
+   <details>
+   <summary>補足: よく使うオプション</summary>
+
+   | オプション | 意味 |
+   |---|---|
+   | `-i N` | インデント幅。`0` はタブ（既定） |
+   | `-ci` | `case` の分岐を字下げする |
+   | `-bn` | 二項演算子の前で改行する |
+   | `-sr` | リダイレクトの後に空白を入れる |
+   | `-s` | 冗長な書き方を簡略化する |
+   | `-d` / `-l` / `-w` | 差分を出す / 対象を列挙する / 上書きする |
+   | `-ln bash\|posix\|mksh` | 方言を明示する（既定はシェバンから判定） |
+
+   </details>
 
 ---
 
 ## 検査を調整する（任意）
 
-**1 行だけ黙らせる**には、その行の直前にディレクティブを置く。スコープは**次の 1 コマンド**で、関数の前なら関数全体、シェバンの直後ならファイル全体になる。
+1. 1 行だけ黙らせるディレクティブの例を、検査対象の中から探す。
 
-```bash
-grep -n 'shellcheck disable' "${SC_TARGET}"
-```
+   ```bash
+   grep -n 'shellcheck disable' "${SC_TARGET}"
+   ```
 
-- `# shellcheck disable=SC1090` のような行が出る
-- 複数まとめるならカンマ区切り（`disable=SC2086,SC2034`）
+   - **1 行だけ黙らせる**には、その行の直前にディレクティブを置く
+   - スコープは**次の 1 コマンド**で、関数の前なら関数全体、シェバンの直後ならファイル全体になる
+   - `# shellcheck disable=SC1090` のような行が出る
+   - 複数まとめるならカンマ区切り（`disable=SC2086,SC2034`）
 
-**リポジトリ全体に効かせる**なら `.shellcheckrc` を置く。次のブロックは**カレントディレクトリにファイルを作る**ので、まず一時ディレクトリで挙動を確かめる:
+1. リポジトリ全体に効かせるときは、`.shellcheckrc` の挙動を一時ディレクトリで確かめる。
 
-```bash
-SC_TMP=$(mktemp -d)
-cp "${SC_TARGET}" "${SC_TMP}/target.sh"
-printf 'disable=SC2034\nexternal-sources=true\nsource-path=SCRIPTDIR\n' > "${SC_TMP}/.shellcheckrc"
-(cd "${SC_TMP}" && shellcheck -x target.sh; echo "rc=$?")
-rm -rf "${SC_TMP}"
-```
+   ```bash
+   SC_TMP=$(mktemp -d)
+   cp "${SC_TARGET}" "${SC_TMP}/target.sh"
+   printf 'disable=SC2034\nexternal-sources=true\nsource-path=SCRIPTDIR\n' > "${SC_TMP}/.shellcheckrc"
+   (cd "${SC_TMP}" && shellcheck -x target.sh; echo "rc=$?")
+   rm -rf "${SC_TMP}"
+   ```
 
-- `disable` に挙げたコードが消えて `rc` が変わる
-- `--norc` を付けると、`.shellcheckrc` を読まずに実行できる
-- **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](#未確認事項)）
+   - **リポジトリ全体に効かせる**なら `.shellcheckrc` を置く
+   - 置くと**カレントディレクトリにファイルを作る**ことになるので、まず一時ディレクトリで挙動を確かめる
+   - `disable` に挙げたコードが消えて `rc` が変わる
+   - `--norc` を付けると、`.shellcheckrc` を読まずに実行できる
+   - **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](#未確認事項)）
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade shellcheck shfmt
-```
+1. ShellCheck と shfmt を上げる。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade shellcheck shfmt
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall shellcheck shfmt
-```
-
-- 依存の `gmp` / `libffi` は他の formula も使うので残る。まとめて整理するなら `brew autoremove`
-- 設定ファイルは作っていないので、消すものは無い（`.shellcheckrc` や `.editorconfig` を自分で置いた場合はそれを消す）
 - 本書ではロールバックは**本実行していない**
+
+1. ShellCheck と shfmt を消す。
+
+   ```bash
+   brew uninstall shellcheck shfmt
+   ```
+
+   - 依存の `gmp` / `libffi` は他の formula も使うので残る。まとめて整理するなら `brew autoremove`
+   - 設定ファイルは作っていないので、消すものは無い（`.shellcheckrc` や `.editorconfig` を自分で置いた場合はそれを消す）
 
 ---
 
@@ -370,7 +364,7 @@ brew uninstall shellcheck shfmt
   - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](#実施手順)）
   - 手順 2〜3 と[検査を調整する（任意）](#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - コンテナで確認したこと: ボトルが降りる、スモークテストが同じ結果になる、EPEL 版の版と名前
-  - **コンテナでは手順 4（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
+  - **コンテナでは手順 4〜5（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -508,7 +502,7 @@ $ brew leaves | wc -l
 | 3. 検証 | `version: 0.11.0` / `3.14.1`。スモークテストは実機と同じく SC2086 が 1 件・`rc=1`、shfmt も差分が出て `rc=1` |
 | 検査を調整する | `mktemp -d` に `.shellcheckrc`（`disable=SC2034`）を置くと該当の指摘が消えて `rc` が `1` → `0` に変わることを確認 |
 | `.editorconfig` | 既定=タブ / `indent_size=2` で 2 / `-i 4` を渡すと 4（`.editorconfig` は無視）の 3 通りを確認 |
-| 4. スクリプトの検査 | **実行していない**（コンテナにリポジトリを置いていない。`wg-vpn.sh` の結果は実機の記録） |
+| 4〜5. スクリプトの検査 | **実行していない**（コンテナにリポジトリを置いていない。`wg-vpn.sh` の結果は実機の記録） |
 | RPM 経路 | `dnf -q list --showduplicates ShellCheck` → `0.10.0-3.el10_0 epel`。`dnf list --available shfmt` → `Error: No matching Packages to list` |
 
 #### 未確認事項

@@ -5,27 +5,23 @@
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
-> - **手順 4 で TUI が開く**。`q` で終了してから次のブロックを貼る
+> - **手順 4 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。プレビュー・検索用のツールを一緒に入れる想定になっている
-   - 最小構成にするなら、`YAZI_EXTRAS` を空にする
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    YAZI_EXTRAS="ffmpeg-full sevenzip jq poppler fd ripgrep fzf resvg imagemagick-full font-symbols-only-nerd-font"   # プレビューと検索に使う。空にすると yazi 本体だけ
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'YAZI_EXTRAS = %s\n' "${YAZI_EXTRAS}"
    ```
+
+   - **編集が必須の変数は無い**。プレビュー・検索用のツールを一緒に入れる想定になっている
+   - 最小構成にするなら、`YAZI_EXTRAS` を空にする
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -35,7 +31,7 @@
 
    </details>
 
-1. **yazi を入れる**
+1. brew で yazi と、プレビュー・検索に使うツールを入れる。
 
    ```bash
    brew install yazi ${YAZI_EXTRAS}
@@ -77,12 +73,7 @@
 
    </details>
 
-1. **シェル関数 `y` を書く**
-
-   yazi をそのまま終了しても、シェルのディレクトリは動かない。公式が案内している関数を入れると:
-
-   - `q` で終了したときに、移動先へ `cd` する
-   - 元の場所で終わりたいときは `Q`
+1. 終了した場所へ移動するシェル関数 `y` を、`~/.bashrc` に書く。
 
    ```bash
    cat >> ~/.bashrc <<'EOF'
@@ -97,6 +88,10 @@
    . ~/.bashrc
    ```
 
+   - yazi をそのまま終了しても、シェルのディレクトリは動かない
+   - 公式が案内しているこの関数を入れると、`q` で終了したときに移動先へ `cd` する
+   - 元の場所で終わりたいときは `Q`
+
    <details>
    <summary>補足: <code>y</code> 関数</summary>
 
@@ -107,28 +102,23 @@
 
    </details>
 
-1. **検証する**
+1. yazi が入ったか確かめ、`y` で起動する。
 
    ```bash
    yazi --version
    ya --version
    brew list --versions yazi
+   y
    ```
 
    - `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る
    - `ya` は付属のプラグイン管理コマンド
-
-   起動して確認する。
-
-   ```bash
-   y
-   ```
-
-   画面が出たら **`q` で終了する。次のブロックは終了してから貼る**（続けて貼ると yazi への操作として食われる）。
-
+   - 最後の `y` で起動して確認する
    - `y` で起動したときは、終了時にそのディレクトリへ移動する
    - プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る
    - 画像プレビューは端末側の対応が要る（[注意点](#注意点)）
+   - 画面が出たら `q` で終了する
+   - **ほかのコマンドは、`q` で終了してから貼る**（続けて貼ると yazi への操作として食われる）
 
 ---
 
@@ -139,37 +129,42 @@
 - **既定値のファイルは配布物に入っていない**（実測: `brew list yazi` に含まれる `.toml` は `.crates.toml` だけ）
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 
-書くときは空のディレクトリを作って、変更したい項目だけ書く:
+1. 設定を書くときは、空のディレクトリを作って変更したい項目だけを書く。
 
-```bash
-mkdir -p ~/.config/yazi
-```
+   ```bash
+   mkdir -p ~/.config/yazi
+   ```
 
-- プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
-- 本書ではプラグインは扱っていない
+   - プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
+   - 本書ではプラグインは扱っていない
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade yazi
-```
+1. brew で yazi を更新する。
 
-- すべてまとめて上げるなら `brew upgrade`
-- `brew outdated` で先に確認できる
+   ```bash
+   brew upgrade yazi
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
+   - `brew outdated` で先に確認できる
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall yazi
-```
-
-- 依存ツール（`YAZI_EXTRAS` で入れたもの）は他でも使うので、消すなら個別に指定する
-- `~/.bashrc` に書いた `y()` 関数と `~/.config/yazi/` は残るので、要らなければ手で消す
 - 本書ではロールバックは**本実行していない**
+
+1. brew で yazi を消す。
+
+   ```bash
+   brew uninstall yazi
+   ```
+
+   - 依存ツール（`YAZI_EXTRAS` で入れたもの）は他でも使うので、消すなら個別に指定する
+   - `~/.bashrc` に書いた `y()` 関数と `~/.config/yazi/` は残るので、要らなければ手で消す
 
 ---
 

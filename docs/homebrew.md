@@ -5,23 +5,23 @@
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
 > - **実行するユーザーは `sudo` できる必要がある**（手順 2・3 で使う）
-> - **手順 3 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。そのブロックだけ続けて貼らない
+> - **手順 3 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。終わってから手順 4 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 - 通すと使えるようになる 12 本: [yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[zoxide](zoxide.md)、[bat](bat.md)、[eza](eza.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[starship](starship.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)
 
-1. **変数を設定する**
-
-   - **編集するものは無い**。導入先は固定
-   - **この場所に入る場合だけ、ビルド済みのボトルが使える**（変えるとすべてソースビルドになる。手順 3 の補足）
-   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    BREW_PREFIX=/home/linuxbrew/.linuxbrew   # Homebrew の導入先。固定。<BREW_PREFIX>
    echo "${BREW_PREFIX}"
    ```
+
+   - **編集するものは無い**。導入先は固定
+   - **この場所に入る場合だけ、ビルド済みのボトルが使える**（変えるとすべてソースビルドになる。手順 3 の補足）
+   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -31,13 +31,13 @@
 
    </details>
 
-1. **依存パッケージを入れる**
+1. 依存パッケージを入れる。
 
    ```bash
    sudo dnf install -y procps-ng curl file git
    ```
 
-   `sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 依存パッケージの役割</summary>
@@ -55,16 +55,16 @@
 
    </details>
 
-1. **インストーラを実行する**
+1. 公式のインストーラを実行する。
 
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-   インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く（`/home/linuxbrew` を作るため）。**次のブロックは、終わってから貼る。**
-
+   - インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く（`/home/linuxbrew` を作るため）
    - 終わりに `==> Installation successful!` と、PATH の通し方を書いた `==> Next steps:` が出る
-   - 次の手順は、その案内と同じ内容（この手順の補足に実測を載せた）
+   - 手順 4 は、その案内と同じ内容（この手順の補足に実測を載せた）
+   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認や `sudo` のパスワードとして食われる）
 
    <details>
    <summary>補足: 導入先を変えてはいけない</summary>
@@ -102,7 +102,7 @@
 
    </details>
 
-1. **PATH に入れる**
+1. `~/.bashrc` に 1 行書いて、`brew` を PATH に入れる。
 
    ```bash
    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
@@ -133,7 +133,7 @@
 
    </details>
 
-1. **検証する**
+1. Homebrew が入ったか確かめる。
 
    ```bash
    brew --version
@@ -201,58 +201,66 @@
 
 ## 更新
 
-Homebrew 自身と formula の索引を更新してから、入れたものを上げる。
+- Homebrew 自身と formula の索引を更新してから、入れたものを上げる
 
-```bash
-brew update
-brew outdated
-```
+1. Homebrew 自身と formula の索引を更新し、上げられるものを見る。
 
-```bash
-brew upgrade
-```
+   ```bash
+   brew update
+   brew outdated
+   ```
 
-- `brew update` が `Already up-to-date.` を返し、`brew outdated` が無出力なら、上げるものは無い
-- 特定のものだけなら `brew upgrade <formula>`
-- **`brew install` / `brew upgrade` は既定で自動更新が走る**ので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）
+   - `brew update` が `Already up-to-date.` を返し、`brew outdated` が無出力なら、上げるものは無いので、この節の手順 2 は飛ばす
+   - **`brew install` / `brew upgrade` は既定で自動更新が走る**ので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）
+
+1. 上げるものがあるときだけ、入れたものを上げる。
+
+   ```bash
+   brew upgrade
+   ```
+
+   - 特定のものだけなら `brew upgrade <formula>`
 
 ---
 
 ## ロールバック
 
-本実行の前に、何が消えるか見る:
-
-```bash
-brew leaves
-brew list --versions | wc -l
-```
-
-公式のアンインストーラを落として、**まず `--dry-run` で何が消えるか見る**。
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh -o /tmp/uninstall.sh
-bash /tmp/uninstall.sh --dry-run
-```
+- 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
+- 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
 
 > [!CAUTION]
-> **本実行すると、Homebrew で入れたものが全部消える。** [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) 以下、`brew leaves` に出るものはすべて使えなくなる。
+> **この節の手順 2 で本実行すると、Homebrew で入れたものが全部消える。** [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) 以下、`brew leaves` に出るものはすべて使えなくなる。
 
-内容を確かめてから本実行する。`sudo` のパスワードと確認を聞かれる。
+1. 本実行の前に、何が消えるか見る。
 
-```bash
-bash /tmp/uninstall.sh
-```
+   ```bash
+   brew leaves
+   brew list --versions | wc -l
+   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh -o /tmp/uninstall.sh
+   bash /tmp/uninstall.sh --dry-run
+   ```
 
-終わったら `~/.bashrc` の行を消す。**消し忘れると、新しいシェルを開くたびにエラーが出る。**
+   - 公式のアンインストーラを `/tmp/uninstall.sh` に落として、**まず `--dry-run` で何が消えるか見る**
+   - **次の手順は、内容を確かめてから貼る**
 
-```bash
-sed -i '/brew shellenv/d' ~/.bashrc
-rm -f /tmp/uninstall.sh
-```
+1. アンインストーラを本実行する（取り戻せない）。
 
-- 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
-- `/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）
-- 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
+   ```bash
+   bash /tmp/uninstall.sh
+   ```
+
+   - `sudo` のパスワードと確認を聞かれる
+   - `/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）
+   - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認や `sudo` のパスワードとして食われる）
+
+1. 終わったら、`~/.bashrc` の行とアンインストーラを消す。
+
+   ```bash
+   sed -i '/brew shellenv/d' ~/.bashrc
+   rm -f /tmp/uninstall.sh
+   ```
+
+   - **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびにエラーが出る**
 
 ---
 

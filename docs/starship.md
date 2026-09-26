@@ -13,22 +13,18 @@
 > [!WARNING]
 > **コンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。既定のままなら starship の組み込みの見た目になり、設定ファイルは作られない
-   - [プリセットを当てる（任意）](#プリセットを当てる任意)まで進むときだけ、`STARSHIP_PRESET` を選び直す（候補は `starship preset --list` で出る）
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    STARSHIP_CONFIG=~/.config/starship.toml   # 設定ファイル。既定の場所。<STARSHIP_CONFIG>
    STARSHIP_PRESET=plain-text-symbols        # 任意手順で当てるプリセット。<STARSHIP_PRESET>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    for v in STARSHIP_CONFIG STARSHIP_PRESET; do printf '%-16s = %s\n' "$v" "${!v}"; done
    ```
+
+   - **編集が必須の変数は無い**。既定のままなら starship の組み込みの見た目になり、設定ファイルは作られない
+   - [プリセットを当てる（任意）](#プリセットを当てる任意)まで進むときだけ、`STARSHIP_PRESET` を選び直す（候補は `starship preset --list` で出る）
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -40,7 +36,7 @@
 
    </details>
 
-1. **starship を入れる**
+1. brew で starship を入れる。
 
    ```bash
    brew install starship
@@ -56,9 +52,7 @@
 
    </details>
 
-1. **シェルに初期化を書く**
-
-   **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）。`~/.bashrc` の**いちばん最後**に置く。
+1. `~/.bashrc` のいちばん最後に、starship の初期化の 1 行を書く。
 
    ```bash
    echo 'eval "$(starship init bash)"' >> ~/.bashrc
@@ -66,6 +60,7 @@
    tail -1 ~/.bashrc
    ```
 
+   - **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）
    - `~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く
    - **注意**: WezTerm のシェル統合の一部が失われる見込み（未検証）。順序とあわせて、この手順の補足を読む
 
@@ -105,22 +100,19 @@
 
    </details>
 
-1. **検証する**
+1. starship が入ったか確かめ、プロンプト文字列が生成されるか見る。
 
    ```bash
    starship --version
    brew list --versions starship
    command -v starship
-   ```
-
-   `starship 1.26.0` と、ビルド情報が数行出る。次に、プロンプト文字列が実際に生成されるか見る（**端末でなくても動く**）。
-
-   ```bash
    starship prompt
    starship module directory
    starship explain
    ```
 
+   - `starship --version` は、`starship 1.26.0` とビルド情報を数行出す
+   - `starship prompt` / `module` / `explain` で、プロンプト文字列が実際に生成されるか見る（**端末でなくても動く**）
    - `starship prompt` は、改行とカレントディレクトリとプロンプト記号を含む文字列を出す
    - `starship explain` は、今のプロンプトに出ている各部分の意味を 1 行ずつ説明する
 
@@ -162,81 +154,107 @@
 
 ## プリセットを当てる（任意）
 
-公式が配っている設定一式を `${STARSHIP_CONFIG}` に書き出す。
+- 公式が配っている設定一式を `${STARSHIP_CONFIG}` に書き出す
 
 > [!WARNING]
-> **既存の設定は上書きされる**ので、自分で書いたものがあれば先に退避する。
+> **この節の手順 2 で、既存の設定は上書きされる**ので、自分で書いたものがあれば先に退避する。
 
-```bash
-starship preset --list
-```
+1. 当てられるプリセットの一覧を見る。
 
-```bash
-mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
-starship preset "${STARSHIP_PRESET:?手順 1 の STARSHIP_PRESET が空のまま。値を入れて貼り直す}" -o "${STARSHIP_CONFIG}"
-wc -l "${STARSHIP_CONFIG}"
-. ~/.bashrc
-starship prompt
-```
+   ```bash
+   starship preset --list
+   ```
 
-- `plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える
-- `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る
-- 実機には `font-symbols-only-nerd-font` が入っている（[yazi.md](yazi.md) 参照）
+   - `plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える
+   - `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る
+   - 実機には `font-symbols-only-nerd-font` が入っている（[yazi.md](yazi.md) 参照）
+   - 既定の `plain-text-symbols` 以外にするなら、[手順 1](#実施手順) の `STARSHIP_PRESET` を選び直して貼り直す
+   - **次の手順は、使うプリセットを決めてから貼る**
+
+1. 選んだプリセットを `${STARSHIP_CONFIG}` に書き出し、シェルに読み込み直す。
+
+   ```bash
+   mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
+   starship preset "${STARSHIP_PRESET:?手順 1 の STARSHIP_PRESET が空のまま。値を入れて貼り直す}" -o "${STARSHIP_CONFIG}"
+   wc -l "${STARSHIP_CONFIG}"
+   . ~/.bashrc
+   starship prompt
+   ```
 
 ---
 
 ## 設定ファイル
 
-`${STARSHIP_CONFIG}` は**既定では存在しない**（無ければ組み込みの既定値で動く）。手で書くなら:
+- `${STARSHIP_CONFIG}` は**既定では存在しない**（無ければ組み込みの既定値で動く）
 
-```bash
-mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
-cat > "${STARSHIP_CONFIG}" <<'EOF'
-add_newline = false
+1. `${STARSHIP_CONFIG}` に、設定を手で書く。
 
-[directory]
-truncation_length = 3
-truncate_to_repo = false
-EOF
-starship prompt
-```
+   ```bash
+   mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
+   cat > "${STARSHIP_CONFIG}" <<'EOF'
+   add_newline = false
 
-- `starship config` で `$EDITOR` が開く
-- 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する
-- 手順 1 の変数は `export` していないので、既定の場所が使われる
+   [directory]
+   truncation_length = 3
+   truncate_to_repo = false
+   EOF
+   starship prompt
+   ```
 
-調べるときに使うサブコマンド:
+   - `starship config` で `$EDITOR` が開く
+   - 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する
+   - 手順 1 の変数は `export` していないので、既定の場所が使われる
 
-| コマンド | 用途 |
-|---|---|
-| `starship explain` | 今のプロンプトの各部分が何を表しているか |
-| `starship timings` | モジュールごとの所要時間。プロンプトが遅いときの犯人探し |
-| `starship module <名前>` | 1 モジュールだけ描画して確かめる |
-| `starship print-config` | 実効設定を表示 |
+   <details>
+   <summary>補足: 調べるときに使うサブコマンド</summary>
+
+   | コマンド | 用途 |
+   |---|---|
+   | `starship explain` | 今のプロンプトの各部分が何を表しているか |
+   | `starship timings` | モジュールごとの所要時間。プロンプトが遅いときの犯人探し |
+   | `starship module <名前>` | 1 モジュールだけ描画して確かめる |
+   | `starship print-config` | 実効設定を表示 |
+
+   </details>
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade starship
-```
+1. brew で starship を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade starship
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall starship
-sed -i '/starship init/d' ~/.bashrc        # ~/.bashrc に書いた 1 行を消す
-rm -f ~/.config/starship.toml              # 設定も消す場合
-rm -rf ~/.cache/starship                   # キャッシュも消す場合
-```
-
-- **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびに `starship: command not found` が出る**（[zoxide](zoxide.md#ロールバック) と同じ落とし穴）
 - 本書ではロールバックは**本実行していない**
+
+1. brew で starship を消し、`~/.bashrc` から初期化の行を消す。
+
+   ```bash
+   brew uninstall starship
+   sed -i '/starship init/d' ~/.bashrc        # ~/.bashrc に書いた 1 行を消す
+   ```
+
+   - **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびに `starship: command not found` が出る**（[zoxide](zoxide.md#ロールバック) と同じ落とし穴）
+
+1. 設定も消すときだけ、`~/.config/starship.toml` を消す。
+
+   ```bash
+   rm -f ~/.config/starship.toml              # 設定も消す場合
+   ```
+
+1. キャッシュも消すときだけ、`~/.cache/starship` を消す。
+
+   ```bash
+   rm -rf ~/.cache/starship                   # キャッシュも消す場合
+   ```
 
 ---
 

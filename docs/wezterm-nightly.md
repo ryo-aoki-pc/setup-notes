@@ -4,37 +4,31 @@
 
 > [!IMPORTANT]
 > - **すべて対象ホスト上で実行する**
-> - **手順 2 と手順 3 には対話入力がある**（COPR の有効化の `[y/N]` と、COPR の GPG 鍵の取り込み）。そのブロックだけ続けて貼らない
+> - **手順 2 と手順 4 には対話入力がある**（COPR の有効化の `[y/N]` と、COPR の GPG 鍵の取り込み）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   **編集するものは無い。**
+1. 変数を設定する。
 
    ```bash
    WZ_CHROOT="rhel-9-$(uname -m)"     # COPR に EL10 向けが無いので EL9 向けを使う。<WZ_CHROOT>
    echo "${WZ_CHROOT}"
    ```
 
+   - **編集するものは無い**
    - `rhel-9-x86_64` または `rhel-9-aarch64` になっていることを確認する。それ以外（`rhel-9-` で終わる、など）なら止める
    - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、このブロックを貼り直してから先へ進む
 
-1. **COPR を有効化する**
+1. chroot を明示して、COPR を有効化する。
 
    ```bash
    sudo dnf copr enable wezfurlong/wezterm-nightly "${WZ_CHROOT}"
    ```
 
-   有効化してよいか `[y/N]` で聞かれる。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
-
-   ```bash
-   cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
-   ```
-
-   `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい。
+   - 有効化してよいか `[y/N]` で聞かれる
+   - **次の手順は、`[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: chroot を明示する理由</summary>
@@ -71,7 +65,15 @@
 
    </details>
 
-1. **インストールする**
+1. できた repo ファイルを確かめる。
+
+   ```bash
+   cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
+   ```
+
+   - `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい
+
+1. WezTerm を入れる。
 
    ```bash
    sudo dnf install wezterm
@@ -79,8 +81,7 @@
 
    - 途中で COPR の GPG 鍵の取り込みを聞かれる
    - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
-
-   **次のブロック（手順 4）は、答えてから貼る**（続けて貼ると答えとして食われる）。
+   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: <code>wezterm</code> はメタパッケージ / 取り込まれる鍵</summary>
@@ -99,7 +100,7 @@
 
    </details>
 
-1. **検証する**
+1. WezTerm が入ったか確かめる。
 
    ```bash
    rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
@@ -109,10 +110,23 @@
    wezterm ls-fonts | head -5
    ```
 
-   GUI を確かめる:
+   - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
+   - アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）
+   - ssh などグラフィカルでないシェルから確かめる場合は、手順 6 でログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる
+   - GNOME の端末から `wezterm` で確かめたなら、手順 6 は飛ばす
 
-   - **GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
-   - ssh などグラフィカルでないシェルから確かめる場合は、次のブロックでログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる
+   <details>
+   <summary>補足: <code>wezterm ls-fonts</code> と <code>wezterm-gui --version</code></summary>
+
+   - **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる
+     - 既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ
+     - `| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
+   - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）
+     - COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
+
+   </details>
+
+1. ssh などグラフィカルでないシェルから確かめるときだけ、ウィンドウを開いて即終了させる。
 
    ```bash
    env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
@@ -120,21 +134,16 @@
        timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
    ```
 
+   - ログイン中の Wayland セッションを指定して、ウィンドウを開く
    - `rc=0` なら、ウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）
-   - アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）
 
    <details>
-   <summary>補足: 検証</summary>
+   <summary>補足: Wayland セッションでの起動試験</summary>
 
    - **Wayland セッションでの起動試験**: この検証は Claude Code のシェル（TTY もディスプレイも無い）から行ったので、`env -i` で環境を空にしてから、ログイン中の GNOME セッションの `WAYLAND_DISPLAY=wayland-0` と `XDG_RUNTIME_DIR` を渡した
      - 値は `/proc/$(pgrep -u "$USER" -x gnome-shell)/environ` から取れる
      - `wezterm start -- sh -c 'exit 0'` はウィンドウを開いて `sh` を走らせ、終了と同時にウィンドウを閉じる。結果 `rc=0`
      - `timeout 30` は、描画に失敗してウィンドウが残った場合の保険
-   - **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる
-     - 既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ
-     - `| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
-   - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）
-     - COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
 
    </details>
 
@@ -153,57 +162,66 @@
 | 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
 | 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
 
-最小の例を `~/.config/wezterm/wezterm.lua` に書く。**`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする。
-
 > [!WARNING]
-> 次のブロックは、既存の `~/.config/wezterm/wezterm.lua` を**上書きする**。自分の設定がある人は貼らない。
+> **この節の**手順 1 は、既存の `~/.config/wezterm/wezterm.lua` を**上書きする**。自分の設定がある人は貼らない。
 
-```bash
-mkdir -p ~/.config/wezterm
-cat > ~/.config/wezterm/wezterm.lua <<'LUA'
-local wezterm = require 'wezterm'
-local config = wezterm.config_builder()
-config.font = wezterm.font 'Noto Sans Mono'
-config.font_size = 12
-return config
-LUA
-wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れば読めている
-```
+1. 自分の設定が無いときだけ、最小の例を `~/.config/wezterm/wezterm.lua` に書く。
 
-- 保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` の既定が true。効かなければ `Ctrl+Shift+R`）
-- Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）
-- `wezterm -n`（`--skip-config`）で、設定を読まずに起動できる
-- `wezterm --config 'font_size=14'` のように、1 項目だけ上書きもできる
+   ```bash
+   mkdir -p ~/.config/wezterm
+   cat > ~/.config/wezterm/wezterm.lua <<'LUA'
+   local wezterm = require 'wezterm'
+   local config = wezterm.config_builder()
+   config.font = wezterm.font 'Noto Sans Mono'
+   config.font_size = 12
+   return config
+   LUA
+   wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れば読めている
+   ```
+
+   - **`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする
+   - 保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` の既定が true。効かなければ `Ctrl+Shift+R`）
+   - Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）
+   - `wezterm -n`（`--skip-config`）で、設定を読まずに起動できる
+   - `wezterm --config 'font_size=14'` のように、1 項目だけ上書きもできる
 
 ---
 
 ## 更新
 
-COPR は `main` ブランチに追従して毎日〜数日おきにビルドされる。通常の `dnf upgrade` に含まれるが、WezTerm だけ上げるなら:
+- COPR は `main` ブランチに追従して毎日〜数日おきにビルドされる
+- 通常の `dnf upgrade` に含まれる
 
-```bash
-sudo dnf upgrade wezterm
-```
+1. WezTerm だけ上げるときは、名前を指定して上げる。
+
+   ```bash
+   sudo dnf upgrade wezterm
+   ```
 
 ---
 
 ## ロールバック
 
-```bash
-sudo dnf remove wezterm wezterm-common wezterm-gui wezterm-mux-server
-```
+- 本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのがこの節の手順 1 の 4 パッケージだけであることまで確認した）
 
-トランザクション表を見て `[y/N]` に答えてから、次のブロックを貼る。
+1. WezTerm の 4 パッケージを消す。
 
-```bash
-sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消す
-```
+   ```bash
+   sudo dnf remove wezterm wezterm-common wezterm-gui wezterm-mux-server
+   ```
 
-- 消えるのは上記 4 パッケージだけで、巻き添えの依存パッケージは無い
-- `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す
-- COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
-- 消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`
-- 本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのが上の 4 パッケージだけであることまで確認した）
+   - 消えるのはこの 4 パッケージだけで、巻き添えの依存パッケージは無い
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. COPR の repo ファイルを消す。
+
+   ```bash
+   sudo dnf copr remove wezfurlong/wezterm-nightly      # repo ファイルを消す
+   ```
+
+   - `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す
+   - COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
+   - 消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`
 
 ---
 

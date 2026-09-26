@@ -4,21 +4,21 @@
 
 > [!IMPORTANT]
 > - **すべて対象ホスト上で実行する**。手順 5 の認証だけブラウザを使う
-> - **手順 4 には対話入力がある**（署名鍵の取り込みの確認が 2 回）。そのブロックだけ続けて貼らない
+> - **手順 4 と手順 5 には対話入力がある**（手順 4 は署名鍵の取り込みの確認が 2 回、手順 5 は `gh auth login` の対話）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集するものは無い**。公式が配っている repo ファイルの URL を入れるだけ
-   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    GH_REPOFILE=https://cli.github.com/packages/rpm/gh-cli.repo   # 公式の repo ファイル。固定。<GH_REPOFILE>
    echo "${GH_REPOFILE}"
    ```
+
+   - **編集するものは無い**。公式が配っている repo ファイルの URL を入れるだけ
+   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -36,15 +36,16 @@
 
    </details>
 
-1. **config-manager を使えるようにする**
+1. `dnf config-manager` を使えるようにする。
 
    ```bash
    sudo dnf install -y 'dnf-command(config-manager)'
    ```
 
    - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（手順 3 の補足）
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
-1. **リポジトリを追加する**
+1. リポジトリを追加する。
 
    ```bash
    sudo dnf config-manager --add-repo "${GH_REPOFILE:?手順 1 の GH_REPOFILE が空のまま。値を入れて貼り直す}"
@@ -67,20 +68,18 @@
 
    </details>
 
-1. **インストールする**
+1. gh をインストールする。
 
    ```bash
    sudo dnf install gh
    ```
 
-   初回は署名鍵の取り込みを **2 回**聞かれる（鍵が 2 本ある）。fingerprint が次の 2 つであることを目で確かめてから `y` と答える。
-
-   - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
-   - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
-
-   どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する。
-
-   **次のブロックは、答えてから貼る**（続けて貼ると答えとして食われる）。
+   - 初回は署名鍵の取り込みを **2 回**聞かれる（鍵が 2 本ある）
+   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える
+     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
+     - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
+   - どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する
+   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 鍵は 2 本</summary>
@@ -106,21 +105,15 @@
 
    </details>
 
-1. **認証する**
+1. GitHub にログインする。
 
    ```bash
    gh auth login
    ```
 
-   対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ。終わったら確認する:
-
-   ```bash
-   gh auth status
-   gh --version
-   ```
-
-   - 認証前の `gh auth status` は `You are not logged into any GitHub hosts.` を返す
+   - 対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
+   - **次の手順は、認証を終えてから貼る**（続けて貼ると対話の答えとして食われる）
 
    <details>
    <summary>補足: 認証</summary>
@@ -131,29 +124,54 @@
 
    </details>
 
+1. 認証できたか確かめる。
+
+   ```bash
+   gh auth status
+   gh --version
+   ```
+
+   - 認証前の `gh auth status` は `You are not logged into any GitHub hosts.` を返す
+
 ---
 
 ## 更新
 
-通常の `dnf upgrade` に含まれる。gh だけ上げるなら:
+- 通常の `dnf upgrade` に含まれる
 
-```bash
-sudo dnf upgrade gh
-```
+1. gh だけを上げるときは、パッケージを指定して更新する。
+
+   ```bash
+   sudo dnf upgrade gh
+   ```
 
 ---
 
 ## ロールバック
 
-```bash
-sudo dnf remove gh
-sudo rm -f /etc/yum.repos.d/gh-cli.repo
-sudo rpm -e gpg-pubkey-62313325-69d4e1f8 gpg-pubkey-75716059-63172e8a   # 鍵も消す場合
-```
-
+- 本書ではロールバックは**本実行していない**
 - 設定（`~/.config/gh/hosts.yml` に保存されたトークン）は残る
 - 消すなら、先に `gh auth logout` でトークンを失効させてから `rm -rf ~/.config/gh`
-- 本書ではロールバックは**本実行していない**
+
+1. gh を消す。
+
+   ```bash
+   sudo dnf remove gh
+   ```
+
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. repo ファイルを消す。
+
+   ```bash
+   sudo rm -f /etc/yum.repos.d/gh-cli.repo
+   ```
+
+1. 鍵も消すときだけ、署名鍵を消す。
+
+   ```bash
+   sudo rpm -e gpg-pubkey-62313325-69d4e1f8 gpg-pubkey-75716059-63172e8a   # 鍵も消す場合
+   ```
 
 ---
 

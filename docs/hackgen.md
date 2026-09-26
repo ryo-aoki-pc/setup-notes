@@ -13,16 +13,16 @@
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行しておらず、aarch64 でも通していない。画面での見た目も確かめていない（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。確認と WezTerm の設定に使うファミリー名で、既定のまま進められる
-   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える（同じ手順で一緒に入る。この手順の補足）
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    HACKGEN_FAMILY='HackGen Console NF'   # 確認と設定に使うファミリー名。<HACKGEN_FAMILY>
    printf '%-15s = %s\n' HACKGEN_FAMILY "${HACKGEN_FAMILY}"
    ```
+
+   - **編集が必須の変数は無い**。確認と WezTerm の設定に使うファミリー名で、既定のまま進められる
+   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える（同じ手順で一緒に入る。この手順の補足）
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 入るフォントの種類</summary>
@@ -55,26 +55,28 @@
 
    </details>
 
-1. **unzip を用意する**
-
-   Homebrew は cask の zip を展開するのに `unzip` を使う。入っているか見る。
+1. `unzip` が入っているか確かめる。
 
    ```bash
    command -v unzip || echo 'unzip は未導入'
    ```
 
-   パスが出れば、次のブロックは飛ばしてよい。無ければ入れる。
+   - Homebrew は cask の zip を展開するのに `unzip` を使う
+   - パスが出れば、手順 3 は飛ばす
+   - `unzip は未導入` と出たら、手順 3 で入れる
+
+1. `unzip` が未導入のときだけ、`unzip` を入れる。
 
    ```bash
    sudo dnf install -y unzip
    ```
 
-   `sudo` のパスワードを聞かれることがある。**次のブロックは、それに答えてから貼る**（続けて貼ると答えとして食われる）。
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: unzip が無いと cask の展開で止まる</summary>
 
-   素のコンテナ（`unzip` 未導入）で手順 3 を先に実行したときの実測。ダウンロードまでは進み、展開で止まる:
+   素のコンテナ（`unzip` 未導入）で手順 4 を先に実行したときの実測。ダウンロードまでは進み、展開で止まる:
 
    ```
    ==> Fetching downloads for: font-hackgen-nerd
@@ -89,7 +91,7 @@
 
    </details>
 
-1. **HackGen を入れる**
+1. HackGen を Homebrew の cask で入れる。
 
    ```bash
    brew install --cask font-hackgen-nerd
@@ -123,26 +125,21 @@
 
    </details>
 
-1. **検証する**
+1. HackGen が入ったか確かめ、かな・漢字・記号・アイコンが入っているかも見る。
 
    ```bash
    brew list --cask --versions font-hackgen-nerd
    ls ~/.local/share/fonts/
    fc-list : family style file | grep HackGen
    fc-match "${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"
+   for cp in 3042 6f22 e0b0 f09b; do printf 'U+%s: ' "${cp}"; fc-list ":charset=${cp}" family | grep -c -x -F "${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"; done
    ```
 
    - `font-hackgen-nerd 2.10.0`、4 つの `.ttf`、`HackGen Console NF` と `HackGen35 Console NF` の Regular / Bold の 4 行が出る
    - `fc-match` が `HackGenConsoleNF-Regular.ttf: "HackGen Console NF" "Regular"` を返せばよい
    - `fc-match` は、名前が合わないときに別のフォントを黙って返すので、**ファイル名が HackGen であることを確かめる**
-
-   次に、かな・漢字・Powerline 記号・Nerd Fonts のアイコンが、このフォントに入っていることを確かめる。
-
-   ```bash
-   for cp in 3042 6f22 e0b0 f09b; do printf 'U+%s: ' "${cp}"; fc-list ":charset=${cp}" family | grep -c -x -F "${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"; done
-   ```
-
-   4 行とも `1` なら入っている（`あ` / `漢` / Powerline の三角 / GitHub のアイコン）。
+   - 最後の `for` で、かな・漢字・Powerline 記号・Nerd Fonts のアイコンが、このフォントに入っていることを確かめる
+   - 4 行とも `1` なら入っている（`あ` / `漢` / Powerline の三角 / GitHub のアイコン）
 
    <details>
    <summary>補足: fontconfig と、fc-cache が要らなかったこと</summary>
@@ -178,90 +175,96 @@
 
 ## WezTerm で使う（任意）
 
-[WezTerm](wezterm-nightly.md) の端末フォントを HackGen Console NF にする。
-
+- [WezTerm](wezterm-nightly.md) の端末フォントを HackGen Console NF にする
 - **[wezterm-nightly.md の設定ファイル](wezterm-nightly.md#設定ファイル)の最小の例（`~/.config/wezterm/wezterm.lua`）を置いてある前提**で、その `config.font` の行を書き換える
 - `~/.wezterm.lua` を使っている場合は、そちらのファイルに読み替える（両方あると `~/.wezterm.lua` だけが読まれる）
 
-まず、書き換える行があるか見る。
+1. 書き換える `config.font` の行があるか見る。
 
-```bash
-grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
-```
+   ```bash
+   grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
+   ```
 
-- `3:config.font = wezterm.font 'Noto Sans Mono'` のように 1 行出ればよい
-- 何も出なければ、`return config` の前に `config.font = wezterm.font 'HackGen Console NF'` を自分で足す
+   - `3:config.font = wezterm.font 'Noto Sans Mono'` のように 1 行出ればよい
+   - 何も出なければ、`return config` の前に `config.font = wezterm.font 'HackGen Console NF'` を自分で足す
+   - **次の手順は、行があるのを確かめてから貼る**
 
-書き換えて、WezTerm がどのフォントで文字を描くかを確かめる。
+1. 行を書き換えて、WezTerm がどのフォントで文字を描くかを確かめる。
 
-```bash
-sed -i "s/^config.font = .*/config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/" ~/.config/wezterm/wezterm.lua
-grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
-wezterm ls-fonts --text 'aあ漢→'
-```
+   ```bash
+   sed -i "s/^config.font = .*/config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/" ~/.config/wezterm/wezterm.lua
+   grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
+   wezterm ls-fonts --text 'aあ漢→'
+   ```
 
-- 4 文字とも `wezterm.font("HackGen Console NF", ...)` と `/home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig` が出ればよい
-- **`→` が `cells=1`（半角）になる**のが Console 版の特徴で、`あ` / `漢` は `cells=2`
-- 起動中の WezTerm には、保存した時点で反映される（wezterm-nightly.md の設定ファイルの節）
+   - 4 文字とも `wezterm.font("HackGen Console NF", ...)` と `/home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig` が出ればよい
+   - **`→` が `cells=1`（半角）になる**のが Console 版の特徴で、`あ` / `漢` は `cells=2`
+   - 起動中の WezTerm には、保存した時点で反映される（wezterm-nightly.md の設定ファイルの節）
 
-<details>
-<summary>補足: <code>wezterm ls-fonts</code> の実測と、Powerline の三角</summary>
+   <details>
+   <summary>補足: <code>wezterm ls-fonts</code> の実測と、Powerline の三角</summary>
 
-コンテナでの実測（画面は出していない。`wezterm ls-fonts` は画面無しで動く）:
+   コンテナでの実測（画面は出していない。`wezterm ls-fonts` は画面無しで動く）:
 
-```
-$ wezterm ls-fonts --text 'aあ漢→'
-LeftToRight
- 0 a    \u{61}       x_adv=8  cells=1  glyph=uni0061#0#0#0#0  ,68   wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
-                                      /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
- 1 あ    \u{3042}     x_adv=17 cells=2  glyph=cid01454#1       ,14050 wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
-                                      /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
- 4 漢    \u{6f22}     x_adv=17 cells=2  glyph=cid24652#1       ,20417 wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
-                                      /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
- 7 →    \u{2192}     x_adv=8  cells=1  glyph=arrowright#0#0#0#0  ,868  wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
-                                      /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
-```
+   ```
+   $ wezterm ls-fonts --text 'aあ漢→'
+   LeftToRight
+    0 a    \u{61}       x_adv=8  cells=1  glyph=uni0061#0#0#0#0  ,68   wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
+                                         /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
+    1 あ    \u{3042}     x_adv=17 cells=2  glyph=cid01454#1       ,14050 wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
+                                         /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
+    4 漢    \u{6f22}     x_adv=17 cells=2  glyph=cid24652#1       ,20417 wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
+                                         /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
+    7 →    \u{2192}     x_adv=8  cells=1  glyph=arrowright#0#0#0#0  ,868  wezterm.font("HackGen Console NF", {weight="Regular", stretch="Normal", style="Normal"})
+                                         /home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig
+   ```
 
-（`glyph=` の後ろの空白は出力を詰めてある。）
+   （`glyph=` の後ろの空白は出力を詰めてある。）
 
-- Nerd Fonts のアイコン（`U+F09B`、GitHub）も同じファイルから引かれた
-- Powerline の三角（`U+E0B0`）は `drawn by wezterm because custom_block_glyphs=true` で、**フォントではなく WezTerm 自身が描く**（WezTerm の既定の設定）
+   - Nerd Fonts のアイコン（`U+F09B`、GitHub）も同じファイルから引かれた
+   - Powerline の三角（`U+E0B0`）は `drawn by wezterm because custom_block_glyphs=true` で、**フォントではなく WezTerm 自身が描く**（WezTerm の既定の設定）
 
-</details>
+   </details>
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade --cask font-hackgen-nerd
-```
+1. HackGen を上げる。
 
-新しい版が無ければ `Warning: Not upgrading font-hackgen-nerd, the latest version is already installed` と出て終わる。
+   ```bash
+   brew upgrade --cask font-hackgen-nerd
+   ```
+
+   - 新しい版が無ければ `Warning: Not upgrading font-hackgen-nerd, the latest version is already installed` と出て終わる
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall --cask font-hackgen-nerd
-ls ~/.local/share/fonts/
-fc-list : family | grep -c HackGen
-```
+- **Homebrew そのものを消すとき**（[homebrew.md のロールバック](homebrew.md#ロールバック)）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
+  - `~/.local/share/fonts` は Homebrew の外なので、Homebrew のアンインストーラがこのフォントを消すかどうかは確かめていない
 
-- `==> Removing Font '/home/<USER>/.local/share/fonts/...'` が 4 行出る
-- `ls` が何も出さず、`grep -c` が `0` になれば消えている（空の `~/.local/share/fonts` は残る）
+1. HackGen を消し、fontconfig から消えたか確かめる。
 
-[WezTerm で使う（任意）](#wezterm-で使う任意)で書き換えた行は、元のフォントに戻す。次は wezterm-nightly.md の最小の例（`Noto Sans Mono`）に戻す場合。
+   ```bash
+   brew uninstall --cask font-hackgen-nerd
+   ls ~/.local/share/fonts/
+   fc-list : family | grep -c HackGen
+   ```
 
-```bash
-sed -i "s/^config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/config.font = wezterm.font 'Noto Sans Mono'/" ~/.config/wezterm/wezterm.lua
-grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
-```
+   - `==> Removing Font '/home/<USER>/.local/share/fonts/...'` が 4 行出る
+   - `ls` が何も出さず、`grep -c` が `0` になれば消えている（空の `~/.local/share/fonts` は残る）
 
-**Homebrew そのものを消すとき**（[homebrew.md のロールバック](homebrew.md#ロールバック)）は、先にこの節の `brew uninstall --cask` を実行しておく。
+1. WezTerm で使う（任意）を通したときだけ、書き換えた行を元のフォントに戻す。
 
-- `~/.local/share/fonts` は Homebrew の外なので、Homebrew のアンインストーラがこのフォントを消すかどうかは確かめていない
+   ```bash
+   sed -i "s/^config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/config.font = wezterm.font 'Noto Sans Mono'/" ~/.config/wezterm/wezterm.lua
+   grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
+   ```
+
+   - [WezTerm で使う（任意）](#wezterm-で使う任意)で書き換えた行は、元のフォントに戻す
+   - このコマンドは、wezterm-nightly.md の最小の例（`Noto Sans Mono`）に戻す場合
 
 ---
 
@@ -272,7 +275,7 @@ grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
 - **目的**: AlmaLinux 10 に、日本語と Nerd Fonts のアイコンが 1 つで揃うプログラミング用フォント [HackGen Console NF](https://github.com/yuru7/HackGen) を入れる。[eza](eza.md) のアイコンや [starship](starship.md) の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフが要る
 - **進め方**: Homebrew の cask `font-hackgen-nerd` で自分の `~/.local/share/fonts` に入れ、fontconfig から見えることを確かめる。**読者が書き換える変数は無い**
 - **状態**: **コンテナでのみ検証済み（2026-09-24、x86_64）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜4・[WezTerm で使う（任意）](#wezterm-で使う任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜5・[WezTerm で使う（任意）](#wezterm-で使う任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**（[flatpak.md](flatpak.md) と同じ環境）
   - 確認したこと:
     - `~/.local/share/fonts` に 4 ファイルが入る
@@ -327,11 +330,11 @@ AlmaLinux 10 で HackGen Console NF を入れる経路を比べた（2026-09-24 
 | 全ユーザー向け（`/usr/local/share/fonts` に置く） | root で置けば全ユーザーから見えるが、cask は自分のホームに置く。複数ユーザーで使う機会が無いので要らない | 不採用 |
 
 - upstream の README は、Linux 向けの導入手順を書いていない（GitHub のリリースの ttf と、Mac の Homebrew、Windows の Chocolatey を案内している）
-- Homebrew の cask も README では Mac 向けとして紹介されているが、Linux の Homebrew でも入った（手順 3 の補足）
+- Homebrew の cask も README では Mac 向けとして紹介されているが、Linux の Homebrew でも入った（手順 4 の補足）
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 4 の直後）:
+**検証コンテナでの出力**（手順 5 の直後）:
 
 ```
 $ brew list --cask --versions font-hackgen-nerd
@@ -351,13 +354,13 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 ### 注意点
 
 - **自分のユーザーにしか入らない**: 置き場所が `~/.local/share/fonts` なので、別のユーザーや root で動くアプリからは見えない
-- **`unzip` が要る**: Homebrew の formula（ボトル）は `unzip` 無しで入るが、zip で配られる cask は展開に `unzip` を使う（手順 2 の補足）
+- **`unzip` が要る**: Homebrew の formula（ボトル）は `unzip` 無しで入るが、zip で配られる cask は展開に `unzip` を使う（手順 3 の補足）
 - **Console 版は記号が半角になる**: 矢印などが 1 セル幅で出る（[WezTerm で使う（任意）](#wezterm-で使う任意)の `→` が `cells=1`）
   - Console ではない通常版（HackGen / HackGen35）は NF 版の zip に入っておらず、NF 無しの cask `font-hackgen` にある
 - **NF 版と NF 無しの版は別の cask**: `font-hackgen-nerd`（Console の 2 ファミリー × NF）と `font-hackgen`（4 ファミリー、アイコン無し）
   - ファミリー名は NF 版だけ末尾に ` NF` が付く（`font-hackgen` は入れていないので、両方入れた状態は確かめていない）
 - **ファミリー名は `HackGen Console NF`**（スペース入り）。ファイル名（`HackGenConsoleNF-Regular.ttf`）や PostScript 名（`HackGenConsoleNF-Regular`）とは違う。アプリの設定にはファミリー名を書く
-- **等幅だけを一覧に出すアプリ**: fontconfig はこのフォントを `spacing=90`（`dual`）と見なす（手順 4 の補足）
+- **等幅だけを一覧に出すアプリ**: fontconfig はこのフォントを `spacing=90`（`dual`）と見なす（手順 5 の補足）
   - `spacing=100`（`mono`）のフォントだけを選択肢に出すアプリで選べるかは、確かめていない
 - **GNOME の端末や VS Code など WezTerm 以外のアプリ**: それぞれの設定でファミリー名 `HackGen Console NF` を指定することになるが、本書では確かめていない
 - **Powerline の記号**: WezTerm は `U+E0B0` などの一部の記号を既定で自分で描く（`custom_block_glyphs`）。ほかの端末ではフォントのグリフが使われる
@@ -375,15 +378,15 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` で立てた使い捨てのコンテナ（x86_64 のクラウドホスト上の Docker）に非 root ユーザーを作り、`docker exec` で [Homebrew の導入](homebrew.md)、手順 2〜4、[WezTerm で使う（任意）](#wezterm-で使う任意)、[更新](#更新)、[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。検証の準備として、`fontconfig` と `dnf-plugins-core` を `dnf` で、WezTerm を [wezterm-nightly.md](wezterm-nightly.md) の手順（COPR `rhel-9-x86_64`。鍵の取り込みを無人で通すため `dnf install -y`）で入れ、WezTerm の設定ファイルは wezterm-nightly.md の最小の例をそのまま置いた。
+`quay.io/almalinuxorg/almalinux:10` で立てた使い捨てのコンテナ（x86_64 のクラウドホスト上の Docker）に非 root ユーザーを作り、`docker exec` で [Homebrew の導入](homebrew.md)、手順 2〜5、[WezTerm で使う（任意）](#wezterm-で使う任意)、[更新](#更新)、[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。検証の準備として、`fontconfig` と `dnf-plugins-core` を `dnf` で、WezTerm を [wezterm-nightly.md](wezterm-nightly.md) の手順（COPR `rhel-9-x86_64`。鍵の取り込みを無人で通すため `dnf install -y`）で入れ、WezTerm の設定ファイルは wezterm-nightly.md の最小の例をそのまま置いた。
 
 | 手順 | 結果 |
 |---|---|
 | 前提. Homebrew | `dnf install -y procps-ng curl file git` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` |
 | 準備. fontconfig | `fontconfig-2.15.0-7.el10`（依存込み 12 パッケージ）。HackGen を入れる前の `fc-list` は 16 行 |
-| 2. unzip | `command -v unzip` が無出力で `unzip は未導入`。`dnf install -y unzip` → `unzip-6.0-69.el10` |
-| 3. HackGen | `Moving Font` が 4 行、`font-hackgen-nerd was successfully installed!`。**この手順書を書く前に別のコンテナで `unzip` を入れずに試したときは、展開で `env: ‘unzip’: No such file or directory` になって失敗した**（手順 2 の補足。これが手順 2 を足した理由） |
-| 4. 検証 | `brew list --cask --versions` → `font-hackgen-nerd 2.10.0`。`fc-list` に 4 行、`fc-match` は `HackGenConsoleNF-Regular.ttf`。`U+3042` / `U+6F22` / `U+E0B0` / `U+F09B` がすべて `1`。`fc-cache` は実行していない |
+| 2〜3. unzip | `command -v unzip` が無出力で `unzip は未導入`。`dnf install -y unzip` → `unzip-6.0-69.el10` |
+| 4. HackGen | `Moving Font` が 4 行、`font-hackgen-nerd was successfully installed!`。**この手順書を書く前に別のコンテナで `unzip` を入れずに試したときは、展開で `env: ‘unzip’: No such file or directory` になって失敗した**（手順 3 の補足。これが手順 2〜3 を足した理由） |
+| 5. 検証 | `brew list --cask --versions` → `font-hackgen-nerd 2.10.0`。`fc-list` に 4 行、`fc-match` は `HackGenConsoleNF-Regular.ttf`。`U+3042` / `U+6F22` / `U+E0B0` / `U+F09B` がすべて `1`。`fc-cache` は実行していない |
 | WezTerm で使う | `grep` が `3:config.font = wezterm.font 'Noto Sans Mono'`、`sed` の後は `3:config.font = wezterm.font 'HackGen Console NF'`。`wezterm ls-fonts --text 'aあ漢→'` は 4 文字とも HackGen Console NF。なお準備で置いた最小の例の `Noto Sans Mono` はコンテナに入っておらず、書き換える前は `Unable to load a font specified by your font=...` と出て組み込みの `JetBrains Mono` が Primary だった（本書の手順とは関係ない） |
 | 更新 | `Warning: Not upgrading font-hackgen-nerd, the latest version is already installed`、終了コード 0 |
 | ロールバック | `Backing up Font` と `Removing Font` が 4 組、`Purging files for version 2.10.0`。`ls` は空、`fc-list` の HackGen は 0 件（`fc-cache` を実行しなくても消えた）。WezTerm の行は `Noto Sans Mono` に戻った |
@@ -395,5 +398,5 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 - 画面での見た目（字形、太字、行の高さ、Nerd Fonts のアイコンの幅と位置）
 - 起動中のアプリ（WezTerm 以外）が、再起動しなくても新しいフォントを見つけるか
 - GNOME の端末・VS Code・GNOME の設定などでのフォントの選択（`spacing=90` のフォントが一覧に出るか）
-- `HackGen35 Console NF` を `${HACKGEN_FAMILY}` にした場合の手順 4 と WezTerm の節（ファイルは同じ cask で入ることだけ確認した）
+- `HackGen35 Console NF` を `${HACKGEN_FAMILY}` にした場合の手順 5 と WezTerm の節（ファイルは同じ cask で入ることだけ確認した）
 - Homebrew を丸ごと消したとき（`uninstall.sh`）に `~/.local/share/fonts` のフォントが消えるか
