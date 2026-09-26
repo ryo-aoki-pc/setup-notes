@@ -13,22 +13,18 @@
 > [!WARNING]
 > **コンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。どちらも既定のまま進められる
-   - 端末の配色に合わせたいときだけ `BAT_THEME_NAME` を変える（候補は[設定ファイル](#設定ファイル)の `bat --list-themes` で出る）
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    BAT_CONFIG=~/.config/bat/config   # bat の設定ファイル。既定の場所。<BAT_CONFIG>
    BAT_THEME_NAME=ansi               # 使うテーマ。ansi は端末の 16 色にそのまま従う。<BAT_THEME_NAME>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    for v in BAT_CONFIG BAT_THEME_NAME; do printf '%-15s = %s\n' "$v" "${!v}"; done
    ```
+
+   - **編集が必須の変数は無い**。どちらも既定のまま進められる
+   - 端末の配色に合わせたいときだけ `BAT_THEME_NAME` を変える（候補は[設定ファイル](#設定ファイル)の `bat --list-themes` で出る）
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -39,7 +35,7 @@
 
    </details>
 
-1. **bat を入れる**
+1. brew で bat を入れる。
 
    ```bash
    brew install bat
@@ -76,20 +72,17 @@
 
    </details>
 
-1. **検証する**
+1. bat が入ったことと、色と行番号が付くことを確かめる。
 
    ```bash
    bat --version
    brew list --versions bat
    command -v bat
-   ```
-
-   `bat 0.26.1` のように出る。次に、色と行番号が付くことを確かめる。
-
-   ```bash
    bat --color=always --style=numbers /etc/os-release | head -5
    ```
 
+   - 版は `bat 0.26.1` のように出る
+   - 最後の行で、色と行番号が付くことを確かめる
    - 行番号付きで `NAME="AlmaLinux"` から 5 行出る
    - **`--color=always` を外してパイプに繋ぐと、装飾の無い `cat` と同じ出力になる**。この確認で明示的に付けているのはそのため
 
@@ -117,23 +110,25 @@
 
 ## ページャに使う（任意）
 
-`man` の表示を色付きにする。`~/.bashrc` に足す:
+- `MANPAGER` も `fzf` のプレビューも**端末が要る**ので、この文書では実行結果を確認していない（[未確認事項](#未確認事項)）
 
-```bash
-cat >> ~/.bashrc <<'EOF'
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-EOF
-. ~/.bashrc
-printf '%s\n' "${MANPAGER}"
-```
+1. `man` の表示を色付きにするため、`~/.bashrc` に `MANPAGER` を足す。
 
-`fzf` を入れてあるなら、ファイル選択のプレビューにも使える（`fzf` の導入は [yazi.md 手順 2](yazi.md#実施手順) 参照）:
+   ```bash
+   cat >> ~/.bashrc <<'EOF'
+   export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+   EOF
+   . ~/.bashrc
+   printf '%s\n' "${MANPAGER}"
+   ```
 
-```bash
-fzf --preview 'bat --color=always --style=numbers {}'
-```
+1. `fzf` を入れてあるときだけ、ファイル選択のプレビューにも bat を使う。
 
-どちらも**端末が要る**ので、この文書では実行結果を確認していない（[未確認事項](#未確認事項)）。
+   ```bash
+   fzf --preview 'bat --color=always --style=numbers {}'
+   ```
+
+   - `fzf` の導入は [yazi.md 手順 2](yazi.md#実施手順) 参照
 
 ---
 
@@ -142,44 +137,59 @@ fzf --preview 'bat --color=always --style=numbers {}'
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は `bat --config-file` で確認できる
 
-よく変える 3 つだけ書く最小の例:
+1. よく変える 3 つだけを書いた、最小の設定ファイルを置く。
 
-```bash
-mkdir -p "$(dirname "${BAT_CONFIG:?手順 1 の BAT_CONFIG が空のまま。値を入れて貼り直す}")"
-cat > "${BAT_CONFIG}" <<EOF
---theme="${BAT_THEME_NAME:?手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
---style="numbers,changes,header"
---paging=never
-EOF
-cat "${BAT_CONFIG}"
-bat --config-file
-```
+   ```bash
+   mkdir -p "$(dirname "${BAT_CONFIG:?手順 1 の BAT_CONFIG が空のまま。値を入れて貼り直す}")"
+   cat > "${BAT_CONFIG}" <<EOF
+   --theme="${BAT_THEME_NAME:?手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
+   --style="numbers,changes,header"
+   --paging=never
+   EOF
+   cat "${BAT_CONFIG}"
+   bat --config-file
+   ```
 
-- テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
-- 自前のシンタックス定義やテーマを足したときだけ `bat cache --build` が要る（キャッシュの場所は `bat --cache-dir`）
+   - テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
+   - 自前のシンタックス定義やテーマを足したときだけ `bat cache --build` が要る（キャッシュの場所は `bat --cache-dir`）
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade bat
-```
+1. brew で bat を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade bat
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall bat
-rm -rf ~/.config/bat ~/.cache/bat        # 設定とキャッシュも消す場合
-sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた場合
-```
-
-- 依存として入った `libgit2` / `oniguruma` は、他の formula（[eza](eza.md) / [git-delta](git-delta.md)）も使う。まとめて整理するなら `brew autoremove` で、不要になったものだけ消える
 - 本書ではロールバックは**本実行していない**
+
+1. brew で bat を消す。
+
+   ```bash
+   brew uninstall bat
+   ```
+
+   - 依存として入った `libgit2` / `oniguruma` は、他の formula（[eza](eza.md) / [git-delta](git-delta.md)）も使う。まとめて整理するなら `brew autoremove` で、不要になったものだけ消える
+
+1. 設定とキャッシュも消すときだけ、`~/.config/bat` と `~/.cache/bat` を消す。
+
+   ```bash
+   rm -rf ~/.config/bat ~/.cache/bat        # 設定とキャッシュも消す場合
+   ```
+
+1. ページャの行を足していたときだけ、`~/.bashrc` からその行を消す。
+
+   ```bash
+   sed -i '/MANPAGER=.*bat/d' ~/.bashrc     # ページャの行を足していた場合
+   ```
 
 ---
 

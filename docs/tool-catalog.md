@@ -24,7 +24,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 表の版は調査日のもの。**導入コマンドを貼る前提**は、導入元ごとに次のとおり。
 
 - Homebrew（`brew install`）: [Homebrew](homebrew.md) を通してあること
-- EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [btop.md 手順 2](btop.md#実施手順) で EPEL を有効にしてあること
+- EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [btop.md 手順 2〜4](btop.md#実施手順) で EPEL を有効にしてあること
 - Flathub（`sudo flatpak install`）: [Flatpak / Flathub](flatpak.md) を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
 
@@ -36,7 +36,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 |---|---|---|---|---|---|
 | BaseOS / AppStream | 既定で有効 | 古めで固定。例: tmux 3.3a、jq 1.7.1、Firefox と Thunderbird は ESR 140 | 調べた範囲では x86_64 と同じ版 | **LibreOffice・GIMP・Inkscape は無い** | — |
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [btop.md](btop.md) |
-| EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream などと合わせて 61 パッケージ）はすべて x86_64 と同じ版 | Chromium・VLC・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 2](btop.md#実施手順) |
+| EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream などと合わせて 61 パッケージ）はすべて x86_64 と同じ版 | Chromium・VLC・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 2〜4](btop.md#実施手順) |
 | RPM Fusion（EL10） | 本書では有効にしていない | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `discord`（x86_64 のみ）と `steam`（i686）。**VLC・OBS・mpv は無い** | [注意点](#注意点) |
 | ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・Brave・Sublime Text・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない**（Sublime Text で実測） | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md) |
@@ -194,7 +194,7 @@ Meld は GUI の規則の 4 番目にあたる。
 |---|---|---|---|---|---|---|
 | GNOME Tweaks | GNOME の細かい設定 | EPEL 46.1 | `sudo dnf install -y gnome-tweaks` | Flathub に無い | 有 | 起動 |
 | Extension Manager | GNOME 拡張の検索と導入 | Flathub `com.mattjakeman.ExtensionManager` 0.6.5（検証済み、GNOME 50） | `sudo flatpak install -y flathub com.mattjakeman.ExtensionManager` | AppStream の `gnome-extensions-app` 46.2（入れてある拡張の管理だけ） | 有 | 導入 |
-| Flatseal | Flatpak アプリの権限を変える | Flathub `com.github.tchx84.Flatseal` 2.4.1（検証済み、GNOME 50） | [flatpak.md 手順 5](flatpak.md#実施手順) | — | 有 | 導入 |
+| Flatseal | Flatpak アプリの権限を変える | Flathub `com.github.tchx84.Flatseal` 2.4.1（検証済み、GNOME 50） | [flatpak.md 手順 8](flatpak.md#実施手順) | — | 有 | 導入 |
 | Mission Center | リソースモニタ（GUI） | Flathub `io.missioncenter.MissionCenter` 1.2.0（検証済み、GNOME 50） | `sudo flatpak install -y flathub io.missioncenter.MissionCenter` | RPM 無し | 有 | 導入 |
 | Remmina | リモートデスクトップのクライアント | EPEL 1.4.39 | `sudo dnf install -y remmina` | Flathub `org.remmina.Remmina` 1.4.43（検証済み） | 有 | 導入 |
 | LocalSend | LAN 内の端末とファイルを送り合う | Flathub `org.localsend.localsend_app` 1.18.2（検証済み、FDO 25.08） | `sudo flatpak install -y flathub org.localsend.localsend_app` | RPM 無し | 有 | 導入 |

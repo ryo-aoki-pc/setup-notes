@@ -3,45 +3,39 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべてサーバー上で実行する**。手順 8 の最後の「クライアントからの接続」だけ別マシン
-> - **手順 6 と手順 8 には対話入力がある**。そのブロックだけ続けて貼らない
+> - **すべてサーバー上で実行する**。手順 15（クライアントからの接続）だけ別マシン
+> - **手順 6 と手順 9 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   **`sudo -i` した root のシェルではなく、公開するユーザー自身のシェルで貼る。**
+1. 公開するユーザー自身のシェルで、変数を設定する（`sudo -i` した root のシェルでは貼らない）。
 
    ```bash
    WORKGROUP=WORKGROUP                 # Windows 側のワークグループ名。既定のままでよいことが多い
    SMB_USER=${USER}                    # 公開するホームディレクトリの持ち主（自動）。<USER>
    SERVER_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 検証と案内に使う（自動）。<SERVER_IP>
-   ```
-
-   値を読み戻して確かめる。
-
-   ```bash
    for v in WORKGROUP SMB_USER SERVER_IP; do
      printf '%-10s = %s\n' "$v" "${!v}"
    done
    ```
 
+   - 最後に値を読み戻して確かめる
    - `SMB_USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、上の 2 つのブロックを貼り直してから先へ進む
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
    <details>
    <summary>補足: 変数について</summary>
 
    - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
-   - `SERVER_IP` が間違っていても、手順 8 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
+   - `SERVER_IP` が間違っていても、手順 11 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
    - `SMB_USER` は `$USER` から入るので、`sudo -i` した root のシェルで貼ると `root` になる。手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
    - `ALLOW_FROM` は[接続元を絞る](#接続元を絞る任意)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 
    </details>
 
-1. **パッケージのインストール**
+1. samba・samba-client・cifs-utils を入れる。
 
    ```bash
    sudo dnf install -y samba samba-client cifs-utils
@@ -52,14 +46,12 @@
    <summary>補足: パッケージ</summary>
 
    - `samba`（baseos）が smbd 本体。依存で `samba-common-tools`（`smbpasswd` / `pdbedit` / `testparm` / `smbstatus`）、`samba-libs`、`samba-dcerpc` などが入る
-   - `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は手順 8 の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
+   - `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は手順 11・12 の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
    - インストール直後は `smb.service` / `nmb.service` とも `disabled` / `inactive`
 
    </details>
 
-1. **smb.conf を書く**
-
-   既定の `/etc/samba/smb.conf` を退避して、最小構成で置き換える:
+1. 既定の smb.conf を退避して最小構成に置き換え、構文を検査する。
 
    ```bash
    sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
@@ -81,11 +73,6 @@
    	read only = No
    	create mask = 0644
    EOF
-   ```
-
-   構文を検査する:
-
-   ```bash
    testparm -s
    ```
 
@@ -98,11 +85,11 @@
    - heredoc は `${WORKGROUP}` を展開するため引用符なしの `<<EOF`。内容にほかの `$` は無い
    - `testparm -s` の出力に `Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)` が出るが、crypto-policies が DEFAULT のときの通常の表示で、エラーではない
    - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` や `read only = No` に対応する行が出なくても書き漏れではない。全パラメータを見るなら `testparm -sv`
-   - 手順 8 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
+   - 手順 15 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
 
    </details>
 
-1. **SELinux**
+1. SELinux の boolean `samba_enable_home_dirs` を on にする。
 
    ```bash
    sudo setsebool -P samba_enable_home_dirs on
@@ -118,7 +105,7 @@
 
    </details>
 
-1. **firewalld**
+1. firewalld で 445/tcp を開ける。
 
    ```bash
    sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
@@ -134,25 +121,17 @@
 
    </details>
 
-1. **Samba ユーザーの登録**
-
-   OS のアカウントが存在することを確かめる:
+1. OS のアカウントを確かめ、Samba ユーザーを登録する。
 
    ```bash
    id "${SMB_USER}"
-   ```
-
-   **端末で対話入力する**（新しいパスワードを 2 回聞かれる。OS のパスワードとは別に保存される）:
-
-   ```bash
    sudo smbpasswd -a "${SMB_USER}"
    ```
 
-   **次のブロックは、2 回の入力を終えてから貼る**（続けて貼るとパスワードとして食われる）。
-
-   ```bash
-   sudo pdbedit -L                              # <USER>:1000: の 1 行が出る
-   ```
+   - `id` で、OS のアカウントが存在することを確かめる
+   - **端末で対話入力する**。新しいパスワードを 2 回聞かれる
+   - Samba のパスワードは、OS のパスワードとは別に保存される
+   - **次の手順は、2 回の入力を終えてから貼る**（続けて貼るとパスワードとして食われる）
 
    <details>
    <summary>補足: Samba ユーザー</summary>
@@ -165,7 +144,15 @@
 
    </details>
 
-1. **サービスの有効化**
+1. Samba ユーザーが登録されたか確かめる。
+
+   ```bash
+   sudo pdbedit -L                              # <USER>:1000: の 1 行が出る
+   ```
+
+   - `<USER>:1000:` の 1 行が出ればよい
+
+1. smb.service を有効にして起動する。
 
    ```bash
    sudo systemctl enable --now smb.service
@@ -181,16 +168,16 @@
 
    </details>
 
-1. **検証**
-
-   **資格情報ファイルを作る。** 手順 6 で登録したパスワードを入力する:
+1. 資格情報ファイルを作るため、手順 6 で登録したパスワードを入力する。
 
    ```bash
    AUTHFILE=/run/user/$(id -u)/smb-auth
    read -rsp "Samba password for ${SMB_USER}: " PW; echo
    ```
 
-   **次のブロックは、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）。
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. 資格情報ファイルを作る。
 
    ```bash
    ( umask 077; printf 'username=%s\npassword=%s\n' "${SMB_USER}" "${PW}" > "${AUTHFILE}" ); unset PW
@@ -200,7 +187,16 @@
    - このファイルを、`smbclient` と `mount.cifs` の両方で使う
    - パスワードをコマンドラインに書かないのは、`ps` に見えるため
 
-   **共有の一覧と読み書き**（`smbclient`）:
+   <details>
+   <summary>補足: 資格情報ファイル</summary>
+
+   - パスワードは `-U user%pass` で渡すと `ps` に見える
+   - `smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う
+   - `/run/user/<uid>/` は tmpfs でユーザー専用（0700）
+
+   </details>
+
+1. `smbclient` で、共有の一覧と読み書きを確かめる。
 
    ```bash
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
@@ -211,7 +207,14 @@
    smbclient "//${SERVER_IP}/${SMB_USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
    ```
 
-   **マウントして書き込む**（`mount.cifs`）:
+   <details>
+   <summary>補足: 共有の一覧</summary>
+
+   - `smbclient -L` に出るのは `IPC$` と `<USER>` の 2 つ。`homes` / `printers` / `print$` は出ない
+
+   </details>
+
+1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
 
    ```bash
    sudo mkdir -p /mnt/smbtest
@@ -222,38 +225,43 @@
    sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
    ```
 
-   `smbstatus` はセッションが生きている間しか見えないので、出力を確かめてからアンマウントする:
+   - `smbstatus` はセッションが生きている間しか見えない
+   - **次の手順は、`smbstatus` の出力を確かめてから貼る**（手順 13 でアンマウントすると見えなくなる）
+
+   <details>
+   <summary>補足: マウントと smbstatus</summary>
+
+   - `mount.cifs` の既定は SMB 3.1.1（`vers=3.1.1`）。`uid=` / `gid=` を渡さないとマウント側のファイルが root 所有に見える
+   - マウント側の `ls -Z` は `cifs_t`、サーバー側は `user_home_t`（`user_home_dir_t` 配下の type transition。`restorecon` していないのにこうなる）
+   - `smbstatus` はサーバー側で「交渉されたプロトコル / 暗号化 / 署名」を表示する。クライアント側では見えにくい情報なので、暗号化の有無を確かめるならここ
+
+   </details>
+
+1. アンマウントして、マウントポイントを消す。
 
    ```bash
    sudo umount /mnt/smbtest && sudo rmdir /mnt/smbtest
    ```
 
-   **後片付け**:
+1. 後片付けとして、検証で作ったファイルと資格情報ファイルを消し、AVC を確かめる。
 
    ```bash
    rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
    sudo ausearch -m AVC -ts today               # <no matches>
    ```
 
-   **クライアントからの接続**（別マシン。**未検証**。値に読み替える）:
+1. 別のマシンから、クライアントで接続する（未検証）。
 
+   - `<SERVER_IP>` と `<USER>` は値に読み替える
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
-
-   WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み替える（クライアント側の `AllowedIPs` にトンネル網が入っていることが前提。[WireGuard の手順書](wireguard.md)）。
+   - WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み替える（クライアント側の `AllowedIPs` にトンネル網が入っていることが前提。[WireGuard の手順書](wireguard.md)）
 
    <details>
-   <summary>補足: 検証</summary>
+   <summary>補足: クライアントからの接続</summary>
 
-   - パスワードは `-U user%pass` で渡すと `ps` に見える
-   - `smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う
-   - `/run/user/<uid>/` は tmpfs でユーザー専用（0700）
-   - `smbclient -L` に出るのは `IPC$` と `<USER>` の 2 つ。`homes` / `printers` / `print$` は出ない
-   - `mount.cifs` の既定は SMB 3.1.1（`vers=3.1.1`）。`uid=` / `gid=` を渡さないとマウント側のファイルが root 所有に見える
-   - マウント側の `ls -Z` は `cifs_t`、サーバー側は `user_home_t`（`user_home_dir_t` 配下の type transition。`restorecon` していないのにこうなる）
-   - `smbstatus` はサーバー側で「交渉されたプロトコル / 暗号化 / 署名」を表示する。クライアント側では見えにくい情報なので、暗号化の有無を確かめるならここ
    - クライアントからの接続は未検証。IP アドレスで指定する（NetBIOS 名では見つからない）
 
    </details>
@@ -262,74 +270,74 @@
 
 ## 接続元を絞る（任意）
 
-**接続元を制限しないなら、この節は不要。**
+- **接続元を制限しないなら、この節は不要**
+- 手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く
+- 補足: [接続元を絞るときの補足](#接続元を絞るときの補足)
 
-手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く。絞るなら、まず送信元サブネットを空白区切りで入れる:
+1. 送信元サブネットを空白区切りで入れ、445/tcp の開放を rich rule に置き換える。
 
-```bash
-ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ALLOW_FROM>
-```
+   ```bash
+   ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ALLOW_FROM>
+   ```
 
-続けて、445/tcp の開放を rich rule に置き換える:
+   ```bash
+   if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
+   sudo firewall-cmd --permanent --remove-port=445/tcp
+   for src in ${ALLOW_FROM}; do
+     sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
+   done
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
+   fi
+   ```
 
-```bash
-if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
-sudo firewall-cmd --permanent --remove-port=445/tcp
-for src in ${ALLOW_FROM}; do
-  sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
-done
-sudo firewall-cmd --reload
-sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
-fi
-```
+   - 先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに、445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
+   - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう
 
-- 先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに、445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
-- rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう
+1. 元に戻すときは、絞ったときと同じ `ALLOW_FROM` を入れてから、public ゾーン全体の 445/tcp に戻す。
 
-元の「public ゾーン全体で 445/tcp」に戻すには、絞ったときと同じ `ALLOW_FROM` を入れてから:
-
-```bash
-if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
-for src in ${ALLOW_FROM}; do
-  sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
-done
-sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
-fi
-```
-
-→ [補足](#接続元を絞るときの補足)
+   ```bash
+   if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
+   for src in ${ALLOW_FROM}; do
+     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
+   done
+   sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+   fi
+   ```
 
 ---
 
 ## ロールバック
 
-上から順に実行する。
-
-```bash
-sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
-sudo systemctl disable --now smb.service
-sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
-sudo smbpasswd -x "${SMB_USER:?手順 1 の SMB_USER を設定してから貼る}"
-sudo setsebool -P samba_enable_home_dirs off
-sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
-```
-
-- 後日このブロックだけ貼るときは、先に手順 1 の変数ブロックを貼る（`SMB_USER` が空だと `${SMB_USER:?…}` で止まる）
-- 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
-- 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[元に戻す](#接続元を絞る任意)ブロックを貼る
-
-パッケージも消すなら（`samba-common` は実施前から入っていたので残す）:
-
-```bash
-sudo dnf remove -y samba samba-client cifs-utils
-```
-
-- `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
+- 上から順に実行する
+- 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
 
 > [!CAUTION]
-> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。手順 6 の補足）。消すと、中の登録は取り戻せない。
+> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。手順 6 の補足）。**この節の**手順 2 の「完全に消すなら」で消すと、中の登録は取り戻せない。
 
-完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`。
+1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
+
+   ```bash
+   sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
+   sudo systemctl disable --now smb.service
+   sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
+   sudo smbpasswd -x "${SMB_USER:?手順 1 の SMB_USER を設定してから貼る}"
+   sudo setsebool -P samba_enable_home_dirs off
+   sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
+   ```
+
+   - 後日この手順だけ貼るときは、先に手順 1 の変数ブロックを貼る（`SMB_USER` が空だと `${SMB_USER:?…}` で止まる）
+   - 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
+
+1. パッケージも消すときだけ、samba・samba-client・cifs-utils を消す。
+
+   ```bash
+   sudo dnf remove -y samba samba-client cifs-utils
+   ```
+
+   - `samba-common` は実施前から入っていたので残す
+   - `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
+   - 完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`（取り戻せない）
 
 ---
 

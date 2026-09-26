@@ -5,26 +5,22 @@
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
-> - **手順 3 で TUI が開く**。`q` で終了してから次のブロックを貼る
+> - **手順 3 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. **変数を設定する**
-
-   - **編集が必須の変数は無い**。`e` キーで開くエディタを変えたいときだけ書き換える
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+1. 変数を設定する。
 
    ```bash
    LG_EDITOR=nvim                  # lazygit の e キーで開くエディタ。vim / code など。<LG_EDITOR>
-   ```
-
-   **値を読み戻して確かめる。**
-
-   ```bash
    printf 'LG_EDITOR = %s\n' "${LG_EDITOR}"
    ```
+
+   - **編集が必須の変数は無い**。`e` キーで開くエディタを変えたいときだけ書き換える
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -34,7 +30,7 @@
 
    </details>
 
-1. **lazygit を入れる**
+1. brew で lazygit を入れる。
 
    ```bash
    brew install lazygit
@@ -60,7 +56,7 @@
 
    </details>
 
-1. **検証する**
+1. lazygit が入ったか確かめ、git リポジトリで起動してみる。
 
    ```bash
    lazygit --version
@@ -68,11 +64,10 @@
    command -v lazygit
    ```
 
-   `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る。
-
-   次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）。
-
+   - `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る
+   - 次に、git リポジトリのルートに `cd` してから `lazygit` を起動して確認する（`q` で終了）
    - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
+   - **ほかのコマンドは、`q` で終了してから貼る**（続けて貼ると lazygit への操作として食われる）
 
    <details>
    <summary>補足: 起動時の注意</summary>
@@ -95,40 +90,45 @@
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
 
-エディタだけ指定する最小の例:
+1. エディタだけを指定する、最小の `config.yml` を書く。
 
-```bash
-mkdir -p ~/.config/lazygit
-cat >> ~/.config/lazygit/config.yml <<EOF
-os:
-  edit: '${LG_EDITOR:?手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
-EOF
-lazygit --print-config-dir
-```
+   ```bash
+   mkdir -p ~/.config/lazygit
+   cat >> ~/.config/lazygit/config.yml <<EOF
+   os:
+     edit: '${LG_EDITOR:?手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
+   EOF
+   lazygit --print-config-dir
+   ```
 
-- 既定値の全体は `lazygit --config` で表示できる
-- アプリ内では `x` でキーバインド一覧が出る
+   - 既定値の全体は `lazygit --config` で表示できる
+   - アプリ内では `x` でキーバインド一覧が出る
 
 ---
 
 ## 更新
 
-```bash
-brew upgrade lazygit
-```
+1. brew で lazygit を更新する。
 
-すべてまとめて上げるなら `brew upgrade`。
+   ```bash
+   brew upgrade lazygit
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
 
 ---
 
 ## ロールバック
 
-```bash
-brew uninstall lazygit
-```
-
-- `~/.config/lazygit/` と `~/.local/state/lazygit/` は残るので、要らなければ手で消す
 - 本書ではロールバックは**本実行していない**
+
+1. brew で lazygit を消す。
+
+   ```bash
+   brew uninstall lazygit
+   ```
+
+   - `~/.config/lazygit/` と `~/.local/state/lazygit/` は残るので、要らなければ手で消す
 
 ---
 
