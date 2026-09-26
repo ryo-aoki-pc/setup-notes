@@ -19,8 +19,7 @@
    ```bash
    SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
    SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
-   CERTDIR=/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates   # 固定。変更不要
-   for v in SERVER_IP SERVER_NAME SERVER_FQDN CERTDIR; do
+   for v in SERVER_IP SERVER_NAME SERVER_FQDN; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
    ```
@@ -36,20 +35,19 @@
    - `LAN_SUBNET` は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する
    - 接続元を制限しない場合は、手順 5 で public ゾーンに `rdp` サービスを開放した状態が完成形
    - `SERVER_IP` が空のまま進むと、手順 2 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
-   - 変数を読み込んでいないシェルで手順のコマンドを貼ると、`"${CERTDIR}"` が空文字で展開されたまま実行される
 
    </details>
 
 1. `gnome-remote-desktop` ユーザーとして、TLS 証明書と鍵を openssl で生成する。
 
    ```bash
-   sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
+   sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
      -subj "/CN=${SERVER_NAME}" \
      -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
      -addext "extendedKeyUsage=serverAuth" \
-     -keyout "${CERTDIR}/rdp-tls.key" \
-     -out    "${CERTDIR}/rdp-tls.crt"
+     -keyout /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
+     -out    /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
    ```
 
    - 所有権を最初から正しくするため、`gnome-remote-desktop` ユーザー自身として生成する
@@ -70,7 +68,7 @@
    環境 2 で生成された証明書の内容:
 
    ```
-   $ sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -subject -dates -ext subjectAltName,extendedKeyUsage
+   $ sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -subject -dates -ext subjectAltName,extendedKeyUsage
    subject=CN=<HOSTNAME>
    notBefore=Sep 16 16:02:07 2026 GMT
    notAfter=Sep 13 16:02:07 2036 GMT
@@ -117,10 +115,10 @@
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
 
    ```bash
-   sudo chmod 600 "${CERTDIR}/rdp-tls.key"
-   sudo chmod 644 "${CERTDIR}/rdp-tls.crt"
+   sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+   sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
    sudo restorecon -Rv /var/lib/gnome-remote-desktop
-   sudo ls -lZ "${CERTDIR}"
+   sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    ```
 
    <details>
@@ -138,8 +136,8 @@
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
-   sudo grdctl --system rdp set-tls-key  "${CERTDIR}/rdp-tls.key"
-   sudo grdctl --system rdp set-tls-cert "${CERTDIR}/rdp-tls.crt"
+   sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+   sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
    sudo grdctl --system rdp enable
    ```
 
@@ -217,8 +215,8 @@
 1. 鍵と証明書が対応しているかを確かめる。
 
    ```bash
-   sudo openssl x509 -in "${CERTDIR}/rdp-tls.crt" -noout -modulus | openssl sha256
-   sudo openssl rsa  -in "${CERTDIR}/rdp-tls.key" -noout -modulus | openssl sha256
+   sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
+   sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
    ```
 
    - 2 つのハッシュが一致すれば、ペアとして正しい
@@ -403,15 +401,15 @@
    ```
 
    ```bash
-   if [ -z "${OLD_BASENAME}" ] || [ -z "${CERTDIR}" ]; then echo '中断: OLD_BASENAME と手順 1 の CERTDIR を設定してから貼り直す' >&2; else
-   sudo grdctl --system rdp set-tls-key  "${CERTDIR}/${OLD_BASENAME}.key"
-   sudo grdctl --system rdp set-tls-cert "${CERTDIR}/${OLD_BASENAME}.crt"
+   if [ -z "${OLD_BASENAME}" ]; then echo '中断: OLD_BASENAME を設定してから貼り直す' >&2; else
+   sudo grdctl --system rdp set-tls-key  "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.key"
+   sudo grdctl --system rdp set-tls-cert "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.crt"
    sudo systemctl restart gnome-remote-desktop.service
    fi
    ```
 
    - `OLD_BASENAME` には、差し替え前の証明書・鍵のファイル名（拡張子なし）を入れる
-   - `OLD_BASENAME` が空のまま、または手順 1 の `CERTDIR` が無い状態で貼ると、先頭の `if` で中断し、`grdctl` は実行されない
+   - `OLD_BASENAME` が空のまま貼ると、先頭の `if` で中断し、`grdctl` は実行されない
 
 ---
 
@@ -441,7 +439,6 @@
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの IP アドレス | `192.168.10.100` |
 > | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](#接続元を-lan-に絞る任意)場合だけ、その節の冒頭で設定する | `192.168.10.0/24` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | サーバーのホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-server` / `my-server.lan` |
-> | `${CERTDIR}` | TLS 証明書・鍵の置き場所（固定値。変更不要） | `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` |
 >
 > 出力例・ログ・表の中の値は `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>`（OS アカウント名）のプレースホルダで書いてある。
 >
@@ -755,9 +752,9 @@ sudo dnf install -y freerdp
 [手順 1](#実施手順) の変数を設定したうえで:
 
 ```bash
-sudo -u gnome-remote-desktop mkdir -p "${CERTDIR}"
-sudo -u gnome-remote-desktop winpr-makecert -silent -rdp -path "${CERTDIR}" rdp-tls
-sudo chmod 600 "${CERTDIR}/rdp-tls.key"
+sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
+sudo -u gnome-remote-desktop winpr-makecert -silent -rdp -path /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates rdp-tls
+sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
 ```
 
@@ -777,8 +774,8 @@ podman run --rm --hostname "${SERVER_NAME}" -v "${OUT}:/out:Z" \
   docker.io/library/almalinux:10 \
   bash -c 'dnf install -y freerdp >/dev/null 2>&1 && winpr-makecert -silent -rdp -path /out rdp-tls'
 
-sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 644 "${OUT}/rdp-tls.crt" "${CERTDIR}/"
-sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 600 "${OUT}/rdp-tls.key" "${CERTDIR}/"
+sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 644 "${OUT}/rdp-tls.crt" /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/
+sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 600 "${OUT}/rdp-tls.key" /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/
 sudo restorecon -Rv /var/lib/gnome-remote-desktop
 rm -rf "${OUT}"
 ```

@@ -4,9 +4,9 @@
 
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）
-> - **手順 8 には対話入力がある**（確認が 2 回）。完了してから手順 9 を貼る
+> - **手順 7 には対話入力がある**（確認が 2 回）。完了してから手順 8 を貼る
 
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: [ツール一覧](tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 - [Firefox](firefox.md) と [VS Code](vscode.md) は Flathub を使わず RPM で入れている（理由はそれぞれの「選択した方針」）
@@ -14,34 +14,14 @@
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行しておらず、aarch64 でも通していない。デスクトップのメニュー・アプリの画面・GNOME Software での表示も確かめていない（[対象と検証環境](#対象と検証環境)）。
 
-1. 変数を設定する。
-
-   ```bash
-   FLATHUB_REPO_URL=https://dl.flathub.org/repo/flathub.flatpakrepo   # Flathub の登録ファイル。固定。<FLATHUB_REPO_URL>
-   FP_TEST_APP=com.github.tchx84.Flatseal                               # 動作確認に入れるアプリの ID。<FP_TEST_APP>
-   for v in FLATHUB_REPO_URL FP_TEST_APP; do printf '%-16s = %s\n' "$v" "${!v}"; done
-   ```
-
-   - **編集するものは無い**。Flathub の登録ファイルの URL は固定
-   - 動作確認に入れるアプリは、小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール。手順 8 の補足）にしてある
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
-
-   <details>
-   <summary>補足: 変数について</summary>
-
-   - どちらも**この文書の中だけで使うシェル変数**で、flatpak が読む環境変数ではない
-   - `${FP_TEST_APP}` を別のアプリ ID に変えてもよいが、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）
-
-   </details>
-
 1. flatpak が入っているか確かめる。
 
    ```bash
    rpm -q flatpak || echo 'flatpak は未導入'
    ```
 
-   - バージョンが出れば、手順 3 は飛ばす
-   - `flatpak は未導入` と出たら、手順 3 で入れる
+   - バージョンが出れば、手順 2 は飛ばす
+   - `flatpak は未導入` と出たら、手順 2 で入れる
 
 1. flatpak が未導入のときだけ、AppStream から入れる。
 
@@ -67,7 +47,7 @@
 
    素のコンテナでは `dnf install flatpak` が依存込みで 138 パッケージ（ダウンロード 92 MB、展開後 323 MB）を入れた。
 
-   - サンドボックスの `bubblewrap`、`ostree-libs`、`polkit`、`xdg-desktop-portal`、`gnupg2`（手順 5 で使う `gpg`）などが含まれる
+   - サンドボックスの `bubblewrap`、`ostree-libs`、`polkit`、`xdg-desktop-portal`、`gnupg2`（手順 4 で使う `gpg`）などが含まれる
    - デスクトップのあるホストでは依存の多くが既に入っているので、数はこれより少ないはず（未確認）
 
    GNOME の `gnome-software` パッケージは `flatpak` に依存し、Flatpak 用のプラグイン（`/usr/lib64/gnome-software/plugins-21/libgs_plugin_flatpak.so`）を含む（`dnf repoquery` で確認）。したがって GNOME のデスクトップには flatpak が最初から入っていることが多い（このリポジトリの 2 台とも入っていた。[実施前の状態](#実施前の状態)）。
@@ -82,14 +62,14 @@
    ```
 
    - `Flatpak 1.16.0` のように出る
-   - **入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**。リモートがまだ無いだけ（手順 3 の補足）
+   - **入れた直後は `flatpak remotes` が `error: While opening repository /var/lib/flatpak/repo: ...` を出すが、壊れているわけではない**。リモートがまだ無いだけ（手順 2 の補足）
    - 何も出ない場合も、リモートが無い状態
-   - **`flathub` の行が既にあれば、手順 6 は何もしない**（`--if-not-exists` のため）
+   - **`flathub` の行が既にあれば、手順 5 は何もしない**（`--if-not-exists` のため）
 
 1. Flathub の登録ファイルに埋め込まれた公開鍵の fingerprint を確かめる。
 
    ```bash
-   curl -fsSL "${FLATHUB_REPO_URL:?手順 1 の FLATHUB_REPO_URL が空のまま。値を入れて貼り直す}" | sed -n 's/^GPGKey=//p' | base64 -d | gpg --show-keys --with-fingerprint
+   curl -fsSL https://dl.flathub.org/repo/flathub.flatpakrepo | sed -n 's/^GPGKey=//p' | base64 -d | gpg --show-keys --with-fingerprint
    ```
 
    - 次の値と一致することを目で確かめる
@@ -108,7 +88,7 @@
 1. Flathub を system に登録する。
 
    ```bash
-   sudo flatpak remote-add --if-not-exists flathub "${FLATHUB_REPO_URL:?手順 1 の FLATHUB_REPO_URL が空のまま。値を入れて貼り直す}"
+   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
    ```
 
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
@@ -149,9 +129,10 @@
 1. 確認用のアプリを入れる。
 
    ```bash
-   sudo flatpak install flathub "${FP_TEST_APP:?手順 1 の FP_TEST_APP が空のまま。値を入れて貼り直す}"
+   sudo flatpak install flathub com.github.tchx84.Flatseal
    ```
 
+   - 確認用のアプリは、小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール）にしてある
    - **確認を 2 回聞かれる**。どちらも `y` で進める
      - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
      - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
@@ -187,6 +168,8 @@
 
    GL ドライバ（`GL.default`）とコーデック（`codecs-extra`）の拡張も一緒に入る。入れ終わった時点で `/var/lib/flatpak` は 2.5 GB になった。
 
+   確認用に別のアプリを入れてもよい（この手順・手順 8・[ロールバック](#ロールバック)の手順 1 の ID を置き換える）が、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）。
+
    同じ runtime を使うアプリを 2 本目以降に入れるときは、runtime の取得は起きない。[ツール一覧](tool-catalog.md#gui)の Flathub の行には、アプリごとの runtime（GNOME 50 / FDO 25.08 / FDO 26.08）を書いてある。
 
    </details>
@@ -195,8 +178,8 @@
 
    ```bash
    flatpak list --app --columns=application,version,branch,installation
-   flatpak info "${FP_TEST_APP:?手順 1 の FP_TEST_APP が空のまま。値を入れて貼り直す}"
-   flatpak run --command=true "${FP_TEST_APP}" && echo 'sandbox OK'
+   flatpak info com.github.tchx84.Flatseal
+   flatpak run --command=true com.github.tchx84.Flatseal && echo 'sandbox OK'
    ls /var/lib/flatpak/exports/share/applications/
    ```
 
@@ -276,7 +259,7 @@
 1. 確認用のアプリを消す。
 
    ```bash
-   sudo flatpak uninstall "${FP_TEST_APP:?手順 1 の FP_TEST_APP が空のまま。値を入れて貼り直す}"
+   sudo flatpak uninstall com.github.tchx84.Flatseal
    ```
 
    - 消す前に `[Y/n]` で聞かれる
@@ -321,8 +304,8 @@
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
 - **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜9・[更新](#更新)・[ロールバック](#ロールバック)を通した
-  - 確認の問い合わせ（手順 8 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 確認の問い合わせ（手順 7 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
   - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
   - **確認していないこと**: デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示。コンテナに画面が無いため
   - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）
@@ -339,13 +322,6 @@
 - Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](syncthing.md)）ので、今の状態は確かめていない
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
->
-> | 変数 | 意味 | 例 |
-> |---|---|---|
-> | `${FLATHUB_REPO_URL}` | Flathub の登録ファイル（`.flatpakrepo`）の URL | `https://dl.flathub.org/repo/flathub.flatpakrepo`（固定） |
-> | `${FP_TEST_APP}` | 動作確認に入れるアプリの ID | `com.github.tchx84.Flatseal`（既定） |
->
 > 出力例の値は `<USER>` のプレースホルダで書いてある。バージョン（`1.16.0` / `2.4.1`）と容量は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
@@ -365,12 +341,12 @@
 | 選択肢 | 採否 |
 |---|---|
 | **system に入れる（`sudo flatpak ...`）** | **採用。** ホストの全ユーザーで共有できる。dnf と同じく `sudo` で操作する |
-| user に入れる（`--user`） | 不採用。自分のユーザーだけで閉じるが、以降のすべてのコマンドに `--user` を付ける必要がある（手順 6 の補足） |
+| user に入れる（`--user`） | 不採用。自分のユーザーだけで閉じるが、以降のすべてのコマンドに `--user` を付ける必要がある（手順 5 の補足） |
 | `sudo` を付けずに system に入れる | 不採用。flatpak は polkit で認証を求めるが、端末からの操作は `sudo` に揃えた。polkit の問い合わせ（デスクトップのダイアログや端末のパスワード入力）は確かめていない |
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 9 の直後。ロールバック前）:
+**検証コンテナでの出力**（手順 8 の直後。ロールバック前）:
 
 ```
 $ flatpak list --app --columns=application,version,branch,installation
@@ -409,7 +385,7 @@ com.github.tchx84.Flatseal.desktop
   - [ツール一覧](tool-catalog.md#gui)の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統）
   - `sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **`dnf upgrade` では上がらない**: [更新](#更新)の `sudo flatpak update` を別に実行する
-- **権限はアプリごとに違う**: 手順 8 の実測のように、入れる前に権限の一覧が出る
+- **権限はアプリごとに違う**: 手順 7 の実測のように、入れる前に権限の一覧が出る
   - 入れた後は `flatpak info --show-permissions <ID>` で見られ、Flatseal か `sudo flatpak override` で変えられる
 - **公開元が検証済みかを見る**: Flathub のアプリには次の 2 種類がある。[ツール一覧](tool-catalog.md#gui)の表に書き分けてある
   - 検証済み: 公開元がアプリの作者本人だと確認されたもの
@@ -430,16 +406,16 @@ com.github.tchx84.Flatseal.desktop
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 2〜9・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、Thunderbird が `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
+`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、Thunderbird が `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
 
 | 手順 | 結果 |
 |---|---|
-| 1. 変数 | 2 つとも既定の値が表示された |
-| 2〜4. flatpak | `flatpak は未導入` → `dnf install -y flatpak` で 138 パッケージ → `Flatpak 1.16.0`。直後の `flatpak remotes --show-details` は `error: While opening repository /var/lib/flatpak/repo: ...` |
-| 5. 鍵 | `gpg: directory '/home/<USER>/.gnupg' created` の後に `6E5C 05D9 79C7 6DAF 93C0  8135 4184 DD4D 907A 7CAE`（`Flathub Repo Signing Key <flathub@flathub.org>`、`expires: 2027-06-14`） |
-| 6〜7. Flathub | `remote-add` は無出力。`flatpak remotes --show-details` に `flathub` の行（`Options` が `system`） |
-| 8. 確認用アプリ | runtime の確認と最終確認の 2 回に `y`。GL ドライバ 2・コーデック 1・GNOME 50 の runtime と翻訳・Flatseal の 6 つが入った |
-| 9. 検証 | `flatpak list` に Flatseal 2.4.1（system）、`flatpak info` の `Origin: flathub`、`sandbox OK`、`com.github.tchx84.Flatseal.desktop`。ログインシェルの `XDG_DATA_DIRS` に 2 つの `exports/share` が入った |
+| 変数（当時の手順 1。今は無い） | 2 つとも既定の値が表示された |
+| 1〜3. flatpak | `flatpak は未導入` → `dnf install -y flatpak` で 138 パッケージ → `Flatpak 1.16.0`。直後の `flatpak remotes --show-details` は `error: While opening repository /var/lib/flatpak/repo: ...` |
+| 4. 鍵 | `gpg: directory '/home/<USER>/.gnupg' created` の後に `6E5C 05D9 79C7 6DAF 93C0  8135 4184 DD4D 907A 7CAE`（`Flathub Repo Signing Key <flathub@flathub.org>`、`expires: 2027-06-14`） |
+| 5〜6. Flathub | `remote-add` は無出力。`flatpak remotes --show-details` に `flathub` の行（`Options` が `system`） |
+| 7. 確認用アプリ | runtime の確認と最終確認の 2 回に `y`。GL ドライバ 2・コーデック 1・GNOME 50 の runtime と翻訳・Flatseal の 6 つが入った |
+| 8. 検証 | `flatpak list` に Flatseal 2.4.1（system）、`flatpak info` の `Origin: flathub`、`sandbox OK`、`com.github.tchx84.Flatseal.desktop`。ログインシェルの `XDG_DATA_DIRS` に 2 つの `exports/share` が入った |
 | 更新 | `Looking for updates…` → `Nothing to do.` |
 | ロールバック | `uninstall` で Flatseal、`--unused` で 5 つが消えた。`flatpak list --app` と、`remote-delete` 後の `flatpak remotes --show-details` はどちらも無出力 |
 

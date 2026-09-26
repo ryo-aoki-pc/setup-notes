@@ -5,11 +5,11 @@
 > [!IMPORTANT]
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **途中で再起動が 1 回（Secure Boot が有効なら 2 回）入る**（手順 24 と、Secure Boot なら手順 16）。再起動した後は新しい端末を開き、手順 1 のブロックを貼り直してから続ける
+> - **途中で再起動が 1 回（Secure Boot が有効なら 2 回）入る**（手順 24 と、Secure Boot なら手順 16）。再起動した後は新しい端末を開いて続ける
 > - **手順 8・9・15・18 には対話入力がある**（鍵の確認・一時パスワード・`[y/N]`）。答えてから次の手順を貼る
 > - **手順 28 で GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから手順 29 を貼る
 
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: カーネルを更新したときは[カーネルを更新したとき](#カーネルを更新したとき)、以後の VirtualBox の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)
 
@@ -19,33 +19,19 @@
 > - `uname -r` と `mokutil` はスタブにした
 > - モジュールの読み込み・MokManager での鍵の登録・VM の起動・GUI の表示などは確かめていない
 
-1. 変数を設定し、この PC に入るかを確かめる。
+1. この PC に入るかを確かめる。
 
    ```bash
-   VBOX_PKG=VirtualBox-7.2          # 入れる系列。パッケージ名に系列が入っている。固定。<VBOX_PKG>
-   VBOX_TEST_VM=vbox-selftest       # 手順 27 で作って消す確認用の VM の名前。<VBOX_TEST_VM>
-   for v in VBOX_PKG VBOX_TEST_VM; do printf '%-12s = %s\n' "$v" "${!v}"; done
    uname -m
    lscpu | grep -E '^Virtualization:' || echo 'CPU の仮想化支援が見えない'
    ```
 
-   - **編集するものは無い**。入れる系列（パッケージ名）と、手順 27 で作ってすぐ消す確認用の VM の名前だけ
-   - 最後の 2 行で、この PC に入るかを確かめる
    - `uname -m` が `x86_64` で、`Virtualization:` の行に `VT-x`（Intel）か `AMD-V`（AMD）が出ればよい
    - **`aarch64` なら VirtualBox は入らないので、ここで止める**
    - `CPU の仮想化支援が見えない` と出たら、PC の UEFI（BIOS）の設定で Intel VT-x / AMD-V（SVM）を有効にしてから始める
-   - **新しいシェルを開いたら**（再起動の後も）、先にこのブロックを貼り直す
 
    <details>
-   <summary>補足: 変数について</summary>
-
-   `${VBOX_PKG}` は **Oracle のリポジトリでのパッケージ名で、系列（7.2）が名前に入っている**。
-
-   - 系列の無い `VirtualBox` という名前は無く、`sudo dnf install --assumeno VirtualBox` は `No match for argument: VirtualBox` で終わる（実測）
-   - 調査日（2026-09-24）のリポジトリには `VirtualBox-7.2`（7.2.0〜7.2.20）と `VirtualBox-7.1`（7.1.10〜7.1.18）がある
-   - **7.1 と 7.2 は同時には入れられない**（[更新](#更新)）。本書は 7.2 だけを検証している
-
-   `${VBOX_TEST_VM}` は手順 27 で作ってすぐ消す VM の名前で、既に同じ名前の VM があるなら別の名前にする（[flatpak.md](flatpak.md) の `FP_TEST_APP` と同じ扱い）。どちらも**この文書の中だけで使うシェル変数**で、VirtualBox が読む環境変数ではない。
+   <summary>補足: コンテナでの表示</summary>
 
    検証コンテナでは `lscpu` に `Virtualization:` の行が出なかった（コンテナを動かしているクラウドのホストに仮想化支援が無い）。**VT-x / AMD-V がある PC での `lscpu` の表示は確かめていない**（[未確認事項](#未確認事項)）。
 
@@ -85,7 +71,7 @@
      - nothing provides liblzf.so.1()(64bit) needed by VirtualBox-7.2-7.2.20_175154_el10-1.x86_64 from virtualbox
    ```
 
-   EPEL の鍵は、最初に EPEL のパッケージを入れるとき（手順 18）に `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` から取り込まれる（[btop.md](btop.md) 手順 3 の補足と同じ）。
+   EPEL の鍵は、最初に EPEL のパッケージを入れるとき（手順 18）に `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` から取り込まれる（[btop.md](btop.md) 手順 2 の補足と同じ）。
 
    </details>
 
@@ -226,14 +212,20 @@
 1. 何が入るかを見る（`--assumeno` は必ず中断する）。
 
    ```bash
-   sudo dnf install --assumeno "${VBOX_PKG:?手順 1 の VBOX_PKG が空のまま。値を入れて貼り直す}"
+   sudo dnf install --assumeno VirtualBox-7.2
    ```
 
    - `VirtualBox-7.2 ... 7.2.20_175154_el10-1 ... virtualbox ... 105 M` と、依存の中に `liblzf ... epel` が出れば解決できている
    - `nothing provides liblzf.so.1()(64bit)` と出たら、手順 2〜4 が済んでいない
 
    <details>
-   <summary>補足: 下見の結果</summary>
+   <summary>補足: パッケージ名と下見の結果</summary>
+
+   **パッケージ名に系列（7.2）が入っている**（Oracle のリポジトリでの名前）。
+
+   - 系列の無い `VirtualBox` という名前は無く、`sudo dnf install --assumeno VirtualBox` は `No match for argument: VirtualBox` で終わる（実測）
+   - 調査日（2026-09-24）のリポジトリには `VirtualBox-7.2`（7.2.0〜7.2.20）と `VirtualBox-7.1`（7.1.10〜7.1.18）がある
+   - **7.1 と 7.2 は同時には入れられない**（[更新](#更新)）。本書は 7.2 だけを検証している
 
    **下見の結果**（素のコンテナ。デスクトップの PC では多くが入っているので、数はずっと少ないはず。未確認）:
 
@@ -426,7 +418,7 @@
    - 起動の途中で青い **MokManager** の画面が出る
    - `Enroll MOK` → `Continue` → `Yes` → 一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは手順 15 の `sudo mokutil --import ...` からやり直す
-   - **次の手順は、起動したら新しい端末を開き、手順 1 のブロックを貼り直してから貼る**
+   - **次の手順は、起動したら新しい端末を開いてから貼る**
 
 1. Secure Boot が有効なときだけ、鍵が登録されたか確かめる。
 
@@ -440,11 +432,11 @@
 1. VirtualBox を入れる。
 
    ```bash
-   sudo dnf install "${VBOX_PKG:?手順 1 の VBOX_PKG が空のまま。値を入れて貼り直す}"
+   sudo dnf install VirtualBox-7.2
    ```
 
    - トランザクション表を見て、`[y/N]` に `y` と答える
-   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[btop.md 手順 5](btop.md#実施手順) と同じ）
+   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[btop.md 手順 4](btop.md#実施手順) と同じ）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
    - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
@@ -568,7 +560,7 @@
    sudo systemctl reboot
    ```
 
-   - **次の手順は、起動したら新しい端末を開き、手順 1 のブロックを貼り直してから貼る**
+   - **次の手順は、起動したら新しい端末を開いてから貼る**
 
 1. VirtualBox の版と、モジュールと KVM の状態を確かめる。
 
@@ -595,12 +587,12 @@
 1. 使い捨ての VM を画面無しで起動し、状態を見てから止めて消す。
 
    ```bash
-   VBoxManage createvm --name "${VBOX_TEST_VM:?手順 1 の VBOX_TEST_VM が空のまま。値を入れて貼り直す}" --ostype Other_64 --register
-   VBoxManage modifyvm "${VBOX_TEST_VM}" --memory 64 --nic1 none --audio-enabled off
-   VBoxManage startvm "${VBOX_TEST_VM}" --type headless
-   VBoxManage showvminfo "${VBOX_TEST_VM:?手順 1 の VBOX_TEST_VM が空のまま。値を入れて貼り直す}" --machinereadable | grep -E '^VMState='
-   VBoxManage controlvm "${VBOX_TEST_VM}" poweroff
-   VBoxManage unregistervm "${VBOX_TEST_VM}" --delete
+   VBoxManage createvm --name vbox-selftest --ostype Other_64 --register
+   VBoxManage modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off
+   VBoxManage startvm vbox-selftest --type headless
+   VBoxManage showvminfo vbox-selftest --machinereadable | grep -E '^VMState='
+   VBoxManage controlvm vbox-selftest poweroff
+   VBoxManage unregistervm vbox-selftest --delete
    ```
 
    - VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
@@ -622,6 +614,7 @@
 
    - KVM とぶつかったときの 2 つの文は、実機で出したものではなく `/usr/lib/virtualbox/VBoxVMM.so` の中の文字列から写した
    - 本文の成功したときの表示（`VM "vbox-selftest" has been successfully started.`）も、`VBoxManage` の中の `VM "%s" has been successfully started.` から写したもので、本書では実際には出ていない
+   - 既に `vbox-selftest` という名前の VM があるなら、この手順の 6 行の名前を別のものに置き換えて貼る
 
    コンテナ（モジュールが無い）での `startvm` の実測は次のとおりで、実機での失敗の出方とは違う可能性がある:
 
@@ -704,7 +697,7 @@
 1. 同じ系列の中で、新しい版に上げる。
 
    ```bash
-   sudo dnf upgrade "${VBOX_PKG:?手順 1 の VBOX_PKG が空のまま。値を入れて貼り直す}"
+   sudo dnf upgrade VirtualBox-7.2
    ```
 
    - トランザクション表を見て `[y/N]` に答える
@@ -717,12 +710,13 @@
 1. 系列を変えるときは（この節の手順 1 の代わりに）、[ロールバック](#ロールバック)の手順 1 だけを行う。
 
    - VM と GUI をすべて閉じてから行う
-   - [ロールバック](#ロールバック)の手順 1 は `sudo dnf remove "${VBOX_PKG}"`
+   - [ロールバック](#ロールバック)の手順 1 は `sudo dnf remove VirtualBox-7.2`
    - `[y/N]` に答えてから、この節の手順 3 に進む
 
-1. 系列を変えるときは、`VBOX_PKG` を書き換えた手順 1 を貼り直し、[手順 10](#実施手順) の下見と手順 18 からやり直す。
+1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[手順 10](#実施手順) の下見と手順 18 からやり直す。
 
-   - `VBOX_PKG` には新しい系列の名前を入れる
+   - 手順 10・18 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
+   - 以後は、この節の手順 1 と[ロールバック](#ロールバック)の手順 1 も同じく置き換える
    - repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
 
 ---
@@ -745,7 +739,7 @@
 1. VM をすべて止めてから、VirtualBox を消す。
 
    ```bash
-   sudo dnf remove "${VBOX_PKG:?手順 1 の VBOX_PKG が空のまま。値を入れて貼り直す}"
+   sudo dnf remove VirtualBox-7.2
    ```
 
    - **依存で入ったもの（Qt 6 など）も一緒に消える**
@@ -783,7 +777,7 @@
   - **Linux の arm64 版は無い**ので、Raspberry Pi 5 は対象外
 - **進め方**: EPEL を有効にし（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具（と Secure Boot なら MOK の鍵）を用意してから `dnf install` する
   - 最後に KVM の設定を足して再起動する
-  - **読者が書き換える変数は無い**
+  - **読者が書き換える値は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-24）。実機には入れていない**
   - 下表の検証コンテナで、**この文書のコードブロックを上から順にそのまま貼って**手順 1〜15・17〜23・25〜29、[カーネルを更新したとき](#カーネルを更新したとき)・[更新](#更新)・[ロールバック](#ロールバック)を通した（手順 16・24 の再起動は実行していない）
   - 確認したこと:
@@ -813,13 +807,6 @@
 実機の列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**。CPU が Intel か AMD か、Secure Boot が有効か、KVM を使っているかは記録が無い。
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
->
-> | 変数 | 意味 | 例 |
-> |---|---|---|
-> | `${VBOX_PKG}` | 入れるパッケージ名（= 系列） | `VirtualBox-7.2`（固定） |
-> | `${VBOX_TEST_VM}` | 手順 27 で作って消す確認用の VM の名前 | `vbox-selftest`（既定） |
->
 > 出力例の値は `<USER>` / `<GID>` などのプレースホルダで書いてある。バージョン（`7.2.20`）とカーネルの版（`6.12.0-211.56.1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。** MOK の秘密鍵と一時パスワードは載せない。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
