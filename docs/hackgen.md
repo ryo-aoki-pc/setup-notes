@@ -290,7 +290,7 @@
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-24 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10`、Docker 29.3.1） |
-| Homebrew | Pi は 2026-09-24 のクリーンインストール後の状態を確かめていない | 7.0.6（[homebrew.md](homebrew.md) の手順 2〜4 で新規導入） |
+| Homebrew | Pi は 2026-09-24 のクリーンインストール後の状態を確かめていない | 7.0.6（[homebrew.md](homebrew.md) の手順 1〜3 で新規導入） |
 | HackGen | 未導入 | `font-hackgen-nerd 2.10.0`（cask） |
 | unzip / fontconfig | 未確認 | どちらも未導入だったので `dnf` で入れた（`unzip-6.0-69.el10` / `fontconfig-2.15.0-7.el10`） |
 | WezTerm | x86_64 PC に nightly（[wezterm-nightly.md](wezterm-nightly.md)） | `wezterm 20260921_051727_5eb03b23`（検証のため wezterm-nightly.md の手順で導入） |

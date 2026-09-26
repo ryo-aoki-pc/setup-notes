@@ -16,12 +16,11 @@
 1. 変数を設定する。
 
    ```bash
-   BAT_CONFIG=~/.config/bat/config   # bat の設定ファイル。既定の場所。<BAT_CONFIG>
    BAT_THEME_NAME=ansi               # 使うテーマ。ansi は端末の 16 色にそのまま従う。<BAT_THEME_NAME>
-   for v in BAT_CONFIG BAT_THEME_NAME; do printf '%-15s = %s\n' "$v" "${!v}"; done
+   printf 'BAT_THEME_NAME = %s\n' "${BAT_THEME_NAME}"
    ```
 
-   - **編集が必須の変数は無い**。どちらも既定のまま進められる
+   - **編集が必須の変数は無い**。既定のまま進められる
    - 端末の配色に合わせたいときだけ `BAT_THEME_NAME` を変える（候補は[設定ファイル](#設定ファイル)の `bat --list-themes` で出る）
    - 最後の行で値を読み戻して確かめる
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
@@ -29,8 +28,6 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   - `${BAT_CONFIG}` は**この文書の中だけで使うシェル変数**で、bat 自身が読む環境変数（`BAT_CONFIG_PATH`）ではない
-   - 既定の場所に置く限り bat は自分で見つけるので、`export` する必要はない。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する
    - `ansi` は「端末が設定している 16 色をそのまま使う」テーマで、端末の配色を変えたときに追従する。固定の配色にしたいなら `bat --list-themes` から選ぶ
 
    </details>
@@ -135,18 +132,19 @@
 ## 設定ファイル
 
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
-- 置き場所は `bat --config-file` で確認できる
+- 置き場所は `~/.config/bat/config`（`bat --config-file` で確認できる）
+  - 既定の場所に置く限り bat は自分で見つける。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する
 
 1. よく変える 3 つだけを書いた、最小の設定ファイルを置く。
 
    ```bash
-   mkdir -p "$(dirname "${BAT_CONFIG:?手順 1 の BAT_CONFIG が空のまま。値を入れて貼り直す}")"
-   cat > "${BAT_CONFIG}" <<EOF
+   mkdir -p ~/.config/bat
+   cat > ~/.config/bat/config <<EOF
    --theme="${BAT_THEME_NAME:?手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
    --style="numbers,changes,header"
    --paging=never
    EOF
-   cat "${BAT_CONFIG}"
+   cat ~/.config/bat/config
    bat --config-file
    ```
 
@@ -219,7 +217,6 @@
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
-> | `${BAT_CONFIG}` | 設定ファイルの置き場所。`bat --config-file` が返す場所と同じ | `~/.config/bat/config`（既定） |
 > | `${BAT_THEME_NAME}` | 設定ファイルに書く `--theme` の値 | `ansi`（既定）/ `Nord` / `Dracula` |
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`0.26.1`）は実行日によって変わる。

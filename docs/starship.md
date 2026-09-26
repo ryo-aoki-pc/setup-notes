@@ -16,9 +16,8 @@
 1. 変数を設定する。
 
    ```bash
-   STARSHIP_CONFIG=~/.config/starship.toml   # 設定ファイル。既定の場所。<STARSHIP_CONFIG>
    STARSHIP_PRESET=plain-text-symbols        # 任意手順で当てるプリセット。<STARSHIP_PRESET>
-   for v in STARSHIP_CONFIG STARSHIP_PRESET; do printf '%-16s = %s\n' "$v" "${!v}"; done
+   printf 'STARSHIP_PRESET = %s\n' "${STARSHIP_PRESET}"
    ```
 
    - **編集が必須の変数は無い**。既定のままなら starship の組み込みの見た目になり、設定ファイルは作られない
@@ -29,8 +28,6 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   - `${STARSHIP_CONFIG}` は starship 自身が読む環境変数と同じ名前だが、**本書では `export` していない**ので starship の挙動には影響しない（既定の `~/.config/starship.toml` が使われる）
-   - 別の場所に置きたいときだけ、`~/.bashrc` で `export STARSHIP_CONFIG=...` する
    - `${STARSHIP_PRESET}` は[プリセットを当てる（任意）](#プリセットを当てる任意)でしか使わない
    - 既定を `plain-text-symbols` にしてあるのは、Nerd Font が無い環境でも文字化けしないため
 
@@ -154,7 +151,7 @@
 
 ## プリセットを当てる（任意）
 
-- 公式が配っている設定一式を `${STARSHIP_CONFIG}` に書き出す
+- 公式が配っている設定一式を `~/.config/starship.toml` に書き出す
 
 > [!WARNING]
 > **この節の手順 2 で、既存の設定は上書きされる**ので、自分で書いたものがあれば先に退避する。
@@ -171,12 +168,12 @@
    - 既定の `plain-text-symbols` 以外にするなら、[手順 1](#実施手順) の `STARSHIP_PRESET` を選び直して貼り直す
    - **次の手順は、使うプリセットを決めてから貼る**
 
-1. 選んだプリセットを `${STARSHIP_CONFIG}` に書き出し、シェルに読み込み直す。
+1. 選んだプリセットを `~/.config/starship.toml` に書き出し、シェルに読み込み直す。
 
    ```bash
-   mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
-   starship preset "${STARSHIP_PRESET:?手順 1 の STARSHIP_PRESET が空のまま。値を入れて貼り直す}" -o "${STARSHIP_CONFIG}"
-   wc -l "${STARSHIP_CONFIG}"
+   mkdir -p ~/.config
+   starship preset "${STARSHIP_PRESET:?手順 1 の STARSHIP_PRESET が空のまま。値を入れて貼り直す}" -o ~/.config/starship.toml
+   wc -l ~/.config/starship.toml
    . ~/.bashrc
    starship prompt
    ```
@@ -185,13 +182,13 @@
 
 ## 設定ファイル
 
-- `${STARSHIP_CONFIG}` は**既定では存在しない**（無ければ組み込みの既定値で動く）
+- `~/.config/starship.toml` は**既定では存在しない**（無ければ組み込みの既定値で動く）
 
-1. `${STARSHIP_CONFIG}` に、設定を手で書く。
+1. `~/.config/starship.toml` に、設定を手で書く。
 
    ```bash
-   mkdir -p "$(dirname "${STARSHIP_CONFIG:?手順 1 の STARSHIP_CONFIG が空のまま。値を入れて貼り直す}")"
-   cat > "${STARSHIP_CONFIG}" <<'EOF'
+   mkdir -p ~/.config
+   cat > ~/.config/starship.toml <<'EOF'
    add_newline = false
 
    [directory]
@@ -203,7 +200,6 @@
 
    - `starship config` で `$EDITOR` が開く
    - 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する
-   - 手順 1 の変数は `export` していないので、既定の場所が使われる
 
    <details>
    <summary>補足: 調べるときに使うサブコマンド</summary>
@@ -286,7 +282,6 @@
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
-> | `${STARSHIP_CONFIG}` | 設定ファイルの置き場所。**starship 自身が読む環境変数と同じ名前**だが、本書では `export` していない | `~/.config/starship.toml`（既定） |
 > | `${STARSHIP_PRESET}` | [プリセットを当てる（任意）](#プリセットを当てる任意)で使う名前 | `plain-text-symbols`（既定）/ `no-nerd-font` / `tokyo-night` |
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`1.26.0`）は実行日によって変わる。

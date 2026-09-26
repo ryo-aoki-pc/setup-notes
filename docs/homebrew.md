@@ -4,32 +4,13 @@
 
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
-> - **実行するユーザーは `sudo` できる必要がある**（手順 2・3 で使う）
-> - **手順 3 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。終わってから手順 4 を貼る
+> - **実行するユーザーは `sudo` できる必要がある**（手順 1・2 で使う）
+> - **手順 2 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。終わってから手順 3 を貼る
 
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 - 通すと使えるようになる 12 本: [yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[zoxide](zoxide.md)、[bat](bat.md)、[eza](eza.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[starship](starship.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)
-
-1. 変数を設定する。
-
-   ```bash
-   BREW_PREFIX=/home/linuxbrew/.linuxbrew   # Homebrew の導入先。固定。<BREW_PREFIX>
-   echo "${BREW_PREFIX}"
-   ```
-
-   - **編集するものは無い**。導入先は固定
-   - **この場所に入る場合だけ、ビルド済みのボトルが使える**（変えるとすべてソースビルドになる。手順 3 の補足）
-   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
-
-   <details>
-   <summary>補足: 変数について</summary>
-
-   - `${BREW_PREFIX}` は**この文書の中だけで使うシェル変数**で、Homebrew が読む環境変数ではない（Homebrew 自身は `HOMEBREW_PREFIX` を使い、`brew shellenv` が設定する）
-   - 手順 5 の確認にだけ使う
-
-   </details>
 
 1. 依存パッケージを入れる。
 
@@ -51,7 +32,7 @@
 
    コンテナでの実測では、`curl` は導入済みで `file` / `git` / `procps-ng` の 3 つが新規、依存を含めて 30 個ほどが入った（`git-core` / `openssh-clients` / `perl-*` など）。実機は最初から git が入っていた。
 
-   **`development-tools` グループは要らない。** インストーラの `Next steps` が勧めてくるが、あれは**ソースビルドをする場合**のもので、ボトルだけ使うなら入れなくてよい（手順 3 の補足）。
+   **`development-tools` グループは要らない。** インストーラの `Next steps` が勧めてくるが、あれは**ソースビルドをする場合**のもので、ボトルだけ使うなら入れなくてよい（手順 2 の補足）。
 
    </details>
 
@@ -63,7 +44,7 @@
 
    - インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く（`/home/linuxbrew` を作るため）
    - 終わりに `==> Installation successful!` と、PATH の通し方を書いた `==> Next steps:` が出る
-   - 手順 4 は、その案内と同じ内容（この手順の補足に実測を載せた）
+   - 手順 3 は、その案内と同じ内容（この手順の補足に実測を載せた）
    - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認や `sudo` のパスワードとして食われる）
 
    <details>
@@ -73,7 +54,7 @@
 
    インストーラは `sudo` で `/home/linuxbrew` を作り、実行したユーザーの所有にする。したがって **root で実行してはいけないが、`sudo` できるユーザーである必要がある**。
 
-   コンテナでの実測（`NONINTERACTIVE=1` 付き。末尾の案内が本書の手順 4 の中身）:
+   コンテナでの実測（`NONINTERACTIVE=1` 付き。末尾の案内が本書の手順 3 の中身）:
 
    ```
    ==> Pouring portable-ruby-4.0.7.arm64_linux.bottle.tar.gz
@@ -138,12 +119,12 @@
    ```bash
    brew --version
    command -v brew
-   ls -d "${BREW_PREFIX:?手順 1 の BREW_PREFIX が空のまま。値を入れて貼り直す}"
+   ls -d /home/linuxbrew/.linuxbrew
    brew config | head -12
    ```
 
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
-   - `brew config` の `HOMEBREW_PREFIX` が `${BREW_PREFIX}` と一致していればよい
+   - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
    <details>
    <summary>補足: <code>brew config</code> の読み方</summary>
@@ -269,14 +250,14 @@
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
-- **進め方**: 公式インストーラで `/home/linuxbrew/.linuxbrew` に入れ、`~/.bashrc` に 1 行足す。**読者が書き換える変数は無い**
+- **進め方**: 公式インストーラで `/home/linuxbrew/.linuxbrew` に入れ、`~/.bashrc` に 1 行足す。**読者が書き換える値は無い**
 - **状態**: **実機で本実行済み（2026-09-20）**
   - 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中
   - **このリポジトリの Homebrew 系 10 本のツールは、すべてこの上に載っている**（記録時点の `brew leaves` は 15 件）
-  - 本書の手順 2〜5 と[使い方の基本](#使い方の基本)・[更新](#更新)は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - 本書の手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - 確認したこと: `Homebrew 7.0.6` が同じ場所に入る、`brew config` の `HOMEBREW_PREFIX` が一致する、`brew install jq` がボトルで入る
   - **本実行していないこと**: ロールバック（`uninstall.sh` の本実行）。実機でもコンテナでも実行していない（`--help` を見ただけ）
-  - **実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[手順 4 の補足](#実施手順)）
+  - **実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[手順 3 の補足](#実施手順)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -289,12 +270,6 @@
 | git | RPM の `git 2.52.0`（`/bin/git`） | 同じ |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
->
-> | 変数 | 意味 | 例 |
-> |---|---|---|
-> | `${BREW_PREFIX}` | Homebrew の導入先。`brew --prefix` が返す場所と同じ | `/home/linuxbrew/.linuxbrew`（固定） |
->
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`7.0.6`）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
@@ -350,7 +325,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
 ### 注意点
 
 - **root で実行しない**: インストーラも `brew` も root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
-- **導入先を変えるとすべてソースビルドになる**: [手順 3 の補足](#実施手順)
+- **導入先を変えるとすべてソースビルドになる**: [手順 2 の補足](#実施手順)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（[bat](bat.md) / [gdu](gdu.md) で実際に問題になる）
 - **`sudo <tool>` が使えない**: root の `PATH` に Homebrew は入っていない。root でも使いたいものは RPM で入れるか、フルパス（`/home/linuxbrew/.linuxbrew/bin/<tool>`）を渡す
 - **`~/.bashrc` を読まない文脈では見えない**: cron や一部の非対話シェルでは `brew shellenv` が走らないので、Homebrew で入れたコマンドが見つからない。スクリプトからはフルパスで呼ぶ
@@ -370,15 +345,15 @@ $ du -sh /home/linuxbrew/.linuxbrew
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 2〜5 と[使い方の基本](#使い方の基本)・[更新](#更新)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、インストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、インストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
 | 実施前 | `command -v brew` は無出力、`/home/linuxbrew` も無い |
-| 2. 依存パッケージ | `curl` は導入済み。`file` / `git` / `procps-ng` が新規で、依存込み 30 個ほど（`git-core` / `openssh-clients` / `perl-*` / `groff-base` など）。`curl` と `openssl-libs` は `Upgrading` に解決された |
-| 3. インストーラ | `portable-ruby-4.0.7.arm64_linux` を `Pouring` して `==> Installation successful!`。所要 1 分弱。`Warning: /home/linuxbrew/.linuxbrew/bin is not in your PATH.` と `==> Next steps:`（本文に全文を引用）が出た |
-| 4. PATH | `~/.bashrc` の 26 行目に `eval "$(... brew shellenv bash)"` が入り、同じシェルで `brew --version` → `Homebrew 7.0.6` |
-| 5. 検証 | `command -v brew` → `/home/linuxbrew/.linuxbrew/bin/brew`。`brew config` の `HOMEBREW_PREFIX` / `Branch: stable` / `CPU: quad-core 64-bit arm` を確認。`brew --prefix` / `--cellar` / `--repository` も期待どおり |
+| 1. 依存パッケージ | `curl` は導入済み。`file` / `git` / `procps-ng` が新規で、依存込み 30 個ほど（`git-core` / `openssh-clients` / `perl-*` / `groff-base` など）。`curl` と `openssl-libs` は `Upgrading` に解決された |
+| 2. インストーラ | `portable-ruby-4.0.7.arm64_linux` を `Pouring` して `==> Installation successful!`。所要 1 分弱。`Warning: /home/linuxbrew/.linuxbrew/bin is not in your PATH.` と `==> Next steps:`（本文に全文を引用）が出た |
+| 3. PATH | `~/.bashrc` の 26 行目に `eval "$(... brew shellenv bash)"` が入り、同じシェルで `brew --version` → `Homebrew 7.0.6` |
+| 4. 検証 | `command -v brew` → `/home/linuxbrew/.linuxbrew/bin/brew`。`brew config` の `HOMEBREW_PREFIX` / `Branch: stable` / `CPU: quad-core 64-bit arm` を確認。`brew --prefix` / `--cellar` / `--repository` も期待どおり |
 | 使い方の基本 | 導入直後は `brew list --versions` / `brew leaves` / `brew outdated` がいずれも無出力。`brew install jq` で `oniguruma` → `jq` の順にボトルが降り（`Pouring jq--1.8.2.arm64_linux.bottle.1.tar.gz`）、`brew leaves` は `jq` だけを返した。`brew deps --tree jq` は `jq └── oniguruma`。`brew autoremove --dry-run` は無出力 |
 | 更新 | `brew update` → `Already up-to-date.`、`brew outdated` は無出力（導入直後なので当然） |
 | ロールバック | **本実行していない。** `uninstall.sh` を落として `--help` だけ見た。`-n, --dry-run` / `-f, --force` / `-p, --path=PATH` / `--skip-cache-and-logs` があり、`NONINTERACTIVE` が非空なら `--force` 相当になることを確認 |
