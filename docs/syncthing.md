@@ -14,11 +14,10 @@
 1. 変数を設定する。
 
    ```bash
-   ST_USER=$(id -un)                   # サービスを動かす OS アカウント（自動）。<USER>
    ST_GUI_USER=$(id -un)               # GUI のログイン名。OS のアカウントとは別物（自動で同じ名前が入る）。<USER>
    ST_GUI_ADDR=0.0.0.0:8384            # GUI の待ち受け。LAN にも公開する。手元だけなら 127.0.0.1:8384
    ST_LAN_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 案内と検証に使う（自動）。<SERVER_IP>
-   for v in ST_USER ST_GUI_USER ST_GUI_ADDR ST_LAN_IP; do
+   for v in USER ST_GUI_USER ST_GUI_ADDR ST_LAN_IP; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
    ```
@@ -26,7 +25,7 @@
    - **編集が必須の変数は無い**。Web GUI を LAN にも公開する前提で既定値が入っている
    - 手元のブラウザからしか開かないなら、`ST_GUI_ADDR` を `127.0.0.1:8384` にする
    - 最後に値を読み戻して確かめる
-   - `ST_USER` が `root` になっている、`ST_LAN_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
+   - `USER` が `root` になっている（root でサービスを動かしてしまう）、`ST_LAN_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
    - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
    <details>
@@ -127,7 +126,7 @@
 1. 常時起動にするため、linger を有効にする。
 
    ```bash
-   sudo loginctl enable-linger "${ST_USER:?手順 1 の ST_USER が空のまま。値を入れて貼り直す}"
+   sudo loginctl enable-linger "${USER}"
    ```
 
    - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
@@ -384,12 +383,12 @@
 
    ```bash
    brew services stop syncthing
-   sudo loginctl disable-linger "${ST_USER:?手順 1 の ST_USER が空のまま。値を入れて貼り直す}"
+   sudo loginctl disable-linger "${USER}"
    sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
    brew uninstall syncthing
    ```
 
-   - 後日この手順だけ貼るときは、先に手順 1 の変数ブロックを貼る（`ST_USER` が空だと `${ST_USER:?…}` で止まる）
+   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
    - `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
    - 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
 
@@ -439,9 +438,8 @@
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
-> | `${ST_USER}` | サービスを動かす OS アカウント（`id -un` から自動で入る）。linger の対象 | `<USER>` |
 > | `${ST_GUI_USER}` | Web GUI のログイン名。OS のアカウントとは別物（自動で同じ名前が入る） | `<USER>` |
-> | `${ST_GUI_ADDR}` | GUI の待ち受けアドレス。固定 | `0.0.0.0:8384`（既定）/ `127.0.0.1:8384` |
+> | `${ST_GUI_ADDR}` | GUI の待ち受けアドレス | `0.0.0.0:8384`（既定）/ `127.0.0.1:8384` |
 > | `${ST_LAN_IP}` | 案内と検証にだけ使う LAN 側 IP（デフォルト経路の送信元から自動で入る） | `192.168.1.10` |
 > | `${ST_ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
 >

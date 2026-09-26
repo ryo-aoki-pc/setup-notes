@@ -14,15 +14,14 @@
 
    ```bash
    WORKGROUP=WORKGROUP                 # Windows 側のワークグループ名。既定のままでよいことが多い
-   SMB_USER=${USER}                    # 公開するホームディレクトリの持ち主（自動）。<USER>
    SERVER_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 検証と案内に使う（自動）。<SERVER_IP>
-   for v in WORKGROUP SMB_USER SERVER_IP; do
+   for v in WORKGROUP USER SERVER_IP; do
      printf '%-10s = %s\n' "$v" "${!v}"
    done
    ```
 
    - 最後に値を読み戻して確かめる
-   - `SMB_USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
+   - `USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
    - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
    <details>
@@ -30,7 +29,7 @@
 
    - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
    - `SERVER_IP` が間違っていても、手順 11 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
-   - `SMB_USER` は `$USER` から入るので、`sudo -i` した root のシェルで貼ると `root` になる。手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
+   - 公開するのは `${USER}`（このシェルのユーザー）のホーム。`sudo -i` した root のシェルでは `root` になり、手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
    - `ALLOW_FROM` は[接続元を絞る](#接続元を絞る任意)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 
    </details>
@@ -124,8 +123,8 @@
 1. OS のアカウントを確かめ、Samba ユーザーを登録する。
 
    ```bash
-   id "${SMB_USER}"
-   sudo smbpasswd -a "${SMB_USER}"
+   id "${USER}"
+   sudo smbpasswd -a "${USER}"
    ```
 
    - `id` で、OS のアカウントが存在することを確かめる
@@ -172,7 +171,7 @@
 
    ```bash
    AUTHFILE=/run/user/$(id -u)/smb-auth
-   read -rsp "Samba password for ${SMB_USER}: " PW; echo
+   read -rsp "Samba password for ${USER}: " PW; echo
    ```
 
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
@@ -180,7 +179,7 @@
 1. 資格情報ファイルを作る。
 
    ```bash
-   ( umask 077; printf 'username=%s\npassword=%s\n' "${SMB_USER}" "${PW}" > "${AUTHFILE}" ); unset PW
+   ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
    ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
    ```
 
@@ -200,11 +199,11 @@
 
    ```bash
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
-   smbclient "//localhost/${SMB_USER}" -A "${AUTHFILE}" -c 'ls'
-   smbclient "//localhost/${SMB_USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
+   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
+   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
    ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r-- / user_home_t
    cmp /etc/hostname /tmp/smb-test.txt && echo "content identical"
-   smbclient "//${SERVER_IP}/${SMB_USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
+   smbclient "//${SERVER_IP}/${USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
    ```
 
    <details>
@@ -218,7 +217,7 @@
 
    ```bash
    sudo mkdir -p /mnt/smbtest
-   sudo mount -t cifs "//127.0.0.1/${SMB_USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+   sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
    mount | grep cifs                            # vers=3.1.1
    echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
    ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
@@ -321,12 +320,12 @@
    sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
    sudo systemctl disable --now smb.service
    sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
-   sudo smbpasswd -x "${SMB_USER:?手順 1 の SMB_USER を設定してから貼る}"
+   sudo smbpasswd -x "${USER}"
    sudo setsebool -P samba_enable_home_dirs off
    sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
    ```
 
-   - 後日この手順だけ貼るときは、先に手順 1 の変数ブロックを貼る（`SMB_USER` が空だと `${SMB_USER:?…}` で止まる）
+   - 公開したユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
    - 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
 
 1. パッケージも消すときだけ、samba・samba-client・cifs-utils を消す。
@@ -374,7 +373,6 @@
 > |---|---|---|
 > | `${WORKGROUP}` | `smb.conf` の `workgroup`。Windows 側のワークグループ名に合わせる（NetBIOS を使わないので実質ラベル） | `WORKGROUP` |
 > | `${ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
-> | `${SMB_USER}` | 公開するホームディレクトリの持ち主。OS のアカウント名（`$USER` から自動で入る） | `<USER>` |
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの LAN 側 IP（デフォルト経路の送信元から自動で入る）。検証と案内にしか使わない | `192.168.1.10` |
 >
 > 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）のプレースホルダで書いてある。
@@ -566,7 +564,7 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - **公開範囲は public ゾーンの全 NIC**: この環境では `wg0` も public にあるので、VPN 越しのクライアント（拠点 A の LAN や外出先の端末）からも 445 に届く。それを望まないなら[接続元を絞る](#接続元を絞る任意)
 - **LAN 上の通信は暗号化されない**: 署名だけ（`smbstatus` の `Encryption` 欄が `-`）。VPN 越しは WireGuard が暗号化する
 - **自ホストからの検証は firewalld を通らない**: 445 の開け忘れは、別ホストか network namespace から接続して初めて分かる
-- **Samba のパスワードは OS と別**: OS のパスワードを変えても Samba 側は変わらない。変えるときは `sudo smbpasswd "${SMB_USER}"`
+- **Samba のパスワードは OS と別**: OS のパスワードを変えても Samba 側は変わらない。変えるときは `sudo smbpasswd "${USER}"`
 - **ユーザー名は OS アカウントと一致が必須**
   - 存在しないユーザー、間違ったパスワードは、どちらも `NT_STATUS_LOGON_FAILURE`
   - 他人のホーム（`//<SERVER_IP>/root` など）は、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`

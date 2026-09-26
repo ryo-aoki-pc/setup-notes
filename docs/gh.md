@@ -3,27 +3,36 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。手順 5 の認証だけブラウザを使う
-> - **手順 4 と手順 5 には対話入力がある**（手順 4 は署名鍵の取り込みの確認が 2 回、手順 5 は `gh auth login` の対話）。答えてから次の手順を貼る
+> - **すべて対象ホスト上で実行する**。手順 4 の認証だけブラウザを使う
+> - **手順 3 と手順 4 には対話入力がある**（手順 3 は署名鍵の取り込みの確認が 2 回、手順 4 は `gh auth login` の対話）。答えてから次の手順を貼る
 
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. 変数を設定する。
+1. `dnf config-manager` を使えるようにする。
 
    ```bash
-   GH_REPOFILE=https://cli.github.com/packages/rpm/gh-cli.repo   # 公式の repo ファイル。固定。<GH_REPOFILE>
-   echo "${GH_REPOFILE}"
+   sudo dnf install -y 'dnf-command(config-manager)'
    ```
 
-   - **編集するものは無い**。公式が配っている repo ファイルの URL を入れるだけ
-   - **新しいシェルを開いたら**、先にこのブロックを貼り直す
+   - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（手順 2 の補足）
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. リポジトリを追加する。
+
+   ```bash
+   sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+   cat /etc/yum.repos.d/gh-cli.repo
+   ```
+
+   - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
+   - `gpgcheck=1` になっていることを確認する
 
    <details>
-   <summary>補足: 変数について</summary>
+   <summary>補足: 生成される repo ファイルと、dnf4 と dnf5 の構文の違い</summary>
 
-   repo ファイルの URL を変数にしているのは、手順 3 のコマンドを空のまま貼っても何も起きないようにするため（`${GH_REPOFILE:?...}`）。中身は固定なので編集する必要はない。生成される repo ファイルは次のとおり:
+   追加するのは公式が配っている repo ファイルで、生成される `/etc/yum.repos.d/gh-cli.repo` は次のとおり:
 
    ```
    [gh-cli]
@@ -33,30 +42,6 @@
    gpgcheck=1
    gpgkey=https://cli.github.com/packages/githubcli-archive-keyring.asc
    ```
-
-   </details>
-
-1. `dnf config-manager` を使えるようにする。
-
-   ```bash
-   sudo dnf install -y 'dnf-command(config-manager)'
-   ```
-
-   - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（手順 3 の補足）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. リポジトリを追加する。
-
-   ```bash
-   sudo dnf config-manager --add-repo "${GH_REPOFILE:?手順 1 の GH_REPOFILE が空のまま。値を入れて貼り直す}"
-   cat /etc/yum.repos.d/gh-cli.repo
-   ```
-
-   - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
-   - `gpgcheck=1` になっていることを確認する
-
-   <details>
-   <summary>補足: dnf4 と dnf5 で構文が違う</summary>
 
    AlmaLinux 10.2 の dnf は **4.20.0**（`dnf5` パッケージは未導入）なので `--add-repo` を使う。Fedora 41 以降の dnf5 では構文が変わり、`sudo dnf install dnf5-plugins` のうえで:
 
@@ -183,8 +168,8 @@
 - **進め方**: GitHub が配っている repo ファイルを `dnf config-manager --add-repo` で取り込み、`dnf install gh` する。**読者が書き換える値は無い**
 - **状態**: **実機で本実行済み（2026-09-20）**
   - 下表のホストで `dnf config-manager --add-repo` → `dnf install -y gh` を実行し、`gh-2.101.0-1.aarch64` が入って認証済み、そのまま常用中
-  - 本書の手順 2〜4 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
-  - **コンテナでは認証（手順 5）とロールバックは実行していない**
+  - 本書の手順 1〜3 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
+  - **コンテナでは認証（手順 4）とロールバックは実行していない**
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -196,12 +181,6 @@
 | 認証 | 済み（常用中） | 未実施 |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
->
-> | 変数 | 意味 | 例 |
-> |---|---|---|
-> | `${GH_REPOFILE}` | 公式が配っている repo ファイルの URL。固定 | `https://cli.github.com/packages/rpm/gh-cli.repo` |
->
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`2.101.0`）は実行日によって変わる。
 >
 > **トークンは書かない。** 鍵の fingerprint は公開情報なので本文に書いてある。
@@ -275,19 +254,19 @@ gpg-pubkey-75716059-63172e8a GitHub CLI <opensource+cli@github.com> public key
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで手順 2〜4 を通した（手順 5 の `gh auth login` は対話なので除外）。実機で加えた変更は `dnf install podman` だけ。 最後にもう 1 つ新しいコンテナを立て、**この文書のコードブロックをそのまま抜き出したスクリプト**（`sudo` を外し、`dnf install` / `dnf upgrade` に `-y` を付けただけ）を流して、上から順に貼れば通ることを確かめている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで手順 1〜3 を通した（手順 4 の `gh auth login` は対話なので除外）。実機で加えた変更は `dnf install podman` だけ。 最後にもう 1 つ新しいコンテナを立て、**この文書のコードブロックをそのまま抜き出したスクリプト**（`sudo` を外し、`dnf install` / `dnf upgrade` に `-y` を付けただけ）を流して、上から順に貼れば通ることを確かめている。
 
 | 手順 | 結果 |
 |---|---|
-| 2. プラグイン | `dnf-plugins-core-4.7.0-10.el10` が入る |
-| 3. repo | `Adding repo from: https://cli.github.com/packages/rpm/gh-cli.repo` → `/etc/yum.repos.d/gh-cli.repo` 作成 |
-| 4. install | `Installing: gh aarch64 2.101.0-1 gh-cli 14 M` + 依存 13 パッケージ（`git` / `git-core` / `git-core-doc` / `groff-base` / `authselect` など）。鍵 2 本を取り込んで成功 |
+| 1. プラグイン | `dnf-plugins-core-4.7.0-10.el10` が入る |
+| 2. repo | `Adding repo from: https://cli.github.com/packages/rpm/gh-cli.repo` → `/etc/yum.repos.d/gh-cli.repo` 作成 |
+| 3. install | `Installing: gh aarch64 2.101.0-1 gh-cli 14 M` + 依存 13 パッケージ（`git` / `git-core` / `git-core-doc` / `groff-base` / `authselect` など）。鍵 2 本を取り込んで成功 |
 | 検証 | `gh --version` → `gh version 2.101.0 (2026-09-15)`。`gh auth status` → `You are not logged into any GitHub hosts.` |
 | EPEL との比較 | `epel-release` を追加して `dnf list --showduplicates gh` → EPEL 2.97.0 と gh-cli 2.101.0 の 2 系統 |
 
 #### 未確認事項
 
-- 手順 5 の認証（コンテナでは未実施。実機では 2026-09-20 に実行して以後常用）
+- 手順 4 の認証（コンテナでは未実施。実機では 2026-09-20 に実行して以後常用）
 - `gh auth login` の SSH 鍵方式、`gh auth login --with-token`、GitHub Enterprise Server への接続
 - `gh extension install` で入れた拡張の扱い
 - ロールバック（`dnf remove` と鍵の削除）の本実行
