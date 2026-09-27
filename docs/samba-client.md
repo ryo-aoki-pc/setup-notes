@@ -12,7 +12,7 @@
 - 手順の後: GNOME Files でも開くなら、[GNOME Files で開く（任意）](#gnome-files-で開く任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 の仮想マシン（QEMU）でのみ検証した手順書**で、実機では本実行していない。サーバーは samba.md のとおりに設定したコンテナ。GNOME Files の画面とキーリングは確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **x86_64 の仮想マシン（QEMU）でのみ検証した手順書**で、実機では本実行していない。サーバーは samba.md 手順 3 の `smb.conf` を置いたコンテナ。GNOME Files の画面とキーリングは確かめていない（[対象と検証環境](#対象と検証環境)）。
 
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
@@ -21,7 +21,7 @@
    ```
 
    ```bash
-   SMB_USER=${USER}                     # サーバーの Samba ユーザー。samba.md のサーバーなら、この PC のユーザー名と同じ。<SMB_USER>
+   SMB_USER=${USER}                     # サーバーの Samba ユーザー。samba.md のサーバーなら、サーバーの OS のユーザー名。<SMB_USER>
    SHARE=${SMB_USER}                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
    MOUNT_POINT=/mnt/${SHARE}            # マウント先（無ければ手順 6 で作る）。<MOUNT_POINT>
    for v in SERVER USER SMB_USER SHARE MOUNT_POINT; do
@@ -29,8 +29,8 @@
    done
    ```
 
-   - 編集が必須なのは、1 行だけの 1 つ目のブロック（`SERVER`）
-   - NAS や Windows の共有なら、`SMB_USER` と `SHARE` も書き換える
+   - 編集が必須なのは `SERVER` だけ
+   - サーバーのユーザー名がこの PC と違うとき、NAS や Windows の共有のときは、`SMB_USER` と `SHARE` も書き換える
    - 最後に値を読み戻して確かめる
    - **既定値のままでもエラーにならない**ので、`SERVER` を書き換えたかをここで確かめる
    - `USER` が `root` なら、ここで止めて、自分のユーザーのシェルで貼り直す
@@ -43,7 +43,7 @@
    - samba.md のサーバーは OS のアカウント名で Samba ユーザーを登録するので、この PC と同じ名前なら既定のままでよい
    - samba.md の `[homes]` は、Samba ユーザーと同じ名前の共有を見せる。ほかの共有につなぐなら `SHARE` を書き換える
    - `SERVER` に NetBIOS 名は使えない。samba.md のサーバーは NetBIOS（nmbd）を動かさない。IP アドレスか、DNS（または `/etc/hosts`）で引ける名前にする
-   - `SHARE` と `MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 7 で中断する
+   - `SMB_USER`・`SHARE`・`MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 7 で中断する
 
    </details>
 
@@ -53,7 +53,8 @@
    sudo dnf install -y cifs-utils
    ```
 
-   - Workstation で入れた PC には最初から入っていて、`Package cifs-utils-… is already installed.` と出る
+   - Workstation で入れた PC には最初から入っている
+   - 入っていれば、`Package cifs-utils-… is already installed.` と出る
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -102,16 +103,18 @@
 1. 資格情報ファイルを、root だけが読めるように置く。
 
    ```bash
-   if [ -z "${PW}" ]; then echo '中断: PW が空のまま。手順 4 を貼り直す' >&2; else
-     printf 'username=%s\npassword=%s\n' "${SMB_USER:?手順 1 の SMB_USER が空のまま}" "${PW}" |
-       sudo install -m 600 -o root -g root /dev/stdin "/root/smb-${SMB_USER}@${SERVER:?手順 1 の SERVER が空のまま}.cred" &&
+   if [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then echo '中断: 手順 1 の SMB_USER か SERVER が空のまま。手順 1 と手順 4 を貼り直す' >&2
+   elif [ -z "${PW}" ]; then echo '中断: PW が空のまま。手順 4 を貼り直す' >&2
+   else
+     printf 'username=%s\npassword=%s\n' "${SMB_USER}" "${PW}" |
+       sudo install -m 600 -o root -g root /dev/stdin "/root/smb-${SMB_USER}@${SERVER}.cred" &&
      sudo ls -lZ "/root/smb-${SMB_USER}@${SERVER}.cred"
-   fi
-   unset PW
+   fi; unset PW
    ```
 
    - `-rw------- … root root … admin_home_t … /root/smb-<SMB_USER>@<SERVER>.cred` の 1 行が出ればよい
    - パスワードは、コマンドラインにもシェルの履歴にも残らない
+   - 最後の `unset PW` で、シェルの変数からもパスワードを消す
    - 資格情報ファイルの中身は平文（[注意点](#注意点)）
 
    <details>
@@ -125,6 +128,9 @@
    - VM では、カンマ・空白・`$` を含むパスワードでマウントできた。カンマは、mount.cifs がカーネルへ渡すときに逃がしている
    - パスワードを変えたら、手順 4・5 を貼り直す。`install` がファイルを置き換え、次にマウントするときから効く
    - VM では、サーバーでパスワードを変えた後、古いファイルのままだと次のマウントが `mount error(13)` で失敗し、手順 4・5 を貼り直すと通った
+   - 変数が空かどうかは、ブロックの先頭の `if` で確かめる。パイプの中の `${VAR:?…}` は、そのパイプの 1 つのコマンドしか止めない
+   - 例えば `SMB_USER` が空のまま `${SMB_USER:?…}` だけで確かめると、`/root/smb-@<SERVER>.cred` という空のファイルができる
+   - `fi; unset PW` を 1 行にしてあるのは、ブロックの全体を 1 つのコマンドにするため。途中の `sudo` が後ろの行を読み取って捨てても、`unset PW` が消えない（[付録](#付録-vm-での検証記録2026-09-27)）
 
    </details>
 
@@ -179,12 +185,14 @@
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
 
    ```bash
-   if grep -q '[[:space:]]' <<< "${SERVER:?手順 1 の SERVER が空のまま}${SHARE:?手順 1 の SHARE が空のまま}${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}"; then
-     echo '中断: SERVER / SHARE / MOUNT_POINT に空白がある（fstab に書けない）' >&2
+   if [ -z "${SERVER}" ] || [ -z "${SMB_USER}" ] || [ -z "${SHARE}" ] || [ -z "${MOUNT_POINT}" ]; then
+     echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
+   elif grep -q '[[:space:]]' <<< "${SERVER}${SMB_USER}${SHARE}${MOUNT_POINT}"; then
+     echo '中断: SERVER / SMB_USER / SHARE / MOUNT_POINT に空白がある（fstab に書けない）' >&2
    elif awk -v mp="${MOUNT_POINT}" '$1 !~ /^#/ && $2 == mp { f = 1 } END { exit !f }' /etc/fstab; then
      echo "中断: /etc/fstab に ${MOUNT_POINT} の行が既にある" >&2
    else
-     echo "//${SERVER}/${SHARE} ${MOUNT_POINT} cifs credentials=/root/smb-${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER}.cred,uid=$(id -u),gid=$(id -g),file_mode=0600,dir_mode=0700,x-systemd.automount,x-systemd.idle-timeout=1min 0 0" | sudo tee -a /etc/fstab &&
+     echo "//${SERVER}/${SHARE} ${MOUNT_POINT} cifs credentials=/root/smb-${SMB_USER}@${SERVER}.cred,uid=$(id -u),gid=$(id -g),file_mode=0600,dir_mode=0700,x-systemd.automount,x-systemd.idle-timeout=1min 0 0" | sudo tee -a /etc/fstab &&
      sudo systemctl daemon-reload &&
      sudo findmnt --verify
    fi
@@ -208,24 +216,29 @@
    - ほかのオプションは手順 6 と同じ。付けなかったもの（`_netdev`・`nofail`・`vers=`）の理由は[選択した方針](#選択した方針)
    - `daemon-reload` で、`systemd-fstab-generator` が `/run/systemd/generator/` に `mnt-<SHARE>.automount` と `mnt-<SHARE>.mount` を作る（名前は `systemd-escape -p` の結果。`/mnt/` の下なら `mnt-` + 共有名）
    - `findmnt --verify` は `sudo` を付ける。付けないと、ほかの行について `cannot detect on-disk filesystem type (Permission denied)` の警告が出る（VM で 3 件）
-   - 中断の条件は、変数に空白があるときと、同じマウント先の行（コメント行は数えない）があるとき。VM で 2 回貼っても、行は増えなかった
+   - 中断の条件は、変数が空のとき、変数に空白があるとき、同じマウント先の行（コメント行は数えない）があるとき。VM で 2 回貼っても、行は増えなかった
+   - 変数が空かどうかを先頭の `if` で確かめるのは、パイプの中の `${VAR:?…}` がブロックを止めないため
+   - 直す前の版は、`SMB_USER` が空でも何も足さずに `Success` と出た（レビューのエージェントが `sudo` をスタブにした bash で確かめた）
 
    </details>
 
 1. 自動マウントを始め、アクセスしたときにマウントされることを確かめる。
 
    ```bash
-   sudo systemctl start "$(systemd-escape -p --suffix=automount "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}")" &&
-   systemctl is-active "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
-   ls "${MOUNT_POINT}" > /dev/null && findmnt -R "${MOUNT_POINT}" &&
-   echo "automount write" > "${MOUNT_POINT}/automount-test.txt" && cat "${MOUNT_POINT}/automount-test.txt" &&
-   rm "${MOUNT_POINT}/automount-test.txt"
-   sudo ausearch -m AVC -ts recent
+   if [ -z "${MOUNT_POINT}" ]; then echo '中断: 手順 1 の MOUNT_POINT が空のまま。手順 1 を貼り直す' >&2; else
+     sudo systemctl start "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
+     systemctl is-active "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
+     ls "${MOUNT_POINT}" > /dev/null && findmnt -R "${MOUNT_POINT}" &&
+     echo "automount write" > "${MOUNT_POINT}/automount-test.txt" && cat "${MOUNT_POINT}/automount-test.txt" &&
+     rm "${MOUNT_POINT}/automount-test.txt"
+     sudo ausearch -m AVC -ts recent
+   fi
    ```
 
    - `active`、`findmnt` の `autofs` と `cifs` の 2 行、`automount write` が出ればよい
    - 最後の `ausearch` は `<no matches>`
-   - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う。使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
+   - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
+   - 使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
    - 再起動した後も、アクセスしたときにマウントされる（VM で確認）
 
    <details>
@@ -257,7 +270,7 @@
 - fstab のマウントとは別の仕組み（gvfs）。ログインしたユーザーがつなぐので、root も資格情報ファイルも要らない
 - 画面では「ファイル」（Nautilus）から開く。この節のコマンドは、同じ仕組みを端末から使う `gio` で、VM で確かめたのはこちら
 - 手順 1 の変数を設定したシェルで貼る
-- **この節の手順 3 には対話入力がある**（ドメインとパスワード）
+- **この節の手順 2 と手順 3 には対話入力がある**（`sudo` のパスワードと、ドメインとパスワード）
 
 1. gvfs-smb と gvfs-fuse が入っているか確かめる。
 
@@ -299,9 +312,12 @@
    gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
-   - `Domain [SAMBA]:` と `Password:` を聞かれる。ドメインは Enter で既定のままでよく、パスワードは手順 4 と同じもの
+   - `Domain [SAMBA]:` と `Password:` を聞かれる
+   - ドメインは、Enter で既定のままでよい
+   - パスワードは、手順 4 と同じもの
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す（画面では未確認）
-   - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される（未確認）。`gio mount` は保存しない
+   - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される（未確認）
+   - `gio mount` は、パスワードを保存しない
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
    <details>
@@ -348,7 +364,8 @@
    gio mount -u "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
-   - 何も出ずに終わればよい。`gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
+   - 何も出ずに終わればよい
+   - 外した共有は、`gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
    - 画面では、サイドバーの共有の横の取り出しのボタンで外す（未確認）
 
 ---
@@ -356,13 +373,15 @@
 ## ロールバック
 
 - 手順 1 の変数を設定したシェルで、上から順に貼る（新しいシェルなら、手順 1 の 2 つのブロックを貼り直してから）
-- GNOME Files の節でつないだままなら、先にその節の手順 5 を貼る
+- GNOME Files でつないだままなら、先に [GNOME Files で開く（任意）](#gnome-files-で開く任意)の手順 5 を貼る
 - この節は、`MOUNT_POINT` の行だけを fstab から消す。ほかの共有の行は残る
 
 1. 自動マウントを止め、マウントを外す。
 
    ```bash
-   sudo systemctl stop "$(systemd-escape -p --suffix=automount "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}")" "$(systemd-escape -p --suffix=mount "${MOUNT_POINT}")"
+   if [ -z "${MOUNT_POINT}" ]; then echo '中断: 手順 1 の MOUNT_POINT が空のまま。手順 1 を貼り直す' >&2; else
+     sudo systemctl stop "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" "$(systemd-escape -p --suffix=mount "${MOUNT_POINT}")"
+   fi
    ```
 
    - 何も出ずに終わればよい
@@ -373,13 +392,16 @@
 
    - `.automount` と `.mount` を一緒に止めると、`cifs` と `autofs` の両方が外れる（VM で確認）
    - `.mount` だけを止めると、`Stopping 'mnt-<SHARE>.mount', but its triggering units are still active: mnt-<SHARE>.automount` と出て、次のアクセスでまたマウントされる
+   - `MOUNT_POINT` が空のまま `$(systemd-escape …)` を使うと、ユニットの名前が `-.mount`（ルートのファイルシステム）になる。先頭の `if` はこれを防ぐ
 
    </details>
 
 1. `/etc/fstab` からその行を消し、systemd に読み直させる。
 
    ```bash
-   if findmnt "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}" > /dev/null; then
+   if [ -z "${MOUNT_POINT}" ]; then
+     echo '中断: 手順 1 の MOUNT_POINT が空のまま。手順 1 を貼り直す' >&2
+   elif findmnt "${MOUNT_POINT}" > /dev/null; then
      echo "中断: ${MOUNT_POINT} がまだマウントされている（この節の手順 1 を貼り直す）" >&2
    elif ! awk -v mp="${MOUNT_POINT}" '$1 !~ /^#/ && $2 == mp && $3 == "cifs" { f = 1 } END { exit !f }' /etc/fstab; then
      echo "中断: /etc/fstab に ${MOUNT_POINT} の cifs の行が無い" >&2
@@ -392,8 +414,10 @@
    fi
    ```
 
-   - `Success, no errors or warnings detected` と、`diff` の消した 1 行（`< //<SERVER>/<SHARE> <MOUNT_POINT> cifs …`）だけが出ればよい
-   - 消す前の fstab は `/etc/fstab.bak-samba-client` に残る。要らなければ消す
+   - `Success, no errors or warnings detected` が出ればよい
+   - `diff` は、`15d14` のような行と、消した 1 行（`< //<SERVER>/<SHARE> <MOUNT_POINT> cifs …`）だけを出す
+   - 消す前の fstab は、`/etc/fstab.bak-samba-client` に残る
+   - `/etc/fstab.bak-samba-client` が要らなければ消す
 
    <details>
    <summary>補足: 行の消し方</summary>
@@ -407,11 +431,15 @@
 1. マウント先と資格情報ファイルを消す。
 
    ```bash
-   sudo rmdir "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}"
-   if grep -qF "credentials=/root/smb-${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}.cred," /etc/fstab; then
-     echo '資格情報ファイルは、/etc/fstab のほかの行が使っているので残す'
+   if [ -z "${MOUNT_POINT}" ] || [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then
+     echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
-     sudo rm -f "/root/smb-${SMB_USER}@${SERVER}.cred"
+     sudo rmdir "${MOUNT_POINT}"
+     if grep -qF "credentials=/root/smb-${SMB_USER}@${SERVER}.cred," /etc/fstab; then
+       echo '資格情報ファイルは、/etc/fstab のほかの行が使っているので残す'
+     else
+       sudo rm -f "/root/smb-${SMB_USER}@${SERVER}.cred"
+     fi
    fi
    ```
 
@@ -437,7 +465,7 @@
 
    </details>
 
-1. GNOME Files の節の手順 2 で入れたときだけ、gvfs-smb と gvfs-fuse を消す。
+1. [GNOME Files で開く（任意）](#gnome-files-で開く任意)の手順 2 で入れたときだけ、gvfs-smb と gvfs-fuse を消す。
 
    ```bash
    sudo dnf remove gvfs-smb gvfs-fuse
@@ -445,7 +473,13 @@
 
    - GNOME を入れた PC には最初から入っているので、消さない（消すと、「ファイル」から SMB につなげなくなる）
    - トランザクション表を見て `[y/N]` に答える
+
+   <details>
+   <summary>補足: 消えるもの</summary>
+
    - VM では、使われなくなった依存を合わせて 21 パッケージ（72 MB）が消えた
+
+   </details>
 
 ---
 
@@ -464,6 +498,7 @@
   - VM の SELinux は Enforcing、firewalld は active
   - サーバーは、samba.md 手順 3 の `smb.conf` をそのまま置いたコンテナ（同じホストの Docker）
   - **この文書のコードブロックをそのまま貼って**、手順 1〜8、GNOME Files の節、ロールバックを通した
+  - 貼り方は、ブラケットペーストとブラケットペースト無しの 2 通りで、それぞれまっさらな VM で通した
   - 確認したこと:
     - 手でのマウントと、アクセスしたときの自動マウント（SMB 3.1.1、`cifs_t`、AVC 無し）
     - 使わないまま 1 分で外れること、再起動した後もアクセスでマウントされること
@@ -471,6 +506,7 @@
     - ほかのローカルユーザーが読めないこと、日本語のファイル名
     - `gio mount` での接続と、FUSE のパス
     - ロールバックの後に、fstab の行・ユニット・資格情報ファイル・マウント先が残らないこと
+    - 手順 1 の変数が空のとき、変数を使うブロックが何も変えずに中断すること
   - **確認していないこと**: 実機（x86_64 PC・Raspberry Pi 5）での実行、GNOME Files の画面の操作とキーリングへの保存、Wi-Fi の切り替えとサスペンドからの復帰、WireGuard 越しのマウント、Windows や NAS の共有
   - 実測の記録は[付録](#付録-vm-での検証記録2026-09-27)
 
@@ -496,7 +532,7 @@
 > | `${SHARE}` | 共有名（既定は `SMB_USER`。samba.md の `[homes]` ではユーザー名と同じ） | `${SMB_USER}` |
 > | `${MOUNT_POINT}` | マウント先（既定は `/mnt/` の下の共有名） | `/mnt/${SHARE}` |
 >
-> 出力例・ログ・表の中の値は `<SERVER>` / `<SMB_USER>` / `<SHARE>` / `<MOUNT_POINT>` / `<USER>`（この PC のユーザー名）/ `<UID>`（その uid）/ `<PORT>` のプレースホルダで書いてある。
+> 出力例・ログ・表の中の値は `<SERVER>` / `<SMB_USER>` / `<SHARE>` / `<MOUNT_POINT>` / `<USER>`（この PC のユーザー名）/ `<UID>`（その uid）/ `<PORT>` のプレースホルダで書いてある。ただし、VM の出力の `uid=1000` / `gid=1000` は、そのままにしてある。
 >
 > Samba のパスワードはこの文書に載せない。検証で使ったものは `openssl rand` で作った使い捨てで、記録していない。
 
@@ -530,7 +566,7 @@ VM で、手順 1 の前に確かめた状態:
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
   - VM では、dontaudit の規則を外して（`semodule -DB`）自動マウントと手でのマウントをしても、AVC は出なかった
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（samba.md 手順 12 の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md 手順 12](samba.md#実施手順) の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。VM では、ほかのユーザーは `Permission denied`、root は読めた
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる（VM で確認）
   - `vers=` は書かない。既定でサーバーの最も新しい版を使い、samba.md のサーバーとは SMB 3.1.1 になった
@@ -597,20 +633,23 @@ PID     Username     Group        Machine                                   Prot
   - パスをたどった時点で systemd がマウントし、そのあと mount.cifs が同じ場所にもう一度マウントしようとするため
   - VM では、共有は 1 つだけマウントされていて、2 回目の `mount -a` は何も出さなかった
 - **資格情報ファイルは平文**: root なら読める。samba.md では Samba のパスワードは OS のパスワードと別なので、OS のパスワードと同じにしない
-- **パスワードを変えたら**: サーバーで変え（samba.md では `sudo smbpasswd <USER>`）、この PC で手順 4・5 を貼り直す
-- **空白を含む共有名・マウント先は扱わない**: 手順 7 で中断する（fstab の欄を空白で区切るため）
+- **パスワードを変えたら**: サーバーで変え（samba.md では `sudo smbpasswd <SMB_USER>`）、この PC で手順 4・5 を貼り直す
+- **空白を含むユーザー名・共有名・マウント先は扱わない**: 手順 7 で中断する（fstab の欄を空白で区切るため）
 - **SELinux**: マウントしたファイルの型は `cifs_t`
   - ログインしたユーザーのプログラムは、そのまま読み書きできる
   - 制限のあるサービス（Apache など）から使うなら、そのサービスの boolean（`httpd_use_cifs` など）が要る（本書では試していない）
-- **貼り方**: 検証では、bash 5.2 の既定のブラケットペースト（GNOME の端末や WezTerm と同じ）で貼って Enter を押した
-  - ブラケットペーストが効かない端末で複数行を貼ると、途中の `sudo` が後ろの行を読んで捨てることがある（[付録](#付録-vm-での検証記録2026-09-27)）
+- **貼り方**: `sudo` の後ろに行が続くブロックは、どれも 1 つのコマンド（`if … fi` や `{ … }`）にしてある
+  - ブラケットペーストが効かない端末で複数行を貼ると、途中の `sudo` が後ろの行を読み取って捨てるため（[付録](#付録-vm-での検証記録2026-09-27)）
+  - VM では、ブラケットペーストで貼った回と、ブラケットペースト無しで貼った回の両方で通した
 
 ### 参照
 
 - [Chapter 5. Mounting an SMB Share — Managing file systems (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/managing_file_systems/mounting-an-smb-share)（資格情報ファイル、fstab の例、よく使うオプション）
 - [Chapter 10. Browsing files on a network share — Using the GNOME desktop environment (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/using_the_gnome_desktop_environment/browsing-files-on-a-network-share)
 - [Chapter 6. Managing storage volumes in GNOME — Administering RHEL by using the GNOME desktop environment (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/administering_rhel_by_using_the_gnome_desktop_environment/managing-storage-volumes-in-gnome)（GIO と、`gvfs-fuse` の `/run/user/UID/gvfs/`）
-- `man mount.cifs`（`credentials=`、`uid=`、`file_mode=`、`soft`、`echo_interval`）/ `man systemd.mount`（`x-systemd.automount`、`x-systemd.idle-timeout`、`nofail`、`_netdev`）/ `man systemd-fstab-generator` / `man findmnt`（`--verify`）/ `man gio`
+- `man mount.cifs`（`credentials=`、`uid=`、`file_mode=`、`soft`、`echo_interval`）
+- `man systemd.mount`（`x-systemd.automount`、`x-systemd.idle-timeout`、`nofail`、`_netdev`）/ `man systemd-fstab-generator`
+- `man findmnt`（`--verify`）/ `man gio`
 - cifs-utils 7.7 のソース（`mount.cifs.c` の `open_cred_file`・`parse_cred_line`・`set_password`・`parse_opt_token`）
 - [Samba でホームディレクトリを公開する手順](samba.md)（サーバー側）
 
@@ -640,14 +679,19 @@ x86_64 のクラウドホストの上で、使い捨ての VM とコンテナを
 - VM を `dnf upgrade` した（54 パッケージ。カーネルは 6.12.0-211.47.1 から 211.56.1 へ）
 - 確かめ用に `setools-console`・`firewalld`（有効にした）・`glibc-langpack-ja`・`policycoreutils-python-utils` を入れた
 - この状態のディスクを残し、検証の回ごとに、その上の overlay で起動した
+- 途中でホストのコンテナが再起動し、プロキシのポートが変わった。その後の回は、起動した VM の dnf の `proxy=` のポートを直してから流した
+  - 直す前に流し始めた 1 回は、手順 2 のダウンロードが `Curl error (7)` で失敗したので捨てた
 
 **流し方**:
 
 - ホストの tmux の中から `ssh -t` で VM にログインし、この文書から抜き出したコードブロックを 1 手順ずつ貼った
   - 手順 1 の `SERVER` だけは `10.0.2.2` に書き換えた
-- 貼り方は、bash 5.2 の既定のブラケットペーストで貼ってから Enter（GNOME の端末や WezTerm と同じ）
+- 貼り方は 2 通り
+  - bash 5.2 の既定のブラケットペーストで貼ってから Enter（GNOME の端末や WezTerm と同じ）
+  - ブラケットペースト無し（行を先に打ち込むのと同じ。途中のコマンドが後ろの行を読めてしまう）
 - 次のものは、画面に問い合わせが出てから入力した: `sudo` のパスワード、手順 4 のパスワード、`gio mount` の問い合わせ、`[y/N]`
-- 書き上げた後に、まっさらな overlay で、手順 1〜8・GNOME Files の節・ロールバックを最初からもう一度通した。下の表はその回の結果
+- 書き上げた後に、独立したレビューの指摘でブロックを直した（下の「レビューで見つけたこと」）
+- 直した版を、まっさらな overlay で 2 回通した（ブラケットペースト無しの回と、ブラケットペーストの回）。対象は手順 1〜8・GNOME Files の節・ロールバック。下の表はその 2 回の結果で、2 回とも同じだった
 
 **最初の回で見つけたこと**: 最初の回はブラケットペースト無しで貼った。すると、手順 6 の最後の行（当時は `&&` の連鎖の後ろに独立した `sudo umount`）が実行されず、共有がマウントされたまま残った。
 
@@ -656,20 +700,43 @@ x86_64 のクラウドホストの上で、使い捨ての VM とコンテナを
 - 手順 6 は、マウントの後の確かめと `umount` を `{ … }` のひとまとまりにして、どちらの貼り方でも外れるようにした
 - マウントが残ったまま自動マウントを始めると、`Path <MOUNT_POINT> is already a mount point, refusing start.` で失敗する（手順の外で確かめた）
 
-| 手順 | 結果（最終版を通した回） |
+**レビューで見つけたこと**: 書き上げた後に、独立したエージェントに CLAUDE.md の規則との突き合わせを頼んだ。ブロックにかかわる指摘が 2 つあった。
+
+- **空の変数でブロックが止まらない**
+  - パイプや `$(…)` の中の `${VAR:?…}` は、そのサブシェルしか止めない
+  - 直す前の手順 5 は、`SMB_USER` が空だと、空の `/root/smb-@<SERVER>.cred` を作った（VM で再現した）
+  - 直す前の手順 7 は、何も足さずに `Success` と出た。ロールバックの手順 1 は、`-.mount` を止めに行った（どちらも、レビューのエージェントが `sudo` をスタブにした bash で確かめた。VM では試していない）
+  - 変数を使うブロックの先頭で、`if [ -z … ]` で中断するようにした
+- **吸われる行が残っていた**: 手順 5 の `unset PW`、手順 8 の `ausearch`、ロールバックの手順 3 の `if … fi`
+  - どれも、ブロックの全体を 1 つのコマンドにした（`fi; unset PW` を 1 行にする、`if … fi` の中に入れる）
+
+直した版で確かめたこと:
+
+- 手順 1 を貼っていない新しいシェルで、次のブロックを貼った。どれも、中断のメッセージか `:?` のエラーだけで終わった
+  - 手順 3・5・6・7・8
+  - GNOME Files の節の手順 3・5
+  - ロールバックの手順 1〜3
+- その後も、`/root` の資格情報ファイル・fstab・`mnt-*` のユニット・`/mnt` は変わらず、`-.mount` も active のままだった
+- `SMB_USER` だけが空のシェルで貼ると、手順 5 と手順 7 は中断した。手順 5 の後は `PW` も消えていた
+- ブラケットペースト無しの回で、次のことを確かめた
+  - 手順 5 の後に `PW` が消えていた
+  - 手順 8 の `ausearch` が `<no matches>` を出した
+  - ロールバックの手順 3 で、資格情報ファイルが消えた
+
+| 手順 | 結果（直した版を 2 通りの貼り方で通した回。同じだった） |
 |---|---|
 | 1 | 読み戻しは `SERVER = <SERVER>`、`USER`・`SMB_USER`・`SHARE` が `<USER>`、`MOUNT_POINT = <MOUNT_POINT>` |
-| 2 | 7 パッケージ（16 MB）。`sudo` のパスワードを 1 回聞かれた。もう一度貼ると `Package cifs-utils-7.7-1.el10_2.x86_64 is already installed.` と `Nothing to do.` |
+| 2 | 7 パッケージ（16 MB）。`sudo` のパスワードを 1 回聞かれた。もう一度貼ると `Package cifs-utils-7.7-1.el10_2.x86_64 is already installed.` と `Nothing to do.`（直す前の版で確認） |
 | 3 | `cifs-utils-7.7-1.el10_2.x86_64`、`/lib/modules/6.12.0-211.56.1.el10_2.x86_64/kernel/fs/smb/client/cifs.ko.xz`、`445/tcp に届く` |
 | 4 | `Samba password for <SMB_USER>@<SERVER>:` の後に入力した |
-| 5 | `-rw-------. 1 root root system_u:object_r:admin_home_t:s0 44 … /root/smb-<SMB_USER>@<SERVER>.cred` |
+| 5 | `-rw-------. 1 root root system_u:object_r:admin_home_t:s0 … /root/smb-<SMB_USER>@<SERVER>.cred`。この後、`PW` は空 |
 | 6 | `findmnt` に `cifs` の行（`vers=3.1.1`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0`。この後の `findmnt` には何も出ない（外れた） |
 | 7 | 足した 1 行と `Success, no errors or warnings detected`。もう一度貼ると `中断: /etc/fstab に <MOUNT_POINT> の行が既にある` で、行は増えない |
 | 8 | `active`、`autofs` と `cifs` の 2 行、`automount write`、`<no matches>` |
-| GNOME Files 1〜2 | 2 つとも `is not installed`。この節の手順 2 で 42 パッケージ（14 MB）。直前の `sudo` の認証が切れていなかったので、パスワードは聞かれなかった |
+| GNOME Files 1〜2 | 2 つとも `is not installed`。GNOME Files の節の手順 2 で 42 パッケージ（14 MB）。直前の `sudo` の認証が切れていなかったので、パスワードは聞かれなかった |
 | GNOME Files 3 | `Authentication Required` と `Enter password for share “<SHARE>” on “<SERVER>”:` の後に、`Domain [SAMBA]:`（Enter）と `Password:` |
-| GNOME Files 4〜5 | `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` と `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>`。手順 5 は何も出ずに外れた |
-| ロールバック 1〜3 | マウントしていた共有が外れた。`findmnt --verify` は成功で、`diff` は消した 1 行。マウント先・資格情報ファイル・`mnt-*` のユニットが消えた |
+| GNOME Files 4〜5 | `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` と `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>`。GNOME Files の節の手順 5 は、何も出ずに外れた |
+| ロールバック 1〜3 | マウントしていた共有が外れた。`findmnt --verify` は成功で、`diff` は `15d14` と消した 1 行。マウント先・資格情報ファイル・`mnt-*` のユニットが消えた |
 | ロールバック 4〜5 | 手順 4 は cifs-utils だけを消した（依存は、GNOME Files の節で入った libsmbclient が使う）。手順 5 は 21 パッケージ（72 MB） |
 | 再起動 | `running` で failed は 0 件。`mnt-*` のユニット、`/mnt` の下、fstab の cifs の行、資格情報ファイルは無い。`/etc/fstab.bak-samba-client` は残る。起動してからの AVC も無い |
 
