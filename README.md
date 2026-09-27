@@ -8,7 +8,7 @@
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
 - 対象はどれも AlmaLinux 10.2。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
-  - CLI・GUI の約 40 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
+  - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 
 ### 導入の基盤
@@ -21,7 +21,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 13 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 14 本と、手順書の無いツールの Homebrew の行 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -105,7 +105,7 @@
 ### ファイル・ディスク・リソースを見る
 
 - 標準のコマンドは置き換えず、別の名前で使う（bat・eza の手順書は `alias cat=bat` / `alias ls=eza` を勧めない）
-- 手順書では btop だけ EPEL の RPM で入れている（Homebrew と同じ版のため。duf・fastfetch も同じ理由で EPEL）。RPM なので `sudo btop` がそのまま動く
+- この節の手順書では btop だけ EPEL の RPM で入れている（Homebrew と同じ版のため。duf・fastfetch も同じ理由で EPEL）。RPM なので `sudo btop` がそのまま動く
 - Homebrew のもの（`gdu-go` など）は `sudo` の PATH に無いので、root で使うならフルパスで呼ぶ
 
 | 手順書 | 見るもの | 近い標準のコマンド | 打つコマンド | 形 | 導入元 |
@@ -183,29 +183,51 @@
 | [just](docs/tool-catalog.md#cli-開発運用) | コマンドランナー（make の代わり） | Homebrew |
 | [hyperfine](docs/tool-catalog.md#cli-開発運用) | コマンドのベンチマーク | Homebrew |
 
-### 仮想化・コンテナ
+### コンテナ
+
+- 土台は [Podman](docs/podman.md)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。ほかの 3 本と手順書の無いツールは、これを前提にしている
+- podman 本体と、システムの podman と組んで使うもの（podman-compose・podman-tui・distrobox・toolbox・buildah・skopeo）は RPM にしている
+  - Homebrew 版の podman-compose は別の podman を連れてきて、システムの podman を隠した
+  - Homebrew の podman・skopeo は、`/etc/containers` の設定を読まない
+- podman の API ソケット（[podman.md 手順 8](docs/podman.md#実施手順)）を、Trivy・podman-tui・Pods・Podman Desktop が使う
+  - lazydocker など Docker の API を使うツールは、`DOCKER_HOST` で同じソケットに向ける
+  - dive は podman のコマンドでイメージを読むので、ソケットは要らない
+- PC の起動時に動かしておくコンテナは、podman.md の任意節（Quadlet）で動かす
+
+| 手順書 | 用途 | 打つコマンド | 導入元 | 前提 |
+|---|---|---|---|---|
+| [Podman](docs/podman.md) | コンテナを自分のユーザーで動かす。API ソケット、Quadlet での自動起動（任意） | `podman` | AppStream（Homebrew 版はシステムの podman を隠すので使わない） | — |
+| [distrobox](docs/distrobox.md) | 別のディストリ（既定は Ubuntu 24.04）の端末とパッケージを使う。入れたコマンドはホストから呼べる | `distrobox create` / `enter` | EPEL | Podman |
+| [podman-compose](docs/podman-compose.md) | compose ファイルで、複数のコンテナをまとめて動かす | `podman-compose`（`podman compose` からも呼ばれる） | EPEL | Podman |
+| [hadolint / dive / Trivy](docs/image-tools.md) | イメージを作るときの検査（Containerfile の書き方、層の無駄、脆弱性） | `hadolint` / `dive` / `trivy`（作るのは `podman build`） | Homebrew と Trivy の公式 dnf リポジトリ | Podman、Homebrew |
+
+| 手順書の無いツール | 用途 | 導入元 |
+|---|---|---|
+| [podman-tui](docs/tool-catalog.md#cli-コンテナ) | podman の TUI | EPEL |
+| [lazydocker](docs/tool-catalog.md#cli-コンテナ) | コンテナの TUI（`DOCKER_HOST` で podman につなぐ） | Homebrew |
+| [toolbox](docs/tool-catalog.md#cli-コンテナ) | 別のディストリの端末をコンテナで使う（distrobox と同類。RHEL の公式） | AppStream |
+| [podman-docker](docs/tool-catalog.md#cli-コンテナ) | `docker` コマンドを podman に読み替える | AppStream |
+| [buildah](docs/tool-catalog.md#cli-コンテナ) | Containerfile を使わずにイメージを作る | AppStream |
+| [skopeo](docs/tool-catalog.md#cli-コンテナ) | レジストリのイメージを取得せずに調べる・コピーする | AppStream |
+| [podlet](docs/tool-catalog.md#cli-コンテナ) | podman のコマンドや compose ファイルから Quadlet の定義を作る | Homebrew |
+| [cosign](docs/tool-catalog.md#cli-コンテナ) | イメージの署名と検証 | Homebrew |
+| [Podman Desktop](docs/tool-catalog.md#コンテナ) | podman の GUI | Flathub |
+| [Pods](docs/tool-catalog.md#コンテナ) | podman の GUI（GNOME のアプリ） | Flathub |
+| [BoxBuddy](docs/tool-catalog.md#コンテナ) | distrobox の GUI | Flathub |
+| [Cockpit の podman の画面](docs/tool-catalog.md#コンテナ) | ブラウザからコンテナを操作する | AppStream / BaseOS |
+
+### 仮想化
 
 - VirtualBox は x86_64 だけ。EPEL・モジュールのビルドの道具・（Secure Boot が有効なら）MOK の登録を先に用意する。EL10 のカーネルでは KVM と同時に動かない
-- システムの podman と組んで使うもの（podman-compose・podman-tui・distrobox）は EPEL の RPM にしている（Homebrew 版の podman-compose は別の podman を連れてきて、システムの podman を隠した）
-- lazydocker と dive は Docker の API を使う。podman の API ソケットで使えるかは試していない
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
 | [VirtualBox](docs/virtualbox.md) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
 
-| 手順書の無いツール | 用途 | 導入元 |
-|---|---|---|
-| [podman-compose](docs/tool-catalog.md#cli-開発運用) | compose ファイルを podman で動かす | EPEL |
-| [podman-tui](docs/tool-catalog.md#cli-開発運用) | podman の TUI | EPEL |
-| [distrobox](docs/tool-catalog.md#cli-開発運用) | 別のディストリのユーザーランドをコンテナで使う | EPEL |
-| [lazydocker](docs/tool-catalog.md#cli-開発運用) | コンテナの TUI | Homebrew |
-| [dive](docs/tool-catalog.md#cli-開発運用) | コンテナイメージの層を調べる | Homebrew |
-| [Podman Desktop](docs/tool-catalog.md#開発) | podman の GUI | Flathub |
-
 ### ブラウザ
 
 - Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
-- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[firefox.md 手順 8〜14](docs/firefox.md#実施手順)）。入れないと、音声が AAC だけの動画が再生できない
+- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[firefox.md 手順 8〜14](docs/firefox.md#実施手順)）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
