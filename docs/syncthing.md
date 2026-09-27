@@ -762,6 +762,7 @@
 
    - 何も出さなければ、この節の手順 4 で linger を切る
    - 何か出す（[Dropbox（rclone）](dropbox-rclone.md) の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 4 は飛ばす
+   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、この節の手順 4 は飛ばす
 
 1. ほかにユーザーサービスを常駐させていないときだけ、linger を切る。
 

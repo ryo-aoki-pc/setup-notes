@@ -430,6 +430,7 @@
 
    - `Removed '.../timers.target.wants/dropbox-rclone.timer'.` が出る
    - 最後の `ls` が何か出す（Raspberry Pi 5 では Syncthing の `sh.brew.syncthing.service`）なら、linger はそれが使っているので、手順 2 は飛ばす
+   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、手順 2 は飛ばす
 
    <details>
    <summary>補足: <code>list-unit-files</code> で判断しない理由</summary>
