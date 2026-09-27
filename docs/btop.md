@@ -253,7 +253,7 @@ AlmaLinux 10 aarch64 で btop を入れる経路を比べた（2026-09-22 時点
 
 **この文書だけ Homebrew を使わないのは、EPEL 版が upstream に追いついているため。**
 
-- 既存の [yazi](yazi.md) / [lazygit](lazygit.md) / [neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) は、EPEL に無いか古いので Homebrew を選んでいる
+- ほかの Homebrew 系の手順書（[homebrew.md](homebrew.md) の冒頭に挙げた 12 本）は、どれも EPEL に無いか古いので Homebrew を選んでいる
 - EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](#注意点)）
 
 版の比較に使った実測:
