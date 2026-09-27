@@ -79,6 +79,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](virtualbox.md) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
+| IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [japanese-input.md](japanese-input.md) |
 
 ---
 
