@@ -22,6 +22,17 @@
 | [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | この一覧で導入元が Homebrew の 12 本 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 導入元一覧で Flathub を推奨にした GUI アプリ |
 
+### デスクトップ（GNOME）の設定
+
+- どちらも GNOME のデスクトップが前提。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
+- 常時動かしておく PC（WireGuard・Samba・Syncthing のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
+- 手順書の無い同類: [GNOME Tweaks・Extension Manager](docs/tool-catalog.md#gnomeシステム)（GNOME の細かい設定、拡張の導入）
+
+| 手順書 | 変えるもの | 変える範囲 | 仕組み | 導入するもの |
+|---|---|---|---|---|
+| [画面オフ・画面ロック・自動サスペンド](docs/gnome-power.md) | 画面を消す・暗くする・ロックする、放置でのサスペンド、電源ボタン、蓋 | 自分のセッション、ログイン画面、OS 全体 | `gsettings`、dconf の `/etc/dconf/db/gdm.d`、`systemctl mask`、logind のドロップイン | 無し |
+| [日本語入力（IBus + Anthy）](docs/japanese-input.md) | 入力ソース（キーボードの配列と Anthy を Super+Space で切り替える） | 自分のセッション | `gsettings` の `org.gnome.desktop.input-sources` と IBus | `ibus-anthy` と日本語のフォント（Workstation には最初から入っている） |
+
 ### リモート接続・VPN
 
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
