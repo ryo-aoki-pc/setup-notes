@@ -11,9 +11,6 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-> [!WARNING]
-> **手順 8〜14（AAC・H.264 を再生するための FFmpeg）はコンテナでのみ検証**し、実機には入れていない（[対象と検証環境](#対象と検証環境)）。
-
 1. 変数を設定する。
 
    ```bash
@@ -254,6 +251,7 @@
 
    - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、手順 9 の鍵で署名を確かめずに入る。この手順の補足）
    - EPEL がまだ無ければ、依存として `epel-release` も入る（EPEL が有効になる）
+   - SELinux のポリシー（`selinux-policy`）が入っているホストでは、弱い依存として CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入る
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -281,7 +279,17 @@
     dnf-plugins-core           noarch     4.7.0-10.el10     baseos            37 k
    ```
 
-   `epel-release` の scriptlet は「CRB を有効に」と表示する。AlmaLinux 10 では CRB が既定で有効で（[導入元一覧](tool-catalog.md#導入経路と-el10-での注意)）、手順 12 の依存にも CRB のものは無かった。
+   実機（GNOME のデスクトップ、SELinux は Enforcing）では 4 パッケージになった（`dnf history`）。`dnf-plugins-core` は元から入っていた。代わりに、`epel-release` の弱い依存 `(selinux-policy-epel if selinux-policy)` を満たす `selinux-policy-extra` と、それが要る `selinux-policy-targeted-extra` が CRB から入った。素のコンテナには `selinux-policy` が無いので、この 2 つは入らない:
+
+   ```
+   Packages Altered:
+       Install selinux-policy-extra-42.1.18-4.el10_2.3.noarch          @crb
+       Install selinux-policy-targeted-extra-42.1.18-4.el10_2.3.noarch @crb
+       Install epel-release-10-6.el10.noarch                           @extras
+       Install rpmfusion-free-release-10-1.noarch                      @@commandline
+   ```
+
+   `epel-release` の scriptlet は「CRB を有効に」と表示する。AlmaLinux 10 では CRB が既定で有効（[導入元一覧](tool-catalog.md#導入経路と-el10-での注意)）なので、`crb enable` は要らない。手順 12 の依存には、CRB のものは無かった。
 
    </details>
 
@@ -302,7 +310,7 @@
    <details>
    <summary>補足: 入るものと、鍵の確認の実測</summary>
 
-   Firefox だけを入れたコンテナでは 79 パッケージが入った（ダウンロード 42 MB、展開後 137 MB）。内訳は EPEL 44・BaseOS 17・AppStream 14・RPM Fusion 4（`ffmpeg-libs`・`x264-libs`・`x265-libs`・`vvenc-libs`）で、CRB からは無い。既に入っているものは数に入らないので、デスクトップのホストでは少なくなる。
+   Firefox だけを入れたコンテナでは 79 パッケージが入った（ダウンロード 42 MB、展開後 137 MB）。内訳は EPEL 44・BaseOS 17・AppStream 14・RPM Fusion 4（`ffmpeg-libs`・`x264-libs`・`x265-libs`・`vvenc-libs`）で、CRB からは無い。実機（GNOME のデスクトップ）では、既に入っているものが多く 60 パッケージだった（EPEL 44・AppStream 10・RPM Fusion 4・BaseOS 2）。
 
    Firefox のプロセスが読み込むのは `/usr/lib64/libavcodec.so.61.19.101`（FFmpeg 7.1）だった（コンテナで `/proc/<pid>/maps` を見た）。コマンドの `ffmpeg` は入らない（要るなら `sudo dnf install ffmpeg`）。
 
@@ -497,23 +505,30 @@
     - 確認したこと: `156.0.1-1` が入る、ESR からの載せ替えが `Upgrading` として解決される、ロールバックが `Downgrading` に解決される
     - **コンテナでは GUI を起動していない**（実機では 156.0 が動作中）
     - **ESR / Beta チャンネルと言語パック以外の l10n は未検証**
-  - **手順 8〜14（AAC・H.264）はコンテナのみで検証（2026-09-28）**
-    - 同じ OS の aarch64 コンテナで、この文書の手順 1〜14 のブロックをそのまま流して通した（条件付きの手順 13 は、`libavcodec-free` を入れた別のコンテナで）
-    - headless の Firefox 156.0.1 を Marionette で動かし、AAC と H.264 の復号と再生、about:support の表、YouTube の動画の再生を確かめた
-    - 実機では、入れる前の Firefox で AAC と H.264 が「未対応」になることだけ確かめた（何も入れていない）
-    - x86_64 は、RPM Fusion のメタデータで `ffmpeg-libs` の依存が解決できることだけ確かめた
-    - **実機への導入と、画面での再生（手順 14 の GUI の確認）は未検証**
+  - **手順 8〜14（AAC・H.264）も実機で本実行済み（2026-09-28）**
+    - 下表の実機で、利用者が手順どおりに入れた（[付録](#付録-実機での本実行2026-09-28)）
+      - 手順 9 の鍵が登録されている
+      - `dnf history` に、手順 11（4 パッケージ）と手順 12（`ffmpeg-libs` ほか 60 パッケージ）の実行が残っている
+      - `libavcodec-free` は入っていなかったので、手順 13 は要らなかった
+    - 利用者が、再生できなかった動画が再生できるようになったことを確かめた
+    - 同じ実機で、一時プロファイルの headless の Firefox を Marionette で動かして次を確かめた
+      - about:support の H264・HEVC・AAC が「対応」になる
+      - AAC と H.264 の再生が通る
+      - Firefox のプロセスが `/usr/lib64/libavcodec.so.61.19.101` を読み込んでいる
+    - この文書の手順 1〜14 のブロックは、同じ OS の aarch64 コンテナでもそのまま流して通した（条件付きの手順 13 は、`libavcodec-free` を入れた別のコンテナで）
+    - **音声が AAC だけの YouTube の動画での再生は確かめていない**（例の動画は、実機に入れる前に YouTube 側で Opus が足されていた。代わりに、AAC を MSE で流すテストを実機でも通した）
+    - **x86_64 は、RPM Fusion のメタデータで `ffmpeg-libs` の依存が解決できることだけ確かめた**
 
-| 項目 | 実機 | 検証コンテナ | 検証コンテナ（手順 8〜14） |
-|---|---|---|---|
-| 実施日 | 2026-09-21 | 2026-09-22 | 2026-09-28 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） | 同左 |
-| カーネル | 6.12.96 | ホストと同じ | ホストと同じ |
-| dnf | 4.20.0 | 4.20.0 | 4.20.0 |
-| 実施前の Firefox | `firefox-140.15.0-1.el10_2.aarch64`（appstream、ESR 140） | 同じものを `dnf install firefox` で用意 | `firefox-156.0.1-1.aarch64`（mozilla。手順 2〜6 で用意） |
-| 入った Firefox | `firefox-156.0-1.aarch64`（mozilla、Vendor: Mozilla） | `firefox-156.0.1-1.aarch64` | 同左。FFmpeg は `ffmpeg-libs-7.1.5-1.el10.aarch64`（rpmfusion-free-updates） |
-| デスクトップ | GNOME 49 / Wayland | 無し（`--version` まで） | 無し（headless の Firefox を Marionette で操作） |
-| SELinux | Enforcing | コンテナ側は無効 | コンテナ側は無効 |
+| 項目 | 実機 | 検証コンテナ | 検証コンテナ（手順 8〜14） | 実機（手順 8〜14） |
+|---|---|---|---|---|
+| 実施日 | 2026-09-21 | 2026-09-22 | 2026-09-28 | 2026-09-28 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） | 同左 | 実機と同じホスト（2026-09-25 に入れ直した後） |
+| カーネル | 6.12.96 | ホストと同じ | ホストと同じ | 6.12.96 |
+| dnf | 4.20.0 | 4.20.0 | 4.20.0 | 4.20.0 |
+| 実施前の Firefox | `firefox-140.15.0-1.el10_2.aarch64`（appstream、ESR 140） | 同じものを `dnf install firefox` で用意 | `firefox-156.0.1-1.aarch64`（mozilla。手順 2〜6 で用意） | `firefox-156.0.1-1.aarch64`（mozilla。2026-09-25 に手順 6 で入れ直したもの） |
+| 入った Firefox | `firefox-156.0-1.aarch64`（mozilla、Vendor: Mozilla） | `firefox-156.0.1-1.aarch64` | 同左。FFmpeg は `ffmpeg-libs-7.1.5-1.el10.aarch64`（rpmfusion-free-updates） | Firefox は変わらない。FFmpeg は `ffmpeg-libs-7.1.5-1.el10.aarch64`（rpmfusion-free-updates） |
+| デスクトップ | GNOME 49 / Wayland | 無し（`--version` まで） | 無し（headless の Firefox を Marionette で操作） | GNOME 49（`gnome-shell` 49.4） |
+| SELinux | Enforcing | コンテナ側は無効 | コンテナ側は無効 | Enforcing |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -622,6 +637,20 @@ gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-g
 
 - 有効なリポジトリに `epel` と `rpmfusion-free-updates` が加わる（`rpmfusion-free-updates-testing` の repo ファイルも置かれるが、無効）
 - about:support の「コーデックサポート情報」では、H264・HEVC・AAC の「ソフトウェアデコーディング」が「対応」になる（[手順 14 の補足](#実施手順)）
+
+実機（2026-09-28、利用者が手順どおりに入れた後）:
+
+```
+$ rpm -q ffmpeg-libs rpmfusion-free-release epel-release
+ffmpeg-libs-7.1.5-1.el10.aarch64
+rpmfusion-free-release-10-1.noarch
+epel-release-10-6.el10.noarch
+$ rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i -E 'fusion|epel'
+gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-gpg-key-el10-free@rpmfusion.org> public key
+gpg-pubkey-e37ed158-65785fa9 Fedora (epel10) <epel@fedoraproject.org> public key
+```
+
+- 手順 11 で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[手順 11 の補足](#実施手順)）
 
 ### 注意点
 
@@ -748,3 +777,30 @@ AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画�
 - ハードウェアでの復号（about:support ではすべて「未対応」だった）
 - DRM（Widevine）の要る動画
 - AppStream の ESR 140 に戻したときに、`~/.config/mozilla/firefox` のプロファイルを読むか
+
+### 付録: 実機での本実行（2026-09-28）
+
+前の付録の後、利用者が実機（2026-09-25 に入れ直した Raspberry Pi 5）で手順どおりに入れ、再生できなかった動画が再生できるようになった。前の付録の未確認事項のうち、実機への導入と再生はこれで済んだ。
+
+**`dnf history`**（時刻は実機の JST）:
+
+| ID | 日時 | コマンド | 結果 |
+|---|---|---|---|
+| 19 | 2026-09-28 02:13 | `--setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm` | Success。`rpmfusion-free-release`・`epel-release`（extras）・`selinux-policy-extra`・`selinux-policy-targeted-extra`（crb）の 4 パッケージ |
+| 20 | 2026-09-28 02:15 | `install ffmpeg-libs` | Success（7 秒）。60 パッケージ（EPEL 44・AppStream 10・RPM Fusion 4・BaseOS 2） |
+
+- 手順 9 の RPM Fusion の鍵（`gpg-pubkey-db85ddd7-67a63d8b`）と、手順 12 で取り込まれた EPEL の鍵（`gpg-pubkey-e37ed158-65785fa9`）が登録されていた
+- `libavcodec-free` は入っておらず、`--allowerasing` の実行も無い（手順 13 は要らなかった）
+- `dnf repoquery --installed --qf '%{name} %{reason}'` では、`selinux-policy-extra` が `weak-dependency`、`selinux-policy-targeted-extra` が `dependency`。`epel-release` の Recommends の `(selinux-policy-epel if selinux-policy)` を、`selinux-policy-extra` が `selinux-policy-epel` を提供して満たしている
+
+**入れた後の Firefox**（一時プロファイルの headless の Firefox を、前の付録と同じプローブで調べた。利用者のプロファイルには触れていない）:
+
+- about:support の「コーデックサポート情報」は、H264・HEVC・AAC の「ソフトウェアデコーディング」が「対応」。「ハードウェアデコーディング」はすべて「未対応」
+- `decodeAudioData` で AAC を復号でき、MSE で AAC を流せた。H.264 + AAC の mp4 も再生できた
+- Firefox のコンテンツプロセス 2 つが `/usr/lib64/libavcodec.so.61.19.101` を読み込んでいた
+
+#### 未確認事項
+
+- 音声が AAC だけの YouTube の動画での再生（例の動画は、実機に入れる前に YouTube 側で Opus が足されていた）
+- 画面に出した about:support の表示（headless の Firefox でだけ確かめた）
+- x86_64 での導入と再生（メタデータのみ）
