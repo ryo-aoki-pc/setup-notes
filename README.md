@@ -8,7 +8,7 @@
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
 - 対象はどれも AlmaLinux 10.2。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
-  - CLI・GUI の約 50 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
+  - CLI・GUI の約 40 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 
 ### 導入の基盤
@@ -142,10 +142,6 @@
 | [Neovim](docs/neovim.md) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系） | `~/.config/nvim`（`init.lua` か `init.vim`） | `brew upgrade neovim` |
 | [VS Code](docs/vscode.md) | GUI（Electron） | Microsoft 公式 dnf リポジトリ（EL 共通の rpm） | `~/.config/Code`、`~/.vscode`（`~/.config/code-flags.conf` は読まれない） | `sudo dnf upgrade code`（内蔵のアップデータは使わない） |
 
-| 手順書の無いツール | 用途 | 導入元 |
-|---|---|---|
-| [Sublime Text](docs/tool-catalog.md#開発) | テキストエディタ（GUI） | [公式 dnf リポジトリ](docs/tool-catalog.md#ベンダーの-dnf-リポジトリ) |
-
 ### git と GitHub
 
 - 役割が違うので、併用できる
@@ -201,7 +197,7 @@
 
 ### ブラウザ
 
-- Firefox・Google Chrome・Brave は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
+- Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
@@ -211,40 +207,16 @@
 | 手順書の無いツール | 導入元 | アーキ |
 |---|---|---|
 | [Google Chrome](docs/tool-catalog.md#ブラウザ) | [公式 dnf リポジトリ](docs/tool-catalog.md#ベンダーの-dnf-リポジトリ) | x86_64・aarch64 |
-| [Brave](docs/tool-catalog.md#ブラウザ) | [公式 dnf リポジトリ](docs/tool-catalog.md#ベンダーの-dnf-リポジトリ) | x86_64・aarch64 |
 | [Chromium](docs/tool-catalog.md#ブラウザ) | EPEL（Flathub 版は新しいが、公開元が未検証） | x86_64・aarch64 |
 | [Microsoft Edge](docs/tool-catalog.md#aarch64-で使えないもの) | 決めていない（公式 dnf リポジトリと Flathub にあるが、入れていない） | x86_64 だけ |
 
-### 文書・画像・動画
+### パスワード管理
 
-- 手順書は無い。どれも GUI アプリ
-- LibreOffice・GIMP・Inkscape は AppStream・EPEL に無いので、Flathub で入れる
-
-| 手順書の無いツール | 用途 | 導入元 |
-|---|---|---|
-| [LibreOffice](docs/tool-catalog.md#文書画像動画) | オフィス | Flathub |
-| [Obsidian](docs/tool-catalog.md#文書画像動画) | Markdown のノート | Flathub |
-| [GIMP](docs/tool-catalog.md#文書画像動画) | 画像編集 | Flathub |
-| [Inkscape](docs/tool-catalog.md#文書画像動画) | ベクター画像 | Flathub |
-| [VLC](docs/tool-catalog.md#文書画像動画) | 動画・音声の再生 | EPEL |
-| [OBS Studio](docs/tool-catalog.md#文書画像動画) | 画面録画・配信 | Flathub（aarch64 に無い） |
-| [Spotify](docs/tool-catalog.md#aarch64-で使えないもの) | 音楽の配信 | 決めていない（x86_64 だけ。Flathub にあるが、入れていない） |
-
-### パスワード・連絡
-
-- 手順書は無い。どれも GUI アプリ
-- Slack・Discord・Zoom は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
+- 手順書は無い
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
-| [KeePassXC](docs/tool-catalog.md#パスワード連絡) | パスワード管理（ローカルのファイル） | EPEL |
-| [Bitwarden](docs/tool-catalog.md#パスワード連絡) | パスワード管理（クラウド） | Flathub |
-| [Thunderbird](docs/tool-catalog.md#文書画像動画) | メール | AppStream（ESR） |
-| [Signal](docs/tool-catalog.md#パスワード連絡) | メッセンジャー | Flathub（公開元は未検証） |
-| [Telegram](docs/tool-catalog.md#パスワード連絡) | メッセンジャー | Flathub |
-| [Slack](docs/tool-catalog.md#aarch64-で使えないもの) | チャット | 決めていない（x86_64 だけ。Flathub にあるが、入れていない） |
-| [Discord](docs/tool-catalog.md#aarch64-で使えないもの) | チャット・通話 | 決めていない（x86_64 だけ。Flathub と RPM Fusion の nonfree にあるが、入れていない） |
-| [Zoom](docs/tool-catalog.md#aarch64-で使えないもの) | ビデオ会議 | 決めていない（x86_64 だけ。Flathub にあるが、入れていない） |
+| [KeePassXC](docs/tool-catalog.md#パスワード管理) | パスワード管理（ローカルのファイル） | EPEL |
 
 ## 記法
 

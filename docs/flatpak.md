@@ -382,7 +382,8 @@ com.github.tchx84.Flatseal.desktop
 ### 注意点
 
 - **容量が大きい**: アプリ 1 つ（1 MB 弱）でも、初回は runtime・翻訳・GL ドライバ・コーデックの拡張で 2.5 GB になる
-  - [ツール一覧](tool-catalog.md#gui)の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統）
+  - [ツール一覧](tool-catalog.md#gui)の Flathub のアプリを全部入れると、runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統になる
+  - 調査時は、ほかのアプリも合わせた 13 本で 8.1 GB になった
   - `sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **`dnf upgrade` では上がらない**: [更新](#更新)の `sudo flatpak update` を別に実行する
 - **権限はアプリごとに違う**: 手順 7 の実測のように、入れる前に権限の一覧が出る
@@ -390,7 +391,7 @@ com.github.tchx84.Flatseal.desktop
 - **公開元が検証済みかを見る**: Flathub のアプリには次の 2 種類がある。[ツール一覧](tool-catalog.md#gui)の表に書き分けてある
   - 検証済み: 公開元がアプリの作者本人だと確認されたもの
   - 未検証: 確認されていないもの。第三者が包んでいる場合がある
-- **aarch64 に無いアプリがある**: OBS・Slack・Discord・Zoom・Spotify・Edge などは Flathub でも x86_64 だけ（[ツール一覧](tool-catalog.md#aarch64-で使えないもの)）
+- **aarch64 に無いアプリがある**: Microsoft Edge などは Flathub でも x86_64 だけ（[ツール一覧](tool-catalog.md#aarch64-で使えないもの)）
 - **RPM と Flatpak で同じアプリを二重に入れない**: [Firefox](firefox.md) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる（未確認。[firefox.md](firefox.md) の未確認事項と同じ）
 - **`sudo -i` した root のシェルで実行しない**: `flatpak run` はふつうのユーザーで行うもので、root で起動したアプリの設定は root のホームにできる
 
@@ -406,7 +407,7 @@ com.github.tchx84.Flatseal.desktop
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、Thunderbird が `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
+`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、試したアプリが `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
 
 | 手順 | 結果 |
 |---|---|
@@ -421,7 +422,7 @@ com.github.tchx84.Flatseal.desktop
 
 最初の試行では、pty を使わずに標準入力から `y` を流した。**このときは flatpak が問い合わせに自動で `n` と答えて中断した**（`Do you want to install it? [Y/n]: n`）。スクリプトから流すなら `-y` を付けるか、pty を用意する必要がある。
 
-同じ日に、別の手順（`-y --noninteractive` 付き）で [ツール一覧](tool-catalog.md#gui) の Flathub のアプリ 13 本を同じコンテナに入れた。記録は一覧の付録にある。[使い方の基本](#使い方の基本)の表のうち、`search`（と、その前に要る `update --appstream`）・`info --show-permissions`・`override --filesystem` / `--reset` はその状態で確かめた。`search` が登録直後に何も返さないことは、別の新しいコンテナで `dnf install` → `remote-add` → `search` の順に流して再現した。
+同じ日に、別の手順（`-y --noninteractive` 付き）で [ツール一覧](tool-catalog.md#gui) の Flathub のアプリを含む 13 本を同じコンテナに入れた。記録は一覧の付録にある。[使い方の基本](#使い方の基本)の表のうち、`search`（と、その前に要る `update --appstream`）・`info --show-permissions`・`override --filesystem` / `--reset` はその状態で確かめた。`search` が登録直後に何も返さないことは、別の新しいコンテナで `dnf install` → `remote-add` → `search` の順に流して再現した。
 
 #### 未確認事項
 
