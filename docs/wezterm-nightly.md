@@ -221,7 +221,7 @@
 
 - **目的**: AlmaLinux 10 に [WezTerm](https://wezterm.org/) の nightly ビルドを **dnf 管理で**入れ、以後は `dnf upgrade` で追従できるようにする
 - **進め方**: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる
-  - **読者が書き換えるのは冒頭の変数ブロックだけ**（実際には `uname -m` から自動で入る）
+  - **読者が書き換える変数は無い**（chroot は `uname -m` から自動で決まる）
   - 設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（[設定ファイル](#設定ファイル)）
 - **状態**: **2026-09-21 にこのホスト（x86_64 / GNOME 49 Wayland）で本実行済み**
   - 確認したこと: ウィンドウの起動・終了まで
