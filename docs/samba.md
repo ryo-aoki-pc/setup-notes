@@ -255,13 +255,14 @@
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
-   - Linux: `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
+   - Linux: AlmaLinux 10 の PC なら [samba-client.md](samba-client.md)（fstab の自動マウントと GNOME Files）。ほかは `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
    - WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み替える（クライアント側の `AllowedIPs` にトンネル網が入っていることが前提。[WireGuard の手順書](wireguard.md)）
 
    <details>
    <summary>補足: クライアントからの接続</summary>
 
    - クライアントからの接続は未検証。IP アドレスで指定する（NetBIOS 名では見つからない）
+   - [samba-client.md](samba-client.md) は、手順 3 の `smb.conf` を置いたコンテナに、AlmaLinux 10 の VM からつないで確かめた。この実機のサーバーへの接続は確かめていない
 
    </details>
 
