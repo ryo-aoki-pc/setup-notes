@@ -729,24 +729,47 @@
 - 上から順に実行する
 - 接続元を絞る節を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
 - 自動バックアップを設定した場合は、Syncthing が動いているうちに、先に[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)の手順 5 を貼る
-- 同期していたファイル自体は、この節のどちらの手順でも消えない
+- 同期していたファイル自体は、この節のどの手順でも消えない
 - 本書ではロールバックは**本実行していない**
 
 > [!CAUTION]
-> **この節の**手順 2 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](#バックアップから戻す)で同じデバイス ID に戻せる）。
+> **この節の**手順 5 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](#バックアップから戻す)で同じデバイス ID に戻せる）。
 
-1. サービスを止め、linger とファイアウォールの設定を外して、Syncthing を消す。
+1. サービスを止めて、Syncthing を消す。
 
    ```bash
    brew services stop syncthing
-   sudo loginctl disable-linger "${USER}"
-   sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
    brew uninstall syncthing
    ```
 
-   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
+   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは、この節の手順 4 の `${USER}` が `root` になる）
    - `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
    - 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
+
+1. ファイアウォールの設定を外す。
+
+   ```bash
+   sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
+   ```
+
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. ほかに自分で有効にしたユーザーサービスがあるか見る。
+
+   ```bash
+   ls ~/.config/systemd/user/*.wants/ 2>/dev/null
+   ```
+
+   - 何も出さなければ、この節の手順 4 で linger を切る
+   - 何か出す（[Dropbox（rclone）](dropbox-rclone.md) の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 4 は飛ばす
+
+1. ほかにユーザーサービスを常駐させていないときだけ、linger を切る。
+
+   ```bash
+   sudo loginctl disable-linger "${USER}"
+   ```
+
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. 完全に消すときだけ、設定・鍵・DB とログを消す（取り戻せない）。
 
