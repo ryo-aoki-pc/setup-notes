@@ -541,6 +541,9 @@ gnome-remote-de[2415]: RDP server started
   - 差し替え後は `sudo systemctl restart gnome-remote-desktop.service` を実行する（接続中の RDP セッションは切断されるので、利用者がいないタイミングで行う）
 - **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。接続元を制限しない場合はそのままでよい
   - LAN 限定に絞る手順は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)
+- **ログイン画面のまま置くと眠ることがある**: Workstation で入れた PC のログイン画面は、電源につないでいても 15 分でサスペンドする
+  - GDM 47 と gnome-settings-daemon の既定値による（コンテナでログイン画面の設定値を読んだもので、本書の環境では確かめていない）
+  - 眠ると RDP でつなげない。止めるなら [gnome-power.md](gnome-power.md)
 
 ### 参照
 
