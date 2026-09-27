@@ -219,10 +219,12 @@
 ### 仮想化
 
 - VirtualBox は x86_64 だけ。EPEL・モジュールのビルドの道具・（Secure Boot が有効なら）MOK の登録を先に用意する。EL10 のカーネルでは KVM と同時に動かない
+- ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
 | [VirtualBox](docs/virtualbox.md) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
+| [VirtualBox Guest Additions（bootc のゲスト）](docs/virtualbox-guest-bootc.md) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
 
 ### ブラウザ
 
