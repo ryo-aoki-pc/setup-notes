@@ -37,7 +37,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | BaseOS / AppStream | 既定で有効 | 古めで固定。例: tmux 3.3a、jq 1.7.1、Firefox は ESR 140 | 調べた範囲では x86_64 と同じ版 | — | — |
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [btop.md](btop.md) |
 | EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 1〜3](btop.md#実施手順) |
-| RPM Fusion（EL10） | 本書では有効にしていない | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い | — |
+| RPM Fusion（EL10） | 本書では有効にしていない。free は [firefox.md 手順 8〜11](firefox.md#実施手順) で、鍵を照合してから `rpmfusion-free-release` を入れる | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [firefox.md](firefox.md) |
 | ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md) |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | root では動かない。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
