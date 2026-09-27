@@ -34,14 +34,14 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 | 経路 | 有効にする方法 | 版の傾向 | aarch64 | EL10 での注意 | 詳細 |
 |---|---|---|---|---|---|
-| BaseOS / AppStream | 既定で有効 | 古めで固定。例: tmux 3.3a、jq 1.7.1、Firefox と Thunderbird は ESR 140 | 調べた範囲では x86_64 と同じ版 | **LibreOffice・GIMP・Inkscape は無い** | — |
+| BaseOS / AppStream | 既定で有効 | 古めで固定。例: tmux 3.3a、jq 1.7.1、Firefox は ESR 140 | 調べた範囲では x86_64 と同じ版 | — | — |
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [btop.md](btop.md) |
-| EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream などと合わせて 61 パッケージ）はすべて x86_64 と同じ版 | Chromium・VLC・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 1〜3](btop.md#実施手順) |
-| RPM Fusion（EL10） | 本書では有効にしていない | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `discord`（x86_64 のみ）と `steam`（i686）。**VLC・OBS・mpv は無い** | [注意点](#注意点) |
-| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・Brave・Sublime Text・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない**（Sublime Text で実測） | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
+| EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 1〜3](btop.md#実施手順) |
+| RPM Fusion（EL10） | 本書では有効にしていない | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い | — |
+| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md) |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | root では動かない。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
-| Flathub | [flatpak.md](flatpak.md) | 上流の最新 | アプリ次第。調べた 31 本のうち 7 本は x86_64 のみ | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [flatpak.md](flatpak.md) |
+| Flathub | [flatpak.md](flatpak.md) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [flatpak.md](flatpak.md) |
 | AppImage | ダウンロードして実行 | 上流の最新 | 配布次第 | FUSE2（`fuse-libs`）と glibc 2.39 の制約がある | [wezterm-nightly.md](wezterm-nightly.md) |
 
 ## 選び方
@@ -145,7 +145,6 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
 | Google Chrome | ブラウザ | 公式 dnf リポジトリ 154.0.8037.57 | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ) | Flathub `com.google.Chrome`（公開元は未検証） | 有（公式 rpm） | 起動 |
-| Brave | ブラウザ | 公式 dnf リポジトリ 1.96.59 | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ) | Flathub `com.brave.Browser`（検証済み） | 有（公式 rpm） | 起動 |
 | Chromium | ブラウザ | EPEL 153.0.8010.52 | `sudo dnf install -y chromium` | Flathub `org.chromium.Chromium` 154.0.8037.57（未検証） | 有 | 起動 |
 
 Chromium は GUI の規則の 4 番目にあたる。
@@ -153,34 +152,16 @@ Chromium は GUI の規則の 4 番目にあたる。
 - 調査日の時点で、EPEL は 1 メジャー遅れていた
 - Flathub 版は新しいが公開元が未検証なので、EPEL にした
 
-### 文書・画像・動画
-
-| ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
-|---|---|---|---|---|---|---|
-| LibreOffice | オフィス | Flathub `org.libreoffice.LibreOffice` 26.8.0.3（検証済み、FDO 25.08） | `sudo flatpak install -y flathub org.libreoffice.LibreOffice` | AppStream・EPEL に無い | 有 | 起動 |
-| Thunderbird | メール | AppStream 140.14.0esr | `sudo dnf install -y thunderbird` | Flathub `org.mozilla.thunderbird` 156.0.1（検証済み、**x86_64 のみ**） | 有 | 起動 |
-| Obsidian | Markdown のノート | Flathub `md.obsidian.Obsidian` 1.13.7（検証済み、FDO 26.08） | `sudo flatpak install -y flathub md.obsidian.Obsidian` | RPM 無し | 有 | 導入 |
-| GIMP | 画像編集 | Flathub `org.gimp.GIMP` 3.2.6（検証済み、GNOME 50） | `sudo flatpak install -y flathub org.gimp.GIMP` | AppStream・EPEL に無い | 有 | 起動 |
-| Inkscape | ベクター画像 | Flathub `org.inkscape.Inkscape` 1.4.4（検証済み、GNOME 50） | `sudo flatpak install -y flathub org.inkscape.Inkscape` | AppStream・EPEL に無い | 有 | 起動 |
-| VLC | 動画・音声の再生 | EPEL 3.0.23 | `sudo dnf install -y vlc` | Flathub `org.videolan.VLC` 3.0.23（未検証） | 有 | 起動 |
-| OBS Studio | 画面録画・配信 | Flathub `com.obsproject.Studio` 32.2.2（検証済み、FDO 25.08） | `sudo flatpak install -y flathub com.obsproject.Studio` | EPEL・RPM Fusion（EL10）に無い | **無** | 起動 |
-
-### パスワード・連絡
+### パスワード管理
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
 | KeePassXC | パスワード管理（ローカルのファイル） | EPEL 2.7.11 | `sudo dnf install -y keepassxc` | Flathub `org.keepassxc.KeePassXC` 2.7.12（検証済み） | 有 | 起動 |
-| Bitwarden | パスワード管理（クラウド） | Flathub `com.bitwarden.desktop` 2026.9.0（検証済み、FDO 25.08） | `sudo flatpak install -y flathub com.bitwarden.desktop` | RPM 無し | 有 | 導入 |
-| Signal | メッセンジャー | Flathub `org.signal.Signal` 8.28.0（**未検証**、FDO 26.08） | `sudo flatpak install -y flathub org.signal.Signal` | RPM 無し | 有 | 導入 |
-| Telegram | メッセンジャー | Flathub `org.telegram.desktop` 7.2.9（検証済み、GNOME 50） | `sudo flatpak install -y flathub org.telegram.desktop` | RPM 無し | 有 | 導入 |
-
-Signal は GUI の規則の 4 番目にあたる。Flathub のほかに EL10 で使える経路が無い。
 
 ### 開発
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
-| Sublime Text | テキストエディタ | 公式 dnf リポジトリ 4213 | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ) | Flathub `com.sublimehq.SublimeText` 4213（未検証） | 有（公式 rpm） | 起動 |
 | Podman Desktop | podman の GUI | Flathub `io.podman_desktop.PodmanDesktop` 1.29.3（検証済み、FDO 26.08） | `sudo flatpak install -y flathub io.podman_desktop.PodmanDesktop` | RPM 無し | 有 | 導入 |
 | Meld | 差分・マージ | EPEL 3.22.2 | `sudo dnf install -y meld` | Flathub `org.gnome.meld` 3.24.0（未検証） | 有 | 導入 |
 
@@ -204,7 +185,7 @@ Meld は GUI の規則の 4 番目にあたる。
 
 ## ベンダーの dnf リポジトリ
 
-上の表で「ベンダーの dnf リポジトリ」を推奨にした 4 つ。
+上の表で「ベンダーの dnf リポジトリ」を推奨にした 2 つ。
 
 - **リポジトリの登録から導入まで、x86_64 コンテナでこのとおり実行した**
 - `dnf config-manager` は `dnf-plugins-core` に入っている（EPEL を入れると一緒に入る）
@@ -228,25 +209,6 @@ google-chrome-stable --version
 - 導入後のファイルは、`baseurl` の `$basearch` がアーキの名前（x86_64 では `.../stable/x86_64`）に置き換わっただけで、ほかは上と同じだった
 - `/etc/cron.daily/google-chrome` も置かれる
 
-**Brave**:
-
-```bash
-sudo dnf install -y dnf-plugins-core
-sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-sudo dnf install -y brave-browser
-brave-browser --version
-```
-
-**Sublime Text**（**`rpm --import` を省くと導入に失敗する**。この節の後ろの説明を参照）:
-
-```bash
-sudo rpm -v --import https://download.sublimetext.com/sublimehq-pub.gpg
-sudo dnf config-manager --add-repo "https://download.sublimetext.com/rpm/stable/$(uname -m)/sublime-text.repo"
-sudo dnf install -y sublime-text
-subl --version
-```
-
 **mise**:
 
 ```bash
@@ -260,41 +222,7 @@ mise --version
 | リポジトリ | 鍵 | fingerprint |
 |---|---|---|
 | Google | Google Inc. (Linux Packages Signing Authority) | `EB4C 1BFD 4F04 2F6D DDCC EC91 7721 F63B D38B 4796`（rpm は副鍵 `c264648f` で署名） |
-| Brave | Brave Linux Release | `DBF1 A116 C220 B8C7 164F 9823 0686 B784 2003 8257`（rpm の署名鍵。`brave-core.asc` には pre-release 用などの鍵も含まれる） |
-| Sublime Text | Sublime HQ Pty Ltd（2025 年の鍵） | `EBC7 33B7 8AAB 352D C773 BF85 7FE2 FA12 CF6E 38F2` |
 | mise | mise releases | `2485 3EC9 F655 CE80 B48E 6C3A 8B81 C9D1 7413 A06D` |
-
-**Sublime Text の鍵は EL10 で一部しか入らない。** `sublimehq-pub.gpg` には鍵が 3 つ入っている。
-
-- EL10 の rpm は、2017 年の 2 つを「その時点で有効な結合署名が無い」として拒否し、2025 年の 1 つ（`CF6E38F2`）だけを取り込む
-- 拒否された 2 つは自己署名のハッシュが SHA-1（`gpg --list-packets` で `digest algo 2`）、取り込めた 1 つは SHA-512（`digest algo 10`）だった
-- **`rpm --import` はエラーを 2 行出して終了コード 2 で終わるが、rpm の署名に使われているのは取り込めた `CF6E38F2` なので、導入はできる**
-- 一方、`rpm --import` を省いて `dnf install` に鍵の取り込みを任せると、dnf は 1 つ目の鍵で失敗した時点で止まる
-
-```
-$ sudo rpm -v --import https://download.sublimetext.com/sublimehq-pub.gpg
-error: Certificate ADAE6AD28A8F901A:
-  Policy rejects ADAE6AD28A8F901A: No binding signature at time 2026-09-24T21:01:16Z
-error: https://download.sublimetext.com/sublimehq-pub.gpg: key 1 import failed.
-error: Certificate CA464A9A222D23D0:
-  Policy rejects CA464A9A222D23D0: No binding signature at time 2026-09-24T21:01:16Z
-error: https://download.sublimetext.com/sublimehq-pub.gpg: key 2 import failed.
-```
-
-`rpm --import` を省いたときの `dnf install -y sublime-text` の実測（別のコンテナ）:
-
-```
-Importing GPG key 0x8A8F901A:
- Userid     : ""
- Fingerprint: 1EDD E2CD FC02 5D17 F6DA 9EC0 ADAE 6AD2 8A8F 901A
- From       : https://download.sublimetext.com/sublimehq-pub.gpg
-error: Certificate ADAE6AD28A8F901A:
-  Policy rejects ADAE6AD28A8F901A: No binding signature at time 2026-09-24T21:05:20Z
-Key import failed (code 2). Failing package is: sublime-text-4213-1.x86_64
- GPG Keys are configured as: https://download.sublimetext.com/sublimehq-pub.gpg
-...
-Error: GPG check FAILED
-```
 
 ---
 
@@ -304,13 +232,7 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 
 | ツール | x86_64 の提供元 | aarch64 |
 |---|---|---|
-| OBS Studio | Flathub `com.obsproject.Studio`（検証済み） | Flathub に無い。EPEL・RPM Fusion（EL10）にも無い |
 | Microsoft Edge | 公式 dnf リポジトリ 154.0.4258.37 / Flathub `com.microsoft.Edge` 153.0.4234.48（未検証） | どちらにも無い |
-| Slack | Flathub `com.slack.Slack` 4.52.155（未検証） | 無い |
-| Discord | Flathub `com.discordapp.Discord` 1.0.159（検証済み）/ RPM Fusion nonfree 1.0.148 | どちらにも無い |
-| Zoom | Flathub `us.zoom.Zoom` 7.1.5.4332（未検証） | 無い |
-| Spotify | Flathub `com.spotify.Client` 1.2.95（未検証） | 無い |
-| Thunderbird（Flathub 版） | Flathub `org.mozilla.thunderbird` 156.0.1 / `org.mozilla.thunderbird_esr` 153.3.1esr | Flathub には無い。**AppStream の Thunderbird（140.14.0esr）は aarch64 にもある** |
 | VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[virtualbox.md](virtualbox.md)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
 
 ---
@@ -356,16 +278,19 @@ sudo flatpak update
   - **依存の多い formula を入れた後は、`command -v` で主要なコマンドの場所を確かめる**
 - **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（[bat.md](bat.md) と同じ問題）
 - **Flathub の「検証済み」はアプリの公開元の確認**で、中身の審査ではない
-  - 未検証のもの（Chrome・Chromium・VLC・Signal・Slack・Zoom・Spotify など）は、上流ではない第三者が包んでいる場合がある
+  - 未検証のもの（Chrome・Chromium・Edge など）は、上流ではない第三者が包んでいる場合がある
 - **Flathub は aarch64 の appstream を配っていない**（`flatpak update --appstream --arch=aarch64` が `No such ref 'appstream2/aarch64'` で失敗する）
   - そのため aarch64 の版は表に書けない
-  - 代わりに、aarch64 に提供がある 24 本すべてで、`flatpak remote-info` のコミットの件名が x86_64 と一致することを確かめた（同じ版のビルドと推定できる）
-- **EPEL の VLC は `libavcodec-free`（EPEL の `ffmpeg-free` 7.1.2）にリンクされている**（`vlc-plugin-ffmpeg` の依存）
-  - どの形式を再生できるかは確かめていない
-  - RPM Fusion（EL10）には `ffmpeg` 7.1.5 がある
+  - 代わりに、aarch64 に提供があるものはすべて、`flatpak remote-info` のコミットの件名が x86_64 と一致することを確かめた（同じ版のビルドと推定できる）
 - **Flatpak の容量**: 最初の 1 本（Flatseal）で `/var/lib/flatpak` が 2.5 GB になった
   - GNOME 50 の runtime・その翻訳・GL ドライバ・コーデックの拡張が一緒に入るため
-  - 一覧の Flathub のアプリ 13 本をすべて入れると 8.1 GB になった（runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統。[付録](#付録-コンテナでの検証記録2026-09-24)）
+  - 一覧の Flathub のアプリを全部入れると、runtime は GNOME 50・FDO 25.08・FDO 26.08 の 3 系統になる
+  - 調査時は、ほかのアプリも合わせた 13 本で 8.1 GB になった（[付録](#付録-コンテナでの検証記録2026-09-24)）
+- **EL10 の rpm は、自己署名のハッシュが SHA-1 の古い鍵を取り込まない**（ベンダーのリポジトリの鍵で実測）
+  - `rpm --import` は `Policy rejects <鍵 ID>: No binding signature at time …` を出してその鍵を取り込まず、終了コード 2 で終わる
+  - 取り込めない鍵があっても、rpm の署名に使われている鍵が取り込めていれば、導入はできる
+  - `rpm --import` を省いて `dnf install` に鍵の取り込みを任せると、dnf は取り込めない鍵で止まり、`GPG check FAILED` で失敗する
+  - 自己署名のハッシュは `gpg --list-packets` の `digest algo` で分かる（2 が SHA-1、10 が SHA-512）
 - **版は日々変わる**: 表の版は調査日のもの。現在の版は `brew info <formula>` / `dnf info <package>` / `flatpak remote-info flathub <ID>` で見る
 - **x86_64_v2 版は見ていない**: AlmaLinux 10 には古い CPU 向けの `x86_64_v2` 版のリポジトリもあるが、本書は通常の x86_64 版だけを調べた
 
@@ -375,7 +300,7 @@ sudo flatpak update
 - [EPEL — Fedora Docs](https://docs.fedoraproject.org/en-US/epel/) — EPEL の方針と有効化の手順
 - [Flathub](https://flathub.org/) — アプリの検索、公開元の検証（Verified）の表示
 - [RPM Fusion — Configuration](https://rpmfusion.org/Configuration) — EL 向けの有効化の手順（本書では使っていない）
-- [Google Chrome の Linux 向けリポジトリ](https://www.google.com/linuxrepositories/) / [Brave — Linux のインストール](https://brave.com/linux/) / [Sublime Text — Linux Package Manager Repositories](https://www.sublimetext.com/docs/linux_repositories.html) / [mise — Installing](https://mise.jdx.dev/installing-mise.html) — ベンダーのリポジトリの登録手順
+- [Google Chrome の Linux 向けリポジトリ](https://www.google.com/linuxrepositories/) / [mise — Installing](https://mise.jdx.dev/installing-mise.html) — ベンダーのリポジトリの登録手順
 
 ---
 
@@ -387,9 +312,9 @@ sudo flatpak update
 |---|---|
 | `meta` | 版の調査だけ（EPEL と flatpak を入れて照会） |
 | `cli` | Homebrew と CLI（Homebrew / EPEL / mise のリポジトリ） |
-| `gui` | GUI の RPM（ベンダー / AppStream / EPEL） |
+| `gui` | GUI の RPM（ベンダー / EPEL） |
 | `fp` | [flatpak.md](flatpak.md) の検証と、この一覧の Flathub のアプリ（`--privileged`） |
-| `gui2` / `fps` | 再現の確認だけ（`rpm --import` を省いた Sublime Text の導入、Flathub 登録直後の `flatpak search`） |
+| `fps` | 再現の確認だけ（Flathub 登録直後の `flatpak search`） |
 
 **版の調査で使ったコマンド**（`meta` で実行。`$(cat /tmp/rpmnames.txt)` はパッケージ名の一覧、`"..."` は 1 行目と同じ書式、`<...>` は実際には値を入れた）:
 
@@ -410,10 +335,10 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 | Homebrew（`cli`） | 表の Homebrew の行と、比較のための `podman-tui` / `podman-compose`、合わせて 24 個を 1 つずつ `brew install` し、すべて終了コード 0。すべてボトルで、ソースビルドは 0。1 個あたり 2〜12 秒。全部入れた時点で `/home/linuxbrew/.linuxbrew` は 1.5 GB（`podman-compose` とその依存を消した後は 959 MB） |
 | EPEL の CLI（`cli`） | `fastfetch` / `duf` / `mosh` / `restic` / `distrobox` / `podman-compose` / `podman-tui` がすべて終了コード 0。追加で入ったパッケージ数は fastfetch 3、duf 1、mosh 3、restic 4、distrobox 31（podman を含む）、podman-compose 5。CRB を有効にする操作はしていない（イメージの既定で有効） |
 | mise（`cli`） | `dnf config-manager --add-repo` の後の `dnf install -y mise` で鍵 `0x7413A06D` が取り込まれ、`mise --version` → `2026.9.13 linux-x64 (2026-09-24)` |
-| ベンダーの GUI（`gui`） | `google-chrome-stable --version` → `Google Chrome 154.0.8037.57`、`brave-browser --version` → `Brave Browser 154.1.96.59`、`subl --version` → `Sublime Text Build 4213`。Sublime Text の `rpm --import` は終了コード 2（本文） |
-| AppStream / EPEL の GUI（`gui`） | `thunderbird --version` → `Mozilla Thunderbird 140.14.0esr`、`chromium-browser --version` → `Chromium 153.0.8010.52`、`vlc --version` → `VLC version 3.0.23`、`keepassxc-cli --version` → `2.7.11`、`gnome-tweaks --version` → `46.1`。`meld --version` は画面が無いため GTK の初期化で落ちた（`AttributeError: 'NoneType' object has no attribute 'props'`）。`remmina --version` は案内文だけで版を出さなかった。この 2 つは `rpm -q` で版を確認した |
+| ベンダーの GUI（`gui`） | `google-chrome-stable --version` → `Google Chrome 154.0.8037.57` |
+| EPEL の GUI（`gui`） | `chromium-browser --version` → `Chromium 153.0.8010.52`、`keepassxc-cli --version` → `2.7.11`、`gnome-tweaks --version` → `46.1`。`meld --version` は画面が無いため GTK の初期化で落ちた（`AttributeError: 'NoneType' object has no attribute 'props'`）。`remmina --version` は案内文だけで版を出さなかった。この 2 つは `rpm -q` で版を確認した |
 | 更新（`cli` / `fp`） | [更新](#更新)の 3 行を実行した。`brew upgrade` は無出力で終了コード 0（導入直後なので上げるものが無い）、`sudo dnf upgrade` はイメージの作成後に出た更新を当てて `Complete!`、`sudo flatpak update` は `Nothing to do.` |
-| Flathub（`fp`） | 13 本を `sudo flatpak install -y --noninteractive flathub <ID>` で入れ、すべて終了コード 0、`flatpak run --command=true` もすべて成功。`--noninteractive` は進捗表示を抑えるためだけに足した。`/var/lib/flatpak` は GNOME 50 の 6 本で 3.4 GB、FDO 25.08 の 4 本（LibreOffice から）を足して 5.7 GB、FDO 26.08 の 3 本（Obsidian から）を足して 8.1 GB。画面を出さずに版を出せた `flatpak run <ID> --version` は GIMP（`GNU Image Manipulation Program version 3.2.6`）・Inkscape（`Inkscape 1.4.4`）・LibreOffice（`LibreOffice 26.8.0.3`）・OBS（`OBS Studio - 32.2.2`）の 4 本 |
+| Flathub（`fp`） | 13 本（一覧に載っていないアプリを含む）を `sudo flatpak install -y --noninteractive flathub <ID>` で入れ、すべて終了コード 0、`flatpak run --command=true` もすべて成功。`--noninteractive` は進捗表示を抑えるためだけに足した。`/var/lib/flatpak` は GNOME 50 の 6 本で 3.4 GB、FDO 25.08 の 4 本を足して 5.7 GB、FDO 26.08 の 3 本を足して 8.1 GB |
 
 #### 未確認事項
 
@@ -421,8 +346,8 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 - GUI アプリの画面の表示と操作（コンテナに画面が無い）
 - Raspberry Pi 5 で Flathub のアプリ（Electron 系・ブラウザ・GPU を使うもの）が実際に動くか
 - 実機（x86_64 PC）での導入。デスクトップの環境では依存の数が変わる（[vscode.md](vscode.md) の実測では、コンテナより大幅に少なかった）
-- RPM Fusion（EL10）の有効化と、EPEL の VLC と組み合わせた場合の挙動
+- RPM Fusion（EL10）の有効化
 - atuin・direnv など、`~/.bashrc` に追記して使うツールのシェルへの組み込み
 - lazydocker・dive を podman の API ソケットで使うこと
 - mosh の接続（サーバー側の導入と UDP の許可）
-- Flathub の Chrome / Chromium / Signal など未検証の公開元のアプリの中身
+- Flathub の Chrome / Chromium / Edge など未検証の公開元のアプリの中身

@@ -118,7 +118,7 @@
    sub   rsa4096 2016-04-22 [E]
    ```
 
-   - **自己署名のハッシュは SHA-512**（`gpg --list-packets` で `digest algo 10`）なので、EL10 の rpm が SHA-1 の自己署名を拒む問題（[tool-catalog.md](tool-catalog.md) の Sublime Text）には当たらず、`rpm --import` は何も出さずに終了コード 0 で終わった
+   - **自己署名のハッシュは SHA-512**（`gpg --list-packets` で `digest algo 10`）なので、EL10 の rpm が SHA-1 の自己署名を拒む問題（[tool-catalog.md の注意点](tool-catalog.md#注意点)）には当たらず、`rpm --import` は何も出さずに終了コード 0 で終わった
    - 7.2.20 の EL10 向け rpm の署名と、リポジトリのメタデータの署名（`repomd.xml.asc`）は、どちらもこの鍵（`A2F683C52980AECF`、SHA-256）で作られていた（rpm のヘッダとメタデータを直接読んで確認）
 
    Oracle は 2010 年の古い鍵 `oracle_vbox.asc`（dsa1024）も配っているが、これは古いパッケージ用で、本書では使わない。
