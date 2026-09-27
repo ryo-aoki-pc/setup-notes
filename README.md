@@ -203,7 +203,7 @@
 ### ブラウザ
 
 - Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
-- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[firefox.md 手順 8〜14](docs/firefox.md#実施手順)）。入れないと、音声が AAC だけの動画が再生できない
+- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[firefox.md 手順 8〜14](docs/firefox.md#実施手順)）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
