@@ -20,7 +20,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 12 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 13 本と、手順書の無いツールの Homebrew の行 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -30,7 +30,7 @@
 ### デスクトップ（GNOME）の設定
 
 - どちらの手順書も GNOME のデスクトップが前提。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
-- 常時動かしておく PC（WireGuard・Samba・Syncthing のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
+- 常時動かしておく PC（WireGuard・Samba・Syncthing・Dropbox のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
 
 | 手順書 | 変えるもの | 変える範囲 | 仕組み | 導入するもの |
 |---|---|---|---|---|
@@ -62,15 +62,18 @@
 
 - Samba は、サーバーにある自分のホームを LAN・WireGuard 越しに SMB3 で読み書きする。Syncthing は、指定したフォルダを端末同士で同期する
 - 同じホストで両方使うときは、Syncthing の同期対象にホームを丸ごと入れない（Samba と同じ領域を二重に扱うことになる）
+- Dropbox は、どちらの手順書も `~/Dropbox` をクラウドと同期する。公式クライアントは x86_64 にしか無いので、Raspberry Pi 5（aarch64）では rclone を使う
+- `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）
 
 | 手順書 | 方式 | 導入元 | 常駐 | 開けるポート |
 |---|---|---|---|---|
 | [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]` だけ） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
 | [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い） | `brew services` のユーザーサービスと `loginctl enable-linger` | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp） |
+| [Dropbox（公式クライアント）](docs/dropbox.md) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと `loginctl enable-linger` | 無し（LAN 同期の `dropbox-lansync` は開けない） |
+| [Dropbox（rclone）](docs/dropbox-rclone.md) | `rclone bisync` で `~/Dropbox` と Dropbox を 15 分ごとに双方向同期する（Raspberry Pi 5 向け） | Homebrew（EPEL 版は古い） | systemd ユーザータイマーと `loginctl enable-linger` | 無し |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
-| [rclone](docs/tool-catalog.md#cli-開発運用) | クラウドストレージとの同期 | Homebrew |
 | [restic](docs/tool-catalog.md#cli-開発運用) | バックアップ | EPEL |
 | [LocalSend](docs/tool-catalog.md#gnomeシステム) | LAN 内の端末とファイルを送り合う（GUI） | Flathub |
 

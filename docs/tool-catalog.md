@@ -72,6 +72,8 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Flatpak / Flathub | AppStream + Flathub | [flatpak.md](flatpak.md) |
 | yazi / lazygit / Neovim / zoxide / bat / eza / git-delta / gdu / starship / ShellCheck・shfmt | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck・shfmt](shellcheck.md) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](syncthing.md) |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](dropbox.md) |
+| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](dropbox-rclone.md) |
 | btop | EPEL | [btop.md](btop.md) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [firefox.md](firefox.md) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
@@ -118,7 +120,6 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | chezmoi | dotfiles の管理 | Homebrew 2.72.2 | `brew install chezmoi` | EPEL 2.72.0 | 有 | 起動 |
 | just | コマンドランナー（make の代わり） | Homebrew 1.58.0 | `brew install just` | EPEL 1.46.0 | 有 | 起動 |
 | hyperfine | コマンドのベンチマーク | Homebrew 1.20.0 | `brew install hyperfine` | RPM 無し | 有 | 起動 |
-| rclone | クラウドストレージとの同期 | Homebrew 1.75.1 | `brew install rclone` | EPEL 1.74.3 | 有 | 起動 |
 | restic | バックアップ | EPEL 0.19.1 | `sudo dnf install -y restic` | Homebrew 0.19.1（同版） | 有 | 起動 |
 | podman-compose | compose ファイルを podman で動かす | EPEL 1.5.0 | `sudo dnf install -y podman-compose` | Homebrew 1.6.0（**podman 6.1.2 などを連れてきて、システムの podman を隠す**） | 有 | 起動 |
 | podman-tui | podman の TUI | EPEL 1.10.0 | `sudo dnf install -y podman-tui` | Homebrew 2.0.0 | 有 | 起動 |
@@ -234,6 +235,7 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 |---|---|---|
 | Microsoft Edge | 公式 dnf リポジトリ 154.0.4258.37 / Flathub `com.microsoft.Edge` 153.0.4234.48（未検証） | どちらにも無い |
 | VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[virtualbox.md](virtualbox.md)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball（[dropbox.md](dropbox.md)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[dropbox-rclone.md](dropbox-rclone.md)） |
 
 ---
 
