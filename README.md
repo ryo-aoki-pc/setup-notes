@@ -16,6 +16,7 @@
 - RPM に無いか古いツールの入れ先。CLI とフォントは Homebrew、GUI アプリは Flathub
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - EPEL の有効化は [btop.md 手順 1〜3](docs/btop.md#実施手順) にある（手順書の無いツールの EPEL の行は、これが前提）
+- RPM Fusion（free）の有効化は [firefox.md 手順 8〜11](docs/firefox.md#実施手順) にある（EPEL も一緒に入る）
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
@@ -202,11 +203,12 @@
 ### ブラウザ
 
 - Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
+- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[firefox.md 手順 8〜14](docs/firefox.md#実施手順)）。入れないと、音声が AAC だけの動画が再生できない
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|
-| [Firefox](docs/firefox.md) | Mozilla 公式 dnf リポジトリ（最新版。4 週間ごとの Rapid Release） | AppStream は ESR 140（年 1 回のメジャー更新） | x86_64・aarch64 |
+| [Firefox](docs/firefox.md) | Mozilla 公式 dnf リポジトリ（最新版。4 週間ごとの Rapid Release）。AAC・H.264 の FFmpeg は RPM Fusion（free） | AppStream は ESR 140（年 1 回のメジャー更新） | x86_64・aarch64 |
 
 | 手順書の無いツール | 導入元 | アーキ |
 |---|---|---|
