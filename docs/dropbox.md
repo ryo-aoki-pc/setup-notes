@@ -369,6 +369,7 @@
    - `Removed '.../default.target.wants/dropbox.service'.` が出る
    - Dropbox の Web（アカウントの設定 → セキュリティ → デバイス）で、この PC のリンクも解除する
    - 最後の `ls` が何か出す（Syncthing の `sh.brew.syncthing.service` など）なら、linger はそれらが使っているので、手順 2 は飛ばす
+   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、手順 2 は飛ばす
 
    <details>
    <summary>補足: <code>list-unit-files</code> で判断しない理由</summary>

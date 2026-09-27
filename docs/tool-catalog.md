@@ -12,6 +12,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 > - **aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない
 > - GUI アプリはどれも画面を出していない
 > - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
+> - **[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。podman-tui と lazydocker は podman の API ソケットにつないで画面が出るところまで確かめた（[付録](#付録-コンテナ関連の追加調査2026-09-27)）
 
 「確認」列の意味:
 
@@ -27,6 +28,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [btop.md 手順 1〜3](btop.md#実施手順) で EPEL を有効にしてあること
 - Flathub（`sudo flatpak install`）: [Flatpak / Flathub](flatpak.md) を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
+- コンテナの節の行は、どの導入元でも [Podman](podman.md) の実施手順を通してあること（podman-tui・lazydocker・Pods などは、その API ソケットを使う）
 
 ---
 
@@ -38,7 +40,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [btop.md](btop.md) |
 | EPEL 10 | `sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [btop.md 手順 1〜3](btop.md#実施手順) |
 | RPM Fusion（EL10） | 本書では有効にしていない。free は [firefox.md 手順 8〜11](firefox.md#実施手順) で、鍵を照合してから `rpmfusion-free-release` を入れる | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [firefox.md](firefox.md) |
-| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md) |
+| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md)、[image-tools.md](image-tools.md)（Trivy） |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md) |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | root では動かない。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
 | Flathub | [flatpak.md](flatpak.md) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [flatpak.md](flatpak.md) |
@@ -50,8 +52,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 1. RPM（AppStream / BaseOS / EPEL / ベンダーのリポジトリ）が **Homebrew と同じ版か新しい**なら RPM にする。root でも使え、`dnf upgrade` に乗る
 1. RPM が古いか無ければ Homebrew にする
-1. **例外として、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox）は RPM にする**
+1. **例外として、podman 本体と、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox / toolbox / buildah / skopeo）は RPM にする**
    - Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
+   - Homebrew の podman と skopeo は、設定を `/etc/containers` ではなく `/home/linuxbrew/.linuxbrew/etc/containers` から読む（formula の定義）
 
 **GUI** は、次の順で選んだ。[Firefox](firefox.md) と [VS Code](vscode.md) を RPM にした判断と同じ。
 
@@ -82,6 +85,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
 | IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [japanese-input.md](japanese-input.md) |
+| Podman | AppStream（自分のユーザーで動かす rootless） | [podman.md](podman.md) |
+| distrobox / podman-compose | EPEL（Podman が前提） | [distrobox](distrobox.md) / [podman-compose](podman-compose.md) |
+| hadolint / dive / Trivy | Homebrew と Trivy の公式 dnf リポジトリ（Podman が前提） | [image-tools.md](image-tools.md) |
 
 ---
 
@@ -121,18 +127,39 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | just | コマンドランナー（make の代わり） | Homebrew 1.58.0 | `brew install just` | EPEL 1.46.0 | 有 | 起動 |
 | hyperfine | コマンドのベンチマーク | Homebrew 1.20.0 | `brew install hyperfine` | RPM 無し | 有 | 起動 |
 | restic | バックアップ | EPEL 0.19.1 | `sudo dnf install -y restic` | Homebrew 0.19.1（同版） | 有 | 起動 |
-| podman-compose | compose ファイルを podman で動かす | EPEL 1.5.0 | `sudo dnf install -y podman-compose` | Homebrew 1.6.0（**podman 6.1.2 などを連れてきて、システムの podman を隠す**） | 有 | 起動 |
-| podman-tui | podman の TUI | EPEL 1.10.0 | `sudo dnf install -y podman-tui` | Homebrew 2.0.0 | 有 | 起動 |
-| distrobox | 別のディストリのユーザーランドをコンテナで使う | EPEL 1.8.2.3 | `sudo dnf install -y distrobox` | Homebrew 1.8.2.5（未導入）/ AppStream の `toolbox` 0.3 | 有 | 起動 |
-| lazydocker | コンテナの TUI | Homebrew 0.25.2 | `brew install lazydocker` | RPM 無し | 有 | 起動 |
-| dive | コンテナイメージの層を調べる | Homebrew 0.13.1 | `brew install dive` | RPM 無し | 有 | 起動 |
 
-- EPEL の podman-compose は、AppStream の `podman`（5.8.2）を依存に持つ
-- distrobox は podman か docker を要求する（素のコンテナでは podman が一緒に入った）
-- podman-tui は podman を依存に持たない（`rpm -q --requires` で確認）
-- lazydocker と dive は Docker の API を使うツールで、上流の説明では podman の API ソケットを有効にすれば podman でも使える。本書では試していない
+- コンテナ系のツールは[CLI: コンテナ](#cli-コンテナ)の節にある。手順書のある podman-compose・distrobox・dive は[文書化済みのツール](#文書化済みのツール)にある
 
 言語処理系は AppStream / BaseOS に Node.js 22.23.2・Python 3.12.14・Go 1.26.7・Rust 1.92.0 がある（どれも両アーキで同じ版。メタデータ）。別の版が要るときに mise を使う。
+
+## CLI: コンテナ
+
+- どの行も [Podman](podman.md) の実施手順を通してあることが前提
+- 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy）は[文書化済みのツール](#文書化済みのツール)にある
+- この節は 2026-09-27 に調べた（[付録](#付録-コンテナ関連の追加調査2026-09-27)）。podman-tui・lazydocker の版は、2026-09-24 の調査から変わっていなかった
+
+| ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
+|---|---|---|---|---|---|---|
+| podman-tui | podman の TUI | EPEL 1.10.0 | `sudo dnf install -y podman-tui` | Homebrew 2.0.0 | 有 | 起動 |
+| lazydocker | コンテナの TUI（Docker の API で podman につなぐ） | Homebrew 0.25.2 | `brew install lazydocker` | RPM 無し | 有 | 起動 |
+| toolbox | 別のディストリの端末をコンテナで使う（distrobox と同類。RHEL の公式） | AppStream 0.3 | `sudo dnf install -y toolbox` | Homebrew に無い | 有 | 起動 |
+| podman-docker | `docker` コマンドを podman に読み替える | AppStream 5.8.2 | `sudo dnf install -y podman-docker` | — | 有 | 起動 |
+| buildah | Containerfile を使わずにイメージを作る | AppStream 1.43.1 | `sudo dnf install -y buildah` | Homebrew に無い | 有 | 起動 |
+| skopeo | レジストリのイメージを取得せずに調べる・コピーする | AppStream 1.22.2 | `sudo dnf install -y skopeo` | Homebrew 1.24.1（設定を `/home/linuxbrew/.linuxbrew/etc/containers` から読む） | 有 | 起動 |
+| podlet | podman のコマンドや compose ファイルから Quadlet の定義を作る | Homebrew 0.3.2 | `brew install podlet` | RPM 無し | 有 | 起動 |
+| cosign | イメージの署名と検証 | Homebrew 3.1.3 | `brew install cosign` | RPM 無し | 有 | 起動 |
+
+- 「起動」は `--version`（cosign は `cosign version`）が版を出したことを示す
+- **podman-tui と lazydocker は、podman の API ソケット（[podman.md 手順 8](podman.md#実施手順)）につなぐ**。lazydocker は `DOCKER_HOST` も要る（[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)）
+  - どちらも x86_64 コンテナで端末（pty）を与えて起動し、画面の文字を読み取った
+  - podman-tui は接続の状態が `STATUS_OK` になり、API の版 `5.8.2` を出した。lazydocker は、動かしていた `ubi10/httpd-24` のコンテナとそのログを出した
+- podman-tui は podman を依存に持たない（`rpm -q --requires` で確認）
+- toolbox は、弱い依存として skopeo も入れた（ほかに `flatpak-session-helper`・`p11-kit-server`）。そのため skopeo の行の導入コマンドは `already installed` で終わった
+- podman-docker の `docker --version` は、`Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.` と `podman version 5.8.2` を出した
+- buildah の RPM の版は `1.43.1-6.el10_2` だが、`buildah --version` は `buildah version 1.43.2` を出した
+- podlet は、`podlet podman run --name demo -p 127.0.0.1:8090:8080 <イメージ>` で Quadlet の `[Container]` 節を出した
+  - `-d` を付けると、`equal sign is needed when assigning values to '--detach=<DETACH>'` で失敗した
+- skopeo は、`skopeo inspect docker://quay.io/podman/hello` でダイジェストを、`skopeo list-tags` でタグの一覧を、イメージを取得せずに出した
 
 ---
 
@@ -163,13 +190,29 @@ Chromium は GUI の規則の 4 番目にあたる。
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
-| Podman Desktop | podman の GUI | Flathub `io.podman_desktop.PodmanDesktop` 1.29.3（検証済み、FDO 26.08） | `sudo flatpak install -y flathub io.podman_desktop.PodmanDesktop` | RPM 無し | 有 | 導入 |
 | Meld | 差分・マージ | EPEL 3.22.2 | `sudo dnf install -y meld` | Flathub `org.gnome.meld` 3.24.0（未検証） | 有 | 導入 |
 
 Meld は GUI の規則の 4 番目にあたる。
 
 - EPEL は 3.22 系で Flathub の 3.24 より古いが、Flathub 版は公開元が未検証
 - EPEL 版は `/usr/bin/meld` に入るので、ほかのツールから名前で呼べる
+
+### コンテナ
+
+| ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
+|---|---|---|---|---|---|---|
+| Podman Desktop | podman の GUI | Flathub `io.podman_desktop.PodmanDesktop` 1.29.3（検証済み、FDO 26.08） | `sudo flatpak install -y flathub io.podman_desktop.PodmanDesktop` | RPM 無し | 有 | 導入 |
+| Pods | podman の GUI（GNOME のアプリ） | Flathub `com.github.marhkb.Pods` 3.1.1（検証済み、GNOME 50） | `sudo flatpak install -y flathub com.github.marhkb.Pods` | RPM 無し | 有 | 導入 |
+| BoxBuddy | distrobox の GUI | Flathub `io.github.dvlv.boxbuddyrs` 2.6.1（検証済み、GNOME 50） | `sudo flatpak install -y flathub io.github.dvlv.boxbuddyrs` | RPM 無し | 有 | 導入 |
+| Cockpit の podman の画面 | ブラウザからコンテナを操作する | AppStream `cockpit-podman` 121（BaseOS の `cockpit` 356.2 と組む） | `sudo dnf install -y cockpit cockpit-podman` | — | 有 | 導入 |
+
+- Podman Desktop の行は 2026-09-24 の調査。ほかの 3 行は 2026-09-27 に調べた
+- Pods と Podman Desktop は podman の API ソケット（[podman.md 手順 8](podman.md#実施手順)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
+- BoxBuddy はホストの distrobox（[distrobox.md](distrobox.md)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
+- Pods と BoxBuddy の 2 本で、`/var/lib/flatpak` は 2.5 GB になった（GNOME 50 の runtime）
+- Cockpit は `sudo systemctl enable --now cockpit.socket` の後、`https://127.0.0.1:9090/` が応答し、`/usr/share/cockpit/podman` があることまで確かめた。ブラウザでのログインと画面は見ていない
+  - `cockpit-podman` だけを入れると、依存は `cockpit-bridge` だけで、Web の画面（`cockpit-ws`）は入らなかった。素のコンテナでは、`cockpit` も入れて 102 パッケージになった
+- distrobox の GUI には DistroShelf（Flathub `com.ranfdev.DistroShelf` 1.5.2、検証済み、GNOME 50）もある（メタデータのみ）
 
 ### GNOME・システム
 
@@ -268,6 +311,9 @@ sudo flatpak update
 | EPEL | `epel-release-10-6.el10`（`extras`）。CRB はイメージの既定で有効 |
 | flatpak | `flatpak-1.16.0-9.el10_2.1`（AppStream） |
 | aarch64 の調べ方 | RPM: `dnf --forcearch=aarch64 repoquery`。Homebrew: formulae.brew.sh の JSON のボトル（`arm64_linux`）。Flathub: `flatpak remote-ls --arch=aarch64` と `flatpak remote-info --arch=aarch64` |
+| コンテナの節の調査日時 | 2026-09-27、UTC 16:26〜17:40 |
+| コンテナの節の検証コンテナ | `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を `--privileged` で立て、systemd を PID 1 にした。中で rootless の podman を動かすため（[podman.md](podman.md) の付録と同じ作り） |
+| コンテナの節の aarch64 の調べ方 | RPM: AppStream・BaseOS・EPEL 10.2・Trivy のリポジトリの `primary.xml` を直接読んだ。Homebrew と Flathub は上と同じ |
 
 - これまでの手順書の「コンテナのみ」の検証は、実機（Raspberry Pi 5）の上の podman で `docker.io/library/almalinux:10` を使っていた
 - **この一覧は x86_64 のクラウドホスト上の Docker で、`quay.io` の同じ AlmaLinux 10 公式イメージを使っている**（Docker Hub がレート制限を返したため）
@@ -353,3 +399,53 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 - lazydocker・dive を podman の API ソケットで使うこと
 - mosh の接続（サーバー側の導入と UDP の許可）
 - Flathub の Chrome / Chromium / Edge など未検証の公開元のアプリの中身
+
+---
+
+### 付録: コンテナ関連の追加調査（2026-09-27）
+
+[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節のために、同じクラウドホストの Docker で使い捨てのコンテナを 2 つ使った。
+
+- どちらも `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にした
+- 非 root ユーザー（NOPASSWD の sudo）に SSH でログインして、表の導入コマンドをそのまま実行した
+
+| コンテナ | 用途 |
+|---|---|
+| `cat1` | CLI の行と Cockpit。先に [podman.md](podman.md) の手順 1〜3・6〜8 と Docker 向けの節、[btop.md 手順 1〜3](btop.md#実施手順)（EPEL）、[homebrew.md](homebrew.md) の手順 1〜4 を通した |
+| `fp1` | GUI の Flathub の行。[flatpak.md](flatpak.md) の手順 1〜6 を通してから入れた |
+
+**手順書の外で行った準備**（検証環境の都合）:
+
+- プロキシの CA を信頼ストアに足し、dnf にプロキシを設定し、AlmaLinux のミラー一覧と EPEL の metalink を https にした
+- cgroup v2 に pids のコントローラが無い環境なので、`/etc/containers/containers.conf.d/` で podman の既定の PID 数の制限を外した
+- `fp1` では、`sudo` がプロキシの環境変数を消して `flatpak remote-add` が証明書の検証で失敗したので、sudoers の `env_keep` にプロキシの変数を足した
+
+**結果:**
+
+| 行 | 結果 |
+|---|---|
+| podman-tui | `sudo dnf install -y podman-tui` で 1 パッケージ（9.5 MB）。`podman-tui version` → `podman-tui v1.10.0`。端末を与えて起動すると、`localhost`（`unix://run/user/<UID>/podman/podman.sock`）が `connected` になり、`STATUS_OK`・API の版 `5.8.2`・`crun version 1.27` を出した。`Ctrl+C` で終了した |
+| lazydocker | `lazydocker--0.25.2.x86_64_linux.bottle.tar.gz`。`lazydocker --version` → `Version: 0.25.2`・`BuildSource: Homebrew`。`DOCKER_HOST` を podman のソケットにした状態で起動し、`Containers`・`Images`・`Volumes`・`Networks` の枠に、動かしていた `ubi10/httpd-24` のコンテナ（`127.0.0.1:8090`）と、その Apache のログを出した。`q` で終了した |
+| toolbox | 4 パッケージ（`toolbox`・`flatpak-session-helper`・弱い依存の `p11-kit-server` と `skopeo`、12 MB）。`toolbox --version` → `toolbox version 0.3` |
+| podman-docker | 1 パッケージ（106 kB）。`command -v docker` → `/usr/bin/docker` |
+| buildah | 1 パッケージ（10 MB）。`buildah --version` → `buildah version 1.43.2 (image-spec 1.1.1, runtime-spec 1.2.1)`（RPM は `1.43.1-6.el10_2`） |
+| skopeo | toolbox の弱い依存で入っていて、`Package skopeo-2:1.22.2-5.el10_2.x86_64 is already installed.`。`skopeo --version` → `skopeo version 1.22.2` |
+| podlet | `podlet--0.3.2.x86_64_linux.bottle.tar.gz`。`podlet --version` → `podlet 0.3.2` |
+| cosign | `cosign--3.1.3.x86_64_linux.bottle.tar.gz`。`cosign version` → `GitVersion: v3.1.3` |
+| Cockpit | `sudo dnf install -y cockpit-podman` だけでは 2 パッケージ（`cockpit-podman`・`cockpit-bridge`）。続けて `sudo dnf install -y cockpit cockpit-podman` で 102 パッケージ（44 MB）。`cockpit.socket` を有効にすると `https://127.0.0.1:9090/` が応答し（`<title>Loading...`）、`/cockpit/@localhost/podman/index.html` が 200 を返した |
+| Pods / BoxBuddy | `sudo flatpak install -y flathub <ID>` で入れ、`flatpak run --command=true` がどちらも成功した。`flatpak info` は Pods 3.1.1（20.2 MB）、BoxBuddy 2.6.1（1.4 MB）で、runtime はどちらも `org.gnome.Platform/x86_64/50`。`/var/lib/flatpak` は 2.5 GB |
+| aarch64 | AppStream（toolbox・podman-docker・buildah・skopeo・cockpit-podman）、BaseOS（cockpit 356.2）、EPEL 10.2（podman-tui 1.10.0）、Trivy のリポジトリ（0.74.0）のどれも aarch64 にある。Homebrew の lazydocker・podlet・cosign・hadolint・dive は `arm64_linux` のボトルがある。Flathub の Pods・BoxBuddy・Podman Desktop は、`flatpak remote-info --arch=aarch64` のコミットの件名が x86_64 と一致した |
+| 移した行 | podman-compose（EPEL 1.5.0 / Homebrew 1.6.0）・podman-tui（1.10.0 / 2.0.0）・distrobox（1.8.2.3 / 1.8.2.5）・lazydocker 0.25.2・dive 0.13.1 は、2026-09-24 と同じ版だった |
+
+最初の調査の[未確認事項](#未確認事項)にあった「lazydocker・dive を podman の API ソケットで使うこと」は、この調査で片付いた。
+
+- lazydocker は、`DOCKER_HOST` で podman の API ソケットにつないで動いた（上の表）
+- dive は API ソケットを使わず、`--source podman` で podman のコマンドからイメージを読んだ（[image-tools.md](image-tools.md)）
+
+#### 未確認事項（2026-09-27 の調査）
+
+- aarch64 での導入と起動（この調査の aarch64 もメタデータのみ）
+- Pods・BoxBuddy・Podman Desktop・Cockpit の画面と操作
+- toolbox でボックスを作ること（AlmaLinux のホストで `toolbox create` がどのイメージを選ぶか）
+- cosign での署名と検証
+- podman-tui・lazydocker での操作（コンテナの停止・削除など）
