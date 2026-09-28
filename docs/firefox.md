@@ -106,7 +106,8 @@
 1. Mozilla のリポジトリを追加し、入手できる版を見る。
 
    ```bash
-   sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
+   {
+     sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
    [mozilla]
    name=Mozilla Packages
    baseurl=https://packages.mozilla.org/rpm/firefox
@@ -116,7 +117,8 @@
    gpgkey=https://packages.mozilla.org/rpm/firefox/signing-key.gpg
    priority=10
    EOF
-   dnf -q list --showduplicates "${FF_PKG}" | tail -6
+     dnf -q list --showduplicates "${FF_PKG}" | tail -6
+   }
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
@@ -539,6 +541,9 @@
       - 起動し直した利用者の Firefox が `/usr/lib64/libavcodec.so.61.19.101` を読み込むことを確かめた
       - 利用者が、その Firefox の画面で 2 本の動画が再生できることを確かめた（[付録](#付録-x86_64-の実機での画面の確認2026-09-28)）
     - 音声が AAC だけの YouTube の動画は、x86_64 の実機でだけ確かめた（利用者の画面と headless の Firefox。aarch64 の例の動画は、実機に入れる前に YouTube 側で Opus が足されていた。代わりに、AAC を MSE で流すテストを実機でも通した）
+  - 2026-09-28: 手順 5のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機 | 検証コンテナ | 検証コンテナ（手順 8〜14） | 実機（手順 8〜14） | x86_64 の実機（手順 8〜14） |
 |---|---|---|---|---|---|

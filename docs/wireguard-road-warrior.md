@@ -56,10 +56,12 @@
 1. `wireguard-tools` を入れる。
 
    ```bash
-   sudo dnf install -y wireguard-tools
-   rpm -q wireguard-tools NetworkManager systemd-resolved
-   systemctl is-enabled systemd-resolved         # disabled（依存で入るだけ。本手順では有効にしない）
-   modinfo -n wireguard                          # カーネル同梱のモジュールのパスが出る
+   {
+     sudo dnf install -y wireguard-tools
+     rpm -q wireguard-tools NetworkManager systemd-resolved
+     systemctl is-enabled systemd-resolved         # disabled（依存で入るだけ。本手順では有効にしない）
+     modinfo -n wireguard                          # カーネル同梱のモジュールのパスが出る
+   }
    ```
 
    <details>
@@ -210,12 +212,14 @@
 1. 拠点の LAN の外で、conf を NetworkManager に取り込み、自動で張られたトンネルをすぐ切る。
 
    ```bash
-   sudo nmcli connection import type wireguard file "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.conf" &&
-   sudo nmcli connection modify wg0 connection.autoconnect no &&
-   nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
-   nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（手順 10 で改めて張る）
-   nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.zone,ipv4.method,ipv4.addresses,ipv4.dns,ipv6.method,wireguard connection show wg0
-   sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
+   {
+     sudo nmcli connection import type wireguard file "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.conf" &&
+     sudo nmcli connection modify wg0 connection.autoconnect no &&
+     nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
+     nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（手順 10 で改めて張る）
+     nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.zone,ipv4.method,ipv4.addresses,ipv4.dns,ipv6.method,wireguard connection show wg0
+     sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
+   }
    ```
 
    - `import` した直後に、NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わる
@@ -248,15 +252,17 @@
 1. 拠点の LAN の外で、トンネルを張る。
 
    ```bash
-   sudo nmcli connection up wg0 &&
-   nmcli device status | grep -E '^(DEVICE|wg0 )' &&                            # wireguard  connected  wg0
-   nmcli -f GENERAL.STATE,IP4.ADDRESS,IP4.ROUTE,IP4.DNS connection show wg0 &&   # activated。IP4.ROUTE に AllowedIPs の 3 経路（mt = 50）
-   ip -4 route show dev wg0 &&                                                  # 同じ 3 経路と metric
-   ip link show dev wg0 | grep -o 'mtu [0-9]*' &&                               # 1420
-   sudo wg show wg0                                                             # latest handshake が数秒前、transfer の received が 0 でない
-   sudo firewall-cmd --get-active-zones           # wg0 が既定ゾーン public に入る
-   cat /etc/resolv.conf                           # 手順 2 の前と同じ（DNS = が無いので変わらない）
-   sudo ausearch -m AVC -ts recent                # <no matches>
+   {
+     sudo nmcli connection up wg0 &&
+     nmcli device status | grep -E '^(DEVICE|wg0 )' &&                            # wireguard  connected  wg0
+     nmcli -f GENERAL.STATE,IP4.ADDRESS,IP4.ROUTE,IP4.DNS connection show wg0 &&   # activated。IP4.ROUTE に AllowedIPs の 3 経路（mt = 50）
+     ip -4 route show dev wg0 &&                                                  # 同じ 3 経路と metric
+     ip link show dev wg0 | grep -o 'mtu [0-9]*' &&                               # 1420
+     sudo wg show wg0                                                             # latest handshake が数秒前、transfer の received が 0 でない
+     sudo firewall-cmd --get-active-zones           # wg0 が既定ゾーン public に入る
+     cat /etc/resolv.conf                           # 手順 2 の前と同じ（DNS = が無いので変わらない）
+     sudo ausearch -m AVC -ts recent                # <no matches>
+   }
    ```
 
    <details>
@@ -365,9 +371,11 @@
 1. PC で、プロファイル `wg0` と鍵・conf の一時置き場を消す（取り戻せない）。
 
    ```bash
-   sudo nmcli connection down wg0 2>/dev/null; sudo nmcli connection delete wg0
-   rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
-   sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
+   {
+     sudo nmcli connection down wg0 2>/dev/null; sudo nmcli connection delete wg0
+     rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
+     sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
+   }
    ```
 
    - `rm -rf` を使わないのは、`WG_DIR` を WG ホストの `~/wg` と取り違えて貼っても登録簿を消さないため
@@ -409,6 +417,9 @@
   - **確認していないこと**: サスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）
   - **拠点の LAN の中からトンネルを張ることは、意図的に試していない**（[注意点](#注意点)のとおり LAN の経路を奪うため）
   - 実測の記録は[付録](#付録-実機での検証記録)
+  - 2026-09-28: 手順 2・9・10 と、[ロールバック](#ロールバック)の手順 1のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 下表は実機（PC 側）で採取した値。
 
