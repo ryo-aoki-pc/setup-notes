@@ -137,7 +137,8 @@
 1. repo ファイルを置き、`sudo` の dnf でメタデータの鍵を受け入れる。
 
    ```bash
-   sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
+   {
+     sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
    [virtualbox]
    name=Oracle VirtualBox for EL$releasever - $basearch
    baseurl=https://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch
@@ -146,8 +147,9 @@
    repo_gpgcheck=1
    gpgkey=https://www.virtualbox.org/download/oracle_vbox_2016.asc
    EOF
-   cat /etc/yum.repos.d/virtualbox.repo
-   sudo dnf makecache --repo virtualbox
+     cat /etc/yum.repos.d/virtualbox.repo
+     sudo dnf makecache --repo virtualbox
+   }
    ```
 
    - ヒアドキュメントは `<<'EOF'`（クォート付き）。`$releasever` / `$basearch` は dnf が展開するので、シェルに展開させない
@@ -338,10 +340,12 @@
 1. Secure Boot が有効なときだけ、署名用の鍵を作り、MOK への登録を予約する。
 
    ```bash
-   sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
-   sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=VirtualBox module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
-   sudo ls -l /var/lib/shim-signed/mok
-   sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+   {
+     sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
+     sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=VirtualBox module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
+     sudo ls -l /var/lib/shim-signed/mok
+     sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+   }
    ```
 
    - 鍵を作る間は `.....+++` のような行が流れる
@@ -750,10 +754,12 @@
 1. repo ファイル・KVM の設定・`vboxusers` グループ・dnf のキャッシュを消す。
 
    ```bash
-   sudo rm -f /etc/yum.repos.d/virtualbox.repo /etc/modprobe.d/kvm-virtualbox.conf
-   sudo groupdel vboxusers
-   sudo rm -rf /var/cache/dnf/virtualbox*
-   rm -rf /var/tmp/dnf-"${USER}"-*/virtualbox*
+   {
+     sudo rm -f /etc/yum.repos.d/virtualbox.repo /etc/modprobe.d/kvm-virtualbox.conf
+     sudo groupdel vboxusers
+     sudo rm -rf /var/cache/dnf/virtualbox*
+     rm -rf /var/tmp/dnf-"${USER}"-*/virtualbox*
+   }
    ```
 
    - `vboxusers` グループは rpm を消しても残るので、ここで消す（手順 22 で自分を入れていても、グループごと消える）
@@ -791,6 +797,9 @@
   - **コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした**（[付録](#付録-コンテナでの検証記録2026-09-24)）
   - **確認していないこと**: モジュールの読み込み、`vboxdrv.service`、MokManager での鍵の登録と署名の受け入れ、`enable_virt_at_load=0` の効果、VM の起動、USB、GUI の表示、カーネル更新後の自動ビルド（コンテナではできない）
   - `--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
+  - 2026-09-28: 手順 8・15 と、[ロールバック](#ロールバック)の手順 2のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|

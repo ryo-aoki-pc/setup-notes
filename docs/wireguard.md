@@ -364,6 +364,11 @@
     - この方式はスタブ環境で `apply` / `remove` を確認したうえで、**拠点 B の実機で `apply` を本実行して旧レイアウトから移行し、拠点間の疎通が維持されることを確認した**（[付録](#実機での移行2026-09-20拠点-b)）
     - **拠点 A の実機はまだ旧レイアウトのまま**
   - **確認していないこと**: 実際に 2 拠点をインターネット越しに結んでの確認、`remove` の実機での本実行、クライアント同士の疎通
+  - 2026-09-28: 補足の firewalld のブロックを、貼り方で行が失われない形に直した（[README の記法](../README.md#記法)）
+    - `{ … }` で囲んだ（中のコマンドは変えていない）: [転送を絞りたい場合](#転送を絞りたい場合)と[Cockpit へ入る場合](#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)の rich rule の例、[旧レイアウトからの移行](#旧レイアウト専用ゾーン--policyからの移行)を手で行うブロック
+    - 2 つに分けた（目視で確かめてから次を貼るため）: `--info-zone` の後の Cockpit の開放、`--dry-run` の後の `apply`
+    - Cockpit の開放は、`--add-service` と `--reload` を `&&` でつないだ 1 行にした
+    - どのブロックも、直した後は構文の検査だけで、流していない
 
 | 項目 | 値 |
 |---|---|
@@ -705,9 +710,11 @@ sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
 それでも WG ホストで絞りたい場合は、LAN 側ゾーンに rich rule を足す（例: 拠点 B のクライアント帯から拠点 A の LAN への転送を拒否する。本書では未検証）。
 
 ```bash
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
-  --add-rich-rule="rule family=ipv4 source address=$WG_B_CLIENT_NET destination address=$SITE_A_LAN reject"
-sudo firewall-cmd --reload
+{
+  sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
+    --add-rich-rule="rule family=ipv4 source address=$WG_B_CLIENT_NET destination address=$SITE_A_LAN reject"
+  sudo firewall-cmd --reload
+}
 ```
 
 方向ごと・組み合わせごとに細かく絞る構成が要るなら、専用ゾーン + policy の旧レイアウト（履歴 `d364840` 以前の `docs/wireguard.md` と `wg-vpn.sh`）が参考になる。
@@ -787,17 +794,23 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 - WG ホスト自身も「宛先ホストのファイアウォールだけを気にする」の例外ではなく、開ける・絞るは LAN と同じゾーン操作で行う
 
 ```bash
-sudo firewall-cmd --info-zone="$LAN_ZONE"                                    # interfaces に wg0、services に ssh / cockpit があるか
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-service=cockpit       # 開いていなければ（LAN からも開く）
-sudo firewall-cmd --reload
+sudo firewall-cmd --info-zone="$LAN_ZONE"   # interfaces に wg0、services に ssh / cockpit があるか
+```
+
+`services` に `cockpit` が無ければ、開けて読み直す（LAN からも開く）。
+
+```bash
+sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-service=cockpit && sudo firewall-cmd --reload
 ```
 
 送信元を絞りたい場合は、LAN 側ゾーンの rich rule で行う（例: ssh はトンネル網からだけ拒否する）。
 
 ```bash
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
-  --add-rich-rule="rule family=ipv4 source address=$WG_A_CLIENT_NET service name=ssh reject"
-sudo firewall-cmd --reload
+{
+  sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
+    --add-rich-rule="rule family=ipv4 source address=$WG_A_CLIENT_NET service name=ssh reject"
+  sudo firewall-cmd --reload
+}
 ```
 
 - Cockpit は `9090/tcp`（firewalld の `cockpit` サービス）。ホスト側で動いているかは `systemctl is-active cockpit.socket` で確認する。ブラウザからは `https://${WG_x_LAN_IP}:9090`
@@ -964,6 +977,11 @@ wg-quick は wg0 の MTU を既定で **1420** にする（IPv4/IPv6 の外側�
 
 ```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply B   # 消す policy・ゾーンと、LAN 側ゾーンに足すものを確認する
+```
+
+dry-run の出力を確かめてから、本実行する。
+
+```bash
 sudo ./wg-vpn.sh -e ~/wg/site.env apply B
 ```
 
@@ -981,13 +999,15 @@ sudo ./wg-vpn.sh -e ~/wg/site.env apply B
 - スクリプトを使わずに手で行う場合は、同じ順序で:
 
 ```bash
-for p in $(sudo firewall-cmd --permanent --get-policies | tr ' ' '\n' \
-           | grep -E '^(site[AB]-to-(site|clients)[AB]|clients[AB]-to-site[AB])$'); do
-  sudo firewall-cmd --permanent --delete-policy="$p"
-done
-sudo firewall-cmd --permanent --delete-zone=wireguard
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface=wg0 --add-port="$WG_PORT/udp" --add-forward
-sudo firewall-cmd --reload
+{
+  for p in $(sudo firewall-cmd --permanent --get-policies | tr ' ' '\n' \
+             | grep -E '^(site[AB]-to-(site|clients)[AB]|clients[AB]-to-site[AB])$'); do
+    sudo firewall-cmd --permanent --delete-policy="$p"
+  done
+  sudo firewall-cmd --permanent --delete-zone=wireguard
+  sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface=wg0 --add-port="$WG_PORT/udp" --add-forward
+  sudo firewall-cmd --reload
+}
 ```
 
 拠点 B の実機（`public` に `end0`、`wireguard` に `wg0`、policy 6 本）では、この `apply` で移行済み（2026-09-20。[付録](#実機での移行2026-09-20拠点-b)）。

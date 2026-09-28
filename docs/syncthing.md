@@ -224,8 +224,10 @@
 1. firewalld で `syncthing` と `syncthing-gui` を開ける。
 
    ```bash
-   sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
-   sudo firewall-cmd --list-services            # syncthing と syncthing-gui が含まれる
+   {
+     sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
+     sudo firewall-cmd --list-services            # syncthing と syncthing-gui が含まれる
+   }
    ```
 
    - `syncthing` は同期と探索（22000/tcp、22000/udp、21027/udp）
@@ -805,6 +807,9 @@
     - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜7 のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
     - 確認したこと: path ユニットとタイマーで取れる、中身が同じなら作らない、100 個を超えたら古いものから消す、送信専用フォルダから受信専用の相手（同じコンテナの 2 つ目の Syncthing）へ届く、同じホストで戻せる、新しいコンテナで戻すとデバイス ID・API キー・フォルダが戻って中身が相手から届く
     - 確認していないこと: 実機（aarch64 を含む）、別のマシンの相手、GUI での共有と受け入れ、実際の 0 時台のタイマーと `Persistent=true` の追いかけ実行
+  - 2026-09-28: 手順 8のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 値 |
 |---|---|
