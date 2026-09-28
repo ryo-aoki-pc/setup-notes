@@ -8,8 +8,8 @@
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: lazydocker など Docker の API を使うツールから使うなら[Docker 向けのツールから使う（任意）](#docker-向けのツールから使う任意)、コンテナを常駐させるなら[Quadlet で自動起動する（任意）](#quadlet-で自動起動する任意)。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
-- 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
+- 手順の後: [lazydocker](lazydocker.md) など Docker の API を使うツールから使うなら[Docker 向けのツールから使う（任意）](#docker-向けのツールから使う任意)、コンテナを常駐させるなら[Quadlet で自動起動する（任意）](#quadlet-で自動起動する任意)。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
 
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
@@ -212,7 +212,7 @@
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
-   - このソケットを使うもの: [Trivy](image-tools.md)、[ツール一覧](tool-catalog.md#cli-コンテナ)の podman-tui・lazydocker、GUI の Pods・Podman Desktop
+   - このソケットを使うもの: [Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、GUI の Pods・Podman Desktop
    - `Failed to connect to user scope bus` と出たら、`sudo -iu` などで切り替えたシェルで実行している。自分のユーザーでログインし直す
 
    <details>
@@ -239,8 +239,8 @@
 
 ## Docker 向けのツールから使う（任意）
 
-- Docker の API に `DOCKER_HOST` でつなぐツール（[ツール一覧](tool-catalog.md#cli-コンテナ)の lazydocker など）のための設定
-- [image-tools.md](image-tools.md) の dive と Trivy は podman を直接読むので、この節は要らない
+- Docker の API に `DOCKER_HOST` でつなぐツール（[lazydocker](lazydocker.md) など）のための設定
+- [image-tools.md](image-tools.md) の dive と Trivy、[podman-tui](podman-tui.md) は podman を直接読むので、この節は要らない
 
 1. `~/.bashrc` に `DOCKER_HOST` を書き、ソケットが Docker の API に答えるか確かめる。
 
@@ -512,6 +512,7 @@
    ```
 
    - `[y/N]` で聞かれる。distrobox や podman-compose を入れていれば、それらも一緒に消える
+   - podman-tui は podman に依存しないので残る（[podman-tui のロールバック](podman-tui.md#ロールバック)で消す）
    - 依存で入ったもの（`crun` など）も一緒に消える。検証コンテナでは、手順 2 で入った 30 パッケージがすべて消えた（`Freed space: 91 M`）
 
 ---
@@ -520,7 +521,7 @@
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
+- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md)・[podman-tui](podman-tui.md)・[lazydocker](lazydocker.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の podman を入れ、subuid / subgid と `podman info` を確かめ、API ソケットを有効にする。自動起動は任意の Quadlet。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・6〜8、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
