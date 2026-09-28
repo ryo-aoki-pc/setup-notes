@@ -253,9 +253,9 @@ AlmaLinux 10 aarch64 で btop を入れる経路を比べた（2026-09-22 時点
 
 **この文書が Homebrew を使わないのは、EPEL 版が upstream に追いついているため。**
 
-- ほかの Homebrew 系の手順書（[homebrew.md](homebrew.md) の冒頭に挙げた 14 本）は、どれも EPEL に無いか古いので Homebrew を選んでいる
+- ほかの Homebrew 系の手順書（[homebrew.md](homebrew.md) の冒頭に挙げた 15 本）は、どれも EPEL に無いか古いので Homebrew を選んでいる
 - 同じ規則（同版なら RPM）で、[image-tools.md](image-tools.md) の Trivy は公式の dnf リポジトリにした
-- [distrobox](distrobox.md)・[podman-compose](podman-compose.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](tool-catalog.md#選び方)の規則 3）
+- [distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[podman-tui](podman-tui.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](tool-catalog.md#選び方)の規則 3）
 - EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](#注意点)）
 
 版の比較に使った実測:
