@@ -12,7 +12,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 > - **aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない
 > - GUI アプリはどれも画面を出していない
 > - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
-> - **[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。podman-tui と lazydocker は podman の API ソケットにつないで画面が出るところまで確かめた（[付録](#付録-コンテナ関連の追加調査2026-09-27)）
+> - **[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](#文書化済みのツール)）
 > - 2026-09-28 に、[ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)と[更新](#更新)のブロックを `{ … }` で囲んだ（[README の記法](../README.md#記法)）。中のコマンドは変えていない
 
 「確認」列の意味:
@@ -29,7 +29,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [btop.md 手順 1〜3](btop.md#実施手順) で EPEL を有効にしてあること
 - Flathub（`sudo flatpak install`）: [Flatpak / Flathub](flatpak.md) を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
-- コンテナの節の行は、どの導入元でも [Podman](podman.md) の実施手順を通してあること（podman-tui・lazydocker・Pods などは、その API ソケットを使う）
+- コンテナの節の行は、どの導入元でも [Podman](podman.md) の実施手順を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
 
 ---
 
@@ -56,6 +56,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 1. **例外として、podman 本体と、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox / toolbox / buildah / skopeo）は RPM にする**
    - Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
    - Homebrew の podman と skopeo は、設定を `/etc/containers` ではなく `/home/linuxbrew/.linuxbrew/etc/containers` から読む（formula の定義）
+   - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui.md](podman-tui.md) の選択した方針）
 
 **GUI** は、次の順で選んだ。[Firefox](firefox.md) と [VS Code](vscode.md) を RPM にした判断と同じ。
 
@@ -87,8 +88,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
 | IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [japanese-input.md](japanese-input.md) |
 | Podman | AppStream（自分のユーザーで動かす rootless） | [podman.md](podman.md) |
-| distrobox / podman-compose | EPEL（Podman が前提） | [distrobox](distrobox.md) / [podman-compose](podman-compose.md) |
+| distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](distrobox.md) / [podman-compose](podman-compose.md) / [podman-tui](podman-tui.md) |
 | hadolint / dive / Trivy | Homebrew と Trivy の公式 dnf リポジトリ（Podman が前提） | [image-tools.md](image-tools.md) |
+| lazydocker | Homebrew（Podman と、その Docker 向けの節の `DOCKER_HOST` が前提） | [lazydocker.md](lazydocker.md) |
 
 ---
 
@@ -129,20 +131,18 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | hyperfine | コマンドのベンチマーク | Homebrew 1.20.0 | `brew install hyperfine` | RPM 無し | 有 | 起動 |
 | restic | バックアップ | EPEL 0.19.1 | `sudo dnf install -y restic` | Homebrew 0.19.1（同版） | 有 | 起動 |
 
-- コンテナ系のツールは[CLI: コンテナ](#cli-コンテナ)の節にある。手順書のある podman-compose・distrobox・dive は[文書化済みのツール](#文書化済みのツール)にある
+- コンテナ系のツールは[CLI: コンテナ](#cli-コンテナ)の節にある。手順書のある podman-compose・distrobox・dive・podman-tui・lazydocker は[文書化済みのツール](#文書化済みのツール)にある
 
 言語処理系は AppStream / BaseOS に Node.js 22.23.2・Python 3.12.14・Go 1.26.7・Rust 1.92.0 がある（どれも両アーキで同じ版。メタデータ）。別の版が要るときに mise を使う。
 
 ## CLI: コンテナ
 
 - どの行も [Podman](podman.md) の実施手順を通してあることが前提
-- 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy）は[文書化済みのツール](#文書化済みのツール)にある
-- この節は 2026-09-27 に調べた（[付録](#付録-コンテナ関連の追加調査2026-09-27)）。podman-tui・lazydocker の版は、2026-09-24 の調査から変わっていなかった
+- 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy・podman-tui・lazydocker）は[文書化済みのツール](#文書化済みのツール)にある
+- この節は 2026-09-27 に調べた（[付録](#付録-コンテナ関連の追加調査2026-09-27)）
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
-| podman-tui | podman の TUI | EPEL 1.10.0 | `sudo dnf install -y podman-tui` | Homebrew 2.0.0 | 有 | 起動 |
-| lazydocker | コンテナの TUI（Docker の API で podman につなぐ） | Homebrew 0.25.2 | `brew install lazydocker` | RPM 無し | 有 | 起動 |
 | toolbox | 別のディストリの端末をコンテナで使う（distrobox と同類。RHEL の公式） | AppStream 0.3 | `sudo dnf install -y toolbox` | Homebrew に無い | 有 | 起動 |
 | podman-docker | `docker` コマンドを podman に読み替える | AppStream 5.8.2 | `sudo dnf install -y podman-docker` | — | 有 | 起動 |
 | buildah | Containerfile を使わずにイメージを作る | AppStream 1.43.1 | `sudo dnf install -y buildah` | Homebrew に無い | 有 | 起動 |
@@ -151,12 +151,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | cosign | イメージの署名と検証 | Homebrew 3.1.3 | `brew install cosign` | RPM 無し | 有 | 起動 |
 
 - 「起動」は `--version`（cosign は `cosign version`）が版を出したことを示す
-- **podman-tui と lazydocker は、podman の API ソケット（[podman.md 手順 8](podman.md#実施手順)）につなぐ**。lazydocker は `DOCKER_HOST` も要る（[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)）
-  - どちらも x86_64 コンテナで端末（pty）を与えて起動し、画面の文字を読み取った
-  - podman-tui は接続の状態が `STATUS_OK` になり、API の版 `5.8.2` を出した。lazydocker は、動かしていた `ubi10/httpd-24` のコンテナとそのログを出した
-- podman-tui は podman を依存に持たない（`rpm -q --requires` で確認）
 - toolbox は、弱い依存として skopeo も入れた（ほかに `flatpak-session-helper`・`p11-kit-server`）。そのため skopeo の行の導入コマンドは `already installed` で終わった
 - podman-docker の `docker --version` は、`Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.` と `podman version 5.8.2` を出した
+  - 入れると、lazydocker の `E`（シェル）・`a`（アタッチ）と compose の判定が、既定の設定のまま動いた（[lazydocker.md](lazydocker.md) の選択した方針）
 - buildah の RPM の版は `1.43.1-6.el10_2` だが、`buildah --version` は `buildah version 1.43.2` を出した
 - podlet は、`podlet podman run --name demo -p 127.0.0.1:8090:8080 <イメージ>` で Quadlet の `[Container]` 節を出した
   - `-d` を付けると、`equal sign is needed when assigning values to '--detach=<DETACH>'` で失敗した

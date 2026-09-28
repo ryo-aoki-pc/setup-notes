@@ -21,7 +21,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 14 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -185,10 +185,11 @@
 
 ### コンテナ
 
-- 土台は [Podman](docs/podman.md)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。ほかの 3 本と手順書の無いツールは、これを前提にしている
+- 土台は [Podman](docs/podman.md)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。ほかの 5 本と手順書の無いツールは、これを前提にしている
 - podman 本体と、システムの podman と組んで使うもの（podman-compose・podman-tui・distrobox・toolbox・buildah・skopeo）は RPM にしている
   - Homebrew 版の podman-compose は別の podman を連れてきて、システムの podman を隠した
   - Homebrew の podman・skopeo は、`/etc/containers` の設定を読まない
+  - Homebrew の podman-tui は 2.x で、podman 6 向け（AlmaLinux 10 の podman は 5）
 - podman の API ソケット（[podman.md 手順 8](docs/podman.md#実施手順)）を、Trivy・podman-tui・Pods・Podman Desktop が使う
   - lazydocker など Docker の API を使うツールは、`DOCKER_HOST` で同じソケットに向ける
   - dive は podman のコマンドでイメージを読むので、ソケットは要らない
@@ -200,11 +201,11 @@
 | [distrobox](docs/distrobox.md) | 別のディストリ（既定は Ubuntu 24.04）の端末とパッケージを使う。入れたコマンドはホストから呼べる | `distrobox create` / `enter` | EPEL | Podman |
 | [podman-compose](docs/podman-compose.md) | compose ファイルで、複数のコンテナをまとめて動かす | `podman-compose`（`podman compose` からも呼ばれる） | EPEL | Podman |
 | [hadolint / dive / Trivy](docs/image-tools.md) | イメージを作るときの検査（Containerfile の書き方、層の無駄、脆弱性） | `hadolint` / `dive` / `trivy`（作るのは `podman build`） | Homebrew と Trivy の公式 dnf リポジトリ | Podman、Homebrew |
+| [podman-tui](docs/podman-tui.md) | podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作する | `podman-tui`（終了は `Ctrl+C`） | EPEL（Homebrew の 2.x は podman 6 向け） | Podman |
+| [lazydocker](docs/lazydocker.md) | コンテナの TUI。ログと CPU の使用率が見やすい。compose のサービスも見られる（任意節） | `lazydocker` | Homebrew（RPM 無し） | Podman（Docker 向けの節まで）、Homebrew |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
-| [podman-tui](docs/tool-catalog.md#cli-コンテナ) | podman の TUI | EPEL |
-| [lazydocker](docs/tool-catalog.md#cli-コンテナ) | コンテナの TUI（`DOCKER_HOST` で podman につなぐ） | Homebrew |
 | [toolbox](docs/tool-catalog.md#cli-コンテナ) | 別のディストリの端末をコンテナで使う（distrobox と同類。RHEL の公式） | AppStream |
 | [podman-docker](docs/tool-catalog.md#cli-コンテナ) | `docker` コマンドを podman に読み替える | AppStream |
 | [buildah](docs/tool-catalog.md#cli-コンテナ) | Containerfile を使わずにイメージを作る | AppStream |
