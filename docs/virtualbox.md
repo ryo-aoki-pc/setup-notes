@@ -14,10 +14,10 @@
 - 手順の後: カーネルを更新したときは[カーネルを更新したとき](#カーネルを更新したとき)、以後の VirtualBox の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機には入れていない（[対象と検証環境](#対象と検証環境)）。
+> **Secure Boot が有効な分岐（手順 15〜17・26）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
 >
-> - `uname -r` と `mokutil` はスタブにした
-> - モジュールの読み込み・MokManager での鍵の登録・VM の起動・GUI の表示などは確かめていない
+> - 検証した PC では、手順 16 の MokManager でキーボードが効かず、鍵を登録できなかった
+> - UEFI の設定で Secure Boot を無効にし、無効の分岐で手順 18 から最後まで本実行した
 
 1. この PC に入るかを確かめる。
 
@@ -31,9 +31,10 @@
    - `CPU の仮想化支援が見えない` と出たら、PC の UEFI（BIOS）の設定で Intel VT-x / AMD-V（SVM）を有効にしてから始める
 
    <details>
-   <summary>補足: コンテナでの表示</summary>
+   <summary>補足: 実機とコンテナでの表示</summary>
 
-   検証コンテナでは `lscpu` に `Virtualization:` の行が出なかった（コンテナを動かしているクラウドのホストに仮想化支援が無い）。**VT-x / AMD-V がある PC での `lscpu` の表示は確かめていない**（[未確認事項](#未確認事項)）。
+   - 実機（AMD のノート PC）では、`x86_64` と `Virtualization:                          AMD-V` が出た
+   - 検証コンテナでは `lscpu` に `Virtualization:` の行が出なかった（コンテナを動かしているクラウドのホストに仮想化支援が無い）
 
    </details>
 
@@ -95,6 +96,7 @@
    - 次の値と一致することを目で確かめる
      - fingerprint `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF`
      - uid `Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org>`
+   - `sub` の下にも fingerprint が出ることがある（Homebrew の gnupg が先に見つかる PC。手順 6 の補足）。照らし合わせるのは `pub` の下の行
    - 違っていればここで止める
    - **次の手順は、fingerprint と uid が一致するのを確かめてから貼る**
 
@@ -118,7 +120,8 @@
    sub   rsa4096 2016-04-22 [E]
    ```
 
-   - **自己署名のハッシュは SHA-512**（`gpg --list-packets` で `digest algo 10`）なので、EL10 の rpm が SHA-1 の自己署名を拒む問題（[tool-catalog.md の注意点](tool-catalog.md#注意点)）には当たらず、`rpm --import` は何も出さずに終了コード 0 で終わった
+   - 実機では `gpg` が Homebrew の gnupg 2.5.24 で、`sub` の下に副鍵の fingerprint（`31DD 01EB 8C64 DF3D 12E7  BC97 AD18 C79D 920E 471F`）の行も出た。`/usr/bin/gpg`（EL10 の 2.4.5）の表示は上と同じ
+   - **自己署名のハッシュは SHA-512**（`gpg --list-packets` で `digest algo 10`）なので、EL10 の rpm が SHA-1 の自己署名を拒む問題（[tool-catalog.md の注意点](tool-catalog.md#注意点)）には当たらず、`rpm --import` は何も出さずに終了コード 0 で終わった（実機でも同じ）
    - 7.2.20 の EL10 向け rpm の署名と、リポジトリのメタデータの署名（`repomd.xml.asc`）は、どちらもこの鍵（`A2F683C52980AECF`、SHA-256）で作られていた（rpm のヘッダとメタデータを直接読んで確認）
 
    Oracle は 2010 年の古い鍵 `oracle_vbox.asc`（dsa1024）も配っているが、これは古いパッケージ用で、本書では使わない。
@@ -229,7 +232,11 @@
    - 調査日（2026-09-24）のリポジトリには `VirtualBox-7.2`（7.2.0〜7.2.20）と `VirtualBox-7.1`（7.1.10〜7.1.18）がある
    - **7.1 と 7.2 は同時には入れられない**（[更新](#更新)）。本書は 7.2 だけを検証している
 
-   **下見の結果**（素のコンテナ。デスクトップの PC では多くが入っているので、数はずっと少ないはず。未確認）:
+   **デスクトップの実機（GNOME）での下見**: 16 パッケージ（ダウンロード 135 M、展開後 350 M）だった。
+
+   - `VirtualBox-7.2` のほかは、`libXt`・`libglvnd-opengl`・`liblzf`（epel）・`libtpms`・`xcb-util-cursor` と、Qt 6 の 10 個（`qt6-qttranslations` は弱い依存）
+
+   **下見の結果**（素のコンテナ）:
 
    ```
    Installing:
@@ -400,14 +407,20 @@
    - 登録前に入れると、鍵があっても読み込みで失敗し、`vboxdrv.sh: You must sign these kernel modules before using VirtualBox:` と `modprobe vboxdrv failed` が出る（スタブで「未登録」と答えさせたときの実測）
    - 登録の確認は、`mokutil --test-key` の出力に `is already` が含まれるかで見ている
 
-   **登録した鍵は `.platform` キーリングに入る見込み。**
+   **登録した鍵は `.platform` キーリングに入る。**
 
    - EL10 のカーネルは `CONFIG_INTEGRITY_CA_MACHINE_KEYRING=y`・`CONFIG_INTEGRITY_CA_MACHINE_KEYRING_MAX=y`
    - kernel-devel に入っている Kconfig の説明によれば、MOK の鍵のうち CA の条件（CA ビットと `keyCertSign`）を満たすものだけが `.machine` に入り、残りは `.platform` に入る
-   - 本書の証明書は `CA:TRUE` だが `keyUsage` を持たない（`openssl x509 -text` で確認）ので、`.platform` 側になる
+   - 本書の証明書は `CA:TRUE` だが `keyUsage` を持たない（`openssl x509 -text` で確認。実機で作った鍵も同じ）ので、`.platform` 側になる
    - RHEL 10 のドキュメント（[参照](#参照)）は「モジュールを読み込むとき、カーネルは `.builtin_trusted_keys` と `.platform` の鍵で署名を確かめる。`.platform` には独自の公開鍵も入る」と書いており、登録後の確認に `keyctl list %:.platform`（`keyutils` パッケージ）を使っている
+   - VirtualBox の VM の中の AlmaLinux（同じ EL10 のカーネル）では、同じ作り方の鍵を MokManager で登録すると `.platform` に入り、`.machine` には入らなかった（[virtualbox-guest-bootc.md 手順 4](virtualbox-guest-bootc.md#実施手順) の補足）
 
-   **本書では実機で確かめていない。** 読み込めないときは、`sudo keyctl list %:.platform` に `VirtualBox module signing key` があるか、`sudo dmesg | grep -i vboxdrv` に `Key was rejected by service` が出ていないかを見る（[未確認事項](#未確認事項)）。
+   **この実機では登録できなかった**（手順 16 の補足）。
+
+   - 読み込めないときは、`sudo keyctl list %:.platform` に `VirtualBox module signing key` があるか、`sudo dmesg` に `Loading of module with unavailable key is rejected` が出ていないかを見る
+   - 後者は、VM の中で鍵を登録しないまま起動したときに出た文
+
+   **予約できたかは `sudo mokutil --list-new` で見られる**（実機で、`CN=VirtualBox module signing key` が出た）。`sudo` を付けないと何も出ない。
 
    **`MOK.priv` はこの PC が信頼するモジュールを作れる鍵になる。** root 以外に読ませず、ほかの PC にも持ち出さない。消し方は[ロールバック](#ロールバック)。
 
@@ -420,18 +433,36 @@
    ```
 
    - 起動の途中で青い **MokManager** の画面が出る
-   - `Enroll MOK` → `Continue` → `Yes` → 一時パスワード → `Reboot` と進む
+     - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す
+     - 続けて `Enroll MOK` → `Continue` → `Yes` → 一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは手順 15 の `sudo mokutil --import ...` からやり直す
+   - **注意**: MokManager でキーボードが効かない PC がある（この手順の補足）
    - **次の手順は、起動したら新しい端末を開いてから貼る**
+
+   <details>
+   <summary>補足: 検証した PC では登録できなかった</summary>
+
+   - 検証した PC（ASUS の ROG Flow Z13 GZ302EA、BIOS 311）では、MokManager の画面は出たが、キーボードの操作が効かず、鍵を登録できなかった（利用者の報告）
+     - つながっていたのは、着脱式の Asus Keyboard と、外付けの USB のキーボード（ZMK）
+     - 起動した後は、予約（`sudo mokutil --list-new`）が消えていて、鍵も登録されていなかった
+   - 利用者が UEFI（BIOS）の設定で Secure Boot を無効にし、以降は無効の分岐（手順 17・26 を飛ばす）で進めた
+     - モジュールは署名されずに作られ、そのまま読み込まれた（手順 18・19）
+   - Secure Boot を後で有効に戻すと、署名の無いモジュールは読み込まれず、VM が動かなくなる見込み。そのときは手順 15 から登録をやり直し、`sudo /sbin/vboxconfig` でモジュールを作り直す（どちらも未確認）
+   - 別のキーボードや、UEFI の設定（Fast Boot など）でキーが効くようになるかは、確かめていない
+   - MokManager の画面の並びとキーの操作は、VirtualBox の VM の中で確かめた（[virtualbox-guest-bootc.md 手順 8](virtualbox-guest-bootc.md#実施手順) の補足）
+
+   </details>
 
 1. Secure Boot が有効なときだけ、鍵が登録されたか確かめる。
 
    ```bash
-   mokutil --test-key /var/lib/shim-signed/mok/MOK.der
+   sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der
    ```
 
    - `/var/lib/shim-signed/mok/MOK.der is already enrolled` が出れば、登録できている
-   - **MokManager での登録から先は実機でしか確かめられず、本書では未確認**
+   - 登録できていなければ `is not enrolled` になる（実機で、登録できなかったときに出た）
+   - `sudo` が要る。鍵のディレクトリは root だけが入れる（`drwx------`）ので、付けないと `Failed to open /var/lib/shim-signed/mok/MOK.der` になった
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. VirtualBox を入れる。
 
@@ -456,11 +487,13 @@
    - **`/sbin/vboxconfig`** は `postinst-common.sh` へのリンクで、同じ処理を最初からやり直す（実測で `/sbin/vboxconfig -> /usr/lib/virtualbox/postinst-common.sh`、`/sbin/rcvboxdrv -> /usr/lib/virtualbox/vboxdrv.sh`）
    - **`/usr/lib/systemd/system/vboxdrv.service` は rpm の持ち物ではない**（`%post` が書き、削除時に `%preun` が消す）
      - 中身は `ExecStart=/usr/lib/virtualbox/vboxdrv.sh start`・`TimeoutSec=5min`・`WantedBy=multi-user.target`
-     - **unit の生成と有効化はスクリプトを読んだだけで、動作は確かめていない**（検証コンテナで systemd を PID 1 にできなかった。[付録](#付録-コンテナでの検証記録2026-09-24)）
-   - **ビルドは数十秒**: コンテナでは 3 つのモジュールを 11 秒でビルドした。`/lib/modules/$(uname -r)/misc/` に `vboxdrv.ko` / `vboxnetflt.ko` / `vboxnetadp.ko` ができる
+     - 実機では、`rpm -qf` が `is not owned by any package` を返し、`systemctl cat vboxdrv` に上の 3 行（と `SourcePath=/usr/lib/virtualbox/vboxdrv.sh`・`Type=forking`）があり、`enabled` / `active` になった
+   - **ビルドは数十秒**: コンテナでは 3 つのモジュールを 11 秒でビルドした。実機では、`[y/N]` に答えてから `Complete!` まで約 20 秒（ダウンロードを含む）。`/lib/modules/$(uname -r)/misc/` に `vboxdrv.ko` / `vboxnetflt.ko` / `vboxnetadp.ko` ができる
+   - 実機での表示は、`Creating group 'vboxusers'. VM users must be member of that group!` の後に空行が続き、`Installed:` の一覧と `Complete!` が出ただけだった（ビルドの経過は標準出力なので出ない）
+   - **Secure Boot が無効なら署名しない**: 実機では、手順 15 の鍵のファイルがあっても、3 つのモジュールの `modinfo -F signer` は空だった
    - **`/dev/vboxdrv` は `root:root` の `0600`**（`%post` が書く `/etc/udev/rules.d/60-vboxdrv.rules` の実測）。VM を動かす `VirtualBoxVM` と `VBoxHeadless` が setuid root（`-r-s--x--x`）なので、一般ユーザーは直接触らない
    - **`vboxdrv.sh setup`（= `vboxconfig`）は、ほかのカーネル用も含めて vbox のモジュールを全部消してから、動いているカーネル用だけを作り直す**。別のカーネル用に作る目的では使わない
-   - SELinux のラベルは `chcon` で付けている（`restorecon` で戻る可能性がある。未確認）
+   - SELinux のラベルは `chcon` で付けている。実機（Enforcing）では、モジュールが `modules_object_t` になり、`sudo restorecon -nv` は何も変えなかった（`restorecon` で戻ってもラベルは同じ）。VirtualBox にかかわる AVC の拒否も無かった
 
    </details>
 
@@ -509,13 +542,14 @@
 
    - Intel は `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`
    - AMD は `VirtualBox can't enable the AMD-V extension. ...`
+   - 実機（AMD）では、この手順の設定をして再起動する前に手順 27 を貼ると、AMD の文で起動に失敗した（手順 27 の補足）
 
    **カーネル引数ではなく modprobe.d にした理由**: Oracle の変更履歴の案内はカーネル引数で、EL10 に当てはめると `sudo grubby --update-kernel=ALL --args=kvm.enable_virt_at_load=0` になる。
 
-   - kvm は読み込み可能なモジュール（`CONFIG_KVM=m`）なので、modprobe.d の設定でも効く見込み
+   - kvm は読み込み可能なモジュール（`CONFIG_KVM=m`）なので、modprobe.d の設定でも効く
    - こちらは起動エントリを書き換えず、カーネルの更新にも左右されない
-   - **この設定で実際に VM が起動するようになるかは確かめていない**（コンテナには KVM も VT-x も無い）
-   - 手順 25 で `N` にならないとき、または手順 27 で VM が起動しないときは、grubby の方法を試す（こちらも未確認）
+   - 実機では、手順 24 の再起動の後に `enable_virt_at_load` が `N` になり（`kvm_amd` は起動時に読み込まれたまま）、手順 27 の VM が起動した
+   - 手順 25 で `N` にならないとき、または手順 27 で VM が起動しないときは、grubby の方法を試す（こちらは未確認）
 
    </details>
 
@@ -527,6 +561,7 @@
    ```
 
    - どちらにも `options kvm enable_virt_at_load=0` が出ればよい（後者は modprobe が読んだ設定）
+   - 後者には `alias symbol:enable_virt_at_load kvm` の行も出る（モジュールの別名の一覧の行で、気にしなくてよい）
    - **効くのは次に kvm が読み込まれたとき**なので、手順 24 の再起動で反映させる
    - KVM（libvirt / GNOME Boxes など）はこの後も使えるが、**KVM の VM と VirtualBox の VM は同時には動かせない**
 
@@ -602,8 +637,7 @@
    - VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
    - `VM "vbox-selftest" has been successfully started.` が出れば動いている（起動するディスクが無いので、中では何も動かない）
    - `VMState="running"` なら動いていた
-   - `controlvm ... poweroff` で止まり、`unregistervm ... --delete` は `0%...10%...` と進んで、VM のファイルごと消える
-   - **VM の起動は実機でしか確かめられず、本書では未確認**（コンテナにはモジュールを読み込めないので、`startvm` は失敗した。この手順の補足）
+   - `controlvm ... poweroff` で止まり、`unregistervm ... --delete` は `0%...10%...` と進んで、VM のファイルごと消える（実機では、`poweroff` と `unregistervm` のそれぞれが `0%...100%` の行を出した）
 
    <details>
    <summary>補足: 出るエラーと対処</summary>
@@ -612,12 +646,12 @@
    |---|---|---|
    | `WARNING: The vboxdrv kernel module is not loaded. Either there is no module available for the current kernel (...) or it failed to load.` | モジュールが無いか、読み込めていない。`VBoxManage` などを包むスクリプト（`VBox.sh`）が、コマンドの前に標準出力へ出す | `sudo tail -n 20 /var/log/vbox-setup.log` で原因を見て `sudo /sbin/vboxconfig`。Secure Boot なら手順 14〜17 |
    | `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`（`VERR_VMX_IN_VMX_ROOT_MODE`） | Intel: KVM が VT-x を確保している | `enable_virt_at_load` が `N` か見る（手順 20・21）。KVM の VM が動いていれば止める |
-   | `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot`（`VERR_SVM_IN_USE`） | AMD: 同上 | 同上 |
-   | `Key was rejected by service`（`sudo modprobe vboxdrv` や `dmesg`） | Secure Boot で署名が受け入れられない | `mokutil --test-key`（手順 17）。**この文は一般的なカーネルのエラーで、本書では出していない** |
+   | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と、続けて `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` | AMD: 同上 | 同上 |
+   | `Key was rejected by service`（`sudo modprobe vboxdrv` や `dmesg`） | Secure Boot で署名が受け入れられない | `sudo mokutil --test-key`（手順 17）。**この文は一般的なカーネルのエラーで、本書では出していない**。鍵が登録されていないときの EL10 の文は `Loading of module with unavailable key is rejected`（VM の中で出た） |
    | `There were problems setting up VirtualBox.  To re-start the set-up process, run /sbin/vboxconfig as root.` | `dnf install` の途中でビルド・署名・読み込みのどこかが失敗した | `/var/log/vbox-setup.log` を見る |
 
-   - KVM とぶつかったときの 2 つの文は、実機で出したものではなく `/usr/lib/virtualbox/VBoxVMM.so` の中の文字列から写した
-   - 本文の成功したときの表示（`VM "vbox-selftest" has been successfully started.`）も、`VBoxManage` の中の `VM "%s" has been successfully started.` から写したもので、本書では実際には出ていない
+   - AMD の 2 行は、実機（AMD）で手順 20 の設定を再起動で効かせる前に、この手順を貼って出した（後ろに `Details: code NS_ERROR_FAILURE (0x80004005), component ConsoleWrap, interface IConsole`、`VMState="poweroff"`、`Machine 'vbox-selftest' is not currently running.` が続いた）
+   - Intel の文は、実機で出したものではなく `/usr/lib/virtualbox/VBoxVMM.so` の中の文字列から写した
    - 既に `vbox-selftest` という名前の VM があるなら、この手順の 6 行の名前を別のものに置き換えて貼る
 
    コンテナ（モジュールが無い）での `startvm` の実測は次のとおりで、実機での失敗の出方とは違う可能性がある:
@@ -642,7 +676,8 @@
 
    - アプリ一覧の「Oracle VirtualBox」からでも同じ
    - VirtualBox マネージャーのウィンドウが開く（手順 27 の VM は消してあるので一覧は空）
-   - **この手順は実機でもコンテナでも確かめていない**（コンテナには画面が無く、`No active display server, X11 or Wayland, detected. Exiting.` で終わった）
+   - 端末に `Qt WARNING: QObject::disconnect: wildcard call disconnects from destroyed signal of UIInvisibleWindow::unnamed` が何行か出るが、気にしなくてよい
+   - ウィンドウを閉じると、端末がプロンプトに戻る
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VirtualBox への操作として食われる）
 
    <details>
@@ -651,7 +686,10 @@
    - GUI は AppStream の Qt 6（`/lib64/libQt6*.so.6`）を使う
    - `/usr/lib/virtualbox` の下の ELF ファイル 48 個すべてで、`ldd` の `not found` が 0 だった（コンテナで確認）
    - Qt の表示の土台は xcb（X11）と wayland の両方のプラグインが入り、VirtualBox の実行ファイルには `QT_QPA_PLATFORM` と `wayland` の文字列がある
-   - **GNOME の Wayland セッションで Wayland のまま動くか XWayland 経由になるかは確かめていない**（[未確認事項](#未確認事項)）
+   - **実機の GNOME の Wayland セッションでは、XWayland 経由で動いた**（プロセスが読み込んでいたのは `platforms/libqxcb.so`。`WAYLAND_DISPLAY` はあり、`QT_QPA_PLATFORM` は無かった）
+   - 実機では、利用者がウィンドウの表示を確かめて閉じた（`Qt WARNING` は 3 行）
+   - コンテナには画面が無く、`No active display server, X11 or Wayland, detected. Exiting.` で終わった
+   - メニューの名前（手順書の本文の日本語と英語）は、`/usr/share/virtualbox/nls/VirtualBox_ja.qm` と `/usr/lib/virtualbox/UICommon.so` の文字列で確かめた（[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) の付録）
 
    </details>
 
@@ -661,7 +699,7 @@
    ls ~/.config/VirtualBox
    ```
 
-   - `VirtualBox.xml` などが並ぶ
+   - `VirtualBox.xml` などが並ぶ（実機では `compreg.dat`・`selectorwindow.log`・`VBoxSVC.log`（と `.1`・`.2`）・`VirtualBox.xml`・`VirtualBox.xml-prev`・`xpti.dat`）
 
 ---
 
@@ -784,36 +822,39 @@
 - **進め方**: EPEL を有効にし（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具（と Secure Boot なら MOK の鍵）を用意してから `dnf install` する
   - 最後に KVM の設定を足して再起動する
   - **読者が書き換える値は無い**
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-24）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックを上から順にそのまま貼って**手順 1〜15・17〜23・25〜29、[カーネルを更新したとき](#カーネルを更新したとき)・[更新](#更新)・[ロールバック](#ロールバック)を通した（手順 16・24 の再起動は実行していない）
+- **状態**: **実機で本実行済み（2026-09-28〜29）。ただし Secure Boot が有効な分岐は、MokManager で鍵を登録できず、最後まで通せていない**。その前に x86_64 のコンテナで検証した（2026-09-24）
+  - 下表の実機で、**この文書のコードブロックを 1 つずつ中身を確かめてから貼った**（[実機の付録](#付録-実機での本実行2026-09-29)）
+    - 手順 1・2・4〜16（手順 3 は EPEL が有効なので飛ばした）。手順 14 で Secure Boot が有効だったので、手順 15 で鍵を作って登録を予約し、手順 16 で再起動した
+    - 手順 16 の MokManager でキーボードが効かず、登録できなかった。利用者が UEFI の設定で Secure Boot を無効にした
+    - 以降は無効の分岐で、手順 18〜21・24・25・27〜29（手順 17・26 は無効の分岐で飛ばし、手順 22・23 は USB を使わないので飛ばした）
+    - 入れた VirtualBox で、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) の VM（Secure Boot 有効）も動かした
   - 確認したこと:
-    - 鍵の fingerprint
-    - 依存の `liblzf` のために EPEL が要ること
-    - `repo_gpgcheck` の鍵の確認が `sudo` の有無で 1 回ずつ要ること
-    - `VirtualBox-7.2 7.2.20` の依存解決と導入
-    - **EL10 のカーネル（`6.12.0-211.56.1.el10_2`）向けに `%post` が 3 つのモジュールをビルドし、手順 15 の鍵で署名すること**
-    - そのモジュールに KVM と共存する仕組みが入らないこと
-    - 更新・系列の切り替え・ロールバックの結果
-  - **コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした**（[付録](#付録-コンテナでの検証記録2026-09-24)）
-  - **確認していないこと**: モジュールの読み込み、`vboxdrv.service`、MokManager での鍵の登録と署名の受け入れ、`enable_virt_at_load=0` の効果、VM の起動、USB、GUI の表示、カーネル更新後の自動ビルド（コンテナではできない）
-  - `--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
+    - `lscpu` の `Virtualization: AMD-V`、鍵の確認が `sudo` の有無で 1 回ずつ要ること、デスクトップの PC での依存（16 パッケージ）
+    - `%post` が `vboxdrv.service` を作って有効にし、3 つのモジュールをビルドして読み込むこと（Secure Boot が無効なら署名しない）
+    - `enable_virt_at_load=0` を modprobe.d に置いて再起動すると `N` になり、VM が起動すること。置く前は `VERR_SVM_IN_USE` で起動に失敗すること
+    - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
+    - 手順 17 は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
+  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 26、USB（手順 22・23）、[カーネルを更新したとき](#カーネルを更新したとき)、[更新](#更新)（新しい版が無い）、[ロールバック](#ロールバック)（VirtualBox を残した）、MOK の削除
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1〜15・17〜23・25〜29、[カーネルを更新したとき](#カーネルを更新したとき)・[更新](#更新)・[ロールバック](#ロールバック)を、コードブロックのまま通した
+    - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
+    - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
   - 2026-09-28: 手順 8・15 と、[ロールバック](#ロールバック)の手順 2のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
-    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+    - 中のコマンドは変えていない。実機では、手順 8・15 を囲む前の形で流し、手順 8 は囲んだ形でもう 1 回流した（どちらもブラケットペーストの効く端末で）。ロールバックの手順 2 は流していない
 
 | 項目 | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|
-| 実施日 | —（未実施） | 2026-09-24 |
+| 実施日 | 2026-09-28〜29 | 2026-09-24 |
+| PC | ASUS ROG Flow Z13（GZ302EA、AMD Strix Halo、BIOS 311） | — |
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64 | 同左（`quay.io/almalinuxorg/almalinux:10`、`sha256:83220192…c4c8`） |
-| カーネル | `6.12.0-211.56.1.el10_2.x86_64`（[wireguard-road-warrior.md](wireguard-road-warrior.md) の 2026-09-22 の記録） | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 12 で入る） |
-| デスクトップ | GNOME Shell 49.4 / Wayland（[wezterm-nightly.md](wezterm-nightly.md) の記録） | 無し |
-| EPEL | 有効（同記録） | 手順 3 で有効化 |
-| CPU の仮想化支援 / KVM | 未確認 | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
-| Secure Boot | 未確認 | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
-| SELinux | Enforcing（同記録） | 無効（コンテナ） |
-| 入った VirtualBox | — | `VirtualBox-7.2-7.2.20_175154_el10-1.x86_64` |
-
-実機の列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**。CPU が Intel か AMD か、Secure Boot が有効か、KVM を使っているかは記録が無い。
+| カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 12 で入る） |
+| デスクトップ | GNOME Shell 49.4 / Wayland（ロケールは en_US.UTF-8） | 無し |
+| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | 手順 3 で有効化 |
+| CPU の仮想化支援 / KVM | AMD-V。`kvm_amd` が起動時に読み込まれていた（KVM の VM は使っていない） | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
+| Secure Boot | 有効 → 手順 16 の後に無効にした | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
+| SELinux | Enforcing | 無効（コンテナ） |
+| sudo | パスワード無し（NOPASSWD）。本文の「`sudo` のパスワードを聞かれたら」は確かめていない | NOPASSWD |
+| 入った VirtualBox | `VirtualBox-7.2-7.2.20_175154_el10-1.x86_64` | 同左 |
 
 > [!NOTE]
 > 出力例の値は `<USER>` / `<GID>` などのプレースホルダで書いてある。バージョン（`7.2.20`）とカーネルの版（`6.12.0-211.56.1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。** MOK の秘密鍵と一時パスワードは載せない。
@@ -831,6 +872,19 @@
 | EPEL | 未設定（baseos / appstream / crb / extras の 4 つ） |
 | gcc / make / perl-interpreter / mokutil / openssl / kernel-devel | どれも未導入 |
 | `which` / `gnupg2` / `systemd-udev` / `kmod` | 導入済み（GNOME の PC に合わせて先に入れた。[付録](#付録-コンテナでの検証記録2026-09-24)） |
+| `vboxusers` グループ | 無し |
+
+実機（2026-09-28、手順 1 の前）の状態:
+
+| 項目 | 状態 |
+|---|---|
+| VirtualBox | 未導入（`VBoxManage` が無い） |
+| `/etc/yum.repos.d/virtualbox.repo` / Oracle の鍵 | どちらも無し |
+| EPEL | 有効（`epel-release-10-8.el10_2`） |
+| gcc / make / perl-interpreter / mokutil / openssl / kernel-devel | どれも導入済み（`kernel-devel` は動いているカーネルと同じ版） |
+| `gpg` | Homebrew の gnupg 2.5.24 が、`/usr/bin/gpg`（2.4.5）より先に見つかる |
+| KVM | `kvm_amd` と `kvm` が読み込まれていた（参照 0）。`/etc/modprobe.d` に kvm の設定は無い |
+| Secure Boot | 有効。`/var/lib/shim-signed/mok` は無く、MOK には AlmaLinux の鍵 3 つだけ |
 | `vboxusers` グループ | 無し |
 
 ### 選択した方針
@@ -906,12 +960,43 @@ xpti.dat
 - `modinfo` をファイルの場所で指定しているのは、コンテナでは `modinfo vboxdrv`（名前で引く形）が別のカーネルの置き場所を見に行って `Module vboxdrv not found.` になるため（[付録](#付録-コンテナでの検証記録2026-09-24)）。実機では手順 26 の書き方でよい
 - 3 つのモジュールとも vermagic と版は同じで、signer はどれも `VirtualBox module signing key`、`sig_hashalgo` は `sha512`、`softdep` は空だった
 
+**実機での出力**（2026-09-29、手順 29 の後。Secure Boot は無効で、検証用の VM が 1 つ動いている。`modinfo` から下は手順書の外のコマンド）:
+
+```
+$ VBoxManage --version
+7.2.20r175154
+$ systemctl is-enabled vboxdrv; systemctl is-active vboxdrv
+enabled
+active
+$ lsmod | grep -E '^vbox'
+vboxnetadp             32768  0
+vboxnetflt             40960  0
+vboxdrv               712704  3 vboxnetadp,vboxnetflt
+$ ls -l /dev/vboxdrv
+crw-------. 1 root root 10, 120 Sep 29 00:31 /dev/vboxdrv
+$ cat /sys/module/kvm/parameters/enable_virt_at_load
+N
+$ modinfo -F signer vboxdrv
+
+$ rpm -qf /usr/lib/systemd/system/vboxdrv.service
+file /usr/lib/systemd/system/vboxdrv.service is not owned by any package
+$ ls -Z /lib/modules/6.12.0-211.56.1.el10_2.x86_64/misc/
+unconfined_u:object_r:modules_object_t:s0 vboxdrv.ko
+unconfined_u:object_r:modules_object_t:s0 vboxnetadp.ko
+unconfined_u:object_r:modules_object_t:s0 vboxnetflt.ko
+$ getent group vboxusers
+vboxusers:x:<GID>:
+```
+
+- `modinfo -F signer` が空なのは、Secure Boot が無効で `vboxdrv.sh` が署名しなかったため（手順 15 の鍵のファイルはある）
+
 ### 注意点
 
 - **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[手順 3](#実施手順) の補足）
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 18・19](#実施手順)）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[手順 9](#実施手順) の補足）
-- **Secure Boot では `mokutil` が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定。MokManager の画面を逃すと登録されない（[手順 14〜17](#実施手順)）
+- **Secure Boot では `mokutil` が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定。MokManager の最初の画面は 10 秒で消え、逃すと登録されない（[手順 14〜17](#実施手順)）
+- **MokManager でキーボードが効かない PC がある**: 検証した PC では登録できず、Secure Boot を無効にして進めた。無効のままならモジュールは署名されない。後で有効に戻すなら、登録をやり直して `sudo /sbin/vboxconfig` を実行する（[手順 16](#実施手順) の補足）
 - **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[手順 20・21](#実施手順)）
 - **カーネルを更新した後の最初の起動は遅くなる**: `vboxdrv.service` がモジュールをビルドし直す（[カーネルを更新したとき](#カーネルを更新したとき)）
 - **系列がパッケージ名に入っている**: 7.2 → 7.3 は `dnf upgrade` では移らない（[更新](#更新)）
@@ -1040,3 +1125,73 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - SELinux（Enforcing）の下での動作（`%post` の `chcon` と、`restorecon` の影響）
 - 実際の 7.2 → 7.3 の切り替え（7.3 はまだ出ていない）
 - Extension Pack と Guest Additions（本書の対象外）
+
+---
+
+### 付録: 実機での本実行（2026-09-29）
+
+前の付録の後、実機で本実行した（手順 1〜16 は 2026-09-28、手順 17 から後は 2026-09-29）。前の付録の未確認事項のうち、次のものはこれで済んだ。
+
+- 実機での本実行（Secure Boot が有効な分岐は、手順 16 の登録まで）
+- VT-x / AMD-V のある PC での `lscpu` の表示、デスクトップの PC での依存の数
+- モジュールの読み込みと、`vboxdrv.service` の生成・有効化・起動時の動作
+- `enable_virt_at_load=0`（modprobe.d）が起動時に効くこと、VM の起動、KVM とぶつかったときの AMD の文の実際の出方
+- GUI の表示（XWayland 経由）、SELinux（Enforcing）の下での動作
+
+**環境**: [対象と検証環境](#対象と検証環境)の表の実機の列のとおり。
+
+**流し方**:
+
+- 本文の `bash` のコードブロックを抜き出し（リストの字下げだけ外す）、自分のログインシェル（擬似端末の上の bash。ブラケットペーストが効く）に 1 つずつ貼って Enter を送った
+  - 1 ブロックごとに中身と出力を確かめてから、次を貼った
+- 確認を聞くブロック（手順 8・9 の鍵の確認、手順 15 の一時パスワード、手順 18 の `[y/N]`）は、入力待ちが出てから答えを送った
+  - 手順 8・9 の fingerprint は、手順 5 と同じであることを確かめてから `y` と答えた
+- 手順 16・24 の再起動では、利用者がログインし直した。手順 16 の MokManager も利用者が操作した
+- 手順 1〜16 は 8835dd5 の版（手順 8・15 を `{ … }` で囲む前）、手順 17 から後は 52299ac の版を貼った。手順 8 は、囲んだ形でもう 1 回流した
+
+| 手順 | 結果 |
+|---|---|
+| 1. 確認 | `x86_64`、`Virtualization:                          AMD-V` |
+| 2〜4. EPEL | `epel` の行が出たので、手順 3 は飛ばした。`epel-release-10-8.el10_2` と `epel` の行 |
+| 5〜7. 鍵 | fingerprint と uid が一致（副鍵の fingerprint の行も出た。手順 6 の補足）。`rpm --import` は無出力。`gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org> public key` |
+| 8〜9. リポジトリ | `Importing GPG key 0x2980AECF:`（fingerprint は手順 5 と同じ）に `y` → `Metadata cache created.`。`sudo` 無しの dnf も同じ確認に `y`。囲んだ形の手順 8 をもう 1 回流すと、確認は出ずに `Metadata cache created.` |
+| 10. 下見 | 16 パッケージ（135 M / 350 M）、`liblzf` は epel。`Operation aborted.` |
+| 11〜13. 道具 | 2 つの版が同じ。6 つとも導入済みで `Nothing to do.`。6 つの版と `build/include` |
+| 14. Secure Boot | `SecureBoot enabled` |
+| 15. 鍵 | `MOK.der`（844 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。一時パスワード 2 回で無出力。`sudo mokutil --list-new` に `CN=VirtualBox module signing key`。登録前の `.platform` は 9 個（UEFI の db と、MOK の AlmaLinux の鍵） |
+| 16. 再起動 | MokManager の画面は出たが、キーボードが効かず登録できなかった（利用者の報告）。利用者が UEFI の設定で Secure Boot を無効にした。起動した後は `SecureBoot disabled`、予約は消え、鍵は登録されていない。`.platform` は UEFI の db の 6 個だけになった |
+| 17. 確認 | Secure Boot が無効なので飛ばした。前の版の形（`sudo` 無し）は `Failed to open /var/lib/shim-signed/mok/MOK.der`、`sudo` 付きは `is not enrolled`（終了コード 1） |
+| 18. 導入 | `[y/N]` に `y`（EPEL の鍵の確認は出なかった。取り込み済み）。約 20 秒で `Creating group 'vboxusers'. VM users must be member of that group!` → `Installed:` → `Complete!`。エラーの表示は無し |
+| 19. 確認 | `enabled`、`active`、vbox の 3 行、`crw------- root root`、ログは `Building the main VirtualBox module.` など 3 行 |
+| 20〜21. KVM | どちらにも `options kvm enable_virt_at_load=0`（`modprobe -c` には `alias symbol:enable_virt_at_load kvm` も）。この時点の値は `Y` |
+| 手順 27 を先に 1 回（手順書の外） | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` → `VirtualBox can't enable the AMD-V extension. ...` → `VMState="poweroff"` → `Machine 'vbox-selftest' is not currently running.` → `unregistervm` は `0%...100%` |
+| 22〜23. vboxusers | USB を使わないので飛ばした |
+| 24. 再起動 | 利用者がログインし直した。`enable_virt_at_load` は `N` |
+| 25. 確認 | `7.2.20r175154`（前に `WARNING` 無し）、`active`、vbox の 3 行、`N`、`vboxusers には入っていない` |
+| 26. 署名 | Secure Boot が無効なので飛ばした（`modinfo -F signer vboxdrv` は空） |
+| 27. VM | `VM "vbox-selftest" has been successfully started.`、`VMState="running"`。`poweroff` と `unregistervm` がそれぞれ `0%...100%` |
+| 28. GUI | 利用者がウィンドウの表示を確かめて閉じた。`platforms/libqxcb.so`（XWayland）。端末に `Qt WARNING: QObject::disconnect: ...` が 3 行 |
+| 29. 設定 | `compreg.dat`・`selectorwindow.log`・`VBoxSVC.log`（と `.1`・`.2`）・`VirtualBox.xml`・`VirtualBox.xml-prev`・`xpti.dat` |
+
+**手順書の外で確かめたこと**:
+
+| 確認 | 結果 |
+|---|---|
+| `vboxdrv.service` | `rpm -qf` は `not owned by any package`。`systemctl cat` に `SourcePath=/usr/lib/virtualbox/vboxdrv.sh`・`Type=forking`・`ExecStart=/usr/lib/virtualbox/vboxdrv.sh start`・`ExecStop=/usr/lib/virtualbox/vboxdrv.sh stop`・`TimeoutSec=5min`・`WantedBy=multi-user.target` |
+| 署名 | Secure Boot が無効なので、手順 15 の鍵のファイルがあっても、3 つとも `signer` が空 |
+| SELinux | モジュールは `modules_object_t`、`sudo restorecon -nv` は何も変えない。VirtualBox にかかわる AVC は 0 件（gnome-remote-desktop の無関係な AVC はあった） |
+| setuid | `VirtualBoxVM`・`VBoxHeadless` が `-r-s--x--x root root` |
+| MOK の予約 | `mokutil --list-new` は、`sudo` が無いと何も出さない |
+| `gpg` | `type -a gpg` は `/home/linuxbrew/.linuxbrew/bin/gpg`、`/usr/bin/gpg` の順 |
+| VM を動かす | 入れた VirtualBox で、Atomic Desktop の VM（UEFI・Secure Boot 有効、4 vCPU・8 GB）を GUI のウィンドウで動かした（[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) の付録）。VM の中の MokManager の登録と削除も確かめた |
+
+#### 未確認事項
+
+- Secure Boot が有効なままでの MokManager での登録（この PC ではキーボードが効かなかった）と、署名したモジュールが実機のカーネルに受け入れられること
+- 別のキーボードや、UEFI の設定（Fast Boot など）で MokManager のキーが効くか
+- Secure Boot を後で有効に戻したときの動作と、登録し直して `sudo /sbin/vboxconfig` を実行したときの動作
+- 手順 26、USB の受け渡し（手順 22・23）
+- `sudo` のパスワードを聞かれる場合（この PC の sudo は NOPASSWD）と、EPEL の鍵の確認（取り込み済みだった）
+- カーネルを更新して再起動したときの自動ビルド、[更新](#更新)、[ロールバック](#ロールバック)（実機では行っていない）
+- Intel の PC（VT-x）で KVM とぶつかったときの文の実際の出方
+- GUI の HiDPI と日本語の表示、日本語入力
