@@ -195,6 +195,7 @@
 | `podman-compose down -v` | 名前付きのボリュームも消す（中のデータも消える） |
 
 - `down` と `down -v` の違いは、名前付きのボリュームを持つ別の compose ファイルで確かめた（`down` の後も `podman volume ls` に残り、`down -v` で消えた）
+- 端末の画面（TUI）でサービスのログを見たり再起動したりするなら、[lazydocker の compose の節](lazydocker.md#compose-のプロジェクトを見る任意)
 
 ---
 
