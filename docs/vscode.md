@@ -62,7 +62,8 @@
 1. リポジトリを追加する。
 
    ```bash
-   sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
+   {
+     sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
    [vscode]
    name=Visual Studio Code
    baseurl=https://packages.microsoft.com/yumrepos/vscode
@@ -70,7 +71,8 @@
    gpgcheck=1
    gpgkey=https://packages.microsoft.com/keys/microsoft.asc
    EOF
-   cat /etc/yum.repos.d/vscode.repo
+     cat /etc/yum.repos.d/vscode.repo
+   }
    ```
 
    - ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い
@@ -78,8 +80,10 @@
 1. 何が入るかを先に見てから、VS Code を入れる。
 
    ```bash
-   sudo dnf install --assumeno code
-   sudo dnf install code
+   {
+     sudo dnf install --assumeno code
+     sudo dnf install code
+   }
    ```
 
    - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
@@ -301,6 +305,9 @@
   - **VS Code は実機に入れたまま残してある**
   - 手順 1〜5 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
   - **確認していないこと**: 拡張機能・`code-insiders`・Wayland ネイティブでの常用
+  - 2026-09-28: 手順 4・5のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

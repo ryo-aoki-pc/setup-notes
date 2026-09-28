@@ -37,7 +37,8 @@
 1. リポジトリを追加する。
 
    ```bash
-   sudo tee /etc/yum.repos.d/claude-code.repo >/dev/null <<EOF
+   {
+     sudo tee /etc/yum.repos.d/claude-code.repo >/dev/null <<EOF
    [claude-code]
    name=Claude Code
    baseurl=https://downloads.claude.ai/claude-code/rpm/${CC_CHANNEL:?手順 1 の CC_CHANNEL が空のまま。値を入れて貼り直す}
@@ -45,7 +46,8 @@
    gpgcheck=1
    gpgkey=https://downloads.claude.ai/keys/claude-code.asc
    EOF
-   cat /etc/yum.repos.d/claude-code.repo
+     cat /etc/yum.repos.d/claude-code.repo
+   }
    ```
 
    - `baseurl` の末尾が手順 1 で選んだチャンネル（既定なら `latest`）になっていることを確認する
@@ -204,8 +206,10 @@
 1. repo ファイルの `baseurl` を `stable` に書き換える。
 
    ```bash
-   sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
-   grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
+   {
+     sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
+     grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
+   }
    ```
 
    - `baseurl` の末尾が `stable` になっていることを確認する
@@ -267,9 +271,11 @@
 1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
 
    ```bash
-   sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
-   grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
-   sudo dnf upgrade claude-code
+   {
+     sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
+     grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
+     sudo dnf upgrade claude-code
+   }
    ```
 
    - `baseurl` の末尾が `latest` に戻ったことを確認する
@@ -326,6 +332,9 @@
   - 2026-09-22: 同じ OS の aarch64 のコンテナで、`stable` の手順 2〜4 を通し直した
   - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](#更新)・[stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)・[ロールバック](#ロールバック)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
   - **確認していないこと**: 実機（aarch64）での `latest`（aarch64 にも同じ版があることはメタデータで確認）、コンテナでの認証（手順 5）、認証後の `claude doctor`
+  - 2026-09-28: 手順 2 と、[stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)の手順 1・4のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機 | 検証コンテナ（`stable`） | 検証コンテナ（`latest`） |
 |---|---|---|---|

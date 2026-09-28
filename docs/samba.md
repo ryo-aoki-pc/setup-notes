@@ -37,8 +37,10 @@
 1. samba・samba-client・cifs-utils を入れる。
 
    ```bash
-   sudo dnf install -y samba samba-client cifs-utils
-   rpm -q samba samba-client cifs-utils
+   {
+     sudo dnf install -y samba samba-client cifs-utils
+     rpm -q samba samba-client cifs-utils
+   }
    ```
 
    <details>
@@ -53,26 +55,28 @@
 1. 既定の smb.conf を退避して最小構成に置き換え、構文を検査する。
 
    ```bash
-   sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
-   sudo tee /etc/samba/smb.conf >/dev/null <<EOF
+   {
+     sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
+     sudo tee /etc/samba/smb.conf >/dev/null <<EOF
    [global]
-   	workgroup = ${WORKGROUP:?手順 1 の WORKGROUP が空のまま。値を入れて貼り直す}
-   	security = user
-   	passdb backend = tdbsam
-   	server smb transports = tcp
-   	load printers = no
-   	printing = bsd
-   	printcap name = /dev/null
-   	disable spoolss = yes
+       workgroup = ${WORKGROUP:?手順 1 の WORKGROUP が空のまま。値を入れて貼り直す}
+       security = user
+       passdb backend = tdbsam
+       server smb transports = tcp
+       load printers = no
+       printing = bsd
+       printcap name = /dev/null
+       disable spoolss = yes
 
    [homes]
-   	comment = Home Directories
-   	valid users = %S
-   	browseable = No
-   	read only = No
-   	create mask = 0644
+       comment = Home Directories
+       valid users = %S
+       browseable = No
+       read only = No
+       create mask = 0644
    EOF
-   testparm -s
+     testparm -s
+   }
    ```
 
    - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出ればよい
@@ -82,6 +86,8 @@
 
    - `cp -an` の `-n` で、2 回目以降の実行で `.orig` を上書きしない（最小構成で上書きした `smb.conf` を原本として退避してしまうのを防ぐ）
    - heredoc は `${WORKGROUP}` を展開するため引用符なしの `<<EOF`。内容にほかの `$` は無い
+   - 字下げは空白にしてある。TAB だと、ブラケットペーストが効かない端末で貼ったときに bash が補完として扱い、行頭が `.` に置き換わった（VM で確認）
+   - そのときの testparm は、`Unknown parameter` と出しつつ `Loaded services file OK.` で終わった（壊れたことに気付きにくい）
    - `testparm -s` の出力に `Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)` が出るが、crypto-policies が DEFAULT のときの通常の表示で、エラーではない
    - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` や `read only = No` に対応する行が出なくても書き漏れではない。全パラメータを見るなら `testparm -sv`
    - 手順 15 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
@@ -91,8 +97,10 @@
 1. SELinux の boolean `samba_enable_home_dirs` を on にする。
 
    ```bash
-   sudo setsebool -P samba_enable_home_dirs on
-   sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
+   {
+     sudo setsebool -P samba_enable_home_dirs on
+     sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
+   }
    ```
 
    <details>
@@ -107,8 +115,10 @@
 1. firewalld で 445/tcp を開ける。
 
    ```bash
-   sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
-   sudo firewall-cmd --list-ports               # 445/tcp が含まれる
+   {
+     sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+     sudo firewall-cmd --list-ports               # 445/tcp が含まれる
+   }
    ```
 
    <details>
@@ -154,9 +164,11 @@
 1. smb.service を有効にして起動する。
 
    ```bash
-   sudo systemctl enable --now smb.service
-   systemctl is-active smb.service              # active
-   ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
+   {
+     sudo systemctl enable --now smb.service
+     systemctl is-active smb.service              # active
+     ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
+   }
    ```
 
    <details>
@@ -216,12 +228,14 @@
 1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
 
    ```bash
-   sudo mkdir -p /mnt/smbtest
-   sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
-   mount | grep cifs                            # vers=3.1.1
-   echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
-   ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
-   sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
+   {
+     sudo mkdir -p /mnt/smbtest
+     sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+     mount | grep cifs                            # vers=3.1.1
+     echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
+     ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
+     sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
+   }
    ```
 
    - `smbstatus` はセッションが生きている間しか見えない
@@ -318,12 +332,14 @@
 1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
 
    ```bash
-   sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
-   sudo systemctl disable --now smb.service
-   sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
-   sudo smbpasswd -x "${USER}"
-   sudo setsebool -P samba_enable_home_dirs off
-   sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
+   {
+     sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
+     sudo systemctl disable --now smb.service
+     sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
+     sudo smbpasswd -x "${USER}"
+     sudo setsebool -P samba_enable_home_dirs off
+     sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
+   }
    ```
 
    - 公開したユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
@@ -354,6 +370,11 @@
 - **状態**: **2026-09-21 に下表の実機で本実行し、そのまま公開を継続中**
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
   - **確認していないこと**: Windows / macOS / Android の実クライアントからの接続
+  - 2026-09-28: 手順 2〜5・8・12 と、[ロールバック](#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）。中のコマンドは変えていない
+    - 手順 3 の smb.conf の字下げを、TAB から空白に変えた。TAB は、ブラケットペースト無しで貼ると bash の補完で `.` に置き換わった（手順 3 の補足）
+    - 直した後の手順 1〜14 とロールバックを、x86_64 の VM にブラケットペースト無しで貼って通した。VM は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じもので、まっさらな状態から始めた
+    - その VM には `samba-common` が入っていなかったので、手順 2 で一緒に入り、ロールバックの手順 2 で一緒に消えた
 
 | 項目 | 値 |
 |---|---|

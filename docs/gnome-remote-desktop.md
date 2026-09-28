@@ -41,13 +41,15 @@
 1. `gnome-remote-desktop` ユーザーとして、TLS 証明書と鍵を openssl で生成する。
 
    ```bash
-   sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
-   sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
-     -subj "/CN=${SERVER_NAME}" \
-     -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
-     -addext "extendedKeyUsage=serverAuth" \
-     -keyout /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
-     -out    /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   {
+     sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
+     sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
+       -subj "/CN=${SERVER_NAME}" \
+       -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
+       -addext "extendedKeyUsage=serverAuth" \
+       -keyout /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
+       -out    /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   }
    ```
 
    - 所有権を最初から正しくするため、`gnome-remote-desktop` ユーザー自身として生成する
@@ -115,10 +117,12 @@
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
 
    ```bash
-   sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-   sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-   sudo restorecon -Rv /var/lib/gnome-remote-desktop
-   sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
+   {
+     sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+     sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+     sudo restorecon -Rv /var/lib/gnome-remote-desktop
+     sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
+   }
    ```
 
    <details>
@@ -136,9 +140,11 @@
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
-   sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-   sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-   sudo grdctl --system rdp enable
+   {
+     sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+     sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+     sudo grdctl --system rdp enable
+   }
    ```
 
    - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10 で使う）
@@ -157,9 +163,11 @@
 1. サービスを有効にして起動し、ファイアウォールで RDP を開ける。
 
    ```bash
-   sudo systemctl enable --now gnome-remote-desktop.service
-   sudo firewall-cmd --permanent --add-service=rdp
-   sudo firewall-cmd --reload
+   {
+     sudo systemctl enable --now gnome-remote-desktop.service
+     sudo firewall-cmd --permanent --add-service=rdp
+     sudo firewall-cmd --reload
+   }
    ```
 
    <details>
@@ -199,10 +207,12 @@
 1. サーバー側の状態を確かめる。
 
    ```bash
-   sudo grdctl --system status              # Status: enabled / Username: (hidden)
-   systemctl status gnome-remote-desktop    # active (running)
-   ss -lntp | grep 3389                     # *:3389 で LISTEN
-   firewall-cmd --list-services             # rdp が含まれる
+   {
+     sudo grdctl --system status              # Status: enabled / Username: (hidden)
+     systemctl status gnome-remote-desktop    # active (running)
+     ss -lntp | grep 3389                     # *:3389 で LISTEN
+     firewall-cmd --list-services             # rdp が含まれる
+   }
    ```
 
    <details>
@@ -215,8 +225,10 @@
 1. 鍵と証明書が対応しているかを確かめる。
 
    ```bash
-   sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
-   sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
+   {
+     sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
+     sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
+   }
    ```
 
    - 2 つのハッシュが一致すれば、ペアとして正しい
@@ -388,10 +400,12 @@
 1. サービスと RDP を止め、資格情報とファイアウォールの開放を消す。
 
    ```bash
-   sudo systemctl disable --now gnome-remote-desktop.service
-   sudo grdctl --system rdp disable
-   sudo grdctl --system rdp clear-credentials
-   sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
+   {
+     sudo systemctl disable --now gnome-remote-desktop.service
+     sudo grdctl --system rdp disable
+     sudo grdctl --system rdp clear-credentials
+     sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
+   }
    ```
 
 1. 証明書だけを差し替え前に戻すときは（この節の手順 1 の代わりに）、旧ファイル名を入れてパスを戻し、再起動する。
@@ -420,6 +434,9 @@
 - **方式**: リモートログイン（システムデーモン `grdctl --system`）
 - **TLS 証明書**: openssl で生成（追加パッケージ不要）
 - **状態**: 下記 2 環境で動作確認済み
+  - 2026-09-28: 手順 2〜5・8・9、[ロールバック](#ロールバック)の手順 1、[注意点](#注意点)の「設定レイヤーの食い違い」の確認方法のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | | 環境 1（初回構築） | 環境 2（openssl 手順の再検証） |
 |---|---|---|
@@ -528,8 +545,10 @@ gnome-remote-de[2415]: RDP server started
   確認方法:
 
   ```bash
-  sudo cat /etc/gnome-remote-desktop/grd.conf
-  sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
+  {
+    sudo cat /etc/gnome-remote-desktop/grd.conf
+    sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
+  }
   ```
 
 - **既存ローカルセッションとの併存**: リモートログインは常に**新規セッション**を作る

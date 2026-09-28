@@ -289,8 +289,10 @@
 1. Flathub の登録を消す。
 
    ```bash
-   sudo flatpak remote-delete flathub
-   flatpak remotes --show-details
+   {
+     sudo flatpak remote-delete flathub
+     flatpak remotes --show-details
+   }
    ```
 
    - 最後の `flatpak remotes --show-details` が何も出さなければ、リモートが無い状態に戻っている
@@ -310,6 +312,9 @@
   - **確認していないこと**: デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示。コンテナに画面が無いため
   - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
+  - 2026-09-28: [ロールバック](#ロールバック)の手順 4のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機（Raspberry Pi 5） | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|---|

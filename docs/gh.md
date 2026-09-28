@@ -22,8 +22,10 @@
 1. リポジトリを追加する。
 
    ```bash
-   sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-   cat /etc/yum.repos.d/gh-cli.repo
+   {
+     sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+     cat /etc/yum.repos.d/gh-cli.repo
+   }
    ```
 
    - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
@@ -170,6 +172,9 @@
   - 下表のホストで `dnf config-manager --add-repo` → `dnf install -y gh` を実行し、`gh-2.101.0-1.aarch64` が入って認証済み、そのまま常用中
   - 本書の手順 1〜3 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
   - **コンテナでは認証（手順 4）とロールバックは実行していない**
+  - 2026-09-28: 手順 2のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

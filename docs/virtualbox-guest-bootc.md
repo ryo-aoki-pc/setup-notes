@@ -84,10 +84,12 @@
 1. Secure Boot が有効なときだけ、署名用の鍵を作り、MOK への登録を予約する。
 
    ```bash
-   sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
-   sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=VirtualBox Guest Additions module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
-   sudo ls -l /var/lib/shim-signed/mok
-   sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+   {
+     sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
+     sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=VirtualBox Guest Additions module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
+     sudo ls -l /var/lib/shim-signed/mok
+     sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+   }
    ```
 
    - 鍵を作る間は `.....+++` のような行が流れる
@@ -381,8 +383,10 @@
 1. Secure Boot が有効なときだけ、鍵が登録されたかとモジュールの署名を見る。
 
    ```bash
-   sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der
-   modinfo -F signer vboxguest
+   {
+     sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der
+     modinfo -F signer vboxguest
+   }
    ```
 
    - `/var/lib/shim-signed/mok/MOK.der is already enrolled` と `VirtualBox Guest Additions module signing key` が出ればよい
@@ -494,10 +498,12 @@
 1. Guest Additions のユーザー・グループ・リンク・ログを消す。
 
    ```bash
-   sudo userdel vboxadd
-   sudo groupdel vboxsf
-   sudo groupdel vboxdrmipc
-   sudo rm -f /var/lib/VBoxGuestAdditions /var/log/vboxadd-setup.log*
+   {
+     sudo userdel vboxadd
+     sudo groupdel vboxsf
+     sudo groupdel vboxdrmipc
+     sudo rm -f /var/lib/VBoxGuestAdditions /var/log/vboxadd-setup.log*
+   }
    ```
 
    - 何も出ずに終われば消えている
@@ -536,6 +542,9 @@
     - ビルドのキャッシュ（鍵を作り直しただけではやり直さないこと）と、`install -m 0644` にした理由（`cp` の上書きの失敗）
   - **確認していないこと**: `bootc switch`・`bootc upgrade`・`bootc rollback`、再起動、MokManager での鍵の登録と削除、モジュールの読み込み、`/dev/vboxguest`、VBoxService、VBoxClient（クリップボード・画面サイズ）、共有フォルダーの自動マウント、SELinux のラベル（コンテナではできない）
   - 実機（検証に使った PC）の設定は変えていない。`sudo` は使わず、rootless の podman のコンテナだけで行った
+  - 2026-09-28: 手順 4・10 と、[ロールバック](#ロールバック)の手順 3のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | VirtualBox の VM（対象） | 検証環境 |
 |---|---|---|

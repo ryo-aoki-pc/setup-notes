@@ -33,7 +33,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
 - `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す
-- `docs/samba.md` — `[homes]` 共有でホームディレクトリを公開する手順書。gnome-remote-desktop.md と同じ変数ブロック方式。実機（拠点 B の WG ホスト）で公開を継続中
+- `docs/samba.md` — `[homes]` 共有でホームディレクトリを公開する手順書。gnome-remote-desktop.md と同じ変数ブロック方式。実機（拠点 B の WG ホスト）で公開を継続中。`{ … }` で囲んだ後の手順 1〜14 とロールバックは、x86_64 の VM にブラケットペースト無しで貼って通した（2026-09-28。手順 3 の smb.conf の字下げは TAB から空白に変えた。TAB は bash の補完で `.` に置き換わった）
 - `docs/samba-client.md` — samba.md の共有を AlmaLinux 10 の PC から使う手順書。samba.md と同じ変数ブロック方式（必須は `SERVER` だけ。`SMB_USER` / `SHARE` / `MOUNT_POINT` の既定は `${USER}` / `${SMB_USER}` / `/mnt/${SHARE}`）。`cifs-utils` を入れ、資格情報を `/root/smb-<SMB_USER>@<SERVER>.cred`（root の 0600）に置き、手で 1 度マウントして確かめてから、`/etc/fstab` に `x-systemd.automount,x-systemd.idle-timeout=1min` の行を足す（`_netdev` と `nofail` は付けない。理由は同書の「選択した方針」）。`sudo` の後ろに行が続くブロックは、どれも 1 つのコマンド（`if … fi` や `{ … }`）にしてある（ブラケットペースト無しで貼ると、sudo 1.9.17 の `use_pty` が残りの行を吸い、手順 6 の `umount` が実行されなかった）。変数が空のときの中断は、ブロックの先頭の `if [ -z … ]` で行う（パイプや `$(…)` の中の `${VAR:?}` はブロックを止めず、直す前の手順 5 は空の `/root/smb-@<SERVER>.cred` を作った）。GNOME Files（`gio mount`、gvfs-smb）は任意節。**x86_64 の VM のみで検証**（このホストのカーネルに CIFS が無いので、QEMU の TCG で AlmaLinux 10.2 の GenericCloud を動かした。SELinux は Enforcing、サーバーは samba.md 手順 3 の `smb.conf` を置いたコンテナ。ブラケットペーストの有りと無しで 1 回ずつ通した）。GNOME Files の画面・キーリング・実機・WireGuard 越しのマウントは未確認
 - `docs/wireguard-road-warrior.md` — 外出先の AlmaLinux 10 PC を WG クライアントにする手順書。鍵は PC 側で生成し、ホストの `client add --pubkey` → `client show` の conf を `nmcli connection import` で取り込む。samba.md と同じ変数ブロック方式。実機で本実行済み（2026-09-22、テザリング回線から拠点 B へ）。サスペンド復帰・Wi-Fi の切り替えなど、付録の「残っている未確認事項」は実機の結果で更新する
 - `docs/syncthing.md` — Syncthing を Homebrew（2.1.5、上流最新と同版）で入れ、`brew services` の systemd ユーザーサービス + `loginctl enable-linger` で常駐させる手順書。EPEL 10 は 2.1.3 で、公式の RPM リポジトリは存在しない（公式は apt のみ）。GUI の認証を入れてから待ち受けを LAN に広げ、firewalld の定義済みサービス `syncthing` / `syncthing-gui` を開ける順にしてある。実機で本実行済み（2026-09-24）。firewalld 越しの到達は samba.md と同じ network namespace の手法で確認したが、**別デバイスとの実同期と再起動後の自動起動は未検証**。任意節の「設定を自動でバックアップする」（`~/.local/bin/syncthing-backup` を systemd のユーザーの path + timer で走らせ、`~/syncthing-backup` を送信専用フォルダにして別の端末へ複製）と「バックアップから戻す」（OS を入れ直したホストは、アーカイブを戻してから実施手順を手順 1 から通す。`syncthing generate` は既存の鍵を使う）は **x86_64 のコンテナのみで検証**（相手は同じコンテナの 2 つ目の Syncthing）。`systemd-analyze --user verify` はユーザーの systemd の private ソケットを置き換えて `systemctl --user` を壊すので使わない
@@ -120,6 +120,11 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
   - 並べてよいのは「1 変数だけのブロック（0 個以上）→ ほかのブロック 1 つ」だけ
   - 言語は bash。手で書き足す設定の断片（lazygit の yaml など）だけは、その言語のブロックでよい
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
+  - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ
+    - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる。ヒアドキュメントやパイプから読む `sudo` も、パスワードを聞くときは捨てる（実測は [samba-client.md の付録](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
+    - bash は `}` まで読んでから実行するので、捨てられる行が残らない。変数の空を弾くブロックは `if … fi` でもよい（samba-client.md）
+    - 目視で確かめてから次を実行するもの（dry-run の後の本番など）は、囲まずに手順（手順の外ならブロック）を分ける
+    - 点検は、ブロックを bash が 1 回に読む単位（`bash -n` が通る最小の行のまとまり）に区切り、`sudo` を含む単位の後ろにコメント以外の行が残らないかで見る
 - **補足（表示）**
   - 箇条書きだけにする（入れ子は可）。段落・表・コードブロックは置かない
   - 出力例は折り畳みへ移し、箇条書きには判定に要る 1 行だけを引く

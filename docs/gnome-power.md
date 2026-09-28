@@ -174,8 +174,10 @@
 1. dconf のデータベースを作り直し、ログイン画面から見える値を確かめる。
 
    ```bash
-   sudo dconf update
-   sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+   {
+     sudo dconf update
+     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+   }
    ```
 
    - `dconf update` は、成功すると何も出さない。`invalid value` と出たら、手順 3 から貼り直す
@@ -196,8 +198,10 @@
 1. OS 全体で、サスペンドとハイバネートを止める。
 
    ```bash
-   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-   systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+   {
+     sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+     systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+   }
    ```
 
    - `Created symlink '/etc/systemd/system/sleep.target' → '/dev/null'.` のような行が 5 つ出て、`masked` が 5 行出ればよい
@@ -222,13 +226,15 @@
 1. 蓋を閉じても何もしないように、logind のドロップインを置く。
 
    ```bash
-   sudo mkdir -p /etc/systemd/logind.conf.d
-   sudo tee /etc/systemd/logind.conf.d/90-lid.conf >/dev/null <<'EOF'
+   {
+     sudo mkdir -p /etc/systemd/logind.conf.d
+     sudo tee /etc/systemd/logind.conf.d/90-lid.conf >/dev/null <<'EOF'
    [Login]
    HandleLidSwitch=ignore
    EOF
-   sudo systemctl reload systemd-logind
-   busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
+     sudo systemctl reload systemd-logind
+     busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
+   }
    ```
 
    - `s "ignore"` と出ればよい（既定は `s "suspend"`）
@@ -294,8 +300,10 @@
 1. dconf のデータベースを作り直し、ログイン画面から見える値が戻ったか確かめる。
 
    ```bash
-   sudo dconf update
-   sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+   {
+     sudo dconf update
+     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+   }
    ```
 
    - 3 行とも `'suspend'` になればよい
@@ -303,8 +311,10 @@
 1. サスペンドとハイバネートの mask を外す。
 
    ```bash
-   sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-   systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+   {
+     sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+     systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+   }
    ```
 
    - `Removed '/etc/systemd/system/sleep.target'.` のような行が 5 つ出て、`static` が 5 行出ればよい
@@ -312,9 +322,11 @@
 1. 蓋のドロップインを消し、logind に読み直させる。
 
    ```bash
-   sudo rm -f /etc/systemd/logind.conf.d/90-lid.conf
-   sudo systemctl reload systemd-logind
-   busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
+   {
+     sudo rm -f /etc/systemd/logind.conf.d/90-lid.conf
+     sudo systemctl reload systemd-logind
+     busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
+   }
    ```
 
    - `s "suspend"` と出ればよい
@@ -341,6 +353,9 @@
     - logind の `HandleLidSwitch` が `"ignore"` になり、戻せる
   - **確認していないこと**: 画面が消えない・暗くならない・ロックしないこと、実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示。コンテナには画面も GNOME のセッションも無いため
   - aarch64（Raspberry Pi 5）では通していない
+  - 2026-09-28: 手順 4〜6 と、[ロールバック](#ロールバック)の手順 3〜5のブロックを `{ … }` で囲んだ
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
+    - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
 | 項目 | 実機 | コンテナ（GNOME の一式） | コンテナ（systemd） |
 |---|---|---|---|
