@@ -13,7 +13,7 @@
 - 手順の後: 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリがあれば、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)を行う。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **AlmaLinux 10 は x86_64 のコンテナでのみ検証した**。実機では本実行していない。**Windows 11 では試していない**（Git for Windows が `system` に書く値は、コンテナの `/etc/gitconfig` に置いて模擬した）。詳しくは[対象と検証環境](#対象と検証環境)。
+> **AlmaLinux 10 は x86_64 のコンテナでのみ検証した**。実機では本実行していない。**Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）。詳しくは[対象と検証環境](#対象と検証環境)。
 
 1. 変数を設定する（`GIT_USER_NAME` と `GIT_USER_EMAIL` は必ず値を入れる）。
 
@@ -91,6 +91,26 @@
    system	file:/etc/gitconfig	pull.rebase=false
    system	file:/etc/gitconfig	pull.ff=only
    system	file:/etc/gitconfig	init.defaultbranch=master
+   ```
+
+   - Windows 11 の PC（Git for Windows 2.55.0.windows.3）の Git Bash では、`system` の行が 13 行出た
+     - その PC のインストーラの選択では、改行は `core.autocrlf=false`（Checkout as-is, commit as-is）、`git pull` は `pull.rebase=true` で、`pull.ff` は無かった
+     - `global` の行は出ない（検証では `HOME` を使い捨てのディレクトリにした。[付録](#付録-windows-11-の-git-bash-での検証記録2026-09-30)）
+
+   ```
+   system	file:C:/Program Files/Git/etc/gitconfig	diff.astextplain.textconv=astextplain
+   system	file:C:/Program Files/Git/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+   system	file:C:/Program Files/Git/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+   system	file:C:/Program Files/Git/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+   system	file:C:/Program Files/Git/etc/gitconfig	filter.lfs.required=true
+   system	file:C:/Program Files/Git/etc/gitconfig	http.sslbackend=schannel
+   system	file:C:/Program Files/Git/etc/gitconfig	core.autocrlf=false
+   system	file:C:/Program Files/Git/etc/gitconfig	core.fscache=true
+   system	file:C:/Program Files/Git/etc/gitconfig	core.symlinks=true
+   system	file:C:/Program Files/Git/etc/gitconfig	pull.rebase=true
+   system	file:C:/Program Files/Git/etc/gitconfig	credential.helper=manager
+   system	file:C:/Program Files/Git/etc/gitconfig	credential.https://dev.azure.com.usehttppath=true
+   system	file:C:/Program Files/Git/etc/gitconfig	init.defaultbranch=master
    ```
 
    </details>
@@ -240,6 +260,9 @@
    pull.ff               system	only
    ```
 
+   - Windows 11 の Git Bash（使い捨ての `HOME`）でも、14 行が `global` になり、`pull.ff` は空だった（その PC の `system` に `pull.ff` が無いので、手順 8 は飛ばした）
+     - `system` の `init.defaultbranch=master` は、`global` の `main` で上書きされた
+
    </details>
 
 1. 手順 7 で `pull.ff` が `only` だったときだけ、`true` で上書きする。
@@ -322,6 +345,7 @@
    ```
 
    - `core.autocrlf=true`（Windows の既定）なら、`i/lf` で入る。`core.quotepath` が既定の `true` なら、`"\346\227\245\346\234\254\350\252\236.txt"` と出る
+   - Windows 11 の Git Bash でも、`?? 日本語.txt`・`i/crlf  w/crlf`・`main`・`branch 'main' set up to track 'origin/main'.` が出た（出力はパイプに出したので、進み具合の行は無い）
 
    </details>
 
@@ -373,6 +397,7 @@
    - `Created autostash` の後に `Rebasing (1/1)` が出て、`Applied autostash.` で上書きされる
    - 比べるために、`pull.rebase=false` で pull すると、`Merge made by the 'ort' strategy.` でマージコミットができ、`git log` が枝分かれした（端末ではマージのメッセージを書くエディタが開く）
    - `rebase.autoStash` が無いと、pull は `error: cannot pull with rebase: You have unstaged changes.` で止まった
+   - Windows 11 の Git Bash でも、`Created autostash` → `Applied autostash.` → `Successfully rebased and updated refs/heads/main.` の順に出て、履歴は 1 本、` M crlf.txt` が残った
 
    </details>
 
@@ -440,6 +465,7 @@
 
    - `git rm -r --cached .` で追跡を外してから `git reset --hard` すると、追跡しているファイルがすべて今の設定で書き直される。追跡していないファイルには触れない
    - 検証コンテナで、`git checkout-index --force --all` も試したが、ファイルは LF になったものの `git status` に `M` が残った
+   - Windows 11 の Git Bash でも、`git -c core.autocrlf=true clone` した 2 ファイルのリポジトリ（CRLF の 1 行を足した）で、この節の手順 1 が ` M y.txt` と `2`、手順 3 が `0` を出し、手順 4 の後は 2 つとも `w/lf` になった
 
    </details>
 
@@ -546,20 +572,27 @@
 
 - **目的**: AlmaLinux 10 と Windows 11 の git を、同じ `global` の設定にする。pull は rebase で autostash を有効にし、改行は変換しない（`core.autocrlf=false`）。ほかに推奨の設定を入れる
 - **進め方**: AlmaLinux 10 は AppStream の `git` を入れる。どちらの OS でも `git config --global` で書く。**読者が書き換えるのは手順 1 の 2 つの変数だけ**
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-29）。実機と Windows では本実行していない**
+- **状態**: **AlmaLinux 10 は x86_64 のコンテナでのみ検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）**
   - 下表の検証コンテナで、**この文書のコードブロックを抜き出したもの**を、一般ユーザーで手順 1〜11 → [改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す) → [ロールバック](#ロールバック)の順に流した
   - Windows の模擬として、`/etc/gitconfig` に Git for Windows のインストーラの選択で書かれうる値（`core.autocrlf=true` など 4 つ）を置いて、手順 1・3〜11 をもう 1 度流した
   - 確認したこと: 14 のキーが `global` で効く、`system` の値に勝つ、`pull.ff=only` が rebase を止め手順 8 で通る、CRLF のファイルが変換されずに入る、pull が rebase と autostash をする
-  - **確認していないこと**: Windows の Git Bash での実行、Git for Windows のインストーラが実際に書く値、aarch64、実機の既存の `~/.gitconfig` との組み合わせ
+  - 2026-09-30: 下表の Windows 11 の PC の Git Bash で、この文書のブロックを抜き出したものを流した（[付録](#付録-windows-11-の-git-bash-での検証記録2026-09-30)）
+    - `HOME` を使い捨てのディレクトリにしたので、`global` はそこに書かれた。その PC の `~/.gitconfig` は変えていない（前後で md5 が同じ）。`system` はインストーラが書いた本物
+    - 手順 1・3〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[ロールバック](#ロールバック)の手順 1〜3・5
+    - 確認したこと: インストーラが書いた `system` の値（手順 3 の補足）、`global` の場所（Git Bash・PowerShell・cmd で同じ）、日本語のファイル名がそのまま出ること、CRLF のファイルが変換されずに入ること、pull の rebase と autostash、`rerere` が覚えた解き方を当てること
+  - **確認していないこと**: AlmaLinux 10 の実機、aarch64、既存の `~/.gitconfig` との組み合わせ
+    - Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）。検証した PC は別の選択だった
+    - Git Bash の端末（mintty）に貼る操作そのもの（検証では、ブロックを 1 つのシェルで順に読み込んだ）
 
-| 項目 | 検証コンテナ | 実機（参考。未実施） | Windows 11 の PC（参考。未実施） |
+| 項目 | 検証コンテナ | Windows 11 の PC（Git Bash） | 実機（参考。未実施） |
 |---|---|---|---|
-| 実施日 | 2026-09-29 | — | — |
-| OS | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10`、Docker 29.3.1） | AlmaLinux 10.2 / aarch64（Raspberry Pi 5） | Windows 11 Pro 25H2 / x86_64 |
-| git | `git-2.52.0-1.el10`（AppStream） | `git 2.52.0`（AppStream） | Git for Windows 2.55.0.windows.3（`C:\Program Files\Git`） |
-| `~/.gitconfig` | 無し（手順 4〜6 で作った） | `[core] autocrlf` と `[user]` だけ（[git-delta.md](git-delta.md#対象と検証環境) の記録） | 未確認 |
+| 実施日 | 2026-09-29 | 2026-09-30 | — |
+| OS | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10`、Docker 29.3.1） | Windows 11 Pro 25H2（ビルド 26200）/ x86_64 | AlmaLinux 10.2 / aarch64（Raspberry Pi 5） |
+| git | `git-2.52.0-1.el10`（AppStream） | Git for Windows 2.55.0.windows.3（`C:\Program Files\Git`、GNU bash 5.3.15） | `git 2.52.0`（AppStream） |
+| `system` | 無し（Windows の模擬では 4 行を置いた） | インストーラが書いた 13 行（[手順 3](#実施手順) の補足） | — |
+| `~/.gitconfig` | 無し（手順 4〜6 で作った） | 使い捨ての `HOME` に作った（その PC の `~/.gitconfig` には書いていない） | `[core] autocrlf` と `[user]` だけ（[git-delta.md](git-delta.md#対象と検証環境) の記録） |
 
-- 実機と Windows の列は、この手順を適用した結果ではなく、ほかの手順書に残っている現時点の状態
+- 実機の列は、この手順を適用した結果ではなく、ほかの手順書に残っている現時点の状態
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -575,11 +608,11 @@
 
 ### 実施前の状態
 
-| 項目 | 検証コンテナ |
-|---|---|
-| git | 未導入（手順 2 で入れた） |
-| `/etc/gitconfig` | 無し（Windows の模擬では、2 回目の前に置いた） |
-| `~/.gitconfig` | 無し |
+| 項目 | 検証コンテナ | Windows 11 の PC |
+|---|---|---|
+| git | 未導入（手順 2 で入れた） | Git for Windows 2.55.0.windows.3 が入っていた |
+| `system`（AlmaLinux 10 は `/etc/gitconfig`） | 無し（Windows の模擬では、2 回目の前に置いた） | `C:/Program Files/Git/etc/gitconfig` に、インストーラが書いた 13 行（[手順 3](#実施手順) の補足） |
+| `~/.gitconfig` | 無し | その PC の `C:\Users\<WIN_USER>\.gitconfig` にはキーが 4 つあった（検証では使い捨ての `HOME` にしたので、読まれていない） |
 
 ### 選択した方針
 
@@ -591,7 +624,8 @@
   - Windows の `system` はインストーラが書く場所なので、そこを直さず `global` で上書きする
 - **Windows は Git Bash に同じ bash のブロックを貼る**
   - PowerShell 向けに書き分けない。git のコマンドは同じで、変数の書き方だけが違うため
-  - Git Bash のホームは `/c/Users/<WIN_USER>`（[windows-openssh-server.md](windows-openssh-server.md) の実測）なので、`global` は `C:\Users\<WIN_USER>\.gitconfig` に書かれるはず（未確認）
+  - Git Bash のホームは `/c/Users/<WIN_USER>`（[windows-openssh-server.md](windows-openssh-server.md) の実測）で、`global` は `C:/Users/<WIN_USER>/.gitconfig` だった
+    - Windows 11 の PC で、`git config --global --list --show-origin` の場所を見て確かめた（値は読んでいない）
 - **pull は `pull.rebase=true`**（依頼どおり）
   - `merges` はマージコミットを残すが、ふだんのブランチでマージコミットを作らないなら `true` で足りる
   - `pull.ff=only` は分岐したときに止まるだけで、rebase の方針と合わない
@@ -601,7 +635,7 @@
 
 ### 完了時点の状態
 
-**検証コンテナでの `~/.gitconfig`**（実機と Windows では本実行していない）:
+**検証コンテナでの `~/.gitconfig`**（Windows 11 の Git Bash の使い捨ての `HOME` でも、同じ中身だった。AlmaLinux 10 の実機では本実行していない）:
 
 ```
 [user]
@@ -646,7 +680,9 @@
 - **`rerere` は、覚えた解き方を黙って当てる**
   - 当てた後も `git add` はしないので、`git diff` で確かめてから add する
   - 間違った解き方を覚えたら、`git rerere forget <ファイル>` で忘れさせる
-- **Windows の PowerShell や cmd から呼ぶ git** も、同じ `global` を読むはず（未確認）
+- **Windows の PowerShell や cmd から呼ぶ git** も、同じ `global`（`C:/Users/<WIN_USER>/.gitconfig`）を読む
+  - Windows 11 の PC で、Git Bash・PowerShell・cmd の `git config --global --list --show-origin` が同じファイルを示した
+  - その PC では環境変数 `HOME` が `C:\Users\<WIN_USER>` に設定されていた。`HOME` の無い PC は試していない
 
 ### 参照
 
@@ -699,3 +735,53 @@ x86_64 のクラウドホストで `dockerd` を動かし、`docker run -d --net
 - aarch64 での実行
 - `rerere` が覚えた解き方を当てるところ
 - [更新](#更新)で新しい版に上がるところ（新しい版が無い状態で `sudo dnf upgrade git` を流しただけ）
+
+---
+
+### 付録: Windows 11 の Git Bash での検証記録（2026-09-30）
+
+前の付録の未確認事項のうち、Windows 11 の Git Bash での実行、`global` の置き場所、PowerShell・cmd から呼ぶ git、`rerere` を、次の PC で確かめた。
+
+**環境**:
+
+- Windows 11 Pro 25H2（ビルド 26200、日本語）/ x86_64 のノート PC（AMD Ryzen AI MAX+ 395）。[windows-openssh-server.md](windows-openssh-server.md) を通した PC と同じ
+- Git for Windows 2.55.0.windows.3（`C:\Program Files\Git`、GNU bash 5.3.15、`MSYSTEM=MINGW64`）
+- 流したのは Claude Code の Bash（Git for Windows の bash）。端末（mintty）ではなく、出力はパイプに出た
+
+**流し方**:
+
+- この文書の `bash` のブロックを機械的に抜き出し（リストの字下げだけ外す）、1 つのスクリプトから順に `.`（source）で読み込んだ。同じシェルに貼り続けたときと同じく、変数は残る
+- スクリプトの先頭で `export HOME=$(mktemp -d /tmp/gitmd-home.XXXXXX)` とした
+  - `global` はそこの `.gitconfig` に書かれ、その PC の `~/.gitconfig` は変わらなかった（前後の md5 が同じ）
+  - `system` は、インストーラが書いた本物（`C:/Program Files/Git/etc/gitconfig`）を読んだ
+- 書き換えたのは手順 1 の 2 つの値（`Test User` / `test@example.com`）だけ
+- 手順 2 は Windows なので飛ばした。手順 8 は、手順 7 の `pull.ff` が空なので飛ばした
+- 改行を直す節の前に、手順書の外で、LF の 2 ファイルのリポジトリを `git -c core.autocrlf=true clone` し、CRLF の 1 行を足した（前の付録と同じ作り方）
+
+| 手順 | 結果 |
+|---|---|
+| 1 | `GIT_USER_NAME  = Test User`、`GIT_USER_EMAIL = test@example.com` |
+| 3 | `git version 2.55.0.windows.3`。`system` の 13 行（[手順 3](#実施手順) の補足）。`global` の行は無い |
+| 4 | `user.name Test User`、`user.email test@example.com` |
+| 5・6 | 何も出ない |
+| 7 | 14 行が `global`、`pull.ff` は空 |
+| 9 | `?? a.txt`・`?? crlf.txt`・`?? 日本語.txt`、`i/crlf  w/crlf  attr/  crlf.txt`、`main`、`* [new branch]      main -> main` と `branch 'main' set up to track 'origin/main'.` |
+| 10 | `Created autostash: <HASH>`、`Rebasing (1/1)Applied autostash.`（パイプでは同じ行に続く）、`Successfully rebased and updated refs/heads/main.`。`git log` は `b: b.txt` → `a: 2` → `first` の 1 本で、` M crlf.txt` が残った |
+| 11 | 何も出ない |
+| 改行を直す 1〜4 | 手順 1 は ` M y.txt` と `2`、手順 2 は `Saved working directory and index state WIP on main: <HASH> init`、手順 3 は `0` で `git status --short` は空、手順 4 は `modified:   y.txt` と `Dropped refs/stash@{0}`。2 つのファイルは `i/lf    w/lf` になり、差分は足した 1 行だけ（CR は付かない） |
+| ロールバック 1〜3・5 | 何も出ない。使い捨ての `HOME` の `.gitconfig` は 0 バイトになった |
+
+**手順書の外で確かめたこと**:
+
+| 確認 | 結果 |
+|---|---|
+| `global` の場所 | Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が、どれも `file:C:/Users/<WIN_USER>/.gitconfig` を示した（場所とキーの数だけを見て、値は読んでいない）。その PC では、PowerShell の `git` は `C:\Program Files\Git\mingw64\bin\git.exe`、環境変数 `HOME` は `C:\Users\<WIN_USER>` だった |
+| `rerere` | 使い捨ての `HOME` で `rerere.enabled=true`・`merge.conflictStyle=zdiff3` にし、同じ衝突を 2 回起こした。1 回目は `Recorded preimage for 'f'`、解いてコミットすると `Recorded resolution for 'f'.`。2 回目は `Resolved 'f' using previous resolution.` で、ファイルは解いた中身になり、`git status --short` は `UU f` のまま（`git add` はされない） |
+| `zdiff3` | 衝突の表示に、共通の祖先の段（`\|\|\|\|\|\|\| <HASH>` の後に元の行）が出た |
+
+#### 未確認事項
+
+- AlmaLinux 10 の実機での本実行と、既存の `~/.gitconfig`（`[core] autocrlf` がある）との組み合わせ
+- Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）と、`git pull` の「Only ever fast-forward」で書かれる `pull.ff=only`
+- Git Bash の端末（mintty）に貼る操作そのもの、環境変数 `HOME` の無い Windows の PC
+- aarch64 での実行、[更新](#更新)で新しい版に上がるところ

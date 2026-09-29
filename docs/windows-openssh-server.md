@@ -247,6 +247,7 @@
    - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。手順 10 の指紋と同じなら `yes`
    - 鍵にパスフレーズを付けたなら、それを聞かれる
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
+     - [既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<win_user>` だけを出す
    - `exit` でクライアントのシェルに戻る
    - **次の手順は、`exit` でクライアントのシェルに戻ってから貼る**（続けて貼ると Windows の cmd への入力として食われる）
 
@@ -270,6 +271,7 @@
 
    - 1 つ目は、パスワードを聞かずに `<WIN_USER>@<WIN_HOST>: Permission denied (publickey,keyboard-interactive).` で失敗すればよい
    - 2 つ目は、`<hostname>\<win_user>` が出ればよい（パスフレーズを付けたなら、それを聞かれる）
+     - 既定のシェルを Git Bash にした後は、`<win_user>` だけが出る（手順 12 と同じ）
 
 ---
 
@@ -475,12 +477,15 @@
     - SSH のセッションで scoop のツールが起動しない原因（sshd の RedirectionGuard）と、ジャンクションを管理者で作り直すと起動すること（scoop の任意節。一般ユーザーで作り直して壊した状態から、この文書のブロックで直した）
     - ロールバックの後に残るもの（`C:\ProgramData\ssh` とレジストリのキー）と、消した後に入れ直せること
     - 変数が空のとき・PowerShell 7 で貼ったときに、手順 5・8・13 とロールバックの手順 4 が何も変えずに止まること
+  - 2026-09-30: 同じ PC で、次の 2 つを追加で確かめた（[付録](#付録-追加の確認2026-09-30)）。Windows の設定は変えていない
+    - Windows の再起動の後に、sshd が自動で起動すること（2 回の起動のどちらも、起動の 30〜40 秒後に待ち受けを始めていた）
+    - LAN の別の IP からの接続: 同じ PC の VirtualBox の VM を LAN にブリッジ接続し、ルーターの DHCP で別の IP を受け取った AlmaLinux 10.2 をクライアントにして、手順 11〜13、Git Bash と scoop の任意節の手順 2、ロールバックの手順 4 を流した
   - **確認していないこと**:
-    - LAN の別の PC からの接続（WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](#注意点)）
+    - LAN の別の PC（実機）からの接続（同じ PC の VM から、LAN の別の IP で確かめた）
     - 端末に貼る操作そのもの（PowerShell の PSReadLine での複数行の貼り付け、bash の対話の入力）
     - 手順 1 で鍵を新しく作ること（WSL に前からあったパスフレーズ無しの鍵を使った）と、パスフレーズ付きの鍵
     - 標準ユーザーでのログイン、パスワードでのログイン、既定の UAC の設定での振る舞い
-    - Windows の再起動の後に sshd が自動で起動すること、Windows Update での OpenSSH の更新
+    - Windows Update での OpenSSH の更新
   - 実測の記録は[付録](#付録-実機での検証記録2026-09-29)
 
 下表は実機で採取した値。
@@ -725,3 +730,50 @@ d----        logs
 1. 既定の UAC の設定で、SSH のセッションが High Mandatory Level になるか
 1. Windows の再起動の後に sshd が自動で起動するか、Windows Update での OpenSSH の更新
 1. `scoop update` の後に、更新したアプリが SSH のセッションで起動しなくなり、scoop の任意節の手順 1 で直ること（理屈の上ではそうなるが、実際の更新では試していない）
+
+---
+
+### 付録: 追加の確認（2026-09-30）
+
+前の付録の「残っている未確認事項」のうち、1（LAN の別の IP からの接続）と 6 の前半（再起動の後の自動起動）を、同じ PC で確かめた。Windows の設定（`sshd_config`・登録した鍵・規則・ネットワークのプロファイル）は変えていない。
+
+**再起動の後の自動起動**:
+
+- 手順を通した後（2026-09-29 の 13:40）に、Windows は 2 回起動し直していた（システムのイベント ログの `Microsoft-Windows-Kernel-General` の ID 12 で、2026-09-30 の 1:29:00 と 1:43:45）
+- `OpenSSH/Operational` の `sshd: Server listening on 0.0.0.0 port 22.` と `sshd: Server listening on :: port 22.` が、1:29:41 と 1:44:18 にあった（起動の 41 秒後と 33 秒後。手では起動していない）
+- `Get-Service sshd` は `Running`・`Automatic` で、WSL の AlmaLinux 10 から `<WIN_HOST>` に鍵でログインでき、Git Bash のセッションになった
+- 管理者でない PowerShell からは、sshd のプロセスの開始時刻と `C:\ProgramData\ssh\ssh_host_ed25519_key.pub` は読めなかった（`ssh-keygen -lf` は `Permission denied`）。`OpenSSH/Operational` とシステムのイベント ログは読めた
+
+**LAN の別の IP からの接続**:
+
+- クライアント: 同じ PC の VirtualBox 7.2.20 の VM の AlmaLinux 10.2（Atomic Desktop、`openssh-clients-9.9p1`。[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)の VM）
+  - VM のネットワークを、動かしたまま NAT から有線 LAN のアダプターへのブリッジ接続に切り替えた（`VBoxManage controlvm <VM> nic1 bridged <アダプター>`）
+  - VM の NetworkManager が DHCP で取り直し、ルーターから `<VM_IP>`（`<WIN_HOST>` と同じサブネットの別の IP）を受け取った
+- 鍵: VM に秘密鍵を置かず、WSL の `ssh-agent` に前からの鍵（`administrators_authorized_keys` に登録済み）を載せ、WSL から VM へエージェントを転送して入った
+  - VM の `~/.ssh` には鍵が無いので、手順 12 などの ssh は、転送されたエージェントの鍵で認証される
+- 流し方: WSL の tmux の擬似端末から VM に入り、この文書の `bash` のブロックを抜き出したものを、ブラケットペーストで貼った
+  - 手順 11 は、`WIN_HOST=` の後ろを書き換えた。`WIN_USER` は、VM のユーザー名が Windows と違うので、手順 11 の箇条書きのとおり `<WIN_USER>` に直した
+- この PC は、Git Bash の任意節（`DefaultShell`）と scoop の任意節を通した状態だった
+
+| 手順 | 結果 |
+|---|---|
+| 11 | `WIN_HOST = <WIN_HOST>`、`WIN_USER = <WIN_USER>` |
+| 12 | `ED25519 key fingerprint is SHA256:<指紋>.`（WSL の `ssh-keyscan -t ed25519 <WIN_HOST> \| ssh-keygen -lf -` と一致）→ `yes` → `<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプト。`whoami` は `<win_user>`、`echo "$SSH_CONNECTION"` は `<VM_IP> <PORT> <WIN_HOST> 22` |
+| 13 | パスワードを聞かずに `<WIN_USER>@<WIN_HOST>: Permission denied (publickey,keyboard-interactive).`、2 つ目は `<win_user>` |
+| Git Bash の任意節 2 | `5.3.15(1)-release MINGW64`、`git version 2.55.0.windows.3`、対話のプロンプト → `exit` |
+| scoop の任意節 2 | `zoxide 0.9.9`（`Shim:` の行は無い） |
+| ロールバック 4 | `# Host <WIN_HOST> found: line 1`〜`3`（ED25519・RSA・ECDSA。ssh がログインの後にほかのホスト鍵も `known_hosts` に足していた）、`… known_hosts updated.`、`Original contents retained as …/known_hosts.old` |
+
+- Windows の `OpenSSH/Operational` には、`sshd: Accepted publickey for <WIN_USER> from <VM_IP> port <PORT> ssh2: ED25519 SHA256:…` が残った（送信元は、この PC の LAN の IP ではなく、VM の IP）
+- LAN の接続はプライベートのままで、規則 `OpenSSH-Server-In-TCP`（プライベート）で通った
+- 終わった後に、VM を NAT に戻し、WSL の `ssh-agent` を止めた
+
+**残っている未確認事項**:
+
+1. LAN の別の PC（実機）からの接続（今回は同じ PC の VM から確かめただけ）
+1. 端末に貼る操作そのもの（Windows PowerShell 5.1 の PSReadLine での複数行の貼り付け、`if … else` のブロック）
+1. パスフレーズ付きの鍵と、手順 1 で鍵を新しく作る流れ
+1. 標準ユーザーの `authorized_keys`、パスワード（Microsoft アカウント）でのログイン
+1. 既定の UAC の設定で、SSH のセッションが High Mandatory Level になるか
+1. Windows Update での OpenSSH の更新
+1. `scoop update` の後に、更新したアプリが SSH のセッションで起動しなくなり、scoop の任意節の手順 1 で直ること

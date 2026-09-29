@@ -229,6 +229,7 @@
 
 - VirtualBox は x86_64 だけ。[EPEL](docs/epel.md)・モジュールのビルドの道具・（Secure Boot が有効なら）MOK の登録を先に用意する。EL10 のカーネルでは KVM と同時に動かない
 - ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
+  - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
