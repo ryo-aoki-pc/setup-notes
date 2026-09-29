@@ -4,10 +4,10 @@
 
 > [!IMPORTANT]
 > - **VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いて自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **dnf では入れない**。Guest Additions を焼き込んだ派生イメージをこの VM でビルドし、`bootc switch` で切り替える（手順 5〜8）
-> - **手順 5 の後に、VM のウィンドウのメニューで Guest Additions の CD を入れる**（ホスト側の操作。手順 5 の箇条書き）
-> - **手順 8 で再起動する**。Secure Boot が有効なら、起動の途中の MokManager の画面を VM のウィンドウで操作する（最初の画面は 10 秒で消える）
-> - **手順 4 には対話入力（一時パスワード）がある**。手順 7 はビルドが終わるのを待ってから次を貼る
+> - **dnf では入れない**。Guest Additions を焼き込んだ派生イメージをこの VM でビルドし、`bootc switch` で切り替える（手順 5〜9）
+> - **手順 6 と手順 12 は、VM のウィンドウで行う**（手順 6 の CD の挿入は、ホスト側の操作）
+> - **手順 9 で再起動する**。Secure Boot が有効なら、手順 10 で起動の途中の MokManager の画面を VM のウィンドウで操作する（最初の画面は 10 秒で消える）
+> - **手順 4 には対話入力（一時パスワード）がある**。手順 8 はビルドが終わるのを待ってから次を貼る
 
 - 手順 1 の変数を設定したシェルで、上から順にコードブロックを貼る。新しい端末を開いたら手順 1 を貼り直す
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -24,7 +24,7 @@
 
    - 公式の ISO で入れた Atomic Desktop の GNOME なら、このままでよい（ISO は `:latest` を追う。この手順の補足）
    - KDE なら `quay.io/almalinuxorg/atomic-desktop-kde:latest` のように、手順 2 の `Booted image:` に合わせて変える（本書では GNOME だけを検証した）
-   - 手順 7、[更新](#更新)、[ロールバック](#ロールバック)で使う
+   - 手順 8、[更新](#更新)、[ロールバック](#ロールバック)で使う
 
    <details>
    <summary>補足: 既定を <code>:latest</code> にしている理由</summary>
@@ -46,7 +46,7 @@
    ```
 
    - 1 行目が `oracle`（VirtualBox）ならよい
-   - `/var` の `Avail` が 10 GB 以上あればよい（手順 7 でベースのイメージをもう 1 つ取り込むため。この手順の補足）
+   - `/var` の `Avail` が 10 GB 以上あればよい（手順 8 でベースのイメージをもう 1 つ取り込むため。この手順の補足）
    - `● Booted image:` が手順 1 の `BASE_IMAGE` と同じならよい。違えば手順 1 を直して貼り直す
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -62,8 +62,8 @@
 
    **VM での実測**（80 GB のディスクに ISO の既定のパーティション）:
 
-   - `/var` は 47G で、使用量は ISO で入れた直後が 5.7G、手順 7 の後が 11G、[ロールバック](#ロールバック)の後が 6.1G だった
-   - 手順 7 の後の内訳は、`/var/lib/containers` が 5.2G、`/sysroot/ostree/repo` が 4.5G
+   - `/var` は 47G で、使用量は ISO で入れた直後が 5.7G、手順 8 の後が 11G、[ロールバック](#ロールバック)の後が 6.1G だった
+   - 手順 8 の後の内訳は、`/var/lib/containers` が 5.2G、`/sysroot/ostree/repo` が 4.5G
 
    **`systemd-detect-virt`**: VM では `oracle` だった（`systemd-detect-virt --list` にある名前）。検証コンテナでは `podman` を返した。
 
@@ -87,9 +87,9 @@
    mokutil --sb-state
    ```
 
-   - `SecureBoot enabled` のときだけ、手順 4 でモジュールの署名鍵を用意し、手順 10 で登録を確かめる
+   - `SecureBoot enabled` のときだけ、手順 4 でモジュールの署名鍵を用意し、手順 13 で登録を確かめる
    - 以前に手順 4 を済ませている（`/var/lib/shim-signed/mok/MOK.der` がある）なら、手順 4 は飛ばす（鍵を作り直すと、登録済みの鍵と合わなくなる）
-   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、手順 4 と手順 10 は飛ばす**
+   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、手順 4・10・13 は飛ばす**
 
    <details>
    <summary>補足: Secure Boot とモジュールの署名</summary>
@@ -98,7 +98,7 @@
    - VM で Secure Boot が有効になるのは、VM の設定の「システム」→「マザーボード」で「UEFI」と「セキュアブート」を有効にしている場合（英語の表示では System → Motherboard の UEFI と Secure Boot）
    - Guest Additions のインストーラは、Secure Boot なら自分でモジュールに署名する処理を持つ
      - ただし判定は `mokutil --sb-state` の答えだけで、ビルドの中（コンテナ）では `EFI variables are not supported on this system` になるので署名しない
-     - そのため、手順 7 のビルドで鍵を渡して署名する
+     - そのため、手順 8 のビルドで鍵を渡して署名する
 
    </details>
 
@@ -116,7 +116,7 @@
    - 鍵を作る間は `.....+++` のような行が流れる
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）ができる
    - 最後の `mokutil --import` で、公開鍵を UEFI の MOK に登録する予約をする
-   - **一時パスワードを 2 回聞かれる**（手順 8 の再起動の途中で 1 回だけ使う。本書には残さない）
+   - **一時パスワードを 2 回聞かれる**（手順 10 の MokManager で 1 回だけ使う。本書には残さない）
    - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -124,10 +124,10 @@
 
    - 置き場所とファイル名は、ホスト側の [virtualbox.md 手順 12](virtualbox.md#実施手順) と同じ。Guest Additions の起動スクリプト（`vboxadd`）も、この 2 つを決め打ちで見る
    - bootc でも `/var` は再起動や `bootc switch` をまたいで残る（イメージから上書きされない）
-   - 鍵はイメージに入れない。手順 7 のビルドに `--secret` で渡し、ビルドの中の `sign-file`（kernel-devel）がモジュールに署名する
+   - 鍵はイメージに入れない。手順 8 のビルドに `--secret` で渡し、ビルドの中の `sign-file`（kernel-devel）がモジュールに署名する
    - 証明書は `CA:TRUE` と `Code Signing` を持つ（検証で `openssl x509` で確認）
    - VM では、登録した鍵は `.platform` のキーリングに入り、`.machine` には入らなかった（`sudo keyctl list %:.platform`。理由は virtualbox.md 手順 12 の補足）
-   - **鍵を作り直したら**、手順 7 のビルドに `--no-cache` を足す（[更新](#更新)）
+   - **鍵を作り直したら**、手順 8 のビルドに `--no-cache` を足す（[更新](#更新)）
    - `MOK.priv` は、この VM が信頼するモジュールを作れる鍵になる。root 以外に読ませず、ほかのマシンに持ち出さない
 
    </details>
@@ -214,10 +214,6 @@
 
    - ヒアドキュメントは `<<'EOF'`（クォート付き）。`${...}` はシェルではなく、ビルドの中で展開される
    - `Containerfile` の 1 行が出ればよい
-   - 続けて、**VM のウィンドウのメニューの「デバイス」→「Guest Additions CD イメージを挿入」を選ぶ**（英語の表示では Devices → Insert Guest Additions CD image...）
-     - VirtualBox のホスト側の操作。ホストの VirtualBox に同梱の ISO が、VM の光学ドライブに入る
-   - CD は自動でマウントされるが、GNOME の画面には何も出ない（自動実行の確認も、デスクトップのアイコンも出ない。この手順の補足）
-   - **次の手順は、CD を入れて 10 秒ほどたってから貼る**
 
    <details>
    <summary>補足: Containerfile がしていること</summary>
@@ -236,7 +232,7 @@
    - `bootc container lint` は、直す前は `sysusers`・`var-log`・`var-tmpfiles` の 3 つを警告した。直した後は `Checks passed: 13`（ベースのイメージと同じ）になる
    - インストーラの終了コードは、ビルドの中では 0 にならない（最後にモジュールが読み込まれているかを見るため）。成否は、2 つのモジュールがあるかで判定している
    - インストーラが `/var` に残すログと dnf のキャッシュも消している（残すと `var-log`・`var-tmpfiles` の警告になる）
-   - 先頭の `ARG BASE_IMAGE` の既定値（`:10`）は、手順 7 の `--build-arg` で上書きされるので使われない
+   - 先頭の `ARG BASE_IMAGE` の既定値（`:10`）は、手順 8 の `--build-arg` で上書きされるので使われない
 
    **`libXt` を入れる**（VM での実測）:
 
@@ -267,9 +263,16 @@
 
    - 自動実行の確認は出ない。EL10 の `gsettings-desktop-schemas`（47.1-4.el10）は `org.gnome.desktop.media-handling` の `autorun-never` の既定が `true`
    - デスクトップにアイコンも出ない（有効な拡張は `background-logo@fedorahosted.org` だけで、デスクトップのアイコンの拡張が無い）
-   - CD を入れてから 10 秒ほど後に確かめると、`/run/media/<USER>/VBox_GAs_7.2.20` にマウントされていた（手順 6 の補足）
+   - CD を入れてから 10 秒ほど後に確かめると、`/run/media/<USER>/VBox_GAs_7.2.20` にマウントされていた（手順 7 の補足）
 
    </details>
+
+1. VM のウィンドウのメニューで、Guest Additions の CD を入れる。
+
+   - 「デバイス」→「Guest Additions CD イメージを挿入」を選ぶ（英語の表示では Devices → Insert Guest Additions CD image...）
+   - VirtualBox のホスト側の操作。ホストの VirtualBox に同梱の ISO が、VM の光学ドライブに入る
+   - CD は自動でマウントされるが、GNOME の画面には何も出ない（自動実行の確認も、デスクトップのアイコンも出ない。手順 5 の補足）
+   - **次の手順は、CD を入れて 10 秒ほどたってから貼る**
 
 1. CD からインストーラをコピーし、壊れていないかと版を確かめる。
 
@@ -373,11 +376,8 @@
    ```
 
    - イメージを取り込んだあと、そのまま再起動する（`--apply`）
-   - Secure Boot なら、起動の途中で青い **MokManager** の画面が出る
-     - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す
-     - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
-   - **MokManager で何もしないで進むと、鍵は登録されず、モジュールが読み込まれない**。そのときは手順 4 の最後の `sudo mokutil --import ...` を貼り直してから再起動する
-   - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
+   - Secure Boot なら、起動の途中で青い **MokManager** の画面が出る（手順 10）
+   - **Secure Boot が無効なら、手順 10 は飛ばし、起動したらログインして新しい端末を開いてから手順 11 を貼る**
 
    <details>
    <summary>補足: 切り替えで起きること</summary>
@@ -407,6 +407,14 @@
 
    </details>
 
+1. Secure Boot が有効なときだけ、起動の途中の MokManager で鍵を登録する。
+
+   - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す
+   - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
+   - **MokManager で何もしないで進むと、鍵は登録されず、モジュールが読み込まれない**。そのときは手順 4 の最後の `sudo mokutil --import ...` を貼り直してから再起動する
+   - 画面の並びは、手順 9 の補足
+   - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
+
 1. Guest Additions が動いているか確かめる。
 
    ```bash
@@ -419,18 +427,14 @@
    - `vboxguest` の行と、`active` が 2 行出ればよい（`vboxsf` は、共有フォルダーを足すまで読み込まれない）
    - `pgrep` に `/usr/bin/VBoxClient --clipboard`・`--vmsvga-session` などが並べばよい（GNOME にログインしたときに自動で起動する）
    - `● Booted image: containers-storage:localhost/vbox-ga:latest` ならよい
-   - VM のウィンドウのメニューの「デバイス」→「クリップボードの共有」→「双方向」にし、ホストとの間でコピー・貼り付けを試す（英語の表示では Devices → Shared Clipboard → Bidirectional）
-   - ウィンドウの大きさを変えると、画面の解像度が追従する
-     - VM の設定のグラフィックコントローラが VMSVGA で、メニューの「表示」→「ゲストOSの画面を自動リサイズ」が有効な場合（英語の表示では View → Auto-resize Guest Display）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 動かないとき</summary>
 
    | 出るもの | 意味 | 対処 |
    |---|---|---|
-   | `lsmod` に何も出ず、`systemctl is-active vboxadd` が `failed` | モジュールを読み込めていない | `journalctl -b -u vboxadd` と `sudo dmesg \| grep -i vbox` を見る。Secure Boot なら手順 10 |
-   | `Loading of module with unavailable key is rejected`（`sudo dmesg`） | Secure Boot で、署名の鍵が登録されていない | 手順 10 で鍵が登録されているか見る。登録できていなければ手順 8 の箇条書き |
+   | `lsmod` に何も出ず、`systemctl is-active vboxadd` が `failed` | モジュールを読み込めていない | `journalctl -b -u vboxadd` と `sudo dmesg \| grep -i vbox` を見る。Secure Boot なら手順 13 |
+   | `Loading of module with unavailable key is rejected`（`sudo dmesg`） | Secure Boot で、署名の鍵が登録されていない | 手順 13 で鍵が登録されているか見る。登録できていなければ手順 10 の箇条書き |
    | `Configuration file /var/lib/VBoxGuestAdditions/config not found`（`journalctl -b -u vboxadd`） | 起動時のリンクが張られていない | `sudo systemd-tmpfiles --create --prefix=/var/lib/VBoxGuestAdditions` の後に `sudo systemctl restart vboxadd vboxadd-service` |
    | `vboxclient.desktop[...]: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable`（`journalctl --user -b`） | ログインした時点で `/dev/vboxguest` が無かった。`VBoxClient-all` が出そうとした通知も、出せずに終わった | モジュールを直してから、ログインし直す |
    | `coredumpctl list` に `/usr/bin/VBoxClient` が 5 秒ごとに並ぶ（`SIGTRAP`） | `libXt` の無いイメージで、`VBoxClient --clipboard` が落ち続けている（手順 5 の補足） | 手順 5 の Containerfile（`libXt` の行がある版）を置き直し、[更新](#更新)の手順 2・3 を行う |
@@ -449,6 +453,13 @@
 
    </details>
 
+1. VM のウィンドウで、クリップボードの共有と画面の大きさの追従を試す。
+
+   - メニューの「デバイス」→「クリップボードの共有」→「双方向」にし、ホストとの間でコピー・貼り付けを試す（英語の表示では Devices → Shared Clipboard → Bidirectional）
+   - ウィンドウの大きさを変えると、画面の解像度が追従する
+     - VM の設定のグラフィックコントローラが VMSVGA で、メニューの「表示」→「ゲストOSの画面を自動リサイズ」が有効な場合（英語の表示では View → Auto-resize Guest Display）
+   - **次の手順は、手順 11 の `sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
 1. Secure Boot が有効なときだけ、鍵が登録されたかとモジュールの署名を見る。
 
    ```bash
@@ -459,17 +470,21 @@
    ```
 
    - `/var/lib/shim-signed/mok/MOK.der is already enrolled` と `VirtualBox Guest Additions module signing key` が出ればよい
-   - `is not enrolled` なら、手順 8 の MokManager で登録できていない（手順 8 の箇条書き）
+   - `is not enrolled` なら、手順 10 の MokManager で登録できていない（手順 10 の箇条書き）
 
 ---
 
 ## 共有フォルダーを使う（任意）
 
-- ホストの VirtualBox で、VM の設定の「共有フォルダー」にフォルダーを足し、「自動マウント」にチェックを入れる（英語の表示では Shared Folders と Auto-mount。VM を動かしたままでも足せる）
-  - 検証では、動いている VM に `VBoxManage sharedfolder add --automount --transient` で足した。`--transient` が無いと、`VBoxManage` は `is already locked for a session` で断った
-- 足すと、VM の中で `vboxsf` のモジュールが読み込まれ、フォルダーが `/media/sf_<名前>` に自動でマウントされる
+- 共有フォルダーを足すと、VM の中で `vboxsf` のモジュールが読み込まれ、フォルダーが `/media/sf_<名前>` に自動でマウントされる
   - `findmnt` の表示は `/run/media/sf_<名前>`（Atomic Desktop では `/media` が `run/media` へのリンク）
 - 読み書きできるのは `vboxsf` グループのユーザーだけ（入る前は `Permission denied` になった）
+
+1. ホストの VirtualBox で、VM の設定の「共有フォルダー」にフォルダーを足す。
+
+   - 「自動マウント」にチェックを入れる（英語の表示では Shared Folders と Auto-mount）
+   - VM を動かしたままでも足せる
+   - 検証では、動いている VM に `VBoxManage sharedfolder add --automount --transient` で足した。`--transient` が無いと、`VBoxManage` は `is already locked for a session` で断った
 
 1. 自分を `vboxsf` グループに入れる。
 
@@ -478,8 +493,11 @@
    ```
 
    - `vboxsf` グループは、切り替えた後の最初の起動で `systemd-sysusers` が作っている
-   - **効くのはログインし直してから**。ログアウトしてログインし直す
-   - **次の手順は、ログインし直し、新しい端末を開いてから貼る**
+   - **効くのはログインし直してから**（この節の手順 3）
+
+1. GNOME からログアウトして、ログインし直す。
+
+   - **次の手順は、新しい端末を開いてから貼る**
 
 1. グループと共有フォルダーを確かめる。
 
@@ -502,12 +520,12 @@
 - Secure Boot の鍵を作り直したときは、この節の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
 
-1. ホストの VirtualBox を上げたときだけ、CD を入れ直して [手順 6](#実施手順) を貼る。
+1. ホストの VirtualBox を上げたときだけ、CD を入れ直して [手順 7](#実施手順) を貼る。
 
    - VM のウィンドウのメニューの「デバイス」→「Guest Additions CD イメージを挿入」（英語の表示では Devices → Insert Guest Additions CD image...）で、新しい版の CD を入れる
-   - [手順 6](#実施手順) の `Identification:` が、ホストの新しい版になっていればよい
+   - [手順 7](#実施手順) の `Identification:` が、ホストの新しい版になっていればよい
 
-1. 手順 1 の変数を設定したシェルで、[手順 7](#実施手順) を貼り直す。
+1. 手順 1 の変数を設定したシェルで、[手順 8](#実施手順) を貼り直す。
 
    - `--pull=newer` なので、ベースが新しくなっていれば取り込み直す
    - 何も変わっていなければ、ビルドのキャッシュが使われて同じイメージになる（`Using cache` が 4 行並び、最後のイメージ ID が同じ）
@@ -522,7 +540,7 @@
 
    - イメージが変わっていれば、`Queued for next boot:` と入れ替わった層の数を出してから再起動する
    - 変わっていなければ、`No changes in ...` と `No update available.` を出して、再起動しない
-   - 起動したら、[手順 9](#実施手順) で確かめる
+   - 起動したら、[手順 11・12](#実施手順) で確かめる
 
 ---
 
@@ -609,14 +627,14 @@
   - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop のときだけ変える）
 - **状態**: **VirtualBox の VM で本実行済み（2026-09-29）**。その前に x86_64 のコンテナで検証した（2026-09-28）
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
-    - 手順 1〜10、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[更新](#更新)の手順 2・3、[ロールバック](#ロールバック)の手順 1〜3
+    - 手順 1〜13、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[更新](#更新)の手順 2・3、[ロールバック](#ロールバック)の手順 1〜3
     - VM はホストの x86_64 の実機の VirtualBox 7.2.20 で動かし、公式の ISO で入れた。VM の Secure Boot は有効
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・共有フォルダーの追加・画面の大きさ）は、同じ働きの `VBoxManage` で行った
   - VM で見つかって直したこと:
     - `BASE_IMAGE` の既定を `:10` から `:latest` にした（ISO は `:latest` を追う。手順 1）
     - Containerfile に `libXt` を足した（無いと `VBoxClient --clipboard` が落ち続け、クリップボードの共有が動かない。手順 5）
     - [ロールバック](#ロールバック)の手順 1 から `--enforce-container-sigpolicy` を外した（Atomic Desktop の `policy.json` では取り込みを断られる）
-    - 手順 5 の CD の合図（GNOME は何も表示しない）、手順 8 の MokManager の最初の画面（10 秒）、手順 9 の `vboxsf` と失敗したときの表、メニューの名前（日本語の表示の 2 か所と、英語の表示）
+    - 手順 6 の CD の合図（GNOME は何も表示しない）、手順 10 の MokManager の最初の画面（10 秒）、手順 11 の `vboxsf` と失敗したときの表、メニューの名前（日本語の表示の 2 か所と、英語の表示）
   - 確認したこと:
     - `bootc switch`、`bootc upgrade`（イメージが変わったときと、変わらないときの両方）、`bootc rollback`
     - MokManager での鍵の登録と削除。登録を見送ったときの失敗のしかた
@@ -627,7 +645,7 @@
   - コンテナでの検証（2026-09-28。[付録](#付録-コンテナでの検証記録2026-09-28)）: Atomic Desktop のイメージそのものを VM の代役にし、中の podman にコードブロックを貼った
     - 確かめたのは、派生イメージのビルド（モジュールのビルドと署名、`bootc container lint`）と、切り替えた後の最初の起動を systemd を PID 1 にしたコンテナで模した結果
     - このとき実機の設定は変えていない（`sudo` を使わず、rootless の podman だけ）
-  - 2026-09-28: 手順 4・10 と、[ロールバック](#ロールバック)の手順 3のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 4・13 と、[ロールバック](#ロールバック)の手順 3のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は、2026-09-29 に VM で流した（ブラケットペーストの効く端末で）
 
@@ -698,7 +716,7 @@ Guest Additions の入手元とビルドの場所:
 
 ### 完了時点の状態
 
-**手順 7 で作ったイメージの中身**（Secure Boot のとき。代役のコンテナで作ったイメージを、実機の rootless の podman に読み込んで見た。VM では `podman` に `sudo` を付ける）:
+**手順 8 で作ったイメージの中身**（Secure Boot のとき。代役のコンテナで作ったイメージを、実機の rootless の podman に読み込んで見た。VM では `podman` に `sudo` を付ける）:
 
 ```
 $ podman images localhost/vbox-ga
@@ -730,7 +748,7 @@ g vboxdrmipc -
 - udev のルールは `KERNEL=="vboxguest", OWNER="vboxadd", MODE="0660"` と `KERNEL=="vboxuser", OWNER="vboxadd", MODE="0666"`
 - `/etc/selinux/targeted/contexts/files/file_contexts.local` に `mount.vboxsf` の `mount_exec_t` が入り、`matchpathcon` もそう答える
 
-**VM での状態**（手順 10 の後。`lsmod` から `pgrep -a VBoxClient` までは、`libXt` を足した版へ[更新](#更新)した後のもの。`pgrep -a VBoxService` から下は手順書の外のコマンドで、更新の前に見た）:
+**VM での状態**（手順 13 の後。`lsmod` から `pgrep -a VBoxClient` までは、`libXt` を足した版へ[更新](#更新)した後のもの。`pgrep -a VBoxService` から下は手順書の外のコマンドで、更新の前に見た）:
 
 ```
 $ lsmod | grep -E '^vbox'
@@ -760,14 +778,14 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 
 ### 注意点
 
-- **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[手順 5〜8](#実施手順)）
+- **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[手順 5〜9](#実施手順)）
 - **公式の ISO で入れた VM は `:latest` を追う**: `BASE_IMAGE` の既定は `:latest`。別のタグを追う VM では、手順 2 の `Booted image:` に合わせて手順 1 を直す（[手順 1](#実施手順) の補足）
 - **Guest Additions のインストーラは、bootc 向けに 4 か所を直して使う**: unit・`/var` の設定・ユーザーとグループ・カーネルの版（[手順 5](#実施手順) の補足）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 5](#実施手順) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](#更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
-- **Secure Boot では鍵の登録が要る**: MokManager の最初の画面は 10 秒で消え、逃すと登録されない。鍵を作り直したら `--no-cache` でビルドし直す（[手順 4・8](#実施手順)）
-- **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから手順 6 を貼る（[手順 5](#実施手順)）
+- **Secure Boot では鍵の登録が要る**: MokManager の最初の画面は 10 秒で消え、逃すと登録されない。鍵を作り直したら `--no-cache` でビルドし直す（[手順 4・10](#実施手順)）
+- **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから手順 7 を貼る（[手順 6](#実施手順)）
 - **元のイメージに戻すときは、`--enforce-container-sigpolicy` を付けない**: Atomic Desktop の `policy.json` の既定では断られる。付けなくても署名は確かめられる（[ロールバック](#ロールバック)の手順 1 の補足）
 - **アンインストーラは使えない**: 戻すときはイメージを切り替える（[ロールバック](#ロールバック)）
 - **ホスト側の手順書は別**: VirtualBox 本体は [virtualbox.md](virtualbox.md)。ホスト側でモジュールを署名する鍵（同じ `/var/lib/shim-signed/mok/` の置き場所）は、ホストの PC のもので、VM の鍵とは別物
@@ -798,7 +816,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - ISO には Rock Ridge が無く、オプション無しの bsdtar は `Tried to parse Rockridge extensions, but none found` で失敗した
 - キャッシュの試験に、7.2.18 の ISO（同じく照合）
 
-**VM の代役のコンテナ**（手順 1〜8 と、[更新](#更新)・[ロールバック](#ロールバック)の手順 1・2）:
+**VM の代役のコンテナ**（手順 1〜9 と、[更新](#更新)・[ロールバック](#ロールバック)の手順 1・2）:
 
 - ベースのイメージそのものを `--privileged` で起動し、中に uid 1000 のユーザー（NOPASSWD の sudo）を作った
 - 中の podman（rootful）は、実機の一時ディレクトリを `/var/lib/containers` にマウントし、入れ子で動くように `containers.conf` を足した（`netns="host"`・`cgroups="disabled"`・`cgroup_manager="cgroupfs"` など）
@@ -811,9 +829,9 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | `mokutil --import` | 一時パスワードを 2 回読み、登録の予約の印を置く |
 | `mokutil --test-key` | 登録済みの印があれば `is already enrolled`（MokManager での登録は、印を置いて模した） |
 
-**起動を模したコンテナ**（手順 9・10、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[ロールバック](#ロールバック)の手順 3）:
+**起動を模したコンテナ**（手順 11・13、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[ロールバック](#ロールバック)の手順 3）:
 
-- 手順 7 で代役のコンテナの中に作ったイメージを、`podman save` / `podman load` で実機の podman に移した
+- 手順 8 で代役のコンテナの中に作ったイメージを、`podman save` / `podman load` で実機の podman に移した
 - `/etc/passwd`・`/etc/group`・`/etc/shadow`・`/etc/gshadow` をベースのイメージのものに戻し、ログインするユーザーを足した（手元で変更済みの `/etc` は 3-way マージで残る、を模す）
 - `/var` は空の tmpfs にし、systemd を PID 1 で起動した。`/var/lib/shim-signed/mok/MOK.der` は代役のコンテナから写した（VM では `/var` が残る）
 
@@ -826,14 +844,14 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 3. Secure Boot | `SecureBoot enabled`（スタブ） |
 | 4. 鍵 | `MOK.der`（876 バイト）と `MOK.priv`（`-rw-------`）。`mokutil --import` はスタブ |
 | 5. Containerfile | 2668 バイト。実機で先に試した Containerfile と同じ中身 |
-| 6. CD | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
-| 7. ビルド | ベースの取り込み（署名の検査あり）からビルドの終わりまで 2 分 22 秒。3 つのモジュールが `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
-| 8. 切り替え | `error: Switching: Initializing storage: Preparing for write: Detected container; this command requires a booted host system.` |
-| 9. 確認（起動を模したコンテナ） | `lsmod` は空、`systemctl is-active` は `failed` が 2 行（コンテナではモジュールを読み込めない）、`pgrep` は空（画面が無い）、`bootc status` は YAML |
-| 10. 署名（同上） | `is already enrolled`（スタブ）と `VirtualBox Guest Additions module signing key`（本物の `modinfo`） |
-| 共有フォルダー 1・2（同上） | `usermod -aG vboxsf` が通り、`id -nG` に `vboxsf`。`findmnt -t vboxsf` は空 |
-| 更新 2 | 手順 7 を貼り直すと、`Using cache` が 4 行で同じイメージ ID。ベースは取り込み直さなかった |
-| 更新 3・ロールバック 1 | 手順 8 と同じ `Detected container` |
+| 7. CD | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
+| 8. ビルド | ベースの取り込み（署名の検査あり）からビルドの終わりまで 2 分 22 秒。3 つのモジュールが `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
+| 9. 切り替え | `error: Switching: Initializing storage: Preparing for write: Detected container; this command requires a booted host system.` |
+| 11. 確認（起動を模したコンテナ） | `lsmod` は空、`systemctl is-active` は `failed` が 2 行（コンテナではモジュールを読み込めない）、`pgrep` は空（画面が無い）、`bootc status` は YAML |
+| 13. 署名（同上） | `is already enrolled`（スタブ）と `VirtualBox Guest Additions module signing key`（本物の `modinfo`） |
+| 共有フォルダー 2・4（同上） | `usermod -aG vboxsf` が通り、`id -nG` に `vboxsf`。`findmnt -t vboxsf` は空 |
+| 更新 2 | 手順 8 を貼り直すと、`Using cache` が 4 行で同じイメージ ID。ベースは取り込み直さなかった |
+| 更新 3・ロールバック 1 | 手順 9 と同じ `Detected container` |
 | ロールバック 2 | `Untagged:` が 2 行と `Deleted:` が 4 行。ビルドの最初の段（`<none>`、6.43 MB）が残った |
 | ロールバック 3（起動を模したコンテナ） | 何も出ずに終わり、`vboxadd`・`vboxsf`・`vboxdrmipc`・リンク・ログが消えた |
 
@@ -930,15 +948,15 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 2. 環境 | `oracle`、`/var` の空き 42G、`● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260918.1）。手順書の分岐のとおり、手順 1 を `:latest` に直して貼り直した |
 | 3. Secure Boot | `SecureBoot enabled` |
 | 4. 鍵（囲んだ形） | `MOK.der`（876 バイト）と `MOK.priv`（1708 バイト、`-rw-------`）。`sudo` は手順 2 の記憶で聞かれず、一時パスワードを 2 回 |
-| 5. Containerfile | 2668 バイト。CD を入れても GNOME の画面には何も出ず、10 秒ほど後に `/run/media/<USER>/VBox_GAs_7.2.20` にマウントされていた |
-| 6. CD | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
-| 7. ビルド | 305 秒。署名を確かめてベースを取り込み（`Storing signatures`）、`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ（動いているカーネルは 211.55.1）、`installer exit=1`。3 つのモジュールが 211.56.1 向けで署名あり、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
-| 8. 切り替え（1 回目） | `layers already present: 65; layers needed: 20 (1.7 GB)` → `Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 再起動。MokManager をわざと見送った（次の表） |
-| 8. 切り替え（やり直し） | 手順 8 の箇条書きのとおり `sudo mokutil --import ...` を貼り直し、`sudo systemctl reboot` → 最初の画面でキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` |
-| 9. 確認 | `vboxguest` の行だけ（`vboxsf` は無い）、`active` が 2 行、`VBoxClient --clipboard` と `--vmsvga-session` が 2 つ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は元の `:latest`）。ただし `VBoxClient --clipboard` は、ログインの直後から 5 秒ごとに落ちていた（次の表） |
-| 10. 署名（囲んだ形） | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
-| 5・7 を直した版で貼り直し、更新 3 | Containerfile 2834 バイト → ビルド 161 秒（`libXt-1.3.0-5.el10` が入り、`mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2`）→ `sudo bootc upgrade --apply` が `Queued for next boot:` と入れ替わった層（151.5 MB → 151.9 MB）を出して再起動。`VBoxClient --clipboard` は落ちなくなった |
-| 共有フォルダー 1・2 | 足すと `vboxsf` が読み込まれ、`/run/media/sf_<名前>`（`gid=<GID>`、`dmode=0770`、`fmode=0770`）にマウントされた。グループに入る前は `Permission denied`。手順 1 は無出力 → ログインし直し → 手順 2 で `vboxsf` とマウントの行。ホストとの間で読み書きできた |
+| 5〜6. Containerfile | 2668 バイト。CD を入れても GNOME の画面には何も出ず、10 秒ほど後に `/run/media/<USER>/VBox_GAs_7.2.20` にマウントされていた |
+| 7. CD | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
+| 8. ビルド | 305 秒。署名を確かめてベースを取り込み（`Storing signatures`）、`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ（動いているカーネルは 211.55.1）、`installer exit=1`。3 つのモジュールが 211.56.1 向けで署名あり、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
+| 9〜10. 切り替え（1 回目） | `layers already present: 65; layers needed: 20 (1.7 GB)` → `Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 再起動。MokManager をわざと見送った（次の表） |
+| 9〜10. 切り替え（やり直し） | 手順 10 の箇条書きのとおり `sudo mokutil --import ...` を貼り直し、`sudo systemctl reboot` → 最初の画面でキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` |
+| 11. 確認 | `vboxguest` の行だけ（`vboxsf` は無い）、`active` が 2 行、`VBoxClient --clipboard` と `--vmsvga-session` が 2 つ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は元の `:latest`）。ただし `VBoxClient --clipboard` は、ログインの直後から 5 秒ごとに落ちていた（次の表） |
+| 13. 署名（囲んだ形） | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
+| 5・8 を直した版で貼り直し、更新 3 | Containerfile 2834 バイト → ビルド 161 秒（`libXt-1.3.0-5.el10` が入り、`mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2`）→ `sudo bootc upgrade --apply` が `Queued for next boot:` と入れ替わった層（151.5 MB → 151.9 MB）を出して再起動。`VBoxClient --clipboard` は落ちなくなった |
+| 共有フォルダー 1〜4 | 足すと `vboxsf` が読み込まれ、`/run/media/sf_<名前>`（`gid=<GID>`、`dmode=0770`、`fmode=0770`）にマウントされた。グループに入る前は `Permission denied`。手順 2 は無出力 → ログインし直し → 手順 4 で `vboxsf` とマウントの行。ホストとの間で読み書きできた |
 | 更新 2・3（変更なし） | `Using cache` が 4 行で同じイメージ ID（5 秒）。`No changes in ...` と `No update available.` を出し、再起動しなかった（boot_id が同じ） |
 | ロールバック 1（直す前） | ``containers-policy.json specifies a default of `insecureAcceptAnything`; refusing usage`` で止まった |
 | ロールバック 1（直した版） | `Fetching layers 0/0`、`Deploying: done (7 seconds)`、`Queued for next boot: quay.io/almalinuxorg/atomic-desktop-gnome:latest` → 再起動。イメージが足した `/etc` のファイルと `/opt` の本体が消えていた |
@@ -966,7 +984,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 #### 未確認事項
 
 - VirtualBox の GUI のメニューそのものでの操作と、ウィンドウの大きさを手で変えたときの追従（同じ働きの `VBoxManage` で確かめた）
-- Secure Boot が無効の VM での手順（手順 4・10 を飛ばす分岐。ビルドはコンテナで確かめた）
+- Secure Boot が無効の VM での手順（手順 4・10・13 を飛ばす分岐。ビルドはコンテナで確かめた）
 - 切り替えた直後の `bootc rollback`（`Rollback image:` が元のイメージであることだけ見た）
 - [更新](#更新)の手順 1（ホストの VirtualBox の新しい版がまだ無い）と、ベースのイメージが新しくなったときの更新
 - KDE・COSMIC の Atomic Desktop と、素の `almalinux-bootc:10` での動作

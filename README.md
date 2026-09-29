@@ -23,7 +23,7 @@
 | [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
-| [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜10） |
+| [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 9〜12） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -233,7 +233,7 @@
 ### ブラウザ
 
 - Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
-- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[rpmfusion.md](docs/rpmfusion.md) で有効にし、[firefox.md 手順 8〜10](docs/firefox.md#実施手順) で入れる）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
+- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[rpmfusion.md](docs/rpmfusion.md) で有効にし、[firefox.md 手順 9〜12](docs/firefox.md#実施手順) で入れる）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
@@ -259,6 +259,7 @@
 - タイトル直後の `## 実施手順` に、変数設定、コマンド、動作確認を番号付きリストで並べる。任意操作・更新・ロールバックはその後ろの見出しに置き、中の手順も番号付きリストにする（節ごとに 1 から）
 - 手順番号は見出しではなくリストで振る。マーカーはすべて `1.`（自動で採番される）で、変数があれば手順 1 が変数設定
 - 各手順は「1 行の説明（太字にしない 1 文）→ コマンドのブロック → 確認点の箇条書き → 折り畳んだ補足」の順に書く。対話入力や完了待ちで止めるところで手順を分け、止める手順の最後に「次の手順は〜してから貼る」と書く
+- コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
 - Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する

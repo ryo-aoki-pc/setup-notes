@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > - **GNOME にログインしたデスクトップの端末で、自分のユーザーのまま実行する**。`sudo -i` / `su -` したシェルでは行わない（手順 4 の `gsettings` は、実行したユーザーの設定しか変えないため）
 > - **手順 3 には対話入力がある**（`sudo` のパスワードと `[y/N]`）
-> - **手順 3 を実行したときは、手順 4 の後でログアウトしてログインし直す**
+> - **手順 3 を実行したときは、手順 5 でログアウトしてログインし直す**
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -117,18 +117,28 @@
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
    - **ほかの入力ソースは消える**。残したいものがあれば、`set` の値に並べて足す
    - 最後の `get` の `['<Super>space', 'XF86Keyboard']` が、入力ソースを切り替えるキー（Super+Space）
-   - **次の手順は、ログアウトしてログインし直してから貼る**（手順 3 を飛ばしたなら、そのまま貼ってよい）
+   - 手順 3 を飛ばしたなら、手順 5 は飛ばす
 
    <details>
-   <summary>補足: 並べ方と、ログインし直す理由</summary>
+   <summary>補足: 並べ方</summary>
 
-   **並べ方**: キーボードの配列を先に、Anthy を後に置く。RHEL を日本語で入れたときも、GNOME は配列と Anthy の 2 つを入力ソースにする（ibus-anthy の RHEL のパッチの説明文から）。
+   キーボードの配列を先に、Anthy を後に置く。RHEL を日本語で入れたときも、GNOME は配列と Anthy の 2 つを入力ソースにする（ibus-anthy の RHEL のパッチの説明文から）。
 
    - 設定アプリの「キーボード」→「入力ソース」と同じキー
    - Anthy のエンジンは配列を `default`（入力ソースで選ばれている配列に従う）で登録している（`/usr/share/ibus-anthy/engine/default.xml`）。JIS 配列でも US 配列でも同じ `anthy` でよい
    - 配列の短い表示名は `jp` が `ja`、Anthy は `あ`（エンジンの定義の `symbol`）。上部バーにはこれが出るはず（画面では確かめていない）
 
-   **ログインし直す理由**: 動いている ibus-daemon は、起動した後に入れたエンジンを知らない。
+   </details>
+
+1. 手順 3 で ibus-anthy を入れたときだけ、ログアウトしてログインし直す。
+
+   - ログインし直すまで、動いている IBus は Anthy を使えない
+   - **次の手順は、ログインし直してデスクトップの端末を開いてから貼る**
+
+   <details>
+   <summary>補足: ログインし直す理由</summary>
+
+   動いている ibus-daemon は、起動した後に入れたエンジンを知らない。
 
    - コンテナで、`dnf install` の直後の `ibus list-engine` には `anthy` が出ず、ibus-daemon を起動し直すと出た
    - `ibus restart` でも起動し直せるはず。GNOME では、systemd のユーザーのユニット `org.freedesktop.IBus.session.GNOME.service` を再起動する作り（ibus 1.5.32 のソース）で、コンテナではこの経路を確かめられないので、本書はログインし直す形にした
@@ -136,19 +146,21 @@
 
    </details>
 
-1. IBus が Anthy を読み込んだか確かめ、日本語を打ってみる。
+1. IBus が Anthy を読み込んだか確かめる。
 
    ```bash
    ibus list-engine | grep -w anthy
    ```
 
    - `anthy - Anthy` と出ればよい
-   - 何も出なければ、手順 4 の後にログインし直したかを確かめる
-   - 続けて画面で確かめる（コマンドは無い）
-     - Super+Space で、上部バーの入力ソースの表示が切り替わる
-     - Anthy に切り替えてからテキストエディタなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
-     - Anthy は、ひらがなで始まる
-     - Anthy の中では、半角/全角キー（US 配列なら Ctrl+Space か Ctrl+J）で英字（直接入力）とひらがなを切り替える
+   - 何も出なければ、手順 5 でログインし直したかを確かめる
+
+1. 画面で、入力ソースを切り替えて日本語を打ってみる。
+
+   - Super+Space で、上部バーの入力ソースの表示が切り替わる
+   - Anthy に切り替えてからテキストエディタなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
+   - Anthy は、ひらがなで始まる
+   - Anthy の中では、半角/全角キー（US 配列なら Ctrl+Space か Ctrl+J）で英字（直接入力）とひらがなを切り替える
 
    <details>
    <summary>補足: コンテナでの確かめ方</summary>
@@ -206,14 +218,14 @@
 - **目的**: AlmaLinux 10 の GNOME で、日本語を入力できるようにする。入力のエンジンは、RHEL 10 の文書が日本語用に挙げている Anthy（IBus）を使う
 - **進め方**: AppStream の `ibus-anthy` を入れ、`gsettings` で入力ソースを「キーボードの配列 + Anthy」にして、Super+Space で切り替える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
-  - GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中に ibus-daemon を GNOME と同じ引数（`--panel disable`）で起動し、**この文書のコードブロックをそのまま貼って**手順 1〜5 と[ロールバック](#ロールバック)を通した
+  - GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中に ibus-daemon を GNOME と同じ引数（`--panel disable`）で起動し、**この文書のコードブロックをそのまま貼って**手順 1〜4・6 と[ロールバック](#ロールバック)を通した
   - 手順 1 の `localectl` は、systemd を PID 1 にした別のコンテナで確かめた（手順 1 の補足）
   - [flatpak.md](flatpak.md) と同じ、x86_64 のクラウドホスト上の Docker で行った
   - 確認したこと:
     - `dnf install` で入るもの
     - ibus-daemon を起動し直すと `ibus list-engine` に `anthy` が出る
     - 入力ソースが `[('xkb', 'jp'), ('ibus', 'anthy')]` になり、既定値に戻せる
-    - IBus の API で `nihongo` と Space と Return を送ると「日本語」が確定し、半角/全角キーで直接入力とひらがなが切り替わる（手順 5 の補足）
+    - IBus の API で `nihongo` と Space と Return を送ると「日本語」が確定し、半角/全角キーで直接入力とひらがなが切り替わる（手順 7 の補足）
   - **確認していないこと**: Super+Space での切り替え、上部バーの表示、候補の一覧の表示、アプリ（GTK・XWayland のアプリ・WezTerm・VS Code など）での入力。コンテナには画面も GNOME Shell も無いため
   - aarch64（Raspberry Pi 5）では通していない。パッケージは同じ版が aarch64 にもある（リポジトリのメタデータで確認）
 
@@ -259,7 +271,7 @@
 
 ### 完了時点の状態
 
-コンテナでの出力（手順 5 の直後）:
+コンテナでの出力（手順 6 の直後）:
 
 ```
 $ gsettings get org.gnome.desktop.input-sources sources
@@ -303,7 +315,7 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 - コンテナに `/etc/machine-id` が無く、IBus がつながらなかったので、`systemd-machine-id-setup` で作った
 - 手順 1 の `localectl` はこのコンテナでは動かず `XKB_LAYOUT` が空になったので、手順 1 の案内のとおり `XKB_LAYOUT=jp` を貼った
 - `dnf install` と `dnf remove` に `-y` を付けた
-- 手順 4 の後のログインし直しの代わりに、ibus-daemon を止めて起動し直した
+- 手順 5 のログインし直しの代わりに、ibus-daemon を止めて起動し直した
 
 | 手順 | 結果 |
 |---|---|
@@ -311,7 +323,7 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 | 2. 確認 | `ibus-1.5.32-1.el10` と、`ibus-anthy` / `default-fonts-cjk-sans` の `is not installed`、`未導入のものがある` |
 | 3. 導入 | 8 パッケージ（手順 3 の補足）。直後の `ibus list-engine` に `anthy` は出なかった |
 | 4. 入力ソース | `@a(ss) []` → `[('xkb', 'jp'), ('ibus', 'anthy')]`、切り替えのキーは `['<Super>space', 'XF86Keyboard']` |
-| 5. 確認 | ibus-daemon を起動し直した後、`anthy - Anthy`。IBus の API での入力は手順 5 の補足のとおり |
+| 6. 確認 | ibus-daemon を起動し直した後、`anthy - Anthy`。IBus の API での入力は手順 7 の補足のとおり |
 | ロールバック 1 | `@a(ss) []` |
 | ロールバック 2 | `ibus-anthy` と依存の 4 パッケージが消えた。`ibus` とフォントは残った |
 | 比較. フォントが入っている PC | `default-fonts-cjk-sans` を先に入れた別のコンテナで手順 2・3: 手順 2 は `ibus-anthy` だけが `is not installed`。手順 3 は `Package default-fonts-cjk-sans-4.1-3.el10.noarch is already installed.` と出て、5 パッケージが入った |
