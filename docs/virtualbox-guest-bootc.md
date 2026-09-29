@@ -122,11 +122,11 @@
    <details>
    <summary>補足: 鍵の置き場所と使われ方</summary>
 
-   - 置き場所とファイル名は、ホスト側の [virtualbox.md 手順 15](virtualbox.md#実施手順) と同じ。Guest Additions の起動スクリプト（`vboxadd`）も、この 2 つを決め打ちで見る
+   - 置き場所とファイル名は、ホスト側の [virtualbox.md 手順 12](virtualbox.md#実施手順) と同じ。Guest Additions の起動スクリプト（`vboxadd`）も、この 2 つを決め打ちで見る
    - bootc でも `/var` は再起動や `bootc switch` をまたいで残る（イメージから上書きされない）
    - 鍵はイメージに入れない。手順 7 のビルドに `--secret` で渡し、ビルドの中の `sign-file`（kernel-devel）がモジュールに署名する
    - 証明書は `CA:TRUE` と `Code Signing` を持つ（検証で `openssl x509` で確認）
-   - VM では、登録した鍵は `.platform` のキーリングに入り、`.machine` には入らなかった（`sudo keyctl list %:.platform`。理由は virtualbox.md 手順 15 の補足）
+   - VM では、登録した鍵は `.platform` のキーリングに入り、`.machine` には入らなかった（`sudo keyctl list %:.platform`。理由は virtualbox.md 手順 12 の補足）
    - **鍵を作り直したら**、手順 7 のビルドに `--no-cache` を足す（[更新](#更新)）
    - `MOK.priv` は、この VM が信頼するモジュールを作れる鍵になる。root 以外に読ませず、ほかのマシンに持ち出さない
 
