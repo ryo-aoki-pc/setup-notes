@@ -10,7 +10,7 @@
 
 - 上から順にコードブロックを貼る。Windows の手順は手順 3 で変数を設定した PowerShell に、クライアントの手順は手順 10 で変数を設定したシェルに貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: ログインしたときのシェルを Git Bash にするなら、[既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)を行う。戻すときは[ロールバック](#ロールバック)
+- 手順の後: ログインしたときのシェルを Git Bash にするなら、[既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)を行う。scoop で入れたツールが SSH のセッションで起動しないなら、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
 > **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。手順 7 で登録した鍵を持つ人は、この PC の管理者として操作できる（[注意点](#注意点)）。
@@ -306,13 +306,14 @@
 
    - 1 つ目で `5.3.15(1)-release MINGW64` と `git version 2.55.0.windows.3` のような 2 行が出ればよい
    - 2 つ目は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` のプロンプトになる。`exit` で戻る
-   - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる（[注意点](#注意点)）
+   - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる
+   - `Shim: Could not create process …` が出るなら、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)を行う
 
    <details>
    <summary>補足: Git Bash のセッション</summary>
 
    - 対話のログインでも、ログインシェルにはならない（`shopt login_shell` が off）。`~/.bash_profile` は読まれず、`~/.bashrc` は読まれる。プロンプトは Git の `/etc/bash.bashrc` の `PS1`
-   - bash は、sshd から起動されたことを見分けて、`bash -c` のときも `~/.bashrc` を読む。検証した PC では、`~/.bashrc` の `eval "$(zoxide init bash)"` のエラー（[注意点](#注意点)のジャンクションの件）が、`ssh … <コマンド>` のたびに出た
+   - bash は、sshd から起動されたことを見分けて、`bash -c` のときも `~/.bashrc` を読む。検証した PC では、`~/.bashrc` の `eval "$(zoxide init bash)"` のエラーが、`ssh … <コマンド>` のたびに出た（原因と対処は[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)）
    - `PATH` は `/mingw64/bin:/usr/bin` の後ろに Windows の `PATH` が続き、`git` は `/mingw64/bin/git` になる。ホームは `/c/Users/<WIN_USER>`
    - `scp`（既定の SFTP の方式）、`scp -O`（旧来の方式。サーバー側では、`~/.bashrc` を読んだ bash の上で `scp` が動いた）、`sftp` の 3 つで、ファイルを送って消せた
 
@@ -325,6 +326,65 @@
    ```
 
    - 何も出ずに終わればよい。次のログインから cmd.exe に戻る
+
+---
+
+## scoop のツールを SSH のセッションで使う（任意）
+
+- scoop で入れたツール（`zoxide`・`rg`・`nvim` など）が、SSH のセッションでだけ起動しないときに行う
+  - 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448（信頼されていないマウントポイント）
+- 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
+  - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
+- この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること
+- この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 10 のシェルに貼る
+- `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
+
+1. Windows で、scoop のジャンクションを管理者で作り直す。
+
+   ```powershell
+   Get-ChildItem "$env:USERPROFILE\scoop\apps" -Recurse -Depth 4 -Force -Attributes ReparsePoint -ErrorAction SilentlyContinue |
+     Where-Object { $_.LinkType -eq 'Junction' -and (Get-Acl $_.FullName).Owner -notlike '*\Administrators' } |
+     ForEach-Object {
+       $link = $_.FullName; $target = @($_.Target)[0]; $ro = $_.Attributes -band [IO.FileAttributes]::ReadOnly
+       if (Test-Path -LiteralPath $target) {
+         attrib.exe -R "$link" /L
+         cmd.exe /c rmdir "$link"
+         New-Item -ItemType Junction -Path $link -Target $target | Out-Null
+         if ($ro) { attrib.exe +R "$link" /L }
+         '{0} -> {1}' -f $link, $target
+       }
+     }
+   ```
+
+   - 作り直したジャンクションごとに、`…\scoop\apps\<アプリ>\current -> …\scoop\apps\<アプリ>\<版>` の形の行が出る
+   - 作り直すものが無ければ、何も出ない（何度貼ってもよい）
+
+   <details>
+   <summary>補足: RedirectionGuard と、作り直す理由</summary>
+
+   - sshd には、IFEO（`HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sshd.exe`）の `MitigationOptions` で RedirectionGuard が掛けてある（19 バイトの値の最後のバイトが `0x10`）。SYSTEM で動く sshd を、ジャンクションを使った攻撃から守るためのもので、本書では外さない
+   - `GetProcessMitigationPolicy` で `ProcessRedirectionTrustPolicy` を見ると、sshd の 3 つのプロセスと、その下の bash・PowerShell はどれも `Enforce=1` で、`services.exe` とローカルのシェルは 0 だった
+   - 信頼されるかどうかは、ジャンクションを作ったときに決まる
+     - 同じ向き先で、一般ユーザーが作ったものは SSH のセッションから開けず（エラー 448）、管理者が作ったものは開けた
+     - 一般ユーザーが作ったものの所有者を、後から Administrators に変えても開けなかった
+   - そこで、一般ユーザーの所有のもの（= 一般ユーザーが作ったもの）だけを選び、管理者の PowerShell で消して作り直す。管理者が作ったものは所有者が `BUILTIN\Administrators` になるので、2 回目からは選ばれない
+   - `cmd.exe /c rmdir` はジャンクションそのものだけを消し、向き先の中身には触れない。scoop が付けた読み取り専用の属性は、`attrib /L` で外してから消し、作り直した後に付け直す
+   - Windows PowerShell 5.1 の `Get-ChildItem -Recurse` は、ジャンクションの中へは入らなかった（`current` を通った重複は出ない）
+   - 管理者が作ったジャンクションも、一般ユーザーが消せた（ACL は `C:\Users\<WIN_USER>` から受け継ぐ）。scoop の更新の邪魔にはならない
+   - 検証した PC では、`current` 39 個と persist（`nodejs\<版>\bin`・`python\<版>\Scripts` など）14 個の、53 個を作り直した。作り直した後も、向き先・読み取り専用の属性は前と同じだった
+
+   </details>
+
+1. クライアントの PC で、scoop のツールが動くことを確かめる。
+
+   ```bash
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 10 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
+   fi
+   ```
+
+   - `zoxide 0.9.9` のような版が出て、`Shim:` で始まる行が出なければよい（`zoxide` の代わりに、scoop で入れたほかのツールでもよい）
 
 ---
 
@@ -393,13 +453,13 @@
 - **目的**: LAN のほかの PC（AlmaLinux 10 など）から、Windows 11 の PC に SSH で入れるようにする
   - Windows のオプション機能「OpenSSH サーバー」を入れ、公開鍵だけで認証する
   - 受け付けるのは、プライベートにしたネットワークからだけ（手順 6）
-  - ログインしたときのシェルを Git Bash にする方法は、任意節にした
+  - ログインしたときのシェルを Git Bash にする方法と、scoop のツールを SSH のセッションで使う方法は、任意節にした
 - **進め方**: 値は、Windows では手順 3、クライアントでは手順 10 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
   - Windows の手順は管理者の Windows PowerShell に、クライアントの手順は bash に貼る
   - 読者が書き換えるのは、`$PUBKEY`（Windows）と `WIN_HOST`（クライアント）だけ
 - **状態**: **実機で本実行済み（2026-09-29）。クライアントは同じ PC の WSL の AlmaLinux 10**
-  - x86_64 のノート PC（Windows 11 Pro 25H2）で、手順 1〜12、任意節、ロールバックを通した
-  - ロールバックで実施前の状態に戻した後、この文書から機械的に抜き出したブロックで、手順 1〜12 と任意節の手順 1〜3 をもう 1 度通した
+  - x86_64 のノート PC（Windows 11 Pro 25H2）で、手順 1〜12、Git Bash の任意節、ロールバックを通した。scoop の任意節は、その後に原因を調べて足し、同じ PC で通した
+  - ロールバックで実施前の状態に戻した後、この文書から機械的に抜き出したブロックで、手順 1〜12 と Git Bash の任意節の手順 1〜3 をもう 1 度通した
   - コードブロックは端末に貼らず、Claude Code から昇格した Windows PowerShell 5.1 と、WSL の bash に、手順ごとのスクリプトにして渡した（[付録](#付録-実機での検証記録2026-09-29)）
   - 確認したこと:
     - 機能の導入（8〜9 分、再起動無し）、sshd の自動起動の設定と待ち受け
@@ -407,6 +467,7 @@
     - 公開鍵でのログイン（cmd と Git Bash）、ホスト鍵の指紋の照合、パスワード認証を切った後に `Permission denied` ですぐ終わること
     - SSH のセッションが管理者の権限（High Mandatory Level）を持つこと
     - Git Bash での `git`・`scp`・`scp -O`・`sftp`、`DefaultShell` を消すと cmd に戻ること
+    - SSH のセッションで scoop のツールが起動しない原因（sshd の RedirectionGuard）と、ジャンクションを管理者で作り直すと起動すること（scoop の任意節。一般ユーザーで作り直して壊した状態から、この文書のブロックで直した）
     - ロールバックの後に残るもの（`C:\ProgramData\ssh` とレジストリのキー）と、消した後に入れ直せること
     - 変数が空のとき・PowerShell 7 で貼ったときに、手順 4・7・12 とロールバックの手順 4 が何も変えずに止まること
   - **確認していないこと**:
@@ -487,7 +548,7 @@
 
 ### 完了時点の状態
 
-実機で、2 回目の通し（任意節で Git Bash にした状態）の後に確かめた状態:
+実機で、2 回目の通し（既定のシェルを Git Bash にした状態）の後に確かめた状態。この後に、scoop の任意節で scoop のジャンクションを作り直した:
 
 ```
 PS> Get-Service sshd, ssh-agent | Format-Table Name, Status, StartType
@@ -547,10 +608,11 @@ d----        logs
   - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、手順 6 の後も捨てられた
   - LAN の IP あての接続は、sshd には送信元がこの PC の LAN の IP として届き、LAN のプロファイル（プライベート）で判定された
 - **Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（手順 9）
-- **SSH のセッションでは、ユーザーが作ったジャンクションの先の実行ファイルが起動しなかった**
-  - scoop の `current`（`C:\Users\<WIN_USER>\scoop\apps\<アプリ>\current` のジャンクション）を通る `zoxide.exe` と `python.exe` が、Git Bash から `Is a directory` になった。scoop の shim は `Could not create process with command …` で失敗した
-  - 版のディレクトリ（`…\zoxide\0.9.9\zoxide.exe`）を直接指せば動いた
-  - ローカルのシェルでは、昇格しても `current` を通して動いた。原因は特定していない
+- **SSH のセッションでは、一般ユーザーが作ったジャンクションをたどれない**
+  - sshd に掛けてある RedirectionGuard を、セッションのプロセスが引き継ぐため。開こうとすると、エラー 448（`ERROR_UNTRUSTED_MOUNT_POINT`）になる
+  - 検証した PC では、scoop の `current` を通る `zoxide.exe` と `python.exe` が Git Bash から `Is a directory` になり、scoop の shim は `Could not create process with command …` で失敗した。`PATH` のうち scoop の 7 つのディレクトリも開けなかった
+  - ローカルのシェルは、昇格していても RedirectionGuard が掛かっておらず、影響を受けない
+  - scoop のジャンクションは、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)で、管理者で作り直せば通る。scoop 以外のツールのジャンクションも、同じ理由で通らないはず（試していない）
 - **設定を変えたとき**: `sshd_config` を変えたら `Restart-Service sshd`（手順 8）。レジストリの `DefaultShell` は、再起動しなくても次のログインから効いた
 - **機能を外したとき**
   - Microsoft の文書は、使っている間に外したなら Windows を再起動するよう書いている
@@ -578,14 +640,14 @@ d----        logs
   - `$PUBKEY` は、`''` の中だけを手順 2 の出力に置き換えた
 - クライアントの手順は、`wsl.exe -d AlmaLinux-10 --exec bash <スクリプト>` で実行した
   - 手順 10 は、`WIN_HOST=` の後ろだけを書き換えた
-  - 手順 11 と任意節の手順 2 の対話は、`script` の擬似端末に `yes`・`whoami`・`exit` を流し込んだ
+  - 手順 11 と Git Bash の任意節の手順 2 の対話は、`script` の擬似端末に `yes`・`whoami`・`exit` を流し込んだ
 - 2 回目は、この文書の `powershell` と `bash` のブロックを順に抜き出したファイルを、上の置き換えだけで使った
 
 **1 回目**（下書きのブロック）:
 
 - 手順 4 は、最初に Microsoft Store の PowerShell 7.6.6 で流し、266 秒後に `Add-WindowsCapability` と `Get-WindowsCapability` が `クラスが登録されていません` で失敗した。状態は `NotPresent` のまま
 - Windows PowerShell 5.1 で流し直すと、532 秒で `State : Installed`（`RestartNeeded : False`）になった
-- 手順 5〜9、手順 11・12、任意節の手順 1・2 を通した。ホスト鍵の指紋は、手順 9 と、クライアントの `ssh-keygen -lF <WIN_HOST>` で一致した
+- 手順 5〜9、手順 11・12、Git Bash の任意節の手順 1・2 を通した。ホスト鍵の指紋は、手順 9 と、クライアントの `ssh-keygen -lF <WIN_HOST>` で一致した
 - ロールバックの手順 1〜4 で、実施前の状態に戻した。`Remove-WindowsCapability` は 6 秒、`RestartNeeded : False`
   - 外した直後に残っていたもの: `C:\ProgramData\ssh` の全ファイル（ホスト鍵・`sshd_config`・`administrators_authorized_keys`）と、`HKLM:\SOFTWARE\OpenSSH` の `DefaultShell`
   - 消えていたもの: サービス `sshd`、`sshd.exe`、規則 `OpenSSH-Server-In-TCP`
@@ -599,7 +661,7 @@ d----        logs
 - 手順 7 の後・手順 8 の前に、パスワードを聞かれることと、セッションが High Mandatory Level であることを確かめた（ホスト鍵は `UserKnownHostsFile=/dev/null` で、`known_hosts` に残さなかった）
 - 手順 8 は 2 回流し、`PasswordAuthentication` の行が 1 行のままだった
 - 手順 11 で、初回の `ED25519 key fingerprint is SHA256:…` が手順 9 と一致し、`yes` の後に cmd のプロンプトになった
-- 任意節は、手順 1 → 2 → 3（cmd に戻る）→ 1 の順に流し、Git Bash の状態で終えた
+- Git Bash の任意節は、手順 1 → 2 → 3（cmd に戻る）→ 1 の順に流し、Git Bash の状態で終えた
 - `WIN_HOST` が空のまま、手順 12 とロールバックの手順 4 のブロックを流し、どちらも何もしないで止まった
 
 **切り分け: WSL から届かなかった接続**:
@@ -623,6 +685,32 @@ d----        logs
 - 一時的な規則（`Verify-WSL-sshd`）は、確かめた後に消した
 - 途中で、どのプロファイルでも有効なブロックの規則が 1 つ見つかった。別のソフトが作ったもので、特定のローカルユーザーのプロセスだけに効き、SYSTEM で動く sshd には関係しなかった
 
+**切り分け: SSH のセッションで scoop のツールが起動しない**（2 回目の後）:
+
+- 症状
+  - Git Bash の既定のシェルで、`ssh … <コマンド>` のたびに `Shim: Could not create process with command '"C:\Users\<WIN_USER>\scoop\apps\zoxide\current\zoxide.exe"  init bash'.` が出た
+  - SSH のセッションの `cmd /c dir …\zoxide\current\zoxide.exe` は `ファイルが見つかりません`。Git Bash の `ls -la …\zoxide\current\` は、名前は出るものの、どれもディレクトリで日付が 1601 年の、壊れた属性で出た
+  - ローカルのシェルでは、昇格していてもいなくても、`current` を通して動いた
+- SSH のセッションの PowerShell で `CreateFileW` を呼ぶと、`…\zoxide\current\zoxide.exe` はエラー 448（`信頼されていないマウントポイントが含まれているため、パスをスキャンできません。`）、`…\zoxide\0.9.9\zoxide.exe` は成功した
+- 同じ PowerShell から、自分と親のプロセスの `GetProcessMitigationPolicy(ProcessRedirectionTrustPolicy)` を順にたどった
+  - PowerShell・bash 2 つ・sshd 3 つは `flags=0x1`（Enforce）、`services.exe`・`wininit.exe` は `0x0`
+  - ローカルの PowerShell は `0x0`
+  - IFEO の `sshd.exe` に `MitigationOptions`（19 バイト、最後が `0x10`）があった
+- 信頼の判定を試した（向き先はどれも `…\zoxide\0.9.9`）
+
+  | ジャンクション | 所有者 | SSH のセッションから開く |
+  |---|---|---|
+  | 一般ユーザーの PowerShell で作った | `<HOSTNAME>\<WIN_USER>` | エラー 448 |
+  | 管理者の PowerShell（`sudo`）で作った | `BUILTIN\Administrators` | 開けた |
+  | 一般ユーザーで作り、管理者で所有者を Administrators に変えた（`icacls /setowner … /L`） | `BUILTIN\Administrators` | エラー 448 |
+
+- SSH のセッションで `PATH` の各ディレクトリを開くと、scoop の `current` を通る 7 つがエラー 448 だった（ほかに、ローカルにも無い WinGet のパスが 1 つ、エラー 2）
+- 対処
+  - 作り直す処理を一時的なジャンクションで試し、向き先の中身が残ること、読み取り専用の属性が戻ること、2 回目は何もしないこと、一般ユーザーが後から消せることを確かめた
+  - scoop の 53 個を作り直し、作り直す前に控えた一覧と、向き先・属性が一致した
+  - SSH のセッションで `zoxide`・`rg`・`fd`・`nvim`・`gh`・`jq`・`lazygit`・`node`・`python` が動き、`Shim:` の行は出なくなった。`PATH` の scoop の 7 つも開けた
+  - 最後に、`zoxide` の `current` を一般ユーザーで作り直して壊し、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)の 2 つのブロックをそのまま流して、直ることを確かめた（手順 1 は 1 行を出し、2 回目は何も出さなかった）
+
 **残っている未確認事項**:
 
 1. LAN の別の PC（AlmaLinux 10）からの接続。送信元が LAN の別の IP になる接続は、まだ流していない
@@ -631,4 +719,4 @@ d----        logs
 1. 標準ユーザーの `authorized_keys`、パスワード（Microsoft アカウント）でのログイン
 1. 既定の UAC の設定で、SSH のセッションが High Mandatory Level になるか
 1. Windows の再起動の後に sshd が自動で起動するか、Windows Update での OpenSSH の更新
-1. SSH のセッションでジャンクションをたどれない原因
+1. `scoop update` の後に、更新したアプリが SSH のセッションで起動しなくなり、scoop の任意節の手順 1 で直ること（理屈の上ではそうなるが、実際の更新では試していない）
