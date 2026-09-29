@@ -69,6 +69,7 @@
    - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）
    - `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
    - `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
+   - [git.md 手順 6](git.md#実施手順) でも同じ値を入れる。先に通していても、同じキーが書き直されるだけ
 
    <details>
    <summary>補足: キー名は小文字に正規化される</summary>
@@ -228,6 +229,8 @@
    ```bash
    git config --global --unset merge.conflictstyle     # zdiff3 も戻す場合
    ```
+
+   - [git.md](git.md) を通したなら外さない（同じ設定を使う）
 
 1. delta の設定が消えたか確かめる。
 
