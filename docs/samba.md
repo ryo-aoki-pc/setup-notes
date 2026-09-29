@@ -8,7 +8,7 @@
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
+- 手順の後: root のホーム（`/root`）も公開するなら、[root のホームも公開する（任意）](#root-のホームも公開する任意)を行う。接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 1. 公開するユーザー自身のシェルで、変数を設定する（`sudo -i` した root のシェルでは貼らない）。
 
@@ -22,6 +22,7 @@
 
    - 最後に値を読み戻して確かめる
    - `USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
+   - root のホームも公開したいときも、ここでは自分のユーザーで進める。root のホームは、手順の後の[root のホームも公開する（任意）](#root-のホームも公開する任意)で足す
    - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
    <details>
@@ -30,6 +31,7 @@
    - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
    - `SERVER_IP` が間違っていても、手順 11 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
    - 公開するのは `${USER}`（このシェルのユーザー）のホーム。`sudo -i` した root のシェルでは `root` になり、手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
+   - root のシェルで進めると、root の Samba ユーザーができるうえ、`/root` のラベル（`admin_home_t`）は手順 4 の boolean の対象外なので、手順 11 の `ls` も通らない。root のホームは、自分のユーザーのまま入れる `[root]` 共有で足す（[root のホームも公開する（任意）](#root-のホームも公開する任意)）
    - `ALLOW_FROM` は[接続元を絞る](#接続元を絞る任意)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 
    </details>
@@ -282,6 +284,156 @@
 
 ---
 
+## root のホームも公開する（任意）
+
+- **root のホーム（`/root`）を公開しないなら、この節は不要**
+- `\\<SERVER_IP>\root` で `/root` を読み書きできるようにする。つなぐのは手順 6 で登録した自分の Samba ユーザーのままで、root の Samba ユーザーは作らない
+- smbd は、この共有の中を root として読み書きする（`force user = root`）。作ったファイルは root の所有になる
+- 手順 1 の変数を設定した、公開したユーザー自身のシェルで貼る（`${USER}` を `valid users` に書く）
+- **この節の手順 3 には対話入力がある**（`smbclient` のパスワード）
+- 補足: [root のホームを公開するときの補足](#root-のホームを公開するときの補足)
+
+> [!WARNING]
+> - `<USER>` の Samba のパスワードが、root のパスワードと同じ重みになる。`/root/.bashrc` や `/root/.ssh/authorized_keys` も書き換えられるので、root で任意のコマンドを動かせる。パスワードは長いものにし、[接続元を絞る](#接続元を絞る任意)も検討する
+> - この節は **x86_64 の VM でのみ検証した**。実機では本実行していない（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
+
+1. smb.conf の末尾に `[root]` 共有を足し、構文を検査する。
+
+   ```bash
+   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。公開したユーザー自身のシェルで貼る' >&2
+   elif grep -q '^\[root\]' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [root] が既にある' >&2
+   else
+     sudo tee -a /etc/samba/smb.conf >/dev/null <<EOF
+
+   [root]
+       comment = Home of root
+       path = /root
+       valid users = ${USER}
+       force user = root
+       browseable = No
+       read only = No
+       create mask = 0644
+   EOF
+     testparm -s
+   fi
+   ```
+
+   - `testparm -s` の末尾に `[root]` の節が出て、`force user = root` と `valid users = <USER>` があればよい
+   - `中断:` と出たら、何も書き換えていない
+
+   <details>
+   <summary>補足: [root] の各行</summary>
+
+   - `path = /root`: `[homes]` と違い、共有の場所を書く普通の共有
+   - `valid users = ${USER}`: 入れるのは `<USER>` だけ。ほかの Samba ユーザーは、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`（VM で確認）
+   - `force user = root`: つないだ後のファイル操作を root として行う。`/root` は `dr-xr-x---`（0550）だが、root として扱うので書ける（smbd の SELinux のドメイン `smbd_t` は `dac_override` を持つ）
+   - `browseable = No`: 共有の一覧（`smbclient -L`）に出さない。つなぐときは共有名 `root` を直接指定する
+   - `create mask = 0644`: `[homes]` と同じ理由（[smb.conf の各行の根拠](#smbconf-の各行の根拠)）
+   - root は OS のユーザーなので、`[homes]` も `root` という名前の共有を出そうとする。同じ名前の節があれば、そちらが使われる（VM では、`[root]` を消すと `<USER>` の接続が `[homes]` の `valid users = %S` で断られた）
+   - ヒアドキュメントは `${USER}` を展開するので、引用符なしの `<<EOF`。先頭の空行は、手順 3 の `[homes]` との区切り
+
+   </details>
+
+1. SELinux で、smbd に `/root`（`admin_home_t`）の読み書きを許すモジュールを入れる。
+
+   ```bash
+   {
+     cat > /tmp/samba_root_home.cil <<'EOF'
+   (allow smbd_t admin_home_t (dir (add_name create getattr ioctl link lock open read remove_name rename reparent rmdir search setattr unlink watch watch_reads write)))
+   (allow smbd_t admin_home_t (file (append create getattr ioctl link lock open read rename setattr unlink watch watch_reads write)))
+   (allow smbd_t admin_home_t (lnk_file (append create getattr ioctl link lock read rename setattr unlink watch watch_reads write)))
+   EOF
+     sudo semodule -i /tmp/samba_root_home.cil
+     rm /tmp/samba_root_home.cil
+     sudo semodule -l | grep -x samba_root_home   # samba_root_home
+   }
+   ```
+
+   - 最後に `samba_root_home` の 1 行が出ればよい
+   - `semodule -i` は、終わるまでしばらく何も出さない（VM では約 50 秒）
+
+   <details>
+   <summary>補足: モジュールが要る理由</summary>
+
+   - 手順 4 の `samba_enable_home_dirs` が smbd に許すのは、一般ユーザーのホームのラベル（属性 `user_home_type`）だけ。`/root` とその中のファイルは `admin_home_t` で、この属性に入っていない（`seinfo -t admin_home_t -x`）
+   - そこで、boolean が `user_home_type` の dir / file / lnk_file に許すのと同じ許可を、`admin_home_t` に足す（VM の `sesearch -A -s smbd_t -t ssh_home_t` で見た許可の並び）
+   - `/root/.ssh`（`ssh_home_t`）や `/root/.config`（`config_home_t`）は `user_home_type` なので、手順 4 の boolean で既に許されている
+   - CIL は `semodule -i` がそのまま読むので、`checkpolicy`（`checkmodule`）などを入れなくてよい。入れたモジュールは優先度 400 に置かれる（`semodule -lfull` の `400 samba_root_home cil`）
+   - モジュールを入れずに `[root]` へつないだときの表示（VM で確認）:
+     - `ls` は `NT_STATUS_ACCESS_DENIED listing \*`。**AVC は出ない**（`admin_home_t` のディレクトリの読み取りは dontaudit されている）
+     - ファイルの取得は `NT_STATUS_ACCESS_DENIED opening remote file \.bashrc` で、AVC は `denied { getattr } … tcontext=system_u:object_r:admin_home_t:s0 tclass=file`
+     - 書き込みは `NT_STATUS_ACCESS_DENIED opening remote file \x.txt` で、AVC は `denied { write } … name="root" … tclass=dir`
+
+   </details>
+
+1. smb.service を再起動し、自分の Samba ユーザーで `/root` の一覧と書き込みを確かめる。
+
+   ```bash
+   {
+     sudo systemctl restart smb.service
+     smbclient //localhost/root -U "${USER}" -c 'ls; put /etc/hostname smb-root-test.txt; ls smb-root-test.txt'
+   }
+   ```
+
+   - パスワードは、手順 6 で登録した `<USER>` の Samba のパスワード
+   - `/root` の中身（`.bashrc` や `.ssh` など）の一覧に続いて、`putting file /etc/hostname as \smb-root-test.txt` と `smb-root-test.txt` の 1 行が出ればよい
+   - 再起動すると、ほかのクライアントのつないでいる接続が切れる
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. 作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
+
+   ```bash
+   {
+     sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
+     sudo rm /root/smb-root-test.txt
+     sudo ausearch -m AVC -ts recent              # <no matches>
+   }
+   ```
+
+   - ファイルは `root root` の所有で、ラベルは `admin_home_t`
+   - `ausearch` が `<no matches>` ならよい
+
+   <details>
+   <summary>補足: 作ったファイル</summary>
+
+   - SMB から `/root` に作ったものは、名前にかかわらず `admin_home_t` になる。VM では、SMB で作った `/root/.config` も `admin_home_t` だった（ローカルで作れば `config_home_t`）
+   - ほかのプログラムがラベルで困ったら、`sudo restorecon -Rv /root/.config` のように既定のラベルに戻す（VM では `config_home_t` に戻り、その後も SMB から読み書きできた）
+   - 既にラベルの付いたディレクトリの中に作ったものは、そのディレクトリのラベルになる（VM では、`/root/.ssh` に作ったファイルは `ssh_home_t`）
+   - `-ts recent` は直近 10 分。この節の手順 3 から時間がたったときは `-ts today` にする
+
+   </details>
+
+1. 別のマシンから、共有名 `root` でつなぐ（未検証）。
+
+   - 手順 15 の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
+   - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`。`\\<SERVER_IP>\<USER>` と同じ資格情報なので、両方を同時に開けるはず（別のユーザー名で同じサーバーにつなぐと、Windows はエラー 1219 で断る）
+   - AlmaLinux 10 の PC なら、[samba-client.md](samba-client.md) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
+
+1. 元に戻すときは、`[root]` の節とモジュールを消し、smb.service を再起動する。
+
+   ```bash
+   {
+     sudo sed -i '/^\[root\]$/,/^\[/{/^\[root\]$/d;/^\[/!d}' /etc/samba/smb.conf
+     sudo semodule -r samba_root_home
+     sudo systemctl restart smb.service
+     testparm -s 2>/dev/null | grep -c '^\[root\]'   # 0
+   }
+   ```
+
+   - 最後に `0` と出ればよい（`[root]` の節が残っていない）
+   - `semodule -r` は約 50 秒（VM）かかり、`libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と出る。エラーではない
+
+   <details>
+   <summary>補足: 元に戻す</summary>
+
+   - `sed` は、`[root]` の行から次の `[` で始まる行の手前までを消す。`[root]` の後ろに別の節を足していても、その節は残る
+   - この節の手順 1 で足した先頭の空行は、ファイルの末尾に残る（`testparm` は気にしない）
+   - 戻した後の `//<SERVER_IP>/root` は、`<USER>` では `tree connect failed: NT_STATUS_ACCESS_DENIED`（`[homes]` の `valid users = %S`）
+
+   </details>
+
+---
+
 ## 接続元を絞る（任意）
 
 - **接続元を制限しないなら、この節は不要**
@@ -327,7 +479,7 @@
 - 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
 
 > [!CAUTION]
-> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。手順 6 の補足）。**この節の**手順 2 の「完全に消すなら」で消すと、中の登録は取り戻せない。
+> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。手順 6 の補足）。**この節の**手順 3 の「完全に消すなら」で消すと、中の登録は取り戻せない。
 
 1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
 
@@ -344,6 +496,15 @@
 
    - 公開したユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
    - 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
+   - [root のホームも公開した](#root-のホームも公開する任意)ときの `[root]` の節も、最後の `smb.conf` の復元で消える
+
+1. root のホームも公開していたときだけ、SELinux のモジュールを外す。
+
+   ```bash
+   sudo semodule -r samba_root_home
+   ```
+
+   - `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` の 1 行が出て終わればよい（VM では約 50 秒）
 
 1. パッケージも消すときだけ、samba・samba-client・cifs-utils を消す。
 
@@ -362,7 +523,8 @@
 ### 対象と検証環境
 
 - **目的**: ローカルユーザーが**自分のホームディレクトリ**に、LAN と WireGuard 越し（`wg0`）の両方から SMB3 で読み書きできるようにする
-  - 共有は Samba の `[homes]` 機構（ユーザー名と同じ名前の共有が自動で現れ、本人しか入れない）だけを使う
+  - 共有は Samba の `[homes]` 機構（ユーザー名と同じ名前の共有が自動で現れ、本人しか入れない）を使う
+  - 任意で、root のホーム（`/root`）も `[root]` 共有で公開できる。入るのは自分の Samba ユーザーのままで、smbd は root として読み書きする（[root のホームも公開する（任意）](#root-のホームも公開する任意)）
   - 印刷・NetBIOS・ゲストアクセスは持たない
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `WORKGROUP` と、接続元を絞る場合の `ALLOW_FROM` だけ
@@ -374,7 +536,12 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）。中のコマンドは変えていない
     - 手順 3 の smb.conf の字下げを、TAB から空白に変えた。TAB は、ブラケットペースト無しで貼ると bash の補完で `.` に置き換わった（手順 3 の補足）
     - 直した後の手順 1〜14 とロールバックを、x86_64 の VM にブラケットペースト無しで貼って通した。VM は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じもので、まっさらな状態から始めた
-    - その VM には `samba-common` が入っていなかったので、手順 2 で一緒に入り、ロールバックの手順 2 で一緒に消えた
+    - その VM には `samba-common` が入っていなかったので、手順 2 で一緒に入り、ロールバックの手順 3 で一緒に消えた
+  - 2026-09-29: [root のホームも公開する（任意）](#root-のホームも公開する任意)と、[ロールバック](#ロールバック)の手順 2 を足した
+    - **この 2 つは x86_64 の VM でのみ検証した**。実機では本実行していない
+    - まっさらな VM で手順 1〜14 を通した後、root の節の手順 1〜4・6 とロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
+    - 確認したこと: `/root` の一覧・読み書き・改名・削除で AVC が出ないこと、作ったファイルが `root root` の `admin_home_t` になること、2 人目の Samba ユーザーが入れないこと、samba-client.md の手でのマウント（`SHARE=root`）、モジュールが無いときの失敗の表示
+    - 確認していないこと: 実機、Windows などのクライアントからの接続（エラー 1219 を避けられることも）、WireGuard 越しの接続
 
 | 項目 | 値 |
 |---|---|
@@ -468,6 +635,16 @@
   - ホームディレクトリのラベルは変えないので、`restorecon` は不要
   - `samba_export_all_rw` は全ファイルへの書き込みを許す粗い boolean なので使わない
   - `use_samba_home_dirs` は「ホームが CIFS マウントされているクライアント側」のための boolean で、サーバーには関係ない
+- **root のホームは `[root]` 共有（`force user = root`）で公開し、root の Samba ユーザーは作らない**
+  - `sudo smbpasswd -a root` だけでも、`[homes]` が `root` という共有を出す。ただし SELinux のモジュールが無いと、`ls` は `NT_STATUS_ACCESS_DENIED listing \*` で通らない（VM で確認）
+  - root を登録しないのは、誰でも知っているユーザー名 root に、パスワードで入れる口を作らないため
+  - Windows は、同じサーバーに別のユーザー名で同時につなげない（エラー 1219）。root で入る形にすると、`<USER>` の共有と root の共有を並べて開けない
+  - `[root]` なら `<USER>` の資格情報のまま入れ、クライアントの資格情報ファイルも 1 つで済む
+- **root のホームの SELinux は、`admin_home_t` だけを smbd に許す CIL のモジュールにする**
+  - 手順 4 の `samba_enable_home_dirs` は、一般ユーザーのホームのラベル（`user_home_type`）だけが対象で、`/root`（`admin_home_t`）に効かない
+  - `samba_export_all_rw` は全ファイルへの書き込みを許すので使わない（上の boolean と同じ方針）
+  - `/root` の中身をまとめて `samba_share_t` に貼り替える方法も採らない。sshd などがラベルで読むファイル（`/root/.ssh` の `ssh_home_t` など）まで変わるため
+  - CIL は `semodule -i` がそのまま読むので、`checkpolicy` などの道具を足さずに済む
 - **接続元の制限は `smb.conf` の `hosts allow` ではなく firewalld で行う**
   - GNOME Remote Desktop の手順書と同じ方式にし、変数の扱いと二重引用符の落とし穴を共通にした
   - `hosts allow` で二重に絞ることもできるが、設定場所が 2 つになるのでやらない
@@ -572,6 +749,16 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 <USER>       77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -            -
 ```
 
+### root のホームを公開するときの補足
+
+- **公開されるのは `/root` の全体**
+  - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](#root-のホームも公開する任意)の手順 2 のモジュールで許す
+  - `.ssh`（`ssh_home_t`）・`.gnupg`（`gpg_secret_t`）・`.config`（`config_home_t`）などは、一般ユーザーのホームと同じ `user_home_type` のラベルなので、手順 4 の boolean で既に許されている
+  - VM では、SMB から `/root/.ssh/authorized_keys` を取得でき、`/root/.ssh` へのファイルの書き込みと `/root/.bashrc` の書き換えも通った（AVC は出ない）
+- **入るのは `<USER>`**: `pdbedit -L` は `<USER>` の 1 行のまま（root は出ない）。`smbstatus` では、Username が `<USER>`、Service が `root` になる
+- **クライアントでの見え方**: [samba-client.md](samba-client.md) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
+- **以前に `smbpasswd -a root` で root を登録していたら**: VM では、`sudo smbpasswd -x root` は `Failed to delete entry for user root.` で消せず、`sudo pdbedit -x -u root` で消えた
+
 ### 接続元を絞るときの補足
 
 - `ALLOW_FROM` の各サブネットについて、rich rule を 1 本ずつ足す
@@ -589,7 +776,8 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - **Samba のパスワードは OS と別**: OS のパスワードを変えても Samba 側は変わらない。変えるときは `sudo smbpasswd "${USER}"`
 - **ユーザー名は OS アカウントと一致が必須**
   - 存在しないユーザー、間違ったパスワードは、どちらも `NT_STATUS_LOGON_FAILURE`
-  - 他人のホーム（`//<SERVER_IP>/root` など）は、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`
+  - 他人のホーム（`//<SERVER_IP>/<別のユーザー>`。`[root]` を足していなければ `//<SERVER_IP>/root` も）は、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`
+- **root の共有は root と同じ重み**: [root のホームも公開した](#root-のホームも公開する任意)ら、`<USER>` の Samba のパスワードで `/root/.bashrc` や `/root/.ssh/authorized_keys` を書き換えられる
 - **`create mask` を変えても既存ファイルのモードは変わらない**: 手順 3 の前にホームに置いていたファイルのモードはそのまま
 - **`nmb` を起動しない構成なので、Windows のエクスプローラーで「ネットワーク」から見つけることはできない**: `\\<SERVER_IP>\<USER>` を直接入力する。一覧に出したいなら `wsdd`
 
@@ -834,3 +1022,163 @@ $ sudo ip netns exec smbtest smbclient "//192.168.250.1/${SMB_USER}" -A "${AUTHF
 - 拠点 A の LAN や外出先クライアントから WireGuard 越しに `<WG_IP>` へ接続すること（firewalld の通過は network namespace で確認したが、実際のトンネル経由では未確認）
 - `server smb encrypt = required` にしたときのクライアント互換性
 - 2 人目以降のユーザー（`useradd` → `smbpasswd -a` の追加だけで済むはずだが未実施）
+
+### 付録: root のホームを公開する節の VM での検証（2026-09-29）
+
+[root のホームも公開する（任意）](#root-のホームも公開する任意)と、[ロールバック](#ロールバック)の手順 2 を足したときの記録。x86_64 のクラウドのホストの上の、使い捨ての VM で行った。実機で加えた変更は無い。
+
+**環境**:
+
+- ホストは Ubuntu 24.04 / x86_64 のクラウドの VM（`/dev/kvm` 無し）。QEMU 8.2.2 の TCG（`-accel tcg,thread=multi -cpu max -smp 4 -m 4096`）で、`AlmaLinux-10-GenericCloud-10.2-20260817.0.x86_64.qcow2`（`CHECKSUM` の SHA-256 と一致）を起動した
+- 作り方は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じ
+  - cloud-init で、`<USER>`（uid 1000、`wheel`。`sudo` はパスワードを聞く）と、確かめ用の 2 人目（uid 1001、NOPASSWD の `sudo`）を作った
+  - プロキシの CA、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=` を入れた
+  - `dnf upgrade`（カーネルは 6.12.0-211.56.1）の後、確かめ用に `setools-console`・`policycoreutils-python-utils`・`firewalld`（有効にした）・`glibc-langpack-ja`・`tmux` を入れた。このディスクを残し、回ごとに overlay で起動した
+- 版: `selinux-policy-targeted-42.1.18-4.el10_2.3`、`policycoreutils-3.10-2.el10_2`、`samba-4.23.5-110.el10_2`、`sudo-1.9.17-10.p2.el10_2.6`、firewalld 2.4.3。SELinux は Enforcing
+- GenericCloud の `/root` は `dr-xr-x---`（`admin_home_t`）で、シェルの設定ファイル 5 つ（`admin_home_t`）と、cloud-init が作る `.ssh`（`ssh_home_t`）がある
+
+**方針を決めた下調べ**（VM の `seinfo` と `sesearch`）:
+
+- `samba_enable_home_dirs` が smbd に許すのは、属性 `user_home_type` のラベル。`ssh_home_t`・`config_home_t`・`cache_home_t`・`gpg_secret_t` などは入っているが、`admin_home_t` は入っていない
+- `admin_home_t` のディレクトリは、どのドメインにも `getattr open search` だけが許され、デーモンの `read` は dontaudit。モジュールが無いときの `ls` で AVC が出ないのはこのため
+- `smbd_t` のケーパビリティには `dac_override` がある
+
+```
+$ seinfo -t admin_home_t -x
+   type admin_home_t, file_type, mountpoint, non_auth_file_type, non_security_file_type, polymember, polyparent;
+$ seinfo -t ssh_home_t -x
+   type ssh_home_t alias { … }, file_type, non_auth_file_type, non_security_file_type, polymember, polyparent, user_home_type;
+$ sesearch -A -s smbd_t -t ssh_home_t
+…
+allow smbd_t user_home_type:dir { add_name create ioctl link lock read remove_name rename reparent rmdir setattr unlink watch watch_reads write }; [ samba_enable_home_dirs ]:True
+allow smbd_t user_home_type:dir { getattr open search };
+$ sesearch --dontaudit -s smbd_t -t admin_home_t
+dontaudit daemon admin_home_t:dir { getattr ioctl lock open read search };
+…
+```
+
+**root を `smbpasswd -a` で登録したとき**（`[homes]` のまま、モジュール無し）: `[homes]` は `root` の共有を出すが、`ls` は通らない。登録は `smbpasswd -x` では消せなかった:
+
+```
+$ sudo pdbedit -L
+<USER>:1000:
+root:0:Super User
+<2 人目>:1001:
+$ smbclient //localhost/root -A <root の資格情報ファイル> -c 'ls'
+NT_STATUS_ACCESS_DENIED listing \*
+$ smbclient //localhost/root -A <root の資格情報ファイル> -c 'get .bashrc /tmp/r.bashrc'
+NT_STATUS_ACCESS_DENIED opening remote file \.bashrc
+$ sudo smbpasswd -x root
+Failed to delete entry for user root.
+$ sudo pdbedit -x -u root
+$ sudo pdbedit -L
+<USER>:1000:
+<2 人目>:1001:
+```
+
+**`[root]` を足し、モジュールを入れる前**:
+
+```
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'ls'
+NT_STATUS_ACCESS_DENIED listing \*
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'get .bashrc /tmp/t.bashrc'
+NT_STATUS_ACCESS_DENIED opening remote file \.bashrc
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'put /etc/hostname x.txt'
+NT_STATUS_ACCESS_DENIED opening remote file \x.txt
+$ sudo ausearch -m AVC -ts recent
+avc:  denied  { getattr } for  pid=… comm="smbd[127.0.0.1]" path="/root/.bashrc" dev="vda4" ino=… scontext=system_u:system_r:smbd_t:s0 tcontext=system_u:object_r:admin_home_t:s0 tclass=file permissive=0
+avc:  denied  { write } for  pid=… comm="smbd[127.0.0.1]" name="root" dev="vda4" ino=… scontext=system_u:system_r:smbd_t:s0 tcontext=system_u:object_r:admin_home_t:s0 tclass=dir permissive=0
+```
+
+**モジュールを入れた後**（下調べの VM で、手順書のブロックとは別に確かめたこと）:
+
+- `semodule -i` は 53 秒、`semodule -r` は 50 秒（`time` の real）
+- `put`・`get`・`mkdir`・`rename`・`allinfo`・`del`・`rmdir` が通り、`ausearch -m AVC` は何も出さなかった
+- `.ssh/authorized_keys` を `get` で取得できた。SMB で作った `.config` とその中のファイルは `admin_home_t` だった
+- 2 人目は `tree connect failed: NT_STATUS_ACCESS_DENIED`。`smbclient -L` の一覧は、どちらのユーザーでも自分の共有と `IPC$` だけ
+- `mount.cifs` でマウントしている間の `smbstatus` では、Username は `<USER>`、Service は `root`
+- 元に戻した後の `//localhost/root` は、`<USER>` では `tree connect failed: NT_STATUS_ACCESS_DENIED`
+- `semodule -r` は、標準エラーに `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module (no other samba_root_home module exists at another priority).` と出した（端末で貼った回も同じ）
+
+```
+$ sudo ls -laZ /root /root/d1
+/root:
+dr-xr-x---.  4 root root system_u:object_r:admin_home_t:s0 113 Sep 29 11:30 .
+…
+drwxr-xr-x.  2 root root system_u:object_r:admin_home_t:s0  23 Sep 29 11:30 d1
+drwx------.  2 root root system_u:object_r:ssh_home_t:s0    29 Sep 29 10:42 .ssh
+…
+/root/d1:
+-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0   6 Sep 29 11:30 moved.txt
+$ sudo smbstatus
+…
+PID     Username     Group        Machine                                   Protocol Version  Encryption           Signing
+…       <USER>       <USER>       127.0.0.1 (ipv4:127.0.0.1:…)              SMB3_11           -                    partial(AES-128-CMAC)
+
+Service      pid     Machine       Connected at                     Encryption   Signing
+root         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -            -
+IPC$         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -            -
+```
+
+**手順書のブロックを貼った回**:
+
+- ホストから `ssh -t` で `<USER>` としてログインし、この文書と samba-client.md から抜き出したコードブロックを、pexpect で端末に送った
+  - 貼り方は 2 通りで、それぞれまっさらな overlay から通した: ブラケットペースト無し（行をそのまま打ち込む）と、ブラケットペースト（`ESC [200~` と `ESC [201~` で包んで送ってから Enter）
+  - `sudo` のパスワード、`smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
+- 1 つのシェルで、次の順に貼った
+  - 手順 1〜14
+  - `sudo -i` した root のシェルで、root の節の手順 1
+  - root の節の手順 1〜4
+  - samba-client.md の手順 1〜6（`SERVER=127.0.0.1`、`SHARE=root` に書き換えた）と、同書のロールバックの手順 3（マウント先と資格情報ファイルを消す）
+  - 別の ssh のセッションから、2 人目を Samba に登録して `[root]` へつなぐ（手順書の外）
+  - root の節の手順 1（2 回目）、手順 6、手順 1・2（入れ直し）
+  - ロールバックの手順 1〜3
+- ブラケットペーストの回では、2 人目の確認と同じところで、`.ssh` へのファイルの書き込み、`.bashrc` の書き換え（元の内容に戻した）、SMB で作った `.config` への `restorecon` も確かめた。どれも AVC は出なかった
+- この 2 回の前に 2 回流し始めたが、貼る道具の不具合（プロンプトの待ち方と、送るパスワードの取り違え）で途中で止まったので捨てた
+
+| 貼ったもの | 結果（2 回とも同じ） |
+|---|---|
+| 手順 1〜14 | 2026-09-28 の記録と同じ。手順 14 の `ausearch` は `<no matches>` |
+| root のシェルで、root の節の手順 1 | `中断: USER が空か root。公開したユーザー自身のシェルで貼る`。smb.conf は変わらない |
+| root の節の手順 1 | `testparm -s` の末尾に `[root]`（`force user = root`、`path = /root`、`valid users = <USER>`） |
+| root の節の手順 2 | `samba_root_home` の 1 行 |
+| root の節の手順 3 | `/root` の一覧（`.ssh`・`.bashrc` など）、`putting file /etc/hostname as \smb-root-test.txt`、`smb-root-test.txt` の 1 行 |
+| root の節の手順 4 | `-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0 6 … /root/smb-root-test.txt` と `<no matches>` |
+| samba-client.md の手順 5・6 | `/root/smb-<USER>@127.0.0.1.cred`、`//127.0.0.1/root` の `cifs`（`vers=3.1.1`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0 … /mnt/root` |
+| 2 人目 | `tree connect failed: NT_STATUS_ACCESS_DENIED`。`smbclient -L` に `root` は出ない |
+| root の節の手順 1（2 回目） | `中断: /etc/samba/smb.conf に [root] が既にある` |
+| root の節の手順 6 | `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と `0`。smb.conf の末尾には空行が 1 つ残る |
+| ロールバックの手順 1〜3 | `semodule -l` に `samba_root_home` が無く、パッケージも消えた。`ausearch -m AVC -ts today` は最後まで `<no matches>` |
+
+- root の節の手順 3 の一覧には `.bash_history` も出た。直前に `sudo -i` で root のシェルを開いたため
+
+ブラケットペーストの回の、書き込みとラベルの確認（手順書の外。`<USER>` の資格情報ファイルで `smbclient` を使った）:
+
+```
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'get .bashrc /tmp/bashrc.orig; put /etc/hostname .ssh/smb-write-test'
+getting file \.bashrc of size 429 as /tmp/bashrc.orig (6.5 KiloBytes/sec) (average 6.5 KiloBytes/sec)
+putting file /etc/hostname as \.ssh\smb-write-test (0.1 kB/s) (average 0.1 kB/s)
+$ sudo ls -lZ /root/.ssh/
+-rw-------. 1 root root system_u:object_r:ssh_home_t:s0 0 Sep 29 10:42 authorized_keys
+-rw-r--r--. 1 root root system_u:object_r:ssh_home_t:s0 6 Sep 29 13:00 smb-write-test
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'put /tmp/bashrc.new .bashrc'      # 末尾に 1 行足したもの
+putting file /tmp/bashrc.new as \.bashrc (8.5 kB/s) (average 8.5 kB/s)
+$ sudo tail -n 2 /root/.bashrc; sudo ls -lZ /root/.bashrc
+alias mv='mv -i'
+# smb write test
+-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0 446 Sep 29 13:00 /root/.bashrc
+$ smbclient //localhost/root -A <USER の資格情報ファイル> -c 'mkdir .config; put /etc/hostname .config/x'
+$ sudo restorecon -Rv /root/.config
+Relabeled /root/.config from system_u:object_r:admin_home_t:s0 to system_u:object_r:config_home_t:s0
+Relabeled /root/.config/x from system_u:object_r:admin_home_t:s0 to system_u:object_r:config_home_t:s0
+$ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh から流したので --input-logs
+<no matches>
+```
+
+`.bashrc` は元の内容を `put` し直し、`.ssh/smb-write-test` と `.config` は SMB から消した。
+
+#### 未確認事項（root の節）
+
+- 実機（Raspberry Pi の拠点 B のホスト）での実行
+- Windows・macOS などのクライアントから `root` の共有につなぐこと。Windows で `<USER>` の共有と同時に開けること（エラー 1219 が出ないこと）
+- samba-client.md の自動マウント（手順 7・8）を `SHARE=root` で行うこと
