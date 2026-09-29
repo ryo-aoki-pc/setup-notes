@@ -3,17 +3,17 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **手順 3〜9 は Windows で、管理者の Windows PowerShell（5.1）に貼る**。スタートメニューの「Windows PowerShell」を右クリックして「管理者として実行」で開く。PowerShell 7（`pwsh`）では手順 4 が失敗する
-> - **手順 1・2・10〜12 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
-> - SSH でログインするのは、手順 3〜9 を貼る Windows のユーザー自身。そのユーザーが Administrators の一員であること（標準ユーザーは[注意点](#注意点)）
-> - **手順 1 と手順 11 には対話入力がある**（鍵のパスフレーズ、ホスト鍵の確認）。入力し終えてから次の手順を貼る
+> - **手順 3〜10 は Windows で行う**。手順 3 で管理者の Windows PowerShell（5.1）を開き、手順 4〜10 をそこに貼る
+> - **手順 1・2・11〜13 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
+> - SSH でログインするのは、手順 4〜10 を貼る Windows のユーザー自身。そのユーザーが Administrators の一員であること（標準ユーザーは[注意点](#注意点)）
+> - **手順 1 と手順 12 には対話入力がある**（鍵のパスフレーズ、ホスト鍵の確認）。入力し終えてから次の手順を貼る
 
-- 上から順にコードブロックを貼る。Windows の手順は手順 3 で変数を設定した PowerShell に、クライアントの手順は手順 10 で変数を設定したシェルに貼る
+- 上から順にコードブロックを貼る。Windows の手順は手順 4 で変数を設定した PowerShell に、クライアントの手順は手順 11 で変数を設定したシェルに貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: ログインしたときのシェルを Git Bash にするなら、[既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)を行う。scoop で入れたツールが SSH のセッションで起動しないなら、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。手順 7 で登録した鍵を持つ人は、この PC の管理者として操作できる（[注意点](#注意点)）。
+> **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。手順 8 で登録した鍵を持つ人は、この PC の管理者として操作できる（[注意点](#注意点)）。
 
 1. クライアントの PC で、鍵ペアが無ければ作る。
 
@@ -28,8 +28,8 @@
    <details>
    <summary>補足: 鍵の種類とパスフレーズ</summary>
 
-   - ED25519 にしたのは、Windows の sshd（OpenSSH 9.5p2）と AlmaLinux 10 の ssh（OpenSSH 9.9p1）のどちらも扱え、鍵が短く、手順 3 で 1 行のまま貼れるため
-   - パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、手順 11・12 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
+   - ED25519 にしたのは、Windows の sshd（OpenSSH 9.5p2）と AlmaLinux 10 の ssh（OpenSSH 9.9p1）のどちらも扱え、鍵が短く、手順 4 で 1 行のまま貼れるため
+   - パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、手順 12・13 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
    - 秘密鍵（`~/.ssh/id_ed25519`）はクライアントから出さない。Windows に渡すのは、手順 2 の公開鍵だけ
 
    </details>
@@ -40,8 +40,13 @@
    cat ~/.ssh/id_ed25519.pub
    ```
 
-   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、手順 3 で Windows に貼る
+   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、手順 4 で Windows に貼る
    - 公開鍵は秘密ではない。チャットやメールで Windows 側へ渡してもよい
+
+1. Windows で、管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+   - PowerShell 7（`pwsh`）では、手順 5 が失敗する
 
 1. Windows の管理者の PowerShell で、変数を設定する（`$PUBKEY` は必ず値を入れる）。
 
@@ -57,14 +62,14 @@
    - 編集が必須なのは `$PUBKEY` だけ。改行を入れずに 1 行のまま貼る
    - 最後に値を読み戻して確かめる
    - `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）。クライアントとつながる接続と違えば、`$LAN_IF = 'Wi-Fi'` のように直す
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 3 の 2 つのブロックを貼り直してから先へ進む
+   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 4 の 2 つのブロックを貼り直してから先へ進む
 
    <details>
    <summary>補足: 変数について</summary>
 
-   - `$LAN_IF` は、手順 6（ネットワークをプライベートにする）、手順 9（接続先の IP を出す）、[ロールバック](#ロールバック)の手順 3 で使う
+   - `$LAN_IF` は、手順 7（ネットワークをプライベートにする）、手順 10（接続先の IP を出す）、[ロールバック](#ロールバック)の手順 3 で使う
    - 接続の一覧は `Get-NetConnectionProfile` で見られる。検証した PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
-   - `$PUBKEY` の値は手順 7 で確かめる。空、または `ssh-` などで始まらなければ、何もしないで止まる
+   - `$PUBKEY` の値は手順 8 で確かめる。空、または `ssh-` などで始まらなければ、何もしないで止まる
 
    </details>
 
@@ -109,8 +114,8 @@
    <details>
    <summary>補足: 最初の起動で作られるもの</summary>
 
-   - 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。手順 4 の直後は、このディレクトリは空（1 回目）か、無かった（2 回目。ロールバックで消した後）
-   - レジストリの `HKLM:\SOFTWARE\OpenSSH` も、手順 4 の直後には無く、この時点でできていた（値は無い）。[既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)は、ここに値を足す
+   - 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。手順 5 の直後は、このディレクトリは空（1 回目）か、無かった（2 回目。ロールバックで消した後）
+   - レジストリの `HKLM:\SOFTWARE\OpenSSH` も、手順 5 の直後には無く、この時点でできていた（値は無い）。[既定のシェルを Git Bash にする（任意）](#既定のシェルを-git-bash-にする任意)は、ここに値を足す
 
    </details>
 
@@ -118,7 +123,7 @@
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error '手順 3 の $LAN_IF が空'
+     Write-Error '手順 4 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
@@ -133,7 +138,7 @@
    <details>
    <summary>補足: プライベートにする理由</summary>
 
-   - 手順 4 でできる規則は、プライベートのネットワークだけで有効。検証した PC の有線 LAN は「パブリック」だったので、そのままでは LAN からの SSH が捨てられる
+   - 手順 5 でできる規則は、プライベートのネットワークだけで有効。検証した PC の有線 LAN は「パブリック」だったので、そのままでは LAN からの SSH が捨てられる
    - WSL の AlmaLinux 10 から、この PC の LAN の IP（`<WIN_HOST>`）の 22/tcp につないで確かめた
      - パブリックのとき: 5 秒待っても応答が無い
      - プライベートにした後: すぐにバナー（`SSH-2.0-OpenSSH_for_Windows_9.5`）が返った
@@ -146,7 +151,7 @@
 
    ```powershell
    if ($PUBKEY -notmatch '^(ssh-|ecdsa-|sk-)') {
-     Write-Error '手順 3 の $PUBKEY が空か、公開鍵の形でない'
+     Write-Error '手順 4 の $PUBKEY が空か、公開鍵の形でない'
    } elseif (-not (Get-LocalGroupMember -SID S-1-5-32-544 | Where-Object Name -like "*\$env:USERNAME")) {
      Write-Error "$env:USERNAME は Administrators の一員ではない（注意点を見る）"
    } else {
@@ -158,7 +163,7 @@
    ```
 
    - 最後の `icacls` に、`NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行だけが出ればよい
-   - クライアントを足すときは、そのクライアントで手順 1・2 を行い、手順 3 の `$PUBKEY` を貼り直してから、手順 7 を貼る（行が足される）
+   - クライアントを足すときは、そのクライアントで手順 1・2 を行い、手順 4 の `$PUBKEY` を貼り直してから、手順 8 を貼る（行が足される）
 
    <details>
    <summary>補足: 鍵の置き場所とアクセス権</summary>
@@ -192,7 +197,7 @@
    - 元の `sshd_config` は ASCII（BOM 無し、改行は CRLF）。Windows PowerShell 5.1 の `Set-Content -Encoding ascii` も CRLF で書く
    - パスワード認証を切るのは、鍵を持たない相手からのパスワードの総当たりを受け付けないため。検証した PC のユーザーは Microsoft アカウントで、Windows Hello だけでサインインする設定だったので、パスワードでのログインは試していない（[注意点](#注意点)）
    - この手順の前は、`ssh -o PubkeyAuthentication=no` で `<WIN_USER>@<WIN_HOST>'s password:` と聞かれ、sshd が返す方法は `publickey,password,keyboard-interactive` だった。後は `publickey,keyboard-interactive`
-   - 残る `keyboard-interactive` は、クライアントにパスワードを聞かずに、すぐ `Permission denied` で終わる（手順 12 で確かめる）。Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
+   - 残る `keyboard-interactive` は、クライアントにパスワードを聞かずに、すぐ `Permission denied` で終わる（手順 13 で確かめる）。Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
 
    </details>
 
@@ -203,8 +208,8 @@
    & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
    ```
 
-   - 1 行目の `<WIN_USER>@<WIN_HOST>` が、手順 10 で使う値
-   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` を、手順 11 の初回の接続で照合する
+   - 1 行目の `<WIN_USER>@<WIN_HOST>` が、手順 11 で使う値
+   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` を、手順 12 の初回の接続で照合する
    - Microsoft アカウントでも、ユーザー名はメールアドレスではなく、`C:\Users\` の下のフォルダーの名前
 
    <details>
@@ -218,28 +223,28 @@
 1. クライアントの PC で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 手順 9 の @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 手順 10 の @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。手順 9 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。手順 10 の @ の前と違えば直す。<WIN_USER>
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
    - 最後に値を読み戻して確かめる
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 10 の 2 つのブロックを貼り直してから先へ進む
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 11 の 2 つのブロックを貼り直してから先へ進む
 
 1. クライアントの PC で、ホスト鍵を照合してログインする。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 10 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 11 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}"
    fi
    ```
 
-   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。手順 9 の指紋と同じなら `yes`
+   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。手順 10 の指紋と同じなら `yes`
    - 鍵にパスフレーズを付けたなら、それを聞かれる
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
    - `exit` でクライアントのシェルに戻る
@@ -249,7 +254,7 @@
    <summary>補足: ログインした後のセッション</summary>
 
    - 既定のシェルは cmd.exe。sshd が `PROMPT` を `<ユーザー>@<ホスト名> <パス>>` の形にする
-   - 指紋が手順 9 と違えば、`no` で止める。途中の経路で別の相手につながっている
+   - 指紋が手順 10 と違えば、`no` で止める。途中の経路で別の相手につながっている
    - Windows のイベント ビューアーの「アプリケーションとサービス ログ」→「OpenSSH」→「Operational」に、`sshd: Accepted publickey for <WIN_USER> from <IP> port <PORT> ssh2: ED25519 SHA256:…` が残る。PowerShell では `Get-WinEvent -LogName OpenSSH/Operational -MaxEvents 10`
 
    </details>
@@ -257,7 +262,7 @@
 1. クライアントの PC で、鍵が無いと入れず、鍵ではコマンドが通ることを確かめる。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 10 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 11 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}" true
      ssh "${WIN_USER}@${WIN_HOST}" whoami
    fi
@@ -272,7 +277,7 @@
 
 - SSH でログインしたとき・コマンドを実行するときのシェルを、cmd.exe から Git for Windows の bash に変える
 - 前提: Git for Windows が `C:\Program Files\Git` に入っていること
-- この節の手順 1・3 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 10 のシェルに貼る
+- この節の手順 1・3 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 11 のシェルに貼る
 
 1. Windows で、既定のシェルを Git Bash にする。
 
@@ -298,7 +303,7 @@
 1. クライアントの PC で、bash になったことを確かめる。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 10 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 11 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'echo "$BASH_VERSION $MSYSTEM"; git --version'
      ssh "${WIN_USER}@${WIN_HOST}"
    fi
@@ -337,7 +342,7 @@
   - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
 - この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
 - 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること
-- この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 10 のシェルに貼る
+- この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 11 のシェルに貼る
 - `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
 
 1. Windows で、scoop のジャンクションを管理者で作り直す。
@@ -379,7 +384,7 @@
 1. クライアントの PC で、scoop のツールが動くことを確かめる。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 10 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 11 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
    fi
    ```
@@ -390,7 +395,7 @@
 
 ## ロールバック
 
-- この節の手順 1〜3 は Windows の管理者の Windows PowerShell（手順 3 の変数を設定したもの）に、手順 4 はクライアントの手順 10 のシェルに貼る
+- この節の手順 1〜3 は Windows の管理者の Windows PowerShell（手順 4 の変数を設定したもの）に、手順 4 はクライアントの手順 11 のシェルに貼る
 - 機能を外しても、`C:\ProgramData\ssh` とレジストリの `HKLM:\SOFTWARE\OpenSSH` は残る。この節の手順 2 で消す
 
 > [!CAUTION]
@@ -425,7 +430,7 @@
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error '手順 3 の $LAN_IF が空'
+     Write-Error '手順 4 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
@@ -433,12 +438,12 @@
    ```
 
    - `<LAN_IF>  Public` が出ればよい
-   - 手順 6 の前からプライベートだったなら、この手順は飛ばす
+   - 手順 7 の前からプライベートだったなら、この手順は飛ばす
 
 1. クライアントの PC で、Windows のホスト鍵を `known_hosts` から消す。
 
    ```bash
-   ssh-keygen -R "${WIN_HOST:?手順 10 の WIN_HOST が空のまま}"
+   ssh-keygen -R "${WIN_HOST:?手順 11 の WIN_HOST が空のまま}"
    ```
 
    - `# Host <WIN_HOST> found: line N` が鍵の種類の数だけ出て、`… known_hosts updated.` で終わればよい
@@ -452,14 +457,14 @@
 
 - **目的**: LAN のほかの PC（AlmaLinux 10 など）から、Windows 11 の PC に SSH で入れるようにする
   - Windows のオプション機能「OpenSSH サーバー」を入れ、公開鍵だけで認証する
-  - 受け付けるのは、プライベートにしたネットワークからだけ（手順 6）
+  - 受け付けるのは、プライベートにしたネットワークからだけ（手順 7）
   - ログインしたときのシェルを Git Bash にする方法と、scoop のツールを SSH のセッションで使う方法は、任意節にした
-- **進め方**: 値は、Windows では手順 3、クライアントでは手順 10 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
+- **進め方**: 値は、Windows では手順 4、クライアントでは手順 11 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
   - Windows の手順は管理者の Windows PowerShell に、クライアントの手順は bash に貼る
   - 読者が書き換えるのは、`$PUBKEY`（Windows）と `WIN_HOST`（クライアント）だけ
 - **状態**: **実機で本実行済み（2026-09-29）。クライアントは同じ PC の WSL の AlmaLinux 10**
-  - x86_64 のノート PC（Windows 11 Pro 25H2）で、手順 1〜12、Git Bash の任意節、ロールバックを通した。scoop の任意節は、その後に原因を調べて足し、同じ PC で通した
-  - ロールバックで実施前の状態に戻した後、この文書から機械的に抜き出したブロックで、手順 1〜12 と Git Bash の任意節の手順 1〜3 をもう 1 度通した
+  - x86_64 のノート PC（Windows 11 Pro 25H2）で、手順 1〜13、Git Bash の任意節、ロールバックを通した。scoop の任意節は、その後に原因を調べて足し、同じ PC で通した
+  - ロールバックで実施前の状態に戻した後、この文書から機械的に抜き出したブロックで、手順 1〜13 と Git Bash の任意節の手順 1〜3 をもう 1 度通した
   - コードブロックは端末に貼らず、Claude Code から昇格した Windows PowerShell 5.1 と、WSL の bash に、手順ごとのスクリプトにして渡した（[付録](#付録-実機での検証記録2026-09-29)）
   - 確認したこと:
     - 機能の導入（8〜9 分、再起動無し）、sshd の自動起動の設定と待ち受け
@@ -469,7 +474,7 @@
     - Git Bash での `git`・`scp`・`scp -O`・`sftp`、`DefaultShell` を消すと cmd に戻ること
     - SSH のセッションで scoop のツールが起動しない原因（sshd の RedirectionGuard）と、ジャンクションを管理者で作り直すと起動すること（scoop の任意節。一般ユーザーで作り直して壊した状態から、この文書のブロックで直した）
     - ロールバックの後に残るもの（`C:\ProgramData\ssh` とレジストリのキー）と、消した後に入れ直せること
-    - 変数が空のとき・PowerShell 7 で貼ったときに、手順 4・7・12 とロールバックの手順 4 が何も変えずに止まること
+    - 変数が空のとき・PowerShell 7 で貼ったときに、手順 5・8・13 とロールバックの手順 4 が何も変えずに止まること
   - **確認していないこと**:
     - LAN の別の PC からの接続（WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](#注意点)）
     - 端末に貼る操作そのもの（PowerShell の PSReadLine での複数行の貼り付け、bash の対話の入力）
@@ -485,7 +490,7 @@
 | 実施日 | 2026-09-29 |
 | PC | x86_64 のノート PC（AMD Ryzen AI MAX+ 395） |
 | OS | Windows 11 Pro 25H2（ビルド 26200.9457、日本語） |
-| PowerShell | Windows PowerShell 5.1.26100.9444（手順で使う）/ PowerShell 7.6.6（Microsoft Store 版。手順 4 が失敗した） |
+| PowerShell | Windows PowerShell 5.1.26100.9444（手順で使う）/ PowerShell 7.6.6（Microsoft Store 版。手順 5 が失敗した） |
 | OpenSSH | オプション機能 `OpenSSH.Server~~~~0.0.1.0`（`OpenSSH_9.5p2 for Windows`）。クライアントは同じ版が最初から入っていた |
 | Git for Windows | 2.55.0.windows.3（GNU bash 5.3.15） |
 | ユーザー | Microsoft アカウント。Administrators の一員。Windows Hello だけでサインインする設定 |
@@ -494,14 +499,14 @@
 | クライアント | 同じ PC の WSL 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2、既定の NAT）の AlmaLinux 10.2。`openssh-clients-9.9p1-23.el10_2.alma.1` |
 
 > [!NOTE]
-> 環境固有の値は**変数**で書いてある。Windows では手順 3 の PowerShell の変数に、クライアントでは手順 10 のシェル変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**変数**で書いてある。Windows では手順 4 の PowerShell の変数に、クライアントでは手順 11 のシェル変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
-> | `$PUBKEY` | Windows（手順 3） | クライアントの公開鍵の 1 行 | `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` |
-> | `$LAN_IF` | Windows（手順 3） | クライアントとつながる LAN の接続の名前（自動で入る） | `イーサネット` |
-> | `${WIN_HOST}` | クライアント（手順 10） | Windows の LAN の IP アドレス | `192.168.1.30` |
-> | `${WIN_USER}` | クライアント（手順 10） | Windows のユーザー名（既定はクライアントのユーザー名） | `${USER}` |
+> | `$PUBKEY` | Windows（手順 4） | クライアントの公開鍵の 1 行 | `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` |
+> | `$LAN_IF` | Windows（手順 4） | クライアントとつながる LAN の接続の名前（自動で入る） | `イーサネット` |
+> | `${WIN_HOST}` | クライアント（手順 11） | Windows の LAN の IP アドレス | `192.168.1.30` |
+> | `${WIN_USER}` | クライアント（手順 11） | Windows のユーザー名（既定はクライアントのユーザー名） | `${USER}` |
 >
 > 出力例・ログ・表の中の値は `<WIN_HOST>` / `<WIN_USER>` / `<HOSTNAME>`（Windows のコンピューター名）/ `<hostname>` と `<win_user>`（`whoami` が小文字で出すもの）/ `<LAN_IF>` / `<USER>`（クライアントのユーザー名）/ `<IP>` / `<PORT>` のプレースホルダで書いてある。
 >
@@ -532,16 +537,16 @@
   - `Add-WindowsCapability` の 1 つで、サービス・受信の規則・既定の `sshd_config` がそろう
   - Microsoft の文書は、Windows Update で保守されるこの版を、ほとんどの場合に勧めている
   - GitHub の Win32-OpenSSH（winget の `Microsoft.OpenSSH.Preview`）は新しい版を使えるが、本書では試していない
-- **公開鍵だけで認証する**（手順 8 でパスワード認証を切る）
+- **公開鍵だけで認証する**（手順 9 でパスワード認証を切る）
   - 鍵を持たない相手からの、パスワードの総当たりを受け付けない
   - 検証した PC のユーザーは、Windows Hello だけでサインインする Microsoft アカウント。パスワードでの SSH は試していない
 - **LAN の接続をプライベートにし、規則は変えない**
   - 機能が作る規則は、プライベートのネットワークだけで有効。家の LAN をプライベートにすれば、規則を変えずに LAN から入れる
   - 持ち出した先のパブリックの Wi-Fi では、閉じたままになる
   - 規則をパブリックにも広げる（接続元を同じサブネットに絞る）方法は採らなかった。持ち出した先でも、同じサブネットの相手に開くため
-  - プライベートにすると、プライベート向けのほかの規則（ネットワーク探索など）もこの LAN で効く（手順 6 の補足）
+  - プライベートにすると、プライベート向けのほかの規則（ネットワーク探索など）もこの LAN で効く（手順 7 の補足）
 - **Windows PowerShell 5.1 で貼る**
-  - Microsoft Store の PowerShell 7 では、手順 4 の Dism のコマンドが失敗した
+  - Microsoft Store の PowerShell 7 では、手順 5 の Dism のコマンドが失敗した
   - ほかの手順（NetSecurity などのコマンド）もこのシェルにそろえ、1 つの PowerShell で通せるようにした
 - **ED25519 の鍵を、クライアントで作る**: 秘密鍵をクライアントから出さない。Windows に渡すのは公開鍵の 1 行だけ
 - **既定のシェルは任意節にした**: 既定の cmd.exe でも使える。Git Bash にすると、Linux のクライアントからシェルの道具と `git` をそのまま使える
@@ -588,8 +593,8 @@ d----        logs
 -a--- 6      sshd.pid
 ```
 
-- 管理者でない PowerShell からは、`icacls C:\ProgramData\ssh\administrators_authorized_keys` が `Access is denied.` になった（手順 7 のアクセス権が効いている）
-- `sshd_config` は、既定の 2297 バイトから、手順 8 の 1 行の置き換えで 2 バイト減った
+- 管理者でない PowerShell からは、`icacls C:\ProgramData\ssh\administrators_authorized_keys` が `Access is denied.` になった（手順 8 のアクセス権が効いている）
+- `sshd_config` は、既定の 2297 バイトから、手順 9 の 1 行の置き換えで 2 バイト減った
 
 ### 注意点
 
@@ -600,24 +605,24 @@ d----        logs
 - **鍵で入ったセッションは、ユーザーの資格情報を持たない**（Microsoft の文書）。セッションの中から、そのユーザーとしてほかのサーバーの共有などへ認証できない。本書では試していない
 - **標準ユーザーでログインするとき**
   - 鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く（Microsoft の文書）
-  - 本書では試していない。手順 7 は、Administrators の一員でなければ止まる
+  - 本書では試していない。手順 8 は、Administrators の一員でなければ止まる
 - **パスワードでのログイン**
-  - 手順 8 の前は、`'s password:` と聞かれた
+  - 手順 9 の前は、`'s password:` と聞かれた
   - Microsoft アカウントのパスワードで入れるかは試していない。試験の入力が空のパスワードとして 1 回送られ、`Permission denied, please try again.` になっただけ
 - **WSL から、この PC につなぐとき**: この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ
-  - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、手順 6 の後も捨てられた
+  - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、手順 7 の後も捨てられた
   - LAN の IP あての接続は、sshd には送信元がこの PC の LAN の IP として届き、LAN のプロファイル（プライベート）で判定された
-- **Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（手順 9）
+- **Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（手順 10）
 - **SSH のセッションでは、一般ユーザーが作ったジャンクションをたどれない**
   - sshd に掛けてある RedirectionGuard を、セッションのプロセスが引き継ぐため。開こうとすると、エラー 448（`ERROR_UNTRUSTED_MOUNT_POINT`）になる
   - 検証した PC では、scoop の `current` を通る `zoxide.exe` と `python.exe` が Git Bash から `Is a directory` になり、scoop の shim は `Could not create process with command …` で失敗した。`PATH` のうち scoop の 7 つのディレクトリも開けなかった
   - ローカルのシェルは、昇格していても RedirectionGuard が掛かっておらず、影響を受けない
   - scoop のジャンクションは、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)で、管理者で作り直せば通る。scoop 以外のツールのジャンクションも、同じ理由で通らないはず（試していない）
-- **設定を変えたとき**: `sshd_config` を変えたら `Restart-Service sshd`（手順 8）。レジストリの `DefaultShell` は、再起動しなくても次のログインから効いた
+- **設定を変えたとき**: `sshd_config` を変えたら `Restart-Service sshd`（手順 9）。レジストリの `DefaultShell` は、再起動しなくても次のログインから効いた
 - **機能を外したとき**
   - Microsoft の文書は、使っている間に外したなら Windows を再起動するよう書いている
   - 検証では、`Remove-WindowsCapability` は `RestartNeeded : False` を返し、再起動せずに入れ直せた
-- **ログ**: イベント ビューアーの「OpenSSH」→「Operational」（手順 11 の補足）
+- **ログ**: イベント ビューアーの「OpenSSH」→「Operational」（手順 12 の補足）
 
 ### 参照
 
@@ -636,18 +641,18 @@ d----        logs
 
 - Windows の手順は、ブロックを UTF-8（BOM 付き）の `.ps1` にし、Claude Code の PowerShell から `sudo powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ファイル>` で 1 手順ずつ実行した
   - Windows の `sudo` はインラインのモードで、UAC は確認無しで昇格する設定
-  - 各 `.ps1` の先頭に手順 3 の 2 つのブロックを付けた。同じ PowerShell に貼り続けたときと同じ変数にするため
+  - 各 `.ps1` の先頭に手順 4 の 2 つのブロックを付けた。同じ PowerShell に貼り続けたときと同じ変数にするため
   - `$PUBKEY` は、`''` の中だけを手順 2 の出力に置き換えた
 - クライアントの手順は、`wsl.exe -d AlmaLinux-10 --exec bash <スクリプト>` で実行した
-  - 手順 10 は、`WIN_HOST=` の後ろだけを書き換えた
-  - 手順 11 と Git Bash の任意節の手順 2 の対話は、`script` の擬似端末に `yes`・`whoami`・`exit` を流し込んだ
+  - 手順 11 は、`WIN_HOST=` の後ろだけを書き換えた
+  - 手順 12 と Git Bash の任意節の手順 2 の対話は、`script` の擬似端末に `yes`・`whoami`・`exit` を流し込んだ
 - 2 回目は、この文書の `powershell` と `bash` のブロックを順に抜き出したファイルを、上の置き換えだけで使った
 
 **1 回目**（下書きのブロック）:
 
-- 手順 4 は、最初に Microsoft Store の PowerShell 7.6.6 で流し、266 秒後に `Add-WindowsCapability` と `Get-WindowsCapability` が `クラスが登録されていません` で失敗した。状態は `NotPresent` のまま
+- 手順 5 は、最初に Microsoft Store の PowerShell 7.6.6 で流し、266 秒後に `Add-WindowsCapability` と `Get-WindowsCapability` が `クラスが登録されていません` で失敗した。状態は `NotPresent` のまま
 - Windows PowerShell 5.1 で流し直すと、532 秒で `State : Installed`（`RestartNeeded : False`）になった
-- 手順 5〜9、手順 11・12、Git Bash の任意節の手順 1・2 を通した。ホスト鍵の指紋は、手順 9 と、クライアントの `ssh-keygen -lF <WIN_HOST>` で一致した
+- 手順 6〜10、手順 12・13、Git Bash の任意節の手順 1・2 を通した。ホスト鍵の指紋は、手順 10 と、クライアントの `ssh-keygen -lF <WIN_HOST>` で一致した
 - ロールバックの手順 1〜4 で、実施前の状態に戻した。`Remove-WindowsCapability` は 6 秒、`RestartNeeded : False`
   - 外した直後に残っていたもの: `C:\ProgramData\ssh` の全ファイル（ホスト鍵・`sshd_config`・`administrators_authorized_keys`）と、`HKLM:\SOFTWARE\OpenSSH` の `DefaultShell`
   - 消えていたもの: サービス `sshd`、`sshd.exe`、規則 `OpenSSH-Server-In-TCP`
@@ -655,14 +660,14 @@ d----        logs
 **2 回目**（この文書のブロック）:
 
 - 先に、何も変えずに止まるかを確かめた
-  - PowerShell 7 で手順 4: `Write-Error: Windows PowerShell（5.1）で貼る。…`
-  - `$PUBKEY` が空のまま手順 7: `手順 3 の $PUBKEY が空か、公開鍵の形でない`（`C:\ProgramData\ssh` はできなかった）
-- 手順 4 は 486 秒。導入の直後は、`C:\ProgramData\ssh` も `HKLM:\SOFTWARE\OpenSSH` もまだ無く、手順 5 で sshd を起動した後にできた
-- 手順 7 の後・手順 8 の前に、パスワードを聞かれることと、セッションが High Mandatory Level であることを確かめた（ホスト鍵は `UserKnownHostsFile=/dev/null` で、`known_hosts` に残さなかった）
-- 手順 8 は 2 回流し、`PasswordAuthentication` の行が 1 行のままだった
-- 手順 11 で、初回の `ED25519 key fingerprint is SHA256:…` が手順 9 と一致し、`yes` の後に cmd のプロンプトになった
+  - PowerShell 7 で手順 5: `Write-Error: Windows PowerShell（5.1）で貼る。…`
+  - `$PUBKEY` が空のまま手順 8: `手順 3 の $PUBKEY が空か、公開鍵の形でない`（`C:\ProgramData\ssh` はできなかった）
+- 手順 5 は 486 秒。導入の直後は、`C:\ProgramData\ssh` も `HKLM:\SOFTWARE\OpenSSH` もまだ無く、手順 6 で sshd を起動した後にできた
+- 手順 8 の後・手順 9 の前に、パスワードを聞かれることと、セッションが High Mandatory Level であることを確かめた（ホスト鍵は `UserKnownHostsFile=/dev/null` で、`known_hosts` に残さなかった）
+- 手順 9 は 2 回流し、`PasswordAuthentication` の行が 1 行のままだった
+- 手順 12 で、初回の `ED25519 key fingerprint is SHA256:…` が手順 10 と一致し、`yes` の後に cmd のプロンプトになった
 - Git Bash の任意節は、手順 1 → 2 → 3（cmd に戻る）→ 1 の順に流し、Git Bash の状態で終えた
-- `WIN_HOST` が空のまま、手順 12 とロールバックの手順 4 のブロックを流し、どちらも何もしないで止まった
+- `WIN_HOST` が空のまま、手順 13 とロールバックの手順 4 のブロックを流し、どちらも何もしないで止まった
 
 **切り分け: WSL から届かなかった接続**:
 
