@@ -1,4 +1,4 @@
-# リモートクライアントの登録簿（docs/wireguard.md の手順 7〜8）
+# リモートクライアントの登録簿（docs/wireguard.md の手順 10〜11）
 #
 # 通常は `wg-vpn.sh client add A|B NAME` が clients.list に追記する。手で書く場合はこの形式にする。
 #   NAME       : 英数字・-・_ のみ。クライアント用 conf のファイル名（<NAME>.conf）にもなる

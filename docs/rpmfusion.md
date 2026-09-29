@@ -11,7 +11,7 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 - 有効にするのは free だけ。nonfree は扱わない
-- 通すと使えるようになるもの: [Firefox の AAC・H.264](firefox.md#実施手順)（firefox.md の手順 8 から。RPM Fusion の `ffmpeg-libs` を入れる）
+- 通すと使えるようになるもの: [Firefox の AAC・H.264](firefox.md#実施手順)（firefox.md の手順 9 から。RPM Fusion の `ffmpeg-libs` を入れる）
 
 1. RPM Fusion（free）の署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
 
@@ -138,7 +138,7 @@
 
    - repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo`（有効）と `rpmfusion-free-updates-testing.repo`（無効）
    - 鍵のファイル `/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-el-10` も置かれる
-   - 有効になった後は、例えば `dnf -q list --showduplicates ffmpeg-libs` に `rpmfusion-free-updates` の行が出る（[firefox.md 手順 8](firefox.md#実施手順)）
+   - 有効になった後は、例えば `dnf -q list --showduplicates ffmpeg-libs` に `rpmfusion-free-updates` の行が出る（[firefox.md 手順 9](firefox.md#実施手順)）
 
    </details>
 
@@ -235,7 +235,7 @@
 - **RPM Fusion は Fedora の外のリポジトリ**: free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）
   - 鍵は手順 1 で照合し、`rpmfusion-free-release` の署名も手順 4 で確かめる
 - **EL10 向けは中身が少ない**: 調べた範囲では、free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）がある。mpv は無い（[導入元一覧](tool-catalog.md#導入経路と-el10-での注意)）
-- **EPEL の FFmpeg（`ffmpeg-free` 系）と同居できないものがある**: RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[firefox.md 手順 9](firefox.md#実施手順)）
+- **EPEL の FFmpeg（`ffmpeg-free` 系）と同居できないものがある**: RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[firefox.md 手順 10](firefox.md#実施手順)）
 
 ### 参照
 
