@@ -14,6 +14,7 @@
 ### 導入の基盤
 
 - RPM に無いか古いツールの入れ先。CLI とフォントは Homebrew、GUI アプリは Flathub
+- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/homebrew-offline.md)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
@@ -21,6 +22,7 @@
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
 | [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから `ssh -R` で張った SOCKS のプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜10） |
