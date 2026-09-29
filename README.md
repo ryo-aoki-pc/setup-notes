@@ -14,6 +14,7 @@
 ### 導入の基盤
 
 - RPM に無いか古いツールの入れ先。CLI とフォントは Homebrew、GUI アプリは Flathub
+- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/homebrew-offline.md)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - EPEL の有効化は [btop.md 手順 1〜3](docs/btop.md#実施手順) にある（手順書の無いツールの EPEL の行は、これが前提）
 - RPM Fusion（free）の有効化は [firefox.md 手順 8〜11](docs/firefox.md#実施手順) にある（EPEL も一緒に入る）
@@ -22,6 +23,7 @@
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
 | [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから `ssh -R` で張った SOCKS のプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 
 | 手順書の無いツール | 用途 | 導入元 |
