@@ -44,7 +44,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 - `docs/yazi.md` — yazi を Homebrew で入れる手順書。COPR `lihaohong/yazi` を実機で一度入れて外した経緯と、プレビュー依存（ffmpeg など）が EL10 に揃わないことを補足に残す。`y()` シェル関数まで含む
 - `docs/lazygit.md` — lazygit を Homebrew で入れる手順書。COPR（`dejan` / `atim`）は `epel-10-aarch64` の repomd が 403 で入らないことを実機とコンテナの両方で確認して不採用にしている
 - `docs/neovim.md` — Neovim を Homebrew で入れる手順書（EPEL は 0.10.1 と古い）。`:checkhealth` の読み方と、`sudo nvim` が使えない理由を補足に置く
-- `docs/zoxide.md` — zoxide を Homebrew で入れる手順書。EPEL にも AppStream にも RPM が無い。`~/.bashrc` の `eval "$(zoxide init bash)"` が本体で、`--cmd cd` の影響範囲も補足に書く
+- `docs/zoxide.md` — zoxide を Homebrew（既定。手順 2）か、x86_64 なら COPR `kray74/cli-tools` の dnf（手順 3〜5）で入れる手順書。EPEL にも AppStream にも Terra にも RPM が無く、EL10 向けは COPR だけ（候補の比較は「選択した方針」）。dnf の経路は `dnf config-manager --save --setopt=…includepkgs=zoxide,fzf` で COPR から入るものを絞る（同じ COPR の chezmoi などが EPEL の同名パッケージを置き換えないように）。`~/.bashrc` の `eval "$(zoxide init bash)"` が本体で、`--cmd cd` の影響範囲も補足に書く。zoxide はプロンプトを出すときに今のディレクトリを記録し、ホームは記録しないので、確認は `cd /usr/share`（手順 7）と `zoxide query --list`（手順 8）の 2 回に分けて貼る（`cd ~` で終わる旧版の 1 つのブロックは、ブラケットペーストの有無にかかわらず空だった）。Homebrew の経路は実機で本実行済み。**dnf の経路は x86_64 のコンテナのみで検証**（手順 1・3〜8、更新とロールバックの dnf の手順）
 - `docs/bat.md` — bat を Homebrew で入れる手順書。EPEL は 0.24.0 で古い。`alias cat=bat` は勧めず、`~/.config/bat/config` と `MANPAGER` の使い方だけ案内する。**コンテナのみで検証（実機未導入）**
 - `docs/eza.md` — eza を Homebrew で入れる手順書。EPEL にも AppStream にも RPM が無い（`exa` も無い）。`ls` は置き換えず `ll` / `la` / `lt` を足す形にしてある。非対話シェルでは `type -t` がエイリアスを見つけられないことも補足に書く。**コンテナのみで検証**
 - `docs/git-delta.md` — git の差分表示を delta にする手順書。formula 名は `git-delta`、バイナリは `delta`。設定は `git config --global` で `~/.gitconfig` に書く（git がキー名を小文字に正規化するので読み戻しの正規表現に注意）。lazygit の `git.paging` 連携は任意節。**コンテナのみで検証**
