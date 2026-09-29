@@ -13,6 +13,7 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 共有フォルダーは[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、OS やホストの VirtualBox を上げたときは[更新](#更新)、戻すときは[ロールバック](#ロールバック)
 - **切り替えた後は、`sudo bootc upgrade` だけでは OS が上がらない**（[更新](#更新)の手順でビルドし直す）
+- 自作の kernel-rt のイメージでも、手順 1 の `BASE_IMAGE` を変えるだけで同じ手順になる。ただし kernel-rt で確かめたのはビルド（手順 8）までで、VM では動かしていない
 - VirtualBox のメニューの名前は、日本語の表示と英語の表示を並べて書いてある
 
 1. 変数を設定する（既定のままでよい）。
@@ -24,6 +25,9 @@
 
    - 公式の ISO で入れた Atomic Desktop の GNOME なら、このままでよい（ISO は `:latest` を追う。この手順の補足）
    - KDE なら `quay.io/almalinuxorg/atomic-desktop-kde:latest` のように、手順 2 の `Booted image:` に合わせて変える（本書では GNOME だけを検証した）
+   - 自作の kernel-rt のイメージ（レジストリにあるもの）なら、手順 2 の `Booted image:` に合わせて、そのイメージの名前にする
+     - 手順 5 の Containerfile がカーネルを見分けて、`kernel-rt-devel` でビルドする
+     - kernel-rt で確かめたのはビルド（手順 8）までで、VM では動かしていない（手順 5 の補足）
    - 手順 8、[更新](#更新)、[ロールバック](#ロールバック)で使う
 
    <details>
@@ -57,7 +61,7 @@
 
    - ベースのイメージ（`atomic-desktop-gnome:10` = 10.2.20260924.1）は、podman の置き場所（`/var/lib/containers`）で 4.92 GB になる。取り込むのは 83 層・圧縮で約 2.2 GB
    - 派生イメージで増えるのは 151 MB。そのうち 98 MB は、ビルドの道具を入れて消したときに書き直される rpm のデータベース
-   - ビルドの途中では、gcc・kernel-devel など 15 パッケージが一時的に入る
+   - ビルドの途中では、gcc・kernel-devel（kernel-rt なら kernel-rt-devel）など 15 パッケージが一時的に入る
    - `bootc switch` は、動いているイメージと中身が同じファイルを共有して取り込む。ベースが新しくなっていれば、そのぶんが増える
 
    **VM での実測**（80 GB のディスクに ISO の既定のパーティション）:
@@ -149,15 +153,17 @@
        --mount=type=tmpfs,target=/tmp \
        --mount=type=secret,id=mok_priv \
        --mount=type=secret,id=mok_der <<'EOS'
-   set -euo pipefail
-   kver=$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-core)
+   # -x: 実行するコマンドを「+」付きでビルドの表示に出す（最後の結果の表示の前で止める）
+   set -euxo pipefail
+   # イメージのカーネル（bootc のイメージには 1 つだけ）。kernel-rt のイメージでは版の末尾に +rt が付く
+   kver=$(ls /usr/lib/modules)
    mods=/usr/lib/modules/${kver}/misc
 
    # VBoxClient が XWayland のクリップボードで読み込む（イメージに無いと --clipboard が落ち続ける）
    dnf -y --repo=appstream install libXt
 
-   # ビルドの道具（最後に消す）
-   dnf -y --repo=baseos --repo=appstream install gcc make "kernel-devel-${kver}"
+   # ビルドの道具（最後に消す）。カーネルと同じ版の kernel-devel か kernel-rt-devel（rt のリポジトリにある）が入る
+   dnf -y --repo=baseos --repo=appstream --repo=rt install gcc make "kernel-devel-uname-r = ${kver}"
 
    # イメージのカーネル向けにビルドする。ビルド中はモジュールを読み込めないので、終了コードは 0 にならない
    TARGET_VER=${kver} sh /ctx/VBoxLinuxAdditions.run --nox11 || echo "installer exit=$?"
@@ -197,10 +203,12 @@
    g vboxdrmipc -
    EOT
 
-   dnf -y remove gcc make "kernel-devel-${kver}"
+   dnf -y remove gcc make "kernel-devel-uname-r = ${kver}"
    dnf clean all
    rm -rf /var/lib/dnf /var/cache/dnf /var/cache/ldconfig /var/log/dnf.* /var/log/hawkey.log /var/log/vboxadd-*
 
+   # 結果を表示する（コマンドの表示は止める）
+   set +x
    for m in "${mods}"/vbox*.ko; do
      echo "${m##*/}: $(modinfo -F vermagic "${m}")signer=$(modinfo -F signer "${m}")"
    done
@@ -227,12 +235,33 @@
    | systemd の unit | インストーラは `systemctl status` が通るとき（systemd が PID 1 のとき）だけ unit を作る。ビルドの中では `/etc/rc.d/init.d` に SysV のスクリプトを置き、`chkconfig` も無いので有効にならない（`systemctl is-enabled vboxadd` が `disabled`） | SysV のスクリプトを消し、同梱の `routines.sh` の `systemd_wrap_init_script`（インストーラが systemd のときに使う関数）で unit を作って `systemctl enable` |
    | `/var/lib/VBoxGuestAdditions/config` | bootc はイメージの `/var` を最初のインストールでしか展開しない。切り替えた VM には入らず、`vboxadd` が `Configuration file /var/lib/VBoxGuestAdditions/config not found` で止まる | `/usr/share/factory` へ移し、tmpfiles.d の `L+` で起動のたびにリンクを張る |
    | ユーザー `vboxadd`、グループ `vboxsf`・`vboxdrmipc` | ビルドの中の `useradd` / `groupadd` はイメージの `/etc/passwd` に書く。手元で変更済みの `/etc/passwd` は切り替えで上書きされないので、VM には入らない | `/usr/lib/sysusers.d` に書き、起動時に `systemd-sysusers` に作らせる |
-   | モジュールのカーネルの版 | 既定では、ビルドしているシステム（`uname -r`）のカーネル向けにビルドする | 環境変数 `TARGET_VER` でイメージのカーネルを指定する |
+   | モジュールのカーネルの版 | 既定では、ビルドしているシステム（`uname -r`）のカーネル向けにビルドする | 環境変数 `TARGET_VER` でイメージのカーネル（`/usr/lib/modules` の版）を指定する |
 
    - `bootc container lint` は、直す前は `sysusers`・`var-log`・`var-tmpfiles` の 3 つを警告した。直した後は `Checks passed: 13`（ベースのイメージと同じ）になる
    - インストーラの終了コードは、ビルドの中では 0 にならない（最後にモジュールが読み込まれているかを見るため）。成否は、2 つのモジュールがあるかで判定している
    - インストーラが `/var` に残すログと dnf のキャッシュも消している（残すと `var-log`・`var-tmpfiles` の警告になる）
    - 先頭の `ARG BASE_IMAGE` の既定値（`:10`）は、手順 8 の `--build-arg` で上書きされるので使われない
+
+   **コマンドの表示**（`set -x`。検証コンテナでの実測）:
+
+   - RUN の中のコマンドは、実行する前に `+` を付けてビルドの表示に出る（`$(…)` の中のコマンドは `++`）
+     - 変数は展開した値で出るので、カーネルの版（`+ kver=…`）や、署名のハッシュ（`+ hash=sha512`）も分かる
+   - インストーラ（`sh /ctx/VBoxLinuxAdditions.run`）は別のプロセスなので、中のコマンドは出ない。インストーラ自身の表示は、これまでどおり出る
+   - `routines.sh` を読むサブシェルは `-x` を引き継ぐので、`systemd_wrap_init_script` の中の行も出る（unit 2 つで約 90 行）
+   - ヒアドキュメントの中身（sysusers.d の 3 行）は出ない（`+ cat` の 1 行だけ）
+   - 最後の結果の行の前で `set +x` にしているので、手順 8 の「最後に次が出ればよい」の行は、トレースと混ざらずに出る
+   - トレースは標準エラーに出るので、標準出力の行と前後が入れ替わることがある（`installer exit=1` の後に `+ echo 'installer exit=1'` が出た）
+
+   **kernel-rt のイメージ**（検証用に作ったイメージでの実測。VM では未確認）:
+
+   - カーネルの版は、イメージの `/usr/lib/modules` から取る（bootc のイメージにはカーネルが 1 つだけ）
+     - kernel-rt のイメージには `kernel-core` が無い（`kernel-rt-core` が持つ）ので、`rpm -q kernel-core` では取れない
+     - 版の末尾に `+rt` が付く（`6.12.0-211.56.1.el10_2.x86_64+rt`）ので、`kernel-devel-<版>` という名前も成り立たない
+   - 道具は `kernel-devel-uname-r = <版>` で指定する。`kernel-devel` は `…x86_64`、`kernel-rt-devel` は `…x86_64+rt` を provide するので、1 行でどちらにも合う
+   - `kernel-rt-devel` は `rt` のリポジトリにしか無い（AppStream・BaseOS には無い）
+     - `rt` は Atomic Desktop のイメージに `almalinux-rt.repo` として入っていて、既定では無効。`--repo=rt` で、この `dnf install` の間だけ使う
+     - 通常のカーネルのイメージでも `rt` のメタデータ（約 25 MB）を読むが、入るパッケージは同じ 15 個だった
+   - 署名（`.config` と `sign-file`）・`depmod`・`TARGET_VER` は同じ版を使うので、kernel-rt でもそのまま通る。3 つのモジュールは、PREEMPT_RT のカーネル向けにもビルドできた
 
    **`libXt` を入れる**（VM での実測）:
 
@@ -244,9 +273,9 @@
 
    **ビルドの道具は消す**:
 
-   - `gcc`・`make`・`kernel-devel` と、一緒に入った 12 パッケージ（`kernel-headers`・`glibc-devel` など）が、`dnf remove` で全部消える
+   - `gcc`・`make`・`kernel-devel`（kernel-rt なら `kernel-rt-devel`）と、一緒に入った 12 パッケージ（`kernel-headers`・`glibc-devel` など）が、`dnf remove` で全部消える
      - `libXt` の行を足す前の Containerfile で、ベースのイメージとパッケージの一覧が同じになることを確かめた（検証コンテナ）
-     - 今の Containerfile では、`libXt` の 1 つが増える
+     - 今の Containerfile では、`libXt` の 1 つが増える（kernel と kernel-rt のイメージの両方で確かめた）
    - `dnf history undo` にしなかったのは、道具を入れるときにベースのパッケージが上がっていた場合に、それを下げてしまうため
    - 道具が無いので、VM の上ではモジュールを作り直せない。カーネルが変わったら、イメージごとビルドし直す（[更新](#更新)）
 
@@ -321,10 +350,13 @@
    ```
 
    - 初回はベースのイメージ（圧縮で約 2.2 GB）を取り込む。Atomic Desktop の `/etc/containers/policy.json` に従って、イメージの署名が確かめられる
+     - 自作の kernel-rt のイメージなど、`policy.json` に載っていないレジストリのイメージは、既定（`insecureAcceptAnything`）のとおり署名を確かめずに取り込む
+   - 途中の `+` で始まる行は、Containerfile の中で実行したコマンド（手順 5 の補足）
    - 途中の `unable to load vboxguest kernel module` と `installer exit=1` は、ビルドの中ではモジュールを読み込めないためで、失敗ではない
      - Guest Additions が動いている VM でビルドし直すと（[更新](#更新)）、代わりに `mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2` になる。これも失敗ではない
    - 最後に次が出ればよい
      - `vboxguest.ko:`・`vboxsf.ko:`・`vboxvideo.ko:` の 3 行（イメージのカーネルの版。Secure Boot なら `signer=VirtualBox Guest Additions module signing key`）
+     - kernel-rt のイメージなら、版の末尾が `+rt` で、`SMP preempt_rt` になる
      - `enabled` が 2 行
      - `Checks passed: 13`（`Warnings:` の行が無い）と `Successfully tagged localhost/vbox-ga:latest`
    - `could not parse secrets: faccessat /var/lib/shim-signed/mok/MOK.priv: no such file or directory` ですぐに止まったら、Secure Boot なのに手順 4 が済んでいない
@@ -333,13 +365,23 @@
    <details>
    <summary>補足: ビルドの表示と所要時間</summary>
 
-   検証コンテナでの出力の終わり（Secure Boot のとき）:
+   検証コンテナでの出力（Secure Boot のとき。`set -x` を足した今の Containerfile）の抜粋:
 
    ```
+   + kver=6.12.0-211.56.1.el10_2.x86_64
+   ...
+   + dnf -y --repo=baseos --repo=appstream --repo=rt install gcc make 'kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64'
+   ...
    installer exit=1
+   + echo 'installer exit=1'
+   + test -f /usr/lib/modules/6.12.0-211.56.1.el10_2.x86_64/misc/vboxguest.ko
+   + test -f /usr/lib/modules/6.12.0-211.56.1.el10_2.x86_64/misc/vboxsf.ko
+   ...
+   + systemctl enable vboxadd.service vboxadd-service.service
    Created symlink '/etc/systemd/system/multi-user.target.wants/vboxadd.service' → '/usr/lib/systemd/system/vboxadd.service'.
    Created symlink '/etc/systemd/system/multi-user.target.wants/vboxadd-service.service' → '/usr/lib/systemd/system/vboxadd-service.service'.
    ...
+   + set +x
    vboxguest.ko: 6.12.0-211.56.1.el10_2.x86_64 SMP preempt mod_unload modversions signer=VirtualBox Guest Additions module signing key
    vboxsf.ko: 6.12.0-211.56.1.el10_2.x86_64 SMP preempt mod_unload modversions signer=VirtualBox Guest Additions module signing key
    vboxvideo.ko: 6.12.0-211.56.1.el10_2.x86_64 SMP preempt mod_unload modversions signer=VirtualBox Guest Additions module signing key
@@ -352,6 +394,8 @@
    Successfully tagged localhost/vbox-ga:latest
    ```
 
+   - **kernel-rt のイメージ**（検証用のイメージ。[付録](#付録-コマンドの表示と-kernel-rt-のコンテナでの確認2026-09-29)）: `+ kver=6.12.0-211.56.1.el10_2.x86_64+rt` になり、dnf は `kernel-rt-devel` を `rt` のリポジトリから入れた
+     - 最後の 3 行は `vboxguest.ko: 6.12.0-211.56.1.el10_2.x86_64+rt SMP preempt_rt mod_unload modversions signer=VirtualBox Guest Additions module signing key` の形で、`Checks passed: 13` も同じだった
    - **所要時間**: 代役のコンテナでは、ベースの取り込みからビルドの終わりまで 2 分 22 秒だった。ベースを取り込んだ後のビルドだけなら約 40 秒（道具の導入 19 秒、インストーラ 12 秒）
      - VM（4 vCPU・8 GB）では、ベースの取り込みを含めて 305 秒だった。Containerfile を変えた後のビルドし直しは 161 秒、何も変えないビルドし直しは 5 秒
      - VM では、ベースの取り込みの `Getting image source signatures` の後に `Storing signatures` が出た（`policy.json` の署名の検査）
@@ -516,6 +560,7 @@
 > **切り替えた後は、`sudo bootc upgrade` だけでは OS（ベースのイメージ）が上がらない**。bootc が見に行くのは、この VM の中の `localhost/vbox-ga:latest` だけになる。OS を上げるときも、この節の手順 2・3 でビルドし直す。
 
 - OS（ベースのイメージ）を上げる: この節の手順 2・3。カーネルが変わっても、同じ手順でモジュールが作り直される
+  - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この節の手順 2 は、レジストリにあるものを取り込む）
 - ホストの VirtualBox を上げた（Guest Additions の版が変わった）: この節の手順 1 から
 - Secure Boot の鍵を作り直したときは、この節の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
@@ -624,7 +669,7 @@
   - 使えるようにするもの: クリップボードの共有、画面サイズの自動変更、共有フォルダー、時刻の同期（VBoxService）
 - **進め方**: dnf では入れられないので、Guest Additions を焼き込んだ派生イメージを VM の上でビルドし、`bootc switch` で切り替える
   - bootc の公式文書の「Booting local builds」と同じ形
-  - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop のときだけ変える）
+  - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop と、自作の kernel-rt のイメージのときだけ変える）
 - **状態**: **VirtualBox の VM で本実行済み（2026-09-29）**。その前に x86_64 のコンテナで検証した（2026-09-28）
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
     - 手順 1〜13、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[更新](#更新)の手順 2・3、[ロールバック](#ロールバック)の手順 1〜3
@@ -648,6 +693,11 @@
   - 2026-09-28: 手順 4・13 と、[ロールバック](#ロールバック)の手順 3のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は、2026-09-29 に VM で流した（ブラケットペーストの効く端末で）
+  - 2026-09-29（VM の本実行の後）: 手順 5 の Containerfile を直した（[付録](#付録-コマンドの表示と-kernel-rt-のコンテナでの確認2026-09-29)）
+    - `set -x` で RUN の中のコマンドを表示し、最後の結果の行の前で `set +x` にした
+    - kernel-rt のイメージのため、カーネルの版を `/usr/lib/modules` から取り、道具を `kernel-devel-uname-r` と `rt` のリポジトリで入れるようにした
+    - 直した版は、x86_64 のコンテナ（クラウドホスト上の Docker）で手順 1・3〜5・7・8 を流して確かめた（手順 6 の CD は、読み取り専用のマウントで代えた）。ベースは公式のイメージと、kernel を kernel-rt に入れ替えた検証用のイメージ（ローカルのレジストリに置いた）の 2 つ
+    - **VM では流していない**。kernel-rt のイメージでの手順 9〜13（切り替え・起動・モジュールの読み込み）と、共有フォルダー・更新・ロールバックは未確認
 
 | 項目 | VirtualBox の VM（本実行） | 検証環境（コンテナ） |
 |---|---|---|
@@ -781,6 +831,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[手順 5〜9](#実施手順)）
 - **公式の ISO で入れた VM は `:latest` を追う**: `BASE_IMAGE` の既定は `:latest`。別のタグを追う VM では、手順 2 の `Booted image:` に合わせて手順 1 を直す（[手順 1](#実施手順) の補足）
 - **Guest Additions のインストーラは、bootc 向けに 4 か所を直して使う**: unit・`/var` の設定・ユーザーとグループ・カーネルの版（[手順 5](#実施手順) の補足）
+- **kernel-rt のイメージでも、同じ Containerfile でビルドできる**: カーネルの版はイメージの `/usr/lib/modules` から取り、`kernel-rt-devel` は `rt` のリポジトリから入れる。確かめたのはビルドまで（[手順 5](#実施手順) の補足）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 5](#実施手順) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](#更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
@@ -991,3 +1042,64 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - ホストが Wayland でない場合のクリップボード
 - VirtualBox の画面の日本語の表示（ホストのロケールが en_US.UTF-8 のため。名前は翻訳ファイルで確かめた）
 - ブラケットペーストが効かない端末に、`{ … }` で囲んだ形を貼ったとき
+
+---
+
+### 付録: コマンドの表示と kernel-rt のコンテナでの確認（2026-09-29）
+
+前の付録の VM での本実行の後に、手順 5 の Containerfile を直した（`set -x` でコマンドを表示する、kernel-rt のイメージでもビルドできるようにする）。直した版は VM では流さず、次のコンテナで確かめた。
+
+**環境**:
+
+- x86_64 のクラウドホスト（Ubuntu 24.04、4 vCPU・16 GB、カーネル `6.18.44-fc-v37`、cgroup v1）の Docker 29.3.1。利用者の実機と VM は使っていない
+- VM の代役: `quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2、カーネル `6.12.0-211.56.1.el10_2`、podman 5.8.2）を `--privileged`・`--network host` で起動し、中に uid 1000 のユーザー（NOPASSWD の sudo）を作った
+  - 中の podman（rootful）は、ホストのディレクトリを `/var/lib/containers` にマウントした（overlay）
+- Guest Additions: 公式サイトの `VBoxGuestAdditions_7.2.20.iso` を `SHA256SUMS`（`4c6ba898…16e7`）で照合し、`bsdtar --options 'iso9660:!rockridge'` で取り出した
+  - `/run/media/<USER>/VBox_GAs_7.2.20` に読み取り専用でマウントした（ディレクトリ 0500、ファイル 0400、所有者はそのユーザー）
+- `mokutil` はスタブにした（前の付録の 1 つ目と同じ。`--sb-state` は `SecureBoot enabled`）
+
+**kernel-rt の検証用イメージ**（AlmaLinux は kernel-rt の bootc イメージを公開していないので作った。手順書には載せない）:
+
+- 公式のイメージ（上と同じ）から、`kernel`・`kernel-core`・`kernel-modules`・`kernel-modules-core`・`kernel-modules-extra` を `rpm -e --nodeps` で外し、古い `/usr/lib/modules/<版>` を消した
+- `dnf -y --repo=baseos --repo=appstream --repo=rt install kernel-rt kernel-rt-modules-extra` で、`rt` のリポジトリの 6.12.0-211.56.1.el10_2 を入れた
+  - `kernel-rt-core`・`kernel-rt-modules`・`kernel-rt-modules-core` と `realtime-setup` も入り、initramfs はイメージの kernel-install（`Generating initramfs`）が作った
+  - `/usr/lib/modules` は `6.12.0-211.56.1.el10_2.x86_64+rt` の 1 つだけになった
+- そのままでは `bootc container lint` が 3 つを警告したので、検証用に直して `Checks passed: 13` にした
+  - `/boot` の `symvers-<版>+rt.xz`（消した）、`realtime-setup` が足す `realtime` グループ（sysusers.d に `g realtime -`）、`/var/lib/rpm-state/kernel`（消した）
+- Docker でビルドし（2 分 38 秒）、`registry:2` で立てたローカルのレジストリに `localhost:5000/atomic-desktop-gnome-rt:latest` として置いた（5.35 GB）。起動はしていない
+
+**検証環境だけの設定**（手順書のコマンドは変えていない）:
+
+- 中の podman の `containers.conf.d` は、前の付録の 1 つ目と同じ `netns = "host"`・`cgroups = "disabled"`・`cgroup_manager = "cgroupfs"`・`events_logger = "file"` に、`default_ulimits = ["nofile=20000:20000", "nproc=64313:64313"]` を足した
+  - 足す前は、RUN の段が ``setrlimit `RLIMIT_NOFILE`: Operation not permitted``（`nofile` を足すと次は `RLIMIT_NPROC`）で失敗した。代役のコンテナの上限（`nofile` は 20000）を超える値を設定しようとしたため
+- プロキシを通すため、sudo の `env_keep` に `HTTPS_PROXY` などを足した（podman build が RUN の段に渡す）
+- `registries.conf.d` で `localhost:5000` を `insecure = true` にした（ローカルのレジストリが HTTP のため）
+
+**流し方**:
+
+- 前の付録の 1 つ目と同じく、本文の `bash` のコードブロックを抜き出し、各ブロックの先頭に手順 1 のブロックを足して、1 つずつ新しい `docker exec` で実行した
+- kernel-rt の回は、読者が手順 1 を直すのと同じく、`BASE_IMAGE=` の値だけを `localhost:5000/atomic-desktop-gnome-rt:latest` に書き換えた
+- 抜き出した RUN の本体（ヒアドキュメントの中）と、全部のブロックは `bash -n` を通った
+
+| 手順 | kernel（`BASE_IMAGE` は既定） | kernel-rt（検証用のイメージ） |
+|---|---|---|
+| 1 | `BASE_IMAGE = quay.io/almalinuxorg/atomic-desktop-gnome:latest` | `BASE_IMAGE = localhost:5000/atomic-desktop-gnome-rt:latest` |
+| 3・4 | `SecureBoot enabled`（スタブ）、`MOK.der`（876 バイト）と `MOK.priv`（`-rw-------`） | kernel の回の鍵をそのまま使った |
+| 5・7 | Containerfile 3270 バイト、`MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` | kernel の回のものをそのまま使った |
+| 8 のコマンドの表示 | `+ kver=6.12.0-211.56.1.el10_2.x86_64`、`+ dnf … 'kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64'`。`+` で始まる行は 126 行（そのうち `routines.sh` の分が 92 行）。`+ set +x` の後は、結果の行だけ | `+ kver=6.12.0-211.56.1.el10_2.x86_64+rt`、`+ TARGET_VER=6.12.0-211.56.1.el10_2.x86_64+rt`。`+ set +x` の後は、結果の行だけ |
+| 8 の道具 | `rt` のメタデータ（25 MB）も読み、`kernel-devel`（`appstream`）を含む 15 パッケージを入れて、最後に 15 パッケージを消した | `kernel-rt-devel`（`rt`）を含む 15 パッケージを入れて、最後に 15 パッケージを消した |
+| 8 のインストーラ | `Building the Guest Additions 7.2.20 modules for kernel 6.12.0-211.56.1.el10_2.x86_64.`、`depmod: FATAL` が 2 回（動いているカーネルが別のため）、`installer exit=1` | `… for kernel 6.12.0-211.56.1.el10_2.x86_64+rt.`。3 つのモジュールがビルドでき、あとは kernel の回と同じ表示 |
+| 8 の結果 | 3 つのモジュールが `6.12.0-211.56.1.el10_2.x86_64 SMP preempt mod_unload modversions` で `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` | 3 つのモジュールが `6.12.0-211.56.1.el10_2.x86_64+rt SMP preempt_rt mod_unload modversions` で署名あり、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged` |
+| 8 の所要時間 | 10 分 49 秒（ベースは、ulimits を足す前に失敗した回で取り込み済み） | 10 分 24 秒（検証用のイメージの取り込みを含む） |
+| できたイメージ | 5.07 GB。パッケージの一覧はベースに `libXt-1.3.0-5.el10` を足したもの | 5.51 GB。パッケージの一覧はベースに `libXt-1.3.0-5.el10` を足したもの。`/usr/lib/modules/<版>+rt/misc` に `vboxguest.ko`・`vboxsf.ko`・`vboxvideo.ko`（`sig_hashalgo` は `sha512`） |
+
+- 所要時間の多くは、最後のイメージの書き出し（`COMMIT`）だった。この環境の入れ子の podman での値で、[手順 8](#実施手順) の補足の時間とは比べられない
+- この環境では、インストーラの始めに `libkmod: ERROR … could not open /proc/modules` と `Error: could not get list of modules` が出た。ホストのカーネルがモジュールに対応していない（`/proc/modules` が無い）ためで、ビルドの結果は変わらなかった
+- 検証用のイメージのレジストリ（`localhost:5000`）は `policy.json` に載っていないので、取り込みで `Storing signatures` は出なかった（公式のイメージの取り込みでは出た）
+
+#### 未確認事項
+
+- 直した Containerfile での VM の本実行（手順 8 のビルド、手順 9 以降）
+- kernel-rt のイメージでの `bootc switch`、MokManager での登録、起動、モジュールの読み込み、VBoxService・VBoxClient、共有フォルダー、更新、ロールバック
+- 検証用ではない、利用者が作った kernel-rt のイメージ（作り方によって、`rt` のリポジトリの定義や `/usr/lib/modules` の中身が違いうる）
+- Secure Boot が無効の分岐（直した行は分岐と関係しないので、今回は流していない）
