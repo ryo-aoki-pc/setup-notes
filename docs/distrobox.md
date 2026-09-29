@@ -3,10 +3,10 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順を通してあること。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さなければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順と、[EPEL](epel.md) を通してあること（distrobox は EPEL にあり、AppStream には無い）。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（ボックスは自分のユーザーの rootless の podman で動かすため）
-> - **手順 5 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 6 を貼る
-> - **手順 8 と 9 はボックスの中のコマンドになる**。手順 8 は終わってから、手順 9 は `exit` で戻ってから、次を貼る
+> - **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
+> - **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -52,35 +52,6 @@
 
    </details>
 
-1. distrobox のために、EPEL が有効になっているか確かめる。
-
-   ```bash
-   dnf repolist enabled | grep -E '^epel' || echo 'EPEL は未設定'
-   ```
-
-   - distrobox は EPEL にある（AppStream には無い）
-   - `epel` の行が出れば、手順 3 は飛ばす
-   - `EPEL は未設定` と出たら、手順 3 で入れる
-
-1. EPEL が未設定のときだけ、`epel-release` を入れる。
-
-   ```bash
-   sudo dnf install -y epel-release
-   ```
-
-   - AlmaLinux の `extras` リポジトリに入っているので、追加のリポジトリ設定は要らない
-   - 最後に出る「CRB を有効にすることを推奨」は、AlmaLinux 10 では既定で有効なので気にしなくてよい（[tool-catalog.md](tool-catalog.md) の「導入経路と EL10 での注意」）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. EPEL が有効になったか確かめる。
-
-   ```bash
-   rpm -q epel-release
-   dnf repolist enabled | grep -E '^epel'
-   ```
-
-   - `epel-release` の版と、`epel` の行が出れば有効になっている
-
 1. 入手できる版を見てから、distrobox を入れる。
 
    ```bash
@@ -92,7 +63,7 @@
    - 一緒に入るのは `hicolor-icon-theme` だけ（podman は前提の手順で入っている）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - [btop.md 手順 4](btop.md#実施手順) と同じ鍵
+   - [epel.md 手順 3](epel.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. distrobox が入ったか確かめる。
@@ -232,7 +203,7 @@
    ```
 
    - 検証では、依存を含めて 117 パッケージ（97.5 MB）を取得し、ボックスの中で 238 MB を使った
-   - ボックスの中の `sudo` はパスワードを聞かない（手順 8 の補足）
+   - ボックスの中の `sudo` はパスワードを聞かない（手順 5 の補足）
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 1. ffmpeg をホストから呼べるように書き出す。
@@ -344,7 +315,7 @@
 
    - `[y/N]` で聞かれる
    - 依存で入った `hicolor-icon-theme` も、ほかに使うものが無ければ一緒に消える
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）
+   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [epel.md のロールバック](epel.md#ロールバック)
 
 ---
 
@@ -353,9 +324,9 @@
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 の上で、別のディストリ（既定は Ubuntu 24.04）のユーザーランドとパッケージを使えるようにする。EL10 の AppStream・EPEL に無いものを、そのディストリのパッケージで補う
-- **進め方**: EPEL の distrobox を入れ、rootless の podman（[podman.md](podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
+- **進め方**: EPEL（前提の [epel.md](epel.md) で有効にする）の distrobox を入れ、rootless の podman（[podman.md](podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
-  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜9、任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 確認したこと:
     - EPEL の distrobox 1.8.2.3 が入り、Ubuntu 24.04 のボックスができる
     - ボックスの中のユーザーとホームがホストと同じ
@@ -368,7 +339,7 @@
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](podman.md) と同じ作り） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](podman.md) の実施手順で導入） |
-| EPEL | 未確認 | 未設定 → 手順 3 で `epel-release-10-6.el10` を導入 |
+| EPEL | 未確認 | 未設定 → [epel.md](epel.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | distrobox | 未導入 | `distrobox-1.8.2.3-1.el10_2`（epel） |
 | ボックス | — | `quay.io/toolbx/ubuntu-toolbox:24.04`（Ubuntu 24.04.5 LTS） |
 
@@ -407,7 +378,7 @@
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 6〜8 と任意節）:
+**検証コンテナでの出力**（手順 3〜5 と任意節）:
 
 ```
 $ distrobox version
@@ -429,11 +400,11 @@ $ ffmpeg -version | head -1
 ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 ```
 
-- `distrobox list` は手順 7 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](#ロールバック)の手順 2 で `running` と聞かれる）
+- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](#ロールバック)の手順 2 で `running` と聞かれる）
 
 ### 注意点
 
-- **ボックスは隔離ではない**: ホームを共有し、ホストのファイルシステム全体が `/run/host` に見え、ネットワークとプロセスもホストと同じ（手順 7 の補足）。信用できないソフトを試す場所にはしない
+- **ボックスは隔離ではない**: ホームを共有し、ホストのファイルシステム全体が `/run/host` に見え、ネットワークとプロセスもホストと同じ（手順 4 の補足）。信用できないソフトを試す場所にはしない
 - **ボックスの `sudo` はホストの root ではない**: rootless の podman の読み替えで、ボックスの root はホストの自分のユーザーになる。ホストのシステムの設定は変えられない
 - **`distrobox enter` が動いている間に貼った行は、ボックスへの入力になる**: 端末の入力をボックスの中のコマンドへ渡し続けるため
   - 検証では、`distrobox enter <名前> -- <コマンド>` の後ろの行を続けて流すと、それらの行は実行されなかった
@@ -450,6 +421,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
 - [Podman](podman.md) — 前提の rootless の podman
+- [EPEL](epel.md) — 前提の EPEL の有効化
 
 ---
 
@@ -466,20 +438,20 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
   - 検証環境の cgroup v2 には pids のコントローラが無く、crun が `pids.max` に書こうとして失敗した（``controller `pids` is not available``）
   - `--pids-limit=-1` だけを `--pids-limit=0`（設定しない）に読み替える `/usr/local/bin/podman` を、手順 1 の前に置いた
   - 実機では要らない見込み（確かめていない）
-- **EPEL**: 手順 3 の直後に、EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）
+- **EPEL**: EPEL の有効化（今の epel.md の手順 2）の直後に、EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）
 - ボックスの中の apt は、`http://archive.ubuntu.com` にそのままつながった
 
-**流し方**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]`・`[Y/n]` には `y` と答えた。手順 9 はボックスのシェルに入ったところで `grep PRETTY_NAME /etc/os-release` と `exit` を打った。
+**流し方**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]`・`[Y/n]` には `y` と答えた。手順 6 はボックスのシェルに入ったところで `grep PRETTY_NAME /etc/os-release` と `exit` を打った。
 
 | 手順 | 結果 |
 |---|---|
 | 1. 変数 | `DBX_NAME  = ubuntu`、`DBX_IMAGE = quay.io/toolbx/ubuntu-toolbox:24.04` |
-| 2〜4. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ（`dnf-plugins-core` など） → `epel` の行 |
-| 5. 導入 | `distrobox.noarch  1.8.2.3-1.el10_2  epel`。`[y/N]` と EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）に `y`。`distrobox` と `hicolor-icon-theme` の 2 つ（300 k） |
-| 6. 確かめる | `distrobox: 1.8.2.3`、`/usr/bin/distrobox`、`distrobox 1.8.2.3-1.el10_2 epel`、`distrobox list` は見出しだけ |
-| 7. 作成 | `quay.io/toolbx/ubuntu-toolbox:24.04` を取得して `Distrobox 'ubuntu' successfully created.`。`distrobox list` は `Created` |
-| 8. 初期化 | `[ OK ]` が 12 行並んで `Container Setup Complete!`、続けて `PRETTY_NAME="Ubuntu 24.04.5 LTS"`・`<USER>`・`/home/<USER>`。別の試行で時間を計ると 1 分 17 秒だった |
-| 9. シェル | `host-spawn: command not found` が 4 行、プロンプトは `📦[<USER>@ubuntu ~]$`。`exit` で戻った |
+| epel.md 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ（`dnf-plugins-core` など） → `epel` の行 |
+| 2. 導入 | `distrobox.noarch  1.8.2.3-1.el10_2  epel`。`[y/N]` と EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）に `y`。`distrobox` と `hicolor-icon-theme` の 2 つ（300 k） |
+| 3. 確かめる | `distrobox: 1.8.2.3`、`/usr/bin/distrobox`、`distrobox 1.8.2.3-1.el10_2 epel`、`distrobox list` は見出しだけ |
+| 4. 作成 | `quay.io/toolbx/ubuntu-toolbox:24.04` を取得して `Distrobox 'ubuntu' successfully created.`。`distrobox list` は `Created` |
+| 5. 初期化 | `[ OK ]` が 12 行並んで `Container Setup Complete!`、続けて `PRETTY_NAME="Ubuntu 24.04.5 LTS"`・`<USER>`・`/home/<USER>`。別の試行で時間を計ると 1 分 17 秒だった |
+| 6. シェル | `host-spawn: command not found` が 4 行、プロンプトは `📦[<USER>@ubuntu ~]$`。`exit` で戻った |
 | 任意 1〜2 | `apt-get update` の後、ffmpeg と依存の 117 パッケージ（97.5 MB、ボックスの中で 238 MB） |
 | 任意 3〜4 | `/usr/bin/ffmpeg from ubuntu exported successfully in /home/<USER>/.local/bin.`、`command -v ffmpeg` → `/home/<USER>/.local/bin/ffmpeg`、`ffmpeg version 6.1.1-3ubuntu5` |
 | 更新 | `sudo dnf upgrade distrobox` は `Nothing to do.`。`distrobox upgrade ubuntu` は確認なしで 12 パッケージを上げた |
@@ -488,7 +460,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 **別に確かめたこと**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 
 - `--yes` を付けない `distrobox create` は `Image quay.io/toolbx/arch-toolbox:latest not found.` と `Do you want to pull the image now? [Y/n]:` を出した（`n` で中断）
-- `distrobox create --dry-run` で、podman に渡すオプション（手順 7 の補足の表）を見た
+- `distrobox create --dry-run` で、podman に渡すオプション（手順 4 の補足の表）を見た
 - `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](#注意点)）
 - `dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た
 

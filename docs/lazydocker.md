@@ -205,7 +205,7 @@
 
 ## compose のプロジェクトを見る（任意）
 
-- 前提: [podman-compose](podman-compose.md) の実施手順を手順 7 まで通し、`~/compose-sample` のコンテナが動いていること
+- 前提: [podman-compose](podman-compose.md) の実施手順を手順 4 まで通し、`~/compose-sample` のコンテナが動いていること
 - lazydocker は、起動したディレクトリで `docker compose config --quiet` が通ったときだけ、`[1]─Project` と `[2]─Services` の枠を出す
 - podman だけの PC では通らないので、この節で compose のコマンドを `podman-compose` に替える
 
@@ -341,7 +341,7 @@
 - **進め方**: Homebrew の lazydocker 0.25.2 を入れ、[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)の `DOCKER_HOST` でつなぐ。podman だけの PC で動かないところ（シェルと compose）は、任意節の設定で補う。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-28）。実機では本実行していない**
   - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
-  - compose の任意節の前には、[podman-compose.md](podman-compose.md) の手順 1〜9 を通した
+  - compose の任意節の前には、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](podman-compose.md) の手順 1〜6 を通した
   - 確認したこと:
     - lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 の API ソケットにつながり、コンテナ・イメージ・ボリューム・ネットワークとログを出す
     - 画面の `s` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
@@ -471,7 +471,7 @@ commandTemplates:
 | 4. 画面 | 4 つの枠と右のログ。`running  lazydocker-web` の行。`←` / `→` で枠を移れた。`s` → `Are you sure you want to stop this container?` → `y` で `exited (0)`。`q` でプロンプトに戻った |
 | 5. 確かめる | `lazydocker-web Exited (0) 13 seconds ago`、`config.yml`（0 バイト） |
 | podman exec の節 | 手順 1 は `lazydocker-web`、手順 2 の読み戻しに 5 行。手順 3 は `c` → `podman exec sh` → Enter で `sh-5.2$`、`id` で `uid=1001(default) gid=0(root) groups=0(root)`、`exit` と Enter で画面に戻り、`q` |
-| compose の節 | 先に podman-compose.md の手順 1〜9 を通した。手順 1 の読み戻しに 2 行。手順 2 は `[1]─Project`（`compose-sample`）・`[2]─Services`（`check`・`web`）・`[3]─Standalone Containers`（`lazydocker-web`）で、`web` を選んで `r`。手順 3 は `compose-sample_web_1 Up 14 seconds` と `compose-sample_check_1 Up 48 seconds` |
+| compose の節 | 先に EPEL の有効化（今の epel.md の手順 1〜3）と、podman-compose.md の手順 1〜6 を通した。手順 1 の読み戻しに 2 行。手順 2 は `[1]─Project`（`compose-sample`）・`[2]─Services`（`check`・`web`）・`[3]─Standalone Containers`（`lazydocker-web`）で、`web` を選んで `r`。手順 3 は `compose-sample_web_1 Up 14 seconds` と `compose-sample_check_1 Up 48 seconds` |
 | 更新 | `Warning: lazydocker 0.25.2 already installed` |
 | ロールバック | 先に podman-compose.md のロールバック手順 1〜2 を通した。手順 1 は `lazydocker-web`、手順 2 は `Untagged:` と `Deleted:`、手順 3 は `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/lazydocker/0.25.2... (6 files, 13.2MB)`、手順 4 は何も出ずに終わった。最後に podman-compose.md のロールバック手順 4 を通した |
 
