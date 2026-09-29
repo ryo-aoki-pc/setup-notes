@@ -13,7 +13,8 @@
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 共有フォルダーは[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、OS やホストの VirtualBox を上げたときは[更新](#更新)、戻すときは[ロールバック](#ロールバック)
 - **切り替えた後は、`sudo bootc upgrade` だけでは OS が上がらない**（[更新](#更新)の手順でビルドし直す）
-- 自作の kernel-rt のイメージでも、手順 1 の `BASE_IMAGE` を変えるだけで同じ手順になる（イメージで `rt` のリポジトリを有効にしておく）。ただし kernel-rt で確かめたのはビルド（手順 8）までで、VM では動かしていない
+- 自作の kernel-rt のイメージでも、手順 1 の `BASE_IMAGE` を変えるだけで同じ手順になる（イメージで `rt` のリポジトリを有効にしておく）
+  - kernel-rt では、起動のたびに `vboxguest` を読み込んだ直後に、カーネルの `WARNING` が 1 回出る（Guest Additions は動く。手順 11 の補足）
 - VirtualBox のメニューの名前は、日本語の表示と英語の表示を並べて書いてある
 
 1. 変数を設定する（既定のままでよい）。
@@ -28,7 +29,7 @@
    - 自作の kernel-rt のイメージ（レジストリにあるもの）なら、手順 2 の `Booted image:` に合わせて、そのイメージの名前にする
      - 手順 5 の Containerfile がカーネルを見分けて、`kernel-rt-devel` でビルドする
      - `kernel-rt-devel` は `rt` のリポジトリにしか無いので、そのイメージで `rt` を有効にしておく（手順 5 の補足）
-     - kernel-rt で確かめたのはビルド（手順 8）までで、VM では動かしていない（手順 5 の補足）
+     - VM では、検証用に作った kernel-rt のイメージで確かめた（手順 5 の補足）
    - 手順 8、[更新](#更新)、[ロールバック](#ロールバック)で使う
 
    <details>
@@ -253,7 +254,7 @@
    - 最後の結果の行の前で `set +x` にしているので、手順 8 の「最後に次が出ればよい」の行は、トレースと混ざらずに出る
    - トレースは標準エラーに出るので、標準出力の行と前後が入れ替わることがある（`installer exit=1` の後に `+ echo 'installer exit=1'` が出た）
 
-   **kernel-rt のイメージ**（検証用に作ったイメージでの実測。VM では未確認）:
+   **kernel-rt のイメージ**（検証用に作ったイメージでの実測。コンテナと VM）:
 
    - カーネルの版は、イメージの `/usr/lib/modules` から取る（bootc のイメージにはカーネルが 1 つだけ）
      - kernel-rt のイメージには `kernel-core` が無い（`kernel-rt-core` が持つ）ので、`rpm -q kernel-core` では取れない
@@ -264,6 +265,9 @@
      - 公式のイメージの `almalinux-rt.repo` は `enabled=0`。`rt` が無効のままの kernel-rt のイメージでは、`No match for argument: kernel-devel-uname-r = …+rt` で止まった
    - 公式のイメージでは、dnf は有効な baseos・appstream・crb・extras・epel を読み、道具として入るのは 15 パッケージだった
    - 署名（`.config` と `sign-file`）・`depmod`・`TARGET_VER` は同じ版を使うので、kernel-rt でもそのまま通る。3 つのモジュールは、PREEMPT_RT のカーネル向けにもビルドできた
+   - kernel-rt のイメージに切り替えた VM でも、手順 1〜13 がそろった（Secure Boot の有効と無効。[付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）
+     - `…+rt` のカーネルで起動し、モジュールが読み込まれ、クリップボード・画面の大きさ・共有フォルダー・時刻の同期が動いた
+     - ただし `vboxguest` を読み込んだ直後に、カーネルの `WARNING` が 1 回出る（手順 11 の補足）
 
    **`libXt` を入れる**（VM での実測）:
 
@@ -356,6 +360,7 @@
    - 途中の `+` で始まる行は、Containerfile の中で実行したコマンド（手順 5 の補足）
    - 途中の `unable to load vboxguest kernel module` と `installer exit=1` は、ビルドの中ではモジュールを読み込めないためで、失敗ではない
      - Guest Additions が動いている VM でビルドし直すと（[更新](#更新)）、代わりに `mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2` になる。これも失敗ではない
+       - カーネルも新しくなったとき（ベースの更新）は、`mknod` の行が出て `installer exit=1` になる
    - 最後に次が出ればよい
      - `vboxguest.ko:`・`vboxsf.ko:`・`vboxvideo.ko:` の 3 行（イメージのカーネルの版。Secure Boot なら `signer=VirtualBox Guest Additions module signing key`）
      - kernel-rt のイメージなら、版の末尾が `+rt` で、`SMP preempt_rt` になる
@@ -399,11 +404,15 @@
 
    - **kernel-rt のイメージ**（検証用のイメージ。[付録](#付録-コマンドの表示と-kernel-rt-のコンテナでの確認2026-09-29)）: `+ kver=6.12.0-211.56.1.el10_2.x86_64+rt` になり、dnf は `kernel-rt-devel` を `rt` のリポジトリから入れた
      - 最後の 3 行は `vboxguest.ko: 6.12.0-211.56.1.el10_2.x86_64+rt SMP preempt_rt mod_unload modversions signer=VirtualBox Guest Additions module signing key` の形で、`Checks passed: 13` も同じだった
+     - VM でも同じ形だった（[VM の付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）。`kernel-rt-devel` は、イメージのカーネルと同じ版が入った（`rt` の最新でない 211.55.1 でも）
+     - VM では、HTTP のローカルのレジストリからベースを取り込んで、333 秒だった。取り込みに `Storing signatures` は出なかった（`policy.json` に載っていないため）
    - **所要時間**: 代役のコンテナでは、ベースの取り込みからビルドの終わりまで 2 分 22 秒だった。ベースを取り込んだ後のビルドだけなら約 40 秒（道具の導入 19 秒、インストーラ 12 秒）
      - VM（4 vCPU・8 GB）では、ベースの取り込みを含めて 305 秒だった。Containerfile を変えた後のビルドし直しは 161 秒、何も変えないビルドし直しは 5 秒
      - VM では、ベースの取り込みの `Getting image source signatures` の後に `Storing signatures` が出た（`policy.json` の署名の検査）
    - **署名**: 検証では、署名したモジュールから署名を取り出し、手順 4 と同じ作り方の証明書で `openssl dgst -sha512 -verify` を通して `Verified OK` になった（Guest Additions の起動スクリプトが署名を確かめるのと同じ方法）
    - **Secure Boot が無効なとき**は `MOK_SIGN=1` も `--secret` も渡らない。Containerfile の secret のマウントは、渡されなければ何もしない（`signer=` が空のまま成功することを確かめた）
+     - Secure Boot が無効の VM（kernel-rt）でも、`signer=` が空のまま成功した
+     - 切り替えた後は、`module verification failed: signature and/or required key missing - tainting kernel` を出して読み込まれた
    - **動いているカーネルとイメージのカーネルが違うとき**（まだ古いデプロイメントで動いている VM など）も、モジュールはイメージのカーネル向けにできる
      - 検証では、カーネルが `6.12.0-211.53.1.el10_2` の古いタグ（`10.2.20260916.0`）を、`6.12.0-211.56.1.el10_2` のカーネルの上でビルドした
      - `depmod: ERROR: could not open directory /lib/modules/<動いているカーネル>` と `depmod: FATAL` が 2 回ずつ出て、モジュールのビルドも 2 回走るが、最後の 3 行はイメージのカーネルの版になった
@@ -476,7 +485,7 @@
    - `● Booted image: containers-storage:localhost/vbox-ga:latest` ならよい
 
    <details>
-   <summary>補足: 動かないとき</summary>
+   <summary>補足: 動かないときと、kernel-rt で出る警告</summary>
 
    | 出るもの | 意味 | 対処 |
    |---|---|---|
@@ -497,6 +506,16 @@
      - クリップボード（`clipboard mode bidirectional`）: ホストで `wl-copy` した文字列を VM の端末に貼れ、VM の端末でコピーした文字列をホストの `wl-paste` で読めた
      - 時刻の同期: 切り替えた後の最初の起動で、VBoxService が `timesync vgsvcTimeSyncWorker: Radical guest time change` を出して、4 時間ずれていた時計を直した
    - メニューの名前は、VirtualBox 7.2.20 の翻訳ファイル（`/usr/share/virtualbox/nls/VirtualBox_ja.qm`）と、GUI のライブラリ（`UICommon.so`）の英語の文字列で確かめた
+
+   **kernel-rt で出る警告**（VM での実測。[付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）:
+
+   - kernel-rt の VM では、起動のたびに `vboxguest` を読み込んだ直後に、`sudo dmesg` に次の行と呼び出し履歴が 1 回出た
+     - `WARNING: CPU: <CPU> PID: <PID> at kernel/rcu/tree_plugin.h:826 rcu_sched_clock_irq+0x330/0x340`（`Comm: (udev-worker)`）
+     - Secure Boot の有効と無効、`211.55.1` と `211.56.1` の kernel-rt のどちらでも、4 回の起動すべてで出た。Guest Additions を入れる前の起動では出ない
+   - レジスタの値（`RAX: 00000000ffffffff`）から、モジュールを読み込んだタスクの RCU の読み取り側の入れ子が -1 になっている（`rcu_read_unlock` が 1 回多い）と読める。原因は調べていない
+   - 警告の後も、RCU の stall や `BUG:` は出ず、Guest Additions の働き（上の確認、クリップボード・画面の大きさ・共有フォルダー・時刻の同期）にも影響は見えなかった
+     - `/proc/sys/kernel/tainted` に `W`（警告）が加わる（Secure Boot が有効なら 4608）
+   - 既定のカーネル（PREEMPT_RT でないもの）でこの警告が出るかは、確かめていない
 
    </details>
 
@@ -596,7 +615,7 @@
 
 - `sudo bootc rollback` の後に再起動すると、1 つ前のデプロイメントに戻る
   - 更新を重ねた後は、1 つ前の派生イメージに戻るだけだった（VM で確認）
-  - 切り替えた直後なら元のイメージに戻る見込み（`bootc status` の `Rollback image:` が元のイメージだった。戻すことは試していない）
+  - 切り替えた直後なら、元のイメージに戻った（kernel-rt のイメージの VM で確認。もう一度 `sudo bootc rollback` すると、派生イメージに戻った）
 - この節の手順では消えないもの:
   - **Secure Boot の MOK**（手順 4 を行った場合）: 次の順で消す（VM で確認）
     - `sudo mokutil --delete /var/lib/shim-signed/mok/MOK.der`（一時パスワードを 2 回）→ 再起動
@@ -610,6 +629,7 @@
    ```
 
    - 元のイメージをレジストリから取り込み、署名を確かめてから再起動する
+     - 自作の kernel-rt のイメージなど、`policy.json` に載っていないレジストリのイメージは、署名を確かめない（手順 8 と同じ）
    - **次の手順は、起動したらログインし、新しい端末で手順 1 を貼ってから貼る**
 
    <details>
@@ -635,7 +655,7 @@
    - `Untagged:` と `Deleted:` の行が並ぶ
    - bootc は自分の置き場所にイメージを持っているので、podman のイメージを消しても起動には影響しない
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`sudo podman image prune` で消せる
-     - [更新](#更新)でビルドし直していれば、前の派生イメージ（5.07 GB）も `<none>` で残る。同じく `sudo podman image prune` で消える
+     - [更新](#更新)でビルドし直していれば、前の派生イメージ（5.07 GB。kernel-rt のイメージでは 5.51 GB）も `<none>` で残る。同じく `sudo podman image prune` で消える
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Guest Additions のユーザー・グループ・リンク・ログを消す。
@@ -689,7 +709,12 @@
     - モジュールの読み込み、VBoxService（時刻の同期）、VBoxClient（クリップボードの両方向・画面の大きさ）、共有フォルダーの自動マウントと読み書き
     - SELinux（`mount.vboxsf` が `mount_exec_t`、AVC の拒否が 0）、署名の検査（`policy.json` の鍵を差し替えると断られる）
     - 元のイメージに戻すと、イメージが足した `/etc` のファイルが消えること
-  - **確認していないこと**: VirtualBox の GUI のメニューそのものでの操作（名前は翻訳ファイルと文字列で確かめた）、Secure Boot が無効の VM、[更新](#更新)の手順 1（ホストの VirtualBox の新しい版が無い）、切り替えた直後の `bootc rollback`、KDE・COSMIC の Atomic Desktop
+  - **確認していないこと**:
+    - VirtualBox の GUI のメニューそのものでの操作（名前は翻訳ファイルと文字列で確かめた）
+    - [更新](#更新)の手順 1（ホストの VirtualBox の新しい版が無い）、KDE・COSMIC の Atomic Desktop
+    - 直した Containerfile（`set -x` と kernel-rt の対応）を、既定のカーネルのイメージの VM で流すこと
+    - 既定のカーネルのイメージでの、Secure Boot が無効の VM と、切り替えた直後の `bootc rollback`（どちらも kernel-rt のイメージでは確かめた）
+    - 認証の要るレジストリにある、自作のイメージ
   - コンテナでの検証（2026-09-28。[付録](#付録-コンテナでの検証記録2026-09-28)）: Atomic Desktop のイメージそのものを VM の代役にし、中の podman にコードブロックを貼った
     - 確かめたのは、派生イメージのビルド（モジュールのビルドと署名、`bootc container lint`）と、切り替えた後の最初の起動を systemd を PID 1 にしたコンテナで模した結果
     - このとき実機の設定は変えていない（`sudo` を使わず、rootless の podman だけ）
@@ -700,7 +725,15 @@
     - `set -x` で RUN の中のコマンドを表示し、最後の結果の行の前で `set +x` にした
     - kernel-rt のイメージのため、カーネルの版を `/usr/lib/modules` から取り、道具を `kernel-devel-uname-r` の指定で入れるようにした。dnf の `--repo` は外し、イメージで有効なリポジトリを使う
     - 直した版は、x86_64 のコンテナ（クラウドホスト上の Docker）で手順 1・3〜5・7・8 を流して確かめた（手順 6 の CD は、読み取り専用のマウントで代えた）。ベースは公式のイメージと、kernel を kernel-rt に入れ替えた検証用のイメージ（ローカルのレジストリに置いた）の 2 つ
-    - **VM では流していない**。kernel-rt のイメージでの手順 9〜13（切り替え・起動・モジュールの読み込み）と、共有フォルダー・更新・ロールバックは未確認
+    - 既定のカーネルのイメージでは、直した版を VM で流していない。kernel-rt のイメージでは、同じ日に VM で流した（次の項目）
+  - 2026-09-29（夜）: 直した版を、同じ実機の VirtualBox の VM で流した（[付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）
+    - VM は公式の ISO で新しく入れ、検証用の kernel-rt のイメージ（ローカルのレジストリに置いた）に切り替えてから、この文書のブロックを貼った
+    - Secure Boot が無効の VM で手順 1〜3・5〜9・11・12、有効の VM で手順 1〜13
+    - 有効の VM で、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)の手順 1〜4、[更新](#更新)の手順 2・3（変わらないときと、ベースとカーネルが新しくなったとき）、[ロールバック](#ロールバック)の手順 1〜3
+    - 確認したこと: kernel-rt での起動、`kernel-rt-devel` でのビルドと署名、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService
+    - あわせて確認したこと: 共有フォルダーの読み書き、カーネルが変わる更新、切り替えた直後の `bootc rollback`
+    - 見つかったこと: kernel-rt では、`vboxguest` の読み込みの直後にカーネルの `WARNING` が 1 回出る（[手順 11](#実施手順) の補足）
+    - 直したこと: カーネルも新しくなる更新では `installer exit=1` になる（[手順 8](#実施手順) の箇条書き）。[ロールバック](#ロールバック)のリードの「切り替えた直後」の見込みを、確かめた結果にした
 
 | 項目 | VirtualBox の VM（本実行） | 検証環境（コンテナ） |
 |---|---|---|
@@ -834,7 +867,8 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[手順 5〜9](#実施手順)）
 - **公式の ISO で入れた VM は `:latest` を追う**: `BASE_IMAGE` の既定は `:latest`。別のタグを追う VM では、手順 2 の `Booted image:` に合わせて手順 1 を直す（[手順 1](#実施手順) の補足）
 - **Guest Additions のインストーラは、bootc 向けに 4 か所を直して使う**: unit・`/var` の設定・ユーザーとグループ・カーネルの版（[手順 5](#実施手順) の補足）
-- **kernel-rt のイメージでも、同じ Containerfile でビルドできる**: カーネルの版はイメージの `/usr/lib/modules` から取り、`kernel-rt-devel` のある `rt` のリポジトリをイメージで有効にしておく。確かめたのはビルドまで（[手順 5](#実施手順) の補足）
+- **kernel-rt のイメージでも、同じ手順で入る**: `kernel-rt-devel` のある `rt` のリポジトリをイメージで有効にしておく。VM で確かめた（[手順 5](#実施手順) の補足）
+  - ただし起動のたびに、`vboxguest` を読み込んだ直後にカーネルの `WARNING` が 1 回出る。Guest Additions の働きには影響が見えなかった（[手順 11](#実施手順) の補足）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 5](#実施手順) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](#更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
@@ -1111,3 +1145,104 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - kernel-rt のイメージでの `bootc switch`、MokManager での登録、起動、モジュールの読み込み、VBoxService・VBoxClient、共有フォルダー、更新、ロールバック
 - 検証用ではない、利用者が作った kernel-rt のイメージ（作り方によって、`rt` のリポジトリが有効かどうかや `/usr/lib/modules` の中身が違いうる）
 - Secure Boot が無効の分岐（直した行は分岐と関係しないので、今回は流していない）
+
+---
+
+### 付録: kernel-rt のイメージの VM での本実行（2026-09-29）
+
+前の付録の後に、直した Containerfile（`57d70c8` の版）を、VM の付録と同じ実機の VirtualBox の VM で流した。自作の kernel-rt のイメージで動いている VM を作り、Secure Boot が無効の回と有効の回に分けた。
+
+前の 2 つの付録の未確認事項のうち、次のものはこれで済んだ（どれも kernel-rt のイメージでの確認）。
+
+- 直した Containerfile での VM の本実行。kernel-rt のイメージでの `bootc switch`・MokManager での登録・起動・モジュールの読み込み・VBoxService・VBoxClient・共有フォルダー・更新・ロールバック
+- Secure Boot が無効の VM での手順（手順 4・10・13 を飛ばす分岐）、切り替えた直後の `bootc rollback`、ベースのイメージが新しくなったときの更新
+
+**環境**:
+
+- ホスト: VM の付録と同じノート PC（AlmaLinux 10.2、カーネル `6.12.0-211.56.1.el10_2`、VirtualBox 7.2.20、SELinux は Enforcing、GNOME 49.4 / Wayland）
+  - ホストの Secure Boot は無効（VirtualBox のモジュールは署名なしで読み込まれている）。VM の Secure Boot は、VM の NVRAM の設定で切り替えた
+- VM: VM の付録と同じ設定で新しく作った（4 vCPU・8 GB・VMSVGA 128 MB・SATA の 80 GB の VDI・NAT・UEFI とセキュアブート）
+- ISO: VM の付録と同じ `atomic-desktop-gnome-amd64.iso`（sha256 が一致）
+  - 入れた直後は `quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260918.1、カーネル `6.12.0-211.55.1.el10_2`）だった
+
+**kernel-rt の検証用イメージ**（ホストの rootless の podman 5.8.2 で作った。手順書には載せない）:
+
+- 前の付録と同じ作り方を、ベースと版を引数にして 2 つ作った
+  - 作り方: `rpm -e --nodeps` で kernel の 5 つを外し、`dnf -y --repo=baseos --repo=appstream --repo=rt install kernel-rt-<版> kernel-rt-modules-extra-<版>` で入れた
+  - そのうえで `[rt]` を `enabled=1` にし、lint の警告を直した
+  - 1 つ目: ISO と同じ `10.2.20260918.1` に kernel-rt `6.12.0-211.55.1.el10_2`（ビルド 52 秒）。初めの `:latest`
+  - 2 つ目: `10.2.20260926.0`（今の `:latest`）に kernel-rt `6.12.0-211.56.1.el10_2`（ビルド 56 秒）。[更新](#更新)を試すときに `:latest` にした
+- どちらも `Generating initramfs`（rpm-ostree の kernel-install）で initramfs ができ、`Checks passed: 13`（警告なし）だった
+- 送り出す前に、元のイメージと比べた
+  - `/usr/lib/modules` は `…+rt` の 1 つだけ、`/boot` は空、`CONFIG_PREEMPT_RT=y`・`CONFIG_MODULE_SIG=y`・`CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT=y`
+  - initramfs の dracut のモジュールは元と同じで、大きさも同じくらい（約 243 MB）
+  - `vmlinuz` の署名者は、元の kernel と同じ `AlmaLinux Secure Boot Signing`（`pesign -S`）
+- 一緒に `realtime-setup`・`tuna`・`tuned-profiles-realtime` が入った
+  - このイメージでは、Guest Additions を入れる前から `tuned-ppd.service`（SELinux の拒否）と `mcelog.service`（`CPU is unsupported`）が `failed` だった
+
+**検証環境だけの設定**（手順書のコマンドは変えていない）:
+
+- レジストリ: ホストの rootless の podman で `quay.io/libpod/registry:2.8.2` を `127.0.0.1:5000` に立て、2 つのイメージを置いた
+  - VM からは NAT の `10.0.2.2:5000` で届くように、VM に `--nat-localhostreachable1=on` を付けた（付けない VM は `localhostReachable="0"`）
+  - VM の `/etc/containers/registries.conf.d/90-pr56-registry.conf` で、`10.0.2.2:5000` を `insecure = true` にした（HTTP のため）
+    - bootc と `sudo podman` の両方がこれを読んだ
+- 手順 1 の前に、`sudo bootc switch --apply 10.0.2.2:5000/atomic-desktop-gnome-rt:latest` で VM を kernel-rt のイメージに切り替えた
+  - `layers already present: 83; layers needed: 1 (366.4 MB)` の後に再起動した
+  - Secure Boot のまま `6.12.0-211.55.1.el10_2.x86_64+rt`（`SMP PREEMPT_RT`）で起動し、lockdown は `integrity` だった
+  - 止めてスナップショットを取り、Secure Boot が無効の回と有効の回をそこから始めた。無効の回は `VBoxManage modifynvram <VM> secureboot --disable`
+- **スナップショットに戻しても、NVRAM の Secure Boot の設定は戻らなかった**（無効のまま。VirtualBox 7.2.20）
+  - 有効の回は、`modifynvram <VM> secureboot --enable` で戻してから始めた。MOK は登録されていなかった
+- Anaconda の後の Reboot System は、ISO をつないだまま選んだ。ディスクから起動し、VM の付録の灰色の画面は起きなかった
+
+**流し方**:
+
+- VM の付録と同じ。抜き出したブロックを、ホストから VM への SSH の擬似端末に 1 つずつ貼った
+  - ホスト側のメニューの操作は、VM の付録の対応表の `VBoxManage` で行った
+- 手順 1 は、手順 2 の分岐のとおり `BASE_IMAGE=10.0.2.2:5000/atomic-desktop-gnome-rt:latest` に直して貼り直した。新しい端末を開くたびに貼り直した
+- 手順書の版: `57d70c8`（抜き出した全部のブロックは `bash -n` を通った）
+
+| 手順 | Secure Boot が無効 | Secure Boot が有効 |
+|---|---|---|
+| 1・2 | 既定の値 → `oracle`、`/var` の空き 41G、`● Booted image: 10.0.2.2:5000/atomic-desktop-gnome-rt:latest`（`Version: 10.2.20260918.1` はベースのラベル）→ 手順 1 を直して貼り直した | 同じ |
+| 3・4 | `SecureBoot disabled`。手順 4・10・13 は飛ばした | `SecureBoot enabled`。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）、一時パスワードを 2 回 |
+| 5〜7 | Containerfile 3225 バイト（写しと同じ中身）。CD を入れても画面に何も出ず、`/run/media/<USER>/VBox_GAs_7.2.20`。`All good.`、`VirtualBox 7.2.20 Guest Additions for Linux` | 同じ |
+| 8 | 333 秒（ベースの取り込みを含む）。`+ kver=6.12.0-211.55.1.el10_2.x86_64+rt`、`+` の行は 118。dnf は AppStream・BaseOS・CRB・Extras・RT・EPEL を読み、`kernel-rt-devel-6.12.0-211.55.1`（`rt`）を含む 15 パッケージを入れて消した。`installer exit=1`、`+ '[' 0 = 1 ']'`。3 行が `…+rt SMP preempt_rt mod_unload modversions signer=`、`enabled` が 2 行、`Checks passed: 13` | 332 秒。`+` の行は 126（`+ hash=sha512` と、`sign-file sha512 /run/secrets/mok_priv /run/secrets/mok_der …` が 3 行。鍵の中身は出ない）。3 行が `signer=VirtualBox Guest Additions module signing key` |
+| 9・10 | `layers already present: 84; layers needed: 2 (152.2 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest`。GRUB（`ostree:0` と `ostree:1`、1 秒）から、MokManager を経ずに起動した | 同じ層の数。MokManager の最初の画面でキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` |
+| 11 | `vboxguest` の行、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は kernel-rt のイメージ） | 同じ |
+| 12 | クリップボードは両方向で文字列が届いた。`setvideomodehint 1600 900 32` で 1600x900 になり、1280x800 に戻せた | 同じ |
+| 13 | 飛ばした | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
+
+Secure Boot が有効の回では、続けて次を流した。無効の回では、手順 12 の後に切り替えた直後の `bootc rollback` だけを試した。
+
+| 節と手順 | 結果 |
+|---|---|
+| 共有フォルダー 1〜4 | 足すと `vboxsf` が読み込まれ（`… on 6.12.0-211.55.1.el10_2.x86_64+rt`）、`/run/media/sf_<名前>`（`gid=<GID>`、`dmode=0770`、`fmode=0770`）。グループに入る前は `Permission denied`。手順 2 は無出力 → ログインし直し → 手順 4 で `vboxsf` とマウントの行。256 MB のファイルが両方向で sha256 まで一致した |
+| 更新 2・3（変わらないとき） | 新しい端末で手順 1 を貼り直してから手順 8: 3 秒、`Using cache` が 4 行で同じイメージ ID → `No changes in ostree-unverified-image:containers-storage:localhost/vbox-ga:latest => sha256:<DIGEST>` と `No update available.`、再起動しない（boot_id が同じ） |
+| 更新 2・3（ベースとカーネルが新しくなったとき） | ホストで `:latest` を 2 つ目のイメージにした後、手順 8: 376 秒。新しいベースを取り込み、`+ kver=6.12.0-211.56.1.el10_2.x86_64+rt`、`kernel-rt-devel-6.12.0-211.56.1`（`rt`）。動いているカーネルと違うので `depmod: FATAL` が 2 回、`mknod: /dev/vboxguest: Operation not permitted` と `installer exit=1` → `sudo bootc upgrade --apply` が `layers already present: 66; layers needed: 20 (2.2 GB)` の後に再起動 → `6.12.0-211.56.1.el10_2.x86_64+rt` で手順 11〜13 がそろった |
+| ロールバック 1 | 新しい端末で手順 1 を貼り直してから: `Fetching layers 0/0`、`Deploying: done (11 seconds)`、`Queued for next boot: 10.0.2.2:5000/atomic-desktop-gnome-rt:latest`。署名の検査の表示は無い → 再起動。モジュール・`/opt` の本体・イメージが足した `/etc` のファイルが消え、ユーザー・グループ・`/var` のリンク・ログ 4 つが残った |
+| ロールバック 2 | `Untagged:` が 2 行、`Deleted:` が 4 行。`podman images` に `<none>` が 2 つ（前の派生イメージ 5.51 GB と 6.43 MB）→ `sudo podman image prune`（`[y/N]` に `y`）で、親のイメージも含めて 5 つ消えた。`/var` の使用量は 7.7G |
+| ロールバック 3 | 無出力。ユーザー・グループ・リンク・ログが消えた。MOK は登録されたまま |
+| 切り替えた直後の `bootc rollback`（Secure Boot が無効の回） | `Next boot: rollback deployment.` → 再起動 → kernel-rt のイメージ（Guest Additions 無し）で起動 → もう一度 `sudo bootc rollback` → 再起動 → 派生イメージに戻り、手順 11 がそろった |
+
+- 手順書を直したところ: [手順 8](#実施手順) の `installer exit=1`（カーネルも新しくなったとき）、[手順 11](#実施手順) の補足の警告、[ロールバック](#ロールバック)のリードと手順 1・2
+
+**手順書の外で確かめたこと**:
+
+| 確認 | 結果 |
+|---|---|
+| カーネルの警告 | Guest Additions を入れた後の 4 回の起動すべてで、`vboxguest: Successfully loaded …` の直後に `WARNING: CPU: <CPU> PID: <PID> at kernel/rcu/tree_plugin.h:826 rcu_sched_clock_irq+0x330/0x340`（`Comm: (udev-worker)`）と呼び出し履歴。割り込まれていたのは `__fput` → `dput` → `kmem_cache_free` の途中で、`RAX: 00000000ffffffff`。Guest Additions を入れる前の起動では出ない |
+| 警告の後 | RCU の stall・`BUG:`・`scheduling while atomic` は出ず、VBox のコアダンプも無い。`irq/20-vboxguest` のスレッドは `SCHED_FIFO` の 50 |
+| taint | Secure Boot が無効: `loading out-of-tree module taints kernel.` と `module verification failed: signature and/or required key missing - tainting kernel`、`tainted` は 12800（O・E・W）。有効: 前の 1 行だけで、4608（O・W） |
+| 鍵 | 登録した鍵は `.platform` のキーリングにあり、`.machine` には無い（VM の付録と同じ） |
+| 時刻の同期 | どちらの回も、切り替えた後の起動で `timesync vgsvcTimeSyncWorker: Radical guest time change` が出て、4 時間のずれが直った |
+| ホストから見た状態 | `GuestAdditionsRunLevel=2`、`GuestAdditionsVersion="7.2.20 r175154"`、`/VirtualBox/GuestInfo/OS/Release = '6.12.0-211.55.1.el10_2.x86_64+rt'`、`OS/Version` に `PREEMPT_RT` |
+| SELinux | AVC の拒否は、Guest Additions を入れる前からの `tuned-ppd` のものだけ |
+
+#### 未確認事項
+
+- 直した Containerfile を、既定のカーネルのイメージの VM で流すこと
+- 既定のカーネルで、同じ `rcu_sched_clock_irq` の警告が出るか。警告の原因
+- `rt` が無効の kernel-rt のイメージを VM で使ったとき（前の付録のコンテナでは、手順 8 で止まることを確かめた）
+- 検証用ではない、利用者が作った kernel-rt のイメージ
+- 認証の要るレジストリ（bootc の文書では、bootc は `/etc/ostree/auth.json` などを読む。手順 8 の `sudo podman` が同じ認証で取り込めるかは確かめていない）
+- kernel-rt の VM を長く動かしたとき（今回は 1 回の起動で長くて 16 分ほど）、kernel-rt での MOK の削除、[更新](#更新)の手順 1
