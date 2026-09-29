@@ -66,7 +66,7 @@
 
 ### ファイル共有・同期
 
-- Samba は、サーバーにある自分のホームを LAN・WireGuard 越しに SMB3 で読み書きする。Syncthing は、指定したフォルダを端末同士で同期する
+- Samba は、サーバーにある自分のホームを LAN・WireGuard 越しに SMB3 で読み書きする（任意で root のホームも、自分のユーザーのまま）。Syncthing は、指定したフォルダを端末同士で同期する
 - Samba クライアントは、その共有を AlmaLinux 10 の PC の `/mnt/<共有名>` に、アクセスしたときにマウントする。GNOME Files（`smb://`）で開く方法も同書にある
 - 同じホストで両方使うときは、Syncthing の同期対象にホームを丸ごと入れない（Samba と同じ領域を二重に扱うことになる）
 - Syncthing の鍵と設定は、[syncthing.md の任意節](docs/syncthing.md#設定を自動でバックアップする任意)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
@@ -75,7 +75,7 @@
 
 | 手順書 | 方式 | 導入元 | 常駐 | 開けるポート |
 |---|---|---|---|---|
-| [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]` だけ） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
+| [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
 | [Samba クライアント](docs/samba-client.md) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`） | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す） | 無し（サーバーの 445/tcp へ出るだけ） |
 | [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い） | `brew services` のユーザーサービスと `loginctl enable-linger` | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp） |
 | [Dropbox（公式クライアント）](docs/dropbox.md) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと `loginctl enable-linger` | 無し（LAN 同期の `dropbox-lansync` は開けない） |
