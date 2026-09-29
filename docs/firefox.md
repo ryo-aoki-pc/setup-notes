@@ -3,11 +3,12 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。手順 7 と手順 14 の GUI の確認だけ、デスクトップセッションで行う
-> - **手順 6・11・12・13 には対話入力がある**（トランザクション表の `[y/N]`。手順 12 は EPEL の鍵の確認も）。答えてから次の手順を貼る
+> - **前提（手順 8 から）**: [RPM Fusion（free）](rpmfusion.md) を有効にしてあること（その前提の [EPEL](epel.md) も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
+> - **すべて対象ホスト上で実行する**。手順 7 と手順 10 の GUI の確認だけ、デスクトップセッションで行う
+> - **手順 6・8・9 には対話入力がある**（トランザクション表の `[y/N]`。手順 8 は EPEL の鍵の確認も）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、手順 8 から貼る（手順 8 以降は変数を使わない）
+- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[rpmfusion.md](rpmfusion.md) を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
@@ -200,109 +201,7 @@
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
    - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
 
-1. RPM Fusion（free）の署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
-
-   ```bash
-   curl -fsSL 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10' | gpg --show-keys
-   ```
-
-   - `pub` 行の fingerprint が `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7`
-   - uid が `RPM Fusion free repository for EL (10) <rpmfusion-gpg-key-el10-free@rpmfusion.org>`
-   - 違っていればここで止める
-   - **次の手順は、この 2 つを目で確かめてから貼る**
-
-   <details>
-   <summary>補足: 手順 8〜14 で足すものと、鍵の出所</summary>
-
-   手順 8〜14 では、Firefox が自前で復号できない AAC と H.264 のために、RPM Fusion（free）の FFmpeg のライブラリを入れる。理由と、EPEL の `libavcodec-free` を採らなかった経緯は[選択した方針](#選択した方針)にある。
-
-   鍵は RPM Fusion の [keys](https://rpmfusion.org/keys) ページの添付ファイル。同じページの「RPM Fusion free for EL 10」の fingerprint（`5FC4 AE73 FC2B 08B9 DFE7 EB99 0C84 89D8 DB85 DDD7`）と一致した:
-
-   ```
-   pub   rsa4096 2025-02-07 [SC]
-         5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7
-   uid                      RPM Fusion free repository for EL (10) <rpmfusion-gpg-key-el10-free@rpmfusion.org>
-   ```
-
-   `gpg` は `gnupg2` のコマンド。素のコンテナには入っていなかったので、検証では先に入れた。
-
-   `gpg` を初めて使うユーザーでは、`pub` 行の前に次の 2 行が出た（x86_64 の実機）。`~/.gnupg` を作っただけで、鍵の照合には関係ない:
-
-   ```
-   gpg: directory '/home/<USER>/.gnupg' created
-   gpg: /home/<USER>/.gnupg/trustdb.gpg: trustdb created
-   ```
-
-   </details>
-
-1. 一致したら、鍵を rpm に取り込む。
-
-   ```bash
-   sudo rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10'
-   ```
-
-   - 何も表示されずに終われば、取り込めている
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 鍵が入ったか確かめる。
-
-   ```bash
-   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i fusion
-   ```
-
-   - `gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) ...` の 1 行が出る
-
-1. RPM Fusion（free）のリポジトリを入れる。
-
-   ```bash
-   sudo dnf --setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm
-   ```
-
-   - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、手順 9 の鍵で署名を確かめずに入る。この手順の補足）
-   - EPEL がまだ無ければ、依存として `epel-release` も入る（EPEL が有効になる）
-   - SELinux のポリシー（`selinux-policy`）が入っているホストでは、弱い依存として CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入る
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-   <details>
-   <summary>補足: 署名の確認と、一緒に入る EPEL</summary>
-
-   **署名の確認**: dnf 4.20 の既定は `localpkg_gpgcheck = 0` で、URL やファイルで渡したパッケージの署名を確かめない。`--setopt=localpkg_gpgcheck=1` を付けると確かめる。手順 9 の鍵が無いコンテナでは、次のように止まって何も入らなかった:
-
-   ```
-   Public key for rpmfusion-free-release-10.noarch.rpm is not installed
-   The downloaded packages were saved in cache until the next successful transaction.
-   You can remove cached packages by executing 'dnf clean packages'.
-   Error: GPG check FAILED
-   ```
-
-   RPM Fusion の [Configuration](https://rpmfusion.org/Configuration) は EL 向けに `--nogpgcheck` で入れる例を載せている。一方 [keys](https://rpmfusion.org/keys) の「Verify GPG signatures on install」は、鍵を先に取り込んで `localpkg_gpgcheck=1` で入れる方法を案内しており、本書は後者にした。`mirrors.rpmfusion.org` はミラーへリダイレクトする（この環境では `mirrors.ustc.edu.cn`）ので、署名で確かめる意味がある。
-
-   **一緒に入る EPEL**: `rpmfusion-free-release` は `epel-release >= 10` を要求するので、EPEL が無ければ extras から一緒に入る。[btop.md 手順 1〜3](btop.md#実施手順) の EPEL の有効化は要らない。素のコンテナでの実測:
-
-   ```
-   Installing:
-    rpmfusion-free-release     noarch     10-1              @commandline      10 k
-   Installing dependencies:
-    epel-release               noarch     10-6.el10         extras            18 k
-   Installing weak dependencies:
-    dnf-plugins-core           noarch     4.7.0-10.el10     baseos            37 k
-   ```
-
-   実機（GNOME のデスクトップ、SELinux は Enforcing）では 4 パッケージになった（`dnf history`）。`dnf-plugins-core` は元から入っていた。代わりに、`epel-release` の弱い依存 `(selinux-policy-epel if selinux-policy)` を満たす `selinux-policy-extra` と、それが要る `selinux-policy-targeted-extra` が CRB から入った。素のコンテナには `selinux-policy` が無いので、この 2 つは入らない:
-
-   ```
-   Packages Altered:
-       Install selinux-policy-extra-42.1.18-4.el10_2.3.noarch          @crb
-       Install selinux-policy-targeted-extra-42.1.18-4.el10_2.3.noarch @crb
-       Install epel-release-10-6.el10.noarch                           @extras
-       Install rpmfusion-free-release-10-1.noarch                      @@commandline
-   ```
-
-   `epel-release` の scriptlet は「CRB を有効に」と表示する。AlmaLinux 10 では CRB が既定で有効（[導入元一覧](tool-catalog.md#導入経路と-el10-での注意)）なので、`crb enable` は要らない。手順 12 の依存には、CRB のものは無かった。
-
-   </details>
-
-1. 入手できる版を見てから、FFmpeg のライブラリを入れる。
+1. [RPM Fusion](rpmfusion.md) を有効にしたホストで、入手できる版を見てから FFmpeg のライブラリを入れる。
 
    ```bash
    dnf -q list --showduplicates ffmpeg-libs
@@ -314,11 +213,13 @@
    - EPEL の `noopenh264` も依存で入るが、H.264 の再生には影響しない（この手順の補足）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを目で確かめてから `y` と答える。違っていれば `N` で中断する
-   - `conflicts with libswresample-free` と出て止まったら、手順 13 で入れ直す。入ったときは手順 13 は飛ばす
+   - `conflicts with libswresample-free` と出て止まったら、手順 9 で入れ直す。入ったときは手順 9 は飛ばす
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
-   <summary>補足: 入るものと、鍵の確認の実測</summary>
+   <summary>補足: 手順 8〜10 で足すもの、入るもの、鍵の確認の実測</summary>
+
+   手順 8〜10 では、Firefox が自前で復号できない AAC と H.264 のために、RPM Fusion（free）の FFmpeg のライブラリを入れる。理由と、EPEL の `libavcodec-free` を採らなかった経緯は[選択した方針](#選択した方針)にある。
 
    Firefox だけを入れたコンテナでは 79 パッケージが入った（ダウンロード 42 MB、展開後 137 MB）。内訳は EPEL 44・BaseOS 17・AppStream 14・RPM Fusion 4（`ffmpeg-libs`・`x264-libs`・`x265-libs`・`vvenc-libs`）で、CRB からは無い。実機（GNOME のデスクトップ）では、既に入っているものが多く 60 パッケージだった（EPEL 44・AppStream 10・RPM Fusion 4・BaseOS 2）。
 
@@ -331,7 +232,7 @@
 
    **`noopenh264` が入る理由**: `ffmpeg-libs` が `libopenh264.so.7` を要求し、x86_64 の実機の有効なリポジトリでそれを提供するのは、EPEL の `noopenh264`（中身の無い OpenH264）だけだった。aarch64 でも同じ（メタデータで確認）。x86_64 の実機では、Firefox のプロセスが `/usr/lib64/libopenh264.so.2.4.1` も読み込んだが、H.264 + AAC の mp4 は再生できた。EPEL の `libavcodec-free` と違い、H.264 は FFmpeg 自身のデコーダで復号される。
 
-   EPEL の鍵の確認の実測（手順 11 で EPEL が入ったコンテナ）。RPM Fusion の鍵は手順 9 で取り込んであるので聞かれない:
+   EPEL の鍵の確認の実測（RPM Fusion の有効化（今の [rpmfusion.md](rpmfusion.md) の手順 4）で、EPEL が依存として入ったコンテナ）。RPM Fusion の鍵は rpmfusion.md の手順 2 で取り込んであるので聞かれない:
 
    ```
    Importing GPG key 0xE37ED158:
@@ -342,7 +243,7 @@
 
    </details>
 
-1. 手順 12 が `libavcodec-free` との衝突で止まったときだけ、それを外して入れ直す。
+1. 手順 8 が `libavcodec-free` との衝突で止まったときだけ、それを外して入れ直す。
 
    ```bash
    sudo dnf install --allowerasing ffmpeg-libs
@@ -355,7 +256,7 @@
    <details>
    <summary>補足: EPEL の libavcodec-free を外す理由</summary>
 
-   EPEL の `libavcodec-free`（EPEL の `ffmpeg-free` のライブラリ）は、EPEL の Chromium や `gstreamer1-plugin-libav` など、`libavcodec.so.61` を使うパッケージの依存で入っていることがある。`ffmpeg-libs` とは同居できず、手順 12 は次のように止まる（`libavcodec-free` を入れたコンテナでの実測）:
+   EPEL の `libavcodec-free`（EPEL の `ffmpeg-free` のライブラリ）は、EPEL の Chromium や `gstreamer1-plugin-libav` など、`libavcodec.so.61` を使うパッケージの依存で入っていることがある。`ffmpeg-libs` とは同居できず、手順 8 は次のように止まる（`libavcodec-free` を入れたコンテナでの実測）:
 
    ```
    Error:
@@ -409,7 +310,7 @@
 ## 更新
 
 - 通常の `dnf upgrade` に含まれる
-- 手順 12 の `ffmpeg-libs`（RPM Fusion）も、`dnf upgrade` で一緒に上がる
+- 手順 8 の `ffmpeg-libs`（RPM Fusion）も、`dnf upgrade` で一緒に上がる
 
 1. Firefox だけ上げるときは、言語パックと一緒に上げる。
 
@@ -428,11 +329,11 @@
 > **ダウングレードした Firefox は、新しいプロファイルを読めないことがある**（[注意点](#注意点)）。
 
 - RPM Fusion の FFmpeg を外し、AppStream の ESR に戻す
-- AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1〜3 だけ行う
-- EPEL は、手順 11 で一緒に入った場合も外さない（[btop.md](btop.md) などほかの手順書でも使う）
+- AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1 だけ行う。RPM Fusion 自体も外すなら、続けて [rpmfusion.md のロールバック](rpmfusion.md#ロールバック)を行う
+- EPEL は外さない（[btop.md](btop.md) などほかの手順書でも使う。外すなら [epel.md のロールバック](epel.md#ロールバック)）
 - プロファイル（`~/.mozilla/firefox`、新しく作られた場合は `~/.config/mozilla/firefox`）は、この節のどの手順でも消えない
-- この節の手順 1〜3 はコンテナで本実行した
-- Firefox を戻す手順（この節の手順 4〜7）は**本実行していない**
+- この節の手順 1 はコンテナで本実行した
+- Firefox を戻す手順（この節の手順 2〜5）は**本実行していない**
   - `dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した
 
 1. FFmpeg のライブラリを消す。
@@ -441,40 +342,8 @@
    sudo dnf remove ffmpeg-libs
    ```
 
-   - 手順 12 で一緒に入った依存も、ほかに使うものが無ければ一緒に消える
+   - 手順 8 で一緒に入った依存も、ほかに使うものが無ければ一緒に消える
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. RPM Fusion（free）のリポジトリを消す。
-
-   ```bash
-   sudo dnf remove --noautoremove rpmfusion-free-release
-   ```
-
-   - `Removing:` が `rpmfusion-free-release` の 1 つだけになる
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-   <details>
-   <summary>補足: --noautoremove を付ける理由</summary>
-
-   付けないと、手順 11 で依存として入った `epel-release` と `dnf-plugins-core` も「使われなくなった依存」として一緒に消える（コンテナでの実測）。EPEL はほかの手順書でも使い、`dnf-plugins-core` は `dnf config-manager` のパッケージなので残す。
-
-   ```
-   Removing:
-    rpmfusion-free-release    noarch    10-1                @@commandline    3.8 k
-   Removing unused dependencies:
-    dnf-plugins-core          noarch    4.7.0-10.el10       @baseos           22 k
-    epel-release              noarch    10-6.el10           @extras           25 k
-   ```
-
-   </details>
-
-1. RPM Fusion の鍵も消すときだけ、その署名鍵を消す。
-
-   ```bash
-   sudo rpm -e gpg-pubkey-db85ddd7-67a63d8b
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Mozilla の repo ファイルを消す。
 
@@ -513,7 +382,7 @@
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に Firefox の**最新版**（Rapid Release）を dnf 管理で入れ、Windows 版と同じように AAC と H.264 の動画も再生できるようにする。標準リポジトリ（AppStream）の `firefox` は ESR 140 系で、最新版より 16 メジャー古い
-- **進め方**: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて RPM Fusion（free）を足し、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜14）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
+- **進め方**: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜10）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
 - **状態**
   - **手順 1〜7（Firefox）は実機で本実行済み（2026-09-21）**
     - 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している
@@ -522,20 +391,21 @@
     - 確認したこと: `156.0.1-1` が入る、ESR からの載せ替えが `Upgrading` として解決される、ロールバックが `Downgrading` に解決される
     - **コンテナでは GUI を起動していない**（実機では 156.0 が動作中）
     - **ESR / Beta チャンネルと言語パック以外の l10n は未検証**
-  - **手順 8〜14（AAC・H.264）も実機で本実行済み（2026-09-28）**。aarch64 と x86_64 の 2 台
+  - **手順 8〜10（AAC・H.264）と、その前の RPM Fusion の有効化も実機で本実行済み（2026-09-28）**。aarch64 と x86_64 の 2 台
+    - RPM Fusion の有効化は、今の [rpmfusion.md](rpmfusion.md) の手順 1〜4。当時はこの文書の手順 8〜11 で、手順 8〜10 は手順 12〜14 だった
     - 下表の aarch64 の実機で、利用者が手順どおりに入れた（[付録](#付録-実機での本実行2026-09-28)）
-      - 手順 9 の鍵が登録されている
-      - `dnf history` に、手順 11（4 パッケージ）と手順 12（`ffmpeg-libs` ほか 60 パッケージ）の実行が残っている
-      - `libavcodec-free` は入っていなかったので、手順 13 は要らなかった
+      - rpmfusion.md 手順 2 の鍵が登録されている
+      - `dnf history` に、rpmfusion.md 手順 4（4 パッケージ）と手順 8（`ffmpeg-libs` ほか 60 パッケージ）の実行が残っている
+      - `libavcodec-free` は入っていなかったので、手順 9 は要らなかった
     - 利用者が、再生できなかった動画が再生できるようになったことを確かめた
     - 同じ実機で、一時プロファイルの headless の Firefox を Marionette で動かして次を確かめた
       - about:support の H264・HEVC・AAC が「対応」になる
       - AAC と H.264 の再生が通る
       - Firefox のプロセスが `/usr/lib64/libavcodec.so.61.19.101` を読み込んでいる
-    - この文書の手順 1〜14 のブロックは、同じ OS の aarch64 コンテナでもそのまま流して通した（条件付きの手順 13 は、`libavcodec-free` を入れた別のコンテナで）
-    - 下表の x86_64 の実機では、手順 8〜12 と手順 14 のコマンドを実行した（[付録](#付録-x86_64-の実機での本実行2026-09-28)）
+    - この文書の手順 1〜10 と rpmfusion.md の手順 1〜4 のブロックは、同じ OS の aarch64 コンテナでもそのまま流して通した（条件付きの手順 9 は、`libavcodec-free` を入れた別のコンテナで）
+    - 下表の x86_64 の実機では、rpmfusion.md の手順 1〜4 と、手順 8・10 のコマンドを実行した（[付録](#付録-x86_64-の実機での本実行2026-09-28)）
       - YouTube の動画が 360p から上がらず、音声が AAC だけの動画は再生できなかったホスト
-      - dnf は `--assumeno` でトランザクション表を確かめてから、`-y` を付けて入れた。手順 13 は要らなかった
+      - dnf は `--assumeno` でトランザクション表を確かめてから、`-y` を付けて入れた。手順 9 は要らなかった
       - 一時プロファイルの headless の Firefox で、about:support の H264・HEVC・AAC が「対応」になり、AAC の復号と H.264 + AAC の mp4 の再生が通ることを確かめた
       - 同じく、音声が AAC だけの YouTube の動画が VP9 1080p60 + AAC で再生された（FFmpeg を切ると「ご利用のブラウザではこの動画を再生できません。」になった）
       - 起動し直した利用者の Firefox が `/usr/lib64/libavcodec.so.61.19.101` を読み込むことを確かめた
@@ -545,7 +415,7 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
-| 項目 | 実機 | 検証コンテナ | 検証コンテナ（手順 8〜14） | 実機（手順 8〜14） | x86_64 の実機（手順 8〜14） |
+| 項目 | 実機 | 検証コンテナ | 検証コンテナ（rpmfusion.md と手順 8〜10） | 実機（rpmfusion.md と手順 8〜10） | x86_64 の実機（rpmfusion.md と手順 8〜10） |
 |---|---|---|---|---|---|
 | 実施日 | 2026-09-21 | 2026-09-22 | 2026-09-28 | 2026-09-28 | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） | 同左 | 実機と同じホスト（2026-09-25 に入れ直した後） | AlmaLinux 10.2 (Lavender Lion) / x86_64（AMD Strix Halo のノート PC） |
@@ -580,7 +450,7 @@
 | Flatpak | `flatpak-1.16.0` は導入済みだが**リモートが 1 つも登録されていない**（flathub 無し） |
 | 鍵 | `rpm -q gpg-pubkey` に Mozilla の鍵は無し |
 
-手順 8〜14 の前の実機（2026-09-28）。2026-09-25 に OS を入れ直し、Firefox は手順 6 で入れ直してある:
+rpmfusion.md と手順 8〜10 の前の実機（2026-09-28）。2026-09-25 に OS を入れ直し、Firefox は手順 6 で入れ直してある:
 
 | 項目 | 状態 |
 |---|---|
@@ -589,7 +459,7 @@
 | 有効な追加リポジトリ | mozilla・crb・raspberrypi など。**EPEL と RPM Fusion は無い** |
 | プロファイル | `~/.config/mozilla/firefox`（`~/.mozilla` は無い）。Cisco の OpenH264（`gmp-gmpopenh264`）はまだ落ちていない |
 
-手順 8〜14 の前の x86_64 の実機（2026-09-28）:
+rpmfusion.md と手順 8〜10 の前の x86_64 の実機（2026-09-28）:
 
 | 項目 | 状態 |
 |---|---|
@@ -661,7 +531,7 @@ gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases <release@mozilla.com> pub
 - 本体の場所は AppStream 版（`/usr/lib64/firefox/`）と違うが、起動スクリプトと `.desktop` は同じパスなので、アプリ一覧やデフォルトブラウザの設定はそのまま引き継がれる
 - 2026-09-25 に入れ直した実機では、プロファイルは `~/.config/mozilla/firefox` に作られた（`~/.mozilla` は無い）
 
-手順 8〜14 の後（コンテナ、2026-09-28）:
+rpmfusion.md と手順 8〜10 の後（コンテナ、2026-09-28）:
 
 ```
 $ dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' ffmpeg-libs rpmfusion-free-release epel-release
@@ -679,7 +549,7 @@ gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-g
 ```
 
 - 有効なリポジトリに `epel` と `rpmfusion-free-updates` が加わる（`rpmfusion-free-updates-testing` の repo ファイルも置かれるが、無効）
-- about:support の「コーデックサポート情報」では、H264・HEVC・AAC の「ソフトウェアデコーディング」が「対応」になる（[手順 14 の補足](#実施手順)）
+- about:support の「コーデックサポート情報」では、H264・HEVC・AAC の「ソフトウェアデコーディング」が「対応」になる（[手順 10 の補足](#実施手順)）
 
 実機（2026-09-28、利用者が手順どおりに入れた後）:
 
@@ -693,9 +563,9 @@ gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-g
 gpg-pubkey-e37ed158-65785fa9 Fedora (epel10) <epel@fedoraproject.org> public key
 ```
 
-- 手順 11 で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[手順 11 の補足](#実施手順)）
+- RPM Fusion の有効化で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[rpmfusion.md 手順 4 の補足](rpmfusion.md#実施手順)）
 
-x86_64 の実機（2026-09-28、手順 8〜12 を実行した後の手順 14）:
+x86_64 の実機（2026-09-28、rpmfusion.md の手順 1〜4 と手順 8 を実行した後の手順 10）:
 
 ```
 $ dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' ffmpeg-libs rpmfusion-free-release epel-release
@@ -711,7 +581,7 @@ $ ls /usr/lib64/libavcodec.so.*
 ```
 
 - EPEL が前から入っていたホストなので、`epel-release` の版と `from_repo` はコンテナと違う
-- EPEL の `noopenh264` も入っている（[手順 12 の補足](#実施手順)）
+- EPEL の `noopenh264` も入っている（[手順 8 の補足](#実施手順)）
 
 ### 注意点
 
@@ -724,9 +594,9 @@ $ ls /usr/lib64/libavcodec.so.*
 - **言語パックは本体と同時に上げる**: バージョンが食い違うと UI が英語に戻る。`dnf upgrade` 全体を流していれば自動で揃う
 - **更新のたびに 107 MB 落ちてくる**: 4 週間ごとの Rapid Release なので、従量課金の回線では効いてくる
 - **RPM Fusion は Fedora の外のリポジトリ**: free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）
-  - 鍵は手順 8 で照合し、`rpmfusion-free-release` の署名も手順 11 で確かめる
-- **FFmpeg を入れたら Firefox を起動し直す**: 起動中の Firefox は読み直さない（手順 14）
-- **EPEL の `libavcodec-free` とは同居できない**: 入っていると手順 12 が止まる。残したままだと H.264 が再生できない（手順 13）
+  - 鍵の照合と、`rpmfusion-free-release` の署名の確かめ方は [rpmfusion.md](rpmfusion.md) にある
+- **FFmpeg を入れたら Firefox を起動し直す**: 起動中の Firefox は読み直さない（手順 10）
+- **EPEL の `libavcodec-free` とは同居できない**: 入っていると手順 8 が止まる。残したままだと H.264 が再生できない（手順 9）
 - **aarch64 の Firefox には Widevine が無い**: Firefox 156（aarch64）には `media.gmp-widevinecdm.*` の設定が無く、`media.eme.enabled` も既定で false だった
   - DRM の要る動画は、FFmpeg を入れても直らない（DRM の動画そのものは試していない）
 
@@ -736,10 +606,9 @@ $ ls /usr/lib64/libavcodec.so.*
 - [Introducing Mozilla's Firefox Nightly .rpm package — Firefox Nightly News](https://blog.nightly.mozilla.org/2026/01/19/introducing-mozillas-firefox-nightly-rpm-package-for-rpm-based-linux-distributions/) — RPM リポジトリの repo ファイルの書き方（RHEL / CentOS / Rocky 向けの `tee` の例）と鍵の fingerprint
 - [Firefox Developer Edition and Beta: Try out Mozilla's .rpm package! — Mozilla Hacks](https://hacks.mozilla.org/2026/03/firefox-developer-edition-and-beta-try-out-mozillas-rpm-package/) — beta / devedition チャンネルの追加
 - [firefox_versions.json — Mozilla product-details](https://product-details.mozilla.org/1.0/firefox_versions.json) — その時点の最新版と ESR の版を機械可読で返す
-- [Configuration — RPM Fusion](https://rpmfusion.org/Configuration) — free / nonfree の区別と、EL 向けの有効化（`--nogpgcheck` の例と、Alma・Rocky の `crb enable`）
-- [Trusting Package Integrity — RPM Fusion](https://rpmfusion.org/keys) — 鍵の fingerprint と、鍵を先に取り込んで `localpkg_gpgcheck=1` で入れる方法
+- [RPM Fusion（free）](rpmfusion.md) — 手順 8 の前提。鍵の照合と有効化、RPM Fusion の Configuration・keys のページへのリンク
 - [Multimedia — RPM Fusion](https://rpmfusion.org/Howto/Multimedia) — `ffmpeg-free` からの切り替え（`dnf swap`）と、`libavcodec-freeworld` の位置づけ
-- `man dnf.conf`（`priority`、`gpgcheck`、`repo_gpgcheck`、`localpkg_gpgcheck`）
+- `man dnf.conf`（`priority`、`gpgcheck`、`repo_gpgcheck`）
 
 ---
 
@@ -770,7 +639,7 @@ $ ls /usr/lib64/libavcodec.so.*
 
 ### 付録: 動画が再生できなかった件の切り分け（2026-09-28）
 
-AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画が再生できず、同じ動画は Windows の Firefox では再生できた（利用者の報告）。原因を切り分け、手順 8〜14 をコンテナで確かめた記録。
+AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画が再生できず、同じ動画は Windows の Firefox では再生できた（利用者の報告）。原因を切り分け、RPM Fusion の有効化と手順 8〜10（当時はどちらもこの文書の手順で、手順 8〜14）をコンテナで確かめた記録。
 
 **動画の形式**: watch ページの `ytInitialPlayerResponse` にある `adaptiveFormats` を `curl` で読んだ。同じ日に 2 回読んだところ、形式が変わっていた:
 
@@ -815,23 +684,23 @@ AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画�
 - EPEL の `libavcodec-free` では、`media.ffmpeg.allow-openh264`（既定で true）により H.264 が `noopenh264` に回る。about:support の「対応」は、復号できることを意味しない
 - `ffmpeg-libs` を入れた後、Firefox のプロセスが `/usr/lib64/libavcodec.so.61.19.101` を読み込んでいることを `/proc/<pid>/maps` で確かめた
 
-**文書どおりに通るか**: 新しいコンテナで `gnupg2` だけ先に入れ、この文書の `## 実施手順` の bash ブロックを抜き出したスクリプトを流した。変えたのは、`sudo` を外したことと、`dnf install` に `-y` を付けたことだけで、条件付きの手順 13 は外した。
+**文書どおりに通るか**: 新しいコンテナで `gnupg2` だけ先に入れ、この文書の `## 実施手順` の bash ブロックを抜き出したスクリプトを流した。変えたのは、`sudo` を外したことと、`dnf install` に `-y` を付けたことだけで、条件付きの手順 9 は外した。
 
 | 手順 | 結果 |
 |---|---|
 | 1〜7 | `firefox` と `firefox-l10n-ja` の `156.0.1-1` が入った（197 パッケージ、ダウンロード 226 MB） |
-| 8〜10. 鍵 | fingerprint が `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7` と一致。`rpm --import` は何も表示せず、`gpg-pubkey-db85ddd7-67a63d8b` が登録された |
-| 11. リポジトリ | `rpmfusion-free-release 10-1` と、依存の `epel-release 10-6.el10`、弱い依存の `dnf-plugins-core` の 3 パッケージ |
-| 12. FFmpeg | `ffmpeg-libs 7.1.5-1.el10` ほか 79 パッケージ（ダウンロード 42 MB、展開後 137 MB）。EPEL の鍵 `0xE37ED158` の取り込みが 1 回あった |
-| 13. 衝突 | 別のコンテナで、EPEL の `libavcodec-free` を入れてから手順 12 を実行すると `conflicts with libswresample-free` で止まった。`dnf install --allowerasing ffmpeg-libs` で `libavcodec-free`・`libavutil-free`・`libswresample-free` の 3 つが外れて入れ替わった |
-| 14. 確認 | `ffmpeg-libs 7.1.5-1.el10 rpmfusion-free-updates` と `/usr/lib64/libavcodec.so.61`。起動した Firefox で、about:support の H264・HEVC・AAC が「対応」になり、AAC と H.264 の再生も通った |
-| ロールバック 1〜3 | 手順 1 で 78 パッケージ・119 MB が消えた（手順 12 で入ったもののうち `glibc-gconv-extra` だけが残った）。手順 2 は `rpmfusion-free-release` の 1 つだけで、`epel-release` と `dnf-plugins-core` は残った。手順 3 で `gpg-pubkey-db85ddd7-67a63d8b` が消えた |
+| rpmfusion.md 1〜3. 鍵 | fingerprint が `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7` と一致。`rpm --import` は何も表示せず、`gpg-pubkey-db85ddd7-67a63d8b` が登録された |
+| rpmfusion.md 4. リポジトリ | `rpmfusion-free-release 10-1` と、依存の `epel-release 10-6.el10`、弱い依存の `dnf-plugins-core` の 3 パッケージ |
+| 8. FFmpeg | `ffmpeg-libs 7.1.5-1.el10` ほか 79 パッケージ（ダウンロード 42 MB、展開後 137 MB）。EPEL の鍵 `0xE37ED158` の取り込みが 1 回あった |
+| 9. 衝突 | 別のコンテナで、EPEL の `libavcodec-free` を入れてから手順 8 を実行すると `conflicts with libswresample-free` で止まった。`dnf install --allowerasing ffmpeg-libs` で `libavcodec-free`・`libavutil-free`・`libswresample-free` の 3 つが外れて入れ替わった |
+| 10. 確認 | `ffmpeg-libs 7.1.5-1.el10 rpmfusion-free-updates` と `/usr/lib64/libavcodec.so.61`。起動した Firefox で、about:support の H264・HEVC・AAC が「対応」になり、AAC と H.264 の再生も通った |
+| ロールバック 1 と rpmfusion.md のロールバック 1〜2 | ロールバックの手順 1 で 78 パッケージ・119 MB が消えた（手順 8 で入ったもののうち `glibc-gconv-extra` だけが残った）。rpmfusion.md のロールバックの手順 1 は `rpmfusion-free-release` の 1 つだけで、`epel-release` と `dnf-plugins-core` は残った。その手順 2 で `gpg-pubkey-db85ddd7-67a63d8b` が消えた |
 
 **x86_64**: `dnf --forcearch=x86_64` で `ffmpeg-libs.x86_64 7.1.5-1.el10` が見えた。空の installroot に `ffmpeg-libs` を入れる解決が、238 パッケージで通った（導入・起動はしていない）。
 
 #### 未確認事項
 
-- 実機（Raspberry Pi 5）への導入と、画面での再生（手順 14 の GUI の確認）
+- 実機（Raspberry Pi 5）への導入と、画面での再生（手順 10 の GUI の確認）
 - x86_64 での導入と再生（メタデータのみ）
 - 音声が AAC だけの YouTube の動画の再生（YouTube の形式が変わったので、MSE で AAC を流すテストで代えた）
 - コマンドの `ffmpeg-free` が入っているホストでの切り替え（RPM Fusion の案内では `dnf swap ffmpeg-free ffmpeg --allowerasing`）
@@ -850,8 +719,8 @@ AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画�
 | 19 | 2026-09-28 02:13 | `--setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm` | Success。`rpmfusion-free-release`・`epel-release`（extras）・`selinux-policy-extra`・`selinux-policy-targeted-extra`（crb）の 4 パッケージ |
 | 20 | 2026-09-28 02:15 | `install ffmpeg-libs` | Success（7 秒）。60 パッケージ（EPEL 44・AppStream 10・RPM Fusion 4・BaseOS 2） |
 
-- 手順 9 の RPM Fusion の鍵（`gpg-pubkey-db85ddd7-67a63d8b`）と、手順 12 で取り込まれた EPEL の鍵（`gpg-pubkey-e37ed158-65785fa9`）が登録されていた
-- `libavcodec-free` は入っておらず、`--allowerasing` の実行も無い（手順 13 は要らなかった）
+- rpmfusion.md 手順 2 の RPM Fusion の鍵（`gpg-pubkey-db85ddd7-67a63d8b`）と、手順 8 で取り込まれた EPEL の鍵（`gpg-pubkey-e37ed158-65785fa9`）が登録されていた
+- `libavcodec-free` は入っておらず、`--allowerasing` の実行も無い（手順 9 は要らなかった）
 - `dnf repoquery --installed --qf '%{name} %{reason}'` では、`selinux-policy-extra` が `weak-dependency`、`selinux-policy-targeted-extra` が `dependency`。`epel-release` の Recommends の `(selinux-policy-epel if selinux-policy)` を、`selinux-policy-extra` が `selinux-policy-epel` を提供して満たしている
 
 **入れた後の Firefox**（一時プロファイルの headless の Firefox を、前の付録と同じプローブで調べた。利用者のプロファイルには触れていない）:
@@ -868,7 +737,7 @@ AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画�
 
 ### 付録: x86_64 の実機での本実行（2026-09-28）
 
-x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 本について利用者から報告があった。1 本目は 360p から上げられず、2 本目は再生できなかった。Firefox は手順 1〜7 の mozilla 版で、FFmpeg は入れていなかった。原因を切り分け、手順 8〜12 と手順 14 のコマンドを実行した記録（時刻は JST）。
+x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 本について利用者から報告があった。1 本目は 360p から上げられず、2 本目は再生できなかった。Firefox は手順 1〜7 の mozilla 版で、FFmpeg は入れていなかった。原因を切り分け、RPM Fusion の有効化（今の rpmfusion.md の手順 1〜4）と、手順 8・10 のコマンド（当時はこの文書の手順 8〜12 と手順 14）を実行した記録（時刻は JST）。
 
 **動画の形式**: 前の付録と同じく、watch ページの `adaptiveFormats` を `curl` で読んだ。どちらもライブ配信のアーカイブで、配信が終わったのは 1 本目が前日の 21:40、2 本目が当日の 02:40:
 
@@ -904,12 +773,12 @@ x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 �
 
 | 手順 | 結果 |
 |---|---|
-| 8. 鍵 | fingerprint と uid が一致。このユーザーは `gpg` を初めて使ったので、`~/.gnupg` を作ったという 2 行が先に出た |
-| 9〜10. 鍵 | `rpm --import` は何も表示せず、`gpg-pubkey-db85ddd7-67a63d8b` が登録された |
-| 11. リポジトリ | `rpmfusion-free-release 10-1` の 1 パッケージだけ。`epel-release`・`selinux-policy-extra`・`selinux-policy-targeted-extra`・`dnf-plugins-core` は入っていた |
-| 12. FFmpeg | `ffmpeg-libs 7.1.5-1.el10` ほか 62 パッケージ（ダウンロード 40 MB、展開後 128 MB）。`noopenh264` も入った。EPEL の鍵は登録済みで、確認は出なかった |
-| 13 | 要らなかった（`libavcodec-free` が無い） |
-| 14. 確認 | `ffmpeg-libs 7.1.5-1.el10 rpmfusion-free-updates` と `/usr/lib64/libavcodec.so.61` |
+| rpmfusion.md 1. 鍵 | fingerprint と uid が一致。このユーザーは `gpg` を初めて使ったので、`~/.gnupg` を作ったという 2 行が先に出た |
+| rpmfusion.md 2〜3. 鍵 | `rpm --import` は何も表示せず、`gpg-pubkey-db85ddd7-67a63d8b` が登録された |
+| rpmfusion.md 4. リポジトリ | `rpmfusion-free-release 10-1` の 1 パッケージだけ。`epel-release`・`selinux-policy-extra`・`selinux-policy-targeted-extra`・`dnf-plugins-core` は入っていた |
+| 8. FFmpeg | `ffmpeg-libs 7.1.5-1.el10` ほか 62 パッケージ（ダウンロード 40 MB、展開後 128 MB）。`noopenh264` も入った。EPEL の鍵は登録済みで、確認は出なかった |
+| 9 | 要らなかった（`libavcodec-free` が無い） |
+| 10. 確認 | `ffmpeg-libs 7.1.5-1.el10 rpmfusion-free-updates` と `/usr/lib64/libavcodec.so.61` |
 
 **入れた後の確認**（一時プロファイルの headless の Firefox。利用者のプロファイルには触れていない）:
 

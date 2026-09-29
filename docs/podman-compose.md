@@ -3,10 +3,10 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順を通してあること。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さなければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順と、[EPEL](epel.md) を通してあること（podman-compose は EPEL にあり、AppStream には無い）。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（コンテナを自分のユーザーの rootless の podman で動かすため）
-> - **手順 4 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 5 を貼る
-> - **手順 9 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
+> - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
+> - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -15,35 +15,6 @@
 
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。SELinux が無効な環境だったので、`:Z` の効果は確かめていない（[対象と検証環境](#対象と検証環境)）。
-
-1. podman-compose のために、EPEL が有効になっているか確かめる。
-
-   ```bash
-   dnf repolist enabled | grep -E '^epel' || echo 'EPEL は未設定'
-   ```
-
-   - podman-compose は EPEL にある（AppStream には無い）
-   - `epel` の行が出れば、手順 2 は飛ばす
-   - `EPEL は未設定` と出たら、手順 2 で入れる
-
-1. EPEL が未設定のときだけ、`epel-release` を入れる。
-
-   ```bash
-   sudo dnf install -y epel-release
-   ```
-
-   - AlmaLinux の `extras` リポジトリに入っているので、追加のリポジトリ設定は要らない
-   - 最後に出る「CRB を有効にすることを推奨」は、AlmaLinux 10 では既定で有効なので気にしなくてよい（[tool-catalog.md](tool-catalog.md) の「導入経路と EL10 での注意」）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. EPEL が有効になったか確かめる。
-
-   ```bash
-   rpm -q epel-release
-   dnf repolist enabled | grep -E '^epel'
-   ```
-
-   - `epel-release` の版と、`epel` の行が出れば有効になっている
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -56,7 +27,7 @@
    - 一緒に入るのは Python のライブラリ 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - [btop.md 手順 4](btop.md#実施手順) と同じ鍵
+   - [epel.md 手順 3](epel.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. podman-compose が入ったか確かめる。
@@ -150,7 +121,7 @@
    | ネットワーク | `compose-sample_default` |
    | コンテナ | `compose-sample_web_1`・`compose-sample_check_1` |
 
-   - 同じネットワークのコンテナ同士は、サービス名（`web`・`check`）で名前が引ける（手順 9）
+   - 同じネットワークのコンテナ同士は、サービス名（`web`・`check`）で名前が引ける（手順 6）
    - `-d` を付けないと、ログを表示したまま前で動き続ける
 
    </details>
@@ -227,7 +198,7 @@
 ## ロールバック
 
 - 上から順に実行する
-- compose で動かしていたデータを残したいときは、手順 2 の前に `~/compose-sample` から取り出しておく
+- compose で動かしていたデータを残したいときは、この節の手順 2 の前に `~/compose-sample` から取り出しておく
 
 1. コンテナ・pod・ネットワークを消す。
 
@@ -261,7 +232,7 @@
    ```
 
    - `[y/N]` で聞かれる。依存で入った Python のライブラリも、ほかに使うものが無ければ一緒に消える
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）
+   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [epel.md のロールバック](epel.md#ロールバック)
 
 ---
 
@@ -270,9 +241,9 @@
 ### 対象と検証環境
 
 - **目的**: compose ファイル（`compose.yaml`）で書いた複数のコンテナを、AlmaLinux 10 の rootless の podman でまとめて動かす
-- **進め方**: EPEL の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
+- **進め方**: EPEL（前提の [epel.md](epel.md) で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
-  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜9、[更新](#更新)、[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時はこの文書の手順だった）、手順 1〜6、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼ばれる
     - `up -d` で pod・ネットワーク・2 つのコンテナができ、公開したポートとサービス名で `web` に届く
@@ -285,7 +256,7 @@
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](podman.md) と同じ作り） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](podman.md) の実施手順で導入） |
-| EPEL | 未確認 | 未設定 → 手順 2 で `epel-release-10-6.el10` を導入 |
+| EPEL | 未確認 | 未設定 → [epel.md](epel.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-compose | 未導入 | `podman-compose-1.5.0-1.el10_1`（epel） |
 
 > [!NOTE]
@@ -311,12 +282,12 @@
 | **EPEL の podman-compose（1.5.0）** | **採用。** システムの podman と組んで使うので RPM にした（[ツール一覧の選び方](tool-catalog.md#選び方)の規則 3）。`dnf upgrade` で上がる |
 | Homebrew の podman-compose（1.6.0） | 不採用。依存として podman 6.1.2 などを連れてきて、PATH の先頭でシステムの podman を隠す（[ツール一覧の注意点](tool-catalog.md#注意点)の実測） |
 | pip で入れる（`pip install podman-compose`） | 不採用。`dnf` の管理の外に入り、更新も別になる |
-| Docker 社の docker-compose を `podman compose` から使う | 対象外。`podman compose` は docker-compose が入っていればそちらを優先する（手順 5 の補足）。本書では入れていない |
+| Docker 社の docker-compose を `podman compose` から使う | 対象外。`podman compose` は docker-compose が入っていればそちらを優先する（手順 2 の補足）。本書では入れていない |
 | PC の起動時に自動で動かす | compose では行わない。[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)で動かす。compose ファイルから Quadlet の定義を作る podlet は[ツール一覧](tool-catalog.md#cli-コンテナ)に載せた |
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 5・8・9）:
+**検証コンテナでの出力**（手順 2・5・6）:
 
 ```
 $ podman-compose version
@@ -342,7 +313,7 @@ hello from compose
 
 - **`podman-compose exec` が動いている間に貼った行は、コンテナへの入力になる**: 検証では、`exec` の後ろの行を続けて流すと、それらの行は実行されなかった
   - `-T` を付けても同じだった（`-T` は擬似端末を付けないだけで、標準入力はつながったまま）
-  - 手順 9 のように、`exec` はブロックの最後に置く
+  - 手順 6 のように、`exec` はブロックの最後に置く
 - **PC の再起動では戻らず、linger が無いとログアウトで止まる**: compose で起動したコンテナは、ふつうの `podman run -d` と同じ（[podman.md の注意点](podman.md#注意点)）。常駐させるものは Quadlet にする
 - **プロジェクトの名前はディレクトリの名前**: 同じ名前のディレクトリで別の compose ファイルを動かすと、同じ名前の pod・ネットワークを使う。`-p <名前>` で変えられる
 - **`down -v` はボリュームの中身も消す**: `down` だけなら名前付きのボリュームは残る（[使い方の基本](#使い方の基本)）
@@ -355,6 +326,7 @@ hello from compose
 - [Compose Specification](https://compose-spec.io/) — compose ファイルの書式
 - `man podman-compose`（podman のパッケージに入っている `podman compose` の説明）/ `podman-compose --help` / `podman-compose <サブコマンド> --help`
 - [Podman](podman.md) — 前提の rootless の podman と、自動起動の Quadlet
+- [EPEL](epel.md) — 前提の EPEL の有効化
 
 ---
 
@@ -365,24 +337,24 @@ hello from compose
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
 - 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 を流した
 
-**手順書の外で行った準備**: podman.md の付録の準備に加えて、手順 2 の直後に EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）。
+**手順書の外で行った準備**: podman.md の付録の準備に加えて、EPEL の有効化（今の epel.md の手順 2）の直後に EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）。
 
 **流し方**: podman.md の付録と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]` には `y` と答えた。
 
 | 手順 | 結果 |
 |---|---|
-| 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ → `epel` の行 |
-| 4. 導入 | `podman-compose.noarch  1.5.0-1.el10_1  epel`。`[y/N]` と EPEL の鍵に `y`。本体と Python のライブラリ 4 つ、合わせて 5 パッケージ（667 k） |
-| 5. 確かめる | `podman-compose version 1.5.0` と `podman version 5.8.2`、`/usr/bin/podman-compose`。`podman compose version` は `>>>> Executing external compose provider "/usr/bin/podman-compose". ... <<<<` の後に同じ 2 行 |
-| 6. ファイル | `compose.yaml` を置き、`cat` で読み戻した |
-| 7. 起動 | ネットワークと pod の ID、イメージの取得、`compose-sample_web_1` と `compose-sample_check_1` |
-| 8〜9. 確かめる | [完了時点の状態](#完了時点の状態)のとおり。どちらの `curl` も `hello from compose` |
+| epel.md 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ → `epel` の行 |
+| 1. 導入 | `podman-compose.noarch  1.5.0-1.el10_1  epel`。`[y/N]` と EPEL の鍵に `y`。本体と Python のライブラリ 4 つ、合わせて 5 パッケージ（667 k） |
+| 2. 確かめる | `podman-compose version 1.5.0` と `podman version 5.8.2`、`/usr/bin/podman-compose`。`podman compose version` は `>>>> Executing external compose provider "/usr/bin/podman-compose". ... <<<<` の後に同じ 2 行 |
+| 3. ファイル | `compose.yaml` を置き、`cat` で読み戻した |
+| 4. 起動 | ネットワークと pod の ID、イメージの取得、`compose-sample_web_1` と `compose-sample_check_1` |
+| 5〜6. 確かめる | [完了時点の状態](#完了時点の状態)のとおり。どちらの `curl` も `hello from compose` |
 | 更新 | `sudo dnf upgrade podman-compose` は `Nothing to do.`。`podman-compose pull` がイメージを取り直し、`up -d` はコンテナの名前を 2 つ出した |
 | ロールバック | `down` の後の `podman pod ps` は見出しだけ。`podman rmi` でイメージが消え、`dnf remove` で 5 パッケージが消えた（`Freed space: 2.6 M`） |
 
 **別に確かめたこと**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 
-- `check` に `init: true` を付けないと、`down` が 10 秒待って `StopSignal SIGTERM failed ...` を出した（手順 6 の補足）。付けると 0.9 秒で終わった
+- `check` に `init: true` を付けないと、`down` が 10 秒待って `StopSignal SIGTERM failed ...` を出した（手順 3 の補足）。付けると 0.9 秒で終わった
 - `podman-compose exec`（`-T` の有無の両方）の後ろに行を続けて流すと、それらの行は実行されなかった
 - 名前付きのボリュームを持つ compose ファイルで、`down` の後もボリュームが残り、`down -v` で消えた
 - `podman-compose --help` の `-p PROJECT_NAME, --project-name PROJECT_NAME`

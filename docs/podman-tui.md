@@ -3,10 +3,10 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順を、手順 8 の API ソケットまで通してあること。`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順（手順 8 の API ソケットまで）と、[EPEL](epel.md) を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
-> - **手順 4 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 5 を貼る
-> - **手順 7 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 8 を貼る（`q` では終わらない）
+> - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
+> - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -15,35 +15,6 @@
 
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。画面は、表示された文字を読み取り、キーを送って確かめた（[対象と検証環境](#対象と検証環境)）。
-
-1. podman-tui のために、EPEL が有効になっているか確かめる。
-
-   ```bash
-   dnf repolist enabled | grep -E '^epel' || echo 'EPEL は未設定'
-   ```
-
-   - podman-tui は EPEL にある（AppStream には無い）
-   - `epel` の行が出れば、手順 2 は飛ばす
-   - `EPEL は未設定` と出たら、手順 2 で入れる
-
-1. EPEL が未設定のときだけ、`epel-release` を入れる。
-
-   ```bash
-   sudo dnf install -y epel-release
-   ```
-
-   - AlmaLinux の `extras` リポジトリに入っているので、追加のリポジトリ設定は要らない
-   - 最後に出る「CRB を有効にすることを推奨」は、AlmaLinux 10 では既定で有効なので気にしなくてよい（[tool-catalog.md](tool-catalog.md) の「導入経路と EL10 での注意」）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. EPEL が有効になったか確かめる。
-
-   ```bash
-   rpm -q epel-release
-   dnf repolist enabled | grep -E '^epel'
-   ```
-
-   - `epel-release` の版と、`epel` の行が出れば有効になっている
 
 1. 入手できる版を見てから、podman-tui を入れる。
 
@@ -56,7 +27,7 @@
    - 入るのは `podman-tui` の 1 パッケージだけ（ダウンロード 9.5 MB、展開後 32 MB）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える。違っていれば `N` で中断する
-   - [btop.md 手順 4](btop.md#実施手順) と同じ鍵
+   - [epel.md 手順 3](epel.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -221,7 +192,7 @@
    ```
 
    - `[y/N]` で聞かれる。消えるのは `podman-tui` の 1 パッケージだけ
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）
+   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [epel.md のロールバック](epel.md#ロールバック)
    - podman-tui はホームにファイルを作らなかったので、ほかに消すものは無い（検証の実測）
 
 ---
@@ -231,9 +202,9 @@
 ### 対象と検証環境
 
 - **目的**: podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作できるようにする
-- **進め方**: EPEL の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
+- **進め方**: EPEL（前提の [epel.md](epel.md) で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-28）。実機では本実行していない**
-  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜8、[更新](#更新)、[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時はこの文書の手順だった）、手順 1〜5、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-tui 1.10.0 が 1 パッケージで入り、podman 5.8.2 の API ソケットに `STATUS_OK` でつながる
     - 画面のメニューの `stop` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
@@ -247,7 +218,7 @@
 | 実施日 | —（未実施） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](podman.md) の実施手順で導入。入れ子の rootless） |
-| EPEL | 未確認 | 未設定 → 手順 2 で `epel-release-10-6.el10` を導入 |
+| EPEL | 未確認 | 未設定 → [epel.md](epel.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-tui | 未導入 | `podman-tui-1.10.0-1.el10_2`（epel） |
 | 端末 | — | 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`）の SSH のログインシェル |
 
@@ -283,7 +254,7 @@
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 5・6・8）:
+**検証コンテナでの出力**（手順 2・3・5）:
 
 ```
 $ podman-tui version
@@ -300,12 +271,12 @@ $ podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
 podman-tui-web Exited (0) 19 seconds ago
 ```
 
-手順 7 の画面は、手順 7 の補足のとおり。
+手順 4 の画面は、手順 4 の補足のとおり。
 
 ### 注意点
 
 - **終了は `Ctrl+C`**: `q` を押しても何も起きない
-- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（手順 7 の補足）。`systemctl --user start podman.socket` で直る
+- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（手順 4 の補足）。`systemctl --user start podman.socket` で直る
 - **podman に接続を登録していると、そちらを使う**: `podman system connection add` で登録した接続があると、podman-tui は `localhost` の代わりにそれを出す
   - 検証では、`local` の名前で登録した接続が `✅ connected` で出た
   - 接続を消す（`podman system connection remove`）と、`localhost` に戻る
@@ -320,6 +291,7 @@ podman-tui-web Exited (0) 19 seconds ago
 - [podman-tui v2.0.0 のリリースノート](https://github.com/containers/podman-tui/releases/tag/v2.0.0) — podman v6 への対応、接続を podman の設定からだけ読むこと
 - `podman-tui --help`、画面の `F1`
 - [Podman](podman.md) — 前提の rootless の podman と API ソケット
+- [EPEL](epel.md) — 前提の EPEL の有効化
 
 ---
 
@@ -346,24 +318,24 @@ podman-tui-web Exited (0) 19 seconds ago
 - 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 を流した
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、ブラケットペーストで 1 ブロックずつ貼って Enter を送った
 - `[y/N]` と鍵の確認は、表示を確かめてから `y` と答えた。コマンドに `-y` は足していない
-- 手順 7 は、画面の文字を読みながらキー（`F4`・`↓`・`m`・`Enter`・`Ctrl+C`）を送った
+- 手順 4 は、画面の文字を読みながらキー（`F4`・`↓`・`m`・`Enter`・`Ctrl+C`）を送った
 
 | 手順 | 結果 |
 |---|---|
-| 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ → `epel` の行 |
-| 4. 導入 | `podman-tui.x86_64  1.10.0-1.el10_2  epel`。`[y/N]` と EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）に `y`。1 パッケージ（9.5 MB、展開後 32 MB） |
-| 5. 確かめる | `podman-tui v1.10.0`、`/usr/bin/podman-tui`、`podman-tui 1.10.0-1.el10_2 epel` |
-| 6. 確認用のコンテナ | イメージを取得し、`podman-tui-web Up Less than a second` |
-| 7. 画面 | `✅ STATUS_OK`・`API version: 5.8.2`・`localhost` が `✅ connected`。`F4` で `CONTAINERS[1]`、`m` → `↓` を 19 回で `stop` → Enter の 2 秒後に `▼ Exited (0) 1 second ago`。`Ctrl+C` でプロンプトに戻った |
-| 8. 確かめる | `podman-tui-web Exited (0) 19 seconds ago` |
+| epel.md 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10` と依存の 7 つ → `epel` の行 |
+| 1. 導入 | `podman-tui.x86_64  1.10.0-1.el10_2  epel`。`[y/N]` と EPEL の鍵（`0xE37ED158`、fingerprint は本文のとおり）に `y`。1 パッケージ（9.5 MB、展開後 32 MB） |
+| 2. 確かめる | `podman-tui v1.10.0`、`/usr/bin/podman-tui`、`podman-tui 1.10.0-1.el10_2 epel` |
+| 3. 確認用のコンテナ | イメージを取得し、`podman-tui-web Up Less than a second` |
+| 4. 画面 | `✅ STATUS_OK`・`API version: 5.8.2`・`localhost` が `✅ connected`。`F4` で `CONTAINERS[1]`、`m` → `↓` を 19 回で `stop` → Enter の 2 秒後に `▼ Exited (0) 1 second ago`。`Ctrl+C` でプロンプトに戻った |
+| 5. 確かめる | `podman-tui-web Exited (0) 19 seconds ago` |
 | 更新 | `Nothing to do.` |
-| ロールバック | 手順 1 は `podman-tui-web`、手順 2 は `Untagged:` と `Deleted:`。手順 3 の `[y/N]` に `y` で、`podman-tui-1.10.0-1.el10_2.x86_64` が消えた（`Freed space: 32 M`）。`~/.config` には `systemd` だけが残った |
+| ロールバック | この節の手順 1 は `podman-tui-web`、手順 2 は `Untagged:` と `Deleted:`。手順 3 の `[y/N]` に `y` で、`podman-tui-1.10.0-1.el10_2.x86_64` が消えた（`Freed space: 32 M`）。`~/.config` には `systemd` だけが残った |
 
 **別に確かめたこと**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 
 - [使い方の基本](#使い方の基本)の表のキーを 1 つずつ押した。`s` の並べ替えのダイアログは、項目にいるうちは `Esc` で閉じず、`Tab` で `Cancel` に移って Enter で閉じた
 - 起動の前後で `find ~ -newer <印のファイル>` を比べ、podman-tui がホームにファイルを作らないこと（`~/.config/podman-tui` も `podman-tui.log` も無い）
-- API ソケットを止めた状態の画面（手順 7 の補足）
+- API ソケットを止めた状態の画面（手順 4 の補足）
 - Homebrew の podman-tui 2.0.0（`podman-tui--2.0.0.x86_64_linux.bottle.tar.gz`、31.4 MB）: そのままでは `❌ DISCONNECTED` と `SYSTEM CONNECTIONS[0]`。`podman system connection add` の後は `STATUS_OK`・API の版 `5.8.2` で、コンテナの一覧と `start` ができた
 - podman の接続を登録すると、1.10.0 も `localhost` ではなくその接続を出すこと
 - `sudo dnf remove --assumeno podman` の 30 パッケージに、podman-tui が入らないこと
