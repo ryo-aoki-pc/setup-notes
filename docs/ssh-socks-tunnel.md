@@ -13,7 +13,7 @@
 - 手順の後: トンネルを使う手順書を、手順 3 のシェルのまま貼る。dnf にも使わせるなら[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)。使い終わったら[トンネルを閉じる](#トンネルを閉じる)。以後は[ロールバック](#ロールバック)
 - これを前提にする手順書:
   - [Homebrew（インターネットに出られないホスト）](homebrew-offline.md)
-  - [VirtualBox Guest Additions の、ホストオンリーアダプターだけの VM でビルドする節](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)（オフラインのホストは VM、オンラインのホストは VirtualBox を動かすホスト）
+  - [npm（インターネットに出られないホスト）](npm-offline.md)（Neovim の Mason が npm で入れるパッケージ。npm には `https_proxy` を足す）
 
 > [!WARNING]
 > **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](#トンネルを閉じる)。
@@ -83,7 +83,7 @@
    - 検証環境で `~/.ssh/config` に `ControlMaster auto`・`ControlPath ~/.ssh/cm-%r@%h:%p`・`ControlPersist 10m` を書き、`ControlPath=none` を外して入ると、`exit` の後（`Shared connection to <OFFLINE_HOST> closed.`）も、オフラインのホストに `127.0.0.1:1080` の待ち受けが残った
    - 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](#トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
 
-   **Windows のオンラインのホスト**: Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）で、VirtualBox の VM へ同じ転送を張れた（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）。
+   **Windows のオンラインのホスト**: Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）で、VirtualBox の VM へ同じ転送を張れた（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。その文書のホストオンリーアダプターの節は、その後トンネルを使わない形に変わった）。
 
    - トンネルは Windows の外向きの接続なので、Windows の受信の規則は要らない
    - オフラインのホスト（VM）が再起動すると、Windows の ssh は `Connection to <VM_IP> closed by remote host.` で終わり、待ち受けも消えた
@@ -105,7 +105,7 @@
    - 最後の行が `200` なら届いている
    - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、手順 2 の転送が無い
    - `export` はこのシェルの中だけで有効。**ssh を張り直したら、手順 2 からやり直す**
-   - `sudo` を付けたコマンドと podman は `ALL_PROXY` を読まない（この手順の補足）。dnf には[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)で設定する
+   - `sudo` を付けたコマンド・podman・npm は `ALL_PROXY` を読まない（この手順の補足）。dnf には[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)で設定する
 
    <details>
    <summary>補足: <code>socks5h</code> と <code>ALL_PROXY</code></summary>
@@ -127,7 +127,8 @@
    **`ALL_PROXY` を読まないもの**:
 
    - **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](#dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
-   - **podman**: `https_proxy`（`HTTPS_PROXY`）を読み、`ALL_PROXY` だけでは取り込めなかった。`sudo https_proxy=socks5h://127.0.0.1:1080 podman …` のように、コマンドの前に変数を置いて渡す（[virtualbox-guest-bootc.md のホストオンリーアダプターの節](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3 の補足）
+   - **podman**: `https_proxy`（`HTTPS_PROXY`）を読み、`ALL_PROXY` だけでは取り込めなかった。`sudo https_proxy=socks5h://127.0.0.1:1080 podman …` のように、コマンドの前に変数を置いて渡す（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。トンネルを使っていた版の、その節の手順 4 の補足の実測）
+   - **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](npm-offline.md#実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
 
    </details>
 
@@ -247,14 +248,16 @@
 
 - **目的**: インターネットに出られない AlmaLinux 10 のホストから、そこへ ssh でログインしてくるインターネットに出られるホストを経由して、外に出られるようにする
   - 入れる・取り込む・上げるときだけ使う。入れたものは、トンネルが無くても動く
-- **進め方**: オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う（dnf は `/etc/dnf/dnf.conf` の `proxy=`、podman はコマンドの前の `https_proxy`）
+- **進め方**: オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う（dnf は `/etc/dnf/dnf.conf` の `proxy=`、podman と npm は `https_proxy`）
   - 読者が編集するのは `OFFLINE_HOST` だけ
   - もとは [homebrew-offline.md](homebrew-offline.md) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
+  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](npm-offline.md)
 - **状態**: **Linux のオンラインのホストは x86_64 のコンテナでのみ検証済み。実機では、Windows 11 のホストから VirtualBox の VM へのトンネルを張った**
   - コマンドは、この文書に移す前に、次の検証で通したもの
     - コンテナ（[homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)、2026-09-29）: 手順 1〜3（手順 3 の確かめる URL は Homebrew の 4 つだった）、dnf の節、トンネルを閉じる節（jq の確かめを含んでいた）、ロールバック
       - 1080 番がふさがっているときと、sshd が転送を禁じているときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること、`sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること
     - Windows 11 のホストの VirtualBox の VM（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)、2026-09-30）: 手順 2 の Windows の 1 行（ただし、自動で流すために鍵でログインし、`-N` を付けた）。VM の端末での `ss` と、`curl -x socks5h://127.0.0.1:1080 https://quay.io/v2/` の `401`
+    - コンテナ（[npm-offline.md の付録](npm-offline.md#付録-コンテナでの検証記録2026-09-30)、2026-09-30）: npm-offline.md の前提として、手順 1〜3・dnf の節・トンネルを閉じる節の手順 1・2（当時の homebrew-offline.md の手順）。npm は `ALL_PROXY` だけでは届かず、`https_proxy` を足すと届くこと
   - 2026-09-30 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
     - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](homebrew-offline.md) の手順 1〜6・更新・ロールバック
   - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、SELinux が Enforcing のオフラインのホスト、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
@@ -300,7 +303,7 @@
 
 - **`ALL_PROXY` を `~/.bashrc` に書かない**: トンネルがあるのは手順 2 の ssh のセッションの間だけなので、手順 3 でそのシェルにだけ入れる
 - **dnf には、`sudo` に環境変数を渡す（`sudo --preserve-env=ALL_PROXY`）のではなく、設定ファイルで渡す**: ほかの手順書の `sudo dnf install` を、書き換えずに貼れるようにするため
-- **独立した手順書にした**: [homebrew-offline.md](homebrew-offline.md) と [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため
+- **独立した手順書にした**: [homebrew-offline.md](homebrew-offline.md) と [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
 
 ### 注意点
 
@@ -309,6 +312,7 @@
 - **`socks5h` の `h` を落とさない**: 落とすと名前を引けない（手順 3 の補足）
 - **`https_proxy` や git の `http.proxy` が入っていると、そちらが勝つ**: 手順 3 の補足
 - **`sudo` は `ALL_PROXY` を渡さない**: dnf は[dnf の節](#dnf-にもトンネルを使わせる任意)の設定で、podman はコマンドの前の `https_proxy` で通す
+- **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm-offline.md 手順 2](npm-offline.md#実施手順)）
 - **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する。dnf で外のリポジトリを使わなくなったら、[ロールバック](#ロールバック)で消す
 - **ssh が切れると、トンネルも消える**: 取得の途中なら失敗するはず（確かめていない）。そのときは手順 2 から張り直して、同じコマンドを貼り直す
 - **SELinux が Enforcing のオフラインのホストでは確かめていない**: 検証のコンテナには SELinux が無い（Atomic Desktop の VM は Enforcing で、待ち受けは拒まれなかった）
