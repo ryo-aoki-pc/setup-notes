@@ -452,7 +452,7 @@ Report Summary
 - **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](#ロールバック)の手順 2 で消す
 - **Trivy の `--image-src podman` は API ソケットが要る**: [podman.md 手順 8](podman.md#実施手順) のソケットが止まっていると、手順 10 の補足のエラーになる
 - **hadolint と Trivy の設定の検査は、見るところが違う**: 確認用の Containerfile は hadolint では指摘が無く、`trivy config` では `USER` と `HEALTHCHECK` が無いことを指摘された（[使い方の基本](#使い方の基本)）
-- **Homebrew の 2 つは `sudo` の PATH に無い**: root で使うなら `/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
+- **Homebrew の 2 つは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うなら `/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
 
 ### 参照
 

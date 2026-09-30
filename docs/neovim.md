@@ -224,8 +224,8 @@ tree-sitter
 
 ### 注意点
 
-- **PATH の先頭が Homebrew になる**: EPEL の `neovim` と両方入れると Homebrew 版が勝つ。どちらか一方にする
-- **`sudo nvim` は動かない**: root の PATH に Homebrew が無い
+- **EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ（[homebrew.md の注意点](homebrew.md#注意点)）。どちらか一方にする
+- **`sudo nvim` は動かない**: root の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）
   - `sudoedit` や `visudo` で使うならフルパスを `EDITOR` に渡す
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節を通しても動かない）
 - **プロバイダは別途**: Python / Node.js のプラグインを使うなら、それぞれ `pynvim` / `neovim` パッケージを入れる。このホストには Node.js が無い

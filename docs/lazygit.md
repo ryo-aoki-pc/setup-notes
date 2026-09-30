@@ -230,7 +230,7 @@ $ command -v lazygit
 
 ### 注意点
 
-- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置く
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo lazygit` は使えない、など
   - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **COPR 経路は「有効化は成功するのに入らない」**: `dnf copr enable` が通っても、メタデータが取れなければ `dnf install` は `No match for argument` になるだけで、原因は警告行にしか出ない
   - COPR を使う前に `curl -sS -o /dev/null -w '%{http_code}\n' -L <chroot の repodata/repomd.xml>` で 200 が返るか確かめると早い

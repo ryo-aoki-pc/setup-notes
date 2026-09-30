@@ -439,7 +439,7 @@ commandTemplates:
 - **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 手順 2 の補足のエラーが出る
 - **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](podman-tui.md) で見る
 - **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の補足）
-- **Homebrew の lazydocker は `sudo` の PATH に無い**: root で使うことは想定しない（つなぐのは自分のユーザーの API ソケット）
+- **Homebrew の lazydocker は `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うことは想定しない（つなぐのは自分のユーザーの API ソケット）
 
 ### 参照
 

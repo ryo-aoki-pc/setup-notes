@@ -290,8 +290,8 @@ $ cat ~/.config/bat/config
   - `-A` / `-v` / `-e` などフラグの意味も GNU `cat` と違う
   - エイリアスは対話シェルにしか効かないのでスクリプトは壊れないが、**壊れないぶん挙動の違いに気づきにくい**
 - **EPEL 版と二重に入れない**: どちらも `bat` という名前で、PATH の先頭にある Homebrew 版が勝つ。[選択した方針](#選択した方針)を参照
-- **PATH の先頭が Homebrew になる**: `brew shellenv` を `~/.bashrc` に書いた時点で `/home/linuxbrew/.linuxbrew/bin` が先頭に来る
-- **`sudo bat` は使えない**: root の PATH に Homebrew は入っていない。root で読むなら `sudo cat` か、フルパスで `sudo /home/linuxbrew/.linuxbrew/bin/bat`
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo bat` は使えない、など
+- **root で読むなら `sudo cat`**: bat で読むなら、フルパスで `sudo /home/linuxbrew/.linuxbrew/bin/bat`
 - **テーマの見え方は端末に依存する**: `ansi` 以外を選ぶと端末の配色とぶつかることがある。true color が出るかは端末側の設定次第
 
 ### 参照
