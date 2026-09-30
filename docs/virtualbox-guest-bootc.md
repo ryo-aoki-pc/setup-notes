@@ -8,7 +8,7 @@
 > - **手順 6 と手順 12 は、VM のウィンドウで行う**（手順 6 の CD の挿入は、ホスト側の操作）
 > - **手順 9 で再起動する**。Secure Boot が有効なら、手順 10 で起動の途中の MokManager の画面を VM のウィンドウで操作する（最初の画面は 10 秒で消える）
 > - **手順 4 には対話入力（一時パスワード）がある**。手順 8 はビルドが終わるのを待ってから次を貼る
-> - **VM がホストオンリーアダプターだけで、インターネットに出られないときは、手順 8 の代わりに[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を行う**（ホストから SSH のトンネルを張る）
+> - **VM がホストオンリーアダプターだけで、インターネットに出られないときは、手順 4 と手順 8 の代わりに[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を行う**（ホストでビルドし、イメージを ssh で VM に運ぶ）
 
 - 手順 1 の変数を設定したシェルで、上から順にコードブロックを貼る。新しい端末を開いたら手順 1 を貼り直す
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -129,6 +129,7 @@
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）ができる
    - 最後の `mokutil --import` で、公開鍵を UEFI の MOK に登録する予約をする
    - **一時パスワードを 2 回聞かれる**（手順 10 の MokManager で 1 回だけ使う。本書には残さない）
+   - ホストオンリーアダプターだけの VM では、この手順の代わりに[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3・4 で、鍵をホストで作る
    - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -324,6 +325,9 @@
      - 同じ操作の `VBoxManage storageattach … --medium additions` は `VERR_PDM_MEDIA_LOCKED` で失敗した
      - `udisksctl unmount -b /dev/sr0` でマウントを外しただけでは、同じエラーのままだった
    - VM の中の `eject /dev/sr0`（`sudo` は要らない。GNOME にログインしているユーザーは `/dev/sr0` を読み書きできる）で、ホスト側のドライブが空になり、続けて CD を入れられた
+   - 別の回（Guest Additions の CD が入ったままの VM）では、`eject /dev/sr0` の後に同じ働きの `VBoxManage storageattach … --medium additions` で入れた CD が、30 秒たっても自動ではマウントされなかった
+     - [手順 7](#実施手順) が `install: cannot stat` になり、その箇条書きの `udisksctl mount -b /dev/sr0` でマウントしてから貼り直すと通った
+     - `udisksctl` は、検証で使った SSH の端末からでは polkit のパスワードを聞いた（GNOME の端末からは試していない）
 
    </details>
 
@@ -576,13 +580,19 @@
 
 ## ホストオンリーアダプターだけの VM でビルドする（任意）
 
-- VM のネットワークが VirtualBox のホストオンリーアダプターだけで、VM からインターネットに出られないときに、[手順 8](#実施手順) の代わりに行う。手順 1〜7 と、手順 9 から後はそのまま
+- VM のネットワークが VirtualBox のホストオンリーアダプターだけで、VM からインターネットに出られないときに、[手順 4 と手順 8](#実施手順) の代わりに行う。手順 1〜3・5〜7 と、手順 9 から後はそのまま
   - そのままの手順 8 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
-- ホスト（VirtualBox を動かしている PC）がインターネットに出られることが前提
-  - ホストから VM に `ssh -R 1080` でログインすると、VM の中の `127.0.0.1:1080` に SOCKS の待ち受けができ、ホストを出口にして外に出られる（[homebrew-offline.md](homebrew-offline.md) と同じ仕組み）
-  - ビルドのときだけ、podman とビルドの中の dnf にこの待ち受けを使わせる。Containerfile、ベースのイメージの署名の検査、MOK の鍵の置き場所は、手順 8 と変わらない
-- この節の手順 2 はホストの端末で行い、この節の手順 1・3・4・5 は VM の端末に貼る（VM の端末では、先に[手順 1](#実施手順) を貼っておく）
-- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#更新)の手順 2 の代わりに、この節の手順 2〜4 でビルドし直す。元のイメージに戻すときは、この節の手順 5
+- ホスト（VirtualBox を動かしている PC）で派生イメージをビルドし、1 つのファイルにして ssh で VM に運ぶ。VM はインターネットに出ない
+  - ビルドの材料（手順 5 の Containerfile と、手順 7 でコピーしたインストーラ）は、VM から写して使う
+- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[podman.md](podman.md) の手順 1〜7）
+  - Windows のホストでは、WSL の AlmaLinux 10 の端末で行う（WSL の既定のネットワークのままで、ホストオンリーのネットワークの VM に届いた）
+  - AlmaLinux 10 のホストでは、そのホストの端末で行う（試していない）
+- 手順 8 と違うところ:
+  - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この節の手順 6）
+  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この節の手順 3・4）
+  - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
+- この節の手順 1・4・9・10 は VM の端末（先に[手順 1](#実施手順) を貼っておく）、手順 2・3・5〜8・11 はホストの端末に貼る
+- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#更新)の手順 2 の代わりに、この節の手順 5・7〜9。元のイメージに戻すときは、この節の手順 10・11
 
 1. VM の端末で、ホストオンリーアダプターの IP を見る。
 
@@ -603,92 +613,252 @@
      - `ip route` はそのサブネットの 1 行だけだった（既定の経路が無い）
      - `getent hosts quay.io` は何も返さず、`curl https://quay.io/v2/` は `Could not resolve host: quay.io` で失敗した
    - ホストから見た VM の IP は、`VBoxManage dhcpserver findlease --interface=<ホストオンリーアダプターの名前> --mac-address=<VM の MAC アドレス>` でも見られた
-   - VM の sshd は、ISO で入れた直後から `enabled` / `active` で、`AllowTcpForwarding yes`・`GatewayPorts no`・`PasswordAuthentication yes`（`sudo sshd -T`）。firewalld の既定のゾーン `public` が `ssh` を許している
+   - VM の sshd は、ISO で入れた直後から `enabled` / `active` で、`PasswordAuthentication yes`（`sudo sshd -T`）。firewalld の既定のゾーン `public` が `ssh` を許している
 
    </details>
 
-1. ホストの端末で、VM にトンネルを張ってログインする。
-
-   - `ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 <USER>@<VM_IP>` を打つ（`<USER>` は VM のユーザー名、`<VM_IP>` は、この節の手順 1 の IP）
-   - Windows のホストでは、PowerShell か cmd に同じ 1 行を打つ（Windows に最初から入っている OpenSSH のクライアントで確かめた）
-   - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
-   - VM のプロンプトが出たら、このウィンドウは開いたままにする（閉じるか、VM が再起動すると、トンネルが消える）
-   - **注意**: トンネルがある間は、VM の中のどのユーザーのプロセスも、ホストを出口にして外に出られる
-   - **次の手順は、VM の端末に戻って貼る**
-
-   <details>
-   <summary>補足: <code>-R 1080</code> のトンネル</summary>
-
-   - `-R` にポートだけを渡すと、逆向きの動的転送になる（OpenSSH 7.6 から）。VM の sshd が VM の中にポートを開き、そこへの接続は SOCKS のプロキシとして、ホストの ssh から外へ出る
-   - 待ち受けは、VM の sshd の `GatewayPorts` が既定の `no` なので、VM の中の `127.0.0.1:1080` と `[::1]:1080` だけ。ホストオンリーのネットワークのほかの VM からは使えない
-   - `ExitOnForwardFailure=yes` は、VM の 1080 番が使われていてトンネルを張れないときに、ログインせずに終わらせるため。`ControlPath=none` は、`~/.ssh/config` で接続の共有（`ControlMaster`）を使っているときに、転送が裏に残る接続に付いて、ログアウトしても待ち受けが残るのを避けるため（[homebrew-offline.md 手順 2](homebrew-offline.md#実施手順) の補足）
-   - 検証では、Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）でトンネルを張った
-     - VM の sshd のログでは、接続元はホストの `192.168.56.1` だった
-     - VM が再起動すると、ホストの ssh は `Connection to <VM_IP> closed by remote host.` で終わり、VM の `127.0.0.1:1080` の待ち受けも消えた
-   - トンネルはホストの Windows の外向きの接続なので、Windows の受信の規則は要らない
-
-   </details>
-
-1. VM の端末で、トンネルを通って外に届くかを確かめる。
+1. ホストの端末で、変数を設定する（`VM_SSH` は必ず値を入れる）。
 
    ```bash
-   ss -ltn 'sport = :1080'
-   curl -sS -o /dev/null -w '%{http_code}\n' -x socks5h://127.0.0.1:1080 https://quay.io/v2/
+   VM_SSH=   # ← VM のユーザー名と、この節の手順 1 の IP（<USER>@<VM_IP>）
+   echo "VM_SSH = ${VM_SSH}"
    ```
 
-   - `127.0.0.1:1080` の `LISTEN` の行と、`401` が出ればよい（quay.io のレジストリに届き、認証を求められた）
-   - `ss` が何も出さないなら、この節の手順 2 のログインが切れている。張り直す
+   - 同じ端末に、[手順 1](#実施手順) も貼る（この節の手順 7・8・11 で `BASE_IMAGE` を使う）
+   - 新しい端末を開いたら、[手順 1](#実施手順) とこの手順を貼り直す
+   - Windows のホストでは、WSL の AlmaLinux 10 の端末を開いて貼る
 
    <details>
-   <summary>補足: <code>socks5h</code> の <code>h</code></summary>
+   <summary>補足: WSL からホストオンリーのネットワークへ</summary>
 
-   - `socks5h` の `h` は、名前をプロキシの側（ホスト）で引く指定。VM は外の名前を引けないので、`h` を落とすと届かない
-   - 検証の VM で `-x socks5://127.0.0.1:1080` にすると、`curl: (97) Could not resolve host: quay.io` で失敗した
+   - 検証では、WSL 2 の既定の NAT のままの AlmaLinux 10 から、ホストオンリーのネットワークの VM（`192.168.56.102`）の 22 番にそのまま届いた。WSL の設定もファイアウォールの規則も変えていない
+   - VM の sshd のログでは、接続元はホストの `192.168.56.1` だった（`Accepted password for <USER> from 192.168.56.1`）
+   - この節の `ssh` と `scp` は、WSL の中の OpenSSH（`openssh-clients`）で動く。Windows の `ssh.exe` は使わない
+   - 検証の WSL の `sudo` は、パスワードを聞かない設定だった（この節の手順 3 の `sudo dnf` は、そのまま進んだ）
 
    </details>
 
-1. トンネルを通して、派生イメージをビルドする（[手順 8](#実施手順) の代わりに）。
+1. Secure Boot が有効なときだけ、ホストの端末で署名用の鍵を作り、証明書を VM に送る。
 
    ```bash
-   build_args=(--pull=newer --network=host)
-   if mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; then
-     build_args+=(--build-arg MOK_SIGN=1 --secret id=mok_priv,src=/var/lib/shim-signed/mok/MOK.priv --secret id=mok_der,src=/var/lib/shim-signed/mok/MOK.der)
+   if [ -z "${VM_SSH}" ]; then
+     echo 'VM_SSH が空のまま。この節の手順 2 を貼り直す' >&2
+   else
+     rpm -q openssl >/dev/null || sudo dnf install -y openssl
+     if [ ! -e ~/vbox-ga-mok/MOK.priv ]; then
+       mkdir -m 0700 -p ~/vbox-ga-mok
+       openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=VirtualBox Guest Additions module signing key/" -days 36500 -keyout ~/vbox-ga-mok/MOK.priv -out ~/vbox-ga-mok/MOK.der
+     fi
+     ls -l ~/vbox-ga-mok
+     scp ~/vbox-ga-mok/MOK.der "${VM_SSH}:"
    fi
-   sudo http_proxy=socks5h://127.0.0.1:1080 https_proxy=socks5h://127.0.0.1:1080 podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-image
    ```
 
-   - [手順 8](#実施手順) と同じ行が出ればよい（`Storing signatures`、3 つのモジュールの行、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest`）
-   - 続けて [手順 9](#実施手順) から先を行う。手順 9 の再起動で、この節の手順 2 のログインとトンネルは切れる
-   - `proxyconnect tcp: dial tcp 127.0.0.1:1080: connect: connection refused` や `Failed to connect to 127.0.0.1 port 1080` で止まったら、この節の手順 2 のトンネルが切れている。張り直してから貼り直す
-   - **[手順 9](#実施手順) は、`sudo` のパスワードに答え、`Successfully tagged` が出てから貼る**
+   - Secure Boot が有効かは、VM の[手順 3](#実施手順) で見たもの
+   - `openssl` が入っていなければ、`sudo dnf` で入れる（`sudo` のパスワードを聞かれることがある。WSL の AlmaLinux 10 には無かった）
+   - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）が並び、`scp` が `MOK.der` を VM のホームに送る
+   - すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
+   - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
+   - **次の手順は、パスワードに答え、`MOK.der` の転送が終わってから、VM の端末で貼る**
 
    <details>
-   <summary>補足: 手順 8 と違うところ</summary>
+   <summary>補足: 鍵をホストに置く理由と扱い</summary>
 
-   - 違うのは、`--network=host` と、`sudo` の後ろの 2 つの変数だけ
-   - **2 つの変数**: podman（Go）はベースのイメージの取り込みに `https_proxy` を、ビルドの中の dnf（libcurl）は `http_proxy` と `https_proxy` を読む
-     - 検証の VM で、podman は `https_proxy=socks5h://…`（大文字の `HTTPS_PROXY` でも）で quay.io に届き、`ALL_PROXY` だけでは `lookup quay.io` で失敗した（`podman manifest inspect` で確かめた）
-     - dnf は、`dnf.conf` を変えずに、この 2 つの変数で AlmaLinux のミラーの一覧と EPEL にも届いた
-     - `http_proxy` も要るのは、ミラーが http:// だから。検証の日、AlmaLinux のミラーの一覧（baseos・appstream）は http:// の URL だけを 10 個返し、EPEL は http:// と https:// が半々だった。VM の curl（dnf と同じ libcurl）は、http:// の宛先には小文字の `http_proxy` だけを使い、`https_proxy` や大文字の `HTTP_PROXY` だけでは `Could not resolve host` で失敗した
-     - `sudo` は、`export` した変数を渡さない（`env_reset`）。`export https_proxy=…` の後の `sudo podman …` は `lookup quay.io` で失敗し、コマンドの前に `名前=値` で渡すと podman に届いた
-   - **podman はプロキシの変数をビルドの中（`RUN`）にも渡す**。ただしビルドの中は既定では別のネットワークなので、そこの `127.0.0.1:1080` にはトンネルが無い
-     - `--network=host` を付けずに流すと、ベースのイメージの確認（`--pull=newer`）は通ったが、`dnf -y install libXt` が `Curl error (7): Could not connect to server for https://mirrors.almalinux.org/mirrorlist/10/appstream [Failed to connect to 127.0.0.1 port 1080 after 0 ms: Could not connect to server]` で止まった
-     - `--network=host` で、ビルドの中が VM と同じネットワークになり、トンネルに届く
-   - ベースのイメージの署名は、手順 8 と同じく `policy.json` で確かめられる（取り込みで `Storing signatures` が出た）
-   - 変数は、このコマンドの間だけ効く。VM のほかのコマンド（手順 9 の `bootc switch` など）には影響しない
-   - トンネルが切れていると、ベースのイメージの取り込みは `pinging container registry quay.io: Get "https://quay.io/v2/": proxyconnect tcp: dial tcp 127.0.0.1:1080: connect: connection refused` で、ビルドの中の dnf は `Failed to connect to 127.0.0.1 port 1080` で止まる（検証の VM で、トンネルを閉じてから同じ変数で確かめた）
-   - 検証では、ベースのイメージの取り込みから `Successfully tagged` まで、約 7 分半だった
+   - モジュールに署名するのは、この節の手順 7 のビルド（ホスト）なので、秘密鍵もホストに置く。VM には公開鍵の証明書だけを送る
+   - 鍵の作り方は[手順 4](#実施手順) と同じ
+   - `~/vbox-ga-mok` は、ビルドの文脈（`~/vbox-ga-host/vbox-ga-image`）の外に置く。文脈のディレクトリは、まるごと podman に渡るため
+   - `MOK.priv` は、この鍵を登録した VM が信頼するモジュールを作れる鍵になる。ホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない
+   - AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[virtualbox.md 手順 12](virtualbox.md#実施手順)）とは別のもの
+   - **鍵を作り直したら**、この節の手順 7 のビルドに `--no-cache` を足す（[手順 4](#実施手順) の補足と同じ）
+   - WSL の AlmaLinux 10 には `openssl` のコマンドが無く（`openssl-libs` だけ）、この手順の `dnf` が入れた。そのとき `openssl-libs` と `openssl-fips-provider` も、3.5.5 から新しい 3.5.8 に上がった
+   - 初めてつなぐときの表示は `The authenticity of host '<VM_IP> (<VM_IP>)' can't be established.` と `ED25519 key fingerprint is SHA256:…`。`yes` の後に `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` が出て、パスワードを聞かれた
 
    </details>
 
-1. 元に戻すときは、この節の手順 2 のトンネルを張ってから、[ロールバック](#ロールバック)の手順 1 の代わりにこれを貼る。
+1. Secure Boot が有効なときだけ、VM の端末で証明書を置き、MOK への登録を予約する。
 
    ```bash
-   sudo https_proxy=socks5h://127.0.0.1:1080 bootc switch --apply "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
+   {
+     sudo install -d -m 0700 /var/lib/shim-signed/mok
+     sudo install -m 0644 ~/MOK.der /var/lib/shim-signed/mok/MOK.der
+     rm ~/MOK.der
+     sudo ls -l /var/lib/shim-signed/mok
+     sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+   }
    ```
 
-   - [ロールバック](#ロールバック)の手順 1 と同じ行が出て、再起動する。続けて[ロールバック](#ロールバック)の手順 2 から先を行う
+   - `MOK.der` だけが並ぶ（秘密鍵は VM に置かない）
+   - 置き場所は[手順 4](#実施手順) と同じなので、[手順 13](#実施手順) と MOK の削除（[ロールバック](#ロールバック)のリード）はそのまま使える
+   - `MOK.priv` も並ぶなら、[手順 4](#実施手順) で VM に作った鍵が残っている。この節ではホストの鍵で署名するので、使われない
+   - **一時パスワードを 2 回聞かれる**（[手順 10](#実施手順) の MokManager で 1 回だけ使う。本書には残さない）
+   - **次の手順は、一時パスワードに答えてから、ホストの端末で貼る**
+
+1. ホストの端末で、ビルドの材料と、署名を確かめる設定を VM から写す。
+
+   ```bash
+   if [ -z "${VM_SSH}" ]; then
+     echo 'VM_SSH が空のまま。この節の手順 2 を貼り直す' >&2
+   else
+     mkdir -p ~/vbox-ga-host
+     ssh "${VM_SSH}" 'tar -cf - vbox-ga-image -C / etc/containers/policy.json etc/containers/registries.d etc/pki/containers' | tar -xvf - -C ~/vbox-ga-host
+   fi
+   ```
+
+   - VM のユーザーのパスワードを聞かれる
+   - `vbox-ga-image/Containerfile`・`vbox-ga-image/VBoxLinuxAdditions.run`・`etc/containers/policy.json` などの名前が並べばよい
+   - `tar: … time stamp … is … s in the future` が混ざることがある。VM の時計が進んでいるためで、害は無い（この手順の補足）
+   - **次の手順は、パスワードに答え、名前が並んでから貼る**
+
+   <details>
+   <summary>補足: 写すもの</summary>
+
+   - `vbox-ga-image`: [手順 5](#実施手順) の Containerfile と、[手順 7](#実施手順) でコピーしたインストーラ。`ssh` のコマンドは VM のホームで動くので、ホームからの相対パスで指定している
+   - `etc/containers/policy.json`・`etc/containers/registries.d`・`etc/pki/containers`: VM のイメージの署名の設定（この節の手順 6 で使う）
+     - `policy.json` は `quay.io/almalinuxorg/atomic-desktop-gnome` に、`/etc/pki/containers` の 2 つの公開鍵（`atomic-desktop-gnome.pub`・`atomic-sig-backup.pub`）のどちらかでの sigstore の署名を求める
+     - `registries.d` の `almalinuxorg-atomic-desktop-gnome.yaml` の `use-sigstore-attachments: true` で、署名をレジストリから取る
+   - どれも一般のユーザーが読めるので、VM で `sudo` は要らない。1 回の `ssh` にまとめたのは、パスワードを聞かれる回数を減らすため
+   - 検証の VM は、Guest Additions を入れる前は時計が 4 時間進んでいた（[実施前の状態](#実施前の状態)の `RTC in local TZ: yes`）。そのとき作ったファイルは、ホストの `tar` が `time stamp 2026-10-01 00:33:56 is 14169.640948876 s in the future` のように言う。切り替えた後に VBoxService が時計を直しても、ファイルの時刻は進んだまま
+
+   </details>
+
+1. ホストの端末で、ベースのイメージの署名を VM と同じ鍵で確かめるようにする。
+
+   ```bash
+   if [ -e ~/.config/containers/policy.json ] || [ -e ~/.config/containers/registries.d ]; then
+     echo '~/.config/containers に policy.json か registries.d がすでにある。上書きしないので、この手順の補足を見て手で足す' >&2
+   else
+     mkdir -p ~/.config/containers/pki
+     cp ~/vbox-ga-host/etc/pki/containers/*.pub ~/.config/containers/pki/
+     cp -r ~/vbox-ga-host/etc/containers/registries.d ~/.config/containers/
+     sed "s#/etc/pki/containers/#${HOME}/.config/containers/pki/#g" ~/vbox-ga-host/etc/containers/policy.json > ~/.config/containers/policy.json
+     podman image trust show
+   fi
+   ```
+
+   - `quay.io/almalinuxorg/atomic-desktop-gnome` の行が `sigstoreSigned` ならよい
+   - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）。消すのは、この節の手順 11
+   - 「すでにある」と出たときは、何も変えずに止まる。この手順の補足を見て、手で足す
+
+   <details>
+   <summary>補足: 自分のユーザーの設定に置く理由と、確かめたこと</summary>
+
+   - rootless の podman は、`~/.config/containers/policy.json` と `~/.config/containers/registries.d` があれば、`/etc/containers` のものの代わりに読む（`man containers-policy.json`・`man containers-registries.d`）
+     - `/etc/containers` を変えないので `sudo` が要らず、ホストのほかのユーザーにも効かない
+   - `policy.json` は、鍵のパスを `/etc/pki/containers/` から `~/.config/containers/pki/` に書き換えただけで、ほかの項目は VM と同じ。Red Hat のレジストリの規則が使う `/etc/pki/sigstore` の鍵は、AlmaLinux 10 のホストにもある
+   - `podman image trust set` は、podman 5.8.2 でも `sigstoreSigned` の規則を作れない（`signedBy`・`accept`・`reject` だけ）ので、ファイルを写した
+   - 検証（手順書の外。WSL の AlmaLinux 10 で、取り込み済みのベースを `podman pull` し直した）:
+     - この手順の後は、`Checking if image destination supports signatures` と `Storing signatures` が出た
+     - `~/.config/containers/pki` の 2 つの鍵を別の鍵に差し替えると、`Source image rejected: cryptographic signature verification failed: invalid signature when validating ASN.1 encoded signature` で断られた（VM で鍵を差し替えたときと同じ文。[ロールバック](#ロールバック)の手順 1 の補足）
+     - `~/.config/containers` を外すと（ホストの `/etc/containers` の既定）、どちらの行も出ずに取り込まれた。AlmaLinux 10 の既定の `policy.json` は、このイメージの署名を確かめない
+   - 「すでにある」と出たとき（試していない）:
+     - 公開鍵は、ブロックの `mkdir` と `cp`（`*.pub`）の 2 行と同じように `~/.config/containers/pki` に写す
+     - `policy.json` があるなら、その `transports` の `docker` に、`~/vbox-ga-host/etc/containers/policy.json` の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を、鍵のパスを `~/.config/containers/pki/` に書き換えて足す。無いなら、ブロックの `sed` の行と同じ
+     - `registries.d` があるなら、`~/vbox-ga-host/etc/containers/registries.d/almalinuxorg-atomic-desktop-gnome.yaml` をそこへ写す。無いなら、ブロックの `cp -r` の行と同じ（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるので、まるごと写す）
+     - この節の手順 11 では、`~/.config/containers` の中を消さずに、足したものだけを手で戻す
+
+   </details>
+
+1. ホストの端末で、派生イメージをビルドする（[手順 8](#実施手順) の代わりに）。
+
+   ```bash
+   build_args=(--pull=newer)
+   if [ -e ~/vbox-ga-mok/MOK.priv ]; then
+     build_args+=(--build-arg MOK_SIGN=1 --secret "id=mok_priv,src=${HOME}/vbox-ga-mok/MOK.priv" --secret "id=mok_der,src=${HOME}/vbox-ga-mok/MOK.der")
+   fi
+   podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-host/vbox-ga-image
+   ```
+
+   - [手順 8](#実施手順) と同じ行が出ればよい（取り込みの `Storing signatures`、3 つのモジュールの行、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest`）
+   - ホストに鍵（`~/vbox-ga-mok/MOK.priv`）があるときだけ、モジュールに署名する（3 行が `signer=VirtualBox Guest Additions module signing key`）
+   - 途中の `depmod: ERROR`・`depmod: FATAL`（2 回ずつ）、`installer exit=1`、`libsemanage.semanage_rename: WARNING: … Invalid cross-device link …` は、失敗ではない（この手順の補足）
+   - **次の手順は、`Successfully tagged` が出てから貼る**
+
+   <details>
+   <summary>補足: 手順 8 と違うところと、ホストでのビルドの表示</summary>
+
+   - 違うのは、`sudo` を付けないこと（自分のユーザーの rootless の podman でビルドする）、署名するかを Secure Boot の判定ではなくホストの鍵の有無で決めること、ビルドの文脈が `~/vbox-ga-host/vbox-ga-image` であることの 3 つ。Containerfile は同じ
+   - WSL の AlmaLinux 10（podman 5.8.2、rootless）での実測:
+     - ベースの取り込み（`Trying to pull` → `Getting image source signatures` → `Checking if image destination supports signatures` → `Storing signatures`）からビルドの終わりまで、約 5 分だった
+     - `+ kver=6.12.0-211.56.1.el10_2.x86_64`、道具は `kernel-devel` を含む 15 パッケージ（AppStream から）、`+` の行は 126 で、VM でビルドしたときと同じ
+     - 動いているのは WSL のカーネル（`6.18.33.2-microsoft-standard-WSL2`）なので、`depmod: ERROR: could not open directory /lib/modules/6.18.33.2-microsoft-standard-WSL2: No such file or directory` と `depmod: FATAL` が 2 回ずつ出た。モジュールはイメージのカーネル向けにできた（[手順 8](#実施手順) の補足の「動いているカーネルとイメージのカーネルが違うとき」と同じ）
+     - rootless のビルドでは、インストーラの `semanage fcontext` が `libsemanage.semanage_rename: WARNING: rename(/etc/selinux/targeted/active, /etc/selinux/targeted/previous) failed: Invalid cross-device link, fall back to non-atomic semanage_copy_dir_flags()` を出した。切り替えた VM でも、`mount.vboxsf` は `mount_exec_t` だった
+     - `Failed to connect to system scope bus via local transport: No such file or directory` も 2 回出たが、結果には影響しなかった
+     - できたイメージは 5.07 GB（ベースは 4.92 GB）で、VM でビルドしたものと同じ大きさ
+   - 切り替えた VM で見たこと（手順書の外）: setuid の `VBoxDRMClient`（`-rwsr-xr-x`）、sysusers のユーザーとグループ、`/var/lib/VBoxGuestAdditions` のリンクは、VM でビルドしたイメージと同じだった。モジュールの `modinfo -F sig_key` は、ホストで作った証明書のシリアルと一致した
+   - 何も変えずにビルドし直すと、`Using cache` が 4 行で同じイメージ ID になり、7 秒で終わった（ベースが新しくなっていなければ、`--pull=newer` は取り込まない）
+
+   </details>
+
+1. ホストの端末で、派生イメージとベースのイメージを 1 つのファイルにして、VM に送る。
+
+   ```bash
+   if [ -z "${VM_SSH}" ] || [ -z "${BASE_IMAGE}" ]; then
+     echo 'VM_SSH か BASE_IMAGE が空のまま。手順 1 とこの節の手順 2 を貼り直す' >&2
+   else
+     rm -f ~/vbox-ga-host/vbox-ga.tar
+     podman save -m -o ~/vbox-ga-host/vbox-ga.tar localhost/vbox-ga:latest "${BASE_IMAGE}" && ls -lh ~/vbox-ga-host/vbox-ga.tar && scp ~/vbox-ga-host/vbox-ga.tar "${VM_SSH}:"
+     rm -f ~/vbox-ga-host/vbox-ga.tar
+   fi
+   ```
+
+   - `vbox-ga.tar` が約 4.8G で並び、`scp` がそれを VM のホームに送る。送った後に、ホストのファイルは消す
+   - VM のユーザーのパスワードを聞かれる。`scp` が進み具合を出す
+   - **次の手順は、パスワードに答え、転送が終わってから、VM の端末で貼る**
+
+   <details>
+   <summary>補足: 2 つのイメージを 1 つのファイルにする理由と、実測</summary>
+
+   - `podman save -m` は、複数のイメージを 1 つの docker-archive に入れる。層は共有されるので、ベースを足しても大きさは派生イメージとほぼ同じ（4.8G。派生イメージは 5.07 GB、ベースは 4.92 GB）
+   - ベースも VM の podman に入るので、[手順 8](#実施手順) で VM がビルドしたときと同じく、VM に派生イメージとベースの 2 つがそろう。元に戻すとき（この節の手順 10）は、このベースを使う
+   - **ファイルがすでにあると、`podman save` は書かない**（`Error: docker-archive doesn't support modifying existing images`）
+     - 検証では、消す行を入れる前の版で更新を流したとき、この表示の後に前の回のファイルを `scp` で送っていた
+     - そのため、書く前に消し、書けたときだけ送り、送った後にも消す
+   - 実測（WSL と、同じ PC の VM の間）: `podman save` が約 80 秒、`scp` が 29〜56 秒（85〜164 MB/s）。圧縮はしていない
+
+   </details>
+
+1. VM の端末で、送ったファイルからイメージを取り込む。
+
+   ```bash
+   {
+     sudo podman load -i ~/vbox-ga.tar
+     rm ~/vbox-ga.tar
+     sudo podman images
+   }
+   ```
+
+   - `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出て、`sudo podman images` にその 2 つ（5.07 GB と 4.92 GB）が並べばよい
+   - 取り込みは、初めては約 90 秒、同じ層がある 2 回目からは 10 秒ほどだった
+   - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[手順 2](#実施手順) の空きの目安より多く）
+   - 続けて[手順 9](#実施手順) から先を行う
+   - **[手順 9](#実施手順) は、`sudo` のパスワードに答え、`Loaded image:` が出てから貼る**
+
+1. 元に戻すときは、VM の端末で、[ロールバック](#ロールバック)の手順 1 の代わりにこれを貼る。
+
+   ```bash
+   sudo bootc switch --apply --transport containers-storage "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
+   ```
+
+   - この節の手順 9 で運んだベースのイメージに切り替えて、再起動する（`Fetching layers` が `0/0` で、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`）
+   - 起動した後の `sudo bootc status` の `● Booted image:` は `containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` になる（レジストリではなく、この VM の podman のイメージを追う）
+     - `Digest:` も、レジストリのものとは違う値になる（ファイルから取り込んだイメージの digest）
+     - 中身は元のイメージと同じ版（`Version:`）で、Guest Additions のモジュールと `/opt/VBoxGuestAdditions-*` は無くなる
+   - 続けて[ロールバック](#ロールバック)の手順 2 から先を行う
    - **[ロールバック](#ロールバック)の手順 2 は、起動したらログインし、新しい端末で[手順 1](#実施手順) を貼ってから貼る**
+
+1. 元に戻すときは、ホストの端末で、ビルドに使ったものと、署名を確かめる設定を消す。
+
+   ```bash
+   rm -rf ~/vbox-ga-host ~/.config/containers/policy.json ~/.config/containers/registries.d ~/.config/containers/pki
+   rmdir --ignore-fail-on-non-empty ~/.config/containers
+   podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
+   ```
+
+   - `Untagged:` が 2 行と、`Deleted:` の行が並ぶ
+   - `~/.config/containers` は、ほかのファイルが無ければ消える
+   - ビルドの最初の段（`<none>`、6.43 MB）が残る。`podman image prune` で消せる（`[y/N]` を聞く）
+   - **注意**: この節の手順 6 で「すでにある」と出て手で足した PC では、`~/.config/containers` の 2 つを消さずに、足した項目だけを手で戻す
+   - Secure Boot の鍵（`~/vbox-ga-mok`）は残る。消すときは、[ロールバック](#ロールバック)のリード
 
 ---
 
@@ -736,8 +906,8 @@
 - OS（ベースのイメージ）を上げる: この節の手順 2・3。カーネルが変わっても、同じ手順でモジュールが作り直される
   - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この節の手順 2 は、レジストリにあるものを取り込む）
 - ホストの VirtualBox を上げた（Guest Additions の版が変わった）: この節の手順 1 から
-- ホストオンリーアダプターだけの VM では、この節の手順 2 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 2〜4 でビルドし直す
-- Secure Boot の鍵を作り直したときは、この節の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない）
+- ホストオンリーアダプターだけの VM では、この節の手順 2 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 5・7〜9 でホストでビルドし直し、VM に運ぶ（ホストの端末では、先に[手順 1](#実施手順) とその節の手順 2 を貼る）
+- Secure Boot の鍵を作り直したときは、この節の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない。ホストでビルドするときも同じ）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
 
 1. ホストの VirtualBox を上げたときだけ、CD を入れ直して [手順 7](#実施手順) を貼る。
@@ -766,15 +936,16 @@
 
 ## ロールバック
 
-- ホストオンリーアダプターだけの VM では、この節の手順 1 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 5 を行う（元のイメージの取り込みにトンネルが要る）
+- ホストオンリーアダプターだけの VM では、この節の手順 1 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 10 を行う（VM はレジストリから元のイメージを取り込めないので、ホストから運んだものに切り替える）。ホストは、その節の手順 11 で片付ける
 - `sudo bootc rollback` の後に再起動すると、1 つ前のデプロイメントに戻る
   - 更新を重ねた後は、1 つ前の派生イメージに戻るだけだった（VM で確認）
   - 切り替えた直後なら、元のイメージに戻った（kernel-rt のイメージの VM で確認。もう一度 `sudo bootc rollback` すると、派生イメージに戻った）
 - この節の手順では消えないもの:
-  - **Secure Boot の MOK**（手順 4 を行った場合）: 次の順で消す（VM で確認）
+  - **Secure Boot の MOK**（手順 4、またはホストオンリーアダプターだけの節の手順 3・4 を行った場合）: 次の順で消す（VM で確認）
     - `sudo mokutil --delete /var/lib/shim-signed/mok/MOK.der`（一時パスワードを 2 回）→ 再起動
     - MokManager の最初の画面で 10 秒以内にキーを押し、`Delete MOK` → `Continue` → `Yes` → パスワード → `Reboot`
     - 起動したら `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is not enrolled` になる。そのあと `sudo rm -rf /var/lib/shim-signed`
+    - ホストオンリーアダプターだけの節で鍵をホストで作ったときは、VM の MOK を消した後に、ホストの端末で `rm -rf ~/vbox-ga-mok`（秘密鍵。取り戻せない。同じ鍵を使うほかの VM が無いときだけ）
 
 1. 元のイメージに切り替えて、再起動する。
 
@@ -810,7 +981,8 @@
    - bootc は自分の置き場所にイメージを持っているので、podman のイメージを消しても起動には影響しない
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`sudo podman image prune` で消せる
      - [更新](#更新)でビルドし直していれば、前の派生イメージ（5.07 GB。kernel-rt のイメージでは 5.51 GB）も `<none>` で残る。同じく `sudo podman image prune` で消える
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+     - ホストオンリーアダプターだけの節でホストでビルドした VM では、`Deleted:` は 2 行で、`<none>` は VM にできない（ホストに残る。その節の手順 11）
+   - **次の手順は、`sudo` のパスワードに答え、`Deleted:` の行が出てから貼る**（消し終わる前に貼ると、`sudo` が読んで捨てる）
 
 1. Guest Additions のユーザー・グループ・リンク・ログを消す。
 
@@ -846,8 +1018,8 @@
   - 使えるようにするもの: クリップボードの共有、画面サイズの自動変更、共有フォルダー、時刻の同期（VBoxService）
 - **進め方**: dnf では入れられないので、Guest Additions を焼き込んだ派生イメージを VM の上でビルドし、`bootc switch` で切り替える
   - bootc の公式文書の「Booting local builds」と同じ形
-  - VM がインターネットに出られない（ホストオンリーアダプターだけの）ときは、ホストから SSH のトンネルを張り、ホストを出口にしてビルドする（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)）
-  - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop と、自作の kernel-rt のイメージのときだけ変える）。ホストオンリーアダプターの節では、ホストで打つ `ssh` の 1 行に VM のユーザー名と IP を入れる
+  - VM がインターネットに出られない（ホストオンリーアダプターだけの）ときは、ホストで同じ Containerfile をビルドし、ファイルにして ssh で VM に運ぶ。VM は外に出ない（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)）
+  - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop と、自作の kernel-rt のイメージのときだけ変える）。ホストオンリーアダプターの節では、ホストの端末の `VM_SSH` に VM のユーザー名と IP を入れる
 - **状態**: **VirtualBox の VM で本実行済み（2026-09-29 は AlmaLinux 10 のホスト、2026-09-30 は Windows 11 のホスト）**。その前に x86_64 のコンテナで検証した（2026-09-28）
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
     - 手順 1〜13、[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、[更新](#更新)の手順 2・3、[ロールバック](#ロールバック)の手順 1〜3
@@ -870,7 +1042,7 @@
     - 認証の要るレジストリにある、自作のイメージ
     - Hyper-V を止めた Windows のホスト（VirtualBox が AMD-V・VT-x を直接使う形）と、Intel の CPU の Windows のホスト
     - Windows のホストで VM が止まる原因と、止まらないようにする設定。`vboxguest` の警告の原因と、起動が止まる頻度
-    - [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の、Linux のホストからのトンネル、パスワードでのログインとホスト鍵の確認、Secure Boot が無効の VM、ベースが新しくなる更新
+    - [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の、AlmaLinux 10 のホスト（ホストオンリーアダプターが `vboxnet0`）でのビルド、Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、その節の手順 6 で「すでにある」と出たときの手作業、元に戻した後にレジストリを追い直すこと
   - コンテナでの検証（2026-09-28。[付録](#付録-コンテナでの検証記録2026-09-28)）: Atomic Desktop のイメージそのものを VM の代役にし、中の podman にコードブロックを貼った
     - 確かめたのは、派生イメージのビルド（モジュールのビルドと署名、`bootc container lint`）と、切り替えた後の最初の起動を systemd を PID 1 にしたコンテナで模した結果
     - このとき実機の設定は変えていない（`sudo` を使わず、rootless の podman だけ）
@@ -897,19 +1069,24 @@
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・自動リサイズ・VirtualBox について）は、GUI のメニューそのもので行った（UI Automation で操作）。共有フォルダーの追加は `VBoxManage`、2 回目の CD の挿入と画面の大きさは `VBoxManage` で行った
     - 確認したこと: 既定のカーネルのイメージで、直した Containerfile のビルド（署名あり・なし）、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService、Windows とのクリップボードの両方向、ウィンドウの大きさへの追従、Windows のフォルダーとの共有フォルダーの読み書き、切り替えた直後の `bootc rollback`
     - 見つかったこと: Hyper-V の上では、手順 8 の途中で VM が 1〜7 分ずつ止まる（リードの WARNING）。既定のカーネルでも `vboxguest` の読み込みの直後に警告が出て、1 度は起動が止まった（[手順 11](#実施手順) の補足）
-  - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）
+  - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を、ホストから SSH のトンネルを張って VM の中でビルドする形で足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）。その節は、この後にトンネルを使わない形に書き換えた（次の項目）。この項目の「その節の手順」は、トンネルを使っていた版のもの
     - 手順 1〜7、そのままの手順 8（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 9〜11・13、[更新](#更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](#ロールバック)の手順 2・3。Secure Boot は有効
     - トンネルは Windows の `ssh.exe` で張った。ただし、自動で流すために鍵でログインし、シェルを開かない `-N` を付けた
     - 確認したこと: トンネル越しのベースの取り込み（署名の検査あり）とビルドの中の dnf（AlmaLinux のミラーと EPEL）、MokManager での登録、モジュールの読み込み、ネットワークの無い VM での VBoxService の時刻の同期、トンネル越しの元のイメージへの切り替え
     - その節の手順 4 の補足の実測（`socks5` と `socks5h`、`ALL_PROXY` だけ、`export` の後の `sudo`、`--network=host` 無し、トンネルが切れているとき）も、この VM で確かめた
     - 見つかって直したこと: インストールに使った ISO がドライブに残っていると、手順 6 で CD を入れられない（[手順 6](#実施手順) の箇条書き）
+  - 2026-09-30（夜）: [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の項目と同じ VM と、同じ PC の WSL 2 の AlmaLinux 10.2 で流した（[付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
+    - 手順 1〜3・5〜7、その節の手順 1〜9、手順 9〜11・13、[更新](#更新)の手順 3（その節の手順 5・7〜9 でビルドし直して運んだ後の、変わらないとき）、その節の手順 10、[ロールバック](#ロールバック)の手順 2・3、その節の手順 11。Secure Boot は有効
+    - ホストの端末（WSL）から VM へのログインは、文書のとおりパスワードとホスト鍵の確認で行った
+    - 確認したこと: ホストでの署名の検査（鍵を差し替えると断られる）、ホストで作った鍵での署名と MokManager での登録、モジュールの読み込み、ホストでビルドしても SELinux のラベル・setuid・sysusers が同じであること、運んだベースへの切り替え
+    - 見つかって直したこと: `podman save` はファイルがすでにあると書かない（その節の手順 8）。[ロールバック](#ロールバック)の手順 2 の `sudo podman rmi` が終わる前に手順 3 を貼ると、`sudo` に読まれて捨てられた（待つ目安を `Deleted:` にした）
 
 | 項目 | VirtualBox の VM（本実行） | Windows のホストの VM（本実行） | 検証環境（コンテナ） |
 |---|---|---|---|
 | 実施日 | 2026-09-29 | 2026-09-30 | 2026-09-28 |
 | ホスト | AlmaLinux 10.2 / x86_64 のノート PC の VirtualBox 7.2.20（[virtualbox.md](virtualbox.md) で導入）。Guest Additions の CD はホストのもの | Windows 11 Pro 25H2（ビルド 26200、日本語）/ x86_64 のノート PC（AMD Ryzen AI MAX+ 395）の VirtualBox 7.2.20 r175154。Hyper-V が動いていて、VM は Hyper-V の上で動いた。Guest Additions の CD はホストのもの | VirtualBox は無し。Guest Additions は公式サイトの `VBoxGuestAdditions_7.2.20.iso`（`SHA256SUMS` で照合） |
 | ゲストの OS | 公式の ISO（`atomic-desktop-gnome-amd64.iso`、2026-09-21）で入れた Atomic Desktop GNOME（10.2.20260918.1）。派生イメージのベースは `:latest`（10.2.20260926.0） | 同じ ISO（sha256 が一致）で入れた。版は左と同じ | 同じイメージ（10.2.20260924.1、`sha256:7be643fe…dcff`）を podman のコンテナとして起動した代役 |
-| VM | 4 vCPU・8 GB・VMSVGA（128 MB）・SATA の 80 GB の VDI・NAT。UEFI とセキュアブート（`modifynvram` で Microsoft と Oracle の鍵を登録） | 左と同じ設定。ホストオンリーアダプターの節は、NAT の代わりに「VirtualBox Host-Only Ethernet Adapter」だけにつないだ VM を新しく作った | — |
+| VM | 4 vCPU・8 GB・VMSVGA（128 MB）・SATA の 80 GB の VDI・NAT。UEFI とセキュアブート（`modifynvram` で Microsoft と Oracle の鍵を登録） | 左と同じ設定。ホストオンリーアダプターの節は、NAT の代わりに「VirtualBox Host-Only Ethernet Adapter」だけにつないだ VM を新しく作った。その節のホストの端末は、同じ PC の WSL 2 の AlmaLinux 10.2（podman 5.8.2 の rootless） | — |
 | カーネル | ISO の `6.12.0-211.55.1.el10_2` → 派生イメージの `6.12.0-211.56.1.el10_2` | 左と同じ | 実機（AlmaLinux 10.2 / x86_64 のノート PC）の `6.12.0-211.56.1.el10_2` を共有 |
 | bootc / podman | 1.16.4 / 5.8.2（イメージ） | 左と同じ | 同左（代役の中の podman で入れ子にビルド） |
 | GNOME | 49.4（Wayland） | 49.4（Wayland） | 無し |
@@ -971,17 +1148,22 @@ Guest Additions の入手元とビルドの場所:
 
 VM がホストオンリーアダプターだけで、インターネットに出られないときの経路（2026-09-30。[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)）:
 
-- **ホストから `ssh -R 1080` でトンネルを張り、VM の上でビルドする（採用）**
-  - Containerfile、ベースのイメージの署名の検査（VM の `policy.json`）、MOK の鍵の置き場所は変わらない。変わるのはビルドのコマンドだけ
-  - ホストに要るのは ssh のクライアントだけ（Windows 11 は最初から入っている）。ホストにサーバーも受信の許可も要らない
-  - トンネルがある間は、VM のどのプロセスもホストを出口にして外に出られる（その節の手順 2 の注意）
-- 別のマシン（ホストの WSL など）でビルドし、イメージを VM に運ぶ（不採用）
-  - この PC の WSL の AlmaLinux 10.2（rootless の podman）では、手順 5 の Containerfile のままビルドが通った
-  - ただし、更新のたびにベースを含むイメージの全体（`podman save` で約 2.3 GB）を運ぶことになる
-  - ベースの署名の検査がビルドするマシンに移る（VM に読み込んだイメージは、`policy.json` の `insecureAcceptAnything` で入る）。Secure Boot では、MOK の秘密鍵もビルドするマシンに置くことになる
+- **ホストでビルドし、`podman save` のファイルを ssh で VM に運ぶ（採用）**
+  - VM はインターネットに出ない。VM に要るのは、ホストからの ssh だけ（sshd は ISO で入れた直後から動いている）
+  - Containerfile は同じ。ホストには、x86_64 の AlmaLinux 10 の rootless の podman が要る（Windows のホストでは WSL の AlmaLinux 10）
+  - ベースの署名の検査はホストに移る。VM の `policy.json` と公開鍵をホストの自分のユーザーの設定に写し、同じ検査をさせる（その節の手順 6）。VM に取り込むイメージ（`podman load` と、`containers-storage` からの `bootc switch`）は、`policy.json` の `insecureAcceptAnything` で入る
+  - Secure Boot の秘密鍵はホストに置く（VM には証明書だけ）
+  - OS を上げるたびに、ベースを含む約 4.8G のファイルを運ぶ（検証では、同じ PC の中で 1 分ほど）
+  - 元のイメージに戻すときも、運んだベースに切り替える（`Booted image:` が `containers-storage:` 付きになり、レジストリを追わなくなる）
+- ホストから `ssh -R 1080` でトンネルを張り、VM の上でビルドする（不採用。2026-09-30 の午後の版はこれだった）
+  - Containerfile も、署名の検査も、MOK の鍵の置き場所も VM のままで、変わるのはビルドのコマンドだけ（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)で本実行した）
+  - ただし、トンネルがある間は、VM のどのプロセスもホストを出口にして外に出られる。ビルドの間は ssh を開いたままにし、VM の再起動で切れるので、元のイメージに戻すときも張り直す
+  - VM から外に出る経路を作らないために、採らなかった
 - ホストにレジストリや転送用の HTTP のプロキシを立てる（不採用。試していない）
   - ビルドの中の dnf がインターネットに出る必要があるので、レジストリだけでは足りない
   - Windows のホストでは、WSL2（既定の NAT）の中のサーバーには、ホストオンリーのネットワークから直接は届かない。受信のファイアウォールの規則も要る
+- ビルドの間だけ、VM に NAT のアダプターを足す（不採用。試していない）
+  - 手順 8 のままで済むが、その間は VM がインターネットに直接出られる
 - RPM を先に落として、ネットワーク無しでビルドする（不採用）
   - Containerfile を 4 か所変える必要があった（リポジトリをすべて無効にする、ローカルの RPM の署名を確かめる設定、依存の後片付けなど。コンテナで試した）
 
@@ -1065,8 +1247,9 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - 動いている VM に CD を入れる操作とは関係が無かった（電源から入れ直した VM でも止まった）。止まらない回もあった
   - 検証では、ホストから VM へ 1 秒ごとに SSH の keepalive を送り続けると、ビルドの出力は止まらずに進んだ（仮想の時計の遅れは、その間にも 1 度 60 秒になった）
   - Hyper-V を止めた Windows（VirtualBox が AMD-V・VT-x を直接使う形）は試していない
-- **ホストオンリーアダプターだけの VM では、ホストからのトンネルでビルドする**: ビルドのコマンドの前に `http_proxy` と `https_proxy` を置き、`--network=host` を足す。どちらかが欠けると、ベースの取り込みかビルドの中の dnf が止まる（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 4 の補足）
-  - OS を上げるときと、元のイメージに戻すときも、トンネルが要る。切り替えた後の `bootc upgrade` と、派生イメージへの `bootc switch` には要らない
+- **ホストオンリーアダプターだけの VM では、ホストでビルドして運ぶ**: ホストの rootless の podman でビルドし、`podman save -m` のファイルを ssh で VM に送って `podman load` する（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)）
+  - ベースの署名は、VM の `policy.json` と公開鍵をホストの `~/.config/containers` に写して確かめる。写さないと、AlmaLinux 10 の既定の設定では確かめずに取り込む（その節の手順 6 の補足）
+  - OS を上げるときも、元のイメージに戻すときも、ホストから運ぶ。`podman save` はファイルがすでにあると書かないので、消してから書く（その節の手順 8 の補足）
 - **インストールに使った ISO が残っていると、Guest Additions の CD を入れられない**: VM の中で `eject /dev/sr0` してから入れる（[手順 6](#実施手順)）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 5](#実施手順) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](#更新)）
@@ -1564,6 +1747,8 @@ Secure Boot が有効の回では、続けて次を流した。
 
 [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、前の付録と同じ Windows 11 のホストで確かめた。表の「ホストオンリー N」は、その節の手順 N。
 
+この付録は、ホストから SSH のトンネルを張って VM の中でビルドしていた版（`c511dac`）の記録で、「ホストオンリー N」はその版の節の手順を指す（今の節とは番号も中身も違う。今の形の記録は[次の付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）。
+
 **環境**:
 
 - ホスト: 前の付録と同じ（Windows 11 Pro 25H2、VirtualBox 7.2.20 r175154、Hyper-V の上の NEM）。ホストは有線の LAN でインターネットに出られる
@@ -1628,3 +1813,84 @@ Secure Boot が有効の回では、続けて次を流した。
 - keepalive を送らないときに、トンネル越しのビルドの間に VM が止まるか
 - Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、[更新](#更新)の手順 1（Guest Additions の版が変わるとき）
 - ホストがプロキシの内側にある場合
+
+### 付録: ホストでビルドして VM に運ぶ形の本実行（2026-09-30）
+
+[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の付録と同じ Windows 11 のホストの同じ VM で確かめた。表の「ホストオンリー N」は、今の節の手順 N。
+
+**環境**:
+
+- ホスト: 前の付録と同じ（Windows 11 Pro 25H2、VirtualBox 7.2.20 r175154、Hyper-V の上の NEM）
+- ホストの端末: 同じ PC の WSL 2 の AlmaLinux 10.2（カーネル `6.18.33.2-microsoft-standard-WSL2`、ネットワークは既定の NAT）
+  - podman 5.8.2 の rootless。始める前は、イメージも `~/.config/containers` も無かった
+  - `openssl` のコマンドは入っていなかった（`openssl-libs` だけ）。`sudo` はパスワードを聞かない設定
+- VM: 前の付録の VM（ホストオンリーアダプターだけ、`192.168.56.102`、Secure Boot 有効）
+  - 始めたときは、前の付録の最後で戻した元のイメージ（`quay.io/almalinuxorg/atomic-desktop-gnome:latest`、10.2.20260926.0）で起動していた。`Rollback image:` は前の回の派生イメージ
+  - podman のイメージは、前の回の `<none>`（6.43 MB）だけ。`/var` は 47G のうち 6.6G を使っていた
+  - GDM のログイン画面のままだったので、VM のウィンドウにキーを送って GNOME にログインした
+
+**手順書の外で行った準備**:
+
+- VM の `/var/lib/shim-signed`（前の回に[手順 4](#実施手順) で作った鍵の組）を消し、VM に鍵が無い状態にした。前の回の鍵は MOK に登録されたまま
+- VM が止まるのを避けるため、最初から最後まで、ホストから VM へ 1 秒ごとに SSH の keepalive を送った。VBox.log に大きな遅れ（`TM: … lag`）は出なかった（リセットのときの数ミリ秒だけ）
+
+**流し方**:
+
+- 本文の `bash` のコードブロックを機械的に抜き出し（リストの字下げだけ外す）、端末に貼るのと同じ形で送った（改行を CR にし、bash がブラケットペーストを有効にしていれば、開始と終了の印で囲む）
+  - VM の端末: 前の付録と同じ（Windows の Python の SSH の擬似端末。鍵でログイン）
+  - ホストの端末: WSL の中の `script` が作る擬似端末の bash（`bash -li`）に送った
+- ホストの端末から VM への `ssh` と `scp` は、文書のとおりパスワードで入った。初めての接続では、ホスト鍵の確認に `yes` と答えた
+- `sudo` のパスワード、`mokutil` の一時パスワード、VM のユーザーのパスワードは、入力待ちが出てから送った
+- 手順書の版は、この付録を書く前の作業中のもの。抜き出した全部のブロックは `bash -n` を通った
+
+| 節と手順 | 結果 |
+|---|---|
+| 手順 1〜3 | 既定の値。`oracle`、`/var` の空き 41G、`● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260926.0）、`SecureBoot enabled`。手順 4 はホストオンリーの節で代えるので飛ばした |
+| 手順 5 | Containerfile 3225 バイト |
+| 手順 6 | 前の回の Guest Additions の CD がドライブに入ったままで、GNOME にログインしたときにマウントされた。手順 6 の操作に合わせるため、VM で `eject /dev/sr0`（ホスト側は `emptydrive`）の後に、同じ働きの `VBoxManage storageattach … --medium additions` で入れ直した。**入れ直した CD は、30 秒たっても自動ではマウントされなかった**（`lsblk` の `sr0` は 50.7M） |
+| 手順 7 | `install: cannot stat '/run/media/<USER>/VBox_GAs_*/VBoxLinuxAdditions.run'` → 箇条書きの `udisksctl mount -b /dev/sr0`。SSH の擬似端末からは polkit が `Authentication is required to mount VBOX CD-ROM (/dev/sr0)` とパスワードを聞いた（1 回目は、続けて貼ったブロックがパスワードとして食われて `AUTHENTICATION FAILED`）。答えてマウントした後に貼り直すと、`MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
+| ホストオンリー 1 | `enp0s3  UP  192.168.56.102/24` |
+| ホストオンリー 2 | ホストの端末に[手順 1](#実施手順) と、`VM_SSH=<USER>@<VM_IP>` にしたこの手順を貼った |
+| ホストオンリー 3 | `openssl` が無く、`sudo dnf install -y openssl` がパスワードを聞かずに進んだ（`openssl` 3.5.8 が入り、`openssl-libs`・`openssl-fips-provider` が 3.5.5 から 3.5.8 に上がった）。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。`scp` は `The authenticity of host … can't be established.`・`ED25519 key fingerprint is SHA256:…` → `yes` → `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` → パスワード → `MOK.der  100%  876` |
+| ホストオンリー 4 | `sudo` は前のコマンドの記憶で聞かれなかった。`-rw-r--r--. 1 root root 876 … MOK.der`（ディレクトリは `drwx------`）、一時パスワードを 2 回。手順書の外の `mokutil --list-new` に `CN=VirtualBox Guest Additions module signing key` |
+| ホストオンリー 5 | パスワードの後に、`vbox-ga-image/` から `etc/pki/containers/atomic-sig-backup.pub` まで 13 の名前。VM の時計が 4 時間進んでいたので、`tar: … time stamp 2026-10-01 00:33:56 is 14169.640948876 s in the future` が混ざった |
+| ホストオンリー 6 | `podman image trust show` に `repository  quay.io/almalinuxorg/atomic-desktop-gnome  sigstoreSigned`（Red Hat のレジストリ 2 つも `sigstoreSigned`、既定は `accept`） |
+| ホストオンリー 7 | 約 5 分。`Trying to pull quay.io/almalinuxorg/atomic-desktop-gnome:latest...` → `Getting image source signatures` → `Storing signatures`、`+ kver=6.12.0-211.56.1.el10_2.x86_64`、道具は `kernel-devel` を含む 15 パッケージ、`depmod: ERROR: could not open directory /lib/modules/6.18.33.2-microsoft-standard-WSL2` と `depmod: FATAL` が 2 回ずつ、`libsemanage.semanage_rename: WARNING: … Invalid cross-device link …`、`installer exit=1`。3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Checks skipped: 1`、`Successfully tagged localhost/vbox-ga:latest`。`+` の行は 126。ホストの `podman images` は派生イメージ 5.07 GB、ベース 4.92 GB、`<none>` 6.43 MB |
+| ホストオンリー 8 | `podman save` が約 80 秒で `vbox-ga.tar`（4.8G、4833 MB）を書き、パスワードの後に `scp` が 29 秒（164.4 MB/s） |
+| ホストオンリー 9 | `sudo` のパスワードの後、約 86 秒で `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`。`sudo podman images` の 2 つの IMAGE ID は、ホストのものと同じだった |
+| 手順 9 | `layers already present: 84; layers needed: 1 (151.9 MB)`、`Deploying: done (8 seconds)`、`Pruned images: 0 (layers: 18, objsize: 832.4 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 再起動。貼ってから 54 秒で MokManager の画面が出た |
+| 手順 10 | `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot`（前の付録と同じく、最初の画面をスクリーンショットの色で捉えてキーを送った）。41 秒で GDM が出た |
+| 手順 11 | `vboxguest  528384  5`、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session`・`--checkhostversion` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`、`Rollback image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` |
+| 手順 13 | `/var/lib/shim-signed/mok/MOK.der is already enrolled`、`VirtualBox Guest Additions module signing key` |
+| 更新（ホストオンリー 5・7〜9 → 更新 3） | ホストオンリー 5 は同じ名前と `tar` の警告。ホストオンリー 7 は `Using cache` が 4 行で同じイメージ ID、7 秒（`Trying to pull` は出ない）。**ホストオンリー 8 は、ファイルを消す行を入れる前の版で `Error: docker-archive doesn't support modifying existing images` になり、そのまま前の回のファイル（時刻が 1 回目のまま）を `scp` で送った**（56 秒、85.6 MB/s）。ホストオンリー 9 は 12 秒で `Loaded image:` が 2 行、更新 3 は `No changes in ostree-unverified-image:containers-storage:localhost/vbox-ga:latest => sha256:<DIGEST>` と `No update available.` |
+| 更新（直した版で、ホストオンリー 8・9 → 更新 3） | ホストオンリー 8 は約 78 秒で新しいファイルを書き、`scp` が 53 秒（89.8 MB/s）、送った後にホストのファイルが消えた。ホストオンリー 9 は 8 秒、更新 3 は同じく `No changes` と `No update available.` |
+| ホストオンリー 10 | `Fetching layers` が `0/0`、`Deploying: done (8 seconds)`、`Pruned images: 0 (layers: 1, objsize: 112.1 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`（`Digest:` はレジストリのものと違う値）→ 貼ってから 31 秒で再起動。起動した後は `● Booted image: containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`、`Rollback image: containers-storage:localhost/vbox-ga:latest`、`vbox` のモジュールも `/opt/VBoxGuestAdditions-*` も無い |
+| ロールバック 2 | `Untagged:` が 2 行、`Deleted:` が 2 行。前の回の `<none>`（6.43 MB）は残った。**`podman rmi` が終わる前（パスワードに答えて 20 秒後）にロールバックの手順 3 を貼ると、`sudo` に読まれて捨てられ、何も起きなかった** |
+| ロールバック 3 | `Deleted:` が出た後に貼り直すと、無出力でユーザー・グループ・リンク・ログが消えた。`/var` の使用量は 5.9G |
+| ホストオンリー 11 | `Untagged:` が 2 行、`Deleted:` が 4 行。ホストには `<none>`（6.43 MB）が残った。`rmdir` の行を足す前の版では空の `~/.config/containers` が残ったので、行を足し、その行で消えることを確かめた |
+
+手順書の外で確かめたこと:
+
+| 確認 | 結果 |
+|---|---|
+| ホストの署名の検査（取り込み済みのベースを `podman pull` し直した） | ホストオンリー 6 の設定のままでは `Checking if image destination supports signatures` と `Storing signatures`。`~/.config/containers/pki` の 2 つの鍵を別の鍵（`openssl ecparam` で作った P-256）に差し替えると `Error: … Source image rejected: cryptographic signature verification failed: invalid signature when validating ASN.1 encoded signature, invalid signature when validating ASN.1 encoded signature`。`~/.config/containers` を外すと、どちらの行も出ずに取り込まれた。確かめた後に元に戻した |
+| 空の変数と、すでにある設定 | `VM_SSH` を空にしてホストオンリー 5・8 を貼ると、どちらも「空のまま」の文だけを出し、`~/vbox-ga-host` も作らなかった。`~/.config/containers/policy.json` を置いてからホストオンリー 6 を貼ると、「すでにある」の文だけを出した |
+| VM の sshd | `Accepted password for <USER> from 192.168.56.1`（WSL からの接続は、ホストのホストオンリーの IP から届いた） |
+| 切り替えた VM | `mount.vboxsf` は `mount_exec_t`（`matchpathcon` も同じ）、`VBoxDRMClient` は `-rwsr-xr-x`、sysusers の `vboxadd`（966）・`vboxsf`（968）・`vboxdrmipc`（967）、`/var/lib/VBoxGuestAdditions -> /usr/share/factory/var/lib/VBoxGuestAdditions` |
+| 署名の鍵 | `modinfo -F sig_key vboxguest` が、ホストで作った `MOK.der` のシリアル（`openssl x509 -serial`）と同じ値。`.platform` のキーリングには、前の回の鍵と今回の鍵の 2 つがあった |
+| カーネルと時刻 | `tainted` は 4096 だけで、この起動では `vboxguest` の `WARNING` は出なかった。VBoxService が `Radical guest time change: -14 390 630 668 000ns` で、4 時間進んでいた時計を直した |
+| AVC の拒否 | 派生イメージの起動で 9 件、どれも `tuned-ppd`（`/var/log/tuned` への書き込み）。元のイメージに戻した起動でも `tuned-ppd` が 7 件出たので、Guest Additions とは関係が無い |
+
+- 検証の後、ホストの `~/vbox-ga-mok` と `<none>`（`podman image prune -f`）は手で消した。VM の MOK は登録したまま（前の回の鍵と合わせて 2 つ）で、VM の `/var/lib/shim-signed/mok/MOK.der` も残した
+- WSL の `openssl` と、`~/.ssh/known_hosts` の VM の行は残した
+
+#### 未確認事項
+
+- AlmaLinux 10 のホスト（ホストオンリーアダプターが `vboxnet0`）でのビルドと運び方
+- Secure Boot が無効の VM（ホストに鍵が無く、署名しないビルド）
+- ベースやカーネルが新しくなる更新、[更新](#更新)の手順 1（Guest Additions の版が変わるとき）
+- ホストオンリーの節の手順 6 で「すでにある」と出たときの手作業
+- 元に戻した後に、VM をインターネットにつないでレジストリを追い直すこと
+- GNOME の端末から `udisksctl mount -b /dev/sr0` を実行したときに、パスワードを聞かれないか
+- keepalive を送らないときに、VM での取り込みや切り替えの間に VM が止まるか
+- MOK の削除と、ホストの鍵の削除の順（[ロールバック](#ロールバック)のリード）
