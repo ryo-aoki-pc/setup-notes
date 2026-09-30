@@ -12,6 +12,7 @@
 - 手順 1 はオンラインのホストのシェルで貼る。手順 2 の後は、ログインしたオフラインのホストのシェルで上から順に貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: ほかの Homebrew 系の手順書（[bat](bat.md) など）は、手順 1〜3 でトンネルを張ったシェルで貼る。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- Neovim の Mason に npm のパッケージを入れるなら、手順 7 の前に、このシェルで [npm-offline.md](npm-offline.md) を貼る（npm は `ALL_PROXY` を読まない）
 
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。オフラインのホストは、外に出られない Docker のネットワークだけにつないだコンテナ（[対象と検証環境](#対象と検証環境)）。
@@ -120,6 +121,7 @@
    - git は、`http.proxy` の設定も `https_proxy` も無いときに `ALL_PROXY` を使い、`socks5h` を解る。`GIT_TRACE_CURL=1 git ls-remote https://github.com/Homebrew/brew HEAD` の出力に `SOCKS5 connect to github.com:443 (remotely resolved)` が出た
    - Homebrew の `bin/brew` は、環境変数を絞ってから動くが、`all_proxy` と `ALL_PROXY` は通す（307 行目: `http_proxy https_proxy ftp_proxy no_proxy all_proxy HTTPS_PROXY FTP_PROXY ALL_PROXY`）。`man brew` の「USING HOMEBREW BEHIND A PROXY」も、SOCKS5 のプロキシには `all_proxy` を使う例を挙げている
    - `https_proxy`（`HTTPS_PROXY`）や git の `http.proxy` が既に入っていると、curl と git はそちらを使う。`env | grep -i proxy` と `git config --get http.proxy` が何も出さないことを確かめておく
+   - npm は `ALL_PROXY` を読まない（`https_proxy` を読む。[npm-offline.md 手順 2](npm-offline.md#実施手順) の補足）
 
    **`sudo` は `ALL_PROXY` を引き継がない。** `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf に手順 4 の設定が要るのはこのため。
 
