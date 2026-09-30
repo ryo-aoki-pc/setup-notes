@@ -340,6 +340,7 @@
 
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - [WireGuard](wireguard.md)・[Samba](samba.md)・[Syncthing](syncthing.md)・[Dropbox](dropbox.md)・[Dropbox（rclone）](dropbox-rclone.md)・[GNOME Remote Desktop](gnome-remote-desktop.md) のホストは、眠るとサービスが止まる
+  - [GNOME Remote Desktop のデスクトップ共有](gnome-remote-desktop-sharing.md)は、画面がロックされると止まる（同書の注意点）。同書は手順 1・2 を前提にしている
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
   - 下表の 2 つのコンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜6 と[ロールバック](#ロールバック)を通した
