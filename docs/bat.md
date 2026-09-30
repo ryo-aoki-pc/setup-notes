@@ -119,6 +119,8 @@
    printf '%s\n' "${MANPAGER}"
    ```
 
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ `MANPAGER` を読む）
+
 1. `fzf` を入れてあるときだけ、ファイル選択のプレビューにも bat を使う。
 
    ```bash

@@ -91,6 +91,7 @@
    - yazi をそのまま終了しても、シェルのディレクトリは動かない
    - 公式が案内しているこの関数を入れると、`q` で終了したときに移動先へ `cd` する
    - 元の場所で終わりたいときは `Q`
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ `y` 関数を読む）
 
    <details>
    <summary>補足: <code>y</code> 関数</summary>

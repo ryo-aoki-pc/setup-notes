@@ -60,6 +60,7 @@
    - **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）
    - `~/.bashrc` に [zoxide](zoxide.md) の初期化や端末のシェル統合（[wezterm-nightly.md](wezterm-nightly.md)）がある場合は、**それらより後ろ**に置く
    - **注意**: WezTerm のシェル統合の一部が失われる見込み（未検証）。順序とあわせて、この手順の補足を読む
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに端末を開き直してから手順 4 を貼る（その設定が starship を WezTerm のシェル統合と zoxide より前に読む。`. ~/.bashrc` で読み直すと、WezTerm のシェル統合より後ろになる）
 
    <details>
    <summary>補足: <code>~/.bashrc</code> の並びと WezTerm シェル統合</summary>

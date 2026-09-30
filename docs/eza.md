@@ -113,6 +113,7 @@
 
    - `alias ll='eza -l --git --group-directories-first'` のように 3 行出れば入っている
    - **`alias` の確認に `type -t` は使えない**（非対話シェルではエイリアスが展開されず、`type` が見つけられない。[補足](#補足)の[注意点](#注意点)を参照）
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `alias ll la lt` を実行する（その設定が、`EZA_OPTS` が既定の値のときと同じ 3 つを読む）
 
 ---
 

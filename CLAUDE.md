@@ -30,6 +30,7 @@ python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=..
 ## 構成
 
 - `README.md` — 手順書とツールを選ぶための一覧と記法。一覧は役割ごとの `###` 節に分け、節ごとの表の列で同じ役割の手順書を比べる（検証範囲の列は置かない）。手順書を足すときは役割の合う節の表に行を足し（合う節が無ければ節を足す）、導入元・設定の置き場所など表に載せた値を変えたときも直す。導入元一覧（`docs/tool-catalog.md`）のツールは、手順書の表の後ろに置く 2 つ目の表（`手順書の無いツール` / 用途 / 導入元）に役割で振り分けて 1 行ずつ載せ、名前は導入元一覧のその行がある節へリンクする（手順書の無い役割は、この表だけの節にする。手順書を作ったツールは手順書の表へ移す）。版は載せない（導入元一覧だけで管理する）。詳しい知見は各手順書の「補足」に置く
+- `~/.bashrc` に書く手順（homebrew.md 手順 3・zoxide.md 手順 6・starship.md 手順 3・yazi.md 手順 3、eza.md / gdu.md / bat.md / neovim.md / podman.md の任意節の手順 1）は、自分用の bash の設定（`ryo-aoki-pc/bash`。非公開。`~/.config/bash` に clone して `~/.bashrc` の 1 行で読む）にもまとめてある。これらの手順の箇条書きに「その設定を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する」を置く（starship.md だけは、読み直すと WezTerm のシェル統合より後ろになるので「端末を開き直す」）。`~/.bashrc` に書く行を変えた・足したとき（手順書を足したときも）は、その設定の `bashrc`・`migrate/old-lines.txt`・README の「読むもの」も直す。README の「手順書とツール」のリードにも、この設定への案内がある
 - `docs/gnome-remote-desktop.md` — 変数ブロックを冒頭に置き、以降のコマンドをそのまま貼れる形式
 - `docs/wireguard.md` — `wg-vpn.sh` を主役にした手順書。`site.env` に値を書き、`keygen` → `apply` → `router` → `client add` の順
 - `docs/wezterm-nightly.md` — 公式 COPR の EL9 向けビルドを chroot 明示で EL10 に入れる手順。採用しなかった経路（GitHub rpm / AppImage / Flathub / ソース）の実測も補足に残す。「設定ファイル」の節から自分用の設定（`ryo-aoki-pc/wezterm`）の導入手順書 `docs/install.md`（この文書群と同じ書式で、検証範囲は同書の状態行）と README へリンクで案内する（clone のコマンドは載せない。RPM の `/etc/profile.d/wezterm.sh` があると設定のシェル統合が完了通知を出さないことも書いた）

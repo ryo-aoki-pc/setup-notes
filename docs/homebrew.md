@@ -97,6 +97,7 @@
 
    - `Homebrew 7.0.6` のように出れば通っている
    - 1 行目で `~/.bashrc` に書き、2 行目で今のシェルにも即時に反映している
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `brew --version` を実行する（その設定が同じ 1 行を読む）
 
    <details>
    <summary>補足: <code>~/.bashrc</code> に書く 1 行</summary>

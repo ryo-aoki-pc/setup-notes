@@ -85,6 +85,7 @@
    - `sudo` 経由のエディタ（`sudoedit`、`visudo`）は root の PATH を使うので、Homebrew 版の `nvim` は見えない
    - 必要なら `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
    - root のシェル（`su -`、root のログイン、`sudo -i`）で `nvim` を使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す。root の Neovim は `/root/.config/nvim` を読む
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ 3 行を読む）
 
 ---
 
