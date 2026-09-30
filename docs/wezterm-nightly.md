@@ -143,6 +143,7 @@
 
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は次の順で探し、**最初に見つかった 1 つだけ**を読む（[補足: 設定ファイルの探索順序](#設定ファイルの探索順序実測)）
+- 作者の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を使うなら、この節の手順 1 は貼らず、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md) で入れる（`~/.config/wezterm` への clone と、`~/.bashrc` のシェル統合）
 
 | 優先 | 場所 | 用途 |
 |---|---|---|
