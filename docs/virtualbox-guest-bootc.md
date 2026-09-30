@@ -513,11 +513,11 @@
 
 - VM のネットワークが VirtualBox のホストオンリーアダプターだけで、VM からインターネットに出られないときに、[手順 6](#実施手順) の代わりに行う。手順 1〜5 と、手順 7 から後はそのまま
   - そのままの手順 6 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
-- ホスト（VirtualBox を動かしている PC）がインターネットに出られることが前提
-  - ホストから VM に `ssh -R 1080` でログインすると、VM の中の `127.0.0.1:1080` に SOCKS の待ち受けができ、ホストを出口にして外に出られる（[homebrew-offline.md](homebrew-offline.md) と同じ仕組み）
+- **前提**: ホスト（VirtualBox を動かしている PC）がインターネットに出られること。この節の手順 2 で、[ssh-socks-tunnel.md](ssh-socks-tunnel.md) のトンネルをホストから VM に張る（オンラインのホストはホスト、オフラインのホストは VM）
+  - VM の中の `127.0.0.1:1080` に SOCKS の待ち受けができ、ホストを出口にして外に出られる
   - ビルドのときだけ、podman とビルドの中の dnf にこの待ち受けを使わせる。Containerfile、ベースのイメージの署名の検査、MOK の鍵の置き場所は、手順 6 と変わらない
-- この節の手順 2 はホストの端末で行い、この節の手順 1・3・4・5 は VM の端末に貼る（VM の端末では、先に[手順 1](#実施手順) を貼っておく）
-- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#更新)の手順 2 の代わりに、この節の手順 2〜4 でビルドし直す。元のイメージに戻すときは、この節の手順 5
+- この節の手順 1・3・4 は VM の端末に貼る（VM の端末では、先に[手順 1](#実施手順) を貼っておく）。この節の手順 2 は、ホストの端末と、ssh でログインした VM のシェルで行う
+- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#更新)の手順 2 の代わりに、この節の手順 2・3 でビルドし直す。元のイメージに戻すときは、この節の手順 4
 
 1. VM の端末で、ホストオンリーアダプターの IP を見る。
 
@@ -525,7 +525,7 @@
    ip -4 -br addr show scope global
    ```
 
-   - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この節の手順 2 で使う `<VM_IP>`
+   - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この節の手順 2 で使う VM の IP（`<VM_IP>`）
    - 何も出ないときは、有線の接続が上がっていない。`nmcli -t -f NAME,DEVICE connection show` で接続の名前を見て、`sudo nmcli connection up <名前>` で上げる
      - ISO のインストーラでネットワークを有効にしなかった VM は、起動しても自動では上がらない（[実施前の状態](#実施前の状態)）。`sudo nmcli connection modify <名前> connection.autoconnect yes` で自動にする
 
@@ -542,43 +542,24 @@
 
    </details>
 
-1. ホストの端末で、VM にトンネルを張ってログインする。
+1. ホストから VM へ、[ssh-socks-tunnel.md 手順 1〜3](ssh-socks-tunnel.md#実施手順) でトンネルを張る。
 
-   - `ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 <USER>@<VM_IP>` を打つ（`<USER>` は VM のユーザー名、`<VM_IP>` は、この節の手順 1 の IP）
-   - Windows のホストでは、PowerShell か cmd に同じ 1 行を打つ（Windows に最初から入っている OpenSSH のクライアントで確かめた）
-   - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
-   - VM のプロンプトが出たら、このウィンドウは開いたままにする（閉じるか、VM が再起動すると、トンネルが消える）
+   - 同書の手順 1 の `OFFLINE_HOST` は、この節の手順 1 の IP、`OFFLINE_USER` は VM のユーザー名にする
+   - Windows のホストでは、同書の手順 1 を飛ばし、手順 2 の箇条書きのとおり、PowerShell か cmd に 1 行を打つ
+   - 同書の手順 3 は、ssh でログインした VM のシェルに貼る（`127.0.0.1:1080` の `LISTEN` の行と `200` が出ればよい）
+   - ssh のウィンドウは開いたままにする（閉じるか、VM が再起動すると、トンネルが消える）
    - **注意**: トンネルがある間は、VM の中のどのユーザーのプロセスも、ホストを出口にして外に出られる
-   - **次の手順は、VM の端末に戻って貼る**
+   - **次の手順は、VM の端末（[手順 1](#実施手順) を貼った端末）に戻って貼る**
 
    <details>
-   <summary>補足: <code>-R 1080</code> のトンネル</summary>
+   <summary>補足: VM へのトンネル</summary>
 
-   - `-R` にポートだけを渡すと、逆向きの動的転送になる（OpenSSH 7.6 から）。VM の sshd が VM の中にポートを開き、そこへの接続は SOCKS のプロキシとして、ホストの ssh から外へ出る
    - 待ち受けは、VM の sshd の `GatewayPorts` が既定の `no` なので、VM の中の `127.0.0.1:1080` と `[::1]:1080` だけ。ホストオンリーのネットワークのほかの VM からは使えない
-   - `ExitOnForwardFailure=yes` は、VM の 1080 番が使われていてトンネルを張れないときに、ログインせずに終わらせるため。`ControlPath=none` は、`~/.ssh/config` で接続の共有（`ControlMaster`）を使っているときに、転送が裏に残る接続に付いて、ログアウトしても待ち受けが残るのを避けるため（[homebrew-offline.md 手順 2](homebrew-offline.md#実施手順) の補足）
    - 検証では、Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）でトンネルを張った
      - VM の sshd のログでは、接続元はホストの `192.168.56.1` だった
      - VM が再起動すると、ホストの ssh は `Connection to <VM_IP> closed by remote host.` で終わり、VM の `127.0.0.1:1080` の待ち受けも消えた
-   - トンネルはホストの Windows の外向きの接続なので、Windows の受信の規則は要らない
-
-   </details>
-
-1. VM の端末で、トンネルを通って外に届くかを確かめる。
-
-   ```bash
-   ss -ltn 'sport = :1080'
-   curl -sS -o /dev/null -w '%{http_code}\n' -x socks5h://127.0.0.1:1080 https://quay.io/v2/
-   ```
-
-   - `127.0.0.1:1080` の `LISTEN` の行と、`401` が出ればよい（quay.io のレジストリに届き、認証を求められた）
-   - `ss` が何も出さないなら、この節の手順 2 のログインが切れている。張り直す
-
-   <details>
-   <summary>補足: <code>socks5h</code> の <code>h</code></summary>
-
-   - `socks5h` の `h` は、名前をプロキシの側（ホスト）で引く指定。VM は外の名前を引けないので、`h` を落とすと届かない
-   - 検証の VM で `-x socks5://127.0.0.1:1080` にすると、`curl: (97) Could not resolve host: quay.io` で失敗した
+   - 検証では、VM の端末で `ss -ltn 'sport = :1080'` が `127.0.0.1:1080` の `LISTEN` の行を出し、`curl -sS -o /dev/null -w '%{http_code}\n' -x socks5h://127.0.0.1:1080 https://quay.io/v2/` が `401` を返した（quay.io のレジストリに届き、認証を求められた。当時はこの節の手順 3 だった）
+     - `-x socks5://127.0.0.1:1080` にすると、`curl: (97) Could not resolve host: quay.io` で失敗した
 
    </details>
 
@@ -593,7 +574,7 @@
    ```
 
    - [手順 6](#実施手順) と同じ行が出ればよい（`Storing signatures`、3 つのモジュールの行、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest`）
-   - 続けて [手順 7](#実施手順) から先を行う。手順 7 の再起動で、この節の手順 2 のログインとトンネルは切れる
+   - 続けて [手順 7](#実施手順) から先を行う。手順 7 の再起動で、この節の手順 2 のトンネルは切れる
    - `proxyconnect tcp: dial tcp 127.0.0.1:1080: connect: connection refused` や `Failed to connect to 127.0.0.1 port 1080` で止まったら、この節の手順 2 のトンネルが切れている。張り直してから貼り直す
    - **[手順 7](#実施手順) は、`sudo` のパスワードに答え、`Successfully tagged` が出てから貼る**
 
@@ -671,7 +652,7 @@
 - OS（ベースのイメージ）を上げる: この節の手順 2・3。カーネルが変わっても、同じ手順でモジュールが作り直される
   - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この節の手順 2 は、レジストリにあるものを取り込む）
 - ホストの VirtualBox を上げた（Guest Additions の版が変わった）: この節の手順 1 から
-- ホストオンリーアダプターだけの VM では、この節の手順 2 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 2〜4 でビルドし直す
+- ホストオンリーアダプターだけの VM では、この節の手順 2 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 2・3 でビルドし直す
 - Secure Boot の鍵を作り直したときは、この節の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
 
@@ -701,7 +682,7 @@
 
 ## ロールバック
 
-- ホストオンリーアダプターだけの VM では、この節の手順 1 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 5 を行う（元のイメージの取り込みにトンネルが要る）
+- ホストオンリーアダプターだけの VM では、この節の手順 1 の代わりに、[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 4 を行う（元のイメージの取り込みにトンネルが要る）
 - `sudo bootc rollback` の後に再起動すると、1 つ前のデプロイメントに戻る
   - 更新を重ねた後は、1 つ前の派生イメージに戻るだけだった（VM で確認）
   - 切り替えた直後なら、元のイメージに戻った（kernel-rt のイメージの VM で確認。もう一度 `sudo bootc rollback` すると、派生イメージに戻った）
@@ -832,10 +813,11 @@
     - 確認したこと: 既定のカーネルのイメージで、直した Containerfile のビルド（署名あり・なし）、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService、Windows とのクリップボードの両方向、ウィンドウの大きさへの追従、Windows のフォルダーとの共有フォルダーの読み書き、切り替えた直後の `bootc rollback`
     - 見つかったこと: Hyper-V の上では、手順 6 の途中で VM が 1〜7 分ずつ止まる（リードの WARNING）。既定のカーネルでも `vboxguest` の読み込みの直後に警告が出て、1 度は起動が止まった（[手順 8](#実施手順) の補足）
   - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）
-    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 7・8・10、[更新](#更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](#ロールバック)の手順 2・3。Secure Boot は有効
+    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の当時の手順 1〜4、手順 7・8・10、[更新](#更新)の手順 3（その節の手順でビルドし直した後の、変わらないとき）、その節の当時の手順 5、[ロールバック](#ロールバック)の手順 2・3。Secure Boot は有効
+      - その節の当時の手順 2・3（トンネルを張る・VM の端末で quay.io に届くかを見る）は、今はその節の手順 2（[ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3）。当時の手順 4・5 は、今の手順 3・4
     - トンネルは Windows の `ssh.exe` で張った。ただし、自動で流すために鍵でログインし、シェルを開かない `-N` を付けた
     - 確認したこと: トンネル越しのベースの取り込み（署名の検査あり）とビルドの中の dnf（AlmaLinux のミラーと EPEL）、MokManager での登録、モジュールの読み込み、ネットワークの無い VM での VBoxService の時刻の同期、トンネル越しの元のイメージへの切り替え
-    - その節の手順 4 の補足の実測（`socks5` と `socks5h`、`ALL_PROXY` だけ、`export` の後の `sudo`、`--network=host` 無し、トンネルが切れているとき）も、この VM で確かめた
+    - その節の手順 3 の補足の実測（`socks5` と `socks5h`、`ALL_PROXY` だけ、`export` の後の `sudo`、`--network=host` 無し、トンネルが切れているとき）も、この VM で確かめた
     - 見つかって直したこと: インストールに使った ISO がドライブに残っていると、手順 4 で CD を入れられない（[手順 4](#実施手順) の箇条書き）
 
 | 項目 | VirtualBox の VM（本実行） | Windows のホストの VM（本実行） | 検証環境（コンテナ） |
@@ -999,7 +981,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - 動いている VM に CD を入れる操作とは関係が無かった（電源から入れ直した VM でも止まった）。止まらない回もあった
   - 検証では、ホストから VM へ 1 秒ごとに SSH の keepalive を送り続けると、ビルドの出力は止まらずに進んだ（仮想の時計の遅れは、その間にも 1 度 60 秒になった）
   - Hyper-V を止めた Windows（VirtualBox が AMD-V・VT-x を直接使う形）は試していない
-- **ホストオンリーアダプターだけの VM では、ホストからのトンネルでビルドする**: ビルドのコマンドの前に `http_proxy` と `https_proxy` を置き、`--network=host` を足す。どちらかが欠けると、ベースの取り込みかビルドの中の dnf が止まる（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 4 の補足）
+- **ホストオンリーアダプターだけの VM では、ホストからのトンネルでビルドする**: ビルドのコマンドの前に `http_proxy` と `https_proxy` を置き、`--network=host` を足す。どちらかが欠けると、ベースの取り込みかビルドの中の dnf が止まる（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3 の補足）
   - OS を上げるときと、元のイメージに戻すときも、トンネルが要る。切り替えた後の `bootc upgrade` と、派生イメージへの `bootc switch` には要らない
 - **インストールに使った ISO が残っていると、Guest Additions の CD を入れられない**: VM の中で `eject /dev/sr0` してから入れる（[手順 4](#実施手順)）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 3](#実施手順) の補足）
@@ -1530,25 +1512,25 @@ Secure Boot が有効の回では、続けて次を流した。
 | 手順 5 | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
 | そのままの手順 6 | `Error: creating build container: unable to copy from source docker://quay.io/almalinuxorg/atomic-desktop-gnome:latest: initializing source …: pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io on [::1]:53: read udp [::1]:<PORT>->[::1]:53: read: connection refused` |
 | ホストオンリー 1 | `enp0s3  UP  192.168.56.102/24`。ホストの `VBoxManage dhcpserver findlease --interface='VirtualBox Host-Only Ethernet Adapter' --mac-address=<MAC>` も `IP Address:  192.168.56.102` |
-| ホストオンリー 2 | `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` の後、つながったまま。VM の sshd のログは `Accepted publickey for <USER> from 192.168.56.1` |
-| ホストオンリー 3 | `127.0.0.1:1080` と `[::1]:1080` の `LISTEN`、`401`。手順書の外で `-x socks5://…` にすると `curl: (97) Could not resolve host: quay.io`（`000`） |
-| ホストオンリー 4 | 約 7 分半。`sudo` は、その前のコマンドの記憶で聞かれなかった。ベースは `Trying to pull` → `Storing signatures`。ビルドの中の dnf は AppStream・BaseOS・CRB・Extras と `Extra Packages for Enterprise Linux 10 - x86_64` のメタデータを取り、`libXt` と 15 パッケージを入れた。`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ、`installer exit=1`、3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
+| ホストオンリー 2（ssh-socks-tunnel.md 2） | `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` の後、つながったまま。VM の sshd のログは `Accepted publickey for <USER> from 192.168.56.1` |
+| 当時のホストオンリー 3（今はホストオンリー 2 の補足） | `127.0.0.1:1080` と `[::1]:1080` の `LISTEN`、`401`。手順書の外で `-x socks5://…` にすると `curl: (97) Could not resolve host: quay.io`（`000`） |
+| ホストオンリー 3 | 約 7 分半。`sudo` は、その前のコマンドの記憶で聞かれなかった。ベースは `Trying to pull` → `Storing signatures`。ビルドの中の dnf は AppStream・BaseOS・CRB・Extras と `Extra Packages for Enterprise Linux 10 - x86_64` のメタデータを取り、`libXt` と 15 パッケージを入れた。`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ、`installer exit=1`、3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
 | 手順 7 | `Fetching layers` が 20 層、`Deploying: done (9 seconds)`、`Pruned images: 1`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 貼ってから 144 秒で再起動。ホストの ssh は `Connection to <VM_IP> closed by remote host.` で終わった |
 | MOK 6 | `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot`（前の付録と同じく、最初の画面をスクリーンショットの色で捉えた） |
 | 手順 8 | `vboxguest` の行、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`。ジャーナルの時刻が VM の起動の途中で 4 時間進み、VBoxService の時刻の同期がネットワーク無しで働いた。`rcu_sched_clock_irq` の `WARNING` は、この起動でも 1 回出た |
 | MOK 7・手順 10 | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
-| 更新（ホストオンリー 2〜4 → 更新 3） | トンネルを張り直し、ホストオンリーの節の手順 3 で `401`。ホストオンリーの節の手順 4 は `Using cache` が 4 行で同じイメージ ID。更新の手順 3 は `No changes in ostree-unverified-image:containers-storage:localhost/vbox-ga:latest => sha256:<DIGEST>` と `No update available.` |
-| ホストオンリー 5 | `Fetching layers` が `0/0`、`Deploying: done (8 seconds)`、`Queued for next boot: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260926.0）→ 30 秒で再起動。起動後の `bootc status` は `● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`、`Rollback image: containers-storage:localhost/vbox-ga:latest`、`vbox` のモジュールは 0 |
+| 更新（ホストオンリー 2・3 → 更新 3） | トンネルを張り直し、当時のホストオンリーの節の手順 3 で `401`。ホストオンリーの節の手順 3 は `Using cache` が 4 行で同じイメージ ID。更新の手順 3 は `No changes in ostree-unverified-image:containers-storage:localhost/vbox-ga:latest => sha256:<DIGEST>` と `No update available.` |
+| ホストオンリー 4 | `Fetching layers` が `0/0`、`Deploying: done (8 seconds)`、`Queued for next boot: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260926.0）→ 30 秒で再起動。起動後の `bootc status` は `● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`、`Rollback image: containers-storage:localhost/vbox-ga:latest`、`vbox` のモジュールは 0 |
 | ロールバック 2・3 | `Untagged:` が 2 行、`Deleted:` が 4 行、`<none>`（6.43 MB）が残った。手順 3 は無出力で、ユーザーと `/var/lib/VBoxGuestAdditions` が消えた。`/var` の使用量は 6.6G |
 
-手順書の外で確かめたこと（ホストオンリーの節の手順 4 の補足の実測）:
+手順書の外で確かめたこと（ホストオンリーの節の手順 3 の補足の実測）:
 
 | 試したこと | 結果 |
 |---|---|
 | `sudo ALL_PROXY=socks5h://127.0.0.1:1080 podman manifest inspect quay.io/almalinuxorg/atomic-desktop-gnome:latest` | `pinging container registry quay.io: … dial tcp: lookup quay.io on [::1]:53: … connection refused` |
 | 同じコマンドを `HTTPS_PROXY=…`・`https_proxy=…` で | どちらもマニフェストが取れた |
 | `export https_proxy=…` の後に `sudo podman manifest inspect …` | `lookup quay.io` で失敗（`sudo` が変数を渡さない） |
-| ホストオンリーの節の手順 4 から `--network=host` を外し、`--no-cache` で | ベースの確認は通り、`dnf -y install libXt` が `Curl error (7): … [Failed to connect to 127.0.0.1 port 1080 after 0 ms: Could not connect to server]` で止まった。残った `<none>` のイメージ 2 つは消した |
+| ホストオンリーの節の手順 3 から `--network=host` を外し、`--no-cache` で | ベースの確認は通り、`dnf -y install libXt` が `Curl error (7): … [Failed to connect to 127.0.0.1 port 1080 after 0 ms: Could not connect to server]` で止まった。残った `<none>` のイメージ 2 つは消した |
 | トンネルを閉じた後に、`sudo https_proxy=… podman manifest inspect …` と `curl -x socks5h://127.0.0.1:1080 https://mirrors.almalinux.org/` | `proxyconnect tcp: dial tcp 127.0.0.1:1080: connect: connection refused` と `curl: (7) Failed to connect to 127.0.0.1 port 1080 after 0 ms: Could not connect to server` |
 | ミラーの一覧を `curl -x socks5h://127.0.0.1:1080` で取り、http:// のミラーの `repomd.xml` を、変数を 1 つずつ変えて `curl` で取る（元のイメージに戻した後に、トンネルを張り直して） | baseos と appstream の一覧は http:// だけが 10 個、EPEL の metalink は http と https が 10 個ずつ。`https_proxy` だけと `HTTP_PROXY` だけは `curl: (6) Could not resolve host: <ミラー>`、`http_proxy` はミラーに届いた |
 | `sudo sshd -T`、`firewall-cmd` | `allowtcpforwarding yes`・`gatewayports no`・`disableforwarding no`・`permitlisten any`・`passwordauthentication yes`。既定のゾーンは `public` で、サービスは `cockpit dhcpv6-client ssh` |

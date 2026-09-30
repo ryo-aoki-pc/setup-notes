@@ -6,7 +6,7 @@
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
 > - **実行するユーザーは `sudo` できる必要がある**（手順 1・2 で使う）
 > - **手順 2 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。終わってから手順 3 を貼る
-> - **インターネットに出られないホストでは、本書を直接貼らず [homebrew-offline.md](homebrew-offline.md) から通す**（ssh でログインしてくるホストをプロキシにして、そのシェルで本書の手順 1〜4 を貼る）
+> - **インターネットに出られないホストでは、本書を直接貼らず [homebrew-offline.md](homebrew-offline.md) から通す**（[ssh-socks-tunnel.md](ssh-socks-tunnel.md) でログインしてくるホストをプロキシにして、そのシェルで本書の手順 1〜4 を貼る）
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -289,6 +289,7 @@
    ```
 
    - 特定のものだけなら `brew upgrade <formula>`
+   - `[y/n]` と聞かれたら、`y` を押す（Enter は要らない。[注意点](#注意点)）
 
 ---
 
@@ -297,7 +298,7 @@
 - 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
 - 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
 - [root のシェルでも使う](#root-のシェルでも使う任意)の節を通したなら、先にその節の手順 3 で root の `~/.bashrc` の行を消す
-- インターネットに出られないホストでは、[homebrew-offline.md 手順 1〜3](homebrew-offline.md#実施手順) でトンネルを張ったシェルで貼る（この節の手順 1 がアンインストーラを取得する）
+- インターネットに出られないホストでは、[ssh-socks-tunnel.md 手順 1〜3](ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで貼る（この節の手順 1 がアンインストーラを取得する）
 
 > [!CAUTION]
 > **この節の手順 2 で本実行すると、Homebrew で入れたものが全部消える。** [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) 以下、`brew leaves` に出るものはすべて使えなくなる。
@@ -458,6 +459,9 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - **`sudo <tool>` が使えない**: root の `PATH` に Homebrew は入っていない
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[root のシェルでも使う](#root-のシェルでも使う任意)の節を通す
   - `sudo <tool>` のままなら、RPM で入れるか、フルパス（`/home/linuxbrew/.linuxbrew/bin/<tool>`）を渡す
+- **依存が付く `brew install` は、端末では `[y/n]` を聞く**（Homebrew 7.0.7 の ask mode）: 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞き、答えは Enter を待たずに 1 文字で読む（[homebrew-offline.md 手順 4](homebrew-offline.md#実施手順) の補足の実測）
+  - 同じブロックに後ろの行があると、その文字が答えとして読まれ、`n` で中止になる。各手順書の `brew install` は、`[y/n]` に答えてから次の手順を貼る
+  - Homebrew の説明では `brew upgrade` でも聞く（上げるものがあったときの表示は確かめていない）。聞かせないなら `HOMEBREW_NO_ASK=1`
 - **`~/.bashrc` を読まない文脈では見えない**: cron や一部の非対話シェルでは `brew shellenv` が走らないので、Homebrew で入れたコマンドが見つからない。スクリプトからはフルパスで呼ぶ
 - **ユーザーごとではなく、ホストに 1 つ**: `/home/linuxbrew` は共有なので、別ユーザーが使うにはそのユーザーの `~/.bashrc` にも `brew shellenv` を書く（書き込みには所有者の権限が要る）
 - **占有が大きい**: 実機で 2.8 GB。`brew cleanup` で古い版とキャッシュを掃除できる

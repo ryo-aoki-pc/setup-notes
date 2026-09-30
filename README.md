@@ -15,7 +15,7 @@
 ### 導入の基盤
 
 - RPM に無いか古いツールの入れ先。CLI とフォントは Homebrew、GUI アプリは Flathub
-- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/homebrew-offline.md)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
+- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/homebrew-offline.md)。トンネルは[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
@@ -23,7 +23,7 @@
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
 | [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルからも使える） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
-| [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから `ssh -R` で張った SOCKS のプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール |
+| [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 9〜12） |
@@ -40,6 +40,7 @@
 | 手順書 | すること | 変わるもの | これを前提にするもの |
 |---|---|---|---|
 | [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Podman の Quadlet（任意節） |
+| [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・VirtualBox Guest Additions の、ホストオンリーアダプターだけの VM でビルドする節 |
 | [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
 
 ### デスクトップ（GNOME）の設定
@@ -242,7 +243,7 @@
 - ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
   - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/secure-boot-mok.md)を先に行う（鍵はホストとは別）
   - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
-  - VM がホストオンリーアダプターだけでインターネットに出られないときは、ホストから `ssh -R 1080` でトンネルを張り、`http_proxy`・`https_proxy`（`socks5h://127.0.0.1:1080`）と `--network=host` を付けて VM の上でビルドする
+  - VM がホストオンリーアダプターだけでインターネットに出られないときは、ホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)（`ssh -R 1080`）を張り、`http_proxy`・`https_proxy`（`socks5h://127.0.0.1:1080`）と `--network=host` を付けて VM の上でビルドする
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
@@ -288,7 +289,7 @@
 - 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。コンテナのみで検証した手順書は、検証範囲を `> [!WARNING]` で示す
 - アラートは本文の最上位にだけ置く（GitHub は番号付きリストや折り畳みの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
 - コマンドは実行済みのものを載せ、未検証事項は明記する
-- 複数の手順書が共有する前提（Homebrew・Podman・EPEL・linger・Secure Boot の MOK など）は独立した手順書にし、各手順書の冒頭から参照する
+- 複数の手順書が共有する前提（Homebrew・Podman・EPEL・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は独立した手順書にし、各手順書の冒頭から参照する
 - [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。冒頭に状態と調査日を `> [!WARNING]` で置き、表の各行に確認の深さ（起動 / 導入 / メタデータ）を書く
 - 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない
