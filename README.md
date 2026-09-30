@@ -47,15 +47,13 @@
 
 ### デスクトップ（GNOME）の設定
 
-- どの手順書も GNOME のデスクトップが前提。画面オフと日本語入力は、自分のセッションの設定を、設定アプリと同じキーで `gsettings` で変える
+- どちらの手順書も GNOME のデスクトップが前提。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
 - 常時動かしておく PC（WireGuard・Samba・Syncthing・Dropbox のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
-- ヘッドレスのセッションは、モニターの無い PC に GNOME のデスクトップを常駐させ、同じ PC の上の Claude Code が画面を撮って操作する（GUI の動作を確かめる）。画面オフ・画面ロック・自動サスペンドの手順 1・2 が前提（サスペンドできる PC では手順 3〜5 も）
 
 | 手順書 | 変えるもの | 変える範囲 | 仕組み | 導入するもの |
 |---|---|---|---|---|
 | [画面オフ・画面ロック・自動サスペンド](docs/gnome-power.md) | 画面を消す・暗くする・ロックする、放置でのサスペンド、電源ボタン、蓋 | 自分のセッション、ログイン画面、OS 全体 | `gsettings`、dconf の `/etc/dconf/db/gdm.d`、`systemctl mask`、logind のドロップイン | 無し |
 | [日本語入力（IBus + Anthy）](docs/japanese-input.md) | 入力ソース（キーボードの配列と Anthy を Super+Space で切り替える） | 自分のセッション | `gsettings` の `org.gnome.desktop.input-sources` と IBus | `ibus-anthy` と日本語のフォント（Workstation には最初から入っている） |
-| [ヘッドレスのセッション（Claude Code で GUI を確かめる）](docs/gnome-headless-session.md) | モニターの無い PC に常駐させる GNOME のセッションと、その画面の撮影・キーボードとポインタの入力 | 自分のユーザー（PC の起動時から） | GDM の `gnome-headless-session@<USER>.service`、gnome-shell の `--virtual-monitor`（ユーザーのドロップイン）、Mutter の ScreenCast / RemoteDesktop（[`scripts/gnome-gui.py`](scripts/gnome-gui.py)） | 無し |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -66,6 +64,7 @@
 
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
 - GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
+- ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ（リモートログインと違い、つなぎ直しても同じデスクトップに戻る。同じ PC で併用できる）。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3〜5 も）
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
@@ -73,6 +72,7 @@
 | [WireGuard VPN](docs/wireguard.md) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
 | [WireGuard Road Warrior](docs/wireguard-road-warrior.md) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down` | 無し（PC の firewalld は変えない） |
 | [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（システムデーモン。GDM で新しいセッションを作る） | 3389/tcp |
+| [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -198,6 +198,7 @@
 |---|---|---|---|
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
 | [Claude Code](docs/claude-code.md) | Claude Code の CLI（Node.js 不要） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる） | `sudo dnf upgrade claude-code`（自動更新しない） |
+| [Claude Code で GUI を確かめる](docs/claude-code-gui.md) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|

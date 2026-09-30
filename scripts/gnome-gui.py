@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 """GNOME のセッションの画面を撮り、キーボードとポインタの入力を送る。
 
-docs/gnome-headless-session.md で常駐させた GNOME のセッションを、同じユーザーの
-シェル（SSH など）から扱う。Claude Code が GUI の動作を確かめるときに使う。
+docs/gnome-headless-session.md で常駐させ、docs/claude-code-gui.md で仮想モニターを付けた
+GNOME のセッションを、同じユーザーのシェル（SSH など）から扱う。Claude Code が GUI の
+動作を確かめるときに使う。
 使うのは Mutter の公式の D-Bus API で、GNOME Shell の unsafe mode は要らない。
 
   shot FILE.png [--no-cursor]  画面を PNG にする（ScreenCast → PipeWire → GStreamer）
@@ -77,7 +78,7 @@ def primary_connector():
     if logical and logical[0][5]:
         return logical[0][5][0][0]
     sys.exit('中断: モニターが 1 枚も無い。gnome-shell に --virtual-monitor が付いていない'
-             '（docs/gnome-headless-session.md の手順）')
+             '（docs/claude-code-gui.md の手順）')
 
 
 def start_and_wait(session_path, session_iface, stream_path):

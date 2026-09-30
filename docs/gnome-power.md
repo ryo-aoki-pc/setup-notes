@@ -352,7 +352,8 @@
 
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - [WireGuard](wireguard.md)・[Samba](samba.md)・[Syncthing](syncthing.md)・[Dropbox](dropbox.md)・[Dropbox（rclone）](dropbox-rclone.md)・[GNOME Remote Desktop](gnome-remote-desktop.md) のホストは、眠るとサービスが止まる
-  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3〜5 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとし、ロックは画面の前にいない Claude Code には解けない
+  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3〜5 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
+  - [Claude Code で GUI を確かめる](claude-code-gui.md)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナで検証済み（2026-09-27）。手順 1・2 だけは aarch64 の実機（Raspberry Pi 5）で本実行した（2026-10-01）**
   - 下表の 2 つのコンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜6 と[ロールバック](#ロールバック)を通した
@@ -371,7 +372,7 @@
   - 2026-10-01: 手順 2 と[ロールバック](#ロールバック)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
     - ロールバックの手順 1 の、`/usr/bin/gsettings` にした形は流していない
   - 2026-10-01: 手順 1・2 を aarch64 の実機（Raspberry Pi 5）で本実行した（[付録](#付録-実機での検証記録2026-10-01)）
-    - [gnome-headless-session.md](gnome-headless-session.md) の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
+    - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](gnome-headless-session.md) と [claude-code-gui.md](claude-code-gui.md) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
     - 読み戻しは[完了時点の状態](#完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
     - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとしなかった（手順 2 の前は、15 分でしようとした）
     - 手順 3〜6 とロールバックは、実機では流していない
@@ -532,7 +533,7 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 
 **環境**: Raspberry Pi 5（aarch64）の AlmaLinux 10.2。モニターはつながっておらず、[gnome-headless-session.md](gnome-headless-session.md) のヘッドレスのセッションを動かした（表の「実機」の列）。PATH の先頭は Homebrew で、`command -v gsettings` は `/home/linuxbrew/.linuxbrew/bin/gsettings`（glib 2.90.0）だった。
 
-**流し方**: gnome-headless-session.md の検証の中で、この文書の手順 1・2 のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま書き込んだ。1 回目はブラケットペースト無し、2 回目はブラケットペーストで貼った（同書の[付録](gnome-headless-session.md#付録-実機での検証記録2026-10-01)）。
+**流し方**: GNOME のヘッドレスのセッションの手順書（分ける前の版）の検証の中で、この文書の手順 1・2 のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま書き込んだ。1 回目はブラケットペースト無し、2 回目はブラケットペーストで貼った（その記録は、今の [claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。
 
 | 手順 | 結果 |
 |---|---|
