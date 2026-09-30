@@ -115,7 +115,7 @@
 
    引数なしだと `brew` が親プロセスからシェルを推測する。bash を使っている限り結果は同じなので実機はそのままにしてある。**明示したほうが確実**なので、本書はインストーラの案内どおり `bash` 付きで書いている。
 
-   この 1 行を `~/.bashrc` の**どこに置くか**は問わない（`PATH` を触るだけで `PROMPT_COMMAND` には触らない）。[zoxide](zoxide.md) や [starship](starship.md) の初期化とは違って、順序の制約は無い。
+   この 1 行は、Homebrew で入れたコマンドを使う行（[zoxide](zoxide.md) や [starship](starship.md) の初期化など）より前に置く。それらは、この 1 行が足した `PATH` からコマンドを探すので、後ろにあると `command not found` になる。`PROMPT_COMMAND` には触らないので、ほかの行との順序の制約は無い。
 
    </details>
 
