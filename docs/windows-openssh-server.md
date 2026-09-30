@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > - **手順 1〜7 は Windows で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2〜7 をそこに貼る
 > - **手順 8・9 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
-> - SSH でログインするのは、手順 2〜7 を貼る Windows のユーザー自身。パスワードは、そのユーザーの Windows のパスワード（Microsoft アカウントなら、そのアカウントのパスワード）。検証したのは Administrators の一員のユーザーだけ（標準ユーザーは[注意点](#注意点)）
+> - SSH でログインするのは、この PC の Windows のユーザー。パスワードは、そのユーザーの Windows のパスワード（Microsoft アカウントなら、そのアカウントのパスワード）。Administrators の一員でないユーザーも入れる（[注意点](#注意点)）
 > - **手順 9 には対話入力がある**（ホスト鍵の確認とパスワード）
 
 - 上から順にコードブロックを貼る。Windows の手順は手順 2 で変数を設定した PowerShell に、クライアントの手順は手順 8 で変数を設定したシェルに貼る
@@ -191,6 +191,7 @@
    - `<WIN_USER>@<WIN_HOST>'s password:` で、Windows のユーザーのパスワードを入れる（Microsoft アカウントなら、そのアカウントのパスワード。PIN ではない）
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
    - `exit` でクライアントのシェルに戻る
+   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（検証した PC は 10 回で 10 分。[注意点](#注意点)）
    - **後ろの節を貼るのは、`exit` でクライアントのシェルに戻ってから**（続けて貼ると Windows の cmd への入力として食われる）
 
    <details>
@@ -201,6 +202,7 @@
    - 指紋が手順 7 と違えば、`no` で止める。途中の経路で別の相手につながっている
    - Windows のイベント ビューアーの「アプリケーションとサービス ログ」→「OpenSSH」→「Operational」に、`sshd: Accepted password for <WIN_USER> from <IP> port <PORT> ssh2` が残る。PowerShell では `Get-WinEvent -LogName OpenSSH/Operational -MaxEvents 10`
    - 検証した PC のユーザーは Microsoft アカウントで、設定の「Windows Hello サインインのみを許可する」がオンのまま、そのアカウントのパスワードで入れた（[注意点](#注意点)）
+   - ローカル アカウントの標準ユーザーでも、このブロックのまま（`WIN_USER` だけ直して）入れた。`whoami /groups` の `Mandatory Label` は `Medium Mandatory Level` だった
 
    </details>
 
@@ -545,31 +547,38 @@
     - 当時は、手順 7 の後に鍵で対話のログインをしていた（今の手順 9 は、パスワードでのログインに変えた）
     - scoop の任意節は、その後に原因を調べて足し、同じ PC で通した
     - ロールバックで実施前の状態に戻した後、当時の文書から機械的に抜き出したブロックで、同じ範囲（ロールバックを除く）をもう 1 度通した
-  - 2026-09-30（今の版）:
-    - 2026-09-29 の後の PC（パスワード認証を切り、鍵を登録してあった）に、手順 2・6 を流し、`PasswordAuthentication` を `no` から `yes` にした
-    - 文書を書き直した後に、この文書から抜き出した手順 2〜5・7 のブロックを流した（何も変わらなかった）。抜き出した手順 6 は先に流したものと同じ行で、2 回目は sshd を再起動せず、`sshd_config` の写しで結果が変わらないことだけ確かめた
-    - パスワードでのログインは、利用者がスマートフォンの SSH のアプリから、WireGuard 越しに行った。手順 8・9 のブロックそのものは流していない
-    - WSL の AlmaLinux 10 から、公開鍵の任意節の手順 5 を流した
-    - 新しい PC で手順 1 から通してはいない
-  - コードブロックは端末に貼らず、Claude Code から昇格した Windows PowerShell 5.1 と、WSL の bash に、手順ごとのスクリプトにして渡した（付録）
+  - 2026-09-30 の 1 回目（今の版を、2026-09-29 の後の PC に適用）:
+    - パスワード認証を切り、鍵を登録してあった PC に、手順 2・6 を流し、`PasswordAuthentication` を `no` から `yes` にした
+    - 書き直した文書から抜き出した手順 2〜5・7 を流した（何も変わらなかった）。手順 6 の 2 回目は、スマートフォンのセッションが切れた後に流し、出力も `sshd_config` のハッシュも変わらなかった
+    - パスワードでのログインは、利用者がスマートフォンの SSH のアプリから、WireGuard 越しに行った（Microsoft アカウントのパスワード）
+  - 2026-09-30 の 2 回目（今の版を、実施前の状態から通した）:
+    - `C:\ProgramData\ssh`（アクセス権ごと）と `HKLM:\SOFTWARE\OpenSSH`、WSL の `known_hosts` を控えてから、ロールバックの手順 1〜4 で実施前の状態にした
+    - この文書から抜き出したブロックで、手順 2〜9、公開鍵の任意節の手順 1〜5、パスワード認証を切る任意節の手順 1・2、戻すための手順 6 を通した
+    - 手順 8・9 は、試験用に作ったローカル アカウントの標準ユーザーで流した（`WIN_USER` を直した）。検証した PC のユーザー（Microsoft アカウント）のパスワードは、OpenSSH の `ssh` では流していない
+    - 公開鍵の任意節は、WSL に作った試験用の Linux ユーザーで、パスフレーズ付きの鍵を新しく作って通した
+    - 試験用のユーザーで、ロックアウトを確かめた
+    - 最後に、控えからホスト鍵・登録した鍵・`DefaultShell`・`known_hosts` を戻し（ハッシュとアクセス権が控えと一致）、試験用のユーザーを消した（Windows のプロファイルのフォルダーは、読み込まれたまま外れず、残った。付録）
+  - コードブロックは端末に貼らず、Claude Code から昇格した Windows PowerShell 5.1 と、WSL の bash に、手順ごとのスクリプトにして渡した。手順 1（PowerShell を開く）は、その形で代えた（付録）
   - 確認したこと:
     - 機能の導入（8〜9 分、再起動無し）、sshd の自動起動の設定と待ち受け
     - LAN の接続がパブリックのままでは LAN の IP あての接続が捨てられ、プライベートにすると通ること
-    - Microsoft アカウントのパスワードでのログイン（「Windows Hello サインインのみを許可する」がオンのまま）と、WireGuard のクライアントのアドレスからの接続
-    - 公開鍵でのログイン（cmd と Git Bash）、ホスト鍵の指紋の照合、パスワード認証を切った後に `Permission denied` ですぐ終わること
-    - SSH のセッションが管理者の権限（High Mandatory Level）を持つこと（2026-09-29 に確かめた）
+    - 手順 6 の後の `sshd_config` が、既定の `sshd_config` から作っても、`no` にしてあったものから作っても、同じになること
+    - パスワードでのログイン: ローカル アカウントの標準ユーザー（手順 8・9 のブロック、cmd）と、Microsoft アカウント（スマートフォンのアプリ。「Windows Hello サインインのみを許可する」がオンのまま）。WireGuard のクライアントのアドレスからの接続
+    - 公開鍵でのログイン（cmd と Git Bash、パスフレーズ付きの鍵を新しく作る流れも）、ホスト鍵の指紋の照合、パスワード認証を切った後に `Permission denied` ですぐ終わること、手順 6 で戻ること
+    - Administrators の一員のセッションは High Mandatory Level（2026-09-29 に確かめた）、標準ユーザーのセッションは Medium Mandatory Level
+    - ロックアウト: ローカル アカウントでは、SSH のパスワードの失敗も数えられ、10 回目でロックされること
+    - Windows の再起動の後に sshd が自動で起動すること（利用者が 2 回起動し直したときのログ）
     - Git Bash での `git`・`scp`・`scp -O`・`sftp`、`DefaultShell` を消すと cmd に戻ること
     - SSH のセッションで scoop のツールが起動しない原因（sshd の RedirectionGuard）と、ジャンクションを管理者で作り直すと起動すること（scoop の任意節。一般ユーザーで作り直して壊した状態から、この文書のブロックで直した）
     - ロールバックの後に残るもの（`C:\ProgramData\ssh` とレジストリのキー）と、消した後に入れ直せること
     - 変数が空のとき・PowerShell 7 で貼ったときに、手順 3、公開鍵の任意節の手順 4、パスワード認証を切る任意節の手順 2、ロールバックの手順 4 が何も変えずに止まること
   - **確認していないこと**:
-    - 手順 8・9 のブロックを OpenSSH の `ssh` で流して、パスワードで入ること（入ったのはスマートフォンのアプリ）
-    - LAN の別の PC からの接続（WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](#注意点)）
+    - Microsoft アカウントのパスワードで、手順 8・9 のブロック（OpenSSH の `ssh`）から入ること
+    - LAN の別の PC から、この文書の手順で入ること（利用者の公開鍵での接続は、LAN の別の IP からもログに残っていた。WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](#注意点)）
     - 端末に貼る操作そのもの（PowerShell の PSReadLine での複数行の貼り付け、bash の対話の入力）
-    - 公開鍵の任意節の手順 1 で鍵を新しく作ること（WSL に前からあったパスフレーズ無しの鍵を使った）と、パスフレーズ付きの鍵
-    - 標準ユーザーでのログイン、ローカル アカウントのパスワードでのログイン、既定の UAC の設定での振る舞い
-    - パスワードを続けて間違えたときのロックアウト
-    - Windows の再起動の後に sshd が自動で起動すること、Windows Update での OpenSSH の更新
+    - 標準ユーザーの鍵での認証（`authorized_keys`）、既定の UAC の設定での振る舞い
+    - Microsoft アカウントのロックアウト
+    - Windows Update での OpenSSH の更新
   - 実測の記録は[付録（2026-09-29）](#付録-実機での検証記録2026-09-29)と[付録（2026-09-30）](#付録-パスワード認証の検証記録2026-09-30)
 
 下表は実機で採取した値。
@@ -587,7 +596,8 @@
 | アカウントのロックアウト | `net accounts` で、10 回の失敗で 10 分（観測期間 10 分） |
 | ネットワーク | 有線 LAN 1 本（IPv4、/24）。2026-09-29 の手順の前はパブリック |
 | クライアント（2026-09-29） | 同じ PC の WSL 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2、既定の NAT）の AlmaLinux 10.2。`openssh-clients-9.9p1-23.el10_2.alma.1` |
-| クライアント（2026-09-30） | パスワード: スマートフォンの SSH のアプリ（WireGuard のクライアント）。公開鍵: 上と同じ WSL |
+| クライアント（2026-09-30） | 1 回目のパスワード: スマートフォンの SSH のアプリ（WireGuard のクライアント）。ほかは上と同じ WSL（公開鍵の任意節は、WSL に作った試験用の Linux ユーザー） |
+| 試験用のユーザー（2026-09-30） | Windows のローカル アカウントの標準ユーザー（`Users` だけ）。WSL の Linux ユーザー。どちらも検証の後に消した（Windows のプロファイルのフォルダーは残った） |
 
 > [!NOTE]
 > 環境固有の値は**変数**で書いてある。Windows では手順 2 の PowerShell の変数に、クライアントでは手順 8 のシェル変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -622,7 +632,8 @@
 | `PATH` | ユーザーの `PATH` の先頭側に Git の `usr\bin` があり、`ssh`・`ssh-keygen`・`whoami` は Git のものが動く |
 | WSL | `AlmaLinux-10`（停止中）。`~/.ssh/id_ed25519`（パスフレーズ無し）が前からあった |
 
-- 2026-09-30 の今の版は、[完了時点の状態](#完了時点の状態)の PC（`PasswordAuthentication no`、鍵を 1 つ登録、既定のシェルは Git Bash、LAN はプライベート）から始めた
+- 2026-09-30 の 1 回目は、[完了時点の状態](#完了時点の状態)の PC（`PasswordAuthentication no`、鍵を 1 つ登録、既定のシェルは Git Bash、LAN はプライベート）から始めた
+- 2026-09-30 の 2 回目は、ロールバックの手順 1〜4 の後に、上の表の OpenSSH サーバー・`C:\ProgramData\ssh`・`HKLM:\SOFTWARE\OpenSSH`・受信の規則・22/tcp・LAN の接続（パブリック）が同じ状態になったことを確かめてから始めた（`C:\ProgramData\ssh` は空ではなく、無かった）
 
 ### 選択した方針
 
@@ -633,7 +644,7 @@
 - **パスワードで認証し、公開鍵は任意節にした**（手順 6 でパスワード認証を明示的に有効にする）
   - クライアントで鍵を作って Windows に登録しなくても、Windows のユーザーのパスワードだけで入れる。鍵を扱いにくいクライアント（スマートフォンのアプリなど）からも入れる
   - 受け付けるのは、プライベートにしたネットワークから届く接続だけ（手順 5）
-  - パスワードの総当たりへの備えは、Windows のアカウントのロックアウトのポリシー（検証した PC は 10 回で 10 分）。SSH での失敗が数えられるかは試していない
+  - パスワードの総当たりへの備えは、Windows のアカウントのロックアウトのポリシー（検証した PC は 10 回で 10 分）。ローカル アカウントでは、SSH での失敗も数えられ、10 回目でロックされた
   - 鍵で入れるようにしたら、パスワード認証を切れる（[パスワード認証を切る（任意）](#パスワード認証を切る任意)）。2026-09-29 の版は、この形（公開鍵だけ）を主にしていた
 - **LAN の接続をプライベートにし、規則は変えない**
   - 機能が作る規則は、プライベートのネットワークだけで有効。家の LAN をプライベートにすれば、規則を変えずに LAN から入れる
@@ -691,6 +702,7 @@ d----        logs
 - 管理者でない PowerShell からは、`icacls C:\ProgramData\ssh\administrators_authorized_keys` が `Access is denied.` になった（公開鍵の任意節の手順 4 のアクセス権が効いている）
 - `sshd_config` は、既定の 2297 バイトから、パスワード認証を切る任意節の手順 1 の 1 行の置き換えで 2 バイト減った
 - 2026-09-30 に手順 6 を流した後は、`sshd_config` の 51 行目が `PasswordAuthentication yes` になり、2296 バイト（既定から 1 バイト減）になった。ほかは上と同じ（`sshd.pid` だけ、プロセス ID の桁が増えて 7 バイト。[付録（2026-09-30）](#付録-パスワード認証の検証記録2026-09-30)）
+- 2026-09-30 の 2 回目の通しの後は、控えから `C:\ProgramData\ssh` と `DefaultShell` を戻したので、1 回目の後と同じ状態（ファイルのハッシュとアクセス権が一致）
 
 ### 注意点
 
@@ -702,11 +714,17 @@ d----        logs
   - ユーザー名は、Microsoft アカウントでもメールアドレスではなく、`C:\Users\` の下のフォルダーの名前（手順 7）。パスワードは、そのアカウントのパスワード（PIN ではない）
   - 検証した PC では、設定の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」がオンのまま、Microsoft アカウントのパスワードで入れた
   - この設定がオンだと、Microsoft アカウントのパスワードが sshd のログにエラー 1326 を残して拒否され、オフにして sshd を再起動すると通った、という報告がある（[参照](#参照)の Q&A）。検証した PC では起きなかった
-  - 検証した PC のロックアウトのポリシーは、10 回の失敗で 10 分。SSH のパスワードの失敗で数えられるかは試していない
+- **パスワードを続けて間違えたとき**（ローカル アカウントの標準ユーザーで試した）
+  - 検証した PC のロックアウトのポリシーは、10 回の失敗で 10 分（`net accounts`）
+  - SSH のパスワードの失敗も、1 回ずつセキュリティのログのイベント 4625（ログオンの種類 8、プロセスは `sshd.exe`）として数えられ、10 回目でロックされた（イベント 4740）
+  - ロック中は、正しいパスワードでも入れない。パスワードを聞かれる前に `Connection reset by <WIN_HOST> port 22` で切られ、sshd のログにも残らなかった
+  - ロックは 10 分で解け、正しいパスワードで入れた
+  - ほかのユーザーの接続には影響しなかった。Microsoft アカウントのロックアウトは試していない
 - **鍵で入ったセッションは、ユーザーの資格情報を持たない**（Microsoft の文書）。セッションの中から、そのユーザーとしてほかのサーバーの共有などへ認証できない。本書では、鍵でもパスワードでも試していない
 - **標準ユーザーでログインするとき**
-  - パスワードでのログインも、鍵での認証（鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く。Microsoft の文書）も、本書では試していない
-  - 公開鍵の任意節の手順 4 は、Administrators の一員でなければ止まる
+  - パスワードの認証を有効にすると、Administrators の一員でないユーザーも、パスワードがあれば SSH で入れる。ローカル アカウントの標準ユーザーで、手順 8・9 のとおりに入れた
+  - 標準ユーザーのセッションは `Medium Mandatory Level` で、管理者の権限を持たない
+  - 標準ユーザーの鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く（Microsoft の文書）。本書では試していない。公開鍵の任意節の手順 4 は、Administrators の一員でなければ止まる
 - **LAN の外のサブネットからの接続**
   - 規則の接続元は `Any` で、プロファイルは接続を受けた LAN で決まる。LAN を通って届く接続なら、送信元が別のサブネットでも受け付ける
   - 検証した PC には、[WireGuard VPN](wireguard.md) のクライアントのアドレスから、パスワードで入れた
@@ -843,7 +861,7 @@ d----        logs
 - 手順 6 の再起動の前に、`Get-Process sshd` が 1 つだけ（待ち受けだけで、セッションが無い）ことを確かめた
 - パスワードは利用者が自分の端末で入れ、成否は `OpenSSH/Operational` のログで確かめた
 
-**結果**:
+**1 回目の結果**（2026-09-29 の後の PC に適用）:
 
 - 手順 6: `…:51:PasswordAuthentication yes` と `…:87:Match Group administrators` が出た。`sshd_config` は 2295 バイトから 2296 バイトになった
 - WSL から `ssh -o PubkeyAuthentication=no -o BatchMode=yes <WIN_USER>@<WIN_HOST> true`（パスワードを聞かない形）でつなぐと、`Permission denied (publickey,password,keyboard-interactive).` で終わり、sshd が `password` を返すようになった
@@ -859,12 +877,80 @@ d----        logs
   - このときスマートフォンのセッションがつながっていた（`sshd` のプロセスが 3 つ）ので、再起動する 2 回目は流さなかった
   - 代わりに、`sshd_config` の写しに手順 6 の置き換えを Windows PowerShell 5.1 でもう 1 度当て、ハッシュが変わらないことを確かめた
 - [完了時点の状態](#完了時点の状態)の確認のコマンドを流し直し、`sshd_config` と `sshd.pid` の長さのほかは 2026-09-29 と同じ値だった
+- スマートフォンのセッションが切れた後に、抜き出した手順 6 をもう 1 度流した。出力は 1 回目と同じで、`sshd_config` のハッシュは変わらず、sshd は再起動した（プロセス ID が変わった）
+
+**2 回目: 実施前の状態からの通し**:
+
+- 試験用のユーザーを 2 つ作った
+  - Windows: ローカル アカウントの標準ユーザー（`New-LocalUser` と、`Users` への追加。Administrators には入れない）。パスワードはランダムに作り、作業用のファイルにだけ置いた
+  - WSL: Linux のユーザー（`useradd -m`）。公開鍵の任意節を、空の `~/.ssh` から通すため
+  - 一時的な `HOME` では代えられなかった。`ssh-keygen` は `$HOME` ではなく passwd のホームを見て、いつものユーザー（`<USER>`）の `~/.ssh/id_ed25519` の `Overwrite (y/n)?` で止まった（何も答えずに打ち切り、鍵が変わっていないことを確かめた）
+- 対話（ホスト鍵の確認・パスワード・パスフレーズ・cmd のプロンプト）には、WSL の Python の `pty` で動かす小さなスクリプトで答えた。ブロックは文書から抜き出したまま流した
+- 控え: `robocopy /E /COPYALL /B` で `C:\ProgramData\ssh` を、`reg export` で `HKLM\SOFTWARE\OpenSSH` を、`cp -p` で WSL の `known_hosts` と `known_hosts.old` を控えた
+- ロールバック: 手順 1 は 6 秒で `State : NotPresent`、手順 2 は `False` が 2 行、手順 3 は `<LAN_IF>  Public`、手順 4 は `found: line 4`〜`6` の 3 行と `known_hosts updated.`
+- 手順 2〜7:
+  - 手順 3 は 493 秒で `RestartNeeded : False` と `State : Installed`。直後は `C:\ProgramData\ssh` もレジストリのキーも無く、sshd は `Stopped` / `Manual`
+  - 手順 4 の後の `sshd_config` は、`C:\Windows\System32\OpenSSH\sshd_config_default` と同じ（2297 バイト、51 行目は `#PasswordAuthentication yes`）
+  - 手順 5 で `Public` から `Private` になった
+  - 手順 6 の後の `sshd_config`（2296 バイト）は、1 回目の後のもの（`no` から `yes` にしたもの）とハッシュが同じだった
+  - 手順 7 は新しいホスト鍵の指紋を出した
+- 手順 8・9（試験用の標準ユーザー。`WIN_HOST=` の後ろと、`WIN_USER` の値だけを書き換えた）:
+  - 初回の `ED25519 key fingerprint is SHA256:…` が手順 7 と一致し、`yes` の後にパスワードを聞かれた
+  - cmd のプロンプトが出て、`whoami` は `<hostname>\<試験用のユーザー>`。`whoami /groups` は `BUILTIN\Users` と `Mandatory Label\Medium Mandatory Level`
+  - ログは `Accepted password for <試験用のユーザー> from <WIN_HOST> port <PORT> ssh2`
+- 公開鍵の任意節（WSL の試験用のユーザー。`WIN_USER` は検証した PC のユーザー（`<WIN_USER>`）に直した）:
+  - 手順 1 は `Created directory '/home/<試験用のユーザー>/.ssh'.` の後にパスフレーズを 2 回聞き、手順 2 は 1 行の公開鍵を出した
+  - 手順 3・4 は、`$PUBKEY` の `''` の中だけを手順 2 の出力に置き換えて流した。`icacls` は `NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行
+  - 手順 5 は、初回のホスト鍵の確認に `yes` と答えると、パスワードではなくパスフレーズ（`Enter passphrase for key …`）を聞き、`<hostname>\<win_user>` を出した
+- パスワード認証を切る任意節:
+  - 手順 1 は `…:51:PasswordAuthentication no`、`…:87:Match Group administrators`、`…:88:       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys`
+  - 手順 2 の 1 つ目は、パスワードを聞かずに `Permission denied (publickey,keyboard-interactive).`。2 つ目はパスフレーズを聞き、`<hostname>\<win_user>` を出した
+  - 試験用の標準ユーザーも、パスワードを聞かれずに `Permission denied (publickey,keyboard-interactive).` になった
+  - 手順 6 を流し直すと、`Permission denied (publickey,password,keyboard-interactive).` に戻り、試験用の標準ユーザーがパスワードで入れた
+- 戻し: sshd を止め、`robocopy /MIR /COPYALL /B`（`sshd.pid` は除く）と `reg import` で戻し、sshd を起動した
+  - ファイルのハッシュと `icacls` の出力が控えと一致し、ホスト鍵の指紋は元に戻った。`DefaultShell` も戻った
+  - WSL の `known_hosts` を控えから戻すと、いつものユーザー（`<USER>`）の鍵で、ホスト鍵の警告無しに入れた
+  - 戻しのスクリプトを最初に流したときは、構文の誤り（Windows PowerShell 5.1 の `( a ; b )`）で何も実行されなかった。そのとき、戻した `known_hosts` の WSL から接続すると、`REMOTE HOST IDENTIFICATION HAS CHANGED!` で止まった
+
+**ロックアウト**（試験用の標準ユーザー）:
+
+- `net accounts` は、しきい値 10 回・ロックの時間 10 分・観測期間 10 分
+- 間違ったパスワードを、1 回の接続で 3 回（`ssh` の既定の `NumberOfPasswordPrompts`）ずつ送った
+
+  | 接続 | `BadPasswordAttempts` | ロック |
+  |---|---|---|
+  | 前 | 0 | 無し |
+  | 1 回目 | 3 | 無し |
+  | 2 回目 | 6 | 無し |
+  | 3 回目 | 9 | 無し |
+  | 4 回目 | 10 | 有り |
+
+- セキュリティのログ: 失敗ごとにイベント 4625（ログオンの種類 8、`Status 0xc000006d`・`SubStatus 0xc000006a`、プロセスは `sshd.exe`）。10 回目の直後にイベント 4740（ロック）
+- ロックの後は、正しいパスワードでも入れなかった
+  - `ssh -v` では、鍵交換が終わった後（ユーザー名を送った段階）で `Connection reset by <WIN_HOST> port 22` になり、パスワードを聞かれなかった
+  - sshd のログには何も残らなかった
+  - 同じときに検証した PC のユーザー（`<WIN_USER>`）でつなぐと、ふだんどおり認証の方法の一覧（`publickey,password,keyboard-interactive`）が返った
+- ロックは 10 分で解けた（20 秒ごとに確かめ、ロックの 10 分 6 秒後に解けていた）。`BadPasswordAttempts` は 0 に戻り、正しいパスワードで入れた
+
+**試験用のユーザーの後片付け**:
+
+- Windows のユーザーは `Remove-LocalUser` で消えたが、プロファイルは `Remove-CimInstance` が `別のプロセスが使用中です` で消せなかった
+  - `Win32_UserProfile` は `Loaded : True`。User Profile Service の Operational のログには、最初の SSH のログオン（パスワードで入った 1 回目）でハイブを読み込んだ記録だけがあり、外した記録が無かった
+  - そのユーザーの SID で動くプロセスは無く、`reg unload` は `Access is denied.` だった
+  - 30 秒ごとに 10 分待っても外れなかったので、プロファイルのフォルダーは残し、再起動の後に消すことにした
+- WSL の Linux ユーザーは、WSL が起こしたログインシェルが残っていて 1 回目の `userdel` が失敗し、それを止めてから消した
+
+**再起動の後の自動起動**（ログから）:
+
+- 2026-09-29 の作業の後に、利用者がこの PC を 2 回起動し直していた
+- どちらも、起動（System のイベント 6005）と同じ秒か 1 秒後に、`OpenSSH/Operational` に `Server listening on 0.0.0.0 port 22.` と `:: port 22.` が出ていた
 
 **残っている未確認事項**（2026-09-30 の時点）:
 
-1. 手順 8・9 のブロックを、OpenSSH の `ssh` で流してパスワードで入ること
-1. LAN の別の PC（AlmaLinux 10）からの接続
-1. 新しい PC で、この版の手順 1 から通すこと
-1. ローカル アカウントと標準ユーザーの、パスワードでのログイン
-1. パスワードを続けて間違えたときのロックアウト（SSH での失敗が `net accounts` のしきい値に数えられるか）
+1. Microsoft アカウントのパスワードで、手順 8・9 のブロック（OpenSSH の `ssh`）から入ること
+1. LAN の別の PC から、この文書の手順で入ること（利用者の公開鍵での接続は、LAN の別の IP からもログに残っていた）
+1. 端末に貼る操作そのもの（Windows PowerShell 5.1 の PSReadLine での複数行の貼り付け、bash の対話の入力）
+1. 標準ユーザーの鍵での認証（`authorized_keys`）と、既定の UAC の設定での振る舞い
+1. Microsoft アカウントのロックアウト
+1. Windows Update での OpenSSH の更新
 1. 「Windows Hello サインインのみを許可する」をオンにしたまま、パスワードで入れる理由（Q&A の報告とは違った。Microsoft アカウントのパスワードでサインインしたことがあるかどうかなど、条件は調べていない）
