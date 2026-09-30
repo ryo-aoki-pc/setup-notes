@@ -104,7 +104,7 @@
 ### 端末とシェル
 
 - 変えるものがそれぞれ違うので、併用できる
-- `~/.bashrc` に足す行は、starship を zoxide と WezTerm のシェル統合より後ろに置く（自分用の bash の設定を入れたホストでは、その設定の読む順番に任せる）
+- `~/.bashrc` に足す行は、starship を zoxide と WezTerm のシェル統合より後ろに置く（WezTerm のシェル統合より後ろでは、OSC 133 の終了コードがいつも 0 になる。[starship.md 手順 3](docs/starship.md#実施手順) の補足。自分用の bash の設定を入れたホストでは、その設定の読む順番に任せる）
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
 
 | 手順書 | 変えるもの | 導入元 | 設定の置き場所 |
