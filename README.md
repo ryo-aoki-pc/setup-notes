@@ -47,13 +47,15 @@
 
 ### デスクトップ（GNOME）の設定
 
-- どちらの手順書も GNOME のデスクトップが前提。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
+- どの手順書も GNOME のデスクトップが前提。画面オフと日本語入力は、自分のセッションの設定を、設定アプリと同じキーで `gsettings` で変える
 - 常時動かしておく PC（WireGuard・Samba・Syncthing・Dropbox のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
+- ヘッドレスのセッションは、モニターの無い PC に GNOME のデスクトップを常駐させ、同じ PC の上の Claude Code が画面を撮って操作する（GUI の動作を確かめる）。画面オフ・画面ロック・自動サスペンドの手順 1・2 が前提（サスペンドできる PC では手順 3〜5 も）
 
 | 手順書 | 変えるもの | 変える範囲 | 仕組み | 導入するもの |
 |---|---|---|---|---|
 | [画面オフ・画面ロック・自動サスペンド](docs/gnome-power.md) | 画面を消す・暗くする・ロックする、放置でのサスペンド、電源ボタン、蓋 | 自分のセッション、ログイン画面、OS 全体 | `gsettings`、dconf の `/etc/dconf/db/gdm.d`、`systemctl mask`、logind のドロップイン | 無し |
 | [日本語入力（IBus + Anthy）](docs/japanese-input.md) | 入力ソース（キーボードの配列と Anthy を Super+Space で切り替える） | 自分のセッション | `gsettings` の `org.gnome.desktop.input-sources` と IBus | `ibus-anthy` と日本語のフォント（Workstation には最初から入っている） |
+| [ヘッドレスのセッション（Claude Code で GUI を確かめる）](docs/gnome-headless-session.md) | モニターの無い PC に常駐させる GNOME のセッションと、その画面の撮影・キーボードとポインタの入力 | 自分のユーザー（PC の起動時から） | GDM の `gnome-headless-session@<USER>.service`、gnome-shell の `--virtual-monitor`（ユーザーのドロップイン）、Mutter の ScreenCast / RemoteDesktop（[`scripts/gnome-gui.py`](scripts/gnome-gui.py)） | 無し |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -63,15 +65,14 @@
 ### リモート接続・VPN
 
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
-- GNOME Remote Desktop は VPN ではなく、RDP で PC の画面を使う。リモートログインは GDM で新しいセッションを作り、デスクトップ共有は PC の画面でログインしているセッションをそのまま見せる（同じ PC で併用できる）
+- GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
 | [WireGuard VPN](docs/wireguard.md) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
 | [WireGuard Road Warrior](docs/wireguard-road-warrior.md) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down` | 無し（PC の firewalld は変えない） |
-| [GNOME Remote Desktop（リモートログイン）](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（システムデーモン。GDM で新しいセッションを作る） | 3389/tcp |
-| [GNOME Remote Desktop（デスクトップ共有）](docs/gnome-remote-desktop-sharing.md) | RDP クライアントと、PC の画面でログインしているデスクトップ | 接続される PC の、共有するデスクトップの端末 | `grdctl`（ユーザーのデーモン。資格情報はログインのキーリング。自動ログインは任意の節） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
+| [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（システムデーモン。GDM で新しいセッションを作る） | 3389/tcp |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 
 | 手順書の無いツール | 用途 | 導入元 |

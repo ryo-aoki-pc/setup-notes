@@ -11,7 +11,7 @@
 - 手順の後: 戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。画面が消えないこと・眠らないこと、ログイン画面・蓋・電源ボタンの実際の動きは確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **手順 1・2 のほかは、x86_64 のコンテナでのみ検証した手順書**。手順 1・2 だけは aarch64 の実機（Raspberry Pi 5）で本実行した。画面が消えないこと・眠らないこと、ログイン画面・蓋・電源ボタンの実際の動きは確かめていない（[対象と検証環境](#対象と検証環境)）。
 
 1. 変数を設定する。
 
@@ -44,20 +44,21 @@
 1. 自分のセッションの画面オフ・減光・ロック・自動サスペンド・電源ボタンを変える。
 
    ```bash
-   gsettings set org.gnome.desktop.session idle-delay "${IDLE_DELAY:?手順 1 の IDLE_DELAY が空のまま。値を入れて貼り直す}"
-   gsettings set org.gnome.desktop.screensaver lock-enabled "${LOCK_ENABLED:?手順 1 の LOCK_ENABLED が空のまま。値を入れて貼り直す}"
-   gsettings set org.gnome.settings-daemon.plugins.power idle-dim false
-   gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
-   gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
-   gsettings set org.gnome.settings-daemon.plugins.power power-button-action "${POWER_BUTTON:?手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}"
-   gsettings get org.gnome.desktop.session idle-delay
-   gsettings get org.gnome.desktop.screensaver lock-enabled
-   gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
+   /usr/bin/gsettings set org.gnome.desktop.session idle-delay "${IDLE_DELAY:?手順 1 の IDLE_DELAY が空のまま。値を入れて貼り直す}"
+   /usr/bin/gsettings set org.gnome.desktop.screensaver lock-enabled "${LOCK_ENABLED:?手順 1 の LOCK_ENABLED が空のまま。値を入れて貼り直す}"
+   /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power idle-dim false
+   /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
+   /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
+   /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power power-button-action "${POWER_BUTTON:?手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}"
+   /usr/bin/gsettings get org.gnome.desktop.session idle-delay
+   /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
+   /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
    ```
 
    - 最後の 3 つのコマンドで読み戻す
    - `uint32 0`、`false`、続いて `idle-dim false`・`power-button-action 'interactive'`・`sleep-inactive-ac-type 'nothing'`・`sleep-inactive-battery-type 'nothing'` の 4 行が出ればよい
    - 値が変わっていなければ、デスクトップの端末で手順 1 から貼り直す（`gsettings` は書けなかったときも終了コード 0 で終わる。この手順の補足）
+   - **注意**: `/usr/bin/` を外さない（この手順の補足）
 
    <details>
    <summary>補足: 変える前の値、0 にしても暗くなる理由、設定アプリの項目</summary>
@@ -111,6 +112,17 @@
 
    - 警告の文面は環境で変わる。`failed to commit changes to dconf` が出たら、書けていない
    - 範囲の外の値（`POWER_BUTTON=poweroff` など）は `The provided value is outside of the valid range` で失敗し、終了コードは 1 になる。値は変わらない
+
+   **Homebrew の `gsettings` のとき**: Homebrew の `gsettings` は、GNOME に効かないのに、読み戻しでは変わったように見える。
+
+   - Homebrew の glib は dconf のモジュールを持たないので、`gsettings` は dconf ではなく `~/.config/glib-2.0/settings/keyfile` に書き、同じファイルから読み戻す。警告は出ず、終了コードも 0
+   - Homebrew の formula の多く（cairo・ffmpeg・imagemagick など）が glib に依存するので、[homebrew.md](homebrew.md) を通したホストでは PATH の先頭の `gsettings` がこれになりやすい
+   - 2026-10-01 に Raspberry Pi 5 の実機で確かめた
+     - `command -v gsettings` が `/home/linuxbrew/.linuxbrew/bin/gsettings`（glib 2.90.0）のホスト
+     - `G_MESSAGES_DEBUG=all` を付けると `Found default implementation keyfile (GKeyfileSettingsBackend)` と出た
+     - `gsettings get org.gnome.desktop.session idle-delay` が `uint32 300` を返し、`/usr/bin/gsettings` は dconf の `uint32 0` を返した
+     - Homebrew の `gsettings set` で書いた値は、Homebrew の `gsettings get` では変わって見え、`/usr/bin/gsettings get` では変わっていなかった
+   - そのため、この手順と[ロールバック](#ロールバック)の手順 1 は `/usr/bin/gsettings` で書いてある（2026-10-01 に直した。それまでのコンテナの検証は、Homebrew の無い環境で `gsettings` のまま流した）
 
    </details>
 
@@ -276,15 +288,15 @@
 1. 自分のセッションの値を既定値に戻す。
 
    ```bash
-   gsettings reset org.gnome.desktop.session idle-delay
-   gsettings reset org.gnome.desktop.screensaver lock-enabled
-   gsettings reset org.gnome.settings-daemon.plugins.power idle-dim
-   gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type
-   gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type
-   gsettings reset org.gnome.settings-daemon.plugins.power power-button-action
-   gsettings get org.gnome.desktop.session idle-delay
-   gsettings get org.gnome.desktop.screensaver lock-enabled
-   gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
+   /usr/bin/gsettings reset org.gnome.desktop.session idle-delay
+   /usr/bin/gsettings reset org.gnome.desktop.screensaver lock-enabled
+   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power idle-dim
+   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type
+   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type
+   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power power-button-action
+   /usr/bin/gsettings get org.gnome.desktop.session idle-delay
+   /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
+   /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
    ```
 
    - `uint32 300`、`true`、続いて `idle-dim true`・`power-button-action 'suspend'`・`sleep-inactive-ac-type 'suspend'`・`sleep-inactive-battery-type 'suspend'` の 4 行が出ればよい
@@ -340,9 +352,9 @@
 
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - [WireGuard](wireguard.md)・[Samba](samba.md)・[Syncthing](syncthing.md)・[Dropbox](dropbox.md)・[Dropbox（rclone）](dropbox-rclone.md)・[GNOME Remote Desktop](gnome-remote-desktop.md) のホストは、眠るとサービスが止まる
-  - [GNOME Remote Desktop のデスクトップ共有](gnome-remote-desktop-sharing.md)は、画面がロックされると止まる（同書の注意点）。同書は手順 1・2 を前提にしている
+  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3〜5 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとし、ロックは画面の前にいない Claude Code には解けない
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
+- **状態**: **x86_64 のコンテナで検証済み（2026-09-27）。手順 1・2 だけは aarch64 の実機（Raspberry Pi 5）で本実行した（2026-10-01）**
   - 下表の 2 つのコンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜6 と[ロールバック](#ロールバック)を通した
     - 手順 1〜4 とロールバックの 1〜3: GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中で実行
     - 手順 5・6 とロールバックの 4・5: systemd を PID 1 にしたコンテナで実行
@@ -353,18 +365,24 @@
     - mask で、logind の `CanSuspend` が `"yes"` から `"no"` に変わる（本当には眠れないコンテナで）
     - logind の `HandleLidSwitch` が `"ignore"` になり、戻せる
   - **確認していないこと**: 画面が消えない・暗くならない・ロックしないこと、実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示。コンテナには画面も GNOME のセッションも無いため
-  - aarch64（Raspberry Pi 5）では通していない
   - 2026-09-28: 手順 4〜6 と、[ロールバック](#ロールバック)の手順 3〜5のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-01: 手順 2 と[ロールバック](#ロールバック)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
+    - ロールバックの手順 1 の、`/usr/bin/gsettings` にした形は流していない
+  - 2026-10-01: 手順 1・2 を aarch64 の実機（Raspberry Pi 5）で本実行した（[付録](#付録-実機での検証記録2026-10-01)）
+    - [gnome-headless-session.md](gnome-headless-session.md) の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
+    - 読み戻しは[完了時点の状態](#完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
+    - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとしなかった（手順 2 の前は、15 分でしようとした）
+    - 手順 3〜6 とロールバックは、実機では流していない
 
 | 項目 | 実機 | コンテナ（GNOME の一式） | コンテナ（systemd） |
 |---|---|---|---|
-| 実施日 | —（未実施） | 2026-09-27 | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10.2`、Docker 29.3.1） | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`） |
-| GNOME | 未確認 | `gdm-47.0-24.el10_2`、`gnome-shell-49.4-9.el10_2.alma.1`、`gnome-settings-daemon-47.2-10.el10_2.alma.1`、`gsettings-desktop-schemas-47.1-4.el10`、`dconf-0.40.0-17.el10`（`gdm` と `gnome-control-center` を入れて依存で揃えた） | 無し |
-| systemd | 未確認 | PID 1 ではない | `systemd-257-23.el10_2.2.alma.1`（`systemd-udev` も入れた） |
-| セッションバス | — | `dbus-run-session`（GNOME のセッションの代わり） | — |
+| 実施日 | 2026-10-01（手順 1・2 だけ） | 2026-09-27 | 2026-09-27 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10.2`、Docker 29.3.1） | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`） |
+| GNOME | `gnome-shell-49.4-9.el10_2.alma.1`、`gnome-settings-daemon-47.2-10.el10_2.alma.1`、`glib2-2.80.4-12.el10_2.22`（ヘッドレスのセッション） | `gdm-47.0-24.el10_2`、`gnome-shell-49.4-9.el10_2.alma.1`、`gnome-settings-daemon-47.2-10.el10_2.alma.1`、`gsettings-desktop-schemas-47.1-4.el10`、`dconf-0.40.0-17.el10`（`gdm` と `gnome-control-center` を入れて依存で揃えた） | 無し |
+| systemd | `systemd-257-23.el10_2.2.alma.1` | PID 1 ではない | `systemd-257-23.el10_2.2.alma.1`（`systemd-udev` も入れた） |
+| セッションバス | ユーザーの systemd のセッションバス（SSH でログインしたシェルから） | `dbus-run-session`（GNOME のセッションの代わり） | — |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -449,6 +467,9 @@ s "ignore"
 ### 注意点
 
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 手順 2 の読み戻しで確かめる（手順 2 の補足）
+- **Homebrew の `gsettings` は GNOME に効かない**: dconf ではなくファイルに書き、読み戻しでは変わったように見える。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（手順 2 の補足）
+  - `sudo -u gdm … gsettings` の行（手順 4 と[ロールバック](#ロールバック)の手順 3）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、Homebrew は探さない
+    - Raspberry Pi 5 で、`sudo -u gdm env sh -c 'command -v gsettings'` が `/bin/gsettings` を返した（手順 4 そのものは実機で流していない）
 - **dconf のファイルの型**: 文字列は `'nothing'` のように引用符で囲む。`idle-delay` のような uint32 は `uint32 0` と書く（手順 3 の補足）
   - 引用符が無いと `dconf update` が失敗し、データベースは前の内容のまま残る
   - `uint32` が無いと、エラーにならずに無視される
@@ -504,3 +525,28 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 - SSH で入ったシェルから `gsettings` で変えた値が、動いている GNOME のセッションに届くか
 - 動いているログイン画面に、`dconf update` の後いつから効くか
 - GNOME Remote Desktop のリモートログインのセッションを放置したときの動き
+
+---
+
+### 付録: 実機での検証記録（2026-10-01）
+
+**環境**: Raspberry Pi 5（aarch64）の AlmaLinux 10.2。モニターはつながっておらず、[gnome-headless-session.md](gnome-headless-session.md) のヘッドレスのセッションを動かした（表の「実機」の列）。PATH の先頭は Homebrew で、`command -v gsettings` は `/home/linuxbrew/.linuxbrew/bin/gsettings`（glib 2.90.0）だった。
+
+**流し方**: gnome-headless-session.md の検証の中で、この文書の手順 1・2 のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま書き込んだ。1 回目はブラケットペースト無し、2 回目はブラケットペーストで貼った（同書の[付録](gnome-headless-session.md#付録-実機での検証記録2026-10-01)）。
+
+| 手順 | 結果 |
+|---|---|
+| 1. 変数 | `USER = <USER>`、`IDLE_DELAY = 0`、`LOCK_ENABLED = false`、`POWER_BUTTON = interactive` |
+| 2. 自分のセッション | `uint32 0`・`false`・`idle-dim false`・`power-button-action 'interactive'`・`sleep-inactive-ac-type 'nothing'`・`sleep-inactive-battery-type 'nothing'`（2 回とも） |
+
+- **実施前**: dconf には前から `idle-delay` の `uint32 0` と `lock-enabled` の `false` があり、電源のキーは既定値だった
+- **Homebrew の `gsettings`**: 直す前の手順 2 の形（`gsettings`）では、この PC の PATH で Homebrew の `gsettings` が動く。Homebrew の `gsettings get org.gnome.desktop.session idle-delay` は `uint32 300` を返し（dconf の値は `uint32 0`）、Homebrew の `gsettings set` の値は `~/.config/glib-2.0/settings/keyfile` に入った（手順 2 の補足）
+- **動いているセッションに効くか**: ヘッドレスのセッションが動いている間に、SSH のシェルから `/usr/bin/gsettings set org.gnome.desktop.interface clock-show-seconds true` を実行すると、上部バーの時計にすぐ秒が出た（画面を撮って確かめた。`reset` で消えた）
+- **放置によるサスペンド**: 手順 2 の前（`sleep-inactive-ac-type` が `'suspend'`）は、ヘッドレスのセッションを無操作で 15 分置くと、gsd-power が `Error calling suspend action: … SleepVerbNotSupported …` を出した（サスペンドしようとした。この Pi はサスペンドできない）
+  - 手順 2 の後（`'nothing'`）は、同じヘッドレスのセッションを 16 分余り放置しても、`Error calling suspend action` も「Suspending soon」の通知も出ず、画面も消えなかった。SSH のシェルから変えた値が、動いているセッションに効いた
+
+#### 未確認事項
+
+- 実機での手順 3〜6 とロールバック
+- 画面が消えない・暗くならないこと（モニターのある PC で）
+- x86_64 の PC
