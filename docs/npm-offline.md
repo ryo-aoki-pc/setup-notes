@@ -3,9 +3,9 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [homebrew-offline.md](homebrew-offline.md) の手順 1〜4 で、インターネットに出られないホスト（以下、オフラインのホスト）にトンネルを張り、dnf にプロキシを設定してあること（同書の手順 4 を飛ばしていたら、手順 1 の前に行う）
-> - **前提**: 同じトンネルで、[Neovim](neovim.md) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
-> - **手順 1〜3 は、homebrew-offline.md の手順 3 のシェル（オフラインのホストの、`sudo` できる自分のユーザー）のまま貼る**。手順 4 で同書の手順 7・8 を行い、手順 5 はログインし直したシェルで貼る
+> - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られないホスト（以下、オフラインのホスト）にトンネルを張り、同書の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で dnf にプロキシを設定してあること（dnf の節を飛ばしていたら、手順 1 の前に行う）
+> - **前提**: 同じトンネルで、[homebrew-offline.md](homebrew-offline.md) の Homebrew と、[Neovim](neovim.md) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
+> - **手順 1〜3 は、ssh-socks-tunnel.md の手順 3 のシェル（オフラインのホストの、`sudo` できる自分のユーザー）のまま貼る**。手順 4 で同書の[トンネルを閉じる](ssh-socks-tunnel.md#トンネルを閉じる)の手順 1・2 を行い、手順 5 はログインし直したシェルで貼る
 > - **手順 1 は `sudo` のパスワード、手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 
 - 上から順にコードブロックを貼る
@@ -15,9 +15,9 @@
 > [!WARNING]
 > **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。Mason を使う設定は、自分用の設定ではなく、上流の LazyVim の starter で確かめた（[対象と検証環境](#対象と検証環境)）。
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[homebrew-offline.md の注意点](homebrew-offline.md#注意点)）
+> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](ssh-socks-tunnel.md#注意点)）
 
-1. homebrew-offline.md の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
+1. ssh-socks-tunnel.md の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
 
    ```bash
    sudo dnf install -y nodejs nodejs-npm
@@ -25,7 +25,7 @@
 
    - `nodejs`・`nodejs-npm` と依存の 7 つ、合わせて 9 パッケージが入り、`Complete!` で終わる
    - `Failed to download metadata for repo` で止まったら、dnf がトンネルを通っていない
-     - `Curl error (6)`（名前を引けない）なら、homebrew-offline.md の手順 4 の設定が無い
+     - `Curl error (6)`（名前を引けない）なら、ssh-socks-tunnel.md の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)の設定が無い
      - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（同書の手順 2 から張り直す）
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -64,7 +64,7 @@
    - `npm config get` の 2 行は、どちらも `null`
    - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される（この手順の補足）
    - `npm notice PONG 148ms` のように `PONG` が出れば、npm はトンネルを通ってレジストリに届いている
-   - `export` はこのシェルの中だけで有効。**トンネルを張り直したら、homebrew-offline.md の手順 3 に続けて、この手順を貼り直す**
+   - `export` はこのシェルの中だけで有効。**トンネルを張り直したら、ssh-socks-tunnel.md の手順 3 に続けて、この手順を貼り直す**
 
    <details>
    <summary>補足: npm は <code>ALL_PROXY</code> を読まない</summary>
@@ -79,10 +79,10 @@
          : PROXY_ENV.https_proxy || PROXY_ENV.http_proxy || PROXY_ENV.proxy
    ```
 
-   - npm のレジストリは https なので、使うのは `https_proxy` だけ。homebrew-offline.md の手順 3 の `ALL_PROXY` は読まない
-   - `socks5h://` は、同梱の `socks-proxy-agent` が受け付ける（`socks`・`socks4`・`socks4a`・`socks5`・`socks5h`）。`h` を落とすと、名前をオフラインのホストで引いて失敗する（[homebrew-offline.md 手順 3](homebrew-offline.md#実施手順) の補足）
+   - npm のレジストリは https なので、使うのは `https_proxy` だけ。ssh-socks-tunnel.md の手順 3 の `ALL_PROXY` は読まない
+   - `socks5h://` は、同梱の `socks-proxy-agent` が受け付ける（`socks`・`socks4`・`socks4a`・`socks5`・`socks5h`）。`h` を落とすと、名前をオフラインのホストで引いて失敗する（[ssh-socks-tunnel.md 手順 3](ssh-socks-tunnel.md#実施手順) の補足）
 
-   **`ALL_PROXY` だけでは届かない。** homebrew-offline.md の手順 3 のシェルで、この手順の `export` の前に `npm ping` を実行したときの出力（70 秒かかった）:
+   **`ALL_PROXY` だけでは届かない。** ssh-socks-tunnel.md の手順 3 のシェルで、この手順の `export` の前に `npm ping` を実行したときの出力（70 秒かかった）:
 
    ```
    npm notice PING https://registry.npmjs.org/
@@ -108,7 +108,7 @@
 
    **`https_proxy` は、curl と git も読む。** 値は `ALL_PROXY` と同じなので、このシェルの brew もそのまま通る（`brew update` が `Already up-to-date.` で終わった）。
 
-   **`~/.bashrc` や `~/.npmrc` には書かない。** トンネルがあるのは homebrew-offline.md の手順 2 の ssh の間だけなので、このシェルにだけ入れる（[選択した方針](#選択した方針)）。
+   **`~/.bashrc` や `~/.npmrc` には書かない。** トンネルがあるのは ssh-socks-tunnel.md の手順 2 の ssh の間だけなので、このシェルにだけ入れる（[選択した方針](#選択した方針)）。
 
    </details>
 
@@ -163,9 +163,9 @@
 
    </details>
 
-1. [homebrew-offline.md 手順 7・8](homebrew-offline.md#実施手順) を貼り、トンネルを閉じて、転送を付けずにログインし直す。
+1. [ssh-socks-tunnel.md の「トンネルを閉じる」](ssh-socks-tunnel.md#トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
 
-   - 手順 7（`exit`）はオフラインのホストで、手順 8 はオンラインのホストで貼る
+   - その節の手順 1（`exit`）はオフラインのホストで、手順 2 はオンラインのホストで貼る
    - オンラインのホストのシェルで同書の手順 1 の変数が消えていたら（新しいシェルなど）、先に同書の手順 1 を貼る
    - **次の手順は、ログインし直してから貼る**（続けて貼るとパスワードへの答えとして食われる）
 
@@ -194,7 +194,7 @@
 
 ## 更新
 
-- [homebrew-offline.md 手順 1〜3](homebrew-offline.md#実施手順) でトンネルを張り、そのシェルで[手順 2](#実施手順) を貼ってから、この節を貼る
+- [ssh-socks-tunnel.md 手順 1〜3](ssh-socks-tunnel.md#実施手順) でトンネルを張り、そのシェルで[手順 2](#実施手順) を貼ってから、この節を貼る
 - Node.js と npm は `sudo dnf upgrade` でも上がる（トンネルか、dnf が届くリポジトリが要る）
 
 1. Node.js と npm を上げる。
@@ -231,7 +231,7 @@
 
 - オフラインのホストで貼る。トンネルは要らない
 - `https_proxy` はどこにも書いていないので、戻すものは無い
-- dnf のプロキシの行は、[homebrew-offline.md のロールバック](homebrew-offline.md#ロールバック)の手順 2 で消す
+- dnf のプロキシの行は、[ssh-socks-tunnel.md のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す
 - Mason で入れたものは、`:MasonUninstall <名前>` で消せる（設定にあるものは、次にトンネルのあるシェルで開いたときに入り直す）
 
 > [!WARNING]
@@ -263,14 +263,14 @@
 ### 対象と検証環境
 
 - **目的**: インターネットに出られない AlmaLinux 10 のホストで、Neovim の Mason が、npm で配られているパッケージ（LSP サーバー・リンターなど）を入れられるようにする
-  - 入れる・上げるときだけ、[homebrew-offline.md](homebrew-offline.md) のトンネルで外に出る
+  - 入れる・上げるときだけ、[ssh-socks-tunnel.md](ssh-socks-tunnel.md) のトンネルで外に出る
   - 入れたパッケージは、トンネルが無くても動く
 - **進め方**: AppStream の Node.js と npm を dnf で入れ、npm には `https_proxy` でトンネル（`socks5h://127.0.0.1:1080`）を使わせる。そのシェルから Neovim を開き、Mason に入れさせる
-  - この文書には変数が無い。オンラインのホストの変数は、homebrew-offline.md の手順 1 にある
+  - この文書には変数が無い。オンラインのホストの変数は、ssh-socks-tunnel.md の手順 1 にある
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-30）。実機では本実行していない**
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした（homebrew-offline.md と同じ形）
   - Mason を使う設定は、上流の [LazyVim/starter](https://github.com/LazyVim/starter) に、LazyVim の extra の `lang.json` と `lang.markdown` を足したもの。自分用の設定（LazyVimStarter）では確かめていない
-  - 前提（homebrew-offline.md の手順 1〜5、neovim.md の手順 1、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](#更新)、[ロールバック](#ロールバック)を通した
+  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 貼り方はブラケットペースト無し。手順 1 とロールバックの手順 1 は、ブラケットペースト有りでも通した
   - このクラウドの出口からは Mason のパッケージの一覧の版を調べる先（api.mason-registry.dev）に届かなかったので、検証のときだけ、オンラインのホストのその名前をセッションのプロキシへ中継した（[付録](#付録-コンテナでの検証記録2026-09-30)）
   - 確認したこと:
@@ -294,7 +294,7 @@
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | 同左 |
 
 > [!NOTE]
-> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[homebrew-offline.md 手順 1](homebrew-offline.md#実施手順) で設定する。
+> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[ssh-socks-tunnel.md 手順 1](ssh-socks-tunnel.md#実施手順) で設定する。
 >
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`22.23.2` など）は実行日によって変わる。
 
@@ -306,8 +306,8 @@
 
 | 項目 | 状態 |
 |---|---|
-| トンネルと dnf | homebrew-offline.md の手順 1〜4 を通した。`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` がある |
-| Homebrew / Neovim | homebrew-offline.md の手順 5 で Homebrew 7.0.7、neovim.md の手順 1 で `neovim 0.12.5_1` |
+| トンネルと dnf | 当時の homebrew-offline.md の手順 1〜4（今の ssh-socks-tunnel.md の手順 1〜3 と dnf の節、homebrew-offline.md の手順 1）を通した。`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` がある |
+| Homebrew / Neovim | 当時の homebrew-offline.md の手順 5（今の手順 3）で Homebrew 7.0.7、neovim.md の手順 1 で `neovim 0.12.5_1` |
 | Neovim の設定 | `~/.config/nvim` に LazyVim の starter と、extra の `lang.json`・`lang.markdown`（`lazyvim.json`）。プラグインはトンネル越しに入れてある |
 | Node.js / npm | 無い（`node`・`npm` が無く、`~/.npm` も無い） |
 | Mason | 入っているのは shfmt・tree-sitter-cli・lua-language-server・marksman（GitHub のリリースから取るもの）。markdownlint-cli2・markdown-toc・json-lsp は `Could not find executable "npm" in PATH.` で、stylua は `Could not find executable "unzip" in PATH.` で失敗していた |
@@ -316,10 +316,10 @@
 
 | 経路 | 要るもの | 採否 |
 |---|---|---|
-| **AppStream の `nodejs`（22 系）と、シェルの `https_proxy`** | homebrew-offline.md のトンネルと dnf のプロキシ | **採用。** 言語処理系は AppStream から入れる方針（[導入元一覧](tool-catalog.md)）で、`dnf upgrade` で上がる。npm にだけ変数を 1 つ足せば、Mason を書き換えずに npm がトンネルを通る |
+| **AppStream の `nodejs`（22 系）と、シェルの `https_proxy`** | ssh-socks-tunnel.md のトンネルと dnf のプロキシ | **採用。** 言語処理系は AppStream から入れる方針（[導入元一覧](tool-catalog.md)）で、`dnf upgrade` で上がる。npm にだけ変数を 1 つ足せば、Mason を書き換えずに npm がトンネルを通る |
 | AppStream の `nodejs24`（24.19.0） | 同上 | 不採用。コマンドが `node-24`・`npm-24` で、Mason が探す `npm` が無い |
 | Homebrew の `node` | homebrew-offline.md のトンネル | 不採用。Homebrew の `bin` が PATH で先に来るので、RPM の node と npm を隠す。版を選ぶなら mise（[導入元一覧](tool-catalog.md)） |
-| `~/.npmrc` に `https-proxy=socks5h://127.0.0.1:1080` を書く | — | 不採用。トンネルが無いときも npm が 1080 番に向かい続ける。dnf のプロキシの行（[homebrew-offline.md 手順 4](homebrew-offline.md#実施手順)）と違い、書かなくても済む |
+| `~/.npmrc` に `https-proxy=socks5h://127.0.0.1:1080` を書く | — | 不採用。トンネルが無いときも npm が 1080 番に向かい続ける。dnf のプロキシの行（ssh-socks-tunnel.md の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)）と違い、書かなくても済む |
 | `ALL_PROXY` だけ | — | 動かない。npm は `ALL_PROXY` を読まない（[手順 2](#実施手順) の補足） |
 | npm のキャッシュ・Mason のディレクトリを運ぶ、社内に npm のミラー（Verdaccio など）を建てる | 同じアーキのホスト、運ぶ手段、ミラーのサーバー | 本書では扱わない（ネットワークで届かないときの方法。確かめていない） |
 
@@ -327,7 +327,7 @@
   - `nvim --headless '+MasonInstall <名前>' +qa` の `:MasonInstall` は、名前を挙げたものが終わるまでしか待たない
   - LazyVim が読み込み時に始めたほかの導入は、`+qa` で止まりうる
   - 読者の設定が入れるものを 1 つずつ挙げる必要もあるので、画面で終わりを見て閉じる形にした
-- **`https_proxy` を `~/.bashrc` に書かない**: homebrew-offline.md の `ALL_PROXY` と同じ理由（トンネルは同書の手順 2 の ssh の間だけ）
+- **`https_proxy` を `~/.bashrc` に書かない**: ssh-socks-tunnel.md の `ALL_PROXY` と同じ理由（トンネルは同書の手順 2 の ssh の間だけ）
 
 ### 完了時点の状態
 
@@ -350,7 +350,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 ```
 
 - 同じシェルで JSON のファイルを開くと、json-lsp の LSP（`jsonls`）が動いた
-- `/etc/dnf/dnf.conf` の `proxy=socks5h://127.0.0.1:1080` は残る（homebrew-offline.md のロールバックの手順 2 で消す）
+- `/etc/dnf/dnf.conf` の `proxy=socks5h://127.0.0.1:1080` は残る（[ssh-socks-tunnel.md のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す）
 - `~/.npm` に npm のキャッシュが残る（[ロールバック](#ロールバック)の手順 2 で消す）
 
 ### 注意点
@@ -369,7 +369,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
   - 入れたパッケージはそのまま使える。検証では、一覧を 2 日前に取ったことにして開き、lua_ls が動いた
   - 一覧を取り直すのは、次にトンネルのあるシェルで開いたとき（[更新](#更新)）
 - **トンネルが無いときに開くと、設定にあって入っていないパッケージの導入が毎回失敗する**: 検証では stylua が毎回 `:MasonLog` にエラーを残した。画面での編集には影響しない
-- **ssh が切れると、トンネルも消える**: 途中の導入は失敗する。[homebrew-offline.md 手順 2](homebrew-offline.md#実施手順) から張り直し、[手順 2・3](#実施手順) を貼り直す
+- **ssh が切れると、トンネルも消える**: 途中の導入は失敗する。[ssh-socks-tunnel.md 手順 2](ssh-socks-tunnel.md#実施手順) から張り直し、[手順 2・3](#実施手順) を貼り直す
 
 ### 参照
 
@@ -377,7 +377,8 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 - [npm/agent の lib/proxy.js](https://github.com/npm/agent/blob/main/lib/proxy.js) — npm が読むプロキシの環境変数と、SOCKS の扱い
 - [mason.nvim](https://github.com/mason-org/mason.nvim) — `lua/mason-core/installer/managers/npm.lua`（npm のパッケージの入れ方）、`lua/mason-core/fetch.lua`（curl と wget）
 - [LazyVim の LSP の設定](https://www.lazyvim.org/plugins/lsp) — mason.nvim と mason-lspconfig.nvim の `ensure_installed`
-- [homebrew-offline.md](homebrew-offline.md) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の手順 7・8 を使う
+- [ssh-socks-tunnel.md](ssh-socks-tunnel.md) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1・2 を使う
+- [homebrew-offline.md](homebrew-offline.md) — 前提の Homebrew（Neovim をトンネル越しに入れる）
 - [neovim.md](neovim.md) — 前提の Neovim と、自分用の設定への案内
 
 ---
@@ -400,7 +401,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
   - 検証のときだけ、オンラインのホストのコンテナの `/etc/hosts` で api.mason-registry.dev を VM の上の中継（Python の標準ライブラリで書いたもの）に向け、中継からセッションの HTTP プロキシへ `CONNECT` で渡した（`200` になった）
   - ssh の `-R 1080`、オフラインのホスト、Mason の設定は変えていない。ほかの取得先（registry.npmjs.org・github.com・ミラー・ghcr.io）には、オンラインのホストから直接届いた
 - 前提は、1 組目のコンテナ（探索用）で通した
-  - homebrew-offline.md の手順 1〜5（手順 4 を含む。手順 5 は homebrew.md の手順 1〜4）と、neovim.md の手順 1（`neovim 0.12.5_1`）
+  - 当時の homebrew-offline.md の手順 1〜5（手順 4 を含む。手順 5 は homebrew.md の手順 1〜4。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3）と、neovim.md の手順 1（`neovim 0.12.5_1`）
   - Neovim の設定: トンネルのシェルで `git clone https://github.com/LazyVim/starter ~/.config/nvim` の後に `.git` を消し、`lazyvim.json` に `{"extras":["lazyvim.plugins.extras.lang.json","lazyvim.plugins.extras.lang.markdown"],…}` を書いた
   - `nvim` を 3 回開いた。1 回目で 35 のプラグインがトンネル越しに入り、Mason の失敗が[実施前の状態](#実施前の状態)のとおりになった
   - この状態で 2 つのコンテナを `docker commit` し、そこから 2 組目のコンテナを立てて、この文書を最初から通した（下の表）
@@ -409,17 +410,17 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 コードブロックの流し方:
 
 - 文書からコードブロックを抜き出し、VM の tmux で開いた `docker exec -it` のオンラインのホストの対話の bash（擬似端末、`TERM=xterm-256color`）に、手順ごとに `tmux paste-buffer` で送った（ブラケットペースト無し。改行は CR）
-- homebrew-offline.md の手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた。ホスト鍵の確認には `yes` を送った
+- 当時の homebrew-offline.md の手順 1（今の ssh-socks-tunnel.md の手順 1）の `OFFLINE_HOST` は、コンテナの名前に書き換えた。ホスト鍵の確認には `yes` を送った
 - Neovim の画面は `tmux capture-pane` で読み、`:Mason`・`q`・`U`・`:qa` はキーとして送った
 - ブラケットペースト有り（`tmux paste-buffer -p`）で送ると、bash は貼った行を入力の行に置いて Enter を待つ。表示を見てから Enter を送った
 
 | 手順 | 結果 |
 |---|---|
-| 前提 | homebrew-offline.md の手順 1〜3。`127.0.0.1:1080` の 1 行、`200` / `301` / `200` / `401`。`rpm -q` の 4 つは入っていた |
+| 前提 | 当時の homebrew-offline.md の手順 1〜3（今の ssh-socks-tunnel.md の手順 1〜3 と homebrew-offline.md の手順 1）。`127.0.0.1:1080` の 1 行、`200` / `301` / `200` / `401`。`rpm -q` の 4 つは入っていた |
 | 1 | 9 パッケージ（ダウンロード 42 MB、導入後 219 MB）、`Complete!` |
 | 2 | `v22.23.2`、`10.9.8`、`/usr/bin/node`、`/usr/bin/npm`、`null`、`null`、`npm notice PONG 211ms` |
 | 3 | 開いてすぐ Mason が stylua・markdownlint-cli2・markdown-toc・json-lsp の導入を始め、9 秒で npm の 3 つが入った（`markdown-toc was successfully installed.`・`[mason-lspconfig.nvim] jsonls was successfully installed` などの通知）。stylua は `unzip` が無くて失敗し、通知は出ず、`:MasonLog` にだけ残った。`:Mason` の画面は `Installed (7)`。`:qa` で閉じた |
-| 4 | homebrew-offline.md の手順 7 で `Connection to <OFFLINE_HOST> closed.`、手順 8 でログインし直した |
+| 4 | 当時の homebrew-offline.md の手順 7 で `Connection to <OFFLINE_HOST> closed.`、手順 8 でログインし直した（今の ssh-socks-tunnel.md の「トンネルを閉じる」の手順 1・2） |
 | 5 | [完了時点の状態](#完了時点の状態)のとおり。続けて JSON のファイルを開くと、`jsonls` が動いた |
 | 更新 | トンネルを張り直して手順 2 を貼った（`PONG 193ms`）。この節の手順 1 は `Nothing to do.`。この節の手順 2 の前に、上げるものを作るため、`:MasonInstall markdown-toc@1.1.0` で古い版にした（手順書の外）。`:MasonUpdate` の後の `:Mason` に `Press U to update 1 package (markdown-toc)` と `new version available: 1.1.0 -> 1.2.0` が出て、`U` で `$ npm install markdown-toc@1.2.0` が走り、2 秒で入った。この節の手順 3 は `Connection to <OFFLINE_HOST> closed.` |
 | ロールバック | 転送無しでログインし直して貼った。この節の手順 1 は 9 パッケージを消して `Complete!`（ダウンロードは無く、トンネル無しで通った）。手順 2 は `無い（期待どおり）`。その後の markdownlint-cli2 は `env: 'node': No such file or directory` で動かなかった |

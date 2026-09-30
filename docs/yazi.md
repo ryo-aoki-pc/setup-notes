@@ -272,12 +272,11 @@ $ command -v yazi
 
 ### 注意点
 
-- **PATH の先頭が Homebrew になる**: `brew shellenv` が `/home/linuxbrew/.linuxbrew/bin` を PATH の先頭に置くので、同名のコマンドは RPM 版より Homebrew 版が勝つ
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる（同名のコマンドは RPM 版より Homebrew 版が勝つ）、`sudo yazi` は使えない（root で使うならフルパスで呼ぶ）、など
   - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **画像プレビューは端末に依存する**: Kitty / WezTerm / foot などのグラフィックプロトコル、または Überzug++ が要る。GNOME 端末では文字ベースの表示になる
 - **`q` と `Q`**: `y` 関数経由なら `q` で終了時にそのディレクトリへ移動し、`Q` なら移動しない
 - **Homebrew の更新は自分の責任で**: `brew upgrade` は指定しなければ全 formula を上げる。yazi だけ上げるなら `brew upgrade yazi`
-- **sudo 環境では使えない**: `sudo yazi` は root の PATH に Homebrew が無いので動かない。root で使いたいならフルパスで呼ぶ
 
 ### 参照
 

@@ -4,6 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も Syncthing を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、Syncthing も同期するファイルの持ち主として動かすため）
 > - **手順 3 には対話入力がある**（パスワード）。入力し終えてから手順 4 を貼る
 
@@ -33,9 +34,9 @@
    <summary>補足: 変数について</summary>
 
    - `ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、OS のアカウントとも Samba のユーザーとも無関係。自動で OS と同じ名前が入るだけなので、別の名前にしてもよい
-   - `ST_LAN_IP` は設定には使わず、手順 9 の案内と、手順 10 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](samba.md) の `SERVER_IP` と同じ扱い）
+   - `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](samba.md) の `SERVER_IP` と同じ扱い）
    - `ST_GUI_ADDR` を `0.0.0.0:8384` にすると**すべての NIC で待ち受ける**。この環境では `end0`（LAN）と `wg0`（VPN）の両方から開ける
-   - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 8 のままでよい）
+   - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 7 のままでよい）
    - パスワードは変数に置かない。手順 3 でその場で読み取り、設定したら `unset` する
 
    </details>
@@ -75,7 +76,7 @@
    ...
    ```
 
-   - `sh.brew.syncthing.service` は formula の `service do` ブロックから Homebrew が生成したもので、公式が配っている `etc/linux-systemd/user/syncthing.service` ではない（手順 6 の補足）
+   - `sh.brew.syncthing.service` は formula の `service do` ブロックから Homebrew が生成したもので、公式が配っている `etc/linux-systemd/user/syncthing.service` ではない（手順 5 の補足）
    - man は `man syncthing` / `man syncthing-config` / `man syncthing-faq` などが読める
 
    </details>
@@ -125,29 +126,9 @@
 
    </details>
 
-1. 常時起動にするため、linger を有効にする。
+1. Syncthing のサービスを開始する。
 
    ```bash
-   sudo loginctl enable-linger "${USER}"
-   ```
-
-   - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-   <details>
-   <summary>補足: linger が要る理由</summary>
-
-   **linger が無いと、SSH を切った時点で Syncthing も止まる。**
-
-   - ユーザーの systemd（`user@1000.service`）はログインセッションが無くなると終了し、その配下のサービスも一緒に落ちるため
-   - `sudo loginctl enable-linger` は `/var/lib/systemd/linger/<USER>` を作り、起動時にユーザーの systemd を立ち上げてこのサービスを開始させる
-
-   </details>
-
-1. linger が有効になったか確かめ、Syncthing のサービスを開始する。
-
-   ```bash
-   loginctl show-user "$(id -u)" -p Linger                 # Linger=yes
    brew services start syncthing
    brew services list
    systemctl --user is-enabled sh.brew.syncthing.service   # enabled
@@ -156,6 +137,7 @@
 
    - `Successfully started 'syncthing' (label: sh.brew.syncthing)` が出る
    - `~/.config/systemd/user/sh.brew.syncthing.service` が置かれる
+   - [linger](linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、SSH を切った時点で Syncthing も止まる）
 
    <details>
    <summary>補足: 生成される unit と、システムサービスにする道</summary>
@@ -288,7 +270,7 @@
 
 1. LAN 上のブラウザで GUI に入り、デバイス ID を確かめる。
 
-   - 手順 9 の URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
+   - 手順 8 の URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
    - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
    - **この時点では同期するフォルダは 1 つも無い**（Syncthing 2.x は既定フォルダを作らない）
    - バックアップから戻したホストでは、戻したフォルダが並ぶ。フォルダのディレクトリと `.stfolder` は Syncthing が作り、中身は相手の端末から届く
@@ -323,7 +305,7 @@
 ## 接続元を絞る（任意）
 
 - **接続元を制限しないなら、この節は不要**
-- 手順 8 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く
+- [手順 7](#実施手順) は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く
 - 同期そのもの（22000）まで絞ると、相手デバイスの側の経路が変わったときに黙って同期が止まる。**絞るのは GUI だけにしておく方が事故が少ない**
 
 1. GUI だけを特定のサブネットに絞るため、`syncthing-gui` の開放を rich rule に置き換える。
@@ -554,7 +536,7 @@
 
    - `Process:` の行に、`ExecStartPre` と `ExecStart` の終了コードが出る（保存先が無いときは `status=1/FAILURE`）
    - `journalctl --user -u syncthing-backup.service` は、ユーザーの journal を読めない環境では何も出ない。コンテナでは `No journal files were opened due to insufficient permissions.` だった（実機でも `sh.brew.syncthing.service` について `No journal files were found.` の実測がある。[付録](#付録-実機での検証記録2026-09-24)）
-   - linger が有効なので（[手順 5](#実施手順)）、ログアウト中も path ユニットとタイマーは動く
+   - [linger](linger.md) が有効なので、ログアウト中も path ユニットとタイマーは動く
 
    </details>
 
@@ -742,10 +724,11 @@
 - 接続元を絞る節を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
 - 自動バックアップを設定した場合は、Syncthing が動いているうちに、先に[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)の手順 7 を貼る
 - 同期していたファイル自体は、この節のどの手順でも消えない
+- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 - 本書ではロールバックは**本実行していない**
 
 > [!CAUTION]
-> **この節の**手順 5 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](#バックアップから戻す)で同じデバイス ID に戻せる）。
+> **この節の**手順 3 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](#バックアップから戻す)で同じデバイス ID に戻せる）。
 
 1. サービスを止めて、Syncthing を消す。
 
@@ -754,7 +737,7 @@
    brew uninstall syncthing
    ```
 
-   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは、この節の手順 4 の `${USER}` が `root` になる）
+   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは、`brew` が動かない）
    - `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
    - 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
 
@@ -762,24 +745,6 @@
 
    ```bash
    sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. ほかに自分で有効にしたユーザーサービスがあるか見る。
-
-   ```bash
-   ls ~/.config/systemd/user/*.wants/ 2>/dev/null
-   ```
-
-   - 何も出さなければ、この節の手順 4 で linger を切る
-   - 何か出す（[Dropbox（rclone）](dropbox-rclone.md) の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 4 は飛ばす
-   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、この節の手順 4 は飛ばす
-
-1. ほかにユーザーサービスを常駐させていないときだけ、linger を切る。
-
-   ```bash
-   sudo loginctl disable-linger "${USER}"
    ```
 
    - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
@@ -799,11 +764,12 @@
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [Syncthing](https://syncthing.net/) の最新版を入れ、ログインしていない間も動き続けるファイル同期デーモンにする。Web GUI は LAN からも開けるようにする
-- **進め方**: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと `loginctl enable-linger` で常駐させる
+- **進め方**: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと、前提の [linger](linger.md)（`loginctl enable-linger`）で常駐させる
   - **GUI の認証を先に設定してから**待ち受けを LAN に広げ、最後に firewalld を開ける
   - 読者が書き換える値は無い（既定のままで通る）
 - **状態**: **実機で本実行済み（2026-09-24）**
   - 下表のホストで、本書の各手順のコマンドを上から順に実行した。本書はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
+    - linger の有効化（今の [linger.md](linger.md) の手順 2・3。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
     - `syncthing 2.1.5`（Homebrew、`arm64_linux` のボトル）が入っている
     - `sh.brew.syncthing.service` が `enabled` / `active`
@@ -813,11 +779,11 @@
   - このホストは**一度構築したあとクリーンインストールした直後**の環境で、Homebrew に formula が 1 本も入っていない状態から始めている
   - **本実行していないこと**: ブラウザでの GUI ログイン、別デバイスとの実際の同期（フォルダ共有・競合処理）、再起動後の自動起動、21027/udp と 22000/udp の実疎通、[接続元を絞る（任意）](#接続元を絞る任意)、ロールバック
   - **バックアップと復旧の 2 節は、コンテナのみで検証した（2026-09-27）**
-    - 対象は[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)と[バックアップから戻す](#バックアップから戻す)、[手順 4](#実施手順)・[手順 10](#実施手順) に足した「戻したホスト」の箇条書き
-    - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜7 のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
+    - 対象は[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)と[バックアップから戻す](#バックアップから戻す)、[手順 4](#実施手順)・[手順 9](#実施手順) に足した「戻したホスト」の箇条書き
+    - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜6（と、[linger.md](linger.md) に移した linger の有効化）のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
     - 確認したこと: path ユニットとタイマーで取れる、中身が同じなら作らない、100 個を超えたら古いものから消す、送信専用フォルダから受信専用の相手（同じコンテナの 2 つ目の Syncthing）へ届く、同じホストで戻せる、新しいコンテナで戻すとデバイス ID・API キー・フォルダが戻って中身が相手から届く
     - 確認していないこと: 実機（aarch64 を含む）、別のマシンの相手、GUI での共有と受け入れ、実際の 0 時台のタイマーと `Persistent=true` の追いかけ実行
-  - 2026-09-28: 手順 8のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 7 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
 
@@ -881,7 +847,7 @@ AlmaLinux 10 / aarch64 で Syncthing を入れる経路を比べた（2026-09-24
   - 同期するのはホームディレクトリ配下なので、ファイルの持ち主として動かすのが素直
   - root 管理の `syncthing@<USER>.service` でも同じことはできるが、Homebrew 版は unit を同梱しないので自分で書くことになる
 - **GUI は LAN に公開し、認証と TLS を先に入れた**
-  - 公開しない構成（`127.0.0.1:8384` のまま、SSH ポートフォワードで開く）なら、手順 7 と `syncthing-gui` の開放が要らない
+  - 公開しない構成（`127.0.0.1:8384` のまま、SSH ポートフォワードで開く）なら、手順 6 と `syncthing-gui` の開放が要らない
   - このホストは GNOME も入っていて、LAN 内の別 PC から触りたいので公開する方を採った
 - **firewalld は定義済みサービス（`syncthing` / `syncthing-gui`）で開けた。** ポート番号を直接書くより意図が読め、上流がポートを足したときにも追従する
 - **設定のバックアップは、systemd のユーザーユニット（path + タイマー）で自動にした**（[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)）
@@ -921,7 +887,7 @@ $ syncthing cli config folders list
 ```
 
 - `index-v2` が 2.x の SQLite データベース
-- `https-cert.pem` / `https-key.pem` は、手順 7 で TLS を有効にしたときに Syncthing が自分で作った自己署名証明書（`cert.pem` / `key.pem` はデバイス ID のもとになる別物）
+- `https-cert.pem` / `https-key.pem` は、手順 6 で TLS を有効にしたときに Syncthing が自分で作った自己署名証明書（`cert.pem` / `key.pem` はデバイス ID のもとになる別物）
 
 `config.xml` の `<gui>` 節は次の形になっている（パスワードは bcrypt ハッシュ、API キーは伏せた）:
 
@@ -944,7 +910,7 @@ $ syncthing cli config folders list
 - **linger を切ると止まる**: `loginctl disable-linger` すると、ログアウトした時点で同期が止まる。止まっていること自体は GUI を開くまで気付きにくい
 - **公開範囲は public ゾーンの全 NIC**: この環境では `wg0` も public にあるので、**VPN 越しの拠点からも 22000 と 8384 に届く**
   - 同期には好都合だが、GUI まで届くことは意識しておく。絞るなら[接続元を絞る（任意）](#接続元を絞る任意)
-- **GUI の認証は必須**: LAN に開く構成なので、認証を設定しないまま待ち受けを広げると誰でも全設定を触れる。本書は手順 3〜4（認証）→ 手順 7（公開）→ 手順 8（firewalld）の順にしてある
+- **GUI の認証は必須**: LAN に開く構成なので、認証を設定しないまま待ち受けを広げると誰でも全設定を触れる。本書は手順 3〜4（認証）→ 手順 6（公開）→ 手順 7（firewalld）の順にしてある
 - **証明書は自己署名**: ブラウザの警告は消えない。警告を無視する運用に慣れると本物の異常を見逃すので、常用するなら例外として明示的に登録する
 - **API キーはパスワードと同じ重み**: `config.xml` にあり、これ 1 つで GUI の全操作ができる。ログや issue に貼らない
 - **設定と DB は `~/.local/state/syncthing`**: 1.27.0 以降の既定
@@ -970,6 +936,7 @@ $ syncthing cli config folders list
 - [FAQ — Syncthing documentation](https://docs.syncthing.net/users/faq.html) — 「My Syncthing database is corrupt」（DB を消して起動すると全フォルダを読み直す）と「folder marker missing」
 - Syncthing 2.1.5 のソース — `lib/model/model.go` の `newFolder`（DB が空のフォルダはディレクトリと `.stfolder` を作る）、`lib/fs/tempname.go`（`.syncthing.` で始まる名前を一時ファイルとして扱う）、`syncthing generate` の `Key exists; will not overwrite`
 - `man syncthing`（`generate`、`cli`、`--gui-address`）/ `man syncthing-config`（`<gui>`）/ `man syncthing-faq` / `man loginctl`（`enable-linger`）/ `man systemd.path` / `man systemd.timer`
+- [linger](linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
 
 ---
 
@@ -1111,9 +1078,9 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 | Homebrew | 7.0.6（[homebrew.md](homebrew.md) と同じインストーラ） |
 | Syncthing | `syncthing 2.1.5`（`x86_64_linux` のボトル。バージョン文字列の末尾は `[noupgrade]` で、aarch64 のボトルのような `modernc-sqlite` は付かない） |
 | 相手の端末 | 同じコンテナの 2 つ目の Syncthing（`--home=~/peer`、`tcp://127.0.0.1:22001` で待ち受け、探索・リレー・NAT は切った） |
-| 通していない手順 | [手順 8](#実施手順)（firewalld を入れていない） |
+| 通していない手順 | [手順 7](#実施手順)（firewalld を入れていない） |
 
-実施手順 1〜7 のあと（手順 3 のパスワードはブロックに直接書いた）、両節のコードブロックをそのまま貼った。相手の端末での操作（共有の受け入れ、受信専用、ゴミ箱）は、GUI の代わりに `syncthing cli --home=~/peer config ...` で同じ設定を入れた。
+実施手順 1〜6 と linger の有効化（今の [linger.md](linger.md) の手順 2）のあと（手順 3 のパスワードはブロックに直接書いた）、両節のコードブロックをそのまま貼った。相手の端末での操作（共有の受け入れ、受信専用、ゴミ箱）は、GUI の代わりに `syncthing cli --home=~/peer config ...` で同じ設定を入れた。
 
 #### スクリプトの動き
 
@@ -1226,7 +1193,7 @@ true
 元のコンテナの Syncthing を止め（相手の 2 つ目の Syncthing は動かしたまま）、Homebrew だけ入れた新しいコンテナで戻した。元のコンテナには、送信専用フォルダのほかに、相手と共有した送受信フォルダ `docs`（`~/Sync`、ファイル 2 つ）を足しておいた。
 
 - [バックアップから戻す](#バックアップから戻す)の手順 1・2・4・5 を、Syncthing を入れる前に貼った。アーカイブは相手の受信専用フォルダから全部（9 個）コピーした（`scp` の代わりに `docker exec` の `tar` のパイプを使った）
-- そのあと実施手順 2〜7 と 9 を通した
+- そのあと実施手順 2〜6 と 8（と、今の [linger.md](linger.md) の手順 2 に当たる linger の有効化）を通した
 
 [手順 4](#実施手順) の `syncthing generate`:
 
@@ -1239,7 +1206,7 @@ INF Updated GUI authentication password (log.pkg=github)
 - `cert.pem` / `key.pem` の sha256 は戻したものと同じ。デバイス ID も元のコンテナと同じ
 - `config.xml` の API キー・フォルダ（`docs` と `syncthing-backup-<HOSTNAME>`）・`<address>0.0.0.0:8384</address>`・`tls="true"` は残り、パスワードのハッシュだけ変わった
 
-[手順 6](#実施手順) で起動したあとのログ（抜粋）:
+[手順 5](#実施手順) で起動したあとのログ（抜粋）:
 
 ```
 INF Ready to synchronize (folder.id=docs folder.type=sendreceive log.pkg=model)
@@ -1289,4 +1256,4 @@ docs
 - 実際に 0 時台にタイマーが走ること、止まっていた間の分を `Persistent=true` で追いかけて走ること
 - ユーザーの journal が読める環境での `journalctl --user` の出力
 - 外付けディスクを保存先や同期フォルダにしたときの、マウントが外れている場合の挙動
-- firewalld（手順 8）を含めた入れ直し
+- firewalld（手順 7）を含めた入れ直し

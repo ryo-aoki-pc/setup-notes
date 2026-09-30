@@ -268,29 +268,12 @@
 - `podman run -d` で動かしたコンテナは、PC を再起動すると戻らない。linger が無いと、ログアウトしただけで止まる（[注意点](#注意点)）
 - Quadlet は、`~/.config/containers/systemd` に置いた定義から、ユーザーの systemd のサービスを作る仕組み。podman に含まれている
 - 確認用に、`registry.access.redhat.com/ubi10/httpd-24`（Apache）を `127.0.0.1:8080` で動かす
-- この節の手順 4 で再起動する
+- **前提**: [linger](linger.md) を有効にしてあること（ログインしていない間もユーザーの systemd を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
+- この節の手順 3 で再起動する
 
-1. ログインしていない間もユーザーの systemd を動かすため、linger を有効にする。
-
-   ```bash
-   sudo loginctl enable-linger "${USER}"
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-   <details>
-   <summary>補足: linger が要る理由</summary>
-
-   ユーザーの systemd（`user@<UID>.service`）は、最後のログインのセッションが終わると止まり、その下で動くコンテナも一緒に止まる。linger を有効にすると、PC の起動時からユーザーの systemd が動き続ける。
-
-   [syncthing.md 手順 5](syncthing.md#実施手順) と同じ設定（[dropbox.md](dropbox.md)・[dropbox-rclone.md](dropbox-rclone.md) も使う）なので、どれかで有効にしてあれば 1 度でよい。
-
-   </details>
-
-1. linger を確かめ、確認用の Web サーバーの定義とページを置く。
+1. 確認用の Web サーバーの定義とページを置く。
 
    ```bash
-   loginctl show-user "$(id -u)" -p Linger
    mkdir -p ~/hello-web ~/.config/containers/systemd
    echo 'hello from quadlet' > ~/hello-web/index.html
    cat > ~/.config/containers/systemd/hello-web.container <<'EOF'
@@ -312,7 +295,6 @@
    EOF
    ```
 
-   - `Linger=yes` が出る
    - 定義の各行の意味は、この手順の補足
 
    <details>
@@ -385,7 +367,7 @@
    sudo systemctl reboot
    ```
 
-   - 再起動しないなら、この節の手順 5 も飛ばす
+   - 再起動しないなら、この節の手順 4 も飛ばす
    - **次の手順は、再起動した後にログインし直してから貼る**
 
 1. 再起動の後、ログインより前にサービスが起動していたことを確かめる。
@@ -450,10 +432,11 @@
 ## ロールバック
 
 - 上から順に、通した節の分だけ実行する
-- 手順 6 の前に、ほかの手順書（distrobox・podman-compose）で作ったものが要らないか確かめる
+- この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose）で作ったものが要らないか確かめる
+- Quadlet の節を通し、linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（[Syncthing](syncthing.md)・[Dropbox](dropbox.md) など、ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
-> **この節の**手順 6 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](distrobox.md) のボックスや [podman-compose](podman-compose.md) のコンテナも含む。
+> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](distrobox.md) のボックスや [podman-compose](podman-compose.md) のコンテナも含む。
 
 1. Quadlet の節を通したときだけ、確認用のサービスと定義とページを消す。
 
@@ -463,14 +446,6 @@
    systemctl --user daemon-reload
    rm -rf ~/hello-web
    ```
-
-1. Quadlet の節を通し、ほかに linger を使うもの（[Syncthing](syncthing.md)・[Dropbox](dropbox.md) など）が無いときだけ、linger を外す。
-
-   ```bash
-   sudo loginctl disable-linger "${USER}"
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Docker 向けの節を通したときだけ、`~/.bashrc` の行を消す。
 
@@ -525,6 +500,7 @@
 - **進め方**: AppStream の podman を入れ、subuid / subgid と `podman info` を確かめ、API ソケットを有効にする。自動起動は任意の Quadlet。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・6〜8、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
+    - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2・3 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
   - 手順 4〜5 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜7 を通した
   - 確認したこと:
     - rootless で `true overlay crun netavark pasta v2` になり、`quay.io/podman/hello` が動く
@@ -608,7 +584,7 @@ $ podman --remote version --format '{{.Server.Version}}'
   - `Error: pasta failed with exit code 1:` と `Failed to bind port 80 (Permission denied) for option '-t 127.0.0.1/80-80:8080-8080'`
   - `sysctl net.ipv4.ip_unprivileged_port_start` は `1024`。8080 など 1024 以上の番号にする
 - **`:Z` をホームやシステムのディレクトリに付けない**: `:Z` は指定したディレクトリの SELinux のラベルを付け替える。`podman-run(1)` の `--volume` の説明も、システムのファイルやディレクトリの付け替えを戒めている
-- **linger が無いと、ログアウトでコンテナが止まる**: linger の無いユーザーで `podman run -d` を動かしてログアウトすると、約 10 秒後にユーザーの systemd と一緒にコンテナが止まった（検証コンテナで再現）
+- **linger が無いと、ログアウトでコンテナが止まる**: linger の無いユーザーで `podman run -d` を動かしてログアウトすると、約 10 秒後にユーザーの systemd と一緒にコンテナが止まった（検証コンテナで再現）。止めたくないものは Quadlet の節で動かし、[linger](linger.md) を有効にする
 - **API ソケットにつなげると、自分のコンテナを何でも操作できる**: ソケットのファイルの権限（`srw-rw----`、持ち主は自分）を変えない
 - **容量**: イメージは `~/.local/share/containers/storage` に溜まる。`podman system df` で見て、`podman image prune -a` で掃除する（`ubi10/httpd-24` は 285 MB）
 - **Docker Hub には、認証なしの取得に回数の上限がある**: 検証の時点の応答は `ratelimit-limit: 100;w=3600`。本書の例は quay.io と registry.access.redhat.com に寄せた
@@ -623,6 +599,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 - [podman-run(1)](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--volume` の `:Z`、`--publish`
 - [RHEL 10 — Building, running, and managing containers](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/building_running_and_managing_containers/index) — RHEL の podman の文書
 - `man containers-registries.conf` — 短い名前の扱い（`unqualified-search-registries`・`short-name-mode`）
+- [linger](linger.md) — [Quadlet の節](#quadlet-で自動起動する任意)の前提の手順書
 
 ---
 
@@ -651,7 +628,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、SSH のログインシェルの端末（pty）に 1 ブロックずつ流した。貼り付け（bracketed paste）ではなく 1 行ずつ打ち込む形で、実際に貼るより厳しい
 - `[y/N]` の確認には pty 越しに `y` と答えた。コマンドに `-y` は足していない
 - 手順 4〜5 は、`useradd -K SUB_UID_COUNT=0 -K SUB_GID_COUNT=0` で作った範囲の無いユーザーで、手順 3〜7 を通した
-- Quadlet の節の手順 4 は、コンテナの中で `sudo systemctl reboot` を実行し、止まったコンテナを `docker start` で起動し直した。ログインせずに 30 秒待ってから SSH で入り直し、手順 5 を流した
+- Quadlet の節の手順 3 は、コンテナの中で `sudo systemctl reboot` を実行し、止まったコンテナを `docker start` で起動し直した。ログインせずに 30 秒待ってから SSH で入り直し、手順 4 を流した
 
 | 手順 | 結果 |
 |---|---|
@@ -662,12 +639,12 @@ $ podman --remote version --format '{{.Server.Version}}'
 | 7. 動作 | `!... Hello Podman World ...!`。`podman images` に `quay.io/podman/hello`（787 kB） |
 | 8. ソケット | `Created symlink ...podman.socket ...`、`active`、`OK`、`5.8.2` |
 | Docker 向け | `unix:///run/user/<UID>/podman/podman.sock`、`"Name":"Podman Engine"` |
-| Quadlet 1〜3 | `Linger=yes`、`active`、`generated`、`hello from quadlet` |
-| Quadlet 4〜5 | 起動し直した後、ログインする前のセッションは linger の `manager` だけ。`ActiveEnterTimestamp` が 17:38:06、ログインが 17:38:37 で、`hello from quadlet` |
+| Quadlet 1・2（当時は linger の有効化と確認も、この節の手順だった。今の linger.md の手順 2・3） | `Linger=yes`、`active`、`generated`、`hello from quadlet` |
+| Quadlet 3・4 | 起動し直した後、ログインする前のセッションは linger の `manager` だけ。`ActiveEnterTimestamp` が 17:38:06、ログインが 17:38:37 で、`hello from quadlet` |
 | 更新 | `Nothing to do.`。`podman auto-update` は `UPDATED` が `false` |
-| ロールバック | 手順 5 でイメージ 2 つ（285.8 MB）を確かめ、手順 6 の確認に `y`、手順 7 で 30 パッケージを消した（`Freed space: 91 M`） |
+| ロールバック | 手順 4 でイメージ 2 つ（285.8 MB）を確かめ、手順 5 の確認に `y`、手順 6 で 30 パッケージを消した（`Freed space: 91 M`） |
 
-**最初の試行で見つけて直したこと**: Quadlet の節の手順 3 の `curl` に再試行を付けていなかったときは、`start` の直後の `curl` が何も出さずに終了コード 56 で終わった（手順 3 の補足）。
+**最初の試行で見つけて直したこと**: Quadlet の節の手順 2 の `curl` に再試行を付けていなかったときは、`start` の直後の `curl` が何も出さずに終了コード 56 で終わった（手順 2 の補足）。
 
 **落とし穴の再現**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 

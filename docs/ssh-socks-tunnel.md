@@ -1,0 +1,371 @@
+# ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）
+
+## 実施手順
+
+> [!IMPORTANT]
+> - **2 台のホストで行う**。手順 1・2 はインターネットに出られるホスト（以下、オンラインのホスト）で、手順 3 は、手順 2 でログインしたインターネットに出られないホスト（以下、オフラインのホスト）のシェルで貼る
+> - 前提: オンラインのホストからオフラインのホストへ ssh でログインできること（LAN・VPN・VirtualBox のホストオンリーのネットワークなど）。オンラインのホストの OpenSSH は 7.6 以上
+> - **手順 2 は ssh のログイン**。ログインしてから手順 3 を貼る
+> - オンラインのホストが Windows なら、手順 1 は飛ばし、手順 2 の箇条書きのとおり 1 行を打つ
+
+- 手順 1 はオンラインのホストのシェルで貼る。手順 2 の後は、ログインしたオフラインのホストのシェルで貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: トンネルを使う手順書を、手順 3 のシェルのまま貼る。dnf にも使わせるなら[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)。使い終わったら[トンネルを閉じる](#トンネルを閉じる)。以後は[ロールバック](#ロールバック)
+- これを前提にする手順書:
+  - [Homebrew（インターネットに出られないホスト）](homebrew-offline.md)
+  - [npm（インターネットに出られないホスト）](npm-offline.md)（Neovim の Mason が npm で入れるパッケージ。npm には `https_proxy` を足す）
+
+> [!WARNING]
+> **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](#トンネルを閉じる)。
+>
+> - Linux のオンラインのホストは、x86_64 のコンテナでのみ確かめた。実機では、Windows 11 のホストから VirtualBox の VM へトンネルを張った（[対象と検証環境](#対象と検証環境)）
+
+1. オンラインのホストで、変数を設定する（`OFFLINE_HOST` は必ず値を入れる）。
+
+   ```bash
+   OFFLINE_HOST=192.168.1.20            # ← 自分の値に書き換える。オフラインのホストの IP アドレスかホスト名。<OFFLINE_HOST>
+   ```
+
+   ```bash
+   OFFLINE_USER=${USER}                 # オフラインのホストでログインするユーザー。<OFFLINE_USER>
+   for v in OFFLINE_HOST OFFLINE_USER; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは `OFFLINE_HOST` だけ
+   - オフラインのホストのユーザー名がオンラインのホストと違うときは、`OFFLINE_USER` も書き換える
+   - 最後に値を読み戻して確かめる
+   - **既定値のままでもエラーにならない**ので、`OFFLINE_HOST` を書き換えたかをここで確かめる
+   - 変数はオンラインのホストのシェルの中だけで使う。**新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直す
+
+   <details>
+   <summary>補足: 変数について</summary>
+
+   - オフラインのホストには変数が無い。ポート（1080）は変える必要が無いので、変数にせずコマンドに直接書いた（変えるときは手順 2 の補足）
+   - `OFFLINE_USER` は、トンネルを使う手順書が決める。[homebrew-offline.md](homebrew-offline.md) なら、Homebrew を使うユーザー（root ではログインしない）
+
+   </details>
+
+1. オンラインのホストから、SOCKS の転送を付けて ssh でログインする。
+
+   ```bash
+   ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 "${OFFLINE_USER:?手順 1 の OFFLINE_USER が空のまま}@${OFFLINE_HOST:?手順 1 の OFFLINE_HOST が空のまま}"
+   ```
+
+   - ログインすると、オフラインのホストの `127.0.0.1:1080` が SOCKS プロキシになる。そこへの接続は、オンラインのホストから外へ出る
+   - 転送は、この ssh のセッションが続く間だけ有効。このウィンドウは開いたままにする
+   - `Error: remote port forwarding failed for listen port 1080` で終わったら、オフラインのホストで 1080 番がふさがっているか、sshd が転送を禁じている（この手順の補足）
+   - オンラインのホストが Windows なら、手順 1 は飛ばし、PowerShell か cmd に `ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 <OFFLINE_USER>@<OFFLINE_HOST>` を打つ（Windows に最初から入っている OpenSSH のクライアントで確かめた）
+   - 初めてつなぐホストでは、ホスト鍵の確認に `yes` と答える
+   - **次の手順は、オフラインのホストにログインしてから貼る**（続けて貼るとホスト鍵の確認やパスワードへの答えとして食われる）
+
+   <details>
+   <summary>補足: 逆向きの動的転送と、2 つのオプション</summary>
+
+   **`-R` にポートだけを書く（転送先を書かない）と、ssh が SOCKS のプロキシとして働く。** オフラインのホストの sshd がそのポートで待ち受け、そこへ来た接続を、オンラインのホストの ssh が SOCKS の要求の宛先へつなぐ。
+
+   - OpenSSH 7.6 で入った機能で、オンラインのホストの ssh だけで実装されている。オフラインのホストの sshd の版は問わない（[参照](#参照)のリリースノート）
+   - 待ち受けは、sshd の `GatewayPorts` が既定の `no` なら loopback だけ（`127.0.0.1`、IPv6 があれば `::1` も）。`yes` のホストでは LAN 全体に開くので、手順 3 の `ss` で確かめる
+   - オフラインのホストの sshd が転送を許しているかは、オフラインのホストで `sudo sshd -T | grep -E '^(allowtcpforwarding|gatewayports|disableforwarding|permitlisten)'` で見られる。AlmaLinux の既定は `allowtcpforwarding yes`・`gatewayports no`・`disableforwarding no`・`permitlisten any` だった（AlmaLinux Atomic Desktop の VM も同じ）
+
+   **`-o ExitOnForwardFailure=yes`: 転送を作れないときに、ログインせずに終わる。** 1080 番を別の ssh の転送でふさいでから手順 2 を貼ると、次の 1 行を出してオンラインのホストのプロンプトに戻った:
+
+   ```
+   Error: remote port forwarding failed for listen port 1080
+   ```
+
+   - オフラインのホストの sshd に `AllowTcpForwarding no` を入れたときも、同じ 1 行で終わった
+   - 付けないと、転送が無いままログインする。1080 番をふさいだまま `-o ExitOnForwardFailure=yes` を外すと、`Warning: remote port forwarding failed for listen port 1080` を出してからログインした（手順 3 で気づくことになる）
+
+   **`-o ControlPath=none`: この ssh では、接続の共有を使わない。** オンラインのホストの `~/.ssh/config` で `ControlMaster auto` と `ControlPersist` を使っていると、転送は裏に残るマスターの接続に付く。
+
+   - 検証環境で `~/.ssh/config` に `ControlMaster auto`・`ControlPath ~/.ssh/cm-%r@%h:%p`・`ControlPersist 10m` を書き、`ControlPath=none` を外して入ると、`exit` の後（`Shared connection to <OFFLINE_HOST> closed.`）も、オフラインのホストに `127.0.0.1:1080` の待ち受けが残った
+   - 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](#トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
+
+   **Windows のオンラインのホスト**: Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）で、VirtualBox の VM へ同じ転送を張れた（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。その文書のホストオンリーアダプターの節は、その後トンネルを使わない形に変わった）。
+
+   - トンネルは Windows の外向きの接続なので、Windows の受信の規則は要らない
+   - オフラインのホスト（VM）が再起動すると、Windows の ssh は `Connection to <VM_IP> closed by remote host.` で終わり、待ち受けも消えた
+
+   **1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](#dnf-にもトンネルを使わせる任意)と[ロールバック](#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](#トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
+
+   </details>
+
+1. オフラインのホストで、プロキシを環境変数に入れ、インターネットに届くか確かめる。
+
+   ```bash
+   export ALL_PROXY=socks5h://127.0.0.1:1080
+   ss -Hltn 'sport = :1080'
+   curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}\n' https://github.com
+   ```
+
+   - `ss` の行は `127.0.0.1:1080`（IPv6 があれば `[::1]:1080` も）だけ
+   - `0.0.0.0:1080` や `*:1080` が出たら、LAN 全体にプロキシが開いている。`exit` で抜けて、ここで止める（手順 2 の補足）
+   - 最後の行が `200` なら届いている
+   - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、手順 2 の転送が無い
+   - `export` はこのシェルの中だけで有効。**ssh を張り直したら、手順 2 からやり直す**
+   - `sudo` を付けたコマンド・podman・npm は `ALL_PROXY` を読まない（この手順の補足）。dnf には[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)で設定する
+
+   <details>
+   <summary>補足: <code>socks5h</code> と <code>ALL_PROXY</code></summary>
+
+   **`socks5h` の `h` は、名前をプロキシの側（オンラインのホスト）で引く指定。** オフラインのホストは外の名前を引けないので、`h` を落とすと届かない。コンテナでの実測:
+
+   ```
+   $ curl -sS -o /dev/null --connect-timeout 10 -x socks5://127.0.0.1:1080 https://github.com
+   curl: (97) Could not resolve host: github.com
+   ```
+
+   **`ALL_PROXY` を読むもの**:
+
+   - curl は、プロトコルを問わずに使う
+   - git は、`http.proxy` の設定も `https_proxy` も無いときに `ALL_PROXY` を使い、`socks5h` を解る。`GIT_TRACE_CURL=1 git ls-remote https://github.com/Homebrew/brew HEAD` の出力に `SOCKS5 connect to github.com:443 (remotely resolved)` が出た
+   - Homebrew（[homebrew-offline.md 手順 1](homebrew-offline.md#実施手順) の補足）
+   - `https_proxy`（`HTTPS_PROXY`）や git の `http.proxy` が既に入っていると、curl と git はそちらを使う。`env | grep -i proxy` と `git config --get http.proxy` が何も出さないことを確かめておく
+
+   **`ALL_PROXY` を読まないもの**:
+
+   - **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](#dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
+   - **podman**: `https_proxy`（`HTTPS_PROXY`）を読み、`ALL_PROXY` だけでは取り込めなかった。`sudo https_proxy=socks5h://127.0.0.1:1080 podman …` のように、コマンドの前に変数を置いて渡す（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。トンネルを使っていた版の、その節の手順 4 の補足の実測）
+   - **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](npm-offline.md#実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
+
+   </details>
+
+---
+
+## dnf にもトンネルを使わせる（任意）
+
+- オフラインのホストで、dnf で外のリポジトリから入れるときだけ行う（[homebrew-offline.md](homebrew-offline.md) では、Homebrew の依存が足りないとき）
+- 社内のミラーなど、dnf がトンネル無しで届くリポジトリを使うホストでは行わない（その通信もトンネルに向かってしまう）
+- 手順 3 のシェルで貼る。足した行は、[ロールバック](#ロールバック)で消すまで残る
+
+1. dnf にプロキシを設定する。
+
+   ```bash
+   if grep -q '^proxy' /etc/dnf/dnf.conf; then echo '中断: /etc/dnf/dnf.conf に proxy の行が既にある（この手順は行わない）' >&2; else
+     sudo sed -i '/^\[main\]$/a proxy=socks5h://127.0.0.1:1080' /etc/dnf/dnf.conf
+     grep -n '^proxy' /etc/dnf/dnf.conf
+     sudo dnf makecache
+   fi
+   ```
+
+   - `sudo` は `ALL_PROXY` を引き継がないので、dnf には `/etc/dnf/dnf.conf` で渡す
+   - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.` が出ればよい
+   - この行がある間は、トンネルが無いと dnf がどのリポジトリにも届かなくなる
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+
+   <details>
+   <summary>補足: dnf のプロキシ</summary>
+
+   **`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](gh.md#実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
+
+   - `[main]` の行の直後に 1 行足す。AlmaLinux の `/etc/dnf/dnf.conf` は `[main]` の節だけ
+   - `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](#ロールバック)で元に戻せなくなるため
+
+   **dnf 4.20 は `socks5h://` を受け付け、リポジトリの設定は変えずに通った。** AlmaLinux のミラーの一覧（`mirrors.almalinux.org`）も、一覧が返したミラーも、トンネルを通った。コンテナでの実測（進み具合の行は省いた）:
+
+   ```
+   2:proxy=socks5h://127.0.0.1:1080
+   AlmaLinux 10 - AppStream                        5.1 MB/s | 2.7 MB     00:00
+   AlmaLinux 10 - BaseOS                            66 MB/s |  37 MB     00:00
+   AlmaLinux 10 - CRB                              1.7 MB/s | 616 kB     00:00
+   AlmaLinux 10 - Extras                            42 kB/s |  13 kB     00:00
+   Metadata cache created.
+   ```
+
+   **この行がある間は、トンネルが無いと dnf はどこにも届かない。** 転送無しでログインしたシェルで `sudo dnf makecache` を実行したときの出力（長い行は省いた）:
+
+   ```
+   Errors during downloading metadata for repository 'appstream':
+     - Curl error (7): Could not connect to server for https://mirrors.almalinux.org/mirrorlist/10/appstream [Failed to connect to 127.0.0.1 port 1080 after 0 ms: Could not connect to server]
+   Error: Failed to download metadata for repo 'appstream': Cannot prepare internal mirrorlist: …
+   ```
+
+   - オフラインのホストなので、この行が無くても dnf は外に届かない。失敗の出方が変わるだけ
+
+   </details>
+
+---
+
+## トンネルを閉じる
+
+- トンネルを使う手順書の作業が終わってから行う
+- 張り直すときは、[手順 1〜3](#実施手順) から（手順 1 の変数が残っているオンラインのホストのシェルなら、手順 2 から）
+- この節の手順 2・3 は、閉じたことを確かめるためのもの。確かめないなら、この節の手順 1 だけでよい
+
+1. オフラインのホストからログアウトして、トンネルを閉じる。
+
+   ```bash
+   exit
+   ```
+
+   - ssh のセッションが終わると、`127.0.0.1:1080` の待ち受けも消える
+   - **次の手順は、オンラインのホストのプロンプトに戻ってから貼る**
+
+1. オンラインのホストから、転送を付けずにログインし直す。
+
+   ```bash
+   ssh "${OFFLINE_USER:?手順 1 の OFFLINE_USER が空のまま}@${OFFLINE_HOST:?手順 1 の OFFLINE_HOST が空のまま}"
+   ```
+
+   - **次の手順は、ログインしてから貼る**（続けて貼るとパスワードへの答えとして食われる）
+
+1. オフラインのホストで、トンネルが無く、外に出られないことを確かめる。
+
+   ```bash
+   ss -Hltn 'sport = :1080'
+   curl -sS -o /dev/null --connect-timeout 10 https://github.com && echo '届いた（オフラインではない）' || echo '届かない（期待どおり）'
+   ```
+
+   - `ss` は何も出さない（トンネルが無い）
+   - 最後の行は `届かない（期待どおり）`
+
+---
+
+## ロールバック
+
+- オフラインのホストで貼る。トンネルは要らない
+- トンネルを使った手順書のロールバックは、それぞれの手順書で行う
+- オンラインのホストには、`~/.ssh/known_hosts` のオフラインのホストの行だけが残る
+
+1. [dnf の節](#dnf-にもトンネルを使わせる任意)を行ったときだけ、dnf のプロキシの行を消す。
+
+   ```bash
+   {
+     sudo sed -i '/^proxy=socks5h:\/\/127\.0\.0\.1:1080$/d' /etc/dnf/dnf.conf
+     grep -c '^proxy' /etc/dnf/dnf.conf
+   }
+   ```
+
+   - `0` が出ればよい
+
+---
+
+## 補足
+
+### 対象と検証環境
+
+- **目的**: インターネットに出られない AlmaLinux 10 のホストから、そこへ ssh でログインしてくるインターネットに出られるホストを経由して、外に出られるようにする
+  - 入れる・取り込む・上げるときだけ使う。入れたものは、トンネルが無くても動く
+- **進め方**: オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う（dnf は `/etc/dnf/dnf.conf` の `proxy=`、podman と npm は `https_proxy`）
+  - 読者が編集するのは `OFFLINE_HOST` だけ
+  - もとは [homebrew-offline.md](homebrew-offline.md) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
+  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](npm-offline.md)
+- **状態**: **Linux のオンラインのホストは x86_64 のコンテナでのみ検証済み。実機では、Windows 11 のホストから VirtualBox の VM へのトンネルを張った**
+  - コマンドは、この文書に移す前に、次の検証で通したもの
+    - コンテナ（[homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)、2026-09-29）: 手順 1〜3（手順 3 の確かめる URL は Homebrew の 4 つだった）、dnf の節、トンネルを閉じる節（jq の確かめを含んでいた）、ロールバック
+      - 1080 番がふさがっているときと、sshd が転送を禁じているときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること、`sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること
+    - Windows 11 のホストの VirtualBox の VM（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)、2026-09-30）: 手順 2 の Windows の 1 行（ただし、自動で流すために鍵でログインし、`-N` を付けた）。VM の端末での `ss` と、`curl -x socks5h://127.0.0.1:1080 https://quay.io/v2/` の `401`
+    - コンテナ（[npm-offline.md の付録](npm-offline.md#付録-コンテナでの検証記録2026-09-30)、2026-09-30）: npm-offline.md の前提として、手順 1〜3・dnf の節・トンネルを閉じる節の手順 1・2（当時の homebrew-offline.md の手順）。npm は `ALL_PROXY` だけでは届かず、`https_proxy` を足すと届くこと
+  - 2026-09-30 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
+    - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](homebrew-offline.md) の手順 1〜6・更新・ロールバック
+  - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、SELinux が Enforcing のオフラインのホスト、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
+
+| 項目 | コンテナ（2026-09-29・30） | Windows のホストの VM（2026-09-30） |
+|---|---|---|
+| オンラインのホスト | AlmaLinux 10.2 / x86_64 のコンテナ。`openssh-clients-9.9p1-27.el10_2.alma.1` | Windows 11 Pro 25H2 / x86_64 のノート PC。`OpenSSH_for_Windows_9.5p2` |
+| オフラインのホスト | AlmaLinux 10.2 / x86_64 のコンテナ（`--internal` のネットワークだけ）。`openssh-server-9.9p1-27.el10_2.alma.1`、systemd 無しで `sshd -D -e`、設定は AlmaLinux の既定のまま | VirtualBox の VM の AlmaLinux Atomic Desktop（ホストオンリーアダプターだけ） |
+| ネットワーク | オフラインのホストは既定の経路も外の名前解決も無い。オンラインのホストは両方のネットワークにつないだ | VM は既定の経路が無く、外の名前を引けない |
+| コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | — |
+
+> [!NOTE]
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で、オンラインのホストのシェルに 1 度だけ設定する。オフラインのホストには変数が無い。
+>
+> | 変数 | 意味 | 例 |
+> |---|---|---|
+> | `${OFFLINE_HOST}` | オフラインのホストの IP アドレスかホスト名 | `192.168.1.20` |
+> | `${OFFLINE_USER}` | オフラインのホストでログインするユーザー（既定はオンラインのホストのユーザー名。違えば直す） | `${USER}` |
+>
+> 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<OFFLINE_USER>` / `<VM_IP>` / `<USER>` のプレースホルダで書いてある。
+
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+### 実施前の状態
+
+オフラインのホスト（コンテナ）で、手順 1 の前に確かめた状態（[homebrew-offline.md の実施前の状態](homebrew-offline.md#実施前の状態)と同じ）:
+
+| 項目 | 状態 |
+|---|---|
+| 経路 | `ip route` は、つないだネットワークの 1 行だけ（`default` の行が無い） |
+| 名前解決 | `getent hosts github.com` は何も返さず、終了コード 2 |
+| 外への接続 | `curl https://github.com` は `curl: (6) Could not resolve host: github.com`。github.com の IP アドレスを直接指定しても `curl: (7) Failed to connect to … port 443 after 0 ms: Could not connect to server` |
+| sshd | `sshd -T` は `allowtcpforwarding yes`・`gatewayports no`・`disableforwarding no`・`permitlisten any`（AlmaLinux の既定） |
+| `/etc/dnf/dnf.conf` | 既定のまま（`[main]` と 5 つの設定。`proxy` の行は無い） |
+
+### 選択した方針
+
+| 経路 | 要るもの | 採否 |
+|---|---|---|
+| **オンラインのホストから `ssh -R 1080`（逆向きの動的転送）** | オンラインのホストからオフラインのホストへ ssh でログインできること。どちらのホストにも追加のソフトは要らない | **採用。** オフラインのホストで curl・git・dnf・podman が外に届く。オフラインのホストが自分で取るので、2 台のアーキが違ってもよい（ただし x86_64 でしか確かめていない） |
+| オフラインのホストから `ssh -D 1080` | オフラインのホストからオンラインのホストへ ssh でログインできること（オンラインのホストで sshd を動かす） | 不採用。ssh の向きが逆のときの代わりになる形だが、確かめていない |
+| オンラインのホストに HTTP プロキシ（squid など）を建てる | オンラインのホストにデーモン、待ち受けのポート、アクセス制御 | 不採用。ssh の転送で足りる |
+
+- **`ALL_PROXY` を `~/.bashrc` に書かない**: トンネルがあるのは手順 2 の ssh のセッションの間だけなので、手順 3 でそのシェルにだけ入れる
+- **dnf には、`sudo` に環境変数を渡す（`sudo --preserve-env=ALL_PROXY`）のではなく、設定ファイルで渡す**: ほかの手順書の `sudo dnf install` を、書き換えずに貼れるようにするため
+- **独立した手順書にした**: [homebrew-offline.md](homebrew-offline.md) と [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
+
+### 注意点
+
+- **転送中は、オフラインのホストのどのユーザーもプロキシを使える**: 待ち受けは loopback だけだが、ユーザーを区別しない。検証では、2 人目のユーザーの `curl` も `200` を返した。使い終わったら[トンネルを閉じる](#トンネルを閉じる)
+- **外への通信の出口はオンラインのホスト**: オンラインのホストのネットワークの規則（社内のプロキシ、ファイアウォール）に従う。オンラインのホストの ssh が知るのは宛先の名前とポートで、HTTPS の中身は暗号化されたまま通る
+- **`socks5h` の `h` を落とさない**: 落とすと名前を引けない（手順 3 の補足）
+- **`https_proxy` や git の `http.proxy` が入っていると、そちらが勝つ**: 手順 3 の補足
+- **`sudo` は `ALL_PROXY` を渡さない**: dnf は[dnf の節](#dnf-にもトンネルを使わせる任意)の設定で、podman はコマンドの前の `https_proxy` で通す
+- **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm-offline.md 手順 2](npm-offline.md#実施手順)）
+- **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する。dnf で外のリポジトリを使わなくなったら、[ロールバック](#ロールバック)で消す
+- **ssh が切れると、トンネルも消える**: 取得の途中なら失敗するはず（確かめていない）。そのときは手順 2 から張り直して、同じコマンドを貼り直す
+- **SELinux が Enforcing のオフラインのホストでは確かめていない**: 検証のコンテナには SELinux が無い（Atomic Desktop の VM は Enforcing で、待ち受けは拒まれなかった）
+
+### 参照
+
+- [OpenSSH 7.6 のリリースノート](https://www.openssh.org/txt/release-7.6) — `ssh -R` の逆向きの動的転送（SOCKS）が入った版。クライアントだけで実装されている（オフラインのホストの sshd の版は問わない）
+- [ssh(1)](https://man.openbsd.org/ssh) — `-R`、`-o ExitOnForwardFailure`、`-o ControlPath`
+- [sshd_config(5)](https://man.openbsd.org/sshd_config) — `AllowTcpForwarding`、`GatewayPorts`、`PermitListen`、`DisableForwarding`
+- [curl(1) の ENVIRONMENT](https://curl.se/docs/manpage.html#ENVIRONMENT) — `ALL_PROXY` と `socks5h://`
+- [git-config(1) の http.proxy](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httpproxy) — git がプロキシを読む順番
+- `man dnf.conf` — `proxy`
+
+---
+
+### 付録: コンテナでの検証記録（2026-09-30）
+
+**環境**: Ubuntu 24.04 / x86_64 のクラウドホスト上の Docker 29.3.1 で、`quay.io/almalinuxorg/almalinux:10`（`sha256:83220192…c4c8`、AlmaLinux 10.2）から 2 つのコンテナを立てた。作りは [homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)と同じ（そちらのイメージは `docker.io/library/almalinux:10`）。実機で加えた変更は無い。
+
+**手順書の外で行った準備**（検証環境の都合）:
+
+- ネットワークを 2 つ作った。外に出られない `docker network create --internal` のもの（オフラインのホスト用）と、ふつうのもの。オンラインのホストのコンテナは両方につないだ
+- オフラインのホスト: ふつうのネットワークにつないでいる間に `openssh-server`・`sudo`・`iproute` を入れて `ssh-keygen -A` を実行し、`--internal` のネットワークだけにつなぎ替えてから `sshd -D -e` を動かした（systemd 無し）。ユーザー（uid 1000、NOPASSWD の sudo）と 2 人目（uid 1001）を作った。`git`・`file`・`procps-ng` は入れていない
+- オンラインのホスト: `openssh-clients` を入れ、同じ名前のユーザーで鍵を作り、公開鍵をオフラインのホストの `authorized_keys` に置いた（鍵認証）
+- このクラウドのホストの外向きの通信は、TLS を署名し直すゲートウェイを通る。その CA を、両方のコンテナの信頼ストアに足した（実際のホストでは要らない）
+
+**流し方**: この文書と [homebrew-offline.md](homebrew-offline.md)・[homebrew.md](homebrew.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
+
+- 手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた
+- ホスト鍵の確認には `yes`、インストーラの `RETURN` と brew の `[y/n]` には、表示が出てから Enter と `y` を送った
+
+| 手順 | 結果 |
+|---|---|
+| 実施前 | オフラインのホストは `ip route` が 1 行だけ、`getent hosts github.com` は終了コード 2、`curl https://github.com` は `Could not resolve host`。`/etc/dnf/dnf.conf` に `proxy` の行は無い |
+| 1 | `OFFLINE_HOST = <OFFLINE_HOST>` / `OFFLINE_USER = <USER>` |
+| 2 | ホスト鍵の確認に `yes` → `Warning: Permanently added '<OFFLINE_HOST>' (ED25519) to the list of known hosts.` の後にログインした |
+| 3 | `127.0.0.1:1080` の 1 行と `200` |
+| homebrew-offline.md 1 | `200` / `301` / `200` / `401`。`rpm -q` は curl だけ入っていた |
+| dnf の節（homebrew-offline.md 2） | `2:proxy=socks5h://127.0.0.1:1080`、`Metadata cache created.` |
+| homebrew-offline.md 3 | homebrew.md の手順 1 で 73 パッケージを導入し 4 つを更新（`Complete!`）、手順 2 で `Press RETURN/ENTER to continue` に Enter → `==> Installation successful!`、手順 3・4 で `Homebrew 7.0.7`・`Branch: stable`・`HOMEBREW_PREFIX: /home/linuxbrew/.linuxbrew` |
+| homebrew-offline.md 4 | `Would install 1 formula:`（`jq 1.8.2`）と依存の `oniguruma` の後に `[y/n]`。`y` で 2 つのボトルがトンネル越しに降りた |
+| トンネルを閉じる 1〜3 | `Connection to <OFFLINE_HOST> closed.` → 転送無しでログイン → `ss` は無出力、`curl: (6) Could not resolve host: github.com` と `届かない（期待どおり）` |
+| homebrew-offline.md 6 | `jq 1.8.2`、`/home/linuxbrew/.linuxbrew/bin/jq`、`offline` |
+| homebrew-offline.md の更新 | 手順 2・3 でトンネルを張り直し（`200`）、homebrew.md の更新は `Already up-to-date.`、`brew outdated` と `brew upgrade` は無出力。トンネルを閉じる節の手順 1 で閉じた |
+| ロールバック（homebrew-offline.md とこの文書） | トンネル無しのシェルで流した。`brew uninstall jq` が `oniguruma` も消し（`==> Autoremoving 1 unneeded formula:`）、`brew autoremove` と `brew list --versions` は無出力。この文書のロールバックは `0` で、`/etc/dnf/dnf.conf` は元の 6 行に戻った |
+
+- 最初の試みでは、検証の道具が、ブロックを送った直後に確かめのための行（`echo`）を続けて打っていた。dnf の節の `sudo dnf makecache` がこの打ち込んだ行を読んで捨て、`echo` は実行されなかった
+  - ブロックの中の行は `if … fi` で先に読まれていたので、失われなかった（[README の記法](../README.md#記法)の `sudo` の規則と同じ現象）
+  - 確かめの方法を変え、新しいコンテナで最初から流し直したのが上の表
+
+#### 未確認事項
+
+- Linux のオンラインのホストの実機（x86_64 の PC・Raspberry Pi 5）
+- aarch64、SELinux が Enforcing のオフラインのホスト、IPv6
+- パスワード認証でのログイン（検証は鍵認証）、macOS の ssh
+- この日の流し直しでは、1080 番がふさがっているとき・`AllowTcpForwarding no`・接続の共有・2 人目のユーザーは試していない（2026-09-29 の [homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)による）

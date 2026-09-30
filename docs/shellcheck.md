@@ -475,7 +475,7 @@ $ brew leaves | wc -l
 - **EPEL 版と brew 版を両方入れない**: どちらもコマンド名は `shellcheck` で、PATH の先頭にある Homebrew 版が勝つ
   - EPEL のパッケージ名だけ大文字の `ShellCheck` なので、`rpm -q shellcheck` では見つからない
 - **指摘があると `rc=1`**: CI に組むときはこれが期待どおりだが、`set -e` のスクリプトの途中で呼ぶと止まる。件数だけ欲しいなら `-f quiet` か `|| true`
-- **PATH の先頭が Homebrew になる**: `sudo shellcheck` は使えない（root の PATH に Homebrew が無い）。root で走らせるならフルパスか EPEL 版
+- **`sudo shellcheck` は使えない**: root の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）。root で走らせるならフルパスか EPEL 版
 - **コメントの中の `shellcheck` という語がディレクティブと誤認される**: 行末コメントを `# shellcheck -S に渡す…` のように書くと、**SC1126（error）**「Place shellcheck directives before commands, not after.」が出る
   - 本書の手順 1 の行末コメントは、これを踏んだので `shellcheck` を外した書き方に直してある
 - **SC2034 は誤検出も出やすい**: 外部から `source` される変数や、`export` せずに使う設定ファイルの変数は「未使用」に見える。個別に潰すならディレクティブ、全体で切るなら `.shellcheckrc`

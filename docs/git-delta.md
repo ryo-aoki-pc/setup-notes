@@ -334,7 +334,7 @@ merge.conflictstyle zdiff3
 - **`sudo git` には効かない**: root は root の `~/.gitconfig` を読むので、この設定は入っていない
 - **`interactive.diffFilter` が変えるのは `git add -p` の表示だけ**: 選択の操作自体は git のまま
 - **lazygit は `core.pager` を見ない**: 別途 `git.paging` の設定が要る（[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)）
-- **PATH の先頭が Homebrew になる**: `brew shellenv` を `~/.bashrc` に書いた時点で `/home/linuxbrew/.linuxbrew/bin` が先頭に来る
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`~/.bashrc` を読まない文脈では見えない、など
 
 ### 参照
 
