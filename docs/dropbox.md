@@ -4,9 +4,10 @@
 
 > [!IMPORTANT]
 > - **x86_64 の PC で実行する**。Dropbox は Linux の ARM 版を出していないので、Raspberry Pi 5（aarch64）では [dropbox-rclone.md](dropbox-rclone.md) を使う
+> - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も Dropbox を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（デーモンは自分のホームに入り、同期するファイルの持ち主として動く）
-> - **手順 2・6 で止まる**（fingerprint の目視・`sudo` のパスワード）
-> - **手順 9 はブラウザでリンクする**。この PC でなくても、ブラウザがあればどこでもよい
+> - **手順 2 で止まる**（fingerprint の目視）
+> - **手順 8 はブラウザでリンクする**。この PC でなくても、ブラウザがあればどこでもよい
 > - **ログアウト中も同期するなら、PC を眠らせない**（[gnome-power.md](gnome-power.md)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
 
 - 上から順にコードブロックを貼る
@@ -165,28 +166,9 @@
    - 公式 RPM（`nautilus-dropbox`）が `/usr/bin/dropbox` に置くのと同じ Python スクリプト（GPLv3、先頭に `This file is part of nautilus-dropbox 2026.05.06.`）。公式の案内する `https://www.dropbox.com/download?dl=packages/dropbox.py` の飛び先を直接落としている
    - 署名は無く、HTTPS で落とすだけ
    - デーモンとは `~/.dropbox/command_socket` で話す
-   - デーモンを起動する `start` と、自動起動の `autostart` もあるが、本書では使わない（起動は手順 7 のユーザーサービスが受け持つ）
+   - デーモンを起動する `start` と、自動起動の `autostart` もあるが、本書では使わない（起動は手順 6 のユーザーサービスが受け持つ）
      - `autostart y` は `/usr/share/applications/dropbox.desktop`（RPM が置く）をコピーするだけなので、tarball の構成では何もしない
    - `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` が PATH に足している。ディレクトリが無くても足すので、作った直後から名前で呼べる
-
-   </details>
-
-1. 常時動かすため、linger を有効にする。
-
-   ```bash
-   sudo loginctl enable-linger "${USER}"
-   ```
-
-   - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-   <details>
-   <summary>補足: linger が要る理由</summary>
-
-   **linger が無いと、ログアウトした時点で Dropbox も止まる。**
-
-   - ユーザーの systemd（`user@1000.service`）はログインセッションが無くなると終了し、その配下のサービスも一緒に落ちるため
-   - `sudo loginctl enable-linger` は `/var/lib/systemd/linger/<USER>` を作り、起動時にユーザーの systemd を立ち上げてサービスを開始させる（[syncthing.md](syncthing.md) と同じ仕組み）
 
    </details>
 
@@ -209,14 +191,14 @@
    WantedBy=default.target
    EOF
    systemctl --user daemon-reload
-   loginctl show-user "$(id -u)" -p Linger       # Linger=yes
    systemctl --user enable --now dropbox.service
    systemctl --user is-enabled dropbox.service   # enabled
    systemctl --user is-active dropbox.service    # active
    ```
 
    - `Created symlink '.../default.target.wants/dropbox.service' → ...` が出る
-   - `Linger=yes`・`enabled`・`active` が出ればよい
+   - `enabled`・`active` が出ればよい
+   - [linger](linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
 
    <details>
    <summary>補足: unit の中身の理由</summary>
@@ -267,7 +249,7 @@
 
    </details>
 
-1. ブラウザで手順 8 の URL を開き、この PC を Dropbox に接続する。
+1. ブラウザで手順 7 の URL を開き、この PC を Dropbox に接続する。
 
    - Dropbox にログインして、この PC の接続を承認する（この PC のブラウザでなくてもよい）
    - **次の手順は、ブラウザで接続し終えてから貼る**
@@ -296,7 +278,7 @@
    ```
 
    - `dropbox.pid` はデーモンの PID で、`dropbox` コマンドはこれを見て動いているかを判断する
-   - リンクの情報もここに入る（[ロールバック](#ロールバック)の手順 5 で消すと、リンクし直すことになる）
+   - リンクの情報もここに入る（[ロールバック](#ロールバック)の手順 4 で消すと、リンクし直すことになる）
 
    </details>
 
@@ -352,48 +334,29 @@
 ## ロールバック
 
 - 上から順に実行する
-- 同期していたファイルはクラウドに残る。この PC の `~/Dropbox` を消すのは、この節の手順 5 だけ
+- 同期していたファイルはクラウドに残る。この PC の `~/Dropbox` を消すのは、この節の手順 4 だけ
 - 手順 2 で作られた `~/.gnupg` は、ほかでも使うので消さない
+- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
-> **この節の**手順 5 で、`~/.dropbox`（リンクの情報）と `~/Dropbox`（この PC の複製）を消す。まだ同期していない変更があれば失われる。
+> **この節の**手順 4 で、`~/.dropbox`（リンクの情報）と `~/Dropbox`（この PC の複製）を消す。まだ同期していない変更があれば失われる。
 >
-> - **デーモンが動いている間に `~/Dropbox` を消すと、クラウドからも消える**。手順 5 は、デーモンが動いていれば `中断:` で止まる
+> - **デーモンが動いている間に `~/Dropbox` を消すと、クラウドからも消える**。手順 4 は、デーモンが動いていれば `中断:` で止まる
 > - 入れ直す可能性があるなら残す
 
-1. サービスを止めて外し、ほかに自分で有効にしたユーザーサービスがあるか見る。
+1. サービスを止めて外す。
 
    ```bash
    systemctl --user disable --now dropbox.service
    rm -f ~/.config/systemd/user/dropbox.service
    systemctl --user daemon-reload
-   ls ~/.config/systemd/user/*.wants/ 2>/dev/null
    ```
 
    - `Removed '.../default.target.wants/dropbox.service'.` が出る
-   - 最後の `ls` が何か出す（Syncthing の `sh.brew.syncthing.service` など）なら、linger はそれらが使っているので、手順 3 は飛ばす
-   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、手順 3 は飛ばす
-
-   <details>
-   <summary>補足: <code>list-unit-files</code> で判断しない理由</summary>
-
-   - `systemctl --user list-unit-files --state=enabled` は、OS が既定で有効にしているユーザーのユニット（`dbus-broker.service` など。GNOME のデスクトップではさらに多い）まで出すので、自分で足したものを見分けにくい
-   - 自分で `enable` したものは `~/.config/systemd/user/<target>.wants/` のリンクになるので、そこだけを見る
-   - 何も無ければ `ls` は何も出さない（終了コードは 0 のことも 2 のこともあったが、どちらでもよい）
-
-   </details>
 
 1. ブラウザで Dropbox の Web を開き、この PC のリンクを解除する。
 
    - アカウントの設定 → セキュリティ → デバイス にある
-
-1. ほかにユーザーサービスを常駐させていないときだけ、linger を切る。
-
-   ```bash
-   sudo loginctl disable-linger "${USER}"
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. デーモンと CLI を消す。
 
@@ -418,14 +381,15 @@
 ### 対象と検証環境
 
 - **目的**: x86_64 の AlmaLinux 10 で Dropbox の公式クライアントを headless で動かし、ログインしていない間も `~/Dropbox` をクラウドと同期し続ける
-- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと `loginctl enable-linger` で常駐させる。**読者が書き換える変数は無い**
+- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](linger.md)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機には入れておらず、アカウントのリンクもしていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜8・10・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](#更新)・[ロールバック](#ロールバック)を通した
+    - linger の有効化と解除（今の [linger.md](linger.md) の手順 2・3 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
   - 確認したこと:
     - 署名が合えば展開され、版が食い違って `BAD signature` のときは展開されない
     - デーモンがユーザーサービスとして動き、`dropbox status` がリンク用の URL を出す（検証のときだけサービスにプロキシを渡した）
     - `dropbox stop` では 10 秒後に戻り、`systemctl --user stop` では止まったまま
-    - ロールバックで元に戻り、デーモンが動いている間は手順 5 が `中断:` で止まる
+    - ロールバックで元に戻り、デーモンが動いている間はロールバックの手順 4 が `中断:` で止まる
   - **確認していないこと**: アカウントのリンク、リンクした後の同期と `exclude` などの操作、デーモンの自己更新、GNOME のデスクトップでの挙動、SELinux が Enforcing の実機での動作、再起動後の自動起動
 
 | 項目 | 実機（x86_64 PC） | 検証コンテナ |
@@ -481,7 +445,7 @@ x86_64 の AlmaLinux 10 で Dropbox の公式クライアントを入れる経�
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 10 の直後。リンクはしていない）:
+**検証コンテナでの出力**（手順 9 の直後。リンクはしていない）:
 
 ```
 $ dropbox version
@@ -520,6 +484,7 @@ Linger=yes
 - [How many devices can I use with my Dropbox account? — Dropbox Help](https://help.dropbox.com/account-access/computer-limit) — Basic の台数の上限
 - [Install Dropbox for Linux](https://www.dropbox.com/install-linux) — 公式の配布ページ
 - `man systemd.service`（`Restart=`）/ `man systemd.exec`（`UnsetEnvironment=`）/ `man loginctl`（`enable-linger`）/ `man gpgv`
+- [linger](linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
 
 ---
 
@@ -534,7 +499,7 @@ Linger=yes
 - プロキシの CA を信頼ストアに足した
 - 非 root ユーザー（uid 1000、NOPASSWD の sudo）を作り、ホームはホストの ext4 のディレクトリを bind mount した
 
-途中で手順 3 と手順 8 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜8・10・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 8 は再起動から 23 秒で URL が出た）。
+途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](linger.md) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
 
 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、手順ごとに `docker exec` で、そのユーザーのログインシェル（`bash -l`）へ標準入力から流した。`docker exec` はログインセッションを作らないので、`XDG_RUNTIME_DIR` と `DBUS_SESSION_BUS_ADDRESS` を渡して `systemctl --user` を使えるようにした。
 
@@ -546,16 +511,16 @@ Linger=yes
 | 3 | `Good signature`、`~/.dropbox-dist` に展開された |
 | 4 | `VERSION` / `dropbox-lnx.x86_64-270.4.3312` / `dropboxd`、`153M`。同梱のライブラリの `ldd` に `not found` は無かった |
 | 5 | `/home/<USER>/.local/bin/dropbox`、`Dropbox daemon version: 270.4.3312`、`Dropbox command-line interface version: 2026.05.06`。`dropbox.py` の中の鍵も同じ fingerprint だった |
-| 6 | 無出力、終了コード 0。`user@1000.service` が `active` になった |
-| 7 | `Linger=yes` / `enabled` / `active`。`Main PID` は本体の `dropbox` |
-| 8 | サービスにプロキシを渡さないうちは、`dropbox status` は `Connecting...` で、20 秒待っても journal にリンクの行は出なかった（コンテナはプロキシを通さないと外に出られない）。検証のためだけに `~/.config/systemd/user/dropbox.service.d/` にプロキシの環境変数の drop-in を置いて再起動すると、17〜23 秒で `dropbox status` がリンク用の URL を出した。このとき手順 8 のブロックの `sleep 15`（最初の版）では `Connecting...` だったので、`sleep 30` にした |
+| linger.md 2 | 無出力、終了コード 0。`user@1000.service` が `active` になった |
+| 6（当時は linger.md 3 の確認も同じブロック） | `Linger=yes` / `enabled` / `active`。`Main PID` は本体の `dropbox` |
+| 7 | サービスにプロキシを渡さないうちは、`dropbox status` は `Connecting...` で、20 秒待っても journal にリンクの行は出なかった（コンテナはプロキシを通さないと外に出られない）。検証のためだけに `~/.config/systemd/user/dropbox.service.d/` にプロキシの環境変数の drop-in を置いて再起動すると、17〜23 秒で `dropbox status` がリンク用の URL を出した。このとき手順 7 のブロックの `sleep 15`（最初の版）では `Connecting...` だったので、`sleep 30` にした |
 | 9 | リンクしていないので、`dropbox status` は URL の案内のまま、`ls ~/Dropbox` は `No such file or directory` |
 | 使い方の基本 | 表のコマンドを実行した。リンクしていないので、`exclude add` / `exclude remove` / `lansync n` は無出力、`exclude list` は `Dropbox isn't responding!`（1 度だけ Python のトレースバックで落ちた）、`filestatus` は `File doesn't exist`、`sharelink` は `... does not exist`。`help` と `help exclude` は使い方を出し、`journalctl -f` はリンク用の URL の行を追った |
 | 停止の挙動 | `dropbox stop` の直後は `ActiveState=activating` / `SubState=auto-restart` / `Result=success`、15 秒後に `NRestarts=1` で別の PID になった。`systemctl --user stop` の後は 15 秒たっても `inactive` で、`dropbox status` は `Dropbox isn't running!` |
 | 自己更新（手順書の外） | サービスを止めて、署名を確かめた 268.4.4124 に入れ替えて起動し、8 分待ったが、`~/.dropbox-dist` は 268.4.4124 のままだった（リンクしていない。更新の間隔も分からない）。確かめた後、270.4.3312 に戻した |
 | 更新 | `dropbox version` は手順 5 と同じ。dropbox.py を取り直しても `2026.05.06` のまま |
 | 手での入れ直し | 署名を確かめた 268.4.4124 を入れてサービスで動かした状態から、更新の手順 1 の箇条書きのとおり止める → 手順 2〜4 → 動かすで、`dropbox version` と主プロセスが 270.4.3312 になった。古い 268.4.4124 のディレクトリは残り、`du` は `304M` になった |
-| ロールバック | デーモンが動いている間に手順 5 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3〜5 を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
+| ロールバック | デーモンが動いている間に手順 4 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3・4 と linger の解除（今の [linger.md のロールバック](linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 3）を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
 
 #### 未確認事項
 

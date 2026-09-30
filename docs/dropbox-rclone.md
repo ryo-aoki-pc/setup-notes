@@ -4,9 +4,10 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も同期を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す（Raspberry Pi 5 で [Syncthing](syncthing.md) を動かしているなら、もう有効になっている）
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、同期するファイルの持ち主として動かすため）
 > - **手順 3 はブラウザで認証する**。手順 2 は、Raspberry Pi 5 のデスクトップの端末で貼るか、手元の PC から `ssh -L localhost:53682:localhost:53682 <USER>@<HOSTNAME>` で入り直してから貼る
-> - **手順 3・6・7・8・9 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了・`sudo` のパスワード）
+> - **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
 > - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[gnome-power.md](gnome-power.md)）
 
 - 上から順にコードブロックを貼る
@@ -159,7 +160,7 @@
    - **`- *.partial` は本書で足した**。rclone は転送中のファイルを `<名前>.<16 進>.partial` として書き、終わってから名前を変える
      - `kill -9` や電源断で止まるとこれが残り、フィルタに無いと、次の回で新しいファイルとして Dropbox に上がった（コンテナで確認）
      - 足した後は、残った書きかけは上がらず、次の回で本物のファイルがコピーされた
-   - このファイルは、手順 7・8 と手順 10 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](#同期するフォルダを変える任意)）
+   - このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](#同期するフォルダを変える任意)）
 
    </details>
 
@@ -200,7 +201,7 @@
    <summary>補足: Path1 と Path2、<code>--resync</code> の意味</summary>
 
    - `dropbox:` が Path1、`~/Dropbox` が Path2。`--resync` は、両方にあって中身が違うファイルでは Path1（Dropbox）を正とし（`--resync-mode path1`）、片方にしか無いファイルはもう片方へコピーする
-   - `--resync` は最初の 1 回と、フィルタを変えたときだけ使う。ふだんの同期（手順 10 の timer）には付けない
+   - `--resync` は最初の 1 回と、フィルタを変えたときだけ使う。ふだんの同期（手順 9 の timer）には付けない
    - `--max-lock 2m` は、途中で止まったときに残るロックを 2 分で切らせる（手順 8 の補足）
    - アカウントが大きいと、ファイルの数だけ行が出る
 
@@ -249,16 +250,6 @@
 
    </details>
 
-1. 常時動かすため、linger を有効にする。
-
-   ```bash
-   sudo loginctl enable-linger "${USER}"
-   ```
-
-   - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
-   - Raspberry Pi 5 で [Syncthing](syncthing.md) を動かしているなら、もう有効になっている（貼っても害は無い）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
 1. 15 分ごとに同期する service と timer を置いて、timer を有効にする。
 
    ```bash
@@ -283,13 +274,13 @@
    WantedBy=timers.target
    EOF
    systemctl --user daemon-reload
-   loginctl show-user "$(id -u)" -p Linger             # Linger=yes
    systemctl --user enable --now dropbox-rclone.timer
    systemctl --user is-enabled dropbox-rclone.timer    # enabled
    ```
 
-   - `Linger=yes` と `enabled` が出ればよい
+   - `enabled` が出ればよい
    - `Created symlink '.../timers.target.wants/dropbox-rclone.timer' → ...` が出る
+   - [linger](linger.md) が有効なので、ログアウトしても timer は動く
 
    <details>
    <summary>補足: unit の中身の理由</summary>
@@ -303,7 +294,7 @@
      - `--max-lock 2m`: 途中で止まって残ったロックを 2 分で切らせる
      - `--conflict-resolve newer`: 両方で変わったファイルは新しい方を残す（古い方は `<名前>.conflict1` として残る）
    - `OnBootSec=5min` は起動から 5 分後、`OnUnitInactiveSec=15min` は前の同期が終わってから 15 分後に動かす
-     - `OnUnitInactiveSec` は 1 回動いた後から効く。手順 11 で 1 回動かしておく
+     - `OnUnitInactiveSec` は 1 回動いた後から効く。手順 10 で 1 回動かしておく
      - 動く時刻は最大 1 分ずれる（systemd の既定の `AccuracySec=1min`。コンテナでは予定の 43 秒後に動いた）
    - ユーザーの systemd からは `network-online.target` を使えないので、起動直後はつながっていないことがある。`OnBootSec` で 5 分待ち、失敗しても `--resilient` で次の回に続ける
 
@@ -419,39 +410,21 @@
 
 - 上から順に実行する
 - Dropbox 側のファイルは、この節のどの手順でも消えない
+- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!WARNING]
-> **この節の**手順 6 で `~/Dropbox` を消すのは、手順 1 でタイマーを止めてからにする。タイマーが動いている間に手元で消すと、次の回で Dropbox 側からも消える（半分を超える削除は `Safety abort` で止まるが、それより少なければ消える）。手順 6 は、タイマーかサービスが動いていれば `中断:` で止まる。
+> **この節の**手順 5 で `~/Dropbox` を消すのは、手順 1 でタイマーを止めてからにする。タイマーが動いている間に手元で消すと、次の回で Dropbox 側からも消える（半分を超える削除は `Safety abort` で止まるが、それより少なければ消える）。手順 5 は、タイマーかサービスが動いていれば `中断:` で止まる。
 
-1. タイマーを止めて unit を消し、ほかに自分で有効にしたユーザーサービスがあるか見る。
+1. タイマーを止めて unit を消す。
 
    ```bash
    systemctl --user disable --now dropbox-rclone.timer
    systemctl --user stop dropbox-rclone.service
    rm -f ~/.config/systemd/user/dropbox-rclone.service ~/.config/systemd/user/dropbox-rclone.timer
    systemctl --user daemon-reload
-   ls ~/.config/systemd/user/*.wants/ 2>/dev/null
    ```
 
    - `Removed '.../timers.target.wants/dropbox-rclone.timer'.` が出る
-   - 最後の `ls` が何か出す（Raspberry Pi 5 では Syncthing の `sh.brew.syncthing.service`）なら、linger はそれが使っているので、手順 2 は飛ばす
-   - [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かしているコンテナは、この `ls` に出ない。`~/.config/containers/systemd/` に定義を置いているなら、手順 2 は飛ばす
-
-   <details>
-   <summary>補足: <code>list-unit-files</code> で判断しない理由</summary>
-
-   - `systemctl --user list-unit-files --state=enabled` は、OS が既定で有効にしているユーザーのユニット（`dbus-broker.service` など）まで出す
-   - 自分で `enable` したものは `~/.config/systemd/user/<target>.wants/` のリンクになるので、そこだけを見る（[dropbox.md のロールバック](dropbox.md#ロールバック)と同じ）
-
-   </details>
-
-1. ほかにユーザーサービスを常駐させていないときだけ、linger を切る。
-
-   ```bash
-   sudo loginctl disable-linger "${USER}"
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. rclone の設定から Dropbox を消す。
 
@@ -493,9 +466,10 @@
 ### 対象と検証環境
 
 - **目的**: Raspberry Pi 5（aarch64）の AlmaLinux 10 で、ログインしていない間も `~/Dropbox` を Dropbox と同期し続ける。Dropbox の公式クライアントは ARM の Linux で動かないので、rclone の双方向同期（bisync）を systemd の timer で 15 分ごとに回す
-- **進め方**: Homebrew で rclone を入れ、ブラウザで Dropbox を登録し、`--resync` で最初の同期をしてから、ユーザーの timer と `loginctl enable-linger` で定期的に動かす。**読者が書き換える変数は無い**
+- **進め方**: Homebrew で rclone を入れ、ブラウザで Dropbox を登録し、`--resync` で最初の同期をしてから、ユーザーの timer と、前提の [linger](linger.md)（`loginctl enable-linger`）で定期的に動かす。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機（Raspberry Pi 5）では本実行しておらず、Dropbox の認証もしていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜11・[同期するフォルダを変える（任意）](#同期するフォルダを変える任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜10・[同期するフォルダを変える（任意）](#同期するフォルダを変える任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
+    - linger の有効化と解除（今の [linger.md](linger.md) の手順 2・3 とロールバック。当時はこの文書の手順 9・10 とロールバックの手順 1・2）も、このとき通した
   - 手順 2 は本物の Dropbox で、URL が出て、`127.0.0.1:53682` が Dropbox の認証画面へ飛ばすところまで確かめた（許可はしていない）
   - **手順 4 以降は、`dropbox` という名前で、コンテナの中のディレクトリを指す代役のリモート（種類 `alias`）で確かめた**
   - 確認したこと:
@@ -555,7 +529,7 @@ Raspberry Pi 5（aarch64）の AlmaLinux 10 で Dropbox と同期する経路を
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 11 の直後。代役のリモート）:
+**検証コンテナでの出力**（手順 10 の直後。代役のリモート）:
 
 ```
 $ systemctl --user list-timers dropbox-rclone.timer --no-pager
@@ -586,7 +560,7 @@ $ find ~/Dropbox -type f | sort
   - `kill -9`・電源断・SSH の切断（SIGHUP）では、その場で止まり、ロックと書きかけが残る
   - ロックは `--max-lock 2m` で 2 分後に切れ、timer の次の回が `--recover` で回復した（コンテナで確認）
 - **トークンは平文で入る**: `~/.config/rclone/rclone.conf`（権限 600）にある。`rclone config create` はトークン入りの設定を画面に出すので、手順 2 では `>/dev/null` を付けた
-- **Raspberry Pi 5 の linger は Syncthing と共有している**: ロールバックで linger を切るのは、どちらも使わなくなったときだけ（[syncthing.md のロールバック](syncthing.md#ロールバック)も同じ判断をする）
+- **Raspberry Pi 5 の linger は Syncthing と共有している**: linger を切るのは、どちらも使わなくなったときだけ（[linger.md のロールバック](linger.md#ロールバック)で確かめる）
 - **Syncthing・Samba と重ねない**: `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）。[Samba](samba.md) でホームを公開していると、`~/Dropbox` も SMB から見える
 - **端末の上限**: Basic（無料）プランは同時に 3 台まで。rclone のような連携アプリが数えられるかは、公式ヘルプに書かれていない（確かめていない）
 - **眠ると止まる**: サスペンド中は同期しない。常時動かすなら [gnome-power.md](gnome-power.md) で眠らないようにする
@@ -599,6 +573,7 @@ $ find ~/Dropbox -type f | sort
 - [Filtering — rclone](https://rclone.org/filtering/) — フィルタのファイルの書き方
 - [Homebrew Formulae — rclone](https://formulae.brew.sh/formula/rclone) — 版とボトル（`arm64_linux`）
 - `man systemd.timer`（`OnBootSec=` / `OnUnitInactiveSec=` / `AccuracySec=`）/ `man systemd.service`（`Type=oneshot`）/ `man loginctl`（`enable-linger`）
+- [linger](linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
 
 ---
 
@@ -606,7 +581,7 @@ $ find ~/Dropbox -type f | sort
 
 `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](homebrew.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
 
-途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜11（手順 6 は飛ばした）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
+途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜10（手順 6 は飛ばした。linger は今の [linger.md](linger.md) の手順に当たるもの）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
 
 **代役のリモート**: 手順 2 を打ち切った後、`rclone config create dropbox alias remote=/home/<USER>/fake-dropbox` で、同じ名前 `dropbox` のリモートを作った。`fake-dropbox` には、`Documents`（2 ファイルと `~memo.tmp`）・`Photos/2026`（2 ファイル）・`Work`（`old/2019.txt` を含む 2 ファイル）・`desktop.ini` を置いた。
 
@@ -617,7 +592,7 @@ $ find ~/Dropbox -type f | sort
 | 4〜5 | 代役で、`dropbox: alias`・容量・3 つのフォルダ。フィルタの有効な行は 7 行 |
 | 7〜8 | `--dry-run` も本番も `Bisync successful`。6 ファイルがコピーされ、`desktop.ini` と `~memo.tmp` は外れた。`.md5` と一覧ができた |
 | 8 の中断 | 20 MB のファイルを足し、`--bwlimit 1M` を付けた同じコマンドに SIGHUP を送ると、終了コード 129 で止まり、ロックと `video.mp4.<16 進>.partial` が残った。すぐ貼り直すと `prior lock file found`（期限まで 1m53s）。期限の後に手順 8 を貼り直すと、`Lock file found, but it expired at ... Will delete it and proceed.` の後に `Bisync successful` になり、書きかけは代役に上がらなかった |
-| 9〜11 | `Linger=yes`、`enabled`、`Result=success`、`No changes found`、`list-timers` に `NEXT` |
+| linger.md 2・3、9・10 | `Linger=yes`、`enabled`、`Result=success`、`No changes found`、`list-timers` に `NEXT` |
 | 双方向 | 手元で足したファイルが代役に、代役で変えたファイルが手元に、手元で消したファイルが代役から消えた |
 | 競合 | 両方で `plan.md` を変えると `The winner is: Path2`（新しい手元の方）、代役の方が `plan.md.conflict1` になって両側に残った |
 | 削除の安全装置 | 手元の 6 ファイル中 4 つを消すと `ERROR : Safety abort: too many deletes (>50%, 4 of 6)`、`Result=exit-code`。次の回も同じ。手元に戻すと成功した。代役のファイルは消えなかった |
@@ -628,7 +603,7 @@ $ find ~/Dropbox -type f | sort
 | timer | 予定（`NEXT`）の 43 秒後に timer が自分で動かし、期限の切れたロックを消して `--recover` で回復した（`Listings not found. Reverting to prior backup as --recover is set.`）。その後の `NEXT` は、終わってから 15 分後だった |
 | 任意の節 | 手順 1 は `vi` の代わりに `sed` で 3 行の `# ` を外した。`--resync` の後、代役の `Documents` に足したファイルは手元に来て、`Work` に足したファイルは来なかった。手元の `Work` は残った |
 | 更新 | `Warning: rclone 1.75.1 already installed` |
-| ロールバック | タイマーが動いている間に手順 6 を貼ると `中断: ...` が出て、何も消えなかった。手順 1〜3・5・6 は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 6 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。手順 2 で linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 6 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
+| ロールバック | タイマーが動いている間に手順 5 を貼ると `中断: ...` が出て、何も消えなかった。手順 1・2・4・5 と linger の解除（今の [linger.md のロールバック](linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 2）は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 5 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 5 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
 
 #### 未確認事項
 
