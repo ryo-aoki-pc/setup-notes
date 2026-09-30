@@ -22,7 +22,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（root では動かない） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルからも使える） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
 | [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから `ssh -R` で張った SOCKS のプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
