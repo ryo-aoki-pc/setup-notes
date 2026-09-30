@@ -9,7 +9,7 @@
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 設定を書く場所と、自分用の設定（`ryo-aoki-pc/lazygit`）への案内は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. 変数を設定する。
 
@@ -89,6 +89,12 @@
 
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
+- **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
+  - 入れ方は [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)。clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
+  - 何を変えたかは [README の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit#主な設定内容)
+  - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[hackgen.md](hackgen.md)）にする
+  - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（手順 1 の `LG_EDITOR` は使わない。[neovim.md の既定のエディタにする](neovim.md#既定のエディタにする任意)）
+  - この設定を入れるなら、この節の手順 1 は貼らない（リンク先の clone したファイルに書き足され、`os:` が 2 つになる）
 
 1. エディタだけを指定する、最小の `config.yml` を書く。
 
@@ -129,6 +135,7 @@
    ```
 
    - `~/.config/lazygit/` と `~/.local/state/lazygit/` は残るので、要らなければ手で消す
+   - 自分用の設定を clone していれば、その clone（README の例では `~/lazygit-config`）も残る
 
 ---
 
@@ -236,6 +243,7 @@ $ command -v lazygit
 - [lazygit Config Docs](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) — `config.yml` の項目（`os.edit` など）
 - [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 - [atim/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/atim/lazygit/) / [dejan/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/dejan/lazygit/) — chroot の一覧（`epel-10-aarch64` はある）
+- [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
 
 ---
 

@@ -178,6 +178,7 @@
 - [WezTerm](wezterm-nightly.md) の端末フォントを HackGen Console NF にする
 - **[wezterm-nightly.md の設定ファイル](wezterm-nightly.md#設定ファイル)の最小の例（`~/.config/wezterm/wezterm.lua`）を置いてある前提**で、その `config.font` の行を書き換える
 - `~/.wezterm.lua` を使っている場合は、そちらのファイルに読み替える（両方あると `~/.wezterm.lua` だけが読まれる）
+- 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)。[wezterm-nightly.md の設定ファイル](wezterm-nightly.md#設定ファイル)）はフォントの候補の先頭が HackGen Console NF なので、この節は要らない
 
 1. 書き換える `config.font` の行があるか見る。
 

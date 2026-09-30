@@ -8,7 +8,7 @@
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 設定を書く場所と、自分用の設定（`ryo-aoki-pc/wezterm`）への案内は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. chroot を明示して、COPR を有効化する。
 
@@ -143,7 +143,6 @@
 
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は次の順で探し、**最初に見つかった 1 つだけ**を読む（[補足: 設定ファイルの探索順序](#設定ファイルの探索順序実測)）
-- 作者の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を使うなら、この節の手順 1 は貼らず、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md) で入れる（`~/.config/wezterm` への clone と、`~/.bashrc` のシェル統合）
 
 | 優先 | 場所 | 用途 |
 |---|---|---|
@@ -152,6 +151,15 @@
 | 3 | `~/.wezterm.lua` | **1 ファイルで済む設定はここ**（公式の推奨） |
 | 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
 | 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
+
+- **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
+  - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書）。`~/.config/wezterm` に clone し、`~/.bashrc` にシェル統合の 1 行を足す
+  - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
+  - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは nightly
+  - フォントは HackGen Console NF（[hackgen.md](hackgen.md)）
+  - 本書の RPM が置く `/etc/profile.d/wezterm.sh` が読まれていると、設定のシェル統合は迷子のマウス報告よけだけになり、完了通知は動かない（[docs/install.md の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)）
+  - この設定を入れるなら、この節の手順 1 は貼らない（`~/.config/wezterm` が空でないと clone できない）
+  - `~/.wezterm.lua` があると、clone した設定は読まれない
 
 > [!WARNING]
 > **この節の**手順 1 は、既存の `~/.config/wezterm/wezterm.lua` を**上書きする**。自分の設定がある人は貼らない。
@@ -211,6 +219,7 @@
    ```
 
    - `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す
+   - 自分用の設定（`ryo-aoki-pc/wezterm`）を入れていれば、`~/.bashrc` に足したシェル統合の 1 行も残る（消し方は、その [docs/install.md のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#ロールバック)）
    - COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
    - 消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`
 
@@ -396,6 +405,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [dnf-copr(8)](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html) — `enable name/project [chroot]`
 - [Configuration Files — WezTerm](https://wezterm.org/config/files.html) — 設定ファイルの探索順序（本書の実測とは `~/.wezterm.lua` の優先度が異なる）
 - [wezterm/wezterm config/src/config.rs `load_with_overrides`](https://github.com/wezterm/wezterm/blob/main/config/src/config.rs) — 実際の探索順序
+- [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) — 自分用の設定。導入の手順は `docs/install.md`、変える場所は README にある
 
 ---
 

@@ -9,7 +9,7 @@
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 既定のエディタにするなら[既定のエディタにする（任意）](#既定のエディタにする任意)。設定を書く場所は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 既定のエディタにするなら[既定のエディタにする（任意）](#既定のエディタにする任意)。設定を書く場所と、自分用の設定（`ryo-aoki-pc/LazyVimStarter`）への案内は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. brew で Neovim を入れる。
 
@@ -84,6 +84,7 @@
 
    - `sudo` 経由のエディタ（`sudoedit`、`visudo`）は root の PATH を使うので、Homebrew 版の `nvim` は見えない
    - 必要なら `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
+   - root のシェル（`su -`、root のログイン、`sudo -i`）で `nvim` を使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す。root の Neovim は `/root/.config/nvim` を読む
 
 ---
 
@@ -92,6 +93,11 @@
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値（素の Vim に近い挙動）で動く
 - 置き場所は `~/.config/nvim` で、読み込まれるのは `init.lua` か `init.vim` のどちらか一方
   - `XDG_CONFIG_HOME` を設定していれば `$XDG_CONFIG_HOME/nvim` になる。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する
+- **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
+  - 入れ方は [docs/setup.md の「AlmaLinux 10 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#almalinux-10-に導入する-1-度だけ)。外部コマンド・日本語入力（ibus-anthy）・フォントも入れる
+  - Homebrew と Neovim の導入（本書の手順 1）も、その手順に含まれる（`brew install neovim lazygit`）
+  - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
+  - この設定を入れるなら、この節の手順 1 は要らない（docs/setup.md が既存の `~/.config/nvim` を `.bak` に退避してから clone する）
 
 1. 最小の例として、`init.lua` を置く。
 
@@ -135,6 +141,7 @@
 
    - 依存（`luajit` / `tree-sitter` など）は他の formula も使うので、自動では消えない。まとめて掃除するなら `brew autoremove`
    - `~/.config/nvim`、`~/.local/share/nvim`（プラグイン）、`~/.local/state/nvim`（undo・swap）は残るので、要らなければ手で消す
+   - 自分用の設定（LazyVimStarter）を入れていれば、その [docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)で、退避した設定に戻す
 
 ---
 
@@ -218,7 +225,9 @@ tree-sitter
 ### 注意点
 
 - **PATH の先頭が Homebrew になる**: EPEL の `neovim` と両方入れると Homebrew 版が勝つ。どちらか一方にする
-- **`sudo nvim` は動かない**: root の PATH に Homebrew が無い。`sudoedit` や `visudo` で使うならフルパスを `EDITOR` に渡す
+- **`sudo nvim` は動かない**: root の PATH に Homebrew が無い
+  - `sudoedit` や `visudo` で使うならフルパスを `EDITOR` に渡す
+  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節を通しても動かない）
 - **プロバイダは別途**: Python / Node.js のプラグインを使うなら、それぞれ `pynvim` / `neovim` パッケージを入れる。このホストには Node.js が無い
 - **設定とプラグインは更新に追従しない**: `brew upgrade neovim` でメジャー版が上がると、古い API を使うプラグインが壊れることがある
 - **`vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
@@ -229,6 +238,7 @@ tree-sitter
 - [neovim/neovim — INSTALL.md](https://github.com/neovim/neovim/blob/master/INSTALL.md) — tarball の展開先と PATH の通し方、glibc の要件
 - `:help nvim-defaults` / `:help checkhealth` — 既定値と健全性チェックの読み方
 - [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
+- [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は [docs/setup.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md)
 
 ---
 
