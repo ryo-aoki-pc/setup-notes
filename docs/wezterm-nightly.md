@@ -153,11 +153,11 @@
 | 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
 
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
-  - 入れ方は [README の「配置と初回セットアップ」](https://github.com/ryo-aoki-pc/wezterm#配置と初回セットアップ)。`~/.config/wezterm` に clone し、`~/.bashrc` にシェル統合の 1 行を足す
+  - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書）。`~/.config/wezterm` に clone し、`~/.bashrc` にシェル統合の 1 行を足す
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは nightly
   - フォントは HackGen Console NF（[hackgen.md](hackgen.md)）
-  - 本書の RPM が置く `/etc/profile.d/wezterm.sh` が読まれていると、設定のシェル統合は迷子のマウス報告よけだけになり、完了通知は動かない（[README の「シェル統合」](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
+  - 本書の RPM が置く `/etc/profile.d/wezterm.sh` が読まれていると、設定のシェル統合は迷子のマウス報告よけだけになり、完了通知は動かない（[docs/install.md の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)）
   - この設定を入れるなら、この節の手順 1 は貼らない（`~/.config/wezterm` が空でないと clone できない）
   - `~/.wezterm.lua` があると、clone した設定は読まれない
 
@@ -219,7 +219,7 @@
    ```
 
    - `~/.config/wezterm/` や `~/.wezterm.lua`（自分で作った設定）は消えないので、不要なら手で消す
-   - 自分用の設定（`ryo-aoki-pc/wezterm`）を入れていれば、`~/.bashrc` に足したシェル統合の 1 行も残る
+   - 自分用の設定（`ryo-aoki-pc/wezterm`）を入れていれば、`~/.bashrc` に足したシェル統合の 1 行も残る（消し方は、その [docs/install.md のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#ロールバック)）
    - COPR の GPG 鍵は `gpg-pubkey-cea2757d-651b2a3e` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
    - 消すなら `sudo rpm -e gpg-pubkey-cea2757d-651b2a3e`
 
@@ -405,7 +405,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [dnf-copr(8)](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html) — `enable name/project [chroot]`
 - [Configuration Files — WezTerm](https://wezterm.org/config/files.html) — 設定ファイルの探索順序（本書の実測とは `~/.wezterm.lua` の優先度が異なる）
 - [wezterm/wezterm config/src/config.rs `load_with_overrides`](https://github.com/wezterm/wezterm/blob/main/config/src/config.rs) — 実際の探索順序
-- [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) — 自分用の設定。配置・シェル統合・変える場所は README にある
+- [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) — 自分用の設定。導入の手順は `docs/install.md`、変える場所は README にある
 
 ---
 
