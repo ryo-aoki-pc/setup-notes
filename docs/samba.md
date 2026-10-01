@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > - **すべてサーバー上で実行する**。手順 15（クライアントからの接続）だけ別マシン
 > - **手順 6 と手順 9 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
+> - **手順を終えたサーバーでは、手順 3 を貼り直さない**（smb.conf が丸ごと置き換わり、`[root]` なども消える）。smb.conf に `smb3 directory leases` の行が無いサーバーには、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -69,6 +70,7 @@
        printing = bsd
        printcap name = /dev/null
        disable spoolss = yes
+       smb3 directory leases = no
 
    [homes]
        comment = Home Directories
@@ -81,7 +83,7 @@
    }
    ```
 
-   - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出ればよい
+   - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出て、`[global]` に `smb3 directory leases = No` があればよい
 
    <details>
    <summary>補足: smb.conf</summary>
@@ -92,6 +94,8 @@
    - そのときの testparm は、`Unknown parameter` と出しつつ `Loaded services file OK.` で終わった（壊れたことに気付きにくい）
    - `testparm -s` の出力に `Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)` が出るが、crypto-policies が DEFAULT のときの通常の表示で、エラーではない
    - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` や `read only = No` に対応する行が出なくても書き漏れではない。全パラメータを見るなら `testparm -sv`
+   - `smb3 directory leases = no` は、クライアントにディレクトリのリース（一覧を手元にキャッシュしてよいという許可）を渡さない。Samba 4.22 からの既定（`auto`）では渡す
+   - Samba は、自分を通さずにサーバーで変えたもの（サーバーのシェルや Syncthing など）では、このリースを破らない。既定のままだと、Windows のエクスプローラーは F5 を押しても古い一覧を出し続けた（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
    - 手順 15 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
 
    </details>
@@ -265,10 +269,11 @@
    sudo ausearch -m AVC -ts today               # <no matches>
    ```
 
-1. 別のマシンから、クライアントで接続する（未検証）。
+1. 別のマシンから、クライアントで接続する（Windows のエクスプローラーのほかは未検証）。
 
    - `<SERVER_IP>` と `<USER>` は値に読み替える
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
+     - サーバーで変えたファイルやディレクトリは、F5 を押さなくても出る（手順 3 の `smb3 directory leases = no`。実機で確認）
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: AlmaLinux 10 の PC なら [samba-client.md](samba-client.md)（fstab の自動マウントと GNOME Files）。ほかは `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
@@ -277,7 +282,8 @@
    <details>
    <summary>補足: クライアントからの接続</summary>
 
-   - クライアントからの接続は未検証。IP アドレスで指定する（NetBIOS 名では見つからない）
+   - Windows のエクスプローラーからは、利用者の PC で実機の共有を開いて使えている。2026-10-01 に、サーバーで変えたものの見え方を確かめた（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）。資格情報を入れる最初の接続の画面は記録していない
+   - ほかのクライアントからの接続は未検証。IP アドレスで指定する（NetBIOS 名では見つからない）
    - [samba-client.md](samba-client.md) は、手順 3 の `smb.conf` を置いたコンテナに、AlmaLinux 10 の VM からつないで確かめた。この実機のサーバーへの接続は確かめていない
 
    </details>
@@ -473,6 +479,66 @@
 
 ---
 
+## 設定済みのサーバーでディレクトリのリースを切る
+
+- **smb.conf に `smb3 directory leases` の行が無いサーバーだけ**（2026-10-01 より前の手順 3 で置いたもの）。今の手順 3 には、この 1 行が入っている
+- 手順 3 は貼り直さず、`[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は手順 3 の補足）
+- 変数を使わないので、どのユーザーのシェルで貼ってもよい
+- **この節の手順 2 で smb.service を再起動すると、つないでいるクライアントの接続が一度切れる**
+
+1. smb.conf の `[global]` に 1 行を足し、構文を検査する。
+
+   ```bash
+   if grep -qiE '^[[:space:]]*smb3[[:space:]]+directory[[:space:]]+leases' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に smb3 directory leases の行が既にある' >&2
+   elif ! grep -q '^\[global\]$' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [global] の行が無い' >&2
+   else
+     sudo sed -i '/^\[global\]$/a\    smb3 directory leases = no' /etc/samba/smb.conf
+     testparm -s 2>/dev/null | grep 'smb3 directory leases'
+   fi
+   ```
+
+   - `smb3 directory leases = No` の 1 行が出ればよい
+   - `中断:` と出たら、何も書き換えていない
+   - `… 既にある` で止まったら、その行が `smb3 directory leases = no` かを見る。`no` なら、この節の手順 2 へ進む
+
+   <details>
+   <summary>補足: 足し方</summary>
+
+   - `sed` は、`[global]` の行のすぐ下に足す。`[global]` の中なら、どこに書いても同じ
+   - 実機の smb.conf は、2026-09-28 より前の手順 3 で置いたもので、字下げが TAB だった。足した行は空白の字下げになるが、`testparm` は気にしない
+   - 実機では、`sed -i` の後もモードは `-rw-r--r--`、ラベルは `samba_etc_t` のままだった
+   - 2 回目に貼ると、`中断: /etc/samba/smb.conf に smb3 directory leases の行が既にある` で止まる（コンテナで確認）
+
+   </details>
+
+1. smb.service を再起動する。
+
+   ```bash
+   {
+     sudo systemctl restart smb.service
+     systemctl is-active smb.service              # active
+   }
+   ```
+
+   - `active` と出ればよい
+   - Windows のエクスプローラーは、次の F5 でつなぎ直す（実機では資格情報を聞かれなかった）
+
+1. 元に戻すときは、足した行を消して smb.service を再起動する。
+
+   ```bash
+   {
+     sudo sed -i '/^[[:space:]]*smb3 directory leases = no$/d' /etc/samba/smb.conf
+     sudo systemctl restart smb.service
+     testparm -s 2>/dev/null | grep -c 'smb3 directory leases'   # 0
+   }
+   ```
+
+   - 最後に `0` と出ればよい
+   - 今の手順 3 で置いた smb.conf の行も消える
+   - 再起動すると、つないでいるクライアントの接続が一度切れる
+
+---
+
 ## ロールバック
 
 - 上から順に実行する
@@ -531,7 +597,7 @@
   - `smb.conf` は既定ファイルを退避したうえで、最小構成に置き換える
 - **状態**: **2026-09-21 に下表の実機で本実行し、そのまま公開を継続中**
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
-  - **確認していないこと**: Windows / macOS / Android の実クライアントからの接続
+  - **確認していないこと**: macOS / iOS / Android の実クライアントからの接続（Windows のエクスプローラーは、2026-10-01 に確かめた）
   - 2026-09-28: 手順 2〜5・8・12 と、[ロールバック](#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）。中のコマンドは変えていない
     - 手順 3 の smb.conf の字下げを、TAB から空白に変えた。TAB は、ブラケットペースト無しで貼ると bash の補完で `.` に置き換わった（手順 3 の補足）
@@ -542,6 +608,12 @@
     - まっさらな VM で手順 1〜14 を通した後、root の節の手順 1〜4・6 とロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
     - 確認したこと: `/root` の一覧・読み書き・改名・削除で AVC が出ないこと、作ったファイルが `root root` の `admin_home_t` になること、2 人目の Samba ユーザーが入れないこと、samba-client.md の手でのマウント（`SHARE=root`）、モジュールが無いときの失敗の表示
     - 確認していないこと: 実機、Windows などのクライアントからの接続（エラー 1219 を避けられることも）、WireGuard 越しの接続
+  - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)を足した
+    - 足す前は、サーバーで直接作ったファイルが、利用者の Windows のエクスプローラーに F5 でも出なかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
+    - 実機では、その節の手順 1・2 を本実行した。その後は、サーバーで作ったもの・消したもの・サブフォルダーの中に作ったものが、エクスプローラーに自動で出た（利用者が確かめた）
+    - 手順 3 の今のブロックと、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
+    - 確認していないこと: 手順 1〜14 の通し、その節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
+    - 実機の smb.conf は、2026-09-28 より前の手順 3（字下げが TAB）に `[root]` を足したもの。`[root]` は `browseable = Yes` で、この文書と違う（今回は変えていない）
 
 | 項目 | 値 |
 |---|---|
@@ -553,7 +625,7 @@
 | firewalld | 2.4.3 |
 | SELinux | Enforcing |
 | NIC | `end0` = <SERVER_IP>/24、`wg0` = <WG_IP>/30（ともに public ゾーン） |
-| クライアント | 検証は Linux の `smbclient` 4.23.5 と `mount.cifs`（SMB 3.1.1）。Windows / macOS / Android は未確認 |
+| クライアント | 検証は Linux の `smbclient` 4.23.5 と `mount.cifs`（SMB 3.1.1）。2026-10-01 に、利用者の Windows のエクスプローラー（SMB 3.1.1）。macOS / iOS / Android は未確認 |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -564,7 +636,7 @@
 > | `${ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの LAN 側 IP（デフォルト経路の送信元から自動で入る）。検証と案内にしか使わない | `192.168.1.10` |
 >
-> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）のプレースホルダで書いてある。
+> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）/ `<CLIENT_IP>`（Windows の PC の IP）のプレースホルダで書いてある。
 >
 > Samba のパスワード（`smbpasswd` で登録する、OS とは別のパスワード）はこの文書に載せない。検証で使ったものは `openssl rand` で作った使い捨てで、記録していない。
 
@@ -631,6 +703,13 @@
   - SMB2 以降のクライアントは 445/tcp に直接つなぎ、IP アドレスか DNS 名で指定する
   - `server smb transports = tcp` で 139 を listen しなくなり、firewalld も 445/tcp だけで済む
   - RHEL のドキュメントは `--add-service=samba`（139/tcp + 445/tcp + `samba-client` の 137/138/udp）を開けるが、nmbd を動かさないなら 137〜139 は誰も受けない
+- **ディレクトリのリース（SMB3 Directory Leases）は切る（`smb3 directory leases = no`）**
+  - 公開するのはホームなので、サーバーにログインしたシェルや、同じホストの Syncthing もファイルを変える
+  - Samba 4.22 からの既定（`auto`。クラスタでなければ有効）では、クライアントに一覧のキャッシュを許すリースを渡す。Samba を通さない変更では、そのリースを破らない
+  - 実機では、リースを持った Windows が、サーバーで作ったファイルを F5 でもウィンドウを開き直しても出さなかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
+  - 代償は、クライアントが一覧を見るたびにサーバーへ聞きに来ること（WireGuard 越しでは往復の分だけ待つ。測っていない）
+  - 振る舞いは Samba 4.21 以前と同じになる。リースが暗に有効にしていた `strict rename` も、既定の `no` に戻る
+  - クライアントごとの設定（Linux の `nohandlecache` など）は、つなぐ端末ごとに要るので採らない
 - **SELinux boolean は `samba_enable_home_dirs` の 1 つだけ** — smbd に `user_home_dir_t` / `user_home_t` のアクセスを許す boolean
   - ホームディレクトリのラベルは変えないので、`restorecon` は不要
   - `samba_export_all_rw` は全ファイルへの書き込みを許す粗い boolean なので使わない
@@ -663,6 +742,7 @@
 | `security = user` / `passdb backend = tdbsam` | 書く（既定と同じ） | 「認証はローカルの tdbsam」を明示するため。`testparm -s` の `Server role: ROLE_STANDALONE` で確認できる |
 | `server smb transports = tcp` | 書く | 445/tcp だけを listen する。4.23 の正式名で、`smb ports` はその同義語（`man smb.conf`） |
 | `load printers = no` / `printing = bsd` / `printcap name = /dev/null` / `disable spoolss = yes` | 書く | `cups` が無い環境で smbd が CUPS へ接続しに行くのと、spoolss RPC を止める定型 |
+| `smb3 directory leases = no` | 書く | 既定は `auto`（クラスタでなければ有効）。有効のままだと、Samba を通さずにサーバーで変えたものが、Windows のエクスプローラーでは F5 でも出ず、Linux の cifs では 30〜60 秒遅れる（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)） |
 | `include = /etc/samba/usershares.conf` | 書かない | `samba-usershares` を入れていないので対象ファイルが無い。既定 `smb.conf` のままでも `testparm` は**警告を出さない**（実測）。無いファイルの `include` は黙って無視される |
 | `[homes] valid users = %S` | 書く | 既定の `%S, %D%w%S` のうち `%D%w%S`（ワークグループ名 + 区切り + 共有名）はドメイン参加時に `DOMAIN\user` 形式を通すためのもの。standalone では `%S` だけでよい |
 | `browseable = No` | 書く（既定と同じ） | `homes` という名前の共有を一覧から隠す。ユーザー名の共有は一覧に出る（実測: `smbclient -L` に `<USER>` は出て `homes` は出ない） |
@@ -702,6 +782,8 @@ Server role: ROLE_STANDALONE
 	read only = No
 	valid users = %S
 ```
+
+上の `testparm -s` は 2026-09-21 の実機の出力。2026-10-01 からは、`[global]` の `server smb transports = tcp` の次に `smb3 directory leases = No` が出る（手順 3）。
 
 ```
 $ systemctl is-enabled smb nmb; systemctl is-active smb nmb
@@ -780,12 +862,20 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - **root の共有は root と同じ重み**: [root のホームも公開した](#root-のホームも公開する任意)ら、`<USER>` の Samba のパスワードで `/root/.bashrc` や `/root/.ssh/authorized_keys` を書き換えられる
 - **`create mask` を変えても既存ファイルのモードは変わらない**: 手順 3 の前にホームに置いていたファイルのモードはそのまま
 - **`nmb` を起動しない構成なので、Windows のエクスプローラーで「ネットワーク」から見つけることはできない**: `\\<SERVER_IP>\<USER>` を直接入力する。一覧に出したいなら `wsdd`
+- **クライアントにも、サーバーとは別の一覧のキャッシュがある**
+  - GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない。F5 ですぐ出る（[samba-client.md の注意点](samba-client.md#注意点)）
+  - Windows は、ディレクトリのリースが無いときも、一覧を最長 10 秒キャッシュする（Microsoft の文書の `DirectoryCacheLifetime`）。実機では、サーバーで変えたものはエクスプローラーに自動で出た
+  - macOS は、SMB 2/3 の一覧を手元にキャッシュする（Apple の文書。止めるには `nsmb.conf` の `dir_cache_max_cnt=0`）。本書では試していない
 
 ### 参照
 
 - [Chapter 1. Using Samba as a server — Configuring and using network file services (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_and_using_network_file_services/using-samba-as-a-server)
 - [Setting up Samba as a Standalone Server — SambaWiki](https://wiki.samba.org/index.php/Setting_up_Samba_as_a_Standalone_Server)
-- `man smb.conf`（`[homes]` 節、`server smb transports`、`valid users`、`map archive`）/ `man smbpasswd`（`-s`）/ `man smbclient`（`-A`）/ `man mount.cifs`（`credentials=`）
+- `man smb.conf`（`[homes]` 節、`server smb transports`、`valid users`、`map archive`、`smb3 directory leases`、`kernel change notify`）/ `man smbpasswd`（`-s`）/ `man smbclient`（`-A`）/ `man mount.cifs`（`credentials=`、`nohandlecache`、`max_cached_dirs`）/ `modinfo cifs`（`dir_cache_timeout`）
+- [Samba 4.22.0 — Release Notes](https://www.samba.org/samba/history/samba-4.22.0.html)（SMB3 Directory Leases が入り、クラスタでなければ既定で有効）
+- [A "Mapped network drive" on Windows 10 pointing to a SAMBA share on Fedora 42 does not reflect updates done on Linux — Fedora Discussion](https://discussion.fedoraproject.org/t/a-mapped-network-drive-on-windows-10-pointing-to-a-samba-share-on-fedora-42-does-not-reflect-updates-done-on-linux/162207)（同じ症状の報告。`smb3 directory leases = no` で以前の振る舞いに戻せる、という書き込みで終わっている）
+- [Performance tuning for file servers — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/administration/performance-tuning/role/file-server)（`DirectoryCacheLifetime`）
+- [Disable local SMB directory enumeration caching — Apple Support](https://support.apple.com/en-us/101918)
 
 ---
 
@@ -1182,3 +1272,112 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
 - 実機（Raspberry Pi の拠点 B のホスト）での実行
 - Windows・macOS などのクライアントから `root` の共有につなぐこと。Windows で `<USER>` の共有と同時に開けること（エラー 1219 が出ないこと）
 - samba-client.md の自動マウント（手順 7・8）を `SHARE=root` で行うこと
+
+### 付録: サーバーで変えたものがクライアントに見えるまで（2026-10-01）
+
+サーバーで（Samba を通さずに）変えたファイルやディレクトリが、クライアントの再読み込みですぐに出るかを確かめ、手順 3 に `smb3 directory leases = no` を足したときの記録。実機に加えた変更は、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)の手順 1・2 だけ（ほかに、ホーム直下にテスト用のファイルを作って消した）。
+
+**環境**:
+
+- 実機は上の表のホスト（カーネル `6.12.96-20260724.v8.1.el10`、`samba-4.23.5-110.el10_2`）。直す前の `testparm -sv` は `smb3 directory leases = Auto`
+- Windows のクライアントは、利用者の PC のエクスプローラー（`<CLIENT_IP>`。`smbstatus` では `SMB3_11`、署名は `AES-128-GMAC`）。実機でファイルを作り、エクスプローラーでの見え方を利用者が確かめた
+- Linux のクライアントは、実機の smbd に触らずに測った
+  - サーバー: 実機の上の rootless の podman 5.8.2 で、`quay.io/almalinuxorg/almalinux:10.2`（aarch64）を `-p 127.0.0.1:4450:445` で立て、`samba-4.23.5-110.el10_2` を入れた
+  - smb.conf は、手順 3 のブロック（直す前と後）をそのまま貼って置いた。試験用のユーザー `smbreload`（実機に無い名前）を `smbpasswd -s -a` で登録し、`smbd --foreground --no-process-group` で動かした
+  - kernel の cifs: 実機のカーネル（`cifs.ko` の版 2.51、`dir_cache_timeout` は既定の 30）で、samba-client.md 手順 6 と同じオプションに `port=4450` を足してマウントした。EL10 の x86_64 のカーネル（6.12.0-211 系）では測っていない
+  - GNOME Files: 実機のヘッドレスの GNOME のセッション（nautilus 47.6、`gvfs-smb-1.54.4-3.el10`）で、`/usr/bin/gio mount smb://smbreload@127.0.0.1:4450/smbreload` でつないだ。PATH で先に見つかる Homebrew の `gio` は、`Operation not supported` で使えなかった
+  - 画面は、[claude-code-gui.md](claude-code-gui.md) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
+  - サーバーでの変更は、`podman exec` でコンテナの中のファイルを直接変えた（Samba を通さない）
+
+**直す前の Windows**（利用者がエクスプローラーで `\\<SERVER_IP>\<USER>` を開き、実機のホーム直下に `touch` でファイルを作った）:
+
+- 作ってから 15 秒見ても出ず、F5 でも出なかった
+- 約 1 分後の F5 でも、ウィンドウを閉じて開き直しても出なかった（作ってから約 3 分）
+- その間の `smbstatus -L` では、`LEASE(RH)` の行（19:35:31 に開いたもの）が残り続けた。F5 のたびに開き直されたのは、リースの無い 2 行だけだった
+
+```
+$ sudo smbstatus -L        # 作ってから約 3 分後（ウィンドウを開き直した後）
+Locked files:
+Pid          User(ID)   DenyMode   Access      R/W        Oplock           SharePath   Name   Time
+--------------------------------------------------------------------------------------------------
+24240        1000       DENY_NONE  0x100081    RDONLY     NONE             /home/<USER>   .   Thu Oct  1 19:38:59 2026
+24240        1000       DENY_NONE  0x100081    RDONLY     NONE             /home/<USER>   .   Thu Oct  1 19:38:59 2026
+24240        1000       DENY_NONE  0x100081    RDONLY     LEASE(RH)        /home/<USER>   .   Thu Oct  1 19:35:31 2026
+```
+
+**実機に足したとき**（[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)の手順 1・2。つないでいたのは `<CLIENT_IP>` の 1 つだけ）:
+
+```
+$ （リースを切る節の手順 1）
+	smb3 directory leases = No
+$ ls -lZ /etc/samba/smb.conf
+-rw-r--r--. 1 root root system_u:object_r:samba_etc_t:s0 493 Oct  1 19:40 /etc/samba/smb.conf
+$ head -3 /etc/samba/smb.conf | cat -A
+[global]$
+    smb3 directory leases = no$
+^Iworkgroup = WORKGROUP$
+$ （リースを切る節の手順 2）
+active
+```
+
+**直した後の Windows**:
+
+- 再起動で切れたエクスプローラーは、F5 でつなぎ直した（資格情報は聞かれなかった）。直す前に作ったファイルも出た
+- 実機で作ったファイル、消した 2 つのファイルと作ったディレクトリ、そのディレクトリを開いた状態で中に作ったファイルが、どれも F5 を押す前に出た（15 秒以内）
+
+```
+$ sudo smbstatus -L        # つなぎ直した後
+Locked files:
+Pid          User(ID)   DenyMode   Access      R/W        Oplock           SharePath   Name   Time
+--------------------------------------------------------------------------------------------------
+92245        1000       DENY_NONE  0x100081    RDONLY     NONE             /home/<USER>   .   Thu Oct  1 19:43:17 2026
+92245        1000       DENY_NONE  0x100081    RDONLY     NONE             /home/<USER>   .   Thu Oct  1 19:43:17 2026
+```
+
+**kernel の cifs**（Linux）:
+
+- 場面ごとにマウントし直し、`ls` で一覧を読んでから、サーバーで変え、0.5 秒ごとに `ls -1A`（名前を引く場面は `stat`）で、出るまでの秒数を測った
+- `/proc/fs/cifs/DebugData` の `Server capabilities` は、直す前が `0x300067`、直した後が `0x300047`（`0x20` がディレクトリのリース）
+- 直す前は、コンテナの `smbstatus -L` に、cifs のクライアントが共有の直下に持つ `LEASE(RH)` が出た。直した後は `No locked files`
+
+| 場面 | 直す前 | 直した後 | 直す前＋クライアントに `nohandlecache` |
+|---|---|---|---|
+| 直下にファイルを作る（`ls`） | 31.5 秒 | 0.0 秒 | 0.0 秒 |
+| 直下のファイルを消す（`ls`） | 31.0 秒 | 0.0 秒 | 0.0 秒 |
+| 直下のファイルの名前を変える（`ls`） | 31.5 秒 | 0.0 秒 | 測っていない |
+| 直下にディレクトリを作る（`ls`） | 32.0 秒 | 0.0 秒 | 測っていない |
+| サブディレクトリの中に作る（`ls`） | 31.5 秒 | 0.0 秒 | 0.0 秒 |
+| マウントの 10 秒後に初めて読んだサブディレクトリの中に作る（`ls`） | 52.1 秒 | 測っていない | 測っていない |
+| 新しい名前を `stat` で引く | 0.0 秒（`ls` にはまだ出ない） | 0.0 秒 | 測っていない |
+| 消したファイルを `stat` で引く | 30.5 秒（その間はあるように見える） | 1.0 秒 | 1.0 秒 |
+| 追記したファイルの大きさ（`stat -c %s`） | 1.0 秒 | 1.0 秒 | 測っていない |
+| Samba を通して作る（コンテナの `smbclient`。対照） | 0.0 秒 | 0.0 秒 | 測っていない |
+
+- 直す前に古い一覧が出たのは、一覧をキャッシュしてから 30〜60 秒。`dir_cache_timeout`（既定 30 秒）の間隔で、古いキャッシュが捨てられるため。マウントの 10 秒後に読んだものは、マウントから 62 秒で出た
+- 直す前でも、Samba を通した変更はすぐに出た（Samba がリースを破る）
+- 直す前に、`ls` を繰り返さずに 65 秒待った回も、65 秒後には出ていた（読むたびに延びるわけではない）
+- 直す前の、古い一覧が出ていた間は、`/proc/fs/cifs/Stats` の `QueryDirectories` が増えなかった（一覧はサーバーに聞かずに返っていた）
+- 1.0 秒の場面は、属性のキャッシュ（`actimeo=1`）による
+
+**GNOME Files（gvfs）**:
+
+- `gio list` は、直す前も直した後も、サーバーで作る・消す・サブディレクトリの中に作るのを、すぐ（0.0 秒）出した。コンテナの `smbstatus -L` は `No locked files`（gvfs はリースを持たない）
+- Nautilus に `smb://` の場所を開いてからサーバーでファイルを作ると、直す前も直した後も、15 秒たっても自動では出ず、F5 ですぐ出た（画面を撮って確かめた）
+- `gio mount` の後に開いた Nautilus のサイドバーに、共有が出た（同じ画面の写しで確かめた）
+
+**ブロックの確かめ**（コンテナ）:
+
+- 直す前の手順 3 で置いた smb.conf と、実機の smb.conf の写し（字下げが TAB、`[root]` あり）の両方で、リースを切る節の手順 1 は `[global]` の次の行に空白の字下げで 1 行を足した
+- 2 回目は `中断: /etc/samba/smb.conf に smb3 directory leases の行が既にある` で、何も変えなかった
+- リースを切る節の手順 3 で、どちらも足す前と同じ内容に戻った（`diff` で比べた）
+- コンテナには systemd が無いので、リースを切る節の手順 2・3 の `systemctl` は、smbd を起動し直すスタブにした
+- 直した後の手順 3 のブロックは、`testparm -s` の `[global]` の `server smb transports = tcp` の次に `smb3 directory leases = No` を出した。上の表の「直した後」と同じ振る舞いだった（作る・サブディレクトリの中に作る・消したファイルの `stat` を測った）
+
+#### 未確認事項（ディレクトリのリース）
+
+- macOS・iOS・Android のクライアント（利用者は Android のファイルアプリも使う）
+- WireGuard 越しの接続
+- EL10 の x86_64 のカーネルの cifs
+- [設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)の手順 3 を、実機で貼ること
+- 手順 1〜14 を通しで貼ること（手順 3 のブロックは、コンテナで貼っただけ）
+- 開いたままのファイルを、サーバーで直接書き換えたときの見え方（ファイルのリース。`smb2 leases` は有効のまま）
