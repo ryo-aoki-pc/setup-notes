@@ -14,6 +14,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 > - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
 > - **[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](#文書化済みのツール)）
 > - 2026-09-28 に、[ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)と[更新](#更新)のブロックを `{ … }` で囲んだ（[README の記法](../README.md#記法)）。中のコマンドは変えていない
+> - [CLI: 定番の置き換え](#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](#文書化済みのツール)）
 
 「確認」列の意味:
 
@@ -75,7 +76,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 |---|---|---|
 | Homebrew 本体 | 公式インストーラ | [homebrew.md](homebrew.md) |
 | Flatpak / Flathub | AppStream + Flathub | [flatpak.md](flatpak.md) |
-| yazi / lazygit / Neovim / zoxide / bat / eza / git-delta / gdu / starship / ShellCheck・shfmt | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck・shfmt](shellcheck.md) |
+| yazi / lazygit / Neovim / zoxide / bat / eza / git-delta / gdu / starship / ShellCheck・shfmt / tmux | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck・shfmt](shellcheck.md) / [tmux](tmux.md) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](syncthing.md) |
 | Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](dropbox.md) |
 | rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](dropbox-rclone.md) |
@@ -104,7 +105,6 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | fd | 使いやすい find | Homebrew 10.5.0 | `brew install fd` | EPEL `fd-find` 10.4.2（実行ファイルは同じ `/usr/bin/fd`） | 有 | 起動 |
 | jq | JSON の加工 | Homebrew 1.8.2 | `brew install jq` | BaseOS 1.7.1 | 有 | 起動 |
 | yq | YAML / JSON / XML の加工（mikefarah 版） | Homebrew 4.53.6 | `brew install yq` | EPEL 4.53.3（同じ mikefarah 版） | 有 | 起動 |
-| tmux | 端末の多重化 | Homebrew 3.7c | `brew install tmux` | BaseOS 3.3a | 有 | 起動 |
 | zellij | 端末の多重化（キー操作が画面に出る） | Homebrew 0.45.1 | `brew install zellij` | RPM 無し | 有 | 起動 |
 | htop | プロセスビューア | Homebrew 3.5.3 | `brew install htop` | EPEL 3.3.0 | 有 | 起動 |
 | fastfetch | システム情報の表示（neofetch の後継） | EPEL 2.68.1 | `sudo dnf install -y fastfetch` | Homebrew 2.68.1（同版） | 有 | 起動 |

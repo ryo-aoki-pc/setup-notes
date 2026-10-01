@@ -8,7 +8,7 @@
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
+- 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
 
 > [!WARNING]
 > 既定の `latest` チャンネルは **x86_64 のコンテナでのみ検証した**。実機（aarch64）で本実行したのは `stable` チャンネル（[対象と検証環境](#対象と検証環境)）。
@@ -178,6 +178,89 @@
 
 ---
 
+## 使い方の基本
+
+- 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
+- 表のコマンドは、本書で実行して確かめた（[付録](#付録-使い方の基本の検証記録2026-10-01)）。確かめていないものは、表の見出しの括弧と、その行に書いた
+- SSH を切っても動かし続けるには、tmux の中で起動する（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)）
+
+**起動と再開**（`-c`・`-r`・`-n`・`--model`・`--permission-mode`・`--add-dir` は `-p` と組み合わせて確かめた。`-r` の一覧から選ぶ画面と `claude "<最初の指示>"` は確かめていない）
+
+| コマンド | すること |
+|---|---|
+| `claude` | 今のディレクトリで、対話のセッションを始める |
+| `claude "<最初の指示>"` | 最初の指示を渡して、対話のセッションを始める |
+| `claude -c` | 今のディレクトリの、いちばん最近の会話を続ける |
+| `claude -r` | 会話の一覧から選んで再開する |
+| `claude -r <名前か ID>` | `-n` で付けた名前か、セッションの ID の会話を再開する |
+| `claude -n <名前>` | セッションに名前を付けて始める（`/resume` の一覧と端末のタイトルに出る） |
+| `claude --model <別名>` | モデルを選んで始める（`opus`・`sonnet`・`haiku` などの別名か、モデルの正式な名前） |
+| `claude --permission-mode plan` | 計画だけを立てるモード（ファイルを変えない）で始める。ほかに `acceptEdits`・`auto` など |
+| `claude --add-dir <ディレクトリ>` | 今のディレクトリのほかに、読み書きしてよいディレクトリを足す |
+
+**セッションの中の操作**（公式ドキュメントの [Interactive mode](https://code.claude.com/docs/en/interactive-mode) と [Commands](https://code.claude.com/docs/en/commands) から。本書では確かめていない）
+
+| 操作 | すること |
+|---|---|
+| `Esc` | 今の応答やツールの実行を止める（ダイアログなら閉じる） |
+| `Esc` を 2 回 | 入力があれば消す。空なら、前の時点に戻すメニューを開く |
+| `Shift+Tab` | 許可のモードを順に切り替える（`default` → `acceptEdits` → `plan` …） |
+| `Ctrl+C` | 動いているものを止める。何も動いていなければ 1 回目で入力を消し、2 回目で終わる |
+| `Ctrl+J` | 改行する（どの端末でも。Shift+Enter は WezTerm などでだけ） |
+| `!` で始める | Claude を通さずにシェルのコマンドを実行し、結果を会話に入れる |
+| `@` | ファイルのパスを補完して、会話で指す |
+| `Ctrl+R` | 入力の履歴をさかのぼって探す |
+| `Ctrl+B` | 動いているコマンドを裏へ回す（tmux の中では 2 回押す） |
+| `/help` | ヘルプとコマンドの一覧 |
+| `/resume` | 会話の一覧から再開する |
+| `/clear` | 会話を空にして始め直す |
+| `/compact` | ここまでの会話を要約して、文脈を空ける |
+| `/model` | モデルを変える |
+| `/permissions` | 許可の規則を見る・変える |
+| `/status` | 版・モデル・アカウント・接続の状態 |
+| `/usage` | 使った量とプランの上限 |
+| `/init` | このディレクトリの `CLAUDE.md` を作る |
+| `/memory` | `CLAUDE.md` を編集する |
+| `/remote-control` | このセッションを Remote Control につなぐ（`/rc`） |
+| `/exit` | 終わる |
+
+**非対話（`-p`）**（1 回答えて終わる。スクリプトやパイプで使う）
+
+| コマンド | すること |
+|---|---|
+| `claude -p "<指示>"` | 答えだけを標準出力に出して終わる |
+| `<コマンド> \| claude -p "<指示>"` | 標準入力の中身を、指示と一緒に渡す |
+| `claude -p --output-format json "<指示>" \| jq -r .result` | 結果を JSON で受け取る（`result`・`session_id`・`is_error`・`num_turns`・`total_cost_usd` など） |
+| `claude -p --allowedTools "Bash(touch *)" "<指示>"` | 聞かずに使ってよいツールを足す。`-p` では許可を聞けないので、無いと断られて `permission_denials` に残る |
+| `claude -p --max-turns <数> "<指示>"` | ターンの数の上限。超えると `error_max_turns` で、終了コードは 1 |
+| `claude -c -p "<指示>"` | 今のディレクトリのいちばん最近の会話に続けて、1 回答える |
+| `claude -r <名前か ID> -p "<指示>"` | その会話に続けて、1 回答える |
+
+- **`-p` はディレクトリの信頼の確認を飛ばす**（`claude --help`）。信頼できるディレクトリでだけ使う
+- `date` のように読むだけのコマンドは、`--allowedTools` が無くても聞かずに動いた
+
+**管理のサブコマンド**
+
+| コマンド | すること |
+|---|---|
+| `claude --version` | 版を出す |
+| `claude doctor` | 導入の状態を診る（読むだけ）。`Remote Control` の段に、使えるかと、使えない理由が出る |
+| `claude auth status --text` | ログインしているかを出す（していなければ `Not logged in.` で、終了コードは 1） |
+| `claude mcp add <名前> -- <コマンド> [<引数>…]` | 標準入出力でつなぐ MCP サーバーを足す（既定は `local`: このディレクトリで、自分だけ） |
+| `claude mcp add -s user …` / `-s project …` | `user` はどのディレクトリでも使う。`project` はこのディレクトリの `.mcp.json` に書いて共有する |
+| `claude mcp add --transport http <名前> <URL>` | HTTP でつなぐ MCP サーバーを足す |
+| `claude mcp list` | MCP サーバーの一覧（つながるかも確かめる） |
+| `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
+| `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
+| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](windows-claude-remote-control.md)）。本書では、ログインしていないときのエラーだけを確かめた |
+
+- `local` と `user` の MCP サーバーは `~/.claude.json` に書かれる（`local` はディレクトリごとの欄）
+- **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
+- ログインとログアウトは、セッションの中の `/login`・`/logout` か、`claude auth login`・`claude auth logout`（本書では試していない）
+
+---
+
 ## 更新
 
 - **dnf で入れた Claude Code は自動更新しない**
@@ -191,6 +274,7 @@
    ```
 
    - 起動中に新しい版が出ると Claude Code が更新を知らせてくるが、dnf 版は自分で更新できない（root 権限が要るため）
+   - `claude update` も、`Claude is managed by a package manager.` と出して何もしない
    - リポジトリ側にその版が届くまで、少し遅れることもある
    - 上がった版は[手順 4](#実施手順)のコマンドで確かめる
 
@@ -335,6 +419,10 @@
   - 2026-09-28: 手順 2 と、[stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)の手順 1・4のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-01: [使い方の基本](#使い方の基本)を足した（[付録](#付録-使い方の基本の検証記録2026-10-01)）
+    - ログインの要るもの（`-p`・`-c`・`-r`・`-n`・`--model`・`--permission-mode`・`--add-dir`・`--allowedTools`・`--max-turns`・`--output-format json`）は、クラウドのホスト（Ubuntu 24.04）にあったログイン済みの Claude Code 2.1.287 で確かめた
+    - ログインの要らないもの（`doctor`・`auth status`・`mcp`・`update`、ログインしていないときの `-p` と `remote-control`）は、x86_64 の AlmaLinux 10 のコンテナに手順 2〜4 で入れた `claude-code-2.1.287-1` で確かめた
+    - **確認していないこと**: セッションの中の操作（キーとスラッシュコマンド）、`-r` の一覧から選ぶ画面、`claude auth login` / `logout`、`claude remote-control` の接続
 
 | 項目 | 実機 | 検証コンテナ（`stable`） | 検証コンテナ（`latest`） |
 |---|---|---|---|
@@ -451,11 +539,18 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 - **`claude` が 2 つ入ると混乱する**: ネイティブインストーラや npm で入れたものが `~/.local/bin/claude` にあると、PATH の順序でそちらが勝つ。`command -v claude` と `claude doctor` で確認する
 - **アカウントが要る**: 無料の claude.ai プランでは使えない
 - **設定ファイルは残る**: `dnf remove` しても `~/.claude` は消えない
+- **`-p` は許可を聞けない**: 許可の要るツールは断られ、JSON の `permission_denials` に残る。要るものは `--allowedTools` で渡す（[使い方の基本](#使い方の基本)）
+- **SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)）
 
 ### 参照
 
 - [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、アンインストール、署名の検証
 - [Troubleshoot installation and login — Claude Code Docs](https://code.claude.com/docs/en/troubleshoot-install) — インストールが失敗したときの切り分け
+- [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](#使い方の基本)）
+- [Interactive mode](https://code.claude.com/docs/en/interactive-mode) / [Commands](https://code.claude.com/docs/en/commands) — セッションの中のキーとスラッシュコマンド
+- [Run Claude Code programmatically](https://code.claude.com/docs/en/headless) — `-p` と `--output-format`
+- [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp) — `claude mcp` とスコープ
+- [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`
 - `man dnf.conf`（`gpgcheck`、`baseurl`）
 
 ---
@@ -522,3 +617,41 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 - 実機（aarch64）での `latest`。aarch64 の `latest` にも `2.1.283-1` があることは repodata で確かめた
 - 手順 5 の認証と、認証後の `claude doctor`（コンテナでは未認証のまま）
 - ネイティブインストーラ版・npm 版との併存時の優先順位（`~/.local/bin/claude` が PATH の先にある場合）
+
+### 付録: 使い方の基本の検証記録（2026-10-01）
+
+**ログインの要らないもの**: [tmux.md の付録](tmux.md#付録-コンテナでの検証記録2026-10-01)と同じ x86_64 の AlmaLinux 10 のコンテナ（`10-init`、systemd と sshd）に、手順 2〜4 の `latest` で `claude-code-2.1.287-1` を入れ、SSH でログインした一般ユーザー（ログインしていない）で実行した。
+
+| コマンド | 結果 |
+|---|---|
+| `claude auth status --text` | `Not logged in. Run claude auth login to authenticate.`、終了コード 1。`--text` を外すと JSON（`"loggedIn": false`） |
+| `claude doctor` | `Package manager: rpm`・`Auto-updates: Managed by package manager`・`No installation issues found.`。`Remote Control` の段に `Not signed in to claude.ai` など 5 行 |
+| `claude update` | `Current version: 2.1.287` の後に `Claude is managed by a package manager.` と `Please use your package manager to update.`、終了コード 0 |
+| `claude mcp add hello -- /usr/bin/echo hi` | `Added stdio MCP server hello with command: /usr/bin/echo hi to local config`、`File modified: ~/.claude.json [project: <PROJECT_DIR>]` |
+| `claude mcp add -s user …` | `to user config`、`File modified: ~/.claude.json` |
+| `claude mcp add --transport http -s project web https://mcp.example.invalid/mcp` | `.mcp.json` に `"type": "http"` と `url` が書かれた |
+| `claude mcp list` / `get` | `✘ Failed to connect`（`echo` は MCP サーバーではないので）。`get` は `Scope: Local config (private to you in this project)` と、消すときの `claude mcp remove hello -s local` |
+| `claude mcp remove …` | 3 つとも消え、`list` は `No MCP servers configured.` に戻った |
+| `claude -p "hi"` | `Not logged in · Please run /login`、終了コード 1 |
+| `claude remote-control --name proj --spawn same-dir` | `Error: You must be logged in to use Remote Control.`、終了コード 1。`claude remote-control --help` もログインしていないと同じエラーで、help は出なかった |
+| `claude --name hup-test`（SSH のシェルで、tmux を使わずに起動） | SSH のクライアントを落とすと、`claude` のプロセスも消えた |
+| `claude auth status --text` の後ろに `echo` の 2 行を続けて貼る（ブラケットペースト無し） | `echo` は 2 行とも実行されなかった。`claude --version` や `claude doctor \| head -3` の後ろの `echo` は実行された |
+
+**ログインの要るもの**: クラウドのホスト（Ubuntu 24.04、x86_64）にあったログイン済みの Claude Code 2.1.287（`claude auth status --text` は `Login method: Claude API account`）で、空のディレクトリから実行した。その環境の Claude Code の環境変数を引き継がないように `env -i` で HOME・PATH・プロキシだけを渡した。
+
+| コマンド | 結果 |
+|---|---|
+| `claude -p "1+1 の答えの数字だけを返して"` | `2` |
+| `echo "hello tmux" \| claude -p "標準入力の文字列を大文字にして、それだけを返して"` | `HELLO TMUX` |
+| `claude -p --output-format json "…" \| jq …` | `result` が `5`、`num_turns` が 1、`is_error` が false。キーは `result`・`session_id`・`total_cost_usd`・`permission_denials` など 25 個 |
+| `claude -p -n tmux-test "合言葉は「りんご」です…"` → `claude -c -p "合言葉を答えて…"` → `claude -r tmux-test -p "…"` | `了解`、`りんご`、`りんご` |
+| `claude -p "touch made.txt を実行して…"` | `承認が得られず、実行できませんでした。`、`permission_denials` に `Bash`。ファイルはできなかった |
+| 同じ指示に `--allowedTools "Bash(touch *)"` | `成功しました。`、ファイルができた |
+| `date +%Y` を実行させる指示（`--allowedTools` 無し） | 聞かずに動き、`2026` |
+| 同じ指示に `--max-turns 1` | `subtype` が `error_max_turns`、`is_error` が true、終了コード 1 |
+| `--model haiku` | `modelUsage` のキーが `claude-haiku-4-5-20251001` |
+| `--permission-mode plan` で `touch` を実行させる指示 | プランモードのため実行しなかった、と答え、ファイルはできなかった |
+| 作業ディレクトリの外のファイルを Read で読ませる指示 | `--add-dir` 無しでは `permission_denials` に `Read`。`--add-dir <そのディレクトリ>` 付きで中身（`banana`）を返した |
+
+- 対話の `claude` は、ログインしていないコンテナではテーマを選ぶ最初の画面まで（tmux の中でも同じ）。ログイン済みのホストでも、`env -i` で起動すると最初の設定の画面からログインの方法を選ぶ画面に進んだので、そこで止めた（ログインはしていない）
+- セッションの中のキーとスラッシュコマンドは、公式ドキュメントの Interactive mode と Commands の表から載せた

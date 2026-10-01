@@ -24,7 +24,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルからも使える） | `brew upgrade` | 導入元が Homebrew の手順書 15 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルからも使える） | `brew upgrade` | 導入元が Homebrew の手順書 16 本と、手順書の無いツールの Homebrew の行 |
 | [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/npm-offline.md) |
 | [npm（インターネットに出られないホスト）](docs/npm-offline.md) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
@@ -68,6 +68,7 @@
 - ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ（リモートログインと違い、つなぎ直しても同じデスクトップに戻る。同じ PC で併用できる）。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3〜5 も）
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
+- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
@@ -117,10 +118,10 @@
 | [HackGen Console NF](docs/hackgen.md) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask | `~/.local/share/fonts` に入る（自分のユーザーだけ） |
 | [starship](docs/starship.md) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | `~/.bashrc` に 1 行。`~/.config/starship.toml` は任意 |
 | [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew。x86_64 は COPR（`kray74/cli-tools`）の dnf でも入る（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
+| [tmux](docs/tmux.md) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
-| [tmux](docs/tool-catalog.md#cli-定番の置き換え) | 端末の多重化 | Homebrew |
 | [zellij](docs/tool-catalog.md#cli-定番の置き換え) | 端末の多重化（キー操作が画面に出る） | Homebrew |
 | [atuin](docs/tool-catalog.md#cli-定番の置き換え) | シェル履歴の検索 | Homebrew |
 | [fzf](docs/tool-catalog.md#cli-定番の置き換え) | 一覧から曖昧検索で選ぶ | Homebrew |
@@ -200,7 +201,7 @@
 | 手順書 | 用途 | 導入元 | 更新 |
 |---|---|---|---|
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
-| [Claude Code](docs/claude-code.md) | Claude Code の CLI（Node.js 不要） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる） | `sudo dnf upgrade claude-code`（自動更新しない） |
+| [Claude Code](docs/claude-code.md) | Claude Code の CLI（Node.js 不要）と、`claude` のコマンドラインの使い方（起動と再開・`-p`・MCP） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる） | `sudo dnf upgrade claude-code`（自動更新しない） |
 | [Claude Code で GUI を確かめる](docs/claude-code-gui.md) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
 
 | 手順書の無いツール | 用途 | 導入元 |
