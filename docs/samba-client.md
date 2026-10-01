@@ -12,7 +12,8 @@
 - 手順の後: GNOME Files でも開くなら、[GNOME Files で開く（任意）](#gnome-files-で開く任意)を行う。戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 の仮想マシン（QEMU）でのみ検証した手順書**で、実機では本実行していない。サーバーは samba.md 手順 3 の `smb.conf` を置いたコンテナ。GNOME Files の画面とキーリングは確かめていない（[対象と検証環境](#対象と検証環境)）。
+> - **手順は x86_64 の仮想マシン（QEMU）でだけ通した**。実機では本実行していない。サーバーは samba.md 手順 3 の `smb.conf` を置いたコンテナ
+> - GNOME Files の画面は、サイドバーの表示と F5 の再読み込みだけを aarch64 の実機で見た。キーリングは確かめていない（[対象と検証環境](#対象と検証環境)）
 
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
@@ -358,7 +359,8 @@
    - `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい
    - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>` と、共有の中の一覧（隠しファイルは出ない）が出る
    - GIO を使わないアプリからは、`/run/user/<UID>/gvfs/smb-share:…/` の下で読み書きできる
-   - 画面では、サイドバーに共有が出るはず（未確認）
+   - 画面では、サイドバーに共有が出る（2026-10-01 に、aarch64 の実機の Nautilus で確認）
+   - サーバーで変えたものは、「ファイル」には自動では出ない。F5 で出る（[注意点](#注意点)）
 
 1. 共有を外す。
 
@@ -514,6 +516,9 @@
   - 2026-09-29: 手順 1 に、samba.md の `[root]`（root のホーム）へ `SHARE=root` でつなぐ案内を足した
     - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜6 とロールバックの手順 3 を `SHARE=root` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
     - `SHARE=root` での自動マウント（手順 7・8）は試していない
+  - 2026-10-01: [注意点](#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
+    - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](claude-code-gui.md) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
+    - この文書のブロックは貼っていない。マウントは、手順 6 と同じオプションに `port=4450` を足して手で行い、GNOME Files は `/usr/bin/gio mount` でつないでから Nautilus で開いた
 
 | 項目 | 実機 | VM |
 |---|---|---|
@@ -634,6 +639,12 @@ PID     Username     Group        Machine                                   Prot
 - **外出先から WireGuard 越しに使うとき**: トンネルを張ってからアクセスする（本書では未検証）
   - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[wireguard-road-warrior.md](wireguard-road-warrior.md) の `AllowedIPs` に拠点の LAN が入っているため
   - トンネル越しに 445/tcp へ届くことは [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)で確かめてあるが、マウントは確かめていない
+- **サーバーで直接変えたもの**（サーバーのシェルや Syncthing などで、Samba を通さずに）
+  - samba.md の今のサーバー（`smb3 directory leases = no`）なら、`ls` にすぐ出る。消したファイルを `stat` で引くと、約 1 秒はまだあるように見える（`actimeo=1`）
+  - ディレクトリのリースを渡すサーバー（Samba 4.22 以降の既定。2026-10-01 より前の samba.md のサーバーも）では、一覧をキャッシュしてから 30〜60 秒、`ls` に古い一覧が出た（cifs の `dir_cache_timeout` の既定 30 秒）
+  - サーバーを変えられないときは、マウントのオプションに `nohandlecache` を足すと、すぐに出た
+  - どれも、aarch64 の Raspberry Pi 5 のカーネル（6.12.96）の cifs と、コンテナの Samba で測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
+- **GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない**: F5 ですぐ出る。gvfs はディレクトリのリースを使わないので、サーバーの設定によらない（同じ付録）
 - **`sudo mount -a` はエラーを出す**: 自動マウントの行について、1 回目は `mount error(16): Device or resource busy`
   - パスをたどった時点で systemd がマウントし、そのあと mount.cifs が同じ場所にもう一度マウントしようとするため
   - VM では、共有は 1 つだけマウントされていて、2 回目の `mount -a` は何も出さなかった
@@ -653,7 +664,7 @@ PID     Username     Group        Machine                                   Prot
 - [Chapter 5. Mounting an SMB Share — Managing file systems (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/managing_file_systems/mounting-an-smb-share)（資格情報ファイル、fstab の例、よく使うオプション）
 - [Chapter 10. Browsing files on a network share — Using the GNOME desktop environment (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/using_the_gnome_desktop_environment/browsing-files-on-a-network-share)
 - [Chapter 6. Managing storage volumes in GNOME — Administering RHEL by using the GNOME desktop environment (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/administering_rhel_by_using_the_gnome_desktop_environment/managing-storage-volumes-in-gnome)（GIO と、`gvfs-fuse` の `/run/user/UID/gvfs/`）
-- `man mount.cifs`（`credentials=`、`uid=`、`file_mode=`、`soft`、`echo_interval`）
+- `man mount.cifs`（`credentials=`、`uid=`、`file_mode=`、`soft`、`echo_interval`、`actimeo`、`nohandlecache`、`max_cached_dirs`）/ `modinfo cifs`（`dir_cache_timeout`）
 - `man systemd.mount`（`x-systemd.automount`、`x-systemd.idle-timeout`、`nofail`、`_netdev`）/ `man systemd-fstab-generator`
 - `man findmnt`（`--verify`）/ `man gio`
 - cifs-utils 7.7 のソース（`mount.cifs.c` の `open_cred_file`・`parse_cred_line`・`set_password`・`parse_opt_token`）
