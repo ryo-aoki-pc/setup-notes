@@ -81,7 +81,7 @@
    	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
    	command yazi "$@" --cwd-file="$tmp"
    	IFS= read -r -d '' cwd < "$tmp"
-   	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+   	! [ "$cwd" -ef "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
    	command rm -f -- "$tmp"
    }
    EOF
@@ -89,7 +89,7 @@
    ```
 
    - yazi をそのまま終了しても、シェルのディレクトリは動かない
-   - 公式が案内しているこの関数を入れると、`q` で終了したときに移動先へ `cd` する
+   - 公式が案内している関数（移ったかの比べ方だけ変えた。補足）を入れると、`q` で終了したときに移動先へ `cd` する
    - 元の場所で終わりたいときは `Q`
    - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ `y` 関数を読む）
 
@@ -100,6 +100,10 @@
 
    - 関数名を `y` にしているのは、公式の例に合わせたもの
    - `command yazi` と書いているのは、関数と実体を取り違えないため
+   - 移ったかどうかは、公式の関数のように `$PWD` と文字列で比べず（`[ "$cwd" != "$PWD" ]`）、同じディレクトリかで比べる（`! [ "$cwd" -ef "$PWD" ]`。bash の組み込みの `test`）
+     - Windows 11 の Git Bash（自分用の bash の設定で同じ関数を読む）では、yazi が `C:\Users\…` の形で書くので、文字列で比べると、動かずに `q` で閉じても違うとみなして同じ場所へ `cd` し直し、`cd -` の戻り先が今の場所になっていた
+     - AlmaLinux 10 では、yazi が `$PWD` と同じ形で書くので（シンボリックリンクを通ったディレクトリでも）、どちらの比べ方でも振る舞いは同じだった（[付録](#付録-y-関数の比べ方を直したときの検証2026-10-01)）
+   - このブロックを前に貼ったホストの `~/.bashrc` には、比べ方を直す前の形が残っている。AlmaLinux 10 では振る舞いが同じなので、そのままでよい（自分用の bash の設定の移行は、どちらの形も消す）
 
    </details>
 
@@ -182,21 +186,22 @@
 - **進め方**: Homebrew で本体と依存ツールをまとめて入れる
   - **読者が書き換えるのは冒頭の変数ブロック（依存ツールの一覧）だけ**
   - RPM（COPR）経路も試したうえで採らなかった（[選択した方針](#選択した方針)）
-- **状態**: **実機で本実行済み（2026-09-21）**
-  - 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数も同じ形で入っている
+- **状態**: **実機で本実行済み（2026-09-21）。手順 3 の `y` 関数の比べ方を直した版（2026-10-01）は、WSL の擬似端末で確かめた（実機では試していない）**
+  - 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数は、比べ方を直す前の形で入っている
   - [Homebrew の導入](homebrew.md)と手順 2・4 は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した（`YAZI_EXTRAS` は空）
   - 確認したこと: ボトルが降りる、`yazi --version` / `ya --version` が出る
+  - 2026-10-01: 比べ方を直した手順 3 のブロックを、WSL の AlmaLinux 10.2 の擬似端末の bash（使い捨ての `HOME`）に括弧付き貼り付けで貼り、GitHub の yazi 26.9.1 のバイナリを開いて `y` を確かめた。直す前の版と比べ、5 つの場合とも振る舞いは同じだった（[付録](#付録-y-関数の比べ方を直したときの検証2026-10-01)）
   - **コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）
   - **画像プレビュー（端末側の対応）とプラグインは未検証**
 
-| 項目 | 実機 | 検証コンテナ |
-|---|---|---|
-| 実施日 | 2026-09-21 | 2026-09-22 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| Homebrew | 7.0.6（`/home/linuxbrew/.linuxbrew`） | 7.0.6（同じ場所に新規導入） |
-| 入った yazi | `yazi 26.9.1`（`arm64_linux` ボトル、Rustc 1.98.0 ビルド） | 同じ（`26.9.1`） |
-| 依存ツール | `ffmpeg-full 9.0.2` / `sevenzip 26.03` / `jq 1.8.2` / `poppler 26.09.0` / `fd 10.5.0` / `ripgrep 15.2.0` / `fzf 0.74.4` / `resvg 0.48.1` / `imagemagick-full 7.1.2-31` / `font-symbols-only-nerd-font 3.5.1` | 本体のみ（formula の存在確認だけ実施） |
-| 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し |
+| 項目 | 実機 | 検証コンテナ | WSL（`y` 関数の比べ方を直したとき） |
+|---|---|---|---|
+| 実施日 | 2026-09-21 | 2026-09-22 | 2026-10-01 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） | AlmaLinux 10.2 (Lavender Lion) / x86_64（Windows 11 の PC の WSL 2.7.13.0、bash 5.2.26） |
+| Homebrew | 7.0.6（`/home/linuxbrew/.linuxbrew`） | 7.0.6（同じ場所に新規導入） | 使っていない |
+| 入った yazi | `yazi 26.9.1`（`arm64_linux` ボトル、Rustc 1.98.0 ビルド） | 同じ（`26.9.1`） | GitHub のリリースの `yazi-x86_64-unknown-linux-gnu.zip`（26.9.1。一時的な場所に展開） |
+| 依存ツール | `ffmpeg-full 9.0.2` / `sevenzip 26.03` / `jq 1.8.2` / `poppler 26.09.0` / `fd 10.5.0` / `ripgrep 15.2.0` / `fzf 0.74.4` / `resvg 0.48.1` / `imagemagick-full 7.1.2-31` / `font-symbols-only-nerd-font 3.5.1` | 本体のみ（formula の存在確認だけ実施） | 無し |
+| 端末 | WezTerm nightly（[wezterm-nightly.md](wezterm-nightly.md)） | 無し | Python の `pty`（160 × 48） |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -309,3 +314,43 @@ $ command -v yazi
 - `ya pkg` で入れるプラグイン・テーマ
 - `YAZI_EXTRAS` を空にした最小構成での動作
 - ロールバック（`brew uninstall`）の本実行
+
+---
+
+### 付録: y 関数の比べ方を直したときの検証（2026-10-01）
+
+手順 3 の `y` 関数の、移ったかの比べ方を `[ "$cwd" != "$PWD" ]` から `! [ "$cwd" -ef "$PWD" ]` に直した。きっかけは、この関数を同じ文字列で読む自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を、Windows 11 の Git Bash で確かめたときの次の振る舞い:
+
+- yazi（scoop の 26.9.1）は cwd-file に `C:\Users\…\Desktop` の形で書き、Git Bash の `$PWD` は `/c/Users/…/Desktop` なので、文字列では一致しない
+- 動かずに `q` で閉じても `cd` し直し、`OLDPWD` が今の場所に変わった（`cd -` で前の場所へ戻れない）。`Q` では変わらなかった
+- bash の組み込みの `test` の `-ef`（同じデバイスと i ノードか）は、Git Bash で `C:\Users\…\Desktop` と `/c/Users/…/Desktop` を同じ、別のディレクトリを違うと判定した
+
+**流し方（AlmaLinux 10）**:
+
+- Windows 11 の PC の WSL の AlmaLinux 10.2 で、Python の `pty` で `bash --norc --noprofile -i` を動かした（`HOME` は `/tmp` の下の使い捨てのディレクトリ。WSL のユーザーのホームには書いていない）
+- この文書の手順 3 のブロックを機械的に抜き出し（リストの字下げを外す）、括弧付き貼り付けで貼ってから Enter を送った。直す前の版（この直しの前の yazi.md）と直した版を、別々のホームで流した
+- yazi は Homebrew で入れず、GitHub のリリースの `yazi-x86_64-unknown-linux-gnu.zip`（26.9.1。sha256 をリリースに載っている値と照合）を一時的な場所に展開して、`PATH` の先頭に置いた
+- yazi の画面が開いた（代替画面に切り替わった）のを待ってからキーを送り、画面が閉じてプロンプトが戻ってから、`PWD` と `OLDPWD` を書き出した
+
+| 確かめたこと | 直す前（`!=`） | 直した版（`-ef`） |
+|---|---|---|
+| 手順 3 のブロックを貼った後 | `~/.bashrc` は 7 行、`type -t y` は `function` | 同じ（比べ方の行だけが違う） |
+| `d1` で `y` → `l` で `share` に入って `q` | `share` へ移り、`OLDPWD` は `d1` | 同じ |
+| `d1` で `y` → 動かずに `q` | 動かず、`OLDPWD` も前のまま | 同じ |
+| `d1` で `y` → 動かずに `Q` | 動かず、`OLDPWD` も前のまま | 同じ |
+| シンボリックリンク（`link` → `real`）の中で `y` → 動かずに `q` | `PWD` は `link` のまま | 同じ |
+| `y 'd1/with space'` → `q` | `d1/with space` へ移った | 同じ |
+| `/tmp/yazi-cwd.*` | 残らない | 残らない |
+
+- `y` を通さずに `yazi --cwd-file=<ファイル>` を開いて確かめると、動かずに `q` で閉じたとき、yazi は `$PWD` と同じ形（シンボリックリンクの中では `…/link` のリンクの形）を書いた。`Q` で閉じるとファイルを作らなかった
+- AlmaLinux 10 では、yazi が `$PWD` と同じ形で書くので、2 つの比べ方で振る舞いが分かれなかった
+
+**Windows 11 の Git Bash**（参考。この文書の対象外）:
+
+- ryo-aoki-pc/bash の `bashrc` の同じ関数を、画面を出さない WezTerm の端末（`wezterm-mux-server` のペイン）で、scoop の yazi 26.9.1 を開いて確かめた
+- 直す前は、動かずに `q` で閉じると `OLDPWD` が今の場所に変わった。直した版では変わらず、中へ入って `q`・`Q`・空白と日本語を含むディレクトリは、直す前と同じだった
+
+#### 未確認事項（2026-10-01）
+
+- 実機（Raspberry Pi 5・aarch64・Homebrew の yazi）で、直した `y` を使うこと（実機の `~/.bashrc` は直す前の形のまま）
+- WezTerm の画面での操作（擬似端末にキーを送って代えた）
