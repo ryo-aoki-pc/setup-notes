@@ -97,6 +97,7 @@
 
    - `Homebrew 7.0.6` のように出れば通っている
    - 1 行目で `~/.bashrc` に書き、2 行目で今のシェルにも即時に反映している
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `brew --version` を実行する（その設定が同じ 1 行を読む）
 
    <details>
    <summary>補足: <code>~/.bashrc</code> に書く 1 行</summary>
@@ -114,7 +115,7 @@
 
    引数なしだと `brew` が親プロセスからシェルを推測する。bash を使っている限り結果は同じなので実機はそのままにしてある。**明示したほうが確実**なので、本書はインストーラの案内どおり `bash` 付きで書いている。
 
-   この 1 行を `~/.bashrc` の**どこに置くか**は問わない（`PATH` を触るだけで `PROMPT_COMMAND` には触らない）。[zoxide](zoxide.md) や [starship](starship.md) の初期化とは違って、順序の制約は無い。
+   この 1 行は、Homebrew で入れたコマンドを使う行（[zoxide](zoxide.md) や [starship](starship.md) の初期化など）より前に置く。それらは、この 1 行が足した `PATH` からコマンドを探すので、後ろにあると `command not found` になる。`PROMPT_COMMAND` には触らないので、ほかの行との順序の制約は無い。
 
    </details>
 

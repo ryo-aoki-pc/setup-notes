@@ -170,6 +170,7 @@
    - いちばん最後に置く理由は、この手順の補足
    - **この 1 行を書かないと `z` は使えない**（zoxide 本体はシェル関数を出力するだけで、`zoxide` コマンド自体では移動できない）
    - `function` と出れば読み込めている
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `type -t z` を実行する（その設定が `--cmd z` の初期化を最後に読む）
 
    <details>
    <summary>補足: init の中身</summary>

@@ -253,6 +253,7 @@
 
    - `unix:///run/user/<UID>/podman/podman.sock` と `"Name":"Podman Engine"` が出ればよい
    - 1 行目はシングルクォートなので、`${XDG_RUNTIME_DIR}` は `~/.bashrc` を読むたびに展開される
+   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、1 行目は貼らない。`. ~/.bashrc` を実行してから、`echo` と `curl` の行を貼る（その設定は、ソケットがあるときだけ同じ `DOCKER_HOST` を入れる。試していない）
 
    <details>
    <summary>補足: <code>docker</code> コマンドが要るとき</summary>
