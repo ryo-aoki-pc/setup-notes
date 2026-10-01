@@ -383,6 +383,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
   - `gdbus` と `gio` も Homebrew のものになる。手で使うときは `/usr/bin/` を付ける
 - **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](gnome-headless-session.md) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
   - 上部バーは主のモニター（`Meta-0`）にしか出ないので、クライアントの画面には上部バーが無かった
+  - リモートログイン（[gnome-remote-desktop.md](gnome-remote-desktop.md)）のログイン画面からこのユーザーで入ったときも、このセッションに引き渡され、gnome-shell のログに `Added virtual monitor Meta-1` が出た（2026-10-02、Windows 11 の「リモートデスクトップ接続」）
   - RDP だけで使うなら、[ロールバック](#ロールバック)でドロップインを外すと、クライアントの画面がデスクトップ全体になる
 - **ドロップインは、このユーザーの GNOME のセッションすべてに効く**: 後からモニターをつないで、このユーザーで PC の画面からログインすると、見えない仮想モニターも足されるはず（確かめていない）。そのときは[ロールバック](#ロールバック)で外す
 - **ログインのキーリングは開いていない**: パスワードを読もうとするアプリは、キーリングを開く窓を出す。Claude Code には答えられない（`Escape` で閉じられるかは確かめていない）

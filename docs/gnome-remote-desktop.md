@@ -9,6 +9,7 @@
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 接続元を LAN に絞る場合は、最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
+- 2026-10-02 より前にこの手順を終えたサーバーは、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)を行う（手順 5 のドロップインが無い）
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[gnome-headless-session.md](gnome-headless-session.md)。この手順書と同じ PC で併用できる（ポートは 3390）
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
@@ -161,21 +162,37 @@
 
    </details>
 
-1. サービスを有効にして起動し、ファイアウォールで RDP を開ける。
+1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
    ```bash
    {
+     sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
+     sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
+   [Unit]
+   After=gdm.service
+   CONF
+     sudo systemctl daemon-reload
      sudo systemctl enable --now gnome-remote-desktop.service
      sudo firewall-cmd --permanent --add-service=rdp
      sudo firewall-cmd --reload
    }
    ```
 
+   - ドロップイン（`10-after-gdm.conf`）は、起動のときにこのデーモンを GDM より後に立ち上げる
+   - 無いと、起動のたびに、リモートログインが真っ暗な画面のまま 30 秒で切れることがある（この手順の補足）
+
    <details>
    <summary>補足: サービスとファイアウォール</summary>
 
    - `gdm` は両環境とも既に active、`systemctl get-default` も既に `graphical.target` だったため、RHEL 標準手順にある `systemctl enable --now gdm` / `systemctl set-default graphical.target` は不要だった
    - `--add-service=rdp` は firewalld 定義済みサービスで 3389/tcp を開放する（`--add-port=3389/tcp` と等価）
+
+   **GDM の後に起動させる理由**
+
+   - パッケージの `gnome-remote-desktop.service` には GDM との順序が無い。環境 2 では、起動のときに GDM より 6 秒先に立ち上がった
+   - 先に立ち上がると、GDM が表示の一覧を公開する前に取りに行って失敗する。その後は、表示の変更（ログイン画面がどのセッションか）を受け取れない
+   - その起動の間は、リモートログインがいつも、資格情報は通るのに真っ暗な画面のまま 30 秒で切れる（[付録](#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
+   - `After=gdm.service` は順番だけを決める。GDM が無いと起動しない、といった依存は足さない
 
    </details>
 
@@ -393,12 +410,125 @@
 
 ---
 
+## 設定済みのサーバーで GDM の後に起動させる
+
+- **`/etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf` が無いサーバーだけ**（2026-10-02 より前の手順 5 で設定したもの）。今の手順 5 は、このドロップインを置く
+- ドロップインが効くのは次の起動から。今のデーモンが起動のときに GDM とすれ違っていたら、この節の手順 3 でデーモンを起動し直すと直る（理由は[手順 5](#実施手順) の補足）
+- **この節の手順 3・4 は、リモートログインでつないでいる利用者がいないときに行う**（ヘッドレスのセッションに入った RDP の接続は、手順 4 で再起動する受け渡し役のデーモンが持っている）
+
+1. 起動の順番を GDM の後にするドロップインを置く。
+
+   ```bash
+   {
+     sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
+     sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
+   [Unit]
+   After=gdm.service
+   CONF
+     sudo systemctl daemon-reload
+     systemctl show gnome-remote-desktop.service -p After | grep -ow 'gdm\.service'
+   }
+   ```
+
+   - `gdm.service` と出ればよい
+
+1. 今のデーモンが、起動のときに GDM とすれ違ったかを確かめる。
+
+   ```bash
+   sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -c 'Error calling GetManagedObjects'
+   ```
+
+   - `1` なら、すれ違っている。この節の手順 3 へ進む
+   - `0` なら、この節の手順 3・4 は飛ばす
+
+   <details>
+   <summary>補足: すれ違ったときのログ</summary>
+
+   環境 2 では、起動のとき（GDM が立ち上がったのと同じ秒）に、次の 1 行が出ていた:
+
+   ```
+   gnome-remote-desktop-daemon[<PID>]: (gnome-remote-desktop-daemon:<PID>): GLib-GIO-WARNING **: 00:09:18.973: Error calling GetManagedObjects() when name owner :1.26 for name org.gnome.DisplayManager came back: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: Object does not exist at path “/org/gnome/DisplayManager/Displays”
+   ```
+
+   - 今のデーモンのプロセス（MainPID）のログだけを数える。起動の後にデーモンを再起動していれば `0` になる
+
+   </details>
+
+1. 起動のときにすれ違っていたら、デーモンを止め、待ってから起動し直す。
+
+   ```bash
+   {
+     sudo systemctl stop gnome-remote-desktop.service
+     sleep 5
+     sudo systemctl start gnome-remote-desktop.service
+     sleep 5
+     sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -E 'GetManagedObjects|RDP server started'
+   }
+   ```
+
+   - `RDP server started` の 1 行だけが出ればよい
+   - 真っ暗なまま残っていたリモートログインのログイン画面のセッションは、止めたときに閉じる（`loginctl list-sessions` の `gdm` の `greeter` で、SEAT が `-` のもの）
+   - **注意**: `systemctl restart` にしない（この手順の補足）
+
+   <details>
+   <summary>補足: restart にしない理由</summary>
+
+   - 残っていたログイン画面のセッションは、デーモンが消えると閉じ、GDM はその表示を消す
+   - `restart` では、これが新しいデーモンの起動と重なる。環境 2 では、新しいデーモンが表示の一覧を読む間に消えた表示を取りこぼし、消えた表示を持ったままになった
+   - GDM は表示のパスを使い回す。同じパスで次のログイン画面が作られると、デーモンはそれを新しい表示として扱わず、引き渡し口を作らない。その 1 回は真っ暗なまま切れた（[付録](#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
+   - 止めて 5 秒待つと、ログイン画面のセッションが閉じてから新しいデーモンが起動する
+
+   </details>
+
+1. ヘッドレスのセッションがある PC では、そのユーザーのシェルで、受け渡し役のデーモンを再起動する。
+
+   ```bash
+   {
+     systemctl --user restart gnome-remote-desktop-handover.service
+     sleep 3
+     sudo journalctl --no-pager _PID="$(systemctl --user show -p MainPID --value gnome-remote-desktop-handover.service)" | grep 'RDP server started'
+   }
+   ```
+
+   - `RDP server started` と出ればよい
+   - ヘッドレスのセッションは [gnome-headless-session.md](gnome-headless-session.md) のもの。無い PC では、この手順は飛ばす
+   - この節の手順 3 の後、このデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある（この手順の補足）
+
+   <details>
+   <summary>補足: 受け渡し役のデーモンを再起動する理由</summary>
+
+   - 受け渡し役のデーモンは、システムのデーモンが消えると引き渡し口（`/org/gnome/RemoteDesktop/Rdp/Handovers/session<ID>`）を手放し、戻ると取り直す（RHEL の独自パッチ）
+   - 取り直すときに口がまだ無いと、口が足されるのを待つ。環境 2 では、2 回とも待つほうに入った
+   - 待ち方に 2 つの穴があり、どちらでも止まった
+     - 1 回目: 足された口が自分のものかを、自分のセッション ID で確かめる。ユーザーのサービス（`gnome-remote-desktop-handover.service`）はセッションの外にいるので ID を引けず、`Could not get session id` を出して見送った（4 回出た）
+     - 2 回目: 口は、待ち始める前に足されていた（D-Bus の記録で、断られてから 9 ミリ秒後に口ができていた）。パッチは「後から足された」知らせしか見ないので、何も出さずに待ち続けた
+   - 再起動すると、最初の問い合わせ（システムのデーモンがユーザーからセッションを引く）で口が見つかる。環境 2 では、2 回とも `RDP server started` まで進んだ
+   - 取り直さないままだと、そのユーザーでリモートログインしたときに、ログイン画面からヘッドレスのセッションへ渡せないはず（パッチのコードから。確かめていない）
+
+   </details>
+
+1. 元に戻すときは、ドロップインを消して読み込ませる。
+
+   ```bash
+   {
+     sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
+     sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
+     sudo systemctl daemon-reload
+     systemctl show gnome-remote-desktop.service -p After | grep -cw 'gdm\.service'   # 0
+   }
+   ```
+
+   - 最後に `0` と出ればよい
+   - 次の起動からの順番が戻るだけで、今動いているデーモンはそのまま
+
+---
+
 ## ロールバック
 
 > [!WARNING]
 > **この節の**手順 2 で証明書を差し替え前に戻すには、旧ファイルが要る。差し替えのときに旧ファイルを消していると、証明書は戻せない。[手順 2](#実施手順) は同じ名前で上書きするので、残すなら先にコピーしておく。
 
-1. サービスと RDP を止め、資格情報とファイアウォールの開放を消す。
+1. サービスと RDP を止め、資格情報とファイアウォールの開放と、手順 5 のドロップインを消す。
 
    ```bash
    {
@@ -406,6 +536,9 @@
      sudo grdctl --system rdp disable
      sudo grdctl --system rdp clear-credentials
      sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
+     sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
+     sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
+     sudo systemctl daemon-reload
    }
    ```
 
@@ -438,6 +571,13 @@
   - 2026-09-28: 手順 2〜5・8・9、[ロールバック](#ロールバック)の手順 1、[注意点](#注意点)の「設定レイヤーの食い違い」の確認方法のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-02: 手順 5 に GDM の後に起動させるドロップインを足し、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)を足した
+    - 環境 2 で、Windows 11 からのリモートログインが真っ暗な画面のまま切れたため（[付録](#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
+    - その節の手順 1〜5 は、環境 2 の実機で流した（手順 5 の後は、手順 1 で置き直した）
+    - 直した後、利用者が Windows 11 の「リモートデスクトップ接続」でつなぎ、GDM のログイン画面が出て、ログインできた（ヘッドレスのセッションに引き渡された。[注意点](#注意点)）
+    - その節の手順 3 は、はじめ `restart` で流した。その後の最初の接続だけが、また真っ暗なまま切れたので、止めて待ってから起動する今の形に直し、流し直した（付録）。流し直した後の接続は、まだ確かめていない
+    - 手順 5 の今のブロックと、[ロールバック](#ロールバック)の手順 1 は、構文の検査だけで、流していない
+    - 起動のときにドロップインが効くこと（再起動して確かめること）は、まだしていない
 
 | | 環境 1（初回構築） | 環境 2（openssl 手順の再検証） |
 |---|---|---|
@@ -447,7 +587,7 @@
 | `gdm` | 47.0-22.el10_2 | 47.0-22.el10_2 |
 | OpenSSL | 3.5 | 3.5.8 |
 | 証明書 | 当初 `winpr-makecert` → 後に openssl 製へ差し替え | 最初から本書の openssl 手順で構築 |
-| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（[手順 10 の補足](#実施手順)） |
+| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（[手順 10 の補足](#実施手順)）。2026-10-02 に、実クライアント（Windows 11）から GDM ログインまで |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -557,7 +697,13 @@ gnome-remote-de[2415]: RDP server started
   - 既存デスクトップをそのまま見たい場合は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）が必要。今回は採用していない
 - **ヘッドレスのセッションを常駐させている PC**（[gnome-headless-session.md](gnome-headless-session.md)）
   - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
-  - そのユーザーでリモートログインしたときの動きは確かめていない
+  - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）
+  - そのユーザーでログイン画面からログインすると、新しいセッションは作られず、常駐しているヘッドレスのセッションに引き渡された（環境 2、2026-10-02。Windows 11 の「リモートデスクトップ接続」で）
+    - RHEL の `gnome-remote-desktop` 49.3-3 からの機能（パッケージの changelog の「Support remote login to sessions from gnome-headless-session@.service」）
+    - ヘッドレスのセッションの gnome-shell のログには、クライアント用の仮想モニター `Meta-1` が足されたと出た。[claude-code-gui.md](claude-code-gui.md) のドロップインがある PC では、`Meta-0` の右に足された別のモニターになる
+    - 切断すると `Meta-1` は消え、ヘッドレスのセッションは残った
+- **GDM を再起動したとき**: このデーモンも起動し直す（[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3。ヘッドレスのセッションがある PC では手順 4 も）
+  - GDM が立ち上がり直すときにも、起動のときと同じすれ違い（[手順 5](#実施手順) の補足）が起きるはず。コードからの推定で、確かめていない
 - **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は、手順 2〜4 でそちらのパスを指定する
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す
   - **クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある
@@ -845,3 +991,101 @@ Common Name (CN):
 ```
 
 openssl 製では「Alternative names」の一覧が出るのに対し、winpr-makecert 製は SAN 自体が無いため CN だけで照合される。**ホスト名で接続する運用なら winpr-makecert 製でも実用上問題ない。IP で接続するなら openssl 製を使う。** また有効期間が 1 年なので、毎年の更新が必要になる。
+
+---
+
+### 付録: 真っ暗な画面のまま切れた原因の調査記録（環境 2、2026-10-02）
+
+Windows 11 の「リモートデスクトップ接続」から環境 2 にリモートログインすると、資格情報は通るのに真っ暗な画面のまま切れた。そのときの切り分けと、直した記録。
+
+| 項目 | 版 |
+|---|---|
+| `gnome-remote-desktop` | 49.3-4.el10_2 |
+| `gdm` | 47.0-24.el10_2 |
+| `glib2` | 2.80.4-12.el10_2.22 |
+| `gnome-shell` / `mutter` | 49.4 |
+
+#### 症状
+
+- つなぐたびに、システムデーモンのログが次の形になった（前日の 2 回も同じ）
+
+  ```
+  01:02:55  [RDP] Network or intentional disconnect, stopping session
+  01:03:26  [DaemonSystem] Aborting handover, removing remote client with remote id /org/gnome/RemoteDesktop/Client/1151524738
+  01:03:26  [ERROR][com.freerdp.core.peer] - [rdp_set_error_info]: ERRINFO_CB_CONNECTION_CANCELLED [0x00010409]
+  ```
+
+- 成功したときに出る `[RDP] Sending server redirection`（[成功時のログ](#成功時のログ)）が出ない。打ち切りは、つないでから約 30 秒後
+- つなぐたびに、GDM がリモートログイン用のログイン画面のセッションを作った（`loginctl` で `gdm` の `greeter`、SEAT が `-`、`Remote=yes`）
+  - その中で `gnome-remote-desktop-daemon --handover` は動いていたが、何も出力していなかった
+  - 打ち切られた後もセッションは残り、前日の分と合わせて 4 つになっていた（gnome-shell が約 150MB ずつ）
+- 同じ秒に `transport_read_layer: ... Connection reset by peer` と `client authentication failure` も出ていた。ただ、ログイン画面のセッションはできていたので、資格情報は通っている
+
+#### 切り分け
+
+- GDM の表示の一覧（`busctl --system call org.gnome.DisplayManager /org/gnome/DisplayManager/Displays org.freedesktop.DBus.ObjectManager GetManagedObjects`）
+  - ログイン画面の表示には、`RemoteId`（打ち切りのログの remote id）と `SessionId`（`c291` など）が正しく入っていた
+- システムデーモンの引き渡し口（`busctl --system tree org.gnome.RemoteDesktop`）
+  - `/org/gnome/RemoteDesktop/Rdp/Handovers/` に、ログイン画面のセッションの口が無かった
+  - ヘッドレスのセッションの口（`session62` など）はあった。終わったヘッドレスのセッションの分も、17 個消えずに残っていた
+- 起動のときのログ（GDM が立ち上がったのと同じ秒）に、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 2 の補足の警告が出ていた
+  - `gnome-remote-desktop.service` は 00:09:12、`gdm.service` は 00:09:18 に始まっていた。ユニットの `After=` に GDM は無い
+
+#### 原因
+
+gnome-remote-desktop 49.3（と CentOS Stream 10 の独自パッチ）・gdm 47.0・GLib 2.80.4 のソースを読み、次のようにつながると判断した。
+
+1. GDM は、バス名 `org.gnome.DisplayManager` を取ってから、表示の一覧（`/org/gnome/DisplayManager/Displays`）を公開する（`on_name_acquired` の中の `register_manager`）
+1. 先に起動して待っていたシステムデーモンは、バス名が現れてすぐに一覧（`GetManagedObjects`）を取りに行き、公開の前だったので失敗した（起動のときの警告）
+1. GLib の `GDBusObjectManagerClient` は、この失敗のとき、子のオブジェクトのシグナルの購読を外したままにする（`on_get_managed_objects_finish` の `maybe_unsubscribe_signals`）
+   - 表示の追加と削除（`InterfacesAdded` / `InterfacesRemoved`）は別の購読で受けるので、その後も届く
+   - 表示のプロパティの変更（`PropertiesChanged`）は届かない
+1. ログイン画面の表示は、`SessionId` が空のまま追加され、ログイン画面のセッションができてから `PropertiesChanged` で `SessionId` が入る（gdm の `gdm-remote-display.c` の `g_object_bind_property`）
+1. システムデーモンはこれを受け取れないので、ログイン画面のセッションの引き渡し口を作らない
+1. ログイン画面の handover デーモンは、口が無いと、できるのを黙って待つ（RHEL の独自パッチ）。そのまま 30 秒たち、システムデーモンが接続を打ち切る。その間、クライアントには何も描かれない
+
+- ヘッドレスのセッションの表示は `SessionId` が入った状態で追加されるので、口はできていた
+- 終わったヘッドレスのセッションの口が残ったのは、システムデーモンが付け直した `RemoteId` の変更が届かず、削除のときに照合できなかったためと考えられる（確かめていない）
+
+#### 直した記録
+
+**1 回目（06:04。その節の手順 3 は、当時は `restart` だった）**
+
+- [設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 1〜3 を流した
+  - その節の手順 2 は `1`、手順 3 の後は `RDP server started` の 1 行だけだった
+  - 残っていた 4 つのログイン画面のセッションは閉じた（ログイン画面の handover デーモンは、システムデーモンが消えると logout する）
+  - ただし、閉じたログイン画面の口が 1 つ（`sessionc44`）、新しいシステムデーモンに残った
+- その後、ヘッドレスのセッションの受け渡し役のデーモンが `[DaemonHandover] Could not get session id` を 4 回出した
+  - 引き渡し口 `session62` は、システムデーモンの側には戻っていた
+  - その節の手順 4 で再起動すると、`RDP server started` まで進んだ
+- その節の手順 5（元に戻す）は、流してから手順 1 で置き直した（動いているデーモンには触れない）
+
+**Windows からの確認（06:30〜06:34）**
+
+利用者が Windows 11 の「リモートデスクトップ接続」で 3 回つないだ。D-Bus の流れは `sudo busctl --system monitor` で記録した。
+
+| つないだ時刻 | ログイン画面のセッション | 結果 |
+|---|---|---|
+| 06:30:08 | c310 | 真っ暗なまま。15 秒後にクライアントが切った（`ERRINFO_LOGOFF_BY_USER`） |
+| 06:30:26 | c311 | `[RDP] Sending server redirection` の後、ログイン画面が出た |
+| 06:31:30 | c312 | ログイン画面が出て、ヘッドレスのセッションのユーザー（`<USER>`）でログインした |
+
+- 2・3 回目は、GDM が `SessionId` を入れた（PropertiesChanged）数ミリ秒後に、システムデーモンがログイン画面の引き渡し口を作った
+- 1 回目は、口が作られなかった。ログイン画面の handover デーモンの `RequestHandover` は `No handover interface for session` で返り、そのまま待った
+  - GDM がこのとき作った表示のパス（`/org/gnome/DisplayManager/Displays/366850084816`）は、06:04 に閉じた c44 の表示と同じだった
+  - 新しいシステムデーモンは、起動の途中で消えた c44 の表示を取りこぼし、持ったままだった（`sessionc44` の口が残ったのもこのため）。同じパスの表示は新しい表示として扱われず、口が作られなかった、と考えられる
+- 3 回目のログインでは、GDM がヘッドレスのセッションの表示の `RemoteId` を、この接続のものに付け替えた
+  - システムデーモンは `session62` の口を待ち状態（`HandoverIsWaiting`）にした。ヘッドレスのセッションの受け渡し役のデーモンが、`StartHandover`・`TakeClient` で接続を引き取った
+  - そのセッションの gnome-shell に `Added virtual monitor Meta-1` が出た。切断（06:34:13）で `Removed virtual monitor Meta-1` が出て、セッションは残った
+  - このとき、システムデーモンが `GLib-CRITICAL **: g_atomic_ref_count_dec: assertion 'old_value > 0' failed` を 1 回出した。デーモンは動き続けた
+
+**2 回目（06:37。その節の手順 3 を今の形にして）**
+
+- 1 回目の接続のログイン画面のセッション（c310）を `sudo loginctl terminate-session c310` で閉じてから、その節の手順 3（止めて 5 秒待ってから起動）を流した
+  - `RDP server started` の 1 行だけが出て、引き渡し口は `session62` だけになった（`sessionc44` も消えた）
+- ヘッドレスのセッションの受け渡し役のデーモンは、今度は何も出さずに止まった
+  - `RequestHandover` が `No handover interface for session` で返った 9 ミリ秒後に、システムデーモンが `session62` の口を作った
+  - 受け渡し役のデーモンは、その後で口の一覧を読み始めた。`session62` を「後から足された口」として受け取れず、待ち続けた（RHEL のパッチは、足されたときの知らせしか見ない）
+  - その節の手順 4 で再起動すると、`RequestHandover` が `session62` を返し、`RDP server started` まで進んだ
+- 今の形で起動し直した後の、Windows からの接続は、まだ確かめていない
+- 起動のときにドロップインが効くか（次の起動で `Error calling GetManagedObjects` が出ないか）は、まだ確かめていない
