@@ -3,8 +3,7 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **自分のユーザーでログインしたシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルや、`sudo -iu <ユーザー>` で切り替えたシェルでは行わない（コンテナを自分のユーザーで動かすため。`sudo -iu` のシェルには `XDG_RUNTIME_DIR` が無く、手順 8 の `systemctl --user` が失敗する）
-> - **手順 2・4 は `sudo` のパスワードを聞かれることがある**。答えてから次の手順を貼る
+> - **自分のユーザーでログインしたシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルや、`sudo -iu <ユーザー>` で切り替えたシェルでは行わない（コンテナを自分のユーザーで動かすため。`sudo -iu` のシェルには `XDG_RUNTIME_DIR` が無く、手順 7 の `systemctl --user` が失敗する）
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -44,7 +43,6 @@
    ```
 
    - 依存として `crun`・`conmon`・`netavark`・`aardvark-dns`・`passt`・`containers-common` などが一緒に入る
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 一緒に入るものと、<code>container-tools</code> を使わない理由</summary>
@@ -76,7 +74,7 @@
    grep "^${USER}:" /etc/subuid /etc/subgid || echo 'subuid / subgid の割り当てが無い'
    ```
 
-   - `/etc/subuid:<USER>:524288:65536` と `/etc/subgid:<USER>:524288:65536` のような 2 行が出れば、手順 4・5 は飛ばす
+   - `/etc/subuid:<USER>:524288:65536` と `/etc/subgid:<USER>:524288:65536` のような 2 行が出れば、手順 4 は飛ばす
    - `subuid / subgid の割り当てが無い` と出たら、手順 4 で割り当てる
 
    <details>
@@ -96,24 +94,19 @@
 
    </details>
 
-1. 割り当てが無いときだけ、ほかのユーザーと重ならない範囲を割り当てる。
+1. 割り当てが無いときだけ、ほかのユーザーと重ならない範囲を割り当て、podman に読み直させて確かめる。
 
    ```bash
-   SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid)
-   sudo usermod --add-subuids "${SUBID_START}-$((SUBID_START + 65535))" --add-subgids "${SUBID_START}-$((SUBID_START + 65535))" "${USER}"
+   {
+     SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid)
+     sudo usermod --add-subuids "${SUBID_START}-$((SUBID_START + 65535))" --add-subgids "${SUBID_START}-$((SUBID_START + 65535))" "${USER}"
+     podman system migrate
+     grep "^${USER}:" /etc/subuid /etc/subgid
+   }
    ```
 
-   - 1 行目で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
-   - 2 行目で、そこから 65536 個を UID と GID の両方に割り当てる
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 範囲を割り当てたときだけ、podman に読み直させて確かめる。
-
-   ```bash
-   podman system migrate
-   grep "^${USER}:" /etc/subuid /etc/subgid
-   ```
-
+   - `SUBID_START=` の行で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
+   - `usermod` の行で、そこから 65536 個を UID と GID の両方に割り当てる
    - 手順 3 で出るはずだった 2 行が出ればよい（検証では、ほかのユーザーの範囲の後ろの `589824` から割り当てられた）
    - `podman system migrate` は、それまでに podman を使っていたときに、新しい範囲を反映させる
 
@@ -303,7 +296,7 @@
 
    | 行 | 意味 |
    |---|---|
-   | `Image=` | イメージ。完全な名前で書く（手順 7 の補足） |
+   | `Image=` | イメージ。完全な名前で書く（手順 6 の補足） |
    | `ContainerName=` | コンテナの名前。`podman ps` に出る |
    | `PublishPort=127.0.0.1:8080:8080` | この PC の 127.0.0.1 の 8080 を、コンテナの 8080 につなぐ。`127.0.0.1:` を付けているので、この PC の中からしか開けない |
    | `Volume=%h/hello-web:/var/www/html:Z` | ホームの `hello-web` を、コンテナの公開ディレクトリにする。`%h` はホームディレクトリ |
@@ -500,9 +493,10 @@
 - **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md)・[podman-tui](podman-tui.md)・[lazydocker](lazydocker.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の podman を入れ、subuid / subgid と `podman info` を確かめ、API ソケットを有効にする。自動起動は任意の Quadlet。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・6〜8、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
-    - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2・3 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
-  - 手順 4〜5 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜7 を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
+    - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
+  - 手順 4 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜6 を通した
+  - 2026-10-02: もとの手順 4・5 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
   - 確認したこと:
     - rootless で `true overlay crun netavark pasta v2` になり、`quay.io/podman/hello` が動く
     - API ソケットが `OK` を返し、Docker の API の `/version` に `Podman Engine` が出る
@@ -579,7 +573,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 ### 注意点
 
-- **イメージは完全な名前で書く**: 短い名前は、端末から実行すると取る場所を聞かれる（手順 7 の補足）
+- **イメージは完全な名前で書く**: 短い名前は、端末から実行すると取る場所を聞かれる（手順 6 の補足）
 - **`sudo podman` は別の保管場所**: 自分のユーザーのコンテナとイメージは、`sudo podman` からは見えない（[使い方の基本](#使い方の基本)）
 - **1024 未満のポートは使えない**: 自分のユーザーで `-p 127.0.0.1:80:8080` のように指定すると、次のように失敗する
   - `Error: pasta failed with exit code 1:` と `Failed to bind port 80 (Permission denied) for option '-t 127.0.0.1/80-80:8080-8080'`
@@ -628,19 +622,19 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、SSH のログインシェルの端末（pty）に 1 ブロックずつ流した。貼り付け（bracketed paste）ではなく 1 行ずつ打ち込む形で、実際に貼るより厳しい
 - `[y/N]` の確認には pty 越しに `y` と答えた。コマンドに `-y` は足していない
-- 手順 4〜5 は、`useradd -K SUB_UID_COUNT=0 -K SUB_GID_COUNT=0` で作った範囲の無いユーザーで、手順 3〜7 を通した
+- 手順 4 は、`useradd -K SUB_UID_COUNT=0 -K SUB_GID_COUNT=0` で作った範囲の無いユーザーで、手順 3〜6 を通した
 - Quadlet の節の手順 3 は、コンテナの中で `sudo systemctl reboot` を実行し、止まったコンテナを `docker start` で起動し直した。ログインせずに 30 秒待ってから SSH で入り直し、手順 4 を流した
 
 | 手順 | 結果 |
 |---|---|
 | 1〜2. 導入 | `podman は未導入` → 30 パッケージ（ダウンロード 29 MB、展開後 91 MB）。`container-selinux` は入らなかった（手順 2 の補足） |
 | 3. subuid | `/etc/subuid:<USER>:524288:65536` と `/etc/subgid:<USER>:524288:65536` |
-| 4〜5.（範囲の無いユーザー） | 手順 3 は `subuid / subgid の割り当てが無い`。手順 4 で `589824` から割り当てられ、手順 5 は 2 行、手順 6 は `true overlay crun netavark pasta v2`、手順 7 も動いた |
-| 6. 設定 | `5.8.2`、`/usr/bin/podman`、`true overlay crun netavark pasta v2`、`/home/<USER>/.local/share/containers/storage` |
-| 7. 動作 | `!... Hello Podman World ...!`。`podman images` に `quay.io/podman/hello`（787 kB） |
-| 8. ソケット | `Created symlink ...podman.socket ...`、`active`、`OK`、`5.8.2` |
+| 4.（範囲の無いユーザー） | 手順 3 は `subuid / subgid の割り当てが無い`。手順 4 で `589824` から割り当てられ、確かめの行（もとの手順 5）は 2 行、手順 5 は `true overlay crun netavark pasta v2`、手順 6 も動いた |
+| 5. 設定 | `5.8.2`、`/usr/bin/podman`、`true overlay crun netavark pasta v2`、`/home/<USER>/.local/share/containers/storage` |
+| 6. 動作 | `!... Hello Podman World ...!`。`podman images` に `quay.io/podman/hello`（787 kB） |
+| 7. ソケット | `Created symlink ...podman.socket ...`、`active`、`OK`、`5.8.2` |
 | Docker 向け | `unix:///run/user/<UID>/podman/podman.sock`、`"Name":"Podman Engine"` |
-| Quadlet 1・2（当時は linger の有効化と確認も、この節の手順だった。今の linger.md の手順 2・3） | `Linger=yes`、`active`、`generated`、`hello from quadlet` |
+| Quadlet 1・2（当時は linger の有効化と確認も、この節の手順だった。今の linger.md の手順 2） | `Linger=yes`、`active`、`generated`、`hello from quadlet` |
 | Quadlet 3・4 | 起動し直した後、ログインする前のセッションは linger の `manager` だけ。`ActiveEnterTimestamp` が 17:38:06、ログインが 17:38:37 で、`hello from quadlet` |
 | 更新 | `Nothing to do.`。`podman auto-update` は `UPDATED` が `false` |
 | ロールバック | 手順 4 でイメージ 2 つ（285.8 MB）を確かめ、手順 5 の確認に `y`、手順 6 で 30 パッケージを消した（`Freed space: 91 M`） |
@@ -649,8 +643,8 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 **落とし穴の再現**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 
-- `sudo -iu` / `su -` / `runuser -l` で切り替えたシェルでの `systemctl --user` と `podman`（手順 8 の補足）
-- 短い名前の問い合わせ（手順 7 の補足。TTY の有無で比べた）
+- `sudo -iu` / `su -` / `runuser -l` で切り替えたシェルでの `systemctl --user` と `podman`（手順 7 の補足）
+- 短い名前の問い合わせ（手順 6 の補足。TTY の有無で比べた）
 - 1024 未満のポートのエラー、linger の無いユーザーのログアウト（約 10 秒後にコンテナが止まった）、`sudo podman images`（空の一覧）
 - `podman generate systemd` の `DEPRECATED command:`、生成された unit への `systemctl --user enable` のエラー
 - [使い方の基本](#使い方の基本)の表のコマンド（`podman image prune` は `-a` の有無で消えるものが変わった）

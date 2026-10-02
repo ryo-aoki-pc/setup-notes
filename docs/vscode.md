@@ -3,9 +3,9 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。デスクトップが要るのは手順 7（GUI の起動）だけ
-> - **手順 7 は、デスクトップにログインした端末から実行する**。TTY もディスプレイも無いシェル（ssh や自動化）からは、6 通り試して 1 つも起動できなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）
-> - **手順 5 と手順 7 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。答えるかウィンドウを閉じてから、次の手順を貼る
+> - **すべて対象ホスト上で実行する**。デスクトップが要るのは手順 6（GUI の起動）だけ
+> - **手順 6 は、デスクトップにログインした端末から実行する**。TTY もディスプレイも無いシェル（ssh や自動化）からは、6 通り試して 1 つも起動できなかった（[付録](#付録-実機での-gui-起動試験2026-09-23)）
+> - **手順 4 と手順 6 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。答えるかウィンドウを閉じてから、次の手順を貼る
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -23,13 +23,17 @@
      - uid `Microsoft (Release signing) <gpgsecurity@microsoft.com>`
    - **次の手順は、一致したのを確かめてから貼る**
 
-1. fingerprint が一致したら、署名鍵を取り込む。
+1. fingerprint が一致したら署名鍵を取り込み、確かめて鍵ファイルを消す。
 
    ```bash
-   sudo rpm --import /tmp/microsoft.asc
+   {
+     sudo rpm --import /tmp/microsoft.asc
+     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i microsoft
+     rm -f /tmp/microsoft.asc
+   }
    ```
 
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - `gpg-pubkey-be1229cf-5631588c Microsoft (Release signing) ...` が出れば入っている
 
    <details>
    <summary>補足: 鍵を先に入れる理由</summary>
@@ -49,15 +53,6 @@
    Microsoft の鍵は**この 1 本だけ**（[gh.md](gh.md) の GitHub CLI は 2 本ある）。
 
    </details>
-
-1. 鍵が入ったか確かめ、落とした鍵ファイルを消す。
-
-   ```bash
-   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i microsoft
-   rm -f /tmp/microsoft.asc
-   ```
-
-   - `gpg-pubkey-be1229cf-5631588c Microsoft (Release signing) ...` が出れば入っている
 
 1. リポジトリを追加する。
 
@@ -132,7 +127,7 @@
    update-mime-database /usr/share/mime &> /dev/null || :
    ```
 
-   - 手順 4 で書いた `/etc/yum.repos.d/vscode.repo` は、インストールの前後で **md5 も mtime も変わらなかった**
+   - 手順 3 で書いた `/etc/yum.repos.d/vscode.repo` は、インストールの前後で **md5 も mtime も変わらなかった**
    - `/etc/yum.repos.d/` に別名のファイルも増えていない
    - 実際にやるのは「古い `/usr/local/bin/code` の削除」と「デスクトップエントリと MIME の登録」だけ
 
@@ -300,14 +295,15 @@
 - **状態**: **実機で本実行済み（2026-09-23）。GUI の起動まで確認した**
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
-  - **[手順 7](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
+  - **[手順 6](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
   - **ただし TTY もディスプレイも無いシェルからの起動は、6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）
   - **VS Code は実機に入れたまま残してある**
-  - 手順 1〜5 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
+  - 手順 1〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
   - **確認していないこと**: 拡張機能・`code-insiders`・Wayland ネイティブでの常用
-  - 2026-09-28: 手順 4・5のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 3・4 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -347,7 +343,7 @@ AlmaLinux 10 aarch64 で VS Code を入れる経路を比べた（2026-09-23 時
 | Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](firefox.md) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 | Snap | EL10 に snapd を入れることになる | 不採用 |
 | VSCodium / `code-oss` | Marketplace と一部の拡張（Remote-SSH など）が使えない | 対象外（本書は Microsoft のビルドを入れる） |
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 5](#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
 
 ### 完了時点の状態
 
@@ -392,8 +388,8 @@ $ code --list-extensions
 
 ### 注意点
 
-- **`.el8` のタグに驚かなくてよい**: Microsoft が EL 共通に 1 本だけ出している rpm で、EL10 向けの別ビルドは存在しない。`rpm -qi` の `Vendor` が `Microsoft Corporation` であることを確かめれば十分（[手順 6 の補足](#実施手順)）
-- **`~/.config/code-flags.conf` は効かない**: Microsoft の rpm のラッパーは読まない（[手順 7 の補足](#実施手順)）
+- **`.el8` のタグに驚かなくてよい**: Microsoft が EL 共通に 1 本だけ出している rpm で、EL10 向けの別ビルドは存在しない。`rpm -qi` の `Vendor` が `Microsoft Corporation` であることを確かめれば十分（[手順 5 の補足](#実施手順)）
+- **`~/.config/code-flags.conf` は効かない**: Microsoft の rpm のラッパーは読まない（[手順 6 の補足](#実施手順)）
 - **大きい**: ダウンロード 318 MB、展開後 953 MB。Raspberry Pi の microSD では取得にも展開にも時間がかかる。`sudo dnf clean packages` でキャッシュを消せる
 - **内蔵のアップデータは使わない**: rpm 版は dnf が管理する。VS Code が更新を促してきても `sudo dnf upgrade code` で上げる
 - **`code-insiders` と併存できる**: コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別。ただし本書では未検証
@@ -460,13 +456,13 @@ $ head -3 ~/.config/Code/logs/20260923T071537/main.log
 
 ### 付録: コンテナでの依存解決の確認（2026-09-23）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜5 を `--assumeno` まで通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 **本実行はしていない**: コンテナには GUI が無いのでこの文書の中核（ウィンドウの起動）を確かめられず、318 MB の取得と 953 MB の展開に見合わないため。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で手順 1〜4 を `--assumeno` まで通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 **本実行はしていない**: コンテナには GUI が無いのでこの文書の中核（ウィンドウの起動）を確かめられず、318 MB の取得と 953 MB の展開に見合わないため。
 
 | 手順 | 結果 |
 |---|---|
-| 1〜3. 鍵 | `gpg --show-keys` の fingerprint が本文の値と一致。`rpm --import` 後に `gpg-pubkey-be1229cf-5631588c` を確認 |
-| 4. repo | `/etc/yum.repos.d/vscode.repo` を作成。`dnf` がメタデータを取得できた |
-| 5. 依存解決 | `dnf install --assumeno code` → **215 パッケージ・442 MB・展開後 1.4 GB**。デスクトップの無いコンテナでは GTK3 / NSS / mesa-dri-drivers / pipewire / xdg-desktop-portal / xkeyboard-config などを全部引いてくる。**実機（GNOME 導入済み）では `code` と弱い依存の `socat` の 2 つだけだった**ので、差の 213 パッケージはデスクトップ環境が既に持っていたぶんになる |
+| 1・2. 鍵 | `gpg --show-keys` の fingerprint が本文の値と一致。`rpm --import` 後に `gpg-pubkey-be1229cf-5631588c` を確認 |
+| 3. repo | `/etc/yum.repos.d/vscode.repo` を作成。`dnf` がメタデータを取得できた |
+| 4. 依存解決 | `dnf install --assumeno code` → **215 パッケージ・442 MB・展開後 1.4 GB**。デスクトップの無いコンテナでは GTK3 / NSS / mesa-dri-drivers / pipewire / xdg-desktop-portal / xkeyboard-config などを全部引いてくる。**実機（GNOME 導入済み）では `code` と弱い依存の `socat` の 2 つだけだった**ので、差の 213 パッケージはデスクトップ環境が既に持っていたぶんになる |
 | チャンネル | `dnf -q list --showduplicates code` は `aarch64` / `x86_64` / `armv7hl` の 3 アーキテクチャを返す。`code-insiders 1.139.0` と `code-exploration 1.140.0` の aarch64 も存在する |
 | glibc の下限 | `dnf -q repoquery --requires code` の aarch64 向けの最大が `GLIBC_2.28` |
 

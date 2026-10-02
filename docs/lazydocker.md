@@ -3,7 +3,7 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 8 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
+> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
@@ -459,7 +459,7 @@ commandTemplates:
 
 **流し方**:
 
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 と Docker 向けの節、[homebrew.md](homebrew.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](homebrew.md) の手順 1〜4 を流した
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、ブラケットペーストで 1 ブロックずつ貼って Enter を送った
 - 画面の手順は、画面の文字を読みながらキーを送った
 

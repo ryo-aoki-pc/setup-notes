@@ -4,8 +4,7 @@
 
 > [!IMPORTANT]
 > - **Claude Code が動くユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない
-> - 前提は [gnome-headless-session.md 手順 1〜3](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[gnome-power.md 手順 1・2](gnome-power.md#実施手順)（ロックされると、画面の前にいない Claude Code には解けない）
-> - **手順 3 は `sudo` のパスワードを聞かれることがある**。答えてから手順 4 を貼る
+> - 前提は [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[gnome-power.md 手順 1・2](gnome-power.md#実施手順)（ロックされると、画面の前にいない Claude Code には解けない）
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -32,7 +31,7 @@
 
    - `VIRTUAL_MONITOR` は、手順 2 で gnome-shell に付ける `--virtual-monitor` の値。Claude Code が撮る画面の大きさになる
    - 小さくすると、画面の写しの PNG も小さくなる（1920x1080 で約 0.7 MB）。後から変えるときは[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)
-   - `REPO` は、手順 5〜7 と[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
+   - `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
 
    </details>
 
@@ -69,7 +68,7 @@
    </details>
 
 
-1. セッションを止め、終わるのを待ってから起動し直す。
+1. セッションを止め、終わるのを待って起動し直し、仮想モニターの付いたセッションができたかを確かめる。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
@@ -78,12 +77,16 @@
      for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
      sleep 3
      sudo systemctl start "gnome-headless-session@${USER}.service"
+     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
+     pgrep -a -u "${USER}" -x gnome-shell
    fi
    ```
 
-   - 何も出さずに終わる。動いていたアプリは閉じる
+   - `stop` と `start` は何も出さない。動いていたアプリは閉じる
+   - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` が出ればよい
+   - `busctl` の `for` の行は、gnome-shell が起動し終わるまで、30 秒まで待つ。`loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](gnome-headless-session.md#実施手順) の補足）
    - `systemctl restart` は使わない（この手順の補足）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: restart を使わない理由</summary>
@@ -94,18 +97,6 @@
    - 前のセッションが `loginctl` から消えた後、ユーザーの D-Bus が起動し直される（`gnome-session-restart-dbus.service`）。それが終わるまで 3 秒待ってから起動する
 
    </details>
-
-
-1. 仮想モニターの付いたセッションができたかを確かめる。
-
-   ```bash
-   for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
-   loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
-   pgrep -a -u "${USER}" -x gnome-shell
-   ```
-
-   - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` が出ればよい
-   - 最初の行は、gnome-shell が起動し終わるまで、30 秒まで待つ。2 行目は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 3](gnome-headless-session.md#実施手順) の補足）
 
 1. 画面を撮って、大きさを確かめる。
 
@@ -118,7 +109,7 @@
 
    - PNG のパスと、`/home/<USER>/gnome-gui-test.png: PNG image data, <幅> x <高さ>, 8-bit/color RGBA, non-interlaced` の 2 行が出ればよい（大きさは `VIRTUAL_MONITOR`）
    - Claude Code は、この PNG を Read で開いて画面を見る。人が見るなら、scp などで手元に持ってきて開く
-   - セッションを始めた直後の画面は、上に検索欄のあるアクティビティ画面（手順 6 の最初の `key Escape` で閉じる）
+   - セッションを始めた直後の画面は、上に検索欄のあるアクティビティ画面（手順 5 の最初の `key Escape` で閉じる）
 
    <details>
    <summary>補足: 画面の撮り方</summary>
@@ -265,7 +256,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
    - `rmdir` が `Directory not empty` で失敗したら、ほかのドロップインがあるので、そのまま残す
 
-1. セッションを止め、終わるのを待ってから起動し直す（仮想モニターの無い形に戻る）。
+1. セッションを止め、終わるのを待って起動し直し、仮想モニターの無い形に戻ったかを確かめる。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
@@ -274,21 +265,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
      sleep 3
      sudo systemctl start "gnome-headless-session@${USER}.service"
+     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     pgrep -a -u "${USER}" -x gnome-shell
    fi
    ```
 
-   - 何も出さずに終わる。動いていたアプリは閉じる
-   - `systemctl restart` は使わない（[手順 3](#実施手順) の補足）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 仮想モニターの無いセッションに戻ったかを確かめる。
-
-   ```bash
-   for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
-   pgrep -a -u "${USER}" -x gnome-shell
-   ```
-
+   - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）が出ればよい
+   - `systemctl restart` は使わない（[手順 3](#実施手順) の補足）
    - 確かめ用の PNG が残っていれば `rm ~/gnome-gui-*.png` で消す
 
 ---
@@ -303,19 +287,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま貼った
     - 書き換えたのは手順 1 の `REPO`（PR #68 の作業ツリーを指した。`scripts/gnome-gui.py` がまだ main に無いため）と、任意節で書き換える `VIRTUAL_MONITOR` だけ
     - 分ける前の版（ヘッドレスのセッションの起動と、ひとつの手順書だった）で 3 回通した（ブラケットペーストの無しと有り、レビューで直した後の版。[付録](#付録-実機での検証記録2026-10-01)）
-    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1〜3](gnome-headless-session.md#実施手順) の後に、実施手順 1〜7 → [ロールバック](#ロールバック) → 実施手順 1〜7 → [仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
+    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順) の後に、実施手順 1〜6 → [ロールバック](#ロールバック) → 実施手順 1〜6 → [仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
   - 確認したこと
     - 仮想モニター（1920x1080 と 1280x720）の画面を撮れる
     - キーボードの入力（電卓で `12×34 = 408`）、ポインタのクリック・ダブルクリック・右クリック・スクロール、アプリの起動（ファイルを渡すときも）
     - SSH のシェルから `/usr/bin/gsettings` で変えた値が、動いているセッションにすぐ効く（上部バーの時計の秒）
     - 前提の gnome-power.md 手順 1・2 の後は、16 分余り放置しても、サスペンドしようとせず、ロックもされない
     - ロールバックで、ドロップインと仮想モニターが無くなり、ヘッドレスのセッションは動き続ける
-    - ほかのユーザーのヘッドレスのセッションがあっても、手順 3・4 とロールバックが、このユーザーのセッションだけを見る
+    - ほかのユーザーのヘッドレスのセッションがあっても、手順 3 とロールバックが、このユーザーのセッションだけを見る
     - SELinux が Enforcing のまま、AVC は出なかった
   - 確認していないこと
     - 再起動の後の自動起動（この Pi では Claude Code と WireGuard・Samba・Syncthing が動いているので、再起動しなかった）
     - x86_64 の PC、モニターのある PC
     - IBus での日本語の入力、キーリングを開く窓が出たときの動き
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](#ロールバック)のもとの手順 2・3 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 値 |
 |---|---|
@@ -342,7 +327,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 | 項目 | 状態 |
 |---|---|
-| ヘッドレスのセッション | [gnome-headless-session.md 手順 1〜3](gnome-headless-session.md#実施手順) の後。gnome-shell は `--virtual-monitor` 無しで動いている |
+| ヘッドレスのセッション | [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順) の後。gnome-shell は `--virtual-monitor` 無しで動いている |
 | ユーザーの systemd | `org.gnome.Shell@wayland.service` のドロップインは無い |
 | dconf | 前提の gnome-power.md 手順 1・2 を済ませてあった |
 | PATH | 先頭が Homebrew（`python3`・`gsettings`・`gdbus`・`gio` が Homebrew のもの） |
@@ -405,12 +390,12 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 | 手順 | 結果 |
 |---|---|
-| 前提 | gnome-headless-session.md 手順 1〜3（`<PID> /usr/bin/gnome-shell`） |
+| 前提 | gnome-headless-session.md 手順 1・2（`<PID> /usr/bin/gnome-shell`） |
 | 1・2 | 読み戻しと、`ExecStart` の 3 行（最後が `--virtual-monitor 1920x1080`） |
-| 3・4 | 何も出さずに終わり、このユーザーの `headless` の 1 行と `<PID> /usr/bin/gnome-shell --virtual-monitor 1920x1080` |
-| 5〜7 | `PNG image data, 1920 x 1080`、電卓の unit の名前と窓、`12×34 = 408`、最後の `windows` は何も出さなかった |
+| 3 | `stop` と `start` は何も出さずに終わり、このユーザーの `headless` の 1 行と `<PID> /usr/bin/gnome-shell --virtual-monitor 1920x1080` |
+| 4〜6 | `PNG image data, 1920 x 1080`、電卓の unit の名前と窓、`12×34 = 408`、最後の `windows` は何も出さなかった |
 | ロールバック | `ExecStart=/usr/bin/gnome-shell` の 1 行、何も出さずに起動し直し、`<PID> /usr/bin/gnome-shell` |
-| もう一度 1〜7 | 同じ |
+| もう一度 1〜6 | 同じ |
 | 任意節 | 手順 1 の値を書き換えて手順 1〜3 を貼り直し、`1280 x 720`。戻して `1920 x 1080` |
 
 以下は、分ける前の版（ヘッドレスのセッションの起動と、ひとつの手順書だった）の記録。手順の番号はその版のもので、手順 3 がセッションの有効化（今の gnome-headless-session.md 手順 2）、ロールバックがセッションの停止を含んでいた。
@@ -467,10 +452,10 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 | 3（今の gnome-headless-session.md 手順 2） | `Created symlink …`（手順 4 から後は、新しいシェルで手順 1 を貼り直して続けた） | `Created symlink …` | `Created symlink …` |
 | 4 | `<SESSION_ID> <UID> <USER> - … user headless no -` と `/usr/bin/gnome-shell --virtual-monitor 1920x1080` | 同じ | 同じ |
 | 5 | `PNG image data, 1920 x 1080` | 同じ | 同じ |
-| 6 | 直す前の版: 電卓にフォーカスが移らず、2 つ目の電卓が開いた（手順 6 の補足）。直した版（任意節の後）: `12×34 = 408` | `12×34 = 408` | `12×34 = 408` |
+| 6 | 直す前の版: 電卓にフォーカスが移らず、2 つ目の電卓が開いた（今の手順 5 の補足）。直した版（任意節の後）: `12×34 = 408` | `12×34 = 408` | `12×34 = 408` |
 | 7 | 直す前の版: `ctrl+q` が捨てられ、電卓が残った。直した版: 最後の `windows` が何も出さなかった | 同じ（直した版） | 同じ |
 | 任意節 | 直す前の版（`restart`、変数をこの節で設定する形）: セッションが消えた（今のこの文書の手順 3 の補足）。直した版: `PNG image data, 1280 x 720` | — | 手順 1 の値を書き換える形で、`1280 x 720`、戻して `1920 x 1080` |
-| ロールバック（今の gnome-headless-session.md のロールバックの手順 5・6 と、この文書のロールバックの手順 1） | `Removed …`、`ExecStart=/usr/bin/gnome-shell` と `0`。`~/.config/systemd/user` は実施前と同じ | — | 同じ（セッションの終わりを待つ行を足した版） |
+| ロールバック（今の gnome-headless-session.md のロールバックの手順 5 と、この文書のロールバックの手順 1） | `Removed …`、`ExecStart=/usr/bin/gnome-shell` と `0`。`~/.config/systemd/user` は実施前と同じ | — | 同じ（セッションの終わりを待つ行を足した版） |
 
 - SELinux の AVC は、`ausearch -m AVC,USER_AVC -ts today` で、起動時（手順より前）の 5 件だけだった
 
@@ -486,7 +471,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 - 再起動の後に、ヘッドレスのセッションが自動で起動すること
 - x86_64 の PC と、モニターのある PC
-- サスペンドできる PC で、ログイン画面（seat0 の GDM）が PC を眠らせないこと（gnome-power.md 手順 3〜5）
+- サスペンドできる PC で、ログイン画面（seat0 の GDM）が PC を眠らせないこと（gnome-power.md 手順 3・4）
 - 同じユーザーでリモートログインやローカルのログインをしたときの動き（ヘッドレスのセッションと重なったとき）
 - キーリングを開く窓が出たときの動き（`Escape` で閉じられるか）
 - IBus での日本語の入力

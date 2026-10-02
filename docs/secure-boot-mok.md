@@ -46,7 +46,6 @@
    ```
 
    - bootc のシステムでは dnf で入れられない（`/usr` が読み取り専用）が、Atomic Desktop のイメージには 2 つとも入っている
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Secure Boot が有効かを見る。
 
@@ -90,7 +89,7 @@
    <details>
    <summary>補足: 鍵の作り方と、登録した鍵の行き先</summary>
 
-   **鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md 手順 11](virtualbox.md#実施手順) の補足の実測）:
+   **鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md 手順 9](virtualbox.md#実施手順) の補足の実測）:
 
    ```
        sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
@@ -169,7 +168,6 @@
    - `/var/lib/shim-signed/mok/MOK.der is already enrolled` が出れば、登録できている
    - 登録できていなければ `is not enrolled` になる（実機で、登録できなかったときに出た）。手順 6 の箇条書きのとおりやり直す
    - `sudo` が要る。鍵のディレクトリは root だけが入れる（`drwx------`）ので、付けないと `Failed to open /var/lib/shim-signed/mok/MOK.der` になった
-   - **この後に使う側の手順書を貼るときは、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 読み込めないときの見方</summary>
@@ -227,7 +225,7 @@
    ```
 
    - `is not enrolled` が出ればよい（VM では、`.platform` のキーリングからも MOK の一覧からも消えた）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、`is not enrolled` が出たのを確かめてから貼る**
 
 1. 鍵のファイルを消す（取り戻せない）。
 
@@ -273,7 +271,7 @@
 - **鍵の場所は `/var/lib/shim-signed/mok/MOK.{der,priv}` に固定する**: VirtualBox の `vboxdrv.sh` と Guest Additions の `vboxadd` が、この場所を決め打ちで使う
 - **鍵は 1 つにし、作り直さない**: 登録済みの鍵を作り直すと、その鍵で署名したモジュールと合わなくなる。手順 4 は、鍵があれば `中断:` で止まる
 - **CN は用途を問わない名前にする**: 1 つの鍵で、この PC（VM）のモジュールのどれにも署名するため
-- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[virtualbox.md](virtualbox.md) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[virtualbox.md 手順 11](virtualbox.md#実施手順) の補足）
+- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[virtualbox.md](virtualbox.md) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[virtualbox.md 手順 9](virtualbox.md#実施手順) の補足）
 - **独立した手順書にした**: VirtualBox のホストと、bootc のゲストの Guest Additions の 2 本で、同じ鍵の作り方・MokManager・確認の手順が重なっていたため
 
 ### 注意点

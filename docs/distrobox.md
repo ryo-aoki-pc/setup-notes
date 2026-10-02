@@ -430,7 +430,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 **環境**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じ作りの使い捨てのコンテナ。実機で加えた変更は無い。
 
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 を流した
 
 **手順書の外で行った準備**（podman.md の付録の準備に加えて）:
 

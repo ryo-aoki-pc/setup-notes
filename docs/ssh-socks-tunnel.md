@@ -153,7 +153,6 @@
    - `sudo` は `ALL_PROXY` を引き継がないので、dnf には `/etc/dnf/dnf.conf` で渡す
    - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.` が出ればよい
    - この行がある間は、トンネルが無いと dnf がどのリポジトリにも届かなくなる
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: dnf のプロキシ</summary>

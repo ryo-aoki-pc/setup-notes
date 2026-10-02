@@ -7,19 +7,19 @@
 > - **前提（Secure Boot が有効な PC）**: [secure-boot-mok.md](secure-boot-mok.md) で、モジュールの署名鍵を MOK に登録してあること（VirtualBox を入れるより前に。同書で再起動し、起動の途中の MokManager を操作する）。Secure Boot が有効かは、同書の手順 3 で分かる
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **途中で再起動が 1 回入る**（手順 17）。再起動した後は新しい端末を開いて続ける
-> - **手順 5・6・11 には対話入力がある**（鍵の確認・`[y/N]`）。答えてから次の手順を貼る
-> - **手順 21 で GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから手順 22 を貼る
+> - **途中で再起動が 1 回入る**（手順 13）。再起動した後は新しい端末を開いて続ける
+> - **手順 4・5・9 には対話入力がある**（鍵の確認・`[y/N]`）。答えてから次の手順を貼る
+> - **手順 17 で GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから手順 18 を貼る
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: カーネルを更新したときは[カーネルを更新したとき](#カーネルを更新したとき)、以後の VirtualBox の更新は[更新](#更新)、戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](secure-boot-mok.md) と手順 19）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
+> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](secure-boot-mok.md) と手順 15）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
 >
 > - 検証した PC では、secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、鍵を登録できなかった
-> - UEFI の設定で Secure Boot を無効にし、無効の分岐で手順 11 から最後まで本実行した
+> - UEFI の設定で Secure Boot を無効にし、無効の分岐で手順 9 から最後まで本実行した
 
 1. この PC に入るかを確かめる。
 
@@ -55,13 +55,17 @@
    - 違っていればここで止める
    - **次の手順は、fingerprint と uid が一致するのを確かめてから貼る**
 
-1. 一致したら、鍵を rpm に取り込む。
+1. 一致したら、鍵を rpm に取り込み、入ったか確かめて、落としたファイルを消す。
 
    ```bash
-   sudo rpm --import /tmp/oracle_vbox_2016.asc
+   {
+     sudo rpm --import /tmp/oracle_vbox_2016.asc
+     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
+     rm -f /tmp/oracle_vbox_2016.asc
+   }
    ```
 
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - `gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) ...` が出れば入っている
 
    <details>
    <summary>補足: 鍵は EL10 の rpm に受け入れられる</summary>
@@ -82,15 +86,6 @@
    Oracle は 2010 年の古い鍵 `oracle_vbox.asc`（dsa1024）も配っているが、これは古いパッケージ用で、本書では使わない。
 
    </details>
-
-1. 鍵が入ったか確かめ、落としたファイルを消す。
-
-   ```bash
-   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
-   rm -f /tmp/oracle_vbox_2016.asc
-   ```
-
-   - `gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) ...` が出れば入っている
 
 1. repo ファイルを置き、`sudo` の dnf でメタデータの鍵を受け入れる。
 
@@ -137,7 +132,7 @@
 
    - こちらはユーザーごとの別のキャッシュを使う
    - 通しておかないと、`sudo` を付けない `dnf list` などが**関係の無いパッケージでも**失敗する（この手順の補足）
-   - 手順 5 と同じ fingerprint を確かめて `y` と答える
+   - 手順 4 と同じ fingerprint を確かめて `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
@@ -210,7 +205,7 @@
    ```
 
    - GUI は **AppStream の Qt 6**（6.10.1）を使う（rpm の要求は `Qt_6.9` の版の記号）
-   - gcc や kernel-devel は依存に含まれないので、手順 9 で別に入れる
+   - gcc や kernel-devel は依存に含まれないので、手順 8 で別に入れる
 
    **`liblzf` は EPEL にしか無い**（前提を [EPEL](epel.md) にした理由）:
 
@@ -245,21 +240,26 @@
 
    </details>
 
-1. カーネルモジュールのビルドに要るものを、VirtualBox より先に入れる。
+1. カーネルモジュールのビルドに要るものを、VirtualBox より先に入れて確かめる。
 
    ```bash
-   sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+   {
+     sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+     rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+     ls -d "/lib/modules/$(uname -r)/build/include"
+   }
    ```
 
    - VirtualBox は、自分のカーネルモジュール（`vboxdrv` / `vboxnetflt` / `vboxnetadp`）を**インストールの途中で、この PC の上でビルドする**
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - 6 つとも版が出て、最後の行がディレクトリを返せばよい
+   - `No such file or directory` なら、kernel-devel の版が合っていない
 
    <details>
    <summary>補足: なぜ先に入れるのか、何が要るのか</summary>
 
    **rpm のインストール後スクリプト（`%post`）が、その場でモジュールをビルドして読み込む。**
 
-   - そのときに道具が無いと、ビルドは失敗するのに `dnf install` は `Complete!` で終わる（手順 11 の補足）
+   - そのときに道具が無いと、ビルドは失敗するのに `dnf install` は `Complete!` で終わる（手順 9 の補足）
    - VirtualBox 自身の確認スクリプト（`/usr/lib/virtualbox/check_module_dependencies.sh`）が見ているのは、コマンドの `gcc` `make` `perl` と、`/lib/modules/$(uname -r)/build/include` の 2 点だけ
 
    道具が無いまま入れたときの実測（`%post` が標準エラーに出したもの）:
@@ -293,16 +293,6 @@
 
    </details>
 
-1. ビルドの道具がそろったか確かめる。
-
-   ```bash
-   rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
-   ls -d "/lib/modules/$(uname -r)/build/include"
-   ```
-
-   - 6 つとも版が出て、最後の行がディレクトリを返せばよい
-   - `No such file or directory` なら、kernel-devel の版が合っていない
-
 1. VirtualBox を入れる。
 
    ```bash
@@ -322,7 +312,7 @@
 
    - これが systemd の unit `vboxdrv.service` を**その場で生成して enable し**、`/usr/lib/virtualbox/vboxdrv.sh setup` でモジュールをビルド・署名・読み込みする
    - 標準出力は捨てられ、失敗も `|| true` で無視されるので、**dnf から見るとどんな場合も成功になる**
-   - 失敗の内容は標準エラーに出る（手順 9 の補足の実測）ので、`dnf install` の出力は最後まで見る
+   - 失敗の内容は標準エラーに出る（手順 8 の補足の実測）ので、`dnf install` の出力は最後まで見る
    - **`/sbin/vboxconfig`** は `postinst-common.sh` へのリンクで、同じ処理を最初からやり直す（実測で `/sbin/vboxconfig -> /usr/lib/virtualbox/postinst-common.sh`、`/sbin/rcvboxdrv -> /usr/lib/virtualbox/vboxdrv.sh`）
    - **`/usr/lib/systemd/system/vboxdrv.service` は rpm の持ち物ではない**（`%post` が書き、削除時に `%preun` が消す）
      - 中身は `ExecStart=/usr/lib/virtualbox/vboxdrv.sh start`・`TimeoutSec=5min`・`WantedBy=multi-user.target`
@@ -383,21 +373,28 @@
    sudo tail -n 5 /var/log/vbox-setup.log
    ```
 
-   - モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる（手順 11 の補足）
+   - モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる（手順 9 の補足）
    - `enabled` と `active`、`vboxnetadp` / `vboxnetflt` / `vboxdrv` の 3 行、root だけが読み書きできる `/dev/vboxdrv` が出ればよい
    - `dnf install` の途中で `There were problems setting up VirtualBox.` が出ていた、または `active` にならないときは、ログ（`/var/log/vbox-setup.log`）で原因を見る
    - 原因を直してから、`sudo /sbin/vboxconfig` を実行し直す
 
-1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置く。
+1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置いて確かめる。
 
    ```bash
-   echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
+   {
+     echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
+     cat /etc/modprobe.d/kvm-virtualbox.conf
+     modprobe -c | grep enable_virt_at_load
+   }
    ```
 
    - **EL10 のカーネル（6.12 系）では、KVM のモジュールが読み込まれた時点で VT-x / AMD-V を確保し、VirtualBox の VM が起動できなくなる**（この手順の補足）
    - KVM を使っていなくても、VT-x / AMD-V のある PC では起動時に自動で読み込まれる
    - この設定で、KVM が自分の VM を動かす間だけ確保するように変える
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - `cat` と `modprobe -c` のどちらにも `options kvm enable_virt_at_load=0` が出ればよい（後者は modprobe が読んだ設定）
+   - `modprobe -c` には `alias symbol:enable_virt_at_load kvm` の行も出る（モジュールの別名の一覧の行で、気にしなくてよい）
+   - **効くのは次に kvm が読み込まれたとき**なので、手順 13 の再起動で反映させる
+   - KVM（libvirt / GNOME Boxes など）はこの後も使えるが、**KVM の VM と VirtualBox の VM は同時には動かせない**
 
    <details>
    <summary>補足: 6.12 系のカーネルでは VirtualBox と KVM が同居できない</summary>
@@ -414,62 +411,45 @@
    - **自動で読み込まれる理由**: `kvm-intel.ko` は `cpu:type:x86,ven*fam*mod*:feature:*0085*`、`kvm-amd.ko` は `...feature:*00C2*` という別名（`modinfo -F alias`）を持つ
      - `0x85` と `0xC2` は kernel-devel の `cpufeatures.h` で `X86_FEATURE_VMX` と `X86_FEATURE_SVM` に当たるので、VT-x / AMD-V のある CPU なら起動時に udev が読み込む
 
-   衝突したときのエラー文は `/usr/lib/virtualbox/VBoxVMM.so` にある（手順 20 の補足の表も見る）:
+   衝突したときのエラー文は `/usr/lib/virtualbox/VBoxVMM.so` にある（手順 16 の補足の表も見る）:
 
    - Intel は `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`
    - AMD は `VirtualBox can't enable the AMD-V extension. ...`
-   - 実機（AMD）では、この手順の設定をして再起動する前に手順 20 を貼ると、AMD の文で起動に失敗した（手順 20 の補足）
+   - 実機（AMD）では、この手順の設定をして再起動する前に手順 16 を貼ると、AMD の文で起動に失敗した（手順 16 の補足）
 
    **カーネル引数ではなく modprobe.d にした理由**: Oracle の変更履歴の案内はカーネル引数で、EL10 に当てはめると `sudo grubby --update-kernel=ALL --args=kvm.enable_virt_at_load=0` になる。
 
    - kvm は読み込み可能なモジュール（`CONFIG_KVM=m`）なので、modprobe.d の設定でも効く
    - こちらは起動エントリを書き換えず、カーネルの更新にも左右されない
-   - 実機では、手順 17 の再起動の後に `enable_virt_at_load` が `N` になり（`kvm_amd` は起動時に読み込まれたまま）、手順 20 の VM が起動した
-   - 手順 18 で `N` にならないとき、または手順 20 で VM が起動しないときは、grubby の方法を試す（こちらは未確認）
+   - 実機では、手順 13 の再起動の後に `enable_virt_at_load` が `N` になり（`kvm_amd` は起動時に読み込まれたまま）、手順 16 の VM が起動した
+   - 手順 14 で `N` にならないとき、または手順 16 で VM が起動しないときは、grubby の方法を試す（こちらは未確認）
 
    </details>
 
-1. 設定が modprobe に読まれているか確かめる。
+1. USB 機器を VM に渡すときだけ、自分を `vboxusers` に入れて確かめる。
 
    ```bash
-   cat /etc/modprobe.d/kvm-virtualbox.conf
-   modprobe -c | grep enable_virt_at_load
+   {
+     sudo usermod -aG vboxusers "${USER}"
+     getent group vboxusers
+   }
    ```
 
-   - どちらにも `options kvm enable_virt_at_load=0` が出ればよい（後者は modprobe が読んだ設定）
-   - 後者には `alias symbol:enable_virt_at_load kvm` の行も出る（モジュールの別名の一覧の行で、気にしなくてよい）
-   - **効くのは次に kvm が読み込まれたとき**なので、手順 17 の再起動で反映させる
-   - KVM（libvirt / GNOME Boxes など）はこの後も使えるが、**KVM の VM と VirtualBox の VM は同時には動かせない**
-
-1. USB 機器を VM に渡すときだけ、自分を `vboxusers` に入れる。
-
-   ```bash
-   sudo usermod -aG vboxusers "${USER}"
-   ```
-
-   - **VM を動かすだけなら要らない**（手順 15・16 は飛ばして手順 17 へ）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - **VM を動かすだけなら要らない**（この手順は飛ばして手順 13 へ）
+   - `vboxusers:x:<GID>:<USER>` のように、自分の名前が出ればよい
+   - **効くのはログインし直してから**（手順 13 の再起動で済む）
 
    <details>
    <summary>補足: グループが効くのは USB だけ</summary>
 
-   - `%post` は「VM users must be member of that group!」と出すが、7.2 の rpm では `/dev/vboxdrv` が `root:root 0600` で、VM は setuid の `VirtualBoxVM` / `VBoxHeadless` から動く（手順 16 の補足）
+   - `%post` は「VM users must be member of that group!」と出すが、7.2 の rpm では `/dev/vboxdrv` が `root:root 0600` で、VM は setuid の `VirtualBoxVM` / `VBoxHeadless` から動く（手順 9 の補足）
    - `vboxusers` が使われるのは USB の機器ノード。udev ルールが呼ぶ `/usr/lib/virtualbox/VBoxCreateUSBNode.sh` が、`/dev/vboxusb/<バス>/<機器>` を `root:vboxusers` の `0660` で作る（スクリプトの既定のグループが `vboxusers`）
    - Oracle のマニュアルも「USB 機器を使うユーザーは vboxusers に入れる」と書いている
    - **USB を実際に VM に渡すことは確かめていない**（`VBoxManage list usbhost` で見える機器の一覧など）
 
    </details>
 
-1. USB 機器を VM に渡すときだけ、`vboxusers` に入ったか確かめる。
-
-   ```bash
-   getent group vboxusers
-   ```
-
-   - `vboxusers:x:<GID>:<USER>` のように、自分の名前が出ればよい
-   - **効くのはログインし直してから**（手順 17 の再起動で済む）
-
-1. 再起動して、手順 13 の KVM の設定と、手順 15 のグループを反映させる。
+1. 再起動して、手順 11 の KVM の設定と、手順 12 のグループを反映させる。
 
    ```bash
    sudo systemctl reboot
@@ -488,8 +468,8 @@
    ```
 
    - `7.2.20r175154` のような版、`active`、vbox の 3 行、`N`（または `kvm は未ロード`）が出ればよい
-   - 最後の行は、手順 15 を行ったときだけ `vboxusers` になる
-   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（手順 12 に戻る）
+   - 最後の行は、手順 12 を行ったときだけ `vboxusers` になる
+   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（手順 10 に戻る）
 
 1. Secure Boot が有効なときだけ、モジュールの署名を見る。
 
@@ -520,13 +500,13 @@
 
    | 出るもの | 意味 | 対処 |
    |---|---|---|
-   | `WARNING: The vboxdrv kernel module is not loaded. Either there is no module available for the current kernel (...) or it failed to load.` | モジュールが無いか、読み込めていない。`VBoxManage` などを包むスクリプト（`VBox.sh`）が、コマンドの前に標準出力へ出す | `sudo tail -n 20 /var/log/vbox-setup.log` で原因を見て `sudo /sbin/vboxconfig`。Secure Boot なら手順 11〜15 |
-   | `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`（`VERR_VMX_IN_VMX_ROOT_MODE`） | Intel: KVM が VT-x を確保している | `enable_virt_at_load` が `N` か見る（手順 18・19）。KVM の VM が動いていれば止める |
+   | `WARNING: The vboxdrv kernel module is not loaded. Either there is no module available for the current kernel (...) or it failed to load.` | モジュールが無いか、読み込めていない。`VBoxManage` などを包むスクリプト（`VBox.sh`）が、コマンドの前に標準出力へ出す | `sudo tail -n 20 /var/log/vbox-setup.log` で原因を見て `sudo /sbin/vboxconfig`。Secure Boot なら [secure-boot-mok.md 手順 3〜7](secure-boot-mok.md#実施手順) |
+   | `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`（`VERR_VMX_IN_VMX_ROOT_MODE`） | Intel: KVM が VT-x を確保している | `enable_virt_at_load` が `N` か見る（手順 11）。KVM の VM が動いていれば止める |
    | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と、続けて `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` | AMD: 同上 | 同上 |
    | `Key was rejected by service`（`sudo modprobe vboxdrv` や `dmesg`） | Secure Boot で署名が受け入れられない | `sudo mokutil --test-key`（[secure-boot-mok.md 手順 7](secure-boot-mok.md#実施手順)）。**この文は一般的なカーネルのエラーで、本書では出していない**。鍵が登録されていないときの EL10 の文は `Loading of module with unavailable key is rejected`（VM の中で出た） |
    | `There were problems setting up VirtualBox.  To re-start the set-up process, run /sbin/vboxconfig as root.` | `dnf install` の途中でビルド・署名・読み込みのどこかが失敗した | `/var/log/vbox-setup.log` を見る |
 
-   - AMD の 2 行は、実機（AMD）で手順 13 の設定を再起動で効かせる前に、この手順を貼って出した（後ろに `Details: code NS_ERROR_FAILURE (0x80004005), component ConsoleWrap, interface IConsole`、`VMState="poweroff"`、`Machine 'vbox-selftest' is not currently running.` が続いた）
+   - AMD の 2 行は、実機（AMD）で手順 11 の設定を再起動で効かせる前に、この手順を貼って出した（後ろに `Details: code NS_ERROR_FAILURE (0x80004005), component ConsoleWrap, interface IConsole`、`VMState="poweroff"`、`Machine 'vbox-selftest' is not currently running.` が続いた）
    - Intel の文は、実機で出したものではなく `/usr/lib/virtualbox/VBoxVMM.so` の中の文字列から写した
    - 既に `vbox-selftest` という名前の VM があるなら、この手順の 6 行の名前を別のものに置き換えて貼る
 
@@ -551,7 +531,7 @@
    ```
 
    - アプリ一覧の「Oracle VirtualBox」からでも同じ
-   - VirtualBox マネージャーのウィンドウが開く（手順 20 の VM は消してあるので一覧は空）
+   - VirtualBox マネージャーのウィンドウが開く（手順 16 の VM は消してあるので一覧は空）
    - 端末に `Qt WARNING: QObject::disconnect: wildcard call disconnects from destroyed signal of UIInvisibleWindow::unnamed` が何行か出るが、気にしなくてよい
    - ウィンドウを閉じると、端末がプロンプトに戻る
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VirtualBox への操作として食われる）
@@ -581,7 +561,7 @@
 
 ## カーネルを更新したとき
 
-- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[手順 9](#実施手順) の補足）
+- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[手順 8](#実施手順) の補足）
 - **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [secure-boot-mok.md](secure-boot-mok.md) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
   - これは `/usr/lib/virtualbox/vboxdrv.sh` の `start` を読んだ結果で、**本書ではカーネルの更新と再起動を試していない**
   - スクリプトは、動いているカーネル用の vbox のモジュールが無ければ、その場でビルドする
@@ -621,20 +601,20 @@
    ```
 
    - トランザクション表を見て `[y/N]` に答える
-   - **更新のたびに `%post` がモジュールをビルドし直す**ので、[手順 12](#実施手順) と同じ確認をする
+   - **更新のたびに `%post` がモジュールをビルドし直す**ので、[手順 10](#実施手順) と同じ確認をする
    - コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
    - モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
    - `/sbin/vboxconfig` と udev のルールも残った
-   - **[手順 12](#実施手順) の確認は、`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - **[手順 10](#実施手順) の確認は、`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは（この節の手順 2 の代わりに）、[ロールバック](#ロールバック)の手順 2 だけを行う。
 
    - [ロールバック](#ロールバック)の手順 2 は `sudo dnf remove VirtualBox-7.2`
    - `[y/N]` に答えてから、この節の手順 4 に進む
 
-1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[手順 7](#実施手順) の下見と手順 11 からやり直す。
+1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[手順 6](#実施手順) の下見と手順 9 からやり直す。
 
-   - 手順 7・11 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
+   - 手順 6・9 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
    - 以後は、この節の手順 2 と[ロールバック](#ロールバック)の手順 2 も同じく置き換える
    - repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
 
@@ -646,7 +626,7 @@
   - **Oracle の署名鍵** `gpg-pubkey-2980aecf-5719f4e1`: 消すなら `sudo rpm -e gpg-pubkey-2980aecf-5719f4e1`
   - **Secure Boot の MOK**（前提の [secure-boot-mok.md](secure-boot-mok.md) で登録した場合）: ほかにその鍵で署名したモジュールを使っていなければ、[secure-boot-mok.md のロールバック](secure-boot-mok.md#ロールバック)で消す
   - **ログ** `/var/log/vbox-setup.log`（と `.1`〜`.4`）: 要らなければ手で消す
-  - **前提の EPEL と、手順 9 の gcc / kernel-devel など**: ほかでも使うので消さない
+  - **前提の EPEL と、手順 8 の gcc / kernel-devel など**: ほかでも使うので消さない
 - 本書ではロールバックを**コンテナでのみ本実行した**
 
 > [!CAUTION]
@@ -678,8 +658,8 @@
    }
    ```
 
-   - `vboxusers` グループは rpm を消しても残るので、ここで消す（手順 15 で自分を入れていても、グループごと消える）
-   - 最後の 2 行は、手順 5・6 で取り込んだメタデータ用の鍵（`pubring/A2F683C52980AECF.pub`）を含む dnf のキャッシュを消す（root の分とユーザーの分）
+   - `vboxusers` グループは rpm を消しても残るので、ここで消す（手順 12 で自分を入れていても、グループごと消える）
+   - 最後の 2 行は、手順 4・5 で取り込んだメタデータ用の鍵（`pubring/A2F683C52980AECF.pub`）を含む dnf のキャッシュを消す（root の分とユーザーの分）
    - **`dnf clean all` ではこの鍵は消えなかった**（コンテナで確認）
    - KVM の設定を消したことは、次の起動から効く
 
@@ -702,9 +682,9 @@
   - **読者が書き換える値は無い**
 - **状態**: **実機で本実行済み（2026-09-28〜29）。ただし Secure Boot が有効な分岐は、MokManager で鍵を登録できず、最後まで通せていない**。その前に x86_64 のコンテナで検証した（2026-09-24）
   - 下表の実機で、**この文書のコードブロックを 1 つずつ中身を確かめてから貼った**（[実機の付録](#付録-実機での本実行2026-09-29)）
-    - 手順 1、EPEL の有効化の確認（今の [epel.md](epel.md) の手順 1・3。手順 2 は EPEL が有効なので飛ばした）、手順 2〜10、MOK の手順（今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
+    - 手順 1、EPEL の有効化の確認（今の [epel.md](epel.md) の手順 1・3。手順 2 は EPEL が有効なので飛ばした）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
     - secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、登録できなかった。利用者が UEFI の設定で Secure Boot を無効にした
-    - 以降は無効の分岐で、手順 11〜14・17・18・20〜22（secure-boot-mok.md の手順 7 と手順 19 は無効の分岐で飛ばし、手順 15・16 は USB を使わないので飛ばした）
+    - 以降は無効の分岐で、手順 9〜11・13・14・16〜18（secure-boot-mok.md の手順 7 と手順 15 は無効の分岐で飛ばし、手順 12 は USB を使わないので飛ばした）
     - 入れた VirtualBox で、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) の VM（Secure Boot 有効）も動かした
   - 確認したこと:
     - `lscpu` の `Virtualization: AMD-V`、鍵の確認が `sudo` の有無で 1 回ずつ要ること、デスクトップの PC での依存（16 パッケージ）
@@ -712,26 +692,27 @@
     - `enable_virt_at_load=0` を modprobe.d に置いて再起動すると `N` になり、VM が起動すること。置く前は `VERR_SVM_IN_USE` で起動に失敗すること
     - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
     - MOK の確認（今の secure-boot-mok.md の手順 7）は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
-  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 19、USB（手順 15・16）、[カーネルを更新したとき](#カーネルを更新したとき)、[更新](#更新)（新しい版が無い）、[ロールバック](#ロールバック)（VirtualBox を残した）、MOK の削除
-  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3）、手順 2〜10、MOK の手順（今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3・4・7）、手順 11〜16・18〜22、[カーネルを更新したとき](#カーネルを更新したとき)・[更新](#更新)・[ロールバック](#ロールバック)を、コードブロックのまま通した
+  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 15、USB（手順 12）、[カーネルを更新したとき](#カーネルを更新したとき)、[更新](#更新)（新しい版が無い）、[ロールバック](#ロールバック)（VirtualBox を残した）、MOK の削除
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](#カーネルを更新したとき)・[更新](#更新)・[ロールバック](#ロールバック)を、コードブロックのまま通した
     - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
     - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
-  - 2026-09-28: 手順 5 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
-    - 中のコマンドは変えていない。実機では、手順 5 と鍵を作るブロックを囲む前の形で流し、手順 5 は囲んだ形でもう 1 回流した（どちらもブラケットペーストの効く端末で）。ロールバックの手順 2 は流していない
+    - 中のコマンドは変えていない。実機では、手順 4 と鍵を作るブロックを囲む前の形で流し、手順 4 は囲んだ形でもう 1 回流した（どちらもブラケットペーストの効く端末で）。ロールバックの手順 2 は流していない
+  - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の手順 3・8・11・12。つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|
 | 実施日 | 2026-09-28〜29 | 2026-09-24 |
 | PC | ASUS ROG Flow Z13（GZ302EA、AMD Strix Halo、BIOS 311） | — |
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64 | 同左（`quay.io/almalinuxorg/almalinux:10`、`sha256:83220192…c4c8`） |
-| カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 9 で入る） |
+| カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 8 で入る） |
 | デスクトップ | GNOME Shell 49.4 / Wayland（ロケールは en_US.UTF-8） | 無し |
 | EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](epel.md) の手順 2 で有効化 |
 | CPU の仮想化支援 / KVM | AMD-V。`kvm_amd` が起動時に読み込まれていた（KVM の VM は使っていない） | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
 | Secure Boot | 有効 → secure-boot-mok.md の手順 6 の後に無効にした | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
 | SELinux | Enforcing | 無効（コンテナ） |
-| sudo | パスワード無し（NOPASSWD）。本文の「`sudo` のパスワードを聞かれたら」は確かめていない | NOPASSWD |
+| sudo | パスワード無し（NOPASSWD） | NOPASSWD |
 | 入った VirtualBox | `VirtualBox-7.2-7.2.20_175154_el10-1.x86_64` | 同左 |
 
 > [!NOTE]
@@ -778,7 +759,7 @@ AlmaLinux 10 の x86_64 で VirtualBox を入れる経路を比べた（2026-09-
 | RPM Fusion | EL10 には VirtualBox が無い（EL9 に 7.1.18） | 不採用 |
 | Flathub | 無い（カーネルモジュールが要るため） | — |
 | 7.1 系（`VirtualBox-7.1`） | 同じリポジトリにある保守版。7.2 と同時には入らない | 対象外 |
-| KVM（libvirt / virt-manager / GNOME Boxes） | AlmaLinux 標準の仮想化。カーネルに組み込み済みでモジュールのビルドも署名も要らない | 対象外（本書は VirtualBox を入れる）。VirtualBox と同時には動かない（手順 18・19） |
+| KVM（libvirt / virt-manager / GNOME Boxes） | AlmaLinux 標準の仮想化。カーネルに組み込み済みでモジュールのビルドも署名も要らない | 対象外（本書は VirtualBox を入れる）。VirtualBox と同時には動かない（手順 11） |
 
 aarch64 には入らない:
 
@@ -788,7 +769,7 @@ aarch64 には入らない:
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 20 の後。ロールバック前。コンテナではモジュールを読み込めないので、`VBoxManage` の前に `WARNING` が出ている）:
+**検証コンテナでの出力**（手順 16 の後。ロールバック前。コンテナではモジュールを読み込めないので、`VBoxManage` の前に `WARNING` が出ている）:
 
 ```
 $ rpm -q VirtualBox-7.2
@@ -835,10 +816,10 @@ compreg.dat
 xpti.dat
 ```
 
-- `modinfo` をファイルの場所で指定しているのは、コンテナでは `modinfo vboxdrv`（名前で引く形）が別のカーネルの置き場所を見に行って `Module vboxdrv not found.` になるため（[付録](#付録-コンテナでの検証記録2026-09-24)）。実機では手順 24 の書き方でよい
+- `modinfo` をファイルの場所で指定しているのは、コンテナでは `modinfo vboxdrv`（名前で引く形）が別のカーネルの置き場所を見に行って `Module vboxdrv not found.` になるため（[付録](#付録-コンテナでの検証記録2026-09-24)）。実機では手順 15 の書き方でよい
 - 3 つのモジュールとも vermagic と版は同じで、signer はどれも `VirtualBox module signing key`、`sig_hashalgo` は `sha512`、`softdep` は空だった
 
-**実機での出力**（2026-09-29、手順 22 の後。Secure Boot は無効で、検証用の VM が 1 つ動いている。`modinfo` から下は手順書の外のコマンド）:
+**実機での出力**（2026-09-29、手順 18 の後。Secure Boot は無効で、検証用の VM が 1 つ動いている。`modinfo` から下は手順書の外のコマンド）:
 
 ```
 $ VBoxManage --version
@@ -870,15 +851,15 @@ vboxusers:x:<GID>:
 
 ### 注意点
 
-- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[手順 7](#実施手順) の補足）。前提の [epel.md](epel.md) で有効にする
-- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 11・12](#実施手順)）
-- **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[手順 6](#実施手順) の補足）
+- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[手順 6](#実施手順) の補足）。前提の [epel.md](epel.md) で有効にする
+- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 9・10](#実施手順)）
+- **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[手順 5](#実施手順) の補足）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [secure-boot-mok.md](secure-boot-mok.md) で作って登録する
-- **MokManager でキーボードが効かない PC がある**: 検証した PC では登録できず、Secure Boot を無効にして進めた（[secure-boot-mok.md 手順 6](secure-boot-mok.md#実施手順) の補足）。無効のままならモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する（[手順 11](#実施手順) の補足）
-- **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[手順 13・14](#実施手順)）
+- **MokManager でキーボードが効かない PC がある**: 検証した PC では登録できず、Secure Boot を無効にして進めた（[secure-boot-mok.md 手順 6](secure-boot-mok.md#実施手順) の補足）。無効のままならモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する（[手順 9](#実施手順) の補足）
+- **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[手順 11](#実施手順)）
 - **カーネルを更新した後の最初の起動は遅くなる**: `vboxdrv.service` がモジュールをビルドし直す（[カーネルを更新したとき](#カーネルを更新したとき)）
 - **系列がパッケージ名に入っている**: 7.2 → 7.3 は `dnf upgrade` では移らない（[更新](#更新)）
-- **vboxusers は USB のためだけ**: VM の起動には要らない（[手順 15](#実施手順)）
+- **vboxusers は USB のためだけ**: VM の起動には要らない（[手順 12](#実施手順)）
 - **Extension Pack は本書では扱わない**: 追加機能（マニュアルによれば VRDP のサーバー、ホストの Web カメラの受け渡し、Intel の PXE ブート ROM、ディスクイメージの暗号化、クラウド連携）をまとめた別配布
   - ライセンスは GPL ではなく **PUEL（個人利用と教育利用に限って無償）**
   - rpm の `%postun` が `/usr/lib/virtualbox/ExtensionPacks` を消すので、入れた場合は **VirtualBox の更新のたびに入れ直す**ことになる（rpm のスクリプトを読んだ結果。未確認）
@@ -910,7 +891,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 ```
 
 - `sudo dnf remove VirtualBox-7.1` の後に `sudo dnf install VirtualBox-7.2` とした場合は、モジュール（`7.2.20 r175154`）・`/sbin/vboxconfig`・udev のルールがすべて揃った
-- `vboxusers` グループは消えずに残るので、手順 15・16 をやり直す必要は無い
+- `vboxusers` グループは消えずに残るので、手順 12 をやり直す必要は無い
 
 ### 参照
 
@@ -939,27 +920,27 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 
 | スタブ | 返すもの | 理由 |
 |---|---|---|
-| `/usr/bin/uname` | `-r` のときだけ `6.12.0-211.56.1.el10_2.x86_64`。ほかの引数は本物に渡す | コンテナはクラウドのホストのカーネル（6.18 系）を共有する。`%post`・vboxdrv.sh・`check_module_dependencies.sh` と手順 9・10 の `kernel-devel-$(uname -r)` が `uname -r` の版を使う |
-| `/usr/bin/mokutil`（手順 9 で本物を入れた後に差し替えた） | `--sb-state` → `SecureBoot enabled`。`--test-key` → 未登録（登録の印のファイルを置いた後は `is already enrolled`）。`--import` / `--list-new` は何もしない | コンテナには UEFI の変数が無い（本物は `EFI variables are not supported on this system`）。Secure Boot の分岐（署名）を通すため |
+| `/usr/bin/uname` | `-r` のときだけ `6.12.0-211.56.1.el10_2.x86_64`。ほかの引数は本物に渡す | コンテナはクラウドのホストのカーネル（6.18 系）を共有する。`%post`・vboxdrv.sh・`check_module_dependencies.sh` と手順 8 の `kernel-devel-$(uname -r)` が `uname -r` の版を使う |
+| `/usr/bin/mokutil`（手順 8 で本物を入れた後に差し替えた） | `--sb-state` → `SecureBoot enabled`。`--test-key` → 未登録（登録の印のファイルを置いた後は `is already enrolled`）。`--import` / `--list-new` は何もしない | コンテナには UEFI の変数が無い（本物は `EFI variables are not supported on this system`）。Secure Boot の分岐（署名）を通すため |
 
 `modinfo`・`modprobe`・`depmod` はコマンドの `uname` ではなくカーネルに版を聞くので、コンテナではホストの版の置き場所（`/lib/modules/6.18…`。無い）を見に行き、`modinfo vboxdrv` は `Module vboxdrv not found.`、`depmod -a` は `could not open directory` になった。モジュールはファイルの場所を指定して確かめた。
 
-**流し方**: 本文の `bash` のコードブロックを上から順に抜き出し、1 つずつ新しい `docker exec` で実行した（手順 1 の 2 つの変数を各ブロックの先頭に足した。本文の「新しいシェルを開いたら手順 1 を貼り直す」と同じ）。確認を聞くブロック（手順 5・6 の `makecache` 2 つ、手順 16 の `dnf install`、更新、ロールバックの `dnf remove`）は `script` で作った pty の中で流し、間を置いて `y` を送った。コマンドに `-y` は足していない。
+**流し方**: 本文の `bash` のコードブロックを上から順に抜き出し、1 つずつ新しい `docker exec` で実行した（手順 1 の 2 つの変数を各ブロックの先頭に足した。本文の「新しいシェルを開いたら手順 1 を貼り直す」と同じ）。確認を聞くブロック（手順 4・5 の `makecache` 2 つ、手順 9 の `dnf install`、更新、ロールバックの `dnf remove`）は `script` で作った pty の中で流し、間を置いて `y` を送った。コマンドに `-y` は足していない。
 
 | 手順 | 結果 |
 |---|---|
 | 1. 変数 | 2 つの値、`x86_64`、`CPU の仮想化支援が見えない`（クラウドのホストに VT-x が無い） |
 | epel.md 1〜3. EPEL | `EPEL は未設定` → `epel-release-10-6.el10`（extras）と `dnf-plugins-core` → `epel` の行 |
-| 2〜4. 鍵 | fingerprint が本文の値と一致。`rpm --import` は無出力で終了コード 0。`gpg-pubkey-2980aecf-5719f4e1` |
-| 5〜7. リポジトリ | repo ファイルを作成。`sudo dnf makecache` と `dnf makecache` のどちらも `Importing GPG key 0x2980AECF:` → `y` → `Metadata cache created.`。下見は 89 パッケージ（223 MB / 展開後 719 MB）で、`liblzf` は epel から |
-| 8〜10. ビルドの道具 | `uname -r` と `rpm -q --last kernel-core` が同じ版。`gcc` / `make` / `perl-interpreter` / `mokutil` / `openssl` / `kernel-devel-6.12.0-211.56.1.el10_2` を導入。途中で 1 つのミラーが証明書のホスト名の不一致で失敗したが、dnf が別のミラーから取り直した |
+| 2〜3. 鍵 | fingerprint が本文の値と一致。`rpm --import` は無出力で終了コード 0。`gpg-pubkey-2980aecf-5719f4e1` |
+| 4〜6. リポジトリ | repo ファイルを作成。`sudo dnf makecache` と `dnf makecache` のどちらも `Importing GPG key 0x2980AECF:` → `y` → `Metadata cache created.`。下見は 89 パッケージ（223 MB / 展開後 719 MB）で、`liblzf` は epel から |
+| 7〜8. ビルドの道具 | `uname -r` と `rpm -q --last kernel-core` が同じ版。`gcc` / `make` / `perl-interpreter` / `mokutil` / `openssl` / `kernel-devel-6.12.0-211.56.1.el10_2` を導入。途中で 1 つのミラーが証明書のホスト名の不一致で失敗したが、dnf が別のミラーから取り直した |
 | secure-boot-mok.md 3・4・7. MOK（スタブ。当時はこの文書の手順 11〜15） | `SecureBoot enabled` → 鍵の生成（`MOK.priv` が `-rw-------`）→ `--import` はスタブ → **再起動は実行せず**、登録の印を置いて `is already enrolled` |
-| 11〜12. 導入 | `[y/N]` と EPEL の鍵（`0xE37ED158`）に `y`。`Creating group 'vboxusers'...` の後、`%post` がモジュールを 3 つビルドして MOK の鍵で署名し、`modprobe vboxdrv failed` と `There were problems setting up VirtualBox.` を出して `Complete!`（コンテナでは読み込めないため）。`systemctl` は `System has not been booted with systemd`、`/dev/vboxdrv` は無し、ログは `Building the main VirtualBox module.` など 3 行 |
-| 13〜14. KVM | ファイルの中身と `modprobe -c` の両方に `options kvm enable_virt_at_load=0` |
-| 15〜16. vboxusers | `vboxusers:x:<GID>:<USER>` |
-| 17. 再起動 | **実行していない**。以降は新しい `docker exec` で行った（新しいログインと同じく、グループが反映される） |
-| 18〜20. 検証 | `7.2.20r175154`（前に `WARNING`）、`kvm は未ロード`、`vboxusers`。`modinfo -F signer vboxdrv` は `Module vboxdrv not found.`（上記の理由）。`createvm` と `modifyvm` は成功、`startvm` は `terminated unexpectedly during startup with exit code 1`、`VMState="poweroff"`、`controlvm poweroff` は `is not currently running`、`unregistervm --delete` は `0%...100%` |
-| 21〜22. GUI | `No active display server, X11 or Wayland, detected. Exiting.`（30 秒の timeout を付けて実行）。`~/.config/VirtualBox` に `VirtualBox.xml` など 5 つ |
+| 9〜10. 導入 | `[y/N]` と EPEL の鍵（`0xE37ED158`）に `y`。`Creating group 'vboxusers'...` の後、`%post` がモジュールを 3 つビルドして MOK の鍵で署名し、`modprobe vboxdrv failed` と `There were problems setting up VirtualBox.` を出して `Complete!`（コンテナでは読み込めないため）。`systemctl` は `System has not been booted with systemd`、`/dev/vboxdrv` は無し、ログは `Building the main VirtualBox module.` など 3 行 |
+| 11. KVM | ファイルの中身と `modprobe -c` の両方に `options kvm enable_virt_at_load=0` |
+| 12. vboxusers | `vboxusers:x:<GID>:<USER>` |
+| 13. 再起動 | **実行していない**。以降は新しい `docker exec` で行った（新しいログインと同じく、グループが反映される） |
+| 14〜16. 検証 | `7.2.20r175154`（前に `WARNING`）、`kvm は未ロード`、`vboxusers`。`modinfo -F signer vboxdrv` は `Module vboxdrv not found.`（上記の理由）。`createvm` と `modifyvm` は成功、`startvm` は `terminated unexpectedly during startup with exit code 1`、`VMState="poweroff"`、`controlvm poweroff` は `is not currently running`、`unregistervm --delete` は `0%...100%` |
+| 17〜18. GUI | `No active display server, X11 or Wayland, detected. Exiting.`（30 秒の timeout を付けて実行）。`~/.config/VirtualBox` に `VirtualBox.xml` など 5 つ |
 | カーネル更新 | `uname -r` だけ通った。`systemctl` と `modinfo` は上と同じ理由で失敗 |
 | 更新 | `Nothing to do.` |
 | ロールバック | `Remove  86 Packages`・`Freed space: 712 M`・`/etc/xml/catalog.rpmsave`。repo ファイル・modprobe.d・`vboxusers` が消えた。**このときの版は `dnf clean all` を使っていて、メタデータ用の鍵（`pubring`）が残った**ので、本文の 2 行（`rm -rf .../virtualbox*`）に直した。直した後のロールバックの 3 ブロックは、同じ版の VirtualBox を入れ直した別のコンテナで流し直し、パッケージ・`vboxusers`・鍵を含む dnf のキャッシュ・repo ファイル・modprobe.d のファイル・VM の設定がどれも残らないことを確かめた |
@@ -971,7 +952,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 | EPEL 無しの下見 | `nothing provides liblzf.so.1()(64bit) needed by VirtualBox-7.2-7.2.20_175154_el10-1.x86_64 from virtualbox` |
 | 系列の無い名前 | `sudo dnf install --assumeno VirtualBox` → `No match for argument: VirtualBox` |
 | `sudo` 無しの dnf | 鍵を受け入れる前は、無関係な `dnf -q list --showduplicates tmux` まで `Signing key not found` で失敗。受け入れた後は成功。ユーザーのキャッシュは `/var/tmp/dnf-<USER>-<ランダム>/` |
-| ビルドの道具が無いとき | `%post` が `This system is currently not set up to build kernel modules.` などを出し、`dnf install` は `Complete!`（手順 9 の補足） |
+| ビルドの道具が無いとき | `%post` が `This system is currently not set up to build kernel modules.` などを出し、`dnf install` は `Complete!`（手順 8 の補足） |
 | `perl` と `perl-interpreter` | 素のコンテナで 269 パッケージ・300 MB と 60 パッケージ・26 MB。`perl-interpreter` だけでビルドと署名の確認（`Verified OK`）が通った。`elfutils-libelf-devel` 無しでビルドできた |
 | Secure Boot（スタブ）で、鍵無し / 鍵ありで未登録 / 登録済み | 署名で止まって鍵の作り方を案内 / 署名はするが `You must sign these kernel modules` と `modprobe vboxdrv failed` / 署名して読み込みに進む（コンテナなので `modprobe` で失敗） |
 | Oracle の案内どおりの `openssl req` | `-subj` が無いと `Country Name (2 letter code) [XX]:` で対話になり、`-days` が無いと有効期限は 30 日（OpenSSL 3.5.8） |
@@ -1009,7 +990,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 
 ### 付録: 実機での本実行（2026-09-29）
 
-前の付録の後、実機で本実行した（手順 1〜10、MOK の手順〔今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [epel.md](epel.md) の手順 1・3〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 11 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
+前の付録の後、実機で本実行した（手順 1〜8、MOK の手順〔今の [secure-boot-mok.md](secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [epel.md](epel.md) の手順 1・3〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 9 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
 
 - 実機での本実行（Secure Boot が有効な分岐は、MokManager での登録〔今の secure-boot-mok.md の手順 6〕まで）
 - VT-x / AMD-V のある PC での `lscpu` の表示、デスクトップの PC での依存の数
@@ -1023,34 +1004,34 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 
 - 本文の `bash` のコードブロックを抜き出し（リストの字下げだけ外す）、自分のログインシェル（擬似端末の上の bash。ブラケットペーストが効く）に 1 つずつ貼って Enter を送った
   - 1 ブロックごとに中身と出力を確かめてから、次を貼った
-- 確認を聞くブロック（手順 5・6 の鍵の確認、secure-boot-mok.md 手順 4 の一時パスワード、手順 11 の `[y/N]`）は、入力待ちが出てから答えを送った
-  - 手順 5・6 の fingerprint は、手順 2 と同じであることを確かめてから `y` と答えた
-- secure-boot-mok.md 手順 5 と手順 17 の再起動では、利用者がログインし直した。同書の手順 6 の MokManager も利用者が操作した
-- 手順 1〜10、MOK の手順（同書の手順 3〜6。当時はこの文書の手順 11〜14）と EPEL の確認は 8835dd5 の版（手順 5 と鍵を作るブロックを `{ … }` で囲む前。EPEL の確認は、当時はこの文書の手順 2〜4）、MOK の確認（同書の手順 7）と手順 11 から後は 52299ac の版を貼った。手順 5 は、囲んだ形でもう 1 回流した
+- 確認を聞くブロック（手順 4・5 の鍵の確認、secure-boot-mok.md 手順 4 の一時パスワード、手順 9 の `[y/N]`）は、入力待ちが出てから答えを送った
+  - 手順 4・5 の fingerprint は、手順 2 と同じであることを確かめてから `y` と答えた
+- secure-boot-mok.md 手順 5 と手順 13 の再起動では、利用者がログインし直した。同書の手順 6 の MokManager も利用者が操作した
+- 手順 1〜8、MOK の手順（同書の手順 3〜6。当時はこの文書の手順 11〜14）と EPEL の確認は 8835dd5 の版（手順 4 と鍵を作るブロックを `{ … }` で囲む前。EPEL の確認は、当時はこの文書の手順 2〜4）、MOK の確認（同書の手順 7）と手順 9 から後は 52299ac の版を貼った。手順 4 は、囲んだ形でもう 1 回流した
 
 | 手順 | 結果 |
 |---|---|
 | 1. 確認 | `x86_64`、`Virtualization:                          AMD-V` |
 | epel.md 1〜3. EPEL | `epel` の行が出たので、手順 2 は飛ばした。`epel-release-10-8.el10_2` と `epel` の行 |
-| 2〜4. 鍵 | fingerprint と uid が一致（副鍵の fingerprint の行も出た。手順 3 の補足）。`rpm --import` は無出力。`gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org> public key` |
-| 5〜6. リポジトリ | `Importing GPG key 0x2980AECF:`（fingerprint は手順 2 と同じ）に `y` → `Metadata cache created.`。`sudo` 無しの dnf も同じ確認に `y`。囲んだ形の手順 5 をもう 1 回流すと、確認は出ずに `Metadata cache created.` |
-| 7. 下見 | 16 パッケージ（135 M / 350 M）、`liblzf` は epel。`Operation aborted.` |
-| 8〜10. 道具 | 2 つの版が同じ。6 つとも導入済みで `Nothing to do.`。6 つの版と `build/include` |
+| 2〜3. 鍵 | fingerprint と uid が一致（副鍵の fingerprint の行も出た。手順 3 の補足）。`rpm --import` は無出力。`gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org> public key` |
+| 4〜5. リポジトリ | `Importing GPG key 0x2980AECF:`（fingerprint は手順 2 と同じ）に `y` → `Metadata cache created.`。`sudo` 無しの dnf も同じ確認に `y`。囲んだ形の手順 4 をもう 1 回流すと、確認は出ずに `Metadata cache created.` |
+| 6. 下見 | 16 パッケージ（135 M / 350 M）、`liblzf` は epel。`Operation aborted.` |
+| 7〜8. 道具 | 2 つの版が同じ。6 つとも導入済みで `Nothing to do.`。6 つの版と `build/include` |
 | secure-boot-mok.md 3. Secure Boot | `SecureBoot enabled` |
 | secure-boot-mok.md 4. 鍵 | `MOK.der`（844 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。一時パスワード 2 回で無出力。`sudo mokutil --list-new` に `CN=VirtualBox module signing key`。登録前の `.platform` は 9 個（UEFI の db と、MOK の AlmaLinux の鍵） |
 | secure-boot-mok.md 5〜6. 再起動 | MokManager の画面は出たが、キーボードが効かず登録できなかった（利用者の報告）。利用者が UEFI の設定で Secure Boot を無効にした。起動した後は `SecureBoot disabled`、予約は消え、鍵は登録されていない。`.platform` は UEFI の db の 6 個だけになった |
 | secure-boot-mok.md 7. 確認 | Secure Boot が無効なので飛ばした。前の版の形（`sudo` 無し）は `Failed to open /var/lib/shim-signed/mok/MOK.der`、`sudo` 付きは `is not enrolled`（終了コード 1） |
-| 11. 導入 | `[y/N]` に `y`（EPEL の鍵の確認は出なかった。取り込み済み）。約 20 秒で `Creating group 'vboxusers'. VM users must be member of that group!` → `Installed:` → `Complete!`。エラーの表示は無し |
-| 12. 確認 | `enabled`、`active`、vbox の 3 行、`crw------- root root`、ログは `Building the main VirtualBox module.` など 3 行 |
-| 13〜14. KVM | どちらにも `options kvm enable_virt_at_load=0`（`modprobe -c` には `alias symbol:enable_virt_at_load kvm` も）。この時点の値は `Y` |
-| 手順 20 を先に 1 回（手順書の外） | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` → `VirtualBox can't enable the AMD-V extension. ...` → `VMState="poweroff"` → `Machine 'vbox-selftest' is not currently running.` → `unregistervm` は `0%...100%` |
-| 15〜16. vboxusers | USB を使わないので飛ばした |
-| 17. 再起動 | 利用者がログインし直した。`enable_virt_at_load` は `N` |
-| 18. 確認 | `7.2.20r175154`（前に `WARNING` 無し）、`active`、vbox の 3 行、`N`、`vboxusers には入っていない` |
-| 19. 署名 | Secure Boot が無効なので飛ばした（`modinfo -F signer vboxdrv` は空） |
-| 20. VM | `VM "vbox-selftest" has been successfully started.`、`VMState="running"`。`poweroff` と `unregistervm` がそれぞれ `0%...100%` |
-| 21. GUI | 利用者がウィンドウの表示を確かめて閉じた。`platforms/libqxcb.so`（XWayland）。端末に `Qt WARNING: QObject::disconnect: ...` が 3 行 |
-| 22. 設定 | `compreg.dat`・`selectorwindow.log`・`VBoxSVC.log`（と `.1`・`.2`）・`VirtualBox.xml`・`VirtualBox.xml-prev`・`xpti.dat` |
+| 9. 導入 | `[y/N]` に `y`（EPEL の鍵の確認は出なかった。取り込み済み）。約 20 秒で `Creating group 'vboxusers'. VM users must be member of that group!` → `Installed:` → `Complete!`。エラーの表示は無し |
+| 10. 確認 | `enabled`、`active`、vbox の 3 行、`crw------- root root`、ログは `Building the main VirtualBox module.` など 3 行 |
+| 11. KVM | どちらにも `options kvm enable_virt_at_load=0`（`modprobe -c` には `alias symbol:enable_virt_at_load kvm` も）。この時点の値は `Y` |
+| 手順 16 を先に 1 回（手順書の外） | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` → `VirtualBox can't enable the AMD-V extension. ...` → `VMState="poweroff"` → `Machine 'vbox-selftest' is not currently running.` → `unregistervm` は `0%...100%` |
+| 12. vboxusers | USB を使わないので飛ばした |
+| 13. 再起動 | 利用者がログインし直した。`enable_virt_at_load` は `N` |
+| 14. 確認 | `7.2.20r175154`（前に `WARNING` 無し）、`active`、vbox の 3 行、`N`、`vboxusers には入っていない` |
+| 15. 署名 | Secure Boot が無効なので飛ばした（`modinfo -F signer vboxdrv` は空） |
+| 16. VM | `VM "vbox-selftest" has been successfully started.`、`VMState="running"`。`poweroff` と `unregistervm` がそれぞれ `0%...100%` |
+| 17. GUI | 利用者がウィンドウの表示を確かめて閉じた。`platforms/libqxcb.so`（XWayland）。端末に `Qt WARNING: QObject::disconnect: ...` が 3 行 |
+| 18. 設定 | `compreg.dat`・`selectorwindow.log`・`VBoxSVC.log`（と `.1`・`.2`）・`VirtualBox.xml`・`VirtualBox.xml-prev`・`xpti.dat` |
 
 **手順書の外で確かめたこと**:
 
@@ -1069,8 +1050,8 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - Secure Boot が有効なままでの MokManager での登録（この PC ではキーボードが効かなかった）と、署名したモジュールが実機のカーネルに受け入れられること
 - 別のキーボードや、UEFI の設定（Fast Boot など）で MokManager のキーが効くか
 - Secure Boot を後で有効に戻したときの動作と、登録し直して `sudo /sbin/vboxconfig` を実行したときの動作
-- 手順 19、USB の受け渡し（手順 15・16）
-- `sudo` のパスワードを聞かれる場合（この PC の sudo は NOPASSWD）と、EPEL の鍵の確認（取り込み済みだった）
+- 手順 15、USB の受け渡し（手順 12）
+- EPEL の鍵の確認（取り込み済みだった）
 - カーネルを更新して再起動したときの自動ビルド、[更新](#更新)、[ロールバック](#ロールバック)（実機では行っていない）
 - Intel の PC（VT-x）で KVM とぶつかったときの文の実際の出方
 - GUI の HiDPI と日本語の表示、日本語入力

@@ -3,7 +3,7 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順（手順 8 の API ソケットまで）と、[EPEL](epel.md) を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と、[EPEL](epel.md) を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 > - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
@@ -36,7 +36,7 @@
    podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requires podman-tui` に出る依存は glibc（`libc.so.6`・`libresolv.so.2`）だけ。
 
    - 入るファイルは `/usr/bin/podman-tui` とライセンスの 2 つ
-   - podman のパッケージには依存しない。podman のコマンドも呼ばず、API ソケット（[podman.md 手順 8](podman.md#実施手順)）にだけつなぐ
+   - podman のパッケージには依存しない。podman のコマンドも呼ばず、API ソケット（[podman.md 手順 7](podman.md#実施手順)）にだけつなぐ
    - そのため、podman を消しても podman-tui は残る（検証では、`sudo dnf remove --assumeno podman` が消す 30 パッケージに入っていなかった）
 
    </details>
@@ -315,7 +315,7 @@ podman-tui-web Exited (0) 19 seconds ago
 
 **流し方**:
 
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 を流した
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、ブラケットペーストで 1 ブロックずつ貼って Enter を送った
 - `[y/N]` と鍵の確認は、表示を確かめてから `y` と答えた。コマンドに `-y` は足していない
 - 手順 4 は、画面の文字を読みながらキー（`F4`・`↓`・`m`・`Enter`・`Ctrl+C`）を送った

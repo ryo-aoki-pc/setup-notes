@@ -4,9 +4,9 @@
 
 > [!IMPORTANT]
 > - **セッションを使うユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない（セッションと RDP の設定は、貼ったユーザーのものになるため）
-> - 前提は [gnome-power.md 手順 1・2](gnome-power.md#実施手順)（サスペンドできる PC では、同書の手順 3〜5 も）。ヘッドレスのセッションでも、既定のままでは 15 分の無操作で PC をサスペンドしようとする
-> - **手順 2・8 は `sudo` のパスワード、手順 6 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
-> - 手順 11（クライアントからの接続）だけ別のマシンで行う
+> - 前提は [gnome-power.md 手順 1・2](gnome-power.md#実施手順)（サスペンドできる PC では、同書の手順 3・4 も）。ヘッドレスのセッションでも、既定のままでは 15 分の無操作で PC をサスペンドしようとする
+> - **手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
+> - 手順 10（クライアントからの接続）だけ別のマシンで行う
 > - [リモートログイン](gnome-remote-desktop.md)（GDM で新しいセッションを作る方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -37,26 +37,34 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   - `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[gnome-remote-desktop.md](gnome-remote-desktop.md) の手順 1 と同じ。証明書の SAN に入れる（手順 4）
+   - `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[gnome-remote-desktop.md](gnome-remote-desktop.md) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
    - `RDP_PORT` の判定に使う `systemctl is-enabled gnome-remote-desktop.service` は、`--user` を付けないのでシステムの unit を見る
    - リモートログインのデーモンは 3389/tcp で待ち受けるので、同じ PC ではヘッドレスのセッションの RDP を 3390/tcp にする
 
    </details>
 
-1. ヘッドレスのセッションを有効にして、起動する。
+1. ヘッドレスのセッションを有効にして起動し、セッションができたかを確かめる。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
-   else sudo systemctl enable --now "gnome-headless-session@${USER}.service"
+   else
+     sudo systemctl enable --now "gnome-headless-session@${USER}.service"
+     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
+     pgrep -a -u "${USER}" -x gnome-shell
    fi
    ```
 
    - `Created symlink '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service' → '/usr/lib/systemd/system/gnome-headless-session@.service'.` と出る
    - PC を起動するたびに、このセッションも起動する
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - 続いて `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell` が出ればよい
+   - `busctl` の `for` の行で、gnome-shell が起動し終わるまで、30 秒まで待つ
+   - 何も出ないときは、`systemctl status "gnome-headless-session@${USER}.service"` と `systemctl --user status org.gnome.Shell@wayland.service` を見る
 
    <details>
-   <summary>補足: gnome-headless-session@.service</summary>
+   <summary>補足: gnome-headless-session@.service と、セッションの見分け方</summary>
+
+   **gnome-headless-session@.service**:
 
    - gdm の unit。`gdm` ユーザーで `gdm-new-session <USER> --headless` を動かし、GDM に、モニターの無いセッションを作らせる（RHEL 10 の文書の「1.4 headless server for a single user」と同じ unit）
    - できるセッションは、`loginctl` で `Class=user`・`Type=wayland`・`TTY=headless`・`Remote=yes`・`Service=gdm-autologin`・seat 無し
@@ -64,24 +72,9 @@
    - `WantedBy=graphical.target` なので、`enable` で起動時にも作られる。`Requires=gdm.service`
    - 起動して 3 秒ほどで gnome-shell が動き、描画には GPU（Raspberry Pi 5 では `/dev/dri/renderD128` の v3d）を使った
 
-   </details>
+   **セッションの見分け方と、モニターが無い間**:
 
-1. セッションができたかを確かめる。
-
-   ```bash
-   for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
-   loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
-   pgrep -a -u "${USER}" -x gnome-shell
-   ```
-
-   - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell` が出ればよい
-   - 最初の行は、gnome-shell が起動し終わるまで、30 秒まで待つ
-   - 何も出ないときは、`systemctl status "gnome-headless-session@${USER}.service"` と `systemctl --user status org.gnome.Shell@wayland.service` を見る
-
-   <details>
-   <summary>補足: セッションの見分け方と、モニターが無い間</summary>
-
-   - 2 行目の `awk` は、このユーザーのヘッドレスのセッションの行だけを出す。ほかのユーザーのヘッドレスのセッションも `TTY` が `headless` になる（検証では、`grep headless` にしていた版が、試験用のユーザーのセッションも数えた）
+   - `loginctl` の行の `awk` は、このユーザーのヘッドレスのセッションの行だけを出す。ほかのユーザーのヘッドレスのセッションも `TTY` が `headless` になる（検証では、`grep headless` にしていた版が、試験用のユーザーのセッションも数えた）
    - このセッションには、RDP のクライアントがつないでいない間、モニターが 1 枚も無い。アプリはそのまま動き続ける
    - クライアントがつなぐと、そのクライアントの窓の大きさの仮想モニターができ、切ると消える
 
@@ -91,7 +84,7 @@
 
    ```bash
    if [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] || [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
-     echo '中断: 証明書か鍵が既にある。そのまま使うなら手順 5 へ進む。作り直すなら、この手順の補足のとおり別名に移してから貼り直す' >&2
+     echo '中断: 証明書か鍵が既にある。そのまま使うなら手順 4 へ進む。作り直すなら、この手順の補足のとおり別名に移してから貼り直す' >&2
    elif [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
@@ -117,7 +110,7 @@
    - `certificates` のディレクトリは、SELinux のラベルが `home_cert_t` になった。gnome-remote-desktop のユーザーのデーモンは `unconfined_t` で動き、Enforcing のまま読めた
    - 既にある証明書を作り直すときは、先に別名に移す（戻すときに使う）:
      - `mv ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt.old`
-     - 鍵（`rdp-tls.key`）も同じように移し、この手順を貼り直す。手順 5 の後に `systemctl --user restart gnome-remote-desktop-headless.service` で読み直させる
+     - 鍵（`rdp-tls.key`）も同じように移し、この手順を貼り直す。手順 4 の後に `systemctl --user restart gnome-remote-desktop-headless.service` で読み直させる
 
    </details>
 
@@ -140,8 +133,8 @@
 
    - `--headless` を付けた `grdctl` は、ヘッドレスのセッションのデーモン（`gnome-remote-desktop-headless.service`）の設定を変える
    - 書き先は dconf。ポートなどは `/org/gnome/desktop/remote-desktop/rdp/headless/`、証明書と鍵は、デスクトップ共有と同じ `/org/gnome/desktop/remote-desktop/rdp/` に入った
-   - 資格情報（手順 6）は、TPM があれば TPM に、無ければ `~/.local/share/gnome-remote-desktop/credentials.ini`（GKeyFile）に置く。TPM の無い Raspberry Pi 5 では、`grdctl --headless` のどのコマンドも TPM のメッセージを出した
-   - `disable-port-negotiation` は、指定したポートが使われていたときに、次のポートを順に試すのを止める。ポートが勝手に変わって、手順 8 で開けたポートと食い違うのを防ぐ
+   - 資格情報（手順 5）は、TPM があれば TPM に、無ければ `~/.local/share/gnome-remote-desktop/credentials.ini`（GKeyFile）に置く。TPM の無い Raspberry Pi 5 では、`grdctl --headless` のどのコマンドも TPM のメッセージを出した
+   - `disable-port-negotiation` は、指定したポートが使われていたときに、次のポートを順に試すのを止める。ポートが勝手に変わって、手順 7 で開けたポートと食い違うのを防ぐ
 
    </details>
 
@@ -172,7 +165,7 @@
    ```
 
    - `enabled` と出ればよい
-   - デーモンが待ち受けたかは、手順 9 で確かめる
+   - デーモンが待ち受けたかは、手順 8 で確かめる
 
    <details>
    <summary>補足: grdctl --headless rdp enable</summary>
@@ -194,7 +187,6 @@
 
    - `success` が 2 行出て、最後に `<RDP_PORT>/tcp` を含む行が出ればよい
    - リモートログインと併用している PC でも、ここで 3390/tcp を足す（3389/tcp はリモートログインの `rdp` サービスで開いている）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: ファイアウォール</summary>
@@ -212,7 +204,7 @@
    ```
 
    - `grdctl --headless status` で、`Unit status: active`・`Status: enabled`・`Port: <RDP_PORT>`・`Negotiate port: no`・`Username: (hidden)` を確かめる
-   - `TLS fingerprint` の値を控えておく（手順 10 と手順 11 で使う）
+   - `TLS fingerprint` の値を控えておく（手順 9 と手順 10 で使う）
    - `ss` が `LISTEN … *:<RDP_PORT> …` の 1 行を出せばよい
 
 1. TLS のハンドシェイクと、提示される証明書を確かめる。
@@ -263,10 +255,10 @@
 1. LAN 内の別のマシンから、RDP クライアントでつなぐ。
 
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` の形でつなぐ。Windows なら「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
-   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 6 の値に読み替える
-   - 証明書の確認を聞かれたら、表示された Thumbprint が手順 9 の `TLS fingerprint` と同じかを見てから受け入れる
+   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 5 の値に読み替える
+   - 証明書の確認を聞かれたら、表示された Thumbprint が手順 8 の `TLS fingerprint` と同じかを見てから受け入れる
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
-   - パスワードは手順 6 のもの。通ると、このセッションの GNOME のデスクトップが、クライアントの窓の大きさで出る
+   - パスワードは手順 5 のもの。通ると、このセッションの GNOME のデスクトップが、クライアントの窓の大きさで出る
    - 切ってつなぎ直すと、同じデスクトップ（開いていたアプリもそのまま）に戻る
    - 問題があれば、PC の端末で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop-headless.service` を見る
 
@@ -275,7 +267,7 @@
 ## 接続元を LAN に絞る（任意）
 
 - **接続元を制限しないなら、この節は不要**
-- [手順 8](#実施手順) は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
+- [手順 7](#実施手順) は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
 - 手順 1 の変数を設定したシェルで貼る
 
 1. LAN に絞るなら、送信元サブネットを入れ、ポートの開放を rich rule に置き換える。
@@ -316,7 +308,6 @@
    ```
 
    - `success` が 2 行出て、`--list-ports` に `<RDP_PORT>/tcp` が無ければよい
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. [接続元を LAN に絞る](#接続元を-lan-に絞る任意)を行ったときは（この節の手順 1 の代わりに）、rich rule を消す。
 
@@ -330,7 +321,6 @@
 
    - `LAN_SUBNET` は、[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の手順 1 の 1 つ目のブロックを貼り直して入れる
    - `success` が 2 行出て、その rich rule が消えていればよい
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. RDP を止め、資格情報と設定を消す。
 
@@ -354,27 +344,21 @@
 
    - 何も出さずに終わる
 
-1. ヘッドレスのセッションを止めて、起動時に作らないようにする。
+1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
-   else sudo systemctl disable --now "gnome-headless-session@${USER}.service"
+   else
+     sudo systemctl disable --now "gnome-headless-session@${USER}.service"
+     for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
    fi
    ```
 
    - `Removed '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service'.` と出る
    - セッションで動いていたアプリも閉じる
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. セッションが終わったかを確かめる。
-
-   ```bash
-   for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
-   loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
-   ```
-
-   - `0` が出ればよい（このユーザーのヘッドレスのセッションだけを数える。[手順 3](#実施手順) の補足）
-   - 最初の行は、セッションが終わるまで、30 秒まで待つ
+   - 続いて `0` が出ればよい（このユーザーのヘッドレスのセッションだけを数える。[手順 2](#実施手順) の補足）
+   - `for` の行で、セッションが終わるまで、30 秒まで待つ
 
 ---
 
@@ -386,14 +370,14 @@
 - **方式**: GDM のヘッドレスのセッション（`gnome-headless-session@<USER>.service`）と、そのセッションの gnome-remote-desktop（`grdctl --headless`、`gnome-remote-desktop-headless.service`）。RHEL 10 の文書の「1.4 headless server for a single user」と同じ
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）**
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末、ブラケットペースト無し）にそのまま貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
-    - 実施手順 1〜10 → 手順 11（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意) → [ロールバック](#ロールバック)の手順 2〜6
-    - `grep headless` を直した後の版で、実施手順 1〜3 → ロールバックの手順 5・6 → 実施手順 1〜3 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
+    - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意) → [ロールバック](#ロールバック)の手順 2〜5
+    - `grep headless` を直した後の版で、実施手順 1・2 → ロールバックの手順 5 → 実施手順 1・2 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
   - 確認したこと
     - リモートログイン（3389）が有効な PC で、`RDP_PORT` が 3390 になり、このセッションの RDP が 3390/tcp で待ち受ける
     - FreeRDP 3.10.3 で、証明書の Thumbprint が `TLS fingerprint` と一致し、正しいパスワードでつながり、違うパスワードで断られる
     - クライアントには、このセッションのデスクトップが、クライアントの大きさ（1600x900）で出る。クライアントからのクリックとキーで、アクティビティ画面から電卓が起動した
     - 切ってつなぎ直すと、同じデスクトップ（電卓が開いたまま）に戻る
-    - 手順 8 の前は、別の network namespace からの接続が `No route to host` で断られ、後はつながる。LAN に絞ると、`LAN_SUBNET` の外からは断られる
+    - 手順 7 の前は、別の network namespace からの接続が `No route to host` で断られ、後はつながる。LAN に絞ると、`LAN_SUBNET` の外からは断られる
     - ロールバックの後、firewalld・dconf・ホームは実施前と同じになる
     - SELinux が Enforcing のまま、AVC は出なかった
   - 確認していないこと
@@ -403,6 +387,7 @@
     - 同じユーザーのローカルのログインとの重なり、後からリモートログインを有効にしたとき
   - 2026-10-02: リモートログインのログイン画面から同じユーザーで入ると、このセッションに引き渡された（Windows 11 の「リモートデスクトップ接続」で。[gnome-remote-desktop.md の付録](gnome-remote-desktop.md#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
     - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](#注意点)）
+  - 2026-10-02: もとの手順 2・3 と、[ロールバック](#ロールバック)のもとの手順 5・6 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 値 |
 |---|---|
@@ -487,7 +472,7 @@ $ sudo firewall-cmd --list-ports
 - **セッションを止めると、ユーザーの D-Bus が起動し直される**: GNOME のセッションが終わると、`gnome-session-restart-dbus.service` がユーザーのセッションバスを起動し直す
 - **ログインのキーリングは開いていない**: パスワード無しで作るセッションなので、キーリング（`login`）はロックされたまま。パスワードを読もうとするアプリは、キーリングを開く窓を出す
 - **サスペンドとロック**: ヘッドレスのセッションでも gsd-power は動き、既定では 15 分の無操作で PC をサスペンドしようとする。前提の [gnome-power.md 手順 1・2](gnome-power.md#実施手順) で止める
-  - seat0 には GDM のログイン画面が残り、Workstation で入れた PC ではそれも 15 分で PC を眠らせる（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）。サスペンドできる PC では、同書の手順 3〜5 も行う（この Pi はサスペンドできないので、確かめていない）
+  - seat0 には GDM のログイン画面が残り、Workstation で入れた PC ではそれも 15 分で PC を眠らせる（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）。サスペンドできる PC では、同書の手順 3・4 も行う（この Pi はサスペンドできないので、確かめていない）
 - **リモートログインを有効にしている PC**: セッションの中で `gnome-remote-desktop-handover.service` も起動する（リモートログインの受け渡し役。TCP では待ち受けない）
   - リモートログインのデーモン（`gnome-remote-desktop.service`）を起動し直したら、この受け渡し役のデーモンも再起動する（[gnome-remote-desktop.md の「設定済みのサーバーで GDM の後に起動させる」](gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、リモートログインからこのセッションへ渡せなくなるはず
 - **自己署名証明書**: クライアントは初回に証明書の確認を出す。証明書を作り直したら、クライアントで保存済みの証明書を消すか、変更の警告を承認する（gnome-remote-desktop.md の注意点と同じ）
@@ -509,29 +494,29 @@ $ sudo firewall-cmd --list-ports
 - 同じ Pi に試験用のユーザーを作り、そのユーザーにもヘッドレスのセッションを起動した。そのセッションには、[claude-code-gui.md](claude-code-gui.md) と同じドロップインで 1600x900 の仮想モニターを付けた
 - root の podman で、AlmaLinux 10 に `freerdp` を入れたコンテナを作り、そのセッションの Xwayland（`DISPLAY`・`XAUTHORITY`）に `xfreerdp /v:192.168.1.10:3390 /u:<RDP のユーザー名> /f` を描かせた（ネットワークは `--network host`）
 - クライアントの画面は、試験用のユーザーのセッションで `scripts/gnome-gui.py shot` で撮り、入力も同じスクリプトで送った（クライアントの FreeRDP の窓へ）
-- ファイアウォールの確かめには、veth でつないだ network namespace（`192.168.252.0/24` と `192.168.253.0/24`。[samba.md の付録](samba.md#network-namespace-から-firewalld-越しに到達する)と同じ手法）から、手順 10 のプローブを 192.168.1.10:3390 へ当てた
+- ファイアウォールの確かめには、veth でつないだ network namespace（`192.168.252.0/24` と `192.168.253.0/24`。[samba.md の付録](samba.md#network-namespace-から-firewalld-越しに到達する)と同じ手法）から、手順 9 のプローブを 192.168.1.10:3390 へ当てた
 - 確かめた後に、試験用のユーザー（`userdel -r`）・コンテナとイメージ・network namespace を消した
 
-**流し方**: この文書のブロックを Python のスクリプトで抜き出し、擬似端末で動かした `bash -i` に書き込んだ（ブラケットペースト無し。手順 6 と FreeRDP の問い合わせには、問い合わせが出てから答えた）。
+**流し方**: この文書のブロックを Python のスクリプトで抜き出し、擬似端末で動かした `bash -i` に書き込んだ（ブラケットペースト無し。手順 5 と FreeRDP の問い合わせには、問い合わせが出てから答えた）。
 
 | 手順 | 結果 |
 |---|---|
 | 1 | `RDP_PORT = 3390`（リモートログインのデーモンが enabled） |
-| 2・3 | `Created symlink …`。`<SESSION_ID> <UID> <USER> - <PID> user headless no -` と `<PID> /usr/bin/gnome-shell` |
-| 4 | `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）。最初は、検証の仕掛けのシェルの `umask 077` を引き継いで `rdp-tls.crt` も 0600 になったので、`umask 022` のシェルで貼り直した |
-| 5 | `BIO_new failed for certificate`・`RDP server certificate is invalid.` が 1 回ずつと、TPM のメッセージが 4 回。貼り直したときは TPM のメッセージだけ |
-| 6 | `Username:` と `Password:` を聞かれた |
-| 7 | `enabled` |
-| 8 の前 | network namespace から `No route to host`（`ss` では `*:3390` で待ち受けていた） |
-| 8 | `success` が 2 行、`22/tcp 445/tcp 3390/tcp 51820/udp`。network namespace からつながった |
-| 9・10 | [完了時点の状態](#完了時点の状態)のとおり。プローブは `selectedProtocol=0x2`・`TLSv1.3`・`fingerprint:` が `TLS fingerprint` と一致 |
-| 11 | 下の「クライアントからの接続」 |
+| 2 | `Created symlink …`。`<SESSION_ID> <UID> <USER> - <PID> user headless no -` と `<PID> /usr/bin/gnome-shell` |
+| 3 | `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）。最初は、検証の仕掛けのシェルの `umask 077` を引き継いで `rdp-tls.crt` も 0600 になったので、`umask 022` のシェルで貼り直した |
+| 4 | `BIO_new failed for certificate`・`RDP server certificate is invalid.` が 1 回ずつと、TPM のメッセージが 4 回。貼り直したときは TPM のメッセージだけ |
+| 5 | `Username:` と `Password:` を聞かれた |
+| 6 | `enabled` |
+| 7 の前 | network namespace から `No route to host`（`ss` では `*:3390` で待ち受けていた） |
+| 7 | `success` が 2 行、`22/tcp 445/tcp 3390/tcp 51820/udp`。network namespace からつながった |
+| 8・9 | [完了時点の状態](#完了時点の状態)のとおり。プローブは `selectedProtocol=0x2`・`TLSv1.3`・`fingerprint:` が `TLS fingerprint` と一致 |
+| 10 | 下の「クライアントからの接続」 |
 | LAN に絞る | `success` が 3 行、rich rule に `192.168.252.0/24` と `3390`。`192.168.252.2` からはつながり、`192.168.253.2` からは `No route to host` |
-| ロールバック 2〜6 | `success` が 2 行（rich rule が消えた）、`disabled`、`Removed …`。firewalld の `--list-all` は runtime・permanent とも実施前と同じ。dconf の `/org/gnome/desktop/remote-desktop/` は空 |
+| ロールバック 2〜5 | `success` が 2 行（rich rule が消えた）、`disabled`、`Removed …`。firewalld の `--list-all` は runtime・permanent とも実施前と同じ。dconf の `/org/gnome/desktop/remote-desktop/` は空 |
 
-**クライアントからの接続**（手順 11）:
+**クライアントからの接続**（手順 10）:
 
-- FreeRDP は、証明書の `Subject`・`Issuer`・`Thumbprint` を出して `Do you trust the above certificate? (Y/T/N)` と聞いた。`Thumbprint` は手順 9 の `TLS fingerprint` と同じだった
+- FreeRDP は、証明書の `Subject`・`Issuer`・`Thumbprint` を出して `Do you trust the above certificate? (Y/T/N)` と聞いた。`Thumbprint` は手順 8 の `TLS fingerprint` と同じだった
   - 新しいコンテナ（保存済みの証明書が無い）でも、`The host key for 192.168.1.10:3390 has changed` の警告を出した（理由は確かめていない）
 - 続けて `Domain:`（空のまま Enter）と `Password:` を聞いた。正しいパスワードで、サーバーのジャーナルに `Added virtual monitor Meta-0` が出た
 - クライアントの画面と、サーバー側で撮ったこのセッションの画面は、ほぼ同じだった（縮めて比べた画素の差の平均が 0.39/255）
@@ -541,7 +526,7 @@ $ sudo firewall-cmd --list-ports
 
 **手順書を直したこと**:
 
-- 手順 3 とロールバックの手順 6 は、最初は `grep headless` で数えていた。試験用のユーザーのヘッドレスのセッションも数えられ、ロールバックの手順 6 が `1` を出した（30 秒待った後）。このユーザーの行だけを数える `awk` にして、ほかのユーザーのセッションがある状態で通し直した
+- 手順 2 とロールバックの手順 5 の確かめの行（もとの手順 3 とロールバックの手順 6）は、最初は `grep headless` で数えていた。試験用のユーザーのヘッドレスのセッションも数えられ、ロールバックの手順 5 の確かめの行が `1` を出した（30 秒待った後）。このユーザーの行だけを数える `awk` にして、ほかのユーザーのセッションがある状態で通し直した
 
 **分ける前の版の検証で見つけたこと**（[claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）:
 

@@ -3,10 +3,10 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 8 の API ソケットまで）を通してあること。`command -v brew podman` が 2 行を返し、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
+> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）を通してあること。`command -v brew podman` が 2 行を返し、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、イメージも自分のユーザーの podman に作るため）
-> - **手順 3・4 には対話入力がある**（手順 3 は `sudo` のパスワード、手順 4 はトランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
-> - **手順 11 で dive の画面（TUI）が開く**。`q` で終了する
+> - **手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
+> - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -52,10 +52,11 @@
    - `Haskell Dockerfile Linter 2.15.1` と `dive 0.13.1` が出る
    - どちらも `/home/linuxbrew/.linuxbrew/bin/` の下にある
 
-1. Trivy の公式 dnf リポジトリを登録する。
+1. Trivy の公式 dnf リポジトリを登録し、ファイルと版を確かめてから Trivy を入れる。
 
    ```bash
-   sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
+   {
+     sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
    [trivy]
    name=Trivy repository
    baseurl=https://aquasecurity.github.io/trivy-repo/rpm/releases/$basearch/
@@ -63,20 +64,14 @@
    enabled=1
    gpgkey=https://aquasecurity.github.io/trivy-repo/rpm/public.key
    EOF
+     cat /etc/yum.repos.d/trivy.repo
+     dnf -q list --showduplicates trivy
+     sudo dnf install trivy
+   }
    ```
 
    - 中身は Trivy の公式の導入手順（RHEL/CentOS）と同じ
    - `<<'EOF'` と引用符を付けているので、`$basearch` はそのままファイルに書かれ、dnf が `x86_64` / `aarch64` に置き換える
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 登録したファイルと入手できる版を確かめてから、Trivy を入れる。
-
-   ```bash
-   cat /etc/yum.repos.d/trivy.repo
-   dnf -q list --showduplicates trivy
-   sudo dnf install trivy
-   ```
-
    - ファイルに `gpgcheck=1` があることを確かめる
    - 版は `trivy.x86_64  0.74.0-1  trivy` のように出る
    - 初回は署名鍵の取り込みを 1 回聞かれる
@@ -145,7 +140,7 @@
    | DL3040 | `microdnf` / `dnf` の後に `dnf clean all` が無い。キャッシュが層に残って大きくなる |
    | DL3041 | パッケージの版を固定していない |
 
-   - `latest` のタグを書くと、DL3007（`Using latest is prone to errors ...`）が出る（手順 7 でタグを `10.1` にした理由）
+   - `latest` のタグを書くと、DL3007（`Using latest is prone to errors ...`）が出る（手順 6 でタグを `10.1` にした理由）
    - 特定の規則を外すなら `--ignore DL3041`、いつも外すなら `~/.config/hadolint.yaml` に書く（hadolint の README）
 
    </details>
@@ -184,7 +179,7 @@
 
    - `Image Source: podman://localhost/image-check:1` が出れば、podman のイメージを直接読めている
    - `efficiency: 85.4470 %` と `wastedBytes: 58951134 bytes (59 MB)` が出る
-   - **既定の基準では `Result:FAIL` と `rc=1` になる**。無駄の元はベースイメージの層で、手順 7 の `COPY` の層ではない（この手順の補足）
+   - **既定の基準では `Result:FAIL` と `rc=1` になる**。無駄の元はベースイメージの層で、手順 6 の `COPY` の層ではない（この手順の補足）
 
    <details>
    <summary>補足: FAIL の理由と、判定の基準</summary>
@@ -224,7 +219,7 @@
 
    データベースは `mirror.gcr.io/aquasec/trivy-db:2` から落ち、`~/.cache/trivy` に置かれる（展開後 1.4 GB）。
 
-   `--image-src podman` の Trivy は、[podman.md 手順 8](podman.md#実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
+   `--image-src podman` の Trivy は、[podman.md 手順 7](podman.md#実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
 
    ```
    FATAL	Fatal error	run error: image scan error: ... unable to find the specified image "localhost/image-check:1" in ["podman"]: 1 error occurred:
@@ -243,7 +238,7 @@
    ```
 
    - 左に `Layers`（層の一覧）と `Image Details`、右に `Current Layer Contents`（その層のファイルの木）が出る
-   - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 9 と同じ値
+   - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 8 と同じ値
    - いちばん下の行に、キーの案内（`Quit`・`Tab Switch view`・`^F Filter` など）が出る
    - `q` で終了する
    - **後ろの節の手順は、`q` で終了してから貼る**（続けて貼ると dive への操作として食われる）
@@ -327,21 +322,16 @@
    - `[y/N]` で聞かれる
    - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
 
-1. Trivy のリポジトリの登録と、取り込んだ鍵を消す。
+1. Trivy のリポジトリの登録と、取り込んだ鍵を消して、消えたか確かめる。
 
    ```bash
-   sudo rm /etc/yum.repos.d/trivy.repo && sudo rpm -e gpg-pubkey-4fd9ca9f-69e0b811
+   {
+     sudo rm /etc/yum.repos.d/trivy.repo && sudo rpm -e gpg-pubkey-4fd9ca9f-69e0b811
+     rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n'
+   }
    ```
 
-   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](#実施手順)の手順 4 で取り込まれた鍵の名前（検証で確かめた値）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 鍵が消えたか確かめる。
-
-   ```bash
-   rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n'
-   ```
-
+   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](#実施手順)の手順 3 で取り込まれた鍵の名前（検証で確かめた値）
    - 一覧から `trivy-repo <oss@aquasec.com>` の行が消えていればよい
 
 ---
@@ -356,13 +346,14 @@
   - Trivy: 脆弱性と設定の問題
 - **進め方**: hadolint と dive は Homebrew、Trivy は公式の dnf リポジトリから入れる（[選択した方針](#選択した方針)）。確認用のイメージを 1 つ作って、3 つを当てる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
-  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と [Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜11、[更新](#更新)、[ロールバック](#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と [Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
     - Trivy が API ソケット経由でイメージを読み、データベースを取得して結果の表を出す
   - **確認していないこと**: dive の画面の見た目と操作（表示された文字を読み取っただけ）、脆弱性が見つかるイメージでの Trivy の出力
   - aarch64（Raspberry Pi 5）では通していない
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -404,7 +395,7 @@
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 2・5・7〜10）:
+**検証コンテナでの出力**（手順 2・4・6〜9）:
 
 ```
 $ hadolint --version
@@ -438,7 +429,7 @@ Report Summary
 └───────────────────────────────────────┴────────┴─────────────────┴─────────┘
 ```
 
-手順 11 の dive の画面の `Image Details` には、次が出た。
+手順 10 の dive の画面の `Image Details` には、次が出た。
 
 - `Image name: localhost/image-check:1`
 - `Total Image size: 275 MB`
@@ -447,10 +438,10 @@ Report Summary
 
 ### 注意点
 
-- **dive の `--ci` の既定の基準は厳しい**: ベースイメージの層の無駄も数えるので、よく使われるイメージを元にしただけで `FAIL` になる（手順 9 の補足）。CI で使うなら、基準を自分で決めて `.dive-ci` に書く
+- **dive の `--ci` の既定の基準は厳しい**: ベースイメージの層の無駄も数えるので、よく使われるイメージを元にしただけで `FAIL` になる（手順 8 の補足）。CI で使うなら、基準を自分で決めて `.dive-ci` に書く
 - **Trivy の結果は日によって変わる**: データベースは新しい脆弱性が見つかるたびに更新される。同じイメージでも、後日の結果は変わりうる
 - **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](#ロールバック)の手順 2 で消す
-- **Trivy の `--image-src podman` は API ソケットが要る**: [podman.md 手順 8](podman.md#実施手順) のソケットが止まっていると、手順 10 の補足のエラーになる
+- **Trivy の `--image-src podman` は API ソケットが要る**: [podman.md 手順 7](podman.md#実施手順) のソケットが止まっていると、手順 9 の補足のエラーになる
 - **hadolint と Trivy の設定の検査は、見るところが違う**: 確認用の Containerfile は hadolint では指摘が無く、`trivy config` では `USER` と `HEALTHCHECK` が無いことを指摘された（[使い方の基本](#使い方の基本)）
 - **Homebrew の 2 つは、そのままでは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、`/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
 
@@ -469,24 +460,24 @@ Report Summary
 **環境**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じ作りの使い捨てのコンテナ。実機で加えた変更は無い。
 
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・6〜8 と [homebrew.md](homebrew.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](homebrew.md) の手順 1〜4 を流した
 
 **手順書の外で行った準備**: podman.md の付録の準備と同じ。Homebrew のインストーラは、`NONINTERACTIVE=1` を付けずに流し、`Press RETURN/ENTER to continue` に pty 越しに Enter を送った。
 
-**流し方**: podman.md の付録と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]` には `y` と答えた。手順 11 は、160 桁 × 50 行の pty（`TERM=xterm-256color`）で 15 秒待って画面の文字を読み取り、`q` を送った。
+**流し方**: podman.md の付録と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]` には `y` と答えた。手順 10 は、160 桁 × 50 行の pty（`TERM=xterm-256color`）で 15 秒待って画面の文字を読み取り、`q` を送った。
 
 | 手順 | 結果 |
 |---|---|
 | 1〜2. hadolint・dive | どちらもボトル（hadolint は依存の `gmp`・`zlib-ng-compat`・`libffi`・`xz` も）。`Haskell Dockerfile Linter 2.15.1`、`dive 0.13.1`、どちらも `/home/linuxbrew/.linuxbrew/bin/` |
-| 3〜5. Trivy | repo ファイルを作成。`trivy.x86_64  0.74.0-1  trivy`。`[y/N]` と鍵（`0x4FD9CA9F`、fingerprint は本文のとおり）に `y`。1 パッケージ（48 MB、展開後 161 MB）。`Version: 0.74.0`、`/usr/bin/trivy`、`trivy-0.74.0-1.x86_64` |
-| 6. 欠陥の検出 | `DL3006`・`DL3040`・`DL3041` の 3 つと `rc=1` |
-| 7. Containerfile | 無出力で `rc=0` |
-| 8. ビルド | `ubi10/httpd-24:10.1` を取得し、`Successfully tagged localhost/image-check:1`（283 MB） |
-| 9. dive の判定 | `efficiency: 85.4470 %`、`Result:FAIL`、`rc=1`（手順 9 の補足） |
-| 10. Trivy | データベース（`mirror.gcr.io/aquasec/trivy-db:2`）を取得し、`redhat 10.1` と判定、`Vulnerabilities` は `0` |
-| 11. dive の画面 | `Layers`・`Current Layer Contents`・`Image Details` の枠と、手順 9 と同じ値。`q` で終了した |
+| 3〜4. Trivy | repo ファイルを作成。`trivy.x86_64  0.74.0-1  trivy`。`[y/N]` と鍵（`0x4FD9CA9F`、fingerprint は本文のとおり）に `y`。1 パッケージ（48 MB、展開後 161 MB）。`Version: 0.74.0`、`/usr/bin/trivy`、`trivy-0.74.0-1.x86_64` |
+| 5. 欠陥の検出 | `DL3006`・`DL3040`・`DL3041` の 3 つと `rc=1` |
+| 6. Containerfile | 無出力で `rc=0` |
+| 7. ビルド | `ubi10/httpd-24:10.1` を取得し、`Successfully tagged localhost/image-check:1`（283 MB） |
+| 8. dive の判定 | `efficiency: 85.4470 %`、`Result:FAIL`、`rc=1`（手順 8 の補足） |
+| 9. Trivy | データベース（`mirror.gcr.io/aquasec/trivy-db:2`）を取得し、`redhat 10.1` と判定、`Vulnerabilities` は `0` |
+| 10. dive の画面 | `Layers`・`Current Layer Contents`・`Image Details` の枠と、手順 8 と同じ値。`q` で終了した |
 | 更新 | `brew upgrade hadolint dive` は `Warning: hadolint 2.15.1 already installed` など。`sudo dnf upgrade trivy` は `Nothing to do.` |
-| ロールバック | イメージ 2 つを消し、`brew uninstall` で 2 つと依存の 4 つ（`==> Autoremoving 4 unneeded formulae:`）、`dnf remove` で Trivy、手順 5 で repo ファイルと鍵を消した。手順 6 の一覧は AlmaLinux の鍵 1 つだけ |
+| ロールバック | イメージ 2 つを消し、`brew uninstall` で 2 つと依存の 4 つ（`==> Autoremoving 4 unneeded formulae:`）、`dnf remove` で Trivy、手順 5 で repo ファイルと鍵を消した。手順 5 の確かめの行（もとの手順 6）の一覧は AlmaLinux の鍵 1 つだけ |
 
 **最初の試行で見つけて直したこと**: [ロールバック](#ロールバック)の手順 5 は、はじめ `sudo rm`・`sudo rpm -e`・`rpm -q` の 3 行だった。
 
@@ -498,8 +489,8 @@ Report Summary
 
 - `latest` のタグで DL3007、`--ignore DL3041` で DL3041 が消えること
 - 層が 1 つの `quay.io/almalinuxorg/10-minimal:10.2` を元にしたイメージでは、`dive --ci` が `efficiency: 100.0000 %` で `Result:PASS`
-- EPEL を有効にした状態の `dnf -q list --showduplicates trivy`（手順 4 の補足）
-- API ソケットを止めた状態の `trivy image --image-src podman`（手順 10 の補足）
+- EPEL を有効にした状態の `dnf -q list --showduplicates trivy`（手順 3 の補足）
+- API ソケットを止めた状態の `trivy image --image-src podman`（手順 9 の補足）
 - `trivy image` でレジストリのイメージを直接調べること、`trivy config`（[使い方の基本](#使い方の基本)）
 - 鍵の自己署名のハッシュ（`gpg --list-packets` の `digest algo 8`）
 
