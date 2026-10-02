@@ -83,7 +83,7 @@
 
    `rpm -q --requires distrobox` の中身は `(podman or /usr/bin/docker)` と `hicolor-icon-theme` など。
 
-   - podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](podman.md#ロールバック)の手順 7 に当たる）
+   - podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](podman.md#ロールバック)の手順 6 に当たる）
    - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり
 
    </details>
@@ -412,7 +412,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 - **書き出したスクリプトの名前が、ホストのコマンドと重なることがある**: `~/.local/bin` は PATH の途中にある
   - 同じ名前のコマンドがほかの場所にもあると、どちらが呼ばれるかは PATH の順で決まる
   - Homebrew の `brew shellenv` は、自分の場所を PATH の先頭に足す
-- **`podman system reset` でボックスも消える**: ボックスは podman のコンテナなので、[podman.md のロールバック](podman.md#ロールバック)の手順 6 で一緒に消える
+- **`podman system reset` でボックスも消える**: ボックスは podman のコンテナなので、[podman.md のロールバック](podman.md#ロールバック)の手順 5 で一緒に消える
 - **ボックスは、止まっていても容量を使う**: Ubuntu のイメージと、ボックスの中に入れたパッケージの分（ffmpeg で 238 MB）。`podman system df` で見る
 
 ### 参照

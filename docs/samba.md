@@ -58,7 +58,7 @@
 1. 既定の smb.conf を退避して最小構成に置き換え、構文を検査する。
 
    ```bash
-   {
+   if [ -z "${WORKGROUP}" ]; then echo '中断: 手順 1 の WORKGROUP が空のまま。値を入れて貼り直す' >&2; else
      sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
      sudo tee /etc/samba/smb.conf >/dev/null <<EOF
    [global]
@@ -80,10 +80,11 @@
        create mask = 0644
    EOF
      testparm -s
-   }
+   fi
    ```
 
    - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出て、`[global]` に `smb3 directory leases = No` があればよい
+   - `中断:` と出たら、何も書いていない
 
    <details>
    <summary>補足: smb.conf</summary>
@@ -611,9 +612,12 @@
   - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)を足した
     - 足す前は、サーバーで直接作ったファイルが、利用者の Windows のエクスプローラーに F5 でも出なかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - 実機では、その節の手順 1・2 を本実行した。その後は、サーバーで作ったもの・消したもの・サブフォルダーの中に作ったものが、エクスプローラーに自動で出た（利用者が確かめた）
-    - 手順 3 の今のブロックと、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
+    - 手順 3 のブロック（2026-10-02 に `if` を足す前の形）と、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
     - 確認していないこと: 手順 1〜14 の通し、その節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
     - 実機の smb.conf は、2026-09-28 より前の手順 3（字下げが TAB）に `[root]` を足したもの。`[root]` は `browseable = Yes` で、この文書と違う（今回は変えていない）
+  - 2026-10-02: 手順 3 の `{ … }` を、`WORKGROUP` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
+    - それまでは、ヒアドキュメントの中の `${WORKGROUP:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、`cp -an` は動き、smb.conf は書き換わらずに、`testparm -s` が元の smb.conf を検査した
+    - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`testparm` はスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
 
 | 項目 | 値 |
 |---|---|

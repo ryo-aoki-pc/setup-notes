@@ -37,7 +37,7 @@
 1. リポジトリを追加する。
 
    ```bash
-   {
+   if [ -z "${CC_CHANNEL}" ]; then echo '中断: 手順 1 の CC_CHANNEL が空のまま。値を入れて貼り直す' >&2; else
      sudo tee /etc/yum.repos.d/claude-code.repo >/dev/null <<EOF
    [claude-code]
    name=Claude Code
@@ -47,10 +47,11 @@
    gpgkey=https://downloads.claude.ai/keys/claude-code.asc
    EOF
      cat /etc/yum.repos.d/claude-code.repo
-   }
+   fi
    ```
 
    - `baseurl` の末尾が手順 1 で選んだチャンネル（既定なら `latest`）になっていることを確認する
+   - `中断:` と出たら、何も書いていない
 
    <details>
    <summary>補足: チャンネルは baseurl で決まる</summary>
@@ -423,6 +424,9 @@
     - ログインの要るもの（`-p`・`-c`・`-r`・`-n`・`--model`・`--permission-mode`・`--add-dir`・`--allowedTools`・`--max-turns`・`--output-format json`）は、クラウドのホスト（Ubuntu 24.04）にあったログイン済みの Claude Code 2.1.287 で確かめた
     - ログインの要らないもの（`doctor`・`auth status`・`mcp`・`update`、ログインしていないときの `-p` と `remote-control`）は、x86_64 の AlmaLinux 10 のコンテナに手順 2〜4 で入れた `claude-code-2.1.287-1` で確かめた
     - **確認していないこと**: セッションの中の操作（キーとスラッシュコマンド）、`-r` の一覧から選ぶ画面、`claude auth login` / `logout`、`claude remote-control` の接続
+  - 2026-10-02: 手順 2 の `{ … }` を、`CC_CHANNEL` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
+    - それまでは、ヒアドキュメントの中の `${CC_CHANNEL:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、repo ファイルは書かれずに、後ろの `cat` が `No such file or directory` を出した
+    - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
 
 | 項目 | 実機 | 検証コンテナ（`stable`） | 検証コンテナ（`latest`） |
 |---|---|---|---|

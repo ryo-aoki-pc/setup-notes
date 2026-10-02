@@ -145,6 +145,7 @@
    - 文字列の値は引用符（`'`）で囲む。囲まないと、`dconf update` が失敗する
    - `dconf update` は、成功すると何も出さない。`invalid value` と出たら、この手順を貼り直す
    - `power-button-action 'interactive'`・`sleep-inactive-ac-type 'nothing'`・`sleep-inactive-battery-type 'nothing'` の 3 行が出ればよい
+   - `中断:` と出たら、何も書いていない
 
    <details>
    <summary>補足: ログイン画面の設定の置き場所と、gdm ユーザーで読む理由</summary>
