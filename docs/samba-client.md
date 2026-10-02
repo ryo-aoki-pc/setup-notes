@@ -576,7 +576,7 @@ VM で、手順 1 の前に確かめた状態:
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
   - VM では、dontaudit の規則を外して（`semodule -DB`）自動マウントと手でのマウントをしても、AVC は出なかった
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md 手順 12](samba.md#実施手順) の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](samba.md#サーバーの上で動作を確かめる)の手順 4 の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。VM では、ほかのユーザーは `Permission denied`、root は読めた
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる（VM で確認）
   - `vers=` は書かない。既定でサーバーの最も新しい版を使い、samba.md のサーバーとは SMB 3.1.1 になった
