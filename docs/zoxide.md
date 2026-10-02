@@ -437,7 +437,7 @@ $ grep -n includepkgs /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:kray74:cl
 
 - **初期化の 1 行が本体**: `brew install` や `dnf install` だけでは `z` は増えない。`~/.bashrc` に `eval "$(zoxide init bash)"` を書き、シェルを開き直す
 - **`--cmd cd` は影響範囲が広い**: `cd` を置き換えると、シェル関数やエイリアス経由の `cd` の挙動も変わる。既定の `z` から始めるのが無難
-- **root のシェルでは効かない**: 手順 6 の初期化の行は自分の `~/.bashrc` だけにあり、root のシェルでは実行されない（root の `.bashrc` には書かない）。Homebrew の zoxide は `sudo` 経由では見えない（[homebrew.md の注意点](homebrew.md#注意点)。homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節は、PATH を足すだけ）。dnf で入れた zoxide は `/usr/bin` にある
+- **root のシェルでは効かない**: 手順 6 の初期化の行は自分の `~/.bashrc` だけにあり、root のシェルでは実行されない（root の `.bashrc` には書かない）。Homebrew の zoxide は、そのままでは `sudo` 経由では見えない（[homebrew.md の注意点](homebrew.md#注意点)。homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)・[sudo でも使う](homebrew.md#sudo-でも使う任意)の節は、PATH を足すだけ）。dnf で入れた zoxide は `/usr/bin` にある
 - **Homebrew と dnf の両方には入れない**: 両方あると、PATH で先に来る Homebrew の方が使われる。入れ替えるときは先に消す（[実施手順](#実施手順)のリード）
 - **`includepkgs` を外さない**: 外すと、同じ COPR の chezmoi などが、EPEL の同じ名前のパッケージを `dnf upgrade` で置き換える（[手順 4 の補足](#実施手順)）
 - **学習はプロンプトを出すたびに走る**: `PROMPT_COMMAND` にフックが入り、そのときの今のディレクトリを記録する。プロンプトを自前で組んでいる場合は順序に注意する

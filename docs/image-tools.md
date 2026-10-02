@@ -116,7 +116,7 @@
    ```
 
    - 1 行目が `Version: 0.74.0` で、`/usr/bin/trivy` と `trivy-0.74.0-1.x86_64` が出る
-   - RPM なので、Homebrew の 2 つと違い root の PATH にも入っている
+   - RPM なので、Homebrew の 2 つと違い、何も足さずに root の PATH にも入っている
 
 1. わざと欠陥のある Containerfile を hadolint に渡し、指摘が出ることを確かめる。
 
@@ -400,7 +400,7 @@
 | syft / grype（SBOM と脆弱性） | 対象外 | Trivy と役割が重なる |
 
 - 3 つの経路が混ざるので、更新も `brew upgrade` と `sudo dnf upgrade` の 2 つになる（[更新](#更新)）
-- Trivy だけ RPM なので、`sudo trivy` がそのまま動く。hadolint と dive は Homebrew なので、root で使うならフルパスで呼ぶ
+- Trivy だけ RPM なので、`sudo trivy` がそのまま動く。hadolint と dive は Homebrew なので、root で使うなら [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、フルパスで呼ぶ
 
 ### 完了時点の状態
 
@@ -452,7 +452,7 @@ Report Summary
 - **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](#ロールバック)の手順 2 で消す
 - **Trivy の `--image-src podman` は API ソケットが要る**: [podman.md 手順 8](podman.md#実施手順) のソケットが止まっていると、手順 10 の補足のエラーになる
 - **hadolint と Trivy の設定の検査は、見るところが違う**: 確認用の Containerfile は hadolint では指摘が無く、`trivy config` では `USER` と `HEALTHCHECK` が無いことを指摘された（[使い方の基本](#使い方の基本)）
-- **Homebrew の 2 つは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うなら `/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
+- **Homebrew の 2 つは、そのままでは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、`/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
 
 ### 参照
 

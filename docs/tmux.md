@@ -421,7 +421,7 @@
 
 - **Homebrew の 3.7c にした**（[導入元一覧](tool-catalog.md)の規則。RPM が Homebrew より古いので Homebrew）
   - BaseOS の RPM は 3.3a（中身は `next-3.4`）。`capture-pane -p` でサーバーが落ちるのを、実機（[podman-tui.md の付録](podman-tui.md#付録-コンテナでの検証記録2026-09-28)）とコンテナの両方で見た
-  - Homebrew で入れると `sudo tmux` では見えないが、tmux は自分のユーザーで使うものなので困らない
+  - Homebrew で入れると、そのままでは `sudo tmux` では見えないが、tmux は自分のユーザーで使うものなので困らない
 - **screen は使わない**: AlmaLinux 10 の BaseOS・AppStream に無い（コンテナの `dnf list --available screen` は `No matching Packages`）。EPEL は調べていない
 - **zellij は手順書にしない**: [導入元一覧](tool-catalog.md#cli-定番の置き換え)の 1 行のまま。Windows では zellij のペインで Claude Code が動かなかった（[Windows の手順書の選択した方針](windows-claude-remote-control.md#選択した方針)）。Linux では試していない
 - **Claude Code の Remote Control は、tmux の中のシェルから始める**: tmux に直接起動させると、終わったときに表示が残らない（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)の手順 4 の補足）
@@ -448,7 +448,7 @@ no server running on /tmp/tmux-<UID>/default
 
 ### 注意点
 
-- **Homebrew 系に共通の注意**（`sudo tmux` は見つからない、PATH の先頭が Homebrew）は [homebrew.md の注意点](homebrew.md#注意点)
+- **Homebrew 系に共通の注意**（`sudo tmux` はそのままでは見つからない、PATH の先頭が Homebrew）は [homebrew.md の注意点](homebrew.md#注意点)
 - **Claude Code の `Ctrl+B` は、tmux の中では 2 回押す**: Claude Code は `Ctrl+B` で動いているコマンドを裏へ回すが、tmux の中では 1 回目を tmux が取る（公式ドキュメント）。`Ctrl+b` → `Ctrl+b` で中のアプリに `Ctrl+b` が届くことは、tmux の側で確かめた（`bind-key -T prefix C-b send-prefix`）
 - **BaseOS の tmux と混ぜない**: 同じソケットを使うので、版の違うクライアントからはセッションにつなげない（[手順 2](#実施手順) の補足）
 - **ログアウトしてもセッションが残るのは、`KillUserProcesses=no` のとき**: AlmaLinux 10 の既定。`yes` にしたホストでは、ログアウトでセッションも止まるはず（確かめていない）

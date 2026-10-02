@@ -265,7 +265,7 @@ alias lt='eza --tree --level=2'
 - **アイコンには Nerd Font が要る**: `--icons=always` はグリフを出すだけなので、フォントが無い端末では豆腐になる
   - 実機には `font-symbols-only-nerd-font` が入っている（[yazi.md](yazi.md)）が、本書では見え方を確認していない
 - **`--git` は大きなリポジトリで遅くなる**: 毎回 git の状態を引くため。気になるなら `--no-git`、リポジトリの一覧だけなら `--git-repos-no-status`
-- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo eza` は使えない、など
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo eza` はそのままでは使えない、など
 
 ### 参照
 

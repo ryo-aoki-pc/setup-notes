@@ -388,7 +388,7 @@ $ wc -l ~/.config/starship.toml
   - `starship timings` で犯人を探し、要らないモジュールは `disabled = true` で切る
 - **記号には Nerd Font が要るものがある**: 既定のプロンプト記号 `❯` は普通のフォントでも出るが、プリセットによっては Nerd Font 前提
   - 無い端末では `plain-text-symbols` / `no-nerd-font` を当てる
-- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo starship` は使えない、など
+- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo starship` はそのままでは使えない、など
 - **root のシェルには効かない**: `sudo -i` した root は root の `~/.bashrc` を読むので、手順 4・5 の初期化の行が無い（homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節も、PATH を足すだけ）
 
 ### 参照

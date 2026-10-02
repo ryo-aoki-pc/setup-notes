@@ -469,8 +469,9 @@ s "ignore"
 
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 手順 2 の読み戻しで確かめる（手順 2 の補足）
 - **Homebrew の `gsettings` は GNOME に効かない**: dconf ではなくファイルに書き、読み戻しでは変わったように見える。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（手順 2 の補足）
-  - `sudo -u gdm … gsettings` の行（手順 4 と[ロールバック](#ロールバック)の手順 3）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、Homebrew は探さない
+  - `sudo -u gdm … gsettings` の行（手順 4 と[ロールバック](#ロールバック)の手順 3）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、RPM の `gsettings` が使われる
     - Raspberry Pi 5 で、`sudo -u gdm env sh -c 'command -v gsettings'` が `/bin/gsettings` を返した（手順 4 そのものは実機で流していない）
+    - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通しても、Homebrew は `secure_path` の末尾なので、`/bin/gsettings` が先に見つかる（同じ形のコマンドを、その節を通したコンテナで確かめた。[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
 - **dconf のファイルの型**: 文字列は `'nothing'` のように引用符で囲む。`idle-delay` のような uint32 は `uint32 0` と書く（手順 3 の補足）
   - 引用符が無いと `dconf update` が失敗し、データベースは前の内容のまま残る
   - `uint32` が無いと、エラーにならずに無視される
