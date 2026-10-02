@@ -136,7 +136,7 @@
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
   - 入れ方は [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)。`custom` ブランチを `~/.config/yazi` に clone する
   - 足したキーは [README の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi#独自キーバインド抜粋)、使う外部コマンドは[「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
-  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る。エディタの nvim は [neovim.md](neovim.md)、zoxide は [zoxide.md](zoxide.md) で入れる
+  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（fzf を bash のキー操作にも使うなら [fzf.md](fzf.md)）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [zoxide.md](zoxide.md) で入れる
   - この設定を入れるなら、この節の手順 1 は要らない（clone が `~/.config/yazi` を作る）
 
 1. 設定を書くときは、空のディレクトリを作って変更したい項目だけを書く。
