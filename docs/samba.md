@@ -3,13 +3,17 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべてサーバー上で実行する**。手順 15（クライアントからの接続）だけ別マシン
-> - **手順 6 と手順 9 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
+> - **すべてサーバー上で実行する**。手順 9（クライアントからの接続）だけ別マシン
+> - **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
 > - **手順を終えたサーバーでは、手順 3 を貼り直さない**（smb.conf が丸ごと置き換わり、`[root]` なども消える）。smb.conf に `smb3 directory leases` の行が無いサーバーには、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: root のホーム（`/root`）も公開するなら、[root のホームも公開する（任意）](#root-のホームも公開する任意)を行う。接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
+- 手順の後の節:
+  - root のホーム（`/root`）も公開するなら、[root のホームも公開する（任意）](#root-のホームも公開する任意)を行う
+  - サーバーの上で読み書きを確かめるとき（クライアントでつなげないときの切り分けにも）は、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)を行う
+  - 接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う
+  - 戻すときは[ロールバック](#ロールバック)
 
 1. 公開するユーザー自身のシェルで、変数を設定する（`sudo -i` した root のシェルでは貼らない）。
 
@@ -30,9 +34,9 @@
    <summary>補足: 変数について</summary>
 
    - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
-   - `SERVER_IP` が間違っていても、手順 11 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
+   - `SERVER_IP` が間違っていても、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 3 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
    - 公開するのは `${USER}`（このシェルのユーザー）のホーム。`sudo -i` した root のシェルでは `root` になり、手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
-   - root のシェルで進めると、root の Samba ユーザーができるうえ、`/root` のラベル（`admin_home_t`）は手順 4 の boolean の対象外なので、手順 11 の `ls` も通らない。root のホームは、自分のユーザーのまま入れる `[root]` 共有で足す（[root のホームも公開する（任意）](#root-のホームも公開する任意)）
+   - root のシェルで進めると、root の Samba ユーザーができるうえ、`/root` のラベル（`admin_home_t`）は手順 4 の boolean の対象外なので、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 3 の `ls` も通らない。root のホームは、自分のユーザーのまま入れる `[root]` 共有で足す（[root のホームも公開する（任意）](#root-のホームも公開する任意)）
    - `ALLOW_FROM` は[接続元を絞る](#接続元を絞る任意)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 
    </details>
@@ -50,7 +54,7 @@
    <summary>補足: パッケージ</summary>
 
    - `samba`（baseos）が smbd 本体。依存で `samba-common-tools`（`smbpasswd` / `pdbedit` / `testparm` / `smbstatus`）、`samba-libs`、`samba-dcerpc` などが入る
-   - `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は手順 11・12 の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
+   - `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
    - インストール直後は `smb.service` / `nmb.service` とも `disabled` / `inactive`
 
    </details>
@@ -96,7 +100,7 @@
    - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` や `read only = No` に対応する行が出なくても書き漏れではない。全パラメータを見るなら `testparm -sv`
    - `smb3 directory leases = no` は、クライアントにディレクトリのリース（一覧を手元にキャッシュしてよいという許可）を渡さない。Samba 4.22 からの既定（`auto`）では渡す
    - Samba は、自分を通さずにサーバーで変えたもの（サーバーのシェルや Syncthing など）では、このリースを破らない。既定のままだと、Windows のエクスプローラーは F5 を押しても古い一覧を出し続けた（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
-   - 手順 15 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
+   - 手順 9 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
 
    </details>
 
@@ -185,90 +189,6 @@
 
    </details>
 
-1. 資格情報ファイルを作るため、手順 6 で登録したパスワードを入力する。
-
-   ```bash
-   AUTHFILE=/run/user/$(id -u)/smb-auth
-   read -rsp "Samba password for ${USER}: " PW; echo
-   ```
-
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
-
-1. 資格情報ファイルを作る。
-
-   ```bash
-   ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
-   ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
-   ```
-
-   - このファイルを、`smbclient` と `mount.cifs` の両方で使う
-   - パスワードをコマンドラインに書かないのは、`ps` に見えるため
-
-   <details>
-   <summary>補足: 資格情報ファイル</summary>
-
-   - パスワードは `-U user%pass` で渡すと `ps` に見える
-   - `smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う
-   - `/run/user/<uid>/` は tmpfs でユーザー専用（0700）
-
-   </details>
-
-1. `smbclient` で、共有の一覧と読み書きを確かめる。
-
-   ```bash
-   smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
-   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
-   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
-   ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r-- / user_home_t
-   cmp /etc/hostname /tmp/smb-test.txt && echo "content identical"
-   smbclient "//${SERVER_IP}/${USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
-   ```
-
-   <details>
-   <summary>補足: 共有の一覧</summary>
-
-   - `smbclient -L` に出るのは `IPC$` と `<USER>` の 2 つ。`homes` / `printers` / `print$` は出ない
-
-   </details>
-
-1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
-
-   ```bash
-   {
-     sudo mkdir -p /mnt/smbtest
-     sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
-     mount | grep cifs                            # vers=3.1.1
-     echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
-     ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
-     sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
-   }
-   ```
-
-   - `smbstatus` はセッションが生きている間しか見えない
-   - **次の手順は、`smbstatus` の出力を確かめてから貼る**（手順 13 でアンマウントすると見えなくなる）
-
-   <details>
-   <summary>補足: マウントと smbstatus</summary>
-
-   - `mount.cifs` の既定は SMB 3.1.1（`vers=3.1.1`）。`uid=` / `gid=` を渡さないとマウント側のファイルが root 所有に見える
-   - マウント側の `ls -Z` は `cifs_t`、サーバー側は `user_home_t`（`user_home_dir_t` 配下の type transition。`restorecon` していないのにこうなる）
-   - `smbstatus` はサーバー側で「交渉されたプロトコル / 暗号化 / 署名」を表示する。クライアント側では見えにくい情報なので、暗号化の有無を確かめるならここ
-
-   </details>
-
-1. アンマウントして、マウントポイントを消す。
-
-   ```bash
-   sudo umount /mnt/smbtest && sudo rmdir /mnt/smbtest
-   ```
-
-1. 後片付けとして、検証で作ったファイルと資格情報ファイルを消し、AVC を確かめる。
-
-   ```bash
-   rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
-   sudo ausearch -m AVC -ts today               # <no matches>
-   ```
-
 1. 別のマシンから、クライアントで接続する（Windows のエクスプローラーのほかは未検証）。
 
    - `<SERVER_IP>` と `<USER>` は値に読み替える
@@ -278,6 +198,7 @@
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: AlmaLinux 10 の PC なら [samba-client.md](samba-client.md)（fstab の自動マウントと GNOME Files）。ほかは `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
    - WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み替える（クライアント側の `AllowedIPs` にトンネル網が入っていることが前提。[WireGuard の手順書](wireguard.md)）
+   - つなげないときは、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)で、サーバーの上から読み書きを確かめる
 
    <details>
    <summary>補足: クライアントからの接続</summary>
@@ -296,7 +217,7 @@
 - `\\<SERVER_IP>\root` で `/root` を読み書きできるようにする。つなぐのは手順 6 で登録した自分の Samba ユーザーのままで、root の Samba ユーザーは作らない
 - smbd は、この共有の中を root として読み書きする（`force user = root`）。作ったファイルは root の所有になる
 - 手順 1 の変数を設定した、公開したユーザー自身のシェルで貼る（`${USER}` を `valid users` に書く）
-- **この節の手順 3 には対話入力がある**（`smbclient` のパスワード）
+- `/root` の読み書きは、この節の手順 3 の後に、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 7・8 で確かめる
 - 補足: [root のホームを公開するときの補足](#root-のホームを公開するときの補足)
 
 > [!WARNING]
@@ -372,46 +293,18 @@
 
    </details>
 
-1. smb.service を再起動し、自分の Samba ユーザーで `/root` の一覧と書き込みを確かめる。
+1. smb.service を再起動する。
 
    ```bash
-   {
-     sudo systemctl restart smb.service
-     smbclient //localhost/root -U "${USER}" -c 'ls; put /etc/hostname smb-root-test.txt; ls smb-root-test.txt'
-   }
+   sudo systemctl restart smb.service
    ```
 
-   - パスワードは、手順 6 で登録した `<USER>` の Samba のパスワード
-   - `/root` の中身（`.bashrc` や `.ssh` など）の一覧に続いて、`putting file /etc/hostname as \smb-root-test.txt` と `smb-root-test.txt` の 1 行が出ればよい
    - 再起動すると、ほかのクライアントのつないでいる接続が切れる
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
-
-1. 作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
-
-   ```bash
-   {
-     sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
-     sudo rm /root/smb-root-test.txt
-     sudo ausearch -m AVC -ts recent              # <no matches>
-   }
-   ```
-
-   - ファイルは `root root` の所有で、ラベルは `admin_home_t`
-   - `ausearch` が `<no matches>` ならよい
-
-   <details>
-   <summary>補足: 作ったファイル</summary>
-
-   - SMB から `/root` に作ったものは、名前にかかわらず `admin_home_t` になる。VM では、SMB で作った `/root/.config` も `admin_home_t` だった（ローカルで作れば `config_home_t`）
-   - ほかのプログラムがラベルで困ったら、`sudo restorecon -Rv /root/.config` のように既定のラベルに戻す（VM では `config_home_t` に戻り、その後も SMB から読み書きできた）
-   - 既にラベルの付いたディレクトリの中に作ったものは、そのディレクトリのラベルになる（VM では、`/root/.ssh` に作ったファイルは `ssh_home_t`）
-   - `-ts recent` は直近 10 分。この節の手順 3 から時間がたったときは `-ts today` にする
-
-   </details>
+   - `/root` の一覧と書き込みは、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 7・8 で確かめる
 
 1. 別のマシンから、共有名 `root` でつなぐ（未検証）。
 
-   - 手順 15 の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
+   - [手順 9](#実施手順) の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`。`\\<SERVER_IP>\<USER>` と同じ資格情報なので、両方を同時に開けるはず（別のユーザー名で同じサーバーにつなぐと、Windows はエラー 1219 で断る）
    - AlmaLinux 10 の PC なら、[samba-client.md](samba-client.md) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
@@ -435,6 +328,135 @@
    - `sed` は、`[root]` の行から次の `[` で始まる行の手前までを消す。`[root]` の後ろに別の節を足していても、その節は残る
    - この節の手順 1 で足した先頭の空行は、ファイルの末尾に残る（`testparm` は気にしない）
    - 戻した後の `//<SERVER_IP>/root` は、`<USER>` では `tree connect failed: NT_STATUS_ACCESS_DENIED`（`[homes]` の `valid users = %S`）
+
+   </details>
+
+---
+
+## サーバーの上で動作を確かめる
+
+- [実施手順](#実施手順)で設定は終わっている。この節は、サーバーの上の `smbclient` と `mount.cifs` で読み書きを確かめる（クライアントでつなげないときの切り分けにも使う）
+- [手順 1](#実施手順) の変数を設定した、公開したユーザー自身のシェルで貼る。新しいシェルなら、手順 1 を貼り直してから貼る
+- **この節の手順 1 と手順 7 には対話入力がある**（パスワード）
+- この節の手順 7・8 は、[root のホームも公開した](#root-のホームも公開する任意)ときだけ行う
+- サーバー自身からの接続は firewalld を通らない（[手順 5](#実施手順) の補足）
+
+1. 資格情報ファイルを作るため、[手順 6](#実施手順) で登録したパスワードを入力する。
+
+   ```bash
+   AUTHFILE=/run/user/$(id -u)/smb-auth
+   read -rsp "Samba password for ${USER}: " PW; echo
+   ```
+
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. 資格情報ファイルを作る。
+
+   ```bash
+   ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
+   ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
+   ```
+
+   - このファイルを、`smbclient` と `mount.cifs` の両方で使う
+   - パスワードをコマンドラインに書かないのは、`ps` に見えるため
+
+   <details>
+   <summary>補足: 資格情報ファイル</summary>
+
+   - パスワードは `-U user%pass` で渡すと `ps` に見える
+   - `smbclient -A` の資格情報ファイル（`username=` / `password=`）は `mount.cifs -o credentials=` と同じ形式なので、1 つ作って両方に使う
+   - `/run/user/<uid>/` は tmpfs でユーザー専用（0700）
+
+   </details>
+
+1. `smbclient` で、共有の一覧と読み書きを確かめる。
+
+   ```bash
+   smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
+   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
+   smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
+   ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r-- / user_home_t
+   cmp /etc/hostname /tmp/smb-test.txt && echo "content identical"
+   smbclient "//${SERVER_IP}/${USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
+   ```
+
+   <details>
+   <summary>補足: 共有の一覧</summary>
+
+   - `smbclient -L` に出るのは `IPC$` と `<USER>` の 2 つ。`homes` / `printers` / `print$` は出ない
+
+   </details>
+
+1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
+
+   ```bash
+   {
+     sudo mkdir -p /mnt/smbtest
+     sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+     mount | grep cifs                            # vers=3.1.1
+     echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
+     ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
+     sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
+   }
+   ```
+
+   - `smbstatus` はセッションが生きている間しか見えない
+   - **次の手順は、`smbstatus` の出力を確かめてから貼る**（この節の手順 5 でアンマウントすると見えなくなる）
+
+   <details>
+   <summary>補足: マウントと smbstatus</summary>
+
+   - `mount.cifs` の既定は SMB 3.1.1（`vers=3.1.1`）。`uid=` / `gid=` を渡さないとマウント側のファイルが root 所有に見える
+   - マウント側の `ls -Z` は `cifs_t`、サーバー側は `user_home_t`（`user_home_dir_t` 配下の type transition。`restorecon` していないのにこうなる）
+   - `smbstatus` はサーバー側で「交渉されたプロトコル / 暗号化 / 署名」を表示する。クライアント側では見えにくい情報なので、暗号化の有無を確かめるならここ
+
+   </details>
+
+1. アンマウントして、マウントポイントを消す。
+
+   ```bash
+   sudo umount /mnt/smbtest && sudo rmdir /mnt/smbtest
+   ```
+
+1. 後片付けとして、検証で作ったファイルと資格情報ファイルを消し、AVC を確かめる。
+
+   ```bash
+   rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
+   sudo ausearch -m AVC -ts today               # <no matches>
+   ```
+
+   - root のホームを公開していないなら、この節の手順 7・8 は飛ばす
+
+1. root のホームも公開したときだけ、自分の Samba ユーザーで `/root` の一覧と書き込みを確かめる。
+
+   ```bash
+   smbclient //localhost/root -U "${USER}" -c 'ls; put /etc/hostname smb-root-test.txt; ls smb-root-test.txt'
+   ```
+
+   - パスワードは、[手順 6](#実施手順) で登録した `<USER>` の Samba のパスワード
+   - `/root` の中身（`.bashrc` や `.ssh` など）の一覧に続いて、`putting file /etc/hostname as \smb-root-test.txt` と `smb-root-test.txt` の 1 行が出ればよい
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. root のホームも公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
+
+   ```bash
+   {
+     sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
+     sudo rm /root/smb-root-test.txt
+     sudo ausearch -m AVC -ts recent              # <no matches>
+   }
+   ```
+
+   - ファイルは `root root` の所有で、ラベルは `admin_home_t`
+   - `ausearch` が `<no matches>` ならよい
+
+   <details>
+   <summary>補足: 作ったファイル</summary>
+
+   - SMB から `/root` に作ったものは、名前にかかわらず `admin_home_t` になる。VM では、SMB で作った `/root/.config` も `admin_home_t` だった（ローカルで作れば `config_home_t`）
+   - ほかのプログラムがラベルで困ったら、`sudo restorecon -Rv /root/.config` のように既定のラベルに戻す（VM では `config_home_t` に戻り、その後も SMB から読み書きできた）
+   - 既にラベルの付いたディレクトリの中に作ったものは、そのディレクトリのラベルになる（VM では、`/root/.ssh` に作ったファイルは `ssh_home_t`）
+   - `-ts recent` は直近 10 分。この節の手順 7 から時間がたったときは `-ts today` にする
 
    </details>
 
@@ -598,22 +620,26 @@
 - **状態**: **2026-09-21 に下表の実機で本実行し、そのまま公開を継続中**
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
   - **確認していないこと**: macOS / iOS / Android の実クライアントからの接続（Windows のエクスプローラーは、2026-10-01 に確かめた）
-  - 2026-09-28: 手順 2〜5・8・12 と、[ロールバック](#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 2〜5・8、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 4、[ロールバック](#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）。中のコマンドは変えていない
     - 手順 3 の smb.conf の字下げを、TAB から空白に変えた。TAB は、ブラケットペースト無しで貼ると bash の補完で `.` に置き換わった（手順 3 の補足）
-    - 直した後の手順 1〜14 とロールバックを、x86_64 の VM にブラケットペースト無しで貼って通した。VM は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じもので、まっさらな状態から始めた
+    - 直した後の手順 1〜8、動作を確かめる節の手順 1〜6、ロールバックを、x86_64 の VM にブラケットペースト無しで貼って通した。VM は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じもので、まっさらな状態から始めた
     - その VM には `samba-common` が入っていなかったので、手順 2 で一緒に入り、ロールバックの手順 3 で一緒に消えた
   - 2026-09-29: [root のホームも公開する（任意）](#root-のホームも公開する任意)と、[ロールバック](#ロールバック)の手順 2 を足した
     - **この 2 つは x86_64 の VM でのみ検証した**。実機では本実行していない
-    - まっさらな VM で手順 1〜14 を通した後、root の節の手順 1〜4・6 とロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
+    - まっさらな VM で手順 1〜8 と[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6 を通した後、root の節の手順 1〜3・5、動作を確かめる節の手順 7・8、ロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
     - 確認したこと: `/root` の一覧・読み書き・改名・削除で AVC が出ないこと、作ったファイルが `root root` の `admin_home_t` になること、2 人目の Samba ユーザーが入れないこと、samba-client.md の手でのマウント（`SHARE=root`）、モジュールが無いときの失敗の表示
     - 確認していないこと: 実機、Windows などのクライアントからの接続（エラー 1219 を避けられることも）、WireGuard 越しの接続
   - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)を足した
     - 足す前は、サーバーで直接作ったファイルが、利用者の Windows のエクスプローラーに F5 でも出なかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - 実機では、その節の手順 1・2 を本実行した。その後は、サーバーで作ったもの・消したもの・サブフォルダーの中に作ったものが、エクスプローラーに自動で出た（利用者が確かめた）
     - 手順 3 の今のブロックと、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
-    - 確認していないこと: 手順 1〜14 の通し、その節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
+    - 確認していないこと: 手順 1〜8 と[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6 の通し、リースを切る節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
     - 実機の smb.conf は、2026-09-28 より前の手順 3（字下げが TAB）に `[root]` を足したもの。`[root]` は `browseable = Yes` で、この文書と違う（今回は変えていない）
+  - 2026-10-02: サーバーの上の動作確認を、`## 実施手順` から[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)へ移した（利用者の依頼）
+    - その節の手順 1〜6 は、もとの手順 9〜14。もとの手順 15（クライアントからの接続）は手順 9 になった
+    - その節の手順 7・8 は、もとの root の節の手順 3 の `smbclient` と手順 4。root の節の手順 3 は smb.service の再起動だけになり、もとの手順 5・6 は手順 4・5 になった
+    - コマンドは変えていない（root の節の手順 3 の `{ … }` を外し、再起動と `smbclient` を別の手順に分けただけ）。移した後の文書は貼って通していない
 
 | 項目 | 値 |
 |---|---|
@@ -1216,31 +1242,31 @@ IPC$         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -         
   - 貼り方は 2 通りで、それぞれまっさらな overlay から通した: ブラケットペースト無し（行をそのまま打ち込む）と、ブラケットペースト（`ESC [200~` と `ESC [201~` で包んで送ってから Enter）
   - `sudo` のパスワード、`smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
 - 1 つのシェルで、次の順に貼った
-  - 手順 1〜14
+  - 手順 1〜8 と、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6
   - `sudo -i` した root のシェルで、root の節の手順 1
-  - root の節の手順 1〜4
+  - root の節の手順 1〜3 と、動作を確かめる節の手順 7・8
   - samba-client.md の手順 1〜6（`SERVER=127.0.0.1`、`SHARE=root` に書き換えた）と、同書のロールバックの手順 3（マウント先と資格情報ファイルを消す）
   - 別の ssh のセッションから、2 人目を Samba に登録して `[root]` へつなぐ（手順書の外）
-  - root の節の手順 1（2 回目）、手順 6、手順 1・2（入れ直し）
+  - root の節の手順 1（2 回目）、手順 5、手順 1・2（入れ直し）
   - ロールバックの手順 1〜3
 - ブラケットペーストの回では、2 人目の確認と同じところで、`.ssh` へのファイルの書き込み、`.bashrc` の書き換え（元の内容に戻した）、SMB で作った `.config` への `restorecon` も確かめた。どれも AVC は出なかった
 - この 2 回の前に 2 回流し始めたが、貼る道具の不具合（プロンプトの待ち方と、送るパスワードの取り違え）で途中で止まったので捨てた
 
 | 貼ったもの | 結果（2 回とも同じ） |
 |---|---|
-| 手順 1〜14 | 2026-09-28 の記録と同じ。手順 14 の `ausearch` は `<no matches>` |
+| 手順 1〜8 と、動作を確かめる節の手順 1〜6 | 2026-09-28 の記録と同じ。動作を確かめる節の手順 6 の `ausearch` は `<no matches>` |
 | root のシェルで、root の節の手順 1 | `中断: USER が空か root。公開したユーザー自身のシェルで貼る`。smb.conf は変わらない |
 | root の節の手順 1 | `testparm -s` の末尾に `[root]`（`force user = root`、`path = /root`、`valid users = <USER>`） |
 | root の節の手順 2 | `samba_root_home` の 1 行 |
-| root の節の手順 3 | `/root` の一覧（`.ssh`・`.bashrc` など）、`putting file /etc/hostname as \smb-root-test.txt`、`smb-root-test.txt` の 1 行 |
-| root の節の手順 4 | `-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0 6 … /root/smb-root-test.txt` と `<no matches>` |
+| root の節の手順 3 と、動作を確かめる節の手順 7 | `/root` の一覧（`.ssh`・`.bashrc` など）、`putting file /etc/hostname as \smb-root-test.txt`、`smb-root-test.txt` の 1 行 |
+| 動作を確かめる節の手順 8 | `-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0 6 … /root/smb-root-test.txt` と `<no matches>` |
 | samba-client.md の手順 5・6 | `/root/smb-<USER>@127.0.0.1.cred`、`//127.0.0.1/root` の `cifs`（`vers=3.1.1`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0 … /mnt/root` |
 | 2 人目 | `tree connect failed: NT_STATUS_ACCESS_DENIED`。`smbclient -L` に `root` は出ない |
 | root の節の手順 1（2 回目） | `中断: /etc/samba/smb.conf に [root] が既にある` |
-| root の節の手順 6 | `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と `0`。smb.conf の末尾には空行が 1 つ残る |
+| root の節の手順 5 | `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と `0`。smb.conf の末尾には空行が 1 つ残る |
 | ロールバックの手順 1〜3 | `semodule -l` に `samba_root_home` が無く、パッケージも消えた。`ausearch -m AVC -ts today` は最後まで `<no matches>` |
 
-- root の節の手順 3 の一覧には `.bash_history` も出た。直前に `sudo -i` で root のシェルを開いたため
+- 動作を確かめる節の手順 7 の一覧には `.bash_history` も出た。直前に `sudo -i` で root のシェルを開いたため
 
 ブラケットペーストの回の、書き込みとラベルの確認（手順書の外。`<USER>` の資格情報ファイルで `smbclient` を使った）:
 
@@ -1379,5 +1405,5 @@ Pid          User(ID)   DenyMode   Access      R/W        Oplock           Share
 - WireGuard 越しの接続
 - EL10 の x86_64 のカーネルの cifs
 - [設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)の手順 3 を、実機で貼ること
-- 手順 1〜14 を通しで貼ること（手順 3 のブロックは、コンテナで貼っただけ）
+- 手順 1〜8 と、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6 を通しで貼ること（手順 3 のブロックは、コンテナで貼っただけ）
 - 開いたままのファイルを、サーバーで直接書き換えたときの見え方（ファイルのリース。`smb2 leases` は有効のまま）
