@@ -15,6 +15,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 > - **[CLI: コンテナ](#cli-コンテナ)と GUI の[コンテナ](#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](#文書化済みのツール)）
 > - 2026-09-28 に、[ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)と[更新](#更新)のブロックを `{ … }` で囲んだ（[README の記法](../README.md#記法)）。中のコマンドは変えていない
 > - [CLI: 定番の置き換え](#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](#文書化済みのツール)）
+> - 同じ表にあった fzf は、2026-10-02 に手順書にした（bash への組み込みまで。[文書化済みのツール](#文書化済みのツール)）
 
 「確認」列の意味:
 
@@ -76,7 +77,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 |---|---|---|
 | Homebrew 本体 | 公式インストーラ | [homebrew.md](homebrew.md) |
 | Flatpak / Flathub | AppStream + Flathub | [flatpak.md](flatpak.md) |
-| yazi / lazygit / Neovim / zoxide / bat / eza / git-delta / gdu / starship / ShellCheck・shfmt / tmux | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck・shfmt](shellcheck.md) / [tmux](tmux.md) |
+| yazi / lazygit / Neovim / zoxide / bat / eza / git-delta / gdu / starship / ShellCheck・shfmt / tmux / fzf | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [zoxide](zoxide.md) / [bat](bat.md) / [eza](eza.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [starship](starship.md) / [ShellCheck・shfmt](shellcheck.md) / [tmux](tmux.md) / [fzf](fzf.md) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](syncthing.md) |
 | Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](dropbox.md) |
 | rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](dropbox-rclone.md) |
@@ -100,7 +101,6 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
 |---|---|---|---|---|---|---|
-| fzf | 一覧から曖昧検索で選ぶ | Homebrew 0.74.4 | `brew install fzf` | EPEL 0.58.0 | 有 | 起動 |
 | ripgrep | 高速な grep（`rg`） | Homebrew 15.2.0 | `brew install ripgrep` | EPEL 14.1.1 | 有 | 起動 |
 | fd | 使いやすい find | Homebrew 10.5.0 | `brew install fd` | EPEL `fd-find` 10.4.2（実行ファイルは同じ `/usr/bin/fd`） | 有 | 起動 |
 | jq | JSON の加工 | Homebrew 1.8.2 | `brew install jq` | BaseOS 1.7.1 | 有 | 起動 |

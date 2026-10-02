@@ -11,7 +11,7 @@
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
-- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)。非公開）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
+- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)。非公開）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
 
 ### 導入の基盤
 
@@ -24,7 +24,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 導入元が Homebrew の手順書 16 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 導入元が Homebrew の手順書 17 本と、手順書の無いツールの Homebrew の行 |
 | [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/npm-offline.md) |
 | [npm（インターネットに出られないホスト）](docs/npm-offline.md) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
@@ -109,7 +109,7 @@
 ### 端末とシェル
 
 - 変えるものがそれぞれ違うので、併用できる
-- `~/.bashrc` に足す行は、Homebrew の `brew shellenv` → starship → WezTerm のシェル統合 → zoxide の順に置く（starship が WezTerm のシェル統合より後ろにあると、この設定のシェル統合が働くとき〔COPR の公式の統合が無いとき〕は、OSC 133 の終了コードがいつも 0 になる。[starship.md 手順 3](docs/starship.md#実施手順) の補足。自分用の bash の設定を入れたホストでは、その設定の読む順番に任せる）
+- `~/.bashrc` に足す行は、Homebrew の `brew shellenv` → starship → WezTerm のシェル統合 → zoxide の順に置く（starship が WezTerm のシェル統合より後ろにあると、この設定のシェル統合が働くとき〔COPR の公式の統合が無いとき〕は、OSC 133 の終了コードがいつも 0 になる。[starship.md 手順 3](docs/starship.md#実施手順) の補足。自分用の bash の設定を入れたホストでは、その設定の読む順番に任せる）。fzf の行は `PROMPT_COMMAND` に触らないのでどこでもよいが、Homebrew のコマンドの補完の行（[bash-settings.md 手順 4](docs/bash-settings.md#実施手順)）より後ろに置く
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
 
 | 手順書 | 変えるもの | 導入元 | 設定の置き場所 |
@@ -119,12 +119,13 @@
 | [starship](docs/starship.md) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | `~/.bashrc` に 1 行。`~/.config/starship.toml` は任意 |
 | [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew。x86_64 は COPR（`kray74/cli-tools`）の dnf でも入る（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
 | [tmux](docs/tmux.md) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
+| [bash の履歴・補完・キー操作](docs/bash-settings.md) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | `~/.bashrc` に 4〜5 行と `~/.inputrc` |
+| [fzf](docs/fzf.md) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い） | `~/.bashrc` に 1 行。fd・bat を使う 4 行は任意 |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
 | [zellij](docs/tool-catalog.md#cli-定番の置き換え) | 端末の多重化（キー操作が画面に出る） | Homebrew |
 | [atuin](docs/tool-catalog.md#cli-定番の置き換え) | シェル履歴の検索 | Homebrew |
-| [fzf](docs/tool-catalog.md#cli-定番の置き換え) | 一覧から曖昧検索で選ぶ | Homebrew |
 | [tealdeer](docs/tool-catalog.md#cli-定番の置き換え) | コマンドの使用例を引く（`tldr`） | Homebrew |
 
 ### ファイル・ディスク・リソースを見る

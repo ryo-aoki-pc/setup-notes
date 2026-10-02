@@ -45,7 +45,7 @@
    brew install zoxide fzf
    ```
 
-   - `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える
+   - `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える（fzf 自身のキー操作と補完を bash に組み込むのは [fzf.md](fzf.md)）
    - aarch64 でもビルド済みのボトルが降ってくる
    - Homebrew で入れたなら、手順 3〜5 は飛ばす
 
@@ -135,7 +135,7 @@
    sudo dnf install zoxide fzf
    ```
 
-   - `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える（zoxide の RPM も `Recommends: fzf`）
+   - `fzf` は必須ではないが、入れておくと候補から選ぶ `zi` が使える（fzf 自身のキー操作と補完を bash に組み込むのは [fzf.md](fzf.md)）（zoxide の RPM も `Recommends: fzf`）
    - トランザクション表の `[y/N]` の後に、COPR の GPG 鍵の取り込みを聞かれる
    - fingerprint は `7BED C827 A615 D85B 4426 0607 33CE 1956 4056 78BB`（`kray74_cli-tools`）
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
