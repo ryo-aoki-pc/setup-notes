@@ -6,7 +6,6 @@
 > - **AlmaLinux 10 では、自分のユーザーのシェルで貼る**。`sudo -i` した root のシェルでは貼らない（設定が root の `~/.gitconfig` に書かれるため）
 > - **Windows 11 では、Git for Windows の Git Bash に同じブロックを貼り、手順 2 は飛ばす**。PowerShell や cmd には貼らない（bash の構文のため）
 > - Windows に Git for Windows が無ければ、先に [Git for Windows](https://gitforwindows.org/) のインストーラで入れる
-> - **手順 2 には対話入力がある**（`sudo` のパスワード）。入力し終えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -52,7 +51,6 @@
    ```
 
    - 入っていれば、`Package git-2.52.0-1.el10.x86_64 is already installed.` と出る（aarch64 では末尾が `.aarch64`）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 入るパッケージ</summary>

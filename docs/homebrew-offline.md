@@ -6,7 +6,7 @@
 > - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られるホスト（以下、オンラインのホスト）からトンネルを付けて、インターネットに出られないホスト（以下、オフラインのホスト）にログインしてあること。**この文書は、同書の手順 3 のシェルのまま貼る**（Homebrew の通信もトンネルを通すため）
 > - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（同書の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew は root で動かない）
 > - **手順 3 で [homebrew.md](homebrew.md) の手順 1〜4 を、同じシェルのまま貼る**
-> - **手順 2〜4 には対話入力がある**（`sudo` のパスワード、インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
+> - **手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
 > - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
 
 - 上から順に、ssh-socks-tunnel.md の手順 3 のシェルで貼る
@@ -69,14 +69,14 @@
 
    - homebrew.md の手順 1 の dnf が、トンネルを通るようになる
    - 足した行は、[ロールバック](#ロールバック)のリードのとおり、ssh-socks-tunnel.md のロールバックで消す
-   - **次の手順は、同書の節の `sudo` のパスワードに答え、`Metadata cache created.` が出てから貼る**
+   - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
 
 1. 手順 1 のシェルのまま、[homebrew.md 手順 1〜4](homebrew.md#実施手順) を貼る。
 
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、Homebrew は入っているので、この手順は飛ばす
    - homebrew.md の手順 1 の dnf は、手順 2 の設定で通る（手順 1 で 4 つとも入っていたなら飛ばす）
    - homebrew.md の手順 2 のインストーラも、中で使う curl と git が `ALL_PROXY` を読むので、そのまま通る
-   - **次の手順は、homebrew.md の手順 4 まで終えてから貼る**（homebrew.md の手順 1・2 に `sudo` のパスワードと `RETURN` の確認がある）
+   - **次の手順は、homebrew.md の手順 4 まで終えてから貼る**（homebrew.md の手順 2 に `RETURN` の確認がある）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。
 

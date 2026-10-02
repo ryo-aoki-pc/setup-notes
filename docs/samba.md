@@ -62,7 +62,7 @@
 1. 既定の smb.conf を退避して最小構成に置き換え、構文を検査する。
 
    ```bash
-   {
+   if [ -z "${WORKGROUP}" ]; then echo '中断: 手順 1 の WORKGROUP が空のまま。値を入れて貼り直す' >&2; else
      sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
      sudo tee /etc/samba/smb.conf >/dev/null <<EOF
    [global]
@@ -84,10 +84,11 @@
        create mask = 0644
    EOF
      testparm -s
-   }
+   fi
    ```
 
    - `Loaded services file OK.` と `Server role: ROLE_STANDALONE` が出て、`[global]` に `smb3 directory leases = No` があればよい
+   - `中断:` と出たら、何も書いていない
 
    <details>
    <summary>補足: smb.conf</summary>
@@ -633,13 +634,16 @@
   - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)を足した
     - 足す前は、サーバーで直接作ったファイルが、利用者の Windows のエクスプローラーに F5 でも出なかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - 実機では、その節の手順 1・2 を本実行した。その後は、サーバーで作ったもの・消したもの・サブフォルダーの中に作ったものが、エクスプローラーに自動で出た（利用者が確かめた）
-    - 手順 3 の今のブロックと、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
+    - 手順 3 のブロック（2026-10-02 に `if` を足す前の形）と、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
     - 確認していないこと: 手順 1〜8 と[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6 の通し、リースを切る節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
     - 実機の smb.conf は、2026-09-28 より前の手順 3（字下げが TAB）に `[root]` を足したもの。`[root]` は `browseable = Yes` で、この文書と違う（今回は変えていない）
   - 2026-10-02: サーバーの上の動作確認を、`## 実施手順` から[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)へ移した（利用者の依頼）
     - その節の手順 1〜6 は、もとの手順 9〜14。もとの手順 15（クライアントからの接続）は手順 9 になった
     - その節の手順 7・8 は、もとの root の節の手順 3 の `smbclient` と手順 4。root の節の手順 3 は smb.service の再起動だけになり、もとの手順 5・6 は手順 4・5 になった
     - コマンドは変えていない（root の節の手順 3 の `{ … }` を外し、再起動と `smbclient` を別の手順に分けただけ）。移した後の文書は貼って通していない
+  - 2026-10-02: 手順 3 の `{ … }` を、`WORKGROUP` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
+    - それまでは、ヒアドキュメントの中の `${WORKGROUP:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、`cp -an` は動き、smb.conf は書き換わらずに、`testparm -s` が元の smb.conf を検査した
+    - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`testparm` はスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
 
 | 項目 | 値 |
 |---|---|
@@ -1147,7 +1151,7 @@ $ sudo ip netns exec smbtest smbclient "//192.168.250.1/${SMB_USER}" -A "${AUTHF
 
 - ホストは Ubuntu 24.04 / x86_64 のクラウドの VM（`/dev/kvm` 無し）。QEMU 8.2.2 の TCG（`-accel tcg,thread=multi -cpu max -smp 4 -m 4096`）で、`AlmaLinux-10-GenericCloud-10.2-20260817.0.x86_64.qcow2`（`CHECKSUM` の SHA-256 と一致）を起動した
 - 作り方は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じ
-  - cloud-init で、`<USER>`（uid 1000、`wheel`。`sudo` はパスワードを聞く）と、確かめ用の 2 人目（uid 1001、NOPASSWD の `sudo`）を作った
+  - cloud-init で、`<USER>`（uid 1000、`wheel`）と、確かめ用の 2 人目（uid 1001、NOPASSWD の `sudo`）を作った
   - プロキシの CA、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=` を入れた
   - `dnf upgrade`（カーネルは 6.12.0-211.56.1）の後、確かめ用に `setools-console`・`policycoreutils-python-utils`・`firewalld`（有効にした）・`glibc-langpack-ja`・`tmux` を入れた。このディスクを残し、回ごとに overlay で起動した
 - 版: `selinux-policy-targeted-42.1.18-4.el10_2.3`、`policycoreutils-3.10-2.el10_2`、`samba-4.23.5-110.el10_2`、`sudo-1.9.17-10.p2.el10_2.6`、firewalld 2.4.3。SELinux は Enforcing
@@ -1240,12 +1244,12 @@ IPC$         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -         
 
 - ホストから `ssh -t` で `<USER>` としてログインし、この文書と samba-client.md から抜き出したコードブロックを、pexpect で端末に送った
   - 貼り方は 2 通りで、それぞれまっさらな overlay から通した: ブラケットペースト無し（行をそのまま打ち込む）と、ブラケットペースト（`ESC [200~` と `ESC [201~` で包んで送ってから Enter）
-  - `sudo` のパスワード、`smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
+  - `smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
 - 1 つのシェルで、次の順に貼った
   - 手順 1〜8 と、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 1〜6
   - `sudo -i` した root のシェルで、root の節の手順 1
   - root の節の手順 1〜3 と、動作を確かめる節の手順 7・8
-  - samba-client.md の手順 1〜6（`SERVER=127.0.0.1`、`SHARE=root` に書き換えた）と、同書のロールバックの手順 3（マウント先と資格情報ファイルを消す）
+  - samba-client.md の手順 1〜5（`SERVER=127.0.0.1`、`SHARE=root` に書き換えた）と、同書のロールバックの手順 3（マウント先と資格情報ファイルを消す）
   - 別の ssh のセッションから、2 人目を Samba に登録して `[root]` へつなぐ（手順書の外）
   - root の節の手順 1（2 回目）、手順 5、手順 1・2（入れ直し）
   - ロールバックの手順 1〜3
@@ -1260,7 +1264,7 @@ IPC$         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -         
 | root の節の手順 2 | `samba_root_home` の 1 行 |
 | root の節の手順 3 と、動作を確かめる節の手順 7 | `/root` の一覧（`.ssh`・`.bashrc` など）、`putting file /etc/hostname as \smb-root-test.txt`、`smb-root-test.txt` の 1 行 |
 | 動作を確かめる節の手順 8 | `-rw-r--r--. 1 root root system_u:object_r:admin_home_t:s0 6 … /root/smb-root-test.txt` と `<no matches>` |
-| samba-client.md の手順 5・6 | `/root/smb-<USER>@127.0.0.1.cred`、`//127.0.0.1/root` の `cifs`（`vers=3.1.1`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0 … /mnt/root` |
+| samba-client.md の手順 4・5 | `/root/smb-<USER>@127.0.0.1.cred`、`//127.0.0.1/root` の `cifs`（`vers=3.1.1`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0 … /mnt/root` |
 | 2 人目 | `tree connect failed: NT_STATUS_ACCESS_DENIED`。`smbclient -L` に `root` は出ない |
 | root の節の手順 1（2 回目） | `中断: /etc/samba/smb.conf に [root] が既にある` |
 | root の節の手順 5 | `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と `0`。smb.conf の末尾には空行が 1 つ残る |
@@ -1297,7 +1301,7 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
 
 - 実機（Raspberry Pi の拠点 B のホスト）での実行
 - Windows・macOS などのクライアントから `root` の共有につなぐこと。Windows で `<USER>` の共有と同時に開けること（エラー 1219 が出ないこと）
-- samba-client.md の自動マウント（手順 7・8）を `SHARE=root` で行うこと
+- samba-client.md の自動マウント（手順 6・7）を `SHARE=root` で行うこと
 
 ### 付録: サーバーで変えたものがクライアントに見えるまで（2026-10-01）
 
@@ -1310,7 +1314,7 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
 - Linux のクライアントは、実機の smbd に触らずに測った
   - サーバー: 実機の上の rootless の podman 5.8.2 で、`quay.io/almalinuxorg/almalinux:10.2`（aarch64）を `-p 127.0.0.1:4450:445` で立て、`samba-4.23.5-110.el10_2` を入れた
   - smb.conf は、手順 3 のブロック（直す前と後）をそのまま貼って置いた。試験用のユーザー `smbreload`（実機に無い名前）を `smbpasswd -s -a` で登録し、`smbd --foreground --no-process-group` で動かした
-  - kernel の cifs: 実機のカーネル（`cifs.ko` の版 2.51、`dir_cache_timeout` は既定の 30）で、samba-client.md 手順 6 と同じオプションに `port=4450` を足してマウントした。EL10 の x86_64 のカーネル（6.12.0-211 系）では測っていない
+  - kernel の cifs: 実機のカーネル（`cifs.ko` の版 2.51、`dir_cache_timeout` は既定の 30）で、samba-client.md 手順 5 と同じオプションに `port=4450` を足してマウントした。EL10 の x86_64 のカーネル（6.12.0-211 系）では測っていない
   - GNOME Files: 実機のヘッドレスの GNOME のセッション（nautilus 47.6、`gvfs-smb-1.54.4-3.el10`）で、`/usr/bin/gio mount smb://smbreload@127.0.0.1:4450/smbreload` でつないだ。PATH で先に見つかる Homebrew の `gio` は、`Operation not supported` で使えなかった
   - 画面は、[claude-code-gui.md](claude-code-gui.md) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
   - サーバーでの変更は、`podman exec` でコンテナの中のファイルを直接変えた（Samba を通さない）

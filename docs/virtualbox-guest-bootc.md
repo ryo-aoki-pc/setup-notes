@@ -60,7 +60,6 @@
    - 1 行目が `oracle`（VirtualBox）ならよい
    - `/var` の `Avail` が 10 GB 以上あればよい（手順 6 でベースのイメージをもう 1 つ取り込むため。この手順の補足）
    - `● Booted image:` が手順 1 の `BASE_IMAGE` と同じならよい。違えば手順 1 を直して貼り直す
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 空き容量の目安と、表示の例</summary>
@@ -341,7 +340,7 @@
    - `No match for argument: kernel-devel-uname-r = …+rt` で止まったら、kernel-rt のイメージで `rt` のリポジトリが有効になっていない
    - `pinging container registry quay.io` と `dial tcp: lookup quay.io` で止まったら、VM がインターネットに出られない（ホストオンリーアダプターだけの VM など）。[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順でビルドする
    - **注意**: Windows のホストで Hyper-V が動いていると、途中で出力が数分止まることがある。VM のウィンドウで Shift キーを押すと動き出す（リードの WARNING）
-   - **次の手順は、`sudo` のパスワードに答え、`Successfully tagged` が出てから貼る**
+   - **次の手順は、`Successfully tagged` が出てから貼る**
 
    <details>
    <summary>補足: ビルドの表示と所要時間</summary>
@@ -499,7 +498,6 @@
    - メニューの「デバイス」→「クリップボードの共有」→「双方向」にし、ホストとの間でコピー・貼り付けを試す（英語の表示では Devices → Shared Clipboard → Bidirectional）
    - ウィンドウの大きさを変えると、画面の解像度が追従する
      - VM の設定のグラフィックコントローラが VMSVGA で、メニューの「表示」→「ゲストOSの画面を自動リサイズ」が有効な場合（英語の表示では View → Auto-resize Guest Display）
-   - **次の手順は、手順 8 の `sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Secure Boot が有効なときだけ、モジュールの署名を見る。
 
@@ -518,7 +516,7 @@
   - そのままの手順 6 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
 - ホスト（VirtualBox を動かしている PC）で派生イメージをビルドし、1 つのファイルにして ssh で VM に運ぶ。VM はインターネットに出ない
   - ビルドの材料（手順 3 の Containerfile と、手順 5 でコピーしたインストーラ）は、VM から写して使う
-- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[podman.md](podman.md) の手順 1〜7）
+- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[podman.md](podman.md) の手順 1〜6）
   - Windows のホストでは、WSL の AlmaLinux 10 の端末で行う（WSL の既定のネットワークのままで、ホストオンリーのネットワークの VM に届いた）
   - AlmaLinux 10 のホストでは、そのホストの端末で行う（試していない）
 - 手順 6 と違うところ:
@@ -568,7 +566,6 @@
    - 検証では、WSL 2 の既定の NAT のままの AlmaLinux 10 から、ホストオンリーのネットワークの VM（`192.168.56.102`）の 22 番にそのまま届いた。WSL の設定もファイアウォールの規則も変えていない
    - VM の sshd のログでは、接続元はホストの `192.168.56.1` だった（`Accepted password for <USER> from 192.168.56.1`）
    - この節の `ssh` と `scp` は、WSL の中の OpenSSH（`openssh-clients`）で動く。Windows の `ssh.exe` は使わない
-   - 検証の WSL の `sudo` は、パスワードを聞かない設定だった（この節の手順 3 の `sudo dnf` は、そのまま進んだ）
 
    </details>
 
@@ -589,7 +586,7 @@
    ```
 
    - Secure Boot が有効かは、VM で [secure-boot-mok.md 手順 3](secure-boot-mok.md#実施手順) の `mokutil --sb-state` で見たもの
-   - `openssl` が入っていなければ、`sudo dnf` で入れる（`sudo` のパスワードを聞かれることがある。WSL の AlmaLinux 10 には無かった）
+   - `openssl` が入っていなければ、`sudo dnf` で入れる（WSL の AlmaLinux 10 には無かった）
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）が並び、`scp` が `MOK.der` を VM のホームに送る
    - すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
    - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
@@ -767,7 +764,7 @@
    - 取り込みは、初めては約 90 秒、同じ層がある 2 回目からは 10 秒ほどだった
    - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[手順 2](#実施手順) の空きの目安より多く）
    - 続けて[手順 7](#実施手順) から先を行う
-   - **[手順 7](#実施手順) は、`sudo` のパスワードに答え、`Loaded image:` が出てから貼る**
+   - **[手順 7](#実施手順) は、`Loaded image:` が出てから貼る**
 
 1. 元に戻すときは、VM の端末で、[ロールバック](#ロールバック)の手順 1 の代わりにこれを貼る。
 
@@ -915,7 +912,7 @@
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`sudo podman image prune` で消せる
      - [更新](#更新)でビルドし直していれば、前の派生イメージ（5.07 GB。kernel-rt のイメージでは 5.51 GB）も `<none>` で残る。同じく `sudo podman image prune` で消える
      - ホストオンリーアダプターだけの節でホストでビルドした VM では、`Deleted:` は 2 行で、`<none>` は VM にできない（ホストに残る。その節の手順 11）
-   - **次の手順は、`sudo` のパスワードに答え、`Deleted:` の行が出てから貼る**（消し終わる前に貼ると、`sudo` が読んで捨てる）
+   - **次の手順は、`Deleted:` の行が出てから貼る**（消し終わる前に貼ると、`sudo` が読んで捨てる）
 
 1. Guest Additions のユーザー・グループ・リンク・ログを消す。
 
@@ -1336,7 +1333,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 
 - 本文の `bash` のコードブロックを抜き出し（リストの字下げだけ外す）、ホストから VM への SSH のログインシェル（`ssh -p 2222`）に 1 つずつ貼って Enter を送った
   - 端末は擬似端末の上の bash で、ブラケットペーストが効く
-  - `sudo` のパスワードと `mokutil` の一時パスワードは、入力待ちが出てから送った
+  - `mokutil` の一時パスワードは、入力待ちが出てから送った
 - GNOME のセッション（CD の自動マウントと VBoxClient）は、VM の画面でログインしたままにした
 - 手順書の版: 52299ac（`{ … }` で囲んだ後）の版を貼った。VM で見つけた 2 か所（`libXt`、[ロールバック](#ロールバック)の手順 1）は、直した版を貼り直した
 - 手順 1 は、手順 2 の分岐のとおり `:latest` に直して貼り直し、SSH をつなぎ直すたびに貼り直した
@@ -1355,7 +1352,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 1. 変数 | `BASE_IMAGE = quay.io/almalinuxorg/atomic-desktop-gnome:10`（直す前の既定） |
 | 2. 環境 | `oracle`、`/var` の空き 42G、`● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260918.1）。手順書の分岐のとおり、手順 1 を `:latest` に直して貼り直した |
 | MOK 3. Secure Boot | `SecureBoot enabled` |
-| MOK 4. 鍵（囲んだ形） | `MOK.der`（876 バイト）と `MOK.priv`（1708 バイト、`-rw-------`）。`sudo` は手順 2 の記憶で聞かれず、一時パスワードを 2 回 |
+| MOK 4. 鍵（囲んだ形） | `MOK.der`（876 バイト）と `MOK.priv`（1708 バイト、`-rw-------`）。一時パスワードを 2 回 |
 | 3〜4. Containerfile | 2668 バイト。CD を入れても GNOME の画面には何も出ず、10 秒ほど後に `/run/media/<USER>/VBox_GAs_7.2.20` にマウントされていた |
 | 5. CD | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
 | 6. ビルド | 305 秒。署名を確かめてベースを取り込み（`Storing signatures`）、`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ（動いているカーネルは 211.55.1）、`installer exit=1`。3 つのモジュールが 211.56.1 向けで署名あり、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
@@ -1602,7 +1599,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 - 本文の `bash` のコードブロックを機械的に抜き出し（リストの字下げだけ外す）、Windows の Python（paramiko）で張った VM への SSH の擬似端末に貼った
   - 端末に貼るのと同じ形で送った（改行を CR にし、bash がブラケットペーストを有効にしていれば、開始と終了の印で囲む）。0.3 秒後に Enter
   - WSL の tmux を使う予定だったが、この PC の WSL（AlmaLinux 10）には Windows の実行ファイルを動かすための登録（`WSLInterop`）が無く、WSL の既定の NAT からは Windows の `127.0.0.1` の転送に届かなかった
-- `sudo` のパスワードと `mokutil` の一時パスワードは、入力待ちが出てから送った
+- `mokutil` の一時パスワードは、入力待ちが出てから送った
 - ホスト側の操作
   - 1 回目は、VM のウィンドウのメニューそのものを UI Automation（Windows の `System.Windows.Automation`）で操作した（CD の挿入・クリップボードの共有・「VirtualBox について」）。ウィンドウの大きさは `SetWindowPos` で変えた
   - 共有フォルダーの追加、2 回目の CD の挿入と画面の大きさは、同じ働きの `VBoxManage` で行った
@@ -1612,7 +1609,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 | 手順 | Secure Boot が有効（1 回目） | Secure Boot が無効（2 回目。スナップショットに戻した VM） |
 |---|---|---|
 | 1・2 | 既定の値。`oracle`、`/var` の空き 42G、`● Booted image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`（10.2.20260918.1）、`mount: (hint)` の 2 行 | 同じ |
-| MOK 3・4 | `SecureBoot enabled`。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。`sudo` は手順 2 の記憶で聞かれず、一時パスワードを 2 回 | `SecureBoot disabled`。MOK 4〜7 と手順 10 は飛ばした |
+| MOK 3・4 | `SecureBoot enabled`。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。一時パスワードを 2 回 | `SecureBoot disabled`。MOK 4〜7 と手順 10 は飛ばした |
 | 3 | Containerfile 3225 バイト | 同じ |
 | 4 | メニューの「デバイス」→「Guest Additions CD イメージを挿入…」。VBox.log では、VM が一瞬 `SUSPENDING` → `RESUMING` を通った。GNOME の画面には何も出ず、10 秒後に `/run/media/<USER>/VBox_GAs_7.2.20`（`iso9660`、`ro`、`dmode=500`、`fmode=400`） | `VBoxManage storageattach <VM> … --medium additions`。同じく `SUSPENDING` → `RESUMING` |
 | 5 | `MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux`。「ヘルプ」→「VirtualBox について…」の版は `7.2.20 r175154` | 同じ（「VirtualBox について」は見ていない） |
@@ -1720,7 +1717,7 @@ Secure Boot が有効の回では、続けて次を流した。
 | ホストオンリー 1 | `enp0s3  UP  192.168.56.102/24`。ホストの `VBoxManage dhcpserver findlease --interface='VirtualBox Host-Only Ethernet Adapter' --mac-address=<MAC>` も `IP Address:  192.168.56.102` |
 | ホストオンリー 2 | `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` の後、つながったまま。VM の sshd のログは `Accepted publickey for <USER> from 192.168.56.1` |
 | ホストオンリー 3 | `127.0.0.1:1080` と `[::1]:1080` の `LISTEN`、`401`。手順書の外で `-x socks5://…` にすると `curl: (97) Could not resolve host: quay.io`（`000`） |
-| ホストオンリー 4 | 約 7 分半。`sudo` は、その前のコマンドの記憶で聞かれなかった。ベースは `Trying to pull` → `Storing signatures`。ビルドの中の dnf は AppStream・BaseOS・CRB・Extras と `Extra Packages for Enterprise Linux 10 - x86_64` のメタデータを取り、`libXt` と 15 パッケージを入れた。`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ、`installer exit=1`、3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
+| ホストオンリー 4 | 約 7 分半。ベースは `Trying to pull` → `Storing signatures`。ビルドの中の dnf は AppStream・BaseOS・CRB・Extras と `Extra Packages for Enterprise Linux 10 - x86_64` のメタデータを取り、`libXt` と 15 パッケージを入れた。`depmod: ERROR` と `depmod: FATAL` が 2 回ずつ、`installer exit=1`、3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
 | 手順 7 | `Fetching layers` が 20 層、`Deploying: done (9 seconds)`、`Pruned images: 1`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 貼ってから 144 秒で再起動。ホストの ssh は `Connection to <VM_IP> closed by remote host.` で終わった |
 | MOK 6 | `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot`（前の付録と同じく、最初の画面をスクリーンショットの色で捉えた） |
 | 手順 8 | `vboxguest` の行、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`。ジャーナルの時刻が VM の起動の途中で 4 時間進み、VBoxService の時刻の同期がネットワーク無しで働いた。`rcu_sched_clock_irq` の `WARNING` は、この起動でも 1 回出た |
@@ -1761,7 +1758,7 @@ Secure Boot が有効の回では、続けて次を流した。
 - ホスト: 前の付録と同じ（Windows 11 Pro 25H2、VirtualBox 7.2.20 r175154、Hyper-V の上の NEM）
 - ホストの端末: 同じ PC の WSL 2 の AlmaLinux 10.2（カーネル `6.18.33.2-microsoft-standard-WSL2`、ネットワークは既定の NAT）
   - podman 5.8.2 の rootless。始める前は、イメージも `~/.config/containers` も無かった
-  - `openssl` のコマンドは入っていなかった（`openssl-libs` だけ）。`sudo` はパスワードを聞かない設定
+  - `openssl` のコマンドは入っていなかった（`openssl-libs` だけ）
 - VM: 前の付録の VM（ホストオンリーアダプターだけ、`192.168.56.102`、Secure Boot 有効）
   - 始めたときは、前の付録の最後で戻した元のイメージ（`quay.io/almalinuxorg/atomic-desktop-gnome:latest`、10.2.20260926.0）で起動していた。`Rollback image:` は前の回の派生イメージ
   - podman のイメージは、前の回の `<none>`（6.43 MB）だけ。`/var` は 47G のうち 6.6G を使っていた
@@ -1778,7 +1775,7 @@ Secure Boot が有効の回では、続けて次を流した。
   - VM の端末: 前の付録と同じ（Windows の Python の SSH の擬似端末。鍵でログイン）
   - ホストの端末: WSL の中の `script` が作る擬似端末の bash（`bash -li`）に送った
 - ホストの端末から VM への `ssh` と `scp` は、文書のとおりパスワードで入った。初めての接続では、ホスト鍵の確認に `yes` と答えた
-- `sudo` のパスワード、`mokutil` の一時パスワード、VM のユーザーのパスワードは、入力待ちが出てから送った
+- `mokutil` の一時パスワードと VM のユーザーのパスワードは、入力待ちが出てから送った
 - 手順書の版は、この付録を書く前の作業中のもの。抜き出した全部のブロックは `bash -n` を通った
 
 | 節と手順 | 結果 |
@@ -1789,13 +1786,13 @@ Secure Boot が有効の回では、続けて次を流した。
 | 手順 5 | `install: cannot stat '/run/media/<USER>/VBox_GAs_*/VBoxLinuxAdditions.run'` → 箇条書きの `udisksctl mount -b /dev/sr0`。SSH の擬似端末からは polkit が `Authentication is required to mount VBOX CD-ROM (/dev/sr0)` とパスワードを聞いた（1 回目は、続けて貼ったブロックがパスワードとして食われて `AUTHENTICATION FAILED`）。答えてマウントした後に貼り直すと、`MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
 | ホストオンリー 1 | `enp0s3  UP  192.168.56.102/24` |
 | ホストオンリー 2 | ホストの端末に[手順 1](#実施手順) と、`VM_SSH=<USER>@<VM_IP>` にしたこの手順を貼った |
-| ホストオンリー 3 | `openssl` が無く、`sudo dnf install -y openssl` がパスワードを聞かずに進んだ（`openssl` 3.5.8 が入り、`openssl-libs`・`openssl-fips-provider` が 3.5.5 から 3.5.8 に上がった）。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。`scp` は `The authenticity of host … can't be established.`・`ED25519 key fingerprint is SHA256:…` → `yes` → `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` → パスワード → `MOK.der  100%  876` |
-| ホストオンリー 4 | `sudo` は前のコマンドの記憶で聞かれなかった。`-rw-r--r--. 1 root root 876 … MOK.der`（ディレクトリは `drwx------`）、一時パスワードを 2 回。手順書の外の `mokutil --list-new` に `CN=VirtualBox Guest Additions module signing key` |
+| ホストオンリー 3 | `openssl` が無く、`sudo dnf install -y openssl` が進んだ（`openssl` 3.5.8 が入り、`openssl-libs`・`openssl-fips-provider` が 3.5.5 から 3.5.8 に上がった）。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。`scp` は `The authenticity of host … can't be established.`・`ED25519 key fingerprint is SHA256:…` → `yes` → `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` → パスワード → `MOK.der  100%  876` |
+| ホストオンリー 4 | `-rw-r--r--. 1 root root 876 … MOK.der`（ディレクトリは `drwx------`）、一時パスワードを 2 回。手順書の外の `mokutil --list-new` に `CN=VirtualBox Guest Additions module signing key` |
 | ホストオンリー 5 | パスワードの後に、`vbox-ga-image/` から `etc/pki/containers/atomic-sig-backup.pub` まで 13 の名前。VM の時計が 4 時間進んでいたので、`tar: … time stamp 2026-10-01 00:33:56 is 14169.640948876 s in the future` が混ざった |
 | ホストオンリー 6 | `podman image trust show` に `repository  quay.io/almalinuxorg/atomic-desktop-gnome  sigstoreSigned`（Red Hat のレジストリ 2 つも `sigstoreSigned`、既定は `accept`） |
 | ホストオンリー 7 | 約 5 分。`Trying to pull quay.io/almalinuxorg/atomic-desktop-gnome:latest...` → `Getting image source signatures` → `Storing signatures`、`+ kver=6.12.0-211.56.1.el10_2.x86_64`、道具は `kernel-devel` を含む 15 パッケージ、`depmod: ERROR: could not open directory /lib/modules/6.18.33.2-microsoft-standard-WSL2` と `depmod: FATAL` が 2 回ずつ、`libsemanage.semanage_rename: WARNING: … Invalid cross-device link …`、`installer exit=1`。3 行が `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Checks skipped: 1`、`Successfully tagged localhost/vbox-ga:latest`。`+` の行は 126。ホストの `podman images` は派生イメージ 5.07 GB、ベース 4.92 GB、`<none>` 6.43 MB |
 | ホストオンリー 8 | `podman save` が約 80 秒で `vbox-ga.tar`（4.8G、4833 MB）を書き、パスワードの後に `scp` が 29 秒（164.4 MB/s） |
-| ホストオンリー 9 | `sudo` のパスワードの後、約 86 秒で `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`。`sudo podman images` の 2 つの IMAGE ID は、ホストのものと同じだった |
+| ホストオンリー 9 | 約 86 秒で `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest`。`sudo podman images` の 2 つの IMAGE ID は、ホストのものと同じだった |
 | 手順 7 | `layers already present: 84; layers needed: 1 (151.9 MB)`、`Deploying: done (8 seconds)`、`Pruned images: 0 (layers: 18, objsize: 832.4 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 再起動。貼ってから 54 秒で MokManager の画面が出た |
 | MOK 6 | `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot`（前の付録と同じく、最初の画面をスクリーンショットの色で捉えてキーを送った）。41 秒で GDM が出た |
 | 手順 8 | `vboxguest  528384  5`、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session`・`--checkhostversion` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`、`Rollback image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` |
@@ -1803,7 +1800,7 @@ Secure Boot が有効の回では、続けて次を流した。
 | 更新（ホストオンリー 5・7〜9 → 更新 3） | ホストオンリー 5 は同じ名前と `tar` の警告。ホストオンリー 7 は `Using cache` が 4 行で同じイメージ ID、7 秒（`Trying to pull` は出ない）。**ホストオンリー 8 は、ファイルを消す行を入れる前の版で `Error: docker-archive doesn't support modifying existing images` になり、そのまま前の回のファイル（時刻が 1 回目のまま）を `scp` で送った**（56 秒、85.6 MB/s）。ホストオンリー 9 は 12 秒で `Loaded image:` が 2 行、更新 3 は `No changes in ostree-unverified-image:containers-storage:localhost/vbox-ga:latest => sha256:<DIGEST>` と `No update available.` |
 | 更新（直した版で、ホストオンリー 8・9 → 更新 3） | ホストオンリー 8 は約 78 秒で新しいファイルを書き、`scp` が 53 秒（89.8 MB/s）、送った後にホストのファイルが消えた。ホストオンリー 9 は 8 秒、更新 3 は同じく `No changes` と `No update available.` |
 | ホストオンリー 10 | `Fetching layers` が `0/0`、`Deploying: done (8 seconds)`、`Pruned images: 0 (layers: 1, objsize: 112.1 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`（`Digest:` はレジストリのものと違う値）→ 貼ってから 31 秒で再起動。起動した後は `● Booted image: containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`、`Rollback image: containers-storage:localhost/vbox-ga:latest`、`vbox` のモジュールも `/opt/VBoxGuestAdditions-*` も無い |
-| ロールバック 2 | `Untagged:` が 2 行、`Deleted:` が 2 行。前の回の `<none>`（6.43 MB）は残った。**`podman rmi` が終わる前（パスワードに答えて 20 秒後）にロールバックの手順 3 を貼ると、`sudo` に読まれて捨てられ、何も起きなかった** |
+| ロールバック 2 | `Untagged:` が 2 行、`Deleted:` が 2 行。前の回の `<none>`（6.43 MB）は残った。**`podman rmi` が終わる前（動き出して 20 秒後）にロールバックの手順 3 を貼ると、`sudo` に読まれて捨てられ、何も起きなかった** |
 | ロールバック 3 | `Deleted:` が出た後に貼り直すと、無出力でユーザー・グループ・リンク・ログが消えた。`/var` の使用量は 5.9G |
 | ホストオンリー 11 | `Untagged:` が 2 行、`Deleted:` が 4 行。ホストには `<none>`（6.43 MB）が残った。`rmdir` の行を足す前の版では空の `~/.config/containers` が残ったので、行を足し、その行で消えることを確かめた |
 

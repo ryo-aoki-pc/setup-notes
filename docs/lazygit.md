@@ -99,16 +99,19 @@
 1. エディタだけを指定する、最小の `config.yml` を書く。
 
    ```bash
-   mkdir -p ~/.config/lazygit
-   cat >> ~/.config/lazygit/config.yml <<EOF
+   if [ -z "${LG_EDITOR}" ]; then echo '中断: 手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す' >&2; else
+     mkdir -p ~/.config/lazygit
+     cat >> ~/.config/lazygit/config.yml <<EOF
    os:
      edit: '${LG_EDITOR:?手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
    EOF
-   lazygit --print-config-dir
+     lazygit --print-config-dir
+   fi
    ```
 
    - 既定値の全体は `lazygit --config` で表示できる
    - アプリ内では `x` でキーバインド一覧が出る
+   - `中断:` と出たら、何も書いていない
 
 ---
 
@@ -153,6 +156,9 @@
   - 確認したこと: ボトルが降りる、`lazygit --version` が出る、`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返す
   - **コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）
   - **実機には設定ファイルを置いていない**
+  - 2026-10-02: [設定ファイル](#設定ファイル)の手順 1 を、`LG_EDITOR` が空なら何もせずに止める `if … fi` にした
+    - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
+    - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`HOME` は使い捨てのディレクトリ、`lazygit` はスタブ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

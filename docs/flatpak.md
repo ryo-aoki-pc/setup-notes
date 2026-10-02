@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（アプリは `sudo` でシステム全体に入れるが、起動は自分のユーザーで行う）
-> - **手順 7 には対話入力がある**（確認が 2 回）。完了してから手順 8 を貼る
+> - **手順 6 には対話入力がある**（確認が 2 回）。完了してから手順 7 を貼る
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -28,8 +28,6 @@
    ```bash
    sudo dnf install -y flatpak
    ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: AlmaLinux 10 の flatpak にはリモートが無い</summary>
@@ -85,37 +83,27 @@
 
    </details>
 
-1. Flathub を system に登録する。
+1. Flathub を system に登録して、登録されたか確かめる。
 
    ```bash
-   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+   {
+     sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+     flatpak remotes --show-details
+   }
    ```
 
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - `flathub` の行が出て、`Options` の列が `system` になっていればよい
 
    <details>
-   <summary>補足: system に入れる理由</summary>
+   <summary>補足: system に入れる理由と、出力例</summary>
 
-   `sudo` を付けて**システム全体のインストール先**（`/var/lib/flatpak`）に登録している。以後のアプリも同じ場所に入り、ホストの全ユーザーから使える。
+   **system に入れる理由**: `sudo` を付けて**システム全体のインストール先**（`/var/lib/flatpak`）に登録している。以後のアプリも同じ場所に入り、ホストの全ユーザーから使える。
 
    自分のユーザーだけに入れたいなら、`sudo` を外して `--user` を付ける（`flatpak remote-add --user --if-not-exists flathub ...`）。
 
    - この場合の置き場所は `~/.local/share/flatpak` で、以降の `install` / `update` / `uninstall` にも `--user` を付ける
    - **system と user に同じアプリを入れると、どちらが起動されるか分かりにくくなる**ので、どちらかに揃える
    - 本書は system だけを検証している
-
-   </details>
-
-1. Flathub が登録されたか確かめる。
-
-   ```bash
-   flatpak remotes --show-details
-   ```
-
-   - `flathub` の行が出て、`Options` の列が `system` になっていればよい
-
-   <details>
-   <summary>補足: 出力例</summary>
 
    **出力例**
 
@@ -168,7 +156,7 @@
 
    GL ドライバ（`GL.default`）とコーデック（`codecs-extra`）の拡張も一緒に入る。入れ終わった時点で `/var/lib/flatpak` は 2.5 GB になった。
 
-   確認用に別のアプリを入れてもよい（この手順・手順 8・[ロールバック](#ロールバック)の手順 1 の ID を置き換える）が、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）。
+   確認用に別のアプリを入れてもよい（この手順・手順 7・[ロールバック](#ロールバック)の手順 1 の ID を置き換える）が、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](#注意点)）。
 
    同じ runtime を使うアプリを 2 本目以降に入れるときは、runtime の取得は起きない。[ツール一覧](tool-catalog.md#gui)の Flathub の行には、アプリごとの runtime（GNOME 50 / FDO 25.08 / FDO 26.08）を書いてある。
 
@@ -306,8 +294,8 @@
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
 - **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した
-  - 確認の問い合わせ（手順 7 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜7・[更新](#更新)・[ロールバック](#ロールバック)を通した
+  - 確認の問い合わせ（手順 6 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
   - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
   - **確認していないこと**: デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示。コンテナに画面が無いため
   - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](tool-catalog.md#aarch64-で使えないもの)を参照）
@@ -315,6 +303,7 @@
   - 2026-09-28: [ロールバック](#ロールバック)の手順 4のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-02: もとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機（Raspberry Pi 5） | 実機（x86_64 PC） | 検証コンテナ |
 |---|---|---|---|
@@ -351,7 +340,7 @@
 
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 8 の直後。ロールバック前）:
+**検証コンテナでの出力**（手順 7 の直後。ロールバック前）:
 
 ```
 $ flatpak list --app --columns=application,version,branch,installation
@@ -391,7 +380,7 @@ com.github.tchx84.Flatseal.desktop
   - 調査時は、ほかのアプリも合わせた 13 本で 8.1 GB になった
   - `sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **`dnf upgrade` では上がらない**: [更新](#更新)の `sudo flatpak update` を別に実行する
-- **権限はアプリごとに違う**: 手順 7 の実測のように、入れる前に権限の一覧が出る
+- **権限はアプリごとに違う**: 手順 6 の実測のように、入れる前に権限の一覧が出る
   - 入れた後は `flatpak info --show-permissions <ID>` で見られ、Flatseal か `sudo flatpak override` で変えられる
 - **公開元が検証済みかを見る**: Flathub のアプリには次の 2 種類がある。[ツール一覧](tool-catalog.md#gui)の表に書き分けてある
   - 検証済み: 公開元がアプリの作者本人だと確認されたもの
@@ -412,16 +401,16 @@ com.github.tchx84.Flatseal.desktop
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜8・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、試したアプリが `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
+`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜7・[更新](#更新)・[ロールバック](#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、試したアプリが `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
 
 | 手順 | 結果 |
 |---|---|
 | 変数（当時の手順 1。今は無い） | 2 つとも既定の値が表示された |
 | 1〜3. flatpak | `flatpak は未導入` → `dnf install -y flatpak` で 138 パッケージ → `Flatpak 1.16.0`。直後の `flatpak remotes --show-details` は `error: While opening repository /var/lib/flatpak/repo: ...` |
 | 4. 鍵 | `gpg: directory '/home/<USER>/.gnupg' created` の後に `6E5C 05D9 79C7 6DAF 93C0  8135 4184 DD4D 907A 7CAE`（`Flathub Repo Signing Key <flathub@flathub.org>`、`expires: 2027-06-14`） |
-| 5〜6. Flathub | `remote-add` は無出力。`flatpak remotes --show-details` に `flathub` の行（`Options` が `system`） |
-| 7. 確認用アプリ | runtime の確認と最終確認の 2 回に `y`。GL ドライバ 2・コーデック 1・GNOME 50 の runtime と翻訳・Flatseal の 6 つが入った |
-| 8. 検証 | `flatpak list` に Flatseal 2.4.1（system）、`flatpak info` の `Origin: flathub`、`sandbox OK`、`com.github.tchx84.Flatseal.desktop`。ログインシェルの `XDG_DATA_DIRS` に 2 つの `exports/share` が入った |
+| 5. Flathub | `remote-add` は無出力。`flatpak remotes --show-details` に `flathub` の行（`Options` が `system`） |
+| 6. 確認用アプリ | runtime の確認と最終確認の 2 回に `y`。GL ドライバ 2・コーデック 1・GNOME 50 の runtime と翻訳・Flatseal の 6 つが入った |
+| 7. 検証 | `flatpak list` に Flatseal 2.4.1（system）、`flatpak info` の `Origin: flathub`、`sandbox OK`、`com.github.tchx84.Flatseal.desktop`。ログインシェルの `XDG_DATA_DIRS` に 2 つの `exports/share` が入った |
 | 更新 | `Looking for updates…` → `Nothing to do.` |
 | ロールバック | `uninstall` で Flatseal、`--unused` で 5 つが消えた。`flatpak list --app` と、`remote-delete` 後の `flatpak remotes --show-details` はどちらも無出力 |
 

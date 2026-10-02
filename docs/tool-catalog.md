@@ -206,7 +206,7 @@ Meld は GUI の規則の 4 番目にあたる。
 | Cockpit の podman の画面 | ブラウザからコンテナを操作する | AppStream `cockpit-podman` 121（BaseOS の `cockpit` 356.2 と組む） | `sudo dnf install -y cockpit cockpit-podman` | — | 有 | 導入 |
 
 - Podman Desktop の行は 2026-09-24 の調査。ほかの 3 行は 2026-09-27 に調べた
-- Pods と Podman Desktop は podman の API ソケット（[podman.md 手順 8](podman.md#実施手順)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
+- Pods と Podman Desktop は podman の API ソケット（[podman.md 手順 7](podman.md#実施手順)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
 - BoxBuddy はホストの distrobox（[distrobox.md](distrobox.md)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
 - Pods と BoxBuddy の 2 本で、`/var/lib/flatpak` は 2.5 GB になった（GNOME 50 の runtime）
 - Cockpit は `sudo systemctl enable --now cockpit.socket` の後、`https://127.0.0.1:9090/` が応答し、`/usr/share/cockpit/podman` があることまで確かめた。ブラウザでのログインと画面は見ていない
@@ -219,7 +219,7 @@ Meld は GUI の規則の 4 番目にあたる。
 |---|---|---|---|---|---|---|
 | GNOME Tweaks | GNOME の細かい設定 | EPEL 46.1 | `sudo dnf install -y gnome-tweaks` | Flathub に無い | 有 | 起動 |
 | Extension Manager | GNOME 拡張の検索と導入 | Flathub `com.mattjakeman.ExtensionManager` 0.6.5（検証済み、GNOME 50） | `sudo flatpak install -y flathub com.mattjakeman.ExtensionManager` | AppStream の `gnome-extensions-app` 46.2（入れてある拡張の管理だけ） | 有 | 導入 |
-| Flatseal | Flatpak アプリの権限を変える | Flathub `com.github.tchx84.Flatseal` 2.4.1（検証済み、GNOME 50） | [flatpak.md 手順 7](flatpak.md#実施手順) | — | 有 | 導入 |
+| Flatseal | Flatpak アプリの権限を変える | Flathub `com.github.tchx84.Flatseal` 2.4.1（検証済み、GNOME 50） | [flatpak.md 手順 6](flatpak.md#実施手順) | — | 有 | 導入 |
 | Mission Center | リソースモニタ（GUI） | Flathub `io.missioncenter.MissionCenter` 1.2.0（検証済み、GNOME 50） | `sudo flatpak install -y flathub io.missioncenter.MissionCenter` | RPM 無し | 有 | 導入 |
 | Remmina | リモートデスクトップのクライアント | EPEL 1.4.39 | `sudo dnf install -y remmina` | Flathub `org.remmina.Remmina` 1.4.43（検証済み） | 有 | 導入 |
 | LocalSend | LAN 内の端末とファイルを送り合う | Flathub `org.localsend.localsend_app` 1.18.2（検証済み、FDO 25.08） | `sudo flatpak install -y flathub org.localsend.localsend_app` | RPM 無し | 有 | 導入 |
@@ -416,8 +416,8 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 
 | コンテナ | 用途 |
 |---|---|
-| `cat1` | CLI の行と Cockpit。先に [podman.md](podman.md) の手順 1〜3・6〜8 と Docker 向けの節、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時は btop.md の手順 1〜3）、[homebrew.md](homebrew.md) の手順 1〜4 を通した |
-| `fp1` | GUI の Flathub の行。[flatpak.md](flatpak.md) の手順 1〜6 を通してから入れた |
+| `cat1` | CLI の行と Cockpit。先に [podman.md](podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時は btop.md の手順 1〜3）、[homebrew.md](homebrew.md) の手順 1〜4 を通した |
+| `fp1` | GUI の Flathub の行。[flatpak.md](flatpak.md) の手順 1〜5 を通してから入れた |
 
 **手順書の外で行った準備**（検証環境の都合）:
 

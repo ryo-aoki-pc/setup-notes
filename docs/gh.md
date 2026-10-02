@@ -3,31 +3,24 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。手順 5 の認証だけブラウザで行う
-> - **手順 3 と手順 4 には対話入力がある**（手順 3 は署名鍵の取り込みの確認が 2 回、手順 4 は `gh auth login` の対話）。手順 4 は、手順 5 のブラウザでの認証を終えてから次の手順を貼る
+> - **すべて対象ホスト上で実行する**。手順 4 の認証だけブラウザで行う
+> - **手順 2 と手順 3 には対話入力がある**（手順 2 は署名鍵の取り込みの確認が 2 回、手順 3 は `gh auth login` の対話）。手順 3 は、手順 4 のブラウザでの認証を終えてから次の手順を貼る
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
-1. `dnf config-manager` を使えるようにする。
-
-   ```bash
-   sudo dnf install -y 'dnf-command(config-manager)'
-   ```
-
-   - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（手順 2 の補足）
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. リポジトリを追加する。
+1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
 
    ```bash
    {
+     sudo dnf install -y 'dnf-command(config-manager)'
      sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
      cat /etc/yum.repos.d/gh-cli.repo
    }
    ```
 
+   - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（この手順の補足）
    - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
    - `gpgcheck=1` になっていることを確認する
 
@@ -99,12 +92,12 @@
    ```
 
    - 対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
-   - ワンタイムコードが表示されたら、手順 5 のブラウザで使う
+   - ワンタイムコードが表示されたら、手順 4 のブラウザで使う
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
 
 1. ブラウザで、GitHub の認証を済ませる。
 
-   - 手順 4 のワンタイムコードを、ブラウザの `https://github.com/login/device` に入れ、画面の案内に従う
+   - 手順 3 のワンタイムコードを、ブラウザの `https://github.com/login/device` に入れ、画面の案内に従う
    - SSH 越しの端末でこのホストのブラウザを開けないときは、手元のブラウザで開く
    - **次の手順は、`gh auth login` が終わってから貼る**（続けて貼ると対話の答えとして食われる）
 
@@ -176,11 +169,12 @@
 - **進め方**: GitHub が配っている repo ファイルを `dnf config-manager --add-repo` で取り込み、`dnf install gh` する。**読者が書き換える値は無い**
 - **状態**: **実機で本実行済み（2026-09-20）**
   - 下表のホストで `dnf config-manager --add-repo` → `dnf install -y gh` を実行し、`gh-2.101.0-1.aarch64` が入って認証済み、そのまま常用中
-  - 本書の手順 1〜3 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
-  - **コンテナでは認証（手順 4・5）とロールバックは実行していない**
-  - 2026-09-28: 手順 2のブロックを `{ … }` で囲んだ
+  - 本書の手順 1・2 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
+  - **コンテナでは認証（手順 3・4）とロールバックは実行していない**
+  - 2026-09-28: もとの手順 2 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-02: もとの手順 1・2 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -265,19 +259,19 @@ gpg-pubkey-75716059-63172e8a GitHub CLI <opensource+cli@github.com> public key
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで手順 1〜3 を通した（手順 4 の `gh auth login` は対話なので除外）。実機で加えた変更は `dnf install podman` だけ。 最後にもう 1 つ新しいコンテナを立て、**この文書のコードブロックをそのまま抜き出したスクリプト**（`sudo` を外し、`dnf install` / `dnf upgrade` に `-y` を付けただけ）を流して、上から順に貼れば通ることを確かめている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで手順 1・2 を通した（手順 3 の `gh auth login` は対話なので除外）。実機で加えた変更は `dnf install podman` だけ。 最後にもう 1 つ新しいコンテナを立て、**この文書のコードブロックをそのまま抜き出したスクリプト**（`sudo` を外し、`dnf install` / `dnf upgrade` に `-y` を付けただけ）を流して、上から順に貼れば通ることを確かめている。
 
 | 手順 | 結果 |
 |---|---|
 | 1. プラグイン | `dnf-plugins-core-4.7.0-10.el10` が入る |
-| 2. repo | `Adding repo from: https://cli.github.com/packages/rpm/gh-cli.repo` → `/etc/yum.repos.d/gh-cli.repo` 作成 |
-| 3. install | `Installing: gh aarch64 2.101.0-1 gh-cli 14 M` + 依存 13 パッケージ（`git` / `git-core` / `git-core-doc` / `groff-base` / `authselect` など）。鍵 2 本を取り込んで成功 |
+| 1. repo | `Adding repo from: https://cli.github.com/packages/rpm/gh-cli.repo` → `/etc/yum.repos.d/gh-cli.repo` 作成 |
+| 2. install | `Installing: gh aarch64 2.101.0-1 gh-cli 14 M` + 依存 13 パッケージ（`git` / `git-core` / `git-core-doc` / `groff-base` / `authselect` など）。鍵 2 本を取り込んで成功 |
 | 検証 | `gh --version` → `gh version 2.101.0 (2026-09-15)`。`gh auth status` → `You are not logged into any GitHub hosts.` |
 | EPEL との比較 | `epel-release` を追加して `dnf list --showduplicates gh` → EPEL 2.97.0 と gh-cli 2.101.0 の 2 系統 |
 
 #### 未確認事項
 
-- 手順 4・5 の認証（コンテナでは未実施。実機では 2026-09-20 に実行して以後常用）
+- 手順 3・4 の認証（コンテナでは未実施。実機では 2026-09-20 に実行して以後常用）
 - `gh auth login` の SSH 鍵方式、`gh auth login --with-token`、GitHub Enterprise Server への接続
 - `gh extension install` で入れた拡張の扱い
 - ロールバック（`dnf remove` と鍵の削除）の本実行

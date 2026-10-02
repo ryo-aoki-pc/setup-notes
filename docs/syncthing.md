@@ -747,8 +747,6 @@
    sudo firewall-cmd --permanent --remove-service=syncthing --remove-service=syncthing-gui && sudo firewall-cmd --reload
    ```
 
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
 1. 完全に消すときだけ、設定・鍵・DB とログを消す（取り戻せない）。
 
    ```bash
@@ -769,7 +767,7 @@
   - 読者が書き換える値は無い（既定のままで通る）
 - **状態**: **実機で本実行済み（2026-09-24）**
   - 下表のホストで、本書の各手順のコマンドを上から順に実行した。本書はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
-    - linger の有効化（今の [linger.md](linger.md) の手順 2・3。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
+    - linger の有効化（今の [linger.md](linger.md) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
     - `syncthing 2.1.5`（Homebrew、`arm64_linux` のボトル）が入っている
     - `sh.brew.syncthing.service` が `enabled` / `active`

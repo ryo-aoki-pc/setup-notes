@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
 > - **実行するユーザーは `sudo` できる必要がある**（手順 1・2 で使う）
-> - **手順 2 には対話入力がある**（インストーラの `RETURN` の確認と `sudo` のパスワード）。終わってから手順 3 を貼る
+> - **手順 2 には対話入力がある**（インストーラの `RETURN` の確認）。終わってから手順 3 を貼る
 > - **インターネットに出られないホストでは、本書を直接貼らず [homebrew-offline.md](homebrew-offline.md) から通す**（[ssh-socks-tunnel.md](ssh-socks-tunnel.md) でログインしてくるホストをプロキシにして、そのシェルで本書の手順 1〜4 を貼る）
 
 - 上から順にコードブロックを貼る
@@ -22,8 +22,6 @@
    ```bash
    sudo dnf install -y procps-ng curl file git
    ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
 
    <details>
    <summary>補足: 依存パッケージの役割</summary>
@@ -47,10 +45,10 @@
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-   - インストーラは続行の確認で `RETURN` を求め、途中でも `sudo` のパスワードを聞く（`/home/linuxbrew` を作るため）
+   - インストーラは続行の確認で `RETURN` を求める
    - 終わりに `==> Installation successful!` と、PATH の通し方を書いた `==> Next steps:` が出る
    - 手順 3 は、その案内と同じ内容（この手順の補足に実測を載せた）
-   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認や `sudo` のパスワードとして食われる）
+   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認として食われる）
 
    <details>
    <summary>補足: 導入先を変えてはいけない</summary>
@@ -202,24 +200,32 @@
 > - `/home/linuxbrew/.linuxbrew` は Homebrew を入れたユーザーの所有。root がここのコマンドを動かすと、そのユーザーが書き換えられるプログラムを root の権限で動かすことになる（そのユーザーを乗っ取られると、root まで取られる）
 > - この節は **x86_64 のコンテナでのみ検証した**。実機では本実行していない（[付録](#付録-root-のシェルでも使う節のコンテナでの検証記録2026-09-30)）
 
-1. root の `~/.bashrc` の末尾に、PATH を足す 1 行を書く。
+1. root の `~/.bashrc` の末尾に PATH を足す 1 行を書き、root のログインシェルで確かめる。
 
    ```bash
-   if sudo grep -q '/home/linuxbrew/.linuxbrew/bin' /root/.bashrc; then echo '中断: /root/.bashrc に既にある' >&2
-   else
-     sudo tee -a /root/.bashrc >/dev/null <<'EOF'
+   {
+     if sudo grep -q '/home/linuxbrew/.linuxbrew/bin' /root/.bashrc; then echo '中断: /root/.bashrc に既にある' >&2
+     else
+       sudo tee -a /root/.bashrc >/dev/null <<'EOF'
    case ":${PATH}:" in *:/home/linuxbrew/.linuxbrew/bin:*) ;; *) PATH="${PATH}:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" ;; esac
    EOF
-     sudo tail -n 1 /root/.bashrc
-   fi
+       sudo tail -n 1 /root/.bashrc
+     fi
+     sudo -i bash -c 'printenv PATH; command -v brew'
+   }
    ```
 
-   - 書いた 1 行（`case ":${PATH}:" in …`）が出ればよい
-   - `中断:` と出たら、何も書き換えていない
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - 書いた 1 行（`case ":${PATH}:" in …`）が出る
+   - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
+   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
+   - `su -`、コンソールや ssh での root のログインも、`sudo -i` と同じく `/root/.bash_profile` から `/root/.bashrc` を読む（コンソールでのログインは未確認）
+   - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
+   - root のシェルでどれが使われるかは、`type -a <コマンド>` で見る（先頭の行が使われる）
+   - [sudo でも使う](#sudo-でも使う任意)の節を通したホストでは、`/root/.bashrc` に書く前から最後の 2 行が同じ出力になる（`sudo -i` の PATH の末尾の 2 つは、sudo の `secure_path` から来る）
+     - この節の行が効いたかは、`sudo su - -c 'printenv PATH; command -v brew'` で見る
 
    <details>
-   <summary>補足: 書く 1 行</summary>
+   <summary>補足: 書く 1 行と、出力例</summary>
 
    - PATH の**末尾**に足すので、`/usr/bin` などにある RPM のコマンドが先に見つかる。root の `git` や `curl` などが、Homebrew が依存として入れたものに置き換わらない
    - `case` は、PATH に `/home/linuxbrew/.linuxbrew/bin` が既にあれば何もしない。root のシェルの中で `bash` を開いても、同じ場所が重ならない
@@ -228,25 +234,7 @@
    - ヒアドキュメントは引用符付きの `<<'EOF'` なので、`${PATH}` は書くときに展開されず、そのまま入る
    - AlmaLinux 10 の `/root/.bashrc`（rootfiles の既定）には、非対話のシェルで途中で抜ける行が無い。末尾の行は、`sudo -i <コマンド>` や `su - -c <コマンド>` でも読まれる
 
-   </details>
-
-1. root のログインシェルで、PATH と `brew` の場所を確かめる。
-
-   ```bash
-   sudo -i bash -c 'printenv PATH; command -v brew'
-   ```
-
-   - PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
-   - `su -`、コンソールや ssh での root のログインも、`sudo -i` と同じく `/root/.bash_profile` から `/root/.bashrc` を読む（コンソールでのログインは未確認）
-   - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
-   - root のシェルでどれが使われるかは、`type -a <コマンド>` で見る（先頭の行が使われる）
-   - [sudo でも使う](#sudo-でも使う任意)の節を通したホストでは、この節の手順 1 の前から同じ出力になる（`sudo -i` の PATH の末尾の 2 つは、sudo の `secure_path` から来る）
-     - この節の行が効いたかは、`sudo su - -c 'printenv PATH; command -v brew'` で見る
-
-   <details>
-   <summary>補足: 出力例</summary>
-
-   コンテナでの実測（Homebrew のユーザーのシェルから）:
+   **出力例**: 最後の行の、コンテナでの実測（Homebrew のユーザーのシェルから）:
 
    ```
    $ sudo -i bash -c 'printenv PATH; command -v brew'
@@ -254,7 +242,7 @@
    /home/linuxbrew/.linuxbrew/bin/brew
    ```
 
-   この節の手順 1 の前は、1 行目が `/root/.local/bin:/root/bin:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin` で終わり、2 行目は出なかった（終了コード 1）。
+   `/root/.bashrc` に書く前は、1 行目が `/root/.local/bin:/root/bin:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin` で終わり、2 行目は出なかった（終了コード 1）。
 
    </details>
 
@@ -290,28 +278,34 @@
 > - sudo の設定はホスト全体にかかる。このホストで `sudo` を使う、ほかのユーザーにも効く
 > - この節は **x86_64 のコンテナでのみ検証した**。実機では本実行していない（[付録](#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
 
-1. sudo の `secure_path` の末尾に、Homebrew を足すファイルを置く。
+1. sudo の `secure_path` の末尾に Homebrew を足すファイルを置き、`sudo` の PATH を確かめる。
 
    ```bash
-   if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
-   elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
-   else
-     line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
-     echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
-     sudo visudo -c
-   fi
+   {
+     if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
+     elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
+     else
+       line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
+       echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
+       sudo visudo -c
+     fi
+     sudo bash -c 'printenv PATH; command -v brew'
+   }
    ```
 
-   - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出ればよい
+   - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出る
      - `/etc/sudoers.d` にほかのファイルがあれば、その行も出る
      - 日本語のロケール（`ja_JP.UTF-8`）では、`parsed OK` は `正しく構文解析されました` と出る
-   - `中断:` と出たら、何も書き換えていない
-     - `既にある` なら、この節は通してある。この節の手順 2 で確かめる
+   - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
+   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
+     - `既にある` なら、この節は通してある。最後の 2 行で確かめる
      - `既定と違う` なら、`secure_path` がほかで変えてある（`sudo grep -rn secure_path /etc/sudoers /etc/sudoers.d` で探す）。そのホストでは、この節は使わない
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - Homebrew で入れたコマンドを、`sudo jq --version` のように打てる
+   - `sudo` でどれが使われるかは、`sudo bash -c 'type -a <コマンド>'` で見る（先頭の行が使われる）
+   - 開いたままの root のシェル（`sudo -s` など）には効かない。開き直す
 
    <details>
-   <summary>補足: 置く 1 行と、置き方</summary>
+   <summary>補足: 置く 1 行と置き方、出力例</summary>
 
    - `secure_path` は、sudo がコマンドを探す PATH で、動かすコマンドの `PATH` にもなる。AlmaLinux 10 の `/etc/sudoers` は `Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin`
    - `secure_path` は 1 つの文字列の設定で、`+=` では足せない（`+=` は `env_keep` のような一覧の設定だけ）。既定の値を書き直し、その末尾に 2 つを足す
@@ -324,25 +318,9 @@
    - `install -m 0440 /dev/stdin` は、root の所有でモードが 0440 の新しいファイルを作る
      - モードが 0644 だと、`sudo` は読むが、`visudo -c` が `bad permissions, should be mode 0440` で失敗した
      - 所有者が自分のユーザーだと、`sudo` は `is owned by uid <UID>, should be 0` と表示して読まなかった
-   - 最後の `visudo -c` は、置いたファイルも含めて、書式・所有者・モードを確かめる。`/etc/sudoers.d` はモード 0750 で、自分のユーザーからは中を見られない
+   - `fi` の前の `visudo -c` は、置いたファイルも含めて、書式・所有者・モードを確かめる。`/etc/sudoers.d` はモード 0750 で、自分のユーザーからは中を見られない
 
-   </details>
-
-1. `sudo` で動かすコマンドの PATH と、`brew` の場所を確かめる。
-
-   ```bash
-   sudo bash -c 'printenv PATH; command -v brew'
-   ```
-
-   - PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
-   - Homebrew で入れたコマンドを、`sudo jq --version` のように打てる
-   - `sudo` でどれが使われるかは、`sudo bash -c 'type -a <コマンド>'` で見る（先頭の行が使われる）
-   - 開いたままの root のシェル（`sudo -s` など）には効かない。開き直す
-
-   <details>
-   <summary>補足: 出力例</summary>
-
-   コンテナでの実測（Homebrew のユーザーのシェルから）:
+   **出力例**: 最後の行の、コンテナでの実測（Homebrew のユーザーのシェルから）:
 
    ```
    $ sudo bash -c 'printenv PATH; command -v brew'
@@ -350,7 +328,7 @@
    /home/linuxbrew/.linuxbrew/bin/brew
    ```
 
-   この節の手順 1 の前は、1 行目が `/sbin:/bin:/usr/sbin:/usr/bin` だけで、2 行目は出なかった（終了コード 1）。
+   ファイルを置く前は、1 行目が `/sbin:/bin:/usr/sbin:/usr/bin` だけで、2 行目は出なかった（終了コード 1）。
 
    </details>
 
@@ -399,8 +377,8 @@
 
 - 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
 - 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
-- [root のシェルでも使う](#root-のシェルでも使う任意)の節を通したなら、先にその節の手順 3 で root の `~/.bashrc` の行を消す
-- [sudo でも使う](#sudo-でも使う任意)の節を通したなら、先にその節の手順 3 で `/etc/sudoers.d/homebrew` を消す
+- [root のシェルでも使う](#root-のシェルでも使う任意)の節を通したなら、先にその節の手順 2 で root の `~/.bashrc` の行を消す
+- [sudo でも使う](#sudo-でも使う任意)の節を通したなら、先にその節の手順 2 で `/etc/sudoers.d/homebrew` を消す
 - インターネットに出られないホストでは、[ssh-socks-tunnel.md 手順 1〜3](ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで貼る（この節の手順 1 がアンインストーラを取得する）
 
 > [!CAUTION]
@@ -424,9 +402,9 @@
    bash /tmp/uninstall.sh
    ```
 
-   - `sudo` のパスワードと確認を聞かれる
+   - 確認を聞かれる
    - `/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）
-   - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認や `sudo` のパスワードとして食われる）
+   - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
 1. 終わったら、`~/.bashrc` の行とアンインストーラを消す。
 
@@ -453,13 +431,15 @@
   - **本実行していないこと**: ロールバック（`uninstall.sh` の本実行）。実機でもコンテナでも実行していない（`--help` を見ただけ）
   - **実機の `~/.bashrc` の 1 行は `brew shellenv`（引数なし）で、本書が書く `brew shellenv bash` と違う**（[手順 3 の補足](#実施手順)）
   - [root のシェルでも使う](#root-のシェルでも使う任意)の節は、**x86_64 のコンテナでのみ検証した**（2026-09-30。[付録](#付録-root-のシェルでも使う節のコンテナでの検証記録2026-09-30)）
-    - 通したこと: その節の手順 1〜3 を、この文書のコードブロックのまま流した。その節の手順 1 を重ねて実行し、その節の手順 3 の後に手順 1・2 をもう一度通した
-    - 確認したこと: `su -`（root のパスワード）・`su`・ssh での root のログイン・`sudo -i`・`sudo -s` のどれでも Homebrew の `jq` と `nvim` が見つかる、`sudo jq` は見つからない、RPM の `jq` があると root では RPM が先、手順 3 で `/root/.bashrc` が元のファイルと同じ内容に戻る
+    - 通したこと: その節の手順 1・2 を、この文書のコードブロックのまま流した。その節の手順 1 の `if … fi`（もとの手順 1）を重ねて実行し、その節の手順 2 の後に手順 1 をもう一度通した
+    - 確認したこと: `su -`（root のパスワード）・`su`・ssh での root のログイン・`sudo -i`・`sudo -s` のどれでも Homebrew の `jq` と `nvim` が見つかる、`sudo jq` は見つからない、RPM の `jq` があると root では RPM が先、手順 2 で `/root/.bashrc` が元のファイルと同じ内容に戻る
     - 確認していないこと: 実機、aarch64、コンソールでの root のログイン、SELinux が Enforcing のホスト
+    - 2026-10-02: その節のもとの手順 1・2 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
   - [sudo でも使う](#sudo-でも使う任意)の節は、**x86_64 のコンテナでのみ検証した**（2026-10-02。[付録](#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
-    - 通したこと: その節の手順 1〜3 を、この文書のコードブロックのまま、パスワードを聞く `sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。その節の手順 1 を重ねて貼り、その節の手順 3 の後に手順 1・2 をもう一度通した
+    - 通したこと: その節の手順 1・2 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。その節の手順 1 の `if … fi`（もとの手順 1）を重ねて貼り、その節の手順 2 の後に手順 1 をもう一度通した
     - 確認したこと: `sudo jq`・`sudo nvim`・`sudo -u`・`sudo -s`・`sudo -i`・`sudo` で動かすスクリプトで Homebrew のコマンドが見つかる、ほかの wheel のユーザーの `sudo` にも効く、RPM の `jq` があると `sudo` では RPM が先、`su -` と ssh での root のログインは変わらない、`EDITOR=nvim` の `sudoedit` と `sudo EDITOR=nvim visudo` が Homebrew の `nvim` で開く、既定と違う `secure_path` と書式の誤りではファイルを置かない、root のシェルでも使う節と両方通しても PATH が重ならない
     - 確認していないこと: 実機、aarch64、SELinux が Enforcing のホスト（置いたファイルのラベル）、LDAP などから配る sudo の設定、sudo の RPM を更新した後
+    - 2026-10-02: その節のもとの手順 1・2 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -665,12 +645,12 @@ $ du -sh /home/linuxbrew/.linuxbrew
 | 手順・確認 | 結果 |
 |---|---|
 | 節の手順 1 の前 | `sudo -i bash -c 'printenv PATH; command -v brew'` は `/root/.local/bin:/root/bin:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin` だけで、終了コード 1。`sudo su - -c 'printenv PATH'` は `/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin`。`sudo jq --version` は `sudo: jq: command not found` |
-| 節の手順 1 | `/root/.bashrc` の末尾に 1 行入り（22 行から 23 行）、その行が表示された |
-| 節の手順 2 | その手順の補足の出力例のとおり |
-| 節の手順 1 をもう一度 | `中断: /root/.bashrc に既にある`。ファイルは変わらない |
+| 節の手順 1 の `if … fi`（もとの手順 1） | `/root/.bashrc` の末尾に 1 行入り（22 行から 23 行）、その行が表示された |
+| 節の手順 1 の確かめの行（もとの手順 2） | その手順の補足の出力例のとおり |
+| 節の手順 1 の `if … fi`（もとの手順 1）をもう一度 | `中断: /root/.bashrc に既にある`。ファイルは変わらない |
 | `su -`（`<USER>` から、root のパスワード） | PATH は `/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin`。`type -a jq` は `jq is /home/linuxbrew/.linuxbrew/bin/jq` |
 | `su`（`-` 無し） | PATH は `/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` の後ろに 2 つ（`<USER>` の PATH は引き継がない）。`jq` は Homebrew 版 |
-| `sudo -i`（対話） | 節の手順 2 と同じ PATH。`jq` は Homebrew 版 |
+| `sudo -i`（対話） | 節の手順 1 の確かめの行（もとの手順 2）と同じ PATH。`jq` は Homebrew 版 |
 | `sudo -s`（対話） | `HOME=/root`。PATH は `/root/.local/bin:/root/bin:/sbin:/bin:/usr/sbin:/usr/bin` の後ろに 2 つ。`jq` は Homebrew 版 |
 | ssh での root のログイン | 公開鍵で `127.0.0.1:2222` の sshd に入った。コマンドを渡した `ssh root@… 'printenv PATH; command -v jq'` も、`ssh -tt` のログインシェルも、PATH の末尾に 2 つが付き、`jq` は Homebrew 版 |
 | root の `su - -c`・`bash -l -c` | どちらも PATH の末尾に 2 つが付き、`command -v jq` は Homebrew 版 |
@@ -679,8 +659,8 @@ $ du -sh /home/linuxbrew/.linuxbrew
 | RPM の jq | AppStream の `jq-1.7.1-11.el10_2.2` を入れると、root の `type -a jq` は `/bin/jq` → `/usr/bin/jq` → Homebrew の順、`<USER>` は Homebrew → `/usr/bin/jq` → `/bin/jq` の順。RPM の `jq --version` は `jq-` とだけ出した（Homebrew 版は `jq-1.8.2`） |
 | Neovim | root の `command -v nvim` は `/home/linuxbrew/.linuxbrew/bin/nvim`、`nvim --version` は `NVIM v0.12.5`、`stdpath("config")` は `/root/.config/nvim`（`<USER>` では `/home/<USER>/.config/nvim`） |
 | root の `brew` | 同じ中身のコンテナを `--cgroupns=private` で立て直し、`/.dockerenv` を消して確かめた。`brew config`・`brew install tree`・`brew list --versions`・`brew leaves`・`brew info jq`・`brew deps --tree jq`・`brew outdated`・`brew autoremove --dry-run`・`brew uninstall jq`・`brew update` は `Error: Running Homebrew as root is extremely dangerous and no longer supported.`（終了コード 1）。`brew --version`・`brew --prefix`・`brew help`・引数の無い `brew list` は動いた。目印を外す前のコンテナでは、root の `brew` は断られない |
-| 節の手順 3 | `0` と出た。`/root/.bashrc` の SHA-256 が、節の手順 1 の前に写したものと一致した。`sudo -i` の PATH から 2 つが消え、`command -v brew` は終了コード 1 |
-| 節の手順 3 の後に手順 1・2 | 1 回目と同じ結果 |
+| 節の手順 2 | `0` と出た。`/root/.bashrc` の SHA-256 が、節の手順 1 の前に写したものと一致した。`sudo -i` の PATH から 2 つが消え、`command -v brew` は終了コード 1 |
+| 節の手順 2 の後に手順 1 | 1 回目と同じ結果 |
 
 #### 未確認事項（root の節）
 
@@ -698,7 +678,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
 
 - `quay.io/almalinuxorg/10-init`（AlmaLinux 10.2、`sha256:a91c1066…fd73`）を `--privileged --cgroupns=private --network host` で立て、systemd を PID 1 にして、sshd（ポート 2222）と systemd-logind を動かした
 - プロキシの CA、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=`、ログインシェルの `HTTPS_PROXY` を入れた
-- wheel の一般ユーザーを 2 人（`<USER>`・`<USER2>`）作った。どちらの `sudo` も、既定の `%wheel ALL=(ALL) ALL` のままでパスワードを聞く。root には、検証のためだけにパスワードを付けた
+- wheel の一般ユーザーを 2 人（`<USER>`・`<USER2>`）作った。どちらの `sudo` も、既定の `%wheel ALL=(ALL) ALL` のまま。root には、検証のためだけにパスワードを付けた
 - Homebrew は、`<USER>` の ssh のログインシェル（umask 0022）で[実施手順](#実施手順)の手順 1〜3 を通した
   - インストーラだけ `NONINTERACTIVE=1` を付け、そのときだけ NOPASSWD の `sudo` の設定を置いた（終わったら消した）
   - `Homebrew 7.0.7`。`brew install jq neovim gdu glib` で `jq 1.8.2`・`neovim 0.12.5_1`・`gdu 5.37.0`・`glib 2.90.0` を入れた
@@ -713,18 +693,17 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - ホストの tmux 3.4 のペイン（200x50）から `docker exec -it … ssh -t -p 2222 <USER>@127.0.0.1` でログインした
 - この文書から節のブロック（折り畳みの外のもの）を抜き出し、手順ごとに `tmux paste-buffer` で貼った（[tmux.md の付録](tmux.md#付録-コンテナでの検証記録2026-10-01)と同じ形）
   - 1 回目はブラケットペースト無し、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）
-  - どちらも最初に `sudo -k` し、`[sudo] password for <USER>:` が出たらパスワードを送った
 - 画面は `tmux capture-pane` で読んだ。エディタは、別の `docker exec` から `/proc/<PID>/exe` と `/proc/<PID>/environ` で、実体・ユーザー・`HOME`・`PATH` を見た
 - `<USER2>` と、開いたままの `sudo -s` は、別の tmux のペインから同じように ssh でログインして確かめた
 
 | 手順・確認 | 結果 |
 |---|---|
-| 節の手順 1 の前 | `sudo printenv PATH` は `/sbin:/bin:/usr/sbin:/usr/bin`。`sudo jq --version` と `sudo brew --version` は `sudo: …: command not found`（終了コード 1）。節の手順 2 のコマンドは 1 行目だけを出し、終了コード 1 |
+| 節の手順 1 の前 | `sudo printenv PATH` は `/sbin:/bin:/usr/sbin:/usr/bin`。`sudo jq --version` と `sudo brew --version` は `sudo: …: command not found`（終了コード 1）。節の手順 1 の確かめの行（もとの手順 2）は 1 行目だけを出し、終了コード 1 |
 | 節の手順 1 の前のエディタ | `EDITOR=nvim VISUAL=nvim sudoedit /etc/motd` は `/usr/bin/vi` を `<USER>` で動かした（`HOME` と `PATH` は `<USER>` のもの）。`sudo EDITOR=nvim visudo` と `sudo visudo` は `/usr/bin/vi` を root で動かした |
 | 同（フルパス） | `SUDO_EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim sudoedit /etc/motd` は Homebrew の `nvim` を `<USER>` で動かし、`stdpath("config")` は `/home/<USER>/.config/nvim`。`sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` は Homebrew の `nvim` を root で動かし、`stdpath("config")` は `/root/.config/nvim` |
-| 節の手順 1（2 回とも、パスワードを聞かれた） | `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK`。置いたファイルは `root:root` の 0440（116 バイト）で、中身はその手順の `line` の 1 行 |
-| 節の手順 2 | その手順の補足の出力例のとおり |
-| 節の手順 1 をもう一度 | `中断: sudo の PATH に Homebrew が既にある`。ファイルの SHA-256 は変わらない |
+| 節の手順 1 の `if … fi`（もとの手順 1） | `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK`。置いたファイルは `root:root` の 0440（116 バイト）で、中身はその手順の `line` の 1 行 |
+| 節の手順 1 の確かめの行（もとの手順 2） | その手順の補足の出力例のとおり |
+| 節の手順 1 の `if … fi`（もとの手順 1）をもう一度 | `中断: sudo の PATH に Homebrew が既にある`。ファイルの SHA-256 は変わらない |
 | 各入口 | [sudo で使うときの補足](#sudo-で使うときの補足)の表のとおり。`sudo -s` は `HOME=/root`。`sudo -u nobody jq --version` は `jq-1.8.2`。`sudo su - -c 'printenv PATH'`・`su -`（root のパスワード）・ssh での root のログインは `/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin` で、`jq` は見つからない |
 | `<USER2>` | 自分の PATH に Homebrew は無く、`command -v jq` は終了コード 1。`sudo jq --version` は `jq-1.8.2` |
 | エディタ（節の後） | `EDITOR=nvim VISUAL=nvim sudoedit /etc/motd` は Homebrew の `nvim` を `<USER>` で動かし、`stdpath("config")` は `/home/<USER>/.config/nvim`。`sudo EDITOR=nvim visudo` は Homebrew の `nvim` を root で動かし、`stdpath("config")` は `/root/.config/nvim` |
@@ -734,16 +713,16 @@ $ du -sh /home/linuxbrew/.linuxbrew
 | コマンドの数 | Homebrew の `bin` と `sbin` に 231 個。`/usr/bin`・`/usr/sbin` と同じ名前が 135 個、無いものが 96 個 |
 | gdu と gsettings | `sudo gdu-go --version` は `v5.37.0`。`~/.local/bin/gdu` のリンクは `<USER>` では動き、`sudo gdu --version` は `sudo: gdu: command not found`。`sudo sh -c 'command -v gsettings'` と `sudo -u <USER2> env sh -c 'command -v gsettings'` は `/bin/gsettings`（`<USER>` の `command -v gsettings` は Homebrew の `glib` のもの） |
 | root の brew | `sudo brew --version` は `Homebrew 7.0.7`。`sudo brew install tree` は `Error: Running Homebrew as root is extremely dangerous and no longer supported.`（終了コード 1）。`sudo brew services list` と `sudo brew services start jq` は `Error: Need to download https://formulae.brew.sh/api/internal/packages.x86_64_linux.jws.json but cannot as root!`（終了コード 1。`<USER>` で `brew update` した後も同じ）。`/home/linuxbrew` の下に root の所有のファイルはできなかった |
-| root の節との組み合わせ | root の節の手順 1 の後、`sudo -i` と `sudo -s` の PATH で 2 つは 1 回ずつ。この節の手順 3 の後も、`sudo -i` と `sudo -s` には root の節の 2 つが残り、`sudo jq` は `command not found` |
-| 同（この節だけ） | root の節の手順 2 は、root の節の手順 1 の前から 2 つと `brew` を出した。root の節の手順 3 の後も `sudo -i` に 2 つが残った。`sudo su - -c 'printenv PATH; command -v brew'` は、root の節の行があるときだけ `brew` を出した |
-| 節の手順 3 | `/sbin:/bin:/usr/sbin:/usr/bin`。`/etc/sudoers.d` は空に戻った。この後の `sudo -E printenv PATH` は `/sbin:/bin:/usr/sbin:/usr/bin` |
-| 節の手順 3 の後に手順 1・2 | 1 回目と同じ結果。ファイルの SHA-256 も同じ |
-| 開いたままのシェル | 別のペインで開いていた `sudo -s` は、節の手順 1 の後も 2 つが無く、開き直すと付いた。節の手順 3 の後も 2 つが残り、開き直すと消えた |
-| 既定と違うホスト | root で `/etc/sudoers.d/site`（`Defaults secure_path = /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin`、0440）を置くと、節の手順 1 は `中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う` で止まり、`homebrew` は作られなかった |
+| root の節との組み合わせ | root の節の手順 1 の後、`sudo -i` と `sudo -s` の PATH で 2 つは 1 回ずつ。この節の手順 2 の後も、`sudo -i` と `sudo -s` には root の節の 2 つが残り、`sudo jq` は `command not found` |
+| 同（この節だけ） | root の節の手順 1 の確かめの行（もとの手順 2）は、`/root/.bashrc` に書く前から 2 つと `brew` を出した。root の節の手順 2 の後も `sudo -i` に 2 つが残った。`sudo su - -c 'printenv PATH; command -v brew'` は、root の節の行があるときだけ `brew` を出した |
+| 節の手順 2 | `/sbin:/bin:/usr/sbin:/usr/bin`。`/etc/sudoers.d` は空に戻った。この後の `sudo -E printenv PATH` は `/sbin:/bin:/usr/sbin:/usr/bin` |
+| 節の手順 2 の後に手順 1 | 1 回目と同じ結果。ファイルの SHA-256 も同じ |
+| 開いたままのシェル | 別のペインで開いていた `sudo -s` は、節の手順 1 の後も 2 つが無く、開き直すと付いた。節の手順 2 の後も 2 つが残り、開き直すと消えた |
+| 既定と違うホスト | root で `/etc/sudoers.d/site`（`Defaults secure_path = /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin`、0440）を置くと、節の手順 1 の `if … fi`（もとの手順 1）は `中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う` で止まり、`homebrew` は作られなかった |
 | 書式の誤り | 節の手順 1 の `line` を `'Defaults secure_path = "/sbin:/bin'` に変えた写しは、`stdin:1:35: unexpected line break in string` を出し、`homebrew` を置かなかった。同じ行のファイルを root で直接置くと、`sudo` は呼ぶたびに同じ誤りを表示したが、終了コードは 0 で、PATH は既定のままだった（`visudo -c` は終了コード 1） |
 | 所有者・モード・名前 | `<USER>` の所有のファイルは `sudo: /etc/sudoers.d/zzowner is owned by uid <UID>, should be 0` と出て読まれなかった。root の所有で 0644 のファイルは読まれたが、`visudo -c` が `bad permissions, should be mode 0440`。`homebrew.conf` という名前のファイルは、何も出ずに読まれなかった |
 | 日本語のロケール | コンテナのイメージは訳を入れない（`%_install_langs C.utf8`）ので、それを外して `sudo` を入れ直した。`LANG=ja_JP.UTF-8` では、`visudo -c` は `/etc/sudoers: 正しく構文解析されました`、節の前の `sudo jq --version` は `sudo: jq: コマンドが見つかりません` |
-| 2 回目（ブラケットペースト有り） | 節の手順 1・2・1（もう一度）・3・1・2・3 が、1 回目と同じ結果 |
+| 2 回目（ブラケットペースト有り） | 節の手順 1、手順 1 の `if … fi`（もう一度）、手順 2、手順 1、手順 2 が、1 回目と同じ結果 |
 
 #### 未確認事項（sudo の節）
 

@@ -71,8 +71,6 @@
    sudo dnf install -y unzip
    ```
 
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
    <details>
    <summary>補足: unzip が無いと cask の展開で止まる</summary>
 

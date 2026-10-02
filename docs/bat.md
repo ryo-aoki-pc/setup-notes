@@ -140,18 +140,21 @@
 1. よく変える 3 つだけを書いた、最小の設定ファイルを置く。
 
    ```bash
-   mkdir -p ~/.config/bat
-   cat > ~/.config/bat/config <<EOF
+   if [ -z "${BAT_THEME_NAME}" ]; then echo '中断: 手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す' >&2; else
+     mkdir -p ~/.config/bat
+     cat > ~/.config/bat/config <<EOF
    --theme="${BAT_THEME_NAME:?手順 1 の BAT_THEME_NAME が空のまま。値を入れて貼り直す}"
    --style="numbers,changes,header"
    --paging=never
    EOF
-   cat ~/.config/bat/config
-   bat --config-file
+     cat ~/.config/bat/config
+     bat --config-file
+   fi
    ```
 
    - テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
    - 自前のシンタックス定義やテーマを足したときだけ `bat cache --build` が要る（キャッシュの場所は `bat --cache-dir`）
+   - `中断:` と出たら、何も書いていない
 
 ---
 
@@ -204,6 +207,9 @@
   - 確認したこと: `arm64_linux` のボトルが降りる、`bat 0.26.1` が入る、`--color=always --style=numbers` で行番号と色が付く
   - **確認していないこと**: ページャとしての表示（`man` / `fzf --preview`）。コンテナには端末が無いため
   - **実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある
+  - 2026-10-02: [設定ファイル](#設定ファイル)の手順 1 を、`BAT_THEME_NAME` が空なら何もせずに止める `if … fi` にした
+    - それまでは、ヒアドキュメントの中の `${BAT_THEME_NAME:?…}` が `cat` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、先に効く `>` が既にある設定ファイルを空にし、後ろの `bat --config-file` も動いた
+    - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`HOME` は使い捨てのディレクトリ、`bat` はスタブ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

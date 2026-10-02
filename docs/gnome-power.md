@@ -7,7 +7,7 @@
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- GNOME を入れていない（デスクトップの無い）機械では、手順 5・6 だけを行う
+- GNOME を入れていない（デスクトップの無い）機械では、手順 4・5 だけを行う
 - 手順の後: 戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
@@ -34,7 +34,7 @@
 
    - 画面を消したいなら、`IDLE_DELAY` に秒数を入れる（`300` で 5 分）。消えたときにロックもするなら `LOCK_ENABLED=true`
    - 放置したときにサスペンドするかどうかは変数にしていない。手順 2・3 で `nothing`（何もしない）を直接書く
-     - 手順 5 でサスペンドとハイバネートを OS ごと止めるので、ほかに選べる値が無いため
+     - 手順 4 でサスペンドとハイバネートを OS ごと止めるので、ほかに選べる値が無いため
    - `POWER_BUTTON` も同じ理由で、`suspend` / `hibernate` は選ばない
      - `interactive` は、設定アプリの「電源ボタンの挙動」の「電源オフ」にあたる
      - 押すと何をするかを聞く画面が出て、何も選ばなければ 60 秒で電源が切れる（RHEL 10 の文書の 13.1.2 節）
@@ -126,28 +126,35 @@
 
    </details>
 
-1. ログイン画面（GDM）用の、自動サスペンドと電源ボタンの設定を書く。
+1. ログイン画面（GDM）用の設定を書き、dconf を作り直して、ログイン画面から見える値を確かめる。
 
    ```bash
-   sudo tee /etc/dconf/db/gdm.d/90-power >/dev/null <<EOF
+   if [ -z "${POWER_BUTTON}" ]; then echo '中断: 手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す' >&2; else
+     sudo tee /etc/dconf/db/gdm.d/90-power >/dev/null <<EOF
    [org/gnome/settings-daemon/plugins/power]
    sleep-inactive-ac-type='nothing'
    sleep-inactive-battery-type='nothing'
    power-button-action='${POWER_BUTTON:?手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}'
    EOF
+     sudo dconf update
+     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+   fi
    ```
 
-   - 文字列の値は引用符（`'`）で囲む。囲まないと、手順 4 の `dconf update` が失敗する
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - ファイルには、自動サスペンドと電源ボタンの設定を書く
+   - 文字列の値は引用符（`'`）で囲む。囲まないと、`dconf update` が失敗する
+   - `dconf update` は、成功すると何も出さない。`invalid value` と出たら、この手順を貼り直す
+   - `power-button-action 'interactive'`・`sleep-inactive-ac-type 'nothing'`・`sleep-inactive-battery-type 'nothing'` の 3 行が出ればよい
+   - `中断:` と出たら、何も書いていない
 
    <details>
-   <summary>補足: ログイン画面の設定の置き場所</summary>
+   <summary>補足: ログイン画面の設定の置き場所と、gdm ユーザーで読む理由</summary>
 
    **Workstation で入れた PC のログイン画面は、既定では 15 分で眠る。** GDM 47 は、ログイン画面の電源のキーを何も設定していない（上流の `data/dconf/defaults/00-upstream-settings`）。
 
    - そのため gnome-settings-daemon の既定（電源につないでいても 900 秒でサスペンド）がそのまま効く
    - Server with GUI で入れた PC は、手順 2 の補足の override がログイン画面にも効くので、電源につないでいる間は眠らない
-   - コンテナで、ログイン画面から見える値（手順 4 と同じ読み方）がそうなっていることを確かめた。実機で眠るところは確かめていない
+   - コンテナで、ログイン画面から見える値（この手順の `sudo -u gdm` の行と同じ読み方）がそうなっていることを確かめた。実機で眠るところは確かめていない
    - 再起動した後や、GNOME Remote Desktop のリモートログインを待っている間は、ログイン画面のまま置かれる
 
    **置き場所**: ログイン画面は `gdm` ユーザーで動き、dconf のプロファイル `/usr/share/dconf/profile/gdm` を読む。
@@ -181,29 +188,17 @@
 
    - 終了コードは 1 で、`/etc/dconf/db/gdm` は作り直されず、前の内容のまま残った
 
-   </details>
-
-1. dconf のデータベースを作り直し、ログイン画面から見える値を確かめる。
-
-   ```bash
-   {
-     sudo dconf update
-     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
-   }
-   ```
-
-   - `dconf update` は、成功すると何も出さない。`invalid value` と出たら、手順 3 から貼り直す
-   - `power-button-action 'interactive'`・`sleep-inactive-ac-type 'nothing'`・`sleep-inactive-battery-type 'nothing'` の 3 行が出ればよい
-
-   <details>
-   <summary>補足: gdm ユーザーで読む理由</summary>
-
-   `sudo -u gdm env DCONF_PROFILE=gdm` は、ログイン画面と同じユーザー・同じプロファイルで読む。
+   **gdm ユーザーで読む理由**: `sudo -u gdm env DCONF_PROFILE=gdm` は、ログイン画面と同じユーザー・同じプロファイルで読む。
 
    - 自分のユーザーのまま `DCONF_PROFILE=gdm` で読むと、プロファイルの先頭の `user-db:user` が自分の設定を指すので、手順 2 で変えた自分の値が見えてしまう
    - コンテナで、自分の `power-button-action` を `'nothing'`、ログイン画面用のファイルを `'interactive'` にして比べると、自分で読むと `'nothing'`、`gdm` ユーザーで読むと `'interactive'` だった
    - 読むと `/var/lib/gdm/.cache/dconf/user`（2 バイトの目印のファイル）が作られる。消さなくてよい
    - 動いているログイン画面に、いつから効くかは確かめていない。次にログイン画面が出たとき（ログアウトか再起動の後）には読まれるはず
+
+   **`POWER_BUTTON` が空のときに `if` で止める理由**: ヒアドキュメントの中の `${POWER_BUTTON:?…}` は、空のときに `sudo tee` だけを失敗させ、`{ … }` で囲んでも後ろの行は動いた。
+
+   - 2026-10-02 に、スタブの `sudo` を置いた対話の bash（5.2、擬似端末、ブラケットペースト無し）に貼って確かめた
+   - `if` の形では、空のときは `中断:` だけが出て、`sudo` の行はどれも動かなかった
 
    </details>
 
@@ -255,9 +250,9 @@
    <details>
    <summary>補足: mask とは別に蓋の設定を置く理由</summary>
 
-   手順 5 の後は、蓋を閉じても、logind は mask された target を使えないので眠らないはず（蓋のイベントは確かめていない）。それでも設定を置くのは、次の 2 つのため。
+   手順 4 の後は、蓋を閉じても、logind は mask された target を使えないので眠らないはず（蓋のイベントは確かめていない）。それでも設定を置くのは、次の 2 つのため。
 
-   - 「蓋を閉じても何もしない」ことを設定として残す。手順 5 の mask を外したときも、蓋では眠らない
+   - 「蓋を閉じても何もしない」ことを設定として残す。手順 4 の mask を外したときも、蓋では眠らない
    - 眠れないサスペンドを logind が試みることが無くなる
 
    **既定の値**（コンテナの実測）:
@@ -301,18 +296,11 @@
 
    - `uint32 300`、`true`、続いて `idle-dim true`・`power-button-action 'suspend'`・`sleep-inactive-ac-type 'suspend'`・`sleep-inactive-battery-type 'suspend'` の 4 行が出ればよい
 
-1. ログイン画面用の設定ファイルを消す。
-
-   ```bash
-   sudo rm -f /etc/dconf/db/gdm.d/90-power
-   ```
-
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. dconf のデータベースを作り直し、ログイン画面から見える値が戻ったか確かめる。
+1. ログイン画面用の設定ファイルを消し、dconf を作り直して、ログイン画面から見える値が戻ったか確かめる。
 
    ```bash
    {
+     sudo rm -f /etc/dconf/db/gdm.d/90-power
      sudo dconf update
      sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
    }
@@ -352,13 +340,13 @@
 
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - [WireGuard](wireguard.md)・[Samba](samba.md)・[Syncthing](syncthing.md)・[Dropbox](dropbox.md)・[Dropbox（rclone）](dropbox-rclone.md)・[GNOME Remote Desktop](gnome-remote-desktop.md) のホストは、眠るとサービスが止まる
-  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3〜5 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
+  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3・4 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
   - [Claude Code で GUI を確かめる](claude-code-gui.md)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナで検証済み（2026-09-27）。手順 1・2 だけは aarch64 の実機（Raspberry Pi 5）で本実行した（2026-10-01）**
-  - 下表の 2 つのコンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜6 と[ロールバック](#ロールバック)を通した
-    - 手順 1〜4 とロールバックの 1〜3: GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中で実行
-    - 手順 5・6 とロールバックの 4・5: systemd を PID 1 にしたコンテナで実行
+  - 下表の 2 つのコンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜5 と[ロールバック](#ロールバック)を通した
+    - 手順 1〜3 とロールバックの 1・2: GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中で実行
+    - 手順 4・5 とロールバックの 3・4: systemd を PID 1 にしたコンテナで実行
   - [flatpak.md](flatpak.md) と同じ、x86_64 のクラウドホスト上の Docker で行った
   - 確認したこと:
     - `gsettings` で 6 つのキーが変わり、`reset` で既定値に戻る
@@ -366,7 +354,7 @@
     - mask で、logind の `CanSuspend` が `"yes"` から `"no"` に変わる（本当には眠れないコンテナで）
     - logind の `HandleLidSwitch` が `"ignore"` になり、戻せる
   - **確認していないこと**: 画面が消えない・暗くならない・ロックしないこと、実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示。コンテナには画面も GNOME のセッションも無いため
-  - 2026-09-28: 手順 4〜6 と、[ロールバック](#ロールバック)の手順 3〜5のブロックを `{ … }` で囲んだ
+  - 2026-09-28: もとの手順 4〜6（今の手順 3 の `dconf update` から後と、手順 4・5）と、[ロールバック](#ロールバック)のもとの手順 3〜5（今の手順 2 の `dconf update` から後と、手順 3・4）のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-01: 手順 2 と[ロールバック](#ロールバック)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
@@ -375,7 +363,10 @@
     - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](gnome-headless-session.md) と [claude-code-gui.md](claude-code-gui.md) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
     - 読み戻しは[完了時点の状態](#完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
     - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとしなかった（手順 2 の前は、15 分でしようとした）
-    - 手順 3〜6 とロールバックは、実機では流していない
+    - 手順 3〜5 とロールバックは、実機では流していない
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](#ロールバック)のもとの手順 2・3 をつないだ（手順 3 は `if … fi`、ロールバックの手順 2 は `{ … }` で囲んだ）
+    - 手順 3 は、スタブの `sudo` を置いた対話の bash に貼り、`POWER_BUTTON` が空なら何も動かず、値があればすべての行が動くことだけ確かめた（手順 3 の補足）
+    - ロールバックの手順 2 は貼っていない。`bash -n` だけ
 
 | 項目 | 実機 | コンテナ（GNOME の一式） | コンテナ（systemd） |
 |---|---|---|---|
@@ -421,12 +412,12 @@
 | ログイン画面 | `gdm` ユーザーとして `gsettings set` し、`gdm` ユーザー自身の設定に書く | 不採用。値が `/var/lib/gdm` の中に隠れ、`/etc` を見ても分からない |
 | OS 全体 | sleep 系の target を `systemctl mask` | **採用**。`systemctl is-enabled` で状態を確かめられ、`unmask` で戻せる |
 | OS 全体 | `/etc/systemd/sleep.conf.d/` で `AllowSuspend=no` などにする | 試していない（mask で `CanSuspend` が `"no"` になることを確かめたので足りた） |
-| 電源ボタン | logind の `HandlePowerKey` | 変えない。GNOME が動いている間は `power-button-action` が効く（手順 6 の補足） |
+| 電源ボタン | logind の `HandlePowerKey` | 変えない。GNOME が動いている間は `power-button-action` が効く（手順 5 の補足） |
 | 蓋 | logind の `HandleLidSwitch=ignore`（ドロップイン） | **採用**。RHEL 10 の文書は `/etc/systemd/logind.conf` を直接書き換えるが、ドロップインなら消すだけで戻せる |
 
 ### 完了時点の状態
 
-**GNOME の一式のコンテナ**（手順 4 の直後）:
+**GNOME の一式のコンテナ**（手順 3 の直後）:
 
 ```
 $ gsettings get org.gnome.desktop.session idle-delay
@@ -449,7 +440,7 @@ org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
 ```
 
-**systemd のコンテナ**（手順 6 の直後）:
+**systemd のコンテナ**（手順 5 の直後）:
 
 ```
 $ systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
@@ -469,8 +460,8 @@ s "ignore"
 
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 手順 2 の読み戻しで確かめる（手順 2 の補足）
 - **Homebrew の `gsettings` は GNOME に効かない**: dconf ではなくファイルに書き、読み戻しでは変わったように見える。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（手順 2 の補足）
-  - `sudo -u gdm … gsettings` の行（手順 4 と[ロールバック](#ロールバック)の手順 3）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、RPM の `gsettings` が使われる
-    - Raspberry Pi 5 で、`sudo -u gdm env sh -c 'command -v gsettings'` が `/bin/gsettings` を返した（手順 4 そのものは実機で流していない）
+  - `sudo -u gdm … gsettings` の行（手順 3 と[ロールバック](#ロールバック)の手順 2）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、RPM の `gsettings` が使われる
+    - Raspberry Pi 5 で、`sudo -u gdm env sh -c 'command -v gsettings'` が `/bin/gsettings` を返した（手順 3 そのものは実機で流していない）
     - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通しても、Homebrew は `secure_path` の末尾なので、`/bin/gsettings` が先に見つかる（同じ形のコマンドを、その節を通したコンテナで確かめた。[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
 - **dconf のファイルの型**: 文字列は `'nothing'` のように引用符で囲む。`idle-delay` のような uint32 は `uint32 0` と書く（手順 3 の補足）
   - 引用符が無いと `dconf update` が失敗し、データベースは前の内容のまま残る
@@ -482,7 +473,7 @@ s "ignore"
   - 手順 2 を `gsettings` で行い、`local.d` を使わなかったのはこのため
 - **仮想マシンの中では**: gnome-settings-daemon は放置によるサスペンドをしない（gsd 47.2 のソースから）
   - 電源ボタンは `nothing` 以外だと電源オフになる（`power-button-action` のスキーマの説明から）
-- **設定アプリで後から変えるとき**: 手順 5 の後は「自動サスペンド」の行が出ないので、戻すなら `gsettings` か[ロールバック](#ロールバック)で行う（手順 5 の補足）
+- **設定アプリで後から変えるとき**: 手順 4 の後は「自動サスペンド」の行が出ないので、戻すなら `gsettings` か[ロールバック](#ロールバック)で行う（手順 4 の補足）
 
 ### 参照
 
@@ -508,13 +499,13 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 |---|---|
 | 1. 変数 | `USER = <USER>`、`IDLE_DELAY = 0`、`LOCK_ENABLED = false`、`POWER_BUTTON = interactive` |
 | 2. 自分のセッション | 読み戻しは [完了時点の状態](#完了時点の状態) のとおり。`~/.config/dconf/user`（748 バイト）ができた。セッションバスを用意しないと `failed to commit changes to dconf` で値が変わらず、終了コードは 0 だった |
-| 3〜4. ログイン画面 | `dconf update` は無出力で終了コード 0。`gdm` ユーザーで読んだ値が `'nothing'` 2 つと `'interactive'` になった。引用符を外したファイルでは `invalid value` で終了コード 1、`idle-delay=0` は無視されて `uint32 300` のまま（手順 3 の補足） |
-| 5. mask | `Created symlink` が 5 行、`masked` が 5 行。logind の `CanSuspend` は mask の前が `"yes"`、後が `"no"` |
-| 6. 蓋 | reload で journal に `Config file reloaded.`。`HandleLidSwitch` は `"suspend"` から `"ignore"` に |
+| 3. ログイン画面 | `dconf update` は無出力で終了コード 0。`gdm` ユーザーで読んだ値が `'nothing'` 2 つと `'interactive'` になった。引用符を外したファイルでは `invalid value` で終了コード 1、`idle-delay=0` は無視されて `uint32 300` のまま（手順 3 の補足） |
+| 4. mask | `Created symlink` が 5 行、`masked` が 5 行。logind の `CanSuspend` は mask の前が `"yes"`、後が `"no"` |
+| 5. 蓋 | reload で journal に `Config file reloaded.`。`HandleLidSwitch` は `"suspend"` から `"ignore"` に |
 | ロールバック 1 | `uint32 300`・`true`・`idle-dim true`・`'suspend'` が 3 つ |
-| ロールバック 2〜3 | `gdm` ユーザーで読んだ値が 3 つとも `'suspend'` に戻った。`gdm.d` には `locks` だけが残った |
-| ロールバック 4 | `Removed` が 5 行、`static` が 5 行。`CanSuspend` は `"yes"` に戻った |
-| ロールバック 5 | `s "suspend"`。空の `/etc/systemd/logind.conf.d` が残った |
+| ロールバック 2 | `gdm` ユーザーで読んだ値が 3 つとも `'suspend'` に戻った。`gdm.d` には `locks` だけが残った |
+| ロールバック 3 | `Removed` が 5 行、`static` が 5 行。`CanSuspend` は `"yes"` に戻った |
+| ロールバック 4 | `s "suspend"`。空の `/etc/systemd/logind.conf.d` が残った |
 | 比較. Server with GUI | `gnome-settings-daemon-server-defaults` を入れると、自分のセッションとログイン画面の両方で `sleep-inactive-ac-timeout` が `0` になり、`power-button-action` は `'suspend'` のままだった（[注意点](#注意点)）。確かめた後に消した |
 
 #### 未確認事項
@@ -549,6 +540,6 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 
 #### 未確認事項
 
-- 実機での手順 3〜6 とロールバック
+- 実機での手順 3〜5 とロールバック
 - 画面が消えない・暗くならないこと（モニターのある PC で）
 - x86_64 の PC
