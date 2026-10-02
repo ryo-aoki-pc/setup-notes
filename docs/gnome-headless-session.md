@@ -400,7 +400,9 @@
     - 再起動の後の自動起動（この Pi では WireGuard・Samba・Syncthing も動いているので、再起動しなかった）
     - Windows のリモート デスクトップ接続・Android のクライアント・LAN の別のマシン（実物）からの接続
     - x86_64 の PC、サスペンドできる PC（ログイン画面が眠らせないこと）
-    - 同じユーザーのリモートログインやローカルのログインとの重なり、後からリモートログインを有効にしたとき
+    - 同じユーザーのローカルのログインとの重なり、後からリモートログインを有効にしたとき
+  - 2026-10-02: リモートログインのログイン画面から同じユーザーで入ると、このセッションに引き渡された（Windows 11 の「リモートデスクトップ接続」で。[gnome-remote-desktop.md の付録](gnome-remote-desktop.md#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
+    - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](#注意点)）
 
 | 項目 | 値 |
 |---|---|
@@ -474,14 +476,20 @@ $ sudo firewall-cmd --list-ports
 ### 注意点
 
 - **Homebrew が PATH の先頭にあると、`gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになる**（[homebrew.md の注意点](homebrew.md#注意点)）。前提の [gnome-power.md](gnome-power.md) の手順は `/usr/bin/gsettings` で書いてある（Homebrew の `gsettings` は GNOME に効かない）
-- **同じユーザーの GNOME のセッションは 1 つにする**: PC の画面やリモートログインから同じユーザーで入るときは、先に `sudo systemctl stop gnome-headless-session@<USER>.service` でヘッドレスのセッションを止める
+- **同じユーザーの GNOME のセッションは 1 つにする**: PC の画面から同じユーザーで入るときは、先に `sudo systemctl stop gnome-headless-session@<USER>.service` でヘッドレスのセッションを止める
   - gnome-session のユーザーの unit（`gnome-session-manager@gnome.service` など）はユーザーに 1 組しか無いので、2 つ目のセッションは動かないはず（重なったときの動きは確かめていない）
+  - リモートログイン（[gnome-remote-desktop.md](gnome-remote-desktop.md)）のログイン画面から同じユーザーで入ると、新しいセッションは作られず、このセッションに引き渡された（2026-10-02。同書の[注意点](gnome-remote-desktop.md#注意点)）
+  - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
 - **起動し直すのは `restart` ではなく、`stop` → 待つ → `start`**: `sudo systemctl restart gnome-headless-session@<USER>.service` では、新しいセッションができなかった（[付録](#付録-実機での検証記録2026-10-01)）
+- **GDM を再起動すると、このセッションも止まって起動し直される**（`Requires=gdm.service`）
+  - 起動し直しが前のセッションの片付けとぶつかると、新しいセッションはすぐ終わる（2026-10-02 に、2 つのうち 1 つで起きた）
+  - GDM を再起動したら `systemctl is-active gnome-headless-session@<USER>.service` を見て、`inactive` なら `sudo systemctl start gnome-headless-session@<USER>.service` で起動する
 - **セッションを止めると、ユーザーの D-Bus が起動し直される**: GNOME のセッションが終わると、`gnome-session-restart-dbus.service` がユーザーのセッションバスを起動し直す
 - **ログインのキーリングは開いていない**: パスワード無しで作るセッションなので、キーリング（`login`）はロックされたまま。パスワードを読もうとするアプリは、キーリングを開く窓を出す
 - **サスペンドとロック**: ヘッドレスのセッションでも gsd-power は動き、既定では 15 分の無操作で PC をサスペンドしようとする。前提の [gnome-power.md 手順 1・2](gnome-power.md#実施手順) で止める
   - seat0 には GDM のログイン画面が残り、Workstation で入れた PC ではそれも 15 分で PC を眠らせる（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）。サスペンドできる PC では、同書の手順 3〜5 も行う（この Pi はサスペンドできないので、確かめていない）
 - **リモートログインを有効にしている PC**: セッションの中で `gnome-remote-desktop-handover.service` も起動する（リモートログインの受け渡し役。TCP では待ち受けない）
+  - リモートログインのデーモン（`gnome-remote-desktop.service`）を起動し直したら、この受け渡し役のデーモンも再起動する（[gnome-remote-desktop.md の「設定済みのサーバーで GDM の後に起動させる」](gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、リモートログインからこのセッションへ渡せなくなるはず
 - **自己署名証明書**: クライアントは初回に証明書の確認を出す。証明書を作り直したら、クライアントで保存済みの証明書を消すか、変更の警告を承認する（gnome-remote-desktop.md の注意点と同じ）
 - **資源**: セッションを起動すると、`free` の `available` が約 600 MB 減った（Raspberry Pi 5、アプリを開いていないとき）
 

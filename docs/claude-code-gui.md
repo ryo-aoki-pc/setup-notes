@@ -383,11 +383,14 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
   - `gdbus` と `gio` も Homebrew のものになる。手で使うときは `/usr/bin/` を付ける
 - **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](gnome-headless-session.md) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
   - 上部バーは主のモニター（`Meta-0`）にしか出ないので、クライアントの画面には上部バーが無かった
+  - リモートログイン（[gnome-remote-desktop.md](gnome-remote-desktop.md)）のログイン画面からこのユーザーで入ったときも、このセッションに引き渡され、gnome-shell のログに `Added virtual monitor Meta-1` が出た（2026-10-02、Windows 11 の「リモートデスクトップ接続」）
+    - 同じドロップインを置いた試験用のユーザーで、FreeRDP で同じように入ると、クライアントには壁紙だけが写った（上部バーもウィンドウも無い）
   - RDP だけで使うなら、[ロールバック](#ロールバック)でドロップインを外すと、クライアントの画面がデスクトップ全体になる
 - **ドロップインは、このユーザーの GNOME のセッションすべてに効く**: 後からモニターをつないで、このユーザーで PC の画面からログインすると、見えない仮想モニターも足されるはず（確かめていない）。そのときは[ロールバック](#ロールバック)で外す
 - **ログインのキーリングは開いていない**: パスワードを読もうとするアプリは、キーリングを開く窓を出す。Claude Code には答えられない（`Escape` で閉じられるかは確かめていない）
 - **手順 3 とロールバックの手順 2 は、ユーザーの D-Bus も起動し直す**: GNOME のセッションが終わると、`gnome-session-restart-dbus.service` がユーザーのセッションバスを起動し直す
 - **起動し直すのは `restart` ではなく、`stop` → 待つ → `start`**: `restart` では新しいセッションができなかった（手順 3 の補足）
+- **GDM を再起動すると、このセッションが消えることがある**: 2026-10-02 に GDM を再起動したとき、このセッションは起動し直されたが 1 秒で終わった（[gnome-headless-session.md の注意点](gnome-headless-session.md#注意点)）。`sudo systemctl start gnome-headless-session@<USER>.service` で起動すると、ドロップインの `Meta-0` も戻った
 
 ### 参照
 
