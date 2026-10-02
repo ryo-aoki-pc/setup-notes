@@ -82,8 +82,10 @@
    printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
    ```
 
-   - `sudo` 経由のエディタ（`sudoedit`、`visudo`）は root の PATH を使うので、Homebrew 版の `nvim` は見えない
-   - 必要なら `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
+   - `sudoedit` は `EDITOR` の `nvim` を sudo の PATH（`secure_path`）で探すので、そのままでは見つからず、黙って `vi` で開く
+   - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すと、`sudoedit` は自分の設定（`~/.config/nvim`）の Homebrew 版の `nvim` で開く
+   - `sudo visudo` は `EDITOR` を引き継がず、その節を通しても `vi` で開く。`nvim` で開くなら、その節を通して `sudo EDITOR=nvim visudo` と打つ（root の設定の `/root/.config/nvim` を読む）
+   - その節を通さないなら、`SUDO_EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim sudoedit <ファイル>` や `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
    - root のシェル（`su -`、root のログイン、`sudo -i`）で `nvim` を使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す。root の Neovim は `/root/.config/nvim` を読む
    - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ 3 行を読む）
 
@@ -159,6 +161,7 @@
   - 確認したこと: ボトルが降りる、`nvim --version` が出る、`EDITOR` / `VISUAL` が `nvim` になる、`init.lua` を置いた状態で `has("nvim")` が `1` を返す
   - **コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）
   - **実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
+  - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -227,9 +230,10 @@ tree-sitter
 ### 注意点
 
 - **EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ（[homebrew.md の注意点](homebrew.md#注意点)）。どちらか一方にする
-- **`sudo nvim` は動かない**: root の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）
-  - `sudoedit` や `visudo` で使うならフルパスを `EDITOR` に渡す
-  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節を通しても動かない）
+- **`sudo nvim` は、そのままでは動かない**: sudo の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）
+  - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む
+  - root のファイルを自分の設定で編集するなら、`sudo nvim` ではなく `sudoedit` を使う（その節を通すか、`SUDO_EDITOR` にフルパスを渡す。[既定のエディタにする](#既定のエディタにする任意)）
+  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節だけでは動かない）
 - **プロバイダは別途**: Python / Node.js のプラグインを使うなら、それぞれ `pynvim` / `neovim` パッケージを入れる。このホストには Node.js が無い
 - **設定とプラグインは更新に追従しない**: `brew upgrade neovim` でメジャー版が上がると、古い API を使うプラグインが壊れることがある
 - **`vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
