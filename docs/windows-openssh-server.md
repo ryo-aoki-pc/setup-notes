@@ -4,6 +4,7 @@
 
 > [!IMPORTANT]
 > - **手順 1〜7 は Windows で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2〜7 をそこに貼る
+> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、Windows のブロックは Ctrl+V で貼る
 > - **手順 8・9 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
 > - SSH でログインするのは、この PC の Windows のユーザー。パスワードは、そのユーザーの Windows のパスワード（Microsoft アカウントなら、そのアカウントのパスワード）。Administrators の一員でないユーザーも入れる（[注意点](#注意点)）
 > - **手順 9 には対話入力がある**（ホスト鍵の確認とパスワード）
@@ -421,7 +422,7 @@
 - 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
   - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
 - この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
-- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[windows-setup.md 手順 3〜6](windows-setup.md#実施手順) で入れた形）
 - この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 8 のシェルに貼る
 - `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
 
