@@ -422,7 +422,7 @@
 - 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
   - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
 - この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
-- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[windows-setup.md 手順 3〜6](windows-setup.md#実施手順) で入れた形）
 - この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 8 のシェルに貼る
 - `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
 

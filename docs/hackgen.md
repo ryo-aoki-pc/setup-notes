@@ -1,8 +1,9 @@
-# HackGen Console NF インストール手順（AlmaLinux 10 / Homebrew）
+# HackGen Console NF インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は上流の zip）
 
 ## 実施手順
 
 > [!IMPORTANT]
+> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（Windows PowerShell 5.1 に貼る。管理者の権限は要らない）
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、フォントも自分のホームの `~/.local/share/fonts` に入るため）
 
@@ -11,7 +12,7 @@
 - 手順の後: 端末のフォントにするなら[WezTerm で使う（任意）](#wezterm-で使う任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行しておらず、aarch64 でも通していない。画面での見た目も確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **この実施手順（AlmaLinux 10）は x86_64 のコンテナでのみ検証した**。実機では本実行しておらず、aarch64 でも通していない。画面での見た目も確かめていない（[対象と検証環境](#対象と検証環境)）。
 
 1. 変数を設定する。
 
@@ -229,6 +230,8 @@
 
 ## 更新
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 の更新](#windows-11-の更新)
+
 1. HackGen を上げる。
 
    ```bash
@@ -241,6 +244,7 @@
 
 ## ロールバック
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - **Homebrew そのものを消すとき**（[homebrew.md のロールバック](homebrew.md#ロールバック)）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
   - `~/.local/share/fonts` は Homebrew の外なので、Homebrew のアンインストーラがこのフォントを消すかどうかは確かめていない
 
@@ -267,13 +271,181 @@
 
 ---
 
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **すべて Windows で行う**。この節の手順 1 で Windows PowerShell（5.1）を開き、この節の手順 2・3 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。管理者の権限は要らない（自分のユーザーに入れる）
+> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、ブロックは Ctrl+V で貼る
+> - **この節の手順 4 で、サインアウトしてサインインし直す**（登録したフォントは、サインインのときに読み込まれる）
+
+- 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `HACKGEN_FAMILY` は AlmaLinux 10 だけで使う）
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その手順 12 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、上流の zip の sha256・中身・ファミリー名、scoop と winget の定義、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](#対象と検証環境)）。
+
+1. Windows で、Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」でなくてよい）
+
+1. HackGen がまだ入っていないことを確かめる。
+
+   ```powershell
+   Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -ErrorAction SilentlyContinue | ForEach-Object { $_.Property -like 'HackGen*' }
+   Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts", "$env:WINDIR\Fonts" -Filter 'HackGen*' -ErrorAction SilentlyContinue | Format-Table Name, DirectoryName
+   ```
+
+   - どちらも何も出なければ、入っていない
+   - 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、この節の手順で入れたもの（この節の手順 3 は何度貼ってもよい）
+   - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っている（ほかの方法で入れたもの）。そのまま使えるので、この節は要らない
+
+1. HackGen Console NF の zip を取り、sha256 を確かめて自分のユーザーのフォントに入れる。
+
+   ```powershell
+   & {
+     $ver = '2.10.0'
+     $sha256 = 'F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428'
+     $fonts = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+     $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
+     $tmp = "$env:TEMP\hackgen-setup"
+     $zip = "$tmp\HackGen_NF_v$ver.zip"
+     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & "$env:WINDIR\System32\curl.exe" -fsSL -o $zip "https://github.com/yuru7/HackGen/releases/download/v$ver/HackGen_NF_v$ver.zip"
+     if ($LASTEXITCODE -ne 0) { Write-Error "中断: HackGen_NF_v$ver.zip を取れない"; return }
+     if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sha256) { Write-Error "中断: HackGen_NF_v$ver.zip の sha256 が一致しない"; return }
+     Expand-Archive -LiteralPath $zip -DestinationPath $tmp -Force
+     $ttf = @(Get-ChildItem -LiteralPath "$tmp\HackGen_NF_v$ver" -Filter '*.ttf')
+     if ($ttf.Count -ne 4) { Write-Error "中断: zip の中の ttf が 4 つではない（$($ttf.Count)）"; return }
+     New-Item -ItemType Directory -Force -Path $fonts | Out-Null
+     icacls.exe $fonts /grant '*S-1-15-2-1:(OI)(CI)(RX)' '*S-1-15-2-2:(OI)(CI)(RX)' | Out-Null
+     if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key | Out-Null }
+     foreach ($f in $ttf) {
+       $dst = Join-Path $fonts $f.Name
+       if (-not (Test-Path -LiteralPath $dst) -or (Get-FileHash -LiteralPath $dst).Hash -ne (Get-FileHash -LiteralPath $f.FullName).Hash) {
+         try { Copy-Item -LiteralPath $f.FullName -Destination $dst -Force -ErrorAction Stop } catch { Write-Error "中断: $($f.Name) を置けない（$($_.Exception.Message)）"; return }
+       }
+       New-ItemProperty -Path $key -Name "$($f.BaseName) (TrueType)" -Value $dst -PropertyType String -Force | Out-Null
+     }
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     Get-ItemProperty -LiteralPath $key | Select-Object -Property 'HackGen*' | Format-List
+   }
+   ```
+
+   - `HackGen35ConsoleNF-Bold (TrueType) : C:\Users\<WIN_USER>\AppData\Local\Microsoft\Windows\Fonts\HackGen35ConsoleNF-Bold.ttf` の形の行が 4 つ出ればよい
+   - `中断:` で始まるエラーが出たら、そこで止まっている（取ってきたものは `%TEMP%\hackgen-setup` に残る。次に貼ったときに消して作り直す）
+   - 何度貼ってもよい（同じファイルは置き直さない）
+   - アプリで使えるのは、この節の手順 4 でサインインし直した後
+
+   <details>
+   <summary>補足: 確かめていることと、入れ方</summary>
+
+   **版と sha256 を固定した**
+
+   - HackGen の上流は、リリースの sha256 を出していない。`HackGen_NF_v2.10.0.zip` の sha256 は、[実施手順](#実施手順)の手順 4 の補足で取った zip・Homebrew の cask `font-hackgen-nerd`・scoop の個人のバケット（mo-san）の定義の 3 つで同じ値だった（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+   - そのため版（2.10.0）と sha256 をブロックに書き、一致しなければ止める。新しい版が出たら、この文書を直してから貼る（[Windows 11 の更新](#windows-11-の更新)）
+   - `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[syncthing.md の Windows 11 で使う](syncthing.md#windows-11-で使う)の手順 4 の補足と同じ）
+
+   **入れるもの**
+
+   - zip の中の 4 つの ttf を全部入れる: `HackGenConsoleNF-{Regular,Bold}.ttf`（ファミリー名は `HackGen Console NF`）と `HackGen35ConsoleNF-{Regular,Bold}.ttf`（`HackGen35 Console NF`）。AlmaLinux 10 の cask と同じ 4 つ
+   - アプリの設定に書くのはファミリー名（`HackGen Console NF`。スペースが入る）で、ファイル名ではない
+
+   **自分のユーザーに入れる**（管理者の権限は要らない）
+
+   - 置き場所は `%LOCALAPPDATA%\Microsoft\Windows\Fonts`、登録は `HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts` に `<ファイル名> (TrueType)` = ファイルのフルパス。Windows 10 1809 から、フォントをユーザーごとに入れられる
+   - 書き方は、scoop の nerd-fonts のバケットの定義（`Hack-NF.json` など）と同じ。そこでは、パッケージのアプリ（Microsoft Store のアプリなど）からも読めるように、フォルダーに「すべてのアプリケーション パッケージ」（`S-1-15-2-1`）と「制限されたすべてのアプリケーション パッケージ」（`S-1-15-2-2`）の読み取りを足している。本書の `icacls` も同じ（足すだけで、ほかの許可は変えない）
+   - 登録したフォントは、サインインのときに読み込まれる。そのため、使えるのはサインインし直した（か再起動した）後
+   - 読み込まれているフォントのファイルは、置き換えも削除もできない。2 回目に貼るときに同じファイルなら置き直さないのは、そのため
+
+   </details>
+
+1. この PC でサインアウトし、サインインし直す。
+
+   - スタートメニューのユーザーのアイコンから「サインアウト」し、サインインし直す（再起動でもよい）
+   - [Windows 11 の初期設定](windows-setup.md)の手順 12 の再起動をこの後に行うなら、この手順は要らない
+
+1. 設定のフォントの一覧で、HackGen Console NF が出ることを確かめる。
+
+   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る
+   - メモ帳のフォントの一覧に出ても同じ
+   - 端末のフォントにするなら、アプリの設定にファミリー名 `HackGen Console NF` を書く（WezTerm は `config.font = wezterm.font 'HackGen Console NF'`。自分用の設定（`ryo-aoki-pc/wezterm`）は、もうこのフォントを使う）
+
+---
+
+## Windows 11 の更新
+
+- 上流は sha256 を出していないので、この文書の版と sha256（[Windows 11 で使う](#windows-11-で使う)の手順 3）を確かめて上げてから入れ直す
+- この節の手順 1 は、Windows PowerShell（5.1）に貼る
+
+1. HackGen の新しい版が出ているかを確かめる。
+
+   ```powershell
+   (Invoke-RestMethod -Uri https://api.github.com/repos/yuru7/HackGen/releases/latest).tag_name
+   ```
+
+   - `v2.10.0` なら、新しい版は無い。この節の手順 2 は行わない
+   - 違う版なら、この文書の[Windows 11 で使う](#windows-11-で使う)の手順 3 の `$ver` と `$sha256` を、その版の zip で確かめた値に直す（直すまで、その手順 3 は貼らない。sha256 が合わずに止まる）
+
+   <details>
+   <summary>補足: 更新を手作業にしている理由</summary>
+
+   - 上流は sha256 を出していないので、版と sha256 をこの文書に書いて確かめている（[Windows 11 で使う](#windows-11-で使う)の手順 3 の補足）。新しい版の値は、この文書を直す人が確かめる
+   - 2.10.0 のファイルの日付は 2024-12-29 で、2026-10-03 の時点でもこれが最新だった
+   - GitHub の API は、サインインしないと 1 時間に 60 回まで
+
+   </details>
+
+1. 新しい版にするときだけ、今の版を外してから入れ直す。
+
+   - [Windows 11 のロールバック](#windows-11-のロールバック)の手順 1〜3 を行う（読み込まれているファイルは置き換えられないため）
+   - 続けて、直した[Windows 11 で使う](#windows-11-で使う)の手順 3〜5 を行う
+
+---
+
+## Windows 11 のロールバック
+
+- この節の手順 1・3 は、Windows PowerShell（5.1）に貼る
+- フォントのファイルは読み込まれている間は消せないので、登録を消してからサインインし直し、その後でファイルを消す
+
+1. HackGen の登録を消す。
+
+   ```powershell
+   $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
+   (Get-Item -LiteralPath $key).Property -like 'HackGen*ConsoleNF-* (TrueType)' | ForEach-Object { Remove-ItemProperty -LiteralPath $key -Name $_ }
+   (Get-Item -LiteralPath $key).Property -like 'HackGen*'
+   ```
+
+   - 最後のコマンドが何も出さなければよい
+
+1. この PC でサインアウトし、サインインし直す。
+
+   - 再起動でもよい
+   - **次の手順は、サインインし直して Windows PowerShell（5.1）を開いてから貼る**
+
+1. フォントのファイルを消す。
+
+   ```powershell
+   Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts\HackGen*ConsoleNF-*.ttf"
+   Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts" -Filter 'HackGen*'
+   ```
+
+   - 最後のコマンドが何も出さなければよい
+   - [Windows 11 で使う](#windows-11-で使う)の手順 3 の `icacls` で足した読み取りの許可は残す（ほかのフォントにも要る）
+
+---
+
 ## 補足
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 に、日本語と Nerd Fonts のアイコンが 1 つで揃うプログラミング用フォント [HackGen Console NF](https://github.com/yuru7/HackGen) を入れる。[eza](eza.md) のアイコンや [starship](starship.md) の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフが要る
-- **進め方**: Homebrew の cask `font-hackgen-nerd` で自分の `~/.local/share/fonts` に入れ、fontconfig から見えることを確かめる。**読者が書き換える変数は無い**
-- **状態**: **コンテナでのみ検証済み（2026-09-24、x86_64）。実機には入れていない**
+- **目的**: AlmaLinux 10 と Windows 11 に、日本語と Nerd Fonts のアイコンが 1 つで揃うプログラミング用フォント [HackGen Console NF](https://github.com/yuru7/HackGen) を入れる。[eza](eza.md) のアイコンや [starship](starship.md) の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフが要る
+- **進め方**: どちらも自分のユーザーだけに入れる。**読者が書き換える変数は無い**
+  - **AlmaLinux 10**（[実施手順](#実施手順)）: Homebrew の cask `font-hackgen-nerd` で自分の `~/.local/share/fonts` に入れ、fontconfig から見えることを確かめる
+  - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: 上流の `HackGen_NF_v2.10.0.zip` を、版と sha256 をブロックに書いて確かめてから、`%LOCALAPPDATA%\Microsoft\Windows\Fonts` に置いて自分のユーザーの登録（`HKCU`）に書く。Windows PowerShell 5.1 に貼り、管理者の権限は要らない。[Windows 11 の初期設定](windows-setup.md)の 1 項目として依頼されたもの
+- **状態（AlmaLinux 10）**: **コンテナでのみ検証済み（2026-09-24、x86_64）。実機には入れていない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜5・[WezTerm で使う（任意）](#wezterm-で使う任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**（[flatpak.md](flatpak.md) と同じ環境）
   - 確認したこと:
@@ -284,6 +456,15 @@
     - ロールバックで消える
   - **確認していないこと**: 実際の見た目（字形、太字、行の高さ、アイコンの幅）。コンテナに画面が無いため
   - aarch64 でも同じ zip が使われる（cask の定義にアーキごとの分岐が無い）が、aarch64 では通していない
+- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - **確かめたこと**:
+    - 配布物: `HackGen_NF_v2.10.0.zip` の sha256（3 か所の記録と一致）・中身・ファミリー名（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+    - ほかの経路: scoop の個人のバケット（mo-san）と nerd-fonts のバケット、winget の既定のソース
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](#windows-11-で使う)の手順 3 のブロックは、Linux の pwsh で偽物の `icacls.exe` とレジストリを使って流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+  - **確かめていないこと**: Windows で貼ること（すべての手順）、サインインし直した後に設定のフォントの一覧とアプリ（WezTerm と、Windows Terminal などのパッケージのアプリ）で使えること、更新とロールバック、arm64 の Windows
+
+AlmaLinux 10:
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -294,18 +475,28 @@
 | unzip / fontconfig | 未確認 | どちらも未導入だったので `dnf` で入れた（`unzip-6.0-69.el10` / `fontconfig-2.15.0-7.el10`） |
 | WezTerm | x86_64 PC に nightly（[wezterm-nightly.md](wezterm-nightly.md)） | `wezterm 20260921_051727_5eb03b23`（検証のため wezterm-nightly.md の手順で導入） |
 
+Windows 11（前提にしている環境。ほかの Windows の手順書の実機の記録と同じ PC を想定）:
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11（[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2）。x64 |
+| PowerShell | Windows PowerShell 5.1（管理者でなくてよい） |
+| HackGen | 2.10.0（`HackGen_NF_v2.10.0.zip`） |
+
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> AlmaLinux 10 の環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。Windows 11 の節には変数が無い（版・sha256・パスはブロックに直接書いてある）。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${HACKGEN_FAMILY}` | fontconfig と WezTerm に渡すファミリー名 | `HackGen Console NF`（既定）/ `HackGen35 Console NF` |
 >
-> 出力例の値は `<USER>` のプレースホルダで書いてある。バージョン（`2.10.0`）は実行日によって変わる。
+> 出力例の値は `<USER>`（AlmaLinux 10）/ `<WIN_USER>`（Windows のユーザー名）のプレースホルダで書いてある。バージョン（`2.10.0`）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
+
+AlmaLinux 10 の検証コンテナ（Windows 11 では流していない）:
 
 | 項目 | 状態 |
 |---|---|
@@ -331,9 +522,23 @@ AlmaLinux 10 で HackGen Console NF を入れる経路を比べた（2026-09-24 
 - upstream の README は、Linux 向けの導入手順を書いていない（GitHub のリリースの ttf と、Mac の Homebrew、Windows の Chocolatey を案内している）
 - Homebrew の cask も README では Mac 向けとして紹介されているが、Linux の Homebrew でも入った（手順 4 の補足）
 
+Windows 11 で入れる経路を比べた（2026-10-03 時点）:
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **上流の zip を版と sha256 を固定して、自分のユーザーに入れる** | 管理者の権限も scoop も要らず、Windows PowerShell 5.1 で動く。更新は手作業 | **採用** |
+| scoop の個人のバケット mo-san の `font-hackgen-console-nf` | 同じ zip（sha256 も同じ）で、scoop と UniGet UI で上げられる。ただし、インストールのスクリプトが `Join-Path` に 3 つ以上の引数を渡していて、Windows PowerShell 5.1 の `Join-Path`（`-Path` と `-ChildPath` だけ）では失敗するはず。scoop はそのスクリプトを、`scoop` を打った PowerShell の中で動かす | 不採用（PowerShell 7 が要り、個人の保守） |
+| scoop の nerd-fonts のバケット | HackGen は無い | — |
+| winget | 既定のソース（winget-pkgs）に HackGen は無い。winget の一覧のサイトには `yuru7.HackGen`（第三者の `dfirr/winget-hackgen` が作り直したインストーラで、PC 全体に入れる）が載っている | 不採用 |
+| Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
+| PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
+
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](syncthing.md) と同じく後ろの節に分けた
+  - [Windows 11 の初期設定](windows-setup.md)（scoop・UniGet UI・Caps Lock・コンテキストメニュー）の依頼の 1 つとして書き、利用者に確かめてここへ置いた
+
 ### 完了時点の状態
 
-**検証コンテナでの出力**（手順 5 の直後）:
+**AlmaLinux 10 の検証コンテナでの出力**（手順 5 の直後。Windows 11 では流していない）:
 
 ```
 $ brew list --cask --versions font-hackgen-nerd
@@ -363,6 +568,8 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
   - `spacing=100`（`mono`）のフォントだけを選択肢に出すアプリで選べるかは、確かめていない
 - **GNOME の端末や VS Code など WezTerm 以外のアプリ**: それぞれの設定でファミリー名 `HackGen Console NF` を指定することになるが、本書では確かめていない
 - **Powerline の記号**: WezTerm は `U+E0B0` などの一部の記号を既定で自分で描く（`custom_block_glyphs`）。ほかの端末ではフォントのグリフが使われる
+- **Windows 11 では、自分のユーザーのフォントが見えないアプリがある**: ユーザーごとのフォントは Windows 10 1809 からで、古いアプリには見えないことがある。そのアプリだけ、PC 全体に入れ直す（本書では扱わない）
+- **Windows 11 では、読み込まれているフォントのファイルを置き換えられない**: 入れ替え（更新）と削除は、登録を消してサインインし直してから行う（[Windows 11 のロールバック](#windows-11-のロールバック)）
 
 ### 参照
 
@@ -372,6 +579,11 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 - `man fc-list` / `man fc-match` / `man fc-cache` — fontconfig の照会と、キャッシュの作り直し
 - [wezterm-nightly.md](wezterm-nightly.md) — WezTerm の導入と設定ファイルの置き場所
 - [Homebrew](homebrew.md) — Homebrew 本体の導入手順と `brew` の基本操作
+- [HackGen v2.10.0](https://github.com/yuru7/HackGen/releases/tag/v2.10.0) — Windows 11 の節で取る `HackGen_NF_v2.10.0.zip`
+- [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
+- [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）
+- [mo-san/scoop-bucket](https://github.com/mo-san/scoop-bucket) — 採らなかった scoop の個人のバケット
+- [Windows 11 の初期設定](windows-setup.md) — 同じ PC で一緒に行う設定（scoop・UniGet UI・Caps Lock・コンテキストメニュー）
 
 ---
 
@@ -399,3 +611,72 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 - GNOME の端末・VS Code・GNOME の設定などでのフォントの選択（`spacing=90` のフォントが一覧に出るか）
 - `HackGen35 Console NF` を `${HACKGEN_FAMILY}` にした場合の手順 5 と WezTerm の節（ファイルは同じ cask で入ることだけ確認した）
 - Homebrew を丸ごと消したとき（`uninstall.sh`）に `~/.local/share/fonts` のフォントが消えるか
+
+---
+
+### 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物と、ほかの経路の定義を読んだ記録。
+
+`HackGen_NF_v2.10.0.zip` を GitHub のリリースから取った:
+
+```
+$ sha256sum HackGen_NF_v2.10.0.zip
+f8abd483d5edfad88a78ed511978f43c83b43c48e364aa29ebe4a68217474428  HackGen_NF_v2.10.0.zip
+$ unzip -l HackGen_NF_v2.10.0.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+        0  2024-12-29 16:11   HackGen_NF_v2.10.0/
+ 13462380  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGen35ConsoleNF-Bold.ttf
+ 12922844  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGen35ConsoleNF-Regular.ttf
+ 13464288  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGenConsoleNF-Bold.ttf
+ 12922800  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGenConsoleNF-Regular.ttf
+---------                     -------
+ 52772312                     5 files
+$ fc-scan --format '%{file}: family=%{family} style=%{style}\n' HackGen_NF_v2.10.0/*.ttf
+HackGen_NF_v2.10.0/HackGen35ConsoleNF-Bold.ttf: family=HackGen35 Console NF style=Bold
+HackGen_NF_v2.10.0/HackGen35ConsoleNF-Regular.ttf: family=HackGen35 Console NF style=Regular
+HackGen_NF_v2.10.0/HackGenConsoleNF-Bold.ttf: family=HackGen Console NF style=Bold
+HackGen_NF_v2.10.0/HackGenConsoleNF-Regular.ttf: family=HackGen Console NF style=Regular
+```
+
+sha256 は、次の 3 つと同じだった:
+
+- [実施手順](#実施手順)の手順 4 の補足（2026-09-24 にコンテナの Homebrew が取った zip）
+- Homebrew の cask `font-hackgen-nerd` の定義（`https://formulae.brew.sh/api/cask/font-hackgen-nerd.json` の `sha256`。版は 2.10.0）
+- scoop の個人のバケット `mo-san/scoop-bucket` の `font-hackgen-console-nf.json` の `hash`（版は 2.10.0）
+
+scoop と winget の HackGen:
+
+- `mo-san/scoop-bucket`（最後のコミットは 2026-09-11）の `font-hackgen-console-nf.json` は、`HackGenConsoleNF-(Regular|Bold)` の 2 つだけを入れる。`--global` が無ければ自分のユーザー（`%LOCALAPPDATA%\Microsoft\Windows\Fonts` と `HKCU`）に入れる。インストールのスクリプトに `Join-Path $env:LOCALAPPDATA Microsoft Windows Fonts` と `Join-Path SOFTWARE Microsoft 'Windows NT' CurrentVersion Fonts`（引数が 3 つ以上）がある
+  - Windows PowerShell 5.1 の `Join-Path` は `-Path` と `-ChildPath` の 2 つしか取らない（Microsoft Learn の 5.1 の説明）。残りの引数を受ける `-AdditionalChildPath` は PowerShell 6 から
+  - scoop 0.6.0 の `lib/install.ps1` は、定義の `installer` のスクリプトを `Invoke-Command ([scriptblock]::Create(…))` で、`scoop` を打った PowerShell の中で動かす
+  - PSScriptAnalyzer の `PSUseCompatibleCommands` は、名前を付けた `-AdditionalChildPath` は 5.1 に無いと指摘したが、名前を付けずに並べた引数は指摘しなかった。Windows PowerShell 5.1 で失敗することは、Windows では確かめていない
+- `matthewjberger/scoop-nerd-fonts`（367 の定義）に HackGen は無い。`Hack-NF.json` などのインストールのスクリプトが、[Windows 11 で使う](#windows-11-で使う)の手順 3 の書き方のもと（`%LOCALAPPDATA%\Microsoft\Windows\Fonts` に置き、フォルダーに `S-1-15-2-1`・`S-1-15-2-2` の `ReadAndExecute` を足し、`HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts` に `<ファイル名> (TrueType)` = フルパスを書く）
+- winget-pkgs（2026-10-03 の `master`）の `manifests` の下に、名前に `hackgen` を含むものは無かった
+
+---
+
+### 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリースの `powershell-7.6.6-linux-x64.tar.gz`）と PSScriptAnalyzer 1.25.0 を入れて確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 5 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、ASCII でない文字を含むファイルの BOM だけ）
+
+**[Windows 11 で使う](#windows-11-で使う)の手順 3 のブロック**を、パスの `\` を `/` に替え、`$env:WINDIR`・`$env:LOCALAPPDATA`・`$env:TEMP` を一時的なディレクトリにして流した。`System32/curl.exe` は Linux の `curl` へのリンク、`icacls.exe` は引数を記録するだけの偽物、レジストリ（`New-ItemProperty`・`Get-ItemProperty`）は値を覚えておく偽物にした:
+
+- 1 回目: zip を取り、sha256 が一致し、4 つの ttf がフォントのフォルダーに置かれ、一時フォルダーが消えた。読み戻しに `HackGen35ConsoleNF-Bold (TrueType) : <フォントのフォルダー>/HackGen35ConsoleNF-Bold.ttf` などの 4 行が出た。`icacls.exe` には `<フォントのフォルダー> /grant *S-1-15-2-1:(OI)(CI)(RX) *S-1-15-2-2:(OI)(CI)(RX)` が渡った
+- 2 回目（同じフォルダーに）: 同じ 4 行が出て、ttf の ctime は変わらなかった（置き直していない）
+- `$sha256` を別の値にしたもの: `中断: HackGen_NF_v2.10.0.zip の sha256 が一致しない` で止まり、フォントのフォルダーには何も作らず、取った zip は一時フォルダーに残った
+- 置けなかったとき（`Copy-Item` の失敗）の分かれ道は試していない（root で動かしたので、書き込めないフォルダーを作れなかった）
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. サインインし直した後に、設定のフォントの一覧と、アプリ（WezTerm と、Windows Terminal などのパッケージのアプリ）で `HackGen Console NF` が使えること
+1. 登録を消してサインインし直した後に、ファイルを消せること（Windows 11 のロールバック）
+1. scoop の個人のバケットの HackGen が、Windows PowerShell 5.1 で本当に失敗すること（採らなかった理由の確かめ）
+1. arm64 の Windows
