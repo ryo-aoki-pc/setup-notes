@@ -238,7 +238,7 @@
 
 > [!IMPORTANT]
 > - **すべて、この PC のデスクトップで行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜5 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。ログインするユーザーは Administrators の一員（インストーラが `C:\Program Files\WezTerm` に入れ、PC 全体の `PATH` に書くため）
-> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **WezTerm の窓をすべて閉じてから始める**（動いていると、この節の手順 4 が止まる）。[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)のタスクが動いていれば、先に同書の[止める・もう一度始める](windows-claude-remote-control.md#止めるもう一度始める)の手順 1 で止める
 > - **この節の手順 6 は画面で行う**（スタートメニューから WezTerm を起動する）
 
@@ -747,7 +747,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [Latest supported Visual C++ Redistributable downloads — Microsoft Learn](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) — `VCRUNTIME140.dll` を入れる再頒布可能パッケージ
 - [microsoft/winget-pkgs の wez.wezterm.nightly](https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/wez/wezterm/nightly) — 採らなかった winget の定義
 - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
-- [Windows 11 の初期設定](windows-setup.md) — 貼り付けの設定（手順 4〜7）と、この文書を通す順
+- [Windows 11 の初期設定](windows-setup.md) — 貼り付けの設定（手順 16〜19）と、この文書を通す順
 
 ---
 

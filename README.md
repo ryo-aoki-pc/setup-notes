@@ -17,7 +17,8 @@
 
 - Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
 - AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある
-- この節の手順書は、VirtualBox の VM でだけ通した（実機では実行していない。手順書の補足の「状態」）
+- 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-dual-boot.md#次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
+- インストールの実施手順は、VirtualBox の VM でだけ通した（実機では実行していない）。QEFI Entry Manager の任意節は配布物・ソース・構文の確認のみで、指定・取り消し・実際の起動は未検証（手順書の補足の「状態」）
 
 | 手順書 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
 |---|---|---|---|---|
@@ -31,7 +32,11 @@
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
-- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）。CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる。AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、初期設定のリードから順に案内する（**どれも Windows の実機では流していない**。初期設定の貼り付けの設定だけは、原因と直し方を実機で確かめた）
+- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）
+  - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（確認した CLI は Preview。実更新は未検証で、ヘルプ・5.1 の構文・模擬の確認まで）
+  - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、初期設定のリードから順に案内する
+  - **どれも Windows の実機では通していない**。初期設定の貼り付けの設定だけは、原因と直し方を実機で確かめた
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
@@ -41,7 +46,7 @@
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜11） |
-| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon と、表示・電源・リモートなどの設定も | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`（どちらも自分のユーザー） | 管理者ではない Windows PowerShell で入れる（scoop のインストーラは管理者では止まる。PC 全体の設定の手順 24〜43 だけ管理者） | `scoop update`（git は Git for Windows）、ほかは `winget upgrade`。UniGet UI は自分で上がる（UniGet UI の画面から scoop と winget のパッケージも上げられる） | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の、scoop のツールを SSH のセッションで使う任意節 |
+| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon と、表示・電源・リモートなどの設定も | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | Windows Update（手順 2〜8）と PC 全体の設定（手順 36〜55）は管理者。それ以外は通常の Windows PowerShell（scoop のインストーラは管理者では止まる） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の、scoop のツールを SSH のセッションで使う任意節 |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -50,7 +55,7 @@
 ### ほかの手順書が使う仕組み
 
 - 複数の手順書が同じ設定を前提にするので、独立させてある。使う側の手順書は、冒頭の `> [!IMPORTANT]`（任意節の前提なら、その節の冒頭）から案内している
-- Windows 11 の貼り付けの設定と LAN をプライベートにする手順は、インストール直後に通す [Windows 11 の初期設定](docs/windows-setup.md)の手順（4〜7・31）で、使う側の手順書はその手順を名指しする
+- Windows 11 の貼り付けの設定と LAN をプライベートにする手順は、インストール直後に通す [Windows 11 の初期設定](docs/windows-setup.md)の手順（16〜19・43）で、使う側の手順書はその手順を名指しする
 - 設定はユーザーやホストに 1 つなので、どれか 1 本の手順書のために通してあれば、ほかの手順書では確かめるだけでよい。元に戻すのは、使う手順書がどれも無くなったとき
 
 | 手順書 | すること | 変わるもの | これを前提にするもの |
@@ -58,8 +63,8 @@
 | [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Podman の Quadlet（任意節） |
 | [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
 | [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
-| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 4〜7）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節） |
-| [LAN をプライベートにする（Windows 11 の初期設定の手順 31）](docs/windows-setup.md#実施手順) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
+| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 16〜19）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節） |
+| [LAN をプライベートにする（Windows 11 の初期設定の手順 43）](docs/windows-setup.md#実施手順) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
 
 ### デスクトップ（GNOME）の設定
 
@@ -82,10 +87,10 @@
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
 - GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
 - ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ（リモートログインと違い、つなぎ直しても同じデスクトップに戻る。同じ PC で併用できる）。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）
-- Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、Windows 11 の初期設定の手順 31
+- Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、[Windows 11 の初期設定の手順 43](docs/windows-setup.md#実施手順)
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
-- Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定](docs/windows-setup.md)の手順 32（Pro 以上。受信の規則をプライベートの LAN に絞る）
+- Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定](docs/windows-setup.md)の手順 44（Pro 以上。受信の規則をプライベートの LAN に絞る）
 - Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
@@ -96,7 +101,7 @@
 | [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
-| [RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、Windows 11 の初期設定の手順 32 か、Windows の設定のリモート デスクトップが開ける） |
+| [RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、[Windows 11 の初期設定の手順 44](docs/windows-setup.md#実施手順)か、Windows の設定のリモート デスクトップが開ける） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -314,7 +319,13 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP でつないだセッションの中の PowerShell。初期設定は管理者ではない PowerShell に貼り、PC 全体の設定の手順 24〜43 だけ管理者。HackGen と Claude Code は管理者でなくてよい）。デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の設定の手順は、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る（Git for Windows を入れる節だけ PowerShell）
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+  - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
+  - 初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る
+  - HackGen と Claude Code は管理者でなくてよい
+  - デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある
+  - `sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く
+  - [Git](docs/git.md) の設定は、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る（Git for Windows を入れる節だけ PowerShell）
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く

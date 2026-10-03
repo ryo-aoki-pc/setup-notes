@@ -383,7 +383,7 @@
 
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2・3 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。ログインするユーザーは Administrators の一員（Firefox を PC 全体の `C:\Program Files\Mozilla Firefox` に入れ、Mozilla Maintenance Service も入れるため）
-> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **この節の手順 4・5 は画面の操作**（Firefox を起動して確かめる、Windows の設定で既定のブラウザーにする）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `FF_PKG`・`FF_L10N` は AlmaLinux 10 だけで使う）
