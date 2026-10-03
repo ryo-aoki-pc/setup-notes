@@ -268,7 +268,7 @@
 
 ### 選択した方針
 
-WezTerm の nightly を Linux に入れる経路は 5 つある。EL10 で使えるかを調べた結果（2026-09-21）:
+WezTerm の nightly を Linux に入れる経路は 6 つある。EL10 で使えるかを調べた結果（2026-09-21。Homebrew の行は 2026-10-03）:
 
 | 経路 | EL10 での状況 | 採否 |
 |---|---|---|
@@ -276,6 +276,7 @@ WezTerm の nightly を Linux に入れる経路は 5 つある。EL10 で使え
 | GitHub Releases の `nightly` タグ | `wezterm-{common,gui,mux-server}-nightly-centos9.rpm` が毎日更新される。EL10 向けは無い。手で `dnf install ./*.rpm` する形になり、更新が自動化されない | 不採用（COPR と同じ EL9 ビルドで、管理面で劣る） |
 | AppImage | `WezTerm-nightly-Ubuntu24.04.AppImage` は EL10 で動く（[付録](#付録-appimage-の実測)）。ただし更新が止まりがち（2026-08-02 版）で、最新の `Ubuntu26.04` 版は **glibc 2.42 以上を要求して EL10（2.39）では起動しない** | 不採用（dnf で管理できず、最新版が動かない） |
 | Flathub `org.wezfurlong.wezterm` | stable のみ。nightly は無い | 不採用 |
+| Homebrew の公式 tap `wezterm/wezterm-linuxbrew` | formula は AppImage を `bin/wezterm` に置くだけ。stable は `20240203-110809-5046fc22`、nightly（`--HEAD`）は `WezTerm-nightly-Ubuntu20.04.AppImage` で、2026-03-18 から更新されていない。aarch64 の AppImage は無い（[補足](#homebrew-の-tap-を採らない理由)） | 不採用（nightly が古く、aarch64 に無い） |
 | ソースビルド（`cargo build --release`） | 可能だが Rust toolchain と `get-deps` の依存パッケージが要り、更新のたびにビルドする | 不採用 |
 
 **EL9 向けビルドが EL10 で通る根拠**: 実行前に `--assumeno` で依存解決だけ試した。
@@ -307,6 +308,18 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - インストール後の `ldd` でも、`not found` は 0 だった
 - 追加で入ったパッケージは無い（4 パッケージのみ）
+
+#### Homebrew の tap を採らない理由
+
+- COPR を brew に置き換えられないかを、2026-10-03 に調べた。tap の formula と配布物の日付を見ただけで、入れてはいない
+- Homebrew の `wezterm` は macOS だけの cask（`wezterm@nightly` も同じ）なので、Linux では公式の tap の formula を名前を全部書いて入れる（`brew install wezterm/wezterm-linuxbrew/wezterm`、nightly は `--HEAD`）
+- tap の `Formula/wezterm.rb` は、AppImage を 1 つ落として `bin/wezterm` に置くだけ（`bin.install img => "wezterm"`）
+  - stable は `20240203-110809-5046fc22`（tap の最後の更新も 2024-02-03）。自分用の設定は nightly が前提
+  - `--HEAD` は `WezTerm-nightly-Ubuntu20.04.AppImage` を指す。GitHub の `nightly` の配布物で、この AppImage の `Last-Modified` は 2026-03-18 だった（`wezterm-gui-nightly-centos9.rpm` は 2026-10-03）
+  - COPR の `rhel-9-x86_64` と `rhel-9-aarch64` は、どちらも 2026-10-02 にメタデータが更新されていた（`repomd.xml` の `revision`）
+  - nightly の AppImage に aarch64 のものは無い（`*-aarch64.AppImage` は 404）
+  - `.desktop` とアイコン、`wezterm-mux-server`、`/etc/profile.d/wezterm.sh` のシェル統合、補完は入らない。AppImage なので FUSE2 も要る（[付録](#付録-appimage-の実測)）
+  - nightly の更新は `brew upgrade` に乗らず、入れ直す（公式ドキュメント）
 
 ### 完了時点の状態
 
@@ -403,6 +416,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [wezfurlong/wezterm-nightly — Copr](https://copr.fedorainfracloud.org/coprs/wezfurlong/wezterm-nightly/) — 対応 chroot の一覧
 - [wezterm/wezterm Releases: nightly](https://github.com/wezterm/wezterm/releases/tag/nightly) — centos9 rpm / AppImage / deb
 - [dnf-copr(8)](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html) — `enable name/project [chroot]`
+- [wezterm/homebrew-wezterm-linuxbrew](https://github.com/wezterm/homebrew-wezterm-linuxbrew) — Homebrew の公式 tap（`Formula/wezterm.rb`）。導入のコマンドは [Linux — WezTerm Install](https://wezterm.org/install/linux.html) の Linuxbrew の節
 - [Configuration Files — WezTerm](https://wezterm.org/config/files.html) — 設定ファイルの探索順序（本書の実測とは `~/.wezterm.lua` の優先度が異なる）
 - [wezterm/wezterm config/src/config.rs `load_with_overrides`](https://github.com/wezterm/wezterm/blob/main/config/src/config.rs) — 実際の探索順序
 - [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) — 自分用の設定。導入の手順は `docs/install.md`、変える場所は README にある
