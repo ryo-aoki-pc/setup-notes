@@ -11,7 +11,7 @@
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
-- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)。非公開）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
+- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
 
 ### 導入の基盤
 
@@ -117,7 +117,7 @@
 | [WezTerm Nightly](docs/wezterm-nightly.md) | 端末アプリ（GUI） | 公式 COPR の EL9 ビルド（chroot を明示） | `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（両方あると前者だけ読む） |
 | [HackGen Console NF](docs/hackgen.md) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask | `~/.local/share/fonts` に入る（自分のユーザーだけ） |
 | [starship](docs/starship.md) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | `~/.bashrc` に 1 行。`~/.config/starship.toml` は任意 |
-| [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew。x86_64 は COPR（`kray74/cli-tools`）の dnf でも入る（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
+| [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
 | [tmux](docs/tmux.md) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
 | [bash の履歴・補完・キー操作](docs/bash-settings.md) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | `~/.bashrc` に 4〜5 行と `~/.inputrc` |
 | [fzf](docs/fzf.md) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い） | `~/.bashrc` に 1 行。fd・bat を使う 4 行は任意 |
