@@ -8,7 +8,7 @@
 > - ログインするユーザーは Administrators の一員（手順 24〜43 は PC 全体の設定を書く）
 > - **手順 4 は 1 行なので、どの貼り方でもそのまま貼れる**。手順 4 を貼った窓には、それより後の複数行のブロックを、GitHub のコピーボタンでコピーして右クリックで貼れる。Windows の PowerShell のブロックを貼るほかの手順書も、手順 4〜7 を前提にする
 > - **手順 43 で再起動する**（この文書の再起動はこの 1 回。手順 1 の Windows Update の再起動は別）。多くの設定は、再起動の後に効く
-> - **画面で行う手順**: 1・2・3・23・44〜48。手順 19 は設定の画面を開いて変える。**対話入力のある手順**: 50（WSL のユーザー名とパスワード）・52（自動サインインのパスワード）。**条件付きの手順**: 32（Pro 以上）・40（デュアル ブート）・41（US 配列のキーボード）
+> - **画面で行う手順**: 1・2・3・23・44〜48。手順 19 は設定の画面を開いて変える。**対話入力のある手順**: 50（WSL のユーザー名とパスワード）・52（自動サインインのパスワード）。**条件付きの手順**: 27（PC の名前を変えるとき）・32（Pro 以上）・40（デュアル ブート）・41（US 配列のキーボード）
 
 - 上から順にコードブロックを貼る。手順 24 の変数は、管理者の PowerShell を開き直したら貼り直す
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -108,13 +108,13 @@
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じて手順 3 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、手順 2 でストアの「アプリ インストーラー」を更新してから
-   - `Scoop` に場所が出たら、scoop はもう入っている。手順 8・9 は飛ばす
    - `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で入れる）
    - `ClassicMenu` は旧形式のコンテキストメニューの設定があるか（無ければ `False`）
    - `ScancodeMap` が空でなければ、キーの割り当てがもうある。その値を控える（手順 39 は、違う値があれば止まる）
    - `Profile` は、このユーザーの Windows PowerShell が起動のときに読むファイル。`ProfileExists : False` なら、手順 7 で作る
    - 最後の表の `CurrentUser` の値を控える（[ロールバック](#ロールバック)の手順 16 で使う。何も設定していなければ `Undefined`）
    - `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、手順 6 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
+   - `Scoop` に場所が出たら、scoop はもう入っている。手順 8・9 は飛ばす
 
    <details>
    <summary>補足: 見ているもの</summary>
@@ -357,7 +357,7 @@
    if (-not (Test-Path -LiteralPath $upe)) { New-Item -Path $upe | Out-Null }
    Set-ItemProperty -Path $upe -Name ScoobeSystemSettingEnabled -Type DWord -Value 0
    Get-ItemProperty -Path $adv | Format-List Start_IrisRecommendations, Start_AccountNotifications
-   Get-ItemProperty -Path $cdm | Format-List SubscribedContent-*, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
+   Get-ItemProperty -Path $cdm | Format-List SubscribedContent-338393Enabled, SubscribedContent-353694Enabled, SubscribedContent-353696Enabled, SubscribedContent-338389Enabled, SubscribedContent-310093Enabled, SubscribedContent-338388Enabled, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
    Get-ItemProperty -Path $upe | Format-List ScoobeSystemSettingEnabled
    ```
 
@@ -574,7 +574,7 @@
    - この窓は、手順 7 でプロファイルに書いた行を読む（手順 25 で確かめる）
    - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。手順 6 を、この窓で貼り直す
 
-1. 変数を設定する（`PC_NAME` は必ず値を入れる）。
+1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
 
    ```powershell
    $PC_NAME = ''   # この PC の新しい名前（15 文字まで。英字・数字・ハイフン）。<HOSTNAME>
@@ -623,8 +623,7 @@
 
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。手順 23 から
-   - `CtrlEnter` が `InsertLineAbove` なら、この窓はプロファイルを読んでいない。手順 6・7 をこの窓で貼り直してから、窓を開き直して手順 24 から
-   - `Edition` が `Core` で始まる（Home）なら、手順 32 は飛ばす
+   - `CtrlEnter` が `InsertLineAbove` なら、この窓はプロファイルを読んでいない。手順 4・6・7 をこの窓で貼り直してから（手順 4 を先に貼ると、手順 6・7 を右クリックで貼れる）、窓を開き直して手順 24 から
    - `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、手順 28 の sudo の行は何もしない
    - 次の値を控える（[ロールバック](#ロールバック)で、元に戻すかを決めるのに使う）
      - `ComputerName`（PC の名前。ロールバックの手順 37）と `LanCategory`（LAN の種類。ロールバックの手順 33）
@@ -632,6 +631,7 @@
      - `HelloOnly`（2 ならオン、0 ならオフ。ロールバックの手順 22）と `Keyboard`（`kbd106.dll` なら JIS 配列。ロールバックの手順 26）
      - 最後の行の配信の最適化のモード（`Lan` が Windows の既定。ロールバックの手順 29）
    - `Hypervisor : True` なら、Hyper-V がもう動いている（[VirtualBox の Windows 11 の節](virtualbox.md#windows-11-で使う)の VM は、その上で動く）
+   - `Edition` が `Core` で始まる（Home）なら、手順 32 は飛ばす
 
    <details>
    <summary>補足: 見ているもの</summary>
@@ -658,7 +658,7 @@
    - 最後の `}` の行で止まるので、Enter を押す
    - `1 行目`・`2 行目`・`3 行目` の順に出ればよい
 
-1. PC の名前を変える（効くのは再起動の後）。
+1. PC の名前を変えるときだけ、名前を変える（効くのは再起動の後）。
 
    ```powershell
    if (-not $PC_NAME) {
@@ -676,6 +676,7 @@
    - 再起動を求める旨の警告と、`再起動の後に <HOSTNAME> になる` が出ればよい
    - 何度貼ってもよい（2 回目からは `すでにこの名前:`。再起動の前は、まだ古い名前と比べる）
    - 効くのは、手順 43 の再起動の後
+   - 名前を変えないなら（手順 24 の `PC_NAME` が空なら）、この手順は飛ばす
 
    <details>
    <summary>補足: 名前の決まりと、確認の問いを出さないこと</summary>
@@ -1102,7 +1103,7 @@
    - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る
    - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える
    - タスクバーのアイコンが左に寄り、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒が出る。全体が濃い色になっている
-   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（手順 37。出たら[注意点](#注意点)）
+   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（手順 37。出たら、手順 37 の補足）
    - デスクトップに Edge と UniGet UI のショートカットが無い
 
 1. タスクバーとスタートの、要らないピン留めを外す。
@@ -1231,8 +1232,8 @@
 ## Wake on LAN を使う（任意）
 
 - 電源を切った（シャットダウンした）この PC を、LAN の別の PC から起こせるようにする。有線 LAN だけ（Wi-Fi では使えない）
-- 前提: 手順 29（休止状態を切ると、高速スタートアップも切れる）と手順 30（アダプターの省電力）。この節の手順 1〜3 は管理者の Windows PowerShell（5.1）に貼る
-- **この節の手順 4 で再起動して UEFI の画面に入り、手順 5 は UEFI の画面、手順 6 はこの PC、手順 7 は LAN の別の PC で行う**
+- 前提: 手順 29（休止状態を切ると、高速スタートアップも切れる）と手順 30（アダプターの省電力）。この節の手順 2〜4・8 は、この節の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
+- **この節の手順 4 で再起動して UEFI の画面に入り、この節の手順 5 は UEFI の画面、手順 6 はこの PC、手順 7 は LAN の別の PC で行う**
 - Windows の側の値は Microsoft の文書の標準の名前（`*WakeOnMagicPacket`）だけを変える。アダプターに独自の項目があれば、この節の手順 3 の表で確かめる
 
 1. 管理者の Windows PowerShell（5.1）を開く。
@@ -1368,7 +1369,7 @@
 
 ## ロールバック
 
-- この節の手順 1〜17 は手順 3 と同じ管理者ではない Windows PowerShell（5.1）に、手順 19〜38 はこの節の手順 18 で開く管理者の Windows PowerShell に貼る
+- この節の手順 1〜17 は手順 3 と同じ管理者ではない Windows PowerShell（5.1）に、この節の手順 19〜38 はこの節の手順 18 で開く管理者の Windows PowerShell に貼る
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
   - 表示と入力: エクスプローラーは 1、コンテキストメニューは 2、スタートは 3・23、タスクバーは 4、ダークモードは 5、既定の端末は 6、IME は 7、キーボードは 26・28
   - 整理: 自動で起動するアプリは 8、標準アプリとウィジェットは 9、ショートカットのポリシーは 24
@@ -1380,7 +1381,7 @@
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
 
 > [!CAUTION]
-> **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
+> **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
 
 1. エクスプローラーの表示を既定に戻す。
 
@@ -1407,7 +1408,7 @@
    ```
 
    - `False` が出ればよい
-   - エクスプローラーに効くのは、この節の手順 38 の再起動の後
+   - エクスプローラーに効くのは、サインインし直すか、この節の手順 38 の再起動の後
 
 1. スタートと設定の、おすすめ・提案・ヒントを既定に戻す。
 
@@ -1418,7 +1419,7 @@
    Set-ItemProperty -Path $adv -Name Start_AccountNotifications -Type DWord -Value 1
    foreach ($n in 'SubscribedContent-338393Enabled', 'SubscribedContent-353694Enabled', 'SubscribedContent-353696Enabled', 'SubscribedContent-338389Enabled', 'SubscribedContent-310093Enabled', 'SubscribedContent-338388Enabled', 'SystemPaneSuggestionsEnabled', 'SilentInstalledAppsEnabled') { Set-ItemProperty -Path $cdm -Name $n -Type DWord -Value 1 }
    Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -Name ScoobeSystemSettingEnabled -ErrorAction SilentlyContinue
-   Get-ItemProperty -Path $cdm | Format-List SubscribedContent-*, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
+   Get-ItemProperty -Path $cdm | Format-List SubscribedContent-338393Enabled, SubscribedContent-353694Enabled, SubscribedContent-353696Enabled, SubscribedContent-338389Enabled, SubscribedContent-310093Enabled, SubscribedContent-338388Enabled, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
    ```
 
    - 並んだ値がすべて `1` ならよい
@@ -1552,8 +1553,8 @@
      $bytes = [System.IO.File]::ReadAllBytes($PROFILE)
      $enc = if ($bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(﻿|ï»¿)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + ')\r?\n?', '$1')
-     if ($rest -eq $text) { "その行は無い: $PROFILE" } elseif ($rest -match '^(﻿|ï»¿)?\s*$') { Remove-Item -LiteralPath $PROFILE; "消した: $PROFILE" } else { [System.IO.File]::WriteAllBytes($PROFILE, $enc.GetBytes($rest)); "その行だけ消した: $PROFILE" }
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + ')\r?\n?', '$1')
+     if ($rest -eq $text) { "その行は無い: $PROFILE" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $PROFILE; "消した: $PROFILE" } else { [System.IO.File]::WriteAllBytes($PROFILE, $enc.GetBytes($rest)); "その行だけ消した: $PROFILE" }
    }
    ```
 
@@ -1729,15 +1730,15 @@
 
    - 何も出なければよい
 
-1. 手順 25 で `RemoteAssistance` が `1` だったときだけ、リモート アシスタンスを戻す。
+1. 手順 25 で `RemoteAssistance` が `1` だったときだけ、システムのプロパティでリモート アシスタンスを戻す。
 
    ```powershell
-   Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name fAllowToGetHelp -Type DWord -Value 1
-   Set-NetFirewallRule -Group '@FirewallAPI.dll,-33002' -Enabled True
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' | Format-List fAllowToGetHelp
+   SystemPropertiesRemote.exe
    ```
 
-   - `fAllowToGetHelp : 1` が出ればよい
+   - システムのプロパティの「リモート」タブが開く。「このコンピューターへのリモート アシスタンス接続を許可する」にチェックを入れて「OK」を押す（画面の文言は確かめていない）
+   - この画面は、`fAllowToGetHelp` と、リモート アシスタンスの受信の規則をまとめて戻すはず（確かめていない）。規則をコマンドでまとめて有効にすると、手順 33 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す
+   - **次の手順は、システムのプロパティを閉じてから貼る**
 
 1. 手順 25 で `RemoteDesktop` が `1`（無効）だったときだけ、リモート デスクトップを無効に戻す。
 
@@ -1809,14 +1810,23 @@
    - `LongPathsEnabled : 0` と `AllowDevelopmentWithoutDevLicense : 0` が出ればよい
    - sudo は、無効になった旨の英語の行を出す
 
-1. PC の名前を戻すときだけ、元の名前にする。
+1. PC の名前を戻すときだけ、元の名前にする（`OLD_PC_NAME` は必ず値を入れる）。
 
    ```powershell
    $OLD_PC_NAME = ''   # 手順 25 で控えた元の名前。<HOSTNAME>
    ```
 
    ```powershell
-   if (-not $OLD_PC_NAME) { Write-Error '中断: $OLD_PC_NAME が空' } elseif ($OLD_PC_NAME -eq $env:COMPUTERNAME) { "すでにこの名前: $OLD_PC_NAME" } else { Rename-Computer -NewName $OLD_PC_NAME -Force; "再起動の後に $OLD_PC_NAME になる" }
+   if (-not $OLD_PC_NAME) {
+     Write-Error '中断: $OLD_PC_NAME が空'
+   } elseif ($OLD_PC_NAME -notmatch '^[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$' -or $OLD_PC_NAME -match '^[0-9]+$') {
+     Write-Error "中断: 使えない名前（15 文字まで。英字・数字・ハイフンで、先頭と末尾は英数字。数字だけは不可）: $OLD_PC_NAME"
+   } elseif ($OLD_PC_NAME -eq $env:COMPUTERNAME) {
+     "すでにこの名前: $OLD_PC_NAME"
+   } else {
+     Rename-Computer -NewName $OLD_PC_NAME
+     "再起動の後に $OLD_PC_NAME になる"
+   }
    ```
 
    - `再起動の後に <HOSTNAME> になる` が出ればよい
@@ -1894,9 +1904,9 @@
 >
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
-> | `$PC_NAME` | 手順 23 | この PC の新しい名前（必須。変えないなら空のままにして手順 27 を飛ばす） | `<HOSTNAME>` |
-> | `$LAN_IF` | 手順 24（[ロールバック](#ロールバック)では手順 19） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
-> | `$OLD_PC_NAME` | [ロールバック](#ロールバック)の手順 37 | 戻す前の PC の名前 | `<HOSTNAME>` |
+> | `$PC_NAME` | 手順 24 | この PC の新しい名前（名前を変えるときに入れる。変えないなら空のままにして手順 27 を飛ばす） | `<HOSTNAME>` |
+> | `$LAN_IF` | 手順 24（[ロールバック](#ロールバック)では手順 19、[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
+> | `$OLD_PC_NAME` | [ロールバック](#ロールバック)の手順 37 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
 >
 > 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
 
@@ -2011,7 +2021,7 @@
 - **サポート外の設定**: 旧形式のコンテキストメニュー（手順 14）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、手順 5 の `ClassicMenu` と手順 14 の `reg.exe query` で、設定が残っているかを見る。手順 13・15・20 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節を、`scoop install`・`scoop update` の後に貼る
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
-- **PowerShell 7 のプロファイルは別**: 手順 7 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 12）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読み、検証した PC の PowerShell 7.6.6（PSReadLine 2.4.5）でも Ctrl+Enter は `InsertLineAbove` だった。この文書の手順書群は、Windows PowerShell 5.1 に貼る
+- **PowerShell 7 のプロファイルは別**: 手順 7 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 12）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読み、貼り付けの設定の原因を確かめた PC の PowerShell 7.6.6（PSReadLine 2.4.5）でも Ctrl+Enter は `InsertLineAbove` だった（もとの手順書 `windows-powershell-paste.md` の注意点の記録）。この文書の手順書群は、Windows PowerShell 5.1 に貼る
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
 - **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。手順 4〜7 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
@@ -2251,7 +2261,7 @@ Ctrl+v           Paste
 
 - この文書の `powershell` のブロック 90 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた
-  - `Set-ItemProperty` の `-Type` が 5.1 に無いという指摘が 55 個出た。`-Type` はレジストリのプロバイダーが足す動的なパラメーターで、5.1 の `Set-ItemProperty` の文書にもある（`reference/5.1/Microsoft.PowerShell.Management/Set-ItemProperty.md` の「This is a dynamic parameter made available by the Registry provider」）。互換の検査は動的なパラメーターを見ないので、指摘は当たらない
+  - `Set-ItemProperty` の `-Type` が 5.1 に無いという指摘が 54 個出た。`-Type` はレジストリのプロバイダーが足す動的なパラメーターで、5.1 の `Set-ItemProperty` の文書にもある（`reference/5.1/Microsoft.PowerShell.Management/Set-ItemProperty.md` の「This is a dynamic parameter made available by the Registry provider」）。互換の検査は動的なパラメーターを見ないので、指摘は当たらない
   - ほかは、手順 8 の `Invoke-Expression`（公式のインストーラの方法）と、1 つの変数だけのブロック（手順 24・ロールバックの手順 37 の `$PC_NAME`・`$OLD_PC_NAME`）の「代入して使っていない」だけ
 - 手順 7 とロールバックの手順 15 の正規表現と文字列、手順 27 の名前の正規表現も、この構文解析器で読めた
 
@@ -2260,9 +2270,9 @@ Ctrl+v           Paste
 | ブロック | 流した場合 | 結果 |
 |---|---|---|
 | 手順 7（プロファイルに足す） | 無い・空・UTF-8（BOM の有無）・Shift_JIS の既存のファイル、新しい印の行がある、古い印（`# windows-powershell-paste.md`）の行がある、両方ある | 無いときだけ `足した:`、2 回目と印の行があるときは `すでにある:` |
-| ロールバックの手順 15（プロファイルから消す） | 上の各場合と、UTF-16 LE、BOM の直後の行、新旧の両方の行 | どちらの印の行も消え、ほかの行と BOM はバイトのまま残った。残りが BOM と空白だけならファイルを消した。UTF-8（BOM 無し、末尾に改行無し）では、手順 7 で付けた CR LF だけが残った（もとの手順書の付録と同じ） |
+| ロールバックの手順 15（プロファイルから消す） | 上の各場合と、UTF-16 LE、BOM の直後の行、新旧の両方の行。正規表現の BOM は、もとの手順書と同じく `\uFEFF` などの ASCII の書き方（文字をそのまま書くと、コピーと貼り付けで落ちうる） | どちらの印の行も消え、ほかの行と BOM はバイトのまま残った。残りが BOM と空白だけならファイルを消した。UTF-8（BOM 無し、末尾に改行無し）では、手順 7 で付けた CR LF だけが残った（もとの手順書の付録と同じ） |
 | 手順 27（PC の名前） | 空、`my-pc`、今と同じ名前（大文字と小文字の違いも）、16 文字以上、数字だけ、先頭か末尾がハイフン、`_` を含む、1 文字 | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer -NewName <名前>` を 1 回呼んだ |
-| ロールバックの手順 37（名前を戻す） | 空、今と同じ名前、別の名前 | `中断:`、`すでにこの名前:`、`Rename-Computer` を 1 回 |
+| ロールバックの手順 37（名前を戻す） | 空、今と同じ名前、別の名前、16 文字以上、数字だけ | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer` を 1 回（`-Force` は付けない） |
 | 手順 20（自動で起動するアプリ） | `Run` に `OneDrive`・`MicrosoftEdgeAutoLaunch_ABC`・`WingetUI`、Teams の起動のタスクあり。もう 1 回は `OneDrive` だけで Teams 無し | `OneDrive` と Edge に `03 00 00 00` と 8 バイトの日時を書き、Teams の `State` を 1 にした。一覧は 2 つが `止めている`、`WingetUI` が `起動する`。2 回目は `OneDrive` だけを止めた |
 | ロールバックの手順 8 | 上の後 | 2 つを `02` と 11 バイトの 0 に、Teams を 2 に戻した |
 | 手順 21・22（標準アプリ・ウィジェット） | 11 個のうち 3 個と Copilot だけが入っている。ウィジェットは無い場合とある場合 | 入っている 3 個だけ `Remove-AppxPackage` に渡し、ほかは `無い:`。Copilot には触れなかった |
