@@ -255,7 +255,6 @@ dnf で入れる経路は、2026-09-29 に x86_64 も含めて探し直した（
   - x86_64 にしか無く、実機（Raspberry Pi 5）は aarch64
   - dnf の利点だった「`/usr/bin` に入り、`sudo` や root のシェルからも見える」は、homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)・[sudo でも使う](homebrew.md#sudo-でも使う任意)の節で足りる
   - COPR は個人のリポジトリで、Fedora は中身を審査しない（`dnf copr enable` の警告）。同じ COPR の chezmoi などが EPEL の同じ名前のパッケージを置き換えないよう、`includepkgs` で絞る手間も要った
-  - その版に従って dnf で入れた PC は、`sudo dnf remove zoxide fzf` と `sudo dnf copr remove kray74/cli-tools` で消してから手順 2 を貼る（`~/.bashrc` の初期化の行はそのまま使える）
 - [tool-catalog.md の選び方](tool-catalog.md#選び方)（RPM が Homebrew と同版以上なら RPM）は COPR を RPM に数えないので、一覧の推奨も Homebrew
 
 ### 完了時点の状態
