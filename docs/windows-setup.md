@@ -6,6 +6,7 @@
 > - **すべて、この PC のデスクトップで行う**。SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動くので、手順 4 の scoop のインストーラが止まる）
 > - 手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、手順 2〜7・9 をそこに貼る。手順 10 で**管理者の** Windows PowerShell を開き、手順 11・12 をそこに貼る
 > - ログインするユーザーは Administrators の一員（手順 11 の Caps Lock の設定は、PC 全体の設定に書く）
+> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、ブロックは Ctrl+V で貼る
 > - **手順 12 で再起動する**。Caps Lock とコンテキストメニューは、再起動の後に効く
 > - **手順 8・13・14 は画面で行う**（UniGet UI の起動、キーと右クリックの確認）
 
