@@ -24,7 +24,6 @@
 
    - [yazi.md 手順 2](yazi.md#実施手順) か [zoxide.md 手順 2](zoxide.md#実施手順) で入れてあるホストでは `Warning: fzf 0.74.4 is already installed and up-to-date.` と出る。それでよい（この手順の補足）
    - 依存の `ncurses` がまだ無いときは、`Do you want to proceed with the installation? [y/n]` と聞かれる。`y`（Enter は要らない）
-   - zoxide を dnf（COPR）で入れた x86_64 の PC には、同じ COPR の fzf 0.74.4 が `/usr/bin/fzf` に入っている。その PC ではこの手順を飛ばしてよい（`rpm -q fzf` で分かる。`fzf --bash` はどちらでも同じ）
    - **次の手順は、`y` と答えてプロンプトに戻ってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
    <details>
@@ -51,7 +50,6 @@
    ```
 
    - `0.74.4 (Homebrew)` と `/home/linuxbrew/.linuxbrew/bin/fzf` が出る
-   - COPR の fzf の PC では `0.74.4 (…)` と `/usr/bin/fzf` が出て、`brew list` は `Error: No such keg` でよい
 
 1. `~/.bashrc` の末尾に、キー操作と補完を組み込む 1 行を書き、今のシェルにも読ませる。
 
@@ -241,7 +239,6 @@
     - bash-completion の遅延読み込み（`git checko<Tab>`）と、[bash-settings.md 手順 4](bash-settings.md#実施手順) の Homebrew の補完の行との並び
   - **確認していないこと**
     - 実機（aarch64 の Raspberry Pi 5、x86_64 の PC）、GNOME 端末・WezTerm から送る Alt+C
-    - COPR の fzf（dnf で入れた zoxide の PC）での `fzf --bash`
     - `kill -9 <Tab>` の fzf の一覧（コンテナでは fzf でなく通常の PID の一覧が出た。理由は追っていない）
     - Homebrew の版が上がる[更新](#更新)
 
@@ -273,7 +270,6 @@
 
 - **Homebrew の 0.74.4 にした**（[導入元一覧](tool-catalog.md)の規則。EPEL は 0.58.0）
   - `fzf --bash` は 0.48.0 からあるので EPEL の版でも同じ手順で動くはずだが、確かめていない。yazi・zoxide の依存ですでに Homebrew の fzf が入っているホストが多いので、揃える
-  - x86_64 で zoxide を dnf で入れた PC には COPR の 0.74.4 が入る。そこでは手順 1 を飛ばす
 - **`fzf --bash` で組み込む**: formula の caveat の案内で、fzf の `install` スクリプト（`~/.fzf.bash` と `~/.bashrc` への追記）は使わない。`~/.bashrc` に残るのは 1 行だけで、版が上がっても追従する
 - **atuin は採らない**: 履歴を SQLite に持ち、別のホストと同期もできる履歴の検索ツール。Ctrl+R を取り合うので、どちらか 1 つにする。fzf は依存ですでに入っていて、履歴のほかにパスとディレクトリにも使えるので、こちらにした。atuin は[導入元一覧](tool-catalog.md#cli-定番の置き換え)の行のまま（試していない）
 - **ble.sh・mcfly も採らない**: ble.sh は行の編集そのものを置き換える大きなもの、mcfly は履歴だけ。どちらも RPM が無い。試していない

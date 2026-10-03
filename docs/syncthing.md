@@ -1,8 +1,9 @@
-# Syncthing インストール手順（AlmaLinux 10 / Homebrew + systemd ユーザーサービス）
+# Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）
 
 ## 実施手順
 
 > [!IMPORTANT]
+> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も Syncthing を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、Syncthing も同期するファイルの持ち主として動かすため）
@@ -280,23 +281,27 @@
 ## 同期フォルダとデバイスを追加する（任意）
 
 - **Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない**。入れただけでは何も同期しないので、GUI から足す
+- 操作は AlmaLinux 10 でも Windows 11 でも同じ。相手もどちらでもよい
 
 > [!WARNING]
-> **この節の手順 4 で、ホームディレクトリを丸ごと同期対象にしない。** `~/.local/state/syncthing` 自身や `~/.cache` まで同期してしまう。
+> **この節の手順 4 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
 >
-> - 同期したいものを入れる専用のディレクトリを作る
+> - 同期したいものを入れる専用のディレクトリを作る（例: `~/Sync`、`C:\Users\<WIN_USER>\Sync`）
 > - このホストは [Samba](samba.md) でホームを公開しているので、同じ領域を二重に扱うことになる点にも注意する
+> - Windows 11 では、OneDrive に移したデスクトップ・ドキュメントや、Dropbox のフォルダーも入れない（2 つの同期が同じファイルを書き合う）
 
 1. 相手側のデバイスでも同じように Syncthing を入れ、そのデバイス ID を控える。
+
+   - 相手が AlmaLinux 10 なら[実施手順](#実施手順)、Windows 11 の PC なら [Windows 11 で使う](#windows-11-で使う)で入れる
 
 1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。
 
    - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
-   - VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000` のように直接書く
+   - VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000`（`tcp://<相手の IP>:22000`）のように直接書く
 
 1. 相手側の GUI に出る承認の通知で、このデバイスを承認する。
 
-1. 「フォルダーを追加」でパス（例: `~/Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる。
+1. 「フォルダーを追加」でパス（例: `~/Sync`、Windows 11 では `C:\Users\<WIN_USER>\Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる。
 
 1. 相手側に「このデバイスがフォルダーを共有しようとしています」と出るので受け入れる。
 
@@ -704,6 +709,8 @@
 
 ## 更新
 
+- AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#windows-11-の更新)
+
 1. Syncthing を更新し、サービスを再起動する。
 
    ```bash
@@ -720,6 +727,7 @@
 
 ## ロールバック
 
+- AlmaLinux 10 の手順。Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)
 - 上から順に実行する
 - 接続元を絞る節を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
 - 自動バックアップを設定した場合は、Syncthing が動いているうちに、先に[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)の手順 7 を貼る
@@ -757,16 +765,538 @@
 
 ---
 
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **すべて Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜11・14 と、後ろの Windows 11 の 3 節（止める・更新・ロールバック）をそこに貼る。ログインするユーザーは Administrators の一員（この節の手順 7 の受信の規則と手順 8 のタスクの登録に、管理者の権限が要る）
+> - Syncthing そのものは、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節の手順 8 のタスク）
+> - **この節の手順 5 には対話入力がある**（GUI のパスワード）。入力し終えてから手順 6 を貼る
+> - **この節の手順 12 は LAN の別の端末のブラウザで、手順 13 はこの PC で行う**（サインアウトしてサインインし直す）
+
+- 上から順にコードブロックを貼る。この節の手順 2 で変数を設定した PowerShell に貼る
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 同期するフォルダと相手のデバイスは[同期フォルダとデバイスを追加する（任意）](#同期フォルダとデバイスを追加する任意)、止めるときは[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- この節の PC は、[実施手順](#実施手順)の AlmaLinux 10 の Syncthing の相手にもなる
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 3 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、配布物の中身と署名、Syncthing のソース、Linux の同じ版での CLI の動き、PowerShell の構文だけ（[対象と検証環境](#対象と検証環境)）。
+
+1. Windows で、管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+   - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする（この節の手順 6 のパイプの文字コードが違う）
+
+1. 変数を設定する。
+
+   ```powershell
+   $ST_GUI_USER = $env:USERNAME          # GUI のログイン名。Windows のアカウントとは別物（自動で同じ名前が入る）。<WIN_USER>
+   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # 相手とつながる LAN の接続（自動）。<LAN_IF>
+   'ST_GUI_USER = {0}' -f $ST_GUI_USER
+   'LAN_IF      = {0}' -f $LAN_IF
+   ```
+
+   - **編集が必須の変数は無い**
+   - 最後に値を読み戻して確かめる
+   - `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）。相手とつながる接続と違えば、`$LAN_IF = 'Wi-Fi'` のように直す
+   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この節の手順 2 のブロックを貼り直してから先へ進む
+
+   <details>
+   <summary>補足: 変数について</summary>
+
+   - `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](#実施手順)の `ST_GUI_USER` と同じ扱い）
+   - `$LAN_IF` は、この節の手順 7（ネットワークをプライベートにする）・手順 11（GUI の URL を出す）・[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 で使う。式は [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 2 と同じ
+   - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
+   - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
+
+   </details>
+
+1. この PC に Syncthing が無いことを確かめる。
+
+   ```powershell
+   Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id, Path
+   Get-ScheduledTask -TaskName 'Syncthing' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
+   Test-Path "$env:LOCALAPPDATA\Syncthing\config.xml", "$env:LOCALAPPDATA\Programs\Syncthing"
+   ```
+
+   - 最初の 3 つは何も出さず、最後に `False` が 2 行出ればよい
+   - 何か出たら、ほかの方法で入れた Syncthing（SyncTrayzor、Syncthing Windows Setup など）がある。それを止めて外してから始める
+   - [Windows 11 のロールバック](#windows-11-のロールバック)の手順 1〜4 の後に入れ直すときは、1 行目の `True`（`config.xml`。前の鍵と設定）はそのままでよい。この節の手順 6 が前の鍵を使うので、デバイス ID は前と同じになる
+
+   <details>
+   <summary>補足: ほかの Syncthing と重ならないようにする理由</summary>
+
+   - Syncthing の設定と DB の置き場所は、Windows では `%LOCALAPPDATA%\Syncthing` に決まっている（ソースの `lib/locations`）。Syncthing Windows Setup の個人用の導入も、同じ場所を使う（その README）
+   - 同じ設定で 2 つの Syncthing を動かすことはできない（設定のフォルダーの `syncthing.lock` で、後から起動した方が止まる）
+   - 同じ待ち受けの番号（8384・22000）を、2 つの Syncthing で取り合うことにもなる
+
+   </details>
+
+1. 公式の zip を取って sha256 と署名を確かめ、`syncthing.exe` を置く。
+
+   ```powershell
+   & {
+     $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+     $curl = "$env:WINDIR\System32\curl.exe"
+     $arch = @{ AMD64 = 'amd64'; ARM64 = 'arm64' }[$env:PROCESSOR_ARCHITECTURE]
+     $tmp = "$env:TEMP\syncthing-setup"
+     if (Get-Process -Name syncthing -ErrorAction SilentlyContinue) { Write-Error '中断: Syncthing が動いている'; return }
+     if (-not $arch) { Write-Error "中断: この手順は $env:PROCESSOR_ARCHITECTURE の Windows を扱わない"; return }
+     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & $curl -fsSL -o "$tmp\sha256sum.txt.asc" https://github.com/syncthing/syncthing/releases/latest/download/sha256sum.txt.asc
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: sha256sum.txt.asc を取れない'; return }
+     $m = Select-String -LiteralPath "$tmp\sha256sum.txt.asc" -CaseSensitive -Pattern "^([0-9a-f]{64})  (syncthing-windows-$arch-(v\d+\.\d+\.\d+)\.zip)$" | Select-Object -First 1
+     if (-not $m) { Write-Error '中断: sha256sum.txt.asc に Windows 版の行が無い'; return }
+     $hash = $m.Matches[0].Groups[1].Value
+     $zip = $m.Matches[0].Groups[2].Value
+     $ver = $m.Matches[0].Groups[3].Value
+     & $curl -fsSL -o "$tmp\$zip" "https://github.com/syncthing/syncthing/releases/download/$ver/$zip"
+     if ($LASTEXITCODE -ne 0) { Write-Error "中断: $zip を取れない"; return }
+     if ((Get-FileHash -LiteralPath "$tmp\$zip" -Algorithm SHA256).Hash -ne $hash) { Write-Error "中断: $zip の sha256 が一致しない"; return }
+     Expand-Archive -LiteralPath "$tmp\$zip" -DestinationPath $tmp -Force
+     $new = Join-Path $tmp (($zip -replace '\.zip$', '') + '\syncthing.exe')
+     $sig = Get-AuthenticodeSignature -LiteralPath $new
+     if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notlike 'CN=Kastelo AB,*' -or -not $sig.TimeStamperCertificate) { Write-Error "中断: syncthing.exe の署名を確かめられない（$($sig.Status)）"; return }
+     New-Item -ItemType Directory -Force -Path (Split-Path $exe) | Out-Null
+     Copy-Item -LiteralPath $new -Destination $exe -Force
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     '{0}: sha256 一致、署名 {1}' -f $zip, $sig.Status
+     & $exe --version
+     icacls.exe (Split-Path $exe)
+   }
+   ```
+
+   - `syncthing-windows-amd64-v2.1.5.zip: sha256 一致、署名 Valid` と、`syncthing v2.1.5 "Hafnium Hornet" (go1.27.1 windows-amd64) …` の 1 行が出ればよい（版は実行した日の最新）
+   - `icacls` の一覧に、自分のユーザーの `(F)`（フル コントロール）の行がある（Syncthing の自動の更新が、このフォルダーに書くため）
+   - `中断:` で始まるエラーが出たら、何も置いていない（取ってきたものは `%TEMP%\syncthing-setup` に残る。次に貼ったときに消して作り直す）
+   - 何度貼ってもよい（Syncthing が動いているときは止まる）
+
+   <details>
+   <summary>補足: 確かめていることと、ブロックの作り</summary>
+
+   **sha256 と署名**
+
+   - `sha256sum.txt.asc` は、公式のリリースのファイルの sha256 の一覧（GPG で署名した平文）。その中の `syncthing-windows-<構成>-<版>.zip` の行と、取ってきた zip を比べる。GPG の署名はここでは確かめないので、この比較で分かるのは zip が壊れていないことまで
+   - 本物かどうかは、`syncthing.exe` の Authenticode の署名で確かめる。署名者は `CN=Kastelo AB`（Syncthing の開発元の会社）で、Microsoft の Trusted Signing の証明書。証明書の期限は 3 日と短いので、タイムスタンプが付いていること（`TimeStamperCertificate`）も見る（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+   - 署名者の名前は `CN=` の部分だけを見る（`L=` に ASCII でない文字があるため）
+
+   **ブロックの作り**
+
+   - 全体を `& { … }` で囲み、確かめられなかったら `return` でそこで止める（後ろの行を動かさない）
+   - 最新の版は、`releases/latest/download/sha256sum.txt.asc`（最新のリリースへ飛ぶ）の中の zip の名前から取る。版を調べるための別の問い合わせ（GitHub の API）はしない
+   - `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 7 の補足と同じ理由）
+   - `curl.exe` で取ったファイルには、ブラウザで取ったときのような「インターネットから来た」印（Mark of the Web）が付かないので、SmartScreen の確認は出ないはず（確かめていない）
+   - `%PROCESSOR_ARCHITECTURE%` が `AMD64` なら `amd64`、`ARM64` なら `arm64` の zip を取る。arm64 の版は試していない
+
+   **置き場所**
+
+   - `%LOCALAPPDATA%\Programs\Syncthing` は、自分のユーザーだけが使うプログラムの置き場所。Syncthing Windows Setup の個人用の導入も同じ場所を使う
+   - 置くのは `syncthing.exe` だけ（zip のほかのファイルは `README.txt` などと、Linux・macOS 向けの `etc/`）
+   - 管理者の PowerShell で作ったフォルダーとファイルは、所有者が `BUILTIN\Administrators` になるが、アクセス権は `%LOCALAPPDATA%` から受け継ぐので、自分のユーザー（管理者ではない Syncthing）も書き換えられる。それを `icacls` で確かめる
+
+   </details>
+
+1. GUI のパスワードを読み取る。
+
+   ```powershell
+   $ST_GUI_PASS = Read-Host -AsSecureString 'Syncthing GUI のパスワード'
+   ```
+
+   - **入力は `*` で表示される**
+   - ASCII の英数字と記号だけにする（ほかの文字があると、この節の手順 6 で止まる）
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. 最初に起動する前に、鍵と設定を作り、GUI のログイン名とパスワードを入れる。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   if (-not $ST_GUI_USER) {
+     Write-Error '手順 2 の $ST_GUI_USER が空'
+   } elseif (-not $ST_GUI_PASS -or $ST_GUI_PASS.Length -eq 0) {
+     Write-Error '手順 5 のパスワードが空'
+   } else {
+     $p = ([Net.NetworkCredential]::new('', $ST_GUI_PASS)).Password
+     if ($p -cnotmatch '^[\x20-\x7e]+$') {
+       Write-Error 'パスワードに ASCII でない文字がある（手順 5 からやり直す）'
+     } else {
+       $p | & $exe generate "--gui-user=$ST_GUI_USER" --gui-password=-
+       if ($LASTEXITCODE -eq 0) { & $exe device-id }
+     }
+     Remove-Variable p
+   }
+   Remove-Variable ST_GUI_PASS -ErrorAction SilentlyContinue
+   ```
+
+   - `Calculated device ID`・`Updated GUI authentication user`・`Updated GUI authentication password` の行と、最後に 7 文字 x 8 の文字列が出ればよい
+   - 最後の文字列が、**この PC のデバイス ID**。相手のデバイスに教える値で、秘密ではない
+   - 前の鍵が残っている PC では、先頭が `Key exists; will not overwrite` になり、デバイス ID は前と同じ
+   - エラーで止まったら、この節の手順 5 からやり直す（パスワードの変数はこの手順で消える）
+
+   <details>
+   <summary>補足: パスワードの渡し方と、作られるもの</summary>
+
+   **パスワードは標準入力で渡す**（`--gui-password=-`）。
+
+   - コマンドラインに書くと、その間だけとはいえ、ほかのプロセスからコマンドラインが見える。AlmaLinux 10 の[手順 4](#実施手順)と同じ渡し方
+   - Windows PowerShell 5.1 は、文字列をパイプで渡すときに、末尾に改行（CR LF）を足し、ASCII の文字コードで送る（`$OutputEncoding` の既定）。Syncthing は 1 行目だけを読み、末尾の CR LF を捨てる（ソースは `bufio.Reader.ReadLine`。Linux の同じ版で、CR LF 付きで渡したパスワードでログインできた。[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）
+   - ASCII でない文字は `?` に置き換わって送られるはずなので、先に弾いている（`-cmatch` は大文字と小文字を区別する比較。区別しない `-match` だと、ケルビン記号などが通る）
+   - `config.xml` に入るのは bcrypt のハッシュで、平文は残らない
+
+   **作られるもの**（`%LOCALAPPDATA%\Syncthing`）
+
+   - `cert.pem` / `key.pem`（デバイス ID のもとになる証明書と秘密鍵）と `config.xml`（設定。GUI のログイン名・パスワードのハッシュ・API キーを含む）
+   - Linux の同じ版では、`.syncthing.tmp.<数字>` という空の一時ファイルも残った（消してよい）
+   - GUI の待ち受けはこの時点では `127.0.0.1:8384`（この PC からだけ）
+
+   </details>
+
+1. LAN の接続をプライベートにし、Syncthing の受信の規則を作る。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   $g = 'Syncthing (setup-notes)'
+   if (-not $LAN_IF) {
+     Write-Error '手順 2 の $LAN_IF が空'
+   } else {
+     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
+     Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
+     New-NetFirewallRule -Name 'Syncthing-In-TCP' -DisplayName 'Syncthing (TCP 22000)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol TCP -LocalPort 22000 | Out-Null
+     New-NetFirewallRule -Name 'Syncthing-In-UDP' -DisplayName 'Syncthing (UDP 22000, 21027)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol UDP -LocalPort 22000, 21027 | Out-Null
+     New-NetFirewallRule -Name 'Syncthing-GUI-In-TCP' -DisplayName 'Syncthing GUI (TCP 8384)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol TCP -LocalPort 8384 | Out-Null
+     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
+     Get-NetFirewallRule -Group $g | Format-Table Name, Enabled, Profile, Direction, Action
+   }
+   ```
+
+   - `<LAN_IF>  Private` と、3 つの規則が `True  Private  Inbound  Allow` で出ればよい
+   - 既にプライベートなら、ネットワークは何も変わらない
+   - 何度貼ってもよい（規則は消してから作り直す）
+   - **注意**: プライベート向けのほかの許可の規則（ネットワーク探索など）も、この LAN で効くようになる（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 の補足）
+
+   <details>
+   <summary>補足: 規則の中身と、最初の起動より前に作る理由</summary>
+
+   - 3 つの規則は、AlmaLinux 10 の[手順 7](#実施手順)の firewalld の `syncthing`（22000/tcp・22000/udp・21027/udp）と `syncthing-gui`（8384/tcp）に当たる。22000/tcp は同期、22000/udp は QUIC、21027/udp は同じ LAN の相手を見つけるため、8384/tcp は Web GUI
+   - どれも `syncthing.exe`（展開したフルパス）に限り、プライベートのネットワークだけで有効にする。持ち出した先のパブリックの Wi-Fi では開かない
+   - Windows のファイアウォールは、規則の無いプログラムが待ち受けると「Windows セキュリティの重要な警告」の窓を出す。そこで「キャンセル」を押すと、そのプログラムの**拒否**の規則ができ、拒否は許可より優先され、窓は二度と出ない。先に許可の規則を作っておけば、少なくともこの LAN では窓は出ないはず（確かめていない）
+   - Syncthing の公式の自動起動の説明は、「一度対話で起動して、ファイアウォールの窓で許可する」としている。本書はその代わりに、規則を先に作る
+   - Syncthing の FAQ も、パブリックのままでは直接つながらずリレー経由になりやすいので、プライベートにするよう書いている
+   - グループの名前（`Syncthing (setup-notes)`）は、ほかの導入の方法が作る規則と分けるためのもの
+
+   </details>
+
+1. サインインしたときに Syncthing を起動するタスクを登録する。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+   $action = New-ScheduledTaskAction -Execute $exe -Argument '--no-console --no-browser' -WorkingDirectory (Split-Path $exe)
+   $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
+   $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive
+   $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+   Register-ScheduledTask -TaskName 'Syncthing' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Format-List TaskName, State
+   ```
+
+   - `TaskName : Syncthing` と `State : Ready` が出ればよい
+   - 同じ名前のタスクがあれば、上書きする（`-Force`）
+
+   <details>
+   <summary>補足: タスクの設定のねらい</summary>
+
+   - **トリガー**: 自分のユーザーがサインインしたとき（`-AtLogOn -User`）。`-User` を外すと、どのユーザーのサインインでも動く
+   - **`-LogonType Interactive`**: サインインしている間のデスクトップのセッションで動く。パスワードをタスクに保存しない。サインアウトすると止まる
+     - Syncthing の公式の説明は「ユーザーがログオンしているかどうかにかかわらず実行する」（パスワードを保存する）だが、本書はサインインしている間だけ動かす（[選択した方針](#選択した方針)）
+   - **実行レベル**: 既定の `Limited`（「最上位の特権で実行する」を付けない）。管理者の PowerShell から登録しても、Syncthing は管理者ではない自分のユーザーとして動く。管理者で動かすと、同期で作るファイルの所有者が `Administrators` になる
+   - **引数**: 公式の説明と同じ `--no-console --no-browser`
+     - `--no-console` はコンソールの窓を隠す。Windows 11 24H2 以降は、`syncthing.exe` に入っている設定（`consoleAllocationPolicy` が `detached`）で、もともと窓を作らない
+     - `--no-browser` は、起動のたびにブラウザで GUI を開かない
+     - `--no-restart` は付けない。Syncthing は親（モニター）と子の 2 つのプロセスで動き、子が終わったとき（設定の変更・自動の更新）に親が起動し直す
+   - **`-ExecutionTimeLimit (New-TimeSpan)`**: 0（無制限）。既定の 3 日で止めないため（公式の説明の「長時間実行されている場合は停止」を外す）
+   - **`-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries`**: ノート PC で、電池のときも起動し、電池になっても止めない（公式の説明の任意の設定）
+   - **`-MultipleInstances IgnoreNew`**: 既に動いていれば、二重に起動しない
+   - **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)の手順 5 の補足）
+
+   </details>
+
+1. タスクを開始し、Syncthing が起動したことを確かめる。
+
+   ```powershell
+   if (Get-Process -Name syncthing -ErrorAction SilentlyContinue) {
+     Write-Error 'Syncthing はもう動いている'
+   } else {
+     Start-ScheduledTask -TaskName 'Syncthing'
+     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     (Get-ScheduledTask -TaskName 'Syncthing').State
+     Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize
+     Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
+   }
+   ```
+
+   - `Running` と、`syncthing.exe` が 2 つ（片方の `ParentProcessId` がもう片方の `ProcessId`）出ればよい
+   - 8384 は `127.0.0.1` で待ち受けている（この節の手順 10 で広げる）。22000 の行も出る
+   - 最初の起動は DB と HTTPS の証明書を作るので、数秒かかる（ブロックは 30 秒まで待つ）
+   - **注意**: 「Windows セキュリティの重要な警告」の窓が出たら、**キャンセルを押さない**（拒否の規則ができる）。「プライベート ネットワーク」だけにチェックして「アクセスを許可する」を押す
+
+   <details>
+   <summary>補足: 2 つのプロセス</summary>
+
+   - タスクが起動するのは親（モニター）で、親が子（本体）を起動する。親は子が終わったときに起動し直すためのもの
+   - 子が 60 秒の間に 4 回起動すると、親はあきらめて終わる（ソースの `cmd/syncthing/monitor.go`）。止めて始め直す操作を短い間に繰り返さない
+   - 窓は出ない（タスクから起動したとき）。動いているかは、この手順のようにプロセスと待ち受けで見る
+
+   </details>
+
+1. GUI の待ち受けを LAN に広げて HTTPS にする。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   & $exe cli config gui raw-address set 0.0.0.0:8384
+   & $exe cli config gui raw-use-tls set true
+   & $exe cli config gui raw-address get
+   & $exe cli config gui raw-use-tls get
+   for ($i = 0; $i -lt 30 -and (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue).LocalAddress -contains '127.0.0.1'; $i++) { Start-Sleep -Seconds 1 }
+   Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
+   ```
+
+   - `0.0.0.0:8384` と `true` が出て、8384 の `LocalAddress` が `127.0.0.1` でなくなればよい（`::` か `0.0.0.0`）
+   - この節の手順 6 で認証を入れてあるので、ここで待ち受けを広げる
+   - `127.0.0.1` のままなら、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1・2 で起動し直す
+
+   <details>
+   <summary>補足: <code>syncthing cli</code> と、起動し直さなくてよい理由</summary>
+
+   - `syncthing cli` は、動いている Syncthing に REST API で話しかける。API キーは `config.xml` から自分で読むので、渡さなくてよい（AlmaLinux 10 の[手順 6](#実施手順)の補足と同じ）
+   - Linux の同じ版（2.1.5）では、この 2 つを入れた直後から、起動し直さずに `0.0.0.0:8384` で HTTPS の待ち受けに変わった（平文の `http://` は 307 で `https://` へ飛ばされた。[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）
+   - 証明書は Syncthing が作る自己署名のもの（`%LOCALAPPDATA%\Syncthing\https-cert.pem`）。ブラウザは警告を出す
+   - Go は `0.0.0.0` の待ち受けを IPv4 と IPv6 の両方で開くので、`Get-NetTCPConnection` では `::` と出るはず（確かめていない）
+
+   </details>
+
+1. 待ち受け・規則・デバイス ID を確かめ、GUI の URL を出す。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   $proc = @{ Label = 'Process'; Expression = { (Get-Process -Id $_.OwningProcess).ProcessName } }
+   if (-not $LAN_IF) {
+     Write-Error '手順 2 の $LAN_IF が空'
+   } else {
+     Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, $proc
+     Get-NetUDPEndpoint -LocalPort 22000, 21027 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, $proc
+     Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe' | Get-NetFirewallRule | Format-Table DisplayName, Enabled, Profile, Action
+     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
+     & $exe device-id
+     Get-Content -LiteralPath "$env:LOCALAPPDATA\Syncthing\syncthing.log" -Tail 5 -Encoding UTF8 -ErrorAction SilentlyContinue
+     'GUI: https://{0}:8384/  （ログイン名 {1}）' -f (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress, $ST_GUI_USER
+   }
+   ```
+
+   - 8384/tcp・22000/tcp・22000/udp・21027/udp が、どれも `syncthing` で出ればよい
+   - 規則はこの節の手順 7 の 3 つだけが `Allow` で出る（規則の一覧は数秒かかる）
+   - **`Block` の行があれば**、警告の窓でキャンセルを押した跡。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 2 で規則をすべて消し、この節の手順 7 を貼り直す
+   - 最後の行の URL を、この節の手順 12 で使う
+
+   <details>
+   <summary>補足: ログと、自分の PC から開いた GUI</summary>
+
+   - Windows の Syncthing は、ログを `%LOCALAPPDATA%\Syncthing\syncthing.log` に書く（10 MiB ごとに切り替え、古いものを 3 つ残す。ソースの既定値）。文字コードは UTF-8 なので、`-Encoding UTF8` を付けて読む（付けないと、Windows PowerShell 5.1 は日本語の Windows の既定の文字コードで読む）
+   - この PC のブラウザで `https://127.0.0.1:8384/` を開いても GUI は使えるが、ファイアウォールを通らないので、この節の手順 7 の規則を確かめたことにはならない（AlmaLinux 10 の[手順 7](#実施手順)の補足と同じ）
+
+   </details>
+
+1. LAN の別の端末のブラウザで GUI に入り、デバイス ID を確かめる。
+
+   - この節の手順 11 の URL を開き、自己署名の証明書の警告を受け入れ、手順 2 のログイン名と手順 5 のパスワードで入る
+   - 最初に、利用状況の報告（Usage Reporting）を許可するかを聞かれる。どちらでもよい
+   - Actions → Show ID のデバイス ID が、この節の手順 11 の `device-id` と同じであることを確かめる
+   - **この時点では同期するフォルダは 1 つも無い**（Syncthing 2.x は既定のフォルダを作らない）
+
+1. この PC でサインアウトし、サインインし直す。
+
+   - スタートメニューのユーザーのアイコン → 「サインアウト」
+   - サインアウトすると、Syncthing も止まる
+   - **次の手順は、サインインし直して管理者の Windows PowerShell を開いてから貼る**
+
+1. サインインで Syncthing が起動したことを確かめる。
+
+   ```powershell
+   for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   (Get-ScheduledTask -TaskName 'Syncthing').State
+   Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize
+   Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
+   ```
+
+   - `Running` と、`syncthing.exe` が 2 つ、8384 が `127.0.0.1` 以外で出ればよい
+   - この節の手順 2 の変数は要らない
+
+---
+
+## Windows 11 で止める・もう一度始める
+
+- タスク スケジューラでタスクを終了しても（`Stop-ScheduledTask` も）、親のプロセス（モニター）しか止まらず、本体は動き続ける（公式の説明）。止めるのはこの節の手順 1
+- 自動の更新の後の Syncthing は、タスクの外で動く（[Windows 11 の更新](#windows-11-の更新)）。動いているかは、タスクの状態ではなくプロセスで見る
+
+1. Syncthing を止める。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   if (-not (Get-Process -Name syncthing -ErrorAction SilentlyContinue)) {
+     'Syncthing は動いていない'
+   } else {
+     & $exe cli operations shutdown
+     for ($i = 0; $i -lt 30 -and (Get-Process -Name syncthing -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id
+     (Get-ScheduledTask -TaskName 'Syncthing').State
+   }
+   ```
+
+   - プロセスの一覧は何も出ず、タスクは `Ready` になればよい
+   - 次のサインインで、また起動する
+
+1. もう一度始めるときは、タスクを開始する。
+
+   ```powershell
+   if (Get-Process -Name syncthing -ErrorAction SilentlyContinue) {
+     Write-Error 'Syncthing はもう動いている'
+   } else {
+     Start-ScheduledTask -TaskName 'Syncthing'
+     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     (Get-ScheduledTask -TaskName 'Syncthing').State
+     Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
+   }
+   ```
+
+   - `Running` と、8384 の待ち受けが出ればよい
+
+---
+
+## Windows 11 の更新
+
+- Syncthing は 12 時間ごとに新しい版を確かめ、あれば自分で入れ替えて起動し直す（入れ替える前に、リリースの署名を確かめる）。新しい版が出てから 24 時間以内に上がる
+- 入れ替えは同じ場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）で行うので、タスクと受信の規則はそのまま使える。古い実行ファイルは、同じフォルダーに `syncthing.exe.old` として残る
+- **自動で入れ替えた後の Syncthing は、タスクの外で動く**（タスクは `Ready` になる）。次のサインインからは、またタスクで起動する
+- 待たずに上げるときは、この節の手順を貼る
+
+1. 今の版と、新しい版があるかを確かめる。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   & $exe --version
+   & $exe upgrade --check-only
+   ```
+
+   - 新しい版があれば、`Upgrade available` の行に今の版（`current`）と新しい版（`latest`）が出る
+   - 新しい版が無ければ、`no upgrade available (current "v2.1.5" >= latest "v2.1.5")` のエラーが出る。そのときは、この節の手順 2 は飛ばす
+
+1. 新しい版があるときだけ、今すぐ上げる。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   $before = & $exe --version
+   & $exe cli operations upgrade
+   for ($i = 0; $i -lt 60 -and (& $exe --version) -eq $before; $i++) { Start-Sleep -Seconds 1 }
+   & $exe --version
+   Start-Sleep -Seconds 5
+   Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize
+   ```
+
+   - `--version` が新しい版になり、`syncthing.exe` が 2 つ出ればよい
+
+   <details>
+   <summary>補足: 更新の動き</summary>
+
+   - 自動の更新の間隔は、設定の `autoUpgradeIntervalH`（既定 12）。0 にすると自動では上げない（GUI の Actions → Settings → General の「自動アップグレード」でも変えられる）
+   - 更新では、実行ファイルのフォルダーに一時ファイルを書き、前の `syncthing.exe.old` を消し、動いている `syncthing.exe` を `syncthing.exe.old` に名前を変え、新しいものを置く（ソースの `lib/upgrade/upgrade_supported.go`）。子は終了コード 4 で終わり、Windows では親（モニター）が新しい親を起動してから終わる（ソースの `restartMonitorWindows`）。そのため、タスクが起動した親はいなくなり、タスクは `Ready` になる
+   - 更新したことはログに `Automatically upgraded` と出る
+   - 本書では、新しい版が出ていないので、更新を試していない（[対象と検証環境](#対象と検証環境)）
+
+   </details>
+
+---
+
+## Windows 11 のロールバック
+
+- 上から順に、[Windows 11 で使う](#windows-11-で使う)の手順 2 で変数を設定した PowerShell に貼る（変数を使うのはこの節の手順 4 だけ）
+- 同期していたファイル自体は、この節のどの手順でも消えない（同期したフォルダーの `.stfolder` も残る）
+
+> [!CAUTION]
+> **この節の手順 5 で、鍵・設定・DB（`%LOCALAPPDATA%\Syncthing`）を消すと、デバイス ID が失われる**。入れ直すと、相手からは別のデバイスとして見える。入れ直すかもしれないなら、手順 5 は行わない（手順 1〜4 だけなら、入れ直したときに同じデバイス ID に戻る）。
+
+1. Syncthing を止め、タスクを消す。
+
+   ```powershell
+   $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   if (Get-Process -Name syncthing -ErrorAction SilentlyContinue) {
+     & $exe cli operations shutdown
+     for ($i = 0; $i -lt 30 -and (Get-Process -Name syncthing -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   }
+   Unregister-ScheduledTask -TaskName 'Syncthing' -Confirm:$false -ErrorAction SilentlyContinue
+   Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id
+   Get-ScheduledTask -TaskName 'Syncthing' -ErrorAction SilentlyContinue
+   ```
+
+   - 最後の 2 つが何も出さなければよい
+
+1. 受信の規則を消す（警告の窓が作った規則も）。
+
+   ```powershell
+   Remove-NetFirewallRule -Group 'Syncthing (setup-notes)' -ErrorAction SilentlyContinue
+   Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe' | Get-NetFirewallRule | Remove-NetFirewallRule
+   Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe'
+   ```
+
+   - 最後のコマンドが何も出さなければよい（数秒かかる）
+
+1. 実行ファイルを消す。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\Programs\Syncthing" -Recurse -Force
+   Test-Path "$env:LOCALAPPDATA\Programs\Syncthing"
+   ```
+
+   - `False` が出ればよい（`syncthing.exe.old` も消える）
+
+1. LAN の接続をパブリックに戻すときだけ、パブリックにする。
+
+   ```powershell
+   if (-not $LAN_IF) {
+     Write-Error '手順 2 の $LAN_IF が空'
+   } else {
+     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
+     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
+   }
+   ```
+
+   - `<LAN_IF>  Public` が出ればよい
+   - [Windows 11 で使う](#windows-11-で使う)の手順 7 の前からプライベートだったなら、この手順は飛ばす
+   - [Windows の OpenSSH サーバー](windows-openssh-server.md)をこの LAN で使っているなら、この手順は飛ばす（パブリックにすると SSH も届かなくなる）
+
+1. 完全に消すときだけ、鍵・設定・DB・ログを消す（取り戻せない）。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\Syncthing" -Recurse -Force
+   Test-Path "$env:LOCALAPPDATA\Syncthing"
+   ```
+
+   - `False` が出ればよい
+
+---
+
 ## 補足
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 に [Syncthing](https://syncthing.net/) の最新版を入れ、ログインしていない間も動き続けるファイル同期デーモンにする。Web GUI は LAN からも開けるようにする
-- **進め方**: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと、前提の [linger](linger.md)（`loginctl enable-linger`）で常駐させる
-  - **GUI の認証を先に設定してから**待ち受けを LAN に広げ、最後に firewalld を開ける
-  - 読者が書き換える値は無い（既定のままで通る）
-- **状態**: **実機で本実行済み（2026-09-24）**
-  - 下表のホストで、本書の各手順のコマンドを上から順に実行した。本書はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
+- **目的**: AlmaLinux 10 と Windows 11 に [Syncthing](https://syncthing.net/) の最新版を入れ、互いに（ほかの端末とも）フォルダを同期する。Web GUI は LAN からも開けるようにする
+  - AlmaLinux 10 では、ログインしていない間も動き続けるファイル同期デーモンにする
+  - Windows 11 では、サインインしている間だけ動かす
+- **進め方**: どちらも **GUI の認証を先に設定してから**待ち受けを LAN に広げる。読者が書き換える値は無い（既定のままで通る）
+  - **AlmaLinux 10**（[実施手順](#実施手順)）: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと、前提の [linger](linger.md)（`loginctl enable-linger`）で常駐させる。最後に firewalld を開ける
+  - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: 公式の zip の `syncthing.exe` を `%LOCALAPPDATA%\Programs\Syncthing` に置き、タスク スケジューラのタスクで、サインインしている間だけ動かす
+    - 受信の規則は、最初の起動より前に作る
+    - 更新は、Syncthing 自身の自動の更新に任せる
+    - すべて管理者の Windows PowerShell 5.1 に貼る
+- **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）**
+  - 下表のホストで、AlmaLinux 10 の各手順のコマンドを上から順に実行した。AlmaLinux 10 の手順はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
     - linger の有効化（今の [linger.md](linger.md) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
     - `syncthing 2.1.5`（Homebrew、`arm64_linux` のボトル）が入っている
@@ -784,6 +1314,17 @@
   - 2026-09-28: 手順 7 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
+    - 配布物: 2.1.5 の Windows の zip の中身、`sha256sum.txt.asc` の行との一致（その GPG の署名も）、`syncthing.exe` の Authenticode の署名者・証明書の連なり・タイムスタンプ・埋め込みの設定（`consoleAllocationPolicy`）。Linux で PE を読んだだけで、Windows の `Get-AuthenticodeSignature` は通していない
+    - Syncthing 2.1.5 のソース: 設定とログの場所、`--no-console`、`generate` のパスワードの読み方、モニターの起動し直しと自動の更新の動き
+    - Linux の公式の tarball の同じ版（2.1.5）での CLI（[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）: CR LF 付きのパスワードの `generate`、[Windows 11 で使う](#windows-11-で使う)の手順 10 の 4 つのコマンドと起動し直さずに変わること、`cli operations restart` / `shutdown` / `upgrade`（新しい版が無いとき）、`upgrade --check-only`
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（構文とコマンドの引数だけ）。[Windows 11 で使う](#windows-11-で使う)の手順 4・6 のブロックは、Linux の pwsh で偽物の署名と Linux の `syncthing` を使って流した（同じ付録）
+  - **確かめていないこと**: Windows で貼ること（すべての手順）、タスクの登録と起動・サインインでの起動・サインアウトで止まること、受信の規則と警告の窓、LAN の別の端末からの GUI と同期、自動の更新とその後のタスクの状態、arm64 の Windows、24H2 より前の Windows
+  - 2026-10-03: 別の手順書（`docs/windows-syncthing.md`）として書いたものを、同じ日にこの文書の Windows 11 の節へ移した。コマンドは変えていない（手順の番号も節の中で同じ）
+
+AlmaLinux 10 の実機:
 
 | 項目 | 値 |
 |---|---|
@@ -799,8 +1340,18 @@
 | NIC | `end0` = <SERVER_IP>/24、`wg0` = <WG_IP>/30（ともに public ゾーン） |
 | デスクトップ | GNOME 49.4 / `graphical.target` |
 
+Windows 11 の手順が前提にしている環境（ほかの Windows の手順書の実機の記録と同じ PC を想定）:
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2） |
+| PowerShell | Windows PowerShell 5.1（管理者として実行） |
+| ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
+| Syncthing | 2.1.5（2026-09-08。`syncthing-windows-amd64-v2.1.5.zip`） |
+| ネットワーク | LAN の接続（[Windows 11 で使う](#windows-11-で使う)の手順 7 でプライベートにする） |
+
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](#実施手順)のシェル変数、Windows 11 は[Windows 11 で使う](#windows-11-で使う)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -809,14 +1360,19 @@
 > | `${ST_LAN_IP}` | 案内と検証にだけ使う LAN 側 IP（デフォルト経路の送信元から自動で入る） | `192.168.1.10` |
 > | `${ST_ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
 > | `${ST_BACKUP}` | 戻すアーカイブ。[バックアップから戻す](#バックアップから戻す)場合だけ、その節の手順 4 で設定する（自動で最新が入る） | `~/syncthing-backup/syncthing-config-<日時>.tar.gz` |
+> | `$ST_GUI_USER` | Windows 11 の Web GUI のログイン名。Windows のアカウントとは別物（自動で同じ名前が入る）。[Windows 11 で使う](#windows-11-で使う)の手順 2 で設定する | `<WIN_USER>` |
+> | `$LAN_IF` | Windows 11 で、相手とつながる LAN の接続の名前（自動で入る）。[Windows 11 で使う](#windows-11-で使う)の手順 2 で設定する | `イーサネット` |
+> | `$ST_GUI_PASS` | Windows 11 の GUI のパスワード。[Windows 11 で使う](#windows-11-で使う)の手順 5 で読み取り、手順 6 で消す | — |
 >
-> 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）/ `<DEVICE_ID>` / `<APIKEY>` のプレースホルダで書いてある。バージョン（`2.1.5`）は実行日によって変わる。
+> 出力例・ログ・表の中の値は `<HOSTNAME>`（Windows ではコンピューター名）/ `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）/ `<WIN_USER>`（Windows のユーザー名）/ `<LAN_IF>` / `<IP>` / `<DEVICE_ID>` / `<APIKEY>` のプレースホルダで書いてある。バージョン（`2.1.5`）は実行日によって変わる。
 >
 > **GUI のパスワードと API キーはこの文書に載せない。** デバイス ID は公開してよい値だが、実機のものはプレースホルダにしてある。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
+
+AlmaLinux 10 の実機（2026-09-24）。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)の手順 3 で確かめる。
 
 | 項目 | 状態 |
 |---|---|
@@ -856,7 +1412,37 @@ AlmaLinux 10 / aarch64 で Syncthing を入れる経路を比べた（2026-09-24
   - 公式のドキュメントが、設定ファイルのバックアップに勧めている形
   - restic（[導入元一覧](tool-catalog.md#cli-開発運用)にある）で別のリポジトリへ送る方法もあるが、送り先を別に用意することになる
 
+Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。中身はどれも公式の `syncthing.exe`）:
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **公式の zip を固定の場所に置く** | GitHub のリリースの `syncthing-windows-amd64-v2.1.5.zip`（Authenticode の署名付き）。更新は Syncthing 自身の自動の更新で、同じ場所の実行ファイルを入れ替える | **採用** |
+| winget の `Syncthing.Syncthing` | 2.1.5（公式の zip をそのまま）。版ごとに展開するフォルダーが変わる（`…\WinGet\Packages\Syncthing.Syncthing_…\syncthing-windows-amd64-v2.1.5\`）。`Links` のシンボリック リンクは、昇格も開発者モードも無いと作られない。Syncthing 自身の自動の更新は切られない | 不採用（パスが変わり、タスクと規則が更新で壊れる） |
+| scoop の `main/syncthing` | 2.1.5。shim が `--home …\current\config --no-upgrade` を付け、設定は `~\scoop\persist\syncthing\config`。実行ファイルは `current` のジャンクションの先 | 不採用（shim を通さずに起動すると別の設定になる。ジャンクションの先のプログラムに規則が効くか確かめられない） |
+| Chocolatey の `syncthing` | 2.1.5（コミュニティの保守）。自動起動も規則も無い | 不採用 |
+| Syncthing Windows Setup（`BillStewart.SyncthingWindowsSetup` 2.0.2） | 公式のダウンロードのページが、新しい利用者に勧めるコミュニティのインストーラー。導入のときに最新の Syncthing を取り、ログオンのタスク・規則・開始と停止のショートカットを作る。サイレントの個人用の導入では規則を作らない | 不採用（画面の操作が中心になる。中身は本書とほぼ同じ） |
+| SyncTrayzor v2（`GermanCoding.SyncTrayzor` 2.2.0）・Syncthing Tray（2.1.7） | タスクバーのトレイのアプリ。Syncthing を中に持つ | 不採用（GUI のアプリを足すことになる） |
+
+- **Windows 11 では、固定の場所に置き、Syncthing 自身に更新させた**
+  - タスクの実行ファイルと、受信の規則のプログラムが、更新の後も同じパスを指す
+  - 自動の更新は、入れ替える前にリリースの署名を確かめる。`winget upgrade` や `scoop update` を自分で走らせなくても、24 時間以内に上がる
+  - 初回だけは本書が取ってくるので、sha256 と Authenticode の署名を確かめてから置く（[Windows 11 で使う](#windows-11-で使う)の手順 4）
+  - AlmaLinux 10 の Homebrew 版は逆に、Syncthing 自身の更新を切ってある（`noupgrade`。[注意点](#注意点)）
+- **Windows 11 では、サインインしている間だけ、タスク スケジューラで動かした**
+  - Syncthing の公式の説明は、タスク スケジューラ（「ユーザーがログオンしているかどうかにかかわらず実行する」とパスワードの保存）か、スタートアップのフォルダーのショートカット。サービスにするのは、ほとんどの使い方では勧めていない
+  - 本書は、利用者の使い方（サインインしている間だけ同期すればよい）に合わせて `-LogonType Interactive` にし、パスワードを保存しない
+  - スタートアップのフォルダーより、タスクの方が、電池・実行時間・二重起動の設定と、`Start-ScheduledTask` での開始ができる
+- **Windows 11 の受信の規則は、プログラムとプライベートに絞り、最初の起動より前に作った**（[Windows 11 で使う](#windows-11-で使う)の手順 7 の補足）
+  - 公式の説明の「一度対話で起動して、警告の窓で許可する」は、窓でキャンセルを押すと拒否の規則ができ、後から気付きにくい
+- **Windows 11 でも GUI は LAN に公開した**（AlmaLinux 10 と同じく、認証 → 起動 → 待ち受けを広げる順）
+  - この PC からだけ開くなら、[Windows 11 で使う](#windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
+- **ネットワークをプライベートにする手順は、[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 と同じ**
+  - 既にプライベートなら何も変わらないので、[Windows 11 で使う](#windows-11-で使う)の手順 7 にも入れた。共有の前提の手順書には分けていない
+  - そのため、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
+
 ### 完了時点の状態
+
+AlmaLinux 10 の実機（2026-09-24）。Windows 11 は流していないので、記録は無い。
 
 ```
 $ syncthing --version
@@ -910,7 +1496,8 @@ $ syncthing cli config folders list
   - 同期には好都合だが、GUI まで届くことは意識しておく。絞るなら[接続元を絞る（任意）](#接続元を絞る任意)
 - **GUI の認証は必須**: LAN に開く構成なので、認証を設定しないまま待ち受けを広げると誰でも全設定を触れる。本書は手順 3〜4（認証）→ 手順 6（公開）→ 手順 7（firewalld）の順にしてある
 - **証明書は自己署名**: ブラウザの警告は消えない。警告を無視する運用に慣れると本物の異常を見逃すので、常用するなら例外として明示的に登録する
-- **API キーはパスワードと同じ重み**: `config.xml` にあり、これ 1 つで GUI の全操作ができる。ログや issue に貼らない
+- **GUI に入れる人は、Syncthing を動かすユーザーのファイルを読み書きできる**: Syncthing はそのユーザーとして動き、GUI からフォルダを足せる。GUI のパスワードは、OS のパスワードと同じ重みで扱う
+- **API キーはパスワードと同じ重み**: `config.xml`（Windows 11 では `%LOCALAPPDATA%\Syncthing\config.xml`）にあり、これ 1 つで GUI の全操作ができる。ログや issue に貼らない
 - **設定と DB は `~/.local/state/syncthing`**: 1.27.0 以降の既定
   - 戻すのに要るのは `cert.pem` / `key.pem`（失うとデバイス ID が変わる）と `config.xml`。DB（`index-v2`）は作り直せる
   - 自動で取っておくなら[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)、戻すなら[バックアップから戻す](#バックアップから戻す)
@@ -919,22 +1506,36 @@ $ syncthing cli config folders list
   - 他のホストの 1.x から移すなら、上げる前に設定ディレクトリごと退避しておく
 - **QUIC の受信バッファについて警告が出る**: 起動時に `failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 7168 kiB, got: 416 kiB)` と出る
   - 動作はする。消すなら `net.core.rmem_max` を上げる（本書では触っていない）
-- **ホームを丸ごと同期しない**: `~/.local/state/syncthing` 自身やキャッシュまで対象になる。このホストは [Samba](samba.md) でホームを公開しているので、同じ領域を二重に扱うことにもなる
+- **ホームを丸ごと同期しない**: `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身やキャッシュまで対象になる。このホストは [Samba](samba.md) でホームを公開しているので、同じ領域を二重に扱うことにもなる
+- **Windows 11 の注意点**
+  - **パブリックのネットワークでは、直接はつながりにくい**: 規則はプライベートだけで有効。持ち出した先の Wi-Fi や、パブリックになっている VPN（WireGuard のトンネルの接続など）では、相手とはリレー（Syncthing のリレーのサーバー）経由になることが多い。外向きの接続だけでも同期はできる
+  - **サインアウトとスリープの間は止まる**: タスクはサインインしている間だけ動く。スリープの間も同期しない。止まっている間の変更は、次に動いたときに同期される
+  - **短い間に何度も起動し直さない**: 子のプロセスが 60 秒の間に 4 回起動すると、親はあきらめて終わる（[Windows 11 で使う](#windows-11-で使う)の手順 9 の補足）
+  - **タスクの状態では、動いているかは分からない**: タスクを終了しても本体は止まらず、自動の更新の後はタスクの外で動く。止めるのは [Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1、確かめるのはプロセス
+  - **Windows で使えない名前のファイル**: 相手（AlmaLinux 10 など）にある、`:` や `?` などを含む名前や、大文字と小文字だけが違う名前のファイルは、Windows では同期できない（Syncthing は、そのファイルを同期できなかったものとして GUI に出す。確かめていない）
+  - **24H2 より前の Windows**: `syncthing.exe` に入っている「コンソールの窓を作らない」設定が効かず、タスクから起動したときにコンソールの窓が一瞬出て、`--no-console` で隠れるはず（確かめていない）
+  - **設定とログの場所**: `%LOCALAPPDATA%\Syncthing`（設定・鍵・DB・`syncthing.log`）。戻すのに要るのは `cert.pem` / `key.pem`（失うとデバイス ID が変わる）と `config.xml`
 
 ### 参照
 
 - [Getting Started — Syncthing documentation](https://docs.syncthing.net/intro/getting-started.html) — 初回起動からフォルダー共有までの流れ
-- [Autostarting Syncthing — Syncthing documentation](https://docs.syncthing.net/users/autostart.html) — systemd のシステムサービス / ユーザーサービスと `enable-linger`
+- [Starting Syncthing Automatically — Syncthing documentation](https://docs.syncthing.net/users/autostart.html) — systemd のシステムサービス / ユーザーサービスと `enable-linger`。Windows のタスク スケジューラ（`--no-console --no-browser`、ファイアウォールの窓、タスクを終了してもモニターしか止まらないこと）、スタートアップのフォルダー、サービス
 - [Firewall Setup — Syncthing documentation](https://docs.syncthing.net/users/firewall.html) — 22000/tcp・22000/udp・21027/udp の役割
-- [Configuration — Syncthing documentation](https://docs.syncthing.net/users/config.html) — `config.xml` の各要素と設定ディレクトリの既定値
+- [Configuration — Syncthing documentation](https://docs.syncthing.net/users/config.html) — `config.xml` の各要素と設定ディレクトリの既定値（Windows は `%LOCALAPPDATA%\Syncthing`）、`autoUpgradeIntervalH`
 - [Syncthing v2.0.0 リリースノート](https://github.com/syncthing/syncthing/releases/tag/v2.0.0) — SQLite への移行、構造化ログへの変更、廃止された項目（`--verbose` / `--logflags`）
 - [homebrew-core の syncthing formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/s/syncthing.rb) — `--no-upgrade` ビルドと `service do` ブロック
 - [Syncing Configuration Files — Syncthing documentation](https://docs.syncthing.net/users/config.html#syncing-configuration-files) — 設定ファイルを Syncthing でバックアップするなら送信専用フォルダにし、相手側で設定として使わない
 - [Folder Types — Syncthing documentation](https://docs.syncthing.net/users/foldertypes.html) — 送信専用フォルダと「Override Changes」、受信専用フォルダ
-- [FAQ — Syncthing documentation](https://docs.syncthing.net/users/faq.html) — 「My Syncthing database is corrupt」（DB を消して起動すると全フォルダを読み直す）と「folder marker missing」
-- Syncthing 2.1.5 のソース — `lib/model/model.go` の `newFolder`（DB が空のフォルダはディレクトリと `.stfolder` を作る）、`lib/fs/tempname.go`（`.syncthing.` で始まる名前を一時ファイルとして扱う）、`syncthing generate` の `Key exists; will not overwrite`
+- [FAQ — Syncthing documentation](https://docs.syncthing.net/users/faq.html) — 「My Syncthing database is corrupt」（DB を消して起動すると全フォルダを読み直す）と「folder marker missing」。自動の更新、Windows のネットワークをプライベートにする話（「Why do my Windows computers always connect through a relay?」）
+- [Syncthing のダウンロード](https://syncthing.net/downloads/) — Windows の zip と、Syncthing Windows Setup・SyncTrayzor v2 の案内
+- [Syncthing v2.1.5](https://github.com/syncthing/syncthing/releases/tag/v2.1.5) — リリースのファイルと `sha256sum.txt.asc`
+- Syncthing 2.1.5 のソース — `lib/model/model.go` の `newFolder`（DB が空のフォルダはディレクトリと `.stfolder` を作る）、`lib/fs/tempname.go`（`.syncthing.` で始まる名前を一時ファイルとして扱う）、`syncthing generate` の `Key exists; will not overwrite`。Windows 11 の節は `cmd/syncthing/main.go`（`serve` の引数）、`cmd/syncthing/hideconsole_windows.go`（`--no-console`）、`cmd/syncthing/generate/generate.go`（`--gui-password=-`）、`cmd/syncthing/monitor.go`（モニターと `restartMonitorWindows`）、`lib/locations/locations.go`（設定とログの場所）
 - `man syncthing`（`generate`、`cli`、`--gui-address`）/ `man syncthing-config`（`<gui>`）/ `man syncthing-faq` / `man loginctl`（`enable-linger`）/ `man systemd.path` / `man systemd.timer`
-- [linger](linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
+- [Console Allocation Policy — Microsoft Learn](https://learn.microsoft.com/en-us/windows/console/console-allocation-policy) — `consoleAllocationPolicy` の `detached`（Windows 11 24H2 以降）
+- [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
+- [New-ScheduledTaskPrincipal](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal)・[New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)・[New-NetFirewallRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule)
+- [linger](linger.md) — AlmaLinux 10 の前提の手順書（ログアウト中もユーザーの systemd を動かす）
+- [Windows の OpenSSH サーバー](windows-openssh-server.md) — Windows 11 の同じ PC で使うことの多い手順書（ネットワークをプライベートにする手順が同じ）
 
 ---
 
@@ -1255,3 +1856,137 @@ docs
 - ユーザーの journal が読める環境での `journalctl --user` の出力
 - 外付けディスクを保存先や同期フォルダにしたときの、マウントが外れている場合の挙動
 - firewalld（手順 7）を含めた入れ直し
+
+---
+
+### 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物とソースと資料を読んだ記録。
+
+#### リリースのファイル
+
+最新は v2.1.5（2026-09-08。次の候補は v2.1.6-rc.4）。`releases/latest/download/sha256sum.txt.asc` は v2.1.5 のファイルへ飛んだ:
+
+```
+$ curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' https://github.com/syncthing/syncthing/releases/latest/download/sha256sum.txt.asc
+302 https://github.com/syncthing/syncthing/releases/download/v2.1.5/sha256sum.txt.asc
+```
+
+`sha256sum.txt.asc` の Windows の行（改行は LF。[Windows 11 で使う](#windows-11-で使う)の手順 4 の正規表現で、amd64 と arm64 の行がそれぞれ 1 つだけ合った）:
+
+```
+39571e4d0900c2a2cab14c0b170f49751340a869e49734ccc8079d9b98a7974b  syncthing-windows-amd64-v2.1.5.zip
+082de37dc99621064bde8378ea26b28378f312f0a4147f52844ce7425f1baab0  syncthing-windows-arm64-v2.1.5.zip
+```
+
+取ってきた amd64 の zip の sha256 は `39571e4d…7974b` で一致した。`.asc` の GPG の署名は、`https://syncthing.net/release-key.txt` の鍵で確かめられた（もう 1 つ、その鍵の一覧に無い古い鍵の署名も付いていた）:
+
+```
+gpg: Good signature from "Syncthing Release Management <release@syncthing.net>" [unknown]
+Primary key fingerprint: FBA2 E162 F2F4 4657 B38F  0309 E566 5F9B D597 0C47
+gpg:                using RSA key 37C84554E7E0A261E4F76E1ED26E6ED000654A3E
+gpg: Can't check signature: No public key
+```
+
+zip の中（`syncthing-windows-amd64-v2.1.5/` の下）は `syncthing.exe`（27,448,104 バイト）・`README.txt`・`LICENSE.txt`・`AUTHORS.txt`・`metadata/release.sig`・`etc/`（`linux-systemd`・`macos-launchd` など。Windows 用は無い）。
+
+#### `syncthing.exe` の署名と埋め込みの設定
+
+PE の証明書テーブルを openssl で読んだ（Windows の `Get-AuthenticodeSignature` は通していない）:
+
+```
+subject=C = SE, ST = Sk\C3\A5ne, L = H\C3\B6llviken, O = Kastelo AB, CN = Kastelo AB
+issuer=C = US, O = Microsoft Corporation, CN = Microsoft ID Verified CS AOC CA 04
+subject=C = US, O = Microsoft Corporation, CN = Microsoft ID Verified CS AOC CA 04
+issuer=C = US, O = Microsoft Corporation, CN = Microsoft ID Verified Code Signing PCA 2021
+subject=C = US, O = Microsoft Corporation, CN = Microsoft ID Verified Code Signing PCA 2021
+issuer=C = US, O = Microsoft Corporation, CN = Microsoft Identity Verification Root Certificate Authority 2020
+```
+
+- 署名者の証明書の有効期間は 2026-09-06〜2026-09-09（3 日）
+- RFC 3161 のタイムスタンプ（OID `1.3.6.1.4.1.311.3.3.1`）が付いていて、時刻は 2026-09-08。期限の切れた後も、タイムスタンプで署名が有効とみなされる
+- 埋め込みの manifest に `<consoleAllocationPolicy xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">detached</consoleAllocationPolicy>` がある（v2.1.2 から）
+
+#### ソース（v2.1.5）
+
+- `cmd/syncthing/generate/generate.go`: `--gui-password=-` は `bufio.NewReader(os.Stdin)` の `ReadLine()` で 1 行を読む（Go の説明: 返す行は `\r\n` も `\n` も含まない）
+- `cmd/syncthing/hideconsole_windows.go`: `--no-console`（環境変数は `STHIDECONSOLE`）。説明は「Hide console window (Always enabled on Windows 11 24H2 and later)」
+- `cmd/syncthing/monitor.go`: 子が 60 秒の間に 4 回起動すると `Too many restarts; not retrying further` で終わる。子が終了コード 4（更新）で終わると、Windows では `restartMonitorWindows` が新しい親を `exec.Command(...).Start()` で起動して、今の親は終わる（Linux などは `syscall.Exec` で同じプロセスのまま）
+- `lib/locations/locations.go`: Windows の設定と DB は `%LOCALAPPDATA%\Syncthing`（無ければ `%APPDATA%\Syncthing`）。ログの既定は Windows だけ `syncthing.log`（ほかは標準出力）
+- 自動の更新の既定は `autoUpgradeIntervalH` が 12
+
+#### パッケージの定義（採らなかった経路）
+
+- winget の `Syncthing.Syncthing` 2.1.5: `InstallerType: zip`、`NestedInstallerType: portable`、`RelativeFilePath: syncthing-windows-amd64-v2.1.5/syncthing.exe`、`InstallerUrl` は GitHub の公式の zip、`UpgradeBehavior: uninstallPrevious`
+- scoop の `main/syncthing` 2.1.5: `"bin": [[ "syncthing.exe", "syncthing", "--home \"$dir\\config\" --no-upgrade" ]]`、`"persist": "config"`、`notes` は公式の自動起動の説明へのリンク
+- `BillStewart.SyncthingWindowsSetup` 2.0.2（2026-03-19）: Inno Setup。README は、個人用の導入でログオンのタスクを作ること、対話の導入では規則を作るかを聞き、サイレントの個人用の導入では規則を作らないことを書いている。Syncthing の自動の更新は既定のまま（12 時間）
+- Syncthing の公式のドキュメント（autostart）は「There is currently no official installer available for Windows.」と書いている
+
+---
+
+### 付録: Windows 11 の CLI と PowerShell のブロックの Linux での確認（2026-10-03）
+
+本書の[Windows 11 で使う](#windows-11-で使う)の手順 6・10 と、後ろの Windows 11 の節で使う `syncthing` のコマンドが 2.1.5 でそのとおり動くかを、Linux の公式の tarball（`syncthing-linux-amd64-v2.1.5.tar.gz`、`syncthing v2.1.5 "Hafnium Hornet" (go1.27.1 linux-amd64) builder@github.syncthing.net 2026-09-08 06:57:55 UTC`）で確かめた。一時的な `HOME` で、親（モニター）付き（`--no-restart` 無し）で動かした。Windows だけのもの（`--no-console`・タスク・ファイアウォール・ログのファイル）は確かめられない。最後に、本書の PowerShell のブロックを Linux の PowerShell 7 で確かめた記録を置く。
+
+**`generate` に CR LF 付きでパスワードを渡す**（[Windows 11 で使う](#windows-11-で使う)の手順 6 の Windows PowerShell 5.1 のパイプに当たる）:
+
+```
+$ printf 'pw-Test_1\r\n' | syncthing generate --gui-user=winuser --gui-password=-
+INF Generating key and certificate (cn=syncthing log.pkg=syncthing)
+INF Calculated device ID (device=<DEVICE_ID> log.pkg=github)
+INF Updated GUI authentication user (name=winuser log.pkg=github)
+INF Updated GUI authentication password (log.pkg=github)
+$ printf '' | syncthing generate --gui-user=x --gui-password=-; echo $?
+syncthing: error: failed reading GUI password: EOF
+1
+```
+
+起動した後に、GUI のログインの API に送った:
+
+```
+POST /rest/noauth/auth/password  {"username":"winuser","password":"pw-Test_1"}    → 204
+POST /rest/noauth/auth/password  {"username":"winuser","password":"pw-Test_1\r"}  → 403
+```
+
+CR を落としたパスワードでだけログインできた。`generate` の直後の設定は `<gui enabled="true" tls="false" …>` と `<address>127.0.0.1:8384</address>` で、空の `.syncthing.tmp.<数字>` が残った。
+
+**[Windows 11 で使う](#windows-11-で使う)の手順 10 のコマンド**: 4 つとも終了コード 0 で、`0.0.0.0:8384` と `true` を読み戻した。起動し直す前から、待ち受けは `0.0.0.0:8384` に変わり、HTTPS になっていた:
+
+```
+https://127.0.0.1:8384/                  → 200
+http://127.0.0.1:8384/                   → 307
+https://127.0.0.1:8384/rest/system/status → 403（認証無し）
+```
+
+**`cli operations restart`**: 終了コード 0。子のプロセスだけが入れ替わり（PID が変わった）、親は同じだった。3 秒で HTTPS の待ち受けに戻った。
+
+**`cli operations shutdown`**: 終了コード 0。親と子の 2 つのプロセスが終わった（ログの最後は `Exiting`）。止まった後にもう 1 度送ると、`dial tcp 0.0.0.0:8384: connect: connection refused` で終了コード 1（`0.0.0.0` の待ち受けへの接続は、ループバックに向く）。
+
+**更新の確認**（新しい版が無いとき）:
+
+```
+$ syncthing upgrade --check-only; echo $?
+ERR Failed to check for upgrade (error="no upgrade available (current \"v2.1.5\" >= latest \"v2.1.5\")." log.pkg=main)
+2
+$ syncthing cli operations upgrade; echo $?
+0
+```
+
+`config.xml` の `autoUpgradeIntervalH` は 12、`urAccepted` は 0（利用状況の報告をまだ聞いていない）だった。
+
+**PowerShell のブロック**:
+
+- 本書の `powershell` のブロック 20 個を、Linux の PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（Windows PowerShell 5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、[Windows 11 で使う](#windows-11-で使う)の手順 5 の `$ST_GUI_PASS` を手順 6 で使うことへの 1 つだけ）。わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`、`ForEach-Object -Parallel`）を入れたファイルでは、それぞれ指摘が出た
+- [Windows 11 で使う](#windows-11-で使う)の手順 4 のブロックを、Linux の pwsh で、パスの `\` を `/` に替え、`Get-AuthenticodeSignature` と `icacls.exe` を偽物にして流した。最新の版の行を `sha256sum.txt.asc` から取り、zip を取って sha256 が一致し、展開した `syncthing.exe` を `%LOCALAPPDATA%` に当たる場所へ置いて、一時フォルダーを消した。偽物の署名の `Status` を `Valid` 以外にすると、`中断: syncthing.exe の署名を確かめられない（HashMismatch）` で止まり、何も置かなかった
+- [Windows 11 で使う](#windows-11-で使う)の手順 6 のブロックを、Linux の pwsh で、`$exe` を Linux の `syncthing` にして流した。`ConvertTo-SecureString` で作ったパスワードで `generate` が通り、起動した後にそのパスワードでログインできた（204）。`パス1` は `パスワードに ASCII でない文字がある` で止まった。どちらも最後に `$ST_GUI_PASS` が消えていた。PowerShell 7 はパイプの文字コードが UTF-8 で、改行は LF なので、Windows PowerShell 5.1 と同じではない
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. `Get-AuthenticodeSignature` が `Valid` を返し、署名者が `CN=Kastelo AB, …` で始まること
+1. タスクで起動したときに窓が出ないこと、サインインでの起動、サインアウトで止まること
+1. 受信の規則を先に作れば、警告の窓が出ないこと
+1. LAN の別の端末からの GUI と、相手との同期
+1. 自動の更新と、その後のタスクの状態（`Ready`）、`syncthing.exe.old`
+1. arm64 の Windows、24H2 より前の Windows

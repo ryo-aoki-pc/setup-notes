@@ -6,12 +6,12 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md) は Windows 11 も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
-- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)。非公開）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
+- 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
 
 ### OS のインストール
 
@@ -79,6 +79,7 @@
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
+- Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
@@ -88,6 +89,7 @@
 | [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
+| [RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、Windows の設定のリモート デスクトップが開ける） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -100,6 +102,7 @@
 - Samba クライアントは、その共有を AlmaLinux 10 の PC の `/mnt/<共有名>` に、アクセスしたときにマウントする。GNOME Files（`smb://`）で開く方法も同書にある
 - 同じホストで両方使うときは、Syncthing の同期対象にホームを丸ごと入れない（Samba と同じ領域を二重に扱うことになる）
 - Syncthing の鍵と設定は、[syncthing.md の任意節](docs/syncthing.md#設定を自動でバックアップする任意)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
+- Syncthing は、Windows 11 の PC にも同書の [Windows 11 の節](docs/syncthing.md#windows-11-で使う)で入れられる。公式の zip の `syncthing.exe` を置き、サインインしている間だけタスク スケジューラで動かす（AlmaLinux 10 の Syncthing の相手にもなる）。更新は Syncthing 自身の自動の更新。**Windows の実機では流していない**（未検証）
 - Dropbox は、どちらの手順書も `~/Dropbox` をクラウドと同期する。公式クライアントは x86_64 にしか無いので、Raspberry Pi 5（aarch64）では rclone を使う
 - `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）
 
@@ -107,7 +110,7 @@
 |---|---|---|---|---|
 | [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
 | [Samba クライアント](docs/samba-client.md) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`） | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す） | 無し（サーバーの 445/tcp へ出るだけ） |
-| [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い） | `brew services` のユーザーサービスと [linger](docs/linger.md) | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp） |
+| [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/linger.md)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
 | [Dropbox（公式クライアント）](docs/dropbox.md) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと [linger](docs/linger.md) | 無し（LAN 同期の `dropbox-lansync` は開けない） |
 | [Dropbox（rclone）](docs/dropbox-rclone.md) | `rclone bisync` で `~/Dropbox` と Dropbox を 15 分ごとに双方向同期する（Raspberry Pi 5 向け） | Homebrew（EPEL 版は古い） | systemd ユーザータイマーと [linger](docs/linger.md) | 無し |
 
@@ -127,7 +130,7 @@
 | [WezTerm Nightly](docs/wezterm-nightly.md) | 端末アプリ（GUI） | 公式 COPR の EL9 ビルド（chroot を明示） | `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（両方あると前者だけ読む） |
 | [HackGen Console NF](docs/hackgen.md) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask | `~/.local/share/fonts` に入る（自分のユーザーだけ） |
 | [starship](docs/starship.md) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | `~/.bashrc` に 1 行。`~/.config/starship.toml` は任意 |
-| [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew。x86_64 は COPR（`kray74/cli-tools`）の dnf でも入る（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
+| [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`。`--cmd cd` なら `cd` も） | Homebrew（EPEL・AppStream に無い） | `~/.bashrc` に 1 行 |
 | [tmux](docs/tmux.md) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
 | [bash の履歴・補完・キー操作](docs/bash-settings.md) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | `~/.bashrc` に 4〜5 行と `~/.inputrc` |
 | [fzf](docs/fzf.md) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い） | `~/.bashrc` に 1 行。fd・bat を使う 4 行は任意 |
@@ -303,7 +306,7 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell）。デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Syncthing の Windows 11 の節](docs/syncthing.md#windows-11-で使う)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP でつないだセッションの中の PowerShell）。デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く

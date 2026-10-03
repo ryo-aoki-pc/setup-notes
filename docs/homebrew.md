@@ -473,7 +473,7 @@ AlmaLinux 10 aarch64 で「EPEL / AppStream に無い、または古い CLI ツ�
 |---|---|---|
 | **Homebrew** | `arm64_linux` のボトルが揃っていて**ソースビルドが要らない**。root 権限なしで upstream の最新版を追え、1 つの `brew upgrade` でまとめて上がる。占有は大きい（実機で 2.8 GB） | **採用** |
 | EPEL / AppStream / CRB の RPM | root 権限で `dnf` に乗るのが利点。ただし目的のツールが**無い**（`eza` / `git-delta` / `starship` / `zoxide`）か、**古い**（`bat 0.24.0` / `neovim 0.10.1` / `fzf 0.58.0`）ことが多い。同版なら RPM を選ぶ（手順書では [btop.md](btop.md) と、[image-tools.md](image-tools.md) の Trivy が例。[ツール一覧](tool-catalog.md)の fastfetch などもこの規則で RPM にした） | 併用（無い・古いときだけ Homebrew） |
-| COPR | EL10 向けの chroot があるとは限らず、`epel-10-aarch64` の repomd が 403 になる例を実測している（[lazygit.md](lazygit.md)）。EL9 向けを流用した例は [wezterm-nightly.md](wezterm-nightly.md) | 不採用（ツールごとに当たり外れが大きい） |
+| COPR | EL10 向けの chroot があるとは限らず、`epel-10-aarch64` の repomd が 403 になる例を実測している（[lazygit.md](lazygit.md)）。zoxide の COPR（x86_64 だけ）も、Homebrew と同じ版なので 2026-10-03 に外した（[zoxide.md](zoxide.md#選択した方針)）。WezTerm Nightly だけは、Homebrew の公式 tap の nightly が古く aarch64 に無いので、EL9 向けの COPR を流用している（[wezterm-nightly.md](wezterm-nightly.md#選択した方針)） | 不採用（ツールごとに当たり外れが大きい） |
 | 各ツールの公式インストーラ / GitHub Releases | バイナリ 1 つで軽いが、**ツールごとに更新方法が違う**。17 本ぶん覚えることになる | 不採用（Homebrew に揃える） |
 | `cargo install` / `go install` | toolchain が要り、Raspberry Pi ではビルドに時間がかかる | 不採用 |
 
