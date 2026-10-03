@@ -769,7 +769,8 @@
 
 > [!IMPORTANT]
 > - **すべて Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜11・14 と、後ろの Windows 11 の 3 節（止める・更新・ロールバック）をそこに貼る。ログインするユーザーは Administrators の一員（この節の手順 7 の受信の規則と手順 8 のタスクの登録に、管理者の権限が要る）
-> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: 相手とつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順)）。この節の手順 7 で確かめる
 > - Syncthing そのものは、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節の手順 8 のタスク）
 > - **この節の手順 5 には対話入力がある**（GUI のパスワード）。入力し終えてから手順 6 を貼る
 > - **この節の手順 12 は LAN の別の端末のブラウザで、手順 13 はこの PC で行う**（サインアウトしてサインインし直す）
@@ -805,7 +806,7 @@
    <summary>補足: 変数について</summary>
 
    - `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](#実施手順)の `ST_GUI_USER` と同じ扱い）
-   - `$LAN_IF` は、この節の手順 7（ネットワークをプライベートにする）・手順 11（GUI の URL を出す）・[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 で使う。式は [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 2 と同じ
+   - `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の手順 23](windows-setup.md#実施手順) と同じ
    - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
    - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
 
@@ -952,15 +953,16 @@
 
    </details>
 
-1. LAN の接続をプライベートにし、Syncthing の受信の規則を作る。
+1. LAN の接続がプライベートなことを確かめ、Syncthing の受信の規則を作る。
 
    ```powershell
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
    $g = 'Syncthing (setup-notes)'
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
+   } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
+     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の手順 31 でプライベートにする）'
    } else {
-     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
      Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
      New-NetFirewallRule -Name 'Syncthing-In-TCP' -DisplayName 'Syncthing (TCP 22000)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol TCP -LocalPort 22000 | Out-Null
      New-NetFirewallRule -Name 'Syncthing-In-UDP' -DisplayName 'Syncthing (UDP 22000, 21027)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol UDP -LocalPort 22000, 21027 | Out-Null
@@ -971,9 +973,9 @@
    ```
 
    - `<LAN_IF>  Private` と、3 つの規則が `True  Private  Inbound  Allow` で出ればよい
-   - 既にプライベートなら、ネットワークは何も変わらない
+   - `中断:` が出たら、[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) でプライベートにしてから、この手順を貼り直す（規則はまだ作っていない）
    - 何度貼ってもよい（規則は消してから作り直す）
-   - **注意**: プライベート向けのほかの許可の規則（ネットワーク探索など）も、この LAN で効くようになる（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 の補足）
+   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 の補足）
 
    <details>
    <summary>補足: 規則の中身と、最初の起動より前に作る理由</summary>
@@ -1217,7 +1219,7 @@
 
 ## Windows 11 のロールバック
 
-- 上から順に、[Windows 11 で使う](#windows-11-で使う)の手順 2 で変数を設定した PowerShell に貼る（変数を使うのはこの節の手順 4 だけ）
+- 上から順に、管理者の Windows PowerShell（5.1）に貼る（変数は使わない）。この節の手順 4 は Windows 11 の初期設定のロールバックで行う
 - 同期していたファイル自体は、この節のどの手順でも消えない（同期したフォルダーの `.stfolder` も残る）
 
 > [!CAUTION]
@@ -1257,20 +1259,9 @@
 
    - `False` が出ればよい（`syncthing.exe.old` も消える）
 
-1. LAN の接続をパブリックに戻すときだけ、パブリックにする。
+1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 30 を行う。
 
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error '手順 2 の $LAN_IF が空'
-   } else {
-     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
-     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
-   }
-   ```
-
-   - `<LAN_IF>  Public` が出ればよい
-   - [Windows 11 で使う](#windows-11-で使う)の手順 7 の前からプライベートだったなら、この手順は飛ばす
-   - [Windows の OpenSSH サーバー](windows-openssh-server.md)をこの LAN で使っているなら、この手順は飛ばす（パブリックにすると SSH も届かなくなる）
+   - [Windows の OpenSSH サーバー](windows-openssh-server.md)やリモート デスクトップをこの LAN で使っているなら、戻さない（パブリックにすると SSH も届かなくなる）
 
 1. 完全に消すときだけ、鍵・設定・DB・ログを消す（取り戻せない）。
 
@@ -1324,6 +1315,7 @@
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（構文とコマンドの引数だけ）。[Windows 11 で使う](#windows-11-で使う)の手順 4・6 のブロックは、Linux の pwsh で偽物の署名と Linux の `syncthing` を使って流した（同じ付録）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、タスクの登録と起動・サインインでの起動・サインアウトで止まること、受信の規則と警告の窓、LAN の別の端末からの GUI と同期、自動の更新とその後のタスクの状態、arm64 の Windows、24H2 より前の Windows
   - 2026-10-03: 別の手順書（`docs/windows-syncthing.md`）として書いたものを、同じ日にこの文書の Windows 11 の節へ移した。コマンドは変えていない（手順の番号も節の中で同じ）
+  - 2026-10-03（後）: LAN をプライベートにする操作を [Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) へ移し、この節の手順 7 を確かめてから規則を作る形に、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 をそこを指す手順に変えた。手順 7 の今のブロックも、構文の検査と、偽物の `Get-NetConnectionProfile` での模擬だけ
 
 AlmaLinux 10 の実機:
 
@@ -1349,7 +1341,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | Syncthing | 2.1.5（2026-09-08。`syncthing-windows-amd64-v2.1.5.zip`） |
-| ネットワーク | LAN の接続（[Windows 11 で使う](#windows-11-で使う)の手順 7 でプライベートにする） |
+| ネットワーク | LAN の接続（[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) でプライベートにする） |
 
 > [!NOTE]
 > 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](#実施手順)のシェル変数、Windows 11 は[Windows 11 で使う](#windows-11-で使う)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -1437,8 +1429,8 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
   - 公式の説明の「一度対話で起動して、警告の窓で許可する」は、窓でキャンセルを押すと拒否の規則ができ、後から気付きにくい
 - **Windows 11 でも GUI は LAN に公開した**（AlmaLinux 10 と同じく、認証 → 起動 → 待ち受けを広げる順）
   - この PC からだけ開くなら、[Windows 11 で使う](#windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
-- **ネットワークをプライベートにする手順は、[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 と同じ**
-  - 既にプライベートなら何も変わらないので、[Windows 11 で使う](#windows-11-で使う)の手順 7 にも入れた。共有の前提の手順書には分けていない
+- **ネットワークをプライベートにするのは、[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順)**
+  - もとは [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
   - そのため、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
 
 ### 完了時点の状態
@@ -1536,7 +1528,7 @@ $ syncthing cli config folders list
 - [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
 - [New-ScheduledTaskPrincipal](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal)・[New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)・[New-NetFirewallRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule)
 - [linger](linger.md) — AlmaLinux 10 の前提の手順書（ログアウト中もユーザーの systemd を動かす）
-- [Windows の OpenSSH サーバー](windows-openssh-server.md) — Windows 11 の同じ PC で使うことの多い手順書（ネットワークをプライベートにする手順が同じ）
+- [Windows の OpenSSH サーバー](windows-openssh-server.md) — Windows 11 の同じ PC で使うことの多い手順書（LAN がプライベートである前提が同じ）
 
 ---
 

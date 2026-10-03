@@ -4,7 +4,8 @@
 
 > [!IMPORTANT]
 > - **手順 1〜7 は Windows で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2〜7 をそこに貼る
-> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、Windows のブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、Windows のブロックは Ctrl+V で貼る
+> - 前提: クライアントとつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順)）。手順 5 で確かめる
 > - **手順 8・9 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
 > - SSH でログインするのは、この PC の Windows のユーザー。パスワードは、そのユーザーの Windows のパスワード（Microsoft アカウントなら、そのアカウントのパスワード）。Administrators の一員でないユーザーも入れる（[注意点](#注意点)）
 > - **手順 9 には対話入力がある**（ホスト鍵の確認とパスワード）
@@ -40,7 +41,7 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   - `$LAN_IF` は、手順 5（ネットワークをプライベートにする）、手順 7（接続先の IP を出す）、[ロールバック](#ロールバック)の手順 3 で使う
+   - `$LAN_IF` は、手順 5（ネットワークがプライベートか確かめる）と手順 7（接続先の IP を出す）で使う
    - 接続の一覧は `Get-NetConnectionProfile` で見られる。検証した PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
    - 公開鍵の `$PUBKEY` は[公開鍵でもログインする（任意）](#公開鍵でもログインする任意)でしか使わないので、手順 2 ではなくその節の手順 3 で設定する
 
@@ -92,25 +93,27 @@
 
    </details>
 
-1. LAN の接続をプライベートにし、sshd の受信の規則を確かめる。
+1. LAN の接続がプライベートなことと、sshd の受信の規則を確かめる。
 
    ```powershell
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
+   } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
+     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の手順 31 でプライベートにする）'
    } else {
-     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
      Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
    }
    ```
 
    - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
-   - 既にプライベートなら、何も変わらない
-   - **注意**: プライベート向けのほかの許可の規則（ネットワーク探索など）も、この LAN で効くようになる（[選択した方針](#選択した方針)）
+   - `中断:` が出たら、[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) でプライベートにしてから、この手順を貼り直す（手順 2 の変数はそのまま使える）
+   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[選択した方針](#選択した方針)）
 
    <details>
    <summary>補足: プライベートにする理由</summary>
 
+   - プライベートにする操作は、2026-10-03 に [Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) へ移し、この手順は確かめるだけにした（Windows のインストール直後の作業をまとめたため。Syncthing の Windows 11 の節も同じ前提）。下の実測は、移す前の、この手順でプライベートにしていたときのもの
    - 手順 3 でできる規則は、プライベートのネットワークだけで有効。検証した PC の有線 LAN は「パブリック」だったので、そのままでは LAN からの SSH が捨てられる
    - WSL の AlmaLinux 10 から、この PC の LAN の IP（`<WIN_HOST>`）の 22/tcp につないで確かめた
      - パブリックのとき: 5 秒待っても応答が無い
@@ -422,7 +425,7 @@
 - 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
   - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
 - この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
-- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[windows-setup.md 手順 3〜6](windows-setup.md#実施手順) で入れた形）
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[Windows 11 の初期設定の手順 8・9](windows-setup.md#実施手順) で入れた形）
 - この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 8 のシェルに貼る
 - `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
 
@@ -477,7 +480,7 @@
 
 ## ロールバック
 
-- この節の手順 1〜3 は Windows の管理者の Windows PowerShell（手順 2 の変数を設定したもの）に、手順 4 はクライアントの手順 8 のシェルに貼る
+- この節の手順 1・2 は Windows の管理者の Windows PowerShell（手順 2 の変数を設定したもの）に、手順 4 はクライアントの手順 8 のシェルに貼る。手順 3 は Windows 11 の初期設定のロールバックで行う
 - 機能を外しても、`C:\ProgramData\ssh` とレジストリの `HKLM:\SOFTWARE\OpenSSH` は残る。この節の手順 2 で消す
 
 > [!CAUTION]
@@ -508,19 +511,9 @@
 
    - `False` が 2 行出ればよい
 
-1. LAN の接続をパブリックに戻すときだけ、パブリックにする。
+1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 30 を行う。
 
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error '手順 2 の $LAN_IF が空'
-   } else {
-     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
-     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
-   }
-   ```
-
-   - `<LAN_IF>  Public` が出ればよい
-   - 手順 5 の前からプライベートだったなら、この手順は飛ばす
+   - この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](syncthing.md#windows-11-で使う)、リモート デスクトップなど）があれば、戻さない
 
 1. クライアントの PC で、Windows のホスト鍵を `known_hosts` から消す。
 
@@ -539,7 +532,7 @@
 
 - **目的**: LAN のほかの PC（AlmaLinux 10 など）から、Windows 11 の PC に SSH で入れるようにする
   - Windows のオプション機能「OpenSSH サーバー」を入れ、Windows のユーザーのパスワードで認証する
-  - 受け付けるのは、プライベートにしたネットワークからだけ（手順 5）
+  - 受け付けるのは、プライベートにしたネットワークからだけ（プライベートにするのは [Windows 11 の初期設定の手順 31](windows-setup.md#実施手順)。手順 5 で確かめる）
   - 公開鍵での認証、パスワード認証を切る方法、ログインしたときのシェルを Git Bash にする方法、scoop のツールを SSH のセッションで使う方法は、任意節にした
 - **進め方**: 値は、Windows では手順 2、クライアントでは手順 8 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
   - Windows の手順は管理者の Windows PowerShell に、クライアントの手順は bash に貼る
@@ -585,6 +578,7 @@
     - 標準ユーザーの鍵での認証（`authorized_keys`）、既定の UAC の設定での振る舞い
     - Microsoft アカウントのロックアウト
     - Windows Update での OpenSSH の更新
+  - **2026-10-03 の変更**: LAN をプライベートにする操作を [Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) へ移し、手順 5 を確かめるだけのブロックに、ロールバックの手順 3 をそこを指すコマンドの無い手順に変えた。今の手順 5 のブロックは、構文の検査（Linux の pwsh 7.6.6 と PSScriptAnalyzer 1.25.0 の 5.1 互換）と、偽物の `Get-NetConnectionProfile` での模擬だけで、実機では流していない。上と付録の「手順 5」「ロールバックの手順 3」は、当時の、プライベートにするブロックとパブリックに戻すブロックを指す
   - 実測の記録は[付録（2026-09-29）](#付録-実機での検証記録2026-09-29)、[追加の確認の付録（2026-09-30）](#付録-追加の確認2026-09-30)、[パスワード認証の付録（2026-09-30）](#付録-パスワード認証の検証記録2026-09-30)
 
 下表は実機で採取した値。
@@ -649,7 +643,7 @@
   - GitHub の Win32-OpenSSH（winget の `Microsoft.OpenSSH.Preview`）は新しい版を使えるが、本書では試していない
 - **パスワードで認証し、公開鍵は任意節にした**（手順 6 でパスワード認証を明示的に有効にする）
   - クライアントで鍵を作って Windows に登録しなくても、Windows のユーザーのパスワードだけで入れる。鍵を扱いにくいクライアント（スマートフォンのアプリなど）からも入れる
-  - 受け付けるのは、プライベートにしたネットワークから届く接続だけ（手順 5）
+  - 受け付けるのは、プライベートにしたネットワークから届く接続だけ（[Windows 11 の初期設定の手順 31](windows-setup.md#実施手順)）
   - パスワードの総当たりへの備えは、Windows のアカウントのロックアウトのポリシー（検証した PC は 10 回で 10 分）。ローカル アカウントでは、SSH での失敗も数えられ、10 回目でロックされた
   - 鍵で入れるようにしたら、パスワード認証を切れる（[パスワード認証を切る（任意）](#パスワード認証を切る任意)）。2026-09-29 の版は、この形（公開鍵だけ）を主にしていた
 - **LAN の接続をプライベートにし、規則は変えない**
@@ -657,6 +651,7 @@
   - 持ち出した先のパブリックの Wi-Fi では、閉じたままになる
   - 規則をパブリックにも広げる（接続元を同じサブネットに絞る）方法は採らなかった。持ち出した先でも、同じサブネットの相手に開くため
   - プライベートにすると、プライベート向けのほかの規則（ネットワーク探索など）もこの LAN で効く（手順 5 の補足）
+  - プライベートにする操作は、Windows のインストール直後の作業として [Windows 11 の初期設定の手順 31](windows-setup.md#実施手順) にまとめた（2026-10-03。もとは手順 5 で行っていた。Syncthing の Windows 11 の節も同じ前提にした）
 - **Windows PowerShell 5.1 で貼る**
   - Microsoft Store の PowerShell 7 では、手順 3 の Dism のコマンドが失敗した
   - ほかの手順（NetSecurity などのコマンド）もこのシェルにそろえ、1 つの PowerShell で通せるようにした
@@ -720,6 +715,7 @@ d----        logs
   - ユーザー名は、Microsoft アカウントでもメールアドレスではなく、`C:\Users\` の下のフォルダーの名前（手順 7）。パスワードは、そのアカウントのパスワード（PIN ではない）
   - 検証した PC では、設定の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」がオンのまま、Microsoft アカウントのパスワードで入れた
   - この設定がオンだと、Microsoft アカウントのパスワードが sshd のログにエラー 1326 を残して拒否され、オフにして sshd を再起動すると通った、という報告がある（[参照](#参照)の Q&A）。検証した PC では起きなかった
+  - [Windows 11 の初期設定の手順 36](windows-setup.md#実施手順) を通した PC では、この設定はオフになっている
 - **パスワードを続けて間違えたとき**（ローカル アカウントの標準ユーザーで試した）
   - 検証した PC のロックアウトのポリシーは、10 回の失敗で 10 分（`net accounts`）
   - SSH のパスワードの失敗も、1 回ずつセキュリティのログのイベント 4625（ログオンの種類 8、プロセスは `sshd.exe`）として数えられ、10 回目でロックされた（イベント 4740）
@@ -735,7 +731,7 @@ d----        logs
   - 規則の接続元は `Any` で、プロファイルは接続を受けた LAN で決まる。LAN を通って届く接続なら、送信元が別のサブネットでも受け付ける
   - 検証した PC には、[WireGuard VPN](wireguard.md) のクライアントのアドレスから、パスワードで入れた
 - **WSL から、この PC につなぐとき**: この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ
-  - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、手順 5 の後も捨てられた
+  - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、LAN の接続をプライベートにした後も捨てられた
   - LAN の IP あての接続は、sshd には送信元がこの PC の LAN の IP として届き、LAN のプロファイル（プライベート）で判定された
 - **Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（手順 7）
 - **SSH のセッションでは、一般ユーザーが作ったジャンクションをたどれない**
