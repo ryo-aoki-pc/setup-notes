@@ -1,18 +1,20 @@
-# Git のセットアップ手順（AlmaLinux 10 / Windows 11 の Git for Windows）
+# Git のセットアップ手順（AlmaLinux 10 は AppStream / Windows 11 は winget の Git for Windows）
 
 ## 実施手順
 
 > [!IMPORTANT]
 > - **AlmaLinux 10 では、自分のユーザーのシェルで貼る**。`sudo -i` した root のシェルでは貼らない（設定が root の `~/.gitconfig` に書かれるため）
 > - **Windows 11 では、Git for Windows の Git Bash に同じブロックを貼り、手順 2 は飛ばす**。PowerShell や cmd には貼らない（bash の構文のため）
-> - Windows に Git for Windows が無ければ、先に [Git for Windows](https://gitforwindows.org/) のインストーラで入れる
+> - Windows に Git for Windows が無ければ、先に[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)を行う（管理者の Windows PowerShell 5.1 に貼る）。その節の最後で開く Git Bash に、手順 1 から貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリがあれば、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)を行う。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **AlmaLinux 10 は x86_64 のコンテナでのみ検証した**。実機では本実行していない。**Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）。詳しくは[対象と検証環境](#対象と検証環境)。
+> - **AlmaLinux 10 は x86_64 のコンテナでのみ検証した**。実機では本実行していない
+> - **Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）
+> - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)・[更新](#更新)の手順 2・[ロールバック](#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
 
 1. 変数を設定する（`GIT_USER_NAME` と `GIT_USER_EMAIL` は必ず値を入れる）。
 
@@ -410,6 +412,129 @@
 
 ---
 
+## Windows 11 で Git for Windows を入れる
+
+> [!IMPORTANT]
+> - **すべて Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2・3 と、[更新](#更新)の手順 2・[ロールバック](#ロールバック)の手順 6 のブロックをそこに貼る（PC 全体の `C:\Program Files\Git` に入れるので、管理者の権限が要る）
+> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - **この節の手順 4 で PowerShell を開き直し、手順 6 で Git Bash を開く**
+
+- Git for Windows が無い Windows 11 の PC で、[実施手順](#実施手順)より先に行う。上から順にコードブロックを貼る。変数は無い
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: この節の手順 6 で開いた Git Bash に、[実施手順](#実施手順)の手順 1 から貼る（手順 2 は飛ばす）。以後は[更新](#更新)の手順 2・[ロールバック](#ロールバック)の手順 6
+- この節のブロックは、Windows の実機で流していない（[対象と検証環境](#対象と検証環境)）
+
+1. Windows で、管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+
+1. Git for Windows がまだ入っていないことを確かめる。
+
+   ```powershell
+   Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
+   Test-Path 'C:\Program Files\Git\bin\bash.exe'
+   winget list --exact --id Git.Git --accept-source-agreements
+   ```
+
+   - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
+   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める（ほかの手順書が `C:\Program Files\Git` を前提にしている）
+   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい（この節の手順 5 の補足）
+   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この節の手順 3・4 は飛ばす（新しい版にするなら[更新](#更新)の手順 2）
+
+   <details>
+   <summary>補足: 確かめていること</summary>
+
+   - Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
+   - `bin\bash.exe` は、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする（任意）](windows-openssh-server.md#既定のシェルを-git-bash-にする任意)が決め打ちにしている。Claude Code（Windows）の公式の文書も、Git Bash の場所の例にこのパスを挙げる
+   - 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
+   - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+
+   </details>
+
+1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
+
+   ```powershell
+   winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Git.Git
+   ```
+
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
+   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）。管理者の窓から動かすので、UAC の確認も出ないはず
+   - 改行の扱いや `git pull` の動作などは、インストーラの画面の既定の選択で入る（この手順の補足）
+
+   <details>
+   <summary>補足: winget の定義と、黙って入れたときの選択</summary>
+
+   **winget の定義**（`Git.Git` 2.55.0.5。2026-10-03 の winget-pkgs）
+
+   - インストーラは、上流の GitHub のリリースの `Git-2.55.0.5-64-bit.exe`（Inno Setup）。winget は、定義に書かれた sha256 を確かめてから動かす（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+   - 定義のスコープは `user` と `machine` の 2 つだが、どちらも同じインストーラで、winget はスコープに合わせたスイッチを渡さない。渡すのは `/SP- /SILENT /SUPPRESSMSGBOXES /NORESTART` と `/LOG=…` だけ
+   - 入れる先は、インストーラが権限で決める。管理者の権限があれば `C:\Program Files\Git` に入れ、PC 全体の `PATH` とレジストリ（`HKLM`）に書く。Administrators の一員が管理者でない窓から動かすと、インストーラが UAC で昇格を求める（定義の `ElevationRequirement: elevatesSelf`）
+   - `--scope machine` は、PC 全体に入ることを winget にもそろえるため。付けないと、winget は `user` の項目を選ぶ（winget の設定の既定）
+   - arm64 の Windows では、同じ定義の `Git-2.55.0.5-arm64.exe` が選ばれる
+   - 上流は 2026-09-28 に 2.56.0 を出したが、2026-10-03 の winget-pkgs にはまだ無い。載ると、この手順でもそれが入る（2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった。上流のリリースノート）
+
+   **黙って入れたときの選択**（画面のインストーラの既定と同じ。上流の `install.iss` を読んだ）
+
+   | 画面 | 既定の選択 | 書かれるもの |
+   |---|---|---|
+   | PATH | Git from the command line and also from 3rd-party software | PC 全体の `PATH` に `C:\Program Files\Git\cmd` |
+   | 既定のブランチ名 | Let Git decide | `system` に `init.defaultBranch=master` |
+   | エディタ | Use Vim (the ubiquitous text editor) as Git's default editor | `core.editor` は書かない |
+   | HTTPS | Use the native Windows Secure Channel library | `system` に `http.sslBackend=schannel` |
+   | 改行 | Checkout Windows-style, commit Unix-style line endings | `system` に `core.autocrlf=true` |
+   | 端末 | Use MinTTY | — |
+   | `git pull` | Merge | `system` に `pull.rebase=false` |
+   | 認証 | Git Credential Manager | `system` に `credential.helper=manager` |
+   | ほか | ファイルシステムのキャッシュは有効、シンボリックリンクは無効（開発者モードが無いとき） | `system` に `core.fscache=true`・`core.symlinks=false` |
+   | 部品 | エクスプローラーの「Open Git Bash here」「Open Git GUI here」・Git LFS・`.git*` と `.sh` の関連付け | — |
+
+   - 入れない部品: デスクトップのアイコン、Windows Terminal の Git Bash のプロファイル、毎日の更新の確認
+   - スタートメニューの「Git」フォルダーには、Git Bash・Git CMD・Git GUI が入る
+   - `system` の改行・`git pull`・ブランチ名は、[実施手順](#実施手順)の手順 5・6 で `global` に書いて上書きする
+   - 上げるとき・入れ直すときは、前に入れたときの選択を引き継ぐ（インストーラが前の選択を覚えている）
+   - 選択は `--custom '/o:CRLFOption=CRLFCommitAsIs'` のように渡して変えられるが、本書では渡さない（[選択した方針](#選択した方針)）
+
+   </details>
+
+1. この節の手順 3 で入れたときは、Windows PowerShell を閉じて開き直す。
+
+   - この節の手順 3 で PC 全体の `PATH` に足された `C:\Program Files\Git\cmd` は、開いていた PowerShell には入らない
+   - 開き直す PowerShell は、管理者でなくてよい
+   - **次の手順は、PowerShell を開き直してから貼る**（開いていた窓では `git` が見つからない）
+
+1. git の場所と版と、Git Bash があることを確かめる。
+
+   ```powershell
+   Get-Command git -All | Format-Table Source
+   git --version
+   Test-Path 'C:\Program Files\Git\bin\bash.exe', 'C:\Program Files\Git\git-bash.exe'
+   ```
+
+   - 1 行目の一番上に `C:\Program Files\Git\cmd\git.exe` が出ればよい
+   - `git version 2.55.0.windows.5` の形の行（版は実行した日の最新）と、`True` が 2 行出ればよい
+   - インストーラは `system`（`C:/Program Files/Git/etc/gitconfig`）に `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` などを書く。[実施手順](#実施手順)の手順 5・6 の `global` で上書きし、手順 7 で確かめる（`pull.ff` が `only` なら手順 8 も）
+
+   <details>
+   <summary>補足: PATH と、ほかの git</summary>
+
+   - `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
+     - 以前の検証の PC は Git の `usr\bin` も `PATH` にあり、`ssh`・`ssh-keygen` が Git のものになっていた（[windows-openssh-server.md 手順 7](windows-openssh-server.md#実施手順) の補足）
+   - Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
+   - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
+   - Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
+
+   </details>
+
+1. スタートメニューから Git Bash を開く。
+
+   - スタートメニューで「Git Bash」を探して開く（管理者でなくてよい）
+   - `<WIN_USER>@<HOSTNAME> MINGW64 ~` のような行と、`$` のプロンプトの窓が開く
+   - **次は、この Git Bash に[実施手順](#実施手順)の手順 1 から貼る**（手順 2 は飛ばす）
+
+---
+
 ## 改行を変換して clone したリポジトリを直す
 
 - 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリは、作業ツリーのファイルが CRLF のまま残る
@@ -481,6 +606,8 @@
 
 ## 更新
 
+- この節の手順 1 は AlmaLinux 10 の端末に、手順 2 は Windows 11 の管理者の Windows PowerShell（5.1）に貼る（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)と同じ前提）
+
 1. AlmaLinux 10 で、git を更新する。
 
    ```bash
@@ -490,18 +617,37 @@
    - 通常の `sudo dnf upgrade` にも含まれる
    - 新しい版が無ければ、`Nothing to do.` と出る
 
-1. Windows 11 では、Git for Windows を新しいインストーラで入れ直す。
+1. Windows 11 では、Git Bash を閉じてから、winget で Git for Windows を上げる。
 
-   - [Git for Windows](https://gitforwindows.org/) から落としたインストーラを実行する
-   - 入れ直した後は、Git Bash を開き直し、[手順 7](#実施手順) を貼り直す（`pull.ff` が `only` なら手順 8 も）
+   ```powershell
+   winget upgrade --exact --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Git.Git
+   ```
+
+   - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
+   - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
+   - **注意**: Git Bash や、Git の bash を使う SSH のセッション・Claude Code が動いていると、インストーラは入れ替えずに終わるはず（この手順の補足）
+   - 上げた後は、Git Bash を開き直し、[手順 7](#実施手順) を貼り直す（`pull.ff` が `only` なら手順 8 も）
+
+   <details>
+   <summary>補足: winget での更新</summary>
+
+   - 定義の `UpgradeBehavior: install` のとおり、新しい版のインストーラを今のものの上から動かす。入れる先（`C:\Program Files\Git`）と、前に入れたときの選択（改行の扱いなど）は引き継ぐ。そのため `--scope` は付けない
+   - インストーラは、Git のファイル（`msys-2.0.dll` など）を使っているプロセスがあると、閉じるよう求める画面を出す。黙って動かすときはその問いが「キャンセル」で答えられ、入れ替えずに終わる（上流の `install.iss` を読んだだけで、確かめていない）
+   - 公式のインストーラで入れた PC でも、winget が `Git.Git` と結び付けて表示すれば、同じ形で上がるはず（確かめていない）。`winget list --exact --id Git.Git` に出なければ、[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)の手順 3 を貼る（今のものの上から入れる）
+   - インストーラの部品の「毎日の更新の確認」は既定で入れないので、Git for Windows は自分では上がらない
+
+   </details>
 
 ---
 
 ## ロールバック
 
 - 本書で `global` に書いた設定を外す。`system` と `local` の設定は変えない
-- git 本体は消さない（gh などが依存している）
+- AlmaLinux 10 の git 本体は消さない（gh などが依存している）。Windows 11 の Git for Windows は、外すときだけこの節の手順 6 で外す
 - [手順 3](#実施手順) で控えた元の値は、この節の手順 4 で書き戻す
+- この節の手順 1〜5 は、Windows 11 では Git Bash に貼る。この節の手順 6 は、管理者の Windows PowerShell（5.1）に貼る
+- この節の手順 6 で Git for Windows を外す PC で、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする（任意）](windows-openssh-server.md#既定のシェルを-git-bash-にする任意)を行っていたら、先にその節の手順 3 で `DefaultShell` を消す
 
 1. 手順 5・6・8 の設定を外す（`merge.conflictStyle` を除く）。
 
@@ -562,6 +708,29 @@
    - 手順 5・6・8 のキー（外さなかったものを除く）が出なければよい
    - すべて外していれば、何も出ない
 
+1. Windows 11 で Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
+
+   ```powershell
+   winget uninstall --exact --id Git.Git --source winget
+   winget list --exact --id Git.Git
+   Test-Path 'C:\Program Files\Git\bin\bash.exe'
+   ```
+
+   - `正常にアンインストールされました`（英語の Windows では `Successfully uninstalled`）と出て、`winget list` が `入力条件に一致するインストール済みのパッケージが見つかりませんでした。` を出し、`False` が出ればよい
+   - **注意**: Claude Code（Windows）の Bash のツールは Git Bash を使う。外すと、PowerShell のツールだけになる
+   - **注意**: [Windows の OpenSSH サーバーの既定のシェルを Git Bash にする（任意）](windows-openssh-server.md#既定のシェルを-git-bash-にする任意)の `DefaultShell` は `C:\Program Files\Git\bin\bash.exe` を指す。外すと、無いファイルを指したままになる（この節のリードのとおり、先に消す）
+   - scoop の git が無い PC では、`scoop update` が git を求めて止まるようになる
+   - `global`（`C:\Users\<WIN_USER>\.gitconfig`）は消えない（この節の手順 1〜5 で外す）
+
+   <details>
+   <summary>補足: winget での削除</summary>
+
+   - winget は、インストーラが「アプリと機能」に書いた静かな削除のコマンド（`C:\Program Files\Git\unins000.exe /SILENT`）を動かす。Inno Setup の削除のプログラムは、`/SILENT` では確かめの問いを出さない
+   - Git for Windows の削除のプログラムは、`PATH` から `C:\Program Files\Git\cmd` を外す（上流の `install.iss`）
+   - 管理者でない窓から貼ると、削除のプログラムが UAC で昇格を求めるはず（確かめていない）
+
+   </details>
+
 ---
 
 ## 補足
@@ -569,8 +738,8 @@
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 と Windows 11 の git を、同じ `global` の設定にする。pull は rebase で autostash を有効にし、改行は変換しない（`core.autocrlf=false`）。ほかに推奨の設定を入れる
-- **進め方**: AlmaLinux 10 は AppStream の `git` を入れる。どちらの OS でも `git config --global` で書く。**読者が書き換えるのは手順 1 の 2 つの変数だけ**
-- **状態**: **AlmaLinux 10 は x86_64 のコンテナでのみ検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）**
+- **進め方**: AlmaLinux 10 は AppStream の `git` を入れる。Windows 11 は、Git for Windows を winget の `Git.Git` で PC 全体（`C:\Program Files\Git`）に入れ（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)）、Git Bash に同じブロックを貼る。どちらの OS でも `git config --global` で書く。**読者が書き換えるのは手順 1 の 2 つの変数だけ**
+- **状態**: **AlmaLinux 10 は x86_64 のコンテナでのみ検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）。Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない（2026-10-03 に足した）**
   - 下表の検証コンテナで、**この文書のコードブロックを抜き出したもの**を、一般ユーザーで手順 1〜11 → [改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す) → [ロールバック](#ロールバック)の順に流した
   - Windows の模擬として、`/etc/gitconfig` に Git for Windows のインストーラの選択で書かれうる値（`core.autocrlf=true` など 4 つ）を置いて、手順 1・3〜11 をもう 1 度流した
   - 確認したこと: 14 のキーが `global` で効く、`system` の値に勝つ、`pull.ff=only` が rebase を止め手順 8 で通る、CRLF のファイルが変換されずに入る、pull が rebase と autostash をする
@@ -578,8 +747,12 @@
     - `HOME` を使い捨てのディレクトリにしたので、`global` はそこに書かれた。その PC の `~/.gitconfig` は変えていない（前後で md5 が同じ）。`system` はインストーラが書いた本物
     - 手順 1・3〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[ロールバック](#ロールバック)の手順 1〜3・5
     - 確認したこと: インストーラが書いた `system` の値（手順 3 の補足）、`global` の場所（Git Bash・PowerShell・cmd で同じ）、日本語のファイル名がそのまま出ること、CRLF のファイルが変換されずに入ること、pull の rebase と autostash、`rerere` が覚えた解き方を当てること
+  - 2026-10-03: [Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)と、[更新](#更新)の手順 2（winget で上げる）・[ロールバック](#ロールバック)の手順 6（winget で外す）を足した。**Windows の実機では流していない**（書いた環境のクラウドの Linux のコンテナでは、Windows を動かせない）
+    - 確かめたこと: winget の定義（`Git.Git` 2.55.0.5 のスコープ・インストーラの種類・スイッチ・sha256）、インストーラの sha256 と Authenticode の署名者、上流の `install.iss`（入れる先・権限・黙って入れたときの選択・`system` に書く値・使われているときの動き）、winget のソース（Inno Setup のインストーラに渡すスイッチ・スコープの既定・削除のコマンド）（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査、偽の `winget` に渡る引数（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - 確かめていないこと: Windows で貼ること（その節のすべての手順・更新・削除）、UAC が出ないこと、`system` に書かれる値、Git Bash が開くこと、公式のインストーラで入れた PC を winget で上げること、arm64 の Windows
   - **確認していないこと**: AlmaLinux 10 の実機、aarch64、既存の `~/.gitconfig` との組み合わせ
-    - Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）。検証した PC は別の選択だった
+    - Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）。検証した PC は別の選択だった（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)は、この既定で入る。上流のソースを読んだだけ）
     - Git Bash の端末（mintty）に貼る操作そのもの（検証では、ブロックを 1 つのシェルで順に読み込んだ）
 
 | 項目 | 検証コンテナ | Windows 11 の PC（Git Bash） | 実機（参考。未実施） |
@@ -591,6 +764,15 @@
 | `~/.gitconfig` | 無し（手順 4〜6 で作った） | 使い捨ての `HOME` に作った（その PC の `~/.gitconfig` には書いていない） | `[core] autocrlf` と `[user]` だけ（[git-delta.md](git-delta.md#対象と検証環境) の記録） |
 
 - 実機の列は、この手順を適用した結果ではなく、ほかの手順書に残っている現時点の状態
+
+[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)の節（前提にしている環境。Windows では流していない）:
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 / x64（ほかの Windows の手順書の実機の記録と同じ PC を想定） |
+| PowerShell | 管理者の Windows PowerShell 5.1 |
+| winget | Windows 11 の「アプリ インストーラー」に入っているもの |
+| Git for Windows | 2.55.0.5（winget の `Git.Git` の 2026-10-03 の最新の定義）。`C:\Program Files\Git` |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -612,6 +794,8 @@
 | `system`（AlmaLinux 10 は `/etc/gitconfig`） | 無し（Windows の模擬では、2 回目の前に置いた） | `C:/Program Files/Git/etc/gitconfig` に、インストーラが書いた 13 行（[手順 3](#実施手順) の補足） |
 | `~/.gitconfig` | 無し | その PC の `C:\Users\<WIN_USER>\.gitconfig` にはキーが 4 つあった（検証では使い捨ての `HOME` にしたので、読まれていない） |
 
+- [Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)は、Git for Windows が入っていない PC を前提にしている（Windows では流していない）
+
 ### 選択した方針
 
 - **git は AppStream の RPM**
@@ -630,6 +814,22 @@
 - **推奨の設定は、既定を変えても困りにくく、日常の操作が楽になるものだけ**
   - 選んだもの・入れなかったものは、手順 6 の補足にある
   - エディタ・署名・認証の設定は、人や PC によって違うので入れていない
+
+Windows 11 で Git for Windows を入れる経路を比べた（2026-10-03 時点）:
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `Git.Git` を `--scope machine` で** | 上流のインストーラを、winget が sha256 を確かめてから黙って動かす。`C:\Program Files\Git` に入り、`winget upgrade` で上がる。管理者の権限が要る | **採用** |
+| winget の `--scope user` | 同じインストーラで、winget はスコープのスイッチを渡さない。入る先はインストーラが権限で決める | 不採用（PC 全体に入れるので、winget にも `machine` を指定する） |
+| 上流のインストーラを落として、画面で入れる | 選択を画面で選べる。版の確認と更新は手作業 | 不採用（以前の検証の PC はこの形で、もとの本書もこれを案内していた） |
+| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows の OpenSSH サーバー](windows-openssh-server.md#既定のシェルを-git-bash-にする任意)が `C:\Program Files\Git` を前提にしている。[Windows 11 の初期設定](windows-setup.md)も、scoop の git を入れなくなった） |
+
+- **インストーラの選択は既定のまま**（winget の `--custom` や `--override` で `/o:` を渡さない）
+  - 本書は `system` を変えず `global` で上書きするので、`system` の `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` は既定のままでよい（[実施手順](#実施手順)の手順 7 で確かめる）
+  - 既定の PATH の選択（`cmd` だけを足す）で、PowerShell・scoop・Claude Code から `git` が見つかる。Unix の道具まで足す選択は、Windows の `find`・`sort` を隠す（インストーラの画面の警告）
+  - `--override` は、winget が渡す黙って動かすスイッチ（`/SP- /SILENT …`）ごと置き換える（winget のソース）
+- **Git for Windows は、scoop の `scoop update` が使う git も兼ねる**
+  - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)の手順 5 の補足）
 
 ### 完了時点の状態
 
@@ -681,6 +881,11 @@
 - **Windows の PowerShell や cmd から呼ぶ git** も、同じ `global`（`C:/Users/<WIN_USER>/.gitconfig`）を読む
   - Windows 11 の PC で、Git Bash・PowerShell・cmd の `git config --global --list --show-origin` が同じファイルを示した
   - その PC では環境変数 `HOME` が `C:\Users\<WIN_USER>` に設定されていた。`HOME` の無い PC は試していない
+- **Git for Windows を上げるときは、Git の bash を使うものを閉じる**
+  - Git Bash の窓、既定のシェルを Git Bash にした SSH のセッション、Claude Code の Bash のツールなど。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[更新](#更新)の手順 2 の補足）
+- **Git for Windows 2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった**（上流のリリースノート）
+  - `C:\Program Files\Git\mingw64\bin\git.exe` を直接指す設定は、上げた後に見直す
+  - 2026-10-03 の winget の定義はまだ 2.55.0.5 で、本書では 2.56.0 を試していない
 
 ### 参照
 
@@ -688,7 +893,14 @@
 - `git help pull` — `--rebase`、`--autostash`、`pull.ff`
 - `git help gitattributes` — `text`・`eol` と `core.autocrlf` の関係
 - `git help rerere` — 解き方の記録と `forget`
-- [Git for Windows](https://gitforwindows.org/) — インストーラ
+- [Git for Windows](https://gitforwindows.org/) — 公式のサイト
+- [winget-pkgs の `Git.Git`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/g/Git/Git) — winget の定義（スコープ・インストーラの種類・スイッチ・sha256）
+- [Silent or Unattended Installation](https://gitforwindows.org/silent-or-unattended-installation) — Git for Windows のインストーラを黙って動かすときのスイッチと、`/o:` で渡せる選択の一覧
+- [git-for-windows/build-extra の `installer/install.iss`](https://github.com/git-for-windows/build-extra/blob/main/installer/install.iss) — インストーラの既定の選択、入れる先、`system` に書く値
+- [Git for Windows のリリースノート](https://github.com/git-for-windows/build-extra/blob/main/ReleaseNotes.md) — 2.56.0 の `mingw64` から `ucrt64` への変更
+- [microsoft/winget-cli](https://github.com/microsoft/winget-cli) — `ShellExecuteInstallerHandler.cpp`（インストーラに渡すスイッチ）、`ManifestCommon.cpp`（Inno Setup の既定のスイッチ）、`UninstallFlow.cpp`（削除のコマンド）、`doc/Settings.md`（スコープの既定）
+- [Inno Setup の Uninstaller Command-Line Parameters](https://jrsoftware.org/ishelp/topic_uninstcmdline.htm) — 削除のプログラムの `/SILENT`
+- [Claude Code の Set up Claude Code](https://code.claude.com/docs/en/setup) — Windows で Git for Windows があれば Bash のツールに Git Bash を使うこと、`CLAUDE_CODE_GIT_BASH_PATH`
 - [Pro Git 8.1 Git の設定](https://git-scm.com/book/ja/v2/Git-%E3%81%AE%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA-Git-%E3%81%AE%E8%A8%AD%E5%AE%9A) — `core.autocrlf` の説明
 
 ---
@@ -783,3 +995,101 @@ x86_64 のクラウドホストで `dockerd` を動かし、`docker run -d --net
 - Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）と、`git pull` の「Only ever fast-forward」で書かれる `pull.ff=only`
 - Git Bash の端末（mintty）に貼る操作そのもの、環境変数 `HOME` の無い Windows の PC
 - aarch64 での実行、[更新](#更新)で新しい版に上がるところ
+
+---
+
+### 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義・インストーラ・上流と winget のソースを読んだ記録。[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)・[更新](#更新)の手順 2・[ロールバック](#ロールバック)の手順 6 は、これをもとに書いた。
+
+**winget の定義**: winget-pkgs（2026-10-03 の `master`、コミット `c612893`）の `manifests/g/Git/Git` の一番新しい版は `2.55.0.5`（`2.56.0` のディレクトリは無い）。`Git.Git.installer.yaml` の抜粋（arm64 の 2 つは、`Git-2.55.0.5-arm64.exe` で同じ形）:
+
+```
+PackageIdentifier: Git.Git
+PackageVersion: 2.55.0.5
+InstallerType: inno
+InstallerSwitches:
+  Silent: /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  SilentWithProgress: /SP- /SILENT /SUPPRESSMSGBOXES /NORESTART
+UpgradeBehavior: install
+ReleaseDate: 2026-08-20
+ElevationRequirement: elevatesSelf
+Installers:
+- Architecture: x64
+  Scope: user
+  InstallerUrl: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/Git-2.55.0.5-64-bit.exe
+  InstallerSha256: D065A4E23C3D9A6B5073D609B5BE0830227EC3CA053C083BA385061DDFAF94C6
+- Architecture: x64
+  Scope: machine
+  InstallerUrl: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/Git-2.55.0.5-64-bit.exe
+  InstallerSha256: D065A4E23C3D9A6B5073D609B5BE0830227EC3CA053C083BA385061DDFAF94C6
+```
+
+- `Git.Git.locale.en-US.yaml` は、`Publisher: The Git Development Community`・`PackageName: Git`・`Moniker: git`。`Agreements` は無い
+- 上流のタグ（`git ls-remote --tags`）の一番新しい正式版は `v2.56.0.windows.1`。winget-pkgs にはまだ載っていなかった
+
+**インストーラ**: 定義の URL から `Git-2.55.0.5-64-bit.exe` を取った:
+
+```
+$ sha256sum Git-2.55.0.5-64-bit.exe
+d065a4e23c3d9a6b5073d609b5be0830227ec3ca053c083ba385061ddfaf94c6  Git-2.55.0.5-64-bit.exe
+```
+
+- 65,343,712 バイト。sha256 は定義の `InstallerSha256` と一致した
+- `osslsigncode verify`: Authenticode の署名者は `CN=Johannes Schindelin`（`O=Johannes Schindelin`・`L=Bruehl`・`C=DE`）、ダイジェストは一致、タイムスタンプは `Microsoft Public RSA Timestamping CA 2020` の 2026-08-20 16:05:39 GMT
+  - 証明書の連鎖は、Linux の CA の一覧に `Microsoft Identity Verification Root Certificate Authority 2020` が無く、検証できなかった
+- `innoextract` 1.9 は、このインストーラ（Inno Setup 7）を読めなかった（`Could not determine setup data version!`）。そのため、既定の選択は上流のソースで確かめた
+
+**インストーラのソース**（git-for-windows/build-extra の `installer/install.iss`。2.55.0(5) のリリースのコミット `f7c8964` と、2026-10-03 の `main` の `0ec0fba` で、下の既定は同じ）:
+
+- `PrivilegesRequired=none`、`DefaultDirName={pf}\Git`（`main` では `{commonpf}\Git`）
+  - Inno Setup のソース（jrsoftware/issrc の `Setup.MainFunc.pas`・`Setup.SpawnServer.pas`）では、`none` は管理者の権限を要求しないが、昇格できるユーザー（Administrators の一員で、UAC で分けられたトークン）なら UAC で昇格し直す。管理者の権限で動けば、管理者のモード（`HKLM`・PC 全体の `PATH`）で入れる
+  - 入れる先が書き込めないとき（管理者でないとき）は、入れる先の画面で `{userpf}\Git`（`%LOCALAPPDATA%\Programs\Git`）に変える
+- 選択（`ReplayChoice`）は、`/o:<キー>=<値>` → `/LOADINF` のファイル → 入っている Git の `system` から推した値 → 前に入れたときの選択 → 既定 の順に決まる
+- 既定: `Editor Option=VIM`・`Default Branch Option`（空）・`Path Option=Cmd`・`SSH Option=OpenSSH`・`CURL Option=WinSSL`・`CRLF Option=CRLFAlways`・`Bash Terminal Option=MinTTY`・`Git Pull Behavior Option=Merge`・`Use Credential Manager=Enabled`・`Performance Tweaks FSCache=Enabled`・`Enable Symlinks=Auto`（開発者モードが無く、管理者で動いていれば無効）
+- 部品の既定（`Types: default`）: `ext`・`ext\shellhere`・`ext\guihere`・`gitlfs`・`assoc`・`assoc_sh`。`icons`（デスクトップのアイコン）・`autoupdate`・`windowsterminal` は入っていない。スタートメニューの Git Bash・Git CMD・Git GUI は、部品によらず作る
+- `system` に書く値: `core.autocrlf`、`pull.rebase`（Merge なら `false`、Rebase なら `true`）か `pull.ff=only`（Fast-forward only）、`credential.helper=manager`、`core.fscache=true`、`core.symlinks`、`http.sslBackend`、`init.defaultBranch`（「Let Git decide」でも `master` を書く）。`core.editor` は、Vim なら書かない
+- `Path Option=Cmd` は `{app}\cmd` を `PATH` の最後に足し（管理者のモードでは PC 全体の `PATH`）、削除のときに外す
+- Git のファイル（`usr\bin\msys-2.0.dll` など）を使っているプロセスがあると、黙って動かしたときも閉じるよう求める問いを出す。`/SUPPRESSMSGBOXES` では「キャンセル」と答えたことになり、中断する
+  - Inno Setup の文書（`NextButtonClick`）: 黙って動かしたときに、入れ始める前に `NextButtonClick` が False を返すと、Setup は終わる
+
+**winget のソース**（microsoft/winget-cli、2026-10-02 のコミット `3973956`）:
+
+- `ManifestCommon.cpp`: Inno Setup の既定のスイッチは、`Silent`・`SilentWithProgress`（定義と同じ）・`Log`（`/LOG="<LOGPATH>"`）・`InstallLocation`（`/DIR="<INSTALLPATH>"`）
+- `ShellExecuteInstallerHandler.cpp`: 渡すのは、黙って動かすスイッチ（`--silent` が無ければ `SilentWithProgress`）・`Log`・定義の `Custom`・`--custom`・更新のときの `Update`・`--location` のときの `InstallLocation`。スコープに合わせたスイッチは無い。`--override` があれば、その値だけを渡す
+- `UserSettings.h`: スコープの既定（`installBehavior.preferences.scope`）は `user`
+- `UninstallFlow.cpp`: Inno Setup のパッケージは、「アプリと機能」の静かな削除のコマンドを動かす。管理者の権限で動いているときは、自分のユーザーのスコープのパッケージの削除を断る（PC 全体に入れたものは当たらない）
+  - Inno Setup が書く静かな削除のコマンドは、`"<unins000.exe>" /SILENT`（jrsoftware/issrc の `Setup.Install.pas`）
+- 日本語の文言（`Localization/Resources/ja-JP/winget.resw`）: `インストールが完了しました`・`利用可能なアップグレードが見つかりませんでした。`・`正常にアンインストールされました`・`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`
+
+**ほか**:
+
+- Git for Windows のリリースノート（build-extra の `ReleaseNotes.md`）: 2.56.0（2026-09-28）で Windows 8.1 のサポートを外し、`/mingw64/bin/git.exe` が `/ucrt64/bin/git.exe` に変わった
+- scoop（ScoopInstaller/Scoop の `lib/core.ps1`）: `Get-HelperPath -Helper Git` は、scoop の git が無ければ `Get-Command git` の場所を返す
+- Claude Code の setup の文書: Windows では Git for Windows は任意で、あれば Bash のツールに Git Bash を使い、無ければ PowerShell のツールを使う。Git Bash が見つからないときの `CLAUDE_CODE_GIT_BASH_PATH` の例は `C:\Program Files\Git\bin\bash.exe`
+
+---
+
+### 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- `powershell` のブロック 5 個（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)の手順 2・3・5、[更新](#更新)の手順 2、[ロールバック](#ロールバック)の手順 6）を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。指摘は 0
+
+**偽の `winget` で流した**: 5 個のブロックを、受け取った引数を数えて表示するだけの関数 `winget` を置いた pwsh で、順に流した:
+
+- `winget` には、どのブロックでも書いたとおりの引数が 1 つずつ渡った。手順 3 の `install` は 10 個（`install`・`--exact`・`--id`・`Git.Git`・`--source`・`winget`・`--scope`・`machine`・`--accept-source-agreements`・`--accept-package-agreements`）
+- 2 つのパスを渡した `Test-Path` は、`False` を 2 行出した（Linux なので、どちらも無い）。`Get-Command git -All | Format-Table Source` は、Linux の `git` の場所を表にした
+- winget そのものの動き（定義の選び方・インストーラの起動・表示）は、Windows でしか確かめられない
+
+**残っている未確認事項**:
+
+1. Windows で、[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)の手順 1〜6 を通すこと（管理者の窓から UAC が出ずに入ること、`C:\Program Files\Git` に入ること、`PATH`、Git Bash が開くこと）
+1. 黙って入れたときに `system` に書かれる値が、その節の手順 3 の補足の表のとおりになること。その後に、[実施手順](#実施手順)の手順 1・3〜11 を Git Bash で通すこと
+1. [更新](#更新)の手順 2 で新しい版に上がること（2.56.0 が winget に載った後）と、Git Bash を開いたまま上げたときの動き
+1. [ロールバック](#ロールバック)の手順 6 で外れること（`PATH` から外れること、残るもの）
+1. 公式のインストーラで入れた PC を、winget で上げること
+1. arm64 の Windows
