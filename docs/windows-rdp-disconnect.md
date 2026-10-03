@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > - **手順 1〜3 は、RDP（リモートデスクトップ）でつないだ Windows のセッションの中で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2・3 をそこに貼る
 > - 前提: Windows 11 Pro 以上で、設定の「システム → リモート デスクトップ」がオンになっていて、RDP でつなげること（Home は RDP でつながれる側になれない）。PC にサインインしているのと同じユーザーでつなぐ。そのユーザーは Administrators の一員（手順 3 の `tscon` に管理者の権限が要る）
+> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、ブロックは Ctrl+V で貼る
 > - **手順 3 を貼ると、その場で RDP が切れる**
 > - **手順 4・5 は、クライアントの PC から SSH で行う**（[Windows の OpenSSH サーバー](windows-openssh-server.md)）。SSH が無ければ、PC の前で画面を見る
 
