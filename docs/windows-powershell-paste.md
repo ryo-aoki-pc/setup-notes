@@ -190,7 +190,7 @@
 
 - **目的**: GitHub の手順書のコピーボタンでコピーした PowerShell のブロックを、Windows PowerShell 5.1 の窓に右クリックで貼っても、行の順が変わらないようにする
   - conhost の窓（この PC では、スタートメニューから管理者として開いた Windows PowerShell）に右クリックで貼ると、行が逆順に入り、ブロックが動かない
-  - [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[Windows 11 の初期設定](windows-setup.md)・[Syncthing の Windows 11 の節](syncthing.md#windows-11-で使う)・[HackGen Console NF の Windows 11 の節](hackgen.md#windows-11-で使う)は、この設定を前提にする
+  - [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[Windows 11 の初期設定](windows-setup.md)・[Syncthing の Windows 11 の節](syncthing.md#windows-11-で使う)・[HackGen Console NF の Windows 11 の節](hackgen.md#windows-11-で使う)・[Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)の手順 9〜13 は、この設定を前提にする
 - **進め方**: このユーザーの Windows PowerShell のプロファイルに、`Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine` の 1 行を足す
   - プロファイルを読ませるため、実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` にする
   - 変数は無い

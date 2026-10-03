@@ -6,12 +6,22 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows PowerShell の貼り付けの設定](docs/windows-powershell-paste.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md) は Windows 11 も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows PowerShell の貼り付けの設定](docs/windows-powershell-paste.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md) は Windows 11 も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
 - 手順書が `~/.bashrc` に書く行（Homebrew・zoxide・starship・yazi の `y`・eza・gdu・bat・Neovim・podman・fzf・bash の履歴と `shopt`・Homebrew のコマンドの補完・WezTerm のシェル統合）は、自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）にまとめてある。どのホストにも同じものを clone し、入っているツールの分だけ読む。入れたホストでは、各手順書の `~/.bashrc` に書くブロックは貼らない（その手順の箇条書きにある）
+
+### OS のインストール
+
+- Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
+- AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある
+- この節の手順書は、VirtualBox の VM でだけ通した（実機では実行していない。手順書の補足の「状態」）
+
+| 手順書 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
+|---|---|---|---|---|
+| [Windows 11（AlmaLinux 10 とのデュアルブート向け）](docs/windows-dual-boot.md) | Windows 11（24H2 以降） | Rufus で作った USB（「インストーラーをカスタムしますか?」の 7 項目をオン、「サイレント」はオフ） | セットアップのコマンド プロンプトの diskpart で、ESP 2 GiB・MSR・Windows・回復を作り、残りを未割り当てにする | 未割り当て領域に AlmaLinux 10 を入れる |
 
 ### 導入の基盤
 
@@ -301,7 +311,7 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Syncthing の Windows 11 の節](docs/syncthing.md#windows-11-で使う)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[HackGen Console NF の Windows 11 の節](docs/hackgen.md#windows-11-で使う)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP でつないだセッションの中の PowerShell。初期設定は管理者ではない PowerShell に貼り、Caps Lock の手順だけ管理者。HackGen は管理者でなくてよい）。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Syncthing の Windows 11 の節](docs/syncthing.md#windows-11-で使う)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[HackGen Console NF の Windows 11 の節](docs/hackgen.md#windows-11-で使う)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP でつないだセッションの中の PowerShell。初期設定は管理者ではない PowerShell に貼り、Caps Lock の手順だけ管理者。HackGen は管理者でなくてよい）。デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く
