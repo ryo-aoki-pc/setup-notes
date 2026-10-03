@@ -289,6 +289,8 @@
 
 1. 相手側のデバイスでも同じように Syncthing を入れ、そのデバイス ID を控える。
 
+   - 相手が Windows 11 の PC なら、[Syncthing（Windows）](windows-syncthing.md)で入れる
+
 1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。
 
    - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
@@ -935,6 +937,7 @@ $ syncthing cli config folders list
 - Syncthing 2.1.5 のソース — `lib/model/model.go` の `newFolder`（DB が空のフォルダはディレクトリと `.stfolder` を作る）、`lib/fs/tempname.go`（`.syncthing.` で始まる名前を一時ファイルとして扱う）、`syncthing generate` の `Key exists; will not overwrite`
 - `man syncthing`（`generate`、`cli`、`--gui-address`）/ `man syncthing-config`（`<gui>`）/ `man syncthing-faq` / `man loginctl`（`enable-linger`）/ `man systemd.path` / `man systemd.timer`
 - [linger](linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
+- [Syncthing（Windows）](windows-syncthing.md) — Windows 11 の PC に Syncthing を入れる手順書（相手の端末）
 
 ---
 
