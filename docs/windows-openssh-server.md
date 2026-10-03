@@ -511,7 +511,7 @@
 
    - `False` が 2 行出ればよい
 
-1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 30 を行う。
+1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 33 を行う。
 
    - この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](syncthing.md#windows-11-で使う)、リモート デスクトップなど）があれば、戻さない
 

@@ -7,7 +7,7 @@
 > - ログインするユーザーは **Administrators の一員**（手順 5 のタスク登録に管理者の権限が要る。Administrators の一員の SSH のセッションは、UAC の確認無しで管理者の権限を持つ。[Windows の OpenSSH サーバー](windows-openssh-server.md#注意点)）
 > - 前提: [Windows の OpenSSH サーバー](windows-openssh-server.md)で SSH でログインできること。Claude Code を公式の native installer で入れ（[Claude Code の Windows 11 で使う](claude-code.md#windows-11-で使う)。この手順書の検証の PC は、PowerShell で `irm https://claude.ai/install.ps1 | iex` で入れた）、`claude` の `/login` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない。WezTerm が `C:\Program Files\WezTerm` に入っていること（[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)）
 > - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。このユーザーのプロファイルに書くので、SSH でログインした Windows PowerShell も読む（SSH のクライアントから貼ったときの動きは確かめていない）
-> - **この PC のデスクトップにログインしたままにしておくこと**。タスクはログオン中のデスクトップのセッションで WezTerm を開く。ログオフすると動かない（[注意点](#注意点)）。再起動の後に自動でサインインさせるのは [Windows 11 の初期設定の手順 51](windows-setup.md#実施手順)
+> - **この PC のデスクトップにログインしたままにしておくこと**。タスクはログオン中のデスクトップのセッションで WezTerm を開く。ログオフすると動かない（[注意点](#注意点)）。再起動の後に自動でサインインさせるのは [Windows 11 の初期設定の手順 52](windows-setup.md#実施手順)
 > - **手順 4 には対話入力がある**（ディレクトリの信頼のダイアログと、初回の Remote Control の確認。URL が出たら Ctrl+C）
 
 - 上から順にコードブロックを貼る。手順 2 で変数を設定した PowerShell に貼る

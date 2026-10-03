@@ -806,7 +806,7 @@
    <summary>補足: 変数について</summary>
 
    - `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](#実施手順)の `ST_GUI_USER` と同じ扱い）
-   - `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の手順 23](windows-setup.md#実施手順) と同じ
+   - `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の手順 24](windows-setup.md#実施手順) と同じ
    - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
    - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
 
@@ -1259,7 +1259,7 @@
 
    - `False` が出ればよい（`syncthing.exe.old` も消える）
 
-1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 30 を行う。
+1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 33 を行う。
 
    - [Windows の OpenSSH サーバー](windows-openssh-server.md)やリモート デスクトップをこの LAN で使っているなら、戻さない（パブリックにすると SSH も届かなくなる）
 
