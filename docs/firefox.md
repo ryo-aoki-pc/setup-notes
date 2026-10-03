@@ -1,8 +1,9 @@
-# Firefox 最新版インストール手順（AlmaLinux 10 / Mozilla 公式 RPM リポジトリ）
+# Firefox 最新版インストール手順（AlmaLinux 10 は Mozilla 公式 RPM リポジトリ / Windows 11 は winget）
 
 ## 実施手順
 
 > [!IMPORTANT]
+> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。AAC・H.264 のための手順 8〜11 に当たる手順は無い）
 > - **前提（手順 8 から）**: [RPM Fusion（free）](rpmfusion.md) を有効にしてあること（その前提の [EPEL](epel.md) も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
 > - **すべて対象ホスト上で実行する**。手順 7 と手順 11 の GUI の確認だけ、デスクトップセッションで行う
 > - **手順 5・8・9 には対話入力がある**（トランザクション表の `[y/N]`。手順 8 は EPEL の鍵の確認も）。答えてから次の手順を貼る
@@ -310,6 +311,7 @@
 
 ## 更新
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 の更新](#windows-11-の更新)
 - 通常の `dnf upgrade` に含まれる
 - 手順 8 の `ffmpeg-libs`（RPM Fusion）も、`dnf upgrade` で一緒に上がる
 
@@ -329,6 +331,7 @@
 > [!WARNING]
 > **ダウングレードした Firefox は、新しいプロファイルを読めないことがある**（[注意点](#注意点)）。
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - RPM Fusion の FFmpeg を外し、AppStream の ESR に戻す
 - AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1 だけ行う。RPM Fusion 自体も外すなら、続けて [rpmfusion.md のロールバック](rpmfusion.md#ロールバック)を行う
 - EPEL は外さない（[btop.md](btop.md) などほかの手順書でも使う。外すなら [epel.md のロールバック](epel.md#ロールバック)）
@@ -376,13 +379,227 @@
 
 ---
 
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **すべて Windows のデスクトップで行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2・3 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。ログインするユーザーは Administrators の一員（Firefox を PC 全体の `C:\Program Files\Mozilla Firefox` に入れ、Mozilla Maintenance Service も入れるため）
+> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - **この節の手順 4・5 は画面の操作**（Firefox を起動して確かめる、Windows の設定で既定のブラウザーにする）
+
+- 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `FF_PKG`・`FF_L10N` は AlmaLinux 10 だけで使う）
+- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
+- 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- [Windows 11 の初期設定](windows-setup.md)の後に通す手順書では、[git.md](git.md) の次に通す。後で通す [wezterm-nightly.md](wezterm-nightly.md)・[claude-code.md](claude-code.md) より先に既定のブラウザーにしておくと、Claude Code のログイン（`/login`）が Firefox で開く
+- AAC と H.264 は Windows の機能（Media Foundation）で再生するので、[実施手順](#実施手順)の手順 8〜11（RPM Fusion の FFmpeg）に当たる手順は無い（この節の手順 4 の補足）
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、winget の定義、Mozilla のインストーラの sha256・署名・中身、Mozilla の文書と Firefox・winget のソース、Linux の PowerShell 7 での構文だけ（[対象と検証環境](#対象と検証環境)）。
+
+1. Windows で、管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+
+1. Firefox がまだ入っていないことを確かめる。
+
+   ```powershell
+   $arp = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+   Get-ItemProperty -Path $arp -ErrorAction SilentlyContinue | Where-Object DisplayName -like 'Mozilla Firefox*' | Format-Table DisplayName, DisplayVersion, InstallLocation
+   Get-AppxPackage -Name 'Mozilla.MozillaFirefox' | Format-Table Name, Version
+   ```
+
+   - どちらも何も出なければ、入っていない
+   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たら、この節の手順で入れたもの（か同じもの）。この節の手順 3 はそのまま貼ってよい（新しい版があれば上がる）
+   - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、設定 →「アプリ」→「インストールされているアプリ」で外してから始める（プロファイルは残る）
+
+   <details>
+   <summary>補足: 調べている場所</summary>
+
+   - Mozilla のインストーラは、アンインストールの登録に `Mozilla Firefox (<構成> <言語>)` の表示名（`DisplayName`）を書く（ESR は `Mozilla Firefox ESR (…)`）。管理者で入れたものは `HKLM`、管理者でないユーザーが自分に入れたもの（`%LOCALAPPDATA%\Mozilla Firefox`）は `HKCU` に書かれる（Firefox のソースの `shared.nsh`。[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+   - Microsoft Store 版と winget の `Mozilla.Firefox.MSIX` は、パッケージのアプリ（`Mozilla.MozillaFirefox`）として入る
+   - 別の言語の Firefox が入っている場所に重ねて入れたときにどうなるかは、確かめていない。そのため、先に外す
+
+   </details>
+
+1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
+
+   ```powershell
+   winget install --exact --id Mozilla.Firefox.ja --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Mozilla.Firefox.ja --source winget
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo | Format-List FileName, ProductVersion
+   Get-Service -Name MozillaMaintenance | Format-Table Name, Status, StartType
+   Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   ```
+
+   - winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
+   - `winget list` に `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形の行が出ればよい（版は実行した日の最新）
+   - `FileName` が `C:\Program Files\Mozilla Firefox\firefox.exe` で、`ProductVersion` が同じ版
+   - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出る。ふだんは止まっていて、更新のときだけ動く
+   - タスクの一覧に `Firefox Default Browser Agent <番号>` が出る
+   - `winget` が見つからないと出たら、Microsoft Store で「アプリ インストーラー」を更新してから貼り直す
+
+   <details>
+   <summary>補足: winget の定義と、インストーラが入れるもの</summary>
+
+   **winget の定義**（`Mozilla.Firefox.ja` 157.0。[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
+
+   - インストーラは、Mozilla の CDN（`download-installer.cdn.mozilla.net`）の日本語版の `Firefox Setup 157.0.exe`（NSIS）。x64・x86・arm64 があり、winget は PC の構成に合うものを選ぶ
+   - `Scope` は `machine` だけ（自分のユーザーに入れる定義は無い）。`--scope machine` は、その確かめ
+   - winget がインストーラに渡すのは `/S /PreventRebootRequired=true`（画面を出さない。使用中のファイルがあっても、再起動が要る処理をしない）
+   - `--accept-source-agreements` と `--accept-package-agreements` は、winget を初めて使う PC で出る同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+
+   **インストーラが入れるもの**（Mozilla の Full Installer Configuration の既定。スイッチで変えていない）
+
+   - 本体: `C:\Program Files\Mozilla Firefox`（64 ビットの Windows の既定の場所）
+     - 場所は変えない（`--location` を付けない）。既定の場所のときだけ、アンインストールの登録のキーの名前が `Mozilla Firefox` になり、winget の定義の `ProductCode` と合う（Firefox のソースの `postupdate_helper.nsh`）
+   - Mozilla Maintenance Service: 管理者で入れたときだけ入る。管理者の確認なしに、`C:\Program Files` の Firefox を更新するためのサービス（[Windows 11 の更新](#windows-11-の更新)）
+   - Default Browser Agent のタスク: タスク スケジューラの `\Mozilla\` に、24 時間ごとに既定のブラウザーが何かを調べて Mozilla に送るタスクを作る（テレメトリを切っていれば送らない。Mozilla の Default Browser Agent の文書）
+   - ショートカット: デスクトップ・スタートメニュー（ふつうのものとプライベート ブラウジングのもの）と、タスクバーへのピン留め
+     - 要らなければ、この手順の `winget install` に `--custom '/DesktopShortcut=false /TaskbarShortcut=false'` を足すと作らないはず（Mozilla の文書のスイッチ。確かめていない）
+
+   </details>
+
+1. スタートメニューから Firefox を起動し、`about:support` で日本語版の公式のビルドかを確かめる。
+
+   - スタートメニューの「Firefox」から起動する（管理者の PowerShell からは起動しない。Firefox が管理者の権限で動いてしまう）
+   - 最初の起動で、Firefox を既定のブラウザーにするかを聞かれることがある。選ぶと Windows の設定が開くので、この節の手順 5 の操作をそこで行ってよい
+   - アドレスバーに `about:support` を入れ、「アプリケーション基本情報」を見る
+     - 「更新チャンネル」が `release`
+     - 「プログラムの実行ファイル」が `C:\Program Files\Mozilla Firefox\firefox.exe`
+   - 同じページの「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
+     - 情報が利用できないと出たら、動画を 1 本再生してから開き直す
+   - メニューやボタンが日本語で出る（日本語版なので、言語パックは要らない）
+
+   <details>
+   <summary>補足: Windows では AAC と H.264 のために何も足さない理由</summary>
+
+   - Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
+   - 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのは Android の MediaCodec を使うものだけ）
+     - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](#実施手順)の手順 8〜11 が要る（[選択した方針](#選択した方針)）
+   - MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
+   - Mozilla のサポートの記事（support.mozilla.org）は、この文書を書いた環境からは読めなかった。Windows で再生しては確かめていない
+   - N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が要るはず（確かめていない）
+
+   </details>
+
+1. Windows の設定で、Firefox を既定のブラウザーにする。
+
+   - 設定（Win+I）→「アプリ」→「既定のアプリ」を開き、「アプリケーションの既定の設定」の一覧で「Firefox」を選ぶ
+   - 「Firefox を既定のブラウザーにする」の横の「既定に設定」を押す
+   - 押した後は、同じ画面の `.htm`・`.html`・`HTTP`・`HTTPS` などの既定が Firefox になる
+   - Win+R の「ファイル名を指定して実行」に `https://www.mozilla.org/ja/` を入れて Enter を押し、Firefox で開けばよい
+   - Firefox の設定（`about:preferences`）の「既定のブラウザー」の「既定のブラウザーにする」からでもよい（Firefox が自分で既定にできなければ、同じ Windows の設定の画面が開く）
+   - **注意**: 画面の名前は、Microsoft のサポートの記事（Edge を既定にする例）と Firefox の日本語の訳から取った。Windows の画面では確かめていない
+
+   <details>
+   <summary>補足: コマンドで変えない理由</summary>
+
+   - Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
+   - Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
+   - 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
+   - Claude Code の `/login` は、既定のブラウザーでログインのページを開く。[Windows 11 の初期設定](windows-setup.md)の後に通す順で、Claude Code より先にこの手順を行うのはそのため
+
+   </details>
+
+---
+
+## Windows 11 の更新
+
+- Firefox は自分で更新する。起動している間に新しい版を取り、次に起動したときに入れ替える
+- 閉じている間も、Firefox を起動すると作られるタスク（タスク スケジューラの `\Mozilla\` の `Firefox Background Update <番号>`。7 時間ごと）が新しい版を取って入れる
+- `C:\Program Files` への書き込みは Mozilla Maintenance Service が行うので、管理者の確認（UAC）は出ない
+- 待たずに上げるときは、Firefox のメニュー →「ヘルプ」→「Firefox について」を開く（新しい版を確かめて取る）か、この節の手順を管理者の Windows PowerShell（5.1）に貼る
+- 日本語版なので、言語パックは使わない。言語パックを足すと、閉じている間の更新が止まる（Mozilla の Background Updates の文書）
+
+1. 今の版と、winget に新しい版があるかを確かめる。
+
+   ```powershell
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
+   winget list --exact --id Mozilla.Firefox.ja --source winget --upgrade-available
+   ```
+
+   - 1 行目が今の版
+   - winget に新しい版があれば、`Mozilla.Firefox.ja` の行に今の版と新しい版が並ぶ
+   - 行が出ずに、見つからない旨が出たら、新しい版は無い（Firefox が自分で先に上げていることもある）。この節の手順 2 は飛ばす
+
+1. 新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
+
+   ```powershell
+   winget upgrade --exact --id Mozilla.Firefox.ja --source winget --accept-source-agreements --accept-package-agreements
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
+   ```
+
+   - 最後の行が新しい版になればよい
+   - **注意**: Firefox を開いたままだと、入れ替えが途中で終わることがある（この手順の補足）
+
+   <details>
+   <summary>補足: winget での更新</summary>
+
+   - winget の定義の `UpgradeBehavior` は `install`。今の Firefox を消さずに、同じ場所へ新しい版のインストーラを重ねて入れる。プロファイルと既定のブラウザーの設定はそのまま
+   - winget が渡す `/PreventRebootRequired=true` は、使用中のファイルがあっても再起動が要る処理をしないスイッチ。Mozilla の文書は、動いている Firefox に重ねて入れるときにこれを付けると、入れ替えが途中で終わることがあると書いている
+   - winget の定義は、Mozilla が新しい版を出してから、winget-pkgs に定義が足されたときに上がる（どれだけ遅れるかは確かめていない）。Firefox 自身の更新の方が先に上がることもある
+
+   </details>
+
+---
+
+## Windows 11 のロールバック
+
+- この節の手順 1・2 は、管理者の Windows PowerShell（5.1）に貼る
+- **この節の手順 1 で、Firefox のアンインストールの窓が開く**（winget は Firefox のアンインストーラを、画面を出したまま起動する）
+- プロファイル（`%APPDATA%\Mozilla\Firefox` と `%LOCALAPPDATA%\Mozilla\Firefox`）は、この節のどの手順でも消えない
+  - 入れ直すと、同じプロファイルを使う（最初の起動で「Firefox をリフレッシュ」を勧められることがある）
+  - 要らなければ手で消す（取り戻せない。ブックマークと保存したパスワードも消える）
+- 既定のブラウザーは、Firefox を外すと Windows が戻す（Microsoft Edge になるはず。確かめていない）。別のブラウザーにするなら、この節の手順 3
+
+1. Firefox をすべて閉じてから、winget でアンインストーラを起動する。
+
+   ```powershell
+   winget uninstall --exact --id Mozilla.Firefox.ja --source winget
+   ```
+
+   - Firefox のアンインストールの窓が開くので、案内に沿ってアンインストールを選び、最後に「完了」を押す
+   - 「Firefox をリフレッシュ」を勧める画面が出ても、リフレッシュは選ばない（プロファイルを作り直すだけで、Firefox は消えない）
+   - **次の手順は、アンインストールの窓で「完了」を押してから貼る**（winget が先に終わっても、窓が閉じるまでは消し終わっていない）
+
+   <details>
+   <summary>補足: 窓が出る理由と、アンインストーラが消すもの</summary>
+
+   - winget は、NSIS のインストーラで入れたものを、アンインストールの登録の `QuietUninstallString`（画面を出さずに消すコマンド）で消し、それが無ければ `UninstallString` で消す（winget のソースの `UninstallFlow.cpp`）
+   - Firefox が書くのは `UninstallString`（`C:\Program Files\Mozilla Firefox\uninstall\helper.exe`）だけなので、ふだんのアンインストールと同じ窓が出る（Firefox のソースの `shared.nsh`）
+   - アンインストーラは、Firefox のタスク（Default Browser Agent と Background Update）を消し、ほかに使う Mozilla のアプリ（Thunderbird など）が無ければ Mozilla Maintenance Service も外す（Firefox のソースの `uninstaller.nsi`）
+   - 入れ直したときのリフレッシュの勧めは、アンインストーラが `HKCU\Software\Mozilla\Firefox` に残す `Uninstalled-release` の値による（同じソース）
+
+   </details>
+
+1. Firefox が消えたことを確かめる。
+
+   ```powershell
+   winget list --exact --id Mozilla.Firefox.ja --source winget
+   Test-Path -LiteralPath "$env:ProgramFiles\Mozilla Firefox"
+   Get-Service -Name MozillaMaintenance -ErrorAction SilentlyContinue | Format-Table Name, Status
+   Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   ```
+
+   - `winget list` が見つからない旨を出し、`False` が出て、最後の 2 つが何も出さなければよい
+   - `MozillaMaintenance` が残るのは、Thunderbird などほかの Mozilla のアプリが使っているとき
+
+1. 別のブラウザーを既定にするときだけ、Windows の設定で既定にする。
+
+   - 設定 →「アプリ」→「既定のアプリ」で使うブラウザーを選び、「既定に設定」を押す（[Windows 11 で使う](#windows-11-で使う)の手順 5 と同じ操作）
+
+---
+
 ## 補足
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 に Firefox の**最新版**（Rapid Release）を dnf 管理で入れ、Windows 版と同じように AAC と H.264 の動画も再生できるようにする。標準リポジトリ（AppStream）の `firefox` は ESR 140 系で、最新版より 16 メジャー古い
-- **進め方**: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
-- **状態**
+- **目的**: AlmaLinux 10 と Windows 11 に、Firefox の**最新版**（Rapid Release）を入れる
+  - AlmaLinux 10 では dnf 管理で入れ、Windows 版と同じように AAC と H.264 の動画も再生できるようにする。標準リポジトリ（AppStream）の `firefox` は ESR 140 系で、最新版より 16 メジャー古い
+  - Windows 11 では日本語版を PC 全体に入れ、既定のブラウザーにする。[Windows 11 の初期設定](windows-setup.md)の後に通す手順書の 1 つ
+- **進め方**
+  - **AlmaLinux 10**（[実施手順](#実施手順)）: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
+  - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: winget の `Mozilla.Firefox.ja`（Mozilla の日本語版のインストーラ）を、管理者の Windows PowerShell 5.1 から PC 全体（`C:\Program Files\Mozilla Firefox`）に入れ、Windows の設定で既定のブラウザーにする。更新は Firefox 自身（Mozilla Maintenance Service）に任せる。変数は無く、AAC・H.264 のために足すものも無い
+- **状態（AlmaLinux 10）**
   - **手順 1〜7（Firefox）は実機で本実行済み（2026-09-21）**
     - 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している
     - 2026-09-25 に OS を入れ直した後も、手順 5 の `dnf install firefox firefox-l10n-ja` で入れ直した（`dnf history` では `Upgrade firefox-156.0.1-1.aarch64 @mozilla`）
@@ -414,6 +631,17 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-02: もとの手順 3・4 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
+    - winget の定義: `Mozilla.Firefox.ja` と `Mozilla.Firefox` の 157.0（インストーラの種類・スコープ・スイッチ・URL・sha256・`ProductCode`）と、`Mozilla.Firefox` から言語のインストーラが無くなった版（137.0.2）
+    - 配布物: x64 の日本語版の `Firefox Setup 157.0.exe` の sha256（winget の定義と Mozilla の `SHA256SUMS` と一致）・Authenticode の署名者（`Mozilla Corporation`）・中身（Maintenance Service のインストーラ、Default Browser Agent、日本語の `updater.ini`）。Linux で読んだだけで、Windows の `Get-AuthenticodeSignature` は通していない
+    - Mozilla の文書と Firefox のソース: インストーラの既定（場所・Maintenance Service・タスク・ショートカット）、アンインストーラが消すもの、閉じている間の更新の条件、既定のブラウザーの設定のしかた、Windows で H.264 と AAC を Media Foundation で復号すること
+    - winget のソース: `--locale` の扱い、NSIS のインストーラで入れたもののアンインストールで窓が出ること、`winget list --upgrade-available`
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+  - **確かめていないこと**: Windows で貼ること（すべての手順）、winget の表示、入れた後の about:support と動画の再生、Windows の設定の画面の名前と既定のブラウザーの切り替え、Firefox 自身の更新と `winget upgrade`、アンインストールの窓、arm64 の Windows、N エディション
+
+AlmaLinux 10:
 
 | 項目 | 実機 | 検証コンテナ | 検証コンテナ（rpmfusion.md と手順 8〜11） | 実機（rpmfusion.md と手順 8〜11） | x86_64 の実機（rpmfusion.md と手順 8〜11） |
 |---|---|---|---|---|---|
@@ -426,21 +654,33 @@
 | デスクトップ | GNOME 49 / Wayland | 無し（`--version` まで） | 無し（headless の Firefox を Marionette で操作） | GNOME 49（`gnome-shell` 49.4） | GNOME 49（`gnome-shell` 49.4）/ Wayland |
 | SELinux | Enforcing | コンテナ側は無効 | コンテナ側は無効 | Enforcing | Enforcing |
 
+Windows 11（前提にしている環境。ほかの Windows の手順書の実機の記録と同じ PC を想定）:
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11（x64。[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2） |
+| PowerShell | Windows PowerShell 5.1（管理者として実行） |
+| ユーザー | Administrators の一員 |
+| winget | Windows 11 の「アプリ インストーラー」に入っているもの |
+| Firefox | 157.0（winget の `Mozilla.Firefox.ja`。Mozilla が 2026-09-29 に出した版） |
+
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> AlmaLinux 10 の環境固有の値は**シェル変数**で書いてある。[手順 1](#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。Windows 11 の節には変数が無い（winget の ID とパスはブロックに直接書いてある）。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${FF_PKG}` | 入れるチャンネルのパッケージ名。`firefox`（最新版）/ `firefox-esr` / `firefox-beta` | `firefox` |
 > | `${FF_L10N}` | 言語パックのパッケージ名。空にすると英語 UI のまま | `firefox-l10n-ja` |
 >
-> 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`156.0.1-1`、`7.1.5-1.el10`）は実行日によって変わる。
+> 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。Windows 11 のタスクの名前の末尾の番号（インストール先ごとに決まる）は `<番号>` と書いた。バージョン（`156.0.1-1`、`7.1.5-1.el10`、Windows の `157.0`）は実行日によって変わる。
 >
 > 鍵の fingerprint（Mozilla・RPM Fusion・EPEL）は公開情報なので本文に書いてある。プロファイルや保存されたパスワードには触れない。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
+
+AlmaLinux 10 の実機（2026-09-21）。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)の手順 2 で確かめる。
 
 | 項目 | 状態 |
 |---|---|
@@ -513,7 +753,26 @@ FFmpeg のライブラリの入れ方を比べた（2026-09-28 時点。aarch64 
 - RPM Fusion の EL 10 向けには、`ffmpeg-libs` 7.1.5 が aarch64 と x86_64 の両方にある
 - RPM Fusion は EPEL を前提にしている（`rpmfusion-free-release` が `epel-release` を要求する）
 
+Windows 11 で Firefox を入れる経路を比べた（2026-10-03 時点。winget の定義は [付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `Mozilla.Firefox.ja` を PC 全体に** | 157.0。Mozilla の CDN の日本語版の NSIS インストーラ（x64・x86・arm64）を、winget が sha256 を確かめて画面を出さずに入れる。`Scope` は `machine` だけ。Maintenance Service が入り、以後は Firefox が自分で更新する | **採用** |
+| winget の `Mozilla.Firefox` に `--locale ja` | 137.0.1 までは言語ごとのインストーラ（`InstallerLocale`）が 51 あったが、137.0.2 から英語（en-US）だけになり、言語ごとに `Mozilla.Firefox.<言語>` に分かれた。言語の無いインストーラは、`--locale` を付けると候補から外れるので、入らないはず（winget のソースで読んだだけ） | 不採用 |
+| `Mozilla.Firefox`（英語版）に日本語の言語パック | 言語パックがあると、閉じている間の更新（Background Update）が動かない（Mozilla の文書）。本体と版を揃える必要もある（AlmaLinux 10 の[注意点](#注意点)と同じ） | 不採用 |
+| winget の `Mozilla.Firefox.MSIX`・Microsoft Store 版 | MSIX（言語は multi）で、パッケージのアプリ（`Mozilla.MozillaFirefox`）として入る | 不採用（Mozilla の通常のインストーラと、Firefox 自身の更新にそろえた） |
+| scoop の `extras/firefox` | 157.0。英語版のインストーラを 7z で展開するだけのポータブル版で、プロファイルは scoop の `persist` に作る | 不採用（日本語版でなく、PC 全体にも入らない） |
+| Mozilla のサイトからインストーラを落として実行 | 同じものが入るが、ダウンロードと実行が画面の操作になる | 不採用（winget で同じインストーラが入る） |
+
+- **PC 全体（`machine`）に入れた**: winget の定義が `machine` しか持たない。AlmaLinux 10 の dnf と同じく、PC の全ユーザーで 1 つの Firefox を使い、更新は Maintenance Service で管理者の確認なしに行える
+  - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
+- **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](#注意点)）に当たる注意が無く、閉じている間の更新も動く
+- **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](#windows-11-で使う)の手順 5 の補足）
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](syncthing.md) と同じく後ろの節に分けた
+
 ### 完了時点の状態
+
+AlmaLinux 10 の実機（2026-09-21）。Windows 11 は流していないので、記録は無い（入るものはこの節の最後の箇条書き）。
 
 ```
 $ dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' firefox
@@ -583,6 +842,15 @@ $ ls /usr/lib64/libavcodec.so.*
 - EPEL が前から入っていたホストなので、`epel-release` の版と `from_repo` はコンテナと違う
 - EPEL の `noopenh264` も入っている（[手順 8 の補足](#実施手順)）
 
+Windows 11 で入るもの（winget の定義・Mozilla の文書・Firefox のソースから。Windows では確かめていない）:
+
+- 本体: `C:\Program Files\Mozilla Firefox`。「アプリと機能」の名前は `Mozilla Firefox (x64 ja)`
+- サービス: `MozillaMaintenance`（Mozilla Maintenance Service）
+- タスク スケジューラの `\Mozilla\`: `Firefox Default Browser Agent <番号>`（インストーラが作る）と `Firefox Background Update <番号>`（Firefox を起動すると作られる）
+- ショートカット: デスクトップ・スタートメニュー（ふつうのものとプライベート ブラウジングのもの）・タスクバーのピン留め
+- プロファイル: `%APPDATA%\Mozilla\Firefox`（設定・ブックマーク・パスワード）と `%LOCALAPPDATA%\Mozilla\Firefox`（キャッシュ）。ユーザーごとに作られる
+- 更新のための作業場所: `C:\ProgramData\Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38`（Firefox のソースの `commonupdatedir.cpp`）
+
 ### 注意点
 
 - **チャンネルが変わる**: ESR（年 1 回のメジャー更新）から Rapid Release（4 週間ごと）に移る
@@ -599,6 +867,13 @@ $ ls /usr/lib64/libavcodec.so.*
 - **EPEL の `libavcodec-free` とは同居できない**: 入っていると手順 8 が止まる。残したままだと H.264 が再生できない（手順 9）
 - **aarch64 の Firefox には Widevine が無い**: Firefox 156（aarch64）には `media.gmp-widevinecdm.*` の設定が無く、`media.eme.enabled` も既定で false だった
   - DRM の要る動画は、FFmpeg を入れても直らない（DRM の動画そのものは試していない）
+- **Windows 11 の注意点**
+  - **AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（[Windows 11 で使う](#windows-11-で使う)の手順 4 の補足）。N エディションの Windows では、Media Feature Pack が要るはず（確かめていない）
+  - **管理者の PowerShell から Firefox を起動しない**: Firefox が管理者の権限で動き、プロファイルに管理者の持ち物のファイルができうる。起動はスタートメニューから
+  - **言語パックを足さない**: 閉じている間の更新（Background Update）が止まる。別の言語にしたいなら、その言語の `Mozilla.Firefox.<言語>` を入れ直す
+  - **Firefox を開いたまま `winget upgrade` しない**: 入れ替えが途中で終わることがある（[Windows 11 の更新](#windows-11-の更新)の手順 2 の補足）
+  - **英語版の `Mozilla.Firefox` と同じ `ProductCode`**: winget の定義では、`Mozilla.Firefox` と言語ごとの `Mozilla.Firefox.<言語>`（100 個）の `ProductCode` が、どれも `Mozilla Firefox` になっている。`winget upgrade --all` や UniGet UI の一括の更新で取り違えないかは、確かめていない
+  - **アンインストールで窓が出る**: `winget uninstall` でも、Firefox のアンインストーラが画面を出す（[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1 の補足）
 
 ### 参照
 
@@ -609,6 +884,16 @@ $ ls /usr/lib64/libavcodec.so.*
 - [RPM Fusion（free）](rpmfusion.md) — 手順 8 の前提。鍵の照合と有効化、RPM Fusion の Configuration・keys のページへのリンク
 - [Multimedia — RPM Fusion](https://rpmfusion.org/Howto/Multimedia) — `ffmpeg-free` からの切り替え（`dnf swap`）と、`libavcodec-freeworld` の位置づけ
 - `man dnf.conf`（`priority`、`gpgcheck`、`repo_gpgcheck`）
+- [Full Installer Configuration — Firefox Source Docs](https://firefox-source-docs.mozilla.org/browser/installer/windows/installer/FullConfig.html) — Windows のフルのインストーラのスイッチと既定（場所・ショートカット・Maintenance Service・Default Browser Agent・`/PreventRebootRequired`）
+- [Background Updates — Firefox Source Docs](https://firefox-source-docs.mozilla.org/toolkit/mozapps/update/docs/BackgroundUpdates.html) — 閉じている間の更新のタスクと、それが動く条件（Maintenance Service・言語パック）
+- [Default Browser Agent — Firefox Source Docs](https://firefox-source-docs.mozilla.org/toolkit/mozapps/defaultagent/default-browser-agent/index.html) — インストーラが作るタスクの中身
+- [Set Default — Firefox Source Docs](https://firefox-source-docs.mozilla.org/widget/windows/shell/set-default.html) — Windows で既定のブラウザーにするしかたと UCPD
+- Firefox のソース（`release` の枝、2026-10-03）— `browser/installer/windows/nsis/installer.nsi`・`uninstaller.nsi`・`shared.nsh`・`postupdate_helper.nsh`（入れるもの・消すもの・アンインストールの登録）、`dom/media/platforms/wmf/WMFDecoderModule.cpp`（H.264 と AAC の Media Foundation の復号器）、`media/ffvpx/libavcodec/codec_list.c`（同梱の FFmpeg の復号器）、`toolkit/mozapps/update/common/commonupdatedir.cpp`（更新の作業場所）
+- [winget-pkgs の `Mozilla.Firefox.ja`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/m/Mozilla/Firefox/ja) — winget の定義（`Mozilla.Firefox` は同じ場所の 1 つ上）
+- winget-cli のソース（2026-10-02）— `src/AppInstallerCommonCore/Manifest/ManifestComparator.cpp`（`--locale`）、`src/AppInstallerCLICore/Workflows/UninstallFlow.cpp` と `src/AppInstallerRepositoryCore/Microsoft/ARPHelper.cpp`（アンインストールのコマンドの選び方）
+- [Windows で既定のアプリを変更する — Microsoft サポート](https://support.microsoft.com/ja-jp/windows/apps/change-default-apps-in-windows) — 設定の「既定のアプリ」と「既定に設定」
+- MDN の [Web video codec guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Video_codecs)・[Web audio codec guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Audio_codecs) — Firefox は AVC と AAC を OS の復号器に頼る
+- [Windows 11 の初期設定](windows-setup.md) — この文書の Windows 11 の節の前に通す手順書
 
 ---
 
@@ -809,3 +1094,143 @@ x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 �
 - 利用者の Firefox で、OpenH264 があるのに H.264 が使われなかった理由
 - YouTube（MSE）の H.264 を FFmpeg で復号すること（x86_64）
 - ハードウェアでの復号
+
+---
+
+### 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義、配布物、資料とソースを読んだ記録。
+
+#### winget の定義
+
+winget-pkgs の `master`（2026-10-03 16:10 UTC のコミット `c6128933`）を、`manifests/m/Mozilla/Firefox` だけ浅く取った（sparse checkout）:
+
+- `Mozilla.Firefox` と `Mozilla.Firefox.ja` の最新は、どちらも 157.0。Mozilla の `product-details` も、`LATEST_FIREFOX_VERSION` が 157.0、`LAST_RELEASE_DATE` が 2026-09-29 だった
+- `manifests/m/Mozilla/Firefox` の下には、版のフォルダーのほかに、`Beta`・`DeveloperEdition`・`ESR`・`MSIX`・`Nightly`・`Unbranded` と、言語ごとのフォルダー（`ja` など）がある
+- `Mozilla.Firefox` の定義は、137.0.1 までは `InstallerLocale` の付いたインストーラが 51 個並んでいたが、137.0.2 からは付いていない（英語版だけ）。`Mozilla.Firefox.ja` の定義は 137.0.2 からある（64 版）
+
+`Mozilla.Firefox.ja` 157.0 の `Mozilla.Firefox.ja.installer.yaml`（`Protocols` と `FileExtensions` は省いた）:
+
+```
+PackageIdentifier: Mozilla.Firefox.ja
+PackageVersion: "157.0"
+InstallerType: nullsoft
+Scope: machine
+InstallerSwitches:
+  Silent: /S /PreventRebootRequired=true
+  SilentWithProgress: /S /PreventRebootRequired=true
+  InstallLocation: /InstallDirectoryPath="<INSTALLPATH>"
+UpgradeBehavior: install
+ProductCode: Mozilla Firefox
+ReleaseDate: 2026-09-29
+Installers:
+- Architecture: x86
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win32/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: D3F2D99344550473B2FE9E9688470B2DF7D89501B6C0AF6243DEAEC689F8AC60
+- Architecture: x64
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win64/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: B3ADC7530D1B1BC383994239908E06A937AE6D2FF85DEA6C1B609A57FA86B220
+- Architecture: arm64
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win64-aarch64/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: 6CCED47FC296950E89803A3ACBA480C633370ACD9EAE4648ED3F47550AAC5E6A
+ManifestType: installer
+ManifestVersion: 1.12.0
+```
+
+- `Mozilla.Firefox` 157.0 の定義は、URL の `ja` が `en-US` になっているほかは同じ（`ProductCode` も `Mozilla Firefox`）。言語ごとのフォルダー 100 個の最新の版の定義も、`ProductCode` はどれも `Mozilla Firefox` だった
+- `Mozilla.Firefox.MSIX` 157.0 は、`InstallerType: msix`・`PackageFamilyName: Mozilla.MozillaFirefox_jag0gd4e3s9p2` で、URL は `…/157.0/win64/multi/Firefox%20Setup%20157.0.msix`
+- scoop の `extras/firefox`（157.0）は、`…/157.0/win64/en-US/Firefox%20Setup%20157.0.exe#/dl.7z`（英語版のインストーラを 7z で展開する）で、`persist` は `distribution`・`profile`
+
+#### インストーラ
+
+x64 の日本語版を取った:
+
+```
+$ sha256sum ff-157.0-win64-ja.exe
+b3adc7530d1b1bc383994239908e06a937ae6d2ff85dea6c1b609a57fa86b220  ff-157.0-win64-ja.exe
+$ grep 'win64/ja/Firefox Setup 157.0.exe' SHA256SUMS
+b3adc7530d1b1bc383994239908e06a937ae6d2ff85dea6c1b609a57fa86b220  win64/ja/Firefox Setup 157.0.exe
+```
+
+- 大きさは 93,612,392 バイト。sha256 は、winget の定義と、Mozilla の `releases/157.0/SHA256SUMS` の行と一致した
+- Authenticode の署名（`osslsigncode verify` は `Succeeded`）: 署名者は `C=US, ST=California, L=San Francisco, O=Mozilla Corporation, OU=Firefox Engineering Operations, CN=Mozilla Corporation`（発行者は `DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1`）。タイムスタンプは 2026-09-24
+- 7z で中を見た（74 ファイル）: `core/maintenanceservice_installer.exe`・`core/maintenanceservice.exe`・`core/default-browser-agent.exe`・`core/updater.exe`・`core/mozavcodec.dll`（同梱の FFmpeg。`Lavc62.29.101`）・`core/wmfclearkey.dll` など
+- `core/updater.ini` の文言は日本語（`Title=Firefox の更新`）で、`core/update-settings.ini` は `ACCEPTED_MAR_CHANNEL_IDS=firefox-mozilla-release`
+
+#### Firefox のソースと文書
+
+Firefox のソースは、GitHub の `mozilla-firefox/firefox` の `release` の枝（`browser/config/version.txt` は 157.0.1）を読んだ:
+
+- `browser/installer/windows/nsis/installer.nsi`
+  - Maintenance Service は、スイッチで指定が無ければ、管理者で `HKLM` に書けるときだけ入れる（`maintenanceservice_installer.exe`）
+  - Default Browser Agent は `default-browser-agent.exe register-task` でタスクを作る。最後に `firefox.exe --backgroundtask install` を動かす
+- `browser/installer/windows/nsis/postupdate_helper.nsh`
+  - 既定の場所は、管理者なら `$PROGRAMFILES64\Mozilla Firefox\`（64 ビットのビルド）、そうでなければ `%LOCALAPPDATA%\Mozilla Firefox\`
+  - Windows 10 以降で既定の場所に入れたときだけ、アンインストールの登録のキーが `…\Uninstall\Mozilla Firefox` になる（ほかは `Mozilla Firefox <版> (<構成> <言語>)`）
+- `browser/installer/windows/nsis/shared.nsh`
+  - アンインストールの登録の `DisplayName` は `Mozilla Firefox (<構成> <言語>)`（ESR は ` ESR` が入る）
+  - 書くのは `UninstallString`（`uninstall\helper.exe`）で、`QuietUninstallString` は書かない。管理者でないときは `HKCU` に書く
+- `browser/installer/windows/nsis/uninstaller.nsi`
+  - `firefox.exe --backgroundtask uninstall` と `default-browser-agent.exe uninstall` で、Firefox が作ったタスク（Background Update を含む）を消す
+  - ほかに Maintenance Service を使う Mozilla のアプリが無ければ、そのアンインストーラを `/S` で動かす
+  - 既定のプロファイルがあれば、リフレッシュを勧める。最後に `HKCU\Software\Mozilla\Firefox` に `Uninstalled-release` を書く（次の起動でリフレッシュを勧めるため）
+- `dom/media/platforms/wmf/WMFDecoderModule.cpp`: H.264 は `CLSID_CMSH264DecoderMFT`、AAC は `CLSID_CMSAACDecMFT` で作る。MP3 には Media Foundation を使わない（「Always use ffvpx for mp3」）
+- `media/ffvpx/libavcodec/codec_list.c`: 同梱の FFmpeg の復号器は、VP8・VP9・FLAC・MP3・AV1（libdav1d と内蔵のもの）・Vorbis・Opus・PCM と、Android の MediaCodec のもの（AAC・H.264・HEVC など）だけ
+- `toolkit/mozapps/update/common/commonupdatedir.cpp`: 更新の作業場所は `C:\ProgramData\Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38`
+
+Mozilla の文書（firefox-source-docs）:
+
+- Full Installer Configuration: どのスイッチを付けても画面を出さずに入れる。タスクバーのピン留め・デスクトップ・スタートメニュー・プライベート ブラウジングのショートカット、Maintenance Service、Default Browser Agent のタスクは、どれも既定で有効。`/PreventRebootRequired=true` を付けて動いている Firefox に重ねて入れると、入れ替えが途中で終わることがある
+- Background Updates: 閉じている間の更新は Windows だけで、既定は 7 時間ごと。条件は、`app.update.background.enabled` と `app.update.auto` が true、インストーラで入れたもの、書き込めるか Maintenance Service が使えること、プロキシの設定が無いこと、言語パックが無いこと など
+- Default Browser Agent: タスクは `Mozilla` のフォルダーに、入れた Firefox ごとに 1 つ作られ、24 時間ごとに動く。インストーラを動かしたユーザーとして、昇格せずに動く
+- Set Default: まず `UserChoice` を書こうとし、できなければ Windows の設定を開く。UCPD は `http`・`https`・`.pdf` の `UserChoice` の書き換えを止める（`htm`・`html` は対象外）。Windows 11 の設定には「既定に設定」のボタンがある
+
+日本語の訳（`mozilla-l10n/firefox-l10n` の `main` の `ja`）: about:support の「アプリケーション基本情報」「更新チャンネル」「プログラムの実行ファイル」「コーデックサポート情報」「ソフトウェアデコーディング」「対応」、設定の「既定のブラウザー」「既定のブラウザーにする」。
+
+Mozilla のサポート（support.mozilla.org）は、JavaScript の確認の画面が返ってきて読めなかった（curl と WebFetch）。
+
+#### winget のソース
+
+winget-cli の `master`（2026-10-02 のコミット `39739564`）を読んだ:
+
+- `src/AppInstallerCommonCore/Manifest/ManifestComparator.cpp` の `LocaleComparator`
+  - `--locale` を付けると、それが「要件」になり、インストーラの言語と完全に合う（`MinimumDistanceScoreAsPerfectMatch` 以上）ものだけが候補に残る
+  - 言語の無いインストーラをそのまま許すのは、入れた後の更新で前の言語を引き継ぐときだけ。言語の無いインストーラと `ja` の距離を出す `GetDistanceOfLanguage` は読んでいない
+- `src/AppInstallerCLICore/Workflows/UninstallFlow.cpp`: NSIS（`Nullsoft`）で入れたものは、`SilentUninstallCommand` があればそれを、無ければ `StandardUninstallCommand` を使う
+  - `src/AppInstallerRepositoryCore/Microsoft/ARPHelper.cpp` で `SilentUninstallCommand` を作るのは、アンインストールの登録の `QuietUninstallString` だけ
+- `src/AppInstallerCLICore/Argument.cpp`: `winget list` の `--upgrade-available`
+
+#### Microsoft の文書と MDN
+
+- 「Windows で既定のアプリを変更する」（日本語）: 設定アプリで [アプリ>既定のアプリ] → [アプリケーションの既定の設定] で Microsoft Edge を選ぶ → [Microsoft Edge を既定のブラウザーにする] の横の [既定に設定]。[Windows 11 で使う](#windows-11-で使う)の手順 5 は、これを Firefox に読み替えた
+- MDN の Web video codec guide は「Firefox support for AVC is dependent upon the operating system's built-in or preinstalled codecs」、Web audio codec guide は「Firefox relies upon a platform's native support for AAC」と書いている
+
+---
+
+### 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6（GitHub のリリースの `powershell-7.6.6-linux-x64.tar.gz`）と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 6 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0 で、既定の規則の指摘も 0
+  - わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`）を入れたファイルでは、それぞれ指摘が出た
+- `winget` はコマンドレットではないので、引数はこの検査の対象外。`winget list` の `--upgrade-available` は winget のソースで確かめた。ほかの引数は [Windows 11 の初期設定](windows-setup.md)の winget と同じ形
+
+**偽物のコマンドで流した**: 6 個のブロックを、`Get-ItemProperty`・`Get-AppxPackage`・`winget`・`Get-Item`・`Get-Service`・`Get-ScheduledTask`・`Test-Path` を「渡された引数を記録し、決まった値を返す偽物」にして流した。
+
+- [Windows 11 で使う](#windows-11-で使う)の手順 2: アンインストールの登録の偽物（`Mozilla Firefox (x64 ja)`・`Mozilla Maintenance Service`・`Git`・表示名の無いもの）から、`Mozilla Firefox (x64 ja)` の行だけが出た
+- どのブロックでも、`winget` に渡る引数と、`$env:ProgramFiles` から組み立てるパス（`C:\Program Files\Mozilla Firefox\firefox.exe`）が本文のとおりだった
+- 本物の Windows の出力（winget の表示、サービスとタスクの有無）は確かめていない
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. winget が x64 の日本語版を選んで `C:\Program Files\Mozilla Firefox` に入れ、Maintenance Service と Default Browser Agent のタスクができること
+1. about:support の表示と、H.264・AAC の動画の再生
+1. 設定の画面の名前（「既定のアプリ」「既定に設定」）と、既定のブラウザーが Firefox になること。最初の起動で Firefox が既定のブラウザーにするかを聞くこと
+1. Firefox 自身の更新（起動している間と、閉じている間の Background Update）と、`winget upgrade`
+1. `winget uninstall` で窓が出ること、消えるもの・残るもの、外した後の既定のブラウザー
+1. `winget upgrade --all` などで、英語版の `Mozilla.Firefox` と取り違えないこと
+1. arm64 の Windows、N エディション

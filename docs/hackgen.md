@@ -275,13 +275,13 @@
 
 > [!IMPORTANT]
 > - **すべて Windows で行う**。この節の手順 1 で Windows PowerShell（5.1）を開き、この節の手順 2・3 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。管理者の権限は要らない（自分のユーザーに入れる）
-> - 前提: [Windows PowerShell の貼り付けの設定](windows-powershell-paste.md)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **この節の手順 4 で、サインアウトしてサインインし直す**（登録したフォントは、サインインのときに読み込まれる）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `HACKGEN_FAMILY` は AlmaLinux 10 だけで使う）
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
-- [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その手順 12 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
+- [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その手順 43 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
 
 > [!WARNING]
 > **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、上流の zip の sha256・中身・ファミリー名、scoop と winget の定義、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](#対象と検証環境)）。
@@ -365,7 +365,7 @@
 1. この PC でサインアウトし、サインインし直す。
 
    - スタートメニューのユーザーのアイコンから「サインアウト」し、サインインし直す（再起動でもよい）
-   - [Windows 11 の初期設定](windows-setup.md)の手順 12 の再起動をこの後に行うなら、この手順は要らない
+   - [Windows 11 の初期設定](windows-setup.md)の手順 43 の再起動をこの後に行うなら、この手順は要らない
 
 1. 設定のフォントの一覧で、HackGen Console NF が出ることを確かめる。
 
@@ -534,7 +534,7 @@ Windows 11 で入れる経路を比べた（2026-10-03 時点）:
 | PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
 
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](syncthing.md) と同じく後ろの節に分けた
-  - [Windows 11 の初期設定](windows-setup.md)（scoop・UniGet UI・Caps Lock・コンテキストメニュー）の依頼の 1 つとして書き、利用者に確かめてここへ置いた
+  - [Windows 11 の初期設定](windows-setup.md)（当時は scoop・UniGet UI・Caps Lock・コンテキストメニュー）の依頼の 1 つとして書き、利用者に確かめてここへ置いた
 
 ### 完了時点の状態
 
@@ -583,7 +583,7 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 - [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
 - [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）
 - [mo-san/scoop-bucket](https://github.com/mo-san/scoop-bucket) — 採らなかった scoop の個人のバケット
-- [Windows 11 の初期設定](windows-setup.md) — 同じ PC で一緒に行う設定（scoop・UniGet UI・Caps Lock・コンテキストメニュー）
+- [Windows 11 の初期設定](windows-setup.md) — Windows のインストール直後にまとめて行う設定（scoop・UniGet UI・Caps Lock・表示・電源・リモート デスクトップなど）。この節は、そのリードから案内される
 
 ---
 
