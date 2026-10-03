@@ -9,16 +9,18 @@
 >   - **「⚠サイレント⚠ ディスクの削除とインストール:」はオフにしてある**こと（オンだと、最初に見つかったディスクを確かめずに消して入れる）
 >   - ビルド 26200 以降の ISO で出る「Windows CA 2023署名のブートローダーを使用する」「インストール時にSkuSiPolicy.p7bを適応する」もオフのまま（既定でオフ）
 > - 手順 1〜3・6〜8 は、PC の画面と機器で行う。**手順 4・5 は、セットアップのコマンド プロンプトに手で 1 行ずつ打つ**（貼り付けられない）
-> - 手順 9〜13 は、入れた Windows の管理者の Windows PowerShell（5.1）に貼る。入れたばかりの Windows は貼り付けの設定（[Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)）を通していないので、ブロックは Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
+> - 手順 9〜13 は、入れた Windows の管理者の Windows PowerShell（5.1）に貼る。入れたばかりの Windows は貼り付けの設定（[Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)）を通していないので、ブロックは Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
 
 - 上から順に進める。手順 10・12・13 は、条件に当たるときだけ行う
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - やり直すときは、手順 3 から始める（ロールバックの節は無い）。手順 5 のパーティションが残っていれば、手順 4・5 は飛ばしてよい
 
 > [!WARNING]
-> **この文書の手順は、VirtualBox の VM でだけ通した**（実機の UEFI の画面・USB メモリ・キーボードでは確かめていない。[対象と検証環境](#対象と検証環境)）。
+> - **実施手順 1〜13 は、VirtualBox の VM でだけ通した**（実機の UEFI の画面・USB メモリ・キーボードでは確かめていない。[対象と検証環境](#対象と検証環境)）
+> - 後ろの QEFI Entry Manager の節は、配布物・ソース・構文の確認のみ。**GUI での指定・取り消し・実際の起動は未検証**
 
 - 手順の後: AlmaLinux 10 は、手順 5 で残した未割り当て領域に入れる（この文書には含めない。入れるときの注意は[注意点](#注意点)）。Windows の初期設定（更新・貼り付けの設定・表示・電源など）は、[Windows 11 の初期設定](windows-setup.md)で行う
+- 両方の OS を入れた後、Windows から次回だけ AlmaLinux を起動したいときは、[QEFI Entry Manager を使う節](#次回だけ-almalinux-で起動する任意)へ進む
 
 > [!CAUTION]
 > **手順 5 の `clean` で、選んだディスクのパーティションとデータをすべて消す（取り戻せない）。** ディスクの番号は、手順 4 で大きさを見て確かめる。
@@ -359,6 +361,176 @@
 
 ---
 
+## 次回だけ AlmaLinux で起動する（任意）
+
+> [!IMPORTANT]
+> - Windows 11 から操作する。AlmaLinux を導入済みで、PC の起動メニューから AlmaLinux のエントリを選んで起動できることが前提
+> - QEFI Entry Manager と PowerShell は管理者として起動する。PowerShell のブロックは Ctrl+V で貼る
+> - この節では、次回だけの起動先（`BootNext`）を指定する。通常の起動順（`BootOrder`）や GRUB の既定の選択は変更しない
+
+- 初回はこの節の手順 1 から行う。展開済みなら、この節の手順 5 から行う（管理者の Windows PowerShell を開いておく）
+- 同梱 CLI に表示の不具合があるため、Windows 標準の BCDEdit も使って確認する（この節の手順 5 の補足）
+- 再起動前に取り消すときは、[次回起動の指定を取り消す](#次回起動の指定を取り消す任意)へ進む。QEFI Entry Manager を閉じるだけでは取り消せない
+
+1. Windows のブラウザで、公式の Windows 向け ZIP をダウンロードする。
+
+   - [公式リリース v0.5.0](https://github.com/Inokinoki/QEFIEntryManager/releases/tag/v0.5.0) の Assets から `QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip` を選ぶ
+   - 「ダウンロード」フォルダーに、この名前で保存する（末尾に `(1)` などが付いたら、既存のファイルと区別してからこの名前にする）
+   - この節はこの配布物を対象にする。別の版は、この節の手順 3 のハッシュと一致しない
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - [手順 8](#実施手順)と同じように、スタートメニューから「管理者として実行する」で開く
+   - この窓は、GUI で指定した後の確認にも使うので残しておく
+   - **次の手順は、管理者の窓が開いてから貼る**
+
+1. ダウンロードした ZIP の SHA256 を確かめる。
+
+   ```powershell
+   if ((Get-FileHash -LiteralPath "$env:USERPROFILE\Downloads\QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip" -Algorithm SHA256 -ErrorAction Stop).Hash -ne 'FC2D83F1369AF02A48072644B08CA7D3D4B2547B955A2088918E7C1179051A10') {
+       throw '中断: ZIP の SHA256 が確認した配布物と一致しません。展開せず、取得元とファイル名を確かめてください。'
+   } else {
+       'SHA256 は確認した配布物と一致しました。'
+   }
+   ```
+
+   - 一致したと出れば、この節の手順 4 へ進む。エラーなら中断する
+   - 「ダウンロード」を別の場所へ移している場合は、この節の手順 1 で `%USERPROFILE%\Downloads` に保存する
+
+   <details>
+   <summary>補足: ハッシュと署名の確認範囲</summary>
+
+   - このハッシュは、取得した ZIP と GitHub のリリース API の `digest` が一致した値（[付録](#付録-qefi-entry-manager-の配布物とソースの確認2026-10-04)）
+   - 同梱の `QEFIEntryManager.exe` と `qefibootmgr.exe` の Authenticode は、どちらも `NotSigned`（署名無し）だった
+   - ハッシュの一致は配布物の同一性の確認で、作者の署名の確認や安全性の保証ではない
+
+   </details>
+
+1. エクスプローラーで、ZIP の中身をすべて展開する。
+
+   - ZIP を右クリックして「すべて展開」を選び、展開先を `%LOCALAPPDATA%\Programs\QEFIEntryManager` にする
+   - 展開先が既にある場合は上書きせず中断する。この節では、異なる版を混ぜない
+   - 展開先の直下に `QEFIEntryManager.exe`・`qefibootmgr.exe`・`Qt6Core.dll` があり、`platforms` フォルダーもあることを確かめる
+   - ZIP の中から直接起動せず、exe だけを別のフォルダーに移さない
+
+1. 管理者の PowerShell で、現在の起動順と AlmaLinux のエントリを確かめる。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
+   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
+   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
+   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
+   ```
+
+   - CLI の `BootOrder` の並びと、AlmaLinux の `Boot` の後ろの 4 桁の番号を控える。AlmaLinux の行は `*` 付き（有効）であることを確かめる
+   - BCDEdit の AlmaLinux の項目の `identifier`（識別子）と `path` を控える。名前だけでなく、CLI の EFI パスと同じブートローダーを指すことを確かめる（通常は `\EFI\almalinux\shimx64.efi`）
+   - BCDEdit の `{fwbootmgr}`（ファームウェアのブート マネージャー）の `displayorder` も控える
+   - `{fwbootmgr}` に `bootsequence` が既にあれば中断する。別の次回起動の予約を、この節では上書きしない
+   - エラー・空の起動順・AlmaLinux が無い・無効・同名の候補を区別できない場合も中断する。番号を推測せず、エントリの追加・削除はしない
+   - **次の手順は、両方の一覧と AlmaLinux の対応を確かめてから行う**
+
+   <details>
+   <summary>補足: CLI の 0000 表示だけでは判定できない</summary>
+
+   - v0.5.0 の CLI は、`BootNext` が未設定でも、読み取りに失敗しても `BootNext: 0000` と表示する。実際にエントリ `0000` を指定している場合と区別できない
+   - 同梱ライブラリの `qefi_get_variable_uint16` は、2 バイトを読み取れないと `0` を返す。一方、CLI は `0xFFFF` だけを未設定とみなしている（[参照](#参照)）
+   - そこで BCDEdit の `{fwbootmgr}` の `bootsequence` も使い、予約の有無と対象を確認する。`displayorder` は通常の起動順。どちらも Windows の `{bootmgr}` ではなく、ファームウェアの `{fwbootmgr}` を見る
+   - CLI の番号と BCDEdit の識別子（GUID）は別の形式なので、文字列としては一致しない。同じ名前・EFI パスのエントリを対応させる
+   - BCDEdit と実際の EFI 変数の対応を含め、この節の読み戻しは本実行していない。表示がこの手順と合わなければ、成功とみなさず中断する
+
+   </details>
+
+1. エクスプローラーで、QEFI Entry Manager を管理者として起動する。
+
+   - 展開先の `QEFIEntryManager.exe` を右クリックして「管理者として実行」を選ぶ
+   - UAC は、展開した実行ファイルであることを確かめてから「はい」を押す（配布物は署名無し）
+   - `Boot Entries` タブに、この節の手順 5 と同じエントリが並ぶことを確かめる
+   - 起動できない・一覧が出ない場合は中断する。Windows の保護を無効にして進めない
+
+1. GUI で AlmaLinux を選び、次回の起動先に指定する。
+
+   - この節の手順 5 で控えた番号と名前の行を選び、`Set reboot` を押す
+   - `Reboot to …` の対象が AlmaLinux であることを確かめ、`Do you want to reboot now?` には `No` を選ぶ
+   - **`No` は「今は再起動しない」で、予約の取り消しではない**
+   - `Make default`・`Move up`・`Move down`・`Save` は使わない
+   - **次の手順は、`No` を選んでから管理者の PowerShell に貼る**
+
+   <details>
+   <summary>補足: Save は要らず、確認画面だけでは成功といえない</summary>
+
+   - `Set reboot` は、その場で `BootNext` を書いてから再起動の確認を出す。`Save` は通常の起動順（`BootOrder`）を書く別の操作
+   - v0.5.0 は、`BootNext` の書き込みの成否を確認せずに再起動の確認を出す。そのため `Yes` ですぐ再起動せず、この節の手順 8 で読み戻す
+   - 対象を間違えた場合も `No` を選び、[取り消す節](#次回起動の指定を取り消す任意)で自分が指定した対象を確認して解除してからやり直す
+
+   </details>
+
+1. 管理者の PowerShell で、次回の起動先と通常の起動順を読み戻す。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
+   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。再起動しないでください。' }
+   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
+   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。再起動しないでください。' }
+   ```
+
+   - `BootNext` が、この節の手順 5 で控えた AlmaLinux の 4 桁の番号と一致することを確かめる
+   - BCDEdit の `{fwbootmgr}` に `bootsequence` があり、その識別子が AlmaLinux の項目と一致することも確かめる（`BootNext: 0000` だけでは成功とみなさない）
+   - `BootOrder` と `{fwbootmgr}` の `displayorder` が、どちらもこの節の手順 5 と同じ並びであることを確かめる
+   - どれかが一致しない・予約が出ない・エラーが出た場合は、再起動せず中断する。自分が設定した予約だけを[取り消す節](#次回起動の指定を取り消す任意)で解除する
+
+1. Windows で作業を保存して、再起動する。
+
+   - 未保存の作業を保存し、スタートメニューの電源から「再起動」を選ぶ
+   - AlmaLinux の GRUB のメニューが出たら、AlmaLinux の項目を選ぶ（UEFI の起動先の指定は、GRUB の既定の項目までは変えない）
+
+1. AlmaLinux の画面で、起動できたことを確かめる。
+
+   - AlmaLinux のログイン画面からログインし、デスクトップが出ることを確かめる
+   - `BootNext` は次の起動で 1 回だけ使われ、その後は元の `BootOrder` に従う
+   - その後の起動が必ず Windows になるわけではない。元の起動順の先頭が AlmaLinux なら、通常も AlmaLinux のブートローダーに進む
+
+---
+
+## 次回起動の指定を取り消す（任意）
+
+- QEFI Entry Manager で指定した後、まだ再起動していないときに行う。展開先は[次回だけ起動する節](#次回だけ-almalinux-で起動する任意)と同じで、管理者の Windows PowerShell（5.1）に貼る
+- 解除するのは次回だけの予約。AlmaLinux のエントリ自体は消さず、通常の起動順も変えない
+
+1. BCDEdit で、取り消す予約を確かめる。
+
+   ```powershell
+   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
+   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
+   ```
+
+   - `{fwbootmgr}` の `bootsequence` が自分の指定したエントリの識別子であることを確かめる。別の対象や不明な対象なら中断する
+   - `{fwbootmgr}` に `bootsequence` が無ければ、この節の手順 2 は飛ばす
+
+1. 自分が指定した予約が残っているときだけ、解除する。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -N
+   if ($LASTEXITCODE -ne 0) { throw '中断: 次回起動の指定を解除できませんでした。' }
+   ```
+
+   - オプションは大文字の `-N`。`-B`（エントリ削除）や `-O`（起動順削除）は使わない
+   - `BootNext deleted` が出ても成功と決めず、この節の手順 3 で確認する
+
+1. 予約が消え、通常の起動順が変わっていないことを確かめる。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
+   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
+   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
+   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
+   ```
+
+   - BCDEdit の `{fwbootmgr}` に `bootsequence` が無く、`BootOrder` と `displayorder` が指定前の並びならよい
+   - CLI の `BootNext: 0000` は、予約が消えた根拠にも、エントリ `0000` の予約が残っている根拠にもならない
+   - BCDEdit に予約が残る・一覧の取得に失敗する・起動順が違う場合は、解除できたとみなさず中断する
+
+---
+
 ## 補足
 
 ### 対象と検証環境
@@ -366,8 +538,9 @@
 - **目的**: 1 台のディスクに Windows 11 と AlmaLinux 10 を入れるために、Windows を先に新しく入れる
   - Windows のセットアップのコマンド プロンプトで、ESP を 2 GiB で作り、Windows と回復のパーティションの後ろに AlmaLinux 用の未割り当て領域を残す
   - AlmaLinux 10 のインストールは、この文書には含めない（[注意点](#注意点)に、入れるときの要点だけを置いた）
+  - 両 OS の導入後に使う任意節として、Windows の QEFI Entry Manager で次回だけ AlmaLinux を起動する方法も扱う
 - **進め方**: インストールメディアは、利用者が Rufus で作ったもの（「インストーラーをカスタムしますか?」の 7 項目をオン）を使う。手順 4・5 はセットアップのコマンド プロンプトに手で打ち、手順 9〜13 は入れた Windows の PowerShell に貼る
-- **状態**: **VirtualBox の VM のみで検証**（2026-10-03。[付録](#付録-virtualbox-の-vm-での検証2026-10-03)）
+- **状態（実施手順 1〜13）**: **VirtualBox の VM のみで検証**（2026-10-03。[付録](#付録-virtualbox-の-vm-での検証2026-10-03)）
   - 通したこと: Windows 11 Pro のホストの VirtualBox 7.2.20 の VM（EFI・Secure Boot 有効・TPM 2.0）で、Windows 11 26H2 の日本語の製品版の ISO から Rufus 4.15 で作ったメディアを USB の記憶装置として付け、手順 1〜13 を通した
     - Rufus は、検証のホストで実物を動かした（「インストーラーをカスタムしますか?」の 7 項目をオン）
     - キーとブロックは、VM に日本語 106/109 の配列のキーの信号を送って打った（手で打つ・貼る代わり）
@@ -382,6 +555,10 @@
   - **確認していないこと**: 実機（UEFI の設定画面・実物の USB メモリと起動メニュー・物理の日本語キーボード・Shift+Fn+F10）、3rd Party UEFI CA を許可しないときに止まること、Home エディション、BitLocker が有効になる PC、AlmaLinux 10 のインストール（[注意点](#注意点)はソースから読んだまま）
   - 書いたときの資料（[参照](#参照)）: Microsoft Learn の UEFI/GPT のパーティションの文書とサンプルの `CreatePartitions-UEFI.txt`、Rufus 4.15（2026-06-30）のソース（`src/wue.c`・`src/drive.c`・`res/loc/rufus.loc`）、Microsoft の KB5028997、AlmaLinux 10.2 のインストーラ（Anaconda 40.22.3.46）の `rhel-10` ブランチと blivet のソース
   - その前に試した VM（QEMU の TCG）は、Windows のブートマネージャーの後に画面が出ないまま中止した（[付録](#付録-vm-での試み2026-10-03中止)）
+- **状態（QEFI Entry Manager の任意節）**: **本実行未検証**（2026-10-04。[付録](#付録-qefi-entry-manager-の配布物とソースの確認2026-10-04)）
+  - 確かめたこと: 公式 ZIP のハッシュと中身、GUI と CLI の署名の有無、v0.5.0 のソース、BCDEdit の文書とヘルプ、追加した PowerShell ブロックの 5.1 での構文
+  - CLI のヘルプの実行は、非管理者の環境で管理者特権を要求して失敗した。CLI の動作確認済みとはしていない
+  - 確認していないこと: GUI の操作、EFI の読み書き、BCDEdit との照合、予約の取り消し、AlmaLinux の起動とその後の通常の起動順への復帰（実機・VM とも）
 
 | 項目 | 想定 |
 |---|---|
@@ -397,6 +574,10 @@
 
 ### 選択した方針
 
+- **次回だけの切り替えには QEFI Entry Manager の `Set reboot` を使う**
+  - 通常の起動順を変えて後で戻すのではなく、UEFI の `BootNext` で 1 回だけ指定する
+  - GUI の確認画面や同梱 CLI の成功の文だけには頼らず、CLI と BCDEdit を読み戻してから再起動する
+  - エントリの追加・削除、ESP の中身の編集、GRUB の設定変更はこの節では行わない
 - **ESP を 2 GiB にする**
   - セットアップの「Windows 11 をインストールする場所の選択」の画面では、ESP の大きさを選べない。そこで、手順 5 で diskpart を使って先に作る
   - Microsoft Learn（2026-09-09 更新）が示すのは最小（512 / 512e のディスクで 200 MB、4Kn で 300 MB）だけで、上限は無い。diskpart の文書の例も `create partition efi size=1000`
@@ -455,7 +636,7 @@
 - **この後 AlmaLinux 10 を入れるとき**（AlmaLinux 10.2 のインストーラのソースから読んだこと。試していない）
   - 「インストール先」で「カスタム」を選び、手順 5 の ESP（2 GiB。既存の Windows のパーティションと一緒に「不明」の下に並ぶ）を選んで、マウントポイントを `/boot/efi` にする。**「再フォーマット」に印を付けない**（付けると Windows のブートローダーが消える）
   - `/boot`・`/`・swap は、未割り当て領域に作る。インストーラは NTFS を縮められないので、空きは手順 5 で残した分だけ
-  - インストーラは、NTFS のパーティションを見つけると、ハードウェアの時計を現地時刻として扱う（`/etc/adjtime` に `LOCAL`）。Windows の時計の設定（`RealTimeIsUniversal`）は変えなくてよい（[Windows 11 の初期設定の手順 40](windows-setup.md#実施手順) は飛ばす。AlmaLinux の時計を UTC にしたときだけ行う）
+  - インストーラは、NTFS のパーティションを見つけると、ハードウェアの時計を現地時刻として扱う（`/etc/adjtime` に `LOCAL`）。Windows の時計の設定（`RealTimeIsUniversal`）は変えなくてよい（[Windows 11 の初期設定の手順 52](windows-setup.md#実施手順) は飛ばす。AlmaLinux の時計を UTC にしたときだけ行う）
   - GRUB の道具（`grub2-tools`）が os-prober を依存で入れ、os-prober は有効のまま。インストールの最後に、GRUB のメニューへ「Windows Boot Manager」が入るはず
 - **BitLocker（デバイスの暗号化）**
   - この文書では Rufus の項目で自動の暗号化を止めている。手順 11 で暗号化されていたら、回復キーを PC の外に控える（`manage-bde -protectors -get C:`。Microsoft アカウントに保存されていれば `https://aka.ms/myrecoverykey` でも見られる）
@@ -482,6 +663,10 @@
 - [BitLocker countermeasures](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/countermeasures) / [Find your BitLocker recovery key](https://support.microsoft.com/en-us/windows/find-your-bitlocker-recovery-key-6b71ad27-0b89-ea08-f143-056f5ab347d6)（PCR 7、回復キー）
 - [Rufus](https://github.com/pbatard/rufus) 4.15 のソース: `src/wue.c`（「インストーラーをカスタムしますか?」の各項目）、`src/drive.c`（USB の並びと UEFI:NTFS）、`res/loc/rufus.loc`（日本語の表示）、[issue #2499](https://github.com/pbatard/rufus/issues/2499)（地域設定でタイムゾーンが設定されなかった報告）
 - [rhinstaller/anaconda](https://github.com/rhinstaller/anaconda) の `rhel-10` ブランチ（既存の ESP の再利用、Windows の検出と `/etc/adjtime`）
+- [QEFI Entry Manager](https://github.com/Inokinoki/QEFIEntryManager) / [v0.5.0 の配布物](https://github.com/Inokinoki/QEFIEntryManager/releases/tag/v0.5.0)（Windows の管理者起動、次回だけ別の OS を起動）
+  - [GUI の操作](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefientryview.cpp)と [EFI 変数の書き込み](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefientrystaticlist.cpp)（`Set reboot` と `Save` の違い、書き込みの結果を確認していないこと）
+  - [CLI のマニュアル](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefibootmgr.8)と [CLI の実装](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/cli.cpp)、[同梱の qefivar](https://github.com/Inokinoki/qefivar/blob/6e0a29d9267a83cb79c0b4f324e382ba9ffbe1c8/qefi.cpp)（`-v`・`-N`、未設定の `BootNext` を `0000` と表示する不具合）
+- [BCDEdit /enum](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--enum) / [BcdBootMgrElementTypes](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bcd/bcdbootmgrelementtypes)（ファームウェアの一覧、`DisplayOrder` と `BootSequence`）
 
 ---
 
@@ -563,3 +748,26 @@
 - Rufus は `install.wim` を ISO から手を加えずに写すだけなので、ISO から取り出してキャッシュを通さずに 3 回読んで同じ値だった `install.wim` を、`robocopy /J`（キャッシュを通さないコピー）で上書きした。上書きした後は ISO と同じ値になった
 - ほかに Rufus が手を加えないファイル 1,060 個も、ISO から 2 回取り出したものと同じ値だった。手を加える 4 つ（`setup.exe`・`autorun.inf`・`sources\boot.wim`・`sources\appraiserres.dll`）は比べていない
 - 3 回目（手順 3 → 6、手順 4・5 は飛ばした）は 23:23 に最初の再起動まで進み、そこで USB を外した。C: に前の回の残りがあったので、`C:\Windows.old` ができた（中身は空の `ProgramData` だけ）
+
+### 付録: QEFI Entry Manager の配布物とソースの確認（2026-10-04）
+
+- **対象**: v0.5.0 の `QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip` と同じタグのソース。Windows の上で配布物を検査したが、GUI での指定・EFI 変数の読み書き・再起動は行っていない
+- **配布物**
+  - ZIP は 23,278,457 バイト。SHA256 は `FC2D83F1369AF02A48072644B08CA7D3D4B2547B955A2088918E7C1179051A10` で、GitHub のリリース API のアセットの `digest` と一致した
+  - ZIP の直下に `QEFIEntryManager.exe`（499,200 バイト）・`qefibootmgr.exe`（104,960 バイト）・`efibootmgr.exe`（104,960 バイト）があった
+  - `Qt6Core.dll`・`Qt6Gui.dll`・`Qt6Widgets.dll` と `platforms/qwindows.dll` などが同梱されていた
+  - GUI と `qefibootmgr.exe` を展開して `Get-AuthenticodeSignature` で調べると、どちらも `NotSigned` だった
+- **CLI の実行の試み**
+  - 展開した CLI の `--help` と `--version` を非管理者の PowerShell から呼んだが、出力が得られなかった
+  - `--help` を `Start-Process` で標準出力・標準エラーを分けて起動し直すと、「要求された操作には管理者特権が必要です」で失敗した。ヘルプや版の動作を確認できたとはしていない
+  - 昇格しての再試行、`-v`、`-N`、GUI の起動はしていない
+- **ソースから確認したこと**
+  - `MainWindow` のタブ名は `Boot Entries`。`Set reboot` は `BootNext` を書いてから `Do you want to reboot now?` を出す
+  - `Yes` は Windows の `shutdown /r /t 0` を起動し、`No` は何もしない（既に書いた `BootNext` は残る）。`Save` は `BootOrder` を書く
+  - GUI の `setBootNext` も CLI の `-N` も、EFI の書き込みの戻り値を判定していない
+  - qefivar の Windows 向け `qefi_get_variable_uint16` は、読み取れた長さが 2 バイト未満なら `0` を返す。CLI は `0xFFFF` 以外を表示するので、未設定でも `BootNext: 0000` となる
+  - この不具合のため、同梱 CLI だけの確認にはせず、BCDEdit の `{fwbootmgr}` の `bootsequence` も見る手順にした
+- **文書と構文**
+  - Microsoft の BCDEdit `/enum` の文書と、この Windows の `bcdedit /? ENUM` で、`firmware` がファームウェアのアプリケーションを列挙することを確認した
+  - 追加した PowerShell ブロックは、Windows PowerShell 5.1.26100.9444 の構文解析器で確認した。ブロックを機械的に本実行してはいない
+- **残っている未確認事項**: GUI の画面と UAC、管理者での CLI、Windows の実際の `bootsequence` と EFI の `BootNext` の照合、指定と取り消し、AlmaLinux の起動、1 回の起動後に通常の起動順へ戻ること（実機・VM とも）

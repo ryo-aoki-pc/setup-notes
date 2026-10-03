@@ -416,7 +416,7 @@
 
 > [!IMPORTANT]
 > - **すべて Windows で行う**。この節の手順 1 で管理者ではない Windows PowerShell（5.1）を開き、手順 2〜5 をそこに貼る。手順 6 で開き直した PowerShell に、手順 7〜9 と、後ろの Windows 11 の 2 節（更新・ロールバック）を貼る。管理者の権限は要らない（自分のユーザーの `%USERPROFILE%` に入る）
-> - 前提: [Windows 11 の初期設定の手順 4〜7](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（Claude Code の Bash のツールが Git Bash を使う）と、既定のブラウザにした [Firefox](firefox.md#windows-11-で使う)（この節の手順 8 のログインで開く）。[Windows 11 の初期設定](windows-setup.md)のリードの順に通していれば、どちらも入っている
 > - **この節の手順 8 には対話入力がある**（Claude Code の最初の設定と、ブラウザでのログイン）。`/exit` で Claude Code を終えてから手順 9 を貼る
 
