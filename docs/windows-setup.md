@@ -8,7 +8,7 @@
 > - ログインするユーザーは Administrators の一員（手順 24〜43 は PC 全体の設定を書く）
 > - **手順 4 は 1 行なので、どの貼り方でもそのまま貼れる**。手順 4 を貼った窓には、それより後の複数行のブロックを、GitHub のコピーボタンでコピーして右クリックで貼れる。Windows の PowerShell のブロックを貼るほかの手順書も、手順 4〜7 を前提にする
 > - **手順 43 で再起動する**（この文書の再起動はこの 1 回。手順 1 の Windows Update の再起動は別）。多くの設定は、再起動の後に効く
-> - **画面で行う手順**: 1・2・3・23・44〜48。手順 19 は設定の画面を開いて変える。**対話入力のある手順**: 50（WSL のユーザー名とパスワード）・52（自動サインインのパスワード）。**条件付きの手順**: 27（PC の名前を変えるとき）・32（Pro 以上）・40（デュアル ブート）・41（US 配列のキーボード）
+> - **画面で行う手順**: 1・2・3・23・44〜48。手順 19 は設定の画面を開いて変える。**対話入力のある手順**: 50（WSL のユーザー名とパスワード）・52（自動サインインのパスワード）。**条件付きの手順**: 27（PC の名前を変えるとき）・32（Pro 以上）・40（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・41（US 配列のキーボード）
 
 - 上から順にコードブロックを貼る。手順 24 の変数は、管理者の PowerShell を開き直したら貼り直す
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -22,6 +22,7 @@
   - PC 全体: PC の名前は 27、長いパス・開発者モード・sudo は 28、電源とロックは 29、LAN のアダプターの省電力は 30、デュアル ブートの時計は 40
   - ネットワーク: LAN をプライベートには 31、リモート デスクトップは 32、リモート アシスタンスは 33、ping は 34、配信の最適化は 35
   - サインイン: Windows Hello だけのサインインを切るのは 36、自動サインインは 52
+- Windows を AlmaLinux 10 とのデュアルブート向けに入れるときは、先に [Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)を通してから、この文書を手順 1 から始める
 - 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 43 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
@@ -1013,7 +1014,7 @@
 
    </details>
 
-1. AlmaLinux とデュアル ブートするときだけ、ハードウェアの時計を UTC として扱う。
+1. AlmaLinux とデュアル ブートし、AlmaLinux の時計を UTC にしているときだけ、Windows も UTC にする。
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' -Name RealTimeIsUniversal -Type DWord -Value 1
@@ -1021,15 +1022,17 @@
    ```
 
    - `RealTimeIsUniversal : 1` が出ればよい
-   - デュアル ブートしない PC では、この手順は飛ばす
    - 効くのは、手順 43 の再起動の後。時刻がずれていたら、設定の「時刻と言語」→「日付と時刻」の「今すぐ同期」で合わせ直す
+   - AlmaLinux の `timedatectl` の `RTC in local TZ:` が `yes`（`/etc/adjtime` の 3 行目が `LOCAL`）なら、この手順は飛ばす。AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[windows-dual-boot.md の注意点](windows-dual-boot.md#注意点)）
+   - デュアル ブートしない PC でも、この手順は飛ばす
 
    <details>
    <summary>補足: Windows と Linux の時計の扱い</summary>
 
-   - Windows は、ハードウェアの時計（RTC）を地方時として読み書きする。Linux（AlmaLinux）は UTC として扱うので、デュアル ブートすると、起動し直すたびに 9 時間ずれる
-   - `HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation` の `RealTimeIsUniversal` を 1 にすると、Windows も UTC として扱う。Microsoft の文書には無い値で、Arch Linux の wiki が勧める形（DWORD。64 ビットの Windows では QWORD という古い勧めは、wiki から消えた）
-   - 逆に、Linux の側を地方時にする方法（`timedatectl set-local-rtc 1`）もあるが、Arch Linux の wiki は勧めていない
+   - Windows は、ハードウェアの時計（RTC）を地方時として読み書きする。Linux は UTC として扱うのが普通で、両方が違う扱いのままデュアル ブートすると、起動し直すたびに 9 時間ずれる。2 つの OS のどちらかにそろえればよい
+   - AlmaLinux 10 のインストーラ（anaconda）は、NTFS のパーティションを見つけると、AlmaLinux の側を地方時にする（`/etc/adjtime` に `LOCAL`。[windows-dual-boot.md の注意点](windows-dual-boot.md#注意点)。インストーラのソースから読んだこと）。その流れで入れたなら、もうそろっているので、この手順は要らない（行うと、かえって 9 時間ずれる）
+   - AlmaLinux の側を UTC にした（`timedatectl set-local-rtc 0`）ときだけ、Windows も UTC にそろえる。`HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation` の `RealTimeIsUniversal` を 1 にすると、Windows も UTC として扱う。Microsoft の文書には無い値で、Arch Linux の wiki が勧める形（DWORD。64 ビットの Windows では QWORD という古い勧めは、wiki から消えた）
+   - Arch Linux の wiki は、両方を UTC にする形を勧めている（Linux の側を地方時にする `timedatectl set-local-rtc 1` は勧めていない）。本書は、AlmaLinux のインストーラの既定（地方時）に合わせ、2026-10-03 に [windows-dual-boot.md](windows-dual-boot.md) とそろえた
    - 元に戻すのは[ロールバック](#ロールバック)の手順 27
 
    </details>
