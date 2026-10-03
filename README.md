@@ -6,7 +6,7 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md) は Windows 11 も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md) は Windows 11 も）。検証範囲（実機か、コンテナのみか）は各手順書の補足の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
@@ -69,6 +69,7 @@
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
+- Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
@@ -78,6 +79,7 @@
 | [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
+| [RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、Windows の設定のリモート デスクトップが開ける） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -294,7 +296,7 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Syncthing の Windows 11 の節](docs/syncthing.md#windows-11-で使う)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell）。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[Syncthing の Windows 11 の節](docs/syncthing.md#windows-11-で使う)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る（Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP でつないだセッションの中の PowerShell）。`sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く。[Git](docs/git.md) の Windows だけは、Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く

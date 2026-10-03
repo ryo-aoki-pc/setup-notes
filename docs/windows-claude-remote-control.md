@@ -69,6 +69,7 @@
 
    - `claude` の版と、ログイン済みを示す行、`wezterm 2026…` が出ればよい
    - `quser` に、自分のユーザーの `console` の行が `Active` で出ること（デスクトップにログインしている）。出なければ、この PC にログインしてから続ける
+   - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-rdp-disconnect.md)で切ると `console` に戻る（その手順書は Windows の実機で流していない）
    - `claude remote-control --help` は貼らない（help を出した後に終わらない。[注意点](#注意点)）
 
 1. 初回だけ、対話で起動して信頼と Remote Control の確認に答え、URL が出たら止める。
@@ -340,6 +341,7 @@ PS> Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object Com
 - [Avoid killing child processes by sshd after session ended · PowerShell/Win32-OpenSSH #1642](https://github.com/PowerShell/Win32-OpenSSH/issues/1642)（SSH の切断でセッションのプロセスが止まること）
 - [Windows implementation issues · zellij-org/zellij #4745](https://github.com/zellij-org/zellij/issues/4745)（zellij の Windows 版の既知の問題）
 - [Windows の OpenSSH サーバー](windows-openssh-server.md)（前提。SSH のセッションの権限、`DefaultShell`）
+- [RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)（RDP で使った後、デスクトップのセッションを `console` に戻して切る）
 
 ---
 
