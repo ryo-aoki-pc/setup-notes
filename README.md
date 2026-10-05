@@ -259,7 +259,7 @@
 | [podman-compose](docs/podman-compose.md) | compose ファイルで、複数のコンテナをまとめて動かす | `podman-compose`（`podman compose` からも呼ばれる） | EPEL | Podman、EPEL |
 | [hadolint / dive / Trivy](docs/image-tools.md) | イメージを作るときの検査（Containerfile の書き方、層の無駄、脆弱性） | `hadolint` / `dive` / `trivy`（作るのは `podman build`） | Homebrew と Trivy の公式 dnf リポジトリ | Podman、Homebrew |
 | [podman-tui](docs/podman-tui.md) | podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作する | `podman-tui`（終了は `Ctrl+C`） | EPEL（Homebrew の 2.x は podman 6 向け） | Podman、EPEL |
-| [lazydocker](docs/lazydocker.md) | コンテナの TUI。ログと CPU の使用率が見やすい。compose のサービスも見られる（任意節） | `lazydocker` | Homebrew（RPM 無し） | Podman（Docker 向けの節まで）、Homebrew |
+| [lazydocker](docs/lazydocker.md) | コンテナの TUI。ログと CPU の使用率が見やすい。compose のサービスと、root のコンテナも見られる（任意節） | `lazydocker`（root のコンテナは `sudo -i lazydocker`） | Homebrew（RPM 無し） | Podman（Docker 向けの節まで）、Homebrew |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|

@@ -575,6 +575,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 - **イメージは完全な名前で書く**: 短い名前は、端末から実行すると取る場所を聞かれる（手順 6 の補足）
 - **`sudo podman` は別の保管場所**: 自分のユーザーのコンテナとイメージは、`sudo podman` からは見えない（[使い方の基本](#使い方の基本)）
+  - root のコンテナを lazydocker で見るなら、[lazydocker.md の root でも使う](lazydocker.md#root-でも使う任意)の節（システムの API ソケットを使う）
 - **1024 未満のポートは使えない**: 自分のユーザーで `-p 127.0.0.1:80:8080` のように指定すると、次のように失敗する
   - `Error: pasta failed with exit code 1:` と `Failed to bind port 80 (Permission denied) for option '-t 127.0.0.1/80-80:8080-8080'`
   - `sysctl net.ipv4.ip_unprivileged_port_start` は `1024`。8080 など 1024 以上の番号にする
