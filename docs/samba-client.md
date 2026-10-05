@@ -33,6 +33,7 @@
    - 編集が必須なのは `SERVER` だけ
    - サーバーのユーザー名がこの PC と違うとき、NAS や Windows の共有のときは、`SMB_USER` と `SHARE` も書き換える
    - samba.md の[root のホーム](samba.md#root-のホームも公開する任意)につなぐときは、`SHARE` を `root` に書き換える（`SMB_USER` は自分のまま）
+   - samba.md の[/home](samba.md#home-も公開する任意)につなぐときは、`SHARE` を `home` に書き換える（`SMB_USER` は自分のまま）
    - 最後に値を読み戻して確かめる
    - **既定値のままでもエラーにならない**ので、`SERVER` を書き換えたかをここで確かめる
    - `USER` が `root` なら、ここで止めて、自分のユーザーのシェルで貼り直す
@@ -45,6 +46,7 @@
    - samba.md のサーバーは OS のアカウント名で Samba ユーザーを登録するので、この PC と同じ名前なら既定のままでよい
    - samba.md の `[homes]` は、Samba ユーザーと同じ名前の共有を見せる。ほかの共有につなぐなら `SHARE` を書き換える
    - samba.md の `[root]` は、自分の Samba ユーザーのまま入る共有。`SHARE=root` だけを変えれば、資格情報ファイル（手順 4）は自分の共有と同じものになり、マウント先は `/mnt/root` になる
+   - samba.md の `[home]` も同じで、`SHARE=home` だけを変える。マウント先は `/mnt/home` になり、その下にユーザーごとのディレクトリが並ぶ
    - `SERVER` に NetBIOS 名は使えない。samba.md のサーバーは NetBIOS（nmbd）を動かさない。IP アドレスか、DNS（または `/etc/hosts`）で引ける名前にする
    - `SMB_USER`・`SHARE`・`MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 6 で中断する
 
@@ -147,6 +149,7 @@
    - `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1` を含む）、続いて `cifs write` が出ればよい
    - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`（自分の所有で、ほかのユーザーは入れない）
    - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因はこの手順の補足）
+   - `SHARE=home`（samba.md の `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる（共有の直下は `/home` で、サーバーの SELinux が作るのを断る）。`findmnt` の行が出ていればよい
 
    <details>
    <summary>補足: 手でマウントする理由と、失敗の表示</summary>
@@ -508,6 +511,10 @@
   - 2026-09-29: 手順 1 に、samba.md の `[root]`（root のホーム）へ `SHARE=root` でつなぐ案内を足した
     - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜5 とロールバックの手順 3 を `SHARE=root` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
     - `SHARE=root` での自動マウント（手順 6・7）は試していない
+  - 2026-10-05: 手順 1 に、samba.md の `[home]`（`/home`）へ `SHARE=home` でつなぐ案内を、手順 5 に、そのときの書き込みの失敗を足した
+    - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜5 とロールバックの手順 3 を `SHARE=home` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-home-を公開する節の-vm-での検証2026-10-05)）
+    - 手順 5 は、`cifs-test.txt` の書き込みが `Permission denied` になり、マウントの確かめと外すところは通った
+    - `SHARE=home` での自動マウント（手順 6・7）は試していない
   - 2026-10-01: [注意点](#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
     - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](claude-code-gui.md) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - この文書のブロックは貼っていない。マウントは、手順 5 と同じオプションに `port=4450` を足して手で行い、GNOME Files は `/usr/bin/gio mount` でつないでから Nautilus で開いた
