@@ -109,7 +109,7 @@
    | `--privileged` | 特権付きのコンテナ（rootless なので、ホストの root にはならない） |
    | `--security-opt label=disable` | SELinux のラベルによる分離を切る |
    | `--network host` / `--pid host` / `--ipc host` | ネットワーク・プロセス・IPC をホストと共有する |
-   | `--userns keep-id:size=65536` | ボックスの中でも自分と同じ UID で動く |
+   | `--userns keep-id:size=65536` | 自分の UID・GID はボックスの中でも同じ番号に対応し、ボックスの root は subordinate UID・GID に対応する |
    | `--volume "/home/<USER>":"/home/<USER>"` | ホームディレクトリをそのまま使う |
    | `--volume /:/run/host/` | ホストのファイルシステム全体を `/run/host` に見せる |
    | `--pids-limit=-1` | プロセス数を制限しない |
@@ -151,7 +151,7 @@
    ```
 
    - ボックスの中に自分と同じ名前のユーザーを作り、`sudo` をパスワード無しで使えるようにする（ボックスの中の `sudo -l` は `(root) NOPASSWD: ALL`）
-   - ボックスの root は、rootless の podman の読み替えでホストの自分のユーザーになるので、ホストの root の権限は無い
+   - 本書の `--userns keep-id` では、ボックスの root はホストの subordinate UID に対応する。自分の UID に対応するのはボックス内の同じ UID で、ボックスの root にホストの root の権限は無い
    - コンテナが止まっていれば、次の `distrobox enter` でも起動と初期化の確認が走る（2 回目からは速い）
 
    </details>
@@ -405,7 +405,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 ### 注意点
 
 - **ボックスは隔離ではない**: ホームを共有し、ホストのファイルシステム全体が `/run/host` に見え、ネットワークとプロセスもホストと同じ（手順 4 の補足）。信用できないソフトを試す場所にはしない
-- **ボックスの `sudo` はホストの root ではない**: rootless の podman の読み替えで、ボックスの root はホストの自分のユーザーになる。ホストのシステムの設定は変えられない
+- **ボックスの `sudo` はホストの root ではない**: 本書の `--userns keep-id` では、ボックスの root はホストの subordinate UID に対応する。自分の UID はボックス内の同じ UID に対応し、ホストの root の権限は得られない
 - **`distrobox enter` が動いている間に貼った行は、ボックスへの入力になる**: 端末の入力をボックスの中のコマンドへ渡し続けるため
   - 検証では、`distrobox enter <名前> -- <コマンド>` の後ろの行を続けて流すと、それらの行は実行されなかった
   - 本書の手順は、どれも `distrobox enter` で終わるように分けてある

@@ -235,7 +235,8 @@
    fi
    ```
 
-   - `active`、`findmnt` の `autofs` と `cifs` の 2 行、`automount write` が出ればよい
+   - 通常の共有では、`active`、`findmnt` の `autofs` と `cifs` の 2 行、`automount write` が出ればよい
+   - `SHARE=home` では、手順 5 と同じく共有直下への書き込みが `Permission denied` になる。これはサーバーの SELinux による拒否で、`active` と `findmnt` の 2 行が出ればマウントの確認はできている
    - 最後の `ausearch` は `<no matches>`
    - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
    - 使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
@@ -301,14 +302,14 @@
    <summary>補足: 入るもの</summary>
 
    - GNOME の無い VM では、gvfs 本体・udisks2・libsmbclient・wsdd など、依存を合わせて 42 パッケージ（ダウンロード 14 MB、導入後 53 MB）が入った
-   - gvfs を入れて gvfsd を動かしたまま gvfs-smb だけを消して入れ直しても、同じ gvfsd（PID が変わらない）で `gio mount` が通った
+   - gvfs を入れて gvfsd を動かしたまま gvfs-smb だけを消して入れ直しても、同じ gvfsd（PID が変わらない）で `/usr/bin/gio mount` が通った
 
    </details>
 
 1. 端末から共有をマウントする。
 
    ```bash
-   gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
+   /usr/bin/gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
    - `Domain [SAMBA]:` と `Password:` を聞かれる
@@ -316,13 +317,13 @@
    - パスワードは、手順 3 と同じもの
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す（画面では未確認）
    - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される（未確認）
-   - `gio mount` は、パスワードを保存しない
+   - `/usr/bin/gio mount` は、パスワードを保存しない
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
    <details>
    <summary>補足: 問い合わせと、画面の文言</summary>
 
-   `gio mount` の問い合わせ（VM）:
+   `/usr/bin/gio mount` の問い合わせ（VM）:
 
    ```
    Authentication Required
@@ -347,9 +348,9 @@
 1. マウントされたことを確かめる。
 
    ```bash
-   gio mount -l | grep -F "${SERVER:?手順 1 の SERVER が空のまま}"
+   /usr/bin/gio mount -l | grep -F "${SERVER:?手順 1 の SERVER が空のまま}"
    ls "/run/user/$(id -u)/gvfs/"
-   gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
+   /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
    ```
 
    - `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい
@@ -361,11 +362,11 @@
 1. 共有を外す。
 
    ```bash
-   gio mount -u "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
+   /usr/bin/gio mount -u "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
    - 何も出ずに終わればよい
-   - 外した共有は、`gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
+   - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
    - 画面では、サイドバーの共有の横の取り出しのボタンで外す（未確認）
 
 ---

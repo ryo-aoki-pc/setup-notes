@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られるホスト（以下、オンラインのホスト）からトンネルを付けて、インターネットに出られないホスト（以下、オフラインのホスト）にログインしてあること。**この文書は、同書の手順 3 のシェルのまま貼る**（Homebrew の通信もトンネルを通すため）
-> - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（同書の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew は root で動かない）
+> - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（同書の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
 > - **手順 3 で [homebrew.md](homebrew.md) の手順 1〜4 を、同じシェルのまま貼る**
 > - **手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
 > - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
@@ -84,15 +84,15 @@
    brew install jq
    ```
 
-   - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれるので、`y` を押す（Enter は要らない）
+   - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれたら、`y` を押す（Enter は要らない）
    - `==> Pouring jq--…bottle…tar.gz` と出て、ソースからのビルドにならない
    - ほかの Homebrew 系の手順書も、手順 5 の前に、このシェルで貼る
-   - **次の手順は、`y` を押して入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
+   - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
    <details>
    <summary>補足: brew の確認（ask mode）と、トンネル越しの取得</summary>
 
-   **Homebrew 7.0.7 の `brew install` は、端末から実行すると、入れるものの一覧を出してから `[y/n]` を聞く**（ask mode。[homebrew.md の注意点](homebrew.md#注意点)）。
+   **Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[homebrew.md の注意点](homebrew.md#注意点)）。
 
    - `brew` の環境変数の説明（`Library/Homebrew/env_config.rb` の `HOMEBREW_ASK`）: 既定で有効。一覧に依存など、名前を挙げたもの以外が入るときだけ聞き、端末でない（TTY が無い）ときは聞かない
    - 答えは Enter を待たずに 1 文字で読む（`Library/Homebrew/ask.rb` の `$stdin.getch`）。`y` で続け、`n`・Esc・Ctrl+C・Ctrl+D で中止、ほかの文字は `Invalid input` と出して読み直す
@@ -242,7 +242,8 @@
 | `brew fetch` でボトルだけを運ぶ | Homebrew 本体（git のリポジトリと portable-ruby）と、formula の API の JSON も要る | 本書では扱わない（確かめていない） |
 
 - **homebrew.md を、リードで前提として挙げるのではなく、手順 3 にした**: ほかの Homebrew 系の手順書と違い、トンネルを張ったシェルの中で貼る必要があるため
-- **トンネルの手順は、ssh-socks-tunnel.md を前提にした**: [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) でも、同じトンネルを使うため
+- **トンネルの手順は、ssh-socks-tunnel.md を前提にした**: [npm-offline.md](npm-offline.md) でも、同じトンネルを使う
+  - [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) の現行手順は、オンラインのホストでビルドしたイメージを VM に運ぶ方式で、トンネルは使わない
 
 ### 完了時点の状態
 

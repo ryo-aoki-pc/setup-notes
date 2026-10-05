@@ -46,7 +46,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | RPM Fusion（EL10） | 本書では有効にしていない。free は [rpmfusion.md](rpmfusion.md) で、鍵を照合してから `rpmfusion-free-release` を入れる（EPEL が前提） | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [rpmfusion.md](rpmfusion.md)、[firefox.md](firefox.md)（`ffmpeg-libs`） |
 | ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md)、[image-tools.md](image-tools.md)（Trivy） |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md)、[zoxide.md](zoxide.md)（外した dnf の経路の記録） |
-| Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | root では動かない。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
+| Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | 導入・更新などの管理操作は一般ユーザーで行う。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [homebrew.md](homebrew.md)、[注意点](#注意点) |
 | Flathub | [flatpak.md](flatpak.md) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [flatpak.md](flatpak.md) |
 | AppImage | ダウンロードして実行 | 上流の最新 | 配布次第 | FUSE2（`fuse-libs`）と glibc 2.39 の制約がある | [wezterm-nightly.md](wezterm-nightly.md) |
 
@@ -287,14 +287,18 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 
 ## 更新
 
-経路ごとにまとめて上げる。それぞれ別の仕組みなので、1 つを実行してもほかは上がらない。
+経路ごとにまとめて上げる。それぞれ別の仕組みなので、1 つを実行してもほかは上がらない。確認が出たら内容を見て答え、更新が成功してプロンプトに戻ってから、次のブロックを貼る。
 
 ```bash
-{
-  brew upgrade
-  sudo dnf upgrade
-  sudo flatpak update
-}
+brew upgrade
+```
+
+```bash
+sudo dnf upgrade
+```
+
+```bash
+sudo flatpak update
 ```
 
 `sudo dnf upgrade` は AppStream / EPEL / ベンダーのリポジトリの分をまとめて上げる。
@@ -359,7 +363,7 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-使い捨てのコンテナを 4 つ使い分けた。どれも同じイメージで、プロキシの CA を信頼ストアに足し、`tester` ユーザーに NOPASSWD の sudo を与えている。
+使い捨てのコンテナを 5 つ使い分けた。どれも同じイメージで、プロキシの CA を信頼ストアに足し、`tester` ユーザーに NOPASSWD の sudo を与えている。
 
 | コンテナ | 用途 |
 |---|---|

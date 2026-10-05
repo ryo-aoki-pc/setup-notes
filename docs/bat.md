@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、設定も自分の `~/.config` に書くため）
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、設定も自分の `~/.config` に書くため）
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -38,6 +38,7 @@
    brew install bat
    ```
 
+   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](homebrew.md#注意点)）
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - 依存の `libgit2` と `oniguruma`、その先の `openssl@3` などもまとめて入る
 
@@ -180,7 +181,7 @@
    brew uninstall bat
    ```
 
-   - 依存として入った `libgit2` / `oniguruma` は、他の formula（[eza](eza.md) / [git-delta](git-delta.md)）も使う。まとめて整理するなら `brew autoremove` で、不要になったものだけ消える
+   - 依存として入った `libgit2` / `oniguruma` は、他の formula（[eza](eza.md) / [git-delta](git-delta.md)）が必要とする間は残る。Homebrew 7 では、不要になった依存は `brew uninstall` の後に自動で削除される。自動削除を無効にしていた場合は、`brew autoremove --dry-run` で対象を確認してから `brew autoremove` を使う
 
 1. 設定とキャッシュも消すときだけ、`~/.config/bat` と `~/.cache/bat` を消す。
 

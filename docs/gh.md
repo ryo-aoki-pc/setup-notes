@@ -106,7 +106,7 @@
 
    `gh auth login` は対話で進む。SSH 越しの端末でブラウザを開けない場合は、表示されるワンタイムコードを手元のブラウザの `https://github.com/login/device` に入れる形になる。**この手順はコンテナでは実行していない**（実機では認証済みで常用している）。
 
-   トークンは `~/.config/gh/hosts.yml` に保存される。`gh auth token` で表示できるが、**記録しない**。
+   トークンは OS の資格情報ストアに保存される。ストアを使えない場合は `~/.config/gh/hosts.yml` の平文保存に切り替わる。保存先は `gh auth status` で確認する。`gh auth token` の出力は**記録しない**。
 
    </details>
 
@@ -136,8 +136,28 @@
 ## ロールバック
 
 - 本書ではロールバックは**本実行していない**
-- 設定（`~/.config/gh/hosts.yml` に保存されたトークン）は残る
-- 消すなら、先に `gh auth logout` でトークンを失効させてから `rm -rf ~/.config/gh`
+- パッケージを消すだけでは、設定と保存された認証情報は残る。認証も外すなら、gh を消す前にこの節の手順 1 を行う
+- GitHub 側でトークンも無効にする場合だけ、この節の手順 2 を行う
+
+> [!WARNING]
+> **この節の手順 2 は、ほかの端末を含め、GitHub CLI が生成した認証トークンをすべて失効させる。** このホストから認証情報を消すだけなら、手順 1 だけでよい。
+
+1. このホストの認証情報も外すときだけ、ローカルからログアウトする。
+
+   ```bash
+   gh auth logout
+   ```
+
+   - 対話でホストとアカウントを選び、確認に答える
+   - OS の資格情報ストアまたは gh の設定から、このアカウントの保存された認証情報を外す。GitHub 側のトークンは失効しない
+   - `~/.config/gh` に残る設定も不要なら、ログアウト後に手で消す。ディレクトリを消すだけでは、資格情報ストアのトークンは消せない
+   - **次の手順は、`gh auth logout` が終わってから行う**（続けて貼ると対話の答えとして食われる）
+
+1. 全端末の GitHub CLI のトークンも失効させるときだけ、ブラウザで GitHub の認可を取り消す。
+
+   - `https://github.com/settings/applications` を開き、「Authorized OAuth Apps」の「GitHub CLI」→「Revoke Access」→「I understand, revoke access」で取り消す
+   - 本書のブラウザ認証で作ったトークンが対象。ほかの端末も、次に使うときに認証し直す
+   - 本書の手順とは別に作った PAT を使っている場合は、その PAT の設定から取り消す
 
 1. gh を消す。
 
@@ -175,6 +195,7 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-02: もとの手順 1・2 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-05: 2.101.0 の公式ソースのヘルプ本文で、トークン保存先と `auth logout` の範囲を確認し、ロールバックの手順 1・2 を追加した。認証・ログアウト・失効は実行していない
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -245,7 +266,8 @@ gpg-pubkey-75716059-63172e8a GitHub CLI <opensource+cli@github.com> public key
 
 - **EPEL と公式リポジトリが両方有効だと、更新のたびに両者を比較する**: バージョンが高い公式側が選ばれるので、実害は無い
   - EPEL 側だけを使いたいなら、`exclude=gh` を `gh-cli` 側に書くか、リポジトリを無効にする
-- **トークンの置き場所**: `~/.config/gh/hosts.yml` は平文。バックアップや共有に混ぜない。`gh auth logout` で失効させられる
+- **トークンの置き場所**: OS の資格情報ストアを優先し、使えない場合は `~/.config/gh/hosts.yml` に平文で保存する。保存先は `gh auth status` で確認し、平文ファイルをバックアップや共有に混ぜない
+  - `gh auth logout` はローカルの認証情報を外す。GitHub 側のトークンの失効は別の操作（[ロールバック](#ロールバック)の手順 2）
 - **`gh` は git を呼ぶ**: `gh repo clone` などは git に依存する。最小構成のホストでは git 一式が付いてくる
 - **全アーキ共通リポジトリ**: `dnf list gh` に `i386` / `armv6hl` の行が出るのは正常
 
@@ -253,6 +275,7 @@ gpg-pubkey-75716059-63172e8a GitHub CLI <opensource+cli@github.com> public key
 
 - [Installing gh on Linux and BSD — cli/cli](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) — dnf4 / dnf5 それぞれの手順と repo ファイルの URL
 - [GitHub CLI manual](https://cli.github.com/manual/) — `gh auth login` などのコマンド
+- [gh 2.101.0 の login](https://github.com/cli/cli/blob/v2.101.0/pkg/cmd/auth/login/login.go)・[logout](https://github.com/cli/cli/blob/v2.101.0/pkg/cmd/auth/logout/logout.go) — 対象版のヘルプ本文。資格情報ストアと平文保存、ローカル削除とサーバー側の失効を区別する（2026-10-05 にソースを確認。認証の操作は未実行）
 - `man dnf.conf`（`gpgcheck`）
 
 ---

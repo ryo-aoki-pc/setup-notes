@@ -3,7 +3,7 @@
 ## 実施手順
 
 > [!IMPORTANT]
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する）
 > - **実行するユーザーは `sudo` できる必要がある**（手順 1・2 で使う）
 > - **手順 2 には対話入力がある**（インストーラの `RETURN` の確認）。終わってから手順 3 を貼る
 > - **インターネットに出られないホストでは、本書を直接貼らず [homebrew-offline.md](homebrew-offline.md) から通す**（[ssh-socks-tunnel.md](ssh-socks-tunnel.md) でログインしてくるホストをプロキシにして、そのシェルで本書の手順 1〜4 を貼る）
@@ -172,16 +172,18 @@
 | コマンド | 用途 |
 |---|---|
 | `brew install <formula>` | 入れる。ビルド済みのボトルがあれば `Pouring ...` と出て、ソースビルドは走らない |
-| `brew uninstall <formula>` | 消す。依存は残る |
+| `brew uninstall <formula>` | 消す。Homebrew 7.0.7 では、不要になった依存も既定で自動削除する（[注意点](#注意点)） |
 | `brew list --versions` | 入っているものと版の一覧 |
-| `brew leaves` | **自分で明示的に入れたものだけ**の一覧（依存として入ったものを除く） |
+| `brew leaves` | ほかの導入済み formula や cask から依存されていない formula の一覧。明示的に入れたものの履歴ではない |
 | `brew info <formula>` | 版・依存・caveat（[gdu](gdu.md) のような名前の注意書き） |
 | `brew deps --tree <formula>` | 依存の木。単独で入れたときに何が付いてくるか |
 | `brew outdated` | 更新できるものの一覧。何も無ければ無出力 |
 | `brew autoremove` | 依存として入って、もう誰も使っていないものを消す（`--dry-run` で確認できる） |
 
-- `brew` はどれも **root では動かない**。`sudo brew ...` は、sudo の PATH に Homebrew が無いので `command not found` になる（[sudo でも使う](#sudo-でも使う任意)の節を通した後は、`brew install` などを `brew` が断る）
+- `brew install`・`brew upgrade` などの管理操作は、Homebrew を入れた一般ユーザーで行う。通常のホストでは root での実行を断られる（`brew --version` などの例外は[root のシェルで使うときの補足](#root-のシェルで使うときの補足)）
+- `sudo brew ...` は、sudo の PATH に Homebrew が無ければ `command not found` になる。[sudo でも使う](#sudo-でも使う任意)の節を通しても、管理操作は一般ユーザーで行う
 - 入れたコマンドを root のシェルでも使うなら [root のシェルでも使う](#root-のシェルでも使う任意)の節を、`sudo <コマンド>` で使うなら [sudo でも使う](#sudo-でも使う任意)の節を通す
+- Homebrew 7.0.7 の `brew install` は、端末で依存や依存先も導入する計画なら `[y/n]` を聞く。指定したものだけの計画、または端末を使わない実行では聞かない（[注意点](#注意点)）
 
 ---
 
@@ -191,8 +193,8 @@
 - root の `~/.bashrc`（`/root/.bashrc`）で、PATH の末尾に Homebrew の `bin` と `sbin` を足す
 - `su -`、コンソールや ssh での root のログイン、`sudo -i` で開いた root のシェルで使えるようになる
 - `sudo <コマンド>` は対象外（sudo の `secure_path` の PATH で動き、root の `~/.bashrc` を読まない）。[sudo でも使う](#sudo-でも使う任意)の節で使えるようにする
-- RPM にも同じ名前のコマンドがあると、root のシェルでは RPM のほうが使われる
-- `brew` そのものは、この節を通しても root では動かない（`brew install` などは `Running Homebrew as root is extremely dangerous …` で断られる）
+- この節で PATH の末尾へ直接追記した場合は、同じ名前の RPM のコマンドが優先される。自分用の bash の設定を root にも入れた場合は、手順 1 の案内のとおり Homebrew が先になる
+- `brew install` などの管理操作は、この節を通しても一般ユーザーで行う（通常のホストでは root だと `Running Homebrew as root is extremely dangerous …` で断られる）
 - 手順 1〜4 を終えた、Homebrew を入れたユーザーのシェルで貼る
 - 補足: [root のシェルで使うときの補足](#root-のシェルで使うときの補足)
 
@@ -257,7 +259,8 @@
    ```
 
    - 最後に `0` と出ればよい
-   - 開いたままの root のシェルの PATH には残る。開き直すと消える
+   - 開いたままの root のシェルの PATH には残る。新しいシェルでは、この節で直接追記した行からは設定されなくなる
+   - 自分用の bash の設定を root にも入れた場合は、このブロックでは外れない。その設定の側で戻す
    - [sudo でも使う](#sudo-でも使う任意)の節も通していれば、`sudo -i`・`sudo -s` のシェルには、その節の 2 つが残る
 
 ---
@@ -270,7 +273,7 @@
 - `EDITOR=nvim` の `sudoedit` も、自分の設定の Homebrew の `nvim` で開くようになる（この節の前は、黙って `vi` で開く）
 - sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [root のシェルでも使う](#root-のシェルでも使う任意)の節を通す
 - RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
-- `brew` そのものは、この節を通しても root では動かない（`sudo brew install` などは `Running Homebrew as root is extremely dangerous …` で断られる）
+- `brew install` などの管理操作は、この節を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
 - 手順 1〜4 を終えた、Homebrew を入れたユーザーのシェルで貼る
 - 補足: [sudo で使うときの補足](#sudo-で使うときの補足)
 
@@ -533,7 +536,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
   ```
 
   root で Homebrew 版を使うときは、フルパス（`/home/linuxbrew/.linuxbrew/bin/<コマンド>`）で呼ぶ
-- **`brew` は root では断られる**: PATH で見つかるが、`brew install` などは `Error: Running Homebrew as root is extremely dangerous and no longer supported.` で止まる（終了コード 1）
+- **`brew install` などは root では断られる**: PATH で見つかるが、通常のホストでは `Error: Running Homebrew as root is extremely dangerous and no longer supported.` で止まる（終了コード 1）
   - 断られなかったのは `brew --version`・`brew --prefix`・`brew help`・引数の無い `brew list` だけ。[使い方の基本](#使い方の基本)の表のコマンドは、どれも断られた
   - コンテナの中（`/.dockerenv` か `/run/.containerenv` がある、または `/proc/1/cgroup` に `docker` などがある）では断られない（`brew.sh` の `check-run-command-as-root`）。検証では、これらを外したコンテナで確かめた
 - **設定ファイルは root のものを読む**: root で動かした Neovim の `stdpath("config")` は `/root/.config/nvim` だった。自分の `~/.config` の設定は使われない
@@ -564,7 +567,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - **`sudoedit` と `visudo` は、この節の前は黙って `vi` で開いた**: エディタを `secure_path` で探し、見つからないと `/usr/bin/vi` を使う。`EDITOR=nvim` の `sudoedit /etc/motd` も `sudo EDITOR=nvim visudo` も、エラーを出さずに `/usr/bin/vi` だった
   - `sudo visudo` は、`EDITOR` を export していても、この節の後も `/usr/bin/vi` だった（sudo が `EDITOR` を渡さない）。`nvim` で開くなら `sudo EDITOR=nvim visudo` と打つ
 - **`sudoedit` だけなら、この節は要らない**: `SUDO_EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim sudoedit <ファイル>` は、この節の前でも Homebrew の `nvim` を自分のユーザーで開き、`stdpath("config")` は自分の `~/.config/nvim` だった
-- **`brew` は root では断られる**: `sudo brew install tree` は `Error: Running Homebrew as root is extremely dangerous and no longer supported.`（終了コード 1）。`sudo brew --version` は動いた
+- **`brew install` などは root では断られる**: `sudo brew install tree` は `Error: Running Homebrew as root is extremely dangerous and no longer supported.`（終了コード 1）。`sudo brew --version` は動いた
   - `brew services` は root の断りから外されている（`brew.sh` の `check-run-command-as-root`）。ただし `sudo brew services list` は `Error: Need to download https://formulae.brew.sh/api/internal/packages.x86_64_linux.jws.json but cannot as root!` で止まった（自分のユーザーで `brew update` した後も同じ）
 - **[root のシェルでも使う](#root-のシェルでも使う任意)の節と両方通してもよい**: `/root/.bashrc` の `case` が足さないので、`sudo -i`・`sudo -s` の PATH で 2 つは重ならなかった。片方を戻しても、もう一方の 2 つは残る
 - **採らなかった形**
@@ -575,16 +578,22 @@ $ du -sh /home/linuxbrew/.linuxbrew
 
 ### 注意点
 
-- **root で実行しない**: インストーラも `brew` も root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
+- **導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **導入先を変えるとすべてソースビルドになる**: [手順 2 の補足](#実施手順)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（[bat](bat.md) / [gdu](gdu.md) で実際に問題になる）
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
   - `sudo <tool>` で使うなら、[sudo でも使う](#sudo-でも使う任意)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[root のシェルでも使う](#root-のシェルでも使う任意)の節を通す
   - どちらも通さないなら、RPM で入れるか、フルパス（`/home/linuxbrew/.linuxbrew/bin/<tool>`）を渡す
-- **依存が付く `brew install` は、端末では `[y/n]` を聞く**（Homebrew 7.0.7 の ask mode）: 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞き、答えは Enter を待たずに 1 文字で読む（[homebrew-offline.md 手順 4](homebrew-offline.md#実施手順) の補足の実測）
+- **`brew install` は、依存や依存先も含む計画なら端末で `[y/n]` を聞く**（Homebrew 7.0.7 の既定の ask mode）
+  - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞き、答えは Enter を待たずに 1 文字で読む（[homebrew-offline.md 手順 4](homebrew-offline.md#実施手順) の補足の実測）
   - 同じブロックに後ろの行があると、その文字が答えとして読まれ、`n` で中止になる。各手順書の `brew install` は、`[y/n]` に答えてから次の手順を貼る
-  - Homebrew の説明では `brew upgrade` でも聞く（上げるものがあったときの表示は確かめていない）。聞かせないなら `HOMEBREW_NO_ASK=1`
+  - 7.0.7 のヘルプでは、指定した formula / cask だけを入れる計画と、TTY が無い実行では確認を省く。コンテナで確認が出なかった記録だけでは、端末でも出ないとは判断できない
+  - `brew upgrade` も 7.0.7 では ask mode が既定。名前を指定した場合はその名前以外も更新する計画、名前を省略した場合は更新対象があるときに、TTY で確認する（公式ソースで確認。更新対象がある状態での表示は未確認）
+  - 導入・更新が終わり、プロンプトに戻ってから次の手順を貼る。確認を省く指定は `HOMEBREW_NO_ASK=1`、または `brew install` / `brew upgrade` の `--no-ask` / `--yes` / `-y`
+- **不要な依存は自動で消えることがある**: Homebrew 7.0.7 の `brew uninstall` と `brew cleanup` は、不要になった依存を既定で自動削除する
+  - 自動削除を止めるときは、そのコマンドに `HOMEBREW_NO_AUTOREMOVE=1` を付ける。明示的な `brew autoremove` は、残った不要な依存を消すための操作
+  - 7.0.7 のソースで確かめた仕様。過去の付録の「依存が残った」という実測は、そのときの版と条件での記録として残している
 - **`~/.bashrc` を読まない文脈では見えない**: cron や一部の非対話シェルでは `brew shellenv` が走らないので、Homebrew で入れたコマンドが見つからない。スクリプトからはフルパスで呼ぶ
 - **ユーザーごとではなく、ホストに 1 つ**: `/home/linuxbrew` は共有なので、別ユーザーが使うにはそのユーザーの `~/.bashrc` にも `brew shellenv` を書く（書き込みには所有者の権限が要る）
 - **占有が大きい**: 実機で 2.8 GB。`brew cleanup` で古い版とキャッシュを掃除できる
@@ -596,6 +605,8 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - [brew.sh](https://brew.sh/) — インストーラのワンライナーと概要
 - [Homebrew — FAQ](https://docs.brew.sh/FAQ) — 更新・掃除・アンインストールのよくある質問
 - [Homebrew/install](https://github.com/Homebrew/install) — `install.sh` と `uninstall.sh` の中身
+- [Homebrew 7.0.7 の leaves](https://github.com/Homebrew/brew/blob/7.0.7/Library/Homebrew/cmd/leaves.rb) — `brew leaves` のヘルプと実装（2026-10-05 に照合）
+- [Homebrew 7.0.7 の install](https://github.com/Homebrew/brew/blob/7.0.7/Library/Homebrew/cmd/install.rb)・[upgrade](https://github.com/Homebrew/brew/blob/7.0.7/Library/Homebrew/cmd/upgrade.rb)・[uninstall](https://github.com/Homebrew/brew/blob/7.0.7/Library/Homebrew/cmd/uninstall.rb)・[cleanup](https://github.com/Homebrew/brew/blob/7.0.7/Library/Homebrew/cleanup.rb) — 確認を聞く条件と、不要な依存の自動削除（2026-10-05 に照合）
 - `man sudoers`（`secure_path`、`#includedir` で読まれないファイル名、`Defaults` の上書き）・`man visudo`（`-c`、`-f`） — [sudo でも使う](#sudo-でも使う任意)の節の 1 行と確かめ方
 - `brew help` / `man brew` / `brew config` — サブコマンドと環境の確認
 

@@ -43,7 +43,9 @@
 1. `gnome-remote-desktop` ユーザーとして、TLS 証明書と鍵を openssl で生成する。
 
    ```bash
-   {
+   if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
+     echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
+   else
      sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
      sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
        -subj "/CN=${SERVER_NAME}" \
@@ -51,10 +53,11 @@
        -addext "extendedKeyUsage=serverAuth" \
        -keyout /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
        -out    /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-   }
+   fi
    ```
 
    - 所有権を最初から正しくするため、`gnome-remote-desktop` ユーザー自身として生成する
+   - `中断:` と出たら、何も変更していない。手順 1 を貼り直してから、この手順をやり直す
 
    <details>
    <summary>補足: 証明書</summary>
@@ -214,13 +217,12 @@
 
    </details>
 
-1. 資格情報を反映させるため、デーモンを再起動する。
-
-   ```bash
-   sudo systemctl restart gnome-remote-desktop.service
-   ```
+1. 資格情報を反映させるため、デーモンを起動し直す。
 
    - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
+   - [設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3 を行う。ヘッドレスのセッションがある PC では、続けて同節の手順 4 も行う
+   - その節の手順 1・2・5 は行わない
+   - **次の手順は、デーモンと必要な受け渡し役の起動し直しが終わってから貼る**
 
 1. サーバー側の状態を確かめる。
 
@@ -372,7 +374,7 @@
 
    1. システム共通パスワードで RDP 認証を通過
    1. GDM ログイン画面が表示される
-   1. `<USER>` などの OS アカウントでログイン → 新規 GNOME セッションが起動
+   1. `<USER>` などの OS アカウントでログイン → そのユーザーのセッションが無ければ新規作成、既存のリモートセッションやヘッドレスのセッションがあればそこへ引き渡す（[注意点](#注意点)）
 
    問題があれば以下を並行して確認する:
 
@@ -412,8 +414,9 @@
 
 ## 設定済みのサーバーで GDM の後に起動させる
 
-- **`/etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf` が無いサーバーだけ**（2026-10-02 より前の手順 5 で設定したもの）。今の手順 5 は、このドロップインを置く
+- **この節の手順 1 は、`/etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf` が無いサーバーだけ**（2026-10-02 より前の手順 5 で設定したもの）。今の手順 5 は、このドロップインを置く
 - ドロップインが効くのは次の起動から。今のデーモンが起動のときに GDM とすれ違っていたら、この節の手順 3 でデーモンを起動し直すと直る（理由は[手順 5](#実施手順) の補足）
+- 資格情報や証明書を変更した後も、この節の手順 3 と、ヘッドレスのセッションがある場合は手順 4 を使う。その場合、この節の手順 1・2・5 は行わない
 - **この節の手順 3・4 は、リモートログインでつないでいる利用者がいないときに行う**（ヘッドレスのセッションに入った RDP の接続は、手順 4 で再起動する受け渡し役のデーモンが持っている）
 
 1. 起動の順番を GDM の後にするドロップインを置く。
@@ -439,7 +442,7 @@
    ```
 
    - `1` なら、すれ違っている。この節の手順 3 へ進む
-   - `0` なら、この節の手順 3・4 は飛ばす
+   - `0` なら、起動時のすれ違いを直すための手順 3・4 は飛ばす（資格情報や証明書を変更した後は、`0` でも行う）
 
    <details>
    <summary>補足: すれ違ったときのログ</summary>
@@ -454,7 +457,7 @@
 
    </details>
 
-1. 起動のときにすれ違っていたら、デーモンを止め、待ってから起動し直す。
+1. デーモンを起動し直す必要があるときは、止めて待ってから起動する。
 
    ```bash
    {
@@ -526,8 +529,11 @@
 
 ## ロールバック
 
+- 利用を止めるときは、この節の手順 1 と、LAN に絞っていた場合は手順 2 を行う
+- 証明書だけを戻すときは、この節の手順 1・2 を飛ばし、手順 3・4 を行う
+
 > [!WARNING]
-> **この節の**手順 2 で証明書を差し替え前に戻すには、旧ファイルが要る。差し替えのときに旧ファイルを消していると、証明書は戻せない。[手順 2](#実施手順) は同じ名前で上書きするので、残すなら先にコピーしておく。
+> **この節の**手順 3 で証明書を差し替え前に戻すには、旧ファイルが要る。差し替えのときに旧ファイルを消していると、証明書は戻せない。[手順 2](#実施手順) は同じ名前で上書きするので、残すなら先にコピーしておく。
 
 1. サービスと RDP を止め、資格情報とファイアウォールの開放と、手順 5 のドロップインを消す。
 
@@ -540,10 +546,28 @@
      sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
      sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
      sudo systemctl daemon-reload
+     sudo firewall-cmd --list-services
+     sudo firewall-cmd --permanent --list-services
    }
    ```
 
-1. 証明書だけを差し替え前に戻すときは（この節の手順 1 の代わりに）、旧ファイル名を入れてパスを戻し、再起動する。
+   - runtime・permanent のどちらのサービス一覧にも `rdp` が無ければよい
+
+1. [接続元を LAN に絞る](#接続元を-lan-に絞る任意)を行ったときは、追加した rich rule も消す。
+
+   ```bash
+   if [ -z "${LAN_SUBNET}" ]; then echo '中断: LAN_SUBNET が空のまま。LAN に絞る節の変数ブロックを貼り直す' >&2; else
+     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
+     sudo firewall-cmd --reload
+     sudo firewall-cmd --list-rich-rules
+     sudo firewall-cmd --permanent --list-rich-rules
+   fi
+   ```
+
+   - `LAN_SUBNET` は、[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の手順 1 の変数ブロックで、設定時と同じ値を入れる
+   - runtime・permanent のどちらにも、その送信元と 3389/tcp の rich rule が無ければよい
+
+1. 証明書だけを差し替え前に戻すときは（この節の手順 1・2 の代わりに）、旧ファイル名を入れてパスを戻す。
 
    ```bash
    OLD_BASENAME=                        # ← 差し替え前の証明書・鍵のファイル名（拡張子なし）
@@ -553,12 +577,16 @@
    if [ -z "${OLD_BASENAME}" ]; then echo '中断: OLD_BASENAME を設定してから貼り直す' >&2; else
    sudo grdctl --system rdp set-tls-key  "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.key"
    sudo grdctl --system rdp set-tls-cert "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.crt"
-   sudo systemctl restart gnome-remote-desktop.service
    fi
    ```
 
    - `OLD_BASENAME` には、差し替え前の証明書・鍵のファイル名（拡張子なし）を入れる
    - `OLD_BASENAME` が空のまま貼ると、先頭の `if` で中断し、`grdctl` は実行されない
+
+1. この節の手順 3 で証明書を戻したときは、デーモンを起動し直して反映する。
+
+   - [設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3 と、ヘッドレスのセッションがある場合は手順 4 を行う
+   - その節の手順 1・2・5 は行わない
 
 ---
 
@@ -580,6 +608,7 @@
     - 同じ日に、ヘッドレスのセッションとの組み合わせ・切断とつなぎ直し・同時の接続・GDM の再起動を、試験用のユーザーとコンテナの FreeRDP 3.10.3 で確かめた（[付録の追加の確認](#追加の確認)）。システム共通の RDP の資格情報は、ファイルを控えてテスト用の値に差し替え、終わってから戻した
     - 手順 5 の今のブロックと、[ロールバック](#ロールバック)の手順 1 は、構文の検査だけで、流していない
     - 起動のときにドロップインが効くこと（再起動して確かめること）は、まだしていない
+  - 2026-10-05: 証明書生成の空変数検査、起動し直しの共通手順への参照、LAN 限定の rich rule の撤去を追加した。変更後は構文検査とスタブでの確認だけで、実機では流していない
 
 | | 環境 1（初回構築） | 環境 2（openssl 手順の再検証） |
 |---|---|---|
@@ -626,7 +655,7 @@
 
 ### 選択した方針
 
-- **リモートログイン方式**（システムデーモン）— ローカルログイン不要。RDP 接続時に GDM 経由で新規セッションを作成する
+- **リモートログイン方式**（システムデーモン）— ローカルログイン不要。GDM で認証し、そのユーザーのセッションが無ければ新規作成する。切断後のリモートセッションや常駐するヘッドレスのセッションがあれば、そこへ引き渡す
 - **TLS 証明書は openssl で生成する** — GNOME 本家の README が記載している方法
   - 追加パッケージ不要で、SAN の付与や有効期間の指定もできる
   - RHEL 10 のドキュメントは `freerdp` の `winpr-makecert` を使うが、GRD 側の要件ではない（[付録](#付録-winpr-makecert-で証明書を作る場合rhel-10-公式手順)参照）
@@ -697,7 +726,7 @@ gnome-remote-de[2415]: RDP server started
 - **リモートログインのセッション**: そのユーザーのセッションが無ければ、ログインで新しいセッションができる
   - 切断してもセッションは残り、次に同じユーザーでログインすると、そのセッションに戻った（環境 2、2026-10-02。[付録の追加の確認](#追加の確認)）
   - ローカルでログイン中のユーザーと同一ユーザーで接続すると、GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある（確かめていない）
-  - 既存デスクトップをそのまま見たい場合は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）が必要。今回は採用していない
+  - PC の物理モニターに表示しているデスクトップを見る用途は「画面共有」方式（ユーザーデーモン `systemctl --user enable --now gnome-remote-desktop`）。本書では採用していない
 - **ヘッドレスのセッションを常駐させている PC**（[gnome-headless-session.md](gnome-headless-session.md)）
   - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
   - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、そのユーザーでログインしたときに、ログイン画面が名前とアイコンのまま進まない
@@ -712,7 +741,7 @@ gnome-remote-de[2415]: RDP server started
 - **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は、手順 2〜4 でそちらのパスを指定する
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す
   - **クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある
-  - 差し替え後は `sudo systemctl restart gnome-remote-desktop.service` を実行する（接続中の RDP セッションは切断されるので、利用者がいないタイミングで行う）
+  - 差し替え後は、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3 と、ヘッドレスのセッションがある場合は手順 4 で反映する（接続中の RDP セッションは切断されるので、利用者がいないときに行う）
 - **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。接続元を制限しない場合はそのままでよい
   - LAN 限定に絞る手順は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)
 - **ログイン画面のまま置くと眠ることがある**: Workstation で入れた PC のログイン画面は、電源につないでいても 15 分でサスペンドする

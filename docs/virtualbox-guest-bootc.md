@@ -657,20 +657,33 @@
 1. ホストの端末で、ベースのイメージの署名を VM と同じ鍵で確かめるようにする。
 
    ```bash
-   if [ -e ~/.config/containers/policy.json ] || [ -e ~/.config/containers/registries.d ]; then
-     echo '~/.config/containers に policy.json か registries.d がすでにある。上書きしないので、この手順の補足を見て手で足す' >&2
-   else
-     mkdir -p ~/.config/containers/pki
-     cp ~/vbox-ga-host/etc/pki/containers/*.pub ~/.config/containers/pki/
-     cp -r ~/vbox-ga-host/etc/containers/registries.d ~/.config/containers/
-     sed "s#/etc/pki/containers/#${HOME}/.config/containers/pki/#g" ~/vbox-ga-host/etc/containers/policy.json > ~/.config/containers/policy.json
+   if [ -e ~/.config/containers/policy.json ] || [ -L ~/.config/containers/policy.json ] ||
+      [ -e ~/.config/containers/registries.d ] || [ -L ~/.config/containers/registries.d ] ||
+      [ -e ~/.config/containers/pki ] || [ -L ~/.config/containers/pki ]; then
+     echo '~/.config/containers に policy.json・registries.d・pki のいずれかがすでにある。上書きせず、この手順の補足を見て手で足す' >&2
+   elif [ -e ~/vbox-ga-host/containers-config-created ] || [ -L ~/vbox-ga-host/containers-config-created ]; then
+     echo '前回の設定の控えがある。上書きせず、この節の手順 11 で確認してからやり直す' >&2
+   elif mkdir ~/vbox-ga-host/containers-config-created &&
+        mkdir ~/vbox-ga-host/containers-config-created/pki &&
+        cp ~/vbox-ga-host/etc/pki/containers/*.pub ~/vbox-ga-host/containers-config-created/pki/ &&
+        cp -r ~/vbox-ga-host/etc/containers/registries.d ~/vbox-ga-host/containers-config-created/ &&
+        sed "s#/etc/pki/containers/#${HOME}/.config/containers/pki/#g" ~/vbox-ga-host/etc/containers/policy.json > ~/vbox-ga-host/containers-config-created/policy.json &&
+        mkdir -p ~/.config/containers &&
+        cp -r ~/vbox-ga-host/containers-config-created/pki ~/.config/containers/ &&
+        cp -r ~/vbox-ga-host/containers-config-created/registries.d ~/.config/containers/ &&
+        cp ~/vbox-ga-host/containers-config-created/policy.json ~/.config/containers/ &&
+        touch ~/vbox-ga-host/containers-config-created/.ready; then
      podman image trust show
+   else
+     echo '設定のコピーに失敗した。次へ進まず、この節の手順 11 で残ったファイルを確認する' >&2
    fi
    ```
 
    - `quay.io/almalinuxorg/atomic-desktop-gnome` の行が `sigstoreSigned` ならよい
    - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）。消すのは、この節の手順 11
    - 「すでにある」と出たときは、何も変えずに止まる。この手順の補足を見て、手で足す
+   - 新規に置く設定の控えは `~/vbox-ga-host/containers-config-created` に残す。この節の手順 11 で、内容が変わっていないことを確かめてから消すため
+   - コピーや `podman image trust show` が失敗したときは、次の手順に進まない
 
    <details>
    <summary>補足: 自分のユーザーの設定に置く理由と、確かめたこと</summary>
@@ -684,10 +697,11 @@
      - `~/.config/containers/pki` の 2 つの鍵を別の鍵に差し替えると、`Source image rejected: cryptographic signature verification failed: invalid signature when validating ASN.1 encoded signature` で断られた（VM で鍵を差し替えたときと同じ文。[ロールバック](#ロールバック)の手順 1 の補足）
      - `~/.config/containers` を外すと（ホストの `/etc/containers` の既定）、どちらの行も出ずに取り込まれた。AlmaLinux 10 の既定の `policy.json` は、このイメージの署名を確かめない
    - 「すでにある」と出たとき（試していない）:
-     - 公開鍵は、ブロックの `mkdir` と `cp`（`*.pub`）の 2 行と同じように `~/.config/containers/pki` に写す
-     - `policy.json` があるなら、その `transports` の `docker` に、`~/vbox-ga-host/etc/containers/policy.json` の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を、鍵のパスを `~/.config/containers/pki/` に書き換えて足す。無いなら、ブロックの `sed` の行と同じ
-     - `registries.d` があるなら、`~/vbox-ga-host/etc/containers/registries.d/almalinuxorg-atomic-desktop-gnome.yaml` をそこへ写す。無いなら、ブロックの `cp -r` の行と同じ（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるので、まるごと写す）
-     - この節の手順 11 では、`~/.config/containers` の中を消さずに、足したものだけを手で戻す
+     - 変更前の設定と公開鍵を別の場所に退避し、今回追加・変更するファイルを控える。既存の同名の鍵や設定は上書きしない
+     - 公開鍵は `~/vbox-ga-host/etc/pki/containers/*.pub` から `~/.config/containers/pki` に写す。同名があるときは内容を照合し、別の鍵なら名前と `policy.json` の参照先を合わせて分ける
+     - `policy.json` があるなら、その `transports` の `docker` に、VM の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を足す。無いなら VM のファイルを写す。どちらも鍵のパスを `~/.config/containers/pki/` に合わせる
+     - `registries.d` があるなら、VM の `almalinuxorg-atomic-desktop-gnome.yaml` を、同名が無いことを確かめて足す。無いなら VM の `registries.d` をまるごと写す（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるため）
+     - この節の手順 11 の自動削除は使わず、控えたファイル・項目だけを元に戻す
 
    </details>
 
@@ -782,15 +796,37 @@
 1. 元に戻すときは、ホストの端末で、ビルドに使ったものと、署名を確かめる設定を消す。
 
    ```bash
-   rm -rf ~/vbox-ga-host ~/.config/containers/policy.json ~/.config/containers/registries.d ~/.config/containers/pki
-   rmdir --ignore-fail-on-non-empty ~/.config/containers
-   podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
+   if [ -z "${BASE_IMAGE}" ]; then
+     echo 'BASE_IMAGE が空のまま。手順 1 を貼り直す' >&2
+   elif [ ! -f ~/vbox-ga-host/containers-config-created/.ready ]; then
+     echo '新規作成した設定の控えが無いか、不完全。自動では消さず、この手順の注意に従って戻す' >&2
+   else
+     vbox_config_matches=1
+     for vbox_config_item in policy.json registries.d pki; do
+       if [ -e "${HOME}/.config/containers/${vbox_config_item}" ] || [ -L "${HOME}/.config/containers/${vbox_config_item}" ]; then
+         if ! diff -qr "${HOME}/vbox-ga-host/containers-config-created/${vbox_config_item}" "${HOME}/.config/containers/${vbox_config_item}"; then
+           vbox_config_matches=0
+         fi
+       fi
+     done
+     if [ "$vbox_config_matches" = 1 ]; then
+       rm -rf ~/.config/containers/policy.json ~/.config/containers/registries.d ~/.config/containers/pki &&
+       rm -rf ~/vbox-ga-host &&
+       podman rmi localhost/vbox-ga:latest "${BASE_IMAGE}"
+       rmdir --ignore-fail-on-non-empty ~/.config/containers
+     else
+       echo '設定・公開鍵の追加や変更、または比較の失敗がある。何も消さず、この手順の注意に従って戻す' >&2
+     fi
+   fi
    ```
 
-   - `Untagged:` が 2 行と、`Deleted:` の行が並ぶ
+   - この節の手順 6 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
+   - 自動で消せたときは、`Untagged:` が 2 行と、`Deleted:` の行が並ぶ
    - `~/.config/containers` は、ほかのファイルが無ければ消える
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`podman image prune` で消せる（`[y/N]` を聞く）
-   - **注意**: この節の手順 6 で「すでにある」と出て手で足した PC では、`~/.config/containers` の 2 つを消さずに、足した項目だけを手で戻す
+   - **注意**: 控えが無い・不完全なときや、設定の内容が変わったときは、`policy.json`・`registries.d`・`pki` をまとめて消さない。退避と控えを見て、今回追加・変更したファイルや項目だけを手で戻す
+     - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 を貼り直す}"` で消す
+     - コピーの途中で失敗した場合も、残ったファイルを確かめてから戻す。比較自体が失敗した場合は原因を直すか、同じく手で確認する
    - Secure Boot の鍵（`~/vbox-ga-mok`）は残る。消すときは、[ロールバック](#ロールバック)のリード
 
 ---
@@ -951,6 +987,8 @@
   - VM がインターネットに出られない（ホストオンリーアダプターだけの）ときは、ホストで同じ Containerfile をビルドし、ファイルにして ssh で VM に運ぶ。VM は外に出ない（[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)）
   - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop と、自作の kernel-rt のイメージのときだけ変える）。ホストオンリーアダプターの節では、ホストの端末の `VM_SSH` に VM のユーザー名と IP を入れる
 - **状態**: **VirtualBox の VM で本実行済み（2026-09-29 は AlmaLinux 10 のホスト、2026-09-30 は Windows 11 のホスト）**。その前に x86_64 のコンテナで検証した（2026-09-28）
+  - 2026-10-05: ホストオンリーの節の手順 6・11 に、既存の `pki` の保護、作成した設定の控え、控えと内容が一致するときだけ消す条件を加えた
+    - `bash -n` と一時ディレクトリで、既存設定・公開鍵、コピー失敗、再実行、後からの変更、比較失敗、空の変数で既存のものを消さないことを確認した。podman はスタブで代え、変更後のブロックは実機では流していない
   - この節と付録の手順番号は、今の番号で書いた。Secure Boot の鍵の手順（当時はこの文書の手順 3・4・10 と手順 13 の前半）は、今は前提の [secure-boot-mok.md](secure-boot-mok.md) の手順 3〜7 にあり、ここでは「MOK の手順」と書く（付録の表では、同書の手順 N を「MOK N」と書く）
     - 当時は、鍵の登録（今の secure-boot-mok.md の手順 6）を、手順 7 の `bootc switch` の再起動の途中の MokManager で行っていた
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
@@ -1240,7 +1278,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - `/etc/passwd`・`/etc/group`・`/etc/shadow`・`/etc/gshadow` をベースのイメージのものに戻し、ログインするユーザーを足した（手元で変更済みの `/etc` は 3-way マージで残る、を模す）
 - `/var` は空の tmpfs にし、systemd を PID 1 で起動した。`/var/lib/shim-signed/mok/MOK.der` は代役のコンテナから写した（VM では `/var` が残る）
 
-**流し方**: 本文の `bash` のコードブロックを抜き出し、1 つずつ新しい `podman exec`（そのユーザーで、`HOME` と `USER` を設定）で実行した。各ブロックの先頭に手順 1 のブロックを足した（本文の「新しい端末を開いたら手順 1 を貼り直す」と同じ）。手順 4 の一時パスワードは標準入力から渡した。
+**流し方**: 本文の `bash` のコードブロックを抜き出し、1 つずつ新しい `podman exec`（そのユーザーで、`HOME` と `USER` を設定）で実行した。各ブロックの先頭に手順 1 のブロックを足した（本文の「新しい端末を開いたら手順 1 を貼り直す」と同じ）。MOK 4 の一時パスワードは標準入力から渡した。
 
 | 手順 | 結果 |
 |---|---|
@@ -1253,7 +1291,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 6. ビルド | ベースの取り込み（署名の検査あり）からビルドの終わりまで 2 分 22 秒。3 つのモジュールが `signer=VirtualBox Guest Additions module signing key`、`enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` |
 | 7. 切り替え | `error: Switching: Initializing storage: Preparing for write: Detected container; this command requires a booted host system.` |
 | 8. 確認（起動を模したコンテナ） | `lsmod` は空、`systemctl is-active` は `failed` が 2 行（コンテナではモジュールを読み込めない）、`pgrep` は空（画面が無い）、`bootc status` は YAML |
-| MOK 7・10. 署名（同上） | `is already enrolled`（スタブ）と `VirtualBox Guest Additions module signing key`（本物の `modinfo`） |
+| MOK 7・手順 10. 署名（同上） | `is already enrolled`（スタブ）と `VirtualBox Guest Additions module signing key`（本物の `modinfo`） |
 | 共有フォルダー 2・4（同上） | `usermod -aG vboxsf` が通り、`id -nG` に `vboxsf`。`findmnt -t vboxsf` は空 |
 | 更新 2 | 手順 6 を貼り直すと、`Using cache` が 4 行で同じイメージ ID。ベースは取り込み直さなかった |
 | 更新 3・ロールバック 1 | 手順 7 と同じ `Detected container` |
@@ -1359,7 +1397,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 7・MOK 6. 切り替え（1 回目） | `layers already present: 65; layers needed: 20 (1.7 GB)` → `Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` → 再起動。MokManager をわざと見送った（次の表） |
 | MOK 5・6. 切り替え（やり直し） | 当時の手順 10 の箇条書き（今の MOK 6 の箇条書き）のとおり `sudo mokutil --import ...` を貼り直し、`sudo systemctl reboot` → 最初の画面でキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` |
 | 8. 確認 | `vboxguest` の行だけ（`vboxsf` は無い）、`active` が 2 行、`VBoxClient --clipboard` と `--vmsvga-session` が 2 つ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は元の `:latest`）。ただし `VBoxClient --clipboard` は、ログインの直後から 5 秒ごとに落ちていた（次の表） |
-| MOK 7・10. 署名（囲んだ形） | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
+| MOK 7・手順 10. 署名（囲んだ形） | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
 | 3・6 を直した版で貼り直し、更新 3 | Containerfile 2834 バイト → ビルド 161 秒（`libXt-1.3.0-5.el10` が入り、`mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2`）→ `sudo bootc upgrade --apply` が `Queued for next boot:` と入れ替わった層（151.5 MB → 151.9 MB）を出して再起動。`VBoxClient --clipboard` は落ちなくなった |
 | 共有フォルダー 1〜4 | 足すと `vboxsf` が読み込まれ、`/run/media/sf_<名前>`（`gid=<GID>`、`dmode=0770`、`fmode=0770`）にマウントされた。グループに入る前は `Permission denied`。手順 2 は無出力 → ログインし直し → 手順 4 で `vboxsf` とマウントの行。ホストとの間で読み書きできた |
 | 更新 2・3（変更なし） | `Using cache` が 4 行で同じイメージ ID（5 秒）。`No changes in ...` と `No update available.` を出し、再起動しなかった（boot_id が同じ） |
@@ -1451,7 +1489,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 
 - **`rt` が無効の kernel-rt のイメージ**（`:rt-disabled`）では、27 秒で止まった
   - `+ dnf -y install gcc make 'kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64+rt'` の後に `No match for argument: kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64+rt` と `Error: Unable to find a match: …`
-- `--repo` を付けていた途中の版は、公式のイメージと `rt` が無効の検証用のイメージで流し、どちらも表の「8 の結果」と同じ行が出て、パッケージの差も `libXt` だけだった（`--repo=rt` が無効の `rt` も使うため、止まらなかった）
+- `--repo` を付けていた途中の版は、公式のイメージと `rt` が無効の検証用のイメージで流し、どちらも表の「6 の結果」と同じ行が出て、パッケージの差も `libXt` だけだった（`--repo=rt` が無効の `rt` も使うため、止まらなかった）
 - 所要時間の多くは、最後のイメージの書き出し（`COMMIT`）だった。この環境の入れ子の podman での値で、[手順 6](#実施手順) の補足の時間とは比べられない
 - この環境では、インストーラの始めに `libkmod: ERROR … could not open /proc/modules` と `Error: could not get list of modules` が出た。ホストのカーネルがモジュールに対応していない（`/proc/modules` が無い）ためで、ビルドの結果は変わらなかった
 - 検証用のイメージのレジストリ（`localhost:5000`）は `policy.json` に載っていないので、取り込みで `Storing signatures` は出なかった（公式のイメージの取り込みでは出た）
@@ -1527,7 +1565,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | 7・MOK 6 | `layers already present: 84; layers needed: 2 (152.2 MB)`、`Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest`。GRUB（`ostree:0` と `ostree:1`、1 秒）から、MokManager を経ずに起動した | 同じ層の数。MokManager の最初の画面でキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` |
 | 8 | `vboxguest` の行、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は kernel-rt のイメージ） | 同じ |
 | 9 | クリップボードは両方向で文字列が届いた。`setvideomodehint 1600 900 32` で 1600x900 になり、1280x800 に戻せた | 同じ |
-| MOK 7・10 | 飛ばした | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
+| MOK 7・手順 10 | 飛ばした | `is already enrolled`、`VirtualBox Guest Additions module signing key` |
 
 Secure Boot が有効の回では、続けて次を流した。無効の回では、手順 9 の後に切り替えた直後の `bootc rollback` だけを試した。
 
@@ -1618,7 +1656,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 | MOK 6 | 最初の画面（`Booting in 10 seconds`）をスクリーンショットの色で捉えてキー → `Enroll MOK` → `Continue` → `Yes` → パスワード → `Reboot` | 飛ばした |
 | 8 | `vboxguest` の行、`active` が 2 行、`VBoxClient --clipboard`・`--vmsvga-session` が 2 つずつ、`● Booted image: containers-storage:localhost/vbox-ga:latest`（`Rollback image:` は元の `:latest`） | 同じ（ログインの直後だけ、`--checkhostversion` も 2 つ出た） |
 | 9 | メニューの「デバイス」→「クリップボードの共有」→「双方向」。Windows の `Set-Clipboard` の文字列を VM の端末に Ctrl+Shift+V で貼れ、VM の端末の Ctrl+Shift+A・Ctrl+Shift+C の後の Windows の `Get-Clipboard` に入っていた。ウィンドウの大きさを変えると追従した（下の表） | `VBoxManage controlvm <VM> setvideomodehint 1600 900 32` で 1600x900 になり、1280x800 に戻せた |
-| MOK 7・10 | `is already enrolled`、`VirtualBox Guest Additions module signing key` | 飛ばした |
+| MOK 7・手順 10 | `is already enrolled`、`VirtualBox Guest Additions module signing key` | 飛ばした |
 
 Secure Boot が有効の回では、続けて次を流した。
 

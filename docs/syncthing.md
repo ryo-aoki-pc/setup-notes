@@ -6,8 +6,8 @@
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も Syncthing を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、Syncthing も同期するファイルの持ち主として動かすため）
-> - **手順 3 には対話入力がある**（パスワード）。入力し終えてから手順 4 を貼る
+> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、Syncthing も同期するファイルの持ち主として動かす
+> - **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -28,8 +28,8 @@
    - **編集が必須の変数は無い**。Web GUI を LAN にも公開する前提で既定値が入っている
    - 手元のブラウザからしか開かないなら、`ST_GUI_ADDR` を `127.0.0.1:8384` にする
    - 最後に値を読み戻して確かめる
-   - `USER` が `root` になっている（root でサービスを動かしてしまう）、`ST_LAN_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
+   - `USER` が `root` なら、ここで止めて自分のシェルに戻る。`ST_GUI_ADDR=0.0.0.0:8384` の場合は、`ST_LAN_IP` が空か意図した NIC の IP と違えば直す（localhost の URL には使わない）
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 を貼り直す。手順 5〜7 へ進む場合は、認証設定の成功を確かめるため手順 3・4 もやり直す
 
    <details>
    <summary>補足: 変数について</summary>
@@ -46,13 +46,12 @@
 
    ```bash
    brew install syncthing
-   brew list --versions syncthing
-   syncthing --version
    ```
 
    - aarch64 でもビルド済みのボトルが降ってくるので、Go のビルドにはならない
    - 依存は無い（静的バイナリ 1 つ、約 30 MB）
-   - バージョン文字列の末尾に `[modernc-sqlite, noupgrade]` と出る（意味はこの手順の補足）
+   - 版は手順 4 で確かめる。検証した aarch64 の末尾は `[modernc-sqlite, noupgrade]`、x86_64 は `[noupgrade]`（意味はこの手順の補足）
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
    <details>
    <summary>補足: <code>noupgrade</code> と入るファイル</summary>
@@ -64,7 +63,7 @@
      - 更新は `brew upgrade` で行う（[更新](#更新)）。パッケージマネージャ管理下のファイルを Syncthing が勝手に書き換えないので、こちらの方が都合がよい
    - `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](#注意点)）
 
-   入るのは実行ファイル 1 つと man ページだけで、**systemd の unit ファイルは入らない**:
+   実行ファイルと man ページに加え、Homebrew が生成したサービス用ファイルが入る。**上流が配る systemd の unit とは別物**:
 
    ```
    $ brew list syncthing
@@ -94,13 +93,22 @@
 1. サービスを起動する前に、鍵・証明書・設定ファイルを作り、GUI のログイン名とパスワードを入れる。
 
    ```bash
-   printf '%s' "${ST_GUI_PASS}" | syncthing generate \
-     --gui-user="${ST_GUI_USER:?手順 1 の ST_GUI_USER が空のまま。値を入れて貼り直す}" --gui-password=-
+   ST_GUI_AUTH_READY=false
+   if [ -z "${ST_GUI_USER}" ] || [ -z "${ST_GUI_PASS}" ]; then
+     echo '中断: GUI のログイン名かパスワードが空。手順 1・3 で設定し直す' >&2
+   elif printf '%s' "${ST_GUI_PASS}" | syncthing generate --gui-user="${ST_GUI_USER}" --gui-password=-; then
+     ST_GUI_AUTH_READY=true
+     brew list --versions syncthing
+     syncthing --version
+     syncthing device-id
+   else
+     echo '中断: GUI の認証設定に失敗した。原因を直して手順 3 からやり直す' >&2
+   fi
    unset ST_GUI_PASS
-   syncthing device-id
    ```
 
    - LAN に開いたあとで認証を設定するのでは、その間 GUI が誰でも開ける状態になるため、サービスの起動より先に入れる
+   - `中断:` が出たら手順 5〜7 へ進まない。認証設定に成功した同じシェルだけで、手順 5〜7 を実行できる
    - `Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
    - [バックアップから戻した](#バックアップから戻す)ホストでは、先頭が `Key exists; will not overwrite` になり、鍵を作り直さない（デバイス ID は元のまま。ログイン名が同じなら `Updated GUI authentication user` の行は出ない）
    - 最後の `syncthing device-id` が出す 7 桁 x 8 の文字列が、**このホストのデバイス ID**。相手デバイスに教える値で、秘密ではない
@@ -108,7 +116,7 @@
    <details>
    <summary>補足: 設定の置き場所とパスワードの渡し方</summary>
 
-   **設定と DB は `~/.local/state/syncthing`**（`$XDG_STATE_HOME/syncthing`）。1.27.0 で `~/.config/syncthing` から移った。古い版から引き継ぐときは元の場所も見に行く。この手順で作られるのは次の 4 つ:
+   **設定と DB は `~/.local/state/syncthing`**（`$XDG_STATE_HOME/syncthing`）。1.27.0 で `~/.config/syncthing` から移った。古い版から引き継ぐときは元の場所も見に行く。この手順で作られる必須ファイルは次の 3 つ:
 
    ```
    $ ls -la ~/.local/state/syncthing/
@@ -130,10 +138,14 @@
 1. Syncthing のサービスを開始する。
 
    ```bash
-   brew services start syncthing
-   brew services list
-   systemctl --user is-enabled sh.brew.syncthing.service   # enabled
-   systemctl --user is-active  sh.brew.syncthing.service   # active
+   if [ "${ST_GUI_AUTH_READY:-false}" != true ]; then
+     echo '中断: このシェルで手順 3・4 の認証設定を完了してから貼る' >&2
+   else
+     brew services start syncthing &&
+       brew services list &&
+       systemctl --user is-enabled sh.brew.syncthing.service &&
+       systemctl --user is-active sh.brew.syncthing.service
+   fi
    ```
 
    - `Successfully started 'syncthing' (label: sh.brew.syncthing)` が出る
@@ -167,24 +179,31 @@
    **システムサービスにする道もある。**
 
    - 公式は root 管理の `syncthing@<USER>.service` も用意していて、その場合 linger は要らない
-   - Homebrew 版には unit が同梱されないので自分で書くことになる。ホームディレクトリを同期する用途では、ユーザーサービスの方が素直（ファイルの持ち主が変わらない）
+   - Homebrew 版には上流のシステムサービス用 unit が同梱されないので、自分で用意することになる。本書は Homebrew が生成するユーザーサービスを使う
 
    </details>
 
-1. GUI の待ち受けを LAN に広げて HTTPS にし、再起動して反映する。
+1. GUI の待ち受けと HTTPS を設定し、再起動して確かめる。
 
    ```bash
-   syncthing cli config gui raw-address set "${ST_GUI_ADDR:?手順 1 の ST_GUI_ADDR が空のまま。値を入れて貼り直す}"
-   syncthing cli config gui raw-use-tls set true
-   syncthing cli config gui raw-address get      # 0.0.0.0:8384
-   syncthing cli config gui raw-use-tls get      # true
-   brew services restart syncthing
-   sleep 3
-   ss -ltnp | grep 8384                          # *:8384 で LISTEN
+   if [ "${ST_GUI_AUTH_READY:-false}" != true ]; then
+     echo '中断: このシェルで手順 3・4 の認証設定を完了してから貼る' >&2
+   elif [ -z "${ST_GUI_ADDR}" ]; then
+     echo '中断: 手順 1 の ST_GUI_ADDR が空。値を入れて貼り直す' >&2
+   else
+     syncthing cli config gui raw-address set "${ST_GUI_ADDR}" &&
+       syncthing cli config gui raw-use-tls set true &&
+       syncthing cli config gui raw-address get &&
+       syncthing cli config gui raw-use-tls get &&
+       brew services restart syncthing &&
+       sleep 3 &&
+       ss -ltnp | grep 8384
+   fi
    ```
 
    - 手順 3〜4 で認証を入れてあるので、ここで待ち受けを広げる
-   - 反映には再起動が要る
+   - 読み戻したアドレスが `ST_GUI_ADDR`、TLS が `true`、8384/tcp がそのアドレスで `LISTEN` ならよい（`0.0.0.0` は `*` と出る場合もある）
+   - 本手順は実機検証時と同様に再起動して確かめる。同じ版の Linux で、待ち受けと TLS は再起動前に変わった実測もある（[Windows 11 の節の補足](#windows-11-で使う)）
 
    <details>
    <summary>補足: 自己署名証明書と、別のやり方</summary>
@@ -204,17 +223,26 @@
 
    </details>
 
-1. firewalld で `syncthing` と `syncthing-gui` を開ける。
+1. firewalld で同期用と、LAN に公開する場合の GUI 用のポートを開ける。
 
    ```bash
-   {
-     sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
-     sudo firewall-cmd --list-services            # syncthing と syncthing-gui が含まれる
-   }
+   if [ "${ST_GUI_AUTH_READY:-false}" != true ]; then
+     echo '中断: このシェルで手順 3・4 の認証設定を完了してから貼る' >&2
+   elif [ -z "${ST_GUI_ADDR}" ]; then
+     echo '中断: 手順 1 の ST_GUI_ADDR を設定してから貼る' >&2
+   else
+     if [ "${ST_GUI_ADDR}" = 127.0.0.1:8384 ]; then
+       sudo firewall-cmd --permanent --add-service=syncthing && sudo firewall-cmd --reload
+     else
+       sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
+     fi
+     sudo firewall-cmd --list-services
+   fi
    ```
 
    - `syncthing` は同期と探索（22000/tcp、22000/udp、21027/udp）
    - `syncthing-gui` は Web GUI（8384/tcp）
+   - `127.0.0.1:8384` の場合は `syncthing` だけ、それ以外は両方が一覧に含まれればよい
    - どちらも firewalld に最初から入っている定義済みサービスで、自分で書く必要はない
 
    <details>
@@ -245,10 +273,18 @@
    ss -ltunp | grep -E ':(8384|22000|21027)'
    syncthing device-id
    tail -5 /home/linuxbrew/.linuxbrew/var/log/syncthing.log
-   printf 'GUI: https://%s:8384/  （ログイン名 %s）\n' "${ST_LAN_IP}" "${ST_GUI_USER}"
+   if [ -z "${ST_GUI_ADDR}" ] || [ -z "${ST_GUI_USER}" ]; then
+     echo '中断: 手順 1 の変数を設定してから GUI の URL を確かめる' >&2
+   elif [ "${ST_GUI_ADDR}" = 0.0.0.0:8384 ] && [ -z "${ST_LAN_IP}" ]; then
+     echo '中断: 手順 1 の ST_LAN_IP が空。LAN の IP を設定する' >&2
+   elif [ "${ST_GUI_ADDR}" = 0.0.0.0:8384 ]; then
+     printf 'GUI: https://%s:8384/  （ログイン名 %s）\n' "${ST_LAN_IP}" "${ST_GUI_USER}"
+   else
+     printf 'GUI: https://%s/  （ログイン名 %s）\n' "${ST_GUI_ADDR}" "${ST_GUI_USER}"
+   fi
    ```
 
-   - 8384/tcp、22000/tcp、22000/udp、21027/udp が LISTEN していれば動いている
+   - 8384/tcp と 22000/tcp が `LISTEN`、22000/udp と 21027/udp が `UNCONN` で出れば待ち受けている
 
    <details>
    <summary>補足: 認証が効いているかの確かめ方</summary>
@@ -269,9 +305,10 @@
 
    </details>
 
-1. LAN 上のブラウザで GUI に入り、デバイス ID を確かめる。
+1. ブラウザで GUI に入り、デバイス ID を確かめる。
 
    - 手順 8 の URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
+   - `ST_GUI_ADDR=127.0.0.1:8384` の場合は、このホストのブラウザで開く。LAN に公開した場合は、LAN の別の端末から開いて firewalld 越しの到達も確かめる
    - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
    - **この時点では同期するフォルダは 1 つも無い**（Syncthing 2.x は既定フォルダを作らない）
    - バックアップから戻したホストでは、戻したフォルダが並ぶ。フォルダのディレクトリと `.stfolder` は Syncthing が作り、中身は相手の端末から届く
@@ -681,9 +718,13 @@
 1. 設定ディレクトリに展開する。
 
    ```bash
-   install -d -m 0700 ~/.local/state/syncthing
-   tar -xzf "${ST_BACKUP:?この節の手順 4 の ST_BACKUP が空のまま。アーカイブのパスを入れて貼り直す}" -C ~/.local/state/syncthing
-   ls -la ~/.local/state/syncthing
+   if [ -z "${ST_BACKUP}" ] || [ ! -f "${ST_BACKUP}" ]; then
+     echo '中断: この節の手順 4 で存在するアーカイブを選び直す' >&2
+   else
+     install -d -m 0700 ~/.local/state/syncthing &&
+       tar -xzf "${ST_BACKUP}" -C ~/.local/state/syncthing &&
+       ls -la ~/.local/state/syncthing
+   fi
    ```
 
    - `cert.pem`・`key.pem`・`config.xml` が並ぶ。同じホストでは DB（`index-v2`）もそのまま残る
@@ -711,17 +752,25 @@
 
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#windows-11-の更新)
 
-1. Syncthing を更新し、サービスを再起動する。
+1. Syncthing を更新する。
 
    ```bash
    brew upgrade syncthing
-   brew services restart syncthing
-   syncthing --version
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
    - **brew 版は自分では更新しない**（`noupgrade` ビルド）ので、放っておいても勝手に版が上がることはない
    - `brew upgrade` は実行ファイルを差し替えるだけなので、**動いているプロセスは古いままになる。再起動まで必ず行う**
+   - **次の手順は、Homebrew の確認が出たら答え、更新が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+
+1. サービスを再起動し、更新した版を確かめる。
+
+   ```bash
+   brew services restart syncthing
+   syncthing --version
+   ```
+
+   - `syncthing --version` が更新した版になっていることを確かめる
 
 ---
 
@@ -745,7 +794,7 @@
    brew uninstall syncthing
    ```
 
-   - Syncthing を動かしていたユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは、`brew` が動かない）
+   - Syncthing を動かしていたユーザー自身のシェルで貼る（Homebrew の削除・サービス管理も、そのユーザーで行う）
    - `brew services stop` は停止に加えて**自動起動の登録も外す**（`brew services --help` の「unregister it from launching at login」）
    - 設定・鍵・DB（`~/.local/state/syncthing`）とログ（`/home/linuxbrew/.linuxbrew/var/log/syncthing.log`）は残る
 
@@ -949,7 +998,7 @@
 
    - `cert.pem` / `key.pem`（デバイス ID のもとになる証明書と秘密鍵）と `config.xml`（設定。GUI のログイン名・パスワードのハッシュ・API キーを含む）
    - Linux の同じ版では、`.syncthing.tmp.<数字>` という空の一時ファイルも残った（消してよい）
-   - GUI の待ち受けはこの時点では `127.0.0.1:8384`（この PC からだけ）
+   - 新規導入の GUI は `127.0.0.1:8384`（この PC からだけ）。設定を残した再導入では、元の待ち受け・TLS・フォルダの設定を引き継ぐ
 
    </details>
 
@@ -1037,7 +1086,7 @@
    ```
 
    - `Running` と、`syncthing.exe` が 2 つ（片方の `ParentProcessId` がもう片方の `ProcessId`）出ればよい
-   - 8384 は `127.0.0.1` で待ち受けている（この節の手順 10 で広げる）。22000 の行も出る
+   - 新規導入では 8384 は `127.0.0.1`（この節の手順 10 で広げる）。設定を残した再導入では元の待ち受けでよい。22000 の行も出る
    - 最初の起動は DB と HTTPS の証明書を作るので、数秒かかる（ブロックは 30 秒まで待つ）
    - **注意**: 「Windows セキュリティの重要な警告」の窓が出たら、**キャンセルを押さない**（拒否の規則ができる）。「プライベート ネットワーク」だけにチェックして「アクセスを許可する」を押す
 
@@ -1112,7 +1161,7 @@
    - この節の手順 11 の URL を開き、自己署名の証明書の警告を受け入れ、手順 2 のログイン名と手順 5 のパスワードで入る
    - 最初に、利用状況の報告（Usage Reporting）を許可するかを聞かれる。どちらでもよい
    - Actions → Show ID のデバイス ID が、この節の手順 11 の `device-id` と同じであることを確かめる
-   - **この時点では同期するフォルダは 1 つも無い**（Syncthing 2.x は既定のフォルダを作らない）
+   - 新規導入では同期するフォルダは 1 つも無い（Syncthing 2.x は既定のフォルダを作らない）。設定を残した再導入では、前のフォルダが並んでよい
 
 1. この PC でサインアウトし、サインインし直す。
 
@@ -1175,7 +1224,7 @@
 
 ## Windows 11 の更新
 
-- Syncthing は 12 時間ごとに新しい版を確かめ、あれば自分で入れ替えて起動し直す（入れ替える前に、リリースの署名を確かめる）。新しい版が出てから 24 時間以内に上がる
+- Syncthing は稼働中、既定で 12 時間ごとに新しい版を確かめ、あれば自分で入れ替えて起動し直す（入れ替える前に、リリースの署名を確かめる）。サインアウト中・スリープ中・通信できない間は更新されない
 - 入れ替えは同じ場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）で行うので、タスクと受信の規則はそのまま使える。古い実行ファイルは、同じフォルダーに `syncthing.exe.old` として残る
 - **自動で入れ替えた後の Syncthing は、タスクの外で動く**（タスクは `Ready` になる）。次のサインインからは、またタスクで起動する
 - 待たずに上げるときは、この節の手順を貼る
@@ -1293,7 +1342,7 @@
   - 結果として、次の状態になっている
     - `syncthing 2.1.5`（Homebrew、`arm64_linux` のボトル）が入っている
     - `sh.brew.syncthing.service` が `enabled` / `active`
-    - 8384/tcp・22000/tcp・22000/udp・21027/udp が LISTEN
+    - 8384/tcp・22000/tcp が `LISTEN`、22000/udp・21027/udp が `UNCONN`
     - firewalld に `syncthing` と `syncthing-gui` が入っている
   - **firewalld 越しの到達は、network namespace から 8384/tcp と 22000/tcp について確認済み**（[付録](#付録-実機での検証記録2026-09-24)）
   - このホストは**一度構築したあとクリーンインストールした直後**の環境で、Homebrew に formula が 1 本も入っていない状態から始めている
@@ -1306,6 +1355,9 @@
   - 2026-09-28: 手順 7 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-05: 必須入力と認証成功の確認、localhost の案内、復旧時の入力確認、Homebrew の完了待ちを修正した
+    - 空のログイン名・空パスワード・`generate` 失敗・成功の 4 通りをスタブで確認し、失敗時はサービス起動・GUI 変更・firewalld の開放へ進まなかった
+    - localhost（LAN の IP が空の場合も）・全 NIC・特定 IP の URL をスタブで確認した。変更した bash ブロックは構文検査済みで、実機には適用していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
@@ -1316,6 +1368,7 @@
   - **確かめていないこと**: Windows で貼ること（すべての手順）、タスクの登録と起動・サインインでの起動・サインアウトで止まること、受信の規則と警告の窓、LAN の別の端末からの GUI と同期、自動の更新とその後のタスクの状態、arm64 の Windows、24H2 より前の Windows
   - 2026-10-03: 別の手順書（`docs/windows-syncthing.md`）として書いたものを、同じ日にこの文書の Windows 11 の節へ移した。コマンドは変えていない（手順の番号も節の中で同じ）
   - 2026-10-03（後）: LAN をプライベートにする操作を [Windows 11 の初期設定の手順 43](windows-setup.md#実施手順) へ移し、この節の手順 7 を確かめてから規則を作る形に、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 4 をそこを指す手順に変えた。手順 7 の今のブロックも、構文の検査と、偽物の `Get-NetConnectionProfile` での模擬だけ
+  - 2026-10-05: 設定を残した再導入の確認条件と、参照先の Windows の版を訂正した。Windows のコマンドは変更せず、実機未検証のまま
 
 AlmaLinux 10 の実機:
 
@@ -1337,7 +1390,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2） |
+| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](windows-openssh-server.md)の実機記録は 25H2） |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | Syncthing | 2.1.5（2026-09-08。`syncthing-windows-amd64-v2.1.5.zip`） |
@@ -1392,9 +1445,9 @@ AlmaLinux 10 / aarch64 で Syncthing を入れる経路を比べた（2026-09-24
 
 - **起動方式はユーザーサービス + linger にした**
   - 同期するのはホームディレクトリ配下なので、ファイルの持ち主として動かすのが素直
-  - root 管理の `syncthing@<USER>.service` でも同じことはできるが、Homebrew 版は unit を同梱しないので自分で書くことになる
+  - root 管理の `syncthing@<USER>.service` でも同じことはできるが、Homebrew 版は上流のシステムサービス用 unit を同梱しないので、自分で用意することになる
 - **GUI は LAN に公開し、認証と TLS を先に入れた**
-  - 公開しない構成（`127.0.0.1:8384` のまま、SSH ポートフォワードで開く）なら、手順 6 と `syncthing-gui` の開放が要らない
+  - 公開しない構成（`127.0.0.1:8384`）でも手順 6 で HTTPS を設定する。手順 7 は `syncthing-gui` を開けず、手順 9 はこのホストのブラウザで確かめる
   - このホストは GNOME も入っていて、LAN 内の別 PC から触りたいので公開する方を採った
 - **firewalld は定義済みサービス（`syncthing` / `syncthing-gui`）で開けた。** ポート番号を直接書くより意図が読め、上流がポートを足したときにも追従する
 - **設定のバックアップは、systemd のユーザーユニット（path + タイマー）で自動にした**（[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)）
@@ -1418,7 +1471,7 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
 
 - **Windows 11 では、固定の場所に置き、Syncthing 自身に更新させた**
   - タスクの実行ファイルと、受信の規則のプログラムが、更新の後も同じパスを指す
-  - 自動の更新は、入れ替える前にリリースの署名を確かめる。`winget upgrade` や `scoop update` を自分で走らせなくても、24 時間以内に上がる
+  - 自動の更新は、入れ替える前にリリースの署名を確かめる。稼働中に定期確認するので、`winget upgrade` や `scoop update` を自分で走らせなくてよい
   - 初回だけは本書が取ってくるので、sha256 と Authenticode の署名を確かめてから置く（[Windows 11 で使う](#windows-11-で使う)の手順 4）
   - AlmaLinux 10 の Homebrew 版は逆に、Syncthing 自身の更新を切ってある（`noupgrade`。[注意点](#注意点)）
 - **Windows 11 では、サインインしている間だけ、タスク スケジューラで動かした**

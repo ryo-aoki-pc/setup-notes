@@ -109,7 +109,7 @@
    ```
 
    - `grep` に、`brew shellenv` の行 → 足した `bash_completion.d` の行（→ fzf の行があればその後ろ）の順で出る
-   - `complete -F _brew brew` が出る。入れてある Homebrew のコマンド（eza・bat・zoxide・fd・starship など）の補完も読まれる
+   - `-F _brew brew` を含む補完定義が出る（検証時は `complete -o bashdefault -o default -F _brew brew`）。入れてある Homebrew のコマンド（eza・bat・zoxide・fd・starship など）の補完も読まれる
    - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `complete -p brew` を実行する（その設定が同じ読み込みを行う）
    - [fzf.md 手順 3](fzf.md#実施手順) の行があるときは、その前に差し込まれる。今のシェルでは `**<Tab>`（fzf）が bat などで効かなくなるが、手順 6 で開き直せば直る
 
@@ -188,7 +188,7 @@
    ```
 
    - 手順 3 と同じ値、`complete -F _completion_loader -D`、`set … on` が 4 行、`"\eOA", "\e[5~", "\e[A"` が出る
-   - Homebrew のホストでは、続けて `complete -p brew` が `complete -F _brew brew` を出す
+   - Homebrew のホストでは、続けて `complete -p brew` が `-F _brew brew` を含む補完定義を出す
 
 1. キーを押して、補完と履歴の検索を確かめる。
 
@@ -319,7 +319,7 @@ $ bind -q history-search-backward
 history-search-backward can be invoked via "\eOA", "\e[5~", "\e[A".
 $ complete -p -D brew
 complete -F _completion_loader -D
-complete -F _brew brew
+complete -o bashdefault -o default -F _brew brew
 ```
 
 - `~/.inputrc` は手順 5 の 13 行（コメント 3 行を含む）

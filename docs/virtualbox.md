@@ -483,15 +483,23 @@
 1. 使い捨ての VM を画面無しで起動し、状態を見てから止めて消す。
 
    ```bash
-   VBoxManage createvm --name vbox-selftest --ostype Other_64 --register
-   VBoxManage modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off
-   VBoxManage startvm vbox-selftest --type headless
-   VBoxManage showvminfo vbox-selftest --machinereadable | grep -E '^VMState='
-   VBoxManage controlvm vbox-selftest poweroff
-   VBoxManage unregistervm vbox-selftest --delete
+   if VBoxManage showvminfo vbox-selftest >/dev/null 2>&1; then
+     echo 'vbox-selftest はすでにある。変更せずに中断する' >&2
+   elif VBoxManage createvm --name vbox-selftest --ostype Other_64 --register; then
+     if VBoxManage modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off &&
+        VBoxManage startvm vbox-selftest --type headless; then
+       VBoxManage showvminfo vbox-selftest --machinereadable | grep -E '^VMState='
+       VBoxManage controlvm vbox-selftest poweroff
+     fi
+     VBoxManage unregistervm vbox-selftest --delete
+   else
+     echo 'VM を作れなかった。変更・起動・削除は行わない' >&2
+   fi
    ```
 
    - VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
+   - 既に `vbox-selftest` があれば、変更せず中断する。別の名前で試すなら、ブロック中の `vbox-selftest` をすべて同じ名前に変える
+   - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
    - `VM "vbox-selftest" has been successfully started.` が出れば動いている（起動するディスクが無いので、中では何も動かない）
    - `VMState="running"` なら動いていた
    - `controlvm ... poweroff` で止まり、`unregistervm ... --delete` は `0%...10%...` と進んで、VM のファイルごと消える（実機では、`poweroff` と `unregistervm` のそれぞれが `0%...100%` の行を出した）
@@ -509,7 +517,6 @@
 
    - AMD の 2 行は、実機（AMD）で手順 11 の設定を再起動で効かせる前に、この手順を貼って出した（後ろに `Details: code NS_ERROR_FAILURE (0x80004005), component ConsoleWrap, interface IConsole`、`VMState="poweroff"`、`Machine 'vbox-selftest' is not currently running.` が続いた）
    - Intel の文は、実機で出したものではなく `/usr/lib/virtualbox/VBoxVMM.so` の中の文字列から写した
-   - 既に `vbox-selftest` という名前の VM があるなら、この手順の 6 行の名前を別のものに置き換えて貼る
 
    コンテナ（モジュールが無い）での `startvm` の実測は次のとおりで、実機での失敗の出方とは違う可能性がある:
 
@@ -818,13 +825,26 @@
    if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
      Write-Error '管理者の PowerShell に貼っている（この節の手順 5 で開いた窓に貼る）'
    } else {
-     & $vbm createvm --name vbox-selftest --ostype Other_64 --register
-     & $vbm modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off
-     & $vbm startvm vbox-selftest --type headless
-     & $vbm showvminfo vbox-selftest --machinereadable | Select-String -Pattern '^VMState='
-     & $vbm showvminfo vbox-selftest --log 0 | Select-String -Pattern 'fall back to NEM|Snail execution mode'
-     & $vbm controlvm vbox-selftest poweroff
-     & $vbm unregistervm vbox-selftest --delete
+     & $vbm showvminfo vbox-selftest *> $null
+     if ($LASTEXITCODE -eq 0) {
+       Write-Error 'vbox-selftest はすでにある。変更せずに中断する'
+     } else {
+       & $vbm createvm --name vbox-selftest --ostype Other_64 --register
+       if ($LASTEXITCODE -eq 0) {
+         & $vbm modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off
+         if ($LASTEXITCODE -eq 0) {
+           & $vbm startvm vbox-selftest --type headless
+           if ($LASTEXITCODE -eq 0) {
+             & $vbm showvminfo vbox-selftest --machinereadable | Select-String -Pattern '^VMState='
+             & $vbm showvminfo vbox-selftest --log 0 | Select-String -Pattern 'fall back to NEM|Snail execution mode'
+             & $vbm controlvm vbox-selftest poweroff
+           }
+         }
+         & $vbm unregistervm vbox-selftest --delete
+       } else {
+         Write-Error 'VM を作れなかった。変更・起動・削除は行わない'
+       }
+     }
    }
    ```
 
@@ -833,7 +853,8 @@
    - **`fall back to NEM` か `Snail execution mode` を含む行が出たら、VM は Hyper-V の上で動いている**（遅くなる。[注意点](#注意点)）
    - その行が出なければ、VirtualBox は VT-x / AMD-V を直接使っているはず
    - `poweroff` と `unregistervm` は `0%...100%` の行を出し、VM のファイルごと消える
-   - 既に `vbox-selftest` という名前の VM があるなら、この手順の 7 行の名前を別のものに置き換えて貼る
+   - 既に `vbox-selftest` があれば、変更せず中断する。別の名前で試すなら、ブロック中の `vbox-selftest` をすべて同じ名前に変える
+   - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
 
    <details>
    <summary>補足: Hyper-V の上かの見分け方と、出るエラー</summary>
@@ -1013,7 +1034,10 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。実機では、手順 4 と鍵を作るブロックを囲む前の形で流し、手順 4 は囲んだ形でもう 1 回流した（どちらもブラケットペーストの効く端末で）。ロールバックの手順 2 は流していない
   - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の手順 3・8・11・12。つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-05: 手順 16 に、既存の `vbox-selftest` と作成失敗を弾く条件を加えた
+    - `bash -n` と VBoxManage のスタブで、既存 VM・作成失敗時に変更や削除をしないこと、変更・起動の失敗時も新規作成分だけを片付けることを確認した。変更後のブロックは実機では流していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 2026-10-05: 使い捨て VM のブロックにも既存 VM と作成失敗の条件を加え、Linux の PowerShell 7.6.6 で構文とスタブを確認した。Windows の権限判定はスタブで代え、本物の VM は動かしていない
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - 利用者の Windows 11 の PC には同じ 7.2.20 が入っていて、Hyper-V の上で VM を動かした（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）。入れた方法の記録は無い
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:

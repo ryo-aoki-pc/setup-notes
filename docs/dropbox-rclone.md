@@ -5,9 +5,10 @@
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も同期を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す（Raspberry Pi 5 で [Syncthing](syncthing.md) を動かしているなら、もう有効になっている）
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、同期するファイルの持ち主として動かすため）
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、同期するファイルの持ち主として動かすため）
 > - **手順 3 はブラウザで認証する**。手順 2 は、Raspberry Pi 5 のデスクトップの端末で貼るか、手元の PC から `ssh -L localhost:53682:localhost:53682 <USER>@<HOSTNAME>` で入り直してから貼る
 > - **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
+> - 手順 1 の導入で `[y/n]` が出たら、答えてプロンプトが戻ってから手順 2 を貼る
 > - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[gnome-power.md](gnome-power.md)）
 
 - 上から順にコードブロックを貼る
@@ -25,13 +26,11 @@
 
    ```bash
    brew install rclone
-   rclone version
-   command -v rclone
    ```
 
-   - `rclone v1.75.1` と、`os/arch:` などの行が出る（コンテナの x86_64 では `linux/amd64`）
-   - `command -v` が `/home/linuxbrew/.linuxbrew/bin/rclone` を出す
    - 最後の Caveats の「`mount` subcommand on macOS」は macOS の話で、ここでは関係ない
+   - 依存の一覧と `[y/n]` が出たら、入るものを見て `y` と答える（Homebrew 7.0.7 の ask mode。[tmux.md 手順 1 の補足](tmux.md#実施手順)）
+   - **次の手順は、導入が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
 
    <details>
    <summary>補足: 入るものと、EPEL 版との違い</summary>
@@ -43,12 +42,15 @@
 
    </details>
 
-1. rclone に Dropbox を登録する。
+1. rclone が入ったことを確かめ、Dropbox を登録する。
 
    ```bash
+   rclone version
+   command -v rclone
    rclone config create dropbox dropbox >/dev/null
    ```
 
+   - `rclone v1.75.1` と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
    - `http://127.0.0.1:53682/auth?state=...` が表示され、`Waiting for code...` で許可を待つ（手順 3 で許可する）
    - SSH で入っているときは、`ssh -L` でトンネルを張った端末で貼る
    - `>/dev/null` は、登録が終わったときに出る設定（トークン入り）を画面に出さないため
@@ -398,10 +400,19 @@
 
    ```bash
    brew upgrade rclone
-   rclone version | head -1
    ```
 
    - 新しい版が無ければ `Warning: rclone 1.75.1 already installed` と出る
+   - 依存の一覧と `[y/n]` が出たら、更新するものを見て `y` と答える
+   - **次の手順は、更新が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
+
+1. 更新後の版を確かめる。
+
+   ```bash
+   rclone version | head -1
+   ```
+
+   - `rclone v` に続いて版が出ればよい
    - timer の次の回から、新しい版で動く（oneshot なので、再起動は要らない）
 
 ---
@@ -412,8 +423,9 @@
 - Dropbox 側のファイルは、この節のどの手順でも消えない
 - linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 
-> [!WARNING]
+> [!CAUTION]
 > **この節の**手順 5 で `~/Dropbox` を消すのは、手順 1 でタイマーを止めてからにする。タイマーが動いている間に手元で消すと、次の回で Dropbox 側からも消える（半分を超える削除は `Safety abort` で止まるが、それより少なければ消える）。手順 5 は、タイマーかサービスが動いていれば `中断:` で止まる。
+> まだ Dropbox に上がっていない手元の変更は、取り戻せない。
 
 1. タイマーを止めて unit を消す。
 
@@ -448,15 +460,16 @@
 
    - 空になった `~/.config/rclone/rclone.conf` は残る
 
-1. 手元のファイルも消すときだけ、`~/Dropbox` と同期の記録とフィルタを消す。
+1. 手元のファイルも消すときだけ、`~/Dropbox` とフィルタを消す（取り戻せない）。
 
    ```bash
    if systemctl --user is-active --quiet dropbox-rclone.timer dropbox-rclone.service; then echo '中断: 同期のタイマーかサービスがまだ動いている。この節の手順 1 を先に貼る' >&2; else
-   rm -rf ~/Dropbox ~/.cache/rclone/bisync ~/.config/rclone/dropbox-filters.txt ~/.config/rclone/dropbox-filters.txt.md5
+   rm -rf ~/Dropbox ~/.config/rclone/dropbox-filters.txt ~/.config/rclone/dropbox-filters.txt.md5
    fi
    ```
 
    - まだ Dropbox に上がっていない手元の変更は失われる
+   - `~/.cache/rclone/bisync` は、ほかの同期も使うので残す（Dropbox の一覧やロックの記録も残る）
    - 先頭の `if` は、タイマーを止めないまま貼ったときに、削除が Dropbox 側へ伝わるのを防ぐ（コンテナで、動いている間は `中断:` が出て何も消えないことを確かめた）
 
 ---
@@ -481,6 +494,7 @@
     - timer が自分で動き、次の回が 15 分後になる
     - ロールバックで元に戻る
   - **確認していないこと**: Dropbox との実際の同期（Dropbox の API の制限、大文字と小文字、Dropbox が受け付けない名前）、aarch64 での導入と実行、SSH のトンネルでの認証、再起動後の timer、SELinux が Enforcing の実機での動作
+  - 2026-10-05: 手順 1 の導入と確認を分け、確認を手順 2 の冒頭へ移した。更新も完了を待ってから別の手順で確認する形にした。ロールバックの手順 5 は共有の bisync キャッシュを残す形にした。変更後は構文検査と一時ディレクトリ・スタブでの確認だけで、Dropbox との同期はしていない
 
 | 項目 | 実機（Raspberry Pi 5） | 検証コンテナ |
 |---|---|---|
@@ -592,7 +606,7 @@ $ find ~/Dropbox -type f | sort
 | 4〜5 | 代役で、`dropbox: alias`・容量・3 つのフォルダ。フィルタの有効な行は 7 行 |
 | 7〜8 | `--dry-run` も本番も `Bisync successful`。6 ファイルがコピーされ、`desktop.ini` と `~memo.tmp` は外れた。`.md5` と一覧ができた |
 | 8 の中断 | 20 MB のファイルを足し、`--bwlimit 1M` を付けた同じコマンドに SIGHUP を送ると、終了コード 129 で止まり、ロックと `video.mp4.<16 進>.partial` が残った。すぐ貼り直すと `prior lock file found`（期限まで 1m53s）。期限の後に手順 8 を貼り直すと、`Lock file found, but it expired at ... Will delete it and proceed.` の後に `Bisync successful` になり、書きかけは代役に上がらなかった |
-| linger.md 2・3、9・10 | `Linger=yes`、`enabled`、`Result=success`、`No changes found`、`list-timers` に `NEXT` |
+| linger.md 2、本書の 9・10 | `Linger=yes`、`enabled`、`Result=success`、`No changes found`、`list-timers` に `NEXT` |
 | 双方向 | 手元で足したファイルが代役に、代役で変えたファイルが手元に、手元で消したファイルが代役から消えた |
 | 競合 | 両方で `plan.md` を変えると `The winner is: Path2`（新しい手元の方）、代役の方が `plan.md.conflict1` になって両側に残った |
 | 削除の安全装置 | 手元の 6 ファイル中 4 つを消すと `ERROR : Safety abort: too many deletes (>50%, 4 of 6)`、`Result=exit-code`。次の回も同じ。手元に戻すと成功した。代役のファイルは消えなかった |

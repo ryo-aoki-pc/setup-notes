@@ -771,7 +771,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2）。x64 |
+| OS | Windows 11（[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2）。x64 |
 | PowerShell | Windows PowerShell 5.1（管理者でなくてよい） |
 | Git for Windows | [git.md](git.md#windows-11-で-git-for-windows-を入れる)で入れたもの（`C:\Program Files\Git`） |
 | 既定のブラウザ | Firefox（[firefox.md](firefox.md#windows-11-で使う)） |

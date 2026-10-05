@@ -208,6 +208,7 @@
    ssh "${OFFLINE_USER:?手順 1 の OFFLINE_USER が空のまま}@${OFFLINE_HOST:?手順 1 の OFFLINE_HOST が空のまま}"
    ```
 
+   - オンラインのホストが Windows なら、この Bash のブロックの代わりに、PowerShell か cmd に `ssh <OFFLINE_USER>@<OFFLINE_HOST>` を打つ（手順 2 と同じユーザー・ホストを指定する）
    - **次の手順は、ログインしてから貼る**（続けて貼るとパスワードへの答えとして食われる）
 
 1. オフラインのホストで、トンネルが無く、外に出られないことを確かめる。
@@ -259,7 +260,7 @@
     - コンテナ（[npm-offline.md の付録](npm-offline.md#付録-コンテナでの検証記録2026-09-30)、2026-09-30）: npm-offline.md の前提として、手順 1〜3・dnf の節・トンネルを閉じる節の手順 1・2（当時の homebrew-offline.md の手順）。npm は `ALL_PROXY` だけでは届かず、`https_proxy` を足すと届くこと
   - 2026-09-30 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
     - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](homebrew-offline.md) の手順 1〜6・更新・ロールバック
-  - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、SELinux が Enforcing のオフラインのホスト、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
+  - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、Linux 発で SELinux が Enforcing のオフラインのホストへの接続、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
 
 | 項目 | コンテナ（2026-09-29・30） | Windows のホストの VM（2026-09-30） |
 |---|---|---|
@@ -314,7 +315,7 @@
 - **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm-offline.md 手順 2](npm-offline.md#実施手順)）
 - **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する。dnf で外のリポジトリを使わなくなったら、[ロールバック](#ロールバック)で消す
 - **ssh が切れると、トンネルも消える**: 取得の途中なら失敗するはず（確かめていない）。そのときは手順 2 から張り直して、同じコマンドを貼り直す
-- **SELinux が Enforcing のオフラインのホストでは確かめていない**: 検証のコンテナには SELinux が無い（Atomic Desktop の VM は Enforcing で、待ち受けは拒まれなかった）
+- **Linux 発の検証では SELinux Enforcing を確かめていない**: 検証のコンテナには SELinux が無い。Windows 発で接続した Atomic Desktop の VM は Enforcing で、待ち受けは拒まれなかった
 
 ### 参照
 

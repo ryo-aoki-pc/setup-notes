@@ -1039,7 +1039,7 @@
 
    </details>
 
-1. 電源につないでいる間は眠らず、休止状態を切り、蓋を閉じても何もせず、放置してもロックしないようにする。
+1. 電源接続中の眠りと蓋の動作を止め、電源に関係なく休止状態と放置後のロックを切る。
 
    ```powershell
    powercfg /change standby-timeout-ac 0
@@ -1053,8 +1053,9 @@
    ```
 
    - 3 つの行の AC の値が `0x00000000` で、`HibernateEnabled: 0` が出ればよい（`powercfg` の表示は日本語）
-   - 画面を消す時間は変えない（画面は消えるが、眠らず、ロックもしない）
-   - バッテリーのときは変えない（眠り、蓋を閉じると眠る）
+   - 画面を消す時間は変えない
+   - バッテリー用の電源プランの値（スリープ時間・蓋を閉じたときの動作・`CONSOLELOCK`）は変えない
+   - 休止状態の無効化と `DelayLockInterval` は電源接続中だけに限定されない（バッテリーのときもかかる）
    - **注意**: PC の前にいる人は、このユーザーとしてそのまま使える（リードの `[!WARNING]`）
 
    <details>
@@ -1120,7 +1121,7 @@
    <summary>補足: プライベートにする理由</summary>
 
    - Windows のファイアウォールの受信の規則は、ネットワークの種類（プライベート・パブリック）ごとに有効にできる。OpenSSH サーバーの機能が作る規則も、Syncthing の Windows 11 の節で作る規則も、手順 44〜46 の規則も、プライベートだけで有効にする
-   - Windows 11 は、新しくつないだネットワークをパブリックにすることがある。[Windows の OpenSSH サーバー](windows-openssh-server.md)を検証した PC の有線 LAN はパブリックで、そのままでは LAN からの SSH が捨てられ、プライベートにすると通った（同書の手順 17 の補足）
+   - Windows 11 は、新しくつないだネットワークをパブリックにすることがある。[Windows の OpenSSH サーバー](windows-openssh-server.md)を検証した PC の有線 LAN はパブリックで、そのままでは LAN からの SSH が捨てられ、プライベートにすると通った（同書の手順 5 の補足）
    - 同じ PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本。手順 45 で切る）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
    - この操作は、もとは Windows の OpenSSH サーバーの手順 5 と Syncthing の Windows 11 の手順 7 の両方にあった。2026-10-03 に、インストール直後の作業としてここへまとめた。ブロックは OpenSSH サーバーの手順 5（実機で通したもの）から、`Get-NetFirewallRule` の行を除いて移した（変数の手順の番号だけ変えた）
    - ノート PC を持ち出したとき: プライベートにしたのはこの接続（有線 LAN か、この Wi-Fi のネットワーク）だけ。出先の Wi-Fi は、つないだときにパブリックかプライベートかを選ぶ（既定はパブリック）
@@ -1555,7 +1556,7 @@
 
 - 電源を切った（シャットダウンした）この PC を、LAN の別の PC から起こせるようにする。有線 LAN だけ（Wi-Fi では使えない）
 - 前提: 手順 41（休止状態を切ると、高速スタートアップも切れる）と手順 42（アダプターの省電力）。この節の手順 2〜4・8 は、この節の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
-- **この節の手順 4 で再起動して UEFI の画面に入り、この節の手順 5 は UEFI の画面、手順 18 はこの PC、手順 19 は LAN の別の PC で行う**
+- **この節の手順 4 で再起動して UEFI の画面に入り、この節の手順 5 は UEFI の画面、この節の手順 6 はこの PC、この節の手順 7 は LAN の別の PC で行う**
 - Windows の側の値は Microsoft の文書の標準の名前（`*WakeOnMagicPacket`）だけを変える。アダプターに独自の項目があれば、この節の手順 3 の表で確かめる
 
 1. 管理者の Windows PowerShell（5.1）を開く。
@@ -1916,16 +1917,24 @@
 
    </details>
 
-1. 実行ポリシーを戻すときだけ、自分のユーザーの値を消す。
+1. 実行ポリシーを戻すときだけ、元の値にする（`OLD_EXECUTION_POLICY` は必ず値を入れる）。
 
    ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Force
-   Get-ExecutionPolicy -List | Format-Table -AutoSize
+   $OLD_EXECUTION_POLICY = ''   # 手順 17 で控えた CurrentUser の値（Undefined・Restricted・AllSigned・RemoteSigned・Unrestricted・Bypass）
    ```
 
-   - 手順 17 で `CurrentUser` が `Undefined` だったときだけ行う。`RemoteSigned` などだったなら飛ばす（手順 18 はその値を変えていない）
-   - 表の `CurrentUser` が `Undefined` に戻ればよい
-   - **注意**: PowerShell のスクリプトを使うほかの道具（scoop を残すときの scoop も）が動かなくなる。プロファイルも読まれなくなる
+   ```powershell
+   if ($OLD_EXECUTION_POLICY -notin 'Undefined', 'Restricted', 'AllSigned', 'RemoteSigned', 'Unrestricted', 'Bypass') {
+     Write-Error '中断: $OLD_EXECUTION_POLICY に手順 17 で控えた CurrentUser の値を入れる'
+   } else {
+     Set-ExecutionPolicy -ExecutionPolicy $OLD_EXECUTION_POLICY -Scope CurrentUser -Force -ErrorAction Stop
+     Get-ExecutionPolicy -List | Format-Table -AutoSize
+   }
+   ```
+
+   - 手順 18 で値を変えなかった場合は、この手順を飛ばす。元の値を控えていなければ、推測で戻さない
+   - 表の `CurrentUser` が、手順 17 で控えた値に戻ればよい。`Undefined` は自分のユーザーの設定を消す値
+   - **注意**: 戻した後の実効値が `Restricted` なら、scoop などのスクリプトやプロファイルは動かない。`AllSigned` なら署名が必要になる
 
 1. WSL の AlmaLinux 10 を消すときだけ、登録を外す（取り戻せない）。
 
@@ -2054,15 +2063,24 @@
    - `Scancode Map を消した` が出ればよい
    - `中断:` が出たら、本書の後でほかの割り当てを足している。消さずに止めている
 
-1. 手順 37 で配信の最適化が `Internet` だったときだけ、`Internet` に戻す。
+1. 配信の最適化を元に戻す（`OLD_DOWNLOAD_MODE` は必ず値を入れる）。
 
    ```powershell
-   Set-DODownloadMode -DownloadMode Internet
-   Get-DODownloadMode
+   $OLD_DOWNLOAD_MODE = ''   # 手順 37 で控えたモード（Internet・Lan・CdnOnly）
    ```
 
-   - `Internet` が出ればよい
-   - `Lan`（既定）だったなら、この手順は飛ばす
+   ```powershell
+   if ($OLD_DOWNLOAD_MODE -notin 'Internet', 'Lan', 'CdnOnly') {
+     Write-Error '中断: $OLD_DOWNLOAD_MODE に手順 37 で控えた Internet・Lan・CdnOnly のいずれかを入れる'
+   } else {
+     Set-DODownloadMode -DownloadMode $OLD_DOWNLOAD_MODE -ErrorAction Stop
+     Get-DODownloadMode
+   }
+   ```
+
+   - 手順 37 で控えたモードが出ればよい
+   - `Lan`（既定）だったなら、この手順は飛ばしてよい。`CdnOnly` なら、ほかの PC と共有しない設定に戻る
+   - 元の値を控えていない場合や、上の 3 つ以外だった場合は、推測で値を選ばず、管理元の設定を確かめる
 
 1. ping に応える規則を消す。
 
@@ -2246,6 +2264,7 @@
     - scoop・UniGet UI・Caps Lock・コンテキストメニュー（最初の版の 4 項目）: [配布物と資料の調査の付録](#付録-配布物と資料の調査2026-10-03)
     - 足した項目: Microsoft の文書（Microsoft Learn・サポートの記事・ポリシーの文書）、Microsoft の DSC のリソース（`microsoft/winget-dsc`）、winget の定義、各ツールのソース（PowerShell・sudo・WSL・winget・PSReadLine・UniGet UI など）、Microsoft Store の API（[設定の調査の付録](#付録-windows-11-の設定の調査2026-10-03)）
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。条件で止まるブロック（プロファイルの行、PC の名前、自動で起動するアプリ、リモート デスクトップなど）は、偽物のコマンドレットで模擬して流した（[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
+    - 2026-10-05 に直したロールバックの手順 16・29: Linux の PowerShell 7.6.6 で、記録した元値の復元と、空・不正値・書き込み失敗の分岐を模擬確認した。Windows の設定は変更していない（[付録](#付録-ロールバックの元値復元の模擬確認2026-10-05)）
   - **確かめていないこと**:
     - PSWindowsUpdate の初回導入・実更新・再起動後の再検索、古い Store から CLI を用意すること、Store の実更新と完了・失敗の表示。CLI 自体は `Preview` 表記
     - Windows で貼ること（すべての手順）と、画面の文言（設定・ストア・UniGet UI・Autologon）
@@ -2255,7 +2274,7 @@
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Windows の OpenSSH サーバー](windows-openssh-server.md)の PC は 25H2・26H2）。x64。Pro を想定（Home では手順 44 を飛ばす） |
+| OS | Windows 11（[Windows の OpenSSH サーバー](windows-openssh-server.md)の実機の記録は 25H2）。x64。Pro を想定（Home では手順 44 を飛ばす） |
 | PowerShell | Windows PowerShell 5.1（管理者ではないものと、管理者として実行したもの） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | winget | Windows 11 の「アプリ インストーラー」に入っているもの |
@@ -2285,6 +2304,8 @@
 > | `$PC_NAME` | 手順 36 | この PC の新しい名前（名前を変えるときに入れる。変えないなら空のままにして手順 39 を飛ばす） | `<HOSTNAME>` |
 > | `$LAN_IF` | 手順 36（[ロールバック](#ロールバック)では手順 19、[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
 > | `$OLD_PC_NAME` | [ロールバック](#ロールバック)の手順 37 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
+> | `$OLD_EXECUTION_POLICY` | [ロールバック](#ロールバック)の手順 16 | 手順 17 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
+> | `$OLD_DOWNLOAD_MODE` | [ロールバック](#ロールバック)の手順 29 | 手順 37 で控えた配信の最適化のモード | `CdnOnly` |
 >
 > 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
 
@@ -2370,8 +2391,8 @@
 |---|---|---|
 | PC の名前 | `Rename-Computer`（15 文字までをブロックで確かめる） | `-Force`: 15 文字を超える名前を黙って短くする |
 | sudo | `sudo config --enable normal`（インライン。利用者の選択） | 既定の `forceNewWindow`: Microsoft が勧める形だが、新しい窓が開く |
-| 電源 | `powercfg`（電源につないでいる間だけ眠らない） | バッテリーのときも眠らない: 持ち出したノート PC の電池が減る |
-| 放置したときのロック | 眠りから戻ったときの `CONSOLELOCK` と、Modern Standby の `DelayLockInterval` | ポリシー（`InactivityTimeoutSecs`）: ロックさせる側の設定 |
+| 電源 | `powercfg`（電源接続中だけスリープと蓋の動作を止め、休止状態は電源に関係なく切る） | バッテリーのときもスリープしない: 持ち出したノート PC の電池が減る |
+| 放置したときのロック | 電源接続中の `CONSOLELOCK` と、電源に関係なくかかる Modern Standby の `DelayLockInterval` | ポリシー（`InactivityTimeoutSecs`）: ロックさせる側の設定 |
 | アダプターの省電力 | `Get-NetAdapterPowerManagement` で取ったものを変えて `-NoRestart` で渡す | `PnPCapabilities`（Windows 7 の頃のサポートの記事の値）: 起動し直しが要る |
 | リモート デスクトップ | レジストリと、組み込みの規則をプライベートに絞る | 規則をそのまま（すべてのプロファイル）: 持ち出した先で開く |
 | ping | 自分の名前とグループの規則（プライベート） | 組み込みの「ファイルとプリンターの共有」の規則: その共有の設定と一緒に変わる |
@@ -2394,7 +2415,7 @@
   - scoop のインストーラは、管理者の PowerShell では止まる。scoop・UniGet UI・PowerToys（自分のユーザーへの導入）と、自分のユーザーの表示の設定は、どれも管理者の権限が要らない
   - PC 全体の設定（`HKLM`・ファイアウォール・電源・機能）と、管理者しか書けない `HKCU\Software\Policies` だけ、管理者の PowerShell で行う
   - そのため、[Windows の OpenSSH サーバー](windows-openssh-server.md)の SSH のセッション（Administrators の一員なら管理者の権限で動く）には貼らない
-- **再起動を 1 回にまとめた**: Scancode Map・PC の名前・キーボードの種類・WSL の機能は再起動、エクスプローラーの設定はエクスプローラーの起動し直しで効く。再起動 1 回で全部効く（hackgen.md の Windows のフォントも、サインインし直す代わりにこの再起動で効く）。Windows Update の再起動は、その前の手順 1 で済ませる
+- **設定のための再起動を 1 回にまとめた**: Scancode Map・PC の名前・キーボードの種類・WSL の機能は再起動、エクスプローラーの設定はエクスプローラーの起動し直しで効く。再起動 1 回で全部効く（hackgen.md の Windows のフォントも、サインインし直す代わりにこの再起動で効く）。Windows Update は先に手順 1〜8 で済ませ、必要な再起動は手順 8 で行う
 - **Windows PowerShell 5.1 にそろえた**: Windows 11 に最初からあり、ほかの Windows の手順書とも同じ。実行ポリシーとプロファイルは PowerShell 7 と別に持つので、5.1 の値を変える
 
 ### 注意点
@@ -2732,3 +2753,12 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 古い Store からの CLI の準備、Store の実更新・進行中の表示・完了待ち・失敗時の終了コード、App Installer や Terminal が自己更新した後の窓の状態
 - モジュールの実際の更新・削除。CLI の引数も模擬の関数で受けただけで、更新時のネイティブの処理は流していない
 - この PC のモジュールの導入・削除、Windows／Store の更新、再起動は行っていない。上の結果を実更新の検証としては扱わない
+
+### 付録: ロールバックの元値復元の模擬確認（2026-10-05）
+
+- Linux の PowerShell 7.6.6 の構文解析器で、修正後の本書の PowerShell ブロック 107 個を解析し、構文の誤りは 0 だった
+- 実施手順 18・47 とロールバックの手順 16・29 を本文から抜き出し、設定の読み書きだけを偽物のコマンドレットに置き換えた
+  - 実行ポリシー: 元の `CurrentUser` が `Undefined`・`Restricted`・`AllSigned`・`RemoteSigned`・`Unrestricted`・`Bypass` の 6 通りで、実施後に元値へ戻った
+  - 配信の最適化: 元の値が `Internet`・`Lan`・`CdnOnly` の 3 通りで、実施後に元値へ戻った
+  - どちらも、元値が空または不正なら設定の読み書きを呼ばず、設定の書き込みが失敗した場合はその後の読み戻しへ進まなかった
+- Windows PowerShell 5.1 での実行、Windows の実設定の復元、グループ ポリシーがある PC では確認していない

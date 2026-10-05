@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わない）
 > - **手順 1 には対話入力があることがある**（依存の `ncurses` がまだ無いときの `[y/n]`）
 > - **手順 4〜7 はキーを押す操作**（コマンドのブロックは無い）
 > - [bash の履歴・補完・キー操作](bash-settings.md)を先に通してあると、Homebrew のコマンドの補完と fzf の `**<Tab>` が両方効く。後から通しても、同書の手順 4 が fzf の行の前に差し込む
@@ -30,7 +30,7 @@
    <summary>補足: 依存と、入れてあるホストで貼る意味</summary>
 
    - fzf の依存は `ncurses` だけ（`brew deps fzf`）。コンテナで `brew install fzf fd bat eza zoxide starship` をまとめて入れたときは、fzf のボトルの前に `ncurses` が入った
-   - yazi.md や zoxide.md で入れた fzf は、`brew install zoxide fzf` のように名前を挙げて入れているので、Homebrew の「頼まれて入れた」印（`installed_on_request`）が付いている。`brew install fzf` を貼り直しても害は無く、印が無かったホストでは付く（印が無いと、zoxide や yazi を `brew uninstall` した後の `brew autoremove` で fzf も消える）
+   - yazi.md や zoxide.md で入れた fzf は、`brew install zoxide fzf` のように名前を挙げて入れているので、Homebrew の「頼まれて入れた」印（`installed_on_request`）が付いている。`brew install fzf` を貼り直しても害は無く、印が無かったホストでは付く（印が無いと、zoxide や yazi を `brew uninstall` した際の自動削除や、明示的な `brew autoremove` で fzf も消えうる）
    - 入れてあるホストの出力:
 
    ```
@@ -79,7 +79,7 @@
 
 1. Ctrl+R を押し、履歴から手順 2 の `fzf --version` を選んで実行する。
 
-   - 画面の下から fzf の一覧が開き、最下行の `>` の右に打った文字で絞り込める。`fzf --v` と打つと `fzf --version` の行だけが残る
+   - 画面の下から fzf の一覧が開き、最下行の `>` の右に打った文字で絞り込める。`fzf --v` では `brew list --versions fzf` なども候補になるので、上下キーで `fzf --version` の行を選ぶ
    - Enter でその行がプロンプトに入る（**実行はされない**）。もう一度 Enter で実行する
    - Esc か Ctrl+C で、何も選ばずに閉じる
 

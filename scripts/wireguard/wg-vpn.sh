@@ -520,6 +520,7 @@ resolve_my_pubkey() {
 # 作り直す conf に載らない [Peer] が既存の conf にあれば列挙する。
 # apply は clients.list からクライアントの [Peer] を毎回組み立て直すので、登録簿に無い peer は
 # 黙って消える（手で足した peer を残したまま移行するとこれで失う）。消す前に止める
+# client remove 後も同じ保護が働く。対象鍵の確認と明示許可は docs/wireguard.md の削除手順を参照
 check_unknown_peers() {
   [[ -f $CONF ]] || return 0
   local known=("$PEER_PUBKEY" "${CL_PUBS[@]}")
@@ -1052,7 +1053,7 @@ cmd_restore() {
   fi
   [[ -z $env_target ]] || env_dir=$(dirname "$env_target")
 
-  # 何も書く前に、鍵と site.env が噛み合っているかを確かめる
+  # 復元先へファイルを書く前に、鍵と site.env が噛み合っているかを確かめる（パッケージ導入は実施済み）
   local derived=""
   if command -v wg >/dev/null; then
     derived=$(wg pubkey <"$stage/$key_name") || die "バックアップの鍵から公開鍵を算出できません"

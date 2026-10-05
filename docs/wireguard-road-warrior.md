@@ -124,14 +124,12 @@
    - 最後に、登録済みのクライアントを一覧で確認する
    - 登録簿は名前で一意。`CLIENT_NAME` と同じ名前が一覧に無ければ、手順 5 は飛ばす
 
-1. `CLIENT_NAME` と同じ名前が一覧にあるときだけ、WG ホストでその登録を消す。
+1. `CLIENT_NAME` と同じ名前が一覧にあるときだけ、WG ホストで旧登録を消して反映する。
 
-   ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME:?CLIENT_NAME が空のまま}"
-   ```
-
-   - 無ければ「登録されていません」で止まる
-   - `apply` は、手順 6 の登録とまとめて行う
+   - [wireguard.md のクライアントを削除する](wireguard.md#クライアントを削除する)の手順 1〜6 を行う。`CLIENT_NAME`・`SITE`・`REPO` は手順 4 と同じ値にする
+   - 削除前の公開鍵を控え、未知 peer がその鍵だけであることを確かめてから、削除を明示的に許可する。無関係の peer が出たら止める
+   - 削除が反映されると、その旧鍵では接続できなくなる。トンネル越しの ssh で作業していた場合は、別の経路から WG ホストに入り直す
+   - 次の手順の `CLIENT_PUBKEY` は、手順 3 で PC に作った新しい鍵の公開鍵のままにする。WG ホストのシェルを開き直したら手順 4 の変数を設定し直す
 
 1. WG ホストで公開鍵を登録し、ホストに反映して、クライアント用 conf を表示する。
 
@@ -394,14 +392,10 @@
 
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
-1. WG ホストで（手順 4 の変数を設定したシェルで）、登録を消して反映する。
+1. WG ホストで、登録を消して反映する。
 
-   ```bash
-   cd "${REPO:?REPO が空のまま}/scripts/wireguard" &&
-   sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME:?CLIENT_NAME が空のまま}" &&
-   sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?SITE が空のまま}"
-   ```
-
+   - [wireguard.md のクライアントを削除する](wireguard.md#クライアントを削除する)の手順 1〜6 を行う。対象は、手順 4 で登録した `CLIENT_NAME` と `SITE`
+   - 削除前の公開鍵を控え、未知 peer と照合する。`--drop-unknown-peers` を確認なしに付けない
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
 ---
@@ -409,13 +403,13 @@
 ## Windows 11 で使う
 
 > [!IMPORTANT]
-> - **Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜6・8・9・11・12・14・15 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。ログインするユーザーは Administrators の一員（WireGuard は PC 全体に入り、トンネルを Windows のサービスとして動かす）
+> - **Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜7・10・12・13・15・16 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。ログインするユーザーは Administrators の一員（WireGuard は PC 全体に入り、トンネルを Windows のサービスとして動かす）
 > - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - **この節の手順 7 と手順 13 は WG ホストで行う**（[実施手順](#実施手順)の手順 4〜6・13 のブロックをそのまま使う）
+> - **この節の手順 8 と手順 14 は WG ホストで行う**（[実施手順](#実施手順)の手順 4〜6・13 を参照する）
 > - **この節の手順 5 で WireGuard の窓が開く**。開いてから手順 6 を貼る
-> - **この節の手順 10 で、PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。手順 11 以降は LAN の外で行う
+> - **この節の手順 11 で、PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。手順 12 以降は LAN の外で行う
 
-- 上から順にコードブロックを貼る。この節の手順 2 で変数を設定した PowerShell に貼る
+- 上から順に進める。コードブロックは、この節の手順 2 で変数を設定した PowerShell に貼る。この節の手順 9 だけは、関数名を手入力する
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
 - WG ホストの側は、AlmaLinux 10 の PC と同じ（`client add --pubkey` で公開鍵を登録して `apply` するだけで、ほかに変えるものは無い）
@@ -460,7 +454,7 @@
    <summary>補足: 変数について</summary>
 
    - 変数の名前と意味は、AlmaLinux 10 の[手順 1](#実施手順)と同じ（PC 視点。`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）。拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値を入れる
-   - 使うのは、この節の手順 12 の疎通の確認だけ
+   - 使うのは、この節の手順 13 の疎通の確認だけ
    - 鍵と conf の一時置き場は `%USERPROFILE%\wg-client`（`C:\Users\<WIN_USER>\wg-client`）に決めてあり、変数にしていない。WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）とは別の名前
 
    </details>
@@ -538,7 +532,7 @@
 
    - 引数無しの `wireguard.exe` は、マネージャーが動いていれば窓を出し、動いていなければマネージャーのサービス `WireGuardManager` を作って起動してから窓を出す（ソースの `main.go`、WireGuard の文書の「Enterprise Usage」）。スタートメニューの「WireGuard」も同じ
    - `WireGuardManager` は自動で起動するサービスになる。以後は、Administrators の一員がサインインするたびに、通知領域に WireGuard のアイコンが出る
-   - マネージャーは、この節の手順 9 の取り込み（設定の置き場所を見張って暗号化する）と、更新の知らせ（[Windows 11 の更新](#windows-11-の更新)）に要る
+   - マネージャーは、この節の手順 10 の取り込み（設定の置き場所を見張って暗号化する）と、更新の知らせ（[Windows 11 の更新](#windows-11-の更新)）に要る
    - 窓は Administrators の一員にしか出ない（ソースの `main.go` の `checkForAdminGroup`）
    - 管理者の PowerShell から開くので、UAC の確認は出ないはず
    - `wireguard.exe` は GUI のプログラムなので、PowerShell は窓が開くのを待たずにプロンプトに戻る
@@ -569,7 +563,7 @@
    - 秘密鍵は `wg0.key` に書き、画面には出さない
    - `icacls` に `NT AUTHORITY\SYSTEM:(OI)(CI)(F)` と `BUILTIN\Administrators:(OI)(CI)(F)` の 2 行だけが出る
    - `wg0.key` と `wg0.pub` がどちらも 45 バイト
-   - 最後の 1 行（公開鍵、44 文字）だけを、この節の手順 7 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
+   - 最後の 1 行（公開鍵、44 文字）だけを、この節の手順 8 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
    - **注意**: `%USERPROFILE%\wg-client` は、管理者の PowerShell からしか読めない（管理者ではない PowerShell やエクスプローラーでは開けない）
 
    <details>
@@ -585,21 +579,13 @@
 
    </details>
 
-1. WG ホストで、[実施手順](#実施手順)の手順 4〜6 を貼り、この PC の公開鍵を登録して conf を表示する。
-
-   - [実施手順](#実施手順)の手順 4 の `CLIENT_PUBKEY` には、この節の手順 6 で出た公開鍵を貼る
-   - 手順 4 の `CLIENT_NAME` は、この PC だけの名前にする（例 `win-laptop`）。ほかの端末（AlmaLinux 10 の PC など）と同じ名前にすると、手順 5 でその端末の登録を消してしまう
-   - 手順 6 の `client show` の出力を、`[Interface]` の行から `PersistentKeepalive` の行まで、この PC のクリップボードにコピーする（WG ホストに SSH でつないだ端末で選んでコピーする、など）
-   - `PrivateKey` はプレースホルダのままなので、**秘密情報を含まない**。どの経路で運んでもよい
-   - **次の手順は、`client show` の出力をこの PC でコピーしてから貼る**
-
-1. クリップボードの conf の `PrivateKey` 行を秘密鍵に置き換え、`wg0.conf` に書く（鍵は表示しない）。
+1. Windows の PowerShell で、conf を取り込む関数を定義する。
 
    ```powershell
-   & {
+   function Import-WgClientConf {
      $dir = "$env:USERPROFILE\wg-client"
      $text = Get-Clipboard -Raw
-     if (-not $text) { Write-Error '中断: クリップボードが空（手順 7 の client show の出力をコピーし直す）'; return }
+     if (-not $text) { Write-Error '中断: クリップボードが空（手順 8 の client show の出力をコピーし直す）'; return }
      $lines = @($text.Trim() -split '\r?\n' | ForEach-Object { $_.TrimEnd() })
      if ($lines[0] -cne '[Interface]') { Write-Error '中断: クリップボードの先頭が [Interface] ではない（client show の出力だけをコピーし直す）'; return }
      if (@($lines -cnotmatch '^[\t\x20-\x7e]*$').Count -ne 0) { Write-Error '中断: クリップボードに ASCII でない文字がある'; return }
@@ -612,15 +598,30 @@
    }
    ```
 
+   - この手順は関数を定義するだけで、何も表示せず、conf もまだ書かない
+   - この節の手順 9 で `Import-WgClientConf` と手入力すると、クリップボードを読み込む
+   - PowerShell を開き直した場合は、この節の手順 2 と、この関数の定義を貼り直す
+
+1. WG ホストで、[実施手順](#実施手順)の手順 4〜6 を行い、この PC の公開鍵を登録して conf を表示する。
+
+   - [実施手順](#実施手順)の手順 4 の `CLIENT_PUBKEY` には、この節の手順 6 で出た公開鍵を貼る
+   - 手順 4 の `CLIENT_NAME` は、この PC だけの名前にする（例 `win-laptop`）。ほかの端末（AlmaLinux 10 の PC など）と同じ名前にすると、手順 5 でその端末の登録を消してしまう
+   - 手順 6 の `client show` の出力を、`[Interface]` の行から `PersistentKeepalive` の行まで、この PC のクリップボードにコピーする（WG ホストに SSH でつないだ端末で選んでコピーする、など）
+   - `PrivateKey` はプレースホルダのままなので、**秘密情報を含まない**。どの経路で運んでもよい
+   - **次の手順は、`client show` の出力をこの PC でコピーしてから行う**。コピー後は、コードブロックなど別の文字列をコピーしない
+
+1. Windows の PowerShell で、`Import-WgClientConf` と手入力して Enter を押す。
+
+   - 関数名はコピーせず手で打つ。クリップボードには、この節の手順 8 の conf を残しておく
    - `1`（置き換わった）と、`PrivateKey` 以外の行（`Address`・`PublicKey`・`Endpoint`・`AllowedIPs` など）が出ればよい。鍵そのものは表示しない
    - 残りの行が `client show` の出力のとおりで、途中で折り返されていないことを目で確かめる
    - `中断:` で始まるエラーが出たら、何も書いていない
-   - 何度貼ってもよい（`wg0.conf` を書き直す）
+   - conf をコピーし直し、この関数をもう一度呼んでもよい（`wg0.conf` を書き直す）
 
    <details>
    <summary>補足: conf と秘密鍵</summary>
 
-   - [実施手順](#実施手順)の手順 7・8（`vi` に貼って保存し、`sed` で `PrivateKey` 行を置き換える）を、1 つのブロックにした。エディタを開かずに、クリップボードの中身を読む（`Get-Clipboard -Raw` は、複数行を 1 つの文字列で返す。Windows PowerShell 5.1 にもある）
+   - [実施手順](#実施手順)の手順 7・8（`vi` に貼って保存し、`sed` で `PrivateKey` 行を置き換える）を、この節の手順 7 の関数にまとめた。エディタを開かずに、クリップボードの中身を読む（`Get-Clipboard -Raw` は、複数行を 1 つの文字列で返す。Windows PowerShell 5.1 にもある）
    - 先頭が `[Interface]` でなければ止めるのは、端末からコピーしたときにプロンプトの行が入りやすいため。行の末尾の空白は落とす
    - 2 つの確かめは、AlmaLinux 10 と同じ「置き換え前に `PrivateKey` 行がちょうど 1 行あること」と「置き換え後に 44 文字の鍵になったこと」
    - ASCII（BOM 無し）・CR LF で書く。WireGuard の読み込みは行を LF で分けて前後の空白を落とすので、CR LF でも読める（ソースの `conf/parser.go`）。BOM 付きの UTF-8 は、先頭の行が `[Interface]` と見なされずに読めない（その読み込みの部分を Linux で動かして確かめた。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
@@ -636,7 +637,7 @@
      $dir = "$env:USERPROFILE\wg-client"
      $store = "$env:ProgramFiles\WireGuard\Data\Configurations"
      if ((Get-Service -Name WireGuardManager -ErrorAction SilentlyContinue).Status -ne 'Running' -or -not (Test-Path -LiteralPath $store)) { Write-Error '中断: WireGuard のマネージャーが動いていない（手順 5 からやり直す）'; return }
-     if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（手順 8）'; return }
+     if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（手順 9）'; return }
      if (Test-Path -LiteralPath "$store\wg0.conf.dpapi") { Write-Error '中断: wg0 というトンネルが既にある'; return }
      Copy-Item -LiteralPath "$dir\wg0.conf" -Destination "$store\wg0.conf"
      for ($i = 0; $i -lt 30 -and (Test-Path -LiteralPath "$store\wg0.conf"); $i++) { Start-Sleep -Seconds 1 }
@@ -647,7 +648,7 @@
    - `wg0.conf.dpapi` の 1 行だけが出ればよい（写した `wg0.conf` は、WireGuard が暗号化して消す）
    - WireGuard の窓のトンネルの一覧に `wg0` が出る（無効のまま）
    - 取り込んでもトンネルは張られない（NetworkManager の `import` と違う）。この手順は LAN の中で貼ってよい
-   - `wg0.conf` が残ったら、取り込めていない。理由を見て（この手順の補足）、残った `wg0.conf` を `Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf"` で消し、この節の手順 7 か 8 からやり直す
+   - `wg0.conf` が残ったら、取り込めていない。理由を見て（この手順の補足）、残った `wg0.conf` を `Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf"` で消し、この節の手順 8・9 からやり直す
    - （この手順の代わりに）窓の「トンネルをファイルからインポート…」で `%USERPROFILE%\wg-client\wg0.conf` を選んでも、同じ `wg0.conf.dpapi` ができるはず
 
    <details>
@@ -663,7 +664,7 @@
 
 1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
 
-   - クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内でこの節の手順 11 を貼ると、そこで LAN の通信が切れる
+   - クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内でこの節の手順 12 を貼ると、そこで LAN の通信が切れる
    - **次の手順は、LAN の外につないでから貼る**
 
 1. 拠点の LAN の外で、トンネルを張る。
@@ -671,7 +672,7 @@
    ```powershell
    & {
      $conf = "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf.dpapi"
-     if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（手順 9）'; return }
+     if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（手順 10）'; return }
      & "$env:ProgramFiles\WireGuard\wireguard.exe" /installtunnelservice $conf 2>&1 | ForEach-Object { "$_" }
      for ($i = 0; $i -lt 30 -and -not (Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
      Get-Service -Name 'WireGuardTunnel$wg0' | Format-Table Name, Status, StartType
@@ -689,7 +690,7 @@
    - `NlMtu` は `1420`（今の回線の MTU が 1500 のとき）
    - `NetworkCategory` は `Public` のはず（変えない。行が出なければ、Windows がまだネットワークを識別している）
    - `ServerAddresses` が空（`{}`）。DNS は変わらない（conf に `DNS =` が無い）
-   - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この節の手順 12 の通信で出る
+   - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この節の手順 13 の通信で出る
    - 窓で `wg0` を選び「有効化」を押しても同じ
    - **注意**: LAN 内で貼ってしまったら、そこで LAN の通信が切れる。PC の画面の WireGuard の窓で「無効化」を押す
 
@@ -744,7 +745,7 @@
 
    - 最後の 2 つが何も出さなければよい（トンネルのサービスとアダプター `wg0` が消える）
    - 窓で `wg0` を選び「無効化」を押しても同じ
-   - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この節の手順 11・14 のコマンドでも同じ）
+   - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この節の手順 12・15 のコマンドでも同じ）
    - **張ったまま再起動すると、起動したときにまた張られる**（トンネルのサービスは自動で起動する）。拠点の LAN に戻る前に切る
 
    <details>
@@ -765,8 +766,8 @@
    ```
 
    - `wg0.pub` だけが残る
-   - 秘密鍵は、この節の手順 9 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
-   - 後片付けを最後にしているのは、取り込みに失敗したときに、この節の手順 9 をやり直すのに `wg0.conf` が要るため（[実施手順](#実施手順)の手順 15 と同じ）
+   - 秘密鍵は、この節の手順 10 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
+   - 後片付けを最後にしているのは、取り込みに失敗したときに、この節の手順 10 をやり直すのに `wg0.conf` が要るため（[実施手順](#実施手順)の手順 15 と同じ）
 
 ---
 
@@ -853,9 +854,9 @@
 
    </details>
 
-1. WG ホストで（[実施手順](#実施手順)の手順 4 の変数を設定したシェルで）、[ロールバック](#ロールバック)の手順 3 を貼り、登録を消して反映する。
+1. WG ホストで、[ロールバック](#ロールバック)の手順 3 の案内に従い、登録を消して反映する。
 
-   - 手順 4 の `CLIENT_NAME` は、[Windows 11 で使う](#windows-11-で使う)の手順 7 で登録した、この PC の名前にする
+   - 手順 4 の `CLIENT_NAME` は、[Windows 11 で使う](#windows-11-で使う)の手順 8 で登録した、この PC の名前にする
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
 ---
@@ -871,7 +872,7 @@
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 手順 4〜6 と手順 13 だけは WG ホスト上で実行する（WG ホスト側の変数は手順 4 で設定する）
   - WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 11〜13](wireguard.md#実施手順) と同じ
-  - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。すべて管理者の Windows PowerShell 5.1 に貼り、WG ホストでは同じ手順 4〜6・13 を使う
+  - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。管理者の Windows PowerShell 5.1 で関数を先に定義し、conf コピー後に関数名を手入力する。WG ホストでは同じ手順 4〜6・13 を使う
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-22）**
   - 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 1〜15 を通した
   - 確認したこと: 両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping
@@ -882,14 +883,16 @@
   - 2026-09-28: 手順 2・10・11 と、[ロールバック](#ロールバック)の手順 1のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
+  - 2026-10-05: 手順 5 とロールバックの手順 3 を、公開鍵を照合してから削除を反映する共通手順への案内に変更した。新しい削除・鍵交換の順序は隔離したスタブで確認し、実機では流していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
     - 配布物: winget の `WireGuard.WireGuard` 1.1.1 の定義、公式の MSI（amd64）の sha256（winget の定義と一致）・BLAKE2b（公式の署名付きの `latest.sig` と一致。その署名も）・Authenticode の署名者、MSI の中の `wireguard.exe`（GUI のプログラム）と `wg.exe`（コンソールのプログラム）
     - WireGuard for Windows 1.1.1 のソースと文書: MSI の定義（`DO_NOT_LAUNCH`、アンインストールで `Data` を消す）、設定の置き場所への取り込みと暗号化・アクセス権、`/installtunnelservice` と窓の「有効化」が同じこと、トンネルの経路・MTU・キルスイッチの条件
     - `wg pubkey` が CR LF 付きの入力を受けること（Linux の wireguard-tools 1.0.20210914 と、ソースで）
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](#windows-11-で使う)の手順 6・8・9・11・12・14・15 と[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（手順 11・14 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
-    - 手順 8 で書いた `wg0.conf` が、WireGuard for Windows 1.1.1 の conf の読み込みの部分（Linux でビルドできるように写したもの）で読めること（BOM 付きの UTF-8 は読めないことも。同じ付録）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](#windows-11-で使う)の手順 6・9（現在は手順 7 の関数内）・10・12・13・15・16 と[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（手順 12・15 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - 手順 9 で書いた `wg0.conf` が、WireGuard for Windows 1.1.1 の conf の読み込みの部分（Linux でビルドできるように写したもの）で読めること（BOM 付きの UTF-8 は読めないことも。同じ付録）
+  - 2026-10-05: 取込みを「手順 7 で関数定義 → 手順 8 で conf をコピー → 手順 9 で関数名を手入力」に分けた。18 ブロックの構文と、この操作順、空・コード・非 ASCII・PrivateKey 重複の拒否を Linux の PowerShell 7.6.6 とクリップボードのスタブで確認した。Windows の端末では貼っていない
   - **確かめていないこと**: Windows で貼ること（すべての手順）、マネージャーの起動と窓、取り込みで `wg0.conf.dpapi` ができること、トンネルの経路・MTU・ネットワークの種類、拠点との疎通、張ったまま再起動したときに張られること、更新とアンインストール、サスペンド復帰と Wi-Fi の切り替え、arm64 の Windows
 
 下表は実機（AlmaLinux 10 の PC 側）で採取した値。
@@ -987,7 +990,7 @@ AlmaLinux 10 の実機で、2026-09-22、手順 2 の前に採取（採取コマ
   - どちらでも同じ結果にするため、`sudo` を付ける
 - **秘密鍵の置き場所は NetworkManager のプロファイルだけ** — `/etc/NetworkManager/system-connections/wg0.nmconnection`（root の 0600）
   - 取り出すときは `sudo nmcli -s -g wireguard.private-key connection show wg0`
-  - バックアップは取らず、失ったら手順 3 からやり直す（ホスト側は `client remove` → `client add --pubkey`）
+  - バックアップは取らず、失ったら手順 3 からやり直す（ホスト側は手順 5 の共通の削除手順で反映した後、手順 6 で `client add --pubkey`）
   - WG ホストの[バックアップ](wireguard.md#バックアップと復旧os-の再インストール)に、クライアントの鍵は含まれない
 
 Windows 11 で WireGuard を入れる経路を比べた（2026-10-03 時点。どれも中身は公式の MSI）:
@@ -1003,7 +1006,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
 | 方法 | 状況 | 採否 |
 |---|---|---|
 | **設定の置き場所（`C:\Program Files\WireGuard\Data\Configurations`）に `wg0.conf` を写し、マネージャーに暗号化させる。張る・切るは `wireguard.exe /installtunnelservice` / `/uninstalltunnelservice`** | マネージャーが `wg0.conf.dpapi` に暗号化して、写した平文を消す（WireGuard の文書の「Enterprise Usage」）。窓の一覧にも出て、窓と通知領域のアイコンからも張る・切るができる。2 つのコマンドは、窓の「有効化」「無効化」がすることと同じ | **採用**（ブロックで写して、できたことを確かめられる） |
-| 窓の「トンネルをファイルからインポート…」 | 結果は同じ（`wg0.conf.dpapi` になる）。ファイルを選ぶ画面の操作になり、確かめをブロックにまとめられない | 不採用（[Windows 11 で使う](#windows-11-で使う)の手順 9 の代わりにしてよい） |
+| 窓の「トンネルをファイルからインポート…」 | 結果は同じ（`wg0.conf.dpapi` になる）。ファイルを選ぶ画面の操作になり、確かめをブロックにまとめられない | 不採用（[Windows 11 で使う](#windows-11-で使う)の手順 10 の代わりにしてよい） |
 | `/installtunnelservice` に作業用の `wg0.conf` を直接渡す | すぐ張られるが、トンネルのサービスは起動のたびにそのファイルを読むので、秘密鍵入りの平文のファイルを消せない | 不採用 |
 
 - **Windows 11 でも、鍵は PC で作り、公開鍵だけを WG ホストに渡す**（AlmaLinux 10 と同じ）
@@ -1011,8 +1014,8 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - `client show` の conf は、ファイルにせずクリップボードから読む（`vi` を開く手順の代わり）。秘密は入っていないので、運ぶ経路を選ばない
 - **Windows 11 の秘密鍵の置き場所は、WireGuard の設定（`wg0.conf.dpapi`）だけ**
   - LocalSystem（マネージャー）の DPAPI で暗号化され、アクセス権は SYSTEM だけが読み書きでき、Administrators は消せるだけ（ソースの `conf/filewriter_windows.go`）
-  - 作業用の置き場所（`%USERPROFILE%\wg-client`）は、アクセス権を Administrators と SYSTEM だけにし（管理者の PowerShell からだけ読める）、[Windows 11 で使う](#windows-11-で使う)の手順 15 で平文の鍵と conf を消す
-  - バックアップは取らず、失ったら作り直す（AlmaLinux 10 と同じ。ホスト側は `client remove` → `client add --pubkey`）
+  - 作業用の置き場所（`%USERPROFILE%\wg-client`）は、アクセス権を Administrators と SYSTEM だけにし（管理者の PowerShell からだけ読める）、[Windows 11 で使う](#windows-11-で使う)の手順 16 で平文の鍵と conf を消す
+  - バックアップは取らず、失ったら作り直す（AlmaLinux 10 と同じ。ホスト側は[実施手順](#実施手順)の手順 5 の共通の削除手順で反映した後、手順 6 で `client add --pubkey`）
 - **Windows 11 では、拠点の LAN に戻る前に手で切る**
   - トンネルのサービスは自動で起動するので、張ったまま再起動すると、起動のときに張られる。NetworkManager の `autoconnect no` に当たる設定は無い
   - 取り込みだけではトンネルは張られない（NetworkManager の `import` と違う）
@@ -1054,13 +1057,13 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 - `DNS =` を書くなら `resolvconf` 経由で `systemd-resolved` が要る（→ [wireguard.md: `DNS =` を書く場合](wireguard.md#dns--を書く場合)）
 - 起動時に張るなら `systemctl enable wg-quick@wg0`。ただし Wi-Fi より先に走り、`Endpoint` が名前なら解決に失敗しうる。拠点の LAN 内でも張られる
 - NetworkManager からは `connected (externally)` として見え、同名の一時プロファイルが作られる（WG ホストで実測）
-- wireguard.md の namespace ラボはクライアント側をこの経路で動かして疎通を確認している（→ [リモートクライアントの検証](wireguard.md#リモートクライアントの検証2026-09-19)）。本書の時点で検証済みなのはこちらだけ
+- wireguard.md の namespace ラボはクライアント側をこの経路で動かして疎通を確認している（→ [リモートクライアントの検証](wireguard.md#リモートクライアントの検証2026-09-19)）。本書の NetworkManager の手順は実機でも確認済み（[対象と検証環境](#対象と検証環境)）。この wg-quick の代替手順を PC の実機で通すことは未確認
 
 ### 代替: WG ホスト側で鍵を作る場合
 
 wireguard.md 手順 10〜16 の元の流れ（→ [wireguard.md 手順 10〜16](wireguard.md#実施手順)、[秘密鍵の扱い](wireguard.md#クライアントの秘密鍵の扱い)）。
 
-1. ホストで `client add A NAME`（`--pubkey` 無し）→ `client show NAME`。この出力に秘密鍵が入っている
+1. ホストで `client add A NAME`（`--pubkey` 無し）→ `apply A` → `client show NAME`（拠点 B なら `A` を `B` に読み替える）。`apply` でホストに反映してから表示する。この出力に秘密鍵が入っている
 1. LAN 内の `scp` など安全な経路で、PC の `${WG_DIR}/wg0.conf` に置く（手順 8 の `sed` は不要）
 1. 手順 9 以降は同じ
 1. 取り込んだら、ホストで `sudo rm /etc/wireguard/clients/NAME.conf`
@@ -1348,31 +1351,31 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 **構文と Windows PowerShell 5.1 との互換**:
 
 - Windows 11 の 3 節の `powershell` のブロック 18 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
-- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0。ほかの規則の指摘は、手順 2 の 4 つの変数をそのブロックの中では使っていないことへの 4 つだけ（手順 12 で使う）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0。ほかの規則の指摘は、手順 2 の 4 つの変数をそのブロックの中では使っていないことへの 4 つだけ（手順 13 で使う）
 
 **模擬の実行**（パスの `\` を `/` に替え、`$env:ProgramFiles`・`$env:USERPROFILE` を一時的なディレクトリにして流した。`wg.exe` は Linux の `wg`〔wireguard-tools 1.0.20210914〕へのリンク、`icacls.exe` は引数を記録するだけの偽物）:
 
 - 手順 6: `wg0.key` と `wg0.pub` が 45 バイトで書かれ、`wg pubkey < wg0.key` が `wg0.pub` と一致した。`icacls.exe` には `<置き場所> /inheritance:r /grant *S-1-5-32-544:(OI)(CI)F /grant *S-1-5-18:(OI)(CI)F` が渡った。2 回目は `中断: wg0.key が既にある…` で止まった
 - Linux の `wg pubkey` は、`<鍵>\r\n` を渡しても `<鍵>\n` と同じ公開鍵を出した（`<鍵>\r\nx` は `Trailing characters found after key`）
-- 手順 8: `Get-Clipboard` を、決めた文字列を返す偽物にした
+- 手順 9: `Get-Clipboard` を、決めた文字列を返す偽物にした
   - `client show` の形（CR LF、`PrivateKey` の行の末尾に空白、先頭に空行）から、`1` と残りの行が出て、`wg0.conf` の `PrivateKey` が `wg0.key` の鍵になり、ほかの行は変わらなかった（CR LF の 11 行、ASCII）
   - 先頭にプロンプトの行があるもの・`PrivateKey` の行が 2 つあるもの・ASCII でない文字を含むもの・空のものは、それぞれの `中断:` で止まり、`wg0.conf` を作らなかった
-- 手順 8 で書いた `wg0.conf` を、WireGuard for Windows 1.1.1 の `conf/parser.go`・`config.go`・`name.go` を Linux でビルドできるように写したもの（Windows だけの部分を外した）で読んだ
+- 手順 9 で書いた `wg0.conf` を、WireGuard for Windows 1.1.1 の `conf/parser.go`・`config.go`・`name.go` を Linux でビルドできるように写したもの（Windows だけの部分を外した）で読んだ
   - `Address`・`AllowedIPs` の 3 つ・`Endpoint`・`PersistentKeepalive = 25` が読めた
   - 先頭に UTF-8 の BOM を付けると `Line must occur in a section: "﻿[Interface]"` で読めず、UTF-16 LE（BOM 付き）にすると読めた
   - `PrivateKey = <CLIENT_PRIVATE_KEY>` のままだと `Invalid key` で読めなかった。トンネルの名前 `win laptop` と `CON` は `Tunnel name is not valid`
-- 手順 9: `Get-Service` を偽物にし、マネージャーの代わりに、写された `.conf` を 2 秒後に（上の読み込みで読めたら）`.conf.dpapi` に変えて元を消すスクリプトを動かした
+- 手順 10: `Get-Service` を偽物にし、マネージャーの代わりに、写された `.conf` を 2 秒後に（上の読み込みで読めたら）`.conf.dpapi` に変えて元を消すスクリプトを動かした
   - `wg0.conf.dpapi` の 1 行が出た
   - もう 1 度貼ると `中断: wg0 というトンネルが既にある`、マネージャーが `Stopped` なら `中断: WireGuard のマネージャーが動いていない…` で止まった
   - 読めない conf（`PrivateKey` がプレースホルダのまま）では、30 秒待ってから、`wg0.conf` が残った一覧を出した
-- 手順 11・14: `wireguard.exe` を、引数を記録して印のファイルを作る・消す偽物にし、`Get-Service` と `Get-Net*`・`Get-DnsClientServerAddress` を偽物にした
-  - 手順 11 は表を順に出した。印が残ったままもう 1 度貼ると、偽物が標準エラーに書いた `Error: Tunnel already installed and running` が文字で出た
-  - 手順 14 は、偽物が 2 秒後に印を消すまで待ってから、何も出さずに終わった
-- 手順 12: 偽物の `ping.exe`（日本語の Windows の出力を真似たもの）と `tracert.exe` で、4 つの宛先の最後の 3 行と、`tracert.exe -d -h 5 -w 2000 <PEER_WG_LAN_IP>` が出た。変数が空なら `手順 2 の変数が空のまま` で止まった
-- 手順 15 と[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1
-  - 手順 15 の後は `wg0.pub` だけが残った
+- 手順 12・15: `wireguard.exe` を、引数を記録して印のファイルを作る・消す偽物にし、`Get-Service` と `Get-Net*`・`Get-DnsClientServerAddress` を偽物にした
+  - 手順 12 は表を順に出した。印が残ったままもう 1 度貼ると、偽物が標準エラーに書いた `Error: Tunnel already installed and running` が文字で出た
+  - 手順 15 は、偽物が 2 秒後に印を消すまで待ってから、何も出さずに終わった
+- 手順 13: 偽物の `ping.exe`（日本語の Windows の出力を真似たもの）と `tracert.exe` で、4 つの宛先の最後の 3 行と、`tracert.exe -d -h 5 -w 2000 <PEER_WG_LAN_IP>` が出た。変数が空なら `手順 2 の変数が空のまま` で止まった
+- 手順 16 と[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1
+  - 手順 16 の後は `wg0.pub` だけが残った
   - ロールバックの手順 1 は、トンネルの印があれば `/uninstalltunnelservice wg0` を渡し、`wg0.conf.dpapi` と置き場所を消して `False` を出した。置き場所にほかのファイル（`notes.txt`）があると、それを残して `True` を出した
-- PowerShell 7 は、Linux ではパイプの改行が LF で、ネイティブのコマンドの `2>&1` の扱いも Windows PowerShell 5.1 と同じではない。winget・`Get-AuthenticodeSignature`・本物の `Get-Net*` と `wireguard.exe` を使うブロック（手順 3〜5、手順 11・14 の本当の動き、更新、ロールバックの手順 2）は流せていない
+- PowerShell 7 は、Linux ではパイプの改行が LF で、ネイティブのコマンドの `2>&1` の扱いも Windows PowerShell 5.1 と同じではない。winget・`Get-AuthenticodeSignature`・本物の `Get-Net*` と `wireguard.exe` を使うブロック（手順 3〜5、手順 12・15 の本当の動き、更新、ロールバックの手順 2）は流せていない
 
 **残っている未確認事項**:
 

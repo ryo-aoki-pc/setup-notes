@@ -4,7 +4,8 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **自分のシェルで実行する**。Homebrew の導入・管理と自分の設定は、`sudo -i` した root のシェルでは行わない
+> - **手順 1 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 2 を貼る
 > - **手順 2 で TUI が開く**。`:q` で終了してから、ほかのコマンドを貼る
 
 - 上から順にコードブロックを貼る
@@ -19,6 +20,7 @@
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
    <details>
    <summary>補足: ボトルが降りること</summary>
@@ -70,16 +72,33 @@
 
 ## 既定のエディタにする（任意）
 
+- 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）が同じ 3 項目を設定しているなら、この節は飛ばす。戻すときも、その設定の側で変更する
+- この節は、元の変数・エイリアスを `~/.local/state/neovim-editor-before.bash` に控え、印付きの 3 行を `~/.bashrc` の末尾に足す
+
 1. `EDITOR` を見るツール（git、lazygit、`crontab -e` など）で Neovim を開くようにする。
 
    ```bash
-   cat >> ~/.bashrc <<'EOF'
+   if [ -e ~/.local/state/neovim-editor-before.bash ]; then
+     echo '中断: 元値の控えがある。再実行せず、既存の設定かロールバックを確認する' >&2
+   elif grep -Fq '# setup-notes: neovim editor' ~/.bashrc; then
+     echo '中断: 印付きの設定がすでにある。元値の控えを確認する' >&2
+   else
+     mkdir -p ~/.local/state
+     (umask 077; {
+       declare -p EDITOR 2>/dev/null || echo 'unset EDITOR'
+       declare -p VISUAL 2>/dev/null || echo 'unset VISUAL'
+       alias vi 2>/dev/null || echo 'unalias vi 2>/dev/null || true'
+     } > ~/.local/state/neovim-editor-before.bash) &&
+     cat >> ~/.bashrc <<'EOF'
+   # setup-notes: neovim editor begin
    export EDITOR=nvim
    export VISUAL=nvim
    alias vi=nvim
+   # setup-notes: neovim editor end
    EOF
-   . ~/.bashrc
-   printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
+     . ~/.bashrc
+     printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
+   fi
    ```
 
    - `sudoedit` は `EDITOR` の `nvim` を sudo の PATH（`secure_path`）で探すので、そのままでは見つからず、黙って `vi` で開く
@@ -87,7 +106,7 @@
    - `sudo visudo` は `EDITOR` を引き継がず、その節を通しても `vi` で開く。`nvim` で開くなら、その節を通して `sudo EDITOR=nvim visudo` と打つ（root の設定の `/root/.config/nvim` を読む）
    - その節を通さないなら、`SUDO_EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim sudoedit <ファイル>` や `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
    - root のシェル（`su -`、root のログイン、`sudo -i`）で `nvim` を使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す。root の Neovim は `/root/.config/nvim` を読む
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が同じ 3 行を読む）
+   - `中断:` が出たら既存の設定と控えは書き換えていない
 
 ---
 
@@ -130,12 +149,36 @@
 
    - すべてまとめて上げるなら `brew upgrade`
    - **設定やプラグインは更新に追従しない**ので、メジャー更新のあとは `:checkhealth` で壊れていないか見る
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
 
 ---
 
 ## ロールバック
 
 - 本書ではロールバックは**本実行していない**
+- 自分用の bash 設定で Neovim を指定している場合は、先にそちらの `EDITOR`・`VISUAL`・`vi` を変更する
+
+1. 本書で既定のエディタを設定したときだけ、追記した部分を外して元値に戻す。
+
+   ```bash
+   if [ ! -f ~/.local/state/neovim-editor-before.bash ]; then
+     echo '中断: 元値の控えが無い。この手順は実行せず、以前の設定を確認する' >&2
+   elif ! grep -Fxq '# setup-notes: neovim editor begin' ~/.bashrc ||
+        ! grep -Fxq '# setup-notes: neovim editor end' ~/.bashrc; then
+     echo '中断: 印付きの設定が揃わない。~/.bashrc を確認する' >&2
+   else
+     sed -i --follow-symlinks '/^# setup-notes: neovim editor begin$/,/^# setup-notes: neovim editor end$/d' ~/.bashrc &&
+       . ~/.local/state/neovim-editor-before.bash &&
+       rm ~/.local/state/neovim-editor-before.bash
+     declare -p EDITOR VISUAL 2>/dev/null
+     alias vi 2>/dev/null
+   fi
+   ```
+
+   - この節の手順 2 へ進む前に、元のエディタ・エイリアスに戻ったことを確かめる。元が未設定なら表示されなくてよい
+   - 新しくログインしたシェルでも、`EDITOR`・`VISUAL`・`alias vi` が意図した値か確かめる
+   - `~/.bashrc` がシンボリックリンクなら、リンクを残して追記先のファイルから印付きの部分を外す
+   - 以前の版で印や控えを付けずに追記した場合は、このブロックを貼らず、今回足した `export EDITOR=nvim`・`export VISUAL=nvim`・`alias vi=nvim` の行だけを手で外し、控えていた元値を戻す
 
 1. brew で Neovim を消す。
 
@@ -143,7 +186,7 @@
    brew uninstall neovim
    ```
 
-   - 依存（`luajit` / `tree-sitter` など）は他の formula も使うので、自動では消えない。まとめて掃除するなら `brew autoremove`
+   - 他の formula が使う依存は残る。不要になった依存は Homebrew が自動で削除する場合がある（[Homebrew の注意点](homebrew.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
    - `~/.config/nvim`、`~/.local/share/nvim`（プラグイン）、`~/.local/state/nvim`（undo・swap）は残るので、要らなければ手で消す
    - 自分用の設定（LazyVimStarter）を入れていれば、その [docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)で、退避した設定に戻す
 
@@ -162,6 +205,7 @@
   - **コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）
   - **実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
   - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
+  - 2026-10-05: 既定のエディタの設定に元値の控えと追記の目印を付け、ロールバックの手順 1 を追加した。一時ファイルで、元値なし・既存値あり・`.bashrc` がリンクの 3 通りを確認し、元値・元の本文・リンクを復元できた（パッケージの導入・削除は未実行）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

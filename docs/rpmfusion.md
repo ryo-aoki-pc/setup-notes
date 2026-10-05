@@ -19,6 +19,7 @@
    curl -fsSL 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10' | gpg --show-keys
    ```
 
+   - `gpg` が無ければ、`sudo dnf install -y gnupg2` で入れてから貼り直す
    - `pub` 行の fingerprint が `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7`
    - uid が `RPM Fusion free repository for EL (10) <rpmfusion-gpg-key-el10-free@rpmfusion.org>`
    - 違っていればここで止める
