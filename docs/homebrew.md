@@ -220,6 +220,7 @@
    - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
    - `su -`、コンソールや ssh での root のログインも、`sudo -i` と同じく `/root/.bash_profile` から `/root/.bashrc` を読む（コンソールでのログインは未確認）
    - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
+   - root のシェルにも自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）を入れたホストでは、このブロックは貼らない。代わりに `sudo -i bash -c 'printenv PATH; command -v brew'` を実行する（その設定は `brew shellenv` で、PATH の先頭に足す。RPM より Homebrew が先になる）
    - root のシェルでどれが使われるかは、`type -a <コマンド>` で見る（先頭の行が使われる）
    - [sudo でも使う](#sudo-でも使う任意)の節を通したホストでは、`/root/.bashrc` に書く前から最後の 2 行が同じ出力になる（`sudo -i` の PATH の末尾の 2 つは、sudo の `secure_path` から来る）
      - この節の行が効いたかは、`sudo su - -c 'printenv PATH; command -v brew'` で見る
@@ -435,6 +436,7 @@
     - 確認したこと: `su -`（root のパスワード）・`su`・ssh での root のログイン・`sudo -i`・`sudo -s` のどれでも Homebrew の `jq` と `nvim` が見つかる、`sudo jq` は見つからない、RPM の `jq` があると root では RPM が先、手順 2 で `/root/.bashrc` が元のファイルと同じ内容に戻る
     - 確認していないこと: 実機、aarch64、コンソールでの root のログイン、SELinux が Enforcing のホスト
     - 2026-10-02: その節のもとの手順 1・2 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+    - 2026-10-05: 自分用の bash の設定を root のシェルにも入れたホストの箇条書き（その節の手順 1）は、その設定の検証の中で、代わりのコマンドを x86_64 のコンテナで流して確かめた（[ryo-aoki-pc/bash の docs/install.md の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#付録-root-のシェルでも読む節の検証記録2026-10-05)）
   - [sudo でも使う](#sudo-でも使う任意)の節は、**x86_64 のコンテナでのみ検証した**（2026-10-02。[付録](#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
     - 通したこと: その節の手順 1・2 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。その節の手順 1 の `if … fi`（もとの手順 1）を重ねて貼り、その節の手順 2 の後に手順 1 をもう一度通した
     - 確認したこと: `sudo jq`・`sudo nvim`・`sudo -u`・`sudo -s`・`sudo -i`・`sudo` で動かすスクリプトで Homebrew のコマンドが見つかる、ほかの wheel のユーザーの `sudo` にも効く、RPM の `jq` があると `sudo` では RPM が先、`su -` と ssh での root のログインは変わらない、`EDITOR=nvim` の `sudoedit` と `sudo EDITOR=nvim visudo` が Homebrew の `nvim` で開く、既定と違う `secure_path` と書式の誤りではファイルを置かない、root のシェルでも使う節と両方通しても PATH が重ならない
@@ -536,6 +538,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
   - コンテナの中（`/.dockerenv` か `/run/.containerenv` がある、または `/proc/1/cgroup` に `docker` などがある）では断られない（`brew.sh` の `check-run-command-as-root`）。検証では、これらを外したコンテナで確かめた
 - **設定ファイルは root のものを読む**: root で動かした Neovim の `stdpath("config")` は `/root/.config/nvim` だった。自分の `~/.config` の設定は使われない
 - **シェルの初期化は `/root/.bashrc` に足さない**: [zoxide](zoxide.md) や [starship](starship.md) の `eval "$(… init bash)"` を書くと、root のシェルを開くたびに、Homebrew のユーザーが所有するコマンドが root で動く
+  - 自分用の bash の設定を root のシェルにも入れると（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）、これらの初期化も root で動く。自分専用のマシンで、一般ユーザーを信用できるときだけにする
 - **この節では sudo の `secure_path` を変えない**: [root のシェルでも使う](#root-のシェルでも使う任意)の節は、root のシェルが対象。`sudo <コマンド>` で使うときは、[sudo でも使う](#sudo-でも使う任意)の節を通すか、フルパスで渡す（`sudo /home/linuxbrew/.linuxbrew/bin/jq --version` は `jq-1.8.2` を返した）
 
 ### sudo で使うときの補足

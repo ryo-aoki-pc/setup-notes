@@ -336,6 +336,7 @@
      - `sudo grep -n DOCKER_HOST /root/.bashrc` で見て、同じ値なら済んでいる。違う値なら手で直す
    - podman-docker を入れたホストでは、書く前から最後の 2 行が同じ出力になる（[root で使うときの補足](#root-で使うときの補足)）
    - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
+   - root のシェルにも自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）を入れたホストでは、このブロックは貼らない。代わりに `sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'` を実行する（その設定が、この節の手順 1 のソケットがあるときに同じ `DOCKER_HOST` を入れる）
 
    <details>
    <summary>補足: 書く 1 行と、<code>sudo -i</code> で読まれる仕組み</summary>
@@ -435,6 +436,7 @@
    - `lazydocker-root-web` と、最後に `0` が出ればよい
    - root の設定ファイルに手で足したもの（`c` のコマンドなど）も消える
    - 開いたままの root のシェルの `DOCKER_HOST` は残る。開き直すと消える
+   - root のシェルにも自分用の bash の設定を入れたホストでは、`/root/.bashrc` にこの行は無い（最後に `0` と出る）。その設定は、この節の手順 8 の後もソケットのファイルが残る間（再起動まで）、`DOCKER_HOST` を入れる
 
 1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
 
@@ -559,6 +561,7 @@
       - `sudo lazydocker` はつながらず、`sudo -E lazydocker` は自分のコンテナを出す
       - homebrew.md のどちらの節だけでも動く。その節の手順 6〜8 で、`/root/.bashrc` が元と同じ内容に戻る
     - 確認していないこと: 実機、aarch64、SELinux が Enforcing のホスト、root の Quadlet のコンテナ
+    - 2026-10-05: 自分用の bash の設定を root のシェルにも入れたホストの箇条書き（その節の手順 2・6）は、その設定の検証の中で、代わりのコマンドと、その節の手順 6〜8 を x86_64 のコンテナで流して確かめた（[ryo-aoki-pc/bash の docs/install.md の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#付録-root-のシェルでも読む節の検証記録2026-10-05)）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
