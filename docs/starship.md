@@ -2,10 +2,12 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、設定も自分の `~/.bashrc` と `~/.config` に書くため）
-> - **手順 6 は、端末を開き直す操作**。手順 7 は、開き直した端末で貼る
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定とツールの設定は自分のユーザーで使うため）
+> - **手順 4 は、端末を開き直す操作**。手順 5 は、開き直した端末で貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -51,87 +53,14 @@
 
    </details>
 
-1. `~/.bashrc` に、Homebrew・starship・zoxide の初期化と WezTerm のシェル統合の行があるか確かめる。
+1. 共通設定の初期化順を確かめる。
 
    ```bash
-   grep -n -e 'brew shellenv' -e 'starship init' -e 'zoxide init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'wezterm.sh' ~/.bashrc
+   grep -n -e 'starship init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'zoxide init' ~/.config/bash/bashrc
    ```
 
-   - **starship の初期化は、`brew shellenv` の行より後ろ、zoxide の初期化と WezTerm のシェル統合より前に置く**（zoxide・WezTerm より後ろにあると、この設定の WezTerm のシェル統合が働くときは、WezTerm に送る終了コードがいつも 0 になる。この手順の補足）
-   - `starship init` も zoxide・WezTerm の行も出なければ、手順 5 は飛ばす
-   - `starship init` の行だけが出たら（zoxide・WezTerm の行が無い）、もう書いてある。手順 4・5 は飛ばす
-   - `starship init` の行が、`brew shellenv` の行より後ろで、zoxide・WezTerm のどの行よりも前（番号が小さい）に出たら、もう書いてある。手順 4・5 は飛ばす
-   - zoxide か WezTerm の行があって、`starship init` の行が無いか、そのどれかより後ろに出たら（前の版のこの文書の並びなど）、手順 4 は飛ばし、手順 5 で前へ置く
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、手順 4・5 は飛ばす（その設定が starship を WezTerm のシェル統合と zoxide より前に読む）
-
-   <details>
-   <summary>補足: <code>~/.bashrc</code> の並びと WezTerm シェル統合</summary>
-
-   `starship init bash` が出すのは 1 行だけで、中身はさらに長い初期化を読み込む `eval` になっている:
-
-   ```
-   $ starship init bash
-   eval -- "$(/home/linuxbrew/.linuxbrew/bin/starship init bash --print-full-init)"
-   ```
-
-   その本体（`--print-full-init` の出力）が `PS1` と `PROMPT_COMMAND` に何をするかを読むと、次のことが分かる。
-
-   - **`PS1` は毎回まるごと組み立て直される**: `PS1="$(starship prompt ...)"` を `PROMPT_COMMAND` の中で実行する
-   - **既存の `PROMPT_COMMAND` は保存される**: `STARSHIP_PROMPT_COMMAND` に退避して `starship_precmd` の中から `eval` する。「前に足すとコマンド実行時間が壊れ、後ろに足すと `$?` が壊れる」という理由がコメントに書いてある
-   - **`PS0` には前に足す**: 既存の `PS0` は残る
-
-   実機の `~/.bashrc` は 36-38 行目で WezTerm のシェル統合（`~/.config/wezterm/shell/wezterm.sh`）を読み込んでいる。この統合は OSC 133 の印を 4 か所に置く。自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）の検証コンテナで、擬似端末の生の出力を見た（2026-09-30。COPR の `/etc/profile.d/wezterm.sh` の公式の統合が無い形）:
-
-   | 印 | 置き場所 | starship が前（この文書の並び） | starship が後ろ（前の版の並び） |
-   |---|---|---|---|
-   | `A`（プロンプト開始） | `PS1` の先頭に追加 | 失われる（`PS1` が毎回上書きされるため） | 同じ |
-   | `B`（入力開始） | `PS1` の末尾に追加 | 失われる（同上） | 同じ |
-   | `C`（コマンド開始） | `PS0` の先頭に追加 | 残る | 残る |
-   | `D`（コマンド終了） | `PROMPT_COMMAND` の関数 | 正しく送られる（`false` の後は `D;1`） | 送られるが、終了コードがいつも 0（starship が退避して自分の中から呼び、そのときの `$?` が 0 のため） |
-
-   - starship が前のときは、WezTerm の統合が `$?` を保つ関数を `starship_precmd` の前に足すので、終了コードが正しく届く。starship が後ろのときは、WezTerm の関数が starship の退避先に入る
-   - starship が前のときは、WezTerm の設定の `PS0` の直し（ryo-aoki-pc/wezterm の `shell/wezterm.sh` で、印を BEL で終える）が要る。直す前の `wezterm.sh` では、コマンドの出力の前に `${STARSHIP_START_TIME:0:0}` の文字が出た
-   - zoxide は、`z` を使うたびに `PROMPT_COMMAND` に自分のフックがあるかを確かめる。starship が zoxide より後ろにあると、zoxide のフックが starship の退避先に入り、文字列の `PROMPT_COMMAND`（Git Bash など）では `zoxide: detected a possible configuration issue.` が出た。AlmaLinux 10 の `/etc/bashrc` は `PROMPT_COMMAND` を配列にするので、出なかった
-   - `A` / `B` を残したいなら、starship 側の `format` に自分で `\033]133;A` / `B` を埋め込むか、シェル統合を使わないか、どちらかになる
-   - 公式の統合があるとき（AlmaLinux 10 の COPR の WezTerm）は、公式の統合が `D` を正しく送る（上流の `wezterm.sh` を読ませた模擬での実測）
-   - 画面でのプロンプトへのジャンプや、出力のコピーは確かめていない（端末が要る）
-
-   </details>
-
-1. starship・zoxide・WezTerm の行がどれも無いときは、`~/.bashrc` の最後に starship の初期化の 1 行を書く。
-
-   ```bash
-   echo 'eval "$(starship init bash)"' >> ~/.bashrc
-   tail -1 ~/.bashrc
-   ```
-
-   - `eval "$(starship init bash)"` が出る
-   - **この 1 行を書かないとプロンプトは変わらない**（`starship` コマンド自体は文字列を出すだけ）
-   - プロンプトは、手順 6 で開き直した端末から変わる
-   - 後から zoxide や WezTerm のシェル統合を入れるときも、それらの行はこの行より後ろに置く（[zoxide.md](zoxide.md) は `~/.bashrc` のいちばん最後に書く）
-
-1. zoxide か WezTerm の行があるときだけ（手順 4 の代わりに）、starship の行をそれらの最初の行の前に置く。
-
-   ```bash
-   awk 'NR == FNR { if (!z && /zoxide init|WEZTERM_SHELL_INTEGRATION|wezterm\.sh/) z = FNR; if (z && /brew shellenv/) b = b $0 "\n"; next } !z { print; next } FNR == z { printf "%s", b; print "eval \"$(starship init bash)\"" } !/^eval "\$\(starship init bash\)"$/ && !(FNR > z && /brew shellenv/)' ~/.bashrc ~/.bashrc > ~/.bashrc.starship-tmp && cat ~/.bashrc.starship-tmp > ~/.bashrc && rm ~/.bashrc.starship-tmp
-   grep -n -e 'brew shellenv' -e 'starship init' -e 'zoxide init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'wezterm.sh' ~/.bashrc
-   ```
-
-   - `brew shellenv` の行（あれば）→ `starship init` の行（1 つだけ）→ zoxide・WezTerm の行の順に出ればよい
-   - 前の版のこの文書で最後に書いた `eval "$(starship init bash)"` は、消えて前に移る
-   - zoxide・WezTerm の最初の行より後ろにあった `brew shellenv` の行は、starship の行のすぐ上に移る（そのままだと、新しい端末で `starship: command not found` になる）
-   - 形の違う starship の行（手で直したもの）は消えない。`grep` に 2 つ出たら、後ろの方をエディタで消す
-
-   <details>
-   <summary>補足: 差し込み方</summary>
-
-   - `awk` は `~/.bashrc` を 2 回読む。1 回目で、`zoxide init`・`WEZTERM_SHELL_INTEGRATION`・`wezterm.sh` のどれかを含む最初の行と、それより後ろの `brew shellenv` の行を探す。2 回目で、その最初の行の前に `brew shellenv` の行と starship の 1 行を置き、行全体が `eval "$(starship init bash)"` と同じ行と、後ろの `brew shellenv` の行を消す
-   - zoxide・WezTerm の行が無ければ、何も変えない
-   - `brew shellenv` の行を動かすのは、starship の 1 行が `starship` コマンドを PATH から探すため。WezTerm の手順書（ryo-aoki-pc/wezterm の docs/install.md）は WezTerm と git だけを前提に末尾へ足すので、WezTerm の行が `brew shellenv` の行より前にあることがある
-   - 実機の `~/.bashrc` の並び（34 行目 `zoxide init`、36-38 行目 WezTerm の `if … fi`）では、34 行目の前に入る。starship → zoxide → WezTerm の並びでも、starship が前なら `false` の後は `D;1` で、`z` の警告も出なかった（zoxide と WezTerm の間の順は結果を変えない）
-   - 一時ファイルから `cat >` で書き戻すのは、`~/.bashrc` のパーミッションを変えないため
-
-   </details>
+   - starship → WezTerm → zoxide の順に出る。`~/.bashrc` の編集は不要
+   - 既に開いているシェルで追加の初期化をせず、次の手順で端末を開き直す
 
 1. 開いている端末を閉じて、開き直す。
 
@@ -220,8 +149,8 @@
    starship prompt
    ```
 
-   - `~/.bashrc` は読み直さない。starship は設定ファイルをプロンプトのたびに読むので、starship を読み込んだ端末（[手順 6](#実施手順) で開き直した端末）のプロンプトは、次のプロンプトから変わる
-   - starship を読み込んだシェルで `. ~/.bashrc` を読み直すと、`PS0` に starship がもう 1 つ入る（starship は初期化のたびに `PS0` に自分を足す）
+   - 設定ファイルの変更だけなら `~/.bashrc` を読み直す必要はない。starship は設定ファイルをプロンプトのたびに読むので、starship を読み込んだ端末（[手順 4](#実施手順) で開き直した端末）のプロンプトは、次のプロンプトから変わる
+   - 共通設定は初期化済みの starship を再初期化しない。手で `eval "$(starship init bash)"` を重ねると `PS0` が重複するため、追加で実行しない
 
 ---
 
@@ -276,14 +205,13 @@
 
 - 本書ではロールバックは**本実行していない**
 
-1. brew で starship を消し、`~/.bashrc` から初期化の行を消す。
+1. starship をアンインストールして、端末を開き直す。
 
    ```bash
    brew uninstall starship
-   sed -i '/starship init/d' ~/.bashrc        # ~/.bashrc に書いた 1 行を消す
    ```
 
-   - **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびに `starship: command not found` が出る**（[zoxide](zoxide.md#ロールバック) と同じ落とし穴）
+   - 次のシェルでは共通設定が starship の初期化を省略する。`~/.bashrc` の編集は不要
 
 1. 設定も消すときだけ、`~/.config/starship.toml` を消す。
 
@@ -301,10 +229,12 @@
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 のシェルプロンプトを [starship](https://starship.rs/)（git の状態・言語バージョン・終了コードなどを自動で出すプロンプト）に置き換える。**EPEL にも AppStream にも RPM が無い**
-- **進め方**: Homebrew で入れ、`~/.bashrc` に初期化の 1 行を足す。**読者が書き換えるのは冒頭の変数ブロックだけ**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **コンテナでのみ検証済み（2026-09-22、並びを直した手順 3〜7 とプリセットの節の手順 2 は 2026-09-30）。実機には入れていない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**[Homebrew の導入](homebrew.md)と手順 2・4・7、[プリセットを当てる（任意）](#プリセットを当てる任意)・[設定ファイル](#設定ファイル)を通した
   - 2026-09-30 に、並びを直した手順 3〜7 とプリセットの節の手順 2 を、x86_64 のコンテナで流し直した（[付録](#付録-並びを直した版の検証2026-09-30)）。WezTerm のシェル統合と zoxide と一緒に読んだ対話のシェルを、`script` の擬似端末で動かして生の出力を見た
@@ -381,16 +311,16 @@ $ wc -l ~/.config/starship.toml
 
 ### 注意点
 
-- **初期化の 1 行が本体**: `brew install` だけではプロンプトは変わらない。`~/.bashrc` に `eval "$(starship init bash)"` を書いて初めて効く
-- **starship の初期化は、`brew shellenv` の行より後ろ、zoxide の初期化と WezTerm のシェル統合より前に置く**: zoxide・WezTerm より後ろにあると、この設定の WezTerm のシェル統合が働くとき（COPR の公式の統合が無いとき）は、WezTerm に送る終了コード（OSC 133 の `D`）がいつも 0 になる（[手順 3 の補足](#実施手順)。検証コンテナの擬似端末での実測）。`brew shellenv` より前にあると、`starship: command not found` になる
-- **WezTerm のシェル統合の `A` / `B` は失われる**: `PS1` が毎回作り直されるため。並びによらない（[手順 3 の補足](#実施手順)）
+- **初期化の 1 行が本体**: `brew install` だけではプロンプトは変わらない。bash の共通設定が `starship init bash` を読むことで有効になる
+- **starship の初期化は、`brew shellenv` の行より後ろ、zoxide の初期化と WezTerm のシェル統合より前に置く**: zoxide・WezTerm より後ろにあると、この設定の WezTerm のシェル統合が働くとき（COPR の公式の統合が無いとき）は、WezTerm に送る終了コード（OSC 133 の `D`）がいつも 0 になる（[bash の読む順番](https://github.com/ryo-aoki-pc/bash#読む順番)の実測）。`brew shellenv` より前にあると、`starship: command not found` になる
+- **WezTerm のシェル統合の `A` / `B` は失われる**: `PS1` が毎回作り直されるため。並びによらない（[bash の読む順番](https://github.com/ryo-aoki-pc/bash#読む順番)）
 - **アンインストール時に行を消し忘れると毎回エラーが出る**: [ロールバック](#ロールバック)の `sed` を忘れない
 - **プロンプトごとに外部プロセスが起動する**: git の状態を調べるので、大きなリポジトリや遅いストレージ（Raspberry Pi の microSD）では体感できるほど遅くなることがある
   - `starship timings` で犯人を探し、要らないモジュールは `disabled = true` で切る
 - **記号には Nerd Font が要るものがある**: 既定のプロンプト記号 `❯` は普通のフォントでも出るが、プリセットによっては Nerd Font 前提
   - 無い端末では `plain-text-symbols` / `no-nerd-font` を当てる
 - **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo starship` はそのままでは使えない、など
-- **root のシェルには効かない**: `sudo -i` した root は root の `~/.bashrc` を読むので、手順 4・5 の初期化の行が無い（homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節も、PATH を足すだけ）
+- **root は別に導入する**: root 自身にも bash の共通設定を導入した場合にだけ、root のシェルで初期化される（[homebrew.md の root の節](homebrew.md#root-のシェルでも使う任意)）
 
 ### 参照
 

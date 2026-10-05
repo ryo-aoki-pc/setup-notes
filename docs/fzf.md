@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わない）
@@ -51,31 +53,16 @@
 
    - `0.74.4 (Homebrew)` と `/home/linuxbrew/.linuxbrew/bin/fzf` が出る
 
-1. `~/.bashrc` の末尾に、キー操作と補完を組み込む 1 行を書き、今のシェルにも読ませる。
+1. 共通設定を読み直し、キー操作と補完を確かめる。
 
    ```bash
-   echo 'eval "$(fzf --bash)"' >> ~/.bashrc
-   eval "$(fzf --bash)"
+   . ~/.bashrc
    bind -X
    complete -p cd vi ssh
    ```
 
-   - `bind -X` に `"\C-r": "__fzf_history__"` と `"\C-t": "fzf-file-widget"` の 2 行、`complete -p` に `_fzf_dir_completion` / `_fzf_path_completion` / `_fzf_complete_ssh` が出る
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `bind -X` を実行する（その設定が、fzf があるときに同じ 1 行を読む）
-   - 末尾に書くので、[bash-settings.md 手順 4](bash-settings.md#実施手順) の Homebrew の補完の行より後ろになる（前後が逆だと `bat **<Tab>` が fzf にならない。同書の手順 4 の補足）
-
-   <details>
-   <summary>補足: <code>fzf --bash</code> が何をするか</summary>
-
-   - `fzf --bash` は、キー割り当て（`key-bindings.bash`）と補完（`completion.bash`）のスクリプトを標準出力に出す（0.74.4 で 939 行）。`eval` で今のシェルに読ませる。fzf の `install` スクリプトが置く `~/.fzf.bash` や、Homebrew の `opt/fzf/shell/*.bash` を直接読む古い形と中身は同じで、formula の caveat もこの形を案内する
-   - 中身はどちらも `if [[ $- =~ i ]]` で囲まれていて、対話のシェルでだけ動く。`bash -c 'eval "$(fzf --bash)"'` の出力は 0 バイト（`bind` の警告も出ない）
-   - `PROMPT_COMMAND`・`PS0`・`PS1` には触らない（`grep` で 0 件）。starship・WezTerm のシェル統合・zoxide の並び（[starship.md 手順 3](starship.md#実施手順) の補足）に fzf は関係しないので、どこに置いてもよい
-   - キーは `bind -x` で Ctrl+R（`__fzf_history__`）と Ctrl+T（`fzf-file-widget`）に、Alt+C は readline のマクロで `__fzf_cd__` に割り当てる。readline の既定の Ctrl+R（`reverse-search-history`）と Ctrl+T（`transpose-chars`）は使えなくなる
-   - 補完は、`cd` `pushd` `rmdir` にディレクトリ、`cat` `vi` `nvim` `less` `git` `ls` `cp` など決まったコマンドにパス、`ssh` `telnet` にホスト、`kill` にプロセス、`export` `unset` に変数、`unalias` にエイリアスの fzf の補完を、すでにある定義を包む形で付ける。`**` を打たなければ、元の定義（bash-completion の遅延読み込みを含む）に渡す（コンテナで `git checko<Tab>` が `checkout` に補完された）
-   - bash-completion 2.11 の `_completion_loader` を見つけて包むので、bash-completion は fzf より先に読まれている必要がある。`/etc/bashrc` が `~/.bashrc` より先に読むので、ふつうはそうなる
-   - 2 回 `eval` しても、キーの割り当ては 2 つのまま（`bind -X | sort | uniq -d` は空）。`. ~/.bashrc` で読み直しても二重にならない
-
-   </details>
+   - 共通設定が Homebrew の補完の後で `fzf --bash` を読む。`~/.bashrc` への追記は不要
+   - Ctrl+R / Ctrl+T / Alt+C の割り当てと補完が出る
 
 1. Ctrl+R を押し、履歴から手順 2 の `fzf --version` を選んで実行する。
 
@@ -144,32 +131,16 @@
 - 前提: fd と bat が入っていること（[yazi.md 手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` か `brew install fd`、[bat](bat.md)）。`command -v fd bat` で 2 行出ればよい
 - `**<Tab>` の候補は変わらない（`find` のまま。この節の手順 1 の補足）
 
-1. `~/.bashrc` に、fzf の変数を 4 行足す。
+1. fd と bat が入っていることを確認し、共通設定を読み直す。
 
    ```bash
-   cat >> ~/.bashrc <<'EOF'
-   export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
-   export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
-   export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
-   export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:200 {}'"
-   EOF
+   command -v fd bat
    . ~/.bashrc
-   printf '%s\n' "${FZF_DEFAULT_COMMAND}" "${FZF_CTRL_T_COMMAND}" "${FZF_ALT_C_COMMAND}" "${FZF_CTRL_T_OPTS}"
+   printf '%s\n' "${FZF_DEFAULT_COMMAND-}" "${FZF_CTRL_T_COMMAND-}" "${FZF_ALT_C_COMMAND-}" "${FZF_CTRL_T_OPTS-}"
    ```
 
-   - 4 行が読み戻される
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` を実行する（その設定が、fd と bat があるときに同じ 4 つを読む）
-
-   <details>
-   <summary>補足: 変数の意味</summary>
-
-   - `FZF_DEFAULT_COMMAND`: 標準入力が端末のときに fzf が候補を作るコマンド（`fzf` と打ったときと、`FZF_CTRL_T_COMMAND` が無いときの Ctrl+T）
-   - `FZF_CTRL_T_COMMAND` / `FZF_ALT_C_COMMAND`: Ctrl+T と Alt+C の候補を作るコマンド。既定は `find` で、`.git` などの中も出る
-   - `FZF_CTRL_T_OPTS`: Ctrl+T のときだけ fzf に渡すオプション。`--preview` の `{}` に候補のパスが入る。`--line-range=:200` で先頭 200 行だけ描く
-   - `**<Tab>` の候補は `_fzf_compgen_path()` / `_fzf_compgen_dir()` という関数を定義すると変えられる（README）。本書では置かない（`find` のまま）
-   - 4 行は読む順番を選ばない（キーを押したときに読まれる）。`. ~/.bashrc` の読み直しは、starship を WezTerm のシェル統合より前に置いたホストでは並びを入れ替える（[starship.md 手順 6](starship.md#実施手順)）ので、気になるなら端末を開き直す
-
-   </details>
+   - fd があれば候補の 3 変数、bat があればプレビューの変数が入る。追加の export は不要
+   - 無いツールは [fd の導入元](tool-catalog.md)・[bat](bat.md)から入れて端末を開き直す
 
 1. `cat ` と打ってから Ctrl+T を押し、プレビューが出ることを確かめる。
 
@@ -192,45 +163,32 @@
 
 ## ロールバック
 
-- fzf の実行ファイルは、zoxide の `zi`（候補から選ぶ）と yazi の `z` / `Z` キー（絞り込み）も使う。それらを使うなら、この節の手順 3 は飛ばす
-- 本書のロールバックは、x86_64 のコンテナで通した
+- fzf の実行ファイルは zoxide の `zi` と yazi の絞り込みにも使う。それらを使うならアンインストールしない
+- キー操作だけ無効にする場合は bash リポジトリ側を変更する。`~/.bashrc` に重ねて設定しない
 
-1. `~/.bashrc` から、手順 3 の 1 行を消す。
-
-   ```bash
-   sed -i '/fzf --bash/d' ~/.bashrc
-   grep -c 'fzf --bash' ~/.bashrc
-   ```
-
-   - `0` が出る。今のシェルのキーと補完は残る（新しい端末から消える）
-
-1. [fd と bat を候補とプレビューに使う（任意）](#fd-と-bat-を候補とプレビューに使う任意)を通していたときだけ、4 行を消す。
-
-   ```bash
-   sed -i '/^export FZF_/d' ~/.bashrc
-   grep -c 'FZF_' ~/.bashrc
-   ```
-
-   - `0` が出る
-
-1. zoxide の `zi` と yazi の絞り込みが要らないときだけ、brew で fzf を消す。
+1. fzf を使うツールがほかに無いときだけ、アンインストールする。
 
    ```bash
    brew uninstall fzf
    ```
 
-   - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/fzf/0.74.4...` に続けて、依存の `ncurses` もほかに使うものが無ければ `==> Autoremoving 1 unneeded formula: ncurses` で消える（Homebrew 7.0.7）
-   - 消した後の `zi` は `zoxide: could not find fzf, is it installed?` になる（この節のリード）
-   - 同じシェルでは、`command -v fzf` がまだ前のパスを返す（bash が覚えている）。`hash -r` の後か新しいシェルでは、何も返さない
+   - 依存の ncurses も、ほかに使うものが無ければ消える
+
+1. 端末を閉じて開き直す。
+
+   - 削除したツールの設定は、次のシェルでは共通設定から読み込まれない
+   - `~/.bashrc` にツール別の行は書いていないので、削除も不要
 
 ---
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 の bash に [fzf](https://github.com/junegunn/fzf)（一覧から曖昧検索で選ぶコマンド）のキー操作と補完を組み込み、履歴・パス・ディレクトリを打ちかけの文字から選べるようにする
-- **進め方**: Homebrew で入れ（yazi・zoxide の依存で入っていることが多い）、`~/.bashrc` に 1 行。**読者が書き換える変数は無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **x86_64 のコンテナでのみ検証した（2026-10-02）**
   - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順・任意節・[更新](#更新)・[ロールバック](#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#付録-コンテナでの検証記録2026-10-02)）
   - 確認したこと
@@ -270,7 +228,7 @@
 
 - **Homebrew の 0.74.4 にした**（[導入元一覧](tool-catalog.md)の規則。EPEL は 0.58.0）
   - `fzf --bash` は 0.48.0 からあるので EPEL の版でも同じ手順で動くはずだが、確かめていない。yazi・zoxide の依存ですでに Homebrew の fzf が入っているホストが多いので、揃える
-- **`fzf --bash` で組み込む**: formula の caveat の案内で、fzf の `install` スクリプト（`~/.fzf.bash` と `~/.bashrc` への追記）は使わない。`~/.bashrc` に残るのは 1 行だけで、版が上がっても追従する
+- **`fzf --bash` で組み込む**: formula の caveat の案内で、fzf の `install` スクリプト（`~/.fzf.bash` と `~/.bashrc` への追記）は使わない。bash リポジトリの初期化がインストール済みの版に追従する
 - **atuin は採らない**: 履歴を SQLite に持ち、別のホストと同期もできる履歴の検索ツール。Ctrl+R を取り合うので、どちらか 1 つにする。fzf は依存ですでに入っていて、履歴のほかにパスとディレクトリにも使えるので、こちらにした。atuin は[導入元一覧](tool-catalog.md#cli-定番の置き換え)の行のまま（試していない）
 - **ble.sh・mcfly も採らない**: ble.sh は行の編集そのものを置き換える大きなもの、mcfly は履歴だけ。どちらも RPM が無い。試していない
 - **`kill` の補完は書かない**: コンテナでは fzf の一覧にならなかった（[対象と検証環境](#対象と検証環境)）

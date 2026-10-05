@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルや、`sudo -iu <ユーザー>` で切り替えたシェルでは行わない（コンテナを自分のユーザーで動かすため。`sudo -iu` のシェルには `XDG_RUNTIME_DIR` が無く、手順 7 の `systemctl --user` が失敗する）
 
@@ -248,25 +250,17 @@
 - Docker の API に `DOCKER_HOST` でつなぐツール（[lazydocker](lazydocker.md) など）のための設定
 - [image-tools.md](image-tools.md) の dive と Trivy、[podman-tui](podman-tui.md) は podman を直接読むので、この節は要らない
 
-1. `~/.bashrc` に `DOCKER_HOST` を書き、ソケットが Docker の API に答えるか確かめる。
+1. 共通設定を読み直し、ソケットが Docker の API に答えるか確かめる。
 
    ```bash
-   echo 'export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"' >> ~/.bashrc
    . ~/.bashrc
-   echo "${DOCKER_HOST}"
+   printf '%s\n' "${DOCKER_HOST-}"
    curl -s --unix-socket "${DOCKER_HOST#unix://}" http://d/version | grep -o '"Name":"Podman Engine"'
    ```
 
-   - `unix:///run/user/<UID>/podman/podman.sock` と `"Name":"Podman Engine"` が出ればよい
-   - 1 行目はシングルクォートなので、`${XDG_RUNTIME_DIR}` は `~/.bashrc` を読むたびに展開される
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、1 行目は貼らない。`. ~/.bashrc` を実行してから、`echo` と `curl` の行を貼る（その設定は、ソケットがあるときだけ同じ `DOCKER_HOST` を入れる。試していない）
-
-   <details>
-   <summary>補足: <code>docker</code> コマンドが要るとき</summary>
-
-   `DOCKER_HOST` は API につなぐツールのための設定で、`docker` というコマンドは入らない。`docker` の名前で podman を呼びたいなら、AppStream の `podman-docker` を入れる（[ツール一覧](tool-catalog.md#cli-コンテナ)）。
-
-   </details>
+   - `unix:///run/user/…/podman/podman.sock` と `"Name":"Podman Engine"` が出ればよい
+   - 共通設定はソケットがあるときだけ `DOCKER_HOST` を入れる。既に別の値がある場合は上書きせず、その用途を確認する
+   - ソケットの有効化は [手順 7](#実施手順)で行う。`~/.bashrc` には追記しない
 
 ---
 
@@ -454,12 +448,14 @@
    rm -rf ~/hello-web
    ```
 
-1. Docker 向けの節を通したときだけ、`~/.bashrc` の行を消す。
+1. Docker 向けのツールを閉じ、今のシェルの接続先を外す。
 
    ```bash
-   sed -i '/^export DOCKER_HOST=.*podman\.sock/d' ~/.bashrc
    unset DOCKER_HOST
    ```
+
+   - `~/.bashrc` の行の削除は不要。この節の手順 3 で API ソケットを止める
+   - ソケットのファイルが残る間は、新しいシェルでも共通設定が `DOCKER_HOST` を入れる。再起動後にソケットが無ければ入れない
 
 1. API ソケットを止める。
 
@@ -501,10 +497,12 @@
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md)・[podman-tui](podman-tui.md)・[lazydocker](lazydocker.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
-- **進め方**: AppStream の podman を入れ、subuid / subgid と `podman info` を確かめ、API ソケットを有効にする。自動起動は任意の Quadlet。**読者が書き換える変数は無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
     - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した

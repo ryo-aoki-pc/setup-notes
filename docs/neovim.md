@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理と自分の設定は、`sudo -i` した root のシェルでは行わない
@@ -72,41 +74,18 @@
 
 ## 既定のエディタにする（任意）
 
-- 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）が同じ 3 項目を設定しているなら、この節は飛ばす。戻すときも、その設定の側で変更する
-- この節は、元の変数・エイリアスを `~/.local/state/neovim-editor-before.bash` に控え、印付きの 3 行を `~/.bashrc` の末尾に足す
+- この節では、bash リポジトリが持つ既定のエディタ設定を確認する
 
-1. `EDITOR` を見るツール（git、lazygit、`crontab -e` など）で Neovim を開くようにする。
+1. 共通設定を読み直し、既定のエディタを確かめる。
 
    ```bash
-   if [ -e ~/.local/state/neovim-editor-before.bash ]; then
-     echo '中断: 元値の控えがある。再実行せず、既存の設定かロールバックを確認する' >&2
-   elif grep -Fq '# setup-notes: neovim editor' ~/.bashrc; then
-     echo '中断: 印付きの設定がすでにある。元値の控えを確認する' >&2
-   else
-     mkdir -p ~/.local/state
-     (umask 077; {
-       declare -p EDITOR 2>/dev/null || echo 'unset EDITOR'
-       declare -p VISUAL 2>/dev/null || echo 'unset VISUAL'
-       alias vi 2>/dev/null || echo 'unalias vi 2>/dev/null || true'
-     } > ~/.local/state/neovim-editor-before.bash) &&
-     cat >> ~/.bashrc <<'EOF'
-   # setup-notes: neovim editor begin
-   export EDITOR=nvim
-   export VISUAL=nvim
-   alias vi=nvim
-   # setup-notes: neovim editor end
-   EOF
-     . ~/.bashrc
-     printf '%s / %s\n' "${EDITOR}" "${VISUAL}"
-   fi
+   . ~/.bashrc
+   printf '%s / %s\n' "$EDITOR" "$VISUAL"
+   alias vi
    ```
 
-   - `sudoedit` は `EDITOR` の `nvim` を sudo の PATH（`secure_path`）で探すので、そのままでは見つからず、黙って `vi` で開く
-   - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すと、`sudoedit` は自分の設定（`~/.config/nvim`）の Homebrew 版の `nvim` で開く
-   - `sudo visudo` は `EDITOR` を引き継がず、その節を通しても `vi` で開く。`nvim` で開くなら、その節を通して `sudo EDITOR=nvim visudo` と打つ（root の設定の `/root/.config/nvim` を読む）
-   - その節を通さないなら、`SUDO_EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim sudoedit <ファイル>` や `sudo EDITOR=/home/linuxbrew/.linuxbrew/bin/nvim visudo` のようにフルパスを渡す
-   - root のシェル（`su -`、root のログイン、`sudo -i`）で `nvim` を使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す。root の Neovim は `/root/.config/nvim` を読む
-   - `中断:` が出たら既存の設定と控えは書き換えていない
+   - `nvim / nvim` と `alias vi='nvim'` が出ればよい
+   - この 3 項目は共通設定が持つ。元値の控えや `~/.bashrc` への追記は行わない
 
 ---
 
@@ -158,27 +137,11 @@
 - 本書ではロールバックは**本実行していない**
 - 自分用の bash 設定で Neovim を指定している場合は、先にそちらの `EDITOR`・`VISUAL`・`vi` を変更する
 
-1. 本書で既定のエディタを設定したときだけ、追記した部分を外して元値に戻す。
+1. 既定のエディタの扱いを確認する。
 
-   ```bash
-   if [ ! -f ~/.local/state/neovim-editor-before.bash ]; then
-     echo '中断: 元値の控えが無い。この手順は実行せず、以前の設定を確認する' >&2
-   elif ! grep -Fxq '# setup-notes: neovim editor begin' ~/.bashrc ||
-        ! grep -Fxq '# setup-notes: neovim editor end' ~/.bashrc; then
-     echo '中断: 印付きの設定が揃わない。~/.bashrc を確認する' >&2
-   else
-     sed -i --follow-symlinks '/^# setup-notes: neovim editor begin$/,/^# setup-notes: neovim editor end$/d' ~/.bashrc &&
-       . ~/.local/state/neovim-editor-before.bash &&
-       rm ~/.local/state/neovim-editor-before.bash
-     declare -p EDITOR VISUAL 2>/dev/null
-     alias vi 2>/dev/null
-   fi
-   ```
-
-   - この節の手順 2 へ進む前に、元のエディタ・エイリアスに戻ったことを確かめる。元が未設定なら表示されなくてよい
-   - 新しくログインしたシェルでも、`EDITOR`・`VISUAL`・`alias vi` が意図した値か確かめる
-   - `~/.bashrc` がシンボリックリンクなら、リンクを残して追記先のファイルから印付きの部分を外す
-   - 以前の版で印や控えを付けずに追記した場合は、このブロックを貼らず、今回足した `export EDITOR=nvim`・`export VISUAL=nvim`・`alias vi=nvim` の行だけを手で外し、控えていた元値を戻す
+   - 本書ではエディタ設定を `~/.bashrc` に書かないので、追記の削除は不要
+   - この節の手順 2 の後に端末を開き直すと、Neovim が無ければ共通設定はエディタを変更しない
+   - 別の場所にも `nvim` がある場合は引き続き使われる。個別の変更は共通設定側で行う
 
 1. brew で Neovim を消す。
 
@@ -194,10 +157,12 @@
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [Neovim](https://neovim.io/) の最新版（0.12 系）を入れる。EPEL の `neovim` は 0.10.1 で 2 マイナーぶん古い
-- **進め方**: Homebrew で入れる。**読者が書き換える値は実質無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **実機で本実行済み（2026-09-20）**
   - 下表のホストで `brew install neovim` を実行し、`neovim 0.12.5_1` が入って常用中
   - [Homebrew の導入](homebrew.md)と手順 1〜2、[既定のエディタにする](#既定のエディタにする任意)・[設定ファイル](#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
