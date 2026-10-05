@@ -18,7 +18,7 @@
 - pod やシークレットも画面で扱うなら [podman-tui](podman-tui.md)（違いは[選択した方針](#選択した方針)）
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。画面は、表示された文字を読み取り、キーを送って確かめた（[対象と検証環境](#対象と検証環境)）。
+> **基本操作・podman exec の任意節・既存設定を使った root の表示と停止は、aarch64 の実機（SELinux Enforcing）でも検証済み（2026-10-06）**。新規導入・更新・全ロールバック・compose の任意節は、x86_64 のコンテナでのみ検証した。画面は、表示された文字を読み取り、キーを送って確かめた（[対象と検証環境](#対象と検証環境)、[実機での検証記録](#付録-aarch64-の実機での検証記録2026-10-06)）。
 
 1. brew で lazydocker を入れる。
 
@@ -282,7 +282,7 @@
 > [!WARNING]
 > - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の導入条件と同じ）
 > - システムの API ソケットにつなげるのは root だけ。権限を緩めない（つなげると、root と同じことができる）
-> - この節の検証の範囲は[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)
+> - この節の検証の範囲は[コンテナの付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)と[実機の付録](#付録-aarch64-の実機での検証記録2026-10-06)
 
 1. システムの podman の API ソケットを有効にして、root で応答を確かめる。
 
@@ -509,38 +509,38 @@
 - **目的**: コンテナ・イメージ・ボリューム・ネットワークと、compose のサービスを、端末の画面（TUI）で見て操作できるようにする。podman の API ソケットに、Docker の API としてつなぐ
   - 任意節で、root のコンテナ（`sudo podman` で動かしたもの）も、`sudo -i lazydocker` で見られるようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-28）。実機では本実行していない**
+- **状態**: **aarch64 の実機で基本操作・podman exec・既存設定を使った root の表示と停止を検証済み（2026-10-06）**。導入済みの環境で、一時設定と確認用コンテナを使った。[今回の範囲と後片付け](#付録-aarch64-の実機での検証記録2026-10-06)を参照。新規導入・更新・全ロールバック・compose の任意節は、x86_64 のコンテナでのみ検証済み（2026-09-28）
   - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - compose の任意節の前には、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](podman-compose.md) の手順 1〜6 を通した
-  - 確認したこと:
+  - 検証コンテナで確認したこと:
     - lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 の API ソケットにつながり、コンテナ・イメージ・ボリューム・ネットワークとログを出す
     - 画面の `s` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
     - `c` に足した `podman exec` でシェルが開き、`dockerCompose: podman-compose` で Project と Services の枠が出て、`r` で `web` が再起動する
     - [使い方の基本](#使い方の基本)の表のキーと、`E`・`a` が何も起こさないこと
   - **確認していないこと**: 色や罫線の見た目、デスクトップの端末での表示、`w`（ブラウザで開く）・`b`（まとめての操作）・`p`（一時停止）・`/`（絞り込み）
-  - aarch64（Raspberry Pi 5）では通していない
-  - [root でも使う](#root-でも使う任意)の節は、**x86_64 のコンテナでのみ検証した**（2026-10-05。[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）
-    - 通したこと: その節の手順 1〜8 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。手順 1・2 は重ねても貼った
-    - 確認したこと:
+  - aarch64 の実機では、手順書全体をコードブロックのまま順に貼る検証はしていない
+  - [root でも使う](#root-でも使う任意)の節は、**目印付きの追記・撤去への修正前の手順 1〜8 を、x86_64 のコンテナで検証した**（2026-10-05。[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。当時の目印付き追記・撤去ブロックは一時ファイルとスタブでの検証のみ。現行手順は共通設定の確認を行い、直接追記・撤去はしない。aarch64 の実機では、既存のソケット・bash の設定を使った表示と停止だけを追加で検証した（2026-10-06）
+    - 検証コンテナで通したこと: その節の手順 1〜8 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。手順 1・2 は重ねても貼った
+    - 検証コンテナで確認したこと:
       - root の画面に root のコンテナだけが出て、`s` で止まる。`su -`・`sudo -s` の root のシェルでも同じ
       - `sudo lazydocker` はつながらず、`sudo -E lazydocker` は自分のコンテナを出す
       - homebrew.md のどちらの節だけでも動く。その節の手順 6〜8 で、`/root/.bashrc` が元と同じ内容に戻る
-    - 確認していないこと: 実機、aarch64、SELinux が Enforcing のホスト、root の Quadlet のコンテナ
+    - 確認していないこと: root の Quadlet のコンテナ。実機でのソケットの新規有効化、bash 設定の追加・撤去、再起動後の動作
     - 2026-10-05: 自分用の bash の設定を root のシェルにも入れたホストの箇条書き（その節の手順 2・6）は、その設定の検証の中で、代わりのコマンドと、その節の手順 6〜8 を x86_64 のコンテナで流して確かめた（[ryo-aoki-pc/bash の docs/install.md の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#付録-root-のシェルでも読む節の検証記録2026-10-05)）
     - 同日、手順 2・6 を、今回追加した行に目印を付け、その行だけ消す形に直した。未設定・既存の同値・既存の別値の 3 通りと繰り返し適用を、一時ファイルと `sudo`・`podman` のスタブで確認した（いずれも撤去後のファイルは元と同じ）。既存の別値は上書きせずに手順を止める。この変更後のブロックは実際の root の環境では未実行
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
-| 実施日 | —（未実施） | 2026-09-28 |
+| 実施日 | 2026-10-06（aarch64 の導入済み環境） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](podman.md) の実施手順で導入。入れ子の rootless） |
-| Homebrew | 未確認 | 7.0.6（[homebrew.md](homebrew.md) の手順 1〜4 で導入） |
-| lazydocker | 未導入 | 0.25.2（`x86_64_linux` のボトル） |
-| podman-compose | 未確認 | `podman-compose-1.5.0-1.el10_1`（epel。compose の任意節だけで使った） |
-| `docker` コマンド | — | 無し（`podman-docker` は入れていない） |
-| 端末 | — | 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`）の SSH のログインシェル |
+| podman | aarch64 は 5.8.2（`podman-5.8.2-9.el10_2.alma.1.aarch64`、rootless と root を確認） | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](podman.md) の実施手順で導入。入れ子の rootless） |
+| Homebrew | aarch64 は 7.0.8 | 7.0.6（[homebrew.md](homebrew.md) の手順 1〜4 で導入） |
+| lazydocker | aarch64 は導入済みの 0.25.2（Homebrew、arm64、ボトルから導入した記録あり） | 0.25.2（`x86_64_linux` のボトル） |
+| podman-compose | aarch64 は未導入 | `podman-compose-1.5.0-1.el10_1`（epel。compose の任意節だけで使った） |
+| `docker` コマンド | aarch64 は無し（`podman-docker` も無し） | 無し（`podman-docker` は入れていない） |
+| 端末 | aarch64 は 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`、pexpect と pyte で文字を読み取った） | 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`）の SSH のログインシェル |
 
-- 実機の列は、この手順を適用した結果ではない
+- 実機の列の aarch64 は導入済み環境での動作検証の値。x86_64 PC での本実行は未確認
 
 > [!NOTE]
 > 出力例の値は `<USER>` / `<UID>` / `<HOSTNAME>` のプレースホルダで書いてある。バージョン（`0.25.2`・`5.8.2`）とイメージの大きさは実行日によって変わる。
@@ -765,3 +765,46 @@ commandTemplates:
 - 再起動の後の、システムの `podman.socket` の起動
 - コンソールでの root のログインと、bash 以外の root のシェル
 - root で compose のプロジェクトを見ること
+
+### 付録: aarch64 の実機での検証記録（2026-10-06）
+
+AlmaLinux 10.2 の aarch64 ホストで、導入済みの lazydocker 0.25.2 を使って検証した。事前確認は 2026-10-05、画面操作と後片付けは 2026-10-06（Asia/Tokyo）。SELinux は Enforcing、cgroup は v2。Homebrew は 7.0.8、Podman は 5.8.2。`docker`・`podman-docker`・`podman-compose` は無い。
+
+**実施前の状態**:
+
+- ユーザーの `podman.socket` は `inactive/disabled`、`DOCKER_HOST` は空。ユーザーのコンテナとイメージは 0 件で、`~/.config/lazydocker` は無い
+- `~/.bashrc` は自分用の bash の設定を読み、ユーザーのソケットがあるときに `DOCKER_HOST` を入れる。設定の追記は不要だった
+- システムの `podman.socket` は `active/enabled`。root のログインシェルには、既に `DOCKER_HOST=unix:///run/podman/podman.sock` と Homebrew の lazydocker の PATH がある
+- root のコンテナは 0 件、既存イメージは 3 件。`/root/.config/lazydocker` は無い
+
+**検証方法**:
+
+- 手順書のブロックを実機で機械的に流さず、既存状態を確かめながら個別に実行した。新規導入・更新・アンインストールは行っていない
+- Codex の通常のサンドボックスでは `podman` が `/run/user/<UID>/libpod` の read-only エラー、`systemctl` が `Operation not permitted` で失敗した。同じユーザーのサンドボックス外のコマンドでは動いた
+- ユーザーのソケットは `systemctl --user start podman.socket` で一時起動し、`. ~/.bashrc` で既存設定を読み直した。永続的な有効化は行っていない
+- 名前の衝突を避け、確認用コンテナはユーザーを `lazydocker-verify-20261005`、root を `lazydocker-root-verify-20261005` にした。それぞれ同名の `name` ラベルを付け、本文と同じ `registry.access.redhat.com/ubi10/httpd-24:latest` を使った。取得したイメージは arm64
+- 設定は `CONFIG_DIR=/tmp/lazydocker-verification/config` と、root 用の `CONFIG_DIR=/tmp/lazydocker-root-verification/config` に分離した。`CONFIG_DIR` は [0.25.2 の設定処理](https://github.com/jesseduffield/lazydocker/blob/v0.25.2/pkg/config/app_config.go)で対応を確認した。通常の設定ディレクトリは作っていない
+- 最初は `/usr/bin/tmux`（`next-3.4`）を使ったが、`capture-pane -p` で `server exited unexpectedly` になった。`/usr/bin/python3` の pexpect と、一時ディレクトリだけに取得した pyte で、160 桁 × 50 行の擬似端末を読み取る方法へ替えた。`TERM=xterm-256color`、`LANG=C.UTF-8`
+- ユーザーの画面では `DOCKER_HOST` をユーザーのソケットに指定。root は `sudo -n -i env CONFIG_DIR=/tmp/lazydocker-root-verification/config TERM=xterm-256color lazydocker` で、既存のログインシェルの接続先を使った
+
+| 確認 | 結果 |
+|---|---|
+| 導入済みの本体 | `Version: 0.25.2`、`BuildSource: Homebrew`、`Arch: arm64`。パスは `/home/linuxbrew/.linuxbrew/bin/lazydocker`。Homebrew の導入記録は `poured_from_bottle: true`、formula の `arm64_linux` ボトルも確認 |
+| ユーザー API | 既存 bash 設定を読み直すと `unix:///run/user/<UID>/podman/podman.sock`。`/_ping` は `OK`、remote のサーバー版は `5.8.2`、`/version` に `Podman Engine` |
+| ユーザーの基本画面 | Containers・Images・Volumes・Networks、専用名の `running`、Apache の `resuming normal operations` を表示 |
+| ユーザーの停止 | Config タブの ID を確認用コンテナと照合し、`s` → 確認 → `y` で `exited (0)`。`q` で終了コード 0。`podman ps -a` も `Exited (0)` |
+| 初回設定 | 分離したディレクトリに `config.yml`（0 バイト）を作った |
+| podman exec の任意節 | コンテナを `podman start` し、一時設定に本文の `customCommands` を追加。`c` → `podman exec sh` → Enter で `sh-5.2$`、`id` は `uid=1001(default) gid=0(root) groups=0(root)`。`exit` → Enter で画面に戻り、`q` で終了コード 0 |
+| root の接続 | 既存のシステムソケットの `/_ping` は `OK`。権限は `srw-rw---- root root` |
+| root の画面と停止 | root の専用コンテナ・Apache ログを表示し、ユーザーの確認用コンテナは出なかった。Config タブの ID を照合後、`s` → 確認 → `y` で `exited (0)`。`q` で終了コード 0、Podman 側も `Exited (0)`。一時設定は root 所有の 0 バイト |
+
+**後片付け**: 今回のコンテナだけを `podman rm -f lazydocker-verify-20261005` と `sudo -n podman rm lazydocker-root-verify-20261005` で撤去し、今回取得した UBI httpd のイメージをユーザーと root の保管場所からそれぞれ `podman rmi` で撤去した。ユーザーのソケットは `systemctl --user stop podman.socket` で `inactive/disabled` に戻した。root のソケットは元の `active/enabled` を維持した。通常の設定ディレクトリはユーザー・root とも作られず、既存の bash 設定と lazydocker 本体は残った。ユーザーのコンテナ・イメージは 0 件、root のコンテナは 0 件、root の既存イメージは開始前と同じ 3 件。一時設定と検証用の端末も撤去した。
+
+**このホストで実施する場合**: 一般ユーザーの手順は、前提の [Podman 手順 7](podman.md#実施手順)でユーザーの API ソケットを有効にし、既存の bash 設定を読み直せば実施できる。root の任意節は既存のソケットと設定で動いた。compose の任意節は `podman-compose` と確認用プロジェクトが未導入なので、そのままでは実施できない。
+
+#### 今回確認していないこと
+
+- 新規インストール、更新、`brew uninstall` と通常の設定ディレクトリ削除を含む全ロールバック
+- compose の任意節。前提を追加する検証はしていない
+- 実機での root のソケットの新規有効化、`/root/.bashrc` への追記・撤去、root の Quadlet、再起動後の動作
+- デスクトップの端末での見た目、その他のキー操作、x86_64 の実機
