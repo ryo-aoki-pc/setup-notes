@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
-> - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、lazydocker も自分のユーザーの API ソケットにつなぐため）
+> - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
 - 上から順にコードブロックを貼る
@@ -26,6 +26,7 @@
 
    - ビルド済みのボトルが降ってくる。依存は無い
    - aarch64 でもソースからのビルドにはならない
+   - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
 
    <details>
    <summary>補足: ボトル</summary>
@@ -314,14 +315,16 @@
 
    </details>
 
-1. root の `~/.bashrc` の末尾に `DOCKER_HOST` を書き、root のログインシェルで確かめる。
+1. root の `~/.bashrc` に `DOCKER_HOST` が無ければ末尾に足し、root のログインシェルで確かめる。
 
    ```bash
    {
-     if sudo grep -q DOCKER_HOST /root/.bashrc; then echo '中断: /root/.bashrc に DOCKER_HOST が既にある' >&2
+     if sudo grep -q DOCKER_HOST /root/.bashrc; then
+       echo '追記なし: /root/.bashrc に DOCKER_HOST が既にある。値を確認する' >&2
+       sudo grep -n DOCKER_HOST /root/.bashrc
      else
        sudo tee -a /root/.bashrc >/dev/null <<'EOF'
-   export DOCKER_HOST=unix:///run/podman/podman.sock
+   export DOCKER_HOST=unix:///run/podman/podman.sock # setup-notes: lazydocker root
    EOF
        sudo tail -n 1 /root/.bashrc
      fi
@@ -329,11 +332,12 @@
    }
    ```
 
-   - 書いた 1 行（`export DOCKER_HOST=unix:///run/podman/podman.sock`）が出る
+   - 追記したときは、末尾に `# setup-notes: lazydocker root` のある `export DOCKER_HOST=unix:///run/podman/podman.sock` の行が出る。コメントは、この節で追加した行を戻すときの目印
    - 最後の 2 行が `unix:///run/podman/podman.sock` と `/home/linuxbrew/.linuxbrew/bin/lazydocker` ならよい
      - 2 行目が出なければ、リードの前提（homebrew.md の節）を通していない
-   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
-     - `sudo grep -n DOCKER_HOST /root/.bashrc` で見て、同じ値なら済んでいる。違う値なら手で直す
+   - `追記なし:` と出たら、既存行は書き換えていない。同じ値なら、その設定を使って進める（元に戻すときも残す）
+   - 既存の値が違う、または最後の値が `unix:///run/podman/podman.sock` でないなら、この節はここで止める。ほかの用途の設定を上書きしない
+     - 手順 1 で今回初めてソケットを有効にした場合は、この節の手順 8 で戻す
    - podman-docker を入れたホストでは、書く前から最後の 2 行が同じ出力になる（[root で使うときの補足](#root-で使うときの補足)）
    - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
    - root のシェルにも自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）を入れたホストでは、このブロックは貼らない。代わりに `sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'` を実行する（その設定が、この節の手順 1 のソケットがあるときに同じ `DOCKER_HOST` を入れる）
@@ -344,7 +348,7 @@
    - `sudo -i` は root のログインシェルを開き、`/root/.bash_profile` から `/root/.bashrc` を読む。`sudo -i <コマンド>` でも読む
    - `-i` の無い `sudo` は root の `~/.bashrc` を読まず、自分の環境の `DOCKER_HOST` も消す（AlmaLinux 10 の `/etc/sudoers` は `env_reset` で、`env_keep` に `DOCKER_HOST` は無い）
    - 自分の `~/.bashrc` の行（[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)）と違い、`${XDG_RUNTIME_DIR}` は使わない。root のソケットは `/run/podman` に決まっている
-   - 先頭の `if` は、ほかで書いた `DOCKER_HOST` に重ねないため
+   - 先頭の `if` は、ほかで書いた `DOCKER_HOST` に重ねないため。既存行には撤去用の目印を付けない
    - ヒアドキュメントは引用符付きの `<<'EOF'` なので、書いた行がそのまま入る
 
    **出力例**: 最後の行の、コンテナでの実測:
@@ -422,21 +426,22 @@
    - `lazydocker-root-web Exited (0) ...` と出ればよい
    - `config.yml`（0 バイト）は root の設定ファイル。自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
 
-1. 元に戻すときは、root の確認用のコンテナと設定、`/root/.bashrc` の行を消す。
+1. 元に戻すときは、root の確認用のコンテナと設定、この節で追加した `DOCKER_HOST` の行を消す。
 
    ```bash
    {
      sudo podman rm -f lazydocker-root-web
      sudo rm -rf /root/.config/lazydocker
-     sudo sed -i '\#^export DOCKER_HOST=unix:///run/podman/podman\.sock$#d' /root/.bashrc
-     sudo grep -c DOCKER_HOST /root/.bashrc   # 0
+     sudo sed -i '/^export DOCKER_HOST=.* # setup-notes: lazydocker root$/d' /root/.bashrc
+     sudo grep -n DOCKER_HOST /root/.bashrc || true
    }
    ```
 
-   - `lazydocker-root-web` と、最後に `0` が出ればよい
+   - `lazydocker-root-web` が出て、最後の一覧に `# setup-notes: lazydocker root` の付いた行が無ければよい。既存の `DOCKER_HOST` の行はそのまま残る
    - root の設定ファイルに手で足したもの（`c` のコマンドなど）も消える
-   - 開いたままの root のシェルの `DOCKER_HOST` は残る。開き直すと消える
-   - root のシェルにも自分用の bash の設定を入れたホストでは、`/root/.bashrc` にこの行は無い（最後に `0` と出る）。その設定は、この節の手順 8 の後もソケットのファイルが残る間（再起動まで）、`DOCKER_HOST` を入れる
+   - 開いたままの root のシェルの `DOCKER_HOST` は残る。新しいログインシェルでは、今回追加した行からは設定されない（以前から設定があれば、その値になる）
+   - 目印を付ける前の版でこの節を通した場合は、自分が追加した行だと確認できるものだけ手で消す。既存の同値の行は消さない
+   - root のシェルにも自分用の bash の設定を入れたホストでは、今回の目印付きの行は `/root/.bashrc` に無い。その設定は、この節の手順 8 の後もソケットのファイルが残る間（再起動まで）、`DOCKER_HOST` を入れる
 
 1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
 
@@ -562,6 +567,7 @@
       - homebrew.md のどちらの節だけでも動く。その節の手順 6〜8 で、`/root/.bashrc` が元と同じ内容に戻る
     - 確認していないこと: 実機、aarch64、SELinux が Enforcing のホスト、root の Quadlet のコンテナ
     - 2026-10-05: 自分用の bash の設定を root のシェルにも入れたホストの箇条書き（その節の手順 2・6）は、その設定の検証の中で、代わりのコマンドと、その節の手順 6〜8 を x86_64 のコンテナで流して確かめた（[ryo-aoki-pc/bash の docs/install.md の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#付録-root-のシェルでも読む節の検証記録2026-10-05)）
+    - 同日、手順 2・6 を、今回追加した行に目印を付け、その行だけ消す形に直した。未設定・既存の同値・既存の別値の 3 通りと繰り返し適用を、一時ファイルと `sudo`・`podman` のスタブで確認した（いずれも撤去後のファイルは元と同じ）。既存の別値は上書きせずに手順を止める。この変更後のブロックは実際の root の環境では未実行
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

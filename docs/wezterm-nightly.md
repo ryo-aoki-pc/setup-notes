@@ -626,7 +626,7 @@ Windows 11 で WezTerm の nightly を入れる経路を比べた（2026-10-03 �
 | scoop の `extras/wezterm`・Chocolatey の `wezterm` | どちらも stable の `20240203-110809-5046fc22`。Chocolatey に nightly は無い | 不採用 |
 | nightly の zip（`WezTerm-windows-nightly.zip`） | インストーラと同じ実行ファイル（と `wezterm.pdb`）。どこに展開してもよく、管理者が要らない。`PATH`・スタートメニュー・アンインストールは自分で用意する | 不採用（`C:\Program Files\WezTerm` に置くなら、インストーラと同じことを手で行うことになる） |
 
-- **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かした**
+- **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
   - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](#windows-11-で使う)の手順 3）

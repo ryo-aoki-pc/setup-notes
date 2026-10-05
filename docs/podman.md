@@ -71,11 +71,13 @@
 1. 自分のユーザーに、rootless 用の UID・GID の範囲（subuid / subgid）があるか確かめる。
 
    ```bash
-   grep "^${USER}:" /etc/subuid /etc/subgid || echo 'subuid / subgid の割り当てが無い'
+   for f in /etc/subuid /etc/subgid; do
+     grep -H "^${USER}:" "$f" || printf '%s: 自分の割り当てが無い\n' "$f"
+   done
    ```
 
    - `/etc/subuid:<USER>:524288:65536` と `/etc/subgid:<USER>:524288:65536` のような 2 行が出れば、手順 4 は飛ばす
-   - `subuid / subgid の割り当てが無い` と出たら、手順 4 で割り当てる
+   - 片方でも `自分の割り当てが無い` と出たら、手順 4 で不足している側だけ割り当てる
 
    <details>
    <summary>補足: subuid / subgid の役割</summary>
@@ -94,19 +96,30 @@
 
    </details>
 
-1. 割り当てが無いときだけ、ほかのユーザーと重ならない範囲を割り当て、podman に読み直させて確かめる。
+1. 片方でも割り当てが無いときだけ、不足する側に範囲を割り当て、podman に読み直させる。
 
    ```bash
-   {
-     SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid)
-     sudo usermod --add-subuids "${SUBID_START}-$((SUBID_START + 65535))" --add-subgids "${SUBID_START}-$((SUBID_START + 65535))" "${USER}"
-     podman system migrate
-     grep "^${USER}:" /etc/subuid /etc/subgid
-   }
+   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: 自分のユーザーのシェルで貼る' >&2
+   elif SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid); then
+     SUBID_ARGS=()
+     if ! grep -q "^${USER}:" /etc/subuid; then
+       SUBID_ARGS+=(--add-subuids "${SUBID_START}-$((SUBID_START + 65535))")
+     fi
+     if ! grep -q "^${USER}:" /etc/subgid; then
+       SUBID_ARGS+=(--add-subgids "${SUBID_START}-$((SUBID_START + 65535))")
+     fi
+     if [ "${#SUBID_ARGS[@]}" -eq 0 ]; then echo '両方とも割り当て済み'
+     else
+       sudo usermod "${SUBID_ARGS[@]}" "${USER}" &&
+       podman system migrate &&
+       grep -H "^${USER}:" /etc/subuid /etc/subgid
+     fi
+   else echo '中断: /etc/subuid または /etc/subgid を読めない' >&2
+   fi
    ```
 
    - `SUBID_START=` の行で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
-   - `usermod` の行で、そこから 65536 個を UID と GID の両方に割り当てる
+   - `usermod` の行で、そこから 65536 個を不足する側だけに割り当てる。既存の UID・GID の範囲は変更しない
    - 手順 3 で出るはずだった 2 行が出ればよい（検証では、ほかのユーザーの範囲の後ろの `589824` から割り当てられた）
    - `podman system migrate` は、それまでに podman を使っていたときに、新しい範囲を反映させる
 
@@ -179,7 +192,7 @@
 
    - `/etc/containers/registries.conf.d/000-shortnames.conf` に載っている名前（`hello`・`ubuntu`・`nginx` など）は、そこに書かれたレジストリに決まる
    - 載っていない名前は、端末（TTY）から実行すると、どれを取るか選ぶように求められる
-   - 端末でないとき（スクリプトなど）は、上の順に試して最初に見つかったものを取る
+   - 端末でないとき（スクリプトなど）は選択の問い合わせに答えられない。検索順だけで取得できるとは考えず、レジストリから始まる完全な名前を指定する
 
    端末から、載っていない名前を指定したときの実測:
 
@@ -497,6 +510,7 @@
     - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
   - 手順 4 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜6 を通した
   - 2026-10-02: もとの手順 4・5 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-05: 手順 3・4 を、subuid / subgid の不足する側だけ補う形に直した。一時ファイルと `sudo`・`usermod`・`podman` のスタブで、両方無し・UID のみ有り・GID のみ有り・両方有りを確認した。既存の範囲を変えず、`usermod` が失敗した場合は migrate を呼ばない。実際のユーザー設定と podman では未実行
   - 確認したこと:
     - rootless で `true overlay crun netavark pasta v2` になり、`quay.io/podman/hello` が動く
     - API ソケットが `OK` を返し、Docker の API の `/version` に `Podman Engine` が出る
@@ -585,7 +599,9 @@ $ podman --remote version --format '{{.Server.Version}}'
 - **容量**: イメージは `~/.local/share/containers/storage` に溜まる。`podman system df` で見て、`podman image prune -a` で掃除する（`ubi10/httpd-24` は 285 MB）
 - **Docker Hub には、認証なしの取得に回数の上限がある**: 検証の時点の応答は `ratelimit-limit: 100;w=3600`。本書の例は quay.io と registry.access.redhat.com に寄せた
 - **Raspberry Pi 5 で使うイメージは arm64 があるか見る**: `podman manifest inspect <イメージ>` に `"architecture": "arm64"` があればよい。本書の例のイメージにはどれもある
-- **Homebrew の formula が podman を連れてくることがある**: podman-compose などを Homebrew で入れると、依存の podman が `/usr/bin/podman` を隠す（[ツール一覧](tool-catalog.md#注意点)）。コンテナ系のツールは RPM で入れる
+- **Homebrew の formula が podman を連れてくることがある**: podman-compose などを Homebrew で入れると、依存の podman が `/usr/bin/podman` を隠す（[ツール一覧](tool-catalog.md#注意点)）
+  - システムの podman との互換性が要るものや、別の podman を依存で入れるものは RPM を選ぶ
+  - [image-tools.md](image-tools.md) の hadolint・dive と [lazydocker.md](lazydocker.md) は、RPM の提供状況などを比べて Homebrew を選んでいる
 
 ### 参照
 

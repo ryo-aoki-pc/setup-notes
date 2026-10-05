@@ -4,7 +4,8 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かない）
+> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、設定も自分のホームに書く
+> - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 > - **手順 3 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -37,6 +38,7 @@
    ```
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
    <details>
    <summary>補足: ボトルが降りること</summary>
@@ -94,16 +96,24 @@
   - 何を変えたかは [README の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[hackgen.md](hackgen.md)）にする
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（手順 1 の `LG_EDITOR` は使わない。[neovim.md の既定のエディタにする](neovim.md#既定のエディタにする任意)）
-  - この設定を入れるなら、この節の手順 1 は貼らない（リンク先の clone したファイルに書き足され、`os:` が 2 つになる）
+  - この設定を入れるなら、この節の手順 1 は貼らない（リンク先の clone したファイルを使う）
+- この節の手順 1 は、設定が無いか空の通常ファイルの場合だけ作成する。既存の設定がある場合は、`os:` があればその中の `edit` を編集し、無ければ `os:` を 1 つだけ追加する
+- `LG_EDITOR` に指定したエディタを先に入れる。既定の `nvim` は [Neovim](neovim.md) を通す
 
 1. エディタだけを指定する、最小の `config.yml` を書く。
 
    ```bash
-   if [ -z "${LG_EDITOR}" ]; then echo '中断: 手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${LG_EDITOR}" ]; then
+     echo '中断: 手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す' >&2
+   elif ! command -v "${LG_EDITOR}" >/dev/null 2>&1; then
+     echo '中断: LG_EDITOR のエディタが見つからない。導入するか値を直す' >&2
+   elif [ -L ~/.config/lazygit/config.yml ] || [ -s ~/.config/lazygit/config.yml ]; then
+     echo '中断: 設定がすでにある。既存の os 節へ edit を併合する' >&2
+   else
      mkdir -p ~/.config/lazygit
-     cat >> ~/.config/lazygit/config.yml <<EOF
+     cat > ~/.config/lazygit/config.yml <<EOF
    os:
-     edit: '${LG_EDITOR:?手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す} {{filename}}'
+     edit: '${LG_EDITOR} {{filename}}'
    EOF
      lazygit --print-config-dir
    fi
@@ -124,6 +134,7 @@
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
 
 ---
 
@@ -159,6 +170,7 @@
   - 2026-10-02: [設定ファイル](#設定ファイル)の手順 1 を、`LG_EDITOR` が空なら何もせずに止める `if … fi` にした
     - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3](gnome-power.md#実施手順) の補足）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`HOME` は使い捨てのディレクトリ、`lazygit` はスタブ）
+  - 2026-10-05: 既存設定への無条件追記をやめ、エディタの存在も確かめる形にした。一時ディレクトリとスタブで、新規作成・再実行・既存 `os:` ありの 3 通りを確認した（既存内容は変わらず、`os:` は重複しない）。TUI は起動していない
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|

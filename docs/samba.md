@@ -99,7 +99,7 @@
    - 字下げは空白にしてある。TAB だと、ブラケットペーストが効かない端末で貼ったときに bash が補完として扱い、行頭が `.` に置き換わった（VM で確認）
    - そのときの testparm は、`Unknown parameter` と出しつつ `Loaded services file OK.` で終わった（壊れたことに気付きにくい）
    - `testparm -s` の出力に `Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)` が出るが、crypto-policies が DEFAULT のときの通常の表示で、エラーではない
-   - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` や `read only = No` に対応する行が出なくても書き漏れではない。全パラメータを見るなら `testparm -sv`
+   - `testparm -s` は**既定と異なる値だけ**を表示する。`workgroup = WORKGROUP` の行が出なくても書き漏れではない。`read only = No` は組み込み既定の `Yes` と異なるので表示される。全パラメータを見るなら `testparm -sv`
    - `smb3 directory leases = no` は、クライアントにディレクトリのリース（一覧を手元にキャッシュしてよいという許可）を渡さない。Samba 4.22 からの既定（`auto`）では渡す
    - Samba は、自分を通さずにサーバーで変えたもの（サーバーのシェルや Syncthing など）では、このリースを破らない。既定のままだと、Windows のエクスプローラーは F5 を押しても古い一覧を出し続けた（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
    - 手順 9 の後で `smb.conf` を直したときは `sudo systemctl restart smb.service`（unit には `ExecReload`（`SIGHUP`）もあるが、本手順の検証では restart しか使っていない）
@@ -404,7 +404,7 @@
 
    - [手順 9](#実施手順) の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\home`。ユーザーごとのフォルダーが並ぶ。フォルダーの外（`/home` の直下）には作れない
-   - AlmaLinux 10 の PC なら、[samba-client.md](samba-client.md) の手順 1 で `SHARE=home` にする（`SMB_USER` は自分のまま。同書の手順 5 の書き込みは `Permission denied` になる）
+   - AlmaLinux 10 の PC なら、[samba-client.md](samba-client.md) の手順 1 で `SHARE=home` にする（`SMB_USER` は自分のまま。同書の手順 5・7 の共有直下への書き込みは `Permission denied` になる）
 
 1. 元に戻すときは、`[home]` の節を消し、smb.service を再起動する。
 
@@ -920,7 +920,7 @@
 | `smb3 directory leases = no` | 書く | 既定は `auto`（クラスタでなければ有効）。有効のままだと、Samba を通さずにサーバーで変えたものが、Windows のエクスプローラーでは F5 でも出ず、Linux の cifs では 30〜60 秒遅れる（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)） |
 | `include = /etc/samba/usershares.conf` | 書かない | `samba-usershares` を入れていないので対象ファイルが無い。既定 `smb.conf` のままでも `testparm` は**警告を出さない**（実測）。無いファイルの `include` は黙って無視される |
 | `[homes] valid users = %S` | 書く | 既定の `%S, %D%w%S` のうち `%D%w%S`（ワークグループ名 + 区切り + 共有名）はドメイン参加時に `DOMAIN\user` 形式を通すためのもの。standalone では `%S` だけでよい |
-| `browseable = No` | 書く（既定と同じ） | `homes` という名前の共有を一覧から隠す。ユーザー名の共有は一覧に出る（実測: `smbclient -L` に `<USER>` は出て `homes` は出ない） |
+| `browseable = No` | 書く（配布済み `smb.conf` の `[homes]` と同じ。組み込み既定は `Yes`） | `homes` という名前の共有を一覧から隠す。ユーザー名の共有は一覧に出る（実測: `smbclient -L` に `<USER>` は出て `homes` は出ない） |
 | `read only = No` | 書く | 書き込み可 |
 | `create mask = 0644` | 書く | 無いと SMB 経由で作ったファイルが `-rwxr--r--` になる（実測。[付録](#create-mask-無しで作ったファイルに-x-ビットが付く)） |
 | `inherit acls = Yes` | 書かない | 親ディレクトリに default ACL があるときだけ意味を持つ。ホームディレクトリに ACL は無い |

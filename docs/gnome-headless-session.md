@@ -7,7 +7,7 @@
 > - 前提は [gnome-power.md 手順 1・2](gnome-power.md#実施手順)（サスペンドできる PC では、同書の手順 3・4 も）。ヘッドレスのセッションでも、既定のままでは 15 分の無操作で PC をサスペンドしようとする
 > - **手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
 > - 手順 10（クライアントからの接続）だけ別のマシンで行う
-> - [リモートログイン](gnome-remote-desktop.md)（GDM で新しいセッションを作る方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
+> - [リモートログイン](gnome-remote-desktop.md)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -80,26 +80,65 @@
 
    </details>
 
-1. 証明書と鍵を openssl で作る（既にあれば作らない）。
+1. 共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
 
    ```bash
-   if [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] || [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
-     echo '中断: 証明書か鍵が既にある。そのまま使うなら手順 4 へ進む。作り直すなら、この手順の補足のとおり別名に移してから貼り直す' >&2
-   elif [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
+   if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
-     mkdir -p ~/.local/share/gnome-remote-desktop/certificates
-     openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
-       -subj "/CN=${SERVER_NAME}" \
-       -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
-       -addext "extendedKeyUsage=serverAuth" \
-       -keyout ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
-       -out    ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+     (
+       set -e
+       trap 'echo "中断: 手順 3 が失敗した。手順 4 へ進まない" >&2' ERR
+       if [ -e ~/.local/state/gnome-headless-session-setup ] || [ -L ~/.local/state/gnome-headless-session-setup ]; then
+         if [ -L ~/.local/state/gnome-headless-session-setup ] ||
+            [ ! -f ~/.local/state/gnome-headless-session-setup/backup-complete ] ||
+            [ ! -f ~/.local/state/gnome-headless-session-setup/tls-cert ] ||
+            [ ! -f ~/.local/state/gnome-headless-session-setup/tls-key ]; then
+           echo '中断: TLS 設定の退避が不完全。退避内容を確認し、先へ進まない' >&2
+           exit 1
+         fi
+       else
+         umask 077
+         mkdir -p ~/.local/state
+         mkdir ~/.local/state/gnome-headless-session-setup
+         dconf read /org/gnome/desktop/remote-desktop/rdp/tls-cert > ~/.local/state/gnome-headless-session-setup/tls-cert
+         dconf read /org/gnome/desktop/remote-desktop/rdp/tls-key > ~/.local/state/gnome-headless-session-setup/tls-key
+         touch ~/.local/state/gnome-headless-session-setup/backup-complete
+       fi
+       rm -f ~/.local/state/gnome-headless-session-setup/ready ~/.local/state/gnome-headless-session-setup/restored
+       if [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
+          [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
+         if [ ! -s ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
+            [ ! -s ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
+           echo '中断: 証明書と鍵の両方が必要。既存ファイルは上書きしていない' >&2
+           exit 1
+         fi
+       else
+         mkdir -p ~/.local/share/gnome-remote-desktop/certificates
+         touch ~/.local/state/gnome-headless-session-setup/created-certificate
+         openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
+           -subj "/CN=${SERVER_NAME}" \
+           -addext "subjectAltName=DNS:${SERVER_NAME},DNS:${SERVER_FQDN},DNS:${SERVER_IP},IP:${SERVER_IP}" \
+           -addext "extendedKeyUsage=serverAuth" \
+           -keyout ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key \
+           -out    ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+         chmod 644 ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+         sha256sum ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt \
+           ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key > ~/.local/state/gnome-headless-session-setup/created.sha256
+       fi
+       openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout
+       openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -noout
+       touch ~/.local/state/gnome-headless-session-setup/ready
+       ls -l ~/.local/share/gnome-remote-desktop/certificates
+       echo 'TLS の退避と証明書の準備が完了'
+     )
    fi
-   ls -l ~/.local/share/gnome-remote-desktop/certificates
    ```
 
-   - `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）の 2 行が出ればよい
+   - 最後に `TLS の退避と証明書の準備が完了` と出れば、手順 4 へ進む
+   - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る。既存の証明書と鍵は上書きしない
+   - 既存の鍵も、この手順で生成するものと同じく、パスフレーズなしで読める必要がある
+   - `中断:` が出たら、手順 4 以降へ進まない。[ロールバック](#ロールバック)の手順 3・4 で戻す。生成途中で照合用の記録も作れなかった場合は、ファイルを自動削除せず残す
    - 置き場所は、RHEL 10 の文書の 1.4 と同じ
 
    <details>
@@ -108,20 +147,26 @@
    - 中身は [gnome-remote-desktop.md 手順 2](gnome-remote-desktop.md#実施手順) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
    - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る
    - `certificates` のディレクトリは、SELinux のラベルが `home_cert_t` になった。gnome-remote-desktop のユーザーのデーモンは `unconfined_t` で動き、Enforcing のまま読めた
-   - 既にある証明書を作り直すときは、先に別名に移す（戻すときに使う）:
-     - `mv ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt.old`
-     - 鍵（`rdp-tls.key`）も同じように移し、この手順を貼り直す。手順 4 の後に `systemctl --user restart gnome-remote-desktop-headless.service` で読み直させる
+   - TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
+   - 貼り直しても退避は上書きしない。`backup-complete` は退避完了、`ready` は証明書の準備完了、`created-certificate` はこの手順が新規生成したことの目印
+   - 新規生成したファイルの SHA-256 も `created.sha256` に保存する。ロールバックでは、中身が変わっていたりリンクへ置き換わっていたりすれば削除しない
+   - 既存の証明書を更新する手順ではない。以前の手順で残した `.old` なども、この手順とロールバックでは消さない
+   - `set -e` は丸括弧の中だけに効かせ、退避・生成・読み取りのどれかが失敗したら、そのブロックを止める
 
    </details>
 
 1. `grdctl --headless` で、証明書と鍵・ポートを設定する。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2; else
-   grdctl --headless rdp set-tls-cert ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-   grdctl --headless rdp set-tls-key  ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-   grdctl --headless rdp set-port "${RDP_PORT}"
-   grdctl --headless rdp disable-port-negotiation
+   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2
+   elif [ ! -f ~/.local/state/gnome-headless-session-setup/ready ]; then
+     echo '中断: 手順 3 が完了していない。TLS 設定は変更しない' >&2
+   else
+     rm -f ~/.local/state/gnome-headless-session-setup/restored &&
+     grdctl --headless rdp set-tls-cert ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt &&
+     grdctl --headless rdp set-tls-key ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key &&
+     grdctl --headless rdp set-port "${RDP_PORT}" &&
+     grdctl --headless rdp disable-port-negotiation
    fi
    ```
 
@@ -296,6 +341,11 @@
 - 手順 1 の変数を設定したシェルで、上から順に貼る
 - [gnome-power.md](gnome-power.md) で変えた値は残る。戻すなら同書の[ロールバック](gnome-power.md#ロールバック)
 - [claude-code-gui.md](claude-code-gui.md) を行ったなら、先に同書の[ロールバック](claude-code-gui.md#ロールバック)で戻す
+- この節の手順 3 は共用 TLS 設定を退避時の値に戻し、手順 4 は今回生成した証明書だけを消す。退避後にデスクトップ共有の TLS 設定を別に変えた場合は、先にその設定を控える
+- 2026-10-05 より前の手順などで退避が無い場合は、共用 TLS 設定と証明書を保持する。導入前の値に戻すには、別に残した記録が要る
+
+> [!CAUTION]
+> **この節の手順 4 で消す証明書の秘密鍵は取り戻せない**。今回生成したものと照合できた場合だけ消し、既存の証明書と鍵は残す。
 
 1. ファイアウォールで開けたポートを閉じる。
 
@@ -322,27 +372,83 @@
    - `LAN_SUBNET` は、[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の手順 1 の 1 つ目のブロックを貼り直して入れる
    - `success` が 2 行出て、その rich rule が消えていればよい
 
-1. RDP を止め、資格情報と設定を消す。
+1. RDP とヘッドレス用の資格情報・設定を解除し、共用 TLS 設定を戻す。
 
    ```bash
-   grdctl --headless rdp disable
-   grdctl --headless rdp clear-credentials
-   dconf reset -f /org/gnome/desktop/remote-desktop/rdp/headless/
-   dconf reset /org/gnome/desktop/remote-desktop/rdp/tls-cert
-   dconf reset /org/gnome/desktop/remote-desktop/rdp/tls-key
-   systemctl --user is-enabled gnome-remote-desktop-headless.service
+   (
+     set -e
+     trap 'echo "中断: 復元が失敗した。この節の手順 4 へ進まない" >&2' ERR
+     if { [ -e ~/.local/state/gnome-headless-session-setup ] || [ -L ~/.local/state/gnome-headless-session-setup ]; } &&
+        { [ -L ~/.local/state/gnome-headless-session-setup ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/backup-complete ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/tls-cert ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/tls-key ]; }; then
+       echo '中断: TLS 設定の退避が不完全。設定とファイルは変更しない' >&2
+       exit 1
+     fi
+     rm -f ~/.local/state/gnome-headless-session-setup/restored
+     grdctl --headless rdp disable
+     grdctl --headless rdp clear-credentials
+     dconf reset -f /org/gnome/desktop/remote-desktop/rdp/headless/
+     if [ -f ~/.local/state/gnome-headless-session-setup/backup-complete ]; then
+       for key in tls-cert tls-key; do
+         if [ -s ~/.local/state/gnome-headless-session-setup/"${key}" ]; then
+           dconf write "/org/gnome/desktop/remote-desktop/rdp/${key}" "$(cat ~/.local/state/gnome-headless-session-setup/"${key}")"
+         else
+           dconf reset "/org/gnome/desktop/remote-desktop/rdp/${key}"
+         fi
+       done
+       touch ~/.local/state/gnome-headless-session-setup/restored
+     else
+       echo '退避なし: 共用 TLS 設定と証明書は保持する'
+     fi
+     systemctl --user is-enabled gnome-remote-desktop-headless.service || true
+   )
    ```
 
    - コマンドごとの TPM のメッセージの後に、`disabled` と出ればよい
+   - `中断:` やエラーが出たら、この節の手順 4 へ進まない。共用 TLS 設定が戻る前は、証明書を削除できない
 
-1. 証明書と鍵、資格情報のファイルを消す。
+1. この手順で生成した証明書と鍵、TLS 設定の退避を消す（取り戻せない）。
 
    ```bash
-   rm -rf ~/.local/share/gnome-remote-desktop
-   rm -f ~/rdp_tls_probe.py
+   if [ -L ~/.local/state/gnome-headless-session-setup ]; then
+     echo '中断: TLS 設定の退避先がリンクになっている。ファイルは削除しない' >&2
+   elif [ ! -e ~/.local/state/gnome-headless-session-setup ]; then
+     echo '退避なし: 証明書と鍵は削除しない'
+   elif [ ! -f ~/.local/state/gnome-headless-session-setup/restored ]; then
+     echo '中断: 共用 TLS 設定を戻していない。この節の手順 3 を先に完了する' >&2
+   else
+     (
+       set -e
+       if [ -f ~/.local/state/gnome-headless-session-setup/created-certificate ]; then
+         if [ ! -f ~/.local/state/gnome-headless-session-setup/created.sha256 ] ||
+            [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
+            [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
+           echo '中断: 生成物を照合できないか、リンクへ置き換わっている。証明書と退避は削除しない' >&2
+           exit 1
+         fi
+         if ! sha256sum --check ~/.local/state/gnome-headless-session-setup/created.sha256; then
+           echo '中断: 生成後に証明書か鍵が変わっている。証明書と退避は削除しない' >&2
+           exit 1
+         fi
+         rm -f ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+         rmdir --ignore-fail-on-non-empty ~/.local/share/gnome-remote-desktop/certificates
+       fi
+       rm -f ~/.local/state/gnome-headless-session-setup/tls-cert ~/.local/state/gnome-headless-session-setup/tls-key \
+         ~/.local/state/gnome-headless-session-setup/backup-complete ~/.local/state/gnome-headless-session-setup/ready \
+         ~/.local/state/gnome-headless-session-setup/restored ~/.local/state/gnome-headless-session-setup/created-certificate \
+         ~/.local/state/gnome-headless-session-setup/created.sha256
+       rmdir --ignore-fail-on-non-empty ~/.local/state/gnome-headless-session-setup
+       rm -f ~/rdp_tls_probe.py
+     )
+   fi
    ```
 
-   - 何も出さずに終わる
+   - 今回生成し、生成時の中身のままの証明書だけが消える。既存の証明書・`.old`・ほかのファイルは残る
+   - `中断:` のときは、生成途中のファイルや後から差し替えたものを手で確認する。照合できないものは自動削除しない
+   - `credentials.ini` 自体も残す。ヘッドレス用の資格情報は、この節の手順 3 の `clear-credentials` で解除済み
+   - 退避の無い既存導入では何も削除しない。`~/rdp_tls_probe.py` が要らなければ手で消す
 
 1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
@@ -382,12 +488,13 @@
     - SELinux が Enforcing のまま、AVC は出なかった
   - 確認していないこと
     - 再起動の後の自動起動（この Pi では WireGuard・Samba・Syncthing も動いているので、再起動しなかった）
-    - Windows のリモート デスクトップ接続・Android のクライアント・LAN の別のマシン（実物）からの接続
+    - 手順 10 のポートへ直接つなぐ場合の、Windows のリモート デスクトップ接続・Android のクライアント・LAN の別のマシン（実物）からの接続。Windows 11 から 3389 のリモートログインを経由する引き渡しは、下の 2026-10-02 の記録で確認済み
     - x86_64 の PC、サスペンドできる PC（ログイン画面が眠らせないこと）
     - 同じユーザーのローカルのログインとの重なり、後からリモートログインを有効にしたとき
   - 2026-10-02: リモートログインのログイン画面から同じユーザーで入ると、このセッションに引き渡された（Windows 11 の「リモートデスクトップ接続」で。[gnome-remote-desktop.md の付録](gnome-remote-desktop.md#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
     - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](#注意点)）
   - 2026-10-02: もとの手順 2・3 と、[ロールバック](#ロールバック)のもとの手順 5・6 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-05: 手順 3・4 とロールバックの手順 3・4 に、共用 TLS 設定の退避・復元と、新規生成した証明書だけの削除を追加した。構文検査と一時ディレクトリ・スタブでの確認だけで、実機の RDP では流していない
 
 | 項目 | 値 |
 |---|---|
@@ -428,7 +535,8 @@
 
 - **ヘッドレスのセッションにする**（RHEL 10 の文書の 1.4）
   - デスクトップ共有（設定アプリの「デスクトップ共有」）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
-  - リモートログイン（[gnome-remote-desktop.md](gnome-remote-desktop.md)）は、つなぐたびに GDM のログイン画面から新しいセッションに入る。ヘッドレスのセッションは起動時から常駐し、切ってつなぎ直しても同じデスクトップに戻る
+  - リモートログイン（[gnome-remote-desktop.md](gnome-remote-desktop.md)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
+  - ヘッドレスのセッションは RDP 接続より前から常駐し、手順 10 の接続では GDM のログイン画面を通らず、そのデスクトップへ入る
 - **証明書は openssl で作る** — SAN に IP を入れる理由は gnome-remote-desktop.md と同じ
 - **ポートを固定し、ポートのネゴシエーションを切る** — ファイアウォールで開けたポートと食い違わないように
 

@@ -16,13 +16,13 @@
 1. 変数を設定する。
 
    ```bash
-   FF_PKG=firefox                  # 入れるチャンネル。firefox（最新版）/ firefox-esr / firefox-beta。<FF_PKG>
+   FF_PKG=firefox                  # 本書は最新版（Rapid Release）の firefox だけを扱う。変更しない。<FF_PKG>
    FF_L10N=firefox-l10n-ja         # 日本語 UI の言語パック。要らなければ空にする。<FF_L10N>
    for v in FF_PKG FF_L10N; do printf '%-9s = %s\n' "$v" "${!v}"; done
    ```
 
    - **編集が必須の変数は無い**。最新版（Rapid Release）を入れるなら既定のままでよい
-   - ESR や Beta にしたいときだけ `FF_PKG` を変える
+   - `FF_PKG` は `firefox` のまま使う。ESR / Beta の導入・確認・ロールバックは本書では扱わない
    - 最後の行で値を読み戻す
    - `FF_PKG` が空なら、ここで止めて直す
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
@@ -30,7 +30,7 @@
    <details>
    <summary>補足: 変数について</summary>
 
-   `FF_PKG` はチャンネルの選択そのもの。リポジトリに入っている 3 つを実測した:
+   本書で導入するのは `firefox`（Rapid Release）だけ。配布の調査では、ほかのチャンネルもリポジトリにあることを確かめた:
 
    ```
    $ dnf -q list --available firefox-l10n-ja firefox-esr firefox-beta | tail -6
@@ -54,6 +54,7 @@
    curl -fsSL https://packages.mozilla.org/rpm/firefox/signing-key.gpg | gpg --show-keys
    ```
 
+   - `gpg` が無ければ、`sudo dnf install -y gnupg2` で入れてから貼り直す
    - `pub` 行の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353`
    - uid が `Mozilla Software Releases <release@mozilla.com>`
    - 違っていればここで止める
@@ -196,7 +197,7 @@
 1. デスクトップのセッションで Firefox を起動し、`about:support` で公式のビルドかを確かめる。
 
    - 次のように出ればよい（日本語 UI の表記）
-     - 「更新チャンネル」が `release`（ESR なら `esr`）
+     - 「更新チャンネル」が `release`
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
    - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
 
@@ -669,7 +670,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
-> | `${FF_PKG}` | 入れるチャンネルのパッケージ名。`firefox`（最新版）/ `firefox-esr` / `firefox-beta` | `firefox` |
+> | `${FF_PKG}` | 本書で導入するパッケージ名。`firefox`（最新版）から変更しない | `firefox` |
 > | `${FF_L10N}` | 言語パックのパッケージ名。空にすると英語 UI のまま | `firefox-l10n-ja` |
 >
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。Windows 11 のタスクの名前の末尾の番号（インストール先ごとに決まる）は `<番号>` と書いた。バージョン（`156.0.1-1`、`7.1.5-1.el10`、Windows の `157.0`）は実行日によって変わる。
@@ -854,7 +855,7 @@ Windows 11 で入るもの（winget の定義・Mozilla の文書・Firefox の�
 ### 注意点
 
 - **チャンネルが変わる**: ESR（年 1 回のメジャー更新）から Rapid Release（4 週間ごと）に移る
-  - 企業ポリシーで ESR を使っている場合は、`FF_PKG=firefox-esr`（Mozilla の ESR 153 系）か、そもそもこの手順を使わない
+  - 企業ポリシーで ESR を使っている場合は、この手順を使わない。Mozilla の ESR / Beta の配布は調べたが、導入・更新・ロールバックは未検証
 - **セキュリティ更新の出所が変わる**: AppStream 版は AlmaLinux が、mozilla 版は Mozilla が直接出す
   - `dnf upgrade` の対象になるのは同じだが、AlmaLinux のエラータ（`dnf updateinfo`）には載らない
 - **ダウングレードするとプロファイルを読めないことがある**: 156 で開いたプロファイルを 140 で開くと、「新しいバージョンの Firefox で作成されたプロファイル」と警告が出る

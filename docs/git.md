@@ -72,7 +72,8 @@
 
    - AlmaLinux 10.2 では `git version 2.52.0` と出る
    - 2 つ目は、設定を `<場所>	file:<ファイル>	<キー>=<値>` の形で 1 行ずつ出す。何も設定していなければ、何も出ない
-   - **手順 4〜6 で変えるキー（`user.name`・`core.autocrlf` など）に元の値があれば、控えておく**（[ロールバック](#ロールバック)で書き戻す）
+   - **手順 4〜6 のキー（`user.name`・`core.autocrlf` など）と `pull.ff` は、元の値・スコープ・ファイルを控える**。`global` に無いキーは「global は未設定」と控える（[ロールバック](#ロールバック)で戻す）
+   - 実際に追加・変更したキーも控える。既存の値が同じなら「変更なし」、手順 8 を飛ばしたら「`pull.ff` は変更なし」とする
    - Windows では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る。手順 5・6 で書く `global` の値が優先される
 
    <details>
@@ -191,7 +192,7 @@
    ```
 
    - 何も出ない。値は手順 7 でまとめて確かめる
-   - 要らないものは、[ロールバック](#ロールバック)の手順 1 のその行だけを貼って外せる
+   - 要らないものは、[ロールバック](#ロールバック)の手順 1・4 に従い、そのキーだけ元の設定に戻せる
    - `merge.conflictStyle zdiff3` は [git-delta.md 手順 3](git-delta.md#実施手順) と同じ設定で、どちらを先に通してもよい
 
    <details>
@@ -234,6 +235,7 @@
    - `pull.ff` 以外に `system` の行があれば、`global` に書けていない。手順 4〜6 を貼り直す
    - 最後の `pull.ff` は、何も出ない（設定が無い）のが普通
    - `pull.ff` が空か、`only` 以外なら、手順 8 は飛ばす
+   - `only` なら、その値とスコープを手順 3 の記録と照合してから手順 8 へ進む
 
    <details>
    <summary>補足: 出力と、Windows の模擬</summary>
@@ -273,6 +275,8 @@
    ```
 
    - `global	true` と出る
+
+   - `pull.ff` を今回変更したことを、手順 3 の元値の記録に書き足す
 
    <details>
    <summary>補足: pull.ff=only と pull.rebase</summary>
@@ -553,7 +557,8 @@
    ```
 
    - 2 つ目の数が、直すファイルの数。`0` なら、この節は要らない
-   - 1 つ目が何も出さなければ、未コミットの変更は無い。この節の手順 2 と 4 は飛ばす
+   - 1 つ目が何も出ないか、`??`（未追跡）の行だけなら、追跡しているファイルの変更は無い。この節の手順 2 と 4 は飛ばす
+   - `??` 以外の行があれば、この節の手順 2 で追跡しているファイルの変更を退避する。未追跡ファイルはそのまま残す
 
    <details>
    <summary>補足: 前の設定で見る理由</summary>
@@ -563,13 +568,14 @@
 
    </details>
 
-1. この節の手順 1 で変更が出たときだけ、前の設定のまま stash する。
+1. この節の手順 1 で `??` 以外の変更が出たときだけ、前の設定のまま stash する。
 
    ```bash
    git -c core.autocrlf=true stash
    ```
 
    - `Saved working directory and index state WIP on …` と出る
+   - `No local changes to save` なら今回は保存していないので、この節の手順 4 は飛ばす。エラーなら、ここで止めて原因を直す
 
 1. 作業ツリーのファイルを、今の設定で書き直す。
 
@@ -581,7 +587,7 @@
    ```
 
    - 数は `0` になる
-   - `git status --short` は何も出さない
+   - `git status --short` は、もともとあった `??` の行以外は出さない
 
    <details>
    <summary>補足: 書き直し方</summary>
@@ -592,7 +598,7 @@
 
    </details>
 
-1. この節の手順 2 で stash したときだけ、変更を戻す。
+1. この節の手順 2 で保存成功の表示が出たときだけ、今回の変更を戻す。
 
    ```bash
    git stash pop
@@ -601,6 +607,7 @@
 
    - `git status` の形で、元の変更だけが出る
    - 戻したファイルも `w/lf` になる
+   - この節の手順 2 からここまでは、別の stash を作らない。`pop` は先頭の stash を戻すため
 
 ---
 
@@ -645,29 +652,17 @@
 
 - 本書で `global` に書いた設定を外す。`system` と `local` の設定は変えない
 - AlmaLinux 10 の git 本体は消さない（gh などが依存している）。Windows 11 の Git for Windows は、外すときだけこの節の手順 6 で外す
-- [手順 3](#実施手順) で控えた元の値は、この節の手順 4 で書き戻す
+- [手順 3](#実施手順) で控えた元の値・スコープと、今回変更したキーの記録を使う。変更しなかったキーはそのまま残す
 - この節の手順 1〜5 は、Windows 11 では Git Bash に貼る。この節の手順 6 は、管理者の Windows PowerShell（5.1）に貼る
 - この節の手順 6 で Git for Windows を外す PC で、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする（任意）](windows-openssh-server.md#既定のシェルを-git-bash-にする任意)を行っていたら、先にその節の手順 3 で `DefaultShell` を消す
 
-1. 手順 5・6・8 の設定を外す（`merge.conflictStyle` を除く）。
+1. 手順 5・6・8 で今回追加・変更したキーだけ、元に戻す（`merge.conflictStyle` を除く）。
 
-   ```bash
-   git config --global --unset pull.rebase
-   git config --global --unset rebase.autoStash
-   git config --global --unset core.autocrlf
-   git config --global --unset init.defaultBranch
-   git config --global --unset core.quotepath
-   git config --global --unset fetch.prune
-   git config --global --unset push.autoSetupRemote
-   git config --global --unset rerere.enabled
-   git config --global --unset diff.algorithm
-   git config --global --unset branch.sort
-   git config --global --unset tag.sort
-   git config --global --unset pull.ff
-   ```
-
-   - 何も出ない（設定していないキーも、何も出さずに飛ばされる）
-   - 最後のキーを外すと、`~/.gitconfig` の `[pull]` などの節も消える
+   - 手順 3 の記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
+   - 元の `global` に値があったキーは、この節の手順 4 で書き戻す。変更なしのキーと、手順 8 を飛ばした場合の `pull.ff` は触らない
+   - 対象は `pull.rebase`・`rebase.autoStash`・`core.autocrlf`・`init.defaultBranch`・`core.quotepath`・`fetch.prune`・`push.autoSetupRemote`・`rerere.enabled`・`diff.algorithm`・`branch.sort`・`tag.sort`・`pull.ff`
+   - 例: 今回初めて追加した `core.autocrlf` なら `git config --global --unset core.autocrlf`
+   - 外すと何も出ない。最後のキーを外した `~/.gitconfig` の節も消える
 
    <details>
    <summary>補足: 残るもの</summary>
@@ -677,27 +672,24 @@
 
    </details>
 
-1. git-delta を使っていないときだけ、`merge.conflictStyle` も外す。
+1. git-delta を使っていないときだけ、今回変えた `merge.conflictStyle` も元に戻す。
 
-   ```bash
-   git config --global --unset merge.conflictStyle
-   ```
+   - [git-delta.md](git-delta.md) を通したならそのまま残す（同じ設定を使う）
+   - 今回追加し、元の `global` が未設定なら `git config --global --unset merge.conflictStyle` で外す
+   - 元の `global` に値があったなら、この節の手順 4 で書き戻す。変更なしなら触らない
 
-   - [git-delta.md](git-delta.md) を通したなら外さない（同じ設定を使う）
+1. 名前とメールアドレスも戻すときだけ、今回変えた値を元に戻す。
 
-1. 名前とメールアドレスも外すときだけ、外す。
-
-   ```bash
-   git config --global --unset user.name
-   git config --global --unset user.email
-   ```
-
+   - 今回追加し、元の `global` が未設定だったものだけ、`git config --global --unset user.name` または `git config --global --unset user.email` で外す
+   - 元の `global` に値があったものは、この節の手順 4 で書き戻す。変更なしのものは触らない
    - 外すと、`git commit` が `Author identity unknown` で止まることがある（検証コンテナでは止まった）
 
-1. 手順 3 で控えた元の値があるキーは、その値で書き戻す。
+1. この節の手順 1〜3 で戻すと決めたキーのうち、元の `global` に値があったものは、実施手順 3 の値で書き戻す。
 
    - `git config --global <キー> <元の値>` の形で、キーごとに 1 行ずつ貼る
    - 例: 元の `core.autocrlf` を戻すなら `git config --global core.autocrlf <元の値>`
+   - 空白を含む値は引用符で囲む。元の値が `system` や `local` だけにあった場合は、それを `global` に写さない（今回追加した `global` を外せば、元のスコープの値がまた効く）
+   - 残すと決めた `merge.conflictStyle`・名前・メールアドレスと、今回変更しなかったキーは書き戻さない
 
 1. 外れたか確かめる。
 
@@ -705,8 +697,8 @@
    git config --global --list
    ```
 
-   - 手順 5・6・8 のキー（外さなかったものを除く）が出なければよい
-   - すべて外していれば、何も出ない
+   - 今回戻すキーが、手順 3 で記録した元の `global` と一致すればよい（元が未設定なら出ない、元の値があればその値が出る）
+   - 残すと決めたキーと、本書で変更しなかったキーはそのまま。元の設定が空で、今回の設定をすべて外した場合だけ、何も出ない
 
 1. Windows 11 で Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
 
@@ -751,7 +743,10 @@
     - 確かめたこと: winget の定義（`Git.Git` 2.55.0.5 のスコープ・インストーラの種類・スイッチ・sha256）、インストーラの sha256 と Authenticode の署名者、上流の `install.iss`（入れる先・権限・黙って入れたときの選択・`system` に書く値・使われているときの動き）、winget のソース（Inno Setup のインストーラに渡すスイッチ・スコープの既定・削除のコマンド）（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査、偽の `winget` に渡る引数（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
     - 確かめていないこと: Windows で貼ること（その節のすべての手順・更新・削除）、UAC が出ないこと、`system` に書かれる値、Git Bash が開くこと、公式のインストーラで入れた PC を winget で上げること、arm64 の Windows
-  - **確認していないこと**: AlmaLinux 10 の実機、aarch64、既存の `~/.gitconfig` との組み合わせ
+  - 2026-10-05: 元値・スコープの記録とロールバック、および改行を直す節の未追跡ファイルの分岐を修正した。クラウドの Linux の Git 2.52.0 で、一時的な `global`・`system` の設定ファイルとリポジトリだけを使って確認した
+    - `pull.ff` は、両スコープそれぞれの未設定・`only`・`true`・`false` の 16 通りで、変更する場合だけ戻し、元の値とスコープが復元されることを確認した
+    - 未追跡ファイルだけの場合と追跡ファイルにも変更がある場合で、改行の修正後も未追跡ファイルと以前の stash が残り、今回の変更だけを戻せることを確認した。実機の設定は変更していない
+  - **確認していないこと**: AlmaLinux 10 の実機、aarch64、利用中の既存の `~/.gitconfig` との組み合わせ
     - Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）。検証した PC は別の選択だった（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)は、この既定で入る。上流のソースを読んだだけ）
     - Git Bash の端末（mintty）に貼る操作そのもの（検証では、ブロックを 1 つのシェルで順に読み込んだ）
 

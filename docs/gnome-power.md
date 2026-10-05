@@ -11,7 +11,7 @@
 - 手順の後: 戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **手順 1・2 のほかは、x86_64 のコンテナでのみ検証した手順書**。手順 1・2 だけは aarch64 の実機（Raspberry Pi 5）で本実行した。画面が消えないこと・眠らないこと、ログイン画面・蓋・電源ボタンの実際の動きは確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **手順 1・2 のほかは、x86_64 のコンテナでのみ検証した手順書**。手順 1・2 は aarch64 の実機（Raspberry Pi 5）で本実行し、ヘッドレスの画面・ロックとサスペンド要求を 16 分余り観測した。物理モニター、サスペンドできる PC、ログイン画面・蓋・電源ボタンの実際の動きは未確認（[対象と検証環境](#対象と検証環境)）。
 
 1. 変数を設定する。
 
@@ -97,7 +97,7 @@
    | `power-button-action` | 「電源」→「電源ボタンの挙動」（サスペンド / 電源オフ / ハイバネート / なにもしない。電源オフが `interactive`） |
    | `lock-enabled` | 「プライバシーとセキュリティー」→「スクリーンロック」→「自動スクリーンロック」 |
 
-   - 同じキーを書くので、動いているセッションにはログインし直さなくても効くはず（gsd は設定の変更を監視している。画面では確かめていない）
+   - SSH のシェルから変えた値が、ログインし直さずヘッドレスのセッションに届くことは、2026-10-01 に時計の秒表示と放置時のサスペンド要求で確かめた（[付録](#付録-実機での検証記録2026-10-01)）。物理モニターの画面では未確認
 
    **`gsettings` が書けなかったとき**: セッションバスに届かないシェルでは、警告を出して値を変えず、**終了コードは 0** になる。コンテナで、セッションバスを用意せずに実行したときの実測:
 
@@ -137,7 +137,7 @@
    power-button-action='${POWER_BUTTON:?手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}'
    EOF
      sudo dconf update
-     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+     sudo -u gdm env DCONF_PROFILE=gdm /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
    fi
    ```
 
@@ -302,7 +302,7 @@
    {
      sudo rm -f /etc/dconf/db/gdm.d/90-power
      sudo dconf update
-     sudo -u gdm env DCONF_PROFILE=gdm gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
+     sudo -u gdm env DCONF_PROFILE=gdm /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
    }
    ```
 
@@ -353,7 +353,7 @@
     - ログイン画面から見える値（`gdm` ユーザーと `gdm` のプロファイルで読んだ値）が、`gdm.d` のファイルで変わり、消すと戻る
     - mask で、logind の `CanSuspend` が `"yes"` から `"no"` に変わる（本当には眠れないコンテナで）
     - logind の `HandleLidSwitch` が `"ignore"` になり、戻せる
-  - **確認していないこと**: 画面が消えない・暗くならない・ロックしないこと、実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示。コンテナには画面も GNOME のセッションも無いため
+  - **確認していないこと**: 物理モニターの画面が消えない・暗くならない・ロックしないこと、サスペンドできる PC が実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示
   - 2026-09-28: もとの手順 4〜6（今の手順 3 の `dconf update` から後と、手順 4・5）と、[ロールバック](#ロールバック)のもとの手順 3〜5（今の手順 2 の `dconf update` から後と、手順 3・4）のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
@@ -362,11 +362,12 @@
   - 2026-10-01: 手順 1・2 を aarch64 の実機（Raspberry Pi 5）で本実行した（[付録](#付録-実機での検証記録2026-10-01)）
     - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](gnome-headless-session.md) と [claude-code-gui.md](claude-code-gui.md) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
     - 読み戻しは[完了時点の状態](#完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
-    - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとしなかった（手順 2 の前は、15 分でしようとした）
+    - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとせず、画面は消えず、ロックもされなかった（`LockedHint=no`。[claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。物理モニターでの観測ではない
     - 手順 3〜5 とロールバックは、実機では流していない
   - 2026-10-02: もとの手順 3・4 と、[ロールバック](#ロールバック)のもとの手順 2・3 をつないだ（手順 3 は `if … fi`、ロールバックの手順 2 は `{ … }` で囲んだ）
     - 手順 3 は、スタブの `sudo` を置いた対話の bash に貼り、`POWER_BUTTON` が空なら何も動かず、値があればすべての行が動くことだけ確かめた（手順 3 の補足）
     - ロールバックの手順 2 は貼っていない。`bash -n` だけ
+  - 2026-10-05: 手順 3 とロールバックの手順 2 も `/usr/bin/gsettings` に統一した。変更後は構文の検査だけで、本実行していない
 
 | 項目 | 実機 | コンテナ（GNOME の一式） | コンテナ（systemd） |
 |---|---|---|---|
@@ -460,7 +461,7 @@ s "ignore"
 
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 手順 2 の読み戻しで確かめる（手順 2 の補足）
 - **Homebrew の `gsettings` は GNOME に効かない**: dconf ではなくファイルに書き、読み戻しでは変わったように見える。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（手順 2 の補足）
-  - `sudo -u gdm … gsettings` の行（手順 3 と[ロールバック](#ロールバック)の手順 2）は、そのままでよい。`sudo` は PATH を `secure_path`（`/sbin:/bin:/usr/sbin:/usr/bin`）に置き換えるので、RPM の `gsettings` が使われる
+  - `sudo -u gdm` の行（手順 3 と[ロールバック](#ロールバック)の手順 2）も `/usr/bin/gsettings` を明示する。以前の無修飾の形も、検証した `secure_path` では RPM のものが選ばれた
     - Raspberry Pi 5 で、`sudo -u gdm env sh -c 'command -v gsettings'` が `/bin/gsettings` を返した（手順 3 そのものは実機で流していない）
     - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通しても、Homebrew は `secure_path` の末尾なので、`/bin/gsettings` が先に見つかる（同じ形のコマンドを、その節を通したコンテナで確かめた。[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
 - **dconf のファイルの型**: 文字列は `'nothing'` のように引用符で囲む。`idle-delay` のような uint32 は `uint32 0` と書く（手順 3 の補足）

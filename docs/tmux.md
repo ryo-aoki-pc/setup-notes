@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、tmux のセッションも実行したユーザーのものになるため）
+> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、tmux のセッションもそのユーザーのものにする
 > - **手順 1・3・4 には対話入力がある**（手順 1 は依存を入れるかの `[y/n]`、手順 3・4 は tmux の画面が開く）
 
 - 上から順にコードブロックを貼る
@@ -169,7 +169,7 @@
 ## 設定ファイル（任意）
 
 - マウスのホイールでさかのぼれるようにし、さかのぼれる行数を 2000 から 50000 に増やす。Claude Code のように出力が長く続くものを、tmux の中で読み返すときに効く
-- tmux は、サーバーが起動するときに `~/.tmux.conf` と `~/.config/tmux/tmux.conf` の**両方**を読む（あるものだけ）。この節は後者に書く
+- tmux は、サーバーが起動するときに `~/.tmux.conf` と `~/.config/tmux/tmux.conf` の**両方**を読む（あるものだけ）。新規作成は後者、既存設定がある場合はそのファイルに書く
 - マウスを on にすると、マウスでの文字の選択は tmux が受け取る。端末の選択を使うときは、端末の決まりに従う（WezTerm などは Shift を押しながら。本書では確かめていない）
 
 1. 設定ファイルを書く。
@@ -190,7 +190,7 @@
    ```
 
    - 書いた 4 行が出る
-   - `中断:` が出たら、すでにある設定ファイルに `set -g …` の 2 行を手で足す
+   - `中断:` が出たら、すでにある設定ファイルの `mouse` と `history-limit` を編集する。両方のファイルがある場合は、後で読む `~/.config/tmux/tmux.conf` に別の値が無いことも確かめる
 
    <details>
    <summary>補足: 読み込む場所と、足さなかった行</summary>
@@ -205,15 +205,20 @@
 1. 動いている tmux にも読ませて、効いたか確かめる。
 
    ```bash
-   tmux new-session -d -s conf-check
-   tmux source-file ~/.config/tmux/tmux.conf
-   tmux show -g mouse
-   tmux show -g history-limit
-   tmux kill-session -t conf-check
+   if TMUX_CHECK_ID=$(tmux new-session -d -P -F '#{session_id}' -s "conf-check-$$"); then
+     for conf in ~/.tmux.conf ~/.config/tmux/tmux.conf; do
+       if [ -f "${conf}" ]; then tmux source-file "${conf}"; fi
+     done
+     tmux show -g mouse
+     tmux show -g history-limit
+     tmux kill-session -t "${TMUX_CHECK_ID}"
+   else
+     echo '中断: 確認用のセッションを作れなかった。既存セッションは終了しない' >&2
+   fi
    ```
 
    - `mouse on` と `history-limit 50000` が出る
-   - ほかのセッションが動いていても、`source-file` で今あるペインにも効く
+   - 既存・新規のどちらの設定ファイルも、起動時と同じ順で読み込む。既存セッションのマウス設定にも反映する
    - tmux の中でホイールを上へ回すと、さかのぼって読める（右上に `[5/258]` のような位置が出る）。下まで回すか `q` で戻る
 
 ---
@@ -254,7 +259,7 @@
 
    - `cd <PROJECT_DIR>` で、Remote Control で作業させたいディレクトリ（プロジェクト）に移る
    - ホームそのものは選ばない（Claude Code はホームの信頼を保存しない。[Windows の手順書](windows-claude-remote-control.md#実施手順)の手順 2）
-   - この節の手順 4 は、このディレクトリの名前を Remote Control のセッション名にする
+   - この節の手順 4 は、tmux の中で確認した作業ディレクトリの名前を Remote Control のセッション名にする
 
 1. tmux のセッションを作って入る。
 
@@ -262,9 +267,10 @@
    tmux new-session -A -s claude
    ```
 
-   - 左下に `[claude]` が出る。tmux の中のシェルは、この節の手順 2 のディレクトリから始まる
-   - 同じ名前のセッションがすでにあれば、そこに入る（`-A`）
-   - **次の手順は、tmux の画面が開いてから貼る**（この節の手順 4 は、tmux の中のシェルに貼る）
+   - 左下に `[claude]` が出る。新規セッションのシェルは、この節の手順 2 のディレクトリから始まる
+   - 同じ名前のセッションがあれば、そこで動いていたコマンドと作業場所のまま戻る（`-A`）。Claude Code がすでに動いているなら、この節の手順 4 は飛ばしてその画面を使う
+   - シェルに戻っている場合は、中で `pwd` を確かめ、必要なら `cd <PROJECT_DIR>` で作業場所へ移る。ほかのコマンドが動いていれば、そこへ手順 4 を貼らない
+   - **次の手順は、tmux の中のシェルで作業場所を確かめてから貼る**（動いているアプリへ貼ると、その入力として食われる）
 
 1. tmux の中で Remote Control を始める。
 
@@ -341,6 +347,7 @@
 
    - 新しい版を使うのは、セッションを全部閉じて `tmux ls` が `no server running on …` になってから
    - 前の版のサーバーへ新しい版のクライアントからつなぐと、つなげないことがある（[手順 2](#実施手順) の補足の BaseOS の tmux と同じ。Homebrew の版が上がる更新は試していない）
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
 
 ---
 
@@ -393,6 +400,8 @@
     - Remote Control の接続と、スマートフォン・ブラウザからの操作（claude.ai のアカウントでのログインが要る）
     - 端末（WezTerm など）から送るマウスと Shift+Enter、[更新](#更新)で Homebrew の版が上がるとき
   - 実機の Raspberry Pi 5 では、tmux の中で `claude remote-control` を動かしている（[claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。この手順書の手順どおりには通しておらず、その tmux が BaseOS と Homebrew のどちらかも確かめていない
+  - 2026-10-05: 設定の読み込みを両パスに対応させ、確認用セッションの作成に失敗した場合は後続を止めた。一時ファイルとスタブで、旧パスのみ・新パスのみ・両方・作成失敗の 4 通りを確認した
+  - 同日の変更で、`-A` で既存セッションへ戻る場合は作業場所と実行中コマンドを確認する説明を追加した。変更後の TUI と Remote Control は実機で実行していない
 
 | 項目 | 検証コンテナ |
 |---|---|

@@ -47,7 +47,7 @@
    ```
 
    - 最後に値を読み戻して確かめる
-   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、プロジェクトのディレクトリ。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない（Claude Code はホームの信頼を保存しない）
+   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない（Claude Code はホームの信頼を保存しない）
    - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
 
    <details>
@@ -78,12 +78,15 @@
    ```powershell
    if (-not $PROJECT_DIR) {
      Write-Error '手順 2 の $PROJECT_DIR が空'
+   } elseif (-not (Test-Path -LiteralPath $PROJECT_DIR -PathType Container)) {
+     Write-Error '中断: $PROJECT_DIR は存在するディレクトリではない'
    } else {
-     Set-Location $PROJECT_DIR
+     Set-Location -LiteralPath $PROJECT_DIR -ErrorAction Stop
      claude remote-control --name $RC_NAME --spawn same-dir
    }
    ```
 
+   - ディレクトリが無い、ファイルを指定した、または移動できない場合は起動しない。手順 2 の値とディレクトリへのアクセスを確かめてから貼り直す
    - 信頼のダイアログ（`Is this a project you created or one you trust?`）が出たら、**↓ で `Yes, I trust this folder` を選び Enter**（既定は `No, exit`）
    - 初めて Remote Control を使うときは `Enable Remote Control? (y/n)` が出る。`y`
    - `https://claude.ai/code/<SESSION_ID>` の URL と `space to show QR code` が出れば、起動できている
@@ -104,6 +107,8 @@
    ```powershell
    if (-not $PROJECT_DIR) {
      Write-Error '手順 2 の $PROJECT_DIR が空'
+   } elseif (-not (Test-Path -LiteralPath $PROJECT_DIR -PathType Container)) {
+     Write-Error '中断: $PROJECT_DIR は存在するディレクトリではない'
    } else {
      $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
      $wt = 'C:\Program Files\WezTerm\wezterm.exe'
@@ -232,7 +237,8 @@
 - **進め方**: 値は手順 2 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
   - すべて、SSH でログインした Windows の PC の Windows PowerShell（5.1）に貼る
   - 読者が書き換えるのは `$PROJECT_DIR` だけ
-- **状態**: **実機で本実行済み（2026-10-01、x86_64 のノート PC の Windows 11 Pro 26H2）**
+- **状態**: **起動と SSH 切断後の継続動作は実機で本実行済み（2026-10-01、x86_64 のノート PC の Windows 11 Pro 26H2）**
+  - 2026-10-05 に足した手順 4・5 のディレクトリの検査と、手順 4 の移動失敗時の停止は、Linux の PowerShell 7.6.6 で模擬確認しただけ。変更後のブロックを Windows では貼っていない（[付録](#付録-ディレクトリの検査と停止の模擬確認2026-10-05)）
   - 通したこと:
     - SSH（`ssh localhost`、使い捨ての鍵）でログインしたシェルから、手順 4（信頼と Remote Control の確認）・手順 5（タスク登録）・手順 6（開始）を通し、手順 7 で SSH を切った
     - 切断の後、タスクで起動した `claude remote-control` が動き続け、Anthropic へ接続していること（プロセスの存続・TLS の接続・claude.ai のセッションが `connected`）を確かめた
@@ -381,3 +387,12 @@ x86_64 のノート PC（Windows 11 Pro 26H2）で、同じ PC から `ssh local
 1. デスクトップをロック／ログオフしたときの挙動
 1. 標準ユーザー、Microsoft アカウントのパスワードの端末からの利用
 1. スリープからの復帰時の再接続、10 分のネットワーク断での終了
+
+### 付録: ディレクトリの検査と停止の模擬確認（2026-10-05）
+
+- Linux の PowerShell 7.6.6 の構文解析器で、修正後の本書の PowerShell ブロック 11 個を解析し、構文の誤りは 0 だった
+- 手順 4・5 を本文から抜き出した。`claude` とタスクのコマンドレットは呼び出しを記録する偽物に、Windows のユーザー名取得は検証用の固定値に置き換えた
+- `PROJECT_DIR` が空・存在しないパス・ファイルなら、起動もタスク登録も呼ばなかった
+- 一時ディレクトリの通常の名前・空白入り・角括弧入りのパスでは、指定したディレクトリへ移動してから起動を呼び、タスクの `--cwd` にも同じパスを渡した
+- `Set-Location` が失敗する場合を模擬し、後続の起動を呼ばないことを確認した。変更前の手順では、存在しないパスを指定しても元の場所で起動を呼ぶことを再現した
+- Windows PowerShell 5.1 での実行、Windows のパスやアクセス権、実際の Claude Code・WezTerm の起動とタスク登録は、この確認では行っていない

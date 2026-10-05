@@ -4,7 +4,8 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、設定も自分の `~/.gitconfig` に書くため）
+> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、設定も自分の `~/.gitconfig` に書く
+> - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -43,6 +44,7 @@
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - **formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
    <details>
    <summary>補足: 降ってくるボトル</summary>
@@ -54,18 +56,22 @@
 1. `git config --global` で git の設定を書き、読み戻す。
 
    ```bash
-   git config --global core.pager delta
-   git config --global interactive.diffFilter 'delta --color-only'
-   git config --global delta.navigate "${DELTA_NAVIGATE:?手順 1 の DELTA_NAVIGATE が空のまま。値を入れて貼り直す}"
-   git config --global delta.line-numbers "${DELTA_LINE_NUMBERS:?手順 1 の DELTA_LINE_NUMBERS が空のまま。値を入れて貼り直す}"
-   git config --global delta.side-by-side "${DELTA_SIDE_BY_SIDE:?手順 1 の DELTA_SIDE_BY_SIDE が空のまま。値を入れて貼り直す}"
-   git config --global merge.conflictstyle zdiff3
-   git config --global --get-regexp '^(core\.pager|interactive\.|delta\.|merge\.conflictstyle)'
+   if [ -z "${DELTA_NAVIGATE}" ] || [ -z "${DELTA_LINE_NUMBERS}" ] || [ -z "${DELTA_SIDE_BY_SIDE}" ]; then
+     echo '中断: 手順 1 の変数が空。3 つとも設定してから貼り直す' >&2
+   else
+     git config --global core.pager delta &&
+       git config --global interactive.diffFilter 'delta --color-only' &&
+       git config --global delta.navigate "${DELTA_NAVIGATE}" &&
+       git config --global delta.line-numbers "${DELTA_LINE_NUMBERS}" &&
+       git config --global delta.side-by-side "${DELTA_SIDE_BY_SIDE}" &&
+       git config --global merge.conflictstyle zdiff3 &&
+       git config --global --get-regexp '^(core\.pager|interactive\.difffilter|delta\.(navigate|line-numbers|side-by-side)|merge\.conflictstyle)$'
+   fi
    ```
 
    - `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）
    - 最後の行で、書けたか読み戻す
-   - 6 行出る
+   - 設定した 6 項目が出る。`中断:` が出た場合は、どの設定も書き換えていない
    - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）
    - `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
    - `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
@@ -74,7 +80,7 @@
    <details>
    <summary>補足: キー名は小文字に正規化される</summary>
 
-   git はセクション名とキー名を小文字に正規化して扱う。`interactive.diffFilter` と書いても、`--get-regexp` や `--list` では `interactive.difffilter` と出る。**大文字の `F` を含む正規表現では引っかからない**ので、読み戻しの正規表現は `interactive\.` までにしてある。コンテナでの実測:
+   git はセクション名とキー名を小文字に正規化して扱う。`interactive.diffFilter` と書いても、`--get-regexp` や `--list` では `interactive.difffilter` と出る。**大文字の `F` を含む正規表現では引っかからない**ので、読み戻しでは小文字を使う。以前の広い正規表現でのコンテナ実測:
 
    ```
    $ git config --global --get-regexp '^(core\.pager|interactive\.|delta\.|merge\.conflictstyle)'
@@ -163,6 +169,7 @@
 
 - lazygit は自前のページャ設定を持っているので、`~/.gitconfig` の `core.pager` は見ない
 - この節はコンテナで検証していない（[未確認事項](#未確認事項)）
+- lazygit 0.65.1 の公式設定に合わせて `git.diffRenderers` を使う（2026-10-05 に対象版の資料とソースを確認。TUI での表示は未検証）
 
 > [!WARNING]
 > **この節の手順 1 で、`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。
@@ -171,9 +178,10 @@
 
    ```yaml
    git:
-     paging:
-       colorArg: always
-       pager: delta --dark --paging=never
+     diffRenderers:
+       - type: stdinFilter
+         colorArg: always
+         command: delta --dark --paging=never
    ```
 
    - 現在の中身は、`lazygit --print-config-dir` で場所を確かめてから開く
@@ -206,6 +214,7 @@
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
 
 ---
 
@@ -235,11 +244,11 @@
 1. delta の設定が消えたか確かめる。
 
    ```bash
-   git config --global --get-regexp '^(core\.pager|interactive\.|delta\.)'   # 何も出なければ消えている
+   git config --global --get-regexp '^(core\.pager|interactive\.difffilter|delta\.)'   # 何も出なければ消えている
    ```
 
    - 何も出なければ消えている
-   - lazygit の `git.paging` を足していた場合は、`~/.config/lazygit/config.yml` からも消す
+   - lazygit の `git.diffRenderers` に delta の項目を足していた場合は、その項目も消す（ほかの renderer は残す）。以前の `git.paging` を使っていた場合は、そちらの delta 設定を外す
 
 ---
 
@@ -254,6 +263,8 @@
   - 確認したこと: `arm64_linux` のボトルが降りる、`delta 0.19.2` が入る、使い捨てリポジトリの `git diff | delta --paging=never` が色付きで出る、`git config --global --get-regexp` で 6 項目が読み戻せる
   - **確認していないこと**: `core.pager` 経由のページャ起動（`git diff` を素で打ったときの表示）と、`navigate` の `n` / `N`。コンテナには端末が無いため
   - **実機（Raspberry Pi 5）では本実行していない**（実機の `~/.gitconfig` は `[core] autocrlf` と `[user]` だけのまま）ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある
+  - 2026-10-05: 手順 3 の空チェックを先頭に移した。一時的な Git 設定ファイルで、3 変数を 1 つずつ空にすると変更が無く、正常時には 6 項目が設定されて既存の別キーは残ることを確認した
+  - lazygit 0.65.1 の任意設定は、同版の公式資料とソースに合わせて `git.diffRenderers` に訂正した。TUI での連携は未検証のまま
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -333,13 +344,14 @@ merge.conflictstyle zdiff3
 - **表示だけを変える。差分の中身は変わらない**: `git diff > patch.diff` はページャを通らないので従来どおりのパッチが出る。`git apply` や CI の挙動には影響しない
 - **`sudo git` には効かない**: root は root の `~/.gitconfig` を読むので、この設定は入っていない
 - **`interactive.diffFilter` が変えるのは `git add -p` の表示だけ**: 選択の操作自体は git のまま
-- **lazygit は `core.pager` を見ない**: 別途 `git.paging` の設定が要る（[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)）
+- **lazygit は `core.pager` を見ない**: 0.65.1 では別途 `git.diffRenderers` を設定する（[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)）
 - **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`~/.bashrc` を読まない文脈では見えない、など
 
 ### 参照
 
 - [dandavison/delta — README](https://github.com/dandavison/delta) — 使い方、`~/.gitconfig` の書き方、side-by-side と navigate の説明
 - [delta manual](https://dandavison.github.io/delta/) — 全設定項目、`features` による設定のまとめ方、他ツールとの連携
+- [lazygit 0.65.1 の差分表示設定](https://github.com/jesseduffield/lazygit/blob/v0.65.1/docs/Custom_DiffRenderers.md) — `git.diffRenderers` の `stdinFilter` と delta の指定
 - `delta --help` / `delta --show-config` / `delta --list-syntax-themes` — オプションと実効値、配色の一覧
 - `git help config` の `core.pager` / `interactive.diffFilter` — git 側の仕様
 - [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作

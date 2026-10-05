@@ -4,7 +4,9 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かないため）
+> - **前提**: 手順 5 の JSON 集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
+> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
+> - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
@@ -45,6 +47,7 @@
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - ShellCheck は `gmp` と `libffi` を要求する（Haskell 製のため）。shfmt に依存は無い
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
    <details>
    <summary>補足: ボトルと依存</summary>
@@ -237,9 +240,15 @@
 1. 件数だけ見たいときと、重大度で絞りたいときは、JSON で数えて `-S` で絞る。
 
    ```bash
-   shellcheck -x -f json "${SC_TARGET}" | jq 'length'
-   shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
-   shellcheck -x -S "${SC_SEVERITY:?手順 1 の SC_SEVERITY が空のまま。値を入れて貼り直す}" "${SC_TARGET}" | head -20
+   if [ -z "${SC_TARGET}" ] || [ -z "${SC_SEVERITY}" ]; then
+     echo '中断: 手順 1 の SC_TARGET と SC_SEVERITY を設定してから貼り直す' >&2
+   elif ! command -v jq >/dev/null 2>&1; then
+     echo '中断: jq が無い。リードの導入元一覧から入れて貼り直す' >&2
+   else
+     shellcheck -x -f json "${SC_TARGET}" | jq 'length'
+     shellcheck -x -f json "${SC_TARGET}" | jq -r '.[] | "\(.level) \(.code)"' | sort | uniq -c | sort -rn
+     shellcheck -x -S "${SC_SEVERITY}" "${SC_TARGET}" | head -20
+   fi
    ```
 
    - `wg-vpn.sh` を `-S` ごとに数えた実測は、手順 4 の補足にある
@@ -256,14 +265,18 @@
 1. 今の書き方とどれだけ違うかを見て、整形対象になるファイルを一覧する。
 
    ```bash
-   shfmt -i "${SHFMT_INDENT:?手順 1 の SHFMT_INDENT が空のまま。値を入れて貼り直す}" -d "${SC_TARGET}" | wc -l
-   shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
-   shfmt -f scripts | head
-   shfmt -l -i "${SHFMT_INDENT}" scripts
+   if [ -z "${SC_TARGET}" ] || [ -z "${SHFMT_INDENT}" ]; then
+     echo '中断: 手順 1 の SC_TARGET と SHFMT_INDENT を設定してから貼り直す' >&2
+   else
+     shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | wc -l
+     shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
+     shfmt -f "$(dirname -- "${SC_TARGET}")" | head
+     shfmt -l -i "${SHFMT_INDENT}" "$(dirname -- "${SC_TARGET}")"
+   fi
    ```
 
    - まず今の書き方とどれだけ違うかを見る
-   - 次に、ディレクトリ配下で整形対象になるファイルを一覧する（`-l` は「整形すると変わるファイル」だけを出す）
+   - 次に、`SC_TARGET` があるディレクトリの配下を一覧する（`-l` は「整形すると変わるファイル」だけを出す）
 
 1. 一時ディレクトリに複製して、`-w` の挙動を見る。
 
@@ -335,6 +348,7 @@
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
 
 ---
 
@@ -348,7 +362,7 @@
    brew uninstall shellcheck shfmt
    ```
 
-   - 依存の `gmp` / `libffi` は他の formula も使うので残る。まとめて整理するなら `brew autoremove`
+   - 他の formula が使う依存は残る。不要になった `gmp` / `libffi` などは Homebrew が自動で削除する場合がある（[Homebrew の注意点](homebrew.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
    - 設定ファイルは作っていないので、消すものは無い（`.shellcheckrc` や `.editorconfig` を自分で置いた場合はそれを消す）
 
 ---
@@ -365,6 +379,8 @@
   - 手順 2〜3 と[検査を調整する（任意）](#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - コンテナで確認したこと: ボトルが降りる、スモークテストが同じ結果になる、EPEL 版の版と名前
   - **コンテナでは手順 4〜5（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
+  - 2026-10-05: `jq` の前提と空値の確認、`SC_TARGET` の親ディレクトリを調べる形に直した。スタブで、別パスへの変更・JSON の件数集計・`jq` が無い場合の中断を確認した
+  - shfmt 3.14.1 の公式ソースと配布バイナリを確認し、一時ファイルで EditorConfig の優先順位を検証した。オプションなし・`-d`・`-l`・`-w` は設定の空白 2、`-i 4` は空白 4、`-s` は既定のタブになった。実機のスクリプトは変更していない
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -427,7 +443,7 @@ AlmaLinux 10 aarch64 で ShellCheck を入れる経路を比べた（2026-09-23 
 
 ### shfmt と `.editorconfig` の優先順位（実測）
 
-shfmt は `.editorconfig` を読むが、**コマンドラインでフラグを 1 つでも渡すと `.editorconfig` は読まれなくなる**。一時ディレクトリで確かめた:
+shfmt は `.editorconfig` を読むが、**構文解析・整形のオプション**（`-i`・`-ln`・`-s` など）を指定すると、整形設定はコマンドライン側を使う。`-d`・`-w`・`-l` だけなら、この切り替えは起きない（3.14.1 のソースで確認）。次の表は一時ディレクトリでの実測:
 
 | `.editorconfig` | 渡したフラグ | 実際のインデント |
 |---|---|---|
@@ -474,7 +490,9 @@ $ brew leaves | wc -l
   - プロジェクトで揃えるなら `.editorconfig` を置き、コマンドラインでは `-i` を**渡さない**（渡すと `.editorconfig` が無視される）
 - **EPEL 版と brew 版を両方入れない**: どちらもコマンド名は `shellcheck` で、PATH の先頭にある Homebrew 版が勝つ
   - EPEL のパッケージ名だけ大文字の `ShellCheck` なので、`rpm -q shellcheck` では見つからない
-- **指摘があると `rc=1`**: CI に組むときはこれが期待どおりだが、`set -e` のスクリプトの途中で呼ぶと止まる。件数だけ欲しいなら `-f quiet` か `|| true`
+- **指摘があると `rc=1`**: CI に組むときはこれが期待どおりだが、`set -e` のスクリプトの途中で呼ぶと止まる
+  - 件数は[手順 5](#実施手順)の JSON と `jq` で数える。`-f quiet` は何も出さず、終了コードだけで成否を確認する形式
+  - `|| true` は終了コードを成功に変えるだけで、件数は数えない。CI の成否判定が必要なら付けない
 - **`sudo shellcheck` は、そのままでは使えない**: sudo の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）。root で走らせるなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、フルパスか EPEL 版
 - **コメントの中の `shellcheck` という語がディレクティブと誤認される**: 行末コメントを `# shellcheck -S に渡す…` のように書くと、**SC1126（error）**「Place shellcheck directives before commands, not after.」が出る
   - 本書の手順 1 の行末コメントは、これを踏んだので `shellcheck` を外した書き方に直してある
@@ -486,6 +504,7 @@ $ brew leaves | wc -l
 - [koalaman/shellcheck — README](https://github.com/koalaman/shellcheck) — ディレクティブ、`.shellcheckrc`、各エディタとの連携
 - [ShellCheck Wiki](https://www.shellcheck.net/wiki/) — `SCxxxx` ごとの解説（警告に出る URL の飛び先）
 - [mvdan/sh — README](https://github.com/mvdan/sh) — shfmt のオプションと `.editorconfig` の対応キー
+- [shfmt 3.14.1 のオプション処理](https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/main.go) — Parser / Printer のオプションを指定した場合の EditorConfig の扱い（2026-10-05 にソースを確認）
 - `shellcheck --help` / `shfmt --help` — 全オプション
 - [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
 

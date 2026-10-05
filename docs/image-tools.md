@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）を通してあること。`command -v brew podman` が 2 行を返し、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
-> - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew は root で動かず、イメージも自分のユーザーの podman に作るため）
+> - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
 > - **手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
 > - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
 
@@ -23,6 +23,7 @@
 
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - hadolint は `gmp` など 4 つの依存を連れてくる（Haskell 製のため）。dive に依存は無い
+   - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
 
    <details>
    <summary>補足: ボトルと依存</summary>

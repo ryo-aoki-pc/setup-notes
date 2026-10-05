@@ -42,7 +42,7 @@
    | `X11 Layout: jp` と `X11 Variant: OADG109A` | `jp`（変種は取らない） |
 
    - `localectl` が動かないとき（systemd の無い環境）は、エラーを捨てて空になる
-   - 変種も指定するときは、手順 4 の `'jp'` を `'jp+OADG109A'` のように `+` でつないだ名前にする（GNOME の配列の一覧で、この形の名前があることをコンテナで確かめた）
+   - 変種も指定するときは、手順 1 の読み戻しの後に `XKB_LAYOUT=jp+OADG109A` のように `+` でつないだ名前を設定する（GNOME の配列の一覧で、この形の名前があることをコンテナで確かめた）
 
    </details>
 
@@ -106,10 +106,10 @@
 1. 入力ソースを「キーボードの配列 + Anthy」にする。
 
    ```bash
-   gsettings get org.gnome.desktop.input-sources sources
-   gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT:?手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す}'), ('ibus', 'anthy')]"
-   gsettings get org.gnome.desktop.input-sources sources
-   gsettings get org.gnome.desktop.wm.keybindings switch-input-source
+   /usr/bin/gsettings get org.gnome.desktop.input-sources sources
+   /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT:?手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す}'), ('ibus', 'anthy')]"
+   /usr/bin/gsettings get org.gnome.desktop.input-sources sources
+   /usr/bin/gsettings get org.gnome.desktop.wm.keybindings switch-input-source
    ```
 
    - 最初の `get` は変える前の値（何も設定していなければ `@a(ss) []`）
@@ -118,6 +118,7 @@
    - **ほかの入力ソースは消える**。残したいものがあれば、`set` の値に並べて足す
    - 最後の `get` の `['<Super>space', 'XF86Keyboard']` が、入力ソースを切り替えるキー（Super+Space）
    - 手順 3 を飛ばしたなら、手順 5 は飛ばす
+   - `/usr/bin/` は外さない（Homebrew の `gsettings` は GNOME の dconf に書かない。[gnome-power.md の手順 2 の補足](gnome-power.md#実施手順)）
 
    <details>
    <summary>補足: 並べ方</summary>
@@ -191,12 +192,12 @@
 1. 入力ソースを既定値に戻す。
 
    ```bash
-   gsettings reset org.gnome.desktop.input-sources sources
-   gsettings get org.gnome.desktop.input-sources sources
+   /usr/bin/gsettings reset org.gnome.desktop.input-sources sources
+   /usr/bin/gsettings get org.gnome.desktop.input-sources sources
    ```
 
    - `@a(ss) []`（既定値）になればよい
-   - 手順 4 で控えた値に戻すなら、`gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
+   - 手順 4 で控えた値に戻すなら、`/usr/bin/gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
 
 1. 手順 3 で ibus-anthy を入れたときだけ、ibus-anthy を消す。
 
@@ -228,6 +229,7 @@
     - IBus の API で `nihongo` と Space と Return を送ると「日本語」が確定し、半角/全角キーで直接入力とひらがなが切り替わる（手順 7 の補足）
   - **確認していないこと**: Super+Space での切り替え、上部バーの表示、候補の一覧の表示、アプリ（GTK・XWayland のアプリ・WezTerm・VS Code など）での入力。コンテナには画面も GNOME Shell も無いため
   - aarch64（Raspberry Pi 5）では通していない。パッケージは同じ版が aarch64 にもある（リポジトリのメタデータで確認）
+  - 2026-10-05: 手順 4 とロールバックの `gsettings` を `/usr/bin/gsettings` に揃えた。変更後は構文の検査だけで、実機・コンテナでは流していない
 
 | 項目 | 実機 | コンテナ |
 |---|---|---|

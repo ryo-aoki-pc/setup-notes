@@ -40,7 +40,7 @@
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 一般ユーザーで使う（`brew` は root では動かない。入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 導入元が Homebrew の手順書 17 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 導入・更新は一般ユーザーで行う（入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 導入元が Homebrew の手順書 17 本と、手順書の無いツールの Homebrew の行 |
 | [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/npm-offline.md) |
 | [npm（インターネットに出られないホスト）](docs/npm-offline.md) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
 | [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
@@ -86,7 +86,7 @@
 
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
 - GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
-- ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ（リモートログインと違い、つなぎ直しても同じデスクトップに戻る。同じ PC で併用できる）。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）
+- ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ。リモートログインも既存のセッションへ戻れるため、同じ PC で併用できる。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、[Windows 11 の初期設定の手順 43](docs/windows-setup.md#実施手順)
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
@@ -97,7 +97,7 @@
 |---|---|---|---|---|
 | [WireGuard VPN](docs/wireguard.md) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
 | [WireGuard Road Warrior](docs/wireguard-road-warrior.md) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down`。Windows 11 は winget の `WireGuard.WireGuard`（公式の MSI）で、`/installtunnelservice` / `/uninstalltunnelservice` | 無し（PC の firewalld は変えない） |
-| [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（システムデーモン。GDM で新しいセッションを作る） | 3389/tcp |
+| [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（GDM で認証し、既存セッションへ戻るか、無ければ作る） | 3389/tcp |
 | [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
@@ -214,7 +214,7 @@
 | [Git](docs/git.md) | git 本体と基本の設定（pull は rebase・autostash、`core.autocrlf=false`、推奨の設定） | `git` | AppStream（Windows 11 は winget の Git for Windows） | `~/.gitconfig`（`git config --global` で書く） |
 | [lazygit](docs/lazygit.md) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い） | `~/.config/lazygit/config.yml` |
 | [git-delta](docs/git-delta.md) | `git diff` / `show` / `log -p` の表示（ページャ） | `delta`（formula 名は `git-delta`。ふだんは git が呼ぶ） | Homebrew（RPM 無し） | `~/.gitconfig`（`git config --global` で書く） |
-| [GitHub CLI](docs/gh.md) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い） | `~/.config/gh/hosts.yml`（トークンが平文） |
+| [GitHub CLI](docs/gh.md) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い） | `~/.config/gh/hosts.yml`（トークンは OS の資格情報ストアを優先し、使えない場合はファイルに平文保存） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
