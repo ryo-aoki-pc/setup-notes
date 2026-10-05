@@ -120,7 +120,7 @@
 
 | 手順書 | 方式 | 導入元 | 常駐 | 開けるポート |
 |---|---|---|---|---|
-| [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
+| [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]`、`/home` 全体を `[home]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
 | [Samba クライアント](docs/samba-client.md) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`） | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す） | 無し（サーバーの 445/tcp へ出るだけ） |
 | [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/linger.md)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
 | [Dropbox（公式クライアント）](docs/dropbox.md) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと [linger](docs/linger.md) | 無し（LAN 同期の `dropbox-lansync` は開けない） |
