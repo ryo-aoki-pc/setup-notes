@@ -9,7 +9,10 @@
 
 - 上から順にコードブロックを貼る
 - 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
-- 手順の後: 画面からコンテナのシェルを開くなら[podman exec でシェルを開く（任意）](#podman-exec-でシェルを開く任意)、compose のサービスを見るなら[compose のプロジェクトを見る（任意）](#compose-のプロジェクトを見る任意)。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後:
+  - 画面からコンテナのシェルを開くなら[podman exec でシェルを開く（任意）](#podman-exec-でシェルを開く任意)、compose のサービスを見るなら[compose のプロジェクトを見る（任意）](#compose-のプロジェクトを見る任意)
+  - root のコンテナ（`sudo podman` で動かしたもの）も見るなら[root でも使う（任意）](#root-でも使う任意)
+  - 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 - pod やシークレットも画面で扱うなら [podman-tui](podman-tui.md)（違いは[選択した方針](#選択した方針)）
 
 > [!WARNING]
@@ -258,6 +261,204 @@
 
 ---
 
+## root でも使う（任意）
+
+- **root のコンテナを lazydocker で見ないなら、この節は不要**
+- `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](podman.md#注意点)。root で動かすのは[例外](podman.md#選択した方針)）
+- この節で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
+- root の `~/.bashrc`（`/root/.bashrc`）に、そこを指す `DOCKER_HOST` を書く（自分の `~/.bashrc` の [Docker 向けの節](podman.md#docker-向けのツールから使う任意)と同じ形）
+- 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
+- `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（[root で使うときの補足](#root-で使うときの補足)）
+- 前提: Homebrew の lazydocker が、root の PATH にあること
+  - [homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)か[sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通す（`su -` でも使うなら root のシェルの節）
+  - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
+- この節の手順 4 で lazydocker の画面（TUI）が開く
+- [手順 1〜5](#実施手順) を終えた、自分のユーザーのシェルで貼る
+- 補足: [root で使うときの補足](#root-で使うときの補足)
+
+> [!WARNING]
+> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の WARNING と同じ）
+> - システムの API ソケットにつなげるのは root だけ。権限を緩めない（つなげると、root と同じことができる）
+> - この節の検証の範囲は[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)
+
+1. システムの podman の API ソケットを有効にして、root で応答を確かめる。
+
+   ```bash
+   {
+     sudo systemctl enable --now podman.socket
+     systemctl is-active podman.socket
+     sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
+     sudo podman --remote version --format '{{.Server.Version}}'
+   }
+   ```
+
+   - `active`・`OK`・`5.8.2` が出ればよい
+   - 自分のユーザーのソケット（[podman.md 手順 7](podman.md#実施手順) の `systemctl --user`）とは別のソケット
+   - `Created symlink …` が出なければ、前から有効だった。元に戻すときは、この節の手順 8 を飛ばす
+
+   <details>
+   <summary>補足: システムの API ソケット</summary>
+
+   システムの `podman.socket` の中身（`systemctl cat podman.socket` の抜粋）:
+
+   ```
+   [Socket]
+   ListenStream=%t/podman/podman.sock
+   SocketMode=0660
+   ```
+
+   - `%t` はシステムでは `/run` なので、ソケットは `/run/podman/podman.sock`。持ち主は root で `srw-rw----`、つなげるのは root だけ
+   - 要求が来たときだけ、root の `podman.service`（`podman system service`）が起動し、要求が途切れると自分から終わる
+   - `sudo podman --remote` は、指定が無ければこのソケットにつなぐ
+   - この節の手順 8 で止めた後も、ソケットのファイルは再起動まで残る。つなごうとすると失敗する（`curl` は終了コード 7）
+
+   </details>
+
+1. root の `~/.bashrc` の末尾に `DOCKER_HOST` を書き、root のログインシェルで確かめる。
+
+   ```bash
+   {
+     if sudo grep -q DOCKER_HOST /root/.bashrc; then echo '中断: /root/.bashrc に DOCKER_HOST が既にある' >&2
+     else
+       sudo tee -a /root/.bashrc >/dev/null <<'EOF'
+   export DOCKER_HOST=unix:///run/podman/podman.sock
+   EOF
+       sudo tail -n 1 /root/.bashrc
+     fi
+     sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'
+   }
+   ```
+
+   - 書いた 1 行（`export DOCKER_HOST=unix:///run/podman/podman.sock`）が出る
+   - 最後の 2 行が `unix:///run/podman/podman.sock` と `/home/linuxbrew/.linuxbrew/bin/lazydocker` ならよい
+     - 2 行目が出なければ、リードの前提（homebrew.md の節）を通していない
+   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
+     - `sudo grep -n DOCKER_HOST /root/.bashrc` で見て、同じ値なら済んでいる。違う値なら手で直す
+   - podman-docker を入れたホストでは、書く前から最後の 2 行が同じ出力になる（[root で使うときの補足](#root-で使うときの補足)）
+   - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
+
+   <details>
+   <summary>補足: 書く 1 行と、<code>sudo -i</code> で読まれる仕組み</summary>
+
+   - `sudo -i` は root のログインシェルを開き、`/root/.bash_profile` から `/root/.bashrc` を読む。`sudo -i <コマンド>` でも読む
+   - `-i` の無い `sudo` は root の `~/.bashrc` を読まず、自分の環境の `DOCKER_HOST` も消す（AlmaLinux 10 の `/etc/sudoers` は `env_reset` で、`env_keep` に `DOCKER_HOST` は無い）
+   - 自分の `~/.bashrc` の行（[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)）と違い、`${XDG_RUNTIME_DIR}` は使わない。root のソケットは `/run/podman` に決まっている
+   - 先頭の `if` は、ほかで書いた `DOCKER_HOST` に重ねないため
+   - ヒアドキュメントは引用符付きの `<<'EOF'` なので、書いた行がそのまま入る
+
+   **出力例**: 最後の行の、コンテナでの実測:
+
+   ```
+   $ sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'
+   unix:///run/podman/podman.sock
+   /home/linuxbrew/.linuxbrew/bin/lazydocker
+   ```
+
+   `/root/.bashrc` に書く前は 1 行目が出なかった。homebrew.md のどちらの節も通していないと 2 行目も出ず、終了コードは 1 だった。
+
+   </details>
+
+1. 確認用のコンテナを root で動かす。
+
+   ```bash
+   {
+     sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
+     sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
+   }
+   ```
+
+   - コンテナの ID の後に、`lazydocker-root-web Up Less than a second` のように出る
+   - root の保管場所に、イメージ（285 MB）を取得する。自分のユーザーで取得したイメージは使われない
+   - 名前を[手順 3](#実施手順) の `lazydocker-web` と分けて、どちらのコンテナの画面かを見分ける
+
+1. root で lazydocker を起動し、確認用のコンテナを止める。
+
+   ```bash
+   sudo -i lazydocker
+   ```
+
+   - `[3]─Containers` に `running  lazydocker-root-web` の行が出る。[手順 3](#実施手順) の `lazydocker-web` は出ない
+   - ↑↓ で `lazydocker-root-web` の行を選び、`s` を押し、`Are you sure you want to stop this container?` に `y` と答える
+   - 行が `exited (0)` に変わる
+   - `q` で終了する
+   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
+
+   <details>
+   <summary>補足: 画面の中身</summary>
+
+   起動した直後の画面（抜粋。右の枠は幅を詰め、ログの行は折り返しを変えた）:
+
+   ```
+   ╭─[3]─Containers─────────────────────────────────────╮╭─Logs - Stats - Env - Config - Top───────────╮
+   │running  lazydocker-root-web 0.00% 8080/tcp, 8443/tc││=> sourcing 10-set-mpm.sh ...                  │
+   │                                                    ││=> sourcing 20-copy-config.sh ...              │
+   ...
+   ╭─[4]─Images─────────────────────────────────────────╮│... AH00489: Apache/2.4.63 (Red Hat Enterprise │
+   │registry.access.redhat.com/ubi10/httpd-24 latest 285││Linux) OpenSSL/3.5.8 configured -- resuming    │
+   ...
+   ```
+
+   - 出るのは root のコンテナとイメージだけ。[手順 3](#実施手順) の `lazydocker-web` と、自分のユーザーの `quay.io/podman/hello` は出ない
+   - `-i` を付けずに `sudo lazydocker` と打つと（[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通したホスト）、`Error` の枠に次が出て、枠は空のまま:
+
+   ```
+   Docker event stream returned error: Cannot connect to the Docker daemon at
+   unix:///var/run/docker.sock. Is the docker daemon running?
+   Retry count: 3
+   ```
+
+   </details>
+
+1. 確認用のコンテナが止まったことと、root の設定ファイルができたことを確かめる。
+
+   ```bash
+   {
+     sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
+     sudo ls -l /root/.config/lazydocker
+   }
+   ```
+
+   - `lazydocker-root-web Exited (0) ...` と出ればよい
+   - `config.yml`（0 バイト）は root の設定ファイル。自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
+
+1. 元に戻すときは、root の確認用のコンテナと設定、`/root/.bashrc` の行を消す。
+
+   ```bash
+   {
+     sudo podman rm -f lazydocker-root-web
+     sudo rm -rf /root/.config/lazydocker
+     sudo sed -i '\#^export DOCKER_HOST=unix:///run/podman/podman\.sock$#d' /root/.bashrc
+     sudo grep -c DOCKER_HOST /root/.bashrc   # 0
+   }
+   ```
+
+   - `lazydocker-root-web` と、最後に `0` が出ればよい
+   - root の設定ファイルに手で足したもの（`c` のコマンドなど）も消える
+   - 開いたままの root のシェルの `DOCKER_HOST` は残る。開き直すと消える
+
+1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
+
+   ```bash
+   sudo podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
+   ```
+
+   - `Untagged:` と `Deleted:` が出る
+   - 同じイメージの root のコンテナが残っていると、消せずにエラーになる
+
+1. 元に戻すときは、この節の手順 1 で有効にしたときだけ、システムの API ソケットを止める。
+
+   ```bash
+   {
+     sudo systemctl disable --now podman.socket
+     systemctl is-active podman.socket
+   }
+   ```
+
+   - `Removed …` と `inactive` が出ればよい
+   - Cockpit の podman の画面など、ほかのものも、このソケットを使うことがある
+
+---
+
 ## 使い方の基本
 
 | キー | 動作 |
@@ -295,6 +496,7 @@
 ## ロールバック
 
 - 上から順に実行する
+- [root でも使う](#root-でも使う任意)の節を通したなら、先にその節の手順 6〜8 で戻す（この節の手順 3 で、root の lazydocker も消える）
 - `DOCKER_HOST` の行と API ソケットは、ほかのツールも使うので残す。消すなら [podman.md のロールバック](podman.md#ロールバック)の手順 2・3
 - compose の任意節で使った `~/compose-sample` は、[podman-compose のロールバック](podman-compose.md#ロールバック)で消す
 
@@ -338,6 +540,7 @@
 ### 対象と検証環境
 
 - **目的**: コンテナ・イメージ・ボリューム・ネットワークと、compose のサービスを、端末の画面（TUI）で見て操作できるようにする。podman の API ソケットに、Docker の API としてつなぐ
+  - 任意節で、root のコンテナ（`sudo podman` で動かしたもの）も、`sudo -i lazydocker` で見られるようにする
 - **進め方**: Homebrew の lazydocker 0.25.2 を入れ、[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)の `DOCKER_HOST` でつなぐ。podman だけの PC で動かないところ（シェルと compose）は、任意節の設定で補う。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-28）。実機では本実行していない**
   - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
@@ -349,6 +552,13 @@
     - [使い方の基本](#使い方の基本)の表のキーと、`E`・`a` が何も起こさないこと
   - **確認していないこと**: 色や罫線の見た目、デスクトップの端末での表示、`w`（ブラウザで開く）・`b`（まとめての操作）・`p`（一時停止）・`/`（絞り込み）
   - aarch64（Raspberry Pi 5）では通していない
+  - [root でも使う](#root-でも使う任意)の節は、**x86_64 のコンテナでのみ検証した**（2026-10-05。[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）
+    - 通したこと: その節の手順 1〜8 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。手順 1・2 は重ねても貼った
+    - 確認したこと:
+      - root の画面に root のコンテナだけが出て、`s` で止まる。`su -`・`sudo -s` の root のシェルでも同じ
+      - `sudo lazydocker` はつながらず、`sudo -E lazydocker` は自分のコンテナを出す
+      - homebrew.md のどちらの節だけでも動く。その節の手順 6〜8 で、`/root/.bashrc` が元と同じ内容に戻る
+    - 確認していないこと: 実機、aarch64、SELinux が Enforcing のホスト、root の Quadlet のコンテナ
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -389,6 +599,10 @@
 | `podman-docker`（AppStream）で `docker` を podman に読み替える | 不採用。入れると、既定の設定のまま `E`・`a`・compose の判定が動いた（検証で確認）。ただし `/usr/bin/docker` がシステム全体に入り、呼ぶたびに `Emulate Docker CLI using podman. ...` が出る。本書は自分の設定ファイルだけで補った |
 | Docker Engine（docker-ce） | 対象外（[podman.md](podman.md#選択した方針) と同じ） |
 | [podman-tui](podman-tui.md) | 別の手順書。podman の API でつなぎ、pod とシークレットも扱える。`DOCKER_HOST` は要らない |
+| **root のコンテナは `sudo -i lazydocker` で見る**（`/root/.bashrc` の `DOCKER_HOST` で、システムの API ソケットにつなぐ） | **採用**（[root でも使う](#root-でも使う任意)の節）。自分の `~/.bashrc` と同じ形で、効くのは root のシェルだけ |
+| `/run/docker.sock` を root のソケットへのリンクにして、`sudo lazydocker` で起動する | 不採用。root で動く Docker の API を使うツールが、どれも root の podman につながる（podman-docker の tmpfiles.d と同じ仕組み） |
+| 毎回 `sudo DOCKER_HOST=unix:///run/podman/podman.sock lazydocker` と打つ | 不採用。設定は残らないが長い（動くことは確かめた） |
+| システムの `podman.socket` の `SocketGroup` を変え、自分の lazydocker から直接つなぐ | 不採用。`sudo` を経ずに、root と同じことができるようになる |
 
 ### 完了時点の状態
 
@@ -427,6 +641,33 @@ commandTemplates:
   dockerCompose: podman-compose
 ```
 
+### root で使うときの補足
+
+[root でも使う](#root-でも使う任意)の節の補足。実測は x86_64 のコンテナで、その節の手順 5 の後のもの（[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。
+
+| 入口 | `DOCKER_HOST` | 画面に出るもの |
+|---|---|---|
+| `sudo -i lazydocker`、`sudo -i`・`su -`・`sudo -s` で開いた root のシェルの `lazydocker` | `/root/.bashrc` の `unix:///run/podman/podman.sock` | root のコンテナ |
+| `sudo lazydocker` | 無い（`sudo` が消す） | 何も出ない。`Cannot connect to the Docker daemon at unix:///var/run/docker.sock`（その節の手順 4 の補足） |
+| `sudo -E lazydocker` | 自分の `unix:///run/user/<UID>/podman/podman.sock` | 自分のコンテナ（root が自分のソケットにつなぐ） |
+| `sudo DOCKER_HOST=unix:///run/podman/podman.sock lazydocker` | 打った値 | root のコンテナ |
+
+- **入口と前提の節**: `-i` の無い 3 つは、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通したときだけ動く（通さないと `sudo: lazydocker: command not found`）
+  - `su -` は、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節が要る
+  - `sudo -i lazydocker` は、どちらの節だけでも動いた。どちらも無いと `-bash: line 1: lazydocker: command not found`
+- **`sudo -E` は使わない**: `HOME` は `/root`（`/etc/sudoers` の `always_set_home`）で root の設定を読みながら、root の権限で自分のコンテナを操作する
+  - 自分の `~/.config/lazydocker` に、root の持ち物のファイルはできなかった
+- **root の設定ファイルは `/root/.config/lazydocker/config.yml`**: 自分の設定（任意節で足した `c` のコマンドなど）は使わない
+  - root でも `c` からシェルを開くなら、[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の 5 行を、`sudo` で root の設定ファイルに書く
+  - 書いたコンテナでは、root の画面の `c` → `podman exec sh` で `sh-5.2$` が開いた
+- **`E` と `a` は root でも何も起きない**: `docker` コマンドが無いため（[注意点](#注意点)）
+- **root のシェルの `DOCKER_HOST` は、ほかのツールにも効く**: root のシェルで動かす Docker の API を使うツールも、root の podman につながる。podman 自身は `DOCKER_HOST` を読まない
+- **podman-docker を入れたホストでは**: `/etc/profile.d/podman-docker.sh` が、`DOCKER_HOST` の無い root のログインシェルに同じ値を入れ、`/run/docker.sock` を root のソケットへのリンクにする
+  - その節の手順 2 の確かめの行は、書く前から同じ 2 行を出した。`if` は `/root/.bashrc` しか見ないので、同じ行を書き足す（害は無い）
+  - `-i` の無い `sudo lazydocker` も、root のコンテナにつながった
+  - podman-docker を外しても、`/run/docker.sock` のリンクは再起動まで残った
+- **ソケットの権限を緩めない**: root の API ソケットにつなげると、root でコンテナを動かせる（ホストの `/` を付けたコンテナなど）。`SocketGroup` などで広げない（[選択した方針](#選択した方針)）
+
 ### 注意点
 
 - **`E` と `a` は `docker` コマンドを呼ぶ**: podman だけの PC では、`+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` が出るだけで、エラーも出ない
@@ -439,7 +680,8 @@ commandTemplates:
 - **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 手順 2 の補足のエラーが出る
 - **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](podman-tui.md) で見る
 - **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の補足）
-- **Homebrew の lazydocker は、そのままでは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うことは想定しない（つなぐのは自分のユーザーの API ソケット）
+- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[homebrew.md の注意点](homebrew.md#注意点)）
+  - root のコンテナは、[root でも使う](#root-でも使う任意)の節を通して `sudo -i lazydocker` で見る
 
 ### 参照
 
@@ -448,6 +690,8 @@ commandTemplates:
 - [lazydocker — Keybindings](https://github.com/jesseduffield/lazydocker/blob/master/docs/keybindings/Keybindings_en.md) — 枠ごとのキー
 - `lazydocker --config` — 既定の設定の全体
 - [Homebrew](homebrew.md) / [Podman](podman.md) / [podman-compose](podman-compose.md) — 前提の手順書
+- [podman-system-service(1)](https://docs.podman.io/en/latest/markdown/podman-system-service.1.html) — root の API ソケット（`unix:///run/podman/podman.sock`）
+- `man sudo`（`-i`）・`man sudoers`（`env_reset`・`env_keep`） — [root でも使う](#root-でも使う任意)の節で、`-i` の無い `sudo` に `DOCKER_HOST` が渡らない理由
 
 ---
 
@@ -492,3 +736,63 @@ commandTemplates:
 - `w`（ブラウザで開く）・`b`（まとめての操作）・`p`（一時停止）・`/`（絞り込み）
 - compose のサービスへの `r` 以外の操作（`U`・`D` での up・down など）
 - SELinux が有効な PC での動き
+
+### 付録: root でも使う節のコンテナでの検証記録（2026-10-05）
+
+[root でも使う（任意）](#root-でも使う任意)を足したときの記録。x86_64 のクラウドホスト（Ubuntu 24.04、cgroup v1）上の Docker 29.6.2 で、使い捨てのコンテナを立てて行った。実機で加えた変更は無い。
+
+**環境**:
+
+- イメージは `quay.io/almalinuxorg/10-init:10.2`（`sha256:c8a5eee8…28e1`。中のパッケージは `x86_64_v2` のもの）。`--privileged --cgroupns=private` で立て、systemd を PID 1 にした
+- 版: `podman-5.8.2-9.el10_2.alma.1`、`sudo-1.9.17-10.p2.el10_2.6`、`systemd-257-23.el10_2.2.alma.1`、`bash-5.2.26-6.el10`、`rootfiles-8.1-54.el10`、Homebrew 7.0.8、lazydocker 0.25.2
+- `/etc/sudoers` は `Defaults always_set_home`・`Defaults env_reset`・`env_keep`（`LANG` や `LC_*` など。`DOCKER_HOST` は無い）・`secure_path = /sbin:/bin:/usr/sbin:/usr/bin`
+- `/root/.bash_profile` は `~/.bashrc` を読む
+
+**手順書の外で行った準備**（検証環境の都合）:
+
+- **cgroup**: ホストは cgroup v1 なので、コンテナの入口のスクリプトで、ホストの cgroup2 の下に枝を作って移り、新しい cgroup の名前空間で `/sys/fs/cgroup` に cgroup2 を付け直してから systemd を起動した。コントローラは無いので、`/etc/containers/containers.conf.d/90-verify.conf` に `pids_limit = 0` を書いた
+- **ネットワーク**: root の podman（netavark）が作る `podman0` と nft の表がクラウドのホストに及ばないように、コンテナは Docker の bridge（自分の network namespace）で立てた。プロキシには、ホストの側の中継で届かせた
+- **プロキシ**: CA を信頼ストアに足し、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=`（https）、ログインシェルとシステム・ユーザーの systemd のプロキシの環境変数を入れた。`sudo` はプロキシの環境変数を消すので、root の podman のイメージの取得のために、同じ `90-verify.conf` の `[engine]` の `env` にも書いた
+- **保管場所**: `/home` と `/var/lib/containers` に Docker のボリューム（ext4）を付けた
+- **ログイン**: `systemd-logind` の mask を戻し、コンテナの中の `sshd` に、`<USER>`（wheel、`/etc/sudoers.d` に NOPASSWD の設定）で鍵を使ってログインした
+- **前提の手順書**: [podman.md](podman.md) の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](homebrew.md) の手順 1〜4（インストーラだけ `NONINTERACTIVE=1`）、この文書の手順 1〜3 は、端末の無い ssh からスクリプトで流した（貼ってはいない）
+  - その ssh を閉じたとき、linger が無いので自分の `lazydocker-web` が止まった。入口の確認の前に `podman start` で起動し直した
+- homebrew.md の [root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の手順 1 は、下の端末に貼った
+
+**流し方**:
+
+- ホストの tmux 3.4 のペイン（160x50）から `docker exec -it … ssh -t <USER>@127.0.0.1` でログインした
+- この文書から節のブロック（折り畳みの外のもの）を抜き出し、手順ごとに `tmux paste-buffer` で貼った。1 回目はブラケットペースト無し、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）
+- 画面は `tmux capture-pane` で読み、キーは `tmux send-keys` で送った
+
+| 手順・確認 | 結果 |
+|---|---|
+| 節の前 | `sudo -i lazydocker` は `-bash: line 1: lazydocker: command not found`（終了コード 127）。`podman.socket`（システム）は `disabled`、root のイメージは 0 個、`/root/.config` は無い |
+| 1 | `Created symlink '/etc/systemd/system/sockets.target.wants/podman.socket' → '/usr/lib/systemd/system/podman.socket'.`、`active`、`OK`、`5.8.2`。ソケットは `srw-rw---- root root` |
+| 2 | 書いた行、`unix:///run/podman/podman.sock`、`/home/linuxbrew/.linuxbrew/bin/lazydocker`。もう一度貼ると `中断: /root/.bashrc に DOCKER_HOST が既にある` と同じ 2 行で、`/root/.bashrc` の SHA-256 は変わらない |
+| 3 | イメージ（285 MB）を取得し、ID と `lazydocker-root-web Up Less than a second` |
+| 4 | 枠に出たのは root のコンテナとイメージだけ（`running  lazydocker-root-web`、`registry.access.redhat.com/ubi10/httpd-24`）。`s` → `Are you sure you want to stop this container?` → `y` で `exited (0)`。`q` でプロンプトに戻った |
+| 5 | `lazydocker-root-web Exited (0) 20 seconds ago`、`config.yml`（root の持ち物、0 バイト） |
+| 自分の lazydocker | 自分のコンテナ（`lazydocker-web`）と自分のイメージ（`quay.io/podman/hello`・`ubi10/httpd-24`）だけ |
+| `sudo -i printenv TERM LANG HOME DOCKER_HOST` | `xterm`、`C.utf8`、`/root`、`unix:///run/podman/podman.sock` |
+| `sudo -s`・`su -` | どちらも `HOME` は `/root`、`DOCKER_HOST` は root のソケットで、`lazydocker` の画面は `running  lazydocker-root-web` だけ。`su -` は検証のためだけに root にパスワードを付け、後で `/etc/shadow` を戻した |
+| `sudo lazydocker` | root のシェルの節だけのときは `sudo: lazydocker: command not found`（終了コード 1）。homebrew.md の sudo の節の手順 1 の後は、`Error` の枠に `Cannot connect to the Docker daemon at unix:///var/run/docker.sock` が出て、`Retry count` が増えた |
+| `sudo -E lazydocker` | `sudo -E printenv` は `HOME` が `/root`、`DOCKER_HOST` が `unix:///run/user/<UID>/podman/podman.sock`。画面は `running  lazydocker-web`（自分のコンテナ）。自分のホームに root の持ち物のファイルはできなかった |
+| `sudo DOCKER_HOST=unix:///run/podman/podman.sock lazydocker` | `running  lazydocker-root-web` |
+| root の `c`・`E` | root の設定ファイルに [podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の 5 行を書くと、`c` → `podman exec sh` → Enter で `+ podman exec -it <ID> sh` と `sh-5.2$`、`id` は `uid=1001(default) gid=0(root) groups=0(root)`、`exit` と Enter で画面に戻った。`E` は `+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` だけ |
+| 6 | `lazydocker-root-web`、`0`。`/root/.bashrc` の SHA-256 が、この節の前（homebrew.md の root のシェルの節の後）と一致し、その節の `case` の行は残った。空の `/root/.config` は残った |
+| 7 | `Untagged: registry.access.redhat.com/ubi10/httpd-24:latest`、`Deleted: 8b178ff9bc02…` |
+| 8 | `Removed '/etc/systemd/system/sockets.target.wants/podman.socket'.`、`inactive`。`/run/podman/podman.sock` のファイルは残り、つなぐと `curl` は終了コード 7 |
+| podman-docker | AppStream の `podman-docker-5.8.2-9.el10_2.alma.1` を入れると、`/run/docker.sock -> /run/podman/podman.sock` ができた。`/root/.bashrc` に行が無いまま、手順 2 の確かめの行が `unix:///run/podman/podman.sock` と `lazydocker` の 2 行を出し、`grep -c DOCKER_HOST /root/.bashrc` は `0`。ソケットを有効にすると、`sudo lazydocker` は root のコンテナを出した。`dnf remove` の後もリンクは残ったので、手で消した |
+| 2 回目（ブラケットペースト有り） | 手順 1〜8 が 1 回目と同じ結果。ソケットが有効なまま手順 1 をもう一度貼ると、`Created symlink` は出ず、`active`・`OK`・`5.8.2` だけ |
+| 前提の分岐（2 回目の途中） | 手順 2 の後に homebrew.md の root のシェルの節の手順 2 を貼ると、`DOCKER_HOST` の行は残り、sudo の節だけで `sudo -i bash -c '…'` が `lazydocker` を見つけた。手順 5 の後に sudo の節の手順 2 も貼ると、手順 2 の確かめの行は `unix:///run/podman/podman.sock` の 1 行だけで、`sudo -i lazydocker` は `-bash: line 1: lazydocker: command not found`（終了コード 127） |
+| 後 | 手順 8 の後、`/root/.bashrc` の SHA-256 は、homebrew.md の 2 つの節を通す前と一致した。root のイメージとコンテナは 0 個、`podman.socket` は `disabled` |
+
+#### 未確認事項（root の節）
+
+- 実機（Raspberry Pi 5 / x86_64 PC）での実行と、aarch64 での実行
+- SELinux が Enforcing のホスト（検証のコンテナには SELinux が無い）
+- root の Quadlet（`/etc/containers/systemd`）で動かしたコンテナの見え方と操作
+- 再起動の後の、システムの `podman.socket` の起動
+- コンソールでの root のログインと、bash 以外の root のシェル
+- root で compose のプロジェクトを見ること
