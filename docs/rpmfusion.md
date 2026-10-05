@@ -151,7 +151,7 @@
 - RPM Fusion から入れたパッケージを先に消す。Firefox の FFmpeg なら、[firefox.md のロールバック](firefox.md#ロールバック)の手順 1
   - 残したまま RPM Fusion を消すと、そのパッケージは更新されなくなる
 - EPEL は、この節では消さない（消すなら [epel.md のロールバック](epel.md#ロールバック)）
-- この節の手順はコンテナで本実行した
+- この節の手順はコンテナと x86_64 の VM で本実行した
 
 1. RPM Fusion（free）のリポジトリを消す。
 
@@ -195,6 +195,7 @@
 - **進め方**: 鍵を照合して取り込み、署名を確かめながら `rpmfusion-free-release` を入れる。前提は [EPEL](epel.md)。読者が編集する変数は無い
   - もとは [firefox.md](firefox.md) の手順 8〜11 と、ロールバックの手順 2〜3 だった。Firefox の FFmpeg から、リポジトリの有効化を切り分けた
 - **状態**: **手順 1〜3 は実機で本実行済み（2026-09-28）**。aarch64 と x86_64 の 2 台
+  - 2026-10-06: クリーンな x86_64 の VM で実施手順 1〜4 とロールバック 1・2 を本実行し、Firefox の FFmpeg の導入も確認した（末尾の付録）。
   - aarch64 の実機（Raspberry Pi 5）: 利用者が手順どおりに入れた（[firefox.md の付録](firefox.md#付録-実機での本実行2026-09-28)）
     - 鍵（`gpg-pubkey-db85ddd7-67a63d8b`）が登録され、`dnf history` に手順 3 の実行（4 パッケージ）が残っている
     - EPEL は無かったので、手順 3 の依存で入った
@@ -269,3 +270,11 @@
 - 実機での手順 4 とロールバック
 - aarch64 での手順 4
 - nonfree のリポジトリと、`rpmfusion-free-updates-testing`
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。利用者のアカウントは使っていない。
+
+EPEL の実施手順 1〜3 の後、実施手順 1〜4 とロールバック 1・2 を本実行した。公式の鍵の fingerprint `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7` と uid を照合し、rpm に取り込んでから `localpkg_gpgcheck=1` で `rpmfusion-free-release-10-1` を入れた。入ったのはこの 1 RPM だけで、有効な `rpmfusion-free-updates` から Firefox の `ffmpeg-libs-7.1.5-1.el10` を導入できた。nonfree と aarch64 の今回の実行は確認していない。
+
+FFmpeg を外した後のロールバックは、`--noautoremove` で rpmfusion-free-release だけが消え、EPEL は残った。RPM Fusion の署名鍵も削除できた。

@@ -15,7 +15,9 @@
 - 手順の後: 履歴を曖昧検索で探す Ctrl+R などは [fzf](fzf.md)。以後は[ロールバック](#ロールバック)（設定だけなので、更新の節は無い）
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本書の手順を通していない（[対象と検証環境](#対象と検証環境)）。GNOME 端末や WezTerm の画面での色と、Home / End / Ctrl+矢印のキーは確かめていない。
+> **今回の VM 検証対象は `0dbb522` の直接追記版。共通 bash 設定へ統一した現行版の新規導入・移行は今回未実施**。
+>
+> **x86_64 のクリーン VM で検証対象版の実施手順を本実行済み**（2026-10-06）で、実機では本書の手順を通していない（[対象と検証環境](#対象と検証環境)）。GNOME 端末や WezTerm の画面での色と、Home / End / Ctrl+矢印のキーは確かめていない。
 
 1. bash-completion が入っているか確かめ、無ければ入れる。
 
@@ -43,7 +45,7 @@
    printf '%s\n' "${BASH_COMPLETION_VERSINFO[*]}"
    ```
 
-   - `complete -F _completion_loader -D` と `2 11` が出る
+   - `complete -F _completion_loader -D` と `2 11` が出る。Workstation では、既定の補完が `complete -F _python_argcomplete_global -D` になっている場合もある（下の補足）
    - 最初から入っていたホストでは、どちらも読み込む前から出る（2 回読んでも何も起きない）
 
    <details>
@@ -52,6 +54,7 @@
    - `/etc/bashrc` は `/etc/profile.d/*.sh` を**ログインシェルでないとき**だけ読む（`if ! shopt -q login_shell`）。SSH でログインしたシェルで `. ~/.bashrc` を実行しても、`/etc/bashrc` 経由では `bash_completion.sh` に届かない
    - `bash_completion.sh` 自身は、対話の bash で、まだ読んでいないとき（`BASH_COMPLETION_VERSINFO` が空）だけ本体を読む。2 回目は何もしない
    - `complete -p -D` の `_completion_loader` は、コマンドの補完を最初の Tab のときに `/usr/share/bash-completion/completions/<コマンド>` から読む仕組み（遅延読み込み）。読む前の `complete -p git` は `bash: complete: git: no completion specification` になる
+   - AlmaLinux 10.2 Workstation のクリーン VM（2026-10-06）では、既存の `python3-argcomplete-3.2.2-4.el10` が既定の補完を `_python_argcomplete_global` にしていた。この関数は argcomplete の対象でなければ `_completion_loader` を呼ぶ。`systemctl star<Tab>` などの補完も通ったので、関数名だけで未読込とは判断しない
 
    </details>
 
@@ -136,7 +139,7 @@
    bind -q history-search-backward
    ```
 
-   - 手順 3 と同じ値、`complete -F _completion_loader -D`、`set … on` が 4 行、`"\eOA", "\e[5~", "\e[A"` が出る
+   - 手順 3 と同じ値、手順 2 と同じ既定の補完（`_completion_loader` または `_python_argcomplete_global`）、`set … on` が 4 行、`"\eOA", "\e[5~", "\e[A"` が出る
    - Homebrew のホストでは、続けて `complete -p brew` が `-F _brew brew` を含む補完定義を出す
 
 1. キーを押して、補完と履歴の検索を確かめる。
@@ -204,7 +207,7 @@
 
 - **目的**: AlmaLinux 10 の bash で、履歴を多く残し、Tab の補完を広く・楽にし、↑ で打ちかけの行から履歴を探せるようにする。ツールを足すのではなく、bash と readline の設定と、bash-completion の RPM だけで行う
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **x86_64 のコンテナでのみ検証した（2026-10-02）**
+- **状態**: **`0dbb522` の直接追記版の実施手順 1〜8 を x86_64 のクリーン VM で本実行済み（2026-10-06）。コンテナでも検証済み（2026-10-02）**。共通 bash 設定へ統一した現行版の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
   - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順と[ロールバック](#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#付録-コンテナでの検証記録2026-10-02)）
   - 確認したこと
     - 手順 1〜7 の出力、手順 8 のキー操作（tmux のペインにキーを送って画面を読んだ）、[ロールバック](#ロールバック)
@@ -212,7 +215,6 @@
     - [fzf.md](fzf.md) の行との並び（手順 4 の補足）
   - **確認していないこと**
     - 実機（aarch64 の Raspberry Pi 5、x86_64 の PC）、GNOME 端末・WezTerm の画面での色と Home / End / Ctrl+矢印
-    - Workstation で入れた PC に bash-completion が最初から入っていること（comps の `Standard` グループの既定のパッケージであることを `dnf group info` で見ただけ）
     - 日本語入力との組み合わせ、`python3` など bash 以外の readline のコマンドでの `~/.inputrc`
 
 | 項目 | 検証コンテナ |
@@ -335,6 +337,19 @@ complete -o bashdefault -o default -F _brew brew
 
 - 実機（aarch64 の Raspberry Pi 5、x86_64 の PC）での本実行
 - GNOME 端末・WezTerm での色、Home / End / Ctrl+矢印、`\eOA`（アプリケーションモード）の ↑
-- Workstation で入れた PC に bash-completion が最初から入っていること（メタデータのみ）
 - `python3` など bash 以外の readline のコマンドでの `~/.inputrc`
 - 日本語入力との組み合わせ
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**検証対象**: `0dbb522` の、各手順で `~/.bashrc` などへ設定を直接追記する版。以下の手順番号と「本文」はこの版を指す。検証後に共通 bash 設定へ統一された現行版（`0bc9970`）の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、検証対象版の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順（`0dbb522`）**: 実施手順 1〜8。
+
+**結果**: Workstation に既存の bash-completion 2.11 を使い、OS 既定の `~/.bashrc` に本文の履歴・shopt・Homebrew 補完を足し、`~/.inputrc` を作った。SSH を切ってログインし直した後も値が残った。手順 8 の systemctl・パス・大小文字・eza の Tab、printf の履歴検索、autocd・cdspell・globstar を全て実操作で確認した。Workstation の `python3-argcomplete-3.2.2-4.el10` は既定の補完を `_python_argcomplete_global` にする。この関数の内容で `_completion_loader` へ戻す分岐を確認し、通常の Tab も成功したため、これを失敗とは扱わず期待出力の説明を直した。
+
+**今回の未確認範囲**: GNOME 端末・WezTerm の色と物理キー、Home/End/Ctrl+矢印の実操作、ロールバックは今回確認していない。

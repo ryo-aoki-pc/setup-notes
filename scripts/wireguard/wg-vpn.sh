@@ -240,7 +240,9 @@ is_pubkey() { [[ $1 =~ ^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$ ]]; }
 
 # 指定 IP を持つインターフェース名（無ければ空）
 iface_of_ip() {
-  ip -o -4 addr show | awk -v ip="$1" '{split($4, a, "/"); if (a[1] == ip) { print $2; exit }}'
+  # 最初の一致を控えて最後まで読む。途中で exit すると ip が SIGPIPE で終わり、
+  # set -o pipefail の下で apply が終了 141 になることがある。
+  ip -o -4 addr show | awk -v ip="$1" '{split($4, a, "/"); if (a[1] == ip && iface == "") iface = $2} END {if (iface != "") print iface}'
 }
 
 check_host_is_site() {

@@ -13,10 +13,7 @@
 - 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない（[対象と検証環境](#対象と検証環境)）。
->
-> - Docker のコンテナの中で systemd を動かし、その中で rootless の podman を入れ子で動かした。[Quadlet](#quadlet-で自動起動する任意) の再起動は、コンテナの再起動で確かめた
-> - SELinux は無効で、cgroup のコントローラも無い環境だった。`:Z` のラベルの付け替えと、資源の制限（`--memory` など）は確かめていない
+> **x86_64 の VM で検証した手順書で、実機では本実行していない。SELinux Enforcing の `:Z` と cgroup v2 の資源制限も確認した**（[対象と検証環境](#対象と検証環境)）。
 
 1. podman が入っているか確かめる。
 
@@ -503,7 +500,8 @@
 
 - **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md)・[podman-tui](podman-tui.md)・[lazydocker](lazydocker.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
+- **状態**: **x86_64 の VM で `0dbb522` 版の実施手順を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**。その後の共通 bash 設定の導入・移行は今回の VM では実行していない
+  - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
     - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
   - 手順 4 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜6 を通した
@@ -680,3 +678,17 @@ $ podman --remote version --format '{{.Server.Version}}'
 - LAN に公開するポートと firewalld
 - 新しいイメージがあるときの `podman auto-update`
 - Raspberry Pi 5 のカーネルのページサイズと、イメージの動作への影響
+
+---
+
+### 付録: VM での検証記録（2026-10-06）
+
+**環境**: [クリーンインストールからの検証記録](almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+
+**検証した版**: `0dbb522`。以下の手順番号と「本文」はこの版を指す。その後に共通 bash 設定へ統一したシェル設定の導入・移行は今回の VM では行っていない。
+
+- Workstation のクリーンインストールでは podman は未導入だった。手順 1〜3・5〜7 を本文のまま SSH の擬似端末で通し、AppStream の podman 5.8.2 が入った。subuid / subgid は両方とも既に `524288:65536` があり、手順 4 は条件に従って飛ばした。不足を補う分岐の本実行は今回もしていない。
+- `podman info` は `true overlay crun netavark pasta v2`、確認用イメージが実行でき、API ソケットは `OK` を返した。Docker 向けの任意節も通し、`/version` に `Podman Engine` が出た。
+- SELinux は Enforcing のまま。Compose の `:Z` のホスト側ディレクトリは `container_file_t` になり、カテゴリがコンテナの `container_t` と一致した。追加の確認で `--memory 64m --pids-limit 32` を渡すと、コンテナ内の `memory.max` は `67108864`、`pids.max` は `32` だった。
+- Quadlet の任意節の手順 1〜4 も通した。再起動後のサービス起動は 04:19:51、最初の SSH ログインは 04:20:12、本文手順 4 のログインは 04:20:42 で、サービスが先に起動した。HTTP は `hello from quadlet`。linger は `yes`、API ソケットも active だった。
+- 今回は実機・aarch64、subuid / subgid の不足するユーザー、更新・ロールバックを通していない。以前のコンテナ検証とは範囲を分ける。

@@ -136,7 +136,9 @@
    <details>
    <summary>補足: <code>wg-vpn.sh</code> の検査結果（実測）</summary>
 
-   実機で `scripts/wireguard/wg-vpn.sh` を検査した結果。**この補足の行数と差分の数値は、下記の修正を入れる前のもの**（当時 1,300 行、修正後は 1,299 行）。
+   **最新の再検査（2026-10-06）**: AlmaLinux 10.2 Workstation のクリーンな x86_64 VM に、このリポジトリの `scripts/wireguard/wg-vpn.sh` を変更せずコピーして検査した。ShellCheck 0.11.0・shfmt 3.14.1 を使い、本文の手順 4 の `bash -n` と `shellcheck -x` は両方 `rc=0`、手順 5 の JSON 集計は 0 件だった。コピーしたファイルの SHA-256 は `d8b5ba4bca3326f2ed07b6b84c7713baf0c49c2753ba760f9b7ad872d1c23e6c`。スクリプトの本実行や `shfmt -w` はしていない。
+
+   以下は、実機で `scripts/wireguard/wg-vpn.sh` を検査したときの経緯。**この補足の行数と差分の数値は、下記の修正を入れる前のもの**（当時 1,300 行、修正後は 1,299 行）。
 
    ```
    $ bash -n scripts/wireguard/wg-vpn.sh
@@ -373,7 +375,7 @@
 
 - **目的**: AlmaLinux 10 に [ShellCheck](https://www.shellcheck.net/)（シェルスクリプトの静的検査）と [shfmt](https://github.com/mvdan/sh)（整形）を入れる。**このリポジトリの `CLAUDE.md` が「よく使うコマンド」として `shellcheck -x scripts/wireguard/wg-vpn.sh` を挙げているのに、実機に入っていなかった**のが動機
 - **進め方**: Homebrew で 2 つ同時に入れ、`scripts/wireguard/wg-vpn.sh` を実際に検査する。**読者が書き換えるのは冒頭の変数ブロック（検査対象のパス）だけ**
-- **状態**: **実機で本実行済み（2026-09-23）**
+- **状態**: **実機で本実行済み（2026-09-23）**。**x86_64 のクリーン VM でも現行の実施手順を本実行済み（2026-10-06）**
   - 下表のホストで `brew install shellcheck shfmt` を実行し、`shellcheck 0.11.0` と `shfmt 3.14.1` が入って常用中
   - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](#実施手順)）
   - 手順 2〜3 と[検査を調整する（任意）](#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
@@ -534,3 +536,15 @@ $ brew leaves | wc -l
 - `--list-optional` で有効にできる追加の検査
 - エディタ連携（[VS Code](vscode.md) の `timonwong.shellcheck` 拡張など）
 - ロールバック（`brew uninstall shellcheck shfmt`）の本実行
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、この文書の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順**: 実施手順 1〜5。
+
+**結果**: ShellCheck 0.11.0 と shfmt 3.14.1 を導入した。手順 3 の意図的に不備を含むサンプルは指摘・整形差分が出て両方 `rc=1` になった。手順 4・5 は、このリポジトリの `wg-vpn.sh` を VM にコピーし、`SC_TARGET` をそのパスに変えて検査した。`bash -n` と `shellcheck -x` は両方 `rc=0`、JSON の件数は 0。元のスクリプトは変更していない。
+
+**今回の未確認範囲**: スクリプト自体の本実行、`shfmt -w`、任意の検査設定や EditorConfig、更新・ロールバックは今回流していない。

@@ -337,9 +337,8 @@
 - AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1 だけ行う。RPM Fusion 自体も外すなら、続けて [rpmfusion.md のロールバック](rpmfusion.md#ロールバック)を行う
 - EPEL は外さない（[btop.md](btop.md) などほかの手順書でも使う。外すなら [epel.md のロールバック](epel.md#ロールバック)）
 - プロファイル（`~/.mozilla/firefox`、新しく作られた場合は `~/.config/mozilla/firefox`）は、この節のどの手順でも消えない
-- この節の手順 1 はコンテナで本実行した
-- Firefox を戻す手順（この節の手順 2〜5）は**本実行していない**
-  - `dnf --assumeno distro-sync firefox` で、`firefox 140.15.0-1.el10_2 appstream` への `Downgrading` 1 パッケージに解決されることだけ確認した
+- この節の手順 1 はコンテナと x86_64 の VM で本実行した
+- Firefox を戻す手順（この節の手順 2〜5）も x86_64 の VM で本実行した（2026-10-06）。`157.0-1` から AppStream の `140.16.0-1.el10_2` に戻り、言語パック・Mozilla の repo と署名鍵も外れた
 
 1. FFmpeg のライブラリを消す。
 
@@ -601,6 +600,7 @@
   - **AlmaLinux 10**（[実施手順](#実施手順)）: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: winget の `Mozilla.Firefox.ja`（Mozilla の日本語版のインストーラ）を、管理者の Windows PowerShell 5.1 から PC 全体（`C:\Program Files\Mozilla Firefox`）に入れ、Windows の設定で既定のブラウザーにする。更新は Firefox 自身（Mozilla Maintenance Service）に任せる。変数は無く、AAC・H.264 のために足すものも無い
 - **状態（AlmaLinux 10）**
+  - **2026-10-06: クリーンな x86_64 の VM で手順 1〜8・10・11 とロールバック 1〜5 を本実行済み**。Mozilla 157 の日本語 GUI と H.264/AAC の動画再生、AppStream の ESR 140 への復元を確認した（末尾の付録）。手順 9 は衝突が無かったため省略した
   - **手順 1〜7（Firefox）は実機で本実行済み（2026-09-21）**
     - 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している
     - 2026-09-25 に OS を入れ直した後も、手順 5 の `dnf install firefox firefox-l10n-ja` で入れ直した（`dnf history` では `Upgrade firefox-156.0.1-1.aarch64 @mozilla`）
@@ -1235,3 +1235,15 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6（GitHub のリリー
 1. `winget uninstall` で窓が出ること、消えるもの・残るもの、外した後の既定のブラウザー
 1. `winget upgrade --all` などで、英語版の `Mozilla.Firefox` と取り違えないこと
 1. arm64 の Windows、N エディション
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で確認した。シェルのブロックは手順書から抜き出して、検証用ユーザーの SSH の対話シェルへ個別に貼った。GUI はヘッドレスの GNOME に 1920x1080 の仮想モニターを付け、既存の `scripts/gnome-gui.py` を変更せずコピーして、操作の後に撮った PNG を見た。利用者のアカウントは使っていない。
+
+実施手順 1〜8・10・11 を本実行した。手順 8 が衝突せず通ったため、条件付きの手順 9 は省略した。AppStream の ESR `140.16.0-1.el10_2` から Mozilla の `157.0-1` と `firefox-l10n-ja-157.0-1` に載せ替わり、Vendor と導入元は Mozilla。GUI の `about:support` は日本語で、更新チャンネル `release`、実行ファイル `/usr/lib/firefox/firefox-bin`、H264 と AAC のソフトウェアデコーディング「対応」だった。
+
+前提の EPEL と RPM Fusion free もこの VM で通し、`ffmpeg-libs-7.1.5-1.el10` を入れた。隔離した検証プロファイルの GUI（headless オプション無し）で、MDN の `flower.mp4`（H.264 High + AAC LC、960x540）をローカルから再生した。画面に花の動画が写り、Marionette で `paused=false`・`error=null`、復号フレームが 8 → 750 に増えたことを確認した。`canPlayType` は H.264 と AAC の両方が `probably`。VM には音声の出力デバイスが無く、耳で音を聴く確認とハードウェアデコードはしていない。
+
+動画の形式を調べるためだけに、検証用の `ffmpeg` CLI（6 RPM）も追加した。Firefox の導入手順に必要なのは `ffmpeg-libs` で、CLI は手順の前提に足していない。プローブが `about:support` を読む起動にだけ `--marionette --remote-allow-system-access` を使い、通常の Firefox の設定には足していない。監査ログファイルを指定した AVC の照合は `<no matches>` だった。Windows の節、Web サービスへのサインイン、音声の実出力は未確認。
+
+続けてロールバック 1〜5 を本実行した。`ffmpeg-libs` と検証用 CLI・ほかで使われていない依存が削除され、言語パックを外してから `distro-sync firefox` で `140.16.0-1.el10_2` に戻った。Mozilla の repo と署名鍵も削除できた。新しい版のプロファイルを古い版で開くことは確認せず、動画の確認に使った隔離プロファイルを保持した。

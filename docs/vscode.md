@@ -140,10 +140,10 @@
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' code
    rpm -qi code | sed -n '/^Vendor/p;/^Build Date/p'
    ldd /usr/share/code/code | grep -c 'not found'
-   ls /usr/share/applications/code*.desktop
+   rpm -ql code | grep '/applications/.*\.desktop$'
    ```
 
-   - `1.138.0` / コミットハッシュ / `arm64` の 3 行が出る
+   - バージョン / コミットハッシュ / アーキテクチャ（`x64` または `arm64`）の 3 行が出る
    - `from_repo` が `vscode`、`Vendor` が `Microsoft Corporation` になる
    - **`ldd` の `not found` が `0`** なら、必要な共有ライブラリがすべて EL10 側で解決できている
 
@@ -180,7 +180,8 @@
 
    - アプリ一覧の「Visual Studio Code」からでも同じ
    - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（冒頭の前提と、この手順の補足）
-   - ウィンドウが開き、初回は Welcome タブが出る
+   - ウィンドウが開き、初回は Welcome 画面が出る。1.140.0 では `Continue without Signing In` を選ぶとサインインせず進められる
+   - ヘッドレスのセッションにはログインのキーリングが開いていない。初回に「新しいキーリングのパスワード指定」が出た場合、起動を確かめるだけなら「キャンセル」で先へ進める（VM で確認）
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VS Code への操作として食われる）
 
    <details>
@@ -202,7 +203,7 @@
    `/usr/share/code/bin/code` は POSIX sh のラッパーで、やっているのは ① リモート端末なら `remote-cli` に渡す ② WSL に入れていないか確認する ③ root なら `--user-data-dir` の指定を要求する、の 3 つだけ。フラグを恒久化したいなら次のどちらかになる:
 
    - `~/.config/environment.d/` に `ELECTRON_OZONE_PLATFORM_HINT=auto` を置く（アプリ一覧から起動したときにも効く）
-   - `/usr/share/applications/code.desktop` を `~/.local/share/applications/` に複製して `Exec=` を書き換える（rpm の更新で消えない）
+   - `rpm -ql code` で見つけた desktop ファイル（1.140.0 は `/usr/share/applications/com.microsoft.VSCode.desktop`）を `~/.local/share/applications/` に複製して `Exec=` を書き換える（rpm の更新で消えない）
 
    **デスクトップエントリは `/usr/bin/code` を経由しない**（`Exec=/usr/share/code/code %F`）点にも注意する。どちらの方法も本書では試していない（[未確認事項](#未確認事項)）。
 
@@ -255,7 +256,7 @@
 
 ## ロールバック
 
-- 本書ではロールバックは**本実行していない**
+- ロールバックは、クリーンインストールの x86_64 VM で手順 1〜3 を本実行した（2026-10-06）
 
 > [!CAUTION]
 > **この節の**手順 3 の `rm -rf ~/.config/Code ~/.vscode` は、**VS Code の設定・履歴・拡張機能を消す**。残すなら、この節の手順 3 は貼らない。
@@ -266,7 +267,7 @@
    sudo dnf remove code
    ```
 
-   - 弱い依存で入った `socat` は他でも使うので、残してよい
+   - `socat` がほかから使われていなければ、dnf の自動掃除で一緒に消える（クリーンインストールの VM では `code` と `socat` の 2 パッケージだけが消えた）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. リポジトリのファイルを消す。
@@ -292,7 +293,7 @@
 
 - **目的**: AlmaLinux 10 に [Visual Studio Code](https://code.visualstudio.com/) を Microsoft 公式の dnf リポジトリから入れる。**aarch64 のパッケージが公式に用意されている**
 - **進め方**: 鍵を照合して取り込み、repo ファイルを置いて `dnf install`。**読者が書き換える変数は無い**
-- **状態**: **実機で本実行済み（2026-09-23）。GUI の起動まで確認した**
+- **状態**: **実機で本実行済み（2026-09-23）、クリーンインストールの x86_64 VM でも導入・GUI 起動・ロールバックを本実行済み（2026-10-06）**
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
   - **[手順 6](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
@@ -476,3 +477,11 @@ $ head -3 ~/.config/Code/logs/20260923T071537/main.log
 - Settings Sync / Remote-SSH / Marketplace の利用
 - `dnf upgrade code` による更新（次のリリースが出ていないため未実施）
 - ロールバック（`dnf remove code` と repo・鍵の削除）の本実行
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で確認した。シェルのブロックは手順書から抜き出して、検証用ユーザーの SSH の対話シェルへ個別に貼った。GUI はヘッドレスの GNOME に 1920x1080 の仮想モニターを付け、既存の `scripts/gnome-gui.py` を変更せずコピーして、操作の後に撮った PNG を見た。利用者のアカウントは使っていない。
+
+手順 1〜7 とロールバック 1〜3 を本実行した。Microsoft の fingerprint を照合してから鍵を取り込み、`code-1.140.0-1790759678.el8.x86_64` と弱い依存の `socat` が入った。`code --version` は 1.140.0・コミットハッシュ・`x64`、導入元は `vscode`、Vendor は Microsoft、`ldd` の未解決は 0。デスクトップの Ptyxis 端末で `code` と打つと実ウィンドウと初回の Welcome が開き、`~/.config/Code`・`~/.vscode` ができ、拡張一覧は空だった。サインインは行っていない。
+
+最初にキーリングのパスワード指定が出たが「キャンセル」で起動を確かめられた。1.140.0 の desktop ファイルは `com.microsoft.VSCode.desktop` と `com.microsoft.VSCode.UrlHandler.desktop` で、旧手順の `code*.desktop` は存在しなかった。手順 5 を RPM の一覧から拾う形へ直して確かめた。ロールバックでは `code` と、ほかで使われていなかった `socat` の 2 パッケージが消え、repo と検証用の設定ディレクトリを消せた。

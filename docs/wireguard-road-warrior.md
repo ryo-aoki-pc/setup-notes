@@ -873,7 +873,7 @@
   - 手順 4〜6 と手順 13 だけは WG ホスト上で実行する（WG ホスト側の変数は手順 4 で設定する）
   - WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 11〜13](wireguard.md#実施手順) と同じ
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。管理者の Windows PowerShell 5.1 で関数を先に定義し、conf コピー後に関数名を手入力する。WG ホストでは同じ手順 4〜6・13 を使う
-- **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-22）**
+- **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-22）。クリーンインストールした x86_64 の VM でも現行ブロックを本実行した（2026-10-06）**
   - 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 1〜15 を通した
   - 確認したこと: 両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping
   - NetworkManager の挙動として推定で書いていた項目は、1〜9 が実測で確定した
@@ -1388,3 +1388,17 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. winget での更新と窓の「今すぐ更新」、アンインストールで `Data` が消えること
 1. サスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき
 1. arm64 の Windows
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から入れた x86_64 VM をクライアントにし、別の 2 VM で wireguard.md の WG ホストを構築した。SELinux Enforcing、NetworkManager 1.56.0、カーネル `6.12.0-211.61.1.el10_2.x86_64`。一般ユーザーの SSH PTY から現行ブロックを実行した。
+
+- 手順 1〜3 でツールと、0600 のクライアントの鍵ペアができた。WG ホストの手順 4・6 はこの公開鍵で通し、conf は公開鍵とプレースホルダだけの状態でクライアント VM へファイル転送した（手順 7 の vi の操作は行っていない）
+- 初回のホストの apply は終了 141 で止まった。IP を調べるパイプの SIGPIPE を修正し、登録の無い状態から手順 6 を再実行すると、登録・apply・conf 表示まで通った（[原因と修正](wireguard.md#間欠的な終了-141-の原因と修正)）
+- クライアントの手順 8 で秘密鍵の行だけが置き換わった。手順 10 の新規 import 直後は activated、autoconnect を no にして切断できた。日本語ロケールの表示は「アクティベート済み」「いいえ」
+- 手順 11 の up で 3 経路（metric 50）・MTU 1420・ハンドシェイク・送受信・public の wg0 が確認できた。resolved は有効にしていない。末尾の `ausearch` は `<no matches>`（この場合の終了コードは 1）
+- 接続先の wg0・両 WG ホストの LAN IP・両 LAN の namespace に ping が通り、namespace からクライアントへの逆方向も双方向 0% 損失。相手 LAN への tracepath は `10.99.0.1` → `10.99.0.2` → 相手 LAN の 3 ホップ、TCP の HTTP も 200
+- LAN の namespace の試験用 veth は firewalld に明示している。WG ホストの設定を再適用すると firewalld が reload するため、試験の veth は permanent にも入れた。追加前は仮想ルーターへの ping だけが拒否され、追加後に通った
+- 手順 14・15 の down と平文鍵/conf の削除、ロールバック 1 のプロファイル・公開鍵・作業ディレクトリの削除、ロールバック 2 の対話でのパッケージ削除が通った。wireguard-tools と、この試験で依存として入った resolved が消えた
+
+Endpoint は隔離された仮想 LAN であり、テザリング回線、実ルーター、Wi-Fi 切り替え、サスペンド復帰の検証ではない。クライアント VM の再起動は今回行っていないので、autoconnect no の読み戻しを再起動時の実証とはしていない。Windows の節は今回の確認に含めていない。

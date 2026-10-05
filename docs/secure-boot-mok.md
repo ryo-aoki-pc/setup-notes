@@ -243,6 +243,7 @@
 - **進め方**: `openssl` で鍵を `/var/lib/shim-signed/mok/` に作り、`mokutil --import` で予約して、再起動の途中の MokManager で登録する。読者が編集する変数は無い
   - もとは [virtualbox.md](virtualbox.md) と [virtualbox-guest-bootc.md](virtualbox-guest-bootc.md) の中にあった同じ手順を、共有の前提として 1 本にした。鍵の CN は、どちらのモジュールにも使える `Local kernel module signing key` にそろえた
 - **状態**: **手順 3〜7 のコマンドは、この文書に移す前に、次の検証で通したもの**（CN はそれぞれの手順書の名前だった）
+  - 2026-10-06 の[クリーンインストール VM](almalinux-vm-verification.md)では、`mokutil --sb-state` が `SecureBoot disabled` と `Platform is in Setup Mode` を返した。本文の条件に従って登録は行わず、今回の VM 試験に MOK 登録の結果は含めない
   - x86_64 の実機（[virtualbox.md の本実行](virtualbox.md#付録-実機での本実行2026-09-29)、2026-09-28。AMD のノート PC）
     - 手順 3 で `SecureBoot enabled`、手順 4 で鍵を作って予約し（`sudo mokutil --list-new` に鍵が出た）、手順 5 で再起動した
     - **手順 6 の MokManager でキーボードが効かず、登録できなかった**。手順 7 は `is not enrolled` になった。利用者が UEFI の設定で Secure Boot を無効にした

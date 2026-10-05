@@ -304,7 +304,7 @@
    - 再起動すると、ほかのクライアントのつないでいる接続が切れる
    - `/root` の一覧と書き込みは、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 7・8 で確かめる
 
-1. 別のマシンから、共有名 `root` でつなぐ（未検証）。
+1. 別のマシンから、共有名 `root` でつなぐ（AlmaLinux 10 の VM で検証。Windows は未検証）。
 
    - [手順 9](#実施手順) の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`。`\\<SERVER_IP>\<USER>` と同じ資格情報なので、両方を同時に開けるはず（別のユーザー名で同じサーバーにつなぐと、Windows はエラー 1219 で断る）
@@ -400,7 +400,7 @@
    - 再起動すると、ほかのクライアントのつないでいる接続が切れる
    - `/home` の一覧と書き込みは、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 9・10 で確かめる
 
-1. 別のマシンから、共有名 `home` でつなぐ（未検証）。
+1. 別のマシンから、共有名 `home` でつなぐ（AlmaLinux 10 の VM で検証。Windows は未検証）。
 
    - [手順 9](#実施手順) の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\home`。ユーザーごとのフォルダーが並ぶ。フォルダーの外（`/home` の直下）には作れない
@@ -475,7 +475,7 @@
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
-   ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r-- / user_home_t
+   ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r--。ホーム側は user_home_t、/tmp 側は user_tmp_t
    cmp /etc/hostname /tmp/smb-test.txt && echo "content identical"
    smbclient "//${SERVER_IP}/${USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
    ```
@@ -733,6 +733,7 @@
    ```
 
    - `samba-common` は実施前から入っていたので残す
+   - Workstation などで `cifs-utils` も実施前から入っていたなら、上のコマンドから `cifs-utils` を外す（ほかの共有のマウントにも使うため）
    - `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
    - 完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`（取り戻せない）
 
@@ -750,7 +751,7 @@
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `WORKGROUP` と、接続元を絞る場合の `ALLOW_FROM` だけ
   - `smb.conf` は既定ファイルを退避したうえで、最小構成に置き換える
-- **状態**: **2026-09-21 に下表の実機で本実行し、そのまま公開を継続中**
+- **状態**: **2026-09-21 に下表の実機で本実行し、公開を継続中。2026-10-06 にクリーンインストールした x86_64 の VM でも現行ブロックを本実行した**
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
   - **確認していないこと**: macOS / iOS / Android の実クライアントからの接続（Windows のエクスプローラーは、2026-10-01 に確かめた）
   - 2026-09-28: 手順 2〜5・8、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)の手順 4、[ロールバック](#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
@@ -1685,3 +1686,24 @@ home         …       127.0.0.1     Mon Oct  5 09:01:43 AM 2026 UTC  -         
 - Windows・macOS などのクライアントから `home` の共有につなぐこと（Windows のエクスプローラーで、`/home` の直下に作ろうとしたときの表示も）
 - samba-client.md の自動マウント（手順 6・7）を `SHARE=home` で行うこと
 - `/home/linuxbrew` のような、ユーザーのホームでないディレクトリの読み書き（ラベルを `matchpathcon` で見ただけ）
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation の ISO からインストールした VirtualBox の VM（x86_64、カーネル `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active、日本語ロケール）で、現行の手順 1〜8・root と /home の任意節・サーバーでの確認 1〜10 を、一般ユーザーの SSH PTY にブラケットペースト無しで貼った。共有するユーザーとパスワードは検証専用のもの。
+
+- Samba は `4.23.5-110.el10_2`。Workstation には `samba-common` と `cifs-utils 7.7` が初めから入っていたが、サーバーと `smbclient` は手順 2 で入った
+- VM に NAT と隔離 LAN の NIC があるため、案内用の `SERVER_IP` だけを隔離 LAN の IP に直した。自動検出では NAT の IP が入る
+- `testparm` は `Loaded services file OK`、`smb3 directory leases = No`。445/tcp のみで待ち受け、ホームの boolean は on
+- `smbclient` とカーネルの CIFS で、通常のホームと root の読み書き・取り出し・比較・削除・アンマウントが通った。SMB は 3.1.1、作成したホームのファイルは `user_home_t`、root のファイルは `root root` の `admin_home_t`
+- /home のサーバー上の確認はユーザーのホームの下への書き込みが通り、所有者はそのユーザー、グループは root。共有直下への書き込みは許可しない設計のまま
+- 別の AlmaLinux 10 Workstation VM から、同じ資格情報で `SHARE=root` と `SHARE=home` の手でのマウントも通った。home の共有直下への書き込みは予告どおり `Permission denied` になり、その下の自分のホームには読み書きできた
+- 接続元を隔離 LAN の帯に絞り、別 VM から 445/tcp が通り、許可帯外の network namespace からは拒否されることを確認した
+- テスト用の長いホスト名では `testparm` が NetBIOS 名の長さを警告した。IP アドレスでの接続には支障が見えなかった
+
+サーバーを再起動し、smb.service は OS の起動時刻 04:15:10 の後、04:15:56 に active になった。SSH の再ログイン 04:16:18 より前で、相手 VM の再起動後も CIFS のアクセスと読み書きが通った。
+
+接続元制限の解除、home の解除 4、root の解除 5、ディレクトリのリース設定の解除 3 → 再設定 1・2、ロールバック 1・3 を通した。共有の解除の `grep -c` は `0` と終了 1（該当なし）になった。Samba のサービス・445/tcp・Samba ユーザー・root の CIL モジュールが外れ、ホームの boolean は off、smb.conf は開始時の控えと一致した。Samba と smbclient を消し、開始時から入っていた samba-common と cifs-utils は残した。パスワード DB ファイルとログの「完全に消すなら」の追加削除は行っていない。
+
+別の Workstation VM の GNOME Files から GUI でも接続・ファイル作成とコピー・F5・切断を通し、サーバーの実体と内容が一致した（[クライアント側の記録](samba-client.md#付録-クリーンインストールした-vm-同士での検証2026-10-06)）。
+
+Windows の接続、キーリング、物理 NIC、実ルーター越しの動作は今回の検証に含めていない。

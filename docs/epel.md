@@ -14,7 +14,7 @@
   - [導入元一覧](tool-catalog.md)で導入元が EPEL の行（fastfetch・duf・mosh・restic・Chromium・KeePassXC・Meld・GNOME Tweaks・Remmina）
 
 > [!WARNING]
-> **手順 2（`epel-release` の導入）は、コンテナでのみ通した**（[対象と検証環境](#対象と検証環境)）。
+> **手順 2（`epel-release` の導入）は、コンテナとクリーンな x86_64 の VM で通した**（[対象と検証環境](#対象と検証環境)）。
 >
 > - x86_64 の実機は EPEL が有効だったので、手順 1・3 だけ通した
 > - aarch64 の実機では、[RPM Fusion](rpmfusion.md) の依存として `epel-release` が入った
@@ -130,7 +130,7 @@
 > **EPEL を消しても、EPEL から入れたパッケージ（btop・distrobox・podman-compose・podman-tui・VirtualBox の `liblzf` など）は残り、更新されなくなる**。要らないものは、先に各手順書のロールバックで消す。
 
 - [RPM Fusion](rpmfusion.md) を入れたホストでは、先に [rpmfusion.md のロールバック](rpmfusion.md#ロールバック)を行う（残っていると、この節の手順 1 で `rpmfusion-free-release` も一緒に消える）
-- この節の手順はコンテナで本実行した
+- この節の手順はコンテナと x86_64 の VM で本実行した
 
 1. `epel-release` を消す。
 
@@ -174,7 +174,7 @@
 - **目的**: AlmaLinux 10 で EPEL（Extra Packages for Enterprise Linux。Fedora のプロジェクトが EL 向けに作る追加のパッケージ）を有効にし、AppStream / BaseOS に無い RPM を dnf で入れられるようにする
 - **進め方**: AlmaLinux の `extras` にある `epel-release` を入れる。読者が編集する変数は無い
   - もとは [btop.md](btop.md) などの手順の中にあった 3 つの手順を、共有の前提として 1 本にした
-- **状態**: **手順 2 はコンテナでのみ検証済み。手順 1・3 は x86_64 の実機でも通した**
+- **状態**: **手順 2 はコンテナと x86_64 の VM で検証済み（VM は 2026-10-06）。手順 1・3 は x86_64 の実機でも通した**
   - 手順 1〜3 のコマンドは、この文書に移す前に、EPEL を使う手順書の検証で通したもの
     - コンテナ: [btop.md](btop.md#付録-コンテナでの検証記録2026-09-22)（2026-09-22、aarch64）、[virtualbox.md](virtualbox.md#付録-コンテナでの検証記録2026-09-24)（2026-09-24）、[distrobox.md](distrobox.md#付録-コンテナでの検証記録2026-09-27)・[podman-compose.md](podman-compose.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman-tui.md](podman-tui.md#付録-コンテナでの検証記録2026-09-28)（2026-09-28）。aarch64 と明記したもの以外は x86_64
     - x86_64 の実機（[virtualbox.md の本実行](virtualbox.md#付録-実機での本実行2026-09-29)、2026-09-28）: EPEL が有効だったので、手順 1・3 だけ通した
@@ -258,3 +258,13 @@
 - 実機での手順 2 と、aarch64 での手順 2（aarch64 は、この文書に移す前の [btop.md の付録](btop.md#付録-コンテナでの検証記録2026-09-22)でコンテナでのみ通した）
 - 実機での[更新](#更新)と[ロールバック](#ロールバック)
 - SELinux が有効なホストで、手順 2 が `selinux-policy-extra` を入れること（RPM Fusion の依存で入ったときの記録しか無い）
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。利用者のアカウントは使っていない。
+
+実施手順 1〜3、更新、ロールバック 1・2 を本実行した。未設定の状態から extras の `epel-release-10-6.el10` と CRB の `selinux-policy-extra`・`selinux-policy-targeted-extra`（ともに `42.1.18-4.el10_2.3`）の計 3 パッケージが入った。Workstation に `dnf-plugins-core` は既にあったため追加されなかった。CRB は既定で有効だった。別のクリーン VM でも同じ 3 パッケージが入った。
+
+続けて Firefox の FFmpeg を入れるとき、EPEL 10 の署名鍵の fingerprint と uid を照合して取り込めた。更新の手順は `epel-release-10-8.el10_2` への 1 パッケージの upgrade になった。実機での手順 2 と aarch64 の今回の実行は確認していない。
+
+ロールバックは RPM Fusion を先に外してから行い、`--noautoremove` で epel-release だけが消えた。EPEL の署名鍵も削除できた。SELinux の extra ポリシーは残した。

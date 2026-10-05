@@ -49,7 +49,11 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
    else
      sudo systemctl enable --now "gnome-headless-session@${USER}.service"
-     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     for i in $(seq 1 30); do
+       busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 &&
+         [ -n "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break
+       sleep 1
+     done
      loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
      pgrep -a -u "${USER}" -x gnome-shell
    fi
@@ -58,7 +62,7 @@
    - `Created symlink '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service' → '/usr/lib/systemd/system/gnome-headless-session@.service'.` と出る
    - PC を起動するたびに、このセッションも起動する
    - 続いて `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell` が出ればよい
-   - `busctl` の `for` の行で、gnome-shell が起動し終わるまで、30 秒まで待つ
+   - `for` の行で、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ。バス名だけ先に出ることがあった（クリーンインストールした VM で確認）
    - 何も出ないときは、`systemctl status "gnome-headless-session@${USER}.service"` と `systemctl --user status org.gnome.Shell@wayland.service` を見る
 
    <details>
@@ -474,7 +478,7 @@
 
 - **目的**: モニターの無い PC で GNOME のデスクトップを常駐させ、別のマシンの RDP クライアントから、そのデスクトップにつなぐ
 - **方式**: GDM のヘッドレスのセッション（`gnome-headless-session@<USER>.service`）と、そのセッションの gnome-remote-desktop（`grdctl --headless`、`gnome-remote-desktop-headless.service`）。RHEL 10 の文書の「1.4 headless server for a single user」と同じ
-- **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）**
+- **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜10・LAN 限定・ロールバック 2〜5 を本実行し、再起動後の自動起動と RDP の画面操作を確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）**
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末、ブラケットペースト無し）にそのまま貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
     - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意) → [ロールバック](#ロールバック)の手順 2〜5
     - `grep headless` を直した後の版で、実施手順 1・2 → ロールバックの手順 5 → 実施手順 1・2 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
@@ -646,9 +650,27 @@ $ sudo firewall-cmd --list-ports
 
 #### 未確認事項
 
-- 再起動の後に、ヘッドレスのセッションと RDP の待ち受けが自動で起動すること
+- 2026-10-01 の実機では、再起動の後にヘッドレスのセッションと RDP の待ち受けが自動で起動することは未確認。2026-10-06 の x86_64 の VM では確認した（末尾の付録）
 - Windows のリモート デスクトップ接続・Android のクライアント・LAN の別のマシン（実物）からの接続
 - x86_64 の PC と、サスペンドできる PC（ログイン画面が眠らせないこと）
 - 同じユーザーでリモートログインやローカルのログインをしたときの動き
 - 後からリモートログインを有効にしたとき（このセッションの RDP を 3389/tcp で使っていた場合）
 - キーリングを開く窓が出たときの動き（RDP のクライアントからパスワードを入れて開けるか）
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、GNOME Shell は `49.4-9.el10_2.alma.1`、Mutter は `49.4-4.el10_2`、GDM は `47.0-24.el10_2`、GNOME Remote Desktop は `49.3-4.el10_2`。利用者のアカウントは使っていない。
+
+実施手順 1〜10、接続元を LAN に絞る任意節、ロールバック 2〜5 を本実行した。システムのリモートログインが有効な状態から、手順 1 の判定で `RDP_PORT=3390` になった。手順 2 は、Mutter のバス名が現れても loginctl の行がまだ無い場合があったので、両方を待つ形に直して再検証した。
+
+手順 3 は、未設定だった共用 TLS の値を退避して新しい証明書・鍵を生成し、ハッシュを控えた。手順 4〜9 で 3390 番・ポート交渉なし・ヘッドレス資格情報を設定して有効化し、TLS 1.3、fingerprint、待ち受けを確認した。最初の `set-tls-cert` は鍵のパスが未設定のため `RDP server certificate is invalid` も出したが、続く `set-tls-key` の後は設定が揃い、実際の TLS と画面接続は通った。証明書・鍵を既に持つ環境や、既存の非空の TLS 設定を復元する分岐は、この VM では流していない。
+
+クライアントは、LAN の別の AlmaLinux VM の FreeRDP 3.10.3（Xvfb 1600x900 上。準備と資格情報の扱いは [リモートログインの今回の記録](gnome-remote-desktop.md#付録-クリーンインストールした-vm-での検証2026-10-06)）。3390 番でデスクトップが表示され、キー入力による電卓の `12×34=408` を実画面で確認した。切断後も同じヘッドレスセッションが残り、再接続すると電卓の 408 に戻った。接続時には RDP 用の仮想モニターができ、切断後の DisplayConfig はモニター 0 枚だった。
+
+LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレスセッションと RDP の unit は自動起動し、3390 番の `RDP server started` は起動後に記録された。1 vCPU では unit が active になってからこのログまで約 25 秒かかった。続いて 3389 番の GDM からこのユーザーへ入ると、自動起動した `Service=gdm-autologin` の同じセッションに渡された。そこで計算した `9×9=81` は、3389 を切って 3390 に直接つなぎ直しても残った。LAN 制限後・再起動後も LAN の別 VM から接続でき、今回の AVC は無かった。
+
+ロールバック 2〜5 は rich rule と資格情報を解除し、共用 TLS の cert / key を退避した未設定の値へ戻した。生成時の SHA-256 と 2 ファイルが一致してから、新規生成した証明書・鍵・退避を削除した。ヘッドレスの unit は disabled / inactive、loginctl の対象行は 0、3389 / 3390 番の待ち受けは消えた。GUI 検証を続けるため、その後は手順 1・2 だけを入れ直した。
+
+今回の RDP は、GUI 検証用の固定 `--virtual-monitor` を外して測った。Windows / Android の直接接続、物理 PC、指定 LAN 外からの拒否、同じユーザーの物理画面への同時ログインは今回も確認していない。2026-10-01 の付録の未確認事項のうち、再起動後の自動起動は今回の x86_64 の VM で確認した。
+
+実行ログは `.verification/desktop/` の `rdp-headless-plan-session`、`rdp-credentials-plan-session`、`rdp-probes-plan-session`、`rdp-lan-plan-session`、`rdp-rollback-plan-session`、`rdp-headless-boot-debug.log`、`rdp-rollback-state.log`。実画面は `rdp-headless-calc-result.png`、`rdp-headless-reconnected.png`、`rdp-direct-after-reboot.png` に保存した。

@@ -77,7 +77,11 @@
      for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
      sleep 3
      sudo systemctl start "gnome-headless-session@${USER}.service"
-     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     for i in $(seq 1 30); do
+       busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 &&
+         [ -n "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break
+       sleep 1
+     done
      loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
      pgrep -a -u "${USER}" -x gnome-shell
    fi
@@ -85,7 +89,7 @@
 
    - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` が出ればよい
-   - `busctl` の `for` の行は、gnome-shell が起動し終わるまで、30 秒まで待つ。`loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](gnome-headless-session.md#実施手順) の補足）
+   - `for` の行は、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ。`loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](gnome-headless-session.md#実施手順) の補足）
    - `systemctl restart` は使わない（この手順の補足）
 
    <details>
@@ -110,6 +114,7 @@
    - PNG のパスと、`/home/<USER>/gnome-gui-test.png: PNG image data, <幅> x <高さ>, 8-bit/color RGBA, non-interlaced` の 2 行が出ればよい（大きさは `VIRTUAL_MONITOR`）
    - Claude Code は、この PNG を Read で開いて画面を見る。人が見るなら、scp などで手元に持ってきて開く
    - セッションを始めた直後の画面は、上に検索欄のあるアクティビティ画面（手順 5 の最初の `key Escape` で閉じる）
+   - クリーンインストール後の最初のセッションでは「AlmaLinux へようこそ」の案内が重なることがある。そのときは先に `key Escape` → `sleep 1` → `shot` で案内を閉じたことを確かめてから、手順 5 へ進む。案内を閉じてもアクティビティ画面は残る（VM で確認）
 
    <details>
    <summary>補足: 画面の撮り方</summary>
@@ -126,16 +131,28 @@
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" key Escape
+   sleep 1
+   "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-desktop.png
    "${REPO}/scripts/gnome-gui.py" launch org.gnome.Calculator
-   sleep 3
-   "${REPO}/scripts/gnome-gui.py" windows
-   "${REPO}/scripts/gnome-gui.py" type '12*34'
-   "${REPO}/scripts/gnome-gui.py" key Return
-   "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-calc.png
+   for i in $(seq 1 30); do
+     "${REPO}/scripts/gnome-gui.py" windows | grep -q '^gnome-calculator' && break
+     sleep 1
+   done
+   if "${REPO}/scripts/gnome-gui.py" windows | grep -q '^gnome-calculator'; then
+     "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-calc-ready.png
+     "${REPO}/scripts/gnome-gui.py" windows
+     "${REPO}/scripts/gnome-gui.py" type '12*34'
+     "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-calc-input.png
+     "${REPO}/scripts/gnome-gui.py" key Return
+     "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-calc.png
+   else
+     echo '中断: 電卓の窓が出ない。画面と起動した unit のログを確かめる' >&2
+   fi
    fi
    ```
 
-   - `gnome-gui-org.gnome.Calculator-<PID>`（起動した unit の名前）、`gnome-calculator` と `Calculator` の行（間はタブ）、PNG のパスが出ればよい
+   - `gnome-gui-org.gnome.Calculator-<PID>`（起動した unit の名前）、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
+   - 窓の一覧に電卓が出るまで待つ。1 vCPU の VM の初回は 18 秒ほどかかり、固定の `sleep 3` では足りなかった
    - `~/gnome-gui-calc.png` に、電卓の窓と `12×34 = 408` が写っていればよい
    - 最初の `key Escape` は、セッションを始めた直後に開いているアクティビティ画面を閉じる（この手順の補足）
 
@@ -144,7 +161,7 @@
 
    - `key` と `type` は、Mutter の `org.gnome.Mutter.RemoteDesktop` のセッションを作り、キーを押して離す（`NotifyKeyboardKeysym`）。送り終えたらセッションを止める
    - セッションを作った直後の入力と、止める直前の入力は、Mutter に捨てられることがあった（最初の数文字や最後の 1 文字が抜けた）。スクリプトは、害の無い入力を先に送り、前後に 0.3 秒ずつ置く
-   - キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。日本語は、IBus（[japanese-input.md](japanese-input.md)）でローマ字を打つ形になるはず（確かめていない）
+   - キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。IBus の Anthy ではこの keysym の経路でローマ字が本文に入らなかった。別の検証用プローブの keycode の経路では「日本語」が確定した（[japanese-input.md の VM の付録](japanese-input.md#付録-クリーンインストールした-vm-での検証2026-10-06)）
    - `launch` は、`.desktop` の `Exec` を `systemd-run --user` の一時的なサービスとして動かす
      - `gio launch` を `systemd-run` で動かすと、`gio` が終わったときにサービスごとアプリが止められて、窓が出なかった
      - 実行ファイルは、ユーザーの systemd の `PATH`（GNOME Shell から起動したときと同じ）で探す
@@ -283,7 +300,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - **目的**: [gnome-headless-session.md](gnome-headless-session.md) で常駐させた GNOME のヘッドレスのセッションを、同じ PC の上で動く Claude Code（リモートコントロールで使うときも）が、画面を撮り、キーボードとポインタで操作して、GUI の動作を確かめられるようにする
 - **方式**: gnome-shell に `--virtual-monitor` で仮想モニターを常に付け、Mutter の ScreenCast と RemoteDesktop の D-Bus で撮って操作する（[`scripts/gnome-gui.py`](../scripts/gnome-gui.py)）
-- **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）**
+- **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜6・1280x720 への変更・ロールバックを本実行し、1920x1080 へ戻して再起動後の自動起動と撮影・入力を確認した（2026-10-06）**
+  - 2026-10-06: クリーンな x86_64 の VM でも現行の実施手順 1〜6、1280x720 への変更、ロールバックを本実行した（末尾の付録）。初回案内と電卓の起動待ちを実測に合わせて修正した
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま貼った
     - 書き換えたのは手順 1 の `REPO`（PR #68 の作業ツリーを指した。`scripts/gnome-gui.py` がまだ main に無いため）と、任意節で書き換える `VIRTUAL_MONITOR` だけ
     - 分ける前の版（ヘッドレスのセッションの起動と、ひとつの手順書だった）で 3 回通した（ブラケットペーストの無しと有り、レビューで直した後の版。[付録](#付録-実機での検証記録2026-10-01)）
@@ -471,10 +489,25 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 #### 未確認事項
 
-- 再起動の後に、ヘッドレスのセッションが自動で起動すること
+- 2026-10-01 の実機では、再起動の後にヘッドレスのセッションが自動で起動することは未確認。2026-10-06 の x86_64 の VM では確認した（末尾の付録）
 - x86_64 の PC と、モニターのある PC
 - サスペンドできる PC で、ログイン画面（seat0 の GDM）が PC を眠らせないこと（gnome-power.md 手順 3・4）
 - 同じユーザーでリモートログインやローカルのログインをしたときの動き（ヘッドレスのセッションと重なったとき）
 - キーリングを開く窓が出たときの動き（`Escape` で閉じられるか）
 - IBus での日本語の入力
 
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。利用者のアカウントは使っていない。
+
+実施手順 1〜6 を、初回に見つけた待ち時間の不足を直して通した。GNOME のバス名と loginctl のセッションの両方を待つ手順 3 は、headless の行と `--virtual-monitor 1920x1080` を返した。電卓の窓を待つ手順 5 は、実画面に `12×34 = 408` が出た。手順 6 のクリックは Activities を開き、Escape と Ctrl+Q で電卓が閉じ、窓の一覧は空になった。1280x720 への変更も PNG の実寸で確認した。
+
+最初のセッションには「AlmaLinux へようこそ」の案内が重なり、閉じても Activities が残った。また初回の電卓は 1 vCPU で約 18 秒かかった。旧手順の固定 `sleep 3` では窓が間に合わず、入力が Activities の検索へ入った。案内と Activities を画面で確かめ、窓の一覧を待つ形へ直して再検証した。IBus の keysym と keycode の違いは japanese-input.md の今回の付録に記録した。
+
+ロールバック 1・2 はドロップインを消し、`gnome-shell` が `--virtual-monitor` 無しになった。DisplayConfig の物理・論理モニターはともに 0、headless のセッションは動き続け、RDP の標準構成の検証へ進んだ。
+
+RDP の標準構成の試験とロールバックを終えた後、ヘッドレスの手順 1・2 と本書の実施手順 1〜6 を入れ直して 1920x1080 に戻し、VM をもう一度再起動した。ヘッドレスセッションは自動起動し、`gnome-shell --virtual-monitor 1920x1080` が動いた。再起動後は手順 4〜6 だけを流し、1920x1080 の撮影、電卓の `12×34=408`、Activities のクリックと電卓の終了を実画面で確認した。初回の AT-SPI の列挙に `GetItems` の警告が 1 回出たが、窓の一覧と入力・撮影は通った。再起動後の AVC は無かった。
+
+最後に RDP クライアント・Xvfb の補助プロセスと RDP 用の試験アカウントを終了・削除した。VM は GUI 用の仮想モニターと電源設定を残し、3389 / 3390 の RDP は disabled、待ち受けも無い。電卓は閉じた。利用者の変更を含む `scripts/gnome-gui.py` は書き換えず、コピーを使った。
+
+ログは `.verification/desktop/gui-final-plan-session/` と `gui-after-boot-plan-session/`、`gui-final-state.log`、`desktop-cleanup.log`。実画面は `gui-after-reboot-calc.png`、最後の窓が無い画面は `gui-final.png` に保存した。実機の再起動、物理画面への同時ログイン、キーリングの解除は今回も確認していない。
