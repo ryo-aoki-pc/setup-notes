@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入したホストでは、参照先の WezTerm 導入手順で、通常のシェル統合の `~/.bashrc` への追記は不要。WezTerm の設定リポジトリの clone は必要。WSL で Windows 側のパスを直接読む場合は参照先の任意節を行う
+
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
 > - **すべて対象ホスト上で実行する**
@@ -157,7 +159,7 @@
   - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
   - Windows 11 の探索順はソースと公式の文書で見ただけで、確かめていない（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
-  - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書）。`~/.config/wezterm` に clone し、`~/.bashrc` にシェル統合の 1 行を足す
+  - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書）。`~/.config/wezterm` に clone する。シェル統合は bash の共通設定が読むので、参照先の手順 5〜7（直接追記）は行わず、手順 8 で端末を開き直す
   - Windows 11 では、同じブロックを Git for Windows の Git Bash（[git.md](git.md)）に貼る（docs/install.md のとおり）
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly

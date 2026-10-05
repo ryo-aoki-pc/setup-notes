@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
@@ -267,18 +269,18 @@
 - **root のコンテナを lazydocker で見ないなら、この節は不要**
 - `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](podman.md#注意点)。root で動かすのは[例外](podman.md#選択した方針)）
 - この節で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
-- root の `~/.bashrc`（`/root/.bashrc`）に、そこを指す `DOCKER_HOST` を書く（自分の `~/.bashrc` の [Docker 向けの節](podman.md#docker-向けのツールから使う任意)と同じ形）
+- root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
 - `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（[root で使うときの補足](#root-で使うときの補足)）
-- 前提: Homebrew の lazydocker が、root の PATH にあること
-  - [homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)か[sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通す（`su -` でも使うなら root のシェルの節）
+- 前提: root 自身にも [bash の共通設定](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)を導入すること
+  - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの節の前提を満たさない
   - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
 - この節の手順 4 で lazydocker の画面（TUI）が開く
 - [手順 1〜5](#実施手順) を終えた、自分のユーザーのシェルで貼る
 - 補足: [root で使うときの補足](#root-で使うときの補足)
 
 > [!WARNING]
-> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の WARNING と同じ）
+> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の導入条件と同じ）
 > - システムの API ソケットにつなげるのは root だけ。権限を緩めない（つなげると、root と同じことができる）
 > - この節の検証の範囲は[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)
 
@@ -315,53 +317,15 @@
 
    </details>
 
-1. root の `~/.bashrc` に `DOCKER_HOST` が無ければ末尾に足し、root のログインシェルで確かめる。
+1. root の共通設定が接続先を設定したことを確かめる。
 
    ```bash
-   {
-     if sudo grep -q DOCKER_HOST /root/.bashrc; then
-       echo '追記なし: /root/.bashrc に DOCKER_HOST が既にある。値を確認する' >&2
-       sudo grep -n DOCKER_HOST /root/.bashrc
-     else
-       sudo tee -a /root/.bashrc >/dev/null <<'EOF'
-   export DOCKER_HOST=unix:///run/podman/podman.sock # setup-notes: lazydocker root
-   EOF
-       sudo tail -n 1 /root/.bashrc
-     fi
-     sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'
-   }
+   sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'
    ```
 
-   - 追記したときは、末尾に `# setup-notes: lazydocker root` のある `export DOCKER_HOST=unix:///run/podman/podman.sock` の行が出る。コメントは、この節で追加した行を戻すときの目印
-   - 最後の 2 行が `unix:///run/podman/podman.sock` と `/home/linuxbrew/.linuxbrew/bin/lazydocker` ならよい
-     - 2 行目が出なければ、リードの前提（homebrew.md の節）を通していない
-   - `追記なし:` と出たら、既存行は書き換えていない。同じ値なら、その設定を使って進める（元に戻すときも残す）
-   - 既存の値が違う、または最後の値が `unix:///run/podman/podman.sock` でないなら、この節はここで止める。ほかの用途の設定を上書きしない
-     - 手順 1 で今回初めてソケットを有効にした場合は、この節の手順 8 で戻す
-   - podman-docker を入れたホストでは、書く前から最後の 2 行が同じ出力になる（[root で使うときの補足](#root-で使うときの補足)）
-   - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
-   - root のシェルにも自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）を入れたホストでは、このブロックは貼らない。代わりに `sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'` を実行する（その設定が、この節の手順 1 のソケットがあるときに同じ `DOCKER_HOST` を入れる）
-
-   <details>
-   <summary>補足: 書く 1 行と、<code>sudo -i</code> で読まれる仕組み</summary>
-
-   - `sudo -i` は root のログインシェルを開き、`/root/.bash_profile` から `/root/.bashrc` を読む。`sudo -i <コマンド>` でも読む
-   - `-i` の無い `sudo` は root の `~/.bashrc` を読まず、自分の環境の `DOCKER_HOST` も消す（AlmaLinux 10 の `/etc/sudoers` は `env_reset` で、`env_keep` に `DOCKER_HOST` は無い）
-   - 自分の `~/.bashrc` の行（[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)）と違い、`${XDG_RUNTIME_DIR}` は使わない。root のソケットは `/run/podman` に決まっている
-   - 先頭の `if` は、ほかで書いた `DOCKER_HOST` に重ねないため。既存行には撤去用の目印を付けない
-   - ヒアドキュメントは引用符付きの `<<'EOF'` なので、書いた行がそのまま入る
-
-   **出力例**: 最後の行の、コンテナでの実測:
-
-   ```
-   $ sudo -i bash -c 'printenv DOCKER_HOST; command -v lazydocker'
-   unix:///run/podman/podman.sock
-   /home/linuxbrew/.linuxbrew/bin/lazydocker
-   ```
-
-   `/root/.bashrc` に書く前は 1 行目が出なかった。homebrew.md のどちらの節も通していないと 2 行目も出ず、終了コードは 1 だった。
-
-   </details>
+   - `unix:///run/podman/podman.sock` と `/home/linuxbrew/.linuxbrew/bin/lazydocker` が出ればよい
+   - root 自身の [共通設定](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)を先に導入する。`/root/.bashrc` への `DOCKER_HOST` の追記は不要
+   - 接続先が違う場合はここで止め、既存の用途を確認する
 
 1. 確認用のコンテナを root で動かす。
 
@@ -426,22 +390,16 @@
    - `lazydocker-root-web Exited (0) ...` と出ればよい
    - `config.yml`（0 バイト）は root の設定ファイル。自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
 
-1. 元に戻すときは、root の確認用のコンテナと設定、この節で追加した `DOCKER_HOST` の行を消す。
+1. 元に戻すときは、root の確認用コンテナと lazydocker の設定を消す。
 
    ```bash
-   {
-     sudo podman rm -f lazydocker-root-web
-     sudo rm -rf /root/.config/lazydocker
-     sudo sed -i '/^export DOCKER_HOST=.* # setup-notes: lazydocker root$/d' /root/.bashrc
-     sudo grep -n DOCKER_HOST /root/.bashrc || true
-   }
+   sudo podman rm -f lazydocker-root-web
+   sudo rm -rf /root/.config/lazydocker
    ```
 
-   - `lazydocker-root-web` が出て、最後の一覧に `# setup-notes: lazydocker root` の付いた行が無ければよい。既存の `DOCKER_HOST` の行はそのまま残る
-   - root の設定ファイルに手で足したもの（`c` のコマンドなど）も消える
-   - 開いたままの root のシェルの `DOCKER_HOST` は残る。新しいログインシェルでは、今回追加した行からは設定されない（以前から設定があれば、その値になる）
-   - 目印を付ける前の版でこの節を通した場合は、自分が追加した行だと確認できるものだけ手で消す。既存の同値の行は消さない
-   - root のシェルにも自分用の bash の設定を入れたホストでは、今回の目印付きの行は `/root/.bashrc` に無い。その設定は、この節の手順 8 の後もソケットのファイルが残る間（再起動まで）、`DOCKER_HOST` を入れる
+   - root の設定ファイルに手で足したものも消える
+   - 共通設定と `~/.bashrc` は変更しない。ソケットはこの節の手順 8 で止める
+   - ソケットのファイルが再起動まで残る間は、共通設定が `DOCKER_HOST` を入れる
 
 1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
 
@@ -544,11 +502,13 @@
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: コンテナ・イメージ・ボリューム・ネットワークと、compose のサービスを、端末の画面（TUI）で見て操作できるようにする。podman の API ソケットに、Docker の API としてつなぐ
   - 任意節で、root のコンテナ（`sudo podman` で動かしたもの）も、`sudo -i lazydocker` で見られるようにする
-- **進め方**: Homebrew の lazydocker 0.25.2 を入れ、[podman.md の Docker 向けの節](podman.md#docker-向けのツールから使う任意)の `DOCKER_HOST` でつなぐ。podman だけの PC で動かないところ（シェルと compose）は、任意節の設定で補う。**読者が書き換える変数は無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-28）。実機では本実行していない**
   - 下表の検証コンテナで、[podman.md](podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - compose の任意節の前には、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](podman-compose.md) の手順 1〜6 を通した

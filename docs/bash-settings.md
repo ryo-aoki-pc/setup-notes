@@ -2,10 +2,12 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **自分のユーザーのシェルで実行する**。`sudo -i` した root のシェルでは行わない（root の `~/.bashrc` と `~/.inputrc` は対象外）
 > - **手順 1 だけ `sudo` を使う**（bash-completion の RPM。Workstation で入れた PC には最初から入っている）
-> - **手順 4 は、[Homebrew](homebrew.md) を入れたホストだけ**で行う。[fzf](fzf.md) を先に通したホストでは、fzf の行の前に差し込む
+> - **手順 4 は、[Homebrew](homebrew.md) を入れたホストだけ**で行う。共通設定が fzf より前に補完を読む
 > - **手順 6 は、端末を開き直す操作**。手順 7 は開き直した端末で貼り、手順 8 はキーを押して確かめる
 
 - 上から順にコードブロックを貼る。変数は無い
@@ -53,78 +55,25 @@
 
    </details>
 
-1. `~/.bashrc` に、履歴の量と `shopt` の設定を足す。
+1. 共通設定から履歴と shopt を読み込み、値を確かめる。
 
    ```bash
-   cat >> ~/.bashrc <<'EOF'
-   HISTSIZE=100000
-   HISTFILESIZE=100000
-   HISTCONTROL=ignoreboth
-   shopt -s autocd cdspell dirspell globstar
-   EOF
    . ~/.bashrc
-   printf '%s\n' "${HISTSIZE}" "${HISTFILESIZE}" "${HISTCONTROL}"
+   printf '%s\n' "$HISTSIZE" "$HISTFILESIZE" "$HISTCONTROL"
    shopt histappend autocd cdspell dirspell globstar
    ```
 
-   - `100000` が 2 行、`ignoreboth`、5 つの `on` が出る
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `shopt autocd` を実行する（その設定が同じ 4 行を読む）
-   - **注意**: `globstar` は、この `~/.bashrc` を読む非対話のシェル（`ssh <ホスト> <コマンド>`）でも効く。そこで打つ `**` は再帰になる
+   - `100000`・`100000`・`ignoreboth`、5 つの `on` が出る
+   - これらの設定は bash リポジトリにあり、`~/.bashrc` には追記しない
 
-   <details>
-   <summary>補足: 既定の値と、足した設定の効き目</summary>
-
-   AlmaLinux 10.2 の既定（コンテナで、SSH でログインした bash 5.2.26）:
-
-   | 項目 | 既定 | 決めている場所 | 本書の値 |
-   |---|---|---|---|
-   | `HISTSIZE`（シェルが覚える行数） | `1000` | `/etc/profile` | `100000` |
-   | `HISTFILESIZE`（`~/.bash_history` に残す行数） | `1000`（`HISTSIZE` と同じ値になる） | bash の既定 | `100000` |
-   | `HISTCONTROL` | `ignoredups`（直前と同じ行を残さない） | `/etc/profile` | `ignoreboth`（空白で始めた行も残さない） |
-   | `histappend`（閉じるときに上書きでなく追記） | on | `/etc/bashrc`（対話のシェルで `shopt -s histappend`） | 変えない（既に on） |
-   | `autocd` | off | — | on（ディレクトリ名だけで `cd`。`cd -- <ディレクトリ>` と表示して移る） |
-   | `cdspell` / `dirspell` | off | — | on（`cd /usr/shaer` を `/usr/share` に直す。`dirspell` は補完のときの直し） |
-   | `globstar` | off | — | on（`**` がサブディレクトリまで再帰） |
-
-   - `HISTSIZE` を変えずに `HISTFILESIZE` だけ変えても、覚える行数は 1000 のまま。両方を書く
-   - `histappend` は EL の `/etc/bashrc` が対話のシェルに入れている。複数の端末を開いていても、後から閉じた端末が前の端末の履歴を消さない。本書では書き足さない（Git Bash など、既定で off のシェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) にある）
-   - **採らなかった設定**は[選択した方針](#選択した方針)（`HISTTIMEFORMAT`・`erasedups`・プロンプトごとの `history -a`）
-   - `autocd` は `cd` の**コマンド**を呼ぶ。zoxide を `--cmd cd` で入れたホスト（[zoxide.md 手順 1](zoxide.md#実施手順) の `ZOXIDE_CMD=cd`）では zoxide の `cd` 関数が呼ばれ、`cdspell` の直しは効かない（コンテナで、`cd /usr/shaer` が `zoxide: no match found` になった）
-   - `. ~/.bashrc` で読み直すと、starship を WezTerm のシェル統合より前に置いたホストでは並びが入れ替わる（[starship.md 手順 6](starship.md#実施手順)）。手順 6 で端末を開き直せば元に戻る
-
-   </details>
-
-1. Homebrew を入れたホストでは、`~/.bashrc` に Homebrew のコマンドの補完を読む 1 行を足す。
+1. Homebrew を入れたホストでは、共通設定が補完を読んだことを確かめる。
 
    ```bash
-   LINE='if [ -d "${HOMEBREW_PREFIX-}/etc/bash_completion.d" ]; then for __f in "${HOMEBREW_PREFIX}"/etc/bash_completion.d/*; do if [ -r "$__f" ]; then . "$__f"; fi; done; unset __f; fi'
-   if grep -q 'fzf --bash' ~/.bashrc; then
-     awk -v line="${LINE}" '!done && /fzf --bash/ { print line; done = 1 } { print }' ~/.bashrc > ~/.bashrc.tmp && cat ~/.bashrc.tmp > ~/.bashrc && rm ~/.bashrc.tmp
-   else
-     printf '%s\n' "${LINE}" >> ~/.bashrc
-   fi
-   grep -n -e 'bash_completion.d' -e 'fzf --bash' -e 'brew shellenv' ~/.bashrc
-   eval "${LINE}"
    complete -p brew
    ```
 
-   - `grep` に、`brew shellenv` の行 → 足した `bash_completion.d` の行（→ fzf の行があればその後ろ）の順で出る
-   - `-F _brew brew` を含む補完定義が出る（検証時は `complete -o bashdefault -o default -F _brew brew`）。入れてある Homebrew のコマンド（eza・bat・zoxide・fd・starship など）の補完も読まれる
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `complete -p brew` を実行する（その設定が同じ読み込みを行う）
-   - [fzf.md 手順 3](fzf.md#実施手順) の行があるときは、その前に差し込まれる。今のシェルでは `**<Tab>`（fzf）が bat などで効かなくなるが、手順 6 で開き直せば直る
-
-   <details>
-   <summary>補足: Homebrew の補完が自動では読まれない理由と、fzf の行より前に置く理由</summary>
-
-   - Homebrew の formula は bash の補完を `/home/linuxbrew/.linuxbrew/etc/bash_completion.d/<コマンド>` に置く（コンテナでは `bat` / `brew` / `eza` / `fd` / `starship` / `zoxide` の 6 つ）。`share/bash-completion/completions/` は無い
-   - bash-completion 2.11 の遅延読み込みが探すのは、`$BASH_COMPLETION_USER_DIR`（既定 `~/.local/share/bash-completion`）と `$XDG_DATA_DIRS`（既定 `/usr/local/share:/usr/share`）の下の `bash-completion/completions/` だけ。Homebrew 7.0.7 の `brew shellenv` は `XDG_DATA_DIRS` を変えないので、この行を足さないと `eza --<Tab>` は何も出ない（コンテナで確認）
-   - 公式の [Shell Completion](https://docs.brew.sh/Shell-Completion) が案内する `for COMPLETION in "${HOMEBREW_PREFIX}/etc/bash_completion.d/"*` の形を、`HOMEBREW_PREFIX` が無いホストでも止まらない 1 行にした（`brew shellenv` の行が `HOMEBREW_PREFIX` を入れるので、その行より後ろに置く）
-   - 6 つの定義（`brew` の 4,041 行を含む）を毎回読んでも、対話のシェルの起動は 38 ミリ秒から 44 ミリ秒になっただけ（`time bash -ic true`）
-   - fzf の `fzf --bash` は、`bat` や `vi` など決まったコマンドの補完を、すでにある定義を包む形で `**<Tab>` 対応に置き換える。この行が fzf の行より後ろにあると、`bat` の補完が bat 自身の定義に戻り、`bat **<Tab>` が fzf にならない（コンテナで確認。`bat --the<Tab>` は、どちらの並びでも `--theme` に補完された）
-   - `awk` は、`fzf --bash` を含む最初の行の前に 1 行を入れる。`cat ~/.bashrc.tmp > ~/.bashrc` は、`~/.bashrc` のファイル自体（パーミッション）を変えないため（[starship.md 手順 5](starship.md#実施手順) と同じ）
-   - `bat` の補完は bash-completion の `_init_completion` を使うので、bash-completion が無いホストでは `bat --<Tab>` でエラーになる。手順 1 を飛ばさない
-
-   </details>
+   - `-F _brew brew` を含む定義が出る
+   - 共通設定が Homebrew の補完を fzf より前に読む。読み込み行の追加や並べ替えは不要
 
 1. `~/.inputrc` を書き、今のシェルにも読ませる。
 
@@ -204,7 +153,7 @@
 
 ## ロールバック
 
-- 足した行を消すだけでよい。bash-completion の RPM は、手順 1 で入れたホストだけ消す
+- `~/.inputrc` と、必要なら共通設定を戻す。bash-completion の RPM は、手順 1 で入れたホストだけ消す
 
 > [!WARNING]
 > **この節の手順 2 の後に閉じたシェルは、`~/.bash_history` を既定の 1,000 行に切り詰める**（コンテナで、2,000 行の履歴ファイルが `exit` の後に 1,000 行になった）。残したい履歴があれば、この節の手順 1 で控える。
@@ -218,14 +167,10 @@
 
    - 行数が出る。要らなくなったら `~/.bash_history.bak` は手で消す
 
-1. `~/.bashrc` から、手順 3・4 で足した行を消す。
+1. 共通設定の履歴・補完も戻したい場合だけ、bash リポジトリの設定を戻す。
 
-   ```bash
-   sed -i -e '/^HISTSIZE=100000$/d' -e '/^HISTFILESIZE=100000$/d' -e '/^HISTCONTROL=ignoreboth$/d' -e '/^shopt -s autocd cdspell dirspell globstar$/d' -e '/HOMEBREW_PREFIX.*bash_completion\.d/d' ~/.bashrc
-   grep -n -e 'HIST' -e 'shopt' -e 'bash_completion.d' ~/.bashrc
-   ```
-
-   - `grep` が何も出さなければ消えている（手で変えた行は残るので、出たら見て直す）
+   - [bash のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
+   - `~/.inputrc` と bash-completion だけを戻すなら、この手順は飛ばす
 
 1. 手順 5 で作った `~/.inputrc` を消す。
 
@@ -253,10 +198,12 @@
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 の bash で、履歴を多く残し、Tab の補完を広く・楽にし、↑ で打ちかけの行から履歴を探せるようにする。ツールを足すのではなく、bash と readline の設定と、bash-completion の RPM だけで行う
-- **進め方**: `~/.bashrc` に 4 行（Homebrew のホストは 5 行）、`~/.inputrc` を 1 つ。**読者が書き換える変数は無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **x86_64 のコンテナでのみ検証した（2026-10-02）**
   - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順と[ロールバック](#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#付録-コンテナでの検証記録2026-10-02)）
   - 確認したこと
@@ -294,7 +241,7 @@
 ### 選択した方針
 
 - **bash-completion はシステムの RPM にした**: BaseOS の 2.11 で足りる。Homebrew にも `bash-completion@2`（2.16 系）があるが、RPM の各パッケージが置く `/usr/share/bash-completion/completions/` を読むのはシステムのものの方が素直で、`sudo` のシェルでも同じものが効く
-- **Homebrew の補完は `~/.bashrc` の 1 行で全部読む**: 遅延読み込みの対象のディレクトリに無いため（手順 4 の補足）。`~/.local/share/bash-completion/completions/` にシンボリックリンクを置けば遅延読み込みにできるが、入れるたびに足す手間があるので採らない
+- **Homebrew の補完は bash リポジトリから全部読む**: 遅延読み込みの対象のディレクトリに無いため（手順 4 の補足）。`~/.local/share/bash-completion/completions/` にシンボリックリンクを置けば遅延読み込みにできるが、入れるたびに足す手間があるので採らない
 - **`~/.inputrc` を使い、`~/.bashrc` の `bind` にはしない**（手順 5 の補足）
 - **採らなかった設定**
   - `HISTTIMEFORMAT`（`history` に時刻を出す）: 履歴ファイルに `#<epoch>` の行が増える。bash 5.2 では、変数を外した後もその行はコマンドとして出なかった（コンテナで確認）が、本書は履歴の見え方を変えない範囲にとどめた。欲しければ `HISTTIMEFORMAT='%F %T '` を手順 3 の行に足せばよい

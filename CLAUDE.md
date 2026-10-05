@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
+共通の bash 設定は、README の「共通の bash 設定を先に入れる」から clone + `install.sh` で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。以下の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/quick-start.md` の対応表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
+
 ## よく使うコマンド
 
 ```bash

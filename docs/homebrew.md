@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する）
 > - **実行するユーザーは `sudo` できる必要がある**（手順 1・2 で使う）
@@ -86,37 +88,14 @@
 
    </details>
 
-1. `~/.bashrc` に 1 行書いて、`brew` を PATH に入れる。
+1. 共通設定を読み直し、Homebrew の PATH を有効にする。
 
    ```bash
-   echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"' >> ~/.bashrc
-   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
+   . ~/.bashrc
    brew --version
    ```
 
-   - `Homebrew 7.0.6` のように出れば通っている
-   - 1 行目で `~/.bashrc` に書き、2 行目で今のシェルにも即時に反映している
-   - 自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れたホストでは、このブロックは貼らない。代わりに `. ~/.bashrc` と `brew --version` を実行する（その設定が同じ 1 行を読む）
-
-   <details>
-   <summary>補足: <code>~/.bashrc</code> に書く 1 行</summary>
-
-   `brew shellenv` は `PATH` / `MANPATH` / `INFOPATH` / `HOMEBREW_PREFIX` などの `export` 文を標準出力に吐くだけのコマンドで、`eval` しなければ何も起こらない。**`~/.bashrc` に書くのは 1 行だけ**で、実体はその都度生成される。
-
-   `echo '...' >> ~/.bashrc` を**シングルクォート**にしてあるのは、`$(...)` をここで展開させず、**文字列のまま**書き込むため。ダブルクォートにすると、貼った時点の `brew shellenv` の出力がベタ書きされてしまい、導入先を変えたときに追従しない。
-
-   **引数の `bash` は省略できる。** 実機の `~/.bashrc:26` は引数なしで書かれていて、本書（インストーラの案内どおり `bash` 付き）と違う:
-
-   ```
-   $ grep -n 'brew shellenv' ~/.bashrc
-   26:eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-   ```
-
-   引数なしだと `brew` が親プロセスからシェルを推測する。bash を使っている限り結果は同じなので実機はそのままにしてある。**明示したほうが確実**なので、本書はインストーラの案内どおり `bash` 付きで書いている。
-
-   この 1 行は、Homebrew で入れたコマンドを使う行（[zoxide](zoxide.md) や [starship](starship.md) の初期化など）より前に置く。それらは、この 1 行が足した `PATH` からコマンドを探すので、後ろにあると `command not found` になる。`PROMPT_COMMAND` には触らないので、ほかの行との順序の制約は無い。
-
-   </details>
+   - `brew shellenv` は共通設定が実行する。インストーラの `Next steps` に出る `~/.bashrc` への追記も行わない
 
 1. Homebrew が入ったか確かめる。
 
@@ -189,79 +168,24 @@
 
 ## root のシェルでも使う（任意）
 
-- **root のシェルで Homebrew のコマンドを使わないなら、この節は不要**
-- root の `~/.bashrc`（`/root/.bashrc`）で、PATH の末尾に Homebrew の `bin` と `sbin` を足す
-- `su -`、コンソールや ssh での root のログイン、`sudo -i` で開いた root のシェルで使えるようになる
-- `sudo <コマンド>` は対象外（sudo の `secure_path` の PATH で動き、root の `~/.bashrc` を読まない）。[sudo でも使う](#sudo-でも使う任意)の節で使えるようにする
-- この節で PATH の末尾へ直接追記した場合は、同じ名前の RPM のコマンドが優先される。自分用の bash の設定を root にも入れた場合は、手順 1 の案内のとおり Homebrew が先になる
-- `brew install` などの管理操作は、この節を通しても一般ユーザーで行う（通常のホストでは root だと `Running Homebrew as root is extremely dangerous …` で断られる）
-- 手順 1〜4 を終えた、Homebrew を入れたユーザーのシェルで貼る
-- 補足: [root のシェルで使うときの補足](#root-のシェルで使うときの補足)
+- root でも使う場合は、[bash の root 用導入手順](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)で root 自身の clone と読み込み口を用意する
+- 自分専用のマシンで、一般ユーザーを信用できる場合だけ行う。root のシェルから Homebrew のユーザー所有のコマンドを実行するため
+- 共通設定の `brew shellenv` は Homebrew を PATH の先頭に入れる。同名の RPM コマンドより Homebrew が優先される
+- `sudo <コマンド>` は別で、次の「sudo でも使う」の `secure_path` を使う
 
-> [!WARNING]
-> - `/home/linuxbrew/.linuxbrew` は Homebrew を入れたユーザーの所有。root がここのコマンドを動かすと、そのユーザーが書き換えられるプログラムを root の権限で動かすことになる（そのユーザーを乗っ取られると、root まで取られる）
-> - この節は **x86_64 のコンテナでのみ検証した**。実機では本実行していない（[付録](#付録-root-のシェルでも使う節のコンテナでの検証記録2026-09-30)）
-
-1. root の `~/.bashrc` の末尾に PATH を足す 1 行を書き、root のログインシェルで確かめる。
+1. root のログインシェルから Homebrew が見えることを確かめる。
 
    ```bash
-   {
-     if sudo grep -q '/home/linuxbrew/.linuxbrew/bin' /root/.bashrc; then echo '中断: /root/.bashrc に既にある' >&2
-     else
-       sudo tee -a /root/.bashrc >/dev/null <<'EOF'
-   case ":${PATH}:" in *:/home/linuxbrew/.linuxbrew/bin:*) ;; *) PATH="${PATH}:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" ;; esac
-   EOF
-       sudo tail -n 1 /root/.bashrc
-     fi
-     sudo -i bash -c 'printenv PATH; command -v brew'
-   }
+   sudo -i bash -c 'printenv PATH; command -v brew'
    ```
 
-   - 書いた 1 行（`case ":${PATH}:" in …`）が出る
-   - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
-   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
-   - `su -`、コンソールや ssh での root のログインも、`sudo -i` と同じく `/root/.bash_profile` から `/root/.bashrc` を読む（コンソールでのログインは未確認）
-   - 開いたままの root のシェルには効かない。開き直すか、そのシェルで `. ~/.bashrc` を実行する
-   - root のシェルにも自分用の bash の設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）を入れたホストでは、このブロックは貼らない。代わりに `sudo -i bash -c 'printenv PATH; command -v brew'` を実行する（その設定は `brew shellenv` で、PATH の先頭に足す。RPM より Homebrew が先になる）
-   - root のシェルでどれが使われるかは、`type -a <コマンド>` で見る（先頭の行が使われる）
-   - [sudo でも使う](#sudo-でも使う任意)の節を通したホストでは、`/root/.bashrc` に書く前から最後の 2 行が同じ出力になる（`sudo -i` の PATH の末尾の 2 つは、sudo の `secure_path` から来る）
-     - この節の行が効いたかは、`sudo su - -c 'printenv PATH; command -v brew'` で見る
+   - `/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい。`/root/.bashrc` に PATH の行は追記しない
+   - `brew install` などは一般ユーザーで行う
 
-   <details>
-   <summary>補足: 書く 1 行と、出力例</summary>
+1. root の共通設定も外す場合だけ、bash のロールバックを行う。
 
-   - PATH の**末尾**に足すので、`/usr/bin` などにある RPM のコマンドが先に見つかる。root の `git` や `curl` などが、Homebrew が依存として入れたものに置き換わらない
-   - `case` は、PATH に `/home/linuxbrew/.linuxbrew/bin` が既にあれば何もしない。root のシェルの中で `bash` を開いても、同じ場所が重ならない
-   - `sbin` も足すのは、`brew shellenv` が PATH に足すのと同じ 2 つにそろえるため
-   - 自分の `~/.bashrc`（手順 3）と違い、`brew shellenv` は使わない。`brew shellenv` は PATH の**先頭**に足すので RPM のコマンドが隠れるうえ、root のシェルを開くたびに、Homebrew のユーザーが所有する `brew` を root で動かす
-   - ヒアドキュメントは引用符付きの `<<'EOF'` なので、`${PATH}` は書くときに展開されず、そのまま入る
-   - AlmaLinux 10 の `/root/.bashrc`（rootfiles の既定）には、非対話のシェルで途中で抜ける行が無い。末尾の行は、`sudo -i <コマンド>` や `su - -c <コマンド>` でも読まれる
-
-   **出力例**: 最後の行の、コンテナでの実測（Homebrew のユーザーのシェルから）:
-
-   ```
-   $ sudo -i bash -c 'printenv PATH; command -v brew'
-   /root/.local/bin:/root/bin:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin
-   /home/linuxbrew/.linuxbrew/bin/brew
-   ```
-
-   `/root/.bashrc` に書く前は、1 行目が `/root/.local/bin:/root/bin:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin` で終わり、2 行目は出なかった（終了コード 1）。
-
-   </details>
-
-1. 元に戻すときは、root の `~/.bashrc` から、この節の手順 1 で書いた 1 行を消す。
-
-   ```bash
-   {
-     sudo sed -i '\#/home/linuxbrew/.linuxbrew/bin#d' /root/.bashrc
-     sudo grep -c /home/linuxbrew /root/.bashrc   # 0
-   }
-   ```
-
-   - 最後に `0` と出ればよい
-   - 開いたままの root のシェルの PATH には残る。新しいシェルでは、この節で直接追記した行からは設定されなくなる
-   - 自分用の bash の設定を root にも入れた場合は、このブロックでは外れない。その設定の側で戻す
-   - [sudo でも使う](#sudo-でも使う任意)の節も通していれば、`sudo -i`・`sudo -s` のシェルには、その節の 2 つが残る
+   - [root の導入手順](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)のロールバックを参照する
+   - Homebrew 自体を削除した場合は、共通設定が自動で読み込みを省略する
 
 ---
 
@@ -381,7 +305,7 @@
 
 - 本書ではロールバックは**本実行していない**（`--help` でオプションを確かめただけ。[付録](#付録-コンテナでの検証記録2026-09-22)）
 - 各ツールが `~/.bashrc` や `~/.config` に書いた設定は残る。それぞれの手順書のロールバックも見る
-- [root のシェルでも使う](#root-のシェルでも使う任意)の節を通したなら、先にその節の手順 2 で root の `~/.bashrc` の行を消す
+- root の共通設定も外したい場合だけ、[root のシェルでも使う](#root-のシェルでも使う任意)の手順 2 を行う。Homebrew の削除だけなら、共通設定は残してよい
 - [sudo でも使う](#sudo-でも使う任意)の節を通したなら、先にその節の手順 2 で `/etc/sudoers.d/homebrew` を消す
 - インターネットに出られないホストでは、[ssh-socks-tunnel.md 手順 1〜3](ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで貼る（この節の手順 1 がアンインストーラを取得する）
 
@@ -410,23 +334,24 @@
    - `/home/linuxbrew` 自体は `uninstall.sh` が消す（`--path` で変えられる）
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
-1. 終わったら、`~/.bashrc` の行とアンインストーラを消す。
+1. アンインストーラを消して、端末を開き直す。
 
    ```bash
-   sed -i '/brew shellenv/d' ~/.bashrc
    rm -f /tmp/uninstall.sh
    ```
 
-   - **`~/.bashrc` の行を消し忘れると、新しいシェルを開くたびにエラーが出る**
+   - 共通設定は Homebrew が無ければ何もしない。`~/.bashrc` の編集は不要
 
 ---
 
 ## 補足
 
+- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
+
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
-- **進め方**: 公式インストーラで `/home/linuxbrew/.linuxbrew` に入れ、`~/.bashrc` に 1 行足す。**読者が書き換える値は無い**
+- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **実機で本実行済み（2026-09-20）**
   - 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中
   - **このリポジトリの Homebrew 系 17 本の手順書は、すべてこれを前提にしている**（実機に入っているのはそのうちの一部で、記録時点の `brew leaves` は 15 件。下表）
@@ -595,7 +520,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
   - 自動削除を止めるときは、そのコマンドに `HOMEBREW_NO_AUTOREMOVE=1` を付ける。明示的な `brew autoremove` は、残った不要な依存を消すための操作
   - 7.0.7 のソースで確かめた仕様。過去の付録の「依存が残った」という実測は、そのときの版と条件での記録として残している
 - **`~/.bashrc` を読まない文脈では見えない**: cron や一部の非対話シェルでは `brew shellenv` が走らないので、Homebrew で入れたコマンドが見つからない。スクリプトからはフルパスで呼ぶ
-- **ユーザーごとではなく、ホストに 1 つ**: `/home/linuxbrew` は共有なので、別ユーザーが使うにはそのユーザーの `~/.bashrc` にも `brew shellenv` を書く（書き込みには所有者の権限が要る）
+- **ユーザーごとではなく、ホストに 1 つ**: `/home/linuxbrew` は共有なので、別ユーザーが使うには、そのユーザーにも bash の共通設定を導入する（書き込みには所有者の権限が要る）
 - **占有が大きい**: 実機で 2.8 GB。`brew cleanup` で古い版とキャッシュを掃除できる
 - **匿名の利用統計が既定で有効**: 止めるなら `brew analytics off`
 
