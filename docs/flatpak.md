@@ -12,7 +12,7 @@
 - [Firefox](firefox.md) と [VS Code](vscode.md) は Flathub を使わず RPM で入れている（理由はそれぞれの「選択した方針」）
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行しておらず、aarch64 でも通していない。デスクトップのメニュー・アプリの画面・GNOME Software での表示も確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **x86_64 のコンテナと VM で検証した手順書**で、実機と aarch64 では通していない。VM ではメニューと Flatseal の実画面を確認したが、GNOME Software の検索には出なかった（[対象と検証環境](#対象と検証環境)）。
 
 1. flatpak が入っているか確かめる。
 
@@ -174,7 +174,7 @@
    - `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出る
    - `sandbox OK` が出れば、アプリのサンドボックスが起動できている
    - 最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている
-   - **メニューに載るのはログインし直してから**（この手順の補足）
+   - **flatpak を新しく入れた場合、メニューに載るのはログインし直してから**（この手順の補足）
 
    <details>
    <summary>補足: メニューに出るまで</summary>
@@ -190,7 +190,7 @@
    bash -lc 'echo "$XDG_DATA_DIRS"'
    ```
 
-   コンテナでの実測は `/home/<USER>/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share`。**デスクトップのメニューに実際に出るかは確かめていない**（コンテナに画面が無い）。
+   コンテナでの実測は `/home/<USER>/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share`。コンテナに画面は無かった。2026-10-06 の Workstation VM では flatpak が既にあり、追加した Flatseal は同じセッションの Activities 検索に出た。
 
    `--command=true` は、アプリの中身の代わりに `true` をサンドボックスの中で実行する。**画面を出さずにサンドボックス（bubblewrap）が立ち上がるかだけを確かめる**ためで、アプリそのものの動作確認ではない。
 
@@ -293,7 +293,7 @@
 
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
-- **状態**: **コンテナでのみ検証済み（2026-09-24）。実機には入れていない**
+- **状態**: **コンテナ（2026-09-24）と x86_64 の VM（2026-10-06）で検証済み。実機には入れていない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜7・[更新](#更新)・[ロールバック](#ロールバック)を通した
   - 確認の問い合わせ（手順 6 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
   - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
@@ -429,3 +429,11 @@ com.github.tchx84.Flatseal.desktop
 - `--user` でのインストール
 - RPM 版と Flatpak 版を両方入れた場合のメニュー表示
 - Raspberry Pi 5 のカーネルのページサイズ（`getconf PAGESIZE`）と、Flatpak のアプリの動作への影響
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。利用者のアカウントは使っていない。
+
+実施手順 1・3〜7、更新、ロールバック 1〜4 を本実行した。`flatpak-1.16.0-9.el10` は Workstation に既にあったため手順 2 は省略した。Flathub の署名鍵を照合し、system に Flatseal 2.4.1 と GNOME 50 の runtime・拡張の計 6 ref を入れた。`sandbox OK` と desktop エントリを確認し、ヘッドレス GNOME の実画面で Flatseal が日本語で開き、Activities の検索にも出た。このセッションは flatpak が既に入っている状態から開始したため、アプリを入れた後のログインし直しは不要だった。
+
+`sudo flatpak update` は `Nothing to do.`。`update --appstream` 後の CLI の検索は Flatseal を返した。一方、GNOME Software 47.5 の検索は、起動し直した後も `No App Found` だった（Flatpak のプラグインは同梱）。GNOME Software で表示・導入・更新が通るとはしない。ロールバックでは Flatseal 1 ref → 使われなくなった runtime と拡張の 5 ref → flathub の登録の順に消え、アプリ一覧とリモート一覧は空になった。RPM の flatpak 本体は残した。実機、aarch64、`--user`、キーリング、GPU は今回も確認していない。

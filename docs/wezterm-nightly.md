@@ -212,7 +212,7 @@
 ## ロールバック
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
-- 本書ではロールバックを**本実行していない**（`dnf remove --assumeno` で、消えるのがこの節の手順 1 の 4 パッケージだけであることまで確認した）
+- ロールバックは、クリーンインストールの x86_64 VM で本実行した（2026-10-06。消えたのは手順 1 の 4 パッケージだけ）
 
 1. WezTerm の 4 パッケージを消す。
 
@@ -504,7 +504,7 @@
     - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)が `C:\Program Files\WezTerm\wezterm.exe` を呼ぶので、その場所に入れる
     - [Windows 11 の初期設定](windows-setup.md)の後に通す手順書の 1 つ
   - 設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（Windows 11 では `%USERPROFILE%` の下。[設定ファイル](#設定ファイル)）
-- **状態（AlmaLinux 10）**: **2026-09-21 にこのホスト（x86_64 / GNOME 49 Wayland）で本実行済み**
+- **状態（AlmaLinux 10）**: **x86_64 の実機（2026-09-21）とクリーンインストールの VM（2026-10-06）で本実行済み**。VM は実施手順 1〜5・CLI と GUI の起動・ロールバックを確認した
   - 確認したこと: ウィンドウの起動・終了まで
   - **aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので、同じ手順で通る見込み）
   - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](#注意点)を見る
@@ -897,3 +897,11 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. スタートメニューから起動した WezTerm の窓と、自分用の設定での Git Bash
 1. アンインストーラが黙って消すこと
 1. arm64 の Windows
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で確認した。シェルのブロックは手順書から抜き出して、検証用ユーザーの SSH の対話シェルへ個別に貼った。GUI はヘッドレスの GNOME に 1920x1080 の仮想モニターを付け、既存の `scripts/gnome-gui.py` を変更せずコピーして、操作の後に撮った PNG を見た。利用者のアカウントは使っていない。
+
+実施手順 1〜5 とロールバック 1・2 を本実行した。COPR の `rhel-9-x86_64` を明示し、署名鍵の fingerprint を照合してから `20261005_054844_37254829-0` の 4 パッケージを入れた。導入元は COPR、共有ライブラリの未解決は 0、CLI は `wezterm 20261005_054844_37254829`。`ls-fonts | head -5` の broken-pipe panic は既存の補足どおりで、手順 5 の Wayland の起動・即終了は `rc=0`。
+
+desktop エントリから実際の WezTerm を開き、キーボードで `wezterm --version` と打った出力と、IBus で確定した「日本語」を PNG で確認した。ロールバックで消えたのは WezTerm の 4 RPM だけで、COPR の repo ファイルも削除できた。自分用の設定・aarch64・Windows の節はこの VM では通していない。

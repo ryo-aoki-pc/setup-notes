@@ -12,7 +12,7 @@
 - 手順の後: 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリがあれば、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)を行う。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> - **AlmaLinux 10 は x86_64 のコンテナでのみ検証した**。実機では本実行していない
+> - **AlmaLinux 10 は x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）で、コンテナでも検証した**。実機では本実行していない
 > - **Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）
 > - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)・[更新](#更新)の手順 2・[ロールバック](#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
 
@@ -731,7 +731,7 @@
 
 - **目的**: AlmaLinux 10 と Windows 11 の git を、同じ `global` の設定にする。pull は rebase で autostash を有効にし、改行は変換しない（`core.autocrlf=false`）。ほかに推奨の設定を入れる
 - **進め方**: AlmaLinux 10 は AppStream の `git` を入れる。Windows 11 は、Git for Windows を winget の `Git.Git` で PC 全体（`C:\Program Files\Git`）に入れ（[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)）、Git Bash に同じブロックを貼る。どちらの OS でも `git config --global` で書く。**読者が書き換えるのは手順 1 の 2 つの変数だけ**
-- **状態**: **AlmaLinux 10 は x86_64 のコンテナでのみ検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）。Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない（2026-10-03 に足した）**
+- **状態**: **AlmaLinux 10 は x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）、コンテナでも検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）。Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない（2026-10-03 に足した）**
   - 下表の検証コンテナで、**この文書のコードブロックを抜き出したもの**を、一般ユーザーで手順 1〜11 → [改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す) → [ロールバック](#ロールバック)の順に流した
   - Windows の模擬として、`/etc/gitconfig` に Git for Windows のインストーラの選択で書かれうる値（`core.autocrlf=true` など 4 つ）を置いて、手順 1・3〜11 をもう 1 度流した
   - 確認したこと: 14 のキーが `global` で効く、`system` の値に勝つ、`pull.ff=only` が rebase を止め手順 8 で通る、CRLF のファイルが変換されずに入る、pull が rebase と autostash をする
@@ -1088,3 +1088,15 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. [ロールバック](#ロールバック)の手順 6 で外れること（`PATH` から外れること、残るもの）
 1. 公式のインストーラで入れた PC を、winget で上げること
 1. arm64 の Windows
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、この文書の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順**: 実施手順 1〜7・9〜11。
+
+**結果**: Git 2.52.0。テスト用の名前・メールで global の 14 設定を読み戻した。CRLF の保持、日本語のファイル名、`main`、ローカル bare リポジトリへの初回 push の upstream 設定、pull の rebase・autostash と未コミット変更の保持、手順 11 の後片付けを確認した。手順 8 は `pull.ff` が未設定だったため条件外。外部リポジトリへは push していない。
+
+**今回の未確認範囲**: 改行を変換した clone を直す節、更新・ロールバック・Windows の手順は今回流していない。

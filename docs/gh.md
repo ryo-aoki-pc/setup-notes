@@ -187,7 +187,7 @@
 
 - **目的**: AlmaLinux 10 に [GitHub CLI](https://cli.github.com/) の最新版を **dnf 管理で**入れる。EPEL にも `gh` はあるが版が古い
 - **進め方**: GitHub が配っている repo ファイルを `dnf config-manager --add-repo` で取り込み、`dnf install gh` する。**読者が書き換える値は無い**
-- **状態**: **実機で本実行済み（2026-09-20）**
+- **状態**: **実機で本実行済み（2026-09-20）。x86_64 のクリーン VM でも実施手順を本実行済み（2026-10-06、下の付録の範囲）**
   - 下表のホストで `dnf config-manager --add-repo` → `dnf install -y gh` を実行し、`gh-2.101.0-1.aarch64` が入って認証済み、そのまま常用中
   - 本書の手順 1・2 は 2026-09-22 に同じ OS のコンテナで通し直し、鍵 2 本の fingerprint・同じ版の導入・`gh --version` まで確認した
   - **コンテナでは認証（手順 3・4）とロールバックは実行していない**
@@ -299,3 +299,15 @@ gpg-pubkey-75716059-63172e8a GitHub CLI <opensource+cli@github.com> public key
 - `gh extension install` で入れた拡張の扱い
 - ロールバック（`dnf remove` と鍵の削除）の本実行
 - dnf5 に移行した場合の `config-manager addrepo` 構文（EL10 では dnf5 が入らないため未検証）
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、この文書の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順**: 実施手順 1・2。
+
+**結果**: GitHub 公式 RPM リポジトリを追加し、表示された 2 本の署名鍵の fingerprint を本文と比べて取り込んだ。gh 2.102.0 が入り、版と `/usr/bin/gh` を確認した。追加の `gh auth status` は未ログインを示した。
+
+**今回の未確認範囲**: 手順 3・4 のアカウント認証と、更新・ロールバックは今回流していない。

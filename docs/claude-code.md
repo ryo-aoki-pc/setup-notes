@@ -12,7 +12,7 @@
 - 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
 
 > [!WARNING]
-> この実施手順（AlmaLinux 10）の既定の `latest` チャンネルは **x86_64 のコンテナでのみ検証した**。実機（aarch64）で本実行したのは `stable` チャンネル（[対象と検証環境](#対象と検証環境)）。
+> この実施手順（AlmaLinux 10）の既定の `latest` チャンネルは **x86_64 のクリーン VM とコンテナで検証した**（VM は 2026-10-06、認証前まで）。実機（aarch64）で本実行したのは `stable` チャンネル（[対象と検証環境](#対象と検証環境)）。
 
 1. 変数を設定する。
 
@@ -728,7 +728,7 @@
 - **進め方**: どちらも Anthropic の公式の配布物を使い、npm も Node.js も使わない。**読者が書き換えるのは変数（チャンネル）だけ**で、既定のままで通る
   - **AlmaLinux 10**（[実施手順](#実施手順)）: 公式の RPM リポジトリの `latest` チャンネルを 1 つ足して `dnf install` する
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: 管理者ではない Windows PowerShell 5.1 で公式の `install.ps1` を動かし、`%USERPROFILE%\.local\bin\claude.exe` に入れる。`PATH` は本書で足し、署名を確かめてから、ブラウザでログインする
-- **状態（AlmaLinux 10）**: **実機で本実行済み（`stable`、2026-09-20）**。既定の `latest` は x86_64 のコンテナのみ（2026-09-26）
+- **状態（AlmaLinux 10）**: **実機で本実行済み（`stable`、2026-09-20）**。既定の `latest` は x86_64 のクリーン VM（2026-10-06、認証前まで）とコンテナ（2026-09-26）で検証
   - 実機（aarch64）: `stable` チャンネルの repo ファイルを置いて `dnf install claude-code` し、`claude-code-2.1.267-1.aarch64` が入っている。認証も済んでいて常用中（本書の初版は、そのホストの Claude Code で書いた）
   - 2026-09-22: 同じ OS の aarch64 のコンテナで、`stable` の手順 2〜4 を通し直した
   - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](#更新)・[stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)・[ロールバック](#ロールバック)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
@@ -1197,3 +1197,15 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. 自動の更新と `claude update`、更新のときの `claude.exe.old.*`
 1. ロールバック（動いている `claude.exe` を消せないこと、`.local\state\claude` と `.cache\claude` が Windows でも作られること）
 1. arm64 の Windows、Git for Windows が無いとき、Windows PowerShell 5.1 での `irm … | iex` の後に設定が残ること
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、この文書の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順**: 実施手順 1〜4。
+
+**結果**: 既定の `latest` チャンネルで署名鍵の fingerprint を本文と比べて取り込み、`claude-code-2.1.289-1` を導入した。導入済み版とリポジトリの版の一致、`/usr/bin/claude`、ライセンスの場所を確認した。
+
+**今回の未確認範囲**: 認証・AI への依頼・Remote Control・Windows の手順、更新・ロールバックは今回流していない。

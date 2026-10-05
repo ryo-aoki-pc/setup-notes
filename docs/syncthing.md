@@ -191,18 +191,28 @@
    elif [ -z "${ST_GUI_ADDR}" ]; then
      echo '中断: 手順 1 の ST_GUI_ADDR が空。値を入れて貼り直す' >&2
    else
-     syncthing cli config gui raw-address set "${ST_GUI_ADDR}" &&
-       syncthing cli config gui raw-use-tls set true &&
-       syncthing cli config gui raw-address get &&
-       syncthing cli config gui raw-use-tls get &&
+     for attempt in 1 2; do
+       syncthing cli config gui raw-address set "${ST_GUI_ADDR}" &&
+         syncthing cli config gui raw-use-tls set true && break
+       sleep 3
+     done
+     if ST_GUI_ACTUAL_ADDR=$(syncthing cli config gui raw-address get) &&
+        ST_GUI_ACTUAL_TLS=$(syncthing cli config gui raw-use-tls get) &&
+        [ "${ST_GUI_ACTUAL_ADDR}" = "${ST_GUI_ADDR}" ] &&
+        [ "${ST_GUI_ACTUAL_TLS}" = true ]; then
+       printf '%s\n' "${ST_GUI_ACTUAL_ADDR}" "${ST_GUI_ACTUAL_TLS}"
        brew services restart syncthing &&
-       sleep 3 &&
-       ss -ltnp | grep 8384
+         sleep 3 &&
+         ss -ltnp | grep 8384
+     else
+       echo '中断: GUI の待ち受けか TLS が設定値と違う。サービスのログを調べ、手順 6 をやり直す' >&2
+     fi
    fi
    ```
 
    - 手順 3〜4 で認証を入れてあるので、ここで待ち受けを広げる
    - 読み戻したアドレスが `ST_GUI_ADDR`、TLS が `true`、8384/tcp がそのアドレスで `LISTEN` ならよい（`0.0.0.0` は `*` と出る場合もある）
+   - GUI の設定変更は API の待ち受けも切り替えるため、設定が保存されても CLI が `EOF` で終わることがある。3 秒待って 1 度だけ再試行し、読み戻した両方の値が一致してから再起動する。`中断:` が出たら手順 7 へ進まない
    - 本手順は実機検証時と同様に再起動して確かめる。同じ版の Linux で、待ち受けと TLS は再起動前に変わった実測もある（[Windows 11 の節の補足](#windows-11-で使う)）
 
    <details>
@@ -393,7 +403,7 @@
 - この節の手順 4〜6 で `~/syncthing-backup` を送信専用フォルダにして、別の端末へ複製する
 - **アーカイブには秘密鍵・GUI パスワードのハッシュ・API キーが入る**。複製先の端末も同じ重さで扱い、リポジトリやほかの共有には置かない
 - 戻し方は[バックアップから戻す](#バックアップから戻す)
-- この節は**実機で本実行していない**（AlmaLinux 10 のコンテナで検証した。[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
+- この節は**実機で本実行していない**。コンテナ（2026-09-27）と、クリーンインストールした x86_64 の VM（2026-10-06）で本実行した（[VM の記録](#付録-クリーンインストールした-vm-での検証2026-10-06)）
 
 1. バックアップのスクリプトを置く。
 
@@ -662,7 +672,7 @@
 - DB は入っていないので、OS を入れ直したホストは初回の起動で全フォルダを読み直し、中身を相手の端末から受け取る。フォルダのディレクトリと `.stfolder` は Syncthing が作る
 - 外付けディスクにあるフォルダは、Syncthing を起動する前にマウントしておく
   - DB が空のフォルダには Syncthing が `.stfolder` を作るので、外れたままだと空のマウントポイントへ受け取り始める（ソースとコンテナの挙動からの推定で、外付けディスクでは試していない）
-- この節は**実機で本実行していない**（コンテナで検証した。[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
+- この節は**実機で本実行していない**。コンテナ（2026-09-27）では OS を入れ直した相当も、x86_64 の VM（2026-10-06）では同じホストの設定復元を本実行した（[VM の記録](#付録-クリーンインストールした-vm-での検証2026-10-06)）
 
 > [!WARNING]
 > - **同じアーカイブから戻した Syncthing を、2 台で同時に動かさない。** 同じデバイス ID が 2 つになる。元のホストを入れ直すときにだけ使う
@@ -782,7 +792,7 @@
 - 自動バックアップを設定した場合は、Syncthing が動いているうちに、先に[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)の手順 7 を貼る
 - 同期していたファイル自体は、この節のどの手順でも消えない
 - linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
-- 本書ではロールバックは**本実行していない**
+- この節の手順 1〜3 は、クリーンインストールした x86_64 の VM 2 台で本実行した（2026-10-06）。実機では本実行していない
 
 > [!CAUTION]
 > **この節の**手順 3 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](#バックアップから戻す)で同じデバイス ID に戻せる）。
@@ -1336,7 +1346,7 @@
     - 受信の規則は、最初の起動より前に作る
     - 更新は、Syncthing 自身の自動の更新に任せる
     - すべて管理者の Windows PowerShell 5.1 に貼る
-- **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）**
+- **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）。クリーンインストールした x86_64 の VM でも現行ブロックと、設定バックアップ・同じホストへの復元を本実行した（2026-10-06）**
   - 下表のホストで、AlmaLinux 10 の各手順のコマンドを上から順に実行した。AlmaLinux 10 の手順はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
     - linger の有効化（今の [linger.md](linger.md) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
@@ -1346,7 +1356,7 @@
     - firewalld に `syncthing` と `syncthing-gui` が入っている
   - **firewalld 越しの到達は、network namespace から 8384/tcp と 22000/tcp について確認済み**（[付録](#付録-実機での検証記録2026-09-24)）
   - このホストは**一度構築したあとクリーンインストールした直後**の環境で、Homebrew に formula が 1 本も入っていない状態から始めている
-  - **本実行していないこと**: ブラウザでの GUI ログイン、別デバイスとの実際の同期（フォルダ共有・競合処理）、再起動後の自動起動、21027/udp と 22000/udp の実疎通、[接続元を絞る（任意）](#接続元を絞る任意)、ロールバック
+  - **2026-09-24 の実機で本実行していないこと**: ブラウザでの GUI ログイン、別デバイスとの実際の同期（フォルダ共有・競合処理）、再起動後の自動起動、21027/udp と 22000/udp の実疎通、[接続元を絞る（任意）](#接続元を絞る任意)、ロールバック
   - **バックアップと復旧の 2 節は、コンテナのみで検証した（2026-09-27）**
     - 対象は[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)と[バックアップから戻す](#バックアップから戻す)、[手順 4](#実施手順)・[手順 9](#実施手順) に足した「戻したホスト」の箇条書き
     - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜6（と、[linger.md](linger.md) に移した linger の有効化）のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
@@ -2036,3 +2046,39 @@ $ syncthing cli operations upgrade; echo $?
 1. LAN の別の端末からの GUI と、相手との同期
 1. 自動の更新と、その後のタスクの状態（`Ready`）、`syncthing.exe.old`
 1. arm64 の Windows、24H2 より前の Windows
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM 2 台で、Homebrew と linger を前提手順から用意し、現行の手順 1〜8 を一般ユーザーの SSH PTY にブラケットペースト無しで貼った。SELinux Enforcing、カーネル `6.12.0-211.61.1.el10_2.x86_64`、1 vCPU、Homebrew 7.0.8、Syncthing 2.1.5 の `[noupgrade]` ボトル。GUI の認証・デバイス・ファイルは検証専用。
+
+- 一方は全 NIC、もう一方は localhost の GUI とした。サービスは enabled/active、HTTPS と 8384/tcp、同期の TCP/UDP の待ち受けができた。トップの HTML は認証なしでも 200 のログイン画面を返すが、保護された REST API は認証なしで 403、API キーを VM 内で読んだ問い合わせは成功した
+- GUI の接続元を隔離 LAN の帯だけに絞る節を実行し、別 VM から到達（認証なしの REST は 403）、許可帯外の network namespace からは拒否されることを確認した
+- 自動バックアップ 1〜4 を通し、path/timer は active、oneshot の Result は success、最初の 0600 の archive ができた。送信専用フォルダの登録後は path が設定変更を拾い、archive がもう 1 つできた
+- 同じホストの復元 3〜6 を通した。変更前の archive と device ID を控え、帯域制限を 0 → 17 に変えて新しい archive ができた後、控えた変更前 archive を選び直して展開した。サービスの再起動後は帯域制限が 0、device ID は元と一致、GUI のアドレス・TLS・フォルダも戻った
+- 相手 VM のデバイス登録と受け入れの一部は、API キーを表示せず VM 内の REST API から設定した。GUI と API のどちらで通したかは、以下の追加の確認に記録する
+
+#### GUI と別 VM への同期
+
+別の Workstation VM の Firefox 157 から、サーバー VM の HTTPS の GUI に検証ユーザーでログインした。フォルダーを追加する画面で `gui-verify` と専用のパスを入れ、「共有」タブで peer にチェックを入れて保存した。日本語 UI の同期完了表示は「最新」だった。
+
+日本語名のファイルをサーバーから peer へ、別のファイルを peer からサーバーへ作り、それぞれ実体が届いて内容が一致した。両方の REST の `needFiles`・`needBytes` は 0、接続方式は直接 TCP。設定バックアップも GUI の編集 → 共有 → peer のチェック → 保存で共有し、受信側に届いた 8 個の archive のファイル名と sha256 がすべて一致した。
+
+相手デバイスの登録と、peer のフォルダの受け入れは REST API で設定した。バックアップの受信側は receiveonly と trashcan にした。peer 側の GUI で承認・受け入れを操作した確認ではない。
+
+#### TLS 切り替えの EOF と修正
+
+localhost の GUI を使った VM の初回の手順 6 は、`raw-use-tls set true` の `Post ... /rest/system/config: EOF` で終了 1 になった。設定自体は HTTPS に変わったが、`&&` の後ろの読み戻し・再起動・待ち受け確認は実行されなかった。同じブロックをもう一度貼って通っただけでは、初回の成功とは扱っていない。
+
+GUI 設定の変更時に API の待ち受けを切り替えることと、HTTP サーバーの停止待ちが 100 ms であることは [2.1.5 の api.go](https://github.com/syncthing/syncthing/blob/v2.1.5/lib/api/api.go)、設定の保存後に応答する処理は [confighandler.go](https://github.com/syncthing/syncthing/blob/v2.1.5/lib/api/confighandler.go) にある。VM の応答が停止の猶予に間に合わなかったと推定した。
+
+手順 6 を 3 秒待って 1 度再試行し、実際のアドレスと TLS が両方一致してから restart する形へ修正。初回失敗時の設定を控えて、新しい鍵・設定から手順 1・3〜8 を通し直すと、読み戻し・HTTPS・restart・LISTEN まで成功した。修正後の新規設定では EOF 自体は出なかった。全 NIC の VM では、修正前の初回も成功していた。
+
+#### 再起動・更新・ロールバック
+
+両 VM を順に再起動した。サーバーは OS の起動時刻 04:15:10、user manager・Syncthing・backup path/timer は 04:15:49、SSH での再ログインは 04:16:18。相手は OS 04:18:51、Syncthing は 04:19:33、SSH は 04:20:12。いずれも SSH ログイン前にユーザーサービスが起動した。再接続後は両フォルダーが idle、needFiles/needBytes が 0、直接 TCP のままで、バックアップは 8 個から増えなかった。これは timer が実際の 0 時台を迎えた確認ではない。
+
+更新 1・2 は、`2.1.5 already installed` の後に restart と版表示が通った。新しい版への入れ替えは試していない。GUI の接続元制限を戻す手順も通した。
+
+バックアップの解除 7 とロールバック 1〜3 を実行し、サーバーの登録・path/timer・スクリプト、両 VM の Homebrew の Syncthing・ユーザーサービス・受信規則・現行の設定と鍵・DB が消えた。保存先の 8 個の archive と相手へ届いたコピーは残った。サーバーはほかのユーザーサービスが無いことを確かめて linger も無効へ戻した。相手は Quadlet と RDP 検証が使うため linger を維持した。
+
+今回の VM では OS を入れ直したホストへの Syncthing 復元、実際の 0 時台の timer と Persistent の追いかけ、競合処理、インターネット経由の relay、UDP/QUIC での同期はまだ検証していない。Windows の節は今回の確認に含めていない。

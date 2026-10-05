@@ -231,7 +231,7 @@
      sudo grdctl --system status              # Status: enabled / Username: (hidden)
      systemctl status gnome-remote-desktop    # active (running)
      ss -lntp | grep 3389                     # *:3389 で LISTEN
-     firewall-cmd --list-services             # rdp が含まれる
+     sudo firewall-cmd --list-services        # rdp が含まれる
    }
    ```
 
@@ -596,7 +596,7 @@
 
 - **方式**: リモートログイン（システムデーモン `grdctl --system`）
 - **TLS 証明書**: openssl で生成（追加パッケージ不要）
-- **状態**: 下記 2 環境で動作確認済み
+- **状態**: 下記 2 環境で動作確認済み。加えて、クリーンインストールした x86_64 の VM で実施手順 1〜11・LAN 限定・ロールバック 1・2 を本実行し、再起動後の GDM からのログインまで確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）
   - 2026-09-28: 手順 2〜5・8・9、[ロールバック](#ロールバック)の手順 1、[注意点](#注意点)の「設定レイヤーの食い違い」の確認方法のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
@@ -1151,4 +1151,28 @@ gnome-remote-desktop 49.3（と CentOS Stream 10 の独自パッチ）・gdm 47.
 - GDM を再起動すると、2 つのヘッドレスのセッションが止まって起動し直された
   - `<USER>` の方は、起動し直しが前のセッションの片付けとぶつかって 1 秒で終わった。`sudo systemctl start gnome-headless-session@<USER>.service` で起動した
   - 終わったセッションは、その間に PAM が起こしたキーリングのデーモンが新しいセッションにも使われていて、`closing` のまま残った
-- 確かめていないこと: 起動のときにドロップインが効くこと（PC の再起動）、Windows からの同じ確認
+- 2026-10-02 の実機では確かめていないこと: 起動のときにドロップインが効くこと（PC の再起動）、Windows からの同じ確認。再起動は 2026-10-06 の x86_64 の VM で確認した（末尾の付録）
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（x86_64、1 vCPU、メモリ 6 GiB、SELinux Enforcing、日本語 UI、US 配列）で、検証用ユーザーの SSH PTY に現行のブロックを個別に貼った。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、GNOME Shell は `49.4-9.el10_2.alma.1`、Mutter は `49.4-4.el10_2`、GDM は `47.0-24.el10_2`、GNOME Remote Desktop は `49.3-4.el10_2`。利用者のアカウントは使っていない。
+
+実施手順 1〜11、接続元を LAN に絞る任意節、ロールバック 1・2 を本実行した。手順 7 は、参照先の「設定済みのサーバーで GDM の後に起動させる」の手順 3・4（stop → 5 秒 → start と、受け渡し役の再起動）を通した。証明書・秘密鍵の所有者、0644・0600、SELinux のラベル、modulus の一致、TLS 1.3 と fingerprint の一致を確認した。手順 8 の `firewall-cmd --list-services` は、SSH の一般ユーザーからは polkit の `Authorization failed` で失敗したため `sudo` を付け、同じブロックを流し直して成功した。
+
+クライアントは LAN の別の AlmaLinux VM。AppStream の `freerdp-3.10.3-12.el10_2.13` を、Homebrew の Xvfb 21.1.24（1600x900）と xdotool 4.20260303.1 で操作し、XGetImage から PNG を保存して実像を確認した。証明書の指紋はサーバー側と照合して一時的に受け入れた。システム共通の資格情報と GDM の OS パスワードは、使い捨ての値を端末または GUI に対話入力し、引数・ログには出していない。
+
+| 確認 | 結果 |
+|---|---|
+| GDM のログイン画面 | 3389 番のシステム共通の認証後、ユーザー一覧と OS パスワード欄が表示された |
+| ヘッドレス設定の無い試験ユーザー | `Service=gdm-password` の新しい Wayland セッションができ、電卓の `7×8=56` を確認した |
+| 切断と再接続 | 同じ session と Leader に戻り、電卓の 56 が残った |
+| LAN 限定 | `rdp` サービスを閉じ、指定 LAN の 3389/tcp の rich rule に置き換えた。LAN の別 VM から引き続きつながった |
+| VM を再起動した後の初回接続 | GDM → 既に自動起動しているユーザーのヘッドレスセッションへ入った。電卓の `9×9=81` を確認した |
+| 起動順 | GDM の active 時刻は起動後 33.488638 秒、システム RDP の開始は 33.510534 秒。`After=gdm.service` が効き、`GetManagedObjects` の警告は無かった |
+| ロールバック 1・2 | システム RDP が disabled / inactive、3389 番の待ち受けと rich rule が消え、資格情報とドロップインを解除した |
+
+受け渡し時には、従来の記録と同じ `g_atomic_ref_count_dec` の CRITICAL が 1 回出たが、画面と入力に支障は見えなかった。TPM の無い VM なので資格情報は GKeyFile へフォールバックした。再起動後の AVC は無かった。1 vCPU では GNOME の描画開始まで待ち時間があり、unit が active になった直後の画面だけで成否を決めていない。
+
+今回の RDP は、GUI 検証用の `--virtual-monitor` をロールバックした標準のヘッドレス構成で測った。Windows / Android の今回の接続、VM の外の実機、指定 LAN の外からの拒否、旧証明書への差し戻し（ロールバック 3・4）は今回確認していない。
+
+実行ログは `.verification/desktop/` の `rdp-system-plan-session`、`rdp-restart-plan-session`、`rdp-status-fixed-plan-session`、`rdp-lan-plan-session`、`rdp-rollback-plan-session`、`rdp-after-reboot.log`。画面は `rdp-gdm-initial.png`、`rdp-new-calc-result.png`、`rdp-new-reconnected.png`、`rdp-gdm-after-reboot.png`、`rdp-handover-result-after-reboot.png` に保存した。

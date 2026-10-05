@@ -7,3 +7,6 @@ wg-backup-*.tar.gz
 # restore が作る退避ファイル（上の site.env / clients.list の行では除外されない）
 scripts/wireguard/site.env.bak-*
 scripts/wireguard/clients.list.bak-*
+
+# VM の検証用メディア・ディスク・ログ・使い捨ての認証情報
+.verification/

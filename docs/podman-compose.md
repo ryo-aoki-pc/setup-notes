@@ -14,7 +14,7 @@
 - PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](#注意点)）
 
 > [!WARNING]
-> **x86_64 のコンテナでのみ検証した手順書**で、実機では本実行していない。SELinux が無効な環境だったので、`:Z` の効果は確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **x86_64 の VM で実施手順を検証した。SELinux Enforcing で `:Z` のラベル付けも確認した。実機では本実行していない**（[対象と検証環境](#対象と検証環境)）。
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -242,7 +242,8 @@
 
 - **目的**: compose ファイル（`compose.yaml`）で書いた複数のコンテナを、AlmaLinux 10 の rootless の podman でまとめて動かす
 - **進め方**: EPEL（前提の [epel.md](epel.md) で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
-- **状態**: **x86_64 のコンテナでのみ検証済み（2026-09-27）。実機では本実行していない**
+- **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
+  - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
   - 下表の検証コンテナで、[podman.md](podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [epel.md](epel.md) の手順 1〜3。当時はこの文書の手順だった）、手順 1〜6、[更新](#更新)、[ロールバック](#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼ばれる
@@ -368,3 +369,15 @@ hello from compose
 - `compose_warning_logs = false` で案内が消えること
 - `depends_on`・`healthcheck`・`build` など、確認用のファイルで使っていない compose の機能
 - podlet で compose ファイルから Quadlet の定義を作ること
+
+---
+
+### 付録: VM での検証記録（2026-10-06）
+
+**環境**: [クリーンインストールからの検証記録](almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+
+- クリーンインストール後に podman.md と epel.md を通した VM で、本文の手順 1〜6 をそのまま SSH の擬似端末に貼った。EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼べた。
+- `up -d` で pod・ネットワーク・`web` / `check` ができた。公開ポートとコンテナ間のサービス名 `web:8080` の両方で、確認用の HTML が返った。
+- SELinux は Enforcing。ホスト側の HTML ディレクトリが `container_file_t` に変わり、カテゴリが Web コンテナの `container_t` と一致した。以前のコンテナ検証で未確認だった `:Z` を今回確認した。
+- VM を再起動すると、この例の `web` / `check` は停止したままだった。自動起動の設定を足していない構成での確認で、再び使うときは `up -d` が要る。
+- docker-compose をプロバイダにする分岐、実機・aarch64、更新・ロールバックは今回通していない。

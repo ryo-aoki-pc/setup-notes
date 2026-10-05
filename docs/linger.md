@@ -121,7 +121,7 @@
 - **目的**: AlmaLinux 10 で、ログインしていない間も自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かし続ける
 - **進め方**: `loginctl enable-linger` を自分のユーザーに対して 1 度だけ行う。読者が編集する変数は無い
   - もとは [syncthing.md](syncthing.md)・[dropbox.md](dropbox.md)・[dropbox-rclone.md](dropbox-rclone.md)・[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)の中にあった手順を、共有の前提として 1 本にした
-- **状態**: **手順 2 の最初の 2 行（`sudo loginctl enable-linger` と `loginctl show-user`）は実機で本実行済み**（2026-09-24、aarch64 の Raspberry Pi の [syncthing.md](syncthing.md#対象と検証環境) の本実行の中で）
+- **状態**: **手順 2 の最初の 2 行は実機で本実行済み（2026-09-24）。現行の手順 1・2 とロールバックは、クリーンインストールした x86_64 の VM で本実行済み（2026-10-06）**
   - 手順 2 のコマンドは、この文書に移す前に、次の検証でも通したもの
     - コンテナ: [dropbox.md](dropbox.md#付録-コンテナでの検証記録2026-09-27)・[dropbox-rclone.md](dropbox-rclone.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman.md](podman.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27、Quadlet の節）
   - [ロールバック](#ロールバック)の手順 1 の 1 つ目の `ls` と手順 2 は、dropbox.md・dropbox-rclone.md のコンテナでの検証で通したもの（実機では未実行）
@@ -186,3 +186,15 @@
 
 - 実機での手順 1 とロールバック
 - 再起動の後に、linger でユーザーのサービスが起動すること（実機）
+
+### 付録: クリーンインストールした VM での検証（2026-10-06）
+
+ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM で、一般ユーザーの SSH PTY に現行の手順 1・2 とロールバック 1・2 をブラケットペースト無しで貼った。
+
+- 最初は `Linger=no`。手順 2 のひとまとまりのブロックで `Linger=yes` になり、`/var/lib/systemd/linger` に検証ユーザーのファイルができた
+- この時点では独自のユーザーユニットは無く、ロールバック 1 の一覧は空だった。ロールバック 2 で `Linger=no` に戻り、同じ手順 2 で有効にし直せた
+- 別のクリーン VM でも手順 1・2 を通し、Syncthing の Homebrew のユーザーサービスが SSH 切断後も稼働した
+- 両 VM を再起動し、user manager と Syncthing が SSH の再ログインより前に起動した。サーバーでは設定バックアップの path/timer も同じ時刻に active だった。各起動時刻は [Syncthing の記録](syncthing.md#再起動更新ロールバック) に残した
+- Syncthing とバックアップを外した後、サーバーではもう一度ロールバック 1・2 を通して `Linger=no` に戻った。相手 VM は Quadlet と RDP 検証のユーザーサービスがあるため linger を維持した
+
+パスワード、SSH の使い捨て鍵、VM の名前はテスト専用。既存実機の linger は変えていない。

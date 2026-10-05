@@ -352,7 +352,7 @@
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **実機で本実行済み（2026-09-20）**
+- **状態**: **実機で本実行済み（2026-09-20）。`0dbb522` の直接追記版の実施手順 1〜4 を x86_64 のクリーン VM でも本実行済み（2026-10-06）**。共通 bash 設定へ統一した現行版の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
   - 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中
   - **このリポジトリの Homebrew 系 17 本の手順書は、すべてこれを前提にしている**（実機に入っているのはそのうちの一部で、記録時点の `brew leaves` は 15 件。下表）
   - 本書の手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
@@ -562,7 +562,6 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - 導入先を `/home/linuxbrew/.linuxbrew` 以外にした場合に本当にソースビルドになるか
 - 複数ユーザーで共有する場合の権限
 - `brew analytics off` の挙動
-- 対話での導入（本書の検証はすべて `NONINTERACTIVE=1` 付き。実機の 2026-09-20 の導入は対話だったが、そのときのログは残していない）
 - bash 以外のシェル（zsh / fish）での `brew shellenv`
 - **[ロールバック](#ロールバック)の本実行**（`uninstall.sh` は `--help` を見ただけで、実機でもコンテナでも走らせていない）
 
@@ -671,3 +670,19 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - `sudo` の RPM を更新して、`/etc/sudoers` の既定の `secure_path` が変わったとき
 - root の Homebrew の API のキャッシュがあるときの `sudo brew services`（検証では、どれも API の取得で止まった）
 - bash 以外のシェル
+
+---
+
+### 付録: クリーン VM での検証記録（2026-10-06）
+
+**検証対象**: `0dbb522` の、各手順で `~/.bashrc` などへ設定を直接追記する版。以下の手順番号と「本文」はこの版を指す。検証後に共通 bash 設定へ統一された現行版（`0bc9970`）の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
+
+**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、検証対象版の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
+
+**通した手順（`0dbb522`）**: 実施手順 1〜4。
+
+**結果**: 公式インストーラーの sudo のパスワード確認と RETURN の確認に答え、Homebrew 7.0.8 が `/home/linuxbrew/.linuxbrew` に入った。本文どおり `brew shellenv bash` を `~/.bashrc` に足し、`brew --version`・`brew config`・PATH を確認した。検証用 sudo は通常のコマンドを NOPASSWD にしていたが、インストーラーの `sudo -v` はパスワードを要求した。パスワードを入力して進め、sudoers は変更しなかった。
+
+ボトルの取得中には `Landlock ABI 10 or later is required to deny all network access; found ABI 6` という警告が出た。Homebrew は、このカーネルが対応する制限を適用すると表示し、導入は続行して成功した。警告だけで導入失敗とは扱わない。
+
+**今回の未確認範囲**: root・sudo で Homebrew を使う任意節、更新・ロールバックは今回流していない。
