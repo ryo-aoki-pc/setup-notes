@@ -85,6 +85,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | btop | EPEL | [btop.md](btop.md) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [firefox.md](firefox.md) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
+| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。Windows 11 の手順もある） | [codex.md](codex.md) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](vscode.md) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](virtualbox.md) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
