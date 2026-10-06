@@ -13,7 +13,7 @@
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **x86_64 のクリーンインストール VM でも検証した手順書**（2026-10-06、SELinux Enforcing）で、実機では本実行していない。Mason を使う設定は、自分用の設定ではなく、上流の LazyVim の starter で確かめた（[対象と検証環境](#対象と検証環境)）。
+> **x86_64 のクリーンインストール VM でも検証した手順書**（2026-10-06、SELinux Enforcing）で、実機では本実行していない。Mason は、上流の LazyVim starter に加え、今回の新規 VM では自分用の LazyVimStarter でも確かめた（[対象と検証環境](#対象と検証環境)）。
 >
 > - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](ssh-socks-tunnel.md#注意点)）
 
@@ -264,8 +264,8 @@
   - 入れたパッケージは、トンネルが無くても動く
 - **進め方**: AppStream の Node.js と npm を dnf で入れ、npm には `https_proxy` でトンネル（`socks5h://127.0.0.1:1080`）を使わせる。そのシェルから Neovim を開き、Mason に入れさせる
   - この文書には変数が無い。オンラインのホストの変数は、ssh-socks-tunnel.md の手順 1 にある
-- **状態**: **x86_64 のクリーンインストール VM で実施手順 1〜5を検証済み（2026-10-06、SELinux Enforcing）。設定は上流 LazyVim starter、実機・aarch64 は未実施**
-  - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下の以前の検証と未確認事項は、当時の範囲の記録。
+- **状態**: **x86_64 のクリーンインストール VM で現行の実施手順 1〜5 とロールバック 1・2 を検証済み（2026-10-06、SELinux Enforcing）。個人用 LazyVimStarter `ae7f049` の Mason 11 ツールも導入完了。実機・aarch64 は未実施**
+  - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした（homebrew-offline.md と同じ形）
   - Mason を使う設定は、上流の [LazyVim/starter](https://github.com/LazyVim/starter) に、LazyVim の extra の `lang.json` と `lang.markdown` を足したもの。自分用の設定（LazyVimStarter）では確かめていない
   - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](#更新)、[ロールバック](#ロールバック)を通した
@@ -470,3 +470,14 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 - 手順 3 の Neovim を開き、Mason に不足していた `markdownlint-cli2` と `json-lsp` を `:MasonInstall markdownlint-cli2 json-lsp` で指定した。Mason のログは両方 `Installation succeeded`。導入中にもプロキシ無しの直接通信は終了 7 だった。
 - 手順 4 では転送を保持した SSH と Neovim の端末を閉じ、転送無しで再ログインした。手順 5 でプロキシ環境変数は無く、Mason の bin に `markdownlint-cli2` / `vscode-json-language-server` / `shfmt` / `stylua` / `tree-sitter` があった。リンターのヘルプは `markdownlint-cli2 v0.23.3 (markdownlint v0.41.1)`、`npm ping --fetch-retries=0` は ENOTFOUND と `届かない（期待どおり）` だった。
 - 今回は LSP として JSON を編集する動作、npm の設定ファイルに競合する値がある場合、更新・ロールバック、個人用設定、実機・aarch64 は確認していない。以前のコンテナの結果と区別する。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO の Workstation クリーンインストールの `clean-install` スナップショットから、新規の `alma10-current-20261006-offline` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+- 実施手順 1〜5 を通した。AppStream の Node.js 22.23.2 / npm 10.9.8 が入り、設定ファイルの proxy / https-proxy はともに `null`。`https_proxy=socks5h://127.0.0.1:1080` を足すと `npm ping` が通った。
+- 今回はサブモジュールと同じ個人用 LazyVimStarter `ae7f049` を公開リポジトリから取得した。Neovim 0.12.5_1 を導入し、プラグインを初回取得・lock に復元した後、本文の `nvim -R ~/.config/nvim/init.lua` を実際の端末で開いた。Mason の実画面は `Installed (11)`、導入中は 0 件。npm の bash-language-server / json-lsp / markdownlint-cli2 / yaml-language-server を含む 11 ツールの導入完了を receipt とログでも確認した。上流 starter のみだった以前の VM 試験を置き換えず、追加した範囲である。
+- Neovim と転送を保持した接続を終了し、転送無しで再ログインした。Mason bin は 11 コマンドを保持し、`markdownlint-cli2 --help` は `v0.23.3 (markdownlint v0.41.1)`。`npm ping --fetch-retries=0` は ENOTFOUND と `届かない（期待どおり）`、IPv4 / IPv6 の既定経路と 1080 の待ち受けも無かった。
+- ロールバック 1・2 をトンネル無しで通し、Node.js / npm の RPM と `~/.npm` が無くなった。Mason のファイルは残るが、npm 系ツールの実行には Node.js が必要である。更新、プロキシ設定ファイルとの競合、JSON の編集・LSP 動作、PyPI の追加ツール、実機・aarch64 はこのオフライン再検証では行っていない。

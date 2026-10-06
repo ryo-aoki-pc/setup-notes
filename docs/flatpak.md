@@ -294,6 +294,7 @@
 - **目的**: GUI アプリの主な配布元である [Flathub](https://flathub.org/) を AlmaLinux 10 で使えるようにする。[ツール一覧](tool-catalog.md#gui)で「Flathub」を推奨にしたアプリの前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
 - **状態**: **コンテナ（2026-09-24）と x86_64 の VM（2026-10-06）で検証済み。実機には入れていない**
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜7・[更新](#更新)・[ロールバック](#ロールバック)を通した
   - 確認の問い合わせ（手順 6 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
   - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
@@ -437,3 +438,13 @@ AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（
 実施手順 1・3〜7、更新、ロールバック 1〜4 を本実行した。`flatpak-1.16.0-9.el10` は Workstation に既にあったため手順 2 は省略した。Flathub の署名鍵を照合し、system に Flatseal 2.4.1 と GNOME 50 の runtime・拡張の計 6 ref を入れた。`sandbox OK` と desktop エントリを確認し、ヘッドレス GNOME の実画面で Flatseal が日本語で開き、Activities の検索にも出た。このセッションは flatpak が既に入っている状態から開始したため、アプリを入れた後のログインし直しは不要だった。
 
 `sudo flatpak update` は `Nothing to do.`。`update --appstream` 後の CLI の検索は Flatseal を返した。一方、GNOME Software 47.5 の検索は、起動し直した後も `No App Found` だった（Flatpak のプラグインは同梱）。GNOME Software で表示・導入・更新が通るとはしない。ロールバックでは Flatseal 1 ref → 使われなくなった runtime と拡張の 5 ref → flathub の登録の順に消え、アプリ一覧とリモート一覧は空になった。RPM の flatpak 本体は残した。実機、aarch64、`--user`、キーリング、GPU は今回も確認していない。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1・3〜6 を本実行した。Flatpak `1.16.0` は OS に既存だったため導入分岐 2 は不要だった。署名鍵の指紋と有効期限を確認し、system の Flathub を追加した。Flatseal `2.4.1` と GNOME 50 の runtime / 拡張を導入し、実際の GUI で権限の画面を確認した。更新は変更なしで成功した。手順 7 の `--command=true` による独立した sandbox 確認は今回実行せず、実アプリの GUI 起動を確認した。
+
+ロールバック 1〜4 を実行した。Flatseal と 5 つの未使用 runtime / 拡張を削除し、アプリ一覧が空になった後、Flathub を削除して remote 一覧も空になった。今回のアプリ起動は desktop ID を使ったため、Activities のメニュー掲載と GNOME Software の検索は今回の確定結果に含めていない。aarch64 と物理実機は未実施。

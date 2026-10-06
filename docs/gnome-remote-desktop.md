@@ -597,6 +597,7 @@
 - **方式**: リモートログイン（システムデーモン `grdctl --system`）
 - **TLS 証明書**: openssl で生成（追加パッケージ不要）
 - **状態**: 下記 2 環境で動作確認済み。加えて、クリーンインストールした x86_64 の VM で実施手順 1〜11・LAN 限定・ロールバック 1・2 を本実行し、再起動後の GDM からのログインまで確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 2026-09-28: 手順 2〜5・8・9、[ロールバック](#ロールバック)の手順 1、[注意点](#注意点)の「設定レイヤーの食い違い」の確認方法のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
@@ -1176,3 +1177,15 @@ AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（
 今回の RDP は、GUI 検証用の `--virtual-monitor` をロールバックした標準のヘッドレス構成で測った。Windows / Android の今回の接続、VM の外の実機、指定 LAN の外からの拒否、旧証明書への差し戻し（ロールバック 3・4）は今回確認していない。
 
 実行ログは `.verification/desktop/` の `rdp-system-plan-session`、`rdp-restart-plan-session`、`rdp-status-fixed-plan-session`、`rdp-lan-plan-session`、`rdp-rollback-plan-session`、`rdp-after-reboot.log`。画面は `rdp-gdm-initial.png`、`rdp-new-calc-result.png`、`rdp-new-reconnected.png`、`rdp-gdm-after-reboot.png`、`rdp-handover-result-after-reboot.png` に保存した。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜10 と 11 の RDP 接続を本実行した。証明書の SAN はホスト名と VM の IP、crt / key は 644 / 600、対応する公開鍵が一致し、SELinux のラベルも確認した。GDM の後に起動する drop-in を読み戻し、system の RDP が 3389 で TLS 1.3 を受け付けた。指定 LAN の rich rule も実行した。
+
+別の新規 VM の FreeRDP `3.10.3` で、証明書の指紋を照合して接続した。RDP 専用資格情報で GDM に到達し、検証用 OS ユーザーでログインして handover が完了した。既存の headless セッションへ引き渡され、RDP のキーで Firefox の窓を移して画面と入力を確認した。VM 再起動後も system サービスと 3389 の待受、LAN rule は維持された。再起動後の実再接続は headless の 3390 で行い、3389 の GDM ログインは再起動前の 1 回である。
+
+ロールバック 1・2 を実行し、RDP 有効化・資格情報・firewall の許可・GDM 依存の drop-in を解除した。system サービスは `disabled` になった。system 側の証明書はこのロールバックの削除対象ではないので保持した。LAN 外からの拒否、Windows / Android、別ユーザーの同時接続、物理 PC は今回実施していない。

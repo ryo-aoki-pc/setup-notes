@@ -12,7 +12,7 @@
 - 手順の後: 端末のフォントにするなら[WezTerm で使う（任意）](#wezterm-で使う任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
-> **この実施手順（AlmaLinux 10）は x86_64 のクリーン VM で本実行済み**（2026-10-06）で、コンテナでも検証した。実機では本実行しておらず、aarch64 でも通していない。画面での見た目も確かめていない（[対象と検証環境](#対象と検証環境)）。
+> **この実施手順（AlmaLinux 10）は x86_64 のクリーン VM で本実行済み**（2026-10-06）で、コンテナでも検証した。実機では本実行しておらず、aarch64 でも通していない。別の新規 x86_64 VM の WezTerm では日本語・Nerd Font・Powerline の表示を確認した（末尾の GUI 再検証記録）。
 
 1. 変数を設定する。
 
@@ -446,6 +446,7 @@
   - **AlmaLinux 10**（[実施手順](#実施手順)）: Homebrew の cask `font-hackgen-nerd` で自分の `~/.local/share/fonts` に入れ、fontconfig から見えることを確かめる
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: 上流の `HackGen_NF_v2.10.0.zip` を、版と sha256 をブロックに書いて確かめてから、`%LOCALAPPDATA%\Microsoft\Windows\Fonts` に置いて自分のユーザーの登録（`HKCU`）に書く。Windows PowerShell 5.1 に貼り、管理者の権限は要らない。[Windows 11 の初期設定](windows-setup.md)の 1 項目として依頼されたもの
 - **状態（AlmaLinux 10）**: **x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-24、x86_64）。実機には入れていない**
+  - 2026-10-06: 別の新規 x86_64 VM では実施手順 1〜5、更新、ロールバックを実行し、WezTerm の日本語・Nerd Font・Powerline を画面でも確認した（末尾の GUI 再検証記録）
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜5・[WezTerm で使う（任意）](#wezterm-で使う任意)・[更新](#更新)・[ロールバック](#ロールバック)を通した
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**（[flatpak.md](flatpak.md) と同じ環境）
   - 確認したこと:
@@ -454,7 +455,7 @@
     - かな・漢字・Powerline・Nerd Fonts のアイコンが入っている
     - WezTerm がこのフォントで文字を描く設定になる（`wezterm ls-fonts`）
     - ロールバックで消える
-  - **確認していないこと**: 実際の見た目（字形、太字、行の高さ、アイコンの幅）。コンテナに画面が無いため
+  - 新規 x86_64 VM では日本語・Nerd Font・Powerline を実際の WezTerm に表示した。字形・太字・行の高さ・アイコンの幅の網羅的な比較はしていない
   - aarch64 でも同じ zip が使われる（cask の定義にアーキごとの分岐が無い）が、aarch64 では通していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
@@ -692,3 +693,20 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 **結果**: Homebrew の cask `font-hackgen-nerd` 2.10.0 を入れ、4 つの TTF が `~/.local/share/fonts` に置かれた。`fc-list` と `fc-match` が HackGen Console NF の Regular/Bold を認識し、本文の U+3042・U+6F22・U+E0B0・U+F09B は全て件数 1 だった。
 
 **今回の未確認範囲**: GNOME・WezTerm の画面での見た目、任意設定、Windows の手順、更新・ロールバックは今回確認していない。
+
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+- `5da3478` の実施手順 1・2・4・5 を、新規導入した AlmaLinux 10.2 Workstation の x86_64 VM の SSH 対話 PTY で実行した。unzip が導入済みだったので手順 3 の分岐は不要だった
+- Homebrew cask の HackGen 2.10.0 を導入し、4 フォントのファイルと `fc-match` の検索結果を確認した
+- GUI アプリでの選択と見え方はこの CLI 検証には含まない。更新・削除も今回は実行していない
+
+---
+
+### 付録: 現行版の新規 VM の GUI での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜5 を本実行した。既存 unzip への dnf は変更なし。Homebrew cask `font-hackgen-nerd` 2.10.0、4 TTF、`fc-match`、本文の日本語・Powerline・Nerd Font のコードポイントの件数 1 を確認した。WezTerm 設定 `4bdfbf1` の実ウィンドウで日本語を表示し、LazyVim の picker のアイコンと日本語検索結果も正常に描かれた。
+
+更新は最新で変更なし。ロールバック 1 で cask と 4 TTF を削除し、`fc-list` の HackGen 件数 `0` を確認した。この grep の終了 1 は一致なしを示す期待結果である。任意の WezTerm フォント設定の書き換え、Windows と aarch64 は今回実施していない。

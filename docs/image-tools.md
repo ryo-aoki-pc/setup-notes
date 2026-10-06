@@ -516,3 +516,13 @@ Report Summary
 - dive の CI 判定は効率 85.4470%、無駄な容量約 59 MB、ユーザーの無駄な割合 93.7985% で終了 1。意図した判定結果として確認した。手順 10 で Layers / Contents の画面が出て、矢印・Tab・Ctrl+C に応答した。
 - Trivy は約 121 MiB のデータベースを取得し、RHEL 10.1 の 207 パッケージを調べた。今回の取得時点・対象イメージでは HIGH / CRITICAL が 0 件だった。将来のデータベースや別のイメージについての結果ではない。
 - TUI の確認は文字とキーの応答まで。脆弱性が見つかるイメージ、実機・aarch64、更新・ロールバックは今回通していない。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1〜10 を通した。hadolint 2.15.1、dive 0.13.1、Trivy 0.75.0。悪い Dockerfile の hadolint は警告と終了 1、改善後は終了 0。`localhost/image-check:1` をビルドし、dive の CI モードは本文の想定どおり効率しきい値で FAIL / 終了 1、TUI は Layers / Layer Details / filetree を表示して `q` で終了した。Trivy はソケットから取得・検査を完了した（その時点の検出は 0 件。このイメージが以後も無脆弱性という意味ではない）。
+
+ロールバックの手順 1〜5 も通した。専用イメージ・作業ディレクトリ・Trivy キャッシュ、hadolint / dive、本体の Trivy RPM、今回追加した Trivy リポジトリと公開鍵を撤去できた。EPEL などほかの公開鍵は残った。

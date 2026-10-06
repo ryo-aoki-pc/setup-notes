@@ -381,3 +381,13 @@ hello from compose
 - SELinux は Enforcing。ホスト側の HTML ディレクトリが `container_file_t` に変わり、カテゴリが Web コンテナの `container_t` と一致した。以前のコンテナ検証で未確認だった `:Z` を今回確認した。
 - VM を再起動すると、この例の `web` / `check` は停止したままだった。自動起動の設定を足していない構成での確認で、再び使うときは `up -d` が要る。
 - docker-compose をプロバイダにする分岐、実機・aarch64、更新・ロールバックは今回通していない。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1〜6 を通した。podman-compose 1.5.0 / Podman 5.8.2。2 コンテナと pod が動き、ホストの `127.0.0.1:8081` と `check` からの `http://web:8080/` は両方 `hello from compose` を返した。共通 bash 導入後の構成でも通った。
+
+ロールバックの手順 1・2・4 を通し、pod・2 コンテナ・ネットワーク・専用ディレクトリ・RPM を撤去した。手順 3 の共有イメージの削除は、lazydocker の確認用コンテナがまだ使っていたため終了 2 で拒否された（本文の注意どおり）。使用元を全て撤去した後、lazydocker のロールバックでその共有イメージを削除できた。

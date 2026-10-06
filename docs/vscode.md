@@ -294,6 +294,7 @@
 - **目的**: AlmaLinux 10 に [Visual Studio Code](https://code.visualstudio.com/) を Microsoft 公式の dnf リポジトリから入れる。**aarch64 のパッケージが公式に用意されている**
 - **進め方**: 鍵を照合して取り込み、repo ファイルを置いて `dnf install`。**読者が書き換える変数は無い**
 - **状態**: **実機で本実行済み（2026-09-23）、クリーンインストールの x86_64 VM でも導入・GUI 起動・ロールバックを本実行済み（2026-10-06）**
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
   - **[手順 6](#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
@@ -485,3 +486,13 @@ AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vC
 手順 1〜7 とロールバック 1〜3 を本実行した。Microsoft の fingerprint を照合してから鍵を取り込み、`code-1.140.0-1790759678.el8.x86_64` と弱い依存の `socat` が入った。`code --version` は 1.140.0・コミットハッシュ・`x64`、導入元は `vscode`、Vendor は Microsoft、`ldd` の未解決は 0。デスクトップの Ptyxis 端末で `code` と打つと実ウィンドウと初回の Welcome が開き、`~/.config/Code`・`~/.vscode` ができ、拡張一覧は空だった。サインインは行っていない。
 
 最初にキーリングのパスワード指定が出たが「キャンセル」で起動を確かめられた。1.140.0 の desktop ファイルは `com.microsoft.VSCode.desktop` と `com.microsoft.VSCode.UrlHandler.desktop` で、旧手順の `code*.desktop` は存在しなかった。手順 5 を RPM の一覧から拾う形へ直して確かめた。ロールバックでは `code` と、ほかで使われていなかった `socat` の 2 パッケージが消え、repo と検証用の設定ディレクトリを消せた。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜5・8 と GUI の起動を実行した。Microsoft の署名鍵を照合して公式 repo を追加し、Code `1.140.0-1790759678.el8`（commit `07f806f999227108933c2e30515b26eecc1fda74`、x64）を導入した。`ldd` に未解決ライブラリは無く、desktop ID で実際の Welcome / Get Started の窓を表示し、サインインせず進めて閉じた。このセッションではキーリングのダイアログは出なかった。ユーザーディレクトリと空の拡張一覧も確認した。
+
+更新とロールバック 1〜3 を本実行した。Code / socat、repo、今回のユーザー設定・拡張ディレクトリを削除できた。本文どおり Microsoft の共有署名鍵は保持した。手順 6 のデスクトップ端末への `code` 手入力は今回行わず、既存の GNOME 補助スクリプトから起動した。拡張導入、IME、Wayland / XWayland の区別、Windows は未実施。

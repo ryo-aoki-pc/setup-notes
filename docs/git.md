@@ -1100,3 +1100,9 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 **結果**: Git 2.52.0。テスト用の名前・メールで global の 14 設定を読み戻した。CRLF の保持、日本語のファイル名、`main`、ローカル bare リポジトリへの初回 push の upstream 設定、pull の rebase・autostash と未コミット変更の保持、手順 11 の後片付けを確認した。手順 8 は `pull.ff` が未設定だったため条件外。外部リポジトリへは push していない。
 
 **今回の未確認範囲**: 改行を変換した clone を直す節、更新・ロールバック・Windows の手順は今回流していない。
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active）で、`5da3478` の本文を SSH 対話 PTY に渡した。試験専用のユーザー・鍵と設定値を使用し、利用者の実アカウントの資格情報は持ち込んでいない。
+
+実施手順 1〜7 を通し、Git 2.52.0 と全体設定の値・global の設定元を確認した。名前とメールは検証専用の値に置き換えた。GitHub への認証・push、Windows の導入は行っていない。

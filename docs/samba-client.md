@@ -494,6 +494,7 @@
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `SERVER` だけ（NAS や Windows の共有なら `SMB_USER` と `SHARE` も）
 - **状態**: **x86_64 の VM で検証済み（QEMU: 2026-09-27 / クリーンインストールした VirtualBox: 2026-10-06）。実機では本実行していない**
+  - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - このクラウドのホストのカーネルには CIFS が無く、コンテナでは `mount -t cifs` を試せない。そこで QEMU の VM（KVM 無しの TCG）で、AlmaLinux 10.2 の GenericCloud イメージを動かした
   - VM の SELinux は Enforcing、firewalld は active
   - サーバーは、samba.md 手順 3 の `smb.conf` をそのまま置いたコンテナ（同じホストの Docker）
@@ -507,7 +508,7 @@
     - `gio mount` での接続と、FUSE のパス
     - ロールバックの後に、fstab の行・ユニット・資格情報ファイル・マウント先が残らないこと
     - 手順 1 の変数が空のとき、変数を使うブロックが何も変えずに中断すること
-  - **確認していないこと**: 実機（x86_64 PC・Raspberry Pi 5）での実行、GNOME のキーリングへの保存、Wi-Fi の切り替えとサスペンドからの復帰、WireGuard 越しのマウント、Windows や NAS の共有
+  - **確認していないこと**: 実機（x86_64 PC・Raspberry Pi 5）での実行、GNOME のキーリングへの保存、Wi-Fi の切り替えとサスペンドからの復帰、WireGuard 越しの fstab 自動マウント、Windows や NAS の共有。WireGuard 越しの手動マウントは新規 VM で確認済み（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）
   - 実測の記録は[付録](#付録-vm-での検証記録2026-09-27)
   - 2026-09-29: 手順 1 に、samba.md の `[root]`（root のホーム）へ `SHARE=root` でつなぐ案内を足した
     - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜5 とロールバックの手順 3 を `SHARE=root` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
@@ -825,3 +826,17 @@ AlmaLinux 10.2 Workstation を ISO から入れた VirtualBox の VM（x86_64、
 GNOME Files の任意節は、さらに別の Workstation VM のヘッドレスの GNOME セッションで画面を操作した。Network → Server address に URI を入れ、認証の既定「ログアウトするまでパスワードを記憶する」を「今すぐパスワードを破棄する」に変えて接続した。サイドバーの共有、GIO の一覧と GVFS の実体、ファイルの作成・コピーが一致した。サーバーで直接作った 2 個目のファイルが更新前の PNG には無く、Files にフォーカスを合わせて F5 を送ると現れ、内容も一致した。取り出しボタンでサイドバー・GIO・GVFS から消えた。マウント名は日本語では「<SERVER> 上の <SHARE>」だった。
 
 実機の CIFS マウントは今回も検証していない。WireGuard 越しの CIFS、別のローカルユーザーのアクセス、キーリングは今回の確認には含めていない。
+
+### 付録: 新規 VM での現行手順の再検証（2026-10-06）
+
+同日の先行検証に使った VM と分け、ISO 導入直後の AlmaLinux 10.2 Workstation から新しい x86_64 VM を用意して、`5da3478` の現行本文を再検証した。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active。一般ユーザーの SSH PTY にブラケットペースト無しで貼り、手順ごとに結果を確認した。
+
+新しい相手 VM から、別の新規 VM で samba.md を通したサーバーへ接続し、手順 1〜7 を実行した。cifs-utils 7.7 と gvfs-smb/gvfs-fuse 1.54.4 は Workstation の初期状態に入っていた。資格情報は root の 0600、手動マウントは SMB 3.1.1・cifs_t、作成・読み戻し・削除・unmount が成功した。
+
+fstab は findmnt --verify で成功し、アクセスで autofs と CIFS が重なってマウントされた。70 秒間マウント先に触れず、/proc/self/mountinfo だけを読んだ時点では CIFS が消えて autofs が残り、再アクセスで CIFS が戻った。OS 再起動後も automount は active、読み書きが成功した。root の手動マウントも成功し、home の共有直下への書き込みは Permission denied だった。
+
+Road Warrior の新規 VM でも、SERVER を WG ホストのトンネル IP にして手順 1〜5 を通した。SMB 3.1.1 の手動マウントで作成・読み戻し・削除が成功し、ip route get は wg0 を示した。WireGuard 越しの fstab 自動マウントは、この確認に含めていない。
+
+GNOME Files の任意節は別の新規 Workstation VM の画面で接続・認証した。ドメインは SAMBA の既定、記憶の選択は「今すぐパスワードを破棄する」。ローカルのファイルを Ctrl+C/Ctrl+V で共有へ写し、GVFS とサーバーの実体が一致した。サーバーで作成した別ファイルは F5 前は無く、F5 後に出現し、GVFS で内容が一致した。取り出し後はサイドバー・GIO・GVFS に残らなかった。gvfs-smb/gvfs-fuse は既設なので追加導入・削除は行っていない。
+
+ロールバック 1〜3 で mount/automount・fstab の該当行・資格情報・マウント先が消え、findmnt --verify も成功した。diff が変更を表示して返す終了 1 は想定どおり。既設の cifs-utils/gvfs は残した。実機、キーリング保存、Wi-Fi 切り替え、サスペンド復帰、Windows/NAS の共有はこの再検証で確認していない。

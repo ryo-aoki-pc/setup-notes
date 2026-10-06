@@ -195,6 +195,7 @@
 - **進め方**: 鍵を照合して取り込み、署名を確かめながら `rpmfusion-free-release` を入れる。前提は [EPEL](epel.md)。読者が編集する変数は無い
   - もとは [firefox.md](firefox.md) の手順 8〜11 と、ロールバックの手順 2〜3 だった。Firefox の FFmpeg から、リポジトリの有効化を切り分けた
 - **状態**: **手順 1〜3 は実機で本実行済み（2026-09-28）**。aarch64 と x86_64 の 2 台
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 2026-10-06: クリーンな x86_64 の VM で実施手順 1〜4 とロールバック 1・2 を本実行し、Firefox の FFmpeg の導入も確認した（末尾の付録）。
   - aarch64 の実機（Raspberry Pi 5）: 利用者が手順どおりに入れた（[firefox.md の付録](firefox.md#付録-実機での本実行2026-09-28)）
     - 鍵（`gpg-pubkey-db85ddd7-67a63d8b`）が登録され、`dnf history` に手順 3 の実行（4 パッケージ）が残っている
@@ -203,9 +204,9 @@
   - コンテナ
     - 2026-09-28 の aarch64 のコンテナで、手順 1〜3 と[ロールバック](#ロールバック)を通した（[firefox.md の付録](firefox.md#付録-動画が再生できなかった件の切り分け2026-09-28)）
     - 2026-09-29 の x86_64 のコンテナで、[epel.md](epel.md) の後にこの文書のブロックを通した（手順 1〜4 とロールバック。[付録](#付録-コンテナでの検証記録2026-09-29)）
-  - **手順 4 とロールバックは、コンテナでのみ検証**
+  - **手順 4 とロールバックは、コンテナと新規 x86_64 VM で検証**
   - **確認していないこと**: nonfree のリポジトリ、`rpmfusion-free-updates-testing`
-  - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ。当時は `bash -n` のみだったが、2026-10-06 の新規 VM では現行ブロックを貼って実行した
 
 | 項目 | aarch64 の実機 | x86_64 の実機 | 検証コンテナ（2026-09-29） |
 |---|---|---|---|
@@ -278,3 +279,13 @@ AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（
 EPEL の実施手順 1〜3 の後、実施手順 1〜4 とロールバック 1・2 を本実行した。公式の鍵の fingerprint `5FC4AE73FC2B08B9DFE7EB990C8489D8DB85DDD7` と uid を照合し、rpm に取り込んでから `localpkg_gpgcheck=1` で `rpmfusion-free-release-10-1` を入れた。入ったのはこの 1 RPM だけで、有効な `rpmfusion-free-updates` から Firefox の `ffmpeg-libs-7.1.5-1.el10` を導入できた。nonfree と aarch64 の今回の実行は確認していない。
 
 FFmpeg を外した後のロールバックは、`--noautoremove` で rpmfusion-free-release だけが消え、EPEL は残った。RPM Fusion の署名鍵も削除できた。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜4 を本実行した。RPM Fusion free の鍵の指紋は `5FC4 AE73 FC2B 08B9 DFE7 EB99 0C84 89D8 DB85 DDD7`。取得した release RPM の署名を確認し、`rpmfusion-free-release-10-1` と EL10 の free / free-updates を導入した。Firefox の `ffmpeg-libs-7.1.5-1.el10` の取得にも使った。
+
+Firefox と関連の codec を先に外してから、ロールバック 1・2 を実行した。`--noautoremove` で release パッケージだけを削除し、その repo とこの鍵が残らないことを確認した。nonfree、Windows、aarch64 は今回実施していない。

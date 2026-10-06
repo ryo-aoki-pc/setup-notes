@@ -106,12 +106,18 @@
 
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
-   "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png
-   file ~/gnome-gui-test.png
+   if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
+      file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
+     file ~/gnome-gui-test.png
+   else
+     echo '中断: 正常な PNG を撮れていない。セッションの状態を確かめて、この手順を貼り直す' >&2
+   fi
    fi
    ```
 
    - PNG のパスと、`/home/<USER>/gnome-gui-test.png: PNG image data, <幅> x <高さ>, 8-bit/color RGBA, non-interlaced` の 2 行が出ればよい（大きさは `VIRTUAL_MONITOR`）
+   - **この 2 行と、PNG の画面を確かめてから次へ進む**。`中断:` や `empty` の場合は進まない
+   - 起動直後は、手順 3 のバス名とセッションが出ても最初の映像がまだ届かず、`15 秒以内に PipeWire のストリームから 1 コマも届かなかった` になることがあった。少し待って同じブロックを貼り直し、正常な PNG が撮れたことを確かめる。繰り返しても撮れなければ、手順 3 に記したサービスの状態とログを見る（新しいクリーン VM で、初回の失敗と再試行の成功を確認）
    - Claude Code は、この PNG を Read で開いて画面を見る。人が見るなら、scp などで手元に持ってきて開く
    - セッションを始めた直後の画面は、上に検索欄のあるアクティビティ画面（手順 5 の最初の `key Escape` で閉じる）
    - クリーンインストール後の最初のセッションでは「AlmaLinux へようこそ」の案内が重なることがある。そのときは先に `key Escape` → `sleep 1` → `shot` で案内を閉じたことを確かめてから、手順 5 へ進む。案内を閉じてもアクティビティ画面は残る（VM で確認）
@@ -246,12 +252,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
-   "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png
-   file ~/gnome-gui-test.png
+   if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
+      file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
+     file ~/gnome-gui-test.png
+   else
+     echo '中断: 正常な PNG を撮れていない。セッションの状態を確かめて、この手順を貼り直す' >&2
+   fi
    fi
    ```
 
    - `PNG image data, <幅> x <高さ>` が新しい大きさになっていればよい
+   - PNG の画面も開いて確かめてから使う。撮れなかったときの再試行は[実施手順 4](#実施手順)と同じ
 
 ---
 
@@ -301,6 +312,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - **目的**: [gnome-headless-session.md](gnome-headless-session.md) で常駐させた GNOME のヘッドレスのセッションを、同じ PC の上で動く Claude Code（リモートコントロールで使うときも）が、画面を撮り、キーボードとポインタで操作して、GUI の動作を確かめられるようにする
 - **方式**: gnome-shell に `--virtual-monitor` で仮想モニターを常に付け、Mutter の ScreenCast と RemoteDesktop の D-Bus で撮って操作する（[`scripts/gnome-gui.py`](../scripts/gnome-gui.py)）
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜6・1280x720 への変更・ロールバックを本実行し、1920x1080 へ戻して再起動後の自動起動と撮影・入力を確認した（2026-10-06）**
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 2026-10-06: クリーンな x86_64 の VM でも現行の実施手順 1〜6、1280x720 への変更、ロールバックを本実行した（末尾の付録）。初回案内と電卓の起動待ちを実測に合わせて修正した
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま貼った
     - 書き換えたのは手順 1 の `REPO`（PR #68 の作業ツリーを指した。`scripts/gnome-gui.py` がまだ main に無いため）と、任意節で書き換える `VIRTUAL_MONITOR` だけ
@@ -511,3 +523,15 @@ RDP の標準構成の試験とロールバックを終えた後、ヘッドレ�
 最後に RDP クライアント・Xvfb の補助プロセスと RDP 用の試験アカウントを終了・削除した。VM は GUI 用の仮想モニターと電源設定を残し、3389 / 3390 の RDP は disabled、待ち受けも無い。電卓は閉じた。利用者の変更を含む `scripts/gnome-gui.py` は書き換えず、コピーを使った。
 
 ログは `.verification/desktop/gui-final-plan-session/` と `gui-after-boot-plan-session/`、`gui-final-state.log`、`desktop-cleanup.log`。実画面は `gui-after-reboot-calc.png`、最後の窓が無い画面は `gui-final.png` に保存した。実機の再起動、物理画面への同時ログイン、キーリングの解除は今回も確認していない。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜6 を実行した。`1920x1080` のスクリーンショットと、電卓の `12*34` → `408` を画面で確認した。最初の起動では、D-Bus と loginctl の準備ができていても約 15 秒の撮影中に最初のフレームが出ず、空ファイルになった。後から同じ撮影を再実行すると正常な PNG になった。約 1 分待った事実を、どの環境でも必ず成功する待ち時間とはしていない。
+
+実施手順 4 と解像度変更の確認を、撮影の成功・MIME `image/png` を確認してから情報を表示し、失敗時は中断を明示するブロックへ修正した。読者にも PNG を開いて画面を確認してから次へ進むようにした。改訂後の両ブロックを再実行し、`1920x1080` と `1280x720` の正常な PNG と画面を確認した。VM 再起動後の GNOME 自動起動も確認した。
+
+ロールバック 1・2 で drop-in を削除し、`ExecStart=/usr/bin/gnome-shell` に戻してセッションを起動し直した。GUI 補助スクリプトそのものは変更していない。物理モニター、長時間の放置試験、全アプリの操作は今回実施していない。

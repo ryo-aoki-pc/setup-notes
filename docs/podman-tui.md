@@ -358,3 +358,13 @@ podman-tui-web Exited (0) 19 seconds ago
 - podman.md と epel.md の後、本文の手順 1〜5 を通した。EPEL の podman-tui 1.10.0 が入り、podman 5.8.2 のソケットに `STATUS_OK` でつながった。SELinux は Enforcing のまま。
 - 確認用の `podman-tui-web` に対し、F4 でコンテナ一覧、`m` でメニューを開き、`stop` を選んだ。画面と終了後の `podman ps -a` の両方で `Exited (0)` を確認した。
 - 今回の確認は SSH の擬似端末での文字と操作。デスクトップの F キー・色や罫線、SSH で別ホストの podman に接続する操作、Homebrew 版、更新・ロールバック、実機・aarch64 は通していない。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1〜5 を通した。EPEL の 1.10.0 が共通 bash 導入後のユーザー socket につながり、`STATUS_OK` / API 5.8.2 が出た。実画面で `F4` → 対象行 → `m` → `stop` と操作し、専用の `podman-tui-web` が `Exited (0)` になった。`Ctrl+C` でホストに戻った。色・罫線の見た目、全キー、更新はこの再検証では行っていない。
+
+ロールバックの手順 1・3 で確認用コンテナと RPM を削除できた。手順 2 の共有イメージはほかの手順書も使っていたため、その時点では飛ばし、最後の使用元を撤去した後に削除した。

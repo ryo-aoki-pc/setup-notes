@@ -874,6 +874,7 @@
   - WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の手順 11〜13](wireguard.md#実施手順) と同じ
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。管理者の Windows PowerShell 5.1 で関数を先に定義し、conf コピー後に関数名を手入力する。WG ホストでは同じ手順 4〜6・13 を使う
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-22）。クリーンインストールした x86_64 の VM でも現行ブロックを本実行した（2026-10-06）**
+  - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ手順 1〜15 を通した
   - 確認したこと: 両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping
   - NetworkManager の挙動として推定で書いていた項目は、1〜9 が実測で確定した
@@ -1402,3 +1403,16 @@ AlmaLinux 10.2 Workstation を ISO から入れた x86_64 VM をクライアン�
 - 手順 14・15 の down と平文鍵/conf の削除、ロールバック 1 のプロファイル・公開鍵・作業ディレクトリの削除、ロールバック 2 の対話でのパッケージ削除が通った。wireguard-tools と、この試験で依存として入った resolved が消えた
 
 Endpoint は隔離された仮想 LAN であり、テザリング回線、実ルーター、Wi-Fi 切り替え、サスペンド復帰の検証ではない。クライアント VM の再起動は今回行っていないので、autoconnect no の読み戻しを再起動時の実証とはしていない。Windows の節は今回の確認に含めていない。
+
+### 付録: 新規 VM での現行手順の再検証（2026-10-06）
+
+同日の先行検証に使った VM と分け、ISO 導入直後の AlmaLinux 10.2 Workstation から新しい x86_64 VM を用意して、`5da3478` の現行本文を再検証した。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active。一般ユーザーの SSH PTY にブラケットペースト無しで貼り、手順ごとに結果を確認した。
+
+同じ新規 ISO 環境の 3 台目を PC にし、2 台の検証用 WG ホストとは別の帯から NetworkManager で接続した。PC で鍵を作る経路を選び、公開鍵をホストに登録・apply して発行されたテンプレートを SCP で PC へ写した。秘密鍵は VM 内で手順 8 により入れ、画面やログへ出していない。実ルーターやテザリングを使う手順 9 の検証ではない。
+
+- 手順 10 の import 直後は activated、自動接続を no にして down した。手順 11 の up、12 の ping が成功した。アドレスは /32、ipv6 は disabled、MTU 1420、経路の metric 50、DNS 指定無し。NM の keyfile は root の 0600 で秘密は hidden だった
+- A/B の両 LAN の端末役へ HTTP/TCP が 200、tracepath は A/B の WG ホストを通る。両拠点と双方の LAN の端末役から PC への ping も成功した
+- A のトンネル IP を Samba の接続先として [samba-client.md](samba-client.md) の手順 1〜5 を通し、SMB 3.1.1 で作成・読み戻し・削除・unmount が成功した。経路は wg0 だった。WireGuard 越しの fstab 自動マウントは行っていない
+- ホストの登録削除は wireguard.md の 6 手順で未知 peer の公開鍵を照合して反映した。PC の手順 14・15 とロールバック 1 でリンク・平文の鍵/conf・NM プロファイル・作業ディレクトリが消えた。ロールバック 2 の対話 dnf で新規 wireguard-tools と追加依存の resolved だけが消えた
+
+クライアント VM の OS 再起動、サスペンド、Wi-Fi 切り替え、DDNS、DNS 指定、GNOME の VPN 表示、Windows の節はこの再検証の対象外。自動接続 no の読み戻しを、再起動で張られないことの実測とはしていない。

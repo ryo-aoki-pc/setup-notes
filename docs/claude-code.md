@@ -1209,3 +1209,9 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 **結果**: 既定の `latest` チャンネルで署名鍵の fingerprint を本文と比べて取り込み、`claude-code-2.1.289-1` を導入した。導入済み版とリポジトリの版の一致、`/usr/bin/claude`、ライセンスの場所を確認した。
 
 **今回の未確認範囲**: 認証・AI への依頼・Remote Control・Windows の手順、更新・ロールバックは今回流していない。
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active）で、`5da3478` の本文を SSH 対話 PTY に渡した。試験専用のユーザー・鍵と設定値を使用し、利用者の実アカウントの資格情報は持ち込んでいない。
+
+実施手順 1〜4 を latest のまま通し、署名鍵の fingerprint が本文と一致することを確認した。claude-code 2.1.291-1 が入り、installed / available の最新値も一致、`claude --version` は 2.1.291 だった。実アカウントの認証・AI への依頼・stable 切替・更新・ロールバックはこの再検証で行っていない。

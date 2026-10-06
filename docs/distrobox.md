@@ -483,3 +483,13 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 - 手順 6 で対話のシェルに入り、OS・ユーザー・作業ディレクトリを確認して `exit` で戻った。ホームはホストと共有された。
 - Homebrew を設定済みのホストの `.bashrc` も共有されるため、入った直後に `bash: /home/linuxbrew/.linuxbrew/bin/brew: No such file or directory` が出た。ボックスにはその prefix が無いことが原因で、シェルへの入退場とコマンドの実行はできた。ホストの設定をボックスでも無条件に読む場合の注意として残す。
 - ffmpeg の書き出しの任意節、GUI のアプリの書き出し、Ubuntu 以外、更新・ロールバック、実機・aarch64 は今回通していない。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1〜6 を通した。EPEL の distrobox 1.8.2.3、Ubuntu 24.04.5 LTS。cgroup v2 と SELinux Enforcing の VM で、以前のコンテナ検証のラッパーを使わず初期化できた。対話シェルの OS・ユーザー・共有ホームを確認し、`exit` でホストに戻った。今回の共通 bash は Homebrew の実行ファイルの有無を確認するため、ボックス内で prefix が無くても以前の付録の `brew: No such file or directory` は出なかった。ffmpeg / GUI の書き出しと、更新はこの再検証では行っていない。
+
+ロールバックの手順 2〜4 も通した。`ubuntu` の削除確認に答え、Ubuntu イメージを消すと一覧は見出しだけになり、RPM も削除できた。今回は ffmpeg を書き出していないため手順 1 は飛ばした。

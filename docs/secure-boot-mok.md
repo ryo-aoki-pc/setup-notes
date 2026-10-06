@@ -324,3 +324,11 @@
 - 実機での MokManager の登録と、署名したモジュールの受け入れ
 - 実機での[ロールバック](#ロールバック)
 - aarch64 の PC
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、実行対象の現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1 と 3 を通した。mokutil 0.7.2 / OpenSSL 3.5.8 は Workstation に導入済み。`SecureBoot disabled` / `Platform is in Setup Mode` が出たため、本文の条件に従って MOK 作成・import・MokManager での登録は行っていない。Secure Boot 有効時の分岐が通ったとは扱わない。

@@ -297,3 +297,9 @@ ayu.theme
 **結果**: btop 1.4.7 が EPEL から入り、署名鍵の fingerprint が本文と一致した。x86_64 の依存として `rocm-smi-7.1.1-2.el10_2` も入った。`hicolor-icon-theme` は Workstation に最初からあった。実際の TUI で CPU・メモリー・ディスク・ネットワーク・プロセスの欄を読み、`q` で終了した。`~/.config/btop/btop.conf` と `themes` が生成された。
 
 **今回の未確認範囲**: テーマを変える任意節、実機の GPU、更新・ロールバックは今回確認していない。
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active）で、`5da3478` の本文を SSH 対話 PTY に渡した。試験専用のユーザー・鍵と設定値を使用し、利用者の実アカウントの資格情報は持ち込んでいない。
+
+実施手順 1・2 を通した。EPEL の btop 1.4.7 と依存 rocm-smi が入り、/usr/bin/btop、RPM の導入元を確認した。対話 PTY に CPU・メモリ・ネットワーク・プロセスの画面が描画され、q で終了 0 に戻った。物理端末での色・GPU・更新・ロールバックはこの再検証で行っていない。

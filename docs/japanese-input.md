@@ -219,6 +219,7 @@
 - **目的**: AlmaLinux 10 の GNOME で、日本語を入力できるようにする。入力のエンジンは、RHEL 10 の文書が日本語用に挙げている Anthy（IBus）を使う
 - **進め方**: AppStream の `ibus-anthy` を入れ、`gsettings` で入力ソースを「キーボードの配列 + Anthy」にして、Super+Space で切り替える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナとクリーンインストールの VM で検証済み。実機では本実行していない**（コンテナ 2026-09-27、VM 2026-10-06。VM は手順 1・2・4・6・7 とロールバックの手順 1。導入済みだったので手順 3・5 は省略）
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中に ibus-daemon を GNOME と同じ引数（`--panel disable`）で起動し、**この文書のコードブロックをそのまま貼って**手順 1〜4・6 と[ロールバック](#ロールバック)を通した
   - 手順 1 の `localectl` は、systemd を PID 1 にした別のコンテナで確かめた（手順 1 の補足）
   - [flatpak.md](flatpak.md) と同じ、x86_64 のクラウドホスト上の Docker で行った
@@ -346,3 +347,15 @@ AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vC
 Workstation には `ibus-1.5.32-1.el10`・`ibus-anthy-1.5.17-1.el10`・`default-fonts-cjk-sans-4.1-3.el10` が入っていたので、手順 3・5 は省略した。手順 1・2・4、デスクトップの Ptyxis 端末での手順 6、手順 7 とロールバック 1 → 再設定を確認した。入力ソースは `[('xkb', 'us'), ('ibus', 'anthy')]`、Super+Space で上部バーが `en` と `あ` に切り替わり、Ctrl+Space で Anthy の直接入力（`_A`）とひらがな（`あ`）を切り替えられた。
 
 `gnome-gui.py` の `NotifyKeyboardKeysym` では、英字の直接入力は届いたが、Anthy のひらがなモードでは `nihongo` が本文に入らなかった。入力間隔を 0.3 秒、前後を 1 秒に広げた検証用プローブでも同じだった。原本を変更せず読み込む別のプローブで、Mutter の `NotifyKeyboardKeycode` に evdev の `n i h o n g o Space Enter` を送ると、WezTerm の実ウィンドウに「日本語」が確定した。設定と変換の成立は VM で確認できたが、既存スクリプトの keysym 経路で日本語を打てるとはしない。物理キーボード・JIS 配列・候補一覧・GTK と VS Code の日本語入力は未確認。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1・2・4・6・7 を確認した。IBus / Anthy は OS に既存だったため、追加導入の分岐は不要だった。入力ソースは US と Anthy、切替は Super+Space で、上部バーの `en` と `あ` を確認した。手順 6 は SSH ではセッションの IBus に届かなかったので、実際の WezTerm タブで実行し `anthy - Anthy` を確認した。
+
+変更していない `gnome-gui.py` の keysym 経路では、Anthy に `nihongo` が揃って届かなかった。別の検証プローブで Mutter の `NotifyKeyboardKeycode` に evdev のキー押下・解放を送り、`nihongo Space Enter` で実際の WezTerm に「日本語」が確定し、保存したファイルにも同じ文字列が入った。入力経路の問題を設定の不具合とは扱っていない。LazyVim の Insert / Search の IBus 切替も別途実キー経路で確認した。
+
+ロールバック 1 の入力ソース reset を実行し、`@a(ss) []` を読み戻した。既存の Anthy パッケージは削除していない。物理キーボード、JIS 配列、候補一覧の網羅、GTK / VS Code の日本語入力は今回実施していない。

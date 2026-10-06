@@ -100,7 +100,7 @@
    dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
    wezterm --version
    ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
-   wezterm ls-fonts | head -5
+   wezterm ls-fonts | sed -n '1,5p'
    ```
 
    - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
@@ -184,7 +184,7 @@
    config.font_size = 12
    return config
    LUA
-   wezterm ls-fonts | head -5     # Primary font に書いたフォントが出れば読めている
+   wezterm ls-fonts | sed -n '1,5p'     # Primary font に書いたフォントが出れば読めている
    ```
 
    - **`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする
@@ -505,6 +505,7 @@
     - [Windows 11 の初期設定](windows-setup.md)の後に通す手順書の 1 つ
   - 設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（Windows 11 では `%USERPROFILE%` の下。[設定ファイル](#設定ファイル)）
 - **状態（AlmaLinux 10）**: **x86_64 の実機（2026-09-21）とクリーンインストールの VM（2026-10-06）で本実行済み**。VM は実施手順 1〜5・CLI と GUI の起動・ロールバックを確認した
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 確認したこと: ウィンドウの起動・終了まで
   - **aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので、同じ手順で通る見込み）
   - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](#注意点)を見る
@@ -905,3 +906,15 @@ AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vC
 実施手順 1〜5 とロールバック 1・2 を本実行した。COPR の `rhel-9-x86_64` を明示し、署名鍵の fingerprint を照合してから `20261005_054844_37254829-0` の 4 パッケージを入れた。導入元は COPR、共有ライブラリの未解決は 0、CLI は `wezterm 20261005_054844_37254829`。`ls-fonts | head -5` の broken-pipe panic は既存の補足どおりで、手順 5 の Wayland の起動・即終了は `rc=0`。
 
 desktop エントリから実際の WezTerm を開き、キーボードで `wezterm --version` と打った出力と、IBus で確定した「日本語」を PNG で確認した。ロールバックで消えたのは WezTerm の 4 RPM だけで、COPR の repo ファイルも削除できた。自分用の設定・aarch64・Windows の節はこの VM では通していない。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜5、任意の最小設定、更新、ロールバック 1・2 を本実行した。COPR の `rhel-9-x86_64` から 4 RPM の `20261005_054844_37254829-0` が導入され、鍵の指紋、バージョン、未解決ライブラリが無いことを確認した。GNOME Wayland の実ウィンドウを起動し、後から HackGen と `ryo-aoki-pc/wezterm` の `4bdfbf1` の設定で日本語・Nerd Font・Powerline の表示と実 IME 変換を確認した。
+
+現行の `wezterm ls-fonts | head -5` は、先に head が終了して Broken pipe の panic（終了 101）になった。実施手順 4 と最小設定の確認を `sed -n '1,5p'` に替え、パイプを最後まで読む形で両ブロックを再実行した。両方終了 0 で、既定の JetBrains Mono と最小設定の Noto Sans Mono CJK JP をそれぞれ確認した。
+
+更新は変更なし。ロールバックで 4 RPM と COPR repo を削除できた。SSH / WSL / Windows の任意手順、aarch64、全キー割り当ての網羅は今回実施していない。
