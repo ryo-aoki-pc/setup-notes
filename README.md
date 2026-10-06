@@ -104,7 +104,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - WireGuard VPN は拠点に建てる側、Road Warrior は外出先の AlmaLinux PC からそこへつなぐ側。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
 - GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
 - ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ。リモートログインも既存のセッションへ戻れるため、同じ PC で併用できる。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）
-- デスクトップ共有は、PC の画面でパスワードでログインしているデスクトップを、そのまま RDP で共有する（設定アプリの「デスクトップ共有」と同じ仕組みを、SSH などから CLI だけで設定する。自動ログインは任意節）。画面が暗くなるかロックされると切れるので、前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）。**実機でも VM でも流していない**（未検証）
+- デスクトップ共有は、PC の画面でパスワードでログインしているデスクトップを、そのまま RDP で共有する（設定アプリの「デスクトップ共有」と同じ仕組みを、SSH などから CLI だけで設定する。自動ログインは任意節）。画面が暗くなるかロックされると切れるので、前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）。自動ログインで使うときは起動画面（plymouth）も止める。**VirtualBox の VM でのみ検証**（実機では未確認）
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、[Windows 11 の初期設定の手順 43](docs/windows-setup.md#実施手順)
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）

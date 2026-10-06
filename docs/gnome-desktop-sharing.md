@@ -16,9 +16,8 @@
 - 手順の後: [見るだけにする（任意）](#見るだけにする任意)・[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)・[自動ログインで使う（任意）](#自動ログインで使う任意)。戻すときは[ロールバック](#ロールバック)
 
 > [!WARNING]
-> - **この手順書は、実機でも VM でも流していない（未検証）**。上流のソースと RHEL 10 の文書から書いた
-> - 確かめたのは、ブロックの構文と、一部の部品と、自動ログインの節のキーリングの操作をコンテナで模擬したことだけ（[検証記録](verification/gnome-desktop-sharing.md)）
-> - 確認の箇条書きにある出力も、実物のものではない
+> - **この手順書は、x86_64 の VirtualBox の VM（AlmaLinux 10.2 の Workstation）でだけ流した。実機では流していない**（[検証記録](verification/gnome-desktop-sharing.md)）
+> - Windows の「リモート デスクトップ接続」は、接続とキーの入力までを確かめた。窓に PC の画面が写ることは、画像では確かめていない
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -154,6 +153,7 @@
 
    - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
    - `disable-view-only` は、クライアントからのキーボードとマウスを受け付ける設定（既定は見るだけ）
+   - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。設定する前の空の値を読んだもので、害は無い
    - `中断:` が出たら、手順 5 以降へ進まない
 
 1. RDP のユーザー名とパスワードを、引数なしで対話入力する。
@@ -238,12 +238,14 @@
    PY
    /usr/bin/python3 ~/rdp_tls_probe.py "${SERVER_IP}" "${RDP_PORT}"
    grdctl status 2>/dev/null | grep 'TLS fingerprint'
+   openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -fingerprint -sha1
    ```
 
    - 次の 3 つがそろえばよい
      - `selectedProtocol=0x2` でネゴシエーションが成立する
-     - `fingerprint:` の行が、最後の `TLS fingerprint:` の行と**完全一致**する
+     - `fingerprint:` の行が、`TLS fingerprint:` の行と**完全一致**する
      - SAN に、接続に使う名前が `DNS:` エントリとして含まれている
+   - 最後の `sha1 Fingerprint=` の行は、Windows のクライアントで証明書を確かめるときに使う（手順 10）
    - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい（この手順書が作る唯一の作業ファイル）
 
 1. LAN 内の別のマシンから、RDP クライアントでつなぐ。
@@ -251,11 +253,14 @@
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` の形でつなぐ
    - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
    - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 5 の値に読み替える
-   - 証明書の確認を聞かれたら、表示された Thumbprint が手順 8 の `TLS fingerprint` と同じかを見てから受け入れる
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。手順 8 の `TLS fingerprint` と同じなら `Y` で受け入れる
+     - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
+   - Windows は、拇印を出さずに「このリモート コンピューターの ID を識別できません」と聞く
+     - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、手順 9 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
    - パスワードは手順 5 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
    - クライアントでの操作は、PC の画面にもそのまま出る。PC の上部バーには、共有中の印が出る
-   - 問題があれば、PC で `journalctl --user -b -u gnome-remote-desktop.service` を見る
+   - 問題があれば、PC で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る（`journalctl --user` は、既定の構成では `No journal files were found.` になる）
 
 ---
 
@@ -316,7 +321,8 @@
 - **PC の起動のたびに PC の画面でパスワードでログインするなら、この節は不要**
 - 実施手順を済ませ、PC の画面でパスワードでログインしている間に、このユーザーのシェルで貼る
 - 自動ログインではログインのキーリングが開かないので、RDP の資格情報を、パスワードの無い別のキーリング（`rdp`）へ移す。ほかのパスワードはログインのキーリングに残り、暗号化されたまま
-- **この節の手順 4 は PC を再起動する**。起動し直してから SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから先へ進む
+- 起動画面（plymouth）も止める（この節の手順 4）。止めないと、自動ログインの後に GDM のログイン画面が前に出て、共有するデスクトップが裏に回る
+- **この節の手順 5 は PC を再起動し、このユーザーの OS のパスワードを聞かれる**。起動し直してから SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 > [!WARNING]
 > - **自動ログインにすると、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の gnome-power.md で、ロックもしない）
@@ -379,7 +385,7 @@
 
    - `aoao 1 "/org/freedesktop/secrets/collection/rdp/<N>" 0` と、`b false` が出ればよい
    - 1 つ目の `ao` に `/collection/login/` のパスがあれば、この節の手順 1 を貼り直す
-   - **注意**: 自動ログインにした後は、[手順 5](#実施手順) の `grdctl rdp set-credentials` を貼らない（閉じたログインのキーリングに書こうとして、PC の画面に窓を出して止まる）。資格情報を変えるときは、この節の手順 7 で戻してから行う
+   - **注意**: 自動ログインにした後は、[手順 5](#実施手順) の `grdctl rdp set-credentials` を貼らない（閉じたログインのキーリングに書こうとして、PC の画面に窓を出して止まる）。資格情報を変えるときは、この節の手順 8 で戻してから行う
 
 1. GDM の自動ログインを、このユーザーで有効にする。
 
@@ -394,12 +400,28 @@
 
    - `[daemon]`・`AutomaticLoginEnable=True`・`AutomaticLogin=<USER>` の 3 行が出ればよい
 
+1. 起動画面（plymouth）を止め、自動ログインの後にログイン画面が前に出ないようにする。
+
+   ```bash
+   {
+     sudo grubby --update-kernel=ALL --args="rd.plymouth=0 plymouth.enable=0"
+     sudo grubby --info=DEFAULT | grep '^args='
+   }
+   ```
+
+   - `args=` の行に `rd.plymouth=0 plymouth.enable=0` が入っていればよい
+   - 止めないと、自動ログインの約 20 秒後に GDM が plymouth を終わらせ、そのときに GDM のログイン画面が出る。共有するデスクトップは裏に回り、RDP の画面は真っ黒になる
+   - 次の起動から、起動画面の代わりに文字のメッセージが出る
+
 1. PC を再起動する。
 
    ```bash
-   sudo systemctl reboot
+   systemctl reboot -i
    ```
 
+   - `sudo` は付けない。`==== AUTHENTICATING FOR org.freedesktop.login1.…` と出てパスワードを聞かれるので、このユーザーの OS のパスワードを入れる
+   - `-i` は、PC の画面のセッションの抑止（`user session inhibited`）とログイン中のユーザーを無視する。付けないと `Operation inhibited by …` で断られる
+   - `sudo systemctl reboot -i` は `Interactive authentication required.` で断られる（root でも polkit の認証が要り、SSH の root には認証を聞く窓口が無い）
    - SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
    - **次の手順は、PC が起動してから SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから貼る**
 
@@ -410,7 +432,7 @@
    elif [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
-     loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Service
+     loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Service -p Active
      grdctl status
      busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.Secret.Collection Locked
      busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Locked
@@ -418,7 +440,10 @@
    fi
    ```
 
-   - `Service=gdm-autologin` が出る
+   - `Service=gdm-autologin` と `Active=yes`（PC の画面に出ているのはこのセッション）が出る
+   - `Active=no` なら、PC の画面に GDM のログイン画面が出ていて、RDP の画面は真っ黒になる
+     - この節の手順 4 を確かめる（`sudo grubby --info=DEFAULT`）
+     - すぐ使うなら、`sudo loginctl activate <SESSION_ID>` でこのセッションへ切り替える。`<SESSION_ID>` は、`loginctl list-sessions` のこのユーザーの `seat0` の行の 1 列目
    - `grdctl status` で `Unit status: active` と `Username: (hidden)` を確かめる
    - 続いて `b true`（ログインのキーリングは閉じたまま）と `b false`（移したキーリングは開いている）が出る。移したキーリングは、パスワードを聞かずに開く
    - `ss` が、[手順 8](#実施手順) と同じ 1 行を出せばよい
@@ -428,13 +453,15 @@
    - 手順 5 のユーザー名とパスワードでつながればよい
    - PC の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
 
-1. 元に戻すときは、自動ログインの行と、移したキーリングを消す。
+1. 元に戻すときは、自動ログインの行と起動画面の設定を戻し、移したキーリングを消す。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
    else
      sudo sed -i "/^AutomaticLoginEnable=True$/d; /^AutomaticLogin=${USER}$/d" /etc/gdm/custom.conf
      grep -c '^AutomaticLogin' /etc/gdm/custom.conf
+     sudo grubby --update-kernel=ALL --remove-args="rd.plymouth=0 plymouth.enable=0"
+     sudo grubby --info=DEFAULT | grep -c 'plymouth.enable=0'
      if busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Label >/dev/null 2>&1; then
        busctl --user call org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Delete
      else
@@ -443,15 +470,16 @@
    fi
    ```
 
-   - `0` と、`o "/"` が出ればよい。貼り直したときは `o "/"` の代わりに `rdp のキーリングは無い（消し済み）` と出る
+   - `0` が 2 行と、`o "/"` が出ればよい。貼り直したときは `o "/"` の代わりに `rdp のキーリングは無い（消し済み）` と出る
    - RDP の資格情報も消える。次に PC を起動したら、PC の画面でパスワードでログインし、[手順 5](#実施手順) を貼り直す
+   - PC の画面にログインしたまま SSH から再起動するときは、この節の手順 5 と同じく `systemctl reboot -i` を使う
 
 ---
 
 ## ロールバック
 
 - 手順 1 の変数を設定したシェルで、上から順に貼る
-- [自動ログインで使う](#自動ログインで使う任意)を行ったなら、先に[自動ログインで使う](#自動ログインで使う任意)の手順 7 で戻し、PC を再起動して PC の画面でパスワードでログインしてから始める（この節の手順 3 は、ログインのキーリングの資格情報を消す）
+- [自動ログインで使う](#自動ログインで使う任意)を行ったなら、先に[自動ログインで使う](#自動ログインで使う任意)の手順 8 で戻し、PC を再起動して PC の画面でパスワードでログインしてから始める（この節の手順 3 は、ログインのキーリングの資格情報を消す）
 - [gnome-power.md](gnome-power.md) で変えた値は残る。戻すなら同書の[ロールバック](gnome-power.md#ロールバック)
 - この節の手順 3 は、[手順 3](#実施手順) で退避した元値に戻す。[ヘッドレスのセッション](gnome-headless-session.md)の RDP を有効にしているときは、共用の TLS 設定と証明書は残す
 - デスクトップ共有は無効になり、RDP の資格情報は消える（設定アプリで有効にしてあった場合も同じ。使うなら設定アプリで入れ直す）
