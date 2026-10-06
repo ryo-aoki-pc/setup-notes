@@ -41,9 +41,9 @@
 - 既定は `view-only=true`（見るだけ）・`negotiate-port=true`・`port=3389`・`screen-share-mode='mirror-primary'`
 - `disable-port-negotiation` は、指定したポートが使われていたときに次のポートを順に試すのを止める。ポートが勝手に変わって、手順 7 で開けたポートと食い違うのを防ぐ。代わりに、ポートが使われていると待ち受けに失敗し、再試行しない
 - `set-tls-cert` と `set-tls-key` は絶対パスだけを受け付ける（`~` はシェルが展開する）
-- `port` と `negotiate-port` は、次に待ち受けるときに効く。`view-only` は、つないでいるクライアントにもすぐ効く
 - 初めて設定するときの `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、`grdctl` が設定を読み込むとき（49.3 の `src/grd-settings.c` の `update_rdp_server_fingerprint`）に、まだ空の `tls-cert` で証明書を読もうとして出すもの
   - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[gnome-headless-session.md 手順 4](../gnome-headless-session.md#実施手順) と同じ）
+- `port` と `negotiate-port` は、次に待ち受けるときに効く。手順 4 は、既に起動しているデーモンを再起動してポートと TLS の設定を反映する。`view-only` 自体は、つないでいるクライアントにもすぐ効く
 
 ### 実施手順 / 手順 6: 補足: grdctl rdp enable
 
@@ -55,6 +55,7 @@
 
 - `grdctl status` の `Port:` は dconf の値で、実際に待ち受けたポートではない（上流 #255）
 - 実際のポートは、`ss` か、D-Bus の `org.gnome.RemoteDesktop.User` の `/org/gnome/RemoteDesktop/Rdp/Server` の `Port` プロパティ（待ち受けていなければ -1）で見る
+- unit の起動完了と待ち受け開始には時間差があるので、手順 8 は自分のデーモンのソケットを最大 30 秒待つ
 - `ss -p` は、自分のプロセスなら root でなくても名前を出す。システムのデーモン（リモートログイン）は `gnome-remote-desktop` ユーザーのプロセスなので、ここには名前が出ない
 
 ### 実施手順 / 手順 9: 補足: TLS プローブ
@@ -88,6 +89,10 @@
 - 手順 1 の始めに、`rdp` のキーリングを `Unlock` する。パスワードでログインし直した後は閉じているので、開かないと、移した項目が閉じたキーリングの側に数えられる
 - Secret Service のセッションは、それを開いた D-Bus の接続でしか使えないので、`busctl` を何回も呼ぶ形ではなく、1 つの接続の Python（Gio）で書いた
 - 値は、`grdctl rdp set-credentials` が保存したものを `GetSecrets` で読み、そのまま `CreateItem` に渡す（ラベル・`xdg:schema` の属性も同じにする）。ユーザー名とパスワードを打ち直さない
+- 作ったコレクションの実際の D-Bus パスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。名前が `rdp` でも、記録と一致しない既存コレクションは再利用しない
+- 元に戻す手順 8 は、この記録のコレクションだけを開き、RDP の schema に一致する項目だけを消す。コレクションと記録を消すのは、ほかの項目が無く、削除が完了したときだけ
+- 再起動直後の手順 6 は、資格情報を読まずに状態を確かめる。`grdctl status` や TLS のプローブでも資格情報が読み出され、空パスワードのキーリングが先に開く可能性があるため、最初の RDP 接続を済ませてから手順 7 の読み戻しを行う
+- [クリーン VM の検証](../verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)では、OS 再起動後の `login`・`rdp` がどちらも閉じた状態から、別 VM の最初の認証で画面と入力を使え、接続後も `login` は閉じたまま `rdp` だけが開いた
 
 ### 自動ログインで使う / 手順 4: 補足: 起動画面（plymouth）を止める理由
 

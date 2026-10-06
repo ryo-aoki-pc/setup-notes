@@ -15,9 +15,13 @@
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 手順の後: [見るだけにする（任意）](#見るだけにする任意)・[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)・[自動ログインで使う（任意）](#自動ログインで使う任意)。戻すときは[ロールバック](#ロールバック)
 
-> [!WARNING]
-> - **この手順書は、x86_64 の VirtualBox の VM（AlmaLinux 10.2 の Workstation）でだけ流した。実機では流していない**（[検証記録](verification/gnome-desktop-sharing.md)）
-> - Windows の「リモート デスクトップ接続」は、接続とキーの入力までを確かめた。窓に PC の画面が写ることは、画像では確かめていない
+> [!NOTE]
+> **2026-10-07 に、aarch64 の実機・公式 ISO から新規インストールした aarch64 VM・x86_64 の VirtualBox VM で検証した**。それぞれが検証した版と範囲は各記録を参照。
+> - [実機の記録](verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07): Raspberry Pi 5 の seat0 に仮想モニターを足し、コンテナの FreeRDP から画面・入力・任意節・ロールバックを確認した
+> - [aarch64 VM の記録](verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07): Server with GUI の通常の仮想 GPU と別の Debian VM を使い、画面・入力・任意節・自然な無操作での切断・実 OS 再起動後の最初の認証・ロールバックを確認した
+> - [x86_64 VM の記録](verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07): Workstation と別 VM の FreeRDP、Windows の mstsc で接続と入力を確認した。Windows の窓の画面表示は画像で未確認
+>
+> 物理 HDMI、ホスト自身の OS 再起動、別の実機・実 LAN、Android は未確認。統合後の手順全体は今回の ARM 環境で再実行していない。
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -52,25 +56,30 @@
      /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
      /usr/bin/gsettings get org.gnome.desktop.remote-desktop.rdp enable
      systemctl --user is-enabled gnome-remote-desktop-headless.service
+     systemctl --user is-active gnome-remote-desktop-headless.service
+     if systemctl --user is-enabled --quiet gnome-remote-desktop-headless.service ||
+        systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
+       echo '中断: ヘッドレスの unit が有効か起動中。以降は貼らず、利用状況を確認する' >&2
+     fi
      ss -Hlnt "sport = :${RDP_PORT}" | wc -l
    fi
    ```
 
-   - 次の 8 行が出ればよい
+   - 次の 9 行が出ればよい
      - `<SESSION_ID> <UID> <USER> seat0 …` の形の行（PC の画面のセッション）
      - `ScreenCast: ok`
      - `b false`（ログインのキーリングが開いている）
      - `uint32 0` と `false`（画面を消さず、ロックしない）
      - `false`（デスクトップ共有はまだ無効）
-     - `disabled`（同じユーザーのヘッドレスの RDP は無効）
+     - `disabled` と `inactive`（同じユーザーのヘッドレスの RDP は無効で停止中）
      - `0`（`RDP_PORT` で待ち受けているものが無い）
    - 1 行目が出ないときは、PC の画面でこのユーザーでログインしてから貼り直す
    - `b true` なら、キーリングが閉じている。PC の画面でパスワードでログインし直す（自動ログインでは開かない）
    - 4・5 行目が `uint32 0` と `false` でなければ、[gnome-power.md 手順 1・2](gnome-power.md#実施手順) を行う
    - 6 行目が `true` なら、設定アプリなどでデスクトップ共有を有効にしてある
-     - 先に `grdctl rdp disable` で止めてから貼り直す（ポートの設定は、次に起動したときに効くため）
+     - 先に `grdctl rdp disable` で止めてから貼り直す
      - この手順の設定で上書きし、[ロールバック](#ロールバック)では無効になる。設定アプリで入れた資格情報も、ロールバックで消える
-   - 7 行目が `enabled` なら、同じユーザーのヘッドレスのセッションの RDP を使っている。ここで止める
+   - ヘッドレスの unit が有効か起動中なら、ここで止める。`disabled` でも、手動で起動した unit は `active` になり得る。利用状況を確認してから、どちらを使うか決める
    - 最後の行が `0` でなければ、ほかのもの（ほかのユーザーの[ヘッドレスのセッション](gnome-headless-session.md)など）がそのポートを使っている
      - 手順 1 の 2 つ目のブロックの `RDP_PORT` の行を、空いているポート（`3391` など）に書き換えて貼り直し、この手順を貼り直す
 
@@ -121,6 +130,13 @@
        fi
        openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout
        openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -noout
+       CERT_PUBLIC_KEY=$(openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -pubkey -noout)
+       KEY_PUBLIC_KEY=$(openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -pubout)
+       if [ "${CERT_PUBLIC_KEY}" != "${KEY_PUBLIC_KEY}" ]; then
+         echo '中断: 証明書と秘密鍵の公開鍵が一致しない。既存ファイルを確認する' >&2
+         exit 1
+       fi
+       echo '証明書と秘密鍵の公開鍵: 一致'
        touch ~/.local/state/gnome-desktop-sharing-setup/ready
        ls -l ~/.local/share/gnome-remote-desktop/certificates
        echo '設定の退避と証明書の準備が完了'
@@ -129,6 +145,7 @@
    ```
 
    - 最後に `設定の退避と証明書の準備が完了` と出れば、手順 4 へ進む
+   - その前に `証明書と秘密鍵の公開鍵: 一致` と出る。既存の証明書と鍵も、組み合わせが正しいことを確かめている
    - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る。既存の証明書と鍵は上書きしない
    - 証明書のパスは、[ヘッドレスのセッション](gnome-headless-session.md)の手順書と同じ。そちらで作ってあれば、それを使う
    - `中断:` が出たら、手順 4 以降へ進まない。原因を直してから、この手順を貼り直す
@@ -147,6 +164,11 @@
      grdctl rdp set-port "${RDP_PORT}" &&
      grdctl rdp disable-port-negotiation &&
      grdctl rdp disable-view-only &&
+     {
+       if systemctl --user is-active --quiet gnome-remote-desktop.service; then
+         systemctl --user restart gnome-remote-desktop.service
+       fi
+     } &&
      /usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp
    fi
    ```
@@ -155,6 +177,7 @@
    - `disable-view-only` は、クライアントからのキーボードとマウスを受け付ける設定（既定は見るだけ）
    - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。設定する前の空の値を読んだもので、害は無い
    - `中断:` が出たら、手順 5 以降へ進まない
+   - 既にデーモンが起動していれば、ポートと TLS の変更を反映するために再起動する。接続中の RDP クライアントは切れる。起動していなければ、手順 6 で起動する
 
 1. RDP のユーザー名とパスワードを、引数なしで対話入力する。
 
@@ -172,8 +195,9 @@
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
    elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then echo '中断: 手順 3 が完了していない。有効にしない' >&2
-   elif [ "$(systemctl --user is-enabled gnome-remote-desktop-headless.service 2>/dev/null)" = enabled ]; then
-     echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効。有効にしない' >&2
+   elif systemctl --user is-enabled --quiet gnome-remote-desktop-headless.service ||
+        systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
+     echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効か起動中。有効にしない' >&2
    else
      grdctl rdp enable
      systemctl --user is-enabled gnome-remote-desktop.service
@@ -199,14 +223,29 @@
 1. デーモンが待ち受けているかを確かめる。
 
    ```bash
-   grdctl status
-   ss -Hlntp "sport = :${RDP_PORT:?手順 1 の RDP_PORT が空のまま}"
+   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2
+   else
+     grdctl status &&
+     (
+       for attempt in {1..30}; do
+         RDP_LISTENER=$(ss -Hlntp "sport = :${RDP_PORT}")
+         if printf '%s\n' "${RDP_LISTENER}" | grep -q 'gnome-remote-de'; then
+           printf '%s\n' "${RDP_LISTENER}"
+           exit 0
+         fi
+         sleep 1
+       done
+       echo "中断: ${RDP_PORT}/tcp の待ち受けを 30 秒以内に確認できない。手順 9 へ進まず、デーモンのログを確認する" >&2
+       exit 1
+     )
+   fi
    ```
 
    - `grdctl status` で、`Unit status: active`・`Status: enabled`・`Port: <RDP_PORT>` を確かめる
    - 続けて、`View-only: no`・`Negotiate port: no`・`Username: (hidden)`・`Password: (hidden)` を確かめる
    - `TLS fingerprint` の値を控えておく（手順 9 と手順 10 で使う）
    - `ss` が `LISTEN … *:<RDP_PORT> … users:(("gnome-remote-de",…))` の 1 行を出せばよい
+   - 起動は非同期なので、unit が `active` でも待ち受けの準備がまだの場合がある。このブロックは最大 30 秒待つ。`中断:` が出たら、`journalctl --user -b -u gnome-remote-desktop.service` を確認し、手順 9 へ進まない
    - **注意**: `grdctl status` の `Port:` は設定した値で、実際に待ち受けたポートではない。ポートは `ss` で見る
 
 1. TLS のハンドシェイクと、提示される証明書を確かめる。
@@ -236,8 +275,8 @@
    print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
    ts.close()
    PY
-   /usr/bin/python3 ~/rdp_tls_probe.py "${SERVER_IP}" "${RDP_PORT}"
-   grdctl status 2>/dev/null | grep 'TLS fingerprint'
+   /usr/bin/python3 ~/rdp_tls_probe.py "${SERVER_IP}" "${RDP_PORT}" &&
+   grdctl status 2>/dev/null | grep 'TLS fingerprint' &&
    openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -fingerprint -sha1
    ```
 
@@ -333,7 +372,13 @@
 
    ```bash
    /usr/bin/python3 - <<'PY'
+   from pathlib import Path
    from gi.repository import Gio, GLib
+   state = Path.home() / '.local/state/gnome-desktop-sharing-setup'
+   marker = state / 'autologin-keyring'
+   if (state.is_symlink() or not (state / 'backup-complete').is_file() or marker.is_symlink()
+           or (marker.exists() and not marker.is_file())):
+       raise SystemExit('中断: 設定の退避かキーリングの記録が不正。実施手順 3 の退避内容を確認する')
    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
    svc = '/org/freedesktop/secrets'
    def call(path, iface, method, args, rtype):
@@ -344,8 +389,17 @@
    attrs = {'xdg:schema': 'org.gnome.RemoteDesktop.RdpCredentials'}
    cols = [c for c in prop(svc, 'org.freedesktop.Secret.Service', 'Collections')
            if prop(c, 'org.freedesktop.Secret.Collection', 'Label') == 'rdp']
+   owned = marker.read_text().strip() if marker.exists() else None
+   if owned == '':
+       raise SystemExit('中断: キーリングの記録が空。autologin-keyring を確認する')
+   if cols and (len(cols) != 1 or owned != cols[0]):
+       raise SystemExit('中断: この手順で作ったと確認できない rdp キーリングがある。既存の項目は変更しない')
+   if owned and not cols:
+       raise SystemExit('中断: 記録したキーリングが見つからない。autologin-keyring と既存のキーリングを確認する')
    if cols:
-       call(svc, 'org.freedesktop.Secret.Service', 'Unlock', GLib.Variant('(ao)', (cols,)), '(aoo)')
+       _, prompt = call(svc, 'org.freedesktop.Secret.Service', 'Unlock', GLib.Variant('(ao)', (cols,)), '(aoo)')
+       if prompt != '/' or prop(cols[0], 'org.freedesktop.Secret.Collection', 'Locked'):
+           raise SystemExit('中断: 記録したキーリングをパスワードなしで開けない。既存の項目は変更しない')
    unlocked, locked = call(svc, 'org.freedesktop.Secret.Service', 'SearchItems', GLib.Variant('(a{ss})', (attrs,)), '(aoao)')
    if locked:
        raise SystemExit('中断: 閉じたキーリングに RDP の資格情報がある。PC の画面でパスワードでログインしてから貼る')
@@ -361,29 +415,37 @@
        cols = [call(svc, 'org.gnome.keyring.InternalUnsupportedGuiltRiddenInterface', 'CreateWithMasterPassword',
                     GLib.Variant('(a{sv}(oayays))', ({'org.freedesktop.Secret.Collection.Label': GLib.Variant('s', 'rdp')},
                                                      (session, b'', b'', 'text/plain'))), '(o)')[0]]
+       with marker.open('x') as f:
+           f.write(cols[0] + '\n')
    props = {'org.freedesktop.Secret.Item.Label': GLib.Variant('s', 'GNOME Remote Desktop RDP credentials'),
             'org.freedesktop.Secret.Item.Attributes': GLib.Variant('a{ss}', attrs)}
-   item, _ = call(cols[0], 'org.freedesktop.Secret.Collection', 'CreateItem',
-                  GLib.Variant('(a{sv}(oayays)b)', (props, (session, b'', bytes(secret[2]), secret[3]), True)), '(oo)')
+   item, prompt = call(cols[0], 'org.freedesktop.Secret.Collection', 'CreateItem',
+                       GLib.Variant('(a{sv}(oayays)b)', (props, (session, b'', bytes(secret[2]), secret[3]), True)), '(oo)')
+   if item == '/' or prompt != '/':
+       raise SystemExit('中断: 移した先の項目を確認できない。元の RDP の資格情報は削除しない')
    for i in src:
        call(i, 'org.freedesktop.Secret.Item', 'Delete', None, '(o)')
    print('移した先:', item)
+   print('キーリングの記録:', marker)
    PY
    ```
 
-   - `移した先: /org/freedesktop/secrets/collection/rdp/<N>` の形の行が出ればよい
+   - `移した先: <コレクションのパス>/<N>` と `キーリングの記録: …/autologin-keyring` の形の行が出ればよい。通常のコレクションのパスは `/org/freedesktop/secrets/collection/rdp` になる
+   - 作ったキーリングのパスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。同じ `rdp` という名前でも、この記録と一致しない既存のキーリングは使わず、項目も変更しない
    - 移した後は、ログインのキーリングに RDP の資格情報が残らない（残っていると、自動ログインの後に、PC の画面へキーリングを開く窓が出るはず）
    - 貼り直したときは `すでに移してある:` と出て、何も変えない
-   - `中断:` が出たら、何も変えていない
+   - `中断:` やエラーが出たら、次へ進まない。作成途中で止まったときは、元の資格情報と、記録したキーリングを確認する
 
 1. RDP の資格情報が、移したキーリングにだけあることを確かめる。
 
    ```bash
    busctl --user call org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service SearchItems 'a{ss}' 1 xdg:schema org.gnome.RemoteDesktop.RdpCredentials
-   busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Locked
+   RDP_KEYRING=$(cat ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring) &&
+   printf '記録したキーリング: %s\n' "${RDP_KEYRING}" &&
+   busctl --user get-property org.freedesktop.secrets "${RDP_KEYRING}" org.freedesktop.Secret.Collection Locked
    ```
 
-   - `aoao 1 "/org/freedesktop/secrets/collection/rdp/<N>" 0` と、`b false` が出ればよい
+   - `aoao 1 "<コレクションのパス>/<N>" 0` と `記録したキーリング: <コレクションのパス>`、`b false` が出ればよい。項目のパスが、記録したキーリングの直下であることを確かめる
    - 1 つ目の `ao` に `/collection/login/` のパスがあれば、この節の手順 1 を貼り直す
    - **注意**: 自動ログインにした後は、[手順 5](#実施手順) の `grdctl rdp set-credentials` を貼らない（閉じたログインのキーリングに書こうとして、PC の画面に窓を出して止まる）。資格情報を変えるときは、この節の手順 8 で戻してから行う
 
@@ -425,7 +487,7 @@
    - SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
    - **次の手順は、PC が起動してから SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから貼る**
 
-1. 自動でログインしたセッションで、デスクトップ共有が待ち受けているかを確かめる。
+1. 自動でログインしたセッションで、資格情報を読み出す前に待ち受けを確かめる。
 
    ```bash
    if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2
@@ -433,9 +495,10 @@
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
      loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Service -p Active
-     grdctl status
+     systemctl --user is-active gnome-remote-desktop.service
      busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.Secret.Collection Locked
-     busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Locked
+     RDP_KEYRING=$(cat ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring) &&
+     busctl --user get-property org.freedesktop.secrets "${RDP_KEYRING}" org.freedesktop.Secret.Collection Locked
      ss -Hlntp "sport = :${RDP_PORT}"
    fi
    ```
@@ -444,16 +507,27 @@
    - `Active=no` なら、PC の画面に GDM のログイン画面が出ていて、RDP の画面は真っ黒になる
      - この節の手順 4 を確かめる（`sudo grubby --info=DEFAULT`）
      - すぐ使うなら、`sudo loginctl activate <SESSION_ID>` でこのセッションへ切り替える。`<SESSION_ID>` は、`loginctl list-sessions` のこのユーザーの `seat0` の行の 1 列目
-   - `grdctl status` で `Unit status: active` と `Username: (hidden)` を確かめる
-   - 続いて `b true`（ログインのキーリングは閉じたまま）と `b false`（移したキーリングは開いている）が出る。移したキーリングは、パスワードを聞かずに開く
+   - `active` と出る
+   - 続いて `b true`（ログインのキーリングは閉じたまま）が出る。移したキーリングは、まだ資格情報を読んでいなければ `b true` でもよい
    - `ss` が、[手順 8](#実施手順) と同じ 1 行を出せばよい
+   - `grdctl status` は資格情報を読み出してキーリングを開くことがあるため、ここでは実行しない。TLS のプローブや TCP の接続確認も、RDP の資格情報の読み出しを始めることがある。起動直後の接続を確かめるときは、先に次の手順で RDP を接続する
 
 1. 別のマシンから、[手順 10](#実施手順) と同じようにつなぐ。
 
-   - 手順 5 のユーザー名とパスワードでつながればよい
+   - 実施手順 5 のユーザー名とパスワードでつながればよい
    - PC の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
+   - 接続できてから、サーバーのシェルで状態を読み戻す
 
-1. 元に戻すときは、自動ログインの行と起動画面の設定を戻し、移したキーリングを消す。
+   ```bash
+   grdctl status
+   busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.Secret.Collection Locked
+   RDP_KEYRING=$(cat ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring) &&
+   busctl --user get-property org.freedesktop.secrets "${RDP_KEYRING}" org.freedesktop.Secret.Collection Locked
+   ```
+
+   - `Unit status: active` と `Username: (hidden)`、`b true`（ログインのキーリングは閉じたまま）、`b false`（移したキーリングは開いている）が出ればよい。移したキーリングは、パスワードを聞かずに開く
+
+1. 元に戻すときは、自動ログインの行と起動画面の設定を戻し、移した RDP の資格情報を消す。キーリングは空になったときだけ消す。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
@@ -462,15 +536,47 @@
      grep -c '^AutomaticLogin' /etc/gdm/custom.conf
      sudo grubby --update-kernel=ALL --remove-args="rd.plymouth=0 plymouth.enable=0"
      sudo grubby --info=DEFAULT | grep -c 'plymouth.enable=0'
-     if busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Label >/dev/null 2>&1; then
-       busctl --user call org.freedesktop.secrets /org/freedesktop/secrets/collection/rdp org.freedesktop.Secret.Collection Delete
-     else
-       echo 'rdp のキーリングは無い（消し済み）'
-     fi
+     /usr/bin/python3 - <<'PY'
+   from pathlib import Path
+   from gi.repository import Gio, GLib
+   state = Path.home() / '.local/state/gnome-desktop-sharing-setup'
+   marker = state / 'autologin-keyring'
+   if state.is_symlink() or marker.is_symlink() or not marker.is_file():
+       raise SystemExit('中断: この手順で作ったキーリングの記録が無いか不正。キーリングは削除しない')
+   col = marker.read_text().strip()
+   bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+   svc = '/org/freedesktop/secrets'
+   def call(path, iface, method, args, rtype):
+       return bus.call_sync('org.freedesktop.secrets', path, iface, method, args,
+                            GLib.VariantType(rtype), Gio.DBusCallFlags.NONE, -1, None).unpack()
+   def prop(path, iface, name):
+       return call(path, 'org.freedesktop.DBus.Properties', 'Get', GLib.Variant('(ss)', (iface, name)), '(v)')[0]
+   if col not in prop(svc, 'org.freedesktop.Secret.Service', 'Collections'):
+       raise SystemExit('中断: 記録したキーリングが見つからない。記録を確認する')
+   _, prompt = call(svc, 'org.freedesktop.Secret.Service', 'Unlock', GLib.Variant('(ao)', ([col],)), '(aoo)')
+   if prompt != '/' or prop(col, 'org.freedesktop.Secret.Collection', 'Locked'):
+       raise SystemExit('中断: 記録したキーリングを開けない。資格情報は削除しない')
+   attrs = {'xdg:schema': 'org.gnome.RemoteDesktop.RdpCredentials'}
+   items, = call(col, 'org.freedesktop.Secret.Collection', 'SearchItems', GLib.Variant('(a{ss})', (attrs,)), '(ao)')
+   for item in items:
+       prompt, = call(item, 'org.freedesktop.Secret.Item', 'Delete', None, '(o)')
+       if prompt != '/':
+           raise SystemExit('中断: 項目の削除が未完了。キーリングと記録は残す')
+   print('移した RDP の資格情報: 削除済み')
+   if prop(col, 'org.freedesktop.Secret.Collection', 'Items'):
+       print('ほかの項目があるため、キーリングと記録は保持:', col)
+   else:
+       prompt, = call(col, 'org.freedesktop.Secret.Collection', 'Delete', None, '(o)')
+       if prompt != '/':
+           raise SystemExit('中断: キーリングの削除が未完了。記録は残す')
+       marker.unlink()
+       print('空のキーリングと記録: 削除済み')
+   PY
    fi
    ```
 
-   - `0` が 2 行と、`o "/"` が出ればよい。貼り直したときは `o "/"` の代わりに `rdp のキーリングは無い（消し済み）` と出る
+   - `0` が 2 行と `移した RDP の資格情報: 削除済み` が出ればよい。ほかの項目が無ければ `空のキーリングと記録: 削除済み` が出る
+   - ほかの項目があれば、キーリングと `autologin-keyring` の記録を保持する。RDP と関係のない項目は消さない。記録が無いか不正なときは、キーリングを削除しない
    - RDP の資格情報も消える。次に PC を起動したら、PC の画面でパスワードでログインし、[手順 5](#実施手順) を貼り直す
    - PC の画面にログインしたまま SSH から再起動するときは、この節の手順 5 と同じく `systemctl reboot -i` を使う
 
@@ -609,10 +715,8 @@
 - **PC の画面に、クライアントの操作がすべて見える**: PC の前の人も同じ画面を操作できる。PC の上部バーの共有中の印から、PC の側で共有を止められる
 - **写るのは PC の主モニター 1 枚で、解像度は PC のまま**: クライアントの窓の大きさには合わせない
 - **同じユーザーのヘッドレスのセッションとは併用できない**: ヘッドレスのデーモンの unit が、この unit と衝突する（`Conflicts=`）
-- **後からリモートログインを有効にしたとき**: リモートログインのデーモンが 3389 を使い、この手順で 3389 にしてあったデスクトップ共有は待ち受けをやめる（ネゴシエーションを切ってあるので、別のポートへ移らない）
-  - 先に、`RDP_PORT` が 3389 のままのシェルで、[ロールバック](#ロールバック)の手順 1 を貼って 3389/tcp を閉じる（リモートログインが開けるのは `rdp` のサービスで、これとは別）
-  - 次に、手順 1 を貼り直して `RDP_PORT` が 3390 になったのを確かめ、手順 2 の最後の行が `0` か見てから手順 4 を貼る
-  - ポートは次に起動したときに効くので、`grdctl rdp disable` と `grdctl rdp enable` で起動し直してから、手順 7・8 を貼る
+- **後からリモートログインを有効にしたとき**: リモートログインのデーモンが 3389 を使う。この手順で 3389 にしてあれば、手順 1 を貼り直して `RDP_PORT` が 3390 になったのを確かめ、手順 4・7・8・9 をやり直す。手順 4 で起動済みの共有デーモンも再起動し、3390 で待ち受け直す。旧ポートの 3389 はリモートログインが使うので、ファイアウォールの開放を残す。更新後の `RDP_PORT` でロールバックの手順 1 を貼ると、新ポートの 3390 を閉じてしまう
+  - ほかのユーザーの[ヘッドレスのセッション](gnome-headless-session.md)が 3390 を使っているなら、手順 1 の `RDP_PORT` に空いている別のポートを入れる
 - **キーリングが閉じているときに、設定アプリの「リモート デスクトップ」を開かない**: 開いただけで、RDP のパスワードが乱数に書き換えられることがある（設定アプリ 47.7 の既知の不具合）
 - **Homebrew が PATH の先頭にあると、`gsettings`・`python3` が Homebrew のものになる**（[homebrew.md の注意点](homebrew.md#注意点)）。この手順書は `/usr/bin/` を付けて呼ぶ
 - **自己署名証明書**: クライアントは初回に証明書の確認を出す。証明書を作り直したら、クライアントで保存済みの証明書を消すか、変更の警告を承認する（gnome-remote-desktop.md の注意点と同じ）
