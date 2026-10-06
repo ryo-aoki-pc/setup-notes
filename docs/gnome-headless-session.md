@@ -479,6 +479,7 @@
 - **目的**: モニターの無い PC で GNOME のデスクトップを常駐させ、別のマシンの RDP クライアントから、そのデスクトップにつなぐ
 - **方式**: GDM のヘッドレスのセッション（`gnome-headless-session@<USER>.service`）と、そのセッションの gnome-remote-desktop（`grdctl --headless`、`gnome-remote-desktop-headless.service`）。RHEL 10 の文書の「1.4 headless server for a single user」と同じ
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜10・LAN 限定・ロールバック 2〜5 を本実行し、再起動後の自動起動と RDP の画面操作を確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）**
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末、ブラケットペースト無し）にそのまま貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
     - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意) → [ロールバック](#ロールバック)の手順 2〜5
     - `grep headless` を直した後の版で、実施手順 1・2 → ロールバックの手順 5 → 実施手順 1・2 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
@@ -674,3 +675,15 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 今回の RDP は、GUI 検証用の固定 `--virtual-monitor` を外して測った。Windows / Android の直接接続、物理 PC、指定 LAN 外からの拒否、同じユーザーの物理画面への同時ログインは今回も確認していない。2026-10-01 の付録の未確認事項のうち、再起動後の自動起動は今回の x86_64 の VM で確認した。
 
 実行ログは `.verification/desktop/` の `rdp-headless-plan-session`、`rdp-credentials-plan-session`、`rdp-probes-plan-session`、`rdp-lan-plan-session`、`rdp-rollback-plan-session`、`rdp-headless-boot-debug.log`、`rdp-rollback-state.log`。実画面は `rdp-headless-calc-result.png`、`rdp-headless-reconnected.png`、`rdp-direct-after-reboot.png` に保存した。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜9 と、手順 10 の RDP 接続を本実行した。システムの RDP が先に有効なので自動判定は `3390` だった。セッションの起動、共通 TLS 設定の退避、証明書・秘密鍵の作成と権限・ラベル、資格情報、有効化、待受と dconf を確認した。GNOME Remote Desktop は `49.3-4.el10_2`、暗号ネゴシエーションは TLS 1.3 だった。指定 LAN の rich rule も実行した。
+
+別の新規 VM の FreeRDP `3.10.3` から、証明書の指紋を照合して接続した。固定の `1920x1080` 仮想モニターは残したため、RDP の `1600x900` は別のモニターになった。RDP のキーで Firefox の窓をそのモニターへ移し、画面・入力を確認した。再起動後もセッションと 3390 の待受が自動起動し、LAN 制限を保持して実再接続できた。起動完了前の接続は失敗したため、待受が出てから再試行した。
+
+ロールバック 2〜5 を実行し、LAN の許可、RDP の資格情報・有効化、共通 TLS 設定、今回生成したファイルを解除した。証明書の sha256 の一致を確認してから削除する分岐も通った。最後に headless セッション数は `0`、サービスは `disabled` になった。Windows / Android クライアント、別ユーザー同時接続、LAN 外の拒否は今回実施していない。

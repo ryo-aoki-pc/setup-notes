@@ -120,7 +120,7 @@
 
    ```
    $ ls -la ~/.local/state/syncthing/
-   -rw-------. 1 <USER> <USER>  623 cert.pem        # デバイス ID のもとになる証明書
+   -rw-r--r--. 1 <USER> <USER>  623 cert.pem        # デバイス ID のもとになる証明書（新規 x86_64 VM の実測）
    -rw-------. 1 <USER> <USER>  119 key.pem         # その秘密鍵
    -rw-------. 1 <USER> <USER> 6613 config.xml      # 設定（GUI のユーザー名・パスワードハッシュ・API キーを含む）
    ```
@@ -1347,6 +1347,7 @@
     - 更新は、Syncthing 自身の自動の更新に任せる
     - すべて管理者の Windows PowerShell 5.1 に貼る
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）。クリーンインストールした x86_64 の VM でも現行ブロックと、設定バックアップ・同じホストへの復元を本実行した（2026-10-06）**
+  - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - 下表のホストで、AlmaLinux 10 の各手順のコマンドを上から順に実行した。AlmaLinux 10 の手順はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
     - linger の有効化（今の [linger.md](linger.md) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
@@ -2082,3 +2083,21 @@ GUI 設定の変更時に API の待ち受けを切り替えることと、HTTP 
 バックアップの解除 7 とロールバック 1〜3 を実行し、サーバーの登録・path/timer・スクリプト、両 VM の Homebrew の Syncthing・ユーザーサービス・受信規則・現行の設定と鍵・DB が消えた。保存先の 8 個の archive と相手へ届いたコピーは残った。サーバーはほかのユーザーサービスが無いことを確かめて linger も無効へ戻した。相手は Quadlet と RDP 検証が使うため linger を維持した。
 
 今回の VM では OS を入れ直したホストへの Syncthing 復元、実際の 0 時台の timer と Persistent の追いかけ、競合処理、インターネット経由の relay、UDP/QUIC での同期はまだ検証していない。Windows の節は今回の確認に含めていない。
+
+### 付録: 新規 VM での現行手順の再検証（2026-10-06）
+
+同日の先行検証に使った VM と分け、ISO 導入直後の AlmaLinux 10.2 Workstation から新しい x86_64 VM を用意して、`5da3478` の現行本文を再検証した。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active。一般ユーザーの SSH PTY にブラケットペースト無しで貼り、手順ごとに結果を確認した。
+
+Homebrew と linger は前提の手順書から導入した。両 VM の手順 1〜8 は初回から成功し、Homebrew 7.0.8 の Syncthing 2.1.5 `[noupgrade]`、GUI の `0.0.0.0:8384` と TLS、enabled/active、同期ポートが確認できた。保護された REST API は認証無しで 403 だった。今回の手順 6 では EOF は出なかった。
+
+- 別の新規 Workstation VM の Firefox で自己署名証明書の警告、認証、Show ID を確認した。双方のデバイス登録と承認、`current-vm-test` フォルダの作成・共有・相手側のパス指定を、両方の GUI で操作した
+- 日本語ファイルを双方から作成し、相手側からの更新と削除も同期した。内容・sha256 が一致し、両方で idle、needFiles/needBytes が 0、接続方式は直接 TCP だった
+- GUI の接続元制限 1 は検証用 LAN だけを許可した。LAN の相手から 8384/tcp へ到達し、許可帯外の WireGuard クライアントは拒否された。解除 2 も成功した
+- 設定バックアップ 1〜4 は path/timer が active、oneshot は success、変更時だけ 0600 の archive が増えた。5・6 の GUI の共有と相手側の承認・受信専用・ゴミ箱（0 日）も操作した。最初に届いた 7 個の名前と sha256 はすべて一致した
+- 同じホストの復元 3〜6 は、変更前の archive を控え、送信帯域制限を 0 → 17 にしてから控えた archive を選んで戻した。再起動後は 0、device ID は元と一致、アドレス・TLS・共有フォルダも戻った
+
+両 VM の OS 再起動後、Syncthing は SSH ログイン前に起動した。サーバーは 14:00:45 JST（SSH セッション 14:00:57）、相手は 14:03:19（SSH 14:03:28）。両フォルダは idle、needFiles/needBytes は 0、設定バックアップは双方に 9 個あった。
+
+更新 1・2 は `2.1.5 already installed` と restart・版表示を確認した。新しい版への更新ではない。バックアップ解除 7 とロールバック 1〜3 を通し、両 VM のサービス・受信規則・Homebrew の Syncthing・現行の設定と鍵・DB が消えた。9 個の archive と相手のコピーは残し、linger は両 VM で無効に戻した。
+
+この再検証では OS を入れ直したホストへの復元、0 時台の timer と Persistent の追いかけ、競合、relay、UDP/QUIC、Windows の節は確かめていない。証明書 `cert.pem` と `https-cert.pem` は 0644、秘密鍵と `config.xml` は 0600 だった。

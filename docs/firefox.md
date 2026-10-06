@@ -600,6 +600,7 @@
   - **AlmaLinux 10**（[実施手順](#実施手順)）: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
   - **Windows 11**（[Windows 11 で使う](#windows-11-で使う)）: winget の `Mozilla.Firefox.ja`（Mozilla の日本語版のインストーラ）を、管理者の Windows PowerShell 5.1 から PC 全体（`C:\Program Files\Mozilla Firefox`）に入れ、Windows の設定で既定のブラウザーにする。更新は Firefox 自身（Mozilla Maintenance Service）に任せる。変数は無く、AAC・H.264 のために足すものも無い
 - **状態（AlmaLinux 10）**
+  - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - **2026-10-06: クリーンな x86_64 の VM で手順 1〜8・10・11 とロールバック 1〜5 を本実行済み**。Mozilla 157 の日本語 GUI と H.264/AAC の動画再生、AppStream の ESR 140 への復元を確認した（末尾の付録）。手順 9 は衝突が無かったため省略した
   - **手順 1〜7（Firefox）は実機で本実行済み（2026-09-21）**
     - 下表のホストで `dnf upgrade firefox` を実行し、AppStream の `140.15.0-1.el10_2` から mozilla の `156.0-1` に載せ替えて、そのまま常用している
@@ -1247,3 +1248,15 @@ AlmaLinux 10.2 Workstation を新規に入れた x86_64 の VirtualBox VM（1 vC
 動画の形式を調べるためだけに、検証用の `ffmpeg` CLI（6 RPM）も追加した。Firefox の導入手順に必要なのは `ffmpeg-libs` で、CLI は手順の前提に足していない。プローブが `about:support` を読む起動にだけ `--marionette --remote-allow-system-access` を使い、通常の Firefox の設定には足していない。監査ログファイルを指定した AVC の照合は `<no matches>` だった。Windows の節、Web サービスへのサインイン、音声の実出力は未確認。
 
 続けてロールバック 1〜5 を本実行した。`ffmpeg-libs` と検証用 CLI・ほかで使われていない依存が削除され、言語パックを外してから `distro-sync firefox` で `140.16.0-1.el10_2` に戻った。Mozilla の repo と署名鍵も削除できた。新しい版のプロファイルを古い版で開くことは確認せず、動画の確認に使った隔離プロファイルを保持した。
+
+---
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+**環境と流し方**: `5da3478` の現行手順を、別のクリーンな AlmaLinux 10.2 Workstation / x86_64 の VM（1 vCPU、SELinux Enforcing、firewalld 稼働、US 配列）で実行した。SSH の一般ユーザーの対話 PTY に折り畳みの外のブロックを手順ごとに貼り、応答とプロンプトを待った。GUI は GNOME 49.4 のヘッドレスセッションに仮想モニターを付け、操作後の PNG を目視した。既存の実機・資格情報は使っていない。
+
+実施手順 1〜8・10 と GUI の起動を実行した。8 が衝突せず通ったため条件付きの 9 は省略した。OS の ESR `140.16.0-1.el10_2` から Mozilla の `157.0-1` / 日本語言語パックに切り替わり、鍵の指紋・導入元・依存関係を確認した。更新も成功し変更は無かった。
+
+codec 確認では、MDN の `flower.mp4`（検証用の ffprobe で H.264 High + AAC LC と確認）を隔離プロファイルの通常 GUI で再生した。花の動画が画面に映り、Marionette で `error=null`、復号フレームが `147` → `656` に増え、再生時刻が進むことを確認した。H.264 / AAC の `canPlayType` は両方 `probably`。追加の AAC デコードは Web Audio で 2 チャンネル・44100 Hz・222970 サンプルになった。ただしこの素材の観測ピークは 0 で、耳で音を聴く試験はしていない。今回の手順 11 はこの実デコード・再生の観測で検証し、codec 導入後の about:support 表の再取得はしていない。
+
+ロールバック 1〜5 を実行し、`ffmpeg-libs`・形式確認のためだけに追加した `ffmpeg` CLI と未使用依存、日本語言語パック、Mozilla repo / 鍵を削除した。`distro-sync` で ESR `140.16.0-1.el10_2` に戻った。隔離プロファイルは古い Firefox で開いていない。ハードウェアデコード、音声の実出力、既定ブラウザー変更、Web サービスへのサインイン、Windows は今回実施していない。

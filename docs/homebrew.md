@@ -352,7 +352,7 @@
 
 - **目的**: AlmaLinux 10 に [Homebrew](https://brew.sh/)（Linux 版。旧称 Linuxbrew）を入れて、**EPEL や AppStream に無い／古い CLI ツールを root 権限なしで新しい版のまま使える**ようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **実機で本実行済み（2026-09-20）。`0dbb522` の直接追記版の実施手順 1〜4 を x86_64 のクリーン VM でも本実行済み（2026-10-06）**。共通 bash 設定へ統一した現行版の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
+- **状態**: **実機で本実行済み（2026-09-20）。`0dbb522` の直接追記版の実施手順 1〜4 を x86_64 のクリーン VM でも本実行済み（2026-10-06）**。現行版 `5da3478` の共通 bash 新規導入・実施手順 1〜4・root 自身の共通設定を、新しい VM で再検証した（[現行版の再検証](#付録-現行の共通-bash-設定での再検証2026-10-06)）。既存ホストからの手動移行は行っていない。
   - 下表のホストに公式インストーラで `Homebrew 7.0.6` を入れ、`~/.bashrc` に `brew shellenv` を書いて常用中
   - **このリポジトリの Homebrew 系 17 本の手順書は、すべてこれを前提にしている**（実機に入っているのはそのうちの一部で、記録時点の `brew leaves` は 15 件。下表）
   - 本書の手順 1〜4 と[使い方の基本](#使い方の基本)・[更新](#更新)は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
@@ -686,3 +686,11 @@ $ du -sh /home/linuxbrew/.linuxbrew
 ボトルの取得中には `Landlock ABI 10 or later is required to deny all network access; found ABI 6` という警告が出た。Homebrew は、このカーネルが対応する制限を適用すると表示し、導入は続行して成功した。警告だけで導入失敗とは扱わない。
 
 **今回の未確認範囲**: root・sudo で Homebrew を使う任意節、更新・ロールバックは今回流していない。
+
+### 付録: 現行の共通 bash 設定での再検証（2026-10-06）
+
+`5da3478` の実施手順 1〜4 を、公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing）で通した。先に README の共通 bash の clone と `install.sh` を実行し、OS 既定の `~/.bashrc` に読み込み口だけを設定した。SSH の対話 PTY でインストーラの VM 専用パスワードと RETURN に答えた。
+
+Homebrew 7.0.8 が標準 prefix に入り、手順 3 の `. ~/.bashrc` で `/home/linuxbrew/.linuxbrew/bin/brew` が見つかった。インストーラの案内する `brew shellenv` の行は追加していない。`brew config` の prefix と stable branch も一致した。依存 RPM は Workstation に既にあり、追加は無かった。
+
+一般ユーザーの共通設定の再実行で、`~/.bashrc`・元の控え・`~/.bash_profile` の SHA256 は変わらず、読み込み口は 1 行、控えは 0600 だった。root 自身にも共通 bash を新規導入し、root の対話シェルで Homebrew の PATH と版を確認した。sudo の `secure_path` を変更する任意節、Homebrew の更新・削除はこの再検証では行っていない。

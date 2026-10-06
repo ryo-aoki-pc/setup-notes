@@ -500,7 +500,7 @@
 
 - **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](distrobox.md)・[podman-compose](podman-compose.md)・[hadolint / dive / Trivy](image-tools.md)・[podman-tui](podman-tui.md)・[lazydocker](lazydocker.md) の前提になる（CLI にとっての [Homebrew](homebrew.md) と同じ位置づけ）
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **x86_64 の VM で `0dbb522` 版の実施手順を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**。その後の共通 bash 設定の導入・移行は今回の VM では実行していない
+- **状態**: **現行 `5da3478` 版を、共通 bash `3d5323e` を新規導入した x86_64 の VM で再検証済み（2026-10-06、SELinux Enforcing）**。実施手順 1〜3・5〜7、Docker API、Quadlet の再起動後の自動起動、ロールバックを通した。subuid/subgid の追加は設定済みのため飛ばした。実機での適用とは別の記録（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](#更新)、[ロールバック](#ロールバック)を通した
     - Quadlet の節の linger の有効化と解除（今の [linger.md](linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
@@ -692,3 +692,15 @@ $ podman --remote version --format '{{.Server.Version}}'
 - SELinux は Enforcing のまま。Compose の `:Z` のホスト側ディレクトリは `container_file_t` になり、カテゴリがコンテナの `container_t` と一致した。追加の確認で `--memory 64m --pids-limit 32` を渡すと、コンテナ内の `memory.max` は `67108864`、`pids.max` は `32` だった。
 - Quadlet の任意節の手順 1〜4 も通した。再起動後のサービス起動は 04:19:51、最初の SSH ログインは 04:20:12、本文手順 4 のログインは 04:20:42 で、サービスが先に起動した。HTTP は `hello from quadlet`。linger は `yes`、API ソケットも active だった。
 - 今回は実機・aarch64、subuid / subgid の不足するユーザー、更新・ロールバックを通していない。以前のコンテナ検証とは範囲を分ける。
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1〜3・5〜7 と Docker API の任意節を通した。subuid/subgid は両方 `524288:65536` だったので、手順 4 は本文の条件に従って飛ばした。Podman は 5.8.2、rootless / overlay / crun / netavark / pasta / cgroup v2。hello コンテナ、ユーザー socket の `active`・`OK`、remote の版を確認した。共通 bash を読み直すと `DOCKER_HOST=unix:///run/user/1000/podman/podman.sock` になり、Docker API の応答にも `Podman Engine` が出た。Quadlet の手順 1・2 で `hello-web` が生成・起動し、HTTP は `hello from quadlet` を返した。
+
+続けて Quadlet の手順 3 の OS 再起動を行い、boot ID が変わったこと、手順 4 のサービス起動時刻、`active` と HTTP 応答を確認した。`~/hello-web` は `container_file_t` とコンテナ専用の MCS カテゴリーになり、SELinux は Enforcing のまま。ユーザー socket と rclone の timer も再起動後に active だった。`podman auto-update --dry-run` は対象の `hello-web` を表示した。SSH の再接続まで数分待ち、補助として VirtualBox から Shift キーを送った。これが必要な条件は切り分けておらず、手順への一般的な追加とはしていない。
+
+ロールバックの手順 1〜6 も、この専用 VM の自分のユーザーで通した。Quadlet のサービス・定義・専用ページを撤去し、socket を無効にした。自分の保管場所にコンテナ・ボリュームが無いことと、今回取得した hello イメージだけが残ることを見てから `podman system reset` の確認に答え、rootless の保管場所を消した。最後に Podman と依存を dnf で削除した。root の KVM イメージの保管場所とは別で、実環境のコンテナを対象にしていない。

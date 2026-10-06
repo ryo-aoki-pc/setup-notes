@@ -268,3 +268,9 @@ AlmaLinux 10.2 Workstation を ISO から新規に入れた VirtualBox の VM（
 続けて Firefox の FFmpeg を入れるとき、EPEL 10 の署名鍵の fingerprint と uid を照合して取り込めた。更新の手順は `epel-release-10-8.el10_2` への 1 パッケージの upgrade になった。実機での手順 2 と aarch64 の今回の実行は確認していない。
 
 ロールバックは RPM Fusion を先に外してから行い、`--noautoremove` で epel-release だけが消えた。EPEL の署名鍵も削除できた。SELinux の extra ポリシーは残した。
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active）で、`5da3478` の本文を SSH 対話 PTY に渡した。試験専用のユーザー・鍵と設定値を使用し、利用者の実アカウントの資格情報は持ち込んでいない。
+
+実施手順 1〜3 を通した。未設定の状態から extras の epel-release-10-6.el10 と、CRB の selinux-policy-extra / selinux-policy-targeted-extra が入り、epel が有効になった。CRB は OS の既定で有効で、追加の有効化は行っていない。この再検証では更新・ロールバックを実行していない。

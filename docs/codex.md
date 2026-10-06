@@ -441,3 +441,9 @@
 **結果**: 公式 standalone インストーラーで Codex CLI 0.160.0 を導入した。Workstation に curl があったため、本文の案内どおり手順 2 の `curl-minimal` は外した。同じインストーラーを再実行すると、検証中に最新が変わっており 0.160.0 から 0.160.1 へ更新された。`Start Codex now?` は `n` と答え、最終の `codex --version` は `codex-cli 0.160.1`、`codex login status` は `Not logged in`。`~/.local/bin/codex` で見つかることを確認した。
 
 **今回の未確認範囲**: 認証・AI への依頼・対話画面・sandbox での実行、Windows の手順、ロールバックは今回確認していない。
+
+### 付録: 現行版の新規 VM での再検証（2026-10-06）
+
+公式 ISO から新規導入した AlmaLinux 10.2 Workstation の x86_64 VM（kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active）で、`5da3478` の本文を SSH 対話 PTY に渡した。試験専用のユーザー・鍵と設定値を使用し、利用者の実アカウントの資格情報は持ち込んでいない。
+
+実施手順 1〜4 を通した。事前の command -v は終了 1、standalone の Codex CLI 0.160.1 が入り、実行場所は自分の ~/.local/bin/codex だった。依存の curl-minimal の指定は、導入済み curl へ解決して成功し、競合は起きなかった。~/.local/bin は OS 既定の PATH にあり、インストーラも既存 PATH と表示した。起動の質問には n と答え、`codex login status` は Not logged in（終了 1）。実アカウントの認証・AI への依頼・更新・ロールバックは行っていない。

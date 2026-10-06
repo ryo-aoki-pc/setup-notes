@@ -1631,3 +1631,11 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. VirtualBox マネージャーの表示と、新しい版の知らせ
 1. `winget upgrade` と `winget uninstall`（ネットワークが切れるか、ドライバーとアダプターが消えるか、Oracle の証明書が残るか）
 1. Hyper-V が動いていない PC（VirtualBox が VT-x / AMD-V を直接使う形）、Intel の CPU、arm64 の Windows
+
+---
+
+### 付録: 現行版を新規 VM で再検証（2026-10-06）
+
+**対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、実行対象の現行ブロックを SSH の擬似端末で順に実行した。
+
+実施手順 1 は `x86_64` / `CPU の仮想化支援が見えない`。外側が Hyper-V NEM のホストで、ゲストへ SVM / VT-x が提供されていない。本文の前提を満たさないため、この VM での VirtualBox 導入・入れ子の VM 起動は実施していない。手順の失敗とハードウェアの不足を分けた記録で、以前の実機検証を置き換えない。
