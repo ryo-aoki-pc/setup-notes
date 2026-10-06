@@ -14,8 +14,9 @@
     - 上流の gnome-remote-desktop 49.3 のソース・README と、AlmaLinux の `gnome-remote-desktop-49.3-4.el10_2` の spec（パッチがデスクトップ共有のふるまいを変えないこと）
     - gnome-shell 49.4（ロック画面で画面の共有を止めること）、gnome-control-center 47.7（同じキーリングの項目と証明書のパスを使うこと）、libsecret 0.21.2・gnome-keyring 42.1 のソース
     - RHEL 10 の文書の 1.1・1.3・1.4
-    - 手順書の bash のブロック 24 個が `bash -n` を通ること
-    - [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 1・2 と、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
+    - 手順書の bash のブロック 24 個が `bash -n` と ShellCheck 0.9.0 を通ること
+    - 部品: [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 3・7 の `sed` を gdm の `custom.conf` の写しにかけたことと、[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の dconf の戻し方を、コンテナの dconf 0.40.0 で確かめたこと
+    - [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 1・2 のブロックと、同節の手順 5 の `grdctl status` と `Locked` の行、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
   - 確かめていないこと
     - 実施手順のすべて（PC の画面のセッションでの `grdctl` の設定・資格情報の保存・有効化・ファイアウォール・待ち受け・TLS のプローブ・クライアントからの接続）
     - 任意節（見るだけにする・接続元を LAN に絞る・自動ログイン）を GNOME のセッションで流すこと。自動ログインの後に、PC の画面にキーリングの窓が出ずにつながること
@@ -66,7 +67,7 @@
 
 **ブロックの構文と、部品の確かめ**:
 
-- 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` にかけた。どれも通った
+- 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` と ShellCheck 0.9.0（`-s bash`。変数のブロックのために SC2034・SC2154 は外した）にかけた。どれも通った
 - `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
 - コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
@@ -78,12 +79,14 @@
   - 写したキーリングのファイルは、暗号化されない文字のファイル（`~/.local/share/keyrings/rdp.keyring`）だった
   - 写したキーリングだけを `Unlock` すると、窓（prompt）無しで `b false` になり、`secret-tool lookup` が値を返した
   - ログインのキーリングのパスワードを空にした場合も、起こした直後は `b true` で、`Unlock` は窓無しで通った
-  - libsecret は、同じ属性の項目が閉じたキーリングにしか無いと、それらを開こうとする。ログインのキーリングの項目が残っていると、そのキーリングを開く窓が要る、と判断した
-- 直した版（写した後に、ログインのキーリングの項目を消す）で、次を確かめた
-  - 手順 1 で `移した先: /org/freedesktop/secrets/collection/rdp/1`、貼り直すと `すでに移してある:`
-  - 手順 2 で `aoao 1 "/org/freedesktop/secrets/collection/rdp/1" 0` と `b false`
-  - デーモンを立て直してパスワード無しで起こした後に、`grdctl status` が `Username: (hidden)`・`Password: (hidden)` を出した（grdctl 自身の libsecret の読み出し）。続けて、ログインのキーリングは `b true`、移したキーリングは `b false`
-  - 同節の手順 7 の `Collection.Delete` で `o "/"` が出て、`rdp.keyring` が消えた
-- この模擬で確かめていないこと: GDM の自動ログイン、GNOME のセッションの中の gnome-keyring（PAM の `pam_gnome_keyring` が起こすもの）、gnome-remote-desktop のデーモンが接続のときに読み出すこと、PC の画面に窓が出ないこと
+  - libsecret 0.21.2 の読み出しは、同じ属性の項目が閉じたキーリングにしか無いと、最初に見つかった 1 つ（`locked[0]`）を開こうとする（ソースで確かめた）。ログインのキーリングの項目が先に返ると、そのキーリングを開く窓が要るはず、と判断した
+- 直した版（写した後に、ログインのキーリングの項目を消す。同節の手順 1 の始めに、`rdp` のキーリングを `Unlock` する）を、手順書のブロックのまま流して、次を確かめた
+  - パスワードで開いたデーモンで、同節の手順 1 が `移した先: /org/freedesktop/secrets/collection/rdp/1`（終了コード 0）、貼り直すと `すでに移してある: /org/freedesktop/secrets/collection/rdp/1`（終了コード 0）
+  - 同節の手順 2 が `aoao 1 "/org/freedesktop/secrets/collection/rdp/1" 0` と `b false`
+  - デーモンを立て直し、パスワードで開き直した直後は、`rdp` のキーリングが `b true` だった。そこで同節の手順 1 を貼り直すと、窓無しで開いて `すでに移してある:`（終了コード 0）、同節の手順 2 も同じ 2 行
+  - デーモンを立て直してパスワード無しで起こした後（自動ログインの代わり）に、同節の手順 5 の `grdctl status` が `Username: (hidden)`・`Password: (hidden)` を出した（grdctl 自身の libsecret の読み出し）。続く `Locked` の行は、ログインのキーリングが `b true`、移したキーリングが `b false`
+    - このコンテナでは証明書を設定していないので、`grdctl status` は `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` も出した
+  - 同節の手順 7 の `busctl` の行で `o "/"` が出て、`rdp.keyring` が消えた。貼り直すと `rdp のキーリングは無い（消し済み）`
+- この模擬で確かめていないこと: GDM の自動ログイン、GNOME のセッションの中の gnome-keyring（PAM の `pam_gnome_keyring` が起こすもの）、gnome-remote-desktop のデーモンが接続のときに読み出すこと、PC の画面に窓が出ないこと、同節の手順 5 の `loginctl` と `ss` の行
 
 ---

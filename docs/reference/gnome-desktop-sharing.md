@@ -19,8 +19,9 @@
 - **ログインのキーリング**: ユーザーのモードの資格情報は、GNOME のキーリング（libsecret の既定のコレクション。通常は `login`）に置く
   - schema は `org.gnome.RemoteDesktop.RdpCredentials`、ラベルは `GNOME Remote Desktop RDP credentials`、値は GVariant の文字列 `{'username': <'…'>, 'password': <'…'>}`。設定アプリ（gnome-control-center 47.7）も同じ項目を読み書きする
   - ヘッドレスとシステムのモードの資格情報（TPM か `credentials.ini`）とは別の場所なので、ぶつからない
-  - ログインのキーリングを開くのは、GDM でパスワードを入れてログインしたときの `pam_gnome_keyring`。SSH のログイン・自動ログイン・指紋では開かない
-  - キーリングが閉じていると、`set-credentials` はロックを解く窓を PC の画面に出して待ち続ける（上流 #166・#338）。接続のたびの資格情報の読み出しも失敗し、`Credentials are not set, denying client` で断る（上流 #27）
+  - ログインのキーリングを開くのは、GDM でパスワードを入れてログインしたときの `pam_gnome_keyring`（gdm 47.0 の `gdm-password` の PAM）。SSH のログイン（sshd の PAM に `pam_gnome_keyring` が無い）と自動ログイン（パスワードが無い）では開かない
+  - キーリングが閉じていると、`set-credentials` はロックを解く窓を PC の画面に出して待ち続ける（上流 #166・#338）
+  - デーモンは接続のたびに資格情報を読み出す（`src/grd-session-rdp.c`）。閉じたキーリングにしか無いと、libsecret がそれを開こうとして PC の画面に窓を出すはずで、開けないと `Credentials are not set, denying client` で断る（上流 #157 の開発者の説明）
 - **画面の設定**: gnome-shell は、ロック画面（`unlock-dialog` のモード）の間、`inhibit_remote_access` で画面の共有を止め、Mutter はつながっているリモートのセッションを閉じる（上流の README の「locking the screen also closes the remote desktop connection」、上流 #119・#172）
   - 無操作で暗くなったとき（`idle-delay`）も、シールドが出て同じモードになる。`lock-enabled` が false でも切れる
   - なので、`idle-delay` を 0 に、`lock-enabled` を false にする（[gnome-power.md 手順 1・2](../gnome-power.md#実施手順) の既定値）
@@ -28,7 +29,7 @@
 
 ### 実施手順 / 手順 3: 補足: 退避と証明書
 
-- 中身は [gnome-headless-session.md 手順 3](../gnome-headless-session.md#実施手順) と同じ形で、退避先だけが違う（`~/.local/state/gnome-desktop-sharing-setup`）
+- 中身は [gnome-headless-session.md 手順 3](../gnome-headless-session.md#実施手順) と同じ形。違うのは、退避先（`~/.local/state/gnome-desktop-sharing-setup`）と、退避するキーの数（5 つ）
 - 退避するのは、手順 4 で変える dconf のキー（`/org/gnome/desktop/remote-desktop/rdp/` の `port`・`negotiate-port`・`view-only`・`tls-cert`・`tls-key`）。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - `tls-cert` と `tls-key` は、デスクトップ共有とヘッドレスのモードで共用する（ヘッドレスの専用のキーは `rdp/headless/` の下の `port`・`negotiate-port`・`enable` だけ）。`rdp/` を `dconf reset -f` すると `rdp/headless/` も消えるので、キーごとに戻す
 - 証明書のパス（`~/.local/share/gnome-remote-desktop/certificates/rdp-tls.{crt,key}`）は、ヘッドレスの手順書・RHEL 10 の文書の 1.4・設定アプリ 47.7 が自分で作るときと同じ
@@ -73,8 +74,9 @@
   - パスワードの無い別のキーリングに RDP の資格情報だけを置く: この手順書はこちらを採る
 - パスワードの無いキーリングを、PC の画面に窓を出さずに作るには、gnome-keyring の `org.gnome.keyring.InternalUnsupportedGuiltRiddenInterface.CreateWithMasterPassword` を空のパスワードで呼ぶ（Secret Service の `CreateCollection` は、PC の画面にパスワードを聞く窓を出す）
 - パスワードの無いキーリングも、gnome-keyring を起こした直後は閉じている。開くように頼まれると、パスワードを聞かずに開く（コンテナでの模擬。[検証記録](../verification/gnome-desktop-sharing.md#付録-資料とブロックの確認2026-10-06)）
-- libsecret は、同じ属性の項目が開いたキーリングにあればそれを使い、閉じたキーリングにしか無ければ、それらを開こうとする
-  - ログインのキーリングに項目が残っていると、そのキーリングを開く窓が要るので、写すのではなく移す（写した後に、ログインのキーリングの項目を消す）
+- libsecret 0.21.2 の読み出しは、同じ属性の項目が開いたキーリングにあればそれを使い、閉じたキーリングにしか無ければ、最初に見つかった 1 つ（`locked[0]`）を開こうとする
+  - ログインのキーリングに項目が残っていて、それが先に返ると、そのキーリングを開く窓が要るはず。なので、写すのではなく移す（写した後に、ログインのキーリングの項目を消す）
+- 手順 1 の始めに、`rdp` のキーリングを `Unlock` する。パスワードでログインし直した後は閉じているので、開かないと、移した項目が閉じたキーリングの側に数えられる
 - Secret Service のセッションは、それを開いた D-Bus の接続でしか使えないので、`busctl` を何回も呼ぶ形ではなく、1 つの接続の Python（Gio）で書いた
 - 値は、`grdctl rdp set-credentials` が保存したものを `GetSecrets` で読み、そのまま `CreateItem` に渡す（ラベル・`xdg:schema` の属性も同じにする）。ユーザー名とパスワードを打ち直さない
 
