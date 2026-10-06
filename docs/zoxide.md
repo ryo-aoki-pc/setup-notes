@@ -2,6 +2,8 @@
 
 ## 実施手順
 
+- [検証記録](verification/zoxide.md)・[参考資料](reference/zoxide.md)
+
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
@@ -9,7 +11,6 @@
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定も自分のユーザーに導入するため）
 
 - 上から順にコードブロックを貼る
-- 各手順の末尾の「補足」（折り畳み）と後半の[補足](#補足)は、実行するだけなら読まなくてよい。折り畳みの中のブロックも貼らなくてよい
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. 共通の bash 設定が導入済みか確かめる。
@@ -50,32 +51,8 @@
    ```
 
    - `command -v zoxide` は `/home/linuxbrew/.linuxbrew/bin/zoxide`
-   - **注意**: 対話シェル（端末に貼る）で実行する。スクリプトの中では記録されない（この手順の補足）
+   - **注意**: 対話シェル（端末に貼る）で実行する。スクリプトの中では記録されない
    - **次の手順は、プロンプトが戻ってから貼る**（zoxide はプロンプトを出すときに今のディレクトリを記録する。ブラケットペーストで続けて貼ると、プロンプトが出る前に手順 5 が走り、`/usr/share` がまだ無い）
-
-   <details>
-   <summary>補足: データベース / 記録されるタイミング</summary>
-
-   学習結果は `~/.local/share/zoxide/db.zo`（バイナリ）に入る。中身は `zoxide query --list`（パスの一覧）や `zoxide query --list --score`（スコア付き）で読める。実機は 5 エントリ、287 バイト:
-
-   ```
-   $ ls -l ~/.local/share/zoxide/
-   -rw-r--r--. 1 <USER> <USER> 287 Sep 22 18:31 db.zo
-   $ zoxide query --list | wc -l
-   5
-   ```
-
-   特定のパスを忘れさせるには `zoxide remove`（引数はパス）。
-
-   **記録されるのは、対話シェルがプロンプトを出すときだけ**。`zoxide init` が仕込むのは `PROMPT_COMMAND` のフックで、プロンプトを出すときの今のディレクトリを 1 つ記録する。
-
-   - 非対話シェル（スクリプトや `bash -c`）で `cd` しても、データベースは増えない
-   - 2026-09-22 の検証コンテナで、当時の確認のブロック（`cd /tmp && cd /usr/share && cd ~` を含む）をスクリプトとして流したときは、`zoxide query --list` の出力が空になった
-   - 対話シェルでも、プロンプトが出るまでの間の `cd` は最後の 1 つしか記録されない。ホーム（`$HOME`）は既定で記録しない（`_ZO_EXCLUDE_DIRS` の既定値）
-   - ブラケットペーストで貼ると、複数行の貼り付けは 1 つの入力として実行され、プロンプトは最後に 1 回しか出ない
-   - そのため、`cd ~` で終わる当時のブロックは、ブラケットペーストの有無にかかわらず何も残さなかった（2026-09-29 に、当時あった dnf の経路の検証コンテナで確認）。確認を手順 4 と手順 5 に分けたのはこのため
-
-   </details>
 
 1. データベースに記録されたか確かめ、ホームに戻る。
 
@@ -106,9 +83,6 @@
 
 ## ロールバック
 
-- この節の手順 1（`brew uninstall`）は**本実行していない**
-- この節の手順 2・3 は、x86_64 のコンテナで通した（2026-09-29。当時あった dnf の経路の検証の中で）
-
 1. brew で zoxide を消す。
 
    ```bash
@@ -131,99 +105,7 @@
 
 ---
 
-## 補足
-
-- 2026-10-05: シェル設定は bash リポジトリに統一し、直接追記とその削除の手順を確認手順に変更した。変更後のコードブロックは `bash -n` で確認し、共通設定の導入・移行は bash リポジトリの一時ホームのテストで確認した。パッケージ導入・削除やサービス操作は再実行していない。以下の過去の実測・出力例は、直接追記していた時点の記録を含む。現行手順では同じ行を `~/.bashrc` に書かない
-
-### 対象と検証環境
-
-- **目的**: AlmaLinux 10 に [zoxide](https://github.com/ajeetdsouza/zoxide)（よく行くディレクトリを覚えて短い入力で移動するツール）の最新版を入れる。**EPEL にも AppStream にも RPM が無い**（EL10 向けの RPM は COPR にしか無い）
-- **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
-- **状態**: **実機で本実行済み（2026-09-21）。`0dbb522` の直接追記版の実施手順 1〜5 を x86_64 のクリーン VM でも本実行済み（2026-10-06）**。現行版 `5da3478` は、共通 bash 新規導入後の別の VM でも再検証した（末尾の再検証記録）。既存ホストの手動移行は行っていない。
-  - 下表のホストで `brew install zoxide` を実行し、`~/.bashrc` に `eval "$(zoxide init bash)"` を書いて常用中（データベースに 5 エントリ）
-  - **実機の初期化は `--cmd` 無し（コマンド名 `z`）で入れてある**
-  - [Homebrew の導入](homebrew.md)と手順 2・3、それに当時の確認のブロック（今の手順 4・5 の元。`brew list --versions zoxide` と `cd /tmp && cd /usr/share && cd ~` を含む 1 つのブロック）は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
-  - 確認したこと: ボトルが降りる、`~/.bashrc` に書いた初期化で `z` 関数が定義される（`type -t z` → `function`）
-  - ただし**非対話シェルでは `cd` が記録されない**ため、そのときの `zoxide query --list` は空だった（[手順 4 の補足](#実施手順)）
-  - 2026-09-29〜10-02 の版には、x86_64 だけの dnf（COPR `kray74/cli-tools`）の経路があった（2026-10-03 に外した。[選択した方針](#選択した方針)）
-    - 当時の手順 1・3〜8（3〜5 が dnf の手順で、6〜8 は今の手順 3〜5）、当時の[更新](#更新)の手順 2、当時の[ロールバック](#ロールバック)の手順 2〜5（4・5 は今の手順 2・3）を、x86_64 のコンテナで**その版のコードブロックのまま**、擬似端末の対話シェルに貼って通した（[付録](#付録-dnf-の経路のコンテナでの検証記録2026-09-29)）
-    - 今の手順 3〜5 と同じブロックで、`type -t z` → `function`、手順 5 で `/usr/share` が出る、`zi share` で `/usr/share` に移る、を確かめた（zoxide は dnf の `/usr/bin/zoxide`）
-  - **確認していないこと**: `ZOXIDE_CMD=cd` の形、Homebrew の zoxide での `zi`（fzf 連携）
-
-| 項目 | 実機 | 検証コンテナ | dnf の検証コンテナ（外した経路） |
-|---|---|---|---|
-| 実施日 | 2026-09-21 | 2026-09-22 | 2026-09-29 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） | AlmaLinux 10.2 (Lavender Lion) / x86_64（`docker.io/library/almalinux:10`、クラウドホスト上の Docker 29.3.1） |
-| Homebrew | 7.0.6（`/home/linuxbrew/.linuxbrew`） | 7.0.6（同じ場所に新規導入） | 使わない |
-| 入った zoxide | `zoxide 0.10.0`（`arm64_linux` ボトル） | 同じ（`0.10.0`） | `zoxide-0.10.0-1.el10.x86_64`（COPR `kray74/cli-tools`） |
-| fzf | `fzf 0.74.4`（Homebrew） | 未導入 | `fzf-0.74.4-1.el10.x86_64`（同じ COPR） |
-| シェル | bash（`~/.bashrc` に `eval "$(zoxide init bash)"`） | bash（初期化は未設定） | bash（`~/.bashrc` に `eval "$(zoxide init bash --cmd z)"`） |
-
-> [!NOTE]
-> シェルのエイリアス・初期化は bash リポジトリの値を使う。本書で設定するシェル変数は無い。
-
-手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
-
-### 実施前の状態
-
-| 項目 | 状態 |
-|---|---|
-| zoxide | 未導入 |
-| Homebrew | 7.0.6 導入済み |
-| fzf | `brew install yazi ...` の一部として同時に導入（[yazi.md](yazi.md)） |
-| EPEL | 有効。ただし `zoxide` は無い |
-
-### 選択した方針
-
-AlmaLinux 10 aarch64 で zoxide を入れる経路を比べた（2026-09-22 時点）:
-
-| 経路 | EL10 aarch64 での状況 | 採否 |
-|---|---|---|
-| **Homebrew** | `zoxide 0.10.0` の `arm64_linux` ボトルがある。upstream の最新リリース（v0.10.0、2026-07-04）と一致 | **採用** |
-| EPEL / AppStream / CRB | **`zoxide` というパッケージが無い**（`dnf list --available zoxide` → `Error: No matching Packages to list`） | 使えない |
-| 公式 install.sh | `~/.local/bin` にバイナリを 1 つ置く。root 不要で軽いが、更新は自分で再実行する | 不採用（Homebrew に揃える） |
-| GitHub Releases のバイナリ | `aarch64-unknown-linux-musl` のビルドがある。展開して PATH に置くだけだが、更新は手作業 | 不採用 |
-| `cargo install zoxide` | Rust toolchain（appstream に `rust 1.92.0` あり）が要り、Raspberry Pi ではビルドに時間がかかる | 不採用 |
-
-dnf で入れる経路は、2026-09-29 に x86_64 も含めて探し直した（EPEL はミラーのディレクトリ一覧とコンテナの `dnf list`、COPR は API とリポジトリのメタデータ）:
-
-| 経路 | x86_64 | aarch64 | 採否 |
-|---|---|---|---|
-| COPR `kray74/cli-tools` | `zoxide-0.10.0-1.el10`（`epel-10-x86_64`）。spec は GitHub で公開、上流の tarball から cargo でビルド。man と補完も入る。同じ COPR の fzf は 0.74.4 | chroot が無い | 不採用（2026-09-29 に dnf の経路として採り、2026-10-03 に外した。下の箇条書き） |
-| COPR `shdwchn10/AllTheTools` | `zoxide-0.10.0-1.el10` | `zoxide-0.10.0-1.el10` | 不採用（RPM に補完が無い。同じ COPR の fzf は 0.74.3） |
-| COPR `faramirza/epel10` | `zoxide-0.10.0-2.el10` | `zoxide-0.10.0-2.el10` | 不採用（説明が無く、71 本の中に vim・tmux・jq・nano など BaseOS / AppStream と同じ名前のパッケージがある） |
-| COPR `ldivizio/tools` | EL10 向けのビルドが無い（`fedora-44-x86_64` だけ） | 無い | 使えない |
-| EPEL 10（10.0〜10.4・10z、testing も） | 無い（コンテナで EPEL を有効にしても `No matching Packages to list`） | 無い | 使えない |
-| EPEL 9 | `zoxide-0.9.8-2.el9` | 調べていない | 不採用（EL9 向けで、版も古い） |
-| Terra（`terrael10`） | 無い | 無い | 使えない |
-
-- **Homebrew だけにした**（2026-10-03）。2026-09-29〜10-02 の版は、x86_64 だけの dnf の経路として `kray74/cli-tools` を載せていたが、外した
-  - 版は Homebrew と同じ（zoxide 0.10.0、fzf 0.74.4。2026-10-03 の Homebrew の API）
-  - x86_64 にしか無く、実機（Raspberry Pi 5）は aarch64
-  - dnf の利点だった「`/usr/bin` に入り、`sudo` や root のシェルからも見える」は、homebrew.md の[root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)・[sudo でも使う](homebrew.md#sudo-でも使う任意)の節で足りる
-  - COPR は個人のリポジトリで、Fedora は中身を審査しない（`dnf copr enable` の警告）。同じ COPR の chezmoi などが EPEL の同じ名前のパッケージを置き換えないよう、`includepkgs` で絞る手間も要った
-- [tool-catalog.md の選び方](tool-catalog.md#選び方)（RPM が Homebrew と同版以上なら RPM）は COPR を RPM に数えないので、一覧の推奨も Homebrew
-
-### 完了時点の状態
-
-実機:
-
-```
-$ brew list --versions zoxide
-zoxide 0.10.0
-$ zoxide --version
-zoxide 0.10.0
-$ command -v zoxide
-/home/linuxbrew/.linuxbrew/bin/zoxide
-$ type -t z
-function
-$ grep -n 'zoxide init' ~/.bashrc
-34:eval "$(zoxide init bash)"
-```
-
-実体は `/home/linuxbrew/.linuxbrew/Cellar/zoxide/0.10.0/`。データベースは `~/.local/share/zoxide/db.zo`。
-
-### 注意点
+## 注意点
 
 - **初期化の 1 行が本体**: `brew install` だけでは `z` は増えない。bash の共通設定が `zoxide init bash` を読む。インストール後はシェルを開き直す
 - **`--cmd cd` は影響範囲が広い**: `cd` を置き換えると、シェル関数やエイリアス経由の `cd` の挙動も変わる。既定の `z` から始めるのが無難
@@ -231,99 +113,3 @@ $ grep -n 'zoxide init' ~/.bashrc
 - **学習はプロンプトを出すたびに走る**: `PROMPT_COMMAND` にフックが入り、そのときの今のディレクトリを記録する。プロンプトを自前で組んでいる場合は順序に注意する
 - **アンインストール時に行を消し忘れると毎回エラーが出る**: [ロールバック](#ロールバック)の `sed` を忘れない
 - **他のツールとの連携**: yazi の `z` キーと、zoxide の対話関数 `zi`（fzf で候補を選ぶ）はこのデータベースを共有する
-
-### 参照
-
-- [ajeetdsouza/zoxide — README](https://github.com/ajeetdsouza/zoxide) — 各 OS のインストール方法、シェルごとの `zoxide init` の書き方、`--cmd` の説明
-- [zoxide — Installation](https://github.com/ajeetdsouza/zoxide#installation) — 公式 install.sh と各ディストリビューションの状況
-- `zoxide --help` / `zoxide query --help` — `query --list` / `--score`、`remove`
-- [Homebrew](homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
-- [kray74/cli-tools — Copr](https://copr.fedorainfracloud.org/coprs/kray74/cli-tools/) — chroot（`epel-10-x86_64` と `fedora-44-x86_64`）とビルドの履歴
-- [kray74/cli-tools — GitHub](https://github.com/kray74/cli-tools) — COPR の spec（`zoxide/zoxide.spec`）
-
----
-
-### 付録: コンテナでの検証記録（2026-09-22）
-
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](homebrew.md)と手順 2・3・4 を通した（手順 4 は当時の確認のブロックで、今の手順 4・5 の元）。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
-
-| 手順 | 結果 |
-|---|---|
-| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](homebrew.md)） |
-| 2. zoxide | `Pouring zoxide--0.10.0.arm64_linux.bottle.tar.gz`。ソースビルドは発生しない |
-| 3. 初期化 | `~/.bashrc` に `eval "$(zoxide init bash --cmd z)"` を追記して読み込み直し、`type -t z` → `function` |
-| 4. 検証 | `zoxide --version` → `zoxide 0.10.0`。`cd` を 3 回してからの `zoxide query --list` は**空**（非対話シェルでは `PROMPT_COMMAND` のフックが走らないため） |
-| fzf | `brew install zoxide fzf` で `fzf 0.74.4` と依存の `ncurses 6.6` も入った |
-| RPM 経路 | EPEL を有効にしても `dnf list --available zoxide` は `Error: No matching Packages to list` |
-
-実機側では `type -t z` が `function` を返し、`~/.bashrc` の 34 行目に `eval "$(zoxide init bash)"` があり、データベースに 5 エントリ溜まっていることを確認した（対話シェルでは記録される）。
-
-#### 未確認事項
-
-- `ZOXIDE_CMD=cd`（`--cmd cd`）での動作。実機は `--cmd` 無しで入れてある
-- `zi`（fzf 連携）の実動作
-- bash 以外のシェル（zsh / fish）での `zoxide init`
-- `_ZO_DATA_DIR` などの環境変数による挙動の変更
-- ロールバック（`brew uninstall` と `~/.bashrc` の行削除）の本実行
-
-### 付録: dnf の経路のコンテナでの検証記録（2026-09-29）
-
-`docker.io/library/almalinux:10`（AlmaLinux 10.2、x86_64）のコンテナに NOPASSWD の sudo を与えた一般ユーザーを作り、**この文書のコードブロックをそのまま**、擬似端末（pty）で開いた対話の bash に貼って通した。
-
-- 手順の番号は今の文書のものに付け替えた。「当時の」と付けたものは、2026-10-03 に外した dnf の経路の手順
-- `[y/N]` には、プロンプトが出てから `y` を返した
-- 通しは、ブロックを 1 行ずつ Enter で送る形（ブラケットペースト無し）で行った。手順 4・5 は、ブロックをブラケットペーストの開始と終了の制御文字で囲んで 1 回で送る形でも通した
-- ブラケットペーストの有無の比較（この付録の最後）は、文書を書く前に同じコマンドで zoxide を入れた 1 つ目のコンテナで行った。ブラケットペースト有りは `TERM=xterm-256color`（`bind -v` が `enable-bracketed-paste on`）
-- 検証環境だけの変更:
-  - ホストの外向きの通信がプロキシ経由なので、dnf にプロキシ（`/etc/dnf/dnf.conf` の `proxy=`）とプロキシの CA を設定した
-  - AlmaLinux の repo ファイルは `mirrorlist=` を止め、コメントにある `baseurl=`（`https://repo.almalinux.org/...`）を使った（ミラーリストが返す http のミラーを、プロキシが通さないため）
-  - `sudo` と `procps-ng` は先に入れた（コンテナのイメージに無い）
-
-| 手順 | 結果 |
-|---|---|
-| 前提 | `dnf-4.20.0-22.el10_2.alma.1` と `python3-dnf-plugins-core-4.7.0-10.el10`（`dnf copr` と `dnf config-manager` の本体）は最初から入っていた。`dnf-plugins-core` というパッケージは無いが、要らなかった |
-| 当時の 3. COPR | 警告文の後の `[y/N]` に `y` → `Repository successfully enabled.`。repo ファイルの `baseurl` は `.../kray74/cli-tools/epel-10-$basearch/` |
-| 当時の 4. 絞り込み | `11:includepkgs=zoxide,fzf`。COPR から見えるのは zoxide と fzf（と各 `.src`）だけ |
-| 当時の 5. 導入 | `fzf-0.74.4-1.el10` と `zoxide-0.10.0-1.el10` の 2 つ（2.3 MB）。トランザクションの後に鍵 `0x405678BB` の取り込みを聞かれ、`Key imported successfully` |
-| 3. 初期化 | `type -t z` → `function` |
-| 4・5. 確認 | `zoxide 0.10.0`、`/usr/bin/zoxide`。手順 5 の `zoxide query --list` → `/usr/share`（ブラケットペーストの有りと無しの両方） |
-| `zi` | 1 つ目のコンテナで、`zi share` で fzf が開き、Enter で `/usr/share` に移った |
-| 当時の更新の手順 2 | `Nothing to do.`（COPR の最新が 0.10.0 のため） |
-| ロールバックの当時の手順 2・3 と、手順 2・3（当時の 4・5） | `dnf remove` で消えたのは zoxide と fzf の 2 つだけ。`dnf copr remove` で repo ファイルが消え、鍵 `gpg-pubkey-405678bb-69063860` は残った。`sed` で `~/.bashrc` の行が消え、`~/.local/share/zoxide` も消えた |
-| aarch64 | 別のコンテナで、`dnf --forcearch aarch64 copr enable kray74/cli-tools` は `Repository 'epel-10-aarch64' does not exist in project 'kray74/cli-tools'.` で止まり、repo ファイルは作られなかった |
-| `includepkgs` | 別のコンテナで EPEL の fzf 0.58.0 と chezmoi 2.72.0 を入れてから COPR を有効にすると、`dnf upgrade --assumeno` の候補は、絞る前は chezmoi 2.72.2 と fzf 0.74.4（どちらも COPR）、絞った後は fzf 0.74.4 だけ |
-| EPEL 10 | 別のコンテナで `epel-release` を入れても、`dnf list --available zoxide` は `Error: No matching Packages to list`（fzf 0.58.0・chezmoi 2.72.0 は EPEL にある）。検証環境だけ、EPEL の repo ファイルも `metalink=` を止めて `dl.fedoraproject.org` を直接指した |
-
-**当時の確認のブロックが空になる理由**は、1 つ目のコンテナで確かめた。
-
-- ブラケットペースト無し: `cd /tmp && cd /usr/share && cd ~` は 1 行なので、プロンプトは `~` に戻ってから 1 回だけ出る。ホームは既定で記録しないので、`zoxide query --list` は空
-- `cd /tmp`・`cd /usr/share`・`cd ~` を別々の行で入れると、`/tmp` と `/usr/share` が記録された（行ごとにプロンプトが出る）
-- ブラケットペースト有り: `cd` を別々の行に書いても、1 回の貼り付けは 1 つの入力として実行され、プロンプトは最後に 1 回しか出ないので空
-- 手順 4 と手順 5 に分けて貼ると、手順 4 の後のプロンプトで `/usr/share` が記録された
-
-#### 未確認事項（dnf の経路）
-
-- 実機（x86_64 の PC）での本実行
-- aarch64（COPR に chroot が無い）
-- `ZOXIDE_CMD=cd` の形
-- COPR が次の版を出したときの `dnf upgrade`（検証の時点では 0.10.0 が最新）
-
----
-
-### 付録: クリーン VM での検証記録（2026-10-06）
-
-**検証対象**: `0dbb522` の、各手順で `~/.bashrc` などへ設定を直接追記する版。以下の手順番号と「本文」はこの版を指す。検証後に共通 bash 設定へ統一された現行版（`0bc9970`）の設定リポジトリの新規導入・既存設定からの移行は、今回の VM では実行していない。
-
-**環境**: AlmaLinux 10.2 Workstation の新規インストールを clone した x86_64 の VirtualBox VM。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing、ロケールは `ja_JP.UTF-8`。一般ユーザーの SSH 対話 PTY（`TERM=xterm-256color`、120×40）に、検証対象版の折り畳みの外のブロックを手順ごとにブラケットペーストで送り、プロンプトに戻ってから次へ進めた。専用 SSH 鍵・sudo・LAN は検証補助として用意し、GDM は停止した。自分用の bash 設定は導入せず、OS 既定の `~/.bashrc` から始めた。実機の設定・資格情報は使っていない。
-
-**通した手順（`0dbb522`）**: 実施手順 1〜5。
-
-**結果**: Homebrew の zoxide 0.10.0 と fzf 0.74.4 を導入した。`~/.bashrc` に `--cmd z` の初期化を書いて読み込み、`z` が function になった。手順 4 の `cd /usr/share` の後は一度プロンプトに戻り、手順 5 でデータベースの `/usr/share` を確認した。
-
-**今回の未確認範囲**: 別のコマンド名での初期化、更新・ロールバックは今回流していない。
-
-### 付録: 現行の共通 bash 設定での再検証（2026-10-06）
-
-- `5da3478` の 実施手順 1〜5を、新規導入した AlmaLinux 10.2 Workstation の x86_64 VM で実行した。先に共通 bash `3d5323e` を新規導入した
-- zoxide 0.10.0 と fzf 0.74.4 を bottle で導入した。読み直し後の z / zi は関数で、`cd /usr/share` の後に query の一覧へ /usr/share が記録された
-- 任意の設定変更、更新、削除は、この再検証では実行していない
