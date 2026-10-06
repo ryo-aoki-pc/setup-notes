@@ -12,6 +12,7 @@
 - 手順の後: 接続元を LAN に絞る場合は、最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[gnome-headless-session.md](gnome-headless-session.md)。この手順書と同じ PC で併用できる（ポートは 3390）
 - PC の画面でログインしているデスクトップを、そのまま RDP で共有するなら、[gnome-desktop-sharing.md](gnome-desktop-sharing.md)。aarch64 の[実機](verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照
+  - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 

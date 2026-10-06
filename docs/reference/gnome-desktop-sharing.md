@@ -56,6 +56,9 @@
 - `grdctl status` の `Port:` は dconf の値で、実際に待ち受けたポートではない（上流 #255）
 - 実際のポートは、`ss` か、D-Bus の `org.gnome.RemoteDesktop.User` の `/org/gnome/RemoteDesktop/Rdp/Server` の `Port` プロパティ（待ち受けていなければ -1）で見る
 - unit の起動完了と待ち受け開始には時間差があるので、手順 8 は自分のデーモンのソケットを最大 30 秒待つ
+- 待ち受けに失敗しても、デーモンは動き続け、unit は `active` のまま。ポートのネゴシエーションを切っているので、ほかのポートも試さず、ポートが空いても待ち受け直さない（手順 4 の補足）
+  - 原因を直した後は、手順 4 を貼り直す。手順 4 は、起動中のデーモンを再起動する
+  - 理由は、デーモンのログの `Failed to start RDP server: Error binding to address [::]:<RDP_PORT>: Address already in use` で分かる（ログの見方は手順 10 の補足）
 - `ss -p` は、自分のプロセスなら root でなくても名前を出す。システムのデーモン（リモートログイン）は `gnome-remote-desktop` ユーザーのプロセスなので、ここには名前が出ない
 
 ### 実施手順 / 手順 9: 補足: TLS プローブ
@@ -105,12 +108,27 @@
 
 ### 自動ログインで使う / 手順 5: 補足: 再起動のコマンド
 
-- systemd 257 の `systemctl reboot` は、端末から呼ばれると、root でも抑止（inhibitor）とログイン中のユーザーを確かめ、あれば断る（`src/systemctl/systemctl-logind.c` の `logind_check_inhibitors`）
-  - PC の画面でログインしたセッションの gnome-session は、`shutdown` の強い抑止（`user session inhibited`）を持つ。SSH のログインもログイン中のユーザーに数えられる
+- systemd 257 の `systemctl reboot` は、端末から呼ばれると、抑止（inhibitor）を確かめ、強い抑止があれば断る（`src/systemctl/systemctl-logind.c` の `logind_check_inhibitors`）
+  - v257 から、root でも抑止を確かめる。root は、抑止が無ければ、ほかのユーザーのセッションを確かめない（同じ関数の「root respects inhibitors since v257 but keeps ignoring sessions by default」）
+  - 自分と同じ uid のセッション（SSH のログインなど）は、root でなくても数えない
+  - gnome-session が `shutdown` の強い抑止（`user session inhibited`）を取るのは、アプリが終了を止めているときだけ（テキスト エディターに保存していない文書があるときなど）。アプリが止めていなければ取らない
 - `-i`（`--check-inhibitors=no`）で抑止を無視させても、logind は、強い抑止を無視するときは root にも polkit の認可を求める（`src/login/logind-dbus.c` の「We want to always ask here, even for root」）
   - `sudo` を付けると root の `systemctl` は polkit の認証を聞く窓口（`pkttyagent`）を起こさない（`src/shared/polkit-agent.c` の「Clients that run as root don't need to activate/query polkit」）ので、`Interactive authentication required.` で断られる
-  - `sudo` を付けない `systemctl` は、端末で `pkttyagent` を起こし、このユーザーのパスワードを聞く（`wheel` のユーザーは管理者として認証できる）
-  - VM で聞かれた操作は、`org.freedesktop.login1.reboot-ignore-inhibit`（パスワードでログインしたセッションのとき）か `org.freedesktop.login1.reboot`（自動ログインのセッションのときと、ログイン画面が前にあったとき）だった
+  - 強い抑止が無ければ、`sudo systemctl reboot -i` は認証を聞かれずに再起動した
+  - `sudo` を付けない `systemctl` は、端末で `pkttyagent` を起こし、このユーザーのパスワードを聞く（`wheel` のユーザーは管理者として認証できる）。抑止の有無にかかわらず通る
+  - VM で聞かれた操作は、`org.freedesktop.login1.reboot-ignore-inhibit`（保存していない文書があり、強い抑止があったとき）か `org.freedesktop.login1.reboot`（無かったとき）だった
+  - 2026-10-07 の最初の記録は、この違いをセッションの種類（パスワードでのログインか自動ログインか）の違いと書いていた
+
+### 注意点の補足: 後からリモートログインを有効にしたとき
+
+- リモートログインの手順 4（`sudo grdctl --system rdp …`）を貼っている間に、システムのデーモンが起動して 3389 で待ち受けた
+  - VM では 2 回とも、同じ秒に共有のデーモンが `RDP server stopped` を出した
+  - 約 3 秒後に `Failed to start RDP server: Error binding to address [::]:3389: Address already in use` を出して、待ち受けをやめた。ユーザーの unit は `active` のまま
+  - 共有のデーモンが待ち受けをいったん止める仕組みは確かめていない
+- firewalld は、ポート（`--add-port`）とサービス（`--add-service`）を別々に持つ。この手順書が手順 7 で開けた `3389/tcp` は、リモートログインが開けた `rdp` のサービスとは別に残る
+  - リモートログインの「接続元を LAN に絞る」は、`rdp` のサービスを外して、LAN だけを通す rich rule にする。ゾーンに `3389/tcp` が残っていると、LAN の外からも 3389 に届く
+  - リモートログインのロールバックは `rdp` のサービスと rich rule だけを消す。この手順書のロールバックの手順 1 は、移した後の `RDP_PORT`（3390）だけを閉じる。どちらも `3389/tcp` を消さない
+- そのため、注意点では、`RDP_PORT=3389` でこの手順書のロールバックの手順 1（LAN に絞ったなら手順 2）を貼って閉じてから、3390 へ移す。閉じても、リモートログインは `rdp` のサービスか、同書の rich rule で届く
 
 ### 選択した方針
 
@@ -123,7 +141,7 @@
 - **クライアントからの操作を許す**（`disable-view-only`）— 既定の見るだけは、任意節で戻せる
 - **自動ログインでは、RDP の資格情報だけをパスワードの無いキーリングへ移す** — ログインのキーリングのほかの秘密は、暗号化したまま残す
 - **自動ログインでは、起動画面（plymouth）を止める** — 止めないと、GDM が自動ログインの 20 秒後に plymouth を終わらせ、そのときに VT1 にログイン画面を作って前に出すので、共有するデスクトップが裏に回る。起動ごとに `loginctl activate` で戻す方法より、起動の引数で止める方を採った（PC の前にいなくても、再起動の後にそのままつながる）
-- **再起動は `sudo` 無しの `systemctl reboot -i` にする** — PC の画面のセッションの抑止を無視するには polkit の認証が要り、`sudo` では聞かれずに断られるため
+- **再起動は `sudo` 無しの `systemctl reboot -i` にする** — PC の画面のアプリが終了を止めていると、その抑止を無視するのに polkit の認証が要り、`sudo` では聞かれずに断られるため。`sudo` 無しの形は、止められていてもいなくても通る
 
 ### 参照
 
