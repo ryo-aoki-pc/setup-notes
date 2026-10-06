@@ -261,7 +261,7 @@
 - 手順 1 の変数を設定したシェルで、上から順に貼る
 - [gnome-power.md](gnome-power.md) で変えた値は残る。戻すなら同書の[ロールバック](gnome-power.md#ロールバック)
 - [claude-code-gui.md](claude-code-gui.md) を行ったなら、先に同書の[ロールバック](claude-code-gui.md#ロールバック)で戻す
-- この節の手順 3 は共用 TLS 設定を退避時の値に戻し、手順 4 は今回生成した証明書だけを消す。退避後にデスクトップ共有の TLS 設定を別に変えた場合は、先にその設定を控える
+- この節の手順 3 は共用 TLS 設定を退避時の値に戻し、手順 4 は今回生成した証明書だけを消す。退避後にデスクトップ共有（[gnome-desktop-sharing.md](gnome-desktop-sharing.md)、設定アプリの「デスクトップ共有」）の TLS 設定を別に変えた場合は、先にその設定を控える
 - 退避が無い場合は、共用 TLS 設定と証明書を保持する。導入前の値に戻すには、別に残した記録が要る
 
 > [!CAUTION]
@@ -394,6 +394,7 @@
 - **同じユーザーの GNOME のセッションは 1 つにする**: PC の画面から同じユーザーで入るときは、先に `sudo systemctl stop gnome-headless-session@<USER>.service` でヘッドレスのセッションを止める
   - gnome-session のユーザーの unit（`gnome-session-manager@gnome.service` など）はユーザーに 1 組しか無いので、2 つ目のセッションは動かないはず
   - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
+  - PC の画面のセッションを共有する[デスクトップ共有](gnome-desktop-sharing.md)とは、同じユーザーでは併用できない（ヘッドレスの RDP のデーモンの unit に `Conflicts=gnome-remote-desktop.service` がある）
 - **起動し直すときは `stop` → 待つ → `start` を使う**。前のセッションの片付けを待ってから新しいセッションを始める
 - **GDM を再起動すると、このセッションも止まって起動し直される**（`Requires=gdm.service`）
   - GDM を再起動したら `systemctl is-active gnome-headless-session@<USER>.service` を見て、`inactive` なら `sudo systemctl start gnome-headless-session@<USER>.service` で起動する
