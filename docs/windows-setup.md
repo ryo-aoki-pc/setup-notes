@@ -29,7 +29,7 @@
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
   - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)
-- 手順の後: Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)、以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
 > - **手順 40 のインラインの sudo、手順 41 の放置でロックしない設定、手順 44 のリモート デスクトップ、手順 48 の Windows Hello 以外のサインイン、手順 64 の自動サインインを重ねると、PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、手順 41・64 は行わない
@@ -1074,6 +1074,193 @@
 
    - 新しい PowerShell なら、先にこの節の手順 2 を貼る
    - UEFI の Wake on LAN も、この節の手順 4・5 と同じように入って切る
+
+---
+
+## リモートから再起動する手段を増やす（任意）
+
+> [!IMPORTANT]
+> - この節は[実施手順](#実施手順)を通した後に行う。少なくとも[手順 43](#実施手順)（LAN をプライベート）が要る。確実に戻すには[手順 41](#実施手順)（放置で眠らない）・[手順 42](#実施手順)（アダプターの省電力を切る）・[手順 64](#実施手順)（自動サインイン）
+> - 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この節の手順 2〜7・撤去の手順は、この節の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
+> - **別の PC で動かすトリガーのコマンドは、その PC で実行する**（AlmaLinux のシェルか、別の Windows の PowerShell）
+
+- リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
+- 既にある接続からの再起動（この節の手順にはしない）
+  - SSH でつながるなら、ログインして `Restart-Computer`（Administrators の一員の SSH のセッションは昇格済みで、UAC は要らない。[Windows の OpenSSH サーバー](windows-openssh-server.md)）。sshd は再起動の後に自動で起動する
+  - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[手順 44](#実施手順) で有効。再起動の後はロック画面に戻るが、また入れる）
+  - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの節の手順 7
+- この節で足す手段: クラッシュ時の自動再起動（手順 3）・別の PC からのネットワーク再起動（手順 4・5）・ネットワークが切れたときの自動再起動（手順 6）
+- 戻すときは、この節の手順 8〜12（入れた手段のものだけ）
+
+> [!WARNING]
+> - この節の手順 4・5 は、LAN の別の PC から、このユーザー（管理者）の資格情報で再起動できる口を開ける。`LocalAccountTokenFilterPolicy` を 1 にして、ローカル・Microsoft アカウントのネットワークログオンに完全な管理者の権限を与える（UAC のリモート制限が緩む）。人が触れる場所や、信用できない LAN にある PC では行わない
+> - この節の手順 6 の見張りタスクは、相手（ルーターなど）がずっと落ちていると再起動を繰り返す（稼働 60 分未満は再起動しない歯止めがある）
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+
+1. 変数を設定する（どちらも自動。見張りタスクを使わないなら `WATCHDOG_HOST` は要らない）。
+
+   ```powershell
+   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
+   $WATCHDOG_HOST = if ($LAN_IF) { (Get-NetIPConfiguration -InterfaceAlias $LAN_IF).IPv4DefaultGateway.NextHop | Select-Object -First 1 } else { '' }   # 見張りタスクが生死を見る相手（自動で既定ゲートウェイ）。<WATCHDOG_HOST>
+   'LAN_IF = {0}' -f $LAN_IF
+   'WATCHDOG_HOST = {0}' -f $WATCHDOG_HOST
+   ```
+
+   - `LAN_IF` に Wi-Fi の名前が出たら、`$LAN_IF = 'イーサネット'` のように有線 LAN の名前に直す
+   - `WATCHDOG_HOST` は、LAN の中でいつも応答する相手に変えてもよい（既定ゲートウェイ以外にするとき）
+
+1. クラッシュ（ブルースクリーン）で止まったときに自動で再起動する設定を確かめる（既定で有効）。
+
+   ```powershell
+   $k = 'HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl'
+   if ((Get-ItemProperty -Path $k -ErrorAction SilentlyContinue).AutoReboot -ne 1) { Set-ItemProperty -Path $k -Name AutoReboot -Type DWord -Value 1 }
+   Get-ItemProperty -Path $k | Format-List AutoReboot
+   ```
+
+   - `AutoReboot : 1` が出ればよい（既定で 1。0 だったときはこの手順で 1 にする）
+   - これは OS が応答するときの再起動には関係せず、カーネルが止まったときだけ効く
+
+1. 別の PC から OS 越しに再起動したいときだけ、SMB のリモートシャットダウンを開ける。
+
+   ```powershell
+   Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled True -Profile Private
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 1
+   Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
+   Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
+   ```
+
+   - `FPS-SMB-In-TCP … True  Private  Inbound  Allow` と `LocalAccountTokenFilterPolicy : 1` が出ればよい
+   - 仕組み: `shutdown /m` も `net rpc shutdown` も、`\PIPE\InitShutdown` の名前付きパイプを SMB（TCP 445）で使う。再起動には Administrators が既定で持つ「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）と、`LocalAccountTokenFilterPolicy = 1` が要る（[参考資料](reference/windows-setup.md)）
+   - 別の PC で動かすトリガー（`<WIN_IP>`・`<WIN_HOST>` はこの PC、`<WIN_USER>` は管理者）
+     - AlmaLinux 10 から: `net rpc shutdown -r -f -t 0 -I <WIN_IP> -U '<WIN_USER>%<PASS>'`（`net` が無ければ `sudo dnf install -y samba-common-tools`）
+     - 別の Windows から: `shutdown /r /f /t 0 /m \\<WIN_HOST>`
+   - **注意**: この手順は、節のリードの `[!WARNING]` のとおり管理の口を LAN に開ける
+
+1. 別の Windows から PowerShell で再起動したいときだけ、WinRM（PowerShell リモート処理）を有効にする。
+
+   ```powershell
+   Enable-PSRemoting -Force -SkipNetworkProfileCheck
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Private
+   Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-PUBLIC -ErrorAction SilentlyContinue
+   Get-NetFirewallRule -DisplayGroup 'Windows Remote Management' | Format-Table Name, Enabled, Profile, Direction, Action
+   ```
+
+   - `WINRM-HTTP-In-TCP` が `Private` で有効、`WINRM-HTTP-In-TCP-PUBLIC` が無効になればよい（WinRM は TCP 5985 で待ち受ける）
+   - `Enable-PSRemoting` も `LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）
+   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`（WinRM を使うので、`Restart-Computer -ComputerName` の既定の WMI/DCOM より開けるポートが少ない）
+
+1. ネットワークが切れたときに自分で再起動させたいときだけ、見張りのタスクを登録する。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この節の手順 1 から）'; return }
+     if (-not $WATCHDOG_HOST) { Write-Error '中断: この節の手順 2 の $WATCHDOG_HOST が空'; return }
+     $dir = 'C:\ProgramData\setup-notes'
+     New-Item -ItemType Directory -Path $dir -Force | Out-Null
+     $body = @'
+   $ErrorActionPreference = 'SilentlyContinue'
+   $target = '__WATCHDOG_HOST__'
+   $key = 'HKLM:\SOFTWARE\setup-notes\net-watchdog'
+   $limit = 6
+   if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+   if (((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).TotalMinutes -lt 60) {
+     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
+     return
+   }
+   if (Test-Connection -ComputerName $target -Count 3 -Quiet) {
+     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
+     return
+   }
+   $fails = [int](Get-ItemProperty -Path $key -Name Fails -ErrorAction SilentlyContinue).Fails + 1
+   if ($fails -ge $limit) {
+     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
+     Restart-Computer -Force
+   } else {
+     Set-ItemProperty -Path $key -Name Fails -Value $fails -Type DWord
+   }
+   '@
+     Set-Content -LiteralPath "$dir\net-watchdog.ps1" -Value ($body.Replace('__WATCHDOG_HOST__', $WATCHDOG_HOST)) -Encoding ASCII
+     $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$dir\net-watchdog.ps1`""
+     $trigger = New-ScheduledTaskTrigger -AtStartup
+     $trigger.Repetition = (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration (New-TimeSpan -Days 3650)).Repetition
+     $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest
+     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
+     Register-ScheduledTask -TaskName 'net-watchdog' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+     Get-ScheduledTask -TaskName 'net-watchdog' | Format-List TaskName, State
+   }
+   ```
+
+   - `net-watchdog  Ready` が出ればよい。SYSTEM として、起動時と 5 分ごとに動く
+   - 歯止め: 稼働 60 分未満は何もしない（起動直後に人が直す余地を残す）。`WATCHDOG_HOST` に 3 回 ping して、届けば失敗の数（`HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails`）を 0 に戻し、6 回続けて届かなければ（約 30 分）再起動する
+   - **注意**: 相手がずっと落ちていると再起動を繰り返す（節のリードの `[!WARNING]`）。`$limit` を増やすと、再起動までの猶予が延びる
+
+1. Remote Control を再起動の後も使いたいときだけ、タスクをログオン時に自動で始まるようにする。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     if (-not (Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue)) { Write-Error '中断: claude-remote-control のタスクが無い（先に Claude Code の Remote Control（Windows）を設定する）'; return }
+     $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+     Set-ScheduledTask -TaskName 'claude-remote-control' -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $me) | Out-Null
+     (Get-ScheduledTask -TaskName 'claude-remote-control').Triggers | Format-Table -AutoSize
+   }
+   ```
+
+   - 前提: [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md) を設定済みで、この PC のデスクトップに同じユーザーでサインインする（[手順 64](#実施手順) の自動サインイン）
+   - ログオンのトリガーが 1 つ表示されればよい。次にそのユーザーでサインインしたときから、タスクが自動で始まる
+
+1. 元に戻すときは（この節の手順 4 を行ったとき）、SMB のリモートシャットダウンを閉じる。
+
+   ```powershell
+   Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled False
+   Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile
+   ```
+
+   - `FPS-SMB-In-TCP … False` になればよい
+   - `LocalAccountTokenFilterPolicy` は、この節の手順 5 の WinRM と共有している。戻すのはこの節の手順 10
+
+1. 元に戻すときは（この節の手順 5 を行ったとき）、WinRM を無効にする。
+
+   ```powershell
+   Disable-PSRemoting -Force
+   Stop-Service -Name WinRM -ErrorAction SilentlyContinue
+   Set-Service -Name WinRM -StartupType Manual
+   Get-NetFirewallRule -DisplayGroup 'Windows Remote Management' | ForEach-Object { Disable-NetFirewallRule -Name $_.Name }
+   ```
+
+   - WinRM のサービスが止まり、受信の規則が無効になればよい
+   - `Disable-PSRemoting` はセッションの構成を無効にするだけなので、サービスの停止・規則の無効化はこの手順で行う
+   - `LocalAccountTokenFilterPolicy` はこの手順では戻さない（この節の手順 10）
+
+1. 元に戻すときは（この節の手順 4 も手順 5 も使わないとき）、UAC のリモート制限を元に戻す。
+
+   ```powershell
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 0
+   Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
+   ```
+
+   - `LocalAccountTokenFilterPolicy : 0` になればよい（管理者のリモートログオンが、既定の制限に戻る）
+   - この節の手順 4・5 のどちらかを使い続けるなら、この手順は行わない
+
+1. 元に戻すときは（この節の手順 6 を行ったとき）、見張りのタスクと記録を消す。
+
+   ```powershell
+   Unregister-ScheduledTask -TaskName 'net-watchdog' -Confirm:$false
+   Remove-Item -Path 'HKLM:\SOFTWARE\setup-notes\net-watchdog' -Recurse -ErrorAction SilentlyContinue
+   Remove-Item -LiteralPath 'C:\ProgramData\setup-notes\net-watchdog.ps1' -ErrorAction SilentlyContinue
+   Get-ScheduledTask -TaskName 'net-watchdog' -ErrorAction SilentlyContinue
+   ```
+
+   - 何も出なければよい（タスクが消えた）
+
+1. 元に戻すときは（この節の手順 7 を行ったとき）、Remote Control のタスクのトリガーを外す。
+
+   - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、同書の[実施手順](windows-claude-remote-control.md#実施手順)の手順 5 で入れ直す
 
 ---
 

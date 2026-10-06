@@ -168,6 +168,15 @@
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
 - 止めるのは[ロールバック](../windows-setup.md#ロールバック)の手順 20
 
+### リモートから再起動する手段を増やす（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未検証。2026-10-06 に書いた）**。ほかの節と同じく、資料と、Linux の PowerShell 7.6.6・PSScriptAnalyzer 1.25.0 での構文・互換・模擬までで確かめた（[付録](#付録-リモート再起動の節の資料とブロックの確認2026-10-06)）
+- **確かめたこと**:
+  - 資料: MS-RSP の transport（InitShutdown・WinReg は名前付きパイプ、WindowsShutdown は TCP）、「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）の既定、`LocalAccountTokenFilterPolicy`（既定で管理者に限定、1 で緩む）、`CrashControl\AutoReboot`（既定 1）、Samba の `net rpc shutdown` と Windows の `shutdown /m`、`Enable-PSRemoting`/`Disable-PSRemoting`
+  - 新しいブロック 10 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty -Type` の指摘だけ。動的なパラメーターで当たらない）
+  - 見張りスクリプトの判定（稼働 60 分の歯止め・連続失敗のしきい値・届いたら 0 に戻すこと）と、手順 6・7 の中断（管理者でない・変数が空・タスクが無い）を、偽物のコマンドレットで模擬
+- **確かめていないこと**: Windows で貼ること、別の PC から `net rpc shutdown`・`shutdown /m`・WinRM で実際に再起動できること、見張りタスクがネットワーク断で再起動し・ループしないこと、再起動の後に SSH・RDP が自動で戻ること、Microsoft アカウントでの SMB・WinRM の認証、`FPS-SMB-In-TCP`・`WINRM-HTTP-In-TCP*` の規則名が版・機種で一致すること
+
 ### 対象と検証環境
 
 - **目的**: Windows 11 をインストールした直後に行う設定を、1 本の手順にまとめる
@@ -293,6 +302,15 @@
 - [Microsoft Edge Update policies — Microsoft Learn](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-update-policies) — `RemoveDesktopShortcutDefault`
 - [hackgen.md](../hackgen.md) — HackGen Console NF（AlmaLinux 10 と Windows 11）
 - [Windows の OpenSSH サーバー](../windows-openssh-server.md) — 同じ PC で使うことの多い手順書（scoop のツールを SSH のセッションで使う任意節。LAN がプライベートである前提）
+
+- [Force shutdown from a remote system — Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/force-shutdown-from-a-remote-system) — `SeRemoteShutdownPrivilege`、既定は Administrators、クライアントでも Administrators
+- [[MS-RSP]: Transport — Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rsp/6dfeb978-7a02-4826-b537-a1760fbf8074) — InitShutdown・WinReg は名前付きパイプ（`\PIPE\InitShutdown`）、WindowsShutdown は TCP
+- [User Account Control and remote restrictions — Microsoft Learn](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/user-account-control-and-remote-restriction) — `LocalAccountTokenFilterPolicy`。ローカル アカウントのネットワークログオンのトークンの絞り込みと、1 にしたときの挙動
+- [Win32_OSRecoveryConfiguration — Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-osrecoveryconfiguration) — `AutoReboot`（`CrashControl\AutoReboot`、既定 1）
+- [Enable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enable-psremoting?view=powershell-5.1)・[Disable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/disable-psremoting?view=powershell-5.1) — Microsoft Learn。WinRM の有効化・無効化と、後始末（サービス・リスナー・規則・`LocalAccountTokenFilterPolicy`）
+- [net(8) — Samba](https://www.samba.org/samba/docs/current/man-html/net.8.html) — `net rpc shutdown [-t timeout] [-r] [-f] [-C message]`、`-I`、`-U`
+- [shutdown — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/shutdown) — `/r`・`/f`・`/t`・`/m \\<host>`
+- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — 手順 7 で再起動後も使えるようにするタスク
 
 ### 付録: 配布物と資料の調査（2026-10-03）
 
@@ -592,6 +610,41 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
   - どちらも、元値が空または不正なら設定の読み書きを呼ばず、設定の書き込みが失敗した場合はその後の読み戻しへ進まなかった
 - Windows PowerShell 5.1 での実行、Windows の実設定の復元、グループ ポリシーがある PC では確認していない
 
+
+### 付録: リモート再起動の節の資料とブロックの確認（2026-10-06）
+
+「リモートから再起動する手段を増やす（任意）」を足したときに、資料と PowerShell のブロックを、Linux（クラウドのコンテナ、Ubuntu 24.04）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた。Windows では貼っていない。
+
+**資料**:
+
+- MS-RSP の transport: InitShutdown・WinReg の各インターフェイスは名前付きパイプ（`\PIPE\InitShutdown`・`\PIPE\winreg`、SMB の ncacn_np）、WindowsShutdown だけが TCP（ncacn_ip_tcp の動的エンドポイント）。`shutdown /m` と `net rpc shutdown` は InitShutdown を使うので、SMB（445）だけでよい
+- 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）: 既定はスタンドアロンのサーバー・クライアントとも Administrators。この権限を持つアカウントだけが遠隔から再起動できる
+- `LocalAccountTokenFilterPolicy`: 無い（既定）と 0 は、ローカル・Microsoft アカウントのネットワークログオンのトークンを絞り、管理の操作を断る。1 で完全な管理者のトークンになる
+- `CrashControl\AutoReboot`（`Win32_OSRecoveryConfiguration.AutoReboot`）: 既定 1。ストップ エラーの後に自動で再起動する
+- Samba の `net(8)`: `net rpc shutdown [-t timeout] [-r] [-f] [-C message]`、`-I ipaddress`、`-U [DOMAIN\]USERNAME[%PASSWORD]`。Windows の `shutdown` は `/r`・`/f`・`/t`・`/m \\<host>`
+- `Enable-PSRemoting`/`Disable-PSRemoting`: 有効化は WinRM の開始・リスナー・規則・`LocalAccountTokenFilterPolicy=1`。無効化はセッション構成だけを戻すので、サービス・規則・ポリシーは手で戻す
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- この節の `powershell` のブロック 10 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）。見張りタスクの中の `.ps1`（here-string）も、取り出して通した（誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の 5.1 のプロファイル）を当てた。指摘は `Set-ItemProperty` の `-Type`（レジストリのプロバイダーが足す動的なパラメーター。ほかの手順と同じ既知の偽陽性）だけで、ほかの互換の指摘は 0
+
+**偽物のコマンドレットで流したブロック**（Linux の pwsh。レジストリは、値を覚えておく偽物に置き換えた）:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 見張りスクリプト（手順 6 の `.ps1`） | 稼働 10 分、稼働 120 分で届く・届かない（しきい値未満・到達）、記録のキーが無い | 稼働 60 分未満と、届いたときは `Fails` を 0 にして再起動せず。届かないと加算し、6 回目（しきい値）でだけ `Restart-Computer -Force` を呼んで 0 に戻した |
+| 手順 7（Remote Control のトリガー） | `claude-remote-control` のタスクが無い | `中断:` で止まり、`Set-ScheduledTask` を呼ばなかった |
+| 手順 6 の始めの検査 | 管理者でない・`$WATCHDOG_HOST` が空 | `中断:` で止まり、ファイルの作成・タスクの登録へ進まなかった |
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. 別の PC から `net rpc shutdown`（AlmaLinux）・`shutdown /r /m`（Windows）・WinRM の `Invoke-Command { Restart-Computer }` で、実際に再起動できること。`FPS-SMB-In-TCP`・`WINRM-HTTP-In-TCP*` の規則名が版・機種で一致すること
+1. 見張りタスクが、ネットワークが切れたときに約 30 分で再起動し、一時的な切断では再起動しないこと。相手がずっと落ちているときのループ
+1. 再起動の後に SSH（sshd）・RDP が自動で戻ること、手順 7 のログオンのトリガーで Remote Control が戻ること
+1. Microsoft アカウントでの SMB・WinRM の認証、`LocalAccountTokenFilterPolicy` の戻し
+1. `Register-ScheduledTask`・`Set-NetFirewallRule`・`Enable-PSRemoting` など、Windows 専用のコマンドレットの実際の動作（Linux の pwsh には無いので模擬・資料まで）
 
 ### 操作上の注意と併記されていた記録
 
