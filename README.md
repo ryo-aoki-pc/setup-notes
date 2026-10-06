@@ -1,16 +1,16 @@
 # setup-notes
 
 実機で検証した構築・設定手順と、失敗時の切り分けを記録するリポジトリ。
-各文書は実施手順を先に置き、手順ごとの理由・実測・落とし穴はその手順の末尾に折り畳み、全体に関わる背景は後半の「補足」に載せている。
+手順書には操作・前提・注意・成功条件を記載する。実施日・環境・結果・失敗例は `docs/verification/<文書名>.md`、採用理由や背景説明は `docs/reference/<文書名>.md` に分け、各手順書の冒頭から参照する。
 
-AlmaLinux 10 の環境構築を VM で通した[検証記録（2026-10-06）](docs/almalinux-vm-verification.md)がある。現行版と設定サブモジュールは、公式 ISO の Workstation クリーンインストールのスナップショットから新規作成した 6 台で再検証した。実行範囲、見つかった不具合と修正、認証・ハードウェアの条件で残った範囲は、同記録の[再検証の章](docs/almalinux-vm-verification.md#現行版と全サブモジュールの再検証2026-10-06)と各手順書の今回の付録にまとめた。
+検証の実施範囲と過去の結果は、[README の検証記録](docs/verification/readme.md)と[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)を参照する。各手順書の冒頭からも対応する検証記録を開ける。
 
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書の補足の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
-  - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない（x86_64 はコンテナで導入まで確認、aarch64 はメタデータのみ）
+  - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
 - シェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) で管理する。各手順書では同じ設定を `~/.bashrc` に追記しない。先に次の導入を行う
@@ -26,7 +26,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 端末を開き直せば、インストール済みのツールの設定が効く。既に clone 済みなら `git -C ~/.config/bash pull --ff-only` で更新し、`install.sh` を実行する。既知の追記は控えを取って移行し、同じ状態での再実行では重複を増やさない。手で変えた行は残るので、[導入手順](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md)に従って確認する。
 
-- **各ツールの `~/.bashrc` への追記は不要**。Homebrew、Neovim、bat、eza、gdu、yazi、fzf、starship、zoxide、Podman の `DOCKER_HOST`、履歴・`shopt`・Homebrew の補完を含む。[追記箇所の照合結果](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md#setup-notes-の追記との対応)を参照
+- **各ツールの `~/.bashrc` への追記は不要**。Homebrew、Neovim、bat、eza、gdu、yazi、fzf、starship、zoxide、Podman の `DOCKER_HOST`、履歴・`shopt`・Homebrew の補完を含む。[追記箇所の照合結果](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/quick-start.md#setup-notes-の追記との対応)を参照
 - ツール本体のインストール、Podman のソケットの有効化、`bash-completion` の導入、`~/.inputrc`、Git などの別ファイルの設定は各手順書で行う
 - root 用は root 自身の clone と読み込み設定が必要。[root の導入条件](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)を先に確認する
 
@@ -35,7 +35,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
 - AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある
 - 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-dual-boot.md#次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
-- インストールの実施手順は、VirtualBox の VM でだけ通した（実機では実行していない）。QEFI Entry Manager の任意節は配布物・ソース・構文の確認のみで、指定・取り消し・実際の起動は未検証（手順書の補足の「状態」）
+- インストールと QEFI Entry Manager の実施範囲は、[検証記録](docs/verification/windows-dual-boot.md)を参照する
 
 | 手順書 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
 |---|---|---|---|---|
@@ -50,10 +50,10 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）
-  - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（確認した CLI は Preview。実更新は未検証で、ヘルプ・5.1 の構文・模擬の確認まで）
+  - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
   - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、初期設定のリードから順に案内する
-  - **どれも Windows の実機では通していない**。初期設定の貼り付けの設定だけは、原因と直し方を実機で確かめた
+  - 各手順の実施範囲は、対応する検証記録を参照する
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
@@ -153,7 +153,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - 変えるものがそれぞれ違うので、併用できる
 - 初期化の順番は bash の共通設定が管理する。Homebrew → starship → WezTerm → zoxide、Homebrew の補完 → fzf の順で読む。手順書ごとの追記や並べ替えは不要
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
-- HackGen Console NF は、Windows 11 の PC にも同書の [Windows 11 の節](docs/hackgen.md#windows-11-で使う)で入れられる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる（**Windows の実機では流していない**）
+- HackGen Console NF は、Windows 11 の PC にも同書の [Windows 11 の節](docs/hackgen.md#windows-11-で使う)で入れられる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる
 
 | 手順書 | 変えるもの | 導入元 | 設定の置き場所 |
 |---|---|---|---|
@@ -333,10 +333,10 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - タイトル直後の `## 実施手順` に、変数設定、コマンド、動作確認を番号付きリストで並べる。任意操作・更新・ロールバックはその後ろの見出しに置き、中の手順も番号付きリストにする（節ごとに 1 から）
 - 手順番号は見出しではなくリストで振る。マーカーはすべて `1.`（自動で採番される）で、変数があれば手順 1 が変数設定
-- 各手順は「1 行の説明（太字にしない 1 文）→ コマンドのブロック → 確認点の箇条書き → 折り畳んだ補足」の順に書く。対話入力や完了待ちで止めるところで手順を分け、止める手順の最後に「次の手順は〜してから貼る」と書く
+- 各手順は「1 行の説明（太字にしない 1 文）→ コマンドのブロック → 確認点・分岐・注意の箇条書き」の順に書く。対話入力や完了待ちで止めるところで手順を分け、止める手順の最後に「次の手順は〜してから貼る」と書く
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
-- `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
+- `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
 - Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - 初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る
@@ -347,11 +347,11 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く
-- 手順ごとの理由・実測・落とし穴・出力例は、その手順の末尾に折り畳んだ（`<details>`）「補足」に置く。対象・検証環境、採用理由など全体に関わるものは後半の「補足」にまとめる
-- 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。コンテナのみで検証した手順書は、検証範囲を `> [!WARNING]` で示す
-- アラートは本文の最上位にだけ置く（GitHub は番号付きリストや折り畳みの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
+- 実測・出力・検証した環境・失敗の記録は `docs/verification/<文書名>.md` に置く。理由・比較・背景・資料の参照は `docs/reference/<文書名>.md` に置く。手順書には操作に必要な前提・注意・成功条件を残す
+- 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。検証範囲は対応する検証記録に記載する
+- アラートは本文の最上位にだけ置く（GitHub は番号付きリストの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
 - コマンドは実行済みのものを載せ、未検証事項は明記する
 - 複数の手順書が共有する前提（Homebrew・Podman・EPEL・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は独立した手順書にし、各手順書の冒頭から参照する
-- [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。冒頭に状態と調査日を `> [!WARNING]` で置き、表の各行に確認の深さ（起動 / 導入 / メタデータ）を書く
-- 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/wireguard.md#付録-構成図の再生成)）
+- [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。表の各行に確認の深さ（起動 / 導入 / メタデータ）を書き、調査日と検証の範囲は[検証記録](docs/verification/tool-catalog.md)に置く
+- 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/reference/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない
