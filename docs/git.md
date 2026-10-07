@@ -208,7 +208,7 @@
    ```powershell
    Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
    Test-Path 'C:\Program Files\Git\bin\bash.exe'
-   winget list --exact --id Git.Git --accept-source-agreements
+   winget list --exact --id Git.Git --accept-source-agreements --source winget
    ```
 
    - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
@@ -221,7 +221,7 @@
 
    ```powershell
    winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Git.Git
+   winget list --exact --id Git.Git --source winget
    ```
 
    - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
@@ -326,7 +326,7 @@
 
    ```powershell
    winget upgrade --exact --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Git.Git
+   winget list --exact --id Git.Git --source winget
    ```
 
    - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
@@ -384,7 +384,7 @@
 
    ```powershell
    winget uninstall --exact --id Git.Git --source winget
-   winget list --exact --id Git.Git
+   winget list --exact --id Git.Git --source winget
    Test-Path 'C:\Program Files\Git\bin\bash.exe'
    ```
 

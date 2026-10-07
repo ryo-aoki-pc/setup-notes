@@ -2,6 +2,14 @@
 
 [手順書](../claude-code.md)
 
+## 最新の確認範囲（Windows 11）
+
+Windows 11 Pro のクリーン VM の通常権限の Windows PowerShell 5.1 で、Windows 節の手順 2〜5 による native installer の新規導入とユーザー PATH、新しいプロセスでの手順 7 の版・署名・doctor の導入診断を確認した（2026-10-06）。
+
+GUI で端末を開いて貼る操作、スタートメニュー経由の環境変更通知、手順 8・9 の設定とブラウザーでの認証、認証を要するコマンドと Remote Control、更新・ロールバックは未検証。導入診断が正常でも認証済みとは扱わない。
+
+[今回の付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -645,3 +653,37 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 ### Windows 11 のロールバック / 手順 2: 補足: 消すもの
 
 - 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../claude-code.md#windows-11-の更新)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。この 2 つは、Linux の native installer の 2.1.288 が作ったフォルダーと、`claude.exe` の中の置き場所の決め方（`XDG_*` が無ければホームの下）から足したもので、Windows では確かめていない
+
+---
+
+### 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
+
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)と Git for Windows の導入の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの通常権限で実行した。GUI のコピー・貼り付けや認証操作は試していない。
+
+| 項目 | 確認した値 |
+|---|---|
+| OS | Windows 11 Pro 26H2、26300.9457、x64 |
+| PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、通常権限、セッション 1 |
+| 前提の設定 | CurrentUser の実行ポリシー `RemoteSigned`、新しい PowerShell の Ctrl+Enter は `AddLine` |
+| 初回導入前 | `claude` のコマンドと `%USERPROFILE%\.local\bin\claude.exe` は無い。Git は `C:\Program Files\Git\cmd\git.exe`、`bin\bash.exe` も存在 |
+| チャンネル・入った版 | `latest`、2.1.291 |
+
+**初回導入（この節の手順 2〜5）**:
+
+- 実行記録は `20261006-110358Z-6b9ec610`。2026-10-06 11:04:38.473 UTC に完了し、手順ごとのエラーは 0、タスクの終了値は 0、開始と完了の対応も確認した
+- 公式の native installer が `Claude Code successfully installed!`、版 2.1.291、最後に `Installation complete!` を出した。自分のユーザーの `PATH` に `%USERPROFILE%\.local\bin` が追加された
+
+**新しい PowerShell での確認（この節の手順 7）**:
+
+- 実行記録は `20261006-111039Z-7d090b3a`。2026-10-06 11:10:46.409 UTC に完了し、手順のエラーは 0、最後の CLI とタスクの終了値は 0、開始と完了の対応も確認した
+- `Get-Command claude -All` は `%USERPROFILE%\.local\bin\claude.exe` の 1 行だけで、`claude --version` は `2.1.291 (Claude Code)`。Authenticode は `Valid` で、署名者は `CN="Anthropic, PBC", O="Anthropic, PBC", …`
+- `claude doctor` は `Running: native (2.1.291)`、`Platform: win32-x64`、導入先と一致する `Path`、`Config install method: native`、`Search: OK (bundled)`、`Auto-updates: enabled`、`Auto-update channel: latest`、`No installation issues found.` を出した
+- `doctor` の認証が要る項目は資格情報が無い旨を表示した。Managed settings と Organization policy は取得されず、Remote Control は claude.ai にサインインしていないため利用可否を確認できなかった。導入の診断が正常でも、認証が済んだことにはならない
+
+**未検証の範囲**:
+
+- 手順 1・6 の GUI での PowerShell の開き方、コピー・貼り付け、環境変更の通知がスタートメニューから開いた PowerShell に届くこと
+- 手順 8・9 の初期設定・Firefox でのログイン・認証後の状態。認証を要するコマンドや Remote Control の接続
+- 自動の更新・`claude update`・チャンネル切り替え、ロールバック、arm64、Git for Windows が無い場合。Windows の実機での通し実行
+
+2026-10-03 以前の付録は当時の確認範囲を記した履歴として保持した。今回も本文のコマンドは変更していない。

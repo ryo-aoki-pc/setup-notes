@@ -2,7 +2,25 @@
 
 [手順書](../windows-setup.md)
 
-以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+## 最新の検証範囲（2026-10-07 UTC）
+
+**Windows の実機では全手順を通していない。新規の Windows 11 Pro 26H2 の VM での部分検証結果であり、初期導入 64 手順と後続ツールの全工程が成功した記録ではない。**
+
+- 初期設定は Windows Update の 4 件の適用と残り 0 件、Store の更新なし、Scoop・UniGet UI・PowerToys・PowerShell 7 の導入、指定値の読み戻しと一部の実画面を確認した。56〜60 と通常権限の Windows PowerShell 5.1 への LF 3 行の貼り付け順は、利用者の手動確認を含む。343 文字のパスとシンボリックリンクの作成・読み取り・削除も、通常権限の PowerShell 7.6.6 で確認した。
+- 追加の 5 項目は次の限定した範囲で成功した。
+
+  1. Git: 子 Bash の global 設定と使い捨てリポジトリに隔離し、12 キーの設定と、実 rebase・autostash・日本語ファイル名・CRLF・最初の push を確認した。機能試験は 14 フェーズ・9 検査が成功した。初回のホストの待ち時間切れとコピー失敗を残し、同じ実行の正常終了を後から回収した。本人の設定・対話的な Git Bash・外部の認証を伴う接続は未検証。
+  1. WezTerm / HackGen: 2 ファミリーの各 6 文字、計 12 glyph が自身の DirectWrite フォントを使い、欠損のない glyph と画素を CLI で生成した。GUI のフォント一覧・描画の見た目・右クリックの実操作は未確認。
+  1. WireGuard: ローカルの鍵生成・公開鍵の対応・ACL と、管理サービスの CLI による一時的な起動・削除を確認した。鍵・サービス・プロセスは削除し、新規の Data は保持した。GUI・VPN 接続・外部との疎通は未確認。
+  1. RDP: TCP 到達・CredSSP の選択と必須、公開証明書の SHA256・名前・有効期間を照合した TLS 1.3 の確立まで確認した。一時転送と待受けは撤去済み。資格情報の送信・認証後のログイン・ping は未確認。
+  1. スタートアップ: 新規の Run 2 項目と StartupApproved の先頭バイト 2/3、通常の OS 再起動 1 回で、有効側の起動と無効側の記録の不在を確認した。初回の両記録なし・終了コード 33 は履歴として保持し、有効側の遅延起動後に再観測して合格とした。専用の値 4 件とディレクトリは撤去済み。OneDrive・Teams 本体の次回起動の効果へは広げない。
+
+- WSL はパッケージ・機能の導入まで成功したが、AlmaLinux 10 の実起動と入れ子の VM は、この VM の仮想化機能の公開範囲による制約で失敗した。復旧比較後は 2 CPU のままで、4 CPU に戻す再試験とホストのセキュリティ変更は行っていない。
+- Autologon は本文と補助タスクの起動要求が取消で終了した履歴を残す。その後の利用者による Explorer 経由の手動起動・設定と、2 CPU の通常再起動で無入力の自動サインインを確認した。元の起動経路の成功には置き換えない。
+- Firefox と既定ブラウザー、HackGen の GUI、ゲスト内の VirtualBox Manager は利用者に確認を依頼済みで回答未取得。残る GUI、Claude Code の認証、GitHub の直接コピー経路と管理者窓への貼り付け、未実施の分岐・任意節・更新・ロールバックも未検証。
+- 生の証跡・実行用ハーネスはローカルの .verification/ に保管し、この PR には含めない。以下の evidence/... は .verification/evidence/... 内の記録を指す。本文の結果要約とハッシュを公開し、秘密値は記載しない。
+
+以下は文書分離前から保存されている過去の記録です。「未検証」「未確認」は、それぞれの実施時点の範囲を指します。最新の結果は上の要約と末尾の 2026-10-06 の VM 検証付録に従い、実施日・対象版・実行範囲を区別します。
 
 ## 補足
 
@@ -858,3 +876,162 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている。この PC にリモート デスクトップでつないだとき、つないだ側の PC でつないだときの効き方は確かめていない
 
 - **このユーザーの Windows PowerShell のコンソールの窓すべてに効く**: 管理者の窓も同じプロファイルを読む。SSH でログインしたセッションの Windows PowerShell で、SSH のクライアントから貼ったときの動きは確かめていない
+
+## 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
+
+**VM での部分検証結果**。利用者の希望で一度中断し、ABIKO-WS への引き継ぎを準備した。その後の「やはりこのホストで作業を再開してください。」により、ROG-FLOW の元の VM で再開した。手順 2〜7・10・13・15〜30・32〜34・61 の CLI 実行と値の読み戻し、管理者設定（40〜51）を確認した。31 の設定と 56 の Caps Lock・Ctrl+Space は利用者が手動で確認した。32 は修正版の実行と値の読み戻し、55 の OS 再起動はログで確認し、57 の Explorer・タスクバーなどの一部を実画面で確認した。WSL（54）はパッケージ・機能の導入まで成功したが、62・63 と VirtualBox の入れ子の VM の実起動は検証環境の制約で未達。64 は Autologon の導入・実体・署名・UAC の画面を確認したが、本文と補助タスクの起動要求は取消で終了した。その後、利用者が Explorer から手動で起動・設定し、2 CPU の通常再起動で無入力の自動サインインを確認した。本文の起動経路が成功した結果とは扱わない。その後、Bing の結果なし（57）、不要な Edge/Store のピン解除（58）、WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧（59）を利用者が手動で確認した。さらに、59 のスタートからの起動と WinGet/Scoop の GUI の版表示、60 の通常権限の Windows PowerShell 5.1 のスタートからの起動、LF 3 行の右クリック貼り付け順を利用者が手動確認した。貼り付けは 16〜19・38 の確認として今回の fixture の範囲に限定する。AI の画面確認、ピン解除の正確な文言、GitHub の直接コピー経路・管理者窓への貼り付けと残る GUI の効果、認証後の RDP ログインと ping は未確認。追加の事前交渉では TCP 到達と CredSSP の選択・必須を確認し、通常権限の PowerShell 7 で長いパスとシンボリックリンクの実操作も確認した。Git の共通手順による 12 キーは試験用の global 設定で検証し、本人の設定には反映していない。14 は条件により飛ばし、実適用は未確認。57〜60 と貼り付け fixture の手動確認は回答済みで、この範囲の結果を記録した。追加の Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager は回答待ち。Windows の実機で全手順を通した記録ではない。
+
+**環境と導入元**:
+
+| 項目 | 値 |
+|---|---|
+| インストール媒体 | 利用者が Rufus 4.15.2396 の画面で専用の 16 GiB VHD に作成し、USB の記憶装置として VM に接続した |
+| ISO | Microsoft 公式の日本語の製品版。SHA256 は `923EC1A2EC46CCBE607FC81BEAF9753BFBB6FC62220B7B8BFFD56E66F6DE3A0C` |
+| OS | Windows 11 Pro 26H2、26300.9457、x64 |
+| VM | VirtualBox 7.2.20、メモリ 8 GiB、当初 CPU 4 個、復旧比較後は 2 個のままで 4 個に戻す再試験は未実施、EFI・Secure Boot・TPM 2.0。Hyper-V の NEM バックエンド |
+| 導入先 | 新規の 256 GiB ディスク。単独の Windows の VM で、デュアルブート向けのパーティション作成は試していない |
+| ユーザー | ローカル アカウント `r-aoki`、Administrators の一員 |
+| PowerShell | Windows PowerShell 5.1、x64。デスクトップにサインインした対話タスクで実行した。当初は Session 2、手順 15 は復旧後の Session 1 |
+| 検証用の追加物 | Guest Additions と検証コードは別の DVD から導入した。Rufus の元媒体は変更していない。利用者の要望により、専用 VM の検証用パスワードを変更した |
+| 導入前の基準記録 | Guest Additions の導入前に採取した読み取りの JSON。保護した原記録の SHA256 は `F0465DE273E11E84517816E20DEAFC71A87520875C6D8DD017ABF29B47211C0C` |
+
+- Rufus の 7 項目は生成された回答ファイルで確認した。回答ファイルは `boot.wim` のイメージ 2 の `Autounattend.xml` にあり、7 項目すべての最終的な効果を証明した記録ではない
+
+**実行方法**:
+
+- 本文の折り畳みの外にある PowerShell ブロックを抽出し、コマンドを変えずに `Invoke-Expression` で順番に実行した。同じ実行グループ内では、手順 20 を除いてスコープを共有した。手順 20 はインストーラーが dot-source と判定しないよう別のスコープで呼び、同じプロセスの環境変数を引き継いだ
+- 手順 2〜7 と PC 全体の設定は管理者、手順 10・13・15〜30・32〜34 は通常権限の対話タスクで実行した。手順 31 の IME の設定は利用者が画面で行った。手順 1・9・35 の画面操作と本文の貼り付けはタスクで代替した。その後、60 の通常窓の起動と、メモ帳からの LF 3 行 fixture の右クリック貼り付けは利用者が手動確認した。GitHub の直接経路・管理者窓への貼り付けは未試験
+- 出力・エラー・終了コードと、実行前後の読み取りの状態を採取した。検証用コードの実行準備は、本文の設定が効いたという判定には使っていない
+
+**確認できた結果**:
+
+| 手順 | 実際の結果 |
+|---|---|
+| 2・3 | NuGet 2.8.5.208 と PSWindowsUpdate 2.2.1.5 の初回導入・読み込みが成功した |
+| 4（修正前） | 表には KB5007651・KB890830・KB2267602 の 3 件が出たが、件数の表示は 1 件だった。検索結果の 1 要素が `Collection<PSObject>` で、その中に 3 件を持つことを診断で確認した |
+| 4・7（修正後） | 検索結果を `ForEach-Object { $_ }` で展開するように直した。実検索の 1 件・0 件は正しく表示・判定した。修正後の 3 件の表示は、型の診断と Windows PowerShell 5.1 の模擬で確認した範囲で、実更新前の 3 件では再検索していない |
+| 5・6 | 元の手順のまま 2 回実行した。KB5007651・KB890830・KB2267602・KB4052623 の計 4 件がすべて `Installed` になり、再起動待ちは `False` だった |
+| 7（修正前） | 最初の 3 件を適用した後は KB4052623 が残り、再度適用した後は残り 0 件・確認完了・再起動待ちなしになった。0 件は元のコードでも正しく判定した |
+| 7（復旧の再起動後） | 管理者の手順 2・3・7 のバッチ `20261006-084631Z-30eaa70d` はすべて完了し、エラーは 0 件。手順 7 の実出力は更新 0 件・再起動待ちなしだった |
+| 10 | 通常権限の Session 2 で成功した。`winget.exe` と `store.exe` が使えた |
+| 11・12 | Windows Update の作業中に Store が 22506.1400.2.0 から 22608.1401.5.0 へ自動更新されたため飛ばした。古い Store から CLI を準備する分岐は未検証 |
+| 13（初回） | `updates --help` の終了と `--apply` 対応を確認した。再起動後に回収した初回のログには `Updates available (31 found)` と `Store-managed updates available for bulk installation`、App Installer・Terminal など 31 件の全一覧があった。この初回は CLI の自然終了と終了コードを確認できず、強制停止で中断した |
+| 13（再起動後の再実行） | 通常権限の手順 10・13 のバッチ `20261006-084901Z-83141775` は正常終了し、手順 13 は `No updates found.` を明示した。エラーの記録は空配列、CLI の終了コードは 0 だった |
+| 14 | 手順 13 で更新なしを明示したため、条件により飛ばした。`store updates --apply` の実適用は未検証 |
+| 15 | 再サインイン後の通常権限の Session 1、Windows PowerShell 5.1.26100.9444 でバッチ `20261006-101014Z-da3b4e6d` を実行した。`No updates found.`、App Installer 1.29.379.0 と Terminal 1.24.12741.0 の `Ok`、winget v1.29.380 を確認。エラー 0 件・CLI の終了コード 0・タスク結果 0 で正常終了し、終了記録も今回のバッチに対応した |
+| 16・17 | バッチ `20261006-101122Z-361fe6d7` を通常権限で実行した。初期状態は Scoop・Git なし、ClassicMenu は `False`、Scancode Map なし、プロファイルなし。実行ポリシーの全範囲は `Undefined`、実効値は `Restricted` だった。手順 16 の設定コマンドはエラーなく無出力で終了した |
+| 18・19 | 実効の実行ポリシーは `RemoteSigned` になり、既定のプロファイルへ印付きの 1 行だけを追加した。バッチ全体はエラー 0 件・タスク結果 0 で終了記録も一致した。続く新しい PowerShell のバッチで `RemoteSigned` と Ctrl+Enter の `AddLine` を確認し、プロファイルが読み込まれることを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認した。GitHub の直接経路・管理者窓は未試験 |
+| 20・21 | 通常権限の Session 1 のバッチ `20261006-102102Z-85dd008c` で、`Initializing...` に続き `Scoop was installed successfully!` を確認した。Scoop v0.6.0（2026-09-30）、main バケット（1,669 件）、ユーザーの `PATH` に `C:\Users\r-aoki\scoop\shims` を確認。エラー 0 件、手順 21 の終了コード 0・タスク結果 0 で終了記録も一致した |
+| 22（初回の一覧確認中断） | バッチ `20261006-102229Z-e5e945ca` で scoop-search 2.1.0 と UniGet UI 2026.3.0 の導入が成功した。利用者が Visual C++ ランタイムの管理者確認を許可した後、`Successfully installed` が出た。続く source 未指定の `winget list` は `msstore` の規約と地域情報の初回同意待ちになり、対象 CLI を操作側で中断した |
+| 22（修正後の再実行） | 通常権限の Session 1 のバッチ `20261006-103736Z-d0d5c6cc` は、scoop-search は既存、UniGet UI は既存で新しい版なしと表示した。`--source winget` を付けた一覧は UniGetUI・Devolutions.UniGetUI・2026.3.0 を正常に表示した。エラー 0 件・終了コード 0・タスク結果 0 で終了記録も一致した。初回導入のやり直しではなく、既存の導入の確認だった |
+| 23 | 通常権限の Session 1 のバッチ `20261006-103844Z-c2c5935a` で PowerToys 0.101.2362.0 のハッシュ確認・初回導入・一覧表示が成功した。HKCU の登録と `%LOCALAPPDATA%\PowerToys` の本体の存在・FileVersion 0.101.2362.0 を確認。10:40:04.713 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
+| 24 | 通常権限の Session 1 のバッチ `20261006-104359Z-4a9f9dd6` で PowerShell 7.6.6.0 のハッシュ確認・初回導入・一覧表示が成功した。ユーザーの MSIX は `Microsoft.PowerShell_8wekyb3d8bbwe`、Status は `Ok`、版は 7.6.6.0。WindowsApps の `pwsh.exe` と `PowerShell 7.6.6` の表示を確認した。10:45:16.137 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
+| 25〜30 | バッチ `20261006-104548Z-b74ba246` はすべてエラー 0 件・タスク結果 0 で終了記録も一致した。10:54:13.309 UTC の独立の読み取りもエラー 0 件で、指定したレジストリの全値と型を確認した。GUI の効果は未確認 |
+| 31 | 利用者が IME のオン・オフを Ctrl+Space に設定し、設定画面を閉じたことを確認した。IsKeyAssignmentEnabled=1・KeyAssignmentCtrlSpace=2 を DWORD で読み戻した。その後の手順 56 では利用者が実際のキー入力も確認した |
+| 32（修正前） | 通常権限のバッチ `20261006-111347Z-f222f42c` で Edge の MicrosoftEdgeAutoLaunch_* の StartupApproved の先頭バイトが 3 になった。OneDrive の正確な名前と Teams のキーはなく、該当部分は何もしなかった。出力には `OneDriveSetup: 起動する` が残った。11:19:49 UTC の独立の読み取りでは Run の項目が実在したが、参照先の `C:\Windows\System32\OneDriveSetup.exe` はなく、動いているインストーラーを確認した結果ではない |
+| 32（修正後） | 手順 32 と対応するロールバック 8 の対象へ正確な名前 `OneDriveSetup` を追加した。修正版のバッチ `20261006-112432Z-9ca3808b` はエラー 0 件・終了コード 0・タスク結果 0 で終了した。11:26:39.6657555 UTC の独立の読み取りで OneDriveSetup と Edge の StartupApproved の先頭バイト 3 を確認した。Run の値と実行ファイルは消さず、RunOnce と Active Setup は変更していない。参照先の実行ファイルは不在で、署名は確認していない |
+| 33・34 | 同じバッチは 11:14:32.816 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。33 は Clipchamp・BingNews・BingWeather・Solitaire・OfficeHub・Todos・FeedbackHub・GetHelp・PowerAutomateDesktop の 9 個、34 は Web Experience Pack を外した。Outlook と Teams は最初から不在だった。独立の読み取りでも対象 11 個と Web Experience Pack はすべて不在で、最初から不在の Copilot も不在のままだった |
+| 36・37 | バッチ `20261006-104738Z-a4ee1724` は管理者・Session 1・Ctrl+Enter `AddLine`。Professional、26H2、26300.9457、PC_NAME は空、対象 LAN は「イーサネット」（index 13）で Public、RemoteDesktop は 1、RemoteAssistance は 1、HelloOnly は 2、キーボードは `kbd106.dll`、配信の最適化は Lan だった |
+| 38・40〜42・45・47〜51 | バッチ `20261006-105215Z-41e42451` はエラー 0 件・タスク結果 0 で終了記録も一致し、10:52:34.809 UTC に終了した。独立の読み取りでも変更した値と型を確認した。このバッチの 38 は CLI の順だけを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認したが、管理者窓は未試験 |
+| 41（確認の修正後） | 元の `/q` では LIDACTION と CONSOLELOCK の確認値が空だった。`/qh` に直したバッチ `20261006-105558Z-e052cc85` は 10:55:59.198 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。AC の STANDBYIDLE・LIDACTION・CONSOLELOCK はすべて 0、HibernateEnabled は 0 だった |
+| 39・52・53 | PC_NAME が空、単独の Windows、JIS 106/109 キーの条件により飛ばした。キーボードの `kbd106.dll`・PCAT_106KEY・7・2 を保持した。改名・UTC・US 配列への変更の分岐は未検証 |
+| 43・44・46 | 利用者がこの VM に限って許可した後、手順 36 を含むバッチ `20261006-111436Z-5b60cb90` は 11:14:48.986 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。11:16:41.776 UTC の読み取りもエラー 0 件で、LAN のイーサネット・index 13 は Private、RDP の fDenyTSConnections=0・UserAuthentication=1、RDP の 3 規則と ICMP の 2 規則は有効・Private・Inbound・Allow を確認した。追加の TCP 到達・事前交渉は確認したが、認証情報送信・実際の RDP ログインと ping は未確認 |
+| 54（再起動前の導入確認） | バッチ `20261006-105428Z-57f1244c` は 10:55:24.498 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。WSL 3.0.1 の導入と VirtualMachinePlatform の DISM が成功し、再起動を求めた。11:07:33.958 UTC の独立の読み取りもエラー 0 件で、WSL 3.0.1.0 の登録・`Ok` と VirtualMachinePlatform の `Enabled` を確認した。この時点では再起動後の WSL 2 の実起動はまだ試していなかった |
+| 55（後回収のログで再起動を確認） | 11:33:51 UTC に通常の `Restart-Computer` を実行し、CLI はエラー 0 件・タスク結果 0 だった。後回収のイベントでは User32 1074 が 11:33:53.778 UTC、Kernel-General 13 の終了が 11:34:13.593 UTC、Kernel-General 12 が OS の起動を 11:39:02.500 UTC と記録し、EventLog 6005 は 11:39:13.762 UTC だった。約 5 分遅れて OS が再起動したことを確認した。最初の起動のロック画面・対話画面への到達は直接確認していない |
+| 55 後の復旧起動 | 利用者の明示承認後、11:45:29.857 UTC に対象 VM の強制停止が成功した。停止後の退避を経て起動し、VM の状態は 11:48:17.364 UTC に running、ゲスト OS の LastBoot は 11:48:29.5 UTC だった。GuestControl は終了コード 0 で応答し、Explorer は 0・未サインイン、管理者と通常権限のタスクは Ready。20:49 JST のロック画面を確認し、手動サインインを依頼した。手順 55 による 11:39 の起動とは別の、強制停止後の起動として扱う |
+| 56（利用者の手動確認） | ツールの Caps_Lock+A と Ctrl+A は入力の到達を確認できなかった。その後、利用者が「その通りになりました。」と回答し、実際の入力で Caps Lock+A の全選択、Caps Lock 単独で大文字にならないこと、Ctrl+Space による IME の A/あ と文字入力の切り替えを確認した。利用者の手動確認として合格とし、自動入力の試験が成功した結果とは扱わない |
+| 57（一部） | 新しい Explorer は PC を開き、`gui-fixtures-visible.txt` の拡張子と Hidden 属性の `hidden.txt` の薄色表示を確認した。ファイルの右クリックで直接、送る・プロパティのある旧形式のメニューが開いた。タスクバーは左寄せ・検索/タスクビュー/ウィジェットなし・時計に秒、全体はダークモード、Edge と UniGet UI のデスクトップのショートカットなしを実画面で確認した。Bing の結果なしは、後の「問題ありませんでした。」という利用者の手動回答で確認した。AI はその検索画面を確認できていない |
+| 58（利用者の手動確認） | 不要な Edge/Store のピン解除について、利用者が「問題ありませんでした。」と回答した。手動確認は合格。AI の画面確認と、ピン解除メニューの正確な文言は未確認 |
+| 59（利用者の手動確認） | WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧について、利用者が「問題ありませんでした。」と回答した。追加の起動経路・GUI の版表示についても「確認しました。」と回答し、スタートからの起動と WinGet/Scoop の GUI の版表示を手動確認PASSとした。AI の画面確認は未実施 |
+| 60・16〜19/38（通常窓の fixture） | 利用者の「確認しました。」により、スタートから通常権限の Windows PowerShell 5.1 を開き、メモ帳の LF 3 行を右クリックで貼って paste-line-1→2→3 の順で実行できたことを手動確認PASSとした。今回の fixture の範囲であり、GitHub の直接コピー経路・管理者窓・AI の画面確認は未試験 |
+| 61 | 通常権限の Session 1 のバッチ `20261006-120810Z-1dab0034` は 12:08:13.075 UTC にエラー 0 件・タスク結果 0 で正常終了した。CtrlEnter=AddLine・20 バイトの Scancode Map・kbd106.dll・LongPaths=1・DeveloperMode=1・Sudo=3・Hibernate=0・RemoteDesktop=0・LanCategory=Private を確認した |
+| 62・63（文字コード修正前） | 62 の CLI は終了コード -1・`HCS_E_HYPERV_NOT_INSTALLED`、63 は終了コード -1・`WSL_E_DISTRO_NOT_FOUND` だった。AlmaLinux 10 の導入と実起動は成功していない |
+| 62・63（文字コード修正後） | `WSL_UTF8` と `Console.OutputEncoding` の UTF-8 を併用する修正版を、バッチ `20261006-122748Z-427db2bf` で実行した。12:27:55.850 UTC に終了し、両手順の PowerShell のエラー記録 0 件・タスク結果 0 だったが、CLI は終了コード -1 で同じ仮想化エラー・ディストリビューションなしだった。両手順の日本語出力は読めた。文字コードの修正は確認したが、WSL の実起動は合格としていない |
+| 64（再開後・起動要求取消） | 通常権限の UTF-8 修正版 manifest のバッチ `20261006-173336Z-f88f0701` で、Autologon の導入成功・winget の終了コード 0 を確認した。17:33:57.0822889 UTC に、`%LOCALAPPDATA%\Microsoft\WinGet\Packages` の下に初めてできた Autologon64.exe の 3.10・署名 Valid・Microsoft Corporation を確認し、UAC の実画面でも製品 Autologon・発行元 Microsoft Corporation を確認した。その後、`Start-Process` が「この操作はユーザーによって取り消されました。」を記録し、17:35:47.0813252 UTC にエラー 1 件・タスク結果 1 で終了、タスクは Ready になった。起動要求取消の原因は未特定で、この試行では Autologon の設定は未実施・自動サインインは未検証だった |
+| 64（Explorer の手動起動・設定後の再起動） | 利用者が手動起動・UAC・Enable・成功表示・終了を報告し、指定した Winlogon の 3 値を読み戻した。2 CPU の条件で通常の OS 再起動を 1 回要求し、VM への入力なしで LastBoot 23:18:13.5 UTC と r-aoki・Explorer・PowerToys の Session 1 を確認した。手動設定後の自動サインインは合格。本文と補助タスクの取消履歴は維持し、その起動経路の成功とは扱わない |
+
+- 貼り付けの fixture は `C:\verify\paste-order-check-20261007.txt`（45 バイト、LF、UTF-8 BOM なし）。SHA256 は `1AE3B7504E8FA11B8A7A23EFB9DA9230DFA946A4FB418BE10EA2D22B5416DBB0`。利用者のメモ帳からの貼り付け確認で、AI が本文の GitHub コピーボタンを操作した試験ではない
+- 手順 4・7 の修正は、複数更新の件数表示の誤差を直すもの。手順 5 は変更していない
+- 手順 25 は DWORD の HideFileExt=0・Hidden=1・LaunchTo=1・Start_TrackDocs=0・ShowRecent=0・ShowFrequent=0、26 は String の既定値が空、27 は指定した 11 個の DWORD が 0 だった。28 は TaskbarAl=0・TaskView=0・秒=1・検索=0、29 は明暗の 2 値が 0、30 は 2 つの委譲の GUID が本文と完全に一致した。その後の実画面で Explorer・旧形式のメニュー・タスクバー・ダークモードを確認したが、既定の端末など、すべての効果を確認したわけではない
+- 管理者設定の読み取りでは、LongPathsEnabled=1・AllowDevelopmentWithoutDevLicense=1・Sudo Enabled=3、DelayLockInterval=4294967295・HibernateEnabled=0 を DWORD で確認した。NIC の AllowComputerToTurnOffDevice は Disabled、RemoteAssistance は 0 で対象の 15 規則はすべて False、HelloOnly は 0、Bing の提案抑止は 1、Edge のショートカット抑止は 1 だった。Edge と UniGet UI の 2 つのショートカットは削除後も不在で、Scancode Map の 20 バイトは本文と一致した
+- 配信の最適化は導入前から Lan で、手順 47 は同じ値を確認した。VM のファームウェアはスリープと休止状態を使えず、手順 41 の実際の眠り・復帰・蓋の動作は試していない
+- 手順 54 後の `wsl --version` は終了コード 0 で WSL 3.0.1.0・カーネル 6.18.40.1-1・WSLg 1.0.79、`wsl --status` は終了コード 0 で既定のバージョン 2 を表示した。同時に「このコンピューターで仮想化が有効になっていないため、WSL2を開始できません」と表示した。CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True だった。この読み取り時点では手順 54 後の再起動をまだしておらず、復旧起動後の WSL 2 の結果とは分けて扱う
+- WSL 1 の機能 `Microsoft-Windows-Subsystem-Linux` は Disabled で、この手順では不要なので正常。`wsl --list --verbose` はディストリビューションなしと表示して終了コード -1 だった。手順 54 は `--no-distribution` なので、これも導入失敗とは判定しない
+- 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の手順 61 と以下の読み取りは、この時点の起動後の状態として扱う
+- 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
+- 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。62・63 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
+- 初回導入と設定確認の時点では、後続の [Git for Windows](../git.md#windows-11-で-git-for-windows-を入れる)・[Firefox](../firefox.md#windows-11-で使う)・[WezTerm](../wezterm-nightly.md#windows-11-で使う)・[Claude Code](../claude-code.md#windows-11-で使う)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard-road-warrior.md#windows-11-で使う)・[HackGen Console NF](../hackgen.md#windows-11-で使う)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
+- VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
+- 手順 43・44・46 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
+- 手順 13 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
+- live snapshot は約 8 分進まず、対象 VM の `IProgress.Cancel` で取り消した（`VERR_SSM_CANCELLED`）。snapshot は保存できていない。この検証環境の復旧経過を、手順 13 の CLI 障害とは断定しない
+- 05:09 UTC の pause 中に差分 VDI 11.7 GB・USB VHD 188 MB と VM 情報をホストの一時保存先へコピーし、resume した。`clonemedium` は書き込みロックで失敗し、独立した全ディスク clone は取得できていない。既存の親ディスク・過去 snapshot は維持した
+- ユーザーの承認後、05:29:11 UTC に `poweroff` が成功した。最初の再起動は接続中の Rufus USB から Windows Setup の言語・キーボード画面へ戻った。「次へ」やインストールは操作していない
+- 05:31:53 UTC に再び `poweroff` し、Rufus USB の接続を `none` にした。媒体ファイルは削除・変更していない。05:32:22 UTC に Windows のルート差分 VDI から起動した
+- Guest Additions 7.2.20 のサービスは Running・Automatic で、認証した GuestControl の読み取り probe は終了コード 0 で戻った。読み取り記録の最終起動は 05:36:42.500 UTC。05:38:02 UTC に起動時の更新画面が終了し、Windows のロック画面へ移った。この時点で UI 入力を止め、`r-aoki` の手動サインインを待った
+- 認証した GuestControl の monitor は成功し、管理者・通常権限の両タスクは Ready、原基準記録の SHA256 も一致した。再起動前の手順 13 の記録は `step_started`・`running` のまま。`finished` の時刻は前の手順 10 より古く、手順 13 の終了を示していない
+- 復旧直後の読み取りでは Store プロセスは 0 個だった。初回の手順 13 は更新 31 件の全一覧を採取できたが、CLI の自然終了と終了コードは確認できず、強制停止による中断として扱う
+- サインイン後に管理者の手順 2・3・7 と通常権限の手順 10・13 を再実行した。手順 7 は更新 0 件・再起動待ちなし、手順 13 はエラーなし・終了コード 0 で正常終了した。この時点では手順 13 の出力の回収を待っていた
+- 手順 13 の再実行が完了した後、08:51:06 UTC に VirtualBox の VM が aborted になった。ホストのログは画面数の変更の直後に例外 `0xc0000005` を記録していた。ログを保存し、対象 UUID を指定して GUI で起動し直した。Store コマンドのエラーとは判定していない
+- 08:54:41.069 UTC に VM が起動し、再び Windows のロック画面を確認した。手動サインインを再依頼して待っていた。この時点では指定ユーザーのログオン失敗でゲストのファイルを回収できなかった
+- ホストに出た以前の無人インストール用ファイルの削除確認は Escape で取り消し、ファイルは削除していない
+- その後、ホストの接続用の認証情報の不一致を確認し、GuestControl の接続を復旧した。ゲストのパスワードは再変更していない。回収した手順 13 の出力は `No updates found.` で、エラーの記録は空配列だった。手順 14 は飛ばし、手順 15 は手動サインイン後に実行する予定
+- 接続復旧後の読み取りでは Explorer・VBoxTray のプロセスがなく、`Win32_ComputerSystem.UserName` は空だった。この時点はログオフ状態で、再サインインを待った
+- ログオン前の補助読み取りでは、Store 22608.1401.5.0・App Installer 1.29.379.0・Terminal 1.24.12741.0 は Status 0（Ok）だった。その後、利用者の再サインインを確認して手順 15 を実行し、10:10:39.719 UTC に正常終了した
+- 手順 20・21 の初回バッチ `20261006-101239Z-3352f6ed` では、手順 20 の出力は空でエラー 0 件、手順 21 は `scoop` 未検出でエラー 1 件・タスク結果 1 だった。補助ハーネスの dot-source 呼び出しが、Scoop の公式インストーラーの「関数だけを読み込む」分岐に入り、実インストールを行っていなかった。手順 20 の呼び出しだけをハーネス側で直し、本文のコマンドは変えずに再実行すると導入と確認が成功した
+- 手順 22 では、依存関係の `vcredist2022_x64.exe` と管理者確認のプロセスを確認した。実ファイルは Microsoft Corporation の有効な署名で、製品は Microsoft Visual C++ v14 Redistributable x64 14.51.36247、版は 14.51.36247.0 だった。取得した GUI の画面は黒く、実際の UAC の文言は観察できていない。利用者が管理者確認を許可した後、VC x64 の HKLM の `Installed=1` と `Version=v14.51.36247.00`、UniGet UI の導入成功の出力を確認した
+- 補助のユーザー別アプリの読み取りでは、UniGet UI 2026.3.0 の HKCU 登録と `%LOCALAPPDATA%\Programs\UniGetUI` の本体、`UniGetUI.exe` の版 2026.3.0.0、scoop-search の実ファイルを確認した
+- 続く source 未指定の `winget list` は `msstore` の初回同意待ちになった。対象の引数と親プロセスを確かめて一覧確認の CLI を中断した。これは操作側による中断として扱い、自然な検索失敗とは判定しない。手順 22・23・24 の一覧確認の 3 行だけに `--source winget` を足し、手順 22 の再実行で一覧の正常表示と終了を確認した
+- 手順 23・24 の実体確認は読み取りエラー 0 件だった。画面の取得は対象を選び直しても 2 回 `foreground window did not report a process id` となり、CLI は正常に応答していた。GUI の操作や表示は確認済みにはしていない
+- 手順 55 の再起動要求後、黒画面・GuestControl 未応答から暫定的に新しい起動を未確認としていた。後回収のイベントと停止時に保存した VBox.log で、11:39 に OS が再起動していたことを確認し、記録を訂正した。VBox.log には HyperV Reset・ACPI Reset と RESETTING/RUNNING、ゲスト VBoxService の 11:39:13.394 UTC のログ開始、graphics capability Yes があった
+- 検証側の最後の GuestControl の失敗確認は新しい起動より前の 11:38:45 UTC で、強制停止直前の再応答の確認が不足していた。強制停止案は当初、別の明示承認が必要として自動承認レビューに拒否された。その後、利用者が「承認します」と明示して強制停止・退避・復旧起動を行った。イベント 41・6008 は後の強制停止後の復旧起動時に発生したもので、手順 55 の自然な再起動の失敗を示すものとして扱わない。Minidump は 0 件、読み取りエラーは 0 件だった
+- 停止後に差分 VDI（約 22.95 GB）・設定・NVRAM・ログの計 4 ファイルを退避し、すべて元と退避先の SHA256 が一致した。11:47:42 UTC に退避の記録を保存した。差分ディスクなので既存の immutable の親が必要で、独立した全ディスク clone ではない。その後に利用者の手動サインインと、手順 61・57 の一部を確認した
+- 手順 61 の確認時点では CLI が正常に応答した。画面が黒くなった際は 1 回のクリックで戻り、表示が消えていた状態として扱う。この時点の観察を VM のハングとは判定しない
+- 利用者の希望で検証を一度中断し、ABIKO-WS へ引き継いで続行する予定とした。この中断中は追加の VM 操作を行わず、検証結果の保存と未実施の範囲の整理のみを行った。中断時点では手順 64 は実行していなかった
+- 2026-10-07 JST に、利用者の指示で ROG-FLOW の元の VM で再開した（以下の時刻は 2026-10-06 UTC）。元の VM は poweroff、状態変更時刻は 14:54:57 UTC だった。同じ UUID を `--type separate` で起動し、ゲストの LastBoot は 17:09:21.5 UTC。利用者の手動サインイン「完了」の後、CIM のユーザーと Explorer・PowerToys・UniGet UI の Session 1 の実プロセス、両検証タスクの Ready を確認した
+- 手順 64 の Autologon64.exe の SHA256 は `5D96BBC4E5B726D87C7CF547F5FE98F8F05434EC2130BD60CBF5671FD3A7381B`。17:33:57.0822889 UTC の確認ではタスクは Running、Consent は Session 1 で、利用者の UAC と有効化の操作を待っていた。自動入力の `u` はスタートの検索に届かず画面が閉じ、GUI のキー入力の到達は未確認のまま。この時点では 57 の Bing・58・59 は合格としていなかった。最新の VBox ログでも NEM の Hyper-V mode を確認し、WSL と入れ子の VM は再実行せず、ホストのセキュリティ設定も変更していない
+- 手順 64 は導入成功の後、Autologon の起動要求が取り消されて終了した。利用者は UAC・パスワード・Enable の依頼に「VMが無かった」と回答し、取消の原因は未特定。設定は未実施で、自動サインインも未検証のまま
+- ROG-FLOW のホストのイベント 1000 は 17:35:36 UTC に VirtualBoxVM.exe の Qt6GuiVBox.dll+0xd5c74・0xc0000005、17:35:41 UTC に 0xc000041d を記録した。直前の VBoxUI.log には host-screen count changed が 6 回あった。一方、VBoxHeadless は running、ゲストの LastBoot 17:09:21.5 UTC と Explorer のログインを維持していた。表示プロセスの障害として記録し、手順 64 の取消原因の確定とは扱わない。証跡を `evidence/frontend-crash-20261006-173536` に保存した
+- 21:57:23.0140619 UTC の最初の GUI だけの再接続は、VBoxUI.log の aboutToQuit が 10.346 秒で、ウィンドウの復旧を確認できなかった。その後、利用者は表示しているホスト PC が ROG-FLOW と回答した
+- 2 回目は `VBoxManage startvm <VM_UUID> --type separate` で GUI のウィンドウが戻り、PID 14420・ウィンドウ 1507508 のホストメニューを実画面で確認した。ただしゲストは黒画面だった。VBox.log には `DetachFramebuffer: Invalid framebuffer object` と `AttachFramebuffer: Framebuffer already attached to 0` があり、経過時間 01:37:41 の実際の heartbeat unresponsive は回復を確認できていない。この検知だけでゲスト OS の停止を確定しない
+- GuestControl の新しいセッションは starting のままタイムアウトした。22:04:23.928 UTC の ACPI による通常終了要求から約 3 分後も VM は running で、通常終了は未確認だった。強制停止による復旧だけを利用者に明確に確認した
+- 22:07:34 UTC ごろの一時停止中に、active VDI（25,531,777,024 バイト）・vbox・NVRAM の 3 データを `%TEMP%\recovery-backup-frontend-20261006-220734` へコピーし、すべて元とコピーの SHA256 が一致した。一方、稼働中の VBox.log のハッシュ確認は file-in-use で失敗し、3 データの照合結果とは分ける。RAM は保存しておらず、差分 VDI のため親 VDI が必要で、独立した clone ではない。`evidence/frontend-reattach-20261006-215723/backup-manifest.json` に記録した。finally の resume は 22:09:27.292 UTC に完了し、VM は running と確認した
+- 利用者が今回の明確な確認に「起動し直してよいです」と回答した後、22:28:04.227054 UTC に対象 VM の poweroff を確認し、同じ UUID を separate で起動した。直後の running 判定は早すぎてコマンドが終了コード 1 になったが、再び start は行わず、22:28:27.944 UTC の読み取りで running、VMStateChangeTime 22:28:13.867 UTC を確認した
+- この 4 CPU の起動では Guest Additions は level 1・base driver までロードした。bootmgfw.efi・Windows の kernel ID・WDDM/USB の記録はあるが、経過時間 28.940 秒以降は 5 分を超えて進展を確認できず、約 11 分 55 秒の観測でも VBoxService に到達しなかった。この試験ではデスクトップとサインインは復旧しなかった
+- 切り分けとして提案した CPU 数 4→2 は、自動承認レビューが「CPU の永続設定変更の明示承認がなく、再起動の許可だけでは不足」として実行前に拒否した。その時点では変更せず、この変更について利用者に明確な承認を依頼した
+- 利用者が CPU 数の比較に「承認します。」と回答した後、22:40:04.323245 UTC に poweroff を確認し、4→2 の設定と読み戻しを行った。separate の起動要求は 22:40:04.5050719 UTC、VMStateChangeTime は 22:40:09.392 UTC、22:40:45.3348627 UTC に running を確認した
+- 2 CPU の起動は、経過 57.677 秒に VBoxGuest、62.560 秒に WDDM、83.716 秒に VBoxService（ゲストの時刻 22:41:30.328 UTC）、84.340 秒に graphics まで進み、Windows のロック画面を実画面で確認した。22:42:21.189987 UTC に GuestControl が成功し、LastBoot 22:40:23.5 UTC を読み戻した。この時点では CIM のユーザーは空、LogonUI は Session 1 で、手動サインインは未完了だった。両検証タスクは Ready で、通常権限タスクの結果 1 は前の手順 64 の取消を保持していた。証跡は `evidence/restart-20261006-222804/VBox-cpu2-ready.log`・`cpu2-diagnostic.json` に保存した。CPU 数以外のハードウェアとホストのセキュリティ設定は変更していない。比較で復旧した結果であり、原因を確定したものではない
+- この時点では 2 CPU のままで検証を続けることにし、4 CPU に戻す再試験は行っていなかった。利用者の「完了」の回答後、22:52:26.7068317 UTC の読み取りでユーザー DESKTOP-5BNC6L6\r-aoki、Explorer（PID 2676・7916）と VBoxTray（PID 8868）の Session 1 を確認し、手動サインインは完了した。LastBoot は 22:40:23.5 UTC のままで、通常権限タスクは Ready、前の取消による結果 1 を保持していた。この時点では Autologon は未設定で、再び開く補助コード `relaunch-autologon.ps1` も VM では実行していなかった
+- 通常権限タスクで Autologon の新しい起動要求 `20261006-225840-29f9cb04` を 1 回行い、22:58:52.2323842 UTC に要求を完了した。補助コードは実体のハッシュ・Microsoft の署名の確認を通過し、22:59:32.8630346 UTC は Consent の Session 1・通常権限タスク Running だった。今回の UAC 文言は画面取得で確認できず、利用者は「VMの画面にはデスクトップしか映っていません」と回答した
+- この要求の完了記録は、開始 22:58:55.1901170 UTC・終了 23:00:58.8458588 UTC・result fail、Start-Process の「この操作はユーザーによって取り消されました」、native_code null だった。利用者が取消を押したかどうかと、取消の原因は未確認。23:05:02.7386707 UTC の GuestControl は同じ LastBoot 22:40:23.5 UTC と r-aoki・Explorer の Session 1、Autologon64 と Consent の不在、通常権限タスク Ready・結果 1 を確認した。完了記録は `evidence/autologon-relaunch-20261006-225840-29f9cb04/guest-launch-result.json` に保存した。同じ裏のタスクからは起動を繰り返さず、署名済みの実体を Explorer で選択表示する要求を 1 回行った。この時点では表示成功は未確認で、Autologon の設定と次回起動の自動サインインも未確認だった
+- 選択表示の補助コードの記録は 23:07:24.3667475 UTC で、実体の SHA256 一致・有効な Microsoft の署名・r-aoki の Session 1 を確認し、Autologon 自体の起動と設定操作は行っていない。23:08:18.8449035 UTC の GuestControl では、通常権限タスク Ready・結果 0、対象 Autologon フォルダーを開いた Explorer（PID 4156）の Session 1、Autologon と Consent の不在を確認した。完了記録 `explorer-display-result.json` を保存した。Explorer を開く処理は成功したが、画面取得は新しく選び直しても 2 回 CreateForMonitor の 0x80070057 で失敗し、画面の視認は未確認。UI 入力を止め、利用者にタスクバーの Explorer から選択された実体を手動で起動し、製品・発行元を確認して設定する操作を依頼した。この時点では Autologon の設定と次回起動の自動サインインは未確認だった
+
+- 利用者が Explorer から Autologon を手動で起動し、UAC・パスワードと Enable・成功表示・終了を行ったと「完了」で報告した。23:16:09.4770037 UTC の読み取りでは、Winlogon の指定した 3 値だけ（AutoAdminLogon=1・DefaultUserName=r-aoki・DefaultDomainName=DESKTOP-5BNC6L6）を確認した。秘密値は読み取っていない。Autologon と Consent は不在、両検証タスクは Ready・結果 0、LastBoot は 22:40:23.5 UTC だった
+- 23:17:36.0232656 UTC に通常の OS 再起動 `shutdown.exe /r /t 10` を 1 回要求し、終了コードは 0、ホストからの poweroff は行っていない。利用者には検証中の VM に入力しないよう事前に伝え、検証側も GUI 入力・認証操作を行っていない。23:19:40.9676058 UTC の GuestControl は終了コード 0 で、LastBoot 23:18:13.5 UTC、ユーザー DESKTOP-5BNC6L6\r-aoki、Explorer（PID 5656・7920）と PowerToys（PID 5528）の Session 1、LogonUI・LockApp・Autologon・Consent の不在、両タスク Ready・結果 0 と指定 3 値の保持を確認した。2 CPU の条件で、手動設定後の無入力の自動サインインを合格とした。本文と補助タスクの Start-Process の取消履歴は維持し、元の起動経路の成功に置き換えない。前後の読み取りと再起動要求は `evidence/autologon-reboot-20261006-2316` に保存した。その後、利用者はホストの通常デスクトップと、VM が見えないことを報告した。ホストのイベントでは VirtualBoxVM（PID 26348）が 23:28:23.7379115 UTC に Qt6GuiVBox.dll+0xd5ec6・0xc0000005、23:28:27.2549383 UTC に 0xc000041d を記録した。原因は未確定で、ゲストは同じ起動とサインインを維持した。表示の再接続 1 回は終了コード 0 だったが、別の表示プロセスは 10.330 秒で aboutToQuit となり、ウィンドウは戻らなかった。強制オプションなしの通常 OS 終了要求はホスト時刻 23:33:55.791 UTC に終了コード 0、VM の poweroff は 23:34:08.177 UTC。同じ 2 CPU の設定で separate 起動を 1 回要求した時刻は 23:34:45.0165607 UTC、終了コード 0、running の状態変更は 23:34:50.521 UTC だった。ゲスト時刻 23:36:42.8632541 UTC の読み取りでは LastBoot 23:35:01.5 UTC、r-aoki、Explorer・PowerToys の Session 1、両タスク Ready・結果 0、認証画面なしを確認した。新しいウィンドウで Windows の起動画面から実際のデスクトップを視認し、再度の自動サインインも CLI で確認した。証跡は `evidence/frontend-reattach-20261006-2330` に保存した。その後、利用者の手動の最大化・前面表示の「完了」を受け、その時点で実際のデスクトップ（1057×1143）の最大化を視認した。Edge のピンの右クリックは対象を選び直した 1 回の再試行でも failed to activate captured window となり、GUI 入力を停止した。この時点では 57 の Bing、58 のピン、59 の UniGet UI の操作は未確認で、利用者にまとめて手動の確認を依頼し、UniGet UI を開いたままの報告を待っていた。ゲスト時刻 23:50:04.3380797 UTC の読み取りでは同じ LastBoot 23:35:01.5 UTC と r-aoki、UniGet UI 2026.3.0.0・有効な Devolutions Inc の署名・Session 1 のプロセスを確認した。23:50:48.0115251 UTC に Get-StartApps の Name=UniGetUI・AppID=Devolutions.UniGetUI でスタートの入口も確認したが、これらは GUI の起動・検出・一覧確認の代用にはしない。最新のウィンドウを選び直した画面取得は 1057×1143 の内部が黒く、1 回の再取得も黒かった。23:57:21.8597671 UTC の GuestControl は同じ LastBoot 23:35:01.5 UTC、r-aoki、Explorer と UniGet UI の Session 1 で正常に応答した。この時点では画面内容を確認できず、57〜59 の結果待ちを維持していた。その後、最後の 3 点について利用者が「問題ありませんでした。」と回答し、Bing/Web の結果なし、不要な Edge/Store のピン解除、UniGet UI の WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧を、利用者の手動確認として合格とした。AI はこれらの画面を確認できていない。この質問では、ピン解除の正確な文言、UniGet UI のスタートからの起動と WinGet/Scoop の GUI の版表示は未確認だった。その後に後者と通常窓での LF 3 行の右クリック貼り付けを依頼し、利用者が「確認しました。」と回答した。59 の起動経路と GUI の版表示、60 のスタートから開く通常権限の Windows PowerShell 5.1、16〜19・38 の今回の fixture による paste-line-1→2→3 の順序を利用者手動確認として合格とした。AI の画面確認は未実施、GitHub のコピーボタンからの直接経路・管理者窓への貼り付け・ピン解除の正確な文言は未試験
+
+**追加検証（2026-10-07 UTC）**:
+
+- RDP はホストのループバックから一時的な NAT 転送を通し、ゲストの TCP 3389 への到達と事前交渉を確認した。TLS と CredSSP を候補にした要求には `selectedProtocol=2`（CredSSP）、TLS だけの要求には `failureCode=5`（CredSSP 必須）が返った。値の意味は Microsoft の [RDP Negotiation Response](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/b2975bdc-6d56-49ee-9c57-f2ff3a0b6817) と [RDP Negotiation Failure](https://learn.microsoft.com/ja-jp/openspecs/windows_protocols/ms-rdpbcgr/1b3920e7-0116-4345-bc45-f2c4ad012761) による。認証情報は送信せず、この時点では TLS の確立・認証後の RDP ログイン・ping は未検証。
+- 初回はプロトコル確認後の後片付けが失敗し、終了コード 1 となった記録を保持した。その後の `natpf1 delete` は終了コード 0 で、一時転送とホストの待受けの撤去、元の転送なしの状態への復元を確認した。ホストとゲストのファイアウォールは変更していない。証跡は `evidence/remaining-network-20261007-035624-8a4e672a/rdp-probe-result.json` と `cleanup-followup.json`。
+- 通常権限の PowerShell 7.6.6・Session 1 で、拡張パス接頭辞を使わない 343 文字のパスの作成・読み取り・削除と、SymbolicLink の作成・読み取り・リンクの削除・元ファイルの保持を確認した。試験用の置き場所の後片付けも成功した。PowerShell 5.1 や全アプリでの効果へは広げない。
+- 同じ追加検証の InstalledFontCollection は `HackGen Console NF` と `HackGen35 Console NF` を認識した。WezTerm は Directory と Directory/Background の右クリック用レジストリ項目が存在した。GUI のフォント一覧・描画、WezTerm の実クリックは未確認。証跡は `evidence/remaining-local-20261007-040410-0e3dc87e/guest-result.json`。
+- Git は検証時の `docs/git.md`（SHA256 `2541D4BE9E3CD490A2474567EC30635496610BBA507922DD25148837BF4ED6A3`）の共通手順 3・5・6・7 を変更せず、通常権限の PowerShell 7.6.6 から非対話の Git Bash で実行した。各終了コードは 0、12 キーすべての値・global スコープ・試験用ファイルの出どころが期待値と一致し、手順 7 の出力とも一致した。子 Bash の `GIT_CONFIG_GLOBAL` だけを試験用ファイルに向け、`HOME` と `CODEX_HOME` は変更していない。実際の system 設定の SHA256 は前後一致し、本人の global 設定は未作成のまま、`pull.ff` も未設定のまま保持した。試験用ファイルと置き場所は削除済み。この時点では本人の identity 設定と実 global への反映、対話的な Git Bash の GUI、pull 動作は未検証。証跡は `evidence/remaining-git-20261007-041841-0ff6f533/guest-result.json`。
+- Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager は利用者に確認を依頼済みで、回答待ち。2 CPU のままで、4 CPU に戻す試験、WSL 2 と入れ子の VM の再試験は行っていない。
+
+**追加検証（2026-10-07 09 UTC）**:
+
+- Git の共通手順 4・5・6・9・10・11 を通常権限の PowerShell 7 から同じ非対話の Git Bash で実行した。identity は検証専用の架空値とし、子プロセスの `GIT_CONFIG_GLOBAL` だけを隔離した。日本語ファイル名・CRLF・最初の push と upstream、分岐した履歴の実 rebase、autostash の作成・適用と未コミット変更の復元、手順 11 による試験用リポジトリの削除を確認した。14 フェーズの終了コードと 9 検査はすべて成功し、実設定も保持した。ホストの 55 秒の待ち時間が先に切れ、最初の実行と結果コピーは終了コード 1 だった。その記録を残し、同じ実行が終了コード 0 で完了した結果を後からコピーした。再実行はしていない。証跡は `evidence/remaining-git-behavior-20261007-092648-ddbf22f4`。
+- WezTerm の `ls-fonts --codepoints ... --rasterize-ascii` で、HackGen Console NF と HackGen35 Console NF の各 6 文字（英字・かな・漢字・矢印・Powerline・フォルダーアイコン）が自身の DirectWrite フォントを使い、欠損でない glyph と画素を生成した。日本語 2 文字は各 2 セル、他は各 1 セルだった。終了コード 0、一時設定の削除と実設定の保持を確認した。GUI の窓や表示の見た目の確認には広げない。証跡は `evidence/remaining-wezterm-font-20261007-092017-4d5448f6`。
+- WireGuard は管理者の Windows PowerShell 5.1 で手順 6 を変更せず実行し、45 bytes・ASCII・LF の鍵ペアと公開鍵の対応、Administrators と SYSTEM だけの ACL を確認した。管理サービスは公式 CLI による一時的な起動・削除で検証した。鍵とサービスとプロセスは削除し、検証タスクの要求ファイルも元に戻した。新しくできた管理サービスの Data は残し、設定ファイルは 0 件だった。鍵の内容・ハッシュは記録していない。手順 5 の GUI と VPN 接続は未確認。証跡は `evidence/remaining-wireguard-local-20261007-094630-d8f8efb9`。
+- RDP は、ゲストに設定された公開証明書を読み取り、SHA256・名前・有効期間を照合して TLS 1.3（`TLS_AES_256_GCM_SHA384`）を確立した。CredSSP の選択後の TLS までで、RDP の資格情報は送信していない。終了コード 0、一時的なループバック転送と待受けの撤去を確認した。認証後のログインと ping は未確認。証跡は `evidence/remaining-rdp-tls-20261007-095055-a37a84b1`。
+
+- スタートアップの追加試験では、新規の Run 項目 2 つに StartupApproved の先頭バイト 2（有効）・3（無効）を設定し、通常の OS 再起動を 1 回行った。起動から 122 秒の最初の読み取りは両記録がなく、確認不能・VBox CLI 終了コード 33 だった。その失敗記録を保持した。有効側は遅れて Explorer の Session 1 から起動し、その記録から 160.754 秒後の読み取りで無効側の記録がないことを確認した。後の観測と後片付けは終了コード 0、今回の Run 2 値・承認 2 値と専用ディレクトリを削除した。既存 OneDriveSetup の参照先は存在しないため、この結果を OneDrive・Teams 本体の次回起動の合格には広げない。証跡は `evidence/remaining-startup-20261007-f0126d5a`。
+
+**未試験・環境未達の範囲**:
+
+1. Windows Update の再起動の分岐（手順 8）
+1. Store の初回 CLI 準備（手順 11・12）、手順 14 の更新適用
+1. GUI の残る効果、GitHub の直接コピー経路と管理者窓への貼り付け、ピン解除の正確なメニュー文言
+1. 認証情報送信・認証後の RDP ログインと ping（TCP 到達・事前交渉・証明書の照合による TLS の確立まで追加検証済み）。手順 39・52・53 の変更する分岐は条件により飛ばした
+1. 手順 55 による最初の起動の対話画面への到達、64 の本文と補助タスクからの起動経路、任意節、更新とロールバック。後続ツールは Firefox の既定・コーデック、VirtualBox Manager、WezTerm の GUI、Claude Code の認証、WireGuard の実接続などが未確認。62・63 の WSL 2 と入れ子の VM の実起動は、この検証環境では未達
+1. すべての本文の GUI 貼り付け、Windows の実機での通し実行

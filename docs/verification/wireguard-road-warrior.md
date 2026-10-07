@@ -2,6 +2,14 @@
 
 [手順書](../wireguard-road-warrior.md)
 
+## 最新の確認範囲（Windows 11）
+
+Windows 11 Pro のクリーン VM で、Windows 節の手順 3・4 の新規導入と署名・版を確認した（2026-10-06）。管理者の Windows PowerShell 5.1 で手順 6 の新規鍵生成・形式・ACL・公開鍵の導出一致と今回作成した鍵の削除を確認し、CLI による ManagerService の一時作成・Running・パス・PID の確認と削除も成功した（2026-10-07）。新規 Data は保持し、設定ファイルは 0 件だった。
+
+手順 5 の GUI、既存の鍵がある分岐、conf の作成・取り込み、WG ホストへの登録、トンネルと拠点への接続、更新・ロールバックは未検証。サービスの CLI 検査を GUI や VPN 全体の成功へ広げず、秘密鍵の値やハッシュは記録していない。
+
+[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -685,3 +693,67 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
   - **`Endpoint` が DDNS 名のとき**: トンネルを張るたびに名前を引く（ソースの `tunnel/service.go`）。張っている間に相手の IP が変わったときは確かめていない
 
   - **サスペンド復帰・Wi-Fi の切り替え**: 確かめていない
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 3・4 のコードブロックを抜き出して、そのまま実行した。本体の新規導入だけを検証し、鍵やトンネルの設定は作っていない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの管理者権限（Session 1） |
+| WinGet | 1.29.380。`WireGuard.WireGuard` を `--source winget` で新規導入 |
+| 検証時の本文の SHA256 | `82D40978DB8C534EB0DE3785A8E315A61E1D1ECCEE74E0D65FA820DB376E64C7`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `5AB55CD6E33EAA94C087E02D756F1DBE6F1E2FD84A1D5EA628232E10C57B2FF0` |
+
+**確認したこと**（バッチ `20261006-111858Z-dd62f552`、完了 11:19:15 UTC）:
+
+- 手順 3 の一覧は `No installed package found matching input criteria.`、ユーザーの鍵の置き場所は `False`。WireGuard のサービスと設定ファイルの一覧には出力がなかった
+- 未導入を確認する winget の終了コード `-1978335212` は、この手順で期待する結果だった
+- 手順 4 は公式の `wireguard-amd64-1.1.1.msi` を取り、インストーラーのハッシュ検証が成功し、`Successfully installed` が出た。続く一覧は `WireGuard.WireGuard 1.1.1`
+- `C:\Program Files\WireGuard\wireguard.exe` と `wg.exe` は、どちらも Authenticode の署名が `Valid`、署名者が `CN=WireGuard LLC` だった
+- `wg --version` は `wireguard-tools v1.0.20260223 - https://git.zx2c4.com/wireguard-tools/` だった
+- 全ブロックの PowerShell のエラーは 0、最後の終了コードは 0
+
+**確認していないこと**:
+
+- 手順 1 の端末を開く画面操作と、手で貼る操作。端末の起動は検証用の処理で代替した
+- 手順 2 の 4 つの実際の IP、WG ホストの接続設定、鍵の作成と登録。接続先の実設定は提供されていない
+- 手順 5 以降のマネージャーの画面、設定の取り込み、トンネルの起動、経路・MTU・DNS・ネットワークの種類、拠点との疎通と外部の SSH 接続
+- トンネルを張ったままの再起動、更新とロールバック、サスペンド復帰、Wi-Fi の切り替え、DDNS、arm64 の Windows
+
+---
+
+### 付録: Windows 11 Pro の VM でのマネージャーのサービスと鍵生成の検証（2026-10-07）
+
+前の新規導入と同じ専用 VM で、[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 6 のコードブロックを変更せず、管理者の Windows PowerShell 5.1 で実行した。手順 5 のマネージャーの画面は操作せず、[公式の CLI](https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md) による一時的なサービスの作成・確認・削除で代替した。
+
+| 項目 | 値 |
+|---|---|
+| 環境 | Windows 11 Pro の同じ専用 VM。ログオンユーザー r-aoki の管理者権限 |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop。`USERPROFILE`・`HOME`・`CODEX_HOME` は変更していない |
+| 実行時刻 | 2026-10-07 09:47:01〜09:47:25 UTC |
+| 実行した manifest が記録する本文の SHA256 | `82D40978DB8C534EB0DE3785A8E315A61E1D1ECCEE74E0D65FA820DB376E64C7` |
+| 実行した source manifest の SHA256 | `5AB55CD6E33EAA94C087E02D756F1DBE6F1E2FD84A1D5EA628232E10C57B2FF0` |
+| 手順 6 のコードの SHA256 | `7A80E2789044868A2424D623BD945F871E9CAA2005F8E97141C185453377C166` |
+
+**確認したこと**（証跡 `remaining-wireguard-local-20261007-094630-d8f8efb9`）:
+
+- `wireguard.exe` と `wg.exe` の Authenticode の署名は `Valid / WireGuard LLC` だった。実行前は WireGuard のサービス・プロセス・設定のディレクトリ・`wg-client` と既存の `wg0` がなく、スキップせず検証した
+- `/installmanagerservice` の終了コードは 0。`WireGuardManager` は `Running`・`Auto` で、サービスのパスは `"C:\Program Files\WireGuard\wireguard.exe" /managerservice`、PID は 6948 だった。PID の実行ファイルも一致した
+- 手順 6 は終了コード 0。`wg0.key` と `wg0.pub` はともに 45 バイトの ASCII、末尾は LF のみで、鍵は Base64 の 32 バイト形式だった。秘密鍵を標準入力に渡したローカルの `wg pubkey` は終了コード 0、保存された公開鍵と一致した
+- `wg-client` の ACL は継承を遮断し、Administrators（`S-1-5-32-544`）と SYSTEM（`S-1-5-18`）の FullControl の 2 件だけだった。両ファイルも同じ 2 件を継承し、所有者は Administrators だった
+- source の出力は全ストリームを破棄し、証跡には鍵の値や秘密鍵のハッシュを載せていない。今回作成した `C:\Users\r-aoki\wg-client` だけを削除し、不在を確認した
+- `/uninstallmanagerservice` は終了コード 0。サービスの不在と WireGuard のプロセス 0 件を確認し、元の状態へ戻した。新しくできた `C:\Program Files\WireGuard\Data` は残し、設定の置き場所のファイルは 0 件だった
+- 補助検証は `passed=true`。検証用の管理者タスクと結果のコピーの終了コードは 0 で、一時的な実行要求も元のハッシュへ復元された
+- `guest-result.json` と `source-manifest-executed.json` は `.verification/evidence/remaining-wireguard-local-20261007-094630-d8f8efb9` に保存した
+
+**確認していないこと**:
+
+- 手順 5 のマネージャーの起動・表示・操作と、Windows の端末へ手で貼る操作
+- 既存の鍵がある場合の手順 6 の分岐。今回の鍵生成は、置き場所が完全に存在しない場合だけで、既存の設定や鍵は使っていない
+- 実際の IP・WG ホストの設定、公開鍵の登録、conf の作成・取り込み、トンネルの起動、拠点との疎通と外部の SSH 接続
+- VPN 全体の動作、張ったままの再起動、更新・ロールバック、サスペンド復帰、Wi-Fi の切り替え、DDNS、arm64 の Windows

@@ -426,7 +426,7 @@
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
 
    ```powershell
-   winget list --exact --id Oracle.VirtualBox
+   winget list --exact --id Oracle.VirtualBox --source winget
    & "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" --version
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State, StartMode
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' | Format-Table Name, InterfaceDescription, Status
@@ -579,7 +579,7 @@
 1. 消えたか確かめる。
 
    ```powershell
-   winget list --exact --id Oracle.VirtualBox
+   winget list --exact --id Oracle.VirtualBox --source winget
    Test-Path -LiteralPath "$env:ProgramFiles\Oracle\VirtualBox"
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' -ErrorAction SilentlyContinue

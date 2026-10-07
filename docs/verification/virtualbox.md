@@ -2,6 +2,14 @@
 
 [手順書](../virtualbox.md)
 
+## 最新の確認範囲（Windows 11）
+
+Windows 11 Pro のクリーン VM で、Windows 節の手順 2〜4 による新規導入・ドライバー・ホストオンリーアダプターと、手順 8 の全体設定ファイル 3 件の存在確認は成功した（2026-10-06）。手順 6 の入れ子 VM の起動は VERR_NEM_NOT_AVAILABLE / VERR_SVM_NO_SVM で失敗し、今回作成した VM の後片付けは成功した。
+
+入れ子 VM の起動成功、手順 7 のマネージャーの GUI、手で貼る操作、更新・ロールバックは未検証。後片付けの終了コード 0 を起動成功へ読み替えない。入れ子 VM の再検証は ABIKO-WS の環境へ引き継いだ。
+
+[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -1047,3 +1055,41 @@ aarch64 には入らない:
   - rpm の `%postun` が `/usr/lib/virtualbox/ExtensionPacks` を消すので、入れた場合は **VirtualBox の更新のたびに入れ直す**ことになる（rpm のスクリプトを読んだ結果。未確認）
 
   - **入れる・上げる・消すときに、ネットワークがいったん切れる**: ブリッジ接続のドライバーを入れるため（MSI の画面の警告。上げる・消すときも切れるはずだが、確かめていない）。SSH やリモート デスクトップでつないでいる PC では行わない
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2〜4 のコードブロックを抜き出して、そのまま実行した。導入後に手順 6 の使い捨て VM の起動を試したが、入れ子の仮想化を利用できず失敗した。手順 8 の全体設定ファイルの確認は成功した。利用者の希望でここで検証を中断し、入れ子の VM の再検証は ABIKO-WS の環境へ引き継ぐ。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| 検証用の VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールし、Guest Additions を導入済み |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの管理者権限（Session 1） |
+| WinGet | 1.29.380。`Oracle.VirtualBox` を `--source winget` で新規導入 |
+| 検証時の本文の SHA256 | `37378A44F0114427AD3501A0CD4811E400714516AEEACB83857ADEC868AD9970`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `A8B17ABCE72DE959C554A9A8E1D4838806DFB6000EF4AD38BD2503896638FF24` |
+
+**確認したこと**（バッチ `20261006-111212Z-dad5bab5`、完了 11:13:21 UTC）:
+
+- 手順 2 は `Admin=True`、`Arch=AMD64`、`VirtualBox=False`。本体は未導入で、Guest Additions のドライバーは既に入っていた
+- 手順 2 の環境の読み戻しは `Hypervisor=True`、`VirtFirmware=True`、`VirtualMachinePlatform=Enabled`、`HypervisorPlatform=Disabled`、`Microsoft-Hyper-V-All=Disabled` だった。これだけでは VM 内で別の VM が起動すると判定しない
+- 手順 3 は公式の `VirtualBox-7.2.20-175154-Win.exe` を取り、インストーラーのハッシュ検証が成功し、`Successfully installed` が出た。依存として `Microsoft.VCRedist.2015+.x64` が表示されたが、依存の新規導入はこのバッチでは確認していない
+- 手順 4 の一覧は `Oracle.VirtualBox 7.2.20`、`VBoxManage --version` は `7.2.20r175154` だった
+- `VBoxSup`・`VBoxNetLwf`・`VBoxUSBMon`・`VBoxNetAdp` はすべて `Running`。既存の Guest Additions の `VBoxGuest`・`VBoxMouse`・`VBoxSF`・`VBoxWddm` も `Running` だった
+- `VirtualBox Host-Only Ethernet Adapter` が「イーサネット 2」として出て、`Up` だった
+- 全ブロックの PowerShell のエラーは 0、最後の終了コードは 0
+
+**導入後の確認**:
+
+- 手順 6 のバッチ `20261006-123615Z-9406750f` は、通常権限で専用の `vbox-selftest`（UUID `4d96aa81-907e-43d2-9458-e2feb9ed532e`、メモリ 64 MB、NIC なし、音声無効）を作り、headless で起動した。Hyper-V の CPUID 署名を利用できない旨の `VERR_NEM_NOT_AVAILABLE` と、AMD-V を利用できない `VERR_SVM_NO_SVM` が出て、起動は失敗した。PowerShell のエラーは 4 件、タスク結果は 1 だった
+- 同じ手順 6 の `unregistervm --delete` による後片付けは完了し、専用 VM のフォルダーが無いことを確認した。後片付けの終了コード 0 を、VM の起動成功とは扱わない
+- 手順 8 のバッチ `20261006-123924Z-b236e950` は 12:39:25.3269553 UTC にエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。`%USERPROFILE%\.VirtualBox` に `VirtualBox.xml`・`VirtualBox.xml-prev`・`VBoxSVC.log` があることを確認した。VirtualBox マネージャーの GUI は起動していない
+
+**確認していないこと**:
+
+- 手順 1・5 の端末を開く画面操作と、手で貼る操作
+- 手順 6 の使い捨て VM の起動成功。この検証では失敗したため、ABIKO-WS の環境で再検証する
+- 手順 7 の VirtualBox マネージャーの画面
+- ネットワークが切れる長さ、ホストオンリーのネットワークの種類、更新とロールバック、Hyper-V が動いていない PC、Intel の CPU、arm64 の Windows

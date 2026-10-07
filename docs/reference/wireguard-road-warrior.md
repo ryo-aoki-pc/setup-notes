@@ -43,6 +43,7 @@
 
 - `WireGuardManager` は WireGuard の窓（マネージャー）のサービス、`WireGuardTunnel$<名前>` は張っているトンネルごとのサービス（[WireGuard for Windows の文書](https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md)）
 - `C:\Program Files\WireGuard\Data\Configurations` は、WireGuard が取り込んだトンネルの設定（`<名前>.conf.dpapi`）の置き場所。アクセス権が SYSTEM と Administrators だけなので、管理者の PowerShell でないと何も出ない
+- `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
 
 ### Windows 11 で使う / 手順 5: 補足: マネージャーのサービス

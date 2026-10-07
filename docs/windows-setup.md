@@ -102,7 +102,7 @@
      if ($rebootRequired) {
        throw '中断: 再起動が必要。手順 8 を行ってから検索し直す'
      }
-     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0')
+     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
      '対象の更新: {0} 件' -f $updates.Count
      $updates | Format-Table KB, Size, Title -AutoSize
    }
@@ -156,7 +156,7 @@
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
-     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0')
+     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
@@ -404,11 +404,11 @@
    ```powershell
    scoop install scoop-search
    winget install --exact --id Devolutions.UniGetUI --source winget --scope user --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Devolutions.UniGetUI
+   winget list --exact --id Devolutions.UniGetUI --source winget
    ```
 
    - `scoop install scoop-search` の最後に `'scoop-search' (2.1.0) was installed successfully!` の形の行が出る
-   - winget はインストーラのハッシュを確かめてから入れる。管理者の確認（UAC）は出ないはず
+   - winget はインストーラのハッシュを確かめてから入れる。初回に Visual C++ ランタイムなどの依存関係を入れる際は、管理者の確認（UAC）が出ることがある。製品名と発行元を確かめて許可する（Visual C++ ランタイムの発行元は Microsoft Corporation）
    - 最後の表に `UniGetUI` と `Devolutions.UniGetUI` の行が出ればよい（版は実行した日の最新）
    - デスクトップに UniGetUI のショートカットができる（手順 50 で消す）
 
@@ -416,7 +416,7 @@
 
    ```powershell
    winget install --exact --id Microsoft.PowerToys --source winget --scope user --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Microsoft.PowerToys
+   winget list --exact --id Microsoft.PowerToys --source winget
    ```
 
    - 最後の表に `PowerToys` と `Microsoft.PowerToys` の行が出ればよい（版は実行した日の最新）
@@ -427,7 +427,7 @@
 
    ```powershell
    winget install --exact --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Microsoft.PowerShell
+   winget list --exact --id Microsoft.PowerShell --source winget
    ```
 
    - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい（版は実行した日の最新）
@@ -542,7 +542,7 @@
      $run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
      $ok = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
      if (-not (Test-Path -LiteralPath $ok)) { New-Item -Path $ok -Force | Out-Null }
-     $names = (Get-Item -LiteralPath $run).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
+     $names = (Get-Item -LiteralPath $run).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -eq 'OneDriveSetup' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
      foreach ($n in $names) {
        Set-ItemProperty -LiteralPath $ok -Name $n -Type Binary -Value ([byte[]](3, 0, 0, 0) + [BitConverter]::GetBytes((Get-Date).ToFileTime()))
        "止めた: $n"
@@ -555,6 +555,7 @@
 
    - `止めた: OneDrive` などと、`Run` にあるアプリごとに `止めている` か `起動する` が出ればよい
    - 無いものは何もしない（Edge の行は、Edge の設定によっては無い）
+   - 初回導入用の `OneDriveSetup` の項目も、残っていれば止める。実行ファイルがある場合は初回インストールも延期される。必要ならタスク マネージャーの「スタートアップ アプリ」から有効に戻せる
    - `WingetUI: 起動する` は UniGet UI（更新を知らせるために起動する）。止めるなら、タスク マネージャーの「スタートアップ アプリ」で無効にする
    - 効くのは、次のサインインから
 
@@ -686,7 +687,7 @@
    ```
 
    - `LongPathsEnabled : 1` と `AllowDevelopmentWithoutDevLicense : 1` が出ればよい
-   - sudo は、今の窓で動く形（インライン）になった旨の英語の行を出す
+   - sudo は、今の窓で動く形（インライン）になった旨を表示する（表示言語は環境による）
    - 管理者ではない窓で `sudo <コマンド>` を打つと、UAC の確認の後に、同じ窓でそのコマンドが管理者の権限で動く
    - **注意**: インラインの sudo は、同じ窓のほかの（管理者でない）プロセスから、管理者のコマンドに入力を送れる形（Microsoft の文書。[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
 
@@ -699,7 +700,7 @@
    powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONSOLELOCK 0
    powercfg /setactive SCHEME_CURRENT
    Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name DelayLockInterval -Type DWord -Value 0xFFFFFFFF
-   foreach ($s in 'SUB_SLEEP STANDBYIDLE', 'SUB_BUTTONS LIDACTION', 'SUB_NONE CONSOLELOCK') { '{0}: {1}' -f $s, ((powercfg /q SCHEME_CURRENT $s.Split(' ')) | Select-String -Pattern 'AC' | Select-Object -Last 1) }
+   foreach ($s in 'SUB_SLEEP STANDBYIDLE', 'SUB_BUTTONS LIDACTION', 'SUB_NONE CONSOLELOCK') { '{0}: {1}' -f $s, ((powercfg /qh SCHEME_CURRENT $s.Split(' ')) | Select-String -Pattern 'AC' | Select-Object -Last 1) }
    'HibernateEnabled: {0}' -f (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
    ```
 
@@ -967,6 +968,8 @@
 1. WSL に AlmaLinux 10 を入れ、ユーザーを作る。
 
    ```powershell
+   $env:WSL_UTF8 = '1'
+   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    wsl.exe --install AlmaLinux-10
    ```
 
@@ -978,12 +981,13 @@
 
    ```powershell
    $env:WSL_UTF8 = '1'
+   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    wsl.exe --list --verbose
    wsl.exe --distribution AlmaLinux-10 -- head -n 2 /etc/os-release
    ```
 
    - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.2 …"` の形の行が出ればよい（版は入れた日のイメージ）
-   - `WSL_UTF8` は、`wsl.exe` の表示を、この窓で読める形（UTF-8）にするため（この窓の中だけ）
+   - 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（手順 62 も同じ）
 
 1. 自動サインイン（Sysinternals の Autologon）を入れて起動し、パスワードを入れて有効にする。
 
@@ -1439,7 +1443,7 @@
    ```powershell
    & {
      $ok = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
-     $props = (Get-Item -LiteralPath $ok -ErrorAction SilentlyContinue).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
+     $props = (Get-Item -LiteralPath $ok -ErrorAction SilentlyContinue).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -eq 'OneDriveSetup' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
      foreach ($n in $props) { Set-ItemProperty -LiteralPath $ok -Name $n -Type Binary -Value ([byte[]](2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); "戻した: $n" }
      $teams = 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\MSTeams_8wekyb3d8bbwe\TeamsTfwStartupTask'
      if (Test-Path -LiteralPath $teams) { Set-ItemProperty -LiteralPath $teams -Name State -Type DWord -Value 2; '戻した: Teams' }

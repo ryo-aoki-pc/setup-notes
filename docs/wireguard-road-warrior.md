@@ -318,7 +318,7 @@
 1. この PC の WireGuard の状態を確かめる。
 
    ```powershell
-   winget list --exact --id WireGuard.WireGuard --accept-source-agreements
+   winget list --exact --id WireGuard.WireGuard --accept-source-agreements --source winget
    Get-Service -Name 'WireGuard*' -ErrorAction SilentlyContinue | Format-Table Name, Status, StartType
    Get-ChildItem -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations" -ErrorAction SilentlyContinue | Format-Table Name
    Test-Path -LiteralPath "$env:USERPROFILE\wg-client"
@@ -334,7 +334,7 @@
 
    ```powershell
    winget install --exact --id WireGuard.WireGuard --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   winget list --exact --id WireGuard.WireGuard
+   winget list --exact --id WireGuard.WireGuard --source winget
    Get-AuthenticodeSignature -FilePath "$env:ProgramFiles\WireGuard\wireguard.exe", "$env:ProgramFiles\WireGuard\wg.exe" | Format-Table Status, @{ Label = 'Signer'; Expression = { $_.SignerCertificate.Subject.Split(',')[0] } }, Path -AutoSize
    & "$env:ProgramFiles\WireGuard\wg.exe" --version
    ```
@@ -538,7 +538,7 @@
 
    ```powershell
    winget upgrade --exact --id WireGuard.WireGuard --source winget --accept-source-agreements --accept-package-agreements
-   winget list --exact --id WireGuard.WireGuard
+   winget list --exact --id WireGuard.WireGuard --source winget
    Get-Service -Name 'WireGuard*' | Format-Table Name, Status, StartType
    ```
 
@@ -583,7 +583,7 @@
 
    ```powershell
    winget uninstall --exact --id WireGuard.WireGuard --source winget
-   winget list --exact --id WireGuard.WireGuard
+   winget list --exact --id WireGuard.WireGuard --source winget
    Get-Service -Name 'WireGuard*' -ErrorAction SilentlyContinue
    Test-Path -LiteralPath "$env:ProgramFiles\WireGuard"
    ```

@@ -2,6 +2,14 @@
 
 [手順書](../firefox.md)
 
+## 最新の確認範囲（Windows 11）
+
+Windows 11 Pro のクリーン VM の管理者の Windows PowerShell 5.1 で、Windows 節の手順 2・3 による新規導入を確認した（2026-10-06）。WinGet の一覧と本体の版、Maintenance Service と Default Browser Agent のタスクまでを確認した。
+
+GUI の起動と about:support の言語・チャンネル・コーデック表示、動画の再生、既定のブラウザーの切り替え、手で貼る操作、更新・ロールバックは未検証。
+
+[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -843,3 +851,33 @@ Installing:
 ### 補足
 
 - **aarch64 の Firefox には Widevine が無い**: Firefox 156（aarch64）には `media.gmp-widevinecdm.*` の設定が無く、`media.eme.enabled` も既定で false だった
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../firefox.md#windows-11-で使う)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの管理者権限（Session 1） |
+| WinGet | 1.29.380。`Mozilla.Firefox.ja` を `--source winget` で新規導入 |
+| 検証時の本文の SHA256 | `421701DAB73DA6AD10A0DCEBEF0E88692A382107A6A8086CA54F66C98E55E331`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `D294CB1ACBECD20715E47E6EF19194F41248360171544A2713E347CA896D926A` |
+
+**確認したこと**（バッチ `20261006-110251Z-aa3cdf07`、完了 11:03:25 UTC）:
+
+- 手順 2 は出力がなく、`HKLM`・`HKCU` のアンインストール登録と Mozilla の Appx パッケージは見つからなかった
+- 手順 3 は x64 の日本語版 `Firefox Setup 157.0.exe` を取り、インストーラーのハッシュ検証が成功し、`Successfully installed` が出た
+- 続く一覧は `Mozilla Firefox (x64 ja) / Mozilla.Firefox.ja / 157.0`。`C:\Program Files\Mozilla Firefox\firefox.exe` の `ProductVersion` も `157.0` だった
+- `MozillaMaintenance` サービスは `Stopped / Manual`、`Firefox Default Browser Agent 308046B0AF4A39CB` のタスクは `Ready` だった
+- PowerShell のエラーは 0、最後の終了コードと検証用タスクの終了コードは 0。要求したバッチと完了記録が対応した
+
+**確認していないこと**:
+
+- 手順 1 の端末を開く画面操作。検証用の起動処理で代替した
+- 手順 4 の起動と `about:support`。画面の言語、Release チャンネル、H.264・AAC の対応表示と実際の動画の再生
+- 手順 5 の既定のブラウザーへの切り替え。Default Browser Agent のタスクがあることだけでは、Firefox が既定になったと判定しない
+- ショートカット、プロファイル、Background Update のタスク、Firefox 自身の更新、`winget upgrade`、アンインストール、arm64 の Windows、N エディション

@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 2026-10-06 の現行版再検証では、公式 ISO の Workstation クリーンインストールのスナップショットから 6 台の VM を新規作成し、`5da3478` の手順と共通 bash `3d5323e`、設定サブモジュールを前提から通した。結果は `docs/almalinux-vm-verification.md` の後半と各文書の `docs/verification/` の今回の付録にある。前半の `0dbb522` の結果と、従来の実機・コンテナの付録は別の履歴。実アカウント、Windows / bootc 固有の手順、VM が条件を満たさない入れ子の仮想化や MOK 登録は実施済みと扱わない。
 
+2026-10-06〜07 UTC の Windows 検証は、Rufus のインストールメディアから入れた Windows 11 Pro の VM で行った。記録は `docs/verification/windows-setup.md` と各後続ツールの Windows VM の付録に集約する。CLI・値の読み戻し・利用者の手動確認を区別し、手順 64 の起動要求取消、WSL 2 と入れ子の VM の失敗、Git の初回通信 timeout、スタートアップの最初の確認不能も保持する。実機での通し実行・残る GUI・認証・VPN と RDP ログイン・ping は未確認。今回の VM の検証から任意のリモート再起動節などへ成功範囲を広げない。
+
 ## よく使うコマンド
 
 ```bash

@@ -54,6 +54,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
   - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、初期設定のリードから順に案内する
   - 各手順の実施範囲は、対応する検証記録を参照する
+  - [Windows 11 のクリーンインストール後の VM 検証](docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06): 導入・設定の読み戻しと一部の手動確認、Git の隔離したローカル機能、HackGen の CLI 描画、WireGuard の鍵と管理サービス、RDP の TLS、スタートアップの確認用項目を検証した。WSL 2 と入れ子の VM は仮想化エラーで未達、残る GUI・認証・外部接続と実機での通し実行は未確認。
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
