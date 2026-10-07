@@ -1,4 +1,4 @@
-# GNOME のデスクトップ共有の手順（PC の画面のデスクトップに RDP でつなぐ。CLI だけで設定する）の検証記録
+# GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）の検証記録
 
 [手順書](../gnome-desktop-sharing.md)
 
@@ -6,9 +6,14 @@
 
 ### 対象と検証環境
 
-- **目的**: PC の画面で GNOME にログインしているユーザーのデスクトップを、別のマシンの RDP クライアントから共有して使う。設定は、そのユーザーの SSH のシェルから CLI だけで行う
+- **目的**: 遠隔の PC の画面のデスクトップを、別のマシンの RDP クライアントから共有して使う。PC の画面・キーボード・マウスは使わず、設定・確認・復旧・ロールバックを、そのユーザーの SSH のシェルと RDP のクライアントだけで行う
 - **方式**: ユーザーのモードの gnome-remote-desktop（オプション無しの `grdctl`、ユーザーの `gnome-remote-desktop.service`）。RHEL 10 の文書の「1.1 Enabling desktop sharing on the server by using GNOME」と同じ仕組みを、設定アプリの代わりに `grdctl` で設定する
-- **状態**: **2026-10-07 に x86_64 の VirtualBox VM、aarch64 の実機、公式 ISO から新規インストールした aarch64 VM で、それぞれ検証した**
+  - PC の画面のセッションは GDM の自動ログインで作り、RDP の資格情報はパスワードの無いキーリングに Python（Gio）で直接入れる
+- **状態**: **2026-10-07 に、PC の画面を触らない今の版を、x86_64 の VirtualBox の VM で通した**（[付録](#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）
+  - 通したもの: 画面で一度もログインしていないユーザーの Workstation の VM で、前提の gnome-power.md 手順 1〜5 → 実施手順 1〜16（手順 4 は飛ばす場合も含む）→ 任意節 2 つ → つながらなくなったとき 1〜3 → ロールバック。最終版のブロックで、同じ VM でもう一度通した
+  - 確認したこと: PC 役の VM には、VirtualBox のキーボード・マウスの入力を 1 度も送らずに、再起動の後の自動ログイン・RDP の画面と入力・SSH からのロック解除と切り替え・ログアウトからの復旧・資格情報の変更・残っている資格情報の削除（閉じたキーリングと開いたキーリング）・ロールバックの後のログイン画面
+  - 確認していないこと: 実機・aarch64 でのこの版、Windows の mstsc でのこの版、モニターの無い PC・暗号化したディスク・SSH が無効などの手順 2 の分岐、長い放置、ほかのユーザーが PC の画面でログインしているとき
+- **以前の版（PC の前でパスワードでログインし、自動ログインは任意節だった）の記録**: 2026-10-07 に x86_64 の VirtualBox VM、aarch64 の実機、公式 ISO から新規インストールした aarch64 VM で、それぞれ検証した
   - [VirtualBox の記録](#付録-virtualbox-の-vm-での本実行2026-10-07): AlmaLinux 10.2 Workstation と、別の VM の FreeRDP 3.10.3・Windows 11 の mstsc。PR #100 の初版・レビュー修正版・この検証で直したブロックを実行した
   - [実機の記録](#付録-このホストでの検証2026-10-07): Raspberry Pi 5 aarch64 で設定・RDP の画面と入力・任意節・ロールバック。HDMI 未接続のため、seat0 に仮想モニターを付けた
   - [aarch64 クリーン VM の記録](#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07): Server with GUI の通常の仮想 GPU と、別の Debian VM の FreeRDP 3.15.0。実際のゲスト OS 再起動後の最初の認証と、無操作での切断も確認した
@@ -19,9 +24,27 @@
 
 VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履歴で、対象の `81012d3`・`f3450e6` と、同検証で直して流し直したブロックを記載する。aarch64 の実機と VM は `81012d3` に今回の検証で見つかった修正を加えた手順を実行した。両 aarch64 付録の自動ログインの手順番号 4・5・6・7 は、その実行対象の番号である。
 
-現行手順では Plymouth 停止が手順 4 に入り、再起動は 5、接続前確認は 6、初回 RDP 接続は 7、ロールバックは 8。統合後の手順全体を aarch64 で再実行した記録ではない。各付録のブロック数や構文確認結果も、記載した時点の結果である。
+PC の画面を触らない今の版の付録より前の付録は、以前の版の手順番号で書いてある。以前の版（`52bf2e7`）の番号と、今の版の番号の対応は次の表のとおり。以前の版の任意節「自動ログインで使う」は、今の版では実施手順に入れたので、付録のその節へのリンクは `## 実施手順` を指す。各付録のブロック数や構文確認結果も、記載した時点の結果である。
 
-統合後の手順は、x86_64 の VM で通した（[付録](#付録-統合後の手順を-x86_64-の-vm-で通した記録2026-10-07)）。
+| 以前の版 | 今の版 |
+|---|---|
+| 実施手順 1（変数） | 実施手順 1 |
+| （無し） | 実施手順 2（再起動の前の確認） |
+| 実施手順 2（PC の画面のセッション・キーリング・画面の設定） | 実施手順 3（PC の画面のセッションとログインのキーリングを前提から外し、サスペンドの mask・自動ログインの行・資格情報を見る） |
+| （無し） | 実施手順 4（残っている資格情報を消す） |
+| 実施手順 3（退避と証明書） | 実施手順 5 |
+| 実施手順 4（`grdctl` の設定） | 実施手順 6 |
+| 実施手順 5（`grdctl rdp set-credentials`）と、自動ログインで使う 1（資格情報を移す） | 削除。実施手順 7（パスワードの無いキーリングに直接入れる）に置き換えた |
+| 自動ログインで使う 2（移した先の確認） | 実施手順 8 |
+| 実施手順 6（有効にする） | 実施手順 9 |
+| 実施手順 7（ファイアウォール） | 実施手順 10 |
+| 自動ログインで使う 3・4・5（GDM の自動ログイン・plymouth・再起動） | 実施手順 11・12・13 |
+| 実施手順 8（`grdctl status` と待ち受け）と、自動ログインで使う 6（再起動の後の確認） | 実施手順 14（セッションと待ち受け）と 15（`grdctl status`） |
+| 実施手順 9（TLS のプローブ） | 実施手順 15 |
+| 実施手順 10（接続）と、自動ログインで使う 7（再起動の後の接続と読み戻し） | 実施手順 16（読み戻しは手順 15 へ） |
+| 自動ログインで使う 8（戻す） | ロールバックの手順 4 |
+| ロールバックの手順 1・2・3・4 | ロールバックの手順 1・2・3（`grdctl rdp clear-credentials` を外した）・5 |
+| （無し） | ロールバックの手順 6（PC の画面のセッションを終わらせる）、つながらなくなったときの手順 1〜3（手順 2 は、自動ログインで使う 6 の箇条書きから移した） |
 
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](../gnome-desktop-sharing.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -37,11 +60,13 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
 
 ### 実施前の状態
 
-- 2026-10-06 の作成時には実機・VM の記録は無かった。2026-10-07 の状態は [VirtualBox](#実施前の状態virtualbox)、[実機](#実施前の状態2026-10-07実施手順-12)、[aarch64 クリーン VM](#実施前の状態と設定tls)、[統合後の x86_64 VM](#環境と準備統合後の-x86_64-vm)を参照
+- PC の画面を触らない今の版は、[付録の実施前の状態](#実施前の状態pc-の画面を触らない版)を参照
+- 2026-10-06 の作成時には実機・VM の記録は無かった。以前の版の 2026-10-07 の状態は [VirtualBox](#実施前の状態virtualbox)、[実機](#実施前の状態2026-10-07実施手順-12)、[aarch64 クリーン VM](#実施前の状態と設定tls)、[統合後の x86_64 VM](#環境と準備統合後の-x86_64-vm)を参照
 
 ### 完了時点の状態
 
-- [VirtualBox の復元結果](#完了時点の状態virtualbox)、[実機の復元結果](#ロールバック完了時点の状態2026-10-07)、[aarch64 クリーン VM の復元と後片付け](#ロールバックと後片付け)、[統合後の x86_64 VM の復元結果](#ロールバックと完了時点の状態統合後の-x86_64-vm)を参照
+- PC の画面を触らない今の版は、[付録の完了時点の状態](#ロールバックと完了時点の状態pc-の画面を触らない版)を参照
+- 以前の版は、[VirtualBox の復元結果](#完了時点の状態virtualbox)、[実機の復元結果](#ロールバック完了時点の状態2026-10-07)、[aarch64 クリーン VM の復元と後片付け](#ロールバックと後片付け)、[統合後の x86_64 VM の復元結果](#ロールバックと完了時点の状態統合後の-x86_64-vm)を参照
 - 2026-10-06 に書いた確認の出力は上流のソースに基づくものだった。各 2026-10-07 の付録には実測した出力を残す
 
 ---
@@ -57,7 +82,7 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
     - gnome-shell 49.4（ロック画面で画面の共有を止めること）、gnome-control-center 47.7（同じキーリングの項目と証明書のパスを使うこと）、libsecret 0.21.2・gnome-keyring 42.1 のソース
     - RHEL 10 の文書の 1.1・1.3・1.4
     - 手順書の bash のブロック 24 個が `bash -n` を通ること
-    - [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 1・2 と、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
+    - [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 1・2 と、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
   - 確かめていないこと
     - 実施手順のすべて（PC の画面のセッションでの `grdctl` の設定・資格情報の保存・有効化・ファイアウォール・待ち受け・TLS のプローブ・クライアントからの接続）
     - 任意節（見るだけにする・接続元を LAN に絞る・自動ログイン）を GNOME のセッションで流すこと。自動ログインの後に、PC の画面にキーリングの窓が出ずにつながること
@@ -88,7 +113,7 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
 **ブロックの構文と、部品の確かめ**:
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` にかけた。どれも通った
-- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
+- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
 - コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
@@ -127,7 +152,7 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
 **ブロックの構文と、部品の確かめ**:
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` と ShellCheck 0.9.0（`-s bash`。変数のブロックのために SC2034・SC2154 は外した）にかけた。どれも通った
-- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 3 と同節の手順 8 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
+- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 3 と同節の手順 8 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
 - コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
@@ -159,7 +184,7 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
 - **状態**: **x86_64 の VirtualBox の VM（AlmaLinux 10.2 の Workstation のクリーンインストール）で本実行した（2026-10-07。[付録](#付録-virtualbox-の-vm-での本実行2026-10-07)）。実機では流していない**
   - 通したもの: この文書のブロックを、SSH でログインした共有するユーザーの対話の bash に、ブラケットペーストで貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
     - PR の最初の版（`81012d3`）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
-    - レビューで直した版（`f3450e6`）: 実施手順 1〜10 → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)
+    - レビューで直した版（`f3450e6`）: 実施手順 1〜10 → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)
     - この検証で直した版: 直した 5 つのブロック（実施手順 9、自動ログインで使うの手順 4・5・6・8）を流し直し、続けて PC を再起動して PC の画面でパスワードでログインし、ロールバックの手順 2〜4
   - 確認したこと
     - 実施手順 2・6〜9 と各任意節の確認の箇条書きの出力が、手順書の記載どおりに出る（手順 2 の 8 行、`grdctl status` の各行、`ss` の 1 行、TLS のプローブの 3 つ）
@@ -346,7 +371,7 @@ VirtualBox の付録は PR #100 の更新版 `18c1ddd` に残された検証履�
 
 ## 付録: このホストでの検証（2026-10-07）
 
-この付録の手順番号は、検証した `81012d3` と今回の修正版の番号。自動ログインの再起動 4・接続前確認 5・初回接続 6・ロールバック 7 は、現行手順の 5・6・7・8 に対応する。現行の Plymouth 停止と `systemctl reboot -i` を含む統合後の手順全体は、この環境で再実行していない。
+この付録の手順番号は、検証した `81012d3` と今回の修正版の番号。自動ログインの再起動 4・接続前確認 5・初回接続 6・ロールバック 7 は、以前の版（`52bf2e7`）の自動ログインで使う 5・6・7・8 に対応する（今の版の番号は[冒頭の対応表](#対象と検証環境)）。以前の版の Plymouth 停止と `systemctl reboot -i` を含む統合後の手順全体は、この環境で再実行していない。
 
 ### 対象と検証環境（2026-10-07）
 
@@ -516,7 +541,7 @@ b false
 
 ## 付録: 公式 ISO から新規インストールした aarch64 VM での検証（2026-10-07）
 
-この付録の手順番号は、検証した `81012d3` と今回の修正版の番号。自動ログインの再起動 4・接続前確認 5・初回接続 6・ロールバック 7 は、現行手順の 5・6・7・8 に対応する。現行の Plymouth 停止と `systemctl reboot -i` を含む統合後の手順全体は、この環境で再実行していない。
+この付録の手順番号は、検証した `81012d3` と今回の修正版の番号。自動ログインの再起動 4・接続前確認 5・初回接続 6・ロールバック 7 は、以前の版（`52bf2e7`）の自動ログインで使う 5・6・7・8 に対応する（今の版の番号は[冒頭の対応表](#対象と検証環境)）。以前の版の Plymouth 停止と `systemctl reboot -i` を含む統合後の手順全体は、この環境で再実行していない。
 
 ### 対象と検証環境
 
@@ -683,13 +708,13 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 ## 付録: 統合後の手順を x86_64 の VM で通した記録（2026-10-07）
 
-この付録は、PR #101 で統合した後の手順（`16b22bb`）を、x86_64 の VirtualBox の VM で通した記録。手順番号は現行の番号。この検証で直した箇所は、[見つかった問題と直したこと（統合後の x86_64 VM）](#見つかった問題と直したこと統合後の-x86_64-vm)にまとめる。
+この付録は、PR #101 で統合した後の手順（`16b22bb`）を、x86_64 の VirtualBox の VM で通した記録。手順番号は当時（以前の版）の番号で、今の版の番号は[冒頭の対応表](#対象と検証環境)を参照。この検証で直した箇所は、[見つかった問題と直したこと（統合後の x86_64 VM）](#見つかった問題と直したこと統合後の-x86_64-vm)にまとめる。
 
 ### 対象と検証環境（統合後の x86_64 VM）
 
 - **状態**: **統合後の手順を、新しく作った x86_64 の Workstation の VM で通した（2026-10-07）。実機・aarch64 では流していない**
   - 通したもの
-    - 1 回目（`16b22bb` のブロック）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10（中断の分岐を含む）→ [自動ログインで使う（任意）](../gnome-desktop-sharing.md#自動ログインで使う任意)の手順 1〜8
+    - 1 回目（`16b22bb` のブロック）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10（中断の分岐を含む）→ [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 1〜8
       - 続けて、PC の画面でパスワードでログインし直す → 実施手順 1・5 → 後からリモートログインを有効にした試験 → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
     - 2 回目（直した注意点の流れ）: 実施手順 1〜9 → [リモートログイン](../gnome-remote-desktop.md)の実施手順 1〜8 → 直した[注意点](../gnome-desktop-sharing.md#注意点)のとおりに 3390 へ移す → クライアントから 3390 へ接続 → リモートログインの接続元を LAN に絞る → 両方のロールバック
   - 確認したこと
@@ -810,3 +835,168 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 | 自動ログインで使う、手順 8 | 削除し終えた後に貼り直すと `中断:` が出る | それでよいことの箇条書きを足した |
 
 - 直した後の `bash` のブロック 26 個は `16b22bb` と同じ（説明の文だけを直した）。どれも `bash -n` を通った
+
+---
+
+## 付録: PC の画面を触らない版を x86_64 の VM で通した記録（2026-10-07）
+
+この付録は、利用者の依頼（遠隔の PC で、画面を直接操作できない前提にする）で書き直した今の版の手順書を、x86_64 の VirtualBox の VM で通した記録。手順番号は今の版の番号。
+
+### 対象と検証環境（PC の画面を触らない版）
+
+- **状態**: **今の版の手順書を、新しく作った x86_64 の Workstation の VM で、PC の画面を 1 度も操作せずに通した（2026-10-07）。実機・aarch64 では流していない**
+  - 通したもの
+    - 1 回目（書き直した版。手順 7 と表示の 1 行を、この検証で直した）: 前提の gnome-power.md 手順 1〜5 → 実施手順 1〜16 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)の手順 1〜3 → 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ → 実施手順 3・4・7・8 の分岐 → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 2〜6
+    - 2 回目（最終版のブロック）: 同じ VM で、ロールバックした後から、実施手順 1〜3・5〜16 → ロールバックの手順 1・3〜6
+  - 確認したこと
+    - PC 役の VM には、VirtualBox のキーボード・マウスの入力を 1 度も送らなかった。PC の画面の操作は、すべてクライアント役の FreeRDP の窓から行った
+    - 画面で一度もログインしていないユーザー（`~/.local/share/keyrings` が無い）で、手順 7 がパスワードの無いキーリングを作り、再起動の後の自動ログインのセッションに、キーリングの窓を出さずに RDP でつながる
+    - 手順 9 は、PC の画面のセッションが無くても通り、再起動の後の自動ログインで待ち受けを始める
+    - 再起動の後に、資格情報を先に読まずにクライアントから直接つないでも（停電などで再起動したときと同じ流れ）、窓を出さずにつながる
+    - つながらなくなったとき: SSH の `loginctl unlock-session` でロックが解けてつなぎ直せる。ログイン画面が前に出たときは `sudo loginctl activate` で戻り、つないだままのクライアントにも画面が戻る。ログアウトした後は、再起動で自動ログインに戻る
+    - 手順 7 の貼り直しで資格情報を変えられる。手順 4 は、閉じたキーリング（パスワードで開いて消し、閉じ直す）・開いたキーリング（聞かずに消す）・違うパスワード（何も消さずに中断）のどれも記載どおり
+    - ロールバックの後に再起動すると、PC はログイン画面で止まり（自動ログインしない）、実施前の状態に戻る（gnome-power.md で変えた値は残る）
+    - SELinux は Enforcing のまま、AVC は 0 件
+  - 確認していないこと
+    - 実機・aarch64 でのこの版、物理のモニター、Windows の「リモート デスクトップ接続」でのこの版
+    - 手順 2 の分岐（モニターの無い PC、暗号化したディスク、`sshd` が無効、firewalld の永続に `ssh` が無い、`multi-user.target`）
+    - ほかのユーザーが PC の画面でログインしているとき、PC の画面のアプリが終了を止めているときの手順 13
+    - 長い放置、クライアントのキーボードからの Super+L（ロックは SSH の `loginctl lock-session` で起こした）
+    - 後からリモートログインを有効にしたとき（[注意点](../gnome-desktop-sharing.md#注意点)は以前の版で確かめた。手順の番号だけを付け替えた）
+    - WireGuard 越しの接続と、接続元を LAN に絞る節の WireGuard の箇条書き
+- 下表は、PC 役の VM の版（`rpm -q` で確かめた。以前の版の検証と同じ）
+
+| 項目 | 値 |
+|---|---|
+| OS | AlmaLinux 10.2 (Lavender Lion)、GNOME の Workstation、kernel `6.12.0-211.61.1.el10_2.x86_64`、SELinux は Enforcing |
+| GNOME | `gnome-remote-desktop-49.3-4.el10_2`、`gnome-shell-49.4-9.el10_2.alma.1`、`mutter-49.4-4.el10_2`、`gdm-47.0-24.el10_2`、`gnome-session-46.0-11.el10`、`gnome-control-center-47.7-7.el10`、`gnome-initial-setup-46.7-3.el10.alma.3`、`gnome-tour-46.0-4.el10.alma.1` |
+| キーリング | `gnome-keyring-42.1-20.el10`、`libsecret-0.21.2-8.el10`、`glib2-2.80.4-12.el10_2.22`、`python3-gobject-base-3.46.0-7.el10`、`dconf-0.40.0-17.el10` |
+| そのほか | `firewalld-2.4.3-4.el10_2`、`openssl-3.5.8-1.el10_2.alma.1`、`systemd-257-23.el10_2.2.alma.1`、`plymouth-24.004.60-17.el10.alma.2`、`polkit-125-4.el10_2.1`、`grubby-8.40-83.el10.alma.1` |
+| クライアント | 別の VM の AppStream の `freerdp-3.10.3-12.el10_2.13`（`xfreerdp`） |
+
+### 環境と準備（PC の画面を触らない版）
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300、VirtualBox 7.2.20（Hyper-V の NEM） |
+| PC 役の VM | `clean-install` スナップショット（公式 ISO の Workstation）から新しく作ったリンククローン。1 vCPU、RAM 6 GiB |
+| クライアント役の VM | [VirtualBox の付録](#環境と準備)のクライアント役（FreeRDP 3.10.3）。この VM の GDM へのログインと FreeRDP の窓への入力は、VirtualBox の入力で行った（クライアント側の操作） |
+| ネットワーク | ホストオンリー `192.168.56.0/24`（PC 役 `192.168.56.81`、クライアント役 `192.168.56.82`、ホスト `192.168.56.1`）。SSH は NAT の転送。LAN の外の試験だけ、PC 役の NAT に `127.0.0.1:23389 → 3389` の転送を足し、終わってから消した |
+| 試験用の値 | ユーザー `verifier`、ホスト名 `remote-pc.test`、RDP のユーザー名 `rdpuser`（変更後は `rdpuser2`）。パスワードは VM 専用の乱数で、リポジトリには載せない |
+
+- 手順書の外の準備（SSH から）: ホストオンリーの接続を `nmcli` で作り、ホスト名を付け、起動の引数を一般的な形（`rhgb quiet` を足し、検証用のシリアルコンソールを外す）にした
+  - 以前の検証と違い、`~/.config/gnome-initial-setup-done` は置かなかった（最初のログインで出るものを見るため）
+- PC 役の VM の画面は、`VBoxManage controlvm … screenshotpng` で撮って見ただけ
+- ブロックは手順書から抜き出し、SSH の対話の bash にブラケットペーストで 1 つずつ貼った。書き換えたのは `SERVER_IP` と `LAN_SUBNET` だけ。手順 4・7・13 の問いには、問いが出てから答えた
+- 分岐を起こす操作（ロック、VT の切り替え、記録のファイルを一時的に隠す、パスワード付きのログインのキーリングと、そこへ置く古い資格情報）は、手順書の外のコマンドで行い、確かめた後に元に戻した
+
+### 実施前の状態（PC の画面を触らない版）
+
+- PC の画面は GDM のログイン画面（`c1 42 gdm seat0 … greeter tty1`）で、このユーザーは画面で一度もログインしていない
+- `~/.local/share/keyrings`・`~/.local/share/gnome-remote-desktop`・`~/.local/state` は無い。dconf の `/org/gnome/desktop/remote-desktop/` は空
+- システムのリモートログイン・ユーザーの `gnome-remote-desktop.service`・`gnome-remote-desktop-headless.service` は `disabled`。`/etc/gdm/custom.conf` は RPM の既定
+- firewalld は `public` ゾーン（`cockpit`・`dhcpv6-client`・`ssh`。ポートと rich rule は無し）。logind の `CanSuspend` は `challenge`
+- ユーザーの unit `gnome-remote-desktop.service` は `Type=dbus`・`WantedBy=gnome-session.target` で、`Requisite=` などのグラフィカルなセッションへの依存は無い
+
+### 実施手順（PC の画面を触らない版）
+
+- 前提の gnome-power.md 手順 1〜5 は記載どおり（`uint32 0`・`false`・4 行・3 行・`masked` が 5 行・`s "ignore"`）
+- 手順 1: `RDP_PORT = 3389`。`SERVER_NAME` と `SERVER_FQDN` は `remote-pc.test`
+- 手順 2: `enabled`・`yes`・`graphical.target`・`enabled`・`1`・`0`
+- 手順 3: `uint32 0`・`false`・`masked`・`false`・`disabled`・`inactive`・`0`・`0`・`aoao 0 0` と、ログイン画面の `gdm` の行（`greeter`）だけ
+- 手順 4: `aoao 0 0` なので飛ばす場合だが、貼って `ほかのキーリングに RDP の資格情報は無い` を確かめた
+- 手順 5・6: 記載どおり。手順 6 は `BIO_new failed for certificate` と `RDP server certificate is invalid.` を 1 回ずつ出した
+- 手順 7（書き直した直後の版）: ユーザー名を `open('/dev/tty', 'r+')` で読もうとして、`io.UnsupportedOperation: File or stream is not seekable.` で止まった。キーリングは作られていない
+  - このとき、試験の道具が続けて送ったユーザー名とパスワードが、シェルにコマンドとして入った。その試験用のパスワードは捨てて作り直し、シェルの履歴を消した（VM の `~/.bash_history` に試験用のパスワードが無いことも確かめた）
+  - `sys.stdin = open('/dev/tty')` と `input()` に直した版で、`RDP のユーザー名:`・`RDP のパスワード:`・`RDP のパスワード（もう一度）:` を聞かれ、`入れた先: /org/freedesktop/secrets/collection/rdp/1` と `キーリングの記録: …/autologin-keyring`
+  - `~/.local/share/keyrings/rdp.keyring` は、`display-name=rdp` などが読める暗号化されていないファイル。手順書の外の `grdctl status --show-credentials` が `Username: rdpuser` を出した（`grdctl` が、直接入れた値を読めた）
+- 手順 8: `aoao 1 "/org/freedesktop/secrets/collection/rdp/1" 0`・`記録したキーリング: /org/freedesktop/secrets/collection/rdp`・`b false`
+- 手順 9（PC の画面にこのユーザーのセッションが無いとき）: `enabled`。unit は `active (running)` で、3389 は待ち受けず、journal に行は無かった
+- 手順 10〜12: 記載どおり（`args=` の最後に `rhgb quiet rd.plymouth=0 plymouth.enable=0`）
+- 手順 13: `==== AUTHENTICATING FOR org.freedesktop.login1.reboot ====` とパスワードを聞かれ、入れると再起動した。約 30 秒で SSH に入れた
+- 再起動の後（約 76 秒）: seat0 に `Service=gdm-autologin`・`Type=wayland`・`Active=yes` のセッション（tty2）。PC の画面はアクティビティの画面で、「AlmaLinux 10.2 (Lavender Lion) へようこそ」（gnome-tour）の窓が出ていた。ログイン画面とキーリングの窓は出なかった
+- 手順 14: `Service=gdm-autologin`・`Active=yes`・`ScreenCast: ok`・`active`・`LISTEN 0 5 *:3389 *:* users:(("gnome-remote-de",pid=<N>,fd=10))`
+- 手順 15: `selectedProtocol=0x2`、`TLSv1.3 TLS_AES_256_GCM_SHA384`、`fingerprint:` と `TLS fingerprint:` が一致、SAN は `DNS:remote-pc.test, DNS:remote-pc.test, DNS:192.168.56.81, IP Address:192.168.56.81`。`grdctl status` は記載どおり（`Username: (hidden)`）。PC の画面にキーリングの窓は出なかった
+- 手順 16: `xfreerdp /v:192.168.56.81:3389 /u:rdpuser`
+  - 保存した証明書を退避した状態で、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の後に `Thumbprint:`（`TLS fingerprint` と一致）と `Do you trust the above certificate? (Y/T/N)`。`Y`・`Domain:` は空・`Password:` でつながった
+  - FreeRDP の窓に、PC の画面（ようこその窓）が 1280x800 のまま写った。PC の上部バーに共有中の印が出た
+  - RDP の窓で「スキップ」を押して閉じ、アクティビティの検索から電卓を起動して `12×34=408` を出せた（PC の画面にも同じ結果）
+
+再起動の後の最初の自動ログインで、クライアント役の FreeRDP の窓に写った PC の画面（VirtualBox の VM のクライアント役の画面から、FreeRDP の窓の部分を切り出して 75% に縮小した。窓はクライアントの画面からはみ出している）:
+
+![FreeRDP: 192.168.56.81 の窓に、AlmaLinux 10.2 (Lavender Lion) へようこそ の窓と、スキップ・ツアーを始める のボタンが写っている](../images/gnome-desktop-sharing/2026-10-07-remote-first-login-rdp.png)
+
+### 任意節（PC の画面を触らない版）
+
+- 見るだけにする: 手順 1 で `View-only: yes`。つないだままのクライアントから打った `99` は電卓に入らなかった。手順 2 で `View-only: no` に戻すと、`99` が入った
+- 接続元を LAN に絞る: `LAN_SUBNET=192.168.56.0/24` で、`success` が 3 行・空の `--list-ports`・`rule family="ipv4" source address="192.168.56.0/24" port port="3389" protocol="tcp" accept`
+  - 絞る前は、NAT 経由（送信元 10.0.2.2）とホストオンリー経由の両方から、RDP のネゴシエーションと TLS が通った
+  - 絞った後は、NAT 経由は時間切れでつながらず、ホストオンリー経由は通った
+
+### つながらなくなったとき（PC の画面を触らない版）
+
+- 手順 1: 手順書の外の `loginctl lock-session` でロックすると、FreeRDP が `ERRINFO_LOGOFF_BY_USER` で切れた。ロック中の新しい接続は、認証の後に `Broken pipe` で切れた（PC の journal は `Session creation inhibited`）
+  - 手順 1 のブロックで `b true` の後に `b false`。FreeRDP でつなぎ直すと、ロックの前の画面（電卓）が写った
+- 手順 2: 手順書の外の `sudo chvt 1` で、GDM が tty1 にログイン画面を作り、自動ログインのセッションが `Active=no` になった（PC の画面は tty1、FreeRDP の窓は最後の画面のまま止まった）
+  - 手順 2 のブロックで `Active=yes`、tty2 に戻った。つないだままの FreeRDP に画面が戻り、打った `2+2` が電卓に入った
+- 手順 3: FreeRDP の窓（全画面）から、PC の上部バーのメニュー → 電源 → 「ログアウト…」を選んだ。メニューに「サスペンド」は無かった（前提の gnome-power.md 手順 4）
+  - 「verifier のログアウト」「verifier は 60 秒後に自動的にログアウトします」の窓で「ログアウト」を押すと、FreeRDP は `ERRINFO_LOGOFF_BY_USER` で切れた
+  - PC の画面はログイン画面になり、seat0 はログイン画面の `gdm` の行だけ。ユーザーの unit は `inactive` で、3389 は接続を断った
+  - このとき、つながらなくなったときの手順 1 は `中断: PC の画面にこのユーザーのセッションが無い。この節の手順 3 を行う`、実施手順 14 は `中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）`
+  - 手順 3 のブロックで `org.freedesktop.login1.reboot` のパスワードを入れると再起動し、自動ログインで戻った
+- その再起動の後（約 43 秒）に、手順 7 のキーリングは `b true`（閉じている）。実施手順 1・14 だけを貼り（資格情報を読まない）、クライアントから直接つなぐと、キーリングの窓を出さずに PC の画面が写った
+
+### 資格情報の変更と、残っている資格情報（PC の画面を触らない版）
+
+- 実施手順 7 の貼り直し（`rdpuser2` と新しいパスワード）: `入れた先: /org/freedesktop/secrets/collection/rdp/1`（同じ項目を上書き）。手順 8 は同じ 3 行。手順書の外の `grdctl status --show-credentials` は `Username: rdpuser2`。新しい資格情報で FreeRDP がつながった
+- 実施手順 11 の貼り直し: `このユーザーの自動ログインは設定済み` と 3 行
+- 実施手順 9: 記録のファイル（`autologin-keyring`）を一時的に隠して貼ると、`中断: 手順 7 が完了していない。有効にしない`（記録は戻した）
+- 残っている資格情報（手順書の外で、パスワード付きのログインのキーリングを `CreateWithMasterPassword` で作り、開いている間に `grdctl rdp set-credentials` で項目を置いてから閉じた）
+  - 実施手順 3 の `SearchItems` は `aoao 1 "…/collection/rdp/1" 1 "…/collection/login/1"`
+  - 実施手順 4 に違うパスワードを入れると、`中断: /org/freedesktop/secrets/collection/login を開けない（GDBus.Error:org.gnome.keyring.Error.Denied: The password was invalid）。資格情報は消していない`。項目は残り、ログインのキーリングは閉じたまま
+  - 正しいパスワードでは、`消した: /org/freedesktop/secrets/collection/login/1` と `閉じ直した: /org/freedesktop/secrets/collection/login`。ログインのキーリングは `b true` で、項目は 0 個。手順 8 は `aoao 1 "…/collection/rdp/1" 0`。貼り直すと `ほかのキーリングに RDP の資格情報は無い`
+  - 開いたログインのキーリングに古い項目（`…/collection/login/3`）があるときは、実施手順 7 が聞く前に `中断: ほかのキーリングに RDP の資格情報がある。手順 4 で消してから貼る` で止まり、手順 4 はパスワードを聞かずに `消した: …/collection/login/3`（`閉じ直した:` は出ない）
+- 手順書の外の誤り: ログインのキーリングを開く手順書の外のコマンドが、ホストの Git Bash のパスの変換で実行されず、閉じたログインのキーリングに対して `grdctl rdp set-credentials` を流した
+  - PC の画面に「認証が必要です」「コンピューターへのログイン時に、ログインキーリングがロックを解除しませんでした。」の窓が出て、`grdctl` は待ち続けた（手順書の注意点が書いていたとおり）
+  - Ctrl+C で `grdctl` を止めても窓は残った。窓は FreeRDP の窓にも写っていて、RDP から「キャンセル」を押すと閉じた。項目は保存されなかった
+
+閉じたログインのキーリングに `grdctl rdp set-credentials` が書こうとしたときに、PC の画面に出た窓（VirtualBox の VM の PC 役の画面から、窓の部分を切り出した）:
+
+![認証が必要です、コンピューターへのログイン時に、ログインキーリングがロックを解除しませんでした。の窓と、キャンセル・ロックの解除 のボタン](../images/gnome-desktop-sharing/2026-10-07-remote-keyring-prompt.png)
+
+### ロールバックと完了時点の状態（PC の画面を触らない版）
+
+- 1 回目（LAN に絞った後。ロールバックの手順 4 の表示は、直す前の `移した RDP の資格情報: 削除済み`）: 手順 1 の代わりに手順 2 で `success` が 2 行と空の rich rule、手順 3 で `disabled`（FreeRDP は `ERRINFO_LOGOFF_BY_USER` で切れた）、手順 4 で `0`・`0`・削除済み・`空のキーリングと記録: 削除済み`、手順 5 で `sha256sum --check` が 2 つとも `完了`
+  - 手順 4 を貼り直すと、`0`・`0` の後に `中断: この手順で作ったキーリングの記録が無いか不正。キーリングは削除しない`
+  - 手順 6 で、seat0 はログイン画面の `gdm` の行だけになり、10〜20 秒で PC の画面にログイン画面が出た
+- 手順書の外で再起動した後
+  - seat0 はログイン画面だけ（自動ログインしない）。起動の引数に `rd.plymouth=0 plymouth.enable=0` は無く、`custom.conf` の `AutomaticLogin` は 0 件
+  - dconf の `/org/gnome/desktop/remote-desktop/` は `[rdp]` の `enable=false` だけ。ユーザーの unit は `disabled`・`inactive`、3389 の待ち受けは無い
+  - firewalld は `cockpit`・`dhcpv6-client`・`ssh` だけで、ポートと rich rule は空。RDP の資格情報は `aoao 0 0`
+  - `rdp.keyring`・退避先・証明書と鍵・`~/rdp_tls_probe.py` は無い。空の `~/.local/share/gnome-remote-desktop` が残る（以前の版の記録と同じ）
+  - 前提の gnome-power.md で変えた値は残る（手順書のとおり）。AVC は 0 件
+- 2 回目の後も同じ。手順書の外で作ったパスワード付きのログインのキーリングと、手順書の外の道具のファイルは、最後に消した（`~/.local/share/keyrings` は空）
+- クライアント役の VM: 退避した FreeRDP の保存済みの証明書を戻した。2 台とも停止した
+
+### 最終版のブロックでの 2 回目（PC の画面を触らない版）
+
+- 1 回目のロールバックの後の同じ VM（手順書の外のパスワード付きのログインのキーリングが、閉じたまま残っている状態）で、最終版の手順書から抜き出したブロックを貼った
+- 実施手順 3 は `aoao 0 0` なので、手順 4 は飛ばした。手順 5〜13 は 1 回目と同じ出力（手順 7 は `入れた先: /org/freedesktop/secrets/collection/rdp/1`）
+- 再起動の後、手順 14・15 は記載どおり。手順 16 では、証明書を作り直したので `!!!Certificate for 192.168.56.81:3389 (RDP-Server) has changed!!!` と新旧の `Thumbprint:` が並び、`Y` でつながった。ダッシュの電卓を RDP から起動して `6×7=42` を出せた。キーリングの窓は出なかった
+- ロールバックは、手順 1（`success` が 2 行）・手順 3（`disabled`）・手順 4（`0`・`0`・`手順 7 の RDP の資格情報: 削除済み`・`空のキーリングと記録: 削除済み`）・手順 5（2 つとも `完了`）・手順 6（ログイン画面の行だけ）
+
+### 見つかった問題と直したこと（PC の画面を触らない版）
+
+| 箇所 | 見つかったこと | 直したこと |
+|---|---|---|
+| 実施手順 7 | `open('/dev/tty', 'r+')` は、テキストの読み書きのモードで `io.UnsupportedOperation: File or stream is not seekable.` になる | `sys.stdin = open('/dev/tty')` と `input()` でユーザー名を読むようにした |
+| ロールバックの手順 4 | 表示の `移した RDP の資格情報` は、今の版（資格情報を移さない）に合わない | `手順 7 の RDP の資格情報: 削除済み` にした |
+| 実施手順 16 | 画面で一度もログインしていないユーザーの最初の自動ログインでは、gnome-tour の「ようこそ」の窓が出る（gnome-initial-setup の窓は出ない） | 窓の名前と「スキップ」を書いた |
+| つながらなくなったとき、手順 2 | つないだままのクライアントは切れずに、画面が戻る | 「つなぎ直す」を、切れていたときだけにした |
+| 注意点 | ログアウトの確認の窓は、60 秒で自動でログアウトする | 「キャンセル」を押すことを足した |
+| 注意点 | `grdctl rdp set-credentials` の窓は、Ctrl+C の後も PC の画面に残り、RDP から閉じられる | その直し方を足した |
+
+### 文書の確認（PC の画面を触らない版）
+
+- 最終版の `bash` のブロック 29 個は、どれも `bash -n` を通り、埋め込みの Python 4 本は `ast.parse` を通った。1 回目に流したブロックとの違いは、ロールバックの手順 4 の表示の 1 行だけで、2 回目でそのブロックも流した
+- ShellCheck は、この検証のホストに無いので、かけていない
