@@ -427,7 +427,7 @@
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
 
    ```powershell
-   winget list --exact --id Oracle.VirtualBox
+   winget list --exact --id Oracle.VirtualBox --source winget
    & "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" --version
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State, StartMode
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' | Format-Table Name, InterfaceDescription, Status
@@ -478,7 +478,8 @@
    - `VM "vbox-selftest" has been successfully started.` と `VMState="running"` が出れば動いている（起動するディスクが無いので、中では何も動かない）
    - **`fall back to NEM` か `Snail execution mode` を含む行が出たら、VM は Hyper-V の上で動いている**（遅くなる。[注意点](#注意点)）
    - その行が出なければ、VirtualBox は VT-x / AMD-V を直接使っているはず
-   - `poweroff` と `unregistervm` は `0%...100%` の行を出し、VM のファイルごと消える
+   - `poweroff` と `unregistervm` は `0%...100%` の行を出し、VM の登録と設定のファイルが消える
+   - `%USERPROFILE%\VirtualBox VMs\vbox-selftest\Logs\VBoxHardening.log` が残ることがある。要らなければ `vbox-selftest` のフォルダーを手で消す
    - 既に `vbox-selftest` があれば、変更せず中断する。別の名前で試すなら、ブロック中の `vbox-selftest` をすべて同じ名前に変える
    - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
 
@@ -619,7 +620,7 @@
 1. 消えたか確かめる。
 
    ```powershell
-   winget list --exact --id Oracle.VirtualBox
+   winget list --exact --id Oracle.VirtualBox --source winget
    Test-Path -LiteralPath "$env:ProgramFiles\Oracle\VirtualBox"
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' -ErrorAction SilentlyContinue
@@ -628,6 +629,8 @@
    - `winget list` は、入っているパッケージが見つからない旨を出す
    - `False` が出て、最後の 2 つは何も出さなければよい
    - ドライバーの行が残ったら、再起動してから貼り直す
+   - 再起動の後も `VBoxNetAdp` が `Stopped` で残ることがある（ドライバーのファイルと登録が残る）。動いていないので、そのままでよい
+   - VirtualBox の VM の中で試したときは、その VM の Guest Additions のドライバー（`VBoxGuest`・`VBoxMouse`・`VBoxSF`・`VBoxWddm`）も出る。これは消さない
 
 1. VM とその設定も消すときだけ、`%USERPROFILE%\VirtualBox VMs` と `%USERPROFILE%\.VirtualBox` を消す（取り戻せない）。
 

@@ -2,6 +2,16 @@
 
 [手順書](../hackgen.md)
 
+## 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 2・3 による 4 ファイル・ユーザー登録・アプリ用の読み取り許可、再サインイン後の登録、WezTerm CLI でのフォント解決とラスタ生成（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 5 の設定のフォントの一覧（2 ファミリーのタイルと見本）、WezTerm の窓での表示、更新の手順 1、ロールバック（[付録](#付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - メモ帳・Windows Terminal などほかのアプリでの選択、太字・行の高さの見た目の比べ
+  - 新しい版への更新、arm64 の Windows、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -419,3 +429,85 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
   - `spacing=100`（`mono`）のフォントだけを選択肢に出すアプリで選べるかは、確かめていない
 
 - **GNOME の端末や VS Code など WezTerm 以外のアプリ**: それぞれの設定でファミリー名 `HackGen Console NF` を指定することになるが、本書では確かめていない
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../hackgen.md#windows-11-で使う)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの通常権限（Session 1） |
+| 配布物 | `HackGen_NF_v2.10.0.zip` |
+| zip の SHA256 | `F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428` |
+| 検証時の本文の SHA256 | `27F32F24DB057AE78FDA4C2B4783DA1572CF28A8843975F6108FCC78024D00A8`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `C6CABB3918DD87333CBD94E4CB4C06A0BBE29CCF99FDAD3FBC0CC5947DF6EFF1` |
+
+**確認したこと**:
+
+- 手順 2・3（バッチ `20261006-110024Z-28d92065`、完了 11:00:28 UTC）:
+  - 手順 2 は出力がなく、既存の HackGen のファイルと登録は見つからなかった
+  - 手順 3 は zip の SHA256 一致の検査を通過し、ユーザーのフォントフォルダーに 4 つの ttf を置き、対応する `HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts` の登録を出した
+  - PowerShell のエラーは 0、最後の終了コードと検証用タスクの終了コードは 0。要求したバッチと完了記録が対応した
+- 独立した読み戻し（11:05:43 UTC）:
+  - `HackGenConsoleNF-Regular.ttf`・`HackGenConsoleNF-Bold.ttf`・`HackGen35ConsoleNF-Regular.ttf`・`HackGen35ConsoleNF-Bold.ttf` の 4 ファイルが存在し、サイズはいずれも 0 より大きかった。4 つとも登録パスが実ファイルと一致した
+  - `PrivateFontCollection` で `HackGen Console NF` と `HackGen35 Console NF` を読み込めた
+  - フォントフォルダーの `ALL APPLICATION PACKAGES`（`S-1-15-2-1`）と `ALL RESTRICTED APPLICATION PACKAGES`（`S-1-15-2-2`）への許可を確認した。どちらも `ReadAndExecute, Synchronize`、`ObjectInherit, ContainerInherit` だった
+  - 最初の追加検査はアカウント名を SID に変換する処理で失敗したため、raw SDDL と SID を読む方法で確認し直した。本文の導入ブロックの失敗ではない
+- 再サインイン後の追加検査（2026-10-07 04:04:16〜04:04:23 UTC）:
+  - 同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、`InstalledFontCollection` が `HackGen Console NF` と `HackGen35 Console NF` を認識した
+  - 設定やメモ帳のフォント一覧の確認は利用者に依頼済みで、回答待ち。GUI の選択・描画は未確認。証跡は `.verification/evidence/remaining-local-20261007-040410-0e3dc87e/guest-result.json`
+
+**確認していないこと**:
+
+- 手順 5 の設定のフォント一覧。Windows の初期設定で再起動・サインインは済んでいるが、フォントの GUI 確認は回答待ち
+- WezTerm や Windows Terminal などのアプリでの利用と見た目。`PrivateFontCollection` と `InstalledFontCollection` の認識だけでは、アプリで選択・描画できると判定しない
+- 更新、ロールバック、arm64 の Windows
+
+---
+
+### 付録: Windows 11 Pro の VM での WezTerm CLI によるフォント利用の検証（2026-10-07）
+
+前の導入と同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、WezTerm の `ls-fonts --codepoints 61,3042,6f22,2192,e0b0,f07c --rasterize-ascii` を実行した。各ファミリーを指定した使い捨ての設定を `--config-file` で渡し、フォントサイズは 12.0、`custom_block_glyphs=false` と `check_for_updates=false` にした。GUI のウィンドウは検査していない。
+
+| ファミリー | DirectWrite が使ったユーザーフォント | ラスタのピクセル数 | alpha が 0 でないピクセル数 |
+|---|---|---:|---:|
+| HackGen Console NF | `HackGenConsoleNF-Regular.ttf` | 974 | 639 |
+| HackGen35 Console NF | `HackGen35ConsoleNF-Regular.ttf` | 1031 | 665 |
+
+**確認したこと**:
+
+- 両ファミリーの `a`・`あ`・`漢`・`→`・Powerline の U+E0B0・Nerd Fonts の U+F07C、計 12 glyph を確認した。glyph ID はすべて 0 以外で `notdef` がなく、セル幅は両ファミリーとも順に `1/2/2/1/1/1`。別のフォントへの fallback や WezTerm の独自 glyph ではなかった
+- stdout の ANSI `38:6` の RGBA を文字ごとに集計し、bearing・offset、ラスタの幅・高さ、各チャンネルの 0〜255 の範囲と、alpha が 0 でない領域を確認した。計 2005 ピクセル中 1304 は alpha が 0 以外、359 は 255。HackGen35 の矢印だけ最大 alpha が 254 で、すべての glyph に 255 を要求する判定はしていない
+- 2 回の CLI 終了コードは 0、stderr は空、作業フォルダーの cleanup は成功した。実ユーザーとインストール先の WezTerm 設定 3 パスは前後とも存在せず、実設定は不変だった
+- 実行時刻は 2026-10-07 09:20:26〜09:20:46 UTC。証跡は `.verification/evidence/remaining-wezterm-font-20261007-092017-4d5448f6` の `guest-result.json` と独立した `glyph-assessment.json` に保存した。raw stdout の NUL padding と ANSI は解析用のコピーだけで処理し、元の JSON は保持した
+- raw JSON の SHA256 は `9B2C1DC0A426F36FF2971561FCC041077D62EFE718D8D85403C68CB1E6A40475`、評価 JSON は `C12A3BF87D1FD9BE9C9061AD12DB6F6866B2A4141E993CC3F80221184E753C68`。文字ごとの寸法と alpha の領域は評価 JSON と[WezTerm の付録](wezterm-nightly.md#付録-windows-11-pro-の-vm-での-hackgen-の-cli-ラスタ生成の検証2026-10-07)に記録した
+
+**確認していないこと**:
+
+- Windows の設定・メモ帳・WezTerm GUI のフォント一覧と選択、画面上の描画や字形・太字・行の高さ。今回の CLI ラスタ生成をスクリーン上の見た目の確認へ広げない
+- Windows Terminal などのパッケージのアプリでの利用、選んだ 6 文字以外、更新・ロールバック、arm64 の Windows。以前の付録の未確認事項はその時点の履歴として保持した
+
+---
+
+### 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、画面のフォントの一覧と WezTerm の窓での表示、更新の確認を行った。手順は [Windows 11 で使う](../hackgen.md#windows-11-で使う)の番号。
+
+- 手順 5:
+  - 設定 → 個人用設定 → フォント は、ライセンス認証していないこの VM でも開いた。ただし、画面の検索欄は使えなかった（UI Automation で `IsEnabled` が `False`）
+  - 一覧をスクロールすると、「HackGen Console NF」と「HackGen35 Console NF」のタイルが、どちらも「2 フォント フェイス」で、見本の文がこのフォントで描かれて並んだ
+  - 本文の手順 5 に、検索欄が使えないときは一覧をスクロールする旨を足した
+- WezTerm の窓での表示: 一時的な `%USERPROFILE%\.wezterm.lua` で `HackGen Console NF` を指定すると、英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が表示された（[wezterm-nightly.md の検証記録](wezterm-nightly.md)の 2026-10-08 の付録。この VM では `prefer_egl` も要った）
+- Windows 11 の更新の手順 1: `v2.10.0`。新しい版は無いので、この節の手順 2 は行っていない
+- Windows 11 のロールバック（管理者ではない窓。Windows Terminal の中に開き、複数行の警告で「強制的に貼り付け」を押した）:
+  - この節の手順 1: 最後のコマンドは何も出さなかった
+  - この節の手順 2: サインアウトの代わりに再起動した（自動サインインで戻った）
+  - この節の手順 3: 最後のコマンドは何も出さなかった（4 つの ttf が消えた）
+
+**確認していないこと**:
+
+- メモ帳・Windows Terminal などほかのアプリでの選択、太字・行の高さの見た目の比べ、新しい版への更新、arm64 の Windows、Windows の実機

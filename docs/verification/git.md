@@ -2,6 +2,16 @@
 
 [手順書](../git.md)
 
+## 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の新規導入・PATH の手順 2・3・5、非対話 Bash と隔離した `global` での共通手順 3〜7・9〜11（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: スタートから開いた対話の Git Bash に右クリックのメニューで貼り、実ユーザーの `global` で実施手順 1・3〜11（`system` の `pull.ff=only` を一時的に置いて手順 8 の分岐も）、ロールバックの手順 1〜6、更新の手順 2（[付録](#付録-windows-11-pro-の-vm-での対話の-git-bash-による通し検証2026-10-08)）
+- 確認していないこと
+  - 本人の名前・メールアドレスと、外部のリモートへの認証・push・pull
+  - 新しい版に上げる更新、arm64 の Windows
+- 機能試験の初回ホスト側通信の終了コード 1 と、後に回収したゲストの成功は別々に記録した。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -170,7 +180,7 @@ You can run "git stash pop" or "git stash drop" at any time.
 > | `${GIT_USER_NAME}` | `user.name`。コミットの作者の名前 | `Taro Yamada` |
 > | `${GIT_USER_EMAIL}` | `user.email`。コミットの作者のメールアドレス | `taro@example.com`、GitHub の noreply のアドレス |
 >
-> 出力例の値は `<GIT_USER_NAME>` / `<HASH>` などのプレースホルダで書いてある。バージョン（`2.52.0`）は実行日によって変わる。
+> 出力例の値は `<GIT_USER_NAME>` / `<HASH>` / `<WIN_USER>`（Windows のユーザー名）などのプレースホルダで書いてある。バージョン（`2.52.0`）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
@@ -645,3 +655,135 @@ fatal: Not possible to fast-forward, aborting.
   - `--override` は、winget が渡す黙って動かすスイッチ（`/SP- /SILENT …`）ごと置き換える（winget のソース）
 - **Git for Windows は、scoop の `scoop update` が使う git も兼ねる**
   - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)の手順 5 の補足）
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)の手順 2・3・5 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。手順 2・3 は管理者、手順 5 は新しい通常権限のプロセス。どちらも同じログオンユーザーの Session 1 |
+| WinGet | 1.29.380。確認の `winget list` は `--source winget` 付き |
+| 検証時の本文の SHA256 | `A14BFED2E1703FED0B083224F9012CBB631F002B8AC3E77151223F97BA73E57B`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `AF11A0B15F103A89BD9A697601A68FD62A772CCFCB43A53FA659A27356B81B55` |
+
+**確認したこと**:
+
+- 手順 2・3（バッチ `20261006-105816Z-096906b0`、完了 10:59:22 UTC）:
+  - 未導入時は `Get-Command git` に出力がなく、Git Bash のパスは `False`、一覧は `No installed package found matching input criteria.` だった。最後の winget の終了コード `-1978335212` は、この未導入の確認で期待する結果
+  - インストーラーのハッシュ検証が成功し、`Successfully installed` が出た。続く一覧は `Git.Git 2.55.0.5` で、PowerShell のエラーは 0、最後の終了コードは 0
+- 手順 5（バッチ `20261006-110243Z-62c3d475`、完了 11:02:43 UTC）:
+  - 新しい通常権限のプロセスで、`Get-Command git` は `C:\Program Files\Git\cmd\git.exe`、版は `git version 2.55.0.windows.5` だった
+  - `C:\Program Files\Git\bin\bash.exe` と `C:\Program Files\Git\git-bash.exe` の存在確認は、どちらも `True`。PowerShell のエラーは 0、最後の終了コードは 0
+- 両バッチとも検証用タスクの終了コードは 0 で、要求したバッチと完了記録が対応した
+
+**確認していないこと**:
+
+- 手順 1・4 の端末を開く画面操作と、手順 6 の Git Bash の起動・表示。手順 4 は新しいプロセスを起動して `PATH` を確認することで代替した
+- この VM の Git Bash での[実施手順](../git.md#実施手順)。`GIT_USER_NAME` と `GIT_USER_EMAIL` は設定しておらず、`global` の設定も書いていない
+- インストーラーが書いた `system` の値、更新、削除、arm64 の Windows
+
+---
+
+### 付録: Windows 11 Pro の VM での非対話 Bash による設定の検証（2026-10-07）
+
+前の新規導入と同じ VM で、共通の[実施手順](../git.md#実施手順)の 3・5・6・7 のコードブロックを抜き出して、そのまま実行した。2026-09-30 の実機で `HOME` を使い捨てにした検証とは別の記録で、今回は `HOME` と `CODEX_HOME` を変更していない。
+
+| 項目 | 値 |
+|---|---|
+| 環境 | Windows 11 Pro の専用 VM、通常権限の `<WIN_USER>`。PowerShell 7.6.6 が非対話の `C:\Program Files\Git\bin\bash.exe` を起動 |
+| Git | `git version 2.55.0.windows.5`。`--noprofile --norc` で起動し、プロファイルは読み込まない |
+| 実行範囲 | 共通手順 3・5・6・7。子 Bash プロセスだけの `GIT_CONFIG_GLOBAL` で専用 scratch の `global.gitconfig` を指定 |
+| 実行時刻 | 2026-10-07 04:18:58〜04:19:20 UTC |
+| 検証時の本文の SHA256 | `2541D4BE9E3CD490A2474567EC30635496610BBA507922DD25148837BF4ED6A3`（この追記より前） |
+| 実行した source manifest の SHA256 | `87AFDF5F88FA15E43C9BB851FEE6E5586EB531741191C3FA4F29B3CD4A77D180` |
+
+**確認したこと**:
+
+- 手順 3 は実物の `C:/Program Files/Git/etc/gitconfig` を読み、`system` の `core.autocrlf=true` を確認した
+- 手順 5 の 3 キーと手順 6 の 9 キー、計 12 キーはすべて指定値になった。独立した読み戻しのスコープは `global`、origin は専用 scratch のファイルで、手順 7 の出力とも一致した。本人設定を省いたため、手順 7 の 14 キーすべてを確認した結果とは扱わない
+- 実ユーザーの `.gitconfig`・`.config/git/config`、Git の `etc/gitconfig`、`C:\ProgramData\Git\config` は、前後の存在状態と SHA256 が一致した。`pull.ff` は前後とも未設定で、取得の終了コード 1 と空の出力も一致した
+- 4 ブロックの終了コードはすべて 0、補助検証は `passed=true` で CLI の終了コードも 0。作成した `C:\verify\git-config-probe-<GUID>` の scratch だけを削除し、削除成功を確認した
+- 証跡は `evidence/remaining-git-20261007-041841-0ff6f533` の `guest-result.json` と `source-manifest-executed.json` に保存した
+
+**確認していないこと**:
+
+- 本人の `GIT_USER_NAME`・`GIT_USER_EMAIL` と共通手順 4。この検証では実ユーザーの `global` に設定を書いていない
+- 対話 Git Bash の起動・表示・コピーと貼り付け。非対話 CLI の成功を画面操作の成功とは扱わない
+- 共通手順 9〜11 の使い捨てリポジトリでの改行・push・pull と後片付け、更新、削除。古い実機・コンテナの検証結果は前の付録に残す
+
+---
+
+### 付録: Windows 11 Pro の VM での非対話 Bash による push・pull と後片付けの検証（2026-10-07）
+
+前の設定検証と同じ VM で、共通の[実施手順](../git.md#実施手順)の 4・5・6・9・10・11 の Bash ブロックを変更せず実行した。Windows PowerShell 5.1 の接続用 launcher が、通常権限の PowerShell 7.6.6 の検証 helper を起動し、その helper が Git Bash を非対話で起動した。手順 9・10 は 1 つの Bash セッションで続けて実行した。
+
+| 項目 | 値 |
+|---|---|
+| 実行環境 | 同じ専用 Windows 11 Pro VM、通常権限の `<WIN_USER>`、PowerShell 7.6.6、Git 2.55.0.windows.5 |
+| Bash | `C:\Program Files\Git\bin\bash.exe --noprofile --norc`。子プロセスの `LC_ALL=C` |
+| 隔離 | 子 Bash だけの `GIT_CONFIG_GLOBAL` と `TMPDIR` を専用 scratch に指定。`HOME` と `CODEX_HOME` は変更しない |
+| 名前・メール | `VM Verification`・`vm-verification@example.invalid`。合成値だけを scratch の設定へ書いた |
+| ゲストでの実行時刻 | 2026-10-07 09:27:08〜09:28:01 UTC |
+| 実行時の本文の SHA256 | `7EA606C3138280166C7F35A90AB20C7E0D14005C640D8681E87E76C209BFE736`（この追記より前） |
+| 実行した manifest の SHA256 | `2B6B05CB73AA6BF9AB78ED1E542543BFA0B34805E9BB75991D3BCCA6FDF462AB` |
+
+**確認したこと**:
+
+- 14 フェーズすべての終了コードが 0、挙動検査 9 件が PASS、Bash 全体の終了コードも 0 で `ALL_PHASES_PASS` を出した。合成の名前・メールと、設定 12 キーの値・`global` のスコープ・scratch の origin を確認した
+- 手順 9 の出力に `?? 日本語.txt` が引用や置換文字なしで出た。helper は stdout とフェーズのログを strict UTF-8 で読んだ。`main`、最初のローカル push と `origin/main` の upstream、index と作業ファイルの CRLF が一致した
+- 手順 10 は、履歴が 3 コミットの直線で merge がなく、古いローカルコミットが別の ID へ書き換わり、書き換え後の親が remote のコミットになった。設定値の読み戻しだけでなく、実際の rebase を確認した
+- autostash の作成出力と実オブジェクト、その親が古いローカルコミットであること、適用の出力と stash が残らないことを確認した。未コミットの CRLF の変更は復元され、HEAD と index の元の内容、日本語のパス、合成のコミット作者も保持された
+- 手順 11 の前に `realpath` と `cygpath` で削除先が専用 scratch の配下であることを確認した。手順 11 が fixture だけを消し、外側の scratch と `HOME` を保持した後、helper が scratch を削除した。実ユーザーの設定ファイル 4 件の存在状態と SHA256 は前後一致し、`pull.ff` も未設定のままだった
+
+**初回の接続と後の回収**:
+
+- 初回のホスト側 GuestControl には 55 秒の上限を付けた。ホスト側の CLI 終了コードは 1、直後の結果コピーも 1 だった。この値を Git の実行結果の成功へ置き換えていない
+- 後で完成したゲストの結果を回収し、2026-10-07 09:36:30 UTC のコピーは終了コード 0 だった。再実行はしていない。ゲスト自身の結果は終了コード 0・`passed=true`・cleanup 成功で、完了時刻は `guest-result.json` の値を使った
+- 証跡は `.verification/evidence/remaining-git-behavior-20261007-092648-ddbf22f4` の `guest-result.json`・実行した manifest/helper・初回の `host-execution-result.json`・後の `host-recovery-result.json`・独立した `git-behavior-assessment.json` に保存した。元の証跡は変更していない
+
+**確認していないこと**:
+
+- 本人の名前・メールを実ユーザーの設定へ反映すること、対話 Git Bash の画面・コピーと貼り付け、外部リモートへの認証や network pull
+- `pull.ff` を変更する手順 8、利用中の既存の設定との組み合わせ、更新・削除、arm64 の Windows。今回の隔離した機能テストを全手順の通し成功とは扱わない
+
+---
+
+### 付録: Windows 11 Pro の VM での対話の Git Bash による通し検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、スタートメニューから開いた Git Bash（mintty）に、本文のブロックを右クリックのメニューの「Paste」で貼り、[実施手順](../git.md#実施手順)の手順 1・3〜11 とロールバックの手順 1〜5 を通した。ロールバックの手順 6 と更新の手順 2 は、管理者の Windows PowerShell に貼った。上の付録と違い、子プロセスの `GIT_CONFIG_GLOBAL` は使わず、実ユーザーの `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた。
+
+| 項目 | 値 |
+|---|---|
+| Git | `git version 2.55.0.windows.5`（上の付録で入れたもの） |
+| 始める前 | `global` の設定ファイルは無かった。`system`（`C:/Program Files/Git/etc/gitconfig`）の SHA256 は `381C2FDA5A3B5ADF7102F5B05F68D7DC3281A44171F9B40556CA56CFDD8461C3` で、`pull.ff` は無かった |
+| 名前とメールアドレス | 試験用の架空の値（`PR104 Verification`・`pr104-verification@example.invalid`） |
+| 手順 8 の分岐 | 確かめるため、管理者の窓で一時的に `git config --system pull.ff only` を足した（終わった後に外した） |
+
+**確認したこと**:
+
+- Windows 11 で Git for Windows を入れるの手順 6: スタートメニューの「Git Bash」で、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` の窓が開いた
+- 窓の中の右クリックで、`Copy`・`Paste`（`Shift+Ins`）などのメニューが出た。本文に「Paste」で貼る旨を足した
+- 手順 1・3〜7: 手順 7 で、`global` の 14 キー（名前・メールアドレスと、手順 5・6 の 12 キー）が出て、`pull.ff` は `system  only` だった
+- 手順 8: `global  true`
+- 手順 9: `?? 日本語.txt`、`i/crlf  w/crlf`（CRLF のまま入った）、ブランチは `main`、`branch 'main' set up to track 'origin/main'.`
+- 手順 10: `Created autostash`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.`、履歴は一直線、作業中の `M crlf.txt` が残った
+- 手順 11: 使い捨てのリポジトリが消えた
+- 手順 8 を行わない場合（`global` の `pull.ff` を外し、`system` の `only` だけにした場合）の分岐した pull は、`fatal: Not possible to fast-forward, aborting.`（終了コード 128）で止まった
+- ロールバックの手順 1〜4: 今回足した 15 キー（手順 4・5・6・8 のもの）を `--unset` で外した。手順 5 の `git config --global --list` は何も出さなかった。ただし `~/.gitconfig` は 0 バイトのファイルとして残った（始める前は無かった）。本文に注意を足した
+- 一時的な `system` の `pull.ff` を外し、`system` の SHA256 が始める前と同じに戻った
+- 更新の手順 2（管理者の窓）: `No available upgrade found.`、`winget list` は `Git  Git.Git  2.55.0.5`
+- ロールバックの手順 6（管理者の窓、Git Bash は閉じた状態）: `Found Git [Git.Git]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、最後は `False`。途中で「Git Uninstall」の進捗の窓（「Uninstalling Git...」）が出て、何も押さずに閉じた
+
+**検証の手順で起きたこと**:
+
+- 最初の通しでは、検証の操作が窓を前に出すために Alt を 1 回だけ押したため、mintty がメニューの操作に入り、貼った後の Enter が食われた。手順 5・6・7 の 3 つのブロックが 1 行につながって実行され、`pull.rebase` が入らず `tag.sort` が `version:refnamecd` になった。操作を直し、手順 4〜7 を貼り直して（どれも何度貼ってもよい）、正しい値になったことを手順 7 で確かめた
+
+**確認していないこと**:
+
+- 本人の名前・メールアドレスと、外部のリモート（GitHub など）への認証・push・pull
+- Ctrl+V・Shift+Insert のキーでの貼り付け（検証の操作では、Shift+Insert が正しいキーとして届かなかった）、arm64 の Windows、Windows の実機

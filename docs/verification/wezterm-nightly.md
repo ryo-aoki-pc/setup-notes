@@ -2,6 +2,16 @@
 
 [手順書](../wezterm-nightly.md)
 
+## 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 2・4・5 による新規導入、CLI の版と登録・PATH・ショートカット、CLI でのフォント解決とラスタ生成（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）
+  - 2026-10-08: 手順 6 のスタートからの起動（この VM では OpenGL のエラーで開かず、`prefer_egl` で開いた）、「Open WezTerm here」の実クリックと HackGen Console NF の表示、更新（同じ版の入れ直し）、ロールバック（[付録](#付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - 3D の描画がある環境で、設定ファイル無しに手順 6 で窓が開くこと
+  - 自分用の設定と Git Bash、Visual C++ Runtime の新規導入、新しい版に上がる更新、arm64 の Windows、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -492,3 +502,98 @@ Install  4 Packages
 ### 補足
 
   設定で `term = "wezterm"` にするなら、先に公式ドキュメントの手順で terminfo を入れる（本書では**未実行**）:
+
+---
+
+### 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
+
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの管理者の Windows PowerShell に実行した。GUI のコピー・貼り付けや WezTerm の起動は試していない。
+
+| 項目 | 確認した値 |
+|---|---|
+| OS | Windows 11 Pro 26H2、26300.9457、x64 |
+| PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、管理者、セッション 1 |
+| 初回導入前 | `Version`・`Location`・`OnPath`・`Running` は空、`Admin: True`、`VCRuntime: True` |
+| Visual C++ Runtime | Windows 初期設定の手順 22 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
+| 作業フォルダー | 実行前に `%TEMP%\wezterm-setup` が無いことを確認 |
+| 入った版 | `20261005-054844-37254829` |
+
+**初回導入と確認（この節の手順 2・4・5）**:
+
+- 実行記録は `20261006-110954Z-cd78c35a`。2026-10-06 11:10:17.710 UTC に完了し、手順ごとのエラーは 0、最後の CLI とタスクの終了値は 0、開始と完了の対応も確認した
+- 手順 4 は `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20261005-054844-37254829` を出した。本文の `.sha256` とインストーラの照合を通して初回導入された
+- 手順 5 の登録は `DisplayName: WezTerm version 20261005-054844-37254829`、`DisplayVersion: 20261005-054844-37254829`、`InstallLocation: C:\Program Files\WezTerm\`。`UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"` だった
+- CLI の版も登録と一致した。PC 全体の `PATH` の `C:\Program Files\WezTerm` は 1 行だけで、全ユーザーのスタートメニューの `WezTerm.lnk` は `True`
+- 導入先に `wezterm.exe`・`wezterm-gui.exe`・`wezterm-mux-server.exe`・`unins000.exe`・`unins000.dat`、`conpty.dll`・`OpenConsole.exe`・`strip-ansi-escapes.exe`・`libEGL.dll`・`libGLESv2.dll`・`mesa` が並ぶことを確認した
+- 2026-10-07 04:04:16〜04:04:23 UTC の追加読み取りは、通常権限の PowerShell 7.6.6・Session 1 で行った。`HKCR\Directory\shell\Open WezTerm here` と `HKCR\Directory\Background\shell\Open WezTerm here` のコマンド項目が存在した。メニューをクリックして実際に起動することは未確認。証跡は `.verification/evidence/remaining-local-20261007-040410-0e3dc87e/guest-result.json`
+
+**未検証の範囲**:
+
+- 手順 1 の GUI での管理者の PowerShell の開き方とコピー・貼り付け、手順 6 の WezTerm の窓・既定のシェル、「Open WezTerm here」の動作。ショートカットやファイルがあることと、GUI が動くことは別に確認する必要がある
+- 自分用の設定と Git Bash、設定ファイルの探索順、新しい PowerShell が PC 全体の `PATH` を読むこと
+- `VCRUNTIME140.dll` が無い場合と手順 3 による導入、前の版への上書き、更新・アンインストール、arm64。Windows の実機での通し実行
+
+2026-10-03 以前の付録は当時の確認範囲を記した履歴として保持した。今回も本文のコマンドは変更していない。
+
+---
+
+### 付録: Windows 11 Pro の VM での HackGen の CLI ラスタ生成の検証（2026-10-07）
+
+前の初回導入と同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、導入済みの `wezterm.exe` の `ls-fonts` を使った。`--config-file` で scratch の設定だけを渡し、`--codepoints 61,3042,6f22,2192,e0b0,f07c --rasterize-ascii` の stdout を採取した。設定はファミリーだけを替えた 2 通りで、フォントサイズは 12.0、`custom_block_glyphs=false` と `check_for_updates=false`。本文の導入コードと実ユーザーの設定は変更していない。
+
+**フォント解決と数値ラスタ**:
+
+- `HackGen Console NF` は `HackGenConsoleNF-Regular.ttf`、`HackGen35 Console NF` は `HackGen35ConsoleNF-Regular.ttf` を、ユーザーのフォントフォルダーから DirectWrite で使った。計 12 glyph はすべて ID が 0 以外、`notdef` なし。フォントの fallback と WezTerm の独自 glyph は出なかった
+- 各文字の bearing と offset、ANSI `38:6` の RGBA を記録した。NUL padding は解析用のコピーだけから除き、元の stdout と JSON は変更していない。glyph 名中の `#0` を ID 0 と誤認せず、カンマ後の数値を glyph ID として判定した
+- 下表のセル幅は両ファミリーで一致した。ラスタ欄は幅×高さと、alpha が 0 でないピクセル数／全ピクセル数。すべての文字に透明でないピクセルがあり、各 RGBA の値は 0〜255 に収まった
+
+| 文字・コードポイント | セル幅 | HackGen Console NF | HackGen35 Console NF |
+|---|---:|---|---|
+| a / U+0061 | 1 | 8×8、52/64 | 8×9、61/72 |
+| あ / U+3042 | 2 | 13×14、117/182 | 14×14、117/196 |
+| 漢 / U+6F22 | 2 | 15×16、144/240 | 16×16、150/256 |
+| → / U+2192 | 1 | 10×9、39/90 | 10×9、38/90 |
+| Powerline / U+E0B0 | 1 | 10×19、117/190 | 11×19、137/209 |
+| Nerd Fonts / U+F07C | 1 | 16×13、170/208 | 16×13、162/208 |
+
+- 計 2005 ピクセル中、alpha が 0 以外は 1304、255 は 359。HackGen35 の U+2192 は最大 alpha 254、他の 11 glyph は最大 255 だった。各文字に 255 のピクセルが必要という判定はしていない
+- 両 CLI の終了コードは 0、stderr は空、09:20:26〜09:20:46 UTC に実行した。scratch の削除は成功し、実ユーザーとインストール先の WezTerm 設定 3 パスの存在状態は前後不変だった
+- 証跡は `.verification/evidence/remaining-wezterm-font-20261007-092017-4d5448f6` の `guest-result.json` と `glyph-assessment.json`。raw の SHA256 は `9B2C1DC0A426F36FF2971561FCC041077D62EFE718D8D85403C68CB1E6A40475`、独立した評価 JSON は `C12A3BF87D1FD9BE9C9061AD12DB6F6866B2A4141E993CC3F80221184E753C68`。文字ごとの RGBA の範囲・透明でない領域・ラスタの SHA256 も評価 JSON に保存した
+
+**確認していないこと**:
+
+- スタートからの WezTerm GUI 起動、既定のシェル、GUI のフォントメニューと選択、スクリーン上の字形・太字・行の高さ、右クリックのメニューの実クリック。CLI の数値ラスタを画面上の描画の確認へ広げない
+- 自分用の設定と Git Bash、設定ファイルの探索順、選んだ文字以外、Visual C++ Runtime が無い場合、更新・上書き・アンインストール、arm64 の Windows。以前の付録はその時点の履歴として保持した
+
+---
+
+### 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、GUI の起動・右クリックの項目・更新を確かめた。手順は [Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の番号。WezTerm は 20261005-054844-37254829。
+
+**手順 6（スタートメニューから起動）**:
+
+- スタートメニューの「WezTerm」から起動すると、窓が開かずにプロセスが終わった。`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` に `ERROR  wezterm_gui::frontend > Failed to create window: The OpenGL implementation is too old to work with glium`
+  - この VM の画面のアダプターは VirtualBox の VBoxSVGA で、3D の描画を使っていない
+  - `wezterm-gui.exe --config front_end="Software"` でも同じエラー
+  - `wezterm-gui.exe --config prefer_egl=true` では窓が開き、中で `cmd.exe` が動いた（設定ファイルが無いときのシェル。`%COMSPEC%`）。窓の中の `wezterm --version` は `wezterm 20261005-054844-37254829`
+  - 本文の手順 6 に、ログの場所と `config.prefer_egl = true` の箇条書きを足した
+- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の手順 26）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
+  - 設定ファイルが無いままでは、同じ OpenGL のエラーで開かなかった
+  - 一時的に `%USERPROFILE%\.wezterm.lua`（`config.prefer_egl = true` と `config.font = wezterm.font 'HackGen Console NF'` だけ）を置くと、`C:\verify\gui-fixtures` で窓が開いた。英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が、HackGen Console NF で表示された（画面で確かめた）
+  - 一時的な設定と試験用の文のファイルは、確かめた後に消した
+
+**Windows 11 の更新**:
+
+- この節の手順 2: 1 行目は `20261005-054844-37254829`、WezTerm のプロセスは無し
+- この節の手順 3（手順 4 の貼り直し）: `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20261005-054844-37254829`。版は同じで、本文の「同じ版なら、main に新しいコミットが無かった」に当たる
+- この節の手順 1・4 は、Remote Control のタスクが無いので飛ばした
+
+**Windows 11 のロールバック**:
+
+- この節の手順 1（WezTerm の窓は無い状態）: `False` が 2 行出て、その後は何も出なかった（登録・`C:\Program Files\WezTerm`・`PATH` の行が消えた）
+
+**確認していないこと**:
+
+- 3D の描画がある環境（実機の GPU）で、設定ファイル無しに手順 6 で窓が開くこと
+- 自分用の設定（`ryo-aoki-pc/wezterm`）と Git Bash、新しい版に上がる更新、arm64 の Windows、Windows の実機

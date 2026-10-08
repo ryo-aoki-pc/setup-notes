@@ -268,6 +268,11 @@
    - スタートメニューで「WezTerm」を探し、クリックして開く
    - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[設定ファイル](#設定ファイル)）
    - 窓の中で `wezterm --version` を打つと、この節の手順 5 と同じ版が出る
+   - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
+     - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
+     - その場で開くなら、`& 'C:\Program Files\WezTerm\wezterm-gui.exe' --config prefer_egl=true` で開く
+     - いつも開くようにするなら、設定の `config` に `config.prefer_egl = true` を足す。設定ファイルが無ければ、`%USERPROFILE%\.wezterm.lua` に `local wezterm = require 'wezterm'`・`local config = wezterm.config_builder()`・`config.prefer_egl = true`・`return config` の 4 行を書く
+     - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[設定ファイル](#設定ファイル)のとおり、clone した設定が読まれなくなる）
    - **注意**: 管理者の PowerShell から `wezterm-gui.exe` を起動しない（WezTerm と中のシェルが管理者で動く）
    - エクスプローラーでフォルダーを右クリックすると「Open WezTerm here」がある（Windows 11 の新しいメニューでは「その他のオプションを確認」の中）
 

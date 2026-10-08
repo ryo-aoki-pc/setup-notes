@@ -2,6 +2,16 @@
 
 [手順書](../virtualbox.md)
 
+## 最新の確認範囲（Windows 11）
+
+- 通したこと
+  - 2026-10-06（Windows 11 Pro のクリーン VM）: Windows 節の手順 2〜4 による新規導入・ドライバー・ホストオンリーアダプター、手順 8 の設定ファイル。手順 6 の入れ子の VM は `VERR_NEM_NOT_AVAILABLE` / `VERR_SVM_NO_SVM` で失敗（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 6 をホストの実機（AMD・Hyper-V）で流し、Hyper-V の上で動く分岐を確かめた（後に `Logs` のフォルダーが残るので本文を直した）。同じ VM で手順 7 のマネージャーの画面、更新の手順 2、ロールバック（[付録](#付録-windows-11-の実機と-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - VM の中での手順 6、Hyper-V が動いていない PC・Intel の CPU での手順 6
+  - 新しい版に上げる更新の手順 3・4、arm64 の Windows
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -405,7 +415,7 @@ Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../virtua
 | Hyper-V | その PC では動いている（WSL 2）。VM は Hyper-V の上で動いた |
 
 > [!NOTE]
-> 出力例の値は `<USER>` / `<GID>` などのプレースホルダで書いてある。バージョン（`7.2.20`）とカーネルの版（`6.12.0-211.56.1.el10_2`）は実行日によって変わる。**鍵の fingerprint とインストーラの sha256 は公開情報なので本文に書いてある。** MOK の秘密鍵と一時パスワードは載せない。
+> 出力例の値は `<USER>` / `<GID>` / `<OTHER_PC>`（引き継ぎ先にした別の PC の名前）などのプレースホルダで書いてある。バージョン（`7.2.20`）とカーネルの版（`6.12.0-211.56.1.el10_2`）は実行日によって変わる。**鍵の fingerprint とインストーラの sha256 は公開情報なので本文に書いてある。** MOK の秘密鍵と一時パスワードは載せない。
 >
 > Windows 11 の節にも変数は無い（パスと名前はブロックに直接書いてある）。
 
@@ -1113,3 +1123,71 @@ aarch64 には入らない:
   - rpm の `%postun` が `/usr/lib/virtualbox/ExtensionPacks` を消すので、入れた場合は **VirtualBox の更新のたびに入れ直す**ことになる（rpm のスクリプトを読んだ結果。未確認）
 
   - **入れる・上げる・消すときに、ネットワークがいったん切れる**: ブリッジ接続のドライバーを入れるため（MSI の画面の警告。上げる・消すときも切れるはずだが、確かめていない）。SSH やリモート デスクトップでつないでいる PC では行わない
+
+---
+
+### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2〜4 のコードブロックを抜き出して、そのまま実行した。導入後に手順 6 の使い捨て VM の起動を試したが、入れ子の仮想化を利用できず失敗した。手順 8 の全体設定ファイルの確認は成功した。利用者の希望でここで検証を中断し、入れ子の VM の再検証は `<OTHER_PC>` の環境へ引き継ぐ。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| 検証用の VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールし、Guest Additions を導入済み |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの管理者権限（Session 1） |
+| WinGet | 1.29.380。`Oracle.VirtualBox` を `--source winget` で新規導入 |
+| 検証時の本文の SHA256 | `37378A44F0114427AD3501A0CD4811E400714516AEEACB83857ADEC868AD9970`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `A8B17ABCE72DE959C554A9A8E1D4838806DFB6000EF4AD38BD2503896638FF24` |
+
+**確認したこと**（バッチ `20261006-111212Z-dad5bab5`、完了 11:13:21 UTC）:
+
+- 手順 2 は `Admin=True`、`Arch=AMD64`、`VirtualBox=False`。本体は未導入で、Guest Additions のドライバーは既に入っていた
+- 手順 2 の環境の読み戻しは `Hypervisor=True`、`VirtFirmware=True`、`VirtualMachinePlatform=Enabled`、`HypervisorPlatform=Disabled`、`Microsoft-Hyper-V-All=Disabled` だった。これだけでは VM 内で別の VM が起動すると判定しない
+- 手順 3 は公式の `VirtualBox-7.2.20-175154-Win.exe` を取り、インストーラーのハッシュ検証が成功し、`Successfully installed` が出た。依存として `Microsoft.VCRedist.2015+.x64` が表示されたが、依存の新規導入はこのバッチでは確認していない
+- 手順 4 の一覧は `Oracle.VirtualBox 7.2.20`、`VBoxManage --version` は `7.2.20r175154` だった
+- `VBoxSup`・`VBoxNetLwf`・`VBoxUSBMon`・`VBoxNetAdp` はすべて `Running`。既存の Guest Additions の `VBoxGuest`・`VBoxMouse`・`VBoxSF`・`VBoxWddm` も `Running` だった
+- `VirtualBox Host-Only Ethernet Adapter` が「イーサネット 2」として出て、`Up` だった
+- 全ブロックの PowerShell のエラーは 0、最後の終了コードは 0
+
+**導入後の確認**:
+
+- 手順 6 のバッチ `20261006-123615Z-9406750f` は、通常権限で専用の `vbox-selftest`（UUID `4d96aa81-907e-43d2-9458-e2feb9ed532e`、メモリ 64 MB、NIC なし、音声無効）を作り、headless で起動した。Hyper-V の CPUID 署名を利用できない旨の `VERR_NEM_NOT_AVAILABLE` と、AMD-V を利用できない `VERR_SVM_NO_SVM` が出て、起動は失敗した。PowerShell のエラーは 4 件、タスク結果は 1 だった
+- 同じ手順 6 の `unregistervm --delete` による後片付けは完了し、専用 VM のフォルダーが無いことを確認した。後片付けの終了コード 0 を、VM の起動成功とは扱わない
+- 手順 8 のバッチ `20261006-123924Z-b236e950` は 12:39:25.3269553 UTC にエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。`%USERPROFILE%\.VirtualBox` に `VirtualBox.xml`・`VirtualBox.xml-prev`・`VBoxSVC.log` があることを確認した。VirtualBox マネージャーの GUI は起動していない
+
+**確認していないこと**:
+
+- 手順 1・5 の端末を開く画面操作と、手で貼る操作
+- 手順 6 の使い捨て VM の起動成功。この検証では失敗したため、`<OTHER_PC>` の環境で再検証する
+- 手順 7 の VirtualBox マネージャーの画面
+- ネットワークが切れる長さ、ホストオンリーのネットワークの種類、更新とロールバック、Hyper-V が動いていない PC、Intel の CPU、arm64 の Windows
+
+---
+
+### 付録: Windows 11 の実機と VM での追加検証（2026-10-08）
+
+上の付録が「確認していないこと」に挙げた項目を確かめた。手順はすべて [Windows 11 で使う](../virtualbox.md#windows-11-で使う)の番号。
+
+**手順 6（使い捨ての VM）を、VM ではなく実機で**:
+
+- 上の付録の VM の中では入れ子の仮想化が使えず、手順 6 は失敗していた。利用者の許可を得て、その VM を動かしているホスト（Windows 11 Pro の x86_64 の PC、AMD の CPU、VirtualBox 7.2.20、Hyper-V が動いている）の通常権限の Windows PowerShell 5.1 で、手順 6 のブロックを変えずに実行した（貼り付けではなく、ブロックの文字列をそのまま実行した）
+- `vbox-selftest` を作って起動し、`VMState="running"`。ログに `HM: HMR3Init: Attempting fall back to NEM: AMD-V is not available` と `NEM: NEMR3Init: Snail execution mode is active!` が出た（本文の「Hyper-V の上で動いている」の分岐）
+- `poweroff` と `unregistervm --delete` は `0%...100%`。`VBoxManage list vms` に残らなかった
+- ただし `%USERPROFILE%\VirtualBox VMs\vbox-selftest\Logs\VBoxHardening.log` のフォルダーが残った（本文の「VM のファイルごと消える」と違ったので、本文を直した）。検証の後に手で消した
+
+**VM の中（上の付録と同じ VM。[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）**:
+
+- 手順 7: スタートメニューの検索で「Oracle VirtualBox」（アプリ）が出て、開くと「Oracle VirtualBox マネージャー」の窓が開いた。VM の一覧は空で、「VirtualBox を始めましょう」と「エクスペリエンスモードを選択してください!」（「基本モード」「エキスパートモード」）の案内が出た。モードは選ばずに閉じた
+- 手順 8: `%USERPROFILE%\.VirtualBox` に `VirtualBox.xml`・`VBoxSVC.log`・`selectorwindow.log`
+- Windows 11 の更新の手順 2: プロセスは出ず、`winget list` は `Oracle VirtualBox 7.2.20  Oracle.VirtualBox  7.2.20` で新しい版の列は無かった。この節の手順 3・4 は飛ばした
+- ゲストの中の VirtualBox が作ったホストオンリーのアダプター（「イーサネット 2」、192.168.56.1/24）は、この VM に 2 枚目の NIC（ホストオンリーのネットワーク、192.168.56.0/24）を足して別の確認をする間、アドレスが重なるので無効にした。ロールバックの前に有効に戻した
+- Windows 11 のロールバック（VirtualBox のプロセスが無い状態。この節の手順 1 は閉じるものが無かった）:
+  - この節の手順 2: `Found Oracle VirtualBox 7.2.20 [Oracle.VirtualBox]`・`Starting package uninstall...`・`Successfully uninstalled`。途中で「Windows インストーラー」の「Preparing to remove...」の窓が出た
+  - この節の手順 3: `winget list` は見つからない旨、`Test-Path` は `False`、ホストオンリーのアダプターは出なかった。ドライバーの一覧には、`VBoxNetAdp`（`Stopped`）と、この VM 自身の Guest Additions のドライバー（`VBoxGuest`・`VBoxMouse`・`VBoxSF`・`VBoxWddm`）が出た。後者は VM の中で試したためで、VirtualBox を入れた PC の実機では出ない
+  - 再起動の後に手順 3 の一覧を見直しても、`VBoxNetAdp`（`Stopped`）は残った。サービスの登録（`ImagePath` は `\SystemRoot\system32\DRIVERS\VBoxNetAdp6.sys`、`Start` は 3）とそのファイルが残り、ドライバー パッケージ（`pnputil /enum-drivers`）とデバイスは無かった。本文に「そのままでよい」の箇条書きと、VM の中では Guest Additions のドライバーも出る旨を足した
+  - この節の手順 4: `False` が 2 行
+
+**確認していないこと**:
+
+- VM の中での手順 6（入れ子の仮想化）と、Hyper-V が動いていない PC・Intel の CPU での手順 6
+- 新しい版に上げる更新の手順 3・4、arm64 の Windows
