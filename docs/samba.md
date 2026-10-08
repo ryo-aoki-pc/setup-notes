@@ -125,6 +125,7 @@
    - `<SERVER_IP>` と `<USER>` は値に読み替える
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
      - サーバーで変えたファイルやディレクトリは、F5 を押さなくても出る（手順 3 の `smb3 directory leases = no`）
+     - ドライブ文字に割り当てて、サインインのたびにつなぐなら、[samba-client.md の Windows 11 で使う](samba-client.md#windows-11-で使う)
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: AlmaLinux 10 の PC なら [samba-client.md](samba-client.md)（fstab の自動マウントと GNOME Files）。ほかは `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`

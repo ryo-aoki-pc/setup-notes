@@ -1,10 +1,11 @@
-# Samba の共有を AlmaLinux 10 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files）
+# Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）
 
 ## 実施手順
 
 - [検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)
 
 > [!IMPORTANT]
+> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者ではない Windows PowerShell 5.1 に貼る）
 > - **クライアントの PC で、自分のユーザーのシェルで貼る**。`sudo -i` した root のシェルでは貼らない（`$(id -u)` が 0 になり、マウントしたファイルが root の所有に見えるため）
 > - 前提: サーバーで [samba.md](samba.md) の手順を終えていること（Windows や NAS の共有でもよい）
 > - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
@@ -206,6 +207,7 @@
 
 ## ロールバック
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 手順 1 の変数を設定したシェルで、上から順に貼る（新しいシェルなら、手順 1 の 2 つのブロックを貼り直してから）
 - GNOME Files でつないだままなら、先に [GNOME Files で開く（任意）](#gnome-files-で開く任意)の手順 5 を貼る
 - この節は、`MOUNT_POINT` の行だけを fstab から消す。ほかの共有の行は残る
@@ -282,6 +284,209 @@
 
 ---
 
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **Windows の手順は、管理者ではない Windows PowerShell（5.1）に貼る**。この節の手順 1 で開き、この節の手順 2〜6 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る。管理者の窓で割り当てたドライブは、エクスプローラーに出ない
+> - 前提: サーバーで [samba.md](samba.md) の手順を終えていること
+> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - **この節の手順 4 には対話入力がある**（共有のパスワード）。入力し終えてから手順 5 を貼る
+> - **この節の手順 7 はサーバーのシェルで、手順 8 はこの PC で行う**（サインアウトしてサインインし直す）
+
+- 上から順にコードブロックを貼る。Windows の手順は、この節の手順 2 で変数を設定した PowerShell に、この節の手順 7 はサーバーのシェルに貼る
+- 共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは、Windows の資格情報マネージャーに置く
+- samba.md の `[root]`・`[home]` も割り当てるなら、この節を通した後に、この節の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この節の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
+- 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+
+1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にしない）
+   - Windows Terminal の管理者のタブや、`sudo` で開いた窓も使わない（ドライブ文字は、管理者の窓と管理者ではない窓で別々になる）
+
+1. 変数を設定する（`SERVER` と `SMB_USER` は必ず値を入れる）。
+
+   ```powershell
+   $SERVER = ''                          # ← サーバーの IP アドレスか DNS 名（samba.md の SERVER_IP）。<SERVER>
+   ```
+
+   ```powershell
+   $SMB_USER = ''                        # ← サーバーの Samba ユーザー（samba.md のサーバーなら、サーバーの OS のユーザー名）。<SMB_USER>
+   ```
+
+   ```powershell
+   $SHARE = $SMB_USER                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
+   $DRIVE = 'Z:'                         # 割り当てるドライブ文字（コロンまで書く）。<DRIVE>
+   'SERVER   = {0}' -f $SERVER
+   'SMB_USER = {0}' -f $SMB_USER
+   'SHARE    = {0}' -f $SHARE
+   'DRIVE    = {0}' -f $DRIVE
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `SMB_USER` は、Windows のユーザー名ではなく、サーバーの Samba ユーザーにする（Windows のユーザー名と違うことが多いので、既定値を置かない）
+   - samba.md の[root のホーム](samba.md#root-のホームも公開する任意)につなぐときは `SHARE` を `root` に、[/home](samba.md#home-も公開する任意)につなぐときは `home` に書き換える（`SMB_USER` は自分のまま）。`DRIVE` も、ほかの割り当てと違う文字にする
+   - `SERVER` は、エクスプローラーで `\\<SERVER>\…` を開くときと同じ書き方にする（資格情報は、この名前に結び付けて置く）
+   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この節の手順 2 の 3 つのブロックを貼り直してから先へ進む
+
+1. 管理者ではないことと、サーバーの 445 番・ドライブ文字・保存済みの資格情報を確かめる。
+
+   ```powershell
+   if (-not $SERVER -or -not $SMB_USER -or -not $SHARE -or -not $DRIVE) {
+     Write-Error '中断: この節の手順 2 の変数が空のまま。値を入れて貼り直す'
+   } elseif (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+     Write-Error '中断: 管理者の窓で開いている。この節の手順 1 で、管理者ではない窓を開き直す'
+   } elseif ($DRIVE -notmatch '^[A-Za-z]:$') {
+     Write-Error '中断: この節の手順 2 の DRIVE は、Z: のようにドライブ文字とコロンにする'
+   } elseif (-not (Test-NetConnection -ComputerName $SERVER -Port 445 -WarningAction SilentlyContinue).TcpTestSucceeded) {
+     Write-Error "中断: $SERVER の 445/tcp に届かない"
+   } elseif ((Test-Path -LiteralPath "$DRIVE\") -or (Get-SmbMapping -LocalPath $DRIVE -ErrorAction SilentlyContinue)) {
+     Write-Error "中断: $DRIVE はもう使われている（切れたまま覚えている割り当ても含む）"
+   } else {
+     "$SERVER の 445/tcp に届く。$DRIVE は空いている"
+     cmdkey "/list:$SERVER"
+   }
+   ```
+
+   - `<SERVER> の 445/tcp に届く。<DRIVE> は空いている` と、`<SERVER>` の資格情報の一覧が出ればよい
+   - 一覧に `<SERVER>` の資格情報があれば、前にエクスプローラーで「資格情報を記憶する」を選んで保存したもの。この節の手順 4 で置き換わり、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 2 で消える
+   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[samba.md 手順 5・8](samba.md#実施手順)）を確かめる。外出先なら、先に WireGuard のトンネルを張る
+   - `もう使われている` ときは、`DRIVE` を別の文字にして、この節の手順 2 の 3 つ目のブロックを貼り直す。前にこの節で同じ共有を割り当てたなら、この節は済んでいる
+
+1. 資格情報マネージャーに、共有のユーザー名とパスワードを登録する。
+
+   ```powershell
+   if (-not $SERVER -or -not $SMB_USER) {
+     Write-Error '中断: この節の手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
+   } else {
+     cmdkey "/add:$SERVER" "/user:$SMB_USER" /pass
+   }
+   ```
+
+   - パスワードを聞かれる。samba.md のサーバーなら、[samba.md 手順 6](samba.md#実施手順) で `smbpasswd -a` に入れたパスワード
+   - パスワードは、コマンドラインにも PowerShell の履歴にも残らない
+   - 資格情報を追加した旨の 1 行が出ればよい
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+
+1. 共有をドライブ文字に割り当て、サインインのたびにつなぎ直すようにする。
+
+   ```powershell
+   if (-not $SERVER -or -not $SHARE -or -not $DRIVE) {
+     Write-Error '中断: この節の手順 2 の変数が空のまま。値を入れて貼り直す'
+   } else {
+     New-SmbMapping -LocalPath $DRIVE -RemotePath "\\$SERVER\$SHARE" -Persistent $true | Out-Null
+     Get-SmbMapping -LocalPath $DRIVE | Format-Table Status, LocalPath, RemotePath
+   }
+   ```
+
+   - `OK`・`<DRIVE>`・`\\<SERVER>\<SHARE>` の 1 行が出ればよい
+   - ユーザー名とパスワードは渡さない。この節の手順 4 で登録した資格情報が使われる
+   - ユーザー名かパスワードが違うと断られたら、この節の手順 4 を貼り直してから、この手順を貼り直す
+   - エラー 1219 が出たら、[注意点](#注意点)の Windows 11 のエラー 1219 を見る
+   - エクスプローラーには、この節の手順 8 でサインインし直すまで出ないことがある
+
+1. 割り当てたドライブで読み書きできることを確かめる。
+
+   ```powershell
+   if (-not $DRIVE) {
+     Write-Error '中断: この節の手順 2 の DRIVE が空のまま。値を入れて貼り直す'
+   } else {
+     Get-ChildItem -LiteralPath "$DRIVE\" | Select-Object -First 5 -ExpandProperty Name
+     Set-Content -LiteralPath "$DRIVE\smb-win-test.txt" -Value 'smb write' -Encoding ascii
+     Get-Content -LiteralPath "$DRIVE\smb-win-test.txt"
+     Remove-Item -LiteralPath "$DRIVE\smb-win-test.txt"
+     Test-Path -LiteralPath "$DRIVE\smb-win-test.txt"
+   }
+   ```
+
+   - 共有の中の名前（5 つまで。隠しファイルは出ない）、`smb write`、`False` の順に出ればよい
+   - `SHARE=home`（samba.md の `[home]`）では、書き込みが拒否される（共有の直下は `/home` で、サーバーの SELinux が作るのを断る）。名前の一覧が出ていればよい
+
+1. サーバーで、署名付きの SMB3_11 でつながっていることを確かめる。
+
+   ```bash
+   sudo smbstatus
+   ```
+
+   - サーバーのシェルに貼る
+   - この PC の IP アドレスの行の `Protocol Version` が `SMB3_11` で、`Signing` が `AES-128-GMAC` などの方式の名前だけ（`partial(…)` でも `-` でもない）ならよい
+   - `Encryption` は `-`（LAN の上の通信は暗号化されない。[samba.md の注意点](samba.md#注意点)）
+   - Windows 11 Home の PC では、`Signing` が `partial(…)` か `-` になりうる（Home は署名を求めない。[注意点](#注意点)）
+   - この PC の行が無ければ、エクスプローラーかこの PC の PowerShell で `<DRIVE>` を開いてから、貼り直す（使っていない接続は、閉じられることがある）
+
+1. サインアウトしてサインインし直し、ドライブがパスワード無しで開くことを確かめる。
+
+   - スタートメニューの自分のアイコンから「サインアウト」を選び、もう一度サインインする
+   - エクスプローラーの「PC」の「ネットワークの場所」に、`<SHARE> (\\<SERVER>) (<DRIVE>)` のような名前でドライブが出ればよい
+   - 開いたときにパスワードを聞かれなければよい
+   - 赤い × が付いているときは、サインインのときにサーバーに届かなかった（[注意点](#注意点)）
+
+---
+
+## Windows 11 の更新
+
+- SMB のクライアントは Windows に入っているもので、Windows Update で上がる。この節で上げるものは無い
+- Samba のパスワードを変えたとき（samba.md では `sudo smbpasswd <SMB_USER>`）だけ、この節の手順を行う
+- この節の手順 1 は、[Windows 11 で使う](#windows-11-で使う)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
+
+1. Samba のパスワードを変えたときだけ、資格情報を登録し直す。
+
+   ```powershell
+   if (-not $SERVER -or -not $SMB_USER) {
+     Write-Error '中断: Windows 11 で使うの手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
+   } else {
+     cmdkey "/add:$SERVER" "/user:$SMB_USER" /pass
+   }
+   ```
+
+   - サーバーで変えた後の新しいパスワードを入れる
+   - 同じ `<SERVER>` の資格情報が置き換わる
+   - パスワードを入力し終えてから、この節の手順 2 を行う
+
+1. サインアウトしてサインインし直し、ドライブがパスワード無しで開くことを確かめる。
+
+   - [Windows 11 で使う](#windows-11-で使う)の手順 8 と同じ
+
+---
+
+## Windows 11 のロールバック
+
+- [Windows 11 で使う](#windows-11-で使う)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
+- `[root]`・`[home]` も割り当てたなら、その手順 2 の 3 つ目のブロックの `DRIVE` をその文字に書き換えて貼り、この節の手順 1 を文字ごとに貼る
+- 共有の中のファイルと、サーバーの Samba ユーザーは変わらない（サーバーを戻すのは [samba.md のロールバック](samba.md#ロールバック)）
+
+1. ドライブの割り当てを外し、サインインのときにつなぎ直さないようにする。
+
+   ```powershell
+   if (-not $DRIVE) {
+     Write-Error '中断: Windows 11 で使うの手順 2 の DRIVE が空のまま。値を入れて貼り直す'
+   } else {
+     Remove-SmbMapping -LocalPath $DRIVE -UpdateProfile -Force
+     Get-SmbMapping -LocalPath $DRIVE -ErrorAction SilentlyContinue
+     Test-Path -LiteralPath ('HKCU:\Network\' + $DRIVE.TrimEnd(':'))
+   }
+   ```
+
+   - `Get-SmbMapping` は何も出さず、`False` が出ればよい
+   - ドライブの中のファイルを開いているアプリがあると、外せないことがある。閉じてから貼り直す
+   - エクスプローラーには、サインインし直すまでドライブが残って見えることがある
+
+1. 同じサーバーのほかの割り当てを残さないときだけ、資格情報マネージャーから共有の資格情報を消す。
+
+   ```powershell
+   if (-not $SERVER) {
+     Write-Error '中断: Windows 11 で使うの手順 2 の SERVER が空のまま。値を入れて貼り直す'
+   } else {
+     cmdkey "/delete:$SERVER"
+     cmdkey "/list:$SERVER"
+   }
+   ```
+
+   - 消した旨の 1 行の後の一覧に、`<SERVER>` の資格情報が出なければよい
+   - 同じサーバーのほかの割り当て（`[root]` など）を残すなら、この手順は行わない（残す割り当てが、この資格情報でつなぐ）
+   - **注意**: [Windows 11 で使う](#windows-11-で使う)の手順 4 より前からあった `<SERVER>` の資格情報（同じ節の手順 3 で見たもの）も、その手順 4 で置き換わっているので、ここで消える。エクスプローラーで開くときに入れ直す
+
+---
+
 ## 注意点
 
 - **サーバーに届かないとき**（VM で測った値）
@@ -305,3 +510,21 @@
   - 制限のあるサービス（Apache など）から使うなら、そのサービスの boolean（`httpd_use_cifs` など）が要る
 - **貼り方**: `sudo` の後ろに行が続くブロックは、どれも 1 つのコマンド（`if … fi` や `{ … }`）にしてある
   - ブラケットペーストが効かない端末で複数行を貼ると、途中の `sudo` が後ろの行を読み取って捨てるため、ブロックを `{ }` で囲む
+- **Windows 11 の注意点**
+  - **Windows 11 Home の PC からの接続は、全体には署名されない**
+    - 24H2 の Pro・Enterprise・Education は SMB の署名を必ず求めるが、Home は求めない
+    - samba.md のサーバーも署名を求めない（`server signing` の既定）ので、Home からはどちらも求めない接続になる
+  - **クライアントの署名とゲストの設定は変えない**: Pro の既定（署名が必須・ゲストの接続は禁止）のままつながる
+    - samba.md のサーバーはユーザーとパスワードで認証し（ゲストにしない）、SMB3 の署名にも応じるため
+    - `Set-SmbClientConfiguration` の `RequireSecuritySignature` と `EnableInsecureGuestLogons` は変えない
+  - **エラー 1219**: 同じサーバーに別のユーザー名でつないでいると、割り当てが断られる（エクスプローラーで別の資格情報で開いた接続など）
+    - その接続を閉じるか、サインアウトしてサインインし直してから、[Windows 11 で使う](#windows-11-で使う)の手順 5 を貼り直す
+    - samba.md の `[root]`・`[home]` は同じユーザーでつなぐので、`[homes]` と並べて割り当てられる
+  - **サインインのときにサーバーに届かないと、ドライブに赤い × が付く**: すべてのネットワーク ドライブを再接続できなかった旨の通知も出る。サーバーに届くようになってから、エクスプローラーでドライブを開き直す
+    - 外出先では、先に WireGuard のトンネルを張る。`SERVER` を LAN 側の IP にしておけば、LAN の中でも外でも同じ割り当てを使える
+  - **管理者の窓からは、割り当てたドライブが見えない**: 管理者の PowerShell・Windows Terminal の管理者のタブ・`sudo` では、ドライブ文字ではなく `\\<SERVER>\<SHARE>` を使う
+  - **SMB の NTLM のブロックを入れると、割り当てられなくなる**
+    - 24H2 から選べる設定（`Set-SmbClientConfiguration -BlockNTLM $true` か、グループ ポリシーの「Block NTLM (LM, NTLM, NTLMv2)」）で、既定では入っていない
+    - samba.md のサーバーは Kerberos を使わず、NTLMv2 で認証するため
+    - 入れるなら、グループ ポリシーの「Block NTLM Server Exception List」に `<SERVER>` を足す（[参考資料](reference/samba-client.md#選択した方針)）
+  - **パスワードを変えたら**: サーバーで変え、[Windows 11 の更新](#windows-11-の更新)を行う
