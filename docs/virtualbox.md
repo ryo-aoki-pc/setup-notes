@@ -382,6 +382,7 @@
 
 - 上から順にコードブロックを貼る。変数は無い
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- Android の Windows App からリモート デスクトップでつないで VM に打つなら、[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)
 - VM に AlmaLinux の Atomic Desktop を入れて Guest Additions を使うなら、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md)（Windows のホストでも同じ手順で入った）
 
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
@@ -496,6 +497,45 @@
 
    - `VirtualBox.xml`・`VBoxSVC.log` などが並べばよい
    - Windows の VirtualBox は、全体の設定を `%USERPROFILE%\.VirtualBox` に置く（AlmaLinux 10 の `~/.config/VirtualBox` に当たる。マニュアルの 13.1.2「Global Settings」）
+
+---
+
+## Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）
+
+> [!IMPORTANT]
+> - **この節は Android の Windows App の画面で行う**。PC と VirtualBox の設定は変えない
+> - 前提: この PC がリモート デスクトップを受け付けていること（[Windows 11 の初期設定の手順 44](windows-setup.md#実施手順)）と、[Windows 11 で使う](#windows-11-で使う)で入れた VirtualBox
+
+- Windows App は既定で、打った文字を Unicode で送る。VirtualBox の VM のウィンドウはその文字コードをキーとして読むので、別のキーになる（`1.,2` が `nczm`。[参考資料](reference/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意--手順-1-補足-文字が別のキーになる理由)）
+- この節で、Windows App がキーの位置（スキャンコード）を送るようにする。Windows App のすべての接続にかかる
+- 日本語は Android の IME では打てなくなる。PC の IME は、物理キーボードの `` Alt+` `` で切り替える（Ctrl+Space は Android が受け取る）
+- 実測は[検証記録](verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
+
+1. Android の Windows App の設定で、「使用可能な場合にスキャンコード入力を使用する」をオンにする。
+
+   - プロファイルのアイコンをタップして設定を開き、「全般」をタップする
+   - 英語の表示では「Use scancode input when available」
+   - 接続している間に変えても、セッションに戻るとすぐ効いた（つなぎ直さなくてよい）
+
+1. Windows App でこの PC につなぎ、VM のウィンドウで文字を打って確かめる。
+
+   - VM のウィンドウのタイトル バーをタップして前に出してから打つ
+   - 打った英数字がそのまま VM に出ればよい（`1.,2` が `nczm` にならない）
+   - 物理キーボード（US 配列）では、Shift で打つ記号（`@`・`:`）も出る
+   - **画面のキーボード（Gboard）では、Shift で打つ記号に Shift が付かない**（`@` が `2`、`:` が `;`、`!` が `1`。PC のメモ帳でも同じ）
+   - 英字の大文字は、画面のキーボードでも出る
+   - 物理キーボードの右 Ctrl は、VirtualBox のホスト キー。右 Ctrl との組み合わせは、ゲストではなく VirtualBox が受け取る
+
+1. 画面のキーボードで Shift の記号を打つときだけ、VirtualBox のソフトキーボードで打つ。
+
+   - VM のウィンドウのメニューの「入力」→「キーボード」→「Soft Keyboard...」で開く（7.2.20 では、日本語の表示でもこの項目は英語）
+   - 開いたキーボードの Shift をタップしてから `2` をタップすると、`@` が出る
+   - メニュー バーが無いときは、VM のウィンドウがスケール モード（メニュー バーを出さない形）になっている
+   - スケール モードは、PC で `& "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" setextradata <VM 名> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻る
+
+1. 元に戻すときは、この節の手順 1 の項目をオフにする。
+
+   - Windows App は、打った文字を Unicode で送る既定に戻る
 
 ---
 
@@ -628,3 +668,4 @@
   - **`VBoxManage` は `PATH` に入らない**: `C:\Program Files\Oracle\VirtualBox\VBoxManage.exe` を場所ごと呼ぶ（インストーラが足す環境変数は `VBOX_MSI_INSTALL_PATH` だけ）
   - **Secure Boot の MOK は要らない**: ドライバーは Microsoft の署名付きで配られる。[secure-boot-mok.md](secure-boot-mok.md) は Linux だけのもの
   - **ロールバックで残るもの**: 依存で入った Visual C++ の再頒布可能パッケージと、インストーラが「信頼された発行元」に入れた Oracle の証明書（[Windows 11 のロールバック](#windows-11-のロールバック)）
+  - **Android の Windows App からリモート デスクトップでつなぐと、VM に打った文字が別のキーになる**: Windows App の既定の Unicode の入力を、VirtualBox はキーとして読み違える。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)で、スキャンコードで送る設定にする

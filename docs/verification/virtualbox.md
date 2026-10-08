@@ -362,7 +362,12 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
   - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の手順 3・8・11・12。つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 手順 16 に、既存の `vbox-selftest` と作成失敗を弾く条件を加えた
     - `bash -n` と VBoxManage のスタブで、既存 VM・作成失敗時に変更や削除をしないこと、変更・起動の失敗時も新規作成分だけを片付けることを確認した。変更後のブロックは実機では流していない
-- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+- **状態（Windows 11）**: **[Windows 11 で使う](../virtualbox.md#windows-11-で使う)と、後ろの更新・ロールバックの 2 節は、Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 2026-10-08: 任意節の[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)を、利用者の Windows 11 の PC（実機）と Android で確かめた（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）
+    - 確かめたこと: 既定の設定では、画面のキーボードでも物理キーボードでも `1.,2` が VM で `nczm` になること。設定をオンにすると、つなぎ直さずに `1.,2` が出ること
+    - 確かめたこと: 物理キーボード（US 配列）は Shift の記号まで出て、画面のキーボード（Gboard）は Shift の記号に Shift が付かないこと（PC のメモ帳でも）。VirtualBox のソフトキーボードで `@` が出ること
+    - 確かめたこと: PC の IME は物理キーボードの `` Alt+` `` で切り替わり、Ctrl+Space は Android が受け取ること
+    - 確かめていないこと: 本物のゲスト OS の中での入力と JIS 配列のゲスト、ゲストの中の IME、iOS・macOS・Windows の Windows App とほかの RDP アプリ、Gboard 以外の画面のキーボード、Hyper-V が動いていない PC
   - 2026-10-05: 使い捨て VM のブロックにも既存 VM と作成失敗の条件を加え、Linux の PowerShell 7.6.6 で構文とスタブを確認した。Windows の権限判定はスタブで代え、本物の VM は動かしていない
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - 利用者の Windows 11 の PC には同じ 7.2.20 が入っていて、Hyper-V の上で VM を動かした（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）。入れた方法の記録は無い
@@ -409,6 +414,8 @@ Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../virtua
 ### 実施前の状態
 
 Windows 11 の PC は、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2 で確かめる（流していないので、記録は無い）。
+
+Android の任意節の前（2026-10-08）は、Windows App の「使用可能な場合にスキャンコード入力を使用する」がオフ（既定）だった。VM のウィンドウに画面のキーボードでも物理キーボードでも `1.,2` を打つと、`nczm` になった（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）。
 
 検証コンテナ（AlmaLinux 10 の素のイメージに、デスクトップの PC に合わせた準備をした後）の状態:
 
@@ -463,6 +470,8 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 ### 完了時点の状態
 
 Windows 11 は流していないので、記録は無い。
+
+Android の任意節の後（2026-10-08）は、Windows App の同じ項目がオンのまま（利用者の Android）。試験の VM は消した。VirtualBox の全体の設定の `GUI/SuppressMessages` には、試験中に出た 2 つの知らせを表示しない設定が足された（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）。
 
 **検証コンテナでの出力**（手順 16 の後。ロールバック前。コンテナではモジュールを読み込めないので、`VBoxManage` の前に `WARNING` が出ている）:
 
@@ -876,6 +885,63 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 **対象**: `setup-notes` の `5da3478` 版。公式 ISO で Workstation を入れた `clean-install` スナップショットから、新規の `alma10-current-20261006-containers` を作った。AlmaLinux 10.2 / x86_64 / SELinux Enforcing / firewalld 有効。共通 bash は `3d5323e` を新規導入した。以前の付録と別の試験で、実行対象の現行ブロックを SSH の擬似端末で順に実行した。
 
 実施手順 1 は `x86_64` / `CPU の仮想化支援が見えない`。外側が Hyper-V NEM のホストで、ゲストへ SVM / VT-x が提供されていない。本文の前提を満たさないため、この VM での VirtualBox 導入・入れ子の VM 起動は実施していない。手順の失敗とハードウェアの不足を分けた記録で、以前の実機検証を置き換えない。
+
+---
+
+### 付録: Android の Windows App からリモート デスクトップでつないだときのキー入力（2026-10-08）
+
+利用者の Android から Windows 11 の PC（実機）にリモート デスクトップでつなぎ、PC の上の VirtualBox の VM のウィンドウに打った文字を、VM の画面で確かめた。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)の手順 1〜3 に当たる。
+
+| 項目 | 値 |
+|---|---|
+| PC | 利用者の Windows 11 Pro（ビルド 26300、x64、AMD）。Hyper-V が動いていて、VM は Hyper-V の上（VM のウィンドウの状態バーに緑の亀のアイコン） |
+| VirtualBox | 7.2.20r175154（Extension Pack は無し） |
+| クライアント | Galaxy Z Fold7（SM-F966Q）、Android 16（One UI 8.5）、Windows App 11.0.26081.13925 |
+| キーボード | 画面のキーボードは Gboard。物理キーボードは US 配列 |
+| 接続 | WireGuard 越しの RDP（クライアントは `<CLIENT_IP>`）。PC のイベント ログ（RdpCoreTS のイベント 169）は、クライアントの OS の種類を `(7、0)`（Android）と記録した |
+| 試験の VM | 使い捨ての `rdp-key-test`（EFI・256 MB・ネットワーク無し・`GUI/MouseCapturePolicy` は `Disabled`）。AlmaLinux 10.2 の boot ISO を付け、GRUB 2.12 のコマンドライン（`grub>`）で打った文字を見た。GRUB は US 配列で読む |
+
+**進め方**:
+
+- VM は PC で `VBoxManage startvm --type gui` で起動し、窓を PC の画面に出した。VM の画面は `VBoxManage controlvm <VM> screenshotpng` で 2〜5 秒ごとに撮った（キーを記録するフックは使っていない）
+- VirtualBox 7.2.20 の EFI は、起動できる媒体が無いと `BdsDxe: No bootable option or device was found.` で止まり、Boot Manager にシェルが無かった。そのため boot ISO の GRUB で `c` を押した（PC から `VBoxManage controlvm <VM> keyboardputscancode`）
+- 利用者が VM のウィンドウのタイトル バーをタップして前に出し、段ごとに打った。マウスの捕捉を切ったのは、画面のキーボードに右 Ctrl（捕捉を外すホスト キー）が無いため
+
+**結果**:
+
+| 段 | 画面のキーボード（Gboard） | 物理キーボード（US 配列） |
+|---|---|---|
+| 設定がオフ（既定）で `1.,2` | `nczm` | `nczm` |
+| 接続したまま設定をオンにして `1.,2` | `1.,2` | `1.,2` |
+| つなぎ直して `ab12.,-/@:` | `ab12.,-/2;`（`@` が `2`、`:` が `;`） | `ab12.,-/@:` |
+| `A!` | `A1` | — |
+
+![GRUB のコマンドライン。grub> nczmnczm1.,21.,2 と出ている（設定がオフのときの nczm が 2 回と、オンにした後の 1.,2 が 2 回）](../images/virtualbox/2026-10-08-android-rdp-before-reconnect.png)
+
+![GRUB のコマンドライン。1 行目の末尾に物理キーボードの ab12.,-/@:、2 行目に画面のキーボードの ab12.,-/2;、3 行目の末尾に画面のキーボードの A1 と、VirtualBox のソフトキーボードの @](../images/virtualbox/2026-10-08-android-rdp-after-reconnect.png)
+
+- 画像は、試験の VM の画面を PC（実機）の `screenshotpng` で撮り、上の部分を切り出したもの。3 行目の `@:nihon` は物理キーボードで打った
+- 設定がオフのときの `1`→`n`・`.`→`c`・`,`→`z`・`2`→`m` は、文字コード（0x31・0x2E・0x2C・0x32）をスキャンコードとして読んだときのキーと一致する（[参考資料](../reference/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意--手順-1-補足-文字が別のキーになる理由)）
+- 設定は、接続したまま Windows App の設定で変えても、セッションに戻ると効いた
+- 画面のキーボードは、Shift で打つ記号に Shift が付かなかった。英字の大文字（`A`）は出た。PC のメモ帳でも、画面のキーボードの `@` は `2` になった
+- VirtualBox のソフトキーボードは、VM のウィンドウのメニューの「入力」→「キーボード」→「Soft Keyboard...」で開き、Shift の後に `2` をタップして `@` が出た。7.2.20 の日本語の訳（`nls\VirtualBox_ja.qm`）に、この項目の訳は無い
+- PC の IME: 物理キーボードの Ctrl+Space は Android が受け取り、Android の表示が切り替わった（PC には届かなかった）。`` Alt+` `` では PC の IME がオンになり、メモ帳で `nihon` を `日本` に変換できた
+
+**途中で起きたこと**:
+
+- 設定がオフのまま打っている途中で、GRUB のコマンドラインが抜けてメニューに戻った（GRUB は Esc で抜ける）。そのとき打った文字は控えていない。日本語の読点（`、` は U+3001）は、文字コードの下の位が Esc のスキャンコード（0x01）になるが、これが原因かは確かめていない
+- VM のウィンドウがスケール モードになり（VM の設定の `GUI/Scale` が `true`）、メニュー バーが消えた。切り替えた操作は確かめていない（VirtualBox のホスト キーは右 Ctrl で、右 Ctrl + C がスケール モードへの切り替え）。PC で `VBoxManage setextradata <VM> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻り、メニュー バーが出た
+- VirtualBox の全体の設定の `GUI/SuppressMessages` に、`confirmInputCapture`（キーボードの捕捉の知らせ）と `confirmGoingScale`（スケール モードへの切り替えの確認）が足された。試験中に出た知らせで、「今後表示しない」が選ばれた
+
+**後片付け**: 試験の VM は ISO を外してから `unregistervm --delete` で消し、ISO の登録も `closemedium` で外した（ISO のファイルは残した）。同じ PC で動いていたほかの VM には触れていない。
+
+**確かめていないこと**:
+
+- 本物のゲスト OS（AlmaLinux・Windows）の中での入力と、JIS 配列のゲスト（US 配列で読む GRUB でだけ見た）
+- ゲストの中の IME の切り替え
+- iOS・macOS・Windows の Windows App、Android のほかの RDP アプリ、Gboard 以外の画面のキーボード
+- 設定をオンにした後、つなぎ直したときに毎回効くこと（つなぎ直しは 1 回だけ）
+- Hyper-V が動いていない PC
 
 
 ### 分離前の検証状況の記録
