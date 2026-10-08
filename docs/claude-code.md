@@ -282,6 +282,7 @@
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」でなくてよい）
    - 「Windows PowerShell (x86)」は開かない（32 ビットで動き、インストーラが `Claude Code does not support 32-bit Windows` で止まる）
+   - Windows Terminal の中に開いた窓に複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 変数を設定する。
 

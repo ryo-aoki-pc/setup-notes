@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM の管理者の Windows PowerShell 5.1 で、Windows 節の手順 2・3 による新規導入を確認した（2026-10-06）。WinGet の一覧と本体の版、Maintenance Service と Default Browser Agent のタスクまでを確認した。
-
-GUI の起動と about:support の言語・チャンネル・コーデック表示、動画の再生、既定のブラウザーの切り替え、手で貼る操作、更新・ロールバックは未検証。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06: Windows 節の手順 2・3 による新規導入。WinGet の一覧と本体の版、Maintenance Service と Default Browser Agent のタスク（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 4 のスタートからの起動・`about:support`（release・日本語・H.264 と AAC のソフトウェアデコード）と、作った mp4・m4a の再生、手順 5 の既定のブラウザーの切り替え（画面の文言に本文を直した）、更新の手順 1、ロールバック（[付録](#付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - 実際の Web の動画と音の出力、ハードウェアのデコード
+  - winget で新しい版に上げる更新の手順 2、閉じている間の更新、arm64 の Windows、N エディション、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -881,3 +883,38 @@ Installing:
 - 手順 4 の起動と `about:support`。画面の言語、Release チャンネル、H.264・AAC の対応表示と実際の動画の再生
 - 手順 5 の既定のブラウザーへの切り替え。Default Browser Agent のタスクがあることだけでは、Firefox が既定になったと判定しない
 - ショートカット、プロファイル、Background Update のタスク、Firefox 自身の更新、`winget upgrade`、アンインストール、arm64 の Windows、N エディション
+
+---
+
+### 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた画面の操作を確かめた。
+
+**確認したこと**:
+
+- Firefox を初めて起動したとき（この付録の操作で GitHub の文書を開くため）、「Firefox へようこそ」の画面（「続行」）、翻訳の案内、タスクバーへのピン留めの案内が出た。ピン留めは「行わない」を選んだ
+- Windows 11 で使うの手順 4:
+  - スタートメニューの「Firefox」から起動すると、「Firefox を優先ブラウザーに設定しますか？」の確認が出た。「後で」を選び、既定にするのは手順 5 で行った
+  - `about:support` の「アプリケーション基本情報」: 版は 157.0.1（winget で入れた 157.0 から、Firefox が自分で上げた）、「更新チャンネル」は `release`、「プログラムの実行ファイル」は `C:\Program Files\Mozilla Firefox\firefox.exe`。メニューと画面は日本語
+  - 「コーデックサポート情報」: `H264` と `AAC` の「ソフトウェアデコーディング」が「対応」（ハードウェアは未対応。VM の画面のアダプターに 3D は無い）
+  - 再生の試験: ホストの ffmpeg で作った 6 秒の H.264（baseline）+ AAC の mp4 と、AAC だけの m4a を、VM の中のファイルの HTML で再生した。mp4 は 6.00 秒まで進み、映像は 180 フレームで落ちたフレームは 0、どちらもエラー無し。`canPlayType` と MSE の `isTypeSupported` は対応の旨を返した
+  - 音の出力は確かめていない（VM に音声のデバイスが無く、`about:support` の音声のバックエンドは `(remote error)`）
+- Windows 11 で使うの手順 5:
+  - 設定 →「アプリ」→「既定のアプリ」の見出しは「アプリケーションの既定値を設定する」で、本文の「アプリケーションの既定の設定」と違った。一覧に「Firefox」が 2 つ並んだ（UI Automation の名前では `App_User_Firefox-308046B0AF4A39CB` と `App_Machine_Firefox-308046B0AF4A39CB`）
+  - 上の「Firefox」を開くと、「Firefox を既定のブラウザーに設定する」と「既定値に設定」のボタン（本文は「既定のブラウザーにする」「既定に設定」）。押すとチェックの印が出た。本文の文言を画面に合わせて直した
+  - 押した後、`.htm`・`.html`・`HTTP`・`HTTPS` が Firefox になった。`.pdf`・`.shtml`・`.svg`・`.xht`・`.xhtml` は Microsoft Edge のまま
+  - Win+R に `https://www.mozilla.org/ja/` を入れると、Firefox で開いた
+  - レジストリでは、`https` の `UserChoiceLatest` の `ProgId` が `FirefoxURL-308046B0AF4A39CB` になり、従来の `UserChoice` は `MSEdgeHTM` のままだった
+- Windows 11 の更新の手順 1: 1 行目は `157.0.1`、`winget list --upgrade-available` は `No installed package found matching input criteria.`（本文の「見つからない旨が出たら、新しい版は無い（Firefox が自分で先に上げていることもある）」）。この節の手順 2 は飛ばした
+- Windows 11 のロールバック（Firefox の窓を閉じてから）:
+  - この節の手順 1: winget は `Found Mozilla Firefox (x64 ja) [Mozilla.Firefox.ja]`・`Starting package uninstall...`・`Successfully uninstalled` を、アンインストーラーの窓が開いている間に出してプロンプトに戻った（本文の「winget が先に終わっても」のとおり）
+  - アンインストーラーの窓「Mozilla Firefox のアンインストール」は、「代わりに Firefox をリフレッシュしますか？」（「Firefox をリフレッシュ」は押さない）→「次へ」→「次の場所の Firefox をアンインストールします: C:\Program Files\Mozilla Firefox」→「削除」→「Mozilla Firefox のアンインストールを完了します」（「Firefox をアンインストールした理由を Mozilla に知らせる」のチェックは外れていた）→「完了」の順だった
+  - この節の手順 2: `winget list` は見つからない旨、サービスとタスクは何も出なかったが、`Test-Path` は `True` だった。`C:\Program Files\Mozilla Firefox` に `update_telemetry.json`（37 バイト。Firefox が自分で更新したときに書いたもの）だけが残っていた。本文に箇条書きを足し、検証ではフォルダーごと消した
+  - プロファイル（`%APPDATA%\Mozilla\Firefox` と `%LOCALAPPDATA%\Mozilla\Firefox`）は残った（本文のとおり）
+  - 既定のアプリの画面では、`.htm`・`.html` などはもう Microsoft Edge に戻っていた。この節の手順 3 として「Microsoft Edge を既定のブラウザーに設定する」の「既定値に設定」を押すと、`http`・`https` の `UserChoice` と `UserChoiceLatest` が `MSEdgeHTM` になった
+
+**確認していないこと**:
+
+- 実際の Web の動画（YouTube など）の再生と音の出力、ハードウェアのデコード
+- 2 つの「Firefox」のうち下のもの（`App_Machine_…`）で既定にしたときの動き、Firefox の設定の「既定のブラウザーにする」からの経路
+- Background Update のタスクによる閉じている間の更新、winget で新しい版に上げる手順 2、arm64 の Windows、N エディション、Windows の実機

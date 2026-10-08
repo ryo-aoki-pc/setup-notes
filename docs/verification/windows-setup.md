@@ -2,10 +2,23 @@
 
 [手順書](../windows-setup.md)
 
-## 最新の検証範囲（2026-10-07 UTC）
+## 最新の検証範囲（2026-10-08 UTC）
 
-**Windows の実機では全手順を通していない。新規の Windows 11 Pro 26H2 の VM での部分検証結果であり、初期導入 64 手順と後続ツールの全工程が成功した記録ではない。**
+**Windows の実機では全手順を通していない。新規の Windows 11 Pro 26H2 の VM での検証結果。**
 
+- 2026-10-08 の追加検証（[付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)）
+  - GitHub のコピーボタンからの貼り付け（管理者の conhost・Windows Terminal）、手順 35・55〜61・64 の画面、手順 39・52・53 の分岐
+  - 2 枚目の NIC（ホストオンリー）での ping と、RDP のログイン・`tscon`
+  - Wake on LAN の節の手順 2〜4・8、リモートから再起動する節の手順 2〜11（AlmaLinux の VM からの SMB・WinRM の実トリガーと、見張りタスクによる再起動）
+  - 更新の手順 1〜5、ロールバックの手順 1〜41
+  - 直した本文: 手順 9・58・59・60、Wake on LAN の節の手順 4、再起動の節の手順 5・6・9・11、ロールバックの手順 9・13・21（管理者ではない窓で行う）・31・35・36 とリード
+  - 撤去の前にスナップショット `pr104-before-rollback-20261008` を撮った
+- 2026-10-08 の時点で確認していないこと
+  - Store の CLI の準備と更新の適用（手順 11・12・14）、Windows Update の再起動の分岐（手順 8）。2026-10-08 には対象の更新が無かった（手順 5 の適用は 2026-10-06 に確かめた）
+  - WSL 2 の AlmaLinux 10（手順 62・63、更新の手順 4 の `dnf -y upgrade`、ロールバックの手順 17）。この VM の仮想化の制約で動かない
+  - Wake on LAN の UEFI の設定とマジック パケットでの起動、別の Windows からの `shutdown /m`・`Invoke-Command`
+  - Windows の実機での通し実行
+- 以下は 2026-10-06〜07 の検証の要約（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）。そのときの「未検証」は、2026-10-08 の付録で多くを確かめた
 - 初期設定は Windows Update の 4 件の適用と残り 0 件、Store の更新なし、Scoop・UniGet UI・PowerToys・PowerShell 7 の導入、指定値の読み戻しと一部の実画面を確認した。56〜60 と通常権限の Windows PowerShell 5.1 への LF 3 行の貼り付け順は、利用者の手動確認を含む。343 文字のパスとシンボリックリンクの作成・読み取り・削除も、通常権限の PowerShell 7.6.6 で確認した。
 - 追加の 5 項目は次の限定した範囲で成功した。
 
@@ -20,7 +33,7 @@
 - Firefox と既定ブラウザー、HackGen の GUI、ゲスト内の VirtualBox Manager は利用者に確認を依頼済みで回答未取得。残る GUI、Claude Code の認証、GitHub の直接コピー経路と管理者窓への貼り付け、未実施の分岐・任意節・更新・ロールバックも未検証。
 - 生の証跡・実行用ハーネスはローカルの .verification/ に保管し、この PR には含めない。以下の evidence/... は .verification/evidence/... 内の記録を指す。本文の結果要約とハッシュを公開し、秘密値は記載しない。
 
-以下は文書分離前から保存されている過去の記録です。「未検証」「未確認」は、それぞれの実施時点の範囲を指します。最新の結果は上の要約と末尾の 2026-10-06 の VM 検証付録に従い、実施日・対象版・実行範囲を区別します。
+以下は文書分離前から保存されている過去の記録です。「未検証」「未確認」は、それぞれの実施時点の範囲を指します。最新の結果は上の要約と、末尾の 2026-10-06 と 2026-10-08 の VM 検証付録に従い、実施日・対象版・実行範囲を区別します。
 
 ## 補足
 
@@ -1035,3 +1048,182 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 1. 認証情報送信・認証後の RDP ログインと ping（TCP 到達・事前交渉・証明書の照合による TLS の確立まで追加検証済み）。手順 39・52・53 の変更する分岐は条件により飛ばした
 1. 手順 55 による最初の起動の対話画面への到達、64 の本文と補助タスクからの起動経路、任意節、更新とロールバック。後続ツールは Firefox の既定・コーデック、VirtualBox Manager、WezTerm の GUI、Claude Code の認証、WireGuard の実接続などが未確認。62・63 の WSL 2 と入れ子の VM の実起動は、この検証環境では未達
 1. すべての本文の GUI 貼り付け、Windows の実機での通し実行
+
+## 付録: PR #104 の未検証項目を同じ VM で確かめた記録（2026-10-08）
+
+**VM での追加検証**。上の 2026-10-06〜07 の付録で「未試験・環境未達」として残した項目のうち、同じ VM で行えるものを通した。Windows の実機では通していない。時刻は UTC（画面の時計は JST）。
+
+**環境**:
+
+| 項目 | 値 |
+|---|---|
+| ホストと VM | 上の付録と同じ。ホストは Windows 11 Pro の x86_64 の PC、VirtualBox 7.2.20（Hyper-V の NEM）。VM は `windows11-verify-20261006`（Windows 11 Pro 26H2、26300.9457、2 CPU、メモリ 8 GiB） |
+| 始める前の控え | 2026-10-07 22:26 ごろに OS を止めて、スナップショット `pr104-baseline-20261008` を撮った |
+| 2 枚目の NIC | 利用者の許可を得て足した。内部ネットワークで足してスナップショット `pr104-nic2-added-20261008` を撮り、動かしたままホストオンリーのネットワーク（192.168.56.0/24）に付け替えた。ゲストでは「イーサネット 3」、DHCP で 192.168.56.107 |
+| ゲストの中の重なり | VirtualBox（[virtualbox.md の Windows 11 で使う](../virtualbox.md#windows-11-で使う)）が作ったホストオンリーのアダプター「イーサネット 2」が 192.168.56.1/24 を持ち、2 枚目の NIC と重なったので、検証の間だけ無効にした |
+| 相手の VM | 同じホストの AlmaLinux 10.2 の VM 2 台（PR #100 の検証で作った `alma10-pr100-client-20261007`・`alma10-pr100-pc-20261007`、192.168.56.82・.81）。前の記録が挙げた `alma10-current-20261006-server`・`-peer` は、ログインの資格情報が分からず使わなかった（起動して ACPI で止めただけ） |
+| RDP のクライアント | `alma10-pr100-client-20261007` の FreeRDP 3.10.3（`wlfreerdp`。`mutter --wayland --headless --virtual-monitor 1280x800` の中で動かした） |
+
+**操作の方法**:
+
+- ゲストの中の 2 つの検証タスク（管理者と通常権限。どちらもサインインしたデスクトップの Session 1）が、SendInput のマウスとキー・UI Automation・画面の取得・コンソールの読み取りで操作した
+- UAC の確認（セキュア デスクトップ）には SendInput が届かないので、ホストの `VBoxManage controlvm keyboardputscancode` で Shift+Tab と Enter を送って「はい」を選んだ。そのときの画面は、ホストの `screenshotpng` で撮った
+- 本文のブロックは、ゲストの Firefox で GitHub の PR #104 のブランチの文書を開き、コードブロックの「Copy code to clipboard」ボタン（UI Automation の Button）を押してコピーし、窓に貼った
+  - windows-setup.md のボタンは 117 個で、抜き出したブロック 117 個と対応した。押してコピーした中身を、windows-setup.md・git.md・claude-code.md の合わせて 50 回、抜き出したブロックと比べた。49 回は一致した（どれも LF だけ・末尾の改行なし）。1 回（claude-code.md の Windows 11 で使うの手順 7 の最初）は、クリップボードが前の中身のままで、押し直すと一致した
+  - その後は、抜き出したブロックの文字列（LF、末尾の改行なし）を検証タスクがクリップボードに置き、同じ貼り方で貼った
+- 貼り方: conhost の窓は窓の中の右クリック、Windows Terminal の窓は右クリック（複数行の警告が出たら「強制的に貼り付け」）、mintty（Git Bash）は右クリックのメニューの「Paste」。最後に Enter を押した
+- 検証用のパスワードは、画面の記録・ログ・この記録に出していない（Autologon の窓と RDP・SMB・WinRM のトリガーには、ホストの一時ファイルから渡し、使った後に消した）
+
+**実施手順で確かめたこと**:
+
+| 手順 | 結果 |
+|---|---|
+| 1〜7（Windows Update） | 管理者の窓で手順 2〜4・6・7 を貼った。対象の更新は 0 件で、`Windows Update の確認完了（対象の更新なし・再起動待ちなし）`。手順 5・8 は条件に当たらなかった |
+| 9〜15（Store） | 手順 10 で Store 22608.1401.5.0 と `store.exe`・`winget.exe`。手順 13 は `No updates found.`。手順 11・12・14 は条件に当たらなかった |
+| 35 | スタートで「Windows PowerShell」を右クリック →「管理者として実行」。UAC の確認（Windows PowerShell、発行元 Microsoft Windows。既定のボタンは「いいえ」）で「はい」を選ぶと、「管理者: Windows PowerShell」の conhost の窓（`ConsoleWindowClass`）が開き、プロファイルのエラーは出なかった |
+| 36・37 | GitHub のコピーボタンから管理者の窓に貼った。`Admin : True`・`CtrlEnter : AddLine`・Professional・26H2・26300.9457・`LanCategory : Private`・`RemoteDesktop : 0`・`RemoteAssistance : 0`・`HelloOnly : 0`・`Keyboard : kbd106.dll`・`Hypervisor : True`・配信の最適化 `Lan` |
+| 38 | 管理者の conhost の窓に右クリックで貼ると、最後の `}` の後で止まり、Enter で `1 行目`・`2 行目`・`3 行目` の順に出た（逆順にならない） |
+| 39（PC の名前を変える分岐） | `$PC_NAME = 'PR104-VERIFY'` で手順 36 を貼り直し、手順 39 は警告と `再起動の後に PR104-VERIFY になる`。再起動の前に貼り直しても同じ出力 |
+| 52・53（UTC と US 配列の分岐） | 手順 52 で `RealTimeIsUniversal : 1`、手順 53 で `kbd101.dll`・`PCAT_101KEY`・`7`・`0` |
+| 55 | `Restart-Computer` の後、自動サインインでデスクトップに戻った（Autologon の `DefaultDomainName` が元の名前 `<HOSTNAME>` のままでも通った） |
+| 56 | ホストからのキーで確かめた。US 配列で Shift+2 が `@`、Caps Lock+A で全選択（Caps Lock だけでは大文字にならない）、Ctrl+Space で IME がオン（「あ」、変換の候補が出る）とオフに入れ替わった |
+| 57 | スタートの検索に Web の結果が出なかった。エクスプローラーは「PC」を開き、拡張子と隠しファイルが見え、ファイルの右クリックで「送る」「プロパティ」のある旧形式のメニュー。タスクバーは左寄せで、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒。全体が濃い色 |
+| 58 | タスクバーのアイコンの右クリックのメニューの文言は「タスクバーからピン留めを外す」で、本文の「タスク バーからピン留めを外す」と違ったので直した。スタートのピン留めの右クリックは「スタートからピン留めを外す」で、本文どおり。Edge はスタートにピン留めされたまま残した |
+| 59 | スタートから UniGet UI 2026.3.0 を起動した。左の「パッケージマネージャー」で WinGet と Scoop が有効・「利用可能」。版はそれぞれの「バージョンを表示」で出た（WinGet v1.29.380、Scoop v0.6.0 - Released at 2026-09-30）。本文の「見つかっている（版が出ている）」と違ったので直した。インストール済みの一覧に `scoop-search` 2.1.0（Scoop: main）と `Devolutions.UniGetUI` 2026.3.0 |
+| 60・61 | スタートから開いた通常の Windows PowerShell は、Windows Terminal の中に開いた。手順 61 を GitHub のコピーボタンからコピーして右クリックで貼ると、「警告 複数の行を含むテキストを貼り付けようとしています…」の確認（「強制的に貼り付け」「キャンセル」）が出た。強制的に貼り付けると、完結した行から順に動いた。`ComputerName : PR104-VERIFY`・`Keyboard : kbd101.dll` などが出た |
+| 64（本文の起動経路） | Windows Terminal の通常の窓に貼った。winget は入っている旨（`Found an existing package already installed.`・`No available upgrade found.`、英語）を出し、UAC の確認（Autologon、Microsoft Corporation、このコンピューター上のハード ドライブ）で「はい」を選ぶと Autologon の窓が開いた（`Username` が <WIN_USER>、`Domain` が <HOSTNAME>）。パスワードを入れて `Enable` を押すと `Autologon successfully configured.` の旨。以後の再起動で、入力無しに自動サインインした |
+
+- 手順 39・52・53 の分岐は、[ロールバック](../windows-setup.md#ロールバック)の手順 18・19・26・27・37・38 で戻した。手順 38 の再起動の後、名前は `<HOSTNAME>`、キーボードは `kbd106.dll`・`PCAT_106KEY`・`7`・`2`、`RealTimeIsUniversal` は無し。手順 27 は何も出さなかった
+- 時計: `RealTimeIsUniversal=1` で起動すると、システムの時刻が 9 時間進み、VBoxService が 32,369,482 ミリ秒戻した（VM の RTC は地方時）。ロールバックの再起動では逆に 9 時間遅れ、32,418,700 ミリ秒進めた。本文の「再起動の後に、時刻を同期し直す」に当たる
+- 実施手順 62・63 の WSL 2 は扱っていない（この VM では動かない。上の付録）
+
+**ping とリモート デスクトップ（2 枚目の NIC で）**:
+
+- 2 枚目の NIC を足した直後（パブリック）は、外からの ping が届かなかった
+- 管理者の窓で、手順 36 の `$LAN_IF` を `'イーサネット 3'` に直して貼り、手順 42（`AllowComputerToTurnOffDevice : Disabled`。`WakeOnMagicPacket` は `Unsupported`）・43（Private）・44（RDP の 3 規則が Private）・46（ping の 2 規則）を貼った
+- AlmaLinux の 2 台とホストからの ping は、どれも 0% loss
+- RDP: AlmaLinux の VM の FreeRDP から、試験用の資格情報で 192.168.56.107 につないだ。Kerberos は失敗して NTLM で認証され、ログインできた
+  - `quser` で `rdp-tcp#0` が Active。RDP のセッションの画面（1280x800、`TerminalServerSession : True`）を撮った。PC の画面はロック画面になった
+  - 切断すると `Disc`。昇格したプロセスから `tscon.exe <ID> /dest:console` を実行すると、`console` が Active に戻り、PC の画面はロックされていなかった
+- 再起動すると、ホストオンリーのネットワーク（既定ゲートウェイの無い「識別されていないネットワーク」）の「イーサネット 3」はパブリックに戻った。NAT の「イーサネット」はプライベートのまま。以後、2 枚目の NIC を使う確認の前に手順 43 を貼り直した
+
+**Wake on LAN を使う（任意）**:
+
+- この節の手順 2 は `LAN_IF = イーサネット`（NAT の NIC）
+- この節の手順 3: `Set-NetAdapterAdvancedProperty` が `*WakeOnMagicPacket` を見つけられない旨のエラーで、Wake の行の表は空。`MacAddress` は出た。Intel PRO/1000 MT Desktop Adapter の Windows 標準の（受信トレイ）ドライバーには標準の項目が無く、本文の「無い旨のエラーが出たら」の分岐に当たった
+- この節の手順 8 も同じエラー（Set と Get の 2 つ）
+- この節の手順 4: `shutdown.exe /r /fw /t 0` は `入力された環境オプションが見つかりませんでした。(203)` を出し、再起動しなかった。VirtualBox の EFI がこの指定に対応していないとみて、本文に分岐を足した
+- この節の手順 5〜7 は、VM ではマジック パケットで電源を入れられないので行っていない
+
+**リモートから再起動する手段を増やす（任意）**:
+
+| この節の手順 | 結果 |
+|---|---|
+| 2 | 本文のままでは `LAN_IF = イーサネット`・`WATCHDOG_HOST = 10.0.2.2`（NAT の NIC と、その既定ゲートウェイ）。2 枚目の NIC で試すため、`$LAN_IF = 'イーサネット 3'`・`$WATCHDOG_HOST = '192.168.56.82'` に直して貼り直した |
+| 3 | `AutoReboot : 1`（もとから 1） |
+| 4 | `FPS-SMB-In-TCP  True  Private  Inbound  Allow` と `LocalAccountTokenFilterPolicy : 1` |
+| 4 のトリガー | AlmaLinux の VM に `samba-common-tools` 4.23.5 を入れ、`net rpc shutdown -r -f -t 0 -I 192.168.56.107 -U '<WIN_USER>%<PASS>'` で `Shutdown of remote machine succeeded`。約 1 分で再起動し、自動サインインした。System のイベント 1074 は、`wininit.exe (192.168.56.82)` が `<HOSTNAME>\<WIN_USER>` の代わりに再起動、理由は「レガシ API シャットダウン」 |
+| 5（本文のまま） | `Enable-PSRemoting` は成功したが、最後の `Get-NetFirewallRule -DisplayGroup 'Windows Remote Management'` が見つからない旨のエラー（日本語の Windows の表示名は「Windows リモート管理」） |
+| 5（規則の実際） | グループ `@FirewallAPI.dll,-30267`（Windows リモート管理）の規則は `WINRM-HTTP-In-TCP`（パブリック、接続元 `LocalSubnet`）と `WINRM-HTTP-In-TCP-NoScope`（ドメイン・プライベート、接続元 `Any`）。`-PUBLIC` の規則は無い。本文のままでは、前者がプライベートになり、後者は有効のまま残った（ファイアウォールのイベント 2099 の時刻とプロファイルで確かめた） |
+| 5（直した形） | `WINRM-HTTP-In-TCP` を `-Enabled True -Profile Private`、`WINRM-HTTP-In-TCP-NoScope` を無効にし、`-Group '@FirewallAPI.dll,-30267'` で表示した。`WINRM-HTTP-In-TCP  True  Private`・`WINRM-HTTP-In-TCP-NoScope  False`・`RemoteAddress : LocalSubnet`。本文をこの形に直した |
+| 5 のトリガー（別の Windows の形） | 別の Windows は使えなかったので、VM の中から自分の IP に `Invoke-Command -ComputerName 192.168.56.107 -Credential …` を送った。`TrustedHosts` が空だと「認証スキームが Kerberos と異なる場合、またはクライアント コンピューターがドメインに参加していない場合は、HTTPS トランスポートを使用するか、または宛先コンピューターが TrustedHosts 構成設定に追加されている必要があります」で止まった。`Set-Item WSMan:\localhost\Client\TrustedHosts -Value 192.168.56.107 -Concatenate -Force` の後は通り、High Mandatory Level で動いた。`TrustedHosts` は空に戻した。本文に注意を足した |
+| 5 のトリガー（AlmaLinux から） | pywinrm 0.5.0（NTLM、HTTP 5985）で、`whoami /groups` は High Mandatory Level。`Restart-Computer -Force` で再起動し、自動サインインした。イベント 1074 は `wmiprvse.exe` |
+| 6 | `net-watchdog  Ready`。登録の直後は `LastTaskResult : 267011`（まだ動いていない）・`NextRunTime` が空で、起動時のトリガーなので次の起動まで動かなかった。本文に注意を足した |
+| 6（起動の後） | 起動時に動き（`LastTaskResult : 0`）、その後 5 分ごとに動いた。稼働 60 分未満の間は `Fails : 0` |
+| 6（届かないとき） | 相手の AlmaLinux の VM（192.168.56.82）を 01:34 に止めた。稼働 60 分を過ぎた最初の実行（02:24）から `Fails` が 1・2・3・4・5 と 5 分ごとに増え、6 回目の 02:50:00 にイベント 1074（`wmiprvse.exe` が `NT AUTHORITY\SYSTEM` の代わりに再起動）で再起動した。02:50:31 に起動して自動サインインし、起動時の実行で `Fails : 0` に戻った。その後も 5 分ごとに動き、稼働 60 分未満なので何もしなかった |
+| 7 | `中断: claude-remote-control のタスクが無い（…）`（このタスクを作っていないので、期待どおり） |
+| 8 | `FPS-SMB-In-TCP  False  Private` |
+| 9（本文のまま） | `Disable-PSRemoting` の警告（リスナー・ファイアウォールの例外・`LocalAccountTokenFilterPolicy` は手で戻す旨）の後、`-DisplayGroup 'Windows Remote Management'` が見つからない旨のエラー。サービスは `Stopped`・`Manual` になったが、`WINRM-HTTP-In-TCP` は `True  Private` のまま残った |
+| 9（直した形） | `-Group '@FirewallAPI.dll,-30267'` で無効にし、`WINRM-HTTP-In-TCP` と `-NoScope` がどちらも `False`。TCP 5985 の待ち受けも無くなった。`WINRM-HTTP-In-TCP` の `Profile` は `Private` のまま（手順 5 で変えたもの。無効なので働かない）。WinRM のリスナーの設定は残る（サービスが止まっているので待ち受けない） |
+| 10 | `LocalAccountTokenFilterPolicy : 0`（値を消すのではなく 0 を書く。0 は値が無いときと同じ働き） |
+| 11 | 何も出なかった（タスクが消えた）。値のキーと `net-watchdog.ps1` も消えたが、空のキー `HKLM:\SOFTWARE\setup-notes` と空のフォルダー `C:\ProgramData\setup-notes` は残った。本文に箇条書きを足し、検証では手で消した |
+
+- Wake on LAN の節の手順 4 の後、管理者の窓から `Restart-Computer` で再起動すると、「再起動しています」の画面のまま 20 分あまり進まなかった
+  - VBox.log には、ディスクのリセットの後に `TM: Giving up catch-up attempt at a 809 068 784 843 ns lag` と、ゲストのハートビートが 809 秒途切れた記録があった（Hyper-V の上の VirtualBox の停止とみている）
+  - ホストからのキーでも進まず、`VBoxManage controlvm reset` でリセットすると、VM のファームウェアの設定の画面（UiApp）が開いた。「Continue」で Windows が起動し、自動サインインした。イベント 41・6008 は出ていない
+  - UiApp が開いたのが、Wake on LAN の節の手順 4 の指定の名残かは分からない
+
+**更新**:
+
+| この節の手順 | 結果 |
+|---|---|
+| 1 | `Scoop was updated successfully!`。`scoop status` は `Scoop is up to date.`・`Everything is ok!` |
+| 2 | 条件に当たらない（`Everything is ok!`）。最初のまとめ貼りでは貼ったが、出力は残っていない |
+| 3 | 4 つの ID とも `No available upgrade found.`（英語） |
+| 4 | `wsl.exe --update` は最新である旨。`dnf -y upgrade` は `WSL_E_DISTRO_NOT_FOUND`（この VM では AlmaLinux-10 を入れられていない） |
+| 5 | `PSWindowsUpdate 2.2.1.5`（`C:\Users\<WIN_USER>\Documents\WindowsPowerShell\Modules\PSWindowsUpdate\2.2.1.5`） |
+
+- Windows Terminal の窓に貼ると、この節の手順 1・4・5（複数行）では複数行の警告が出て、手順 2・3（1 行）では出なかった
+
+**ロールバック**:
+
+- 始める前に、ゲストの「イーサネット 2」を有効に戻し、OS を止めて 2 枚目の NIC を外し、スナップショット `pr104-before-rollback-20261008` を撮った（利用者はここへ戻せる）
+- 各ツールの Windows 11 のロールバックを先に流した（それぞれの検証記録の 2026-10-08 の付録）
+- この節の手順 1〜17 は、管理者ではない Windows PowerShell（Windows Terminal の中）に貼った
+
+| この節の手順 | 結果 |
+|---|---|
+| 1 | `HideFileExt : 1`・`Hidden : 2`・`Start_TrackDocs : 1`、`LaunchTo` は出なかった |
+| 2 | `この操作を正しく終了しました。` と `False` |
+| 3 | 8 つの値がすべて `1` |
+| 4 | 3 つの値は何も出なかった。画面のタスクバーは中央寄せで、検索ボックスとタスク ビューのボタンが出た |
+| 5 | `1` が 2 つ。画面が淡色になった |
+| 6 | 2 つの値は何も出なかった |
+| 7 | Microsoft IME の設定の画面が開いた。「キーとタッチのカスタマイズ」を開くと、「キーの割り当て」の「各キー / キーの組み合わせに好みの機能を割り当てます」のスイッチが「オン」で、「Ctrl + Space」は「IME-オン/オフ」（選択肢は「IME-オン/オフ」と「なし」）。本文の 2 つの方法のうち、スイッチをオフにした。`IsKeyAssignmentEnabled` が 0 になった（`KeyAssignmentCtrlSpace` は 2 のまま） |
+| 8 | `戻した: MicrosoftEdgeAutoLaunch_<番号>` と `戻した: OneDriveSetup`（Teams のキーは無かった） |
+| 9 | 約 15 分かかった。11 個の ID のうち 9 個と Teams（`Microsoft.Teams` 26198.304.4946.9672）は `Successfully installed` で入った（Clipchamp・天気・Office Hub・To Do・フィードバック Hub・問い合わせ・Power Automate・Outlook・ウィジェットの Windows Web Experience Pack）。入らなかった 2 つは次のとおり |
+| 9（ニュース `9WZDNCRFHVFW`） | `Failed to install or upgrade Microsoft Store package. Error code: 0x80073cfb`。AppX のイベント 404・474 は、イメージに残っていた `Microsoft.BingNews_1.0.2.0_x64__8wekyb3d8bbwe`（SYSTEM 用に Staged）と同じ ID で中身が違うので展開を止めた、というものだった |
+| 9（Solitaire `9WZDNCRFHWD2`） | `No package found matching input criteria.`（msstore のソースにその ID が無い。名前で探しても見つからなかった） |
+| 9（登録し直し） | どちらも PC にプロビジョニングされたパッケージとして残っていたので、`Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.BingNews_8wekyb3d8bbwe`（と Solitaire の同じ形）で登録し直すと、`Microsoft.BingNews` 1.0.2.0 と `Microsoft.MicrosoftSolitaireCollection` 4.27.9181.0 が `Ok` になった。本文に箇条書きを足した |
+| 10〜12 | PowerShell 7・PowerToys（`PowerToys (Preview) x64`）・UniGet UI とも `Successfully uninstalled`、続く `winget list` は `No installed package found matching input criteria.`。動いていた PowerToys と UniGet UI は閉じられた |
+| 13（本文のまま） | `Are you sure? (yN):` に `y` を入れると、`Uninstalling 'scoop-search'` の後に `WARN  Couldn't remove ~\scoop\apps\scoop-search: 項目 …\current を削除できません: パス 'current' へのアクセスが拒否されました。` と、`Couldn't remove ~\scoop\apps: …` で止まった。`Scoop has been uninstalled.` は出ず、scoop 本体は消えていた（貼り直すと `scoop.ps1` が見つからない旨）。ユーザーの PATH に `scoop\shims` が残った |
+| 13（原因） | `current` のジャンクションに読み取り専用の属性が付いていた。scoop 0.6.0 の `bin/uninstall.ps1` は、アプリの `current` の読み取り専用を外さずに消そうとする（[参考資料](../reference/windows-setup.md)） |
+| 14（本文のまま、13 が止まった後） | `Remove-Item … -ErrorAction SilentlyContinue` も消せず、`True`・`False`。`attrib.exe -R /L` で `current` の読み取り専用を外してから貼り直すと、`False` が 2 行になった。PATH の `scoop\shims` は残った |
+| 13（直した形） | 手順 20・21 と `scoop install scoop-search` で入れ直し（`current` は `ReadOnly, Directory, ReparsePoint`）、1 行目に `current` の読み取り専用を外す行を足したブロックを貼った。`y` を入れると `Uninstalling 'scoop-search'`・`Removing ~\scoop\shims from your path.`・`Scoop has been uninstalled.` で終わり、ユーザーの PATH から `scoop\shims` も消えた。本文をこの形に直した |
+| 14（直した 13 の後） | `False` が 2 行 |
+| 15 | `消した: C:\Users\<WIN_USER>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（プロファイルにはその 1 行だけがあった） |
+| 16 | `$OLD_EXECUTION_POLICY = 'Undefined'`（2026-10-06 の実施手順 17 の記録）で、表の `CurrentUser` を含むすべてが `Undefined` |
+| 17 | `WSL_E_DISTRO_NOT_FOUND`（AlmaLinux-10 は入れられていなかった）。一覧はディストリビューションが無い旨 |
+| 18 | スタートで「Windows PowerShell」を探し、右側の「管理者として実行」を押した。UAC の確認（Windows PowerShell、発行元 Microsoft Windows）で「はい」を選び、conhost の窓が開いた |
+| 18 の後の貼り付け | この節の手順 15 でプロファイルの行を消したので、実施手順 38 の 3 行の試験を右クリックで貼ると、`}`・`'3 行目'`・`'2 行目'`・`'1 行目'`・`& {` の逆順に入った（本文のこの節の手順 15 の「右クリックで貼ると、行が逆順になる」のとおり）。Ctrl+C で捨て、Ctrl+V で貼ると `1 行目`・`2 行目`・`3 行目` の順に動いた。この節の手順 19〜38 は Ctrl+V で貼った |
+| 19 | `LAN_IF = イーサネット` |
+| 20 | 管理者の窓から起動したので UAC の確認は出ず、Autologon の窓（`Username` <WIN_USER>、`Domain` <HOSTNAME>）が開いた。`Disable` を押すと「AutoLogon is disabled.」の窓が出て、「OK」で Autologon も閉じた。`AutoAdminLogon` は 0 |
+| 21（本文のまま、管理者の窓） | `Found Autologon [Microsoft.Sysinternals.Autologon]` の後、`The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れなかった（手順 64 は管理者ではない窓で `--scope user` で入れる）。続く `AutoAdminLogon` は 0 |
+| 21（管理者ではない窓） | 同じブロックをこの節の手順 1〜17 の窓に貼ると、`Successfully uninstalled` と `0`。`Autologon64.exe` も消えた。本文のこの節の手順 21 を管理者ではない窓で行う形に直し、節のリードも直した |
+| 22 | `DevicePasswordLessBuildVersion : 2`（2026-10-06 の実施手順 37 の記録では `HelloOnly` は 2） |
+| 23・24 | どちらも何も出なかった |
+| 25 | `wsl.exe --uninstall` は何も表示しなかった。`Disable-WindowsOptionalFeature` は `RestartNeeded : True`。WSL のパッケージは消え、仮想マシン プラットフォームは `Disabled` になった |
+| 26 | `kbd106.dll`・`PCAT_106KEY`・`7`・`2`（手順 53 は前の分岐の確認の後に戻してあったので、同じ値の書き直し） |
+| 27 | 何も出なかった |
+| 28 | `Scancode Map を消した` |
+| 29 | `$OLD_DOWNLOAD_MODE = 'Lan'`（2026-10-06 の実施手順 37 の記録）で `Lan` |
+| 30 | 何も出なかった |
+| 31 | システムのプロパティの「リモート」タブが開き、「このコンピューターへのリモート アシスタンス接続を許可する(R)」のチェックを入れて「OK」を押すと、窓が閉じた。`fAllowToGetHelp` は 1、リモート アシスタンスの規則 15 個がすべて有効になった（パブリック向けの `RemoteAssistance-In-TCP-EdgeScope` なども）。手順 45 の前の規則の状態は記録していないので、元に戻ったかは確かめられない。本文の「手順 45 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す」の理由は観察と合わないので、箇条書きを観察に合わせて直した |
+| 32 | 3 つの規則が `False  Any` |
+| 33 | `イーサネット  Public`（2026-10-06 の実施手順 37 の `LanCategory` は `Public`） |
+| 34 | `AllowComputerToTurnOffDevice : Enabled` |
+| 35 | `powercfg /hibernate on` が「システム ファームウェアは休止状態をサポートしていません。」の旨で失敗し、`HibernateEnabled: 0`。本文に箇条書きを足した |
+| 36 | `このコンピューターでは sudo が無効化されています。`（本文の「無効になった旨の英語の行を出す」を直した）、`LongPathsEnabled : 0`、`AllowDevelopmentWithoutDevLicense : 0` |
+| 37 | `$OLD_PC_NAME = '<HOSTNAME>'` で `すでにこの名前: <HOSTNAME>`（名前は前の分岐の確認の後に戻してあった） |
+| 38 | `Restart-Computer` の後、起動の途中の「機能をカスタマイズしています。100% 完了。」（この節の手順 25 の仮想マシン プラットフォームを外す処理）のまま 20 分進まなかった。下の「起動が止まったこと」 |
+| 39 | 電源を入れ直した後、自動サインインはされずロック画面になり（この節の手順 20 のとおり）、パスワードでサインインした。メモ帳で、Caps Lock の位置のキー（0x3A）を押しても Ctrl にはならず（`a` を押すと全選択ではなく文字が入った）、JIS 配列の Caps Lock（Shift+英数）でオンにすると `A`・`B` と大文字になり、もう一度で小文字に戻った（JIS 配列の PC では Caps Lock は Shift+英数）。ファイルの右クリックは新しい形のメニュー（最後に「その他のオプションを確認」）。エクスプローラーは「ホーム」で開き、隠しファイルは見えず、淡色で、タスクバーは中央寄せ（検索ボックス・タスク ビューあり）、時計に秒は無かった |
+| 40・41 | 新しく開いた管理者ではない窓（Windows Terminal の中。この節の手順 15 の後なので Ctrl+V で貼った）で、`PSWindowsUpdate を外した`。`Documents\WindowsPowerShell\Modules` は空になった |
+
+**起動が止まったこと（ロールバックの手順 38）**:
+
+- 05:06 UTC に再起動し、05:07 に VBoxService が動き出した後、05:08〜05:12 にゲストが 240 秒止まった（VBox.log の `TM: Giving up catch-up attempt at a 240 078 329 157 ns lag`）。その後はハートビートが戻ったが、ディスクの読み書きが 0 のまま、画面は「機能をカスタマイズしています。100% 完了。」で止まり、ゲストのセッションも始められなかった
+- 05:28 に `VBoxManage controlvm reset` でリセットした。ファームウェアは `BdsDxe: failed to load Boot0003 "Windows Boot Manager" from HD(2,GPT,…)/\EFI\Microsoft\Boot\bootmgfw.efi: Not Found` を出した後（外した USB の VHD の起動項目とみている）、Windows の起動の回転表示のまま、また 11 分進まなかった（CPU は 5% ほどで、待っている状態）
+- 05:40 に電源を切って入れ直すと、2 分でロック画面まで起動した。サインインの後、この節の手順 25 の結果（WSL のパッケージ無し、仮想マシン プラットフォームは `Disabled`）は保たれていた
+- 実施手順の確認の途中（Wake on LAN の節の手順 4 の後）でも同じような停止があった。Hyper-V の上の VirtualBox（NEM）でゲストが止まる問題とみていて、手順の誤りとは扱っていない
+
+**検証の手順で起きたこと（ロールバック）**:
+
+- 2 枚目の NIC を外すために OS を止めた後、一時的に足していた共有フォルダー（検証用のエージェントが使う）が消えていたので、足し直した
+- VM の GUI の窓がいつの間にか閉じ、ゲストの画面が 360x249 に縮んで、貼り付けのクリックが外れた（そのとき Git の手順 6 は実際には動いていた）。`VBoxManage controlvm setvideomodehint 1274 1029 32` で戻した
+- 始めたときの事故（下の「検証の手順で起きたこと」）で動いた `read-wsl-state.ps1` は、ゲストの `C:\verify\wsl-raw-530c2a261db84989bd0f2629cdf8cf54` も作っていた（残してある）
+- 最後に、ゲストの検証用のエージェントを止め、`C:\verify\request-Admin.ps1`・`request-User.ps1` を始める前の控えに戻し（SHA256 は `C3BAD24F…`・`69A5A62C…` で一致）、今回の `C:\verify\pr104`・`C:\verify\pr104-backup` を消し、一時的な共有フォルダーを外した。VM は動いたまま（サインイン済み）にした。AlmaLinux の VM 4 台は電源を切ってある
+- 生の証跡（画面 214 枚・ログ・ハーネス）は、ローカルの `.verification/evidence/pr104-20261008` に控えた（この PR には含めない。検証用のパスワードを含むファイルが無いことを確かめた）
+
+**検証の手順で起きたこと**:
+
+- 始めたとき、ゲストの検証タスクを起動すると、前の検証（上の付録）が置いた要求のファイルがそのまま動いた。管理者のタスクは `read-wsl-state.ps1` を動かして、ゲストの `C:\verify\wsl-after-step55-recovery-20261006.json` を上書きした（ホストに控えた前の証跡は残っている）。通常権限のタスクの `show-autologon-location` は失敗し、記録のファイルは変わらなかった。要求のファイルは `C:\verify\pr104-backup` に控えてから差し替えた

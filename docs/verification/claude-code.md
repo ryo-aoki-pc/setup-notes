@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM の通常権限の Windows PowerShell 5.1 で、Windows 節の手順 2〜5 による native installer の新規導入とユーザー PATH、新しいプロセスでの手順 7 の版・署名・doctor の導入診断を確認した（2026-10-06）。
-
-GUI で端末を開いて貼る操作、スタートメニュー経由の環境変更通知、手順 8・9 の設定とブラウザーでの認証、認証を要するコマンドと Remote Control、更新・ロールバックは未検証。導入診断が正常でも認証済みとは扱わない。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06: Windows 節の手順 2〜5 による native installer の新規導入とユーザー PATH、新しいプロセスでの手順 7 の版・署名・doctor の導入診断（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）
+  - 2026-10-08: スタートから開いた窓への貼り付けで、手順 7、更新（2.1.291 → 2.1.293）、ロールバックの手順 1〜4、入れ直し（手順 2〜7。PATH の変更がスタートから開き直した窓に届いた）、手順 8 のログインの画面の手前まで、手順 9 のログインしていない分岐（[付録](#付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - ログイン（claude.ai での承認）と、その後の手順 8・9、認証を要するコマンドと Remote Control
+  - 手順 8 でブラウザが自動で開かなかった原因（本文の `c` で URL をコピーする経路は確かめた）
+- 導入診断が正常でも認証済みとは扱わない。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -687,3 +689,42 @@ Rufus で作ったインストールメディアからクリーンインスト�
 - 自動の更新・`claude update`・チャンネル切り替え、ロールバック、arm64、Git for Windows が無い場合。Windows の実機での通し実行
 
 2026-10-03 以前の付録は当時の確認範囲を記した履歴として保持した。今回も本文のコマンドは変更していない。
+
+---
+
+### 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた項目を、画面の操作と本文のブロックの貼り付けで確かめた。ログインは行っていない。
+
+| 項目 | 値 |
+|---|---|
+| 端末 | スタートメニューから開いた通常の Windows PowerShell 5.1（Windows Terminal の中に開く） |
+| 貼り方 | 本文のブロックを右クリックで貼り、複数行の警告が出たら「強制的に貼り付け」を押した（windows-setup.md の付録の「操作の方法」） |
+| Claude Code | 2.1.291（上の付録で入れたもの）から、更新で 2.1.293 |
+
+**確認したこと**:
+
+- Windows 11 で使うの手順 7: スタートから開いた窓で、`claude` の場所が `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行、署名は `Valid` で `CN="Anthropic, PBC"`、`claude doctor` は native の 2.1.291 と `No installation issues found.`
+- Windows 11 の更新の手順 1: `claude update` は `Successfully updated from 2.1.291 to version 2.1.293`
+- Windows 11 のロールバックの手順 1〜4（2.1.293 で）:
+  - 手順 1: プロセスもタスクも出なかった
+  - 手順 2: `False` が 2 行。`.local\bin` の一覧は空
+  - 手順 3: ユーザーの PATH から `C:\Users\<WIN_USER>\.local\bin` が消えた
+  - 手順 4: `%USERPROFILE%\.claude` と `%USERPROFILE%\.claude.json` の `False` が 2 行
+- 入れ直し（Windows 11 で使うの手順 2〜7）:
+  - 手順 2〜5: インストーラは `Setup notes` に PATH に無い旨を出し、手順 5 でユーザーの PATH に足した
+  - 手順 6: 窓を閉じて、スタートメニューから開き直した（再起動もサインアウトもしていない）
+  - 手順 7: 開き直した窓で `claude` が見つかり、2.1.293・署名 `Valid`・`No installation issues found.`。手順 5 の PATH の変更は、スタートから開き直した窓に届いた
+- Windows 11 で使うの手順 8（ログインの手前まで）:
+  - 文字の色の組み合わせの画面の後、`Select login method:` に 3 つの選択肢（`Claude account with subscription`・`Anthropic Console account`・ほかのプラットフォーム）が出た
+  - `Claude account with subscription` を選ぶと、ブラウザは自動では開かず、開かなかったときの案内が出た（原因は分からない）
+  - 本文の案内どおり `c` を押すと、claude.com の認可の URL がクリップボードに入った。Firefox に貼ると claude.ai のログインの画面が出た。ここでログインはしていない
+  - ログインを待つ画面は Esc でも Ctrl+C でも終わらなかったので、`claude.exe` のプロセスを止めた
+- Windows 11 で使うの手順 9: `Not logged in. Run claude auth login to authenticate.`（本文の「ログインしていない」の分岐）。ログインの情報のファイルは作られていなかった
+- 検証の最後に、Windows 11 のロールバックの手順 1〜4 をもう一度通した（2.1.293 で）。手順 1 は何も出さず、手順 2 は `False` が 2 行で `.local\bin` は空、手順 3 はユーザーの PATH から `.local\bin` が消え（`scoop\shims` などは残った）、手順 4 は `False` が 2 行
+
+**確認していないこと**:
+
+- ログイン（claude.ai のアカウントでの承認とコードの貼り付け）と、ログインした後の手順 8 の続き・手順 9 の `Login method:` の行・認証の要るコマンドと Remote Control
+- ブラウザが自動で開かなかった原因。既定のブラウザは Firefox にしてあった（[firefox.md の検証記録](firefox.md)の 2026-10-08 の付録）
+- `stable` のチャンネル、自動の更新、arm64 の Windows、Windows の実機

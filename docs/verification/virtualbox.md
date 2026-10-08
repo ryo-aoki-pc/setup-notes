@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM で、Windows 節の手順 2〜4 による新規導入・ドライバー・ホストオンリーアダプターと、手順 8 の全体設定ファイル 3 件の存在確認は成功した（2026-10-06）。手順 6 の入れ子 VM の起動は VERR_NEM_NOT_AVAILABLE / VERR_SVM_NO_SVM で失敗し、今回作成した VM の後片付けは成功した。
-
-入れ子 VM の起動成功、手順 7 のマネージャーの GUI、手で貼る操作、更新・ロールバックは未検証。後片付けの終了コード 0 を起動成功へ読み替えない。入れ子 VM の再検証は ABIKO-WS の環境へ引き継いだ。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと
+  - 2026-10-06（Windows 11 Pro のクリーン VM）: Windows 節の手順 2〜4 による新規導入・ドライバー・ホストオンリーアダプター、手順 8 の設定ファイル。手順 6 の入れ子の VM は `VERR_NEM_NOT_AVAILABLE` / `VERR_SVM_NO_SVM` で失敗（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 6 をホストの実機（AMD・Hyper-V）で流し、Hyper-V の上で動く分岐を確かめた（後に `Logs` のフォルダーが残るので本文を直した）。同じ VM で手順 7 のマネージャーの画面、更新の手順 2、ロールバック（[付録](#付録-windows-11-の実機と-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - VM の中での手順 6、Hyper-V が動いていない PC・Intel の CPU での手順 6
+  - 新しい版に上げる更新の手順 3・4、arm64 の Windows
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -1093,3 +1095,33 @@ aarch64 には入らない:
 - 手順 6 の使い捨て VM の起動成功。この検証では失敗したため、ABIKO-WS の環境で再検証する
 - 手順 7 の VirtualBox マネージャーの画面
 - ネットワークが切れる長さ、ホストオンリーのネットワークの種類、更新とロールバック、Hyper-V が動いていない PC、Intel の CPU、arm64 の Windows
+
+---
+
+### 付録: Windows 11 の実機と VM での追加検証（2026-10-08）
+
+上の付録が「確認していないこと」に挙げた項目を確かめた。手順はすべて [Windows 11 で使う](../virtualbox.md#windows-11-で使う)の番号。
+
+**手順 6（使い捨ての VM）を、VM ではなく実機で**:
+
+- 上の付録の VM の中では入れ子の仮想化が使えず、手順 6 は失敗していた。利用者の許可を得て、その VM を動かしているホスト（Windows 11 Pro の x86_64 の PC、AMD の CPU、VirtualBox 7.2.20、Hyper-V が動いている）の通常権限の Windows PowerShell 5.1 で、手順 6 のブロックを変えずに実行した（貼り付けではなく、ブロックの文字列をそのまま実行した）
+- `vbox-selftest` を作って起動し、`VMState="running"`。ログに `HM: HMR3Init: Attempting fall back to NEM: AMD-V is not available` と `NEM: NEMR3Init: Snail execution mode is active!` が出た（本文の「Hyper-V の上で動いている」の分岐）
+- `poweroff` と `unregistervm --delete` は `0%...100%`。`VBoxManage list vms` に残らなかった
+- ただし `%USERPROFILE%\VirtualBox VMs\vbox-selftest\Logs\VBoxHardening.log` のフォルダーが残った（本文の「VM のファイルごと消える」と違ったので、本文を直した）。検証の後に手で消した
+
+**VM の中（上の付録と同じ VM。[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）**:
+
+- 手順 7: スタートメニューの検索で「Oracle VirtualBox」（アプリ）が出て、開くと「Oracle VirtualBox マネージャー」の窓が開いた。VM の一覧は空で、「VirtualBox を始めましょう」と「エクスペリエンスモードを選択してください!」（「基本モード」「エキスパートモード」）の案内が出た。モードは選ばずに閉じた
+- 手順 8: `%USERPROFILE%\.VirtualBox` に `VirtualBox.xml`・`VBoxSVC.log`・`selectorwindow.log`
+- Windows 11 の更新の手順 2: プロセスは出ず、`winget list` は `Oracle VirtualBox 7.2.20  Oracle.VirtualBox  7.2.20` で新しい版の列は無かった。この節の手順 3・4 は飛ばした
+- ゲストの中の VirtualBox が作ったホストオンリーのアダプター（「イーサネット 2」、192.168.56.1/24）は、この VM に 2 枚目の NIC（ホストオンリーのネットワーク、192.168.56.0/24）を足して別の確認をする間、アドレスが重なるので無効にした。ロールバックの前に有効に戻した
+- Windows 11 のロールバック（VirtualBox のプロセスが無い状態。この節の手順 1 は閉じるものが無かった）:
+  - この節の手順 2: `Found Oracle VirtualBox 7.2.20 [Oracle.VirtualBox]`・`Starting package uninstall...`・`Successfully uninstalled`。途中で「Windows インストーラー」の「Preparing to remove...」の窓が出た
+  - この節の手順 3: `winget list` は見つからない旨、`Test-Path` は `False`、ホストオンリーのアダプターは出なかった。ドライバーの一覧には、`VBoxNetAdp`（`Stopped`）と、この VM 自身の Guest Additions のドライバー（`VBoxGuest`・`VBoxMouse`・`VBoxSF`・`VBoxWddm`）が出た。後者は VM の中で試したためで、VirtualBox を入れた PC の実機では出ない
+  - 再起動の後に手順 3 の一覧を見直しても、`VBoxNetAdp`（`Stopped`）は残った。サービスの登録（`ImagePath` は `\SystemRoot\system32\DRIVERS\VBoxNetAdp6.sys`、`Start` は 3）とそのファイルが残り、ドライバー パッケージ（`pnputil /enum-drivers`）とデバイスは無かった。本文に「そのままでよい」の箇条書きと、VM の中では Guest Additions のドライバーも出る旨を足した
+  - この節の手順 4: `False` が 2 行
+
+**確認していないこと**:
+
+- VM の中での手順 6（入れ子の仮想化）と、Hyper-V が動いていない PC・Intel の CPU での手順 6
+- 新しい版に上げる更新の手順 3・4、arm64 の Windows

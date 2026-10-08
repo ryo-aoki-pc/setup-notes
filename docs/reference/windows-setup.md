@@ -233,6 +233,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `-NoRestart` で、アダプターを起動し直さない（効くのは次の再起動から）
 - 眠り（S3・Modern Standby）からの起動は、手順 41 で眠らないようにしたので扱わない
 
+### ロールバック / 手順 13: 補足: 先に current の読み取り専用を外す理由
+
+- scoop はアプリを入れるたびに、`~\scoop\apps\<アプリ>\current` を版のフォルダーへのジャンクションにし、読み取り専用の属性を付ける（`lib/install.ps1` の `link_current` の `attrib $currentdir +R /L`）
+- scoop 0.6.0 の `scoop uninstall scoop`（`bin/uninstall.ps1`）は、アプリごとに `unlink_current (appdir $app $global)` を呼ぶ。`unlink_current` は渡されたフォルダーの親の `current` を探すので、`~\scoop\apps\current` を探して何もしない（ふつうの `scoop uninstall <アプリ>` は版のフォルダーを渡すので、読み取り専用を外してから消す）
+- 残った読み取り専用のジャンクションは、続く `Remove-Item -Recurse -Force` で「アクセスが拒否されました」になる。`$errors = $true` は関数の中だけで立つので `Not all apps could be deleted.` は出ず、`~\scoop\apps` を消すところで `Couldn't remove` の `abort` で終わる。後ろの PATH の片付けまで進まないので、ユーザーの PATH の `scoop\shims` は残る
+- `~\scoop\apps` の中は名前の順に消すので、消せないアプリが `scoop` より後ろ（`scoop-search` など）なら、scoop 本体は先に消えている。前（`7zip`・`git` など）なら、scoop 本体は残る
+- 1 行目で `attrib.exe -R /L` を先に当てると、`Remove-Item` がジャンクションを消せて、最後まで進む（2026-10-08 に VM で確かめた。[検証記録](../verification/windows-setup.md)）
+
 ### ロールバック / 手順 15: 補足: 文字コードを変えずに消す
 
 - ファイルをバイトのまま読み、消す行のほかのバイトは変えずに書き戻す
@@ -261,7 +269,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `Restart-Computer -ComputerName` は、既定で WMI/DCOM（RPC のエンドポイント マッパー 135 と動的ポート）を使う。開けるポートが多く、絞りにくい
 - 代わりに WinRM（WS-Management、TCP 5985）を有効にして、`Invoke-Command -ComputerName … { Restart-Computer -Force }` で再起動する。開けるのは 5985 の 1 つだけ
 - `Enable-PSRemoting` は、WinRM のサービスの開始・リスナーの作成・受信規則の有効化に加えて、`LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）。`-SkipNetworkProfileCheck` は、ほかにパブリックの接続があっても止まらないようにする（LAN はプライベートにしてある）
-- 既定で作られる 2 つの規則のうち、`WINRM-HTTP-In-TCP-PUBLIC`（パブリック向けで、既定でローカル サブネットに絞られる）は無効にし、`WINRM-HTTP-In-TCP` をプライベートにする
+- Windows 11（クライアント版）の「Windows リモート管理」のグループ（`@FirewallAPI.dll,-30267`）の受信規則は 2 つ。`WINRM-HTTP-In-TCP` はパブリック向けで接続元をローカル サブネットに絞り、`WINRM-HTTP-In-TCP-NoScope` はドメイン・プライベート向けで接続元を絞らない。`Enable-PSRemoting` は両方を有効にする
+  - ほかに、別のグループの互換モードの規則（`WINRM-HTTP-Compat-In-TCP`・`WINRM-HTTP-Compat-In-TCP-NoScope`）があり、既定で無効。本書は触らない
+  - 本書は、ローカル サブネットに絞った `WINRM-HTTP-In-TCP` をプライベートにし、`WINRM-HTTP-In-TCP-NoScope` を切る（LAN の外からは届かないようにする）
+  - 2026-10-06 の版の手順は、`WINRM-HTTP-In-TCP` をドメイン・プライベート向け、`WINRM-HTTP-In-TCP-PUBLIC` をパブリック向けとして書いていたが、Windows 11 の VM には `-PUBLIC` の規則が無かった（[検証記録](../verification/windows-setup.md)）
+- 規則のグループは、表示名（`DisplayGroup`）が Windows の言語で変わる（日本語の Windows では「Windows リモート管理」）ので、言語に依らない `Group`（`@FirewallAPI.dll,-30267`）で選ぶ
+- ドメインに参加していない PC から `Invoke-Command -ComputerName` で送ると、Kerberos を使えないので、送る側の WinRM のクライアントが、相手を `TrustedHosts` に入れるか HTTPS を使うことを求める（about_Remote_Troubleshooting）。本書は送る側で `TrustedHosts` に相手を足す
 
 ### リモートから再起動する手段を増やす（任意） / 手順 6: 補足: 見張りタスクの作り
 
@@ -272,6 +285,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - 連続して届かない回数を `HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails` に記録し、6 回（約 30 分）でだけ再起動する。1 回でも届けば 0 に戻すので、一時的な切断では再起動しない
 - 相手（ルーターなど）がずっと落ちていると、稼働 60 分ごとに再起動を繰り返す。`$limit` を増やすと猶予が延びる。相手は、LAN の中でいつも応答するものにする
 - 起動時トリガーに 5 分ごとの繰り返しを足すため、`-Once` のトリガーの `Repetition` を起動時トリガーに移している（Windows PowerShell 5.1 の `New-ScheduledTaskTrigger` は、起動時トリガーに直接 `-RepetitionInterval` を取らない）
+- 起動時トリガーなので、登録した時点では動かず（`NextRunTime` も空）、次の起動から起動時と 5 分ごとに動く
 
 ### リモートから再起動する手段を増やす（任意） / 手順 7: 補足: Remote Control を再起動後も使う
 

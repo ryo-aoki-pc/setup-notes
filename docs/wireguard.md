@@ -375,6 +375,8 @@
    sudo ./wg-vpn.sh -e ~/wg/site.env remove A --purge    # conf・鍵・クライアント用 conf も消す（clients.list は残る）
    ```
 
+   - `apply` が控えた `/etc/wireguard/wg0.conf.bak-<日時>`（秘密鍵を含む）は、`--purge` でも残る。要らなければ手で消す
+
 1. `site.env` と `clients.list` も要らないときだけ、`~/wg` を消す。
 
    ```bash

@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM で、Windows 節の新規導入・PATH の手順 2・3・5 を確認した（2026-10-06）。同じ VM の通常権限の非対話 Bash では、共通手順 3・5・6・7 の 12 設定と、合成の名前・メールを使う 4・5・6・9・10・11 のローカル push、実 rebase、autostash、CRLF・日本語パスの保持、後片付けを確認した（2026-10-07）。子プロセスの scratch だけを使い、HOME・CODEX_HOME と実ユーザーの設定は保持した。
-
-本人の名前・メールの適用、対話 Git Bash の画面と貼り付け、外部リモートへの認証・通信、pull.ff を変更する手順 8、更新・削除は未検証。機能試験の初回ホスト側通信の終了コード 1 と、後に回収したゲストの成功は別々に記録した。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の新規導入・PATH の手順 2・3・5、非対話 Bash と隔離した `global` での共通手順 3〜7・9〜11（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: スタートから開いた対話の Git Bash に右クリックのメニューで貼り、実ユーザーの `global` で実施手順 1・3〜11（`system` の `pull.ff=only` を一時的に置いて手順 8 の分岐も）、ロールバックの手順 1〜6、更新の手順 2（[付録](#付録-windows-11-pro-の-vm-での対話の-git-bash-による通し検証2026-10-08)）
+- 確認していないこと
+  - 本人の名前・メールアドレスと、外部のリモートへの認証・push・pull
+  - 新しい版に上げる更新、arm64 の Windows
+- 機能試験の初回ホスト側通信の終了コード 1 と、後に回収したゲストの成功は別々に記録した。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -748,3 +750,40 @@ fatal: Not possible to fast-forward, aborting.
 
 - 本人の名前・メールを実ユーザーの設定へ反映すること、対話 Git Bash の画面・コピーと貼り付け、外部リモートへの認証や network pull
 - `pull.ff` を変更する手順 8、利用中の既存の設定との組み合わせ、更新・削除、arm64 の Windows。今回の隔離した機能テストを全手順の通し成功とは扱わない
+
+---
+
+### 付録: Windows 11 Pro の VM での対話の Git Bash による通し検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、スタートメニューから開いた Git Bash（mintty）に、本文のブロックを右クリックのメニューの「Paste」で貼り、[実施手順](../git.md#実施手順)の手順 1・3〜11 とロールバックの手順 1〜5 を通した。ロールバックの手順 6 と更新の手順 2 は、管理者の Windows PowerShell に貼った。上の付録と違い、子プロセスの `GIT_CONFIG_GLOBAL` は使わず、実ユーザーの `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた。
+
+| 項目 | 値 |
+|---|---|
+| Git | `git version 2.55.0.windows.5`（上の付録で入れたもの） |
+| 始める前 | `global` の設定ファイルは無かった。`system`（`C:/Program Files/Git/etc/gitconfig`）の SHA256 は `381C2FDA5A3B5ADF7102F5B05F68D7DC3281A44171F9B40556CA56CFDD8461C3` で、`pull.ff` は無かった |
+| 名前とメールアドレス | 試験用の架空の値（`PR104 Verification`・`pr104-verification@example.invalid`） |
+| 手順 8 の分岐 | 確かめるため、管理者の窓で一時的に `git config --system pull.ff only` を足した（終わった後に外した） |
+
+**確認したこと**:
+
+- Windows 11 で Git for Windows を入れるの手順 6: スタートメニューの「Git Bash」で、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` の窓が開いた
+- 窓の中の右クリックで、`Copy`・`Paste`（`Shift+Ins`）などのメニューが出た。本文に「Paste」で貼る旨を足した
+- 手順 1・3〜7: 手順 7 で、`global` の 14 キー（名前・メールアドレスと、手順 5・6 の 12 キー）が出て、`pull.ff` は `system  only` だった
+- 手順 8: `global  true`
+- 手順 9: `?? 日本語.txt`、`i/crlf  w/crlf`（CRLF のまま入った）、ブランチは `main`、`branch 'main' set up to track 'origin/main'.`
+- 手順 10: `Created autostash`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.`、履歴は一直線、作業中の `M crlf.txt` が残った
+- 手順 11: 使い捨てのリポジトリが消えた
+- 手順 8 を行わない場合（`global` の `pull.ff` を外し、`system` の `only` だけにした場合）の分岐した pull は、`fatal: Not possible to fast-forward, aborting.`（終了コード 128）で止まった
+- ロールバックの手順 1〜4: 今回足した 15 キー（手順 4・5・6・8 のもの）を `--unset` で外した。手順 5 の `git config --global --list` は何も出さなかった。ただし `~/.gitconfig` は 0 バイトのファイルとして残った（始める前は無かった）。本文に注意を足した
+- 一時的な `system` の `pull.ff` を外し、`system` の SHA256 が始める前と同じに戻った
+- 更新の手順 2（管理者の窓）: `No available upgrade found.`、`winget list` は `Git  Git.Git  2.55.0.5`
+- ロールバックの手順 6（管理者の窓、Git Bash は閉じた状態）: `Found Git [Git.Git]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、最後は `False`。途中で「Git Uninstall」の進捗の窓（「Uninstalling Git...」）が出て、何も押さずに閉じた
+
+**検証の手順で起きたこと**:
+
+- 最初の通しでは、検証の操作が窓を前に出すために Alt を 1 回だけ押したため、mintty がメニューの操作に入り、貼った後の Enter が食われた。手順 5・6・7 の 3 つのブロックが 1 行につながって実行され、`pull.rebase` が入らず `tag.sort` が `version:refnamecd` になった。操作を直し、手順 4〜7 を貼り直して（どれも何度貼ってもよい）、正しい値になったことを手順 7 で確かめた
+
+**確認していないこと**:
+
+- 本人の名前・メールアドレスと、外部のリモート（GitHub など）への認証・push・pull
+- Ctrl+V・Shift+Insert のキーでの貼り付け（検証の操作では、Shift+Insert が正しいキーとして届かなかった）、arm64 の Windows、Windows の実機
