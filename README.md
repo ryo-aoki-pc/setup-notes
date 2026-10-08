@@ -320,6 +320,9 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
   - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/secure-boot-mok.md)を先に行う（鍵はホストとは別）
   - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
   - VM がホストオンリーアダプターだけでインターネットに出られないときは、ホスト（Windows では WSL の AlmaLinux 10）の rootless の podman で同じ Containerfile をビルドし、`podman save` のファイルを ssh で VM に運んで `podman load` する。ベースの署名は VM の `policy.json` と公開鍵をホストに写して確かめ、Secure Boot の鍵はホストで作る
+- Windows 11 の PC に Android の Windows App からリモート デスクトップでつないで VM に打つときは、Windows App の「使用可能な場合にスキャンコード入力を使用する」をオンにする（[VirtualBox の任意節](docs/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)）
+  - 既定の Unicode の入力では、打った文字が VM で別のキーになる（`1.,2` が `nczm`）
+  - 画面のキーボード（Gboard）では Shift で打つ記号が出ないので、VirtualBox のソフトキーボードで打つ。物理キーボードは記号まで出る
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
