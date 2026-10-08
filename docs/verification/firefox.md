@@ -92,7 +92,7 @@ Firefox のプロセスが読み込むのは `/usr/lib64/libavcodec.so.61.19.101
 
 **`noopenh264` が入る理由**: `ffmpeg-libs` が `libopenh264.so.7` を要求し、x86_64 の実機の有効なリポジトリでそれを提供するのは、EPEL の `noopenh264`（中身の無い OpenH264）だけだった。aarch64 でも同じ（メタデータで確認）。x86_64 の実機では、Firefox のプロセスが `/usr/lib64/libopenh264.so.2.4.1` も読み込んだが、H.264 + AAC の mp4 は再生できた。EPEL の `libavcodec-free` と違い、H.264 は FFmpeg 自身のデコーダで復号される。
 
-EPEL の鍵の確認の実測（RPM Fusion の有効化（今の [rpmfusion.md](../rpmfusion.md) の手順 3）で、EPEL が依存として入ったコンテナ）。RPM Fusion の鍵は rpmfusion.md の手順 2 で取り込んであるので聞かれない:
+EPEL の鍵の確認の実測（RPM Fusion の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 20）で、EPEL が依存として入ったコンテナ）。RPM Fusion の鍵は rpmfusion.md の手順 2 で取り込んであるので聞かれない:
 
 ```
 Importing GPG key 0xE37ED158:
@@ -177,7 +177,7 @@ FFmpeg を入れる前から起動していた Firefox では、入れた後も 
   - AlmaLinux 10 では dnf 管理で入れ、Windows 版と同じように AAC と H.264 の動画も再生できるようにする。標準リポジトリ（AppStream）の `firefox` は ESR 140 系で、最新版より 16 メジャー古い
   - Windows 11 では日本語版を PC 全体に入れ、既定のブラウザーにする。[Windows 11 の初期設定](../windows-setup.md)の後に通す手順書の 1 つ
 - **進め方**
-  - **AlmaLinux 10**（[実施手順](../firefox.md#実施手順)）: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](../rpmfusion.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
+  - **AlmaLinux 10**（[実施手順](../firefox.md#実施手順)）: Mozilla が公式に配っている RPM リポジトリ `packages.mozilla.org/rpm/firefox` を 1 つ足し、`dnf install` する。続けて、[rpmfusion.md](../almalinux-setup.md) で有効にした RPM Fusion（free）から、FFmpeg のライブラリ `ffmpeg-libs` を入れる（手順 8〜11）。**読者が書き換えるのは冒頭の変数ブロックだけ**で、既定（最新版 + 日本語パック）ならそのまま貼れる
   - **Windows 11**（[Windows 11 で使う](../firefox.md#windows-11-で使う)）: winget の `Mozilla.Firefox.ja`（Mozilla の日本語版のインストーラ）を、管理者の Windows PowerShell 5.1 から PC 全体（`C:\Program Files\Mozilla Firefox`）に入れ、Windows の設定で既定のブラウザーにする。更新は Firefox 自身（Mozilla Maintenance Service）に任せる。変数は無く、AAC・H.264 のために足すものも無い
 - **状態（AlmaLinux 10）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
@@ -190,7 +190,7 @@ FFmpeg を入れる前から起動していた Firefox では、入れた後も 
     - **コンテナでは GUI を起動していない**（実機では 156.0 が動作中）
     - **ESR / Beta チャンネルと言語パック以外の l10n は未検証**
   - **手順 8〜11（AAC・H.264）と、その前の RPM Fusion の有効化も実機で本実行済み（2026-09-28）**。aarch64 と x86_64 の 2 台
-    - RPM Fusion の有効化は、今の [rpmfusion.md](../rpmfusion.md) の手順 1〜3。当時はこの文書の手順 8〜11 で、今の手順 8〜11 は手順 12〜14 だった
+    - RPM Fusion の有効化は、今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 18〜20。当時はこの文書の手順 8〜11 で、今の手順 8〜11 は手順 12〜14 だった
     - 下表の aarch64 の実機で、利用者が手順どおりに入れた（[付録](#付録-実機での本実行2026-09-28)）
       - rpmfusion.md 手順 2 の鍵が登録されている
       - `dnf history` に、rpmfusion.md 手順 3（4 パッケージ）と手順 8（`ffmpeg-libs` ほか 60 パッケージ）の実行が残っている
@@ -373,7 +373,7 @@ gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-g
 gpg-pubkey-e37ed158-65785fa9 Fedora (epel10) <epel@fedoraproject.org> public key
 ```
 
-- RPM Fusion の有効化で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[rpmfusion.md 手順 3 の補足](../rpmfusion.md#実施手順)）
+- RPM Fusion の有効化で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[rpmfusion.md 手順 3 の補足](almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)）
 
 x86_64 の実機（2026-09-28、rpmfusion.md の手順 1〜3 と手順 8 を実行した後の手順 10）:
 
@@ -412,7 +412,7 @@ Windows 11 で入るもの（winget の定義・Mozilla の文書・Firefox の�
 - [Introducing Mozilla's Firefox Nightly .rpm package — Firefox Nightly News](https://blog.nightly.mozilla.org/2026/01/19/introducing-mozillas-firefox-nightly-rpm-package-for-rpm-based-linux-distributions/) — RPM リポジトリの repo ファイルの書き方（RHEL / CentOS / Rocky 向けの `tee` の例）と鍵の fingerprint
 - [Firefox Developer Edition and Beta: Try out Mozilla's .rpm package! — Mozilla Hacks](https://hacks.mozilla.org/2026/03/firefox-developer-edition-and-beta-try-out-mozillas-rpm-package/) — beta / devedition チャンネルの追加
 - [firefox_versions.json — Mozilla product-details](https://product-details.mozilla.org/1.0/firefox_versions.json) — その時点の最新版と ESR の版を機械可読で返す
-- [RPM Fusion（free）](../rpmfusion.md) — 手順 8 の前提。鍵の照合と有効化、RPM Fusion の Configuration・keys のページへのリンク
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 8 の前提（手順 18〜21 の RPM Fusion（free））。鍵の照合と有効化。RPM Fusion の Configuration・keys のページへのリンクは同書の参考資料
 - [Multimedia — RPM Fusion](https://rpmfusion.org/Howto/Multimedia) — `ffmpeg-free` からの切り替え（`dnf swap`）と、`libavcodec-freeworld` の位置づけ
 - `man dnf.conf`（`priority`、`gpgcheck`、`repo_gpgcheck`）
 - [Full Installer Configuration — Firefox Source Docs](https://firefox-source-docs.mozilla.org/browser/installer/windows/installer/FullConfig.html) — Windows のフルのインストーラのスイッチと既定（場所・ショートカット・Maintenance Service・Default Browser Agent・`/PreventRebootRequired`）
@@ -551,7 +551,7 @@ AlmaLinux 10 の Firefox（Mozilla 版 156.0.1）で YouTube の一部の動画�
 
 ### 付録: x86_64 の実機での本実行（2026-09-28）
 
-x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 本について利用者から報告があった。1 本目は 360p から上げられず、2 本目は再生できなかった。Firefox は手順 1〜7 の mozilla 版で、FFmpeg は入れていなかった。原因を切り分け、RPM Fusion の有効化（今の rpmfusion.md の手順 1〜3）と、手順 8・10 のコマンド（当時はこの文書の手順 8〜12 と手順 14）を実行した記録（時刻は JST）。
+x86_64 の実機（AMD Strix Halo のノート PC）で、YouTube の動画 2 本について利用者から報告があった。1 本目は 360p から上げられず、2 本目は再生できなかった。Firefox は手順 1〜7 の mozilla 版で、FFmpeg は入れていなかった。原因を切り分け、RPM Fusion の有効化（今の AlmaLinux 10 の初期設定の手順 18〜20）と、手順 8・10 のコマンド（当時はこの文書の手順 8〜12 と手順 14）を実行した記録（時刻は JST）。
 
 **動画の形式**: 前の付録と同じく、watch ページの `adaptiveFormats` を `curl` で読んだ。どちらもライブ配信のアーカイブで、配信が終わったのは 1 本目が前日の 21:40、2 本目が当日の 02:40:
 

@@ -6,7 +6,7 @@
 
 公式 ISO から Workstation を新規インストールし、その状態のスナップショットから用途ごとの VM を作った。既に環境構築済みのホストを使い回さず、各 VM で前提の手順書から順に通した。導入・設定・CLI / GUI の確認と、サーバー間の通信を対象にした。アカウントの認証が必要な手順、ハードウェアの条件を満たさない分岐、実機のルーター設定は、到達したところと未実施の範囲を分けて記録する。
 
-この文書は検証結果の一覧。実行するときは、リンク先の手順書を使う。各手順書から案内する `verification/<手順書名>.md` にも、今回の状態と検証範囲を記録している。
+この文書は検証結果の一覧。実行するときは、リンク先の手順書を使う。各手順書から案内する `verification/<手順書名>.md` にも、今回の状態と検証範囲を記録している。2026-10-08 に、Homebrew・EPEL・bash の設定など 13 本の手順書を [AlmaLinux 10 の初期設定](almalinux-setup.md)にまとめた。表のそれらの文書へのリンクは、まとめた先を指す（当時の記録と手順番号の対応は、その[検証記録](verification/almalinux-setup.md)の「統合前の記録」）。
 
 **現行版の結果**: 共通 bash と設定サブモジュールを含む現行版は、その後に新規作成した 6 台で通し直した。[現行版と全サブモジュールの再検証](#現行版と全サブモジュールの再検証2026-10-06)を参照。以下の前半は、それより前の検証版の記録として残している。
 
@@ -41,22 +41,22 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 | 手順書 | 今回の範囲と結果 |
 |---|---|
 | [Git](git.md) | 導入・設定・一時リポジトリの操作。認証を伴う GitHub への送信は除外 |
-| [Homebrew](homebrew.md) / [EPEL](epel.md) | 新規導入、PATH と導入元の確認。インストーラの Return / sudo / パッケージ導入の問い合わせにも答えた |
+| [Homebrew](almalinux-setup.md) / [EPEL](almalinux-setup.md) | 新規導入、PATH と導入元の確認。インストーラの Return / sudo / パッケージ導入の問い合わせにも答えた |
 | [gh](gh.md) / [Claude Code](claude-code.md) / [Codex CLI](codex.md) | 導入・版・未ログインの確認まで。Codex はインストーラの再実行で 0.160.0 → 0.160.1 の更新も確認。実アカウントへのログインと認証後の操作は除外 |
-| [btop](btop.md) / [tmux](tmux.md) / [bat](bat.md) / [eza](eza.md) / [gdu](gdu.md) | 導入と実行。TUI は文字を読み取り、キーの応答と終了を確認 |
-| [zoxide](zoxide.md) / [fzf](fzf.md) | bash の設定を読み直し、移動・履歴・ファイル・ディレクトリ選択を実際に操作 |
+| [btop](btop.md) / [tmux](almalinux-setup.md) / [bat](almalinux-setup.md) / [eza](almalinux-setup.md) / [gdu](gdu.md) | 導入と実行。TUI は文字を読み取り、キーの応答と終了を確認 |
+| [zoxide](almalinux-setup.md) / [fzf](almalinux-setup.md) | bash の設定を読み直し、移動・履歴・ファイル・ディレクトリ選択を実際に操作 |
 | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [delta](git-delta.md) | 導入と対話操作。yazi の追加ツールは本文の既定を全て導入し、ディレクトリ移動・ZIP プレビューも確認。Neovim の checkhealth はエラー無し、任意 provider などの警告 8 件。delta のページャと複数の変更間の n / N の移動も成功 |
-| [ShellCheck](shellcheck.md) / [HackGen Console NF](hackgen.md) / [bash の設定](bash-settings.md) / [starship](starship.md) | 導入・設定・読み戻し。ShellCheck で WG スクリプトを検査し、フォントの 4 字種、Tab・履歴・移動、再 SSH 後のプロンプトも確認 |
+| [ShellCheck](shellcheck.md) / [HackGen Console NF](hackgen.md) / [bash の設定](almalinux-setup.md) / [starship](almalinux-setup.md) | 導入・設定・読み戻し。ShellCheck で WG スクリプトを検査し、フォントの 4 字種、Tab・履歴・移動、再 SSH 後のプロンプトも確認 |
 
 ### デスクトップ
 
 | 手順書 | 今回の範囲と結果 |
 |---|---|
-| [電源とロック](gnome-power.md) | ユーザー・GDM・OS の設定を実行して読み戻し。Workstation の自動サスペンドを止めた |
+| [電源とロック](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) | ユーザー・GDM・OS の設定を実行して読み戻し。Workstation の自動サスペンドを止めた |
 | [ヘッドレスのセッション](gnome-headless-session.md) / [GUI の操作](claude-code-gui.md) | セッションと仮想モニターを作り、画面を撮影。電卓への入力とクリックを確認。GUI 構成を戻した後の再起動でも 1920×1080 の撮影・入力・クリックが成功 |
-| [日本語入力](japanese-input.md) | Anthy を有効にして実際に日本語を確定。Mutter のキーコード入力で `日本語` を確認。既存スクリプトの keysym によるローマ字入力は別の制限として記録 |
-| [RPM Fusion](rpmfusion.md) / [Firefox](firefox.md) | リポジトリ・Firefox・FFmpeg の導入。H.264 / AAC の動画を表示し、復号フレームの増加を確認。音声の実出力と GPU デコードは未確認 |
-| [Flatpak](flatpak.md) / [VS Code](vscode.md) | 導入と実ウィンドウの起動。VS Code の desktop ファイルの確認方法を修正。Flatseal は Activities と CLI 検索で見えるが、GNOME Software の検索では表示されなかった |
+| [日本語入力](almalinux-setup.md) | Anthy を有効にして実際に日本語を確定。Mutter のキーコード入力で `日本語` を確認。既存スクリプトの keysym によるローマ字入力は別の制限として記録 |
+| [RPM Fusion](almalinux-setup.md) / [Firefox](firefox.md) | リポジトリ・Firefox・FFmpeg の導入。H.264 / AAC の動画を表示し、復号フレームの増加を確認。音声の実出力と GPU デコードは未確認 |
+| [Flatpak](almalinux-setup.md) / [VS Code](vscode.md) | 導入と実ウィンドウの起動。VS Code の desktop ファイルの確認方法を修正。Flatseal は Activities と CLI 検索で見えるが、GNOME Software の検索では表示されなかった |
 | [WezTerm nightly](wezterm-nightly.md) | COPR の EL9 RPM を EL10 に導入、依存を確認して実ウィンドウを起動 |
 | [GNOME Remote Desktop](gnome-remote-desktop.md) | 別 VM の FreeRDP から 3390 の既存セッションと 3389 の GDM に接続。新規セッション・再接続・既存セッションへの引き渡し、再起動後の接続と LAN の接続元制限も確認 |
 

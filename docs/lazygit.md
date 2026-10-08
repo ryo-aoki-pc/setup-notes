@@ -5,7 +5,7 @@
 - [検証記録](verification/lazygit.md)・[参考資料](reference/lazygit.md)
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、設定も自分のホームに書く
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 > - **手順 3 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
@@ -55,7 +55,7 @@
 - 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
 - **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
   - 入れ方は [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)。clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
-  - 何を変えたかは [README の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit#主な設定内容)
+  - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[hackgen.md](hackgen.md)）にする
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（手順 1 の `LG_EDITOR` は使わない。[neovim.md の既定のエディタにする](neovim.md#既定のエディタにする任意)）
   - この設定を入れるなら、この節の手順 1 は貼らない（リンク先の clone したファイルを使う）
@@ -115,7 +115,7 @@
 
 ## 注意点
 
-- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`sudo lazygit` はそのままでは使えない、など
+- **Homebrew 全般の注意は [AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: PATH の先頭が Homebrew になる、`sudo lazygit` はそのままでは使えない、など
   - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **COPR 経路は「有効化は成功するのに入らない」**: `dnf copr enable` が通っても、メタデータが取れなければ `dnf install` は `No match for argument` になるだけで、原因は警告行にしか出ない
   - COPR を使う前に `curl -sS -o /dev/null -w '%{http_code}\n' -L <chroot の repodata/repomd.xml>` で 200 が返るか確かめると早い

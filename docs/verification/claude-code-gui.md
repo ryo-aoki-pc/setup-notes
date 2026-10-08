@@ -10,7 +10,7 @@
 
 - `key` と `type` は、Mutter の `org.gnome.Mutter.RemoteDesktop` のセッションを作り、キーを押して離す（`NotifyKeyboardKeysym`）。送り終えたらセッションを止める
 - セッションを作った直後の入力と、止める直前の入力は、Mutter に捨てられることがあった（最初の数文字や最後の 1 文字が抜けた）。スクリプトは、害の無い入力を先に送り、前後に 0.3 秒ずつ置く
-- キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。IBus の Anthy ではこの keysym の経路でローマ字が本文に入らなかった。別の検証用プローブの keycode の経路では「日本語」が確定した（[japanese-input.md の VM の付録](japanese-input.md#付録-クリーンインストールした-vm-での検証2026-10-06)）
+- キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。IBus の Anthy ではこの keysym の経路でローマ字が本文に入らなかった。別の検証用プローブの keycode の経路では「日本語」が確定した（[japanese-input.md の VM の付録](almalinux-setup.md#日本語入力-付録-クリーンインストールした-vm-での検証2026-10-06)）
 - `launch` は、`.desktop` の `Exec` を `systemd-run --user` の一時的なサービスとして動かす
   - `gio launch` を `systemd-run` で動かすと、`gio` が終わったときにサービスごとアプリが止められて、窓が出なかった
   - 実行ファイルは、ユーザーの systemd の `PATH`（GNOME Shell から起動したときと同じ）で探す
@@ -135,7 +135,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
   - キー配列（us）に無い文字（`é`・`ü`・`ß`・`日本語`・`←`）は、エラーにならずに捨てられた。間の空白は入った
   - スクリプトにした後は、`type` を 3 回続けて、どれも全部の文字が入った
 - アプリの起動: `systemd-run --user -- gio launch …` では窓が出なかった（`gio` が終わると unit ごと止められた）。`systemd-run` は `gio` をこのシェルの PATH で探し、Homebrew の `gio` を動かしていた
-- Homebrew: `python3`（3.14.7）には `gi` が無く、`gsettings`（glib 2.90.0）は keyfile のバックエンドだった（[gnome-power.md 手順 2 の補足](../gnome-power.md#実施手順)）
+- Homebrew: `python3`（3.14.7）には `gi` が無く、`gsettings`（glib 2.90.0）は keyfile のバックエンドだった（[gnome-power.md 手順 2 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
 - AT-SPI: 窓の一覧は取れた。GTK4 のアプリの窓は、フォーカスがあっても `active` の状態を出さなかった
 - gsd-power: 電源のキーが既定のまま（`sleep-inactive-ac-type` が `'suspend'`）だと、無操作が続いて「Automatic suspend — Suspending soon because of inactivity.」の通知が出た
   - 15 分（900 秒）で `gsd-power: Error calling suspend action: GDBus.Error:org.freedesktop.login1.SleepVerbNotSupported: Sleep verb 'suspend' is not configured or configuration is not supported by kernel` が出た

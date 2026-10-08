@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。下の EPEL と Secure Boot の前提、KVM の設定は要らない）
-> - **前提**: [EPEL](epel.md) を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で EPEL を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **前提（Secure Boot が有効な PC）**: [secure-boot-mok.md](secure-boot-mok.md) で、モジュールの署名鍵を MOK に登録してあること（VirtualBox を入れるより前に。同書で再起動し、起動の途中の MokManager を操作する）。Secure Boot が有効かは、同書の手順 3 で分かる
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
@@ -98,7 +98,7 @@
    ```
 
    - `VirtualBox-7.2 ... 7.2.20_175154_el10-1 ... virtualbox ... 105 M` と、依存の中に `liblzf ... epel` が出れば解決できている
-   - `nothing provides liblzf.so.1()(64bit)` と出たら、[EPEL](epel.md) が有効になっていない
+   - `nothing provides liblzf.so.1()(64bit)` と出たら、EPEL が有効になっていない（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)）
 
 1. 動いているカーネルが、入っている中で一番新しいものかを見る。
 
@@ -132,7 +132,7 @@
    ```
 
    - トランザクション表を見て、`[y/N]` に `y` と答える
-   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[epel.md 手順 3](epel.md#実施手順) に書いた鍵）
+   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
    - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
@@ -603,7 +603,7 @@
 
 ## 注意点
 
-- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）。前提の [epel.md](epel.md) で有効にする
+- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で有効にする
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 9・10](#実施手順)）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [secure-boot-mok.md](secure-boot-mok.md) で作って登録する

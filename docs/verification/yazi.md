@@ -27,7 +27,7 @@ aarch64 で降ってくるボトルは `yazi--26.9.1.arm64_linux.bottle.tar.gz`�
 | `imagemagick-full` | 画像・フォントの変換 |
 | `font-symbols-only-nerd-font` | アイコン表示用のフォント |
 
-`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では[別手順](../zoxide.md)で入れている。
+`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では別の手順（[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 49）で入れている。
 
 ボトルが降りたことの確認（実測、コンテナ）:
 
@@ -57,7 +57,7 @@ Bash completion has been installed to:
   - RPM（COPR）経路も試したうえで採らなかった（[選択した方針](../verification/yazi.md#選択した方針)）
 - **状態**: **実機で本実行済み（2026-09-21）。`0dbb522` 版の手順 1〜4（2026-10-01 に比べ方を直した `y` 関数を含む）は、x86_64 のクリーン VM で本実行済み（2026-10-06）。WSL の擬似端末でも確認した（実機の関数は変更前の形）**。現行 `5da3478` の共通 bash 新規導入後の再検証も、別の新規 VM で行った（末尾の記録）。既存ホストの手動移行は今回は未実施
   - 下表のホストで `brew install yazi ...` を実行し、`yazi 26.9.1` が入って常用中。`~/.bashrc` の `y()` 関数は、比べ方を直す前の形で入っている
-  - [Homebrew の導入](../homebrew.md)と手順 2・4 は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した（`YAZI_EXTRAS` は空）
+  - [Homebrew の導入](../almalinux-setup.md)と手順 2・4 は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した（`YAZI_EXTRAS` は空）
   - 確認したこと: ボトルが降りる、`yazi --version` / `ya --version` が出る
   - 2026-10-01: 比べ方を直した手順 3 のブロックを、WSL の AlmaLinux 10.2 の擬似端末の bash（使い捨ての `HOME`）に括弧付き貼り付けで貼り、GitHub の yazi 26.9.1 のバイナリを開いて `y` を確かめた。直す前の版と比べ、5 つの場合とも振る舞いは同じだった（[付録](#付録-y-関数の比べ方を直したときの検証2026-10-01)）
   - **コンテナでは TUI の起動とプレビューは確認していない**（端末が無いため）
@@ -131,11 +131,11 @@ $ command -v yazi
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../homebrew.md)と手順 2・4 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `y` の 1 行と、`YAZI_EXTRAS` の中身（空にした）だけ除いている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../almalinux-setup.md)と手順 2・4 を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `y` の 1 行と、`YAZI_EXTRAS` の中身（空にした）だけ除いている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` が `/home/linuxbrew/.linuxbrew` に入った（[homebrew.md](../homebrew.md)） |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6` が `/home/linuxbrew/.linuxbrew` に入った（[homebrew.md](../almalinux-setup.md)） |
 | 2. yazi | `brew install yazi` → `Pouring yazi--26.9.1.arm64_linux.bottle.tar.gz`（17 files, 32.5MB）。ソースビルドは発生しない |
 | 4. 検証 | `yazi --version` / `ya --version` ともに `26.9.1 (Homebrew 2026-09-01)`、`Triple: aarch64-unknown-linux-gnu` |
 | 依存ツール | `ffmpeg` / `sevenzip` / `jq` / `poppler` / `fd` / `ripgrep` / `fzf` / `resvg` / `imagemagick` / `font-symbols-only-nerd-font` の formula がすべて存在することを `brew info` で確認（インストールはしていない。実機には `-full` 版が入っている） |

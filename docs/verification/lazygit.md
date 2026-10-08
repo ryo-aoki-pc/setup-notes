@@ -33,12 +33,12 @@ aarch64 で降ってくるボトルは `lazygit--0.65.1.arm64_linux.bottle.tar.g
   - RPM（COPR）経路は実機でもコンテナでも通らなかった（[選択した方針](../reference/lazygit.md#選択した方針)）
 - **状態**: **実機で本実行済み（2026-09-20）**。**x86_64 のクリーン VM でも現行の実施手順を本実行済み（2026-10-06）**
   - 下表のホストで `brew install lazygit` を実行し、`lazygit 0.65.1` が入って常用中
-  - [Homebrew の導入](../homebrew.md)と手順 2〜3、[設定ファイル](../lazygit.md#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - [Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[設定ファイル](../lazygit.md#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - 確認したこと: ボトルが降りる、`lazygit --version` が出る、`config.yml` を書いた後に `lazygit --print-config-dir` が `~/.config/lazygit` を返す
   - **コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）
   - **実機には設定ファイルを置いていない**
   - 2026-10-02: [設定ファイル](../lazygit.md#設定ファイル)の手順 1 を、`LG_EDITOR` が空なら何もせずに止める `if … fi` にした
-    - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3](../gnome-power.md#実施手順) の補足）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
+    - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`HOME` は使い捨てのディレクトリ、`lazygit` はスタブ）
   - 2026-10-05: 既存設定への無条件追記をやめ、エディタの存在も確かめる形にした。一時ディレクトリとスタブで、新規作成・再実行・既存 `os:` ありの 3 通りを確認した（既存内容は変わらず、`os:` は重複しない）。TUI は起動していない
 
@@ -100,11 +100,11 @@ $ command -v lazygit
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../homebrew.md)と手順 2〜3、[設定ファイル](../lazygit.md#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[設定ファイル](../lazygit.md#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../homebrew.md)） |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../almalinux-setup.md)） |
 | 2. lazygit | `Pouring lazygit--0.65.1.arm64_linux.bottle.tar.gz`（6 files, 18.8MB）。ソースビルドは発生しない |
 | 3. 検証 | `lazygit --version` → `build source=Homebrew, version=0.65.1, os=linux, arch=arm64, git version=2.52.0` |
 | 設定ファイル | `config.yml` を書いたあと `lazygit --print-config-dir` → `/home/<USER>/.config/lazygit` |

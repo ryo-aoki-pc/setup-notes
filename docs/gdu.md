@@ -7,7 +7,7 @@
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定も自分のユーザーに導入するため）
 
 - 上から順にコードブロックを貼る
@@ -61,7 +61,7 @@
    - `~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている
    - リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい
    - ただし **PATH の順序では Homebrew のほうが先**なので、EPEL 版の `/usr/bin/gdu` を同時に入れている場合はどちらが呼ばれるか変わる（[注意点](#注意点)）
-   - `sudo gdu` には効かない（`~/.local/bin` は sudo の PATH に無い）。`sudo` では `gdu-go` と打つ（[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節が要る）
+   - `sudo gdu` には効かない（`~/.local/bin` は sudo の PATH に無い）。`sudo` では `gdu-go` と打つ（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節が要る）
 
 ---
 
@@ -108,10 +108,10 @@
 
 - **コマンド名が `gdu-go`**: これが最大の引っかかりどころ。`gdu` と打って `command not found` になったら、まず `command -v gdu-go` を見る
 - **エイリアスの確認に `type -t` は使えない**: bash は非対話シェルでエイリアスを展開しないため、`type -t gdu` はエイリアスを見つけられない（`alias gdu` なら確認できる）
-  - 関数を定義する [zoxide](zoxide.md) / [yazi](yazi.md) の `y()` は、この制約を受けない
+  - 関数を定義する [zoxide](almalinux-setup.md#実施手順) / [yazi](yazi.md) の `y()` は、この制約を受けない
 - **EPEL 版と同時に入れると版が 2 つ並ぶ**: 名前が違う（`/usr/bin/gdu` と `gdu-go`）ので上書きされず、**共存してしまう**
   - `gdu` と打つと EPEL の 5.32.0、`gdu-go` と打つと Homebrew の 5.37.0 という状態になる
   - どちらか片方にする
 - **エイリアスは対話シェルだけ**: スクリプトや `sudo` からは `gdu-go`。スクリプトからも揃えたいならシンボリックリンク（`sudo` には効かない）
 - **走査は I/O が重い**: Raspberry Pi の microSD で `/` 全体を走らせると時間がかかる。`-x`（ファイルシステムを跨がない）や対象ディレクトリの限定を併用する
-- **TUI からファイルを消せる**: `d` で削除できるので、root 権限で起動するときは特に注意する（`sudo gdu-go` は、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通さないと、フルパスが要る。[homebrew.md の注意点](homebrew.md#注意点)）
+- **TUI からファイルを消せる**: `d` で削除できるので、root 権限で起動するときは特に注意する（`sudo gdu-go` は、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通さないと、フルパスが要る。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）

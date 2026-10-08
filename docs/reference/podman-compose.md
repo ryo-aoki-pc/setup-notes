@@ -23,6 +23,6 @@ podman-compose は、ディレクトリの名前（`compose-sample`）をプロ�
 - [Compose Specification](https://compose-spec.io/) — compose ファイルの書式
 - `man podman-compose`（podman のパッケージに入っている `podman compose` の説明）/ `podman-compose --help` / `podman-compose <サブコマンド> --help`
 - [Podman](../podman.md) — 前提の rootless の podman と、自動起動の Quadlet
-- [EPEL](../epel.md) — 前提の EPEL の有効化
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
 
 ---

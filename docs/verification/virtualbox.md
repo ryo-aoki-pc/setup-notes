@@ -98,7 +98,7 @@ Installed size: 719 M
 - GUI は **AppStream の Qt 6**（6.10.1）を使う（rpm の要求は `Qt_6.9` の版の記号）
 - gcc や kernel-devel は依存に含まれないので、手順 8 で別に入れる
 
-**`liblzf` は EPEL にしか無い**（前提を [EPEL](../epel.md) にした理由）:
+**`liblzf` は EPEL にしか無い**（前提を [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の EPEL にした理由）:
 
 - Oracle の EL10 向け rpm は `liblzf.so.1()(64bit)` を要求するが、これを持つ `liblzf-3.6-28.el10_0` は **EPEL 10 にしかない**（BaseOS / AppStream / CRB / extras の一覧に無いことを確かめた）
 - ほかの依存（Qt 6、`libtpms`、`libvpx`、`vulkan-loader` など）は AppStream / BaseOS にある
@@ -334,7 +334,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
   - AlmaLinux 10 では、Oracle 公式の dnf リポジトリから入れ、カーネルモジュールをこの PC でビルドする
   - **Linux の arm64 版は無い**ので、Raspberry Pi 5 は対象外
 - **進め方**: **読者が書き換える値は無い**
-  - **AlmaLinux 10**（[実施手順](../virtualbox.md#実施手順)）: 前提の [EPEL](../epel.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
+  - **AlmaLinux 10**（[実施手順](../virtualbox.md#実施手順)）: 前提の [EPEL](../almalinux-setup.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
     - Secure Boot なら、前提の [secure-boot-mok.md](../secure-boot-mok.md) で MOK の鍵も先に登録する
     - 最後に KVM の設定を足して再起動する
   - **Windows 11**（[Windows 11 で使う](../virtualbox.md#windows-11-で使う)）: winget の `Oracle.VirtualBox` を管理者の Windows PowerShell 5.1 で入れる（PC 全体の `C:\Program Files\Oracle\VirtualBox`）。使い捨ての VM は、管理者ではない窓で動かす
@@ -342,7 +342,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-28〜29）。ただし Secure Boot が有効な分岐は、MokManager で鍵を登録できず、最後まで通せていない**。その前に x86_64 のコンテナで検証した（2026-09-24）
   - 2026-10-06 の[クリーンインストール VM](../almalinux-vm-verification.md)では、手順 1 の `lscpu` に仮想化支援が出なかった。本文の条件に従ってそこで止め、AlmaLinux のゲスト内への VirtualBox の導入・入れ子の VM 起動は行っていない。この試験を導入成功とは扱わない
   - 下表の実機で、**この文書のコードブロックを 1 つずつ中身を確かめてから貼った**（[実機の付録](#付録-実機での本実行2026-09-29)）
-    - 手順 1、EPEL の有効化の確認（今の [epel.md](../epel.md) の手順 1・3。手順 2 は EPEL が有効なので飛ばした）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
+    - 手順 1、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分。EPEL を入れる部分は、EPEL が有効なので飛ばした）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
     - secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、登録できなかった。利用者が UEFI の設定で Secure Boot を無効にした
     - 以降は無効の分岐で、手順 9〜11・13・14・16〜18（secure-boot-mok.md の手順 7 と手順 15 は無効の分岐で飛ばし、手順 12 は USB を使わないので飛ばした）
     - 入れた VirtualBox で、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM（Secure Boot 有効）も動かした
@@ -353,7 +353,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
     - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
     - MOK の確認（今の secure-boot-mok.md の手順 7）は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
   - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 15、USB（手順 12）、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)、[更新](../virtualbox.md#更新)（新しい版が無い）、[ロールバック](../virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
-  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../virtualbox.md#ロールバック)を、コードブロックのまま通した
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../virtualbox.md#ロールバック)を、コードブロックのまま通した
     - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
     - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
   - 2026-09-28: 手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](../virtualbox.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
@@ -382,7 +382,7 @@ AlmaLinux 10:
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64 | 同左（`quay.io/almalinuxorg/almalinux:10`、`sha256:83220192…c4c8`） |
 | カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 8 で入る） |
 | デスクトップ | GNOME Shell 49.4 / Wayland（ロケールは en_US.UTF-8） | 無し |
-| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](../epel.md) の手順 2 で有効化 |
+| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](../almalinux-setup.md) の手順 2 で有効化 |
 | CPU の仮想化支援 / KVM | AMD-V。`kvm_amd` が起動時に読み込まれていた（KVM の VM は使っていない） | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
 | Secure Boot | 有効 → secure-boot-mok.md の手順 6 の後に無効にした | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
 | SELinux | Enforcing | 無効（コンテナ） |
@@ -558,7 +558,7 @@ vboxusers:x:<GID>:
 
 **手順書の外で行った準備**（検証環境の都合）:
 
-- プロキシの CA を信頼ストアに足し、dnf にプロキシを設定した。プロキシが平文の HTTP を通さないので、AlmaLinux のミラー一覧の URL に `?protocol=https`、EPEL の metalink に `&protocol=https` を足した（EPEL は、EPEL の有効化の確認（今の [epel.md](../epel.md) の手順 3）の直後）
+- プロキシの CA を信頼ストアに足し、dnf にプロキシを設定した。プロキシが平文の HTTP を通さないので、AlmaLinux のミラー一覧の URL に `?protocol=https`、EPEL の metalink に `&protocol=https` を足した（EPEL は、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分）の直後）
 - GNOME のデスクトップの PC に合わせて、`which`・`gnupg2`・`systemd-udev`・`kmod`（Workstation / Server with GUI の必須グループ「Standard」などに入っているもの）と、動いているカーネルの `kernel-core` / `kernel-modules-core`（`6.12.0-211.56.1.el10_2`）を先に入れた。`/lib/modules/<版>/build` のリンクは `kernel-modules-core` が持っている
 
 **スタブ**:
@@ -635,7 +635,7 @@ vboxusers:x:<GID>:
 
 ### 付録: 実機での本実行（2026-09-29）
 
-前の付録の後、実機で本実行した（手順 1〜8、MOK の手順〔今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [epel.md](../epel.md) の手順 1・3〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 9 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
+前の付録の後、実機で本実行した（手順 1〜8、MOK の手順〔今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 9 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
 
 - 実機での本実行（Secure Boot が有効な分岐は、MokManager での登録〔今の secure-boot-mok.md の手順 6〕まで）
 - VT-x / AMD-V のある PC での `lscpu` の表示、デスクトップの PC での依存の数
@@ -981,7 +981,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - [VirtualBox — Downloads](https://www.virtualbox.org/wiki/Downloads) / [PUEL](https://www.virtualbox.org/wiki/VirtualBox_PUEL) — Extension Pack とそのライセンス
 - `/usr/lib/virtualbox/vboxdrv.sh` / `/usr/lib/virtualbox/postinst-common.sh` / `/usr/lib/virtualbox/check_module_dependencies.sh` / `/usr/share/virtualbox/src/vboxhost/vboxdrv/linux/SUPDrv-linux.c` — 本書の説明の元にした、rpm が入れるスクリプトとソース
 - `man dnf.conf`（`repo_gpgcheck`）/ `man modprobe.d` / `man mokutil`
-- [EPEL](../epel.md) — 前提の EPEL の有効化（依存の `liblzf`）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17。依存の `liblzf`）
 - [winget-pkgs の `Oracle.VirtualBox`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Oracle/VirtualBox) — Windows 11 の節で使う winget の定義
 - [winget の install — Microsoft Learn](https://learn.microsoft.com/en-us/windows/package-manager/winget/install) — `--accept-source-agreements`・`--accept-package-agreements`、依存を止める `--skip-dependencies`、既定は進み具合を出す
 - Oracle VirtualBox User Guide 7.2（インストーラに同梱の `UserManual.pdf`）— 2.2 Installing on Windows Hosts（機能・`ADDLOCAL`・公開プロパティ）、11.30 Using Hyper-V with Oracle VirtualBox、13.1.2 Global Settings（Windows は `$HOME/.VirtualBox`）、13.7.6.7 Poor performance when using Oracle VirtualBox and Hyper-V on the same host、15.44.2.2 Viewing Virtual Machine Log Contents（`showvminfo --log`）、15.52 VBoxManage updatecheck

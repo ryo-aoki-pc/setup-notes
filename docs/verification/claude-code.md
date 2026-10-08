@@ -205,7 +205,7 @@ Complete!
     - ログインの要らないもの（`doctor`・`auth status`・`mcp`・`update`、ログインしていないときの `-p` と `remote-control`）は、x86_64 の AlmaLinux 10 のコンテナに手順 2〜4 で入れた `claude-code-2.1.287-1` で確かめた
     - **確認していないこと**: セッションの中の操作（キーとスラッシュコマンド）、`-r` の一覧から選ぶ画面、`claude auth login` / `logout`、`claude remote-control` の接続
   - 2026-10-02: 手順 2 の `{ … }` を、`CC_CHANNEL` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
-    - それまでは、ヒアドキュメントの中の `${CC_CHANNEL:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3](../gnome-power.md#実施手順) の補足）、repo ファイルは書かれずに、後ろの `cat` が `No such file or directory` を出した
+    - それまでは、ヒアドキュメントの中の `${CC_CHANNEL:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、repo ファイルは書かれずに、後ろの `cat` が `No such file or directory` を出した
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
@@ -399,7 +399,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 ### 付録: 使い方の基本の検証記録（2026-10-01）
 
-**ログインの要らないもの**: [tmux.md の付録](tmux.md#付録-コンテナでの検証記録2026-10-01)と同じ x86_64 の AlmaLinux 10 のコンテナ（`10-init`、systemd と sshd）に、手順 2〜4 の `latest` で `claude-code-2.1.287-1` を入れ、SSH でログインした一般ユーザー（ログインしていない）で実行した。
+**ログインの要らないもの**: [tmux.md の付録](almalinux-setup.md#tmux-付録-コンテナでの検証記録2026-10-01)と同じ x86_64 の AlmaLinux 10 のコンテナ（`10-init`、systemd と sshd）に、手順 2〜4 の `latest` で `claude-code-2.1.287-1` を入れ、SSH でログインした一般ユーザー（ログインしていない）で実行した。
 
 | コマンド | 結果 |
 |---|---|
@@ -628,7 +628,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 ### 手順中の実測・検証状況の記録
 
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../tmux.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../windows-claude-remote-control.md)）。本書では、ログインしていないときのエラーだけを確かめた |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../windows-claude-remote-control.md)）。本書では、ログインしていないときのエラーだけを確かめた |
 
 ### ロールバック / 手順 1: 補足: 消えたかの確かめ方
 

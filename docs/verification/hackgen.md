@@ -28,7 +28,7 @@ Error: font-hackgen-nerd: Download failed for font-hackgen-nerd.
 ```
 
 - `PATH` の先頭が `/home/linuxbrew/.linuxbrew/opt/unzip/bin` なので、Homebrew の `unzip`（`brew install unzip`）でも足りるはずだが、本書では BaseOS の `unzip`（`unzip-6.0-69.el10`）を入れた
-- **Homebrew のインストーラも `homebrew.md` の依存パッケージも `unzip` を入れない**ので、formula（ボトル）だけ使ってきた環境では、cask を初めて入れるときにここで引っかかる
+- **Homebrew のインストーラも、AlmaLinux 10 の初期設定の手順 46 の依存パッケージも `unzip` を入れない**ので、formula（ボトル）だけ使ってきた環境では、cask を初めて入れるときにここで引っかかる
 
 ### 実施手順 / 手順 4: 補足: Linux ではフォントが ~/.local/share/fonts に入る
 
@@ -134,14 +134,14 @@ LeftToRight
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 と Windows 11 に、日本語と Nerd Fonts のアイコンが 1 つで揃うプログラミング用フォント [HackGen Console NF](https://github.com/yuru7/HackGen) を入れる。[eza](../eza.md) のアイコンや [starship](../starship.md) の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフが要る
+- **目的**: AlmaLinux 10 と Windows 11 に、日本語と Nerd Fonts のアイコンが 1 つで揃うプログラミング用フォント [HackGen Console NF](https://github.com/yuru7/HackGen) を入れる。eza のアイコンや starship の Nerd Font 前提のプリセット（[AlmaLinux 10 の初期設定](../almalinux-setup.md)）は、端末のフォントに Nerd Fonts のグリフが要る
 - **進め方**: どちらも自分のユーザーだけに入れる。**読者が書き換える変数は無い**
   - **AlmaLinux 10**（[実施手順](../hackgen.md#実施手順)）: Homebrew の cask `font-hackgen-nerd` で自分の `~/.local/share/fonts` に入れ、fontconfig から見えることを確かめる
   - **Windows 11**（[Windows 11 で使う](../hackgen.md#windows-11-で使う)）: 上流の `HackGen_NF_v2.10.0.zip` を、版と sha256 をブロックに書いて確かめてから、`%LOCALAPPDATA%\Microsoft\Windows\Fonts` に置いて自分のユーザーの登録（`HKCU`）に書く。Windows PowerShell 5.1 に貼り、管理者の権限は要らない。[Windows 11 の初期設定](../windows-setup.md)の 1 項目として依頼されたもの
 - **状態（AlmaLinux 10）**: **x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-24、x86_64）。実機には入れていない**
   - 2026-10-06: 別の新規 x86_64 VM では実施手順 1〜5、更新、ロールバックを実行し、WezTerm の日本語・Nerd Font・Powerline を画面でも確認した（末尾の GUI 再検証記録）
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 2〜5・[WezTerm で使う（任意）](../hackgen.md#wezterm-で使う任意)・[更新](../hackgen.md#更新)・[ロールバック](../hackgen.md#ロールバック)を通した
-  - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**（[flatpak.md](../flatpak.md) と同じ環境）
+  - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**（[flatpak.md](../almalinux-setup.md) と同じ環境）
   - 確認したこと:
     - `~/.local/share/fonts` に 4 ファイルが入る
     - `fc-list` / `fc-match` で見える
@@ -164,7 +164,7 @@ AlmaLinux 10:
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-24 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/almalinux:10`、Docker 29.3.1） |
-| Homebrew | Pi は 2026-09-24 のクリーンインストール後の状態を確かめていない | 7.0.6（[homebrew.md](../homebrew.md) の手順 1〜3 で新規導入） |
+| Homebrew | Pi は 2026-09-24 のクリーンインストール後の状態を確かめていない | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 で新規導入） |
 | HackGen | 未導入 | `font-hackgen-nerd 2.10.0`（cask） |
 | unzip / fontconfig | 未確認 | どちらも未導入だったので `dnf` で入れた（`unzip-6.0-69.el10` / `fontconfig-2.15.0-7.el10`） |
 | WezTerm | x86_64 PC に nightly（[wezterm-nightly.md](../wezterm-nightly.md)） | `wezterm 20260921_051727_5eb03b23`（検証のため wezterm-nightly.md の手順で導入） |
@@ -228,7 +228,7 @@ drwxr-xr-x 3 <USER> <USER>     4096 Sep 24 22:07 ..
 
 ### 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` で立てた使い捨てのコンテナ（x86_64 のクラウドホスト上の Docker）に非 root ユーザーを作り、`docker exec` で [Homebrew の導入](../homebrew.md)、手順 2〜5、[WezTerm で使う（任意）](../hackgen.md#wezterm-で使う任意)、[更新](../hackgen.md#更新)、[ロールバック](../hackgen.md#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。検証の準備として、`fontconfig` と `dnf-plugins-core` を `dnf` で、WezTerm を [wezterm-nightly.md](../wezterm-nightly.md) の手順（COPR `rhel-9-x86_64`。鍵の取り込みを無人で通すため `dnf install -y`）で入れ、WezTerm の設定ファイルは wezterm-nightly.md の最小の例をそのまま置いた。
+`quay.io/almalinuxorg/almalinux:10` で立てた使い捨てのコンテナ（x86_64 のクラウドホスト上の Docker）に非 root ユーザーを作り、`docker exec` で [Homebrew の導入](../almalinux-setup.md)、手順 2〜5、[WezTerm で使う（任意）](../hackgen.md#wezterm-で使う任意)、[更新](../hackgen.md#更新)、[ロールバック](../hackgen.md#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。検証の準備として、`fontconfig` と `dnf-plugins-core` を `dnf` で、WezTerm を [wezterm-nightly.md](../wezterm-nightly.md) の手順（COPR `rhel-9-x86_64`。鍵の取り込みを無人で通すため `dnf install -y`）で入れ、WezTerm の設定ファイルは wezterm-nightly.md の最小の例をそのまま置いた。
 
 | 手順 | 結果 |
 |---|---|

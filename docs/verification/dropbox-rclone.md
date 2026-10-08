@@ -128,7 +128,7 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64 | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`、systemd を PID 1） |
-| Homebrew | 7.0.6（[syncthing.md](../syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](../homebrew.md) の手順 1〜3 で新規導入） |
+| Homebrew | 7.0.6（[syncthing.md](../syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 で新規導入） |
 | rclone | 未導入 | 1.75.1（`x86_64_linux` のボトル）。`arm64_linux` のボトルもある（formulae.brew.sh の JSON） |
 | Dropbox のリモート | — | 手順 2 は本物（URL が出るまで）、手順 4 以降は代役（`alias`） |
 | linger | Syncthing のために有効（syncthing.md の記録） | 無効から始めた |
@@ -200,7 +200,7 @@ $ find ~/Dropbox -type f | sort
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
-`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](../homebrew.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
+`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](../almalinux-setup.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
 
 途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜10（手順 6 は飛ばした。linger は今の [linger.md](../linger.md) の手順に当たるもの）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
 

@@ -7,7 +7,7 @@
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理と自分の設定は、`sudo -i` した root のシェルでは行わない
 > - **手順 1 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 2 を貼る
 > - **手順 2 で TUI が開く**。`:q` で終了してから、ほかのコマンドを貼る
@@ -118,7 +118,7 @@
    brew uninstall neovim
    ```
 
-   - 他の formula が使う依存は残る。不要になった依存は Homebrew が自動で削除する場合がある（[Homebrew の注意点](homebrew.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
+   - 他の formula が使う依存は残る。不要になった依存は Homebrew が自動で削除する場合がある（[Homebrew の注意点](almalinux-setup.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
    - `~/.config/nvim`、`~/.local/share/nvim`（プラグイン）、`~/.local/state/nvim`（undo・swap）は残るので、要らなければ手で消す
    - 自分用の設定（LazyVimStarter）を入れていれば、その [docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)で、退避した設定に戻す
 
@@ -126,11 +126,11 @@
 
 ## 注意点
 
-- **EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ（[homebrew.md の注意点](homebrew.md#注意点)）。どちらか一方にする
-- **`sudo nvim` は、そのままでは動かない**: sudo の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）
-  - [homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む
+- **EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）。どちらか一方にする
+- **`sudo nvim` は、そのままでは動かない**: sudo の PATH に Homebrew が無い（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
+  - [AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む
   - root のファイルを自分の設定で編集するなら、`sudo nvim` ではなく `sudoedit` を使う（その節を通すか、`SUDO_EDITOR` にフルパスを渡す。[既定のエディタにする](#既定のエディタにする任意)）
-  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節だけでは動かない）
+  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節だけでは動かない）
 - **プロバイダは別途**: Python / Node.js のプラグインを使うなら、それぞれ `pynvim` / `neovim` パッケージを入れる。このホストには Node.js が無い
 - **設定とプラグインは更新に追従しない**: `brew upgrade neovim` でメジャー版が上がると、古い API を使うプラグインが壊れることがある
 - **`vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
