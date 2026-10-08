@@ -16,7 +16,7 @@
 > - GUI アプリはどれも画面を出していない
 > - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
 > - **[CLI: コンテナ](../tool-catalog.md#cli-コンテナ)と GUI の[コンテナ](../tool-catalog.md#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
-> - 2026-09-28 に、[ベンダーの dnf リポジトリ](../tool-catalog.md#ベンダーの-dnf-リポジトリ)と[更新](../tool-catalog.md#更新)のブロックを `{ … }` で囲んだ（[README の記法](../../README.md#記法)）。中のコマンドは変えていない
+> - 2026-09-28 に、[ベンダーの dnf リポジトリ](../tool-catalog.md#ベンダーの-dnf-リポジトリ)と[更新](../tool-catalog.md#更新)のブロックを `{ … }` で囲んだ（[README の記法](../writing-guide.md#記法)）。中のコマンドは変えていない
 > - [CLI: 定番の置き換え](../tool-catalog.md#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
 > - 同じ表にあった fzf は、2026-10-02 に手順書にした（bash への組み込みまで。[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
 > - 2026-10-03 に、zoxide の dnf（COPR）の経路を zoxide.md から外し、[文書化済みのツール](../tool-catalog.md#文書化済みのツール)の「zoxide（dnf）」の行を消した

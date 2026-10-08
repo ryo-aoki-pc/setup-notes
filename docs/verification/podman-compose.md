@@ -141,7 +141,7 @@ hello from compose
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - クリーンインストール後に podman.md と epel.md を通した VM で、本文の手順 1〜6 をそのまま SSH の擬似端末に貼った。EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼べた。
 - `up -d` で pod・ネットワーク・`web` / `check` ができた。公開ポートとコンテナ間のサービス名 `web:8080` の両方で、確認用の HTML が返った。

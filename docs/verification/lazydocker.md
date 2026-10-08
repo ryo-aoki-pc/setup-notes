@@ -296,7 +296,7 @@ AlmaLinux 10.2 の aarch64 ホストで、導入済みの lazydocker 0.25.2 を�
 
 **検証した版**: コミット `0dbb522` の lazydocker.md と前提の手順書を使った。共通の bash 設定へ統一する前の版で、今回の VM にその共通設定は導入していない。後から変更されたコードブロックと、共通設定を前提にした構築の流れは、この VM で本実行していない。
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。この版のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。この版のブロックを SSH の擬似端末で実行した。
 
 - `0dbb522` 版の podman.md の Docker 向けの節と homebrew.md の後、同じ版の lazydocker.md の実施手順 1〜5 を通した。Homebrew の lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 のソケットにつながった。
 - `lazydocker-web` と Apache のログが表示された。`s` で Stop の確認を開き、`y` で止めると `Exited (0)` になった。`q` で終え、CLI でも停止を確認した。SELinux は Enforcing のまま。

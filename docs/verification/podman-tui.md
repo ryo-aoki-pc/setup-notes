@@ -139,7 +139,7 @@ podman-tui-web Exited (0) 19 seconds ago
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - podman.md と epel.md の後、本文の手順 1〜5 を通した。EPEL の podman-tui 1.10.0 が入り、podman 5.8.2 のソケットに `STATUS_OK` でつながった。SELinux は Enforcing のまま。
 - 確認用の `podman-tui-web` に対し、F4 でコンテナ一覧、`m` でメニューを開き、`stop` を選んだ。画面と終了後の `podman ps -a` の両方で `Exited (0)` を確認した。

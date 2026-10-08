@@ -158,7 +158,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - podman.md と epel.md を通した VM で、手順 1〜6 を本文のまま実行した。EPEL の distrobox 1.8.2.3 と `quay.io/toolbx/ubuntu-toolbox:24.04` を使い、Ubuntu 24.04.5 LTS のボックスができた。
 - SELinux は Enforcing、cgroup v2 に pids のコントローラがある。以前のコンテナ検証の podman ラッパーは置かず、`--pids-limit=-1` のまま初期化を完了した。1 vCPU の VM では初期化に約 8 分かかった。

@@ -228,7 +228,7 @@ curl: (6) Could not resolve host: github.com
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - [ssh-socks-tunnel.md の今回の記録](ssh-socks-tunnel.md#付録-vm-での検証記録2026-10-06)と同じ、既定経路を無くして再起動した新しい VM を使った。Homebrew は未導入で、取得先に直接つながらない状態から始めた。
 - 手順 1 の 4 URL は SOCKS 経由で順に 200 / 301 / 200 / 401。必要な RPM は Workstation に既に入っていたため、本文の条件に従って手順 2 と homebrew.md の手順 1 は飛ばした。

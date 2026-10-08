@@ -255,7 +255,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 | 項目 | 値 |
 |---|---|
 | ホスト | Windows 11 Pro 10.0.26300、VirtualBox 7.2.20（Hyper-V の NEM） |
-| VM | [AlmaLinux 10 の環境構築の検証](../almalinux-vm-verification.md)の `clean-install` スナップショット（公式 ISO の Workstation）から、リンククローンを 2 台新しく作った。PC 役（共有する側、RAM 6 GiB）とクライアント役（RAM 4 GiB） |
+| VM | [AlmaLinux 10 の環境構築の検証](almalinux-vm.md)の `clean-install` スナップショット（公式 ISO の Workstation）から、リンククローンを 2 台新しく作った。PC 役（共有する側、RAM 6 GiB）とクライアント役（RAM 4 GiB） |
 | CPU | 1 vCPU。2 vCPU にした初回は、2 台とも UEFI の `CpuMpPei` か、カーネルの起動の途中（`evm: HMAC attrs` の後）で止まったので、前回の検証と同じ 1 vCPU に戻した |
 | ネットワーク | NAT（SSH 用の転送）と、ホストオンリー `192.168.56.0/24`（PC 役 `192.168.56.81`、クライアント役 `192.168.56.82`、ホスト `192.168.56.1`）。LAN の外の試験だけ、PC 役の NAT に `127.0.0.1:23389 → 3389` の転送を足した |
 | 試験用の値 | ユーザー `verifier`、PC 役のホスト名 `pr100-pc.test`、RDP のユーザー名 `rdpuser`（パスワードは VM 専用の乱数。リポジトリには載せない） |
@@ -530,7 +530,7 @@ b false
 ### 後続のクリーンインストール VM 検証（依頼・実施: 2026-10-07）
 
 - 利用者の「開始してください」の依頼により、このホスト上で公式 ISO から新規インストールした aarch64 VM を検証した。通常の仮想 GPU と別のクライアント VM を使い、実 OS 再起動後の最初の認証と通常のロールバックまで通した。[別の付録](#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)に結果と画像を記録する
-- [以前の Windows / VirtualBox の x86_64 VM](../almalinux-vm-verification.md)は使用していない。今回の結果を、その環境の再検証とは扱わない
+- [以前の Windows / VirtualBox の x86_64 VM](almalinux-vm.md)は使用していない。今回の結果を、その環境の再検証とは扱わない
 
 ### 文書の最終確認（2026-10-07）
 

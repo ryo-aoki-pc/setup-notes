@@ -54,6 +54,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
 - [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
 - [lazygit Config Docs（v0.66.0）](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md) — Windows の設定の場所（`%LOCALAPPDATA%\lazygit\config.yml`）と `LG_CONFIG_FILE`
-- [ryo-aoki-pc/lazygit — README の導入方法](https://github.com/ryo-aoki-pc/lazygit#導入方法) — 自分用の設定の Windows の clone の例と元に戻し方
+- [ryo-aoki-pc/lazygit — README の導入方法](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/setup.md#導入方法) — 自分用の設定の Windows の clone の例と元に戻し方
 
 ---

@@ -242,7 +242,7 @@ $ find ~/Dropbox -type f | sort
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - 本文の手順 1 で Homebrew の rclone 1.75.1 が入った。手順 2 では版とコマンドの場所を確認し、Dropbox リモートの作成が認証 URL と `127.0.0.1:53682` の待ち受けを出した。
 - ブラウザで許可する前に Ctrl+C 相当で中断した。手順 2 の設定作成は未完了で、手順 3 以降は実行していない。今回の VM では代役のリモートを使った同期もしていない。

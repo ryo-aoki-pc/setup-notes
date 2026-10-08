@@ -190,7 +190,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - [homebrew-offline.md の今回の記録](homebrew-offline.md#付録-vm-での検証記録2026-10-06)と同じ VM で、dnf の SOCKS 設定と Neovim の導入を前提から用意した。本文の主手順を SSH の擬似端末で通した。
 - 手順 1 で AppStream の Node.js 22.23.2 と npm 10.9.8 が、計 5 パッケージで入った。手順 2 のコマンドの場所は `/usr/bin/node` / `/usr/bin/npm`、プロキシの設定ファイルの値は両方 `null`。`https_proxy` を入れると `npm ping` は `PONG 384ms` だった。

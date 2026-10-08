@@ -209,7 +209,7 @@ Report Summary
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - podman.md と homebrew.md を通した VM で、手順 1〜10 を本文のまま実行した。hadolint 2.15.1、dive 0.13.1、ベンダーの RPM の Trivy 0.75.0 が入った。Trivy の鍵の fingerprint も本文と一致した。
 - 欠陥のある Containerfile は hadolint が DL3006 / DL3040 / DL3041 を報告して終了 1、直した Containerfile は終了 0。`localhost/image-check:1` を実際にビルドした。

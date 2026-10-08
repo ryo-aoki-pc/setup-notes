@@ -20,7 +20,7 @@
 | 項目 | 内容 |
 |---|---|
 | ホスト | Windows 11 Pro、VirtualBox 7.2.20（Hyper-V の NEM のバックエンド） |
-| VM | `clean-install` のスナップショット（AlmaLinux 10.2 の Workstation。[AlmaLinux 10 の環境構築の記録](../almalinux-vm-verification.md)と同じベース）からのリンククローン。EFI、2 vCPU、RAM 6 GiB、VMSVGA（1280×800）、NAT と SSH の転送 |
+| VM | `clean-install` のスナップショット（AlmaLinux 10.2 の Workstation。[AlmaLinux 10 の環境構築の記録](almalinux-vm.md)と同じベース）からのリンククローン。EFI、2 vCPU、RAM 6 GiB、VMSVGA（1280×800）、NAT と SSH の転送 |
 | ゲスト | AlmaLinux 10.2、kernel `6.12.0-211.61.1.el10_2.x86_64`、GNOME Shell 49.4、mutter 49.4、gdm 47.0、Nautilus 47.6、Ptyxis 47.13、fwupd 2.0.19、systemd 257、dnf 4.20.0、SELinux Enforcing、ロケール `ja_JP.UTF-8`、US キーボード |
 | 入れたもの | `epel-release` 10-6（後で 10-8）、`rpmfusion-free-release` 10-1、Flatpak 1.16.0 と Flatseal 2.4.1、`gnome-shell-extension-appindicator` 61、Homebrew 7.0.8、starship 1.26.0・zoxide 0.10.0・fzf 0.74.4・eza 0.23.5・bat 0.26.1・tmux 3.7c、共通の bash 設定（`ryo-aoki-pc/bash` の `bdb64c2`） |
 | 貼り方 | 文書から抜き出したブロックを、SSH の対話の bash（`xterm-256color`）にブラケットペーストで 1 つずつ貼った。画面の操作は VirtualBox のキーボード（途中から USB タブレットのポインタ）で行い、画面を撮って確かめた |
@@ -1303,7 +1303,7 @@ bash -lc 'echo "$XDG_DATA_DIRS"'
   - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](../tool-catalog.md#aarch64-で使えないもの)を参照）
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
   - 2026-09-28: [ロールバック](../almalinux-setup.md#ロールバック)の手順 4のブロックを `{ … }` で囲んだ
-    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../writing-guide.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-02: もとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
@@ -1924,7 +1924,7 @@ error: failed to update at least one of the databases
     - logind の `HandleLidSwitch` が `"ignore"` になり、戻せる
   - **確認していないこと**: 物理モニターの画面が消えない・暗くならない・ロックしないこと、サスペンドできる PC が実際に眠らないこと、ログイン画面・蓋・電源ボタンの実際の動き、GNOME のメニューと設定アプリの表示
   - 2026-09-28: もとの手順 4〜6（今の手順 3 の `dconf update` から後と、手順 4・5）と、[ロールバック](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)のもとの手順 3〜5（今の手順 2 の `dconf update` から後と、手順 3・4）のブロックを `{ … }` で囲んだ
-    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
+    - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../writing-guide.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-01: 手順 2 と[ロールバック](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
     - ロールバックの手順 1 の、`/usr/bin/gsettings` にした形は流していない

@@ -57,13 +57,13 @@
 - Windows 11 の置き場所は `%LOCALAPPDATA%\lazygit\config.yml`（`%APPDATA%\lazygit\config.yml` があれば、そちらも見つける）。状態ファイル `state.yml` も同じフォルダーに入る（[Windows 11 で使う](#windows-11-で使う)の手順 5 で確かめる）
   - この節の手順 1 は AlmaLinux 10 のもの。Windows 11 の Git Bash に貼っても、lazygit は `~/.config/lazygit` を読まない
 - **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
-  - 入れ方は [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)。clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
-  - Windows 11 の入れ方は、同じ [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の Windows の例（シンボリックリンクではなく、`%LOCALAPPDATA%\lazygit` に直接 clone する。元に戻すブロックもそこにある）
+  - 入れ方は [設定の導入方法](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/setup.md#導入方法)。clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
+  - Windows 11 の入れ方は、同じ [設定の導入方法](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/setup.md#導入方法)の Windows の例（シンボリックリンクではなく、`%LOCALAPPDATA%\lazygit` に直接 clone する。元に戻すブロックもそこにある）
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[hackgen.md](hackgen.md)）にする
     - Windows 11 で入れるのは [hackgen.md の Windows 11 で使う](hackgen.md#windows-11-で使う)。Windows Terminal のフォントにするのは [Windows 11 の初期設定の任意節](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える任意)で、WezTerm は自分用の設定で変わる
   - 差分の表示に delta を使う。delta は [git-delta.md](git-delta.md) で入れる（lazygit 側の設定は、その[lazygit と組み合わせる（任意）](git-delta.md#lazygit-と組み合わせる任意)）
-    - Windows 11 は [git-delta.md の Windows 11 で使う](git-delta.md#windows-11-で使う)の手順 2・3（VC++ のランタイムも、その手順 2 で確かめる）。Windows の設定例の引用符は [README の「Windows で使う場合」](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)
+    - Windows 11 は [git-delta.md の Windows 11 で使う](git-delta.md#windows-11-で使う)の手順 2・3（VC++ のランタイムも、その手順 2 で確かめる）。Windows の設定例の引用符は [delta の Windows 向け設定](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/diff-renderers.md#windows-で使う場合)
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（手順 1 の `LG_EDITOR` は使わない。[neovim.md の既定のエディタにする](neovim.md#既定のエディタにする任意)）
     - Windows 11 で Windows PowerShell から起動するなら、[neovim.md の既定のエディタにする（任意）](neovim.md#既定のエディタにする任意)の手順 2 で、ユーザーの環境変数 `EDITOR` を `nvim` にする
   - この設定を入れるなら、この節の手順 1 は貼らない（リンク先の clone したファイルを使う）
@@ -244,7 +244,7 @@
 ## Windows 11 のロールバック
 
 - この節の手順 1 は、管理者ではない Windows PowerShell（5.1）に、lazygit をすべて閉じてから貼る
-- `%LOCALAPPDATA%\lazygit`（設定と状態ファイル `state.yml`）は残るので、要らなければ手で消す。自分用の設定を clone していれば、その [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の元に戻すブロックで、退避した設定に戻す
+- `%LOCALAPPDATA%\lazygit`（設定と状態ファイル `state.yml`）は残るので、要らなければ手で消す。自分用の設定を clone していれば、その [設定の導入方法](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/setup.md#導入方法)の元に戻すブロックで、退避した設定に戻す
 - extras のバケットは、ほかのアプリも使うので外さない（外すなら `scoop bucket rm extras`）
 - 自分用の Neovim の設定（LazyVimStarter）は、`<leader>gg` で lazygit を使う。消すと、そのキーが使えなくなる
 

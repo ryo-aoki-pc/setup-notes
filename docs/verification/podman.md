@@ -255,7 +255,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 **検証した版**: `0dbb522`。以下の手順番号と「本文」はこの版を指す。その後に共通 bash 設定へ統一したシェル設定の導入・移行は今回の VM では行っていない。
 

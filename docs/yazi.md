@@ -77,9 +77,9 @@
 - **既定値のファイルは配布物に入っていない**。変更する項目だけを設定ファイルに書く
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
-  - 入れ方は [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)。`custom` ブランチを `~/.config/yazi` に clone する
-  - Windows 11 の入れ方は、同じ [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)の Windows の例（`custom` ブランチを `%APPDATA%\yazi\config` に clone する）。そこにある `YAZI_FILE_ONE` と VC++ のランタイムは、[Windows 11 で使う](#windows-11-で使う)の手順 3・5 で済んでいる
-  - 足したキーは [設定のリポジトリの参考資料の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、使う外部コマンドは [README の「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
+  - 入れ方は [設定の導入](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/setup.md#インストール)。`custom` ブランチを `~/.config/yazi` に clone する
+  - Windows 11 の入れ方は、同じ [設定の導入](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/setup.md#インストール)の Windows の例（`custom` ブランチを `%APPDATA%\yazi\config` に clone する）。そこにある `YAZI_FILE_ONE` と VC++ のランタイムは、[Windows 11 で使う](#windows-11-で使う)の手順 3・5 で済んでいる
+  - 足したキーは [設定のリポジトリの参考資料の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、使う外部コマンドは [導入の依存コマンド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/setup.md#依存コマンド)
   - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（Windows 11 は[Windows 11 で使う](#windows-11-で使う)の手順 4。fzf の bash のキー操作は [AlmaLinux 10 の初期設定の手順 42〜53](almalinux-setup.md#実施手順) で入る）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順) で入れる
     - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定のシェルのツールを入れる（任意）](windows-setup.md#シェルのツールを入れる任意)で入る（zoxide は 0.9.9 に止める）
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
@@ -267,7 +267,7 @@
 
 - この節の手順 1 は、[Windows 11 で使う](#windows-11-で使う)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
 - [Windows 11 の初期設定の更新](windows-setup.md#更新)の手順 1・2（`scoop update *`）でも上がる。`$YAZI_EXTRAS` で入れたツールも、そこで上がる
-- 自分用の設定（`ryo-aoki-pc/yazi`）は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
+- 自分用の設定（`ryo-aoki-pc/yazi`）は上流の版に合わせてある。yazi の版が上がったら、その [上流への追従手順](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/maintenance.md#上流の新しい版に追従する)で設定も追う
 - SSH のセッションで使っているなら、上げた後に [windows-openssh-server.md の scoop のツールを SSH のセッションで使う（任意）](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を、管理者の Windows PowerShell で貼り直す
 
 1. yazi をすべて閉じてから、scoop で上げる。

@@ -87,11 +87,12 @@
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
   - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書）。`~/.config/wezterm` に clone する。シェル統合は bash の共通設定が読むので、参照先の手順 5〜7（直接追記）は行わず、手順 8 で端末を開き直す
   - Windows 11 では、同じブロックを Git for Windows の Git Bash（[git.md](git.md)）に貼る（docs/install.md のとおり）
-  - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
+  - どこを変えればよいかは [設定参照の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/configuration.md#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
   - フォントは HackGen Console NF（[hackgen.md](hackgen.md)。Windows 11 は同書の[Windows 11 で使う](hackgen.md#windows-11-で使う)）
-  - AlmaLinux 10 だけ: 本書の RPM が置く `/etc/profile.d/wezterm.sh` が読まれていると、設定のシェル統合は迷子のマウス報告よけだけになり、完了通知は動かない（[docs/install.md の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md#注意点)）
-  - Windows 11 のインストーラはシェル統合を入れない。設定が無いときに開くシェルは `cmd.exe`（`%COMSPEC%`）で、この設定は Git Bash を既定にし、Git Bash と PowerShell のシェル統合を設定の中から読ませる（[README の「シェル統合」](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
+  - AlmaLinux 10 だけ: 本書の RPM が置く `/etc/profile.d/wezterm.sh` の公式 Bash 統合を保ち、この設定が Starship の後でプロンプトの区切りと完了通知を補う（[シェル統合の仕様](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/shell-integration.md#シェル統合)）
+    - 公式統合は無効にせず、共通の bash 設定の順序で読み、新しいタブを開く（[導入手順の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)）
+  - Windows 11 のインストーラはシェル統合を入れない。設定が無いときに開くシェルは `cmd.exe`（`%COMSPEC%`）で、この設定は Git Bash を既定にし、Git Bash と PowerShell のシェル統合を設定の中から読ませる（[シェル統合の仕様](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/shell-integration.md#シェル統合)）
   - この設定を入れるなら、この節の手順 1 は貼らない（`~/.config/wezterm` が空でないと clone できない）
   - `~/.wezterm.lua` があると、clone した設定は読まれない
 

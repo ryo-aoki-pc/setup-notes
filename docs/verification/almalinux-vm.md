@@ -6,7 +6,7 @@
 
 公式 ISO から Workstation を新規インストールし、その状態のスナップショットから用途ごとの VM を作った。既に環境構築済みのホストを使い回さず、各 VM で前提の手順書から順に通した。導入・設定・CLI / GUI の確認と、サーバー間の通信を対象にした。アカウントの認証が必要な手順、ハードウェアの条件を満たさない分岐、実機のルーター設定は、到達したところと未実施の範囲を分けて記録する。
 
-この文書は検証結果の一覧。実行するときは、リンク先の手順書を使う。各手順書から案内する `verification/<手順書名>.md` にも、今回の状態と検証範囲を記録している。2026-10-08 に、Homebrew・EPEL・bash の設定など 13 本の手順書を [AlmaLinux 10 の初期設定](almalinux-setup.md)にまとめた。表のそれらの文書へのリンクは、まとめた先を指す（当時の記録と手順番号の対応は、その[検証記録](verification/almalinux-setup.md)の「統合前の記録」）。
+この文書は検証結果の一覧。実行するときは、リンク先の手順書を使う。各手順書から案内する `verification/<手順書名>.md` にも、今回の状態と検証範囲を記録している。2026-10-08 に、Homebrew・EPEL・bash の設定など 13 本の手順書を [AlmaLinux 10 の初期設定](../almalinux-setup.md)にまとめた。表のそれらの文書へのリンクは、まとめた先を指す（当時の記録と手順番号の対応は、その[検証記録](almalinux-setup.md)の「統合前の記録」）。
 
 **現行版の結果**: 共通 bash と設定サブモジュールを含む現行版は、その後に新規作成した 6 台で通し直した。[現行版と全サブモジュールの再検証](#現行版と全サブモジュールの再検証2026-10-06)を参照。以下の前半は、それより前の検証版の記録として残している。
 
@@ -40,29 +40,29 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 
 | 手順書 | 今回の範囲と結果 |
 |---|---|
-| [Git](git.md) | 導入・設定・一時リポジトリの操作。認証を伴う GitHub への送信は除外 |
-| [Homebrew](almalinux-setup.md) / [EPEL](almalinux-setup.md) | 新規導入、PATH と導入元の確認。インストーラの Return / sudo / パッケージ導入の問い合わせにも答えた |
-| [gh](gh.md) / [Claude Code](claude-code.md) / [Codex CLI](codex.md) | 導入・版・未ログインの確認まで。Codex はインストーラの再実行で 0.160.0 → 0.160.1 の更新も確認。実アカウントへのログインと認証後の操作は除外 |
-| [btop](btop.md) / [tmux](almalinux-setup.md) / [bat](almalinux-setup.md) / [eza](almalinux-setup.md) / [gdu](gdu.md) | 導入と実行。TUI は文字を読み取り、キーの応答と終了を確認 |
-| [zoxide](almalinux-setup.md) / [fzf](almalinux-setup.md) | bash の設定を読み直し、移動・履歴・ファイル・ディレクトリ選択を実際に操作 |
-| [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [delta](git-delta.md) | 導入と対話操作。yazi の追加ツールは本文の既定を全て導入し、ディレクトリ移動・ZIP プレビューも確認。Neovim の checkhealth はエラー無し、任意 provider などの警告 8 件。delta のページャと複数の変更間の n / N の移動も成功 |
-| [ShellCheck](shellcheck.md) / [HackGen Console NF](hackgen.md) / [bash の設定](almalinux-setup.md) / [starship](almalinux-setup.md) | 導入・設定・読み戻し。ShellCheck で WG スクリプトを検査し、フォントの 4 字種、Tab・履歴・移動、再 SSH 後のプロンプトも確認 |
+| [Git](../git.md) | 導入・設定・一時リポジトリの操作。認証を伴う GitHub への送信は除外 |
+| [Homebrew](../almalinux-setup.md) / [EPEL](../almalinux-setup.md) | 新規導入、PATH と導入元の確認。インストーラの Return / sudo / パッケージ導入の問い合わせにも答えた |
+| [gh](../gh.md) / [Claude Code](../claude-code.md) / [Codex CLI](../codex.md) | 導入・版・未ログインの確認まで。Codex はインストーラの再実行で 0.160.0 → 0.160.1 の更新も確認。実アカウントへのログインと認証後の操作は除外 |
+| [btop](../btop.md) / [tmux](../almalinux-setup.md) / [bat](../almalinux-setup.md) / [eza](../almalinux-setup.md) / [gdu](../gdu.md) | 導入と実行。TUI は文字を読み取り、キーの応答と終了を確認 |
+| [zoxide](../almalinux-setup.md) / [fzf](../almalinux-setup.md) | bash の設定を読み直し、移動・履歴・ファイル・ディレクトリ選択を実際に操作 |
+| [yazi](../yazi.md) / [lazygit](../lazygit.md) / [Neovim](../neovim.md) / [delta](../git-delta.md) | 導入と対話操作。yazi の追加ツールは本文の既定を全て導入し、ディレクトリ移動・ZIP プレビューも確認。Neovim の checkhealth はエラー無し、任意 provider などの警告 8 件。delta のページャと複数の変更間の n / N の移動も成功 |
+| [ShellCheck](../shellcheck.md) / [HackGen Console NF](../hackgen.md) / [bash の設定](../almalinux-setup.md) / [starship](../almalinux-setup.md) | 導入・設定・読み戻し。ShellCheck で WG スクリプトを検査し、フォントの 4 字種、Tab・履歴・移動、再 SSH 後のプロンプトも確認 |
 
 ### デスクトップ
 
 | 手順書 | 今回の範囲と結果 |
 |---|---|
-| [電源とロック](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) | ユーザー・GDM・OS の設定を実行して読み戻し。Workstation の自動サスペンドを止めた |
-| [ヘッドレスのセッション](gnome-headless-session.md) / [GUI の操作](claude-code-gui.md) | セッションと仮想モニターを作り、画面を撮影。電卓への入力とクリックを確認。GUI 構成を戻した後の再起動でも 1920×1080 の撮影・入力・クリックが成功 |
-| [日本語入力](almalinux-setup.md) | Anthy を有効にして実際に日本語を確定。Mutter のキーコード入力で `日本語` を確認。既存スクリプトの keysym によるローマ字入力は別の制限として記録 |
-| [RPM Fusion](almalinux-setup.md) / [Firefox](firefox.md) | リポジトリ・Firefox・FFmpeg の導入。H.264 / AAC の動画を表示し、復号フレームの増加を確認。音声の実出力と GPU デコードは未確認 |
-| [Flatpak](almalinux-setup.md) / [VS Code](vscode.md) | 導入と実ウィンドウの起動。VS Code の desktop ファイルの確認方法を修正。Flatseal は Activities と CLI 検索で見えるが、GNOME Software の検索では表示されなかった |
-| [WezTerm nightly](wezterm-nightly.md) | COPR の EL9 RPM を EL10 に導入、依存を確認して実ウィンドウを起動 |
-| [GNOME Remote Desktop](gnome-remote-desktop.md) | 別 VM の FreeRDP から 3390 の既存セッションと 3389 の GDM に接続。新規セッション・再接続・既存セッションへの引き渡し、再起動後の接続と LAN の接続元制限も確認 |
+| [電源とロック](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) | ユーザー・GDM・OS の設定を実行して読み戻し。Workstation の自動サスペンドを止めた |
+| [ヘッドレスのセッション](../gnome-headless-session.md) / [GUI の操作](../claude-code-gui.md) | セッションと仮想モニターを作り、画面を撮影。電卓への入力とクリックを確認。GUI 構成を戻した後の再起動でも 1920×1080 の撮影・入力・クリックが成功 |
+| [日本語入力](../almalinux-setup.md) | Anthy を有効にして実際に日本語を確定。Mutter のキーコード入力で `日本語` を確認。既存スクリプトの keysym によるローマ字入力は別の制限として記録 |
+| [RPM Fusion](../almalinux-setup.md) / [Firefox](../firefox.md) | リポジトリ・Firefox・FFmpeg の導入。H.264 / AAC の動画を表示し、復号フレームの増加を確認。音声の実出力と GPU デコードは未確認 |
+| [Flatpak](../almalinux-setup.md) / [VS Code](../vscode.md) | 導入と実ウィンドウの起動。VS Code の desktop ファイルの確認方法を修正。Flatseal は Activities と CLI 検索で見えるが、GNOME Software の検索では表示されなかった |
+| [WezTerm nightly](../wezterm-nightly.md) | COPR の EL9 RPM を EL10 に導入、依存を確認して実ウィンドウを起動 |
+| [GNOME Remote Desktop](../gnome-remote-desktop.md) | 別 VM の FreeRDP から 3390 の既存セッションと 3389 の GDM に接続。新規セッション・再接続・既存セッションへの引き渡し、再起動後の接続と LAN の接続元制限も確認 |
 
 ヘッドレスの RDP 接続から、電卓に `12×34` を入力し `408` を確認した画面:
 
-![FreeRDP クライアントから操作した GNOME の電卓](images/almalinux-vm/rdp-calculator.png)
+![FreeRDP クライアントから操作した GNOME の電卓](../images/almalinux-vm/rdp-calculator.png)
 
 デスクトップ VM の再起動後は、GDM → システムの GNOME Remote Desktop の順に起動し、`GetManagedObjects` の警告は無かった。3389 の GDM からヘッドレスのセッションへ引き渡し、電卓の `9×9 = 81` を確認した。切断して 3390 へ直接接続しても同じ表示が残った。これは Linux の FreeRDP クライアントでの確認で、Windows の「リモートデスクトップ接続」は今回使っていない。
 
@@ -70,12 +70,12 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 
 | 手順書 | 今回の範囲と結果 |
 |---|---|
-| [linger](linger.md) | 有効化、解除、再有効化。ユーザーサービスの前提として使用 |
-| [Samba](samba.md) | 共有の作成と認証、ホームと root の任意共有、SELinux Enforcing での読み書き |
-| [Samba クライアント](samba-client.md) | 別 VM から CIFS の手動マウント、読み書き、資格情報の権限、fstab / automount。再起動・未使用時の解除・再アクセスと、GNOME Files の接続・F5・切断も確認 |
-| [Syncthing](syncthing.md) | 2 台への導入・ユーザーサービス・GUI の設定、日本語名ファイルの双方向同期、バックアップ 8 個の一致と設定の復元。TLS 設定の応答が切れる問題を修正 |
-| [WireGuard](wireguard.md) | 2 台で鍵生成・apply、カーネルの WireGuard と firewalld を使用。各 LAN を模した namespace 間で双方向 ICMP、MTU 1420、TCP / HTTP を確認 |
-| [WireGuard Road Warrior](wireguard-road-warrior.md) | 別 VM で鍵生成、ホストでクライアント追加、NetworkManager への import、切断と接続。実機の回線切り替えは除外 |
+| [linger](../linger.md) | 有効化、解除、再有効化。ユーザーサービスの前提として使用 |
+| [Samba](../samba.md) | 共有の作成と認証、ホームと root の任意共有、SELinux Enforcing での読み書き |
+| [Samba クライアント](../samba-client.md) | 別 VM から CIFS の手動マウント、読み書き、資格情報の権限、fstab / automount。再起動・未使用時の解除・再アクセスと、GNOME Files の接続・F5・切断も確認 |
+| [Syncthing](../syncthing.md) | 2 台への導入・ユーザーサービス・GUI の設定、日本語名ファイルの双方向同期、バックアップ 8 個の一致と設定の復元。TLS 設定の応答が切れる問題を修正 |
+| [WireGuard](../wireguard.md) | 2 台で鍵生成・apply、カーネルの WireGuard と firewalld を使用。各 LAN を模した namespace 間で双方向 ICMP、MTU 1420、TCP / HTTP を確認 |
+| [WireGuard Road Warrior](../wireguard-road-warrior.md) | 別 VM で鍵生成、ホストでクライアント追加、NetworkManager への import、切断と接続。実機の回線切り替えは除外 |
 
 WireGuard の拠点間通信には VM の内部ネットワークを使った。家庭のルーターのポート転送、外部の回線からの接続、実際の LAN に置いた機器は今回の検証に含まれない。
 
@@ -87,19 +87,19 @@ Samba とクライアント、Syncthing のロールバックも実行した。�
 
 | 手順書 | 今回の範囲と結果 |
 |---|---|
-| [Podman](podman.md) | 実施手順 1〜3・5〜7、API、Docker 向けの節、Quadlet。subuid / subgid は既存のため補う分岐は飛ばした |
-| [podman-compose](podman-compose.md) | 実施手順 1〜6。公開ポートとサービス名で HTTP が返り、`:Z` のラベルとカテゴリも一致 |
-| [Distrobox](distrobox.md) | 実施手順 1〜6。Ubuntu 24.04.5 の初期化と入退場。pids の読み替えは不要 |
-| [hadolint / dive / Trivy](image-tools.md) | 実施手順 1〜10。意図した lint エラー、イメージのビルド、dive の判定・画面操作、Trivy の DB 取得と走査 |
-| [podman-tui](podman-tui.md) / [lazydocker](lazydocker.md) | 各実施手順 1〜5。実際のコンテナを画面から停止し、CLI でも停止を確認 |
-| [Dropbox](dropbox.md) | 実施手順 1〜7。署名の検証、新規導入、ユーザーサービス、リンク用 URL の表示まで。アカウント未リンク |
-| [Dropbox（rclone）](dropbox-rclone.md) | 導入と OAuth 待ち受けまで。ブラウザで許可する前に中断。同期は未実施 |
-| [ssh の SOCKS トンネル](ssh-socks-tunnel.md) / [Homebrew のオフライン導入](homebrew-offline.md) / [npm のオフライン導入](npm-offline.md) | 既定経路の無い VM と Windows の OpenSSH を使用。Homebrew の新規導入、jq、dnf、Node.js / npm、Mason の範囲は各付録に記録 |
-| [VirtualBox](virtualbox.md) / [Secure Boot の MOK](secure-boot-mok.md) | ゲストに仮想化支援が見えず、Secure Boot も無効。本文の条件に従って止めた。入れ子の VM 起動と MOK 登録は未実施 |
+| [Podman](../podman.md) | 実施手順 1〜3・5〜7、API、Docker 向けの節、Quadlet。subuid / subgid は既存のため補う分岐は飛ばした |
+| [podman-compose](../podman-compose.md) | 実施手順 1〜6。公開ポートとサービス名で HTTP が返り、`:Z` のラベルとカテゴリも一致 |
+| [Distrobox](../distrobox.md) | 実施手順 1〜6。Ubuntu 24.04.5 の初期化と入退場。pids の読み替えは不要 |
+| [hadolint / dive / Trivy](../image-tools.md) | 実施手順 1〜10。意図した lint エラー、イメージのビルド、dive の判定・画面操作、Trivy の DB 取得と走査 |
+| [podman-tui](../podman-tui.md) / [lazydocker](../lazydocker.md) | 各実施手順 1〜5。実際のコンテナを画面から停止し、CLI でも停止を確認 |
+| [Dropbox](../dropbox.md) | 実施手順 1〜7。署名の検証、新規導入、ユーザーサービス、リンク用 URL の表示まで。アカウント未リンク |
+| [Dropbox（rclone）](../dropbox-rclone.md) | 導入と OAuth 待ち受けまで。ブラウザで許可する前に中断。同期は未実施 |
+| [ssh の SOCKS トンネル](../ssh-socks-tunnel.md) / [Homebrew のオフライン導入](../homebrew-offline.md) / [npm のオフライン導入](../npm-offline.md) | 既定経路の無い VM と Windows の OpenSSH を使用。Homebrew の新規導入、jq、dnf、Node.js / npm、Mason の範囲は各付録に記録 |
+| [VirtualBox](../virtualbox.md) / [Secure Boot の MOK](../secure-boot-mok.md) | ゲストに仮想化支援が見えず、Secure Boot も無効。本文の条件に従って止めた。入れ子の VM 起動と MOK 登録は未実施 |
 
 コンテナ用 VM の再起動では、Quadlet の Web サーバーが最初の SSH ログインより前に起動し、HTTP 応答も戻った。Podman の API ソケットと未リンクの Dropbox サービスも active だった。一方、Compose の例と Distrobox は自動起動を設定していないため、停止したままだった。
 
-[VirtualBox の bootc ゲスト](virtualbox-guest-bootc.md)は、AlmaLinux Atomic Desktop を作る別の構築手順で、今回の Workstation のクリーンインストール試験には含めていない。導入元一覧の手順書が無いツールも、一括してインストールしたわけではない。
+[VirtualBox の bootc ゲスト](../virtualbox-guest-bootc.md)は、AlmaLinux Atomic Desktop を作る別の構築手順で、今回の Workstation のクリーンインストール試験には含めていない。導入元一覧の手順書が無いツールも、一括してインストールしたわけではない。
 
 ## 見つかった問題と切り分け
 
@@ -116,7 +116,7 @@ Samba とクライアント、Syncthing のロールバックも実行した。�
 
 GUI 用のキー注入では、既存の `NotifyKeyboardKeysym` で送るローマ字が Anthy に期待どおり届かなかった。一方、同じセッションで `NotifyKeyboardKeycode` による入力では `日本語` を確定できた。日本語入力の OS 設定の結果と、操作スクリプトの制限を分けた。スクリプト本体の入力方式は変更していない。
 
-![検証用 GNOME セッションの WezTerm で日本語を確定した画面](images/almalinux-vm/japanese-input.png)
+![検証用 GNOME セッションの WezTerm で日本語を確定した画面](../images/almalinux-vm/japanese-input.png)
 
 ## 記録の取り方と残る範囲
 

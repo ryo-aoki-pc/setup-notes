@@ -72,7 +72,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
 
 [Windows 11 で使う](../gh.md#windows-11-で使う)の理由。**Windows の実機では未検証**（[検証記録](../verification/gh.md#windows-11-で使う-検証状況の記録)）。
 
-- **scoop の main のバケットの `gh`**: [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」に合わせた
+- **scoop の main のバケットの `gh`**: [README の導入の基盤](../getting-started.md#初期設定で整えるもの)の「CLI ツールは scoop」に合わせた
   - 管理者の権限が要らない。[Windows 11 の初期設定の更新](../windows-setup.md#更新)の `scoop update *` でほかのツールとまとめて上がり、UniGet UI にも出る
   - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
   - 上流の MSI や zip を手で入れる形は、更新が手作業になる

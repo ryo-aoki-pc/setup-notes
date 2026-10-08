@@ -210,7 +210,7 @@ Linger=yes
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のコンテナ用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - XFS のホームを持つクリーンインストール由来の VM で、linger を有効にした後、本文の手順 1〜7 を実行した。SELinux は Enforcing。
 - 公式配布物の署名と鍵の fingerprint が合い、デーモン 272.4.3798 と CLI 2026.05.06 が入った。`~/.local/bin` から CLI を呼べた。

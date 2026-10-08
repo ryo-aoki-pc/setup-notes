@@ -56,7 +56,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 [Windows 11 で使う](../git-delta.md#windows-11-で使う)の理由。**Windows の実機では未検証**（[検証記録](../verification/git-delta.md#windows-11-で使う-検証状況の記録)）。
 
 - **scoop の main のバケットで入れた**（winget は採らない）
-  - [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」と同じ。管理者が要らず、[Windows 11 の初期設定の更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
+  - [README の導入の基盤](../getting-started.md#初期設定で整えるもの)の「CLI ツールは scoop」と同じ。管理者が要らず、[Windows 11 の初期設定の更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
   - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
   - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
   - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）

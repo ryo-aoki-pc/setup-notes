@@ -178,7 +178,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 | ロールバック（homebrew-offline.md とこの文書） | トンネル無しのシェルで流した。`brew uninstall jq` が `oniguruma` も消し（`==> Autoremoving 1 unneeded formula:`）、`brew autoremove` と `brew list --versions` は無出力。この文書のロールバックは `0` で、`/etc/dnf/dnf.conf` は元の 6 行に戻った |
 
 - 最初の試みでは、検証の道具が、ブロックを送った直後に確かめのための行（`echo`）を続けて打っていた。dnf の節の `sudo dnf makecache` がこの打ち込んだ行を読んで捨て、`echo` は実行されなかった
-  - ブロックの中の行は `if … fi` で先に読まれていたので、失われなかった（[README の記法](../../README.md#記法)の `sudo` の規則と同じ現象）
+  - ブロックの中の行は `if … fi` で先に読まれていたので、失われなかった（[README の記法](../writing-guide.md#記法)の `sudo` の規則と同じ現象）
   - 確かめの方法を変え、新しいコンテナで最初から流し直したのが上の表
 
 #### 未確認事項
@@ -192,7 +192,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 ### 付録: VM での検証記録（2026-10-06）
 
-**環境**: [クリーンインストールからの検証記録](../almalinux-vm-verification.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
+**環境**: [クリーンインストールからの検証記録](almalinux-vm.md)のオフライン用 VM。公式 ISO から Workstation を入れた状態から始め、x86_64、SELinux Enforcing、firewalld 有効。本文のブロックを SSH の擬似端末で実行した。
 
 - Windows の OpenSSH から、既定の経路を持たない AlmaLinux 10.2 の VM にリバース SOCKS 転送を張った。手順 2 の Windows の形に、検証用鍵・NAT の SSH ポート・ホスト鍵の固定・`-N` を足した。転送を保持する接続と、手順 3 以降の対話シェルを別にした検証で、パスワード認証は使っていない。
 - オフライン状態の準備は手順書の外。NetworkManager の NAT 側の接続に `ipv4.never-default=yes` と `ipv6.method=disabled` を設定し、再起動した。IPv4 / IPv6 とも既定経路が無く、プロキシ無しで IP を指定した GitHub の HTTPS は終了 7。外の名前も引けなかった。
