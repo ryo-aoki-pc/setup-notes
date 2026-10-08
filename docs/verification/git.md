@@ -180,7 +180,7 @@ You can run "git stash pop" or "git stash drop" at any time.
 > | `${GIT_USER_NAME}` | `user.name`。コミットの作者の名前 | `Taro Yamada` |
 > | `${GIT_USER_EMAIL}` | `user.email`。コミットの作者のメールアドレス | `taro@example.com`、GitHub の noreply のアドレス |
 >
-> 出力例の値は `<GIT_USER_NAME>` / `<HASH>` などのプレースホルダで書いてある。バージョン（`2.52.0`）は実行日によって変わる。
+> 出力例の値は `<GIT_USER_NAME>` / `<HASH>` / `<WIN_USER>`（Windows のユーザー名）などのプレースホルダで書いてある。バージョン（`2.52.0`）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
@@ -695,7 +695,7 @@ fatal: Not possible to fast-forward, aborting.
 
 | 項目 | 値 |
 |---|---|
-| 環境 | Windows 11 Pro の専用 VM、通常権限の r-aoki。PowerShell 7.6.6 が非対話の `C:\Program Files\Git\bin\bash.exe` を起動 |
+| 環境 | Windows 11 Pro の専用 VM、通常権限の `<WIN_USER>`。PowerShell 7.6.6 が非対話の `C:\Program Files\Git\bin\bash.exe` を起動 |
 | Git | `git version 2.55.0.windows.5`。`--noprofile --norc` で起動し、プロファイルは読み込まない |
 | 実行範囲 | 共通手順 3・5・6・7。子 Bash プロセスだけの `GIT_CONFIG_GLOBAL` で専用 scratch の `global.gitconfig` を指定 |
 | 実行時刻 | 2026-10-07 04:18:58〜04:19:20 UTC |
@@ -724,7 +724,7 @@ fatal: Not possible to fast-forward, aborting.
 
 | 項目 | 値 |
 |---|---|
-| 実行環境 | 同じ専用 Windows 11 Pro VM、通常権限の r-aoki、PowerShell 7.6.6、Git 2.55.0.windows.5 |
+| 実行環境 | 同じ専用 Windows 11 Pro VM、通常権限の `<WIN_USER>`、PowerShell 7.6.6、Git 2.55.0.windows.5 |
 | Bash | `C:\Program Files\Git\bin\bash.exe --noprofile --norc`。子プロセスの `LC_ALL=C` |
 | 隔離 | 子 Bash だけの `GIT_CONFIG_GLOBAL` と `TMPDIR` を専用 scratch に指定。`HOME` と `CODEX_HOME` は変更しない |
 | 名前・メール | `VM Verification`・`vm-verification@example.invalid`。合成値だけを scratch の設定へ書いた |

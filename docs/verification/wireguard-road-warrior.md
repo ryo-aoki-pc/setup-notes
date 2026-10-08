@@ -735,7 +735,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 | 項目 | 値 |
 |---|---|
-| 環境 | Windows 11 Pro の同じ専用 VM。ログオンユーザー r-aoki の管理者権限 |
+| 環境 | Windows 11 Pro の同じ専用 VM。ログオンユーザー `<WIN_USER>` の管理者権限 |
 | PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop。`USERPROFILE`・`HOME`・`CODEX_HOME` は変更していない |
 | 実行時刻 | 2026-10-07 09:47:01〜09:47:25 UTC |
 | 実行した manifest が記録する本文の SHA256 | `82D40978DB8C534EB0DE3785A8E315A61E1D1ECCEE74E0D65FA820DB376E64C7` |
@@ -748,7 +748,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 - `/installmanagerservice` の終了コードは 0。`WireGuardManager` は `Running`・`Auto` で、サービスのパスは `"C:\Program Files\WireGuard\wireguard.exe" /managerservice`、PID は 6948 だった。PID の実行ファイルも一致した
 - 手順 6 は終了コード 0。`wg0.key` と `wg0.pub` はともに 45 バイトの ASCII、末尾は LF のみで、鍵は Base64 の 32 バイト形式だった。秘密鍵を標準入力に渡したローカルの `wg pubkey` は終了コード 0、保存された公開鍵と一致した
 - `wg-client` の ACL は継承を遮断し、Administrators（`S-1-5-32-544`）と SYSTEM（`S-1-5-18`）の FullControl の 2 件だけだった。両ファイルも同じ 2 件を継承し、所有者は Administrators だった
-- source の出力は全ストリームを破棄し、証跡には鍵の値や秘密鍵のハッシュを載せていない。今回作成した `C:\Users\r-aoki\wg-client` だけを削除し、不在を確認した
+- source の出力は全ストリームを破棄し、証跡には鍵の値や秘密鍵のハッシュを載せていない。今回作成した `C:\Users\<WIN_USER>\wg-client` だけを削除し、不在を確認した
 - `/uninstallmanagerservice` は終了コード 0。サービスの不在と WireGuard のプロセス 0 件を確認し、元の状態へ戻した。新しくできた `C:\Program Files\WireGuard\Data` は残し、設定の置き場所のファイルは 0 件だった
 - 補助検証は `passed=true`。検証用の管理者タスクと結果のコピーの終了コードは 0 で、一時的な実行要求も元のハッシュへ復元された
 - `guest-result.json` と `source-manifest-executed.json` は `.verification/evidence/remaining-wireguard-local-20261007-094630-d8f8efb9` に保存した
