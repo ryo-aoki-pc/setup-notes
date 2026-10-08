@@ -29,7 +29,11 @@
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
   - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)
-- 手順の後: Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後の節
+  - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
+  - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
+  - Edge の常駐は[Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)（管理者の窓）、クリップボードの履歴は[CopyQ を使う（任意）](#copyq-を使う任意)
+  - 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
 > - **手順 40 のインラインの sudo、手順 41 の放置でロックしない設定、手順 44 のリモート デスクトップ、手順 48 の Windows Hello 以外のサインイン、手順 64 の自動サインインを重ねると、PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、手順 41・64 は行わない
@@ -1264,11 +1268,687 @@
 
 ---
 
+## プライバシーと広告の表示を切る（任意）
+
+- 自分のユーザーの設定で、広告 ID・Web サイトに渡す言語リスト・診断データを使った提案・手書き入力と入力の改善・フィードバックの問い・オンライン音声認識・検索のクラウドと履歴・エクスプローラーの同期プロバイダーの通知を切る（手順 27・49 の続き）
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- **この節の手順 3 でサインアウトしてサインインし直し、この節の手順 4・6 は設定の画面で行う**
+- **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
+- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](verification/windows-setup.md)）
+- 戻すときは、この節の手順 5・6（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 自分のユーザーで、プライバシーと広告の設定を切る（元の値はファイルに控える）。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
+     $set = @(
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', 'Enabled', 0),
+       @('HKCU:\Control Panel\International\User Profile', 'HttpAcceptLanguageOptOut', 1),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy', 'TailoredExperiencesWithDiagnosticDataEnabled', 0),
+       @('HKCU:\Software\Microsoft\Input\TIPC', 'Enabled', 0),
+       @('HKCU:\Software\Microsoft\Siuf\Rules', 'NumberOfSIUFInPeriod', 0),
+       @('HKCU:\Software\Microsoft\Siuf\Rules', 'PeriodInNanoSeconds', 0),
+       @('HKCU:\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy', 'HasAccepted', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsMSACloudSearchEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsAADCloudSearchEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsDeviceSearchHistoryEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', 0)
+     )
+     $old = foreach ($s in $set) { $key = Get-Item -LiteralPath $s[0] -ErrorAction SilentlyContinue; [pscustomobject]@{ Path = $s[0]; Name = $s[1]; Value = [string](Get-ItemProperty -LiteralPath $s[0] -ErrorAction SilentlyContinue).($s[1]); Kind = $(if ($key -and ($key.GetValueNames() -contains $s[1])) { [string]$key.GetValueKind($s[1]) } else { '' }) } }
+     if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
+       $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       "控えた: $rec"
+     }
+     for ($i = 0; $i -lt $set.Count; $i++) {
+       $p, $n, $v = $set[$i]
+       if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p -Force | Out-Null }
+       Set-ItemProperty -LiteralPath $p -Name $n -Type DWord -Value $v
+       '{0}\{1}: {2} -> {3}' -f (Split-Path -Path $p -Leaf), $n, $old[$i].Value, (Get-ItemProperty -LiteralPath $p).$n
+     }
+   }
+   ```
+
+   - `控えた:` か `控えはもうある` の行と、`AdvertisingInfo\Enabled: 1 -> 0` の形の 11 行が出て、`->` の右がすべて `0`（`HttpAcceptLanguageOptOut` だけ `1`）ならよい
+   - `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない（この節の手順 5 で使う）
+   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、中の値が消える）
+   - `IsDeviceSearchHistoryEnabled` は、0 と 1 のどちらがオフかで資料が食い違う。この節の手順 4 の画面で確かめる
+   - 多くは、この節の手順 3 でサインインし直した後に効く
+
+1. サインアウトして、同じユーザーでサインインし直す。
+
+   - スタートメニューのユーザーのアイコンから「サインアウト」を選ぶ（スタートメニューの電源から再起動してもよい）
+   - **次の手順は、サインインし、この節の手順 1 と同じ方法で管理者ではない窓を開いてから貼る**
+
+1. 設定の「プライバシーとセキュリティ」を開き、切り替えを確かめ、残りを画面で切る。
+
+   ```powershell
+   Start-Process 'ms-settings:privacy'
+   ```
+
+   - 「全般」（新しいビルドでは「おすすめとオファー」）で、広告 ID と言語リストの切り替えがオフ。「設定アプリで通知を表示する」があれば、オフにする
+   - 「音声認識」で、「オンライン音声認識」がオフ
+   - 「手書き入力と入力の個人用設定」で、「カスタム手書き入力と入力の辞書」をオフにする（覚えた単語の一覧が消える）
+   - 「診断とフィードバック」で、「オプションの診断データを送信する」がオンなら、オフにする。「手書き入力と入力の改善」と「カスタマイズされたエクスペリエンス」がオフ、「フィードバックの頻度」が「しない」
+   - 新しいビルドでは、「カスタマイズされたエクスペリエンス」は「パーソナライズされたオファー」の名前で別のページにある
+   - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、手順 49 の値で灰色になっている
+   - この節の手順 2 で書いた項目がオンのまま出ていたら、その画面でオフにする
+   - **次の手順は、設定を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 2 を行ったとき）、控えた元の値に戻す。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
+     if (-not (Test-Path -LiteralPath $rec)) { Write-Error "中断: 控えが無い: $rec"; return }
+     foreach ($r in Import-Csv -LiteralPath $rec) {
+       if ($r.Value -match '^-?[0-9]+$') { Set-ItemProperty -LiteralPath $r.Path -Name $r.Name -Type $(if ($r.Kind -eq 'QWord') { 'QWord' } else { 'DWord' }) -Value ([long]$r.Value) } else { Remove-ItemProperty -LiteralPath $r.Path -Name $r.Name -ErrorAction SilentlyContinue }
+       '{0}\{1}: {2}' -f (Split-Path -Path $r.Path -Leaf), $r.Name, (Get-ItemProperty -LiteralPath $r.Path -ErrorAction SilentlyContinue).($r.Name)
+     }
+   }
+   ```
+
+   - 11 行が出て、`:` の右が控えた元の値（元が空なら空）ならよい。元の値が無かったものは消す
+   - `中断: 控えが無い` が出たら、この節の手順 6 の画面で戻す
+   - 控えのファイルは残る。要らなければ手で消す
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 4 で切ったものを使うときか、この節の手順 5 で控えが無かったとき）、設定の画面でオンに戻す。
+
+   ```powershell
+   Start-Process 'ms-settings:privacy'
+   ```
+
+   - この節の手順 4 でオフにした「設定アプリで通知を表示する」・「カスタム手書き入力と入力の辞書」・「オプションの診断データを送信する」のうち、使うものをオンにする
+   - この節の手順 5 で `中断: 控えが無い` が出たときは、この節の手順 2 で切った項目（「全般」の広告 ID と言語リスト・「オンライン音声認識」・「手書き入力と入力の改善」・「カスタマイズされたエクスペリエンス」・「フィードバックの頻度」・「検索のアクセス許可」の 3 つ）も、使うものを戻す
+   - 同じときに、エクスプローラーの同期プロバイダーの通知も使うなら、フォルダー オプションの「表示」で戻す
+   - 消えた辞書（覚えた単語の一覧）は戻らない
+
+---
+
+## 表示・入力・音・ストレージを変える（任意）
+
+- 自分のユーザーの設定で、次のものを変える（手順 25・28・31 の続き）
+  - 誤って押しやすいキー: 固定キー・フィルター キー・切り替えキーのショートカット、入力言語とキー配列の切り替え（Alt+Shift・Ctrl+Shift）
+  - 窓とエクスプローラー: Alt+Tab の Edge のタブ、タイトル バーのシェイク、左の一覧のギャラリーとホーム、タスクバーの「タスクの終了」
+  - アニメーション効果、効果音と起動音、ストレージ センサー
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- 項目は独立しているので、要らない手順は飛ばしてよい（この節の手順 1・2・13・14 は飛ばさない）
+- **この節の手順 10・12・14 は画面で行い、この節の手順 13 でサインアウトしてサインインし直す**
+- **この節の手順 11 のストレージ センサーは、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを、毎月消す（取り戻せない）**。ごみ箱を置き場に使うなら、この節の手順 11・12 は行わないか、この節の手順 12 でごみ箱を「許可しない」にする
+- 入力言語の切り替えのキーを切っても、Win+Space で切り替えられる
+- 戻すときは、この節の手順 15〜23（行った手順のものだけ）。この節の手順 2 で控えた値を使う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。「Windows PowerShell (x86)」は使わない）
+
+1. 今の値を表示し、ファイルに控える。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $acc = 'HKCU:\Control Panel\Accessibility'
+     $tog = 'HKCU:\Keyboard Layout\Toggle'
+     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+     $cls = 'HKCU:\Software\Classes\CLSID'
+     $now = [ordered]@{
+       'StickyKeys'                             = (Get-ItemProperty -LiteralPath "$acc\StickyKeys" -ErrorAction SilentlyContinue).Flags
+       'Keyboard Response'                      = (Get-ItemProperty -LiteralPath "$acc\Keyboard Response" -ErrorAction SilentlyContinue).Flags
+       'ToggleKeys'                             = (Get-ItemProperty -LiteralPath "$acc\ToggleKeys" -ErrorAction SilentlyContinue).Flags
+       'Hotkey'                                 = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Hotkey'
+       'Language Hotkey'                        = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Language Hotkey'
+       'Layout Hotkey'                          = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Layout Hotkey'
+       'MultiTaskingAltTabFilter'               = (Get-ItemProperty -LiteralPath $adv).MultiTaskingAltTabFilter
+       'DisallowShaking'                        = (Get-ItemProperty -LiteralPath $adv).DisallowShaking
+       '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' = Test-Path -LiteralPath "$cls\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}"
+       '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' = Test-Path -LiteralPath "$cls\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}"
+       'TaskbarEndTask'                         = (Get-ItemProperty -LiteralPath "$adv\TaskbarDeveloperSettings" -ErrorAction SilentlyContinue).TaskbarEndTask
+       'MinAnimate'                             = (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics' -ErrorAction SilentlyContinue).MinAnimate
+       'SoundScheme'                            = (Get-ItemProperty -LiteralPath 'HKCU:\AppEvents\Schemes' -ErrorAction SilentlyContinue).'(default)'
+     }
+     $rows = foreach ($n in $now.Keys) { [pscustomobject]@{ Name = $n; Value = [string]$now[$n] } }
+     if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
+       $rows | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       "控えた: $rec"
+     }
+     $rows | Format-Table -AutoSize
+   }
+   ```
+
+   - `控えた:` か `控えはもうある` の行と、13 行の表（`Name` と `Value`）が出ればよい。値が無いものは空
+   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 16〜19 で使う）
+   - `{e88865ea-…}`（ギャラリー）と `{f874310e-…}`（ホーム）は、自分のユーザーにキーが既にあったか（ふつうは `False`）
+
+1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
+
+   ```powershell
+   foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
+     $p = "HKCU:\Control Panel\Accessibility\$k"
+     $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
+     if ($null -eq $v -or $v -notmatch '^[0-9]+$') { "無い: $k" } else {
+       Set-ItemProperty -LiteralPath $p -Name Flags -Type String -Value ([string]([int]$v -band (-bnot 4)))
+       '{0}: {1} -> {2}' -f $k, $v, (Get-ItemProperty -LiteralPath $p).Flags
+     }
+   }
+   ```
+
+   - `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` の形で出ればよい（左の数は PC で違うことがある）
+   - 切るのは、Shift を 5 回・右 Shift の長押し・Num Lock の長押しで機能をオンにするショートカットだけ。機能そのものはオフのまま
+   - `無い:` が出たキーには、何も書かない
+   - 効くのは、この節の手順 13 でサインインし直した後
+   - **注意**: サインインし直すまで、設定の「アクセシビリティ」→「キーボード」を開かない（今の値で書き戻されることがある）
+
+1. 入力言語とキー配列を切り替えるキー（Alt+Shift・Ctrl+Shift）を切る。
+
+   ```powershell
+   & {
+     $t = 'HKCU:\Keyboard Layout\Toggle'
+     if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
+     foreach ($n in 'Hotkey', 'Language Hotkey', 'Layout Hotkey') {
+       $old = (Get-ItemProperty -LiteralPath $t).$n
+       Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value '3'
+       '{0}: {1} -> {2}' -f $n, $old, (Get-ItemProperty -LiteralPath $t).$n
+     }
+   }
+   ```
+
+   - 3 行とも `->` の右が `3`（割り当てなし）ならよい
+   - 効くのは、この節の手順 13 でサインインし直した後
+   - Win+Space の切り替えは残る。半角/全角と、手順 31 の Ctrl+Space（IME のオン・オフ）には関係しない
+   - タスクバーに「英語 (米国)」のキーボードが勝手に出るのは、この設定では防げない（言語の一覧から消す）
+
+1. Alt+Tab に Edge のタブを出さず、タイトル バーのシェイクを切る。
+
+   ```powershell
+   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+   Set-ItemProperty -Path $adv -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+   Set-ItemProperty -Path $adv -Name DisallowShaking -Type DWord -Value 1
+   Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
+   ```
+
+   - `MultiTaskingAltTabFilter : 3` と `DisallowShaking : 1` が出ればよい
+   - Alt+Tab とスナップの候補に、Edge のタブを出さず、窓だけを並べる（設定の「システム」→「マルチタスク」の「タブを表示しない」）
+   - シェイク（タイトル バーをつかんで振ると、ほかの窓が最小化される）は、Windows 11 の既定でもオフ。明示的に切る
+   - 効くのは、この節の手順 13 でサインインし直した後
+
+1. エクスプローラーの左の一覧から、ギャラリーとホームを消す。
+
+   ```powershell
+   foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
+     '既にあった {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
+     reg.exe add "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /t REG_DWORD /d 0 /f
+     reg.exe query "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree
+   }
+   ```
+
+   - キーごと（`{e88865ea-…}` がギャラリー、`{f874310e-…}` がホーム）に、`既にあった` の行と、成功の 1 行と、`System.IsPinnedToNameSpaceTree    REG_DWORD    0x0` が出ればよい
+   - PC 全体の登録を、自分のユーザーで上書きする（手順 26 と同じ、サポート外の方法）
+   - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
+   - 左の一覧を右クリックして「すべてのフォルダーを表示」をオンにすると、どちらも出る
+   - 「Windows PowerShell (x86)」で貼ると、別の場所に書かれて効かない
+
+1. タスクバーのアプリの右クリックに「タスクの終了」を出す。
+
+   ```powershell
+   $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+   Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value 1
+   Get-ItemProperty -LiteralPath $k | Format-List TaskbarEndTask
+   ```
+
+   - `TaskbarEndTask : 1` が出ればよい
+   - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
+   - **注意**: 「タスクの終了」はアプリのプロセスを終わらせるので、保存していない内容は失われる
+
+1. アニメーション効果（最小化・最大化のアニメーションも）を切る。
+
+   ```powershell
+   & {
+     Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
+   [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
+   '@
+     $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]::Zero, $f)   # SPI_SETCLIENTAREAANIMATION: FALSE
+     $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
+     $ai.cbSize = 8
+     $ai.iMinAnimate = 0
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
+     $on = 1
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     'ClientAreaAnimation : {0}' -f $on
+     'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
+   }
+   ```
+
+   - `ClientAreaAnimation : 0` と `MinAnimate : 0` が出ればよい
+   - すぐに効く（開いているアプリの一部は、起動し直した後）
+   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」に当たる（この節の手順 14 で確かめる）。Firefox・Chromium の Web ページにも、動きを減らす設定（`prefers-reduced-motion`）として伝わる
+   - メニューのフェードなどの細かいアニメーション（「パフォーマンス オプション」の項目）は変えない
+
+1. 効果音を「サウンドなし」にする（今の設定はファイルに控える）。
+
+   ```powershell
+   & {
+     $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $bak) -Force | Out-Null
+       reg.exe export 'HKCU\AppEvents' $bak /y
+     }
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えを作れなかった: $bak"; return }
+     $n = 0
+     Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps\*\*' | ForEach-Object {
+       $cur = Join-Path $_.PSPath '.Current'
+       if (Test-Path -LiteralPath $cur) { Set-ItemProperty -LiteralPath $cur -Name '(default)' -Type String -Value ''; $n++ }
+     }
+     Set-ItemProperty -Path 'HKCU:\AppEvents\Schemes' -Name '(default)' -Type String -Value '.None'
+     'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
+     '空にしたイベント : {0}' -f $n
+   }
+   ```
+
+   - 控えを作った成功の 1 行（2 回目からは `控えはもうある`）と、`Scheme : .None` と、空にしたイベントの数（1 以上）が出ればよい
+   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 21 で戻す）
+   - サウンドの画面の「サウンド設定」を「サウンドなし」にするのと同じ。次に鳴る音から効く
+   - 後から入れたアプリが足したイベントには、音が入る。気になれば、この手順を貼り直す
+   - 設定の「システム」→「通知」の「通知で音を鳴らす」と、起動音（この節の手順 10）は別の設定
+
+1. 起動音も消すときだけ、サウンドの画面を開き、起動音を切る。
+
+   ```powershell
+   control.exe 'mmsys.cpl,,2'
+   ```
+
+   - 「サウンド」のタブが開く。「Windows スタートアップのサウンドを再生する」のチェックを外し、「OK」を押す
+   - 管理者の確認（UAC）が出ることがある（起動音は PC 全体の設定）
+   - 同じタブの「サウンド設定」が「サウンドなし」になっていれば、この節の手順 9 が効いている
+   - **次の手順は、サウンドの画面を閉じてから貼る**
+
+1. ストレージ センサーをオンにし、一時ファイルと古いごみ箱を毎月消すようにする（取り戻せない）。
+
+   ```powershell
+   & {
+     $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
+     $set = [ordered]@{ '01' = 1; '04' = 1; '08' = 1; '256' = 30; '32' = 0; '512' = 0; '2048' = 30 }
+     if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+     foreach ($n in $set.Keys) {
+       $old = (Get-ItemProperty -LiteralPath $k).$n
+       Set-ItemProperty -LiteralPath $k -Name $n -Type DWord -Value $set[$n]
+       '{0}: {1} -> {2}' -f $n, $old, (Get-ItemProperty -LiteralPath $k).$n
+     }
+   }
+   ```
+
+   - 7 行が出て、`->` の右が `01`・`04`・`08` は `1`、`256` と `2048` は `30`、`32` と `512` は `0` ならよい
+   - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、この節の手順 23 で戻した後に、画面で同じにし直す
+   - 毎月、一時ファイルと、ごみ箱に 30 日を超えて置いたファイルを消す。ダウンロード フォルダーは消さない
+   - 対象はシステムのドライブ（C:）だけ。サインインしてオンラインの状態が 10 分以上続かないと動かない
+   - **注意**: OneDrive にサインインしているなら、30 日開かないファイルがオンラインだけになりうる。この節の手順 12 で外す
+
+1. この節の手順 11 を行ったときだけ、ストレージ センサーの画面で値を確かめ、OneDrive を外す。
+
+   ```powershell
+   Start-Process 'ms-settings:storagepolicies'
+   ```
+
+   - 「ユーザー コンテンツの自動クリーンアップ」がオン、「ストレージ センサーを実行するタイミング」が「毎月」、ごみ箱が「30 日」、ダウンロード フォルダーが「許可しない」ならよい
+   - 「ローカルで利用可能なクラウド コンテンツ」に OneDrive があれば、「許可しない」にする
+   - ごみ箱を置き場に使っているなら、ごみ箱を「許可しない」にする
+   - 値が出ていなければ、この節の手順 13 でサインインし直した後に、もう一度開いて確かめる
+   - **次の手順は、設定を閉じてから行う**
+
+1. サインアウトして、同じユーザーでサインインし直す。
+
+   - スタートメニューのユーザーのアイコンから「サインアウト」を選ぶ（スタートメニューの電源から再起動してもよい）
+   - **次の手順は、サインインし、この節の手順 1 と同じ方法で管理者ではない窓を開いてから貼る**
+
+1. 設定の視覚効果の画面を開き、変わったことを確かめる。
+
+   ```powershell
+   Start-Process 'ms-settings:easeofaccess-visualeffects'
+   ```
+
+   - 「アニメーション効果」がオフ。オンと出たら、この画面でオフにする
+   - Shift を 5 回押しても、固定キー機能をオンにするかを聞く窓が出ない
+   - Alt+Shift・Ctrl+Shift を押して離しても、タスクバーの言語の表示が変わらない
+   - Edge でタブを 2 つ以上開いて Alt+Tab を押すと、Edge は窓ごとに 1 つだけ並ぶ
+   - エクスプローラーの左の一覧に「ギャラリー」と「ホーム」が無い（「すべてのフォルダーを表示」がオフのとき）
+   - タスクバーのアプリを右クリックすると「タスクの終了」がある
+   - エラーや通知の効果音が鳴らない
+   - 行わなかった手順のものは、元のまま
+   - **次の手順は、設定を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 3 を行ったとき）、固定キーなどのショートカットを有効に戻す。
+
+   ```powershell
+   foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
+     $p = "HKCU:\Control Panel\Accessibility\$k"
+     $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
+     if ($null -eq $v -or $v -notmatch '^[0-9]+$') { "無い: $k" } else {
+       Set-ItemProperty -LiteralPath $p -Name Flags -Type String -Value ([string]([int]$v -bor 4))
+       '{0}: {1} -> {2}' -f $k, $v, (Get-ItemProperty -LiteralPath $p).Flags
+     }
+   }
+   ```
+
+   - `StickyKeys: 506 -> 510` の形で出ればよい（値は消さない）
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 4 を行ったとき）、切り替えのキーを控えた値に戻す。
+
+   ```powershell
+   & {
+     $t = 'HKCU:\Keyboard Layout\Toggle'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（既定の値にする）: $rec" }
+     $def = [ordered]@{ 'Hotkey' = '1'; 'Language Hotkey' = '1'; 'Layout Hotkey' = '2' }
+     if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
+     foreach ($n in $def.Keys) {
+       $v = if ($before[$n] -match '^[1-4]$') { $before[$n] } else { $def[$n] }
+       Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value $v
+       '{0}: {1}' -f $n, (Get-ItemProperty -LiteralPath $t).$n
+     }
+   }
+   ```
+
+   - 3 行に、この節の手順 2 で控えた値が出ればよい（控えが無いか空なら、既定とされる `1`・`1`・`2`）
+   - 効くのは、サインインし直した後
+   - 画面で戻すなら、設定の「時刻と言語」→「入力」→「キーボードの詳細設定」の「入力言語のホットキー」
+
+1. 元に戻すときは（この節の手順 5 を行ったとき）、Alt+Tab とシェイクの値を控えた値に戻す。
+
+   ```powershell
+   & {
+     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
+     foreach ($n in 'MultiTaskingAltTabFilter', 'DisallowShaking') {
+       if ($before[$n] -match '^[0-9]+$') { Set-ItemProperty -Path $adv -Name $n -Type DWord -Value ([int]$before[$n]) } else { Remove-ItemProperty -Path $adv -Name $n -ErrorAction SilentlyContinue }
+     }
+     Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
+   }
+   ```
+
+   - 2 つに控えた値が出るか、控えで空だったものが空（既定）になればよい
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 6 を行ったとき）、ギャラリーとホームを戻す。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値だけ消す）: $rec" }
+     foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
+       if ($before[$g] -eq 'False') { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /f } else { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /f }
+       '残っている {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
+     }
+   }
+   ```
+
+   - キーごとに、成功の 1 行と `残っている` の行が出ればよい
+   - この節の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
+   - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
+
+1. 元に戻すときは（この節の手順 7 を行ったとき）、「タスクの終了」の値を控えた値に戻す。
+
+   ```powershell
+   & {
+     $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
+     if ($before['TaskbarEndTask'] -match '^[0-9]+$') { Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value ([int]$before['TaskbarEndTask']) } else { Remove-ItemProperty -LiteralPath $k -Name TaskbarEndTask -ErrorAction SilentlyContinue }
+     Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List TaskbarEndTask
+   }
+   ```
+
+   - 控えた値が出るか、控えで空なら何も出なければよい（値が無いとオフ）
+
+1. 元に戻すときは（この節の手順 8 を行ったとき）、アニメーション効果を戻す。
+
+   ```powershell
+   & {
+     Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
+   [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
+   '@
+     $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]1, $f)   # SPI_SETCLIENTAREAANIMATION: TRUE
+     $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
+     $ai.cbSize = 8
+     $ai.iMinAnimate = 1
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
+     $on = 0
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     'ClientAreaAnimation : {0}' -f $on
+     'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
+   }
+   ```
+
+   - `ClientAreaAnimation : 1` と `MinAnimate : 1` が出ればよい（すぐに効く）
+   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」をオンにしてもよい
+
+1. 元に戻すときは（この節の手順 9 を行ったとき）、控えた効果音の設定を書き戻す。
+
+   ```powershell
+   & {
+     $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     reg.exe import $bak
+     'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
+   }
+   ```
+
+   - 成功の 1 行と、控えたときのスキーム（ふつうは `.Default`）が出ればよい
+   - `中断: 控えが無い` が出たら、サウンドの画面（この節の手順 10 と同じ）の「サウンド設定」を「Windows 標準」にする
+   - 控えのファイルは残る。要らなければ手で消す
+
+1. 元に戻すときは（この節の手順 10 を行ったとき）、サウンドの画面で起動音を戻す。
+
+   ```powershell
+   control.exe 'mmsys.cpl,,2'
+   ```
+
+   - 「Windows スタートアップのサウンドを再生する」にチェックを入れ、「OK」を押す
+   - **次の手順は、サウンドの画面を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 11 を行ったとき）、ストレージ センサーの値を消す。
+
+   ```powershell
+   $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
+   foreach ($n in '01', '04', '08', '256', '32', '512', '2048') { Remove-ItemProperty -LiteralPath $k -Name $n -ErrorAction SilentlyContinue }
+   Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List '01', '04', '08', '256', '32', '512', '2048'
+   ```
+
+   - 7 つが空ならよい。ストレージ センサーはオフに戻る（空きが少ないときに、Windows がオンにすることがある）
+   - この節の手順 11 の `->` の左に数があったなら、設定の「ストレージ センサー」で同じにし直す
+   - この節の手順 12 で OneDrive やごみ箱を変えたなら、同じ画面で戻す
+
+---
+
+## Edge の常駐をポリシーで止める（任意）
+
+- Edge のスタートアップ ブースト（サインインのときに Edge を裏で起動しておく）と、閉じた後も拡張機能とアプリを動かし続けるバックグラウンドの実行を、PC 全体のポリシーで切る
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者の** Windows PowerShell（5.1）に貼る（PC 全体のポリシーなので、すべてのユーザーにかかる）
+- **この節の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この節の手順 2 の代わりにこの節の手順 3（画面だけで切る）を行う
+- 手順 50 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
+- **この節の手順 3・4 は Edge の画面で行う**
+- 戻すときは、この節の手順 5・6（行った手順のものだけ）
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+
+1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
+
+   ```powershell
+   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+   Set-ItemProperty -Path $k -Name StartupBoostEnabled -Type DWord -Value 0
+   Set-ItemProperty -Path $k -Name BackgroundModeEnabled -Type DWord -Value 0
+   Get-ItemProperty -Path $k | Format-List StartupBoostEnabled, BackgroundModeEnabled
+   ```
+
+   - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
+   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）
+   - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
+   - 手順 32 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（手順 32 と[ロールバック](#ロールバック)の手順 8 は、無いものを飛ばす）
+
+1. （この節の手順 2 の代わりに）管理の表示を出したくないときは、Edge の設定の画面で 2 つを切る。
+
+   - Edge のアドレス バーに `edge://settings/system` を入れて開く（「設定」→「システムとパフォーマンス」→「システム」）
+   - 「スタートアップ ブースト」をオフにする
+   - 「Microsoft Edge が終了してもバックグラウンドの拡張機能およびアプリの実行を続行する」をオフにする
+
+1. Edge で、2 つが切れていることを確かめる。
+
+   - `edge://settings/system` で、2 つがオフになっている（この節の手順 2 を行ったなら、灰色で変えられない）
+   - この節の手順 2 を行ったなら、`edge://policy` に `StartupBoostEnabled` と `BackgroundModeEnabled` が、値 `false`・状態 `OK` で出る
+   - Edge の窓をすべて閉じると、通知領域に Edge のアイコンが残らない
+   - サインインし直した後も `msedge.exe` が見えることがある（Edge Update のサインインのときのコマンドが起動すると広く言われる。[参考資料](reference/windows-setup.md)）
+
+1. 元に戻すときは（この節の手順 2 を行ったとき）、管理者の PowerShell で、2 つのポリシーを消す。
+
+   ```powershell
+   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+   foreach ($n in 'StartupBoostEnabled', 'BackgroundModeEnabled') { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue }
+   Get-ItemProperty -Path $k -ErrorAction SilentlyContinue | Format-List StartupBoostEnabled, BackgroundModeEnabled
+   ```
+
+   - 2 つが空ならよい
+   - キーは消さない（ほかの Edge のポリシーがありうる）
+   - Edge を開き直すと、2 つの切り替えをまた変えられる
+
+1. 元に戻すときは（この節の手順 3 を行ったとき）、Edge の設定の画面で 2 つをオンに戻す。
+
+   - `edge://settings/system` で、この節の手順 3 でオフにした 2 つをオンにする
+
+---
+
+## CopyQ を使う（任意）
+
+- クリップボードの履歴は、Windows の履歴（Win+V）ではなく、CopyQ に持たせる
+- 前提: 手順 9〜15（winget を使えること）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
+- **この節の手順 3 で CopyQ を起動し、この節の手順 5・6 は画面で行う**
+- CopyQ は窓を持つアプリなので、`copyq.exe` のコマンドの結果は、`| Write-Output` を付けないと出ない
+- **CopyQ の履歴は、暗号化されずにディスクに残る**。パスワードなどをコピーするときは、[注意点](#注意点)を読む
+- 戻すときは、この節の手順 7・8
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. CopyQ を、自分のユーザーに入れる。
+
+   ```powershell
+   winget install --exact --id hluk.CopyQ --source winget --scope user --accept-source-agreements --accept-package-agreements
+   winget list --exact --id hluk.CopyQ
+   ```
+
+   - 最後の表に `CopyQ` と `hluk.CopyQ` の行が出ればよい（版は実行した日の最新）
+   - 管理者の確認（UAC）は出ないはず。winget が、出るかもしれない旨の行を出すことはある
+   - `%LOCALAPPDATA%\Programs\CopyQ` に入る。デスクトップのショートカットと、サインインのときの起動は作らない。入れた直後は起動しない
+
+1. CopyQ を起動する。
+
+   ```powershell
+   Start-Process -FilePath "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+   ```
+
+   - 窓を待たずに PowerShell に戻り、通知領域（「^」の中のことがある）に CopyQ のアイコンが出る
+   - 見つからない旨のエラーが出たら、前に別の場所へ入れた CopyQ がある。この節の手順 7・8 で外してから始め直す
+   - **次の手順は、アイコンが出てから貼る**（起動の前に貼ると、サーバーにつながらない旨が出る）
+
+1. サインインのときに CopyQ が起動するようにし、Windows の履歴（Win+V）がオフかを確かめる。
+
+   ```powershell
+   & {
+     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+     & $copyq config autostart false | Out-Null
+     & $copyq config autostart true | Write-Output
+     Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk')
+     'EnableClipboardHistory: {0}' -f (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Clipboard' -ErrorAction SilentlyContinue).EnableClipboardHistory
+   }
+   ```
+
+   - `true`・`True`・`EnableClipboardHistory:` の 3 行が出て、最後の右が空か `0` ならよい
+   - 先に `false` を送るのは、前の CopyQ の設定（`autostart=true`）が残っていても、起動のショートカットを作り直すため
+   - 起動のショートカットは、スタートアップ フォルダーの `copyq.lnk`（手順 32 の `Run` の一覧には出ない）
+   - 最後の右が `1` なら、Windows の履歴もオン。この節の手順 5 で切る。空か `0` なら、この節の手順 5 は飛ばす
+
+1. Windows の履歴がオンだったときだけ、設定の画面で切る。
+
+   ```powershell
+   Start-Process 'ms-settings:clipboard'
+   ```
+
+   - 「クリップボードの履歴」をオフにする
+   - オフでも、Win+V は Windows のパネルを開く。そこで「有効にする」は押さない
+   - **次の手順は、設定を閉じてから行う**
+
+1. CopyQ の設定の画面で、窓を開くグローバル ショートカットを割り当てる。
+
+   - 通知領域の CopyQ のアイコンをクリックして窓を開き、「ファイル」→「設定...」（Ctrl+P）→「ショートカット」→「グローバル」で、「メインウィンドウの表示切り替え」にキーを足して「OK」を押す
+   - 次のキーは避ける
+     - Win+V（Windows の履歴のパネル）
+     - Win+Shift+V と Ctrl+Win+Alt+V（手順 23 の PowerToys の高度な貼り付け）
+     - Ctrl+Shift+V（多くのアプリの、書式なしの貼り付け）
+     - Ctrl+Space（手順 31 の IME）
+   - Windows キーを含むキーは、OS が予約していて効かないことがある。効かなくても、画面には何も出ない
+   - 管理者の窓には、CopyQ から自動では貼れない。クリップボードには入るので、右クリックで貼る
+
+1. 元に戻すときは、サインインのときの起動を外し、CopyQ を止める。
+
+   ```powershell
+   & {
+     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+     $lnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk'
+     & $copyq config autostart false | Write-Output
+     Remove-Item -LiteralPath $lnk -ErrorAction SilentlyContinue
+     & $copyq exit | Write-Output
+     Test-Path -LiteralPath $lnk
+   }
+   ```
+
+   - `false` と、最後に `False` が出て、通知領域から CopyQ のアイコンが消えればよい
+   - CopyQ が動いていなければ、サーバーにつながらない旨が出る。それでも `copyq.lnk` は消える
+   - アンインストーラは `copyq.lnk` を消さないので、先にこの手順で消す
+
+1. 元に戻すときは、CopyQ を外す。
+
+   ```powershell
+   winget uninstall --exact --id hluk.CopyQ --source winget
+   winget list --exact --id hluk.CopyQ
+   ```
+
+   - 最後に、入っているパッケージが見つからない旨が出ればよい
+   - 設定と履歴は残る（`%APPDATA%\copyq`。17.0.0 からは `%LOCALAPPDATA%\copyq` も）。要らなければ手で消す（取り戻せない）
+   - この節の手順 5 で Windows の履歴を切ったなら、使うときは設定の「システム」→「クリップボード」でオンに戻す
+
+---
+
 ## 更新
 
 - Windows Update は[手順 1〜8](#実施手順)（管理者の窓）、Microsoft Store は[手順 9〜15](#実施手順)（通常の窓）を通す。再起動が必要な場合も、自動では再起動しない
-- scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon）は winget で上げる。UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
+- scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon・任意節の CopyQ）は winget で上げる
+- UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
+- CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[手順 27](#実施手順)・[手順 32〜34](#実施手順) を貼り直す
+- 機能の更新の後は、任意節（[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る任意)・[表示・入力・音・ストレージを変える](#表示入力音ストレージを変える任意)・[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める任意)）の設定も戻ることがある。その節の「元に戻すときは、」より前の手順を貼り直す（控えのファイルは書き換えない）
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、それぞれの手順書の「Windows 11 の更新」
 - この節の手順は、手順 9 と同じ、管理者ではない Windows PowerShell（5.1）に貼る
 
@@ -1296,7 +1976,7 @@
 1. winget で入れたものを上げる。
 
    ```powershell
-   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
+   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
    ```
 
    - それぞれ、新しい版が無ければ更新が見つからない旨の行を出して何もしない
@@ -1347,6 +2027,7 @@
   - ネットワークとサインイン: 配信の最適化は 29、ping は 30、リモート アシスタンスは 31、リモート デスクトップは 32、LAN の種類は 33、Windows Hello は 22
 - 多くは、元に戻すかを手順 37 で控えた値で決める
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
+- 任意節（Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ）で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
 
 > [!CAUTION]
 > **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
@@ -1870,3 +2551,7 @@
 - **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。手順 16〜19 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
 - **このユーザーの Windows PowerShell のコンソールの窓すべてに効く**: 管理者の窓も同じプロファイルを読む
+- **任意節にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)の手順 6）は、手順 26 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
+- **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)の手順 2 のポリシーで出る。消すには、その節の手順 5 で 2 つの値を消す（ほかの Edge のポリシーが無ければ消えるはず。手順 50 の `EdgeUpdate` だけで出るかも含め、確かめていない）
+- **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、その節の手順 12 で外さないと、オンラインだけにされうる
+- **CopyQ の履歴は暗号化されない**: [CopyQ を使う（任意）](#copyq-を使う任意)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
