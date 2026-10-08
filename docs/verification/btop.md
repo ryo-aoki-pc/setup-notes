@@ -42,9 +42,9 @@ color_theme = "Default"
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [btop](https://github.com/aristocratos/btop)（CPU・メモリ・ディスク・ネットワーク・プロセスをまとめて見る TUI。`htop` の後継的な位置づけ）を入れる
-- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](../verification/btop.md#選択した方針)）。EPEL の有効化は前提の [epel.md](../epel.md) に任せる。読者が編集する変数は無い
+- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](../verification/btop.md#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 に任せる。読者が編集する変数は無い
 - **状態**: **x86_64 のクリーン VM で実施手順 1〜3 を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-22）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3。当時はこの文書の手順だった）と手順 1〜3 を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順だった）と手順 1〜3 を通した
   - 確認したこと: `epel-release` が `extras` から入る、`btop 1.4.7-1.el10_2` が EPEL から解決される、署名鍵の fingerprint が本文の値と一致する、pty を与えた起動で `btop.conf` が生成される
   - コンテナで未確認だった TUI の各欄の表示と `q` での終了は、2026-10-06 のクリーン VM で確認した。テーマを変えた見え方は未確認
   - **実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある
@@ -53,7 +53,7 @@ color_theme = "Default"
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-22 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](../epel.md) の手順 2 は不要） | 未設定 → [epel.md](../epel.md) の手順 2 で `epel-release 10-6.el10` を導入 |
+| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](../almalinux-setup.md) の手順 2 は不要） | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release 10-6.el10` を導入 |
 | 有効なリポジトリ | baseos / appstream / crb / extras / epel / raspberrypi ほか | baseos / appstream / crb / extras（→ epel を追加） |
 | btop | **未導入** | `btop 1.4.7-1.el10_2`（epel） |
 | 一緒に入る依存 | — | `hicolor-icon-theme 0.17-20.el10`（appstream） |
@@ -111,7 +111,7 @@ ayu.theme
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3。当時はこの文書の手順 1〜3）と手順 1〜3 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順 1〜3）と手順 1〜3 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
 
 | 手順 | 結果 |
 |---|---|
@@ -164,7 +164,7 @@ ayu.theme
 
 **この文書が Homebrew を使わないのは、EPEL 版が upstream に追いついているため。**
 
-- ほかの Homebrew 系の手順書（[homebrew.md](../homebrew.md) の冒頭に挙げた 17 本）は、どれも RPM（BaseOS・AppStream・EPEL）に無いか古いので Homebrew を選んでいる
+- ほかの Homebrew 系の手順書（当時の homebrew.md の冒頭に挙げた 17 本）は、どれも RPM（BaseOS・AppStream・EPEL）に無いか古いので Homebrew を選んでいる
 - 同じ規則（同版なら RPM）で、[image-tools.md](../image-tools.md) の Trivy は公式の dnf リポジトリにした
 - [distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[podman-tui](../podman-tui.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）
 - EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](../btop.md#注意点)）

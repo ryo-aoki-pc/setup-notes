@@ -100,7 +100,7 @@ curl に再試行を付けたのは、最初の検証で `start` の直後の `c
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[hadolint / dive / Trivy](../image-tools.md)・[podman-tui](../podman-tui.md)・[lazydocker](../lazydocker.md) の前提になる（CLI にとっての [Homebrew](../homebrew.md) と同じ位置づけ）
+- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[hadolint / dive / Trivy](../image-tools.md)・[podman-tui](../podman-tui.md)・[lazydocker](../lazydocker.md) の前提になる（CLI にとっての Homebrew〔[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 46〜48〕と同じ位置づけ）
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **現行 `5da3478` 版を、共通 bash `3d5323e` を新規導入した x86_64 の VM で再検証済み（2026-10-06、SELinux Enforcing）**。実施手順 1〜3・5〜7、Docker API、Quadlet の再起動後の自動起動、ロールバックを通した。subuid/subgid の追加は設定済みのため飛ばした。実機での適用とは別の記録（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
@@ -121,7 +121,7 @@ curl に再試行を付けたのは、最初の検証で `start` の直後の `c
 |---|---|---|---|
 | 実施日 | —（未実施） | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64 | AlmaLinux 10.2 (Lavender Lion) / x86_64 | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`） |
-| podman | 5.8.2（rootless）。2026-09-22 まで、ほかの手順書の検証に使っていた（[homebrew.md](../homebrew.md) の付録）。この手順で入れたものではなく、2026-09-24 のクリーンインストール後は未確認 | 未確認 | 未導入 → `podman-5.8.2-9.el10_2.alma.1` |
+| podman | 5.8.2（rootless）。2026-09-22 まで、ほかの手順書の検証に使っていた（[homebrew.md](../almalinux-setup.md) の付録）。この手順で入れたものではなく、2026-09-24 のクリーンインストール後は未確認 | 未確認 | 未導入 → `podman-5.8.2-9.el10_2.alma.1` |
 | systemd | 未確認 | 未確認 | `systemd-257-23.el10_2.2.alma.1`（PID 1） |
 | ログイン | — | — | SSH（コンテナの中の `sshd` に、`<USER>` で鍵認証） |
 | SELinux | — | — | 無効 |

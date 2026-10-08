@@ -5,7 +5,7 @@
 - [検証記録](verification/shellcheck.md)・[参考資料](reference/shellcheck.md)
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: 手順 5 の JSON 集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
@@ -176,7 +176,7 @@
    brew uninstall shellcheck shfmt
    ```
 
-   - 他の formula が使う依存は残る。不要になった `gmp` / `libffi` などは Homebrew が自動で削除する場合がある（[Homebrew の注意点](homebrew.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
+   - 他の formula が使う依存は残る。不要になった `gmp` / `libffi` などは Homebrew が自動で削除する場合がある（[Homebrew の注意点](almalinux-setup.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
    - 設定ファイルは作っていないので、消すものは無い（`.shellcheckrc` や `.editorconfig` を自分で置いた場合はそれを消す）
 
 ---
@@ -191,7 +191,7 @@
 - **指摘があると `rc=1`**: CI に組むときはこれが期待どおりだが、`set -e` のスクリプトの途中で呼ぶと止まる
   - 件数は[手順 5](#実施手順)の JSON と `jq` で数える。`-f quiet` は何も出さず、終了コードだけで成否を確認する形式
   - `|| true` は終了コードを成功に変えるだけで、件数は数えない。CI の成否判定が必要なら付けない
-- **`sudo shellcheck` は、そのままでは使えない**: sudo の PATH に Homebrew が無い（[homebrew.md の注意点](homebrew.md#注意点)）。root で走らせるなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、フルパスか EPEL 版
+- **`sudo shellcheck` は、そのままでは使えない**: sudo の PATH に Homebrew が無い（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）。root で走らせるなら、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスか EPEL 版
 - **コメントの中の `shellcheck` という語がディレクティブと誤認される**: 行末コメントを `# shellcheck -S に渡す…` のように書くと、**SC1126（error）**「Place shellcheck directives before commands, not after.」が出る
   - 本書の手順 1 の行末コメントは、これを踏んだので `shellcheck` を外した書き方に直してある
 - **SC2034 は誤検出も出やすい**: 外部から `source` される変数や、`export` せずに使う設定ファイルの変数は「未使用」に見える。個別に潰すならディレクティブ、全体で切るなら `.shellcheckrc`

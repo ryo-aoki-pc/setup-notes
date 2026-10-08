@@ -56,7 +56,7 @@ SocketMode=0660
 [この節の検証記録](../verification/lazydocker.md#root-でも使う任意--手順-4-補足-画面の中身)
 
 - 出るのは root のコンテナとイメージだけ。[手順 3](../lazydocker.md#実施手順) の `lazydocker-web` と、自分のユーザーの `quay.io/podman/hello` は出ない
-- `-i` を付けずに `sudo lazydocker` と打つと（[homebrew.md の sudo でも使う](../homebrew.md#sudo-でも使う任意)の節を通したホスト）、`Error` の枠に次が出て、枠は空のまま:
+- `-i` を付けずに `sudo lazydocker` と打つと（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通したホスト）、`Error` の枠に次が出て、枠は空のまま:
 
 ```
 Docker event stream returned error: Cannot connect to the Docker daemon at
@@ -79,7 +79,7 @@ Retry count: 3
 - [lazydocker — Config.md](https://github.com/jesseduffield/lazydocker/blob/master/docs/Config.md) — `customCommands`・`commandTemplates` の書き方、設定ファイルの場所（Linux は `~/.config/lazydocker/config.yml`）
 - [lazydocker — Keybindings](https://github.com/jesseduffield/lazydocker/blob/master/docs/keybindings/Keybindings_en.md) — 枠ごとのキー
 - `lazydocker --config` — 既定の設定の全体
-- [Homebrew](../homebrew.md) / [Podman](../podman.md) / [podman-compose](../podman-compose.md) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（手順 46〜48 の Homebrew） / [Podman](../podman.md) / [podman-compose](../podman-compose.md) — 前提の手順書
 - [podman-system-service(1)](https://docs.podman.io/en/latest/markdown/podman-system-service.1.html) — root の API ソケット（`unix:///run/podman/podman.sock`）
 - `man sudo`（`-i`）・`man sudoers`（`env_reset`・`env_keep`） — [root でも使う](../lazydocker.md#root-でも使う任意)の節で、`-i` の無い `sudo` に `DOCKER_HOST` が渡らない理由
 

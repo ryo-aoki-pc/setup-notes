@@ -44,7 +44,7 @@ Failed to download https://formulae.brew.sh/api/internal/packages.x86_64_linux.j
 
 ### 実施手順 / 手順 4: 補足: brew の確認（ask mode）と、トンネル越しの取得
 
-**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[homebrew.md の注意点](../homebrew.md#注意点)）。
+**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[AlmaLinux 10 の初期設定の注意点](../almalinux-setup.md#注意点)）。
 
 - `brew` の環境変数の説明（`Library/Homebrew/env_config.rb` の `HOMEBREW_ASK`）: 既定で有効。一覧に依存など、名前を挙げたもの以外が入るときだけ聞き、端末でない（TTY が無い）ときは聞かない
 - 答えは Enter を待たずに 1 文字で読む（`Library/Homebrew/ask.rb` の `$stdin.getch`）。`y` で続け、`n`・Esc・Ctrl+C・Ctrl+D で中止、ほかの文字は `Invalid input` と出して読み直す
@@ -91,7 +91,7 @@ oniguruma
     - トンネルを張る前は、オフラインのホストから外の名前を引けず、IP アドレスでもつながらない
     - トンネル越しに、dnf（homebrew.md の手順 1 の 73 パッケージを含む）、Homebrew のインストーラ、`brew install`、`brew update` が通る
     - トンネルを閉じた後も jq が動き、外には届かない
-    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](../bat.md) の手順 1〜3、[hackgen.md](../hackgen.md) の手順 1〜5。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
+    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](../almalinux-setup.md) の手順 1〜3、[hackgen.md](../hackgen.md) の手順 1〜5。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
     - 1080 番がふさがっているときと、sshd が転送を禁じている（`AllowTcpForwarding no`）ときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること
     - `sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること、トンネルが無いときの dnf と brew の失敗の出方
   - **確認していないこと**: 実機（x86_64 の PC・Raspberry Pi 5）、aarch64、SELinux が Enforcing のホスト（コンテナに SELinux が無い）、IPv6、パスワード認証（検証は鍵認証）、Windows・macOS の ssh、長い導入の途中で ssh が切れたとき、homebrew.md のロールバック
@@ -250,7 +250,7 @@ curl: (6) Could not resolve host: github.com
 
 ### 手順中の実測・検証状況の記録
 
-- 検証では [bat](../bat.md) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
+- 検証では [bat](../almalinux-setup.md) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
 
 ### 手順中の実測・検証状況の記録
 

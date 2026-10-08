@@ -71,5 +71,5 @@
 ## 注意点
 
 - **linger はユーザーごとに 1 つで、使う側の手順書で共有する**: どれか 1 本で有効にすれば、ほかの手順書では手順 1 で `Linger=yes` を確かめるだけでよい。切るのは、どれも使わなくなったときだけ（[ロールバック](#ロールバック)）
-- **ログアウト中も動かすなら、PC を眠らせない**: linger はサスペンドを止めない（[gnome-power.md](gnome-power.md)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
+- **ログアウト中も動かすなら、PC を眠らせない**: linger はサスペンドを止めない（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
 - **`sudo -iu` で切り替えたシェルでは、`systemctl --user` が失敗する**: `XDG_RUNTIME_DIR` が無いため（[podman.md の検証記録](verification/podman.md)・[参考資料](reference/podman.md)）。常駐させるユーザーで、直接ログインしたシェルを使う

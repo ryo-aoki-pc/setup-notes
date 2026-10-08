@@ -73,6 +73,6 @@ fi
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
 - [Podman](../podman.md) — 前提の rootless の podman
-- [EPEL](../epel.md) — 前提の EPEL の有効化
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
 
 ---

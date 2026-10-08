@@ -7,7 +7,7 @@
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わない）
 > - **手順 4 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
@@ -32,7 +32,7 @@
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](homebrew.md#注意点)）
+   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](almalinux-setup.md#注意点)）
    - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
 1. 共通設定を読み直し、y 関数を確かめる。
@@ -73,8 +73,8 @@
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
   - 入れ方は [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)。`custom` ブランチを `~/.config/yazi` に clone する
-  - 足したキーは [README の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi#独自キーバインド抜粋)、使う外部コマンドは[「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
-  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（fzf を bash のキー操作にも使うなら [fzf.md](fzf.md)）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [zoxide.md](zoxide.md) で入れる
+  - 足したキーは [設定のリポジトリの参考資料の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、使う外部コマンドは[「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
+  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（fzf の bash のキー操作は [AlmaLinux 10 の初期設定の手順 42〜53](almalinux-setup.md#実施手順) で入る）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順) で入れる
   - この設定を入れるなら、この節の手順 1 は要らない（clone が `~/.config/yazi` を作る）
 
 1. 設定を書くときは、空のディレクトリを作って変更したい項目だけを書く。
@@ -116,7 +116,7 @@
 
 ## 注意点
 
-- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる（同名のコマンドは RPM 版より Homebrew 版が勝つ）、`sudo yazi` はそのままでは使えない（root で使うなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、フルパスで呼ぶ）、など
+- **Homebrew 全般の注意は [AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: PATH の先頭が Homebrew になる（同名のコマンドは RPM 版より Homebrew 版が勝つ）、`sudo yazi` はそのままでは使えない（root で使うなら、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスで呼ぶ）、など
   - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **画像プレビューは端末に依存する**: Kitty / WezTerm / foot などのグラフィックプロトコル、または Überzug++ が要る。GNOME 端末では文字ベースの表示になる
 - **`q` と `Q`**: `y` 関数経由なら `q` で終了時にそのディレクトリへ移動し、`Q` なら移動しない

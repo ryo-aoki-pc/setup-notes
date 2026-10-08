@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **Claude Code が動くユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない
-> - 前提は [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[gnome-power.md 手順 1・2](gnome-power.md#実施手順)（ロックされると、画面の前にいない Claude Code には解けない）
+> - 前提は [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1・2（ロックされると、画面の前にいない Claude Code には解けない）
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -238,9 +238,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ## 注意点
 
-- **Homebrew が PATH の先頭にあると、GLib のコマンドが Homebrew のものになる**（[homebrew.md の注意点](homebrew.md#注意点)）
+- **Homebrew が PATH の先頭にあると、GLib のコマンドが Homebrew のものになる**（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
   - `python3` には `gi` が無い。`scripts/gnome-gui.py` は `#!/usr/bin/python3` で動く
-  - `gsettings` は dconf ではなく `~/.config/glib-2.0/settings/keyfile` に書き、GNOME には効かないのに、読み戻すと変わったように見える。[gnome-power.md](gnome-power.md) の手順は `/usr/bin/gsettings` で書く
+  - `gsettings` は dconf ではなく `~/.config/glib-2.0/settings/keyfile` に書き、GNOME には効かないのに、読み戻すと変わったように見える。[AlmaLinux 10 の初期設定](almalinux-setup.md)の手順は `/usr/bin/gsettings` で書く
   - `gdbus` と `gio` も Homebrew のものになる。手で使うときは `/usr/bin/` を付ける
 - **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](gnome-headless-session.md) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
   - 上部バーは主のモニター（`Meta-0`）にしか出ないので、クライアントの画面には上部バーが無かった

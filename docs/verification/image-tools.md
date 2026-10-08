@@ -79,7 +79,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 - **進め方**: hadolint と dive は Homebrew、Trivy は公式の dnf リポジトリから入れる（[選択した方針](../reference/image-tools.md#選択した方針)）。確認用のイメージを 1 つ作って、3 つを当てる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../homebrew.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../image-tools.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../image-tools.md#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
@@ -93,7 +93,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../podman.md) と同じ作り） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入） |
-| Homebrew | 未確認 | 7.0.6（[homebrew.md](../homebrew.md) の手順 1〜4 で導入） |
+| Homebrew | 未確認 | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜4 で導入） |
 | hadolint / dive | 未導入 | 2.15.1 / 0.13.1（`x86_64_linux` のボトル） |
 | Trivy | 未導入 | `trivy-0.74.0-1`（公式の dnf リポジトリ） |
 | 端末 | — | pty（160 桁 × 50 行、`TERM=xterm-256color`） |
@@ -162,7 +162,7 @@ Report Summary
 **環境**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じ作りの使い捨てのコンテナ。実機で加えた変更は無い。
 
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](../homebrew.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](../almalinux-setup.md) の手順 1〜4 を流した
 
 **手順書の外で行った準備**: podman.md の付録の準備と同じ。Homebrew のインストーラは、`NONINTERACTIVE=1` を付けずに流し、`Press RETURN/ENTER to continue` に pty 越しに Enter を送った。
 

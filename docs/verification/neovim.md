@@ -35,11 +35,11 @@
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **実機で本実行済み（2026-09-20）。`0dbb522` の直接追記版の実施手順 1・2 を x86_64 のクリーン VM でも本実行済み（2026-10-06）**。現行版 `5da3478` は、共通 bash 新規導入後の別の VM でも再検証した（末尾の再検証記録）。既存ホストの手動移行は行っていない。
   - 下表のホストで `brew install neovim` を実行し、`neovim 0.12.5_1` が入って常用中
-  - [Homebrew の導入](../homebrew.md)と手順 1〜2、[既定のエディタにする](../neovim.md#既定のエディタにする任意)・[設定ファイル](../neovim.md#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - [Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[既定のエディタにする](../neovim.md#既定のエディタにする任意)・[設定ファイル](../neovim.md#設定ファイル)の節は、2026-09-22 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - 確認したこと: ボトルが降りる、`nvim --version` が出る、`EDITOR` / `VISUAL` が `nvim` になる、`init.lua` を置いた状態で `has("nvim")` が `1` を返す
   - **コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）
   - **実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
-  - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](homebrew.md#付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
+  - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](almalinux-setup.md#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
   - 2026-10-05: 既定のエディタの設定に元値の控えと追記の目印を付け、ロールバックの手順 1 を追加した。一時ファイルで、元値なし・既存値あり・`.bashrc` がリンクの 3 通りを確認し、元値・元の本文・リンクを復元できた（パッケージの導入・削除は未実行）
 
 | 項目 | 実機 | 検証コンテナ |
@@ -102,11 +102,11 @@ tree-sitter
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../homebrew.md)と手順 1〜2、[既定のエディタにする](../neovim.md#既定のエディタにする任意)・[設定ファイル](../neovim.md#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `nvim -c 'checkhealth' -c 'only'` の 1 行だけ除いている。
+`podman run --rm docker.io/library/almalinux:10` の使い捨てコンテナで、非 root ユーザーを作って[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[既定のエディタにする](../neovim.md#既定のエディタにする任意)・[設定ファイル](../neovim.md#設定ファイル)の節を通した。実機で加えた変更は `dnf install podman` だけ。 実行したのは**この文書のコードブロックをそのまま抜き出したスクリプト**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。 端末が要る `nvim -c 'checkhealth' -c 'only'` の 1 行だけ除いている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../homebrew.md)） |
+| 前提. Homebrew | `dnf install -y procps-ng curl file git sudo` のうえで `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../almalinux-setup.md)） |
 | 1. Neovim | `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc` / `neovim` の順に `arm64_linux` ボトルを `Pouring`。ソースビルドは発生しない |
 | 2. 検証 | `nvim --version` → `NVIM v0.12.5` / `Build type: Release` / `LuaJIT 2.1.1788856981` |
 | 既定のエディタ | `~/.bashrc` に追記して読み込み直し、`EDITOR` / `VISUAL` ともに `nvim` |

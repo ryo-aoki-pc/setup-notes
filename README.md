@@ -9,11 +9,12 @@
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
 - 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
+- インストールした直後に、AlmaLinux 10 は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)、Windows 11 は [Windows 11 の初期設定](docs/windows-setup.md)を通す。下の手順書の多くは、その手順で入れたもの（Homebrew・EPEL・NOPASSWD の sudo など）を前提にする
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
 - Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
-- シェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) で管理する。各手順書では同じ設定を `~/.bashrc` に追記しない。先に次の導入を行う
+- シェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) で管理する。各手順書では同じ設定を `~/.bashrc` に追記しない。先に次の導入を行う（AlmaLinux 10 は、[AlmaLinux 10 の初期設定の手順 42・43](docs/almalinux-setup.md#実施手順)に同じブロックがある）
 
 ### 共通の bash 設定を先に入れる
 
@@ -27,19 +28,19 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 端末を開き直せば、インストール済みのツールの設定が効く。既に clone 済みなら `git -C ~/.config/bash pull --ff-only` で更新し、`install.sh` を実行する。既知の追記は控えを取って移行し、同じ状態での再実行では重複を増やさない。手で変えた行は残るので、[導入手順](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md)に従って確認する。
 
 - **各ツールの `~/.bashrc` への追記は不要**。Homebrew、Neovim、bat、eza、gdu、yazi、fzf、starship、zoxide、Podman の `DOCKER_HOST`、履歴・`shopt`・Homebrew の補完を含む。[追記箇所の照合結果](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/quick-start.md#setup-notes-の追記との対応)を参照
-- ツール本体のインストール、Podman のソケットの有効化、`bash-completion` の導入、`~/.inputrc`、Git などの別ファイルの設定は各手順書で行う
+- ツール本体のインストール、Podman のソケットの有効化、`bash-completion` の導入、`~/.inputrc`、Git などの別ファイルの設定は各手順書で行う（AlmaLinux 10 の `bash-completion` と `~/.inputrc` は、[AlmaLinux 10 の初期設定の手順 44・45](docs/almalinux-setup.md#実施手順)）
 - root 用は root 自身の clone と読み込み設定が必要。[root の導入条件](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)を先に確認する
 
 ### OS のインストール
 
 - Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
-- AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある
+- AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある。入れた後は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す
 - 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-dual-boot.md#次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
 - インストールと QEFI Entry Manager の実施範囲は、[検証記録](docs/verification/windows-dual-boot.md)を参照する
 
 | 手順書 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
 |---|---|---|---|---|
-| [Windows 11（AlmaLinux 10 とのデュアルブート向け）](docs/windows-dual-boot.md) | Windows 11（24H2 以降） | Rufus で作った USB（「インストーラーをカスタムしますか?」の 7 項目をオン、「サイレント」はオフ） | セットアップのコマンド プロンプトの diskpart で、ESP 2 GiB・MSR・Windows・回復を作り、残りを未割り当てにする | 未割り当て領域に AlmaLinux 10 を入れる |
+| [Windows 11（AlmaLinux 10 とのデュアルブート向け）](docs/windows-dual-boot.md) | Windows 11（24H2 以降） | Rufus で作った USB（「インストーラーをカスタムしますか?」の 7 項目をオン、「サイレント」はオフ） | セットアップのコマンド プロンプトの diskpart で、ESP 2 GiB・MSR・Windows・回復を作り、残りを未割り当てにする | 未割り当て領域に AlmaLinux 10 を入れる。入れた後は、それぞれの OS で [Windows 11 の初期設定](docs/windows-setup.md)・[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す |
 
 ### 導入の基盤
 
@@ -49,31 +50,36 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
+- AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、共通の bash 設定・Homebrew と starship・zoxide・fzf・eza・bat・tmux）
+  - 下の表の EPEL・RPM Fusion・Flatpak / Flathub・Homebrew は、同書の手順 17・18〜21・22〜24・46〜48
+  - Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI の手順書は、同書の後に、そのリードの順に通す
+  - 常時動かしておく PC の画面オフ・画面ロック・自動サスペンド、SSH を公開鍵だけにする、dnf-automatic、Wake on LAN は、同書の任意節
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、初期設定のリードから順に案内する
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF）は、それぞれの手順書の Windows 11 の節で入れ、Windows 11 の初期設定のリードから順に案内する
   - 任意節で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 各手順の実施範囲は、対応する検証記録を参照する
 
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
-| [Homebrew](docs/homebrew.md) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 導入・更新は一般ユーザーで行う（入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 導入元が Homebrew の手順書 17 本と、手順書の無いツールの Homebrew の行 |
+| [Homebrew（AlmaLinux 10 の初期設定の手順 46〜48）](docs/almalinux-setup.md#実施手順) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 導入・更新は一般ユーザーで行う（入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 同書の手順 49 の 6 つ（starship・zoxide・fzf・eza・bat・tmux）、導入元が Homebrew の手順書 11 本、手順書の無いツールの Homebrew の行 |
 | [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/npm-offline.md) |
 | [npm（インターネットに出られないホスト）](docs/npm-offline.md) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
-| [Flatpak / Flathub](docs/flatpak.md) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
-| [EPEL](docs/epel.md) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）・RPM Fusion と、手順書の無いツールの EPEL の行 |
-| [RPM Fusion（free）](docs/rpmfusion.md) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜11） |
+| [Flatpak / Flathub（AlmaLinux 10 の初期設定の手順 22〜24）](docs/almalinux-setup.md#実施手順) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
+| [EPEL（AlmaLinux 10 の初期設定の手順 17）](docs/almalinux-setup.md#実施手順) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（手順 38）、btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
+| [RPM Fusion（free。AlmaLinux 10 の初期設定の手順 18〜21）](docs/almalinux-setup.md#実施手順) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜11） |
 | [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ（任意節）と、表示・電源・リモートなどの設定も | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | Windows Update（手順 2〜8）と PC 全体の設定（手順 36〜55）は管理者。それ以外は通常の Windows PowerShell（scoop のインストーラは管理者では止まる）。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の、scoop のツールを SSH のセッションで使う任意節 |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
-| [Flatseal](docs/tool-catalog.md#gnomeシステム) | Flatpak アプリの権限を変える（GUI） | Flathub（[flatpak.md 手順 6](docs/flatpak.md#実施手順) の確認用に入る） |
+| [Flatseal](docs/tool-catalog.md#gnomeシステム) | Flatpak アプリの権限を変える（GUI） | Flathub（[AlmaLinux 10 の初期設定の手順 25](docs/almalinux-setup.md#実施手順) の確認用に入る） |
 
 ### ほかの手順書が使う仕組み
 
 - 複数の手順書が同じ設定を前提にするので、独立させてある。使う側の手順書は、冒頭の `> [!IMPORTANT]`（任意節の前提なら、その節の冒頭）から案内している
 - Windows 11 の貼り付けの設定と LAN をプライベートにする手順は、インストール直後に通す [Windows 11 の初期設定](docs/windows-setup.md)の手順（16〜19・43）で、使う側の手順書はその手順を名指しする
+- AlmaLinux 10 の EPEL・RPM Fusion・Flathub・Homebrew は、インストール直後に通す [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の手順（17・18〜21・22〜24・46〜48）で、画面オフ・画面ロック・自動サスペンドを止めるのは同書の任意節。使う側の手順書はその手順と節を名指しする
 - 設定はユーザーやホストに 1 つなので、どれか 1 本の手順書のために通してあれば、ほかの手順書では確かめるだけでよい。元に戻すのは、使う手順書がどれも無くなったとき
 
 | 手順書 | すること | 変わるもの | これを前提にするもの |
@@ -86,15 +92,16 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### デスクトップ（GNOME）の設定
 
-- どちらの手順書も GNOME のデスクトップが前提。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
+- どれも GNOME のデスクトップが前提で、[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の手順と任意節にある。自分のセッションは、設定アプリと同じキーを `gsettings` で変える
 - 常時動かしておく PC（WireGuard・Samba・Syncthing・Dropbox のホスト、GNOME Remote Desktop で待ち受ける PC）は、ログイン画面と OS のサスペンドも止める
 - Windows 11 の表示と入力の設定は、[Windows 11 の初期設定](docs/windows-setup.md)にある（Caps Lock を Ctrl に〔PC 全体の Scancode Map〕・旧形式のコンテキストメニュー・エクスプローラー・スタート・タスクバー・ダークモード・IME の Ctrl+Space・US 配列。電源とロックも同じ文書）
   - 固定キーなどのショートカット・入力言語の切り替えキー（Alt+Shift・Ctrl+Shift）・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは、同じ文書の任意節「[表示・入力・音・ストレージを変える](docs/windows-setup.md#表示入力音ストレージを変える任意)」。広告 ID などは「[プライバシーと広告の表示を切る](docs/windows-setup.md#プライバシーと広告の表示を切る任意)」
 
 | 手順書 | 変えるもの | 変える範囲 | 仕組み | 導入するもの |
 |---|---|---|---|---|
-| [画面オフ・画面ロック・自動サスペンド](docs/gnome-power.md) | 画面を消す・暗くする・ロックする、放置でのサスペンド、電源ボタン、蓋 | 自分のセッション、ログイン画面、OS 全体 | `gsettings`、dconf の `/etc/dconf/db/gdm.d`、`systemctl mask`、logind のドロップイン | 無し |
-| [日本語入力（IBus + Anthy）](docs/japanese-input.md) | 入力ソース（キーボードの配列と Anthy を Super+Space で切り替える） | 自分のセッション | `gsettings` の `org.gnome.desktop.input-sources` と IBus | `ibus-anthy` と日本語のフォント（Workstation には最初から入っている） |
+| [画面オフ・画面ロック・自動サスペンド（AlmaLinux 10 の初期設定の任意節）](docs/almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) | 画面を消す・暗くする・ロックする、放置でのサスペンド、電源ボタン、蓋 | 自分のセッション、ログイン画面、OS 全体 | `gsettings`、dconf の `/etc/dconf/db/gdm.d`、`systemctl mask`、logind のドロップイン | 無し |
+| [日本語入力（IBus + Anthy。AlmaLinux 10 の初期設定の手順 27・28）](docs/almalinux-setup.md#実施手順) | 入力ソース（キーボードの配列と Anthy を Super+Space で切り替える） | 自分のセッション | `gsettings` の `org.gnome.desktop.input-sources` と IBus | `ibus-anthy` と日本語のフォント（Workstation には最初から入っている） |
+| [表示と入力（AlmaLinux 10 の初期設定の手順 29〜41）](docs/almalinux-setup.md#実施手順) | ホームのフォルダーの名前（英語に）、ダークモード、Caps Lock を Ctrl に、ウィンドウのボタン、時計と電池、Files、Alt+Tab、ホットコーナー、拡大率、トレイアイコン、Ctrl+Alt+T、Dash のお気に入り | 自分のセッション | `gsettings`（拡大率は mutter の実験的な機能）、`xdg-user-dirs-update`、GNOME Shell の拡張 | トレイアイコンの拡張（EPEL の `gnome-shell-extension-appindicator`） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -109,7 +116,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - デスクトップ共有は、遠隔の PC の画面のデスクトップを、PC の画面を触らずに RDP で共有する（設定アプリの「デスクトップ共有」と同じ仕組みを、SSH から CLI だけで設定する。PC の画面のセッションは GDM の自動ログインで作り、RDP の資格情報はパスワードの無い専用のキーリングに置く。ロックやログアウトでつながらなくなったときも SSH から直す）。画面が暗くなるか眠ると使えないので、前提は画面オフ・画面ロック・自動サスペンドの手順 1〜4。今の版は、x86_64 の VirtualBox の Workstation の VM で、PC の画面を一度も操作せずに通した（[記録](docs/verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）。PC の前でパスワードでログインしていた以前の版は、aarch64 の実機・Server with GUI の新規 VM と、x86_64 の VirtualBox / Workstation の VM で検証した（[実機の記録](docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)・[クリーン VM の記録](docs/verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)・[x86_64 VM の記録](docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)・[統合後の x86_64 VM の記録](docs/verification/gnome-desktop-sharing.md#付録-統合後の手順を-x86_64-の-vm-で通した記録2026-10-07)）
 - Windows の OpenSSH サーバーは、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、[Windows 11 の初期設定の手順 43](docs/windows-setup.md#実施手順)
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
-- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[tmux の任意節](docs/tmux.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
+- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AlmaLinux 10 の初期設定の tmux の任意節](docs/almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
 - Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定](docs/windows-setup.md)の手順 44（Pro 以上。受信の規則をプライベートの LAN に絞る）
 - Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 - リモートの操作ができなくなったときに備えて再起動の経路を増やすのは、[Windows 11 の初期設定](docs/windows-setup.md#リモートから再起動する手段を増やす任意)の任意節（既にある SSH・RDP・Remote Control からの再起動に加え、別の PC からの SMB〔`net rpc shutdown`・`shutdown /m`〕・WinRM、クラッシュ時の自動再起動、ネットワーク断で自分で再起動する見張りタスク）。SMB・WinRM は管理の口を LAN に開け UAC のリモート制限を緩めるので任意。**Windows の実機では未検証**
@@ -156,6 +163,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 ### 端末とシェル
 
 - 変えるものがそれぞれ違うので、併用できる
+- starship・zoxide・fzf・eza・bat・tmux と bash の設定は、[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の手順 42〜66 でまとめて入れて確かめる（使い方と設定は同書の後ろの節）
 - 初期化の順番は bash の共通設定が管理する。Homebrew → starship → WezTerm → zoxide、Homebrew の補完 → fzf の順で読む。手順書ごとの追記や並べ替えは不要
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
 - HackGen Console NF は、Windows 11 の PC にも同書の [Windows 11 の節](docs/hackgen.md#windows-11-で使う)で入れられる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる
@@ -164,11 +172,11 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 |---|---|---|---|
 | [WezTerm Nightly](docs/wezterm-nightly.md) | 端末アプリ（GUI） | 公式 COPR の EL9 ビルド（chroot を明示）。Windows 11 は GitHub の nightly の `WezTerm-nightly-setup.exe`（`C:\Program Files\WezTerm`） | `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（両方あると前者だけ読む。Windows は `%USERPROFILE%` の下） |
 | [HackGen Console NF](docs/hackgen.md) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask。Windows 11 は上流の zip（版と sha256 を固定） | `~/.local/share/fonts` に入る（自分のユーザーだけ）。Windows 11 は `%LOCALAPPDATA%\Microsoft\Windows\Fonts` と `HKCU` の登録 |
-| [starship](docs/starship.md) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | bash の共通設定。`~/.config/starship.toml` は任意 |
-| [zoxide](docs/zoxide.md) | ディレクトリの移動（`z`・`zi`） | Homebrew（EPEL・AppStream に無い） | bash の共通設定 |
-| [tmux](docs/tmux.md) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
-| [bash の履歴・補完・キー操作](docs/bash-settings.md) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | bash の共通設定と `~/.inputrc` |
-| [fzf](docs/fzf.md) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い） | bash の共通設定（fd・bat があれば候補・プレビューも有効） |
+| [starship（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し） | bash の共通設定。`~/.config/starship.toml` は任意 |
+| [zoxide（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | ディレクトリの移動（`z`・`zi`） | Homebrew（EPEL・AppStream に無い） | bash の共通設定 |
+| [tmux（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
+| [bash の履歴・補完・キー操作（AlmaLinux 10 の初期設定の手順 44・45）](docs/almalinux-setup.md#実施手順) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | bash の共通設定と `~/.inputrc` |
+| [fzf（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い） | bash の共通設定（fd・bat があれば候補・プレビューも有効） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -178,14 +186,14 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### ファイル・ディスク・リソースを見る
 
-- 標準のコマンドは置き換えず、別の名前で使う（bat・eza の手順書は `alias cat=bat` / `alias ls=eza` を勧めない）
+- 標準のコマンドは置き換えず、別の名前で使う（[AlmaLinux 10 の初期設定の注意点](docs/almalinux-setup.md#注意点)は `alias cat=bat` / `alias ls=eza` を勧めない）
 - この節の手順書では btop だけ EPEL の RPM で入れている（Homebrew と同じ版のため。duf・fastfetch も同じ理由で EPEL）。RPM なので `sudo btop` がそのまま動く
-- Homebrew のもの（`gdu-go` など）は、そのままでは `sudo` の PATH に無い。`sudo gdu-go` のように使うなら [homebrew.md の sudo でも使う](docs/homebrew.md#sudo-でも使う任意)の節を通す（通さないならフルパスで呼ぶ）
+- Homebrew のもの（`gdu-go` など）は、そのままでは `sudo` の PATH に無い。`sudo gdu-go` のように使うなら [AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（通さないならフルパスで呼ぶ）
 
 | 手順書 | 見るもの | 近い標準のコマンド | 打つコマンド | 形 | 導入元 |
 |---|---|---|---|---|---|
-| [bat](docs/bat.md) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系） |
-| [eza](docs/eza.md) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、足したエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し） |
+| [bat（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系） |
+| [eza（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、共通の bash 設定のエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し） |
 | [yazi](docs/yazi.md) | ファイルの閲覧と操作（プレビュー、検索） | — | `y`（終了した場所へ移るシェル関数）、`yazi` | TUI | Homebrew（EPEL・AppStream に無い） |
 | [gdu](docs/gdu.md) | ディスク使用量 | `du` | `gdu-go`（`gdu` ではない） | TUI | Homebrew（EPEL は 5.32 系で、コマンド名は `gdu`） |
 | [btop](docs/btop.md) | CPU・メモリ・ディスク・ネットワーク・プロセス | `top` | `btop` | TUI | EPEL（Homebrew と同じ 1.4.7） |
@@ -216,7 +224,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - 端末の中で使うなら Neovim、GUI なら VS Code
 - lazygit の `e` キーで開くエディタは、lazygit.md の既定では `nvim`（`code` にもできる）
-- Homebrew の nvim は、そのままでは `sudo` の PATH に無く、`EDITOR=nvim` でも `sudoedit` は黙って `vi` で開く。[homebrew.md の sudo でも使う](docs/homebrew.md#sudo-でも使う任意)の節を通すと、`sudoedit` が自分の設定の nvim で開く（通さないなら `SUDO_EDITOR` にフルパスを渡す）
+- Homebrew の nvim は、そのままでは `sudo` の PATH に無く、`EDITOR=nvim` でも `sudoedit` は黙って `vi` で開く。[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すと、`sudoedit` が自分の設定の nvim で開く（通さないなら `SUDO_EDITOR` にフルパスを渡す）
 - インターネットに出られないホストでは、Neovim は [homebrew-offline.md](docs/homebrew-offline.md) のトンネルで入れ、Mason の npm のパッケージは [npm-offline.md](docs/npm-offline.md) で入れる
 
 | 手順書 | 形 | 導入元 | 設定の置き場所 | 更新 |
@@ -299,7 +307,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### 仮想化
 
-- VirtualBox は x86_64 だけ。[EPEL](docs/epel.md)・モジュールのビルドの道具・（Secure Boot が有効なら）[MOK の登録](docs/secure-boot-mok.md)を先に用意する。EL10 のカーネルでは KVM と同時に動かない
+- VirtualBox は x86_64 だけ。[EPEL（AlmaLinux 10 の初期設定の手順 17）](docs/almalinux-setup.md#実施手順)・モジュールのビルドの道具・（Secure Boot が有効なら）[MOK の登録](docs/secure-boot-mok.md)を先に用意する。EL10 のカーネルでは KVM と同時に動かない
 - ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
   - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/secure-boot-mok.md)を先に行う（鍵はホストとは別）
   - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
@@ -313,7 +321,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 ### ブラウザ
 
 - Firefox と Google Chrome は、ベンダーの公式 dnf リポジトリから入れる。`sudo dnf upgrade` で上がる
-- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[rpmfusion.md](docs/rpmfusion.md) で有効にし、[firefox.md 手順 8〜11](docs/firefox.md#実施手順) で入れる）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
+- Mozilla の Linux 版 Firefox は AAC と H.264 を自前で復号できないので、RPM Fusion（free）の FFmpeg（`ffmpeg-libs`）で補う（[AlmaLinux 10 の初期設定の手順 18〜21](docs/almalinux-setup.md#実施手順) で有効にし、[firefox.md 手順 8〜11](docs/firefox.md#実施手順) で入れる）。入れないと、音声が AAC だけの動画が再生できず、YouTube で 720p 以上が H.264 だけの動画は 360p までしか選べないことがある
 - Microsoft Edge は x86_64 にしか無く、導入元一覧では導入元を決めていない（[aarch64 で使えないもの](docs/tool-catalog.md#aarch64-で使えないもの)に提供元だけ載せてある）
 
 | 手順書 | 導入元 | ほかの経路 | アーキ |
@@ -340,11 +348,11 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - 手順番号は見出しではなくリストで振る。マーカーはすべて `1.`（自動で採番される）で、変数があれば手順 1 が変数設定
 - 各手順は「1 行の説明（太字にしない 1 文）→ コマンドのブロック → 確認点・分岐・注意の箇条書き」の順に書く。対話入力や完了待ちで止めるところで手順を分け、止める手順の最後に「次の手順は〜してから貼る」と書く
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
-- `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている
+- `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の手順 3](docs/almalinux-setup.md#実施手順) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
 - Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)と、Git・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
-  - 初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者）
+  - Windows 11 の初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者）
   - HackGen・Claude Code・Codex CLI は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）
   - デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある
   - `sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く
@@ -356,7 +364,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。検証範囲は対応する検証記録に記載する
 - アラートは本文の最上位にだけ置く（GitHub は番号付きリストの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
 - コマンドは実行済みのものを載せ、未検証事項は明記する
-- 複数の手順書が共有する前提（Homebrew・Podman・EPEL・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は独立した手順書にし、各手順書の冒頭から参照する
+- 複数の手順書が共有する前提（Podman・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は独立した手順書にし、各手順書の冒頭から参照する。インストール直後に通す前提（AlmaLinux 10 の Homebrew・EPEL・RPM Fusion・Flathub、Windows 11 の貼り付けの設定など）は、初期設定の手順書の手順を名指しする
 - [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。表の各行に確認の深さ（起動 / 導入 / メタデータ）を書き、調査日と検証の範囲は[検証記録](docs/verification/tool-catalog.md)に置く
 - 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/reference/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない

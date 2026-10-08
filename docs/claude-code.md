@@ -10,7 +10,7 @@
 > - **手順 3 には対話入力がある**（トランザクション表と署名鍵の取り込みの確認）。答えてから手順 4 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
+- 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
 
 1. 変数を設定する。
 
@@ -83,7 +83,7 @@
 ## 使い方の基本
 
 - 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
-- SSH を切っても動かし続けるには、tmux の中で起動する（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)）。Windows 11 は [windows-claude-remote-control.md](windows-claude-remote-control.md)（タスク スケジューラと WezTerm）
+- SSH を切っても動かし続けるには、tmux の中で起動する（[AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)）。Windows 11 は [windows-claude-remote-control.md](windows-claude-remote-control.md)（タスク スケジューラと WezTerm）
 
 | コマンド | すること |
 |---|---|
@@ -155,7 +155,7 @@
 | `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
 | `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
 | `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の更新](#windows-11-の更新)） |
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](windows-claude-remote-control.md)） |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](windows-claude-remote-control.md)） |
 
 - `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
 - **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
@@ -490,7 +490,7 @@
 - **アカウントが要る**: 無料の claude.ai プランでは使えない
 - **設定ファイルは残る**: `dnf remove` しても `~/.claude` は消えない
 - **`-p` は許可を聞けない**: 許可の要るツールは断られ、JSON の `permission_denials` に残る。要るものは `--allowedTools` で渡す（[使い方の基本](#使い方の基本)）
-- **SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[tmux.md の任意節](tmux.md#claude-code-を-tmux-の中で動かす任意)）
+- **SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)）
 - **Windows 11 の注意点**
   - **`PATH` は自分で足す**: インストーラも `claude install` も足さない（[Windows 11 で使う](#windows-11-で使う)の手順 5）。足さないと、開き直した PowerShell でも `claude` が見つからない
   - **Windows PowerShell (x86) では入らない**: `Claude Code does not support 32-bit Windows` で止まる。x86 の付かない「Windows PowerShell」で入れ直す

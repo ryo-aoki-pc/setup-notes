@@ -32,7 +32,7 @@
   - 手順 3 の `SearchItems` は、項目を読むだけで、キーリングを開かない。SSH のシェルからでも、gnome-keyring は D-Bus で起動する（`org.freedesktop.secrets` が activatable）
 - **画面の設定**: gnome-shell は、ロック画面（`unlock-dialog` のモード）の間、`inhibit_remote_access` で画面の共有を止め、Mutter はつながっているリモートのセッションを閉じる（上流の README の「locking the screen also closes the remote desktop connection」、上流 #119・#172）
   - 無操作で暗くなったとき（`idle-delay`）も、シールドが出て同じモードになる。`lock-enabled` が false でも切れる
-  - なので、`idle-delay` を 0 に、`lock-enabled` を false にする（[gnome-power.md 手順 1・2](../gnome-power.md#実施手順) の既定値）
+  - なので、`idle-delay` を 0 に、`lock-enabled` を false にする（[AlmaLinux 10 の初期設定](../almalinux-setup.md)の「画面オフ・画面ロック・自動サスペンドを止める（任意）」の手順 1・2 の既定値）
   - 遠隔の PC は、眠ると起こす手段が無いので、サスペンドの mask（同書の手順 4）も前提にし、`suspend.target` が `masked` かを見る
 - **ヘッドレスのセッション**: ヘッドレスのユーザーの unit（`gnome-remote-desktop-headless.service`）には `Conflicts=gnome-remote-desktop.service` がある。同じユーザーでは、片方を起動するともう片方が止まる
 

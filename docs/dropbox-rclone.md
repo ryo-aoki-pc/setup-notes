@@ -5,13 +5,13 @@
 - [検証記録](verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も同期を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す（Raspberry Pi 5 で [Syncthing](syncthing.md) を動かしているなら、もう有効になっている）
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、同期するファイルの持ち主として動かすため）
 > - **手順 3 はブラウザで認証する**。手順 2 は、Raspberry Pi 5 のデスクトップの端末で貼るか、手元の PC から `ssh -L localhost:53682:localhost:53682 <USER>@<HOSTNAME>` で入り直してから貼る
 > - **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
 > - 手順 1 の導入で `[y/n]` が出たら、答えてプロンプトが戻ってから手順 2 を貼る
-> - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[gnome-power.md](gnome-power.md)）
+> - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)）
 
 - 上から順にコードブロックを貼る
 - x86_64 の PC では、公式クライアントの [dropbox.md](dropbox.md) を勧める（この手順も同じように動く）
@@ -24,7 +24,7 @@
    ```
 
    - 最後の Caveats の「`mount` subcommand on macOS」は macOS の話で、ここでは関係ない
-   - 依存の一覧と `[y/n]` が出たら、入るものを見て `y` と答える（Homebrew 7.0.7 の ask mode。[tmux.md [検証記録](verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)](tmux.md#実施手順)）
+   - 依存の一覧と `[y/n]` が出たら、入るものを見て `y` と答える（Homebrew 7.0.7 の ask mode。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
    - **次の手順は、導入が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
 
 1. rclone が入ったことを確かめ、Dropbox を登録する。
@@ -320,4 +320,4 @@
 - **Raspberry Pi 5 の linger は Syncthing と共有している**: linger を切るのは、どちらも使わなくなったときだけ（[linger.md のロールバック](linger.md#ロールバック)で確かめる）
 - **Syncthing・Samba と重ねない**: `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）。[Samba](samba.md) でホームを公開していると、`~/Dropbox` も SMB から見える
 - **端末の上限**: Basic（無料）プランは同時に 3 台まで。rclone のような連携アプリが数えられるかは、公式ヘルプに書かれていない
-- **眠ると止まる**: サスペンド中は同期しない。常時動かすなら [gnome-power.md](gnome-power.md) で眠らないようにする
+- **眠ると止まる**: サスペンド中は同期しない。常時動かすなら [画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) の節で眠らないようにする
