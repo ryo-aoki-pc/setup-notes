@@ -177,6 +177,66 @@
   - 見張りスクリプトの判定（稼働 60 分の歯止め・連続失敗のしきい値・届いたら 0 に戻すこと）と、手順 6・7 の中断（管理者でない・変数が空・タスクが無い）を、偽物のコマンドレットで模擬
 - **確かめていないこと**: Windows で貼ること、別の PC から `net rpc shutdown`・`shutdown /m`・WinRM で実際に再起動できること、見張りタスクがネットワーク断で再起動し・ループしないこと、再起動の後に SSH・RDP が自動で戻ること、Microsoft アカウントでの SMB・WinRM の認証、`FPS-SMB-In-TCP`・`WINRM-HTTP-In-TCP*` の規則名が版・機種で一致すること
 
+### プライバシーと広告の表示を切る（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft の文書（Manage connections の 18.1・18.6・18.16、Policy CSP の Privacy・Experience・System・Search、サポートの記事の画面の項目）と、広く使われている情報（privacy.sexy・Ten Forums・ElevenForum など）。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ。動的なパラメーターで当たらない）。この節の手順 2 の `->` の左と控え（キーや値が無いとき・QWORD のとき・2 回目）と、この節の手順 5 で値と種類が流す前に戻ること・控えが無いときの中断を、偽物のコマンドレットで模擬（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、控えのファイルの書き出しと読み戻しを Windows PowerShell 5.1 で流すこと
+  - `HKCU` に書いた値が画面の切り替えに出ることと、サインインし直した後に効くこと（`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は広くだけ）
+  - `IsDeviceSearchHistoryEnabled` の 0 がオフであること（資料どうしで食い違う）
+  - 手順 49 の `DisableSearchBoxSuggestions` で「検索のハイライトを表示する」が灰色になること（Microsoft Q&A の回答だけ）
+  - 「フィードバックの頻度」を「1 日 1 回」などにしていた PC で、`PeriodInNanoSeconds` が QWORD であることと、この節の手順 5 がその型で戻すこと
+  - 画面の切り替えで戻したときに、書いた `HKCU` の値も直ること
+  - 日本語の画面の文言（「おすすめとオファー」と「推奨事項 & オファー」の表記の割れ、「パーソナライズされたオファー」の置き場所、「設定アプリで通知を表示する」・同期プロバイダーの通知の項目の名前）
+  - Rufus の「データ収集を無効化」で入れた PC で、広告 ID・カスタマイズされたエクスペリエンス・診断データ・オンライン音声認識が既に切れているか
+  - 24H2・25H2・26H2 の違い（26H2 で値を確かめた資料は無い）
+
+### 表示・入力・音・ストレージを変える（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft の文書（`STICKYKEYS`・`FILTERKEYS`・`TOGGLEKEYS`・`SystemParametersInfo`・`ANIMATIONINFO`・Integrate a Cloud Storage Provider・WOW64 のリダイレクト・KB5031455・Policy CSP の Storage・ストレージ センサーのサポートの記事）、コード（`microsoft/winget-dsc`・`microsoft/WindowsDeveloperConfig`・ReactOS・Wine・Chromium）、広く使われている情報（winutil・Disassembler0・stealthpuppy・cyberdrain など）。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 21 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。この節の手順 3・15 の `Flags` のビット、手順 9・21 の控えの有無と書き戻し、手順 11・23 のストレージ センサー、手順 2・4・16 の切り替えのキー、手順 6・18 のギャラリーとホームを、偽物のコマンドレットと `reg.exe` で模擬。この節の手順 8・20 の `Add-Type` の宣言のコンパイルと、多重定義の選ばれ方（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、控えのファイル（`display-before.csv`・`appevents.reg`）の書き出しと読み戻しを Windows で流すこと
+  - 固定キーなどの Windows 11 の既定（510・126・62）、サインアウトのときに書き戻されないこと、サインインし直す前に設定の画面で上書きされること
+  - 入力言語の切り替えのキーの日本語版の既定と、サインインし直した後に効くこと
+  - `MultiTaskingAltTabFilter` の値の意味と既定（広くだけ）
+  - ギャラリーとホームを消す値が 24H2・25H2・26H2 で効くこと（効かなくなった・戻ったという報告が 1 件ずつある）
+  - `SystemParametersInfo` で切った後に、設定の「アニメーション効果」がオフと出ること。`Add-Type` の宣言の呼び分けが Windows で働くこと
+  - 効果音の `.reg` の書き戻しで元に戻ること、起動音のチェックで UAC が出るか
+  - ストレージ センサー: `StoragePolicy` の値で掃除が動くか（掃除は `StorageSensorV2` を読むという主張がある）、`04` の向き、Windows 11 が `08` と `32` を読むか、OneDrive の既定、書いた値が画面に出ること。25H2 の 26200.8328 で多くのアプリが消えたという掲示板の報告（1 件。Microsoft の返答は無い）
+  - 日本語の画面の文言（固定キーなどの「…用のキーボード ショートカット」、ストレージ センサーの項目と選択肢、「タスクの終了」の置き場所）
+
+### Edge の常駐をポリシーで止める（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft Edge のポリシーの文書（`StartupBoostEnabled`・`BackgroundModeEnabled`・Configure Microsoft Edge）、スタートアップ ブーストのサポートの記事、Chromium の `auto_launch_util.cc`
+  - この節のブロック 2 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。模擬はしていない（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、家庭の PC（ドメイン・MDM なし）で 2 つのポリシーが効くこと
+  - 「組織によって管理」の表示の日本語の文言と、ポリシーを消した後に表示が消えるか
+  - 手順 32 の `Run` の `MicrosoftEdgeAutoLaunch_*` が消えるか、Edge Update のサインインのときのコマンドで Edge が起動するか
+  - 画面で切った値を、Edge が自分でオンに戻すか
+
+### CopyQ を使う（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: winget の `hluk.CopyQ` 16.0.0 の定義、CopyQ 16.0.0・17.0.0 のソース（`shared/copyq.iss`・`winplatform.cpp`・`CHANGES.md`・訳のファイル）と文書、Inno Setup と winget の文書、`RegisterHotKey`・`SendInput`・PowerToys の高度な貼り付けの文書
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。`winget`・`copyq.exe` を呼ぶので、模擬はしていない（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、winget の版（16.0.0。上流は 17.0.0）で UAC が出ないこと、入る場所（前に入れた CopyQ の場所に入ると、決め打ちのパスが外れる）
+  - `config autostart true` の出力と、`| Write-Output`・`| Out-Null` で終わるまで待つこと、サインインのときに起動すること
+  - `EnableClipboardHistory` の値の名前（広く）
+  - 更新でインストーラが閉じた CopyQ が、起動し直さないこと
+  - 日本語の画面の文言（「設定...」・「ショートカット」・「メインウィンドウの表示切り替え」など。訳のファイルから書いた）と、割り当てたグローバル ショートカットが効くこと
+  - RDP の画面とスクリーンショットに CopyQ の窓が写らないこと
+
 ### 対象と検証環境
 
 - **目的**: Windows 11 をインストールした直後に行う設定を、1 本の手順にまとめる
@@ -188,6 +248,7 @@
   - ネットワーク: LAN をプライベートに（もとは Windows の OpenSSH サーバーと Syncthing の Windows 11 の節にあった）・リモート デスクトップ・リモート アシスタンス・ping・配信の最適化
   - サインイン: Windows Hello だけのサインインを切る・自動サインイン
   - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](../verification/windows-setup.md#選択した方針)）。この文書のリードから順に案内する
+  - 任意節（2026-10-08）: プライバシーと広告の表示・表示と入力と音とストレージ センサー・Edge の常駐のポリシー・CopyQ
 - **進め方**: 最初に管理者の Windows PowerShell 5.1 で Windows Update を行い、必要なら手動で再起動する。その後、通常の窓で Store と自分のユーザーの設定を、管理者の窓で PC 全体の設定を行う
   - 設定の後に 1 回再起動し、WSL のディストリビューションと自動サインインを入れる
 - **状態**: **Windows の実機では通していない**（2026-10-03 に作成、2026-10-04 に更新を CLI 化）
@@ -221,6 +282,7 @@
 | PowerToys | 0.101.2362.0（winget の `Microsoft.PowerToys`、自分のユーザー） |
 | PowerShell 7 | 7.6.6.0（winget の `Microsoft.PowerShell`、MSIX） |
 | Autologon | 3.10（winget の `Microsoft.Sysinternals.Autologon`） |
+| CopyQ（任意節） | 16.0.0（winget の `hluk.CopyQ`、自分のユーザー。2026-10-08 の定義。上流の最新は 17.0.0） |
 | WSL の AlmaLinux 10 | `AlmaLinux-10`（2026-10-03 のイメージは 10.2） |
 
 貼り付けの設定（手順 16〜19・37・38）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
@@ -646,6 +708,69 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 1. Microsoft アカウントでの SMB・WinRM の認証、`LocalAccountTokenFilterPolicy` の戻し
 1. `Register-ScheduledTask`・`Set-NetFirewallRule`・`Enable-PSRemoting` など、Windows 専用のコマンドレットの実際の動作（Linux の pwsh には無いので模擬・資料まで）
 
+### 付録: プライバシー・表示・入力・音・ストレージ・Edge・CopyQ の任意節のブロックの確認（2026-10-08）
+
+「プライバシーと広告の表示を切る（任意）」「表示・入力・音・ストレージを変える（任意）」「Edge の常駐をポリシーで止める（任意）」「CopyQ を使う（任意）」を足したときに、PowerShell のブロックを、Linux（クラウドのコンテナ、Ubuntu 24.04）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。Windows では貼っていない。
+
+**対象のブロック**:
+
+- `origin/main` との差分で、足したか変えた `powershell` のブロック 34 個（手順書のブロックは 117 個から 150 個になった）
+  - プライバシーと広告の節の 4 個（その節の手順 2・4・5・6）、表示・入力・音・ストレージの節の 21 個（その節の手順 2〜12・14〜23）、Edge の常駐の節の 2 個（その節の手順 2・5）、CopyQ の節の 6 個（その節の手順 2〜5・7・8）
+  - [更新](../windows-setup.md#更新)の手順 3 の 1 個（winget の一覧に `hluk.CopyQ` を足した）
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- 34 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）。表示・入力・音・ストレージの手順 8・20 の here-string（閉じの `'@` はリストの字下げの位置）も、字下げを外した形で読めた
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）を当てた
+  - 互換の指摘は 16 個で、すべて `PSUseCompatibleCommands` の `Set-ItemProperty` の `-Type`（ブロックの中の 16 か所すべて）。レジストリのプロバイダーが足す動的なパラメーターで、ほかの手順と同じ既知の偽陽性（[付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
+  - `PSUseCompatibleSyntax` と `PSUseCompatibleTypes` の指摘は 0
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、3 つとも指摘が出た
+- 既定の規則の指摘は 12 個で、すべて `PSUseBOMForUnicodeEncodedFile`（日本語を含むファイルに BOM が無い。貼るので関係が無い）
+
+**`Add-Type` の宣言**（表示・入力・音・ストレージの手順 8・20。2 つの宣言は同じ文字列）:
+
+- 宣言（`ANIMATIONINFO` の構造体と、`SystemParametersInfo` の 3 つの多重定義）は、PowerShell 7.5.3 の `Add-Type` でそのままコンパイルできた。構造体の大きさは 8 バイト（`cbSize` の 8 と同じ）。Linux では、呼び出しは例外になった（`user32.dll` は Windows の DLL）
+- 同じ窓で同じ宣言の `Add-Type` を 2 回流しても、誤りは出なかった（手順 8 の後に手順 20 を貼る場合）
+- 同じ 3 つの形で、中身を「受け取った値を覚えるだけ」にした型に差し替えて、2 つのブロックを流した:
+  - `0x1043`（`SPI_SETCLIENTAREAANIMATION`）は `IntPtr` の形、`0x0049`（`SPI_SETANIMATION`）は `ref ANIMATIONINFO` の形（`uiParam` と `cbSize` が 8）、`0x1042`（`SPI_GETCLIENTAREAANIMATION`）は `ref int` の形が選ばれた。`fWinIni` は、設定の 2 つが 3、読み戻しが 0
+  - 手順 8 は `pvParam` が 0・`iMinAnimate` が 0 で、`ClientAreaAnimation : 0`・`MinAnimate : 0` を出した。手順 20 は 1・1 で、`1`・`1` を出した（`MinAnimate` の行は、偽物の型が覚えた値を返す偽物の `Get-ItemProperty` で出した）
+
+**偽物のコマンドレットで流したブロック**（Linux の pwsh）:
+
+- レジストリは、キーと値と種類を覚えておく偽物（`Get-Item`・`Get-ItemProperty`・`Set-ItemProperty`・`New-Item`・`Remove-ItemProperty`・`Test-Path`・`Get-ChildItem`・`Join-Path`）に置き換えた
+  - 値の無いキーの `Get-ItemProperty` は何も返さず、既にあるキーへの `New-Item -Force` は中の値を消す偽物にした。どの場合も、既にあるキーへの `New-Item` は呼ばれなかった
+- `reg.exe` は、`export`・`import`・`add`・`query`・`delete` を真似る関数にした（控えのファイルは `.reg` の形式ではない）
+- `%LOCALAPPDATA%` は一時のディレクトリにし、控えの CSV と `reg.exe` の控えは、そこに本物のファイルとして書いた
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 表示・入力・音・ストレージの手順 3（固定キーなど） | `Flags` が `510`・`126`・`62`。続けてもう 1 回 | `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` を出し、文字列（REG_SZ）で書いた。2 回目は `506 -> 506` などで変わらない |
+| 同じ手順 3 | `StickyKeys` のキーが無い、`Keyboard Response` に `Flags` が無い、`ToggleKeys` が `abc` | 3 つとも `無い:` を出し、何も書かなかった |
+| 同じ節の手順 15（戻す） | 手順 3 の後。続けてもう 1 回。上の無い・`abc` の場合 | `506 -> 510`・`122 -> 126`・`58 -> 62`。2 回目は変わらない。無い・`abc` は `無い:` で、何も書かなかった |
+| プライバシーと広告の手順 2 | `Enabled`（`AdvertisingInfo`）・`NumberOfSIUFInPeriod`・`HasAccepted`・`IsDeviceSearchHistoryEnabled` が 1、`PeriodInNanoSeconds` が QWORD の `864000000000`。`Privacy` と `Input\TIPC` のキーが無い。ほかの 4 つは値だけが無い（同じキーにほかの値がある） | `控えた:` と 11 行を出した。あった値は `AdvertisingInfo\Enabled: 1 -> 0` の形、無かった値は `User Profile\HttpAcceptLanguageOptOut:  -> 1` の形（左が空）。`New-Item` は無い 2 つのキーにだけ呼び、ほかの値は残った。控えの CSV は 11 行（無かった値は値と種類が空、`PeriodInNanoSeconds` は `QWord`） |
+| 同じ手順 2 の 2 回目 | 上の後 | `控えはもうある（書き換えない）` を出し、CSV は変わらない。`->` の左は今の値（`0 -> 0` など） |
+| 同じ節の手順 5（戻す） | 上の後。控えのファイルを消した後 | あった 5 つを元の値に（`PeriodInNanoSeconds` は QWORD で）書き、無かった 6 つは消した。値と種類が、流す前とすべて一致した（手順 2 で作った 2 つのキーは、値の無いまま残る）。控えが無いときは `中断: 控えが無い:` で止まった |
+| 表示・入力・音・ストレージの手順 11（ストレージ センサー） | キーが無い | キーを作り、`01:  -> 1` から `2048:  -> 30` の 7 行（左は空）を出した |
+| 同じ手順 11 | `01=0`・`256=1`・`2048=0` と、ほかの値（`StoragePoliciesNotified`）がある | `01: 0 -> 1`・`256: 1 -> 30`・`2048: 0 -> 30` と、左が空の 4 行。`New-Item` は呼ばず、ほかの値は残った |
+| 同じ節の手順 23（戻す） | 上の後。キーが無い | 7 つだけを消し、`StoragePoliciesNotified` は残った。キーが無いときは、何も出さず、誤りも出なかった |
+| 同じ節の手順 9（効果音） | 控えが無い。`.Current` のあるイベントが 4 つ、無いイベントが 1 つ | `reg.exe export HKCU\AppEvents <控え> /y` を 1 回呼び、`Scheme : .None` と `空にしたイベント : 4` を出した。`.Default` の値と、`.Current` の無いイベントは変えなかった |
+| 同じ手順 9 の 2 回目 | 控えがある | `控えはもうある（書き換えない）` を出し、`reg.exe export` を呼ばずに同じ 2 行を出した |
+| 同じ手順 9 | 控えが無く、`reg.exe export` が失敗する（ファイルができない） | `中断: 控えを作れなかった:` で止まり、スキームとイベントを変えなかった |
+| 同じ節の手順 21（戻す） | 1 回目の控えがある。控えが無い | `reg.exe import <控え>` を 1 回呼び、`Scheme : .Default` を出した（イベントの値と種類も戻った）。控えが無いときは `中断: 控えが無い:` で止まった |
+| 同じ節の手順 2・4・16（切り替えのキー） | `Hotkey`・`Language Hotkey` が `1`、`Layout Hotkey` が `2`。キーが無い。控えが無い | 手順 2 は `控えた:` と 13 行の表。手順 4 は `1 -> 3`・`1 -> 3`・`2 -> 3`、手順 16 は控えの `1`・`1`・`2` に戻した。キーが無いときは手順 4 がキーを作り、控えが無いときは手順 16 が `控えが無い（既定の値にする）` を出して `1`・`1`・`2` にした |
+| 同じ節の手順 6・18（ギャラリーとホーム） | ギャラリーのキーが無く、ホームのキーがある | 手順 6 は `既にあった …: False`・`True` を出し、2 つに `System.IsPinnedToNameSpaceTree` の 0 を書いた。手順 18 は、無かったギャラリーをキーごと消し（`残っている …: False`）、あったホームは値だけを消した（`True`） |
+
+- 手順 9 の `Get-ChildItem -Path '…\Apps\*\*'` が、2 段下のキーそのもの（イベント）を返すことは、Linux のファイル システムのプロバイダーで確かめた（レジストリのプロバイダーでは確かめていない）
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、すべてのブロックを貼って通すこと。5.1 の `Add-Type`（.NET Framework のコンパイラー）で宣言が通り、`SystemParametersInfo` が設定を変えて `WindowMetrics\MinAnimate` に書くこと
+1. 本物のレジストリのプロバイダーの動き（`-Type` で既にある値の種類が変わること、値の無いキーの `Get-ItemProperty`、`(default)` の読み書き、`Get-ChildItem` のワイルドカード）と、5.1 の `Export-Csv`・`Import-Csv` での控えの読み書き
+1. 本物の `reg.exe` の出力と、`.reg` の書き戻しで効果音の値が種類（`REG_EXPAND_SZ`）まで戻ること
+1. `winget`・`copyq.exe`・`Start-Process 'ms-settings:…'`・`control.exe` を呼ぶブロック（Edge と CopyQ の節は、構文と互換だけ）
+1. 書いた値が画面と動作に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
+
 ### 操作上の注意と併記されていた記録
 
    - **注意**: この後は Hyper-V が動くので、[VirtualBox](../virtualbox.md#windows-11-で使う) の VM は Hyper-V の上で動く（遅くなり、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の検証では VM が数分ずつ止まった）
@@ -786,7 +911,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 **アプリの置き場所**
 
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 でも使うツールなので、それぞれの手順書の Windows 11 の節に置いた（同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、1 つの手順書にする）。この文書のリードから、入れる順に案内する
-- PowerToys・PowerShell 7・Autologon・WSL は、このリポジトリでは Windows でだけ使うので、この文書に置いた
+- PowerToys・PowerShell 7・Autologon・WSL・CopyQ（任意節）は、このリポジトリでは Windows でだけ使うので、この文書に置いた
 - **scoop の `git` は入れない**: git は [git.md](../git.md#windows-11-で-git-for-windows-を入れる) の Git for Windows（`C:\Program Files\Git`）にそろえる。ほかの手順書（OpenSSH サーバーの既定のシェル、Claude Code）がその場所を使う。scoop は `PATH` の `git` を使い、git 無しで入れた scoop も、Git for Windows を入れた後の `scoop update` で git の形に直る（scoop 0.6.0 の `libexec/scoop-update.ps1`）
 
 **窓と再起動**
