@@ -33,6 +33,6 @@ podman.sock: connect: connection refused
 - [podman-tui v2.0.0 のリリースノート](https://github.com/containers/podman-tui/releases/tag/v2.0.0) — podman v6 への対応、接続を podman の設定からだけ読むこと
 - `podman-tui --help`、画面の `F1`
 - [Podman](../podman.md) — 前提の rootless の podman と API ソケット
-- [EPEL](../epel.md) — 前提の EPEL の有効化
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
 
 ---

@@ -108,7 +108,7 @@ Installed size: 719 M
 - GUI は **AppStream の Qt 6**（6.10.1）を使う（rpm の要求は `Qt_6.9` の版の記号）
 - gcc や kernel-devel は依存に含まれないので、手順 8 で別に入れる
 
-**`liblzf` は EPEL にしか無い**（前提を [EPEL](../epel.md) にした理由）:
+**`liblzf` は EPEL にしか無い**（前提を [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の EPEL にした理由）:
 
 - Oracle の EL10 向け rpm は `liblzf.so.1()(64bit)` を要求するが、これを持つ `liblzf-3.6-28.el10_0` は **EPEL 10 にしかない**（BaseOS / AppStream / CRB / extras の一覧に無いことを確かめた）
 - ほかの依存（Qt 6、`libtpms`、`libvpx`、`vulkan-loader` など）は AppStream / BaseOS にある
@@ -344,7 +344,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
   - AlmaLinux 10 では、Oracle 公式の dnf リポジトリから入れ、カーネルモジュールをこの PC でビルドする
   - **Linux の arm64 版は無い**ので、Raspberry Pi 5 は対象外
 - **進め方**: **読者が書き換える値は無い**
-  - **AlmaLinux 10**（[実施手順](../virtualbox.md#実施手順)）: 前提の [EPEL](../epel.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
+  - **AlmaLinux 10**（[実施手順](../virtualbox.md#実施手順)）: 前提の [EPEL](../almalinux-setup.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
     - Secure Boot なら、前提の [secure-boot-mok.md](../secure-boot-mok.md) で MOK の鍵も先に登録する
     - 最後に KVM の設定を足して再起動する
   - **Windows 11**（[Windows 11 で使う](../virtualbox.md#windows-11-で使う)）: winget の `Oracle.VirtualBox` を管理者の Windows PowerShell 5.1 で入れる（PC 全体の `C:\Program Files\Oracle\VirtualBox`）。使い捨ての VM は、管理者ではない窓で動かす
@@ -352,7 +352,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-28〜29）。ただし Secure Boot が有効な分岐は、MokManager で鍵を登録できず、最後まで通せていない**。その前に x86_64 のコンテナで検証した（2026-09-24）
   - 2026-10-06 の[クリーンインストール VM](../almalinux-vm-verification.md)では、手順 1 の `lscpu` に仮想化支援が出なかった。本文の条件に従ってそこで止め、AlmaLinux のゲスト内への VirtualBox の導入・入れ子の VM 起動は行っていない。この試験を導入成功とは扱わない
   - 下表の実機で、**この文書のコードブロックを 1 つずつ中身を確かめてから貼った**（[実機の付録](#付録-実機での本実行2026-09-29)）
-    - 手順 1、EPEL の有効化の確認（今の [epel.md](../epel.md) の手順 1・3。手順 2 は EPEL が有効なので飛ばした）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
+    - 手順 1、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分。EPEL を入れる部分は、EPEL が有効なので飛ばした）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
     - secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、登録できなかった。利用者が UEFI の設定で Secure Boot を無効にした
     - 以降は無効の分岐で、手順 9〜11・13・14・16〜18（secure-boot-mok.md の手順 7 と手順 15 は無効の分岐で飛ばし、手順 12 は USB を使わないので飛ばした）
     - 入れた VirtualBox で、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM（Secure Boot 有効）も動かした
@@ -363,7 +363,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
     - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
     - MOK の確認（今の secure-boot-mok.md の手順 7）は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
   - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 15、USB（手順 12）、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)、[更新](../virtualbox.md#更新)（新しい版が無い）、[ロールバック](../virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
-  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../virtualbox.md#ロールバック)を、コードブロックのまま通した
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../virtualbox.md#ロールバック)を、コードブロックのまま通した
     - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
     - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
   - 2026-09-28: 手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](../virtualbox.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
@@ -372,7 +372,12 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
   - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の手順 3・8・11・12。つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 手順 16 に、既存の `vbox-selftest` と作成失敗を弾く条件を加えた
     - `bash -n` と VBoxManage のスタブで、既存 VM・作成失敗時に変更や削除をしないこと、変更・起動の失敗時も新規作成分だけを片付けることを確認した。変更後のブロックは実機では流していない
-- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+- **状態（Windows 11）**: **[Windows 11 で使う](../virtualbox.md#windows-11-で使う)と、後ろの更新・ロールバックの 2 節は、Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 2026-10-08: 任意節の[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)を、利用者の Windows 11 の PC（実機）と Android で確かめた（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）
+    - 確かめたこと: 既定の設定では、画面のキーボードでも物理キーボードでも `1.,2` が VM で `nczm` になること。設定をオンにすると、つなぎ直さずに `1.,2` が出ること
+    - 確かめたこと: 物理キーボード（US 配列）は Shift の記号まで出て、画面のキーボード（Gboard）は Shift の記号に Shift が付かないこと（PC のメモ帳でも）。VirtualBox のソフトキーボードで `@` が出ること
+    - 確かめたこと: PC の IME は物理キーボードの `` Alt+` `` で切り替わり、Ctrl+Space は Android が受け取ること
+    - 確かめていないこと: 本物のゲスト OS の中での入力と JIS 配列のゲスト、ゲストの中の IME、iOS・macOS・Windows の Windows App とほかの RDP アプリ、Gboard 以外の画面のキーボード、Hyper-V が動いていない PC
   - 2026-10-05: 使い捨て VM のブロックにも既存 VM と作成失敗の条件を加え、Linux の PowerShell 7.6.6 で構文とスタブを確認した。Windows の権限判定はスタブで代え、本物の VM は動かしていない
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - 利用者の Windows 11 の PC には同じ 7.2.20 が入っていて、Hyper-V の上で VM を動かした（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）。入れた方法の記録は無い
@@ -392,7 +397,7 @@ AlmaLinux 10:
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64 | 同左（`quay.io/almalinuxorg/almalinux:10`、`sha256:83220192…c4c8`） |
 | カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は手順 8 で入る） |
 | デスクトップ | GNOME Shell 49.4 / Wayland（ロケールは en_US.UTF-8） | 無し |
-| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](../epel.md) の手順 2 で有効化 |
+| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](../almalinux-setup.md) の手順 2 で有効化 |
 | CPU の仮想化支援 / KVM | AMD-V。`kvm_amd` が起動時に読み込まれていた（KVM の VM は使っていない） | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
 | Secure Boot | 有効 → secure-boot-mok.md の手順 6 の後に無効にした | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
 | SELinux | Enforcing | 無効（コンテナ） |
@@ -419,6 +424,8 @@ Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../virtua
 ### 実施前の状態
 
 Windows 11 の PC は、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2 で確かめる（流していないので、記録は無い）。
+
+Android の任意節の前（2026-10-08）は、Windows App の「使用可能な場合にスキャンコード入力を使用する」がオフ（既定）だった。VM のウィンドウに画面のキーボードでも物理キーボードでも `1.,2` を打つと、`nczm` になった（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）。
 
 検証コンテナ（AlmaLinux 10 の素のイメージに、デスクトップの PC に合わせた準備をした後）の状態:
 
@@ -473,6 +480,8 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 ### 完了時点の状態
 
 Windows 11 は流していないので、記録は無い。
+
+Android の任意節の後（2026-10-08）は、Windows App の同じ項目がオンのまま（利用者の Android）。試験の VM は消した。VirtualBox の全体の設定の `GUI/SuppressMessages` には、試験中に出た 2 つの知らせを表示しない設定が足された（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）。
 
 **検証コンテナでの出力**（手順 16 の後。ロールバック前。コンテナではモジュールを読み込めないので、`VBoxManage` の前に `WARNING` が出ている）:
 
@@ -568,7 +577,7 @@ vboxusers:x:<GID>:
 
 **手順書の外で行った準備**（検証環境の都合）:
 
-- プロキシの CA を信頼ストアに足し、dnf にプロキシを設定した。プロキシが平文の HTTP を通さないので、AlmaLinux のミラー一覧の URL に `?protocol=https`、EPEL の metalink に `&protocol=https` を足した（EPEL は、EPEL の有効化の確認（今の [epel.md](../epel.md) の手順 3）の直後）
+- プロキシの CA を信頼ストアに足し、dnf にプロキシを設定した。プロキシが平文の HTTP を通さないので、AlmaLinux のミラー一覧の URL に `?protocol=https`、EPEL の metalink に `&protocol=https` を足した（EPEL は、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分）の直後）
 - GNOME のデスクトップの PC に合わせて、`which`・`gnupg2`・`systemd-udev`・`kmod`（Workstation / Server with GUI の必須グループ「Standard」などに入っているもの）と、動いているカーネルの `kernel-core` / `kernel-modules-core`（`6.12.0-211.56.1.el10_2`）を先に入れた。`/lib/modules/<版>/build` のリンクは `kernel-modules-core` が持っている
 
 **スタブ**:
@@ -645,7 +654,7 @@ vboxusers:x:<GID>:
 
 ### 付録: 実機での本実行（2026-09-29）
 
-前の付録の後、実機で本実行した（手順 1〜8、MOK の手順〔今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [epel.md](../epel.md) の手順 1・3〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 9 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
+前の付録の後、実機で本実行した（手順 1〜8、MOK の手順〔今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 の確かめる部分〕は 2026-09-28、MOK の確認〔同書の手順 7〕と手順 9 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
 
 - 実機での本実行（Secure Boot が有効な分岐は、MokManager での登録〔今の secure-boot-mok.md の手順 6〕まで）
 - VT-x / AMD-V のある PC での `lscpu` の表示、デスクトップの PC での依存の数
@@ -887,6 +896,63 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 実施手順 1 は `x86_64` / `CPU の仮想化支援が見えない`。外側が Hyper-V NEM のホストで、ゲストへ SVM / VT-x が提供されていない。本文の前提を満たさないため、この VM での VirtualBox 導入・入れ子の VM 起動は実施していない。手順の失敗とハードウェアの不足を分けた記録で、以前の実機検証を置き換えない。
 
+---
+
+### 付録: Android の Windows App からリモート デスクトップでつないだときのキー入力（2026-10-08）
+
+利用者の Android から Windows 11 の PC（実機）にリモート デスクトップでつなぎ、PC の上の VirtualBox の VM のウィンドウに打った文字を、VM の画面で確かめた。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)の手順 1〜3 に当たる。
+
+| 項目 | 値 |
+|---|---|
+| PC | 利用者の Windows 11 Pro（ビルド 26300、x64、AMD）。Hyper-V が動いていて、VM は Hyper-V の上（VM のウィンドウの状態バーに緑の亀のアイコン） |
+| VirtualBox | 7.2.20r175154（Extension Pack は無し） |
+| クライアント | Galaxy Z Fold7（SM-F966Q）、Android 16（One UI 8.5）、Windows App 11.0.26081.13925 |
+| キーボード | 画面のキーボードは Gboard。物理キーボードは US 配列 |
+| 接続 | WireGuard 越しの RDP（クライアントは `<CLIENT_IP>`）。PC のイベント ログ（RdpCoreTS のイベント 169）は、クライアントの OS の種類を `(7、0)`（Android）と記録した |
+| 試験の VM | 使い捨ての `rdp-key-test`（EFI・256 MB・ネットワーク無し・`GUI/MouseCapturePolicy` は `Disabled`）。AlmaLinux 10.2 の boot ISO を付け、GRUB 2.12 のコマンドライン（`grub>`）で打った文字を見た。GRUB は US 配列で読む |
+
+**進め方**:
+
+- VM は PC で `VBoxManage startvm --type gui` で起動し、窓を PC の画面に出した。VM の画面は `VBoxManage controlvm <VM> screenshotpng` で 2〜5 秒ごとに撮った（キーを記録するフックは使っていない）
+- VirtualBox 7.2.20 の EFI は、起動できる媒体が無いと `BdsDxe: No bootable option or device was found.` で止まり、Boot Manager にシェルが無かった。そのため boot ISO の GRUB で `c` を押した（PC から `VBoxManage controlvm <VM> keyboardputscancode`）
+- 利用者が VM のウィンドウのタイトル バーをタップして前に出し、段ごとに打った。マウスの捕捉を切ったのは、画面のキーボードに右 Ctrl（捕捉を外すホスト キー）が無いため
+
+**結果**:
+
+| 段 | 画面のキーボード（Gboard） | 物理キーボード（US 配列） |
+|---|---|---|
+| 設定がオフ（既定）で `1.,2` | `nczm` | `nczm` |
+| 接続したまま設定をオンにして `1.,2` | `1.,2` | `1.,2` |
+| つなぎ直して `ab12.,-/@:` | `ab12.,-/2;`（`@` が `2`、`:` が `;`） | `ab12.,-/@:` |
+| `A!` | `A1` | — |
+
+![GRUB のコマンドライン。grub> nczmnczm1.,21.,2 と出ている（設定がオフのときの nczm が 2 回と、オンにした後の 1.,2 が 2 回）](../images/virtualbox/2026-10-08-android-rdp-before-reconnect.png)
+
+![GRUB のコマンドライン。1 行目の末尾に物理キーボードの ab12.,-/@:、2 行目に画面のキーボードの ab12.,-/2;、3 行目の末尾に画面のキーボードの A1 と、VirtualBox のソフトキーボードの @](../images/virtualbox/2026-10-08-android-rdp-after-reconnect.png)
+
+- 画像は、試験の VM の画面を PC（実機）の `screenshotpng` で撮り、上の部分を切り出したもの。3 行目の `@:nihon` は物理キーボードで打った
+- 設定がオフのときの `1`→`n`・`.`→`c`・`,`→`z`・`2`→`m` は、文字コード（0x31・0x2E・0x2C・0x32）をスキャンコードとして読んだときのキーと一致する（[参考資料](../reference/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意--手順-1-補足-文字が別のキーになる理由)）
+- 設定は、接続したまま Windows App の設定で変えても、セッションに戻ると効いた
+- 画面のキーボードは、Shift で打つ記号に Shift が付かなかった。英字の大文字（`A`）は出た。PC のメモ帳でも、画面のキーボードの `@` は `2` になった
+- VirtualBox のソフトキーボードは、VM のウィンドウのメニューの「入力」→「キーボード」→「Soft Keyboard...」で開き、Shift の後に `2` をタップして `@` が出た。7.2.20 の日本語の訳（`nls\VirtualBox_ja.qm`）に、この項目の訳は無い
+- PC の IME: 物理キーボードの Ctrl+Space は Android が受け取り、Android の表示が切り替わった（PC には届かなかった）。`` Alt+` `` では PC の IME がオンになり、メモ帳で `nihon` を `日本` に変換できた
+
+**途中で起きたこと**:
+
+- 設定がオフのまま打っている途中で、GRUB のコマンドラインが抜けてメニューに戻った（GRUB は Esc で抜ける）。そのとき打った文字は控えていない。日本語の読点（`、` は U+3001）は、文字コードの下の位が Esc のスキャンコード（0x01）になるが、これが原因かは確かめていない
+- VM のウィンドウがスケール モードになり（VM の設定の `GUI/Scale` が `true`）、メニュー バーが消えた。切り替えた操作は確かめていない（VirtualBox のホスト キーは右 Ctrl で、右 Ctrl + C がスケール モードへの切り替え）。PC で `VBoxManage setextradata <VM> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻り、メニュー バーが出た
+- VirtualBox の全体の設定の `GUI/SuppressMessages` に、`confirmInputCapture`（キーボードの捕捉の知らせ）と `confirmGoingScale`（スケール モードへの切り替えの確認）が足された。試験中に出た知らせで、「今後表示しない」が選ばれた
+
+**後片付け**: 試験の VM は ISO を外してから `unregistervm --delete` で消し、ISO の登録も `closemedium` で外した（ISO のファイルは残した）。同じ PC で動いていたほかの VM には触れていない。
+
+**確かめていないこと**:
+
+- 本物のゲスト OS（AlmaLinux・Windows）の中での入力と、JIS 配列のゲスト（US 配列で読む GRUB でだけ見た）
+- ゲストの中の IME の切り替え
+- iOS・macOS・Windows の Windows App、Android のほかの RDP アプリ、Gboard 以外の画面のキーボード
+- 設定をオンにした後、つなぎ直したときに毎回効くこと（つなぎ直しは 1 回だけ）
+- Hyper-V が動いていない PC
+
 
 ### 分離前の検証状況の記録
 
@@ -991,7 +1057,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - [VirtualBox — Downloads](https://www.virtualbox.org/wiki/Downloads) / [PUEL](https://www.virtualbox.org/wiki/VirtualBox_PUEL) — Extension Pack とそのライセンス
 - `/usr/lib/virtualbox/vboxdrv.sh` / `/usr/lib/virtualbox/postinst-common.sh` / `/usr/lib/virtualbox/check_module_dependencies.sh` / `/usr/share/virtualbox/src/vboxhost/vboxdrv/linux/SUPDrv-linux.c` — 本書の説明の元にした、rpm が入れるスクリプトとソース
 - `man dnf.conf`（`repo_gpgcheck`）/ `man modprobe.d` / `man mokutil`
-- [EPEL](../epel.md) — 前提の EPEL の有効化（依存の `liblzf`）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17。依存の `liblzf`）
 - [winget-pkgs の `Oracle.VirtualBox`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Oracle/VirtualBox) — Windows 11 の節で使う winget の定義
 - [winget の install — Microsoft Learn](https://learn.microsoft.com/en-us/windows/package-manager/winget/install) — `--accept-source-agreements`・`--accept-package-agreements`、依存を止める `--skip-dependencies`、既定は進み具合を出す
 - Oracle VirtualBox User Guide 7.2（インストーラに同梱の `UserManual.pdf`）— 2.2 Installing on Windows Hosts（機能・`ADDLOCAL`・公開プロパティ）、11.30 Using Hyper-V with Oracle VirtualBox、13.1.2 Global Settings（Windows は `$HOME/.VirtualBox`）、13.7.6.7 Poor performance when using Oracle VirtualBox and Hyper-V on the same host、15.44.2.2 Viewing Virtual Machine Log Contents（`showvminfo --log`）、15.52 VBoxManage updatecheck

@@ -1,11 +1,12 @@
-# git-delta（delta）インストール手順（AlmaLinux 10 / Homebrew）
+# git-delta（delta）インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）
 
 ## 実施手順
 
 - [検証記録](verification/git-delta.md)・[参考資料](reference/git-delta.md)
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（scoop で入れる。管理者ではない Windows PowerShell 5.1 に貼り、git の設定はその節から Git Bash で手順 1・3 を貼る）
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、設定も自分の `~/.gitconfig` に書く
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
@@ -81,6 +82,9 @@
 - lazygit は自前のページャ設定を持っているので、`~/.gitconfig` の `core.pager` は見ない
 
 - lazygit の設定には `git.diffRenderers` を使う
+- 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、もう `git.diffRenderers` で delta を使う（`--no-gitconfig` を付けるので、この文書で書いた `~/.gitconfig` の `[delta]` は読まない）。その設定を使うなら、この節の手順 1 は要らない
+- Windows 11 でも同じ設定でよい（delta は、[Windows 11 で使う](#windows-11-で使う)で入れたものを PATH から呼ぶ）。設定ファイルは `%LOCALAPPDATA%\lazygit\config.yml`（`lazygit --print-config-dir` で確かめる）
+
 > [!WARNING]
 > **この節の手順 1 で、`~/.config/lazygit/config.yml` に既に `git:` があるなら、`cat >>` で追記せずに手で中身を併合する。** 同じトップレベルキーを 2 回書くと YAML として壊れる。
 
@@ -100,7 +104,7 @@
 
 ## 設定ファイル
 
-設定の実体は `~/.gitconfig` の `[delta]` セクション。手順 3 で書いた 3 つのほかによく使うもの:
+設定の実体は `~/.gitconfig` の `[delta]` セクション（Windows 11 では `C:\Users\<WIN_USER>\.gitconfig`。Git Bash・PowerShell・cmd の git が同じファイルを読む）。手順 3 で書いた 3 つのほかによく使うもの:
 
 | キー | 意味 |
 |---|---|
@@ -117,6 +121,8 @@
 
 ## 更新
 
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 の更新](#windows-11-の更新)
+
 1. brew で git-delta を更新する。
 
    ```bash
@@ -129,6 +135,8 @@
 ---
 
 ## ロールバック
+
+- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 
 1. brew で git-delta を消し、git から delta の設定を外す。
 
@@ -160,6 +168,145 @@
 
 ---
 
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **すべて Windows のデスクトップで行う**。この節の手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、この節の手順 2・3 と、後ろの Windows 11 の 2 節（更新・ロールバック）のブロックをそこに貼る
+> - SSH のセッションには貼らない（scoop は自分のユーザーに入れる。Administrators の一員の SSH のセッションは管理者の権限で動く）
+> - 前提: [Windows 11 の初期設定の手順 16〜19 と手順 20・21](windows-setup.md#実施手順)（貼り付けの設定と scoop）。手順 16〜19 を通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)と、[README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)（Git Bash で）、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)と自分用の WezTerm の設定（新しいタブが Git Bash で開く。[設定ファイル](wezterm-nightly.md#設定ファイル)）
+> - 前提: VC++ ランタイム（`VCRUNTIME140.dll`。Windows の delta が使う）。この節の手順 2 で確かめ、無ければ [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を、管理者の Windows PowerShell で行う
+> - **この節の手順 4・5 は、WezTerm の Git Bash のタブで行う**（この節の手順 4 で[実施手順](#実施手順)の手順 1・3 を貼る。PowerShell には貼らない）。この節の手順 5 で開く less は `q` で閉じる
+
+- この節の手順 1 で開いた PowerShell に、上から順にコードブロックを貼る。PowerShell の変数は無い（[実施手順](#実施手順)の手順 1 の変数は、この節の手順 4 で Git Bash に貼る）
+- 手順の後: lazygit でも delta で差分を出すなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)、設定項目は[設定ファイル](#設定ファイル)。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- git の設定（`C:\Users\<WIN_USER>\.gitconfig`）は、Git Bash・PowerShell・cmd の git で同じファイル。`~/.bashrc` と PowerShell のプロファイルには何も足さない（[参考資料](reference/git-delta.md#windows-11-では-選択した方針)）
+- WSL の AlmaLinux 10 の git は、WSL の中の `~/.gitconfig` を読む。WSL でも使うなら、その中で[実施手順](#実施手順)を通す
+- SSH のセッションの Git Bash でも git を使うなら、この節の後に [windows-openssh-server.md の scoop のツールを SSH のセッションで使う（任意）](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を、管理者の Windows PowerShell で貼る（`core.pager` の delta は scoop の shim で起動する）
+- この節のブロックは、Windows の実機で流していない（[検証記録](verification/git-delta.md#windows-11-で使う-検証状況の記録)）
+
+1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。「PowerShell 7」ではない）
+
+1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
+
+   ```powershell
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Delta      = (Get-Command delta -All -ErrorAction SilentlyContinue).Source -join ', '
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
+   - `VCRuntime : True` ならよい。`False` なら、先に [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
+   - `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（この節の手順 3 の `scoop install` は何も変えない）
+   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。混ざらないよう、外してから始める
+
+1. scoop で delta を入れ、版と場所を確かめる。
+
+   ```powershell
+   scoop install delta
+   delta --version
+   (Get-Command delta -All).Source
+   ```
+
+   - `'delta' (0.20.1) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）
+   - もう入っていれば、`'delta' (<版>) is already installed.` と `Use 'scoop update delta' to install a new version.` の警告を出して何も変えない
+   - scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
+   - `delta 0.20.1` の形で、入れた版が出ればよい。版が出なければ、この節の手順 2 の `VCRuntime` を確かめる
+   - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\delta.exe` の 1 行だけを出せばよい
+   - scoop の delta は x64 版だけ。arm64 の Windows でも、その x64 版が入る（確かめていない）
+
+1. WezTerm の新しいタブ（Git Bash）で、[実施手順](#実施手順)の手順 1・3 を貼る。
+
+   - WezTerm を起動するか、新しいタブ（既定のキーは Ctrl+Shift+T）を開く（自分用の WezTerm の設定では Git Bash が開く）
+   - 手順 1 の 3 つの変数は、AlmaLinux 10 と同じ既定のままでよい。変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
+   - 手順 3 は、AlmaLinux 10 と同じく、設定した 6 項目が出ればよい（`interactive.difffilter` は小文字）
+   - 書く先は `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `~/.gitconfig`）。PowerShell と cmd の git も、同じファイルを読む
+   - [実施手順](#実施手順)の手順 2・4 は行わない（`brew` の行があるため。版と場所は、この節の手順 3 で確かめた）
+
+1. 同じ Git Bash のタブで `git diff` を打ち、delta の表示になることを確かめる。
+
+   - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ（[共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分）
+   - ファイル名のヘッダと、行番号・行ごとに背景色の付いた差分が出ればよい（[実施手順](#実施手順)の手順 4 と同じ見え方）
+   - 1 画面に収まらないときは、less で止まる。`q` で閉じる
+   - 素の差分（背景色の無い `+` / `-` の行）が出たら、この節の手順 4 で貼った[実施手順](#実施手順)の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
+   - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
+   - PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](#注意点)）
+
+---
+
+## Windows 11 の更新
+
+- この節の手順 1 は、[Windows 11 で使う](#windows-11-で使う)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
+- [Windows 11 の初期設定の更新](windows-setup.md#更新)の手順 1・2（`scoop update *`）でも、ほかの scoop のツールと一緒に上がる
+- git の設定（`~/.gitconfig`）は変わらない。上げた後に、Git Bash で貼り直すものは無い
+- SSH のセッションの Git Bash でも git を使うなら、上げた後に [windows-openssh-server.md の scoop のツールを SSH のセッションで使う（任意）](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を、管理者の Windows PowerShell で貼り直す
+
+1. 開いている delta の表示（less）を閉じてから、scoop で delta を上げる。
+
+   ```powershell
+   scoop update
+   scoop update delta
+   delta --version
+   ```
+
+   - `scoop update` は `Scoop was updated successfully!` を出す
+   - 新しい版があれば、`'delta' (<版>) was installed successfully!` の形の行が出る。無ければ `delta: <版> (latest version)` と出て、何も変わらない
+   - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash などで開いている delta の表示（less）を `q` で閉じてから貼り直す
+   - 最後のコマンドで、今の版が出る
+
+---
+
+## Windows 11 のロールバック
+
+- この節のブロックは、管理者ではない Windows PowerShell（5.1）に、上から順に貼る
+- **先に git の設定から delta を外してから（この節の手順 1）、delta を消す（この節の手順 3）**。`core.pager` が delta のまま delta を消すと、`git diff` などが delta を起動できない
+- [Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 13 で scoop ごと外すときも、先にこの節の手順 1 を行う（scoop を外しても `~/.gitconfig` の `core.pager` は残る）。そのときは、この節の手順 3 は要らない（delta も一緒に消える）
+
+1. git の設定から delta を外し、消えたか確かめる。
+
+   ```powershell
+   git config --global --unset core.pager
+   git config --global --unset interactive.diffFilter
+   git config --global --remove-section delta
+   git config --global --get-regexp '^(core\.pager|interactive\.difffilter|delta\.)'
+   ```
+
+   - 最後のコマンドが何も出さなければよい
+   - もう外してあれば、`--remove-section` が `fatal: no such section: delta` を出す。そのままでよい
+   - Git Bash・PowerShell・cmd のどの git も、delta を通さない表示に戻る
+
+1. `zdiff3` も戻すときだけ、`merge.conflictstyle` を外す。
+
+   ```powershell
+   git config --global --unset merge.conflictstyle
+   ```
+
+   - [git.md](git.md) を通したなら外さない（同じ設定を使う）
+
+1. scoop で delta を消す。
+
+   ```powershell
+   scoop uninstall delta
+   (Get-Command delta -All -ErrorAction SilentlyContinue).Source
+   ```
+
+   - `'delta' was uninstalled.` が出て、最後のコマンドが何も出さなければよい
+   - `'delta' isn't installed.` なら、もう入っていない
+   - `are still running` のエラーが出たら、消えていない。開いている delta の表示（less）を `q` で閉じてから貼り直す
+   - `DELTA_NAVIGATE=true` で使っていたなら、delta が `%LOCALAPPDATA%\delta`（less の検索履歴の写し）を作っている。要らなければ手で消す
+   - lazygit の `git.diffRenderers` に delta の項目があれば（[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)で足したものと、自分用の lazygit の設定）、その項目も外す（自分用の設定は、その README の「前提ツール」のとおり `git.diffRenderers` を `[]` に戻す）
+
+---
+
 ## 注意点
 
 - **`core.pager` は PATH に `delta` がある文脈でしか動かない**
@@ -169,4 +316,9 @@
 - **`sudo git` には効かない**: root は root の `~/.gitconfig` を読むので、この設定は入っていない
 - **`interactive.diffFilter` が変えるのは `git add -p` の表示だけ**: 選択の操作自体は git のまま
 - **lazygit は `core.pager` を見ない**: 0.65.1 では別途 `git.diffRenderers` を設定する（[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)）
-- **Homebrew 全般の注意は [homebrew.md の注意点](homebrew.md#注意点)**: PATH の先頭が Homebrew になる、`~/.bashrc` を読まない文脈では見えない、など
+- **Homebrew 全般の注意は [AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: PATH の先頭が Homebrew になる、`~/.bashrc` を読まない文脈では見えない、など
+- **Windows 11 の PowerShell と cmd で打つ git も、delta を通る**: `~/.gitconfig` は Git Bash と同じファイル
+  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。[参考資料](reference/git-delta.md#windows-11-で使う--手順-5-補足-ページャの-less-と-powershell-の-git)）
+  - そのため、scoop の less は入れていない。PowerShell で delta を直に動かす（`git diff | delta` など）ときは、PATH に less が無いので、ページャを使わずに出る
+- **Windows 11 の SSH のセッションでは、そのままでは scoop の delta が起動しないことがある**: sshd は、一般ユーザーが作った scoop の `current` のジャンクションをたどらせない（scoop の shim が `Could not create process with command …` で失敗する）
+  - SSH で git を使うなら、[windows-openssh-server.md の scoop のツールを SSH のセッションで使う（任意）](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)を通す（`scoop install`・`scoop update` の後は貼り直す）

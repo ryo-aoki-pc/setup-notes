@@ -399,7 +399,9 @@
   - 標準ユーザーの鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く（Microsoft の文書）。公開鍵の任意節の手順 4 は、Administrators の一員でなければ止まる
 - **LAN の外のサブネットからの接続**
   - 規則の接続元は `Any` で、プロファイルは接続を受けた LAN で決まる。LAN を通って届く接続なら、送信元が別のサブネットでも受け付ける
-- **WSL から、この PC につなぐとき**: この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ
+- **WSL から、この PC につなぐとき**
+  - WSL のネットワークが既定（NAT）なら、この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ
+  - ミラーにした PC（[Windows 11 の初期設定の任意節](windows-setup.md#wsl-のネットワークをミラーにする任意)）では、`127.0.0.1` あてにつなぐ。LAN の IP あてはつながらず、sshd のログの送信元も `127.0.0.1` になるはず（`127.0.0.1` で届くことも含め、確かめていない）
 - **Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（手順 7）
 - **SSH のセッションでは、一般ユーザーが作ったジャンクションをたどれない**
   - sshd に掛けてある RedirectionGuard を、セッションのプロセスが引き継ぐため。開こうとすると、エラー 448（`ERROR_UNTRUSTED_MOUNT_POINT`）になる

@@ -157,7 +157,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 - オンラインのホスト: `openssh-clients` を入れ、同じ名前のユーザーで鍵を作り、公開鍵をオフラインのホストの `authorized_keys` に置いた（鍵認証）
 - このクラウドのホストの外向きの通信は、TLS を署名し直すゲートウェイを通る。その CA を、両方のコンテナの信頼ストアに足した（実際のホストでは要らない）
 
-**流し方**: この文書と [homebrew-offline.md](../homebrew-offline.md)・[homebrew.md](../homebrew.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
+**流し方**: この文書と [homebrew-offline.md](../homebrew-offline.md)・[homebrew.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
 
 - 手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた
 - ホスト鍵の確認には `yes`、インストーラの `RETURN` と brew の `[y/n]` には、表示が出てから Enter と `y` を送った

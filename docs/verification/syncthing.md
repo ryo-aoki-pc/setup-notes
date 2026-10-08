@@ -550,7 +550,7 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 | 実施日 | 2026-09-27 |
 | 土台 | クラウド上の Docker 29.3.1（ホストは cgroup v1。ホストの `/sys/fs/cgroup/unified`（cgroup2）をコンテナの `/sys/fs/cgroup` に渡した） |
 | コンテナ | `almalinux:10`（AlmaLinux 10.2、x86_64）を `--privileged --network host` で、`/sbin/init`（systemd 257）を PID 1 にして起動。イメージがマスクしている `systemd-logind` を戻し、`<USER>`（uid 1000）に `loginctl enable-linger` |
-| Homebrew | 7.0.6（[homebrew.md](../homebrew.md) と同じインストーラ） |
+| Homebrew | 7.0.6（[homebrew.md](../almalinux-setup.md) と同じインストーラ） |
 | Syncthing | `syncthing 2.1.5`（`x86_64_linux` のボトル。バージョン文字列の末尾は `[noupgrade]` で、aarch64 のボトルのような `modernc-sqlite` は付かない） |
 | 相手の端末 | 同じコンテナの 2 つ目の Syncthing（`--home=~/peer`、`tcp://127.0.0.1:22001` で待ち受け、探索・リレー・NAT は切った） |
 | 通していない手順 | [手順 7](../syncthing.md#実施手順)（firewalld を入れていない） |

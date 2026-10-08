@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。下の EPEL と Secure Boot の前提、KVM の設定は要らない）
-> - **前提**: [EPEL](epel.md) を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で EPEL を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **前提（Secure Boot が有効な PC）**: [secure-boot-mok.md](secure-boot-mok.md) で、モジュールの署名鍵を MOK に登録してあること（VirtualBox を入れるより前に。同書で再起動し、起動の途中の MokManager を操作する）。Secure Boot が有効かは、同書の手順 3 で分かる
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
@@ -98,7 +98,7 @@
    ```
 
    - `VirtualBox-7.2 ... 7.2.20_175154_el10-1 ... virtualbox ... 105 M` と、依存の中に `liblzf ... epel` が出れば解決できている
-   - `nothing provides liblzf.so.1()(64bit)` と出たら、[EPEL](epel.md) が有効になっていない
+   - `nothing provides liblzf.so.1()(64bit)` と出たら、EPEL が有効になっていない（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)）
 
 1. 動いているカーネルが、入っている中で一番新しいものかを見る。
 
@@ -132,7 +132,7 @@
    ```
 
    - トランザクション表を見て、`[y/N]` に `y` と答える
-   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[epel.md 手順 3](epel.md#実施手順) に書いた鍵）
+   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
    - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
@@ -382,6 +382,7 @@
 
 - 上から順にコードブロックを貼る。変数は無い
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](#windows-11-のロールバック)
+- Android の Windows App からリモート デスクトップでつないで VM に打つなら、[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)
 - VM に AlmaLinux の Atomic Desktop を入れて Guest Additions を使うなら、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md)（Windows のホストでも同じ手順で入った）
 
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
@@ -500,6 +501,45 @@
 
 ---
 
+## Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）
+
+> [!IMPORTANT]
+> - **この節は Android の Windows App の画面で行う**。PC と VirtualBox の設定は変えない
+> - 前提: この PC がリモート デスクトップを受け付けていること（[Windows 11 の初期設定の手順 44](windows-setup.md#実施手順)）と、[Windows 11 で使う](#windows-11-で使う)で入れた VirtualBox
+
+- Windows App は既定で、打った文字を Unicode で送る。VirtualBox の VM のウィンドウはその文字コードをキーとして読むので、別のキーになる（`1.,2` が `nczm`。[参考資料](reference/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意--手順-1-補足-文字が別のキーになる理由)）
+- この節で、Windows App がキーの位置（スキャンコード）を送るようにする。Windows App のすべての接続にかかる
+- 日本語は Android の IME では打てなくなる。PC の IME は、物理キーボードの `` Alt+` `` で切り替える（Ctrl+Space は Android が受け取る）
+- 実測は[検証記録](verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
+
+1. Android の Windows App の設定で、「使用可能な場合にスキャンコード入力を使用する」をオンにする。
+
+   - プロファイルのアイコンをタップして設定を開き、「全般」をタップする
+   - 英語の表示では「Use scancode input when available」
+   - 接続している間に変えても、セッションに戻るとすぐ効いた（つなぎ直さなくてよい）
+
+1. Windows App でこの PC につなぎ、VM のウィンドウで文字を打って確かめる。
+
+   - VM のウィンドウのタイトル バーをタップして前に出してから打つ
+   - 打った英数字がそのまま VM に出ればよい（`1.,2` が `nczm` にならない）
+   - 物理キーボード（US 配列）では、Shift で打つ記号（`@`・`:`）も出る
+   - **画面のキーボード（Gboard）では、Shift で打つ記号に Shift が付かない**（`@` が `2`、`:` が `;`、`!` が `1`。PC のメモ帳でも同じ）
+   - 英字の大文字は、画面のキーボードでも出る
+   - 物理キーボードの右 Ctrl は、VirtualBox のホスト キー。右 Ctrl との組み合わせは、ゲストではなく VirtualBox が受け取る
+
+1. 画面のキーボードで Shift の記号を打つときだけ、VirtualBox のソフトキーボードで打つ。
+
+   - VM のウィンドウのメニューの「入力」→「キーボード」→「Soft Keyboard...」で開く（7.2.20 では、日本語の表示でもこの項目は英語）
+   - 開いたキーボードの Shift をタップしてから `2` をタップすると、`@` が出る
+   - メニュー バーが無いときは、VM のウィンドウがスケール モード（メニュー バーを出さない形）になっている
+   - スケール モードは、PC で `& "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" setextradata <VM 名> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻る
+
+1. 元に戻すときは、この節の手順 1 の項目をオフにする。
+
+   - Windows App は、打った文字を Unicode で送る既定に戻る
+
+---
+
 ## Windows 11 の更新
 
 - この節は、[Windows 11 で使う](#windows-11-で使う)の手順 1 と同じ管理者の Windows PowerShell（5.1）に貼る
@@ -606,7 +646,7 @@
 
 ## 注意点
 
-- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）。前提の [epel.md](epel.md) で有効にする
+- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で有効にする
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 9・10](#実施手順)）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [secure-boot-mok.md](secure-boot-mok.md) で作って登録する
@@ -631,3 +671,4 @@
   - **`VBoxManage` は `PATH` に入らない**: `C:\Program Files\Oracle\VirtualBox\VBoxManage.exe` を場所ごと呼ぶ（インストーラが足す環境変数は `VBOX_MSI_INSTALL_PATH` だけ）
   - **Secure Boot の MOK は要らない**: ドライバーは Microsoft の署名付きで配られる。[secure-boot-mok.md](secure-boot-mok.md) は Linux だけのもの
   - **ロールバックで残るもの**: 依存で入った Visual C++ の再頒布可能パッケージと、インストーラが「信頼された発行元」に入れた Oracle の証明書（[Windows 11 のロールバック](#windows-11-のロールバック)）
+  - **Android の Windows App からリモート デスクトップでつなぐと、VM に打った文字が別のキーになる**: Windows App の既定の Unicode の入力を、VirtualBox はキーとして読み違える。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)で、スキャンコードで送る設定にする

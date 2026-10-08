@@ -66,7 +66,10 @@
 
 - winget の定義（`Microsoft.PowerToys` 0.101.2362.0）には、自分のユーザーに入れるインストーラ（`PowerToysUserSetup-<版>-x64.exe`。管理者の確認の指定が無い）と、PC 全体に入れるインストーラ（`PowerToysSetup-<版>-x64.exe`。`elevatesSelf`）がある。`--scope user` を付けて、自分のユーザーのほうを選ばせる
 - インストーラの形式は WiX の Burn で、winget は `/quiet /norestart` を渡す
-- 入る場所は、Microsoft の文書では自分のユーザーなら `%USERPROFILE%\AppData\Local\Programs` の下（下のフォルダーの名前は書かれていない）
+- 入る場所は、Microsoft の情報どうしで食い違う
+  - Install PowerToys のページは、自分のユーザーなら `%USERPROFILE%\AppData\Local\Programs` の下と書く（下のフォルダーの名前は書かれていない）
+  - インストーラのソース（`installer/PowerToysSetupVNext/Common.wxi` の `DefaultInstallDir` と `Product.wxs`）と、DSC・Peek のページは `%LOCALAPPDATA%\PowerToys`
+  - そのため、[PowerToys のユーティリティを絞る（任意）](../windows-setup.md#powertoys-のユーティリティを絞る任意)は、場所を決め打ちせず、動いている PowerToys から取る
 - PowerToys のいくつかの機能は、PowerToys を管理者として動かしていないと、管理者の窓には効かない（PowerToys の設定の「常に管理者として実行」）
 - WebView2 のランタイムが無ければ一緒に入れる（Windows 11 には最初からある）
 
@@ -76,6 +79,9 @@
 - MSIX は自分のユーザーだけに入り、更新は winget かストアで行う。PC 全体の実行ポリシーやリモートの受け口は設定できない（Microsoft の文書）。このリポジトリの使い方では足りる
 - PC 全体の MSI（`$Env:ProgramFiles\PowerShell\7`、Microsoft Update で更新）にするなら `--installer-type wix` を付ける。ただし Microsoft の文書では、7.7.0 から MSI は無くなる
 - PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（手順 19 は PowerShell 7 のプロファイルには書かない。[注意点](../windows-setup.md#注意点)）
+- winget の既定の範囲: 設定（`settings.json`）の `installBehavior.preferences.scope` は、書かなくても `user`（winget の `UserSettings.h`）で、user のインストーラが無ければ machine を選ぶ。そのため、範囲を変える設定は足さない
+  - PowerShell 7 の MSIX（範囲の宣言が無い）と MSI（machine）は、どちらも user に当たらない。インストーラの種類の順（MSIX が MSI より先）で MSIX が選ばれる
+  - `installBehavior.requirements.scope` は絞り込みで、machine だけのパッケージと、範囲を宣言しないインストーラ（MSIX・Store・持ち運び版・フォントを除く）が外れるので書かない。UniGet UI のスコープも「デフォルト」のまま（「ユーザー | ローカル」は `--scope user` を付ける）
 
 ### 実施手順 / 手順 29: 補足: 値の意味
 
@@ -313,9 +319,543 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - **電源・帯域外の手段（スマートプラグ + BIOS の通電時起動・IP-KVM・Intel AMT/vPro）は、この文書では扱わない**（利用者の選択）
   - 機器やマザーボードに依存し、設定が Windows の外になる。電源を切った後に起こすのは、既存の [Wake on LAN を使う（任意）](../windows-setup.md#wake-on-lan-を使う任意)が担う
 
+### プライバシーと広告の表示を切る（任意） / 手順 2: 補足: 値と画面の対応
+
+出典の「文書」は Microsoft の文書（Microsoft Learn・サポートの記事）、「広く」はコミュニティで広く使われている情報（privacy.sexy・Ten Forums・ElevenForum・Winaero など）。値は `HKCU` の DWORD。
+
+| 値 | 書く値 | 設定の画面 | 出典 |
+|---|---|---|---|
+| `Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo` の `Enabled` | 0 | 「プライバシーとセキュリティ」→「全般」の広告 ID | 広く（Windows の移行マニフェストがユーザーごとの値として扱う。Microsoft Learn は `HKLM` の同じ名前の値を書く） |
+| `Control Panel\International\User Profile` の `HttpAcceptLanguageOptOut` | 1 | 同じページの言語リスト | 文書（Manage connections の 18.1） |
+| `Software\Microsoft\Windows\CurrentVersion\Privacy` の `TailoredExperiencesWithDiagnosticDataEnabled` | 0 | 「診断とフィードバック」の「カスタマイズされたエクスペリエンス」（新しいビルドでは「パーソナライズされたオファー」） | 広く（移行マニフェストに値がある） |
+| `Software\Microsoft\Input\TIPC` の `Enabled` | 0 | 「診断とフィードバック」の「手書き入力と入力の改善」 | 広く |
+| `Software\Microsoft\Siuf\Rules` の `NumberOfSIUFInPeriod`・`PeriodInNanoSeconds` | 0・0 | 「フィードバックの頻度」の「しない」 | 文書（18.16。「自動」は 2 つとも消す） |
+| `Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy` の `HasAccepted` | 0 | 「音声認識」の「オンライン音声認識」 | 文書（18.6） |
+| `Software\Microsoft\Windows\CurrentVersion\SearchSettings` の `IsMSACloudSearchEnabled`・`IsAADCloudSearchEnabled` | 0 | 「検索のアクセス許可」の「クラウドのコンテンツ検索」 | 広く |
+| 同じキーの `IsDeviceSearchHistoryEnabled` | 0 | 「検索のアクセス許可」の「このデバイスの検索履歴」 | 広く（Ten Forums は 0 がオフ。privacy.sexy は逆に 1 を書く） |
+| `Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced` の `ShowSyncProviderNotifications` | 0 | フォルダー オプションの「表示」の、同期プロバイダーの通知 | 広く |
+
+- 既定では、`HttpAcceptLanguageOptOut`・`Siuf\Rules` の 2 つ・`HasAccepted`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は値が無い（広く）。`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled` は、OOBE の選び方で 1 か 0
+- キーが無いときだけ `New-Item -Force` で作る。PowerShell 5.1 の `New-Item` の文書のとおり、既にあるレジストリのキーに `-Force` を付けると、値の無い空のキーで上書きされる
+- 元の値を `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控えるのは、この節の手順 5 で、値が無かったものは消し、あったものはその数と型（DWORD か QWORD）に戻すため。初めて貼ったときだけ作るので、2 回目に貼っても元の値は失われない
+- 「フィードバックの頻度」を「1 日 1 回」などにしていると、`PeriodInNanoSeconds` は 864000000000 などの 32 ビットに収まらない数になる（18.16）。型は QWORD のはず（推測。文書は REG_DWORD と書く）なので、型も控える
+- 広告 ID を切っても、広告の数は減らない。オンに戻すと、ID は作り直される（サポートの記事）
+- 画面の名前が変わった後のビルド（「全般」→「おすすめとオファー」、「カスタマイズされたエクスペリエンス」→「パーソナライズされたオファー」）でも同じ値を使うかは、資料では確かめられなかった。日本語の表記も、「おすすめとオファー」と「推奨事項 & オファー」で割れている
+
+### プライバシーと広告の表示を切る（任意） / 手順 4: 補足: 画面で行うもの
+
+- 「カスタム手書き入力と入力の辞書」: 画面で切ると、覚えた単語の一覧が消える（サポートの記事）。レジストリの値を書いても、既にある辞書は消えない（広く）
+- 「オプションの診断データを送信する」: 画面が書く値は資料が無い。ポリシー（`AllowTelemetry`）は画面を灰色にするので使わない。Windows 10 1903 以降の既定は「必須」だけ（文書）。Rufus の「データ収集を無効化」で入れた PC は、既に切れている見込み（確かめていない）
+- 「設定アプリで通知を表示する」: 値（`SystemSettings\AccountNotifications` の `EnableAccountNotifications`）の資料は ElevenForum などだけ（広く）。24H2・25H2 の画面にあるかも確かめていない。手順 27 の `Start_AccountNotifications`（スタートのアカウントの通知）とは別
+- 「検索のハイライトを表示する」: 手順 49 の `DisableSearchBoxSuggestions` で灰色になる（Microsoft Q&A の回答）。ポリシー（`EnableDynamicContentInWSB`）は管理者の窓が要り、同じく灰色にする
+- この節の手順 2 の値が画面でオンのまま出たら、その画面でオフにすれば、画面が値を書き直す
+
+### プライバシーと広告の表示を切る（任意）: 選択した方針
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 広告 ID・カスタマイズされたエクスペリエンス | 自分のユーザーの値（`HKCU`） | ポリシー（`DisabledByGroupPolicy`・`DisableTailoredExperiencesWithDiagnosticData`）: 設定の画面が灰色になり、「組織によって管理」の表示が出る。広告 ID のポリシーは全ユーザーにかかる |
+| 診断データ | 画面で確かめ、オプションがオンのときだけ切る | `AllowTelemetry` のポリシー: 画面を灰色にする。0（オフ）は Enterprise・Education・Server だけ |
+| 辞書・設定アプリの通知 | 画面で切る | レジストリ: 辞書は既にある分が消えない。通知の値は資料が少ない |
+| アクティビティの履歴 | 入れない | 送信は KB5034204（2024-01）で廃止され、履歴はこの PC にだけ残る。24H2 以降は画面が無いと広く報告されていて、止めるのは `HKLM` のポリシー（`PublishUserActivities` など）だけ |
+| Recall | 入れない | Copilot+ PC だけの機能で、管理されていない PC では、利用者が同意するまでスナップショットを保存しない（文書） |
+| アプリの起動の追跡（`Start_TrackProgs`） | 入れない | 文書（18.1）にある値だが、スタートの「よく使う」と、Win+R・アドレス バーのアプリの履歴も消えると広く言われる（2025 年の新しいスタートでの働きは確かめていない） |
+| ロック画面のトリビアとヒント | 入れない | 背景が Windows スポットライトの間は切れない（チェックが出ない。広く）。スポットライトを止めるポリシーは Enterprise・Education だけ（文書） |
+| モバイル デバイスの提案・共有のおすすめのアプリ・スタートの閲覧履歴のサイト・Edge のおすすめ | 入れない | 資料が少ないか、管理者のポリシーで Pro では効かないものがある |
+| 位置情報 | 入れない | 文書にあるのは `HKLM` のポリシーだけで、「組織によって管理」の表示が出る |
+| 値を戻す方法 | 元の値をファイルに控えて、そのとおりに戻す | 既定の値に戻す: Rufus で入れた PC などでは、元が 0 のことがある |
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 2: 補足: 控えのファイル
+
+- `%LOCALAPPDATA%\setup-notes\display-before.csv` に、この節で変える値の、変える前の値を `Name`・`Value` の 2 列で書く。初めて貼ったときだけ作り、2 回目からは書き換えない（機能の更新の後に貼り直しても、元の値が残る）
+- 控えを使うのは、この節の手順 16（切り替えのキー）・17（Alt+Tab とシェイク）・18（ギャラリーとホームのキーがあったか）・19（タスクの終了）。値が空なら、もとは値が無かった（戻すときは消す）
+- 固定キーなどの `Flags`・`MinAnimate`・効果音のスキームは、確かめるために並べるだけ。戻すときは、`Flags` は今の値に 0x4 を立て（この節の手順 15）、アニメーションは決まった値（オンと `1`）に戻し（この節の手順 20）、効果音はこの節の手順 9 の `.reg` の控えを使う
+- 読者が値を控えて手で入れる形にしなかったのは、値が多く、打ち間違えやすいため
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 3: 補足: Flags のビット
+
+- `HKCU\Control Panel\Accessibility` の `StickyKeys`・`Keyboard Response`・`ToggleKeys` の `Flags`（REG_SZ の 10 進の数）。0x4 のビット（`SKF_HOTKEYACTIVE`・`FKF_HOTKEYACTIVE`・`TKF_HOTKEYACTIVE`）が、ショートカットで機能をオンにできるかを決める（文書。`STICKYKEYS`・`FILTERKEYS`・`TOGGLEKEYS` の構造体）
+- 既定の 510 と、ショートカットを切った 506 は、Microsoft の 2007 年の Windows XP Embedded のブログ（文書。Windows 11 の既定かは確かめていない。広くも 510 とする）。126 → 122 と 62 → 58 は広く
+- 既定の値に頼らず、今の値から 0x4 だけを落とすので、ほかのビットは変えない
+- 型は REG_SZ のままにする（DWORD で書く例があるが誤り）。値が無いか数でないときは書かない（0 を書くと、機能を使える印 0x2 まで落ちる）
+- 戻すときは、値を消さずに `-bor 4` で 0x4 を立てる。値を消したときの動きは文書に無い
+- レジストリに書いただけでは、今のサインインには効かない（サインインし直した後に読む）。その間に設定の画面で切り替えると、メモリの値で書き戻されうる（推測）
+- 切り替えキー（Num Lock の長押し）の秒数は、構造体の文書は 8 秒、サポートの記事は 5 秒と書いていて食い違う
+- 同じ値は、Microsoft の DSC のリソース（`microsoft/winget-dsc` の `Microsoft.Windows.Setting.Accessibility`）も読み書きする（コード）
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 4: 補足: 切り替えのキーの値
+
+- `HKCU\Keyboard Layout\Toggle` の 3 つの値（REG_SZ）。`1` が Alt+Shift、`2` が Ctrl+Shift、`3` が割り当てなし（文書。SystemParametersInfo の `SPI_SETLANGTOGGLE`）
+- `Language Hotkey` が入力言語の切り替え、`Layout Hotkey` が同じ言語の中のキー配列の切り替え、`Hotkey` は古い名前で `Language Hotkey` と同じ値（ReactOS の input.cpl のコード。値の名前は Microsoft の文書に無い）
+- 既定は広く `1`・`1`・`2` とされる（日本語版の値は確かめていない）。キーが無いユーザーもあるので、この節の手順 2 で控える
+- 日本語の IME だけの PC では、ふだんは切り替える先が無い。タスクバーに「英語 (米国)」が勝手に出たときや、後で英語の配列を足したときに、Ctrl+Shift・Alt+Shift を押して離すだけで切り替わるのを防ぐ。WezTerm の自分用の設定は、Ctrl+Shift の組み合わせを多く使う
+- Win+Space（入力言語とキー配列を順に切り替える）は、この値では消えない（サポートの記事）。誤って切り替わったときに戻す手段として残る
+- 文書では、値を書いてから `SPI_SETLANGTOGGLE` を呼ぶと読み直す。この節では呼ばず、サインインし直して効かせる
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 5: 補足: Alt+Tab とシェイクの値
+
+- `Explorer\Advanced` の `MultiTaskingAltTabFilter`: 0 がすべて（今は最新の 20 個）、1 が 5 個、2 が 3 個、3 が窓だけ（広く。Winaero・ElevenForum）。値が無いときの既定は、資料で 3 個と 5 個に割れる
+- 同じことをするポリシー（`BrowserAltTabBlowout`）は文書にあるが、番号が 1 つずれ（4 が窓だけ）、preview の扱いで、Alt+Tab にだけ効く。ユーザーの値は、スナップの候補にも効く
+- `DisallowShaking` が 1 でシェイクを切る。build 21286 から既定で切れている（Windows Insider のブログ）。1 がオフの意味は広く。日本語の画面の名前は「タイトル バー ウィンドウのシェイク」（広く）
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 6: 補足: ギャラリーとホームを消す仕組み
+
+- `System.IsPinnedToNameSpaceTree` が 0 だと、その名前空間の拡張を消さずに、ナビゲーション ウィンドウに既定では出さない。「すべてのフォルダーを表示」で出る（文書。Integrate a Cloud Storage Provider）
+- `HKCR` は `HKLM\SOFTWARE\Classes` と `HKCU\Software\Classes` を合わせた見え方で、両方にあるキーは合わさり、`HKCU` の値が勝つ（文書。Merged View of HKEY_CLASSES_ROOT の例）
+- ギャラリーの CLSID `{e88865ea-…}` とホームの `{f874310e-…}` は広く（winutil・WinSetView・winscript など）。手順 26 と同じく、Microsoft が説明していない使い方
+- `HKCU\Software\Classes\CLSID` は WOW64 でリダイレクトされる（文書）ので、32 ビットの PowerShell から書くと別の場所に入る。32 ビットのアプリのファイルを開く画面には、残ることがある（推測）
+- 2024 年 6 月の更新の後に効かなくなったという報告と、25H2 に上げた後にホームが戻ったという報告が 1 件ずつある（広く。確かめていない）
+- 2 つを 1 つの手順にしたのは、同じ値・同じ仕組みで、確かめ方も同じため。手順 25 の `LaunchTo` = 1 で、エクスプローラーを開いたときも「PC」になる
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 7: 補足: タスクの終了
+
+- `Explorer\Advanced\TaskbarDeveloperSettings` の `TaskbarEndTask` = 1。Microsoft の WindowsDeveloperConfig の設定スクリプトが、同じキーと値を書く（コード）
+- 機能は KB5031455（2023-10、22621.2506・22631.2506）で足された（文書）。25H2 以降は「開発者向け」のページが「詳細設定」に変わった（文書。Windows の詳細設定）
+- 開発者モード（手順 40）は要らない
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 8: 補足: UserPreferencesMask ではなく SystemParametersInfo を使う理由
+
+- 設定の「アニメーション効果」は、アプリには `SPI_GETCLIENTAREAANIMATION`（0x1042）として見える（MDN の `prefers-reduced-motion` の説明と、Chromium の `animation_win.cc`）。値は `HKCU\Control Panel\Desktop` の `UserPreferencesMask`（8 バイトの REG_BINARY）の 5 バイト目の 0x02 のビット（Wine の `sysparams.c`）
+- `UserPreferencesMask` は、メニューのフェード・ClearType など多くのビットを 1 つの値に詰めている。丸ごと書く例（Microsoft Q&A の回答など）は、ほかのビットまで変える
+- `SystemParametersInfo` に `SPIF_UPDATEINIFILE`（1）と `SPIF_SENDCHANGE`（2）を付けて書かせると、そのビットだけを変えてプロファイルに残し、開いている窓に知らせる（文書）
+- 最小化・最大化のアニメーションは `SPI_SETANIMATION`（0x0049）の `ANIMATIONINFO` の `iMinAnimate` で、`HKCU\Control Panel\Desktop\WindowMetrics` の `MinAnimate`（REG_SZ、既定 `1`）に入る（文書）
+- `Add-Type` で `user32.dll` の `SystemParametersInfo` をその場でコンパイルして呼ぶ。同じ定義なら、同じ窓で貼り直しても止まらない。制約付き言語モードの PC では使えない
+- 設定の画面がほかに何を書くか（メニュー・コンボ ボックスのアニメーションのビットなど）は、文書に無い。この手順では変えない
+- 切ると、Firefox・Chromium は Web ページに `prefers-reduced-motion: reduce` を返す
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 9: 補足: 効果音の控えとスキーム
+
+- サウンドの画面でスキームを選ぶと、`HKCU\AppEvents\Schemes` の既定の値にスキームの名前（「サウンドなし」は `.None`、「Windows 標準」は `.Default`）を書き、`Schemes\Apps\<アプリ>\<イベント>` ごとに、そのスキームの音を `.Current` に写す。`.None` には音が無いので、`.Current` を空にするのと同じ（古い Microsoft の文書・Scripting Guy の記事と、広く使われているスクリプト）
+- 先に `reg.exe export` で `HKCU\AppEvents` を丸ごと控えるのは、イベントごとの元の音を、`.Default` が無いものやアプリが自分で書いたものも含めて戻すため。画面で「Windows 標準」に戻すと、`.Default` が無いイベントは空のまま残る
+- 控えは初めて貼ったときだけ作る。2 回目に貼っても、「サウンドなし」にした後の状態で上書きしない
+- 戻すときの `reg.exe import` は、控えにある値を書き戻す。控えの後に足されたイベントは、空のまま残る
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 10: 補足: 起動音をレジストリで変えない理由
+
+- 起動音はサインインの前に鳴るので、ユーザーごとではなく PC 全体の設定（`HKLM`）
+- レジストリの値は、資料どうしで食い違う（`BootAnimation` の `DisableStartupSound` と `EditionOverrides` の `UserSetting_DisableStartupSound`。多くは 1 が鳴らさない側だが、Winaero は別の値を書く。どれも広く）。ポリシー（「Windows スタートアップのサウンドをオフにする」）は Policy CSP の一覧に無い
+- そのため、サウンドの画面のチェックで行う。`control.exe mmsys.cpl,,2` は、サウンドの画面を「サウンド」のタブで開く（広く）。PowerShell ではカンマが配列の区切りになるので、引数を引用符で囲む
+- 手順 41 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
+
+### 表示・入力・音・ストレージを変える（任意） / 手順 11: 補足: ストレージ センサーの値
+
+`HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy` の DWORD:
+
+| 値 | 書く値 | 意味 |
+|---|---|---|
+| `01` | 1 | ストレージ センサー（ユーザー コンテンツの自動クリーンアップ）をオン |
+| `04` | 1 | 一時ファイルを消す |
+| `08` | 1 | ごみ箱を消す（`256` と組） |
+| `256` | 30 | ごみ箱に移してから消すまでの日数（0 が許可しない・1・14・30・60） |
+| `32` | 0 | ダウンロード フォルダーを消さない（`512` と組） |
+| `512` | 0 | ダウンロード フォルダーの日数（0 が許可しない） |
+| `2048` | 30 | 実行のタイミング（0 が空きが少ないとき・1 が毎日・7 が毎週・30 が毎月） |
+
+- 値の名前と意味は広く（stealthpuppy・cyberdrain のスクリプトなど）。Microsoft の文書にあるのは `01` だけ（Azure Virtual Desktop の文書。`HKLM` の同じ形のパス）。値が無いときの動き（オフで、空きが少ないとオンになることがある。一時ファイルは消し、ごみ箱は 30 日、ダウンロードは消さない）は、Policy CSP の Storage の文書
+- `04` の向きは、stealthpuppy の表だけが逆に書いている（同じ記事のスクリプトは 1 で消す）
+- 掃除の本体は `StorageSensor\Parameters\StorageSensorV2` を読み、`StoragePolicy` は画面の表示だけ、という Microsoft Q&A の回答（社員ではない）があるが、出典が無い。書いた値で掃除が動くかは確かめていない
+- 動くのはシステムのドライブだけで、サインインしてオンラインの状態が 10 分以上続いたとき（サポートの記事）
+- 22H2 以降の既定では、OneDrive のファイルは 30 日開かないとオンラインだけになる（サポートの記事）。OneDrive のアカウントごとの値（`StoragePolicy` の下の `OneDrive!…` のサブキー）は、名前がアカウントで変わり、資料も少ないので、画面で外す（この節の手順 12）
+- キーが無いときだけ作る。既にあるキーを作り直すと、OneDrive のサブキーなども消える
+- PC 全体のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Windows\StorageSense` の `AllowStorageSenseGlobal`）があると、そちらが勝つ
+
+### 表示・入力・音・ストレージを変える（任意）: 選択した方針
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 透明効果 | 変えない | `EnableTransparency` を 0 にすると、WezTerm の自分用の設定のアクリルの背景（`win32_system_backdrop = "Acrylic"`）も単色になるはず（WinUI の文書が、透明効果を切るとアクリルが単色になると書く）。利用者はアクリルを使い続ける |
+| Xbox Game Bar と録画 | 入れない | Win+G を止めるサポートされた値が無い。Game Bar のアプリを外すと、ゲームを開くたびに `ms-gamingoverlay` の窓が出たという報告がある（Microsoft Q&A の質問。広く）。バックグラウンドの録画は既定でオフ。録画を止めるポリシー（`AllowGameDVR`）の CSP の注は "The policy is only enforced in Windows 10 for desktop." で、Windows 11 で効くかは書いていない（確かめていない） |
+| アニメーション効果 | `SystemParametersInfo` | `UserPreferencesMask` を丸ごと書く: ほかのビットも変わる |
+| 起動音 | 画面のチェック | レジストリ: 資料どうしで値の意味が食い違う |
+| 効果音 | `.Current` を空にし、スキームを `.None` にする（先に `.reg` で控える） | 画面だけ: 戻すときに、元の音を全部は戻せない |
+| ギャラリーとホーム | 自分のユーザーの CLSID の上書き | PC 全体の `NameSpace` を消す: 管理者が要り、ほかのユーザーにもかかる |
+| ストレージ センサー | 自分のユーザーの値（ダウンロードは消さない） | ポリシー（`AllowStorageSenseGlobal`）: 設定の画面が灰色になる |
+| マウス キー・ハイ コントラスト・ナレーターのショートカット | 入れない | 3 つのキーを同時に押すので誤って押しにくく、値は広くだけ |
+
+### Edge の常駐をポリシーで止める（任意） / 手順 2: 補足: 2 つのポリシー
+
+- `StartupBoostEnabled`（Edge 88 から）と `BackgroundModeEnabled`（Edge 77 から）。どちらも REG_DWORD のブールで、必須にも推奨にもでき、Dynamic Policy Refresh が Yes（開き直さずに読み直せる）、Per Profile が No（文書。Microsoft Edge のポリシーの文書）
+- スタートアップ ブーストは、サインインのときに Edge を裏で起動しておく。4 GB を超えるメモリ（または 1 GB を超え、新しいディスク）で、Edge を数日おきに使う PC では、Edge が自分でオンにする（サポートの記事）
+- バックグラウンドの実行が残ると、スタートアップ ブーストの扱いと関係なく、窓を閉じても Edge が終わらないことがある（文書）。そのため 2 つを組で切る
+- 手順 32 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
+- Edge Update の、サインインのときのコマンド（`on-logon-startup-boost`・`on-logon-autolaunch`）でも、Edge が起動することがある（広く）。文書に無いので変えない
+- 必須のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Edge`）を置くと、Edge は組織が管理している旨を出し、その切り替えを灰色にする（表示の日本語の文言は広く）
+- 手順 50 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
+- `Edge` のキーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）。戻すときも、キーは消さずに 2 つの値だけを消す
+- ドメイン参加か MDM の登録が要るポリシーには、その旨の注記がある。2 つのポリシーの文書には無いので、家庭の PC でも効くはず（確かめていない）
+
+### Edge の常駐をポリシーで止める（任意）: 選択した方針
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **`HKLM` の必須のポリシー** | 手順 50 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
+| 推奨のポリシー（`Edge\Recommended`） | 利用者が一度でも切り替えていると効かない（文書）。管理の表示が出るかは資料が無い | 不採用 |
+| `HKCU` のポリシー | 書くのに管理者が要るのは同じ。両方あると `HKLM` が勝つ（Chromium の文書） | 不採用 |
+| Edge の設定の画面 | 管理の表示は出ない。Edge が自分でオンに戻すことがあるかは、資料が無い | 代わりの手順（この節の手順 3） |
+| 旧 Edge の `AllowPrelaunch` など | EdgeHTML の Edge のポリシーで、今の Edge には効かない | 不採用 |
+
+### CopyQ を使う（任意） / 手順 2: 補足: 入れ方と入る場所
+
+- winget の `hluk.CopyQ`（2026-10-08 の定義は 16.0.0。上流の最新は 17.0.0）は Inno Setup のインストーラ。`--scope user` は `/CURRENTUSER` を渡し、`%LOCALAPPDATA%\Programs\CopyQ` に入る
+- `/CURRENTUSER` は winget の定義。入る場所は、`copyq.iss` の `{autopf}\CopyQ` を、Inno Setup が自分のユーザーの導入で `%LOCALAPPDATA%\Programs` にするため
+- インストーラは `PrivilegesRequiredOverridesAllowed=dialog` なので、管理者の確認を出さずに自分のユーザーに入れられる（`shared/copyq.iss` と Inno Setup の文書）。winget の定義は `elevatesSelf` で、winget は UAC が出るかもしれない旨を出すだけで、自分では昇格しない（winget の文書）
+- デスクトップのショートカットとスタートアップのタスクは既定で外れていて、入れた後の起動は `postinstall skipifsilent` なので、黙って入れると起動しない。PATH には入らない
+- 自分のユーザーにしたのは、手順 22・23 の UniGet UI・PowerToys と同じく、管理者が要らず、ほかのユーザーにかからないため。更新も、管理者ではない窓の `## 更新` の winget で上がる
+- 17.0.0 は、データを `%LOCALAPPDATA%\copyq` に移し、前の版では読めなくなる（`CHANGES.md`）
+- 前に別の場所へ入れた CopyQ があると、インストーラはその場所に入れる（`UsePreviousAppDir`）。そのときは、この節の手順 3・4・7 の決め打ちのパスが外れる
+
+### CopyQ を使う（任意） / 手順 4: 補足: 自動の起動の仕組み
+
+- `copyq config autostart true` は、スタートアップ フォルダー（`CSIDL_STARTUP`）に `copyq.lnk` を作る（`winplatform.cpp`）。手順 32 の `Run` とは別の所なので、手順 32 の一覧には出ない
+- CLI の `config` は、値が変わったときだけショートカットを作る（`ConfigurationManager::setOptionValue`）。`copyq.ini` に `autostart=true` が残っていて `copyq.lnk` が無いと、`true` を送っても作られない。先に `false` を送るのはそのため
+- アンインストーラは `copyq.lnk` を消さない（スタートアップのタスクを選んだときだけ、アンインストールの記録に入る）
+- `copyq.exe` は窓を持つアプリ（GUI のサブシステム）なので、PowerShell は結果を出さずに戻る。`| Write-Output` を付けると、終わるまで待って結果を出す（CopyQ の known-issues）。`| Out-Null` は、終わるまで待って結果を捨てる
+- 起動を別の手順（この節の手順 3）にしたのは、`--start-server` に `| Write-Output` を付けると、裏で動き続けるサーバーが標準出力のパイプを持ち続け、窓が戻らないおそれがあるため（Qt の `startDetached` のコード。確かめていない）。クライアントがサーバーを待つのは、既定で 1 秒だけ
+- `EnableClipboardHistory`（`HKCU\Software\Microsoft\Clipboard`）の名前は広く。Windows の履歴が既定でオフなのは文書（サポートの記事）
+
+### CopyQ を使う（任意） / 手順 6: 補足: 避けるキーと貼り付け
+
+- CopyQ のグローバル ショートカットは `RegisterHotKey` を使う。Windows キーを含むキーは OS が予約していて、ほかが登録済みのキーと同じく失敗することがある（文書）。失敗はサーバーの記録に出るだけで、画面には出ない（コード）
+- 手順 23 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
+- CopyQ は Ctrl+V などのキーを `SendInput` で送って貼る。`SendInput` は、同じか低い整合性のレベルの窓にしか届かないので、管理者の窓には貼れない（文書。UIPI）
+- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP で窓が見えない不具合は 16.0.0 で直った（`CHANGES.md`）
+- パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
+- 履歴は暗号化しないで保存する（`encrypt_tabs` の既定は false。項目は既定で 200 まで）。16.0.0 は `%APPDATA%\copyq`、17.0.0 からは `%LOCALAPPDATA%\copyq` の下
+- 画面の日本語は、同梱の訳（約 94%）が、Windows の地域の形式に合わせて出る（推測）
+
+### CopyQ を使う（任意）: 選択した方針
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `hluk.CopyQ` を `--scope user` で** | 管理者が要らず、UniGet UI・PowerToys と同じ形。`## 更新` の winget の一覧で上がる | **採用** |
+| winget の `--scope machine` | `%ProgramFiles%\CopyQ` に入り、管理者の確認が要る | 不採用 |
+| scoop の `extras/copyq` | extras のバケットは git が要り（この文書の時点では Git for Windows が無い）、動いている間は更新を飛ばし、シムが GUI の終了を待つ | 不採用 |
+| Windows のクリップボードの履歴（Win+V） | 標準で入っている | 不採用（利用者の選択） |
+| Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
+| インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
+| ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
+
+### PowerToys のユーティリティを絞る（任意） / 手順 2: 補足: 入る場所と、切るユーティリティの案
+
+- 入る場所は、Microsoft の情報どうしで食い違う（[手順 23 の補足](#実施手順--手順-23-補足-入れ方と入る場所)）。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
+- 設定ファイルの `enabled` の名前は、設定の画面のコード（`EnabledModules.cs`）の JSON の名前。`Measure Tool`・`File Locksmith`・`Image Resizer` などは空白を含む。DSC の文書の App の例の名前（`MeasureTool`・`PowerOCR` など）とは違う
+- 既定で有効なもの（main のソース）: FancyZones・Image Resizer・File Explorer Preview・PowerRename・ColorPicker・Awake・FindMyMouse・MouseHighlighter・AlwaysOnTop・Measure Tool・File Locksmith・Peek・CmdNotFound・CmdPal。ほかは既定で無効。0.101.2362.0 で同じかは、この節の手順 3 の表で確かめる
+- `$PT_OFF` の案（利用者の好みで変えてよい）
+  - FindMyMouse: 既定は左 Ctrl を 2 回で出る。手順 51 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
+  - MouseHighlighter（Win+Shift+H）・ColorPicker（Win+Shift+C）・Measure Tool: 使わないなら、Win のキーの割り当てを空ける
+  - FancyZones: Windows のスナップで足りるなら要らない
+  - Awake: 手順 41 で、電源接続中は眠らないようにした。既定のモードは何もしない
+- 残す案: Always On Top（Win+Ctrl+T）・コマンド パレット（Win+Alt+Space）・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer。Text Extractor（Win+Shift+T。画面の文字を読み取ってコピーする）は既定で無効で、使うなら画面でオンにする
+- LightSwitch（既定で無効）は、時刻で明暗を切り替えるので、手順 29 のダークモードとぶつかる。オンにしない
+- WezTerm の自分用の設定は Win のキーを使わないので、PowerToys の Win+ のショートカットとはぶつからない
+
+### PowerToys のユーティリティを絞る（任意） / 手順 5: 補足: 設定ファイルを書く順と、変えない設定
+
+- PowerToys のランナー（`PowerToys.exe`）は、起動のときに `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json` を読んで当てはめ、ファイルを見張らない（`src/runner/main.cpp`）。そのため、終了してから書き、起動し直す。ランナーは、`enabled` のうち自分の一覧にある名前だけを使い、無い名前は黙って飛ばす（`general_settings.cpp`）ので、この節の手順 3・5 で名前を確かめる
+- 設定ファイルを直接書く方法は、Microsoft の文書には無い
+- Windows PowerShell 5.1 の `ConvertTo-Json` は、`-Depth` の既定が 2 で、深い入れ子が文字列に潰れるので、`-Depth 100` を付ける。`Set-Content` は ANSI か BOM 付きで書くので、`[IO.File]::WriteAllText` で BOM の無い UTF-8 にする
+- 控えは、控えが無いときだけ作る（2 回目に貼っても、元の設定が残る）。この節の手順 8 で書き戻すと消すので、次にこの節を通すときは、そのときの設定を控え直す（前の控えで、その間に変えた設定を戻さない）
+- `enabled` は、今ある名前のプロパティの値を書き換える。`Add-Member -Force` で足し直すと、名前が `$PT_OFF` の綴りになり、大文字と小文字が違うと、ランナーが読まないおそれがある
+- 「起動時に実行」（`startup`）は、ランナーがタスク スケジューラの `\PowerToys\Autorun for <ユーザー>` を作る。キーが無ければ作る（既定で有効）
+- 「常に管理者として実行」（`run_elevated`）をオンにすると、そのタスクが最上位の特権で動く。Microsoft の文書は、管理者の窓で要るときだけ「管理者として再起動」するよう勧める。管理者の窓で効かないのは、Always On Top・FancyZones・File Locksmith（昇格したプロセスを止める）など
+- 自動の更新の取得（`download_updates_automatically`）は、Administrators の一員なら既定で有効。winget と UniGet UI でも上がるが、二重でも壊れないので変えない
+
+### PowerToys のユーティリティを絞る（任意） / 手順 6: 補足: Peek・Find My Mouse・Command Not Found
+
+- Peek の起動のキーの既定は Ctrl+Space だが、「Space で開く」（`EnableSpaceToActivate`）が既定でオンの間は Space だけになる（0.95 から。`PeekProperties.cs`・`dllmain.cpp`）。オフにすると Ctrl+Space に戻り、手順 31 の IME とぶつかる。0.95 より前の設定を引き継いだ PC も同じ
+- Find My Mouse の起動の方法は、設定ファイル（`FindMyMouse\settings.json`）の `activation_method`（0 が左 Ctrl を 2 回、1 が右 Ctrl を 2 回、2 が振る、3 がショートカット）と `include_win_key`（Windows キーを押しているときだけ。0 と 1 のときだけ画面に出る）。この節では画面で変える
+- Command Not Found は、有効の印があっても、画面で「インストール」を押すまで何もしない。押すと、PowerShell 7 のプロファイルに行を足す（Microsoft の文書）
+- 通知領域のアイコンを 1 回クリックすると、クイック アクセス（`enable_quick_access` が既定で true）が開く。設定の窓は、右クリックのメニューの「設定」か、ダブルクリックで開く（`src/runner/tray_icon.cpp`）
+- 画面の日本語の文言（「終了」「設定」「ダッシュボード」「Space で開く」「マウスを振る」など）は、英語の文言から書き、確かめていない
+
+### PowerToys のユーティリティを絞る（任意）: 選択した方針
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **設定ファイル（`settings.json` の `enabled`）を、終了してから書く** | 管理者が要らず、控えから戻せる。書き方は Microsoft の文書に無い | **採用** |
+| 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | この節の手順 6 で確かめに使う |
+| `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
+| `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
+| Keyboard Manager で Caps Lock を変える | 手順 51 の Scancode Map を採った（[選択した方針](../verification/windows-setup.md#選択した方針)） | 不採用 |
+| 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
+
+### PowerShell 7 のプロファイルを設定する（任意） / 手順 2: 補足: 足す行
+
+- プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。5.1 から書くので、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
+- Ctrl+Enter: PowerShell 7.5 の PSReadLine 2.3.6 と、7.6 の 2.4.5 も、Windows モードの Ctrl+Enter は `InsertLineAbove`（`KeyBindings.cs`）
+  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（手順 30 の補足）、右クリックで貼ると 5.1 と同じく行が逆順になるはず
+  - Windows Terminal は、貼るときに LF を CR に直す（`ControlCore::PasteText`）ので起きない。WezTerm（Windows では、貼るときに改行を CRLF に直す）は確かめていない
+- ↑/↓: `HistorySearchBackward`・`HistorySearchForward`（既定は F8・Shift+F8 に割り当て）。bash-settings.md の `~/.inputrc` の `history-search-backward` と同じく、打った文字で始まる履歴だけを出す
+  - `-HistorySearchCursorMovesToEnd` は付けない（既定の False で、カーソルは打った文字の後ろに残る。bash と同じ）。Microsoft の `SamplePSReadLineProfile.ps1` は付けている
+  - 予測の一覧（ListView）が出ているときは、候補を選ぶ。複数行の入力の中では、ほかの行へ移る
+  - 履歴のファイル（`%APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`）は 5.1 と共有する
+- 各行を `if (Get-Module -Name PSReadLine) { … }` で囲むのは、`pwsh -Command`・`-File` では PSReadLine が読み込まれず（`ConsoleHost.cs` の `LoadPSReadline`）、囲まないと `Set-PSReadLineKeyHandler` が PSReadLine を自動で読み込むため。`-NoExit` 付きの起動（WezTerm の起動メニューの PowerShell 7）では読み込まれる
+- 行は ASCII の文字だけにする。5.1 の `Add-Content` は新しいファイルを ANSI で書き、PowerShell 7 は BOM の無いファイルを UTF-8 として読むので、日本語を書くと化ける
+- 予測（Predictive IntelliSense）は書かない。PSReadLine 2.2.6 から既定で有効で、PowerShell 7 では `HistoryAndPlugin`・`InlineView`（`Cmdlets.cs`。about_PSReadLine の「既定で無効」は古い記述）。F2 で一覧（ListView）に切り替わる。予測のプラグインを入れていなければ、候補は履歴だけ
+- EditMode は Windows（既定）のまま。`-EditMode Emacs` は、`Set-PSReadLineKeyHandler` で付けたキーを既定に戻し、Emacs モードには Ctrl+Enter も Ctrl+V の `Paste` も無い
+
+### PowerShell 7 のプロファイルを設定する（任意） / 手順 2: 補足: zoxide と starship の順
+
+- zoxide の初期化は、その時点の `prompt` を `$__zoxide_prompt_old` に入れて包み、プロンプトのたびに `__zoxide_hook` を呼ぶ。既定の `--hook pwd` では、ディレクトリが変わったときだけ `zoxide add` する（zoxide の `templates/powershell.txt`。0.9.9 と 0.10.0 で同じ）
+- starship の初期化は `prompt` を定義し直すので、zoxide の後に読むと zoxide の包みを捨てる。starship の `prompt` は、最初に `$?` を控えた後に、`Invoke-Starship-PreCommand` があれば呼ぶ（starship 1.26.0 の `starship.ps1`）。この節の行は、そこで `__zoxide_hook` を呼ぶ
+- 両方の README の形（starship → zoxide）では、zoxide の包みが starship の `prompt` を呼ぶ前に `if` を評価して `$?` を真に戻し、失敗したコマンドの後もプロンプトが成功の印になるおそれがある（コードからの推測。確かめていない）。WezTerm の自分用の設定の `shell/wezterm.ps1` は、元の `prompt` を呼ぶ直前に `$?` を戻している
+- 初期化の行は、ツールが無ければ（`Get-Command -CommandType Application`）読まない。scoop の zoxide は shim、starship は `PATH` に足したフォルダーから見つかる
+- `Invoke-Starship-PreCommand` はプロンプトのたびに呼ばれるので、`__zoxide_hook` があるかは `Test-Path -Path Function:\__zoxide_hook` で見る（starship の `starship.ps1` も `Test-Path` の形）
+  - `Get-Command` は、無い名前のときに `PATH` とモジュールを探すので、zoxide を入れていない PC で、プロンプトのたびに遅くなる
+- zoxide と starship の行を、それぞれの手順書から 1 行ずつ足す形にしないのは、通す順で行の順が変わるため（bash の共通設定が順を管理するのと同じ考え）
+
+### PowerShell 7 のプロファイルを設定する（任意） / 手順 4: 補足: 5.1 から確かめる形と実行ポリシー
+
+- 5.1 から `pwsh.exe -Command { … }` にスクリプト ブロックを渡すと、5.1 が `-EncodedCommand` に変えて渡し、結果をオブジェクトで受け取る（5.1 の `NativeCommandProcessor.cs` の minishell）。Windows では確かめていない
+- 結果は、子の pwsh で `Out-String` にして文字列で受け取る。オブジェクトのまま受け取ると、5.1 は最初に届いた実行ポリシーの列で表を作るので、キーの行が空になる
+  - `-Width 120` を付けるのは、子が端末の幅を取れないと、`Out-String` が空の行だけを返すため
+- `-NoProfile` でも `$PROFILE` は設定される（`ConsoleHost.cs`）ので、`. $PROFILE` で読む
+- Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。手順 18 の 5.1 の値（レジストリ）は効かない
+- すべてが `Undefined` なら `Restricted` になり、プロファイルが読まれない。そのときだけ、この節の手順 5 で `CurrentUser` を `RemoteSigned` にする（`Documents\PowerShell\powershell.config.json` に書かれる）。MSIX では `LocalMachine` に書けない
+- `Set-ExecutionPolicy` に `-Force` を付けるのは、確認の問いで止まらないようにするため
+- UniGet UI は scoop を `-NoProfile -ExecutionPolicy Bypass` で動かすので、このプロファイルと実行ポリシーに依らない
+
+### PowerShell 7 のプロファイルを設定する（任意） / 手順 7: 補足: 印の行だけを消す
+
+- [ロールバック](../windows-setup.md#ロールバック)の手順 15 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバック / 手順 15 の補足](#ロールバック--手順-15-補足-文字コードを変えずに消す)）
+- 消すのは、行末が `  # windows-setup.md` の行。印が行の途中にある行は消さない
+- PowerToys の Command Not Found が足した行は、印が無いので残る
+
+### PowerShell 7 のプロファイルを設定する（任意）: 選択した方針
+
+- **Windows で CLI ツールを組み込むシェルは、Git Bash を主にする**
+  - WezTerm の自分用の設定の Windows の `default_prog` は Git Bash（`C:/Program Files/Git/bin/bash.exe -i -l`。`lua/shells.lua`）。PowerShell 7・Windows PowerShell・WSL は、起動メニュー（Ctrl+Shift+M）から開く
+  - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
+  - Claude Code の Bash ツールと、sshd の `DefaultShell`（[Windows の OpenSSH サーバー](../windows-openssh-server.md#既定のシェルを-git-bash-にする任意)の任意節）も Git Bash なので、bash の設定 1 つで済む
+- **PowerShell 7 は補助**: この節で、starship と zoxide だけを、入っているときだけ読む。PSFzf・eza の関数・gh の補完・yazi の `y` は入れない（主のシェルの Git Bash に同じ機能がある。PSFzf はコミュニティのモジュール）
+- **Windows PowerShell 5.1 には何も足さない**: 手順書を貼る窓で、プロファイルは管理者の conhost の窓も読む。見た目と起動の時間が変わり、SSH のセッションでは scoop の shim が RedirectionGuard で起動できないことがある。5.1 のプロファイルは手順 19 の 1 行のまま
+- **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
+- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows の OpenSSH サーバーの `Add-WindowsCapability` など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。手順 9 の窓で Windows Terminal が先に設定を作るので、手順 24 の後も既定は Windows PowerShell のままのはず（コードからの推測）
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| Tab の補完 | 条件付きの手順（この節の手順 3） | 既定で入れる: 好みが分かれる。bash に近い動き（共通する部分まで補完し、もう 1 回で一覧）が好みなら、`MenuComplete` の代わりに `Complete` |
+| 予測 | 既定のまま（F2 で一覧に切り替え） | プロファイルに `-PredictionViewStyle ListView`: 既定で候補が出るので要らない |
+| EditMode | Windows（既定） | Emacs: 足したキーが消え、Ctrl+V の貼り付けも無くなる |
+| 履歴の件数 | 既定（4096） | `-MaximumHistoryCount 100000`（bash の `HISTSIZE` に合わせる）: 窓を開くたびに読む量が増える |
+| 起動の更新の通知・テレメトリ | 変えない | `POWERSHELL_UPDATECHECK`・`POWERSHELL_TELEMETRY_OPTOUT`: プロファイルではなく環境変数。更新の通知はバナーを出す起動だけで、WezTerm の `-NoLogo` の起動には出ない |
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意） / 手順 2: 補足: 設定ファイルの読み書き
+
+- 場所は、Store（MSIX）版の `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json`（Microsoft の文書）
+- Windows Terminal は、初めて起動したときにコメントの無い `settings.json` を書く。設定の画面でリセットすると、コメント入りの `userDefaults.json` をそのまま書く（`CascadiaSettingsSerialization.cpp`）。5.1 の `ConvertFrom-Json` はコメントを読めないので、文字列を除いた残りにコメントか末尾のカンマがあれば、書かずに止める
+- Windows Terminal は BOM の無い UTF-8 で書き、ASCII 以外の文字（訳したプロファイルの名前）も入る。5.1 の `Get-Content` は BOM の無いファイルを ANSI として読むので、`[IO.File]::ReadAllText` で読む
+- `ConvertTo-Json` は `-Depth 100`（既定の 2 では深い入れ子が潰れる）。字下げと、`<`・`>`・`&`・`'` の書き方（`\u003c` など）が変わるが、JSON の中身は同じで、Windows Terminal が次に保存するときに整える
+- `profiles` が配列なのは古い形式で、この節のブロックは扱わない
+- 保存すると、Windows Terminal がファイルの変化を見て読み直し、開いているタブにも効く
+- fragment（`%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments`）に書けるのは、プロファイル・配色・アクション（キーを除く）だけで、全体の設定と `profiles.defaults` は読まれない（`_parseFragment`）
+- 控えは、控えが無いときだけ作る（2 回目に貼っても、元の設定が残る）。この節の手順 6 で書き戻すと消すので、次にこの節を通すときは、そのときの設定を控え直す
+- 書き戻しは `Move-Item` にせず、`Copy-Item` の後に控えを消す。Windows Terminal が見張る `settings.json` が、途中で無くならないようにするため
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意） / 手順 3: 補足: フォント
+
+- `profiles.defaults.font.face`。既定は `Cascadia Mono`（見つからなければ Consolas）、大きさは 12（WezTerm の自分用の設定も 12）
+- 手順 30 で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
+- 管理者として開いた窓（conhost）のフォントは、`HKCU\Console` などの別の設定で、この節では扱わない
+- hackgen.md は自分のユーザーのフォントに入れ、パッケージのアプリ向けに読み取りの権限（`S-1-15-2-1`・`S-1-15-2-2`）を足す。MSIX の Windows Terminal から見えるかは確かめていない
+- 見つからないと、設定の画面に「見つからないフォント:」、端末に「次のフォントが見つかりません: …」が出る（`Resources.resw` の日本語の訳）
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意） / 手順 4: 補足: 複数行の貼り付けの警告
+
+- 値は版で変わった。1.22 以前は `multiLinePasteWarning`（真偽値）、1.23 は `warning.multiLinePaste`（真偽値）、1.24 から `warning.multiLinePaste` が `automatic`・`always`・`never`（既定は `automatic`。`true` は `automatic`、`false` は `never` として読む）。古い名前も読み、新しい名前に直して書き直す。Microsoft の文書（interaction のページ）は、まだ古い名前だけを書いている
+- `automatic` は、シェルが角かっこで囲む貼り付け（bracketed paste）を有効にしていないときに、改行を含む文字を貼ると警告する（`TerminalPage.cpp`）。Windows PowerShell 5.1 の PSReadLine 2.0.0 も ConPTY もこれを有効にしないので、5.1 の窓では毎回出るはず（コードからの推測。確かめていない）
+- 画面では「操作」→「改行を貼り付ける際に警告する」（「"角かっこで囲まれた貼り付け" がオフの場合」・「常時」・「なし」）。ダイアログの題は「警告」で、ボタンは「強制的に貼り付け」と「キャンセル」
+- 出るダイアログは 1 つだけ。複数行の警告が出ないときに、5 KiB（UTF-16 で 5,120 文字）を超えると `warning.largePaste`（既定 true）の警告が出る
+- Windows Terminal は、貼るときに改行を Enter として送る。PSReadLine は、閉じていない文（`& {` など）の行を続きとして受けるので、1 行ずつ届いても、この文書のブロックは正しく動く
+- `trimPaste`（既定 true）は、1 行の貼り付けの末尾の空白だけを削る。貼った後に Enter が要るのは、コピーボタンの中身に末尾の改行が無いため
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意）: 選択した方針
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 書く場所 | `settings.json`（コメントがあれば止める） | fragment: 全体の設定と `profiles.defaults` を読まない |
+| フォント | `profiles.defaults`（全プロファイル） | プロファイルごと（fragment の `updates`）: 一致するプロファイルの無い窓に効かない |
+| 複数行の警告 | 既定（`automatic`）。切るのは条件付き（この節の手順 4） | 無条件に `never`: 信用できない複数行も、確かめずに動く |
+| 既定のプロファイル | Windows PowerShell のまま | PowerShell 7: 5.1 でだけ動く手順を貼り違えやすい（[PowerShell 7 のプロファイルの選択した方針](#powershell-7-のプロファイルを設定する任意-選択した方針)） |
+| `copyOnSelect` | 既定（false）のまま | true: 選ぶとコピーされ、右クリックが常に貼り付けになる。貼る手順書で、意図しない貼り付け（実行）になりやすい |
+| 起動の大きさ | 既定（120×30）のまま | 好みなので扱わない |
+| 管理者の窓（conhost）のフォント | 扱わない | 別の設定（`HKCU\Console`・ショートカットごと） |
+| 戻し方 | 控えのファイルを書き戻す | 足した値だけを消す: 控えのほうが、書く前の状態に確実に戻る（その後に画面で変えたものは消える） |
+
+### WSL のネットワークをミラーにする（任意） / 手順 3: 補足: `.wslconfig`
+
+- `%USERPROFILE%\.wslconfig` の `[wsl2]` の `networkingMode`。既定は `nat`（2.3.25 からは、NAT に失敗すると Consomme）。`[experimental]` の `networkingMode` も、互換のために読む（`WslCoreConfig.cpp`）
+- Windows 11 22H2 以上が要る（対象の 24H2・25H2 は満たす）
+- 「Linux 用 Windows サブシステム設定」の画面も同じファイルに書く。そのため、ファイルがあれば上書きせず、控えてから `[wsl2]` の見出しの次に 1 行足す（見出しが無ければ末尾に足す。改行はファイルに合わせる）。`networkingMode` の行が既にあれば止める
+- BOM の無い UTF-8 で書く
+- `localhostForwarding` は、ミラーでは無視される
+- 効くのは `wsl.exe --shutdown` の後。シェルを閉じるだけでは、VM が既定でおよそ 60 秒（`vmIdleTimeout`）残る
+- 書かないもの
+  - `dnsTunneling`・`firewall`・`autoProxy`: どれも既定で true（Windows 11 22H2 以上）。ミラーでは `firewall=false` を書いても、Hyper-V のファイアウォールは有効になる
+  - メモリ・プロセッサ・スワップ: 既定は RAM の 50%・全論理プロセッサ・RAM の 25%。VirtualBox と RAM を分けたいときだけ `memory` を絞る
+  - `[experimental]` の `autoMemoryReclaim`（既定 `dropCache`）・`sparseVhd`（新しく作る VHD にだけ効く）
+  - `[experimental]` の `hostAddressLoopback`（既定 false）: true にすると、WSL からこの PC の LAN の IP あてでも Windows につながる（IPv4 だけ）。`127.0.0.1` で足りる
+  - `[experimental]` の `ignoredPorts`: Windows が使っているポートでも Linux に bind させる。WSL の中で sshd を動かす手順は、このリポジトリに無い
+
+### WSL のネットワークをミラーにする（任意） / 手順 4・5: 補足: 確かめ方
+
+- `wslinfo --networking-mode` は、WSL が各ディストリビューションに置くコマンド。AlmaLinux 10 のイメージで使えるかは確かめていない。無ければ、WSL の中の IP と Windows の IP を比べる（ミラーでは同じ IP になる）
+- ミラーを使えないとき、WSL は NAT に戻し、`wsl.exe` が理由の行（`ミラー化されたネットワーク モードはサポートされていません: …`）を出す（`Resources.resw` の `MessageMirroredNetworkingNotSupportedReason`）
+  - `wslinfo --networking-mode` は、そのときも `nat` を出す（`wslinfo.cpp`）
+- この節の手順 5: NAT では、WSL の中の `127.0.0.1:22` は WSL 自身を指すので、Windows の sshd には届かない。ミラーでは Windows のループバックに届く（`::1` は使えない）。`/dev/tcp` は bash の機能で、`head -n 1` で sshd の最初の 1 行（バナー。CR LF で終わる）を読む
+- ミラーでは、sshd のログの送信元が、LAN の IP から `127.0.0.1` に変わるはず（確かめていない。`sshd_config` にアドレスでの絞り込みは無いので、動きは変わらない）
+
+### WSL のネットワークをミラーにする（任意）: 選択した方針
+
+- **ミラーにする理由**: WSL と Windows が `127.0.0.1` で互いにつながり、IPv6・マルチキャスト（mDNS）・VPN との相性がよく、LAN から WSL に直接届く（Microsoft の文書）
+- **既知の問題**（Microsoft の文書。troubleshooting）
+  - Docker の `-p` のポートの公開（`ignoredPorts` で避ける）、OpenVPN 2.6.501 などの一部の VPN
+  - UDP 68・TCP 135/1900/2869/5004/3702/5357/5358 は、WSL に届かない
+  - WSL が `accept_local`・`route_localnet`・`rp_filter` などの sysctl を自分で設定する
+  - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
+- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、手順 44・46 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
+- **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
+- [VirtualBox のゲスト（bootc）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| ネットワーク | ミラー | NAT（既定）: WSL から Windows のサーバーに LAN の IP あてでつなぎ、IPv6・mDNS が使えない |
+| 書くキー | `networkingMode` だけ | `dnsTunneling`・`firewall`・`autoProxy`: 既定で有効。メモリなど: 既定で足りる |
+| LAN から WSL への受信 | 開けない | Hyper-V のファイアウォールの規則: 管理者が要り、WSL の中のサーバーを LAN に開ける |
+| `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
+| 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
+
+### シェルのツールを入れる（任意） / 手順 4: 補足: scoop がすることと、zoxide を 0.9.9 に止める理由
+
+- 5 つとも scoop の main のバケットの定義で、上流の Windows の zip を、定義の sha256 で確かめて置く（2026-10-08 の定義は fzf 0.74.4・zoxide 0.10.0・starship 1.26.0・eza 0.23.5・bat 0.26.1）
+  - fzf・zoxide・eza・bat は、`~\scoop\shims` に shim を作る（eza は `exa` の名前の shim も）
+  - starship は shim を作らず、定義の `env_add_path` で `~\scoop\apps\starship\current` を自分のユーザーの `Path` の先頭に足す。scoop は、今の窓の `$env:PATH` にも足す（Scoop の `lib/system.ps1` の `Add-Path`）
+  - bat は、定義の `env_set` で、自分のユーザーの環境変数 `BAT_CONFIG_DIR` を `~\scoop\apps\bat\current` にし、今の窓にも入れる。`config`・`syntaxes`・`themes` は `~\scoop\persist\bat` に控える（ファイルはハードリンク、フォルダーはジャンクション）。控えに `config` が無い最初の導入では、`%APPDATA%\bat\config` があれば写し、無ければ空のファイルを作る（定義の `pre_install`）
+- **zoxide を 0.9.9 に止める理由**
+  - 0.10.0 の bash の初期化は、Windows では `__zoxide_pwd` が `\command cygpath -w "\builtin pwd -L"` になり、コマンド置換が無い（`templates/bash.txt`）。今のディレクトリではなく、`<ドライブ>:\builtin pwd -L` の形の文字列を返すので、プロンプトのフックが移動に気付かず、Git Bash からは何も記録しない（上流の issue #1259）
+  - 直すコミット（`1f484a4`、PR #1260、2026-07-07）は `main` にあり、`CHANGELOG.md` の `[Unreleased]` に「Bash/Zsh: fix `z` failing on Cygwin/MSYS2 due to `cygpath` being passed a bad string.」とある。2026-10-08 の時点で、タグの最新は `v0.10.0` で、このコミットを含むタグは無い
+  - 0.9.9 の初期化は `\command cygpath -w "$(\builtin pwd -P)"`（Windows の `zoxide.exe` の中の文字列でも確かめた）。共通の bash 設定の Git Bash での検証（ryo-aoki-pc/bash の 2026-10-01・2026-10-06 の付録）も、0.9.9 で通っている
+  - PowerShell の初期化は、この不具合に当たらない。PowerShell 7 の zoxide も Git Bash と同じ実行ファイルなので、0.9.9 にそろう
+  - データベースの形は、0.9.9 と 0.10.0 で同じ（版 3 の `db.zo`。`src/db/mod.rs`）。0.10.0 から 0.9.9 に戻しても、覚えた履歴はそのまま読む
+  - `main` には、データベースを平文の `db.txt` に変え、`db.zo` があれば読んで移す変更もある（`c479cc8`、#1288、2026-10-03。版になっていない）。直った版に上げると、履歴はその形に移るはず。上げた後に 0.9.9 に戻すと、上げた後に覚えたものは読まないはず
+- **版の指定と止め方**（Scoop v0.6.0 のソース）
+  - `scoop install zoxide@0.9.9` は、バケットの今の定義と版が違うと、バケットの git の履歴から `0.9.9` の定義を探し（`git log --follow -n 1 -G …` で見つけたコミットと、その親）、`~\scoop\workspace\zoxide.json` に書いてから入れる（v0.6.0 の #6370）。見つからなければ `WARN` の行を出して、定義の `autoupdate` で作る
+  - 履歴を探すのは、main のバケットが git のリポジトリのときだけ（`lib/manifest.ps1` の `Find-HistoricalManifestInGit`）。そうでなければ `WARN  Bucket 'main' is not a git repository. Cannot search historical versions.` を出して `autoupdate` に移り、hash はバケットの履歴の定義のものではなく、そのときに取ったものになる。`autoupdate` も失敗すると、`Could not install: zoxide@0.9.9` で止まる
+  - 本書の手順 20・21 は Git for Windows より前に scoop を入れるので、main のバケットは zip で置かれる（ScoopInstaller/Install の `install.ps1`）。git の形になるのは、最初の `scoop update`（`scoop-update.ps1` の `Sync-Bucket` の `Converting 'main' bucket to git repo...`）。`scoop install` が自分で `scoop update` を動かすのは、前の更新から 3 時間たったとき（`is_scoop_outdated`）だけなので、この節の手順 4 の先頭で `scoop update` を貼る
+  - main のバケットでは、`73b1eafab`（2026-01-31）で 0.9.9 に、`f8683b6ce`（2026-07-04）で 0.10.0 になった。`f8683b6ce` の親の定義が 0.9.9
+  - こうして入れたものは、`install.json` に `bucket` が無く、`url` が `workspace` の定義を指す。`scoop status` と `scoop update` は、その定義の版（0.9.9）を最新とみなすので、それだけでも上がらない。`scoop list` の `Source` は `<auto-generated>`
+  - そのうえで `scoop hold` を付けた（`install.json` に `hold` を書く）。`scoop list` の `Info` が `Held package` になり、止めてあることが見える。`scoop update * --force` でも、止めたものは上げない
+  - 直った版に上げるときは、`scoop unhold` の後に `scoop update zoxide --force` にする。`--force` は、版を指定して入れたもの（`bucket` が無く、`url` が `workspace` の定義）を、バケットの今の定義で入れ直す（v0.6.0 の #6730）。`--force` が無ければ、`zoxide: 0.9.9 (latest version)` の形の行を出して何もしない
+  - 先に `scoop update` を貼るのは、バケットを新しくするため（`scoop update <名前>` は、前の更新から 3 時間たっていなければバケットを新しくしない）
+  - 版を指定したものは、`~\scoop\workspace\zoxide.json` の場所として扱われ、`prune_installed` は入っているとみなさない（`installed` が `zoxide.json` の名前で探す）。0.10.0 が入っていても 0.9.9 を並べて入れ、`current` を 0.9.9 に付け替え、0.10.0 のフォルダーを残す。そのため、この節の手順 3 で先に外す
+  - 同じ 0.9.9 がもう入っていると、`'zoxide' (0.9.9) is already installed.` の警告の後の `continue`（`scoop-install.ps1` の `ForEach-Object` の中で、囲むループが無い）が `bin/scoop.ps1` の `switch` まで抜け、同じ行のほかの名前を入れずに終わる。そのため、この節の手順 4 では zoxide だけを別の `scoop install` にした
+  - 版を指定しない名前を並べたとき（この節の手順 4 の 2 行目）は、もう入っているものを `prune_installed` で飛ばす。`'<名前>' (<版>) is already installed. Skipping.` の警告は出ない（`Get-Dependency` が名前を `main/<名前>` の形に変えるので、警告を出す前の、指定した名前との突き合わせに当たらない）
+  - 名前を 1 つだけ渡したときは、もう入っていれば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）
+  - この節の手順 10 で、先に main のバケットの `bucket\zoxide.json` の版を見るのは、`scoop update zoxide --force` が Releases ではなく、main のバケットの今の定義を入れるため（`update` の `$pin_broken` から `Find-AppBucket`）。バケットの定義は、Releases に出てから自動の更新で上がるまで遅れる。0.10.0 のまま上げると、止めるのをやめた 0.10.0 になる
+  - `scoop uninstall` は、止めてあっても消す（`hold` を見ない）。そのため、この節の手順 11 に `scoop unhold` は要らない
+- **VC++ ランタイム**: 5 つの Windows の実行ファイル（x64）の DLL の読み込みの表（PE のインポート表）で、`VCRUNTIME140.dll` を使うのは bat だけだった
+  - fzf（Go）は `kernel32.dll` だけ。zoxide と starship は MSVC のビルドだが、C のランタイムを静的にリンクする（zoxide の `.cargo/config.toml`、starship の `release.yml` の `+crt-static`）。eza は MinGW のビルドで、Windows に付いている `msvcrt.dll` を使う
+  - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [WezTerm の Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
+- starship の定義の `notes` は、PowerShell の `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足すよう案内するが、従わない。Windows PowerShell 5.1 の `$PROFILE` は、手順書を貼る窓（管理者の窓も）が読むプロファイル。PowerShell 7 には、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)が、zoxide と starship の行を 1 回だけ置く
+
+### シェルのツールを入れる（任意） / 手順 6: 補足: bat の設定ファイル
+
+- Windows の bat は、`BAT_CONFIG_PATH` が無ければ `BAT_CONFIG_DIR` の下の `config` を、それも無ければ `%APPDATA%\bat\config` を読む（bat 0.26.1 の `src/bin/bat/directories.rs`・`config.rs`。`XDG_CONFIG_HOME` も `~/.config` も見ない）。scoop で入れると `BAT_CONFIG_DIR` の下になる
+  - そのため、AlmaLinux 10 の [bat の設定ファイル](../almalinux-setup.md#bat-の設定ファイル)の bash のブロックを Git Bash に貼っても効かない
+  - `C:\ProgramData\bat\config`（PC 全体）があれば、bat はその後ろに自分の設定をつないで読む。本書では作らない
+- 書く場所は、bat が探すのと同じ順（`BAT_CONFIG_PATH`、無ければ `BAT_CONFIG_DIR` の下の `config`）で決める。`BAT_CONFIG_PATH` を自分で決めていても、bat が読む場所に書ける。どちらも無ければ（scoop の bat が入っていない）、`%APPDATA%` には書かずに止める
+- `bat --config-file` の出力は使わない。bat はパイプに UTF-8 で書く（bat 0.26.1 の `src/bin/bat/main.rs` の `println!`）が、Windows PowerShell 5.1 は外部コマンドの出力を `[Console]::OutputEncoding`（日本語の Windows では OEM のコードページ 932）で読む。ユーザーのフォルダー名に ASCII 以外の文字があると、場所の文字が化けて書けない（Windows では確かめていない）
+- 「無いときだけ」ではなく「空のときだけ」書く。scoop は最初の導入で空の `config` を作る（定義の `pre_install`）。`%APPDATA%\bat\config` から写されたものや、手で書いたものは変えない
+- `-Encoding ASCII` にしたのは、BOM を付けないため
+  - Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付ける。bat は設定の各行の前後の空白を削ってから読むが、BOM は削らず、1 行目をファイルの名前として読んで失敗する（Linux の bat 0.26.1 で確かめた。[検証記録](../verification/windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
+  - テーマの名前と 3 行の中身は ASCII だけ。改行は CRLF になるが、bat は行末の `\r` も削る（同じ記録）
+- `current\config` に書いた中身は、ハードリンクのもう一方の控え（`persist`）にも入るはず（Linux のハードリンクと PowerShell 7.5.3 では、同じ中身になった。Windows の NTFS と 5.1 では確かめていない）
+- 戻す（この節の手順 12）のは控えのファイルで、この節で書いた形（1 行目がテーマ、後の 2 行が同じ）のときだけ、空にする。ハードリンクのもう一方（`current\config`）も空になるので、bat を残していても組み込みの既定値に戻る。scoop の最初の導入と同じ空のファイルなので、入れ直しても困らない
+
+### シェルのツールを入れる（任意） / 手順 7・8: 補足: Git Bash での確かめ方
+
+- AlmaLinux 10 の初期設定の手順 52〜55・57・58・60〜63 は、`brew` の行を含まず、共通の bash 設定が読んだ結果を確かめるだけなので、Git Bash でもそのまま使える。この節には bash のブロックを足さず、Windows で違うところだけを箇条書きにした（同じブロックを書き写すと、片方だけ直したときに食い違う）
+  - 手順 56（tmux）は、Windows では入れない。手順 59 は bash-completion と `~/.inputrc`（AlmaLinux 10 の手順 44・45）を確かめるもので、この節では入れていない
+- WezTerm は Windows で新しいタブを開くたびに、レジストリのシステムとユーザーの環境変数を読み直す（WezTerm の `pty/src/cmdbuilder.rs` の `get_base_env`）。そのため、この節の手順 4 の後に開いた新しいタブには、WezTerm を起動し直さなくても、starship の `Path` と `BAT_CONFIG_DIR` が入るはず（確かめていない）。起動し直すのは、プロンプトが starship にならなかったときだけにした
+- 違うところの出どころ
+  - `bind -X` のコロンと、WezTerm のシェル統合のマウス報告よけの行: ryo-aoki-pc/bash の `docs/install.md`（Git Bash の bash 5.3 の記録）
+  - eza の見出し: eza 0.23.5 の `src/output/table.rs`。Windows では `Permissions` の見出しが `Mode` になり、`User` の列は Unix のときだけ作る
+  - Git for Windows の `ll`（`/etc/profile.d/aliases.sh`。ログインシェルだけ）は `~/.bashrc` より先に読まれるので、共通の bash 設定の `ll` が上書きする。`MANPAGER` は bat があれば入るが、Git Bash に `man` は無い（ryo-aoki-pc/bash の `docs/reference/readme.md`）
+  - zoxide: Windows の zoxide は、Git Bash ではプロンプトのたびに `cygpath -w` を動かし、Windows の形のパスで記録する。データベースは `HOME` の下ではなく `%LOCALAPPDATA%\zoxide`（zoxide の README の `_ZO_DATA_DIR` の表と、scoop の定義の `notes`）
+  - fzf の ASCII 以外の文字: fzf の `CHANGELOG.md` の 0.54.2 に、Windows では全画面（`--no-height`）で開いたときしか ASCII 以外の文字を読めず、必要なら `FZF_DEFAULT_OPTS` に `--no-height` を足すよう書いてある。キー操作と `**<Tab>` は画面の一部（`--height`）に開く
+  - fzf は Windows でも `$SHELL` で外部のコマンド（プレビューの bat など）を動かし、`/` を含むパスは `cygpath -w` で直す（fzf 0.74.4 の `src/util/util_windows.go`）。Git Bash の `SHELL` は bash なので、プレビューは bash で動くはず
+- スタートメニューの「Git Bash」（mintty）でも同じ共通の bash 設定を読むが、fzf は winpty の連携で動く（fzf の CHANGELOG の 0.53.0）ので、WezTerm（ConPTY）と動きが違いうる。確かめは WezTerm で行う
+
+### シェルのツールを入れる（任意）: 選択した方針
+
+- **1 つの任意節にまとめた**: AlmaLinux 10 の starship・zoxide・fzf・eza・bat は、2026-10-08 に [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 49 などにまとめられ、ツールごとの手順書は無くなった。Windows 11 も同じく、初期設定の手順書の任意節にし、5 つを 1 つの手順（`scoop install` は、版を指定しない 4 つと zoxide の 2 回）で入れる
+  - git-delta と GitHub CLI は、それぞれの手順書（[git-delta.md](../git-delta.md)・[gh.md](../gh.md)）にある
+- **導入元は scoop の main のバケット**（README の「導入の基盤」の、CLI ツールは scoop）
+  - 管理者が要らず、[更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
+  - zoxide の README は、Windows では winget を勧めている。0.10.0 の不具合は zoxide の初期化（実行ファイルの中）にあるので、どちらで入れても避けられず、版を止められる scoop にそろえた
+- **シェルとの組み込み方は、[PowerShell 7 のプロファイルを設定する（任意）の選択した方針](#powershell-7-のプロファイルを設定する任意-選択した方針)と同じ**: Git Bash が主、PowerShell 7 は補助（starship と zoxide だけ）、Windows PowerShell 5.1 には入れない、WSL の AlmaLinux 10 は Linux のホストとして扱う
+  - Git Bash では共通の bash 設定が読むので、この節は入れて確かめるだけにし、`~/.bashrc` には書かない
+  - PowerShell 7 の fzf のキー操作（PSFzf）と eza の関数は入れない（主の Git Bash に同じものがある）
+- **`XDG_CONFIG_HOME` などの環境変数は足さない**: Windows の bat と eza は `XDG_CONFIG_HOME` を見ない（bat の設定は `BAT_CONFIG_DIR` か `%APPDATA%`、eza のテーマは `%APPDATA%\eza\theme.yml`。eza 0.23.5 の `src/options/theme.rs`）。starship は `STARSHIP_CONFIG` が無ければ `~\.config\starship.toml` を読む（starship 1.26.0 の `src/context.rs`。Git Bash と PowerShell 7 で 1 つ）。zoxide は `%LOCALAPPDATA%\zoxide`。足すと、gh などほかのツールの設定の置き場所まで変わる
+- **bat の設定は AlmaLinux 10 と同じ 3 行**: テーマも同じ名前の変数（`BAT_THEME_NAME`）で決める。書く場所だけが違う
+- **使い方と設定の節は、AlmaLinux 10 の初期設定の後ろの節を指す**: starship の 3 節は `~/.config/starship.toml`（Git Bash と PowerShell 7 で 1 つ）に書き、fzf の候補の fd は共通の bash 設定が `command -v fd` で見つける（ryo-aoki-pc/bash の `bashrc`）ので、`brew` の行を除けば Git Bash に同じブロックを貼れる。違う 2 つ（fd の入れ方と、bat の設定ファイル）だけを、この節のリードに書いた（Git Bash では確かめていない）
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| zoxide の版 | 0.9.9 に止める（`zoxide@0.9.9` と `scoop hold`）。上げるのは、main のバケットの定義が 0.10.0 より新しくなってから | 0.10.0: Git Bash で記録しない。共通の bash 設定で `__zoxide_pwd` を上書きする: 上流の初期化に合わせた上書きを持ち、直った版が出たら外す手間が要る |
+| 入れる単位 | 1 つの手順で、版を指定しない 4 つを 1 回の `scoop install`、zoxide の 0.9.9 を別の 1 回 | ツールごとの節: 確かめる場所が同じ Git Bash のタブで、まとめたほうが短い。5 つを 1 回の `scoop install`: zoxide の 0.9.9 がもう入っていると、scoop がほかの 4 つを入れずに終わる |
+| Git Bash での確かめ | AlmaLinux 10 の初期設定の手順を指す | 同じ bash のブロックを書き写す: 片方だけ直したときに食い違う |
+| bat の設定 | `BAT_CONFIG_PATH` か `BAT_CONFIG_DIR` の下（scoop の中）に、空のときだけ書く | `BAT_CONFIG_PATH` で `~/.config/bat/config` を読ませる: scoop の定義が向ける場所と二重になる。`bat --config-file` の出力を使う: 5.1 では、ASCII 以外の文字のフォルダー名が化ける |
+| VC++ ランタイム | 無ければ WezTerm の手順 3（管理者の窓） | extras の `vcredist2022` を scoop で入れる: extras のバケットを足す手順が増える |
+| fzf の ASCII 以外の文字 | 変えない（手順 8 の補足だけ） | `FZF_DEFAULT_OPTS` に `--no-height`: 全画面で開き、AlmaLinux 10 と見た目が変わる。実機で確かめてから決める |
+
 ### 参照
 
 [検証記録](../verification/windows-setup.md#参考資料から分離した記録)
+
+任意節（プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ。2026-10-08）の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
+
+- 文書: [Manage connections from Windows operating system components to Microsoft services — Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services) — 18.1（広告 ID・言語リスト・`Start_TrackProgs`）、18.6（オンライン音声認識）、18.16（フィードバックの頻度）、18.21（手書き入力）、18.22（アクティビティの履歴）
+- 文書: Policy CSP — [Privacy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)・[Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[System](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system)・[Search](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage)・[ApplicationManagement](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement) — 採らなかったポリシーと、値が無いときの動き
+- 文書: [Manage Recall — Microsoft Learn](https://learn.microsoft.com/en-us/windows/client-management/manage-recall)・[Windows spotlight — Microsoft Learn](https://learn.microsoft.com/en-us/windows/configuration/windows-spotlight/)・[Windows activity history and your privacy — Microsoft Support](https://support.microsoft.com/en-us/windows/windows-activity-history-and-your-privacy-2b279964-44ec-8c2f-e0c2-6779b07d2cbd) — 入れなかった項目
+- 文書: [Diagnostics, feedback, and privacy in Windows](https://support.microsoft.com/en-us/windows/diagnostics-feedback-and-privacy-in-windows-28808a2b-a31b-dd73-dcd3-4559a5199319)・[Speech, voice activation, inking, typing, and privacy](https://support.microsoft.com/en-us/windows/privacy/speech-voice-activation-inking-typing-and-privacy)・[Windows Search and privacy](https://support.microsoft.com/en-us/windows/windows-search-and-privacy-99fb8251-7260-1cd6-1bbb-15c2370eb168) — Microsoft Support。画面の項目と、辞書が消えること
+- 文書: [Launch the Windows Settings app — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/launch/launch-settings) — `ms-settings:privacy`・`storagepolicies`・`easeofaccess-visualeffects`・`clipboard`
+- 文書: [STICKYKEYS](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-stickykeys)・[FILTERKEYS](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-filterkeys)・[TOGGLEKEYS](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-togglekeys)（Microsoft Learn）と [StickyKeys（Windows Embedded のブログ、2007 年）](https://learn.microsoft.com/en-us/archive/blogs/embedded/stickykeys) — `Flags` のビットと既定の 510
+- 文書: [Windows keyboard shortcuts for accessibility](https://support.microsoft.com/en-us/windows/windows-keyboard-shortcuts-for-accessibility-021bcb62-45c8-e4ef-1e4f-41b8c1fc87fd)・[Keyboard shortcuts in Windows](https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec) — Microsoft Support。Win+Space・Ctrl+Shift+V・Win+V
+- 文書: [SystemParametersInfo](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfow)・[ANIMATIONINFO](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-animationinfo) — Microsoft Learn。`SPI_SETLANGTOGGLE`・`SPI_SETCLIENTAREAANIMATION`・`SPI_SETANIMATION`
+- 文書: [Integrate a Cloud Storage Provider](https://learn.microsoft.com/en-us/windows/win32/shell/integrate-cloud-storage)・[Merged View of HKEY_CLASSES_ROOT](https://learn.microsoft.com/en-us/windows/win32/sysinfo/merged-view-of-hkey-classes-root)・[Registry Keys Affected by WOW64](https://learn.microsoft.com/en-us/windows/win32/winprog64/shared-registry-keys) — Microsoft Learn。`System.IsPinnedToNameSpaceTree` と `HKCU` の上書き
+- 文書: [Windows でマルチタスクを行う方法 — Microsoft サポート](https://support.microsoft.com/ja-jp/windows/how-to-multitask-in-windows-b4fa0333-98f8-ef43-e25c-06d4fb1d6960)・[Windows 10 Insider Preview Build 21286](https://blogs.windows.com/windows-insider/2021/01/06/announcing-windows-10-insider-preview-build-21286/) — Alt+Tab のタブとシェイク
+- 文書: [KB5031455](https://support.microsoft.com/en-us/topic/october-31-2023-kb5031455-os-builds-22621-2506-and-22631-2506-preview-6513c5ec-c5a2-4aaf-97f5-44c13d29e0d4)・[Windows の詳細設定 — Microsoft Learn](https://learn.microsoft.com/en-us/windows/advanced-settings/) — タスクの終了
+- 文書: [Manage drive space with Storage Sense — Microsoft Support](https://support.microsoft.com/en-us/windows/manage-drive-space-with-storage-sense-654f6ada-7bfc-45e5-966b-e24aded96ad5)・[Prepare and customize a VHD image of Azure Virtual Desktop — Microsoft Learn](https://learn.microsoft.com/en-us/azure/virtual-desktop/set-up-customize-master-image) — ストレージ センサーの動きと `01`
+- 文書: [New-Item（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1) — 既にあるレジストリのキーに `-Force` を付けると空のキーになる
+- 文書: [StartupBoostEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/startupboostenabled)・[BackgroundModeEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/backgroundmodeenabled)・[Configure Microsoft Edge](https://learn.microsoft.com/en-us/deployedge/configure-microsoft-edge)（Microsoft Learn）と [Get help with startup boost — Microsoft Support](https://support.microsoft.com/en-us/topic/get-help-with-startup-boost-ebef73ed-5c72-462f-8726-512782c5e442)
+- 文書: [Materials — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/ui/materials) — 透明効果を切るとアクリルが単色になる
+- 文書: [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)・[SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)・[PowerToys Advanced Paste](https://learn.microsoft.com/en-us/windows/powertoys/advanced-paste) — Microsoft Learn
+- コード: [hluk/CopyQ](https://github.com/hluk/CopyQ)（`shared/copyq.iss`・`src/platform/win/winplatform.cpp`・`CHANGES.md`）と [CopyQ の known-issues](https://copyq.readthedocs.io/en/latest/known-issues.html)、[winget-pkgs の hluk.CopyQ](https://github.com/microsoft/winget-pkgs/tree/master/manifests/h/hluk/CopyQ)、[Inno Setup の PrivilegesRequiredOverridesAllowed](https://jrsoftware.org/ishelp/topic_setup_privilegesrequiredoverridesallowed.htm)
+- コード: [microsoft/winget-dsc](https://github.com/microsoft/winget-dsc)（`Microsoft.Windows.Setting.Accessibility`）・[microsoft/WindowsDeveloperConfig](https://github.com/microsoft/WindowsDeveloperConfig)（`TaskbarEndTask`）
+- コード: [ReactOS の input.cpl](https://github.com/reactos/reactos/blob/master/dll/cpl/input/key_settings_dialog.c)・[Wine の sysparams.c](https://github.com/wine-mirror/wine/blob/master/dlls/win32u/sysparams.c)・[Chromium の animation_win.cc](https://chromium.googlesource.com/chromium/src/+/HEAD/ui/gfx/animation/animation_win.cc)・[Chromium の auto_launch_util.cc](https://chromium.googlesource.com/chromium/src/+/main/chrome/installer/util/auto_launch_util.cc)、[MDN の prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
+- 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
+
+任意節（PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク。2026-10-08 の 2 つ目）の資料。「文書」「コード」「広く」の区別は上と同じ。
+
+- 文書: [Install PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/install)・[PowerToys の DSC（Microsoft.PowerToys DSC v3）](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/microsoft-dsc)・[PSDSC](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/psdsc)・[Running as administrator](https://learn.microsoft.com/en-us/windows/powertoys/administrator)・[Peek](https://learn.microsoft.com/en-us/windows/powertoys/peek)・[Mouse utilities](https://learn.microsoft.com/en-us/windows/powertoys/mouse-utilities)・[Command Not Found](https://learn.microsoft.com/en-us/windows/powertoys/cmd-not-found) — Microsoft Learn。入る場所の食い違い、DSC、管理者で動かすこと、Peek の Space、Find My Mouse、プロファイルへの追記
+- コード: [microsoft/PowerToys](https://github.com/microsoft/PowerToys)（`src/runner/main.cpp`・`general_settings.cpp`・`auto_start_helper.cpp`、`src/common/SettingsAPI/settings_helpers.cpp`、`src/settings-ui/Settings.UI.Library/EnabledModules.cs`・`PeekProperties.cs`・`FindMyMouseProperties.cs`、`src/modules/peek/peek/dllmain.cpp`、`installer/PowerToysSetupVNext/Common.wxi`・`Product.wxs`、`doc/dsc/modules/App.md`）
+- 文書: [about_Profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.6)・[about_Execution_Policies](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.6)・[about_PowerShell_Config](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_config?view=powershell-7.6)・[about_PSReadLine](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline?view=powershell-7.6)・[about_PSReadLine_Functions](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline_functions?view=powershell-7.6)・[Set-PSReadLineOption](https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.6)・[Using predictors in PSReadLine](https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/using-predictors)・[about_Update_Notifications](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_update_notifications?view=powershell-7.6)・[about_Telemetry](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.6) — Microsoft Learn
+- コード: [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell)（`CorePsPlatform.cs`・`ConsoleHost.cs`・`build.psm1`・`src/Modules/PSGalleryModules.csproj`）・[PowerShell/PSReadLine](https://github.com/PowerShell/PSReadLine)（`KeyBindings.cs`・`History.cs`・`Cmdlets.cs`・`SamplePSReadLineProfile.ps1`）
+- コード: [zoxide の templates/powershell.txt](https://github.com/ajeetdsouza/zoxide/blob/v0.10.0/templates/powershell.txt)（0.9.9 も同じ形）・[starship の src/init/starship.ps1](https://github.com/starship/starship/blob/v1.26.0/src/init/starship.ps1)、自分用の設定の [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)（`lua/shells.lua`・`shell/wezterm.ps1`）と [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)（`bashrc`）
+- 文書: [winget settings](https://learn.microsoft.com/en-us/windows/package-manager/winget/settings)（Microsoft Learn）と、コードの [microsoft/winget-cli](https://github.com/microsoft/winget-cli)（`doc/Settings.md`・`src/AppInstallerCommonCore/Public/winget/UserSettings.h`・`Manifest/ManifestComparator.cpp`）、[Devolutions/UniGetUI](https://github.com/Devolutions/UniGetUI)（`WinGetPkgOperationHelper.cs`） — winget の既定の範囲（手順 24 の補足）
+- 文書: [Windows Terminal の settings.json の場所](https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file)・[JSON fragment extensions](https://learn.microsoft.com/en-us/windows/terminal/json-fragment-extensions)・[Profile - Appearance](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/profile-appearance)・[Interaction](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/interaction)・[Startup](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/startup) — Microsoft Learn（interaction のページは古い名前だけ）
+- コード: [microsoft/terminal](https://github.com/microsoft/terminal)（`TerminalSettingsModel/MTSMSettings.h`・`CascadiaSettingsSerialization.cpp`・`CascadiaSettings.cpp`・`userDefaults.json`・`TerminalApp/TerminalPage.cpp`・`src/host/VtIo.cpp`・`src/types/utils.cpp`、日本語の訳の `Resources.resw`）
+- 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
+- コード: [microsoft/WSL](https://github.com/microsoft/WSL)（`src/windows/common/WslCoreConfig.cpp`・`WslCoreConfig.h`、日本語の訳の `localization/strings/ja-JP/Resources.resw`）
+
+任意節（シェルのツール。2026-10-08 の 3 つ目）の資料。「コード」の区別は上と同じ。
+
+- コード: [ScoopInstaller/Main](https://github.com/ScoopInstaller/Main)（`bucket/fzf.json`・`zoxide.json`・`starship.json`・`eza.json`・`bat.json`。zoxide の 0.9.9 の定義は `f8683b6ce` の親）
+- コード: [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop)（v0.6.0。`lib/manifest.ps1` の `Find-HistoricalManifestInGit`・`generate_user_manifest`、`lib/install.ps1` の `env_add_path`・`env_set`・`persist_data`・`show_suggestions`・`test_running_process`・`prune_installed`、`lib/core.ps1` の `installed`、`lib/depends.ps1` の `Get-Dependency`、`lib/system.ps1` の `Add-Path`、`bin/scoop.ps1`、`libexec/scoop-install.ps1`・`scoop-update.ps1`（`Sync-Bucket`・`update`）・`scoop-hold.ps1`・`scoop-unhold.ps1`・`scoop-list.ps1`・`scoop-uninstall.ps1`、`CHANGELOG.md` の #6370・#6730）と [ScoopInstaller/Install](https://github.com/ScoopInstaller/Install)（`install.ps1`。git が無いときは、本体と main のバケットを zip で置く）
+- コード: [ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide)（`templates/bash.txt` の v0.9.9・v0.10.0・`main`、`CHANGELOG.md`（`main`）、`src/db/mod.rs`、`.cargo/config.toml`、README の Windows の導入と `_ZO_DATA_DIR`）と、[issue #1259](https://github.com/ajeetdsouza/zoxide/issues/1259)・[PR #1260](https://github.com/ajeetdsouza/zoxide/pull/1260)・[Releases](https://github.com/ajeetdsouza/zoxide/releases)
+- コード: [sharkdp/bat](https://github.com/sharkdp/bat)（v0.26.1 の `src/bin/bat/directories.rs`・`config.rs`）・[eza-community/eza](https://github.com/eza-community/eza)（v0.23.5 の `src/options/theme.rs`・`src/output/table.rs`・`src/fs/feature/git.rs`）・[junegunn/fzf](https://github.com/junegunn/fzf)（v0.74.4 の `CHANGELOG.md`・`src/util/util_windows.go`）・[starship/starship](https://github.com/starship/starship)（v1.26.0 の `src/context.rs`・`src/init/starship.ps1`・`.github/workflows/release.yml`）
+- コード: [wezterm/wezterm](https://github.com/wezterm/wezterm)（`pty/src/cmdbuilder.rs` の `get_base_env`）と、自分用の設定の [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)（`bashrc`・`docs/install.md`・`docs/reference/readme.md` の「Windows 11 の Git Bash での違い」）
 
 ---
 

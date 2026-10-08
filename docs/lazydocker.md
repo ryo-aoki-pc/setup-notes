@@ -7,7 +7,7 @@
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順)（Homebrew）と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
@@ -183,7 +183,7 @@
 - 補足: [root で使うときの補足](reference/lazydocker.md#root-で使うときの補足)
 
 > [!WARNING]
-> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[homebrew.md の root のシェルでも使う](homebrew.md#root-のシェルでも使う任意)の節の導入条件と同じ）
+> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の導入条件と同じ）
 > - システムの API ソケットにつなげるのは root だけ。権限を緩めない（つなげると、root と同じことができる）
 
 1. システムの podman の API ソケットを有効にして、root で応答を確かめる。
@@ -370,5 +370,5 @@
 - **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 手順 2 の補足のエラーが出る
 - **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](podman-tui.md) で見る
 - **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の補足）
-- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[homebrew.md の注意点](homebrew.md#注意点)）
+- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
   - root のコンテナは、[root でも使う](#root-でも使う任意)の節を通して `sudo -i lazydocker` で見る

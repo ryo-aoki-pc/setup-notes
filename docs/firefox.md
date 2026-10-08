@@ -6,12 +6,12 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。AAC・H.264 のための手順 8〜11 に当たる手順は無い）
-> - **前提（手順 8 から）**: [RPM Fusion（free）](rpmfusion.md) を有効にしてあること（その前提の [EPEL](epel.md) も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
+> - **前提（手順 8 から）**: [AlmaLinux 10 の初期設定の手順 18〜21](almalinux-setup.md#実施手順) で RPM Fusion（free）を有効にしてあること（その前提の同書の手順 17 の EPEL も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
 > - **すべて対象ホスト上で実行する**。手順 7 と手順 11 の GUI の確認だけ、デスクトップセッションで行う
 > - **手順 5・8・9 には対話入力がある**（トランザクション表の `[y/N]`。手順 8 は EPEL の鍵の確認も）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[rpmfusion.md](rpmfusion.md) を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
+- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[AlmaLinux 10 の初期設定の手順 17〜21](almalinux-setup.md#実施手順)（EPEL と RPM Fusion）を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
 - 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 1. 変数を設定する。
@@ -99,7 +99,7 @@
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
    - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
 
-1. [RPM Fusion](rpmfusion.md) を有効にしたホストで、入手できる版を見てから FFmpeg のライブラリを入れる。
+1. [RPM Fusion](almalinux-setup.md#実施手順) を有効にしたホストで、入手できる版を見てから FFmpeg のライブラリを入れる。
 
    ```bash
    dnf -q list --showduplicates ffmpeg-libs
@@ -166,8 +166,8 @@
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - RPM Fusion の FFmpeg を外し、AppStream の ESR に戻す
-- AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1 だけ行う。RPM Fusion 自体も外すなら、続けて [rpmfusion.md のロールバック](rpmfusion.md#ロールバック)を行う
-- EPEL は外さない（[btop.md](btop.md) などほかの手順書でも使う。外すなら [epel.md のロールバック](epel.md#ロールバック)）
+- AAC・H.264 のための FFmpeg だけ外すなら、この節の手順 1 だけ行う。RPM Fusion 自体も外すなら、続けて [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 32・33 を行う
+- EPEL は外さない（[btop.md](btop.md) などほかの手順書でも使う。外すなら [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 34・35）
 - プロファイル（`~/.mozilla/firefox`、新しく作られた場合は `~/.config/mozilla/firefox`）は、この節のどの手順でも消えない
 
 1. FFmpeg のライブラリを消す。
@@ -356,7 +356,7 @@
 - **言語パックは本体と同時に上げる**: バージョンが食い違うと UI が英語に戻る。`dnf upgrade` 全体を流していれば自動で揃う
 - パッケージの導入・削除が終わったことを確かめる
 - **RPM Fusion は Fedora の外のリポジトリ**: free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）
-  - 鍵の照合と、`rpmfusion-free-release` の署名の確かめ方は [rpmfusion.md](rpmfusion.md) にある
+  - 鍵の照合と、`rpmfusion-free-release` の署名の確かめ方は [AlmaLinux 10 の初期設定の手順 18〜21](almalinux-setup.md#実施手順) にある
 - **FFmpeg を入れたら Firefox を起動し直す**: 起動中の Firefox は読み直さない（手順 11）
 - **EPEL の `libavcodec-free` とは同居できない**: 入っていると手順 8 が止まる。残したままだと H.264 が再生できない（手順 9）
 - **aarch64 では Widevine を必要とするコンテンツの再生を前提にしない**

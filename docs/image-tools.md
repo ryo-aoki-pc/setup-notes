@@ -5,7 +5,7 @@
 - [検証記録](verification/image-tools.md)・[参考資料](reference/image-tools.md)
 
 > [!IMPORTANT]
-> - **前提**: [Homebrew](homebrew.md) と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）を通してあること。`command -v brew podman` が 2 行を返し、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順)（Homebrew）と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）を通してあること。`command -v brew podman` が 2 行を返し、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
 > - **手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
 > - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
@@ -237,4 +237,4 @@
 - Trivy のキャッシュも消す場合は、キャッシュの置き場所を確かめてから削除する
 - **Trivy の `--image-src podman` は API ソケットが要る**: [podman.md 手順 7](podman.md#実施手順) のソケットが止まっていると、手順 9 の補足のエラーになる
 - **hadolint と Trivy の設定の検査は、見るところが違う**: 確認用の Containerfile は hadolint では指摘が無く、`trivy config` では `USER` と `HEALTHCHECK` が無いことを指摘された（[使い方の基本](#使い方の基本)）
-- **Homebrew の 2 つは、そのままでは `sudo` の PATH に無い**（[homebrew.md の注意点](homebrew.md#注意点)）: root で使うなら、[homebrew.md の sudo でも使う](homebrew.md#sudo-でも使う任意)の節を通すか、`/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ
+- **Homebrew の 2 つは、そのままでは `sudo` の PATH に無い**（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）: root で使うなら、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、`/home/linuxbrew/.linuxbrew/bin/hadolint` のようにフルパスで呼ぶ

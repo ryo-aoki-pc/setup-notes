@@ -5,7 +5,7 @@
 - [検証記録](verification/btop.md)・[参考資料](reference/btop.md)
 
 > [!IMPORTANT]
-> - **前提**: [EPEL](epel.md) を有効にしてあること。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で EPEL を有効にしてあること。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **すべて対象ホスト上で実行する**
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
 > - **手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
@@ -89,7 +89,7 @@
    ```
 
    - 依存で入った `hicolor-icon-theme` は他のパッケージも使うので、残しておいてよい（不要なものだけ消すなら `sudo dnf autoremove`）
-   - **EPEL 自体は消さない**（他のパッケージが依存している可能性がある）。消すなら [epel.md のロールバック](epel.md#ロールバック)
+   - **EPEL 自体は消さない**（他のパッケージが依存している可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 34・35
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. 設定とユーザーテーマも消すときだけ、`~/.config/btop` を消す。

@@ -28,8 +28,17 @@
 - 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
-  - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)
-- 手順の後: Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+  - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)
+  - git の差分の表示と GitHub の操作も使うなら、Git for Windows と WezTerm の後に [git-delta](git-delta.md#windows-11-で使う) → [GitHub CLI](gh.md#windows-11-で使う)（どちらも scoop で入れる）
+  - 端末のエディタと TUI も使うなら、続けて [Neovim](neovim.md#windows-11-で使う) → [lazygit](lazygit.md#windows-11-で使う) → [yazi](yazi.md#windows-11-で使う)（どれも scoop で入れる。管理者ではない窓。git-delta・GitHub CLI も使うなら、その後に）
+- 手順の後の節
+  - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
+  - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
+  - Edge の常駐は[Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)（管理者の窓）、クリップボードの履歴は[CopyQ を使う（任意）](#copyq-を使う任意)
+  - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
+  - Windows Terminal のフォントは、HackGen Console NF を入れた後に[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
+  - Git Bash の starship・zoxide・fzf・eza・bat は、Git for Windows・WezTerm と Git Bash の共通の bash 設定の後に[シェルのツールを入れる（任意）](#シェルのツールを入れる任意)（zoxide は 0.9.9 に止める）
+  - 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
 > - **手順 40 のインラインの sudo、手順 41 の放置でロックしない設定、手順 44 のリモート デスクトップ、手順 48 の Windows Hello 以外のサインイン、手順 64 の自動サインインを重ねると、PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、手順 41・64 は行わない
@@ -1295,12 +1304,1392 @@
 
 ---
 
+## プライバシーと広告の表示を切る（任意）
+
+- 自分のユーザーの設定で、広告 ID・Web サイトに渡す言語リスト・診断データを使った提案・手書き入力と入力の改善・フィードバックの問い・オンライン音声認識・検索のクラウドと履歴・エクスプローラーの同期プロバイダーの通知を切る（手順 27・49 の続き）
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- **この節の手順 3 でサインアウトしてサインインし直し、この節の手順 4・6 は設定の画面で行う**
+- **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
+- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](verification/windows-setup.md)）
+- 戻すときは、この節の手順 5・6（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 自分のユーザーで、プライバシーと広告の設定を切る（元の値はファイルに控える）。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
+     $set = @(
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', 'Enabled', 0),
+       @('HKCU:\Control Panel\International\User Profile', 'HttpAcceptLanguageOptOut', 1),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy', 'TailoredExperiencesWithDiagnosticDataEnabled', 0),
+       @('HKCU:\Software\Microsoft\Input\TIPC', 'Enabled', 0),
+       @('HKCU:\Software\Microsoft\Siuf\Rules', 'NumberOfSIUFInPeriod', 0),
+       @('HKCU:\Software\Microsoft\Siuf\Rules', 'PeriodInNanoSeconds', 0),
+       @('HKCU:\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy', 'HasAccepted', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsMSACloudSearchEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsAADCloudSearchEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsDeviceSearchHistoryEnabled', 0),
+       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', 0)
+     )
+     $old = foreach ($s in $set) { $key = Get-Item -LiteralPath $s[0] -ErrorAction SilentlyContinue; [pscustomobject]@{ Path = $s[0]; Name = $s[1]; Value = [string](Get-ItemProperty -LiteralPath $s[0] -ErrorAction SilentlyContinue).($s[1]); Kind = $(if ($key -and ($key.GetValueNames() -contains $s[1])) { [string]$key.GetValueKind($s[1]) } else { '' }) } }
+     if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
+       $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       "控えた: $rec"
+     }
+     for ($i = 0; $i -lt $set.Count; $i++) {
+       $p, $n, $v = $set[$i]
+       if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p -Force | Out-Null }
+       Set-ItemProperty -LiteralPath $p -Name $n -Type DWord -Value $v
+       '{0}\{1}: {2} -> {3}' -f (Split-Path -Path $p -Leaf), $n, $old[$i].Value, (Get-ItemProperty -LiteralPath $p).$n
+     }
+   }
+   ```
+
+   - `控えた:` か `控えはもうある` の行と、`AdvertisingInfo\Enabled: 1 -> 0` の形の 11 行が出て、`->` の右がすべて `0`（`HttpAcceptLanguageOptOut` だけ `1`）ならよい
+   - `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない（この節の手順 5 で使う）
+   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、中の値が消える）
+   - `IsDeviceSearchHistoryEnabled` は、0 と 1 のどちらがオフかで資料が食い違う。この節の手順 4 の画面で確かめる
+   - 多くは、この節の手順 3 でサインインし直した後に効く
+
+1. サインアウトして、同じユーザーでサインインし直す。
+
+   - スタートメニューのユーザーのアイコンから「サインアウト」を選ぶ（スタートメニューの電源から再起動してもよい）
+   - **次の手順は、サインインし、この節の手順 1 と同じ方法で管理者ではない窓を開いてから貼る**
+
+1. 設定の「プライバシーとセキュリティ」を開き、切り替えを確かめ、残りを画面で切る。
+
+   ```powershell
+   Start-Process 'ms-settings:privacy'
+   ```
+
+   - 「全般」（新しいビルドでは「おすすめとオファー」）で、広告 ID と言語リストの切り替えがオフ。「設定アプリで通知を表示する」があれば、オフにする
+   - 「音声認識」で、「オンライン音声認識」がオフ
+   - 「手書き入力と入力の個人用設定」で、「カスタム手書き入力と入力の辞書」をオフにする（覚えた単語の一覧が消える）
+   - 「診断とフィードバック」で、「オプションの診断データを送信する」がオンなら、オフにする。「手書き入力と入力の改善」と「カスタマイズされたエクスペリエンス」がオフ、「フィードバックの頻度」が「しない」
+   - 新しいビルドでは、「カスタマイズされたエクスペリエンス」は「パーソナライズされたオファー」の名前で別のページにある
+   - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、手順 49 の値で灰色になっている
+   - この節の手順 2 で書いた項目がオンのまま出ていたら、その画面でオフにする
+   - **次の手順は、設定を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 2 を行ったとき）、控えた元の値に戻す。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
+     if (-not (Test-Path -LiteralPath $rec)) { Write-Error "中断: 控えが無い: $rec"; return }
+     foreach ($r in Import-Csv -LiteralPath $rec) {
+       if ($r.Value -match '^-?[0-9]+$') { Set-ItemProperty -LiteralPath $r.Path -Name $r.Name -Type $(if ($r.Kind -eq 'QWord') { 'QWord' } else { 'DWord' }) -Value ([long]$r.Value) } else { Remove-ItemProperty -LiteralPath $r.Path -Name $r.Name -ErrorAction SilentlyContinue }
+       '{0}\{1}: {2}' -f (Split-Path -Path $r.Path -Leaf), $r.Name, (Get-ItemProperty -LiteralPath $r.Path -ErrorAction SilentlyContinue).($r.Name)
+     }
+   }
+   ```
+
+   - 11 行が出て、`:` の右が控えた元の値（元が空なら空）ならよい。元の値が無かったものは消す
+   - `中断: 控えが無い` が出たら、この節の手順 6 の画面で戻す
+   - 控えのファイルは残る。要らなければ手で消す
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 4 で切ったものを使うときか、この節の手順 5 で控えが無かったとき）、設定の画面でオンに戻す。
+
+   ```powershell
+   Start-Process 'ms-settings:privacy'
+   ```
+
+   - この節の手順 4 でオフにした「設定アプリで通知を表示する」・「カスタム手書き入力と入力の辞書」・「オプションの診断データを送信する」のうち、使うものをオンにする
+   - この節の手順 5 で `中断: 控えが無い` が出たときは、この節の手順 2 で切った項目（「全般」の広告 ID と言語リスト・「オンライン音声認識」・「手書き入力と入力の改善」・「カスタマイズされたエクスペリエンス」・「フィードバックの頻度」・「検索のアクセス許可」の 3 つ）も、使うものを戻す
+   - 同じときに、エクスプローラーの同期プロバイダーの通知も使うなら、フォルダー オプションの「表示」で戻す
+   - 消えた辞書（覚えた単語の一覧）は戻らない
+
+---
+
+## 表示・入力・音・ストレージを変える（任意）
+
+- 自分のユーザーの設定で、次のものを変える（手順 25・28・31 の続き）
+  - 誤って押しやすいキー: 固定キー・フィルター キー・切り替えキーのショートカット、入力言語とキー配列の切り替え（Alt+Shift・Ctrl+Shift）
+  - 窓とエクスプローラー: Alt+Tab の Edge のタブ、タイトル バーのシェイク、左の一覧のギャラリーとホーム、タスクバーの「タスクの終了」
+  - アニメーション効果、効果音と起動音、ストレージ センサー
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- 項目は独立しているので、要らない手順は飛ばしてよい（この節の手順 1・2・13・14 は飛ばさない）
+- **この節の手順 10・12・14 は画面で行い、この節の手順 13 でサインアウトしてサインインし直す**
+- **この節の手順 11 のストレージ センサーは、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを、毎月消す（取り戻せない）**。ごみ箱を置き場に使うなら、この節の手順 11・12 は行わないか、この節の手順 12 でごみ箱を「許可しない」にする
+- 入力言語の切り替えのキーを切っても、Win+Space で切り替えられる
+- 戻すときは、この節の手順 15〜23（行った手順のものだけ）。この節の手順 2 で控えた値を使う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。「Windows PowerShell (x86)」は使わない）
+
+1. 今の値を表示し、ファイルに控える。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $acc = 'HKCU:\Control Panel\Accessibility'
+     $tog = 'HKCU:\Keyboard Layout\Toggle'
+     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+     $cls = 'HKCU:\Software\Classes\CLSID'
+     $now = [ordered]@{
+       'StickyKeys'                             = (Get-ItemProperty -LiteralPath "$acc\StickyKeys" -ErrorAction SilentlyContinue).Flags
+       'Keyboard Response'                      = (Get-ItemProperty -LiteralPath "$acc\Keyboard Response" -ErrorAction SilentlyContinue).Flags
+       'ToggleKeys'                             = (Get-ItemProperty -LiteralPath "$acc\ToggleKeys" -ErrorAction SilentlyContinue).Flags
+       'Hotkey'                                 = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Hotkey'
+       'Language Hotkey'                        = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Language Hotkey'
+       'Layout Hotkey'                          = (Get-ItemProperty -LiteralPath $tog -ErrorAction SilentlyContinue).'Layout Hotkey'
+       'MultiTaskingAltTabFilter'               = (Get-ItemProperty -LiteralPath $adv).MultiTaskingAltTabFilter
+       'DisallowShaking'                        = (Get-ItemProperty -LiteralPath $adv).DisallowShaking
+       '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' = Test-Path -LiteralPath "$cls\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}"
+       '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' = Test-Path -LiteralPath "$cls\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}"
+       'TaskbarEndTask'                         = (Get-ItemProperty -LiteralPath "$adv\TaskbarDeveloperSettings" -ErrorAction SilentlyContinue).TaskbarEndTask
+       'MinAnimate'                             = (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics' -ErrorAction SilentlyContinue).MinAnimate
+       'SoundScheme'                            = (Get-ItemProperty -LiteralPath 'HKCU:\AppEvents\Schemes' -ErrorAction SilentlyContinue).'(default)'
+     }
+     $rows = foreach ($n in $now.Keys) { [pscustomobject]@{ Name = $n; Value = [string]$now[$n] } }
+     if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
+       $rows | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       "控えた: $rec"
+     }
+     $rows | Format-Table -AutoSize
+   }
+   ```
+
+   - `控えた:` か `控えはもうある` の行と、13 行の表（`Name` と `Value`）が出ればよい。値が無いものは空
+   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 16〜19 で使う）
+   - `{e88865ea-…}`（ギャラリー）と `{f874310e-…}`（ホーム）は、自分のユーザーにキーが既にあったか（ふつうは `False`）
+
+1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
+
+   ```powershell
+   foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
+     $p = "HKCU:\Control Panel\Accessibility\$k"
+     $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
+     if ($null -eq $v -or $v -notmatch '^[0-9]+$') { "無い: $k" } else {
+       Set-ItemProperty -LiteralPath $p -Name Flags -Type String -Value ([string]([int]$v -band (-bnot 4)))
+       '{0}: {1} -> {2}' -f $k, $v, (Get-ItemProperty -LiteralPath $p).Flags
+     }
+   }
+   ```
+
+   - `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` の形で出ればよい（左の数は PC で違うことがある）
+   - 切るのは、Shift を 5 回・右 Shift の長押し・Num Lock の長押しで機能をオンにするショートカットだけ。機能そのものはオフのまま
+   - `無い:` が出たキーには、何も書かない
+   - 効くのは、この節の手順 13 でサインインし直した後
+   - **注意**: サインインし直すまで、設定の「アクセシビリティ」→「キーボード」を開かない（今の値で書き戻されることがある）
+
+1. 入力言語とキー配列を切り替えるキー（Alt+Shift・Ctrl+Shift）を切る。
+
+   ```powershell
+   & {
+     $t = 'HKCU:\Keyboard Layout\Toggle'
+     if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
+     foreach ($n in 'Hotkey', 'Language Hotkey', 'Layout Hotkey') {
+       $old = (Get-ItemProperty -LiteralPath $t).$n
+       Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value '3'
+       '{0}: {1} -> {2}' -f $n, $old, (Get-ItemProperty -LiteralPath $t).$n
+     }
+   }
+   ```
+
+   - 3 行とも `->` の右が `3`（割り当てなし）ならよい
+   - 効くのは、この節の手順 13 でサインインし直した後
+   - Win+Space の切り替えは残る。半角/全角と、手順 31 の Ctrl+Space（IME のオン・オフ）には関係しない
+   - タスクバーに「英語 (米国)」のキーボードが勝手に出るのは、この設定では防げない（言語の一覧から消す）
+
+1. Alt+Tab に Edge のタブを出さず、タイトル バーのシェイクを切る。
+
+   ```powershell
+   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+   Set-ItemProperty -Path $adv -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+   Set-ItemProperty -Path $adv -Name DisallowShaking -Type DWord -Value 1
+   Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
+   ```
+
+   - `MultiTaskingAltTabFilter : 3` と `DisallowShaking : 1` が出ればよい
+   - Alt+Tab とスナップの候補に、Edge のタブを出さず、窓だけを並べる（設定の「システム」→「マルチタスク」の「タブを表示しない」）
+   - シェイク（タイトル バーをつかんで振ると、ほかの窓が最小化される）は、Windows 11 の既定でもオフ。明示的に切る
+   - 効くのは、この節の手順 13 でサインインし直した後
+
+1. エクスプローラーの左の一覧から、ギャラリーとホームを消す。
+
+   ```powershell
+   foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
+     '既にあった {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
+     reg.exe add "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /t REG_DWORD /d 0 /f
+     reg.exe query "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree
+   }
+   ```
+
+   - キーごと（`{e88865ea-…}` がギャラリー、`{f874310e-…}` がホーム）に、`既にあった` の行と、成功の 1 行と、`System.IsPinnedToNameSpaceTree    REG_DWORD    0x0` が出ればよい
+   - PC 全体の登録を、自分のユーザーで上書きする（手順 26 と同じ、サポート外の方法）
+   - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
+   - 左の一覧を右クリックして「すべてのフォルダーを表示」をオンにすると、どちらも出る
+   - 「Windows PowerShell (x86)」で貼ると、別の場所に書かれて効かない
+
+1. タスクバーのアプリの右クリックに「タスクの終了」を出す。
+
+   ```powershell
+   $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+   Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value 1
+   Get-ItemProperty -LiteralPath $k | Format-List TaskbarEndTask
+   ```
+
+   - `TaskbarEndTask : 1` が出ればよい
+   - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
+   - **注意**: 「タスクの終了」はアプリのプロセスを終わらせるので、保存していない内容は失われる
+
+1. アニメーション効果（最小化・最大化のアニメーションも）を切る。
+
+   ```powershell
+   & {
+     Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
+   [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
+   '@
+     $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]::Zero, $f)   # SPI_SETCLIENTAREAANIMATION: FALSE
+     $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
+     $ai.cbSize = 8
+     $ai.iMinAnimate = 0
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
+     $on = 1
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     'ClientAreaAnimation : {0}' -f $on
+     'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
+   }
+   ```
+
+   - `ClientAreaAnimation : 0` と `MinAnimate : 0` が出ればよい
+   - すぐに効く（開いているアプリの一部は、起動し直した後）
+   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」に当たる（この節の手順 14 で確かめる）。Firefox・Chromium の Web ページにも、動きを減らす設定（`prefers-reduced-motion`）として伝わる
+   - メニューのフェードなどの細かいアニメーション（「パフォーマンス オプション」の項目）は変えない
+
+1. 効果音を「サウンドなし」にする（今の設定はファイルに控える）。
+
+   ```powershell
+   & {
+     $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else {
+       New-Item -ItemType Directory -Path (Split-Path -Path $bak) -Force | Out-Null
+       reg.exe export 'HKCU\AppEvents' $bak /y
+     }
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えを作れなかった: $bak"; return }
+     $n = 0
+     Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps\*\*' | ForEach-Object {
+       $cur = Join-Path $_.PSPath '.Current'
+       if (Test-Path -LiteralPath $cur) { Set-ItemProperty -LiteralPath $cur -Name '(default)' -Type String -Value ''; $n++ }
+     }
+     Set-ItemProperty -Path 'HKCU:\AppEvents\Schemes' -Name '(default)' -Type String -Value '.None'
+     'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
+     '空にしたイベント : {0}' -f $n
+   }
+   ```
+
+   - 控えを作った成功の 1 行（2 回目からは `控えはもうある`）と、`Scheme : .None` と、空にしたイベントの数（1 以上）が出ればよい
+   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 21 で戻す）
+   - サウンドの画面の「サウンド設定」を「サウンドなし」にするのと同じ。次に鳴る音から効く
+   - 後から入れたアプリが足したイベントには、音が入る。気になれば、この手順を貼り直す
+   - 設定の「システム」→「通知」の「通知で音を鳴らす」と、起動音（この節の手順 10）は別の設定
+
+1. 起動音も消すときだけ、サウンドの画面を開き、起動音を切る。
+
+   ```powershell
+   control.exe 'mmsys.cpl,,2'
+   ```
+
+   - 「サウンド」のタブが開く。「Windows スタートアップのサウンドを再生する」のチェックを外し、「OK」を押す
+   - 管理者の確認（UAC）が出ることがある（起動音は PC 全体の設定）
+   - 同じタブの「サウンド設定」が「サウンドなし」になっていれば、この節の手順 9 が効いている
+   - **次の手順は、サウンドの画面を閉じてから貼る**
+
+1. ストレージ センサーをオンにし、一時ファイルと古いごみ箱を毎月消すようにする（取り戻せない）。
+
+   ```powershell
+   & {
+     $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
+     $set = [ordered]@{ '01' = 1; '04' = 1; '08' = 1; '256' = 30; '32' = 0; '512' = 0; '2048' = 30 }
+     if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+     foreach ($n in $set.Keys) {
+       $old = (Get-ItemProperty -LiteralPath $k).$n
+       Set-ItemProperty -LiteralPath $k -Name $n -Type DWord -Value $set[$n]
+       '{0}: {1} -> {2}' -f $n, $old, (Get-ItemProperty -LiteralPath $k).$n
+     }
+   }
+   ```
+
+   - 7 行が出て、`->` の右が `01`・`04`・`08` は `1`、`256` と `2048` は `30`、`32` と `512` は `0` ならよい
+   - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、この節の手順 23 で戻した後に、画面で同じにし直す
+   - 毎月、一時ファイルと、ごみ箱に 30 日を超えて置いたファイルを消す。ダウンロード フォルダーは消さない
+   - 対象はシステムのドライブ（C:）だけ。サインインしてオンラインの状態が 10 分以上続かないと動かない
+   - **注意**: OneDrive にサインインしているなら、30 日開かないファイルがオンラインだけになりうる。この節の手順 12 で外す
+
+1. この節の手順 11 を行ったときだけ、ストレージ センサーの画面で値を確かめ、OneDrive を外す。
+
+   ```powershell
+   Start-Process 'ms-settings:storagepolicies'
+   ```
+
+   - 「ユーザー コンテンツの自動クリーンアップ」がオン、「ストレージ センサーを実行するタイミング」が「毎月」、ごみ箱が「30 日」、ダウンロード フォルダーが「許可しない」ならよい
+   - 「ローカルで利用可能なクラウド コンテンツ」に OneDrive があれば、「許可しない」にする
+   - ごみ箱を置き場に使っているなら、ごみ箱を「許可しない」にする
+   - 値が出ていなければ、この節の手順 13 でサインインし直した後に、もう一度開いて確かめる
+   - **次の手順は、設定を閉じてから行う**
+
+1. サインアウトして、同じユーザーでサインインし直す。
+
+   - スタートメニューのユーザーのアイコンから「サインアウト」を選ぶ（スタートメニューの電源から再起動してもよい）
+   - **次の手順は、サインインし、この節の手順 1 と同じ方法で管理者ではない窓を開いてから貼る**
+
+1. 設定の視覚効果の画面を開き、変わったことを確かめる。
+
+   ```powershell
+   Start-Process 'ms-settings:easeofaccess-visualeffects'
+   ```
+
+   - 「アニメーション効果」がオフ。オンと出たら、この画面でオフにする
+   - Shift を 5 回押しても、固定キー機能をオンにするかを聞く窓が出ない
+   - Alt+Shift・Ctrl+Shift を押して離しても、タスクバーの言語の表示が変わらない
+   - Edge でタブを 2 つ以上開いて Alt+Tab を押すと、Edge は窓ごとに 1 つだけ並ぶ
+   - エクスプローラーの左の一覧に「ギャラリー」と「ホーム」が無い（「すべてのフォルダーを表示」がオフのとき）
+   - タスクバーのアプリを右クリックすると「タスクの終了」がある
+   - エラーや通知の効果音が鳴らない
+   - 行わなかった手順のものは、元のまま
+   - **次の手順は、設定を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 3 を行ったとき）、固定キーなどのショートカットを有効に戻す。
+
+   ```powershell
+   foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
+     $p = "HKCU:\Control Panel\Accessibility\$k"
+     $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
+     if ($null -eq $v -or $v -notmatch '^[0-9]+$') { "無い: $k" } else {
+       Set-ItemProperty -LiteralPath $p -Name Flags -Type String -Value ([string]([int]$v -bor 4))
+       '{0}: {1} -> {2}' -f $k, $v, (Get-ItemProperty -LiteralPath $p).Flags
+     }
+   }
+   ```
+
+   - `StickyKeys: 506 -> 510` の形で出ればよい（値は消さない）
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 4 を行ったとき）、切り替えのキーを控えた値に戻す。
+
+   ```powershell
+   & {
+     $t = 'HKCU:\Keyboard Layout\Toggle'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（既定の値にする）: $rec" }
+     $def = [ordered]@{ 'Hotkey' = '1'; 'Language Hotkey' = '1'; 'Layout Hotkey' = '2' }
+     if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
+     foreach ($n in $def.Keys) {
+       $v = if ($before[$n] -match '^[1-4]$') { $before[$n] } else { $def[$n] }
+       Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value $v
+       '{0}: {1}' -f $n, (Get-ItemProperty -LiteralPath $t).$n
+     }
+   }
+   ```
+
+   - 3 行に、この節の手順 2 で控えた値が出ればよい（控えが無いか空なら、既定とされる `1`・`1`・`2`）
+   - 効くのは、サインインし直した後
+   - 画面で戻すなら、設定の「時刻と言語」→「入力」→「キーボードの詳細設定」の「入力言語のホットキー」
+
+1. 元に戻すときは（この節の手順 5 を行ったとき）、Alt+Tab とシェイクの値を控えた値に戻す。
+
+   ```powershell
+   & {
+     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
+     foreach ($n in 'MultiTaskingAltTabFilter', 'DisallowShaking') {
+       if ($before[$n] -match '^[0-9]+$') { Set-ItemProperty -Path $adv -Name $n -Type DWord -Value ([int]$before[$n]) } else { Remove-ItemProperty -Path $adv -Name $n -ErrorAction SilentlyContinue }
+     }
+     Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
+   }
+   ```
+
+   - 2 つに控えた値が出るか、控えで空だったものが空（既定）になればよい
+   - 効くのは、サインインし直した後
+
+1. 元に戻すときは（この節の手順 6 を行ったとき）、ギャラリーとホームを戻す。
+
+   ```powershell
+   & {
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値だけ消す）: $rec" }
+     foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
+       if ($before[$g] -eq 'False') { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /f } else { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /f }
+       '残っている {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
+     }
+   }
+   ```
+
+   - キーごとに、成功の 1 行と `残っている` の行が出ればよい
+   - この節の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
+   - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
+
+1. 元に戻すときは（この節の手順 7 を行ったとき）、「タスクの終了」の値を控えた値に戻す。
+
+   ```powershell
+   & {
+     $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
+     $before = @{}
+     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
+     if ($before['TaskbarEndTask'] -match '^[0-9]+$') { Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value ([int]$before['TaskbarEndTask']) } else { Remove-ItemProperty -LiteralPath $k -Name TaskbarEndTask -ErrorAction SilentlyContinue }
+     Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List TaskbarEndTask
+   }
+   ```
+
+   - 控えた値が出るか、控えで空なら何も出なければよい（値が無いとオフ）
+
+1. 元に戻すときは（この節の手順 8 を行ったとき）、アニメーション効果を戻す。
+
+   ```powershell
+   & {
+     Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
+   [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
+   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
+   '@
+     $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]1, $f)   # SPI_SETCLIENTAREAANIMATION: TRUE
+     $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
+     $ai.cbSize = 8
+     $ai.iMinAnimate = 1
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
+     $on = 0
+     [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     'ClientAreaAnimation : {0}' -f $on
+     'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
+   }
+   ```
+
+   - `ClientAreaAnimation : 1` と `MinAnimate : 1` が出ればよい（すぐに効く）
+   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」をオンにしてもよい
+
+1. 元に戻すときは（この節の手順 9 を行ったとき）、控えた効果音の設定を書き戻す。
+
+   ```powershell
+   & {
+     $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     reg.exe import $bak
+     'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
+   }
+   ```
+
+   - 成功の 1 行と、控えたときのスキーム（ふつうは `.Default`）が出ればよい
+   - `中断: 控えが無い` が出たら、サウンドの画面（この節の手順 10 と同じ）の「サウンド設定」を「Windows 標準」にする
+   - 控えのファイルは残る。要らなければ手で消す
+
+1. 元に戻すときは（この節の手順 10 を行ったとき）、サウンドの画面で起動音を戻す。
+
+   ```powershell
+   control.exe 'mmsys.cpl,,2'
+   ```
+
+   - 「Windows スタートアップのサウンドを再生する」にチェックを入れ、「OK」を押す
+   - **次の手順は、サウンドの画面を閉じてから貼る**
+
+1. 元に戻すときは（この節の手順 11 を行ったとき）、ストレージ センサーの値を消す。
+
+   ```powershell
+   $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
+   foreach ($n in '01', '04', '08', '256', '32', '512', '2048') { Remove-ItemProperty -LiteralPath $k -Name $n -ErrorAction SilentlyContinue }
+   Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List '01', '04', '08', '256', '32', '512', '2048'
+   ```
+
+   - 7 つが空ならよい。ストレージ センサーはオフに戻る（空きが少ないときに、Windows がオンにすることがある）
+   - この節の手順 11 の `->` の左に数があったなら、設定の「ストレージ センサー」で同じにし直す
+   - この節の手順 12 で OneDrive やごみ箱を変えたなら、同じ画面で戻す
+
+---
+
+## Edge の常駐をポリシーで止める（任意）
+
+- Edge のスタートアップ ブースト（サインインのときに Edge を裏で起動しておく）と、閉じた後も拡張機能とアプリを動かし続けるバックグラウンドの実行を、PC 全体のポリシーで切る
+- 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者の** Windows PowerShell（5.1）に貼る（PC 全体のポリシーなので、すべてのユーザーにかかる）
+- **この節の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この節の手順 2 の代わりにこの節の手順 3（画面だけで切る）を行う
+- 手順 50 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
+- **この節の手順 3・4 は Edge の画面で行う**
+- 戻すときは、この節の手順 5・6（行った手順のものだけ）
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+
+1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
+
+   ```powershell
+   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+   Set-ItemProperty -Path $k -Name StartupBoostEnabled -Type DWord -Value 0
+   Set-ItemProperty -Path $k -Name BackgroundModeEnabled -Type DWord -Value 0
+   Get-ItemProperty -Path $k | Format-List StartupBoostEnabled, BackgroundModeEnabled
+   ```
+
+   - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
+   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）
+   - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
+   - 手順 32 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（手順 32 と[ロールバック](#ロールバック)の手順 8 は、無いものを飛ばす）
+
+1. （この節の手順 2 の代わりに）管理の表示を出したくないときは、Edge の設定の画面で 2 つを切る。
+
+   - Edge のアドレス バーに `edge://settings/system` を入れて開く（「設定」→「システムとパフォーマンス」→「システム」）
+   - 「スタートアップ ブースト」をオフにする
+   - 「Microsoft Edge が終了してもバックグラウンドの拡張機能およびアプリの実行を続行する」をオフにする
+
+1. Edge で、2 つが切れていることを確かめる。
+
+   - `edge://settings/system` で、2 つがオフになっている（この節の手順 2 を行ったなら、灰色で変えられない）
+   - この節の手順 2 を行ったなら、`edge://policy` に `StartupBoostEnabled` と `BackgroundModeEnabled` が、値 `false`・状態 `OK` で出る
+   - Edge の窓をすべて閉じると、通知領域に Edge のアイコンが残らない
+   - サインインし直した後も `msedge.exe` が見えることがある（Edge Update のサインインのときのコマンドが起動すると広く言われる。[参考資料](reference/windows-setup.md)）
+
+1. 元に戻すときは（この節の手順 2 を行ったとき）、管理者の PowerShell で、2 つのポリシーを消す。
+
+   ```powershell
+   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+   foreach ($n in 'StartupBoostEnabled', 'BackgroundModeEnabled') { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue }
+   Get-ItemProperty -Path $k -ErrorAction SilentlyContinue | Format-List StartupBoostEnabled, BackgroundModeEnabled
+   ```
+
+   - 2 つが空ならよい
+   - キーは消さない（ほかの Edge のポリシーがありうる）
+   - Edge を開き直すと、2 つの切り替えをまた変えられる
+
+1. 元に戻すときは（この節の手順 3 を行ったとき）、Edge の設定の画面で 2 つをオンに戻す。
+
+   - `edge://settings/system` で、この節の手順 3 でオフにした 2 つをオンにする
+
+---
+
+## CopyQ を使う（任意）
+
+- クリップボードの履歴は、Windows の履歴（Win+V）ではなく、CopyQ に持たせる
+- 前提: 手順 9〜15（winget を使えること）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
+- **この節の手順 3 で CopyQ を起動し、この節の手順 5・6 は画面で行う**
+- CopyQ は窓を持つアプリなので、`copyq.exe` のコマンドの結果は、`| Write-Output` を付けないと出ない
+- **CopyQ の履歴は、暗号化されずにディスクに残る**。パスワードなどをコピーするときは、[注意点](#注意点)を読む
+- 戻すときは、この節の手順 7・8
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. CopyQ を、自分のユーザーに入れる。
+
+   ```powershell
+   winget install --exact --id hluk.CopyQ --source winget --scope user --accept-source-agreements --accept-package-agreements
+   winget list --exact --id hluk.CopyQ
+   ```
+
+   - 最後の表に `CopyQ` と `hluk.CopyQ` の行が出ればよい（版は実行した日の最新）
+   - 管理者の確認（UAC）は出ないはず。winget が、出るかもしれない旨の行を出すことはある
+   - `%LOCALAPPDATA%\Programs\CopyQ` に入る。デスクトップのショートカットと、サインインのときの起動は作らない。入れた直後は起動しない
+
+1. CopyQ を起動する。
+
+   ```powershell
+   Start-Process -FilePath "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+   ```
+
+   - 窓を待たずに PowerShell に戻り、通知領域（「^」の中のことがある）に CopyQ のアイコンが出る
+   - 見つからない旨のエラーが出たら、前に別の場所へ入れた CopyQ がある。この節の手順 7・8 で外してから始め直す
+   - **次の手順は、アイコンが出てから貼る**（起動の前に貼ると、サーバーにつながらない旨が出る）
+
+1. サインインのときに CopyQ が起動するようにし、Windows の履歴（Win+V）がオフかを確かめる。
+
+   ```powershell
+   & {
+     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+     & $copyq config autostart false | Out-Null
+     & $copyq config autostart true | Write-Output
+     Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk')
+     'EnableClipboardHistory: {0}' -f (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Clipboard' -ErrorAction SilentlyContinue).EnableClipboardHistory
+   }
+   ```
+
+   - `true`・`True`・`EnableClipboardHistory:` の 3 行が出て、最後の右が空か `0` ならよい
+   - 先に `false` を送るのは、前の CopyQ の設定（`autostart=true`）が残っていても、起動のショートカットを作り直すため
+   - 起動のショートカットは、スタートアップ フォルダーの `copyq.lnk`（手順 32 の `Run` の一覧には出ない）
+   - 最後の右が `1` なら、Windows の履歴もオン。この節の手順 5 で切る。空か `0` なら、この節の手順 5 は飛ばす
+
+1. Windows の履歴がオンだったときだけ、設定の画面で切る。
+
+   ```powershell
+   Start-Process 'ms-settings:clipboard'
+   ```
+
+   - 「クリップボードの履歴」をオフにする
+   - オフでも、Win+V は Windows のパネルを開く。そこで「有効にする」は押さない
+   - **次の手順は、設定を閉じてから行う**
+
+1. CopyQ の設定の画面で、窓を開くグローバル ショートカットを割り当てる。
+
+   - 通知領域の CopyQ のアイコンをクリックして窓を開き、「ファイル」→「設定...」（Ctrl+P）→「ショートカット」→「グローバル」で、「メインウィンドウの表示切り替え」にキーを足して「OK」を押す
+   - 次のキーは避ける
+     - Win+V（Windows の履歴のパネル）
+     - Win+Shift+V と Ctrl+Win+Alt+V（手順 23 の PowerToys の高度な貼り付け）
+     - Ctrl+Shift+V（多くのアプリの、書式なしの貼り付け）
+     - Ctrl+Space（手順 31 の IME）
+   - Windows キーを含むキーは、OS が予約していて効かないことがある。効かなくても、画面には何も出ない
+   - 管理者の窓には、CopyQ から自動では貼れない。クリップボードには入るので、右クリックで貼る
+
+1. 元に戻すときは、サインインのときの起動を外し、CopyQ を止める。
+
+   ```powershell
+   & {
+     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
+     $lnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk'
+     & $copyq config autostart false | Write-Output
+     Remove-Item -LiteralPath $lnk -ErrorAction SilentlyContinue
+     & $copyq exit | Write-Output
+     Test-Path -LiteralPath $lnk
+   }
+   ```
+
+   - `false` と、最後に `False` が出て、通知領域から CopyQ のアイコンが消えればよい
+   - CopyQ が動いていなければ、サーバーにつながらない旨が出る。それでも `copyq.lnk` は消える
+   - アンインストーラは `copyq.lnk` を消さないので、先にこの手順で消す
+
+1. 元に戻すときは、CopyQ を外す。
+
+   ```powershell
+   winget uninstall --exact --id hluk.CopyQ --source winget
+   winget list --exact --id hluk.CopyQ
+   ```
+
+   - 最後に、入っているパッケージが見つからない旨が出ればよい
+   - 設定と履歴は残る（`%APPDATA%\copyq`。17.0.0 からは `%LOCALAPPDATA%\copyq` も）。要らなければ手で消す（取り戻せない）
+   - この節の手順 5 で Windows の履歴を切ったなら、使うときは設定の「システム」→「クリップボード」でオンに戻す
+
+---
+
+## PowerToys のユーティリティを絞る（任意）
+
+- 手順 23 で入れた PowerToys の、既定で有効なユーティリティのうち、使わないものを設定ファイルで切る（手順 23 の続き）
+- 前提: 手順 23。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- **この節の手順 4・7 は通知領域で PowerToys を終了し、この節の手順 6 は PowerToys の設定の画面で行う**
+- PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
+- 切るユーティリティは好みで選ぶ。この節の手順 2 の `$PT_OFF` は案で、Always On Top・コマンド パレット・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer は残す（[参考資料](reference/windows-setup.md)）
+- 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
+- Keyboard Manager は使わない（既定でオフ。Caps Lock は手順 51 で変える）
+- 戻すときは、この節の手順 7・8
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 変数を設定する。
+
+   ```powershell
+   $PT_OFF = 'FindMyMouse', 'MouseHighlighter', 'FancyZones', 'ColorPicker', 'Measure Tool', 'Awake'   # 切るユーティリティ（設定ファイルの名前）
+   $PT_EXE = @((Get-Process -Name PowerToys -ErrorAction SilentlyContinue).Path) + "$env:LOCALAPPDATA\PowerToys\PowerToys.exe", "$env:LOCALAPPDATA\Programs\PowerToys\PowerToys.exe" | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1   # PowerToys.exe の場所（自動）
+   'PT_OFF = {0}' -f ($PT_OFF -join ', ')
+   'PT_EXE = {0}' -f $PT_EXE
+   ```
+
+   - `PT_OFF = FindMyMouse, …` と、`PT_EXE = C:\Users\<WIN_USER>\AppData\Local\PowerToys\PowerToys.exe` の形の 2 行が出ればよい
+   - `PT_EXE` が空なら、PowerToys が見つからない。手順 23 を確かめる
+   - `$PT_OFF` の名前は、設定ファイルの名前（空白を含むものがある）。変えるなら、この節の手順 3 の表の `Name` から選ぶ
+   - 入る場所は Microsoft の資料どうしで食い違うので、動いている PowerToys から取る
+   - 新しい窓を開いたら、このブロックを貼り直す
+
+1. 今のユーティリティの有効・無効と、自動の起動を確かめる。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
+     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     $s.enabled.PSObject.Properties | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Enabled = $_.Value; Off = $PT_OFF -contains $_.Name } } | Format-Table -AutoSize
+     foreach ($n in $PT_OFF) { if (-not $s.enabled.PSObject.Properties[$n]) { "無い名前: $n" } }
+     'startup: {0} / run_elevated: {1}' -f $s.startup, $s.run_elevated
+     Get-ScheduledTask -TaskPath '\PowerToys\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   }
+   ```
+
+   - ユーティリティごとの `Name`・`Enabled`・`Off`（`$PT_OFF` にあるか）の表と、`startup: True / run_elevated: False` と、`Autorun for <WIN_USER>` の行が出ればよい
+   - `無い名前:` が出たら、その名前は今の版の設定ファイルに無い（版で名前が変わる）。この節の手順 2 の `$PT_OFF` を表の名前に直して貼り直す
+   - `startup` が `False` か、`Autorun for <WIN_USER>` が無いなら、サインインのときに起動しない。`run_elevated` が `True` なら、「常に管理者として実行」がオンになっている。どちらも PowerToys の設定の「全般」で戻す
+   - `中断: 設定ファイルが無い` が出たら、PowerToys を 1 度起動してから貼り直す
+
+1. 通知領域の PowerToys を右クリックし、「終了」で閉じる。
+
+   - 通知領域（「^」の中のことがある）の PowerToys のアイコンを右クリックし、「終了」を選ぶ。PowerToys の設定の窓も閉じる
+   - **次の手順は、アイコンが消えてから貼る**
+
+1. 設定ファイルで `$PT_OFF` のユーティリティを切り、PowerToys を起動し直す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 4 で終了してから貼り直す'; return }
+     if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 4 に戻る'; return }
+     try { $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 設定ファイルを読めない: $path"; return }
+     if (-not $s.PSObject.Properties['enabled']) { Write-Error "中断: 設定ファイルに enabled が無い: $path"; return }
+     $miss = @($PT_OFF | Where-Object { -not $s.enabled.PSObject.Properties[$_] })
+     if ($miss.Count) { Write-Error "中断: 設定ファイルに無い名前: $($miss -join ', ')"; return }
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     foreach ($n in $PT_OFF) { $s.enabled.PSObject.Properties[$n].Value = $false }
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
+     Start-Process -FilePath $PT_EXE
+   }
+   ```
+
+   - `控えた:`（2 回目からは `控えはもうある`）の行と、`FindMyMouse: False` の形の行が `$PT_OFF` の数だけ出て、通知領域に PowerToys のアイコンが戻ればよい
+   - 控えは `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 8 で使い、書き戻すと消える）
+   - 書くのは `enabled` の値だけで、ほかの設定は変えない
+   - `中断: PowerToys が動いている` が出たら、この節の手順 4 に戻る（設定の窓が残っていても止まる）
+
+1. PowerToys の設定の画面で、切ったユーティリティがオフになっていることを確かめる。
+
+   - 通知領域の PowerToys のアイコンを右クリックし、「設定」で設定の窓を開く（ダブルクリックでも開く。1 回のクリックで開くのはクイック アクセス）
+   - 「ダッシュボード」で、`$PT_OFF` のユーティリティがオフ、残したものがオンになっている
+   - 同じことは、ユーティリティごとのスイッチでもできる（すぐに効く）
+   - Peek は「Space で開く」をオンのままにする（オフにすると、起動のキーが手順 31 の IME と同じ Ctrl+Space に戻る）
+   - Find My Mouse を使うなら、起動の方法を「マウスを振る」にする（左 Ctrl を 2 回のままでは、手順 51 で Ctrl にした Caps Lock を 2 回押しても出る）
+   - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の印は付かない）
+   - 見終わったら、設定の窓を閉じる
+
+1. 元に戻すときは、通知領域の PowerToys を右クリックし、「終了」で閉じる。
+
+   - PowerToys の設定の窓も閉じる
+   - **次の手順は、アイコンが消えてから貼る**
+
+1. 元に戻すときは、控えた設定ファイルを書き戻し、PowerToys を起動する。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 7 で終了してから貼り直す'; return }
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 7 に戻る'; return }
+     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+     Remove-Item -LiteralPath $bak
+     $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
+     Start-Process -FilePath $PT_EXE
+   }
+   ```
+
+   - `FindMyMouse: True` の形の行（控えたときの値）が出て、通知領域に PowerToys のアイコンが戻ればよい
+   - 新しい窓では、先にこの節の手順 2 を貼る
+   - 控えた後に画面で変えた PowerToys の設定も、控えたときの値に戻る
+   - `中断: 控えが無い` が出たら、スタートメニューから PowerToys を起動し、設定の画面で、切ったユーティリティのスイッチをオンにする
+   - 控えのファイルは消える（もう一度この節を通すと、そのときの設定を控え直す）
+
+---
+
+## PowerShell 7 のプロファイルを設定する（任意）
+
+- 手順 24 で入れた PowerShell 7 のプロファイルに、手順 16〜19 と同じ貼り付けの設定と、↑/↓ の履歴の検索と、入っているときだけ zoxide・starship を読む行を足す（手順 24 の続き）
+- 前提: 手順 16〜19・24。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（PowerShell 7 の窓には貼らない）
+- 書くのは PowerShell 7 のプロファイル（`Documents\PowerShell\Microsoft.PowerShell_profile.ps1`）で、手順 19 の Windows PowerShell 5.1 のプロファイルとは別のファイル
+- 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
+- **この節の手順 6 は PowerShell 7 の窓で確かめる**
+- zoxide と starship は、入れていなければ読まない。この節は、それらを入れる前に通してよい（入れた後に PowerShell 7 を開き直せば読む）
+- Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない。この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+- 戻すときは、この節の手順 7・8（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. PowerShell 7 のプロファイルに、貼り付けと履歴の検索のキーと、zoxide・starship を読む行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward }  # windows-setup.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward }  # windows-setup.md'
+       'if (Get-Command -Name zoxide -CommandType Application -ErrorAction Ignore) { Invoke-Expression (& { (zoxide init powershell | Out-String) }) }  # windows-setup.md'
+       'if (Get-Command -Name starship -CommandType Application -ErrorAction Ignore) { function global:Invoke-Starship-PreCommand { if (Test-Path -Path Function:\__zoxide_hook) { $null = __zoxide_hook } }; Invoke-Expression (& starship init powershell) }  # windows-setup.md'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     foreach ($line in $lines) {
+       $text = Get-Content -LiteralPath $p -Raw
+       if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+         $add = $line
+         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+         "足した: $line"
+       }
+     }
+     "--- $p"
+     Get-Content -LiteralPath $p
+   }
+   ```
+
+   - 5 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）。無ければ作る
+   - 何度貼ってもよい（同じ行は足さない）。プロファイルにほかの行があれば、そのまま残る
+   - zoxide の行は、starship の行より前に置く（starship のプロンプトから zoxide の記録を呼ぶ。順の理由は[参考資料](reference/windows-setup.md)）
+   - 開いている PowerShell 7 の窓には、開き直すまで効かない
+
+1. Tab で補完の候補の一覧を出すときだけ、Tab の行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete }  # windows-setup.md'
+     if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。この節の手順 2 を先に貼る: $p"; return }
+     $text = Get-Content -LiteralPath $p -Raw
+     if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+       $add = $line
+       if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+       Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+       "足した: $line"
+     }
+   }
+   ```
+
+   - `足した:` か `すでにある:` が出ればよい
+   - Tab で、候補が一覧で出る（矢印で選んで Enter、Esc で取り消す）。既定の Tab は、候補を 1 つずつ入れ替える
+   - 一覧を出す既定のキーの Ctrl+Space は、手順 31 で IME が受け取るので、その代わりになる
+
+1. PowerShell 7 で、実行ポリシーとキーの割り当てを確かめる。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Get-ExecutionPolicy -List | Out-String -Width 120; Import-Module PSReadLine; . $PROFILE; Get-PSReadLineKeyHandler -Bound | Where-Object Key -in 'Ctrl+Enter', 'UpArrow', 'DownArrow', 'Tab' | Format-Table Key, Function -AutoSize | Out-String -Width 120 }
+   ```
+
+   - 次のとおりならよい
+     - 実行ポリシーの表の `LocalMachine` か `CurrentUser` が `RemoteSigned`
+     - キーの表の `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`（この節の手順 3 を行ったなら、`Tab` が `MenuComplete`）
+   - `pwsh.exe` が見つからない旨が出たら、手順 24 を確かめる
+   - 実行ポリシーがどれも `Undefined` なら、プロファイルは読まれず、キーは既定のまま（`Ctrl+Enter` が `InsertLineAbove`）。そうでなければ、この節の手順 5 は飛ばす
+
+1. 実行ポリシーがどれも `Undefined` のときだけ、PowerShell 7 の CurrentUser を RemoteSigned にする。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
+   ```
+
+   - 表の `CurrentUser` が `RemoteSigned` になればよい
+   - PowerShell 7 の実行ポリシーは、手順 18 の Windows PowerShell 5.1 の値とは別に持つ（`Documents\PowerShell\powershell.config.json` に書かれる）
+   - この節の手順 4 をもう一度貼って、キーの割り当てを確かめる
+
+1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
+
+   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
+   - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
+   - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）
+   - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
+   - Ctrl+Alt+? で、キーの割り当ての一覧が出る
+   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この節の手順 1 の窓に貼る**
+
+1. 元に戻すときは、PowerShell 7 のプロファイルから、この節で足した行を消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [System.IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # windows-setup\.md\r?(\n|$)', '$1')
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
+   - 消すのは、行末が `  # windows-setup.md` の行だけ（PowerToys の Command Not Found などが足した行は残る）。ほかの行の文字コードは変えない
+   - `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
+   - 開いている PowerShell 7 の窓には、閉じるまで設定が残る
+
+1. 元に戻すときは（この節の手順 5 を行ったとき）、PowerShell 7 の CurrentUser の実行ポリシーを戻す。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
+   ```
+
+   - 表の `CurrentUser` が `Undefined` ならよい
+
+---
+
+## Windows Terminal のフォントと貼り付けの警告を変える（任意）
+
+- Windows Terminal（手順 30 で既定の端末にした）の全プロファイルのフォントを HackGen Console NF にし、複数行を貼るときの警告を、要らなければ切る
+- 前提: [HackGen Console NF の Windows 11 で使う](hackgen.md#windows-11-で使う)（入れた後にサインインし直すか、手順 55 で再起動した後）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
+- **この節の手順 5 は Windows Terminal の設定の画面で行う**
+- 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
+- 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この節の手順 4）
+- コマンドで書くのは `settings.json` だけ。既定のプロファイル（Windows PowerShell）と、選んだらコピーする設定（`copyOnSelect`）は変えない
+- 戻すときは、この節の手順 6
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（手順 30 の設定で、Windows Terminal の窓で開く）
+
+1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い。Windows Terminal を 1 度開いてから貼り直す: $path"; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある。この節の手順 5 の画面で変える: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない。この節の手順 5 の画面で変える: $path"; return }
+     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）。この節の手順 5 の画面で変える'; return }
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     [pscustomobject]@{
+       Version          = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
+       DefaultsFontFace = $s.profiles.defaults.font.face
+       MultiLinePaste   = $s.'warning.multiLinePaste'
+       DefaultProfile   = $s.defaultProfile
+       CopyOnSelect     = $s.copyOnSelect
+     } | Format-List
+     $s.profiles.list | Where-Object { $_.font.face } | Format-Table name, @{ Name = 'face'; Expression = { $_.font.face } }
+   }
+   ```
+
+   - `控えた:`（2 回目からは `控えはもうある`）の行と、`Version : 1.25.…` の形の 5 行が出ればよい。`DefaultsFontFace` が空なら、既定のフォント（Cascadia Mono）
+   - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 6 で使い、書き戻すと消える）
+   - 最後に表が出たら、そのプロファイルは自分のフォントを持つので、この節の手順 3 の値は効かない（この節の手順 5 の画面で、そのプロファイルを変える）
+   - `中断:` が出たら、何も書いていない。この節の手順 5 の画面で変える（設定の画面でリセットした後は、コメントの入ったファイルになる）
+   - `Version` が 1.24 より前なら、この節の手順 4 は飛ばす（警告の値の形が違う）
+
+1. 全プロファイルのフォントを HackGen Console NF にする。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この節の手順 2 を先に貼る'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）'; return }
+     if (-not $s.profiles.PSObject.Properties['defaults']) { $s.profiles | Add-Member -NotePropertyName defaults -NotePropertyValue ([pscustomobject]@{}) }
+     if (-not $s.profiles.defaults.PSObject.Properties['font']) { $s.profiles.defaults | Add-Member -NotePropertyName font -NotePropertyValue ([pscustomobject]@{}) }
+     $s.profiles.defaults.font | Add-Member -NotePropertyName face -NotePropertyValue 'HackGen Console NF' -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     'face: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).profiles.defaults.font.face
+   }
+   ```
+
+   - `face: HackGen Console NF` が出ればよい
+   - 保存した直後に、開いているタブにも効く（Windows Terminal がファイルを読み直す）
+   - ファイルの字下げと記号の書き方は変わるが、中身は同じ
+   - フォントが見つからないと、端末に、フォントが見つからない旨が出て、別のフォントで出る（この節の手順 5 で確かめる）
+
+1. Windows Terminal が 1.24 以降で、複数行を貼るたびに出る警告を出さないときだけ、警告を切る。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $ver = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
+     if (-not $ver -or [version]$ver -lt [version]'1.24') { Write-Error "中断: Windows Terminal の版が 1.24 より前: $ver"; return }
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この節の手順 2 を先に貼る'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     $s | Add-Member -NotePropertyName 'warning.multiLinePaste' -NotePropertyValue 'never' -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     'warning.multiLinePaste: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).'warning.multiLinePaste'
+   }
+   ```
+
+   - `warning.multiLinePaste: never` が出ればよい
+   - **注意**: 信用できない複数行の文字も、確かめずにそのまま貼られて動く
+   - 5 KiB を超える文字を貼るときは、別の警告が出ることがある
+
+1. Windows Terminal の設定の画面で、フォントが見つかっていることを確かめる。
+
+   - Windows Terminal の窓で Ctrl+, を押し、「既定値」→「外観」の「フォント スタイル」が `HackGen Console NF` で、「見つからないフォント:」が出ていない
+   - 新しいタブを開くと、文字が HackGen になっている
+   - この節の手順 2〜4 が `中断:` で止まったときは、この画面でフォント スタイルを選んで「保存」を押す（一覧に無ければ「すべてのフォントの表示」をオン）。警告は「操作」の「改行を貼り付ける際に警告する」を「なし」にする
+   - **次の手順は、設定の画面を閉じてから貼る**
+
+1. 元に戻すときは、控えた設定ファイルを書き戻す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+     Remove-Item -LiteralPath $bak
+     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     'face: {0} / warning.multiLinePaste: {1}' -f $s.profiles.defaults.font.face, $s.'warning.multiLinePaste'
+   }
+   ```
+
+   - 控えたときの値（ふつうは 2 つとも空）が出ればよい。開いているタブにもすぐ効く
+   - 控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻る。残すなら、このブロックは貼らず、この節の手順 5 の画面でフォント スタイルと警告を戻す
+   - `中断: 控えが無い` が出たら、この節の手順 5 の画面で戻す
+   - 控えのファイルは消える（もう一度この節を通すと、そのときの設定を控え直す）
+
+---
+
+## WSL のネットワークをミラーにする（任意）
+
+- WSL 2 のネットワークを、既定の NAT から、Windows と同じ IP を使うミラーに変える（手順 54・62 の続き）
+- 前提: 手順 54・62・63。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（自分のユーザーの `%USERPROFILE%\.wslconfig` に書く）
+- **この節の手順 4・7 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
+- ミラーにして変わること
+  - WSL からこの PC の Windows のサーバー（[Windows の OpenSSH サーバー](windows-openssh-server.md)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
+  - Windows が使っているポートは、WSL の中では使えない。Windows の sshd が 22 番で待っていると、WSL の中の sshd は 22 番を使えない
+  - Docker のポートの公開と、一部の VPN には、既知の問題がある（[参考資料](reference/windows-setup.md)）
+- 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この節では作らない
+- 画面で変えるなら、スタートメニューの「Linux 用 Windows サブシステム設定」→「ネットワーク」→「ネットワーク モード」（同じファイルに書く）
+- 戻すときは、この節の手順 6・7
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 今の `.wslconfig` と、WSL の版と、動いているディストリビューションを確かめる。
+
+   ```powershell
+   & {
+     $env:WSL_UTF8 = '1'
+     $p = Join-Path $env:USERPROFILE '.wslconfig'
+     if (Test-Path -LiteralPath $p) { "--- $p"; [IO.File]::ReadAllText($p) } else { "無い: $p" }
+     wsl.exe --version
+     wsl.exe --list --running
+   }
+   ```
+
+   - `無い:` か、`.wslconfig` の中身が出る
+   - `wsl.exe --version` が、WSL の版（`2.…` の形）を出せばよい
+   - 最後に、動いているディストリビューションが出る（無ければ、無い旨の行）。この節の手順 4 で止まる
+   - 中身の `[wsl2]` に `networkingMode=mirrored` があれば、もうミラー。この節の手順 3 は飛ばす
+
+1. ミラーになっていないときだけ、`.wslconfig` に、ネットワークをミラーにする行を書く（ファイルがあれば控える）。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:USERPROFILE '.wslconfig'
+     $bak = "$path.windows-setup.bak"
+     $enc = New-Object System.Text.UTF8Encoding $false
+     if (-not (Test-Path -LiteralPath $path)) {
+       [IO.File]::WriteAllText($path, "[wsl2]`r`nnetworkingMode=mirrored`r`n", $enc)
+       "作った: $path"
+     } else {
+       $text = [IO.File]::ReadAllText($path)
+       if ($text -match '(?im)^[ \t]*networkingMode[ \t]*=') { Write-Error "中断: networkingMode の行がもうある。手で直すか、設定の画面で変える: $path"; return }
+       if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+       $nl = if ($text.Contains("`n") -and -not $text.Contains("`r`n")) { "`n" } else { "`r`n" }
+       $re = [regex]'(?im)^([ \t]*\[wsl2\][ \t]*)(?=\r?$)'
+       if ($re.IsMatch($text)) { $text = $re.Replace($text, '$1' + $nl + 'networkingMode=mirrored', 1) } else {
+         if ($text -and -not $text.EndsWith("`n")) { $text += $nl }
+         $text += '[wsl2]' + $nl + 'networkingMode=mirrored' + $nl
+       }
+       [IO.File]::WriteAllText($path, $text, $enc)
+       "足した: $path"
+     }
+     [IO.File]::ReadAllText($path)
+   }
+   ```
+
+   - `作った:` か `足した:` の行（ファイルがあったときは、その前に `控えた:`）と、`[wsl2]` の次の行が `networkingMode=mirrored` の中身が出ればよい
+   - 控えは `%USERPROFILE%\.wslconfig.windows-setup.bak`。ファイルがあって、控えが無いときだけ作る（この節の手順 6 で使い、戻すと消える）
+   - `中断: networkingMode の行がもうある` が出たら、何も書いていない。その行を手で `networkingMode=mirrored` にするか、設定の画面で変える
+   - 効くのは、この節の手順 4 で WSL を止めた後
+
+1. WSL を止めて、ミラーで動くことを確かめる。
+
+   ```powershell
+   wsl.exe --shutdown
+   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
+   ```
+
+   - `mirrored` が出ればよい
+   - `ミラー化されたネットワーク モードはサポートされていません` の行が出て `nat` なら、この PC ではミラーを使えない（理由はその行に出る）。この節の手順 6・7 で戻す
+   - その行が無く `nat` なら、`.wslconfig` が読まれていない（この節の手順 2 で中身を確かめる）
+   - `wslinfo` が無い旨が出たら、`wsl.exe --distribution AlmaLinux-10 -- ip -4 -br addr` の IP が、Windows の LAN の IP（`ipconfig`）と同じならミラー
+   - WezTerm の WSL のタブは切れているので、開き直す
+
+1. Windows の OpenSSH サーバーを入れたときだけ、WSL から `127.0.0.1` の 22 番に届くことを確かめる。
+
+   ```powershell
+   wsl.exe --distribution AlmaLinux-10 -- bash -c 'exec 3<>/dev/tcp/127.0.0.1/22 && head -n 1 <&3'
+   ```
+
+   - `SSH-2.0-OpenSSH_for_Windows_` で始まる行が出ればよい
+   - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[Windows の OpenSSH サーバーの注意点](windows-openssh-server.md#注意点)）
+   - `Connection refused` が出たら、Windows の sshd が動いていない（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順で確かめる）
+
+1. 元に戻すときは、`.wslconfig` を元に戻す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:USERPROFILE '.wslconfig'
+     $bak = "$path.windows-setup.bak"
+     if (Test-Path -LiteralPath $bak) {
+       Move-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+       "控えから戻した: $path"
+     } elseif (-not (Test-Path -LiteralPath $path)) {
+       "無い: $path"
+     } elseif ([IO.File]::ReadAllText($path) -eq "[wsl2]`r`nnetworkingMode=mirrored`r`n") {
+       Remove-Item -LiteralPath $path -ErrorAction Stop
+       "消した: $path"
+     } else {
+       Write-Error "中断: この節で作った形ではない。networkingMode の行を手で消す: $path"
+     }
+   }
+   ```
+
+   - `控えから戻した:`（ファイルがあったとき）か `消した:`（この節で作ったとき）が出ればよい
+   - 控えた後に設定の画面などで変えた値も、控えたときに戻る
+   - `中断:` が出たら、`.wslconfig` をメモ帳で開き、`networkingMode=mirrored` の行を消して保存する
+   - 効くのは、この節の手順 7 で WSL を止めた後
+
+1. 元に戻すときは、WSL を止めて、NAT に戻ったことを確かめる。
+
+   ```powershell
+   wsl.exe --shutdown
+   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
+   ```
+
+   - `nat` が出ればよい
+   - WSL から Windows のサーバーには、また LAN の IP あてにつなぐ
+
+---
+
+## シェルのツールを入れる（任意）
+
+- Git Bash で使う starship・zoxide・fzf・eza・bat を、scoop で入れる（手順 20・21 の続き。AlmaLinux 10 では [AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順)で入れるもの）
+- 前提: 手順 16〜21、[Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)、Git Bash で通した [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)、[WezTerm](wezterm-nightly.md#windows-11-で使う)と自分用の設定（[設定ファイル](wezterm-nightly.md#設定ファイル)。新しいタブが Git Bash で開く）
+- この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（scoop は自分のユーザーに入れる）
+- **この節の手順 7・8 は WezTerm の新しいタブ（Git Bash）で、この節の手順 9 はブラウザで行う**
+- Git Bash では、共通の bash 設定が、入っているツールを見つけて読む。`~/.bashrc` には書かない。Windows PowerShell 5.1 には読み込まない
+- **zoxide は 0.9.9 に止めて入れる**（今の 0.10.0 は、Git Bash で移ったディレクトリを記録しない。[参考資料](reference/windows-setup.md)）。直った版が出たら、この節の手順 9・10 で上げる。ほかの 4 つは[更新](#更新)の手順 1・2 で上がる
+- bat は VC++ ランタイム（`VCRUNTIME140.dll`）を使う。無ければ、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行う（この節の手順 2 で確かめる）
+- PowerShell 7 でも starship と zoxide を使うなら、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)を通す（入っているときだけ読む行を置く。確かめるのは、その節の手順 6）
+- 使い方と設定は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（starship・fzf・eza・bat）。Git Bash のタブに、同じブロックを貼る
+  - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、この節の手順 1 の窓で `scoop install fd`・`scoop uninstall fd` にする
+  - bat の設定ファイルは、[同書の節](almalinux-setup.md#bat-の設定ファイル)ではなく、この節の手順 6 で書く
+- SSH のセッションの Git Bash でも使うなら、この節の手順 4 の後に、[Windows の OpenSSH サーバーの任意節](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を管理者の窓で貼る（`scoop install`・`scoop update` の後も貼り直す）
+- **この節の手順 13 は、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）**
+- 戻すときは、この節の手順 11〜13（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
+
+   ```powershell
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     BashConfig = Test-Path -LiteralPath "$env:USERPROFILE\.config\bash\bashrc"
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Tools      = (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source -join ', '
+     Zoxide     = if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) { zoxide --version } else { '' }
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
+   - `Scoop` が空なら、先に手順 20・21 を通す
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)を通す
+   - `BashConfig : False` なら、先に Git Bash で [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)を通す
+   - `VCRuntime : False` なら、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
+   - `Tools` が空なら、どれも入っていない
+   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この節の手順 4 は、入っているものを飛ばす）
+   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。混ざらないよう、その方法で外してから始める
+   - `Zoxide` が空か `zoxide 0.9.9` なら、この節の手順 3 は飛ばす
+
+1. scoop の zoxide が 0.9.9 でないときだけ、外す。
+
+   ```powershell
+   scoop uninstall zoxide
+   ```
+
+   - `'zoxide' was uninstalled.` が出ればよい
+   - 外さなくても、この節の手順 4 は 0.9.9 を並べて入れて切り替えるが、0.10.0 のフォルダー（`~\scoop\apps\zoxide\0.10.0`）が残る
+   - 覚えたディレクトリの履歴（`%LOCALAPPDATA%\zoxide`）は残る。0.9.9 も同じ形で読む
+
+1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
+
+   ```powershell
+   scoop update
+   scoop install fzf starship eza bat
+   scoop install zoxide@0.9.9
+   scoop hold zoxide
+   ```
+
+   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
+   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（版は入れた日の最新。zoxide は `0.9.9`）
+   - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
+   - 2 行目は、もう入っているものを、何も出さずに飛ばす
+   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す（zoxide を 2 行目に並べると、scoop はこの警告で止まり、ほかの名前を入れない）
+   - もう止めてあれば、`'zoxide' is already held.` が出る
+   - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
+   - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
+   - `Notes` の、PowerShell の `$PROFILE` に starship の行を足す案内は行わない。`suggests installing` の行（VC++ ランタイム・less）も、入れなくてよい
+
+1. 版と場所と、zoxide を止めたことを確かめる。
+
+   ```powershell
+   fzf --version
+   zoxide --version
+   starship --version
+   eza --version
+   bat --version
+   (Get-Command fzf, zoxide, starship, eza, bat -All).Source
+   scoop list zoxide
+   ```
+
+   - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
+   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この節の手順 2 の `VCRuntime`）
+   - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
+   - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
+
+1. bat の設定ファイル（`BAT_CONFIG_DIR` の下の `config`）に、3 行の設定を書く（中身があれば書き換えない）。
+
+   ```powershell
+   $BAT_THEME_NAME = 'ansi'   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
+   ```
+
+   ```powershell
+   & {
+     if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
+     $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
+     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる'; return }
+     if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
+       Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
+       "書いた: $f"
+     }
+     Get-Content -LiteralPath $f
+   }
+   ```
+
+   - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
+   - 中身は [AlmaLinux 10 の初期設定の bat の設定ファイル](almalinux-setup.md#bat-の設定ファイル)の 3 行と同じ。Windows の bat は `~/.config/bat/config` を読まず、scoop が足した `BAT_CONFIG_DIR` の下を読む
+   - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
+   - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
+   - `中断:` が出たら、何も書いていない
+
+1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の手順 52〜55・57・58](almalinux-setup.md#実施手順)のブロックを貼る。
+
+   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の手順 50](almalinux-setup.md#実施手順)の補足と同じ）
+   - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
+   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
+     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この節の手順 5 と同じ
+     - 同書の手順 53 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
+     - 同書の手順 54 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
+     - 同書の手順 55 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
+     - 同書の手順 57 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の手順 58 の一覧には、その形（`C:\…`）で出る
+   - 同書の手順 56（tmux）は行わない
+   - 覚えたディレクトリは `%LOCALAPPDATA%\zoxide` に入る（PowerShell 7 の zoxide も同じものを使う）
+
+1. 同じタブで、[同書の手順 60〜63](almalinux-setup.md#実施手順)のキーを押して、fzf を確かめる。
+
+   - 同書の手順 60 の `fzf --version` は、この節の手順 7 で Git Bash の履歴に入っている
+   - 同書の手順 61 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
+   - 同書の手順 62 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
+   - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
+
+1. zoxide を上げるときは、ブラウザで、Git Bash の記録を直した版が出たかを確かめる。
+
+   - `https://github.com/ajeetdsouza/zoxide/releases` を開く
+   - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
+   - 無ければ、この節の手順 10 は飛ばす（0.9.9 のまま使う）
+   - **次の手順は、この節の手順 1 の窓（Windows PowerShell 5.1）に貼る**
+
+1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
+
+   ```powershell
+   & {
+     scoop update
+     $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
+     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この節の手順 9 から"; return }
+     scoop unhold zoxide
+     scoop update zoxide --force
+     zoxide --version
+   }
+   ```
+
+   - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
+   - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
+   - `--force` は、版を指定して入れた zoxide を、main のバケットの定義に戻す（付けないと 0.9.9 のまま変わらない）
+   - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
+   - これより後は、[更新](#更新)の手順 1・2 で、ほかのツールと一緒に上がる
+   - 新しいタブで、この節の手順 7 のうち同書の手順 57・58 を確かめ直す
+
+1. 元に戻すときは、この節で入れた 5 つを scoop で消す。
+
+   ```powershell
+   scoop uninstall fzf zoxide starship eza bat
+   (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source
+   [Environment]::GetEnvironmentVariable('BAT_CONFIG_DIR', 'User')
+   ```
+
+   - それぞれ `'<名前>' was uninstalled.` が出て、後の 2 つが何も出さなければよい（止めた zoxide も、そのまま消える）
+   - 残すものは、名前を外してから貼る（fzf は yazi も使う）
+   - `are still running` の旨のエラーが出たら、そのツールは消えていない。Git Bash で開いている一覧などを閉じてから貼り直す
+   - starship の `Path` と、bat の `BAT_CONFIG_DIR` も消える。bat の設定（`~\scoop\persist\bat`）は残る（この節の手順 12）
+   - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す（共通の bash 設定と PowerShell 7 のプロファイルは、無いツールを読まない）
+   - starship のログ（`~\.cache\starship`）は、要らなければ手で消す
+
+1. 元に戻すときは（この節の手順 6 で書いたときだけ）、bat の設定ファイルの 3 行を消す。
+
+   ```powershell
+   & {
+     $f = Join-Path $env:USERPROFILE 'scoop\persist\bat\config'
+     if (-not (Test-Path -LiteralPath $f)) { "無い: $f"; return }
+     $text = [IO.File]::ReadAllText($f)
+     if (-not $text.Trim()) { "もう空: $f" } elseif ($text -match '\A--theme="[^"\r\n]*"\r?\n--style="numbers,changes,header"\r?\n--paging=never\r?\n?\z') {
+       [IO.File]::WriteAllText($f, '')
+       "空にした: $f"
+     } else { "この節で書いた形ではない（変えない）: $f" }
+   }
+   ```
+
+   - `空にした:` か `もう空:` が出ればよい（scoop が bat を初めて入れたときと同じ、空のファイルになる）
+   - bat を残していれば、次に動かしたときから、組み込みの既定値に戻る
+   - `この節で書いた形ではない` が出たら、手で書き換えた設定がある。要らない行は、手で消す
+
+1. 元に戻すときは（履歴も捨てるときだけ）、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\zoxide" -Recurse -Force -ErrorAction SilentlyContinue
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\zoxide"
+   ```
+
+   - `False` が出ればよい
+   - 消した履歴は取り戻せない。残しておけば、zoxide を入れ直したときにそのまま使える
+   - PowerShell 7 の zoxide と yazi も、同じ履歴を使う
+
+---
+
 ## 更新
 
 - Windows Update は[手順 1〜8](#実施手順)（管理者の窓）、Microsoft Store は[手順 9〜15](#実施手順)（通常の窓）を通す。再起動が必要な場合も、自動では再起動しない
-- scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon）は winget で上げる。UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
+- scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon・任意節の CopyQ）は winget で上げる
+  - [シェルのツールを入れる（任意）](#シェルのツールを入れる任意)の zoxide は 0.9.9 に止めてあるので、この節の手順 2 では上がらない。直った版が出たかは、その節の手順 9 で確かめ、出ていればその節の手順 10 で上げる
+- UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
+- CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[手順 27](#実施手順)・[手順 32〜34](#実施手順) を貼り直す
+- 機能の更新の後は、任意節（[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る任意)・[表示・入力・音・ストレージを変える](#表示入力音ストレージを変える任意)・[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める任意)）の設定も戻ることがある。その節の「元に戻すときは、」より前の手順を貼り直す（控えのファイルは書き換えない）
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、それぞれの手順書の「Windows 11 の更新」
+  - [SSH クライアント（Windows）](windows-ssh-client.md#更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
+  - git-delta・GitHub CLI は scoop で入れたので、この節の手順 2 でも上がる
+  - Neovim・lazygit・yazi も scoop で入れたので、この節の手順 2 でも上がる（手順書の節は、[Neovim](neovim.md#windows-11-の更新)・[lazygit](lazygit.md#windows-11-の更新)・[yazi](yazi.md#windows-11-の更新)の「Windows 11 の更新」）
 - この節の手順は、手順 9 と同じ、管理者ではない Windows PowerShell（5.1）に貼る
 
 1. scoop とバケットを上げ、古くなったものを確かめる。
@@ -1327,7 +2716,7 @@
 1. winget で入れたものを上げる。
 
    ```powershell
-   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
+   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
    ```
 
    - それぞれ、新しい版が無ければ更新が見つからない旨の行を出して何もしない
@@ -1378,6 +2767,18 @@
   - ネットワークとサインイン: 配信の最適化は 29、ping は 30、リモート アシスタンスは 31、リモート デスクトップは 32、LAN の種類は 33、Windows Hello は 22
 - 多くは、元に戻すかを手順 37 で控えた値で決める
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
+  - [SSH クライアント（Windows）](windows-ssh-client.md#ロールバック)は「ロールバック」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-のロールバック)は「Windows 11 のロールバック」
+  - この節の手順 13 で scoop ごと消すなら、先に [git-delta の Windows 11 のロールバック](git-delta.md#windows-11-のロールバック)の手順 1 と、[GitHub CLI の Windows 11 のロールバック](gh.md#windows-11-のロールバック)の手順 1〜4 を行う
+    - `~/.gitconfig` の `core.pager` と、資格情報マネージャーの gh のトークンは、scoop を消しても残る
+  - この節の手順 13 で scoop ごと消すなら、先に [Neovim の Windows 11 のロールバック](neovim.md#windows-11-のロールバック)の手順 2 と、[yazi の Windows 11 のロールバック](yazi.md#windows-11-のロールバック)の手順 2 を行う
+    - ユーザーの環境変数 `EDITOR`・`VISUAL`（Neovim の任意節）と `YAZI_FILE_ONE` は、scoop を消しても残る。lazygit は scoop の外に残すものが無い
+- 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
+  - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・シェルのツール
+  - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 7・8
+  - この節の手順 17・25 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)の手順 6・7
+  - この節の手順 13・14 で scoop ごと消すなら、[シェルのツールを入れる（任意）](#シェルのツールを入れる任意)の手順 11・12 は要らない
+    - 止めた zoxide もこの節の手順 13 で消え、bat の設定はこの節の手順 14 で `persist` ごと消える
+    - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、その任意節の手順 13（scoop を消した後でもよい）
 
 > [!CAUTION]
 > **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
@@ -1898,13 +3299,23 @@
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
+  - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 3）
 - **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（手順 30）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、手順 16〜19 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（手順 33・34）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。手順 27・32〜34 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（手順 26）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、手順 17 の `ClassicMenu` と手順 26 の `reg.exe query` で、設定が残っているかを見る。手順 25・27・32 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節を、`scoop install`・`scoop update` の後に貼る
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: 手順 19 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 24）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
+  - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
 - **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。手順 16〜19 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
 - **このユーザーの Windows PowerShell のコンソールの窓すべてに効く**: 管理者の窓も同じプロファイルを読む
+- **任意節にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)の手順 6）は、手順 26 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
+- **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)の手順 2 のポリシーで出る。消すには、その節の手順 5 で 2 つの値を消す（ほかの Edge のポリシーが無ければ消えるはず。手順 50 の `EdgeUpdate` だけで出るかも含め、確かめていない）
+- **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、その節の手順 12 で外さないと、オンラインだけにされうる
+- **CopyQ の履歴は暗号化されない**: [CopyQ を使う（任意）](#copyq-を使う任意)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
+- **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
+  - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)の手順 4
+- **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
+  - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない

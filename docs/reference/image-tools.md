@@ -28,7 +28,7 @@
 | syft / grype（SBOM と脆弱性） | 対象外 | Trivy と役割が重なる |
 
 - 3 つの経路が混ざるので、更新も `brew upgrade` と `sudo dnf upgrade` の 2 つになる（[更新](../image-tools.md#更新)）
-- Trivy だけ RPM なので、`sudo trivy` がそのまま動く。hadolint と dive は Homebrew なので、root で使うなら [homebrew.md の sudo でも使う](../homebrew.md#sudo-でも使う任意)の節を通すか、フルパスで呼ぶ
+- Trivy だけ RPM なので、`sudo trivy` がそのまま動く。hadolint と dive は Homebrew なので、root で使うなら [AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスで呼ぶ
 
 ### 参照
 
@@ -36,6 +36,6 @@
 - [dive — README](https://github.com/wagoodman/dive) — `--source`、`--ci` と `.dive-ci`、キー操作
 - [Trivy — Installation](https://trivy.dev/docs/latest/getting-started/installation/) — RHEL/CentOS の公式 dnf リポジトリの登録
 - [Trivy — Container Image](https://trivy.dev/docs/latest/guide/target/container_image/) — `--image-src`（podman は API ソケットを使う）
-- [Homebrew](../homebrew.md) / [Podman](../podman.md) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（手順 46〜48 の Homebrew） / [Podman](../podman.md) — 前提の手順書
 
 ---

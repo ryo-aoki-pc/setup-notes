@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（Windows PowerShell 5.1 に貼る。管理者の権限は要らない）
-> - **前提**: [Homebrew](homebrew.md) が入っていること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、フォントも自分のホームの `~/.local/share/fonts` に入るため）
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -114,7 +114,7 @@
 ## ロールバック
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
-- **Homebrew そのものを消すとき**（[homebrew.md のロールバック](homebrew.md#ロールバック)）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
+- **Homebrew そのものを消すとき**（[AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 24〜26）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
   - `~/.local/share/fonts` は Homebrew の外なので、このフォントを外すときは上の削除手順も行う
 
 1. HackGen を消し、fontconfig から消えたか確かめる。

@@ -214,6 +214,151 @@
   - 見張りスクリプトの判定（稼働 60 分の歯止め・連続失敗のしきい値・届いたら 0 に戻すこと）と、手順 6・7 の中断（管理者でない・変数が空・タスクが無い）を、偽物のコマンドレットで模擬
 - **確かめていないこと**: Windows で貼ること、別の PC から `net rpc shutdown`・`shutdown /m`・WinRM で実際に再起動できること、見張りタスクがネットワーク断で再起動し・ループしないこと、再起動の後に SSH・RDP が自動で戻ること、Microsoft アカウントでの SMB・WinRM の認証、`FPS-SMB-In-TCP`・`WINRM-HTTP-In-TCP*` の規則名が版・機種で一致すること
 
+### プライバシーと広告の表示を切る（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft の文書（Manage connections の 18.1・18.6・18.16、Policy CSP の Privacy・Experience・System・Search、サポートの記事の画面の項目）と、広く使われている情報（privacy.sexy・Ten Forums・ElevenForum など）。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ。動的なパラメーターで当たらない）。この節の手順 2 の `->` の左と控え（キーや値が無いとき・QWORD のとき・2 回目）と、この節の手順 5 で値と種類が流す前に戻ること・控えが無いときの中断を、偽物のコマンドレットで模擬（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、控えのファイルの書き出しと読み戻しを Windows PowerShell 5.1 で流すこと
+  - `HKCU` に書いた値が画面の切り替えに出ることと、サインインし直した後に効くこと（`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は広くだけ）
+  - `IsDeviceSearchHistoryEnabled` の 0 がオフであること（資料どうしで食い違う）
+  - 手順 49 の `DisableSearchBoxSuggestions` で「検索のハイライトを表示する」が灰色になること（Microsoft Q&A の回答だけ）
+  - 「フィードバックの頻度」を「1 日 1 回」などにしていた PC で、`PeriodInNanoSeconds` が QWORD であることと、この節の手順 5 がその型で戻すこと
+  - 画面の切り替えで戻したときに、書いた `HKCU` の値も直ること
+  - 日本語の画面の文言（「おすすめとオファー」と「推奨事項 & オファー」の表記の割れ、「パーソナライズされたオファー」の置き場所、「設定アプリで通知を表示する」・同期プロバイダーの通知の項目の名前）
+  - Rufus の「データ収集を無効化」で入れた PC で、広告 ID・カスタマイズされたエクスペリエンス・診断データ・オンライン音声認識が既に切れているか
+  - 24H2・25H2・26H2 の違い（26H2 で値を確かめた資料は無い）
+
+### 表示・入力・音・ストレージを変える（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft の文書（`STICKYKEYS`・`FILTERKEYS`・`TOGGLEKEYS`・`SystemParametersInfo`・`ANIMATIONINFO`・Integrate a Cloud Storage Provider・WOW64 のリダイレクト・KB5031455・Policy CSP の Storage・ストレージ センサーのサポートの記事）、コード（`microsoft/winget-dsc`・`microsoft/WindowsDeveloperConfig`・ReactOS・Wine・Chromium）、広く使われている情報（winutil・Disassembler0・stealthpuppy・cyberdrain など）。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 21 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。この節の手順 3・15 の `Flags` のビット、手順 9・21 の控えの有無と書き戻し、手順 11・23 のストレージ センサー、手順 2・4・16 の切り替えのキー、手順 6・18 のギャラリーとホームを、偽物のコマンドレットと `reg.exe` で模擬。この節の手順 8・20 の `Add-Type` の宣言のコンパイルと、多重定義の選ばれ方（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、控えのファイル（`display-before.csv`・`appevents.reg`）の書き出しと読み戻しを Windows で流すこと
+  - 固定キーなどの Windows 11 の既定（510・126・62）、サインアウトのときに書き戻されないこと、サインインし直す前に設定の画面で上書きされること
+  - 入力言語の切り替えのキーの日本語版の既定と、サインインし直した後に効くこと
+  - `MultiTaskingAltTabFilter` の値の意味と既定（広くだけ）
+  - ギャラリーとホームを消す値が 24H2・25H2・26H2 で効くこと（効かなくなった・戻ったという報告が 1 件ずつある）
+  - `SystemParametersInfo` で切った後に、設定の「アニメーション効果」がオフと出ること。`Add-Type` の宣言の呼び分けが Windows で働くこと
+  - 効果音の `.reg` の書き戻しで元に戻ること、起動音のチェックで UAC が出るか
+  - ストレージ センサー: `StoragePolicy` の値で掃除が動くか（掃除は `StorageSensorV2` を読むという主張がある）、`04` の向き、Windows 11 が `08` と `32` を読むか、OneDrive の既定、書いた値が画面に出ること。25H2 の 26200.8328 で多くのアプリが消えたという掲示板の報告（1 件。Microsoft の返答は無い）
+  - 日本語の画面の文言（固定キーなどの「…用のキーボード ショートカット」、ストレージ センサーの項目と選択肢、「タスクの終了」の置き場所）
+
+### Edge の常駐をポリシーで止める（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: Microsoft Edge のポリシーの文書（`StartupBoostEnabled`・`BackgroundModeEnabled`・Configure Microsoft Edge）、スタートアップ ブーストのサポートの記事、Chromium の `auto_launch_util.cc`
+  - この節のブロック 2 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。模擬はしていない（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、家庭の PC（ドメイン・MDM なし）で 2 つのポリシーが効くこと
+  - 「組織によって管理」の表示の日本語の文言と、ポリシーを消した後に表示が消えるか
+  - 手順 32 の `Run` の `MicrosoftEdgeAutoLaunch_*` が消えるか、Edge Update のサインインのときのコマンドで Edge が起動するか
+  - 画面で切った値を、Edge が自分でオンに戻すか
+
+### CopyQ を使う（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: winget の `hluk.CopyQ` 16.0.0 の定義、CopyQ 16.0.0・17.0.0 のソース（`shared/copyq.iss`・`winplatform.cpp`・`CHANGES.md`・訳のファイル）と文書、Inno Setup と winget の文書、`RegisterHotKey`・`SendInput`・PowerToys の高度な貼り付けの文書
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。`winget`・`copyq.exe` を呼ぶので、模擬はしていない（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること、winget の版（16.0.0。上流は 17.0.0）で UAC が出ないこと、入る場所（前に入れた CopyQ の場所に入ると、決め打ちのパスが外れる）
+  - `config autostart true` の出力と、`| Write-Output`・`| Out-Null` で終わるまで待つこと、サインインのときに起動すること
+  - `EnableClipboardHistory` の値の名前（広く）
+  - 更新でインストーラが閉じた CopyQ が、起動し直さないこと
+  - 日本語の画面の文言（「設定...」・「ショートカット」・「メインウィンドウの表示切り替え」など。訳のファイルから書いた）と、割り当てたグローバル ショートカットが効くこと
+  - RDP の画面とスクリーンショットに CopyQ の窓が写らないこと
+
+### PowerToys のユーティリティを絞る（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: PowerToys の main のソース（`src/runner/main.cpp`・`general_settings.cpp`・`auto_start_helper.cpp`・`settings_helpers.cpp`・`EnabledModules.cs`・`PeekProperties.cs`・`FindMyMouseProperties.cs`・Peek の `dllmain.cpp`・インストーラの `Common.wxi`・`Product.wxs`）と、Microsoft Learn の Install・DSC・PSDSC・Running as administrator・Peek・Mouse utilities・Command Not Found のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2 の `$PT_EXE` の選び方、手順 3 の `無い名前:`、手順 5 の中断（動いている・`$PT_EXE` が空・無い名前・`enabled` が無い・読めない）と書き換え（変わったのは `enabled` の 6 つだけで、7 段の入れ子と配列は型まで保った。2 回目は控えを書き換えない）、手順 8 の書き戻し（流す前とバイトで一致し、控えが消えた）を、Linux の PowerShell 7.5.3 と偽物のコマンドレットで模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。0.101.2362.0 の入る場所（`%LOCALAPPDATA%\PowerToys` か `%LOCALAPPDATA%\Programs\PowerToys`）と、動いているプロセスから場所を取れること
+  - `settings.json` を直接書いて、起動し直した PowerToys に効くこと。終了のときに PowerToys が設定ファイルを書き直さないこと
+  - 0.101.2362.0 の設定ファイルの `enabled` の名前と既定（main のソースから書いた）
+  - `Get-ScheduledTask` で `\PowerToys\Autorun for <WIN_USER>` が読めること
+  - 日本語の画面の文言（通知領域の「終了」・「設定」・「ダッシュボード」・Peek の「Space で開く」・Find My Mouse の「マウスを振る」・Command Not Found の「インストール」）
+  - 通知領域のアイコンを 1 回クリックするとクイック アクセスが開き、右クリックの「設定」かダブルクリックで設定の窓が開くこと（main のソースから書いた）
+  - 0.95 より前の設定を引き継いだ PC での Peek の起動のキー
+
+### PowerShell 7 のプロファイルを設定する（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: PowerShell 7.5.4・7.6.0・7.6.6 のソース（`CorePsPlatform.cs`・`ConsoleHost.cs`・`build.psm1`・`PSGalleryModules.csproj`）、PSReadLine 2.3.6・2.4.5 のソース（`KeyBindings.cs`・`History.cs`・`Cmdlets.cs`）、zoxide 0.9.9・0.10.0 の `templates/powershell.txt`、starship 1.26.0 の `starship.ps1`、自分用の WezTerm の設定（`lua/shells.lua`・`shell/wezterm.ps1`）、Microsoft Learn の about_Profiles・about_Execution_Policies・about_PowerShell_Config・about_PSReadLine・Using predictors。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 貼り付けの設定の原因（PSReadLine の Ctrl+Enter が `InsertLineAbove`）は、PowerShell 7.6.6（PSReadLine 2.4.5）でも同じだった（もとの手順書 `windows-powershell-paste.md` の注意点の記録。この記録の「操作上の注意と併記されていた記録」）
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2・3 の足し方（無いときに作る・2 回目は `すでにある:` で変わらない・末尾に改行の無いファイル・BOM 付きのファイル・5 行のうち 2 行があるファイル）と、手順 7 の消し方（BOM 付きの UTF-8・UTF-16LE・CRLF・LF。印の行だけならファイルを消し、印の形の違う行と PowerToys の Command Not Found の行は残る）を、Linux の PowerShell 7.5.3 で模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+  - 足したプロファイルを、Linux の PowerShell 7.5.3（PSReadLine 2.3.6）と Linux 版の starship 1.26.0・zoxide 0.10.0 で読んだ。この節の手順 4 のキーの表が `AddLine`・`HistorySearchBackward`・`HistorySearchForward`・`MenuComplete` になり、新しいディレクトリで `prompt` を呼ぶと zoxide に記録された（`Invoke-Starship-PreCommand` を除いた形では記録されない）。2 つが無いと、どちらも読まなかった。実行ポリシーの手順 5・8 は、Linux では流せない（同じ付録）
+- **確かめていないこと**:
+  - Windows で貼ること。5.1 の `Add-Content` と `Get-Content -Raw` が、PowerShell 7 のプロファイルに行を足すこと（手順 19 と同じ形）
+  - 5.1 から `pwsh.exe -NoLogo -NoProfile -Command { … }` を呼ぶ形（minishell）で、結果が表で出ること。非対話の起動で `Set-PSReadLineKeyHandler` が通ること
+  - MSIX の PowerShell 7 の `$PSHOME` に `powershell.config.json`（`RemoteSigned`）があること
+  - スタートメニューから管理者として開いた PowerShell 7（conhost の窓）に右クリックで貼ると、この節の行が無ければ逆順になり、あれば正しい順になること。WezTerm（ConPTY）の PowerShell 7 に複数行を貼ったときに Ctrl+Enter の行が要るか
+  - zoxide → starship の順（`Invoke-Starship-PreCommand` で zoxide の記録を呼ぶ）で、`z` が移動先を記録し、失敗したコマンドの後に starship のエラーの印が出ること。README の starship → zoxide の順で `$?` が崩れるか
+  - Tab の `MenuComplete` を既定で入れるか（条件付きの手順のままにした）
+  - OneDrive でドキュメントをバックアップしている PC のプロファイルの場所
+  - スタートメニューの PowerShell 7 の表示名（MSIX の表示名は「PowerShell」のはず。PowerShell のソースの `packaging.psm1` から書いた。手順 24 の「PowerShell 7」とは違う）
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: microsoft/terminal の main と release-1.21〜1.24 のソース（`MTSMSettings.h`・`CascadiaSettingsSerialization.cpp`・`CascadiaSettings.cpp`・`userDefaults.json`・`TerminalPage.cpp`・`VtIo.cpp`・`utils.cpp`・日本語の訳の `Resources.resw`）と、Microsoft Learn の Windows Terminal のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 貼り付けの設定の原因を確かめた PC の、管理者ではない窓は Windows Terminal 1.25.2733.0 だった（[対象と検証環境](#対象と検証環境)）
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2〜4 の中断（ファイルが無い・行とブロックのコメント・末尾のカンマ・配列の `profiles`・控えが無い・版が 1.24 より前）と、文字列の中の `//`・`/*` では止まらないこと、書き換え（変わったのは `profiles.defaults.font.face` と `warning.multiLinePaste` だけで、`font.size` などと、入れ子・空と 1 要素の配列・`null` は型まで保った）、手順 6 の書き戻し（流す前とバイトで一致し、控えが消えた）を、Linux の PowerShell 7.5.3 と偽物の `Get-AppxPackage` で模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。5.1 の `ConvertFrom-Json`・`ConvertTo-Json -Depth 100` で、実際の `settings.json` の配列（`profiles.list`・`actions`・空の配列）が形を保って書き戻されること
+  - 管理者ではない 5.1 の窓（Windows Terminal 1.25）に複数行を貼るたびに「警告」が出ること（コードからの推測）。出るなら、ほかの手順書のリードにも書くか
+  - 自分のユーザーに入れた HackGen Console NF が、MSIX の Windows Terminal から見えること（hackgen.md の検証記録でも未確認）
+  - 日本語の画面の文言（`Resources.resw` の訳から書いた）と、「見つからないフォント:」の出方
+  - 手順 9 の窓で Windows Terminal が先に設定を作り、手順 24 の後も既定のプロファイルが Windows PowerShell のままであること
+  - 管理者の窓（conhost）のフォントは、この節の範囲外
+
+### WSL のネットワークをミラーにする（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: microsoft/WSL の master のソース（`WslCoreConfig.cpp`・`WslCoreConfig.h`・日本語の訳の `Resources.resw`）と、Microsoft Learn の wsl-config・networking・troubleshooting・Hyper-V Firewall・`New-NetFirewallHyperVRule` のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 同じ PC の WSL の記録は 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2）で、ネットワークは既定の NAT だった（[Windows の OpenSSH サーバーの検証記録](windows-openssh-server.md)と [VirtualBox のゲスト（bootc）の検証記録](virtualbox-guest-bootc.md)）
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 3 の作成・控え・`[wsl2]` の行の直後への挿入（CRLF・LF・大文字の `[WSL2]`・`[wsl2]` の無いファイル・BOM 付き）と、`networkingMode` の行があるときの中断、手順 6 の戻し（控えからはバイトで一致・作ったままなら消す・手で変えたら中断）を、Linux の PowerShell 7.5.3 で模擬。`wsl.exe` を呼ぶ手順 2・4・5・7 は、偽物の関数で流れを見ただけ（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。既にある `.wslconfig`（設定の画面が書いたもの）に 1 行足して、WSL が読むこと
+  - AlmaLinux 10 の WSL のイメージで `wslinfo --networking-mode` が使えること（無ければ `ip` で比べる）
+  - ミラーを使えない PC で `wsl.exe` が出す文言（`ミラー化されたネットワーク モードはサポートされていません`。`Resources.resw` の訳から書いた）
+  - ミラーで、WSL から `127.0.0.1:22` の Windows の sshd に届くことと、LAN の IP あてが届かないこと（文書の言い方からの推測。ミラーでも `127.0.0.1` に届かないというコミュニティの報告もある）
+  - ミラーで、WSL からホストオンリーのネットワークの VirtualBox の VM に届くか（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の記録は NAT のとき）
+  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard-road-warrior.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
+  - 対象の 24H2・25H2 と、利用者の 26H2（26300）の違い
+
+### シェルのツールを入れる（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**（[付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)）:
+  - 上流の zoxide（2026-10-08 05:11 UTC。06:22 UTC と 06:40 UTC にタグを見直しても同じ）: タグの最新は `v0.10.0`。Git Bash の記録を直すコミット `1f484a4`（#1260）は `main` にあり、どのタグにも入っていない。そのため、0.9.9 に止める形で書いた
+  - scoop の main の 5 つの定義と、バケットの履歴の zoxide 0.9.9 の定義。6 つの zip（5 つと zoxide 0.10.0。x64）の sha256 が定義と一致した。PE のインポート表で `VCRUNTIME140.dll` を読み込むのは bat だけ。0.9.9 の `zoxide.exe` に `cygpath -w "$(\builtin pwd -P)"` がある
+  - Scoop v0.6.0 のソース: 版の指定（バケットの履歴）・`hold`・`unhold`・`update --force`・`list`・`uninstall` の動きと表示
+  - Scoop v0.6.0 の `install` の分かれを、偽の scoop のフォルダーで Linux の pwsh 7.5.3 で動かした: 版を指定した同じ版がもう入っていると、同じ行のほかの名前を入れずに終わる。版を指定しない名前を並べると、入っているものを何も出さずに飛ばす。main が git でなければ、履歴を探さない
+  - Linux の bat 0.26.1 で、CRLF の 3 行の設定が効き、BOM を付けると 1 行目で失敗すること
+  - この節のブロック 10 個の構文（誤り 0）と 5.1 互換（指摘 0）。偽物の `scoop` と本物の Linux の bat で、手順 2〜6・10〜13 の流れを Linux の PowerShell 7.5.3 で模擬した（手順 4・6・10 を直した後に、もう一度流した。最後に、手順書から取り出し直したブロックで、構文・互換・模擬を通し直した）
+- **確かめていないこと**:
+  - Windows で貼ること（すべての手順）。`scoop install zoxide@0.9.9` がバケットの履歴から定義を取り出すことと、`hold`・`list`・`unhold`・`update --force`・`uninstall` の実際の表示
+  - Git for Windows より前に zip で置いた main のバケットを、この節の手順 4 の `scoop update` が git の形に直すこと
+  - 5.1 の `Set-Content -Encoding ASCII` と `[IO.File]::WriteAllText` が、NTFS のハードリンクの控え（`persist`）にも同じ中身を書くこと
+  - WezTerm の新しいタブが、起動し直さずに starship の `Path` と `BAT_CONFIG_DIR` を読むこと
+  - Git Bash で、AlmaLinux 10 の初期設定の手順 52〜55・57・58・60〜63 を通すこと（zoxide の Windows の形のパスでの記録、eza の見出しと `Git` の列、bat のプレビュー、Git for Windows に `/etc/os-release` があるか、fzf の ASCII 以外の文字）
+  - 0.10.0 で記録されないことの再現と、直った版への上げ方（まだ出ていない）
+  - Git Bash で、AlmaLinux 10 の初期設定の後ろの節（starship・fzf・eza・bat）を貼ること（リードで案内した、fd を scoop で入れる形を含む）
+  - `VCRUNTIME140.dll` が無いときの `bat --version` の出方
+  - SSH のセッション、arm64 の Windows、スタートメニューの Git Bash（mintty）
+
 ### 対象と検証環境
 
 - **目的**: Windows 11 をインストールした直後に行う設定を、1 本の手順にまとめる
@@ -225,6 +370,9 @@
   - ネットワーク: LAN をプライベートに（もとは Windows の OpenSSH サーバーと Syncthing の Windows 11 の節にあった）・リモート デスクトップ・リモート アシスタンス・ping・配信の最適化
   - サインイン: Windows Hello だけのサインインを切る・自動サインイン
   - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](../verification/windows-setup.md#選択した方針)）。この文書のリードから順に案内する
+  - 任意節（2026-10-08）: プライバシーと広告の表示・表示と入力と音とストレージ センサー・Edge の常駐のポリシー・CopyQ
+  - 任意節（2026-10-08 の 2 つ目）: PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォントと貼り付けの警告・WSL のネットワークのミラー
+  - 任意節（2026-10-08 の 3 つ目）: Git Bash のシェルのツール（starship・zoxide・fzf・eza・bat）
 - **進め方**: 最初に管理者の Windows PowerShell 5.1 で Windows Update を行い、必要なら手動で再起動する。その後、通常の窓で Store と自分のユーザーの設定を、管理者の窓で PC 全体の設定を行う
   - 設定の後に 1 回再起動し、WSL のディストリビューションと自動サインインを入れる
 - **状態**: **Windows の実機では通していない**（2026-10-03 に作成、2026-10-04 に更新を CLI 化）
@@ -258,6 +406,10 @@
 | PowerToys | 0.101.2362.0（winget の `Microsoft.PowerToys`、自分のユーザー） |
 | PowerShell 7 | 7.6.6.0（winget の `Microsoft.PowerShell`、MSIX） |
 | Autologon | 3.10（winget の `Microsoft.Sysinternals.Autologon`） |
+| CopyQ（任意節） | 16.0.0（winget の `hluk.CopyQ`、自分のユーザー。2026-10-08 の定義。上流の最新は 17.0.0） |
+| Windows Terminal（任意節） | 1.24 以降（`warning.multiLinePaste` が 3 つの値の版）。貼り付けの設定の原因を確かめた PC は 1.25.2733.0 |
+| WSL（任意節） | 同じ PC の記録は 2.7.13.0（ネットワークは既定の NAT）。ミラーには Windows 11 22H2 以上が要る |
+| シェルのツール（任意節） | scoop の main の fzf 0.74.4・starship 1.26.0・eza 0.23.5・bat 0.26.1（2026-10-08 の定義）と、バケットの履歴の zoxide 0.9.9（main の定義は 0.10.0） |
 | WSL の AlmaLinux 10 | `AlmaLinux-10`（2026-10-03 のイメージは 10.2） |
 
 貼り付けの設定（手順 16〜19・37・38）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
@@ -683,6 +835,291 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 1. Microsoft アカウントでの SMB・WinRM の認証、`LocalAccountTokenFilterPolicy` の戻し
 1. `Register-ScheduledTask`・`Set-NetFirewallRule`・`Enable-PSRemoting` など、Windows 専用のコマンドレットの実際の動作（Linux の pwsh には無いので模擬・資料まで）
 
+### 付録: プライバシー・表示・入力・音・ストレージ・Edge・CopyQ の任意節のブロックの確認（2026-10-08）
+
+「プライバシーと広告の表示を切る（任意）」「表示・入力・音・ストレージを変える（任意）」「Edge の常駐をポリシーで止める（任意）」「CopyQ を使う（任意）」を足したときに、PowerShell のブロックを、Linux（クラウドのコンテナ、Ubuntu 24.04）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。Windows では貼っていない。
+
+**対象のブロック**:
+
+- `origin/main` との差分で、足したか変えた `powershell` のブロック 34 個（手順書のブロックは 117 個から 150 個になった）
+  - プライバシーと広告の節の 4 個（その節の手順 2・4・5・6）、表示・入力・音・ストレージの節の 21 個（その節の手順 2〜12・14〜23）、Edge の常駐の節の 2 個（その節の手順 2・5）、CopyQ の節の 6 個（その節の手順 2〜5・7・8）
+  - [更新](../windows-setup.md#更新)の手順 3 の 1 個（winget の一覧に `hluk.CopyQ` を足した）
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- 34 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）。表示・入力・音・ストレージの手順 8・20 の here-string（閉じの `'@` はリストの字下げの位置）も、字下げを外した形で読めた
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）を当てた
+  - 互換の指摘は 16 個で、すべて `PSUseCompatibleCommands` の `Set-ItemProperty` の `-Type`（ブロックの中の 16 か所すべて）。レジストリのプロバイダーが足す動的なパラメーターで、ほかの手順と同じ既知の偽陽性（[付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
+  - `PSUseCompatibleSyntax` と `PSUseCompatibleTypes` の指摘は 0
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、3 つとも指摘が出た
+- 既定の規則の指摘は 12 個で、すべて `PSUseBOMForUnicodeEncodedFile`（日本語を含むファイルに BOM が無い。貼るので関係が無い）
+
+**`Add-Type` の宣言**（表示・入力・音・ストレージの手順 8・20。2 つの宣言は同じ文字列）:
+
+- 宣言（`ANIMATIONINFO` の構造体と、`SystemParametersInfo` の 3 つの多重定義）は、PowerShell 7.5.3 の `Add-Type` でそのままコンパイルできた。構造体の大きさは 8 バイト（`cbSize` の 8 と同じ）。Linux では、呼び出しは例外になった（`user32.dll` は Windows の DLL）
+- 同じ窓で同じ宣言の `Add-Type` を 2 回流しても、誤りは出なかった（手順 8 の後に手順 20 を貼る場合）
+- 同じ 3 つの形で、中身を「受け取った値を覚えるだけ」にした型に差し替えて、2 つのブロックを流した:
+  - `0x1043`（`SPI_SETCLIENTAREAANIMATION`）は `IntPtr` の形、`0x0049`（`SPI_SETANIMATION`）は `ref ANIMATIONINFO` の形（`uiParam` と `cbSize` が 8）、`0x1042`（`SPI_GETCLIENTAREAANIMATION`）は `ref int` の形が選ばれた。`fWinIni` は、設定の 2 つが 3、読み戻しが 0
+  - 手順 8 は `pvParam` が 0・`iMinAnimate` が 0 で、`ClientAreaAnimation : 0`・`MinAnimate : 0` を出した。手順 20 は 1・1 で、`1`・`1` を出した（`MinAnimate` の行は、偽物の型が覚えた値を返す偽物の `Get-ItemProperty` で出した）
+
+**偽物のコマンドレットで流したブロック**（Linux の pwsh）:
+
+- レジストリは、キーと値と種類を覚えておく偽物（`Get-Item`・`Get-ItemProperty`・`Set-ItemProperty`・`New-Item`・`Remove-ItemProperty`・`Test-Path`・`Get-ChildItem`・`Join-Path`）に置き換えた
+  - 値の無いキーの `Get-ItemProperty` は何も返さず、既にあるキーへの `New-Item -Force` は中の値を消す偽物にした。どの場合も、既にあるキーへの `New-Item` は呼ばれなかった
+- `reg.exe` は、`export`・`import`・`add`・`query`・`delete` を真似る関数にした（控えのファイルは `.reg` の形式ではない）
+- `%LOCALAPPDATA%` は一時のディレクトリにし、控えの CSV と `reg.exe` の控えは、そこに本物のファイルとして書いた
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 表示・入力・音・ストレージの手順 3（固定キーなど） | `Flags` が `510`・`126`・`62`。続けてもう 1 回 | `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` を出し、文字列（REG_SZ）で書いた。2 回目は `506 -> 506` などで変わらない |
+| 同じ手順 3 | `StickyKeys` のキーが無い、`Keyboard Response` に `Flags` が無い、`ToggleKeys` が `abc` | 3 つとも `無い:` を出し、何も書かなかった |
+| 同じ節の手順 15（戻す） | 手順 3 の後。続けてもう 1 回。上の無い・`abc` の場合 | `506 -> 510`・`122 -> 126`・`58 -> 62`。2 回目は変わらない。無い・`abc` は `無い:` で、何も書かなかった |
+| プライバシーと広告の手順 2 | `Enabled`（`AdvertisingInfo`）・`NumberOfSIUFInPeriod`・`HasAccepted`・`IsDeviceSearchHistoryEnabled` が 1、`PeriodInNanoSeconds` が QWORD の `864000000000`。`Privacy` と `Input\TIPC` のキーが無い。ほかの 4 つは値だけが無い（同じキーにほかの値がある） | `控えた:` と 11 行を出した。あった値は `AdvertisingInfo\Enabled: 1 -> 0` の形、無かった値は `User Profile\HttpAcceptLanguageOptOut:  -> 1` の形（左が空）。`New-Item` は無い 2 つのキーにだけ呼び、ほかの値は残った。控えの CSV は 11 行（無かった値は値と種類が空、`PeriodInNanoSeconds` は `QWord`） |
+| 同じ手順 2 の 2 回目 | 上の後 | `控えはもうある（書き換えない）` を出し、CSV は変わらない。`->` の左は今の値（`0 -> 0` など） |
+| 同じ節の手順 5（戻す） | 上の後。控えのファイルを消した後 | あった 5 つを元の値に（`PeriodInNanoSeconds` は QWORD で）書き、無かった 6 つは消した。値と種類が、流す前とすべて一致した（手順 2 で作った 2 つのキーは、値の無いまま残る）。控えが無いときは `中断: 控えが無い:` で止まった |
+| 表示・入力・音・ストレージの手順 11（ストレージ センサー） | キーが無い | キーを作り、`01:  -> 1` から `2048:  -> 30` の 7 行（左は空）を出した |
+| 同じ手順 11 | `01=0`・`256=1`・`2048=0` と、ほかの値（`StoragePoliciesNotified`）がある | `01: 0 -> 1`・`256: 1 -> 30`・`2048: 0 -> 30` と、左が空の 4 行。`New-Item` は呼ばず、ほかの値は残った |
+| 同じ節の手順 23（戻す） | 上の後。キーが無い | 7 つだけを消し、`StoragePoliciesNotified` は残った。キーが無いときは、何も出さず、誤りも出なかった |
+| 同じ節の手順 9（効果音） | 控えが無い。`.Current` のあるイベントが 4 つ、無いイベントが 1 つ | `reg.exe export HKCU\AppEvents <控え> /y` を 1 回呼び、`Scheme : .None` と `空にしたイベント : 4` を出した。`.Default` の値と、`.Current` の無いイベントは変えなかった |
+| 同じ手順 9 の 2 回目 | 控えがある | `控えはもうある（書き換えない）` を出し、`reg.exe export` を呼ばずに同じ 2 行を出した |
+| 同じ手順 9 | 控えが無く、`reg.exe export` が失敗する（ファイルができない） | `中断: 控えを作れなかった:` で止まり、スキームとイベントを変えなかった |
+| 同じ節の手順 21（戻す） | 1 回目の控えがある。控えが無い | `reg.exe import <控え>` を 1 回呼び、`Scheme : .Default` を出した（イベントの値と種類も戻った）。控えが無いときは `中断: 控えが無い:` で止まった |
+| 同じ節の手順 2・4・16（切り替えのキー） | `Hotkey`・`Language Hotkey` が `1`、`Layout Hotkey` が `2`。キーが無い。控えが無い | 手順 2 は `控えた:` と 13 行の表。手順 4 は `1 -> 3`・`1 -> 3`・`2 -> 3`、手順 16 は控えの `1`・`1`・`2` に戻した。キーが無いときは手順 4 がキーを作り、控えが無いときは手順 16 が `控えが無い（既定の値にする）` を出して `1`・`1`・`2` にした |
+| 同じ節の手順 6・18（ギャラリーとホーム） | ギャラリーのキーが無く、ホームのキーがある | 手順 6 は `既にあった …: False`・`True` を出し、2 つに `System.IsPinnedToNameSpaceTree` の 0 を書いた。手順 18 は、無かったギャラリーをキーごと消し（`残っている …: False`）、あったホームは値だけを消した（`True`） |
+
+- 手順 9 の `Get-ChildItem -Path '…\Apps\*\*'` が、2 段下のキーそのもの（イベント）を返すことは、Linux のファイル システムのプロバイダーで確かめた（レジストリのプロバイダーでは確かめていない）
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、すべてのブロックを貼って通すこと。5.1 の `Add-Type`（.NET Framework のコンパイラー）で宣言が通り、`SystemParametersInfo` が設定を変えて `WindowMetrics\MinAnimate` に書くこと
+1. 本物のレジストリのプロバイダーの動き（`-Type` で既にある値の種類が変わること、値の無いキーの `Get-ItemProperty`、`(default)` の読み書き、`Get-ChildItem` のワイルドカード）と、5.1 の `Export-Csv`・`Import-Csv` での控えの読み書き
+1. 本物の `reg.exe` の出力と、`.reg` の書き戻しで効果音の値が種類（`REG_EXPAND_SZ`）まで戻ること
+1. `winget`・`copyq.exe`・`Start-Process 'ms-settings:…'`・`control.exe` を呼ぶブロック（Edge と CopyQ の節は、構文と互換だけ）
+1. 書いた値が画面と動作に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
+
+### 付録: PowerToys・PowerShell 7・Windows Terminal・WSL の任意節のブロックの確認（2026-10-08）
+
+「PowerToys のユーティリティを絞る（任意）」「PowerShell 7 のプロファイルを設定する（任意）」「Windows Terminal のフォントと貼り付けの警告を変える（任意）」「WSL のネットワークをミラーにする（任意）」を足したときに、PowerShell のブロックを、Linux（クラウドのコンテナ、Ubuntu 24.04）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。Windows では貼っていない。
+
+**対象のブロック**:
+
+- `origin/main` との差分で、足した `powershell` のブロック 20 個（手順書のブロックは 150 個から 170 個になった。既にあるブロックで変えたものは無い）
+  - PowerToys の節の 4 個（その節の手順 2・3・5・8）、PowerShell 7 の節の 6 個（その節の手順 2〜5・7・8）、Windows Terminal の節の 4 個（その節の手順 2〜4・6）、WSL の節の 6 個（その節の手順 2〜7）
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- 20 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）を当てた
+  - 互換の指摘は 0 個（3 つの規則とも 0）。レジストリに書くブロックが無いので、`Set-ItemProperty -Type` の既知の偽陽性も出ない
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、`PSUseCompatibleSyntax` が 1 個、`PSUseCompatibleCommands` が 2 個の指摘を出した
+- 既定の規則の指摘は 14 個で、すべて `PSUseBOMForUnicodeEncodedFile`（日本語を含むファイルに BOM が無い。貼るので関係が無い）。日本語を含まない 6 個（PowerShell 7 の節の手順 4・5・8、WSL の節の手順 4・5・7）には指摘が無い
+
+**模擬の仕方**（Linux の pwsh 7.5.3）:
+
+- `%LOCALAPPDATA%`・`%USERPROFILE%`・`HOME`（ドキュメントは `$HOME/Documents`）は一時のディレクトリにし、設定ファイル・控え・プロファイル・`.wslconfig` は、本物のファイルとして読み書きした
+- `Get-Process`・`Start-Process`・`Get-ScheduledTask`・`Get-AppxPackage`・`wsl.exe` は、決めた値を返すか、呼ばれたことを覚えるだけの関数にした
+- 設定ファイルは Python で作った
+  - PowerToys: 1 行の `settings.json`。`enabled` の 30 個と、7 段の入れ子・1 要素と空の配列・空のオブジェクト・`null`・小数・2^53 を超える整数・日本語と `<&>"\/` を含む文字列
+  - Windows Terminal: 字下げのある `settings.json`。`profiles.list` の 4 個（1 つは自分の `font` を持つ）、`actions` の入れ子、1 要素と空の配列、`null`、`ms-appx:///…` の URL、`/* … */` と `//` を中身に持つ文字列
+- 書いた後は、型まで比べる JSON の差分（Python の `json`）と、ファイルのバイト（SHA-256）で確かめた
+
+**PowerToys の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（変数） | 動いている `PowerToys` の `Path` がある。プロセスが無く、`%LOCALAPPDATA%\PowerToys\PowerToys.exe` と `%LOCALAPPDATA%\Programs\PowerToys\PowerToys.exe` の両方・`Programs` だけ・どちらも無い | プロセスがあればその `Path`、無ければ `%LOCALAPPDATA%\PowerToys` → `Programs\PowerToys` の順に、あるものを取った。どれも無いと `PT_EXE = ` の後ろが空 |
+| 手順 3（確かめる） | 設定ファイルが無い。ある。`Measure Tool` が無い | 無いと `中断: 設定ファイルが無い:`。あれば 30 行の表（`$PT_OFF` の 6 個だけ `Off` が `True`）・`startup: True / run_elevated: False`・偽物のタスクの行。`Measure Tool` が無いと、表の後に `無い名前: Measure Tool` |
+| 手順 5（書く） | `PowerToys` か `PowerToys.Settings` が動いている、`$PT_EXE` が空、`Measure Tool` が無い、`enabled` が無い、JSON が壊れている | どれも `中断:` で止まり、設定ファイルを変えず、控えを作らなかった（無い名前・`enabled` が無い・壊れているときは、`Start-Process` も呼ばれなかった） |
+| 同じ手順 5 | 1 回目。続けて 2 回目 | 1 回目は `控えた:` と `FindMyMouse: False` の形の 6 行を出し、`Start-Process` を `$PT_EXE` で 1 回呼んだ。控えは流す前とバイトで一致。JSON の差分は `enabled` の 6 個の `true -> false` だけで、入れ子（7 段）・配列・`null`・数・文字列は型まで同じ。2 回目は `控えはもうある（書き換えない）` を出し、控えも設定ファイルも変わらなかった |
+| 手順 8（戻す） | 動いている。控えがある。続けてもう 1 回 | 動いていると `中断:` で、控えは残った。控えがあると `FindMyMouse: True` の形の 6 行を出して `Start-Process` を呼び、設定ファイルは流す前とバイトで一致し、控えは消えた。もう 1 回では `中断: 控えが無い:` |
+| 手順 5・8 | 先頭に `// コメント` の行を足した、字下げのある設定ファイル | PowerShell 7.5.3 の `ConvertFrom-Json` はコメントを読み飛ばしたので止まらず、書いたファイルからコメントが消えた（JSON の差分は上と同じ 6 個）。手順 8 でバイトまで戻った |
+
+**PowerShell 7 の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（足す） | プロファイルも `Documents\PowerShell` も無い。続けてもう 1 回 | フォルダーとファイルを作り、`足した:` の 5 行と中身（5 行）を出した。2 回目は `すでにある:` の 5 行で、ファイルはバイトまで変わらない |
+| 同じ手順 2 | 末尾に改行の無い 2 行（間は CRLF）。BOM 付きの UTF-8 で、日本語の行と、5 行のうち 2 行がある（CRLF） | 前者は改行（CRLF）を足してから 5 行を足し、元の 2 行はそのまま（7 行）。後者は 2 行が `すでにある:`、3 行が `足した:` で、元のバイト（BOM を含む）は先頭にそのまま残った。Linux の `Add-Content` が足した行の区切りは LF だった |
+| 手順 3（Tab） | プロファイルが無い。手順 2 の後に 2 回 | 無いと `中断: プロファイルが無い。この節の手順 2 を先に貼る:`。手順 2 の後は `足した:`、2 回目は `すでにある:` で変わらない |
+| 手順 7（消す） | 手順 2・3 で書いた 6 行だけ。BOM 付きの UTF-8 で印の行だけ。BOM 付きの UTF-16LE で印の行だけ | どれも `消した:` で、ファイルが消えた |
+| 同じ手順 7 | BOM 付きの UTF-8（日本語の行・印の行・ほかの行・末尾に改行の無い印の行、CRLF）。BOM 付きの UTF-16LE（日本語の行・印の行・ほかの行）。LF だけのファイル（ほかの 4 行と印の 2 行） | どれも `その行だけ消した:` で、印の行だけが消え、残りは BOM と UTF-16LE を含めてバイトまで期待どおり |
+| 同じ手順 7 | 印の前の空白が 1 つの行・印が行末に無い行・PowerToys の Command Not Found の 2 行だけ。プロファイルが無い | 前者は `その行は無い:` で、ファイルは変わらない。無いと `プロファイルが無い:` |
+
+- 手順 2・3 で書いたプロファイルを、PowerShell 7.5.3（PSReadLine 2.3.6）で読んだ。Linux の `$PROFILE` は `~/.config/powershell/…` なので、そこにドキュメントのプロファイルへのシンボリック リンクを置き、`pwsh.exe` は Linux の pwsh へのリンクにした
+  - 手順 4 のブロックは、キーの表で `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`、`Tab` が `MenuComplete` を出した。実行ポリシーの表は、Linux なのですべて `Unrestricted` だった
+  - 手順 5・8 の `Set-ExecutionPolicy` は、`Operation is not supported on this platform.` で流せなかった
+  - starship 1.26.0 と zoxide 0.10.0 の Linux 版を `PATH` に置くと、プロファイルを読んでも誤りは 0 で、`__zoxide_hook`・`Invoke-Starship-PreCommand`・`z` があり、`prompt` は starship のものになった。新しいディレクトリに移って `prompt` を呼ぶと、そのディレクトリが zoxide に記録された
+  - 比べるために、starship の行から `Invoke-Starship-PreCommand` の定義を除いた形で同じことをすると、`__zoxide_hook` はあるが、zoxide には何も記録されなかった
+  - 2 つを `PATH` から外すと、プロファイルは誤り無しで読まれ、`__zoxide_hook`・`Invoke-Starship-PreCommand`・`z` は無く、`prompt` は starship のものではなかった
+
+**Windows Terminal の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（控える） | 設定ファイルが無い。`//` の行のコメント・`/* */` のコメント・末尾のカンマがある。`profiles` が配列 | どれも `中断:` で止まり、控えを作らなかった。続けて手順 3 を貼ると `中断: 控えが無い。この節の手順 2 を先に貼る` |
+| 同じ手順 2 | 上の字下げの設定ファイル（文字列の中に `//`・`/*`・`ms-appx:///` がある）。続けてもう 1 回 | 止まらずに `控えた:` と、`Version : 1.25.2733.0`（偽物の `Get-AppxPackage`）などの 5 行と、自分のフォントを持つ `AlmaLinux-10` の表を出した。控えはバイトで一致し、設定ファイルは変わらない。2 回目は `控えはもうある（書き換えない）` |
+| 手順 3・4 | 控えがあり、設定ファイルに `//` のコメントがある | どちらも `中断: コメントか末尾のカンマがある:` で、変えなかった |
+| 手順 3（フォント） | `profiles.defaults` が空・無い・`font.size` と `font.weight` と `colorScheme` がある。続けてもう 1 回 | `face: HackGen Console NF`。JSON の差分は `profiles.defaults.font.face` を足したこと（無いときは `defaults`・`font` ごと）だけで、`size` などは残り、入れ子（5 段）・空と 1 要素の配列・`null` は型まで同じ。2 回目はバイトまで変わらない |
+| 手順 4（警告） | 版が 1.23.12811.0・パッケージが無い・1.25.2733.0。`warning.multiLinePaste` が `true` | 1.23 とパッケージが無いときは `中断: Windows Terminal の版が 1.24 より前:` で、変えなかった。1.25 では `warning.multiLinePaste: never` で、差分はその値だけ（`true` は文字列の `never` に変わった） |
+| 手順 6（戻す） | 手順 2〜4 の後（設定ファイル 4 種）。続けてもう 1 回 | `face:  / warning.multiLinePaste: `（`true` だったものは `True`）を出し、流す前とバイトで一致し、控えが消えた。もう 1 回では `中断: 控えが無い:` |
+
+**WSL の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（確かめる） | `.wslconfig` が無い | `無い:` と、偽物の `wsl.exe` の 2 行。`$env:WSL_UTF8` はブロックの後も `1` のまま残った |
+| 手順 3（書く） | ファイルが無い。続けてもう 1 回 | `作った:` で、中身は `[wsl2]`・`networkingMode=mirrored` の 2 行（CRLF）。控えは作らない。2 回目は `中断: networkingMode の行がもうある` |
+| 同じ手順 3 | `[wsl2]` とほかの 2 つの値（CRLF）。`# comment`・`[WSL2]  `（大文字、後ろに空白）・ほかの値（LF だけ）。`[experimental]` だけで、末尾に改行が無い。BOM 付きの UTF-8 | どれも `控えた:` と `足した:`。`networkingMode=mirrored` は `[wsl2]` の行の直後に、ファイルの改行（CRLF か LF）で入った。`[wsl2]` が無いと、改行を足してから `[wsl2]` と 1 行を末尾に足した。BOM 付きのファイルは、BOM の無い UTF-8 で書いた |
+| 同じ手順 3 | `networkingMode=nat`。`  NetworkingMode = NAT`（字下げ・大文字・空白） | どちらも `中断: networkingMode の行がもうある` で、ファイルを変えず、控えを作らなかった |
+| 同じ手順 3 | `#networkingMode=nat`（コメントの行）だけ | 止まらずに、`[wsl2]` の直後に足した（コメントの行は残る） |
+| 同じ手順 3 | 前の控えが残っていて、ファイルに `networkingMode` が無い | `控えはもうある（書き換えない）` で、控えを残して足した。手順 6 では、前の控えの中身に戻った |
+| 手順 6（戻す） | 上のそれぞれの後。手順 3 で作った後に手で 1 行足した。ファイルも控えも無い | 控えがあれば `控えから戻した:` で、控えは消えた（手順 3 で控えたときは、手順 3 の前とバイトで一致した。BOM も）。手順 3 で作ったままなら `消した:` でファイルが消えた。手で足した後は `中断: この節で作った形ではない`。どちらも無いと `無い:` |
+| 手順 4・5・7 | `wsl.exe` を、`wslinfo` には `mirrored` を返す関数にした | 書いたとおりの引数で呼ばれた（流れを見ただけで、WSL は動かしていない。関数には `--` が渡らないので、本物の `wsl.exe` への `--` の渡り方は見ていない） |
+
+- Linux の pwsh は `.` で始まるファイルを隠しファイルとして扱い、手順 6 の `-Force` の無い `Remove-Item` が `You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only.` で断った。上の表は、`Remove-Item` に `-Force` を足す関数をかぶせて流した結果
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、20 個のブロックを貼って通すこと。5.1 の `ConvertFrom-Json`・`ConvertTo-Json -Depth 100` で、PowerToys と Windows Terminal の設定ファイルの入れ子と配列（空・1 要素）が形を保つこと。コメントのある PowerToys の設定ファイルで、5.1 では手順 5 が止まるか（7.5.3 はコメントを読み飛ばして消した）
+1. 5.1 の `Add-Content` が PowerShell 7 のプロファイルに足す行の文字コードと改行（Linux の 7.5.3 では LF）。UTF-16LE のプロファイルに足すとき
+1. 本物の `Get-Process`・`Start-Process`・`Get-ScheduledTask`・`Get-AppxPackage` の値と動き。WSL の節の手順 6 の `-Force` の無い `Remove-Item` が、Windows の `.wslconfig` を消せること
+1. `wsl.exe` と、5.1 から `pwsh.exe -Command { … }` を呼ぶブロック（PowerShell 7 の実行ポリシーの手順 5・8 を含む）。Windows 版の starship・zoxide と、対話の窓でのキーとプロンプト
+1. 書いた値が PowerToys・Windows Terminal・WSL に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
+
+### 付録: シェルのツールの任意節のブロックの確認（2026-10-08）
+
+「シェルのツールを入れる（任意）」を足したときに、上流と scoop の資料・配布物を調べ、PowerShell のブロックを、Linux（クラウドのコンテナ）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。**Windows の実機では未検証**（どのブロックも、Windows では貼っていない）。
+
+**上流の zoxide**（2026-10-08 05:11 UTC に確かめた）:
+
+- 06:22 UTC と 06:40 UTC にも `git ls-remote --tags` を見直した。タグの最新は `v0.10.0` のまま、`main` も `86b443c` のままだった。06:40 UTC の scoop の main の `bucket/zoxide.json` も `0.10.0`
+- `git ls-remote --tags` のタグの最新は `v0.10.0`。`main` は `86b443c`（`git describe` は `v0.10.0-22-g86b443c`）
+- `1f484a4`「Fix MSYS2 cygpath pwd substitution (#1260)」（2026-07-07）は `main` にあり、`git tag --contains` は何も出さなかった
+- `main` の `CHANGELOG.md` の `[Unreleased]` の Fixed に「Bash/Zsh: fix `z` failing on Cygwin/MSYS2 due to `cygpath` being passed a bad string.」がある
+- `templates/bash.txt` の、Windows のときの `__zoxide_pwd`
+  - v0.9.9: `\command cygpath -w "$(\builtin pwd -P)"`
+  - v0.10.0: `\command cygpath -w "{{ pwd }}"`（`pwd` は `\builtin pwd -L` などの文字列で、コマンド置換が無い）
+  - `main`: `\command cygpath -w "$({{ pwd }})"`
+- `src/db/mod.rs` の `VERSION` は、v0.9.9 と v0.10.0 のどちらも 3（`db.zo`）。`main` の `c479cc8`（#1288、2026-10-03）は `db.txt` に変え、`db.txt` が無くて `db.zo` があれば、それを読んで移す
+- GitHub の API（`releases/latest`）は、この環境の `gh` からは使えなかった（リポジトリへのアクセスが無い旨の 403）。版になったかは、タグと `main` で判断した
+
+**scoop の定義**（ScoopInstaller/Main の `master`。2026-10-08 に取得）:
+
+| 定義 | 版 | 書いてあること |
+|---|---|---|
+| `fzf.json` | 0.74.4 | `bin` は `fzf.exe` |
+| `zoxide.json` | 0.10.0 | `bin` は `zoxide.exe`。`notes` は `_ZO_DATA_DIR is located at '$env:LOCALAPPDATA\zoxide' by default` |
+| `starship.json` | 1.26.0 | `bin` は無く、`env_add_path` が `.`。`suggest` は `extras/vcredist2022`。`notes` は `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足す案内と、Powerline のフォント |
+| `eza.json` | 0.23.5 | `bin` は `eza.exe` と、`exa` の名前の `eza.exe`。64bit（`x86_64-pc-windows-gnu`）だけ |
+| `bat.json` | 0.26.1 | `env_set` は `BAT_CONFIG_DIR` に `$dir`。`persist` は `config`・`syntaxes`・`themes`。`pre_install` は、控えに `config` が無ければ `%APPDATA%\bat\config` を写し、空のファイルを作る。`suggest` は `extras/vcredist2022` と `less` |
+
+- `bucket/zoxide.json` の履歴: `f8683b6ce`（2026-07-04、0.10.0 に）、`73b1eafab`（2026-01-31、0.9.9 に）
+- Scoop と同じ探し方（`git log --follow -n 1 --format=%H -G 'version.: .0\.9\.9' -- bucket/zoxide.json`）は `f8683b6ce` を出した。その親（`f8683b6ce^`）の定義が 0.9.9 で、64bit の hash は `5af00d0916f0…`、arm64 は `58c55ef6f0ea…`
+
+**配布物**（上の定義の x64 の zip を落とし、Linux の `sha256sum` と `objdump -p` で見た）:
+
+| zip | sha256 | 実行ファイルが読み込む DLL |
+|---|---|---|
+| `fzf-0.74.4-windows_amd64.zip` | 定義と一致 | `kernel32.dll` だけ |
+| `zoxide-0.9.9-x86_64-pc-windows-msvc.zip` | 履歴の定義と一致 | `KERNEL32.dll`・`ntdll.dll`・`ole32.dll`・`shell32.dll`・`api-ms-win-core-synch-l1-2-0.dll` |
+| `zoxide-0.10.0-x86_64-pc-windows-msvc.zip` | 定義と一致 | `KERNEL32.dll`・`ntdll.dll`・`combase.dll`・`shell32.dll`・`userenv.dll`・`api-ms-win-core-synch-l1-2-0.dll` |
+| `starship-x86_64-pc-windows-msvc.zip`（1.26.0） | 定義と一致 | `KERNEL32.dll`・`ADVAPI32.dll`・`user32.dll`・`setupapi.dll` などで、`VCRUNTIME140.dll` は無い |
+| `eza.exe_x86_64-pc-windows-gnu.zip`（0.23.5） | 定義と一致 | `msvcrt.dll`・`KERNEL32.dll`・`advapi32.dll` などで、`VCRUNTIME140.dll` は無い |
+| `bat-v0.26.1-x86_64-pc-windows-msvc.zip` | 定義と一致 | `VCRUNTIME140.dll` と、`api-ms-win-crt-*`（UCRT）・`kernel32.dll` など |
+
+- 0.9.9 の `zoxide.exe` の文字列に `\command cygpath -w "$(\builtin pwd -P)"` がある。0.10.0 の `zoxide.exe` では `\command cygpath -w "` で切れている（テンプレートの `{{ pwd }}` の前）
+- `eza.exe` の文字列に `v0.23.5 [+git]` がある
+
+**Scoop のソース**（ScoopInstaller/Scoop の `v0.6.0`、2026-09-30。ここは読んだだけ。`install` の分かれは、後の「Scoop v0.6.0 を動かした確認」で動かした）:
+
+- `scoop install <名前>@<版>`: `generate_user_manifest` が `INFO  Resolving historical manifest for '<名前>' (<版>)` を出し、SQLite のキャッシュ（設定したときだけ）→ バケットの git の履歴（`Find-HistoricalManifestInGit`。見つけたコミットの親とそのコミットの定義の版を比べる）→ `autoupdate` の順に定義を探す。履歴の定義は `~\scoop\workspace\<名前>.json` に書く
+- 版を指定したものは `~\scoop\workspace\<名前>.json` の場所になり、`prune_installed`（`installed` は `<名前>.json` の名前で探す）は入っているとみなさない。ほかの版が入っていても、並べて入れて `current` を付け替える
+- 版を指定した同じ版がもう入っていると、`'<名前>' (<版>) is already installed.` の警告の後の `continue`（`ForEach-Object` の中で、囲むループが無い）が `bin/scoop.ps1` の `switch` まで抜け、同じ行のほかの名前を入れずに終わる
+- 版を指定しない名前を並べたときは、入っているものを `prune_installed` で飛ばす。`'<名前>' (<版>) is already installed. Skipping.` の警告は、`Get-Dependency` が名前を `main/<名前>` の形に変えるので、指定した名前との突き合わせに当たらず出ない
+- 名前を 1 つだけ渡したときは、もう入っていれば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる
+- バケットの履歴を探すのは、main が git のリポジトリのときだけ（`Find-HistoricalManifestInGit`）。そうでなければ `WARN  Bucket 'main' is not a git repository. Cannot search historical versions.` を出して `autoupdate` に移る。git の形に直すのは `scoop update` の `Sync-Bucket`（`Converting 'main' bucket to git repo...`）。ScoopInstaller/Install の `install.ps1` は、git が無ければ main を zip で置く
+- `env_add_path` は `Add-Path` で、ユーザーの `Path` と今のセッションの `$env:PATH` に足し、`Adding <場所> to your path.` を出す。`env_set` は `Setting user environment variable: <名前> = <値>` を出し、今のセッションにも入れる
+- `scoop hold`: `<名前> is now held and can not be updated anymore.`。すでに止めてあれば `'<名前>' is already held.`。`scoop unhold`: `<名前> is no longer held and can be updated again.`
+- `scoop update`: 止めたものは、古くても `'<名前>' is held to version <版>` の警告で飛ばす。版を指定して入れたものは、`--force` のときだけバケットの今の定義で入れ直す（#6730）。名前を渡したときは、前の更新から 3 時間たっていなければバケットを新しくしない（`is_scoop_outdated`）
+- `scoop list`: `Source` は、`bucket` が無く `url` が `workspace` の定義なら `<auto-generated>`。`Info` は、`hold` があれば `Held package`
+- `scoop update zoxide --force`（版を指定して入れたもの）: `update` の `$pin_broken` から `Find-AppBucket` で、main のバケットの今の定義を入れる（Releases は見ない）
+- `scoop uninstall`: `hold` を見ない。動いているプロセスがあれば、`The following instances of "<名前>" are still running. Close them and try again.` で止まる
+
+**Scoop v0.6.0 を動かした確認**（`v0.6.0` の `bin/scoop.ps1` と `lib`。Linux の pwsh 7.5.3）:
+
+- `SCOOP`・`XDG_CONFIG_HOME`・`USERPROFILE` を一時のフォルダーにし、`apps\<名前>\<版>` に `manifest.json` と `install.json`（`bucket` は `main`）を置いて、入っている形にした。main のバケットの定義の `url` は使えない場所にし、ダウンロードは失敗させた
+- 設定ファイルの場所が Linux では読めず、どの場合も `Updating Scoop...` が動いて失敗した。下の結果は、その後の行
+
+| 入っているもの | 渡した引数 | 結果 |
+|---|---|---|
+| zoxide 0.9.9 | `install fzf zoxide@0.9.9 starship` | `WARN  'zoxide' (0.9.9) is already installed.` と `Use 'scoop update zoxide' to install a new version.` だけで、`Installing 'fzf'` の行は出なかった |
+| zoxide 0.9.9 | `install fzf starship`（比べるため） | `Installing 'fzf' (0.74.4) [64bit] from 'main' bucket` の後、ダウンロードで失敗した |
+| zoxide 0.9.9 | `install zoxide@0.9.9` | 1 行目と同じ 2 行の警告 |
+| zoxide 0.9.9 | `install zoxide`（名前 1 つ） | 同じ 2 行の警告 |
+| fzf と starship | `install fzf starship` | 何も出さなかった。`lib` を読み込んで `Get-Dependency` と `prune_installed` を同じ順に呼ぶと、名前は `main/fzf`・`main/starship` になり、どちらも飛ばす側に入り、`fzf`・`starship` との突き合わせ（警告を出す側）は空だった |
+| zoxide 0.10.0（main は git でない） | `install zoxide@0.9.9` | `INFO  Resolving historical manifest for 'zoxide' (0.9.9)`・`WARN  Bucket 'main' is not a git repository. Cannot search historical versions.`・`WARN  No historical manifest found for 'zoxide@0.9.9'; attempting autoupdate` の後、ダウンロードで失敗して `Could not install: zoxide@0.9.9` |
+
+- zoxide 0.10.0 が入った形で `lib` を読み込むと、`installed '<SCOOP>\workspace\zoxide.json'` は `False`、`installed zoxide` は `True`、`prune_installed` に workspace の場所と `fzf` を渡すと、どちらも入れる側に入った
+- `switch` → スクリプト → `ForEach-Object { …; continue }` の形だけの小さな模型でも、`continue` の後ろ（同じスクリプトの残り）は動かず、`switch` の後ろから続いた
+
+**bat の設定ファイル**（Linux の bat 0.26.1。`bat-v0.26.1-x86_64-unknown-linux-musl.tar.gz`）:
+
+- `BAT_CONFIG_DIR` のフォルダーに、CRLF の 3 行（`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never`）の `config` を置くと、`--decorations=always --color=never` で、行番号と見出しだけ（格子の線が無い）の表示になった。空の `config` では、格子の線のある既定の表示
+- 同じ 3 行の先頭に BOM（`EF BB BF`）を付けると、`[bat error]: '<BOM>--theme=ansi': No such file or directory (os error 2)` の形のエラーで、終了コードが 1 になった
+
+**構文と Windows PowerShell 5.1 との互換**（最後の確認。手順書の今のブロックを取り出し直して通した）:
+
+- `claude/win11-postinstall-2-tools` との差分で足した `powershell` のブロックは、この節の 10 個（この節の手順 2〜5・10〜13 と、手順 6 の 2 個）と、git-delta.md の 6 個・gh.md の 10 個の 26 個。手順書のブロックは 170 個から 180 個になり、既にあるブロックで変えたものは無い（変えたのは、リードの「手順の後に、この順に通す手順書」〔git-delta・GitHub CLI の入れ子の箇条書き〕と「手順の後の節」、`## 更新` と `## ロールバック` のリードだけ。手順書のアラートは 5 つのまま）
+- 26 個を PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）。この節の 10 個は、手順 4・6・10 を直した後にも通している（そのときも誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016 Datacenter の `win-8_x64_10.0.14393.0_…`、Windows Server 2019 Datacenter の `win-8_x64_10.0.17763.0_…`、Windows 10 Pro の `win-48_x64_10.0.17763.0_…`）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）を当てた。互換の指摘は、4 つの規則とも 0 個
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、`PSUseCompatibleSyntax` が 1 個、`PSUseCompatibleCommands` が 6 個（プロファイルごとに 2 個）の指摘を出した。`}` の足りないファイルは、構文の誤り 1 個
+- 既定の規則の指摘は 5 個で、どれもこの節のブロック。4 個は `PSUseBOMForUnicodeEncodedFile`（日本語を含む、手順 6 の 2 個と手順 10・12。貼るので関係が無い）、1 個は手順 6 の変数だけのブロックの `PSUseDeclaredVarsMoreThanAssignments`（変数は、手順 6 のもう 1 つのブロックで使う）。git-delta.md と gh.md のブロックには指摘が無い
+
+**模擬**（Linux の pwsh 7.5.3。手順 4・6・10 を直した後に全部を流し直し、最後に手順書から取り出し直したブロックでもう一度流した。表は最後の結果で、前の回と違ったのは `Scoop` の行と、足した 2 つの場合だけ）:
+
+- `%USERPROFILE%`・`%LOCALAPPDATA%`・`%APPDATA%`・`%WINDIR%` を一時のフォルダーにした。`scoop` は、渡った引数を覚えて shim のファイルを作る・消す関数（最後の回は、shims に置いた `scoop.ps1` からその関数を呼んだ）、fzf・zoxide・starship・eza は版の行を出すだけのスクリプト、bat は本物の Linux 版 0.26.1 にした。管理者の判定（`WindowsPrincipal`。Linux では使えない）は `$false` に置き換えた
+- 偽物の `scoop install` の bat は、scoop の `pre_install` と `persist` のように、控えの空の `config` を作って `current\config` からハードリンクし、`BAT_CONFIG_DIR` を入れた（`current` はシンボリック リンク）
+- 偽物の `scoop install` は、上の「Scoop v0.6.0 を動かした確認」の分かれをまねた（版を指定した同じ版で、その回を終える。名前を並べたときは、入っているものを何も出さずに飛ばす。名前 1 つで入っていれば、2 行の警告）。`hold` は止めた状態を覚え、`update zoxide` はバケットの `zoxide.json` の版を入れる
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2 | 何も無い（VC++ ランタイムの DLL と共通の bash 設定も無い） | `Admin : False`・`BashConfig : False`・`VCRuntime : False`。`Tools`・`Zoxide` は空。`Scoop` は偽物の `shims/scoop.ps1`（前の回は関数だけで、`Scoop` は空だった） |
+| 同じ手順 2 | 偽物の zoxide 0.10.0 の shim・DLL・`bashrc` がある | `BashConfig : True`・`VCRuntime : True`、`Tools` は shim の zoxide だけ、`Zoxide : zoxide 0.10.0` |
+| 同じ手順 2 | 続けて、偽物の fzf を winget の `Microsoft\WinGet\Links` に置き、PATH の後ろに足した（最後の回だけ） | `Tools` に、その `Links` の `fzf` と、shim の zoxide が並んだ |
+| 手順 3・4 | 続けて | `scoop` に `uninstall zoxide`・`update`・`install fzf starship eza bat`・`install zoxide@0.9.9`・`hold zoxide` が渡った。4 つの導入の行・`Resolving historical manifest`・`zoxide is now held` |
+| 手順 2 | 手順 4 の後 | `Tools` は、4 つの shim と `apps/starship/current/starship` の 5 つ。`Zoxide : zoxide 0.9.9` |
+| 同じ手順 4 | 続けてもう 1 回 | 2 行目は何も出さず、3 行目は `'zoxide' (0.9.9) is already installed.` の 2 行の警告、4 行目は `'zoxide' is already held.` |
+| 手順 5 | 手順 4 の後 | 5 つの版の行と、5 つの場所と、偽物の `scoop list` の表（`<auto-generated>`・`Held package`） |
+| 手順 2・4・5 | main の zoxide 0.9.9 だけがあり、ほかの 4 つと bat の環境変数は無い（手順 3 を飛ばす分かれ） | 手順 2 は `Zoxide : zoxide 0.9.9`。手順 4 は 4 つを入れ、3 行目は警告だけで、4 行目で止めた。手順 5 は 5 つの版と場所と、`main`・`Held package` の行 |
+| 手順 6 | 控えの `config` が空 | 変数のブロックは何も出さない。`書いた:` と 3 行。ファイルは ASCII だけ（0x7E より大きいバイトが 0 個で、BOM も無い）。控えと `current\config` は同じ i ノードで、同じ中身。本物の bat の `--config-file` も同じ場所を出し、行番号と見出しだけの表示になった |
+| 同じ手順 6 | 続けてもう 1 回 | `中身がある（書き換えない）:` で、変えなかった |
+| 同じ手順 6 | `$BAT_THEME_NAME` が空 | `中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す` |
+| 同じ手順 6 | `config` が空白と改行だけ。テーマは `Monokai Extended` | `書いた:` と、`--theme="Monokai Extended"` で始まる 3 行。本物の bat が読んだ |
+| 同じ手順 6 | `BAT_CONFIG_PATH` も `BAT_CONFIG_DIR` も無い | `中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる`。`%APPDATA%\bat\config` は作らなかった |
+| 同じ手順 6 | `BAT_CONFIG_PATH` を別のフォルダーの `config`（まだ無い）にした | `書いた:` とその場所と 3 行。本物の bat の `--config-file` も同じ場所を出した |
+| 手順 12 | 控えの中身が、CRLF の 3 行・LF の 3 行（テーマに空白）・4 行目がある・`--style` を変えた・空 | CRLF と LF は `空にした:` で、控えと `current\config` がどちらも 0 バイトになった。4 行目があるときと `--style` を変えたときは `この節で書いた形ではない（変えない）:` で、変えなかった。空は `もう空:` |
+| 同じ手順 12 | 手順 11 の後（bat を消し、控えだけが残る）に、控えに CRLF の 3 行を書いた（最後の回だけ） | `空にした:` で、控えが 0 バイトになった |
+| 同じ手順 12 | 控えが無い | `無い:` |
+| 手順 10 | バケットの `zoxide.json` の版が `0.10.0` | `Scoop was updated successfully!` の後に `中断: scoop の main のバケットの zoxide はまだ 0.10.0。日を置いて、この節の手順 9 から`。zoxide は 0.9.9 で止めたまま |
+| 同じ手順 10 | 版が `nightly`・`zoxide.json` が無い | どちらも `中断:`（無いときは `Get-Content` のエラーの後）。zoxide は 0.9.9 で止めたまま |
+| 同じ手順 10 | 版が `0.10.1` | `scoop` に `unhold zoxide`・`update zoxide --force` が渡り、最後に `zoxide 0.10.1`。止めていない状態になった |
+| 手順 11 | 手順 10 の後 | `scoop` に `uninstall fzf zoxide starship eza bat` が渡った。後の 2 つのコマンドは何も出さなかった（Linux では、ユーザーの環境変数はいつも空） |
+| 手順 13 | `%LOCALAPPDATA%\zoxide\db.zo` がある。続けてもう 1 回 | どちらも `False` |
+
+- Linux の pwsh では、`Join-Path`・`Test-Path`・`Remove-Item` は `\` を区切りとして扱ったので、ブロックの `\` を直さずに流せた
+- Linux の 7.5.3 の `Set-Content` が書いた行の区切りは LF だった。手順 12 の CRLF の場合は、`[IO.File]::WriteAllText` で作った
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、10 個のブロックを貼って通すこと。本物の scoop の表示（版の指定・`hold`・`list`・`unhold`・`update --force`・`uninstall`）
+1. 5.1 の `Set-Content -Encoding ASCII` と `[IO.File]::WriteAllText` が、NTFS のハードリンクの控えにも同じ中身を書くこと
+1. WezTerm の新しいタブが、起動し直さずに starship の `Path` と `BAT_CONFIG_DIR` を読むこと
+1. Git Bash での確かめ（この節の手順 7・8）のすべて
+1. 直った zoxide の版への上げ方（まだ出ていない）
+1. main のバケットを zip で置いた PC で、この節の手順 4 の `scoop update` が git の形に直してから、0.9.9 を履歴から取ること
+
 ### 操作上の注意と併記されていた記録
 
    - **注意**: この後は Hyper-V が動くので、[VirtualBox](../virtualbox.md#windows-11-で使う) の VM は Hyper-V の上で動く（遅くなり、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の検証では VM が数分ずつ止まった）
@@ -823,7 +1260,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 **アプリの置き場所**
 
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 でも使うツールなので、それぞれの手順書の Windows 11 の節に置いた（同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、1 つの手順書にする）。この文書のリードから、入れる順に案内する
-- PowerToys・PowerShell 7・Autologon・WSL は、このリポジトリでは Windows でだけ使うので、この文書に置いた
+- PowerToys・PowerShell 7・Autologon・WSL・CopyQ（任意節）は、このリポジトリでは Windows でだけ使うので、この文書に置いた
 - **scoop の `git` は入れない**: git は [git.md](../git.md#windows-11-で-git-for-windows-を入れる) の Git for Windows（`C:\Program Files\Git`）にそろえる。ほかの手順書（OpenSSH サーバーの既定のシェル、Claude Code）がその場所を使う。scoop は `PATH` の `git` を使い、git 無しで入れた scoop も、Git for Windows を入れた後の `scoop update` で git の形に直る（scoop 0.6.0 の `libexec/scoop-update.ps1`）
 
 **窓と再起動**

@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **セッションを使うユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない（セッションと RDP の設定は、貼ったユーザーのものになるため）
-> - 前提は [gnome-power.md 手順 1・2](gnome-power.md#実施手順)（サスペンドできる PC では、同書の手順 3・4 も）。ヘッドレスのセッションでも、既定のままでは 15 分の無操作で PC をサスペンドしようとする
+> - 前提は [AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1・2（サスペンドできる PC では、同じ節の手順 3・4 も）。ヘッドレスのセッションでも、既定のままでは 15 分の無操作で PC をサスペンドしようとする
 > - **手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
 > - 手順 10（クライアントからの接続）だけ別のマシンで行う
 > - [リモートログイン](gnome-remote-desktop.md)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
@@ -259,7 +259,7 @@
 ## ロールバック
 
 - 手順 1 の変数を設定したシェルで、上から順に貼る
-- [gnome-power.md](gnome-power.md) で変えた値は残る。戻すなら同書の[ロールバック](gnome-power.md#ロールバック)
+- [画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)で変えた値は残る。戻すなら同じ節の手順 6〜9
 - [claude-code-gui.md](claude-code-gui.md) を行ったなら、先に同書の[ロールバック](claude-code-gui.md#ロールバック)で戻す
 - この節の手順 3 は共用 TLS 設定を退避時の値に戻し、手順 4 は今回生成した証明書だけを消す。退避後にデスクトップ共有（[gnome-desktop-sharing.md](gnome-desktop-sharing.md)、設定アプリの「デスクトップ共有」）の TLS 設定を別に変えた場合は、先にその設定を控える
 - 退避が無い場合は、共用 TLS 設定と証明書を保持する。導入前の値に戻すには、別に残した記録が要る
@@ -390,7 +390,7 @@
 
 ## 注意点
 
-- **Homebrew が PATH の先頭にあると、`gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになる**（[homebrew.md の注意点](homebrew.md#注意点)）。前提の [gnome-power.md](gnome-power.md) の手順は `/usr/bin/gsettings` で書いてある（Homebrew の `gsettings` は GNOME に効かない）
+- **Homebrew が PATH の先頭にあると、`gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになる**（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）。前提の[画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順は `/usr/bin/gsettings` で書いてある（Homebrew の `gsettings` は GNOME に効かない）
 - **同じユーザーの GNOME のセッションは 1 つにする**: PC の画面から同じユーザーで入るときは、先に `sudo systemctl stop gnome-headless-session@<USER>.service` でヘッドレスのセッションを止める
   - gnome-session のユーザーの unit（`gnome-session-manager@gnome.service` など）はユーザーに 1 組しか無いので、2 つ目のセッションは動かないはず
   - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
@@ -400,8 +400,8 @@
   - GDM を再起動したら `systemctl is-active gnome-headless-session@<USER>.service` を見て、`inactive` なら `sudo systemctl start gnome-headless-session@<USER>.service` で起動する
 - **セッションを止めると、ユーザーの D-Bus が起動し直される**: GNOME のセッションが終わると、`gnome-session-restart-dbus.service` がユーザーのセッションバスを起動し直す
 - **ログインのキーリングは開いていない**: パスワード無しで作るセッションなので、キーリング（`login`）はロックされたまま。パスワードを読もうとするアプリは、キーリングを開く窓を出す
-- **サスペンドとロック**: ヘッドレスのセッションでも gsd-power は動き、既定では 15 分の無操作で PC をサスペンドしようとする。前提の [gnome-power.md 手順 1・2](gnome-power.md#実施手順) で止める
-  - seat0 には GDM のログイン画面が残り、Workstation で入れた PC ではそれも 15 分で PC を眠らせる。サスペンドできる PC では、[gnome-power.md](gnome-power.md) の手順 3・4 も行う
+- **サスペンドとロック**: ヘッドレスのセッションでも gsd-power は動き、既定では 15 分の無操作で PC をサスペンドしようとする。前提の[画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1・2 で止める
+  - seat0 には GDM のログイン画面が残り、Workstation で入れた PC ではそれも 15 分で PC を眠らせる。サスペンドできる PC では、[画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 3・4 も行う
 - **リモートログインを有効にしている PC**: セッションの中で `gnome-remote-desktop-handover.service` も起動する（リモートログインの受け渡し役。TCP では待ち受けない）
   - リモートログインのデーモン（`gnome-remote-desktop.service`）を起動し直したら、この受け渡し役のデーモンも再起動する（[gnome-remote-desktop.md の「設定済みのサーバーで GDM の後に起動させる」](gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、リモートログインからこのセッションへ渡せなくなるはず
 - **自己署名証明書**: クライアントは初回に証明書の確認を出す。証明書を作り直したら、クライアントで保存済みの証明書を消すか、変更の警告を承認する（gnome-remote-desktop.md の注意点と同じ）
