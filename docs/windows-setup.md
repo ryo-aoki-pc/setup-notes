@@ -33,6 +33,8 @@
   - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
   - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
   - Edge の常駐は[Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)（管理者の窓）、クリップボードの履歴は[CopyQ を使う（任意）](#copyq-を使う任意)
+  - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
+  - Windows Terminal のフォントは、HackGen Console NF を入れた後に[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
   - 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
@@ -1941,6 +1943,496 @@
 
 ---
 
+## PowerToys のユーティリティを絞る（任意）
+
+- 手順 23 で入れた PowerToys の、既定で有効なユーティリティのうち、使わないものを設定ファイルで切る（手順 23 の続き）
+- 前提: 手順 23。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- **この節の手順 4・7 は通知領域で PowerToys を終了し、この節の手順 6 は PowerToys の設定の画面で行う**
+- PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
+- 切るユーティリティは好みで選ぶ。この節の手順 2 の `$PT_OFF` は案で、Always On Top・コマンド パレット・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer は残す（[参考資料](reference/windows-setup.md)）
+- 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
+- Keyboard Manager は使わない（既定でオフ。Caps Lock は手順 51 で変える）
+- 戻すときは、この節の手順 7・8
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 変数を設定する。
+
+   ```powershell
+   $PT_OFF = 'FindMyMouse', 'MouseHighlighter', 'FancyZones', 'ColorPicker', 'Measure Tool', 'Awake'   # 切るユーティリティ（設定ファイルの名前）
+   $PT_EXE = @((Get-Process -Name PowerToys -ErrorAction SilentlyContinue).Path) + "$env:LOCALAPPDATA\PowerToys\PowerToys.exe", "$env:LOCALAPPDATA\Programs\PowerToys\PowerToys.exe" | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1   # PowerToys.exe の場所（自動）
+   'PT_OFF = {0}' -f ($PT_OFF -join ', ')
+   'PT_EXE = {0}' -f $PT_EXE
+   ```
+
+   - `PT_OFF = FindMyMouse, …` と、`PT_EXE = C:\Users\<WIN_USER>\AppData\Local\PowerToys\PowerToys.exe` の形の 2 行が出ればよい
+   - `PT_EXE` が空なら、PowerToys が見つからない。手順 23 を確かめる
+   - `$PT_OFF` の名前は、設定ファイルの名前（空白を含むものがある）。変えるなら、この節の手順 3 の表の `Name` から選ぶ
+   - 入る場所は Microsoft の資料どうしで食い違うので、動いている PowerToys から取る
+   - 新しい窓を開いたら、このブロックを貼り直す
+
+1. 今のユーティリティの有効・無効と、自動の起動を確かめる。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
+     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     $s.enabled.PSObject.Properties | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Enabled = $_.Value; Off = $PT_OFF -contains $_.Name } } | Format-Table -AutoSize
+     foreach ($n in $PT_OFF) { if (-not $s.enabled.PSObject.Properties[$n]) { "無い名前: $n" } }
+     'startup: {0} / run_elevated: {1}' -f $s.startup, $s.run_elevated
+     Get-ScheduledTask -TaskPath '\PowerToys\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   }
+   ```
+
+   - ユーティリティごとの `Name`・`Enabled`・`Off`（`$PT_OFF` にあるか）の表と、`startup: True / run_elevated: False` と、`Autorun for <WIN_USER>` の行が出ればよい
+   - `無い名前:` が出たら、その名前は今の版の設定ファイルに無い（版で名前が変わる）。この節の手順 2 の `$PT_OFF` を表の名前に直して貼り直す
+   - `startup` が `False` か、`Autorun for <WIN_USER>` が無いなら、サインインのときに起動しない。`run_elevated` が `True` なら、「常に管理者として実行」がオンになっている。どちらも PowerToys の設定の「全般」で戻す
+   - `中断: 設定ファイルが無い` が出たら、PowerToys を 1 度起動してから貼り直す
+
+1. 通知領域の PowerToys を右クリックし、「終了」で閉じる。
+
+   - 通知領域（「^」の中のことがある）の PowerToys のアイコンを右クリックし、「終了」を選ぶ。PowerToys の設定の窓も閉じる
+   - **次の手順は、アイコンが消えてから貼る**
+
+1. 設定ファイルで `$PT_OFF` のユーティリティを切り、PowerToys を起動し直す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 4 で終了してから貼り直す'; return }
+     if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 4 に戻る'; return }
+     try { $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 設定ファイルを読めない: $path"; return }
+     if (-not $s.PSObject.Properties['enabled']) { Write-Error "中断: 設定ファイルに enabled が無い: $path"; return }
+     $miss = @($PT_OFF | Where-Object { -not $s.enabled.PSObject.Properties[$_] })
+     if ($miss.Count) { Write-Error "中断: 設定ファイルに無い名前: $($miss -join ', ')"; return }
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     foreach ($n in $PT_OFF) { $s.enabled.PSObject.Properties[$n].Value = $false }
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
+     Start-Process -FilePath $PT_EXE
+   }
+   ```
+
+   - `控えた:`（2 回目からは `控えはもうある`）の行と、`FindMyMouse: False` の形の行が `$PT_OFF` の数だけ出て、通知領域に PowerToys のアイコンが戻ればよい
+   - 控えは `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 8 で使い、書き戻すと消える）
+   - 書くのは `enabled` の値だけで、ほかの設定は変えない
+   - `中断: PowerToys が動いている` が出たら、この節の手順 4 に戻る（設定の窓が残っていても止まる）
+
+1. PowerToys の設定の画面で、切ったユーティリティがオフになっていることを確かめる。
+
+   - 通知領域の PowerToys のアイコンを右クリックし、「設定」で設定の窓を開く（ダブルクリックでも開く。1 回のクリックで開くのはクイック アクセス）
+   - 「ダッシュボード」で、`$PT_OFF` のユーティリティがオフ、残したものがオンになっている
+   - 同じことは、ユーティリティごとのスイッチでもできる（すぐに効く）
+   - Peek は「Space で開く」をオンのままにする（オフにすると、起動のキーが手順 31 の IME と同じ Ctrl+Space に戻る）
+   - Find My Mouse を使うなら、起動の方法を「マウスを振る」にする（左 Ctrl を 2 回のままでは、手順 51 で Ctrl にした Caps Lock を 2 回押しても出る）
+   - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の印は付かない）
+   - 見終わったら、設定の窓を閉じる
+
+1. 元に戻すときは、通知領域の PowerToys を右クリックし、「終了」で閉じる。
+
+   - PowerToys の設定の窓も閉じる
+   - **次の手順は、アイコンが消えてから貼る**
+
+1. 元に戻すときは、控えた設定ファイルを書き戻し、PowerToys を起動する。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 7 で終了してから貼り直す'; return }
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 7 に戻る'; return }
+     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+     Remove-Item -LiteralPath $bak
+     $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
+     Start-Process -FilePath $PT_EXE
+   }
+   ```
+
+   - `FindMyMouse: True` の形の行（控えたときの値）が出て、通知領域に PowerToys のアイコンが戻ればよい
+   - 新しい窓では、先にこの節の手順 2 を貼る
+   - 控えた後に画面で変えた PowerToys の設定も、控えたときの値に戻る
+   - `中断: 控えが無い` が出たら、スタートメニューから PowerToys を起動し、設定の画面で、切ったユーティリティのスイッチをオンにする
+   - 控えのファイルは消える（もう一度この節を通すと、そのときの設定を控え直す）
+
+---
+
+## PowerShell 7 のプロファイルを設定する（任意）
+
+- 手順 24 で入れた PowerShell 7 のプロファイルに、手順 16〜19 と同じ貼り付けの設定と、↑/↓ の履歴の検索と、入っているときだけ zoxide・starship を読む行を足す（手順 24 の続き）
+- 前提: 手順 16〜19・24。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（PowerShell 7 の窓には貼らない）
+- 書くのは PowerShell 7 のプロファイル（`Documents\PowerShell\Microsoft.PowerShell_profile.ps1`）で、手順 19 の Windows PowerShell 5.1 のプロファイルとは別のファイル
+- 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
+- **この節の手順 6 は PowerShell 7 の窓で確かめる**
+- zoxide と starship は、入れていなければ読まない。この節は、それらを入れる前に通してよい（入れた後に PowerShell 7 を開き直せば読む）
+- Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない。この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+- 戻すときは、この節の手順 7・8（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. PowerShell 7 のプロファイルに、貼り付けと履歴の検索のキーと、zoxide・starship を読む行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward }  # windows-setup.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward }  # windows-setup.md'
+       'if (Get-Command -Name zoxide -CommandType Application -ErrorAction Ignore) { Invoke-Expression (& { (zoxide init powershell | Out-String) }) }  # windows-setup.md'
+       'if (Get-Command -Name starship -CommandType Application -ErrorAction Ignore) { function global:Invoke-Starship-PreCommand { if (Test-Path -Path Function:\__zoxide_hook) { $null = __zoxide_hook } }; Invoke-Expression (& starship init powershell) }  # windows-setup.md'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     foreach ($line in $lines) {
+       $text = Get-Content -LiteralPath $p -Raw
+       if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+         $add = $line
+         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+         "足した: $line"
+       }
+     }
+     "--- $p"
+     Get-Content -LiteralPath $p
+   }
+   ```
+
+   - 5 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）。無ければ作る
+   - 何度貼ってもよい（同じ行は足さない）。プロファイルにほかの行があれば、そのまま残る
+   - zoxide の行は、starship の行より前に置く（starship のプロンプトから zoxide の記録を呼ぶ。順の理由は[参考資料](reference/windows-setup.md)）
+   - 開いている PowerShell 7 の窓には、開き直すまで効かない
+
+1. Tab で補完の候補の一覧を出すときだけ、Tab の行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete }  # windows-setup.md'
+     if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。この節の手順 2 を先に貼る: $p"; return }
+     $text = Get-Content -LiteralPath $p -Raw
+     if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+       $add = $line
+       if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+       Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+       "足した: $line"
+     }
+   }
+   ```
+
+   - `足した:` か `すでにある:` が出ればよい
+   - Tab で、候補が一覧で出る（矢印で選んで Enter、Esc で取り消す）。既定の Tab は、候補を 1 つずつ入れ替える
+   - 一覧を出す既定のキーの Ctrl+Space は、手順 31 で IME が受け取るので、その代わりになる
+
+1. PowerShell 7 で、実行ポリシーとキーの割り当てを確かめる。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Get-ExecutionPolicy -List | Out-String -Width 120; Import-Module PSReadLine; . $PROFILE; Get-PSReadLineKeyHandler -Bound | Where-Object Key -in 'Ctrl+Enter', 'UpArrow', 'DownArrow', 'Tab' | Format-Table Key, Function -AutoSize | Out-String -Width 120 }
+   ```
+
+   - 次のとおりならよい
+     - 実行ポリシーの表の `LocalMachine` か `CurrentUser` が `RemoteSigned`
+     - キーの表の `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`（この節の手順 3 を行ったなら、`Tab` が `MenuComplete`）
+   - `pwsh.exe` が見つからない旨が出たら、手順 24 を確かめる
+   - 実行ポリシーがどれも `Undefined` なら、プロファイルは読まれず、キーは既定のまま（`Ctrl+Enter` が `InsertLineAbove`）。そうでなければ、この節の手順 5 は飛ばす
+
+1. 実行ポリシーがどれも `Undefined` のときだけ、PowerShell 7 の CurrentUser を RemoteSigned にする。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
+   ```
+
+   - 表の `CurrentUser` が `RemoteSigned` になればよい
+   - PowerShell 7 の実行ポリシーは、手順 18 の Windows PowerShell 5.1 の値とは別に持つ（`Documents\PowerShell\powershell.config.json` に書かれる）
+   - この節の手順 4 をもう一度貼って、キーの割り当てを確かめる
+
+1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
+
+   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
+   - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
+   - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）
+   - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
+   - Ctrl+Alt+? で、キーの割り当ての一覧が出る
+   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この節の手順 1 の窓に貼る**
+
+1. 元に戻すときは、PowerShell 7 のプロファイルから、この節で足した行を消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [System.IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # windows-setup\.md\r?(\n|$)', '$1')
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
+   - 消すのは、行末が `  # windows-setup.md` の行だけ（PowerToys の Command Not Found などが足した行は残る）。ほかの行の文字コードは変えない
+   - `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
+   - 開いている PowerShell 7 の窓には、閉じるまで設定が残る
+
+1. 元に戻すときは（この節の手順 5 を行ったとき）、PowerShell 7 の CurrentUser の実行ポリシーを戻す。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
+   ```
+
+   - 表の `CurrentUser` が `Undefined` ならよい
+
+---
+
+## Windows Terminal のフォントと貼り付けの警告を変える（任意）
+
+- Windows Terminal（手順 30 で既定の端末にした）の全プロファイルのフォントを HackGen Console NF にし、複数行を貼るときの警告を、要らなければ切る
+- 前提: [HackGen Console NF の Windows 11 で使う](hackgen.md#windows-11-で使う)（入れた後にサインインし直すか、手順 55 で再起動した後）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
+- **この節の手順 5 は Windows Terminal の設定の画面で行う**
+- 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
+- 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この節の手順 4）
+- コマンドで書くのは `settings.json` だけ。既定のプロファイル（Windows PowerShell）と、選んだらコピーする設定（`copyOnSelect`）は変えない
+- 戻すときは、この節の手順 6
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（手順 30 の設定で、Windows Terminal の窓で開く）
+
+1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い。Windows Terminal を 1 度開いてから貼り直す: $path"; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある。この節の手順 5 の画面で変える: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない。この節の手順 5 の画面で変える: $path"; return }
+     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）。この節の手順 5 の画面で変える'; return }
+     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     [pscustomobject]@{
+       Version          = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
+       DefaultsFontFace = $s.profiles.defaults.font.face
+       MultiLinePaste   = $s.'warning.multiLinePaste'
+       DefaultProfile   = $s.defaultProfile
+       CopyOnSelect     = $s.copyOnSelect
+     } | Format-List
+     $s.profiles.list | Where-Object { $_.font.face } | Format-Table name, @{ Name = 'face'; Expression = { $_.font.face } }
+   }
+   ```
+
+   - `控えた:`（2 回目からは `控えはもうある`）の行と、`Version : 1.25.…` の形の 5 行が出ればよい。`DefaultsFontFace` が空なら、既定のフォント（Cascadia Mono）
+   - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 6 で使い、書き戻すと消える）
+   - 最後に表が出たら、そのプロファイルは自分のフォントを持つので、この節の手順 3 の値は効かない（この節の手順 5 の画面で、そのプロファイルを変える）
+   - `中断:` が出たら、何も書いていない。この節の手順 5 の画面で変える（設定の画面でリセットした後は、コメントの入ったファイルになる）
+   - `Version` が 1.24 より前なら、この節の手順 4 は飛ばす（警告の値の形が違う）
+
+1. 全プロファイルのフォントを HackGen Console NF にする。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この節の手順 2 を先に貼る'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）'; return }
+     if (-not $s.profiles.PSObject.Properties['defaults']) { $s.profiles | Add-Member -NotePropertyName defaults -NotePropertyValue ([pscustomobject]@{}) }
+     if (-not $s.profiles.defaults.PSObject.Properties['font']) { $s.profiles.defaults | Add-Member -NotePropertyName font -NotePropertyValue ([pscustomobject]@{}) }
+     $s.profiles.defaults.font | Add-Member -NotePropertyName face -NotePropertyValue 'HackGen Console NF' -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     'face: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).profiles.defaults.font.face
+   }
+   ```
+
+   - `face: HackGen Console NF` が出ればよい
+   - 保存した直後に、開いているタブにも効く（Windows Terminal がファイルを読み直す）
+   - ファイルの字下げと記号の書き方は変わるが、中身は同じ
+   - フォントが見つからないと、端末に、フォントが見つからない旨が出て、別のフォントで出る（この節の手順 5 で確かめる）
+
+1. Windows Terminal が 1.24 以降で、複数行を貼るたびに出る警告を出さないときだけ、警告を切る。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $ver = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
+     if (-not $ver -or [version]$ver -lt [version]'1.24') { Write-Error "中断: Windows Terminal の版が 1.24 より前: $ver"; return }
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この節の手順 2 を先に貼る'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     $s | Add-Member -NotePropertyName 'warning.multiLinePaste' -NotePropertyValue 'never' -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     'warning.multiLinePaste: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).'warning.multiLinePaste'
+   }
+   ```
+
+   - `warning.multiLinePaste: never` が出ればよい
+   - **注意**: 信用できない複数行の文字も、確かめずにそのまま貼られて動く
+   - 5 KiB を超える文字を貼るときは、別の警告が出ることがある
+
+1. Windows Terminal の設定の画面で、フォントが見つかっていることを確かめる。
+
+   - Windows Terminal の窓で Ctrl+, を押し、「既定値」→「外観」の「フォント スタイル」が `HackGen Console NF` で、「見つからないフォント:」が出ていない
+   - 新しいタブを開くと、文字が HackGen になっている
+   - この節の手順 2〜4 が `中断:` で止まったときは、この画面でフォント スタイルを選んで「保存」を押す（一覧に無ければ「すべてのフォントの表示」をオン）。警告は「操作」の「改行を貼り付ける際に警告する」を「なし」にする
+   - **次の手順は、設定の画面を閉じてから貼る**
+
+1. 元に戻すときは、控えた設定ファイルを書き戻す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     $bak = "$path.windows-setup.bak"
+     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
+     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+     Remove-Item -LiteralPath $bak
+     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+     'face: {0} / warning.multiLinePaste: {1}' -f $s.profiles.defaults.font.face, $s.'warning.multiLinePaste'
+   }
+   ```
+
+   - 控えたときの値（ふつうは 2 つとも空）が出ればよい。開いているタブにもすぐ効く
+   - 控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻る。残すなら、このブロックは貼らず、この節の手順 5 の画面でフォント スタイルと警告を戻す
+   - `中断: 控えが無い` が出たら、この節の手順 5 の画面で戻す
+   - 控えのファイルは消える（もう一度この節を通すと、そのときの設定を控え直す）
+
+---
+
+## WSL のネットワークをミラーにする（任意）
+
+- WSL 2 のネットワークを、既定の NAT から、Windows と同じ IP を使うミラーに変える（手順 54・62 の続き）
+- 前提: 手順 54・62・63。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（自分のユーザーの `%USERPROFILE%\.wslconfig` に書く）
+- **この節の手順 4・7 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
+- ミラーにして変わること
+  - WSL からこの PC の Windows のサーバー（[Windows の OpenSSH サーバー](windows-openssh-server.md)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
+  - Windows が使っているポートは、WSL の中では使えない。Windows の sshd が 22 番で待っていると、WSL の中の sshd は 22 番を使えない
+  - Docker のポートの公開と、一部の VPN には、既知の問題がある（[参考資料](reference/windows-setup.md)）
+- 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この節では作らない
+- 画面で変えるなら、スタートメニューの「Linux 用 Windows サブシステム設定」→「ネットワーク」→「ネットワーク モード」（同じファイルに書く）
+- 戻すときは、この節の手順 6・7
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+
+1. 今の `.wslconfig` と、WSL の版と、動いているディストリビューションを確かめる。
+
+   ```powershell
+   & {
+     $env:WSL_UTF8 = '1'
+     $p = Join-Path $env:USERPROFILE '.wslconfig'
+     if (Test-Path -LiteralPath $p) { "--- $p"; [IO.File]::ReadAllText($p) } else { "無い: $p" }
+     wsl.exe --version
+     wsl.exe --list --running
+   }
+   ```
+
+   - `無い:` か、`.wslconfig` の中身が出る
+   - `wsl.exe --version` が、WSL の版（`2.…` の形）を出せばよい
+   - 最後に、動いているディストリビューションが出る（無ければ、無い旨の行）。この節の手順 4 で止まる
+   - 中身の `[wsl2]` に `networkingMode=mirrored` があれば、もうミラー。この節の手順 3 は飛ばす
+
+1. ミラーになっていないときだけ、`.wslconfig` に、ネットワークをミラーにする行を書く（ファイルがあれば控える）。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:USERPROFILE '.wslconfig'
+     $bak = "$path.windows-setup.bak"
+     $enc = New-Object System.Text.UTF8Encoding $false
+     if (-not (Test-Path -LiteralPath $path)) {
+       [IO.File]::WriteAllText($path, "[wsl2]`r`nnetworkingMode=mirrored`r`n", $enc)
+       "作った: $path"
+     } else {
+       $text = [IO.File]::ReadAllText($path)
+       if ($text -match '(?im)^[ \t]*networkingMode[ \t]*=') { Write-Error "中断: networkingMode の行がもうある。手で直すか、設定の画面で変える: $path"; return }
+       if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+       $nl = if ($text.Contains("`n") -and -not $text.Contains("`r`n")) { "`n" } else { "`r`n" }
+       $re = [regex]'(?im)^([ \t]*\[wsl2\][ \t]*)(?=\r?$)'
+       if ($re.IsMatch($text)) { $text = $re.Replace($text, '$1' + $nl + 'networkingMode=mirrored', 1) } else {
+         if ($text -and -not $text.EndsWith("`n")) { $text += $nl }
+         $text += '[wsl2]' + $nl + 'networkingMode=mirrored' + $nl
+       }
+       [IO.File]::WriteAllText($path, $text, $enc)
+       "足した: $path"
+     }
+     [IO.File]::ReadAllText($path)
+   }
+   ```
+
+   - `作った:` か `足した:` の行（ファイルがあったときは、その前に `控えた:`）と、`[wsl2]` の次の行が `networkingMode=mirrored` の中身が出ればよい
+   - 控えは `%USERPROFILE%\.wslconfig.windows-setup.bak`。ファイルがあって、控えが無いときだけ作る（この節の手順 6 で使い、戻すと消える）
+   - `中断: networkingMode の行がもうある` が出たら、何も書いていない。その行を手で `networkingMode=mirrored` にするか、設定の画面で変える
+   - 効くのは、この節の手順 4 で WSL を止めた後
+
+1. WSL を止めて、ミラーで動くことを確かめる。
+
+   ```powershell
+   wsl.exe --shutdown
+   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
+   ```
+
+   - `mirrored` が出ればよい
+   - `ミラー化されたネットワーク モードはサポートされていません` の行が出て `nat` なら、この PC ではミラーを使えない（理由はその行に出る）。この節の手順 6・7 で戻す
+   - その行が無く `nat` なら、`.wslconfig` が読まれていない（この節の手順 2 で中身を確かめる）
+   - `wslinfo` が無い旨が出たら、`wsl.exe --distribution AlmaLinux-10 -- ip -4 -br addr` の IP が、Windows の LAN の IP（`ipconfig`）と同じならミラー
+   - WezTerm の WSL のタブは切れているので、開き直す
+
+1. Windows の OpenSSH サーバーを入れたときだけ、WSL から `127.0.0.1` の 22 番に届くことを確かめる。
+
+   ```powershell
+   wsl.exe --distribution AlmaLinux-10 -- bash -c 'exec 3<>/dev/tcp/127.0.0.1/22 && head -n 1 <&3'
+   ```
+
+   - `SSH-2.0-OpenSSH_for_Windows_` で始まる行が出ればよい
+   - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[Windows の OpenSSH サーバーの注意点](windows-openssh-server.md#注意点)）
+   - `Connection refused` が出たら、Windows の sshd が動いていない（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順で確かめる）
+
+1. 元に戻すときは、`.wslconfig` を元に戻す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:USERPROFILE '.wslconfig'
+     $bak = "$path.windows-setup.bak"
+     if (Test-Path -LiteralPath $bak) {
+       Move-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
+       "控えから戻した: $path"
+     } elseif (-not (Test-Path -LiteralPath $path)) {
+       "無い: $path"
+     } elseif ([IO.File]::ReadAllText($path) -eq "[wsl2]`r`nnetworkingMode=mirrored`r`n") {
+       Remove-Item -LiteralPath $path -ErrorAction Stop
+       "消した: $path"
+     } else {
+       Write-Error "中断: この節で作った形ではない。networkingMode の行を手で消す: $path"
+     }
+   }
+   ```
+
+   - `控えから戻した:`（ファイルがあったとき）か `消した:`（この節で作ったとき）が出ればよい
+   - 控えた後に設定の画面などで変えた値も、控えたときに戻る
+   - `中断:` が出たら、`.wslconfig` をメモ帳で開き、`networkingMode=mirrored` の行を消して保存する
+   - 効くのは、この節の手順 7 で WSL を止めた後
+
+1. 元に戻すときは、WSL を止めて、NAT に戻ったことを確かめる。
+
+   ```powershell
+   wsl.exe --shutdown
+   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
+   ```
+
+   - `nat` が出ればよい
+   - WSL から Windows のサーバーには、また LAN の IP あてにつなぐ
+
+---
+
 ## 更新
 
 - Windows Update は[手順 1〜8](#実施手順)（管理者の窓）、Microsoft Store は[手順 9〜15](#実施手順)（通常の窓）を通す。再起動が必要な場合も、自動では再起動しない
@@ -2027,7 +2519,10 @@
   - ネットワークとサインイン: 配信の最適化は 29、ping は 30、リモート アシスタンスは 31、リモート デスクトップは 32、LAN の種類は 33、Windows Hello は 22
 - 多くは、元に戻すかを手順 37 で控えた値で決める
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
-- 任意節（Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ）で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
+- 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
+  - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク
+  - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 7・8
+  - この節の手順 17・25 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)の手順 6・7
 
 > [!CAUTION]
 > **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
@@ -2541,12 +3036,14 @@
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
+  - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 3）
 - **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（手順 30）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、手順 16〜19 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（手順 33・34）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。手順 27・32〜34 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（手順 26）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、手順 17 の `ClassicMenu` と手順 26 の `reg.exe query` で、設定が残っているかを見る。手順 25・27・32 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節を、`scoop install`・`scoop update` の後に貼る
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: 手順 19 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 24）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
+  - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
 - **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。手順 16〜19 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
@@ -2555,3 +3052,7 @@
 - **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)の手順 2 のポリシーで出る。消すには、その節の手順 5 で 2 つの値を消す（ほかの Edge のポリシーが無ければ消えるはず。手順 50 の `EdgeUpdate` だけで出るかも含め、確かめていない）
 - **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、その節の手順 12 で外さないと、オンラインだけにされうる
 - **CopyQ の履歴は暗号化されない**: [CopyQ を使う（任意）](#copyq-を使う任意)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
+- **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
+  - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)の手順 4
+- **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
+  - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない

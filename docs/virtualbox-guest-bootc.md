@@ -230,7 +230,7 @@
 - ホスト（VirtualBox を動かしている PC）で派生イメージをビルドし、1 つのファイルにして ssh で VM に運ぶ。VM はインターネットに出ない
   - ビルドの材料（手順 3 の Containerfile と、手順 5 でコピーしたインストーラ）は、VM から写して使う
 - ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[podman.md](podman.md) の手順 1〜6）
-  - Windows のホストでは、WSL の AlmaLinux 10 の端末で行う（WSL の既定のネットワークのままで、ホストオンリーのネットワークの VM に届いた）
+  - Windows のホストでは、WSL の AlmaLinux 10 の端末で行う（WSL の既定のネットワーク〔NAT〕のままで、ホストオンリーのネットワークの VM に届いた。WSL をミラーにした PC〔[Windows 11 の初期設定の任意節](windows-setup.md#wsl-のネットワークをミラーにする任意)〕で届くかは確かめていない）
 - 手順 6 と違うところ:
   - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この節の手順 6）
   - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この節の手順 3・4。登録は secure-boot-mok.md の手順 5〜7）

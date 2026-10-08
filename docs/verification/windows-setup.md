@@ -237,6 +237,70 @@
   - 日本語の画面の文言（「設定...」・「ショートカット」・「メインウィンドウの表示切り替え」など。訳のファイルから書いた）と、割り当てたグローバル ショートカットが効くこと
   - RDP の画面とスクリーンショットに CopyQ の窓が写らないこと
 
+### PowerToys のユーティリティを絞る（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: PowerToys の main のソース（`src/runner/main.cpp`・`general_settings.cpp`・`auto_start_helper.cpp`・`settings_helpers.cpp`・`EnabledModules.cs`・`PeekProperties.cs`・`FindMyMouseProperties.cs`・Peek の `dllmain.cpp`・インストーラの `Common.wxi`・`Product.wxs`）と、Microsoft Learn の Install・DSC・PSDSC・Running as administrator・Peek・Mouse utilities・Command Not Found のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2 の `$PT_EXE` の選び方、手順 3 の `無い名前:`、手順 5 の中断（動いている・`$PT_EXE` が空・無い名前・`enabled` が無い・読めない）と書き換え（変わったのは `enabled` の 6 つだけで、7 段の入れ子と配列は型まで保った。2 回目は控えを書き換えない）、手順 8 の書き戻し（流す前とバイトで一致し、控えが消えた）を、Linux の PowerShell 7.5.3 と偽物のコマンドレットで模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。0.101.2362.0 の入る場所（`%LOCALAPPDATA%\PowerToys` か `%LOCALAPPDATA%\Programs\PowerToys`）と、動いているプロセスから場所を取れること
+  - `settings.json` を直接書いて、起動し直した PowerToys に効くこと。終了のときに PowerToys が設定ファイルを書き直さないこと
+  - 0.101.2362.0 の設定ファイルの `enabled` の名前と既定（main のソースから書いた）
+  - `Get-ScheduledTask` で `\PowerToys\Autorun for <WIN_USER>` が読めること
+  - 日本語の画面の文言（通知領域の「終了」・「設定」・「ダッシュボード」・Peek の「Space で開く」・Find My Mouse の「マウスを振る」・Command Not Found の「インストール」）
+  - 通知領域のアイコンを 1 回クリックするとクイック アクセスが開き、右クリックの「設定」かダブルクリックで設定の窓が開くこと（main のソースから書いた）
+  - 0.95 より前の設定を引き継いだ PC での Peek の起動のキー
+
+### PowerShell 7 のプロファイルを設定する（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: PowerShell 7.5.4・7.6.0・7.6.6 のソース（`CorePsPlatform.cs`・`ConsoleHost.cs`・`build.psm1`・`PSGalleryModules.csproj`）、PSReadLine 2.3.6・2.4.5 のソース（`KeyBindings.cs`・`History.cs`・`Cmdlets.cs`）、zoxide 0.9.9・0.10.0 の `templates/powershell.txt`、starship 1.26.0 の `starship.ps1`、自分用の WezTerm の設定（`lua/shells.lua`・`shell/wezterm.ps1`）、Microsoft Learn の about_Profiles・about_Execution_Policies・about_PowerShell_Config・about_PSReadLine・Using predictors。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 貼り付けの設定の原因（PSReadLine の Ctrl+Enter が `InsertLineAbove`）は、PowerShell 7.6.6（PSReadLine 2.4.5）でも同じだった（もとの手順書 `windows-powershell-paste.md` の注意点の記録。この記録の「操作上の注意と併記されていた記録」）
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2・3 の足し方（無いときに作る・2 回目は `すでにある:` で変わらない・末尾に改行の無いファイル・BOM 付きのファイル・5 行のうち 2 行があるファイル）と、手順 7 の消し方（BOM 付きの UTF-8・UTF-16LE・CRLF・LF。印の行だけならファイルを消し、印の形の違う行と PowerToys の Command Not Found の行は残る）を、Linux の PowerShell 7.5.3 で模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+  - 足したプロファイルを、Linux の PowerShell 7.5.3（PSReadLine 2.3.6）と Linux 版の starship 1.26.0・zoxide 0.10.0 で読んだ。この節の手順 4 のキーの表が `AddLine`・`HistorySearchBackward`・`HistorySearchForward`・`MenuComplete` になり、新しいディレクトリで `prompt` を呼ぶと zoxide に記録された（`Invoke-Starship-PreCommand` を除いた形では記録されない）。2 つが無いと、どちらも読まなかった。実行ポリシーの手順 5・8 は、Linux では流せない（同じ付録）
+- **確かめていないこと**:
+  - Windows で貼ること。5.1 の `Add-Content` と `Get-Content -Raw` が、PowerShell 7 のプロファイルに行を足すこと（手順 19 と同じ形）
+  - 5.1 から `pwsh.exe -NoLogo -NoProfile -Command { … }` を呼ぶ形（minishell）で、結果が表で出ること。非対話の起動で `Set-PSReadLineKeyHandler` が通ること
+  - MSIX の PowerShell 7 の `$PSHOME` に `powershell.config.json`（`RemoteSigned`）があること
+  - スタートメニューから管理者として開いた PowerShell 7（conhost の窓）に右クリックで貼ると、この節の行が無ければ逆順になり、あれば正しい順になること。WezTerm（ConPTY）の PowerShell 7 に複数行を貼ったときに Ctrl+Enter の行が要るか
+  - zoxide → starship の順（`Invoke-Starship-PreCommand` で zoxide の記録を呼ぶ）で、`z` が移動先を記録し、失敗したコマンドの後に starship のエラーの印が出ること。README の starship → zoxide の順で `$?` が崩れるか
+  - Tab の `MenuComplete` を既定で入れるか（条件付きの手順のままにした）
+  - OneDrive でドキュメントをバックアップしている PC のプロファイルの場所
+  - スタートメニューの PowerShell 7 の表示名（MSIX の表示名は「PowerShell」のはず。PowerShell のソースの `packaging.psm1` から書いた。手順 24 の「PowerShell 7」とは違う）
+
+### Windows Terminal のフォントと貼り付けの警告を変える（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: microsoft/terminal の main と release-1.21〜1.24 のソース（`MTSMSettings.h`・`CascadiaSettingsSerialization.cpp`・`CascadiaSettings.cpp`・`userDefaults.json`・`TerminalPage.cpp`・`VtIo.cpp`・`utils.cpp`・日本語の訳の `Resources.resw`）と、Microsoft Learn の Windows Terminal のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 貼り付けの設定の原因を確かめた PC の、管理者ではない窓は Windows Terminal 1.25.2733.0 だった（[対象と検証環境](#対象と検証環境)）
+  - この節のブロック 4 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2〜4 の中断（ファイルが無い・行とブロックのコメント・末尾のカンマ・配列の `profiles`・控えが無い・版が 1.24 より前）と、文字列の中の `//`・`/*` では止まらないこと、書き換え（変わったのは `profiles.defaults.font.face` と `warning.multiLinePaste` だけで、`font.size` などと、入れ子・空と 1 要素の配列・`null` は型まで保った）、手順 6 の書き戻し（流す前とバイトで一致し、控えが消えた）を、Linux の PowerShell 7.5.3 と偽物の `Get-AppxPackage` で模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。5.1 の `ConvertFrom-Json`・`ConvertTo-Json -Depth 100` で、実際の `settings.json` の配列（`profiles.list`・`actions`・空の配列）が形を保って書き戻されること
+  - 管理者ではない 5.1 の窓（Windows Terminal 1.25）に複数行を貼るたびに「警告」が出ること（コードからの推測）。出るなら、ほかの手順書のリードにも書くか
+  - 自分のユーザーに入れた HackGen Console NF が、MSIX の Windows Terminal から見えること（hackgen.md の検証記録でも未確認）
+  - 日本語の画面の文言（`Resources.resw` の訳から書いた）と、「見つからないフォント:」の出方
+  - 手順 9 の窓で Windows Terminal が先に設定を作り、手順 24 の後も既定のプロファイルが Windows PowerShell のままであること
+  - 管理者の窓（conhost）のフォントは、この節の範囲外
+
+### WSL のネットワークをミラーにする（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**:
+  - 資料: microsoft/WSL の master のソース（`WslCoreConfig.cpp`・`WslCoreConfig.h`・日本語の訳の `Resources.resw`）と、Microsoft Learn の wsl-config・networking・troubleshooting・Hyper-V Firewall・`New-NetFirewallHyperVRule` のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
+  - 同じ PC の WSL の記録は 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2）で、ネットワークは既定の NAT だった（[Windows の OpenSSH サーバーの検証記録](windows-openssh-server.md)と [VirtualBox のゲスト（bootc）の検証記録](virtualbox-guest-bootc.md)）
+  - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 3 の作成・控え・`[wsl2]` の行の直後への挿入（CRLF・LF・大文字の `[WSL2]`・`[wsl2]` の無いファイル・BOM 付き）と、`networkingMode` の行があるときの中断、手順 6 の戻し（控えからはバイトで一致・作ったままなら消す・手で変えたら中断）を、Linux の PowerShell 7.5.3 で模擬。`wsl.exe` を呼ぶ手順 2・4・5・7 は、偽物の関数で流れを見ただけ（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
+- **確かめていないこと**:
+  - Windows で貼ること。既にある `.wslconfig`（設定の画面が書いたもの）に 1 行足して、WSL が読むこと
+  - AlmaLinux 10 の WSL のイメージで `wslinfo --networking-mode` が使えること（無ければ `ip` で比べる）
+  - ミラーを使えない PC で `wsl.exe` が出す文言（`ミラー化されたネットワーク モードはサポートされていません`。`Resources.resw` の訳から書いた）
+  - ミラーで、WSL から `127.0.0.1:22` の Windows の sshd に届くことと、LAN の IP あてが届かないこと（文書の言い方からの推測。ミラーでも `127.0.0.1` に届かないというコミュニティの報告もある）
+  - ミラーで、WSL からホストオンリーのネットワークの VirtualBox の VM に届くか（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の記録は NAT のとき）
+  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard-road-warrior.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
+  - 対象の 24H2・25H2 と、利用者の 26H2（26300）の違い
+
 ### 対象と検証環境
 
 - **目的**: Windows 11 をインストールした直後に行う設定を、1 本の手順にまとめる
@@ -249,6 +313,7 @@
   - サインイン: Windows Hello だけのサインインを切る・自動サインイン
   - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](../verification/windows-setup.md#選択した方針)）。この文書のリードから順に案内する
   - 任意節（2026-10-08）: プライバシーと広告の表示・表示と入力と音とストレージ センサー・Edge の常駐のポリシー・CopyQ
+  - 任意節（2026-10-08 の 2 つ目）: PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォントと貼り付けの警告・WSL のネットワークのミラー
 - **進め方**: 最初に管理者の Windows PowerShell 5.1 で Windows Update を行い、必要なら手動で再起動する。その後、通常の窓で Store と自分のユーザーの設定を、管理者の窓で PC 全体の設定を行う
   - 設定の後に 1 回再起動し、WSL のディストリビューションと自動サインインを入れる
 - **状態**: **Windows の実機では通していない**（2026-10-03 に作成、2026-10-04 に更新を CLI 化）
@@ -283,6 +348,8 @@
 | PowerShell 7 | 7.6.6.0（winget の `Microsoft.PowerShell`、MSIX） |
 | Autologon | 3.10（winget の `Microsoft.Sysinternals.Autologon`） |
 | CopyQ（任意節） | 16.0.0（winget の `hluk.CopyQ`、自分のユーザー。2026-10-08 の定義。上流の最新は 17.0.0） |
+| Windows Terminal（任意節） | 1.24 以降（`warning.multiLinePaste` が 3 つの値の版）。貼り付けの設定の原因を確かめた PC は 1.25.2733.0 |
+| WSL（任意節） | 同じ PC の記録は 2.7.13.0（ネットワークは既定の NAT）。ミラーには Windows 11 22H2 以上が要る |
 | WSL の AlmaLinux 10 | `AlmaLinux-10`（2026-10-03 のイメージは 10.2） |
 
 貼り付けの設定（手順 16〜19・37・38）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
@@ -770,6 +837,96 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 1. 本物の `reg.exe` の出力と、`.reg` の書き戻しで効果音の値が種類（`REG_EXPAND_SZ`）まで戻ること
 1. `winget`・`copyq.exe`・`Start-Process 'ms-settings:…'`・`control.exe` を呼ぶブロック（Edge と CopyQ の節は、構文と互換だけ）
 1. 書いた値が画面と動作に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
+
+### 付録: PowerToys・PowerShell 7・Windows Terminal・WSL の任意節のブロックの確認（2026-10-08）
+
+「PowerToys のユーティリティを絞る（任意）」「PowerShell 7 のプロファイルを設定する（任意）」「Windows Terminal のフォントと貼り付けの警告を変える（任意）」「WSL のネットワークをミラーにする（任意）」を足したときに、PowerShell のブロックを、Linux（クラウドのコンテナ、Ubuntu 24.04）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。Windows では貼っていない。
+
+**対象のブロック**:
+
+- `origin/main` との差分で、足した `powershell` のブロック 20 個（手順書のブロックは 150 個から 170 個になった。既にあるブロックで変えたものは無い）
+  - PowerToys の節の 4 個（その節の手順 2・3・5・8）、PowerShell 7 の節の 6 個（その節の手順 2〜5・7・8）、Windows Terminal の節の 4 個（その節の手順 2〜4・6）、WSL の節の 6 個（その節の手順 2〜7）
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- 20 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）を当てた
+  - 互換の指摘は 0 個（3 つの規則とも 0）。レジストリに書くブロックが無いので、`Set-ItemProperty -Type` の既知の偽陽性も出ない
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、`PSUseCompatibleSyntax` が 1 個、`PSUseCompatibleCommands` が 2 個の指摘を出した
+- 既定の規則の指摘は 14 個で、すべて `PSUseBOMForUnicodeEncodedFile`（日本語を含むファイルに BOM が無い。貼るので関係が無い）。日本語を含まない 6 個（PowerShell 7 の節の手順 4・5・8、WSL の節の手順 4・5・7）には指摘が無い
+
+**模擬の仕方**（Linux の pwsh 7.5.3）:
+
+- `%LOCALAPPDATA%`・`%USERPROFILE%`・`HOME`（ドキュメントは `$HOME/Documents`）は一時のディレクトリにし、設定ファイル・控え・プロファイル・`.wslconfig` は、本物のファイルとして読み書きした
+- `Get-Process`・`Start-Process`・`Get-ScheduledTask`・`Get-AppxPackage`・`wsl.exe` は、決めた値を返すか、呼ばれたことを覚えるだけの関数にした
+- 設定ファイルは Python で作った
+  - PowerToys: 1 行の `settings.json`。`enabled` の 30 個と、7 段の入れ子・1 要素と空の配列・空のオブジェクト・`null`・小数・2^53 を超える整数・日本語と `<&>"\/` を含む文字列
+  - Windows Terminal: 字下げのある `settings.json`。`profiles.list` の 4 個（1 つは自分の `font` を持つ）、`actions` の入れ子、1 要素と空の配列、`null`、`ms-appx:///…` の URL、`/* … */` と `//` を中身に持つ文字列
+- 書いた後は、型まで比べる JSON の差分（Python の `json`）と、ファイルのバイト（SHA-256）で確かめた
+
+**PowerToys の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（変数） | 動いている `PowerToys` の `Path` がある。プロセスが無く、`%LOCALAPPDATA%\PowerToys\PowerToys.exe` と `%LOCALAPPDATA%\Programs\PowerToys\PowerToys.exe` の両方・`Programs` だけ・どちらも無い | プロセスがあればその `Path`、無ければ `%LOCALAPPDATA%\PowerToys` → `Programs\PowerToys` の順に、あるものを取った。どれも無いと `PT_EXE = ` の後ろが空 |
+| 手順 3（確かめる） | 設定ファイルが無い。ある。`Measure Tool` が無い | 無いと `中断: 設定ファイルが無い:`。あれば 30 行の表（`$PT_OFF` の 6 個だけ `Off` が `True`）・`startup: True / run_elevated: False`・偽物のタスクの行。`Measure Tool` が無いと、表の後に `無い名前: Measure Tool` |
+| 手順 5（書く） | `PowerToys` か `PowerToys.Settings` が動いている、`$PT_EXE` が空、`Measure Tool` が無い、`enabled` が無い、JSON が壊れている | どれも `中断:` で止まり、設定ファイルを変えず、控えを作らなかった（無い名前・`enabled` が無い・壊れているときは、`Start-Process` も呼ばれなかった） |
+| 同じ手順 5 | 1 回目。続けて 2 回目 | 1 回目は `控えた:` と `FindMyMouse: False` の形の 6 行を出し、`Start-Process` を `$PT_EXE` で 1 回呼んだ。控えは流す前とバイトで一致。JSON の差分は `enabled` の 6 個の `true -> false` だけで、入れ子（7 段）・配列・`null`・数・文字列は型まで同じ。2 回目は `控えはもうある（書き換えない）` を出し、控えも設定ファイルも変わらなかった |
+| 手順 8（戻す） | 動いている。控えがある。続けてもう 1 回 | 動いていると `中断:` で、控えは残った。控えがあると `FindMyMouse: True` の形の 6 行を出して `Start-Process` を呼び、設定ファイルは流す前とバイトで一致し、控えは消えた。もう 1 回では `中断: 控えが無い:` |
+| 手順 5・8 | 先頭に `// コメント` の行を足した、字下げのある設定ファイル | PowerShell 7.5.3 の `ConvertFrom-Json` はコメントを読み飛ばしたので止まらず、書いたファイルからコメントが消えた（JSON の差分は上と同じ 6 個）。手順 8 でバイトまで戻った |
+
+**PowerShell 7 の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（足す） | プロファイルも `Documents\PowerShell` も無い。続けてもう 1 回 | フォルダーとファイルを作り、`足した:` の 5 行と中身（5 行）を出した。2 回目は `すでにある:` の 5 行で、ファイルはバイトまで変わらない |
+| 同じ手順 2 | 末尾に改行の無い 2 行（間は CRLF）。BOM 付きの UTF-8 で、日本語の行と、5 行のうち 2 行がある（CRLF） | 前者は改行（CRLF）を足してから 5 行を足し、元の 2 行はそのまま（7 行）。後者は 2 行が `すでにある:`、3 行が `足した:` で、元のバイト（BOM を含む）は先頭にそのまま残った。Linux の `Add-Content` が足した行の区切りは LF だった |
+| 手順 3（Tab） | プロファイルが無い。手順 2 の後に 2 回 | 無いと `中断: プロファイルが無い。この節の手順 2 を先に貼る:`。手順 2 の後は `足した:`、2 回目は `すでにある:` で変わらない |
+| 手順 7（消す） | 手順 2・3 で書いた 6 行だけ。BOM 付きの UTF-8 で印の行だけ。BOM 付きの UTF-16LE で印の行だけ | どれも `消した:` で、ファイルが消えた |
+| 同じ手順 7 | BOM 付きの UTF-8（日本語の行・印の行・ほかの行・末尾に改行の無い印の行、CRLF）。BOM 付きの UTF-16LE（日本語の行・印の行・ほかの行）。LF だけのファイル（ほかの 4 行と印の 2 行） | どれも `その行だけ消した:` で、印の行だけが消え、残りは BOM と UTF-16LE を含めてバイトまで期待どおり |
+| 同じ手順 7 | 印の前の空白が 1 つの行・印が行末に無い行・PowerToys の Command Not Found の 2 行だけ。プロファイルが無い | 前者は `その行は無い:` で、ファイルは変わらない。無いと `プロファイルが無い:` |
+
+- 手順 2・3 で書いたプロファイルを、PowerShell 7.5.3（PSReadLine 2.3.6）で読んだ。Linux の `$PROFILE` は `~/.config/powershell/…` なので、そこにドキュメントのプロファイルへのシンボリック リンクを置き、`pwsh.exe` は Linux の pwsh へのリンクにした
+  - 手順 4 のブロックは、キーの表で `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`、`Tab` が `MenuComplete` を出した。実行ポリシーの表は、Linux なのですべて `Unrestricted` だった
+  - 手順 5・8 の `Set-ExecutionPolicy` は、`Operation is not supported on this platform.` で流せなかった
+  - starship 1.26.0 と zoxide 0.10.0 の Linux 版を `PATH` に置くと、プロファイルを読んでも誤りは 0 で、`__zoxide_hook`・`Invoke-Starship-PreCommand`・`z` があり、`prompt` は starship のものになった。新しいディレクトリに移って `prompt` を呼ぶと、そのディレクトリが zoxide に記録された
+  - 比べるために、starship の行から `Invoke-Starship-PreCommand` の定義を除いた形で同じことをすると、`__zoxide_hook` はあるが、zoxide には何も記録されなかった
+  - 2 つを `PATH` から外すと、プロファイルは誤り無しで読まれ、`__zoxide_hook`・`Invoke-Starship-PreCommand`・`z` は無く、`prompt` は starship のものではなかった
+
+**Windows Terminal の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（控える） | 設定ファイルが無い。`//` の行のコメント・`/* */` のコメント・末尾のカンマがある。`profiles` が配列 | どれも `中断:` で止まり、控えを作らなかった。続けて手順 3 を貼ると `中断: 控えが無い。この節の手順 2 を先に貼る` |
+| 同じ手順 2 | 上の字下げの設定ファイル（文字列の中に `//`・`/*`・`ms-appx:///` がある）。続けてもう 1 回 | 止まらずに `控えた:` と、`Version : 1.25.2733.0`（偽物の `Get-AppxPackage`）などの 5 行と、自分のフォントを持つ `AlmaLinux-10` の表を出した。控えはバイトで一致し、設定ファイルは変わらない。2 回目は `控えはもうある（書き換えない）` |
+| 手順 3・4 | 控えがあり、設定ファイルに `//` のコメントがある | どちらも `中断: コメントか末尾のカンマがある:` で、変えなかった |
+| 手順 3（フォント） | `profiles.defaults` が空・無い・`font.size` と `font.weight` と `colorScheme` がある。続けてもう 1 回 | `face: HackGen Console NF`。JSON の差分は `profiles.defaults.font.face` を足したこと（無いときは `defaults`・`font` ごと）だけで、`size` などは残り、入れ子（5 段）・空と 1 要素の配列・`null` は型まで同じ。2 回目はバイトまで変わらない |
+| 手順 4（警告） | 版が 1.23.12811.0・パッケージが無い・1.25.2733.0。`warning.multiLinePaste` が `true` | 1.23 とパッケージが無いときは `中断: Windows Terminal の版が 1.24 より前:` で、変えなかった。1.25 では `warning.multiLinePaste: never` で、差分はその値だけ（`true` は文字列の `never` に変わった） |
+| 手順 6（戻す） | 手順 2〜4 の後（設定ファイル 4 種）。続けてもう 1 回 | `face:  / warning.multiLinePaste: `（`true` だったものは `True`）を出し、流す前とバイトで一致し、控えが消えた。もう 1 回では `中断: 控えが無い:` |
+
+**WSL の節**:
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2（確かめる） | `.wslconfig` が無い | `無い:` と、偽物の `wsl.exe` の 2 行。`$env:WSL_UTF8` はブロックの後も `1` のまま残った |
+| 手順 3（書く） | ファイルが無い。続けてもう 1 回 | `作った:` で、中身は `[wsl2]`・`networkingMode=mirrored` の 2 行（CRLF）。控えは作らない。2 回目は `中断: networkingMode の行がもうある` |
+| 同じ手順 3 | `[wsl2]` とほかの 2 つの値（CRLF）。`# comment`・`[WSL2]  `（大文字、後ろに空白）・ほかの値（LF だけ）。`[experimental]` だけで、末尾に改行が無い。BOM 付きの UTF-8 | どれも `控えた:` と `足した:`。`networkingMode=mirrored` は `[wsl2]` の行の直後に、ファイルの改行（CRLF か LF）で入った。`[wsl2]` が無いと、改行を足してから `[wsl2]` と 1 行を末尾に足した。BOM 付きのファイルは、BOM の無い UTF-8 で書いた |
+| 同じ手順 3 | `networkingMode=nat`。`  NetworkingMode = NAT`（字下げ・大文字・空白） | どちらも `中断: networkingMode の行がもうある` で、ファイルを変えず、控えを作らなかった |
+| 同じ手順 3 | `#networkingMode=nat`（コメントの行）だけ | 止まらずに、`[wsl2]` の直後に足した（コメントの行は残る） |
+| 同じ手順 3 | 前の控えが残っていて、ファイルに `networkingMode` が無い | `控えはもうある（書き換えない）` で、控えを残して足した。手順 6 では、前の控えの中身に戻った |
+| 手順 6（戻す） | 上のそれぞれの後。手順 3 で作った後に手で 1 行足した。ファイルも控えも無い | 控えがあれば `控えから戻した:` で、控えは消えた（手順 3 で控えたときは、手順 3 の前とバイトで一致した。BOM も）。手順 3 で作ったままなら `消した:` でファイルが消えた。手で足した後は `中断: この節で作った形ではない`。どちらも無いと `無い:` |
+| 手順 4・5・7 | `wsl.exe` を、`wslinfo` には `mirrored` を返す関数にした | 書いたとおりの引数で呼ばれた（流れを見ただけで、WSL は動かしていない。関数には `--` が渡らないので、本物の `wsl.exe` への `--` の渡り方は見ていない） |
+
+- Linux の pwsh は `.` で始まるファイルを隠しファイルとして扱い、手順 6 の `-Force` の無い `Remove-Item` が `You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only.` で断った。上の表は、`Remove-Item` に `-Force` を足す関数をかぶせて流した結果
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、20 個のブロックを貼って通すこと。5.1 の `ConvertFrom-Json`・`ConvertTo-Json -Depth 100` で、PowerToys と Windows Terminal の設定ファイルの入れ子と配列（空・1 要素）が形を保つこと。コメントのある PowerToys の設定ファイルで、5.1 では手順 5 が止まるか（7.5.3 はコメントを読み飛ばして消した）
+1. 5.1 の `Add-Content` が PowerShell 7 のプロファイルに足す行の文字コードと改行（Linux の 7.5.3 では LF）。UTF-16LE のプロファイルに足すとき
+1. 本物の `Get-Process`・`Start-Process`・`Get-ScheduledTask`・`Get-AppxPackage` の値と動き。WSL の節の手順 6 の `-Force` の無い `Remove-Item` が、Windows の `.wslconfig` を消せること
+1. `wsl.exe` と、5.1 から `pwsh.exe -Command { … }` を呼ぶブロック（PowerShell 7 の実行ポリシーの手順 5・8 を含む）。Windows 版の starship・zoxide と、対話の窓でのキーとプロンプト
+1. 書いた値が PowerToys・Windows Terminal・WSL に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
 
 ### 操作上の注意と併記されていた記録
 
