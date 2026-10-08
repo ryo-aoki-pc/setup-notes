@@ -263,6 +263,10 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）。Administrators が既定で持つ。スタンドアロンのクライアントでは Administrators だけ
   - `LocalAccountTokenFilterPolicy = 1`。これが無いと、ローカル・Microsoft アカウントの管理者がネットワークログオンしたとき、UAC のリモート制限で絞られたトークンになり、再起動の権限を使えない（アクセス拒否になる）。1 にすると完全な管理者のトークンになる（UAC のリモート制限が緩む）
 - ドメインに参加していない PC が対象なので、`-U '<user>%<pass>'` の資格情報はローカル・Microsoft アカウントのもの。Samba の `net` は `samba-common-tools` にある
+- Windows の `shutdown /m` には資格情報を渡す引数が無く、送る側のユーザーの資格情報で相手につなぐ。検証では、相手に無いユーザーからと、Microsoft アカウントでサインインした PC から送ったときに、`アクセスが拒否されました。(5)` で止まった
+  - 先に `net use \\<host>\IPC$ /user:<host>\<user>` で、相手の資格情報で `IPC$` につないでおくと、`shutdown /m \\<host>` はその接続を使う。名前（`<host>`）は 2 つのコマンドでそろえる
+  - `net use` は、パスワードを聞く前に `…のパスワードまたはユーザー名が無効です。` を出す。聞かれたパスワードを入れるとつながる
+  - 相手が再起動すると、送る側の接続は `Disconnected` で残るので、`net use \\<host>\IPC$ /delete` で消す
 
 ### リモートから再起動する手段を増やす（任意） / 手順 5: 補足: WinRM を選ぶ理由
 
@@ -273,8 +277,15 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - ほかに、別のグループの互換モードの規則（`WINRM-HTTP-Compat-In-TCP`・`WINRM-HTTP-Compat-In-TCP-NoScope`）があり、既定で無効。本書は触らない
   - 本書は、ローカル サブネットに絞った `WINRM-HTTP-In-TCP` をプライベートにし、`WINRM-HTTP-In-TCP-NoScope` を切る（LAN の外からは届かないようにする）
   - 2026-10-06 の版の手順は、`WINRM-HTTP-In-TCP` をドメイン・プライベート向け、`WINRM-HTTP-In-TCP-PUBLIC` をパブリック向けとして書いていたが、Windows 11 の VM には `-PUBLIC` の規則が無かった（[検証記録](../verification/windows-setup.md)）
+- `WINRM-HTTP-In-TCP` が無効のままプライベートになっていると、`Enable-PSRemoting` は `エラー:1 つ以上の更新手順を終了できませんでした。`（`winrm quickconfig` では「WinRM ファイアウォールの例外を有効にします。」の後に「WinRM のファイアウォールを有効にできません。」）で止まった（[検証記録](../verification/windows-setup.md)）。パブリック向けの例外としてこの規則を探し、パブリックに見つからないためとみている（中の動きは資料・ソースで確かめていない）
+  - 止まる前に、2 つの規則（`WINRM-HTTP-In-TCP` はプライベートのまま）を有効にしてしまう。このエラーは、複数行を貼ったときの後ろの行も止めるので、`-NoScope` を切る行が動かずに残る
+  - 規則が有効でプライベートのとき（手順 5 を貼り直したとき）と、無効でパブリック（既定）のときは止まらない
+  - そこで手順 5 の 1 行目で規則を既定のパブリックに戻し、この節の手順 9 でもパブリックに戻す（以前の版のこの節の手順 9 は、プライベートのまま残していた）
 - 規則のグループは、表示名（`DisplayGroup`）が Windows の言語で変わる（日本語の Windows では「Windows リモート管理」）ので、言語に依らない `Group`（`@FirewallAPI.dll,-30267`）で選ぶ
 - ドメインに参加していない PC から `Invoke-Command -ComputerName` で送ると、Kerberos を使えないので、送る側の WinRM のクライアントが、相手を `TrustedHosts` に入れるか HTTPS を使うことを求める（about_Remote_Troubleshooting）。本書は送る側で `TrustedHosts` に相手を足す
+  - 送る側の WinRM のサービスが止まっていても、`Invoke-Command` は `TrustedHosts` の検査のエラー（`ServerNotTrusted`）までは進んだ。相手に届いて再起動できたのは、サービスを動かした後（止めたまま送れるかは確かめていない）。サービスが要るのは、`TrustedHosts` を読み書きする `WSMan:\localhost` のドライブ
+  - `TrustedHosts` は `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` の `trusted_hosts` に入る。検証のホストでは初めは値が無く、`-Value ''` で戻すと空の値で残った
+  - 検証のホスト（送る側）では、WinRM のサービスを動かしている間、TCP 5985 を System が待ち受けた（受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効のままだった）。戻すときにサービスも止める
 
 ### リモートから再起動する手段を増やす（任意） / 手順 6: 補足: 見張りタスクの作り
 

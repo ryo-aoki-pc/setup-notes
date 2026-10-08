@@ -13,10 +13,16 @@
   - 更新の手順 1〜5、ロールバックの手順 1〜41
   - 直した本文: 手順 9・58・59・60、Wake on LAN の節の手順 4、再起動の節の手順 5・6・9・11、ロールバックの手順 9・13・21（管理者ではない窓で行う）・31・35・36 とリード
   - 撤去の前にスナップショット `pr104-before-rollback-20261008` を撮った
+- 2026-10-08 の追加検証その 2（[付録](#付録-別の-windows-からの再起動とwinrm-の手順-5-の貼り直しを確かめた記録2026-10-08)）
+  - 別の Windows（ホストの実機）から、再起動の節の手順 4 の `net use` と `shutdown /m`、手順 5 の `TrustedHosts` と `Invoke-Command` で、VM を実際に再起動した
+  - 再起動の節の手順 5 を、以前の版の同じ節の手順 9 の後に貼り直すと止まることを確かめ、手順 5・9 を直した
+  - 直した本文: 再起動の節の手順 4・5・9
+  - 相手の VM のリンク クローンは、正しい資格情報でも NTLM が拒否され（4625 の状態 `0xc000006d`・副状態 `0x0`）、送る側に使えなかった。sysprep をしていないのでマシンの SID の重複が原因とみたが、確かめていない
 - 2026-10-08 の時点で確認していないこと
   - Store の CLI の準備と更新の適用（手順 11・12・14）、Windows Update の再起動の分岐（手順 8）。2026-10-08 には対象の更新が無かった（手順 5 の適用は 2026-10-06 に確かめた）
   - WSL 2 の AlmaLinux 10（手順 62・63、更新の手順 4 の `dnf -y upgrade`、ロールバックの手順 17）。この VM の仮想化の制約で動かない
-  - Wake on LAN の UEFI の設定とマジック パケットでの起動、別の Windows からの `shutdown /m`・`Invoke-Command`
+  - Wake on LAN の UEFI の設定とマジック パケットでの起動
+  - 別の Windows の `Get-Credential` の窓での資格情報の入力（`PSCredential` で渡した）、`-ComputerName`・`TrustedHosts` を IP にしたとき、この PC と同じ名前・同じパスワードのローカル アカウントから `net use` 無しで `shutdown /m` を送ったとき、Microsoft アカウントの PC を再起動される側にしたとき
   - Windows の実機での通し実行
 - 以下は 2026-10-06〜07 の検証の要約（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）。そのときの「未検証」は、2026-10-08 の付録で多くを確かめた
 - 初期設定は Windows Update の 4 件の適用と残り 0 件、Store の更新なし、Scoop・UniGet UI・PowerToys・PowerShell 7 の導入、指定値の読み戻しと一部の実画面を確認した。56〜60 と通常権限の Windows PowerShell 5.1 への LF 3 行の貼り付け順は、利用者の手動確認を含む。343 文字のパスとシンボリックリンクの作成・読み取り・削除も、通常権限の PowerShell 7.6.6 で確認した。
@@ -274,7 +280,7 @@
 > | `$OLD_EXECUTION_POLICY` | [ロールバック](../windows-setup.md#ロールバック)の手順 16 | 手順 17 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
 > | `$OLD_DOWNLOAD_MODE` | [ロールバック](../windows-setup.md#ロールバック)の手順 29 | 手順 37 で控えた配信の最適化のモード | `CdnOnly` |
 >
-> 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
+> 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<hostname>`（`whoami` が小文字で出すコンピューター名）/ `<SENDER_HOST>`（別の Windows から再起動した付録の、送る側の PC のコンピューター名）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
@@ -1227,3 +1233,67 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 **検証の手順で起きたこと**:
 
 - 始めたとき、ゲストの検証タスクを起動すると、前の検証（上の付録）が置いた要求のファイルがそのまま動いた。管理者のタスクは `read-wsl-state.ps1` を動かして、ゲストの `C:\verify\wsl-after-step55-recovery-20261006.json` を上書きした（ホストに控えた前の証跡は残っている）。通常権限のタスクの `show-autologon-location` は失敗し、記録のファイルは変わらなかった。要求のファイルは `C:\verify\pr104-backup` に控えてから差し替えた
+
+## 付録: 別の Windows からの再起動と、WinRM の手順 5 の貼り直しを確かめた記録（2026-10-08）
+
+**VM とホストの実機での追加検証**。上の付録で確かめられなかった、[リモートから再起動する手段を増やす](../windows-setup.md#リモートから再起動する手段を増やす任意)の節の「別の Windows で動かすトリガー」を確かめた。再起動される側（この PC）は VM、送る側（別の Windows）は最後にホストの実機を使った。時刻は UTC。
+
+**環境**:
+
+| 項目 | 値 |
+|---|---|
+| 再起動される側 | `windows11-verify-20261006`（上の付録と同じ VM。`<HOSTNAME>`、試験用のローカル アカウント `<WIN_USER>`）。上の付録のロールバックの後の状態をスナップショット `pr104-after-rollback-20261008` に控え、ロールバックを流す前のスナップショット `pr104-before-rollback-20261008`（再起動の節の手段は元に戻した後）に戻してから、再起動の節の手順 2〜5 を管理者の conhost の窓に貼り直した。終わった後は `pr104-after-rollback-20261008` に戻した（電源は切ったまま） |
+| 送る側（1 つ目） | 再起動される側の VM のリンク クローン（`pr104-baseline-20261008` から作り、名前を `PR104-SENDER` に変えた）。2 台を VirtualBox の NAT ネットワーク（10.0.77.0/24）でつないだ。後で消した |
+| 送る側（2 つ目） | 手元の Windows 11 Enterprise 評価版の ISO から無人インストールした新しい VM。インストールが止まったので使わずに消した |
+| 送る側（3 つ目） | ホストの実機（`<SENDER_HOST>`。Windows 11 Pro 26H2 の 26300、ワークグループ、Microsoft アカウントでサインイン、Windows PowerShell 5.1.26100.9444）。利用者の許可を得て使った。再起動される側の VM をホストオンリーのネットワーク（192.168.56.0/24、VM は 192.168.56.108）につなぎ替え、VM の中の VirtualBox のホストオンリーのアダプター「イーサネット 2」（192.168.56.1 で重なる）を無効にした |
+
+**再起動の節の手順 5 の貼り直しと手順 9**:
+
+- `pr104-before-rollback-20261008` に戻した直後（以前の版の再起動の節の手順 9 の後で、`WINRM-HTTP-In-TCP` は無効・プライベート）に本文のままの再起動の節の手順 5 を貼ると、`Enable-PSRemoting` が `WinRM は要求を受信するように更新されました。`・`WinRM サービスが開始されました。` などの後に `Set-WSManQuickConfig : エラー:1 つ以上の更新手順を終了できませんでした。` で止まり、後ろの 3 行は動かなかった
+- このとき `winrm quickconfig -force` は「WinRM ファイアウォールの例外を有効にします。」の後に「WinRM のファイアウォールを有効にできません。」。止まった後の規則は `WINRM-HTTP-In-TCP  True  Private`・`WINRM-HTTP-In-TCP-NoScope  True`（接続元 Any）で、接続元を絞らない規則が開いたまま残った
+- 規則の状態を変えて `Enable-PSRemoting -Force -SkipNetworkProfileCheck` を流した結果
+
+| `WINRM-HTTP-In-TCP` の前の状態 | 結果 |
+|---|---|
+| 無効・プライベート | 止まる。2 つの規則とも有効になる |
+| 無効・パブリック（既定） | 通る（`WinRM ファイアウォールの例外を有効にしました。`）。2 つの規則とも有効になる |
+| 有効・プライベート（`-NoScope` は無効） | 通る。何も出さず、規則も変えない |
+
+- 再起動の節の手順 9 に規則をパブリックに戻す行を足した形を貼ると、`WINRM-HTTP-In-TCP  False  Public`・`-NoScope  False`。続けて手順 5 の 1 行目に同じ行を足した形を貼ると、`WinRM ファイアウォールの例外を有効にしました。` の後に `WINRM-HTTP-In-TCP  True  Private`・`-NoScope  False`。手順 5 をもう一度貼っても同じ表になった
+- 以前の版の再起動の節の手順 9 を貼った後に、直した手順 5 を貼っても通り、同じ表になった
+- 本文の再起動の節の手順 5（1 行目と箇条書き）と手順 9 をこの形に直した。参考資料にも理由を足した
+
+**送る側がクローンのとき（使えなかった）**:
+
+- クローンの通常権限の conhost の窓（Windows PowerShell 5.1）で、`shutdown /r /f /t 0 /m \\<HOSTNAME>` は `<HOSTNAME>: アクセスが拒否されました。(5)`（終了コード 5）。送る側のユーザーは、再起動される側と同じ名前・同じパスワード
+- 別に作った標準ユーザー（再起動される側に無い名前）の窓でも同じ (5)。`net use \\<HOSTNAME>\IPC$ /user:<HOSTNAME>\<WIN_USER>` は、`\\<HOSTNAME>\IPC$ のパスワードまたはユーザー名が無効です。` の後に `'<HOSTNAME>' に接続するための '<HOSTNAME>\<WIN_USER>' のパスワードを入力してください:` と聞き、正しいパスワードを入れても `システム エラー 1326 が発生しました。`
+- 再起動される側のセキュリティのログ（4625、NTLM）: 再起動される側に無いユーザーは副状態 `0xc0000064`、誤ったパスワードは `0xc000006a`。正しい資格情報（同じ名前のユーザーの素通しと、`net use` で入れたもの）は、状態 `0xc000006d`・副状態 `0x0`・失敗の理由「ログオン中にエラーが発生しました」だった
+- クローンは sysprep をしていないので、マシンの SID が再起動される側と同じ。SID の重複した PC の間の NTLM の認証が拒否されたとみて、送る側に使うのをやめた（原因は確かめていない）
+
+**送る側がホストの実機のとき**:
+
+- つなぎ替えた直後の再起動される側の接続（`イーサネット`）は、`識別されていないネットワーク`・`Public` だった。管理者の conhost の窓で `$LAN_IF = 'イーサネット'` を入れてから実施手順 43 を貼り、`Private` にしてから試した（再起動の節の手順 4・5 の受信規則はプライベートだけで有効）。SMB での再起動の後は `Public` に戻ったので、WinRM を試す前に `Set-NetConnectionProfile` で `Private` に戻した
+- `<HOSTNAME>` は mDNS（`<HOSTNAME>.local`）で、VM の IPv6 のリンクローカル アドレスと 192.168.56.108 に解決された。ping と TCP 445・5985 は届いた（`Test-NetConnection` は IPv6 のリンクローカルを使った）
+- 始める前のホスト: WinRM のサービスは `Stopped`・`Manual`、`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` に `trusted_hosts` の値は無かった。受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効
+- SMB（再起動の節の手順 4）
+  - `net use` をせずに `shutdown /r /f /t 0 /m \\<HOSTNAME>` を実行すると、`<HOSTNAME>: Access is denied.(5)`（このときの端末は UTF-8 のコード ページで、表示が英語）。再起動される側に 4624・4625 は残らなかった
+  - `net use \\<HOSTNAME>\IPC$ /user:<HOSTNAME>\<WIN_USER>` を、非表示の conhost の中の cmd で実行し、パスワードのプロンプトにコンソールの入力としてパスワードを入れた。`\\<HOSTNAME>\IPC$ のパスワードまたはユーザー名が無効です。`・`'<HOSTNAME>' に接続するための '<HOSTNAME>\<WIN_USER>' のパスワードを入力してください:`・`コマンドは正常に終了しました。`。再起動される側の 4624 は、NTLM・ワークステーション名 `<SENDER_HOST>`・昇格したトークン
+  - 続けて `shutdown /r /f /t 0 /m \\<HOSTNAME>` は何も出さずに終了コード 0。再起動される側は 08:56:35 に起動し、約 2 分で自動サインインした。System のイベント 1074 は、`wininit.exe ([<ホストの IPv6 のリンクローカル>])` が `<HOSTNAME>\<WIN_USER>` の代わりに再起動を始めた、理由コード `0x800000ff`
+  - ホストの `net use` の一覧には `Disconnected  \\<HOSTNAME>\IPC$` が残り、`net use \\<HOSTNAME>\IPC$ /delete` で `was deleted successfully.` と消えた
+  - パスワードを標準入力のリダイレクトで渡した `net use` は 1326 で失敗し、再起動される側にログは残らなかった（本文の形ではない）。`New-SmbMapping` で IP あてに資格情報を渡すとつながった（確かめた後に外した）
+- WinRM（再起動の節の手順 5）
+  - `TrustedHosts` が無いまま、Windows PowerShell 5.1 で `Invoke-Command -ComputerName <HOSTNAME> -Credential …` を実行すると、`WinRM クライアントは要求を処理できません。認証スキームが Kerberos と異なる場合、またはクライアント コンピューターがドメインに参加していない場合は、 HTTPS トランスポートを使用するか、または宛先コンピューターが TrustedHosts 構成設定に追加されている必要があります。…`（`ServerNotTrusted,PSSessionStateBroken`）。ホストの WinRM のサービスは止まったままで、ここまで進んだ
+  - 利用者が、ホストの管理者の Windows PowerShell で、本文の手順 5 の注意の 3 つ（`Start-Service WinRM`、`(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控える、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <HOSTNAME> -Concatenate -Force`）を貼った。WinRM は `Running`、`trusted_hosts` は `<HOSTNAME>`。このとき、ホストでも TCP 5985 を System が待ち受けた（受信規則は無効のまま）
+  - 管理者ではない Windows PowerShell 5.1 から、コンピューター名を付けないユーザー名 `<WIN_USER>` の資格情報で `Invoke-Command -ComputerName <HOSTNAME> … -ScriptBlock { hostname; whoami; … }` を送ると、`<HOSTNAME>`・`<hostname>\<WIN_USER>`・`High Mandatory Level`（4.8 秒）
+  - `-ScriptBlock { Restart-Computer -Force }` は、エラー無しに 5.3 秒で戻り、何も出さなかった。再起動される側は 09:15:59 に起動し、自動サインインした。System のイベント 1074 は、`wmiprvse.exe` が `<HOSTNAME>\<WIN_USER>` の代わりに再起動を始めた、理由コード `0x80070015`。4624 は NTLM・ワークステーション名 `<SENDER_HOST>`・昇格したトークン
+  - 資格情報は、`Get-Credential` の窓ではなく、パスワードのファイルから作った `PSCredential` で渡した（窓での入力は確かめていない）
+  - 戻し（再起動の節の手順 9 の箇条書き）: 利用者が同じ管理者の窓で `Set-Item WSMan:\localhost\Client\TrustedHosts -Value '' -Force` と `Stop-Service WinRM` を貼った。WinRM は `Stopped`・`Manual`、TCP 5985 の待ち受けは無くなった。`trusted_hosts` は値が無い状態には戻らず、空の値で残った。ホストの `net use` の一覧に、再起動される側への接続は残っていない
+- 本文に足したもの: 再起動の節の手順 4 の別の Windows からの形（`net use` → `shutdown /m` → `net use … /delete`、`net use` をしないと (5)、パスワードの前の表示）、手順 5 の `TrustedHosts` を先に足す順・`Invoke-Command` の成功の条件と `-ComputerName` の名前、手順 9 の送る側の戻し方（`TrustedHosts` とサービス。送る側のサービスが止まっていれば先に動かす）
+
+**検証の手順で起きたこと**:
+
+- クローンの通常権限の conhost の窓には、SendInput の Unicode の文字が入らなかった（Enter だけ届いた）。コマンドはクリップボードと Ctrl+V で貼り、パスワードのプロンプトには窓の右クリックで貼って、すぐにクリップボードを消した
+- 新しい VM の無人インストールは、開始から 13 分の `AHCI#0: Port 0 reset` の後、画面が黒いまま CPU だけ回り、ディスクへの書き込みが 35 分止まった。一時停止と再開でも動かなかったので、VM を消した（Hyper-V の上の VirtualBox の停止とみている）
+- `VBoxManage unattended install` は、渡した使い捨てのユーザー（その VM だけのもの。再起動される側の試験用のパスワードとは別）のパスワードを平文で表示した。VM と応答のファイル（`autounattend.xml`）は消した
+- ホストで UAC の確認を出して管理者の窓を開く操作は、このツールの安全の判定で止められたので、ホストの管理者の操作は利用者が行った
+- 生の証跡は、ローカルの `.verification/evidence/pr104-20261008/win2win` に控えた（この PR には含めない。検証用のパスワードを含まないことを確かめた）

@@ -1143,12 +1143,16 @@
    - 仕組み: `shutdown /m` も `net rpc shutdown` も、`\PIPE\InitShutdown` の名前付きパイプを SMB（TCP 445）で使う。再起動には Administrators が既定で持つ「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）と、`LocalAccountTokenFilterPolicy = 1` が要る（[参考資料](reference/windows-setup.md)）
    - 別の PC で動かすトリガー（`<WIN_IP>`・`<WIN_HOST>` はこの PC、`<WIN_USER>` は管理者）
      - AlmaLinux 10 から: `net rpc shutdown -r -f -t 0 -I <WIN_IP> -U '<WIN_USER>%<PASS>'`（`net` が無ければ `sudo dnf install -y samba-common-tools`）
-     - 別の Windows から: `shutdown /r /f /t 0 /m \\<WIN_HOST>`
+     - 別の Windows から: `net use \\<WIN_HOST>\IPC$ /user:<WIN_HOST>\<WIN_USER>`（パスワードを聞かれる）でこの PC の資格情報を渡してから、`shutdown /r /f /t 0 /m \\<WIN_HOST>` を打つ
+     - 別の Windows から送り終わったら、`net use \\<WIN_HOST>\IPC$ /delete` を打つ
+   - `net use` は、パスワードを聞く前に `\\<WIN_HOST>\IPC$ のパスワードまたはユーザー名が無効です。` を出すが、そのまま入れてよい（`コマンドは正常に終了しました。` になればよい）
+   - `net use` をせずに `shutdown /m` を打つと、送る側のユーザーの資格情報で送られ、`アクセスが拒否されました。(5)` で止まる（この PC に無いユーザーや、Microsoft アカウントでサインインした PC から送ったとき）
    - **注意**: この手順は、節のリードの `[!WARNING]` のとおり管理の口を LAN に開ける
 
 1. 別の Windows から PowerShell で再起動したいときだけ、WinRM（PowerShell リモート処理）を有効にする。
 
    ```powershell
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
    Enable-PSRemoting -Force -SkipNetworkProfileCheck
    Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile Private
    Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-NoScope -ErrorAction SilentlyContinue
@@ -1157,12 +1161,17 @@
 
    - `WINRM-HTTP-In-TCP` が `True  Private` で、`WINRM-HTTP-In-TCP-NoScope` が `False` になればよい（WinRM は TCP 5985 で待ち受ける）
    - Windows 11 では、`WINRM-HTTP-In-TCP` は接続元を同じサブネット（`LocalSubnet`）に絞った規則で、`Enable-PSRemoting` は接続元を絞らない `WINRM-HTTP-In-TCP-NoScope` を有効にする。後者は切る
+   - 1 行目は、`WINRM-HTTP-In-TCP` を既定のパブリックに戻す（無効でプライベートのままだと、`Enable-PSRemoting` が `エラー:1 つ以上の更新手順を終了できませんでした。` で止まり、後ろの行が動かずに `-NoScope` が開いたまま残る。[参考資料](reference/windows-setup.md)）
    - `Enable-PSRemoting` も `LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）
-   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`（WinRM を使うので、`Restart-Computer -ComputerName` の既定の WMI/DCOM より開けるポートが少ない）
-   - ドメインに入っていない PC から送ると、`TrustedHosts 構成設定に追加されている必要があります` の旨のエラーで止まる。送る側の管理者の PowerShell で、相手を `TrustedHosts` に足す
+   - 別の Windows から送る前に、送る側の管理者の PowerShell で、この PC を `TrustedHosts` に足す（ドメインに入っていない PC は、足していないと `TrustedHosts 構成設定に追加されている必要があります` の旨のエラーで止まる）
      - `WSMan:\localhost` は WinRM のサービスが動いていないと使えないので、止まっていれば先に `Start-Service WinRM` を行う
      - 足す前の値を `(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控えてから、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <WIN_HOST> -Concatenate -Force` を行う
-     - 別の PC からは確かめていない（同じ PC から自分の IP あてに送る形でだけ確かめた。[検証記録](verification/windows-setup.md)）
+     - 戻し方は、この節の手順 9 の箇条書き
+   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`（WinRM を使うので、`Restart-Computer -ComputerName` の既定の WMI/DCOM より開けるポートが少ない）
+     - 管理者ではない PowerShell でよい
+     - `<WIN_USER>` には、コンピューター名を付けなくてよい
+     - `-ComputerName` には、`TrustedHosts` に足したのと同じ名前を書く
+     - エラー無しに数秒で戻り、この PC が再起動すればよい
 
 1. ネットワークが切れたときに自分で再起動させたいときだけ、見張りのタスクを登録する。
 
@@ -1244,13 +1253,18 @@
    Stop-Service -Name WinRM -ErrorAction SilentlyContinue
    Set-Service -Name WinRM -StartupType Manual
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Disable-NetFirewallRule
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile
    ```
 
    - 最後の表の規則が、すべて `False` になればよい（WinRM のサービスも止まる）
+   - `WINRM-HTTP-In-TCP` の `Profile` が、既定の `Public` に戻ればよい
    - `Disable-PSRemoting` はセッションの構成を無効にするだけなので、サービスの停止・規則の無効化はこの手順で行う
-   - `Enable-PSRemoting` が作ったリスナーの設定と、この節の手順 5 で変えた `WINRM-HTTP-In-TCP` の `Profile`（`Private`）は残る。サービスが止まり、規則も無効なので、待ち受けない
-   - この節の手順 5 の注意で、送る側の `TrustedHosts` に足したときは、送る側でも足す前の値に戻す
+   - `Enable-PSRemoting` が作ったリスナーの設定は残る。サービスが止まり、規則も無効なので、待ち受けない
+   - この節の手順 5 の注意で、送る側の `TrustedHosts` に足したときは、送る側の管理者の PowerShell で控えた値に戻す
+     - 送る側の WinRM のサービスが止まっていれば（送る側を再起動した後など）、先に `Start-Service WinRM` を行う
+     - `Set-Item WSMan:\localhost\Client\TrustedHosts -Value '<控えた値>' -Force` を行う（空だったなら `-Value ''`）
+     - 足す前にサービスが止まっていたなら、続けて `Stop-Service WinRM` を行う
    - `LocalAccountTokenFilterPolicy` はこの手順では戻さない（この節の手順 10）
 
 1. 元に戻すときは（この節の手順 4 も手順 5 も使わないとき）、UAC のリモート制限を元に戻す。
