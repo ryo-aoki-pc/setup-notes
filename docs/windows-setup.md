@@ -30,6 +30,7 @@
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
   - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)
   - git の差分の表示と GitHub の操作も使うなら、Git for Windows と WezTerm の後に [git-delta](git-delta.md#windows-11-で使う) → [GitHub CLI](gh.md#windows-11-で使う)（どちらも scoop で入れる）
+  - 端末のエディタと TUI も使うなら、続けて [Neovim](neovim.md#windows-11-で使う) → [lazygit](lazygit.md#windows-11-で使う) → [yazi](yazi.md#windows-11-で使う)（どれも scoop で入れる。管理者ではない窓。git-delta・GitHub CLI も使うなら、その後に）
 - 手順の後の節
   - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
   - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
@@ -2657,6 +2658,7 @@
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、それぞれの手順書の「Windows 11 の更新」
   - [SSH クライアント（Windows）](windows-ssh-client.md#更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
   - git-delta・GitHub CLI は scoop で入れたので、この節の手順 2 でも上がる
+  - Neovim・lazygit・yazi も scoop で入れたので、この節の手順 2 でも上がる（手順書の節は、[Neovim](neovim.md#windows-11-の更新)・[lazygit](lazygit.md#windows-11-の更新)・[yazi](yazi.md#windows-11-の更新)の「Windows 11 の更新」）
 - この節の手順は、手順 9 と同じ、管理者ではない Windows PowerShell（5.1）に貼る
 
 1. scoop とバケットを上げ、古くなったものを確かめる。
@@ -2737,6 +2739,8 @@
   - [SSH クライアント（Windows）](windows-ssh-client.md#ロールバック)は「ロールバック」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-のロールバック)は「Windows 11 のロールバック」
   - この節の手順 13 で scoop ごと消すなら、先に [git-delta の Windows 11 のロールバック](git-delta.md#windows-11-のロールバック)の手順 1 と、[GitHub CLI の Windows 11 のロールバック](gh.md#windows-11-のロールバック)の手順 1〜4 を行う
     - `~/.gitconfig` の `core.pager` と、資格情報マネージャーの gh のトークンは、scoop を消しても残る
+  - この節の手順 13 で scoop ごと消すなら、先に [Neovim の Windows 11 のロールバック](neovim.md#windows-11-のロールバック)の手順 2 と、[yazi の Windows 11 のロールバック](yazi.md#windows-11-のロールバック)の手順 2 を行う
+    - ユーザーの環境変数 `EDITOR`・`VISUAL`（Neovim の任意節）と `YAZI_FILE_ONE` は、scoop を消しても残る。lazygit は scoop の外に残すものが無い
 - 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
   - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・シェルのツール
   - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 7・8
