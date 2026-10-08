@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM で、Windows 節の手順 3・4 の新規導入と署名・版を確認した（2026-10-06）。管理者の Windows PowerShell 5.1 で手順 6 の新規鍵生成・形式・ACL・公開鍵の導出一致と今回作成した鍵の削除を確認し、CLI による ManagerService の一時作成・Running・パス・PID の確認と削除も成功した（2026-10-07）。新規 Data は保持し、設定ファイルは 0 件だった。
-
-手順 5 の GUI、既存の鍵がある分岐、conf の作成・取り込み、WG ホストへの登録、トンネルと拠点への接続、更新・ロールバックは未検証。サービスの CLI 検査を GUI や VPN 全体の成功へ広げず、秘密鍵の値やハッシュは記録していない。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 3・4 の新規導入と署名・版、手順 6 の鍵の生成・形式・ACL、CLI による ManagerService の一時作成と削除（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: AlmaLinux の VM 2 台を拠点 A・B にした検証環境に向けて、手順 1〜16（窓・鍵・WG ホストへの登録・取り込み・トンネル・疎通・ハンドシェイク・切断・後片付け）、更新、ロールバック（WG ホストのクライアントの削除を含む）（[付録](#付録-windows-11-pro-の-vm-での-vpn-の通し検証2026-10-08)）
+- 確認していないこと
+  - インターネット越し（物理のルーターのポート転送・NAT・DDNS）、テザリングなどへのつなぎ替え、張ったままの再起動、サスペンド復帰、Wi-Fi の切り替え
+  - 既存の鍵がある場合の手順 6 の分岐、arm64 の Windows、Windows の実機
+- 秘密鍵の値やハッシュは記録していない。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -733,7 +735,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 | 項目 | 値 |
 |---|---|
-| 環境 | Windows 11 Pro の同じ専用 VM。ログオンユーザー r-aoki の管理者権限 |
+| 環境 | Windows 11 Pro の同じ専用 VM。ログオンユーザー `<WIN_USER>` の管理者権限 |
 | PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop。`USERPROFILE`・`HOME`・`CODEX_HOME` は変更していない |
 | 実行時刻 | 2026-10-07 09:47:01〜09:47:25 UTC |
 | 実行した manifest が記録する本文の SHA256 | `82D40978DB8C534EB0DE3785A8E315A61E1D1ECCEE74E0D65FA820DB376E64C7` |
@@ -746,7 +748,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 - `/installmanagerservice` の終了コードは 0。`WireGuardManager` は `Running`・`Auto` で、サービスのパスは `"C:\Program Files\WireGuard\wireguard.exe" /managerservice`、PID は 6948 だった。PID の実行ファイルも一致した
 - 手順 6 は終了コード 0。`wg0.key` と `wg0.pub` はともに 45 バイトの ASCII、末尾は LF のみで、鍵は Base64 の 32 バイト形式だった。秘密鍵を標準入力に渡したローカルの `wg pubkey` は終了コード 0、保存された公開鍵と一致した
 - `wg-client` の ACL は継承を遮断し、Administrators（`S-1-5-32-544`）と SYSTEM（`S-1-5-18`）の FullControl の 2 件だけだった。両ファイルも同じ 2 件を継承し、所有者は Administrators だった
-- source の出力は全ストリームを破棄し、証跡には鍵の値や秘密鍵のハッシュを載せていない。今回作成した `C:\Users\r-aoki\wg-client` だけを削除し、不在を確認した
+- source の出力は全ストリームを破棄し、証跡には鍵の値や秘密鍵のハッシュを載せていない。今回作成した `C:\Users\<WIN_USER>\wg-client` だけを削除し、不在を確認した
 - `/uninstallmanagerservice` は終了コード 0。サービスの不在と WireGuard のプロセス 0 件を確認し、元の状態へ戻した。新しくできた `C:\Program Files\WireGuard\Data` は残し、設定の置き場所のファイルは 0 件だった
 - 補助検証は `passed=true`。検証用の管理者タスクと結果のコピーの終了コードは 0 で、一時的な実行要求も元のハッシュへ復元された
 - `guest-result.json` と `source-manifest-executed.json` は `.verification/evidence/remaining-wireguard-local-20261007-094630-d8f8efb9` に保存した
@@ -757,3 +759,50 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 - 既存の鍵がある場合の手順 6 の分岐。今回の鍵生成は、置き場所が完全に存在しない場合だけで、既存の設定や鍵は使っていない
 - 実際の IP・WG ホストの設定、公開鍵の登録、conf の作成・取り込み、トンネルの起動、拠点との疎通と外部の SSH 接続
 - VPN 全体の動作、張ったままの再起動、更新・ロールバック、サスペンド復帰、Wi-Fi の切り替え、DDNS、arm64 の Windows
+
+---
+
+### 付録: Windows 11 Pro の VM での VPN の通し検証（2026-10-08）
+
+上の付録と同じ Windows の VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 1〜16 と更新・ロールバックを、2 拠点の WG ホストの検証環境に向けて通した。物理のルーター・NAT・DDNS・インターネット越しの接続は使っていない。
+
+**検証環境**:
+
+| 項目 | 値 |
+|---|---|
+| WG ホスト（拠点 A・B） | 同じホストの AlmaLinux 10.2 の VM 2 台（`alma10-pr100-client-20261007` を拠点 A、`alma10-pr100-pc-20261007` を拠点 B）。ホストオンリーのネットワークの 192.168.56.82・.81 を `SITE_A_PUBLIC`・`SITE_B_PUBLIC` にした |
+| 拠点の LAN | それぞれの VM に veth の対を作り、片方を拠点の LAN 側（`lanA` 192.168.110.2/24・`lanB` 192.168.120.2/24）、もう片方を network namespace のルーター役（`routerA` 192.168.110.1・`routerB` 192.168.120.1、既定の経路は WG ホスト）にした。`lanA`・`lanB` は firewalld の public ゾーンに入れた（一時的な設定） |
+| WG ホストの手順 | このリポジトリの 8a79aff を clone し、`site.env.example` から `site.env` を作って `SITE_A_PUBLIC`・`SITE_B_PUBLIC` だけを直し、[wireguard.md](../wireguard.md#実施手順) の `keygen` → 公開鍵を `site.env` に書く → `--dry-run apply` → `apply` を両拠点で行った（`wireguard-tools` 1.0.20250521 と `systemd-resolved` が入った）。`routerA` から `routerB` まで届いた（経路 MTU 1420、3 ホップ） |
+| Windows の PC | 2 枚目の NIC（「イーサネット 3」、192.168.56.107）で拠点 A の WG ホストに届く。拠点の LAN（192.168.110.0/24・192.168.120.0/24）の外にいる形 |
+| 変数 | 手順 2 の本文の例の値（`10.99.0.1`・`192.168.110.2`・`192.168.110.1`・`192.168.120.2`）が、検証環境の値と同じだったので、そのまま貼った |
+
+**確認したこと**（手順はすべて Windows 11 で使うの番号）:
+
+| 手順 | 結果 |
+|---|---|
+| 1 | スタートから管理者の Windows PowerShell（conhost）を開いた |
+| 3 | WireGuard 1.1.1 が入っている状態（上の付録で入れたもの） |
+| 4 | winget は新しい版なしの旨。署名は `Valid`・WireGuard LLC。`wg.exe --version` は `wireguard-tools v1.0.20260223` |
+| 5 | WireGuard の窓（「トンネル」「ログ」のタブ）が開き、`WireGuardManager` は `Running`・`Automatic` |
+| 6 | `%USERPROFILE%\wg-client` の ACL は SYSTEM と Administrators だけ。鍵ファイルは 45 バイト。鍵の値はこの記録に載せない |
+| 7 | `Import-WgClientConf` を定義した（何も出ない） |
+| 8 | 拠点 A の WG ホストで実施手順 4・6（`client add A win-pr104 --pubkey …` → `apply A` → `client show win-pr104`）。トンネル IP は 10.99.1.1。表示した conf を Windows のクリップボードに置いた |
+| 9 | `Import-WgClientConf` を手で打って Enter（検証ではホストからのキーで打った）。`1` と、`PrivateKey` 以外の行が `client show` のとおりに出た |
+| 10 | `wg0.conf.dpapi`（540 バイト）の 1 行だけ。写した `wg0.conf` は消えた |
+| 11 | この PC はもとから拠点の LAN の外（ホストオンリーのネットワーク）にいるので、つなぎ替えはしていない |
+| 12 | `WireGuardTunnel$wg0  Running  Automatic`、`wg0` に `10.99.1.1`/`32`、`AllowedIPs` の経路 3 つ（`RouteMetric` 0）、`NlMtu` 1420、`NetworkCategory` は `Public`、`ServerAddresses` は `{}`、`latest handshake` は 7 秒前 |
+| 13 | 4 つのあて先とも `0% の損失`。`tracert` は `10.99.0.1` → `192.168.120.2` |
+| 14 | 拠点 A の WG ホストで実施手順 13: `client list` の `win-pr104` の `LAST_HANDSHAKE` が 49 秒前。拠点 → PC の `ping` は 100% の損失（本文のとおり、Windows のファイアウォールが受けない） |
+| 15 | トンネルのサービスとアダプター `wg0` が消えた |
+| 16 | `wg0.pub` だけが残った |
+
+- Windows 11 の更新: winget は `No available upgrade found.`、マネージャーは `Running` のまま
+- Windows 11 のロールバックの手順 1: 最後に `False` だけが出た
+- Windows 11 のロールバックの手順 2（WG ホストの手順 3 の後に行った）: `Found WireGuard [WireGuard.WireGuard]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、サービスは何も出ず、`False`。WireGuard の窓と `wireguard.exe` のプロセスも消えた
+- Windows 11 のロールバックの手順 3（WG ホストで、[wireguard.md のクライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6）: 手順 3 は `client remove` の後の dry-run が、その公開鍵の未知の peer だけを挙げて終了コード 1 で止まった。手順 4 の `--drop-unknown-peers --dry-run`、手順 5 の本適用の後、手順 6 でクライアントは無く、`wg show wg0 peers` は拠点 B だけ
+- 検証環境は、両拠点で [wireguard.md の全部消す](../wireguard.md#全部消すロールバック)の手順 1〜4 と、veth・namespace・clone の削除で片付けた。拠点 A の `remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つ（`client add`・`client remove` の `apply` が作った控えで、秘密鍵を含む）が残った。`--purge` は控えを消さない（`scripts/wireguard/wg-vpn.sh` の `cmd_remove`）。検証用の鍵なので手で消した
+
+**確認していないこと**:
+
+- インターネット越し（物理のルーターのポート転送・NAT・DDNS）と、テザリングなどへのつなぎ替え
+- トンネル越しの SSH、相手拠点の LAN 上の別のホスト、張ったままの再起動、サスペンド復帰、Wi-Fi の切り替え、arm64 の Windows、Windows の実機

@@ -4,11 +4,13 @@
 
 ## 最新の確認範囲（Windows 11）
 
-Windows 11 Pro のクリーン VM の管理者の Windows PowerShell 5.1 で、Windows 節の手順 2・4・5 による新規導入、CLI の版と登録・PATH・ショートカットを確認した（2026-10-06）。手順 3 は Visual C++ Runtime が既存のため飛ばした。同じ VM の通常権限の CLI で、HackGen 2 ファミリー×6 文字のフォント解決・数値ラスタ生成と後片付けを確認した（2026-10-07）。
-
-GUI の窓・既定のシェル・フォント選択と画面描画、右クリック項目の実クリック、新しい PowerShell からの PATH、Runtime の新規導入、更新・ロールバックは未検証。右クリック項目のレジストリ存在確認と、GUI の動作は区別する。
-
-[今回の付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した。
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 2・4・5 による新規導入、CLI の版と登録・PATH・ショートカット、CLI でのフォント解決とラスタ生成（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）
+  - 2026-10-08: 手順 6 のスタートからの起動（この VM では OpenGL のエラーで開かず、`prefer_egl` で開いた）、「Open WezTerm here」の実クリックと HackGen Console NF の表示、更新（同じ版の入れ直し）、ロールバック（[付録](#付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - 3D の描画がある環境で、設定ファイル無しに手順 6 で窓が開くこと
+  - 自分用の設定と Git Bash、Visual C++ Runtime の新規導入、新しい版に上がる更新、arm64 の Windows、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -562,3 +564,36 @@ Rufus で作ったインストールメディアからクリーンインスト�
 
 - スタートからの WezTerm GUI 起動、既定のシェル、GUI のフォントメニューと選択、スクリーン上の字形・太字・行の高さ、右クリックのメニューの実クリック。CLI の数値ラスタを画面上の描画の確認へ広げない
 - 自分用の設定と Git Bash、設定ファイルの探索順、選んだ文字以外、Visual C++ Runtime が無い場合、更新・上書き・アンインストール、arm64 の Windows。以前の付録はその時点の履歴として保持した
+
+---
+
+### 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、GUI の起動・右クリックの項目・更新を確かめた。手順は [Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の番号。WezTerm は 20261005-054844-37254829。
+
+**手順 6（スタートメニューから起動）**:
+
+- スタートメニューの「WezTerm」から起動すると、窓が開かずにプロセスが終わった。`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` に `ERROR  wezterm_gui::frontend > Failed to create window: The OpenGL implementation is too old to work with glium`
+  - この VM の画面のアダプターは VirtualBox の VBoxSVGA で、3D の描画を使っていない
+  - `wezterm-gui.exe --config front_end="Software"` でも同じエラー
+  - `wezterm-gui.exe --config prefer_egl=true` では窓が開き、中で `cmd.exe` が動いた（設定ファイルが無いときのシェル。`%COMSPEC%`）。窓の中の `wezterm --version` は `wezterm 20261005-054844-37254829`
+  - 本文の手順 6 に、ログの場所と `config.prefer_egl = true` の箇条書きを足した
+- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の手順 26）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
+  - 設定ファイルが無いままでは、同じ OpenGL のエラーで開かなかった
+  - 一時的に `%USERPROFILE%\.wezterm.lua`（`config.prefer_egl = true` と `config.font = wezterm.font 'HackGen Console NF'` だけ）を置くと、`C:\verify\gui-fixtures` で窓が開いた。英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が、HackGen Console NF で表示された（画面で確かめた）
+  - 一時的な設定と試験用の文のファイルは、確かめた後に消した
+
+**Windows 11 の更新**:
+
+- この節の手順 2: 1 行目は `20261005-054844-37254829`、WezTerm のプロセスは無し
+- この節の手順 3（手順 4 の貼り直し）: `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20261005-054844-37254829`。版は同じで、本文の「同じ版なら、main に新しいコミットが無かった」に当たる
+- この節の手順 1・4 は、Remote Control のタスクが無いので飛ばした
+
+**Windows 11 のロールバック**:
+
+- この節の手順 1（WezTerm の窓は無い状態）: `False` が 2 行出て、その後は何も出なかった（登録・`C:\Program Files\WezTerm`・`PATH` の行が消えた）
+
+**確認していないこと**:
+
+- 3D の描画がある環境（実機の GPU）で、設定ファイル無しに手順 6 で窓が開くこと
+- 自分用の設定（`ryo-aoki-pc/wezterm`）と Git Bash、新しい版に上がる更新、arm64 の Windows、Windows の実機

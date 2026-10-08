@@ -684,3 +684,12 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 ### 付録: 構成図の再生成
 
 > 検証環境に最初から入っていた日本語フォント（Droid 系 2 つ）は、**どちらも Latin の字形を持たない**。`Client A` や `${SITE_A_LAN}` が豆腐になるため、Latin と日本語の両方を持つ Noto Sans CJK を入れている。
+
+---
+
+### 付録: 全部消すの手順 2 の後に残る控え（2026-10-08）
+
+- [wireguard-road-warrior.md の検証記録の 2026-10-08 の付録](wireguard-road-warrior.md#付録-windows-11-pro-の-vm-での-vpn-の通し検証2026-10-08)の検証環境（AlmaLinux 10.2 の VM 2 台を拠点 A・B にした）を片付けたとき、[全部消す](../wireguard.md#全部消すロールバック)の手順 1〜4 を両拠点で行った
+- 拠点 A（`client add`・`client remove` の後の `apply` を行った方）では、`remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つが残った（秘密鍵を含む conf の控え）。拠点 B（`apply` を 1 回だけ行った方）は `/etc/wireguard` ごと消えた
+- `scripts/wireguard/wg-vpn.sh` の `cmd_remove` は、`--purge` で `$CONF`・`$KEY`・`$PUB` と登録簿にあるクライアント用 conf だけを消す。控え（`write_conf` と `restore_file` が作る `.bak-<日時>`）は消さない
+- 本文の手順 2 に、控えが残る旨の箇条書きを足した。検証用の鍵なので、検証では手で消した。スクリプトは変えていない

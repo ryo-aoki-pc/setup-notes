@@ -190,6 +190,7 @@
    - 手順 1 の管理者の窓を閉じる
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
    - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする（実行ポリシーとプロファイルは、5.1 と 7 で別々に持つ）
+   - Windows Terminal の中に開いた窓に複数行のブロックを貼ると、「複数の行を含むテキストを貼り付けようとしています」の警告が出る。「強制的に貼り付け」を押す
 
 1. 管理者ではないことと、Store CLI・winget の有無を確かめる。
 
@@ -923,7 +924,7 @@
 
 1. タスクバーとスタートの、要らないピン留めを外す。
 
-   - タスクバーのアイコン（Microsoft Edge・Microsoft Store など）を右クリックし、「タスク バーからピン留めを外す」
+   - タスクバーのアイコン（Microsoft Edge・Microsoft Store など）を右クリックし、「タスクバーからピン留めを外す」
    - スタートを開き、ピン留めされたアプリを右クリックし、「スタートからピン留めを外す」
    - Copilot は外さない（利用者の選択）。使うアプリは残す
 
@@ -931,13 +932,14 @@
 
    - スタートメニューで「UniGetUI」を探して開く
    - 初回は、使い方の案内や設定の問いが出ることがある。読んで進める
-   - 設定のパッケージ マネージャーの一覧で、WinGet と Scoop が有効になっていて、見つかっている（版が出ている）ことを確かめる
+   - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）
    - 「インストール済みのパッケージ」に、手順 22 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る
    - git が無い旨の警告が出たら、この文書の後に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れる（scoop の `git` は入れない）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 手順 30 の後なので、Windows Terminal の中に開く。複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 再起動の後の状態を確かめる。
 
@@ -1047,6 +1049,7 @@
    ```
 
    - すぐに再起動し、UEFI（BIOS）の設定の画面が開く
+   - `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある。スタートメニューの電源から再起動し、起動の直後に機種のキー（F2・Del など）を押して UEFI の設定の画面に入る
    - **次の手順は、UEFI の設定の画面が開いてから行う**
 
 1. UEFI の設定の画面で、Wake on LAN を有効にして保存し、Windows を起動する。
@@ -1140,21 +1143,35 @@
    - 仕組み: `shutdown /m` も `net rpc shutdown` も、`\PIPE\InitShutdown` の名前付きパイプを SMB（TCP 445）で使う。再起動には Administrators が既定で持つ「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）と、`LocalAccountTokenFilterPolicy = 1` が要る（[参考資料](reference/windows-setup.md)）
    - 別の PC で動かすトリガー（`<WIN_IP>`・`<WIN_HOST>` はこの PC、`<WIN_USER>` は管理者）
      - AlmaLinux 10 から: `net rpc shutdown -r -f -t 0 -I <WIN_IP> -U '<WIN_USER>%<PASS>'`（`net` が無ければ `sudo dnf install -y samba-common-tools`）
-     - 別の Windows から: `shutdown /r /f /t 0 /m \\<WIN_HOST>`
+     - 別の Windows から: `net use \\<WIN_HOST>\IPC$ /user:<WIN_HOST>\<WIN_USER>`（パスワードを聞かれる）でこの PC の資格情報を渡してから、`shutdown /r /f /t 0 /m \\<WIN_HOST>` を打つ
+     - 別の Windows から送り終わったら、`net use \\<WIN_HOST>\IPC$ /delete` を打つ
+   - `net use` は、パスワードを聞く前に `\\<WIN_HOST>\IPC$ のパスワードまたはユーザー名が無効です。` を出すが、そのまま入れてよい（`コマンドは正常に終了しました。` になればよい）
+   - `net use` をせずに `shutdown /m` を打つと、送る側のユーザーの資格情報で送られ、`アクセスが拒否されました。(5)` で止まる（この PC に無いユーザーや、Microsoft アカウントでサインインした PC から送ったとき）
    - **注意**: この手順は、節のリードの `[!WARNING]` のとおり管理の口を LAN に開ける
 
 1. 別の Windows から PowerShell で再起動したいときだけ、WinRM（PowerShell リモート処理）を有効にする。
 
    ```powershell
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
    Enable-PSRemoting -Force -SkipNetworkProfileCheck
-   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Private
-   Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-PUBLIC -ErrorAction SilentlyContinue
-   Get-NetFirewallRule -DisplayGroup 'Windows Remote Management' | Format-Table Name, Enabled, Profile, Direction, Action
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile Private
+   Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-NoScope -ErrorAction SilentlyContinue
+   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile, Direction, Action
    ```
 
-   - `WINRM-HTTP-In-TCP` が `Private` で有効、`WINRM-HTTP-In-TCP-PUBLIC` が無効になればよい（WinRM は TCP 5985 で待ち受ける）
+   - `WINRM-HTTP-In-TCP` が `True  Private` で、`WINRM-HTTP-In-TCP-NoScope` が `False` になればよい（WinRM は TCP 5985 で待ち受ける）
+   - Windows 11 では、`WINRM-HTTP-In-TCP` は接続元を同じサブネット（`LocalSubnet`）に絞った規則で、`Enable-PSRemoting` は接続元を絞らない `WINRM-HTTP-In-TCP-NoScope` を有効にする。後者は切る
+   - 1 行目は、`WINRM-HTTP-In-TCP` を既定のパブリックに戻す（無効でプライベートのままだと、`Enable-PSRemoting` が `エラー:1 つ以上の更新手順を終了できませんでした。` で止まり、後ろの行が動かずに `-NoScope` が開いたまま残る。[参考資料](reference/windows-setup.md)）
    - `Enable-PSRemoting` も `LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）
+   - 別の Windows から送る前に、送る側の管理者の PowerShell で、この PC を `TrustedHosts` に足す（ドメインに入っていない PC は、足していないと `TrustedHosts 構成設定に追加されている必要があります` の旨のエラーで止まる）
+     - `WSMan:\localhost` は WinRM のサービスが動いていないと使えないので、止まっていれば先に `Start-Service WinRM` を行う
+     - 足す前の値を `(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控えてから、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <WIN_HOST> -Concatenate -Force` を行う
+     - 戻し方は、この節の手順 9 の箇条書き
    - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`（WinRM を使うので、`Restart-Computer -ComputerName` の既定の WMI/DCOM より開けるポートが少ない）
+     - 管理者ではない PowerShell でよい
+     - `<WIN_USER>` には、コンピューター名を付けなくてよい
+     - `-ComputerName` には、`TrustedHosts` に足したのと同じ名前を書く
+     - エラー無しに数秒で戻り、この PC が再起動すればよい
 
 1. ネットワークが切れたときに自分で再起動させたいときだけ、見張りのタスクを登録する。
 
@@ -1200,6 +1217,7 @@
    ```
 
    - `net-watchdog  Ready` が出ればよい。SYSTEM として、起動時と 5 分ごとに動く
+   - 起動時のトリガーなので、登録しただけでは動かない。次に起動したときから動く
    - 歯止め: 稼働 60 分未満は何もしない（起動直後に人が直す余地を残す）。`WATCHDOG_HOST` に 3 回 ping して、届けば失敗の数（`HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails`）を 0 に戻し、6 回続けて届かなければ（約 30 分）再起動する
    - **注意**: 相手がずっと落ちていると再起動を繰り返す（節のリードの `[!WARNING]`）。`$limit` を増やすと、再起動までの猶予が延びる
 
@@ -1234,11 +1252,19 @@
    Disable-PSRemoting -Force
    Stop-Service -Name WinRM -ErrorAction SilentlyContinue
    Set-Service -Name WinRM -StartupType Manual
-   Get-NetFirewallRule -DisplayGroup 'Windows Remote Management' | ForEach-Object { Disable-NetFirewallRule -Name $_.Name }
+   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Disable-NetFirewallRule
+   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
+   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile
    ```
 
-   - WinRM のサービスが止まり、受信の規則が無効になればよい
+   - 最後の表の規則が、すべて `False` になればよい（WinRM のサービスも止まる）
+   - `WINRM-HTTP-In-TCP` の `Profile` が、既定の `Public` に戻ればよい
    - `Disable-PSRemoting` はセッションの構成を無効にするだけなので、サービスの停止・規則の無効化はこの手順で行う
+   - `Enable-PSRemoting` が作ったリスナーの設定は残る。サービスが止まり、規則も無効なので、待ち受けない
+   - この節の手順 5 の注意で、送る側の `TrustedHosts` に足したときは、送る側の管理者の PowerShell で控えた値に戻す
+     - 送る側の WinRM のサービスが止まっていれば（送る側を再起動した後など）、先に `Start-Service WinRM` を行う
+     - `Set-Item WSMan:\localhost\Client\TrustedHosts -Value '<控えた値>' -Force` を行う（空だったなら `-Value ''`）
+     - 足す前にサービスが止まっていたなら、続けて `Stop-Service WinRM` を行う
    - `LocalAccountTokenFilterPolicy` はこの手順では戻さない（この節の手順 10）
 
 1. 元に戻すときは（この節の手順 4 も手順 5 も使わないとき）、UAC のリモート制限を元に戻す。
@@ -1261,6 +1287,7 @@
    ```
 
    - 何も出なければよい（タスクが消えた）
+   - 空になったキー `HKLM:\SOFTWARE\setup-notes` とフォルダー `C:\ProgramData\setup-notes` は残る。ほかに使っていなければ、手で消してよい
 
 1. 元に戻すときは（この節の手順 7 を行ったとき）、Remote Control のタスクのトリガーを外す。
 
@@ -1339,7 +1366,7 @@
 
 ## ロールバック
 
-- この節の手順 1〜17 は手順 9 と同じ管理者ではない Windows PowerShell（5.1）に、この節の手順 19〜38 はこの節の手順 18 で開く管理者の Windows PowerShell に貼る
+- この節の手順 1〜17・21 は手順 9 と同じ管理者ではない Windows PowerShell（5.1）に、この節の手順 19・20・22〜38 はこの節の手順 18 で開く管理者の Windows PowerShell に貼る（この節の手順 21 の分だけ、管理者ではない窓も開いたままにしておく）
 - PSWindowsUpdate だけを外すなら、この節の手順 40・41 を行う（管理者ではない窓）。この文書で初めて入れた場合だけが対象
 - Windows Update や Store の更新を一括で取り消す手順ではない。Store 本体と、ほかのモジュールも使う NuGet のプロバイダーは外さない
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
@@ -1461,6 +1488,7 @@
    ```
 
    - アプリごとに、入れた旨か、もう入っている旨の行が出る
+   - `No package found matching input criteria.`（ストアにその ID が無い）や `0x80073cfb` で入らないアプリは、PC に残っているものを `Add-AppxPackage -RegisterByFamilyName -MainPackage <パッケージ ファミリー名>` で登録し直す（例: `Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe`）
    - 要らないアプリは、その ID を消してから貼る（ID とアプリの対応は[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)の表。`9MSSGKG348SP` がウィジェット）
 
 1. PowerShell 7 を外す。
@@ -1497,12 +1525,16 @@
 1. scoop と、scoop で入れたすべてのアプリを外す。
 
    ```powershell
+   Get-ChildItem -Path "$env:USERPROFILE\scoop\apps\*\current" -Force -ErrorAction SilentlyContinue | ForEach-Object { attrib.exe -R /L $_.FullName }
    scoop uninstall scoop
    ```
 
+   - 1 行目は、scoop がアプリごとに作る `current`（ジャンクション）の読み取り専用を外す。外さないと `Couldn't remove ~\scoop\apps` で止まる
    - `Are you sure? (yN)` と聞かれるので、`y` を入れる
    - 最後に `Scoop has been uninstalled.` が出ればよい（`~\scoop\persist` は残る）
-   - 消せないアプリがあると `Not all apps could be deleted. Try again or restart.` で止まる。そのアプリを閉じて貼り直す
+   - 消せないアプリがあると `Couldn't remove` の旨の行で止まる。そのアプリを閉じて、この手順を貼り直す
+     - `scoop` が見つからない旨が出たら、scoop 本体が先に消えている。この節の手順 14 で残りを消す（`persist` も消える）
+     - 途中で止まったときは、ユーザーの PATH に `~\scoop\shims` が残る。要らなければ手で外す
    - **次の手順は、`Scoop has been uninstalled.` が出てから貼る**（続けて貼ると `y` の答えとして食われる）
 
 1. scoop の残りを消すときだけ、`persist` と設定を消す（取り戻せない）。
@@ -1588,7 +1620,7 @@
    - Autologon の窓で `Disable` を押す。自動ログオンの設定と、置いてあったパスワード（LSA のシークレット）が消える
    - **次の手順は、Autologon の窓が閉じてから貼る**
 
-1. Autologon を外す。
+1. この節の手順 1〜17 の管理者ではない窓で、Autologon を外す。
 
    ```powershell
    winget uninstall --exact --id Microsoft.Sysinternals.Autologon --source winget
@@ -1596,6 +1628,7 @@
    ```
 
    - アンインストールの成功の行と、`0` が出ればよい（自動ログオンが無効）
+   - 手順 64 で自分のユーザーに入れたので、管理者の窓では `The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れない
    - `1` が出たら、この節の手順 20 で `Disable` を押していない。外す前に戻って押す（外した後は、もう一度入れてから）
 
 1. 手順 37 で `HelloOnly` が `2` だったときだけ、「Windows Hello サインインのみを許可する」をオンに戻す。
@@ -1715,7 +1748,7 @@
    ```
 
    - システムのプロパティの「リモート」タブが開く。「このコンピューターへのリモート アシスタンス接続を許可する」にチェックを入れて「OK」を押す
-   - この画面は、`fAllowToGetHelp` と、リモート アシスタンスの受信の規則をまとめて戻すはず。規則をコマンドでまとめて有効にすると、手順 45 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す
+   - 「OK」を押すと窓が閉じ、`fAllowToGetHelp` が 1 になり、リモート アシスタンスの規則（パブリック向けも含む 15 個）がまとめて有効になる
    - **次の手順は、システムのプロパティを閉じてから貼る**
 
 1. 手順 37 で `RemoteDesktop` が `1`（無効）だったときだけ、リモート デスクトップを無効に戻す。
@@ -1773,6 +1806,7 @@
    ```
 
    - `HibernateEnabled: 1` が出ればよい
+   - ファームウェアが休止状態に対応しない PC（VM など）では、`システム ファームウェアは休止状態をサポートしていません。` の旨が出て `HibernateEnabled: 0` のまま（もとから休止状態は使えない）
    - **注意**: `/restoredefaultschemes` は、電源プランをすべて既定に戻す（本書の外で変えた電源の設定も消える）
 
 1. 長いパス・開発者モード・sudo を切る。
@@ -1786,7 +1820,7 @@
    ```
 
    - `LongPathsEnabled : 0` と `AllowDevelopmentWithoutDevLicense : 0` が出ればよい
-   - sudo は、無効になった旨の英語の行を出す
+   - sudo は、無効になった旨の行を出す（日本語の Windows では `このコンピューターでは sudo が無効化されています。`）
 
 1. PC の名前を戻すときだけ、元の名前にする（`OLD_PC_NAME` は必ず値を入れる）。
 
