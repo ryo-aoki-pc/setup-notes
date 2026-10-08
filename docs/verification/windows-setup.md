@@ -301,6 +301,27 @@
   - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard-road-warrior.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
   - 対象の 24H2・25H2 と、利用者の 26H2（26300）の違い
 
+### シェルのツールを入れる（任意）: 検証状況の記録
+
+- **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
+- **確かめたこと**（[付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)）:
+  - 上流の zoxide（2026-10-08 05:11 UTC。06:22 UTC と 06:40 UTC にタグを見直しても同じ）: タグの最新は `v0.10.0`。Git Bash の記録を直すコミット `1f484a4`（#1260）は `main` にあり、どのタグにも入っていない。そのため、0.9.9 に止める形で書いた
+  - scoop の main の 5 つの定義と、バケットの履歴の zoxide 0.9.9 の定義。6 つの zip（5 つと zoxide 0.10.0。x64）の sha256 が定義と一致した。PE のインポート表で `VCRUNTIME140.dll` を読み込むのは bat だけ。0.9.9 の `zoxide.exe` に `cygpath -w "$(\builtin pwd -P)"` がある
+  - Scoop v0.6.0 のソース: 版の指定（バケットの履歴）・`hold`・`unhold`・`update --force`・`list`・`uninstall` の動きと表示
+  - Scoop v0.6.0 の `install` の分かれを、偽の scoop のフォルダーで Linux の pwsh 7.5.3 で動かした: 版を指定した同じ版がもう入っていると、同じ行のほかの名前を入れずに終わる。版を指定しない名前を並べると、入っているものを何も出さずに飛ばす。main が git でなければ、履歴を探さない
+  - Linux の bat 0.26.1 で、CRLF の 3 行の設定が効き、BOM を付けると 1 行目で失敗すること
+  - この節のブロック 10 個の構文（誤り 0）と 5.1 互換（指摘 0）。偽物の `scoop` と本物の Linux の bat で、手順 2〜6・10〜13 の流れを Linux の PowerShell 7.5.3 で模擬した（手順 4・6・10 を直した後に、もう一度流した。最後に、手順書から取り出し直したブロックで、構文・互換・模擬を通し直した）
+- **確かめていないこと**:
+  - Windows で貼ること（すべての手順）。`scoop install zoxide@0.9.9` がバケットの履歴から定義を取り出すことと、`hold`・`list`・`unhold`・`update --force`・`uninstall` の実際の表示
+  - Git for Windows より前に zip で置いた main のバケットを、この節の手順 4 の `scoop update` が git の形に直すこと
+  - 5.1 の `Set-Content -Encoding ASCII` と `[IO.File]::WriteAllText` が、NTFS のハードリンクの控え（`persist`）にも同じ中身を書くこと
+  - WezTerm の新しいタブが、起動し直さずに starship の `Path` と `BAT_CONFIG_DIR` を読むこと
+  - Git Bash で、AlmaLinux 10 の初期設定の手順 52〜55・57・58・60〜63 を通すこと（zoxide の Windows の形のパスでの記録、eza の見出しと `Git` の列、bat のプレビュー、Git for Windows に `/etc/os-release` があるか、fzf の ASCII 以外の文字）
+  - 0.10.0 で記録されないことの再現と、直った版への上げ方（まだ出ていない）
+  - Git Bash で、AlmaLinux 10 の初期設定の後ろの節（starship・fzf・eza・bat）を貼ること（リードで案内した、fd を scoop で入れる形を含む）
+  - `VCRUNTIME140.dll` が無いときの `bat --version` の出方
+  - SSH のセッション、arm64 の Windows、スタートメニューの Git Bash（mintty）
+
 ### 対象と検証環境
 
 - **目的**: Windows 11 をインストールした直後に行う設定を、1 本の手順にまとめる
@@ -314,6 +335,7 @@
   - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](../verification/windows-setup.md#選択した方針)）。この文書のリードから順に案内する
   - 任意節（2026-10-08）: プライバシーと広告の表示・表示と入力と音とストレージ センサー・Edge の常駐のポリシー・CopyQ
   - 任意節（2026-10-08 の 2 つ目）: PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォントと貼り付けの警告・WSL のネットワークのミラー
+  - 任意節（2026-10-08 の 3 つ目）: Git Bash のシェルのツール（starship・zoxide・fzf・eza・bat）
 - **進め方**: 最初に管理者の Windows PowerShell 5.1 で Windows Update を行い、必要なら手動で再起動する。その後、通常の窓で Store と自分のユーザーの設定を、管理者の窓で PC 全体の設定を行う
   - 設定の後に 1 回再起動し、WSL のディストリビューションと自動サインインを入れる
 - **状態**: **Windows の実機では通していない**（2026-10-03 に作成、2026-10-04 に更新を CLI 化）
@@ -350,6 +372,7 @@
 | CopyQ（任意節） | 16.0.0（winget の `hluk.CopyQ`、自分のユーザー。2026-10-08 の定義。上流の最新は 17.0.0） |
 | Windows Terminal（任意節） | 1.24 以降（`warning.multiLinePaste` が 3 つの値の版）。貼り付けの設定の原因を確かめた PC は 1.25.2733.0 |
 | WSL（任意節） | 同じ PC の記録は 2.7.13.0（ネットワークは既定の NAT）。ミラーには Windows 11 22H2 以上が要る |
+| シェルのツール（任意節） | scoop の main の fzf 0.74.4・starship 1.26.0・eza 0.23.5・bat 0.26.1（2026-10-08 の定義）と、バケットの履歴の zoxide 0.9.9（main の定義は 0.10.0） |
 | WSL の AlmaLinux 10 | `AlmaLinux-10`（2026-10-03 のイメージは 10.2） |
 
 貼り付けの設定（手順 16〜19・37・38）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
@@ -927,6 +950,138 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 1. 本物の `Get-Process`・`Start-Process`・`Get-ScheduledTask`・`Get-AppxPackage` の値と動き。WSL の節の手順 6 の `-Force` の無い `Remove-Item` が、Windows の `.wslconfig` を消せること
 1. `wsl.exe` と、5.1 から `pwsh.exe -Command { … }` を呼ぶブロック（PowerShell 7 の実行ポリシーの手順 5・8 を含む）。Windows 版の starship・zoxide と、対話の窓でのキーとプロンプト
 1. 書いた値が PowerToys・Windows Terminal・WSL に効くこと（それぞれの節の「検証状況の記録」の「確かめていないこと」）
+
+### 付録: シェルのツールの任意節のブロックの確認（2026-10-08）
+
+「シェルのツールを入れる（任意）」を足したときに、上流と scoop の資料・配布物を調べ、PowerShell のブロックを、Linux（クラウドのコンテナ）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0 で確かめた。**Windows の実機では未検証**（どのブロックも、Windows では貼っていない）。
+
+**上流の zoxide**（2026-10-08 05:11 UTC に確かめた）:
+
+- 06:22 UTC と 06:40 UTC にも `git ls-remote --tags` を見直した。タグの最新は `v0.10.0` のまま、`main` も `86b443c` のままだった。06:40 UTC の scoop の main の `bucket/zoxide.json` も `0.10.0`
+- `git ls-remote --tags` のタグの最新は `v0.10.0`。`main` は `86b443c`（`git describe` は `v0.10.0-22-g86b443c`）
+- `1f484a4`「Fix MSYS2 cygpath pwd substitution (#1260)」（2026-07-07）は `main` にあり、`git tag --contains` は何も出さなかった
+- `main` の `CHANGELOG.md` の `[Unreleased]` の Fixed に「Bash/Zsh: fix `z` failing on Cygwin/MSYS2 due to `cygpath` being passed a bad string.」がある
+- `templates/bash.txt` の、Windows のときの `__zoxide_pwd`
+  - v0.9.9: `\command cygpath -w "$(\builtin pwd -P)"`
+  - v0.10.0: `\command cygpath -w "{{ pwd }}"`（`pwd` は `\builtin pwd -L` などの文字列で、コマンド置換が無い）
+  - `main`: `\command cygpath -w "$({{ pwd }})"`
+- `src/db/mod.rs` の `VERSION` は、v0.9.9 と v0.10.0 のどちらも 3（`db.zo`）。`main` の `c479cc8`（#1288、2026-10-03）は `db.txt` に変え、`db.txt` が無くて `db.zo` があれば、それを読んで移す
+- GitHub の API（`releases/latest`）は、この環境の `gh` からは使えなかった（リポジトリへのアクセスが無い旨の 403）。版になったかは、タグと `main` で判断した
+
+**scoop の定義**（ScoopInstaller/Main の `master`。2026-10-08 に取得）:
+
+| 定義 | 版 | 書いてあること |
+|---|---|---|
+| `fzf.json` | 0.74.4 | `bin` は `fzf.exe` |
+| `zoxide.json` | 0.10.0 | `bin` は `zoxide.exe`。`notes` は `_ZO_DATA_DIR is located at '$env:LOCALAPPDATA\zoxide' by default` |
+| `starship.json` | 1.26.0 | `bin` は無く、`env_add_path` が `.`。`suggest` は `extras/vcredist2022`。`notes` は `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足す案内と、Powerline のフォント |
+| `eza.json` | 0.23.5 | `bin` は `eza.exe` と、`exa` の名前の `eza.exe`。64bit（`x86_64-pc-windows-gnu`）だけ |
+| `bat.json` | 0.26.1 | `env_set` は `BAT_CONFIG_DIR` に `$dir`。`persist` は `config`・`syntaxes`・`themes`。`pre_install` は、控えに `config` が無ければ `%APPDATA%\bat\config` を写し、空のファイルを作る。`suggest` は `extras/vcredist2022` と `less` |
+
+- `bucket/zoxide.json` の履歴: `f8683b6ce`（2026-07-04、0.10.0 に）、`73b1eafab`（2026-01-31、0.9.9 に）
+- Scoop と同じ探し方（`git log --follow -n 1 --format=%H -G 'version.: .0\.9\.9' -- bucket/zoxide.json`）は `f8683b6ce` を出した。その親（`f8683b6ce^`）の定義が 0.9.9 で、64bit の hash は `5af00d0916f0…`、arm64 は `58c55ef6f0ea…`
+
+**配布物**（上の定義の x64 の zip を落とし、Linux の `sha256sum` と `objdump -p` で見た）:
+
+| zip | sha256 | 実行ファイルが読み込む DLL |
+|---|---|---|
+| `fzf-0.74.4-windows_amd64.zip` | 定義と一致 | `kernel32.dll` だけ |
+| `zoxide-0.9.9-x86_64-pc-windows-msvc.zip` | 履歴の定義と一致 | `KERNEL32.dll`・`ntdll.dll`・`ole32.dll`・`shell32.dll`・`api-ms-win-core-synch-l1-2-0.dll` |
+| `zoxide-0.10.0-x86_64-pc-windows-msvc.zip` | 定義と一致 | `KERNEL32.dll`・`ntdll.dll`・`combase.dll`・`shell32.dll`・`userenv.dll`・`api-ms-win-core-synch-l1-2-0.dll` |
+| `starship-x86_64-pc-windows-msvc.zip`（1.26.0） | 定義と一致 | `KERNEL32.dll`・`ADVAPI32.dll`・`user32.dll`・`setupapi.dll` などで、`VCRUNTIME140.dll` は無い |
+| `eza.exe_x86_64-pc-windows-gnu.zip`（0.23.5） | 定義と一致 | `msvcrt.dll`・`KERNEL32.dll`・`advapi32.dll` などで、`VCRUNTIME140.dll` は無い |
+| `bat-v0.26.1-x86_64-pc-windows-msvc.zip` | 定義と一致 | `VCRUNTIME140.dll` と、`api-ms-win-crt-*`（UCRT）・`kernel32.dll` など |
+
+- 0.9.9 の `zoxide.exe` の文字列に `\command cygpath -w "$(\builtin pwd -P)"` がある。0.10.0 の `zoxide.exe` では `\command cygpath -w "` で切れている（テンプレートの `{{ pwd }}` の前）
+- `eza.exe` の文字列に `v0.23.5 [+git]` がある
+
+**Scoop のソース**（ScoopInstaller/Scoop の `v0.6.0`、2026-09-30。ここは読んだだけ。`install` の分かれは、後の「Scoop v0.6.0 を動かした確認」で動かした）:
+
+- `scoop install <名前>@<版>`: `generate_user_manifest` が `INFO  Resolving historical manifest for '<名前>' (<版>)` を出し、SQLite のキャッシュ（設定したときだけ）→ バケットの git の履歴（`Find-HistoricalManifestInGit`。見つけたコミットの親とそのコミットの定義の版を比べる）→ `autoupdate` の順に定義を探す。履歴の定義は `~\scoop\workspace\<名前>.json` に書く
+- 版を指定したものは `~\scoop\workspace\<名前>.json` の場所になり、`prune_installed`（`installed` は `<名前>.json` の名前で探す）は入っているとみなさない。ほかの版が入っていても、並べて入れて `current` を付け替える
+- 版を指定した同じ版がもう入っていると、`'<名前>' (<版>) is already installed.` の警告の後の `continue`（`ForEach-Object` の中で、囲むループが無い）が `bin/scoop.ps1` の `switch` まで抜け、同じ行のほかの名前を入れずに終わる
+- 版を指定しない名前を並べたときは、入っているものを `prune_installed` で飛ばす。`'<名前>' (<版>) is already installed. Skipping.` の警告は、`Get-Dependency` が名前を `main/<名前>` の形に変えるので、指定した名前との突き合わせに当たらず出ない
+- 名前を 1 つだけ渡したときは、もう入っていれば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる
+- バケットの履歴を探すのは、main が git のリポジトリのときだけ（`Find-HistoricalManifestInGit`）。そうでなければ `WARN  Bucket 'main' is not a git repository. Cannot search historical versions.` を出して `autoupdate` に移る。git の形に直すのは `scoop update` の `Sync-Bucket`（`Converting 'main' bucket to git repo...`）。ScoopInstaller/Install の `install.ps1` は、git が無ければ main を zip で置く
+- `env_add_path` は `Add-Path` で、ユーザーの `Path` と今のセッションの `$env:PATH` に足し、`Adding <場所> to your path.` を出す。`env_set` は `Setting user environment variable: <名前> = <値>` を出し、今のセッションにも入れる
+- `scoop hold`: `<名前> is now held and can not be updated anymore.`。すでに止めてあれば `'<名前>' is already held.`。`scoop unhold`: `<名前> is no longer held and can be updated again.`
+- `scoop update`: 止めたものは、古くても `'<名前>' is held to version <版>` の警告で飛ばす。版を指定して入れたものは、`--force` のときだけバケットの今の定義で入れ直す（#6730）。名前を渡したときは、前の更新から 3 時間たっていなければバケットを新しくしない（`is_scoop_outdated`）
+- `scoop list`: `Source` は、`bucket` が無く `url` が `workspace` の定義なら `<auto-generated>`。`Info` は、`hold` があれば `Held package`
+- `scoop update zoxide --force`（版を指定して入れたもの）: `update` の `$pin_broken` から `Find-AppBucket` で、main のバケットの今の定義を入れる（Releases は見ない）
+- `scoop uninstall`: `hold` を見ない。動いているプロセスがあれば、`The following instances of "<名前>" are still running. Close them and try again.` で止まる
+
+**Scoop v0.6.0 を動かした確認**（`v0.6.0` の `bin/scoop.ps1` と `lib`。Linux の pwsh 7.5.3）:
+
+- `SCOOP`・`XDG_CONFIG_HOME`・`USERPROFILE` を一時のフォルダーにし、`apps\<名前>\<版>` に `manifest.json` と `install.json`（`bucket` は `main`）を置いて、入っている形にした。main のバケットの定義の `url` は使えない場所にし、ダウンロードは失敗させた
+- 設定ファイルの場所が Linux では読めず、どの場合も `Updating Scoop...` が動いて失敗した。下の結果は、その後の行
+
+| 入っているもの | 渡した引数 | 結果 |
+|---|---|---|
+| zoxide 0.9.9 | `install fzf zoxide@0.9.9 starship` | `WARN  'zoxide' (0.9.9) is already installed.` と `Use 'scoop update zoxide' to install a new version.` だけで、`Installing 'fzf'` の行は出なかった |
+| zoxide 0.9.9 | `install fzf starship`（比べるため） | `Installing 'fzf' (0.74.4) [64bit] from 'main' bucket` の後、ダウンロードで失敗した |
+| zoxide 0.9.9 | `install zoxide@0.9.9` | 1 行目と同じ 2 行の警告 |
+| zoxide 0.9.9 | `install zoxide`（名前 1 つ） | 同じ 2 行の警告 |
+| fzf と starship | `install fzf starship` | 何も出さなかった。`lib` を読み込んで `Get-Dependency` と `prune_installed` を同じ順に呼ぶと、名前は `main/fzf`・`main/starship` になり、どちらも飛ばす側に入り、`fzf`・`starship` との突き合わせ（警告を出す側）は空だった |
+| zoxide 0.10.0（main は git でない） | `install zoxide@0.9.9` | `INFO  Resolving historical manifest for 'zoxide' (0.9.9)`・`WARN  Bucket 'main' is not a git repository. Cannot search historical versions.`・`WARN  No historical manifest found for 'zoxide@0.9.9'; attempting autoupdate` の後、ダウンロードで失敗して `Could not install: zoxide@0.9.9` |
+
+- zoxide 0.10.0 が入った形で `lib` を読み込むと、`installed '<SCOOP>\workspace\zoxide.json'` は `False`、`installed zoxide` は `True`、`prune_installed` に workspace の場所と `fzf` を渡すと、どちらも入れる側に入った
+- `switch` → スクリプト → `ForEach-Object { …; continue }` の形だけの小さな模型でも、`continue` の後ろ（同じスクリプトの残り）は動かず、`switch` の後ろから続いた
+
+**bat の設定ファイル**（Linux の bat 0.26.1。`bat-v0.26.1-x86_64-unknown-linux-musl.tar.gz`）:
+
+- `BAT_CONFIG_DIR` のフォルダーに、CRLF の 3 行（`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never`）の `config` を置くと、`--decorations=always --color=never` で、行番号と見出しだけ（格子の線が無い）の表示になった。空の `config` では、格子の線のある既定の表示
+- 同じ 3 行の先頭に BOM（`EF BB BF`）を付けると、`[bat error]: '<BOM>--theme=ansi': No such file or directory (os error 2)` の形のエラーで、終了コードが 1 になった
+
+**構文と Windows PowerShell 5.1 との互換**（最後の確認。手順書の今のブロックを取り出し直して通した）:
+
+- `claude/win11-postinstall-2-tools` との差分で足した `powershell` のブロックは、この節の 10 個（この節の手順 2〜5・10〜13 と、手順 6 の 2 個）と、git-delta.md の 6 個・gh.md の 10 個の 26 個。手順書のブロックは 170 個から 180 個になり、既にあるブロックで変えたものは無い（変えたのは、リードの「手順の後に、この順に通す手順書」〔git-delta・GitHub CLI の入れ子の箇条書き〕と「手順の後の節」、`## 更新` と `## ロールバック` のリードだけ。手順書のアラートは 5 つのまま）
+- 26 個を PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）。この節の 10 個は、手順 4・6・10 を直した後にも通している（そのときも誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016 Datacenter の `win-8_x64_10.0.14393.0_…`、Windows Server 2019 Datacenter の `win-8_x64_10.0.17763.0_…`、Windows 10 Pro の `win-48_x64_10.0.17763.0_…`）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）を当てた。互換の指摘は、4 つの規則とも 0 個
+  - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、`PSUseCompatibleSyntax` が 1 個、`PSUseCompatibleCommands` が 6 個（プロファイルごとに 2 個）の指摘を出した。`}` の足りないファイルは、構文の誤り 1 個
+- 既定の規則の指摘は 5 個で、どれもこの節のブロック。4 個は `PSUseBOMForUnicodeEncodedFile`（日本語を含む、手順 6 の 2 個と手順 10・12。貼るので関係が無い）、1 個は手順 6 の変数だけのブロックの `PSUseDeclaredVarsMoreThanAssignments`（変数は、手順 6 のもう 1 つのブロックで使う）。git-delta.md と gh.md のブロックには指摘が無い
+
+**模擬**（Linux の pwsh 7.5.3。手順 4・6・10 を直した後に全部を流し直し、最後に手順書から取り出し直したブロックでもう一度流した。表は最後の結果で、前の回と違ったのは `Scoop` の行と、足した 2 つの場合だけ）:
+
+- `%USERPROFILE%`・`%LOCALAPPDATA%`・`%APPDATA%`・`%WINDIR%` を一時のフォルダーにした。`scoop` は、渡った引数を覚えて shim のファイルを作る・消す関数（最後の回は、shims に置いた `scoop.ps1` からその関数を呼んだ）、fzf・zoxide・starship・eza は版の行を出すだけのスクリプト、bat は本物の Linux 版 0.26.1 にした。管理者の判定（`WindowsPrincipal`。Linux では使えない）は `$false` に置き換えた
+- 偽物の `scoop install` の bat は、scoop の `pre_install` と `persist` のように、控えの空の `config` を作って `current\config` からハードリンクし、`BAT_CONFIG_DIR` を入れた（`current` はシンボリック リンク）
+- 偽物の `scoop install` は、上の「Scoop v0.6.0 を動かした確認」の分かれをまねた（版を指定した同じ版で、その回を終える。名前を並べたときは、入っているものを何も出さずに飛ばす。名前 1 つで入っていれば、2 行の警告）。`hold` は止めた状態を覚え、`update zoxide` はバケットの `zoxide.json` の版を入れる
+
+| 対象 | 流した場合 | 結果 |
+|---|---|---|
+| 手順 2 | 何も無い（VC++ ランタイムの DLL と共通の bash 設定も無い） | `Admin : False`・`BashConfig : False`・`VCRuntime : False`。`Tools`・`Zoxide` は空。`Scoop` は偽物の `shims/scoop.ps1`（前の回は関数だけで、`Scoop` は空だった） |
+| 同じ手順 2 | 偽物の zoxide 0.10.0 の shim・DLL・`bashrc` がある | `BashConfig : True`・`VCRuntime : True`、`Tools` は shim の zoxide だけ、`Zoxide : zoxide 0.10.0` |
+| 同じ手順 2 | 続けて、偽物の fzf を winget の `Microsoft\WinGet\Links` に置き、PATH の後ろに足した（最後の回だけ） | `Tools` に、その `Links` の `fzf` と、shim の zoxide が並んだ |
+| 手順 3・4 | 続けて | `scoop` に `uninstall zoxide`・`update`・`install fzf starship eza bat`・`install zoxide@0.9.9`・`hold zoxide` が渡った。4 つの導入の行・`Resolving historical manifest`・`zoxide is now held` |
+| 手順 2 | 手順 4 の後 | `Tools` は、4 つの shim と `apps/starship/current/starship` の 5 つ。`Zoxide : zoxide 0.9.9` |
+| 同じ手順 4 | 続けてもう 1 回 | 2 行目は何も出さず、3 行目は `'zoxide' (0.9.9) is already installed.` の 2 行の警告、4 行目は `'zoxide' is already held.` |
+| 手順 5 | 手順 4 の後 | 5 つの版の行と、5 つの場所と、偽物の `scoop list` の表（`<auto-generated>`・`Held package`） |
+| 手順 2・4・5 | main の zoxide 0.9.9 だけがあり、ほかの 4 つと bat の環境変数は無い（手順 3 を飛ばす分かれ） | 手順 2 は `Zoxide : zoxide 0.9.9`。手順 4 は 4 つを入れ、3 行目は警告だけで、4 行目で止めた。手順 5 は 5 つの版と場所と、`main`・`Held package` の行 |
+| 手順 6 | 控えの `config` が空 | 変数のブロックは何も出さない。`書いた:` と 3 行。ファイルは ASCII だけ（0x7E より大きいバイトが 0 個で、BOM も無い）。控えと `current\config` は同じ i ノードで、同じ中身。本物の bat の `--config-file` も同じ場所を出し、行番号と見出しだけの表示になった |
+| 同じ手順 6 | 続けてもう 1 回 | `中身がある（書き換えない）:` で、変えなかった |
+| 同じ手順 6 | `$BAT_THEME_NAME` が空 | `中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す` |
+| 同じ手順 6 | `config` が空白と改行だけ。テーマは `Monokai Extended` | `書いた:` と、`--theme="Monokai Extended"` で始まる 3 行。本物の bat が読んだ |
+| 同じ手順 6 | `BAT_CONFIG_PATH` も `BAT_CONFIG_DIR` も無い | `中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる`。`%APPDATA%\bat\config` は作らなかった |
+| 同じ手順 6 | `BAT_CONFIG_PATH` を別のフォルダーの `config`（まだ無い）にした | `書いた:` とその場所と 3 行。本物の bat の `--config-file` も同じ場所を出した |
+| 手順 12 | 控えの中身が、CRLF の 3 行・LF の 3 行（テーマに空白）・4 行目がある・`--style` を変えた・空 | CRLF と LF は `空にした:` で、控えと `current\config` がどちらも 0 バイトになった。4 行目があるときと `--style` を変えたときは `この節で書いた形ではない（変えない）:` で、変えなかった。空は `もう空:` |
+| 同じ手順 12 | 手順 11 の後（bat を消し、控えだけが残る）に、控えに CRLF の 3 行を書いた（最後の回だけ） | `空にした:` で、控えが 0 バイトになった |
+| 同じ手順 12 | 控えが無い | `無い:` |
+| 手順 10 | バケットの `zoxide.json` の版が `0.10.0` | `Scoop was updated successfully!` の後に `中断: scoop の main のバケットの zoxide はまだ 0.10.0。日を置いて、この節の手順 9 から`。zoxide は 0.9.9 で止めたまま |
+| 同じ手順 10 | 版が `nightly`・`zoxide.json` が無い | どちらも `中断:`（無いときは `Get-Content` のエラーの後）。zoxide は 0.9.9 で止めたまま |
+| 同じ手順 10 | 版が `0.10.1` | `scoop` に `unhold zoxide`・`update zoxide --force` が渡り、最後に `zoxide 0.10.1`。止めていない状態になった |
+| 手順 11 | 手順 10 の後 | `scoop` に `uninstall fzf zoxide starship eza bat` が渡った。後の 2 つのコマンドは何も出さなかった（Linux では、ユーザーの環境変数はいつも空） |
+| 手順 13 | `%LOCALAPPDATA%\zoxide\db.zo` がある。続けてもう 1 回 | どちらも `False` |
+
+- Linux の pwsh では、`Join-Path`・`Test-Path`・`Remove-Item` は `\` を区切りとして扱ったので、ブロックの `\` を直さずに流せた
+- Linux の 7.5.3 の `Set-Content` が書いた行の区切りは LF だった。手順 12 の CRLF の場合は、`[IO.File]::WriteAllText` で作った
+
+**残っている未確認事項**:
+
+1. Windows（Windows PowerShell 5.1）で、10 個のブロックを貼って通すこと。本物の scoop の表示（版の指定・`hold`・`list`・`unhold`・`update --force`・`uninstall`）
+1. 5.1 の `Set-Content -Encoding ASCII` と `[IO.File]::WriteAllText` が、NTFS のハードリンクの控えにも同じ中身を書くこと
+1. WezTerm の新しいタブが、起動し直さずに starship の `Path` と `BAT_CONFIG_DIR` を読むこと
+1. Git Bash での確かめ（この節の手順 7・8）のすべて
+1. 直った zoxide の版への上げ方（まだ出ていない）
+1. main のバケットを zip で置いた PC で、この節の手順 4 の `scoop update` が git の形に直してから、0.9.9 を履歴から取ること
 
 ### 操作上の注意と併記されていた記録
 

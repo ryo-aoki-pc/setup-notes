@@ -29,12 +29,14 @@
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
   - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)
+  - git の差分の表示と GitHub の操作も使うなら、Git for Windows と WezTerm の後に [git-delta](git-delta.md#windows-11-で使う) → [GitHub CLI](gh.md#windows-11-で使う)（どちらも scoop で入れる）
 - 手順の後の節
   - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
   - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
   - Edge の常駐は[Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)（管理者の窓）、クリップボードの履歴は[CopyQ を使う（任意）](#copyq-を使う任意)
   - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
   - Windows Terminal のフォントは、HackGen Console NF を入れた後に[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
+  - Git Bash の starship・zoxide・fzf・eza・bat は、Git for Windows・WezTerm と Git Bash の共通の bash 設定の後に[シェルのツールを入れる（任意）](#シェルのツールを入れる任意)（zoxide は 0.9.9 に止める）
   - 以後は[更新](#更新)・[ロールバック](#ロールバック)
 
 > [!WARNING]
@@ -2433,16 +2435,228 @@
 
 ---
 
+## シェルのツールを入れる（任意）
+
+- Git Bash で使う starship・zoxide・fzf・eza・bat を、scoop で入れる（手順 20・21 の続き。AlmaLinux 10 では [AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順)で入れるもの）
+- 前提: 手順 16〜21、[Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)、Git Bash で通した [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)、[WezTerm](wezterm-nightly.md#windows-11-で使う)と自分用の設定（[設定ファイル](wezterm-nightly.md#設定ファイル)。新しいタブが Git Bash で開く）
+- この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（scoop は自分のユーザーに入れる）
+- **この節の手順 7・8 は WezTerm の新しいタブ（Git Bash）で、この節の手順 9 はブラウザで行う**
+- Git Bash では、共通の bash 設定が、入っているツールを見つけて読む。`~/.bashrc` には書かない。Windows PowerShell 5.1 には読み込まない
+- **zoxide は 0.9.9 に止めて入れる**（今の 0.10.0 は、Git Bash で移ったディレクトリを記録しない。[参考資料](reference/windows-setup.md)）。直った版が出たら、この節の手順 9・10 で上げる。ほかの 4 つは[更新](#更新)の手順 1・2 で上がる
+- bat は VC++ ランタイム（`VCRUNTIME140.dll`）を使う。無ければ、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行う（この節の手順 2 で確かめる）
+- PowerShell 7 でも starship と zoxide を使うなら、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)を通す（入っているときだけ読む行を置く。確かめるのは、その節の手順 6）
+- 使い方と設定は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（starship・fzf・eza・bat）。Git Bash のタブに、同じブロックを貼る
+  - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、この節の手順 1 の窓で `scoop install fd`・`scoop uninstall fd` にする
+  - bat の設定ファイルは、[同書の節](almalinux-setup.md#bat-の設定ファイル)ではなく、この節の手順 6 で書く
+- SSH のセッションの Git Bash でも使うなら、この節の手順 4 の後に、[Windows の OpenSSH サーバーの任意節](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を管理者の窓で貼る（`scoop install`・`scoop update` の後も貼り直す）
+- **この節の手順 13 は、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）**
+- 戻すときは、この節の手順 11〜13（行った手順のものだけ）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
+
+   ```powershell
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     BashConfig = Test-Path -LiteralPath "$env:USERPROFILE\.config\bash\bashrc"
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Tools      = (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source -join ', '
+     Zoxide     = if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) { zoxide --version } else { '' }
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
+   - `Scoop` が空なら、先に手順 20・21 を通す
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)を通す
+   - `BashConfig : False` なら、先に Git Bash で [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)を通す
+   - `VCRuntime : False` なら、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
+   - `Tools` が空なら、どれも入っていない
+   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この節の手順 4 は、入っているものを飛ばす）
+   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。混ざらないよう、その方法で外してから始める
+   - `Zoxide` が空か `zoxide 0.9.9` なら、この節の手順 3 は飛ばす
+
+1. scoop の zoxide が 0.9.9 でないときだけ、外す。
+
+   ```powershell
+   scoop uninstall zoxide
+   ```
+
+   - `'zoxide' was uninstalled.` が出ればよい
+   - 外さなくても、この節の手順 4 は 0.9.9 を並べて入れて切り替えるが、0.10.0 のフォルダー（`~\scoop\apps\zoxide\0.10.0`）が残る
+   - 覚えたディレクトリの履歴（`%LOCALAPPDATA%\zoxide`）は残る。0.9.9 も同じ形で読む
+
+1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
+
+   ```powershell
+   scoop update
+   scoop install fzf starship eza bat
+   scoop install zoxide@0.9.9
+   scoop hold zoxide
+   ```
+
+   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
+   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（版は入れた日の最新。zoxide は `0.9.9`）
+   - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
+   - 2 行目は、もう入っているものを、何も出さずに飛ばす
+   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す（zoxide を 2 行目に並べると、scoop はこの警告で止まり、ほかの名前を入れない）
+   - もう止めてあれば、`'zoxide' is already held.` が出る
+   - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
+   - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
+   - `Notes` の、PowerShell の `$PROFILE` に starship の行を足す案内は行わない。`suggests installing` の行（VC++ ランタイム・less）も、入れなくてよい
+
+1. 版と場所と、zoxide を止めたことを確かめる。
+
+   ```powershell
+   fzf --version
+   zoxide --version
+   starship --version
+   eza --version
+   bat --version
+   (Get-Command fzf, zoxide, starship, eza, bat -All).Source
+   scoop list zoxide
+   ```
+
+   - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
+   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この節の手順 2 の `VCRuntime`）
+   - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
+   - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
+
+1. bat の設定ファイル（`BAT_CONFIG_DIR` の下の `config`）に、3 行の設定を書く（中身があれば書き換えない）。
+
+   ```powershell
+   $BAT_THEME_NAME = 'ansi'   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
+   ```
+
+   ```powershell
+   & {
+     if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
+     $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
+     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる'; return }
+     if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
+       Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
+       "書いた: $f"
+     }
+     Get-Content -LiteralPath $f
+   }
+   ```
+
+   - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
+   - 中身は [AlmaLinux 10 の初期設定の bat の設定ファイル](almalinux-setup.md#bat-の設定ファイル)の 3 行と同じ。Windows の bat は `~/.config/bat/config` を読まず、scoop が足した `BAT_CONFIG_DIR` の下を読む
+   - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
+   - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
+   - `中断:` が出たら、何も書いていない
+
+1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の手順 52〜55・57・58](almalinux-setup.md#実施手順)のブロックを貼る。
+
+   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の手順 50](almalinux-setup.md#実施手順)の補足と同じ）
+   - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
+   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
+     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この節の手順 5 と同じ
+     - 同書の手順 53 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
+     - 同書の手順 54 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
+     - 同書の手順 55 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
+     - 同書の手順 57 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の手順 58 の一覧には、その形（`C:\…`）で出る
+   - 同書の手順 56（tmux）は行わない
+   - 覚えたディレクトリは `%LOCALAPPDATA%\zoxide` に入る（PowerShell 7 の zoxide も同じものを使う）
+
+1. 同じタブで、[同書の手順 60〜63](almalinux-setup.md#実施手順)のキーを押して、fzf を確かめる。
+
+   - 同書の手順 60 の `fzf --version` は、この節の手順 7 で Git Bash の履歴に入っている
+   - 同書の手順 61 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
+   - 同書の手順 62 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
+   - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
+
+1. zoxide を上げるときは、ブラウザで、Git Bash の記録を直した版が出たかを確かめる。
+
+   - `https://github.com/ajeetdsouza/zoxide/releases` を開く
+   - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
+   - 無ければ、この節の手順 10 は飛ばす（0.9.9 のまま使う）
+   - **次の手順は、この節の手順 1 の窓（Windows PowerShell 5.1）に貼る**
+
+1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
+
+   ```powershell
+   & {
+     scoop update
+     $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
+     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この節の手順 9 から"; return }
+     scoop unhold zoxide
+     scoop update zoxide --force
+     zoxide --version
+   }
+   ```
+
+   - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
+   - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
+   - `--force` は、版を指定して入れた zoxide を、main のバケットの定義に戻す（付けないと 0.9.9 のまま変わらない）
+   - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
+   - これより後は、[更新](#更新)の手順 1・2 で、ほかのツールと一緒に上がる
+   - 新しいタブで、この節の手順 7 のうち同書の手順 57・58 を確かめ直す
+
+1. 元に戻すときは、この節で入れた 5 つを scoop で消す。
+
+   ```powershell
+   scoop uninstall fzf zoxide starship eza bat
+   (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source
+   [Environment]::GetEnvironmentVariable('BAT_CONFIG_DIR', 'User')
+   ```
+
+   - それぞれ `'<名前>' was uninstalled.` が出て、後の 2 つが何も出さなければよい（止めた zoxide も、そのまま消える）
+   - 残すものは、名前を外してから貼る（fzf は yazi も使う）
+   - `are still running` の旨のエラーが出たら、そのツールは消えていない。Git Bash で開いている一覧などを閉じてから貼り直す
+   - starship の `Path` と、bat の `BAT_CONFIG_DIR` も消える。bat の設定（`~\scoop\persist\bat`）は残る（この節の手順 12）
+   - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す（共通の bash 設定と PowerShell 7 のプロファイルは、無いツールを読まない）
+   - starship のログ（`~\.cache\starship`）は、要らなければ手で消す
+
+1. 元に戻すときは（この節の手順 6 で書いたときだけ）、bat の設定ファイルの 3 行を消す。
+
+   ```powershell
+   & {
+     $f = Join-Path $env:USERPROFILE 'scoop\persist\bat\config'
+     if (-not (Test-Path -LiteralPath $f)) { "無い: $f"; return }
+     $text = [IO.File]::ReadAllText($f)
+     if (-not $text.Trim()) { "もう空: $f" } elseif ($text -match '\A--theme="[^"\r\n]*"\r?\n--style="numbers,changes,header"\r?\n--paging=never\r?\n?\z') {
+       [IO.File]::WriteAllText($f, '')
+       "空にした: $f"
+     } else { "この節で書いた形ではない（変えない）: $f" }
+   }
+   ```
+
+   - `空にした:` か `もう空:` が出ればよい（scoop が bat を初めて入れたときと同じ、空のファイルになる）
+   - bat を残していれば、次に動かしたときから、組み込みの既定値に戻る
+   - `この節で書いた形ではない` が出たら、手で書き換えた設定がある。要らない行は、手で消す
+
+1. 元に戻すときは（履歴も捨てるときだけ）、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\zoxide" -Recurse -Force -ErrorAction SilentlyContinue
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\zoxide"
+   ```
+
+   - `False` が出ればよい
+   - 消した履歴は取り戻せない。残しておけば、zoxide を入れ直したときにそのまま使える
+   - PowerShell 7 の zoxide と yazi も、同じ履歴を使う
+
+---
+
 ## 更新
 
 - Windows Update は[手順 1〜8](#実施手順)（管理者の窓）、Microsoft Store は[手順 9〜15](#実施手順)（通常の窓）を通す。再起動が必要な場合も、自動では再起動しない
 - scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon・任意節の CopyQ）は winget で上げる
+  - [シェルのツールを入れる（任意）](#シェルのツールを入れる任意)の zoxide は 0.9.9 に止めてあるので、この節の手順 2 では上がらない。直った版が出たかは、その節の手順 9 で確かめ、出ていればその節の手順 10 で上げる
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[手順 27](#実施手順)・[手順 32〜34](#実施手順) を貼り直す
 - 機能の更新の後は、任意節（[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る任意)・[表示・入力・音・ストレージを変える](#表示入力音ストレージを変える任意)・[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める任意)）の設定も戻ることがある。その節の「元に戻すときは、」より前の手順を貼り直す（控えのファイルは書き換えない）
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、それぞれの手順書の「Windows 11 の更新」
   - [SSH クライアント（Windows）](windows-ssh-client.md#更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
+  - git-delta・GitHub CLI は scoop で入れたので、この節の手順 2 でも上がる
 - この節の手順は、手順 9 と同じ、管理者ではない Windows PowerShell（5.1）に貼る
 
 1. scoop とバケットを上げ、古くなったものを確かめる。
@@ -2521,10 +2735,15 @@
 - 多くは、元に戻すかを手順 37 で控えた値で決める
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
   - [SSH クライアント（Windows）](windows-ssh-client.md#ロールバック)は「ロールバック」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-のロールバック)は「Windows 11 のロールバック」
+  - この節の手順 13 で scoop ごと消すなら、先に [git-delta の Windows 11 のロールバック](git-delta.md#windows-11-のロールバック)の手順 1 と、[GitHub CLI の Windows 11 のロールバック](gh.md#windows-11-のロールバック)の手順 1〜4 を行う
+    - `~/.gitconfig` の `core.pager` と、資格情報マネージャーの gh のトークンは、scoop を消しても残る
 - 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
-  - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク
+  - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・シェルのツール
   - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 7・8
   - この節の手順 17・25 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)の手順 6・7
+  - この節の手順 13・14 で scoop ごと消すなら、[シェルのツールを入れる（任意）](#シェルのツールを入れる任意)の手順 11・12 は要らない
+    - 止めた zoxide もこの節の手順 13 で消え、bat の設定はこの節の手順 14 で `persist` ごと消える
+    - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、その任意節の手順 13（scoop を消した後でもよい）
 
 > [!CAUTION]
 > **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
