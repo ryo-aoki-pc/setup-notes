@@ -8,12 +8,12 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md)・[git-delta](docs/git-delta.md)・[GitHub CLI](docs/gh.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md)・[git-delta](docs/git-delta.md)・[GitHub CLI](docs/gh.md)・[Neovim](docs/neovim.md)・[lazygit](docs/lazygit.md)・[yazi](docs/yazi.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
 - インストールした直後に、AlmaLinux 10 は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)、Windows 11 は [Windows 11 の初期設定](docs/windows-setup.md)を通す。下の手順書の多くは、その手順で入れたもの（Homebrew・EPEL・NOPASSWD の sudo など）を前提にする
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
-- Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）
+- Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。各手順書の「設定ファイル」の節から案内している（[Neovim](docs/neovim.md#設定ファイル)・[WezTerm](docs/wezterm-nightly.md#設定ファイル)・[lazygit](docs/lazygit.md#設定ファイル)・[yazi](docs/yazi.md#設定ファイル)）。Windows 11 の入れ方も、それぞれのリポジトリにある（clone のコマンドは手順書に載せない）
 - シェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) で管理する。各手順書では同じ設定を `~/.bashrc` に追記しない。先に次の導入を行う（AlmaLinux 10 は、[AlmaLinux 10 の初期設定の手順 42・43](docs/almalinux-setup.md#実施手順)に同じブロックがある）
 
 ### 共通の bash 設定を先に入れる
@@ -57,7 +57,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF、続けて git-delta・GitHub CLI）は、それぞれの手順書の Windows 11 の節で入れ、Windows 11 の初期設定のリードから順に案内する
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF、続けて git-delta・GitHub CLI・Neovim・lazygit・yazi）は、それぞれの手順書の Windows 11 の節で入れ、Windows 11 の初期設定のリードから順に案内する
   - 任意節で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 同じく任意節で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
   - AlmaLinux 10 の初期設定の手順 49 で入れる starship・zoxide・fzf・eza・bat は、同じく任意節「[シェルのツールを入れる](docs/windows-setup.md#シェルのツールを入れる任意)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
@@ -71,7 +71,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [Flatpak / Flathub（AlmaLinux 10 の初期設定の手順 22〜24）](docs/almalinux-setup.md#実施手順) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL（AlmaLinux 10 の初期設定の手順 17）](docs/almalinux-setup.md#実施手順) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（手順 38）、btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free。AlmaLinux 10 の初期設定の手順 18〜21）](docs/almalinux-setup.md#実施手順) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | [Firefox](docs/firefox.md) の AAC・H.264（手順 8〜11） |
-| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ（任意節）と、表示・電源・リモートなどの設定も（PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォント・WSL のミラーは任意節）。Git Bash の starship・zoxide・fzf・eza・bat も任意節で scoop から | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | Windows Update（手順 2〜8）と PC 全体の設定（手順 36〜55）は管理者。それ以外は通常の Windows PowerShell（scoop のインストーラは管理者では止まる）。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows。任意節の zoxide は 0.9.9 に止めてあり、上がらない）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の、scoop のツールを SSH のセッションで使う任意節。[git-delta](docs/git-delta.md#windows-11-で使う)・[GitHub CLI](docs/gh.md#windows-11-で使う)の Windows 11 の節（scoop で入れる） |
+| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ（任意節）と、表示・電源・リモートなどの設定も（PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォント・WSL のミラーは任意節）。Git Bash の starship・zoxide・fzf・eza・bat も任意節で scoop から | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | Windows Update（手順 2〜8）と PC 全体の設定（手順 36〜55）は管理者。それ以外は通常の Windows PowerShell（scoop のインストーラは管理者では止まる）。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows。任意節の zoxide は 0.9.9 に止めてあり、上がらない）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | [Windows の OpenSSH サーバー](docs/windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の、scoop のツールを SSH のセッションで使う任意節。[git-delta](docs/git-delta.md#windows-11-で使う)・[GitHub CLI](docs/gh.md#windows-11-で使う)・[Neovim](docs/neovim.md#windows-11-で使う)・[lazygit](docs/lazygit.md#windows-11-で使う)・[yazi](docs/yazi.md#windows-11-で使う)の Windows 11 の節（scoop で入れる） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -89,7 +89,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Podman の Quadlet（任意節） |
 | [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
 | [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
-| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 16〜19）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI の Windows 11 の節） |
+| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 16〜19）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節） |
 | [LAN をプライベートにする（Windows 11 の初期設定の手順 43）](docs/windows-setup.md#実施手順) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
 
 ### デスクトップ（GNOME）の設定
@@ -204,7 +204,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 |---|---|---|---|---|---|
 | [bat（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系）。Windows 11 は scoop（[Windows 11 の初期設定の任意節](docs/windows-setup.md#シェルのツールを入れる任意)） |
 | [eza（AlmaLinux 10 の初期設定の手順 49）](docs/almalinux-setup.md#実施手順) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、共通の bash 設定のエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し）。Windows 11 は scoop（[Windows 11 の初期設定の任意節](docs/windows-setup.md#シェルのツールを入れる任意)） |
-| [yazi](docs/yazi.md) | ファイルの閲覧と操作（プレビュー、検索） | — | `y`（終了した場所へ移るシェル関数）、`yazi` | TUI | Homebrew（EPEL・AppStream に無い） |
+| [yazi](docs/yazi.md) | ファイルの閲覧と操作（プレビュー、検索） | — | `y`（終了した場所へ移るシェル関数）、`yazi` | TUI | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の main |
 | [gdu](docs/gdu.md) | ディスク使用量 | `du` | `gdu-go`（`gdu` ではない） | TUI | Homebrew（EPEL は 5.32 系で、コマンド名は `gdu`） |
 | [btop](docs/btop.md) | CPU・メモリ・ディスク・ネットワーク・プロセス | `top` | `btop` | TUI | EPEL（Homebrew と同じ 1.4.7） |
 
@@ -234,12 +234,13 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - 端末の中で使うなら Neovim、GUI なら VS Code
 - lazygit の `e` キーで開くエディタは、lazygit.md の既定では `nvim`（`code` にもできる）
+  - Windows 11 の PowerShell から起動するときは、[neovim.md の既定のエディタにする（任意）](docs/neovim.md#既定のエディタにする任意)の手順 2 で、ユーザーの環境変数 `EDITOR` を `nvim` にする（Git Bash では、共通の bash 設定が `nvim` にする）
 - Homebrew の nvim は、そのままでは `sudo` の PATH に無く、`EDITOR=nvim` でも `sudoedit` は黙って `vi` で開く。[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すと、`sudoedit` が自分の設定の nvim で開く（通さないなら `SUDO_EDITOR` にフルパスを渡す）
 - インターネットに出られないホストでは、Neovim は [homebrew-offline.md](docs/homebrew-offline.md) のトンネルで入れ、Mason の npm のパッケージは [npm-offline.md](docs/npm-offline.md) で入れる
 
 | 手順書 | 形 | 導入元 | 設定の置き場所 | 更新 |
 |---|---|---|---|---|
-| [Neovim](docs/neovim.md) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系） | `~/.config/nvim`（`init.lua` か `init.vim`） | `brew upgrade neovim` |
+| [Neovim](docs/neovim.md) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系）。Windows 11 は scoop の main | `~/.config/nvim`（`init.lua` か `init.vim`）。Windows 11 は `%LOCALAPPDATA%\nvim` | `brew upgrade neovim`（Windows 11 は `scoop update neovim`） |
 | [VS Code](docs/vscode.md) | GUI（Electron） | Microsoft 公式 dnf リポジトリ（EL 共通の rpm） | `~/.config/Code`、`~/.vscode`（`~/.config/code-flags.conf` は読まれない） | `sudo dnf upgrade code`（内蔵のアップデータは使わない） |
 
 ### git と GitHub
@@ -252,7 +253,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | 手順書 | 役割 | 打つコマンド | 導入元 | 設定の置き場所 |
 |---|---|---|---|---|
 | [Git](docs/git.md) | git 本体と基本の設定（pull は rebase・autostash、`core.autocrlf=false`、推奨の設定） | `git` | AppStream（Windows 11 は winget の Git for Windows） | `~/.gitconfig`（`git config --global` で書く） |
-| [lazygit](docs/lazygit.md) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い） | `~/.config/lazygit/config.yml` |
+| [lazygit](docs/lazygit.md) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の extras | `~/.config/lazygit/config.yml`。Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml` |
 | [git-delta](docs/git-delta.md) | `git diff` / `show` / `log -p` の表示（ページャ） | `delta`（formula 名は `git-delta`。ふだんは git が呼ぶ） | Homebrew（RPM 無し）。Windows 11 は scoop の main（`delta`） | `~/.gitconfig`（`git config --global` で書く。Windows 11 は `C:\Users\<WIN_USER>\.gitconfig` で、Git Bash・PowerShell・cmd の git が同じものを読む） |
 | [GitHub CLI](docs/gh.md) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い）。Windows 11 は scoop の main（`gh`） | `~/.config/gh/hosts.yml`（トークンは OS の資格情報ストアを優先し、使えない場合はファイルに平文保存）。Windows 11 は `%APPDATA%\GitHub CLI`（トークンは資格情報マネージャーを優先） |
 
@@ -363,11 +364,13 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の手順 3](docs/almalinux-setup.md#実施手順) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節。Neovim は任意節「既定のエディタにする」の手順 2・3 も）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者。シェルのツールなど、ほかは通常の窓）
   - HackGen・Claude Code・Codex CLI は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）。git-delta・GitHub CLI は scoop で自分のユーザーに入れるので、管理者ではない窓に貼る
   - SSH クライアント（Windows）と Samba クライアントの Windows 11 の節は、管理者ではない窓に貼る（Samba のドライブは、管理者の窓で割り当てるとエクスプローラーに出ない）
+  - Neovim・lazygit・yazi は、管理者ではない窓に貼る（scoop は自分のユーザーに入れる。VC++ のランタイムが無いときだけ、WezTerm の手順書の Windows 11 の手順 3 を管理者の窓で）。Neovim の任意節「既定のエディタにする」の手順 2・3 も、管理者ではない窓に貼る
+  - yazi の Windows 11 で使うの手順 8（`y` の確かめ）だけは、WezTerm の Git Bash のタブに貼る `bash` のブロック
   - デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある
   - `sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く
   - [Git](docs/git.md) の設定は、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る（Git for Windows を入れる節だけ PowerShell）

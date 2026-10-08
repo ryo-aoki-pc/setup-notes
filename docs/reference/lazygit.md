@@ -1,4 +1,4 @@
-# lazygit 最新版インストール手順（AlmaLinux 10 / Homebrew）の参考資料
+# lazygit 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
 [手順書](../lazygit.md)
 
@@ -28,6 +28,23 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - 一方で COPR 全体が落ちているわけではない。同じ日に `lihaohong/yazi` の `epel-10-aarch64` はメタデータを取得できている（[yazi.md](../yazi.md)）
 - **プロジェクトごとの問題で、いずれ直る可能性がある**
 
+### Windows 11 では: 選択した方針
+
+[Windows 11 で使う](../lazygit.md#windows-11-で使う)の理由。**Windows 実機では未検証**（[検証記録](../verification/lazygit.md#windows-11-で使う-検証状況の記録)）。
+
+- **scoop の extras の `lazygit`**（main のバケットには無い）
+  - extras のバケットを足すのに git が要る（Git for Windows）。extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使うので、ロールバックでも外さない
+  - lazygit は Go の 1 つの実行ファイルなので、VC++ のランタイムは要らない（自分用の設定が使う delta は要る。[git-delta.md の Windows 11 で使う](../git-delta.md#windows-11-で使う)の手順 2 で確かめる）
+  - winget の `JesseDuffield.lazygit` と両方あると、`PATH` の順でどちらかが使われ、分かりにくい。Windows 11 で使うの手順 2 で見つけたら、外してから始める
+- **設定の置き場所は `%LOCALAPPDATA%\lazygit`**
+  - lazygit 0.66.0 の Config.md の Windows の既定の場所。`%APPDATA%\lazygit\config.yml` も探す（adrg/xdg の Windows の `XDG_CONFIG_DIRS` は `%ProgramData%` と `%APPDATA%`）
+  - `XDG_CONFIG_HOME` は設定しない（[neovim.md の参考資料](neovim.md#windows-11-では-選択した方針)）
+- **自分用の設定は、設定のリポジトリの README の Windows の例へリンクする**（clone のコマンドはこの文書に載せない）。その例は `%LOCALAPPDATA%\lazygit` に直接 clone する（シンボリックリンクには、開発者モードか管理者の権限が要るため）。状態ファイル `state.yml` は、そのリポジトリの `.gitignore` で除いてある
+- **確かめの起動は `%TEMP%\lazygit-check` の空のリポジトリで行う**
+  - 読者のリポジトリの場所を決め打ちできないため。git 管理外で起動すると、リポジトリを作るか聞かれる
+  - `git init` が失敗したまま起動すると、元のフォルダーでリポジトリを作るか聞かれるので、`.git` ができたことを確かめてから起動する
+- **`e` キーのエディタ**: Windows PowerShell から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[neovim.md の参考資料](neovim.md#windows-11-では-選択した方針)）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
+
 ### 参照
 
 - [jesseduffield/lazygit — README](https://github.com/jesseduffield/lazygit) — 各 OS のインストール方法と機能一覧
@@ -35,5 +52,8 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 46〜48 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [atim/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/atim/lazygit/) / [dejan/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/dejan/lazygit/) — chroot の一覧（`epel-10-aarch64` はある）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
+- [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
+- [lazygit Config Docs（v0.66.0）](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md) — Windows の設定の場所（`%LOCALAPPDATA%\lazygit\config.yml`）と `LG_CONFIG_FILE`
+- [ryo-aoki-pc/lazygit — README の導入方法](https://github.com/ryo-aoki-pc/lazygit#導入方法) — 自分用の設定の Windows の clone の例と元に戻し方
 
 ---
