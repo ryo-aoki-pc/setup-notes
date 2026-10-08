@@ -20,6 +20,7 @@
   - 表示: フォルダーの名前は 29、ダークモードは 30、ウィンドウのボタンは 32、時計と電池は 33、Files は 34、ホットコーナーは 36、拡大率は 37・70、トレイアイコンは 38・39、Dash のお気に入りは 41。確かめるのは 68・73
   - 入力: Caps Lock を Ctrl には 31、Alt+Tab は 35、Ctrl+Alt+T は 40。確かめるのは 71
   - シェル: 共通の bash 設定は 42・43、bash の補完とキー操作は 44・45・51・59、Homebrew は 46〜48、starship・zoxide・fzf・eza・bat・tmux は 49・52〜58・60〜66
+- Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の任意節](windows-setup.md#シェルのツールを入れる任意)で scoop から入れる。確かめるのは、Git Bash で、この文書の手順 52〜55・57・58・60〜63
 - 手順の後に、この順に通す手順書
   - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。手順 8〜11 の AAC・H.264 は、この文書の手順 18〜21 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md)
   - HackGen Console NF と WezTerm を入れたら、[WezTerm と HackGen Console NF をデスクトップで使う（任意）](#wezterm-と-hackgen-console-nf-をデスクトップで使う任意)
