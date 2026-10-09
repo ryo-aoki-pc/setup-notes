@@ -7,11 +7,12 @@
 - **状態（2026-10-09 UTC）**: AlmaLinux 10.2 / x86_64 のコンテナで、ログインの前までを、手順書のコードブロックのまま本実行した。実機・VM ではない
   - 通したもの: 実施手順の手順 1〜3、手順 4（URL とコードを出して待つところまで）、手順 6（ログインしていないときの表示）、手順 7 のディレクトリの準備（`grok` の画面は起動していない）、更新の手順 2、ロールバックの手順 1〜4
   - 確かめたこと: インストーラーが置くもの、`~/.bashrc` のブロックと控え、`~/.local/bin` のリンク（Codex を先に入れたユーザーでは置かれ、入れていないユーザーでは置かれない）、2 回目のインストーラーの動き、`grok update` が `~/.bashrc` を変えないこと、ロールバックの後に Codex のリンクが残ること
+  - 確かめたこと（追加の検証）: 1.0.49 から 1.0.50 への自動の更新（対話の画面の起動のとき）、`[cli] auto_update = false` で止まること、Homebrew の cask との違い（[付録](#付録-自動の更新とパッケージマネージャー2026-10-09)）
   - 確かめたこと: `grok --trust inspect` が、ログイン無しで、読み込む指示書（AGENTS.md・CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md`）を一覧すること
   - 確かめたこと: bash の 13 ブロックの `bash -n`（エラー 0）と ShellCheck 0.9.0（指摘は手順 7 の `cd ~/grok-sandbox` の SC2164 だけ。直前の `mkdir -p` で作るので、codex.md の手順 8 と同じ形のままにした）
   - 確かめたこと: Windows 11 の節の PowerShell の 12 ブロックの構文（Linux の PowerShell 7.6.6 の構文解析器でエラー 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の検査で指摘 0）
   - **確認していないこと**: grok.com でのログインと、その後（手順 5 の承認、手順 6 のログイン済みの表示、手順 7 の画面・フォルダーの信頼・AI への依頼）。X Premium（Plus でない）での利用。aarch64。実機・VM
-  - **確認していないこと**: Windows 11 での実行すべて（インストーラー、PATH、ログイン、更新、ロールバック）
+  - **確認していないこと**: Windows 11 での実行すべて（インストーラー、PATH、ログイン、更新と自動の更新、ロールバック）
 
 | 項目 | 値 |
 |---|---|
@@ -157,3 +158,46 @@
 - PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（プロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）で指摘 0
 - `install.ps1` は読んで確かめただけで、実行していない（置く場所・MinGit の SHA-256 の確認・ユーザーの PATH の先頭に足すこと・`$ErrorActionPreference = 'Stop'`・失敗のときの `exit 1`）
 - Windows のロールバックの手順 3 は、[claude-code.md](../claude-code.md) の Windows 11 のロールバックの手順 3 と同じ書き方（その手順は Windows 11 の VM で通っている）だが、この手順書のブロックとしては Windows で流していない
+
+## 付録: 自動の更新とパッケージマネージャー（2026-10-09）
+
+利用者の依頼（パッケージマネージャーで入れられるならその手順にする。自動で最新になるなら公式の方法でよい）を受けて、公式のインストーラーで入れた Grok の自動の更新と、Homebrew の cask を比べた。
+
+| 項目 | 値 |
+|---|---|
+| 環境 | 上の付録と同じ `almalinux:10`（別のコンテナ）。プロキシの環境変数と CA を渡した |
+| 版 | Grok Build 1.0.49（古い版として `bash -s 1.0.49` で入れた）と 1.0.50（調査時の最新） |
+| 公式のインストーラーの確認 | 新規の一般ユーザー（`/etc/skel` の `.bashrc`）。端末の代わりに `script` の PTY（150×40）で `grok` を 40 秒動かし、`timeout` で止めた。ログインはしていない |
+| Homebrew の確認 | 別のコンテナの一般ユーザー。[共通の bash 設定](https://github.com/ryo-aoki-pc/bash)と Homebrew 7.0.9 |
+
+### 自動の更新
+
+| 試したこと | 結果 |
+|---|---|
+| 1.0.49 を入れた直後に `grok`（対話の画面）を起動 | 起動した後に `~/.grok/downloads/grok-1.0.50-linux-x86_64` が入り、`~/.grok/bin/grok`・`agent` のリンクが付け替わった。`grok --version` は `grok 1.0.50 (c58f321264ba) [stable]`。`~/.grok/version.json` に `"version": "1.0.50"` と `checked_at` が書かれた |
+| 入れ直した 1.0.49 で、`grok --version` を 3 回・`grok models`・`grok -p`（ログインしていないので終了コード 1） | どれも上がらなかった |
+| `checked_at` が 3 分前のまま `grok` を起動 | 確かめず、上がらなかった |
+| `checked_at` を 2 日前にし、`[cli]` に `auto_update = false` を書いて起動 | 確かめず（`checked_at` も変わらず）、上がらなかった |
+| `checked_at` を 2 日前にし、`auto_update` の行を消して起動 | 1.0.50 に上がり、`checked_at` が起動の時刻になった |
+| 自動の更新の前後の `~/.bashrc` | 変更時刻が変わらなかった（書き換えていない） |
+| 上がった後の `grok update`・`grok update --check` | `Already up to date (1.0.50).`・`Grok Build - v1.0.50 (latest: 1.0.50) [stable]` |
+
+- ログインしていない画面は、すぐにログインの案内（`Waiting for approval...`）になり、更新の知らせは画面に出なかった
+- 前の配布物（`grok-linux-x86_64`）は残り、2 つで約 350 MB になった
+- 確認していないこと: ログイン後の画面での知らせ、`checked_at` から確かめるまでの間隔、Windows 11 での自動の更新
+
+### Homebrew の cask
+
+- `brew info --cask grok-build`: 1.0.50。`grok-1.0.50-linux-x86_64` を `grok` と `agent` の名前でリンクし、補完を作る
+- `brew install --cask grok-build`: `/home/linuxbrew/.linuxbrew/bin/grok`・`agent` に入り、`~/.bashrc` は変わらなかった。`~/.grok` は、最初に `grok` を動かしたときにできた（`config.toml` に `[cli]` の行は無かった）
+- `grok update --check`: `Grok Build - v1.0.50 (latest: 1.0.50) [stable]`。`grok update`: `Already up to date (1.0.50).`
+- `grok update --force-reinstall`: `✓ grok v1.0.50 installed successfully!` と出て、Homebrew の外の `~/.grok/bin`・`~/.grok/downloads` に別の Grok が入った（`config.toml` に `installer = "internal"`）
+- そのとき、Homebrew の Caskroom の配布物はハッシュも時刻も変わらず、PATH で先の Homebrew の `grok` が動き続けた
+- `brew outdated --cask` と `brew upgrade --cask grok-build` は動いた（最新なので上げるものは無かった）
+- `brew uninstall --cask grok-build` はリンクと補完を消し、`~/.grok` は残った。`--zap` も、`~/.grok` は空のときだけ消す
+- Homebrew の formula の `grok` は `DRY and RAD for regular expressions and then some`（Grok Build ではない）
+
+### ほかの配布
+
+- WinGet の `xAI.GrokBuild` は 1.0.50（portable）。npm の `@xai-official/grok` は 1.0.50（`latest`）
+- scoop の main と extras には無い

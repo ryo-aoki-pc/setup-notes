@@ -96,6 +96,11 @@
 ## 更新
 
 - Windows 11 は [Windows 11 の更新](#windows-11-の更新)へ進む
+- Codex は、端末で起動したときに新しい版を裏で確かめる
+- 新しい版があれば、その後の起動で `Update available!` と `1. Update now` が出る
+- `1. Update now` のまま Enter を押すと、公式インストーラーが動いて上がる
+- `Update ran successfully! Please restart Codex.` と出て終わったら、`codex` を起動し直す
+- この節の手順は、知らせを待たずに上げるときに行う
 
 1. 起動中の Codex を終了する。
 
@@ -235,6 +240,9 @@
 ---
 
 ## Windows 11 の更新
+
+- AlmaLinux 10 と同じく、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
+- この節の手順は、知らせを待たずに上げるときに行う
 
 1. 起動中の Codex を終了する。
 

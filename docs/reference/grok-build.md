@@ -5,8 +5,17 @@
 ## 選択した方針
 
 - xAI の公式のインストーラー（`https://x.ai/cli/install.sh`・`install.ps1`）を使う
-  - 公式の配布はほかに npm（`@xai-official/grok`）と WinGet（`xAI.GrokBuild`）がある
-  - Node.js を増やさず、両 OS で同じ配布元・同じ `grok update` で上げられる形にした（WinGet で入れた Grok では、`grok update` は WinGet のコマンドを出すだけで何も変えない）
+  - 公式のインストーラーで入れた Grok は、対話の画面の起動のときに、自分で新しい版に上がる（[更新: 自動の更新の仕組み](#更新-自動の更新の仕組み)）。利用者の希望（自動で最新になるなら公式の方法でよい）に合う
+  - Node.js を増やさず、両 OS で同じ配布元・同じ `grok update` で上げられる
+- パッケージマネージャーでは入れない
+  - 配布はある: Homebrew の cask `grok-build`（Linux でも入る）、WinGet の `xAI.GrokBuild`（portable）、npm の `@xai-official/grok`。scoop の main と extras には無い（2026-10-09）
+  - Homebrew と WinGet の版は、`brew upgrade --cask grok-build`・`winget upgrade` を打たないと上がらない
+  - npm の版は Node.js が要る
+  - Homebrew の cask で入れた Grok でも、`grok update` は Homebrew を使わずに Grok 自身で入れる
+  - `grok update --force-reinstall` を打つと、Homebrew の外（`~/.grok/bin`・`~/.grok/downloads`）に別の Grok が入り、Homebrew の版はそのままだった（[検証記録](../verification/grok-build.md#homebrew-の-cask)）
+  - Homebrew で使うなら、自動の更新を止め（`[cli] auto_update = false`）、`brew upgrade --cask grok-build` で上げる形になる
+  - WinGet で入れた Grok では、`grok update` は WinGet のコマンドを出すだけで何も変えない
+  - Homebrew の formula の `grok`（`brew install grok`）は Grok Build ではない（正規表現でログを読む別のツール）
 - ログインは grok.com のアカウント（ブラウザ）で行う
   - API キー（`XAI_API_KEY`）は、ログインが無いときだけ使われ、API の従量課金になる
   - 利用者の契約がサブスクリプション（SuperGrok / X Premium）なので、API キーの手順は置かない
@@ -55,6 +64,14 @@
 - 信頼は `~/.grok/trusted_folders.toml` に残る。対話の画面で答えるか、`--trust` を付けて起動すると記録される
 - 信頼はそのリポジトリの下のディレクトリにも効く。入れ子の別の git のチェックアウトや、別の場所の worktree は、別に信頼する
 
+### 更新: 自動の更新の仕組み
+
+- 設定の `[cli] auto_update`（既定は有効）で、対話の画面の起動のときに新しい版を確かめる。環境変数 `GROK_DISABLE_AUTOUPDATER` でも止められる（同梱の文書 05-configuration・26-config-reference）
+- 確かめた時刻は `~/.grok/version.json` の `checked_at` に残り、間もないうちは確かめない
+- 新しい版は `~/.grok/downloads/grok-<版>-<OS>-<CPU>` に入り、`~/.grok/bin` の `grok`・`agent` のリンクが付け替わる。前の配布物は残る
+- 更新の入れ方は、設定の `[cli] installer`（公式のインストーラーは `internal` を書く）で選ばれる（同梱の文書 26-config-reference）
+- 確かめた範囲は[検証記録](../verification/grok-build.md#付録-自動の更新とパッケージマネージャー2026-10-09)
+
 ### Windows 11 で使う / 手順 2: インストーラーの動き
 
 - `%USERPROFILE%\.grok\downloads\grok-windows-<アーキ>.exe` を取ってきて、`%USERPROFILE%\.grok\bin\grok.exe` と `agent.exe` に写す（リンクではなくコピー）
@@ -75,8 +92,9 @@
 
 - [xAI: Grok Build CLI の発表](https://x.ai/news/grok-build-cli)（2026-05-25。対象は SuperGrok と X Premium+）
 - [xAI: Grok Build の文書](https://docs.x.ai/build/overview) — 導入・ログイン・使い方
-- 手元の文書 `~/.grok/docs/user-guide/`（1.0.50 に同梱）: 01-getting-started・02-authentication・05-configuration・12-project-rules・14-headless-mode・18-sandbox・22-permissions-and-safety
+- 手元の文書 `~/.grok/docs/user-guide/`（1.0.50 に同梱）: 01-getting-started・02-authentication・05-configuration・12-project-rules・14-headless-mode・18-sandbox・22-permissions-and-safety・26-config-reference
 - [公式の Linux / macOS のインストーラー](https://x.ai/cli/install.sh)・[公式の Windows のインストーラー](https://x.ai/cli/install.ps1)
 - [xai-org/grok-build](https://github.com/xai-org/grok-build) — ソース（Apache-2.0）
+- [Homebrew: grok-build](https://formulae.brew.sh/cask/grok-build) — Homebrew の cask（使わなかった経路）
 - [xAI: Models](https://docs.x.ai/developers/models) — モデルと料金（API キーで使うとき）
 - [Simon Willison: xai-org/grok-build, now open source](https://simonwillison.net/2026/Jul/15/grok-build/)（二次情報）
