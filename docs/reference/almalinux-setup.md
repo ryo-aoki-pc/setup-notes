@@ -10,7 +10,7 @@
   - もとは、更新・sudo・SSH などの OS の作業はどの手順書にも無く、導入元（EPEL・RPM Fusion・Flathub・Homebrew）・日本語入力・電源・シェルのツールは、13 本の手順書に分かれていた
   - 13 本（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）は、この文書に入れて消した。もとの参考資料は、この文書の[統合前の参考資料](#統合前の参考資料-epelもとは-epelmd)以下に、中身を変えずに移した
   - ほかの手順書が前提にしていたもの（EPEL・RPM Fusion・Homebrew・Flathub・画面オフの設定）は、使う側の手順書がこの文書の手順番号か節を名指しする
-  - AlmaLinux 10 と Windows 11 の両方を対象にする手順書（git・firefox・hackgen・wezterm-nightly・claude-code・codex）は、OS ごとの節があるので残し、リードから順に案内する
+  - AlmaLinux 10 と Windows 11 の両方を対象にする手順書（git・firefox・hackgen・wezterm-nightly・claude-code・codex・grok-build）は、OS ごとの節があるので残し、リードから順に案内する
 - **sudo をパスワード無しにする（手順 3）**: このリポジトリの手順書は、`sudo` の後ろに続く行がパスワードの入力に食われないように、NOPASSWD を前提に書いてある（README の記法）。それを設定する手順が無かったので、最初に置いた
   - `/etc/sudoers.d/nopasswd` に、このユーザーだけの 2 行を置く。`/etc/sudoers` の `%wheel ALL=(ALL) ALL` は残す（ロールバックで、ファイルを消せば元に戻る）
   - `Defaults:<USER> verifypw=any` も置く。`sudo -v`（`-v` は資格を更新するだけ）は、`verifypw` の既定の `all` では、そのユーザーに当たるすべての行が NOPASSWD のときだけパスワードを聞かない。`%wheel` の行が残るので、`verifypw=any` が無いと Homebrew のインストーラの `sudo -v` がパスワードを聞いた（sudoers(5) の `verifypw`）

@@ -28,7 +28,7 @@
 - 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）
   - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard-road-warrior.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
   - HackGen Console NF を手順 55 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
-  - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)
+  - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)・[コーディングエージェントの共同作業](coding-agents.md#windows-11-で使う)（[Codex CLI](codex.md#windows-11-で使う)と [Grok Build](grok-build.md#windows-11-で使う)を入れてから）
   - git の差分の表示と GitHub の操作も使うなら、Git for Windows と WezTerm の後に [git-delta](git-delta.md#windows-11-で使う) → [GitHub CLI](gh.md#windows-11-で使う)（どちらも scoop で入れる）
   - 端末のエディタと TUI も使うなら、続けて [Neovim](neovim.md#windows-11-で使う) → [lazygit](lazygit.md#windows-11-で使う) → [yazi](yazi.md#windows-11-で使う)（どれも scoop で入れる。管理者ではない窓。git-delta・GitHub CLI も使うなら、その後に）
 - 手順の後の節
@@ -2772,6 +2772,8 @@
     - `~/.gitconfig` の `core.pager` と、資格情報マネージャーの gh のトークンは、scoop を消しても残る
   - この節の手順 13 で scoop ごと消すなら、先に [Neovim の Windows 11 のロールバック](neovim.md#windows-11-のロールバック)の手順 2 と、[yazi の Windows 11 のロールバック](yazi.md#windows-11-のロールバック)の手順 2 を行う
     - ユーザーの環境変数 `EDITOR`・`VISUAL`（Neovim の任意節）と `YAZI_FILE_ONE` は、scoop を消しても残る。lazygit は scoop の外に残すものが無い
+  - この節の手順 13 で scoop ごと消すなら、先に [コーディングエージェントの共同作業の Windows 11 のロールバック](coding-agents.md#windows-11-のロールバック)の手順 5（Claude Code のプラグインを外す）を行う
+    - プラグインは、Claude Code の起動と終了のたびに、scoop の `nodejs-lts` の `node` を動かす
 - 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
   - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・シェルのツール
   - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の手順 7・8

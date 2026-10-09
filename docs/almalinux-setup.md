@@ -22,9 +22,9 @@
   - シェル: 共通の bash 設定は 42・43、bash の補完とキー操作は 44・45・51・59、Homebrew は 46〜48、starship・zoxide・fzf・eza・bat・tmux は 49・52〜58・60〜66
 - Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の任意節](windows-setup.md#シェルのツールを入れる任意)で scoop から入れる。確かめるのは、Git Bash で、この文書の手順 52〜55・57・58・60〜63
 - 手順の後に、この順に通す手順書
-  - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。手順 8〜11 の AAC・H.264 は、この文書の手順 18〜21 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md)
+  - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。手順 8〜11 の AAC・H.264 は、この文書の手順 18〜21 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md) → [Grok Build](grok-build.md)
   - HackGen Console NF と WezTerm を入れたら、[WezTerm と HackGen Console NF をデスクトップで使う（任意）](#wezterm-と-hackgen-console-nf-をデスクトップで使う任意)
-  - 必要なら: Homebrew のほかのツール（[yazi](yazi.md)・[lazygit](lazygit.md)・[git-delta](git-delta.md)・[Neovim](neovim.md)・[gdu](gdu.md)・[ShellCheck / shfmt](shellcheck.md)）、[btop](btop.md)・[GitHub CLI](gh.md)・[VS Code](vscode.md)・[Podman](podman.md)、役割ごとの手順書（[README の手順書とツール](../README.md#手順書とツール)）
+  - 必要なら: Homebrew のほかのツール（[yazi](yazi.md)・[lazygit](lazygit.md)・[git-delta](git-delta.md)・[Neovim](neovim.md)・[gdu](gdu.md)・[ShellCheck / shfmt](shellcheck.md)）、[btop](btop.md)・[GitHub CLI](gh.md)・[VS Code](vscode.md)・[Podman](podman.md)、3 つのコーディング用の CLI を 1 つのプロジェクトで使う[コーディングエージェントの共同作業](coding-agents.md)、役割ごとの手順書（[README の手順書とツール](../README.md#手順書とツール)）
 - 手順の後: SSH を公開鍵だけにするなら[SSH を公開鍵だけにする（任意）](#ssh-を公開鍵だけにする任意)、OS を自動で更新するなら[dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)、常時動かしておく PC は[画面オフ・画面ロック・自動サスペンドを止める（任意）](#画面オフ画面ロック自動サスペンドを止める任意)、[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)
   - Homebrew・Flatpak・starship・fzf・eza・bat・tmux の使い方と設定は、この文書の後ろの節。以後は[更新](#更新)・[ロールバック](#ロールバック)
 
@@ -1907,7 +1907,7 @@
 - [dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)を通したなら、OS の更新は毎日自動で入る（再起動は手順 7・8 で自分で行う）
 - EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[手順 17](#実施手順)）
 - Flatpak のアプリは `dnf upgrade` では上がらない（この節の手順 4）
-- 別の手順書で入れたもの（Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI など）は、それぞれの手順書の「更新」
+- 別の手順書で入れたもの（Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build など）は、それぞれの手順書の「更新」
 - この節の手順は、[手順 50](#実施手順) と同じ、開き直した端末に貼る
 
 1. 共通の bash 設定を上げる。
