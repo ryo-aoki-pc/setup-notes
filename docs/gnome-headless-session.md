@@ -12,7 +12,7 @@
 > - [リモートログイン](gnome-remote-desktop.md)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 手順の後: 接続元を絞るなら[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)。戻すときは[ロールバック](#ロールバック)
+- 手順の後: 接続元を絞るなら[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)。リモートログインと併用していて、ヘッドレスのセッションだけをやめるなら[リモートログインだけにする（併用をやめる）](#リモートログインだけにする併用をやめる)。戻すときは[ロールバック](#ロールバック)
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -256,6 +256,125 @@
 
 ---
 
+## リモートログインだけにする（併用をやめる）
+
+> [!IMPORTANT]
+> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この節の手順 5 で、そのセッションを終わらせるため）
+> - この節の手順 6（クライアントからの接続）だけ、クライアントの PC で行う
+
+- [リモートログイン](gnome-remote-desktop.md)とこの手順書のヘッドレスのセッションを併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
+- リモートログインの設定（システムのデーモン・証明書・資格情報・3389/tcp）は変えない
+- ヘッドレスのセッションで動いていたアプリは閉じる
+- [claude-code-gui.md](claude-code-gui.md) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
+- やめた後は、リモートログインで入ると新しいセッションができる。切断してもセッションは残り、次のログインでそこへ戻る
+- ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [linger.md](linger.md) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
+- 実施手順 1 の変数は、この節の手順 2 を行うときだけ要る
+- 元に戻すときは、[手順 2](#実施手順)（ヘッドレスのセッションの RDP も使うなら手順 3〜10）と、[claude-code-gui.md 手順 1〜3](claude-code-gui.md#実施手順)
+
+1. 今の状態を確かめる。
+
+   ```bash
+   {
+     for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
+       echo "${s} $(loginctl show-session "${s}" -p Service --value)"
+     done
+     systemctl is-enabled "gnome-headless-session@${USER}.service"
+     systemctl --user is-enabled gnome-remote-desktop-headless.service
+     ls ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
+     pgrep -a -u "${USER}" -x gnome-shell
+     sudo firewall-cmd --list-ports
+     sudo firewall-cmd --list-rich-rules
+   }
+   ```
+
+   - `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す。`gdm-autologin` はヘッドレスのセッション、`gdm-password` はリモートログインで入ったセッション（どちらも `loginctl` の `TTY` の列は `headless`）
+   - `grdctl --headless status` では確かめない（`credentials.ini` が無ければ作るため）
+   - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この節の手順 2 は飛ばす
+   - `ls` が `virtual-monitor.conf` を出せば、claude-code-gui.md のドロップインがある。`No such file or directory` なら、この節の手順 3 は飛ばす
+   - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この節の手順 5 を行う。そうでなければ、この節の手順 5 は飛ばす
+
+1. ヘッドレスのセッションの RDP を設定してあるときだけ、その設定を外す。
+
+   - [手順 1](#実施手順) の 2 つのブロックを貼ってから、[ロールバック](#ロールバック)の手順 1（LAN に絞ったときは手順 2）・手順 3・手順 4 を順に貼る
+   - ロールバックの手順 5 は貼らない（この節の手順 4 で行う）
+
+1. claude-code-gui.md のドロップインがあるときだけ、外す。
+
+   ```bash
+   rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
+   rmdir --ignore-fail-on-non-empty ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
+   systemctl --user daemon-reload
+   systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
+   ```
+
+   - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
+   - 動いている gnome-shell には効かない。この節の手順 4・5 でセッションを終わらせ、手順 6 で入り直したときに効く
+   - claude-code-gui.md の[ロールバック](claude-code-gui.md#ロールバック)の手順 2 は行わない（ヘッドレスのセッションを起動し直すため）
+
+1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
+
+   ```bash
+   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
+   else
+     sudo systemctl disable --now "gnome-headless-session@${USER}.service"
+     for i in $(seq 1 30); do
+       [ "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}' |
+         xargs -r -n 1 loginctl show-session -p Service --value 2>/dev/null | grep -cx gdm-autologin)" -eq 0 ] && break
+       sleep 1
+     done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}' |
+       xargs -r -n 1 loginctl show-session -p Service --value 2>/dev/null | grep -cx gdm-autologin
+   fi
+   ```
+
+   - 有効だったときは `Removed '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service'.` と出る（既に `disabled` なら何も出ない）
+   - セッションで動いていたアプリも閉じる
+   - 続いて `0` が出ればよい（このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない）
+   - `for` の行で、セッションが終わるまで、30 秒まで待つ
+
+1. ドロップインを外す前に入ったリモートログインのセッションが残っていれば、終わらせる。
+
+   ```bash
+   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
+   else
+     for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
+       [ "$(loginctl show-session "${s}" -p Service --value 2>/dev/null)" = gdm-password ] && loginctl terminate-session "${s}"
+     done
+     for i in $(seq 1 30); do [ -z "$(pgrep -u "${USER}" -x gnome-shell)" ] && break; sleep 1; done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
+     pgrep -a -u "${USER}" -x gnome-shell
+   fi
+   ```
+
+   - `0` が出て、gnome-shell の行が出なければよい
+   - そのセッションで開いていたアプリは閉じる。つないでいたクライアントは切れる
+   - `sudo` は要らない（自分のセッションは自分で終わらせられる）
+   - ユーザーの D-Bus が起動し直される（[注意点](#注意点)）
+
+1. クライアントの PC から、リモートログインでつなぎ直してログインする。
+
+   - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[gnome-remote-desktop.md 手順 11](gnome-remote-desktop.md#実施手順) と同じ）
+   - 上部バーのあるデスクトップが、クライアントの窓の大きさで出ればよい
+   - 切断してつなぎ直すと、同じデスクトップに戻る
+   - **次の手順は、ログインし終えてから貼る**
+
+1. サーバーで、リモートログインのセッションだけになったかを確かめる。
+
+   ```bash
+   for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
+     echo "${s} $(loginctl show-session "${s}" -p Service --value)"
+   done
+   pgrep -a -u "${USER}" -x gnome-shell
+   systemctl is-enabled "gnome-headless-session@${USER}.service"
+   ss -Hlnt 'sport = :3389'
+   ```
+
+   - `<SESSION_ID> gdm-password` の 1 行だけが出て、`gdm-autologin` の行が無ければよい
+   - gnome-shell の行が `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）ならよい
+   - 続いて `disabled` と、`LISTEN … *:3389 …` の 1 行が出ればよい
+
+---
+
 ## ロールバック
 
 - 手順 1 の変数を設定したシェルで、上から順に貼る
@@ -376,14 +495,19 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
    else
      sudo systemctl disable --now "gnome-headless-session@${USER}.service"
-     for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
-     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
+     for i in $(seq 1 30); do
+       [ "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}' |
+         xargs -r -n 1 loginctl show-session -p Service --value 2>/dev/null | grep -cx gdm-autologin)" -eq 0 ] && break
+       sleep 1
+     done
+     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}' |
+       xargs -r -n 1 loginctl show-session -p Service --value 2>/dev/null | grep -cx gdm-autologin
    fi
    ```
 
    - `Removed '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service'.` と出る
    - セッションで動いていたアプリも閉じる
-   - 続いて `0` が出ればよい（このユーザーのヘッドレスのセッションだけを数える。[検証記録](verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)）
+   - 続いて `0` が出ればよい（このユーザーのヘッドレスのセッション〔`Service=gdm-autologin`〕だけを数え、リモートログインのセッションは数えない。[検証記録](verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)）
    - `for` の行で、セッションが終わるまで、30 秒まで待つ
 
 ---
@@ -395,6 +519,8 @@
   - gnome-session のユーザーの unit（`gnome-session-manager@gnome.service` など）はユーザーに 1 組しか無いので、2 つ目のセッションは動かないはず
   - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
   - PC の画面のセッションを共有する[デスクトップ共有](gnome-desktop-sharing.md)とは、同じユーザーでは併用できない（ヘッドレスの RDP のデーモンの unit に `Conflicts=gnome-remote-desktop.service` がある）
+- **リモートログインのセッションも、`loginctl list-sessions` の `TTY` の列は `headless` になる**: ヘッドレスのセッションと見分けるときは、`loginctl show-session` の `Service` が `gdm-autologin`（ヘッドレス）か `gdm-password`（リモートログイン）かで見る
+  - [手順 2](#実施手順) の確かめの行は `TTY` の列だけで見るので、同じユーザーのリモートログインのセッションがあると、ヘッドレスのセッションができる前に抜けるはず（確かめていない）
 - **起動し直すときは `stop` → 待つ → `start` を使う**。前のセッションの片付けを待ってから新しいセッションを始める
 - **GDM を再起動すると、このセッションも止まって起動し直される**（`Requires=gdm.service`）
   - GDM を再起動したら `systemctl is-active gnome-headless-session@<USER>.service` を見て、`inactive` なら `sudo systemctl start gnome-headless-session@<USER>.service` で起動する
