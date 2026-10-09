@@ -11,7 +11,7 @@
 
 - 上から順にコードブロックを貼る
 - 手順の後: [lazydocker](lazydocker.md) など Docker の API を使うツールから使うなら[Docker 向けのツールから使う（任意）](#docker-向けのツールから使う任意)、コンテナを常駐させるなら[Quadlet で自動起動する（任意）](#quadlet-で自動起動する任意)。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
-- 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
+- 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[Forgejo](forgejo.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
 
 1. podman が入っているか確かめる。
 
@@ -246,11 +246,11 @@
 ## ロールバック
 
 - 上から順に、通した節の分だけ実行する
-- この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose）で作ったものが要らないか確かめる
-- Quadlet の節を通し、linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（[Syncthing](syncthing.md)・[Dropbox](dropbox.md) など、ほかに linger を使うものが無いかは、そこで確かめる）
+- この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose・[Forgejo](forgejo.md#ロールバック)）で作ったものが要らないか確かめる。Forgejo が動いているときは先に止め、Quadlet の定義も外す
+- Quadlet の節を通し、linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（[Syncthing](syncthing.md)・[Dropbox](dropbox.md)・[Forgejo](forgejo.md) など、ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
-> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](distrobox.md) のボックスや [podman-compose](podman-compose.md) のコンテナも含む。
+> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](distrobox.md) のボックスや [podman-compose](podman-compose.md)・[Forgejo](forgejo.md) のコンテナも含む。Forgejo の bind mount 先の `~/.local/share/forgejo` と Quadlet の定義は残るので、[Forgejo のロールバック](forgejo.md#ロールバック)で扱う。
 
 1. Quadlet の節を通したときだけ、確認用のサービスと定義とページを消す。
 
