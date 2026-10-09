@@ -11,7 +11,8 @@
 
 - 上から順にコードブロックを貼る
 - [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)
-- 手順の後: [設定ファイル](#設定ファイル)・[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)・[更新](#更新)・[ロールバック](#ロールバック)
+- 通常系列の最新安定版を使う。導入する版を指定し、以後は[更新](#更新)で公式の最新安定版へ進める
+- 手順の後: [使い方の基本](#使い方の基本)・[設定ファイル](#設定ファイル)・[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)・[更新](#更新)・[ロールバック](#ロールバック)
 - Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
 - 初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない。インターネット向けのポート転送は設定しない
 
@@ -76,8 +77,8 @@
        sudo firewall-cmd --get-active-zones &&
        sudo firewall-cmd --zone="${FW_ZONE}" --list-all &&
        sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-all &&
-       podman pull codeberg.org/forgejo/forgejo:15.0.9-rootless &&
-       podman run --rm --entrypoint /usr/local/bin/gitea codeberg.org/forgejo/forgejo:15.0.9-rootless --version
+       podman pull codeberg.org/forgejo/forgejo:16.0.5-rootless &&
+       podman run --rm --entrypoint /usr/local/bin/gitea codeberg.org/forgejo/forgejo:16.0.5-rootless --version
      fi
    else
      echo '中断: 手順 1 の値を直す' >&2
@@ -109,7 +110,7 @@
    Description=Forgejo
 
    [Container]
-   Image=codeberg.org/forgejo/forgejo:15.0.9-rootless
+   Image=codeberg.org/forgejo/forgejo:16.0.5-rootless
    ContainerName=forgejo
    UserNS=keep-id:uid=1000,gid=1000
    User=1000
@@ -189,10 +190,11 @@
 1. 別の PC のブラウザで初期設定を開き、管理者を作成する。
 
    - `http://localhost:3000/` を開く。Web ポートを変えたらその番号にする
+   - 表示言語が違う場合は、画面下部の言語メニューで English を選ぶ
    - DB は SQLite3、DB のパスは `/var/lib/gitea/data/forgejo.db`、ドメインは `localhost`、ベース URL は `http://localhost:3000/`（ホストの Web ポートに合わせる）を確かめる
    - HTTP ポートはコンテナ内部の `3000`、SSH ポートは手順 1 のホスト側の番号にする。リポジトリとアプリケーションのデータの場所は自動で入った値を使う
-   - 自己登録を無効にする項目を有効にし、「管理者アカウントの設定」を開いてユーザー名・メールアドレス・パスワードを入力する。OS のアカウントとは別のアカウントになる
-   - 「Forgejo をインストール」を押し、作った管理者でログインできることを確かめる
+   - 自己登録を無効にする項目を有効にし、「Administrator account settings」を開いてユーザー名・メールアドレス・パスワードを入力する。OS のアカウントとは別のアカウントになる
+   - 「Install Forgejo」を押し、作った管理者でログインできることを確かめる
    - **次の手順は、管理者でログインできてから貼る**
 
 1. 初期設定のロックと自己登録の無効化をサーバーで確かめる。
@@ -326,7 +328,7 @@
 
 1. 別の PC のブラウザで、Git に使う公開鍵を Forgejo に登録する。
 
-   - 管理者の設定から「SSH / GPG キー」を開き、Git を使う PC の SSH 公開鍵（`.pub`）を追加する
+   - 管理者の設定から「SSH / GPG keys」を開き、Git を使う PC の SSH 公開鍵（`.pub`）を追加する
    - 公開鍵を持っていなければ、その PC で `ssh-keygen -t ed25519` を実行し、保存先とパスフレーズに答える。既存の鍵には上書きしない
    - **秘密鍵は登録しない**。公開鍵の末尾までを貼り、登録した鍵が一覧に出ることを確かめる
 
@@ -429,6 +431,132 @@
 
    - LAN または VPN の URL で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
    - 作業場所で `git fetch` を実行する。許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことも確かめる
+
+---
+
+## 使い方の基本
+
+- 構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う。端末の操作はその PC の bash（Windows は Git Bash）で行う。先に [Git](git.md) で名前・メールアドレスを設定する
+- 初回はログイン・SSH 公開鍵の登録・リポジトリの作成・clone を行う。普段は Issue → 作業ブランチ → commit / push → Pull Request → マージ → main の更新を繰り返す
+- Issue は作業内容と完了条件を共有する場所、Pull Request はブランチの変更を確認して main に取り込むための画面
+- この節では、新しいプライベートな `forgejo-demo` で操作を練習する。同名のリポジトリや作業ディレクトリが既にあるときは、上書きせず別の名前で作る
+- 画面は試験用コンテナの Forgejo 16.0.5 の英語 UI。画面内のユーザー・接続先・ポートは試験用で、接続には自分のサーバーの URL を使う
+
+1. 利用する PC のブラウザで、Forgejo にログインする。
+
+   - `http://<SERVER_IP>:3000/` を開く。表示言語が違う場合は、画面下部の言語メニューで English を選ぶ。Web ポートを変更した場合はその番号を使う
+   - Forgejo のユーザー名とパスワードを入力して「Sign in」を押す
+   - 自己登録は無効なので、アカウントが無いときは管理者に作成を依頼する
+   - ログイン後に自分のダッシュボードが開けばよい
+   - ![Forgejo の英語ログイン画面。Username or email address、Password、Sign in](images/forgejo/usage-login-en-v16.png)
+
+1. ブラウザで、自分のアカウントに SSH 公開鍵を登録する。
+
+   - 右上のアカウントメニューから「Settings」を開き、「SSH / GPG keys」の「Add key」で公開鍵を登録する。名前は利用する PC を識別できるものにする
+   - [実施手順の手順 12](#実施手順)で、同じ Forgejo アカウントに同じ PC の鍵を登録済みなら、この節の手順 2 は飛ばす
+   - 公開鍵が無ければ、その PC で `ssh-keygen -t ed25519` を実行し、保存先とパスフレーズに答える。既存の鍵へ上書きしない
+   - `.pub` の内容を末尾まで貼る。秘密鍵は登録しない
+   - 登録した鍵の名前と指紋が一覧に出ればよい
+   - ![SSH / GPG keys の一覧。usage-test-key の名前と公開鍵の指紋](images/forgejo/usage-ssh-keys-en-v16.png)
+
+1. 利用する PC の端末で、Git 用 SSH の接続先を確かめる。
+
+   - 管理者から、[実施手順の手順 13](#実施手順)で表示したサーバーのホスト鍵の指紋を受け取る
+   - [実施手順の手順 14](#実施手順)の初回接続時に表示される指紋と照合し、一致したときだけ接続を許可する。同じサーバーへ照合済みなら、この節の手順 3 は飛ばす
+   - 接続先は `git@<SERVER_IP>` と Git 用 SSH ポート（既定は 2222）。`git` は接続用の名前で、OS のユーザー名や Forgejo のログイン名とは別になる
+   - 自分の Forgejo のユーザー名を含む認証成功の案内が出ればよい。シェルは開かない
+
+1. ブラウザで、新しいプライベートなリポジトリを作る。
+
+   - 右上の `+` から「New repository」を開き、所有者を自分、名前を `forgejo-demo` にする
+   - 「Make repository private」と「Initialize repository」を選び、README で初期化する。「Advanced settings」の「Default branch」は `main` にする
+   - 「Create repository」を押す
+   - 作成後に `README.md` と `main` が表示されればよい
+   - ![New repository の画面。forgejo-demo、Make repository private、Initialize repository、main](images/forgejo/usage-repo-create-en-v16.png)
+
+1. 利用する PC の端末で、リポジトリを clone する。
+
+   - リポジトリ画面で SSH を選び、clone URL をコピーする
+   - 空の作業場所で `git clone ssh://git@<SERVER_IP>:2222/<Forgejoユーザー>/forgejo-demo.git` を実行する。URL は画面でコピーしたものに置き換える
+   - 別のリポジトリ名で作った場合は、clone URL と `cd forgejo-demo` の名前も合わせる
+   - `cd forgejo-demo`、`git status` の順に実行し、ブランチが `main` で未コミットの変更が無いことを確かめる
+   - 初回の指紋がこの節の手順 3 で確認したものと違うときは、接続を中止して管理者に確認する
+   - ![forgejo-demo のコード画面。Private、main、README.md、SSH の clone URL](images/forgejo/usage-repo-clone-en-v16.png)
+
+1. ブラウザで、作業内容を Issue に書く。
+
+   - リポジトリの「Issues」で「New issue」を開く
+   - タイトルを「README に使い方を追加する」にし、本文へ追加したい内容と完了条件を書く
+   - 「Create issue」を押し、作成後の Issue 番号を控える。次の Pull Request でこの番号を使う
+   - ![Issue「README に使い方を追加する」。番号と Open の状態](images/forgejo/usage-issue-en-v16.png)
+
+1. 利用する PC の端末で、main を更新して作業ブランチを作る。
+
+   ```bash
+   git switch main &&
+   git pull --ff-only &&
+   git switch -c docs/readme-guide
+   ```
+
+   - この節の手順 5 で clone した `forgejo-demo` の中で実行する。未コミットの変更がある場合は、先にその作業を保存する
+   - `docs/readme-guide` が既にある場合は新しい名前を使い、以後の push と Pull Request の比較元も同じ名前にする
+   - `--ff-only` が失敗したときは先へ進まず、ローカルとサーバーの main の差分を確認する
+
+1. 利用する PC の端末で、README に使い方を追加して差分を見る。
+
+   ```bash
+   printf '\n## 使い方\n\nGit で clone して作業用ブランチを作成します。\n' >> README.md &&
+   git diff -- README.md
+   ```
+
+   - `README.md` に、この節で追加した見出しと説明だけが増えていればよい
+   - このブロックは練習用に 1 回だけ実行する。普段の作業ではエディタで必要なファイルを編集する
+
+1. 利用する PC の端末で、変更を commit して作業ブランチを push する。
+
+   ```bash
+   git add README.md &&
+   git commit -m 'README に使い方を追加' &&
+   git push --set-upstream origin docs/readme-guide
+   ```
+
+   - `main` へ直接 push せず、作業ブランチをサーバーへ送る
+   - push が成功した後、ブラウザのブランチ一覧に `docs/readme-guide` が出ればよい
+   - 認証で失敗したときは、登録した公開鍵・対応する秘密鍵・clone URL の SSH ポートを確かめる
+
+1. ブラウザで、main に取り込む Pull Request を作る。
+
+   - リポジトリの「Pull requests」で「New pull request」を開く
+   - 「merge into」を `main`、「pull from」を `docs/readme-guide` にする。向きを逆にしない
+   - タイトルを「README に使い方を追加」にし、本文に変更の目的・内容・確認結果を書く
+   - 本文に `Closes #1` を書くと、main へのマージ時に Issue を閉じる。`#1` は、この節の手順 6 で控えた実際の番号に置き換える
+   - 「Create pull request」を押し、作成後の画面に main と作業ブランチの名前が表示されればよい
+   - ![New pull request。merge into は main、pull from は docs/readme-guide、本文の Closes #1](images/forgejo/usage-pr-create-en-v16.png)
+
+1. ブラウザで、Pull Request の変更ファイルと差分を確認する。
+
+   - 「Files changed」のタブで、`README.md` に意図した内容だけが追加されているか見る
+   - 直す必要があれば、同じ作業ブランチで編集・commit・push する。Pull Request の差分も更新される
+   - 共同作業では担当者へレビューを依頼し、必要な承認と CI の結果を確かめる
+   - ![Files changed に表示された README.md の差分。「使い方」の見出しと説明が追加されている](images/forgejo/usage-pr-diff-en-v16.png)
+
+1. ブラウザで、確認した Pull Request をマージする。
+
+   - マージ権限があるユーザーで「Conversation」を開き、「Create merge commit」を押す。確認フォームでも同じボタンを押して確定する
+   - 競合や必須チェックの失敗が表示される場合は、解消するまでマージしない
+   - 「Merged」と表示され、main に変更が入ったことを確かめる。`Closes` で指定した Issue も「Closed」になればよい
+   - ![Pull Request「README に使い方を追加」が Merged で、main に取り込まれた状態](images/forgejo/usage-pr-merged-en-v16.png)
+
+1. 利用する PC の端末で、マージ後の main を取り込む。
+
+   ```bash
+   git switch main &&
+   git pull --ff-only &&
+   git log -1 --oneline
+   ```
+
+   - main の `README.md` に、この節の手順 8 で追加した内容が残っていればよい
+   - 次の作業も更新した main から別の作業ブランチを作る
 
 ---
 
@@ -641,7 +769,7 @@
 1. 更新する版を設定する（`FORGEJO_VERSION` は必ず値を入れる）。
 
    ```bash
-   FORGEJO_VERSION=''                 # 公式の安定版の番号（例: 15.0.9、先頭の v は付けない）
+   FORGEJO_VERSION=''                 # 公式の最新安定版の番号（例: 16.0.5、先頭の v は付けない）
    ```
 
    - 公式の[リリース一覧](https://forgejo.org/releases/)で、対象版の変更とサポート期限を確認する
