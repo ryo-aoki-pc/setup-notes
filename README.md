@@ -8,7 +8,7 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md)・[git-delta](docs/git-delta.md)・[GitHub CLI](docs/gh.md)・[Neovim](docs/neovim.md)・[lazygit](docs/lazygit.md)・[yazi](docs/yazi.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Grok Build](docs/grok-build.md)・[コーディングエージェントの共同作業](docs/coding-agents.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md)・[git-delta](docs/git-delta.md)・[GitHub CLI](docs/gh.md)・[Neovim](docs/neovim.md)・[lazygit](docs/lazygit.md)・[yazi](docs/yazi.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
 - インストールした直後に、AlmaLinux 10 は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)、Windows 11 は [Windows 11 の初期設定](docs/windows-setup.md)を通す。下の手順書の多くは、その手順で入れたもの（Homebrew・EPEL・NOPASSWD の sudo など）を前提にする
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
@@ -52,7 +52,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
 - AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、共通の bash 設定・Homebrew と starship・zoxide・fzf・eza・bat・tmux）
   - 下の表の EPEL・RPM Fusion・Flatpak / Flathub・Homebrew は、同書の手順 17・18〜21・22〜24・46〜48
-  - Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI の手順書は、同書の後に、そのリードの順に通す
+  - Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build の手順書は、同書の後に、そのリードの順に通す
   - 常時動かしておく PC の画面オフ・画面ロック・自動サスペンド、SSH を公開鍵だけにする、dnf-automatic、Wake on LAN は、同書の任意節
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
@@ -91,7 +91,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Podman の Quadlet（任意節） |
 | [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
 | [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
-| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 16〜19）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節） |
+| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の手順 16〜19）](docs/windows-setup.md#実施手順) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows の OpenSSH サーバー・Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build・コーディングエージェントの共同作業・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節） |
 | [LAN をプライベートにする（Windows 11 の初期設定の手順 43）](docs/windows-setup.md#実施手順) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
 
 ### デスクトップ（GNOME）の設定
@@ -269,12 +269,15 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 ### 開発の補助
 
 - 言語処理系は AppStream / BaseOS にある（Node.js・Python・Go・Rust）。別の版が要るときに mise を使う
+- Claude Code・Codex CLI・Grok Build は、それぞれの手順書で入れてログインしてから、[コーディングエージェントの共同作業](docs/coding-agents.md)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree。Claude Code から公式のプラグインで Codex と Grok に頼み、スマートフォンからは Remote Control で Claude に頼む）
 
 | 手順書 | 用途 | 導入元 | 更新 |
 |---|---|---|---|
 | [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
 | [Claude Code](docs/claude-code.md) | Claude Code の CLI（Node.js 不要）と、`claude` のコマンドラインの使い方（起動と再開・`-p`・MCP） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる）。Windows 11 は公式の native installer（`%USERPROFILE%\.local\bin\claude.exe`。PATH は手順書で足す） | `sudo dnf upgrade claude-code`（自動更新しない）。Windows 11 は自動の更新（`claude update` で今すぐ） |
-| [Codex CLI](docs/codex.md) | OpenAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・認証・起動 | OpenAI 公式の standalone インストーラー（Linux は `~/.local/bin/codex`、Windows は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`） | 公式インストーラーを再実行 |
+| [Codex CLI](docs/codex.md) | OpenAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・認証・起動 | OpenAI 公式の standalone インストーラー（Linux は `~/.local/bin/codex`、Windows は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`） | 起動したときの `Update available!` で上げる（公式インストーラーの再実行でも上がる） |
+| [Grok Build](docs/grok-build.md) | xAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・ログイン・起動 | xAI 公式のインストーラー（Linux は `~/.grok/bin/grok` で、`~/.bashrc` に PATH のブロックを足す。Windows は `%USERPROFILE%\.grok\bin\grok.exe`） | 自動の更新（対話の画面の起動時。`grok update` で今すぐ） |
+| [コーディングエージェントの共同作業](docs/coding-agents.md) | Claude Code・Codex・Grok Build を 1 つのプロジェクトで使う（AGENTS.md の規則、エージェントごとの git worktree、相互のレビュー、main への取り込み、スマートフォンからの指示） | OpenAI と xAI の Claude Code 用の公式プラグイン（`claude plugin install`）。プラグインが使う Node.js は AppStream（Windows 11 は scoop の `nodejs-lts`）、Grok の sandbox が使う bubblewrap は BaseOS | `claude plugin update`（Node.js は `sudo dnf upgrade nodejs`。Windows 11 は `scoop update nodejs-lts`） |
 | [Claude Code で GUI を確かめる](docs/claude-code-gui.md) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -368,10 +371,11 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の手順 3](docs/almalinux-setup.md#実施手順) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節。Neovim は任意節「既定のエディタにする」の手順 2・3 も）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)と、Git・Samba クライアント・Syncthing・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build・コーディングエージェントの共同作業・Firefox・VirtualBox・WireGuard Road Warrior・git-delta・GitHub CLI・Neovim・lazygit・yazi の Windows 11 の節。Neovim は任意節「既定のエディタにする」の手順 2・3 も）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、Windows Update の手順 2〜8 と PC 全体の設定の手順 36〜55 が管理者。Store・scoop などは通常の窓。貼り付け設定前の手順 2〜15 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐は管理者。シェルのツールなど、ほかは通常の窓）
-  - HackGen・Claude Code・Codex CLI は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）。git-delta・GitHub CLI は scoop で自分のユーザーに入れるので、管理者ではない窓に貼る
+  - HackGen・Claude Code・Codex CLI・Grok Build・コーディングエージェントの共同作業は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）。git-delta・GitHub CLI は scoop で自分のユーザーに入れるので、管理者ではない窓に貼る
+  - コーディングエージェントの共同作業の、両 OS に共通の節（分担して作業する・相互にレビューする・main に取り込む）の `bash` のブロックは、Windows 11 ではそのまま PowerShell に貼る（同じコマンド。OS で違う手順だけ `powershell` のブロックにした）
   - SSH クライアント（Windows）と Samba クライアントの Windows 11 の節は、管理者ではない窓に貼る（Samba のドライブは、管理者の窓で割り当てるとエクスプローラーに出ない）
   - Neovim・lazygit・yazi は、管理者ではない窓に貼る（scoop は自分のユーザーに入れる。VC++ のランタイムが無いときだけ、WezTerm の手順書の Windows 11 の手順 3 を管理者の窓で）。Neovim の任意節「既定のエディタにする」の手順 2・3 も、管理者ではない窓に貼る
   - yazi の Windows 11 で使うの手順 8（`y` の確かめ）だけは、WezTerm の Git Bash のタブに貼る `bash` のブロック

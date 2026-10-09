@@ -75,7 +75,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | btop | EPEL | [btop.md](btop.md) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [firefox.md](firefox.md) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
-| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。Windows 11 の手順もある） | [codex.md](codex.md) |
+| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [codex.md](codex.md) |
+| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [grok-build.md](grok-build.md) |
+| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [coding-agents.md](coding-agents.md) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](vscode.md) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](virtualbox.md) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
