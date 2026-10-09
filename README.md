@@ -249,7 +249,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - 役割が違うので、併用できる
 - [Git](docs/git.md) は git 本体と `~/.gitconfig` の基本の設定（pull は rebase と autostash、改行を変換しない、推奨の設定）。AlmaLinux 10 と Windows 11 の Git for Windows で同じ設定にする
-- [Forgejo](docs/forgejo.md) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する
+- [Forgejo](docs/forgejo.md) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。[使い方の基本](docs/forgejo.md#使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
 - `merge.conflictStyle zdiff3` は、Git と git-delta の両方の手順書で入れる（同じ値なので、どちらを先に通してもよい）
 - lazygit は git の `core.pager` を読まない。lazygit でも delta で差分を出すなら、[git-delta.md の任意節](docs/git-delta.md#lazygit-と組み合わせる任意)で `git.diffRenderers` を足す
 

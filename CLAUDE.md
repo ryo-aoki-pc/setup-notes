@@ -168,16 +168,29 @@ GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `d
   - 現行版の新規 VM 再検証（2026-10-06）: 272.4.3798 の署名を照合し、CLI と未認証の user service を新規導入した。クラウド認証無しでできる撤去も確認。実アカウントのリンク・同期・自己更新は未実施。詳しい実行範囲と未実施項目は対応する `docs/verification/` の今回の付録を参照
 - `docs/dropbox-rclone.md` — Raspberry Pi 5（aarch64。Dropbox の公式クライアントが無い）で、Homebrew の rclone の `bisync` を systemd のユーザータイマーで 15 分ごとに回し、`~/Dropbox` と Dropbox を双方向同期する手順書（Homebrew 系の 1 本）。`rclone config create` は登録が終わるとトークン入りの設定を標準出力に出すので `>/dev/null` を付ける。フィルタのファイル（`~/.config/rclone/dropbox-filters.txt`）はいつも `--filters-file` で渡し、変えたら `--resync`。強制終了で残る書きかけ（`*.partial`）が次の回で上がったので、フィルタの既定に `- *.partial` を入れた。変数は無い。従来は **x86_64 のコンテナのみで検証**（OAuth は URL が出るまで、手順 4 以降は `alias` の代役のリモート）。aarch64 はボトルがあることだけ確かめた。2026-10-05: 導入の確認入力を終えてから確認・登録へ進む。更新は brew upgrade 単独と版確認の 2 手順。ロールバックはほかの同期と共用する bisync キャッシュを残す。変更後は構文と一時ディレクトリ・スタブのみで確認した。
   - 現行版の新規 VM 再検証（2026-10-06）: rclone 1.75.1 を新規導入し、ローカル alias の代役で resync/bisync の双方向伝播・service/timer とロールバックを確認。Dropbox の OAuth・クラウド同期と aarch64 は未実施。詳しい実行範囲と未実施項目は対応する `docs/verification/` の今回の付録を参照
-- `docs/forgejo.md` — AlmaLinux 10 に、自前の Git ホスティングを rootless Podman と Quadlet で構築する手順書。公式の `codeberg.org/forgejo/forgejo:15.0.9-rootless` と SQLite を使う。
+- `docs/forgejo.md` — AlmaLinux 10 に、自前の Git ホスティングを rootless Podman と Quadlet で構築する手順書。通常系列の最新安定版である公式の `codeberg.org/forgejo/forgejo:16.0.5-rootless` と SQLite を使う。
   - LAN・VPN 内の HTTP 3000/tcp・SSH 2222/tcp に公開する。初期設定中は localhost に限定し、管理者作成後に指定 IPv4 へ切り替える
   - 前提は podman.md・linger.md と、常時動かす PC のサスペンドを止める almalinux-setup.md の任意節
   - 永続データは `~/.local/share/forgejo`、Quadlet は `~/.config/containers/systemd/forgejo.container`
   - 更新・停止バックアップと復元・ロールバックを案内し、撤去しても Podman と linger の共有前提は残す。理由・公式資料は `docs/reference/forgejo.md`、検証状態と実行結果は `docs/verification/forgejo.md` に置く
-  - **状態（2026-10-09 UTC）**: **隔離した AlmaLinux 10.2 の systemd コンテナで検証済み**。rootless Podman 5.8.2 を検証専用の vfs で使った。実機・VM の本実行ではない
+  - 「使い方の基本」は利用する PC でログイン・SSH 公開鍵・プライベートなリポジトリ・clone・Issue・作業ブランチ・commit / push・Pull Request・差分確認・マージ・main の更新を通す 13 手順。構築の接続確認（実施手順 12〜16）とは番号を分ける
+  - 利用者の画面付き案内の依頼に合わせ、「使い方の基本」の手順内の箇条書きへ画面を直接載せる。画像は `docs/images/forgejo/`、撮影環境と実行結果は検証記録の付録に置く
+  - 利用者の指定で、使い方の画面と本文の UI 名は英語表示にそろえる。16.0.5 のガイドからは `usage-*-en-v16.png` を参照する
+  - **16.0.5 の検証状態（2026-10-09 UTC）**: 隔離した AlmaLinux 10.2 の systemd コンテナで、通常系列の最新版を新規導入した。実機・VM での本実行ではない
+    - rootless Podman での公式イメージ取得・Quadlet の起動、実ブラウザでの初期管理者作成・ログイン、SQLite と設定の保存先、自己登録・OpenID・匿名閲覧の制限を確認した
+    - サービスの stop / start 後に、設定・SSH ホスト鍵・登録済みの公開鍵・プライベートなリポジトリ・管理者ログインが保持された。OS 再起動の確認ではない
+    - 別の専用 Docker コンテナでは英語 UI の利用フローを通し、8 枚を撮影した。SSH の clone・commit / push・PR のマージ・Issue の自動クローズ・main の pull を確認した
+    - 現行の Bash 35 ブロックと埋め込み Python 5 本は構文検査済み。16.0.5 のバックアップ・復元・ログアウト後や OS 再起動後の稼働、旧版からの更新・DB 移行は未確認。SELinux Enforcing・firewalld の runtime 規則・実際の LAN / VPN・実機・VM へ成功範囲を広げない
+  - **15.0.9 の検証状態（2026-10-09 UTC）**: **隔離した AlmaLinux 10.2 の systemd コンテナで検証済み**。rootless Podman 5.8.2 を検証専用の vfs で使った。実機・VM の本実行ではない
     - 通したもの: 実ブラウザでの初期設定と管理者ログイン、指定 IPv4 への切り替え、SSH の clone・push、停止バックアップと復元、同じ 15.0.9 の再適用、撤去と専用データの任意削除
     - 確認したこと: バックアップ時点のコミットへの復元と復元後のログイン・push、`doctor check --all` の 28 項目、ログアウト後の稼働、検証コンテナ再起動後の最初の SSH ログイン前の自動起動
     - firewalld はカーネルの nftables 機能不足で起動せず、offline の保存規則の追加・削除と構文だけ確認した。runtime 規則と許可外の接続拒否は未確認
     - 未確認: SELinux Enforcing の `:Z`、実際の LAN・VPN 接続、実機・VM の OS 再起動、異なる版への更新と DB の移行・旧版への復旧、aarch64、ホスト UID が 1000 以外の構成、別サーバーへの移設、外部保管先へのコピー
+  - 15.0.9 の利用操作の追加確認（2026-10-09 UTC）: 公式の 15.0.9-rootless を別の専用 Docker コンテナで動かし、日本語 UI のログイン・SSH 公開鍵・プライベートなリポジトリ・Issue・Pull Request・差分・マージを撮影した
+    - SSH の clone・作業ブランチ・README の変更・commit / push・マージ後の main の pull と、`Closes #1` による Issue のクローズを確認した。撮影は 8 枚
+    - この追加確認は利用操作だけで、AlmaLinux・rootless Podman・Quadlet・firewalld・SELinux の再検証ではない。共同レビュー・必須承認・CI・競合解消・Windows の Git Bash は未検証
+  - 15.0.9 の英語画面の再撮影（2026-10-09 UTC）: 別の専用 Docker コンテナで同じ利用フローを通し、英語 UI の画像 8 枚を `usage-*-en.png` へ保存した
+    - PR 本文は目的・確認結果と `Closes #1` を記載し、マージ・Issue のクローズ・main の pull を確認した
 - `docs/podman.md` — AppStream の podman を自分のユーザー（rootless）で使う手順書。**コンテナ系の手順書（distrobox・podman-compose・image-tools・podman-tui・lazydocker・Forgejo）の共有前提**で、各手順書は `## 実施手順` のリード文からここへ誘導する。subuid / subgid の確認（無ければ登録済みの範囲の後ろから計算して割り当てる）、`podman info` の要点、完全な名前のイメージ（`quay.io/podman/hello`）での確認、API ソケット（`podman.socket`、手順 7）まで。任意節は `DOCKER_HOST`（Docker の API を使うツール用。lazydocker.md の前提）と Quadlet（前提は linger.md。`~/.config/containers/systemd/*.container` に置き、生成された unit には `systemctl --user enable` を使えない）。`sudo -iu` で切り替えたシェルには `XDG_RUNTIME_DIR` が無く `systemctl --user` が失敗する（`su -` は動いた）。従来は **x86_64 のコンテナのみで検証**（`10-init` を `--privileged` で立てて systemd を PID 1 にし、入れ子の rootless podman を SSH のログインシェルから動かした。cgroup v2 に pids のコントローラが無いので、検証環境だけ `containers.conf.d` で PID 数の制限を外した。再起動は中の `sudo systemctl reboot` と `docker start`）。SELinux の `:Z` と資源の制限は未検証。2026-10-05: subuid / subgid は各ファイルを個別に確認し、不足する側だけ追加する。非 TTY では短縮名の検索順に頼らず、完全なイメージ名を使う。
   - 現行版の新規 VM 再検証（2026-10-06）: 共通 bash 3d5323e からの rootless・socket・Docker API・Quadlet と OS 再起動後の自動起動、SELinux のラベル、ロールバックを確認。subid は導入済みの分岐、追加・資源制限は未実施。詳しい実行範囲と未実施項目は対応する `docs/verification/` の今回の付録を参照
 - `docs/distrobox.md` — EPEL の distrobox で Ubuntu 24.04 のボックス（`quay.io/toolbx/ubuntu-toolbox:24.04`）を作る手順書。前提は podman.md と almalinux-setup.md 手順 17（もとは手順 2〜4 が EPEL の有効化で、その後 epel.md だった）。`distrobox enter` は動いている間に貼った行をボックスへの入力として取り込むので、`enter` で終わる手順はそこで止める。任意節で、AppStream・EPEL に無い ffmpeg を apt で入れ、`distrobox-export --bin` でホストから呼ぶ。ボックスは `--privileged`・`label=disable` で、ホーム・ネットワーク・プロセスをホストと共有する（隔離ではない）。従来は **x86_64 のコンテナのみで検証**（distrobox が渡す `--pids-limit=-1` を、検証環境だけ podman のラッパーで読み替えた）
@@ -302,7 +315,7 @@ GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `d
 - **検証記録の「状態」行は入れ子の箇条書きに割る**（何を通したか・確認したこと・確認していないこと）。「選択した方針」「注意点」なども、150 字を超える段落は箇条書きに割る。過去の検証記録（付録を含む）は書き直さない。分離・移動では実施日・対象版・出力・成功と失敗・未実施範囲を保持し、相対リンクや見出しの移動に必要な変更だけを行う（手順番号の付け替えだけは行う。昔の手作業を指す「手動手順 N」は付け替えない）
 - **太字の `**` を約物に接して閉じない。** 閉じの `**` の直前が `）`・`。`・`` ` `` などの約物で、直後が文字だと太字にならない（CommonMark の規則。`**最新版（Rapid Release）**を` は記号のまま出る）。約物を太字の外に出すか、太字の後ろを約物か空白にする
 - **状態（検証範囲）を変えたら**、対応する検証記録の状態行とこの CLAUDE.md の構成欄を合わせて直す。新たな検証をしていない文書分離では、検証範囲を変更しない
-- **画面のスクリーンショットは `docs/images/<手順書の名前>/` に PNG で置く**（今は windows-dual-boot.md・gnome-desktop-sharing.md・almalinux-setup.md・virtualbox.md）
+- **画面のスクリーンショットは `docs/images/<手順書の名前>/` に PNG で置く**（今は windows-dual-boot.md・gnome-desktop-sharing.md・almalinux-setup.md・virtualbox.md・forgejo.md）
   - 検証で撮った画面は対応する検証記録に置き、背景の説明用の画面は参考資料に置く。実施に必要な判定条件は手順書の箇条書きに残す。既存の画像ファイルは移動せず、文書側の相対パスを直す
   - 何で撮った画面か（VM か実機か）を断る。窓の部分だけを切り出す
   - 本当のユーザー名・ホスト名・IP が写るものは載せない（試験用の値にして撮る）
