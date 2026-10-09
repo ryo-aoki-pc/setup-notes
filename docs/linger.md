@@ -10,7 +10,7 @@
 - 上から順にコードブロックを貼る
 - 手順の後: 以後は[ロールバック](#ロールバック)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
-  - [Syncthing](syncthing.md)、[Dropbox（公式クライアント）](dropbox.md)、[Dropbox（rclone）](dropbox-rclone.md)
+  - [Syncthing](syncthing.md)、[Dropbox（公式クライアント）](dropbox.md)、[Dropbox（rclone）](dropbox-rclone.md)、[Forgejo](forgejo.md)
   - [Podman の Quadlet（任意）](podman.md#quadlet-で自動起動する任意)で動かすコンテナ
 
 1. linger が有効になっているか確かめる。
@@ -41,9 +41,9 @@
 ## ロールバック
 
 > [!WARNING]
-> **linger を切ると、ログアウトしている間は、自分のユーザーのサービスがすべて止まる**（Syncthing・Dropbox・Quadlet のコンテナなど）。止まっていること自体は気付きにくい。
+> **linger を切ると、ログアウトしている間は、自分のユーザーのサービスがすべて止まる**（Syncthing・Dropbox・Forgejo・Quadlet のコンテナなど）。止まっていること自体は気付きにくい。
 
-- linger を使う手順書（[Syncthing](syncthing.md#ロールバック)・[Dropbox](dropbox.md#ロールバック)・[Dropbox（rclone）](dropbox-rclone.md#ロールバック)・[Podman の Quadlet](podman.md#ロールバック)）のロールバックを先に行う
+- linger を使う手順書（[Syncthing](syncthing.md#ロールバック)・[Dropbox](dropbox.md#ロールバック)・[Dropbox（rclone）](dropbox-rclone.md#ロールバック)・[Forgejo](forgejo.md#ロールバック)・[Podman の Quadlet](podman.md#ロールバック)）のロールバックを先に行う
 - この節の手順も、そのユーザー自身のシェルで貼る
 
 1. ほかに自分で有効にしたユーザーのサービスと、Quadlet の定義が残っていないか見る。
@@ -55,7 +55,7 @@
 
    - どちらも何も出さなければ、この節の手順 2 で linger を切る
    - 1 つ目の `ls` が何か出す（Syncthing の `sh.brew.syncthing.service`、Dropbox（rclone）の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 2 は飛ばす
-   - 2 つ目の `ls` が何か出す（`hello-web.container` など）なら、[Podman の Quadlet](podman.md#quadlet-で自動起動する任意) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
+   - 2 つ目の `ls` が何か出す（`hello-web.container`・[Forgejo](forgejo.md) の `forgejo.container` など）なら、[Podman の Quadlet](podman.md#quadlet-で自動起動する任意) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
    - 1 つ目の `ls` が `podman.socket` だけを出すときは、linger を切ってよい（[podman.md 手順 7](podman.md#実施手順) の API ソケット。ログインしている間に使うもの）
 
 1. ほかにユーザーのサービスを常駐させていないときだけ、linger を切る。
