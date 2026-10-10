@@ -171,6 +171,10 @@
    - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る。検証時は AppStream の 22.23.2 と BaseOS の 0.10.0）
    - npm（`nodejs-npm`）も一緒に入る。この手順書では使わない
    - bubblewrap は、Grok の読むだけの sandbox（`/grok-build:review` と、この手順書の端末からの Grok のレビュー）と Codex の sandbox が使う。無いと、Grok は `this sandbox could not enforce its deny list on Linux` と出して起動しない
+   - Grok の sandbox には、Landlock が有効な Linux カーネルも要る。`CONFIG_SECURITY_LANDLOCK` が無効なら、対応するカーネルで起動してから再試行する。カーネルの版が新しいだけでは、この条件を満たさない
+   - `runtime-socket deny path /run/podman/podman.sock` と `Permission denied (os error 13)` が出たら、Grok のレビューは未実行（bubblewrap があっても起動しない）
+   - このエラーでは、管理者がソケットの親ディレクトリの検索権限を確認する。ソケットが無くても、親を検索できないと起動に失敗する。ソケット自体のアクセス権は緩めない。検索権限を直しても、Landlock が無効なら sandbox の保護は成立しない
+   - このエラーでは[相互にレビューする](#相互にレビューする)の代替へ進む。条件と対象版は[検証記録](verification/coding-agents.md)を参照
    - GNOME のデスクトップの PC には、Flatpak の依存として bubblewrap がもう入っている（`Package bubblewrap-… is already installed.`）
 
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
@@ -237,7 +241,7 @@
 |---|---|
 | `codex review --base main` | Codex が、今のブランチの `main` との差分をレビューする |
 | `claude -p --permission-mode plan "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない"` | Claude がレビューする |
-| `grok --trust -p "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない" --sandbox read-only --always-approve` | Grok がレビューする（AlmaLinux 10 だけ。読むだけの sandbox の中で、確認を聞かずに動く。bubblewrap が要る） |
+| `grok --trust -p "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない" --sandbox read-only --always-approve` | Grok がレビューする（AlmaLinux 10 だけ。読むだけの sandbox の中で、確認を聞かずに動く。Landlock が有効なカーネルと bubblewrap が要る） |
 
 - Windows には Grok の sandbox が無い（公式の文書は Linux と macOS だけ）ので、`--always-approve` を付けない。`grok` を起動して同じ文で頼み、確認には自分で答える
 
@@ -260,7 +264,7 @@
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ。手順 4 から後は、bash でも PowerShell でも同じコマンドを貼る
 
 > [!WARNING]
-> **Grok Build は既定で sandbox が無く、許可すれば worktree の外のファイルも変えられる**（AGENTS.md の規則で止めるだけ）。この節の手順 6 で、確認の画面には中身を読んでから答える。AlmaLinux 10 では `grok --sandbox workspace` で起動すると、書ける場所を worktree・`~/.grok`・一時ディレクトリに絞れる（bubblewrap が要る。その場合、コミットは人が行う）。
+> **Grok Build は既定で sandbox が無く、許可すれば worktree の外のファイルも変えられる**（AGENTS.md の規則で止めるだけ）。この節の手順 6 で、確認の画面には中身を読んでから答える。AlmaLinux 10 では `grok --sandbox workspace` で起動すると、書ける場所を worktree・`~/.grok`・一時ディレクトリに絞れる（Landlock が有効なカーネルと bubblewrap が要る。その場合、コミットは人が行う）。
 
 1. AlmaLinux 10 のときだけ、tmux に 4 つのウィンドウを作って入る。
 
@@ -341,6 +345,7 @@
 - 書いたものとは別のモデルに、新しい会話でレビューさせる（どれもファイルを変えない）
 - 各ブランチを、ほかの 2 つがレビューする。指摘は人が選んで、担当に直させる
 - 頼む前に、レビューされる側の変更が自分のブランチにコミットしてあること（[分担して作業する](#分担して作業する)の手順 7）
+- Grok の sandbox が起動しないときは、Grok のレビューを未実行として残し、この節の Claude・Codex のレビューを使う。sandbox は外さず、ソケット自体のアクセス権は緩めない。Landlock と親ディレクトリの検索権限を確かめ、対応するカーネルで起動してから再試行する
 
 1. `claude` の窓の Claude Code で、Claude のブランチを Codex と Grok にレビューさせる。
 
@@ -912,7 +917,7 @@
 - **`/codex:rescue` と `/grok-build:delegate` は、Claude の worktree で動く**: Codex と Grok が Claude の worktree のファイルを変える。Claude 自身の作業と同じファイルを頼まない
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
 - **Grok Build は既定で sandbox が無い**: [分担して作業する](#分担して作業する)のリードの `[!WARNING]`。Windows には sandbox が無い
-- **Grok の読むだけの sandbox には bubblewrap が要る**: AlmaLinux 10 で bubblewrap が無いと、`--sandbox read-only` の Grok（`/grok-build:review` も）は起動しない（実施手順の手順 9 で入れる。[検証記録](verification/coding-agents.md#grok-の-sandbox-と-bubblewrap)）
+- **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を実施手順の手順 9 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
 - **Grok は Claude の指示書も読む**: CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（信頼したフォルダーだけ）。3 つに共通の規則は AGENTS.md に書く
 - **`/grok-build:check` は、ログインしていなくても ready と出る**（grok-build のプラグイン 0.2.1 と Grok Build 1.0.50。`grok models` の終了コードで判定するため）。ログインは `grok models` の表示で確かめる
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない

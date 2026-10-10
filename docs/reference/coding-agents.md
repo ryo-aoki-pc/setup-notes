@@ -78,7 +78,10 @@
   - `/codex:setup` は、Codex が見つからず npm があると、`npm install -g @openai/codex` を提案する（codex.md の standalone のインストーラーと二重になるので断る）
   - hooks: `SessionStart`・`SessionEnd`（どのセッションでも `node` を動かす）と、`Stop`（レビューの関門。`--enable-review-gate` で有効にしたときだけ）
 - **xAI の grok-build-plugin-cc**（`grok-build@xai-grok-build`、検証時は 0.2.1）
-  - 本物の `grok` を `grok -p` で動かす。レビューは、読むだけのエージェント（`explore`）を `--sandbox read-only --always-approve` で動かす（承認する人がいない非対話では、plan のモードが止まるため）。Linux ではこの sandbox に bubblewrap が要る
+  - 本物の `grok` を `grok -p` で動かす。レビューは、読むだけのエージェント（`explore`）を `--sandbox read-only --always-approve` で動かす（承認する人がいない非対話では、plan のモードが止まるため）。Linux ではこの sandbox に Landlock が有効なカーネルと bubblewrap が要る
+  - `review` と `critique` は `runHeadlessAgent` に `sandbox: "read-only"` を渡す。`--always-approve` は確認を自動承認するだけで、sandbox の起動失敗は直さない
+  - `runtime-socket deny path` のエラーは、sandbox の拒否パスを解決する段階の失敗。bubblewrap 不足とは別に判定する（[対象版と実機の結果](../verification/coding-agents.md)）
+  - ソケットが無くても、親ディレクトリを検索できないと拒否パスを解決できない。親の検索権限とソケット自体のアクセス権は別で、後者を緩める必要はない。検索権限を直しても、Landlock が無効なカーネルでは read-only の保護が成立しない（[追加の原因調査](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
   - `/grok-build:check` のログインの判定は `grok models` の終了コードだけを見る。Grok Build 1.0.50 の `grok models` はログインしていなくても終了コード 0 なので、ready と出る（検証記録）
   - hooks: `SessionStart`・`SessionEnd`
 - 2 つの `review` は `disable-model-invocation: true` で、Claude は自分からは呼ばない。`rescue`（`codex-rescue` のサブエージェント）と `delegate`（`grok-delegate` のサブエージェント）は、Claude が自分で呼べる
@@ -93,7 +96,7 @@
 - レビューは、書いたものとは別のモデルに、新しい会話で頼む（書いた会話のままだと、自分の書いたものに甘くなる。Claude Code の Best practices の Writer/Reviewer）
 - Codex は、sandbox の中では `.git` に書けない（`git add` で `index.lock` が作れない）。worktree でも、ふつうのチェックアウトでも同じ（検証記録）。コミットは承認して sandbox の外で動かすか、人が行う
 - Grok Build は既定で sandbox が無い。`--sandbox workspace` で絞ると、worktree の `.git` は `main` のチェックアウトの `.git/worktrees/` にあるので、コミットはできなくなるはず（確かめていない）
-- 端末から頼む Grok のレビュー（`grok --trust -p … --sandbox read-only --always-approve`）は、プラグインと同じく、読むだけの sandbox を安全の境界にした。Linux では、この sandbox は Landlock と bubblewrap で張られ、bubblewrap が無いと Grok は起動しない（検証記録）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）ので、`--always-approve` を付けない
+- 端末から頼む Grok のレビュー（`grok --trust -p … --sandbox read-only --always-approve`）は、プラグインと同じく、読むだけの sandbox を安全の境界にした。Linux では、この sandbox は Landlock と bubblewrap で張られる。Landlock が無効なカーネル、bubblewrap 不足、拒否パスの解決失敗を分けて確認する（検証記録）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）ので、`--always-approve` を付けない
 
 ### スマートフォンから指示する
 

@@ -4,6 +4,15 @@
 
 ## 対象と検証環境
 
+- **状態（2026-10-10 UTC）**: AlmaLinux 10.2 / aarch64 の Raspberry Pi 5 の実機で、ログイン済みの CLI と専用の一時リポジトリを使って検証した。PR #117 のマージコミット `814b590` を対象に、操作を個別に実施した。手順書のコードブロックを抽出して一括実行していない
+  - 確認したこと: 3 つの CLI が担当ファイルだけを実装すること。各担当の受入テストと ShellCheck、Claude・Grok のコミット、Codex の sandbox の `git add` 拒否を人のコミットへ引き継ぐこと。人が main に取り込んだ後の 8 テストと各 worktree の同期
+  - 確認したこと: 実際の Claude Code の対話画面での `/codex:setup`・`/grok-build:check`。Codex のプラグインの review が既知の欠陥 2 件を検出し、前後のファイルのハッシュと git の状態が変わらないこと。rescue が依頼した `ports.py` だけを修正し、担当テストが通ること
+  - 確認したこと: 別の専用リポジトリで、競合・abort・競合の解消・3 ブランチの取り込み・各 worktree の fast-forward・変更が残る worktree と未取り込みのブランチの撤去拒否・片付け後の撤去の再実行・使い捨ての変更の強制撤去。コミットと競合の解消は人が作ったもので、AI の実分担の結果とは別
+  - 失敗したこと: Grok の workspace sandbox は準備に失敗。プラグインの read-only review は `/run/podman/podman.sock` の拒否パスの解決で permission denied（errno 13）。bubblewrap が入っていても、レビューは起動しなかった
+  - 追加の原因調査と準備: 空の `/run/podman` の検索権限不足と、カーネルの Landlock 無効を別々に確認し、試験後の権限は復元済み。対応する Image のビルドと静的検査 7 項目、検索だけを許す ACL の模擬検査 6 項目は成功。ユーザーの指示で調査・準備までで終了し、ホストへの適用・再起動・Grok の再検証は行っていない。レビュー失敗は未解消
+  - 確認したこと: Grok の通常の auto 許可での実装と delegate、Claude・Codex の端末レビュー、tmux の detach と再接続、Codex の背景レビュー・結果取得・worker の取消。両 CLI の導入・更新・撤去は対応する検証記録に記載する。設定の復旧結果は今回の付録の末尾に分ける
+  - 今回の対象外: スマートフォンからの Remote Control・SSH と、スマートフォンからのプラグインのコマンド。Windows 11。今回のホストの結果を、2026-10-09 のコンテナの結果や Windows の成功範囲へ広げない
+
 - **状態（2026-10-09 UTC）**: AlmaLinux 10.2 / x86_64 のコンテナで、3 つの CLI のログイン無しでできる範囲を、手順書のコードブロックのまま本実行した。ログインの要る Claude Code の確かめは、クラウドのホストのログイン済みの Claude Code で行った。実機・VM ではない
   - 通したもの（コンテナ）: 実施手順の手順 1〜7・9・10、手順 8 の Grok の行、手順 11 の変数が空のときの中断
   - 通したもの（コンテナ）: 分担して作業するの手順 1（tmux。疑似端末で流し、デタッチと貼り直しも）と手順 7、main に取り込むの手順 2〜7（エージェントのコミットは手で作り、わざと競合させて `--abort` と直し方も通した）、更新の手順 1・2、ロールバックの手順 1〜6（手順 6 は `N` と答えてトランザクション表まで）
@@ -153,3 +162,158 @@
   - 貼り直したとき: `中断: AGENTS.md に「## 共同作業の規則」がもうある。…` と `CLAUDE.md に @AGENTS.md はもうある`。規則の節は 1 つのまま
   - `$PROJECT_DIR` が空のとき: 手順 4・5・8 とも `中断: 手順 1 の $PROJECT_DIR が空のまま。…`
 - worktree を作る・消すブロックは、パスに `\` を使うので Linux では流していない
+
+## 付録: Raspberry Pi 5 の実機での検証（2026-10-10）
+
+| 項目 | 値 |
+|---|---|
+| 対象 | setup-notes PR #117 のマージコミット `814b590badccdb7af4b471bac628f34e0f3cb7ec` |
+| 実施日 | 2026-10-10 UTC |
+| ホスト | Raspberry Pi 5 Model B Rev 1.0。AlmaLinux 10.2 (Lavender Lion)、aarch64、カーネル `6.12.96-20260724.v8.1.el10` |
+| CLI | Claude Code 2.1.296（RPM）、Codex CLI 0.160.0、Grok Build 1.0.50。既存の利用者のログインを使った。Codex は前回の 0.162.0 とは別の版 |
+| OS の条件 | SELinux は Disabled。ソケット本体の権限と OS の保護設定は永続変更していない。親ディレクトリの mode の一時試験と復元は後述 |
+| 依存 | Node.js 22.23.2、npm 10.9.8、bubblewrap 0.10.0、tmux next-3.4 |
+| プラグイン | `codex@openai-codex` 1.0.6、`grok-build@xai-grok-build` 0.2.1 |
+| 実分担用のリポジトリ | `<VERIFY_DIR>/fixture` と、隣の `fixture.worktrees/claude`・`codex`・`grok`。`main` と `agent/claude`・`agent/codex`・`agent/grok` |
+| 別の試験用リポジトリ | プラグインのレビューと委任のためのリポジトリ、git の競合と撤去を確かめる `fixture-lifecycle`。実分担用のリポジトリとは分けた |
+
+> [!NOTE]
+> 利用者名とホスト名は `<USER>`・`<HOSTNAME>` に置き換える。以下の `<VERIFY_DIR>` は今回だけの一時ディレクトリ。生の認証情報、デバイスコード、トークン、パスワードは記録しない。以下にある追加のフラグは今回の非対話の検証の条件で、手順書の対話起動と同じ実施範囲とは扱わない。
+
+### 実施手順 / 手順 1〜8: 一時プロジェクトと共通規則
+
+- `AGENTS.md` に手順書の「共同作業の規則」と担当ごとのテスト・リンターのコマンドを置き、`CLAUDE.md` に `@AGENTS.md` の 1 行を置いた。ローカルの git の作者は `Test Operator <test@example.invalid>` とし、グローバルの設定は変えていない
+- 初期コミット `40eefed` から 3 つの worktree と `agent/*` のブランチを作り、4 つとも同じコミットから始まることを確かめた
+- Claude と Codex に、ツールを使わずに読み込まれた規則だけから変更できる場所を答えるよう頼み、自分の worktree の中だけという答えを確認した
+- 初期状態の 3 つのスクリプトは、終了コード 3 の未実装の stub。`python3 -m unittest discover -s tests -v` は 8 テスト・71 failures で失敗し、`shellcheck bin/*` は終了コード 0。実装前からテストが成功していたわけではない
+- 1 つの担当のブランチにはほかの 2 つの stub が残るため、各担当は自分のテストと共通の ShellCheck をコミットの条件とした。統合テストは人が 3 ブランチを取り込んだ後の確認とした
+
+### 実施手順 / 手順 9〜11: プラグインの準備と対話画面
+
+- 2 つの公式のマーケットプレイスとプラグインを追加し、Codex 1.0.6 と Grok Build 0.2.1 が有効であることを確認した
+- Claude Code の実際の対話画面で `/codex:setup` と `/grok-build:check` を実行した。Codex の準備とログイン、Node.js と Grok の検出を確認した。前回の、`node` でスクリプトだけを呼んだ検証とは別
+- Grok の認証は `grok --no-auto-update models` の `You are logged in with grok.com.` で確認した。`/grok-build:check` の ready だけを認証成功の根拠にしていない
+- `/codex:setup --enable-review-gate` は使っていない。検証中に既存の CLI を意図せず更新しないよう、自動更新を止める条件で起動した
+
+### 分担して作業する / 手順 3〜7: 3 つの CLI の実装
+
+- Claude は `bin/double`、Codex は `bin/is-port`、Grok は `bin/trim` を担当する形にした。固定の `tests/`・仕様書・指示書・ほかの担当のスクリプトを変えないよう依頼した
+- Claude の起動は `-p --no-session-persistence --permission-mode acceptEdits`。Read・Edit・Write と、担当の unittest・ShellCheck・git のステージとコミット等に許可を限定した。モデルと reasoning effort は指定していない
+  - `bin/double` だけを実装し、`agent/claude` に `72bc567` をコミットした。差分は 1 ファイル、worktree は clean
+  - 符号と先頭の 0、不正な引数、64 bit を超える整数を含む担当の 3 テストと `shellcheck bin/*` が成功した。検証者が同じコマンドをもう一度実行しても成功した
+  - 複数の操作をまとめた Bash の書き込みと spot check は許可に合わず、2 回拒否された。その後、許可されたファイルの編集とテストで完了した。全権を許す設定には切り替えていない
+  - 実行時間 27.860 秒、CLI の終了コード 0、timeout 無し、9 turns
+- Codex の起動は `codex exec --ephemeral -s workspace-write --json`。モデルと reasoning effort は指定していない
+  - `bin/is-port` だけを実装した。ASCII 数字・先頭の 0・1〜65535 の境界・巨大な整数の拒否を含む担当の 3 テストと `shellcheck bin/*` が成功した。検証者の再実行も成功した
+  - `git add -- bin/is-port` は終了コード 128。`fatal: Unable to create '<VERIFY_DIR>/fixture/.git/worktrees/codex/index.lock': Read-only file system` で拒否された
+  - Codex は sandbox の回避をせず、変更を未ステージで残し、人がこの worktree でステージとコミットを行うよう報告した。この時点では Codex 自身のコミットは無い
+  - 実行時間 56.585 秒、CLI の終了コード 0、timeout 無し。CLI が正常終了したことと、git のコミットが成功したことは区別する
+- Grok の `--sandbox workspace` による実装は sandbox の準備で失敗した。その結果を、後の通常の許可モードでの成功と分けた
+  - `acceptEdits` と限定した Bash 許可の試行、および担当ファイルの Edit・Write 許可を指定した試行は、Bash の許可待ちで `stopReason: "cancelled"` になった。終了コードは 0 だが、変更とコミットは無かった
+  - 前者の最後はシェルによる書き込み、後者は `stat`・`file` 等を含む連結コマンド。許可した Edit・Write や一部の Bash コマンドだけでは許可されなかった。今回のセッションの `permission_cancelled` で確認した
+  - `grok --no-auto-update --trust --permission-mode auto --output-format json -p …` では `bin/trim` だけを実装し、`agent/grok` に `147bb88` をコミットした。通常の許可判定を使い、sandbox の成功として扱わない
+  - ASCII の 6 種の空白、内部の空白、Unicode 空白、シェルの文字、不正な引数を含む担当の 2 テストと ShellCheck が成功した。検証者の再実行も成功した
+  - 実行時間 175.605 秒、終了コード 0、`stopReason: "end_turn"`、12 turns。モデルと reasoning effort は指定していない
+- Codex の変更は人が `e5c1422` にコミットした。3 担当の差分は `bin/double`・`bin/is-port`・`bin/trim` だけで、固定のテスト・仕様・指示書は変わらなかった
+
+### 相互にレビューする / 手順 1: 2 つのプラグインのレビュー
+
+- 別の試験用リポジトリに既知の欠陥 2 件を置き、Claude Code から Codex の review を実行した。2 件を検出し、前後のファイルのハッシュと git の状態は同じだった。読取レビューが勝手に修正したという結果ではない
+- Grok の review は失敗した。このホストの `/run/podman/podman.sock` を扱う sandbox の準備で permission denied（errno 13）となり、モデルのレビューまで進まなかった
+- 同じホストの Grok の workspace sandbox による実装も、`could not apply the 'workspace' sandbox profile` で失敗した。この出力だけでは read-only と同じ原因か断定しない。Podman のソケットの権限は変更していない
+
+### 使い方の基本: rescue と delegate
+
+- Codex の rescue は、Claude の試験用 worktree で、依頼した `ports.py` だけを修正した。担当テストは成功した。独立した Codex の worktree に修正したのではない
+- Grok の delegate は、依頼した `text.py` だけを修正し、ASCII の 6 種の空白を除く処理へ戻した。担当テストが成功し、Codex の rescue と合わせた全 2 テストも成功した。tests と指示書は変わらなかった
+- 2 つの委任は実際の Claude Code の対話画面から、プラグインのサブエージェントを通して実行した。実行先は Claude の worktree。別々の CLI の worktree で行った前節の実分担とは区別する
+- 背景実行の検査は、インストールされたプラグインのスクリプトを `node` で呼んだ。実際の slash command の検証とは別の component の検査で、モデルと effort の上書きは無い
+
+| 検査 | 結果 |
+|---|---|
+| Codex `review`・`adversarial-review` | 背景実行が completed になり、状態と結果を取得した。既知のポート上限の欠陥を指摘。前後の全ファイルのハッシュ・HEAD・git の状態は同じ |
+| Codex `cancel` 初回 | turnId の取得を待つ間にレビューが完了し、実行中の取消は未検証 |
+| Codex `cancel` 再試験 | threadId と生存中の worker PID を確認して取消。終了コード 0、running → cancelled、worker PID 消滅。`turnInterruptAttempted: false`・`turnInterrupted: false` のため、サーバー側の推論停止までは証明していない |
+| Codex 専用 broker の終了 | shutdown が終了コード 0。登録した broker と子プロセスが残っていない |
+| Grok `critique` | read-only sandbox の同じ errno 13 で failed。状態と失敗結果を取得でき、全ファイル・HEAD・git の状態は同じ |
+| Grok `stop` | 先に sandbox 起動が failed になったため、実行中の停止は未検証。停止機能の不具合とは判定しない |
+
+### main に取り込む / 手順 2〜7・ロールバック / 手順 2〜4: 別のリポジトリでの git 操作
+
+- `fixture-lifecycle` に人が作った 3 ブランチを使い、以下の 9 項目を実際の git で確認した。これらのコミットは、Claude・Codex・Grok の実装の代わりに人が作ったもの
+  - 同じ `app.py` の変更による merge conflict
+  - `git merge --abort` で取り込み前の HEAD と clean な状態へ戻ること
+  - 担当のブランチで main を取り込み、人が競合を解消してコミットすること
+  - 3 ブランチの main への取り込み
+  - 3 つの worktree の `git merge --ff-only main`
+  - 未追跡ファイルの残る worktree の通常の撤去が拒否され、ファイルが残ること
+  - worktree を消せても、未取り込みのブランチの `branch -d` が拒否されること
+  - 未追跡ファイルを片付け、残るブランチを取り込んでから通常の撤去を再実行できること
+  - 強制撤去用に別に作った使い捨てのファイルとコミットの `--force`・`branch -D` による撤去。main の HEAD は変わらないこと
+- 最後は `main` だけ、worktree は 1 つで clean。この結果を、実分担用の 3 つの実装が統合済みであるという記録にはしていない
+
+### main に取り込む / 手順 1〜7: 実分担の統合と同期
+
+- 3 担当のテストが成功した後、人が `main` で Claude → Codex → Grok の順に `git merge --no-ff --no-edit agent/<担当>` を実行した
+- 統合後の `python3 -m unittest discover -s tests -v` は全 8 テスト成功、`shellcheck bin/*` は終了コード 0
+- 各 worktree で `git merge --ff-only main` を実行し、4 つとも `673357286b1b90e817c3a895196a4087fb03f966` で clean になった。エージェントに main を変えさせていない
+
+### 分担して作業する / 手順 1: tmux と対話起動
+
+- 既存の tmux へ触れないよう、今回だけの名前のサーバーに `agents` を作った。`0:main`・`1:claude`・`2:codex`・`3:grok` の 4 ウィンドウと、それぞれの作業ディレクトリを確認した
+- 実際の PTY から attach し、`Ctrl+b` → `d` で detach。セッションが残ることを確認し、もう一度 attach と detach を通した。最後に今回のサーバーだけを終了した
+- ログイン済みの Codex 0.160.0 と Grok 1.0.50 を実際の PTY で起動した。Codex は更新確認を起動時だけ無効にし、規則だけから自分の担当範囲を答えた。Grok は自動更新を起動時だけ無効にし、読むだけの依頼でプロジェクトの構成を説明した
+
+### 相互にレビューする / 手順 2・3: 端末の CLI
+
+- 別の試験用リポジトリにポート番号 65536 を許す欠陥をコミットし、`codex review --base main` と `claude -p --permission-mode plan …` を実行した。どちらも欠陥を指摘し、終了コード 0。レビュー対象の追跡ファイルと HEAD は変わらなかった
+- Claude の検査コマンドで未追跡の Python bytecode と、Claude の計画ファイルが生成された。どちらも今回のファイルとして撤去した。端末レビューの全ファイル・git 状態が不変だったとは記録しない
+- 手順書の `grok --trust -p … --sandbox read-only --always-approve` も実行した。同じ sandbox 準備エラーで終了コード 1。Grok のレビューは、端末からもプラグインからも成功していない
+
+### 更新・撤去と今回の対象外
+
+- 2 つの追加した marketplace と user scope のプラグインは、名前を指定して更新した。4 コマンドは終了コード 0。同じ版の確認で、無関係な marketplace は更新していない
+- CLI の新規導入、更新、PATH と撤去は今回だけの native ユーザーで実施した。[Grok Build の今回の付録](grok-build.md#付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)と [Codex の今回の付録](codex.md#付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)に、実端末の更新と検証補助の失敗を分けて記録する
+- スマートフォンの Remote Control・SSH と、スマートフォンからのプラグインのコマンド、Windows 11 は今回の対象外
+- 各プランの使用量を使った。使用量は元に戻せない。初回のログイン手続き・サーバー側の推論停止・Grok の実行中ジョブの停止は今回の成功範囲に含めない
+
+### 実施前の設定への復旧
+
+- 既存の Claude Code は 2.1.296、Codex は 0.160.0、Grok は 1.0.50 のまま。終了後に 3 つの版とログイン済みの状態を確認した。認証ファイルのコピー・差し替え・ログアウトは行っていない
+- 今回追加したプラグインと marketplace を名前を指定して削除した。4 コマンドは終了コード 0。対象の設定項目と設定ファイルの有無は実施前と一致し、もとの marketplace を保持した
+- 今回だけの broker は所有する PID と起動時刻を確かめて shutdown した。残存した検証用のプロセスは 0。専用データと配布キャッシュも撤去した
+- 復旧補助が終了済みジョブへ取消を再要求した 6 回は、対象状態を見つけられず終了コード 1。これを実行中の停止成功とは扱わない。専用 broker の終了と登録済み worker の消滅は別に確認した
+- アンインストールが作った `.orphaned_at` だけがキャッシュに残ったため、内容を確認して 2 個の marker と空の専用ディレクトリを撤去した
+- Claude の今回の project の信頼項目 2 件・セッションディレクトリ 5 個、Codex の今回の project trust table 2 件、Grok の今回の trust table 2 件・セッションディレクトリ 2 個、今回生成された計画ファイル 1 個を撤去した。他の設定値は保持した
+- Codex と Grok の共有データベース、モデルのキャッシュ等の CLI が通常生成する共通状態は巻き戻していない。今回作成した worktree・プロジェクトは撤去し、非公開の試験ログと再確認用の fixture のアーカイブ、文書を修正した checkout を一時ディレクトリに残した
+- native の専用ユーザー・グループ・ホームは無く、OS の RPM 一覧のハッシュは実施前後で一致。既存の checkout と親リポジトリは clean のまま。動作検証の終了時点では、文書の修正は今回の独立した checkout のローカル差分だけで、push はしていなかった（公開・マージは後続作業）
+
+### 文書の確認
+
+- 今回追加した相対リンク 12 件のファイルと見出しを確認し、参照先の不在は 0。`git diff --check` も成功した
+- 手順書 3 本の bash の 59 ブロック（共同作業 33、Grok 13、Codex 13）を `bash -n` で確認し、構文エラーは 0。ブロックをホスト上で一括実行した検査ではない
+- 過去の検証付録は保持し、今回の実機の結果を先頭の状態と付録に追加した。実ユーザー名・認証情報を文書へ転載していない
+
+### 追加原因調査と対処の準備（2026-10-10）
+
+- 先の errno 13 の失敗を受け、host の `/run/podman` を管理者権限で確認した。root 所有・mode `0700` の空ディレクトリで、`podman.sock` は存在せず、`podman.socket` と `podman.service` は inactive だった。ソケットへの接続権限ではなく、親ディレクトリを検索できないため、Grok の拒否パスの解決が失敗した
+- 親の mode を一時的に `0711` にすると errno 13 は解消した。その後の `--sandbox read-only` は、必要な保護が適用されていないとして起動を拒否した。試験後は `0700` に復元した。ソケットを作成したり、ソケット自体のアクセス権を緩めたりしていない
+- 稼働カーネルは `6.12.96-20260724.v8.1.el10`。build 設定は `CONFIG_SECURITY_LANDLOCK` が無効、実行中の LSM は `capability,selinux`。`landlock_create_ruleset` の ABI 問合せは `ENOSYS` だった。bubblewrap `0.10.0` の user namespace は動くが、これだけで read-only の保護が成立するとは扱わない
+- このホスト向けの公式リポジトリの最新カーネルも同じ版で、対応する `raspberrypi2-6.12.96-20260724.v8.1.el10.src.rpm` を取得し、digest と署名の検証が成功した。SHA256 は `c13055e3878d5ccec4875ee3bd60de791912d75dc8258b23d89d577997a50aa3`
+- 同じ source・release を使い、設定差分を `CONFIG_SECURITY_LANDLOCK=y` だけにした Image のビルドが完了した。実行時間は 1,245 秒、`Image.gz` は 9,597,976 bytes。SHA256 は `1a4a44d11d4be66f3c3db82d0bc6e3b8fabe99e92adafde8c4d40c13de683b49`。独立した静的検査の 7 項目はすべて成功した
+
+| 静的検査 | 結果 |
+|---|---|
+| 完了記録と実 Image の照合 | release・SHA256 が一致 |
+| 設定差分 | `CONFIG_SECURITY_LANDLOCK` の `n` → `y` だけ |
+| カーネル release | `6.12.96-20260724.v8.1.el10` と完全一致 |
+| 組み込みカーネルの公開 symbol | 11,289 件の集合・CRC・公開種別・namespace がすべて一致 |
+| vmlinux の形式 | little-endian の ELF64 / AArch64 |
+| Landlock の syscall 3 個 | create_ruleset・add_rule・restrict_self がすべて強い text symbol（`T`） |
+| gzip と Image header | gzip の展開と AArch64 の header が有効 |
+
+- この CRC の照合は静的な互換性検査で、実動作の保証ではない。新 Image での起動、既存 modules のロード、Landlock の初期化と ABI はまだ確認していない。同 release なので `uname -r` だけでは起動 Image を区別できない。また `CONFIG_IKCONFIG=m` の既存 `configs.ko` は元の設定を内包するため、`/proc/config.gz` の表示を新 Image の設定の証拠にしない。今後カーネルを更新する場合は、その版に合わせた再構築と検査が必要
+- 別の使い捨てのディレクトリで、対象のユーザーだけに検索（`--x`）を許し、default ACL を付けない案を模擬した。root 所有・mode `0660` のソケットに対し、パス解決ができること、ディレクトリ一覧・書き込み・ソケット接続が拒否されること、ソケットの mode が変わらないこと、default ACL が無いことの 6 項目がすべて成功した。実ホストの `/run/podman` にこの ACL を永続適用した結果ではない
+- 実ホストの ACL 適用は、自動承認審査が root の管理するコンテナ用パスへの変更には明示承認が必要として拒否した。別名 Image と一度限りの `tryboot` を使う適用スクリプトとロールバックを準備し、通常の `config.txt`・`kernel8.img`・`initramfs8` を保持する案を作った
+- その後、ユーザーがホスト修正を不要とし、ここまでの検証結果をマージするよう指示したため、調査・準備までで終了した。実ホストの ACL と Image は未適用で、再起動も Grok の sandbox とレビューの再検証も行っていない。Grok の sandbox によるレビューは未解消のまま。先の失敗を成功へ置き換えない
+- 手順書には、Landlock が有効なカーネルで起動してから再試行する条件と、ソケットの親の検索権限を確認する案内を追加した。カーネルの構築手順は追加していない
