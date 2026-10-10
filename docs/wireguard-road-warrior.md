@@ -149,7 +149,7 @@
    else
      sed -i "s|^PrivateKey *=.*|PrivateKey = $(cat "${WG_DIR}/wg0.key")|" "${WG_DIR}/wg0.conf" &&
      grep -c '^PrivateKey = [A-Za-z0-9+/]\{43\}=$' "${WG_DIR}/wg0.conf" &&    # 1（置き換わった。鍵そのものは表示しない）
-     grep -v '^PrivateKey' "${WG_DIR}/wg0.conf"                                # 残りの行を目で確かめる（Address / PublicKey / Endpoint / AllowedIPs）
+     grep -v '^PrivateKey' "${WG_DIR}/wg0.conf"                                # 残りの行を目で確かめる（Address / PublicKey / Endpoint / AllowedIPs。拠点が WG_MTU を書いていれば MTU も）
    fi
    ```
 
@@ -192,7 +192,7 @@
      nmcli device status | grep -E '^(DEVICE|wg0 )' &&                            # wireguard  connected  wg0
      nmcli -f GENERAL.STATE,IP4.ADDRESS,IP4.ROUTE,IP4.DNS connection show wg0 &&   # activated。IP4.ROUTE に AllowedIPs の 3 経路（mt = 50）
      ip -4 route show dev wg0 &&                                                  # 同じ 3 経路と metric
-     ip link show dev wg0 | grep -o 'mtu [0-9]*' &&                               # 1420
+     ip link show dev wg0 | grep -o 'mtu [0-9]*' &&                               # 1420（conf に MTU = があれば、その値）
      sudo wg show wg0                                                             # latest handshake が数秒前、transfer の received が 0 でない
      sudo firewall-cmd --get-active-zones           # wg0 が既定ゾーン public に入る
      cat /etc/resolv.conf                           # 「鍵を作る」の手順 2 の前と同じ（DNS = が無いので変わらない）
@@ -454,7 +454,7 @@
 
    - `WireGuardTunnel$wg0  Running  Automatic` と、`wg0` に `<CLIENT_TUN_IP>` / `32` が出ればよい
    - 経路に、`AllowedIPs` の 3 つ（`RouteMetric` が `0`）がある
-   - `NlMtu` は `1420`（今の回線の MTU が 1500 のとき）
+   - `NlMtu` は、conf に `MTU =` があればその値、無ければ `1420`（今の回線の MTU が 1500 のとき）
    - `NetworkCategory` は `Public` のはず（変えない。行が出なければ、Windows がまだネットワークを識別している）
    - `ServerAddresses` が空（`{}`）
    - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この項の手順 3 の通信で出る

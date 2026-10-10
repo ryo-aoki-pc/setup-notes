@@ -160,6 +160,9 @@
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-05: 「WG ホストに登録する」の手順 2 とロールバックの手順 3 を、公開鍵を照合してから削除を反映する共通手順への案内に変更した。新しい削除・鍵交換の順序は隔離したスタブで確認し、実機では流していない
+  - 2026-10-10: 拠点が `WG_MTU` を下げているときは PC も同じ値にする案内を、注意点「MTU」に足した（[wireguard.md の検証記録の付録](wireguard.md#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）
+    - `wg-vpn.sh` の `client add` が、`WG_MTU` に値があればクライアント用 conf に `MTU =` を書くようになった。「conf を取り込む」の手順 2 のコメントと、「トンネルを確かめる」の手順 1 の `mtu` のコメントを、それに合わせた（コマンドは変えていない）
+    - **どれも PC では流していない**。NetworkManager 1.56.0 が取り込みで `MTU =` を `wireguard.mtu` にすることは、ソースを読んで確かめただけ。注意点の `nmcli connection modify wg0 wireguard.mtu 1380` も流していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
@@ -169,6 +172,7 @@
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で WireGuard と鍵を用意する](../wireguard-road-warrior.md#windows-11-で-wireguard-と鍵を用意する)の手順 6、[Windows 11 で WG ホストに登録して取り込む](../wireguard-road-warrior.md#windows-11-で-wg-ホストに登録して取り込む)の手順 3（現在は同じ項の手順 1 の関数内）・4、[Windows 11 でトンネルを確かめる](../wireguard-road-warrior.md#windows-11-でトンネルを確かめる)の手順 2・3・5・6 と[Windows 11 のロールバック](../extra/wireguard-road-warrior.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（「Windows 11 でトンネルを確かめる」の手順 2・5 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
     - 「Windows 11 で WG ホストに登録して取り込む」の手順 3 で書いた `wg0.conf` が、WireGuard for Windows 1.1.1 の conf の読み込みの部分（Linux でビルドできるように写したもの）で読めること（BOM 付きの UTF-8 は読めないことも。同じ付録）
   - 2026-10-05: 取込みを、「Windows 11 で WG ホストに登録して取り込む」の手順 1 で関数定義 → 同じ項の手順 2 で conf をコピー → 同じ項の手順 3 で関数名を手入力、に分けた。18 ブロックの構文と、この操作順、空・コード・非 ASCII・PrivateKey 重複の拒否を Linux の PowerShell 7.6.6 とクリップボードのスタブで確認した。Windows の端末では貼っていない
+  - 2026-10-10: 「Windows 11 でトンネルを確かめる」の手順 2 の `NlMtu` の箇条書きと注意点「MTU」を、conf に `MTU =` がある場合に合わせた。WireGuard for Windows の `conf/parser.go` が `mtu` を読むことを見ただけで、Windows では流していない
   - **確かめていないこと**: Windows で貼ること（すべての手順）、マネージャーの起動と窓、取り込みで `wg0.conf.dpapi` ができること、トンネルの経路・MTU・ネットワークの種類、拠点との疎通、張ったまま再起動したときに張られること、更新とアンインストール、サスペンド復帰と Wi-Fi の切り替え、arm64 の Windows
 
 下表は実機（AlmaLinux 10 の PC 側）で採取した値。
@@ -294,7 +298,7 @@ AlmaLinux 10 の実機で、2026-09-22、「トンネルを確かめる」の手
 
 ### 代替: wg-quick で張る場合
 
-- `DNS =` を書くなら `resolvconf` 経由で `systemd-resolved` が要る（→ [wireguard.md: `DNS =` を書く場合](../wireguard.md#dns--を書く場合)）
+- `DNS =` を書くなら `resolvconf` 経由で `systemd-resolved` が要る（→ [wireguard.md: `DNS =` を書く場合](../extra/wireguard.md#dns--を書く場合)）
 - 起動時に張るなら `systemctl enable wg-quick@wg0`。ただし Wi-Fi より先に走り、`Endpoint` が名前なら解決に失敗しうる。拠点の LAN 内でも張られる
 - NetworkManager からは `connected (externally)` として見え、同名の一時プロファイルが作られる（WG ホストで実測）
 - wireguard.md の namespace ラボはクライアント側をこの経路で動かして疎通を確認している（→ [リモートクライアントの検証](wireguard.md#リモートクライアントの検証2026-09-19)）。本書の NetworkManager の手順は実機でも確認済み（[対象と検証環境](#対象と検証環境)）。この wg-quick の代替手順を PC の実機で通すことは未確認

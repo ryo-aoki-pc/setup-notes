@@ -103,7 +103,10 @@
 - **`DNS =` の扱いが wg-quick と違う**: 本書は `DNS =` 無し
   - NetworkManager では `ipv4.dns` になり、接続中は resolv.conf を NetworkManager が書き換えるので、`systemd-resolved` は不要と考えられる
   - wg-quick は `resolvconf` 経由で resolved が要る（→ [wireguard.md](wireguard.md#dns--を書く場合)）
-- **MTU**: PPPoE やモバイル回線で大きい通信だけ止まるなら `sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（→ [wireguard.md: MTU](wireguard.md#mtu)）
+- **MTU**: 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../wireguard.md#回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする
+  - 拠点が `WG_MTU` を書いた後に `client add` で登録した conf には `MTU =` が入っていて、取り込むと `wireguard.mtu` になる
+  - それより前に取り込んだプロファイルは、`sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（`1380` は拠点の値に読み替える）
+  - 拠点が下げていなくても、PPPoE やモバイル回線で大きい通信だけ遅い・止まるなら、同じ操作で下げる（→ [wireguard.md: MTU](wireguard.md#mtu)）
 - **全トラフィックを VPN に通す構成は対象外**: NetworkManager 側は `wireguard.ip4-auto-default-route`（`/0` の peer で自動有効）、拠点側は NAT が要る（→ [wireguard.md](wireguard.md#全トラフィックを-vpn-経由にする場合対象外)）
 - **`Endpoint` が DDNS 名のとき**: 本書の例は IP リテラルを使う。DDNS を使う場合は [wireguard.md](wireguard.md#endpoint-に-ddns-名を書く場合)を参照する
 - **サスペンド復帰・Wi-Fi の切り替え**: 復帰後に `nmcli device status` でトンネルの状態を見る
@@ -121,7 +124,9 @@
   - **ほかの端末と同じ名前で登録しない**: 実施手順の[WG ホストに登録する](../wireguard-road-warrior.md#wg-ホストに登録する)の手順 2 は、`CLIENT_NAME` と同じ名前の登録を消す。AlmaLinux 10 の PC と両方使うなら、別々の名前と鍵で登録する
   - **秘密鍵は、管理者なら読める**: 張っている間の `wg.exe show wg0 private-key`、窓の「編集」（設定の全文を出す）と「すべてのトンネルをzipにエクスポート」。WireGuard の窓は Administrators の一員にしか出ない。Windows のサインインのパスワードが鍵の守りになる
   - **WireGuard を外すと、ほかのトンネルの設定も消える**: MSI のアンインストールは `C:\Program Files\WireGuard\Data` を丸ごと消す（ソースの `installer/customactions.c` の `RemoveConfigFolder`）
-  - **MTU**: conf に `MTU =` が無いと、既定の経路のインターフェースの MTU から 80 を引いた値になる（1500 なら 1420。WireGuard の文書の「Network Configuration Quirks」）。大きい通信だけ止まるなら、トンネルを切ってから窓の「編集」で `[Interface]` に `MTU = 1380` を足す
+  - **MTU**: conf に `MTU =` が無いと、既定の経路のインターフェースの MTU から 80 を引いた値になる（1500 なら 1420。WireGuard の文書の「Network Configuration Quirks」）
+    - 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../wireguard.md#回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする。拠点が `WG_MTU` を書いた後に `client add` で登録した conf には、はじめから `MTU =` が入っている
+    - それより前に取り込んだトンネルと、大きい通信だけ遅い・止まるときは、トンネルを切ってから窓の「編集」で `[Interface]` に `MTU = 1380` を足す（`1380` は拠点の値に読み替える）
   - **`DNS =` を書いた場合**: `wg0` の DNS サーバーになり、Windows の通常の名前解決の扱い（複数の DNS サーバーを使う）に任される。DNS を絞る規則は、キルスイッチが掛かる構成（`/0` の peer が 1 つ）でだけ入る（同じ文書）。本書は `DNS =` 無し
   - **`Endpoint` が DDNS 名のとき**: トンネルを張るたびに名前を引く（ソースの `tunnel/service.go`）
   - **トンネルの名前はファイル名から決まる**: `wg0.conf` → `wg0`（英数字と `_=+.-` の 32 文字まで。ソースの `conf/name.go`）。サービスの名前は `WireGuardTunnel$wg0`、アダプターの名前も `wg0`

@@ -82,6 +82,9 @@ $ tracepath -n 192.168.120.100
     - 実機の 2 拠点で通したこと: この節の手順 1・4〜7 のブロック（本文の形のまま。手順 6 の `apply` は、拠点 A では落とし穴の節の `systemd-run` で ssh から切り離した）と、手順 2・3 に当たる `site.env` の書き換え（`vi` ではなく `sed`）
     - 確認したこと: 下げる前は拠点 B から拠点 A への MTU いっぱいの ping だけが約 5% 落ち、両拠点の `wg0` を 1380 にした後は落ちないこと、動いている `wg0` の MTU を変えてもトンネルと ssh が切れないこと、`apply` が conf に `MTU = 1380` を書き、restart で作り直された `wg0` が 1380 になること
     - **確認していないこと**: 手順 2 の `vi` での編集、OS の再起動、クライアント側の MTU、`Endpoint` が IPv6 の構成
+    - 同じ日に、`client add` が作るクライアント用 conf にも `MTU =` を書くようスクリプトを変え、この節に手順 8（配布済みのクライアントに MTU を入れる）を足した（[付録](#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）
+      - スタブ環境と、実機の dry-run で確かめた
+      - `MTU =` 入りの conf をクライアントに取り込むことと、手順 8 の操作は、どのクライアントでも流していない
   - 2026-10-05: クライアント削除と鍵交換の反映、無関係の未知 peer による停止、LAN 側 IP の変更前後の検査を、一時ファイルとホスト操作のスタブで確認した。稼働中の WireGuard・firewalld・systemd には適用していない
 
 | 項目 | 値 |
@@ -809,3 +812,50 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 #### 従来の記述との違い
 
 - 上の[手順中の実測・検証状況の記録](#手順中の実測検証状況の記録-7)（MTU の 2 つ）と注意点にあった「wg-quick は `MTU` を指定しない場合、外側の経路の MTU から自動で決める」は、`/usr/bin/wg-quick` の `set_mtu_up` を読み、「出口の NIC の MTU から 80 を引いた値にする。ルーターの先の回線の MTU は見ない」に改めた（[注意点の MTU](../extra/wireguard.md#mtu)。過去の記録の文は書き換えていない）
+
+### 付録: クライアント用 conf に MTU を書く変更の検証（2026-10-10）
+
+- 上の付録の後、`client add` が作るクライアント用 conf にも `MTU =` を書くよう、`wg-vpn.sh` を変えた
+  - 変えたのは `render_client_conf` だけ。`WG_MTU` に値があれば、`[Interface]` の `PrivateKey` の後ろに `MTU = <値>` を書く（拠点の conf と同じ位置）
+  - 外出先のクライアントも拠点の回線を通るので、同じ MTU が要る（[参考資料の補足](../reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-8-補足-クライアントにも入れる理由)）
+
+#### スタブ環境
+
+[スタブ環境での本実行](#スタブ環境での本実行)・[LAN 側ゾーン + forward 版のスタブ検証](#lan-側ゾーン--forward-版のスタブ検証2026-09-20)と同じやり方で、拠点 B の実機の上で、実機の設定に触れずに流した。
+
+- `unshare -Urm` の中で `/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`ip`・`firewall-cmd`・`systemctl`・`dnf`・`sysctl`・`restorecon` のスタブを `PATH` の先頭に置いた。`wg`・`wg-quick`・`qrencode`・`python3`・`rpm` は本物
+- `site.env` は、`site.env.example` に相手拠点の公開鍵と、下の表の値を入れたもの
+- 変更前（`b2861e0`）と変更後のスクリプトを、条件ごとに新しい tmpfs で、同じ順に流した
+  - `keygen A` → `client add A alice --dry-run` → `client add A alice` → `client show alice` → `client show alice --qr` → `client add A bob --pubkey … --ip 10.99.1.50` → `client show bob` → `client list` → `wg-quick strip`（alice の conf）→ `client remove bob`
+- 出力は、鍵とパスを伏せてから比べた
+
+| 条件 | 結果 |
+|---|---|
+| `WG_MTU` が空 | 変更前と変更後で、出力と作られた conf が同じ |
+| `WG_MTU=1380` | 変更後だけ、dry-run の表示・alice の conf・bob の conf（`--pubkey`）に `MTU = 1380` が 1 行ずつ増えた。ほかの行は同じ |
+| `WG_MTU=1380`・`WG_CLIENT_DNS=192.168.110.1` | `[Interface]` は `Address` → `PrivateKey` → `MTU` → `DNS` の順 |
+| `WG_MTU=1200`（範囲の外） | 変更前と同じく `ERROR: WG_MTU=1200: 1280〜1500 で指定してください` で止まり、登録も conf も作らない |
+| 権限と副作用（`WG_MTU=1380`） | `clients/` は 700、conf は 600。dry-run はファイルを作らない。スタブが受けた呼び出しは `ip -o -4 addr show` と `restorecon` だけ |
+| `wg-quick strip`（`WG_MTU=1380`） | `MTU = 1380` 入りの conf を読めて、終了 0 |
+| `client show alice --qr`（`WG_MTU=1380`） | QR コードが出る |
+
+#### 実機の dry-run
+
+拠点 B の実機（`WG_MTU=1380`）で、変更前と変更後のスクリプトの dry-run を比べた。どちらも何も書かない。
+
+- `--dry-run apply B`: 出力の 41 行が同じ（拠点の conf は変わらない）
+- `--dry-run client add B mtu-check`: 変更後だけ、`[Interface]` に `MTU = 1380` の 1 行が増えた。`/etc/wireguard/clients` も、登録簿の行もできていない
+
+#### クライアントが conf の MTU を読むこと
+
+ソースで確かめただけで、取り込みは流していない。
+
+- NetworkManager 1.56.0 の `nm_conn_wireguard_import`（`src/libnm-client-impl/nm-conn-utils.c`）は、conf の `MTU` を `wireguard.mtu` にする
+- WireGuard for Windows の `conf/parser.go` と、Android の公式アプリの `config/Interface.java` は、`[Interface]` の `mtu` を読む（どちらも master を見た）
+- 拠点 B の実機の `nmcli -f wireguard.mtu connection show wg0`（wg-quick が作った `wg0`）は、`wireguard.mtu: 0` と出た
+
+#### この変更で確かめていないこと
+
+- `MTU =` 入りの conf をクライアントに取り込むこと（AlmaLinux 10・Windows 11・スマートフォンのどれも）
+- 手順 8 の、配布済みのクライアントへの操作（実機の 3 台のクライアントは、この時点で 1420 のまま）
+- `shellcheck -x`（このホストに入っていないので流していない。`bash -n` は通った）

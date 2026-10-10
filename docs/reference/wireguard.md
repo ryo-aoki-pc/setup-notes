@@ -84,6 +84,18 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - 小さい ping と並べるのは、回線そのものの損失（混雑など）と見分けるため
 - 下げる前に同じ 2 つを打つと、分割されたパケットが落ちている向きでは、MTU いっぱいの ping だけが落ちる（実測は検証記録の同じ付録）
 
+### 回線に合わせて MTU を下げる（任意） / 手順 8: 補足: クライアントにも入れる理由
+
+- クライアントから拠点へ向かうパケットも拠点の回線を通る。クライアントの MTU が 1420 のままだと、外側が回線の MTU を超える
+- WG ホスト自身との TCP（ssh・Samba・Syncthing）は、両端の小さいほうに合わせてセグメントを決めるので、ホスト側を下げただけで両方向とも収まる（拠点間の ssh で、張ってあった接続の `mss` が変わるのを実機で確かめた）
+- 拠点の LAN のほかの機器との通信と、TCP 以外は、クライアントの MTU の大きさで送られる
+  - 拠点からクライアントへ向かう向きは、WG ホストが大きすぎるパケットを送り元へ知らせ、送り元が小さくし直す（経路 MTU 探索）ことに頼る
+  - この 2 つは仕組みからの見立てで、クライアントでは測っていない
+- `apply` は配布済みのクライアントに触れない。`client add` が作る conf に `MTU =` を書くのは、`WG_MTU` に値を書いた後の登録だけ（[スクリプトの動作](#スクリプトの動作)）
+- クライアントは conf の `MTU` を読む（ソースで確かめただけで、取り込みは流していない。[検証記録の付録](../verification/wireguard.md#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）
+  - NetworkManager は、取り込みで `MTU =` を `wireguard.mtu` にする（1.56.0 の `nm_conn_wireguard_import`）
+  - WireGuard for Windows と Android の公式アプリは、`[Interface]` の `MTU` を読む（`conf/parser.go`・`config/Interface.java`）
+
 ### 構成とパケットの流れ
 
 - **構成**: 各拠点で、既存ルーターの配下にある AlmaLinux 1 台を WireGuard ホストにする（ルーターの置き換えはしない）。外出先のクライアントは、どちらかの拠点のホストに接続する
@@ -203,6 +215,7 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 - `client add` は、帯の重複・名前や IP の重複・拠点の取り違えなどを**何かを書く前に**検査する
 - トンネル IP は、`--ip` が無ければ帯の中で最小の空きを割り当てる
+- クライアント用 conf には、`site.env` の `WG_MTU` に値があれば、同じ `MTU =` を書く（空なら書かない）。書くのは `client add` のときだけで、配布済みの conf は作り直さない
 - `remove A` は `wg0` と待ち受けポートを LAN 側ゾーンから外し（forward は戻さない。旧レイアウトの残骸があればそれも消す）、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）
 
 `keygen` の動作: `wireguard-tools` が無ければ dnf で入れ、鍵が無ければ生成する。**既存の鍵は上書きしない**（公開鍵だけ表示し直す）。
@@ -333,6 +346,7 @@ firewalld 2.4 には `gateway-lan-to-world`（`internal` / `home` / `trusted` �
 - [WireGuard: Conceptual Overview](https://www.wireguard.com/#cryptokey-routing)
 - [WireGuard メーリングリスト: Header / MTU sizes for Wireguard](https://lists.zx2c4.com/pipermail/wireguard/2017-December/002201.html) — 外側に足される大きさの内訳（IPv4 は 60、IPv6 は 80 で、MTU 1500 から 80 を引いた 1420 が既定）
 - Linux 6.12 のソース [`drivers/net/wireguard/send.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/send.c)（`calculate_skb_padding`。16 バイトの倍数に詰め、MTU を超えては詰めない）・[`socket.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/socket.c)（`send4`。外側の IPv4 に DF を立てない） — [回線に合わせて MTU を下げる](../wireguard.md#回線に合わせて-mtu-を下げる任意)の補足に使っている（実機のカーネルは 6.12.96）
+- クライアントが conf の `MTU` を読むところ: NetworkManager 1.56.0 の [`src/libnm-client-impl/nm-conn-utils.c`](https://github.com/NetworkManager/NetworkManager/blob/1.56.0/src/libnm-client-impl/nm-conn-utils.c)（`nm_conn_wireguard_import`）、WireGuard for Windows の [`conf/parser.go`](https://github.com/WireGuard/wireguard-windows/blob/master/conf/parser.go)、Android の公式アプリの [`config/Interface.java`](https://github.com/WireGuard/wireguard-android/blob/master/tunnel/src/main/java/com/wireguard/config/Interface.java)
 - [firewalld: Policy Objects](https://firewalld.org/2020/09/policy-objects-introduction)
 - [firewalld ソース `src/firewall/core/io/policy.py`](https://github.com/firewalld/firewalld/blob/v2.4.3/src/firewall/core/io/policy.py) — ingress/egress ゾーンの検証（同一ゾーンを拒否する規則は無い。policy 名の上限は 128 文字）
 - [nwdiag](http://blockdiag.com/en/nwdiag/) — 冒頭の構成図の記述に使っている（[付録: 構成図の再生成](#付録-構成図の再生成)）
