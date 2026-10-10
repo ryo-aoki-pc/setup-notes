@@ -66,6 +66,8 @@
 | Claude Code から Codex・Grok を呼ぶ | Claude Code にシェルで `codex review`・`grok -p` を動かさせる | 代わりの方法として載せた（使い方の基本の表） | 依存は増えない。裏で動かして状況を見る機能は無い |
 | Claude Code から Codex・Grok を呼ぶ | MCP で Codex を呼ぶ（`codex mcp-server`） | 使えない | Codex 0.154.0 で削除された |
 | Claude Code から Codex・Grok を呼ぶ | PAL MCP Server（旧 Zen MCP Server） | 採らない | 2025-12 から更新が無い。Grok は API キー（従量課金）が要る |
+| エージェントの変更を人に渡す | エージェントが自分のブランチを push し、`main` への Pull Request を作る。取り込みは人 | 採った（2026-10-10 から。AGENTS.md の規則） | リモートと、push の認証・Pull Request を作る道具（GitHub は gh）。リモートが無ければ、ブランチへのコミットまで |
+| エージェントの変更を人に渡す | push も Pull Request も人が行い、エージェントはブランチへのコミットまで | 採らない（2026-10-09 の初版の形） | 人の手間が増える。リモートの無いプロジェクトでは、今の形でも同じになる |
 | 役割を分けてレビューし合う | 書いたものとは別のモデルが、新しい会話でレビューし、人が指摘を選ぶ | 採った（分担して作業する・相互にレビューする・main に取り込む） | 3 つの契約の使用量を使う |
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
@@ -79,9 +81,11 @@
 ## 選択した方針
 
 - 規則は AGENTS.md 1 つにまとめ、3 つに同じものを読ませる。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
-- 作業場所は素の `git worktree` で分け、受け渡しはブランチへのコミットで行う。push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
+- 作業場所は素の `git worktree` で分け、worktree の間の受け渡しはブランチへのコミットで行う。そのための push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
-- `main` への取り込み・push は人だけが行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
+- エージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
+  - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
+  - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../coding-agents.md#main-に取り込む)の手順で手元で取り込んでもよい
 - GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md) など）でも同じに使えることを優先した
 
 ### 実施手順 / 手順 4〜6: 各 CLI が読む指示書
@@ -148,6 +152,13 @@
 - Codex は、sandbox の中では `.git` に書けない（`git add` で `index.lock` が作れない）。worktree でも、ふつうのチェックアウトでも同じ（検証記録）。コミットは承認して sandbox の外で動かすか、人が行う
 - Grok Build は既定で sandbox が無い。`--sandbox workspace` で絞ると、worktree の `.git` は `main` のチェックアウトの `.git/worktrees/` にあるので、コミットはできなくなるはず（確かめていない）
 - 端末から頼む Grok のレビュー（`grok --trust -p … --sandbox read-only --always-approve`）は、プラグインと同じく、読むだけの sandbox を安全の境界にした。Linux では、この sandbox は Landlock と bubblewrap で張られる。Landlock が無効なカーネル、bubblewrap 不足、拒否パスの解決失敗を分けて確認する（検証記録）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）ので、`--always-approve` を付けない
+
+### main に取り込む: 画面で取り込むとき
+
+- Pull Request を GitHub などの画面で取り込むときは、merge commit で取り込む
+  - merge commit は、エージェントのブランチのコミットをそのまま `main` の祖先に入れる。[main に取り込む](../coding-agents.md#main-に取り込む)の手順 7 の `git merge --ff-only main` で、各 worktree が `main` に追いつける
+  - squash と rebase は、同じ変更の新しいコミットを `main` に作る。エージェントのブランチのコミットは `main` に入らないので、`--ff-only` は `Not possible to fast-forward` で止まる（検証記録）
+- 手元で取り込んで `main` を push したときは、Pull Request が開いたまま残ることがある。そのときは閉じる（ホスティングがマージ済みと見なすかどうかは、確かめていない）
 
 ### スマートフォンから指示する
 

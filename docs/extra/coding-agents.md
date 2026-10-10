@@ -156,4 +156,7 @@
 - **`/grok-build:check` は、ログインしていなくても ready と出る**（grok-build のプラグイン 0.2.1 と Grok Build 1.0.50。`grok models` の終了コードで判定するため）。ログインは `grok models` の表示で確かめる
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない
 - **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ai-エージェントとプラグインを消す)）
+- **エージェントの push と Pull Request には、そのホストの認証が要る**: エージェントは、動いているユーザーの git の認証で push し、Pull Request は gh で作る。GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](../almalinux-setup.md#github-cli)・[Windows 11 の初期設定の「GitHub CLI」](../windows-setup.md#github-cli)でログインしておく（git の HTTPS の認証は、AlmaLinux 10 は gh の `Authenticate Git with your GitHub credentials?`、Windows 11 は Git Credential Manager）。Codex は、push と Pull Request の作成にも sandbox の外での実行の承認が要る
+- **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[forgejo.md の使い方の基本](../forgejo.md#使い方の基本)）
+- **画面で取り込むときは merge commit で**: squash と rebase で取り込むと、各 worktree の `git merge --ff-only main` が通らなくなる（[参考資料](../reference/coding-agents.md#main-に取り込む-画面で取り込むとき)）
 - **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../coding-agents.md#main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）

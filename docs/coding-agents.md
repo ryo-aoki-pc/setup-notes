@@ -9,11 +9,12 @@
 > - この節は AlmaLinux 10 の bash に、自分のユーザーで貼る
 > - 前提: [AlmaLinux 10 の初期設定](almalinux-setup.md)の[Git](almalinux-setup.md#git)と、[Claude Code](almalinux-setup.md#claude-code)から[Codex・Grok のプラグイン](almalinux-setup.md#codexgrok-のプラグイン)までを通し、3 つのエージェントにログインしてある（`init.defaultBranch` が `main`。2 つのプラグインと、それが使う Node.js・bubblewrap も入っている）
 > - 前提: 共同作業させるプロジェクトが git のリポジトリで、基準のブランチが `main`（ほかの名前のときの読み替えは[参考資料](reference/coding-agents.md#main-でないブランチを基準にするとき)）
+> - 前提: リモートがあるなら、そこへ push できる認証と、Pull Request を作る道具がある（GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)の gh でログインしてある）
 > - **手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- できあがる形: 人は `main`、Claude Code・Codex・Grok Build はそれぞれの worktree とブランチで作業し、3 つが同じ規則（AGENTS.md）を読む。Claude Code からは、OpenAI と xAI の公式のプラグインで、Codex と Grok にレビューや作業を頼める
+- できあがる形: 人は `main`、Claude Code・Codex・Grok Build はそれぞれの worktree とブランチで作業し、3 つが同じ規則（AGENTS.md）を読む。エージェントは、コミットした自分のブランチを push し、`main` への Pull Request を作る（リモートがあるとき）。`main` への取り込みは人が行う。Claude Code からは、OpenAI と xAI の公式のプラグインで、Codex と Grok にレビューや作業を頼める
 - 手順の後: 役割と打つコマンドは[使い方の基本](#使い方の基本)。作業の流れは[分担して作業する](#分担して作業する) → [相互にレビューする](#相互にレビューする) → [main に取り込む](#main-に取り込む)。スマートフォンから指示するなら[スマートフォンから指示する](#スマートフォンから指示する)。以後は[更新](#更新)・[ロールバック](extra/coding-agents.md#ロールバック)
 
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
@@ -85,10 +86,10 @@
    このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担と `main` への取り込みは人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
-   - 今のブランチにだけコミットする。`main` にはコミットしない
-   - `main` への取り込み・push・Pull Request の作成・ブランチの削除は人が行う。自分のブランチに `main` を取り込むのは、頼まれたときだけ
+   - 今のブランチにだけコミットする。`main` にはコミットも push もしない
    - 頼まれた範囲のファイルだけを変える。範囲の外を変えるときは、変える前に理由を書いて確かめる
    - 終わったら、テストとリンターを通してから、目的ごとにコミットする。通らなければコミットせずに、結果を報告する
+   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。`main` への取り込み（マージ）とブランチの削除は人が行う。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
    - 秘密情報（`.env`・鍵・トークン・パスワード）を読まない・書かない・出力しない
    - レビューを頼まれたら、ファイルを変えずに、指摘を「重大度・場所（ファイル:行）・理由・直し方」で挙げる
    - ほかの担当の変更は、`git diff main...agent/codex` のように git で読む（ほかの worktree へ移らない）
@@ -182,10 +183,12 @@
 
 | だれ | 主な役割 | 作業する場所 | ブランチ |
 |---|---|---|---|
-| 人 | 分担を決める・テスト・`main` への取り込み・push | `<PROJECT_DIR>` | `main` |
+| 人 | 分担を決める・テスト・`main` への取り込み（Pull Request のマージ）・`main` の push | `<PROJECT_DIR>` | `main` |
 | Claude Code | 実装の主担当。Codex と Grok にレビューと作業を頼む窓口（スマートフォンからの入口も） | `<WT_ROOT>/claude` | `agent/claude` |
 | Codex | レビュー、別の実装 | `<WT_ROOT>/codex` | `agent/codex` |
 | Grok Build | 調べもの（Web の検索）、別の目のレビュー、別の実装 | `<WT_ROOT>/grok` | `agent/grok` |
+
+- 3 つのエージェントは、コミットしたら自分のブランチ（`agent/<名前>`）を push し、`main` への Pull Request を作る（AGENTS.md の規則。リモートがあるとき）
 
 **Claude Code の画面（スマートフォンからも）で打つプラグインのコマンド**
 
@@ -218,7 +221,7 @@
 
 | 送る文 | 起きること |
 |---|---|
-| 「ログインの画面の入力チェックを足して。テストを通して、コミットして」 | Claude が自分の worktree で実装し、`agent/claude` にコミットする |
+| 「ログインの画面の入力チェックを足して。テストを通して、コミットして」 | Claude が自分の worktree で実装し、`agent/claude` にコミットし、push して Pull Request を作る |
 | `/codex:review --base main --wait` | Codex が Claude の変更をレビューし、結果が会話に出る |
 | `/grok-build:review --base main --wait` | Grok が同じ変更をレビューする |
 | 「Codex の指摘のうち、重大なものだけ直してコミットして」 | Claude が指摘を直す |
@@ -266,7 +269,7 @@
 1. 人が分担を決める。
 
    - 3 つに同じファイルを触らせない（モジュールやディレクトリで分ける）
-   - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットすることを書く
+   - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットし、push して Pull Request を作ることを書く
    - 振り方の目安は、[使い方の基本](#使い方の基本)の役割の表
 
 1. `claude` の worktree の窓で Claude Code を起動し、担当の作業を頼む。
@@ -286,6 +289,7 @@
 
    - 初めての worktree では作業場所の確認が出る。`codex` の worktree であることを確かめて進む
    - **Codex は sandbox の中では `git add` も `git commit` もできない**。sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する。許可しないなら、終わった後に人がその窓でコミットする
+   - push と Pull Request の作成も、sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する
 
 1. `grok` の worktree の窓で Grok を起動し、担当の作業を頼む。
 
@@ -307,6 +311,8 @@
    - エージェントを終えてから貼る（Claude Code は `/exit`、Codex と Grok は `/quit`）
    - 1 つ目のコマンドに、この作業のコミットが出る。2 つ目は何も出ない
    - 2 つ目に何か出たら、コミットされていない変更が残っている。エージェントにコミットさせるか、人がコミットする
+   - リモートがあれば、ホスティングの画面に、それぞれのブランチの Pull Request が出る
+   - Pull Request が無ければ、担当のエージェントに作らせるか、人が作る
 
 ---
 
@@ -353,6 +359,9 @@
 
 - 人が行う。エージェントには `main` を変えさせない（AGENTS.md の規則）
 - 両 OS で同じコマンド。この節の手順 2〜6 は `main` の窓（プロジェクト）、手順 7 は各 worktree の窓に貼る
+- Pull Request は、GitHub などの画面で取り込んでもよい
+- 画面で取り込むときは、merge commit にする（squash と rebase にしない。この節の手順 7 の `--ff-only` が通らなくなる）
+- 画面で取り込んだときは、この節の手順 2〜6 の代わりに、`main` の窓で `git pull --ff-only` する
 
 1. それぞれの worktree の窓で、プロジェクトのテストを通す。
 
@@ -418,7 +427,8 @@
    - エージェントを終えてから貼る
    - `Fast-forward` か `Already up to date.` が出ればよい。次の分担はここから始める
    - `Not possible to fast-forward` と出たら、その worktree に、`main` に取り込んでいないコミットがある（この節の手順 3〜5 で取り込んでから、もう一度貼る）
-   - リモートがあれば、`main` の窓で `git push` する（エージェントには push させない）
+   - この節の手順 3〜5 で取り込んだときは、`main` の窓で `git push` する（`main` への push は人が行う）
+   - 取り込んだブランチの Pull Request が開いたまま残ったら、閉じる
 
 ---
 
@@ -466,6 +476,7 @@
 
    - [main に取り込む](#main-に取り込む)の手順を、`main` の窓で行う
    - 取り込んだら、Claude の worktree も同じ節の手順 7 で `main` にそろえる（Remote Control のセッションは動かしたままでよい）
+   - Pull Request を画面で取り込んだときは、`main` の窓で `git pull --ff-only` してから、同じ節の手順 7 でそろえる
 
 ---
 
@@ -483,6 +494,7 @@
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
 > - 前提: [Windows 11 の初期設定](windows-setup.md)の[Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)と、[Claude Code](windows-setup.md#claude-code)から[Codex・Grok のプラグイン](windows-setup.md#codexgrok-のプラグイン)までを通し、3 つのエージェントにログインしてある
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）と、「アプリを入れる」の手順 1・2（scoop）
+> - 前提: リモートがあるなら、そこへ push できる認証と、Pull Request を作る道具がある（GitHub は、[Windows 11 の初期設定の「GitHub CLI」](windows-setup.md#github-cli)の gh でログインしてある）
 > - **この節の手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定した PowerShell に貼る
@@ -551,10 +563,10 @@
    このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担と `main` への取り込みは人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
-   - 今のブランチにだけコミットする。`main` にはコミットしない
-   - `main` への取り込み・push・Pull Request の作成・ブランチの削除は人が行う。自分のブランチに `main` を取り込むのは、頼まれたときだけ
+   - 今のブランチにだけコミットする。`main` にはコミットも push もしない
    - 頼まれた範囲のファイルだけを変える。範囲の外を変えるときは、変える前に理由を書いて確かめる
    - 終わったら、テストとリンターを通してから、目的ごとにコミットする。通らなければコミットせずに、結果を報告する
+   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。`main` への取り込み（マージ）とブランチの削除は人が行う。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
    - 秘密情報（`.env`・鍵・トークン・パスワード）を読まない・書かない・出力しない
    - レビューを頼まれたら、ファイルを変えずに、指摘を「重大度・場所（ファイル:行）・理由・直し方」で挙げる
    - ほかの担当の変更は、`git diff main...agent/codex` のように git で読む（ほかの worktree へ移らない）
