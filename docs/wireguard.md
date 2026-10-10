@@ -14,12 +14,12 @@
 
 - [site.env を作る](#siteenv-を作る)の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 手順の後: クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](extra/wireguard.md#全部消すロールバック)
+- 手順の後: 大きい通信だけ遅い・止まるなら[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)、クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](extra/wireguard.md#全部消すロールバック)
 
 > [!WARNING]
 > **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる。**
 >
-> - 該当するのは、[鍵を作って適用する](#鍵を作って適用する)の手順 5、[クライアントを登録する](#クライアントを登録する)の手順 3 と、[クライアントを削除する](#クライアントを削除する)の `apply`
+> - 該当するのは、[鍵を作って適用する](#鍵を作って適用する)の手順 5、[クライアントを登録する](#クライアントを登録する)の手順 3 と、[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)・[クライアントを削除する](#クライアントを削除する)の `apply`
 > - 切り離して実行する方法は、[wireguard-road-warrior.md の落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)にある
 
 ### site.env を作る
@@ -184,6 +184,90 @@
      - `tracepath -n <相手拠点の LAN のホスト>`
    - **逆方向（Client B → Client A、拠点の LAN → クライアント）も必ず確認する**
    - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [検証記録の症状と原因の対応](verification/wireguard.md#症状と原因の対応実測) を見る
+
+---
+
+## 回線に合わせて MTU を下げる（任意）
+
+- 小さい通信は通るのに、大きい通信だけ遅い・止まるときに行う（ssh の画面の描き直し、ファイル転送、一部の HTTPS）
+- 両拠点の WG ホストで行い、`WG_MTU` は両拠点で同じ値にする
+- **トンネル越しに ssh して作業している場合、この節の手順 6 の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
+- クライアントの MTU は、この節では変わらない（→ [注意点の MTU](extra/wireguard.md#mtu)）
+- → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-1-補足-wg_mtu-に書く値)
+
+1. 両拠点の WG ホストで、回線の MTU と今の `wg0` の MTU を調べる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   tracepath -n -m 8 1.1.1.1 | grep -o 'pmtu [0-9]*' | tail -n 1
+   ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   ```
+
+   - `pmtu` の値を、両拠点の分とも控える
+   - `WG_MTU` に書く値は、両拠点の `pmtu` の小さいほうから 60 を引いた値以下にする（1454 なら 1394 以下。例: `1380`）
+   - `Endpoint` が IPv6 のアドレスのときは、60 ではなく 80 を引く
+   - その値が今の `wg0` の `mtu` 以上なら、下げなくてよい（この節はここで終える）
+
+1. `site.env` の `WG_MTU` に、この節の手順 1 で決めた値を書く。
+
+   ```bash
+   vi ~/wg/site.env                      # WG_MTU= の右に値を書く（例: WG_MTU=1380）
+   ```
+
+   - 書けたら、保存して `vi` を閉じる
+
+1. 両拠点の `~/wg/site.env` を、`WG_MTU` を書いた同じ内容にそろえる。
+
+   - **次の手順は、両拠点でそろえてから貼る**
+
+1. トンネルを切らずに先に効かせるときだけ、両拠点の WG ホストで動いている `wg0` の MTU を下げる。
+
+   ```bash
+   . ~/wg/site.env
+   if [ -z "${WG_MTU}" ]; then echo '中断: site.env の WG_MTU が空のまま' >&2; else
+     sudo ip link set dev wg0 mtu "${WG_MTU}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   fi
+   ```
+
+   - `mtu` が `WG_MTU` の値になっていればよい
+   - この節の手順 5・6 も、切れてよいときに必ず行う（行わないと、`wg-quick@wg0` の restart や OS の再起動で元の MTU に戻る）
+
+1. 両拠点の WG ホストで、`apply` の実行予定の内容を見る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
+   ```
+
+   - `[Interface]` に `MTU =` の行があり、値がこの節の手順 2 で書いたものになっている
+   - **次の手順は、表示された内容でよいか確かめてから貼る**
+
+1. 両拠点の WG ホストで、設定を適用する。
+
+   ```bash
+   sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 拠点 B のホストでは B
+   ```
+
+   - `wg-quick@wg0 を起動しました` と出ればよい
+   - **注意**: トンネル越しの ssh で作業していると、`apply` の restart で切れる（冒頭の警告）
+
+1. 両拠点の WG ホストで、`wg0` の MTU と、相手拠点への ping の損失を確かめる。
+
+   ```bash
+   . ~/wg/site.env
+   printf '\n\033[7m 確認 \033[0m\n'
+   ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   ping -c 100 -i 0.2 -q "$WG_B_TUN_IP"                                                        # 拠点 B のホストでは WG_A_TUN_IP
+   ping -c 100 -i 0.2 -q -M do -s "$(( $(cat /sys/class/net/wg0/mtu) - 28 ))" "$WG_B_TUN_IP"   # 同上
+   ```
+
+   - `mtu` が `WG_MTU` の値になっている
+   - 2 つの ping が、どちらも `0% packet loss`
+   - 後ろの ping（`wg0` の MTU いっぱいの大きさ）だけ落ちるなら、`WG_MTU` をさらに下げて、この節の手順 2 からやり直す
+   - `WG_IFACE` を変えている場合は、この節の `wg0` を読み替える
 
 ---
 
@@ -373,3 +457,4 @@
 | `${WG_IFACE}` / `${WG_FW_ZONE}` | インターフェース名 / 旧レイアウトで `wg0` を入れていた専用ゾーン名（残っていれば `apply` / `remove` が消す。[移行](reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)） |
 | `${WG_A_CLIENT_NET}` / `${WG_B_CLIENT_NET}` | 各拠点に接続するクライアントに割り当てるトンネル内のアドレス帯（**LAN・`${WG_TUNNEL_NET}`・互いに重複不可**、`/30` またはそれより広く。クライアントを受けない拠点は空） |
 | `${WG_CLIENT_DNS}` | クライアント用 conf に書く DNS サーバー（任意） |
+| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)の手順 1） |
