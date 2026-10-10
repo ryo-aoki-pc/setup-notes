@@ -8,7 +8,7 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Windows の OpenSSH サーバー](docs/windows-openssh-server.md)・[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[ホットキーの調査](docs/windows-hotkey-conflict.md)は Windows 11 だけ、[Git](docs/git.md) は Windows 11 の Git for Windows も、[Syncthing](docs/syncthing.md)・[HackGen Console NF](docs/hackgen.md)・[WezTerm](docs/wezterm-nightly.md)・[Claude Code](docs/claude-code.md)・[Codex CLI](docs/codex.md)・[Firefox](docs/firefox.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard Road Warrior](docs/wireguard-road-warrior.md) は Windows 11 も）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
   - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
@@ -98,6 +98,12 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 |---|---|---|
 | [GNOME Tweaks](docs/tool-catalog.md#gnomeシステム) | GNOME の細かい設定（GUI） | EPEL |
 | [Extension Manager](docs/tool-catalog.md#gnomeシステム) | GNOME 拡張の検索と導入（GUI） | Flathub |
+
+### Windows の入力の切り分け
+
+| 手順書 | 調べるもの | 使うもの |
+|---|---|---|
+| [ホットキーを使用しているアプリを調べる（Windows 11）](docs/windows-hotkey-conflict.md) | 指定したグローバルホットキーに反応するアプリと、キー設定の競合 | Hotkey Screener。表示されない場合は入力条件・常駐アプリの設定、必要なときだけ登録可否の確認 |
 
 ### リモート接続・VPN
 

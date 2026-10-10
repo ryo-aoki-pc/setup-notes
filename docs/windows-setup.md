@@ -1673,6 +1673,7 @@
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
+- **想定した割り当て以外でショートカットキーが効かないとき**: メニューから同じ操作が動くなら、[ホットキーを使用しているアプリを調べる手順](windows-hotkey-conflict.md)で対象アプリと常駐アプリの競合を切り分ける
 - **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（手順 30）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、手順 16〜19 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（手順 33・34）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。手順 27・32〜34 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（手順 26）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、手順 17 の `ClassicMenu` と手順 26 の `reg.exe query` で、設定が残っているかを見る。手順 25・27・32 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの

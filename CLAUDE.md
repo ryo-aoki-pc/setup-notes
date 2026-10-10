@@ -168,6 +168,8 @@ GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `d
 - `scripts/gnome-gui.py` — claude-code-gui.md で使う、ヘッドレスのセッションを撮って操作する Python（`#!/usr/bin/python3`。Homebrew の `python3` には `gi` が無い）。`shot` は ScreenCast の `RecordMonitor` → PipeWire（`pipewiresrc path=`。`target-object=` はノードの ID を受け付けなかった）→ GStreamer で PNG。`key` / `type` / `move` / `click` / `scroll` は RemoteDesktop の Notify* で、コマンドごとにセッションを作る（作った直後と止める直前の入力が捨てられたので、`Control_L` と動かない相対移動を先に送り、前後に 0.3 秒置く）。`windows` は AT-SPI、`launch` は `.desktop` の `Exec` を `systemd-run --user` の主のプロセスにする（`gio launch` を挟むと、`gio` が終わったときにアプリも止められた）
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
 
+- `docs/windows-hotkey-conflict.md` — Windows 11 で Hotkey Screener の登録一覧から対象キーを選び、反応するアプリを調べる手順。初回のダウンロード・展開を別節にし、主手順は起動・対象選択・検出・使用アプリの確認・設定の見直しと確認・記録と終了の 6 手順。表示されない場合の一般的な切り分けと、PowerShell の登録可否の確認は任意の補助にする。実機の確認範囲は `docs/verification/windows-hotkey-conflict.md`、検出と登録確認の限界・参照資料は `docs/reference/windows-hotkey-conflict.md` に置く
+
 ### 手順書の構造
 
 各手順書は同じ骨格で書いてある。新しい手順書もこれに合わせる。
