@@ -190,9 +190,9 @@
 ## 回線に合わせて MTU を下げる（任意）
 
 - 小さい通信は通るのに、大きい通信だけ遅い・止まるときに行う（ssh の画面の描き直し、ファイル転送、一部の HTTPS）
-- 両拠点の WG ホストで行い、`WG_MTU` は両拠点で同じ値にする
+- この節の手順 1〜7 は両拠点の WG ホストで、手順 8 はクライアントで行う。`WG_MTU` は両拠点で同じ値にする
 - **トンネル越しに ssh して作業している場合、この節の手順 6 の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
-- クライアントの MTU は、この節では変わらない（→ [注意点の MTU](extra/wireguard.md#mtu)）
+- 配布済みのクライアントの MTU は、`apply` では変わらない（この節の手順 8 で入れる。→ [注意点の MTU](extra/wireguard.md#mtu)）
 - → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-1-補足-wg_mtu-に書く値)
 
 1. 両拠点の WG ホストで、回線の MTU と今の `wg0` の MTU を調べる。
@@ -268,6 +268,14 @@
    - 2 つの ping が、どちらも `0% packet loss`
    - 後ろの ping（`wg0` の MTU いっぱいの大きさ）だけ落ちるなら、`WG_MTU` をさらに下げて、この節の手順 2 からやり直す
    - `WG_IFACE` を変えている場合は、この節の `wg0` を読み替える
+
+1. 配布済みのクライアントに、この節の手順 2 と同じ値の MTU を入れる。
+
+   - この節の手順 2 より後に `client add` で登録したクライアントは、conf に同じ `MTU =` が入っているので、何もしなくてよい
+   - AlmaLinux 10 の PC は、`sudo nmcli connection modify wg0 wireguard.mtu 1380` の後、`sudo nmcli connection down wg0` と `sudo nmcli connection up wg0`（`1380` は手順 2 の値に読み替える）
+   - Windows 11 の PC は、トンネルを切ってから、WireGuard の窓の「編集」で `[Interface]` に `MTU = 1380` を足す（同じく読み替える）
+   - スマートフォンは、公式アプリのトンネルの編集で、インターフェースの MTU に同じ値を入れる
+   - PC の注意は、[road-warrior の注意点](extra/wireguard-road-warrior.md#注意点)の「MTU」
 
 ---
 
@@ -457,4 +465,4 @@
 | `${WG_IFACE}` / `${WG_FW_ZONE}` | インターフェース名 / 旧レイアウトで `wg0` を入れていた専用ゾーン名（残っていれば `apply` / `remove` が消す。[移行](reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)） |
 | `${WG_A_CLIENT_NET}` / `${WG_B_CLIENT_NET}` | 各拠点に接続するクライアントに割り当てるトンネル内のアドレス帯（**LAN・`${WG_TUNNEL_NET}`・互いに重複不可**、`/30` またはそれより広く。クライアントを受けない拠点は空） |
 | `${WG_CLIENT_DNS}` | クライアント用 conf に書く DNS サーバー（任意） |
-| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)の手順 1） |
+| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)の手順 1）。値があれば、`client add` が作るクライアント用 conf にも同じ `MTU =` を書く |

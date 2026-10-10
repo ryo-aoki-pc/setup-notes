@@ -474,6 +474,8 @@ render_client_conf() {
   echo "# Client $1 (site $L)"
   echo "Address = $2/32"
   echo "PrivateKey = $3"
+  # 拠点の回線に合わせて下げた MTU は、その拠点へつなぐクライアントにも要る
+  [[ -z $WG_MTU ]] || echo "MTU = $WG_MTU"
   [[ -z $WG_CLIENT_DNS ]] || echo "DNS = $WG_CLIENT_DNS"
   echo
   echo "[Peer]"
