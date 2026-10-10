@@ -249,7 +249,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - 役割が違うので、併用できる
 - [Git](docs/git.md) は git 本体と `~/.gitconfig` の基本の設定（pull は rebase と autostash、改行を変換しない、推奨の設定）。AlmaLinux 10 と Windows 11 の Git for Windows で同じ設定にする
-- [Forgejo](docs/forgejo.md) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。[使い方の基本](docs/forgejo.md#使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
+- [Forgejo](docs/forgejo.md) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。公式の最新安定版を入れ、毎日自動で最新版へ更新する（失敗したら自動で戻す）。[使い方の基本](docs/forgejo.md#使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
 - `merge.conflictStyle zdiff3` は、Git と git-delta の両方の手順書で入れる（同じ値なので、どちらを先に通してもよい）
 - lazygit は git の `core.pager` を読まない。lazygit でも delta で差分を出すなら、[git-delta.md の任意節](docs/git-delta.md#lazygit-と組み合わせる任意)で `git.diffRenderers` を足す
 
@@ -259,7 +259,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [lazygit](docs/lazygit.md) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の extras | `~/.config/lazygit/config.yml`。Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml` |
 | [git-delta](docs/git-delta.md) | `git diff` / `show` / `log -p` の表示（ページャ） | `delta`（formula 名は `git-delta`。ふだんは git が呼ぶ） | Homebrew（RPM 無し）。Windows 11 は scoop の main（`delta`） | `~/.gitconfig`（`git config --global` で書く。Windows 11 は `C:\Users\<WIN_USER>\.gitconfig` で、Git Bash・PowerShell・cmd の git が同じものを読む） |
 | [GitHub CLI](docs/gh.md) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い）。Windows 11 は scoop の main（`gh`） | `~/.config/gh/hosts.yml`（トークンは OS の資格情報ストアを優先し、使えない場合はファイルに平文保存）。Windows 11 は `%APPDATA%\GitHub CLI`（トークンは資格情報マネージャーを優先） |
-| [Forgejo](docs/forgejo.md) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo` |
+| [Forgejo](docs/forgejo.md) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo`。自動更新は `~/.config/systemd/user/forgejo-auto-update.timer` と `~/.local/bin/forgejo-auto-update` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|

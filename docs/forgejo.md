@@ -11,7 +11,7 @@
 
 - 上から順にコードブロックを貼る
 - [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)
-- 通常系列の最新安定版を使う。導入する版を指定し、以後は[更新](#更新)で公式の最新安定版へ進める
+- 手順 2 で公式の最新安定版を調べて入れる。手順 24〜26 で、毎日最新の安定版へ自動で更新するタイマーを有効にする（[更新](#更新)）
 - 手順の後: [使い方の基本](#使い方の基本)・[設定ファイル](#設定ファイル)・[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)・[更新](#更新)・[ロールバック](#ロールバック)
 - Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
 - 初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない。インターネット向けのポート転送は設定しない
@@ -42,9 +42,10 @@
    - ポートを変えたら、別の PC で打つ手順 6・14・16 の番号も同じにする
    - 空のままなら先へ進まない
 
-1. 値と前提を確かめ、公式の rootless イメージを取得する。
+1. 値と前提を確かめ、公式の最新安定版の rootless イメージを取得する。
 
    ```bash
+   unset FORGEJO_VERSION
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${LAN_SUBNET}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
@@ -77,24 +78,51 @@
        sudo firewall-cmd --get-active-zones &&
        sudo firewall-cmd --zone="${FW_ZONE}" --list-all &&
        sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-all &&
-       podman pull codeberg.org/forgejo/forgejo:16.0.5-rootless &&
-       podman run --rm --entrypoint /usr/local/bin/gitea codeberg.org/forgejo/forgejo:16.0.5-rootless --version
+       FORGEJO_VERSION=$(/usr/bin/python3 - <<'PY'
+   import json
+   import re
+   import urllib.request
+
+
+   def latest_version():
+       url = 'https://codeberg.org/api/v1/repos/forgejo/forgejo/releases?draft=false&pre-release=false&limit=50'
+       with urllib.request.urlopen(url, timeout=30) as response:
+           releases = json.load(response)
+       versions = []
+       for release in releases:
+           match = re.fullmatch(r'v(\d+)\.(\d+)\.(\d+)', release['tag_name'])
+           if match and not release['draft'] and not release['prerelease']:
+               versions.append(tuple(int(part) for part in match.groups()))
+       return '.'.join(str(part) for part in max(versions))
+
+
+   print(latest_version())
+   PY
+   ) &&
+       printf '導入する版: %s\n' "${FORGEJO_VERSION}" &&
+       podman pull "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless" &&
+       podman run --rm --entrypoint /usr/local/bin/gitea "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless" --version
      fi
    else
      echo '中断: 手順 1 の値を直す' >&2
    fi
    ```
 
-   - 値の確認が `OK` で、firewalld が `running`、Forgejo の版が表示されればよい
+   - 値の確認が `OK` で、firewalld が `running`、`導入する版:` と同じ番号の Forgejo の版が表示されればよい
+   - 版は、Codeberg の公式リリースの一覧から、下書きとプレリリースを除いた最も大きい番号を選ぶ
+   - 調べられないときは `urllib.error.URLError` などを表示し、何も取得せずに止まる。サーバーから `codeberg.org` へ HTTPS で接続できるか確かめてから貼り直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、手順 1 の値を直す
    - zone の `target` が `ACCEPT`、zone が `trusted`、または Web・Git 用 SSH ポートへの広い許可があれば、公開前に管理者へ確認する
-   - **`sudo podman` は使わない**。固定した版の更新は後ろの[更新](#更新)で行う
+   - **`sudo podman` は使わない**
+   - **手順 3 は、同じシェルに続けて貼る**（この手順で調べた `FORGEJO_VERSION` を使う）
 
 1. 既存の設定やデータが無いことを確かめ、localhost 用の Quadlet を置く。
 
    ```bash
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
+   elif [[ ! ${FORGEJO_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+     echo '中断: 同じシェルで手順 2 を通す' >&2
    elif [ -e ~/.config/containers/systemd/forgejo.container ] || [ -L ~/.config/containers/systemd/forgejo.container ] ||
         [ -e ~/.config/containers/systemd/forgejo.container.d ] || [ -L ~/.config/containers/systemd/forgejo.container.d ] ||
         [ -e ~/.config/systemd/user/forgejo.service ] || [ -L ~/.config/systemd/user/forgejo.service ] ||
@@ -110,7 +138,7 @@
    Description=Forgejo
 
    [Container]
-   Image=codeberg.org/forgejo/forgejo:16.0.5-rootless
+   Image=codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless
    ContainerName=forgejo
    UserNS=keep-id:uid=1000,gid=1000
    User=1000
@@ -148,7 +176,8 @@
 
    - データのディレクトリは自分のユーザーが所有する。`:Z` はこの専用ディレクトリにだけ付ける
    - **中断したときは手順 4 へ進まない**。既存の構築を使うか、必要なデータを退避してからやり直す
-   - `INSTALL_LOCK` と `AutoUpdate` は定義に追加しない
+   - イメージの行には、手順 2 で調べた版の番号が入る
+   - `INSTALL_LOCK` と `AutoUpdate` は定義に追加しない。Podman の自動更新は使わず、手順 24〜26 の自動更新で版を上げる
 
 1. 定義を読み直し、localhost でサービスを起動する。
 
@@ -431,6 +460,386 @@
 
    - LAN または VPN の URL で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
    - 作業場所で `git fetch` を実行する。許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことも確かめる
+   - **次の手順は、Web と Git を確かめてから貼る**
+
+1. 自動更新のプログラムを置く。
+
+   ```bash
+   if [ ! -f ~/.config/containers/systemd/forgejo.container ] ||
+      ! grep -qx '# setup-notes: forgejo' ~/.config/containers/systemd/forgejo.container; then
+     echo '中断: この手順で作った Quadlet が無い' >&2
+   else
+     mkdir -p ~/.local/bin &&
+     (umask 077; cat > ~/.local/bin/forgejo-auto-update <<'EOF'
+   #!/usr/bin/python3 -I
+   # setup-notes: forgejo
+   # Forgejo を公式の最新安定版へ自動で更新する（docs/forgejo.md の手順 24〜26）。
+   # 新しい版があれば、停止バックアップ → イメージの行の更新 → 起動 → 確認を行う。
+   # 確認に失敗したら直前のバックアップへ戻し、その版を保留する。
+   # 終了コード: 0 最新・更新済み・停止中で何もしない / 1 変更せずに中断・保留中 / 2 戻して保留した / 3 戻せなかった
+   import fcntl
+   import http.client
+   import json
+   import os
+   from pathlib import Path
+   import re
+   import shutil
+   import socket
+   import subprocess
+   import sys
+   import tempfile
+   import time
+   import urllib.request
+
+   HOME = Path.home()
+   QUADLET = HOME / '.config/containers/systemd/forgejo.container'
+   DROPIN = HOME / '.config/containers/systemd/forgejo.container.d'
+   DATA = HOME / '.local/share/forgejo'
+   BACKUPS = HOME / '.local/state/forgejo-backups'
+   STATE = HOME / '.local/state/forgejo-auto-update'
+   SKIP = STATE / 'skip-version'
+   IMAGE = 'codeberg.org/forgejo/forgejo:{}-rootless'
+   IMAGE_LINE = re.compile(r'^Image=codeberg\.org/forgejo/forgejo:(\d+\.\d+\.\d+)-rootless$', re.M)
+   KEEP_BACKUPS = 3
+
+
+   class Failure(Exception):
+       pass
+
+
+   def latest_version():
+       url = 'https://codeberg.org/api/v1/repos/forgejo/forgejo/releases?draft=false&pre-release=false&limit=50'
+       with urllib.request.urlopen(url, timeout=30) as response:
+           releases = json.load(response)
+       versions = []
+       for release in releases:
+           match = re.fullmatch(r'v(\d+)\.(\d+)\.(\d+)', release['tag_name'])
+           if match and not release['draft'] and not release['prerelease']:
+               versions.append(tuple(int(part) for part in match.groups()))
+       return '.'.join(str(part) for part in max(versions))
+
+
+   def parse(version):
+       return tuple(int(part) for part in version.split('.'))
+
+
+   def systemctl(*args, check=True, timeout=600):
+       return subprocess.run(['systemctl', '--user', *args], check=check, timeout=timeout,
+                             capture_output=True, text=True).stdout.strip()
+
+
+   def unit_state():
+       return systemctl('show', '-p', 'ActiveState', '--value', 'forgejo.service')
+
+
+   def container_exists():
+       return subprocess.run(['podman', 'container', 'exists', 'forgejo'], timeout=60).returncode == 0
+
+
+   def binary_version(output):
+       match = re.search(r'version (\d+\.\d+\.\d+)', output)
+       return match.group(1) if match else ''
+
+
+   def endpoints(text):
+       web = re.findall(r'^PublishPort=([0-9.]+):(\d+):3000$', text, re.M)
+       ssh = re.findall(r'^PublishPort=([0-9.]+):(\d+):2222$', text, re.M)
+       if len(web) != 1 or len(ssh) != 1:
+           raise Failure('Quadlet の Web と Git 用 SSH の PublishPort が 1 行ずつではない')
+       return web[0], ssh[0]
+
+
+   def write_quadlet(text):
+       descriptor, temporary = tempfile.mkstemp(dir=QUADLET.parent, prefix='.forgejo.', suffix='.tmp')
+       with os.fdopen(descriptor, 'w') as stream:
+           stream.write(text)
+           stream.flush()
+           os.fsync(stream.fileno())
+       os.replace(temporary, QUADLET)
+
+
+   def stop():
+       systemctl('stop', 'forgejo.service')
+       for _ in range(60):
+           if unit_state() in ('inactive', 'failed') and not container_exists():
+               return
+           time.sleep(1)
+       raise Failure('forgejo.service とコンテナが止まらない')
+
+
+   def start():
+       systemctl('daemon-reload')
+       systemctl('reset-failed', 'forgejo.service', check=False)
+       systemctl('start', 'forgejo.service')
+
+
+   def check(text, version):
+       (web_host, web_port), (ssh_host, ssh_port) = endpoints(text)
+       opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+       deadline = time.monotonic() + 900
+       while True:
+           state = unit_state()
+           if state == 'failed':
+               raise Failure('forgejo.service が failed になった')
+           if state == 'active':
+               try:
+                   with opener.open(f'http://{web_host}:{web_port}/api/healthz', timeout=10) as response:
+                       status = json.load(response).get('status')
+                   with socket.create_connection((ssh_host, int(ssh_port)), timeout=10) as connection:
+                       banner = connection.recv(64)
+                   if status == 'pass' and banner.startswith(b'SSH-2.0-'):
+                       break
+               except (OSError, http.client.HTTPException, ValueError):
+                   pass
+           if time.monotonic() > deadline:
+               raise Failure('15 分待っても、Web の /api/healthz と Git 用 SSH が応答しない')
+           time.sleep(5)
+       output = subprocess.run(['podman', 'exec', 'forgejo', '/usr/local/bin/gitea', '--version'],
+                               check=True, timeout=60, capture_output=True, text=True).stdout
+       if binary_version(output) != version:
+           raise Failure(f'動いている版が {version} ではない: {output.strip()}')
+
+
+   def doctor():
+       for attempt in range(3):
+           if attempt:
+               time.sleep(30)
+           result = subprocess.run(['podman', 'exec', 'forgejo', '/usr/local/bin/gitea',
+                                    '--config', '/var/lib/gitea/custom/conf/app.ini', 'doctor', 'check', '--all'],
+                                   timeout=600, capture_output=True, text=True)
+           lines = (result.stdout + result.stderr).strip().splitlines()
+           if result.returncode == 0:
+               print('doctor check --all: ' + (lines[-1] if lines else 'OK'))
+               return
+           print('\n'.join(['doctor check --all が失敗した:', *lines[-30:]]))
+       raise Failure('doctor check --all が 3 回とも失敗した')
+
+
+   def backup(version):
+       name = 'forgejo-auto-{}-{}.tar.gz'.format(time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()), version)
+       temporary = BACKUPS / f'.{name}.tmp'
+       subprocess.run(['tar', '--create', '--gzip', f'--file={temporary}', f'--directory={HOME}',
+                       '.local/share/forgejo', '.config/containers/systemd/forgejo.container'], check=True)
+       os.chmod(temporary, 0o600)
+       with temporary.open('rb') as stream:
+           os.fsync(stream.fileno())
+       os.rename(temporary, BACKUPS / name)
+       directory = os.open(BACKUPS, os.O_RDONLY)
+       try:
+           os.fsync(directory)
+       finally:
+           os.close(directory)
+       return BACKUPS / name
+
+
+   def rollback(archive, old_text, old_version):
+       work = Path(tempfile.mkdtemp(prefix='rollback-', dir=BACKUPS))
+       subprocess.run(['tar', '--extract', '--gzip', '--preserve-permissions', '--no-same-owner',
+                       f'--file={archive}', f'--directory={work}',
+                       '.local/share/forgejo', '.config/containers/systemd/forgejo.container'], check=True)
+       stop()
+       failed = BACKUPS / 'failed-update-{}'.format(time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()))
+       failed.mkdir(mode=0o700)
+       os.rename(DATA, failed / 'data')
+       shutil.copy2(QUADLET, failed / 'forgejo.container')
+       os.rename(work / '.local/share/forgejo', DATA)
+       os.chmod(DATA, 0o700)
+       write_quadlet(old_text)
+       start()
+       check(old_text, old_version)
+       shutil.rmtree(work)
+       print(f'更新に失敗したデータと定義の退避: {failed}')
+
+
+   def prune(versions):
+       archives = sorted(BACKUPS.glob('forgejo-auto-*.tar.gz'))
+       for archive in archives[:-KEEP_BACKUPS]:
+           archive.unlink()
+           print(f'古い自動更新のバックアップを削除: {archive}')
+       output = subprocess.run(['podman', 'images', '--format', '{{.Repository}}:{{.Tag}}', 'codeberg.org/forgejo/forgejo'],
+                               timeout=60, capture_output=True, text=True).stdout
+       for reference in output.split():
+           match = re.fullmatch(r'codeberg\.org/forgejo/forgejo:(\d+\.\d+\.\d+)-rootless', reference)
+           if match and match.group(1) not in versions:
+               subprocess.run(['podman', 'rmi', reference], timeout=300, capture_output=True)
+
+
+   def main():
+       sys.stdout.reconfigure(line_buffering=True)
+       if os.geteuid() == 0:
+           print('中断: root では動かさない。Forgejo を動かす一般ユーザーで実行する')
+           return 1
+       os.umask(0o077)
+       STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
+       BACKUPS.mkdir(mode=0o700, parents=True, exist_ok=True)
+       os.chmod(BACKUPS, 0o700)
+       lock = (STATE / 'lock').open('w')
+       try:
+           fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+       except BlockingIOError:
+           print('中断: 別の自動更新が動いている')
+           return 1
+       for stale in [*QUADLET.parent.glob('.forgejo.*.tmp'), *BACKUPS.glob('.forgejo-auto-*.tmp')]:
+           stale.unlink()
+
+       if not QUADLET.is_file():
+           print(f'中断: {QUADLET} が無い')
+           return 1
+       text = QUADLET.read_text()
+       images = IMAGE_LINE.findall(text)
+       if not text.startswith('# setup-notes: forgejo\n') or len(images) != 1:
+           print('中断: この手順が作った Quadlet ではないか、固定したイメージの行が 1 行ではない')
+           return 1
+       if DROPIN.exists() and any(re.search(r'^Image=', path.read_text(), re.M) for path in DROPIN.glob('*.conf')):
+           print(f'中断: {DROPIN} にイメージの指定がある')
+           return 1
+       try:
+           endpoints(text)
+       except Failure as error:
+           print(f'中断: {error}')
+           return 1
+       current = images[0]
+
+       try:
+           latest = latest_version()
+       except (OSError, ValueError, KeyError, http.client.HTTPException) as error:
+           print(f'中断: 公式の最新安定版を調べられない: {error}')
+           return 1
+       hold = SKIP.read_text().strip() if SKIP.exists() else ''
+       if hold and not re.fullmatch(r'\d+\.\d+\.\d+', hold):
+           print(f'中断: {SKIP} の内容が x.y.z ではない')
+           return 1
+       if hold and parse(hold) <= parse(current):
+           SKIP.unlink()
+           hold = ''
+       if parse(latest) <= parse(current):
+           print(f'最新版 {current} を使用中')
+           return 0
+       if latest == hold:
+           print(f'保留中: {latest} へは更新しない（{current} を使用中）。{SKIP} を消すと、次の実行で試し直す')
+           return 1
+       state = unit_state()
+       if state == 'inactive':
+           print(f'forgejo.service が止まっているので更新しない（{current} → {latest} は次の実行で行う）')
+           return 0
+       if state != 'active':
+           print(f'中断: forgejo.service が {state}')
+           return 1
+
+       image = IMAGE.format(latest)
+       try:
+           subprocess.run(['podman', 'pull', '--quiet', image], check=True, timeout=1800, stdout=subprocess.DEVNULL)
+           output = subprocess.run(['podman', 'run', '--rm', '--network=none', '--entrypoint', '/usr/local/bin/gitea',
+                                    image, '--version'], check=True, timeout=300, capture_output=True, text=True).stdout
+       except subprocess.SubprocessError as error:
+           print(f'中断: {image} を取得・実行できない: {error}')
+           return 1
+       if binary_version(output) != latest:
+           print(f'中断: {image} の版が {latest} ではない: {output.strip()}')
+           return 1
+       if DATA.stat().st_dev != BACKUPS.stat().st_dev:
+           print(f'中断: {DATA} と {BACKUPS} が同じファイルシステムに無い')
+           return 1
+       size = sum(path.lstat().st_size for path in DATA.rglob('*'))
+       if shutil.disk_usage(BACKUPS).free < size * 2 + 2**30:
+           print(f'中断: {BACKUPS} の空きが足りない（データの 2 倍と 1 GiB が要る）')
+           return 1
+       if unit_state() != 'active':
+           print('中断: forgejo.service が動いていない')
+           return 1
+
+       print(f'更新を始める: {current} → {latest}')
+       try:
+           stop()
+           archive = backup(current)
+       except (Failure, subprocess.SubprocessError, OSError) as error:
+           print(f'中断: 停止またはバックアップに失敗した: {error}')
+           start()
+           return 1
+       print(f'バックアップ: {archive}')
+       new_text = IMAGE_LINE.sub(f'Image={image}', text, count=1)
+       try:
+           write_quadlet(new_text)
+           start()
+           check(new_text, latest)
+           doctor()
+       except (Failure, subprocess.SubprocessError, OSError) as error:
+           print(f'更新に失敗した: {error}')
+           SKIP.write_text(latest + '\n')
+           try:
+               rollback(archive, text, current)
+           except (Failure, subprocess.SubprocessError, OSError) as error:
+               print(f'戻せなかった: {error}。バックアップから復元する: {archive}')
+               return 3
+           print(f'{current} に戻し、{latest} を保留した')
+           return 2
+       SKIP.unlink(missing_ok=True)
+       prune({current, latest})
+       print(f'更新: {current} → {latest}')
+       return 0
+
+
+   if __name__ == '__main__':
+       sys.exit(main())
+   EOF
+     ) &&
+     chmod 700 ~/.local/bin/forgejo-auto-update &&
+     ls -l ~/.local/bin/forgejo-auto-update
+   fi
+   ```
+
+   - `-rwx------` の `~/.local/bin/forgejo-auto-update` が表示されればよい
+   - プログラムは、公式の最新安定版が今の版より新しいときだけ、停止 → バックアップ → イメージの行の更新 → 起動 → 確認を行う。確認に失敗したら直前のバックアップへ戻し、その版を保留する（[更新](#更新)）
+   - この手順を貼り直すと、プログラムだけを置き直す。Quadlet とデータは変えない
+
+1. 自動更新のサービスとタイマーを置き、読み込ませる。
+
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cat > ~/.config/systemd/user/forgejo-auto-update.service <<'EOF'
+   [Unit]
+   Description=Update Forgejo to the latest stable release
+
+   [Service]
+   Type=oneshot
+   Environment=PATH=/usr/bin
+   TimeoutStartSec=2h
+   ExecStart=%h/.local/bin/forgejo-auto-update
+   EOF
+   cat > ~/.config/systemd/user/forgejo-auto-update.timer <<'EOF'
+   [Unit]
+   Description=Update Forgejo to the latest stable release daily
+
+   [Timer]
+   OnCalendar=*-*-* 04:00
+   RandomizedDelaySec=30min
+
+   [Install]
+   WantedBy=timers.target
+   EOF
+   systemctl --user daemon-reload
+   ```
+
+   - `.service` がプログラムを 1 回動かす。`.timer` は、毎日 4:00〜4:30（サーバーの時刻）のどこかで `.service` を起動する
+   - 何も表示されなければよい
+
+1. タイマーを有効にし、自動更新を 1 回動かして確かめる。
+
+   ```bash
+   systemctl --user enable --now forgejo-auto-update.timer
+   systemctl --user start forgejo-auto-update.service
+   systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
+   journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
+   systemctl --user list-timers forgejo-auto-update.timer --no-pager
+   podman exec forgejo /usr/local/bin/gitea --version
+   ```
+
+   - `start` は、プログラムが終わるまで戻らない。新しい版があればその場で更新するので数分かかり、その間は Web と Git が止まる
+   - `Result=success`・`ExecMainStatus=0` で、journal の最後に `最新版 <版> を使用中` か `更新: <旧版> → <新版>` が出ればよい
+   - `list-timers` の `NEXT` に、次の 4 時台の時刻が出る。最後の行の版は、journal の版と同じになる
+   - 失敗すると、`start` が `Job for forgejo-auto-update.service failed` を出す。journal の最後の行と、[更新](#更新)のリードの終了コードを見る
+   - `更新:` が出たときは、[更新](#更新)の手順 3 で別の PC から確かめる
+   - [linger](linger.md) が有効なので、ログアウトしていてもタイマーは動く
 
 ---
 
@@ -440,7 +849,7 @@
 - 初回はログイン・SSH 公開鍵の登録・リポジトリの作成・clone を行う。普段は Issue → 作業ブランチ → commit / push → Pull Request → マージ → main の更新を繰り返す
 - Issue は作業内容と完了条件を共有する場所、Pull Request はブランチの変更を確認して main に取り込むための画面
 - この節では、新しいプライベートな `forgejo-demo` で操作を練習する。同名のリポジトリや作業ディレクトリが既にあるときは、上書きせず別の名前で作る
-- 画面は試験用コンテナの Forgejo 16.0.5 の英語 UI。画面内のユーザー・接続先・ポートは試験用で、接続には自分のサーバーの URL を使う
+- 画面は試験用コンテナの Forgejo 16.0.5 の英語 UI。自動更新で新しい版になると、表示が変わることがある。画面内のユーザー・接続先・ポートは試験用で、接続には自分のサーバーの URL を使う
 
 1. 利用する PC のブラウザで、Forgejo にログインする。
 
@@ -568,7 +977,12 @@
 | `~/.local/share/forgejo/custom/conf/app.ini` | 初期設定の結果と秘密を含む Forgejo の設定 |
 | `~/.local/share/forgejo/data/forgejo.db` | SQLite の DB |
 | `~/.local/share/forgejo/` の残り | リポジトリ、添付、SSH のホスト鍵などの永続データ |
-| `~/.local/state/forgejo-backups/` | この手順で作る停止中のバックアップと復元前の退避 |
+| `~/.local/bin/forgejo-auto-update` | 毎日の自動更新のプログラム（手順 24） |
+| `~/.config/systemd/user/forgejo-auto-update.service`・`.timer` | 自動更新を毎日 4:00〜4:30 に動かすユーザーユニット（手順 25） |
+| `~/.local/state/forgejo-auto-update/` | 保留した版（`skip-version`）と、自動更新を重ねて動かさないためのロック |
+| `~/.local/state/forgejo-backups/forgejo-<日時>.tar.gz` | [バックアップ](#バックアップ)で作る停止中のバックアップ |
+| `~/.local/state/forgejo-backups/forgejo-auto-<日時>-<旧版>.tar.gz` | 自動更新が更新の直前に作る停止中のバックアップ。新しい 3 つを残す |
+| `~/.local/state/forgejo-backups/` の残り | 復元前の退避（`before-restore-*`）、自動更新で戻したときの退避（`failed-update-*`）、ロールバックで外した定義（`removed-*`） |
 
 - コンテナでは `~/.local/share/forgejo` が `/var/lib/gitea` に見える
 - Quadlet の `FORGEJO__...` で指定した項目は、再起動時に `app.ini` へ反映される。同じ項目は Quadlet 側を変更する
@@ -579,18 +993,23 @@
 ## バックアップ
 
 - サーバーを動かすユーザーのシェルで行う。データと Quadlet を一緒に取る
-- この節の手順 1 から 3 まで、Web と Git の操作が止まる
+- この節の手順 1 から 3 まで、Web と Git の操作が止まる。止めている間は、自動更新は版を上げない
 - バックアップにはリポジトリ・アカウント・SSH のホスト秘密鍵などが入る。保管先のディレクトリは 0700、アーカイブは 0600 にする
 
 1. サービスを停止し、コンテナが止まったことを確かめる。
 
    ```bash
-   systemctl --user stop forgejo.service &&
-   systemctl --user show forgejo.service -p ActiveState -p SubState
-   podman ps --filter name='^forgejo$'
+   if [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
+     echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
+   else
+     systemctl --user stop forgejo.service &&
+     systemctl --user show forgejo.service -p ActiveState -p SubState
+     podman ps --filter name='^forgejo$'
+   fi
    ```
 
    - `ActiveState=inactive` で、動いている `forgejo` の行が無ければよい
+   - `中断: 自動更新の実行中` が出たら、`systemctl --user is-active forgejo-auto-update.service` が `inactive` を返してから貼り直す
    - **次の手順は、サービスが止まってから貼る**
 
 1. 停止中のデータと Quadlet を新しいアーカイブに保存する。
@@ -643,11 +1062,12 @@
 ## バックアップから復元する
 
 > [!IMPORTANT]
-> - 自分がこの文書の[バックアップ](#バックアップ)で作ったアーカイブを使う。バックアップと同じイメージの版・Quadlet・データを組にして戻す
+> - 自分がこの文書の[バックアップ](#バックアップ)か自動更新（[更新](#更新)）で作ったアーカイブを使う。バックアップと同じイメージの版・Quadlet・データを組にして戻す
 > - 同じサーバー・同じユーザー・同じ IP とポートの復元を扱う。IP や許可 CIDR を変える移設では、Quadlet の URL・待ち受けと firewalld も合わせ直す
 
 - 先に現在の状態を[バックアップ](#バックアップ)する。復元前のデータは消さず、別のディレクトリへ退避する
 - この節の手順 3 から 5 まで Web と Git の操作が止まる
+- 戻した後は、次の自動更新で最新版へ上がる。新しい版の不具合で戻すときは、この節の手順 7 でその版を保留する
 
 1. 復元するバックアップを指定する（`FORGEJO_RESTORE` は必ず値を入れる）。
 
@@ -655,7 +1075,8 @@
    FORGEJO_RESTORE=''                 # 復元する .tar.gz の絶対パス
    ```
 
-   - [バックアップ](#バックアップ)の手順 2 で表示された場所を入れる。作成途中や失敗したアーカイブは使わない
+   - [バックアップ](#バックアップ)の手順 2 で表示された場所を入れる。自動更新のアーカイブは、[更新](#更新)の手順 1 の journal の `バックアップ:` の行に出る
+   - 作成途中や失敗したアーカイブは使わない
 
 1. バックアップの構成とイメージを確かめ、空の作業場所に展開する。
 
@@ -705,12 +1126,17 @@
 1. サービスを停止する。
 
    ```bash
-   systemctl --user stop forgejo.service &&
-   systemctl --user show forgejo.service -p ActiveState -p SubState
-   podman ps --filter name='^forgejo$'
+   if [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
+     echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
+   else
+     systemctl --user stop forgejo.service &&
+     systemctl --user show forgejo.service -p ActiveState -p SubState
+     podman ps --filter name='^forgejo$'
+   fi
    ```
 
    - `inactive` で、動いている `forgejo` の行が無ければよい
+   - `中断: 自動更新の実行中` が出たら、`systemctl --user is-active forgejo-auto-update.service` が `inactive` を返してから貼り直す
    - **次の手順は、サービスが止まってから貼る**
 
 1. 現在のデータを退避し、復元したデータと定義へ入れ替える。
@@ -758,103 +1184,104 @@
    - 自己登録が無効なことと、許可外の送信元から接続できないことを確かめる
    - 退避した現在のデータと展開用の作業場所は、復元を確認するまで消さない
 
----
-
-## 更新
-
-- 自動更新は使わず、公式のリリースノートとサポート期限を確認して固定した版を指定する
-- メジャー番号を変える更新では、その間の各メジャー版の破壊的変更も読む
-- 更新後に DB の移行が始まったら、旧イメージだけへ戻さない。[バックアップから復元する](#バックアップから復元する)で旧イメージ・旧データ・旧定義を一緒に戻す
-
-1. 更新する版を設定する（`FORGEJO_VERSION` は必ず値を入れる）。
+1. 新しい版の不具合で戻したときだけ、その版への自動更新を保留する。
 
    ```bash
-   FORGEJO_VERSION=''                 # 公式の最新安定版の番号（例: 16.0.5、先頭の v は付けない）
-   ```
-
-   - 公式の[リリース一覧](https://forgejo.org/releases/)で、対象版の変更とサポート期限を確認する
-   - `latest`・メジャー番号だけのタグ・テスト版は指定しない
-
-1. 指定した公式イメージを取得する。
-
-   ```bash
-   if [[ ! ${FORGEJO_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-     echo '中断: 安定版の番号を x.y.z の形式で指定する' >&2
+   if [ -z "${FORGEJO_RESTORE_SAVED}" ] || [ ! -f "${FORGEJO_RESTORE_SAVED}/forgejo.container" ]; then
+     echo '中断: 同じシェルでこの節の手順 4 を通す' >&2
    else
-     podman pull "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless" &&
-     podman run --rm --entrypoint /usr/local/bin/gitea "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless" --version
-   fi
-   ```
-
-   - 指定した版が表示されればよい。この時点では既存のサービスを変えない
-
-1. サービスを停止し、更新直前のバックアップを取る。
-
-   - [バックアップ](#バックアップ)の手順 1・2 を行い、完了を確認する。手順 3 の起動は飛ばす
-   - アーカイブの場所を控える。旧イメージは復元の確認まで削除しない
-   - **次の手順は、サービスが停止し、バックアップが完了してから貼る**
-
-1. 固定したイメージの行だけを更新する。
-
-   ```bash
-   if [[ ! ${FORGEJO_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-     echo '中断: この節の手順 1 の版を設定する' >&2
-   elif systemctl --user is-active --quiet forgejo.service || podman container exists forgejo; then
-     echo '中断: この節の手順 3 の停止とバックアップを先に行う' >&2
-   elif [ -z "${FORGEJO_BACKUP}" ] || [ ! -s "${FORGEJO_BACKUP}" ]; then
-     echo '中断: 更新直前のバックアップが無い' >&2
-   else
-     /usr/bin/python3 - "${FORGEJO_VERSION}" <<'PY'
-   import os
+     /usr/bin/python3 - "${FORGEJO_RESTORE_SAVED}/forgejo.container" <<'PY'
    from pathlib import Path
    import re
    import sys
 
-   path = Path.home() / '.config/containers/systemd/forgejo.container'
-   text = path.read_text()
-   if not text.startswith('# setup-notes: forgejo\n'):
-       raise SystemExit('中断: この手順が作った Quadlet ではない')
-   pattern = r'^Image=codeberg\.org/forgejo/forgejo:\d+\.\d+\.\d+-rootless$'
-   text, count = re.subn(pattern, f'Image=codeberg.org/forgejo/forgejo:{sys.argv[1]}-rootless', text, flags=re.M)
-   if count != 1:
-       raise SystemExit('中断: 固定したイメージの行が一意ではない')
-   temporary = path.with_suffix('.container.tmp')
-   with temporary.open('x') as stream:
-       stream.write(text)
-   temporary.chmod(0o600)
-   os.replace(temporary, path)
-   print('イメージの行: 更新済み')
+   pattern = r'^Image=codeberg\.org/forgejo/forgejo:(\d+\.\d+\.\d+)-rootless$'
+   saved = re.findall(pattern, Path(sys.argv[1]).read_text(), re.M)
+   restored = re.findall(pattern, (Path.home() / '.config/containers/systemd/forgejo.container').read_text(), re.M)
+   if len(saved) != 1 or len(restored) != 1:
+       raise SystemExit('中断: イメージの行が 1 行ではない')
+   if tuple(map(int, saved[0].split('.'))) <= tuple(map(int, restored[0].split('.'))):
+       raise SystemExit(f'中断: 退避した {saved[0]} は、復元した {restored[0]} より新しくない')
+   state = Path.home() / '.local/state/forgejo-auto-update'
+   state.mkdir(mode=0o700, parents=True, exist_ok=True)
+   (state / 'skip-version').write_text(saved[0] + '\n')
+   print(f'保留: {saved[0]}（{restored[0]} を使用中）')
    PY
    fi
    ```
 
-   - イメージの行だけが更新され、URL・ポート・データの場所は引き継ぐ
-   - **次の手順は、イメージの行の更新が完了してから貼る**
+   - `保留: <新しい版>（<戻した版> を使用中）` が出ればよい
+   - 自動更新はその版を飛ばし、journal に `保留中:` を出す（終了コード 1）。さらに新しい版が出たら、自動で更新する
+   - 保留を解くときは、[更新](#更新)の手順 4 を行う
 
-1. 新しい版で起動し、ログと診断を確かめる。
+---
+
+## 更新
+
+- [手順 24〜26](#実施手順)のタイマーが、毎日 4:00〜4:30（サーバーの時刻）に公式の最新安定版を調べる。今の版が最新なら何もしない
+- 新しい版があれば、Forgejo を止めてバックアップを取り、イメージの行を新しい版に変えて起動する。続けて、Web の `/api/healthz`・Git 用 SSH・動いている版・`doctor check --all` を確かめる。止まるのは数分で、DB の移行があると長くなる
+- 確かめられなければ、直前のバックアップへ自動で戻し、その版を保留する（`~/.local/state/forgejo-auto-update/skip-version`）。さらに新しい版が出たら、また自動で更新する
+- 自動更新のバックアップは `~/.local/state/forgejo-backups/forgejo-auto-<日時>-<旧版>.tar.gz` で、新しい 3 つを残す。戻したときは、更新後のデータと定義を同じ場所の `failed-update-<日時>` に残す
+- Forgejo が止まっている間（[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)の途中など）は、版を上げずに終わる
+- 終了コード
+  - `0`: 最新版を使用中、更新した、または Forgejo が止まっているので何もしなかった
+  - `1`: 何も変えずに中断した（最新版を調べられない・イメージを取得できない・空きが足りないなど）、または保留中
+  - `2`: 更新に失敗し、前の版とデータに戻して保留した
+  - `3`: 戻せなかった。journal の `バックアップ:` のアーカイブを、[バックアップから復元する](#バックアップから復元する)で戻す
+- この文書の前の版で構築したサーバー（自動更新の無いもの）は、[手順 24〜26](#実施手順)を通すと自動更新になる
+
+> [!WARNING]
+> メジャー版の更新と DB の移行も、確認無しで自動で入る。自動の確認で見つからない不具合に気付いたら、[バックアップから復元する](#バックアップから復元する)で更新直前のアーカイブを戻し、その節の手順 7 で新しい版を保留する。戻すと、更新後に受け付けた変更は失われる。
+
+1. 自動更新の結果と、次に動く時刻を確かめる。
 
    ```bash
-   systemctl --user daemon-reload &&
-   systemctl --user start forgejo.service &&
-   systemctl --user is-active forgejo.service &&
-   podman exec forgejo /usr/local/bin/gitea --version &&
-   podman exec forgejo /usr/local/bin/gitea --config /var/lib/gitea/custom/conf/app.ini doctor check --all
+   systemctl --user list-timers forgejo-auto-update.timer --no-pager
+   systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
+   journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 30 --no-pager
+   cat ~/.local/state/forgejo-auto-update/skip-version 2>/dev/null
+   podman exec forgejo /usr/local/bin/gitea --version
    ```
 
-   - `active` と指定した版が出て、診断で問題が報告されなければよい
-   - DB の移行がある場合は、完了まで待つ。失敗したらログを確認し、旧イメージだけに戻さない
+   - `list-timers` の `NEXT` に、次の 4 時台の時刻が出る
+   - `Result=success` なら、最後の実行は最新版の確認か更新で終わった。`exit-code` なら、`ExecMainStatus` の終了コード（この節のリード）と journal の最後の行で理由を見る
+   - 版の番号が 1 行出たら、その版は保留中。保留を解くときは、この節の手順 4 を行う
+   - 最後の行の版が、journal の最後の `最新版 <版> を使用中` か `更新: <旧版> → <新版>` の版と同じならよい
 
-1. 別の PC で、更新後の Web と Git を確かめる。
+1. 次の自動更新を待たないときだけ、今すぐ最新版へ更新する。
+
+   ```bash
+   systemctl --user start forgejo-auto-update.service
+   systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
+   journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
+   ```
+
+   - 新しい版があれば、終わるまで数分戻らない。その間は Web と Git が止まる
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
+
+1. 更新したときは、別の PC で更新後の Web と Git を確かめる。
 
    - 管理者のログイン、リポジトリの一覧・既存のコミット、`git fetch`、新しいコミットの push を確かめる
    - 自己登録が無効で、許可外の送信元から接続できないことを確かめる
-   - 問題があれば[バックアップから復元する](#バックアップから復元する)で更新直前のアーカイブを戻す。更新後に受け付けた変更は、そのバックアップへ戻すと失われる
+   - 問題があれば、この節のリードの WARNING のとおり、更新直前のアーカイブを戻して新しい版を保留する
+
+1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。
+
+   ```bash
+   rm -f ~/.local/state/forgejo-auto-update/skip-version
+   systemctl --user start forgejo-auto-update.service
+   systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
+   journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
+   ```
+
+   - 失敗の原因を直してから行う。また失敗すると、自動で戻して同じ版を保留する
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
 
 ---
 
 ## ロールバック
 
-- Forgejo の起動と、この文書が追加した firewalld の 2 規則を解除する。データとバックアップは既定で残す
+- Forgejo の起動・自動更新のタイマーと、この文書が追加した firewalld の 2 規則を解除する。データとバックアップは既定で残す
 - サーバーを動かすユーザーのシェルで行う。手順 1 の `SERVER_IP`・`LAN_SUBNET`・ポート・`FW_ZONE` は、追加したときと同じ値を貼り直す
 - Podman と linger はほかのサービスも使うので、この節では削除・無効化しない
 
@@ -863,16 +1290,22 @@
    - 保持するデータがあれば[バックアップ](#バックアップ)を通す
    - 保存したアーカイブの場所を控える
 
-1. Forgejo を停止し、定義を退避して自動起動を解除する。
+1. 自動更新と Forgejo を停止し、定義を退避して自動起動を解除する。
 
    ```bash
    if [ ! -f ~/.config/containers/systemd/forgejo.container ]; then
      echo '中断: この手順の Quadlet が見つからない' >&2
    elif ! grep -qx '# setup-notes: forgejo' ~/.config/containers/systemd/forgejo.container; then
      echo '中断: この手順が作った Quadlet ではない' >&2
+   elif [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
+     echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
    else
      install -d -m 700 ~/.local/state/forgejo-backups &&
      FORGEJO_REMOVED=$(mktemp -d "$HOME/.local/state/forgejo-backups/removed-XXXXXXXX") &&
+     { [ ! -e ~/.config/systemd/user/forgejo-auto-update.timer ] || systemctl --user disable --now forgejo-auto-update.timer; } &&
+     { [ ! -e ~/.config/systemd/user/forgejo-auto-update.timer ] || mv ~/.config/systemd/user/forgejo-auto-update.timer "${FORGEJO_REMOVED}/"; } &&
+     { [ ! -e ~/.config/systemd/user/forgejo-auto-update.service ] || mv ~/.config/systemd/user/forgejo-auto-update.service "${FORGEJO_REMOVED}/"; } &&
+     { [ ! -e ~/.local/bin/forgejo-auto-update ] || mv ~/.local/bin/forgejo-auto-update "${FORGEJO_REMOVED}/"; } &&
      systemctl --user stop forgejo.service &&
      mv ~/.config/containers/systemd/forgejo.container "${FORGEJO_REMOVED}/forgejo.container" &&
      systemctl --user daemon-reload &&
@@ -880,6 +1313,7 @@
    fi
    ```
 
+   - 自動更新のタイマー・サービス・プログラムがあれば、無効にして同じ退避先へ移す。自動更新の無い構成では、その部分は何もしない
    - 定義は `~/.config/containers/systemd` から外れ、サービスが次回のログイン・起動で戻らなくなる
    - 永続データと SSH のホスト鍵は残る
 
@@ -912,12 +1346,13 @@
      echo '中断: 手順 1 のポートを設定する' >&2
    else
      systemctl --user status forgejo.service --no-pager
+     systemctl --user list-timers --all forgejo-auto-update.timer --no-pager
      podman ps --filter name='^forgejo$'
      ss -ltn "( sport = :${FORGEJO_HTTP_PORT} or sport = :${FORGEJO_SSH_PORT} )"
    fi
    ```
 
-   - `forgejo.service` が見つからず、動いている `forgejo` と 2 ポートの待ち受けが無ければよい
+   - `forgejo.service` が見つからず、`list-timers` が `0 timers listed.` を出し、動いている `forgejo` と 2 ポートの待ち受けが無ければよい
    - イメージとデータを残すだけなら、ここで終わる
    - ほかに常駐するユーザーサービスが無く、linger も切るときだけ [linger のロールバック](linger.md#ロールバック)を行う
 
@@ -943,16 +1378,18 @@
 
    ```bash
    if [ -e ~/.config/containers/systemd/forgejo.container ] || podman container exists forgejo ||
-        systemctl --user is-active --quiet forgejo.service; then
+        systemctl --user is-active --quiet forgejo.service || [ -e ~/.config/systemd/user/forgejo-auto-update.timer ]; then
      echo '中断: 先にロールバックで停止と自動起動の解除を行う' >&2
    elif [ -L ~/.local/share/forgejo ] || [ ! -d ~/.local/share/forgejo ]; then
      echo '中断: データの場所が専用ディレクトリではない' >&2
    else
-     rm -r -- ~/.local/share/forgejo
+     rm -r -f -- ~/.local/share/forgejo
    fi
    ```
 
+   - 何も表示されずに終わればよい。git のオブジェクトは書き込み禁止なので、`-f` で 1 つずつの確認を出さずに消す
    - `~/.local/share/forgejo` だけを消す。`podman system reset` や Podman 全体の削除は行わない
-   - `~/.local/state/forgejo-backups` のアーカイブ・退避にも秘密は残る。不要になったものは、その保管先の運用に合わせて個別に消す
+   - `~/.local/state/forgejo-backups` のアーカイブ・退避（自動更新の `forgejo-auto-*`・`failed-update-*` を含む）にも秘密は残る。不要になったものは、その保管先の運用に合わせて個別に消す
+   - 自動更新の保留とロックの `~/.local/state/forgejo-auto-update` は秘密を含まない。要らなければ手で消す
 
 ---
