@@ -297,7 +297,7 @@ sudo flatpak update
   - その結果、PATH の先頭で `podman`・`mount`・`gpg`・`python3` が Homebrew のものに置き換わった（`command -v` で確認）
   - `brew uninstall podman-compose` と `brew autoremove` で元に戻る
   - **依存の多い formula を入れた後は、`command -v` で主要なコマンドの場所を確かめる**
-- **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（bat と同じ問題。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
+- **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（bat と同じ問題。[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）
 - **Flathub の「検証済み」はアプリの公開元の確認**で、中身の審査ではない
   - 未検証のもの（Chrome・Chromium・Edge など）は、上流ではない第三者が包んでいる場合がある
 - **Flathub は aarch64 の appstream を配っていない**（`flatpak update --appstream --arch=aarch64` が `No such ref 'appstream2/aarch64'` で失敗する）

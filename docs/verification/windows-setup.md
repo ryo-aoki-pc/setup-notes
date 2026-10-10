@@ -1,6 +1,6 @@
 # Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL）の検証記録
 
-[手順書](../windows-setup.md)
+[手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
 ## 最新の検証範囲（2026-10-08 UTC）
 
@@ -109,7 +109,7 @@
 ### 実施手順 / 手順 19: 補足: プロファイルの書き方
 
 - プロファイルが無ければ、`New-Item -Force` がフォルダ（`WindowsPowerShell`）ごと作る
-- 行の末尾の `# windows-setup.md` は、[ロールバック](../windows-setup.md#ロールバック)で消す行を見分けるための印。2026-10-03 の前の版（貼り付けの設定が別の手順書 `windows-powershell-paste.md` だったとき）は、印が `# windows-powershell-paste.md` だった。どちらの印の行も、この手順は「すでにある」とみなし、ロールバックは消す
+- 行の末尾の `# windows-setup.md` は、[ロールバック](../extra/windows-setup.md#ロールバック)で消す行を見分けるための印。2026-10-03 の前の版（貼り付けの設定が別の手順書 `windows-powershell-paste.md` だったとき）は、印が `# windows-powershell-paste.md` だった。どちらの印の行も、この手順は「すでにある」とみなし、ロールバックは消す
 - 足す行は ASCII の文字だけなので、既存のプロファイルの文字コードによらず足せる。Windows PowerShell 5.1 の `Add-Content` は、既存のファイルの BOM（UTF-16 LE・UTF-8）を見て、同じ文字コードで足した
 - `Add-Content` は、ファイルの末尾が改行でなくても改行を足さずに書き足す（最後の行につながった）。そのときは、行の前に改行を付けて足す
 - 対話でない起動（標準入力をリダイレクトした `powershell -Command`）でも、この行はエラーを出さなかった
@@ -170,7 +170,7 @@
 - 名前とストアの ID は、Microsoft Store の API で確かめた（[付録](#付録-windows-11-の設定の調査2026-10-03)）。名前は `*` を使わずに書く（`*Copilot*` のように書くと、残す Copilot も当たる）
 - `Remove-AppxPackage` は、自分のユーザーからだけ外す。管理者の権限は要らない。PC に置かれた元（プロビジョニングされたパッケージ）は残るので、新しく作ったユーザーには入る
 - Microsoft の文書では、Windows の更新で入れ直さない印は、管理者が元ごと外したとき（プロビジョニングの解除）にだけ付く。自分のユーザーから外しただけのアプリは、機能の更新の後に戻ってくることがあると広く報告されている
-- 戻すときは、[ロールバック](../windows-setup.md#ロールバック)の手順 9 で、ストアの ID を指定して winget で入れる
+- 戻すときは、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 9 で、ストアの ID を指定して winget で入れる
 
 ### 実施手順 / 手順 43: 補足: プライベートにする理由
 
@@ -183,10 +183,10 @@
 ### 実施手順 / 手順 52: 補足: Windows と Linux の時計の扱い
 
 - Windows は、ハードウェアの時計（RTC）を地方時として読み書きする。Linux は UTC として扱うのが普通で、両方が違う扱いのままデュアル ブートすると、起動し直すたびに 9 時間ずれる。2 つの OS のどちらかにそろえればよい
-- AlmaLinux 10 のインストーラ（anaconda）は、NTFS のパーティションを見つけると、AlmaLinux の側を地方時にする（`/etc/adjtime` に `LOCAL`。[windows-dual-boot.md の注意点](../windows-dual-boot.md#注意点)。インストーラのソースから読んだこと）。その流れで入れたなら、もうそろっているので、この手順は要らない（行うと、かえって 9 時間ずれる）
+- AlmaLinux 10 のインストーラ（anaconda）は、NTFS のパーティションを見つけると、AlmaLinux の側を地方時にする（`/etc/adjtime` に `LOCAL`。[windows-dual-boot.md の注意点](../extra/windows-dual-boot.md#注意点)。インストーラのソースから読んだこと）。その流れで入れたなら、もうそろっているので、この手順は要らない（行うと、かえって 9 時間ずれる）
 - AlmaLinux の側を UTC にした（`timedatectl set-local-rtc 0`）ときだけ、Windows も UTC にそろえる。`HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation` の `RealTimeIsUniversal` を 1 にすると、Windows も UTC として扱う。Microsoft の文書には無い値で、Arch Linux の wiki が勧める形（DWORD。64 ビットの Windows では QWORD という古い勧めは、wiki から消えた）
 - Arch Linux の wiki は、両方を UTC にする形を勧めている（Linux の側を地方時にする `timedatectl set-local-rtc 1` は勧めていない）。本書は、AlmaLinux のインストーラの既定（地方時）に合わせ、2026-10-03 に [windows-dual-boot.md](../windows-dual-boot.md) とそろえた
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 27
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 27
 
 ### 実施手順 / 手順 62: 補足: AlmaLinux 10 の WSL のイメージ
 
@@ -203,7 +203,7 @@
 - `-accepteula` は、使用許諾の窓を出さないため
 - Microsoft アカウントでは、`Username` をメールアドレスにし、`Domain` を `MicrosoftAccount` か PC の名前にする、という報告があるが、確かめていない。パスワード（PIN ではない）が要り、手順 48 でパスワードのサインインを使えるようにしておく
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
-- 止めるのは[ロールバック](../windows-setup.md#ロールバック)の手順 20
+- 止めるのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 20
 
 ### リモートから再起動する手段を増やす（任意）: 検証状況の記録
 
@@ -427,10 +427,10 @@
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
 > | `$PC_NAME` | 手順 36 | この PC の新しい名前（名前を変えるときに入れる。変えないなら空のままにして手順 39 を飛ばす） | `<HOSTNAME>` |
-> | `$LAN_IF` | 手順 36（[ロールバック](../windows-setup.md#ロールバック)では手順 19、[Wake on LAN を使う（任意）](../windows-setup.md#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
-> | `$OLD_PC_NAME` | [ロールバック](../windows-setup.md#ロールバック)の手順 37 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
-> | `$OLD_EXECUTION_POLICY` | [ロールバック](../windows-setup.md#ロールバック)の手順 16 | 手順 17 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
-> | `$OLD_DOWNLOAD_MODE` | [ロールバック](../windows-setup.md#ロールバック)の手順 29 | 手順 37 で控えた配信の最適化のモード | `CdnOnly` |
+> | `$LAN_IF` | 手順 36（[ロールバック](../extra/windows-setup.md#ロールバック)では手順 19、[Wake on LAN を使う（任意）](../windows-setup.md#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
+> | `$OLD_PC_NAME` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 37 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
+> | `$OLD_EXECUTION_POLICY` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 16 | 手順 17 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
+> | `$OLD_DOWNLOAD_MODE` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 29 | 手順 37 で控えた配信の最適化のモード | `CdnOnly` |
 >
 > 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<hostname>`（`whoami` が小文字で出すコンピューター名）/ `<HOST_PC>`（VM を動かしたホストの PC のコンピューター名。別の Windows から再起動した付録では送る側）/ `<OTHER_PC>`（引き継ぎ先として準備した別の PC の名前）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
 
@@ -456,7 +456,7 @@
   - プロファイルに書くので、窓を開くたびに貼り直さなくてよい
 - **採らなかった案**
   - 管理者の Windows PowerShell を Windows Terminal で開く（Win+X の「ターミナル (管理者)」）: 設定は変えずに済むが、開き方を変える必要がある。既定の端末を Windows Terminal にしても（手順 30）、スタートメニューから管理者で開くと conhost になる（手順 30 の補足）
-  - conhost の窓では Ctrl+V で貼る: 設定は変えずに済むが、右クリックで貼ると逆順になるのは残る（[ロールバック](../windows-setup.md#ロールバック)の後の貼り方として、その手順 15 に書いた）
+  - conhost の窓では Ctrl+V で貼る: 設定は変えずに済むが、右クリックで貼ると逆順になるのは残る（[ロールバック](../extra/windows-setup.md#ロールバック)の後の貼り方として、その手順 15 に書いた）
   - ブロックを 1 行に書く: 手順書が読みにくくなる
   - 選んで Ctrl+C でコピーする: コピーボタンを使えない
   - コピーボタンの中身の改行を変える: 中身は GitHub が作る（改行は LF）
@@ -595,7 +595,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
   - わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`、`ForEach-Object -Parallel`、`Join-Path -AdditionalChildPath`）を入れたファイルでは、それぞれ指摘が出た
 - `(Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass'`（手順 18）は、列挙の値と文字列を比べて、`RemoteSigned` で `False`、`Restricted` で `True` になった
 
-**手順 51 と[ロールバック](../windows-setup.md#ロールバック)の手順 28 のブロック**を、管理者の判定を `$true` に替え、レジストリ（`Get-ItemProperty`・`New-ItemProperty`・`Remove-ItemProperty`）を値を覚えておく偽物にして、`Scancode Map` が無いとき・本書の値のとき・別の値（`00 00 00 00 00 00 00 00 02 00 00 00 00 00 5B E0 00 00 00 00`）のときで流した:
+**手順 51 と[ロールバック](../extra/windows-setup.md#ロールバック)の手順 28 のブロック**を、管理者の判定を `$true` に替え、レジストリ（`Get-ItemProperty`・`New-ItemProperty`・`Remove-ItemProperty`）を値を覚えておく偽物にして、`Scancode Map` が無いとき・本書の値のとき・別の値（`00 00 00 00 00 00 00 00 02 00 00 00 00 00 5B E0 00 00 00 00`）のときで流した:
 
 | ブロック | 無い | 本書の値 | 別の値 |
 |---|---|---|---|
@@ -613,7 +613,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 ### 付録: 原因の確認と貼り付けの試験（2026-10-03）
 
-この付録は、もとの手順書 `docs/windows-powershell-paste.md`（2026-10-03 にこの文書へまとめて消した）の付録を移したもの。手順の番号だけ、この文書の番号に付け替えた（当時の手順 1〜7 は今の手順 16・17・18・19・35・37・38、当時のロールバックの手順 1・2 は今の[ロールバック](../windows-setup.md#ロールバック)の手順 15・16）。試験したブロックは当時のもの（プロファイルの行の印は `# windows-powershell-paste.md`。今の手順 19 とロールバックの手順 15 は、印を変え、古い印の行も見つけるようにした。その確認は[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）。
+この付録は、もとの手順書 `docs/windows-powershell-paste.md`（2026-10-03 にこの文書へまとめて消した）の付録を移したもの。手順の番号だけ、この文書の番号に付け替えた（当時の手順 1〜7 は今の手順 16・17・18・19・35・37・38、当時のロールバックの手順 1・2 は今の[ロールバック](../extra/windows-setup.md#ロールバック)の手順 15・16）。試験したブロックは当時のもの（プロファイルの行の印は `# windows-powershell-paste.md`。今の手順 19 とロールバックの手順 15 は、印を変え、古い印の行も見つけるようにした。その確認は[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）。
 
 **利用者の観察**: Firefox で開いた GitHub の [RDP をロックせずに切断](../windows-rdp-disconnect.md)の PowerShell のブロックを、コピーボタンでコピーして、スタートメニューから管理者として開いた Windows PowerShell（conhost の窓）に右クリックで貼ると、行が逆順になった。選んで Ctrl+C でコピーしたもの、管理者でない Windows PowerShell の窓、conhost の窓に Ctrl+V で貼ったものは、元の順に入った。
 
@@ -844,7 +844,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - `origin/main` との差分で、足したか変えた `powershell` のブロック 34 個（手順書のブロックは 117 個から 150 個になった）
   - プライバシーと広告の節の 4 個（その節の手順 2・4・5・6）、表示・入力・音・ストレージの節の 21 個（その節の手順 2〜12・14〜23）、Edge の常駐の節の 2 個（その節の手順 2・5）、CopyQ の節の 6 個（その節の手順 2〜5・7・8）
   - [更新](../windows-setup.md#更新)の手順 3 の 1 個（winget の一覧に `hluk.CopyQ` を足した）
-- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 1〜41、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
 
 **構文と Windows PowerShell 5.1 との互換**:
 
@@ -906,7 +906,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - `origin/main` との差分で、足した `powershell` のブロック 20 個（手順書のブロックは 150 個から 170 個になった。既にあるブロックで変えたものは無い）
   - PowerToys の節の 4 個（その節の手順 2・3・5・8）、PowerShell 7 の節の 6 個（その節の手順 2〜5・7・8）、Windows Terminal の節の 4 個（その節の手順 2〜4・6）、WSL の節の 6 個（その節の手順 2〜7）
-- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../windows-setup.md#ロールバック)の手順 1〜41、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
+- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 1〜41、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
 
 **構文と Windows PowerShell 5.1 との互換**:
 
@@ -1135,7 +1135,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - Windows 11 のエクスプローラーは、右クリックで新しい形のメニューを出し、その中の「その他のオプションを確認」（Shift+F10 か Shift+右クリックでも）で旧形式のメニューを出す
 - 新しい形のメニューは、CLSID `{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}` の COM のクラスが出している。自分のユーザーの `HKCU\Software\Classes\CLSID` に同じ CLSID の `InprocServer32` を空の既定の値で置くと、そのクラスを読めなくなり、エクスプローラーは最初から旧形式のメニューを出す
 - Microsoft が説明している設定ではない（サポート外）。広く使われている方法で、25H2 でも効くという記事が複数ある（本書では確かめていない）
-- 自分のユーザーだけにかかり、管理者の権限は要らない。消せば元に戻る（[ロールバック](../windows-setup.md#ロールバック)の手順 2）
+- 自分のユーザーだけにかかり、管理者の権限は要らない。消せば元に戻る（[ロールバック](../extra/windows-setup.md#ロールバック)の手順 2）
 - PowerShell の `New-Item -Force` で作らず `reg.exe` を使うのは、`New-Item -Force` が既にあるキーを作り直して中の値を消すため。`reg.exe add /f /ve` は既定の値だけを書く
 
 
@@ -1167,7 +1167,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 受信の規則は、表示の名前が日本語に訳されるので、Microsoft の勧める形（`@FirewallAPI.dll,-28752` のグループ）で指定する。規則の名前は `RemoteDesktop-UserMode-In-TCP`・`-UDP` など（3389 番）
 - `-Profile Private` で、プライベートの LAN（手順 43）からだけ受け付ける。持ち出した先のパブリックの Wi-Fi では開かない。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC は、規則がすべてのプロファイルで有効だった
 - 設定の画面でリモート デスクトップをオンとオフにし直すと、規則のプロファイルが戻るかは確かめていない。画面で変えたら、この手順の最後の行で確かめ直す
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 32
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 32
 
 
 
@@ -1176,7 +1176,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - Edge のショートカットは、すべてのユーザーのデスクトップ（`C:\Users\Public\Desktop`）にある。ここは管理者でないと消せない。名前は `Microsoft Edge.lnk`（製品の名前なので訳されないはず。確かめていない）
 - UniGet UI のショートカットは、手順 22 で入れたときに自分のデスクトップにできる（インストーラの定義の `{autodesktop}\UniGetUI`）。OneDrive でデスクトップをバックアップしていると場所が変わるので、`GetFolderPath('Desktop')` で探す
 - Edge のショートカットは、Edge の更新で作り直されることがある。Edge Update のポリシー `RemoveDesktopShortcutDefault` を 1 にすると、Edge の更新や再起動のときに、すべてのユーザーのデスクトップの Edge のショートカットを消す（Microsoft の文書。Edge Update 1.3.155.1 から）。`CreateDesktopShortcutDefault` は、Edge が入っていると効かない（同じ文書）
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 24（ポリシーだけ。消したショートカットは戻らない）
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 24（ポリシーだけ。消したショートカットは戻らない）
 
 
 
@@ -1286,14 +1286,14 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、LAN をプライベートにすると、リモート アシスタンスの受信の規則 4 本が効くようになった（手順 43 の補足）
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
 - Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。手順 37 の `RemoteAssistance` で、元の値を控える
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 31
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 31
 
 ### 参考資料: 実施手順 / 手順 48: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
-- オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある。[Windows の OpenSSH サーバー](../windows-openssh-server.md#注意点)の検証の PC では、オンのまま SSH にパスワードで入れた（Q&A の報告とは違った）
+- オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある。[Windows の OpenSSH サーバー](../extra/windows-openssh-server.md#注意点)の検証の PC では、オンのまま SSH にパスワードで入れた（Q&A の報告とは違った）
 - オンだと、自動サインイン（手順 64）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 22
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 22
 
 ## 本文から分離した確認範囲と実測
 
@@ -1536,7 +1536,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 | 60・61 | スタートから開いた通常の Windows PowerShell は、Windows Terminal の中に開いた。手順 61 を GitHub のコピーボタンからコピーして右クリックで貼ると、「警告 複数の行を含むテキストを貼り付けようとしています…」の確認（「強制的に貼り付け」「キャンセル」）が出た。強制的に貼り付けると、完結した行から順に動いた。`ComputerName : PR104-VERIFY`・`Keyboard : kbd101.dll` などが出た |
 | 64（本文の起動経路） | Windows Terminal の通常の窓に貼った。winget は入っている旨（`Found an existing package already installed.`・`No available upgrade found.`、英語）を出し、UAC の確認（Autologon、Microsoft Corporation、このコンピューター上のハード ドライブ）で「はい」を選ぶと Autologon の窓が開いた（`Username` が <WIN_USER>、`Domain` が <HOSTNAME>）。パスワードを入れて `Enable` を押すと `Autologon successfully configured.` の旨。以後の再起動で、入力無しに自動サインインした |
 
-- 手順 39・52・53 の分岐は、[ロールバック](../windows-setup.md#ロールバック)の手順 18・19・26・27・37・38 で戻した。手順 38 の再起動の後、名前は `<HOSTNAME>`、キーボードは `kbd106.dll`・`PCAT_106KEY`・`7`・`2`、`RealTimeIsUniversal` は無し。手順 27 は何も出さなかった
+- 手順 39・52・53 の分岐は、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 18・19・26・27・37・38 で戻した。手順 38 の再起動の後、名前は `<HOSTNAME>`、キーボードは `kbd106.dll`・`PCAT_106KEY`・`7`・`2`、`RealTimeIsUniversal` は無し。手順 27 は何も出さなかった
 - 時計: `RealTimeIsUniversal=1` で起動すると、システムの時刻が 9 時間進み、VBoxService が 32,369,482 ミリ秒戻した（VM の RTC は地方時）。ロールバックの再起動では逆に 9 時間遅れ、32,418,700 ミリ秒進めた。本文の「再起動の後に、時刻を同期し直す」に当たる
 - 実施手順 62・63 の WSL 2 は扱っていない（この VM では動かない。上の付録）
 

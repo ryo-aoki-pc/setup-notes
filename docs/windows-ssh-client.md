@@ -2,20 +2,20 @@
 
 ## 実施手順
 
-- [検証記録](verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)
+- [検証記録](verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
 
 > [!IMPORTANT]
-> - **手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**。手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、手順 2〜7・9・10 と、後ろの節のブロックをそこに貼る
+> - **手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**。手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、手順 2〜7・9・10 と、[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)のブロックをそこに貼る
 > - 管理者の権限は要らない。Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ（ホストでは、手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す）
 > - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる) が `C:\Program Files\Git` に入っていること（Git の ssh でも同じ config を読めるかを、手順 7・10 で確かめる）
-> - 前提: つなぐ先の AlmaLinux 10 のホストで sshd が動き、そのユーザーのパスワードで SSH に入れること（AlmaLinux 10 の既定。[注意点](#注意点)）
+> - 前提: つなぐ先の AlmaLinux 10 のホストで sshd が動き、そのユーザーのパスワードで SSH に入れること（AlmaLinux 10 の既定。[注意点](extra/windows-ssh-client.md#注意点)）
 > - **手順 4 と手順 9 には対話入力がある**（手順 4 は鍵を作るか公開鍵を作り直すときのパスフレーズ、手順 9 はホスト鍵の確認とホストのユーザーのパスワード）。鍵にパスフレーズを付けたなら、手順 10（2 回）・11 でも聞かれる
 
 - 上から順にコードブロックを貼る。Windows の手順は手順 2 で変数を設定した PowerShell に、手順 8 はホストの端末に貼る
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）の両方で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに（ssh・scp・ssh を使う git・WezTerm の起動メニュー）パスフレーズを聞かれる
-- 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 以後は[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)
 - 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[Windows の OpenSSH サーバー](windows-openssh-server.md)
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
@@ -57,7 +57,7 @@
 
    - 1 行目に Windows の ssh の版（`OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2` か、それより新しい版）、2 行目に Git の ssh の版（`OpenSSH_10.5p1` など）が出ればよい
    - 1 行目が「認識されません」のエラーなら、Windows の OpenSSH クライアントが無い。設定の「オプション機能」（`ms-settings:optionalfeatures`）で「OpenSSH クライアント」を追加してから始める（追加には管理者の承認が要る）
-   - `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](#注意点)）。この手順書のブロックは、どちらもフルパスで呼ぶ
+   - `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](extra/windows-ssh-client.md#注意点)）。この手順書のブロックは、どちらもフルパスで呼ぶ
    - `Test-Path` の 3 行は、秘密鍵・公開鍵・config が既にあるか。秘密鍵と公開鍵がどちらも `True` なら、その鍵を使う（手順 4 は何もしない）
    - 秘密鍵だけが `True` なら、手順 4 で秘密鍵から公開鍵を作り直す
    - `core.sshCommand` の行は出ず、最後の行は `GIT_SSH= GIT_SSH_COMMAND= HOME=` であればよい（git は Git の ssh を使い、Windows の ssh と同じ `%USERPROFILE%\.ssh` を読む）
@@ -136,10 +136,10 @@
    ```
 
    - `user <SSH_USER>`・`hostname <SSH_HOST>`・`identitiesonly yes`・`identityfile ~/.ssh/id_ed25519` の 4 行が、2 回（Windows の ssh と Git の ssh）出ればよい（順は ssh による）
-   - 足した行は `# BEGIN windows-ssh-client.md <SSH_ALIAS>` と `# END …` の印で挟まれる（[ロールバック](#ロールバック)の手順 2 で消すため）
+   - 足した行は `# BEGIN windows-ssh-client.md <SSH_ALIAS>` と `# END …` の印で挟まれる（[ロールバック](extra/windows-ssh-client.md#ロールバック)の手順 2 で消すため）
    - `user` などが手順 2 の値と違えば、config の前の方の `Host *` などが先に効いている（ssh は最初に見つけた値を使う）。その行を直す
-   - `Bad configuration option` が出たら、前からある config に、片方の ssh が知らない設定がある（[注意点](#注意点)）
-   - `Bad owner or permissions on …config` が出たら、config にほかの主体の書き込みの許可がある（[注意点](#注意点)）
+   - `Bad configuration option` が出たら、前からある config に、片方の ssh が知らない設定がある（[注意点](extra/windows-ssh-client.md#注意点)）
+   - `Bad owner or permissions on …config` が出たら、config にほかの主体の書き込みの許可がある（[注意点](extra/windows-ssh-client.md#注意点)）
    - `中断: … BOM がある` ときは、メモ帳で config を開き、「名前を付けて保存」の文字コードを「UTF-8」（BOM なし）にして保存し直す
 
 1. AlmaLinux 10 のホストで、ホスト鍵の指紋を表示する。
@@ -170,8 +170,8 @@
    - その指紋が手順 8 の指紋と同じなら `yes`、違えば `no` で止める
    - `<SSH_USER>@<SSH_HOST>'s password:` で、ホストのユーザーのパスワードを入れる
    - `added` と出ればよい
-   - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](#注意点)）
-   - 貼り直すと、同じ行がもう 1 行足される（害は無い。[ロールバック](#ロールバック)の手順 1 は両方消す）
+   - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](extra/windows-ssh-client.md#注意点)）
+   - 貼り直すと、同じ行がもう 1 行足される（害は無い。[ロールバック](extra/windows-ssh-client.md#ロールバック)の手順 1 は両方消す）
    - **次の手順は、パスワードを入力し終えて `added` が出てから貼る**（続けて貼るとパスワードとして食われる）
 
 1. Windows の ssh と Git の ssh で、鍵でログインできることを確かめる。
@@ -220,109 +220,4 @@
    ```
 
    - 版が 2 行と、`user <SSH_USER>`・`hostname <SSH_HOST>` が 2 組出ればよい
-   - `Bad configuration option` が出たら、片方の ssh が知らない設定が config にある（[注意点](#注意点)）
-
----
-
-## ロールバック
-
-- [手順 2](#実施手順) の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、手順 2 のブロックを貼り直してから貼る
-- ホストの `authorized_keys` の行を消すには鍵で入るので、鍵のファイルを消す手順は最後にしてある
-- Windows の OpenSSH クライアントと Git の ssh は外さない（ほかの手順書も使う）
-
-> [!CAUTION]
-> **この節の手順 4 で、秘密鍵と公開鍵（`%USERPROFILE%\.ssh\id_ed25519`・`id_ed25519.pub`）を消すと、取り戻せない**。GitHub やほかのホストにも登録してある鍵（[手順 4](#実施手順) で作らなかった鍵）なら、この節の手順 4 は行わない。
-
-1. ホストの authorized_keys から、この鍵の行を消す。
-
-   ```powershell
-   $pub = "$env:USERPROFILE\.ssh\id_ed25519.pub"
-   $k = ''
-   if (Test-Path -LiteralPath $pub) { $k = [string]((Get-Content -LiteralPath $pub -TotalCount 1) -split ' ')[1] }
-   if (-not $SSH_ALIAS) {
-     Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
-   } elseif ($k -notmatch '^AAAA[0-9A-Za-z+/=]+$') {
-     Write-Error "中断: $pub が無いか、公開鍵の形でない（ホストの authorized_keys は変えない）"
-   } else {
-     $cmd = 'umask 077; grep -vF -- {0} ~/.ssh/authorized_keys > ~/.ssh/authorized_keys.new; if [ $? -le 1 ]; then mv -f ~/.ssh/authorized_keys.new ~/.ssh/authorized_keys; else rm -f ~/.ssh/authorized_keys.new; fi; if type restorecon >/dev/null 2>&1; then restorecon -F ~/.ssh/authorized_keys; fi; grep -cF -- {0} ~/.ssh/authorized_keys' -f $k
-     & "$env:WINDIR\System32\OpenSSH\ssh.exe" $SSH_ALIAS $cmd
-   }
-   ```
-
-   - 最後に `0`（この鍵の行が残っていない）が出ればよい
-   - 鍵にパスフレーズを付けたなら聞かれる。鍵で入れなくなっていれば、ホストのユーザーのパスワードを聞かれる
-   - ホストを既に消したなど、つなげないときは、この手順は飛ばす
-   - **次の手順は、`0` が出てから貼る**（続けて貼るとパスフレーズかパスワードとして食われる）
-
-1. `~/.ssh/config` から、[手順 7](#実施手順) で足した接続先を消す。
-
-   ```powershell
-   $f = "$env:USERPROFILE\.ssh\config"
-   if (-not $SSH_ALIAS) {
-     Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
-   } elseif (-not (Test-Path -LiteralPath $f)) {
-     Write-Error "中断: $f が無い"
-   } else {
-     $a = [regex]::Escape($SSH_ALIAS)
-     $e = [Text.Encoding]::GetEncoding(28591)
-     $t = $e.GetString([IO.File]::ReadAllBytes($f))
-     $n = [regex]::Replace($t, "(?ms)^# BEGIN windows-ssh-client\.md $a\r?\n.*?^# END windows-ssh-client\.md $a(\r?\n|\z)", '')
-     if ($n -eq $t) {
-       Write-Error "中断: $f に $SSH_ALIAS の印の行が無い"
-     } else {
-       [IO.File]::WriteAllBytes($f, $e.GetBytes($n))
-       Select-String -LiteralPath $f -Pattern "windows-ssh-client\.md $a"
-     }
-   }
-   ```
-
-   - 何も出なければよい（印の行が残っていない）
-   - 印の間の行だけを消し、config のほかの行はそのまま残す（ファイルのバイトをそのまま書き戻すので、文字コードは変わらない）
-
-1. known_hosts から、ホストのホスト鍵を消す。
-
-   ```powershell
-   if (-not $SSH_HOST) {
-     Write-Error '中断: 手順 2 の SSH_HOST が空のまま。値を入れて貼り直す'
-   } else {
-     & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -R $SSH_HOST
-   }
-   ```
-
-   - `# Host <SSH_HOST> found: line N` が鍵の種類の数だけと、`… known_hosts updated.`・`Original contents retained as … known_hosts.old` が出ればよい
-   - Git の ssh も同じ known_hosts を使うので、Git の ssh の側で消す手順は無い
-   - **注意**: 元の known_hosts は `known_hosts.old` に写される。前からあった `known_hosts.old` は上書きされる
-
-1. [手順 4](#実施手順) で作った鍵を、ほかで使っていないときだけ消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub"
-   Test-Path -LiteralPath "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub"
-   ```
-
-   - `False` が 2 行出ればよい
-   - [手順 4](#実施手順) で `既にある:` か `公開鍵を作り直した:` と出た鍵（前からあった鍵）は消さない
-
----
-
-## 注意点
-
-- **ssh-agent は使わない**: パスフレーズを付けた鍵は、使うたびに聞かれる（ssh・scp・WezTerm の起動メニュー・ssh を使う git）
-  - 同じ鍵を GitHub にも登録しているなら、git の fetch・push のたびにも聞かれる
-  - パスフレーズを後から付ける・変えるのは、`& "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -p -f "$env:USERPROFILE\.ssh\id_ed25519"`
-- **2 つの ssh が、同じ `%USERPROFILE%\.ssh` を使う**: Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）は、鍵・config・known_hosts を共有する
-  - WSL の AlmaLinux 10 の ssh は、WSL のホームの `~/.ssh` を使う（別のもの）。WSL から入るなら、WSL の中で鍵を作る
-- **config を BOM 付きや UTF-16 で保存しない**: Windows PowerShell 5.1 の `-Encoding UTF8`・`>`・`>>`・`Out-File` は、BOM 付きの UTF-8 か UTF-16 で書く
-  - Windows の ssh は UTF-8 の BOM を読み飛ばすが、Git の ssh は `Bad configuration option` で止まり、ssh を使う git（GitHub への push など）も失敗する。UTF-16 は両方が読めない
-  - メモ帳で書くなら、文字コードを「UTF-8」（BOM なし）にする
-- **config には、両方の ssh が知っている設定だけを書く**: Windows の ssh（9.5p2）が知らない新しい設定を書くと、Windows の ssh が止まる。書いた後は、[更新](#更新)の手順 1 で両方を確かめる
-- **ssh の設定は、最初に見つけた値が効く**: config の前の方の `Host *` などにある `User`・`IdentityFile` は、手順 7 で足した値より先に効く
-- **Git の `usr\bin` が `PATH` の先にある PC**: PowerShell と WezTerm の起動メニューの `ssh` が、Git のものになる（[Windows の OpenSSH サーバーの注意点](windows-openssh-server.md#注意点)と同じ）。この手順書のブロックは、どちらもフルパスで呼ぶ
-- **秘密鍵のアクセス権**: Windows の ssh は、ほかの主体（Everyone・Users など）に許可のある秘密鍵を、`UNPROTECTED PRIVATE KEY FILE!` と出して使わない（手順 5・6）
-- **config のアクセス権**: Windows の ssh は、ほかの主体に書き込みの許可のある config を読まず、`Bad owner or permissions on …config` で止まる
-  - ほかの PC から写した config や、同期した config で起こりうる
-  - 手順 6 のブロックの 1 行目の `id_ed25519` を `config` に書き換えて貼り、[更新](#更新)の手順 1 で確かめ直す
-- **ホストがパスワードでのログインを受け付けないとき**（`PasswordAuthentication no` にしたホストなど）: 手順 9 は使えない。手順 9 の公開鍵の 1 行（`id_ed25519.pub` の中身）を、ホストの画面などで `~/.ssh/authorized_keys` に足す
-  - [AlmaLinux 10 の初期設定の任意節「SSH を公開鍵だけにする」](almalinux-setup.md#ssh-を公開鍵だけにする任意)を通したホストが、これに当たる。足すのは、その節の手順 1（`SSH_PUBKEY` に公開鍵の 1 行を入れる）でよい
-  - その節をまだ通していないホストでは、この手順書を先に通す（手順 9 でパスワードを使う）
-- **FIPS モードのホスト**: ed25519 の鍵は使えない（RHEL 10 の文書）。この手順書では扱わない
+   - `Bad configuration option` が出たら、片方の ssh が知らない設定が config にある（[注意点](extra/windows-ssh-client.md#注意点)）

@@ -1,6 +1,6 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../distrobox.md)
+[手順書](../distrobox.md)・[ロールバックと注意点](../extra/distrobox.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -17,7 +17,7 @@
 
 - `sudo`・`curl`・`git` など、distrobox がボックスの初期化で要るものが最初から入っていて、初期化で入れるものが少ない
 - amd64 と arm64 の両方がある（Raspberry Pi 5 でも同じイメージ）
-- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](../podman.md#注意点)）にかからない
+- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](../extra/podman.md#注意点)）にかからない
 
 distrobox の互換一覧（上流の `docs/compatibility.md`）に載っている、ほかの Toolbx 系のイメージの例:
 
@@ -39,7 +39,7 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 - **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 で有効にする）の distrobox を入れ、rootless の podman（[podman.md](../podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](../distrobox.md#更新)、[ロールバック](../distrobox.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](../distrobox.md#更新)、[ロールバック](../extra/distrobox.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の distrobox 1.8.2.3 が入り、Ubuntu 24.04 のボックスができる
     - ボックスの中のユーザーとホームがホストと同じ
@@ -103,7 +103,7 @@ $ ffmpeg -version | head -1
 ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 ```
 
-- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](../distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
+- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](../extra/distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
@@ -141,7 +141,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 
 - `--yes` を付けない `distrobox create` は `Image quay.io/toolbx/arch-toolbox:latest not found.` と `Do you want to pull the image now? [Y/n]:` を出した（`n` で中断）
 - `distrobox create --dry-run` で、podman に渡すオプション（手順 4 の補足の表）を見た
-- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](../distrobox.md#注意点)）
+- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](../extra/distrobox.md#注意点)）
 - `dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た
 
 #### 未確認事項
@@ -233,4 +233,4 @@ Container Setup Complete!
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
-- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../podman.md#ロールバック)の手順 6 に当たる）
+- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）

@@ -1,6 +1,6 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../btop.md)
+[手順書](../btop.md)・[ロールバックと注意点](../extra/btop.md)
 
 ## 補足
 

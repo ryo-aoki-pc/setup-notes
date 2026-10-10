@@ -1,6 +1,6 @@
 # GitHub CLI（gh）インストール手順（AlmaLinux 10 は公式 dnf リポジトリ / Windows 11 は scoop）の検証記録
 
-[手順書](../gh.md)
+[手順書](../gh.md)・[ロールバックと注意点](../extra/gh.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -33,7 +33,7 @@ gh 本体は依存の少ないパッケージだが、**git が入っていな�
 
 ### Windows 11 で使う: 検証状況の記録
 
-- **[Windows 11 で使う](../gh.md#windows-11-で使う)・[Windows 11 の更新](../gh.md#windows-11-の更新)・[Windows 11 のロールバック](../gh.md#windows-11-のロールバック)は、Windows の実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- **[Windows 11 で使う](../gh.md#windows-11-で使う)・[Windows 11 の更新](../gh.md#windows-11-の更新)・[Windows 11 のロールバック](../extra/gh.md#windows-11-のロールバック)は、Windows の実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
 - 確かめた範囲は[対象と検証環境](#対象と検証環境)の「状態（Windows 11）」と[付録](#付録-windows-11-の節の資料と-linux-での確認2026-10-08)
 
 ### 対象と検証環境
@@ -63,7 +63,7 @@ gh 本体は依存の少ないパッケージだが、**git が入っていな�
   - **確かめていないこと**
     - Windows で貼ること（すべての手順）、scoop での導入・更新・削除
     - `gh auth login` の問いの出方とキー操作、ワンタイムコードのクリップボードへのコピー、ブラウザでの認証、資格情報マネージャーへの保存（`(keyring)` の表示）と、そこに出る項目の名前
-    - Git の認証に `Y` と答えたときの動き（ソースからの推論）と、そのときの[Windows 11 のロールバック](../gh.md#windows-11-のロールバック)の手順 4 で Git Credential Manager の資格情報が消えること
+    - Git の認証に `Y` と答えたときの動き（ソースからの推論）と、そのときの[Windows 11 のロールバック](../extra/gh.md#windows-11-のロールバック)の手順 4 で Git Credential Manager の資格情報が消えること
     - Git Bash・PowerShell 7・cmd の gh が同じ設定とログインを使うこと
     - SSH のセッション（scoop の shim と、資格情報マネージャーを読めるか）、arm64 の Windows、winget の gh が入った PC
 

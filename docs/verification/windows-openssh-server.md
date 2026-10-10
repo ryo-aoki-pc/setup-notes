@@ -1,6 +1,6 @@
 # Windows 11 で OpenSSH サーバーを使う手順（OpenSSH.Server の機能 + パスワード認証）の検証記録
 
-[手順書](../windows-openssh-server.md)
+[手順書](../windows-openssh-server.md)・[ロールバックと注意点](../extra/windows-openssh-server.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -12,12 +12,12 @@
 
 ### 操作上の注意と併記されていた記録
 
-   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（検証した PC は 10 回で 10 分。[注意点](../windows-openssh-server.md#注意点)）
+   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（検証した PC は 10 回で 10 分。[注意点](../extra/windows-openssh-server.md#注意点)）
 
 ### 実施手順: 検証状況の記録
 
 > [!WARNING]
-> **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。このユーザーのパスワードを知る人は、SSH が届くところから、この PC の管理者として操作できる（[注意点](../windows-openssh-server.md#注意点)）。
+> **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。このユーザーのパスワードを知る人は、SSH が届くところから、この PC の管理者として操作できる（[注意点](../extra/windows-openssh-server.md#注意点)）。
 
 ### 実施手順 / 手順 2: 補足: 変数について
 
@@ -33,7 +33,7 @@
   - パブリックのとき: 5 秒待っても応答が無い
   - プライベートにした後: すぐにバナー（`SSH-2.0-OpenSSH_for_Windows_9.5`）が返った
 - 検証した PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
-- 規則の接続元は `Any` なので、LAN を通って届く別のサブネットの相手も受け付ける。検証した PC には、WireGuard のクライアントのアドレスからも入れた（[注意点](../windows-openssh-server.md#注意点)）
+- 規則の接続元は `Any` なので、LAN を通って届く別のサブネットの相手も受け付ける。検証した PC には、WireGuard のクライアントのアドレスからも入れた（[注意点](../extra/windows-openssh-server.md#注意点)）
 - パブリックのまま開ける方法（規則をパブリックにも広げる）は採らなかった（[選択した方針](#選択した方針)）
 
 ### 実施手順 / 手順 7: 補足: フルパスで呼ぶ理由
@@ -47,7 +47,7 @@
 - 既定のシェルは cmd.exe。sshd が `PROMPT` を `<ユーザー>@<ホスト名> <パス>>` の形にする
 - 指紋が手順 7 と違えば、`no` で止める。途中の経路で別の相手につながっている
 - Windows のイベント ビューアーの「アプリケーションとサービス ログ」→「OpenSSH」→「Operational」に、`sshd: Accepted password for <WIN_USER> from <IP> port <PORT> ssh2` が残る。PowerShell では `Get-WinEvent -LogName OpenSSH/Operational -MaxEvents 10`
-- 検証した PC のユーザーは Microsoft アカウントで、設定の「Windows Hello サインインのみを許可する」がオンのまま、そのアカウントのパスワードで入れた（[注意点](../windows-openssh-server.md#注意点)）
+- 検証した PC のユーザーは Microsoft アカウントで、設定の「Windows Hello サインインのみを許可する」がオンのまま、そのアカウントのパスワードで入れた（[注意点](../extra/windows-openssh-server.md#注意点)）
 - ローカル アカウントの標準ユーザーでも、このブロックのまま（`WIN_USER` だけ直して）入れた。`whoami /groups` の `Mandatory Label` は `Medium Mandatory Level` だった
 
 ### 公開鍵でもログインする（任意） / 手順 4: 補足: 鍵の置き場所とアクセス権
@@ -123,7 +123,7 @@
     - 変数が空のとき・PowerShell 7 で貼ったときに、手順 3、公開鍵の任意節の手順 4、パスワード認証を切る任意節の手順 2、ロールバックの手順 4 が何も変えずに止まること
   - **確認していないこと**:
     - Microsoft アカウントのパスワードで、手順 8・9 のブロック（OpenSSH の `ssh`）から入ること
-    - LAN の別の PC（実機）から、この文書の手順で入ること（LAN の別の IP からは、同じ PC の VM から、2026-09-29 の版の手順で鍵で入った。[付録](#付録-追加の確認2026-09-30)。WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](../windows-openssh-server.md#注意点)）
+    - LAN の別の PC（実機）から、この文書の手順で入ること（LAN の別の IP からは、同じ PC の VM から、2026-09-29 の版の手順で鍵で入った。[付録](#付録-追加の確認2026-09-30)。WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](../extra/windows-openssh-server.md#注意点)）
     - 端末に貼る操作そのもの（PowerShell の PSReadLine での複数行の貼り付け、bash の対話の入力）
     - 標準ユーザーの鍵での認証（`authorized_keys`）、既定の UAC の設定での振る舞い
     - Microsoft アカウントのロックアウト

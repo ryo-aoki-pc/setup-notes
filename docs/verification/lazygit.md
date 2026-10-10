@@ -1,6 +1,6 @@
 # lazygit 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の検証記録
 
-[手順書](../lazygit.md)
+[手順書](../lazygit.md)・[ロールバックと注意点](../extra/lazygit.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -27,7 +27,7 @@ aarch64 で降ってくるボトルは `lazygit--0.65.1.arm64_linux.bottle.tar.g
 
 ### Windows 11 で使う: 検証状況の記録
 
-- **[Windows 11 で使う](../lazygit.md#windows-11-で使う)・[Windows 11 の更新](../lazygit.md#windows-11-の更新)・[Windows 11 のロールバック](../lazygit.md#windows-11-のロールバック)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- **[Windows 11 で使う](../lazygit.md#windows-11-で使う)・[Windows 11 の更新](../lazygit.md#windows-11-の更新)・[Windows 11 のロールバック](../extra/lazygit.md#windows-11-のロールバック)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
 - 確かめた範囲は[対象と検証環境](#対象と検証環境)の「状態（Windows 11）」と[付録](#付録-windows-11-の節の資料と-linux-での確認2026-10-08)
 
 ### 対象と検証環境

@@ -1,6 +1,6 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../coding-agents.md)・[検証記録](../verification/coding-agents.md)
+[手順書](../coding-agents.md)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](../verification/coding-agents.md)
 
 ## 方法のまとめ
 

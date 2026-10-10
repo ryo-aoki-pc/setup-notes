@@ -1,6 +1,6 @@
 # WireGuard Road Warrior 設定手順（AlmaLinux 10 は NetworkManager + nmcli / Windows 11 は公式の WireGuard for Windows）の参考資料
 
-[手順書](../wireguard-road-warrior.md)
+[手順書](../wireguard-road-warrior.md)・[ロールバックと注意点](../extra/wireguard-road-warrior.md)
 
 [検証記録](../verification/wireguard-road-warrior.md#参考資料から分離した記録)
 
@@ -29,7 +29,7 @@
 
 - `client add` は同じ名前・同じ公開鍵・同じトンネル IP を拒否する（`wg-vpn.sh` の `cmd_client_add`）
 - `--pubkey` で登録した conf の `PrivateKey` は、文字列 `<CLIENT_PRIVATE_KEY>` のまま書かれる（`client add` の末尾にもその旨が出る）
-- `apply` は `wg0.conf` を作り直して `systemctl restart` するので、他のクライアントと拠点間トンネルが数秒切れる（`reload` では経路が入らない。→ [落とし穴 2](../wireguard.md#落とし穴-2-reload-では経路が追加されない)）
+- `apply` は `wg0.conf` を作り直して `systemctl restart` するので、他のクライアントと拠点間トンネルが数秒切れる（`reload` では経路が入らない。→ [落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)）
 - `apply` の末尾に出るルーターの設定（クライアント帯の静的経路）は、既に入っていれば変更不要
 - トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）
 
@@ -95,7 +95,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows の OpenSSH サーバー](../windows-openssh-server.md)など）が、拠点からトンネル越しに届くようになる
   - 拠点から PC への ping（[実施手順](../wireguard-road-warrior.md#実施手順)の手順 13 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
 - **Windows 11 ではキルスイッチは出ない**: `AllowedIPs` に `/0` が無いので、窓の編集の「トンネルを通らないトラフィックのブロック（キルスイッチ）」は出ず、ファイアウォールの制限も掛からない（WireGuard の文書の「Network Configuration Quirks」）。全トラフィックを通す構成は、AlmaLinux 10 と同じく対象外
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[実施手順](../wireguard-road-warrior.md#実施手順)の手順 4〜6・13 と[ロールバック](../wireguard-road-warrior.md#ロールバック)の手順 3 をそのまま使う
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[実施手順](../wireguard-road-warrior.md#実施手順)の手順 4〜6・13 と[ロールバック](../extra/wireguard-road-warrior.md#ロールバック)の手順 3 をそのまま使う
 
 ### 代替: wg-quick で張る場合
 
@@ -112,7 +112,7 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 
 ### 代替: WG ホスト側で鍵を作る場合
 
-wireguard.md 手順 10〜16 の元の流れ（→ [wireguard.md 手順 10〜16](../wireguard.md#実施手順)、[秘密鍵の扱い](../wireguard.md#クライアントの秘密鍵の扱い)）。
+wireguard.md 手順 10〜16 の元の流れ（→ [wireguard.md 手順 10〜16](../wireguard.md#実施手順)、[秘密鍵の扱い](../extra/wireguard.md#クライアントの秘密鍵の扱い)）。
 
 1. ホストで `client add A NAME`（`--pubkey` 無し）→ `apply A` → `client show NAME`（拠点 B なら `A` を `B` に読み替える）。`apply` でホストに反映してから表示する。この出力に秘密鍵が入っている
 1. LAN 内の `scp` など安全な経路で、PC の `${WG_DIR}/wg0.conf` に置く（手順 8 の `sed` は不要）

@@ -1,6 +1,6 @@
 # Claude Code 最新版インストール手順（AlmaLinux 10 は公式 dnf リポジトリ / Windows 11 は公式の native installer）の検証記録
 
-[手順書](../claude-code.md)
+[手順書](../claude-code.md)・[ロールバックと注意点](../extra/claude-code.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -72,7 +72,7 @@ Complete!
 
 - `--available` はリポジトリにある版だけを見る（入っている版は含めない）。リポジトリには古い版も残っているので、`--latest-limit 1` で一番新しいものだけに絞る
 - 2026-09-26 の時点で、`latest` には 137 版、`stable` には 56 版が残っていた（x86_64 / aarch64 それぞれ）
-- ネイティブインストーラが最新版として取りに行くのは `https://downloads.claude.ai/claude-code-releases/latest` が指す版で、2026-09-26 は RPM の `latest` と同じ `2.1.283` だった。RPM に届くのが遅れることはある（[注意点](../claude-code.md#注意点)）
+- ネイティブインストーラが最新版として取りに行くのは `https://downloads.claude.ai/claude-code-releases/latest` が指す版で、2026-09-26 は RPM の `latest` と同じ `2.1.283` だった。RPM に届くのが遅れることはある（[注意点](../extra/claude-code.md#注意点)）
 - コンテナの dnf 4.20.0 では、`--qf` の末尾に `\n` を付けると結果の後に空行が 1 行増えた。本書の 2026-09-22 版はそう書いていたので外した
 
 ### 実施手順 / 手順 5: 補足: 認証
@@ -152,7 +152,7 @@ Complete!
 
 ### Windows 11 で使う / 手順 0: 本文中の記録
 
-- 手順の後: `claude` のコマンドラインは[使い方の基本](../claude-code.md#使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-claude-remote-control.md)。以後は[Windows 11 の更新](../claude-code.md#windows-11-の更新)・[Windows 11 のロールバック](../claude-code.md#windows-11-のロールバック)
+- 手順の後: `claude` のコマンドラインは[使い方の基本](../claude-code.md#使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-claude-remote-control.md)。以後は[Windows 11 の更新](../claude-code.md#windows-11-の更新)・[Windows 11 のロールバック](../extra/claude-code.md#windows-11-のロールバック)
 
 ### Windows 11 で使う: 検証状況の記録
 
@@ -205,7 +205,7 @@ Complete!
 - **状態（AlmaLinux 10）**: **実機で本実行済み（`stable`、2026-09-20）**。既定の `latest` は x86_64 のクリーン VM（2026-10-06、認証前まで）とコンテナ（2026-09-26）で検証
   - 実機（aarch64）: `stable` チャンネルの repo ファイルを置いて `dnf install claude-code` し、`claude-code-2.1.267-1.aarch64` が入っている。認証も済んでいて常用中（本書の初版は、そのホストの Claude Code で書いた）
   - 2026-09-22: 同じ OS の aarch64 のコンテナで、`stable` の手順 2〜4 を通し直した
-  - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](../claude-code.md#更新)・[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)・[ロールバック](../claude-code.md#ロールバック)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
+  - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](../claude-code.md#更新)・[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)・[ロールバック](../extra/claude-code.md#ロールバック)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
   - **確認していないこと**: 実機（aarch64）での `latest`（aarch64 にも同じ版があることはメタデータで確認）、コンテナでの認証（手順 5）、認証後の `claude doctor`
   - 2026-09-28: 手順 2 と、[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)の手順 1・4のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
@@ -224,7 +224,7 @@ Complete!
     - インストーラ: `install.ps1`（`bootstrap.ps1`）の中身。sha256 は照らすが、署名は確かめず、`PATH` も変えない
     - 配布物: 2.1.288 の `manifest.json` の GPG の署名、Windows の `claude.exe`（x64）の sha256 と Authenticode の署名者・タイムスタンプ（Linux で読んだだけ）、`claude.exe` の中の文字列（`PATH` の案内、置き場所、更新のときの名前の変え方）
     - Linux の native installer の同じ版（2.1.288）: `claude install latest` / `stable` で書かれる設定と置き場所、`claude doctor`・`claude update` の出力
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../claude-code.md#windows-11-で使う)の手順 4 は、本物の `install.ps1` を Linux の pwsh で動かし、`claude.exe` を落として sha256 が合うところまで通した（Windows の実行ファイルを動かすところで止まる）。同じ節の手順 5 と[Windows 11 のロールバック](../claude-code.md#windows-11-のロールバック)の手順 2〜4 は、自分のユーザーの PATH とフォルダーを偽物にして流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../claude-code.md#windows-11-で使う)の手順 4 は、本物の `install.ps1` を Linux の pwsh で動かし、`claude.exe` を落として sha256 が合うところまで通した（Windows の実行ファイルを動かすところで止まる）。同じ節の手順 5 と[Windows 11 のロールバック](../extra/claude-code.md#windows-11-のロールバック)の手順 2〜4 は、自分のユーザーの PATH とフォルダーを偽物にして流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
   - 別の手順書の実機（[windows-claude-remote-control.md](../windows-claude-remote-control.md) の Windows 11 Pro 26H2）には、native installer の 2.1.286 が `C:\Users\<WIN_USER>\.local\bin\claude.exe` に入っていて、claude.ai にログインしてあった（2026-10-01。この節の手順で入れたものではない）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、`claude install` が Windows で出す文言と `PATH` の案内、`PATH` を足して開き直した PowerShell で `claude` が動くこと、`Get-AuthenticodeSignature` の結果、ブラウザでのログイン、`claude update`、ロールバック、arm64 の Windows、Git for Windows が無いとき
 
@@ -377,7 +377,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 **やり方**:
 
 - 1 つ目のコンテナで、`-y` 付きの dnf で同じ操作を試して挙動を確かめた
-- 新しいコンテナで、この文書の折り畳みの外にある bash のコードブロック 12 個（手順 1〜4、[更新](../claude-code.md#更新)の手順 1、[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)の手順 1〜4、[ロールバック](../claude-code.md#ロールバック)の手順 1〜3）を、上から順にそのまま抜き出したスクリプトを流した
+- 新しいコンテナで、この文書の折り畳みの外にある bash のコードブロック 12 個（手順 1〜4、[更新](../claude-code.md#更新)の手順 1、[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)の手順 1〜4、[ロールバック](../extra/claude-code.md#ロールバック)の手順 1〜3）を、上から順にそのまま抜き出したスクリプトを流した
 - `sudo` も `-y` 無しの dnf もそのまま。全体を `script` で作った pty の中で流し、6 秒おきに `y` を送った。全体で 42 秒
 - ブロックの間に確認のコマンドを挟んだ（下表の「追加」）
 
@@ -588,7 +588,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 **`irm … | iex` との違い**: `install.ps1` と同じ先頭（`param` と `Set-StrictMode -Version Latest`・`$ErrorActionPreference = "Stop"`・`$ProgressPreference = "SilentlyContinue"`）の文字列を `iex` に渡すと、流した後も `$ErrorActionPreference` が `Stop`、`$ProgressPreference` が `SilentlyContinue` のままで、未定義の変数を読むと `VariableIsUndefined` のエラーになった。`& ([scriptblock]::Create(...)) stable` では何も残らず、位置引数の `stable` が `$Target` に入った。Windows PowerShell 5.1 では確かめていない
 
-**[Windows 11 で使う](../claude-code.md#windows-11-で使う)の手順 5 と[Windows 11 のロールバック](../claude-code.md#windows-11-のロールバック)の手順 2〜4**: 文書から抜き出したブロックの `[Environment]::GetEnvironmentVariable('Path', 'User')` と `SetEnvironmentVariable('Path', …, 'User')` を、値を覚えておく偽物に置き換え（Linux の .NET は `User` の環境変数を持たない）、`$env:USERPROFILE` を一時的なディレクトリにして流した（パスの `\` は Linux の pwsh がそのまま区切りとして扱った）:
+**[Windows 11 で使う](../claude-code.md#windows-11-で使う)の手順 5 と[Windows 11 のロールバック](../extra/claude-code.md#windows-11-のロールバック)の手順 2〜4**: 文書から抜き出したブロックの `[Environment]::GetEnvironmentVariable('Path', 'User')` と `SetEnvironmentVariable('Path', …, 'User')` を、値を覚えておく偽物に置き換え（Linux の .NET は `User` の環境変数を持たない）、`$env:USERPROFILE` を一時的なディレクトリにして流した（パスの `\` は Linux の pwsh がそのまま区切りとして扱った）:
 
 - 手順 5、PATH に無いとき: `PATH に <USERPROFILE>\.local\bin を足した` で、書いたのは 1 回、値は前の値の後ろに `;<USERPROFILE>\.local\bin`
 - もう 1 度: `はもうある` で、書かなかった。末尾に `\` の付いた `<USERPROFILE>\.local\bin\` があるときも `はもうある`

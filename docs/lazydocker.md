@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/lazydocker.md)・[参考資料](reference/lazydocker.md)
+- [検証記録](verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
 
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
@@ -15,7 +15,7 @@
 - 手順の後:
   - 画面からコンテナのシェルを開くなら[podman exec でシェルを開く（任意）](#podman-exec-でシェルを開く任意)、compose のサービスを見るなら[compose のプロジェクトを見る（任意）](#compose-のプロジェクトを見る任意)
   - root のコンテナ（`sudo podman` で動かしたもの）も見るなら[root でも使う（任意）](#root-でも使う任意)
-  - 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+  - 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/lazydocker.md#ロールバック)
 - pod やシークレットも画面で扱うなら [podman-tui](podman-tui.md)（違いは[選択した方針](verification/lazydocker.md#選択した方針)）
 
 1. brew で lazydocker を入れる。
@@ -80,7 +80,7 @@
 
 ## podman exec でシェルを開く（任意）
 
-- lazydocker の `E`（シェルを開く）と `a`（アタッチ）は、`docker` コマンドを直接呼ぶ。podman だけの PC では、`+ docker exec -it ...` と出るだけで何も起きない（[注意点](#注意点)）
+- lazydocker の `E`（シェルを開く）と `a`（アタッチ）は、`docker` コマンドを直接呼ぶ。podman だけの PC では、`+ docker exec -it ...` と出るだけで何も起きない（[注意点](extra/lazydocker.md#注意点)）
 - この節で、`c`（自分で足したコマンドのメニュー）に、`podman exec` でシェルを開くコマンドを足す
 
 1. [手順 4](#実施手順) で止めた確認用のコンテナを、起動し直す。
@@ -170,7 +170,7 @@
 ## root でも使う（任意）
 
 - **root のコンテナを lazydocker で見ないなら、この節は不要**
-- `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](podman.md#注意点)。root で動かすのは[例外](verification/podman.md#選択した方針)）
+- `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](extra/podman.md#注意点)。root で動かすのは[例外](verification/podman.md#選択した方針)）
 - この節で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
 - root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
@@ -313,62 +313,3 @@
 
    - 新しい版が無ければ `Warning: lazydocker 0.25.2 already installed` のように出て、何もしない
    - すべてまとめて上げるなら `brew upgrade`
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- [root でも使う](#root-でも使う任意)の節を通したなら、先にその節の手順 6〜8 で戻す（この節の手順 3 で、root の lazydocker も消える）
-- `DOCKER_HOST` の行と API ソケットは、ほかのツールも使うので残す。消すなら [podman.md のロールバック](podman.md#ロールバック)の手順 2・3
-- compose の任意節で使った `~/compose-sample` は、[podman-compose のロールバック](podman-compose.md#ロールバック)で消す
-
-1. 確認用のコンテナを消す。
-
-   ```bash
-   podman rm -f lazydocker-web
-   ```
-
-   - `lazydocker-web` と出る
-
-1. 同じイメージをほかで使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 同じイメージを使うもの: [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)、[podman-compose](podman-compose.md)、[podman-tui](podman-tui.md)
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. lazydocker を消す。
-
-   ```bash
-   brew uninstall lazydocker
-   ```
-
-   - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/lazydocker/0.25.2...` と出る
-
-1. 設定も消すときだけ、`~/.config/lazydocker` を消す。
-
-   ```bash
-   rm -rf ~/.config/lazydocker
-   ```
-
-   - 任意節で足した設定も消える
-
----
-
-## 注意点
-
-- **`E` と `a` は `docker` コマンドを呼ぶ**: podman だけの PC では、`+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` が出るだけで、エラーも出ない
-  - シェルは [podman exec の節](#podman-exec-でシェルを開く任意)の `c` で開く
-  - `a` は `-it` で起動したコンテナにだけ使える。`-it` でないコンテナでは `Container does not support attaching. ...` と出る
-- **UBI のイメージのコンテナは、イメージの名前で並ぶ**: lazydocker はコンテナの `name` ラベルを名前として出す（参考資料を参照）
-  - 同じイメージのコンテナが並ぶと見分けにくい。操作する前に、右の枠の `Config` タブの `ID` を `podman ps` と見比べる
-  - 自分で動かすコンテナなら、手順 3 のように `podman run` の `--label name=<名前>` で分けられる
-- **`r` は確認なしで再起動する**: `s`（止める）は確認が出るが、`r` はすぐに実行する
-- **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 手順 2 の補足のエラーが出る
-- **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](podman-tui.md) で見る
-- **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の補足）
-- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
-  - root のコンテナは、[root でも使う](#root-でも使う任意)の節を通して `sudo -i lazydocker` で見る

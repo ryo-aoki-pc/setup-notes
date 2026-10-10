@@ -1,6 +1,6 @@
 # Windows 11 で OpenSSH クライアントを使う手順（ed25519 の鍵と ssh の config で AlmaLinux 10 のホストに入る）の参考資料
 
-[手順書](../windows-ssh-client.md)
+[手順書](../windows-ssh-client.md)・[ロールバックと注意点](../extra/windows-ssh-client.md)
 
 [検証記録](../verification/windows-ssh-client.md)
 
@@ -21,7 +21,7 @@
 
 - ED25519 は、Windows の ssh・Git の ssh・AlmaLinux 10 の sshd のどれも扱え、鍵が短い。Microsoft の文書も、種類を指定しないときの既定を Ed25519 としている
 - `-N ''`（空のパスフレーズ）は書かない。Windows PowerShell 5.1 は、ネイティブのコマンドに空の文字列の引数を渡さない（PowerShell 7.3 からは渡す）ので、`-N` の値が抜ける。パスフレーズは `ssh-keygen` に聞かせる
-- パスフレーズは、秘密鍵のファイルが漏れたときの守り。ssh-agent を使わないので、付けると鍵を使うたびに聞かれる（[選択した方針](#選択した方針)）。後から付けるなら、[注意点](../windows-ssh-client.md#注意点)の `ssh-keygen -p`
+- パスフレーズは、秘密鍵のファイルが漏れたときの守り。ssh-agent を使わないので、付けると鍵を使うたびに聞かれる（[選択した方針](#選択した方針)）。後から付けるなら、[注意点](../extra/windows-ssh-client.md#注意点)の `ssh-keygen -p`
 - 既に `id_ed25519` があれば作らない。GitHub に登録した鍵をそのまま使える。ホストごとに鍵を分ける形にはしなかった（鍵の管理が増えるため）
 - 秘密鍵だけがあるとき（秘密鍵だけをほかの PC から写したときなど）は、`ssh-keygen -y` で秘密鍵から公開鍵を作り直す。`ssh-keygen -t` を流すと、上書きを聞かれる
   - 出力が `ssh-ed25519 AAAA` で始まるときだけ、`Set-Content -Encoding ascii` で `id_ed25519.pub` に書く。`>` は、Windows PowerShell 5.1 では UTF-16 で書くので使わない
@@ -47,7 +47,7 @@
 
 ### 実施手順 / 手順 7: 補足: config の書き方と文字コード
 
-- 足すのは `Host`・`HostName`・`User`・`IdentityFile`・`IdentitiesOnly` の 5 行と、前後の印の 2 行。印（`#` で始まる行）は ssh が読み飛ばす。[ロールバック](../windows-ssh-client.md#ロールバック)の手順 2 は、この印の間だけを消す
+- 足すのは `Host`・`HostName`・`User`・`IdentityFile`・`IdentitiesOnly` の 5 行と、前後の印の 2 行。印（`#` で始まる行）は ssh が読み飛ばす。[ロールバック](../extra/windows-ssh-client.md#ロールバック)の手順 2 は、この印の間だけを消す
 - `IdentitiesOnly yes` で、この接続先には `IdentityFile` の鍵だけを使う（ほかの鍵を順に試さない）。`IdentityFile` は `~/.ssh/…` と `/` で書く。どちらの ssh も `~` を展開する
 - 書く文字コードは `-Encoding ascii`（BOM の無い ASCII。値は ASCII の英数字と記号だけに限っている）。Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付け、`>`・`>>`・`Out-File` は UTF-16 で書く
   - Windows の ssh は UTF-8 の BOM を読み飛ばすが（Win32-OpenSSH のソース）、Git の ssh は読み飛ばさず、`Bad configuration option` で止まる。そのため、BOM のある config には足さずに止める
@@ -74,7 +74,7 @@
 - ホストに渡すコマンドの中に二重引用符を使わない。Windows PowerShell 5.1 は、ネイティブのコマンドの引数の中の二重引用符を逃がさない。単一引用符は、PowerShell の単一引用符の文字列の中で `''` と重ねて書く
 - `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため（[windows-openssh-server.md の手順 9](../windows-openssh-server.md#実施手順) と同じ）
 - Windows の ssh は、ホスト鍵の問いへの答えとパスワードを、標準入力ではなくコンソールから読む（Win32-OpenSSH のソース）。そのため、標準入力で渡す公開鍵は、問いに食われない（Windows では確かめていない）
-- AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../windows-ssh-client.md#注意点)）
+- AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../extra/windows-ssh-client.md#注意点)）
 
 ### 実施手順 / 手順 10: 補足: 鍵でのログインの確かめ方
 

@@ -1,6 +1,6 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）の参考資料
 
-[手順書](../gnome-remote-desktop.md)
+[手順書](../gnome-remote-desktop.md)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
 
 ## 補足
 
@@ -83,7 +83,7 @@ echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /a
 
 1. システム共通パスワードで RDP 認証を通過
 1. GDM ログイン画面が表示される
-1. `<USER>` などの OS アカウントでログイン → そのユーザーのセッションが無ければ新規作成、既存のリモートセッションやヘッドレスのセッションがあればそこへ引き渡す（[注意点](../gnome-remote-desktop.md#注意点)）
+1. `<USER>` などの OS アカウントでログイン → そのユーザーのセッションが無ければ新規作成、既存のリモートセッションやヘッドレスのセッションがあればそこへ引き渡す（[注意点](../extra/gnome-remote-desktop.md#注意点)）
 
 問題があれば以下を並行して確認する:
 

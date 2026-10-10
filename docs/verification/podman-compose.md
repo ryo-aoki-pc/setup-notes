@@ -1,6 +1,6 @@
 # podman-compose インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../podman-compose.md)
+[手順書](../podman-compose.md)・[ロールバックと注意点](../extra/podman-compose.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -32,7 +32,7 @@
 - **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順だった）、手順 1〜6、[更新](../podman-compose.md#更新)、[ロールバック](../podman-compose.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順だった）、手順 1〜6、[更新](../podman-compose.md#更新)、[ロールバック](../extra/podman-compose.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼ばれる
     - `up -d` で pod・ネットワーク・2 つのコンテナができ、公開したポートとサービス名で `web` に届く
@@ -175,7 +175,7 @@ hello from compose
 | `command: sleep infinity` | 何もせずに動き続ける |
 | `init: true` | コンテナの PID 1 に小さな init を置き、止めるときの信号を `sleep` に届ける |
 
-`init: true` が無いと、`sleep infinity` が止める信号（SIGTERM）を無視し、[ロールバック](../podman-compose.md#ロールバック)の `down` が 10 秒待たされた。付けると 1 秒かからなかった。
+`init: true` が無いと、`sleep infinity` が止める信号（SIGTERM）を無視し、[ロールバック](../extra/podman-compose.md#ロールバック)の `down` が 10 秒待たされた。付けると 1 秒かからなかった。
 
 ```
 level=warning msg="StopSignal SIGTERM failed to stop container compose-sample_check_1 in 10 seconds, resorting to SIGKILL"

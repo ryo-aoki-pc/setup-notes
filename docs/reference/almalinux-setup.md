@@ -1,6 +1,6 @@
 # AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール）の参考資料
 
-[手順書](../almalinux-setup.md)
+[手順書](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
 
 ## 補足
 
@@ -73,7 +73,7 @@
 
 `epel-release` は、repo ファイル（`/etc/yum.repos.d/epel.repo` と、無効の `epel-testing.repo`）と、鍵のファイル `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` を置く。
 
-取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る（[ロールバック](../almalinux-setup.md#ロールバック)の手順 2 で使う）。
+取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る（[ロールバック](../extra/almalinux-setup.md#ロールバック)の手順 2 で使う）。
 
 #### EPEL: 参照
 
@@ -188,7 +188,7 @@
 | `sudo <コマンド>` | 読まない。PATH は `secure_path` の `/sbin:/bin:/usr/sbin:/usr/bin` | 使えない（`sudo: jq: command not found`）。[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節で使える |
 
 - **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わり、その末尾に足される
-- **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
+- **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../extra/almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
 - **RPM と同じ名前のコマンドは、root では RPM が先**: AppStream の `jq` も入れると、`type -a jq` の並びが root と Homebrew のユーザーで逆になる
 
   ```

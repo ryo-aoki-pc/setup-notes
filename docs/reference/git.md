@@ -1,6 +1,6 @@
 # Git のセットアップ手順（AlmaLinux 10 は AppStream / Windows 11 は winget の Git for Windows）の参考資料
 
-[手順書](../git.md)
+[手順書](../git.md)・[ロールバックと注意点](../extra/git.md)
 
 [検証記録](../verification/git.md#参考資料から分離した記録)
 

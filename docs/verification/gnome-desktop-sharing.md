@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）の検証記録
 
-[手順書](../gnome-desktop-sharing.md)
+[手順書](../gnome-desktop-sharing.md)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
 
 ## 補足
 
@@ -114,7 +114,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` にかけた。どれも通った
 - `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
-- コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
+- コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
 
@@ -153,7 +153,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` と ShellCheck 0.9.0（`-s bash`。変数のブロックのために SC2034・SC2154 は外した）にかけた。どれも通った
 - `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 3 と同節の手順 8 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
-- コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
+- コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
 
@@ -183,7 +183,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 
 - **状態**: **x86_64 の VirtualBox の VM（AlmaLinux 10.2 の Workstation のクリーンインストール）で本実行した（2026-10-07。[付録](#付録-virtualbox-の-vm-での本実行2026-10-07)）。実機では流していない**
   - 通したもの: この文書のブロックを、SSH でログインした共有するユーザーの対話の bash に、ブラケットペーストで貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
-    - PR の最初の版（`81012d3`）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
+    - PR の最初の版（`81012d3`）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
     - レビューで直した版（`f3450e6`）: 実施手順 1〜10 → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)
     - この検証で直した版: 直した 5 つのブロック（実施手順 9、自動ログインで使うの手順 4・5・6・8）を流し直し、続けて PC を再起動して PC の画面でパスワードでログインし、ロールバックの手順 2〜4
   - 確認したこと
@@ -715,8 +715,8 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 - **状態**: **統合後の手順を、新しく作った x86_64 の Workstation の VM で通した（2026-10-07）。実機・aarch64 では流していない**
   - 通したもの
     - 1 回目（`16b22bb` のブロック）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10（中断の分岐を含む）→ [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の手順 1〜8
-      - 続けて、PC の画面でパスワードでログインし直す → 実施手順 1・5 → 後からリモートログインを有効にした試験 → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
-    - 2 回目（直した注意点の流れ）: 実施手順 1〜9 → [リモートログイン](../gnome-remote-desktop.md)の実施手順 1〜8 → 直した[注意点](../gnome-desktop-sharing.md#注意点)のとおりに 3390 へ移す → クライアントから 3390 へ接続 → リモートログインの接続元を LAN に絞る → 両方のロールバック
+      - 続けて、PC の画面でパスワードでログインし直す → 実施手順 1・5 → 後からリモートログインを有効にした試験 → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
+    - 2 回目（直した注意点の流れ）: 実施手順 1〜9 → [リモートログイン](../gnome-remote-desktop.md)の実施手順 1〜8 → 直した[注意点](../extra/gnome-desktop-sharing.md#注意点)のとおりに 3390 へ移す → クライアントから 3390 へ接続 → リモートログインの接続元を LAN に絞る → 両方のロールバック
   - 確認したこと
     - 実施手順 2・3・6 の中断（同じユーザーのヘッドレスの unit が起動中、証明書と鍵の組み合わせの不一致）。原因を戻した後は、貼り直して先へ進めた
     - 実施手順 8 は、ほかのプロセスがポートを使っていると、30 秒待って `中断:` を出す。手順 9 も終了コード 1 で止まる。ポートを空けて手順 4 を貼り直すと、手順 8・9 が通る
@@ -846,7 +846,7 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 - **状態**: **今の版の手順書を、新しく作った x86_64 の Workstation の VM で、PC の画面を 1 度も操作せずに通した（2026-10-07）。実機・aarch64 では流していない**
   - 通したもの
-    - 1 回目（書き直した版。手順 7 と表示の 1 行を、この検証で直した）: 前提の gnome-power.md 手順 1〜5 → 実施手順 1〜16 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)の手順 1〜3 → 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ → 実施手順 3・4・7・8 の分岐 → [ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 2〜6
+    - 1 回目（書き直した版。手順 7 と表示の 1 行を、この検証で直した）: 前提の gnome-power.md 手順 1〜5 → 実施手順 1〜16 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)の手順 1〜3 → 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ → 実施手順 3・4・7・8 の分岐 → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 2〜6
     - 2 回目（最終版のブロック）: 同じ VM で、ロールバックした後から、実施手順 1〜3・5〜16 → ロールバックの手順 1・3〜6
   - 確認したこと
     - PC 役の VM には、VirtualBox のキーボード・マウスの入力を 1 度も送らなかった。PC の画面の操作は、すべてクライアント役の FreeRDP の窓から行った
@@ -862,7 +862,7 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
     - 手順 2 の分岐（モニターの無い PC、暗号化したディスク、`sshd` が無効、firewalld の永続に `ssh` が無い、`multi-user.target`）
     - ほかのユーザーが PC の画面でログインしているとき、PC の画面のアプリが終了を止めているときの手順 13
     - 長い放置、クライアントのキーボードからの Super+L（ロックは SSH の `loginctl lock-session` で起こした）
-    - 後からリモートログインを有効にしたとき（[注意点](../gnome-desktop-sharing.md#注意点)は以前の版で確かめた。手順の番号だけを付け替えた）
+    - 後からリモートログインを有効にしたとき（[注意点](../extra/gnome-desktop-sharing.md#注意点)は以前の版で確かめた。手順の番号だけを付け替えた）
     - WireGuard 越しの接続と、接続元を LAN に絞る節の WireGuard の箇条書き
 - 下表は、PC 役の VM の版（`rpm -q` で確かめた。以前の版の検証と同じ）
 

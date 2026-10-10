@@ -1,6 +1,6 @@
 # Grok Build（xAI の公式 CLI）を AlmaLinux 10・Windows 11 に入れるの検証記録
 
-[手順書](../grok-build.md)・[参考資料](../reference/grok-build.md)
+[手順書](../grok-build.md)・[ロールバックと注意点](../extra/grok-build.md)・[参考資料](../reference/grok-build.md)
 
 ## 現在の検証状態（2026-10-10）
 

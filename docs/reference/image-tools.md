@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）の参考資料
 
-[手順書](../image-tools.md)
+[手順書](../image-tools.md)・[ロールバックと注意点](../extra/image-tools.md)
 
 ## 補足
 

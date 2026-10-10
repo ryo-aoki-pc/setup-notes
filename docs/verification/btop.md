@@ -1,6 +1,6 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../btop.md)
+[手順書](../btop.md)・[ロールバックと注意点](../extra/btop.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -167,7 +167,7 @@ ayu.theme
 - ほかの Homebrew 系の手順書（当時の homebrew.md の冒頭に挙げた 17 本）は、どれも RPM（BaseOS・AppStream・EPEL）に無いか古いので Homebrew を選んでいる
 - 同じ規則（同版なら RPM）で、[image-tools.md](../image-tools.md) の Trivy は公式の dnf リポジトリにした
 - [distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[podman-tui](../podman-tui.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）
-- EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](../btop.md#注意点)）
+- EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](../extra/btop.md#注意点)）
 
 ```
 $ dnf -q list --showduplicates btop

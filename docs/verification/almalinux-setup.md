@@ -1,6 +1,6 @@
 # AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール）の検証記録
 
-[手順書](../almalinux-setup.md)
+[手順書](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
 
 ## 補足
 
@@ -231,7 +231,7 @@ RPM Fusion が残っている状態では、`Removing dependent packages:` に `
     - コンテナ: [btop.md](btop.md#付録-コンテナでの検証記録2026-09-22)（2026-09-22、aarch64）、[virtualbox.md](virtualbox.md#付録-コンテナでの検証記録2026-09-24)（2026-09-24）、[distrobox.md](distrobox.md#付録-コンテナでの検証記録2026-09-27)・[podman-compose.md](podman-compose.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman-tui.md](podman-tui.md#付録-コンテナでの検証記録2026-09-28)（2026-09-28）。aarch64 と明記したもの以外は x86_64
     - x86_64 の実機（[virtualbox.md の本実行](virtualbox.md#付録-実機での本実行2026-09-29)、2026-09-28）: EPEL が有効だったので、手順 1・3 だけ通した
   - 2026-09-29 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#epel-付録-コンテナでの検証記録2026-09-29)）
-    - 手順 1〜3、[更新](../almalinux-setup.md#更新)、[ロールバック](../almalinux-setup.md#ロールバック)
+    - 手順 1〜3、[更新](../almalinux-setup.md#更新)、[ロールバック](../extra/almalinux-setup.md#ロールバック)
     - [rpmfusion.md](../almalinux-setup.md) を続けて通し、そのロールバックの後にこの文書のロールバックを行った
   - **確認していないこと**: 実機での手順 2（`dnf install epel-release`）
     - aarch64 の実機では、`epel-release` は RPM Fusion の依存として入った（[firefox.md の付録](firefox.md#付録-実機での本実行2026-09-28)）
@@ -270,7 +270,7 @@ RPM Fusion が残っている状態では、`Removing dependent packages:` に `
 **流し方**: 同じ作りのコンテナで 2 回通した。どちらも非 root ユーザーのログインシェルで実行し、`dnf install` / `dnf upgrade` / `dnf remove` には `-y` を付けた。
 
 - 1 回目: 本文と同じコマンドを手で打った。手順書の外のコマンドも混ぜて、下の箇条書きのことを確かめた
-- 2 回目: 新しいコンテナで、この文書と [rpmfusion.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出して流した。順番は、手順 1〜3 → rpmfusion.md の手順 1〜4 → [更新](../almalinux-setup.md#更新) → rpmfusion.md のロールバック → [ロールバック](../almalinux-setup.md#ロールバック)
+- 2 回目: 新しいコンテナで、この文書と [rpmfusion.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出して流した。順番は、手順 1〜3 → rpmfusion.md の手順 1〜4 → [更新](../almalinux-setup.md#更新) → rpmfusion.md のロールバック → [ロールバック](../extra/almalinux-setup.md#ロールバック)
 
 2 回目の結果:
 
@@ -287,14 +287,14 @@ RPM Fusion が残っている状態では、`Removing dependent packages:` に `
 1 回目に確かめたこと:
 
 - 手順 3 の補足の鍵の表示は、手順書の外で EPEL の btop を入れたときのもの
-- `epel-release` を消した後も、EPEL から入れた btop は残った（[ロールバック](../almalinux-setup.md#ロールバック)のアラート）
+- `epel-release` を消した後も、EPEL から入れた btop は残った（[ロールバック](../extra/almalinux-setup.md#ロールバック)のアラート）
 - `--noautoremove` を付けない `dnf remove --assumeno epel-release` では、`dnf-plugins-core` も消える表になった
 - RPM Fusion を入れた状態の `dnf remove --assumeno epel-release` では、`rpmfusion-free-release` が `Removing dependent packages:` に出た
 
 ##### EPEL: 未確認事項
 
 - 実機での手順 2 と、aarch64 での手順 2（aarch64 は、この文書に移す前の [btop.md の付録](btop.md#付録-コンテナでの検証記録2026-09-22)でコンテナでのみ通した）
-- 実機での[更新](../almalinux-setup.md#更新)と[ロールバック](../almalinux-setup.md#ロールバック)
+- 実機での[更新](../almalinux-setup.md#更新)と[ロールバック](../extra/almalinux-setup.md#ロールバック)
 - SELinux が有効なホストで、手順 2 が `selinux-policy-extra` を入れること（RPM Fusion の依存で入ったときの記録しか無い）
 
 #### EPEL: 付録: クリーンインストールした VM での検証（2026-10-06）
@@ -417,7 +417,7 @@ Packages Altered:
     Install rpmfusion-free-release-10-1.noarch                      @@commandline
 ```
 
-依存で入った `epel-release` は、[ロールバック](../almalinux-setup.md#ロールバック)で一緒に消えやすい（その手順 1 の補足）。本書では EPEL を前提にして、[epel.md](../almalinux-setup.md) で先に入れる。
+依存で入った `epel-release` は、[ロールバック](../extra/almalinux-setup.md#ロールバック)で一緒に消えやすい（その手順 1 の補足）。本書では EPEL を前提にして、[epel.md](../almalinux-setup.md) で先に入れる。
 
 #### RPM Fusion: 実施手順 / 手順 4: 補足: 出力例と、置かれるファイル
 
@@ -465,7 +465,7 @@ Removing unused dependencies:
     - EPEL は無かったので、手順 3 の依存で入った
   - x86_64 の実機（AMD のノート PC）: EPEL が入ったホストで手順 1〜3 のコマンドを実行した（[firefox.md の付録](firefox.md#付録-x86_64-の実機での本実行2026-09-28)）。手順 3 は `rpmfusion-free-release` の 1 つだけだった
   - コンテナ
-    - 2026-09-28 の aarch64 のコンテナで、手順 1〜3 と[ロールバック](../almalinux-setup.md#ロールバック)を通した（[firefox.md の付録](firefox.md#付録-動画が再生できなかった件の切り分け2026-09-28)）
+    - 2026-09-28 の aarch64 のコンテナで、手順 1〜3 と[ロールバック](../extra/almalinux-setup.md#ロールバック)を通した（[firefox.md の付録](firefox.md#付録-動画が再生できなかった件の切り分け2026-09-28)）
     - 2026-09-29 の x86_64 のコンテナで、[epel.md](../almalinux-setup.md) の後にこの文書のブロックを通した（手順 1〜4 とロールバック。[付録](#rpm-fusion-付録-コンテナでの検証記録2026-09-29)）
   - **手順 4 とロールバックは、コンテナと新規 x86_64 VM で検証**
   - **確認していないこと**: nonfree のリポジトリ、`rpmfusion-free-updates-testing`
@@ -500,7 +500,7 @@ Removing unused dependencies:
 | 2. 確かめる | `gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-gpg-key-el10-free@rpmfusion.org> public key` |
 | 3. リポジトリ | EPEL が有効なので、`Installing:` は `rpmfusion-free-release 10-1 @commandline` の 1 つだけ |
 | 4. 確かめる | `rpmfusion-free-release-10-1.noarch` と `rpmfusion-free-updates      RPM Fusion for EL 10 - Free - Updates` |
-| ロールバック | epel.md の[更新](../almalinux-setup.md#更新)の後に行った。手順 1 の `Removing:` は `rpmfusion-free-release` の 1 つだけ。手順 2 で鍵が消えた。続けて [epel.md のロールバック](../almalinux-setup.md#ロールバック)を行った |
+| ロールバック | epel.md の[更新](../almalinux-setup.md#更新)の後に行った。手順 1 の `Removing:` は `rpmfusion-free-release` の 1 つだけ。手順 2 で鍵が消えた。続けて [epel.md のロールバック](../extra/almalinux-setup.md#ロールバック)を行った |
 
 - 1 回目は、手順 4 の後に手順書の外の `dnf -q list --showduplicates ffmpeg-libs` を実行し、`ffmpeg-libs.x86_64  7.1.5-1.el10  rpmfusion-free-updates` が出た
 - 1 回目は、手順 3 の後の `dnf remove --assumeno rpmfusion-free-release`（`--noautoremove` 無し）も、`rpmfusion-free-release` の 1 つだけだった。`epel-release` を epel.md で入れたので、依存として入ったものではない
@@ -583,9 +583,9 @@ Firefox と関連の codec を先に外してから、ロールバック 1・2 �
 - **目的**: AlmaLinux 10 の bash で、履歴を多く残し、Tab の補完を広く・楽にし、↑ で打ちかけの行から履歴を探せるようにする。ツールを足すのではなく、bash と readline の設定と、bash-completion の RPM だけで行う
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **`0dbb522` の直接追記版の実施手順 1〜8 を x86_64 のクリーン VM で本実行済み（2026-10-06）。コンテナでも検証済み（2026-10-02）**。現行版 `5da3478` は、共通 bash 新規導入後の別の VM でも再検証した（末尾の再検証記録）。既存ホストの手動移行は行っていない。
-  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順と[ロールバック](../almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#bash-の設定-付録-コンテナでの検証記録2026-10-02)）
+  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順と[ロールバック](../extra/almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#bash-の設定-付録-コンテナでの検証記録2026-10-02)）
   - 確認したこと
-    - 手順 1〜7 の出力、手順 8 のキー操作（tmux のペインにキーを送って画面を読んだ）、[ロールバック](../almalinux-setup.md#ロールバック)
+    - 手順 1〜7 の出力、手順 8 のキー操作（tmux のペインにキーを送って画面を読んだ）、[ロールバック](../extra/almalinux-setup.md#ロールバック)
     - `~/.inputrc` に `$include /etc/inputrc` が無いと `/etc/inputrc` の割り当てが消えること、`~/.bashrc` の行を消した後に閉じたシェルが履歴を 1,000 行に切り詰めること
     - [fzf.md](../almalinux-setup.md) の行との並び（手順 4 の補足）
   - **確認していないこと**
@@ -658,7 +658,7 @@ complete -o bashdefault -o default -F _brew brew
 **流し方**:
 
 - ホストの tmux のペインで `docker exec -it … ssh -t` したログインシェルに、この文書の bash のブロック（折り畳みの外のもの）を抜き出して、手順ごとに `tmux paste-buffer` で書き込んだ
-- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../almalinux-setup.md#ロールバック)まで通した。2 回の間に bash-completion を消し、`~/.bashrc` と `~/.inputrc` を実施前に戻した
+- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../extra/almalinux-setup.md#ロールバック)まで通した。2 回の間に bash-completion を消し、`~/.bashrc` と `~/.inputrc` を実施前に戻した
 - 手順 8 のキーは `tmux send-keys` で送り、`capture-pane -e` で色の制御文字ごと読んだ
 
 | 手順 | 結果（2 回とも同じ） |
@@ -1017,7 +1017,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
 - 複数ユーザーで共有する場合の権限
 - `brew analytics off` の挙動
 - bash 以外のシェル（zsh / fish）での `brew shellenv`
-- **[ロールバック](../almalinux-setup.md#ロールバック)の本実行**（`uninstall.sh` は `--help` を見ただけで、実機でもコンテナでも走らせていない）
+- **[ロールバック](../extra/almalinux-setup.md#ロールバック)の本実行**（`uninstall.sh` は `--help` を見ただけで、実機でもコンテナでも走らせていない）
 
 #### Homebrew: 付録: root のシェルでも使う節のコンテナでの検証記録（2026-09-30）
 
@@ -1261,7 +1261,7 @@ Proceed with these changes to the system installation? [Y/n]: y
 
 GL ドライバ（`GL.default`）とコーデック（`codecs-extra`）の拡張も一緒に入る。入れ終わった時点で `/var/lib/flatpak` は 2.5 GB になった。
 
-確認用に別のアプリを入れてもよい（この手順・手順 7・[ロールバック](../almalinux-setup.md#ロールバック)の手順 1 の ID を置き換える）が、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](../almalinux-setup.md#注意点)）。
+確認用に別のアプリを入れてもよい（この手順・手順 7・[ロールバック](../extra/almalinux-setup.md#ロールバック)の手順 1 の ID を置き換える）が、Flatseal より大きいアプリは runtime と合わせて数百 MB を落とす（[注意点](../extra/almalinux-setup.md#注意点)）。
 
 同じ runtime を使うアプリを 2 本目以降に入れるときは、runtime の取得は起きない。[ツール一覧](../tool-catalog.md#gui)の Flathub の行には、アプリごとの runtime（GNOME 50 / FDO 25.08 / FDO 26.08）を書いてある。
 
@@ -1296,13 +1296,13 @@ bash -lc 'echo "$XDG_DATA_DIRS"'
 - **進め方**: AppStream の `flatpak` に Flathub をシステム全体で登録し、小さいアプリを 1 つ入れて確かめる。**読者が書き換える変数は無い**
 - **状態**: **コンテナ（2026-09-24）と x86_64 の VM（2026-10-06）で検証済み。実機には入れていない**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#flatpak-付録-現行版の新規-vm-での再検証2026-10-06)に記録した
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜7・[更新](../almalinux-setup.md#更新)・[ロールバック](../almalinux-setup.md#ロールバック)を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**手順 1〜7・[更新](../almalinux-setup.md#更新)・[ロールバック](../extra/almalinux-setup.md#ロールバック)を通した
   - 確認の問い合わせ（手順 6 とロールバックの `[Y/n]`）には、端末（pty）越しに `y` を送って答えた。コマンドに `-y` は足していない
   - 確認したこと: Flathub の追加、鍵の fingerprint、Flatseal の導入、サンドボックスの起動（`--command=true`）、`.desktop` の書き出し、ロールバックで元に戻ること
   - **確認していないこと**: デスクトップのメニューへの表示、アプリの画面、GNOME Software での表示。コンテナに画面が無いため
   - 検証は x86_64 だけで、aarch64 では通していない（aarch64 向けに出ているアプリは[ツール一覧](../tool-catalog.md#aarch64-で使えないもの)を参照）
   - **これまでの手順書のコンテナ検証（実機の上の podman）と違い、x86_64 のクラウドホスト上の Docker で行った**
-  - 2026-09-28: [ロールバック](../almalinux-setup.md#ロールバック)の手順 4のブロックを `{ … }` で囲んだ
+  - 2026-09-28: [ロールバック](../extra/almalinux-setup.md#ロールバック)の手順 4のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-02: もとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
@@ -1389,7 +1389,7 @@ com.github.tchx84.Flatseal.desktop
 
 #### Flatpak: 付録: コンテナでの検証記録（2026-09-24）
 
-`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜7・[更新](../almalinux-setup.md#更新)・[ロールバック](../almalinux-setup.md#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、試したアプリが `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
+`quay.io/almalinuxorg/almalinux:10` を `docker run --privileged` で立てた使い捨てコンテナに非 root ユーザーを作り、`docker exec` で手順 1〜7・[更新](../almalinux-setup.md#更新)・[ロールバック](../extra/almalinux-setup.md#ロールバック)を通した。実機で加えた変更は無い。実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）。確認の問い合わせに答えるため、全体を `script` で作った pty の中で流し、15 秒おきに `y` を送った。`--privileged` を付けたのは、サンドボックス（bubblewrap）がコンテナの中で名前空間を作れるようにするため。同じホストの非特権コンテナでは、試したアプリが `CanCreateUserNamespace() clone() failure: EPERM` を出して名前空間を作れなかった。flatpak を非特権のコンテナで試してはいない。
 
 | 手順 | 結果 |
 |---|---|
@@ -1574,7 +1574,7 @@ Installing weak dependencies:
 - **進め方**: AppStream の `ibus-anthy` を入れ、`gsettings` で入力ソースを「キーボードの配列 + Anthy」にして、Super+Space で切り替える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナとクリーンインストールの VM で検証済み。実機では本実行していない**（コンテナ 2026-09-27、VM 2026-10-06。VM は手順 1・2・4・6・7 とロールバックの手順 1。導入済みだったので手順 3・5 は省略）
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#日本語入力-付録-現行版の新規-vm-での再検証2026-10-06)に記録した
-  - GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中に ibus-daemon を GNOME と同じ引数（`--panel disable`）で起動し、**この文書のコードブロックをそのまま貼って**手順 1〜4・6 と[ロールバック](../almalinux-setup.md#ロールバック)を通した
+  - GNOME の一式を入れたコンテナで、`dbus-run-session` のセッションバスの中に ibus-daemon を GNOME と同じ引数（`--panel disable`）で起動し、**この文書のコードブロックをそのまま貼って**手順 1〜4・6 と[ロールバック](../extra/almalinux-setup.md#ロールバック)を通した
   - 手順 1 の `localectl` は、systemd を PID 1 にした別のコンテナで確かめた（手順 1 の補足）
   - [flatpak.md](../almalinux-setup.md) と同じ、x86_64 のクラウドホスト上の Docker で行った
   - 確認したこと:
@@ -1771,7 +1771,7 @@ org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'suspend'
 ```
 
 - 既定では、5 分で画面が消えてすぐロックし、電源につないでいても 15 分（900 秒）で眠る
-- Server with GUI で入れた PC は、`gnome-settings-daemon-server-defaults` が `sleep-inactive-ac-timeout` を `0`（眠らない）にしている。電源ボタンは既定の `'suspend'` のまま（[注意点](../almalinux-setup.md#注意点)）
+- Server with GUI で入れた PC は、`gnome-settings-daemon-server-defaults` が `sleep-inactive-ac-timeout` を `0`（眠らない）にしている。電源ボタンは既定の `'suspend'` のまま（[注意点](../extra/almalinux-setup.md#注意点)）
 - タイムアウトではなく方式（`sleep-inactive-*-type`）を `nothing` にするのは、設定アプリ（gnome-control-center 47.7）が「自動サスペンド」を切った状態をこの形で表すため（ソースの `cc-power-panel.c` から）
 
 **`idle-dim` も切る理由**: gnome-settings-daemon 47.2 は、`idle-dim` が true のとき、`idle-delay` が 0 でも 60 秒の無操作で画面を暗くする（ソースの `IDLE_DIM_BLANK_DISABLED_MIN`）。
@@ -2056,7 +2056,7 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 | ロールバック 2 | `gdm` ユーザーで読んだ値が 3 つとも `'suspend'` に戻った。`gdm.d` には `locks` だけが残った |
 | ロールバック 3 | `Removed` が 5 行、`static` が 5 行。`CanSuspend` は `"yes"` に戻った |
 | ロールバック 4 | `s "suspend"`。空の `/etc/systemd/logind.conf.d` が残った |
-| 比較. Server with GUI | `gnome-settings-daemon-server-defaults` を入れると、自分のセッションとログイン画面の両方で `sleep-inactive-ac-timeout` が `0` になり、`power-button-action` は `'suspend'` のままだった（[注意点](../almalinux-setup.md#注意点)）。確かめた後に消した |
+| 比較. Server with GUI | `gnome-settings-daemon-server-defaults` を入れると、自分のセッションとログイン画面の両方で `sleep-inactive-ac-timeout` が `0` になり、`power-button-action` は `'suspend'` のままだった（[注意点](../extra/almalinux-setup.md#注意点)）。確かめた後に消した |
 
 ##### 画面オフ・ロック・サスペンド: 未確認事項
 
@@ -2466,7 +2466,7 @@ $ zoxide query --list | wc -l
   - 確認したこと: ボトルが降りる、`~/.bashrc` に書いた初期化で `z` 関数が定義される（`type -t z` → `function`）
   - ただし**非対話シェルでは `cd` が記録されない**ため、そのときの `zoxide query --list` は空だった（[手順 4 の補足](../almalinux-setup.md#実施手順)）
   - 2026-09-29〜10-02 の版には、x86_64 だけの dnf（COPR `kray74/cli-tools`）の経路があった（2026-10-03 に外した。[選択した方針](#zoxide-選択した方針)）
-    - 当時の手順 1・3〜8（3〜5 が dnf の手順で、6〜8 は今の手順 3〜5）、当時の[更新](../almalinux-setup.md#更新)の手順 2、当時の[ロールバック](../almalinux-setup.md#ロールバック)の手順 2〜5（4・5 は今の手順 2・3）を、x86_64 のコンテナで**その版のコードブロックのまま**、擬似端末の対話シェルに貼って通した（[付録](#zoxide-付録-dnf-の経路のコンテナでの検証記録2026-09-29)）
+    - 当時の手順 1・3〜8（3〜5 が dnf の手順で、6〜8 は今の手順 3〜5）、当時の[更新](../almalinux-setup.md#更新)の手順 2、当時の[ロールバック](../extra/almalinux-setup.md#ロールバック)の手順 2〜5（4・5 は今の手順 2・3）を、x86_64 のコンテナで**その版のコードブロックのまま**、擬似端末の対話シェルに貼って通した（[付録](#zoxide-付録-dnf-の経路のコンテナでの検証記録2026-09-29)）
     - 今の手順 3〜5 と同じブロックで、`type -t z` → `function`、手順 5 で `/usr/share` が出る、`zi share` で `/usr/share` に移る、を確かめた（zoxide は dnf の `/usr/bin/zoxide`）
   - **確認していないこと**: `ZOXIDE_CMD=cd` の形、Homebrew の zoxide での `zi`（fzf 連携）
 
@@ -2667,9 +2667,9 @@ $ grep -n 'zoxide init' ~/.bashrc
 - **目的**: AlmaLinux 10 の bash に [fzf](https://github.com/junegunn/fzf)（一覧から曖昧検索で選ぶコマンド）のキー操作と補完を組み込み、履歴・パス・ディレクトリを打ちかけの文字から選べるようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **`0dbb522` の直接追記版の実施手順 1〜7・fd と bat の任意節を x86_64 のクリーン VM で本実行済み（2026-10-06）。コンテナでも検証済み（2026-10-02）**。現行版 `5da3478` の共通 bash 新規導入後の再検証も、末尾に記録した。既存ホストの手動移行は今回は実行していない。
-  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順・任意節・[更新](../almalinux-setup.md#更新)・[ロールバック](../almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#fzf-付録-コンテナでの検証記録2026-10-02)）
+  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順・任意節・[更新](../almalinux-setup.md#更新)・[ロールバック](../extra/almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#fzf-付録-コンテナでの検証記録2026-10-02)）
   - 確認したこと
-    - 手順 1〜3 の出力、手順 4〜7 のキー（tmux のペインに `C-r` / `C-t` / `M-c` / Tab を送って画面を読んだ）、[使い方の基本](../almalinux-setup.md#fzf-の使い方の基本)の表、任意節のプレビュー、[ロールバック](../almalinux-setup.md#ロールバック)
+    - 手順 1〜3 の出力、手順 4〜7 のキー（tmux のペインに `C-r` / `C-t` / `M-c` / Tab を送って画面を読んだ）、[使い方の基本](../almalinux-setup.md#fzf-の使い方の基本)の表、任意節のプレビュー、[ロールバック](../extra/almalinux-setup.md#ロールバック)
     - `fzf --bash` が `PROMPT_COMMAND` などに触らないこと、非対話のシェルで何も出さないこと、2 回読んでも二重にならないこと
     - bash-completion の遅延読み込み（`git checko<Tab>`）と、[bash-settings.md 手順 4](../almalinux-setup.md#実施手順) の Homebrew の補完の行との並び
   - **確認していないこと**
@@ -2744,7 +2744,7 @@ complete -o bashdefault -o default -F _fzf_complete_ssh ssh
 **流し方**:
 
 - ホストの tmux のペインで `docker exec -it … ssh -t` したログインシェルに、この文書の bash のブロック（折り畳みの外のもの）を抜き出して、手順ごとに `tmux paste-buffer` で書き込んだ（bash-settings.md を通した後の `~/.bashrc` から）
-- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../almalinux-setup.md#ロールバック)まで通した。2 回の間に `brew uninstall fzf` と `brew autoremove` で実施前に戻した
+- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../extra/almalinux-setup.md#ロールバック)まで通した。2 回の間に `brew uninstall fzf` と `brew autoremove` で実施前に戻した
 - キーは `tmux send-keys` で `C-r` / `C-t` / `M-c` / Tab / Escape を送り、`capture-pane` で画面を読んだ
 
 | 手順 | 結果（2 回とも同じ） |
@@ -3280,9 +3280,9 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
 - **目的**: AlmaLinux 10 に [tmux](https://github.com/tmux/tmux)（端末の多重化。1 つの端末の中に複数のシェルを持ち、SSH を切ってもシェルとその中のコマンドを動かし続ける）を入れ、基本の使い方と、Claude Code を SSH の切断後も動かし続ける使い方をまとめる
 - **進め方**: Homebrew で入れる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 のクリーン VM で実施手順 1〜5 と任意設定を本実行済み（2026-10-06）。コンテナでも検証済み（2026-10-01）**
-  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順・任意節・[更新](../almalinux-setup.md#更新)・[ロールバック](../almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#tmux-付録-コンテナでの検証記録2026-10-01)）
+  - 通したこと: SSH でログインした対話の bash に、この文書の bash のブロックをそのまま貼り、実施手順・任意節・[更新](../almalinux-setup.md#更新)・[ロールバック](../extra/almalinux-setup.md#ロールバック)を、ブラケットペーストの無しと有りで 1 回ずつ通した（[付録](#tmux-付録-コンテナでの検証記録2026-10-01)）
   - 確認したこと
-    - 実施手順 1〜5、[使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)の表のキーとコマンド、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)（ホイール・クリック・境界のドラッグは、マウスの信号を端末に送って確かめた）、[ロールバック](../almalinux-setup.md#ロールバック)
+    - 実施手順 1〜5、[使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)の表のキーとコマンド、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)（ホイール・クリック・境界のドラッグは、マウスの信号を端末に送って確かめた）、[ロールバック](../extra/almalinux-setup.md#ロールバック)
     - SSH のクライアントを落としても tmux のセッションとその中のコマンドが残り、ログインし直して戻れること
     - BaseOS の tmux と並べたときの挙動（[手順 2](../almalinux-setup.md#実施手順) の補足）
     - [Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)のうち、ログインしていない `claude` で通るところ（その節の手順 1〜3・5、手順 4 のエラー。手順 4 の代わりに対話の `claude` を動かして、手順 6 で SSH を切った後も残り、手順 8 で戻れること）
@@ -3363,7 +3363,7 @@ no server running on /tmp/tmux-<UID>/default
 **流し方**:
 
 - ホストの tmux のペインで `docker exec -it … ssh -t` したログインシェルに、この文書の bash のブロック（折り畳みの外のもの）を抜き出して、手順ごとに `tmux paste-buffer` で書き込んだ（npm-offline.md の付録と同じ形）
-- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../almalinux-setup.md#ロールバック)まで通した。2 回の間に、1 回目で見つけたことを直した（下の表）
+- 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../extra/almalinux-setup.md#ロールバック)まで通した。2 回の間に、1 回目で見つけたことを直した（下の表）
 - 画面は `tmux capture-pane` で読み、`y`・`Ctrl+b d`・`exit` はキーとして送った
 - 中の tmux の状態は、`tmux list-windows` / `list-panes` / `show -g` を同じユーザーで別に呼んで読んだ
 - 表の「設定ファイル」と「Claude Code」は、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)と[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の手順
@@ -3450,7 +3450,7 @@ Example configuration has been installed to:
 ```
 
 - 依存がすでに入っていれば、一覧は短くなる。全部入っていれば聞かれない
-- `[y/n]` を聞くのは Homebrew 7.0.7 の ask mode（[homebrew.md の注意点](../almalinux-setup.md#注意点)）
+- `[y/n]` を聞くのは Homebrew 7.0.7 の ask mode（[homebrew.md の注意点](../extra/almalinux-setup.md#注意点)）
 - `example_tmux.conf` は、プレフィックスを `Ctrl+a` に変えるなど好みの強い例なので、本書は読み込まない
 
 #### tmux: 実施手順 / 手順 3: 補足: SSH が切れたとき

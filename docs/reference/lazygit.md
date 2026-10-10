@@ -1,6 +1,6 @@
 # lazygit 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
-[手順書](../lazygit.md)
+[手順書](../lazygit.md)・[ロールバックと注意点](../extra/lazygit.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）の参考資料
 
-[手順書](../ssh-socks-tunnel.md)
+[手順書](../ssh-socks-tunnel.md)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
 
 ## 補足
 

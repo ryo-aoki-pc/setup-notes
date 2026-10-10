@@ -1,6 +1,6 @@
 # podman-tui インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../podman-tui.md)
+[手順書](../podman-tui.md)・[ロールバックと注意点](../extra/podman-tui.md)
 
 ## 補足
 

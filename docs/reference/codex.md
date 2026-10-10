@@ -1,6 +1,6 @@
 # Codex CLI を AlmaLinux 10・Windows 11 に入れるの参考資料
 
-[手順書](../codex.md)
+[手順書](../codex.md)・[ロールバック](../extra/codex.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # ShellCheck / shfmt インストール手順（AlmaLinux 10 / Homebrew）の参考資料
 
-[手順書](../shellcheck.md)
+[手順書](../shellcheck.md)・[ロールバックと注意点](../extra/shellcheck.md)
 
 [検証記録](../verification/shellcheck.md#参考資料から分離した記録)
 

@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)
+- [検証記録](verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[注意点](extra/windows-dual-boot.md)
 
 > [!IMPORTANT]
 > - **入れる先のディスクの中身は、手順 5 ですべて消える**。そのディスクに Windows 11 を新しく入れ、後ろに AlmaLinux 10 用の未割り当て領域を残す
@@ -16,7 +16,7 @@
 - 上から順に進める。手順 10・12・13 は、条件に当たるときだけ行う
 - やり直すときは、手順 3 から始める（ロールバックの節は無い）。手順 5 のパーティションが残っていれば、手順 4・5 は飛ばしてよい
 
-- 手順の後: AlmaLinux 10 は、手順 5 で残した未割り当て領域に入れる（この文書には含めない。入れるときの注意は[注意点](#注意点)）。Windows の初期設定（更新・貼り付けの設定・表示・電源など）は、[Windows 11 の初期設定](windows-setup.md)で行う
+- 手順の後: AlmaLinux 10 は、手順 5 で残した未割り当て領域に入れる（この文書には含めない。入れるときの注意は[注意点](extra/windows-dual-boot.md#注意点)）。Windows の初期設定（更新・貼り付けの設定・表示・電源など）は、[Windows 11 の初期設定](windows-setup.md)で行う
 - 両方の OS を入れた後、Windows から次回だけ AlmaLinux を起動したいときは、[QEFI Entry Manager を使う節](#次回だけ-almalinux-で起動する任意)へ進む
 
 > [!CAUTION]
@@ -144,7 +144,7 @@
    ```
 
    - `HiberbootEnabled : 0` なら高速スタートアップは切れている（Rufus の「利便性向上パッチ」）。`1` なら、手順 12 で切る。`0` なら手順 12 は飛ばす
-   - `VolumeStatus : FullyDecrypted` と `ProtectionStatus : Off` なら、BitLocker は使われていない（Rufus の BitLocker の項目）。暗号化されていたら[注意点](#注意点)
+   - `VolumeStatus : FullyDecrypted` と `ProtectionStatus : Off` なら、BitLocker は使われていない（Rufus の BitLocker の項目）。暗号化されていたら[注意点](extra/windows-dual-boot.md#注意点)
    - `Id : Tokyo Standard Time` なら、手順 13 は飛ばす。違えば、手順 13 で直す
    - Home エディションで `Get-BitLockerVolume` が無いと出たら、代わりに `manage-bde -status C:` で見る
 
@@ -308,24 +308,3 @@
    - BCDEdit の `{fwbootmgr}` に `bootsequence` が無く、`BootOrder` と `displayorder` が指定前の並びならよい
    - CLI の `BootNext: 0000` は、予約が消えた根拠にも、エントリ `0000` の予約が残っている根拠にもならない
    - BCDEdit に予約が残る・一覧の取得に失敗する・起動順が違う場合は、解除できたとみなさず中断する
-
----
-
-## 注意点
-
-- **この後 AlmaLinux 10 を入れるとき**
-  - 「インストール先」で「カスタム」を選び、手順 5 の ESP（2 GiB。既存の Windows のパーティションと一緒に「不明」の下に並ぶ）を選んで、マウントポイントを `/boot/efi` にする。**「再フォーマット」に印を付けない**（付けると Windows のブートローダーが消える）
-  - `/boot`・`/`・swap は、未割り当て領域に作る。インストーラは NTFS を縮められないので、空きは手順 5 で残した分だけ
-  - インストーラは、NTFS のパーティションを見つけると、ハードウェアの時計を現地時刻として扱う（`/etc/adjtime` に `LOCAL`）。Windows の時計の設定（`RealTimeIsUniversal`）は変えなくてよい（[Windows 11 の初期設定の手順 52](windows-setup.md#実施手順) は飛ばす。AlmaLinux の時計を UTC にしたときだけ行う）
-  - GRUB の道具（`grub2-tools`）が os-prober を依存で入れ、os-prober は有効のまま。インストールの最後に、GRUB のメニューへ「Windows Boot Manager」が入るはず
-- **BitLocker（デバイスの暗号化）**
-  - この文書では Rufus の項目で自動の暗号化を止めている。手順 11 で暗号化されていたら、回復キーを PC の外に控える（`manage-bde -protectors -get C:`。Microsoft アカウントに保存されていれば `https://aka.ms/myrecoverykey` でも見られる）
-  - AlmaLinux の GRUB から Windows を起動すると、TPM の測定値（PCR 7 など）が Windows が封じたときと変わり、回復キーを聞かれることがある（Microsoft の BitLocker の文書からの推測）。そのときは PC の起動メニューで「Windows Boot Manager」を選んで起動する
-- **Rufus のローカル アカウント**
-  - パスワードは空のまま作られる。次のサインインで変更を求められるまでは、PC の前の誰でもサインインできる
-  - `net accounts /maxpwage:unlimited` で、この PC のローカル アカウント全体のパスワードの有効期限が無くなる
-- **「利便性向上パッチ」の副作用**: OneDrive のセットアップと、Outlook・Teams のアプリが入らない。要るなら、後から入れる
-- **インストールが「Windows 11 のインストールが失敗しました」で止まったとき**
-  - Shift+F10 のコマンド プロンプトで `type C:\$Windows.~BT\Sources\Panther\setuperr.log` を見る
-  - `0x80070570`（`Error in apply of …`）は、メディアの `install.wim` が壊れている。同じメディアでやり直しても、同じファイルで止まる。Rufus でメディアを作り直し、作った PC で `install.wim` のハッシュを ISO の中のものと比べてから使う
-- **手順 4・5 を飛ばしてやり直したとき**: C: に前の回の残りがあると、セットアップが `C:\Windows.old` を作る。要らなければ、ディスク クリーンアップで消す

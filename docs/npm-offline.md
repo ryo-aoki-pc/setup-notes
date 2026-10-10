@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/npm-offline.md)・[参考資料](reference/npm-offline.md)
+- [検証記録](verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
 
 > [!IMPORTANT]
 > - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られないホスト（以下、オフラインのホスト）にトンネルを張り、同書の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で dnf にプロキシを設定してあること（dnf の節を飛ばしていたら、手順 1 の前に行う）
@@ -11,11 +11,11 @@
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 
 - 上から順にコードブロックを貼る
-- 手順の後: 以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 以後は[更新](#更新)・[ロールバック](extra/npm-offline.md#ロールバック)
 
 > [!WARNING]
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](ssh-socks-tunnel.md#注意点)）
+> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](extra/ssh-socks-tunnel.md#注意点)）
 
 1. ssh-socks-tunnel.md の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
 
@@ -41,7 +41,7 @@
    ```
 
    - `v22.23.2`、`10.9.8`、`/usr/bin/node`、`/usr/bin/npm` が出る
-   - `/home/linuxbrew/.linuxbrew/bin/npm` が出たら、Homebrew の node が PATH で先に来ていて、Mason もそちらを使う（[注意点](#注意点)）
+   - `/home/linuxbrew/.linuxbrew/bin/npm` が出たら、Homebrew の node が PATH で先に来ていて、Mason もそちらを使う（[注意点](extra/npm-offline.md#注意点)）
    - `npm config get` の 2 行は、どちらも `null`
    - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される（参考資料を参照）
    - `npm notice PONG 148ms` のように `PONG` が出れば、npm はトンネルを通ってレジストリに届いている
@@ -59,7 +59,7 @@
    - npm のパッケージ（`markdownlint-cli2`・`json-lsp` など）が `Installed` に並べばよい
    - 手順 5 で使う `markdownlint-cli2` が設定に無ければ、`:MasonInstall markdownlint-cli2` で入れる。ほかの npm のパッケージも、同じように名前で入れられる
    - 失敗は通知が出ないことがある。`Installed` に並ばないものは、`:MasonLog` の `Installation failed for Package(name=…)` の行で理由を見る
-   - npm 以外の理由（`unzip` が無い、など）で失敗したものは[注意点](#注意点)
+   - npm 以外の理由（`unzip` が無い、など）で失敗したものは[注意点](extra/npm-offline.md#注意点)
    - 通知が出そろってから、`:qa` で閉じる（入れている途中で閉じると、確認無しにその導入が止まる）
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る（参考資料を参照）
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
@@ -117,52 +117,3 @@
    ```bash
    exit
    ```
-
----
-
-## ロールバック
-
-- オフラインのホストで貼る。トンネルは要らない
-- `https_proxy` はどこにも書いていないので、戻すものは無い
-- dnf のプロキシの行は、[ssh-socks-tunnel.md のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す
-- Mason で入れたものは、`:MasonUninstall <名前>` で消せる（設定にあるものは、次にトンネルのあるシェルで開いたときに入り直す）
-
-> [!WARNING]
-> **この節の手順 1 で Node.js を消すと、Mason で入れた npm のパッケージは動かなくなる**（どれも `#!/usr/bin/env node` で始まる）。Mason を使い続けるなら、この節は行わない。
-
-1. [手順 1](#実施手順) で入れた Node.js と npm を、ほかに使わないときだけ消す。
-
-   ```bash
-   sudo dnf remove -y nodejs nodejs-npm
-   ```
-
-   - [手順 1](#実施手順) で一緒に入った依存（`libuv`・`openssl` など）も消え、合わせて 9 パッケージが消える
-
-1. npm のキャッシュとログを消す。
-
-   ```bash
-   rm -rf ~/.npm
-   command -v node npm || echo '無い（期待どおり）'
-   ```
-
-   - `無い（期待どおり）` が出ればよい
-   - Mason のパッケージ（`~/.local/share/nvim/mason/packages`）は残る
-
----
-
-## 注意点
-
-- **npm だけは `ALL_PROXY` では足りない**: [手順 2](#実施手順) の `export` を飛ばさない。Mason の npm パッケージが導入に失敗して再試行を繰り返す
-- **`sudo` は `https_proxy` を渡さない**: `sudo printenv https_proxy` は何も出さなかった。`sudo npm install -g` のような使い方は、本書では扱わない
-- **Homebrew の node が入っていると、Mason はそちらの npm を使う**: Mason は PATH の先頭の `npm` を使い、`brew shellenv` は Homebrew の `bin` を PATH の先頭に置く。[手順 2](#実施手順) の `command -v` で確かめる
-- **PyPI のパッケージは入らない**: Mason は PyPI のパッケージを、仮想環境の pip で入れる。その pip は SOCKS のプロキシを使えない
-  - GitHub のリリースから入るもの（ruff など）は、この問題が無い
-- **npm 以外の理由でも失敗する**: `unzip` が無い場合もパッケージを導入できない。足りないコマンドを確認する
-  - 足りないコマンドは、`:checkhealth mason` の `WARNING unzip: not available` のような行で見られる
-  - トンネルのシェルで `sudo dnf install -y unzip` を実行してから開き直す
-- **Mason のパッケージの一覧は、24 時間ごとに取り直そうとする**: トンネルの無いときに開くと、取り直しに失敗する
-  - `:Mason` の画面に `Registry installation failed with the following error:` と出る
-  - 入れたパッケージはそのまま使える
-  - 一覧を取り直すのは、次にトンネルのあるシェルで開いたとき（[更新](#更新)）
-- **トンネルが無いときに開くと、設定にあって入っていないパッケージの導入が毎回失敗する**: 画面での編集には影響しない
-- **ssh が切れると、トンネルも消える**: 途中の導入は失敗する。[ssh-socks-tunnel.md 手順 2](ssh-socks-tunnel.md#実施手順) から張り直し、[手順 2・3](#実施手順) を貼り直す

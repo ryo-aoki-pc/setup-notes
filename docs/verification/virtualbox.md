@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の検証記録
 
-[手順書](../virtualbox.md)
+[手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -292,7 +292,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 > **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、winget の定義、インストーラの中身と署名、VirtualBox のソースと同梱のマニュアル、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](#対象と検証環境)）。
 >
 > - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM を動かした（入れた方法の記録は無い）
-> - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../virtualbox.md#注意点)）
+> - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../extra/virtualbox.md#注意点)）
 
 ### Windows 11 で使う / 手順 3: 補足: winget の定義と、インストーラがすること
 
@@ -362,11 +362,11 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
     - `enable_virt_at_load=0` を modprobe.d に置いて再起動すると `N` になり、VM が起動すること。置く前は `VERR_SVM_IN_USE` で起動に失敗すること
     - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
     - MOK の確認（今の secure-boot-mok.md の手順 7）は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
-  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 15、USB（手順 12）、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)、[更新](../virtualbox.md#更新)（新しい版が無い）、[ロールバック](../virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
-  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../virtualbox.md#ロールバック)を、コードブロックのまま通した
+  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、手順 15、USB（手順 12）、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)、[更新](../virtualbox.md#更新)（新しい版が無い）、[ロールバック](../extra/virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17）、手順 2〜8、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、手順 9〜12・14〜18、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../extra/virtualbox.md#ロールバック)を、コードブロックのまま通した
     - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
     - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
-  - 2026-09-28: 手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](../virtualbox.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](../extra/virtualbox.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。実機では、手順 4 と鍵を作るブロックを囲む前の形で流し、手順 4 は囲んだ形でもう 1 回流した（どちらもブラケットペーストの効く端末で）。ロールバックの手順 2 は流していない
   - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の手順 3・8・11・12。つないだ形は貼っていない。`bash -n` だけ）
@@ -385,7 +385,7 @@ AlmaLinux 10 の[手順 16](../virtualbox.md#実施手順)と同じ VM で、VM 
     - winget の定義: `Oracle.VirtualBox` 7.2.20 と、依存の `Microsoft.VCRedist.2015+.x64`
     - 配布物: インストーラの sha256（winget の定義と公式の `SHA256SUMS`）と Authenticode の署名。中の MSI の機能・起動の条件・カスタム アクション・環境変数・サービス・画面の文言、ドライバーの INF とカタログの署名、`VBoxVMM.dll` の中の文字列、同梱のマニュアル（PDF）
     - VirtualBox 7.2.20 のソース: インストーラ（`--silent` と証明書）、MSI の補助（Visual C++ と Python の確かめ方）、`VBoxManage --version`、`VBoxSVC` が終わるまでの時間
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2・6 と[Windows 11 のロールバック](../virtualbox.md#windows-11-のロールバック)の手順 2 は、偽物のコマンドで流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2・6 と[Windows 11 のロールバック](../extra/virtualbox.md#windows-11-のロールバック)の手順 2 は、偽物のコマンドで流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、winget の表示と、依存の入り方、ネットワークが切れる長さ、ドライバーとアダプターの出方、管理者ではない窓での VM の起動、`showvminfo --log` に NEM の行が出ること、VirtualBox マネージャーの表示と更新の知らせ、更新とロールバック、Hyper-V が動いていない PC、Intel の CPU、arm64 の Windows
 
 AlmaLinux 10:
@@ -465,7 +465,7 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 | Chocolatey の `virtualbox` | 7.2.20（コミュニティの保守） | 不採用（別のパッケージ マネージャーを足す） |
 
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
-- **Windows 11 でも Extension Pack は入れない**: ライセンスが PUEL（個人利用・教育利用・評価に限って無償。[注意点](../virtualbox.md#注意点)）
+- **Windows 11 でも Extension Pack は入れない**: ライセンスが PUEL（個人利用・教育利用・評価に限って無償。[注意点](../extra/virtualbox.md#注意点)）
   - winget に Extension Pack のパッケージは無い（winget-pkgs の `manifests/o/Oracle` の下は `VirtualBox` だけ）
   - scoop には、本体と一緒に入れる `nonportable/virtualbox-with-extension-pack-np` がある
 - **入れる・上げる・消すのは管理者の窓、VM は管理者ではない窓にした**
@@ -473,7 +473,7 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
   - VM は自分のユーザーで動かす（AlmaLinux 10 で root ではなく自分で動かすのと同じ。[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 5 の補足）
 - **機能は既定のまま、すべて入れた**: ブリッジ接続とホストオンリーのアダプターは、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) のホストオンリーアダプターの節などで使う
   - 要らない機能は、マニュアルの `ADDLOCAL`（`-msiparams ADDLOCAL=VBoxApplication,VBoxUSB` など）で外せるが、本書では試していない
-- **Hyper-V は止めない**: VirtualBox のマニュアルは、Hyper-V と一緒に使うと遅くなるので、Hyper-V を使う Windows の機能を切るよう勧めている（[注意点](../virtualbox.md#注意点)）
+- **Hyper-V は止めない**: VirtualBox のマニュアルは、Hyper-V と一緒に使うと遅くなるので、Hyper-V を使う Windows の機能を切るよう勧めている（[注意点](../extra/virtualbox.md#注意点)）
   - 本書は切らない。WSL 2 が Virtual Machine Platform を使うため（[Windows 11 の初期設定](../windows-setup.md)で WSL を入れた PC も）
   - 切ると VM が速くなるかは、試していない
 
@@ -716,7 +716,7 @@ vboxusers:x:<GID>:
 - Secure Boot を後で有効に戻したときの動作と、登録し直して `sudo /sbin/vboxconfig` を実行したときの動作
 - 手順 15、USB の受け渡し（手順 12）
 - EPEL の鍵の確認（取り込み済みだった）
-- カーネルを更新して再起動したときの自動ビルド、[更新](../virtualbox.md#更新)、[ロールバック](../virtualbox.md#ロールバック)（実機では行っていない）
+- カーネルを更新して再起動したときの自動ビルド、[更新](../virtualbox.md#更新)、[ロールバック](../extra/virtualbox.md#ロールバック)（実機では行っていない）
 - Intel の PC（VT-x）で KVM とぶつかったときの文の実際の出方
 - GUI の HiDPI と日本語の表示、日本語入力
 
@@ -877,7 +877,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
   - `showvminfo --machinereadable` の出力からは `VMState="running"` の行だけが残った
   - 偽物のログに NEM の 2 行（`HM: HMR3Init: Attempting fall back to NEM: AMD-V is not available` と `NEM: NEMR3Init: Snail execution mode is active!`）を入れたときはその 2 行が出て、入れないときは何も出なかった
   - 管理者のとき: `管理者の PowerShell に貼っている（この節の手順 5 で開いた窓に貼る）` で止まり、`VBoxManage` は 1 度も呼ばれなかった
-- [Windows 11 のロールバック](../virtualbox.md#windows-11-のロールバック)の手順 2: 偽物の `Get-Process` が何も返さないときは `winget uninstall --exact --id Oracle.VirtualBox --source winget` が呼ばれ、`VBoxSVC` を返すときは `中断: VirtualBox が動いている（…）` で止まって `winget` は呼ばれなかった
+- [Windows 11 のロールバック](../extra/virtualbox.md#windows-11-のロールバック)の手順 2: 偽物の `Get-Process` が何も返さないときは `winget uninstall --exact --id Oracle.VirtualBox --source winget` が呼ばれ、`VBoxSVC` を返すときは `中断: VirtualBox が動いている（…）` で止まって `winget` は呼ばれなかった
 
 **残っている未確認事項**:
 
@@ -963,7 +963,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 > [!WARNING]
 >
 > - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM を動かした（入れた方法の記録は無い）
-> - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../virtualbox.md#注意点)）
+> - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../extra/virtualbox.md#注意点)）
 
 
 ### 操作上の注意と併記されていた記録
@@ -973,7 +973,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 ### 操作上の注意と併記されていた記録
 
-    - 利用者の Windows 11 の PC（AMD、Hyper-V が動いている）では、VM の中の重い処理（ネットワークとディスク）の間に、VM が 1〜7 分ずつ止まった。VM のウィンドウでキーを押すと動き出した（[virtualbox-guest-bootc.md の注意点](../virtualbox-guest-bootc.md#注意点)）
+    - 利用者の Windows 11 の PC（AMD、Hyper-V が動いている）では、VM の中の重い処理（ネットワークとディスク）の間に、VM が 1〜7 分ずつ止まった。VM のウィンドウでキーを押すと動き出した（[virtualbox-guest-bootc.md の注意点](../extra/virtualbox-guest-bootc.md#注意点)）
 
 
 ### 操作上の注意と併記されていた記録

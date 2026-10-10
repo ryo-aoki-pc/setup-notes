@@ -1,6 +1,6 @@
 # Neovim 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
-[手順書](../neovim.md)
+[手順書](../neovim.md)・[ロールバックと注意点](../extra/neovim.md)
 
 ## 補足
 

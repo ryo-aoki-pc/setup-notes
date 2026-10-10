@@ -1,6 +1,6 @@
 # git-delta（delta）インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
-[手順書](../git-delta.md)
+[手順書](../git-delta.md)・[ロールバックと注意点](../extra/git-delta.md)
 
 ## 補足
 
@@ -71,7 +71,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#windows-11-で使う--手順-2-補足-vc-ランタイム)
 - **scoop の less は入れない**: [Windows 11 で使う / 手順 5 の補足](#windows-11-で使う--手順-5-補足-ページャの-less-と-powershell-の-git)
 - **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
-- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバック](../windows-setup.md#ロールバック)の手順 13（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
+- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバック](../extra/windows-setup.md#ロールバック)の手順 13（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
 - **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
 

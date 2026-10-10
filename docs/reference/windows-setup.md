@@ -1,6 +1,6 @@
 # Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL）の参考資料
 
-[手順書](../windows-setup.md)
+[手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
 [検証記録](../verification/windows-setup.md#参考資料から分離した記録)
 
@@ -78,7 +78,7 @@
 - Microsoft の文書は、winget のパッケージは 7.6.0 から既定で MSIX を入れると書いている。winget の定義（`Microsoft.PowerShell` 7.6.6.0）も、MSIX（自分のユーザー）を先に、MSI（PC 全体。`elevatesSelf`）を後に並べている
 - MSIX は自分のユーザーだけに入り、更新は winget かストアで行う。PC 全体の実行ポリシーやリモートの受け口は設定できない（Microsoft の文書）。このリポジトリの使い方では足りる
 - PC 全体の MSI（`$Env:ProgramFiles\PowerShell\7`、Microsoft Update で更新）にするなら `--installer-type wix` を付ける。ただし Microsoft の文書では、7.7.0 から MSI は無くなる
-- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（手順 19 は PowerShell 7 のプロファイルには書かない。[注意点](../windows-setup.md#注意点)）
+- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（手順 19 は PowerShell 7 のプロファイルには書かない。[注意点](../extra/windows-setup.md#注意点)）
 - winget の既定の範囲: 設定（`settings.json`）の `installBehavior.preferences.scope` は、書かなくても `user`（winget の `UserSettings.h`）で、user のインストーラが無ければ machine を選ぶ。そのため、範囲を変える設定は足さない
   - PowerShell 7 の MSIX（範囲の宣言が無い）と MSI（machine）は、どちらも user に当たらない。インストーラの種類の順（MSIX が MSI より先）で MSIX が選ばれる
   - `installBehavior.requirements.scope` は絞り込みで、machine だけのパッケージと、範囲を宣言しないインストーラ（MSIX・Store・持ち運び版・フォントを除く）が外れるので書かない。UniGet UI のスコープも「デフォルト」のまま（「ユーザー | ローカル」は `--scope user` を付ける）
@@ -100,7 +100,7 @@
 - タスク マネージャーの「スタートアップ アプリ」と設定の「アプリ」→「スタートアップ」は、`Run` の値を消さずに、`Explorer\StartupApproved\Run` に同じ名前の値（バイナリ）を書く。先頭の 1 バイトが 2 なら起動し、3（と、止めた日時の 8 バイト）なら止める。Microsoft の文書には無いが、広く知られた形（UniGet UI のインストーラも同じ所に書く）
 - OneDrive の値の名前は `OneDrive`、Edge は `MicrosoftEdgeAutoLaunch_<文字列>`。OneDrive は OneDrive の設定の「Windows にサインインしたときに OneDrive を自動的に開始する」でも止められる
 - Teams（新しい Teams。手順 33 で外す）はパッケージのアプリで、起動のタスク `TeamsTfwStartupTask` の `State` を 1（「ユーザーが無効にした」）にする。値の意味は Microsoft の文書（`StartupTaskState`）にある
-- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバック](../windows-setup.md#ロールバック)の手順 8）
+- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバック](../extra/windows-setup.md#ロールバック)の手順 8）
 
 ### 実施手順 / 手順 34: 補足: ウィジェットを外すこと
 
@@ -148,7 +148,7 @@
 - `CONSOLELOCK` を 0: 電源につないでいる間、眠りから戻ったときにサインインを求めない（既定は 1）。眠らないようにしても、手で眠らせたときのため
 - `DelayLockInterval` を `0xFFFFFFFF`: Modern Standby（S0）の PC で、画面が消えた後のロック（設定の「アカウント」→「サインイン オプション」の「一定時間不在にした場合、もう一度サインインを求めるタイミング」）を「しない」にする。この値は Microsoft の文書に無く、広く使われているもの。S3 の PC では、画面が消えるだけではロックしない（ロックするのは、眠り・パスワード付きのスクリーン セーバー・ポリシー・動的ロック）
 - Modern Standby の PC かは、`powercfg /a` に「スタンバイ (S0 低電力アイドル)」が出るかで分かる
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 35（電源プランを既定に戻す。ほかに変えた電源の設定も戻る）
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 35（電源プランを既定に戻す。ほかに変えた電源の設定も戻る）
 
 ### 実施手順 / 手順 42: 補足: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」
 
@@ -156,42 +156,42 @@
 - `Set-NetAdapterPowerManagement` の文書にこの項目の引数は無く、`Get-NetAdapterPowerManagement` で取ったものの `AllowComputerToTurnOffDevice` を変えて渡す形は、広く使われているもの（Microsoft の文書には無い）
 - `Set-NetAdapterPowerManagement` は、`-NoRestart` が無いとアダプターを起動し直す（Microsoft の文書）。SSH・リモート デスクトップでつないでいると切れるので、付ける
 - この項目を外すと、Windows がアダプターに「この PC を起こす」を任せる設定（眠りからの Wake on LAN）も使えなくなる（Microsoft の古いサポートの記事）。シャットダウンからの Wake on LAN は UEFI とアダプターが行い、Windows は関わらないので、[任意節](../windows-setup.md#wake-on-lan-を使う任意)はこの手順と両立する
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 34
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 34
 
 ### 実施手順 / 手順 45: 補足: リモート アシスタンス
 
 - リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
 - Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。手順 37 の `RemoteAssistance` で、元の値を控える
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 31
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 31
 
 ### 実施手順 / 手順 46: 補足: 自分で規則を作る理由
 
 - Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
 - その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で使う)の規則と同じ形）
 - 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 30
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 30
 
 ### 実施手順 / 手順 47: 補足: 配信の最適化
 
 - 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
 - `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
 - `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 29
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 29
 
 ### 実施手順 / 手順 48: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
 - オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある
 - オンだと、自動サインイン（手順 64）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 22
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 22
 
 ### 実施手順 / 手順 49: 補足: 管理者の窓で書く理由と、効き目
 
 - 自分のユーザーの設定（`HKCU`）だが、`HKCU\Software\Policies` の下は、管理者の権限が無いと書けない。管理者の窓も同じユーザーなので、自分の `HKCU` に書かれる
 - Microsoft の文書では、このポリシーは「エクスプローラーの検索ボックスに最近の検索の項目を出さない」。スタートの検索から Web の結果が消えることは、広く報告されているもの（24H2 でも効くという報告と、効かないことがあるという報告がある）
 - Windows 10 の `BingSearchEnabled` は、Windows 11 で効く根拠が見つからないので使わない
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 23
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 23
 
 ### 実施手順 / 手順 51: 補足: Scancode Map の値
 
@@ -217,14 +217,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - US 配列の値は、Microsoft の日本の社員のブログ（Learn に残っている「英語キーボードを快適に使う」）と同じ。設定の「時刻と言語」→「言語と地域」→「日本語」の「言語のオプション」→「キーボード レイアウト」の「英語キーボード (101/102 キー)」も、同じ値を書くと報告されている
 - JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）。手順 37 の `Keyboard` で、元の値を控える
 - 手順 51 の Scancode Map は、キーの位置（スキャン コード）で変えるので、US 配列でも Caps Lock の位置のキーが Ctrl になる
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 26
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 26
 
 ### 実施手順 / 手順 54: 補足: 入るもの
 
 - Windows 11 では、`wsl --install --no-distribution` は Windows の機能「仮想マシン プラットフォーム」（`VirtualMachinePlatform`）を入れ、WSL のパッケージを入れる（WSL のソースの `WslInstall.cpp`）。WSL 1 の機能（`Microsoft-Windows-Subsystem-Linux`）は `--enable-wsl1` を付けたときだけ
 - 機能を入れたときは、再起動が要る。この文書では手順 55 の再起動で済ませ、AlmaLinux 10 は手順 62 で入れる
 - VirtualBox は、Hyper-V が動いていると、それを通して VM を動かす（NEM）。仮想マシン プラットフォームを外しても、メモリ整合性などで Hyper-V が動き続けることがある
-- 元に戻すのは[ロールバック](../windows-setup.md#ロールバック)の手順 25
+- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 25
 
 ### 実施手順 / 手順 58: 補足: コマンドで外さない理由
 
@@ -617,7 +617,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### PowerShell 7 のプロファイルを設定する（任意） / 手順 7: 補足: 印の行だけを消す
 
-- [ロールバック](../windows-setup.md#ロールバック)の手順 15 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバック / 手順 15 の補足](#ロールバック--手順-15-補足-文字コードを変えずに消す)）
+- [ロールバック](../extra/windows-setup.md#ロールバック)の手順 15 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバック / 手順 15 の補足](#ロールバック--手順-15-補足-文字コードを変えずに消す)）
 - 消すのは、行末が `  # windows-setup.md` の行。印が行の途中にある行は消さない
 - PowerToys の Command Not Found が足した行は、印が無いので残る
 

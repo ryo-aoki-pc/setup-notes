@@ -1,6 +1,6 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の参考資料
 
-[手順書](../samba-client.md)
+[手順書](../samba-client.md)・[ロールバックと注意点](../extra/samba-client.md)
 
 [検証記録](../verification/samba-client.md#参考資料から分離した記録)
 
@@ -36,7 +36,7 @@
 
 - UAC が有効な Windows では、Administrators の一員がサインインすると、昇格したものとしないものの 2 つのログオン セッションができる。ドライブの割り当ては、作った側のセッションにだけある（Microsoft の文書）
 - エクスプローラーは昇格しない側で動くので、管理者の窓（`sudo` を含む）で割り当てたドライブは、エクスプローラーにも、管理者ではない窓にも出ない
-- 管理者の窓からも見えるようにするレジストリの値（`EnableLinkedConnections`）は、PC 全体の設定を足すことになるので採らない。管理者の窓では UNC パスを使う（[注意点](../samba-client.md#注意点)）
+- 管理者の窓からも見えるようにするレジストリの値（`EnableLinkedConnections`）は、PC 全体の設定を足すことになるので採らない。管理者の窓では UNC パスを使う（[注意点](../extra/samba-client.md#注意点)）
 
 ### Windows 11 で使う / 手順 2: 補足: 変数について
 

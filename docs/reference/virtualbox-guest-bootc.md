@@ -1,6 +1,6 @@
 # VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の参考資料
 
-[手順書](../virtualbox-guest-bootc.md)
+[手順書](../virtualbox-guest-bootc.md)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
 ## 補足
 

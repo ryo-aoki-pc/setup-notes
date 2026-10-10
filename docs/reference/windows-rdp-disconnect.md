@@ -1,6 +1,6 @@
 # Windows 11 のリモートデスクトップを、画面をロックせずに切断する手順（tscon）の参考資料
 
-[手順書](../windows-rdp-disconnect.md)
+[手順書](../windows-rdp-disconnect.md)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
 
 ## 補足
 

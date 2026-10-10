@@ -1,6 +1,6 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）の検証記録
 
-[手順書](../wireguard.md)
+[手順書](../wireguard.md)・[ロールバックと注意点](../extra/wireguard.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -33,7 +33,7 @@ $ tracepath -n 192.168.120.100
 
 - 経路に**相手のトンネル IP**（`${WG_B_TUN_IP}`）が出ればトンネル経由で届いている
 - `pmtu 1420` は wg0 の MTU
-- 1 ホップ目が `${ROUTER_A_LAN_IP}` で、2 ホップ目に `asymm` と出るのは、Redirect を受け入れないクライアント（[ヘアピン](../wireguard.md#ルーターの静的経路とヘアピン非対称経路)参照）
+- 1 ホップ目が `${ROUTER_A_LAN_IP}` で、2 ホップ目に `asymm` と出るのは、Redirect を受け入れないクライアント（[ヘアピン](../extra/wireguard.md#ルーターの静的経路とヘアピン非対称経路)参照）
 
 **逆方向（Client B → Client A）も必ず確認する。**
 
@@ -74,7 +74,7 @@ $ tracepath -n 192.168.120.100
     - **拠点 A の実機はまだ旧レイアウトのまま**
   - **確認していないこと**: 両拠点の実機を現行の firewalld レイアウトにそろえた構成、`remove` の実機での本実行、クライアント同士の疎通
   - 2026-09-28: 補足の firewalld のブロックを、貼り方で行が失われない形に直した（[README の記法](../../README.md#記法)）
-    - `{ … }` で囲んだ（中のコマンドは変えていない）: [転送を絞りたい場合](../wireguard.md#転送を絞りたい場合)と[Cockpit へ入る場合](../wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)の rich rule の例、[旧レイアウトからの移行](../reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)を手で行うブロック
+    - `{ … }` で囲んだ（中のコマンドは変えていない）: [転送を絞りたい場合](../extra/wireguard.md#転送を絞りたい場合)と[Cockpit へ入る場合](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)の rich rule の例、[旧レイアウトからの移行](../reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)を手で行うブロック
     - 2 つに分けた（目視で確かめてから次を貼るため）: `--info-zone` の後の Cockpit の開放、`--dry-run` の後の `apply`
     - Cockpit の開放は、`--add-service` と `--reload` を `&&` でつないだ 1 行にした
     - どのブロックも、直した後は構文の検査だけで、流していない
@@ -132,7 +132,7 @@ $ tracepath -n 192.168.120.100
 - **値は `site.env` に集約し、両拠点で同じファイルを使う** — `site.env` は A/B 両拠点の値を並べて持つ
   - スクリプトは指定された拠点を**このホストの LAN 側 IP** と照合してから、自拠点・相手拠点の値を組み立てる
   - 拠点ごとに手順を書き分けないので、**A/B の取り違えが起きない**
-- **秘密鍵は `wg0.conf` に直接書く** — `PostUp` で別ファイルから読み込む書き方もできるが、`systemctl reload` で**秘密鍵が消えてトンネルが止まる**ことを実測で確認した（[落とし穴 1](../wireguard.md#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）
+- **秘密鍵は `wg0.conf` に直接書く** — `PostUp` で別ファイルから読み込む書き方もできるが、`systemctl reload` で**秘密鍵が消えてトンネルが止まる**ことを実測で確認した（[落とし穴 1](../extra/wireguard.md#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）
 - **firewalld は `wg0` を LAN 側ゾーンに入れ、ゾーン内転送で無条件に通す** — トンネルを通る通信は WireGuard の鍵で認証済みなので、WG ホストでは絞らず、絞るのは**宛先ホストのファイアウォール**に任せる
   - Road Warrior からも拠点の LAN からも、どのホストへ行くときも気にするのは宛先の設定だけになる
   - firewalld の設定は「LAN 側ゾーンに待ち受けポート・`wg0`・forward」の 3 点で、policy は作らない
@@ -140,17 +140,17 @@ $ tracepath -n 192.168.120.100
   - WG ホスト自身宛ての通信も LAN からと同じ扱いになる（LAN 側ゾーンで開いているものはトンネル越しにも開く）
   - 以前は専用ゾーン `wireguard` + 方向ごとの policy 8 本で組み合わせを絞っていた（履歴 `d364840` 以前。残っていれば `apply` が消す → [移行](../reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)）
 - **トンネルも、クライアントの通信も NAT しない** — 送信元 IP がそのまま相手拠点の LAN に届くので、相手側でアクセス元を識別・制限できる
-  - その代わり、**両拠点のルーターに相手 LAN とクライアント帯の静的経路が要る**（[注意点](../wireguard.md#ルーターにはクライアント帯の静的経路も要る)）
-- **両拠点とも `Endpoint` と `PersistentKeepalive` を設定** — どちらからでもトンネルを張り直せる。片側がグローバル IP を持たない場合は[注意点](../wireguard.md#片側がグローバル-ip-を持たない場合cgnat-など)を参照
+  - その代わり、**両拠点のルーターに相手 LAN とクライアント帯の静的経路が要る**（[注意点](../extra/wireguard.md#ルーターにはクライアント帯の静的経路も要る)）
+- **両拠点とも `Endpoint` と `PersistentKeepalive` を設定** — どちらからでもトンネルを張り直せる。片側がグローバル IP を持たない場合は[注意点](../extra/wireguard.md#片側がグローバル-ip-を持たない場合cgnat-など)を参照
 - **クライアントは拠点に所属させ、拠点ごとにアドレス帯を分ける** — WireGuard はインターフェースごとに「この宛先はこの peer」という対応表（cryptokey routing）を持ち、**1 つのアドレスを 2 つの peer に対応づけることはできない**
   - WG host B から見ると拠点 A のクライアントはすべて拠点 A の peer の向こうにいるので、帯をまとめて `AllowedIPs` に 1 行書けばよく、クライアントを追加しても拠点 B 側の設定は変わらない
   - 同じクライアントを両拠点に直接つなげる構成にすると、各ホストでそのクライアントの IP を「直接の peer」と「相手拠点の peer」の両方に書くことになり成立しない
   - 片方の拠点だけで受けたい場合は、もう一方の帯を空にする
 - **クライアントの conf はホスト側で生成し、QR コードかファイルで渡す** — スマートフォンではこれが実用的。秘密鍵を拠点の外で作りたい場合は、クライアント側で鍵を作って公開鍵だけを渡す
-- **反映は restart で行う** — 新しい peer の `AllowedIPs` に対する経路は reload では追加されない（[落とし穴 2](../wireguard.md#落とし穴-2-reload-では経路が追加されない) と同じ機構。実測）
+- **反映は restart で行う** — 新しい peer の `AllowedIPs` に対する経路は reload では追加されない（[落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない) と同じ機構。実測）
   - まとめて登録してから 1 回 restart する運用にする
   - **トンネル越しに WG ホストへ ssh して作業しているときは、この restart が自分のセッションの足元を切る**（切り離して実行する方法は [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
-- **ホストの転送規則はクライアント同士を隔離しないが、生成したクライアント conf はクライアント帯を含まない。全トラフィックの VPN 経由（`0.0.0.0/0`）は対象外** — [注意点](../wireguard.md#クライアント同士を通す場合)を参照
+- **ホストの転送規則はクライアント同士を隔離しないが、生成したクライアント conf はクライアント帯を含まない。全トラフィックの VPN 経由（`0.0.0.0/0`）は対象外** — [注意点](../extra/wireguard.md#クライアント同士を通す場合)を参照
 
 ### スクリプトの動作
 
@@ -160,7 +160,7 @@ $ tracepath -n 192.168.120.100
       - IP の一覧は最後まで読み、最初に一致するインターフェースを使う。途中で awk を終えると、`pipefail` の下で `ip` の SIGPIPE により apply が間欠的に終了 141 になるため（[VM の実測](#間欠的な終了-141-の原因と修正)）
   - 既存の conf に、登録簿にも相手拠点にも無い `[Peer]` が無いか（あれば鍵と行番号を出して停止。消してよい場合は `--drop-unknown-peers`）
 - その後、必要なパッケージを導入し、ホストの鍵または既存 conf を検査する。ここで失敗しても導入済みパッケージは戻さない
-- **conf を生成する場合**: `PrivateKey` を直接書く（[落とし穴 1](../wireguard.md#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）
+- **conf を生成する場合**: `PrivateKey` を直接書く（[落とし穴 1](../extra/wireguard.md#落とし穴-1-秘密鍵を-conf-の外に出すと-reload-で消える)）
   - 既存の conf と内容が違えば、`.bak-日時` に退避してから書く
   - 相手 peer の `AllowedIPs` には相手拠点のクライアント帯が、その後ろには `clients.list` に登録したクライアントの `[Peer]` が入る
 - **既存の conf を使う場合**:
@@ -170,7 +170,7 @@ $ tracepath -n 192.168.120.100
   - 旧レイアウト（`${WG_FW_ZONE}` ゾーンと `siteA-to-siteB` などの policy）が残っていれば、その前に policy → ゾーンの順に消す
   - `wg0` が旧ゾーンでも LAN 側ゾーンでもない別のゾーンにあれば、firewalld を変更せずに止まる。ただし、その前に conf と sysctl が変更されている場合がある
 - **sysctl**: `ip_forward` だけを有効にする。`rp_filter` は strict（1）のままで動く（相手 LAN への経路が `wg0` を向いているので、逆経路チェックを通る）
-- **サービス**: 最後は常に `systemctl restart` する（[落とし穴 2](../wireguard.md#落とし穴-2-reload-では経路が追加されない)）。クライアントを追加・削除したときも `apply` で反映する
+- **サービス**: 最後は常に `systemctl restart` する（[落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)）。クライアントを追加・削除したときも `apply` で反映する
 - **LAN_ZONE**: 空なら `WG_x_LAN_IP` を持つ NIC のゾーンを自動で使う
 - **CGNAT 構成**: `SITE_x_PUBLIC` を空にすると、その拠点に向けた `Endpoint` を書かない
 - **`client add` が作る conf**: ホスト側の `[Peer]` に `Endpoint` は書かず、ハンドシェイクを受けた送信元を endpoint として覚える（`PersistentKeepalive` もクライアント側にだけ書く）
@@ -184,14 +184,14 @@ $ tracepath -n 192.168.120.100
 |---|---|
 | クライアントの ping に `From ${WG_A_LAN_IP} ... Packet filtered` | WG ホストの firewalld が転送を拒否している。`wg0` が LAN 側ゾーンに入っていない、またはそのゾーンの forward が `no`（`status` の `--info-zone` で確認。`apply` で直る） |
 | `wg show` の handshake は成立しているのに、クライアントの ping が無応答 | 相手側の firewalld（`wg0` のゾーン・forward）、相手ルーターの静的経路、**相手の `ip_forward`** のいずれか。両拠点で `apply` したか確認する |
-| WG ホスト自身から相手 LAN へ ping できないのに、クライアント同士は通る | 下記「[WG ホスト自身から相手 LAN へ送る場合](../wireguard.md#wg-ホスト自身から相手-lan-へ送る場合)」 |
+| WG ホスト自身から相手 LAN へ ping できないのに、クライアント同士は通る | 下記「[WG ホスト自身から相手 LAN へ送る場合](../extra/wireguard.md#wg-ホスト自身から相手-lan-へ送る場合)」 |
 | クライアントから相手の**トンネル IP** へ ping すると `Destination Net Unreachable`（送信元は自拠点ルーター） | ルーターに `${WG_TUNNEL_NET}` の経路が無いため。クライアント同士の通信には不要 |
 | 自拠点から張ったトンネルは動くのに、相手側から張ろうとすると失敗する | 自拠点の firewalld で `${WG_PORT}/udp` を開け忘れている、またはルーターのポート転送が無い |
-| トンネル越しに WG ホスト自身の ssh / Cockpit に `No route to host`。**同じ宛先に ping は通る** | `wg0` が属するゾーンでその service が開いていない。`wg0` は LAN 側ゾーンにあるので、同じホストに LAN からも入れないはず。旧レイアウト（空の専用ゾーン）が残っている場合も同じ症状（[トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合](../wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)） |
+| トンネル越しに WG ホスト自身の ssh / Cockpit に `No route to host`。**同じ宛先に ping は通る** | `wg0` が属するゾーンでその service が開いていない。`wg0` は LAN 側ゾーンにあるので、同じホストに LAN からも入れないはず。旧レイアウト（空の専用ゾーン）が残っている場合も同じ症状（[トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)） |
 | ハンドシェイクは成立するのに、相手拠点 LAN へ**まったく応答が無い**（ICMP も返らない） | 相手拠点のホストの `AllowedIPs` にクライアント帯が無い。WireGuard は範囲外の送信元を黙って捨てる。両拠点の `site.env` に帯を書いて両拠点で `apply` したか確認する |
-| クライアントを足したのに届かない。`wg show` には出ている | `reload` で済ませた。`restart` する（[落とし穴 2](../wireguard.md#落とし穴-2-reload-では経路が追加されない)） |
+| クライアントを足したのに届かない。`wg show` には出ている | `reload` で済ませた。`restart` する（[落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)） |
 | その端末だけハンドシェイクが成立しない（`wg show` に `[Peer]` が出ない、クライアント側は送信だけ増えて受信が 0） | ホストにその端末の公開鍵の `[Peer]` が無い。拠点 LAN どころか WG ホストのトンネル IP まで**すべて無応答**になる。`client list` と `sudo wg show` を突き合わせる |
-| 手で `wg0.conf` に書いた `[Peer]` が、`apply` の後で消えている | `clients.list` が唯一の登録簿で、`apply` はそこから `[Peer]` を毎回組み立て直す（[落とし穴 3](../wireguard.md#落とし穴-3-登録簿に無い-peer-は-apply-で消える)） |
+| 手で `wg0.conf` に書いた `[Peer]` が、`apply` の後で消えている | `clients.list` が唯一の登録簿で、`apply` はそこから `[Peer]` を毎回組み立て直す（[落とし穴 3](../extra/wireguard.md#落とし穴-3-登録簿に無い-peer-は-apply-で消える)） |
 | 拠点の LAN からクライアントへ接続できない（逆方向だけ失敗） | ルーターにクライアント帯の静的経路が無い |
 | クライアントから WG ホスト自身（`${MY_TUN_IP}`）に届かない | クライアント conf の `AllowedIPs` に `${WG_TUNNEL_NET}` が入っていない |
 | OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < /etc/wireguard/wg0.key` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](../wireguard.md#バックアップと復旧os-の再インストール)） |
@@ -689,7 +689,7 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 
 ### 付録: 全部消すの手順 2 の後に残る控え（2026-10-08）
 
-- [wireguard-road-warrior.md の検証記録の 2026-10-08 の付録](wireguard-road-warrior.md#付録-windows-11-pro-の-vm-での-vpn-の通し検証2026-10-08)の検証環境（AlmaLinux 10.2 の VM 2 台を拠点 A・B にした）を片付けたとき、[全部消す](../wireguard.md#全部消すロールバック)の手順 1〜4 を両拠点で行った
+- [wireguard-road-warrior.md の検証記録の 2026-10-08 の付録](wireguard-road-warrior.md#付録-windows-11-pro-の-vm-での-vpn-の通し検証2026-10-08)の検証環境（AlmaLinux 10.2 の VM 2 台を拠点 A・B にした）を片付けたとき、[全部消す](../extra/wireguard.md#全部消すロールバック)の手順 1〜4 を両拠点で行った
 - 拠点 A（`client add`・`client remove` の後の `apply` を行った方）では、`remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つが残った（秘密鍵を含む conf の控え）。拠点 B（`apply` を 1 回だけ行った方）は `/etc/wireguard` ごと消えた
 - `scripts/wireguard/wg-vpn.sh` の `cmd_remove` は、`--purge` で `$CONF`・`$KEY`・`$PUB` と登録簿にあるクライアント用 conf だけを消す。控え（`write_conf` と `restore_file` が作る `.bak-<日時>`）は消さない
 - 本文の手順 2 に、控えが残る旨の箇条書きを足した。検証用の鍵なので、検証では手で消した。スクリプトは変えていない

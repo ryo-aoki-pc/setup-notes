@@ -1,6 +1,6 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の参考資料
 
-[手順書](../claude-code-gui.md)
+[手順書](../claude-code-gui.md)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
 ## 補足
 
@@ -17,7 +17,7 @@
 - ヘッドレスのセッションには、モニターが 1 枚も無い。撮る画面が無く、窓も置き場所が無い
 - `--virtual-monitor` は gnome-shell 49（Mutter）の「消えない仮想モニターを足す」オプション。セッションの間ずっと `Meta-0` という名前のモニターがあり、主のモニターになる
   - 起動のログ: `No seat assigned, running headlessly` の後に `Added virtual monitor Meta-0`
-- RDP（[gnome-headless-session.md](../gnome-headless-session.md) の `grdctl --headless`）でつないだときにも仮想モニターはできるが、つないでいる間だけ（[注意点](../claude-code-gui.md#注意点)）
+- RDP（[gnome-headless-session.md](../gnome-headless-session.md) の `grdctl --headless`）でつないだときにも仮想モニターはできるが、つないでいる間だけ（[注意点](../extra/claude-code-gui.md#注意点)）
 - `ExecStart=` の空の行は、元の `ExecStart` を消すため（systemd のドロップインの決まり）
 - 置き場所は、ユーザーの systemd のドロップイン（`~/.config/systemd/user/<unit>.d/`）。`/usr/lib/systemd/user/org.gnome.Shell@wayland.service` は変えない
 
@@ -37,7 +37,7 @@
 - `gnome-gui.py shot` は、Mutter の `org.gnome.Mutter.ScreenCast` で主のモニターを録画するセッションを作り、PipeWire のストリームから GStreamer で 1 コマを PNG にして、セッションを止める
 - 撮っている間は、上部バーの右に画面共有の表示（オレンジ）が出て、写しにも写る
 - GNOME Shell の `org.gnome.Shell.Screenshot` は、GNOME 41 から決まった相手（と unsafe mode）にしか使わせないので、使わない（[選択した方針](#選択した方針)）
-- スクリプトは `/usr/bin/python3` で動く。Homebrew の `python3` が PATH の先頭にあっても、そちらには `gi` が無い（[注意点](../claude-code-gui.md#注意点)）
+- スクリプトは `/usr/bin/python3` で動く。Homebrew の `python3` が PATH の先頭にあっても、そちらには `gi` が無い（[注意点](../extra/claude-code-gui.md#注意点)）
 
 ### 実施手順 / 手順 6: 補足: 座標とキーの間合い
 
@@ -53,7 +53,7 @@
   - unsafe mode は、同じユーザーのどのプロセスにも、画面の撮影と任意の JavaScript の実行を許す。この手順書は使わない（検証の途中で、Claude Code の auto mode の安全判定にも止められた）
   - Mutter の ScreenCast と RemoteDesktop は、gnome-remote-desktop や xdg-desktop-portal-gnome が使う口。使っている間は、上部バーに画面共有の表示が出る
 - **仮想モニターを gnome-shell のオプションで付ける**: ヘッドレスのセッションには、RDP のクライアントがつないでいる間しかモニターが無い。常に 1 枚あれば、いつでも撮れ、窓の位置も変わらない
-- **人が同じ画面を見るときは、Claude Code が撮った画面を送る**: RDP（gnome-headless-session.md）でつなぐと、Claude Code が見ている仮想モニターとは別のモニターが足され、同じ画面は写らなかった（[注意点](../claude-code-gui.md#注意点)）
+- **人が同じ画面を見るときは、Claude Code が撮った画面を送る**: RDP（gnome-headless-session.md）でつなぐと、Claude Code が見ている仮想モニターとは別のモニターが足され、同じ画面は写らなかった（[注意点](../extra/claude-code-gui.md#注意点)）
 - **ヘッドレスのセッションの手順書から分けた**: もとはひとつの手順書だった。利用者の依頼で、セッションの動かし方と RDP でつなぐところを [gnome-headless-session.md](../gnome-headless-session.md) に残し、Claude Code にかかわるところをこの手順書にした
 
 ### 参照

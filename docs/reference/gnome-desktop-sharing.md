@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）の参考資料
 
-[手順書](../gnome-desktop-sharing.md)
+[手順書](../gnome-desktop-sharing.md)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
 
 [検証記録](../verification/gnome-desktop-sharing.md)
 
@@ -84,7 +84,7 @@
   - `open('/dev/tty', 'r+')` は、テキストの読み書きのモードでは `io.UnsupportedOperation: File or stream is not seekable.` で失敗した（検証で直した）
 - パスワードの無いキーリングも、gnome-keyring を起こした直後は閉じている。開くように頼まれると、パスワードを聞かずに開く（コンテナでの模擬と、VM の再起動の後の最初の RDP の認証）
 - 作ったコレクションの実際の D-Bus パスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。名前が `rdp` でも、記録と一致しない既存コレクションは再利用しない。記録のファイル名は、この手順書の以前の版の任意節「自動ログインで使う」と同じなので、その版で作ったキーリングもそのまま使える
-- 元に戻す[ロールバック](../gnome-desktop-sharing.md#ロールバック)の手順 4 は、この記録のコレクションだけを開き、RDP の schema に一致する項目だけを消す。コレクションと記録を消すのは、ほかの項目が無く、削除が完了したときだけ
+- 元に戻す[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 4 は、この記録のコレクションだけを開き、RDP の schema に一致する項目だけを消す。コレクションと記録を消すのは、ほかの項目が無く、削除が完了したときだけ
 
 ### 実施手順 / 手順 9: 補足: grdctl rdp enable
 

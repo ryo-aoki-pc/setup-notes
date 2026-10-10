@@ -1,6 +1,6 @@
 # Firefox 最新版インストール手順（AlmaLinux 10 は Mozilla 公式 RPM リポジトリ / Windows 11 は winget）の参考資料
 
-[手順書](../firefox.md)
+[手順書](../firefox.md)・[ロールバックと注意点](../extra/firefox.md)
 
 ## 補足
 
@@ -77,14 +77,14 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 |---|---|---|
 | **winget の `Mozilla.Firefox.ja` を PC 全体に** | 157.0。Mozilla の CDN の日本語版の NSIS インストーラ（x64・x86・arm64）を、winget が sha256 を確かめて画面を出さずに入れる。`Scope` は `machine` だけ。Maintenance Service が入り、以後は Firefox が自分で更新する | **採用** |
 | winget の `Mozilla.Firefox` に `--locale ja` | 137.0.1 までは言語ごとのインストーラ（`InstallerLocale`）が 51 あったが、137.0.2 から英語（en-US）だけになり、言語ごとに `Mozilla.Firefox.<言語>` に分かれた。言語の無いインストーラは、`--locale` を付けると候補から外れるので、入らないはず | 不採用 |
-| `Mozilla.Firefox`（英語版）に日本語の言語パック | 言語パックがあると、閉じている間の更新（Background Update）が動かない（Mozilla の文書）。本体と版を揃える必要もある（AlmaLinux 10 の[注意点](../firefox.md#注意点)と同じ） | 不採用 |
+| `Mozilla.Firefox`（英語版）に日本語の言語パック | 言語パックがあると、閉じている間の更新（Background Update）が動かない（Mozilla の文書）。本体と版を揃える必要もある（AlmaLinux 10 の[注意点](../extra/firefox.md#注意点)と同じ） | 不採用 |
 | winget の `Mozilla.Firefox.MSIX`・Microsoft Store 版 | MSIX（言語は multi）で、パッケージのアプリ（`Mozilla.MozillaFirefox`）として入る | 不採用（Mozilla の通常のインストーラと、Firefox 自身の更新にそろえた） |
 | scoop の `extras/firefox` | 157.0。英語版のインストーラを 7z で展開するだけのポータブル版で、プロファイルは scoop の `persist` に作る | 不採用（日本語版でなく、PC 全体にも入らない） |
 | Mozilla のサイトからインストーラを落として実行 | 同じものが入るが、ダウンロードと実行が画面の操作になる | 不採用（winget で同じインストーラが入る） |
 
 - **PC 全体（`machine`）に入れた**: winget の定義が `machine` しか持たない。AlmaLinux 10 の dnf と同じく、PC の全ユーザーで 1 つの Firefox を使い、更新は Maintenance Service で管理者の確認なしに行える
   - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
-- **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../firefox.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
+- **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/firefox.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
 - **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../firefox.md#windows-11-で使う)の手順 5 の補足）
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
 

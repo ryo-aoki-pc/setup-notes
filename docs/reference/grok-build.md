@@ -1,6 +1,6 @@
 # Grok Build（xAI の公式 CLI）を AlmaLinux 10・Windows 11 に入れるの参考資料
 
-[手順書](../grok-build.md)・[検証記録](../verification/grok-build.md)
+[手順書](../grok-build.md)・[ロールバックと注意点](../extra/grok-build.md)・[検証記録](../verification/grok-build.md)
 
 ## 選択した方針
 
@@ -48,7 +48,7 @@
   - 初回は元の `~/.bashrc` を `~/.bashrc.bak.<UNIX 時刻>` に控える。2 回目からは、前のブロックを消して末尾に足し直す（ブロックの前の空行が 1 つずつ増える）
   - 書かせない設定（環境変数など）はインストーラーに無い。`SHELL` が bash・zsh・fish 以外のときだけ書かない
   - `~/.bashrc` がリンクなら、リンク先のファイルを書き換える
-- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../grok-build.md#ロールバック)の手順 3 で消す（codex.md のインストーラーが足すブロックと同じ扱い）
+- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../extra/grok-build.md#ロールバック)の手順 3 で消す（codex.md のインストーラーが足すブロックと同じ扱い）
   - 共通の bash 設定より後ろで読まれるので、`~/.grok/bin` が PATH の先頭に来る
 - インストーラー（`install.sh`）は、配布物のハッシュや署名を確かめない（Windows の `install.ps1` が同梱の Git の zip の SHA-256 を確かめるだけ）
 
@@ -56,7 +56,7 @@
 
 - `grok login` は SpaceXAI の OAuth（`auth.x.ai`）でログインする。ブラウザが開けないときは、`https://accounts.x.ai/oauth2/device?user_code=…` の URL と確認用のコードを出して待つ（`--device-auth` と同じ画面）
 - ログインの情報は `~/.grok/auth.json`（Unix では `0600`）に入り、自動で更新される。更新できなくなると、もう一度ログインを求められる（公式の文書 02-authentication）
-- `grok models` は、ログインしていなくても終了コード 0 で、`You are not authenticated.` と既定のモデルの一覧を出す（1.0.50）。Claude Code のプラグインの `/grok-build:check` も、この終了コードだけで「ログイン済み」と判定する（[coding-agents.md の注意点](../coding-agents.md#注意点)）
+- `grok models` は、ログインしていなくても終了コード 0 で、`You are not authenticated.` と既定のモデルの一覧を出す（1.0.50）。Claude Code のプラグインの `/grok-build:check` も、この終了コードだけで「ログイン済み」と判定する（[coding-agents.md の注意点](../extra/coding-agents.md#注意点)）
 
 ### 実施手順 / 手順 7: フォルダーの信頼
 

@@ -1,6 +1,6 @@
 # Forgejo 構築手順の検証記録
 
-[手順書](../forgejo.md)・[参考資料](../reference/forgejo.md)
+[手順書](../forgejo.md)・[ロールバック](../extra/forgejo.md)・[参考資料](../reference/forgejo.md)
 
 ## 対象と検証環境
 

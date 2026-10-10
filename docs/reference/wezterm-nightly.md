@@ -1,6 +1,6 @@
 # WezTerm Nightly インストール手順（AlmaLinux 10 は公式 COPR の EL9 ビルドを流用 / Windows 11 は nightly のインストーラ）の参考資料
 
-[手順書](../wezterm-nightly.md)
+[手順書](../wezterm-nightly.md)・[ロールバックと注意点](../extra/wezterm-nightly.md)
 
 ## 補足
 

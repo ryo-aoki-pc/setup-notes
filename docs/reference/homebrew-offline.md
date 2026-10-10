@@ -1,6 +1,6 @@
 # Homebrew をインターネットに出られないホストで使う手順（AlmaLinux 10 / ssh -R の SOCKS プロキシ）の参考資料
 
-[手順書](../homebrew-offline.md)
+[手順書](../homebrew-offline.md)・[ロールバックと注意点](../extra/homebrew-offline.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）の検証記録
 
-[手順書](../secure-boot-mok.md)
+[手順書](../secure-boot-mok.md)・[ロールバックと注意点](../extra/secure-boot-mok.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -45,7 +45,7 @@
 
 **bootc のシステムでも、鍵は残る。** `/var` は再起動や `bootc switch` をまたいで残る（イメージから上書きされない）。
 
-**`MOK.priv` は、この PC（VM）が信頼するモジュールを作れる鍵になる。** root 以外に読ませず、ほかのマシンに持ち出さない。消し方は[ロールバック](../secure-boot-mok.md#ロールバック)。
+**`MOK.priv` は、この PC（VM）が信頼するモジュールを作れる鍵になる。** root 以外に読ませず、ほかのマシンに持ち出さない。消し方は[ロールバック](../extra/secure-boot-mok.md#ロールバック)。
 
 ### 実施手順 / 手順 6: 補足: 画面の並びと、登録できなかった PC
 
@@ -84,12 +84,12 @@ VM で確かめた並び: `Delete MOK` → 「[Delete MOK]」（`View key 0` / `
     - 手順 3 で `SecureBoot enabled`、手順 4 で鍵を作って予約し（`sudo mokutil --list-new` に鍵が出た）、手順 5 で再起動した
     - **手順 6 の MokManager でキーボードが効かず、登録できなかった**。手順 7 は `is not enrolled` になった。利用者が UEFI の設定で Secure Boot を無効にした
   - VirtualBox の VM の中の AlmaLinux Atomic Desktop（[virtualbox-guest-bootc.md の VM での本実行](virtualbox-guest-bootc.md#付録-virtualbox-の-vm-での本実行2026-09-29)、2026-09-29 と 2026-09-30。Secure Boot 有効）
-    - 手順 3・4、MokManager での登録（手順 6）、手順 7、[ロールバック](../secure-boot-mok.md#ロールバック)（2026-09-29 の VM）
+    - 手順 3・4、MokManager での登録（手順 6）、手順 7、[ロールバック](../extra/secure-boot-mok.md#ロールバック)（2026-09-29 の VM）
     - 登録のための再起動は、多くの回で `bootc switch --apply` の再起動を使った。**手順 5 の `sudo systemctl reboot` からの登録**は、MokManager をわざと見送った後のやり直しで通した
     - MokManager を見送ったときの失敗のしかた、`.platform` のキーリングに入ること
   - 2026-09-30 に、この文書のブロックを x86_64 のコンテナで通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
     - 手順 1〜4（`mokutil` はスタブ）、手順 4 の 2 回目が `中断:` で止まること、新しい CN で証明書ができること、手順 7 とロールバックの手順 1・4・5（スタブ）
-  - **確認していないこと**: 実機での MokManager の登録（キーボードが効かなかった）と、実機で署名したモジュールが受け入れられること。実機での[ロールバック](../secure-boot-mok.md#ロールバック)。aarch64
+  - **確認していないこと**: 実機での MokManager の登録（キーボードが効かなかった）と、実機で署名したモジュールが受け入れられること。実機での[ロールバック](../extra/secure-boot-mok.md#ロールバック)。aarch64
 
 | 項目 | x86_64 の実機 | VirtualBox の VM | 検証コンテナ（2026-09-30） |
 |---|---|---|---|
@@ -143,7 +143,7 @@ VM で確かめた並び: `Delete MOK` → 「[Delete MOK]」（`View key 0` / `
 #### 未確認事項
 
 - 実機での MokManager の登録と、署名したモジュールの受け入れ
-- 実機での[ロールバック](../secure-boot-mok.md#ロールバック)
+- 実機での[ロールバック](../extra/secure-boot-mok.md#ロールバック)
 - aarch64 の PC
 
 ---

@@ -1,6 +1,6 @@
 # Claude Code 最新版インストール手順（AlmaLinux 10 は公式 dnf リポジトリ / Windows 11 は公式の native installer）の参考資料
 
-[手順書](../claude-code.md)
+[手順書](../claude-code.md)・[ロールバックと注意点](../extra/claude-code.md)
 
 ## 補足
 

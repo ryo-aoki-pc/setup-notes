@@ -1,6 +1,6 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）の参考資料
 
-[手順書](../dropbox.md)
+[手順書](../dropbox.md)・[ロールバックと注意点](../extra/dropbox.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # npm をインターネットに出られないホストで使う手順（AlmaLinux 10 / AppStream の Node.js / Neovim の Mason）の参考資料
 
-[手順書](../npm-offline.md)
+[手順書](../npm-offline.md)・[ロールバックと注意点](../extra/npm-offline.md)
 
 ## 補足
 

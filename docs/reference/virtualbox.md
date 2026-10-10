@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-[手順書](../virtualbox.md)
+[手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](../verification/virtualbox.md#参考資料から分離した記録)
 

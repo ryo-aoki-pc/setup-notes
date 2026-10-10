@@ -1,6 +1,6 @@
 # Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）の参考資料
 
-[手順書](../samba.md)
+[手順書](../samba.md)・[ロールバックと注意点](../extra/samba.md)
 
 [検証記録](../verification/samba.md#参考資料から分離した記録)
 

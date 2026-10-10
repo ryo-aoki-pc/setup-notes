@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/podman-tui.md)・[参考資料](reference/podman-tui.md)
+- [検証記録](verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
 
 > [!IMPORTANT]
 > - **前提**: [Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と、[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)（EPEL）を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
@@ -11,7 +11,7 @@
 > - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
 
 - 上から順にコードブロックを貼る
-- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-tui.md#ロールバック)
 - Docker の API でつなぐ TUI なら [lazydocker](lazydocker.md)（違いは[選択した方針](verification/podman-tui.md#選択した方針)）
 
 1. 入手できる版を見てから、podman-tui を入れる。
@@ -104,50 +104,4 @@
 
    - システム全体なら `sudo dnf upgrade`
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - EPEL の podman-tui が 2.x に上がったときは、上流の互換表で podman の版と合うかを確かめる（[注意点](#注意点)）
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- API ソケットは止めない。ほかの手順書も使う（止めるなら [podman.md のロールバック](podman.md#ロールバック)の手順 3）
-
-1. 確認用のコンテナを消す。
-
-   ```bash
-   podman rm -f podman-tui-web
-   ```
-
-   - `podman-tui-web` と出る
-
-1. 同じイメージをほかで使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 同じイメージを使うもの: [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)、[podman-compose](podman-compose.md)、[lazydocker](lazydocker.md)
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-tui を消す。
-
-   ```bash
-   sudo dnf remove podman-tui
-   ```
-
-   - `[y/N]` で聞かれる。消えるのは `podman-tui` の 1 パッケージだけ
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 34・35
-
----
-
-## 注意点
-
-- **終了は `Ctrl+C`**: `q` を押しても何も起きない
-- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（参考資料を参照）。`systemctl --user start podman.socket` で直る
-- **podman に接続を登録していると、そちらを使う**: `podman system connection add` で登録した接続があると、podman-tui は `localhost` の代わりにそれを出す
-  - 接続を消す（`podman system connection remove`）と、`localhost` に戻る
-- **Homebrew の 2.x と二重に入れない**: `brew install podman-tui` の 2.0.0 は `/home/linuxbrew/.linuxbrew/bin` に入り、PATH の先頭で `/usr/bin/podman-tui` を隠す
-  - 2.0.0 は接続を podman の設定からだけ読むため、使う場合は先に接続を登録する
-  - 2.0.0 と podman 5.8.2 は上流の互換表の外の組み合わせなので、互換表に合う版を選ぶ
-- **EPEL が 2.x に上がったら、互換表を確かめる**: 2.x は podman 6 向け。AlmaLinux の podman が 5.x のうちに EPEL だけが上がったら、動きを確かめてから使う
+   - EPEL の podman-tui が 2.x に上がったときは、上流の互換表で podman の版と合うかを確かめる（[注意点](extra/podman-tui.md#注意点)）

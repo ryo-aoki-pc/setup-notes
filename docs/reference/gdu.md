@@ -1,6 +1,6 @@
 # gdu インストール手順（AlmaLinux 10 / Homebrew）の参考資料
 
-[手順書](../gdu.md)
+[手順書](../gdu.md)・[ロールバックと注意点](../extra/gdu.md)
 
 ## 補足
 

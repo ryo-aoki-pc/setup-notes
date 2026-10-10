@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/podman-compose.md)・[参考資料](reference/podman-compose.md)
+- [検証記録](verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
 
 > [!IMPORTANT]
 > - **前提**: [Podman](podman.md) の実施手順と、[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)（EPEL）を通してあること（podman-compose は EPEL にあり、AppStream には無い）。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
@@ -11,8 +11,8 @@
 > - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 
 - 上から順にコードブロックを貼る
-- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
-- PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](#注意点)）
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-compose.md#ロールバック)
+- PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -140,57 +140,3 @@
 
    - `pull` がイメージを取り直し、`up -d` がコンテナを作り直す
    - 新しいイメージが無いときも、`up -d` はコンテナの名前を出して終わる
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- compose で動かしていたデータを残したいときは、この節の手順 2 の前に `~/compose-sample` から取り出しておく
-
-1. コンテナ・pod・ネットワークを消す。
-
-   ```bash
-   cd ~/compose-sample
-   podman-compose down
-   podman pod ps
-   ```
-
-   - `podman pod ps` が見出しの行だけになればよい
-
-1. 確認用の compose ファイルとページを消す。
-
-   ```bash
-   cd ~
-   rm -rf ~/compose-sample
-   ```
-
-1. [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)で同じイメージを使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-compose を消す。
-
-   ```bash
-   sudo dnf remove podman-compose
-   ```
-
-   - `[y/N]` で聞かれる。依存で入った Python のライブラリも、ほかに使うものが無ければ一緒に消える
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 34・35
-
----
-
-## 注意点
-
-- **`podman-compose exec` が動いている間に貼った行は、コンテナへの入力になる**。`exec` が終了してプロンプトに戻ってから次の手順を貼る
-  - `-T` は擬似端末を付けないだけで、標準入力はつながったままなので、入力を止める用途には使わない
-  - 手順 6 のように、`exec` はブロックの最後に置く
-- **PC の再起動では戻らず、linger が無いとログアウトで止まる**: compose で起動したコンテナは、ふつうの `podman run -d` と同じ（[podman.md の注意点](podman.md#注意点)）。常駐させるものは Quadlet にし、[linger](linger.md) を有効にする
-- **プロジェクトの名前はディレクトリの名前**: 同じ名前のディレクトリで別の compose ファイルを動かすと、同じ名前の pod・ネットワークを使う。`-p <名前>` で変えられる
-- **`down -v` はボリュームの中身も消す**: `down` だけなら名前付きのボリュームは残る（[使い方の基本](#使い方の基本)）
-- **1024 未満のポートは使えない**: rootless の podman と同じ制限（[podman.md の注意点](podman.md#注意点)）
-- **`:Z` をホームやシステムのディレクトリに付けない**: 付けるのはコンテナ用のディレクトリだけ（[podman.md の注意点](podman.md#注意点)）

@@ -1,6 +1,6 @@
 # Firefox 最新版インストール手順（AlmaLinux 10 は Mozilla 公式 RPM リポジトリ / Windows 11 は winget）の検証記録
 
-[手順書](../firefox.md)
+[手順書](../firefox.md)・[ロールバックと注意点](../extra/firefox.md)
 
 ## 最新の確認範囲（Windows 11）
 

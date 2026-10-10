@@ -1,6 +1,6 @@
 # WireGuard Road Warrior 設定手順（AlmaLinux 10 は NetworkManager + nmcli / Windows 11 は公式の WireGuard for Windows）の検証記録
 
-[手順書](../wireguard-road-warrior.md)
+[手順書](../wireguard-road-warrior.md)・[ロールバックと注意点](../extra/wireguard-road-warrior.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -56,7 +56,7 @@
 ### 実施手順 / 手順 11: 補足: up
 
 - `GENERAL.STATE` / `IP4.ROUTE[n]: dst = …, nh = …, mt = …` の書式は、NetworkManager 1.56 で確認済み
-- `mt` の値（WireGuard デバイスの既定 metric）は **50**（実測。`ipv4.route-metric` は `-1` のままなので、これは WireGuard デバイスの既定）。Wi-Fi の 600 より優先される（→ [注意点](../wireguard-road-warrior.md#注意点)）
+- `mt` の値（WireGuard デバイスの既定 metric）は **50**（実測。`ipv4.route-metric` は `-1` のままなので、これは WireGuard デバイスの既定）。Wi-Fi の 600 より優先される（→ [注意点](../extra/wireguard-road-warrior.md#注意点)）
 - `wireguard.peer-routes yes` が `AllowedIPs` の経路を入れる（`nm-settings-nmcli(5)`）。`ip4-auto-default-route` は `/0` の peer が無いので関係ない
 - MTU は `wireguard.mtu 0` のときカーネル既定の 1420 になる（実測）。`wg-quick` と違い NetworkManager は経路から MTU を計算しない
 - `wg show` の `listening port` はランダム（`wireguard.listen-port 0`）。`latest handshake` が出ない場合は、鍵の対応（ホストの `clients.list` と `wg0.pub`）、`Endpoint`、ルーターのポート転送を疑う
@@ -70,7 +70,7 @@
 - (3) ルーターは `wg0 → LAN` の転送と、ルーターのクライアント帯の静的経路
 - (4) 相手拠点の WG ホストは、拠点間トンネルと相手ホストの `AllowedIPs`（クライアント帯）
 
-→ [wireguard.md: 手順 18 の補足](../wireguard.md#実施手順)、[症状と原因の対応](wireguard.md#症状と原因の対応実測)。トンネル越しの ssh は [WG ホスト自身の ssh へ入る場合](../wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)。
+→ [wireguard.md: 手順 18 の補足](../wireguard.md#実施手順)、[症状と原因の対応](wireguard.md#症状と原因の対応実測)。トンネル越しの ssh は [WG ホスト自身の ssh へ入る場合](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)。
 
 ### 実施手順 / 手順 14: 補足: down と日常の使い方
 
@@ -154,9 +154,9 @@
   - 確認したこと: 両拠点の LAN への ping、トンネル越しの ssh、拠点側からの逆方向 ping
   - NetworkManager の挙動として推定で書いていた項目は、1〜9 が実測で確定した
   - **確認していないこと**: サスペンド復帰・Wi-Fi の切り替え・`Endpoint` が DDNS 名のとき・GNOME の UI・`DNS =` がある場合など（→ [残っている未確認事項](#残っている未確認事項)）
-  - **拠点の LAN の中からトンネルを張ることは、意図的に試していない**（[注意点](../wireguard-road-warrior.md#注意点)のとおり LAN の経路を奪うため）
+  - **拠点の LAN の中からトンネルを張ることは、意図的に試していない**（[注意点](../extra/wireguard-road-warrior.md#注意点)のとおり LAN の経路を奪うため）
   - 実測の記録は[付録](#付録-実機での検証記録)
-  - 2026-09-28: 手順 2・10・11 と、[ロールバック](../wireguard-road-warrior.md#ロールバック)の手順 1のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 2・10・11 と、[ロールバック](../extra/wireguard-road-warrior.md#ロールバック)の手順 1のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-05: 手順 5 とロールバックの手順 3 を、公開鍵を照合してから削除を反映する共通手順への案内に変更した。新しい削除・鍵交換の順序は隔離したスタブで確認し、実機では流していない
@@ -166,7 +166,7 @@
     - 配布物: winget の `WireGuard.WireGuard` 1.1.1 の定義、公式の MSI（amd64）の sha256（winget の定義と一致）・BLAKE2b（公式の署名付きの `latest.sig` と一致。その署名も）・Authenticode の署名者、MSI の中の `wireguard.exe`（GUI のプログラム）と `wg.exe`（コンソールのプログラム）
     - WireGuard for Windows 1.1.1 のソースと文書: MSI の定義（`DO_NOT_LAUNCH`、アンインストールで `Data` を消す）、設定の置き場所への取り込みと暗号化・アクセス権、`/installtunnelservice` と窓の「有効化」が同じこと、トンネルの経路・MTU・キルスイッチの条件
     - `wg pubkey` が CR LF 付きの入力を受けること（Linux の wireguard-tools 1.0.20210914 と、ソースで）
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 6・9（現在は手順 7 の関数内）・10・12・13・15・16 と[Windows 11 のロールバック](../wireguard-road-warrior.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（手順 12・15 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 6・9（現在は手順 7 の関数内）・10・12・13・15・16 と[Windows 11 のロールバック](../extra/wireguard-road-warrior.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（手順 12・15 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
     - 手順 9 で書いた `wg0.conf` が、WireGuard for Windows 1.1.1 の conf の読み込みの部分（Linux でビルドできるように写したもの）で読めること（BOM 付きの UTF-8 は読めないことも。同じ付録）
   - 2026-10-05: 取込みを「手順 7 で関数定義 → 手順 8 で conf をコピー → 手順 9 で関数名を手入力」に分けた。18 ブロックの構文と、この操作順、空・コード・非 ASCII・PrivateKey 重複の拒否を Linux の PowerShell 7.6.6 とクリップボードのスタブで確認した。Windows の端末では貼っていない
   - **確かめていないこと**: Windows で貼ること（すべての手順）、マネージャーの起動と窓、取り込みで `wg0.conf.dpapi` ができること、トンネルの経路・MTU・ネットワークの種類、拠点との疎通、張ったまま再起動したときに張られること、更新とアンインストール、サスペンド復帰と Wi-Fi の切り替え、arm64 の Windows
@@ -245,7 +245,7 @@ AlmaLinux 10 の実機で、2026-09-22、手順 2 の前に採取（採取コマ
     - この文書を書いた WG ホストで実測: `nmcli device status` に `wg0  wireguard  connected (externally)  wg0`
   - `import` はホストが出す conf をそのまま読むので、手で写すのは秘密鍵の 1 行だけ
   - RHEL 10 のドキュメントは `nmcli connection add` で組む方式（→ [代替](../reference/wireguard-road-warrior.md#代替-nmcli-connection-add-で組む場合rhel-のドキュメントの方式)）
-- **鍵は PC で作り、公開鍵だけをホストに渡す**（→ [wireguard.md: クライアントの秘密鍵の扱い](../wireguard.md#クライアントの秘密鍵の扱い)）
+- **鍵は PC で作り、公開鍵だけをホストに渡す**（→ [wireguard.md: クライアントの秘密鍵の扱い](../extra/wireguard.md#クライアントの秘密鍵の扱い)）
   - 秘密鍵が PC から出ない
   - `client show` の出力に秘密が無いので、渡す経路を選ばない
   - ホストに秘密鍵入りの conf が残らないので、wireguard.md 手順 16 の `rm` も要らない（`--pubkey` で作った conf はプレースホルダのまま残してよい）
@@ -253,8 +253,8 @@ AlmaLinux 10 の実機で、2026-09-22、手順 2 の前に採取（採取コマ
 - **スプリットトンネル、`DNS =` 無し** — ホストが出す conf のとおり
   - `AllowedIPs` は両拠点の LAN とトンネル網だけで、それ以外の通信は今いるネットワークにそのまま出る
   - `site.env` の `WG_CLIENT_DNS` が空なので、resolv.conf にも触らない
-  - 全トラフィックを通す構成（`0.0.0.0/0`）は[対象外](../wireguard.md#全トラフィックを-vpn-経由にする場合対象外)
-- **autoconnect は無効** — 拠点の LAN 内で自動的に張られると、ヘアピンと経路の奪い合いになる（→ [注意点](../wireguard-road-warrior.md#注意点)）
+  - 全トラフィックを通す構成（`0.0.0.0/0`）は[対象外](../extra/wireguard.md#全トラフィックを-vpn-経由にする場合対象外)
+- **autoconnect は無効** — 拠点の LAN 内で自動的に張られると、ヘアピンと経路の奪い合いになる（→ [注意点](../extra/wireguard-road-warrior.md#注意点)）
   - 外出先で手で `up` する
   - 常に外にある端末なら、`sudo nmcli connection modify wg0 connection.autoconnect yes` に戻してもよい
 - **firewalld は触らない** — PC 側で開けるものは無い（外向きの UDP は既定で通る）
@@ -309,7 +309,7 @@ AlmaLinux 10 の実機で、2026-09-22、手順 15 の後（元の Wi-Fi に戻�
 
 ### 操作上の注意と併記されていた記録
 
-- **MTU**: `wireguard.mtu 0` のときカーネル既定の 1420（実測）。PPPoE やモバイル回線で大きい通信だけ止まるなら `sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（→ [wireguard.md: MTU](../wireguard.md#mtu)）
+- **MTU**: `wireguard.mtu 0` のときカーネル既定の 1420（実測）。PPPoE やモバイル回線で大きい通信だけ止まるなら `sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（→ [wireguard.md: MTU](../extra/wireguard.md#mtu)）
 
 ### 操作上の注意と併記されていた記録
 
@@ -400,7 +400,7 @@ sudo systemd-run --unit=wg-apply-rw -p Type=oneshot \
 
 - `tracepath -n <PEER_WG_LAN_IP>` は `pmtu 1420` で `1: <WG_HOST_TUN_IP>` → `2: <PEER_WG_LAN_IP>`
 - WG ホスト側の `client list` で `LAST_HANDSHAKE` が `35 秒前`、逆方向の `ping <CLIENT_TUN_IP>`（拠点 → PC）も `0% packet loss`。PC 側の firewalld は既定の `public` のままで ping に応答した
-- **トンネル越しの ssh** で WG ホストに入れた（`SSH_CONNECTION` の送信元が `<CLIENT_TUN_IP>`）。新レイアウト（`wg0` を LAN 側ゾーンに入れる）では、ホスト自身宛ての ssh も LAN と同じ扱いになるため（→ [wireguard.md](../wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)）
+- **トンネル越しの ssh** で WG ホストに入れた（`SSH_CONNECTION` の送信元が `<CLIENT_TUN_IP>`）。新レイアウト（`wg0` を LAN 側ゾーンに入れる）では、ホスト自身宛ての ssh も LAN と同じ扱いになるため（→ [wireguard.md](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)）
 - 追加で確認したこと: **相手拠点のルーター**（`<ROUTER_A_LAN_IP>`、WG ホストではない LAN 上の機器）への ping も通り、接続先拠点の `445/tcp`（Samba）へも TCP が張れた。クライアント → 接続先拠点 → 拠点間トンネル → 相手拠点 LAN の折り返しが実際に動いている
 
 **手順 14**: `down` の直後に `ip link show dev wg0` が `Device "wg0" does not exist.`（終了コード 1）。経路 3 本と firewalld の `wg0` も消える。プロファイルは `wg0  wireguard  --  --` で残る。
@@ -421,7 +421,7 @@ sudo systemd-run --unit=wg-apply-rw -p Type=oneshot \
 | 8 | `down` でリンク `wg0` が消える | 消える |
 | 9 | `DNS =` が無いので resolv.conf が変わらない | 変わらない（`ipv4.dns` も `--`） |
 
-加えて、[注意点](../wireguard-road-warrior.md#注意点)に書いていた「非 root で秘密鍵が読める」も確認した。アクティブなローカルセッション（Wayland、`wheel` 所属）の非 root ユーザーで `nmcli -s -g wireguard.private-key connection show wg0 | wc -c` が `45` を返し、その値のハッシュは手順 3 で作った `wg0.key` と一致した。
+加えて、[注意点](../extra/wireguard-road-warrior.md#注意点)に書いていた「非 root で秘密鍵が読める」も確認した。アクティブなローカルセッション（Wayland、`wheel` 所属）の非 root ユーザーで `nmcli -s -g wireguard.private-key connection show wg0 | wc -c` が `45` を返し、その値のハッシュは手順 3 で作った `wg0.key` と一致した。
 
 #### 残っている未確認事項
 
@@ -561,7 +561,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
   - 手順 12 は表を順に出した。印が残ったままもう 1 度貼ると、偽物が標準エラーに書いた `Error: Tunnel already installed and running` が文字で出た
   - 手順 15 は、偽物が 2 秒後に印を消すまで待ってから、何も出さずに終わった
 - 手順 13: 偽物の `ping.exe`（日本語の Windows の出力を真似たもの）と `tracert.exe` で、4 つの宛先の最後の 3 行と、`tracert.exe -d -h 5 -w 2000 <PEER_WG_LAN_IP>` が出た。変数が空なら `手順 2 の変数が空のまま` で止まった
-- 手順 16 と[Windows 11 のロールバック](../wireguard-road-warrior.md#windows-11-のロールバック)の手順 1
+- 手順 16 と[Windows 11 のロールバック](../extra/wireguard-road-warrior.md#windows-11-のロールバック)の手順 1
   - 手順 16 の後は `wg0.pub` だけが残った
   - ロールバックの手順 1 は、トンネルの印があれば `/uninstalltunnelservice wg0` を渡し、`wg0.conf.dpapi` と置き場所を消して `False` を出した。置き場所にほかのファイル（`notes.txt`）があると、それを残して `True` を出した
 - PowerShell 7 は、Linux ではパイプの改行が LF で、ネイティブのコマンドの `2>&1` の扱いも Windows PowerShell 5.1 と同じではない。winget・`Get-AuthenticodeSignature`・本物の `Get-Net*` と `wireguard.exe` を使うブロック（手順 3〜5、手順 12・15 の本当の動き、更新、ロールバックの手順 2）は流せていない
@@ -647,7 +647,7 @@ PersistentKeepalive = 25
 
 - `client add` は同じ名前・同じ公開鍵・同じトンネル IP を拒否する（`wg-vpn.sh` の `cmd_client_add`）
 - `--pubkey` で登録した conf の `PrivateKey` は、文字列 `<CLIENT_PRIVATE_KEY>` のまま書かれる（`client add` の末尾にもその旨が出る）
-- `apply` は `wg0.conf` を作り直して `systemctl restart` するので、他のクライアントと拠点間トンネルが数秒切れる（`reload` では経路が入らない。→ [落とし穴 2](../wireguard.md#落とし穴-2-reload-では経路が追加されない)）
+- `apply` は `wg0.conf` を作り直して `systemctl restart` するので、他のクライアントと拠点間トンネルが数秒切れる（`reload` では経路が入らない。→ [落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)）
 - `apply` の末尾に出るルーターの設定（クライアント帯の静的経路）は、既に入っていれば変更不要
 - トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）
 
@@ -682,7 +682,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
   - NetworkManager では `ipv4.dns` になり、接続中は resolv.conf を NetworkManager が書き換えるので、`systemd-resolved` は要らない（未確認）
 
-- **`Endpoint` が DDNS 名のとき**: NetworkManager が再解決するかは未確認（→ [wireguard.md](../wireguard.md#endpoint-に-ddns-名を書く場合)）。本書の例は IP リテラル
+- **`Endpoint` が DDNS 名のとき**: NetworkManager が再解決するかは未確認（→ [wireguard.md](../extra/wireguard.md#endpoint-に-ddns-名を書く場合)）。本書の例は IP リテラル
 
   - `autoconnect no` のプロファイルをスリープ復帰後に NetworkManager が張り直すかは要確認（張り直さない可能性が高い。復帰後に `nmcli device status` を見る）
 
@@ -800,7 +800,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 - Windows 11 のロールバックの手順 1: 最後に `False` だけが出た
 - Windows 11 のロールバックの手順 2（WG ホストの手順 3 の後に行った）: `Found WireGuard [WireGuard.WireGuard]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、サービスは何も出ず、`False`。WireGuard の窓と `wireguard.exe` のプロセスも消えた
 - Windows 11 のロールバックの手順 3（WG ホストで、[wireguard.md のクライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6）: 手順 3 は `client remove` の後の dry-run が、その公開鍵の未知の peer だけを挙げて終了コード 1 で止まった。手順 4 の `--drop-unknown-peers --dry-run`、手順 5 の本適用の後、手順 6 でクライアントは無く、`wg show wg0 peers` は拠点 B だけ
-- 検証環境は、両拠点で [wireguard.md の全部消す](../wireguard.md#全部消すロールバック)の手順 1〜4 と、veth・namespace・clone の削除で片付けた。拠点 A の `remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つ（`client add`・`client remove` の `apply` が作った控えで、秘密鍵を含む）が残った。`--purge` は控えを消さない（`scripts/wireguard/wg-vpn.sh` の `cmd_remove`）。検証用の鍵なので手で消した
+- 検証環境は、両拠点で [wireguard.md の全部消す](../extra/wireguard.md#全部消すロールバック)の手順 1〜4 と、veth・namespace・clone の削除で片付けた。拠点 A の `remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つ（`client add`・`client remove` の `apply` が作った控えで、秘密鍵を含む）が残った。`--purge` は控えを消さない（`scripts/wireguard/wg-vpn.sh` の `cmd_remove`）。検証用の鍵なので手で消した
 
 **確認していないこと**:
 

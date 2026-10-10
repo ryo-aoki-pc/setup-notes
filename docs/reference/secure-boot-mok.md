@@ -1,6 +1,6 @@
 # Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）の参考資料
 
-[手順書](../secure-boot-mok.md)
+[手順書](../secure-boot-mok.md)・[ロールバックと注意点](../extra/secure-boot-mok.md)
 
 ## 補足
 

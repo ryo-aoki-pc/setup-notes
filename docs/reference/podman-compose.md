@@ -1,6 +1,6 @@
 # podman-compose インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../podman-compose.md)
+[手順書](../podman-compose.md)・[ロールバックと注意点](../extra/podman-compose.md)
 
 ## 補足
 

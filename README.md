@@ -198,7 +198,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### ファイル・ディスク・リソースを見る
 
-- 標準のコマンドは置き換えず、別の名前で使う（[AlmaLinux 10 の初期設定の注意点](docs/almalinux-setup.md#注意点)は `alias cat=bat` / `alias ls=eza` を勧めない）
+- 標準のコマンドは置き換えず、別の名前で使う（[AlmaLinux 10 の初期設定の注意点](docs/extra/almalinux-setup.md#注意点)は `alias cat=bat` / `alias ls=eza` を勧めない）
 - この節の手順書では btop だけ EPEL の RPM で入れている（Homebrew と同じ版のため。duf・fastfetch も同じ理由で EPEL）。RPM なので `sudo btop` がそのまま動く
 - Homebrew のもの（`gdu-go` など）は、そのままでは `sudo` の PATH に無い。`sudo gdu-go` のように使うなら [AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（通さないならフルパスで呼ぶ）
 

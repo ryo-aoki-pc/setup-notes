@@ -1,6 +1,6 @@
 # Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の参考資料
 
-[手順書](../syncthing.md)
+[手順書](../syncthing.md)・[ロールバックと注意点](../extra/syncthing.md)
 
 ## 補足
 
@@ -21,7 +21,7 @@ aarch64 で降ってくるボトルは `syncthing--2.1.5.arm64_linux.bottle.tar.
 - `noupgrade` は、**Syncthing 自身の自動アップグレード機能を無効にしてビルドされている**という印
   - 公式の tarball 版は自分で新しい版を取ってきて入れ替えるが、Homebrew の formula は `go run build.go --version ... --no-upgrade tar` でビルドするので、その機能が入らない
   - 更新は `brew upgrade` で行う（[更新](../syncthing.md#更新)）。パッケージマネージャ管理下のファイルを Syncthing が勝手に書き換えないので、こちらの方が都合がよい
-- `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](../syncthing.md#注意点)）
+- `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](../extra/syncthing.md#注意点)）
 
 実行ファイルと man ページに加え、Homebrew が生成したサービス用ファイルが入る。**上流が配る systemd の unit とは別物**:
 

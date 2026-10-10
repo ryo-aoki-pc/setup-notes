@@ -1,6 +1,6 @@
 # Windows 11 で OpenSSH サーバーを使う手順（OpenSSH.Server の機能 + パスワード認証）の参考資料
 
-[手順書](../windows-openssh-server.md)
+[手順書](../windows-openssh-server.md)・[ロールバックと注意点](../extra/windows-openssh-server.md)
 
 [検証記録](../verification/windows-openssh-server.md#参考資料から分離した記録)
 

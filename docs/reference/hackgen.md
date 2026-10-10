@@ -1,6 +1,6 @@
 # HackGen Console NF インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は上流の zip）の参考資料
 
-[手順書](../hackgen.md)
+[手順書](../hackgen.md)・[ロールバックと注意点](../extra/hackgen.md)
 
 [検証記録](../verification/hackgen.md#参考資料から分離した記録)
 

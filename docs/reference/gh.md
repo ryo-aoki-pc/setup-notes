@@ -1,6 +1,6 @@
 # GitHub CLI（gh）インストール手順（AlmaLinux 10 は公式 dnf リポジトリ / Windows 11 は scoop）の参考資料
 
-[手順書](../gh.md)
+[手順書](../gh.md)・[ロールバックと注意点](../extra/gh.md)
 
 ## 補足
 
@@ -41,9 +41,9 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
   - ヘルパーが無い: `~/.gitconfig` の `credential.https://github.com.helper` と `credential.https://gist.github.com.helper` に、空の値（ほかのヘルパーを切る）と `!<gh の場所> auth git-credential` を書く。`gh auth setup-git` と同じ
 - **No を選んだ理由**
   - git の HTTPS の認証は、Git for Windows の Git Credential Manager が自分のサインイン（Git Credential Manager の OAuth アプリ）で行う。gh と git のトークンが別になるので、`gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことが、git の push に効かない
-  - Yes にすると、gh のトークンが Git Credential Manager にも残る。`gh auth logout` は gh 自身の置き場所しか消さないので、ロールバックに 1 手順増える（[Windows 11 のロールバック](../gh.md#windows-11-のロールバック)の手順 4）
+  - Yes にすると、gh のトークンが Git Credential Manager にも残る。`gh auth logout` は gh 自身の置き場所しか消さないので、ロールバックに 1 手順増える（[Windows 11 のロールバック](../extra/gh.md#windows-11-のロールバック)の手順 4）
   - `~/.gitconfig` に gh の場所を書かない。書くと、scoop を外した後も git がその場所の gh を呼ぶ
-- **Git の資格情報のヘルパーが無い PC**（[Windows 11 で使う](../gh.md#windows-11-で使う)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる（外すのは[Windows 11 のロールバック](../gh.md#windows-11-のロールバック)の手順 3）
+- **Git の資格情報のヘルパーが無い PC**（[Windows 11 で使う](../gh.md#windows-11-で使う)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる（外すのは[Windows 11 のロールバック](../extra/gh.md#windows-11-のロールバック)の手順 3）
 - **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
   - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
   - SSH のセッションの git からその場所を呼ぶと、scoop の `current` のジャンクションが [windows-openssh-server.md の任意節](../windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の制限に当たるはず（確かめていない）
@@ -89,7 +89,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
   - **Windows PowerShell 5.1 のプロファイルにも足さない**: 手順書を貼る窓のプロファイルは、Windows 11 の初期設定の手順 19 の 1 行のまま
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../gh.md#実施手順)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
 - **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[wezterm-nightly.md の Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 3 を前提にしない
-- **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 の初期設定のロールバック](../windows-setup.md#ロールバック)の手順 13 で scoop ごと外したときも）、その項目が残る
+- **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 の初期設定のロールバック](../extra/windows-setup.md#ロールバック)の手順 13 で scoop ごと外したときも）、その項目が残る
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
 
 ### 参照
