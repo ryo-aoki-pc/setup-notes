@@ -11,6 +11,7 @@
 > - **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: ボックスに入れたコマンドをホストから呼ぶなら[ボックスのコマンドをホストから呼ぶ（任意）](#ボックスのコマンドをホストから呼ぶ任意)。以後は[更新](#更新)・[ロールバック](extra/distrobox.md#ロールバック)
 
 1. 変数を設定する。
@@ -18,6 +19,7 @@
    ```bash
    DBX_NAME=ubuntu                                  # ボックスの名前。<DBX_NAME>
    DBX_IMAGE=quay.io/toolbx/ubuntu-toolbox:24.04    # 元にするイメージ。<DBX_IMAGE>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%-9s = %s\n' DBX_NAME "${DBX_NAME}" DBX_IMAGE "${DBX_IMAGE}"
    ```
 
@@ -29,6 +31,7 @@
 1. 入手できる版を見てから、distrobox を入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q list --showduplicates distrobox
    sudo dnf install distrobox
    ```
@@ -42,6 +45,7 @@
 1. distrobox が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    distrobox version
    command -v distrobox
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' distrobox
@@ -54,6 +58,7 @@
 1. ボックスを作る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    distrobox create --yes --name "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" --image "${DBX_IMAGE:?手順 1 の DBX_IMAGE が空のまま。値を入れて貼り直す}"
    distrobox list
    ```
@@ -120,6 +125,7 @@
 1. ホストのシェルから ffmpeg を呼ぶ。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v ffmpeg
    ffmpeg -version | head -1
    ```

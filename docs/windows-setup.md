@@ -14,6 +14,7 @@
 > - **画面で行う手順**: 1・9・35・56〜60。手順 31 は設定の画面を開いて変える。**対話入力のある手順**: 62（WSL のユーザー名とパスワード）・64（自動サインインのパスワード）。**条件付きの手順**: 5・7・8・11・12・14（更新の結果による分岐）・39（PC の名前を変えるとき）・44（Pro 以上）・52（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・53（US 配列のキーボード）
 
 - 上から順にコードブロックを貼る。手順 36 の変数は、管理者の PowerShell を開き直したら貼り直す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - 項目ごとの手順（要らない項目の手順は飛ばしてよい。手順 9・16〜19・35〜37・55 は飛ばさない）
   - 更新: Windows Update は 1〜8、Microsoft Store は 9〜15。貼り付けの設定: 16〜19・37・38
@@ -60,6 +61,7 @@
      if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
        throw '中断: 手順 1 で管理者の Windows PowerShell を開く'
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Module -ListAvailable -Name PSWindowsUpdate | Select-Object Name, Version, ModuleBase
      if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -92,6 +94,7 @@
        }
        Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope CurrentUser -Force
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Import-Module -Name PSWindowsUpdate -Global -PassThru | Select-Object Name, Version, ModuleBase
    }
    ```
@@ -106,6 +109,7 @@
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
@@ -127,6 +131,7 @@
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
@@ -150,6 +155,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $rebootRequired = Get-WURebootStatus -Silent -ErrorAction Stop
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      $rebootRequired
@@ -170,6 +176,7 @@
      if ($rebootRequired) {
        throw '中断: 再起動が必要。手順 8 を行ってから検索し直す'
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      '残っている対象の更新: {0} 件' -f $updates.Count
      $updates | Format-Table KB, Size, Title -AutoSize
      if ($updates.Count -gt 0) {
@@ -211,6 +218,7 @@
      if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
        throw '中断: 手順 9 で管理者ではない窓を開く'
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-AppxPackage -Name Microsoft.WindowsStore | Select-Object Name, Version
      foreach ($name in 'store.exe', 'winget.exe') {
        $command = Get-Command -Name $name -ErrorAction SilentlyContinue
@@ -229,6 +237,7 @@
    & {
      $ErrorActionPreference = 'Stop'
      Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Command -Name winget.exe | Select-Object Name, Source
      winget.exe --version
      if ($LASTEXITCODE -ne 0) { throw "中断: winget の確認に失敗（終了コード $LASTEXITCODE）" }
@@ -243,6 +252,7 @@
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($id in '9NBLGGH4NNS1', '9WZDNCRFJBMP') {
        winget.exe upgrade --exact --id $id --source msstore --include-unknown --accept-source-agreements --accept-package-agreements --disable-interactivity
        if ($LASTEXITCODE -notin 0, -1978335189) {
@@ -268,6 +278,7 @@
      if ($LASTEXITCODE -ne 0 -or ($help -join "`n") -notmatch '--apply\b') {
        throw '中断: Store CLI の一括更新を確認できない。手順 12 の後も同じなら進まない'
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      store.exe updates
      if ($LASTEXITCODE -ne 0) { throw "中断: Store の検索に失敗（終了コード $LASTEXITCODE）" }
    }
@@ -282,6 +293,7 @@
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      store.exe updates --apply
      if ($LASTEXITCODE -ne 0) { throw "中断: Store の更新に失敗（終了コード $LASTEXITCODE）" }
    }
@@ -294,6 +306,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $ErrorActionPreference = 'Stop'
      store.exe updates
      if ($LASTEXITCODE -ne 0) { throw "中断: Store の再検索に失敗（終了コード $LASTEXITCODE）" }
@@ -325,6 +338,7 @@
 1. 管理者ではないことと、今の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $sm = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -ErrorAction SilentlyContinue).'Scancode Map'
    [pscustomobject]@{
      PowerShell    = $PSVersionTable.PSVersion.ToString()
@@ -351,6 +365,7 @@
 
    ```powershell
    if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ExecutionPolicy
    ```
 
@@ -365,6 +380,7 @@
      $old = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-powershell-paste.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
      $text = Get-Content -LiteralPath $PROFILE -Raw
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($text -and ($text.Contains($line) -or $text.Contains($old))) { "すでにある: $PROFILE" } else {
        if ($text -and -not $text.EndsWith("`n")) { $line = "`r`n" + $line }
        Add-Content -LiteralPath $PROFILE -Value $line
@@ -392,6 +408,7 @@
 1. scoop が入ったことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop --version
    scoop bucket list
    [Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -like '*\scoop\shims' }
@@ -404,6 +421,7 @@
 1. UniGet UI（winget）と、その scoop の検索に使う scoop-search を入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop install scoop-search
    winget install --exact --id Devolutions.UniGetUI --source winget --scope user --accept-source-agreements --accept-package-agreements
    winget list --exact --id Devolutions.UniGetUI --source winget
@@ -417,6 +435,7 @@
 
    ```powershell
    winget install --exact --id Microsoft.PowerToys --source winget --scope user --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerToys --source winget
    ```
 
@@ -427,6 +446,7 @@
 
    ```powershell
    winget install --exact --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerShell --source winget
    ```
 
@@ -445,6 +465,7 @@
    Set-ItemProperty -Path $adv -Name Start_TrackDocs -Type DWord -Value 0
    Set-ItemProperty -Path $exp -Name ShowRecent -Type DWord -Value 0
    Set-ItemProperty -Path $exp -Name ShowFrequent -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List HideFileExt, Hidden, LaunchTo, Start_TrackDocs
    Get-ItemProperty -Path $exp | Format-List ShowRecent, ShowFrequent
    ```
@@ -455,6 +476,7 @@
 1. 自分のユーザーで、旧形式のコンテキストメニューを出すようにする。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    reg.exe add 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /f /ve
    reg.exe query 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' /ve
    ```
@@ -473,6 +495,7 @@
    foreach ($n in 'SubscribedContent-338393Enabled', 'SubscribedContent-353694Enabled', 'SubscribedContent-353696Enabled', 'SubscribedContent-338389Enabled', 'SubscribedContent-310093Enabled', 'SubscribedContent-338388Enabled', 'SystemPaneSuggestionsEnabled', 'SilentInstalledAppsEnabled') { Set-ItemProperty -Path $cdm -Name $n -Type DWord -Value 0 }
    if (-not (Test-Path -LiteralPath $upe)) { New-Item -Path $upe | Out-Null }
    Set-ItemProperty -Path $upe -Name ScoobeSystemSettingEnabled -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List Start_IrisRecommendations, Start_AccountNotifications
    Get-ItemProperty -Path $cdm | Format-List SubscribedContent-338393Enabled, SubscribedContent-353694Enabled, SubscribedContent-353696Enabled, SubscribedContent-338389Enabled, SubscribedContent-310093Enabled, SubscribedContent-338388Enabled, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
    Get-ItemProperty -Path $upe | Format-List ScoobeSystemSettingEnabled
@@ -489,6 +512,7 @@
    Set-ItemProperty -Path $adv -Name ShowTaskViewButton -Type DWord -Value 0
    Set-ItemProperty -Path $adv -Name ShowSecondsInSystemClock -Type DWord -Value 1
    Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' -Name SearchboxTaskbarMode -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List TaskbarAl, ShowTaskViewButton, ShowSecondsInSystemClock
    Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' | Format-List SearchboxTaskbarMode
    ```
@@ -502,6 +526,7 @@
    $p = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
    Set-ItemProperty -Path $p -Name AppsUseLightTheme -Type DWord -Value 0
    Set-ItemProperty -Path $p -Name SystemUsesLightTheme -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $p | Format-List AppsUseLightTheme, SystemUsesLightTheme
    ```
 
@@ -515,6 +540,7 @@
    if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p | Out-Null }
    Set-ItemProperty -LiteralPath $p -Name DelegationConsole -Type String -Value '{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}'
    Set-ItemProperty -LiteralPath $p -Name DelegationTerminal -Type String -Value '{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -LiteralPath $p | Format-List DelegationConsole, DelegationTerminal
    ```
 
@@ -541,6 +567,7 @@
      $ok = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
      if (-not (Test-Path -LiteralPath $ok)) { New-Item -Path $ok -Force | Out-Null }
      $names = (Get-Item -LiteralPath $run).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -eq 'OneDriveSetup' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in $names) {
        Set-ItemProperty -LiteralPath $ok -Name $n -Type Binary -Value ([byte[]](3, 0, 0, 0) + [BitConverter]::GetBytes((Get-Date).ToFileTime()))
        "止めた: $n"
@@ -559,6 +586,7 @@
 1. 要らない標準アプリを、自分のユーザーから外す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($n in 'Clipchamp.Clipchamp', 'Microsoft.BingNews', 'Microsoft.BingWeather', 'Microsoft.MicrosoftSolitaireCollection', 'Microsoft.MicrosoftOfficeHub', 'Microsoft.Todos', 'Microsoft.WindowsFeedbackHub', 'Microsoft.GetHelp', 'Microsoft.OutlookForWindows', 'MSTeams', 'Microsoft.PowerAutomateDesktop') {
      $p = Get-AppxPackage -Name $n
      if ($p) { $p | Remove-AppxPackage; "外した: $n" } else { "無い: $n" }
@@ -573,6 +601,7 @@
 
    ```powershell
    $p = Get-AppxPackage -Name MicrosoftWindows.Client.WebExperience
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if ($p) { $p | Remove-AppxPackage; '外した: MicrosoftWindows.Client.WebExperience' } else { '無い: MicrosoftWindows.Client.WebExperience' }
    ```
 
@@ -593,6 +622,7 @@
 
    ```powershell
    $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PC_NAME = {0}' -f $PC_NAME
    'LAN_IF  = {0}' -f $LAN_IF
    ```
@@ -605,6 +635,7 @@
 1. 管理者であることと、プロファイルの行が効いていることと、今の値を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $cv = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
    [pscustomobject]@{
      Admin            = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -637,6 +668,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      '1 行目'
      '2 行目'
      '3 行目'
@@ -650,6 +682,7 @@
 1. PC の名前を変えるときだけ、名前を変える（効くのは再起動の後）。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $PC_NAME) {
      Write-Error '中断: 手順 36 の $PC_NAME が空'
    } elseif ($PC_NAME -notmatch '^[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$' -or $PC_NAME -match '^[0-9]+$') {
@@ -674,6 +707,7 @@
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Type DWord -Value 1
    if (-not (Test-Path -LiteralPath $dev)) { New-Item -Path $dev | Out-Null }
    Set-ItemProperty -Path $dev -Name AllowDevelopmentWithoutDevLicense -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (Get-Command sudo -ErrorAction SilentlyContinue) { sudo config --enable normal } else { 'sudo が無い（24H2 より前の Windows）' }
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' | Format-List LongPathsEnabled
    Get-ItemProperty -Path $dev | Format-List AllowDevelopmentWithoutDevLicense
@@ -692,6 +726,7 @@
    powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONSOLELOCK 0
    powercfg /setactive SCHEME_CURRENT
    Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name DelayLockInterval -Type DWord -Value 0xFFFFFFFF
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($s in 'SUB_SLEEP STANDBYIDLE', 'SUB_BUTTONS LIDACTION', 'SUB_NONE CONSOLELOCK') { '{0}: {1}' -f $s, ((powercfg /qh SCHEME_CURRENT $s.Split(' ')) | Select-String -Pattern 'AC' | Select-Object -Last 1) }
    'HibernateEnabled: {0}' -f (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
    ```
@@ -706,6 +741,7 @@
      Write-Error '手順 36 の $LAN_IF が空'
    } else {
      $pm = Get-NetAdapterPowerManagement -Name $LAN_IF
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($pm.AllowComputerToTurnOffDevice -eq 'Unsupported') { "このアダプターは対象外: $LAN_IF" } else {
        $pm.AllowComputerToTurnOffDevice = 'Disabled'
        $pm | Set-NetAdapterPowerManagement -NoRestart
@@ -725,6 +761,7 @@
      Write-Error '手順 36 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
    }
    ```
@@ -740,6 +777,7 @@
      Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Type DWord -Value 0
      Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name UserAuthentication -Type DWord -Value 1
      Set-NetFirewallRule -Group '@FirewallAPI.dll,-28752' -Enabled True -Profile Private
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetFirewallRule -Group '@FirewallAPI.dll,-28752' | Format-Table Name, Enabled, Profile, Direction, Action
    }
    ```
@@ -751,6 +789,7 @@
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name fAllowToGetHelp -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Set-NetFirewallRule -Group '@FirewallAPI.dll,-33002' -Enabled False
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' | Format-List fAllowToGetHelp
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-33002' | Format-Table Name, Enabled, Profile
@@ -766,6 +805,7 @@
    Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
    New-NetFirewallRule -Name 'Ping-ICMPv4-In-setup-notes' -DisplayName 'Ping (ICMPv4 エコー要求)' -Group $g -Direction Inbound -Action Allow -Profile Private -Protocol ICMPv4 -IcmpType 8 | Out-Null
    New-NetFirewallRule -Name 'Ping-ICMPv6-In-setup-notes' -DisplayName 'Ping (ICMPv6 エコー要求)' -Group $g -Direction Inbound -Action Allow -Profile Private -Protocol ICMPv6 -IcmpType 128 | Out-Null
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Group $g | Format-Table Name, Enabled, Profile, Direction, Action
    ```
 
@@ -777,6 +817,7 @@
 
    ```powershell
    Set-DODownloadMode -DownloadMode Lan
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-DODownloadMode
    ```
 
@@ -788,6 +829,7 @@
    $k = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name DevicePasswordLessBuildVersion -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List DevicePasswordLessBuildVersion
    ```
 
@@ -800,6 +842,7 @@
    $k = 'HKCU:\Software\Policies\Microsoft\Windows\Explorer'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name DisableSearchBoxSuggestions -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List DisableSearchBoxSuggestions
    ```
 
@@ -812,6 +855,7 @@
    $k = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name RemoveDesktopShortcutDefault -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($f in (Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'Microsoft Edge.lnk'), (Join-Path ([Environment]::GetFolderPath('Desktop')) 'UniGetUI.lnk')) {
      if (Test-Path -LiteralPath $f) { Remove-Item -LiteralPath $f; "消した: $f" } else { "無い: $f" }
    }
@@ -831,6 +875,7 @@
      if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（手順 35 から）'; return }
      $now = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).'Scancode Map'
      $nowHex = if ($now) { ($now | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($nowHex -and $nowHex -ne $want) { Write-Error "中断: 別の Scancode Map がある（$nowHex）"; return }
      if (-not $nowHex) { New-ItemProperty -Path $key -Name 'Scancode Map' -PropertyType Binary -Value ([byte[]]($want -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })) | Out-Null }
      'Scancode Map = {0}' -f ((((Get-ItemProperty -Path $key).'Scancode Map') | ForEach-Object { '{0:X2}' -f $_ }) -join ' ')
@@ -846,6 +891,7 @@
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' -Name RealTimeIsUniversal -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' | Format-List RealTimeIsUniversal
    ```
 
@@ -862,6 +908,7 @@
    Set-ItemProperty -Path $k -Name OverrideKeyboardIdentifier -Type String -Value 'PCAT_101KEY'
    Set-ItemProperty -Path $k -Name OverrideKeyboardType -Type DWord -Value 7
    Set-ItemProperty -Path $k -Name OverrideKeyboardSubtype -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List 'LayerDriver JPN', OverrideKeyboardIdentifier, OverrideKeyboardType, OverrideKeyboardSubtype
    ```
 
@@ -927,6 +974,7 @@
 1. 再起動の後の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $sm = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -ErrorAction SilentlyContinue).'Scancode Map'
    [pscustomobject]@{
      ComputerName  = $env:COMPUTERNAME
@@ -967,6 +1015,7 @@
    ```powershell
    $env:WSL_UTF8 = '1'
    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --list --verbose
    wsl.exe --distribution AlmaLinux-10 -- head -n 2 /etc/os-release
    ```
@@ -1014,6 +1063,7 @@
    if (-not $LAN_IF) {
      Write-Error 'この節の手順 2 の $LAN_IF が空'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Set-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' -RegistryValue 1 -NoRestart
      Get-NetAdapterAdvancedProperty -Name $LAN_IF | Where-Object { $_.RegistryKeyword -like '*Wake*' -or $_.DisplayName -like '*Wake*' } | Format-Table DisplayName, DisplayValue, RegistryKeyword
      Get-NetAdapter -Name $LAN_IF | Format-List Name, InterfaceDescription, MacAddress
@@ -1057,6 +1107,7 @@
      Write-Error 'この節の手順 2 の $LAN_IF が空'
    } else {
      Set-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' -RegistryValue 0 -NoRestart
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' | Format-Table DisplayName, DisplayValue
    }
    ```
@@ -1094,6 +1145,7 @@
    ```powershell
    $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
    $WATCHDOG_HOST = if ($LAN_IF) { (Get-NetIPConfiguration -InterfaceAlias $LAN_IF).IPv4DefaultGateway.NextHop | Select-Object -First 1 } else { '' }   # 見張りタスクが生死を見る相手（自動で既定ゲートウェイ）。<WATCHDOG_HOST>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'LAN_IF = {0}' -f $LAN_IF
    'WATCHDOG_HOST = {0}' -f $WATCHDOG_HOST
    ```
@@ -1106,6 +1158,7 @@
    ```powershell
    $k = 'HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl'
    if ((Get-ItemProperty -Path $k -ErrorAction SilentlyContinue).AutoReboot -ne 1) { Set-ItemProperty -Path $k -Name AutoReboot -Type DWord -Value 1 }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List AutoReboot
    ```
 
@@ -1116,6 +1169,7 @@
    ```powershell
    Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled True -Profile Private
    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
    ```
@@ -1136,6 +1190,7 @@
    Enable-PSRemoting -Force -SkipNetworkProfileCheck
    Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile Private
    Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-NoScope -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile, Direction, Action
    ```
 
@@ -1189,6 +1244,7 @@
      $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest
      $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
      Register-ScheduledTask -TaskName 'net-watchdog' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-ScheduledTask -TaskName 'net-watchdog' | Format-List TaskName, State
    }
    ```
@@ -1205,6 +1261,7 @@
      if (-not (Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue)) { Write-Error '中断: claude-remote-control のタスクが無い（先に Claude Code の Remote Control（Windows）を設定する）'; return }
      $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
      Set-ScheduledTask -TaskName 'claude-remote-control' -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $me) | Out-Null
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      (Get-ScheduledTask -TaskName 'claude-remote-control').Triggers | Format-Table -AutoSize
    }
    ```
@@ -1216,6 +1273,7 @@
 
    ```powershell
    Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled False
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile
    ```
 
@@ -1230,6 +1288,7 @@
    Set-Service -Name WinRM -StartupType Manual
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Disable-NetFirewallRule
    Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile
    ```
 
@@ -1247,6 +1306,7 @@
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
    ```
 
@@ -1259,6 +1319,7 @@
    Unregister-ScheduledTask -TaskName 'net-watchdog' -Confirm:$false
    Remove-Item -Path 'HKLM:\SOFTWARE\setup-notes\net-watchdog' -Recurse -ErrorAction SilentlyContinue
    Remove-Item -LiteralPath 'C:\ProgramData\setup-notes\net-watchdog.ps1' -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ScheduledTask -TaskName 'net-watchdog' -ErrorAction SilentlyContinue
    ```
 
@@ -1303,6 +1364,7 @@
        @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', 0)
      )
      $old = foreach ($s in $set) { $key = Get-Item -LiteralPath $s[0] -ErrorAction SilentlyContinue; [pscustomobject]@{ Path = $s[0]; Name = $s[1]; Value = [string](Get-ItemProperty -LiteralPath $s[0] -ErrorAction SilentlyContinue).($s[1]); Kind = $(if ($key -and ($key.GetValueNames() -contains $s[1])) { [string]$key.GetValueKind($s[1]) } else { '' }) } }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
        $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
@@ -1347,6 +1409,7 @@
    ```powershell
    & {
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not (Test-Path -LiteralPath $rec)) { Write-Error "中断: 控えが無い: $rec"; return }
      foreach ($r in Import-Csv -LiteralPath $rec) {
        if ($r.Value -match '^-?[0-9]+$') { Set-ItemProperty -LiteralPath $r.Path -Name $r.Name -Type $(if ($r.Kind -eq 'QWord') { 'QWord' } else { 'DWord' }) -Value ([long]$r.Value) } else { Remove-ItemProperty -LiteralPath $r.Path -Name $r.Name -ErrorAction SilentlyContinue }
@@ -1415,6 +1478,7 @@
        'SoundScheme'                            = (Get-ItemProperty -LiteralPath 'HKCU:\AppEvents\Schemes' -ErrorAction SilentlyContinue).'(default)'
      }
      $rows = foreach ($n in $now.Keys) { [pscustomobject]@{ Name = $n; Value = [string]$now[$n] } }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
        $rows | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
@@ -1430,6 +1494,7 @@
 1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
      $p = "HKCU:\Control Panel\Accessibility\$k"
      $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
@@ -1451,6 +1516,7 @@
    & {
      $t = 'HKCU:\Keyboard Layout\Toggle'
      if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in 'Hotkey', 'Language Hotkey', 'Layout Hotkey') {
        $old = (Get-ItemProperty -LiteralPath $t).$n
        Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value '3'
@@ -1468,6 +1534,7 @@
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    Set-ItemProperty -Path $adv -Name MultiTaskingAltTabFilter -Type DWord -Value 3
    Set-ItemProperty -Path $adv -Name DisallowShaking -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
    ```
 
@@ -1477,6 +1544,7 @@
 1. エクスプローラーの左の一覧から、ギャラリーとホームを消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
      '既にあった {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
      reg.exe add "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /t REG_DWORD /d 0 /f
@@ -1495,6 +1563,7 @@
    $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -LiteralPath $k | Format-List TaskbarEndTask
    ```
 
@@ -1519,6 +1588,7 @@
      [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
      $on = 1
      [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'ClientAreaAnimation : {0}' -f $on
      'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
    }
@@ -1532,6 +1602,7 @@
    ```powershell
    & {
      $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $bak) -Force | Out-Null
        reg.exe export 'HKCU\AppEvents' $bak /y
@@ -1571,6 +1642,7 @@
      $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
      $set = [ordered]@{ '01' = 1; '04' = 1; '08' = 1; '256' = 30; '32' = 0; '512' = 0; '2048' = 30 }
      if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in $set.Keys) {
        $old = (Get-ItemProperty -LiteralPath $k).$n
        Set-ItemProperty -LiteralPath $k -Name $n -Type DWord -Value $set[$n]
@@ -1620,6 +1692,7 @@
 1. 元に戻すときは（この節の手順 3 を行ったとき）、固定キーなどのショートカットを有効に戻す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
      $p = "HKCU:\Control Panel\Accessibility\$k"
      $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
@@ -1640,6 +1713,7 @@
      $t = 'HKCU:\Keyboard Layout\Toggle'
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
      $before = @{}
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（既定の値にする）: $rec" }
      $def = [ordered]@{ 'Hotkey' = '1'; 'Language Hotkey' = '1'; 'Layout Hotkey' = '2' }
      if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
@@ -1662,6 +1736,7 @@
      $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
      $before = @{}
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
      foreach ($n in 'MultiTaskingAltTabFilter', 'DisallowShaking') {
        if ($before[$n] -match '^[0-9]+$') { Set-ItemProperty -Path $adv -Name $n -Type DWord -Value ([int]$before[$n]) } else { Remove-ItemProperty -Path $adv -Name $n -ErrorAction SilentlyContinue }
@@ -1679,6 +1754,7 @@
    & {
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
      $before = @{}
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値だけ消す）: $rec" }
      foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
        if ($before[$g] -eq 'False') { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /f } else { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /f }
@@ -1697,6 +1773,7 @@
      $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
      $before = @{}
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
      if ($before['TaskbarEndTask'] -match '^[0-9]+$') { Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value ([int]$before['TaskbarEndTask']) } else { Remove-ItemProperty -LiteralPath $k -Name TaskbarEndTask -ErrorAction SilentlyContinue }
      Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List TaskbarEndTask
@@ -1723,6 +1800,7 @@
      [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
      $on = 0
      [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'ClientAreaAnimation : {0}' -f $on
      'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
    }
@@ -1736,6 +1814,7 @@
    ```powershell
    & {
      $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
      reg.exe import $bak
      'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
@@ -1760,6 +1839,7 @@
    ```powershell
    $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
    foreach ($n in '01', '04', '08', '256', '32', '512', '2048') { Remove-ItemProperty -LiteralPath $k -Name $n -ErrorAction SilentlyContinue }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List '01', '04', '08', '256', '32', '512', '2048'
    ```
 
@@ -1789,6 +1869,7 @@
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name StartupBoostEnabled -Type DWord -Value 0
    Set-ItemProperty -Path $k -Name BackgroundModeEnabled -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List StartupBoostEnabled, BackgroundModeEnabled
    ```
 
@@ -1814,6 +1895,7 @@
    ```powershell
    $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
    foreach ($n in 'StartupBoostEnabled', 'BackgroundModeEnabled') { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k -ErrorAction SilentlyContinue | Format-List StartupBoostEnabled, BackgroundModeEnabled
    ```
 
@@ -1843,6 +1925,7 @@
 
    ```powershell
    winget install --exact --id hluk.CopyQ --source winget --scope user --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id hluk.CopyQ
    ```
 
@@ -1865,6 +1948,7 @@
    & {
      $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
      & $copyq config autostart false | Out-Null
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & $copyq config autostart true | Write-Output
      Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk')
      'EnableClipboardHistory: {0}' -f (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Clipboard' -ErrorAction SilentlyContinue).EnableClipboardHistory
@@ -1901,6 +1985,7 @@
    & {
      $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
      $lnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & $copyq config autostart false | Write-Output
      Remove-Item -LiteralPath $lnk -ErrorAction SilentlyContinue
      & $copyq exit | Write-Output
@@ -1915,6 +2000,7 @@
 
    ```powershell
    winget uninstall --exact --id hluk.CopyQ --source winget
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id hluk.CopyQ
    ```
 
@@ -1944,6 +2030,7 @@
    ```powershell
    $PT_OFF = 'FindMyMouse', 'MouseHighlighter', 'FancyZones', 'ColorPicker', 'Measure Tool', 'Awake'   # 切るユーティリティ（設定ファイルの名前）
    $PT_EXE = @((Get-Process -Name PowerToys -ErrorAction SilentlyContinue).Path) + "$env:LOCALAPPDATA\PowerToys\PowerToys.exe", "$env:LOCALAPPDATA\Programs\PowerToys\PowerToys.exe" | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1   # PowerToys.exe の場所（自動）
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PT_OFF = {0}' -f ($PT_OFF -join ', ')
    'PT_EXE = {0}' -f $PT_EXE
    ```
@@ -1957,6 +2044,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
      if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
      $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
@@ -1983,6 +2071,7 @@
    & {
      $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
      $bak = "$path.windows-setup.bak"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 4 で終了してから貼り直す'; return }
      if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 4 に戻る'; return }
      try { $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 設定ファイルを読めない: $path"; return }
@@ -2023,6 +2112,7 @@
    & {
      $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
      $bak = "$path.windows-setup.bak"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この節の手順 7 で終了してから貼り直す'; return }
      if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
      if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この節の手順 2 を貼り直してから、この節の手順 7 に戻る'; return }
@@ -2070,6 +2160,7 @@
        'if (Get-Command -Name starship -CommandType Application -ErrorAction Ignore) { function global:Invoke-Starship-PreCommand { if (Test-Path -Path Function:\__zoxide_hook) { $null = __zoxide_hook } }; Invoke-Expression (& starship init powershell) }  # windows-setup.md'
      )
      if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($line in $lines) {
        $text = Get-Content -LiteralPath $p -Raw
        if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
@@ -2097,6 +2188,7 @@
      $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete }  # windows-setup.md'
      if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。この節の手順 2 を先に貼る: $p"; return }
      $text = Get-Content -LiteralPath $p -Raw
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
        $add = $line
        if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
@@ -2149,6 +2241,7 @@
      $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
      $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # windows-setup\.md\r?(\n|$)', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
    }
    ```
@@ -2186,6 +2279,7 @@
    & {
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      $bak = "$path.windows-setup.bak"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い。Windows Terminal を 1 度開いてから貼り直す: $path"; return }
      $text = [IO.File]::ReadAllText($path)
      if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある。この節の手順 5 の画面で変える: $path"; return }
@@ -2223,6 +2317,7 @@
      if (-not $s.profiles.defaults.PSObject.Properties['font']) { $s.profiles.defaults | Add-Member -NotePropertyName font -NotePropertyValue ([pscustomobject]@{}) }
      $s.profiles.defaults.font | Add-Member -NotePropertyName face -NotePropertyValue 'HackGen Console NF' -Force
      [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'face: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).profiles.defaults.font.face
    }
    ```
@@ -2244,6 +2339,7 @@
      try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
      $s | Add-Member -NotePropertyName 'warning.multiLinePaste' -NotePropertyValue 'never' -Force
      [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'warning.multiLinePaste: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).'warning.multiLinePaste'
    }
    ```
@@ -2265,6 +2361,7 @@
    & {
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      $bak = "$path.windows-setup.bak"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
      Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
      Remove-Item -LiteralPath $bak
@@ -2301,6 +2398,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $env:WSL_UTF8 = '1'
      $p = Join-Path $env:USERPROFILE '.wslconfig'
      if (Test-Path -LiteralPath $p) { "--- $p"; [IO.File]::ReadAllText($p) } else { "無い: $p" }
@@ -2321,6 +2419,7 @@
      $path = Join-Path $env:USERPROFILE '.wslconfig'
      $bak = "$path.windows-setup.bak"
      $enc = New-Object System.Text.UTF8Encoding $false
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not (Test-Path -LiteralPath $path)) {
        [IO.File]::WriteAllText($path, "[wsl2]`r`nnetworkingMode=mirrored`r`n", $enc)
        "作った: $path"
@@ -2350,6 +2449,7 @@
 
    ```powershell
    wsl.exe --shutdown
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
    ```
 
@@ -2375,6 +2475,7 @@
    & {
      $path = Join-Path $env:USERPROFILE '.wslconfig'
      $bak = "$path.windows-setup.bak"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $bak) {
        Move-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
        "控えから戻した: $path"
@@ -2398,6 +2499,7 @@
 
    ```powershell
    wsl.exe --shutdown
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
    ```
 
@@ -2430,6 +2532,7 @@
 1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell = $PSVersionTable.PSVersion.ToString()
      Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -2462,6 +2565,7 @@
 1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop install fzf starship eza bat
    scoop install zoxide@0.9.9
@@ -2481,6 +2585,7 @@
 1. 版と場所と、zoxide を止めたことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    fzf --version
    zoxide --version
    starship --version
@@ -2503,6 +2608,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
      $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
      if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる'; return }
@@ -2551,6 +2657,7 @@
    & {
      scoop update
      $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この節の手順 9 から"; return }
      scoop unhold zoxide
      scoop update zoxide --force
@@ -2566,6 +2673,7 @@
 1. 元に戻すときは、この節で入れた 5 つを scoop で消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop uninstall fzf zoxide starship eza bat
    (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source
    [Environment]::GetEnvironmentVariable('BAT_CONFIG_DIR', 'User')
@@ -2585,6 +2693,7 @@
      $f = Join-Path $env:USERPROFILE 'scoop\persist\bat\config'
      if (-not (Test-Path -LiteralPath $f)) { "無い: $f"; return }
      $text = [IO.File]::ReadAllText($f)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not $text.Trim()) { "もう空: $f" } elseif ($text -match '\A--theme="[^"\r\n]*"\r?\n--style="numbers,changes,header"\r?\n--paging=never\r?\n?\z') {
        [IO.File]::WriteAllText($f, '')
        "空にした: $f"
@@ -2600,6 +2709,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\zoxide" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath "$env:LOCALAPPDATA\zoxide"
    ```
 
@@ -2627,6 +2737,7 @@
 1. scoop とバケットを上げ、古くなったものを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop status
    ```
@@ -2658,6 +2769,7 @@
 1. WSL と AlmaLinux 10 を上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --update
    wsl.exe --distribution AlmaLinux-10 --user root -- dnf -y upgrade
    ```
@@ -2675,6 +2787,7 @@
      }
      [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
      Update-Module -Name PSWindowsUpdate -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-InstalledModule -Name PSWindowsUpdate | Select-Object Name, Version, InstalledLocation
    }
    ```

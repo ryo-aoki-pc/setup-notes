@@ -10,6 +10,7 @@
 > - **手順 4 と手順 6 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。答えるかウィンドウを閉じてから、次の手順を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 拡張機能は[拡張機能を入れる（任意）](#拡張機能を入れる任意)。以後は[更新](#更新)・[ロールバック](extra/vscode.md#ロールバック)
 
 1. 署名鍵を落として、取り込む前に fingerprint を見る。
@@ -48,6 +49,7 @@
    gpgcheck=1
    gpgkey=https://packages.microsoft.com/keys/microsoft.asc
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/yum.repos.d/vscode.repo
    }
    ```
@@ -56,6 +58,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf install --assumeno code
      sudo dnf install code
    }
@@ -68,6 +71,7 @@
 1. VS Code が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    code --version
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' code
    rpm -qi code | sed -n '/^Vendor/p;/^Build Date/p'
@@ -94,6 +98,7 @@
 1. 初回起動で設定のディレクトリができたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -d ~/.config/Code ~/.vscode
    code --list-extensions
    ```

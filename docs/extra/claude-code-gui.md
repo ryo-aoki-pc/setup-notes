@@ -3,6 +3,7 @@
 [手順書](../claude-code-gui.md)・[検証記録](../verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
 
 - 「手順 N」は[手順書](../claude-code-gui.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -15,6 +16,7 @@
 
    ```bash
    rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
+   printf '\n\033[7m 確認 \033[0m\n'
    rmdir ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
    systemctl --user daemon-reload
    systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
@@ -33,6 +35,7 @@
      sleep 3
      sudo systemctl start "gnome-headless-session@${USER}.service"
      for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+     printf '\n\033[7m 確認 \033[0m\n'
      pgrep -a -u "${USER}" -x gnome-shell
    fi
    ```

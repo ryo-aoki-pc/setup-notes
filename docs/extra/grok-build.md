@@ -3,6 +3,7 @@
 [手順書](../grok-build.md)・[検証記録](../verification/grok-build.md)・[参考資料](../reference/grok-build.md)
 
 - 「手順 N」は[手順書](../grok-build.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -31,6 +32,7 @@
    rm -f ~/.grok/bin/grok ~/.grok/bin/agent
    rm -rf ~/.grok/downloads ~/.grok/completions
    hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v grok agent
    ```
 
@@ -41,6 +43,7 @@
 1. インストーラーが `~/.bashrc` に足したブロックを消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if grep -qx '# >>> grok installer >>>' ~/.bashrc && grep -qx '# <<< grok installer <<<' ~/.bashrc; then
      sed -i --follow-symlinks '/^# >>> grok installer >>>$/,/^# <<< grok installer <<<$/d' ~/.bashrc
      grep -c 'grok' ~/.bashrc
@@ -57,6 +60,7 @@
 
    ```bash
    rm -rf ~/.grok
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -ld ~/.grok
    ```
 
@@ -76,6 +80,7 @@
 1. 動いている Grok が無いことを確かめ、ログイン情報も外すならログアウトする。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name grok, agent -ErrorAction SilentlyContinue | Format-Table Id, Path
    grok logout
    ```
@@ -87,6 +92,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\.grok\bin", "$env:USERPROFILE\.grok\downloads", "$env:USERPROFILE\.grok\completions", "$env:LOCALAPPDATA\grok\git" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:USERPROFILE\.grok\bin", "$env:LOCALAPPDATA\grok\git"
    ```
 
@@ -101,6 +107,7 @@
      $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
      $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
      if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
    }
    ```
@@ -120,6 +127,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\.grok" -Recurse -Force
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:USERPROFILE\.grok"
    ```
 

@@ -11,6 +11,7 @@
 > - オンラインのホストが Windows なら、手順 1 は飛ばし、手順 2 の箇条書きのとおり 1 行を打つ
 
 - 手順 1 はオンラインのホストのシェルで貼る。手順 2 の後は、ログインしたオフラインのホストのシェルで貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: トンネルを使う手順書を、手順 3 のシェルのまま貼る。dnf にも使わせるなら[dnf にもトンネルを使わせる（任意）](#dnf-にもトンネルを使わせる任意)。使い終わったら[トンネルを閉じる](#トンネルを閉じる)。以後は[ロールバック](extra/ssh-socks-tunnel.md#ロールバック)
 - これを前提にする手順書:
   - [Homebrew（インターネットに出られないホスト）](homebrew-offline.md)
@@ -28,6 +29,7 @@
 
    ```bash
    OFFLINE_USER=${USER}                 # オフラインのホストでログインするユーザー。<OFFLINE_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in OFFLINE_HOST OFFLINE_USER; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -56,6 +58,7 @@
 
    ```bash
    export ALL_PROXY=socks5h://127.0.0.1:1080
+   printf '\n\033[7m 確認 \033[0m\n'
    ss -Hltn 'sport = :1080'
    curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}\n' https://github.com
    ```
@@ -80,6 +83,7 @@
    ```bash
    if grep -q '^proxy' /etc/dnf/dnf.conf; then echo '中断: /etc/dnf/dnf.conf に proxy の行が既にある（この手順は行わない）' >&2; else
      sudo sed -i '/^\[main\]$/a proxy=socks5h://127.0.0.1:1080' /etc/dnf/dnf.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      grep -n '^proxy' /etc/dnf/dnf.conf
      sudo dnf makecache
    fi
@@ -115,6 +119,7 @@
 1. オフラインのホストで、トンネルが無く、外に出られないことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ss -Hltn 'sport = :1080'
    curl -sS -o /dev/null --connect-timeout 10 https://github.com && echo '届いた（オフラインではない）' || echo '届かない（期待どおり）'
    ```

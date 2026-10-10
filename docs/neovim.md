@@ -14,6 +14,7 @@
 > - **手順 2 で TUI が開く**。`:q` で終了してから、ほかのコマンドを貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 既定のエディタにするなら[既定のエディタにする（任意）](#既定のエディタにする任意)。設定を書く場所と、自分用の設定（`ryo-aoki-pc/LazyVimStarter`）への案内は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](extra/neovim.md#ロールバック)
 
 1. brew で Neovim を入れる。
@@ -27,6 +28,7 @@
 1. Neovim が入ったか確かめ、起動して健全性を確認する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    nvim --version | head -3
    brew list --versions neovim
    command -v nvim
@@ -52,6 +54,7 @@
 
    ```bash
    . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%s / %s\n' "$EDITOR" "$VISUAL"
    alias vi
    ```
@@ -66,6 +69,7 @@
      $other = @(foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::GetEnvironmentVariable($n, 'User') }) | Where-Object { $_ -and $_ -ne 'nvim' }
      if ($other) { Write-Error "中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（$($other -join ', ')）" } else {
        foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::SetEnvironmentVariable($n, 'nvim', 'User') }
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
        foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
      }
    }
@@ -79,6 +83,7 @@
 
    ```powershell
    foreach ($n in 'EDITOR', 'VISUAL') { if ([Environment]::GetEnvironmentVariable($n, 'User') -eq 'nvim') { [Environment]::SetEnvironmentVariable($n, $null, 'User') } }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
    ```
 
@@ -145,6 +150,7 @@
 > - **この節の手順 5 で Neovim の画面（TUI）が開く**。`:qa` で閉じてから、ほかのブロックを貼る
 
 - 上から順にコードブロックを貼る。変数は無い
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 自分用の設定（`ryo-aoki-pc/LazyVimStarter`）を入れるなら、その導入の手順が Neovim も scoop で入れるので、この節の手順 3 は要らない（[設定ファイル](#設定ファイル)）
 - 手順の後: 置き場所と自分用の設定は[設定ファイル](#設定ファイル)。PowerShell などから起動するツールにも Neovim を使わせるなら[既定のエディタにする（任意）](#既定のエディタにする任意)の手順 2。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/neovim.md#windows-11-のロールバック)
 - SSH のセッションで scoop の nvim を使うなら、[windows-openssh-server.md の scoop のツールを SSH のセッションで使う（任意）](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)
@@ -157,6 +163,7 @@
 1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell = $PSVersionTable.PSVersion.ToString()
      Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -186,6 +193,7 @@
 1. 版と場所と、設定・データの置き場所を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    nvim --version | Select-Object -First 3
    (Get-Command nvim -All).Source
    nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
@@ -220,6 +228,7 @@
 1. Neovim をすべて閉じてから、scoop で上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update neovim
    nvim --version | Select-Object -First 1

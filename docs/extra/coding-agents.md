@@ -3,6 +3,7 @@
 [手順書](../coding-agents.md)・[検証記録](../verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
 - 「手順 N」は[手順書](../coding-agents.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -27,6 +28,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        echo "== ${a}"
        git -C "${WT_ROOT}/${a}" status --short
@@ -42,6 +44,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        if [ -d "${WT_ROOT}/${a}" ]; then git -C "${PROJECT_DIR}" worktree remove "${WT_ROOT}/${a}"; fi
        git -C "${PROJECT_DIR}" branch -d "agent/${a}"
@@ -59,6 +62,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        git -C "${PROJECT_DIR}" worktree remove --force "${WT_ROOT}/${a}"
        git -C "${PROJECT_DIR}" branch -D "agent/${a}"
@@ -79,6 +83,7 @@
    claude plugin uninstall grok-build@xai-grok-build
    claude plugin marketplace remove openai-codex
    claude plugin marketplace remove xai-grok-build
+   printf '\n\033[7m 確認 \033[0m\n'
    claude plugin list
    ```
 
@@ -120,6 +125,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($a in 'claude', 'codex', 'grok') { "== $a"; git -C "$WT_ROOT\$a" status --short; git -C $PROJECT_DIR log --oneline "main..agent/$a" }
    }
    ```
@@ -130,6 +136,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($a in 'claude', 'codex', 'grok') {
        if (Test-Path -LiteralPath "$WT_ROOT\$a") { git -C $PROJECT_DIR worktree remove "$WT_ROOT\$a" }
        git -C $PROJECT_DIR branch -d "agent/$a"
@@ -145,6 +152,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($a in 'claude', 'codex', 'grok') {
        git -C $PROJECT_DIR worktree remove --force "$WT_ROOT\$a"
        git -C $PROJECT_DIR branch -D "agent/$a"
@@ -164,6 +172,7 @@
    claude plugin uninstall grok-build@xai-grok-build
    claude plugin marketplace remove openai-codex
    claude plugin marketplace remove xai-grok-build
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude plugin list
    ```
 

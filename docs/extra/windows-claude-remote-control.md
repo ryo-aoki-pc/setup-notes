@@ -3,6 +3,7 @@
 [手順書](../windows-claude-remote-control.md)・[検証記録](../verification/windows-claude-remote-control.md)・[参考資料](../reference/windows-claude-remote-control.md)
 
 - 「手順 N」は[手順書](../windows-claude-remote-control.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -15,6 +16,7 @@
    Stop-ScheduledTask -TaskName 'claude-remote-control'
    Start-Sleep -Seconds 2
    Unregister-ScheduledTask -TaskName 'claude-remote-control' -Confirm:$false
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue
    ```
 

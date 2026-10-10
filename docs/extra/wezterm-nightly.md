@@ -3,6 +3,7 @@
 [手順書](../wezterm-nightly.md)・[検証記録](../verification/wezterm-nightly.md)・[参考資料](../reference/wezterm-nightly.md)
 
 - 「手順 N」は[手順書](../wezterm-nightly.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -51,6 +52,7 @@
      $p = Start-Process -FilePath $unins -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -Wait -PassThru
      if ($p.ExitCode -ne 0) { Write-Error "中断: アンインストーラが終了コード $($p.ExitCode) で終わった"; return }
      for ($i = 0; $i -lt 60 -and ((Test-Path -LiteralPath $key) -or (Test-Path -LiteralPath $dir)); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Test-Path -LiteralPath $key, $dir
      [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -like '*\WezTerm*' }
    }

@@ -13,6 +13,7 @@
 > - **手順 9 には対話入力がある**（ホスト鍵の確認とパスワード）
 
 - 上から順にコードブロックを貼る。Windows の手順は手順 2 で変数を設定した PowerShell に、クライアントの手順は手順 8 で変数を設定したシェルに貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後に、必要なら次の任意節を行う
   - 鍵でも入る: [公開鍵でもログインする（任意）](#公開鍵でもログインする任意)
   - 鍵で入れるようにした後、パスワードを受け付けないようにする: [パスワード認証を切る（任意）](#パスワード認証を切る任意)
@@ -28,6 +29,7 @@
 
    ```powershell
    $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # クライアントとつながる LAN の接続（自動）。<LAN_IF>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'LAN_IF = {0}' -f $LAN_IF
    ```
 
@@ -41,6 +43,7 @@
    if ($PSVersionTable.PSEdition -ne 'Desktop') {
      Write-Error 'Windows PowerShell（5.1）で貼る。PowerShell 7 では Add-WindowsCapability が失敗する'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
      Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 | Format-List Name, State
    }
@@ -55,6 +58,7 @@
    ```powershell
    Set-Service -Name sshd -StartupType Automatic
    Start-Service -Name sshd
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Service -Name sshd | Format-Table Name, Status, StartType
    Get-NetTCPConnection -State Listen -LocalPort 22 | Format-Table LocalAddress, LocalPort, OwningProcess
    ```
@@ -65,6 +69,7 @@
 1. LAN の接続がプライベートなことと、sshd の受信の規則を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
@@ -86,6 +91,7 @@
    (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication yes' | Set-Content $c -Encoding ascii
    & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
    if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match'
    ```
 
@@ -94,6 +100,7 @@
 1. 接続先と、ホスト鍵の指紋を表示する。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    '{0}@{1}' -f $env:USERNAME, (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress
    & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
    ```
@@ -109,6 +116,7 @@
 
    ```bash
    WIN_USER=${USER}                      # Windows のユーザー名。手順 7 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
@@ -186,6 +194,7 @@
      $f = "$env:ProgramData\ssh\administrators_authorized_keys"
      Add-Content -Path $f -Value $PUBKEY -Encoding ascii
      icacls.exe $f /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      icacls.exe $f
    }
    ```
@@ -196,6 +205,7 @@
 1. クライアントの PC で、鍵で入れることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 8 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PasswordAuthentication=no "${WIN_USER}@${WIN_HOST}" whoami
    fi
@@ -220,6 +230,7 @@
    (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication no' | Set-Content $c -Encoding ascii
    & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
    if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match', 'administrators_authorized_keys'
    ```
 
@@ -228,6 +239,7 @@
 1. クライアントの PC で、鍵が無いと入れず、鍵ではコマンドが通ることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 8 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}" true
      ssh "${WIN_USER}@${WIN_HOST}" whoami
@@ -252,6 +264,7 @@
    if (-not (Test-Path 'C:\Program Files\Git\bin\bash.exe')) {
      Write-Error 'C:\Program Files\Git\bin\bash.exe が無い（Git for Windows が入っていない）'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value 'C:\Program Files\Git\bin\bash.exe' -PropertyType String -Force | Format-List DefaultShell
    }
    ```
@@ -261,6 +274,7 @@
 1. クライアントの PC で、bash になったことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 8 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'echo "$BASH_VERSION $MSYSTEM"; git --version'
      ssh "${WIN_USER}@${WIN_HOST}"
@@ -297,6 +311,7 @@
 1. Windows で、scoop のジャンクションを管理者で作り直す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ChildItem "$env:USERPROFILE\scoop\apps" -Recurse -Depth 4 -Force -Attributes ReparsePoint -ErrorAction SilentlyContinue |
      Where-Object { $_.LinkType -eq 'Junction' -and (Get-Acl $_.FullName).Owner -notlike '*\Administrators' } |
      ForEach-Object {
@@ -317,6 +332,7 @@
 1. クライアントの PC で、scoop のツールが動くことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 手順 8 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
    fi

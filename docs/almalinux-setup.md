@@ -12,6 +12,7 @@
 > - **画面で行う手順**: 1・2・50・59〜63・68・70〜73（59〜63・71 はキーを押して確かめる）。**再起動**: 8（要るときだけ）・67。**条件付きの手順**: 8・10・12・15・70
 
 - 上から順にコードブロックを貼る。手順 9 の変数は、新しい端末を開いたら貼り直す（手順 50 より後では使わない）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 項目ごとの手順（要らない項目の手順は飛ばしてよい。手順 1〜4・7〜9・42・43・46〜50・67 は飛ばさない）
   - 更新: OS は 4・7・8、ファームウェアは 5・6
   - PC 全体: sudo は 3、PC の名前は 10、SSH は 11・12、journal は 13、kdump は 14・15、コマンドが無いときのパッケージの案内は 16
@@ -48,6 +49,7 @@
      if ! id -nG | grep -qw wheel; then
        echo '中断: このユーザーは wheel の一員ではない（インストールのときに管理者にしたユーザーで貼る）' >&2
      else
+       printf '\n\033[7m 確認 \033[0m\n'
        printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo visudo -cf - &&
          printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/nopasswd
        sudo visudo -c
@@ -123,6 +125,7 @@
    ```bash
    XKB_LAYOUT=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: \([a-z][a-z0-9_]*\).*/\1/p')   # キーボードの配列（自動）。JIS は jp、US は us。<XKB_LAYOUT>
    DASH_FAVORITES="['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop']"   # Dash に並べるアプリ（左から）
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER HOST_NAME XKB_LAYOUT DASH_FAVORITES; do
      printf '%-14s = %s\n' "$v" "${!v}"
    done
@@ -138,6 +141,7 @@
 
    ```bash
    if [ -z "${HOST_NAME}" ]; then echo '中断: 手順 9 の HOST_NAME が空のまま。名前を変えないなら、この手順は飛ばす' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      echo "変える前: $(hostnamectl --static)"
      sudo hostnamectl hostname "${HOST_NAME}"
      echo "変えた後: $(hostnamectl --static)"
@@ -152,6 +156,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-enabled sshd
      systemctl is-active sshd
      sudo firewall-cmd --query-service=ssh
@@ -171,6 +176,7 @@
      sudo systemctl enable --now sshd
      sudo firewall-cmd --permanent --add-service=ssh
      sudo firewall-cmd --reload
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-active sshd
      sudo firewall-cmd --query-service=ssh
    }
@@ -187,6 +193,7 @@
      sudo systemctl restart systemd-journald
      sudo journalctl --flush
      sudo systemd-tmpfiles --create --prefix /var/log/journal
+     printf '\n\033[7m 確認 \033[0m\n'
      ls -ld /var/log/journal
      journalctl --disk-usage
    }
@@ -197,6 +204,7 @@
 1. kdump が有効になっているか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl is-enabled kdump
    cat /sys/kernel/kexec_crash_size
    grep -o 'crashkernel=[^ ]*' /proc/cmdline
@@ -212,6 +220,7 @@
      sudo systemctl disable --now kdump
      sudo sed -i 's/^auto_reset_crashkernel yes$/auto_reset_crashkernel no/' /etc/kdump.conf
      sudo grubby --update-kernel=ALL --remove-args=crashkernel
+     printf '\n\033[7m 確認 \033[0m\n'
      grep -n '^auto_reset_crashkernel' /etc/kdump.conf
      sudo grubby --info=ALL | grep -E '^args='
    }
@@ -234,6 +243,7 @@
    ```bash
    {
      if ! dnf repolist enabled | grep -qE '^epel'; then sudo dnf install -y epel-release; fi
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q epel-release
      dnf repolist enabled | grep -E '^epel'
    }
@@ -261,6 +271,7 @@
    ```bash
    {
      sudo rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10'
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i fusion
    }
    ```
@@ -281,6 +292,7 @@
 1. RPM Fusion（free）が有効になったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rpm -q rpmfusion-free-release
    dnf repolist enabled | grep -E '^rpmfusion'
    ```
@@ -291,6 +303,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      if ! rpm -q flatpak; then sudo dnf install -y flatpak; fi
      flatpak --version
      flatpak remotes --show-details
@@ -315,6 +328,7 @@
    ```bash
    {
      sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+     printf '\n\033[7m 確認 \033[0m\n'
      flatpak remotes --show-details
    }
    ```
@@ -336,6 +350,7 @@
 1. 確認用のアプリが入り、サンドボックスが起動できるか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    flatpak list --app --columns=application,version,branch,installation
    flatpak info com.github.tchx84.Flatseal
    flatpak run --command=true com.github.tchx84.Flatseal && echo 'sandbox OK'
@@ -360,6 +375,7 @@
 
    ```bash
    if [ -z "${XKB_LAYOUT}" ]; then echo '中断: 手順 9 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
      /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT}'), ('ibus', 'anthy')]"
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
@@ -375,6 +391,7 @@
 1. ホームのフォルダーの名前を、日本語から英語にする（中身ごと移す）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 - <<'EOF'
    import pathlib, subprocess, urllib.parse
    home = pathlib.Path.home()
@@ -417,6 +434,7 @@
 
    ```bash
    /usr/bin/gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface color-scheme
    ```
 
@@ -432,6 +450,7 @@
      '@as []') /usr/bin/gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" ;;
      *) /usr/bin/gsettings set org.gnome.desktop.input-sources xkb-options "${xkb%]}, 'ctrl:nocaps']" ;;
    esac
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.input-sources xkb-options
    ```
 
@@ -441,6 +460,7 @@
 
    ```bash
    /usr/bin/gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.wm.preferences button-layout
    ```
 
@@ -452,6 +472,7 @@
    /usr/bin/gsettings set org.gnome.desktop.interface clock-show-weekday true
    /usr/bin/gsettings set org.gnome.desktop.interface clock-show-seconds true
    /usr/bin/gsettings set org.gnome.desktop.interface show-battery-percentage true
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings list-recursively org.gnome.desktop.interface | grep -E 'clock-show-(weekday|seconds)|show-battery-percentage'
    ```
 
@@ -461,6 +482,7 @@
 1. Files とファイルを選ぶ窓で、隠しファイルを出し、フォルダーを先に並べる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for s in org.gtk.Settings.FileChooser org.gtk.gtk4.Settings.FileChooser; do
      /usr/bin/gsettings set "${s}" show-hidden true
      /usr/bin/gsettings set "${s}" sort-directories-first true
@@ -477,6 +499,7 @@
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-applications-backward "['<Shift><Super>Tab']"
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-windows-backward "['<Shift><Alt>Tab']"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings list-recursively org.gnome.desktop.wm.keybindings | grep -E 'switch-(applications|windows)'
    ```
 
@@ -486,6 +509,7 @@
 
    ```bash
    /usr/bin/gsettings set org.gnome.desktop.interface enable-hot-corners false
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface enable-hot-corners
    ```
 
@@ -504,6 +528,7 @@
      esac
    done
    /usr/bin/gsettings set org.gnome.mutter experimental-features "${f}"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
 
@@ -530,6 +555,7 @@
      '@as []') /usr/bin/gsettings set org.gnome.shell enabled-extensions "['appindicatorsupport@rgcjonas.gmail.com']" ;;
      *) /usr/bin/gsettings set org.gnome.shell enabled-extensions "${e%]}, 'appindicatorsupport@rgcjonas.gmail.com']" ;;
    esac
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.shell enabled-extensions
    ```
 
@@ -548,6 +574,7 @@
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" name '端末'
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'ptyxis --new-window'
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" binding '<Control><Alt>t'
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
    /usr/bin/gsettings list-recursively "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}"
    ```
@@ -558,6 +585,7 @@
 
    ```bash
    if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 手順 9 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.shell favorite-apps
      /usr/bin/gsettings set org.gnome.shell favorite-apps "${DASH_FAVORITES}"
      /usr/bin/gsettings get org.gnome.shell favorite-apps
@@ -570,6 +598,7 @@
 1. 共通の bash 設定を入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
      bash ~/.config/bash/install.sh
    ```
@@ -581,6 +610,7 @@
 
    ```bash
    . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "${__bash_config_loaded-読まれていない}"
    printf '%s\n' "$HISTSIZE" "$HISTFILESIZE" "$HISTCONTROL"
    shopt histappend autocd cdspell dirspell globstar
@@ -618,6 +648,7 @@
    "\eOB": history-search-forward
    EOF
      bind -f ~/.inputrc
+     printf '\n\033[7m 確認 \033[0m\n'
      bind -v | grep -E 'completion-ignore-case|show-all-if-ambiguous|colored-stats|colored-completion-prefix'
      bind -q history-search-backward
      bind -q beginning-of-line
@@ -650,6 +681,7 @@
 
    ```bash
    . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
    brew --version
    command -v brew
    brew config | head -12
@@ -679,6 +711,7 @@
 1. bash の履歴・補完・キー操作の設定が効いていることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%s\n' "${HISTSIZE}" "${HISTFILESIZE}" "${HISTCONTROL}"
    shopt histappend autocd cdspell dirspell globstar
    complete -p -D
@@ -694,6 +727,7 @@
 1. starship が入り、プロンプトの文字列が作られるか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    grep -n -e 'starship init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'zoxide init' ~/.config/bash/bashrc
    starship --version
    command -v starship
@@ -707,6 +741,7 @@
 1. fzf が入り、キー操作と補完が組み込まれたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    fzf --version
    command -v fzf
    bind -X
@@ -721,6 +756,7 @@
 1. eza の版と Git の列、`ll`・`la`・`lt` を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    eza --version
    command -v eza
    eza -l --git --header ~/.config/bash
@@ -734,6 +770,7 @@
 1. bat の版と、色と行番号、man のページャを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    bat --version
    command -v bat
    bat --color=always --style=numbers /etc/os-release | head -5
@@ -747,6 +784,7 @@
 1. tmux が入ったことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    tmux -V
    command -v tmux
    rpm -q tmux
@@ -759,6 +797,7 @@
 1. zoxide の `z` と `zi` を確かめ、記録を試すディレクトリへ移る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    type -t z zi
    zoxide --version
    command -v zoxide
@@ -772,6 +811,7 @@
 1. zoxide のデータベースに記録されたか確かめ、ホームに戻る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    zoxide query --list
    cd ~
    ```
@@ -823,6 +863,7 @@
 1. セッションの一覧を見て、もう一度入る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    tmux ls
    tmux attach -t work
    ```
@@ -860,6 +901,7 @@
 1. 端末を開き、再起動の後の状態を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    journalctl --list-boots --no-pager | tail -n 2
    cat /sys/kernel/kexec_crash_size
    hostnamectl --static
@@ -927,6 +969,7 @@
      chmod 600 ~/.ssh/authorized_keys
      if grep -qxF "${SSH_PUBKEY}" ~/.ssh/authorized_keys; then echo 'この鍵はもうある'; else printf '%s\n' "${SSH_PUBKEY}" >> ~/.ssh/authorized_keys; fi
      restorecon -R ~/.ssh
+     printf '\n\033[7m 確認 \033[0m\n'
      ssh-keygen -lf ~/.ssh/authorized_keys
    fi
    ```
@@ -944,6 +987,7 @@
    ```bash
    {
      printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' | sudo install -m 0600 /dev/stdin /etc/ssh/sshd_config.d/40-pubkey-only.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo sshd -t && sudo systemctl reload sshd
      sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
    }
@@ -963,6 +1007,7 @@
    {
      sudo rm -f /etc/ssh/sshd_config.d/40-pubkey-only.conf
      sudo sshd -t && sudo systemctl reload sshd
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication) '
    }
    ```
@@ -992,6 +1037,7 @@
    ```bash
    {
      sudo systemctl enable --now dnf-automatic-install.timer
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl list-timers 'dnf-automatic*' --no-pager
    }
    ```
@@ -1002,6 +1048,7 @@
 
    ```bash
    /usr/bin/gsettings set org.gnome.software download-updates false
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.software download-updates
    ```
 
@@ -1012,6 +1059,7 @@
    ```bash
    {
      sudo systemctl start dnf-automatic-install.service
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl status dnf-automatic-install.service --no-pager | head -n 5
      journalctl -u dnf-automatic-install.service -b --no-pager | tail -n 5
    }
@@ -1026,6 +1074,7 @@
    {
      sudo systemctl disable --now dnf-automatic-install.timer
      /usr/bin/gsettings reset org.gnome.software download-updates
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl list-timers 'dnf-automatic*' --no-pager
      /usr/bin/gsettings get org.gnome.software download-updates
    }
@@ -1059,6 +1108,7 @@
    IDLE_DELAY=0               # 無操作で画面を消すまでの秒数。0 は消さない（GNOME の既定は 300）
    LOCK_ENABLED=false         # 画面が消えたときにロックするか。true / false（既定は true）
    POWER_BUTTON=interactive   # 電源ボタンを押したとき。interactive（電源オフの確認を出す）/ nothing（何もしない）
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER IDLE_DELAY LOCK_ENABLED POWER_BUTTON; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -1078,6 +1128,7 @@
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power power-button-action "${POWER_BUTTON:?この節の手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.session idle-delay
    /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
    /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
@@ -1097,6 +1148,7 @@
    sleep-inactive-battery-type='nothing'
    power-button-action='${POWER_BUTTON:?この節の手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}'
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dconf update
      sudo -u gdm env DCONF_PROFILE=gdm /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
    fi
@@ -1110,6 +1162,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
      systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
    }
@@ -1128,6 +1181,7 @@
    HandleLidSwitch=ignore
    EOF
      sudo systemctl reload systemd-logind
+     printf '\n\033[7m 確認 \033[0m\n'
      busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
    }
    ```
@@ -1143,6 +1197,7 @@
    /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type
    /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type
    /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power power-button-action
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.session idle-delay
    /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
    /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
@@ -1156,6 +1211,7 @@
    {
      sudo rm -f /etc/dconf/db/gdm.d/90-power
      sudo dconf update
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo -u gdm env DCONF_PROFILE=gdm /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
    }
    ```
@@ -1166,6 +1222,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
      systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
    }
@@ -1179,6 +1236,7 @@
    {
      sudo rm -f /etc/systemd/logind.conf.d/90-lid.conf
      sudo systemctl reload systemd-logind
+     printf '\n\033[7m 確認 \033[0m\n'
      busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
    }
    ```
@@ -1198,6 +1256,7 @@
    ```bash
    LAN_CON=$(nmcli -g NAME,TYPE connection show --active | awk -F: '$2 == "802-3-ethernet" { print $1; exit }')   # 有線 LAN の接続（自動）。<LAN_CON>
    LAN_IF=$(nmcli -g GENERAL.DEVICES connection show "${LAN_CON}" 2>/dev/null)   # その機器（自動）。<LAN_IF>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in LAN_CON LAN_IF; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
@@ -1213,6 +1272,7 @@
    if [ -z "${LAN_CON}" ]; then echo '中断: この節の手順 1 の LAN_CON が空のまま（有線の LAN の接続が無い）' >&2; else
      sudo nmcli connection modify "${LAN_CON}" 802-3-ethernet.wake-on-lan magic
      sudo nmcli device reapply "${LAN_IF}"
+     printf '\n\033[7m 確認 \033[0m\n'
      nmcli -g 802-3-ethernet.wake-on-lan connection show "${LAN_CON}"
      sudo ethtool "${LAN_IF}" | grep -i 'wake-on'
      ip -brief link show "${LAN_IF}"
@@ -1267,6 +1327,7 @@
    if [ -z "${LAN_CON}" ]; then echo '中断: この節の手順 1 の LAN_CON が空のまま' >&2; else
      sudo nmcli connection modify "${LAN_CON}" 802-3-ethernet.wake-on-lan default
      sudo nmcli device reapply "${LAN_IF}"
+     printf '\n\033[7m 確認 \033[0m\n'
      nmcli -g 802-3-ethernet.wake-on-lan connection show "${LAN_CON}"
    fi
    ```
@@ -1291,6 +1352,7 @@
    if [ -z "${MONO_FONT}" ]; then echo '中断: MONO_FONT が空のまま。値を入れて貼り直す' >&2; else
      /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
      /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name "${MONO_FONT}"
+     printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
    fi
    ```
@@ -1302,6 +1364,7 @@
    ```bash
    kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'wezterm start'
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
    fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
    /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.gnome.Ptyxis.desktop/org.wezfurlong.wezterm.desktop}"
@@ -1324,6 +1387,7 @@
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'ptyxis --new-window'
    fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
    /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.wezfurlong.wezterm.desktop/org.gnome.Ptyxis.desktop}"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
    /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
    /usr/bin/gsettings get org.gnome.shell favorite-apps
@@ -1420,6 +1484,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
      elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
      else
@@ -1445,6 +1510,7 @@
    ```bash
    {
      sudo rm -f /etc/sudoers.d/homebrew
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo printenv PATH   # /sbin:/bin:/usr/sbin:/usr/bin
    }
    ```
@@ -1523,6 +1589,7 @@
    mkdir -p ~/.config
    starship config username.show_always true
    starship config hostname.ssh_only false
+   printf '\n\033[7m 確認 \033[0m\n'
    starship module username
    starship module hostname
    ```
@@ -1592,6 +1659,7 @@
 1. fd と bat があり、変数が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v fd bat
    printf '%s\n' "${FZF_DEFAULT_COMMAND-}" "${FZF_CTRL_T_COMMAND-}" "${FZF_ALT_C_COMMAND-}" "${FZF_CTRL_T_OPTS-}"
    ```
@@ -1653,6 +1721,7 @@
    --style="numbers,changes,header"
    --paging=never
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat ~/.config/bat/config
      bat --config-file
    fi
@@ -1718,6 +1787,7 @@
    # さかのぼれる行数（既定は 2000）
    set -g history-limit 50000
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat ~/.config/tmux/tmux.conf
    fi
    ```
@@ -1732,6 +1802,7 @@
      for conf in ~/.tmux.conf ~/.config/tmux/tmux.conf; do
        if [ -f "${conf}" ]; then tmux source-file "${conf}"; fi
      done
+     printf '\n\033[7m 確認 \033[0m\n'
      tmux show -g mouse
      tmux show -g history-limit
      tmux kill-session -t "${TMUX_CHECK_ID}"
@@ -1756,6 +1827,7 @@
 1. Claude Code と tmux が使えることと、ログインを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    claude --version
    tmux -V
    claude auth status --text
@@ -1797,6 +1869,7 @@
 1. Remote Control が動いていることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    tmux ls
    pgrep -af 'claude remote-control'
    ```
@@ -1843,6 +1916,7 @@
 1. 共通の bash 設定を上げる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/bash pull --ff-only &&
      bash ~/.config/bash/install.sh
    ```
@@ -1853,6 +1927,7 @@
 1. Homebrew 自身と formula の索引を更新し、上げられるものを見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew update
    brew outdated
    ```

@@ -3,6 +3,7 @@
 [手順書](../hackgen.md)・[検証記録](../verification/hackgen.md)・[参考資料](../reference/hackgen.md)
 
 - 「手順 N」は[手順書](../hackgen.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -13,6 +14,7 @@
 1. HackGen を消し、fontconfig から消えたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew uninstall --cask font-hackgen-nerd
    ls ~/.local/share/fonts/
    fc-list : family | grep -c HackGen
@@ -25,6 +27,7 @@
 
    ```bash
    sed -i "s/^config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/config.font = wezterm.font 'Noto Sans Mono'/" ~/.config/wezterm/wezterm.lua
+   printf '\n\033[7m 確認 \033[0m\n'
    grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
    ```
 
@@ -43,6 +46,7 @@
    ```powershell
    $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
    (Get-Item -LiteralPath $key).Property -like 'HackGen*ConsoleNF-* (TrueType)' | ForEach-Object { Remove-ItemProperty -LiteralPath $key -Name $_ }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-Item -LiteralPath $key).Property -like 'HackGen*'
    ```
 
@@ -57,6 +61,7 @@
 
    ```powershell
    Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts\HackGen*ConsoleNF-*.ttf"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts" -Filter 'HackGen*'
    ```
 

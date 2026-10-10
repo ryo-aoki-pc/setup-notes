@@ -3,6 +3,7 @@
 [手順書](../codex.md)・[検証記録](../verification/codex.md)・[参考資料](../reference/codex.md)
 
 - 「手順 N」は[手順書](../codex.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -23,6 +24,7 @@
    rm -f ~/.local/bin/codex ~/.local/bin/codex-code-mode-host
    rm -rf ~/.codex/packages/standalone
    hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v codex
    ```
 

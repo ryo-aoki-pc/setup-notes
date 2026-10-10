@@ -3,6 +3,7 @@
 [手順書](../homebrew-offline.md)・[検証記録](../verification/homebrew-offline.md)・[参考資料](../reference/homebrew-offline.md)
 
 - 「手順 N」は[手順書](../homebrew-offline.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -15,6 +16,7 @@
    ```bash
    brew uninstall jq
    brew autoremove
+   printf '\n\033[7m 確認 \033[0m\n'
    brew list --versions
    ```
 

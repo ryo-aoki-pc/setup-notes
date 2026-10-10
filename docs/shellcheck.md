@@ -11,6 +11,7 @@
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 整形は[shfmt で整形を確かめる（任意）](#shfmt-で整形を確かめる任意)、警告の抑制は[検査を調整する（任意）](#検査を調整する任意)。以後は[更新](#更新)・[ロールバック](extra/shellcheck.md#ロールバック)
 
 1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
@@ -22,6 +23,7 @@
    ```bash
    SC_SEVERITY=style        # -S に渡す最低重大度。style だと全部出る。error / warning / info / style。<SC_SEVERITY>
    SHFMT_INDENT=2           # shfmt -i のインデント幅。0 ならタブ。<SHFMT_INDENT>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in SC_TARGET SC_SEVERITY SHFMT_INDENT; do printf '%-13s = %s\n' "$v" "${!v}"; done
    ```
 
@@ -41,6 +43,7 @@
 1. 2 つが入ったか確かめ、わざと欠陥のあるコードで検出できるかを見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    shellcheck --version
    shfmt --version
    command -v shellcheck shfmt
@@ -58,6 +61,7 @@
 1. スクリプトを、bash の構文チェックと ShellCheck で検査する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    bash -n "${SC_TARGET:?手順 1 の SC_TARGET が空のまま。値を入れて貼り直す}"
    echo "rc=$?"
    shellcheck -x "${SC_TARGET}"
@@ -70,6 +74,7 @@
 1. 件数だけ見たいときと、重大度で絞りたいときは、JSON で数えて `-S` で絞る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SC_TARGET}" ] || [ -z "${SC_SEVERITY}" ]; then
      echo '中断: 手順 1 の SC_TARGET と SC_SEVERITY を設定してから貼り直す' >&2
    elif ! command -v jq >/dev/null 2>&1; then
@@ -93,6 +98,7 @@
 1. 今の書き方とどれだけ違うかを見て、整形対象になるファイルを一覧する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SC_TARGET}" ] || [ -z "${SHFMT_INDENT}" ]; then
      echo '中断: 手順 1 の SC_TARGET と SHFMT_INDENT を設定してから貼り直す' >&2
    else
@@ -109,6 +115,7 @@
    SHFMT_TMP=$(mktemp -d)
    cp "${SC_TARGET}" "${SHFMT_TMP}/copy.sh"
    shfmt -i "${SHFMT_INDENT}" -w "${SHFMT_TMP}/copy.sh"
+   printf '\n\033[7m 確認 \033[0m\n'
    diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
    rm -rf "${SHFMT_TMP}"
    ```
@@ -135,6 +142,7 @@
    ```bash
    SC_TMP=$(mktemp -d)
    cp "${SC_TARGET}" "${SC_TMP}/target.sh"
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'disable=SC2034\nexternal-sources=true\nsource-path=SCRIPTDIR\n' > "${SC_TMP}/.shellcheckrc"
    (cd "${SC_TMP}" && shellcheck -x target.sh; echo "rc=$?")
    rm -rf "${SC_TMP}"

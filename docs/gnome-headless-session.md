@@ -12,6 +12,7 @@
 > - [リモートログイン](gnome-remote-desktop.md)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 接続元を絞るなら[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)。リモートログインと併用していて、ヘッドレスのセッションだけをやめるなら[リモートログインだけにする（併用をやめる）](#リモートログインだけにする併用をやめる)。戻すときは[ロールバック](extra/gnome-headless-session.md#ロールバック)
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
@@ -24,6 +25,7 @@
    SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
    SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
    RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER SERVER_IP SERVER_NAME SERVER_FQDN RDP_PORT; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -38,6 +40,7 @@
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl enable --now "gnome-headless-session@${USER}.service"
      for i in $(seq 1 30); do
        busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 &&
@@ -102,6 +105,7 @@
        openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout
        openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -noout
        touch ~/.local/state/gnome-headless-session-setup/ready
+       printf '\n\033[7m 確認 \033[0m\n'
        ls -l ~/.local/share/gnome-remote-desktop/certificates
        echo 'TLS の退避と証明書の準備が完了'
      )
@@ -120,6 +124,7 @@
    elif [ ! -f ~/.local/state/gnome-headless-session-setup/ready ]; then
      echo '中断: 手順 3 が完了していない。TLS 設定は変更しない' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      rm -f ~/.local/state/gnome-headless-session-setup/restored &&
      grdctl --headless rdp set-tls-cert ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt &&
      grdctl --headless rdp set-tls-key ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key &&
@@ -144,6 +149,7 @@
 
    ```bash
    grdctl --headless rdp enable
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user is-enabled gnome-remote-desktop-headless.service
    ```
 
@@ -154,6 +160,7 @@
 
    ```bash
    if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --add-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --reload
    sudo firewall-cmd --list-ports
@@ -165,6 +172,7 @@
 1. デーモンが待ち受けているかを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    grdctl --headless status
    ss -Hlnt "sport = :${RDP_PORT:?手順 1 の RDP_PORT が空のまま}"
    ```
@@ -200,6 +208,7 @@
    print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
    ts.close()
    PY
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 ~/rdp_tls_probe.py "${SERVER_IP}" "${RDP_PORT}"
    grdctl --headless status 2>/dev/null | grep 'TLS fingerprint'
    ```
@@ -236,6 +245,7 @@
 
    ```bash
    if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
    sudo firewall-cmd --reload
@@ -267,6 +277,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
        echo "${s} $(loginctl show-session "${s}" -p Service --value)"
      done
@@ -295,6 +306,7 @@
    rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
    rmdir --ignore-fail-on-non-empty ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
    ```
 
@@ -306,6 +318,7 @@
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl disable --now "gnome-headless-session@${USER}.service"
      for i in $(seq 1 30); do
        [ "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}' |
@@ -330,6 +343,7 @@
        [ "$(loginctl show-session "${s}" -p Service --value 2>/dev/null)" = gdm-password ] && loginctl terminate-session "${s}"
      done
      for i in $(seq 1 30); do [ -z "$(pgrep -u "${USER}" -x gnome-shell)" ] && break; sleep 1; done
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
      pgrep -a -u "${USER}" -x gnome-shell
    fi
@@ -348,6 +362,7 @@
 1. サーバーで、リモートログインのセッションだけになったかを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
      echo "${s} $(loginctl show-session "${s}" -p Service --value)"
    done

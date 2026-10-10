@@ -3,6 +3,7 @@
 [手順書](../claude-code.md)・[検証記録](../verification/claude-code.md)・[参考資料](../reference/claude-code.md)
 
 - 「手順 N」は[手順書](../claude-code.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -47,6 +48,7 @@
 1. 動いている Claude Code と、Remote Control のタスクが無いことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name claude -ErrorAction SilentlyContinue | Where-Object Path -like "$env:USERPROFILE\.local\*" | Format-Table Id, Path
    Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
@@ -60,6 +62,7 @@
    ```powershell
    Remove-Item -Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\bin\claude.exe.old.*" -Force -ErrorAction SilentlyContinue
    Remove-Item -LiteralPath "$env:USERPROFILE\.local\share\claude", "$env:USERPROFILE\.local\state\claude", "$env:USERPROFILE\.cache\claude" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\share\claude"
    Get-ChildItem -LiteralPath "$env:USERPROFILE\.local\bin" -Force -ErrorAction SilentlyContinue | Format-Table Name
    ```
@@ -78,6 +81,7 @@
      $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
      if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
      Remove-Item -LiteralPath $bin -ErrorAction SilentlyContinue
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
    }
    ```
@@ -90,6 +94,7 @@
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\.claude" -Recurse -Force
    Remove-Item -LiteralPath "$env:USERPROFILE\.claude.json" -Force
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:USERPROFILE\.claude", "$env:USERPROFILE\.claude.json"
    ```
 

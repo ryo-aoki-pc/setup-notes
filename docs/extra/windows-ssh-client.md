@@ -3,6 +3,7 @@
 [手順書](../windows-ssh-client.md)・[検証記録](../verification/windows-ssh-client.md)・[参考資料](../reference/windows-ssh-client.md)
 
 - 「手順 N」は[手順書](../windows-ssh-client.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -25,6 +26,7 @@
      Write-Error "中断: $pub が無いか、公開鍵の形でない（ホストの authorized_keys は変えない）"
    } else {
      $cmd = 'umask 077; grep -vF -- {0} ~/.ssh/authorized_keys > ~/.ssh/authorized_keys.new; if [ $? -le 1 ]; then mv -f ~/.ssh/authorized_keys.new ~/.ssh/authorized_keys; else rm -f ~/.ssh/authorized_keys.new; fi; if type restorecon >/dev/null 2>&1; then restorecon -F ~/.ssh/authorized_keys; fi; grep -cF -- {0} ~/.ssh/authorized_keys' -f $k
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" $SSH_ALIAS $cmd
    }
    ```
@@ -51,6 +53,7 @@
        Write-Error "中断: $f に $SSH_ALIAS の印の行が無い"
      } else {
        [IO.File]::WriteAllBytes($f, $e.GetBytes($n))
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
        Select-String -LiteralPath $f -Pattern "windows-ssh-client\.md $a"
      }
    }
@@ -65,6 +68,7 @@
    if (-not $SSH_HOST) {
      Write-Error '中断: 手順 2 の SSH_HOST が空のまま。値を入れて貼り直す'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -R $SSH_HOST
    }
    ```
@@ -77,6 +81,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub"
    ```
 

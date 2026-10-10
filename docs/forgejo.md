@@ -10,6 +10,7 @@
 > - 手順 21 でサーバーを再起動する。ログインし直した後は、手順 1 の変数だけを貼り直す
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバック](extra/forgejo.md)
 - 手順 2 で公式の最新安定版を調べて入れる。手順 24〜26 で、毎日最新の安定版へ自動で更新するタイマーを有効にする（[更新](#更新)）
 - 手順の後: [使い方の基本](#使い方の基本)・[設定ファイル](#設定ファイル)・[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)・[更新](#更新)・[ロールバック](extra/forgejo.md#ロールバック)
@@ -31,6 +32,7 @@
      FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
      FORGEJO_SSH_PORT=2222             # ホスト側の Git 用 SSH ポート（1024〜65535）
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
+     printf '\n\033[7m 確認 \033[0m\n'
      printf '待ち受け: %s\n許可する送信元: %s\nWeb: %s / SSH: %s\nfirewalld: %s\n' \
        "${SERVER_IP}" "${LAN_SUBNET}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" "${FW_ZONE}"
    }
@@ -46,6 +48,7 @@
 
    ```bash
    unset FORGEJO_VERSION
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${LAN_SUBNET}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
@@ -179,6 +182,7 @@
 1. 定義を読み直し、localhost でサービスを起動する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user daemon-reload &&
    systemctl --user start forgejo.service &&
    systemctl --user is-active forgejo.service &&
@@ -196,6 +200,7 @@
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      curl -fsS --retry 10 --retry-delay 1 --retry-all-errors -o /dev/null -w '%{http_code}\n' \
        "http://127.0.0.1:${FORGEJO_HTTP_PORT}/"
      podman port forgejo
@@ -225,6 +230,7 @@
 1. 初期設定のロックと自己登録の無効化をサーバーで確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if /usr/bin/python3 - <<'PY'
    import configparser
    from pathlib import Path
@@ -256,6 +262,7 @@
 1. 送信元と宛先を限定した、この手順専用の firewalld の規則を追加する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
    else
@@ -290,6 +297,7 @@
 1. 初期設定済みの Quadlet を LAN 用に変え、サービスを再起動する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
      echo '中断: 手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
@@ -360,6 +368,7 @@
 1. サーバーで、Git 用 SSH のホスト鍵の指紋を表示する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for public_key in ~/.local/share/forgejo/ssh/*.pub; do
      if [ -f "${public_key}" ]; then
        ssh-keygen -lf "${public_key}"
@@ -396,6 +405,7 @@
 1. サーバーでサービスを再起動し、設定とデータが残ることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user restart forgejo.service &&
    systemctl --user is-active forgejo.service &&
    podman port forgejo
@@ -438,6 +448,7 @@
      if [ -z "${FW_ZONE}" ]; then
        echo '中断: 手順 1 の変数を貼り直す' >&2
      else
+       printf '\n\033[7m 確認 \033[0m\n'
        systemctl --user is-active forgejo.service
        systemctl --user is-enabled forgejo.service
        systemctl --user show forgejo.service -p ActiveEnterTimestamp
@@ -465,6 +476,7 @@
       ! grep -qx '# setup-notes: forgejo' ~/.config/containers/systemd/forgejo.container; then
      echo '中断: この手順で作った Quadlet が無い' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      mkdir -p ~/.local/bin &&
      (umask 077; cat > ~/.local/bin/forgejo-auto-update <<'EOF'
    #!/usr/bin/python3 -I
@@ -789,6 +801,7 @@
 1. 自動更新のサービスとタイマーを置き、読み込ませる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    mkdir -p ~/.config/systemd/user
    cat > ~/.config/systemd/user/forgejo-auto-update.service <<'EOF'
    [Unit]
@@ -820,6 +833,7 @@
 
    ```bash
    systemctl --user enable --now forgejo-auto-update.timer
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user start forgejo-auto-update.service
    systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
    journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
@@ -906,6 +920,7 @@
 1. 利用する PC の端末で、README に使い方を追加して差分を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '\n## 使い方\n\nGit で clone して作業用ブランチを作成します。\n' >> README.md &&
    git diff -- README.md
    ```
@@ -951,6 +966,7 @@
 1. 利用する PC の端末で、マージ後の main を取り込む。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git switch main &&
    git pull --ff-only &&
    git log -1 --oneline
@@ -991,6 +1007,7 @@
 1. サービスを停止し、コンテナが止まったことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
      echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
    else
@@ -1020,6 +1037,7 @@
        echo '中断: 同じ名前のバックアップがある' >&2
      elif (umask 077; tar --create --gzip --file="${FORGEJO_BACKUP_CANDIDATE}" --directory="$HOME" \
              .local/share/forgejo .config/containers/systemd/forgejo.container); then
+       printf '\n\033[7m 確認 \033[0m\n'
        chmod 600 "${FORGEJO_BACKUP_CANDIDATE}" &&
        FORGEJO_BACKUP="${FORGEJO_BACKUP_CANDIDATE}" &&
        stat -c '%a %n' ~/.local/state/forgejo-backups "${FORGEJO_BACKUP}" &&
@@ -1036,6 +1054,7 @@
 1. サービスを起動し直す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user start forgejo.service &&
    systemctl --user is-active forgejo.service
    ```
@@ -1073,6 +1092,7 @@
 
    ```bash
    unset FORGEJO_RESTORE_WORK FORGEJO_RESTORE_READY
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${FORGEJO_RESTORE}" ] || [ ! -f "${FORGEJO_RESTORE}" ]; then
      echo '中断: 復元するバックアップの絶対パスを指定する' >&2
    elif install -d -m 700 ~/.local/state/forgejo-backups &&
@@ -1116,6 +1136,7 @@
 1. サービスを停止する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
      echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
    else
@@ -1132,6 +1153,7 @@
 1. 現在のデータを退避し、復元したデータと定義へ入れ替える。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${FORGEJO_RESTORE_WORK}" ] || [ "${FORGEJO_RESTORE_READY}" != "${FORGEJO_RESTORE_WORK}" ] ||
         [ ! -d "${FORGEJO_RESTORE_WORK}/.local/share/forgejo" ] ||
         [ ! -f "${FORGEJO_RESTORE_WORK}/.config/containers/systemd/forgejo.container" ]; then
@@ -1159,6 +1181,7 @@
 1. 定義を読み直し、復元した版で起動する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user daemon-reload &&
    systemctl --user start forgejo.service &&
    systemctl --user is-active forgejo.service &&
@@ -1180,6 +1203,7 @@
    if [ -z "${FORGEJO_RESTORE_SAVED}" ] || [ ! -f "${FORGEJO_RESTORE_SAVED}/forgejo.container" ]; then
      echo '中断: 同じシェルでこの節の手順 4 を通す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/python3 - "${FORGEJO_RESTORE_SAVED}/forgejo.container" <<'PY'
    from pathlib import Path
    import re
@@ -1225,6 +1249,7 @@
 1. 自動更新の結果と、次に動く時刻を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user list-timers forgejo-auto-update.timer --no-pager
    systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
    journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 30 --no-pager
@@ -1241,6 +1266,7 @@
 
    ```bash
    systemctl --user start forgejo-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
    journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
    ```
@@ -1259,6 +1285,7 @@
    ```bash
    rm -f ~/.local/state/forgejo-auto-update/skip-version
    systemctl --user start forgejo-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show -p Result -p ExecMainStatus forgejo-auto-update.service
    journalctl --user -u forgejo-auto-update.service -t forgejo-auto-update -n 20 --no-pager
    ```

@@ -12,6 +12,7 @@
 > - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
 
 - 上から順に、ssh-socks-tunnel.md の手順 3 のシェルで貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: ほかの Homebrew 系の手順（[AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順)や [yazi](yazi.md) など）は、ssh-socks-tunnel.md の手順 1〜3 でトンネルを張ったシェルで貼る。以後は[更新](#更新)・[ロールバック](extra/homebrew-offline.md#ロールバック)
 - Neovim の Mason に npm のパッケージを入れるなら、手順 5 でトンネルを閉じる前に、このシェルで [npm-offline.md](npm-offline.md) を貼る（npm は `ALL_PROXY` を読まない）
 
@@ -22,6 +23,7 @@
 1. トンネルのシェルで、Homebrew の取得先に届くかと、Homebrew が使うパッケージを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for u in https://github.com https://raw.githubusercontent.com https://formulae.brew.sh https://ghcr.io/v2/; do
      printf '%-34s %s\n' "$u" "$(curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}' "$u")"
    done
@@ -64,6 +66,7 @@
 1. オフラインのホストで、トンネルが無くても jq が動くことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew list --versions jq
    command -v jq
    echo '{"host": "offline"}' | jq -r .host

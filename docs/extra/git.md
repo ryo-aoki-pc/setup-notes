@@ -3,6 +3,7 @@
 [手順書](../git.md)・[検証記録](../verification/git.md)・[参考資料](../reference/git.md)
 
 - 「手順 N」は[手順書](../git.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -52,6 +53,7 @@
 1. Windows 11 で Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget uninstall --exact --id Git.Git --source winget
    winget list --exact --id Git.Git --source winget
    Test-Path 'C:\Program Files\Git\bin\bash.exe'

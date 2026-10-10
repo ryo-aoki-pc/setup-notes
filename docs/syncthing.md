@@ -12,6 +12,7 @@
 > - **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 同期するフォルダは[同期フォルダとデバイスを追加する（任意）](#同期フォルダとデバイスを追加する任意)、GUI の接続元を制限するなら[接続元を絞る（任意）](#接続元を絞る任意)、鍵と設定を自動で取っておくなら[設定を自動でバックアップする（任意）](#設定を自動でバックアップする任意)。以後は[更新](#更新)・[ロールバック](extra/syncthing.md#ロールバック)
 - OS を入れ直したホストを同じデバイス ID で戻すなら、先に[バックアップから戻す](#バックアップから戻す)の手順 1・2・4・5 を行ってから、手順 1 から通す
 
@@ -21,6 +22,7 @@
    ST_GUI_USER=$(id -un)               # GUI のログイン名。OS のアカウントとは別物（自動で同じ名前が入る）。<USER>
    ST_GUI_ADDR=0.0.0.0:8384            # GUI の待ち受け。LAN にも公開する。手元だけなら 127.0.0.1:8384
    ST_LAN_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 案内と検証に使う（自動）。<SERVER_IP>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER ST_GUI_USER ST_GUI_ADDR ST_LAN_IP; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -53,6 +55,7 @@
 
    ```bash
    ST_GUI_AUTH_READY=false
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${ST_GUI_USER}" ] || [ -z "${ST_GUI_PASS}" ]; then
      echo '中断: GUI のログイン名かパスワードが空。手順 1・3 で設定し直す' >&2
    elif printf '%s' "${ST_GUI_PASS}" | syncthing generate --gui-user="${ST_GUI_USER}" --gui-password=-; then
@@ -77,6 +80,7 @@
    if [ "${ST_GUI_AUTH_READY:-false}" != true ]; then
      echo '中断: このシェルで手順 3・4 の認証設定を完了してから貼る' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      brew services start syncthing &&
        brew services list &&
        systemctl --user is-enabled sh.brew.syncthing.service &&
@@ -89,6 +93,7 @@
 1. GUI の待ち受けと HTTPS を設定し、再起動して確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ "${ST_GUI_AUTH_READY:-false}" != true ]; then
      echo '中断: このシェルで手順 3・4 の認証設定を完了してから貼る' >&2
    elif [ -z "${ST_GUI_ADDR}" ]; then
@@ -129,6 +134,7 @@
      else
        sudo firewall-cmd --permanent --add-service=syncthing --add-service=syncthing-gui && sudo firewall-cmd --reload
      fi
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --list-services
    fi
    ```
@@ -138,6 +144,7 @@
 1. サービスと待ち受けを確かめ、GUI の URL を出す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew services list
    systemctl --user is-active sh.brew.syncthing.service
    ss -ltunp | grep -E ':(8384|22000|21027)'
@@ -214,6 +221,7 @@
      sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
    done
    sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
    fi
    ```
@@ -295,6 +303,7 @@
 1. systemd のユーザーユニットを 3 つ置き、読み込ませる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    mkdir -p ~/.config/systemd/user
    cat > ~/.config/systemd/user/syncthing-backup.service <<'EOF'
    [Unit]
@@ -338,6 +347,7 @@
    ```bash
    systemctl --user enable --now syncthing-backup.path syncthing-backup.timer
    systemctl --user start syncthing-backup.service
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show -p Result,ExecMainStatus syncthing-backup.service
    systemctl --user is-active syncthing-backup.path syncthing-backup.timer
    systemctl --user list-timers syncthing-backup.timer
@@ -355,6 +365,7 @@
    ```bash
    syncthing cli config folders add --id "syncthing-backup-$(uname -n)" --label "syncthing-backup ($(uname -n))" \
      --path "${HOME}/syncthing-backup" --type sendonly
+   printf '\n\033[7m 確認 \033[0m\n'
    syncthing cli config folders list
    sleep 10
    ls -la ~/syncthing-backup
@@ -381,6 +392,7 @@
    systemctl --user disable --now syncthing-backup.path syncthing-backup.timer
    rm -f ~/.config/systemd/user/syncthing-backup.{service,path,timer} ~/.local/bin/syncthing-backup
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    for id in $(syncthing cli config folders list); do
      if [ "$(syncthing cli config folders "${id}" path get)" = "${HOME}/syncthing-backup" ]; then
        syncthing cli config folders "${id}" delete && echo "登録を消した: ${id}"
@@ -435,6 +447,7 @@
    ```
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%-10s = %s\n' ST_BACKUP "${ST_BACKUP}"
    ls -l ~/syncthing-backup
    tar -tzvf "${ST_BACKUP:?この節の手順 4 の ST_BACKUP が空のまま。アーカイブのパスを入れて貼り直す}"
@@ -450,6 +463,7 @@
    if [ -z "${ST_BACKUP}" ] || [ ! -f "${ST_BACKUP}" ]; then
      echo '中断: この節の手順 4 で存在するアーカイブを選び直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      install -d -m 0700 ~/.local/state/syncthing &&
        tar -xzf "${ST_BACKUP}" -C ~/.local/state/syncthing &&
        ls -la ~/.local/state/syncthing
@@ -462,6 +476,7 @@
 1. 同じホストで戻すときだけ、Syncthing を開始して確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew services start syncthing
    sleep 3
    syncthing device-id
@@ -494,6 +509,7 @@
 
    ```bash
    brew services restart syncthing
+   printf '\n\033[7m 確認 \033[0m\n'
    syncthing --version
    ```
 
@@ -512,6 +528,7 @@
 > - **この節の手順 12 は LAN の別の端末のブラウザで、手順 13 はこの PC で行う**（サインアウトしてサインインし直す）
 
 - 上から順にコードブロックを貼る。この節の手順 2 で変数を設定した PowerShell に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 同期するフォルダと相手のデバイスは[同期フォルダとデバイスを追加する（任意）](#同期フォルダとデバイスを追加する任意)、止めるときは[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/syncthing.md#windows-11-のロールバック)
 - この節の PC は、[実施手順](#実施手順)の AlmaLinux 10 の Syncthing の相手にもなる
 
@@ -525,6 +542,7 @@
    ```powershell
    $ST_GUI_USER = $env:USERNAME          # GUI のログイン名。Windows のアカウントとは別物（自動で同じ名前が入る）。<WIN_USER>
    $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # 相手とつながる LAN の接続（自動）。<LAN_IF>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'ST_GUI_USER = {0}' -f $ST_GUI_USER
    'LAN_IF      = {0}' -f $LAN_IF
    ```
@@ -537,6 +555,7 @@
 1. この PC に Syncthing が無いことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id, Path
    Get-ScheduledTask -TaskName 'Syncthing' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
@@ -551,6 +570,7 @@
 
    ```powershell
    & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
      $curl = "$env:WINDIR\System32\curl.exe"
      $arch = @{ AMD64 = 'amd64'; ARM64 = 'arm64' }[$env:PROCESSOR_ARCHITECTURE]
@@ -601,6 +621,7 @@
 
    ```powershell
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $ST_GUI_USER) {
      Write-Error '手順 2 の $ST_GUI_USER が空'
    } elseif (-not $ST_GUI_PASS -or $ST_GUI_PASS.Length -eq 0) {
@@ -628,6 +649,7 @@
    ```powershell
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
    $g = 'Syncthing (setup-notes)'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
@@ -656,6 +678,7 @@
    $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
    $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive
    $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Register-ScheduledTask -TaskName 'Syncthing' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Format-List TaskName, State
    ```
 
@@ -669,6 +692,7 @@
    } else {
      Start-ScheduledTask -TaskName 'Syncthing'
      for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      (Get-ScheduledTask -TaskName 'Syncthing').State
      Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize
      Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
@@ -686,6 +710,7 @@
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
    & $exe cli config gui raw-address set 0.0.0.0:8384
    & $exe cli config gui raw-use-tls set true
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & $exe cli config gui raw-address get
    & $exe cli config gui raw-use-tls get
    for ($i = 0; $i -lt 30 -and (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue).LocalAddress -contains '127.0.0.1'; $i++) { Start-Sleep -Seconds 1 }
@@ -703,6 +728,7 @@
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, $proc
      Get-NetUDPEndpoint -LocalPort 22000, 21027 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, $proc
      Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe' | Get-NetFirewallRule | Format-Table DisplayName, Enabled, Profile, Action
@@ -734,6 +760,7 @@
 
    ```powershell
    for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'Syncthing').State
    Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize
    Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
@@ -758,6 +785,7 @@
    } else {
      & $exe cli operations shutdown
      for ($i = 0; $i -lt 30 -and (Get-Process -Name syncthing -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id
      (Get-ScheduledTask -TaskName 'Syncthing').State
    }
@@ -773,6 +801,7 @@
    } else {
      Start-ScheduledTask -TaskName 'Syncthing'
      for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      (Get-ScheduledTask -TaskName 'Syncthing').State
      Get-NetTCPConnection -State Listen -LocalPort 8384 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess
    }
@@ -793,6 +822,7 @@
 
    ```powershell
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & $exe --version
    & $exe upgrade --check-only
    ```
@@ -807,6 +837,7 @@
    $before = & $exe --version
    & $exe cli operations upgrade
    for ($i = 0; $i -lt 60 -and (& $exe --version) -eq $before; $i++) { Start-Sleep -Seconds 1 }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & $exe --version
    Start-Sleep -Seconds 5
    Get-CimInstance Win32_Process -Filter "Name='syncthing.exe'" | Format-Table ProcessId, ParentProcessId -AutoSize

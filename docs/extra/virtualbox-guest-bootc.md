@@ -3,6 +3,7 @@
 [手順書](../virtualbox-guest-bootc.md)・[検証記録](../verification/virtualbox-guest-bootc.md)・[参考資料](../reference/virtualbox-guest-bootc.md)
 
 - 「手順 N」は[手順書](../virtualbox-guest-bootc.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -28,6 +29,7 @@
 
    ```bash
    rm -rf ~/vbox-ga-image
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
    ```
 
@@ -42,6 +44,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo userdel vboxadd
      sudo groupdel vboxsf
      sudo groupdel vboxdrmipc

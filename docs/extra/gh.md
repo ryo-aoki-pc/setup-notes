@@ -3,6 +3,7 @@
 [手順書](../gh.md)・[検証記録](../verification/gh.md)・[参考資料](../reference/gh.md)
 
 - 「手順 N」は[手順書](../gh.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -82,6 +83,7 @@
    foreach ($k in 'credential.https://github.com.helper', 'credential.https://gist.github.com.helper') {
      if ((git config --global --get-all $k) -match 'auth git-credential') { git config --global --unset-all $k }
    }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git config --get-regexp '^credential\..*helper$'
    ```
 
@@ -102,6 +104,7 @@
 1. scoop で gh を消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop uninstall gh
    (Get-Command gh -All -ErrorAction SilentlyContinue).Source
    ```
@@ -114,6 +117,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:APPDATA\GitHub CLI", "$env:LOCALAPPDATA\GitHub CLI" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath "$env:APPDATA\GitHub CLI", "$env:LOCALAPPDATA\GitHub CLI"
    ```
 

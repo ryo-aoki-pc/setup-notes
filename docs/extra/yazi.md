@@ -3,6 +3,7 @@
 [手順書](../yazi.md)・[検証記録](../verification/yazi.md)・[参考資料](../reference/yazi.md)
 
 - 「手順 N」は[手順書](../yazi.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -33,6 +34,7 @@
 1. scoop で yazi を消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop uninstall yazi
    Get-Command yazi, ya -All -ErrorAction SilentlyContinue | Format-Table Source
    ```
@@ -46,6 +48,7 @@
    ```powershell
    if ([Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User') -eq 'C:\Program Files\Git\usr\bin\file.exe') { [Environment]::SetEnvironmentVariable('YAZI_FILE_ONE', $null, 'User') }
    $env:YAZI_FILE_ONE = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'YAZI_FILE_ONE = {0}' -f $env:YAZI_FILE_ONE
    ```
 

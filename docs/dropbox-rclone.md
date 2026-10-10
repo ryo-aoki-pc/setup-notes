@@ -14,6 +14,7 @@
 > - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - x86_64 の PC では、公式クライアントの [dropbox.md](dropbox.md) を勧める（この手順も同じように動く）
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、同期するフォルダを後から変えるなら[同期するフォルダを変える（任意）](#同期するフォルダを変える任意)。以後は[更新](#更新)・[ロールバック](extra/dropbox-rclone.md#ロールバック)
 
@@ -30,6 +31,7 @@
 1. rclone が入ったことを確かめ、Dropbox を登録する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rclone version
    command -v rclone
    rclone config create dropbox dropbox >/dev/null
@@ -48,6 +50,7 @@
 1. Dropbox に届くかと、使っている容量を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rclone listremotes --long
    rclone about dropbox:
    rclone lsd dropbox:
@@ -83,6 +86,7 @@
    # + /Photos/**
    # - **
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    grep -v -e '^#' -e '^$' ~/.config/rclone/dropbox-filters.txt
    ```
 
@@ -144,6 +148,7 @@
    WantedBy=timers.target
    EOF
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user enable --now dropbox-rclone.timer
    systemctl --user is-enabled dropbox-rclone.timer    # enabled
    ```
@@ -154,6 +159,7 @@
 1. 1 回動かして、結果と次の実行時刻を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user start dropbox-rclone.service
    systemctl --user show -p Result dropbox-rclone.service      # Result=success
    journalctl --user -u dropbox-rclone.service -n 20 --no-pager
@@ -215,6 +221,7 @@
 1. `--resync` で同期し直し、タイマーを戻す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rclone bisync dropbox: ~/Dropbox --filters-file ~/.config/rclone/dropbox-filters.txt --resync --max-lock 2m --verbose
    systemctl --user start dropbox-rclone.timer
    systemctl --user list-timers dropbox-rclone.timer --no-pager

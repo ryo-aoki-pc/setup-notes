@@ -9,6 +9,7 @@
 > - **手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 接続元を LAN に絞る場合は、最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](extra/gnome-remote-desktop.md#ロールバック)
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[gnome-headless-session.md](gnome-headless-session.md)。この手順書と同じ PC で併用できる（ポートは 3390）
 - PC の画面のデスクトップ（自動ログインで作る）を、PC の画面を触らずにそのまま RDP で共有するなら、[gnome-desktop-sharing.md](gnome-desktop-sharing.md)。今の版は [x86_64 VM](verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07) で、以前の版は aarch64 の[実機](verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照
@@ -23,6 +24,7 @@
    ```bash
    SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
    SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in SERVER_IP SERVER_NAME SERVER_FQDN; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -57,6 +59,7 @@
      sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
      sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
      sudo restorecon -Rv /var/lib/gnome-remote-desktop
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    }
    ```
@@ -113,6 +116,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo grdctl --system status              # Status: enabled / Username: (hidden)
      systemctl status gnome-remote-desktop    # active (running)
      ss -lntp | grep 3389                     # *:3389 で LISTEN
@@ -124,6 +128,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
      sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
    }
@@ -158,6 +163,7 @@
    print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
    ts.close()
    PY
+   printf '\n\033[7m 確認 \033[0m\n'
    python3 ~/rdp_tls_probe.py "${SERVER_IP}"
    ```
 
@@ -193,6 +199,7 @@
    sudo firewall-cmd --permanent --remove-service=rdp
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
    sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
    fi
    ```
@@ -215,6 +222,7 @@
    After=gdm.service
    CONF
      sudo systemctl daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl show gnome-remote-desktop.service -p After | grep -ow 'gdm\.service'
    }
    ```
@@ -238,6 +246,7 @@
      sleep 5
      sudo systemctl start gnome-remote-desktop.service
      sleep 5
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -E 'GetManagedObjects|RDP server started'
    }
    ```
@@ -251,6 +260,7 @@
    {
      systemctl --user restart gnome-remote-desktop-handover.service
      sleep 3
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo journalctl --no-pager _PID="$(systemctl --user show -p MainPID --value gnome-remote-desktop-handover.service)" | grep 'RDP server started'
    }
    ```
@@ -265,6 +275,7 @@
      sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
      sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
      sudo systemctl daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl show gnome-remote-desktop.service -p After | grep -cw 'gdm\.service'   # 0
    }
    ```

@@ -3,6 +3,7 @@
 [手順書](../wireguard-road-warrior.md)・[検証記録](../verification/wireguard-road-warrior.md)・[参考資料](../reference/wireguard-road-warrior.md)
 
 - 「手順 N」は[手順書](../wireguard-road-warrior.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -19,6 +20,7 @@
    {
      sudo nmcli connection down wg0 2>/dev/null; sudo nmcli connection delete wg0
      rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
    }
    ```
@@ -61,6 +63,7 @@
      Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf.dpapi" -ErrorAction SilentlyContinue
      Remove-Item -LiteralPath "$dir\wg0.key", "$dir\wg0.conf", "$dir\wg0.pub" -ErrorAction SilentlyContinue
      if ((Test-Path -LiteralPath $dir) -and -not (Get-ChildItem -LiteralPath $dir -Force)) { Remove-Item -LiteralPath $dir }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Service -Name 'WireGuardTunnel$wg0' -ErrorAction SilentlyContinue
      Get-ChildItem -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations" -Filter 'wg0.*' -ErrorAction SilentlyContinue
      Test-Path -LiteralPath $dir
@@ -74,6 +77,7 @@
 1. WireGuard も消すときだけ、WireGuard を外す（取り戻せない）。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget uninstall --exact --id WireGuard.WireGuard --source winget
    winget list --exact --id WireGuard.WireGuard --source winget
    Get-Service -Name 'WireGuard*' -ErrorAction SilentlyContinue

@@ -10,6 +10,7 @@
 > - Windows に Git for Windows が無ければ、先に[Windows 11 で Git for Windows を入れる](#windows-11-で-git-for-windows-を入れる)を行う（管理者の Windows PowerShell 5.1 に貼る）。その節の最後で開く Git Bash に、手順 1 から貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリがあれば、[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)を行う。以後は[更新](#更新)・[ロールバック](extra/git.md#ロールバック)
 
 > [!WARNING]
@@ -26,6 +27,7 @@
    ```
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in GIT_USER_NAME GIT_USER_EMAIL; do
      printf '%-14s = %s\n' "$v" "${!v}"
    done
@@ -47,6 +49,7 @@
 1. git の版と、今の設定を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git --version
    git config --list --show-scope --show-origin
    ```
@@ -63,6 +66,7 @@
    if [ -z "${GIT_USER_NAME}" ] || [ -z "${GIT_USER_EMAIL}" ]; then echo '中断: 手順 1 の GIT_USER_NAME か GIT_USER_EMAIL が空のまま' >&2; else
      git config --global user.name "${GIT_USER_NAME}"
      git config --global user.email "${GIT_USER_EMAIL}"
+     printf '\n\033[7m 確認 \033[0m\n'
      git config --global --get-regexp '^user\.'
    fi
    ```
@@ -99,6 +103,7 @@
 1. 効いている値と、その値を書いた場所を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd ~
    for k in user.name user.email pull.rebase rebase.autoStash core.autocrlf \
             init.defaultBranch core.quotepath fetch.prune push.autoSetupRemote rerere.enabled \
@@ -117,6 +122,7 @@
 
    ```bash
    git config --global pull.ff true
+   printf '\n\033[7m 確認 \033[0m\n'
    git config --show-scope --get pull.ff
    ```
 
@@ -135,6 +141,7 @@
    printf 'line 1\r\n' > crlf.txt
    printf '1\n' > a.txt
    touch 日本語.txt
+   printf '\n\033[7m 確認 \033[0m\n'
    git status --short
    git add .
    git commit -q -m first
@@ -163,6 +170,7 @@
    git add b.txt
    git commit -q -m 'b: b.txt'
    printf 'line 2\r\n' >> crlf.txt
+   printf '\n\033[7m 確認 \033[0m\n'
    git pull
    git log --oneline --graph
    git status --short
@@ -201,6 +209,7 @@
 1. Git for Windows がまだ入っていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
    Test-Path 'C:\Program Files\Git\bin\bash.exe'
    winget list --exact --id Git.Git --accept-source-agreements --source winget
@@ -215,6 +224,7 @@
 1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
    winget list --exact --id Git.Git --source winget
    ```
@@ -230,6 +240,7 @@
 1. git の場所と版と、Git Bash があることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command git -All | Format-Table Source
    git --version
    Test-Path 'C:\Program Files\Git\bin\bash.exe', 'C:\Program Files\Git\git-bash.exe'
@@ -260,6 +271,7 @@
 1. 直すリポジトリのトップで、未コミットの変更と、CRLF で書かれたファイルの数を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git -c core.autocrlf=true status --short
    git ls-files --eol | grep -c 'i/lf *w/crlf'
    ```
@@ -282,6 +294,7 @@
    ```bash
    git rm -r -q --cached .
    git reset -q --hard
+   printf '\n\033[7m 確認 \033[0m\n'
    git ls-files --eol | grep -c 'i/lf *w/crlf'
    git status --short
    ```
@@ -292,6 +305,7 @@
 1. この節の手順 2 で保存成功の表示が出たときだけ、今回の変更を戻す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git stash pop
    git ls-files --eol
    ```
@@ -317,6 +331,7 @@
 1. Windows 11 では、Git Bash を閉じてから、winget で Git for Windows を上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget upgrade --exact --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
    winget list --exact --id Git.Git --source winget
    ```

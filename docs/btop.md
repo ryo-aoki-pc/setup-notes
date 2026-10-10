@@ -11,11 +11,13 @@
 > - **手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 設定を書く場所は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](extra/btop.md#ロールバック)
 
 1. 入手できる版を見てから、btop を入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q list --showduplicates btop
    sudo dnf install btop
    ```
@@ -28,6 +30,7 @@
 1. btop が入ったか確かめ、起動する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    btop --version
    command -v btop
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop

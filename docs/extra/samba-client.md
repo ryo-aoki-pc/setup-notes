@@ -3,6 +3,7 @@
 [手順書](../samba-client.md)・[検証記録](../verification/samba-client.md)・[参考資料](../reference/samba-client.md)
 
 - 「手順 N」は[手順書](../samba-client.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -31,6 +32,7 @@
    elif ! awk -v mp="${MOUNT_POINT}" '$1 !~ /^#/ && $2 == mp && $3 == "cifs" { f = 1 } END { exit !f }' /etc/fstab; then
      echo "中断: /etc/fstab に ${MOUNT_POINT} の cifs の行が無い" >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo cp -a /etc/fstab /etc/fstab.bak-samba-client &&
      awk -v mp="${MOUNT_POINT}" '!($1 !~ /^#/ && $2 == mp && $3 == "cifs")' /etc/fstab.bak-samba-client | sudo tee /etc/fstab > /dev/null &&
      sudo systemctl daemon-reload &&
@@ -50,6 +52,7 @@
    if [ -z "${MOUNT_POINT}" ] || [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo rmdir "${MOUNT_POINT}"
      if grep -qF "credentials=/root/smb-${SMB_USER}@${SERVER}.cred," /etc/fstab; then
        echo '資格情報ファイルは、/etc/fstab のほかの行が使っているので残す'
@@ -95,6 +98,7 @@
    if (-not $DRIVE) {
      Write-Error '中断: Windows 11 で使うの手順 2 の DRIVE が空のまま。値を入れて貼り直す'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Remove-SmbMapping -LocalPath $DRIVE -UpdateProfile -Force
      Get-SmbMapping -LocalPath $DRIVE -ErrorAction SilentlyContinue
      Test-Path -LiteralPath ('HKCU:\Network\' + $DRIVE.TrimEnd(':'))
@@ -111,6 +115,7 @@
    if (-not $SERVER) {
      Write-Error '中断: Windows 11 で使うの手順 2 の SERVER が空のまま。値を入れて貼り直す'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      cmdkey "/delete:$SERVER"
      cmdkey "/list:$SERVER"
    }

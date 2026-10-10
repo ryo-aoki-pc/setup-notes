@@ -3,6 +3,7 @@
 [手順書](../firefox.md)・[検証記録](../verification/firefox.md)・[参考資料](../reference/firefox.md)
 
 - 「手順 N」は[手順書](../firefox.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -76,6 +77,7 @@
 1. Firefox が消えたことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Mozilla.Firefox.ja --source winget
    Test-Path -LiteralPath "$env:ProgramFiles\Mozilla Firefox"
    Get-Service -Name MozillaMaintenance -ErrorAction SilentlyContinue | Format-Table Name, Status

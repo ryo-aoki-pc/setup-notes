@@ -12,6 +12,7 @@
 > - **手順 4・5 は、クライアントの PC から SSH で行う**（[Windows の OpenSSH サーバー](windows-openssh-server.md)）。SSH が無ければ、PC の前で画面を見る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 毎回の切断をデスクトップのアイコンのダブルクリックにするなら[ショートカットで切断する（任意）](#ショートカットで切断する任意)、そのショートカットを消すときは[ロールバック](extra/windows-rdp-disconnect.md#ロールバック)
 
 > [!WARNING]
@@ -27,6 +28,7 @@
 1. 今のセッションが RDP であることと、その ID を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    quser
    'このセッションの ID: {0}' -f (Get-Process -Id $PID).SessionId
    ```
@@ -82,6 +84,7 @@
      if ($b[0] -ne 0x4C) { Write-Error "中断: $lnk がショートカットの形式でない"; return }
      $b[0x15] = $b[0x15] -bor 0x20
      [System.IO.File]::WriteAllBytes($lnk, $b)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      '{0}（管理者として実行: {1}）' -f $lnk, [bool]([System.IO.File]::ReadAllBytes($lnk)[0x15] -band 0x20)
    }
    ```

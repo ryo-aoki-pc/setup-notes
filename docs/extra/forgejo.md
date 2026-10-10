@@ -3,6 +3,7 @@
 [手順書](../forgejo.md)・[検証記録](../verification/forgejo.md)・[参考資料](../reference/forgejo.md)
 
 - 「手順 N」は[手順書](../forgejo.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -57,6 +58,7 @@
          sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${rule}"
        fi
      done
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
      sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
    fi
@@ -70,6 +72,7 @@
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
      echo '中断: 手順 1 のポートを設定する' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl --user status forgejo.service --no-pager
      systemctl --user list-timers --all forgejo-auto-update.timer --no-pager
      podman ps --filter name='^forgejo$'
@@ -93,6 +96,7 @@
 1. 削除する専用ディレクトリを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -ld ~/.local/share/forgejo
    du -sh ~/.local/share/forgejo
    ```
@@ -102,6 +106,7 @@
 1. 停止した Forgejo の専用データだけを削除する（取り戻せない）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -e ~/.config/containers/systemd/forgejo.container ] || podman container exists forgejo ||
         systemctl --user is-active --quiet forgejo.service || [ -e ~/.config/systemd/user/forgejo-auto-update.timer ]; then
      echo '中断: 先にロールバックで停止と自動起動の解除を行う' >&2

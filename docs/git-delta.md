@@ -11,6 +11,7 @@
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: lazygit を使っているなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)。設定項目の一覧は[設定ファイル](#設定ファイル)、以後は[更新](#更新)・[ロールバック](extra/git-delta.md#ロールバック)
 
 1. 変数を設定する。
@@ -19,6 +20,7 @@
    DELTA_NAVIGATE=true       # ページャ内で n / N を「次の変更・前の変更」にする。<DELTA_NAVIGATE>
    DELTA_LINE_NUMBERS=true   # 差分の左に行番号を出す。<DELTA_LINE_NUMBERS>
    DELTA_SIDE_BY_SIDE=false  # true にすると左右 2 面に分けて表示する。<DELTA_SIDE_BY_SIDE>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in DELTA_NAVIGATE DELTA_LINE_NUMBERS DELTA_SIDE_BY_SIDE; do printf '%-19s = %s\n' "$v" "${!v}"; done
    ```
 
@@ -38,6 +40,7 @@
 1. `git config --global` で git の設定を書き、読み戻す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${DELTA_NAVIGATE}" ] || [ -z "${DELTA_LINE_NUMBERS}" ] || [ -z "${DELTA_SIDE_BY_SIDE}" ]; then
      echo '中断: 手順 1 の変数が空。3 つとも設定してから貼り直す' >&2
    else
@@ -57,6 +60,7 @@
 1. 変更のあるリポジトリに `cd` してから、delta の版と差分の表示を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    delta --version
    brew list --versions git-delta
    command -v delta
@@ -137,6 +141,7 @@
 > - **この節の手順 4・5 は、WezTerm の Git Bash のタブで行う**（この節の手順 4 で[実施手順](#実施手順)の手順 1・3 を貼る。PowerShell には貼らない）。この節の手順 5 で開く less は `q` で閉じる
 
 - この節の手順 1 で開いた PowerShell に、上から順にコードブロックを貼る。PowerShell の変数は無い（[実施手順](#実施手順)の手順 1 の変数は、この節の手順 4 で Git Bash に貼る）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: lazygit でも delta で差分を出すなら[lazygit と組み合わせる（任意）](#lazygit-と組み合わせる任意)、設定項目は[設定ファイル](#設定ファイル)。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/git-delta.md#windows-11-のロールバック)
 - git の設定（`C:\Users\<WIN_USER>\.gitconfig`）は、Git Bash・PowerShell・cmd の git で同じファイル。`~/.bashrc` と PowerShell のプロファイルには何も足さない（[参考資料](reference/git-delta.md#windows-11-では-選択した方針)）
 - WSL の AlmaLinux 10 の git は、WSL の中の `~/.gitconfig` を読む。WSL でも使うなら、その中で[実施手順](#実施手順)を通す
@@ -150,6 +155,7 @@
 1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell = $PSVersionTable.PSVersion.ToString()
      Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -169,6 +175,7 @@
 1. scoop で delta を入れ、版と場所を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop install delta
    delta --version
    (Get-Command delta -All).Source
@@ -206,6 +213,7 @@
 1. 開いている delta の表示（less）を閉じてから、scoop で delta を上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update delta
    delta --version

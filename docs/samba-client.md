@@ -11,6 +11,7 @@
 > - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: GNOME Files でも開くなら、[GNOME Files で開く（任意）](#gnome-files-で開く任意)を行う。戻すときは[ロールバック](extra/samba-client.md#ロールバック)
 
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
@@ -23,6 +24,7 @@
    SMB_USER=${USER}                     # サーバーの Samba ユーザー。samba.md のサーバーなら、サーバーの OS のユーザー名。<SMB_USER>
    SHARE=${SMB_USER}                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
    MOUNT_POINT=/mnt/${SHARE}            # マウント先（無ければ手順 5 で作る）。<MOUNT_POINT>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in SERVER USER SMB_USER SHARE MOUNT_POINT; do
      printf '%-11s = %s\n' "$v" "${!v}"
    done
@@ -41,6 +43,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf install -y cifs-utils
      rpm -q cifs-utils
      modinfo -n cifs
@@ -69,6 +72,7 @@
    if [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then echo '中断: 手順 1 の SMB_USER か SERVER が空のまま。手順 1 と手順 3 を貼り直す' >&2
    elif [ -z "${PW}" ]; then echo '中断: PW が空のまま。手順 3 を貼り直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      printf 'username=%s\npassword=%s\n' "${SMB_USER}" "${PW}" |
        sudo install -m 600 -o root -g root /dev/stdin "/root/smb-${SMB_USER}@${SERVER}.cred" &&
      sudo ls -lZ "/root/smb-${SMB_USER}@${SERVER}.cred"
@@ -81,6 +85,7 @@
 1. 1 度だけ手でマウントして読み書きを確かめ、外す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo mkdir -p "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}" &&
    sudo mount -t cifs "//${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}" "${MOUNT_POINT}" \
      -o "credentials=/root/smb-${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER}.cred,uid=$(id -u),gid=$(id -g),file_mode=0600,dir_mode=0700" && {
@@ -106,6 +111,7 @@
    elif awk -v mp="${MOUNT_POINT}" '$1 !~ /^#/ && $2 == mp { f = 1 } END { exit !f }' /etc/fstab; then
      echo "中断: /etc/fstab に ${MOUNT_POINT} の行が既にある" >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      echo "//${SERVER}/${SHARE} ${MOUNT_POINT} cifs credentials=/root/smb-${SMB_USER}@${SERVER}.cred,uid=$(id -u),gid=$(id -g),file_mode=0600,dir_mode=0700,x-systemd.automount,x-systemd.idle-timeout=1min 0 0" | sudo tee -a /etc/fstab &&
      sudo systemctl daemon-reload &&
      sudo findmnt --verify
@@ -120,6 +126,7 @@
 
    ```bash
    if [ -z "${MOUNT_POINT}" ]; then echo '中断: 手順 1 の MOUNT_POINT が空のまま。手順 1 を貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl start "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
      systemctl is-active "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
      ls "${MOUNT_POINT}" > /dev/null && findmnt -R "${MOUNT_POINT}" &&
@@ -175,6 +182,7 @@
 1. マウントされたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gio mount -l | grep -F "${SERVER:?手順 1 の SERVER が空のまま}"
    ls "/run/user/$(id -u)/gvfs/"
    /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
@@ -205,6 +213,7 @@
 > - **この節の手順 7 はサーバーのシェルで、手順 8 はこの PC で行う**（サインアウトしてサインインし直す）
 
 - 上から順にコードブロックを貼る。Windows の手順は、この節の手順 2 で変数を設定した PowerShell に、この節の手順 7 はサーバーのシェルに貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは、Windows の資格情報マネージャーに置く
 - samba.md の `[root]`・`[home]` も割り当てるなら、この節を通した後に、この節の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この節の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/samba-client.md#windows-11-のロールバック)
@@ -227,6 +236,7 @@
    ```powershell
    $SHARE = $SMB_USER                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
    $DRIVE = 'Z:'                         # 割り当てるドライブ文字（コロンまで書く）。<DRIVE>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'SERVER   = {0}' -f $SERVER
    'SMB_USER = {0}' -f $SMB_USER
    'SHARE    = {0}' -f $SHARE
@@ -242,6 +252,7 @@
 1. 管理者ではないことと、サーバーの 445 番・ドライブ文字・保存済みの資格情報を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SERVER -or -not $SMB_USER -or -not $SHARE -or -not $DRIVE) {
      Write-Error '中断: この節の手順 2 の変数が空のまま。値を入れて貼り直す'
    } elseif (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -269,6 +280,7 @@
    if (-not $SERVER -or -not $SMB_USER) {
      Write-Error '中断: この節の手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      cmdkey "/add:$SERVER" "/user:$SMB_USER" /pass
    }
    ```
@@ -283,6 +295,7 @@
    if (-not $SERVER -or -not $SHARE -or -not $DRIVE) {
      Write-Error '中断: この節の手順 2 の変数が空のまま。値を入れて貼り直す'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      New-SmbMapping -LocalPath $DRIVE -RemotePath "\\$SERVER\$SHARE" -Persistent $true | Out-Null
      Get-SmbMapping -LocalPath $DRIVE | Format-Table Status, LocalPath, RemotePath
    }
@@ -296,6 +309,7 @@
 1. 割り当てたドライブで読み書きできることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $DRIVE) {
      Write-Error '中断: この節の手順 2 の DRIVE が空のまま。値を入れて貼り直す'
    } else {

@@ -3,6 +3,7 @@
 [手順書](../windows-rdp-disconnect.md)・[検証記録](../verification/windows-rdp-disconnect.md)・[参考資料](../reference/windows-rdp-disconnect.md)
 
 - 「手順 N」は[手順書](../windows-rdp-disconnect.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -15,6 +16,7 @@
    & {
      $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'RDP をロックせずに切断.lnk'
      Remove-Item -LiteralPath $lnk
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Test-Path -LiteralPath $lnk
    }
    ```

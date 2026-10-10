@@ -13,6 +13,7 @@
 > - **手順 4 と手順 9 には対話入力がある**（手順 4 は鍵を作るか公開鍵を作り直すときのパスフレーズ、手順 9 はホスト鍵の確認とホストのユーザーのパスワード）。鍵にパスフレーズを付けたなら、手順 10（2 回）・11 でも聞かれる
 
 - 上から順にコードブロックを貼る。Windows の手順は手順 2 で変数を設定した PowerShell に、手順 8 はホストの端末に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）の両方で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに（ssh・scp・ssh を使う git・WezTerm の起動メニュー）パスフレーズを聞かれる
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)
@@ -34,6 +35,7 @@
 
    ```powershell
    $SSH_USER = $env:USERNAME             # ホストのユーザー名（自動で Windows のユーザー名が入る。違えば直す）。<SSH_USER>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'SSH_HOST  = {0}' -f $SSH_HOST
    'SSH_ALIAS = {0}' -f $SSH_ALIAS
    'SSH_USER  = {0}' -f $SSH_USER
@@ -47,6 +49,7 @@
 1. 2 つの ssh の版と `PATH` の順、鍵・config・Git の ssh の設定を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:WINDIR\System32\OpenSSH\ssh.exe" -V
    & 'C:\Program Files\Git\usr\bin\ssh.exe' -V
    Get-Command ssh, ssh-keygen -All -ErrorAction SilentlyContinue | Format-Table Source
@@ -64,6 +67,7 @@
 
    ```powershell
    $k = "$env:USERPROFILE\.ssh\id_ed25519"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if ((Test-Path -LiteralPath $k) -and (Test-Path -LiteralPath "$k.pub")) {
      "既にある: $k（この鍵を使う）"
    } elseif (Test-Path -LiteralPath $k) {
@@ -104,6 +108,7 @@
    $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
    icacls.exe $f /reset
    icacls.exe $f /inheritance:r /grant:r "*${sid}:F" /grant:r '*S-1-5-18:F' /grant:r '*S-1-5-32-544:F'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    icacls.exe $f
    ```
 
@@ -126,6 +131,7 @@
      $lines = @("# BEGIN windows-ssh-client.md $SSH_ALIAS", "Host $SSH_ALIAS", "  HostName $SSH_HOST", "  User $SSH_USER", '  IdentityFile ~/.ssh/id_ed25519', '  IdentitiesOnly yes', "# END windows-ssh-client.md $SSH_ALIAS")
      if ((Test-Path -LiteralPath $f) -and (Get-Item -LiteralPath $f).Length -gt 0 -and -not (Get-Content -LiteralPath $f -Raw).EndsWith("`n")) { $lines = @('') + $lines }
      Add-Content -LiteralPath $f -Value $lines -Encoding ascii
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" -G $SSH_ALIAS | Select-String -Pattern '^(hostname|user|identityfile|identitiesonly) '
      & 'C:\Program Files\Git\usr\bin\ssh.exe' -G $SSH_ALIAS | Select-String -Pattern '^(hostname|user|identityfile|identitiesonly) '
    }
@@ -157,6 +163,7 @@
    } elseif (-not (Test-Path -LiteralPath $pub) -or [string](Get-Content -LiteralPath $pub -TotalCount 1) -notmatch '^ssh-ed25519 AAAA[0-9A-Za-z+/=]+( |$)') {
      Write-Error "中断: $pub が無いか、ed25519 の公開鍵の形でない"
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Content -LiteralPath $pub -TotalCount 1 | & "$env:WINDIR\System32\OpenSSH\ssh.exe" -o PubkeyAuthentication=no $SSH_ALIAS 'umask 077; mkdir -p ~/.ssh && if [ -s ~/.ssh/authorized_keys ] && [ $(tail -c1 ~/.ssh/authorized_keys | wc -l) -eq 0 ]; then echo >> ~/.ssh/authorized_keys; fi && tr -d ''\r'' | sed ''1s/^\xEF\xBB\xBF//'' >> ~/.ssh/authorized_keys && echo added; if type restorecon >/dev/null 2>&1; then restorecon -F ~/.ssh ~/.ssh/authorized_keys; fi'
    }
    ```
@@ -171,6 +178,7 @@
 1. Windows の ssh と Git の ssh で、鍵でログインできることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SSH_ALIAS) {
      Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
@@ -202,6 +210,7 @@
 1. 2 つの ssh の版と、両方が config を読めることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SSH_ALIAS) {
      Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {

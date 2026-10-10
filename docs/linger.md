@@ -8,6 +8,7 @@
 > - **常駐させるユーザー自身のシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルでは行わない（`${USER}` が `root` になる）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[ロールバック](extra/linger.md#ロールバック)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](syncthing.md)、[Dropbox（公式クライアント）](dropbox.md)、[Dropbox（rclone）](dropbox-rclone.md)、[Forgejo](forgejo.md)
@@ -27,6 +28,7 @@
    ```bash
    {
      sudo loginctl enable-linger "${USER}"
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl show-user "$(id -u)" -p Linger
      ls /var/lib/systemd/linger
    }

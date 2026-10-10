@@ -3,6 +3,7 @@
 [手順書](../neovim.md)・[検証記録](../verification/neovim.md)・[参考資料](../reference/neovim.md)
 
 - 「手順 N」は[手順書](../neovim.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -39,6 +40,7 @@
 1. scoop で Neovim を消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop uninstall neovim
    Get-Command nvim -All -ErrorAction SilentlyContinue | Format-Table Source
    ```

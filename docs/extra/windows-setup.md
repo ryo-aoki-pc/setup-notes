@@ -3,6 +3,7 @@
 [手順書](../windows-setup.md)・[検証記録](../verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)
 
 - 「手順 N」は[手順書](../windows-setup.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -47,6 +48,7 @@
    Set-ItemProperty -Path $adv -Name Start_TrackDocs -Type DWord -Value 1
    Set-ItemProperty -Path $exp -Name ShowRecent -Type DWord -Value 1
    Set-ItemProperty -Path $exp -Name ShowFrequent -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List HideFileExt, Hidden, LaunchTo, Start_TrackDocs
    ```
 
@@ -57,6 +59,7 @@
 
    ```powershell
    reg.exe delete 'HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' /f
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
    ```
 
@@ -72,6 +75,7 @@
    Set-ItemProperty -Path $adv -Name Start_AccountNotifications -Type DWord -Value 1
    foreach ($n in 'SubscribedContent-338393Enabled', 'SubscribedContent-353694Enabled', 'SubscribedContent-353696Enabled', 'SubscribedContent-338389Enabled', 'SubscribedContent-310093Enabled', 'SubscribedContent-338388Enabled', 'SystemPaneSuggestionsEnabled', 'SilentInstalledAppsEnabled') { Set-ItemProperty -Path $cdm -Name $n -Type DWord -Value 1 }
    Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -Name ScoobeSystemSettingEnabled -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $cdm | Format-List SubscribedContent-338393Enabled, SubscribedContent-353694Enabled, SubscribedContent-353696Enabled, SubscribedContent-338389Enabled, SubscribedContent-310093Enabled, SubscribedContent-338388Enabled, SystemPaneSuggestionsEnabled, SilentInstalledAppsEnabled
    ```
 
@@ -84,6 +88,7 @@
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    foreach ($n in 'TaskbarAl', 'ShowTaskViewButton', 'ShowSecondsInSystemClock') { Remove-ItemProperty -Path $adv -Name $n -ErrorAction SilentlyContinue }
    Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' -Name SearchboxTaskbarMode -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $adv | Format-List TaskbarAl, ShowTaskViewButton, ShowSecondsInSystemClock
    ```
 
@@ -96,6 +101,7 @@
    $p = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
    Set-ItemProperty -Path $p -Name AppsUseLightTheme -Type DWord -Value 1
    Set-ItemProperty -Path $p -Name SystemUsesLightTheme -Type DWord -Value 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $p | Format-List AppsUseLightTheme, SystemUsesLightTheme
    ```
 
@@ -105,6 +111,7 @@
 
    ```powershell
    foreach ($n in 'DelegationConsole', 'DelegationTerminal') { Remove-ItemProperty -LiteralPath 'HKCU:\Console\%%Startup' -Name $n -ErrorAction SilentlyContinue }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -LiteralPath 'HKCU:\Console\%%Startup' -ErrorAction SilentlyContinue | Format-List DelegationConsole, DelegationTerminal
    ```
 
@@ -125,6 +132,7 @@
    & {
      $ok = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
      $props = (Get-Item -LiteralPath $ok -ErrorAction SilentlyContinue).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -eq 'OneDriveSetup' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in $props) { Set-ItemProperty -LiteralPath $ok -Name $n -Type Binary -Value ([byte[]](2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); "戻した: $n" }
      $teams = 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\MSTeams_8wekyb3d8bbwe\TeamsTfwStartupTask'
      if (Test-Path -LiteralPath $teams) { Set-ItemProperty -LiteralPath $teams -Name State -Type DWord -Value 2; '戻した: Teams' }
@@ -137,6 +145,7 @@
 1. 外した標準アプリとウィジェットを戻すときだけ、ストアと winget から入れ直す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($id in '9P1J8S7CCWWT', '9WZDNCRFHVFW', '9WZDNCRFJ3Q2', '9WZDNCRFHWD2', '9WZDNCRD29V9', '9NBLGGH5R558', '9NBLGGH4R32N', '9PKDZBMV1H3T', '9NRX63209R7B', '9NFTCH6J7FHV', '9MSSGKG348SP') { winget install --exact --id $id --source msstore --accept-source-agreements --accept-package-agreements }
    winget install --exact --id Microsoft.Teams --source winget --accept-source-agreements --accept-package-agreements
    ```
@@ -149,6 +158,7 @@
 
    ```powershell
    winget uninstall --exact --id Microsoft.PowerShell --source winget
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerShell
    ```
 
@@ -159,6 +169,7 @@
 
    ```powershell
    winget uninstall --exact --id Microsoft.PowerToys --source winget
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerToys
    ```
 
@@ -169,6 +180,7 @@
 
    ```powershell
    winget uninstall --exact --id Devolutions.UniGetUI --source winget
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Devolutions.UniGetUI
    ```
 
@@ -195,6 +207,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\scoop", "$env:USERPROFILE\.config\scoop" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:USERPROFILE\scoop", "$env:USERPROFILE\.config\scoop"
    ```
 
@@ -212,6 +225,7 @@
      $enc = if ($bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
      $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + ')\r?\n?', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $PROFILE" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $PROFILE; "消した: $PROFILE" } else { [System.IO.File]::WriteAllBytes($PROFILE, $enc.GetBytes($rest)); "その行だけ消した: $PROFILE" }
    }
    ```
@@ -231,6 +245,7 @@
      Write-Error '中断: $OLD_EXECUTION_POLICY に手順 17 で控えた CurrentUser の値を入れる'
    } else {
      Set-ExecutionPolicy -ExecutionPolicy $OLD_EXECUTION_POLICY -Scope CurrentUser -Force -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-ExecutionPolicy -List | Format-Table -AutoSize
    }
    ```
@@ -244,6 +259,7 @@
    ```powershell
    wsl.exe --unregister AlmaLinux-10
    $env:WSL_UTF8 = '1'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --list --verbose
    ```
 
@@ -277,6 +293,7 @@
 1. この節の手順 1〜17 の管理者ではない窓で、Autologon を外す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget uninstall --exact --id Microsoft.Sysinternals.Autologon --source winget
    (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon').AutoAdminLogon
    ```
@@ -289,6 +306,7 @@
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' -Name DevicePasswordLessBuildVersion -Type DWord -Value 2
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' | Format-List DevicePasswordLessBuildVersion
    ```
 
@@ -298,6 +316,7 @@
 
    ```powershell
    Remove-ItemProperty -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' -Name DisableSearchBoxSuggestions -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ItemProperty -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' -ErrorAction SilentlyContinue).DisableSearchBoxSuggestions
    ```
 
@@ -307,6 +326,7 @@
 
    ```powershell
    Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate' -Name RemoveDesktopShortcutDefault -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate' -ErrorAction SilentlyContinue).RemoveDesktopShortcutDefault
    ```
 
@@ -317,6 +337,7 @@
 
    ```powershell
    wsl.exe --uninstall
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Disable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
    ```
 
@@ -332,6 +353,7 @@
    Set-ItemProperty -Path $k -Name OverrideKeyboardIdentifier -Type String -Value 'PCAT_106KEY'
    Set-ItemProperty -Path $k -Name OverrideKeyboardType -Type DWord -Value 7
    Set-ItemProperty -Path $k -Name OverrideKeyboardSubtype -Type DWord -Value 2
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path $k | Format-List 'LayerDriver JPN', OverrideKeyboardIdentifier, OverrideKeyboardType, OverrideKeyboardSubtype
    ```
 
@@ -342,6 +364,7 @@
 
    ```powershell
    Remove-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' -Name RealTimeIsUniversal -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation').RealTimeIsUniversal
    ```
 
@@ -357,6 +380,7 @@
      if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この節の手順 18 から）'; return }
      $now = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).'Scancode Map'
      $nowHex = if ($now) { ($now | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not $nowHex) { 'Scancode Map は無い'; return }
      if ($nowHex -ne $want) { Write-Error "中断: 本書の値ではない Scancode Map がある（$nowHex）"; return }
      Remove-ItemProperty -Path $key -Name 'Scancode Map'
@@ -378,6 +402,7 @@
      Write-Error '中断: $OLD_DOWNLOAD_MODE に手順 37 で控えた Internet・Lan・CdnOnly のいずれかを入れる'
    } else {
      Set-DODownloadMode -DownloadMode $OLD_DOWNLOAD_MODE -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-DODownloadMode
    }
    ```
@@ -390,6 +415,7 @@
 
    ```powershell
    Remove-NetFirewallRule -Group 'Ping (setup-notes)' -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Group 'Ping (setup-notes)' -ErrorAction SilentlyContinue
    ```
 
@@ -410,6 +436,7 @@
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Type DWord -Value 1
    Set-NetFirewallRule -Group '@FirewallAPI.dll,-28752' -Enabled False -Profile Any
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-28752' | Format-Table Name, Enabled, Profile
    ```
 
@@ -424,6 +451,7 @@
      Write-Error 'この節の手順 19 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
    }
    ```
@@ -443,6 +471,7 @@
        $pm.AllowComputerToTurnOffDevice = 'Enabled'
        $pm | Set-NetAdapterPowerManagement -NoRestart
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetAdapterPowerManagement -Name $LAN_IF | Format-List Name, AllowComputerToTurnOffDevice
    }
    ```
@@ -454,6 +483,7 @@
 
    ```powershell
    powercfg /restoredefaultschemes
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    powercfg /hibernate on
    Remove-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name DelayLockInterval -ErrorAction SilentlyContinue
    'HibernateEnabled: {0}' -f (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
@@ -468,6 +498,7 @@
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Type DWord -Value 0
    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -Name AllowDevelopmentWithoutDevLicense -Type DWord -Value 0
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (Get-Command sudo -ErrorAction SilentlyContinue) { sudo config --enable disable }
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' | Format-List LongPathsEnabled
    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' | Format-List AllowDevelopmentWithoutDevLicense
@@ -483,6 +514,7 @@
    ```
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $OLD_PC_NAME) {
      Write-Error '中断: $OLD_PC_NAME が空'
    } elseif ($OLD_PC_NAME -notmatch '^[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$' -or $OLD_PC_NAME -match '^[0-9]+$') {
@@ -534,6 +566,7 @@
      if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
        throw '中断: PSWindowsUpdate が残っている。元からあった別の場所のものは消さない'
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'PSWindowsUpdate を外した'
    }
    ```

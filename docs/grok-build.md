@@ -12,6 +12,7 @@
 > - **手順 2 のインストーラーは、`~/.bashrc` の末尾に PATH と補完のブロックを足す**（共通の bash 設定とは別。[参考資料](reference/grok-build.md#実施手順--手順-2-インストーラーが置くものと-bashrc)）
 
 - 上から順に貼る。操作に使うコードブロックだけを上から順に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 対象は端末で使う Grok Build の CLI（`grok`）。名前の似た非公式の grok-cli（npm の `grok-dev` など）とは別物
 - SSH 先などブラウザの無いホストでは、手順 4・5 の代わりに[ブラウザの無いホストでログインする](#ブラウザの無いホストでログインする)を通す
 - 手順の後: Claude Code・Codex と同じプロジェクトで使うなら [coding-agents.md](coding-agents.md)。以後は[更新](#更新)・[ロールバック](extra/grok-build.md#ロールバック)
@@ -19,6 +20,7 @@
 1. 既存の Grok と、同じ名前のコマンドが無いか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v grok agent curl
    ls -ld ~/.grok
    ```
@@ -44,6 +46,7 @@
    ```bash
    export PATH="$HOME/.grok/bin:$PATH"
    hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v grok
    grok --version
    ```
@@ -107,6 +110,7 @@
 1. 新しい版を入れ、版を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    grok update
    grok --version
    ```
@@ -126,11 +130,13 @@
 
 - 上から順に貼る。WSL・Node.js・npm は、この方法では要らない
 - 操作に使うコードブロックだけを上から順に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - Windows には Grok の sandbox（`--sandbox`）が無い（公式の文書は Linux と macOS だけ。[注意点](extra/grok-build.md#注意点)）
 
 1. 既存の Grok が入っていないか確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok, agent -All -ErrorAction SilentlyContinue
    Test-Path "$env:USERPROFILE\.grok"
    ```
@@ -151,6 +157,7 @@
 1. 実行ファイルと版を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok -All
    grok --version
    ```
@@ -211,6 +218,7 @@
 1. 新しい版を入れ、版を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    grok update
    grok --version
    ```

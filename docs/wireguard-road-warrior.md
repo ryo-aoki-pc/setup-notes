@@ -12,6 +12,7 @@
 > - **手順 9 で、PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。手順 10 以降は LAN の外で行う
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 戻すときは[ロールバック](extra/wireguard-road-warrior.md#ロールバック)
 
 1. 変数を設定する（4 つの IP は必ず値を入れる）。
@@ -34,6 +35,7 @@
 
    ```bash
    WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（手順 15 で秘密鍵と conf を消す）
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
      printf '%-15s = %s\n' "$v" "${!v}"
    done
@@ -51,6 +53,7 @@
    ```bash
    {
      sudo dnf install -y wireguard-tools
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q wireguard-tools NetworkManager systemd-resolved
      systemctl is-enabled systemd-resolved         # disabled（依存で入るだけ。本手順では有効にしない）
      modinfo -n wireguard                          # カーネル同梱のモジュールのパスが出る
@@ -60,6 +63,7 @@
 1. 鍵ペアを作る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -e "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" ]; then echo '中断: wg0.key が既にある（作り直すなら先に消す。WG ホストに登録済みの公開鍵と対応しなくなる）' >&2; else
      mkdir -p "${WG_DIR}" && chmod 700 "${WG_DIR}" &&
      ( umask 077; wg genkey | tee "${WG_DIR}/wg0.key" | wg pubkey > "${WG_DIR}/wg0.pub" ) &&
@@ -86,6 +90,7 @@
 
    ```bash
    REPO=~/setup-notes                   # WG ホスト上でこのリポジトリを clone した場所（wireguard.md の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?REPO が空のまま}/scripts/wireguard" && ./wg-vpn.sh -e ~/wg/site.env client list
    ```
 
@@ -132,6 +137,7 @@
 1. `PrivateKey` 行だけを、手順 3 の秘密鍵に置き換える（鍵は表示しない）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ "$(grep -c '^PrivateKey *=' "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.conf" 2>/dev/null)" != 1 ] || [ ! -s "${WG_DIR}/wg0.key" ]; then
      echo '中断: wg0.conf の PrivateKey 行が 1 行ちょうどでないか、wg0.key が無い' >&2
    else
@@ -154,6 +160,7 @@
      sudo nmcli connection modify wg0 connection.autoconnect no &&
      nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
      nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（手順 11 で改めて張る）
+     printf '\n\033[7m 確認 \033[0m\n'
      nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.zone,ipv4.method,ipv4.addresses,ipv4.dns,ipv6.method,wireguard connection show wg0
      sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
    }
@@ -172,6 +179,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo nmcli connection up wg0 &&
      nmcli device status | grep -E '^(DEVICE|wg0 )' &&                            # wireguard  connected  wg0
      nmcli -f GENERAL.STATE,IP4.ADDRESS,IP4.ROUTE,IP4.DNS connection show wg0 &&   # activated。IP4.ROUTE に AllowedIPs の 3 経路（mt = 50）
@@ -187,6 +195,7 @@
 1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for h in "${WG_HOST_TUN_IP:?手順 1 の変数が空のまま}" "${WG_HOST_LAN_IP:?}" "${ROUTER_LAN_IP:?}" "${PEER_WG_LAN_IP:?}"; do
      echo "== $h"; ping -c 3 -W 2 "$h" | tail -2
    done
@@ -199,6 +208,7 @@
 1. WG ホストで（手順 4 のシェルで）、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?REPO が空のまま}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env client list &&                                        # LAST_HANDSHAKE が「N 秒前」
    CLIENT_TUN_IP=$(awk -v n="${CLIENT_NAME:?CLIENT_NAME が空のまま}" '$1 == n { print $3 }' ~/wg/clients.list) &&
@@ -211,6 +221,7 @@
 1. PC で、トンネルを切る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo nmcli connection down wg0 &&
    nmcli device status | grep -E '^(DEVICE|wg0 )'         # wg0 の行が消える
    ```
@@ -220,6 +231,7 @@
 1. 平文の鍵と conf を消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" &&
    ls -l "${WG_DIR}"                                       # wg0.pub だけ残る
    ```
@@ -236,6 +248,7 @@
 > - **この節の手順 11 で、PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。手順 12 以降は LAN の外で行う
 
 - 上から順に進める。コードブロックは、この節の手順 2 で変数を設定した PowerShell に貼る。この節の手順 9 だけは、関数名を手入力する
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/wireguard-road-warrior.md#windows-11-のロールバック)
 - WG ホストの側は、AlmaLinux 10 の PC と同じ（`client add --pubkey` で公開鍵を登録して `apply` するだけで、ほかに変えるものは無い）
 
@@ -262,6 +275,7 @@
    ```
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    foreach ($v in 'WG_HOST_TUN_IP', 'WG_HOST_LAN_IP', 'ROUTER_LAN_IP', 'PEER_WG_LAN_IP') {
      '{0,-15} = {1}' -f $v, (Get-Variable -Name $v -ValueOnly -ErrorAction SilentlyContinue)
    }
@@ -275,6 +289,7 @@
 1. この PC の WireGuard の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id WireGuard.WireGuard --accept-source-agreements --source winget
    Get-Service -Name 'WireGuard*' -ErrorAction SilentlyContinue | Format-Table Name, Status, StartType
    Get-ChildItem -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations" -ErrorAction SilentlyContinue | Format-Table Name
@@ -289,6 +304,7 @@
 1. WireGuard を winget で入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget install --exact --id WireGuard.WireGuard --source winget --scope machine --accept-source-agreements --accept-package-agreements
    winget list --exact --id WireGuard.WireGuard --source winget
    Get-AuthenticodeSignature -FilePath "$env:ProgramFiles\WireGuard\wireguard.exe", "$env:ProgramFiles\WireGuard\wg.exe" | Format-Table Status, @{ Label = 'Signer'; Expression = { $_.SignerCertificate.Subject.Split(',')[0] } }, Path -AutoSize
@@ -326,6 +342,7 @@
      if ($LASTEXITCODE -ne 0 -or $pub -cnotmatch '^[A-Za-z0-9+/]{43}=$') { Write-Error '中断: 公開鍵を出せない'; return }
      [IO.File]::WriteAllText("$dir\wg0.key", "$priv`n", [Text.Encoding]::ASCII)
      [IO.File]::WriteAllText("$dir\wg0.pub", "$pub`n", [Text.Encoding]::ASCII)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      icacls.exe $dir
      Get-ChildItem -LiteralPath $dir | Format-Table Name, Length
      $pub
@@ -386,6 +403,7 @@
      if (Test-Path -LiteralPath "$store\wg0.conf.dpapi") { Write-Error '中断: wg0 というトンネルが既にある'; return }
      Copy-Item -LiteralPath "$dir\wg0.conf" -Destination "$store\wg0.conf"
      for ($i = 0; $i -lt 30 -and (Test-Path -LiteralPath "$store\wg0.conf"); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-ChildItem -LiteralPath $store | Format-Table Name, Length, LastWriteTime
    }
    ```
@@ -409,6 +427,7 @@
      if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（手順 10）'; return }
      & "$env:ProgramFiles\WireGuard\wireguard.exe" /installtunnelservice $conf 2>&1 | ForEach-Object { "$_" }
      for ($i = 0; $i -lt 30 -and -not (Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Service -Name 'WireGuardTunnel$wg0' | Format-Table Name, Status, StartType
      Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table InterfaceAlias, IPAddress, PrefixLength
      Get-NetRoute -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table DestinationPrefix, NextHop, RouteMetric
@@ -431,6 +450,7 @@
 1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not ($WG_HOST_TUN_IP -and $WG_HOST_LAN_IP -and $ROUTER_LAN_IP -and $PEER_WG_LAN_IP)) {
      Write-Error '手順 2 の変数が空のまま'
    } else {
@@ -459,6 +479,7 @@
    ```powershell
    & "$env:ProgramFiles\WireGuard\wireguard.exe" /uninstalltunnelservice wg0 2>&1 | ForEach-Object { "$_" }
    for ($i = 0; $i -lt 30 -and (Get-Service -Name 'WireGuardTunnel$wg0' -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Service -Name 'WireGuardTunnel$wg0' -ErrorAction SilentlyContinue
    Get-NetAdapter -Name wg0 -ErrorAction SilentlyContinue
    ```
@@ -472,6 +493,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\wg-client\wg0.key", "$env:USERPROFILE\wg-client\wg0.conf"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ChildItem -LiteralPath "$env:USERPROFILE\wg-client" | Format-Table Name, Length
    ```
 
@@ -490,6 +512,7 @@
 1. WireGuard を winget で上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget upgrade --exact --id WireGuard.WireGuard --source winget --accept-source-agreements --accept-package-agreements
    winget list --exact --id WireGuard.WireGuard --source winget
    Get-Service -Name 'WireGuard*' | Format-Table Name, Status, StartType

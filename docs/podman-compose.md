@@ -11,6 +11,7 @@
 > - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-compose.md#ロールバック)
 - PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
@@ -30,6 +31,7 @@
 1. podman-compose が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose version
    command -v podman-compose
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-compose
@@ -65,6 +67,7 @@
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
    ```
 
@@ -74,6 +77,7 @@
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose ps
    podman pod ps
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8081/
@@ -87,6 +91,7 @@
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose exec check curl -s http://web:8080/
    ```
 
@@ -130,6 +135,7 @@
    ```bash
    cd ~/compose-sample
    podman-compose pull
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
    ```
 

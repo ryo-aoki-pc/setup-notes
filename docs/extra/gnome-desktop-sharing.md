@@ -3,6 +3,7 @@
 [手順書](../gnome-desktop-sharing.md)・[検証記録](../verification/gnome-desktop-sharing.md)・[参考資料](../reference/gnome-desktop-sharing.md)
 
 - 「手順 N」は[手順書](../gnome-desktop-sharing.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -18,6 +19,7 @@
 
    ```bash
    if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --reload
    sudo firewall-cmd --list-ports
@@ -30,6 +32,7 @@
 
    ```bash
    if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
    sudo firewall-cmd --reload
    sudo firewall-cmd --list-rich-rules
@@ -71,6 +74,7 @@
      else
        echo '退避なし: ポート・操作・TLS の設定と証明書は保持する'
      fi
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl --user is-enabled gnome-remote-desktop.service || true
    )
    ```
@@ -85,6 +89,7 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
    else
      sudo sed -i "/^AutomaticLoginEnable=True$/d; /^AutomaticLogin=${USER}$/d" /etc/gdm/custom.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      grep -c '^AutomaticLogin' /etc/gdm/custom.conf
      sudo grubby --update-kernel=ALL --remove-args="rd.plymouth=0 plymouth.enable=0"
      sudo grubby --info=DEFAULT | grep -c 'plymouth.enable=0'
@@ -185,6 +190,7 @@
    else
      loginctl terminate-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')"
      sleep 5
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl list-sessions --no-legend | awk '$4 == "seat0"'
    fi
    ```

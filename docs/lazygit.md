@@ -12,12 +12,14 @@
 > - **手順 3 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 設定を書く場所と、自分用の設定（`ryo-aoki-pc/lazygit`）への案内は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](extra/lazygit.md#ロールバック)
 
 1. 変数を設定する。
 
    ```bash
    LG_EDITOR=nvim                  # lazygit の e キーで開くエディタ。vim / code など。<LG_EDITOR>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'LG_EDITOR = %s\n' "${LG_EDITOR}"
    ```
 
@@ -36,6 +38,7 @@
 1. lazygit が入ったか確かめ、git リポジトリで起動してみる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    lazygit --version
    brew list --versions lazygit
    command -v lazygit
@@ -72,6 +75,7 @@
 1. エディタだけを指定する、最小の `config.yml` を書く。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${LG_EDITOR}" ]; then
      echo '中断: 手順 1 の LG_EDITOR が空のまま。値を入れて貼り直す' >&2
    elif ! command -v "${LG_EDITOR}" >/dev/null 2>&1; then
@@ -117,6 +121,7 @@
 > - **この節の手順 6 で lazygit の画面（TUI）が開く**。`q` で閉じてから、ほかのブロックを貼る
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `LG_EDITOR` は AlmaLinux 10 だけで使う）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 先に [Neovim の Windows 11 で使う](neovim.md#windows-11-で使う)を通しておく（`e` キーで開くエディタ）
 - 自分用の設定（`ryo-aoki-pc/lazygit`）を使うなら、差分の表示に使う delta も先に入れておく（[git-delta.md の Windows 11 で使う](git-delta.md#windows-11-で使う)の手順 2・3）
 - 手順の後: 置き場所と自分用の設定は[設定ファイル](#設定ファイル)。PowerShell から起動した lazygit の `e` キーで Neovim を開くなら、[neovim.md の既定のエディタにする（任意）](neovim.md#既定のエディタにする任意)の手順 2。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/lazygit.md#windows-11-のロールバック)
@@ -130,6 +135,7 @@
 1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell = $PSVersionTable.PSVersion.ToString()
      Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -149,6 +155,7 @@
 1. extras のバケットが無いときだけ、scoop に足す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop bucket add extras
    scoop bucket list
    ```
@@ -167,6 +174,7 @@
 1. 版と、設定の置き場所を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    lazygit --version
    lazygit --print-config-dir
    (Get-Command lazygit -All).Source
@@ -209,6 +217,7 @@
 1. lazygit をすべて閉じてから、scoop で上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update lazygit
    lazygit --version

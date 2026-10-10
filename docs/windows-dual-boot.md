@@ -14,6 +14,7 @@
 > - 手順 9〜13 は、入れた Windows の管理者の Windows PowerShell（5.1）に貼る。入れたばかりの Windows は貼り付けの設定（[Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)）を通していないので、ブロックは Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
 
 - 上から順に進める。手順 10・12・13 は、条件に当たるときだけ行う
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - やり直すときは、手順 3 から始める（ロールバックの節は無い）。手順 5 のパーティションが残っていれば、手順 4・5 は飛ばしてよい
 
 - 手順の後: AlmaLinux 10 は、手順 5 で残した未割り当て領域に入れる（この文書には含めない。入れるときの注意は[注意点](extra/windows-dual-boot.md#注意点)）。Windows の初期設定（更新・貼り付けの設定・表示・電源など）は、[Windows 11 の初期設定](windows-setup.md)で行う
@@ -111,6 +112,7 @@
 1. パーティションの並び・ESP の大きさ・未割り当て領域・WinRE の場所を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $d = (Get-Partition -DriveLetter C).DiskNumber
    Get-Partition -DiskNumber $d | Format-Table PartitionNumber, DriveLetter, Size, Type -AutoSize
    Get-Disk -Number $d | Format-List Number, PartitionStyle, Size, LargestFreeExtent
@@ -127,6 +129,7 @@
    ```powershell
    reagentc /disable
    reagentc /enable
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    reagentc /info
    ```
 
@@ -135,6 +138,7 @@
 1. 高速スタートアップ・BitLocker・タイムゾーンの状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' | Format-List HiberbootEnabled
    Get-BitLockerVolume -MountPoint C: | Format-List VolumeStatus, ProtectionStatus
    Get-TimeZone | Format-List Id
@@ -149,6 +153,7 @@
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name HiberbootEnabled -Value 0 -Type DWord
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' | Format-List HiberbootEnabled
    ```
 
@@ -158,6 +163,7 @@
 
    ```powershell
    Set-TimeZone -Id 'Tokyo Standard Time'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-TimeZone | Format-List Id
    ```
 
@@ -191,6 +197,7 @@
 1. ダウンロードした ZIP の SHA256 を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if ((Get-FileHash -LiteralPath "$env:USERPROFILE\Downloads\QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip" -Algorithm SHA256 -ErrorAction Stop).Hash -ne 'FC2D83F1369AF02A48072644B08CA7D3D4B2547B955A2088918E7C1179051A10') {
        throw '中断: ZIP の SHA256 が確認した配布物と一致しません。展開せず、取得元とファイル名を確かめてください。'
    } else {
@@ -211,6 +218,7 @@
 1. 管理者の PowerShell で、現在の起動順と AlmaLinux のエントリを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
    if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
    & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
@@ -242,6 +250,7 @@
 1. 管理者の PowerShell で、次回の起動先と通常の起動順を読み戻す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
    if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。再起動しないでください。' }
    & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
@@ -272,6 +281,7 @@
 1. BCDEdit で、取り消す予約を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
    if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
    ```
@@ -292,6 +302,7 @@
 1. 予約が消え、通常の起動順が変わっていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
    if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
    & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware

@@ -11,6 +11,7 @@
 > - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/image-tools.md#ロールバック)
 
 1. brew で hadolint と dive を入れる。
@@ -24,6 +25,7 @@
 1. hadolint と dive が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    hadolint --version
    dive --version
    command -v hadolint dive
@@ -44,6 +46,7 @@
    enabled=1
    gpgkey=https://aquasecurity.github.io/trivy-repo/rpm/public.key
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/yum.repos.d/trivy.repo
      dnf -q list --showduplicates trivy
      sudo dnf install trivy
@@ -59,6 +62,7 @@
 1. Trivy が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    trivy --version
    command -v trivy
    rpm -q trivy
@@ -79,6 +83,7 @@
    ```bash
    mkdir -p ~/image-check
    echo 'hello from image-check' > ~/image-check/index.html
+   printf '\n\033[7m 確認 \033[0m\n'
    cat > ~/image-check/Containerfile <<'EOF'
    FROM registry.access.redhat.com/ubi10/httpd-24:10.1
    COPY index.html /var/www/html/index.html
@@ -91,6 +96,7 @@
 1. イメージを作る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman build -t localhost/image-check:1 ~/image-check
    podman images localhost/image-check
    ```

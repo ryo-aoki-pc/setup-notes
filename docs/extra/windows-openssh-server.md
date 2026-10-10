@@ -3,6 +3,7 @@
 [手順書](../windows-openssh-server.md)・[検証記録](../verification/windows-openssh-server.md)・[参考資料](../reference/windows-openssh-server.md)
 
 - 「手順 N」は[手順書](../windows-openssh-server.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -19,6 +20,7 @@
      Write-Error 'Windows PowerShell（5.1）で貼る'
    } else {
      Stop-Service -Name sshd
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Remove-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
      Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 | Format-List Name, State
    }
@@ -32,6 +34,7 @@
    ```powershell
    Remove-Item -Path "$env:ProgramData\ssh" -Recurse -Force
    Remove-Item -Path HKLM:\SOFTWARE\OpenSSH -Recurse
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:ProgramData\ssh", HKLM:\SOFTWARE\OpenSSH
    ```
 

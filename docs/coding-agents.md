@@ -12,6 +12,7 @@
 > - **手順 11 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定したシェルに貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - できあがる形: 人は `main`、Claude Code・Codex・Grok Build はそれぞれの worktree とブランチで作業し、3 つが同じ規則（AGENTS.md）を読む。Claude Code からは、OpenAI と xAI の公式のプラグインで、Codex と Grok にレビューや作業を頼める
 - 手順の後: 役割と打つコマンドは[使い方の基本](#使い方の基本)。作業の流れは[分担して作業する](#分担して作業する) → [相互にレビューする](#相互にレビューする) → [main に取り込む](#main-に取り込む)。スマートフォンから指示するなら[スマートフォンから指示する](#スマートフォンから指示する)。以後は[更新](#更新)・[ロールバック](extra/coding-agents.md#ロールバック)
 
@@ -23,6 +24,7 @@
 
    ```bash
    WT_ROOT="${PROJECT_DIR%/}.worktrees"   # 3 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'PROJECT_DIR = %s\nWT_ROOT     = %s\n' "${PROJECT_DIR}" "${WT_ROOT}"
    ```
 
@@ -34,6 +36,7 @@
 1. 3 つの CLI の版とログインを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    claude --version
    codex --version
    grok --version
@@ -51,6 +54,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      git -C "${PROJECT_DIR}" rev-parse --show-toplevel
      git -C "${PROJECT_DIR}" status --short --branch
      for f in AGENTS.md AGENTS.override.md CLAUDE.md CLAUDE.local.md; do
@@ -89,6 +93,7 @@
    - レビューを頼まれたら、ファイルを変えずに、指摘を「重大度・場所（ファイル:行）・理由・直し方」で挙げる
    - ほかの担当の変更は、`git diff main...agent/codex` のように git で読む（ほかの worktree へ移らない）
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat "${PROJECT_DIR}/AGENTS.md"
    fi
    ```
@@ -105,6 +110,7 @@
    else
      if [ -s "${PROJECT_DIR}/CLAUDE.md" ] && [ -n "$(tail -c 1 "${PROJECT_DIR}/CLAUDE.md")" ]; then echo >> "${PROJECT_DIR}/CLAUDE.md"; fi
      echo '@AGENTS.md' >> "${PROJECT_DIR}/CLAUDE.md"
+     printf '\n\033[7m 確認 \033[0m\n'
      tail -n 3 "${PROJECT_DIR}/CLAUDE.md"
    fi
    ```
@@ -115,6 +121,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      git -C "${PROJECT_DIR}" add AGENTS.md CLAUDE.md
      git -C "${PROJECT_DIR}" commit -m 'Claude Code・Codex・Grok Build の共同作業の規則を足す'
      git -C "${PROJECT_DIR}" log --oneline -1
@@ -128,6 +135,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        git -C "${PROJECT_DIR}" worktree add -b "agent/${a}" "${WT_ROOT}/${a}" main
      done
@@ -142,6 +150,7 @@
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
      (cd "${WT_ROOT}/claude" && claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で')
      codex exec -C "${WT_ROOT}/codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      (cd "${WT_ROOT}/grok" && grok --trust inspect | grep -e 'Project trusted' -e 'AGENTS.md' -e 'CLAUDE.md')
@@ -157,6 +166,7 @@
    ```bash
    {
      sudo dnf install -y nodejs bubblewrap
+     printf '\n\033[7m 確認 \033[0m\n'
      node --version
      bwrap --version
    }
@@ -172,6 +182,7 @@
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    claude plugin marketplace add openai/codex-plugin-cc
    claude plugin marketplace add xai-org/grok-build-plugin-cc
    claude plugin install codex@openai-codex
@@ -321,6 +332,7 @@
 1. 3 つが終わったら、それぞれの worktree の窓で、コミットと残りの変更を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git log --oneline main..HEAD
    git status --short
    ```
@@ -383,6 +395,7 @@
 1. `main` の窓で、取り込む前の状態を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git status --short --branch
    git log --oneline --decorate main..agent/claude
    git log --oneline --decorate main..agent/codex
@@ -421,6 +434,7 @@
 
    ```bash
    git merge --abort
+   printf '\n\033[7m 確認 \033[0m\n'
    git status --short --branch
    ```
 
@@ -497,6 +511,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf upgrade -y nodejs
      node --version
    }
@@ -507,6 +522,7 @@
 1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    claude plugin marketplace update openai-codex
    claude plugin marketplace update xai-grok-build
    claude plugin update codex@openai-codex
@@ -528,6 +544,7 @@
 > - **この節の手順 12 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定した PowerShell に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後は、両 OS に共通の[使い方の基本](#使い方の基本)・[分担して作業する](#分担して作業する)・[相互にレビューする](#相互にレビューする)・[main に取り込む](#main-に取り込む)・[スマートフォンから指示する](#スマートフォンから指示する)へ進む
 - 書くファイル（AGENTS.md・CLAUDE.md）は、BOM の無い UTF-8 と LF の改行にする（AlmaLinux 10 で書いたものと同じ形）
 
@@ -539,6 +556,7 @@
 
    ```powershell
    $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 3 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
    'WT_ROOT     = {0}' -f $WT_ROOT
    ```
@@ -550,6 +568,7 @@
 1. 3 つの CLI の版とログインを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude --version
    codex --version
    grok --version
@@ -564,6 +583,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $PROJECT_DIR rev-parse --show-toplevel
      git -C $PROJECT_DIR status --short --branch
      Get-ChildItem -LiteralPath $PROJECT_DIR -Force -Name | Where-Object { $_ -in 'AGENTS.md', 'AGENTS.override.md', 'CLAUDE.md', 'CLAUDE.local.md' }
@@ -599,6 +619,7 @@
    '@
      $prefix = if ($old.Length -eq 0) { '' } elseif ($old.EndsWith("`n")) { "`n" } else { "`n`n" }
      [IO.File]::AppendAllText($path, $prefix + ($text -replace "`r`n", "`n") + "`n", (New-Object Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Content -LiteralPath $path -Encoding UTF8
    }
    ```
@@ -616,6 +637,7 @@
      if ($old -match '(?m)^@AGENTS\.md\r?$') { 'CLAUDE.md に @AGENTS.md はもうある'; return }
      $prefix = if ($old.Length -eq 0 -or $old.EndsWith("`n")) { '' } else { "`n" }
      [IO.File]::AppendAllText($path, $prefix + "@AGENTS.md`n", (New-Object Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Content -LiteralPath $path -Encoding UTF8 | Select-Object -Last 3
    }
    ```
@@ -626,6 +648,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $PROJECT_DIR add AGENTS.md CLAUDE.md
      git -C $PROJECT_DIR commit -m 'Claude Code・Codex・Grok Build の共同作業の規則を足す'
      git -C $PROJECT_DIR log --oneline -1
@@ -638,6 +661,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($a in 'claude', 'codex', 'grok') { git -C $PROJECT_DIR worktree add -b "agent/$a" "$WT_ROOT\$a" main }
      git -C $PROJECT_DIR worktree list
    }
@@ -649,6 +673,7 @@
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'; Pop-Location
      codex exec -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
@@ -661,6 +686,7 @@
 1. Node.js 18.18 以上が無いときだけ、scoop で入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command node -All -ErrorAction SilentlyContinue
    scoop install nodejs-lts
    ```
@@ -676,6 +702,7 @@
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude plugin marketplace add openai/codex-plugin-cc
    claude plugin marketplace add xai-org/grok-build-plugin-cc
    claude plugin install codex@openai-codex
@@ -704,6 +731,7 @@
 1. Node.js を上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update nodejs-lts
    node --version
    ```
@@ -714,6 +742,7 @@
 1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude plugin marketplace update openai-codex
    claude plugin marketplace update xai-grok-build
    claude plugin update codex@openai-codex

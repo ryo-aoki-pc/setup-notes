@@ -3,6 +3,7 @@
 [手順書](../almalinux-setup.md)・[検証記録](../verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -27,6 +28,7 @@
 
    ```bash
    /usr/bin/gsettings reset org.gnome.desktop.interface color-scheme
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface color-scheme
    ```
 
@@ -36,6 +38,7 @@
 
    ```bash
    /usr/bin/gsettings reset org.gnome.desktop.wm.preferences button-layout
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.wm.preferences button-layout
    ```
 
@@ -47,6 +50,7 @@
    /usr/bin/gsettings reset org.gnome.desktop.interface clock-show-weekday
    /usr/bin/gsettings reset org.gnome.desktop.interface clock-show-seconds
    /usr/bin/gsettings reset org.gnome.desktop.interface show-battery-percentage
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings list-recursively org.gnome.desktop.interface | grep -E 'clock-show-(weekday|seconds)|show-battery-percentage'
    ```
 
@@ -55,6 +59,7 @@
 1. Files とファイルを選ぶ窓の表示を既定に戻す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for s in org.gtk.Settings.FileChooser org.gtk.gtk4.Settings.FileChooser; do
      /usr/bin/gsettings reset "${s}" show-hidden
      /usr/bin/gsettings reset "${s}" sort-directories-first
@@ -71,6 +76,7 @@
    /usr/bin/gsettings reset org.gnome.desktop.wm.keybindings switch-applications-backward
    /usr/bin/gsettings reset org.gnome.desktop.wm.keybindings switch-windows
    /usr/bin/gsettings reset org.gnome.desktop.wm.keybindings switch-windows-backward
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings list-recursively org.gnome.desktop.wm.keybindings | grep -E 'switch-(applications|windows)'
    ```
 
@@ -80,6 +86,7 @@
 
    ```bash
    /usr/bin/gsettings reset org.gnome.desktop.interface enable-hot-corners
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface enable-hot-corners
    ```
 
@@ -94,6 +101,7 @@
      "['ctrl:nocaps']") /usr/bin/gsettings reset org.gnome.desktop.input-sources xkb-options ;;
      *"'ctrl:nocaps'"*) /usr/bin/gsettings set org.gnome.desktop.input-sources xkb-options "$(printf '%s' "${xkb}" | sed -e "s/, 'ctrl:nocaps'//" -e "s/'ctrl:nocaps', //")" ;;
    esac
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.input-sources xkb-options
    ```
 
@@ -108,6 +116,7 @@
      f=$(printf '%s' "${f}" | sed -e "s/, '${x}'//" -e "s/'${x}', //" -e "s/\['${x}'\]/@as []/")
    done
    /usr/bin/gsettings set org.gnome.mutter experimental-features "${f}"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
 
@@ -123,6 +132,7 @@
      *"'${kb}'"*) /usr/bin/gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$(printf '%s' "${list}" | sed -e "s|, '${kb}'||" -e "s|'${kb}', ||")" ;;
    esac
    /usr/bin/dconf reset -f "${kb}"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
    /usr/bin/dconf dump "${kb}"
    ```
@@ -133,6 +143,7 @@
 
    ```bash
    /usr/bin/gsettings reset org.gnome.shell favorite-apps
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.shell favorite-apps
    ```
 
@@ -144,6 +155,7 @@
    ```bash
    e=$(/usr/bin/gsettings get org.gnome.shell enabled-extensions)
    /usr/bin/gsettings set org.gnome.shell enabled-extensions "$(printf '%s' "${e}" | sed -e "s/, 'appindicatorsupport@rgcjonas.gmail.com'//" -e "s/'appindicatorsupport@rgcjonas.gmail.com', //" -e "s/\['appindicatorsupport@rgcjonas.gmail.com'\]/@as []/")"
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.shell enabled-extensions
    ```
 
@@ -162,6 +174,7 @@
 
    ```bash
    /usr/bin/gsettings reset org.gnome.desktop.input-sources sources
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.input-sources sources
    ```
 
@@ -181,6 +194,7 @@
 1. フォルダーの名前を日本語に戻すときだけ、英語の名前のフォルダーを日本語の名前に戻す（中身ごと移す）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 - <<'EOF'
    import pathlib, subprocess, urllib.parse
    home = pathlib.Path.home()
@@ -230,6 +244,7 @@
 
    ```bash
    cp -p ~/.bash_history ~/.bash_history.bak
+   printf '\n\033[7m 確認 \033[0m\n'
    wc -l ~/.bash_history.bak
    ```
 
@@ -286,6 +301,7 @@
 1. Homebrew を消す前に、何が消えるか見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /home/linuxbrew/.linuxbrew/bin/brew leaves
    /home/linuxbrew/.linuxbrew/bin/brew list --versions | wc -l
    curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh -o /tmp/uninstall.sh
@@ -314,6 +330,7 @@
    {
      rm -f /tmp/uninstall.sh
      sudo rm -rf /home/linuxbrew
+     printf '\n\033[7m 確認 \033[0m\n'
      ls -ld /home/linuxbrew
    }
    ```
@@ -365,6 +382,7 @@
    ```bash
    {
      sudo flatpak remote-delete flathub
+     printf '\n\033[7m 確認 \033[0m\n'
      flatpak remotes --show-details
    }
    ```
@@ -419,6 +437,7 @@
      sudo sed -i 's/^auto_reset_crashkernel no$/auto_reset_crashkernel yes/' /etc/kdump.conf
      sudo kdumpctl reset-crashkernel --kernel=ALL
      sudo systemctl enable kdump
+     printf '\n\033[7m 確認 \033[0m\n'
      grep -n '^auto_reset_crashkernel' /etc/kdump.conf
      sudo grubby --info=ALL | grep -E '^args='
    }
@@ -434,6 +453,7 @@
      sudo journalctl --relinquish-var
      sudo rm -rf /var/log/journal
      sudo systemctl restart systemd-journald
+     printf '\n\033[7m 確認 \033[0m\n'
      ls -ld /var/log/journal /run/log/journal
    }
    ```
@@ -451,6 +471,7 @@
    ```bash
    if [ -z "${OLD_HOST_NAME}" ]; then echo '中断: OLD_HOST_NAME が空のまま。手順 10 で控えた名前を入れて貼り直す' >&2; else
      sudo hostnamectl hostname "${OLD_HOST_NAME}"
+     printf '\n\033[7m 確認 \033[0m\n'
      hostnamectl --static
    fi
    ```
@@ -468,6 +489,7 @@
 1. 元に戻ったことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cat /sys/kernel/kexec_crash_size
    journalctl --list-boots --no-pager
    hostnamectl --static
@@ -485,6 +507,7 @@
    {
      sudo rm -f /etc/sudoers.d/nopasswd
      sudo -k
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo -n true 2>&1 || true
    }
    ```

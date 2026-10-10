@@ -11,6 +11,7 @@
 > - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-tui.md#ロールバック)
 - Docker の API でつなぐ TUI なら [lazydocker](lazydocker.md)（違いは[選択した方針](verification/podman-tui.md#選択した方針)）
 
@@ -30,6 +31,7 @@
 1. podman-tui が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-tui version
    command -v podman-tui
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-tui
@@ -41,6 +43,7 @@
 
    ```bash
    podman run -d --name podman-tui-web registry.access.redhat.com/ubi10/httpd-24:latest
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
    ```
 

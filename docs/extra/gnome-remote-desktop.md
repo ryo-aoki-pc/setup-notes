@@ -3,6 +3,7 @@
 [手順書](../gnome-remote-desktop.md)・[検証記録](../verification/gnome-remote-desktop.md)・[参考資料](../reference/gnome-remote-desktop.md)
 
 - 「手順 N」は[手順書](../gnome-remote-desktop.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -23,6 +24,7 @@
      sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
      sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
      sudo systemctl daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --list-services
      sudo firewall-cmd --permanent --list-services
    }
@@ -36,6 +38,7 @@
    if [ -z "${LAN_SUBNET}" ]; then echo '中断: LAN_SUBNET が空のまま。LAN に絞る節の変数ブロックを貼り直す' >&2; else
      sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
      sudo firewall-cmd --reload
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --list-rich-rules
      sudo firewall-cmd --permanent --list-rich-rules
    fi
@@ -81,6 +84,7 @@
 
   ```bash
   {
+    printf '\n\033[7m 確認 \033[0m\n'
     sudo cat /etc/gnome-remote-desktop/grd.conf
     sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
   }

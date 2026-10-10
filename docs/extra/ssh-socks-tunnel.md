@@ -3,6 +3,7 @@
 [手順書](../ssh-socks-tunnel.md)・[検証記録](../verification/ssh-socks-tunnel.md)・[参考資料](../reference/ssh-socks-tunnel.md)
 
 - 「手順 N」は[手順書](../ssh-socks-tunnel.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -15,6 +16,7 @@
    ```bash
    {
      sudo sed -i '/^proxy=socks5h:\/\/127\.0\.0\.1:1080$/d' /etc/dnf/dnf.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      grep -c '^proxy' /etc/dnf/dnf.conf
    }
    ```

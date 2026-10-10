@@ -10,12 +10,14 @@
 > - **手順 3 には対話入力がある**（トランザクション表と署名鍵の取り込みの確認）。答えてから手順 4 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](extra/claude-code.md#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
 
 1. 変数を設定する。
 
    ```bash
    CC_CHANNEL=latest               # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'CC_CHANNEL = %s\n' "${CC_CHANNEL}"
    ```
 
@@ -37,6 +39,7 @@
    gpgcheck=1
    gpgkey=https://downloads.claude.ai/keys/claude-code.asc
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/yum.repos.d/claude-code.repo
    fi
    ```
@@ -59,6 +62,7 @@
 1. インストールできたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
    dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
    claude --version
@@ -194,6 +198,7 @@
    ```bash
    {
      sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
      grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
    }
    ```
@@ -212,6 +217,7 @@
 1. 入っている版を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
    dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
    claude --version
@@ -224,6 +230,7 @@
    ```bash
    {
      sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
      grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
      sudo dnf upgrade claude-code
    }
@@ -244,6 +251,7 @@
 > - **この節の手順 8 には対話入力がある**（Claude Code の最初の設定と、ブラウザでのログイン）。`/exit` で Claude Code を終えてから手順 9 を貼る
 
 - 上から順にコードブロックを貼る。この節の手順 2 で変数を設定した PowerShell に、手順 5 までを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - Pro / Max / Team / Enterprise か Console のアカウントが要る（無料の claude.ai プランでは使えない）
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
@@ -256,6 +264,7 @@
 
    ```powershell
    $CC_CHANNEL = 'latest'                # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'CC_CHANNEL = {0}' -f $CC_CHANNEL
    ```
 
@@ -267,6 +276,7 @@
 1. Claude Code と Git for Windows があるか、64 ビットの PowerShell かを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [Environment]::Is64BitProcess
    Get-Command claude -All -ErrorAction SilentlyContinue | Format-Table Source
    Test-Path "$env:USERPROFILE\.local\bin\claude.exe"
@@ -287,6 +297,7 @@
    if (-not $CC_CHANNEL) {
      Write-Error '手順 2 の $CC_CHANNEL が空'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & ([scriptblock]::Create((Invoke-RestMethod -Uri https://claude.ai/install.ps1))) $CC_CHANNEL
    }
    ```
@@ -302,6 +313,7 @@
      $bin = "$env:USERPROFILE\.local\bin"
      $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
      if (-not (Test-Path -LiteralPath "$bin\claude.exe")) { Write-Error "中断: $bin\claude.exe が無い（この節の手順 4 で入っていない）"; return }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($entries | Where-Object { $_.TrimEnd('\') -eq $bin }) {
        "PATH に $bin はもうある"
      } else {
@@ -324,6 +336,7 @@
 1. Claude Code の場所・版・署名と、導入の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command claude -All | Format-Table Source
    claude --version
    $sig = Get-AuthenticodeSignature -LiteralPath "$env:USERPROFILE\.local\bin\claude.exe"
@@ -373,6 +386,7 @@
 1. Claude Code をすぐに更新する。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude update
    claude --version
    ```

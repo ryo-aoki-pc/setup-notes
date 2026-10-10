@@ -10,12 +10,14 @@
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、フォントも自分のホームの `~/.local/share/fonts` に入るため）
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 端末のフォントにするなら[WezTerm で使う（任意）](#wezterm-で使う任意)。以後は[更新](#更新)・[ロールバック](extra/hackgen.md#ロールバック)
 
 1. 変数を設定する。
 
    ```bash
    HACKGEN_FAMILY='HackGen Console NF'   # 確認と設定に使うファミリー名。<HACKGEN_FAMILY>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%-15s = %s\n' HACKGEN_FAMILY "${HACKGEN_FAMILY}"
    ```
 
@@ -50,6 +52,7 @@
 1. HackGen が入ったか確かめ、かな・漢字・記号・アイコンが入っているかも見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    brew list --cask --versions font-hackgen-nerd
    ls ~/.local/share/fonts/
    fc-list : family style file | grep HackGen
@@ -85,6 +88,7 @@
 
    ```bash
    sed -i "s/^config.font = .*/config.font = wezterm.font '${HACKGEN_FAMILY:?手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}'/" ~/.config/wezterm/wezterm.lua
+   printf '\n\033[7m 確認 \033[0m\n'
    grep -n '^config.font = ' ~/.config/wezterm/wezterm.lua
    wezterm ls-fonts --text 'aあ漢→'
    ```
@@ -116,6 +120,7 @@
 > - **この節の手順 4 で、サインアウトしてサインインし直す**（登録したフォントは、サインインのときに読み込まれる）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `HACKGEN_FAMILY` は AlmaLinux 10 だけで使う）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/hackgen.md#windows-11-のロールバック)
 - [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その手順 55 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
 
@@ -127,6 +132,7 @@
 1. HackGen がまだ入っていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -ErrorAction SilentlyContinue | ForEach-Object { $_.Property -like 'HackGen*' }
    Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts", "$env:WINDIR\Fonts" -Filter 'HackGen*' -ErrorAction SilentlyContinue | Format-Table Name, DirectoryName
    ```
@@ -163,6 +169,7 @@
        New-ItemProperty -Path $key -Name "$($f.BaseName) (TrueType)" -Value $dst -PropertyType String -Force | Out-Null
      }
      Remove-Item -LiteralPath $tmp -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-ItemProperty -LiteralPath $key | Select-Object -Property 'HackGen*' | Format-List
    }
    ```

@@ -10,6 +10,7 @@
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: Claude Code からの使い方は[使い方の基本](#使い方の基本)。仮想モニターの大きさを変えるなら[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)。戻すときは[ロールバック](extra/claude-code-gui.md#ロールバック)
 
 1. 変数を設定する。
@@ -17,6 +18,7 @@
    ```bash
    REPO=~/setup-notes                  # このリポジトリを clone した場所（scripts/gnome-gui.py を使う）。<REPO>
    VIRTUAL_MONITOR=1920x1080           # 仮想モニターの大きさ（幅x高さ）。<VIRTUAL_MONITOR>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER REPO VIRTUAL_MONITOR; do
      printf '%-16s = %s\n' "$v" "${!v}"
    done
@@ -38,6 +40,7 @@
    ExecStart=/usr/bin/gnome-shell --virtual-monitor ${VIRTUAL_MONITOR}
    EOF
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
    fi
    ```
@@ -58,6 +61,7 @@
          [ -n "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break
        sleep 1
      done
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
      pgrep -a -u "${USER}" -x gnome-shell
    fi
@@ -71,6 +75,7 @@
 
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
       file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
      file ~/gnome-gui-test.png
@@ -93,6 +98,7 @@
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" key Escape
    sleep 1
+   printf '\n\033[7m 確認 \033[0m\n'
    "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-desktop.png
    "${REPO}/scripts/gnome-gui.py" launch org.gnome.Calculator
    for i in $(seq 1 30); do
@@ -120,6 +126,7 @@
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" click 70 15
+   printf '\n\033[7m 確認 \033[0m\n'
    "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-overview.png
    "${REPO}/scripts/gnome-gui.py" key Escape
    sleep 1
@@ -178,6 +185,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+   printf '\n\033[7m 確認 \033[0m\n'
    if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
       file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
      file ~/gnome-gui-test.png

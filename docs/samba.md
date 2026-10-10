@@ -10,6 +10,7 @@
 > - **手順を終えたサーバーでは、手順 3 を貼り直さない**（smb.conf が丸ごと置き換わり、`[root]`・`[home]` なども消える）。smb.conf に `smb3 directory leases` の行が無いサーバーには、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後の節:
   - root のホーム（`/root`）も公開するなら、[root のホームも公開する（任意）](#root-のホームも公開する任意)を行う
   - `/home` の下のすべてのホーム（ほかのユーザーのホームも）を 1 つの共有で開くなら、[/home も公開する（任意）](#home-も公開する任意)を行う
@@ -22,6 +23,7 @@
    ```bash
    WORKGROUP=WORKGROUP                 # Windows 側のワークグループ名。既定のままでよいことが多い
    SERVER_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 検証と案内に使う（自動）。<SERVER_IP>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in WORKGROUP USER SERVER_IP; do
      printf '%-10s = %s\n' "$v" "${!v}"
    done
@@ -37,6 +39,7 @@
    ```bash
    {
      sudo dnf install -y samba samba-client cifs-utils
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q samba samba-client cifs-utils
    }
    ```
@@ -65,6 +68,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -77,6 +81,7 @@
    ```bash
    {
      sudo setsebool -P samba_enable_home_dirs on
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
    }
    ```
@@ -86,6 +91,7 @@
    ```bash
    {
      sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --list-ports               # 445/tcp が含まれる
    }
    ```
@@ -93,6 +99,7 @@
 1. OS のアカウントを確かめ、Samba ユーザーを登録する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    id "${USER}"
    sudo smbpasswd -a "${USER}"
    ```
@@ -114,6 +121,7 @@
    ```bash
    {
      sudo systemctl enable --now smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-active smb.service              # active
      ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
    }
@@ -161,6 +169,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -179,6 +188,7 @@
    EOF
      sudo semodule -i /tmp/samba_root_home.cil
      rm /tmp/samba_root_home.cil
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo semodule -l | grep -x samba_root_home   # samba_root_home
    }
    ```
@@ -206,6 +216,7 @@
    ```bash
    {
      sudo sed -i '/^\[root\]$/,/^\[/{/^\[root\]$/d;/^\[/!d}' /etc/samba/smb.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo semodule -r samba_root_home
      sudo systemctl restart smb.service
      testparm -s 2>/dev/null | grep -c '^\[root\]'   # 0
@@ -249,6 +260,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -277,6 +289,7 @@
    {
      sudo sed -i '/^\[home\]$/,/^\[/{/^\[home\]$/d;/^\[/!d}' /etc/samba/smb.conf
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep -c '^\[home\]'   # 0
    }
    ```
@@ -307,12 +320,14 @@
 
    ```bash
    ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
    ```
 
 1. `smbclient` で、共有の一覧と読み書きを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
@@ -327,6 +342,7 @@
    {
      sudo mkdir -p /mnt/smbtest
      sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+     printf '\n\033[7m 確認 \033[0m\n'
      mount | grep cifs                            # vers=3.1.1
      echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
      ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
@@ -346,6 +362,7 @@
 
    ```bash
    rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo ausearch -m AVC -ts today               # <no matches>
    ```
 
@@ -366,6 +383,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
      sudo rm /root/smb-root-test.txt
      sudo ausearch -m AVC -ts recent              # <no matches>
@@ -389,6 +407,7 @@
 1. `/home` も公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -lZ ~/smb-home-test.txt                   # -rw-r--r--. <USER> root … user_home_t
    rm ~/smb-home-test.txt
    sudo ausearch -m AVC -ts recent              # <no matches>
@@ -418,6 +437,7 @@
      sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
    done
    sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
    fi
    ```
@@ -449,6 +469,7 @@
    elif ! grep -q '^\[global\]$' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [global] の行が無い' >&2
    else
      sudo sed -i '/^\[global\]$/a\    smb3 directory leases = no' /etc/samba/smb.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep 'smb3 directory leases'
    fi
    ```
@@ -462,6 +483,7 @@
    ```bash
    {
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-active smb.service              # active
    }
    ```
@@ -474,6 +496,7 @@
    {
      sudo sed -i '/^[[:space:]]*smb3 directory leases = no$/d' /etc/samba/smb.conf
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep -c 'smb3 directory leases'   # 0
    }
    ```

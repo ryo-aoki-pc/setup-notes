@@ -14,6 +14,7 @@
 > - 同じユーザーの[ヘッドレスのセッション](gnome-headless-session.md)とは併用できない。[リモートログイン](gnome-remote-desktop.md)と同じ PC で使うときは、手順 1 でポートが自動で 3390 になる（後からリモートログインを有効にするときは[注意点](extra/gnome-desktop-sharing.md#注意点)）
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: [見るだけにする（任意）](#見るだけにする任意)・[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)。つながらなくなったら[つながらなくなったとき](#つながらなくなったとき)。戻すときは[ロールバック](extra/gnome-desktop-sharing.md#ロールバック)
 - 2026-10-07 に、x86_64 の VirtualBox の VM で、PC の画面を一度も操作せずに通した（[記録](verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）。PC の前でパスワードでログインしていた以前の版の記録（aarch64 の実機と VM を含む）も、同じ検証記録にある
 
@@ -32,6 +33,7 @@
    SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
    SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
    RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER SERVER_IP SERVER_NAME SERVER_FQDN RDP_PORT; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
@@ -45,6 +47,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-enabled sshd.service
      sudo firewall-cmd --permanent --query-service=ssh
      systemctl get-default
@@ -68,6 +71,7 @@
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ] || [ -z "${RDP_PORT}" ]; then echo '中断: USER が空か root、または手順 1 の RDP_PORT が空のまま。共有するユーザーのシェルで手順 1 を貼り直す' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.session idle-delay
      /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
      systemctl is-enabled suspend.target
@@ -106,6 +110,7 @@
 1. 前に入れた RDP の資格情報が残っているときだけ、手順 7 のキーリングの外にあるものを消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 - <<'PY'
    import getpass
    from pathlib import Path
@@ -211,6 +216,7 @@
          echo '中断: 証明書と秘密鍵の公開鍵が一致しない。既存ファイルを確認する' >&2
          exit 1
        fi
+       printf '\n\033[7m 確認 \033[0m\n'
        echo '証明書と秘密鍵の公開鍵: 一致'
        touch ~/.local/state/gnome-desktop-sharing-setup/ready
        ls -l ~/.local/share/gnome-remote-desktop/certificates
@@ -232,6 +238,7 @@
    elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then
      echo '中断: 手順 5 が完了していない。設定は変更しない' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      rm -f ~/.local/state/gnome-desktop-sharing-setup/restored &&
      grdctl rdp set-tls-cert ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt &&
      grdctl rdp set-tls-key ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key &&
@@ -256,6 +263,7 @@
 1. RDP のユーザー名とパスワードを、パスワードの無いキーリングに入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 - <<'PY'
    import getpass
    import sys
@@ -324,6 +332,7 @@
 1. RDP の資格情報が、手順 7 のキーリングにだけあることを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    busctl --user call org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service SearchItems 'a{ss}' 1 xdg:schema org.gnome.RemoteDesktop.RdpCredentials
    RDP_KEYRING=$(cat ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring) &&
    printf '記録したキーリング: %s\n' "${RDP_KEYRING}" &&
@@ -344,6 +353,7 @@
      echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効か起動中。有効にしない' >&2
    else
      grdctl rdp enable
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl --user is-enabled gnome-remote-desktop.service
    fi
    ```
@@ -355,6 +365,7 @@
 
    ```bash
    if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --add-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --reload
    sudo firewall-cmd --list-ports
@@ -366,6 +377,7 @@
 1. GDM の自動ログインを、このユーザーで有効にする。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
    elif grep -qx 'AutomaticLoginEnable=True' /etc/gdm/custom.conf && grep -qx "AutomaticLogin=${USER}" /etc/gdm/custom.conf &&
         [ "$(grep -c '^AutomaticLogin' /etc/gdm/custom.conf)" = 2 ]; then
@@ -387,6 +399,7 @@
    ```bash
    {
      sudo grubby --update-kernel=ALL --args="rd.plymouth=0 plymouth.enable=0"
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo grubby --info=DEFAULT | grep '^args='
    }
    ```
@@ -411,6 +424,7 @@
    elif [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Service -p Active
      busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && echo 'ScreenCast: ok'
      systemctl --user is-active gnome-remote-desktop.service
@@ -464,6 +478,7 @@
    print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
    ts.close()
    PY
+   printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/python3 ~/rdp_tls_probe.py "${SERVER_IP}" "${RDP_PORT}" &&
    grdctl status &&
    openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -fingerprint -sha1
@@ -503,6 +518,7 @@
 
    ```bash
    grdctl rdp enable-view-only
+   printf '\n\033[7m 確認 \033[0m\n'
    grdctl status | grep 'View-only'
    ```
 
@@ -512,6 +528,7 @@
 
    ```bash
    grdctl rdp disable-view-only
+   printf '\n\033[7m 確認 \033[0m\n'
    grdctl status | grep 'View-only'
    ```
 
@@ -534,6 +551,7 @@
 
    ```bash
    if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
    sudo firewall-cmd --reload
@@ -558,6 +576,7 @@
    if [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い。この節の手順 3 を行う' >&2
    else
+     printf '\n\033[7m 確認 \033[0m\n'
      busctl --user call org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver GetActive
      loginctl unlock-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')"
      sleep 2
@@ -574,6 +593,7 @@
      echo '中断: PC の画面にこのユーザーのセッションが無い。この節の手順 3 を行う' >&2
    else
      sudo loginctl activate "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')"
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Active
    fi
    ```

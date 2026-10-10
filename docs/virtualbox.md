@@ -15,11 +15,13 @@
 > - **手順 17 で GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから手順 18 を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: カーネルを更新したときは[カーネルを更新したとき](#カーネルを更新したとき)、以後の VirtualBox の更新は[更新](#更新)、戻すときは[ロールバック](extra/virtualbox.md#ロールバック)
 
 1. この PC に入るかを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    uname -m
    lscpu | grep -E '^Virtualization:' || echo 'CPU の仮想化支援が見えない'
    ```
@@ -32,6 +34,7 @@
 
    ```bash
    curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc -o /tmp/oracle_vbox_2016.asc
+   printf '\n\033[7m 確認 \033[0m\n'
    gpg --show-keys --with-fingerprint /tmp/oracle_vbox_2016.asc
    ```
 
@@ -48,6 +51,7 @@
    ```bash
    {
      sudo rpm --import /tmp/oracle_vbox_2016.asc
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
      rm -f /tmp/oracle_vbox_2016.asc
    }
@@ -69,6 +73,7 @@
    gpgkey=https://www.virtualbox.org/download/oracle_vbox_2016.asc
    EOF
      cat /etc/yum.repos.d/virtualbox.repo
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf makecache --repo virtualbox
    }
    ```
@@ -99,6 +104,7 @@
 1. 動いているカーネルが、入っている中で一番新しいものかを見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    uname -r
    rpm -q --last kernel-core | head -1
    ```
@@ -112,6 +118,7 @@
    ```bash
    {
      sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
      ls -d "/lib/modules/$(uname -r)/build/include"
    }
@@ -135,6 +142,7 @@
 1. `Complete!` だけでは成功とは限らないので、モジュールが動いているか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl is-enabled vboxdrv
    systemctl is-active vboxdrv
    lsmod | grep -E '^vbox'
@@ -151,6 +159,7 @@
    ```bash
    {
      echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/modprobe.d/kvm-virtualbox.conf
      modprobe -c | grep enable_virt_at_load
    }
@@ -164,6 +173,7 @@
    ```bash
    {
      sudo usermod -aG vboxusers "${USER}"
+     printf '\n\033[7m 確認 \033[0m\n'
      getent group vboxusers
    }
    ```
@@ -182,6 +192,7 @@
 1. VirtualBox の版と、モジュールと KVM の状態を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    VBoxManage --version
    systemctl is-active vboxdrv
    lsmod | grep -E '^vbox'
@@ -204,6 +215,7 @@
 1. 使い捨ての VM を画面無しで起動し、状態を見てから止めて消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if VBoxManage showvminfo vbox-selftest >/dev/null 2>&1; then
      echo 'vbox-selftest はすでにある。変更せずに中断する' >&2
    elif VBoxManage createvm --name vbox-selftest --ostype Other_64 --register; then
@@ -256,6 +268,7 @@
 1. 新しいカーネルで起動した後に、モジュールが作り直されたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    uname -r
    systemctl is-active vboxdrv
    modinfo -F vermagic vboxdrv
@@ -312,6 +325,7 @@
 > - **AlmaLinux 10 の前提（EPEL・Secure Boot の MOK の鍵）と KVM の設定は要らない**。Windows のドライバーは、Microsoft の署名付きでインストーラに入っている
 
 - 上から順にコードブロックを貼る。変数は無い
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/virtualbox.md#windows-11-のロールバック)
 - Android の Windows App からリモート デスクトップでつないで VM に打つなら、[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)
 - VM に AlmaLinux の Atomic Desktop を入れて Guest Additions を使うなら、[virtualbox-guest-bootc.md](virtualbox-guest-bootc.md)（Windows のホストでも同じ手順で入った）
@@ -323,6 +337,7 @@
 1. この PC に入るか、今の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      Admin        = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
      Arch         = $env:PROCESSOR_ARCHITECTURE
@@ -354,6 +369,7 @@
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Oracle.VirtualBox --source winget
    & "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" --version
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State, StartMode
@@ -372,6 +388,7 @@
 1. 使い捨ての VM を画面無しで起動し、Hyper-V の上で動くかを見てから止めて消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
    if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
      Write-Error '管理者の PowerShell に貼っている（この節の手順 5 で開いた窓に貼る）'
@@ -478,6 +495,7 @@
 1. VirtualBox が動いていないことと、新しい版があるかを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name VirtualBox, VirtualBoxVM, VBoxHeadless, VBoxSVC -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
    winget list --exact --id Oracle.VirtualBox --source winget
    ```
@@ -499,6 +517,7 @@
 1. 新しい版にしたときだけ、新しい版になったか確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" --version
    winget list --exact --id Oracle.VirtualBox --source winget
    ```

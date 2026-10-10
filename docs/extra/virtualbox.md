@@ -3,6 +3,7 @@
 [手順書](../virtualbox.md)・[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
 
 - 「手順 N」は[手順書](../virtualbox.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -75,6 +76,7 @@
 1. VirtualBox が動いていなければ、winget で消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (Get-Process -Name VirtualBox, VirtualBoxVM, VBoxHeadless, VBoxSVC -ErrorAction SilentlyContinue) {
      Write-Error '中断: VirtualBox が動いている（この節の手順 1 で閉じ、数秒待って貼り直す）'
    } else {
@@ -89,6 +91,7 @@
 1. 消えたか確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Oracle.VirtualBox --source winget
    Test-Path -LiteralPath "$env:ProgramFiles\Oracle\VirtualBox"
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State
@@ -105,6 +108,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\VirtualBox VMs", "$env:USERPROFILE\.VirtualBox" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath "$env:USERPROFILE\VirtualBox VMs", "$env:USERPROFILE\.VirtualBox"
    ```
 

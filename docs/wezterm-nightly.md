@@ -12,6 +12,7 @@
 > - **手順 1 と手順 3 には対話入力がある**（COPR の有効化の `[y/N]` と、COPR の GPG 鍵の取り込み）。答えてから次の手順を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 設定を書く場所と、自分用の設定（`ryo-aoki-pc/wezterm`）への案内は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](extra/wezterm-nightly.md#ロールバック)
 
 1. chroot を明示して、COPR を有効化する。
@@ -44,6 +45,7 @@
 1. WezTerm が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
    dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
    wezterm --version
@@ -59,6 +61,7 @@
 1. ssh などグラフィカルでないシェルから確かめるときだけ、ウィンドウを開いて即終了させる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin \
        WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR="/run/user/$(id -u)" XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=GNOME \
        timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
@@ -107,6 +110,7 @@
    config.font_size = 12
    return config
    LUA
+   printf '\n\033[7m 確認 \033[0m\n'
    wezterm ls-fonts | sed -n '1,5p'     # Primary font に書いたフォントが出れば読めている
    ```
 
@@ -139,6 +143,7 @@
 > - **この節の手順 6 は画面で行う**（スタートメニューから WezTerm を起動する）
 
 - 上から順にコードブロックを貼る。変数は無い（入れる先と URL はブロックに直接書いてある）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 設定ファイルの置き場所と自分用の設定は[設定ファイル](#設定ファイル)。以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/wezterm-nightly.md#windows-11-のロールバック)
 - もう WezTerm が `C:\Program Files\WezTerm` に入っている PC でも、同じ手順で今の nightly に上書きできる
 
@@ -151,6 +156,7 @@
 
    ```powershell
    $u = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      Admin     = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
      Version   = $u.DisplayVersion
@@ -172,6 +178,7 @@
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget install --exact --id Microsoft.VCRedist.2015+.x64 --source winget --scope machine --accept-source-agreements --accept-package-agreements
    Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
    ```
@@ -205,6 +212,7 @@
      $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG=`"$tmp\setup.log`"" -Wait -PassThru
      if ($p.ExitCode -ne 0) { Write-Error "中断: インストーラが終了コード $($p.ExitCode) で終わった（ログは $tmp\setup.log）"; return }
      Remove-Item -LiteralPath $tmp -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0'
      & "$dir\wezterm.exe" --version
    }
@@ -219,6 +227,7 @@
 1. 入ったものと、`PATH`・スタートメニューを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' | Format-List DisplayName, DisplayVersion, InstallLocation, UninstallString
    & 'C:\Program Files\WezTerm\wezterm.exe' --version
    [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -like '*\WezTerm*' }
@@ -261,6 +270,7 @@
 1. 今の版を確かめ、WezTerm が動いていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1').DisplayVersion
    Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
    ```

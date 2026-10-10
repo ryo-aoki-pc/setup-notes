@@ -11,6 +11,7 @@
 > - **手順 5・8・9 には対話入力がある**（トランザクション表の `[y/N]`。手順 8 は EPEL の鍵の確認も）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[AlmaLinux 10 の初期設定の手順 17〜21](almalinux-setup.md#実施手順)（EPEL と RPM Fusion）を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/firefox.md#ロールバック)
 
@@ -19,6 +20,7 @@
    ```bash
    FF_PKG=firefox                  # 本書は最新版（Rapid Release）の firefox だけを扱う。変更しない。<FF_PKG>
    FF_L10N=firefox-l10n-ja         # 日本語 UI の言語パック。要らなければ空にする。<FF_L10N>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in FF_PKG FF_L10N; do printf '%-9s = %s\n' "$v" "${!v}"; done
    ```
 
@@ -43,6 +45,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
      rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
    }
@@ -65,6 +68,7 @@
    gpgkey=https://packages.mozilla.org/rpm/firefox/signing-key.gpg
    priority=10
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      dnf -q list --showduplicates "${FF_PKG}" | tail -6
    }
    ```
@@ -84,6 +88,7 @@
 1. Mozilla 公式のビルドが入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' "${FF_PKG}" ${FF_L10N}
    firefox --version
    rpm -qi "${FF_PKG}" | sed -n '/^Vendor/p;/^Build Date/p'
@@ -101,6 +106,7 @@
 1. [RPM Fusion](almalinux-setup.md#実施手順) を有効にしたホストで、入手できる版を見てから FFmpeg のライブラリを入れる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q list --showduplicates ffmpeg-libs
    sudo dnf install ffmpeg-libs
    ```
@@ -126,6 +132,7 @@
 1. FFmpeg のライブラリが入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' ffmpeg-libs rpmfusion-free-release epel-release
    ls /usr/lib64/libavcodec.so.*
    ```
@@ -163,6 +170,7 @@
 > - **この節の手順 4・5 は画面の操作**（Firefox を起動して確かめる、Windows の設定で既定のブラウザーにする）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `FF_PKG`・`FF_L10N` は AlmaLinux 10 だけで使う）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/firefox.md#windows-11-のロールバック)
 - [Windows 11 の初期設定](windows-setup.md)の後に通す手順書では、[git.md](git.md) の次に通す。後で通す [wezterm-nightly.md](wezterm-nightly.md)・[claude-code.md](claude-code.md) より先に既定のブラウザーにしておくと、Claude Code のログイン（`/login`）が Firefox で開く
 - AAC と H.264 は Windows の機能（Media Foundation）で再生するので、[実施手順](#実施手順)の手順 8〜11（RPM Fusion の FFmpeg）に当たる手順は無い（この節の手順 4 の補足）
@@ -174,6 +182,7 @@
 1. Firefox がまだ入っていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    $arp = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
    Get-ItemProperty -Path $arp -ErrorAction SilentlyContinue | Where-Object DisplayName -like 'Mozilla Firefox*' | Format-Table DisplayName, DisplayVersion, InstallLocation
    Get-AppxPackage -Name 'Mozilla.MozillaFirefox' | Format-Table Name, Version
@@ -187,6 +196,7 @@
 
    ```powershell
    winget install --exact --id Mozilla.Firefox.ja --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Mozilla.Firefox.ja --source winget
    (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo | Format-List FileName, ProductVersion
    Get-Service -Name MozillaMaintenance | Format-Table Name, Status, StartType
@@ -232,6 +242,7 @@
 1. 今の版と、winget に新しい版があるかを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
    winget list --exact --id Mozilla.Firefox.ja --source winget --upgrade-available
    ```
@@ -244,6 +255,7 @@
 
    ```powershell
    winget upgrade --exact --id Mozilla.Firefox.ja --source winget --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
    ```
 

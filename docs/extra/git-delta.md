@@ -3,6 +3,7 @@
 [手順書](../git-delta.md)・[検証記録](../verification/git-delta.md)・[参考資料](../reference/git-delta.md)
 
 - 「手順 N」は[手順書](../git-delta.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -50,6 +51,7 @@
    git config --global --unset core.pager
    git config --global --unset interactive.diffFilter
    git config --global --remove-section delta
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git config --global --get-regexp '^(core\.pager|interactive\.difffilter|delta\.)'
    ```
 
@@ -68,6 +70,7 @@
 1. scoop で delta を消す。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop uninstall delta
    (Get-Command delta -All -ErrorAction SilentlyContinue).Source
    ```

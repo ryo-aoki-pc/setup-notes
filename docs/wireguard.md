@@ -13,6 +13,7 @@
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
 - 手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](extra/wireguard.md#全部消すロールバック)
 
 > [!WARNING]
@@ -48,6 +49,7 @@
 1. 両拠点の WG ホストで、`wireguard-tools` を入れて鍵ペアを作る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env keygen A        # 拠点 B のホストでは B
    ```
@@ -203,6 +205,7 @@
 1. 登録簿を表示し、削除対象の名前・拠点・IP・公開鍵を控える。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?この節の手順 1 の REPO が空のまま}/scripts/wireguard" &&
    ./wg-vpn.sh -e ~/wg/site.env client list
    ```
@@ -214,6 +217,7 @@
 1. 登録を消し、通常の dry-run で既存 conf に残る公開鍵を確認する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${CLIENT_NAME}" ] || [ -z "${SITE}" ]; then echo '中断: この節の手順 1 を貼り直す' >&2; else
      sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME}" &&
      sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply "${SITE}"
@@ -247,6 +251,7 @@
 1. 登録簿と動作中の peer から、削除対象の公開鍵が消えたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ./wg-vpn.sh -e ~/wg/site.env client list &&
    sudo wg show wg0 peers
    ```
@@ -284,6 +289,7 @@
    ```
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}"
    ```

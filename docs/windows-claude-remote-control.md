@@ -13,6 +13,7 @@
 > - **手順 4 には対話入力がある**（ディレクトリの信頼のダイアログと、初回の Remote Control の確認。URL が出たら Ctrl+C）
 
 - 上から順にコードブロックを貼る。手順 2 で変数を設定した PowerShell に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後に、止めるとき・もう一度始めるときは[止める・もう一度始める](#止めるもう一度始める)、全部消すときは[ロールバック](extra/windows-claude-remote-control.md#ロールバック)
 
 > [!WARNING]
@@ -33,6 +34,7 @@
 
    ```powershell
    $RC_NAME = if ($PROJECT_DIR) { Split-Path $PROJECT_DIR -Leaf }   # claude.ai/code とアプリに出るセッション名（既定はディレクトリ名）。<RC_NAME>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
    'RC_NAME     = {0}' -f $RC_NAME
    ```
@@ -44,6 +46,7 @@
 1. Claude Code・WezTerm・ログインと、デスクトップのセッションを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude --version
    claude auth status --text
    & 'C:\Program Files\WezTerm\wezterm.exe' --version
@@ -89,6 +92,7 @@
      $action = New-ScheduledTaskAction -Execute $wt -Argument $arg
      $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive
      $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Register-ScheduledTask -TaskName 'claude-remote-control' -Action $action -Principal $principal -Settings $settings -Force | Format-List TaskName, State
    }
    ```
@@ -100,6 +104,7 @@
    ```powershell
    Start-ScheduledTask -TaskName 'claude-remote-control'
    Start-Sleep -Seconds 8
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId, ParentProcessId | Format-Table -AutoSize
    ```
@@ -127,6 +132,7 @@
 1. 必要なら SSH でログインし直し、タスクとプロセスが残っていることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
@@ -145,6 +151,7 @@
 
    ```powershell
    Stop-ScheduledTask -TaskName 'claude-remote-control'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
 

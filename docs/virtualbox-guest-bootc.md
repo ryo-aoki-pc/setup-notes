@@ -13,6 +13,7 @@
 > - **VM がホストオンリーアダプターだけで、インターネットに出られないときは、手順 6 の代わりに[ホストオンリーアダプターだけの VM でビルドする（任意）](#ホストオンリーアダプターだけの-vm-でビルドする任意)を行う**（ホストでビルドし、イメージを ssh で VM に運ぶ。Secure Boot の鍵も、その節でホストで作る）
 
 - 手順 1 の変数を設定したシェルで、上から順にコードブロックを貼る。新しい端末を開いたら手順 1 を貼り直す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 共有フォルダーは[共有フォルダーを使う（任意）](#共有フォルダーを使う任意)、OS やホストの VirtualBox を上げたときは[更新](#更新)、戻すときは[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)
 - **切り替えた後は、`sudo bootc upgrade` だけでは OS が上がらない**（[更新](#更新)の手順でビルドし直す）
 - ホストは AlmaLinux 10 でも Windows 11 でもよい
@@ -40,6 +41,7 @@
 1. VirtualBox の VM で bootc のシステムが動いているかと、空き容量を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemd-detect-virt
    df -h /var
    sudo bootc status
@@ -130,6 +132,7 @@
 
    RUN bootc container lint
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -l ~/vbox-ga-image
    ```
 
@@ -147,6 +150,7 @@
 
    ```bash
    install -m 0644 /run/media/"${USER}"/VBox_GAs_*/VBoxLinuxAdditions.run ~/vbox-ga-image/
+   printf '\n\033[7m 確認 \033[0m\n'
    sh ~/vbox-ga-image/VBoxLinuxAdditions.run --check
    sh ~/vbox-ga-image/VBoxLinuxAdditions.run --info | head -1
    ```
@@ -163,6 +167,7 @@
    if mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; then
      build_args+=(--build-arg MOK_SIGN=1 --secret id=mok_priv,src=/var/lib/shim-signed/mok/MOK.priv --secret id=mok_der,src=/var/lib/shim-signed/mok/MOK.der)
    fi
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-image
    ```
 
@@ -195,6 +200,7 @@
 1. Guest Additions が動いているか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    lsmod | grep -E '^vbox'
    systemctl is-active vboxadd vboxadd-service
    pgrep -a VBoxClient
@@ -268,6 +274,7 @@
        mkdir -m 0700 -p ~/vbox-ga-mok
        openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=Local kernel module signing key/" -days 36500 -keyout ~/vbox-ga-mok/MOK.priv -out ~/vbox-ga-mok/MOK.der
      fi
+     printf '\n\033[7m 確認 \033[0m\n'
      ls -l ~/vbox-ga-mok
      scp ~/vbox-ga-mok/MOK.der "${VM_SSH}:"
    fi
@@ -286,6 +293,7 @@
      sudo install -d -m 0700 /var/lib/shim-signed/mok
      sudo install -m 0644 ~/MOK.der /var/lib/shim-signed/mok/MOK.der
      rm ~/MOK.der
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -l /var/lib/shim-signed/mok
      sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
    }
@@ -306,6 +314,7 @@
      echo 'VM_SSH が空のまま。この節の手順 2 を貼り直す' >&2
    else
      mkdir -p ~/vbox-ga-host
+     printf '\n\033[7m 確認 \033[0m\n'
      ssh "${VM_SSH}" 'tar -cf - vbox-ga-image -C / etc/containers/policy.json etc/containers/registries.d etc/pki/containers' | tar -xvf - -C ~/vbox-ga-host
    fi
    ```
@@ -334,6 +343,7 @@
         cp -r ~/vbox-ga-host/containers-config-created/registries.d ~/.config/containers/ &&
         cp ~/vbox-ga-host/containers-config-created/policy.json ~/.config/containers/ &&
         touch ~/vbox-ga-host/containers-config-created/.ready; then
+     printf '\n\033[7m 確認 \033[0m\n'
      podman image trust show
    else
      echo '設定のコピーに失敗した。次へ進まず、この節の手順 11 で残ったファイルを確認する' >&2
@@ -353,6 +363,7 @@
    if [ -e ~/vbox-ga-mok/MOK.priv ]; then
      build_args+=(--build-arg MOK_SIGN=1 --secret "id=mok_priv,src=${HOME}/vbox-ga-mok/MOK.priv" --secret "id=mok_der,src=${HOME}/vbox-ga-mok/MOK.der")
    fi
+   printf '\n\033[7m 確認 \033[0m\n'
    podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-host/vbox-ga-image
    ```
 
@@ -368,6 +379,7 @@
      echo 'VM_SSH か BASE_IMAGE が空のまま。手順 1 とこの節の手順 2 を貼り直す' >&2
    else
      rm -f ~/vbox-ga-host/vbox-ga.tar
+     printf '\n\033[7m 確認 \033[0m\n'
      podman save -m -o ~/vbox-ga-host/vbox-ga.tar localhost/vbox-ga:latest "${BASE_IMAGE}" && ls -lh ~/vbox-ga-host/vbox-ga.tar && scp ~/vbox-ga-host/vbox-ga.tar "${VM_SSH}:"
      rm -f ~/vbox-ga-host/vbox-ga.tar
    fi
@@ -381,6 +393,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo podman load -i ~/vbox-ga.tar
      rm ~/vbox-ga.tar
      sudo podman images
@@ -422,6 +435,7 @@
        fi
      done
      if [ "$vbox_config_matches" = 1 ]; then
+       printf '\n\033[7m 確認 \033[0m\n'
        rm -rf ~/.config/containers/policy.json ~/.config/containers/registries.d ~/.config/containers/pki &&
        rm -rf ~/vbox-ga-host &&
        podman rmi localhost/vbox-ga:latest "${BASE_IMAGE}"
@@ -468,6 +482,7 @@
 1. グループと共有フォルダーを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    id -nG | tr ' ' '\n' | grep -x vboxsf
    findmnt -t vboxsf
    ```

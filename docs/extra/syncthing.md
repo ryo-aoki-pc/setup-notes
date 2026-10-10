@@ -3,6 +3,7 @@
 [手順書](../syncthing.md)・[検証記録](../verification/syncthing.md)・[参考資料](../reference/syncthing.md)
 
 - 「手順 N」は[手順書](../syncthing.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
@@ -60,6 +61,7 @@
      for ($i = 0; $i -lt 30 -and (Get-Process -Name syncthing -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
    }
    Unregister-ScheduledTask -TaskName 'Syncthing' -Confirm:$false -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name syncthing -ErrorAction SilentlyContinue | Format-Table Id
    Get-ScheduledTask -TaskName 'Syncthing' -ErrorAction SilentlyContinue
    ```
@@ -71,6 +73,7 @@
    ```powershell
    Remove-NetFirewallRule -Group 'Syncthing (setup-notes)' -ErrorAction SilentlyContinue
    Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe' | Get-NetFirewallRule | Remove-NetFirewallRule
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe'
    ```
 
@@ -80,6 +83,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\Programs\Syncthing" -Recurse -Force
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:LOCALAPPDATA\Programs\Syncthing"
    ```
 
@@ -93,6 +97,7 @@
 
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\Syncthing" -Recurse -Force
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:LOCALAPPDATA\Syncthing"
    ```
 

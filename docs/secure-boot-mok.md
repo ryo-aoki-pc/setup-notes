@@ -11,6 +11,7 @@
 > - **手順 6 は、起動の途中の MokManager の画面で行う**（最初の画面は 10 秒で消える。VM なら VM のウィンドウで操作する）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[ロールバック](extra/secure-boot-mok.md#ロールバック)
 - 通すと使えるようになるもの（この鍵で署名したモジュールが、Secure Boot のまま読み込まれる）:
   - [VirtualBox](virtualbox.md) のホストのモジュール（`vboxdrv` など）
@@ -48,6 +49,7 @@
    if sudo test -e /var/lib/shim-signed/mok/MOK.der; then echo '中断: 鍵が既にある。作り直さずに、手順 7 で登録を確かめる' >&2; else
      sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
      sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=Local kernel module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -l /var/lib/shim-signed/mok
      sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
    fi

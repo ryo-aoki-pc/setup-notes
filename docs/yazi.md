@@ -13,12 +13,14 @@
 > - **手順 4 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 設定を書く場所と、自分用の設定（`ryo-aoki-pc/yazi`）への案内は[設定ファイル](#設定ファイル)。以後は[更新](#更新)・[ロールバック](extra/yazi.md#ロールバック)
 
 1. 変数を設定する。
 
    ```bash
    YAZI_EXTRAS="ffmpeg-full sevenzip jq poppler fd ripgrep fzf resvg imagemagick-full font-symbols-only-nerd-font"   # プレビューと検索に使う。空にすると yazi 本体だけ
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'YAZI_EXTRAS = %s\n' "${YAZI_EXTRAS}"
    ```
 
@@ -39,6 +41,7 @@
 
    ```bash
    . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
    type -t y
    ```
 
@@ -47,6 +50,7 @@
 1. yazi が入ったか確かめ、`y` で起動する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    yazi --version
    ya --version
    brew list --versions yazi
@@ -113,6 +117,7 @@
 > - **この節の手順 7 で WezTerm の Git Bash のタブを開き、手順 8 の `bash` のブロックはそこに貼る**。手順 8 と手順 9 で yazi の画面（TUI）が開く。`q` で閉じてから、ほかのブロックを貼る
 
 - この節の手順 2 で変数を設定した PowerShell に、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 自分用の設定（`ryo-aoki-pc/yazi`）はファイルを Neovim で開くので、先に [Neovim の Windows 11 で使う](neovim.md#windows-11-で使う)を通しておく
   - 上流の既定の設定では、Windows でファイルを開くエディタは VS Code の `code`（Windows の yazi は `EDITOR` を見ない。[参考資料](reference/yazi.md#windows-11-では-選択した方針)）
 - zoxide（`Z` キー）を使うなら [Windows 11 の初期設定のシェルのツールを入れる（任意）](windows-setup.md#シェルのツールを入れる任意)で入れる（zoxide は 0.9.9 に止める。この節の `$YAZI_EXTRAS` には入れていない）
@@ -130,6 +135,7 @@
 
    ```powershell
    $YAZI_EXTRAS = @('ffmpeg', '7zip', 'jq', 'poppler', 'fd', 'ripgrep', 'fzf', 'resvg', 'imagemagick')   # プレビューと検索に使う。@() にすると yazi 本体だけ
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'YAZI_EXTRAS = {0}' -f ($YAZI_EXTRAS -join ' ')
    ```
 
@@ -142,6 +148,7 @@
 1. 管理者ではないことと、scoop・`file.exe`・VC++ のランタイム・ほかの yazi・設定を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell  = $PSVersionTable.PSVersion.ToString()
      Admin       = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -179,6 +186,7 @@
    if (-not (Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe')) { Write-Error '中断: C:\Program Files\Git\usr\bin\file.exe が無い（git.md の Windows 11 で Git for Windows を入れる）' } else {
      [Environment]::SetEnvironmentVariable('YAZI_FILE_ONE', 'C:\Program Files\Git\usr\bin\file.exe', 'User')
      $env:YAZI_FILE_ONE = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      'YAZI_FILE_ONE = {0}' -f $env:YAZI_FILE_ONE
    }
    ```
@@ -190,6 +198,7 @@
 1. 版と、yazi から見た環境を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    yazi --version
    ya --version
    ya env
@@ -215,6 +224,7 @@
 1. WezTerm（自分用の設定）と Git Bash の共通の bash 設定を入れたときだけ、そのタブで `y` を確かめ、yazi を開く。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    type -t y
    y
    ```
@@ -247,6 +257,7 @@
 1. yazi をすべて閉じてから、scoop で上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update yazi
    yazi --version

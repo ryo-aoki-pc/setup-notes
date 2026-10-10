@@ -13,11 +13,13 @@
 > - **ログアウト中も同期するなら、PC を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](extra/dropbox.md#ロールバック)
 
 1. この PC で公式クライアントが動くかを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    uname -m
    stat -f -c %T "${HOME}"
    df -h "${HOME}"
@@ -32,6 +34,7 @@
 
    ```bash
    curl -fsSL https://linux.dropbox.com/fedora/rpm-public-key.asc -o /tmp/dropbox-key.asc
+   printf '\n\033[7m 確認 \033[0m\n'
    gpg --show-keys --with-fingerprint /tmp/dropbox-key.asc
    ```
 
@@ -46,6 +49,7 @@
 
    ```bash
    DBX_URL=$(curl -fsS -o /dev/null -w '%{redirect_url}' 'https://www.dropbox.com/download?plat=lnx.x86_64')
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "${DBX_URL}"
    curl -fL -o /tmp/dropbox-lnx.tar.gz "${DBX_URL:?URL を取れなかった。この手順を貼り直す}"
    curl -fsSL -o /tmp/dropbox-lnx.tar.gz.asc "${DBX_URL}.asc"
@@ -60,6 +64,7 @@
 1. 展開した版を確かめ、落としたファイルを消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls ~/.dropbox-dist
    du -sh ~/.dropbox-dist
    rm -f /tmp/dropbox-lnx.tar.gz /tmp/dropbox-lnx.tar.gz.asc /tmp/dropbox-key.asc /tmp/dropbox-key.gpg
@@ -74,6 +79,7 @@
    mkdir -p ~/.local/bin
    curl -fsSL -o ~/.local/bin/dropbox https://linux.dropbox.com/packages/dropbox.py
    chmod +x ~/.local/bin/dropbox
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v dropbox
    dropbox version
    ```
@@ -100,6 +106,7 @@
    WantedBy=default.target
    EOF
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user enable --now dropbox.service
    systemctl --user is-enabled dropbox.service   # enabled
    systemctl --user is-active dropbox.service    # active
@@ -112,6 +119,7 @@
 
    ```bash
    sleep 30
+   printf '\n\033[7m 確認 \033[0m\n'
    dropbox status
    ```
 
@@ -127,6 +135,7 @@
 1. 同期が始まったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dropbox status
    ls ~/Dropbox
    journalctl --user -u dropbox.service -n 20 --no-pager

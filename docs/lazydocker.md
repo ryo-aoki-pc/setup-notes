@@ -12,6 +12,7 @@
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後:
   - 画面からコンテナのシェルを開くなら[podman exec でシェルを開く（任意）](#podman-exec-でシェルを開く任意)、compose のサービスを見るなら[compose のプロジェクトを見る（任意）](#compose-のプロジェクトを見る任意)
   - root のコンテナ（`sudo podman` で動かしたもの）も見るなら[root でも使う（任意）](#root-でも使う任意)
@@ -29,6 +30,7 @@
 1. lazydocker が入ったことと、つなぐ先を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    lazydocker --version
    command -v lazydocker
    echo "${DOCKER_HOST}"
@@ -44,6 +46,7 @@
 
    ```bash
    podman run -d --name lazydocker-web --label name=lazydocker-web registry.access.redhat.com/ubi10/httpd-24:latest
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
    ```
 
@@ -65,6 +68,7 @@
 1. 確認用のコンテナが止まったことと、設定ファイルができたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps -a --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
    ls -l ~/.config/lazydocker
    ```
@@ -97,6 +101,7 @@
          attach: true
          command: 'podman exec -it {{ .Container.ID }} sh'
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    cat ~/.config/lazydocker/config.yml
    ```
 
@@ -131,6 +136,7 @@
    commandTemplates:
      dockerCompose: podman-compose
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    cat ~/.config/lazydocker/config.yml
    ```
 
@@ -155,6 +161,7 @@
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose ps --format '{{.Names}} {{.Status}}'
    ```
 
@@ -185,6 +192,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl enable --now podman.socket
      systemctl is-active podman.socket
      sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
@@ -209,6 +217,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
      sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
    }
@@ -232,6 +241,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
      sudo ls -l /root/.config/lazydocker
    }
@@ -263,6 +273,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl disable --now podman.socket
      systemctl is-active podman.socket
    }

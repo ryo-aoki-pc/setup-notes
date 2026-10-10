@@ -11,6 +11,7 @@
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/npm-offline.md#ロールバック)
 
 > [!WARNING]
@@ -31,6 +32,7 @@
 1. Node.js と npm を確かめ、npm にトンネルを使わせて、レジストリに届くか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    node --version
    npm --version
    command -v node npm
@@ -72,6 +74,7 @@
 1. オフラインのホストで、トンネルが無くても Mason の npm のパッケージが動き、npm が外に出られないことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    env | grep -i _proxy
    ls ~/.local/share/nvim/mason/bin
    ~/.local/share/nvim/mason/bin/markdownlint-cli2 --help | head -n 1

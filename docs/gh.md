@@ -10,6 +10,7 @@
 > - **手順 2 と手順 3 には対話入力がある**（手順 2 は署名鍵の取り込みの確認が 2 回、手順 3 は `gh auth login` の対話）。手順 3 は、手順 4 のブラウザでの認証を終えてから次の手順を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/gh.md#ロールバック)
 
 1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
@@ -17,6 +18,7 @@
    ```bash
    {
      sudo dnf install -y 'dnf-command(config-manager)'
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
      cat /etc/yum.repos.d/gh-cli.repo
    }
@@ -57,6 +59,7 @@
 1. 認証できたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    gh auth status
    gh --version
    ```
@@ -88,6 +91,7 @@
 > - **この節の手順 4 には対話入力があり、この節の手順 5 は既定のブラウザで行う**（`gh auth login` の問いと、ブラウザでの認証）。`gh auth login` が終わってから、この節の手順 6 を貼る
 
 - この節の手順 1 で開いた PowerShell に、上から順にコードブロックを貼る。変数は無い
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/gh.md#windows-11-のロールバック)
 - Git Bash（WezTerm のタブ）・PowerShell 7・cmd の gh も、同じ設定（`%APPDATA%\GitHub CLI`）と同じログインを使う。`~/.bashrc` と PowerShell のプロファイルには何も足さない（gh の補完も入れない。[参考資料](reference/gh.md#windows-11-では-選択した方針)）
 - WSL の AlmaLinux 10 の gh は、WSL の中で[実施手順](#実施手順)を通して別に入れる（ログインも別）
@@ -101,6 +105,7 @@
 1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
      PowerShell = $PSVersionTable.PSVersion.ToString()
      Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -121,6 +126,7 @@
 1. scoop で gh を入れ、版と場所を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop install gh
    gh --version
    (Get-Command gh -All).Source
@@ -159,6 +165,7 @@
 1. ログインできたことと、Git の資格情報のヘルパーが変わっていないことを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    gh auth status
    git config --get-regexp '^credential\..*helper$'
    ```
@@ -181,6 +188,7 @@
 1. scoop で gh を上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update gh
    gh --version

@@ -10,6 +10,7 @@
 > - **自分のユーザーでログインしたシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルや、`sudo -iu <ユーザー>` で切り替えたシェルでは行わない（コンテナを自分のユーザーで動かすため。`sudo -iu` のシェルには `XDG_RUNTIME_DIR` が無く、手順 7 の `systemctl --user` が失敗する）
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: [lazydocker](lazydocker.md) など Docker の API を使うツールから使うなら[Docker 向けのツールから使う（任意）](#docker-向けのツールから使う任意)、コンテナを常駐させるなら[Quadlet で自動起動する（任意）](#quadlet-で自動起動する任意)。日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman.md#ロールバック)
 - 通すと使えるようになるもの: [distrobox](distrobox.md)、[podman-compose](podman-compose.md)、[hadolint / dive / Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[Forgejo](forgejo.md)、[ツール一覧の CLI: コンテナ](tool-catalog.md#cli-コンテナ)の行
 
@@ -31,6 +32,7 @@
 1. 自分のユーザーに、rootless 用の UID・GID の範囲（subuid / subgid）があるか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    for f in /etc/subuid /etc/subgid; do
      grep -H "^${USER}:" "$f" || printf '%s: 自分の割り当てが無い\n' "$f"
    done
@@ -53,6 +55,7 @@
      fi
      if [ "${#SUBID_ARGS[@]}" -eq 0 ]; then echo '両方とも割り当て済み'
      else
+       printf '\n\033[7m 確認 \033[0m\n'
        sudo usermod "${SUBID_ARGS[@]}" "${USER}" &&
        podman system migrate &&
        grep -H "^${USER}:" /etc/subuid /etc/subgid
@@ -66,6 +69,7 @@
 1. 自分のユーザーで動く設定になっているか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman version --format '{{.Client.Version}}'
    command -v podman
    podman info --format '{{.Host.Security.Rootless}} {{.Store.GraphDriverName}} {{.Host.OCIRuntime.Name}} {{.Host.NetworkBackend}} {{.Host.RootlessNetworkCmd}} {{.Host.CgroupsVersion}}'
@@ -79,6 +83,7 @@
 1. イメージを完全な名前で指定して、コンテナを 1 つ動かす。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman run --rm quay.io/podman/hello
    podman images
    ```
@@ -90,6 +95,7 @@
 1. API ソケットを有効にして、応答を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user enable --now podman.socket
    systemctl --user is-active podman.socket
    curl -s --unix-socket "${XDG_RUNTIME_DIR}/podman/podman.sock" http://d/_ping; echo
@@ -110,6 +116,7 @@
 
    ```bash
    . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
    printf '%s\n' "${DOCKER_HOST-}"
    curl -s --unix-socket "${DOCKER_HOST#unix://}" http://d/version | grep -o '"Name":"Podman Engine"'
    ```
@@ -157,6 +164,7 @@
    ```bash
    systemctl --user daemon-reload
    systemctl --user start hello-web.service
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user is-active hello-web.service
    systemctl --user is-enabled hello-web.service
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8080/
@@ -178,6 +186,7 @@
 1. 再起動の後、ログインより前にサービスが起動していたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show hello-web.service -p ActiveEnterTimestamp
    loginctl show-session "${XDG_SESSION_ID}" -p Timestamp
    curl -s http://127.0.0.1:8080/
@@ -225,6 +234,7 @@
 1. Quadlet の節を通したときだけ、新しいイメージがあるか見てから当てる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman auto-update --dry-run
    podman auto-update
    ```
