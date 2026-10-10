@@ -75,7 +75,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 ### 回線に合わせて MTU を下げる（任意） / 手順 4: 補足: ip link で先に下げる
 
 - `ip link set` は、動いている `wg0` の MTU だけを変える。トンネルは張ったままで、作業中の ssh も切れない（実機で確かめた）
-- `wg0.conf` には書かれない。`wg-quick@wg0` の restart と OS の再起動では、conf の `MTU =`（無ければ wg-quick が決める値）になる
+- `wg0.conf` には書かれない。`wg-quick@wg0` の restart と OS の再起動では、conf の `MTU =`（無ければ wg-quick が決める値）になる（restart は、実機の `apply` で確かめた。OS の再起動は確かめていない）
 - 張ってある TCP の接続も、その後に送る分は小さいセグメントになる（実機の拠点間の接続で確かめた）
 
 ### 回線に合わせて MTU を下げる（任意） / 手順 7: 補足: ping の大きさ
