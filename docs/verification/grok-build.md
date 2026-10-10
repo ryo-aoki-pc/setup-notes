@@ -8,6 +8,7 @@
 - 既存ユーザー `<USER>` の Grok 1.0.50 と Codex 0.160.0 は更新せず、既存認証を利用する確認を分けて実施した。初回ログイン・ブラウザでの承認・デバイスコード認証の操作そのものを通した記録ではない。
 - 検証後は専用ユーザーの CLI 状態・ユーザー・ホームを撤去し、OS の RPM 一覧が実施前と同じことを確認した。Windows 11 の実行、X Premium（Plus でない）での利用、認証済みユーザーのログアウトは今回も未確認。
 - sandbox の追加調査では、Podman のソケット親ディレクトリの検索権限と、カーネルで Landlock が未有効であることを別々の原因として確認した。Landlock を有効にする Image のビルドと 7 項目の静的検査、検索権限だけを与える ACL の模擬試験は成功した。ユーザーの指示により実機への適用・再起動・再検証は行わず、調査と準備までで終了した。Grok の sandbox レビューの失敗は未解消（[対処の準備結果](#sandbox-の追加原因調査と対処の準備)）。
+- 同日の再起動なしの追加検証では、実ホストの `/run/podman` に検索だけの ACL を約 2 分適用し、errno 13 の解消と、一覧・作成の拒否、元の状態への復元を確認した。起動時のシステムコールの追跡で、`read-only` は Podman のソケットの確認（`EACCES`）、`workspace` は `landlock_create_ruleset` の `ENOSYS` で止まることを特定した。Landlock が有効なカーネルでの起動は今回も行っておらず、sandbox が起動した状態は未確認のまま（[再起動なしの追加検証](#sandbox-の再起動なしの追加検証)）。
 
 以下の「対象と検証環境」と 2026-10-09 の付録は過去の記録を保持したものです。その中の「実機・aarch64 未確認」は当時の状態を表します。
 
@@ -268,3 +269,46 @@
 - ACL は専用の模擬ディレクトリとソケットで検証した。指定したユーザー UID に、親ディレクトリへの検索権限 `--x` だけを access ACL で与えた。パスの解決は成功し、ディレクトリの一覧・書き込みと root 所有のソケットへの接続は拒否された。ソケットの `0660` は変わらず、default ACL も無い。これら 6 項目がすべて成功した。
 - 実ホストの `/run/podman` への ACL の永続適用は、自動承認レビューが、root が管理するコンテナ用パスへの変更には明示的な承認が必要として拒否した。実ホストへは適用していない。模擬試験の成功を、実機の Grok の起動成功とは扱わない。
 - 通常起動の設定・`kernel8.img`・`initramfs8` を保持し、別名の Image と 1 回限りの `tryboot` を使う適用・復旧スクリプトを準備した。ユーザーの指示により、今回の対処は実ホストに適用せず、調査と準備までで終了した。ACL の永続適用・Image の適用・再起動・レビューの再検証は実施していない。Landlock が有効なカーネルでの起動、sandbox の再試行、プロジェクトへの書き込み拒否と Grok のレビュー成功は未確認で、Grok の sandbox レビューの失敗は未解消のまま。
+
+### sandbox の再起動なしの追加検証
+
+- setup-notes #119 のマージ後（`cf8774d`）、同じ実機・同じ稼働カーネル・Grok 1.0.50 のまま、ユーザーの指示で再起動を伴わない範囲だけを確かめた（2026-10-10 05:35〜06:10 UTC）。Landlock を有効にした Image の適用と再起動、ACL の永続化は今回も行っていない。
+- どの実行も `--no-auto-update` を付けた。sandbox の準備で終了コード 1 になり、モデルへの依頼まで進んでいない。
+- SELinux は Enforcing で、起動以降の監査ログに Grok・bubblewrap に関する拒否は無かった（[共同作業の検証記録](coding-agents.md#selinux-の記録の訂正)）。
+- 起動時のシステムコールを `strace -f` で追い、Landlock の 3 つのシステムコール・パスを調べるシステムコール・`execve` だけを記録した。
+
+| プロファイル | `/run/podman` | `/run/docker.sock` | `/run/podman/podman.sock` | `landlock_create_ruleset` | 標準エラー |
+|---|---|---|---|---|---|
+| `read-only` | 元のまま（root 所有の `0700`） | `ENOENT` | `EACCES` | 呼ばれない | `could not resolve runtime-socket deny path /run/podman/podman.sock: Permission denied (os error 13)` |
+| `workspace` | 元のまま | 調べない | 調べない | `ENOSYS`（6 回） | `could not apply the 'workspace' sandbox profile; see the warning above for the cause. Refusing to start with its protections missing.` |
+| `read-only` | 検索の ACL を適用中 | `ENOENT` | `ENOENT` | `ENOSYS`（6 回） | `could not apply the 'read-only' sandbox profile; …`（上と同じ形） |
+| `workspace` | 検索の ACL を適用中 | 調べない | 調べない | `ENOSYS`（6 回） | 適用前と同じ |
+
+- `read-only` は、Docker と Podman の rootful のソケットを起動時に調べる。`/run/podman` を検索できないと、Landlock の適用より前に止まる。
+- `workspace` は、この 2 つのソケットを調べない。先の付録で「`read-only` と同じ原因か断定しない」とした `workspace` の失敗は、errno 13 ではなく、Landlock が無いこと（`ENOSYS`）による。
+- 検索の ACL を適用した後は、どちらのプロファイルも `/usr/bin/bwrap` の起動まで進み、その後の `landlock_create_ruleset` の `ENOSYS` で止まった。`landlock_add_rule` と `landlock_restrict_self` は 4 回の実行のどれでも呼ばれていない。
+- エラーの文は `see the warning above` と案内するが、`workspace` の実行では、標準エラー・`--debug`・`RUST_LOG=warn`・`~/.grok/logs/unified.jsonl` のどこにもその警告は無かった。原因は上の追跡で確かめた。
+- Landlock のエラーで起動を拒否した実行は、`~/.grok/` に空で mode `000` の `sandbox-blocked.<PID>` を 1 個ずつ残した（9 回の実行で 9 個）。errno 13 で止まった 3 回の実行は残さなかった。
+
+### 検索の ACL の実ホストへの一時適用
+
+- `acl` のパッケージはこのホストに入っていない。先の調査で取得していた公式の `acl-2.4.0-1.el10_2.aarch64.rpm` は `rpm -K` が `digests signatures OK`、展開済みの `getfacl`・`setfacl` の SHA-256 は RPM の記録と一致したので、このコマンドを使った。OS の RPM は増やしていない。
+- 適用の前に、`/run/podman` が root 所有・`0700`・空で、拡張の ACL が無く、`podman.socket`・`podman.service` が inactive であることを確かめた。
+- `setfacl -m u:<UID>:--x,m::--x /run/podman` を適用した。`getfacl` は `user:<UID>:--x`・`group::---`・`mask::--x`・`other::---` で、default ACL は無い。`stat` の mode は `0710`（`drwx--x---+`）と表示された（グループの欄は mask を表す）。
+- 実ディレクトリに対して、`<USER>` で次を確かめた。ソケットは作っていない。
+
+| 確認 | 結果 |
+|---|---|
+| `/run/podman/podman.sock` のパスの解決 | `ENOENT`（`EACCES` ではなくなった） |
+| ディレクトリの一覧 | `EACCES` |
+| ファイルの作成 | `EACCES` |
+| ディレクトリの作成 | `EACCES` |
+| ソケットへの接続 | `ENOENT`（ソケットが無い） |
+
+- root から見て、ディレクトリは空のまま。ソケットがあるときの接続の拒否と、ソケットの mode が変わらないことは、実ホストでは確かめていない（先の模擬試験の範囲）。
+- 適用していたのは約 2 分（06:02:09〜06:03:57 UTC）。`setfacl -b` で外した後、mode・ACL・一覧（mtime を含む）・2 つの unit の状態は適用前の控えと一致し、`read-only` の errno 13 も元どおり再現した。tmpfiles などでの永続化はしていない。
+
+### 再起動なしの追加検証の片付けと残る未確認
+
+- 片付け: `--trust` が `~/.grok/trusted_folders.toml` に足した試験用フォルダー 1 件と、今回の実行が残した `sandbox-blocked.<PID>` 9 個を消した（先の検証の 1 個は残した）。`config.toml` と `trusted_folders.toml` のハッシュ、版（1.0.50）、ログインの状態は実施前と同じ。
+- 未確認のまま: Landlock が有効なカーネルでの起動、sandbox が起動した状態でのレビュー・プロジェクトへの書き込みの拒否・`workspace` でのコミット、検索の ACL の永続化。Grok の sandbox レビューの失敗は未解消のまま。

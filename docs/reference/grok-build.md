@@ -85,6 +85,7 @@
 - Linux のファイルアクセス制限には Landlock が要る。カーネルの版が 5.13 以降でも、`CONFIG_SECURITY_LANDLOCK=y` で組み込まれ、起動中のカーネルで有効になっている必要がある。`/sys/kernel/security/lsm` に `landlock` があることを確かめる
 - bubblewrap は、拒否するパスの遮蔽などに使う。bubblewrap があることだけでは `read-only` の書き込み制限が効くと判断しない
 - `runtime-socket deny path /run/podman/podman.sock` の `Permission denied (os error 13)` は、ソケット本体に限らず、親ディレクトリを検索できないときも出る。Podman が停止し、ソケットが存在しなくても、親の検索権限が無ければ失敗する。親ディレクトリの検索権限を確かめ、ソケット本体の権限は緩めない
+- `read-only` は起動時に `/run/docker.sock` と `/run/podman/podman.sock` を調べるが、`workspace` は調べない。`workspace` が `could not apply the 'workspace' sandbox profile` で止まるときは、ソケットの親ではなく Landlock の側を確かめる（Grok 1.0.50 の起動時のシステムコールを実機で追った。[検証記録](../verification/grok-build.md#sandbox-の再起動なしの追加検証)）
 - 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](../verification/grok-build.md#sandbox-の追加原因調査と対処の準備)に分けた。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
 
 ### 注意点: 会話のデータの扱い
