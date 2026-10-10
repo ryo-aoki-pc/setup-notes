@@ -667,7 +667,7 @@
    - `<LAN_IF>  Private` と、3 つの規則が `True  Private  Inbound  Allow` で出ればよい
    - `中断:` が出たら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート) でプライベートにしてから、この手順を貼り直す
    - 何度貼ってもよい
-   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 の補足）
+   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows 11 の初期設定の「OpenSSH サーバー」の手順 3](windows-setup.md#openssh-サーバー)の補足）
 
 1. サインインしたときに Syncthing を起動するタスクを登録する。
 

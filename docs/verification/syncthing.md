@@ -185,7 +185,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 
 - 全体を `& { … }` で囲み、確かめられなかったら `return` でそこで止める（後ろの行を動かさない）
 - 最新の版は、`releases/latest/download/sha256sum.txt.asc`（最新のリリースへ飛ぶ）の中の zip の名前から取る。版を調べるための別の問い合わせ（GitHub の API）はしない
-- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 7 の補足と同じ理由）
+- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[Windows の OpenSSH サーバー](windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)の手順 7 の補足と同じ理由）
 - `curl.exe` で取ったファイルには、ブラウザで取ったときのような「インターネットから来た」印（Mark of the Web）が付かないので、SmartScreen の確認は出ないはず（確かめていない）
 - `%PROCESSOR_ARCHITECTURE%` が `AMD64` なら `amd64`、`ARM64` なら `arm64` の zip を取る。arm64 の版は試していない
 
@@ -295,7 +295,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の実機記録は 25H2） |
+| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の実機記録は 25H2） |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | Syncthing | 2.1.5（2026-09-08。`syncthing-windows-amd64-v2.1.5.zip`） |
@@ -364,7 +364,7 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
 - **Windows 11 でも GUI は LAN に公開した**（AlmaLinux 10 と同じく、認証 → 起動 → 待ち受けを広げる順）
   - この PC からだけ開くなら、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
 - **ネットワークをプライベートにするのは、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート)**
-  - もとは [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
+  - もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
   - そのため、[Windows 11 のロールバック](../extra/syncthing.md#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
 
 - このホストは GNOME も入っていて、LAN 内の別 PC から触りたいので公開する方を採った

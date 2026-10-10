@@ -33,11 +33,11 @@
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11 Pro（Enterprise・Education でもよい。Home は RDP でつながれる側になれない）。24H2 以降を想定（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の PC は 25H2・26H2） |
+| OS | Windows 11 Pro（Enterprise・Education でもよい。Home は RDP でつながれる側になれない）。24H2 以降を想定（[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の PC は 25H2・26H2） |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員。PC にサインインしているのと同じユーザーで、RDP でつなぐ |
 | RDP のクライアント | どれでもよい（Windows の「リモート デスクトップ接続」、Windows App、Remmina など） |
-| 確かめに使う SSH | [Windows の OpenSSH サーバー](../windows-openssh-server.md)（無ければ PC の前で画面を見る） |
+| 確かめに使う SSH | [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)（無ければ PC の前で画面を見る） |
 
 > [!NOTE]
 > この手順書には変数が無い。コマンドはそのまま貼って実行できる。

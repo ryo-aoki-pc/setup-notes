@@ -1068,7 +1068,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 - ファイルは `[IO.File]::WriteAllText` で ASCII（BOM 無し）で書く。Windows PowerShell 5.1 の `>` と `Out-File` は UTF-16 で書く
 - `$priv | & $wg pubkey` は、末尾に CR LF を付けて ASCII で送る（Windows PowerShell 5.1 のパイプ）。`wg pubkey` は鍵の 44 文字の後ろの空白（CR と LF を含む）を読み飛ばす（wireguard-tools のソースの `pubkey.c` と `ctype.h`。Linux の `wg` で、CR LF 付きの入力から同じ公開鍵が出た。[付録](#road-warrior-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
 - `wg genkey` / `wg pubkey` は、トンネルのドライバー無しで動く
-- アクセス権は、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の `administrators_authorized_keys` と同じ考え方で、`/inheritance:r` で `C:\Users\<WIN_USER>` から受け継ぐ自分のユーザーの許可を外し、Administrators（`S-1-5-32-544`）と SYSTEM（`S-1-5-18`）だけにする。管理者ではない窓（UAC で権限を落としたもの）で動くプログラムからは読めない
+- アクセス権は、[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の `administrators_authorized_keys` と同じ考え方で、`/inheritance:r` で `C:\Users\<WIN_USER>` から受け継ぐ自分のユーザーの許可を外し、Administrators（`S-1-5-32-544`）と SYSTEM（`S-1-5-18`）だけにする。管理者ではない窓（UAC で権限を落としたもの）で動くプログラムからは読めない
 - 管理者の PowerShell で作ったフォルダーの所有者は `BUILTIN\Administrators` になる
 
 #### Road Warrior: Windows 11 で使う / Windows 11 で WG ホストに登録して取り込む / 手順 3: 補足: conf と秘密鍵
@@ -1488,7 +1488,7 @@ Installers:
 
 #### Road Warrior: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
 
-Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた（[hackgen.md](../hackgen.md) の付録と同じ環境）。この付録の手順は、どれも[Windows 11 で使う](../wireguard.md#windows-11-で使う)のもの。
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた（[hackgen.md](windows-setup.md#統合前の記録-hackgen-console-nf-の-windows-11もとは-hackgenmd) の付録と同じ環境）。この付録の手順は、どれも[Windows 11 で使う](../wireguard.md#windows-11-で使う)のもの。
 
 **構文と Windows PowerShell 5.1 との互換**:
 

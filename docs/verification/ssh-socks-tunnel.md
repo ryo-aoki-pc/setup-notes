@@ -70,7 +70,7 @@ curl: (97) Could not resolve host: github.com
 
 ### dnf にもトンネルを使わせる（任意） / 手順 1: 補足: dnf のプロキシ
 
-**`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](gh.md#実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
+**`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](almalinux-setup.md#github-cli-実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
 
 - `[main]` の行の直後に 1 行足す。AlmaLinux の `/etc/dnf/dnf.conf` は `[main]` の節だけ
 - `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)で元に戻せなくなるため

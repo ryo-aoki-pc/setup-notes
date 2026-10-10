@@ -481,7 +481,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - 取り込みだけではトンネルは張られない（NetworkManager の `import` と違う）
 - **Windows 11 のファイアウォールとネットワークの種類は変えない**
   - PC 側で開けるものは無い（外向きの UDP は既定で通る）。WireGuard は自分のパケットを通す規則を自分で足す
-  - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows の OpenSSH サーバー](../windows-openssh-server.md)など）が、拠点からトンネル越しに届くようになる
+  - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)など）が、拠点からトンネル越しに届くようになる
   - 拠点から PC への ping（[トンネルを確かめる](../wireguard.md#トンネルを確かめる)の手順 3 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
 - **Windows 11 ではキルスイッチは出ない**: `AllowedIPs` に `/0` が無いので、窓の編集の「トンネルを通らないトラフィックのブロック（キルスイッチ）」は出ず、ファイアウォールの制限も掛からない（WireGuard の文書の「Network Configuration Quirks」）。全トラフィックを通す構成は、AlmaLinux 10 と同じく対象外
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[クライアントを登録する](../wireguard.md#クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../wireguard.md#トンネルを確かめる)の手順 3 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う

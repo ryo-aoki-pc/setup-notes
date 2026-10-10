@@ -7,9 +7,9 @@
 > [!IMPORTANT]
 > - **Windows 11 は、[Windows 11 で使う](#windows-11-で使う)から始める**
 > - この節は AlmaLinux 10 の bash に、自分のユーザーで貼る
-> - 前提: [Claude Code](claude-code.md)・[Codex CLI](codex.md)・[Grok Build](grok-build.md) を入れて、それぞれログインしてある。Git は [git.md](git.md) で設定してある（`init.defaultBranch` が `main`）
+> - 前提: [AlmaLinux 10 の初期設定](almalinux-setup.md)の[Git](almalinux-setup.md#git)と、[Claude Code](almalinux-setup.md#claude-code)から[Codex・Grok のプラグイン](almalinux-setup.md#codexgrok-のプラグイン)までを通し、3 つのエージェントにログインしてある（`init.defaultBranch` が `main`。2 つのプラグインと、それが使う Node.js・bubblewrap も入っている）
 > - 前提: 共同作業させるプロジェクトが git のリポジトリで、基準のブランチが `main`（ほかの名前のときの読み替えは[参考資料](reference/coding-agents.md#main-でないブランチを基準にするとき)）
-> - **手順 11 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
+> - **手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -46,9 +46,9 @@
    ```
 
    - 3 つの版が出る
-   - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [codex.md 手順 5](codex.md#実施手順) から）
-   - `grok models` に `You are not authenticated.` が出ない（出たら [grok-build.md 手順 4](grok-build.md#実施手順) から）
-   - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [claude-code.md 手順 5](claude-code.md#実施手順)）
+   - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [AlmaLinux 10 の初期設定の「Codex CLI」の手順 5](almalinux-setup.md#codex-cli) から）
+   - `grok models` に `You are not authenticated.` が出ない（出たら [AlmaLinux 10 の初期設定の「Grok Build」の手順 4](almalinux-setup.md#grok-build) から）
+   - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [AlmaLinux 10 の初期設定の「Claude Code」の手順 5](almalinux-setup.md#claude-code)）
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
 
@@ -159,40 +159,7 @@
 
    - Claude と Codex が、「起動された worktree の中だけ」という趣旨の 1 行を答える。「分からない」と答えたら、手順 4・5 のファイルと手順 6 のコミットを確かめる
    - Grok は `Project trusted: yes` と、`AGENTS.md (project, …)`・`CLAUDE.md (project, …)` の行が出る
-   - Codex が `could not find bubblewrap on PATH` と警告しても、同梱のものを使って動く（手順 9 で bubblewrap を入れると出なくなる）
-
-1. Node.js と bubblewrap を入れる（プラグインと sandbox が使う）。
-
-   ```bash
-   {
-     sudo dnf install -y nodejs bubblewrap
-     printf '\n\033[7m 確認 \033[0m\n'
-     node --version
-     bwrap --version
-   }
-   ```
-
-   - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る）
-   - Grok の sandbox には、Landlock が有効な Linux カーネルも要る。`CONFIG_SECURITY_LANDLOCK` が無効なら、対応するカーネルで起動してから再試行する。カーネルの版が新しいだけでは、この条件を満たさない
-   - `runtime-socket deny path /run/podman/podman.sock` と `Permission denied (os error 13)` が出たら、Grok のレビューは未実行（bubblewrap があっても起動しない）
-   - このエラーでは、管理者がソケットの親ディレクトリの検索権限を確認する。ソケット自体のアクセス権は緩めない。検索権限を直しても、Landlock が無効なら sandbox の保護は成立しない
-   - このエラーでは[相互にレビューする](#相互にレビューする)の代替へ進む
-   - GNOME のデスクトップの PC には、Flatpak の依存として bubblewrap がもう入っている（`Package bubblewrap-… is already installed.`）
-
-1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   claude plugin marketplace add openai/codex-plugin-cc
-   claude plugin marketplace add xai-org/grok-build-plugin-cc
-   claude plugin install codex@openai-codex
-   claude plugin install grok-build@xai-grok-build
-   claude plugin list
-   ```
-
-   - `✔ Successfully added marketplace: openai-codex` と `xai-grok-build`、`✔ Successfully installed plugin: …（scope: user）` が 2 つ出る
-   - 最後の一覧に、`codex@openai-codex` と `grok-build@xai-grok-build` が `Status: ✔ enabled` で出る
-   - 動いている Claude Code には、起動し直すまで効かない
+   - Codex が `could not find bubblewrap on PATH` と警告しても、同梱のものを使って動く（[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](almalinux-setup.md#codexgrok-のプラグイン)の手順 1 で bubblewrap を入れると出なくなる）
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
 
@@ -201,7 +168,7 @@
    ```
 
    - 信頼のダイアログが出たら、`claude` の worktree であることを確かめて信頼する
-   - `/codex:setup` と入力する。Codex の版と、`loggedIn` が `true` であることを確かめる。npm で Codex を入れるかを聞かれたら `Skip for now` を選ぶ（[codex.md](codex.md) で入れた Codex が PATH に無い。Claude Code を終えて手順 2 から確かめる）
+   - `/codex:setup` と入力する。Codex の版と、`loggedIn` が `true` であることを確かめる。npm で Codex を入れるかを聞かれたら `Skip for now` を選ぶ（[Codex CLI](almalinux-setup.md#codex-cli)で入れた Codex が PATH に無い。Claude Code を終えて手順 2 から確かめる）
    - `/codex:setup --enable-review-gate`（終わるたびに Codex のレビューを待つ設定）は使わない（[注意点](extra/coding-agents.md#注意点)）
    - `/grok-build:check` と入力する。Node と `grok` の版が出る。**ログインしていなくても ready と出る**ので、Grok のログインは手順 2 の `grok models` で確かめる
    - `/exit` で終える
@@ -308,7 +275,7 @@
    claude
    ```
 
-   - 初めての worktree では信頼のダイアログが出る（実施手順の手順 11 で信頼してあれば出ない）
+   - 初めての worktree では信頼のダイアログが出る（実施手順の手順 9 で信頼してあれば出ない）
    - 頼んだら、その窓は Claude Code に任せる。Claude Code の確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える
 
 1. `codex` の worktree の窓で Codex を起動し、担当の作業を頼む。
@@ -505,33 +472,8 @@
 ## 更新
 
 - Windows 11 は [Windows 11 の更新](#windows-11-の更新)へ進む
-- Claude Code・Codex・Grok Build 自身は、それぞれの手順書の「更新」（[claude-code.md](claude-code.md#更新)・[codex.md](codex.md#更新)・[grok-build.md](grok-build.md#更新)）
-
-1. Node.js を上げる。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo dnf upgrade -y nodejs
-     node --version
-   }
-   ```
-
-   - 上げるものが無ければ `Nothing to do.` と出る
-
-1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   claude plugin marketplace update openai-codex
-   claude plugin marketplace update xai-grok-build
-   claude plugin update codex@openai-codex
-   claude plugin update grok-build@xai-grok-build
-   claude plugin list
-   ```
-
-   - `✔ Successfully updated marketplace: …` が 2 つと、`✔ … updated …` か `✔ … is already at the latest version (…)` が 2 つ出る
-   - 上がったプラグインは、Claude Code を起動し直すまで効かない（Remote Control も止めてから始め直す）
+- Claude Code・Codex・Grok Build と 2 つのプラグインは、[AlmaLinux 10 の初期設定の更新](almalinux-setup.md#更新)で上げる（プラグインは、その手順 9）。Node.js は OS の更新で上がる
+- この手順書で足した AGENTS.md・CLAUDE.md・worktree は、上げるものが無い。規則を変えたときは[main に取り込む](#main-に取り込む)の手順 7 で各 worktree をそろえる
 
 ---
 
@@ -539,9 +481,9 @@
 
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
-> - 前提: [Claude Code](claude-code.md#windows-11-で使う)・[Codex CLI](codex.md#windows-11-で使う)・[Grok Build](grok-build.md#windows-11-で使う) の Windows 11 の節で入れて、それぞれログインしてある。Git は [git.md の Windows 11 の節](git.md#windows-11-で-git-for-windows-を入れる)
+> - 前提: [Windows 11 の初期設定](windows-setup.md)の[Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)と、[Claude Code](windows-setup.md#claude-code)から[Codex・Grok のプラグイン](windows-setup.md#codexgrok-のプラグイン)までを通し、3 つのエージェントにログインしてある
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）と、「アプリを入れる」の手順 1・2（scoop）
-> - **この節の手順 12 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
+> - **この節の手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定した PowerShell に貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -683,71 +625,19 @@
    - 見方は、[実施手順](#実施手順)の手順 8 と同じ
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
 
-1. Node.js 18.18 以上が無いときだけ、scoop で入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Command node -All -ErrorAction SilentlyContinue
-   scoop install nodejs-lts
-   ```
-
-   - 1 行目にパスが出て、`node --version` が `v18.18` 以上なら、2 行目は貼らない
-   - `'nodejs-lts' (…) was installed successfully!` が出ればよい
-
-1. PowerShell を閉じ、スタートメニューから開き直す。
-
-   - 開き直した窓で `node --version` が通ることを確かめる
-   - **次の手順は、この節の手順 1 の 2 つのブロックを貼り直してから貼る**
-
-1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   claude plugin marketplace add openai/codex-plugin-cc
-   claude plugin marketplace add xai-org/grok-build-plugin-cc
-   claude plugin install codex@openai-codex
-   claude plugin install grok-build@xai-grok-build
-   claude plugin list
-   ```
-
-   - 見方は、[実施手順](#実施手順)の手順 10 と同じ
-
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else { Set-Location -LiteralPath "$WT_ROOT\claude"; claude }
    ```
 
-   - 確かめることは、[実施手順](#実施手順)の手順 11 と同じ
-   - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、この節の手順 10 を確かめる
+   - 確かめることは、[実施手順](#実施手順)の手順 9 と同じ
+   - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、[Windows 11 の初期設定の「Codex・Grok のプラグイン」](windows-setup.md#codexgrok-のプラグイン)の手順 1・2 を確かめる
    - **後ろの節のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
 
 ---
 
 ## Windows 11 の更新
 
-- Claude Code・Codex・Grok Build 自身は、それぞれの手順書の Windows 11 の更新
-
-1. Node.js を上げる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop update nodejs-lts
-   node --version
-   ```
-
-   - 上げるものが無ければ `Latest versions for all apps are installed!`（か `… is already installed`）と出る
-   - Node.js をほかの方法で入れていたら、その方法で上げる
-
-1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   claude plugin marketplace update openai-codex
-   claude plugin marketplace update xai-grok-build
-   claude plugin update codex@openai-codex
-   claude plugin update grok-build@xai-grok-build
-   claude plugin list
-   ```
-
-   - 見方は、[更新](#更新)の手順 2 と同じ
+- Claude Code・Codex・Grok Build と 2 つのプラグインは、[Windows 11 の初期設定の「AI エージェントとプラグインを上げる」](windows-setup.md#ai-エージェントとプラグインを上げる)で上げる。Node.js（scoop）は、同書の[「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)の手順 1・2 で上がる
+- 規則を変えたときは、AlmaLinux 10 と同じく[main に取り込む](#main-に取り込む)の手順 7 で各 worktree をそろえる

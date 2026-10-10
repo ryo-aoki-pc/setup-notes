@@ -35,7 +35,7 @@
 
 - **コマンド名が `gdu-go`**: これが最大の引っかかりどころ。`gdu` と打って `command not found` になったら、まず `command -v gdu-go` を見る
 - **エイリアスの確認に `type -t` は使えない**: bash は非対話シェルでエイリアスを展開しないため、`type -t gdu` はエイリアスを見つけられない（`alias gdu` なら確認できる）
-  - 関数を定義する [zoxide](../almalinux-setup.md#実施手順) / [yazi](../yazi.md) の `y()` は、この制約を受けない
+  - 関数を定義する [zoxide](../almalinux-setup.md#実施手順) / [yazi](../almalinux-setup.md#yazi) の `y()` は、この制約を受けない
 - **EPEL 版と同時に入れると版が 2 つ並ぶ**: 名前が違う（`/usr/bin/gdu` と `gdu-go`）ので上書きされず、**共存してしまう**
   - `gdu` と打つと EPEL の 5.32.0、`gdu-go` と打つと Homebrew の 5.37.0 という状態になる
   - どちらか片方にする

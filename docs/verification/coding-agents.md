@@ -4,6 +4,8 @@
 
 ## 対象と検証環境
 
+- **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../windows-setup.md#codexgrok-のプラグイン)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
+
 - **状態（2026-10-10 UTC）**: AlmaLinux 10.2 / aarch64 の Raspberry Pi 5 の実機で、ログイン済みの CLI と専用の一時リポジトリを使って検証した。PR #117 のマージコミット `814b590` を対象に、操作を個別に実施した。手順書のコードブロックを抽出して一括実行していない
   - 確認したこと: 3 つの CLI が担当ファイルだけを実装すること。各担当の受入テストと ShellCheck、Claude・Grok のコミット、Codex の sandbox の `git add` 拒否を人のコミットへ引き継ぐこと。人が main に取り込んだ後の 8 テストと各 worktree の同期
   - 確認したこと: 実際の Claude Code の対話画面での `/codex:setup`・`/grok-build:check`。Codex のプラグインの review が既知の欠陥 2 件を検出し、前後のファイルのハッシュと git の状態が変わらないこと。rescue が依頼した `ports.py` だけを修正し、担当テストが通ること
@@ -29,7 +31,7 @@
 | 項目 | 値 |
 |---|---|
 | 実施日 | 2026-10-09 UTC |
-| コンテナ | クラウドの Linux の Docker 29.8.2 の上の `almalinux:10`（AlmaLinux 10.2 (Lavender Lion)、x86_64、digest `sha256:838c2fafefb1a8a0d7f8cdbc3b0551c2a2b1eb0cd87aad6d62aecadb18311f1b`）。一般ユーザー（`SHELL=/bin/bash`、umask 0022）、git の設定は [git.md](../git.md) の手順 2〜5 と同じ値 |
+| コンテナ | クラウドの Linux の Docker 29.8.2 の上の `almalinux:10`（AlmaLinux 10.2 (Lavender Lion)、x86_64、digest `sha256:838c2fafefb1a8a0d7f8cdbc3b0551c2a2b1eb0cd87aad6d62aecadb18311f1b`）。一般ユーザー（`SHELL=/bin/bash`、umask 0022）、git の設定は [git.md](../almalinux-setup.md#git) の手順 2〜5（今の AlmaLinux 10 の初期設定の「Git」の手順 2〜4）と同じ値 |
 | CLI | Claude Code 2.1.295（公式 dnf リポジトリの `latest`）、Codex CLI 0.162.0（standalone のインストーラー）、Grok Build 1.0.50。どれもログインしていない |
 | ほかのもの | git 2.52.0-1.el10、tmux 3.3a（BaseOS）、Node.js 22.23.2-3.el10_2 と nodejs-npm 10.9.8（AppStream） |
 | プラグイン | `codex@openai-codex` 1.0.6、`grok-build@xai-grok-build` 0.2.1 |
@@ -274,7 +276,7 @@
 ### 更新・撤去と今回の対象外
 
 - 2 つの追加した marketplace と user scope のプラグインは、名前を指定して更新した。4 コマンドは終了コード 0。同じ版の確認で、無関係な marketplace は更新していない
-- CLI の新規導入、更新、PATH と撤去は今回だけの native ユーザーで実施した。[Grok Build の今回の付録](grok-build.md#付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)と [Codex の今回の付録](codex.md#付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)に、実端末の更新と検証補助の失敗を分けて記録する
+- CLI の新規導入、更新、PATH と撤去は今回だけの native ユーザーで実施した。[Grok Build の今回の付録](almalinux-setup.md#grok-build-付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)と [Codex の今回の付録](almalinux-setup.md#codex-cli-付録-raspberry-pi-5--aarch64-実機での検証2026-10-10)に、実端末の更新と検証補助の失敗を分けて記録する
 - スマートフォンの Remote Control・SSH と、スマートフォンからのプラグインのコマンド、Windows 11 は今回の対象外
 - 各プランの使用量を使った。使用量は元に戻せない。初回のログイン手続き・サーバー側の推論停止・Grok の実行中ジョブの停止は今回の成功範囲に含めない
 
@@ -339,7 +341,7 @@
 
 ### Grok の sandbox の原因の切り分けと検索の ACL
 
-- 起動時のシステムコールの追跡と、実ホストへの ACL の一時適用の詳細は [Grok Build の検証記録](grok-build.md#sandbox-の再起動なしの追加検証)に置く。ここには結果だけを書く
+- 起動時のシステムコールの追跡と、実ホストへの ACL の一時適用の詳細は [Grok Build の検証記録](almalinux-setup.md#grok-build-sandbox-の再起動なしの追加検証)に置く。ここには結果だけを書く
 - `read-only` は `/run/podman/podman.sock` の確認が `EACCES` で止まり、Landlock まで進まない。`workspace` は Podman と Docker のソケットを調べず、`landlock_create_ruleset` の `ENOSYS` で止まる。先に「同じ原因か断定しない」とした 2 つの失敗は、最初に当たる原因が別だった
 - 実ホストの `/run/podman` に、`<USER>` に検索だけを許す ACL を約 2 分適用した。`read-only` の errno 13 は解消し、`workspace` と同じ Landlock のエラーに変わった。ディレクトリの一覧と作成は拒否されたまま。外した後は、適用前の mode・ACL・一覧と一致した
 - ACL の適用中に、プラグインの `review` と `critique` を `--wait --base main --json` で呼んだ。どちらも終了コード 1 で、`grok.stderr` は `could not apply the 'read-only' sandbox profile; … Refusing to start with its protections missing.`。先の errno 13 ではなくなったが、レビューは始まらない。試験用のリポジトリの HEAD・git の状態・全ファイルのハッシュは前後で同じ

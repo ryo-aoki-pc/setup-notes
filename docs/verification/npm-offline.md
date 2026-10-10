@@ -43,7 +43,7 @@ Complete!
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした（homebrew-offline.md と同じ形）
   - Mason を使う設定は、上流の [LazyVim/starter](https://github.com/LazyVim/starter) に、LazyVim の extra の `lang.json` と `lang.markdown` を足したもの。自分用の設定（LazyVimStarter）では確かめていない
-  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](../npm-offline.md#更新)、[ロールバック](../extra/npm-offline.md#ロールバック)を通した
+  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1（今の AlmaLinux 10 の初期設定の「Neovim」の手順 1）、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](../npm-offline.md#更新)、[ロールバック](../extra/npm-offline.md#ロールバック)を通した
   - 貼り方はブラケットペースト無し。手順 1 とロールバックの手順 1 は、ブラケットペースト有りでも通した
   - このクラウドの出口からは Mason のパッケージの一覧の版を調べる先（api.mason-registry.dev）に届かなかったので、検証のときだけ、オンラインのホストのその名前をセッションのプロキシへ中継した（[付録](#付録-コンテナでの検証記録2026-09-30)）
   - 確認したこと:

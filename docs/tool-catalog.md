@@ -32,12 +32,12 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | BaseOS / AppStream | 既定で有効 | 古めで固定。例: tmux 3.3a、jq 1.7.1、Firefox は ESR 140 | 調べた範囲では x86_64 と同じ版 | — | — |
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
 | EPEL 10 | [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)。`sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
-| RPM Fusion（EL10） | 本書では有効にしていない。free は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5](almalinux-setup.md#epel-と-rpm-fusion) で、鍵を照合してから `rpmfusion-free-release` を入れる（EPEL が前提） | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[firefox.md](firefox.md)（`ffmpeg-libs`） |
-| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[firefox.md](firefox.md)、[gh.md](gh.md)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md)、[image-tools.md](image-tools.md)（Trivy） |
-| COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit.md](lazygit.md)、[wezterm-nightly.md](wezterm-nightly.md)、[AlmaLinux 10 の初期設定の検証記録](verification/almalinux-setup.md#zoxide-付録-dnf-の経路のコンテナでの検証記録2026-09-29)（zoxide の外した dnf の経路の記録） |
+| RPM Fusion（EL10） | 本書では有効にしていない。free は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5](almalinux-setup.md#epel-と-rpm-fusion) で、鍵を照合してから `rpmfusion-free-release` を入れる（EPEL が前提） | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[初期設定の「Firefox」](almalinux-setup.md#firefox)（`ffmpeg-libs`） |
+| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[初期設定の「Firefox」](almalinux-setup.md#firefox)、[初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)、[vscode.md](vscode.md)、[virtualbox.md](virtualbox.md)、[image-tools.md](image-tools.md)（Trivy） |
+| COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit の注意点](extra/almalinux-setup.md#注意点)（COPR の経路）、[初期設定の「WezTerm」](almalinux-setup.md#wezterm)、[AlmaLinux 10 の初期設定の検証記録](verification/almalinux-setup.md#zoxide-付録-dnf-の経路のコンテナでの検証記録2026-09-29)（zoxide の外した dnf の経路の記録） |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | 導入・更新などの管理操作は一般ユーザーで行う。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[注意点](#注意点) |
 | Flathub | [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
-| AppImage | ダウンロードして実行 | 上流の最新 | 配布次第 | FUSE2（`fuse-libs`）と glibc 2.39 の制約がある | [wezterm-nightly.md](wezterm-nightly.md) |
+| AppImage | ダウンロードして実行 | 上流の最新 | 配布次第 | FUSE2（`fuse-libs`）と glibc 2.39 の制約がある | [初期設定の「WezTerm」](almalinux-setup.md#wezterm) |
 
 ## 選び方
 
@@ -50,7 +50,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
    - Homebrew の podman と skopeo は、設定を `/etc/containers` ではなく `/home/linuxbrew/.linuxbrew/etc/containers` から読む（formula の定義）
    - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui.md](podman-tui.md) の選択した方針）
 
-**GUI** は、次の順で選んだ。[Firefox](firefox.md) と [VS Code](vscode.md) を RPM にした判断と同じ。
+**GUI** は、次の順で選んだ。[Firefox](almalinux-setup.md#firefox) と [VS Code](vscode.md) を RPM にした判断と同じ。
 
 1. ベンダーの公式 dnf リポジトリ（x86_64 と aarch64 の両方にあるもの）
 1. AppStream / EPEL（Flathub との版の差がパッチ版までのもの）
@@ -68,20 +68,20 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Homebrew 本体 | 公式インストーラ | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Homebrew」の手順 1〜3） |
 | Flatpak / Flathub | AppStream + Flathub | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Flatpak と Flathub」の手順 1〜3） |
 | starship / zoxide / fzf / eza / bat / tmux | Homebrew（初期化は共通の bash 設定） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「シェルのツール」の手順 1） |
-| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](yazi.md) / [lazygit](lazygit.md) / [Neovim](neovim.md) / [git-delta](git-delta.md) / [gdu](gdu.md) / [ShellCheck・shfmt](shellcheck.md) |
+| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](almalinux-setup.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](gdu.md) / [ShellCheck・shfmt](shellcheck.md) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](syncthing.md) |
 | Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](dropbox.md) |
 | rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](dropbox-rclone.md) |
 | btop | EPEL | [btop.md](btop.md) |
-| Firefox | Mozilla 公式 dnf リポジトリ | [firefox.md](firefox.md) |
-| Claude Code / GitHub CLI | 公式 dnf リポジトリ | [claude-code.md](claude-code.md) / [gh.md](gh.md) |
-| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [codex.md](codex.md) |
-| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [grok-build.md](grok-build.md) |
+| Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
+| Claude Code / GitHub CLI | 公式 dnf リポジトリ | [初期設定の「Claude Code」](almalinux-setup.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
+| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [初期設定の「Codex CLI」](almalinux-setup.md#codex-cli) |
+| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [初期設定の「Grok Build」](almalinux-setup.md#grok-build) |
 | Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [coding-agents.md](coding-agents.md) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](vscode.md) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](virtualbox.md) |
-| WezTerm Nightly | COPR（EL9 向けビルドの流用） | [wezterm-nightly.md](wezterm-nightly.md) |
-| HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [hackgen.md](hackgen.md) |
+| WezTerm Nightly | COPR（EL9 向けビルドの流用） | [初期設定の「WezTerm」](almalinux-setup.md#wezterm) |
+| HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [初期設定の「HackGen Console NF」](almalinux-setup.md#hackgen-console-nf) |
 | IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「日本語入力」の手順 1・2） |
 | Podman | AppStream（自分のユーザーで動かす rootless） | [podman.md](podman.md) |
 | distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](distrobox.md) / [podman-compose](podman-compose.md) / [podman-tui](podman-tui.md) |

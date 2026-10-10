@@ -91,7 +91,7 @@ oniguruma
     - トンネルを張る前は、オフラインのホストから外の名前を引けず、IP アドレスでもつながらない
     - トンネル越しに、dnf（homebrew.md の手順 1 の 73 パッケージを含む）、Homebrew のインストーラ、`brew install`、`brew update` が通る
     - トンネルを閉じた後も jq が動き、外には届かない
-    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](../almalinux-setup.md) の手順 1〜3、[hackgen.md](../hackgen.md) の手順 1〜5。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
+    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](../almalinux-setup.md) の手順 1〜3、[hackgen.md](../almalinux-setup.md#hackgen-console-nf) の手順 1〜5（今の AlmaLinux 10 の初期設定の「HackGen Console NF」の手順 1〜5）。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
     - 1080 番がふさがっているときと、sshd が転送を禁じている（`AllowTcpForwarding no`）ときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること
     - `sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること、トンネルが無いときの dnf と brew の失敗の出方
   - **確認していないこと**: 実機（x86_64 の PC・Raspberry Pi 5）、aarch64、SELinux が Enforcing のホスト（コンテナに SELinux が無い）、IPv6、パスワード認証（検証は鍵認証）、Windows・macOS の ssh、長い導入の途中で ssh が切れたとき、homebrew.md のロールバック

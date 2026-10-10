@@ -41,7 +41,7 @@
 - [New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)（`-ExecutionTimeLimit`、`-MultipleInstances`）
 - [Avoid killing child processes by sshd after session ended · PowerShell/Win32-OpenSSH #1642](https://github.com/PowerShell/Win32-OpenSSH/issues/1642)（SSH の切断でセッションのプロセスが止まること）
 - [Windows implementation issues · zellij-org/zellij #4745](https://github.com/zellij-org/zellij/issues/4745)（zellij の Windows 版の既知の問題）
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md)（前提。SSH のセッションの権限、`DefaultShell`）
+- [Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)（前提。SSH のセッションの権限。`DefaultShell` は同書の任意節）
 - [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)（RDP で使った後、デスクトップのセッションを `console` に戻して切る）
 
 ---

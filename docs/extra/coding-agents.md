@@ -8,7 +8,8 @@
 ## ロールバック
 
 - Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)へ進む
-- この節では、worktree・ブランチ・プラグイン・Node.js を外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、この節の手順 7）
+- この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、この節の手順 5）
+- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AlmaLinux 10 の初期設定のロールバックの「AI エージェントとプラグインを消す」](almalinux-setup.md#ai-エージェントとプラグインを消す)の手順 1 と、「端末とエディタを消す」の手順 5
 - 実施手順の手順 1 の変数を設定したシェルで行う
 
 > [!CAUTION]
@@ -76,31 +77,6 @@
    - （この節の手順 3 の代わりに）最後の一覧が `[main]` の 1 行だけになればよい
    - この節の手順 3 で消えたものは `is not a working tree`・`not found` と出る（そのままでよい）
 
-1. 2 つのプラグインとマーケットプレイスを外す。
-
-   ```bash
-   claude plugin uninstall codex@openai-codex
-   claude plugin uninstall grok-build@xai-grok-build
-   claude plugin marketplace remove openai-codex
-   claude plugin marketplace remove xai-grok-build
-   printf '\n\033[7m 確認 \033[0m\n'
-   claude plugin list
-   ```
-
-   - 最後の一覧に、2 つのプラグインが出なければよい
-   - プラグインのデータ（`~/.claude/plugins/data/` の下）も消える
-
-1. ほかに使うものが無いときだけ、Node.js を外す。
-
-   ```bash
-   sudo dnf remove nodejs nodejs-npm
-   ```
-
-   - [npm-offline.md](../npm-offline.md) や Neovim の Mason で Node.js を使っているなら、外さない
-   - bubblewrap は外さない（Flatpak と GNOME のデスクトップも使う）
-   - トランザクション表の `Removing:` に `nodejs` と `nodejs-npm`、`Removing unused dependencies:` に一緒に入った `nodejs-libs`・`libuv` などが出る。ほかに使っているパッケージが出たら `N` で止める。よければ `y` と答える
-   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
-
 1. 要るときだけ、AGENTS.md の規則と CLAUDE.md の取り込みの行を消す。
 
    - エディタで、AGENTS.md の「## 共同作業の規則」の節と、CLAUDE.md の `@AGENTS.md` の行を消し、`main` にコミットする
@@ -110,7 +86,8 @@
 
 ## Windows 11 のロールバック
 
-- この節では、worktree・ブランチ・プラグイン・Node.js を外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、[ロールバック](#ロールバック)の手順 7 と同じ）
+- この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、[ロールバック](#ロールバック)の手順 5 と同じ）
+- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[Windows 11 の初期設定のロールバックの「AI エージェントとプラグインを消す」](windows-setup.md#ai-エージェントとプラグインを消す)の手順 1 と、「エディタとシェルのツールを消す」の手順 6
 - [Windows 11 で使う](../coding-agents.md#windows-11-で使う)の手順 1 の変数を設定した PowerShell で行う
 
 > [!CAUTION]
@@ -165,27 +142,6 @@
 
    - （この節の手順 3 の代わりに）最後の一覧が `[main]` の 1 行だけになればよい
 
-1. 2 つのプラグインとマーケットプレイスを外す。
-
-   ```powershell
-   claude plugin uninstall codex@openai-codex
-   claude plugin uninstall grok-build@xai-grok-build
-   claude plugin marketplace remove openai-codex
-   claude plugin marketplace remove xai-grok-build
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   claude plugin list
-   ```
-
-   - 最後の一覧に、2 つのプラグインが出なければよい
-
-1. ほかに使うものが無いときだけ、scoop で入れた Node.js を外す。
-
-   ```powershell
-   scoop uninstall nodejs-lts
-   ```
-
-   - この節の手順 5 でプラグインを外してから行う（プラグインは Claude Code の起動と終了のたびに `node` を動かす）
-
 ---
 
 ## 注意点
@@ -195,9 +151,9 @@
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](../verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
 - **`/codex:cancel` の後も、Codex が始めたコマンドは動き続けることがある**: cancel はターンを中断するが、その中で始めたコマンドは裏に残ることがある。残ったコマンドは、Claude Code のセッションを終えてプラグインが Codex の共有のプロセスを止めると消える（プラグイン 1.0.6 と Codex 0.160.0。スクリプトを直接呼んだ確認。[検証記録](../verification/coding-agents.md#codex-の実行中のターンの中断を伴う-cancel)）
 - **Grok Build は既定で sandbox が無い**: [分担して作業する](../coding-agents.md#分担して作業する)のリードの `[!WARNING]`。Windows には sandbox が無い
-- **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を実施手順の手順 9 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
+- **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
 - **Grok は Claude の指示書も読む**: CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（信頼したフォルダーだけ）。3 つに共通の規則は AGENTS.md に書く
 - **`/grok-build:check` は、ログインしていなくても ready と出る**（grok-build のプラグイン 0.2.1 と Grok Build 1.0.50。`grok models` の終了コードで判定するため）。ログインは `grok models` の表示で確かめる
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない
-- **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す
+- **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ai-エージェントとプラグインを消す)）
 - **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../coding-agents.md#main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）

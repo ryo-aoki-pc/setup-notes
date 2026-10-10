@@ -56,7 +56,7 @@
 | PC | x86_64 のノート PC（AMD Ryzen AI MAX+ 395） |
 | OS | Windows 11 Pro 26H2（ビルド 26300.9457、日本語） |
 | PowerShell | Windows PowerShell 5.1.26100.9444 |
-| OpenSSH | `OpenSSH_for_Windows_9.5p2`。`DefaultShell` は Git Bash（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の任意節） |
+| OpenSSH | `OpenSSH_for_Windows_9.5p2`。`DefaultShell` は Git Bash（[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の任意節） |
 | WezTerm | 20260905-153129-092dcf70（`C:\Program Files\WezTerm`） |
 | Claude Code | 2.1.286（native installer、`C:\Users\<WIN_USER>\.local\bin\claude.exe`） |
 | ユーザー | Microsoft アカウント。Administrators の一員。SSH のセッションは High Mandatory Level |

@@ -29,7 +29,7 @@
 
 - **トンネルそのものの注意は、[ssh-socks-tunnel.md の注意点](ssh-socks-tunnel.md#注意点)**: 転送中はオフラインのホストのどのユーザーもプロキシを使える、出口はオンラインのホスト、`socks5h` の `h`、`https_proxy` が勝つ、`sudo` は `ALL_PROXY` を渡さない、dnf の行が残る
 - **`sudo brew` はもともと使えない**: [AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)
-- **ほかの手順書の `sudo dnf` も、手順 2 を行ったときだけ通る**: hackgen.md の手順 3（`unzip`）は、dnf の設定で通った
+- **ほかの手順書の `sudo dnf` も、手順 2 を行ったときだけ通る**: [AlmaLinux 10 の初期設定の「HackGen Console NF」](../almalinux-setup.md#hackgen-console-nf)の手順 3（`unzip`）は、dnf の設定で通った
 - **トンネルが要るのは、取得するときだけ**: `brew install` / `brew update` / `brew upgrade` は要る。`brew list` / `brew uninstall` / `brew autoremove` は要らない
   - トンネル無しの `brew install hello` は、`curl: (6) Could not resolve host: ghcr.io` と `Error: Failed to download resource "hello"` で失敗した
 - **brew は、依存が付くときに `[y/n]` を聞く**: ほかの Homebrew 系の手順書の `brew install` でも、端末から実行すると同じように聞かれる（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）。当時の bat.md の手順 2（依存が 8 つ）でも聞かれた（参考資料を参照）

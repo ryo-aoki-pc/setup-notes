@@ -4,6 +4,8 @@
 
 ## 補足
 
+- **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../windows-setup.md#codexgrok-のプラグイン)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
+
 ### 実施手順 / 手順 2: 補足: 版と並べる順
 
 - 検証時の版は `2.1.295 (Claude Code)`・`codex-cli 0.162.0`・`grok 1.0.50 (…)`
@@ -112,7 +114,7 @@
 
 ### main でないブランチを基準にするとき
 
-- この手順書は、基準のブランチを `main` に固定して、コマンドに直接書いた（[git.md](../git.md) の `init.defaultBranch` が `main` のため）
+- この手順書は、基準のブランチを `main` に固定して、コマンドに直接書いた（[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の `init.defaultBranch` が `main` のため）
 - `master` などを基準にするなら、手順書のコマンドと AGENTS.md の規則の `main` を、すべてそのブランチの名前に読み替える
   - 実施手順の手順 3（`## main` の確かめ）・手順 7（`worktree add … main`）
   - 使い方の基本・相互にレビューするの `--base main`・`main...HEAD`
@@ -123,7 +125,7 @@
 
 - **OpenAI の codex-plugin-cc**（`codex@openai-codex`、検証時は 1.0.6）
   - Codex の app server（`codex app-server`）を通して Codex を動かす。レビューは読むだけの sandbox、`rescue` は既定で書き込みのできる sandbox
-  - `/codex:setup` は、Codex が見つからず npm があると、`npm install -g @openai/codex` を提案する（codex.md の standalone のインストーラーと二重になるので断る）
+  - `/codex:setup` は、Codex が見つからず npm があると、`npm install -g @openai/codex` を提案する（初期設定の「Codex CLI」の standalone のインストーラーと二重になるので断る）
   - hooks: `SessionStart`・`SessionEnd`（どのセッションでも `node` を動かす）と、`Stop`（レビューの関門。`--enable-review-gate` で有効にしたときだけ）
 - **xAI の grok-build-plugin-cc**（`grok-build@xai-grok-build`、検証時は 0.2.1）
   - 本物の `grok` を `grok -p` で動かす。レビューは、読むだけのエージェント（`explore`）を `--sandbox read-only --always-approve` で動かす（承認する人がいない非対話では、plan のモードが止まるため）。Linux ではこの sandbox に Landlock が有効なカーネルと bubblewrap が要る

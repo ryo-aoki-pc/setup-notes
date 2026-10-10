@@ -13,7 +13,7 @@
 
 - 上から順に、ssh-socks-tunnel.md の手順 3 のシェルで貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 手順の後: ほかの Homebrew 系の手順（[AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](almalinux-setup.md#シェルのツール)や [yazi](yazi.md) など）は、ssh-socks-tunnel.md の手順 1〜3 でトンネルを張ったシェルで貼る。以後は[更新](#更新)・[ロールバック](extra/homebrew-offline.md#ロールバック)
+- 手順の後: ほかの Homebrew 系の手順（[AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](almalinux-setup.md#シェルのツール)や [yazi](almalinux-setup.md#yazi) など）は、ssh-socks-tunnel.md の手順 1〜3 でトンネルを張ったシェルで貼る。以後は[更新](#更新)・[ロールバック](extra/homebrew-offline.md#ロールバック)
 - Neovim の Mason に npm のパッケージを入れるなら、手順 5 でトンネルを閉じる前に、このシェルで [npm-offline.md](npm-offline.md) を貼る（npm は `ALL_PROXY` を読まない）
 
 > [!WARNING]
