@@ -8,14 +8,16 @@
 - Forgejo は公式の `-rootless` イメージを使い、コンテナ内も UID・GID 1000 で動かす。ホストの一般ユーザーとコンテナのユーザーを `keep-id` で対応させる
 - DB は SQLite にする。小規模で同時操作が多くない構成では外部 DB の導入・保守が不要になる。Forgejo の公式バイナリとイメージは SQLite に対応している。高い同時負荷では PostgreSQL または MySQL / MariaDB を検討するが、既存 DB の変更は単純な設定変更だけではできない
 - HTTP 3000 と Git 用 SSH 2222 を、初期設定中は localhost、管理者作成後は指定した LAN / VPN の IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
-- 通常系列の最新安定版を使い、導入するパッチ版を指定する。新しい安定版へは、停止バックアップ・手動更新・動作確認を組にして進める
+- 公式の最新安定版を導入時に自動で調べて入れ、以後は毎日のユーザータイマーで最新の安定版へ自動で更新する（利用者の指定）。Quadlet には調べた版の番号を書き、停止バックアップ・更新・確認・失敗時の自動の戻しを組にする
 
 ### 実施手順 / 手順 2・3: 最新安定版とイメージの選択
 
-- 手順書で指定する `16.0.5` は、2026-10-09 に確認した通常系列の最新安定版。取得・実行結果は検証記録に置く
-- 通常系列は次のメジャー版が出た 2 週間後にサポートを終える。16 系の期限は 2026-10-29。版を更新するときは[公式の予定](https://forgejo.org/docs/latest/admin/release-schedule/)と[リリース一覧](https://forgejo.org/releases/)を確認する
-- `16-rootless`・`16.0-rootless` は対応する系列のパッチ版へ動くタグで、`16.0.5-rootless` は版を指定するタグ。本書は取得・起動・バックアップ・復元で同じ版を指すため後者を使い、取得した digest を検証記録へ置く
-- 2026-10-09 の確認時点で、公式レジストリには `latest`・`latest-rootless` の汎用タグが無い。最新版への更新では、リリース一覧の安定版の番号を指定する
+- 手順書に版の番号を書かない。手順 2 で、Codeberg の API（`/api/v1/repos/forgejo/forgejo/releases?draft=false&pre-release=false&limit=50`）から、`v<数>.<数>.<数>` の形で下書きとプレリリースでないものの最も大きい番号を選ぶ
+- `/releases/latest` は、最後に公開したリリースを返す。LTS（15.x・11.x）のパッチは通常版と前後して公開される（2026-09-17 は v15.0.9 の 3 分後に v16.0.5）ので、公開順では LTS の版を選ぶことがある。番号の大きさで選ぶ
+- 通常系列は次のメジャー版が出た 2 週間後にサポートを終える（16 系の期限は 2026-10-29）。最も大きい番号を選び、毎日更新するので、新しいメジャー版が出ると数日のうちにそちらへ移る。予定は[公式の予定](https://forgejo.org/docs/latest/admin/release-schedule/)と[リリース一覧](https://forgejo.org/releases/)にある
+- `16-rootless`・`16.0-rootless` は対応する系列のパッチ版へ動くタグで、`16.0.5-rootless` は版を指定するタグ。本書は取得・起動・バックアップ・復元で同じ版を指すため、調べた番号の後者を Quadlet に書く
+- 2026-10-10 の確認時点でも、公式レジストリには `latest`・`latest-rootless` の汎用タグが無い（418 個のタグの中で、動くタグは系列ごとの `16`・`16.0` など）
+- 手順 2 と自動更新のプログラムの版を選ぶ関数は、同じ文字列にしてある。片方を直すときは、もう片方も直す
 - 公式の Podman 例は root 管理の `/etc/containers/systemd` とホストポート 222 を使う。本書は rootless Podman のユーザー unit に変え、1024 以上のホストポートを使う
 
 ### 実施手順 / 手順 3: rootless の 2 つの意味とデータ
@@ -62,6 +64,34 @@
 - `SSH_PORT` は clone URL に表示するホストの番号、`SSH_LISTEN_PORT` は内蔵 SSH の内部番号。本書では後者を 2222 に固定する
 - SSH のホスト鍵は永続データに保存される。サービス再起動やコンテナ再作成で変わらないことを確認する。初回の確認でホストの OpenSSH 22 の鍵と取り違えない
 
+### 実施手順 / 手順 24〜26・更新: 自動更新
+
+- Podman の自動更新（`AutoUpdate=registry` と `podman auto-update`）は採らない
+  - 動くタグは系列の中だけなので、メジャー版をまたいで最新版へ進めない
+  - 失敗時の戻しは旧イメージの再起動だけで、DB の移行の後は元に戻らない（この節の下の「バックアップ・…・更新」）
+- 代わりに、ユーザーの systemd の `oneshot` サービスとタイマーで自前のプログラム（`~/.local/bin/forgejo-auto-update`、Python の標準ライブラリだけ）を動かす。プログラムは手順書の手順 24 のブロックにだけ置き、リポジトリに別のファイルを置かない
+- 流れ
+  - Quadlet の目印・イメージの行・Web と Git 用 SSH の `PublishPort` が 1 行ずつあることを確かめてから、最新の安定版を調べる
+  - 新しい版があれば、イメージを取得して版を確かめ、空き容量（データの 2 倍と 1 GiB）と、データとバックアップが同じファイルシステムにあることを確かめる。ここまでは何も止めない
+  - 止めて、手動のバックアップと同じ `tar` の中身でアーカイブを作り、イメージの行だけを書き換えて起動する
+  - Web の `/api/healthz` が `pass`、Git 用 SSH が `SSH-2.0-` を返し、動いている版が新しい版で、`doctor check --all` が成功すれば終わり。DB の移行を待つため、応答は 15 分まで待つ。doctor は、起動直後の一時的な失敗で戻さないよう 30 秒おきに 3 回まで試す
+- 失敗したときは、展開してから止め、今のデータと新しい定義を `failed-update-<日時>` へ `rename` で退避し、展開したデータと前の定義へ入れ替えて起動・確認する。退避と入れ替えは同じファイルシステムの中の `rename` だけで行う
+- 戻した版は `skip-version` に書いて保留する。同じ版で毎晩失敗と戻しを繰り返さないため。さらに新しい版が出たら、その版は試す。保留中は終了コード 1 にして、`systemctl --user` の結果で気付けるようにした
+- Forgejo が `inactive` のときは、手作業（バックアップ・復元）の途中とみなして何もせずに終わる。手作業の側は、自動更新が `activating` の間は止める（`is-active` は `activating` を active として扱わないので、`ActiveState` を見る）。プログラムは `flock` で重ねて動かさない
+- 時刻は毎日 4:00 から 30 分の間。`Persistent=true` は付けない。止めていた PC を起動した直後（昼間）に更新が走るのと、ユーザーのユニットからシステムの `network-online.target` を待てないため
+- サービスの `PATH` は `/usr/bin` に固定する（GNOME のセッションから Homebrew の `PATH` を受け取らないため）。`TimeoutStartSec=2h` で、止まったままの実行が次の実行を塞ぎ続けないようにする
+- `/api/healthz` は、`REQUIRE_SIGNIN_VIEW=true` でもログイン無しで `pass` を返す（2026-10-10 に確認。検証記録）。プロキシの環境変数があっても、確認の通信はプロキシを通さない
+- 古いものの整理
+  - 自動更新のアーカイブ（`forgejo-auto-*`）は新しい 3 つを残し、手動のバックアップには触れない
+  - イメージは、今の版と直前の版以外の `codeberg.org/forgejo/forgejo:<x.y.z>-rootless` を消す。復元の手順 2 は、バックアップの版のイメージが無ければ取得し直す
+- 限界
+  - 自動の確認（起動・応答・版・doctor）で見つからない不具合は戻さない。気付いたら手動の復元と保留を使う
+  - 更新の途中で OS ごと止まったとき（停電など）は、書き換えた定義のまま次の起動を迎えることがある。次の実行は、その版を最新とみなして何もしない
+  - 復元の節の手順 5（起動）と手順 7（保留）の間にタイマーが動くと、また更新することがある。4 時台を避けて復元する
+- 採らなかったもの
+  - 新しい版が出てから数日待つ・1 回に上げるメジャー版を 1 つに限る: 「常に最新版を使う」と食い違うため
+  - 失敗の通知（メールなど）: 宛先の設定が要るため。`systemctl --user` の結果と journal で確かめる
+
 ### バックアップ・バックアップから復元する・更新
 
 - SQLite の DB・リポジトリ・添付などは同じ時点にそろえる必要がある。単純なファイルコピーをする本書では Forgejo を停止してディレクトリ全体を保存する
@@ -70,6 +100,7 @@
 - 復元は空の作業場所へ展開してから、停止中のデータ全体と入れ替える。元のデータは退避し、既存 DB と復元 DB のファイルを混ぜない
 - DB の移行を伴う更新後に、旧イメージだけを起動しても元へは戻らない。旧イメージの定義と更新前データをセットで復元する。更新後に受け付けた操作は、更新前バックアップには含まれない
 - 初回作成用の上書きガードと、更新用の置き換えは用途が異なる。既存の導入へ実施手順 3 を再実行するのではなく、後ろの更新・復元の節を使う
+- 自動更新のアーカイブも、手動のバックアップと同じ中身なので、復元の節でそのまま使える
 
 ## 参照
 
@@ -84,6 +115,8 @@
 - [Recommended Settings and Tips（v16）](https://forgejo.org/docs/v16.0/admin/setup/recommendations/) — 負荷に応じた DB の選択
 - [Installation from binary（v16）](https://forgejo.org/docs/v16.0/admin/installation/binary/) — 初期設定画面と管理者作成
 - [Upgrade guide（v16）](https://forgejo.org/docs/v16.0/admin/upgrade/) — 停止を含む整合したバックアップ、更新と診断
+- [Forgejo API（Codeberg の swagger）](https://codeberg.org/api/swagger) — リリースの一覧（`draft`・`pre-release`・`limit`）
+- [systemd.timer](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html) — `OnCalendar`・`RandomizedDelaySec`・`Persistent`
 - [podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) — rootless Quadlet の配置・ユーザー名前空間・生成 unit の自動起動
 - [podman run](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--userns=keep-id`、`--user`、bind mount の所有者と SELinux の `:Z`
 - [firewalld rich language](https://firewalld.org/documentation/man-pages/firewalld.richlanguage.html) — 送信元・宛先・ポート・priority と許可の規則
