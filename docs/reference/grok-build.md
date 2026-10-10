@@ -80,13 +80,20 @@
 - 自分のユーザーの PATH の先頭に `%USERPROFILE%\.grok\bin` を足し、今の窓の `$env:Path` にも足す（`[Environment]::SetEnvironmentVariable('Path', …, 'User')`。[claude-code.md の参考資料](claude-code.md#windows-11-で使う--手順-5-補足-path-の足し方)と同じ書き方で、`%USERPROFILE%` のような書き方は展開した形で書き戻される）
 - スクリプトの先頭で `$ErrorActionPreference = 'Stop'` にするので、`irm … | iex` ではなく `&` でスクリプトブロックとして呼び、今の窓にその設定を残さない（codex.md と同じ）。失敗したときの `exit 1` は、どちらの呼び方でも窓を閉じることがある
 
+### 注意点: Linux の sandbox を起動できないとき
+
+- Linux のファイルアクセス制限には Landlock が要る。カーネルの版が 5.13 以降でも、`CONFIG_SECURITY_LANDLOCK=y` で組み込まれ、起動中のカーネルで有効になっている必要がある。`/sys/kernel/security/lsm` に `landlock` があることを確かめる
+- bubblewrap は、拒否するパスの遮蔽などに使う。bubblewrap があることだけでは `read-only` の書き込み制限が効くと判断しない
+- `runtime-socket deny path /run/podman/podman.sock` の `Permission denied (os error 13)` は、ソケット本体に限らず、親ディレクトリを検索できないときも出る。Podman が停止し、ソケットが存在しなくても、親の検索権限が無ければ失敗する。親ディレクトリの検索権限を確かめ、ソケット本体の権限は緩めない
+- 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](../verification/grok-build.md#sandbox-の追加原因調査と対処の準備)に分けた。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
+
 ### 注意点: 会話のデータの扱い
 
 - `/privacy` は、設定の Coding data, retention, and training を開き、Opt in / Opt out を選ぶ（公式の文書 04-slash-commands）
 - 2026-07 に、ベータ版の `grok` がディレクトリの中身を xAI のクラウドのストレージに送ることがあったと報告された（Simon Willison のブログ、2026-07-15。二次情報）
   - 同じ記事が引く xAI の発表は「2026-07-12 から、すべての Grok Build の利用者で既定の保存を止めた」「それまでに送られたデータは削除する」としている
   - その後、ソースコードが Apache-2.0 で公開された（github.com/xai-org/grok-build）
-- 秘密情報のあるディレクトリで `grok` を起動しない。sandbox（`--sandbox read-only` など。Linux と macOS だけ。Linux では bubblewrap が要る）で書き込める場所を絞れる
+- 秘密情報のあるディレクトリで `grok` を起動しない。sandbox（`--sandbox read-only` など。Linux と macOS だけ。Linux では有効な Landlock と bubblewrap が要る）で書き込める場所を絞れる
 
 ## 参照
 
