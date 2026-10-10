@@ -31,7 +31,6 @@
    brew install lazygit
    ```
 
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
 1. lazygit が入ったか確かめ、git リポジトリで起動してみる。
@@ -89,8 +88,6 @@
    fi
    ```
 
-   - 既定値の全体は `lazygit --config` で表示できる
-   - アプリ内では `x` でキーバインド一覧が出る
    - `中断:` と出たら、何も書いていない
 
 ---
@@ -146,8 +143,7 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じてこの節の手順 1 から
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
-   - `Lazygit` が空なら、lazygit は入っていない。`C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` だけなら、もう scoop で入っている（自分用の Neovim の設定の導入でも入る）
-   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、混ざらないよう、外してから始める
+   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、外してから始める
    - `Extras : True` なら、extras のバケットはもうある。この節の手順 3 は飛ばす
 
 1. extras のバケットが無いときだけ、scoop に足す。
@@ -158,7 +154,6 @@
    ```
 
    - `The extras bucket was added successfully.` が出て、一覧に `main` と `extras` の行が出ればよい
-   - extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使う
 
 1. scoop で lazygit を入れる。
 
@@ -166,7 +161,7 @@
    scoop install lazygit
    ```
 
-   - `'lazygit' (0.66.0) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）
+   - `'lazygit' (0.66.0) was installed successfully!` の形の行が出ればよい
    - `'lazygit' (0.66.0) is already installed.` の形なら、もう入っている（何も変えない）
 
 1. 版と、設定の置き場所を確かめる。
@@ -177,7 +172,7 @@
    (Get-Command lazygit -All).Source
    ```
 
-   - 1 行目に `version=0.66.0, os=windows, arch=amd64` を含む行が出ればよい（版は実行した日の最新）
+   - 1 行目に `version=0.66.0, os=windows, arch=amd64` を含む行が出ればよい
    - 2 行目は `C:\Users\<WIN_USER>\AppData\Local\lazygit`（[設定ファイル](#設定ファイル)）
    - 最後は `C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` の 1 行だけならよい
 
@@ -196,11 +191,11 @@
    - Status・Files・Branches・Commits などの欄が出ればよい（空のリポジトリなので、一覧は空）
    - ほかのリポジトリで確かめるなら、そのフォルダーに `Set-Location` してから `lazygit` を打つ（git 管理外のフォルダーで起動すると、リポジトリを作るか聞かれる）
    - **注意**: Windows PowerShell から起動した lazygit の `e` キーは、git の `core.editor` と環境変数 `VISUAL`・`EDITOR` などが無いと `vim` で開こうとして失敗する
-     - [neovim.md の既定のエディタにする（任意）](neovim.md#既定のエディタにする任意)の手順 2 で `nvim` にし、新しい窓で lazygit を起動し直す（今の窓には入らない）
+     - [neovim.md の既定のエディタにする（任意）](neovim.md#既定のエディタにする任意)の手順 2 で `nvim` にし、新しい窓で lazygit を起動し直す
      - Git Bash から起動したときは、共通の bash 設定が `nvim` にしてある
    - `q` で閉じる
    - `%TEMP%\lazygit-check` は、要らなければ手で消す
-     - この窓の今のフォルダーがそこにあるので、消す前に `Set-Location ~` で出る（今のフォルダーのままでは、使用中で消せない）
+     - 消す前に `Set-Location ~` で出る
    - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると lazygit への操作として食われる）
 
 ---

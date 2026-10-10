@@ -33,9 +33,9 @@
    - samba.md の[root のホーム](samba.md#root-のホームも公開する任意)につなぐときは、`SHARE` を `root` に書き換える（`SMB_USER` は自分のまま）
    - samba.md の[/home](samba.md#home-も公開する任意)につなぐときは、`SHARE` を `home` に書き換える（`SMB_USER` は自分のまま）
    - 最後に値を読み戻して確かめる
-   - **既定値のままでもエラーにならない**ので、`SERVER` を書き換えたかをここで確かめる
+   - `SERVER` を書き換えたかをここで確かめる
    - `USER` が `root` なら、ここで止めて、自分のユーザーのシェルで貼り直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. cifs-utils を入れ、カーネルのモジュールと、サーバーの 445/tcp に届くかを確かめる。
 
@@ -48,7 +48,6 @@
    }
    ```
 
-   - Workstation で入れた PC には最初から入っている
    - 入っていれば、`Package cifs-utils-… is already installed.` と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
@@ -77,8 +76,6 @@
    ```
 
    - `-rw------- … root root … admin_home_t … /root/smb-<SMB_USER>@<SERVER>.cred` の 1 行が出ればよい
-   - パスワードは、コマンドラインにもシェルの履歴にも残らない
-   - 最後の `unset PW` で、シェルの変数からもパスワードを消す
    - 資格情報ファイルの中身は平文（[注意点](extra/samba-client.md#注意点)）
 
 1. 1 度だけ手でマウントして読み書きを確かめ、外す。
@@ -95,9 +92,9 @@
    ```
 
    - `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1` を含む）、続いて `cifs write` が出ればよい
-   - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`（自分の所有で、ほかのユーザーは入れない）
+   - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`
    - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は[検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)）
-   - `SHARE=home`（samba.md の `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる（共有の直下は `/home` で、サーバーの SELinux が作るのを断る）。`findmnt` の行が出ていればよい
+   - `SHARE=home`（samba.md の `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる。`findmnt` の行が出ていればよい
 
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
 
@@ -133,11 +130,8 @@
    ```
 
    - 通常の共有では、`active`、`findmnt` の `autofs` と `cifs` の 2 行、`automount write` が出ればよい
-   - `SHARE=home` では、手順 5 と同じく共有直下への書き込みが `Permission denied` になる。これはサーバーの SELinux による拒否で、`active` と `findmnt` の 2 行が出ればマウントの確認はできている
+   - `SHARE=home` では、手順 5 と同じく共有直下への書き込みが `Permission denied` になる。`active` と `findmnt` の 2 行が出ればマウントの確認はできている
    - 最後の `ausearch` は `<no matches>`
-   - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
-   - 使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
-   - 再起動した後も、アクセスしたときにマウントされる
 
 ---
 
@@ -155,7 +149,7 @@
    ```
 
    - `package … is not installed` が出たら、この節の手順 2 で入れる
-   - 2 つとも版が出たら、この節の手順 2 は飛ばす（GNOME を入れた PC には最初から入っている）
+   - 2 つとも版が出たら、この節の手順 2 は飛ばす
 
 1. どちらかが未導入のときだけ、gvfs-smb と gvfs-fuse を入れる。
 
@@ -163,7 +157,7 @@
    sudo dnf install -y gvfs-smb gvfs-fuse
    ```
 
-   - 入れた後、ログインし直さなくてよい（VM で、動いている gvfsd がそのまま SMB につないだ）
+   - 入れた後、ログインし直さなくてよい
 
 1. 端末から共有をマウントする。
 
@@ -176,7 +170,6 @@
    - パスワードは、手順 3 と同じもの
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
    - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される
-   - `/usr/bin/gio mount` は、パスワードを保存しない
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
 1. マウントされたことを確かめる。
@@ -189,9 +182,7 @@
 
    - `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい
    - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>` と、共有の中の一覧（隠しファイルは出ない）が出る
-   - GIO を使わないアプリからは、`/run/user/<UID>/gvfs/smb-share:…/` の下で読み書きできる
    - 画面では、サイドバーに共有が出る
-   - サーバーで変えたものは、「ファイル」には自動では出ない。F5 で出る（[注意点](extra/samba-client.md#注意点)）
 
 1. 共有を外す。
 
@@ -200,7 +191,6 @@
    ```
 
    - 何も出ずに終わればよい
-   - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
    - 画面では、サイドバーの共有の横の取り出しのボタンで外す
 
 ---
@@ -222,7 +212,7 @@
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にしない）
-   - Windows Terminal の管理者のタブや、`sudo` で開いた窓も使わない（ドライブ文字は、管理者の窓と管理者ではない窓で別々になる）
+   - Windows Terminal の管理者のタブや、`sudo` で開いた窓も使わない
 
 1. 変数を設定する（`SERVER` と `SMB_USER` は必ず値を入れる）。
 
@@ -244,10 +234,10 @@
    ```
 
    - 最後に値を読み戻して確かめる
-   - `SMB_USER` は、Windows のユーザー名ではなく、サーバーの Samba ユーザーにする（Windows のユーザー名と違うことが多いので、既定値を置かない）
+   - `SMB_USER` は、Windows のユーザー名ではなく、サーバーの Samba ユーザーにする
    - samba.md の[root のホーム](samba.md#root-のホームも公開する任意)につなぐときは `SHARE` を `root` に、[/home](samba.md#home-も公開する任意)につなぐときは `home` に書き換える（`SMB_USER` は自分のまま）。`DRIVE` も、ほかの割り当てと違う文字にする
-   - `SERVER` は、エクスプローラーで `\\<SERVER>\…` を開くときと同じ書き方にする（資格情報は、この名前に結び付けて置く）
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この節の手順 2 の 3 つのブロックを貼り直してから先へ進む
+   - `SERVER` は、エクスプローラーで `\\<SERVER>\…` を開くときと同じ書き方にする
+   - **新しい PowerShell を開いたら**、この節の手順 2 の 3 つのブロックを貼り直してから先へ進む
 
 1. 管理者ではないことと、サーバーの 445 番・ドライブ文字・保存済みの資格情報を確かめる。
 
@@ -284,7 +274,6 @@
    ```
 
    - パスワードを聞かれる。samba.md のサーバーなら、[samba.md 手順 6](samba.md#実施手順) で `smbpasswd -a` に入れたパスワード
-   - パスワードは、コマンドラインにも PowerShell の履歴にも残らない
    - 資格情報を追加した旨の 1 行が出ればよい
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
@@ -300,7 +289,6 @@
    ```
 
    - `OK`・`<DRIVE>`・`\\<SERVER>\<SHARE>` の 1 行が出ればよい
-   - ユーザー名とパスワードは渡さない。この節の手順 4 で登録した資格情報が使われる
    - ユーザー名かパスワードが違うと断られたら、この節の手順 4 を貼り直してから、この手順を貼り直す
    - エラー 1219 が出たら、[注意点](extra/samba-client.md#注意点)の Windows 11 のエラー 1219 を見る
    - エクスプローラーには、この節の手順 8 でサインインし直すまで出ないことがある
@@ -320,7 +308,7 @@
    ```
 
    - 共有の中の名前（5 つまで。隠しファイルは出ない）、`smb write`、`False` の順に出ればよい
-   - `SHARE=home`（samba.md の `[home]`）では、書き込みが拒否される（共有の直下は `/home` で、サーバーの SELinux が作るのを断る）。名前の一覧が出ていればよい
+   - `SHARE=home`（samba.md の `[home]`）では、書き込みが拒否される。名前の一覧が出ていればよい
 
 1. サーバーで、署名付きの SMB3_11 でつながっていることを確かめる。
 
@@ -331,8 +319,8 @@
    - サーバーのシェルに貼る
    - この PC の IP アドレスの行の `Protocol Version` が `SMB3_11` で、`Signing` が `AES-128-GMAC` などの方式の名前だけ（`partial(…)` でも `-` でもない）ならよい
    - `Encryption` は `-`（LAN の上の通信は暗号化されない。[samba.md の注意点](extra/samba.md#注意点)）
-   - Windows 11 Home の PC では、`Signing` が `partial(…)` か `-` になりうる（Home は署名を求めない。[注意点](extra/samba-client.md#注意点)）
-   - この PC の行が無ければ、エクスプローラーかこの PC の PowerShell で `<DRIVE>` を開いてから、貼り直す（使っていない接続は、閉じられることがある）
+   - Windows 11 Home の PC では、`Signing` が `partial(…)` か `-` になりうる（[注意点](extra/samba-client.md#注意点)）
+   - この PC の行が無ければ、エクスプローラーかこの PC の PowerShell で `<DRIVE>` を開いてから、貼り直す
 
 1. サインアウトしてサインインし直し、ドライブがパスワード無しで開くことを確かめる。
 
@@ -360,7 +348,6 @@
    ```
 
    - サーバーで変えた後の新しいパスワードを入れる
-   - 同じ `<SERVER>` の資格情報が置き換わる
    - パスワードを入力し終えてから、この節の手順 2 を行う
 
 1. サインアウトしてサインインし直し、ドライブがパスワード無しで開くことを確かめる。

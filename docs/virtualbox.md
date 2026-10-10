@@ -35,11 +35,11 @@
    gpg --show-keys --with-fingerprint /tmp/oracle_vbox_2016.asc
    ```
 
-   - `gpg` が無ければ、`sudo dnf install -y gnupg2` で入れてから貼り直す（GNOME のデスクトップには入っている）
+   - `gpg` が無ければ、`sudo dnf install -y gnupg2` で入れてから貼り直す
    - 次の値と一致することを目で確かめる
      - fingerprint `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF`
      - uid `Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org>`
-   - `sub` の下にも fingerprint が出ることがある（Homebrew の gnupg が先に見つかる PC。[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）。照らし合わせるのは `pub` の下の行
+   - `sub` の下にも fingerprint が出ることがある。照らし合わせるのは `pub` の下の行
    - 違っていればここで止める
    - **次の手順は、fingerprint と uid が一致するのを確かめてから貼る**
 
@@ -73,9 +73,7 @@
    }
    ```
 
-   - ヒアドキュメントは `<<'EOF'`（クォート付き）。`$releasever` / `$basearch` は dnf が展開するので、シェルに展開させない
-   - このリポジトリは**メタデータにも署名がある**（`repo_gpgcheck=1`）
-   - dnf はそれを確かめるための鍵を rpm とは別に持つので、最初の 1 回だけ鍵の取り込みを聞かれる
+   - 最初の 1 回だけ鍵の取り込みを聞かれる
    - `Importing GPG key 0x2980AECF:` の `Fingerprint:` が、手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
    - `Metadata cache created.` で終わる
    - **次の手順は、鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -86,8 +84,6 @@
    dnf makecache --repo virtualbox
    ```
 
-   - こちらはユーザーごとの別のキャッシュを使う
-   - 通しておかないと、`sudo` を付けない `dnf list` などが**関係の無いパッケージでも**失敗する
    - 手順 4 と同じ fingerprint を確かめて `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -121,7 +117,6 @@
    }
    ```
 
-   - VirtualBox は、自分のカーネルモジュール（`vboxdrv` / `vboxnetflt` / `vboxnetadp`）を**インストールの途中で、この PC の上でビルドする**
    - 6 つとも版が出て、最後の行がディレクトリを返せばよい
    - `No such file or directory` なら、kernel-devel の版が合っていない
 
@@ -147,7 +142,6 @@
    sudo tail -n 5 /var/log/vbox-setup.log
    ```
 
-   - モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる
    - `enabled` と `active`、`vboxnetadp` / `vboxnetflt` / `vboxdrv` の 3 行、root だけが読み書きできる `/dev/vboxdrv` が出ればよい
    - `dnf install` の途中で `There were problems setting up VirtualBox.` が出ていた、または `active` にならないときは、ログ（`/var/log/vbox-setup.log`）で原因を見る
    - 原因を直してから、`sudo /sbin/vboxconfig` を実行し直す
@@ -162,13 +156,8 @@
    }
    ```
 
-   - **EL10 のカーネル（6.12 系）では、KVM のモジュールが読み込まれた時点で VT-x / AMD-V を確保し、VirtualBox の VM が起動できなくなる**
-   - KVM を使っていなくても、VT-x / AMD-V のある PC では起動時に自動で読み込まれる
-   - この設定で、KVM が自分の VM を動かす間だけ確保するように変える
-   - `cat` と `modprobe -c` のどちらにも `options kvm enable_virt_at_load=0` が出ればよい（後者は modprobe が読んだ設定）
+   - `cat` と `modprobe -c` のどちらにも `options kvm enable_virt_at_load=0` が出ればよい
    - `modprobe -c` には `alias symbol:enable_virt_at_load kvm` の行も出る（モジュールの別名の一覧の行で、気にしなくてよい）
-   - **効くのは次に kvm が読み込まれたとき**なので、手順 13 の再起動で反映させる
-   - KVM（libvirt / GNOME Boxes など）はこの後も使えるが、**KVM の VM と VirtualBox の VM は同時には動かせない**
 
 1. USB 機器を VM に渡すときだけ、自分を `vboxusers` に入れて確かめる。
 
@@ -181,7 +170,6 @@
 
    - **VM を動かすだけなら要らない**（この手順は飛ばして手順 13 へ）
    - `vboxusers:x:<GID>:<USER>` のように、自分の名前が出ればよい
-   - **効くのはログインし直してから**（手順 13 の再起動で済む）
 
 1. 再起動して、手順 11 の KVM の設定と、手順 12 のグループを反映させる。
 
@@ -230,10 +218,8 @@
    fi
    ```
 
-   - VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
    - 既に `vbox-selftest` があれば、変更せず中断する。別の名前で試すなら、ブロック中の `vbox-selftest` をすべて同じ名前に変える
-   - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
-   - `VM "vbox-selftest" has been successfully started.` が出れば動いている（起動するディスクが無いので、中では何も動かない）
+   - `VM "vbox-selftest" has been successfully started.` が出れば動いている
    - `VMState="running"` なら動いていた
    - `controlvm ... poweroff` で止まり、`unregistervm ... --delete` は `0%...10%...` と進んで、VM のファイルごと消える
 
@@ -244,7 +230,7 @@
    ```
 
    - アプリ一覧の「Oracle VirtualBox」からでも同じ
-   - VirtualBox マネージャーのウィンドウが開く（手順 16 の VM は消してあるので一覧は空）
+   - VirtualBox マネージャーのウィンドウが開く（一覧は空）
    - 端末に `Qt WARNING: QObject::disconnect: wildcard call disconnects from destroyed signal of UIInvisibleWindow::unnamed` が何行か出るが、気にしなくてよい
    - ウィンドウを閉じると、端末がプロンプトに戻る
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VirtualBox への操作として食われる）
@@ -301,10 +287,7 @@
    ```
 
    - トランザクション表を見て `[y/N]` に答える
-   - **更新のたびに `%post` がモジュールをビルドし直す**ので、[手順 10](#実施手順) と同じ確認をする
-   - コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
-   - モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
-   - `/sbin/vboxconfig` と udev のルールも残った
+   - [手順 10](#実施手順) と同じ確認をする
    - **[手順 10](#実施手順) の確認は、`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは（この節の手順 2 の代わりに）、[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 だけを行う。
@@ -316,7 +299,6 @@
 
    - 手順 6・9 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
    - 以後は、この節の手順 2 と[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 も同じく置き換える
-   - repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
 
 ---
 
@@ -356,9 +338,7 @@
    - `Admin` が `False` なら、管理者ではない窓に貼っている。閉じて、この節の手順 1 から
    - `Arch` が `ARM64` なら、この節は扱わない
    - `Winget` が空なら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `Hypervisor` が `True` なら、Hyper-V のハイパーバイザーが動いている（WSL 2 を使う PC など）。VirtualBox の VM は Hyper-V の上で動き、遅くなる（[注意点](extra/virtualbox.md#注意点)）
    - `Hypervisor` が `False` で `VirtFirmware` も `False` なら、PC の UEFI（BIOS）の設定で Intel VT-x / AMD-V（SVM）を有効にしてから始める
-   - 最後の表は、Hyper-V を使う Windows の機能の状態（`Enabled` / `Disabled`）。一覧を作るのに数秒かかる
    - `VirtualBox` が `True` なら、もう入っている。この節の手順 3 は飛ばす（新しい版にするなら[Windows 11 の更新](#windows-11-の更新)）
 
 1. VirtualBox が入っていないときだけ、winget で入れる。
@@ -367,10 +347,8 @@
    winget install --exact --id Oracle.VirtualBox --source winget --accept-source-agreements --accept-package-agreements
    ```
 
-   - 依存の Microsoft Visual C++ の再頒布可能パッケージ（`Microsoft.VCRedist.2015+.x64`）が無ければ、先にそれが入る
-   - **途中でネットワークがいったん切れる**（VirtualBox のネットワークのドライバーを入れるため）
+   - **途中でネットワークがいったん切れる**
    - インストーラの画面は出ず、進み具合だけが出る。最後に、入れ終えた旨の行（英語の表示では `Successfully installed`）が出ればよい
-   - デスクトップとスタートメニューに「Oracle VirtualBox」のショートカットができる
    - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、winget が何か聞いたときの答えとして食われる）
 
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
@@ -382,15 +360,13 @@
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' | Format-Table Name, InterfaceDescription, Status
    ```
 
-   - `Oracle.VirtualBox` の `7.2.20` の行と、`7.2.20r175154` が出ればよい（版は実行した日の最新）
-   - `VBoxManage` は `PATH` に入らないので、場所を付けて呼ぶ
+   - `Oracle.VirtualBox` の `7.2.20` の行と、`7.2.20r175154` が出ればよい
    - ドライバーは `VBoxSup`・`VBoxNetLwf`・`VBoxNetAdp`・`VBoxUSBMon` などが出て、`VBoxSup` が `Running` ならよい
    - ホストオンリーのアダプターが 1 つ出る（`Name` は `イーサネット 2` のように PC で違う）
 
 1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
-   - VM と VirtualBox マネージャーは、自分のユーザー（管理者ではない権限）で動かす
    - この節の手順 1 の管理者の窓は、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/virtualbox.md#windows-11-のロールバック)で使う。閉じてもよい
 
 1. 使い捨ての VM を画面無しで起動し、Hyper-V の上で動くかを見てから止めて消す。
@@ -423,19 +399,17 @@
    }
    ```
 
-   - VirtualBox が VT-x / AMD-V（か Hyper-V）を使えるかは、ここで初めて分かる
-   - `VM "vbox-selftest" has been successfully started.` と `VMState="running"` が出れば動いている（起動するディスクが無いので、中では何も動かない）
+   - `VM "vbox-selftest" has been successfully started.` と `VMState="running"` が出れば動いている
    - **`fall back to NEM` か `Snail execution mode` を含む行が出たら、VM は Hyper-V の上で動いている**（遅くなる。[注意点](extra/virtualbox.md#注意点)）
    - その行が出なければ、VirtualBox は VT-x / AMD-V を直接使っているはず
    - `poweroff` と `unregistervm` は `0%...100%` の行を出し、VM の登録と設定のファイルが消える
    - `%USERPROFILE%\VirtualBox VMs\vbox-selftest\Logs\VBoxHardening.log` が残ることがある。要らなければ `vbox-selftest` のフォルダーを手で消す
    - 既に `vbox-selftest` があれば、変更せず中断する。別の名前で試すなら、ブロック中の `vbox-selftest` をすべて同じ名前に変える
-   - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
 
 1. スタートメニューの「Oracle VirtualBox」で VirtualBox マネージャーを開き、閉じる。
 
    - デスクトップのショートカットでも、この節の手順 6 の窓で `& "$env:ProgramFiles\Oracle\VirtualBox\VirtualBox.exe"` を打っても同じ
-   - VirtualBox マネージャーのウィンドウが開く（この節の手順 6 の VM は消してあるので、一覧は空）
+   - VirtualBox マネージャーのウィンドウが開く（一覧は空）
    - 右クリックの「管理者として実行」では開かない
    - **次の手順は、ウィンドウを閉じてから貼る**
 
@@ -446,7 +420,6 @@
    ```
 
    - `VirtualBox.xml`・`VBoxSVC.log` などが並べばよい
-   - Windows の VirtualBox は、全体の設定を `%USERPROFILE%\.VirtualBox` に置く（AlmaLinux 10 の `~/.config/VirtualBox` に当たる。マニュアルの 13.1.2「Global Settings」）
 
 ---
 
@@ -510,7 +483,7 @@
    ```
 
    - プロセスは何も出なければよい
-   - `VBoxSVC` だけが出たら、数秒待って貼り直す（VirtualBox マネージャーや VM を閉じた後、しばらく残る。ソースでは、使われなくなってから 5 秒で終わる）
+   - `VBoxSVC` だけが出たら、数秒待って貼り直す
    - `winget list` の版の列の右に、新しい版の列（英語の表示では `Available`）が出たら、新しい版がある
    - 新しい版の列が無ければ、この節の手順 3・4 は飛ばす
 
@@ -520,7 +493,6 @@
    winget upgrade --exact --id Oracle.VirtualBox --source winget --accept-source-agreements --accept-package-agreements
    ```
 
-   - 新しい版のインストーラを、今の版の上から動かす（winget の定義の `UpgradeBehavior: install`）。VM と設定は残る
    - 途中でネットワークがいったん切れるはず
    - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、winget が何か聞いたときの答えとして食われる）
 

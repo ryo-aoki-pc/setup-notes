@@ -4,6 +4,15 @@
 
 ## 補足
 
+### 実施手順 / 手順 1: 補足: 扱う範囲
+
+- ESR / Beta の導入・確認・ロールバックは本書では扱わない
+- 手順 1 のブロックは、最後の行で値を読み戻す
+
+### 実施手順 / 手順 3: 補足: 期限切れの副鍵の warning
+
+- `rpm --import` が出す期限切れの副鍵についての warning は、署名に使う副鍵が別にあるので問題ない
+
 ### 実施手順 / 手順 4: 補足: priority は保険
 
 [この節の検証記録](../verification/firefox.md#実施手順--手順-4-補足-priority-は保険)
@@ -16,6 +25,24 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 このリポジトリは `baseurl` に `$basearch` を含まない**全アーキテクチャ共通**の作りなので、`dnf list` には `firefox.x86_64` の行も出る。インストールされるのは実行中のアーキテクチャのものだけ。
 
+### 実施手順 / 手順 11: 補足: 起動し直す理由
+
+- 起動中の Firefox は FFmpeg を読み直さない
+
+### 更新 / 手順 1: 補足: RPM 版の更新
+
+- Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
+- 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
+
+### Windows 11 で使う / 手順 2: 補足: 入れたものがあるとき
+
+- `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たときも、同じ節の手順 3 を貼れば、新しい版があれば上がる
+
+### Windows 11 で使う / 手順 3: 補足: 入れ方と版
+
+- winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
+- `winget list` に出る版は、実行した日の最新
+
 ### Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由
 
 [この節の検証記録](../verification/firefox.md#windows-11-で使う--手順-4-補足-windows-では-aac-と-h264-のために何も足さない理由)
@@ -27,12 +54,20 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が必要になる可能性がある
 
+### Windows 11 で使う / 手順 4: 補足: 言語パック
+
+- 日本語版なので、言語パックは要らない
+
 ### Windows 11 で使う / 手順 5: 補足: コマンドで変えない理由
 
 - Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
 - Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
 - 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
 - Claude Code の `/login` は、既定のブラウザーでログインのページを開く。[Windows 11 の初期設定](../windows-setup.md)の後に通す順で、Claude Code より先にこの手順を行うのはそのため
+
+### Windows 11 の更新 / 手順 1: 補足: 新しい版が無いとき
+
+- winget に新しい版が無いのは、Firefox が自分で先に上げているからのこともある
 
 ### Windows 11 の更新 / 手順 2: 補足: winget での更新
 

@@ -31,7 +31,7 @@
    sudo dnf install -y mokutil openssl
    ```
 
-   - bootc のシステムでは dnf で入れられない（`/usr` が読み取り専用）が、Atomic Desktop のイメージには 2 つとも入っている
+   - bootc のシステムでは dnf で入れられないが、Atomic Desktop のイメージには 2 つとも入っている
 
 1. Secure Boot が有効かを見る。
 
@@ -40,7 +40,7 @@
    ```
 
    - `SecureBoot enabled` なら、手順 4 から続ける
-   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、この文書の手順はここで終わり**（署名していないモジュールも読み込まれる）
+   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、この文書の手順はここで終わり**
 
 1. 鍵がまだ無いときだけ、署名用の鍵を作り、MOK への登録を予約する。
 
@@ -56,10 +56,9 @@
    - 鍵を作る間は `.....+++` のような行が流れる
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）ができる
    - **`MOK.priv` は登録した鍵で信頼するモジュールを作れる秘密鍵**。root 以外に読ませず、ほかのマシンに持ち出さない
-   - **場所とファイル名は変えない**（VirtualBox の `vboxdrv.sh` と、Guest Additions の起動スクリプト `vboxadd` が、この 2 つを決め打ちで使う）
-   - 最後の `mokutil --import` で、公開鍵を UEFI の MOK に登録する予約をする
+   - **場所とファイル名は変えない**
    - **一時パスワードを 2 回聞かれる**（手順 6 の MokManager で 1 回だけ使う。本書には残さない）
-   - `中断: 鍵が既にある` と出たら、前に作った鍵がある。作り直すと、登録済みの鍵や、その鍵で署名したモジュールと合わなくなるので、手順 7 へ進む
+   - `中断: 鍵が既にある` と出たら、前に作った鍵がある。手順 7 へ進む
    - VirtualBox Guest Additions の、ホストオンリーアダプターだけの VM では、この手順の代わりに [virtualbox-guest-bootc.md のその節](virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3・4 で、鍵をホストで作り、証明書だけを VM に置いて予約する（手順 5 から先は同じ）
    - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 

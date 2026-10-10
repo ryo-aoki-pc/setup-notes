@@ -23,8 +23,7 @@
    ```
 
    - **編集が必須の変数は無い**。最新版（Rapid Release）を入れるなら既定のままでよい
-   - `FF_PKG` は `firefox` のまま使う。ESR / Beta の導入・確認・ロールバックは本書では扱わない
-   - 最後の行で値を読み戻す
+   - `FF_PKG` は `firefox` のまま使う
    - `FF_PKG` が空なら、ここで止めて直す
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
@@ -49,7 +48,7 @@
    }
    ```
 
-   - `rpm --import` は期限切れの副鍵についての warning を出すが、署名に使う副鍵は別にあるので問題ない（参考資料を参照）
+   - `rpm --import` は期限切れの副鍵についての warning を出すが、問題ない
    - `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る
 
 1. Mozilla のリポジトリを追加し、入手できる版を見る。
@@ -71,7 +70,7 @@
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
-   - このリポジトリは `baseurl` にアーキテクチャを含まないので、`x86_64` の行も一緒に並ぶ（参考資料を参照）
+   - `x86_64` の行も一緒に並ぶ
 
 1. Firefox を入れる。
 
@@ -136,7 +135,7 @@
 
 1. Firefox をすべて閉じてから起動し直し、AAC・H.264 の再生を確かめる。
 
-   - **起動中の Firefox は FFmpeg を読み直さないので、開いていたら全部閉じてから起動し直す**
+   - **開いていたら全部閉じてから起動し直す**
    - `about:support` の「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
    - 再生できなかった動画が再生できる
 
@@ -153,9 +152,6 @@
    ```bash
    sudo dnf upgrade "${FF_PKG}" ${FF_L10N}
    ```
-
-   - Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
-   - 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
 
 ---
 
@@ -184,7 +180,7 @@
    ```
 
    - どちらも何も出なければ、入っていない
-   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たら、この節の手順で入れたもの（か同じもの）。この節の手順 3 はそのまま貼ってよい（新しい版があれば上がる）
+   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たら、この節の手順で入れたもの（か同じもの）。この節の手順 3 はそのまま貼ってよい
    - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、設定 →「アプリ」→「インストールされているアプリ」で外してから始める（プロファイルは残る）
 
 1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
@@ -197,8 +193,7 @@
    Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
 
-   - winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
-   - `winget list` に `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形の行が出ればよい（版は実行した日の最新）
+   - `winget list` に `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形の行が出ればよい
    - `FileName` が `C:\Program Files\Mozilla Firefox\firefox.exe` で、`ProductVersion` が同じ版
    - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出る。ふだんは止まっていて、更新のときだけ動く
    - タスクの一覧に `Firefox Default Browser Agent <番号>` が出る
@@ -213,7 +208,7 @@
      - 「プログラムの実行ファイル」が `C:\Program Files\Mozilla Firefox\firefox.exe`
    - 同じページの「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
      - 情報が利用できないと出たら、動画を 1 本再生してから開き直す
-   - メニューやボタンが日本語で出る（日本語版なので、言語パックは要らない）
+   - メニューやボタンが日本語で出る
 
 1. Windows の設定で、Firefox を既定のブラウザーにする。
 
@@ -243,7 +238,7 @@
 
    - 1 行目が今の版
    - winget に新しい版があれば、`Mozilla.Firefox.ja` の行に今の版と新しい版が並ぶ
-   - 行が出ずに、見つからない旨が出たら、新しい版は無い（Firefox が自分で先に上げていることもある）。この節の手順 2 は飛ばす
+   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この節の手順 2 は飛ばす
 
 1. 新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
 

@@ -25,8 +25,8 @@
 
    - `uname -m` が `x86_64` ならよい
    - **`aarch64` ならここで止め、[dropbox-rclone.md](dropbox-rclone.md) へ進む**
-   - `stat` が `xfs`（AlmaLinux の既定）・`ext2/ext3`（ext4 もこう出る）・`btrfs` のどれかなら、Dropbox が対応するファイルシステム
-   - `df` の `Avail` が、Dropbox で使っている容量より大きいこと（リンクすると全部落ちてくる）
+   - `stat` が `xfs`・`ext2/ext3`（ext4 もこう出る）・`btrfs` のどれかなら、Dropbox が対応するファイルシステム
+   - `df` の `Avail` が、Dropbox で使っている容量より大きいこと
 
 1. Dropbox の署名鍵を落として、fingerprint を見る。
 
@@ -35,7 +35,7 @@
    gpg --show-keys --with-fingerprint /tmp/dropbox-key.asc
    ```
 
-   - `gpg: command not found` と出たら、`sudo dnf install -y gnupg2` で入れてから貼り直す（GNOME のデスクトップには入っている）
+   - `gpg: command not found` と出たら、`sudo dnf install -y gnupg2` で入れてから貼り直す
    - 次の値と一致することを目で確かめる
      - fingerprint `1C61 A265 6FB5 7B7E 4DE0  F4C1 FC91 8B33 5044 912E`
      - uid `Dropbox Automatic Signing Key <linux@dropbox.com>`
@@ -107,7 +107,6 @@
 
    - `Created symlink '.../default.target.wants/dropbox.service' → ...` が出る
    - `enabled`・`active` が出ればよい
-   - [linger](linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
 
 1. リンク用の URL を出す。
 
@@ -170,7 +169,7 @@
    dropbox version
    ```
 
-   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから [手順 2〜4](#実施手順) をやり直し、`systemctl --user start dropbox.service` で動かす（コンテナで、268.4.4124 から 270.4.3312 に入れ直せた）
+   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから [手順 2〜4](#実施手順) をやり直し、`systemctl --user start dropbox.service` で動かす
    - 入れ直すと、古い版のディレクトリ（`~/.dropbox-dist/dropbox-lnx.x86_64-<古い版>`）が残る。新しい版で動いているのを `dropbox version` で確かめてから、`rm -rf` で消してよい
 
 1. CLI（dropbox.py）を取り直す。

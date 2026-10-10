@@ -28,8 +28,6 @@
    sudo dnf install -y podman
    ```
 
-   - 依存として `crun`・`conmon`・`netavark`・`aardvark-dns`・`passt`・`containers-common` などが一緒に入る
-
 1. 自分のユーザーに、rootless 用の UID・GID の範囲（subuid / subgid）があるか確かめる。
 
    ```bash
@@ -63,10 +61,7 @@
    fi
    ```
 
-   - `SUBID_START=` の行で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
-   - `usermod` の行で、そこから 65536 個を不足する側だけに割り当てる。既存の UID・GID の範囲は変更しない
    - 手順 3 で出るはずだった 2 行が出ればよい
-   - `podman system migrate` は、それまでに podman を使っていたときに、新しい範囲を反映させる
 
 1. 自分のユーザーで動く設定になっているか確かめる。
 
@@ -102,7 +97,6 @@
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
-   - このソケットを使うもの: [Trivy](image-tools.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、GUI の Pods・Podman Desktop
    - `Failed to connect to user scope bus` と出たら、`sudo -iu` などで切り替えたシェルで実行している。自分のユーザーでログインし直す
 
 ---
@@ -121,8 +115,8 @@
    ```
 
    - `unix:///run/user/…/podman/podman.sock` と `"Name":"Podman Engine"` が出ればよい
-   - 共通設定はソケットがあるときだけ `DOCKER_HOST` を入れる。既に別の値がある場合は上書きせず、その用途を確認する
-   - ソケットの有効化は [手順 7](#実施手順)で行う。`~/.bashrc` には追記しない
+   - 既に別の値がある場合は上書きせず、その用途を確認する
+   - `~/.bashrc` には追記しない
 
 ---
 
@@ -158,8 +152,6 @@
    EOF
    ```
 
-   - 定義の各行の意味は、この手順の補足
-
 1. systemd に定義を読み直させ、サービスを起動して応答を確かめる。
 
    ```bash
@@ -171,9 +163,8 @@
    ```
 
    - `active`・`generated`・`hello from quadlet` が出ればよい
-   - 初回の `start` はイメージの取得を待つので、数十秒かかることがある
-   - `start` から戻った直後は、Apache がまだ待ち受けていないことがある。curl は、応答が来るまで 1 秒おきに 10 回まで試し直す
-   - **`systemctl --user enable` は使わない**。自動で起動するかは、定義の `[Install]` で決まる（参考資料を参照）
+   - 初回の `start` は、数十秒かかることがある
+   - **`systemctl --user enable` は使わない**
 
 1. 再起動しても起動するかを確かめるときだけ、再起動する。
 

@@ -15,11 +15,51 @@
 - samba.md の `[home]` も同じで、`SHARE=home` だけを変える。マウント先は `/mnt/home` になり、その下にユーザーごとのディレクトリが並ぶ
 - `SERVER` に NetBIOS 名は使えない。samba.md のサーバーは NetBIOS（nmbd）を動かさない。IP アドレスか、DNS（または `/etc/hosts`）で引ける名前にする
 - `SMB_USER`・`SHARE`・`MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 6 で中断する
+- `SERVER` は既定値のままでもエラーにならないので、書き換えたかを手順 1 で確かめる
+- 変数はそのシェルの中だけで有効
+
+### 実施手順 / 手順 2: 補足: cifs-utils
+
+- Workstation で入れた PC には、cifs-utils が最初から入っている
+
+### 実施手順 / 手順 4: 補足: パスワードの扱い
+
+- パスワードは、コマンドラインにもシェルの履歴にも残らない
+- 最後の `unset PW` で、シェルの変数からもパスワードを消す
+
+### 実施手順 / 手順 5: 補足: 出力の意味
+
+- `ls -ldZ` の `drwx------ … <USER> <USER>` は、自分の所有で、ほかのユーザーは入れないこと
+- `SHARE=home` で `cifs-test.txt` の書き込みが `Permission denied` になるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため
+
+### 実施手順 / 手順 7: 補足: 自動マウントの動き
+
+- `SHARE=home` の `Permission denied` は、サーバーの SELinux による拒否
+- 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
+- 使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
+- 再起動した後も、アクセスしたときにマウントされる
 
 ### GNOME Files で開く（任意） / 手順 1: 補足: パッケージ
 
 - `gvfs-smb` が gvfs の SMB のバックエンド（libsmbclient を使う）、`gvfs-fuse` が GIO を使わないアプリ向けの `/run/user/<UID>/gvfs/`
 - どちらも GNOME のグループ（`gnome-desktop`）の必須パッケージなので、Workstation にも Server with GUI にも入っている
+
+### GNOME Files で開く（任意） / 手順 2: 補足: ログインし直さなくてよい理由
+
+- VM で、動いている gvfsd がそのまま SMB につないだ
+
+### GNOME Files で開く（任意） / 手順 3: 補足: パスワードの保存
+
+- `/usr/bin/gio mount` は、パスワードを保存しない
+
+### GNOME Files で開く（任意） / 手順 4: 補足: 使い方
+
+- GIO を使わないアプリからは、`/run/user/<UID>/gvfs/smb-share:…/` の下で読み書きできる
+- サーバーで変えたものは、「ファイル」には自動では出ない。F5 で出る（[注意点](../extra/samba-client.md#注意点)）
+
+### GNOME Files で開く（任意） / 手順 5: 補足: 外した後
+
+- 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
 ### ロールバック / 手順 1: 補足: 2 つのユニットを止める理由
 
@@ -43,6 +83,8 @@
 - `SMB_USER` は、AlmaLinux 10 の節と違って必須にした。Windows のユーザー名（Microsoft アカウントなら `C:\Users\` の下のフォルダーの名前）は、サーバーの OS のユーザー名と違うことが多いため
 - `SHARE` の既定が `SMB_USER` なのは、samba.md の `[homes]` が Samba ユーザーと同じ名前の共有を見せるため（[実施手順の手順 1 の補足](#実施手順--手順-1-補足-変数について)と同じ）
 - `SERVER` に NetBIOS 名は使えない（samba.md のサーバーは nmbd を動かさない）。IP アドレスか、DNS で引ける名前にする
+- `SERVER` をエクスプローラーで `\\<SERVER>\…` を開くときと同じ書き方にするのは、資格情報をこの名前に結び付けて置くため
+- 変数はその PowerShell の中だけで有効
 
 ### Windows 11 で使う / 手順 4: 補足: 資格情報マネージャーに置く
 
@@ -57,12 +99,21 @@
 - 成功は、`Get-SmbMapping` の `Status` が `OK` で判断する。Microsoft のコミュニティには、Windows 11 で `New-SmbMapping` のドライブがエクスプローラーを起動し直す（かサインインし直す）まで出ないという報告があるので、エクスプローラーでの確かめはこの節の手順 8 のサインインし直した後にした
 - 前に割り当てて、切れたまま覚えているドライブ文字（`Status` が `Unavailable` など）には割り当てられない（`ERROR_DEVICE_ALREADY_REMEMBERED`）。この節の手順 3 は、そのドライブ文字も `Get-SmbMapping` で見つけて止める
 
+### Windows 11 で使う / 手順 6: 補足: [home] の書き込み
+
+- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[実施手順](../samba-client.md#実施手順)の手順 5 と同じ）
+
 ### Windows 11 で使う / 手順 7: 補足: 署名と、サーバーの設定を変えない理由
 
 - Windows 11 24H2 の Pro・Enterprise・Education は、SMB の署名を、送る側（クライアント）と受ける側（サーバー）の両方で必ず求める。Home は、どちらも求めない（Microsoft の文書）
 - samba.md のサーバーは `server signing` を書いておらず、既定の `default` のまま。SMB2 以降では署名を止められず、クライアントが求めれば署名する（smb.conf(5)）。そのため Pro の PC からの接続は署名され、サーバーもクライアントも設定を変えずにつながる
 - `smbstatus` の `Signing` の欄は、全体に署名した接続なら方式の名前（`AES-128-GMAC` など）だけ、一部だけなら `partial(<方式>)`、無ければ `-`（Samba 4.23.5 のソース）。署名を求めない AlmaLinux 10 の cifs の接続は `partial(AES-128-CMAC)` だった
 - Pro は、ゲスト（認証しない接続）も既定で断る。samba.md のサーバーはユーザーとパスワードで認証し、`map to guest` は既定の `Never`（ゲストにしない）なので、当たらない
+- `smbstatus` にこの PC の行が無いことがあるのは、使っていない接続が閉じられることがあるため
+
+### Windows 11 の更新 / 手順 1: 補足: 置き換わる資格情報
+
+- 登録し直すと、同じ `<SERVER>` の資格情報が置き換わる
 
 ### Windows 11 のロールバック / 手順 1: 補足: 外すものと残るもの
 

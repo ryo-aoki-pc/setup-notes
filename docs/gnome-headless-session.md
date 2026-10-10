@@ -30,10 +30,8 @@
    ```
 
    - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
-   - `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
-   - 最後に値を読み戻して確かめる
    - `USER` が `root` なら、ここで止めて、セッションを使うユーザーのシェルで貼り直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. ヘッドレスのセッションを有効にして起動し、セッションができたかを確かめる。
 
@@ -52,9 +50,7 @@
    ```
 
    - `Created symlink '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service' → '/usr/lib/systemd/system/gnome-headless-session@.service'.` と出る
-   - PC を起動するたびに、このセッションも起動する
    - 続いて `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell` が出ればよい
-   - `for` の行で、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ
    - 何も出ないときは、`systemctl status "gnome-headless-session@${USER}.service"` と `systemctl --user status org.gnome.Shell@wayland.service` を見る
 
 1. 共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
@@ -113,10 +109,9 @@
    ```
 
    - 最後に `TLS の退避と証明書の準備が完了` と出れば、手順 4 へ進む
-   - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る。既存の証明書と鍵は上書きしない
+   - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る
    - 既存の鍵も、この手順で生成するものと同じく、パスフレーズなしで読める必要がある
-   - `中断:` が出たら、手順 4 以降へ進まない。[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 3・4 で戻す。生成途中で照合用の記録も作れなかった場合は、ファイルを自動削除せず残す
-   - 置き場所は、RHEL 10 の文書の 1.4 と同じ
+   - `中断:` が出たら、手順 4 以降へ進まない。[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 3・4 で戻す
 
 1. `grdctl --headless` で、証明書と鍵・ポートを設定する。
 
@@ -134,7 +129,7 @@
    ```
 
    - コマンドごとに `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` が出る（TPM の無い PC。[検証記録](verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)）
-   - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。設定する前の空の値を読んだもので、害は無い
+   - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
 
 1. RDP のユーザー名とパスワードを、引数なしで対話入力する。
 
@@ -143,7 +138,6 @@
    ```
 
    - ユーザー名とパスワードを聞かれる。クライアントが接続するときに入れるもので、OS のアカウントと違ってよい
-   - 引数なしで打つのは、パスワードをシェルの履歴に残さないため
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
 1. RDP を有効にする。
@@ -167,7 +161,6 @@
    ```
 
    - `success` が 2 行出て、最後に `<RDP_PORT>/tcp` を含む行が出ればよい
-   - リモートログインと併用している PC でも、ここで 3390/tcp を足す（3389/tcp はリモートログインの `rdp` サービスで開いている）
 
 1. デーモンが待ち受けているかを確かめる。
 
@@ -215,7 +208,7 @@
      - `selectedProtocol=0x2` でネゴシエーションが成立する
      - `fingerprint:` の行が、最後の `TLS fingerprint:` の行と**完全一致**する
      - SAN に、接続に使う名前が `DNS:` エントリとして含まれている
-   - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい（この手順書が作る唯一の作業ファイル）
+   - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい
 
 1. LAN 内の別のマシンから、RDP クライアントでつなぐ。
 
@@ -252,7 +245,6 @@
    ```
 
    - `success` が 3 行出て、`--list-ports` に `<RDP_PORT>/tcp` が無く、rich rule に `<LAN_SUBNET>` と `<RDP_PORT>` が入っていればよい
-   - rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[gnome-remote-desktop.md の同じ節](gnome-remote-desktop.md#接続元を-lan-に絞る任意)）
 
 ---
 
@@ -287,8 +279,7 @@
    }
    ```
 
-   - `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す。`gdm-autologin` はヘッドレスのセッション、`gdm-password` はリモートログインで入ったセッション（どちらも `loginctl` の `TTY` の列は `headless`）
-   - `grdctl --headless status` では確かめない（`credentials.ini` が無ければ作るため）
+   - `grdctl --headless status` では確かめない
    - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この節の手順 2 は飛ばす
    - `ls` が `virtual-monitor.conf` を出せば、claude-code-gui.md のドロップインがある。`No such file or directory` なら、この節の手順 3 は飛ばす
    - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この節の手順 5 を行う。そうでなければ、この節の手順 5 は飛ばす
@@ -308,8 +299,7 @@
    ```
 
    - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
-   - 動いている gnome-shell には効かない。この節の手順 4・5 でセッションを終わらせ、手順 6 で入り直したときに効く
-   - claude-code-gui.md の[ロールバック](extra/claude-code-gui.md#ロールバック)の手順 2 は行わない（ヘッドレスのセッションを起動し直すため）
+   - claude-code-gui.md の[ロールバック](extra/claude-code-gui.md#ロールバック)の手順 2 は行わない
 
 1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
@@ -329,8 +319,7 @@
 
    - 有効だったときは `Removed '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service'.` と出る（既に `disabled` なら何も出ない）
    - セッションで動いていたアプリも閉じる
-   - 続いて `0` が出ればよい（このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない）
-   - `for` の行で、セッションが終わるまで、30 秒まで待つ
+   - 続いて `0` が出ればよい
 
 1. ドロップインを外す前に入ったリモートログインのセッションが残っていれば、終わらせる。
 
@@ -348,8 +337,6 @@
 
    - `0` が出て、gnome-shell の行が出なければよい
    - そのセッションで開いていたアプリは閉じる。つないでいたクライアントは切れる
-   - `sudo` は要らない（自分のセッションは自分で終わらせられる）
-   - ユーザーの D-Bus が起動し直される（[注意点](extra/gnome-headless-session.md#注意点)）
 
 1. クライアントの PC から、リモートログインでつなぎ直してログインする。
 

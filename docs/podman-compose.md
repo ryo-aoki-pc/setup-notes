@@ -25,7 +25,6 @@
    - 一緒に入るのは Python のライブラリ 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. podman-compose が入ったか確かめる。
@@ -39,7 +38,7 @@
 
    - `podman version 5.8.2` と `podman-compose version 1.5.0` の 2 行が出る
    - `/usr/bin/podman-compose`、`podman-compose 1.5.0-1.el10_1 epel` が出る
-   - 最後の `podman compose`（podman のサブコマンド）は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
+   - 最後の `podman compose` は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
 
 1. 確認用の compose ファイルとページを置く。
 
@@ -62,9 +61,6 @@
    cat ~/compose-sample/compose.yaml
    ```
 
-   - `web` は Apache で、`127.0.0.1:8081` で開く。ページは `~/compose-sample/html` から読む
-   - `check` は、`web` にサービス名でつながるかを確かめるためだけのコンテナ（同じイメージなので、取得は 1 回で済む）
-
 1. compose ファイルのあるディレクトリで、コンテナを起動する。
 
    ```bash
@@ -72,7 +68,6 @@
    podman-compose up -d
    ```
 
-   - 初回はイメージ（285 MB）を取得する
    - 最後に `compose-sample_web_1` と `compose-sample_check_1` が出る
 
 1. 起動したコンテナと、公開したポートを確かめる。
@@ -86,7 +81,7 @@
 
    - `podman-compose ps` に 2 つのコンテナが `Up` で出て、`web` の `PORTS` に `127.0.0.1:8081->8080/tcp` が出る
    - `podman pod ps` に `pod_compose-sample` が `Running` で出る
-   - `hello from compose` が出ればよい（curl は、Apache が待ち受けるまで 1 秒おきに 10 回まで試し直す）
+   - `hello from compose` が出ればよい
 
 1. `check` のコンテナから、サービス名 `web` でつながるか確かめる。
 
@@ -95,7 +90,7 @@
    podman-compose exec check curl -s http://web:8080/
    ```
 
-   - `hello from compose` が出ればよい。`web` という名前が、compose のネットワークの中で引けている
+   - `hello from compose` が出ればよい
    - **次の節は、プロンプトが戻ってから貼る**（続けて貼るとコンテナの中のコマンドへの入力として食われる）
 
 ---
@@ -138,5 +133,4 @@
    podman-compose up -d
    ```
 
-   - `pull` がイメージを取り直し、`up -d` がコンテナを作り直す
    - 新しいイメージが無いときも、`up -d` はコンテナの名前を出して終わる

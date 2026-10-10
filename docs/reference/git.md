@@ -11,6 +11,17 @@
 - GitHub に push するなら、メールアドレスに GitHub の noreply のアドレス（`<ID>+<GITHUB_USER>@users.noreply.github.com`）を使うと、私用のアドレスをコミットに載せずに済む。アドレスは GitHub の Settings の Emails で確かめる
 - 名前に空白を入れるときは、引用符の中に書く（引用符が無いと、空白の後ろがコマンドとして実行される）
 - 使うのは手順 4 だけ。後から変えるときは、手順 1 と手順 4 を貼り直す（`git config --global` は同じキーを上書きする）
+- 変数はそのシェルの中だけで有効
+
+### 実施手順 / 手順 3: 補足: Windows の system の行
+
+- Windows で出る `system` の行（インストーラが書いたもの）より、手順 5・6 で書く `global` の値が優先される
+
+### 実施手順 / 手順 5: 補足: 設定の意味
+
+- `pull.rebase true`: `git pull` が、取ってきた履歴の上に自分のコミットを載せ直す（マージコミットを作らない）
+- `rebase.autoStash true`: 未コミットの変更があっても pull できる（pull の前に stash し、後で戻す）
+- `core.autocrlf false`: チェックアウトでもコミットでも、改行を変換しない
 
 ### 実施手順 / 手順 6: 補足: 推奨の設定と、入れなかった設定
 
@@ -26,6 +37,9 @@
 | `branch.sort` | `-committerdate` | `git branch` を、最近コミットしたブランチから並べる |
 | `tag.sort` | `version:refname` | `git tag` を版の順（`v1.9` の後に `v1.10`）に並べる |
 
+- 要らないものは、[ロールバック](../extra/git.md#ロールバック)の手順 1・4 に従い、そのキーだけ元の設定に戻せる
+- `merge.conflictStyle zdiff3` は [git-delta.md 手順 3](../git-delta.md#実施手順) と同じ設定で、どちらを先に通してもよい
+
 入れなかったもの:
 
 - `core.editor`: 好みで決める。未設定なら、環境変数 `VISUAL`・`EDITOR` のエディタ、どちらも無ければ `vi` が開く。Windows では、インストーラで選んだエディタが `system` に入る
@@ -34,6 +48,21 @@
 - `pull.ff only`: 分岐したときの pull が、rebase せずに止まる（手順 8）
 - `push.default`: 既定の `simple`（今のブランチを、同じ名前の追跡ブランチにだけ push する）のままでよい
 
+### 実施手順 / 手順 7: 補足: pull.ff
+
+- 最後の `pull.ff` が何も出さないのは、設定が無いこと
+
+### 実施手順 / 手順 9: 補足: 確かめている設定
+
+- `?? 日本語.txt` がそのまま出るのは `core.quotepath`
+- `i/crlf  w/crlf` は、CRLF のまま入ったこと（`core.autocrlf`）
+- ブランチの `main` は `init.defaultBranch`
+- `branch 'main' set up to track 'origin/main'.` は `push.autoSetupRemote`
+
+### 実施手順 / 手順 10: 補足: 残る変更
+
+- `M crlf.txt` は、pull の前の、未コミットの変更
+
 ### Windows 11 で Git for Windows を入れる / 手順 2: 補足: 確かめていること
 
 - Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
@@ -41,6 +70,15 @@
 - 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+- `…\AppData\Local\Programs\Git\cmd\git.exe` の Git for Windows を外してから始めるのは、ほかの手順書が `C:\Program Files\Git` を前提にしているため
+
+### Windows 11 で Git for Windows を入れる / 手順 3: 補足: UAC
+
+- 管理者の窓から動かすので、UAC の確認も出ないはず
+
+### Windows 11 で Git for Windows を入れる / 手順 4: 補足: 開き直す理由
+
+- 同じ節の手順 3 で PC 全体の `PATH` に足された `C:\Program Files\Git\cmd` は、開いていた PowerShell には入らない
 
 ### Windows 11 で Git for Windows を入れる / 手順 5: 補足: PATH と、ほかの git
 
@@ -48,6 +86,22 @@
 - Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
 - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
 - Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
+
+### Windows 11 で Git for Windows を入れる / 手順 5: 補足: 版
+
+- `git version` の版は、実行した日の最新
+
+### 改行を変換して clone したリポジトリを直す / 手順 2: 補足: 保存しなかったとき
+
+- `No local changes to save` は、今回は保存していないこと
+
+### 改行を変換して clone したリポジトリを直す / 手順 4: 補足: 別の stash を作らない理由
+
+- `pop` は先頭の stash を戻すため
+
+### 更新 / 手順 1: 補足: dnf upgrade
+
+- 通常の `sudo dnf upgrade` にも含まれる
 
 ### ロールバック / 手順 1: 補足: 残るもの
 

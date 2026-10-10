@@ -22,7 +22,7 @@
    for v in DELTA_NAVIGATE DELTA_LINE_NUMBERS DELTA_SIDE_BY_SIDE; do printf '%-19s = %s\n' "$v" "${!v}"; done
    ```
 
-   - **編集が必須の変数は無い**。3 つとも表示の好みなので、既定のままで進められる
+   - **編集が必須の変数は無い**。既定のままで進められる
    - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
    - 最後の行で値を読み戻して確かめる
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
@@ -33,8 +33,6 @@
    brew install git-delta
    ```
 
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
-   - **formula 名は `git-delta` だが、入るコマンドは `delta`**（`brew install delta` でも同じ formula に解決される）
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
 1. `git config --global` で git の設定を書き、読み戻す。
@@ -53,13 +51,8 @@
    fi
    ```
 
-   - `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）
-   - 最後の行で、書けたか読み戻す
    - 設定した 6 項目が出る。`中断:` が出た場合は、どの設定も書き換えていない
-   - **`interactive.difffilter` と小文字で表示される**のが正しい（git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま）
-   - `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
-   - `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
-   - [git.md 手順 6](git.md#実施手順) でも同じ値を入れる。先に通していても、同じキーが書き直されるだけ
+   - **`interactive.difffilter` と小文字で表示される**のが正しい
 
 1. 変更のあるリポジトリに `cd` してから、delta の版と差分の表示を確かめる。
 
@@ -71,7 +64,6 @@
    ```
 
    - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
-   - 最後の行で、変更のあるリポジトリの差分を出す
    - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
    - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
 
@@ -172,8 +164,7 @@
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : True` ならよい。`False` なら、先に [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
-   - `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（この節の手順 3 の `scoop install` は何も変えない）
-   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。混ざらないよう、外してから始める
+   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める
 
 1. scoop で delta を入れ、版と場所を確かめる。
 
@@ -183,29 +174,25 @@
    (Get-Command delta -All).Source
    ```
 
-   - `'delta' (0.20.1) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）
+   - `'delta' (0.20.1) was installed successfully!` の形の行が出ればよい
    - もう入っていれば、`'delta' (<版>) is already installed.` と `Use 'scoop update delta' to install a new version.` の警告を出して何も変えない
-   - scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
    - `delta 0.20.1` の形で、入れた版が出ればよい。版が出なければ、この節の手順 2 の `VCRuntime` を確かめる
    - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\delta.exe` の 1 行だけを出せばよい
-   - scoop の delta は x64 版だけ。arm64 の Windows でも、その x64 版が入る（確かめていない）
 
 1. WezTerm の新しいタブ（Git Bash）で、[実施手順](#実施手順)の手順 1・3 を貼る。
 
    - WezTerm を起動するか、新しいタブ（既定のキーは Ctrl+Shift+T）を開く（自分用の WezTerm の設定では Git Bash が開く）
-   - 手順 1 の 3 つの変数は、AlmaLinux 10 と同じ既定のままでよい。変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
+   - 手順 1 の 3 つの変数は、AlmaLinux 10 と同じ既定のままでよい。手順 3 も同じタブに貼る
    - 手順 3 は、AlmaLinux 10 と同じく、設定した 6 項目が出ればよい（`interactive.difffilter` は小文字）
-   - 書く先は `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `~/.gitconfig`）。PowerShell と cmd の git も、同じファイルを読む
-   - [実施手順](#実施手順)の手順 2・4 は行わない（`brew` の行があるため。版と場所は、この節の手順 3 で確かめた）
+   - [実施手順](#実施手順)の手順 2・4 は行わない
 
 1. 同じ Git Bash のタブで `git diff` を打ち、delta の表示になることを確かめる。
 
-   - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ（[共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分）
+   - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ
    - ファイル名のヘッダと、行番号・行ごとに背景色の付いた差分が出ればよい（[実施手順](#実施手順)の手順 4 と同じ見え方）
    - 1 画面に収まらないときは、less で止まる。`q` で閉じる
    - 素の差分（背景色の無い `+` / `-` の行）が出たら、この節の手順 4 で貼った[実施手順](#実施手順)の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
    - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
-   - PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](extra/git-delta.md#注意点)）
 
 ---
 

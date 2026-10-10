@@ -46,7 +46,7 @@
    ```
 
    - 1 行目が `oracle`（VirtualBox）ならよい
-   - `/var` の `Avail` が 10 GB 以上あればよい（手順 6 でベースのイメージをもう 1 つ取り込むため。この手順の補足）
+   - `/var` の `Avail` が 10 GB 以上あればよい
    - `● Booted image:` が手順 1 の `BASE_IMAGE` と同じならよい。違えば手順 1 を直して貼り直す
 
 1. ビルド用のディレクトリに Containerfile を置く。
@@ -139,7 +139,6 @@
 1. VM のウィンドウのメニューで、Guest Additions の CD を入れる。
 
    - 「デバイス」→「Guest Additions CD イメージを挿入」を選ぶ（英語の表示では Devices → Insert Guest Additions CD image...）
-   - VirtualBox のホスト側の操作。ホストの VirtualBox に同梱の ISO が、VM の光学ドライブに入る
    - CD は自動でマウントされるが、GNOME の画面には何も出ない（自動実行の確認も、デスクトップのアイコンも出ない。手順 3 の補足）
    - 「仮想光学ディスク … をマシン … に挿入できません。」と出たら、インストールに使った ISO がまだ入っている。VM の端末で `eject /dev/sr0` を実行してから、もう一度選ぶ
    - **次の手順は、CD を入れて 10 秒ほどたってから貼る**
@@ -154,7 +153,7 @@
 
    - `MD5 checksums are OK. All good.` が出れば壊れていない（前の `does not contain an embedded SHA256 checksum.` は出てよい）
    - `Identification: VirtualBox 7.2.20 Guest Additions for Linux` の版が、ホストの VirtualBox（「ヘルプ」→「VirtualBox について」。英語の表示では Help → About VirtualBox...）と同じならよい
-   - **7.2.8 より古いなら、先にホストの VirtualBox を上げる**（EL10.1・10.2 のカーネルへの対応が 7.2.8 で入った）
+   - **7.2.8 より古いなら、先にホストの VirtualBox を上げる**
    - `install: cannot stat` なら、CD がマウントされていない。`udisksctl mount -b /dev/sr0` でマウントしてから貼り直す
 
 1. 派生イメージをビルドする。
@@ -169,8 +168,7 @@
 
    - 初回はベースのイメージ（圧縮で約 2.2 GB）を取り込む。Atomic Desktop の `/etc/containers/policy.json` に従って、イメージの署名が確かめられる
      - 自作の kernel-rt のイメージなど、`policy.json` に載っていないレジストリのイメージは、既定（`insecureAcceptAnything`）のとおり署名を確かめずに取り込む
-   - 途中の `+` で始まる行は、Containerfile の中で実行したコマンド（参考資料を参照）
-   - 途中の `unable to load vboxguest kernel module` と `installer exit=1` は、ビルドの中ではモジュールを読み込めないためで、失敗ではない
+   - 途中の `unable to load vboxguest kernel module` と `installer exit=1` は、失敗ではない
      - Guest Additions が動いている VM でビルドし直すと（[更新](#更新)）、代わりに `mknod: /dev/vboxguest: Operation not permitted` と `installer exit=2` になる。これも失敗ではない
        - カーネルも新しくなったとき（ベースの更新）は、`mknod` の行が出て `installer exit=1` になる
    - 最後に次が出ればよい
@@ -276,10 +274,8 @@
    ```
 
    - Secure Boot が有効かは、VM で [secure-boot-mok.md 手順 3](secure-boot-mok.md#実施手順) の `mokutil --sb-state` で見たもの
-   - `openssl` が入っていなければ、`sudo dnf` で入れる
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）が並び、`scp` が `MOK.der` を VM のホームに送る
    - **秘密鍵 `MOK.priv` はホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない**。VM へ送るのは証明書 `MOK.der` だけ
-   - すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
    - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
    - **次の手順は、パスワードに答え、`MOK.der` の転送が終わってから、VM の端末で貼る**
 
@@ -316,7 +312,7 @@
 
    - VM のユーザーのパスワードを聞かれる
    - `vbox-ga-image/Containerfile`・`vbox-ga-image/VBoxLinuxAdditions.run`・`etc/containers/policy.json` などの名前が並べばよい
-   - `tar: … time stamp … is … s in the future` が混ざることがある。VM の時計が進んでいるためで、害は無い（参考資料を参照）
+   - `tar: … time stamp … is … s in the future` が混ざることがある。害は無い（参考資料を参照）
    - **次の手順は、パスワードに答え、名前が並んでから貼る**
 
 1. ホストの端末で、ベースのイメージの署名を VM と同じ鍵で確かめるようにする。
@@ -403,8 +399,8 @@
    ```
 
    - この節の手順 9 で運んだベースのイメージに切り替えて、再起動する（`Fetching layers` が `0/0` で、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest`）
-   - 起動した後の `sudo bootc status` の `● Booted image:` は `containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` になる（レジストリではなく、この VM の podman のイメージを追う）
-     - `Digest:` も、レジストリのものとは違う値になる（ファイルから取り込んだイメージの digest）
+   - 起動した後の `sudo bootc status` の `● Booted image:` は `containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` になる
+     - `Digest:` も、レジストリのものとは違う値になる
      - 中身は元のイメージと同じ版（`Version:`）で、Guest Additions のモジュールと `/opt/VBoxGuestAdditions-*` は無くなる
    - 続けて[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 から先を行う
    - **[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 は、起動したらログインし、新しい端末で[手順 1](#実施手順) を貼ってから貼る**
@@ -436,9 +432,7 @@
    fi
    ```
 
-   - この節の手順 6 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
    - 自動で消せたときは、`Untagged:` が 2 行と、`Deleted:` の行が並ぶ
-   - `~/.config/containers` は、ほかのファイルが無ければ消える
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`podman image prune` で消せる（`[y/N]` を聞く）
    - **注意**: 控えが無い・不完全なときや、設定の内容が変わったときは、`policy.json`・`registries.d`・`pki` をまとめて消さない。退避と控えを見て、今回追加・変更したファイルや項目だけを手で戻す
      - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 を貼り直す}"` で消す
@@ -465,7 +459,6 @@
    sudo usermod -aG vboxsf "${USER}"
    ```
 
-   - `vboxsf` グループは、切り替えた後の最初の起動で `systemd-sysusers` が作っている
    - **効くのはログインし直してから**（この節の手順 3）
 
 1. GNOME からログアウトして、ログインし直す。
@@ -502,7 +495,6 @@
 
 1. 手順 1 の変数を設定したシェルで、[手順 6](#実施手順) を貼り直す。
 
-   - `--pull=newer` なので、ベースが新しくなっていれば取り込み直す
    - 何も変わっていなければ、ビルドのキャッシュが使われて同じイメージになる（`Using cache` が 4 行並び、最後のイメージ ID が同じ）
    - Containerfile を置き直したとき（[手順 3](#実施手順)）は、Guest Additions の段をやり直す
    - **次の手順は、`Successfully tagged` が出てから貼る**

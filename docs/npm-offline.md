@@ -43,9 +43,9 @@
    - `v22.23.2`、`10.9.8`、`/usr/bin/node`、`/usr/bin/npm` が出る
    - `/home/linuxbrew/.linuxbrew/bin/npm` が出たら、Homebrew の node が PATH で先に来ていて、Mason もそちらを使う（[注意点](extra/npm-offline.md#注意点)）
    - `npm config get` の 2 行は、どちらも `null`
-   - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される（参考資料を参照）
+   - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される
    - `npm notice PONG 148ms` のように `PONG` が出れば、npm はトンネルを通ってレジストリに届いている
-   - `export` はこのシェルの中だけで有効。**トンネルを張り直したら、ssh-socks-tunnel.md の手順 3 に続けて、この手順を貼り直す**
+   - **トンネルを張り直したら、ssh-socks-tunnel.md の手順 3 に続けて、この手順を貼り直す**
 
 1. 手順 2 のシェルで Neovim でファイルを開き、Mason に足りないパッケージを入れさせる。
 
@@ -53,15 +53,14 @@
    nvim -R ~/.config/nvim/init.lua
    ```
 
-   - ファイルを開くと Mason が読み込まれ、設定にある足りないパッケージを入れ始める（LazyVim をもとにした設定なら、ツールと LSP サーバーの両方）
    - 入れ終わるたびに、`markdownlint-cli2 was successfully installed.` のような通知が出る
    - `:Mason` で画面を開くと、入れている間は `Installing` に `$ npm install markdown-toc@1.2.0` のような行が出る
    - npm のパッケージ（`markdownlint-cli2`・`json-lsp` など）が `Installed` に並べばよい
    - 手順 5 で使う `markdownlint-cli2` が設定に無ければ、`:MasonInstall markdownlint-cli2` で入れる。ほかの npm のパッケージも、同じように名前で入れられる
    - 失敗は通知が出ないことがある。`Installed` に並ばないものは、`:MasonLog` の `Installation failed for Package(name=…)` の行で理由を見る
    - npm 以外の理由（`unzip` が無い、など）で失敗したものは[注意点](extra/npm-offline.md#注意点)
-   - 通知が出そろってから、`:qa` で閉じる（入れている途中で閉じると、確認無しにその導入が止まる）
-   - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る（参考資料を参照）
+   - 通知が出そろってから、`:qa` で閉じる
+   - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
 1. [ssh-socks-tunnel.md の「トンネルを閉じる」](ssh-socks-tunnel.md#トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
@@ -79,7 +78,7 @@
    npm ping --fetch-retries=0 && echo '届いた（オフラインではない）' || echo '届かない（期待どおり）'
    ```
 
-   - `env` は何も出さない（プロキシの変数は、手順 2 のシェルと一緒に消えた）
+   - `env` は何も出さない
    - `ls` に、Mason で入れたコマンド（`markdownlint-cli2`・`vscode-json-language-server` など）が並ぶ
    - `markdownlint-cli2 v0.23.3 (markdownlint v0.41.1)` のような版の行が出る
    - 最後の行は、`ENOTFOUND` のエラーの後に `届かない（期待どおり）`

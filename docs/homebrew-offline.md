@@ -28,23 +28,20 @@
    rpm -q procps-ng curl file git
    ```
 
-   - 4 つの URL の数字が、どれも `000` 以外なら届いている（ghcr.io はトークンが無いので `401`）
+   - 4 つの URL の数字が、どれも `000` 以外なら届いている（ghcr.io は `401`）
    - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、トンネルが無いか、`ALL_PROXY` を入れていないシェルで貼っている（[ssh-socks-tunnel.md 手順 2](ssh-socks-tunnel.md#実施手順) からやり直す）
    - `rpm -q` の 4 つがどれも入っていれば、**手順 2 は飛ばし、手順 3 でも AlmaLinux 10 の初期設定の手順 46 を飛ばす**
    - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、手順 2 は飛ばす
 
 1. 手順 1 で入っていないパッケージがあったときだけ、[ssh-socks-tunnel.md の「dnf にもトンネルを使わせる（任意）」](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)を行う。
 
-   - AlmaLinux 10 の初期設定の手順 46 の dnf が、トンネルを通るようになる
-   - 足した行は、[ロールバック](extra/homebrew-offline.md#ロールバック)のリードのとおり、ssh-socks-tunnel.md のロールバックで消す
    - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
 
 1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) を貼る。
 
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、Homebrew は入っているので、この手順は飛ばす
    - 同書の手順 46 の dnf は、手順 2 の設定で通る（手順 1 で 4 つとも入っていたなら飛ばす）
-   - 同書の手順 47 のインストーラも、中で使う curl と git が `ALL_PROXY` を読むので、そのまま通る
-   - 同書の手順 48 は、共通の bash 設定（同書の手順 42・43）を入れてあるシェルで貼る（`brew shellenv` は共通設定が実行する）
+   - 同書の手順 48 は、共通の bash 設定（同書の手順 42・43）を入れてあるシェルで貼る
    - **次の手順は、同書の手順 48 まで終えてから貼る**（同書の手順 47 に `RETURN` の確認がある）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。

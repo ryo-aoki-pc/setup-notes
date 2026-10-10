@@ -19,10 +19,8 @@
    brew install gdu
    ```
 
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
-   - 依存は無い（Go の静的バイナリ 1 つ、約 20 MB）
    - **入るコマンドは `gdu` ではなく `gdu-go`**
-   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る（出力例は[検証記録](verification/gdu.md)・[参考資料](reference/gdu.md)）
+   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る
 
 1. `gdu-go` が入ったことと、TUI を起動せずに走査できることを確かめる。
 
@@ -37,7 +35,6 @@
    - `Version: v5.37.0` と出る
    - `command -v gdu` の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ（任意）](#gdu-の名前で呼ぶ任意)をやるまでは、これが正しい状態
    - 最後の `gdu-go -n` では、サイズの大きい順に並んだ一覧が出る
-   - **TUI で使うときは引数にディレクトリを渡すだけ**（`gdu-go ~` など。`q` で終了）
 
 ---
 
@@ -50,7 +47,7 @@
    alias gdu
    ```
 
-   - `alias gdu='gdu-go'` が出ればよい。`~/.bashrc` への追記は不要
+   - `alias gdu='gdu-go'` が出ればよい
 
 1. スクリプトや他のツールからも `gdu` で呼びたいときだけ、シンボリックリンクにする。
 
@@ -58,10 +55,7 @@
    mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
    ```
 
-   - `~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている
-   - リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい
-   - ただし **PATH の順序では Homebrew のほうが先**なので、EPEL 版の `/usr/bin/gdu` を同時に入れている場合はどちらが呼ばれるか変わる（[注意点](extra/gdu.md#注意点)）
-   - `sudo gdu` には効かない（`~/.local/bin` は sudo の PATH に無い）。`sudo` では `gdu-go` と打つ（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節が要る）
+   - `sudo gdu` には効かない。`sudo` では `gdu-go` と打つ（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節が要る）
 
 ---
 

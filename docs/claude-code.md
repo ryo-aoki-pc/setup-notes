@@ -68,7 +68,6 @@
    - 1 行目（入っている版）と 2 行目（チャンネルにある一番新しい版）が同じなら、そのチャンネルの最新版が入っている
    - `2.1.283 (Claude Code)` のようにバージョンが出れば動く
    - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](verification/claude-code.md#完了時点の状態)）
-   - Node.js は要らない
 
 1. 作業したいディレクトリで `claude` を起動し、ブラウザでログインする。
 
@@ -175,7 +174,7 @@
    sudo dnf upgrade claude-code
    ```
 
-   - 起動中に新しい版が出ると Claude Code が更新を知らせてくるが、dnf 版は自分で更新できない（root 権限が要るため）
+   - 起動中に新しい版が出ると Claude Code が更新を知らせてくるが、dnf 版は自分で更新できない
    - `claude update` も、`Claude is managed by a package manager.` と出して何もしない
    - リポジトリ側にその版が届くまで、少し遅れることもある
    - 上がった版は[手順 4](#実施手順)のコマンドで確かめる
@@ -219,7 +218,6 @@
    ```
 
    - 1 行目と 2 行目が同じ版なら、`stable` の最新版に揃っている
-   - 以後の `sudo dnf upgrade claude-code`（[更新](#更新)）は `stable` の版を追う
 
 1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
 
@@ -251,7 +249,7 @@
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」でなくてよい）
-   - 「Windows PowerShell (x86)」は開かない（32 ビットで動き、インストーラが `Claude Code does not support 32-bit Windows` で止まる）
+   - 「Windows PowerShell (x86)」は開かない
    - Windows Terminal の中に開いた窓に複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 変数を設定する。
@@ -281,7 +279,7 @@
    - claude の行が `C:\Users\<WIN_USER>\.local\bin\claude.exe` だけで、3 つ目が `True` なら、もう native installer で入っている。この節の手順 4 は入れ直しになる（設定とログインは残る）
    - claude の行にほかの場所（WinGet・npm・scoop で入れたものなど）が出たら、そちらを先に外す（[注意点](extra/claude-code.md#注意点)）
    - `WindowsApps` の `Claude.exe` が出たら、古い Claude Desktop が `claude` の名前を取っている。Claude Desktop を最新にする（公式の Troubleshoot installation）
-   - git が出ず、最後が `False` なら、Git for Windows が無い。先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)を通す（無くても Claude Code は動き、Bash のツールの代わりに PowerShell のツールを使う）
+   - git が出ず、最後が `False` なら、Git for Windows が無い。先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)を通す
 
 1. Claude Code を公式の native installer で入れる。
 
@@ -316,12 +314,10 @@
 
    - `PATH に C:\Users\<WIN_USER>\.local\bin を足した`（か `はもうある`）の後に、自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.local\bin` があればよい
    - 何度貼ってもよい（あれば足さない）
-   - 開いている PowerShell には効かない。この節の手順 6 で開き直す
 
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
 
    - ウィンドウを閉じ（`exit` と打ってもよい）、この節の手順 1 と同じように、管理者ではない Windows PowerShell を開く
-   - 開き直した PowerShell は、この節の手順 5 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
    - この節の手順 2 の変数は、この後は使わない
    - **次の手順は、開き直した PowerShell に貼る**（前の PowerShell の `PATH` には、`.local\bin` が無いことがある）
 
@@ -364,7 +360,7 @@
 
    - `Login method: Claude Max account` のように、プランの行が出ればよい（ほかにメールアドレスと組織の行も出る）
    - `Not logged in. Run claude auth login to authenticate.` なら、ログインしていない。この節の手順 8 をやり直す
-   - このコマンドの後ろに、別のコマンドを続けて貼らない（AlmaLinux 10 では、ブラケットペースト無しで、後ろに貼った行を読んで捨てた。[使い方の基本](#使い方の基本)）
+   - このコマンドの後ろに、別のコマンドを続けて貼らない
 
 ---
 

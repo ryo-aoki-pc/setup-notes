@@ -10,6 +10,18 @@
 - [virtualbox.md](../verification/virtualbox.md#実施前の状態) の実機（GNOME の PC）と、[virtualbox-guest-bootc.md](../verification/virtualbox-guest-bootc.md#実施前の状態) の VM（Atomic Desktop のイメージ）には、どちらも入っていた
 - 素のコンテナ（`quay.io/almalinuxorg/almalinux:10`）には、どちらも無かった
 
+### 実施手順 / 手順 2: 補足: bootc のシステム
+
+- bootc のシステムで dnf で入れられないのは、`/usr` が読み取り専用だから
+
+### 実施手順 / 手順 3: 補足: Secure Boot が無効のとき
+
+- Secure Boot が無効なら、署名していないモジュールも読み込まれるので、この文書の手順は要らない
+
+### 実施手順 / 手順 4: 補足: 登録の予約
+
+- 最後の `mokutil --import` で、公開鍵を UEFI の MOK に登録する予約をする（登録するのは、同じ節の手順 6 の MokManager）
+
 ### 実施手順 / 手順 7: 補足: 読み込めないときの見方
 
 - `sudo keyctl list %:.platform` に、手順 4 の鍵の CN があるかを見る（`keyutils` パッケージ）

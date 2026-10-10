@@ -22,8 +22,6 @@
    brew install neovim
    ```
 
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
-   - 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
 1. Neovim が入ったか確かめ、起動して健全性を確認する。
@@ -36,7 +34,6 @@
    ```
 
    - `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている
-   - 最後の行で起動して、`:checkhealth` で健全性を確認する
    - `vim.provider` の node / perl / python / ruby が `WARNING` になるのは、それぞれの言語のプロバイダを入れていないため（[注意点](extra/neovim.md#注意点)）
    - 画面が出たら `:q` で終了する
    - **ほかのコマンドは、`:q` で終了してから貼る**（続けて貼ると Neovim への入力として食われる）
@@ -76,9 +73,7 @@
 
    - `EDITOR = nvim` と `VISUAL = nvim` が出ればよい（何度貼ってもよい）
    - `中断:` と出たら、何も変えていない。ほかのエディタを使っているなら、この手順は行わない
-   - 値は `nvim` だけにする（`nvim.exe` やフルパスにすると、lazygit が Neovim のプリセットを選ばない）
    - 効くのは、この後に開いた窓とアプリから（開いている窓には入らない。WezTerm は新しいタブから）
-   - git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
 
 1. 元に戻すときは、Windows 11 のユーザーの環境変数 `EDITOR`・`VISUAL` を消す。
 
@@ -89,7 +84,6 @@
 
    - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
    - 値が `nvim` のときだけ消す（ほかの値は残る）
-   - Git Bash の共通設定の `EDITOR`・`VISUAL` は、この手順では変わらない
 
 ---
 
@@ -121,9 +115,6 @@
    EOF
    nvim -c 'echo has("nvim")' -c 'q'
    ```
-
-   - 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
-   - LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
 
 ---
 
@@ -180,8 +171,7 @@
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : False` なら、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
-   - `Nvim` が空なら、Neovim は入っていない。`C:\Users\<WIN_USER>\scoop\shims\nvim.exe` だけなら、もう scoop で入っている
-   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。PC 全体の `PATH` はユーザーの `PATH` より先に引かれ、そちらが使われるので、外してから始める
+   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める
 
 1. scoop で Neovim を入れる。
 
@@ -189,7 +179,7 @@
    scoop install neovim
    ```
 
-   - `'neovim' (0.12.5) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）
+   - `'neovim' (0.12.5) was installed successfully!` の形の行が出ればよい
    - `'neovim' suggests installing 'extras/vcredist2022'.` も出るが、この節の手順 2 が `VCRuntime : True` なら入れなくてよい
    - `'neovim' (0.12.5) is already installed.` の形なら、もう入っている（何も変えない）
 
@@ -201,7 +191,7 @@
    nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
    ```
 
-   - `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい（版は実行した日の最新）
+   - `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい
    - 何も出さずに終わるか、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出たら、VC++ のランタイムが無い（この節の手順 2 の `VCRuntime`）
      - 窓が出たら、OK で閉じる
    - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい

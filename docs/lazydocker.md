@@ -24,8 +24,6 @@
    brew install lazydocker
    ```
 
-   - ビルド済みのボトルが降ってくる。依存は無い
-   - aarch64 でもソースからのビルドにはならない
    - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
 
 1. lazydocker が入ったことと、つなぐ先を確かめる。
@@ -50,8 +48,6 @@
    ```
 
    - `lazydocker-web Up Less than a second` のように出る
-   - 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) などで取得済みなら、取り直さない
-   - `--label name=lazydocker-web` は、lazydocker の画面にこの名前で出すため（参考資料を参照）
 
 1. lazydocker を起動し、確認用のコンテナを画面から止める。
 
@@ -73,8 +69,8 @@
    ls -l ~/.config/lazydocker
    ```
 
-   - `lazydocker-web Exited (0) ...` と出ればよい。画面の操作が、API を通して podman に届いている
-   - `config.yml`（0 バイト）がある。lazydocker が最初の起動で作った空のファイルで、中身が無ければ既定の設定で動く
+   - `lazydocker-web Exited (0) ...` と出ればよい
+   - `config.yml`（0 バイト）がある
 
 ---
 
@@ -105,7 +101,6 @@
    ```
 
    - 読み戻した中身に、足した 5 行が出る
-   - `{{ .Container.ID }}` は、lazydocker が選んだコンテナの ID に置き換える（シェルの変数ではない）
    - **注意**: 既に `customCommands:` があるなら、`cat >>` で足さずに手で中身をまとめる。同じキーが 2 つあると、後ろのものだけが使われ、前の定義は黙って無視される（参考資料を参照）
 
 1. lazydocker を起動し、足したコマンドでコンテナのシェルを開く。
@@ -116,7 +111,7 @@
 
    - `running` の `lazydocker-web` の行を選び、`c` を押す
    - `Custom Command:` の枠の `podman exec sh` で Enter を押すと、`sh-5.2$` のプロンプトになる
-   - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る（Apache のコンテナのユーザー）
+   - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る
    - `exit` で抜け、`Press enter to return to lazydocker ...` で Enter を押すと画面に戻る
    - `q` で終了する
    - **後ろの節の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
@@ -140,7 +135,7 @@
    ```
 
    - 読み戻した中身に、足した 2 行が出る
-   - **注意**: 既に `commandTemplates:` があるなら、`cat >>` で足さずに手で中身をまとめる（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 と同じ理由）
+   - **注意**: 既に `commandTemplates:` があるなら、`cat >>` で足さずに手で中身をまとめる
 
 1. compose ファイルのあるディレクトリで lazydocker を起動し、`web` のサービスを再起動する。
 
@@ -198,7 +193,6 @@
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
-   - 自分のユーザーのソケット（[podman.md 手順 7](podman.md#実施手順) の `systemctl --user`）とは別のソケット
    - `Created symlink …` が出なければ、前から有効だった。元に戻すときは、この節の手順 8 を飛ばす
 
 1. root の共通設定が接続先を設定したことを確かめる。
@@ -221,8 +215,6 @@
    ```
 
    - コンテナの ID の後に、`lazydocker-root-web Up Less than a second` のように出る
-   - root の保管場所に、イメージ（285 MB）を取得する。自分のユーザーで取得したイメージは使われない
-   - 名前を[手順 3](#実施手順) の `lazydocker-web` と分けて、どちらのコンテナの画面かを見分ける
 
 1. root で lazydocker を起動し、確認用のコンテナを止める。
 
@@ -246,7 +238,7 @@
    ```
 
    - `lazydocker-root-web Exited (0) ...` と出ればよい
-   - `config.yml`（0 バイト）は root の設定ファイル。自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
+   - `config.yml`（0 バイト）は root の設定ファイル
 
 1. 元に戻すときは、root の確認用コンテナと lazydocker の設定を消す。
 
@@ -257,7 +249,6 @@
 
    - root の設定ファイルに手で足したものも消える
    - 共通設定と `~/.bashrc` は変更しない。ソケットはこの節の手順 8 で止める
-   - ソケットのファイルが再起動まで残る間は、共通設定が `DOCKER_HOST` を入れる
 
 1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
 

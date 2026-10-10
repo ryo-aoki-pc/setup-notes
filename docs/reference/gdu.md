@@ -4,6 +4,27 @@
 
 ## 補足
 
+### 実施手順 / 手順 1: 補足: ボトルと依存
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+- 依存は無い（Go の静的バイナリ 1 つ、約 20 MB）
+- `brew install` の最後に出る caveat の出力例は[検証記録](../verification/gdu.md)
+
+### 実施手順 / 手順 2: 補足: TUI で使う
+
+- TUI で使うときは引数にディレクトリを渡すだけ（`gdu-go ~` など。`q` で終了）
+
+### gdu の名前で呼ぶ（任意） / 手順 1: 補足: 共通設定
+
+- gdu のエイリアスは共通設定にあるので、`~/.bashrc` への追記は不要
+
+### gdu の名前で呼ぶ（任意） / 手順 2: 補足: シンボリックリンク
+
+- `~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている
+- リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい
+- ただし **PATH の順序では Homebrew のほうが先**なので、EPEL 版の `/usr/bin/gdu` を同時に入れている場合はどちらが呼ばれるか変わる（[注意点](../extra/gdu.md#注意点)）
+- `sudo gdu` に効かないのは、`~/.local/bin` が sudo の PATH に無いため
+
 ### 参照
 
 - [dundee/gdu — README](https://github.com/dundee/gdu) — 使い方、キーバインド、各ディストリビューションでの入手方法

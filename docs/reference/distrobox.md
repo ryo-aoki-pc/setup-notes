@@ -4,6 +4,11 @@
 
 ## 補足
 
+### 実施手順 / 手順 2: 補足: 一緒に入るものと鍵
+
+- 一緒に入るのが `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
+- 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の手順 17](../almalinux-setup.md#実施手順) に書いた鍵
+
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
 [この節の検証記録](../verification/distrobox.md#実施手順--手順-3-補足-distrobox-の依存)
@@ -32,10 +37,15 @@
 - ボックスの中に自分と同じ名前のユーザーを作り、`sudo` をパスワード無しで使えるようにする（ボックスの中の `sudo -l` は `(root) NOPASSWD: ALL`）
 - 本書の `--userns keep-id` では、ボックスの root はホストの subordinate UID に対応する。自分の UID に対応するのはボックス内の同じ UID で、ボックスの root にホストの root の権限は無い
 - コンテナが止まっていれば、次の `distrobox enter` でも起動と初期化の確認が走る（2 回目からは速い）
+- 同じ節の手順 5 で出るユーザー名とホームは、ホストと同じ
 
 ### 実施手順 / 手順 6: 補足: host-spawn: command not found
 
 ボックスの中の `/etc/profile.d/distrobox_profile.sh` は、`DISPLAY`・`WAYLAND_DISPLAY`・`XAUTHORITY` などが空のとき、`host-spawn` でホストの値を読みに行く。
+
+### ボックスのコマンドをホストから呼ぶ（任意） / 手順 2: 補足: ボックスの中の sudo
+
+- ボックスの中の `sudo` はパスワードを聞かない（[実施手順 / 手順 5 の補足](#実施手順--手順-5-補足-初期化で行われること)の初期化で、パスワード無しにしてある）
 
 ### ボックスのコマンドをホストから呼ぶ（任意） / 手順 4: 補足: 書き出されたもの
 
@@ -56,6 +66,11 @@ fi
 
 - 呼ぶたびに `distrobox enter` を通るので、ボックスが止まっていれば起動から始まる
 - ホームはボックスと共有しているので、ホームの中のファイルはそのままのパスで渡せる
+- `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` で PATH に入っている
+
+### 更新 / 手順 2: 補足: ボックスの中の更新
+
+- Ubuntu のボックスでは `apt-get update` と `apt-get upgrade` が確認なしで走る
 
 ### 選択した方針
 

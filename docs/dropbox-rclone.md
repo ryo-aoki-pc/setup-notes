@@ -24,7 +24,7 @@
    ```
 
    - 最後の Caveats の「`mount` subcommand on macOS」は macOS の話で、ここでは関係ない
-   - 依存の一覧と `[y/n]` が出たら、入るものを見て `y` と答える（Homebrew 7.0.7 の ask mode。[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）
+   - 依存の一覧と `[y/n]` が出たら、入るものを見て `y` と答える
    - **次の手順は、導入が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
 
 1. rclone が入ったことを確かめ、Dropbox を登録する。
@@ -38,7 +38,6 @@
    - `rclone v1.75.1` と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
    - `http://127.0.0.1:53682/auth?state=...` が表示され、`Waiting for code...` で許可を待つ（手順 3 で許可する）
    - SSH で入っているときは、`ssh -L` でトンネルを張った端末で貼る
-   - `>/dev/null` は、登録が終わったときに出る設定（トークン入り）を画面に出さないため
 
 1. ブラウザで手順 2 の URL を開き、rclone のアクセスを許可する。
 
@@ -55,8 +54,7 @@
    df -h ~
    ```
 
-   - `listremotes` が `dropbox: dropbox`（名前と種類）を出す
-   - `rclone about` の `Used:` が Dropbox で使っている容量、`df` の `Avail` が手元の空き
+   - `listremotes` が `dropbox: dropbox` を出す
    - `lsd` が Dropbox の一番上のフォルダを並べる
    - **`Used:` が `Avail` より大きいとき、または一部のフォルダだけ同期するときは、手順 6 で絞る**
    - 全部同期するなら、手順 6 は飛ばす
@@ -97,7 +95,7 @@
    ```
 
    - 最後の 3 行の `# ` を外し、同期するフォルダを `+ /名前/**` の形で並べる（`/Documents` と `/Photos` は例なので書き換える）
-   - `- **` は最後の行に残す（並べたフォルダ以外を外す行）
+   - `- **` は最後の行に残す
    - **次の手順は、保存して `vi` を閉じてから貼る**
 
 1. 最初の同期で何が起きるかを見る（`--dry-run`）。
@@ -152,7 +150,6 @@
 
    - `enabled` が出ればよい
    - `Created symlink '.../timers.target.wants/dropbox-rclone.timer' → ...` が出る
-   - [linger](linger.md) が有効なので、ログアウトしても timer は動く
 
 1. 1 回動かして、結果と次の実行時刻を確かめる。
 
@@ -246,4 +243,3 @@
    ```
 
    - `rclone v` に続いて版が出ればよい
-   - timer の次の回から、新しい版で動く（oneshot なので、再起動は要らない）

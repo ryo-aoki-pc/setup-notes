@@ -25,9 +25,25 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 になる。公式ドキュメントは両方を併記している。EL10 でも将来 dnf5 に移れば後者になる。
 
+### 実施手順 / 手順 2: 補足: 署名鍵
+
+- 鍵が 2 本あるので、初回は取り込みを 2 回聞かれる
+
 ### 実施手順 / 手順 4: 補足: 認証
 
 トークンは OS の資格情報ストアに保存される。ストアを使えない場合は `~/.config/gh/hosts.yml` の平文保存に切り替わる。保存先は `gh auth status` で確認する。`gh auth token` の出力は**記録しない**。
+
+### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+
+- `GitCred` の `credential.helper manager` は、Git for Windows のインストーラの既定の Git Credential Manager
+- `GitCred` に `auth git-credential` で終わる行があれば、前に gh を Git の資格情報のヘルパーにしてある（`gh auth setup-git` など）。同じ節の手順 4 で Git の認証は聞かれない
+- `GitCred` が空なのは、Git の資格情報のヘルパーが無いこと。同じ節の手順 4 で `Y` と答えると、gh が `~/.gitconfig` に自分をヘルパーとして書く
+- `Gh` が空なら、gh は入っていない。`C:\Users\<WIN_USER>\scoop\shims\gh.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
+- ほかの方法で入れた gh を外すのは、混ざらないようにするため。外してもログインと設定は残り、scoop の gh も同じ場所を読む
+
+### Windows 11 で使う / 手順 3: 補足: 版
+
+- `'gh' (<版>) was installed successfully!` の版は、実行した日の最新
 
 ### Windows 11 で使う / 手順 4: 補足: Git の認証に n と答える理由
 
@@ -47,6 +63,10 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
 - **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
   - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
   - SSH のセッションの git からその場所を呼ぶと、scoop の `current` のジャンクションが [windows-openssh-server.md の任意節](../windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の制限に当たるはず（確かめていない）
+
+### Windows 11 で使う / 手順 4: 補足: ワンタイムコード
+
+- gh の既定では、ワンタイムコードはクリップボードにも入る
 
 ### Windows 11 で使う / 手順 6: 補足: トークンと設定の置き場所
 

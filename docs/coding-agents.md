@@ -28,7 +28,7 @@
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`/home/<USER>/src/myproject` のような、git のリポジトリのルートの絶対パス
-   - `WT_ROOT` の既定は、プロジェクトと同じ階層の `<プロジェクト名>.worktrees`。プロジェクトの中には置かない（[参考資料](reference/coding-agents.md#worktree-の置き場所とブランチ)）
+   - `WT_ROOT` の既定は、プロジェクトと同じ階層の `<プロジェクト名>.worktrees`。プロジェクトの中には置かない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの 2 つのブロックを貼り直す
 
 1. 3 つの CLI の版とログインを確かめる。
@@ -42,11 +42,10 @@
    claude auth status --text
    ```
 
-   - 3 つの版が出る（検証時は `2.1.295 (Claude Code)`・`codex-cli 0.162.0`・`grok 1.0.50 (…)`）
+   - 3 つの版が出る
    - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [codex.md 手順 5](codex.md#実施手順) から）
    - `grok models` に `You are not authenticated.` が出ない（出たら [grok-build.md 手順 4](grok-build.md#実施手順) から）
    - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [claude-code.md 手順 5](claude-code.md#実施手順)）
-   - `claude auth status` は後ろに貼った行を読んで捨てるので、最後に置いてある
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
 
@@ -63,8 +62,7 @@
 
    - 1 行目に `PROJECT_DIR` と同じパスが出る。違えば、`PROJECT_DIR` をリポジトリのルートに直して手順 1 から貼り直す
    - 2 行目が `## main`（追跡先があれば `## main...origin/main`）で、その後に何も出ない（変更が無い）。ほかのブランチなら `git switch main`、変更があればコミットしてから進む
-   - 指示書のファイルの名前が出たら、それがすでにある（この後の手順 4・5 は、そのファイルへの追記になる）
-   - `AGENTS.override.md` が出たら、Codex はそのディレクトリでは AGENTS.md の代わりにそれを読む。中身を AGENTS.md に移して消してから進む
+   - `AGENTS.override.md` が出たら、中身を AGENTS.md に移して消してから進む
    - 最後に `No such file or directory` が出ればよい。`WT_ROOT` がすでにあれば、中身を確かめる（別の場所にするなら、手順 1 の `WT_ROOT` を変える）
 
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
@@ -97,7 +95,7 @@
 
    - AGENTS.md の中身が出て、最後に「## 共同作業の規則」の節がある
    - `中断:` が出たら、何も書いていない
-   - テストとリンターのコマンドが AGENTS.md に無ければ、後でエディタで足す（3 つともそれを見て通す）
+   - テストとリンターのコマンドが AGENTS.md に無ければ、後でエディタで足す
 
 1. CLAUDE.md に `@AGENTS.md` の 1 行を足す（無ければ作る）。
 
@@ -112,8 +110,6 @@
    ```
 
    - 最後の行に `@AGENTS.md` が出る
-   - Claude Code は、CLAUDE.md（か CLAUDE.local.md）があると AGENTS.md を自分では読まない。この 1 行で取り込ませる
-   - Grok Build は CLAUDE.md も読む。Claude Code だけに伝えたいことを CLAUDE.md に書くと、Grok にも伝わる
 
 1. 2 つのファイルを `main` にコミットする。
 
@@ -126,7 +122,7 @@
    ```
 
    - 最後に、今のコミットが出る
-   - `The following paths are ignored by one of your .gitignore files` と出たら、`.gitignore` で除いている。worktree に届かないので、`.gitignore` から外してから貼り直す
+   - `The following paths are ignored by one of your .gitignore files` と出たら、`.gitignore` で除いている。`.gitignore` から外してから貼り直す
 
 1. 3 つの worktree とブランチを作る。
 
@@ -153,9 +149,7 @@
    ```
 
    - Claude と Codex が、「起動された worktree の中だけ」という趣旨の 1 行を答える。「分からない」と答えたら、手順 4・5 のファイルと手順 6 のコミットを確かめる
-   - Grok は `Project trusted: yes` と、`AGENTS.md (project, …)`・`CLAUDE.md (project, …)` の行が出る（AI には聞かないので、使用量は減らない）
-   - `grok --trust` は、この worktree を信頼したことを `~/.grok/trusted_folders.toml` に残す（Grok の画面で信頼するのと同じ）
-   - Claude と Codex への 2 つの問いは、それぞれのプランの使用量を少し使う
+   - Grok は `Project trusted: yes` と、`AGENTS.md (project, …)`・`CLAUDE.md (project, …)` の行が出る
    - Codex が `could not find bubblewrap on PATH` と警告しても、同梱のものを使って動く（手順 9 で bubblewrap を入れると出なくなる）
 
 1. Node.js と bubblewrap を入れる（プラグインと sandbox が使う）。
@@ -168,13 +162,11 @@
    }
    ```
 
-   - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る。検証時は AppStream の 22.23.2 と BaseOS の 0.10.0）
-   - npm（`nodejs-npm`）も一緒に入る。この手順書では使わない
-   - bubblewrap は、Grok の読むだけの sandbox（`/grok-build:review` と、この手順書の端末からの Grok のレビュー）と Codex の sandbox が使う。無いと、Grok は `this sandbox could not enforce its deny list on Linux` と出して起動しない
+   - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る）
    - Grok の sandbox には、Landlock が有効な Linux カーネルも要る。`CONFIG_SECURITY_LANDLOCK` が無効なら、対応するカーネルで起動してから再試行する。カーネルの版が新しいだけでは、この条件を満たさない
    - `runtime-socket deny path /run/podman/podman.sock` と `Permission denied (os error 13)` が出たら、Grok のレビューは未実行（bubblewrap があっても起動しない）
-   - このエラーでは、管理者がソケットの親ディレクトリの検索権限を確認する。ソケットが無くても、親を検索できないと起動に失敗する。ソケット自体のアクセス権は緩めない。検索権限を直しても、Landlock が無効なら sandbox の保護は成立しない
-   - このエラーでは[相互にレビューする](#相互にレビューする)の代替へ進む。条件と対象版は[検証記録](verification/coding-agents.md)を参照
+   - このエラーでは、管理者がソケットの親ディレクトリの検索権限を確認する。ソケット自体のアクセス権は緩めない。検索権限を直しても、Landlock が無効なら sandbox の保護は成立しない
+   - このエラーでは[相互にレビューする](#相互にレビューする)の代替へ進む
    - GNOME のデスクトップの PC には、Flatpak の依存として bubblewrap がもう入っている（`Package bubblewrap-… is already installed.`）
 
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
@@ -188,8 +180,7 @@
    ```
 
    - `✔ Successfully added marketplace: openai-codex` と `xai-grok-build`、`✔ Successfully installed plugin: …（scope: user）` が 2 つ出る
-   - 最後の一覧に、`codex@openai-codex` と `grok-build@xai-grok-build` が `Status: ✔ enabled` で出る（検証時は 1.0.6 と 0.2.1）
-   - 自分のユーザーの、どのプロジェクトの Claude Code でも使える（`~/.claude/settings.json` の `enabledPlugins`）
+   - 最後の一覧に、`codex@openai-codex` と `grok-build@xai-grok-build` が `Status: ✔ enabled` で出る
    - 動いている Claude Code には、起動し直すまで効かない
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
@@ -296,7 +287,7 @@
 
 1. 人が分担を決める。
 
-   - 3 つに同じファイルを触らせない（モジュールやディレクトリで分ける）。重なると、取り込みのときに競合する
+   - 3 つに同じファイルを触らせない（モジュールやディレクトリで分ける）
    - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットすることを書く
    - 振り方の目安は、[使い方の基本](#使い方の基本)の役割の表
 
@@ -316,7 +307,7 @@
    ```
 
    - 初めての worktree では作業場所の確認が出る。`codex` の worktree であることを確かめて進む
-   - **Codex は sandbox の中では `git add` も `git commit` もできない**（`.git` は読むだけ）。sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する。許可しないなら、終わった後に人がその窓でコミットする
+   - **Codex は sandbox の中では `git add` も `git commit` もできない**。sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する。許可しないなら、終わった後に人がその窓でコミットする
 
 1. `grok` の worktree の窓で Grok を起動し、担当の作業を頼む。
 
@@ -361,8 +352,7 @@
    ```
 
    - Codex を `/quit` で終えてから貼る
-   - Windows 11 では、2 行目を貼らずに `grok` を起動し、同じ文で頼む（Windows には Grok の sandbox が無いため。[使い方の基本](#使い方の基本)の表の下）
-   - `grok --trust` は、この worktree も信頼したことを残す
+   - Windows 11 では、2 行目を貼らずに `grok` を起動し、同じ文で頼む
 
 1. `grok` の worktree の窓で、Grok のブランチを Codex と Claude にレビューさせる。
 
@@ -555,7 +545,7 @@
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、git のリポジトリのルートの絶対パス
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
+   - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
 
 1. 3 つの CLI の版とログインを確かめる。
 
@@ -631,7 +621,6 @@
    ```
 
    - 最後の行に `@AGENTS.md` が出る
-   - 理由は、[実施手順](#実施手順)の手順 5 と同じ
 
 1. 2 つのファイルを `main` にコミットする。
 
@@ -677,11 +666,11 @@
    ```
 
    - 1 行目にパスが出て、`node --version` が `v18.18` 以上なら、2 行目は貼らない
-   - `'nodejs-lts' (…) was installed successfully!` が出ればよい（検証時の scoop の定義は 24.21.0）
+   - `'nodejs-lts' (…) was installed successfully!` が出ればよい
 
 1. PowerShell を閉じ、スタートメニューから開き直す。
 
-   - 開き直した窓で `node --version` が通ることを確かめる（Claude Code が起動するプラグインのスクリプトも、この PATH の `node` を使う）
+   - 開き直した窓で `node --version` が通ることを確かめる
    - **次の手順は、この節の手順 1 の 2 つのブロックを貼り直してから貼る**
 
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
@@ -694,7 +683,7 @@
    claude plugin list
    ```
 
-   - 見方は、[実施手順](#実施手順)の手順 10 と同じ（`%USERPROFILE%\.claude\settings.json` の `enabledPlugins`）
+   - 見方は、[実施手順](#実施手順)の手順 10 と同じ
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
 
@@ -703,7 +692,7 @@
    ```
 
    - 確かめることは、[実施手順](#実施手順)の手順 11 と同じ
-   - プラグインのスクリプトは、Claude Code が Git Bash で動かす。`/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、この節の手順 10 を確かめる
+   - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、この節の手順 10 を確かめる
    - **後ろの節のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
 
 ---

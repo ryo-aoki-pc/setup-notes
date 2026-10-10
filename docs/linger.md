@@ -19,7 +19,7 @@
    loginctl show-user "$(id -u)" -p Linger
    ```
 
-   - `Linger=yes` が出れば、手順 2 は飛ばす（ほかの手順書で有効にしてある）
+   - `Linger=yes` が出れば、手順 2 は飛ばす
    - `Linger=no` と出たら、手順 2 で有効にする
 
 1. linger が無効のときだけ、linger を有効にして、有効になったか確かめる。
@@ -32,6 +32,5 @@
    }
    ```
 
-   - linger を有効にすると、ログインしていない間もユーザーの systemd が動き続ける
    - `enable-linger` は何も出さない
    - `Linger=yes` と、自分のユーザー名が出ればよい

@@ -20,7 +20,6 @@
    sudo dnf copr enable wezfurlong/wezterm-nightly "rhel-9-$(uname -m)"
    ```
 
-   - chroot は `uname -m` から `rhel-9-x86_64` か `rhel-9-aarch64` になる（COPR に EL10 向けが無いので EL9 向けを使う）
    - 有効化してよいか `[y/N]` で聞かれる
    - **次の手順は、`[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -53,10 +52,10 @@
    ```
 
    - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
-   - アプリ一覧には「WezTerm」が出る（`/usr/share/applications/org.wezfurlong.wezterm.desktop`）
+   - アプリ一覧には「WezTerm」が出る
    - ssh などグラフィカルでないシェルから確かめる場合は、手順 5 でログイン中の Wayland セッションを指定して、ウィンドウを開いて即終了させる
-
    - GNOME の端末から `wezterm` で動作を確認した場合は、手順 5 は飛ばす
+
 1. ssh などグラフィカルでないシェルから確かめるときだけ、ウィンドウを開いて即終了させる。
 
    ```bash
@@ -65,8 +64,7 @@
        timeout 30 wezterm start --always-new-process -- sh -c 'exit 0'; echo "rc=$?"
    ```
 
-   - ログイン中の Wayland セッションを指定して、ウィンドウを開く
-   - `rc=0` なら、ウィンドウが開いて閉じている（`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じる）
+   - `rc=0` なら、ウィンドウが開いて閉じている
 
 ---
 
@@ -113,10 +111,8 @@
    ```
 
    - **`~/.wezterm.lua` が既にあるとそちらが優先されて読まれない**ので、どちらか一方にする
-   - 保存すれば、起動中の WezTerm にも自動で反映される（`automatically_reload_config` の既定が true。効かなければ `Ctrl+Shift+R`）
-   - Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**（別の候補ファイルには進まない）
-   - `wezterm -n`（`--skip-config`）で、設定を読まずに起動できる
-   - `wezterm --config 'font_size=14'` のように、1 項目だけ上書きもできる
+   - 保存すれば、起動中の WezTerm にも自動で反映される（効かなければ `Ctrl+Shift+R`）
+   - Lua の文法エラーがあると、起動時に `ERROR wezterm_gui > syntax error: ...` を出して**組み込みの既定値で起動する**
 
 ---
 
@@ -149,7 +145,7 @@
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
-   - WezTerm の中の PowerShell は使わない（WezTerm が動いていると、この節の手順 4 が止まる）
+   - WezTerm の中の PowerShell は使わない
 
 1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
 
@@ -169,8 +165,7 @@
    - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
    - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この節の手順 4 で今の nightly に上書きする
      - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[Windows 11 のロールバック](extra/wezterm-nightly.md#windows-11-のロールバック)で外す
-     - `20240203-110809-5046fc22` なら stable（winget の `wez.wezterm` など）。同じ登録なので、nightly で上書きされる
-   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。混ざらないよう、外してから始める
+   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
    - `Running` に名前が出たら、その WezTerm の窓を閉じる（Remote Control のタスクは、この節のリードのとおりに止める）
    - `VCRuntime : True` なら、この節の手順 3 は飛ばす。`False` なら、この節の手順 3 で入れる
 
@@ -215,11 +210,11 @@
    }
    ```
 
-   - `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と、`wezterm 20260929-043349-cab25161` の形の 1 行が出ればよい（版は実行した日の nightly）
+   - `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と、`wezterm 20260929-043349-cab25161` の形の 1 行が出ればよい
    - インストーラの画面は出ない。終わるまでプロンプトが戻らない
-   - `中断:` で始まるエラーが出たら、そこで止まっている（取ってきたものとログは `%TEMP%\wezterm-setup` に残る。次に貼ったときに消して作り直す）
+   - `中断:` で始まるエラーが出たら、そこで止まっている
    - `取れない` と `sha256 が一致しない` は、nightly が入れ替わる最中に取ったときにも出る。少し待って貼り直す
-   - 何度貼ってもよい（同じ場所に上書きする）
+   - 何度貼ってもよい
 
 1. 入ったものと、`PATH`・スタートメニューを確かめる。
 
@@ -248,7 +243,6 @@
      - いつも開くようにするなら、設定の `config` に `config.prefer_egl = true` を足す。設定ファイルが無ければ、`%USERPROFILE%\.wezterm.lua` に `local wezterm = require 'wezterm'`・`local config = wezterm.config_builder()`・`config.prefer_egl = true`・`return config` の 4 行を書く
      - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[設定ファイル](#設定ファイル)のとおり、clone した設定が読まれなくなる）
    - **注意**: 管理者の PowerShell から `wezterm-gui.exe` を起動しない（WezTerm と中のシェルが管理者で動く）
-   - エクスプローラーでフォルダーを右クリックすると「Open WezTerm here」がある（Windows 11 の新しいメニューでは「その他のオプションを確認」の中）
 
 ---
 
@@ -272,7 +266,7 @@
    ```
 
    - 1 行目に今の版が出る
-   - プロセスが出たら、その WezTerm の窓をすべて閉じる（動いていると、この節の手順 3 が止まる）
+   - プロセスが出たら、その WezTerm の窓をすべて閉じる
 
 1. [Windows 11 で使う](#windows-11-で使う)の手順 4 のブロックを貼る。
 

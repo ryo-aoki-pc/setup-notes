@@ -25,6 +25,10 @@
 - `wg genkey` / `wg pubkey` はカーネルモジュール無しで動く
 - 既に `wg0.key` があるときに中断するのは、上書きするとホストに登録済みの公開鍵と対応しなくなるため
 
+### 実施手順 / 手順 4: 補足: 登録簿の名前
+
+- 登録簿は名前で一意。そのため、`CLIENT_NAME` と同じ名前が一覧にあるときだけ、同じ節の手順 5 で旧登録を消す
+
 ### 実施手順 / 手順 6: 補足: WG ホストでの登録
 
 - `client add` は同じ名前・同じ公開鍵・同じトンネル IP を拒否する（`wg-vpn.sh` の `cmd_client_add`）
@@ -32,6 +36,28 @@
 - `apply` は `wg0.conf` を作り直して `systemctl restart` するので、他のクライアントと拠点間トンネルが数秒切れる（`reload` では経路が入らない。→ [落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)）
 - `apply` の末尾に出るルーターの設定（クライアント帯の静的経路）は、既に入っていれば変更不要
 - トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）
+
+### 実施手順 / 手順 7: 補足: ファイル名と運び方
+
+- ファイル名を `wg0.conf` にするのは、NetworkManager がファイル名から接続名とインターフェース名を決めるため
+- `client show` の出力には秘密鍵が入っていないので、ファイルで渡すときも平文でよい
+
+### 実施手順 / 手順 9: 補足: LAN の外につなぐ理由
+
+- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で同じ節の手順 10 を貼ると、そこで通信が切れる
+
+### 実施手順 / 手順 10: 補足: 取り込んだ直後に切る理由
+
+- `import` した直後に、NetworkManager が `wg0` を自動で張る（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わる
+- そのため、張られたトンネルは取り込んだ直後に切る（同じ節の手順 11 で改めて張る）
+
+### 実施手順 / 手順 14: 補足: 再起動したとき
+
+- autoconnect を無効にしてあるので、再起動しても勝手には張られない
+
+### 実施手順 / 手順 15: 補足: 平文の鍵と conf を消す理由
+
+- 秘密鍵は同じ節の手順 10 で NetworkManager のプロファイルに入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
 
 ### Windows 11 で使う / 手順 2: 補足: 変数について
 
@@ -45,6 +71,11 @@
 - `C:\Program Files\WireGuard\Data\Configurations` は、WireGuard が取り込んだトンネルの設定（`<名前>.conf.dpapi`）の置き場所。アクセス権が SYSTEM と Administrators だけなので、管理者の PowerShell でないと何も出ない
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+- `WireGuard.WireGuard` の行が出たら、WireGuard はもう入っている（公式のインストーラーで入れたものも出るはず）。そのまま進めてよい（同じ節の手順 4 は、新しい版があれば上げる）
+
+### Windows 11 で使う / 手順 4: 補足: 版
+
+- `winget list` に出る版は、実行した日の最新
 
 ### Windows 11 で使う / 手順 5: 補足: マネージャーのサービス
 
@@ -54,6 +85,15 @@
 - 窓は Administrators の一員にしか出ない（ソースの `main.go` の `checkForAdminGroup`）
 - 管理者の PowerShell から開くので、UAC の確認は出ないはず
 - `wireguard.exe` は GUI のプログラムなので、PowerShell は窓が開くのを待たずにプロンプトに戻る
+- 窓を閉じても、マネージャーは動き続ける
+
+### Windows 11 で使う / 手順 7: 補足: 関数が読むもの
+
+- 同じ節の手順 9 で `Import-WgClientConf` と手入力すると、クリップボードを読み込む
+
+### Windows 11 で使う / 手順 9: 補足: 表示するもの
+
+- 関数は、置き換えた鍵そのものは表示しない
 
 ### Windows 11 で使う / 手順 10: 補足: 取り込みと、理由の見方
 
@@ -63,12 +103,28 @@
 - 読めなかったときは、マネージャーのログに `Unable to ingest and encrypt` の行が出て、`wg0.conf` が残る。ログは `& "$env:ProgramFiles\WireGuard\wireguard.exe" /dumplog | Select-String -SimpleMatch 'wg0.conf'` で見られる（窓の「ログ」のタブでも見られる）
 - 同じ名前の `wg0.conf.dpapi` があると上書きしない（取り込めずに残る）ので、ブロックの先頭で止めている
 
+### Windows 11 で使う / 手順 11: 補足: LAN の外につなぐ理由
+
+- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で同じ節の手順 12 を貼ると、そこで LAN の通信が切れる
+
+### Windows 11 で使う / 手順 12: 補足: DNS
+
+- `ServerAddresses` が空なのは、conf に `DNS =` が無いため。DNS は変わらない
+
 ### Windows 11 で使う / 手順 15: 補足: 切ったときと、日常の使い方
 
 - `/uninstalltunnelservice wg0` は、トンネルのサービスを止めて消す。窓の「無効化」も同じ（ソースの `manager/ipc_server.go` の `Stop`）。アダプターは、トンネルが止まると消える
 - トンネルの設定（`wg0.conf.dpapi`）は残るので、次は有効化だけでよい
 - サービスは消されてもすぐには無くならないことがあるので、消えるまで 30 秒まで待つ
 - NetworkManager の `autoconnect no` に当たる設定は無い。張ったまま（サービスが残ったまま）再起動すると、起動のときに張られ、拠点の LAN の中なら LAN の通信を奪う
+
+### Windows 11 で使う / 手順 16: 補足: 平文の鍵と conf を消す理由
+
+- 秘密鍵は、同じ節の手順 10 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
+
+### Windows 11 の更新 / 手順 1: 補足: winget の定義の遅れ
+
+- winget の定義は、公式の版より遅れて出ることがある
 
 ### 選択した方針
 

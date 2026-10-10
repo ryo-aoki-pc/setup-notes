@@ -25,7 +25,7 @@
    - **編集が必須の変数は無い**。clone した場所が `~/setup-notes` なら、既定のままでよい
    - 最後に値を読み戻して確かめる
    - `USER` が `root` なら、ここで止めて、Claude Code が動くユーザーのシェルで貼り直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 1 のブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、手順 1 のブロックを貼り直してから先へ進む
 
 1. gnome-shell に仮想モニターを付けるドロップインを置く。
 
@@ -43,8 +43,6 @@
    ```
 
    - `ExecStart=/usr/bin/gnome-shell`（元の行）・`ExecStart=`・`ExecStart=/usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` の 3 行が出ればよい
-   - このユーザーの GNOME のセッションすべてに効く（[注意点](extra/claude-code-gui.md#注意点)）
-   - 動いているセッションには、手順 3 で起動し直したときに効く
 
 1. セッションを止め、終わるのを待って起動し直し、仮想モニターの付いたセッションができたかを確かめる。
 
@@ -67,8 +65,7 @@
 
    - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` が出ればよい
-   - `for` の行は、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ。`loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](gnome-headless-session.md#実施手順) の補足）
-   - `systemctl restart` は使わない（参考資料を参照）
+   - `systemctl restart` は使わない
 
 1. 画面を撮って、大きさを確かめる。
 
@@ -115,10 +112,8 @@
    fi
    ```
 
-   - `gnome-gui-org.gnome.Calculator-<PID>`（起動した unit の名前）、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
-   - 窓の一覧に電卓が出るまで待つ。固定の `sleep 3` だけで起動完了を判断しない
+   - `gnome-gui-org.gnome.Calculator-<PID>`、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
    - `~/gnome-gui-calc.png` に、電卓の窓と `12×34 = 408` が写っていればよい
-   - 最初の `key Escape` は、セッションを始めた直後に開いているアクティビティ画面を閉じる（参考資料を参照）
 
 1. ポインタの入力が届くかを確かめて、電卓を閉じる。
 

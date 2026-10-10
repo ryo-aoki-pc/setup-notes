@@ -2,6 +2,53 @@
 
 [手順書](../coding-agents.md)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](../verification/coding-agents.md)
 
+## 補足
+
+### 実施手順 / 手順 2: 補足: 版と並べる順
+
+- 検証時の版は `2.1.295 (Claude Code)`・`codex-cli 0.162.0`・`grok 1.0.50 (…)`
+- `claude auth status` は後ろに貼った行を読んで捨てるので、最後に置いてある
+
+### 実施手順 / 手順 3: 補足: 指示書がすでにあるとき
+
+- 指示書のファイルの名前が出たら、それがすでにある（同じ節の手順 4・5 は、そのファイルへの追記になる）
+
+### 実施手順 / 手順 6: 補足: .gitignore で除いたファイル
+
+- `.gitignore` で除いたファイルは、worktree に届かない
+
+### 実施手順 / 手順 8: 補足: 確かめの問いと信頼
+
+- Grok の確かめは AI には聞かないので、使用量は減らない
+- `grok --trust` は、この worktree を信頼したことを `~/.grok/trusted_folders.toml` に残す（Grok の画面で信頼するのと同じ）
+- Claude と Codex への 2 つの問いは、それぞれのプランの使用量を少し使う
+
+### 実施手順 / 手順 9: 補足: Node.js と bubblewrap
+
+- 検証時は AppStream の 22.23.2 と BaseOS の 0.10.0
+- npm（`nodejs-npm`）も一緒に入る。この手順書では使わない
+- bubblewrap は、Grok の読むだけの sandbox（`/grok-build:review` と、この手順書の端末からの Grok のレビュー）と Codex の sandbox が使う。無いと、Grok は `this sandbox could not enforce its deny list on Linux` と出して起動しない
+
+### 相互にレビューする / 手順 2: 補足: grok --trust
+
+- `grok --trust` は、この worktree も信頼したことを残す
+
+### Windows 11 で使う / 手順 1: 補足: 変数
+
+- 変数はその PowerShell の中だけで有効
+
+### Windows 11 で使う / 手順 9: 補足: 版
+
+- 検証時の scoop の定義は 24.21.0
+
+### Windows 11 で使う / 手順 10: 補足: node の PATH
+
+- Claude Code が起動するプラグインのスクリプトも、この PATH の `node` を使う
+
+### Windows 11 で使う / 手順 12: 補足: プラグインのスクリプト
+
+- プラグインのスクリプトは、Claude Code が Git Bash で動かす
+
 ## 方法のまとめ
 
 3 つのコーディング用の CLI（Claude Code・Codex・Grok Build）を、1 つのプロジェクトで一緒に使う方法を目的ごとに比べた（2026-10-09 時点）。「この手順書」の列が「採った」のものを、手順書で手順にした。
@@ -45,6 +92,7 @@
 
 - skills を 3 つで共有するときは、置き場所が違う（Claude Code は `.claude/skills/`、Codex は `.agents/skills/`、Grok は 3 つとも読む）。この手順書では扱わない
 - テストとリンターのコマンドは、AGENTS.md のほかの節に書いておく（規則の「テストとリンターを通してから」が、それを指す）
+- Grok Build は CLAUDE.md も読む。Claude Code だけに伝えたいことを CLAUDE.md に書くと、Grok にも伝わる
 
 ### worktree の置き場所とブランチ
 
@@ -84,6 +132,7 @@
   - ソケットが無くても、親ディレクトリを検索できないと拒否パスを解決できない。親の検索権限とソケット自体のアクセス権は別で、後者を緩める必要はない。検索権限を直しても、Landlock が無効なカーネルでは read-only の保護が成立しない（[追加の原因調査](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
   - `/grok-build:check` のログインの判定は `grok models` の終了コードだけを見る。Grok Build 1.0.50 の `grok models` はログインしていなくても終了コード 0 なので、ready と出る（検証記録）
   - hooks: `SessionStart`・`SessionEnd`
+- 2 つのプラグインは自分のユーザーに入り、どのプロジェクトの Claude Code でも使える（`~/.claude/settings.json` の `enabledPlugins`。Windows 11 では `%USERPROFILE%\.claude\settings.json`）
 - 2 つの `review` は `disable-model-invocation: true` で、Claude は自分からは呼ばない。`rescue`（`codex-rescue` のサブエージェント）と `delegate`（`grok-delegate` のサブエージェント）は、Claude が自分で呼べる
 - Claude Code の Remote Control では、`/plugin` などの端末だけのコマンドはスマートフォンから動かない（公式の文書）。プラグインの `/codex:review` などがスマートフォンから動くかは書かれておらず、確かめていない
 - MCP を使わない理由

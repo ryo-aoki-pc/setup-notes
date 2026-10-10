@@ -11,6 +11,7 @@
 - `VIRTUAL_MONITOR` は、手順 2 で gnome-shell に付ける `--virtual-monitor` の値。Claude Code が撮る画面の大きさになる
 - 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)
 - `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
+- 変数はそのシェルの中だけで有効
 
 ### 実施手順 / 手順 2: 補足: 仮想モニターが要る理由
 
@@ -21,6 +22,11 @@
 - `ExecStart=` の空の行は、元の `ExecStart` を消すため（systemd のドロップインの決まり）
 - 置き場所は、ユーザーの systemd のドロップイン（`~/.config/systemd/user/<unit>.d/`）。`/usr/lib/systemd/user/org.gnome.Shell@wayland.service` は変えない
 
+### 実施手順 / 手順 2: 補足: 効く範囲
+
+- このユーザーの GNOME のセッションすべてに効く（[注意点](../extra/claude-code-gui.md#注意点)）
+- 動いているセッションには、同じ節の手順 3 で起動し直したときに効く
+
 ### 実施手順 / 手順 3: 補足: restart を使わない理由
 
 [この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-3-補足-restart-を使わない理由)
@@ -30,6 +36,11 @@
 - `gdm-new-session` は終了コード 0 で終わるので、unit の `Restart=on-failure` も効かない
 - 前のセッションが `loginctl` から消えた後、ユーザーの D-Bus が起動し直される（`gnome-session-restart-dbus.service`）。それが終わるまで 3 秒待ってから起動する
 
+### 実施手順 / 手順 3: 補足: 待ち方と loginctl の行
+
+- `for` の行は、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ
+- `loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](../gnome-headless-session.md#実施手順) の補足）
+
 ### 実施手順 / 手順 4: 補足: 画面の撮り方
 
 [この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-4-補足-画面の撮り方)
@@ -38,6 +49,12 @@
 - 撮っている間は、上部バーの右に画面共有の表示（オレンジ）が出て、写しにも写る
 - GNOME Shell の `org.gnome.Shell.Screenshot` は、GNOME 41 から決まった相手（と unsafe mode）にしか使わせないので、使わない（[選択した方針](#選択した方針)）
 - スクリプトは `/usr/bin/python3` で動く。Homebrew の `python3` が PATH の先頭にあっても、そちらには `gi` が無い（[注意点](../extra/claude-code-gui.md#注意点)）
+
+### 実施手順 / 手順 5: 補足: 電卓の起動を待つ
+
+- `gnome-gui-org.gnome.Calculator-<PID>` は、起動した unit の名前
+- 窓の一覧に電卓が出るまで待つ。固定の `sleep 3` だけで起動完了を判断しない
+- 最初の `key Escape` は、セッションを始めた直後に開いているアクティビティ画面を閉じる
 
 ### 実施手順 / 手順 6: 補足: 座標とキーの間合い
 

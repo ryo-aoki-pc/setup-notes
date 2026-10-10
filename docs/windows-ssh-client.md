@@ -41,8 +41,8 @@
 
    - 最後に値を読み戻して確かめる
    - `SSH_USER` は、AlmaLinux 10 のホストのユーザー名にする。Windows のユーザー名（`C:\Users\` の下のフォルダーの名前）と、大文字・小文字やつづりが違えば直す
-   - `SSH_USER` に `root` は使わない（AlmaLinux 10 の既定では、root はパスワードで SSH に入れない）
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 2 の 3 つのブロックを貼り直してから先へ進む
+   - `SSH_USER` に `root` は使わない
+   - **新しい PowerShell を開いたら**、手順 2 の 3 つのブロックを貼り直してから先へ進む
 
 1. 2 つの ssh の版と `PATH` の順、鍵・config・Git の ssh の設定を確かめる。
 
@@ -57,10 +57,7 @@
 
    - 1 行目に Windows の ssh の版（`OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2` か、それより新しい版）、2 行目に Git の ssh の版（`OpenSSH_10.5p1` など）が出ればよい
    - 1 行目が「認識されません」のエラーなら、Windows の OpenSSH クライアントが無い。設定の「オプション機能」（`ms-settings:optionalfeatures`）で「OpenSSH クライアント」を追加してから始める（追加には管理者の承認が要る）
-   - `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](extra/windows-ssh-client.md#注意点)）。この手順書のブロックは、どちらもフルパスで呼ぶ
-   - `Test-Path` の 3 行は、秘密鍵・公開鍵・config が既にあるか。秘密鍵と公開鍵がどちらも `True` なら、その鍵を使う（手順 4 は何もしない）
-   - 秘密鍵だけが `True` なら、手順 4 で秘密鍵から公開鍵を作り直す
-   - `core.sshCommand` の行は出ず、最後の行は `GIT_SSH= GIT_SSH_COMMAND= HOME=` であればよい（git は Git の ssh を使い、Windows の ssh と同じ `%USERPROFILE%\.ssh` を読む）
+   - `core.sshCommand` の行は出ず、最後の行は `GIT_SSH= GIT_SSH_COMMAND= HOME=` であればよい
    - どれかに値があれば、git が別の ssh か別の `.ssh` を使う。その設定を外すまで、手順 7・10 の Git の ssh の確かめは、git の動きと一致しない
 
 1. 鍵ペアが無いときだけ、ed25519 で作る（公開鍵だけが無ければ作り直す）。
@@ -83,12 +80,12 @@
    }
    ```
 
-   - 鍵の対があれば、`既にある: …` と出て何もしない（GitHub に登録した鍵も、そのまま使える）
+   - 鍵の対があれば、`既にある: …` と出て何もしない
    - 秘密鍵だけがあれば、秘密鍵から公開鍵（`id_ed25519.pub`）を作り直し、`公開鍵を作り直した: …` と出る。秘密鍵にパスフレーズがあれば聞かれる
    - `中断: … 公開鍵を作れなかった` の前に `UNPROTECTED PRIVATE KEY FILE!` が出ていれば、手順 5・6 で秘密鍵のアクセス権を直してから、この手順を貼り直す
    - その表示が無ければ、パスフレーズが違う。この手順を貼り直す
    - 鍵が無ければ、`Enter passphrase (empty for no passphrase):` と `Enter same passphrase again:` でパスフレーズを 2 回聞かれ、鍵の指紋が出る
-   - パスフレーズを付けると、鍵を使うたびに聞かれる（ssh-agent は使わない）。空にすると聞かれないが、秘密鍵のファイルを持つ人は誰でも入れる
+   - パスフレーズを付けると、鍵を使うたびに聞かれる。空にすると聞かれないが、秘密鍵のファイルを持つ人は誰でも入れる
    - **次の手順は、パスフレーズを入力し終えてから貼る**（続けて貼るとパスフレーズとして食われる）
 
 1. 秘密鍵のアクセス権を確かめる。
@@ -111,7 +108,6 @@
    ```
 
    - 最後の `icacls` に、`NT AUTHORITY\SYSTEM:(F)`・`BUILTIN\Administrators:(F)`・`<HOSTNAME>\<WIN_USER>:(F)` の 3 行だけが出ればよい
-   - 明示の許可をすべて外し（`/reset`）、受け継ぎを切って、3 つの主体にだけフル コントロールを付ける
 
 1. `~/.ssh/config` に接続先を足し、Windows と Git の両方の ssh で読めることを確かめる。
 
@@ -136,8 +132,7 @@
    ```
 
    - `user <SSH_USER>`・`hostname <SSH_HOST>`・`identitiesonly yes`・`identityfile ~/.ssh/id_ed25519` の 4 行が、2 回（Windows の ssh と Git の ssh）出ればよい（順は ssh による）
-   - 足した行は `# BEGIN windows-ssh-client.md <SSH_ALIAS>` と `# END …` の印で挟まれる（[ロールバック](extra/windows-ssh-client.md#ロールバック)の手順 2 で消すため）
-   - `user` などが手順 2 の値と違えば、config の前の方の `Host *` などが先に効いている（ssh は最初に見つけた値を使う）。その行を直す
+   - `user` などが手順 2 の値と違えば、config の前の方の `Host *` などが先に効いている。その行を直す
    - `Bad configuration option` が出たら、前からある config に、片方の ssh が知らない設定がある（[注意点](extra/windows-ssh-client.md#注意点)）
    - `Bad owner or permissions on …config` が出たら、config にほかの主体の書き込みの許可がある（[注意点](extra/windows-ssh-client.md#注意点)）
    - `中断: … BOM がある` ときは、メモ帳で config を開き、「名前を付けて保存」の文字コードを「UTF-8」（BOM なし）にして保存し直す
@@ -150,7 +145,7 @@
 
    - ホストの画面の端末か、すでにホストに入れている別の端末に貼る（`sudo` は要らない）
    - `256 SHA256:<指紋> no comment (ED25519)` の 1 行が出る。この指紋を、手順 9 の初回の接続で照合する
-   - 同じ LAN から `ssh-keyscan` で取った指紋は、照合に使えない（途中で別の相手に入れ替わっていても分からない）
+   - 同じ LAN から `ssh-keyscan` で取った指紋は、照合に使えない
    - **次の手順は、指紋を控えてから、手順 2 の変数を設定した PowerShell に貼る**
 
 1. 公開鍵をホストの authorized_keys に足す（パスワードで 1 回ログインする）。
@@ -171,7 +166,6 @@
    - `<SSH_USER>@<SSH_HOST>'s password:` で、ホストのユーザーのパスワードを入れる
    - `added` と出ればよい
    - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](extra/windows-ssh-client.md#注意点)）
-   - 貼り直すと、同じ行がもう 1 行足される（害は無い。[ロールバック](extra/windows-ssh-client.md#ロールバック)の手順 1 は両方消す）
    - **次の手順は、パスワードを入力し終えて `added` が出てから貼る**（続けて貼るとパスワードとして食われる）
 
 1. Windows の ssh と Git の ssh で、鍵でログインできることを確かめる。
@@ -187,7 +181,7 @@
 
    - パスワードを聞かれずに、`<SSH_USER>` と、`authorized_keys` の行、もう一度 `<SSH_USER>` が出ればよい
    - `authorized_keys` の行は、group と other に書き込みが無く（`-rw-------` など）、`ssh_home_t` が付いていればよい
-   - 鍵にパスフレーズを付けたなら、2 回聞かれる（`ssh` が 2 つある）
+   - 鍵にパスフレーズを付けたなら、2 回聞かれる
    - Git の ssh でホスト鍵を聞かれたら、Git の ssh が別の known_hosts を見ている（手順 3 の `HOME`）
    - `Permission denied (publickey…)` なら、鍵が登録されていないか、Windows の ssh が秘密鍵を使っていない。`UNPROTECTED PRIVATE KEY FILE!` が出ていれば、手順 6 で直す
 
@@ -196,7 +190,6 @@
    - 前提は、[WezTerm の Windows 11 の節](wezterm-nightly.md#windows-11-で使う)と、自分用の設定（[設定ファイル](wezterm-nightly.md#設定ファイル)）。入れていなければ、この手順は飛ばす
    - WezTerm で Ctrl+Shift+R（設定の読み直し）を押してから、Ctrl+Shift+M で起動メニューを開く
    - `ssh <SSH_ALIAS>` が並び、選ぶと新しいタブでホストのシェルに入ればよい（パスフレーズを付けたなら聞かれる）
-   - 起動メニューの ssh は、`PATH` で最初に見つかる `ssh.exe` で動く。新しい PowerShell で `(Get-Command ssh.exe).Source` が `C:\Windows\System32\OpenSSH\ssh.exe` なら、Windows のもの
 
 ---
 

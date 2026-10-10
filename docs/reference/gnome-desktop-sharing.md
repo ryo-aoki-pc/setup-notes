@@ -12,6 +12,9 @@
 - `RDP_PORT` の式は、[gnome-headless-session.md](../gnome-headless-session.md) の手順 1 と同じ。`systemctl is-enabled gnome-remote-desktop.service` は `--user` を付けないので、システムの unit（リモートログイン）を見る
   - ユーザーの unit も同じ名前（`gnome-remote-desktop.service`）なので、ユーザーの unit を見るときは必ず `--user` を付ける
 - RHEL 10 の文書の 1.1 も、リモートログインと併用するときはデスクトップ共有のポートが 3390 になると書いている
+- `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
+- 任意の変数のブロックは、最後に値を読み戻す
+- 変数はそのシェルの中だけで有効なので、新しいシェルでは（手順 13 の再起動の後も）手順 1 の 2 つのブロックを貼り直す
 
 ### 実施手順 / 手順 2: 補足: 再起動の前に確かめること
 
@@ -19,6 +22,7 @@
 - 確かめるのは、再起動の後に SSH で入り直せること（`sshd.service` が enabled、firewalld の永続の設定に `ssh` がある）と、GNOME が自動で起動すること（既定の target が `graphical.target`、`gdm.service` が enabled）
 - `/sys/class/drm/card*-*/status` の `connected` の数は、PC につながっているモニターの数。デスクトップ共有は PC の主モニターを写す（`screen-share-mode='mirror-primary'`）ので、モニターの無い PC には写すものが無い
   - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](../verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../gnome-headless-session.md)を使う（「選択した方針」）
+- 既定の target が `graphical.target` でないと、再起動の後に GNOME が起動しない。`gdm.service` が要るのは、この手順書が GDM の自動ログインを使うため
 - `lsblk` の `crypt` は、LUKS などで暗号化したブロックデバイス。起動のときにパスフレーズを PC の画面で入れる構成なら、手順 13 の再起動の後に入力を待って止まる。TPM などで自動で開く構成かどうかは、この確認では分からないので、手順書は利用者に確かめさせる
 
 ### 実施手順 / 手順 3: 補足: 確かめる前提
@@ -35,6 +39,9 @@
   - なので、`idle-delay` を 0 に、`lock-enabled` を false にする（[AlmaLinux 10 の初期設定](../almalinux-setup.md)の「画面オフ・画面ロック・自動サスペンドを止める（任意）」の手順 1・2 の既定値）
   - 遠隔の PC は、眠ると起こす手段が無いので、サスペンドの mask（同書の手順 4）も前提にし、`suspend.target` が `masked` かを見る
 - **ヘッドレスのセッション**: ヘッドレスのユーザーの unit（`gnome-remote-desktop-headless.service`）には `Conflicts=gnome-remote-desktop.service` がある。同じユーザーでは、片方を起動するともう片方が止まる
+  - `disabled` でも、手動で起動した unit は `active` になり得るので、`is-active` も見る
+- **設定アプリで有効にしてあったとき**: 4 行目が `true` のときは、この手順の設定で上書きし、[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)では無効になる
+- **残っている資格情報の出どころ**: `aoao 0 0` 以外のときの資格情報は、設定アプリ・この手順書の以前の版・この手順書の手順 7 で入れたもの
 
 ### 実施手順 / 手順 4: 補足: 残っている資格情報を消す理由
 
@@ -50,9 +57,10 @@
 ### 実施手順 / 手順 5: 補足: 退避と証明書
 
 - 中身は [gnome-headless-session.md 手順 3](../gnome-headless-session.md#実施手順) と同じ形。違うのは、退避先（`~/.local/state/gnome-desktop-sharing-setup`）と、退避するキーの数（5 つ）
+- `証明書と秘密鍵の公開鍵: 一致` は、既存の証明書と鍵も、組み合わせが正しいことを確かめたもの。既存の証明書と鍵は上書きしない
 - 退避するのは、手順 6 で変える dconf のキー（`/org/gnome/desktop/remote-desktop/rdp/` の `port`・`negotiate-port`・`view-only`・`tls-cert`・`tls-key`）。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - `tls-cert` と `tls-key` は、デスクトップ共有とヘッドレスのモードで共用する（ヘッドレスの専用のキーは `rdp/headless/` の下の `port`・`negotiate-port`・`enable` だけ）。`rdp/` を `dconf reset -f` すると `rdp/headless/` も消えるので、キーごとに戻す
-- 証明書のパス（`~/.local/share/gnome-remote-desktop/certificates/rdp-tls.{crt,key}`）は、ヘッドレスの手順書・RHEL 10 の文書の 1.4・設定アプリ 47.7 が自分で作るときと同じ
+- 証明書のパス（`~/.local/share/gnome-remote-desktop/certificates/rdp-tls.{crt,key}`）は、ヘッドレスの手順書・RHEL 10 の文書の 1.4・設定アプリ 47.7 が自分で作るときと同じ。ヘッドレスの手順書で作ってあれば、それを使う
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る（[gnome-remote-desktop.md の参考資料](gnome-remote-desktop.md)）
 
 ### 実施手順 / 手順 6: 補足: grdctl（オプション無し）
@@ -60,6 +68,7 @@
 - `--headless` も `--system` も付けない `grdctl` は、デスクトップ共有（上流のソースでは `GRD_RUNTIME_MODE_SCREEN_SHARE`）の設定を変える。書き先は dconf の `/org/gnome/desktop/remote-desktop/rdp/`
 - dconf への書き込みなので、PC の画面のセッションが無くても（SSH だけでも）設定できる
 - 既定は `view-only=true`（見るだけ）・`negotiate-port=true`・`port=3389`・`screen-share-mode='mirror-primary'`
+- `disable-view-only` は、クライアントからのキーボードとマウスを受け付ける設定
 - `disable-port-negotiation` は、指定したポートが使われていたときに次のポートを順に試すのを止める。ポートが勝手に変わって、手順 10 で開けたポートと食い違うのを防ぐ。代わりに、ポートが使われていると待ち受けに失敗し、再試行しない
 - `set-tls-cert` と `set-tls-key` は絶対パスだけを受け付ける（`~` はシェルが展開する）
 - 初めて設定するときの `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、`grdctl` が設定を読み込むとき（49.3 の `src/grd-settings.c` の `update_rdp_server_fingerprint`）に、まだ空の `tls-cert` で証明書を読もうとして出すもの
@@ -80,7 +89,7 @@
   - 項目の値は、g-r-d と同じく GVariant の `a{sv}`（`username` と `password`）を `print_(True)`（`g_variant_print` と同じ）で文字にしたもの。ラベル・`xdg:schema` の属性も `grdctl` と同じにする
   - VM では、入れた項目を `grdctl status --show-credentials` がユーザー名で読み、RDP の認証も通った
   - `CreateItem` の `replace` を真にするので、貼り直すと同じキーリングの項目を上書きする（資格情報の変更）
-- 標準入力はヒアドキュメント（スクリプトそのもの）なので、ユーザー名は `/dev/tty` を開き直して `input()` で読み、パスワードは `getpass`（`/dev/tty` を使う）で読む
+- 標準入力はヒアドキュメント（スクリプトそのもの）なので、ユーザー名は `/dev/tty` を開き直して `input()` で読み、パスワードは `getpass`（`/dev/tty` を使う）で読む。パスワードは画面に出ず、シェルの履歴にも残らない
   - `open('/dev/tty', 'r+')` は、テキストの読み書きのモードでは `io.UnsupportedOperation: File or stream is not seekable.` で失敗した（検証で直した）
 - パスワードの無いキーリングも、gnome-keyring を起こした直後は閉じている。開くように頼まれると、パスワードを聞かずに開く（コンテナでの模擬と、VM の再起動の後の最初の RDP の認証）
 - 作ったコレクションの実際の D-Bus パスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。名前が `rdp` でも、記録と一致しない既存コレクションは再利用しない。記録のファイル名は、この手順書の以前の版の任意節「自動ログインで使う」と同じなので、その版で作ったキーリングもそのまま使える
@@ -100,6 +109,7 @@
 - VirtualBox の VM では、自動ログインのセッションは VT2 で動き、約 22 秒後に plymouth が終わった直後に、GDM が VT1 にログイン画面を作って、VT1 が前に出た（起動の引数を `rhgb quiet` 付きの一般的な形にしても同じだった）
 - その結果、PC の画面にはログイン画面が出て、自動ログインのセッションは裏（`Active=no`）に回る。裏のセッションは画面を描かないので、RDP でつなぐと、認証は通るのに画面が真っ黒になる
 - VirtualBox の VM で、起動の引数に `rd.plymouth=0 plymouth.enable=0` を足すと、plymouth が動かず、VT の切り替えが起きないので、ログイン画面は出なかった（[検証記録](../verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)）
+- 起動の引数で止めると、次の起動から、起動画面の代わりに文字のメッセージが出る
 - 裏に回ったセッションは、`sudo loginctl activate <SESSION_ID>` で前に戻せる（[つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)の手順 2）。`sudo` が無いと `Interactive authentication required.` で断られる
 
 ### 実施手順 / 手順 13: 補足: 再起動のコマンド
@@ -108,6 +118,7 @@
   - v257 から、root でも抑止を確かめる。root は、抑止が無ければ、ほかのユーザーのセッションを確かめない（同じ関数の「root respects inhibitors since v257 but keeps ignoring sessions by default」）
   - 自分と同じ uid のセッション（SSH のログインなど）は、root でなくても数えない
   - gnome-session が `shutdown` の強い抑止（`user session inhibited`）を取るのは、アプリが終了を止めているときだけ（テキスト エディターに保存していない文書があるときなど）。アプリが止めていなければ取らない
+- `-i` は、gnome-session の抑止とログイン中のユーザーを無視する。付けないと、PC の画面のアプリが終了を止めているときは `Operation inhibited by …` で断られる
 - `-i`（`--check-inhibitors=no`）で抑止を無視させても、logind は、強い抑止を無視するときは root にも polkit の認可を求める（`src/login/logind-dbus.c` の「We want to always ask here, even for root」）
   - `sudo` を付けると root の `systemctl` は polkit の認証を聞く窓口（`pkttyagent`）を起こさない（`src/shared/polkit-agent.c` の「Clients that run as root don't need to activate/query polkit」）ので、`Interactive authentication required.` で断られる
   - 強い抑止が無ければ、`sudo systemctl reboot -i` は認証を聞かれずに再起動した
@@ -118,6 +129,7 @@
 ### 実施手順 / 手順 14: 補足: 待ち受けの確かめ方
 
 - `grdctl status` の `Port:` は dconf の値で、実際に待ち受けたポートではない（上流 #255）
+- `loginctl show-session` の `Active=yes` は、PC の画面に出ているのがこのセッションであること
 - 実際のポートは、`ss` か、D-Bus の `org.gnome.RemoteDesktop.User` の `/org/gnome/RemoteDesktop/Rdp/Server` の `Port` プロパティ（待ち受けていなければ -1）で見る
 - unit の起動完了と待ち受け開始には時間差があるので、手順 14 は自分のデーモンのソケットを最大 30 秒待つ
 - 待ち受けに失敗しても、デーモンは動き続け、unit は `active` のまま。ポートのネゴシエーションを切っているので、ほかのポートも試さず、ポートが空いても待ち受け直さない（手順 6 の補足）
@@ -145,6 +157,10 @@
 - 画面で一度もログインしていないユーザーの最初の自動ログインでは、`gnome-tour` の「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出た（gnome-initial-setup の窓は出なかった）。RDP の画面で「スキップ」を押して閉じた
 - ログの見方: AlmaLinux 10 の既定は `/var/log/journal` が無く、journal は揮発（`/run/log/journal`）。揮発のときはユーザーごとの journal のファイルが分かれないので、`journalctl --user` は `No journal files were found.` になる
   - `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` は、システムの journal から、このユーザーの unit の行を読む（`wheel` と `adm` のグループは ACL で読める）。ヘッドレスの手順書と同じ形
+
+### 接続元を LAN に絞る（任意） / 手順 1: 補足: 引用符
+
+- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[gnome-remote-desktop.md の同じ節](../gnome-remote-desktop.md#接続元を-lan-に絞る任意)）
 
 ### つながらなくなったとき: 補足
 

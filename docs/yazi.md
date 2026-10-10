@@ -22,7 +22,7 @@
    printf 'YAZI_EXTRAS = %s\n' "${YAZI_EXTRAS}"
    ```
 
-   - **編集が必須の変数は無い**。プレビュー・検索用のツールを一緒に入れる想定になっている
+   - **編集が必須の変数は無い**
    - 最小構成にするなら、`YAZI_EXTRAS` を空にする
    - 最後の行で値を読み戻して確かめる
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
@@ -34,7 +34,6 @@
    ```
 
    - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
 1. 共通設定を読み直し、y 関数を確かめる。
 
@@ -44,7 +43,6 @@
    ```
 
    - `function` が出ればよい。`~/.bashrc` への関数の追記は不要
-   - `y` は yazi を閉じたディレクトリへ移る。空白や日本語を含むパスも扱い、同じ場所なら移動し直さない
 
 1. yazi が入ったか確かめ、`y` で起動する。
 
@@ -56,9 +54,6 @@
    ```
 
    - `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る
-   - `ya` は付属のプラグイン管理コマンド
-   - 最後の `y` で起動して確認する
-   - `y` で起動したときは、終了時にそのディレクトリへ移動する
    - プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る
    - 画像プレビューは端末側の対応が要る（[注意点](extra/yazi.md#注意点)）
    - 画面が出たら `q` で終了する
@@ -91,9 +86,6 @@
    mkdir -p ~/.config/yazi
    ```
 
-   - プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
-   - 本書ではプラグインは扱っていない
-
 ---
 
 ## 更新
@@ -107,7 +99,6 @@
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
-   - `brew outdated` で先に確認できる
 
 ---
 
@@ -142,9 +133,9 @@
    'YAZI_EXTRAS = {0}' -f ($YAZI_EXTRAS -join ' ')
    ```
 
-   - **編集が必須の変数は無い**。プレビュー・検索用のツールを一緒に入れる想定になっている（どれも scoop の main のバケットにある）
+   - **編集が必須の変数は無い**
    - 最小構成にするなら、`$YAZI_EXTRAS = @()` にする
-   - 減らして 1 つだけにするときも、`@('fd')` の形のままにする（`'fd'` だけにすると、1 文字ずつ別の名前として scoop に渡る）
+   - 減らして 1 つだけにするときも、`@('fd')` の形のままにする
    - 最後の行で値を読み戻して確かめる
    - **新しい PowerShell を開いたら**、先にこのブロックを貼り直す
 
@@ -168,9 +159,8 @@
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : False` なら、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
-   - `Yazi` が空なら、yazi は入っていない。`C:\Users\<WIN_USER>\scoop\shims\yazi.exe` だけなら、もう scoop で入っている。ほかの場所が出たら、混ざらないよう、外してから始める
+   - `Yazi` が空なら、yazi は入っていない。`C:\Users\<WIN_USER>\scoop\shims\yazi.exe` だけなら、もう scoop で入っている。ほかの場所が出たら、外してから始める
    - `YaziFileOne` が空なら、この節の手順 5 で入れる。別の値なら、この節の手順 5 で Git for Windows の `file.exe` に上書きされる（元の値は控えておく。[Windows 11 のロールバック](extra/yazi.md#windows-11-のロールバック)の手順 2 で戻す）
-   - `Config : True` なら、設定がもうある（[設定ファイル](#設定ファイル)）
 
 1. scoop で yazi と、プレビュー・検索に使うツールを入れる。
 
@@ -178,11 +168,10 @@
    if ($null -eq $YAZI_EXTRAS) { Write-Error '中断: この節の手順 2 の $YAZI_EXTRAS が無い。手順 2 を貼り直す' } else { scoop install yazi @YAZI_EXTRAS }
    ```
 
-   - アプリごとに `'yazi' (26.9.1) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）。入っていたものは `is already installed.` の形の行を出して飛ばす
-   - `'ripgrep' suggests installing 'extras/vcredist2022'.` などの `suggests installing` の行は、入れなくてよい（VC++ のランタイムは、この節の手順 3 で確かめてある）
+   - アプリごとに `'yazi' (26.9.1) was installed successfully!` の形の行が出ればよい。入っていたものは `is already installed.` の形の行を出して飛ばす
+   - `'ripgrep' suggests installing 'extras/vcredist2022'.` などの `suggests installing` の行は、入れなくてよい
    - `中断:` と出たら、何も入れていない（新しい窓では、この節の手順 2 を貼り直す。yazi 本体だけにするなら `$YAZI_EXTRAS = @()`）
-   - scoop の `file` は入れない（Unicode のファイル名を扱えない。この節の手順 5 で Git for Windows のものを使う）
-   - imagemagick が足すユーザーの環境変数（`MAGICK_HOME` など）と `PATH` は、今の窓にも入る。ほかの開いている窓は、開き直してから効く
+   - scoop の `file` は入れない
 
 1. ユーザーの環境変数 `YAZI_FILE_ONE` を Git for Windows の `file.exe` にする。
 
@@ -206,7 +195,7 @@
    ya env
    ```
 
-   - `yazi --version` は `Version: 26.9.1 (…)` と、括弧の中が `windows-x86_64` の `Triple` の行、`ya --version` は `Version: 26.9.1 (…)` の行が出ればよい（版は実行した日の最新）
+   - `yazi --version` は `Version: 26.9.1 (…)` と、括弧の中が `windows-x86_64` の `Triple` の行、`ya --version` は `Version: 26.9.1 (…)` の行が出ればよい
    - 何も出さずに終わるか、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出たら、VC++ のランタイムが無い（この節の手順 3 の `VCRuntime`）
      - 窓が出たら、OK で閉じる
    - `ya env` の `Config` の各行に `C:\Users\<WIN_USER>\AppData\Roaming\yazi\config\…` が出る

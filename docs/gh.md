@@ -22,7 +22,6 @@
    }
    ```
 
-   - AlmaLinux 10 の dnf は 4 系（dnf5 ではない）なので、この後の手順も dnf4 の構文を使う（参考資料を参照）
    - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
    - `gpgcheck=1` になっていることを確認する
 
@@ -32,7 +31,7 @@
    sudo dnf install gh
    ```
 
-   - 初回は署名鍵の取り込みを **2 回**聞かれる（鍵が 2 本ある）
+   - 初回は署名鍵の取り込みを **2 回**聞かれる
    - fingerprint が次の 2 つであることを目で確かめてから `y` と答える
      - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
      - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
@@ -115,11 +114,9 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
-   - `GitCred` が `credential.helper manager` ならよい（Git for Windows のインストーラの既定の Git Credential Manager）
-   - `GitCred` に `auth git-credential` で終わる行があれば、前に gh を Git の資格情報のヘルパーにしてある（`gh auth setup-git` など）。この節の手順 4 で Git の認証は聞かれない
-   - `GitCred` が空なら、Git の資格情報のヘルパーが無い。この節の手順 4 の Git の認証には `Y` と答えてよい（gh が `~/.gitconfig` に自分をヘルパーとして書く）
-   - `Gh` が空なら、gh は入っていない。`C:\Users\<WIN_USER>\scoop\shims\gh.exe` だけなら、もう scoop で入っている（この節の手順 3 の `scoop install` は何も変えない）
-   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。混ざらないよう、外してから始める（ログインと設定は残り、scoop の gh も同じ場所を読む）
+   - `GitCred` が `credential.helper manager` ならよい
+   - `GitCred` が空なら、この節の手順 4 の Git の認証には `Y` と答えてよい
+   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。外してから始める
 
 1. scoop で gh を入れ、版と場所を確かめる。
 
@@ -129,7 +126,7 @@
    (Get-Command gh -All).Source
    ```
 
-   - `'gh' (2.102.0) was installed successfully!` の形の行が出ればよい（版は実行した日の最新）
+   - `'gh' (2.102.0) was installed successfully!` の形の行が出ればよい
    - もう入っていれば、`'gh' (<版>) is already installed.` と `Use 'scoop update gh' to install a new version.` の警告を出して何も変えない
    - `gh version <版> (<日付>)` の形で、入れた版が出ればよい
    - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\gh.exe` の 1 行だけを出せばよい
@@ -143,10 +140,10 @@
    - 問いには、矢印キーで選んで Enter で答える
      - `Where do you use GitHub?` は `GitHub.com`
      - `What is your preferred protocol for Git operations on this host?` は `HTTPS`
-     - `Authenticate Git with your GitHub credentials?` は、**`n` と打って Enter**（既定は `Y`）。git の HTTPS の認証は、Git Credential Manager のままにする（[参考資料](reference/gh.md#windows-11-で使う--手順-4-補足-git-の認証に-n-と答える理由)）
+     - `Authenticate Git with your GitHub credentials?` は、**`n` と打って Enter**（既定は `Y`）
      - `How would you like to authenticate GitHub CLI?` は `Login with a web browser`
    - Git の認証の問いが出なければ、gh がもう Git の資格情報のヘルパーになっている（この節の手順 2 の `GitCred`）
-   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この節の手順 5 のブラウザで使う（gh の既定では、クリップボードにも入る）
+   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この節の手順 5 のブラウザで使う
    - クリップボードに入れられなかったときは、`First copy your one-time code:` の後にコードが出る
    - `Press Enter to open https://github.com/login/device in your browser...` で Enter を押すと、既定のブラウザが開く
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
@@ -166,7 +163,7 @@
    git config --get-regexp '^credential\..*helper$'
    ```
 
-   - `Logged in to github.com account <GITHUB_USER> (keyring)` の行と、`Git operations protocol: https` の行が出ればよい（`keyring` は、トークンが資格情報マネージャーにあること）
+   - `Logged in to github.com account <GITHUB_USER> (keyring)` の行と、`Git operations protocol: https` の行が出ればよい
    - `(keyring)` の代わりに `(C:\Users\<WIN_USER>\AppData\Roaming\GitHub CLI\hosts.yml)` が出たら、トークンは平文のファイルにある
    - `You are not logged into any GitHub hosts.` なら、ログインしていない。この節の手順 4 からやり直す
    - 最後のコマンドが、この節の手順 2 の `GitCred` と同じ行（ふつうは `credential.helper manager`）を出せばよい

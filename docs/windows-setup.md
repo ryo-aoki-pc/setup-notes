@@ -47,7 +47,7 @@
 
    - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」。UAC の確認で「はい」
    - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
-   - 手順 2〜8 はこの窓に貼る。更新コマンドから自動では再起動しない
+   - 手順 2〜8 はこの窓に貼る
 
 1. 管理者であることを確かめ、今の窓だけモジュールを使えるようにする。
 
@@ -74,7 +74,7 @@
 
    - PSWindowsUpdate の一覧が出たら、版と場所を控える。何も並ばなければ、手順 3 で初めて入れる
    - 最後に `RemoteSigned`・`Unrestricted`・`Bypass` のいずれかが出ればよい
-   - エラーが出たら進まない。グループ ポリシーによる制限は、この手順では変えない
+   - エラーが出たら進まない
 
 1. PSWindowsUpdate が無ければ自分のユーザーに入れ、読み込む。
 
@@ -117,7 +117,7 @@
    }
    ```
 
-   - 更新の件数と一覧を確かめる。この手順はダウンロードとインストールを行わない
+   - 更新の件数と一覧を確かめる
    - `対象の更新: 0 件` なら、手順 5 は飛ばす（手順 6・7 で最終確認する）
    - 再起動が必要と出たら、手順 5〜7 は飛ばして手順 8 へ。検索のエラーなら進まない
    - **次の手順は、検索が終わり、更新の一覧を確かめてから貼る**
@@ -142,9 +142,8 @@
    }
    ```
 
-   - `Result` は、受け付け・ダウンロード・インストールの段階ごとに出る。`Accepted`・`Downloaded` だけではインストール完了ではない
+   - `Accepted`・`Downloaded` だけではインストール完了ではない
    - `Installed` になったことを確かめる。エラーや `中断:` が出たら、理由を解決するまで次へ進まない
-   - このコマンドからは再起動しない
    - **次の手順は、インストールが終わり、プロンプトが戻ってから貼る**
 
 1. Windows Update が再起動を必要としているか確かめる。
@@ -198,7 +197,7 @@
 
    - 手順 1 の管理者の窓を閉じる
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
-   - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする（実行ポリシーとプロファイルは、5.1 と 7 で別々に持つ）
+   - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
    - Windows Terminal の中に開いた窓に複数行のブロックを貼ると、「複数の行を含むテキストを貼り付けようとしています」の警告が出る。「強制的に貼り付け」を押す
 
 1. 管理者ではないことと、Store CLI・winget の有無を確かめる。
@@ -237,7 +236,7 @@
    ```
 
    - `winget.exe` の場所と版が出ればよい
-   - 初回サインイン後の登録を要求する操作。アプリ インストーラー自体が無い場合や、登録が失敗した場合は止める
+   - アプリ インストーラー自体が無い場合や、登録が失敗した場合は止める
 
 1. Store CLI が無いか一括更新に非対応のときだけ、Store 本体を更新する。
 
@@ -253,7 +252,7 @@
    }
    ```
 
-   - アプリ インストーラー、Microsoft Store の順に更新する。更新が無い旨の表示なら、そのアプリは何も変えない
+   - 更新が無い旨の表示なら、そのアプリは何も変えない
    - 終わったら手順 13 へ。まだ CLI が使えない場合は止める
    - **次の手順は、両方の更新が終わり、プロンプトが戻ってから貼る**
 
@@ -288,7 +287,6 @@
    }
    ```
 
-   - 名前や発行元のフィルターは付けず、すべての Store アプリを対象にする
    - エラーや適用できないアプリが出たら進まない。使用中のアプリが原因なら、作業を保存してそのアプリを閉じてから、この手順を貼り直す
    - **次の手順は、更新処理が終わり、プロンプトが戻ってから貼る**（コマンドの終了だけで更新完了とはみなさない）
 
@@ -322,7 +320,7 @@
    ```
 
    - 何も出なければよい
-   - この窓を閉じるまで効く。手順 17 から後の複数行のブロックを、この窓に右クリックで貼れるようにするため
+   - この窓を閉じるまで効く
 
 1. 管理者ではないことと、今の状態を確かめる。
 
@@ -345,12 +343,8 @@
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じて手順 9 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、手順 10〜15 でアプリ インストーラーの登録と更新を確かめてから
-   - `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で入れる）
-   - `ClassicMenu` は旧形式のコンテキストメニューの設定があるか（無ければ `False`）
    - `ScancodeMap` が空でなければ、キーの割り当てがもうある。その値を控える（手順 51 は、違う値があれば止まる）
-   - `Profile` は、このユーザーの Windows PowerShell が起動のときに読むファイル。`ProfileExists : False` なら、手順 19 で作る
    - 最後の表の `CurrentUser` の値を控える（[ロールバック](extra/windows-setup.md#ロールバック)の手順 16 で使う。何も設定していなければ `Undefined`）
-   - `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、手順 18 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
    - `Scoop` に場所が出たら、scoop はもう入っている。手順 20・21 は飛ばす
 
 1. スクリプトの実行ポリシーを RemoteSigned にする。
@@ -361,7 +355,6 @@
    ```
 
    - `RemoteSigned`（もとから `Unrestricted` か `Bypass` だった PC では、その値）が出ればよい
-   - 今の値が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、何も書かない
    - 「より限定的なスコープで定義されたポリシーによって上書きされます」の旨のエラーが出て、ほかの値が出たら、グループ ポリシー（`MachinePolicy` か `UserPolicy`）で決められている。その PC では、scoop も手順 19 のプロファイルも使えない（ほかの手順書のブロックは、conhost の窓でも Ctrl+V で貼る）
 
 1. プロファイルに、手順 16 と同じ 1 行を足す。
@@ -382,9 +375,8 @@
    ```
 
    - `足した: C:\Users\<WIN_USER>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` と、足した行が出ればよい（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下のパスになる）
-   - プロファイルにほかの行があれば、それも出る（そのまま残る）
+   - プロファイルにほかの行があれば、それも出る
    - 何度貼ってもよい（2 回目からは `すでにある:`）。前の版の手順書（`windows-powershell-paste.md`）で足した行があるときも `すでにある:` で、何も足さない
-   - これより後に開く Windows PowerShell の窓（手順 35 の管理者の窓も）は、この行を読む
 
 1. scoop を入れる。
 
@@ -405,7 +397,7 @@
    [Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -like '*\scoop\shims' }
    ```
 
-   - `Current Scoop version:` の次に版と公開日が出ればよい（版は実行した日の最新）
+   - `Current Scoop version:` の次に版と公開日が出ればよい
    - `scoop bucket list` に `main` の行が出る
    - 最後に `C:\Users\<WIN_USER>\scoop\shims` が出る
 
@@ -418,9 +410,8 @@
    ```
 
    - `scoop install scoop-search` の最後に `'scoop-search' (2.1.0) was installed successfully!` の形の行が出る
-   - winget はインストーラのハッシュを確かめてから入れる。初回に Visual C++ ランタイムなどの依存関係を入れる際は、管理者の確認（UAC）が出ることがある。製品名と発行元を確かめて許可する（Visual C++ ランタイムの発行元は Microsoft Corporation）
-   - 最後の表に `UniGetUI` と `Devolutions.UniGetUI` の行が出ればよい（版は実行した日の最新）
-   - デスクトップに UniGetUI のショートカットができる（手順 50 で消す）
+   - 初回に Visual C++ ランタイムなどの依存関係を入れる際は、管理者の確認（UAC）が出ることがある。製品名と発行元を確かめて許可する（Visual C++ ランタイムの発行元は Microsoft Corporation）
+   - 最後の表に `UniGetUI` と `Devolutions.UniGetUI` の行が出ればよい
 
 1. PowerToys を、自分のユーザーに入れる。
 
@@ -429,9 +420,8 @@
    winget list --exact --id Microsoft.PowerToys --source winget
    ```
 
-   - 最後の表に `PowerToys` と `Microsoft.PowerToys` の行が出ればよい（版は実行した日の最新）
+   - 最後の表に `PowerToys` と `Microsoft.PowerToys` の行が出ればよい
    - 管理者の確認（UAC）は出ないはず
-   - Caps Lock は、PowerToys の Keyboard Manager ではなく、手順 51 の Scancode Map で変える（[選択した方針](verification/windows-setup.md#選択した方針)）
 
 1. PowerShell 7 を、自分のユーザーに入れる。
 
@@ -440,9 +430,9 @@
    winget list --exact --id Microsoft.PowerShell --source winget
    ```
 
-   - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい（版は実行した日の最新）
-   - 管理者の確認（UAC）は出ないはず（MSIX のパッケージで、自分のユーザーに入る）
-   - スタートメニューに「PowerShell 7」ができる。この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+   - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい
+   - 管理者の確認（UAC）は出ないはず
+   - この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
 
 1. エクスプローラーで、拡張子と隠しファイルを表示し、「PC」で開き、最近使ったものを出さないようにする。
 
@@ -489,8 +479,7 @@
    ```
 
    - 並んだ値がすべて `0` ならよい
-   - 外したアプリが戻らないように、手順 33 より前に貼る（`SilentInstalledAppsEnabled`）
-   - スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、手順 49 で切る
+   - 手順 33 より前に貼る
 
 1. タスクバーを左に寄せ、タスク ビューと検索のボタンを消し、時計に秒を出す。
 
@@ -506,7 +495,6 @@
 
    - `TaskbarAl : 0`・`ShowTaskViewButton : 0`・`ShowSecondsInSystemClock : 1`・`SearchboxTaskbarMode : 0` が出ればよい
    - タスクバーには、すぐか、手順 55 の再起動の後に効く
-   - ウィジェットのボタンは、手順 34 でウィジェットを外すと消える（この手順では書けない）
 
 1. ダークモードにする。
 
@@ -518,7 +506,7 @@
    ```
 
    - `AppsUseLightTheme : 0` と `SystemUsesLightTheme : 0` が出ればよい
-   - 動いているアプリとタスクバーには、手順 55 の再起動の後に効く（設定の「個人用設定」→「色」から変えると、すぐに効く）
+   - 動いているアプリとタスクバーには、手順 55 の再起動の後に効く
 
 1. 既定の端末を Windows Terminal にする。
 
@@ -565,8 +553,7 @@
 
    - `止めた: OneDrive` などと、`Run` にあるアプリごとに `止めている` か `起動する` が出ればよい
    - 無いものは何もしない（Edge の行は、Edge の設定によっては無い）
-   - 初回導入用の `OneDriveSetup` の項目も、残っていれば止める。実行ファイルがある場合は初回インストールも延期される。必要ならタスク マネージャーの「スタートアップ アプリ」から有効に戻せる
-   - `WingetUI: 起動する` は UniGet UI（更新を知らせるために起動する）。止めるなら、タスク マネージャーの「スタートアップ アプリ」で無効にする
+   - `WingetUI: 起動する` は UniGet UI。止めるなら、タスク マネージャーの「スタートアップ アプリ」で無効にする
    - 効くのは、次のサインインから
 
 1. 要らない標準アプリを、自分のユーザーから外す。
@@ -580,7 +567,6 @@
 
    - 11 個のアプリごとに `外した:` か `無い:` が出ればよい
    - 赤い字のエラーが出たアプリは、外せなかった（動いていれば閉じて貼り直す）
-   - Copilot（`Microsoft.Copilot`）は外さない。`Microsoft.MicrosoftOfficeHub` はストアの名前が「Microsoft 365 Copilot」になった別のアプリ（Office の入口）
    - 機能の更新（Windows の大きな更新）の後に、戻ってくることがある。そのときはこの手順を貼り直す
 
 1. ウィジェット（Windows Web Experience Pack）を外す。
@@ -597,7 +583,6 @@
 
    - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
    - 手順 9 の PowerShell は閉じてよい（再起動の後は、手順 60 で開き直す）
-   - この窓は、手順 19 でプロファイルに書いた行を読む（手順 37 で確かめる）
    - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。手順 18 を、この窓で貼り直す
 
 1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
@@ -613,7 +598,7 @@
    ```
 
    - 最後に値を読み戻して確かめる
-   - `PC_NAME` は、SSH・リモート デスクトップ・Syncthing などで、この PC を見分ける名前。名前を変えないなら、空のままにして手順 39 を飛ばす
+   - 名前を変えないなら、空のままにして手順 39 を飛ばす
    - `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）。ほかの PC とつながる接続と違えば、`$LAN_IF = 'Wi-Fi'` のように直す
    - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 36 のブロックを貼り直してから先へ進む
 
@@ -641,13 +626,11 @@
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。手順 35 から
    - `CtrlEnter` が `InsertLineAbove` なら、この窓はプロファイルを読んでいない。手順 16・18・19 をこの窓で貼り直してから（手順 16 を先に貼ると、手順 18・19 を右クリックで貼れる）、窓を開き直して手順 36 から
-   - `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、手順 40 の sudo の行は何もしない
    - 次の値を控える（[ロールバック](extra/windows-setup.md#ロールバック)で、元に戻すかを決めるのに使う）
      - `ComputerName`（PC の名前。ロールバックの手順 37）と `LanCategory`（LAN の種類。ロールバックの手順 33）
      - `RemoteDesktop`（1 なら無効、0 ならもう有効。ロールバックの手順 32）と `RemoteAssistance`（1 なら有効、0 なら無効。ロールバックの手順 31）
      - `HelloOnly`（2 ならオン、0 ならオフ。ロールバックの手順 22）と `Keyboard`（`kbd106.dll` なら JIS 配列。ロールバックの手順 26）
      - 最後の行の配信の最適化のモード（`Lan` が Windows の既定。ロールバックの手順 29）
-   - `Hypervisor : True` なら、Hyper-V がもう動いている（[VirtualBox の Windows 11 の節](virtualbox.md#windows-11-で使う)の VM は、その上で動く）
    - `Edition` が `Core` で始まる（Home）なら、手順 44 は飛ばす
 
 1. 複数行のブロックをコピーボタンでコピーして右クリックで貼り、元の順に動くことを確かめる。
@@ -698,7 +681,6 @@
 
    - `LongPathsEnabled : 1` と `AllowDevelopmentWithoutDevLicense : 1` が出ればよい
    - sudo は、今の窓で動く形（インライン）になった旨を表示する（表示言語は環境による）
-   - 管理者ではない窓で `sudo <コマンド>` を打つと、UAC の確認の後に、同じ窓でそのコマンドが管理者の権限で動く
    - **注意**: インラインの sudo は、同じ窓のほかの（管理者でない）プロセスから、管理者のコマンドに入力を送れる形（Microsoft の文書。[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
 
 1. 電源接続中の眠りと蓋の動作を止め、電源に関係なく休止状態と放置後のロックを切る。
@@ -715,9 +697,6 @@
    ```
 
    - 3 つの行の AC の値が `0x00000000` で、`HibernateEnabled: 0` が出ればよい（`powercfg` の表示は日本語）
-   - 画面を消す時間は変えない
-   - バッテリー用の電源プランの値（スリープ時間・蓋を閉じたときの動作・`CONSOLELOCK`）は変えない
-   - 休止状態の無効化と `DelayLockInterval` は電源接続中だけに限定されない（バッテリーのときもかかる）
    - **注意**: PC の前にいる人は、このユーザーとしてそのまま使える（リードの `[!WARNING]`）
 
 1. LAN のアダプターを、電力の節約のために止めないようにする。
@@ -737,7 +716,7 @@
 
    - `AllowComputerToTurnOffDevice : Disabled` が出ればよい
    - `このアダプターは対象外:` なら、このアダプターには設定が無い（何もしない）
-   - アダプターは起動し直さない（`-NoRestart`）。効くのは、手順 55 の再起動の後
+   - 効くのは、手順 55 の再起動の後
 
 1. LAN の接続をプライベートにする。
 
@@ -751,9 +730,7 @@
    ```
 
    - `<LAN_IF>  Private` が出ればよい
-   - 既にプライベートなら、何も変わらない
    - **注意**: プライベート向けのほかの許可の規則（ネットワーク探索など）も、この LAN で効くようになる
-   - [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・手順 44〜46 は、この LAN がプライベートであることを前提にする
 
 1. Pro 以上のときだけ、リモート デスクトップを有効にし、受け付けるのをプライベートの LAN に絞る。
 
@@ -769,8 +746,6 @@
 
    - `RemoteDesktop-UserMode-In-TCP` などの行が `True  Private  Inbound  Allow` で出ればよい
    - 手順 37 の `Edition` が `Core` で始まる（Home）なら、この手順は飛ばす（貼っても `中断:` で止まる）
-   - つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。手順 48 も）
-   - [RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)は、この手順を前提にする
 
 1. リモート アシスタンスを切る。
 
@@ -795,7 +770,7 @@
    ```
 
    - 2 つの規則が `True  Private  Inbound  Allow` で出ればよい
-   - 何度貼ってもよい（規則は消してから作り直す）
+   - 何度貼ってもよい
    - LAN の別の PC から、この PC の IP アドレスへ ping が通るようになる
 
 1. 配信の最適化を、LAN の PC とだけ共有するようにする。
@@ -806,7 +781,6 @@
    ```
 
    - `Lan` が出ればよい
-   - Windows の既定も `Lan` なので、手順 37 で `Lan` だったなら何も変わらない
 
 1. 「Windows Hello サインインのみを許可する」を切る。
 
@@ -865,7 +839,7 @@
 
    - `Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` が出ればよい
    - 同じ値がもうあれば、何も書かずに同じ行を出す（何度貼ってもよい）
-   - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある。消さないように止めている（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
+   - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
    - 効くのは、手順 55 の再起動の後
 
 1. AlmaLinux とデュアル ブートし、AlmaLinux の時計を UTC にしているときだけ、Windows も UTC にする。
@@ -877,7 +851,7 @@
 
    - `RealTimeIsUniversal : 1` が出ればよい
    - 効くのは、手順 55 の再起動の後。時刻がずれていたら、設定の「時刻と言語」→「日付と時刻」の「今すぐ同期」で合わせ直す
-   - AlmaLinux の `timedatectl` の `RTC in local TZ:` が `yes`（`/etc/adjtime` の 3 行目が `LOCAL`）なら、この手順は飛ばす。AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[windows-dual-boot.md の注意点](extra/windows-dual-boot.md#注意点)）
+   - AlmaLinux の `timedatectl` の `RTC in local TZ:` が `yes`（`/etc/adjtime` の 3 行目が `LOCAL`）なら、この手順は飛ばす
    - デュアル ブートしない PC でも、この手順は飛ばす
 
 1. US 配列（101/102 キー）のキーボードを使うときだけ、キーボードの種類を変える。
@@ -893,7 +867,7 @@
 
    - `LayerDriver JPN : kbd101.dll`・`OverrideKeyboardIdentifier : PCAT_101KEY`・`OverrideKeyboardType : 7`・`OverrideKeyboardSubtype : 0` が出ればよい
    - JIS 配列（日本語の 106/109 キー）のキーボードなら、この手順は飛ばす
-   - 効くのは、手順 55 の再起動の後。US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは、手順 31 の Ctrl+Space（または Alt+`）で行う
+   - 効くのは、手順 55 の再起動の後。日本語の入力の切り替えは、手順 31 の Ctrl+Space（または Alt+`）で行う
 
 1. WSL を使えるように、Windows の機能を入れる（ディストリビューションは再起動の後に入れる）。
 
@@ -928,14 +902,14 @@
    - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る
    - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える
    - タスクバーのアイコンが左に寄り、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒が出る。全体が濃い色になっている
-   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（手順 49。出たら、[検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)）
+   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（手順 49）
    - デスクトップに Edge と UniGet UI のショートカットが無い
 
 1. タスクバーとスタートの、要らないピン留めを外す。
 
    - タスクバーのアイコン（Microsoft Edge・Microsoft Store など）を右クリックし、「タスクバーからピン留めを外す」
    - スタートを開き、ピン留めされたアプリを右クリックし、「スタートからピン留めを外す」
-   - Copilot は外さない（利用者の選択）。使うアプリは残す
+   - Copilot は外さない。使うアプリは残す
 
 1. スタートメニューから UniGet UI を起動し、WinGet と Scoop が使えることを確かめる。
 
@@ -948,7 +922,7 @@
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 手順 30 の後なので、Windows Terminal の中に開く。複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
+   - 複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 再起動の後の状態を確かめる。
 
@@ -974,7 +948,7 @@
      - `Keyboard` は、手順 53 を行ったなら `kbd101.dll`
      - `LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`
      - `RemoteDesktop : 0`（手順 44 を行ったとき）・`LanCategory : Private`
-     - `Hypervisor : True`（手順 54 で WSL の機能を入れたので）
+     - `Hypervisor : True`
 
 1. WSL に AlmaLinux 10 を入れ、ユーザーを作る。
 
@@ -997,8 +971,7 @@
    wsl.exe --distribution AlmaLinux-10 -- head -n 2 /etc/os-release
    ```
 
-   - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.2 …"` の形の行が出ればよい（版は入れた日のイメージ）
-   - 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（手順 62 も同じ）
+   - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.2 …"` の形の行が出ればよい
 
 1. 自動サインイン（Sysinternals の Autologon）を入れて起動し、パスワードを入れて有効にする。
 
@@ -1033,7 +1006,7 @@
    'LAN_IF = {0}' -f $LAN_IF
    ```
 
-   - 手順 36 の 2 つ目のブロックと同じ式。Wi-Fi の名前が出たら、`$LAN_IF = 'イーサネット'` のように有線 LAN の名前に直す
+   - Wi-Fi の名前が出たら、`$LAN_IF = 'イーサネット'` のように有線 LAN の名前に直す
 
 1. アダプターのマジック パケットでの起動を有効にし、MAC アドレスを表示する。
 
@@ -1058,7 +1031,7 @@
    ```
 
    - すぐに再起動し、UEFI（BIOS）の設定の画面が開く
-   - `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある。スタートメニューの電源から再起動し、起動の直後に機種のキー（F2・Del など）を押して UEFI の設定の画面に入る
+   - `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、スタートメニューの電源から再起動し、起動の直後に機種のキー（F2・Del など）を押して UEFI の設定の画面に入る
    - **次の手順は、UEFI の設定の画面が開いてから行う**
 
 1. UEFI の設定の画面で、Wake on LAN を有効にして保存し、Windows を起動する。
@@ -1136,8 +1109,7 @@
    Get-ItemProperty -Path $k | Format-List AutoReboot
    ```
 
-   - `AutoReboot : 1` が出ればよい（既定で 1。0 だったときはこの手順で 1 にする）
-   - これは OS が応答するときの再起動には関係せず、カーネルが止まったときだけ効く
+   - `AutoReboot : 1` が出ればよい
 
 1. 別の PC から OS 越しに再起動したいときだけ、SMB のリモートシャットダウンを開ける。
 
@@ -1149,7 +1121,6 @@
    ```
 
    - `FPS-SMB-In-TCP … True  Private  Inbound  Allow` と `LocalAccountTokenFilterPolicy : 1` が出ればよい
-   - 仕組み: `shutdown /m` も `net rpc shutdown` も、`\PIPE\InitShutdown` の名前付きパイプを SMB（TCP 445）で使う。再起動には Administrators が既定で持つ「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）と、`LocalAccountTokenFilterPolicy = 1` が要る（[参考資料](reference/windows-setup.md)）
    - 別の PC で動かすトリガー（`<WIN_IP>`・`<WIN_HOST>` はこの PC、`<WIN_USER>` は管理者）
      - AlmaLinux 10 から: `net rpc shutdown -r -f -t 0 -I <WIN_IP> -U '<WIN_USER>%<PASS>'`（`net` が無ければ `sudo dnf install -y samba-common-tools`）
      - 別の Windows から: `net use \\<WIN_HOST>\IPC$ /user:<WIN_HOST>\<WIN_USER>`（パスワードを聞かれる）でこの PC の資格情報を渡してから、`shutdown /r /f /t 0 /m \\<WIN_HOST>` を打つ
@@ -1168,15 +1139,12 @@
    Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile, Direction, Action
    ```
 
-   - `WINRM-HTTP-In-TCP` が `True  Private` で、`WINRM-HTTP-In-TCP-NoScope` が `False` になればよい（WinRM は TCP 5985 で待ち受ける）
-   - Windows 11 では、`WINRM-HTTP-In-TCP` は接続元を同じサブネット（`LocalSubnet`）に絞った規則で、`Enable-PSRemoting` は接続元を絞らない `WINRM-HTTP-In-TCP-NoScope` を有効にする。後者は切る
-   - 1 行目は、`WINRM-HTTP-In-TCP` を既定のパブリックに戻す（無効でプライベートのままだと、`Enable-PSRemoting` が `エラー:1 つ以上の更新手順を終了できませんでした。` で止まり、後ろの行が動かずに `-NoScope` が開いたまま残る。[参考資料](reference/windows-setup.md)）
-   - `Enable-PSRemoting` も `LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）
+   - `WINRM-HTTP-In-TCP` が `True  Private` で、`WINRM-HTTP-In-TCP-NoScope` が `False` になればよい
    - 別の Windows から送る前に、送る側の管理者の PowerShell で、この PC を `TrustedHosts` に足す（ドメインに入っていない PC は、足していないと `TrustedHosts 構成設定に追加されている必要があります` の旨のエラーで止まる）
      - `WSMan:\localhost` は WinRM のサービスが動いていないと使えないので、止まっていれば先に `Start-Service WinRM` を行う
      - 足す前の値を `(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控えてから、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <WIN_HOST> -Concatenate -Force` を行う
      - 戻し方は、この節の手順 9 の箇条書き
-   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`（WinRM を使うので、`Restart-Computer -ComputerName` の既定の WMI/DCOM より開けるポートが少ない）
+   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`
      - 管理者ではない PowerShell でよい
      - `<WIN_USER>` には、コンピューター名を付けなくてよい
      - `-ComputerName` には、`TrustedHosts` に足したのと同じ名前を書く
@@ -1225,9 +1193,8 @@
    }
    ```
 
-   - `net-watchdog  Ready` が出ればよい。SYSTEM として、起動時と 5 分ごとに動く
-   - 起動時のトリガーなので、登録しただけでは動かない。次に起動したときから動く
-   - 歯止め: 稼働 60 分未満は何もしない（起動直後に人が直す余地を残す）。`WATCHDOG_HOST` に 3 回 ping して、届けば失敗の数（`HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails`）を 0 に戻し、6 回続けて届かなければ（約 30 分）再起動する
+   - `net-watchdog  Ready` が出ればよい
+   - 登録しただけでは動かない。次に起動したときから動く
    - **注意**: 相手がずっと落ちていると再起動を繰り返す（節のリードの `[!WARNING]`）。`$limit` を増やすと、再起動までの猶予が延びる
 
 1. Remote Control を再起動の後も使いたいときだけ、タスクをログオン時に自動で始まるようにする。
@@ -1352,7 +1319,6 @@
 
    - `控えた:` か `控えはもうある` の行と、`AdvertisingInfo\Enabled: 1 -> 0` の形の 11 行が出て、`->` の右がすべて `0`（`HttpAcceptLanguageOptOut` だけ `1`）ならよい
    - `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない（この節の手順 5 で使う）
-   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、中の値が消える）
    - `IsDeviceSearchHistoryEnabled` は、0 と 1 のどちらがオフかで資料が食い違う。この節の手順 4 の画面で確かめる
    - 多くは、この節の手順 3 でサインインし直した後に効く
 
@@ -1460,7 +1426,6 @@
 
    - `控えた:` か `控えはもうある` の行と、13 行の表（`Name` と `Value`）が出ればよい。値が無いものは空
    - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 16〜19 で使う）
-   - `{e88865ea-…}`（ギャラリー）と `{f874310e-…}`（ホーム）は、自分のユーザーにキーが既にあったか（ふつうは `False`）
 
 1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
 
@@ -1476,7 +1441,6 @@
    ```
 
    - `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` の形で出ればよい（左の数は PC で違うことがある）
-   - 切るのは、Shift を 5 回・右 Shift の長押し・Num Lock の長押しで機能をオンにするショートカットだけ。機能そのものはオフのまま
    - `無い:` が出たキーには、何も書かない
    - 効くのは、この節の手順 13 でサインインし直した後
    - **注意**: サインインし直すまで、設定の「アクセシビリティ」→「キーボード」を開かない（今の値で書き戻されることがある）
@@ -1497,8 +1461,6 @@
 
    - 3 行とも `->` の右が `3`（割り当てなし）ならよい
    - 効くのは、この節の手順 13 でサインインし直した後
-   - Win+Space の切り替えは残る。半角/全角と、手順 31 の Ctrl+Space（IME のオン・オフ）には関係しない
-   - タスクバーに「英語 (米国)」のキーボードが勝手に出るのは、この設定では防げない（言語の一覧から消す）
 
 1. Alt+Tab に Edge のタブを出さず、タイトル バーのシェイクを切る。
 
@@ -1510,8 +1472,6 @@
    ```
 
    - `MultiTaskingAltTabFilter : 3` と `DisallowShaking : 1` が出ればよい
-   - Alt+Tab とスナップの候補に、Edge のタブを出さず、窓だけを並べる（設定の「システム」→「マルチタスク」の「タブを表示しない」）
-   - シェイク（タイトル バーをつかんで振ると、ほかの窓が最小化される）は、Windows 11 の既定でもオフ。明示的に切る
    - 効くのは、この節の手順 13 でサインインし直した後
 
 1. エクスプローラーの左の一覧から、ギャラリーとホームを消す。
@@ -1525,7 +1485,6 @@
    ```
 
    - キーごと（`{e88865ea-…}` がギャラリー、`{f874310e-…}` がホーム）に、`既にあった` の行と、成功の 1 行と、`System.IsPinnedToNameSpaceTree    REG_DWORD    0x0` が出ればよい
-   - PC 全体の登録を、自分のユーザーで上書きする（手順 26 と同じ、サポート外の方法）
    - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
    - 左の一覧を右クリックして「すべてのフォルダーを表示」をオンにすると、どちらも出る
    - 「Windows PowerShell (x86)」で貼ると、別の場所に書かれて効かない
@@ -1540,7 +1499,6 @@
    ```
 
    - `TaskbarEndTask : 1` が出ればよい
-   - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
    - **注意**: 「タスクの終了」はアプリのプロセスを終わらせるので、保存していない内容は失われる
 
 1. アニメーション効果（最小化・最大化のアニメーションも）を切る。
@@ -1568,8 +1526,6 @@
 
    - `ClientAreaAnimation : 0` と `MinAnimate : 0` が出ればよい
    - すぐに効く（開いているアプリの一部は、起動し直した後）
-   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」に当たる（この節の手順 14 で確かめる）。Firefox・Chromium の Web ページにも、動きを減らす設定（`prefers-reduced-motion`）として伝わる
-   - メニューのフェードなどの細かいアニメーション（「パフォーマンス オプション」の項目）は変えない
 
 1. 効果音を「サウンドなし」にする（今の設定はファイルに控える）。
 
@@ -1594,9 +1550,8 @@
 
    - 控えを作った成功の 1 行（2 回目からは `控えはもうある`）と、`Scheme : .None` と、空にしたイベントの数（1 以上）が出ればよい
    - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（この節の手順 21 で戻す）
-   - サウンドの画面の「サウンド設定」を「サウンドなし」にするのと同じ。次に鳴る音から効く
+   - 次に鳴る音から効く
    - 後から入れたアプリが足したイベントには、音が入る。気になれば、この手順を貼り直す
-   - 設定の「システム」→「通知」の「通知で音を鳴らす」と、起動音（この節の手順 10）は別の設定
 
 1. 起動音も消すときだけ、サウンドの画面を開き、起動音を切る。
 
@@ -1605,7 +1560,7 @@
    ```
 
    - 「サウンド」のタブが開く。「Windows スタートアップのサウンドを再生する」のチェックを外し、「OK」を押す
-   - 管理者の確認（UAC）が出ることがある（起動音は PC 全体の設定）
+   - 管理者の確認（UAC）が出ることがある
    - 同じタブの「サウンド設定」が「サウンドなし」になっていれば、この節の手順 9 が効いている
    - **次の手順は、サウンドの画面を閉じてから貼る**
 
@@ -1627,7 +1582,6 @@
    - 7 行が出て、`->` の右が `01`・`04`・`08` は `1`、`256` と `2048` は `30`、`32` と `512` は `0` ならよい
    - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、この節の手順 23 で戻した後に、画面で同じにし直す
    - 毎月、一時ファイルと、ごみ箱に 30 日を超えて置いたファイルを消す。ダウンロード フォルダーは消さない
-   - 対象はシステムのドライブ（C:）だけ。サインインしてオンラインの状態が 10 分以上続かないと動かない
    - **注意**: OneDrive にサインインしているなら、30 日開かないファイルがオンラインだけになりうる。この節の手順 12 で外す
 
 1. この節の手順 11 を行ったときだけ、ストレージ センサーの画面で値を確かめ、OneDrive を外す。
@@ -1676,7 +1630,7 @@
    }
    ```
 
-   - `StickyKeys: 506 -> 510` の形で出ればよい（値は消さない）
+   - `StickyKeys: 506 -> 510` の形で出ればよい
    - 効くのは、サインインし直した後
 
 1. 元に戻すときは（この節の手順 4 を行ったとき）、切り替えのキーを控えた値に戻す。
@@ -1734,7 +1688,6 @@
    ```
 
    - キーごとに、成功の 1 行と `残っている` の行が出ればよい
-   - この節の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
    - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
 
 1. 元に戻すときは（この節の手順 7 を行ったとき）、「タスクの終了」の値を控えた値に戻す。
@@ -1810,7 +1763,7 @@
    Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List '01', '04', '08', '256', '32', '512', '2048'
    ```
 
-   - 7 つが空ならよい。ストレージ センサーはオフに戻る（空きが少ないときに、Windows がオンにすることがある）
+   - 7 つが空ならよい。ストレージ センサーはオフに戻る
    - この節の手順 11 の `->` の左に数があったなら、設定の「ストレージ センサー」で同じにし直す
    - この節の手順 12 で OneDrive やごみ箱を変えたなら、同じ画面で戻す
 
@@ -1840,7 +1793,6 @@
    ```
 
    - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
-   - キーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）
    - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
    - 手順 32 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（手順 32 と[ロールバック](extra/windows-setup.md#ロールバック)の手順 8 は、無いものを飛ばす）
 
@@ -1855,7 +1807,7 @@
    - `edge://settings/system` で、2 つがオフになっている（この節の手順 2 を行ったなら、灰色で変えられない）
    - この節の手順 2 を行ったなら、`edge://policy` に `StartupBoostEnabled` と `BackgroundModeEnabled` が、値 `false`・状態 `OK` で出る
    - Edge の窓をすべて閉じると、通知領域に Edge のアイコンが残らない
-   - サインインし直した後も `msedge.exe` が見えることがある（Edge Update のサインインのときのコマンドが起動すると広く言われる。[参考資料](reference/windows-setup.md)）
+   - サインインし直した後も `msedge.exe` が見えることがある
 
 1. 元に戻すときは（この節の手順 2 を行ったとき）、管理者の PowerShell で、2 つのポリシーを消す。
 
@@ -1866,7 +1818,6 @@
    ```
 
    - 2 つが空ならよい
-   - キーは消さない（ほかの Edge のポリシーがありうる）
    - Edge を開き直すと、2 つの切り替えをまた変えられる
 
 1. 元に戻すときは（この節の手順 3 を行ったとき）、Edge の設定の画面で 2 つをオンに戻す。
@@ -1895,9 +1846,8 @@
    winget list --exact --id hluk.CopyQ
    ```
 
-   - 最後の表に `CopyQ` と `hluk.CopyQ` の行が出ればよい（版は実行した日の最新）
+   - 最後の表に `CopyQ` と `hluk.CopyQ` の行が出ればよい
    - 管理者の確認（UAC）は出ないはず。winget が、出るかもしれない旨の行を出すことはある
-   - `%LOCALAPPDATA%\Programs\CopyQ` に入る。デスクトップのショートカットと、サインインのときの起動は作らない。入れた直後は起動しない
 
 1. CopyQ を起動する。
 
@@ -1922,8 +1872,6 @@
    ```
 
    - `true`・`True`・`EnableClipboardHistory:` の 3 行が出て、最後の右が空か `0` ならよい
-   - 先に `false` を送るのは、前の CopyQ の設定（`autostart=true`）が残っていても、起動のショートカットを作り直すため
-   - 起動のショートカットは、スタートアップ フォルダーの `copyq.lnk`（手順 32 の `Run` の一覧には出ない）
    - 最後の右が `1` なら、Windows の履歴もオン。この節の手順 5 で切る。空か `0` なら、この節の手順 5 は飛ばす
 
 1. Windows の履歴がオンだったときだけ、設定の画面で切る。
@@ -1962,7 +1910,6 @@
 
    - `false` と、最後に `False` が出て、通知領域から CopyQ のアイコンが消えればよい
    - CopyQ が動いていなければ、サーバーにつながらない旨が出る。それでも `copyq.lnk` は消える
-   - アンインストーラは `copyq.lnk` を消さないので、先にこの手順で消す
 
 1. 元に戻すときは、CopyQ を外す。
 
@@ -2004,7 +1951,6 @@
    - `PT_OFF = FindMyMouse, …` と、`PT_EXE = C:\Users\<WIN_USER>\AppData\Local\PowerToys\PowerToys.exe` の形の 2 行が出ればよい
    - `PT_EXE` が空なら、PowerToys が見つからない。手順 23 を確かめる
    - `$PT_OFF` の名前は、設定ファイルの名前（空白を含むものがある）。変えるなら、この節の手順 3 の表の `Name` から選ぶ
-   - 入る場所は Microsoft の資料どうしで食い違うので、動いている PowerToys から取る
    - 新しい窓を開いたら、このブロックを貼り直す
 
 1. 今のユーティリティの有効・無効と、自動の起動を確かめる。
@@ -2054,7 +2000,6 @@
 
    - `控えた:`（2 回目からは `控えはもうある`）の行と、`FindMyMouse: False` の形の行が `$PT_OFF` の数だけ出て、通知領域に PowerToys のアイコンが戻ればよい
    - 控えは `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 8 で使い、書き戻すと消える）
-   - 書くのは `enabled` の値だけで、ほかの設定は変えない
    - `中断: PowerToys が動いている` が出たら、この節の手順 4 に戻る（設定の窓が残っていても止まる）
 
 1. PowerToys の設定の画面で、切ったユーティリティがオフになっていることを確かめる。
@@ -2062,8 +2007,8 @@
    - 通知領域の PowerToys のアイコンを右クリックし、「設定」で設定の窓を開く（ダブルクリックでも開く。1 回のクリックで開くのはクイック アクセス）
    - 「ダッシュボード」で、`$PT_OFF` のユーティリティがオフ、残したものがオンになっている
    - 同じことは、ユーティリティごとのスイッチでもできる（すぐに効く）
-   - Peek は「Space で開く」をオンのままにする（オフにすると、起動のキーが手順 31 の IME と同じ Ctrl+Space に戻る）
-   - Find My Mouse を使うなら、起動の方法を「マウスを振る」にする（左 Ctrl を 2 回のままでは、手順 51 で Ctrl にした Caps Lock を 2 回押しても出る）
+   - Peek は「Space で開く」をオンのままにする
+   - Find My Mouse を使うなら、起動の方法を「マウスを振る」にする
    - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)の印は付かない）
    - 見終わったら、設定の窓を閉じる
 
@@ -2140,9 +2085,8 @@
    ```
 
    - 5 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
-   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）。無ければ作る
-   - 何度貼ってもよい（同じ行は足さない）。プロファイルにほかの行があれば、そのまま残る
-   - zoxide の行は、starship の行より前に置く（starship のプロンプトから zoxide の記録を呼ぶ。順の理由は[参考資料](reference/windows-setup.md)）
+   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）
+   - 何度貼ってもよい
    - 開いている PowerShell 7 の窓には、開き直すまで効かない
 
 1. Tab で補完の候補の一覧を出すときだけ、Tab の行を足す。
@@ -2163,8 +2107,7 @@
    ```
 
    - `足した:` か `すでにある:` が出ればよい
-   - Tab で、候補が一覧で出る（矢印で選んで Enter、Esc で取り消す）。既定の Tab は、候補を 1 つずつ入れ替える
-   - 一覧を出す既定のキーの Ctrl+Space は、手順 31 で IME が受け取るので、その代わりになる
+   - Tab で、候補が一覧で出る（矢印で選んで Enter、Esc で取り消す）
 
 1. PowerShell 7 で、実行ポリシーとキーの割り当てを確かめる。
 
@@ -2185,7 +2128,6 @@
    ```
 
    - 表の `CurrentUser` が `RemoteSigned` になればよい
-   - PowerShell 7 の実行ポリシーは、手順 18 の Windows PowerShell 5.1 の値とは別に持つ（`Documents\PowerShell\powershell.config.json` に書かれる）
    - この節の手順 4 をもう一度貼って、キーの割り当てを確かめる
 
 1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
@@ -2212,8 +2154,6 @@
    ```
 
    - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
-   - 消すのは、行末が `  # windows-setup.md` の行だけ（PowerToys の Command Not Found などが足した行は残る）。ほかの行の文字コードは変えない
-   - `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
    - 開いている PowerShell 7 の窓には、閉じるまで設定が残る
 
 1. 元に戻すときは（この節の手順 5 を行ったとき）、PowerShell 7 の CurrentUser の実行ポリシーを戻す。
@@ -2266,8 +2206,8 @@
    - `控えた:`（2 回目からは `控えはもうある`）の行と、`Version : 1.25.…` の形の 5 行が出ればよい。`DefaultsFontFace` が空なら、既定のフォント（Cascadia Mono）
    - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る（この節の手順 6 で使い、書き戻すと消える）
    - 最後に表が出たら、そのプロファイルは自分のフォントを持つので、この節の手順 3 の値は効かない（この節の手順 5 の画面で、そのプロファイルを変える）
-   - `中断:` が出たら、何も書いていない。この節の手順 5 の画面で変える（設定の画面でリセットした後は、コメントの入ったファイルになる）
-   - `Version` が 1.24 より前なら、この節の手順 4 は飛ばす（警告の値の形が違う）
+   - `中断:` が出たら、何も書いていない。この節の手順 5 の画面で変える
+   - `Version` が 1.24 より前なら、この節の手順 4 は飛ばす
 
 1. 全プロファイルのフォントを HackGen Console NF にする。
 
@@ -2288,8 +2228,7 @@
    ```
 
    - `face: HackGen Console NF` が出ればよい
-   - 保存した直後に、開いているタブにも効く（Windows Terminal がファイルを読み直す）
-   - ファイルの字下げと記号の書き方は変わるが、中身は同じ
+   - 保存した直後に、開いているタブにも効く
    - フォントが見つからないと、端末に、フォントが見つからない旨が出て、別のフォントで出る（この節の手順 5 で確かめる）
 
 1. Windows Terminal が 1.24 以降で、複数行を貼るたびに出る警告を出さないときだけ、警告を切る。
@@ -2508,9 +2447,8 @@
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)を通す
    - `BashConfig : False` なら、先に Git Bash で [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)を通す
    - `VCRuntime : False` なら、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
-   - `Tools` が空なら、どれも入っていない
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この節の手順 4 は、入っているものを飛ばす）
-   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。混ざらないよう、その方法で外してから始める
+   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
    - `Zoxide` が空か `zoxide 0.9.9` なら、この節の手順 3 は飛ばす
 
 1. scoop の zoxide が 0.9.9 でないときだけ、外す。
@@ -2520,8 +2458,6 @@
    ```
 
    - `'zoxide' was uninstalled.` が出ればよい
-   - 外さなくても、この節の手順 4 は 0.9.9 を並べて入れて切り替えるが、0.10.0 のフォルダー（`~\scoop\apps\zoxide\0.10.0`）が残る
-   - 覚えたディレクトリの履歴（`%LOCALAPPDATA%\zoxide`）は残る。0.9.9 も同じ形で読む
 
 1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
 
@@ -2533,10 +2469,10 @@
    ```
 
    - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
-   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（版は入れた日の最新。zoxide は `0.9.9`）
+   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
    - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
    - 2 行目は、もう入っているものを、何も出さずに飛ばす
-   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す（zoxide を 2 行目に並べると、scoop はこの警告で止まり、ほかの名前を入れない）
+   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す
    - もう止めてあれば、`'zoxide' is already held.` が出る
    - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
    - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
@@ -2579,7 +2515,6 @@
    ```
 
    - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
-   - 中身は [AlmaLinux 10 の初期設定の bat の設定ファイル](almalinux-setup.md#bat-の設定ファイル)の 3 行と同じ。Windows の bat は `~/.config/bat/config` を読まず、scoop が足した `BAT_CONFIG_DIR` の下を読む
    - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
    - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
    - `中断:` が出たら、何も書いていない
@@ -2595,7 +2530,6 @@
      - 同書の手順 55 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
      - 同書の手順 57 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の手順 58 の一覧には、その形（`C:\…`）で出る
    - 同書の手順 56（tmux）は行わない
-   - 覚えたディレクトリは `%LOCALAPPDATA%\zoxide` に入る（PowerShell 7 の zoxide も同じものを使う）
 
 1. 同じタブで、[同書の手順 60〜63](almalinux-setup.md#実施手順)のキーを押して、fzf を確かめる。
 
@@ -2626,9 +2560,7 @@
 
    - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
    - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
-   - `--force` は、版を指定して入れた zoxide を、main のバケットの定義に戻す（付けないと 0.9.9 のまま変わらない）
    - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - これより後は、[更新](#更新)の手順 1・2 で、ほかのツールと一緒に上がる
    - 新しいタブで、この節の手順 7 のうち同書の手順 57・58 を確かめ直す
 
 1. 元に戻すときは、この節で入れた 5 つを scoop で消す。
@@ -2643,7 +2575,7 @@
    - 残すものは、名前を外してから貼る（fzf は yazi も使う）
    - `are still running` の旨のエラーが出たら、そのツールは消えていない。Git Bash で開いている一覧などを閉じてから貼り直す
    - starship の `Path` と、bat の `BAT_CONFIG_DIR` も消える。bat の設定（`~\scoop\persist\bat`）は残る（この節の手順 12）
-   - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す（共通の bash 設定と PowerShell 7 のプロファイルは、無いツールを読まない）
+   - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す
    - starship のログ（`~\.cache\starship`）は、要らなければ手で消す
 
 1. 元に戻すときは（この節の手順 6 で書いたときだけ）、bat の設定ファイルの 3 行を消す。
@@ -2700,7 +2632,7 @@
    ```
 
    - `scoop update` は `Scoop was updated successfully!` を出す
-   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れる（初めての `scoop update` は、scoop 本体と main のバケットを git の形に直す）
+   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れる
    - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この節の手順 2 は飛ばす
 
 1. 古いものがあるときだけ、scoop で入れたものを上げる。
@@ -2711,7 +2643,7 @@
 
    - アプリごとに `'<名前>' (<版>) was installed successfully!` の形の行が出る
    - 動いているアプリは `Running process detected, skip updating.` で飛ばされる。閉じてから貼り直す
-   - SSH のセッションで scoop のツールを使っているなら、[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節の手順 1 を、管理者の PowerShell で貼り直す（新しいジャンクションができるため）
+   - SSH のセッションで scoop のツールを使っているなら、[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節の手順 1 を、管理者の PowerShell で貼り直す
 
 1. winget で入れたものを上げる。
 
@@ -2730,7 +2662,7 @@
    wsl.exe --distribution AlmaLinux-10 --user root -- dnf -y upgrade
    ```
 
-   - `wsl.exe --update` は WSL のパッケージ（とカーネル）を上げる。新しい版が無ければ、最新である旨を出す
+   - `wsl.exe --update` は、新しい版が無ければ、最新である旨を出す
    - `dnf -y upgrade` の最後に `Complete!` か `Nothing to do.` が出ればよい
 
 1. この文書で PSWindowsUpdate を入れたときだけ、モジュールを更新する。
@@ -2747,6 +2679,6 @@
    }
    ```
 
-   - モジュールの版と場所が出ればよい。Windows の更新は、このコマンドでは行わない
-   - 読み込み済みの窓では古いモジュールが残るため、次の Windows Update は[手順 1](#実施手順)で新しく開いた管理者の窓で行う
+   - モジュールの版と場所が出ればよい
+   - 次の Windows Update は[手順 1](#実施手順)で新しく開いた管理者の窓で行う
    - この文書の前から入っていた PSWindowsUpdate は、元の導入方法で管理する

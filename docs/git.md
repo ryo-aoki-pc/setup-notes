@@ -33,7 +33,7 @@
 
    - 2 つとも `git log` に出る。push したリポジトリでは公開される
    - 最後に値を読み戻して確かめる。空のままなら、手順 4 で中断する
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 1 の 3 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、手順 1 の 3 つのブロックを貼り直してから先へ進む
    - Windows の Git Bash なら、手順 2 は飛ばす
 
 1. AlmaLinux 10 のときだけ、git を入れる。
@@ -55,7 +55,7 @@
    - 2 つ目は、設定を `<場所>	file:<ファイル>	<キー>=<値>` の形で 1 行ずつ出す。何も設定していなければ、何も出ない
    - **手順 4〜6 のキー（`user.name`・`core.autocrlf` など）と `pull.ff` は、元の値・スコープ・ファイルを控える**。`global` に無いキーは「global は未設定」と控える（[ロールバック](extra/git.md#ロールバック)で戻す）
    - 実際に追加・変更したキーも控える。既存の値が同じなら「変更なし」、手順 8 を飛ばしたら「`pull.ff` は変更なし」とする
-   - Windows では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る。手順 5・6 で書く `global` の値が優先される
+   - Windows では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
 
 1. 名前とメールアドレスを設定する。
 
@@ -79,9 +79,6 @@
    ```
 
    - 何も出ない。値は手順 7 でまとめて確かめる
-   - `pull.rebase true`: `git pull` が、取ってきた履歴の上に自分のコミットを載せ直す（マージコミットを作らない）
-   - `rebase.autoStash true`: 未コミットの変更があっても pull できる（pull の前に stash し、後で戻す）
-   - `core.autocrlf false`: チェックアウトでもコミットでも、改行を変換しない
 
 1. 推奨の設定を入れる。
 
@@ -98,8 +95,6 @@
    ```
 
    - 何も出ない。値は手順 7 でまとめて確かめる
-   - 要らないものは、[ロールバック](extra/git.md#ロールバック)の手順 1・4 に従い、そのキーだけ元の設定に戻せる
-   - `merge.conflictStyle zdiff3` は [git-delta.md 手順 3](git-delta.md#実施手順) と同じ設定で、どちらを先に通してもよい
 
 1. 効いている値と、その値を書いた場所を確かめる。
 
@@ -114,7 +109,7 @@
 
    - `pull.ff` を除く 14 行が、`global` と手順 4〜6 の値になる（`pull.rebase           global	true` など）
    - `pull.ff` 以外に `system` の行があれば、`global` に書けていない。手順 4〜6 を貼り直す
-   - 最後の `pull.ff` は、何も出ない（設定が無い）のが普通
+   - 最後の `pull.ff` は、何も出ないのが普通
    - `pull.ff` が空か、`only` 以外なら、手順 8 は飛ばす
    - `only` なら、その値とスコープを手順 3 の記録と照合してから手順 8 へ進む
 
@@ -149,10 +144,10 @@
    git push
    ```
 
-   - `git status --short` に `?? 日本語.txt` がそのまま出る（`core.quotepath`）
-   - `git ls-files --eol` は `i/crlf  w/crlf` で始まる。CRLF のまま入った（`core.autocrlf`）
-   - ブランチは `main`（`init.defaultBranch`）
-   - `git push` の最後に `branch 'main' set up to track 'origin/main'.` と出る（`push.autoSetupRemote`）
+   - `git status --short` に `?? 日本語.txt` がそのまま出る
+   - `git ls-files --eol` は `i/crlf  w/crlf` で始まる
+   - ブランチは `main`
+   - `git push` の最後に `branch 'main' set up to track 'origin/main'.` と出る
 
 1. 手順 9 と同じシェルで、別の clone から pull し、rebase と autostash を確かめる。
 
@@ -175,7 +170,7 @@
 
    - `git pull` が `Created autostash: …`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.` を出す
    - `git log` は枝分かれせず、`b: b.txt` → `a: 2` → `first` の 1 本になる
-   - `git status --short` に `M crlf.txt` が残る（pull の前の、未コミットの変更）
+   - `git status --short` に `M crlf.txt` が残る
 
 1. 使い捨てのリポジトリを消す。
 
@@ -212,8 +207,8 @@
    ```
 
    - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
-   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める（ほかの手順書が `C:\Program Files\Git` を前提にしている）
-   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい（この節の[検証記録](verification/git.md)・[参考資料](reference/git.md)）
+   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
+   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
    - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この節の手順 3・4 は飛ばす（新しい版にするなら[更新](#更新)の手順 2）
 
@@ -225,12 +220,10 @@
    ```
 
    - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
-   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）。管理者の窓から動かすので、UAC の確認も出ないはず
-   - 改行の扱いや `git pull` の動作などは、インストーラの画面の既定の選択で入る
+   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
 
 1. この節の手順 3 で入れたときは、Windows PowerShell を閉じて開き直す。
 
-   - この節の手順 3 で PC 全体の `PATH` に足された `C:\Program Files\Git\cmd` は、開いていた PowerShell には入らない
    - 開き直す PowerShell は、管理者でなくてよい
    - **次の手順は、PowerShell を開き直してから貼る**（開いていた窓では `git` が見つからない）
 
@@ -243,8 +236,7 @@
    ```
 
    - 1 行目の一番上に `C:\Program Files\Git\cmd\git.exe` が出ればよい
-   - `git version 2.55.0.windows.5` の形の行（版は実行した日の最新）と、`True` が 2 行出ればよい
-   - インストーラは `system`（`C:/Program Files/Git/etc/gitconfig`）に `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` などを書く。[実施手順](#実施手順)の手順 5・6 の `global` で上書きし、手順 7 で確かめる（`pull.ff` が `only` なら手順 8 も）
+   - `git version 2.55.0.windows.5` の形の行と、`True` が 2 行出ればよい
 
 1. スタートメニューから Git Bash を開く。
 
@@ -283,7 +275,7 @@
    ```
 
    - `Saved working directory and index state WIP on …` と出る
-   - `No local changes to save` なら今回は保存していないので、この節の手順 4 は飛ばす。エラーなら、ここで止めて原因を直す
+   - `No local changes to save` なら、この節の手順 4 は飛ばす。エラーなら、ここで止めて原因を直す
 
 1. 作業ツリーのファイルを、今の設定で書き直す。
 
@@ -306,7 +298,7 @@
 
    - `git status` の形で、元の変更だけが出る
    - 戻したファイルも `w/lf` になる
-   - この節の手順 2 からここまでは、別の stash を作らない。`pop` は先頭の stash を戻すため
+   - この節の手順 2 からここまでは、別の stash を作らない
 
 ---
 
@@ -320,7 +312,6 @@
    sudo dnf upgrade git
    ```
 
-   - 通常の `sudo dnf upgrade` にも含まれる
    - 新しい版が無ければ、`Nothing to do.` と出る
 
 1. Windows 11 では、Git Bash を閉じてから、winget で Git for Windows を上げる。

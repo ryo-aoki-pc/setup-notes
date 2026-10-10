@@ -39,7 +39,7 @@
    ```
 
    - `Codex CLI … installed successfully.` を確認する
-   - `Start Codex now?` と聞かれたら `n` で答える（手順 8 で起動する）
+   - `Start Codex now?` と聞かれたら `n` で答える
    - **次の手順は、インストーラーが終わり、シェルのプロンプトに戻ってから貼る**
 
 1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
@@ -51,7 +51,7 @@
    codex --version
    ```
 
-   - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る（検証時は `0.160.0`）
+   - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る
    - 新しく開いた端末でも `codex --version` が通ることを確認する
 
 1. ChatGPT でのログインを始める。
@@ -112,7 +112,7 @@
    curl -fsSL https://chatgpt.com/codex/install.sh | sh
    ```
 
-   - 新しい配布物を導入する。`Start Codex now?` は `n` で答える
+   - `Start Codex now?` は `n` で答える
    - **次の手順は、シェルのプロンプトに戻ってから貼る**
 
 1. 更新後の版を確かめる。

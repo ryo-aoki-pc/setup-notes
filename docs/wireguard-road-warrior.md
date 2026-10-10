@@ -68,7 +68,6 @@
    fi
    ```
 
-   - 秘密鍵は `wg0.key` に書き、端末には表示しない
    - 表示された公開鍵（44 文字）だけを、手順 4 で WG ホストに渡す
 
 1. WG ホストで変数を設定し、登録済みのクライアントを確かめる（`REPO` 以外は必ず値を入れる）。
@@ -95,7 +94,7 @@
    - `REPO` は、clone 先が `~/setup-notes` なら既定のままでよい
    - [wireguard.md の手順 1・2](wireguard.md#実施手順) の `REPO` と `~/wg/site.env` がある前提
    - 最後に、登録済みのクライアントを一覧で確認する
-   - 登録簿は名前で一意。`CLIENT_NAME` と同じ名前が一覧に無ければ、手順 5 は飛ばす
+   - `CLIENT_NAME` と同じ名前が一覧に無ければ、手順 5 は飛ばす
 
 1. `CLIENT_NAME` と同じ名前が一覧にあるときだけ、WG ホストで旧登録を消して反映する。
 
@@ -126,8 +125,8 @@
    ```
 
    - `client show` の出力は、WG ホストの端末からコピーする
-   - **ファイル名は `wg0.conf` にする。** NetworkManager がファイル名から接続名とインターフェース名を決める
-   - ファイルで渡すなら、WG ホストで `client show` の出力をファイルに書き出し（秘密鍵は入っていないので平文でよい）、`scp` で `${WG_DIR}/wg0.conf` に置く
+   - **ファイル名は `wg0.conf` にする**
+   - ファイルで渡すなら、WG ホストで `client show` の出力をファイルに書き出し、`scp` で `${WG_DIR}/wg0.conf` に置く
    - **次の手順は、保存して `vi` を閉じてから貼る**（続けて貼ると `vi` への入力として食われる）
 
 1. `PrivateKey` 行だけを、手順 3 の秘密鍵に置き換える（鍵は表示しない）。
@@ -144,7 +143,7 @@
 
 1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
 
-   - クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で手順 10 を貼ると、そこで通信が切れる
+   - LAN 内で手順 10 を貼ると、そこで通信が切れる
    - **次の手順は、LAN の外につないでから貼る**
 
 1. 拠点の LAN の外で、conf を NetworkManager に取り込み、自動で張られたトンネルをすぐ切る。
@@ -160,9 +159,7 @@
    }
    ```
 
-   - `import` した直後に、NetworkManager が `wg0` を**自動で張る**（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わる
    - **注意**: LAN 内でこの手順を貼ってしまうと、そこで通信が切れて、その後の手順を貼れなくなる。その場合は PC のコンソールで `sudo nmcli connection down wg0`
-   - 張られたトンネルは、取り込んだ直後に切る（手順 11 で改めて張る）
    - 最後に、プロファイルの内容と秘密鍵の保存先を確認する。見るところは次のとおり
      - `ipv4.method` が `manual`
      - `ipv4.addresses` が `<CLIENT_TUN_IP>/32`
@@ -219,7 +216,6 @@
    ```
 
    - 日常は、外出先で `sudo nmcli connection up wg0`、拠点に戻る前に `sudo nmcli connection down wg0`
-   - autoconnect を無効にしてあるので、再起動しても勝手には張られない
 
 1. 平文の鍵と conf を消す。
 
@@ -227,8 +223,6 @@
    rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" &&
    ls -l "${WG_DIR}"                                       # wg0.pub だけ残る
    ```
-
-   - 秘密鍵は手順 10 で NetworkManager のプロファイルに入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
 
 ---
 
@@ -288,7 +282,6 @@
    ```
 
    - `入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）と、`False` だけが出れば、まだ入っていない
-   - `WireGuard.WireGuard` の行が出たら、WireGuard はもう入っている（公式のインストーラーで入れたものも出るはず）。そのまま進めてよい（この節の手順 4 は、新しい版があれば上げる）
    - `WireGuardTunnel$wg0` の行か `wg0.conf.dpapi` が出たら、同じ名前のトンネルがある。[Windows 11 のロールバック](extra/wireguard-road-warrior.md#windows-11-のロールバック)の手順 1 で消してから始める（その鍵は取り戻せない）
    - 最後が `True` なら、前に作った鍵が残っている（この節の手順 6 で止まる）。使わないなら、[Windows 11 のロールバック](extra/wireguard-road-warrior.md#windows-11-のロールバック)の手順 1 で消す
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
@@ -302,7 +295,7 @@
    & "$env:ProgramFiles\WireGuard\wg.exe" --version
    ```
 
-   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `WireGuard.WireGuard` の行が出ればよい（版は実行した日の最新）
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `WireGuard.WireGuard` の行が出ればよい
    - 2 つのファイルの署名が `Valid` で、署名者が `CN=WireGuard LLC`
    - 最後に `wireguard-tools v1.0.20260223 - https://git.zx2c4.com/wireguard-tools/` の形の 1 行が出る
    - インストーラーの画面は出ず、入れた後に WireGuard の窓も開かない（窓は、この節の手順 5 で開く）
@@ -315,7 +308,7 @@
 
    - WireGuard の窓が開き、タスク バーの通知領域に WireGuard のアイコンが出る（トンネルの一覧はまだ空）
    - スタートメニューの「WireGuard」から開いても同じ
-   - 窓は開いたままでよい（閉じても、マネージャーは動き続ける）
+   - 窓は開いたままでよい
    - **次の手順は、WireGuard の窓が開いてから、PowerShell の窓をクリックして貼る**（窓が開く前に貼ると、開いた窓に入力が移ることがある）
 
 1. 鍵ペアを作る。
@@ -339,7 +332,6 @@
    }
    ```
 
-   - 秘密鍵は `wg0.key` に書き、画面には出さない
    - `icacls` に `NT AUTHORITY\SYSTEM:(OI)(CI)(F)` と `BUILTIN\Administrators:(OI)(CI)(F)` の 2 行だけが出る
    - `wg0.key` と `wg0.pub` がどちらも 45 バイト
    - 最後の 1 行（公開鍵、44 文字）だけを、この節の手順 8 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
@@ -365,7 +357,6 @@
    ```
 
    - この手順は関数を定義するだけで、何も表示せず、conf もまだ書かない
-   - この節の手順 9 で `Import-WgClientConf` と手入力すると、クリップボードを読み込む
    - PowerShell を開き直した場合は、この節の手順 2 と、この関数の定義を貼り直す
 
 1. WG ホストで、[実施手順](#実施手順)の手順 4〜6 を行い、この PC の公開鍵を登録して conf を表示する。
@@ -379,7 +370,7 @@
 1. Windows の PowerShell で、`Import-WgClientConf` と手入力して Enter を押す。
 
    - 関数名はコピーせず手で打つ。クリップボードには、この節の手順 8 の conf を残しておく
-   - `1`（置き換わった）と、`PrivateKey` 以外の行（`Address`・`PublicKey`・`Endpoint`・`AllowedIPs` など）が出ればよい。鍵そのものは表示しない
+   - `1`（置き換わった）と、`PrivateKey` 以外の行（`Address`・`PublicKey`・`Endpoint`・`AllowedIPs` など）が出ればよい
    - 残りの行が `client show` の出力のとおりで、途中で折り返されていないことを目で確かめる
    - `中断:` で始まるエラーが出たら、何も書いていない
    - conf をコピーし直し、この関数をもう一度呼んでもよい（`wg0.conf` を書き直す）
@@ -399,15 +390,15 @@
    }
    ```
 
-   - `wg0.conf.dpapi` の 1 行だけが出ればよい（写した `wg0.conf` は、WireGuard が暗号化して消す）
+   - `wg0.conf.dpapi` の 1 行だけが出ればよい
    - WireGuard の窓のトンネルの一覧に `wg0` が出る（無効のまま）
-   - 取り込んでもトンネルは張られない（NetworkManager の `import` と違う）。この手順は LAN の中で貼ってよい
+   - この手順は LAN の中で貼ってよい
    - `wg0.conf` が残ったら、取り込めていない。理由を見て、残った `wg0.conf` を `Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf"` で消し、この節の手順 8・9 からやり直す
    - （この手順の代わりに）窓の「トンネルをファイルからインポート…」で `%USERPROFILE%\wg-client\wg0.conf` を選んでも、同じ `wg0.conf.dpapi` ができるはず
 
 1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
 
-   - クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内でこの節の手順 12 を貼ると、そこで LAN の通信が切れる
+   - LAN 内でこの節の手順 12 を貼ると、そこで LAN の通信が切れる
    - **次の手順は、LAN の外につないでから貼る**
 
 1. 拠点の LAN の外で、トンネルを張る。
@@ -432,7 +423,7 @@
    - 経路に、`AllowedIPs` の 3 つ（`RouteMetric` が `0`）がある
    - `NlMtu` は `1420`（今の回線の MTU が 1500 のとき）
    - `NetworkCategory` は `Public` のはず（変えない。行が出なければ、Windows がまだネットワークを識別している）
-   - `ServerAddresses` が空（`{}`）。DNS は変わらない（conf に `DNS =` が無い）
+   - `ServerAddresses` が空（`{}`）
    - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この節の手順 13 の通信で出る
    - 窓で `wg0` を選び「有効化」を押しても同じ
    - **注意**: LAN 内で貼ってしまったら、そこで LAN の通信が切れる。PC の画面の WireGuard の窓で「無効化」を押す
@@ -459,7 +450,7 @@
 1. WG ホストで、[実施手順](#実施手順)の手順 13 を（手順 4 のシェルで）貼り、ハンドシェイクを確かめる。
 
    - `client list` の、この PC の名前の `LAST_HANDSHAKE` が「N 秒前」なら届いている
-   - 最後の `ping`（拠点 → PC）は、応答が無くてよい。Windows の既定のファイアウォールは、ICMP のエコー要求を受けないはず（[選択した方針](reference/wireguard-road-warrior.md#選択した方針)のとおり、変えない）
+   - 最後の `ping`（拠点 → PC）は、応答が無くてよい
    - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](verification/wireguard.md#症状と原因の対応実測)
    - **次の手順は、WG ホストで確かめてから、この PC で貼る**
 
@@ -472,10 +463,10 @@
    Get-NetAdapter -Name wg0 -ErrorAction SilentlyContinue
    ```
 
-   - 最後の 2 つが何も出さなければよい（トンネルのサービスとアダプター `wg0` が消える）
+   - 最後の 2 つが何も出さなければよい
    - 窓で `wg0` を選び「無効化」を押しても同じ
    - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この節の手順 12・15 のコマンドでも同じ）
-   - **張ったまま再起動すると、起動したときにまた張られる**（トンネルのサービスは自動で起動する）。拠点の LAN に戻る前に切る
+   - **張ったまま再起動すると、起動したときにまた張られる**。拠点の LAN に戻る前に切る
 
 1. 平文の鍵と conf を消す。
 
@@ -485,7 +476,6 @@
    ```
 
    - `wg0.pub` だけが残る
-   - 秘密鍵は、この節の手順 10 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
    - 後片付けを最後にしているのは、取り込みに失敗したときに、この節の手順 10 をやり直すのに `wg0.conf` が要るため（[実施手順](#実施手順)の手順 15 と同じ）
 
 ---
@@ -508,7 +498,7 @@
    - 上がったら `インストールが完了しました` と出て、`winget list` の `WireGuard.WireGuard` の版が新しくなる
    - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
    - 最後に `WireGuardManager` が `Running` で出る（張っていれば `WireGuardTunnel$wg0` も）
-   - winget の定義は、公式の版より遅れて出ることがある。窓が更新を知らせているのに winget で上がらないときは、窓の「今すぐ更新」で上げる
+   - 窓が更新を知らせているのに winget で上がらないときは、窓の「今すぐ更新」で上げる
 
 ---
 

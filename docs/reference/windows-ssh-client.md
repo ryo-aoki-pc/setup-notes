@@ -6,6 +6,11 @@
 
 ## 補足
 
+### 実施手順 / 手順 2: 補足: 変数について
+
+- `SSH_USER` に `root` を使わないのは、AlmaLinux 10 の既定では、root はパスワードで SSH に入れないため
+- 変数はその PowerShell の中だけで有効
+
 ### 実施手順 / 手順 3: 補足: 2 つの ssh と、共有する .ssh
 
 - Windows 11 には、2 つの OpenSSH クライアントがある
@@ -16,6 +21,14 @@
   - git は、`HOME` が無ければ `%HOMEDRIVE%%HOMEPATH%`（または `%USERPROFILE%`）を `HOME` にして、Git の ssh を動かす
 - そのため、`HOME` を別の場所にしていると、Git の ssh だけが別の `.ssh` を使う。git が使う ssh は、`GIT_SSH_COMMAND` → `core.sshCommand` → `GIT_SSH` → `PATH` の `ssh` の順に決まるので、手順 3 でこの 3 つも空なことを確かめる
 - ブロックの中では、どちらの ssh もフルパスで呼ぶ。ユーザーの `PATH` の先頭側に Git の `usr\bin` があると、`ssh`・`ssh-keygen` が Git のものになる（[Windows の OpenSSH サーバーの手順 7 の補足](../verification/windows-openssh-server.md#実施手順--手順-7-補足-フルパスで呼ぶ理由)）
+- 手順 3 の `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](../extra/windows-ssh-client.md#注意点)）
+- 手順 3 の最後の行が `GIT_SSH= GIT_SSH_COMMAND= HOME=` なら、git は Git の ssh を使い、Windows の ssh と同じ `%USERPROFILE%\.ssh` を読む
+
+### 実施手順 / 手順 3: 補足: 鍵と config の有無
+
+- `Test-Path` の 3 行は、秘密鍵・公開鍵・config が既にあるか
+- 秘密鍵と公開鍵がどちらも `True` なら、その鍵を使う（手順 4 は何もしない）
+- 秘密鍵だけが `True` なら、手順 4 で秘密鍵から公開鍵を作り直す
 
 ### 実施手順 / 手順 4: 補足: 鍵の種類とパスフレーズ
 
@@ -55,12 +68,14 @@
 - 同じ `Host` がもうあるかは、`Host <別名>` と `Host=<別名>` の両方の書き方で探す（ssh_config は `=` でも区切れる）。2 つ目の `Host` のブロックを足しても、ssh は最初のものを使い、足した値は効かない
 - `Add-Content` は、末尾に改行の無いファイルに、改行を入れずに続けて書く（このリポジトリの [windows-setup.md の記録](../verification/windows-setup.md)）。そのため、末尾に改行が無ければ、先に空の 1 行（改行）を書く
 - 確かめは、2 つの ssh の `-G`（config を読んだ結果の表示）で行う。Git の ssh のほうが BOM に厳しく、Windows の ssh（9.5p2）は新しい設定を知らないので、両方を必ず確かめる
+- ssh は最初に見つけた値を使うので、config の前の方の `Host *` などにある値が、足した値より先に効く
 
 ### 実施手順 / 手順 8: 補足: ホスト鍵の指紋
 
 - 最初の接続で出る指紋を、別の経路（ホストの画面か、すでに信頼している接続）で見た指紋と照合する。照合した後は known_hosts に入り、以後は聞かれない
 - AlmaLinux 10 の sshd は、最初の起動のときに ED25519・ECDSA・RSA のホスト鍵を作る。公開鍵は 0644 なので、`sudo` 無しで読める。コメントは空なので `no comment` と出る（AlmaLinux 10.2 の `sshd-keygen`）
 - 初回の接続の表示は、ssh の版で少し違う（Git の 10.5p1 は `ED25519 key fingerprint is: SHA256:…`、AlmaLinux 10.2 の 9.9p1 は `ED25519 key fingerprint is SHA256:….`）。照合するのは `SHA256:` の後ろ
+- 同じ LAN から `ssh-keyscan` で取った指紋を照合に使えないのは、途中で別の相手に入れ替わっていても分からないため
 
 ### 実施手順 / 手順 9: 補足: 公開鍵の足し方
 
@@ -75,17 +90,20 @@
 - `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため（[windows-openssh-server.md の手順 9](../windows-openssh-server.md#実施手順) と同じ）
 - Windows の ssh は、ホスト鍵の問いへの答えとパスワードを、標準入力ではなくコンソールから読む（Win32-OpenSSH のソース）。そのため、標準入力で渡す公開鍵は、問いに食われない（Windows では確かめていない）
 - AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../extra/windows-ssh-client.md#注意点)）
+- 貼り直すと、同じ行がもう 1 行足される（害は無い。[ロールバック](../extra/windows-ssh-client.md#ロールバック)の手順 1 は両方消す）
 
 ### 実施手順 / 手順 10: 補足: 鍵でのログインの確かめ方
 
 - `-o PreferredAuthentications=publickey` は、鍵が通らなかったときにパスワードへ移らず、そこで失敗させるため
 - 2 つの ssh で確かめるのは、Git の ssh が同じ鍵・config・known_hosts を使っていること（ホスト鍵を聞かれないこと）も見るため
+- 鍵にパスフレーズを付けたなら 2 回聞かれるのは、`ssh` が 2 つあるため
 
 ### 実施手順 / 手順 11: 補足: WezTerm の起動メニュー
 
 - 自分用の設定（ryo-aoki-pc/wezterm）は、`~/.ssh/config` の `Host`（ワイルドカードを含むものと、github.com などの git のホストは除く）を、起動メニューに `ssh <Host>` として並べる。起動するのは `ssh.exe` で、パスは決めていない
 - WezTerm の設定の読み直し（Ctrl+Shift+R）で、config に足した `Host` が並ぶ
 - config の読み取りに失敗しても、設定の全体は落ちず、ssh の項目だけが出ない。WezTerm が BOM 付きの config を読めるかは確かめていない
+- 起動メニューの ssh は、`PATH` で最初に見つかる `ssh.exe` で動く。新しい PowerShell で `(Get-Command ssh.exe).Source` が `C:\Windows\System32\OpenSSH\ssh.exe` なら、Windows のもの
 
 ### ロールバック / 手順 1: 補足: 行の消し方
 

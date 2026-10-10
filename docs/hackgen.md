@@ -20,7 +20,7 @@
    ```
 
    - **編集が必須の変数は無い**。確認と WezTerm の設定に使うファミリー名で、既定のまま進められる
-   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える（同じ手順で一緒に入る。[検証記録](verification/hackgen.md)・[参考資料](reference/hackgen.md)）
+   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
 1. `unzip` が入っているか確かめる。
@@ -29,7 +29,6 @@
    command -v unzip || echo 'unzip は未導入'
    ```
 
-   - Homebrew は cask の zip を展開するのに `unzip` を使う
    - パスが出れば、手順 3 は飛ばす
    - `unzip は未導入` と出たら、手順 3 で入れる
 
@@ -60,8 +59,7 @@
 
    - `font-hackgen-nerd 2.10.0`、4 つの `.ttf`、`HackGen Console NF` と `HackGen35 Console NF` の Regular / Bold の 4 行が出る
    - `fc-match` が `HackGenConsoleNF-Regular.ttf: "HackGen Console NF" "Regular"` を返せばよい
-   - `fc-match` は、名前が合わないときに別のフォントを黙って返すので、**ファイル名が HackGen であることを確かめる**
-   - 最後の `for` で、かな・漢字・Powerline 記号・Nerd Fonts のアイコンが、このフォントに入っていることを確かめる
+   - **ファイル名が HackGen であることを確かめる**
    - 4 行とも `1` なら入っている（`あ` / `漢` / Powerline の三角 / GitHub のアイコン）
 
 ---
@@ -93,7 +91,6 @@
 
    - 4 文字とも `wezterm.font("HackGen Console NF", ...)` と `/home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf, FontConfig` が出ればよい
    - **`→` が `cells=1`（半角）になる**のが Console 版の特徴で、`あ` / `漢` は `cells=2`
-   - 起動中の WezTerm には、保存した時点で反映される（wezterm-nightly.md の設定ファイルの節）
 
 ---
 
@@ -135,8 +132,7 @@
    ```
 
    - どちらも何も出なければ、入っていない
-   - 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、この節の手順で入れたもの（この節の手順 3 は何度貼ってもよい）
-   - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っている（ほかの方法で入れたもの）。そのまま使えるので、この節は要らない
+   - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っている（ほかの方法で入れたもの）。この節は要らない
 
 1. HackGen Console NF の zip を取り、sha256 を確かめて自分のユーザーのフォントに入れる。
 
@@ -172,8 +168,8 @@
    ```
 
    - `HackGen35ConsoleNF-Bold (TrueType) : C:\Users\<WIN_USER>\AppData\Local\Microsoft\Windows\Fonts\HackGen35ConsoleNF-Bold.ttf` の形の行が 4 つ出ればよい
-   - `中断:` で始まるエラーが出たら、そこで止まっている（取ってきたものは `%TEMP%\hackgen-setup` に残る。次に貼ったときに消して作り直す）
-   - 何度貼ってもよい（同じファイルは置き直さない）
+   - `中断:` で始まるエラーが出たら、そこで止まっている
+   - 何度貼ってもよい
    - アプリで使えるのは、この節の手順 4 でサインインし直した後
 
 1. この PC でサインアウトし、サインインし直す。
@@ -202,9 +198,9 @@
    ```
 
    - `v2.10.0` なら、新しい版は無い。この節の手順 2 は行わない
-   - 違う版なら、この文書の[Windows 11 で使う](#windows-11-で使う)の手順 3 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る（直さなければ、固定した旧版を再び入れるだけで更新にはならない）
+   - 違う版なら、この文書の[Windows 11 で使う](#windows-11-で使う)の手順 3 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
 
 1. 新しい版にするときだけ、今の版を外してから入れ直す。
 
-   - [Windows 11 のロールバック](extra/hackgen.md#windows-11-のロールバック)の手順 1〜3 を行う（読み込まれているファイルは置き換えられないため）
+   - [Windows 11 のロールバック](extra/hackgen.md#windows-11-のロールバック)の手順 1〜3 を行う
    - 続けて、直した[Windows 11 で使う](#windows-11-で使う)の手順 3〜5 を行う

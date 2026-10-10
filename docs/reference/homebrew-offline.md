@@ -4,6 +4,20 @@
 
 ## 補足
 
+### 実施手順 / 手順 1: 補足: ghcr.io の 401
+
+- ghcr.io が `401` になるのは、トークンが無いため
+
+### 実施手順 / 手順 2: 補足: dnf の設定
+
+- AlmaLinux 10 の初期設定の手順 46 の dnf が、トンネルを通るようになる
+- 足した行は、[ロールバック](../extra/homebrew-offline.md#ロールバック)のリードのとおり、ssh-socks-tunnel.md のロールバックで消す
+
+### 実施手順 / 手順 3: 補足: Homebrew の導入とトンネル
+
+- AlmaLinux 10 の初期設定の手順 47 のインストーラも、中で使う curl と git が `ALL_PROXY` を読むので、そのまま通る
+- 同書の手順 48 を共通の bash 設定を入れてあるシェルで貼るのは、`brew shellenv` を共通設定が実行するため
+
 ### 選択した方針
 
 [この節の検証記録](../verification/homebrew-offline.md#選択した方針)

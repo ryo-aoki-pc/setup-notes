@@ -4,6 +4,11 @@
 
 ## 補足
 
+### 実施手順 / 手順 1: 補足: ボトルと依存
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+- 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
+
 ### 実施手順 / 手順 2: 補足: :checkhealth の読み方
 
 [この節の検証記録](../verification/neovim.md#実施手順--手順-2-補足-checkhealth-の読み方)
@@ -15,6 +20,29 @@
 - ツールの不足: `rg`（ripgrep）、`fd`、`git`、`tree-sitter` など。必要なものを各手順書で導入する（[yazi.md](../yazi.md) の依存ツール、および RPM の git）
 
 `ERROR` が出ていなければ、日常の編集には支障がない。
+
+- 手順 2 のブロックは、最後の行で起動して、`:checkhealth` で健全性を確認する
+
+### 既定のエディタにする（任意） / 手順 2: 補足: git commit のエディタ
+
+- git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
+
+### 既定のエディタにする（任意） / 手順 3: 補足: Git Bash の共通設定
+
+- Git Bash の共通設定の `EDITOR`・`VISUAL` は、この手順では変わらない
+
+### 設定ファイル / 手順 1: 補足: 探索先とディストリビューション
+
+- 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
+- LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
+
+### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+
+- `Nvim` が空なら、Neovim は入っていない。`C:\Users\<WIN_USER>\scoop\shims\nvim.exe` だけなら、もう scoop で入っている
+
+### Windows 11 で使う / 手順 3・4: 補足: 版
+
+- 同じ節の手順 3 の `'neovim' (<版>) was installed successfully!` と、手順 4 の `NVIM v…` の版は、実行した日の最新
 
 ### Windows 11 では: 選択した方針
 

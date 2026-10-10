@@ -25,7 +25,6 @@
    - 入るのは `podman-tui` の 1 パッケージだけ（ダウンロード 9.5 MB、展開後 32 MB）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える。違っていれば `N` で中断する
-   - [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. podman-tui が入ったか確かめる。
@@ -46,8 +45,6 @@
    ```
 
    - `podman-tui-web Up Less than a second` のように出る
-   - 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) などで取得済みなら、取り直さない
-   - ポートは公開しない（画面から止めるためだけのコンテナ）
 
 1. podman-tui を起動し、確認用のコンテナを画面から止める。
 
@@ -69,7 +66,7 @@
    podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
    ```
 
-   - `podman-tui-web Exited (0) ...` と出ればよい。画面の操作が、API を通して podman に届いている
+   - `podman-tui-web Exited (0) ...` と出ればよい
 
 ---
 

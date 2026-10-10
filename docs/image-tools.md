@@ -19,8 +19,6 @@
    brew install hadolint dive
    ```
 
-   - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
-   - hadolint は `gmp` など 4 つの依存を連れてくる（Haskell 製のため）。dive に依存は無い
    - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
 
 1. hadolint と dive が入ったか確かめる。
@@ -52,8 +50,6 @@
    }
    ```
 
-   - 中身は Trivy の公式の導入手順（RHEL/CentOS）と同じ
-   - `<<'EOF'` と引用符を付けているので、`$basearch` はそのままファイルに書かれ、dnf が `x86_64` / `aarch64` に置き換える
    - ファイルに `gpgcheck=1` があることを確かめる
    - 版は `trivy.x86_64  0.74.0-1  trivy` のように出る
    - 初回は署名鍵の取り込みを 1 回聞かれる
@@ -69,7 +65,6 @@
    ```
 
    - 1 行目が `Version: 0.74.0` で、`/usr/bin/trivy` と `trivy-0.74.0-1.x86_64` が出る
-   - RPM なので、Homebrew の 2 つと違い、何も足さずに root の PATH にも入っている
 
 1. わざと欠陥のある Containerfile を hadolint に渡し、指摘が出ることを確かめる。
 
@@ -78,7 +73,6 @@
    ```
 
    - `DL3006`・`DL3040`・`DL3041` の 3 つの `warning` と、`rc=1` が出ればよい
-   - 末尾の `-` は、標準入力の Containerfile を読む指定
 
 1. 確認用の Containerfile とページを置き、hadolint が何も指摘しないことを確かめる。
 
@@ -93,7 +87,6 @@
    ```
 
    - 何も出ずに `rc=0` ならよい
-   - `ubi10/httpd-24`（Apache）に、ページを 1 つ足すだけのイメージ
 
 1. イメージを作る。
 
@@ -104,7 +97,6 @@
 
    - `Successfully tagged localhost/image-check:1` が出る
    - `podman images` に `localhost/image-check  1` の行が出る（283 MB）
-   - `podman build` は podman に入っている。buildah を別に入れる必要は無い
 
 1. dive の判定のモード（`--ci`）で、イメージの無駄を数える。
 
@@ -114,7 +106,7 @@
 
    - `Image Source: podman://localhost/image-check:1` が出れば、podman のイメージを直接読めている
    - `efficiency: 85.4470 %` と `wastedBytes: 58951134 bytes (59 MB)` が出る
-   - **既定の基準では `Result:FAIL` と `rc=1` になる**。無駄の元はベースイメージの層で、手順 6 の `COPY` の層ではない（参考資料を参照）
+   - **既定の基準では `Result:FAIL` と `rc=1` になる**
 
 1. Trivy で、イメージの脆弱性を調べる。
 
@@ -132,7 +124,7 @@
    dive --source podman localhost/image-check:1
    ```
 
-   - 左に `Layers`（層の一覧）と `Image Details`、右に `Current Layer Contents`（その層のファイルの木）が出る
+   - 左に `Layers` と `Image Details`、右に `Current Layer Contents` が出る
    - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 8 と同じ値
    - いちばん下の行に、キーの案内（`Quit`・`Tab Switch view`・`^F Filter` など）が出る
    - `q` で終了する
@@ -177,4 +169,3 @@
    ```
 
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - 脆弱性のデータベースは別もので、`trivy image` が古いと判断したときに取り直す

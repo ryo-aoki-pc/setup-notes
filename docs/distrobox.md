@@ -34,10 +34,9 @@
    ```
 
    - 版は `distrobox.noarch  1.8.2.3-1.el10_2  epel` のように 1 つだけ出る
-   - 一緒に入るのは `hicolor-icon-theme` だけ（podman は前提の手順で入っている）
+   - 一緒に入るのは `hicolor-icon-theme` だけ
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. distrobox が入ったか確かめる。
@@ -70,7 +69,7 @@
    ```
 
    - 初回はボックスの初期化が走る。`[ OK ]` の行が並んだ後に `Container Setup Complete!` が出る
-   - その後に `PRETTY_NAME="Ubuntu 24.04.5 LTS"`・自分のユーザー名・`/home/<USER>` が出る。ユーザーもホームもホストと同じ
+   - その後に `PRETTY_NAME="Ubuntu 24.04.5 LTS"`・自分のユーザー名・`/home/<USER>` が出る
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 1. ボックスのシェルに入る。
@@ -80,7 +79,7 @@
    ```
 
    - プロンプトが `📦[<USER>@ubuntu ~]$` に変わる。ここから先はボックスの中のシェル
-   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が 4 行出る（理由はこの手順の補足）
+   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が 4 行出る
    - `exit` でホストに戻る
    - **後ろの節の手順は、`exit` でホストに戻ってから貼る**
 
@@ -107,7 +106,6 @@
    distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get install -y ffmpeg
    ```
 
-   - ボックスの中の `sudo` はパスワードを聞かない（参考資料を参照）
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 1. ffmpeg をホストから呼べるように書き出す。
@@ -127,7 +125,6 @@
    ```
 
    - `/home/<USER>/.local/bin/ffmpeg` と `ffmpeg version 6.1.1-3ubuntu5 ...` が出ればよい
-   - `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` で PATH に入っている
 
 ---
 
@@ -149,6 +146,5 @@
    distrobox upgrade "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}"
    ```
 
-   - Ubuntu のボックスでは `apt-get update` と `apt-get upgrade` が確認なしで走る
    - **ボックスの中身は `dnf upgrade` では上がらない**。ボックスごとにこの手順を行う
    - **次の節は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）

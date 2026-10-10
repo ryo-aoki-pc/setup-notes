@@ -38,8 +38,8 @@
    ```
 
    - 最後に値を読み戻して確かめる
-   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない（Claude Code はホームの信頼を保存しない）
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
+   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない
+   - **新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
 
 1. Claude Code・WezTerm・ログインと、デスクトップのセッションを確かめる。
 
@@ -51,9 +51,9 @@
    ```
 
    - `claude` の版と、ログイン済みを示す行、`wezterm 2026…` が出ればよい
-   - `quser` に、自分のユーザーの `console` の行が `Active` で出ること（デスクトップにログインしている）。出なければ、この PC にログインしてから続ける
+   - `quser` に、自分のユーザーの `console` の行が `Active` で出ること。出なければ、この PC にログインしてから続ける
    - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-rdp-disconnect.md)で切ると `console` に戻る
-   - `claude remote-control --help` は貼らない（help を出した後に終わらない。[注意点](extra/windows-claude-remote-control.md#注意点)）
+   - `claude remote-control --help` は貼らない
 
 1. 初回だけ、対話で起動して信頼と Remote Control の確認に答え、URL が出たら止める。
 
@@ -72,7 +72,7 @@
    - 信頼のダイアログ（`Is this a project you created or one you trust?`）が出たら、**↓ で `Yes, I trust this folder` を選び Enter**（既定は `No, exit`）
    - 初めて Remote Control を使うときは `Enable Remote Control? (y/n)` が出る。`y`
    - `https://claude.ai/code/<SESSION_ID>` の URL と `space to show QR code` が出れば、起動できている
-   - **Ctrl+C** で止める（この起動は信頼と確認を一度受けるためのもの。タスクが同じことを無人で起動する）
+   - **Ctrl+C** で止める
    - **次の手順は、Ctrl+C で止めてプロンプトに戻ってから貼る**（続けて貼ると Claude Code への入力として食われる）
 
 1. タスクを登録する（WezTerm で `claude remote-control` を起動するタスク）。
@@ -94,7 +94,6 @@
    ```
 
    - `State : Ready` が出ればよい
-   - トリガーは付けない（手で `Start-ScheduledTask` したときだけ動く。起動時の自動起動は本書では扱わない）
 
 1. タスクを開始し、動いていることを確かめる。
 
