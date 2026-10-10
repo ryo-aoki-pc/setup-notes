@@ -79,6 +79,6 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 - [LazyVim の LSP の設定](https://www.lazyvim.org/plugins/lsp) — mason.nvim と mason-lspconfig.nvim の `ensure_installed`
 - [ssh-socks-tunnel.md](../ssh-socks-tunnel.md) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1・2 を使う
 - [homebrew-offline.md](../homebrew-offline.md) — 前提の Homebrew（Neovim をトンネル越しに入れる）
-- [neovim.md](../neovim.md) — 前提の Neovim と、自分用の設定への案内
+- [AlmaLinux 10 の初期設定の「Neovim」](../almalinux-setup.md#neovim) — 前提の Neovim と、自分用の設定
 
 ---

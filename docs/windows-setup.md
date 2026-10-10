@@ -1,4 +1,4 @@
-# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL）
+# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim・AI エージェント）
 
 ## 実施手順
 
@@ -6,17 +6,20 @@
 
 > [!IMPORTANT]
 > - **すべて、この PC のデスクトップで行う**。SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動くので、[アプリを入れる](#アプリを入れる)の手順 1 の scoop のインストーラが止まる）
-> - 窓の使い分け: [Windows Update](#windows-update)の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、同じ項の手順 2〜8 で Windows Update を行う。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 で**管理者ではない** Windows PowerShell を開き、同じ項の手順 2〜7 と、[貼り付けの設定](#貼り付けの設定)から[自動起動と標準アプリ](#自動起動と標準アプリ)までの手順をそこに貼る。[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き、同じ項の手順 2〜8 と、[ネットワークとリモート](#ネットワークとリモート)から[WSL と再起動](#wsl-と再起動)までの手順を貼る。再起動の後は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開く管理者ではない窓に、同じ項の手順 2〜5 を貼る
-> - ログインするユーザーは Administrators の一員（[Windows Update](#windows-update)の手順 2〜8 の Windows Update と、[PC 全体の設定](#pc-全体の設定)の手順 2〜8 から[WSL と再起動](#wsl-と再起動)までの PC 全体の設定に管理者の権限が要る）
+> - 窓の使い分け: [Windows Update](#windows-update)の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、同じ項の手順 2〜8 で Windows Update を行う。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 で**管理者ではない** Windows PowerShell を開き、同じ項の手順 2〜7 と、[貼り付けの設定](#貼り付けの設定)から[HackGen Console NF](#hackgen-console-nf)までの手順をそこに貼る。[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き、同じ項の手順 2〜8 と、[ネットワークとリモート](#ネットワークとリモート)から[WSL と再起動](#wsl-と再起動)までの手順（[OpenSSH サーバー](#openssh-サーバー)・[Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)も）を貼る。再起動の後は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開く管理者ではない窓に、同じ項の手順 2〜5 と、それより後の項の PowerShell のブロックを貼る（[Claude Code](#claude-code)・[Codex CLI](#codex-cli)・[Grok Build](#grok-build)・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)は、項の中で開き直した窓に貼る）
+> - bash のブロックの貼り先: [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2〜4 はクライアント（この PC の WSL の AlmaLinux 10 など）のシェル、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3〜5 は Git Bash。それより後の bash のブロックは、WezTerm の新しいタブ（Git Bash）に貼る
+> - ログインするユーザーは Administrators の一員（[Windows Update](#windows-update)の手順 2〜8 の Windows Update と、[PC 全体の設定](#pc-全体の設定)の手順 2〜8 から[WSL と再起動](#wsl-と再起動)までの PC 全体の設定に管理者の権限が要る。OpenSSH サーバー・Git for Windows・Firefox・WezTerm も PC 全体に入れる）
+> - 前提: AI エージェントと GitHub のアカウント（[AlmaLinux 10 の初期設定](almalinux-setup.md#実施手順)のリードと同じ）
 > - [Windows Update](#windows-update)の手順 2〜8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 は、**Ctrl+V で貼る**。貼り付けの設定をまだ通していないため、conhost の窓に右クリックで貼ると行が逆順になる
 > - [貼り付けの設定](#貼り付けの設定)の手順 1 は、**1 行なので、どの貼り方でもそのまま貼れる**。この 1 行を貼った窓には、それより後の複数行のブロックを、GitHub のコピーボタンでコピーして右クリックで貼れる。Windows の PowerShell のブロックを貼るほかの手順書も、[貼り付けの設定](#貼り付けの設定)の手順 1〜4 を前提にする
-> - [WSL と再起動](#wsl-と再起動)の手順 2 で、**再起動する**（設定のための再起動はこの 1 回。Windows Update は、必要なときだけ[Windows Update](#windows-update)の手順 8 で手動で再起動し、更新が無くなるまで繰り返す）
-> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜4、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）
+> - [WSL と再起動](#wsl-と再起動)の手順 2 で、**再起動する**（設定のための再起動はこの 1 回。HackGen Console NF のフォントと WezTerm の VC++ ランタイムも、この再起動で読み直す。Windows Update は、必要なときだけ[Windows Update](#windows-update)の手順 8 で手動で再起動し、更新が無くなるまで繰り返す）
+> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[Firefox](#firefox)の手順 3・4（起動して確かめる・既定のブラウザー）、[WezTerm](#wezterm)の手順 5、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜5、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2・5（Git Bash と WezTerm を開く）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7（キーを押して確かめる）、[yazi](#yazi)の手順 7（WezTerm のタブを開く）、[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 4・[Grok Build](#grok-build)の手順 4・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（PowerShell を開き直す）、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 7・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 6（ブラウザでのログイン）。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1（WSL のシェルに入る）・2（`sudo` のパスワード）・4（ホスト鍵の確認とパスワード）、[git-delta](#git-delta)の手順 4（less）、[GitHub CLI](#github-cli)の手順 3（`gh auth login`）、[Neovim](#neovim)の手順 3（Neovim の画面）、[lazygit](#lazygit)の手順 6・[yazi](#yazi)の手順 8・9（TUI の画面）、[Claude Code](#claude-code)の手順 7（最初の設定とログイン）、[Codex CLI](#codex-cli)の手順 2（`Start Codex now?`）・5・8、[Grok Build](#grok-build)の手順 5・8。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）、[Git for Windows](#git-for-windows)の手順 2（入っていないとき）、[WezTerm](#wezterm)の手順 2（VC++ ランタイムが無いとき）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2（`ssh` が無いとき）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 2（zoxide が 0.9.9 でないとき）、[lazygit](#lazygit)の手順 2（extras のバケットが無いとき）、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（同じ項の手順 1 で Node.js を入れたとき）
 
-- 上から順にコードブロックを貼る。[PC 全体の設定](#pc-全体の設定)の手順 2 の変数は、管理者の PowerShell を開き直したら貼り直す
+- 上から順にコードブロックを貼る。[PC 全体の設定](#pc-全体の設定)の手順 2 の変数は、管理者の PowerShell を開き直したら貼り直す（[OpenSSH サーバー](#openssh-サーバー)の手順 3・5 も使う）
+  - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3・[yazi](#yazi)の手順 1・[Claude Code](#claude-code)の手順 1 の変数も、その項の中で新しいシェルや窓を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[WSL と再起動](#wsl-と再起動)の手順 2 は飛ばさない）
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[Git for Windows](#git-for-windows)の手順 1・2、[Firefox](#firefox)の手順 1〜4（ブラウザでのログインに使う）、[WezTerm](#wezterm)の手順 1〜5、[WSL と再起動](#wsl-と再起動)の手順 2、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜5、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4 は飛ばさない）
   - 更新: Windows Update は[Windows Update](#windows-update)の手順 1〜8、Microsoft Store は[Microsoft Store の更新](#microsoft-store-の更新)の手順 1〜7。貼り付けの設定: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[PC 全体の設定](#pc-全体の設定)の手順 3・4
   - 入れるもの: scoop は[アプリを入れる](#アプリを入れる)の手順 1・2、UniGet UI は同じ項の手順 3 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 4、PowerToys は[アプリを入れる](#アプリを入れる)の手順 4、PowerShell 7 は同じ項の手順 5、WSL の AlmaLinux 10 は[WSL と再起動](#wsl-と再起動)の手順 1 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3・4、自動サインイン（Autologon）は同じ項の手順 5
   - 表示: エクスプローラーは[表示と入力](#表示と入力)の手順 1、旧形式のコンテキストメニューは同じ項の手順 2、スタートと検索は同じ項の手順 3 と[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2、タスクバーは[表示と入力](#表示と入力)の手順 4 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 3、ダークモードは[表示と入力](#表示と入力)の手順 5、既定の端末は同じ項の手順 6
@@ -25,24 +28,32 @@
   - PC 全体: PC の名前は[PC 全体の設定](#pc-全体の設定)の手順 5、長いパス・開発者モード・sudo は同じ項の手順 6、電源とロックは同じ項の手順 7、LAN のアダプターの省電力は同じ項の手順 8、デュアル ブートの時計は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5
   - ネットワーク: LAN をプライベートには[ネットワークとリモート](#ネットワークとリモート)の手順 1、リモート デスクトップは同じ項の手順 2、リモート アシスタンスは同じ項の手順 3、ping は同じ項の手順 4、配信の最適化は同じ項の手順 5
   - サインイン: Windows Hello だけのサインインを切るのは[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 1、自動サインインは[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5
+  - フォント: HackGen Console NF は[HackGen Console NF](#hackgen-console-nf)の手順 1・2。確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5
+  - リモート: OpenSSH サーバーは[OpenSSH サーバー](#openssh-サーバー)の手順 1〜5。確かめるのは[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1〜4
+  - Git: Git for Windows は[Git for Windows](#git-for-windows)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1、`~/.gitconfig` は同じ項の手順 2・3、共通の bash 設定は同じ項の手順 4、git-delta は[git-delta](#git-delta)の手順 1〜4、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5、lazygit は[lazygit](#lazygit)の手順 1〜6（自分用の設定は同じ項の手順 4）
+  - ブラウザと端末: Firefox は[Firefox](#firefox)の手順 1〜4、WezTerm は[WezTerm](#wezterm)の手順 1〜5（自分用の設定は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5）、Git Bash の starship・zoxide・fzf・eza・bat は[シェルのツールを入れる](#シェルのツールを入れる)の手順 1〜7
+  - エディタとファイル: Neovim は[Neovim](#neovim)の手順 1・2・4（自分用の設定は同じ項の手順 3）、yazi は[yazi](#yazi)の手順 1〜9（自分用の設定は同じ項の手順 5）
+  - AI エージェント: Claude Code は[Claude Code](#claude-code)の手順 1〜8、Codex CLI は[Codex CLI](#codex-cli)の手順 1〜8、Grok Build は[Grok Build](#grok-build)の手順 1〜8、Claude Code に入れる Codex・Grok のプラグインは[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1〜3（3 つを入れた後）
 - Windows を AlmaLinux 10 とのデュアルブート向けに入れるときは、先に [Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)を通してから、この文書を[Windows Update](#windows-update)の手順 1 から始める
-- 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）
-  - [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（続けて、Git Bash で同じ文書の実施手順）→ [Firefox](firefox.md#windows-11-で使う)（既定のブラウザーにする）→ [WezTerm](wezterm-nightly.md#windows-11-で使う) → [Claude Code](claude-code.md#windows-11-で使う) → [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard.md#windows-11-で使う) → [HackGen Console NF](hackgen.md#windows-11-で使う)
-  - HackGen Console NF を[WSL と再起動](#wsl-と再起動)の手順 2 の再起動より前に入れれば、そちらのサインインし直す手順は要らない
-  - 必要なら: [Windows の OpenSSH サーバー](windows-openssh-server.md)・[Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)・[コーディングエージェントの共同作業](coding-agents.md#windows-11-で使う)（[Codex CLI](codex.md#windows-11-で使う)と [Grok Build](grok-build.md#windows-11-で使う)を入れてから）
-  - git の差分の表示と GitHub の操作も使うなら、Git for Windows と WezTerm の後に [git-delta](git-delta.md#windows-11-で使う) → [GitHub CLI](gh.md#windows-11-で使う)（どちらも scoop で入れる）
-  - 端末のエディタと TUI も使うなら、続けて [Neovim](neovim.md#windows-11-で使う) → [lazygit](lazygit.md#windows-11-で使う) → [yazi](yazi.md#windows-11-で使う)（どれも scoop で入れる。管理者ではない窓。git-delta・GitHub CLI も使うなら、その後に）
+- 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）: [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard.md#windows-11-で使う)
+  - 必要なら: [Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)・[コーディングエージェントの共同作業](coding-agents.md#windows-11-で使う)
 - 手順の後の節
   - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
   - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)
   - Edge の常駐は[Edge の常駐をポリシーで止める（任意）](#edge-の常駐をポリシーで止める任意)（管理者の窓）、クリップボードの履歴は[CopyQ を使う（任意）](#copyq-を使う任意)
   - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
-  - Windows Terminal のフォントは、HackGen Console NF を入れた後に[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
-  - Git Bash の starship・zoxide・fzf・eza・bat は、Git for Windows・WezTerm と Git Bash の共通の bash 設定の後に[シェルのツールを入れる（任意）](#シェルのツールを入れる任意)（zoxide は 0.9.9 に止める）
+  - Windows Terminal のフォントは[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
+  - OpenSSH サーバーは、鍵でも入るなら[OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)、その後にパスワードを受け付けないなら[OpenSSH サーバーのパスワード認証を切る（任意）](#openssh-サーバーのパスワード認証を切る任意)、ログインのシェルを Git Bash にするなら[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)、scoop のツールが SSH のセッションで起動しないなら[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)
+  - PowerShell などから起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら[Neovim を既定のエディタにする（任意）](#neovim-を既定のエディタにする任意)
+  - Git for Windows の既定（`core.autocrlf=true`）のまま clone したリポジトリ（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3 より前に clone したもの）があれば、[AlmaLinux 10 の初期設定の「改行を変換して clone したリポジトリを直す」](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を、Git Bash でそのリポジトリに行う
+  - starship・fzf・eza・bat・WezTerm・git-delta・Neovim・lazygit・yazi・Codex CLI・Grok Build の使い方と設定ファイル、Claude Code の使い方は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（両 OS で同じ）。Git Bash のタブに、同じブロックを貼る
+    - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、管理者ではない窓で `scoop install fd`・`scoop uninstall fd` にする（[yazi](#yazi)の手順 3 で入っていれば、入れなくてよい）
+    - bat の設定ファイルは、[同書の節](almalinux-setup.md#bat-の設定ファイル)ではなく、[シェルのツールを入れる](#シェルのツールを入れる)の手順 5 で書く
+  - SSH のセッションの Git Bash でも scoop のツールを使うなら、scoop で入れた後に[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を管理者の窓で貼る（`scoop install`・`scoop update` の後も貼り直す）
   - 以後は[更新](#更新)・[ロールバック](extra/windows-setup.md#ロールバック)
 
 > [!WARNING]
-> - [PC 全体の設定](#pc-全体の設定)の手順 6 のインラインの sudo、同じ項の手順 7 の放置でロックしない設定、[ネットワークとリモート](#ネットワークとリモート)の手順 2 のリモート デスクトップ、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 1 の Windows Hello 以外のサインイン、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 の自動サインインを重ねると、**PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、[PC 全体の設定](#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
+> - [PC 全体の設定](#pc-全体の設定)の手順 6 のインラインの sudo、同じ項の手順 7 の放置でロックしない設定、[ネットワークとリモート](#ネットワークとリモート)の手順 2 のリモート デスクトップ、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 1 の Windows Hello 以外のサインイン、[OpenSSH サーバー](#openssh-サーバー)の手順 4 のパスワードでの SSH のログイン、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 の自動サインインを重ねると、**PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**（SSH なら LAN から）。人が触れる場所にある PC では、[PC 全体の設定](#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
 
 ### Windows Update
 
@@ -620,6 +631,58 @@
    - `外した:` か `無い:` が出ればよい
    - タスクバーのウィジェットのボタンと、設定のウィジェットの切り替えが消える（[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後に確かめる）
 
+### HackGen Console NF
+
+1. HackGen がまだ入っていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -ErrorAction SilentlyContinue | ForEach-Object { $_.Property -like 'HackGen*' }
+   Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts", "$env:WINDIR\Fonts" -Filter 'HackGen*' -ErrorAction SilentlyContinue | Format-Table Name, DirectoryName
+   ```
+
+   - どちらも何も出なければ、入っていない
+   - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っている（ほかの方法で入れたもの）。この項は要らない
+
+1. HackGen Console NF の zip を取り、sha256 を確かめて自分のユーザーのフォントに入れる。
+
+   ```powershell
+   & {
+     $ver = '2.10.0'
+     $sha256 = 'F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428'
+     $fonts = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+     $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
+     $tmp = "$env:TEMP\hackgen-setup"
+     $zip = "$tmp\HackGen_NF_v$ver.zip"
+     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & "$env:WINDIR\System32\curl.exe" -fsSL -o $zip "https://github.com/yuru7/HackGen/releases/download/v$ver/HackGen_NF_v$ver.zip"
+     if ($LASTEXITCODE -ne 0) { Write-Error "中断: HackGen_NF_v$ver.zip を取れない"; return }
+     if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sha256) { Write-Error "中断: HackGen_NF_v$ver.zip の sha256 が一致しない"; return }
+     Expand-Archive -LiteralPath $zip -DestinationPath $tmp -Force
+     $ttf = @(Get-ChildItem -LiteralPath "$tmp\HackGen_NF_v$ver" -Filter '*.ttf')
+     if ($ttf.Count -ne 4) { Write-Error "中断: zip の中の ttf が 4 つではない（$($ttf.Count)）"; return }
+     New-Item -ItemType Directory -Force -Path $fonts | Out-Null
+     icacls.exe $fonts /grant '*S-1-15-2-1:(OI)(CI)(RX)' '*S-1-15-2-2:(OI)(CI)(RX)' | Out-Null
+     if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key | Out-Null }
+     foreach ($f in $ttf) {
+       $dst = Join-Path $fonts $f.Name
+       if (-not (Test-Path -LiteralPath $dst) -or (Get-FileHash -LiteralPath $dst).Hash -ne (Get-FileHash -LiteralPath $f.FullName).Hash) {
+         try { Copy-Item -LiteralPath $f.FullName -Destination $dst -Force -ErrorAction Stop } catch { Write-Error "中断: $($f.Name) を置けない（$($_.Exception.Message)）"; return }
+       }
+       New-ItemProperty -Path $key -Name "$($f.BaseName) (TrueType)" -Value $dst -PropertyType String -Force | Out-Null
+     }
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-ItemProperty -LiteralPath $key | Select-Object -Property 'HackGen*' | Format-List
+   }
+   ```
+
+   - `HackGen35ConsoleNF-Bold (TrueType) : C:\Users\<WIN_USER>\AppData\Local\Microsoft\Windows\Fonts\HackGen35ConsoleNF-Bold.ttf` の形の行が 4 つ出ればよい
+   - `中断:` で始まるエラーが出たら、そこで止まっている
+   - 何度貼ってもよい
+   - アプリで使えるのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5）
+
 ### PC 全体の設定
 
 1. 管理者の Windows PowerShell（5.1）を開く。
@@ -839,6 +902,79 @@
 
    - `Lan` が出ればよい
 
+### OpenSSH サーバー
+
+1. OpenSSH サーバーの機能を入れる。
+
+   ```powershell
+   if ($PSVersionTable.PSEdition -ne 'Desktop') {
+     Write-Error 'Windows PowerShell（5.1）で貼る。PowerShell 7 では Add-WindowsCapability が失敗する'
+   } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+     Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 | Format-List Name, State
+   }
+   ```
+
+   - 数分かかる
+   - `RestartNeeded : False` と `State : Installed` が出ればよい
+   - 既に入っていれば、すぐに `State : Installed` が出る
+
+1. sshd を自動で起動するようにして起動し、待ち受けを確かめる。
+
+   ```powershell
+   Set-Service -Name sshd -StartupType Automatic
+   Start-Service -Name sshd
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Service -Name sshd | Format-Table Name, Status, StartType
+   Get-NetTCPConnection -State Listen -LocalPort 22 | Format-Table LocalAddress, LocalPort, OwningProcess
+   ```
+
+   - `sshd  Running  Automatic` が出る
+   - 22 番で `0.0.0.0` と `::` の 2 行が出ればよい
+
+1. LAN の接続がプライベートなことと、sshd の受信の規則を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   if (-not $LAN_IF) {
+     Write-Error '「PC 全体の設定」の手順 2 の $LAN_IF が空'
+   } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
+     Write-Error '中断: LAN の接続がプライベートではない（「ネットワークとリモート」の手順 1 でプライベートにする）'
+   } else {
+     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
+     Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
+   }
+   ```
+
+   - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
+   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 1 でプライベートにしてから、この手順を貼り直す（[PC 全体の設定](#pc-全体の設定)の手順 2 の変数はそのまま使える）
+   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[選択した方針](verification/windows-setup.md#openssh-サーバー-選択した方針)）
+
+1. パスワード認証を有効にし、設定を検査してから sshd を再起動する。
+
+   ```powershell
+   $c = "$env:ProgramData\ssh\sshd_config"
+   (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication yes' | Set-Content $c -Encoding ascii
+   & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
+   if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match'
+   ```
+
+   - `…sshd_config:51:PasswordAuthentication yes` と `…sshd_config:87:Match Group administrators` が出ればよい
+
+1. 接続先と、ホスト鍵の指紋を表示する。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   '{0}@{1}' -f $env:USERNAME, (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress
+   & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
+   ```
+
+   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（再起動の後の[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 で使う）
+   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` も控え、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 の初回の接続で照合する
+
 ### サインイン・検索・キーボード
 
 1. 「Windows Hello サインインのみを許可する」を切る。
@@ -934,6 +1070,191 @@
    - JIS 配列（日本語の 106/109 キー）のキーボードなら、この手順は飛ばす
    - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後。日本語の入力の切り替えは、[表示と入力](#表示と入力)の手順 7 の Ctrl+Space（または Alt+`）で行う
 
+### Git for Windows
+
+1. Git for Windows がまだ入っていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
+   Test-Path 'C:\Program Files\Git\bin\bash.exe'
+   winget list --exact --id Git.Git --accept-source-agreements --source winget
+   ```
+
+   - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
+   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
+   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
+   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 2 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
+
+1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Git.Git --source winget
+   ```
+
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
+   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
+   - この窓では `git` は見つからない（PATH は、[WSL と再起動](#wsl-と再起動)の再起動の後に開く窓から効く。確かめるのは[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1）
+
+### Firefox
+
+1. Firefox がまだ入っていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   $arp = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+   Get-ItemProperty -Path $arp -ErrorAction SilentlyContinue | Where-Object DisplayName -like 'Mozilla Firefox*' | Format-Table DisplayName, DisplayVersion, InstallLocation
+   Get-AppxPackage -Name 'Mozilla.MozillaFirefox' | Format-Table Name, Version
+   ```
+
+   - どちらも何も出なければ、入っていない
+   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たら、この項の手順で入れたもの（か同じもの）。この項の手順 2 はそのまま貼ってよい
+   - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、設定 →「アプリ」→「インストールされているアプリ」で外してから始める（プロファイルは残る）
+
+1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
+
+   ```powershell
+   winget install --exact --id Mozilla.Firefox.ja --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget list --exact --id Mozilla.Firefox.ja --source winget
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo | Format-List FileName, ProductVersion
+   Get-Service -Name MozillaMaintenance | Format-Table Name, Status, StartType
+   Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   ```
+
+   - `winget list` に `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形の行が出ればよい
+   - `FileName` が `C:\Program Files\Mozilla Firefox\firefox.exe` で、`ProductVersion` が同じ版
+   - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出る。ふだんは止まっていて、更新のときだけ動く
+   - タスクの一覧に `Firefox Default Browser Agent <番号>` が出る
+   - `winget` が見つからないと出たら、Microsoft Store で「アプリ インストーラー」を更新してから貼り直す
+
+1. スタートメニューから Firefox を起動し、`about:support` で日本語版の公式のビルドかを確かめる。
+
+   - スタートメニューの「Firefox」から起動する（管理者の PowerShell からは起動しない。Firefox が管理者の権限で動いてしまう）
+   - 最初の起動で、Firefox を既定のブラウザーにするかを聞かれることがある。選ぶと Windows の設定が開くので、この項の手順 4 の操作をそこで行ってよい
+   - アドレスバーに `about:support` を入れ、「アプリケーション基本情報」を見る
+     - 「更新チャンネル」が `release`
+     - 「プログラムの実行ファイル」が `C:\Program Files\Mozilla Firefox\firefox.exe`
+   - 同じページの「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
+     - 情報が利用できないと出たら、動画を 1 本再生してから開き直す
+   - メニューやボタンが日本語で出る
+
+1. Windows の設定で、Firefox を既定のブラウザーにする。
+
+   - 設定（Win+I）→「アプリ」→「既定のアプリ」を開き、「アプリケーションの既定値を設定する」の一覧で「Firefox」を選ぶ（2 つ並んだときは上のもの）
+   - 「Firefox を既定のブラウザーに設定する」の横の「既定値に設定」を押す（押すと横にチェックの印が出る）
+   - 押した後は、同じ画面の `.htm`・`.html`・`HTTP`・`HTTPS` などの既定が Firefox になる
+   - Win+R の「ファイル名を指定して実行」に `https://www.mozilla.org/ja/` を入れて Enter を押し、Firefox で開けばよい
+   - Firefox の設定（`about:preferences`）の「既定のブラウザー」の「既定のブラウザーにする」からでもよい（Firefox が自分で既定にできなければ、同じ Windows の設定の画面が開く）
+   - 画面の名前が異なる場合は、Windows の既定のアプリの設定から Firefox を選ぶ
+
+### WezTerm
+
+1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
+
+   ```powershell
+   $u = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     Admin     = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Version   = $u.DisplayVersion
+     Location  = $u.InstallLocation
+     OnPath    = (Get-Command wezterm.exe -All -ErrorAction SilentlyContinue).Source -join ' '
+     Running   = (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue).ProcessName -join ' '
+     VCRuntime = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+   } | Format-List
+   ```
+
+   - `Admin : True` であること（`False` なら、[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き直し、同じ項の手順 2 を貼り直してから、このブロックを貼る）
+   - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
+   - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 3 で今の nightly に上書きする
+     - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
+   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
+   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)のタスクは、同書の[止める・もう一度始める](windows-claude-remote-control.md#止めるもう一度始める)の手順 1 で止める）
+   - `VCRuntime : True` なら、この項の手順 2 は飛ばす。`False` なら、この項の手順 2 で入れる
+
+1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget install --exact --id Microsoft.VCRedist.2015+.x64 --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+   ```
+
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と、`True` が出ればよい
+   - winget が再起動を求めても、ここでは再起動しない。最後の行が `True` なら、続けてこの項の手順 3 を貼る（[WSL と再起動](#wsl-と再起動)の手順 2 でまとめて再起動する）
+   - 最後の行が `False` なら、この項の残りは、再起動の後（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)より前）に管理者の窓（[PC 全体の設定](#pc-全体の設定)の手順 1 と同じ）を開いて、この項の手順 1 から行う
+   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
+
+1. nightly のインストーラを取り、sha256 を確かめて、黙って入れる。
+
+   ```powershell
+   & {
+     $dir = 'C:\Program Files\WezTerm'
+     $curl = "$env:WINDIR\System32\curl.exe"
+     $url = 'https://github.com/wezterm/wezterm/releases/download/nightly/WezTerm-nightly-setup.exe'
+     $tmp = "$env:TEMP\wezterm-setup"
+     $setup = "$tmp\WezTerm-nightly-setup.exe"
+     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない'; return }
+     if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（「WezTerm」の手順 2）'; return }
+     if (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue) { Write-Error '中断: WezTerm が動いている（窓をすべて閉じる）'; return }
+     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & $curl -fsSL -o "$setup.sha256" "$url.sha256"
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 を取れない'; return }
+     & $curl -fsSL -o $setup $url
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe を取れない'; return }
+     $m = Select-String -LiteralPath "$setup.sha256" -Pattern '^([0-9a-f]{64})  WezTerm-nightly-setup\.exe$' | Select-Object -First 1
+     if (-not $m) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い'; return }
+     if ((Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash -ne $m.Matches[0].Groups[1].Value) { Write-Error '中断: WezTerm-nightly-setup.exe の sha256 が一致しない'; return }
+     $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG=`"$tmp\setup.log`"" -Wait -PassThru
+     if ($p.ExitCode -ne 0) { Write-Error "中断: インストーラが終了コード $($p.ExitCode) で終わった（ログは $tmp\setup.log）"; return }
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0'
+     & "$dir\wezterm.exe" --version
+   }
+   ```
+
+   - `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と、`wezterm 20260929-043349-cab25161` の形の 1 行が出ればよい
+   - インストーラの画面は出ない。終わるまでプロンプトが戻らない
+   - `中断:` で始まるエラーが出たら、そこで止まっている
+   - `取れない` と `sha256 が一致しない` は、nightly が入れ替わる最中に取ったときにも出る。少し待って貼り直す
+   - 何度貼ってもよい
+
+1. 入ったものと、`PATH`・スタートメニューを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' | Format-List DisplayName, DisplayVersion, InstallLocation, UninstallString
+   & 'C:\Program Files\WezTerm\wezterm.exe' --version
+   [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -like '*\WezTerm*' }
+   Test-Path -LiteralPath "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\WezTerm.lnk"
+   Get-ChildItem -LiteralPath 'C:\Program Files\WezTerm' -Name
+   ```
+
+   - `DisplayVersion` と `wezterm --version` の版が同じ（`20260929-043349-cab25161` の形）
+   - `UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"`
+   - PC 全体の `PATH` に `C:\Program Files\WezTerm` が 1 行と、スタートメニューの `True` が出る
+   - 最後に `wezterm.exe`・`wezterm-gui.exe`・`unins000.exe` などのファイルの名前が並ぶ
+   - 開いていた PowerShell の `PATH` には入らない。新しく開いた窓（WezTerm の中も）では、`wezterm` を名前で呼べる
+
+1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
+
+   - スタートメニューで「WezTerm」を探し、クリックして開く
+   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 で入れる）
+   - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
+   - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
+     - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
+     - その場で開くなら、Win+R の「ファイル名を指定して実行」に `"C:\Program Files\WezTerm\wezterm-gui.exe" --config prefer_egl=true` を入れて開く（管理者の窓からは起動しない）
+     - いつも開くようにするなら、設定の `config` に `config.prefer_egl = true` を足す。設定ファイルが無ければ、`%USERPROFILE%\.wezterm.lua` に `local wezterm = require 'wezterm'`・`local config = wezterm.config_builder()`・`config.prefer_egl = true`・`return config` の 4 行を書く
+     - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[AlmaLinux 10 の初期設定の「WezTerm の設定ファイル」](almalinux-setup.md#wezterm-の設定ファイル)のとおり、clone した設定が読まれなくなる）
+   - **注意**: 管理者の PowerShell から `wezterm-gui.exe` を起動しない（WezTerm と中のシェルが管理者で動く）
+
 ### WSL と再起動
 
 1. WSL を使えるように、Windows の機能を入れる（ディストリビューションは再起動の後に入れる）。
@@ -986,7 +1307,13 @@
    - 初回は、使い方の案内や設定の問いが出ることがある。読んで進める
    - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）
    - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 3 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る
-   - git が無い旨の警告が出たら、この文書の後に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れる（scoop の `git` は入れない）
+
+1. 設定のフォントの一覧で、HackGen Console NF が出ることを確かめる。
+
+   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）
+   - ライセンス認証していない Windows では、フォントの画面の検索欄が使えないことがある。そのときは一覧をスクロールして探す
+   - メモ帳のフォントの一覧に出ても同じ
+   - 端末のフォントにするなら、アプリの設定にファミリー名 `HackGen Console NF` を書く（WezTerm は `config.font = wezterm.font 'HackGen Console NF'`。自分用の設定（`ryo-aoki-pc/wezterm`）は、もうこのフォントを使う）
 
 ### WSL の AlmaLinux 10 と自動サインイン
 
@@ -1058,6 +1385,921 @@
    - `Username` にこの PC のユーザー名、`Domain` に PC の名前（入っている値のまま）、`Password` にこのユーザーのパスワードを入れ、`Enable` を押す
    - 効くのは、次に起動したときから（起動のときに Shift を押していると、その回は飛ばす）
    - 人が触れる場所にある PC では、この手順は行わない（リードの `[!WARNING]`）
+
+### SSH でログインを確かめる
+
+1. クライアントのシェルを開く（この PC の WSL の AlmaLinux 10 を使うなら、そのシェルに入る）。
+
+   ```powershell
+   wsl.exe --distribution AlmaLinux-10 --cd ~
+   ```
+
+   - [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 の PowerShell に貼る。`[<ユーザー>@<HOSTNAME> ~]$` のプロンプトになればよい
+   - ほかの PC（AlmaLinux 10 など）をクライアントにするなら、その PC の自分のユーザーの端末を開き、このブロックは貼らない
+   - WSL のネットワークが既定（NAT）なら、この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ（[注意点](extra/windows-setup.md#注意点)の WSL からつなぐとき）
+   - **次の手順は、クライアントのシェルに貼る**
+
+1. クライアントに `ssh` が無いときだけ、入れる。
+
+   ```bash
+   command -v ssh || sudo dnf install -y openssh-clients
+   ```
+
+   - `/usr/bin/ssh` が出れば、入っている（何も入れない）
+   - 入れるときは、`sudo` のパスワード（WSL では[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3 で決めたもの）を聞かれる
+   - **次の手順は、`Complete!` が出てプロンプトに戻ってから貼る**（続けて貼るとパスワードとして食われる）
+
+1. クライアントのシェルで、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 3 の 2 つのブロックを貼り直してから先へ進む（任意節の[OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)などでも使う）
+
+1. クライアントのシェルで、ホスト鍵を照合し、パスワードでログインする。
+
+   ```bash
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}"
+   fi
+   ```
+
+   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。[OpenSSH サーバー](#openssh-サーバー)の手順 5 で控えた指紋と同じなら `yes`
+   - `<WIN_USER>@<WIN_HOST>'s password:` で、Windows のユーザーのパスワードを入れる（Microsoft アカウントなら、そのアカウントのパスワード。PIN ではない）
+   - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
+     - [SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<WIN_USER>` だけを出す
+   - `exit` でクライアントのシェルに戻る
+   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（[注意点](extra/windows-setup.md#注意点)）
+   - WSL の AlmaLinux 10 をクライアントにしたときは、続けてもう一度 `exit` を打ち、PowerShell に戻る
+   - **次の手順は、`exit` で PowerShell に戻ってから貼る**（続けて貼ると Windows の cmd への入力として食われる）
+
+### Git Bash と WezTerm の設定
+
+1. Git for Windows の git の場所と版と、Git Bash があることを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command git -All | Format-Table Source
+   git --version
+   Test-Path 'C:\Program Files\Git\bin\bash.exe', 'C:\Program Files\Git\git-bash.exe'
+   ```
+
+   - 1 行目の一番上に `C:\Program Files\Git\cmd\git.exe` が出ればよい
+   - `git version 2.55.0.windows.5` の形の行と、`True` が 2 行出ればよい
+
+1. スタートメニューから Git Bash を開く。
+
+   - スタートメニューで「Git Bash」を探して開く（管理者でなくてよい）
+   - `<WIN_USER>@<HOSTNAME> MINGW64 ~` のような行と、`$` のプロンプトの窓が開く
+   - Git Bash の窓に貼るときは、窓の中を右クリックして出るメニューの「Paste」を選ぶ。最後の行は、貼った後に Enter を押す
+   - **次の手順は、この Git Bash に貼る**
+
+1. Git Bash に、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 1〜10 を上から順に貼る。
+
+   - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
+   - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
+   - **この手順は、この項の手順 4・5 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
+   - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
+   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)で行う（同書の「Git」の手順 2 の箇条書きが案内する AlmaLinux 10 のロールバックと同じ内容を、Git Bash で行う）
+
+1. 同じ Git Bash で、共通の bash 設定を入れる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
+     bash ~/.config/bash/install.sh
+   ```
+
+   - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[AlmaLinux 10 の初期設定の「共通の bash 設定」](almalinux-setup.md#共通の-bash-設定)の手順 1 と同じブロック
+   - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
+   - すでに clone してあるなら `fatal: destination path … already exists` で止まる。そのときは `git -C ~/.config/bash pull --ff-only` で更新し、`bash ~/.config/bash/install.sh` を貼る
+
+1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
+
+   - [その docs/install.md の実施手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#実施手順)の手順 1〜4 を、この Git Bash に貼る（`~/.config/wezterm` に clone する）
+   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 4 の共通の bash 設定が読む
+   - その手順 8 で、スタートメニューの「WezTerm」から起動し、手順 9 を WezTerm のタブに貼って確かめる（新しいタブは Git Bash で開く）
+   - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
+   - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+
+### シェルのツールを入れる
+
+1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     BashConfig = Test-Path -LiteralPath "$env:USERPROFILE\.config\bash\bashrc"
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Tools      = (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source -join ', '
+     Zoxide     = if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) { zoxide --version } else { '' }
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
+   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 4 を通す
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
+   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 3 は、入っているものを飛ばす）
+   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
+   - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 2 は飛ばす
+
+1. scoop の zoxide が 0.9.9 でないときだけ、外す。
+
+   ```powershell
+   scoop uninstall zoxide
+   ```
+
+   - `'zoxide' was uninstalled.` が出ればよい
+
+1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   scoop update
+   scoop install fzf starship eza bat
+   scoop install zoxide@0.9.9
+   scoop hold zoxide
+   ```
+
+   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
+   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
+   - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
+   - 2 行目は、もう入っているものを、何も出さずに飛ばす
+   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す
+   - もう止めてあれば、`'zoxide' is already held.` が出る
+   - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
+   - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
+   - `Notes` の、PowerShell の `$PROFILE` に starship の行を足す案内は行わない。`suggests installing` の行（VC++ ランタイム・less）も、入れなくてよい
+   - **zoxide は 0.9.9 に止めて入れる**（今の 0.10.0 は、Git Bash で移ったディレクトリを記録しない。[参考資料](reference/windows-setup.md)）。直った版が出たら、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6・7 で上げる。ほかの 4 つは同じ項の手順 1・2 で上がる
+
+1. 版と場所と、zoxide を止めたことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   fzf --version
+   zoxide --version
+   starship --version
+   eza --version
+   bat --version
+   (Get-Command fzf, zoxide, starship, eza, bat -All).Source
+   scoop list zoxide
+   ```
+
+   - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
+   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この項の手順 1 の `VCRuntime`）
+   - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
+   - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
+
+1. bat の設定ファイル（`BAT_CONFIG_DIR` の下の `config`）に、3 行の設定を書く（中身があれば書き換えない）。
+
+   ```powershell
+   $BAT_THEME_NAME = 'ansi'   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
+   ```
+
+   ```powershell
+   & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
+     $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
+     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。「シェルのツールを入れる」の手順 3 で bat を入れたかを確かめる'; return }
+     if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
+       Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
+       "書いた: $f"
+     }
+     Get-Content -LiteralPath $f
+   }
+   ```
+
+   - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
+   - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
+   - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
+   - `中断:` が出たら、何も書いていない
+
+1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10](almalinux-setup.md#シェルのツール)のブロックを貼る。
+
+   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の「シェルのツール」の手順 2](almalinux-setup.md#シェルのツール)の補足と同じ）
+   - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
+   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
+     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 4 と同じ
+     - 同書の「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
+     - 同書の「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
+     - 同書の「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
+     - 同書の「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
+   - 同書の「シェルのツール」の手順 8（tmux）は行わない
+   - Git Bash では、共通の bash 設定が、入っているツールを見つけて読む。`~/.bashrc` には書かない。Windows PowerShell 5.1 には読み込まない
+
+1. 同じタブで、[同書の「キー操作を試す」の手順 2〜5](almalinux-setup.md#キー操作を試す)のキーを押して、fzf を確かめる。
+
+   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 6 で Git Bash の履歴に入っている
+   - 同書の「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
+   - 同書の「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
+   - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
+   - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+
+### git-delta
+
+1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Delta      = (Get-Command delta -All -ErrorAction SilentlyContinue).Source -join ', '
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
+   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
+   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める
+
+1. scoop で delta を入れ、版と場所を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   scoop install delta
+   delta --version
+   (Get-Command delta -All).Source
+   ```
+
+   - `'delta' (0.20.1) was installed successfully!` の形の行が出ればよい
+   - もう入っていれば、`'delta' (<版>) is already installed.` と `Use 'scoop update delta' to install a new version.` の警告を出して何も変えない
+   - `delta 0.20.1` の形で、入れた版が出ればよい。版が出なければ、この項の手順 1 の `VCRuntime` を確かめる
+   - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\delta.exe` の 1 行だけを出せばよい
+
+1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「git-delta」](almalinux-setup.md#git-delta)の手順 1・3 を貼る。
+
+   - WezTerm を起動するか、新しいタブ（既定のキーは Ctrl+Shift+T）を開く（自分用の WezTerm の設定では Git Bash が開く）
+   - 同書の「git-delta」の手順 1 の 3 つの変数は、AlmaLinux 10 と同じ既定のままでよい。同じ項の手順 3 も同じタブに貼る
+   - 同書の「git-delta」の手順 3 は、AlmaLinux 10 と同じく、設定した 6 項目が出ればよい（`interactive.difffilter` は小文字）
+   - 同書の「git-delta」の手順 2・4 は行わない
+
+1. 同じ Git Bash のタブで `git diff` を打ち、delta の表示になることを確かめる。
+
+   - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ
+   - ファイル名のヘッダと、行番号・行ごとに背景色の付いた差分が出ればよい（同書の「git-delta」の手順 4 と同じ見え方）
+   - 1 画面に収まらないときは、less で止まる。`q` で閉じる
+   - 素の差分（背景色の無い `+` / `-` の行）が出たら、この項の手順 3 で貼った同書の「git-delta」の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
+   - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
+   - **次の手順は、less を `q` で閉じ、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+
+### GitHub CLI
+
+1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     GitCred    = if (Get-Command git -ErrorAction SilentlyContinue) { (git config --get-regexp '^credential\..*helper$') -join ', ' }
+     Gh         = (Get-Command gh -All -ErrorAction SilentlyContinue).Source -join ', '
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
+   - `GitCred` が `credential.helper manager` ならよい
+   - `GitCred` が空なら、この項の手順 3 の Git の認証には `Y` と答えてよい
+   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。外してから始める
+
+1. scoop で gh を入れ、版と場所を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   scoop install gh
+   gh --version
+   (Get-Command gh -All).Source
+   ```
+
+   - `'gh' (2.102.0) was installed successfully!` の形の行が出ればよい
+   - もう入っていれば、`'gh' (<版>) is already installed.` と `Use 'scoop update gh' to install a new version.` の警告を出して何も変えない
+   - `gh version <版> (<日付>)` の形で、入れた版が出ればよい
+   - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\gh.exe` の 1 行だけを出せばよい
+
+1. GitHub へのログインを始める。
+
+   ```powershell
+   gh auth login
+   ```
+
+   - 問いには、矢印キーで選んで Enter で答える
+     - `Where do you use GitHub?` は `GitHub.com`
+     - `What is your preferred protocol for Git operations on this host?` は `HTTPS`
+     - `Authenticate Git with your GitHub credentials?` は、**`n` と打って Enter**（既定は `Y`）
+     - `How would you like to authenticate GitHub CLI?` は `Login with a web browser`
+   - Git の認証の問いが出なければ、gh がもう Git の資格情報のヘルパーになっている（この項の手順 1 の `GitCred`）
+   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この項の手順 4 のブラウザで使う
+   - クリップボードに入れられなかったときは、`First copy your one-time code:` の後にコードが出る
+   - `Press Enter to open https://github.com/login/device in your browser...` で Enter を押すと、既定のブラウザが開く
+   - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
+
+1. ブラウザで、GitHub の認証を済ませる。
+
+   - 開いたページ（`https://github.com/login/device`）に、この項の手順 3 のワンタイムコードを入れ、画面の案内に従う（[AlmaLinux 10 の初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)の手順 4 と同じ）
+   - ブラウザが開かなければ（`Failed opening a web browser at …`）、`https://github.com/login/device` を自分でブラウザで開く
+   - PowerShell に `Logged in as <GITHUB_USER>` が出れば、`gh auth login` は終わっている
+   - `Authentication credentials saved in plain text` も出たら、トークンは資格情報マネージャーに置けず、`%APPDATA%\GitHub CLI\hosts.yml` に平文で入った（[注意点](extra/windows-setup.md#注意点)の GitHub CLI のトークンの置き場所）
+   - **次の手順は、`gh auth login` が終わってから貼る**（続けて貼ると対話の答えとして食われる）
+
+1. ログインできたことと、Git の資格情報のヘルパーが変わっていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   gh auth status
+   git config --get-regexp '^credential\..*helper$'
+   ```
+
+   - `Logged in to github.com account <GITHUB_USER> (keyring)` の行と、`Git operations protocol: https` の行が出ればよい
+   - `(keyring)` の代わりに `(C:\Users\<WIN_USER>\AppData\Roaming\GitHub CLI\hosts.yml)` が出たら、トークンは平文のファイルにある
+   - `You are not logged into any GitHub hosts.` なら、ログインしていない。この項の手順 3 からやり直す
+   - 最後のコマンドが、この項の手順 1 の `GitCred` と同じ行（ふつうは `credential.helper manager`）を出せばよい
+   - `GitCred` が空で、Git の認証に `Y` と答えたときは、代わりに `auth git-credential` で終わる行が出る
+
+### Neovim
+
+1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Nvim       = (Get-Command nvim -All -ErrorAction SilentlyContinue).Source -join ', '
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める
+
+1. scoop で Neovim を入れる。
+
+   ```powershell
+   scoop install neovim
+   ```
+
+   - `'neovim' (0.12.5) was installed successfully!` の形の行が出ればよい
+   - `'neovim' suggests installing 'extras/vcredist2022'.` も出るが、この項の手順 1 が `VCRuntime : True` なら入れなくてよい
+   - `'neovim' (0.12.5) is already installed.` の形なら、もう入っている（何も変えない）
+   - まだ `nvim` は起動しない（この項の手順 3 の退避より前に起動すると、`nvim-data` などができて、それも退避される）
+
+1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
+
+   - [その docs/setup.md の「Windows 11 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#windows-11-に導入する-1-度だけ)の手順 1・3〜11 を、この窓に上から順に貼る
+   - 飛ばす手順: 2（scoop。[アプリを入れる](#アプリを入れる)の手順 1・2 で入れた）と、手順 7 のフォント（[HackGen Console NF](#hackgen-console-nf)で入れた。手順 7 の確かめは行う）
+   - その手順 3 で `extras` のバケットを足し、手順 6 で ripgrep・fd・gcc・nodejs・zenhan・lazygit も scoop で入れる（Neovim は、この項の手順 2 で入っている）
+   - その手順 9・11 で Neovim の画面が開く（その手順 10 は画面を開かない）。手順 9 は `:qa`、手順 11 は `:qa!` で閉じてから次を貼る
+
+1. 版と場所と、設定・データの置き場所を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   nvim --version | Select-Object -First 3
+   (Get-Command nvim -All).Source
+   nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
+   ```
+
+   - `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい
+   - 何も出さずに終わるか、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出たら、VC++ のランタイムが無い（この項の手順 1 の `VCRuntime`）
+     - 窓が出たら、OK で閉じる
+   - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい
+   - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[AlmaLinux 10 の初期設定の「Neovim の設定ファイル」](almalinux-setup.md#neovim-の設定ファイル)）
+
+### lazygit
+
+1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell = $PSVersionTable.PSVersion.ToString()
+     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
+     Extras     = if (Get-Command scoop -ErrorAction SilentlyContinue) { [bool](scoop bucket list | Where-Object Name -eq 'extras') } else { $false }
+     Lazygit    = (Get-Command lazygit -All -ErrorAction SilentlyContinue).Source -join ', '
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
+   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、外してから始める
+   - `Extras : True` なら、extras のバケットはもうある（[Neovim](#neovim)の手順 3 で足した）。この項の手順 2 は飛ばす
+
+1. extras のバケットが無いときだけ、scoop に足す。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   scoop bucket add extras
+   scoop bucket list
+   ```
+
+   - `The extras bucket was added successfully.` が出て、一覧に `main` と `extras` の行が出ればよい
+
+1. scoop で lazygit を入れる。
+
+   ```powershell
+   scoop install lazygit
+   ```
+
+   - `'lazygit' (0.66.0) was installed successfully!` の形の行が出ればよい
+   - `'lazygit' (0.66.0) is already installed.` の形なら、もう入っている（[Neovim](#neovim)の手順 3 で入る。何も変えない）
+
+1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
+
+   - [その README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の Windows の例のブロックを、この窓に貼る（`%LOCALAPPDATA%\lazygit` に直接 clone する。シンボリックリンクにはしない）
+   - `custom` と `C:\Users\<WIN_USER>\AppData\Local\lazygit` が出れば、入っている
+   - lazygit を起動する（この項の手順 6）前に入れる。先に起動すると、できた状態ファイルごと `lazygit.bak` に退避される
+
+1. 版と、設定の置き場所を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   lazygit --version
+   lazygit --print-config-dir
+   (Get-Command lazygit -All).Source
+   ```
+
+   - 1 行目に `version=0.66.0, os=windows, arch=amd64` を含む行が出ればよい
+   - 2 行目は `C:\Users\<WIN_USER>\AppData\Local\lazygit`（[AlmaLinux 10 の初期設定の「lazygit の設定ファイル」](almalinux-setup.md#lazygit-の設定ファイル)）
+   - 最後は `C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` の 1 行だけならよい
+
+1. 確かめ用の git のリポジトリで、lazygit を起動して確かめる。
+
+   ```powershell
+   git init --quiet "$env:TEMP\lazygit-check"
+   if (-not (Test-Path -LiteralPath "$env:TEMP\lazygit-check\.git")) { Write-Error '中断: 確かめ用のリポジトリ（%TEMP%\lazygit-check）を作れない' } else {
+     Set-Location -LiteralPath "$env:TEMP\lazygit-check"
+     lazygit
+   }
+   ```
+
+   - `中断:` と出たら、lazygit は起動していない（git が呼べるかを、この項の手順 1 で確かめ直す）
+   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる
+   - Status・Files・Branches・Commits などの欄が出ればよい（空のリポジトリなので、一覧は空）
+   - ほかのリポジトリで確かめるなら、そのフォルダーに `Set-Location` してから `lazygit` を打つ（git 管理外のフォルダーで起動すると、リポジトリを作るか聞かれる）
+   - **注意**: Windows PowerShell から起動した lazygit の `e` キーは、git の `core.editor` と環境変数 `VISUAL`・`EDITOR` などが無いと `vim` で開こうとして失敗する
+     - [Neovim を既定のエディタにする（任意）](#neovim-を既定のエディタにする任意)で `nvim` にし、新しい窓で lazygit を起動し直す
+     - Git Bash から起動したときは、共通の bash 設定が `nvim` にしてある
+   - `q` で閉じる
+   - `%TEMP%\lazygit-check` は、要らなければ手で消す
+     - 消す前に `Set-Location ~` で出る
+   - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると lazygit への操作として食われる）
+
+### yazi
+
+1. 変数を設定する。
+
+   ```powershell
+   $YAZI_EXTRAS = @('ffmpeg', '7zip', 'jq', 'poppler', 'fd', 'ripgrep', 'fzf', 'resvg', 'imagemagick')   # プレビューと検索に使う。@() にすると yazi 本体だけ
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'YAZI_EXTRAS = {0}' -f ($YAZI_EXTRAS -join ' ')
+   ```
+
+   - **編集が必須の変数は無い**
+   - 最小構成にするなら、`$YAZI_EXTRAS = @()` にする
+   - 減らして 1 つだけにするときも、`@('fd')` の形のままにする
+   - 最後の行で値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、先にこのブロックを貼り直す
+
+1. 管理者ではないことと、scoop・`file.exe`・VC++ のランタイム・ほかの yazi・設定を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{
+     PowerShell  = $PSVersionTable.PSVersion.ToString()
+     Admin       = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     Scoop       = (Get-Command scoop -ErrorAction SilentlyContinue).Source
+     Git         = (Get-Command git -ErrorAction SilentlyContinue).Source
+     FileExe     = Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe'
+     VCRuntime   = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
+     Yazi        = (Get-Command yazi -All -ErrorAction SilentlyContinue).Source -join ', '
+     YaziFileOne = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
+     Config      = Test-Path -LiteralPath "$env:APPDATA\yazi\config"
+   } | Format-List
+   ```
+
+   - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す（この項の手順 1 も貼り直す）
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `Yazi` が空なら、yazi は入っていない。`C:\Users\<WIN_USER>\scoop\shims\yazi.exe` だけなら、もう scoop で入っている。ほかの場所が出たら、外してから始める
+   - `YaziFileOne` が空なら、この項の手順 4 で入れる。別の値なら、この項の手順 4 で Git for Windows の `file.exe` に上書きされる（元の値は控えておく。ロールバックで戻す）
+
+1. scoop で yazi と、プレビュー・検索に使うツールを入れる。
+
+   ```powershell
+   if ($null -eq $YAZI_EXTRAS) { Write-Error '中断: 「yazi」の手順 1 の $YAZI_EXTRAS が無い。手順 1 を貼り直す' } else { scoop install yazi @YAZI_EXTRAS }
+   ```
+
+   - アプリごとに `'yazi' (26.9.1) was installed successfully!` の形の行が出ればよい。入っていたものは `is already installed.` の形の行を出して飛ばす
+   - `'ripgrep' suggests installing 'extras/vcredist2022'.` などの `suggests installing` の行は、入れなくてよい
+   - `中断:` と出たら、何も入れていない（新しい窓では、この項の手順 1 を貼り直す。yazi 本体だけにするなら `$YAZI_EXTRAS = @()`）
+   - scoop の `file` は入れない
+
+1. ユーザーの環境変数 `YAZI_FILE_ONE` を Git for Windows の `file.exe` にする。
+
+   ```powershell
+   if (-not (Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe')) { Write-Error '中断: C:\Program Files\Git\usr\bin\file.exe が無い（「Git for Windows」で入れる）' } else {
+     [Environment]::SetEnvironmentVariable('YAZI_FILE_ONE', 'C:\Program Files\Git\usr\bin\file.exe', 'User')
+     $env:YAZI_FILE_ONE = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'YAZI_FILE_ONE = {0}' -f $env:YAZI_FILE_ONE
+   }
+   ```
+
+   - `YAZI_FILE_ONE = C:\Program Files\Git\usr\bin\file.exe` が出ればよい（何度貼ってもよい）
+   - 今の窓にも入れる。ほかの窓は開き直してから効く（WezTerm は新しいタブから）
+   - `中断:` と出たら、何も変えていない
+
+1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
+
+   - [その README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)の Windows のブロックを、この窓に貼る（`custom` ブランチを `%APPDATA%\yazi\config` に clone する）
+   - `custom` が出れば、入っている
+   - 同じところにある `YAZI_FILE_ONE` と VC++ のランタイムは、この項の手順 2・4 で済んでいる
+
+1. 版と、yazi から見た環境を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   yazi --version
+   ya --version
+   ya env
+   ```
+
+   - `yazi --version` は `Version: 26.9.1 (…)` と、括弧の中が `windows-x86_64` の `Triple` の行、`ya --version` は `Version: 26.9.1 (…)` の行が出ればよい
+   - 何も出さずに終わるか、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出たら、VC++ のランタイムが無い（この項の手順 2 の `VCRuntime`）
+     - 窓が出たら、OK で閉じる
+   - `ya env` の `Config` の各行に `C:\Users\<WIN_USER>\AppData\Roaming\yazi\config\…` が出る
+     - 設定のフォルダーが無ければ、パスが見つからない旨と `os error 3` が出る
+     - フォルダーはあってファイルが無い行は、ファイルが見つからない旨と `os error 2`
+   - `Variables` の `YAZI_FILE_ONE` が `Some("C:\\Program Files\\Git\\usr\\bin\\file.exe")` ならよい
+   - `Dependencies` の `file` に版が出て、最後の `Routine` の `` `file -bL --mime-type` `` が `text/plain` ならよい
+   - `Dependencies` に、`$YAZI_EXTRAS` で入れたもの（ffmpeg・pdftoppm・magick・fzf・fd・rg・7z・resvg・jq）の版が出る
+
+1. WezTerm で新しいタブを開く。
+
+   - 自分用の WezTerm の設定では、新しいタブで Git Bash が開く
+   - **次の手順は、開いた Git Bash のタブに貼る**（bash の構文なので、PowerShell には貼らない）
+
+1. そのタブで `y` を確かめ、yazi を開く。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   type -t y
+   y
+   ```
+
+   - `function` が出ればよい（[AlmaLinux 10 の初期設定の「yazi」](almalinux-setup.md#yazi)の手順 4 と同じ）
+   - 最後の `y` で yazi が開く。別のフォルダーへ移って `q` で閉じると、Git Bash もそのフォルダーへ移る（`Q` なら移らない）
+   - **次の手順は、yazi を閉じて、この項の手順 1 の PowerShell に戻ってから貼る**（続けて貼ると yazi への操作として食われる）
+
+1. yazi を起動して確かめる。
+
+   ```powershell
+   yazi
+   ```
+
+   - プレビューを確かめるには、PDF・動画・画像・書庫のあるフォルダーで右のペインを見る
+   - 画像のプレビューは、WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）の中で出る。conhost の窓では出ない
+   - [表示と入力](#表示と入力)の手順 6 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
+   - `q` で閉じる
+   - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると yazi への操作として食われる）
+
+### Claude Code
+
+1. 変数を設定する。
+
+   ```powershell
+   $CC_CHANNEL = 'latest'                # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'CC_CHANNEL = {0}' -f $CC_CHANNEL
+   ```
+
+   - **編集が必須の変数は無い**。既定の `latest`（最新版）でよければ、そのまま貼る
+   - 大きな不具合のある版を避けたいなら `stable` にする（[AlmaLinux 10 の初期設定の「Claude Code」](almalinux-setup.md#claude-code)の手順 1 の `CC_CHANNEL` と同じ意味）
+   - 最後に値を読み戻して確かめる
+   - 変数はその PowerShell の中だけで有効。使うのはこの項の手順 3 だけ
+
+1. Claude Code と Git for Windows があるか、64 ビットの PowerShell かを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [Environment]::Is64BitProcess
+   Get-Command claude -All -ErrorAction SilentlyContinue | Format-Table Source
+   Test-Path "$env:USERPROFILE\.local\bin\claude.exe"
+   Get-Command git -ErrorAction SilentlyContinue | Format-Table Source
+   Test-Path 'C:\Program Files\Git\bin\bash.exe'
+   ```
+
+   - `True`、（claude は何も出ずに）`False`、`C:\Program Files\Git\cmd\git.exe`、`True` の順に出ればよい
+   - 最初が `False` なら、32 ビットの PowerShell（x86）を開いている。窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す（「Windows PowerShell (x86)」は開かない）
+   - claude の行が `C:\Users\<WIN_USER>\.local\bin\claude.exe` だけで、3 つ目が `True` なら、もう native installer で入っている。この項の手順 3 は入れ直しになる（設定とログインは残る）
+   - claude の行にほかの場所（WinGet・npm・scoop で入れたものなど）が出たら、そちらを先に外す（[注意点](extra/windows-setup.md#注意点)）
+   - `WindowsApps` の `Claude.exe` が出たら、古い Claude Desktop が `claude` の名前を取っている。Claude Desktop を最新にする（公式の Troubleshoot installation）
+   - git が出ず、最後が `False` なら、Git for Windows が無い。先に [Git for Windows](#git-for-windows)を通す
+
+1. Claude Code を公式の native installer で入れる。
+
+   ```powershell
+   if (-not $CC_CHANNEL) {
+     Write-Error '「Claude Code」の手順 1 の $CC_CHANNEL が空'
+   } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     & ([scriptblock]::Create((Invoke-RestMethod -Uri https://claude.ai/install.ps1))) $CC_CHANNEL
+   }
+   ```
+
+   - `Claude Code successfully installed!` と版（`Version: 2.1.288` など）の後に、最後に `Installation complete!`（前に絵文字の ✅ が付く）が出ればよい
+   - `Setup notes:` に `Native installation exists but C:\Users\<WIN_USER>\.local\bin is not in your PATH.` と出ても、この項の手順 4 で足すので、ここでは何もしない
+   - 赤いエラー（`Checksum verification failed`、`Failed to download binary` など）が出たら、そこで止まっている。[注意点](extra/windows-setup.md#注意点)と公式の [Troubleshoot installation](https://code.claude.com/docs/en/troubleshoot-install) を見る
+
+1. 自分のユーザーの PATH に `%USERPROFILE%\.local\bin` が無ければ足す。
+
+   ```powershell
+   & {
+     $bin = "$env:USERPROFILE\.local\bin"
+     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
+     if (-not (Test-Path -LiteralPath "$bin\claude.exe")) { Write-Error "中断: $bin\claude.exe が無い（「Claude Code」の手順 3 で入っていない）"; return }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($entries | Where-Object { $_.TrimEnd('\') -eq $bin }) {
+       "PATH に $bin はもうある"
+     } else {
+       [Environment]::SetEnvironmentVariable('Path', (($entries + $bin) -join ';'), 'User')
+       "PATH に $bin を足した"
+     }
+     [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
+   }
+   ```
+
+   - `PATH に C:\Users\<WIN_USER>\.local\bin を足した`（か `はもうある`）の後に、自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.local\bin` があればよい
+   - 何度貼ってもよい（あれば足さない）
+
+1. 開いている Windows PowerShell を閉じ、新しく開き直す。
+
+   - ウィンドウを閉じ（`exit` と打ってもよい）、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 と同じように、管理者ではない Windows PowerShell を開く（「Windows PowerShell (x86)」は開かない）
+   - この項の手順 1 の変数は、この後は使わない
+   - **次の手順は、開き直した PowerShell に貼る**（前の PowerShell の `PATH` には、`.local\bin` が無いことがある）
+
+1. Claude Code の場所・版・署名と、導入の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command claude -All | Format-Table Source
+   claude --version
+   $sig = Get-AuthenticodeSignature -LiteralPath "$env:USERPROFILE\.local\bin\claude.exe"
+   '{0}  {1}' -f $sig.Status, $sig.SignerCertificate.Subject
+   claude doctor
+   ```
+
+   - `claude` の場所は `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行だけ
+   - `2.1.288 (Claude Code)` のように版が出る（`stable` を選んだら、`latest` より古い版）
+   - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに、ロールバックの Claude Code の手順で消す
+   - `claude doctor` に `Running: native (...)`・`Auto-updates: enabled`・`Auto-update channel: latest`（`stable` を選んだら `stable`）・`No installation issues found.` が出ればよい
+
+1. `claude` を起動し、最初の設定とブラウザでのログインを行う。
+
+   ```powershell
+   claude
+   ```
+
+   - 文字の色の組み合わせ（`Choose the text style that looks best with your terminal`）を選んで Enter
+   - `Select login method:` で `Claude account with subscription`（Pro / Max / Team / Enterprise）を選ぶ。Console のアカウントなら `Anthropic Console account`
+   - 既定のブラウザ（Firefox）が開くので、claude.ai にログインして承認する。ブラウザが開かなければ、`c` で URL をコピーしてブラウザに貼る
+   - ブラウザにコードが出たら、端末の `Paste code here if prompted >` に貼る
+   - 端末に `Login successful` が出たら Enter。続く案内とフォルダーの信頼の確認（↓ で `Yes, I trust this folder`）に答えると、セッションが始まる
+   - 前にログインしたことがある（`%USERPROFILE%\.claude` が残っている）なら、ログインは聞かれない。別のアカウントにするときは、セッションの中で `/login`
+   - `/exit` で終える
+   - **認証情報（トークン・コード）はこの文書に載せない**
+   - **次の手順は、`/exit` で Claude Code を終えてから貼る**（続けて貼ると Claude Code への入力として食われる）
+
+1. ログインしたかを確かめる。
+
+   ```powershell
+   claude auth status --text
+   ```
+
+   - `Login method: Claude Max account` のように、プランの行が出ればよい（ほかにメールアドレスと組織の行も出る）
+   - `Not logged in. Run claude auth login to authenticate.` なら、ログインしていない。この項の手順 7 をやり直す
+   - このコマンドの後ろに、別のコマンドを続けて貼らない
+
+### Codex CLI
+
+1. 既存の Codex が入っていないか確かめる。
+
+   ```powershell
+   Get-Command codex -All -ErrorAction SilentlyContinue
+   ```
+
+   - 新規の PC なら何も出ない
+   - パスが出たら、元の導入方法を確認してから進める
+   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない（この項は、既定の場所への新規の standalone インストールを前提にする。ロールバックもその場所を消す）
+
+1. 公式の standalone インストーラーで Codex CLI を入れる。
+
+   ```powershell
+   & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://chatgpt.com/codex/install.ps1')))
+   ```
+
+   - `Codex CLI … installed successfully.` を確認する
+   - `Start Codex now?` と聞かれたら `n` で答える
+   - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
+
+1. 実行ファイルと版を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command codex -All
+   codex --version
+   ```
+
+   - `Source` がこの項の手順 2 の場所で、`codex-cli …` が出ることを確認する
+
+1. 開いている Windows PowerShell を閉じ、新しく開き直す。
+
+   - [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1と同じように、管理者ではない Windows PowerShell（5.1）を開く
+   - 新しい窓でも `codex --version` が通ることを確認する
+   - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
+
+1. ChatGPT でのログインを始める。
+
+   ```powershell
+   codex login
+   ```
+
+   - ブラウザが開く。自動で開かなければ、端末に出た URL を同じ PC のブラウザで開く
+   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[AlmaLinux 10 の初期設定の「Codex CLI をブラウザの無いホストでログインする」](almalinux-setup.md#codex-cli-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
+
+1. ブラウザで ChatGPT にログインし、Codex との接続を承認する。
+
+   - 利用するアカウント・ワークスペースを選ぶ
+   - **次の手順は、端末でログインの成功を確認し、PowerShell のプロンプトに戻ってから貼る**
+
+1. ログイン状態を確かめる。
+
+   ```powershell
+   codex login status
+   ```
+
+   - ChatGPT でログイン済みであることを確認する
+
+1. 確認用のディレクトリで Codex を起動する。
+
+   ```powershell
+   New-Item -ItemType Directory -Path "$env:USERPROFILE\codex-sandbox" -Force | Out-Null
+   Set-Location "$env:USERPROFILE\codex-sandbox"
+   git init
+   codex
+   ```
+
+   - 作業場所の確認が出たら、`codex-sandbox` であることを確認する
+   - Windows sandbox の設定を求められたら案内に従う。推奨の `elevated` sandbox の初回設定には管理者の承認が必要（普段の Codex は通常のユーザーで動かす）
+   - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確認する
+   - 終了するときは `/quit` を入力する
+   - **次の手順は、Codex を終了して PowerShell のプロンプトに戻ってから貼る**
+
+### Grok Build
+
+1. 既存の Grok が入っていないか確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command grok, agent -All -ErrorAction SilentlyContinue
+   Test-Path "$env:USERPROFILE\.grok"
+   ```
+
+   - 新規の PC なら、`False` だけが出る
+   - パスか `True` が出たら、元の導入方法を確かめてから進める（WinGet の `xAI.GrokBuild` で入れた Grok なら、WinGet で更新する）
+
+1. 公式のインストーラーで Grok Build を入れる。
+
+   ```powershell
+   & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://x.ai/cli/install.ps1')))
+   ```
+
+   - `Grok … installed to C:\Users\<WIN_USER>\.grok\bin\grok.exe` を確かめる
+   - 初回は `Added C:\Users\<WIN_USER>\.grok\bin to your User PATH.` も出る
+   - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
+
+1. 実行ファイルと版を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command grok -All
+   grok --version
+   ```
+
+   - `Source` がこの項の手順 2 の場所で、`grok …` の版が出ることを確かめる
+
+1. 開いている Windows PowerShell を閉じ、新しく開き直す。
+
+   - [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1と同じように、管理者ではない Windows PowerShell（5.1）を開く
+   - 新しい窓でも `grok --version` が通ることを確かめる
+   - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
+
+1. ブラウザでのログインを始める。
+
+   ```powershell
+   grok login
+   ```
+
+   - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
+   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[AlmaLinux 10 の初期設定の「Grok Build をブラウザの無いホストでログインする」](almalinux-setup.md#grok-build-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
+
+1. ブラウザで grok.com のアカウントにログインし、Grok Build との接続を承認する。
+
+   - ブラウザに出たコードが、端末のコードと同じであることを確かめてから承認する
+   - **次の手順は、端末でログインの成功を確かめ、PowerShell のプロンプトに戻ってから貼る**
+
+1. ログインを確かめる。
+
+   ```powershell
+   grok models
+   ```
+
+   - `You are not authenticated.` が出なければ、ログインできている（[AlmaLinux 10 の初期設定の「Grok Build」](almalinux-setup.md#grok-build)の手順 6 と同じ）
+
+1. 確認用のディレクトリで Grok を起動する。
+
+   ```powershell
+   New-Item -ItemType Directory -Path "$env:USERPROFILE\grok-sandbox" -Force | Out-Null
+   Set-Location "$env:USERPROFILE\grok-sandbox"
+   git init
+   grok
+   ```
+
+   - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
+   - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
+   - 終了するときは `/quit` を入力する
+   - **次の手順は、Grok を終了して PowerShell のプロンプトに戻ってから貼る**
+
+### Codex・Grok のプラグイン
+
+1. Node.js 18.18 以上があるか確かめ、無いときだけ scoop で入れる（プラグインが使う）。
+
+   ```powershell
+   & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $node = Get-Command node -ErrorAction SilentlyContinue
+     if ($node -and [version]((node --version) -replace '^v', '') -ge [version]'18.18') {
+       'Node.js がある: {0}（{1}）' -f (node --version), $node.Source
+     } else {
+       scoop install nodejs-lts
+     }
+   }
+   ```
+
+   - `Node.js がある:` と版と場所が出たら、何も入れていない（[Neovim](#neovim)の手順 3 で入った scoop の `nodejs` などを使う）。この項の手順 2 は飛ばす
+   - 入れたときは、`'nodejs-lts' (…) was installed successfully!` が出ればよい
+
+1. この項の手順 1 で nodejs-lts を入れたときだけ、PowerShell を閉じ、スタートメニューから開き直す。
+
+   - 開き直した窓で `node --version` が通ることを確かめる
+   - **次の手順は、開き直した PowerShell に貼る**
+
+1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   claude plugin marketplace add openai/codex-plugin-cc
+   claude plugin marketplace add xai-org/grok-build-plugin-cc
+   claude plugin install codex@openai-codex
+   claude plugin install grok-build@xai-grok-build
+   claude plugin list
+   ```
+
+   - 見方は、[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](almalinux-setup.md#codexgrok-のプラグイン)の手順 2 と同じ
 
 ---
 
@@ -1150,7 +2392,7 @@
 
 - リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
 - 既にある接続からの再起動（この節の手順にはしない）
-  - SSH でつながるなら、ログインして `Restart-Computer`（Administrators の一員の SSH のセッションは昇格済みで、UAC は要らない。[Windows の OpenSSH サーバー](windows-openssh-server.md)）。sshd は再起動の後に自動で起動する
+  - SSH でつながるなら、ログインして `Restart-Computer`（Administrators の一員の SSH のセッションは昇格済みで、UAC は要らない。[OpenSSH サーバー](#openssh-サーバー)）。sshd は再起動の後に自動で起動する
   - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 2 で有効。再起動の後はロック画面に戻るが、また入れる）
   - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの節の手順 7
 - この節で足す手段: クラッシュ時の自動再起動（この節の手順 3）・別の PC からのネットワーク再起動（この節の手順 4・5）・ネットワークが切れたときの自動再起動（この節の手順 6）
@@ -2290,7 +3532,7 @@
 ## Windows Terminal のフォントと貼り付けの警告を変える（任意）
 
 - Windows Terminal（[表示と入力](#表示と入力)の手順 6 で既定の端末にした）の全プロファイルのフォントを HackGen Console NF にし、複数行を貼るときの警告を、要らなければ切る
-- 前提: [HackGen Console NF の Windows 11 で使う](hackgen.md#windows-11-で使う)（入れた後にサインインし直すか、[WSL と再起動](#wsl-と再起動)の手順 2 で再起動した後）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
+- 前提: [HackGen Console NF](#hackgen-console-nf)（入れた後にサインインし直すか、[WSL と再起動](#wsl-と再起動)の手順 2 で再起動した後）。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る
 - **この節の手順 5 は Windows Terminal の設定の画面で行う**
 - 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この節の手順 4）
@@ -2411,7 +3653,7 @@
 - 前提: [WSL と再起動](#wsl-と再起動)の手順 1 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3・4。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（自分のユーザーの `%USERPROFILE%\.wslconfig` に書く）
 - **この節の手順 4・7 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
 - ミラーにして変わること
-  - WSL からこの PC の Windows のサーバー（[Windows の OpenSSH サーバー](windows-openssh-server.md)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
+  - WSL からこの PC の Windows のサーバー（[OpenSSH サーバー](#openssh-サーバー)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
   - Windows が使っているポートは、WSL の中では使えない。Windows の sshd が 22 番で待っていると、WSL の中の sshd は 22 番を使えない
   - Docker のポートの公開と、一部の VPN には、既知の問題がある（[参考資料](reference/windows-setup.md)）
 - 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この節では作らない
@@ -2494,8 +3736,8 @@
    ```
 
    - `SSH-2.0-OpenSSH_for_Windows_` で始まる行が出ればよい
-   - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[Windows の OpenSSH サーバーの注意点](extra/windows-openssh-server.md#注意点)）
-   - `Connection refused` が出たら、Windows の sshd が動いていない（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順で確かめる）
+   - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[注意点](extra/windows-setup.md#注意点)の OpenSSH サーバー）
+   - `Connection refused` が出たら、Windows の sshd が動いていない（[OpenSSH サーバー](#openssh-サーバー)の手順で確かめる）
 
 1. 元に戻すときは、`.wslconfig` を元に戻す。
 
@@ -2536,231 +3778,271 @@
 
 ---
 
-## シェルのツールを入れる（任意）
+## OpenSSH サーバーに公開鍵でもログインする（任意）
 
-- Git Bash で使う starship・zoxide・fzf・eza・bat を、scoop で入れる（[アプリを入れる](#アプリを入れる)の手順 1・2 の続き。AlmaLinux 10 では [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](almalinux-setup.md#シェルのツール)で入れるもの）
-- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[アプリを入れる](#アプリを入れる)の手順 1・2、[Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)、Git Bash で通した [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)、[WezTerm](wezterm-nightly.md#windows-11-で使う)と自分用の設定（[設定ファイル](wezterm-nightly.md#設定ファイル)。新しいタブが Git Bash で開く）
-- この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（scoop は自分のユーザーに入れる）
-- **この節の手順 7・8 は WezTerm の新しいタブ（Git Bash）で、この節の手順 9 はブラウザで行う**
-- Git Bash では、共通の bash 設定が、入っているツールを見つけて読む。`~/.bashrc` には書かない。Windows PowerShell 5.1 には読み込まない
-- **zoxide は 0.9.9 に止めて入れる**（今の 0.10.0 は、Git Bash で移ったディレクトリを記録しない。[参考資料](reference/windows-setup.md)）。直った版が出たら、この節の手順 9・10 で上げる。ほかの 4 つは[更新](#更新)の手順 1・2 で上がる
-- bat は VC++ ランタイム（`VCRUNTIME140.dll`）を使う。無ければ、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行う（この節の手順 2 で確かめる）
-- PowerShell 7 でも starship と zoxide を使うなら、[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)を通す（入っているときだけ読む行を置く。確かめるのは、その節の手順 6）
-- 使い方と設定は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（starship・fzf・eza・bat）。Git Bash のタブに、同じブロックを貼る
-  - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、この節の手順 1 の窓で `scoop install fd`・`scoop uninstall fd` にする
-  - bat の設定ファイルは、[同書の節](almalinux-setup.md#bat-の設定ファイル)ではなく、この節の手順 6 で書く
-- SSH のセッションの Git Bash でも使うなら、この節の手順 4 の後に、[Windows の OpenSSH サーバーの任意節](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を管理者の窓で貼る（`scoop install`・`scoop update` の後も貼り直す）
-- **この節の手順 13 は、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）**
-- 戻すときは、この節の手順 11〜13（行った手順のものだけ）
+- クライアントで作った鍵で、パスワードを入れずに入れるようにする。パスワード認証は有効のまま
+- この節の手順 1・2・5 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに、手順 3・4 は Windows の管理者の Windows PowerShell に貼る
+- 登録できるのは、Administrators の一員のユーザーの鍵だけ（この節の手順 4 で確かめる。標準ユーザーは[注意点](extra/windows-setup.md#注意点)）
+- 登録した鍵を持つ人も、パスワードを知る人と同じく、この PC の管理者として操作できる（[注意点](extra/windows-setup.md#注意点)）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. クライアントの PC で、鍵ペアが無ければ作る。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     BashConfig = Test-Path -LiteralPath "$env:USERPROFILE\.config\bash\bashrc"
-     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-     Tools      = (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source -join ', '
-     Zoxide     = if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) { zoxide --version } else { '' }
-   } | Format-List
+   ```bash
+   ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519
    ```
 
-   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
-   - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)を通す
-   - `BashConfig : False` なら、先に Git Bash で [README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)を通す
-   - `VCRuntime : False` なら、[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
-   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この節の手順 4 は、入っているものを飛ばす）
-   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
-   - `Zoxide` が空か `zoxide 0.9.9` なら、この節の手順 3 は飛ばす
+   - 鍵があれば、`/home/<USER>/.ssh/id_ed25519.pub` と出て何もしない（その鍵を使う）
+   - 無ければ、保存先（Enter で既定の `~/.ssh/id_ed25519`）とパスフレーズ（2 回）を聞かれる
+   - **次の手順は、パスフレーズを入力し終えてから貼る**（続けて貼るとパスフレーズとして食われる）
 
-1. scoop の zoxide が 0.9.9 でないときだけ、外す。
+1. クライアントの PC で、公開鍵を表示する。
 
-   ```powershell
-   scoop uninstall zoxide
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
    ```
 
-   - `'zoxide' was uninstalled.` が出ればよい
+   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、この節の手順 3 で Windows に貼る
+   - 公開鍵は秘密ではない。チャットやメールで Windows 側へ渡してもよい
 
-1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop update
-   scoop install fzf starship eza bat
-   scoop install zoxide@0.9.9
-   scoop hold zoxide
-   ```
-
-   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
-   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
-   - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
-   - 2 行目は、もう入っているものを、何も出さずに飛ばす
-   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す
-   - もう止めてあれば、`'zoxide' is already held.` が出る
-   - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
-   - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
-   - `Notes` の、PowerShell の `$PROFILE` に starship の行を足す案内は行わない。`suggests installing` の行（VC++ ランタイム・less）も、入れなくてよい
-
-1. 版と場所と、zoxide を止めたことを確かめる。
+1. Windows の管理者の PowerShell で、変数を設定する（`$PUBKEY` は必ず値を入れる）。
 
    ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   fzf --version
-   zoxide --version
-   starship --version
-   eza --version
-   bat --version
-   (Get-Command fzf, zoxide, starship, eza, bat -All).Source
-   scoop list zoxide
-   ```
-
-   - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
-   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この節の手順 2 の `VCRuntime`）
-   - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
-   - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
-
-1. bat の設定ファイル（`BAT_CONFIG_DIR` の下の `config`）に、3 行の設定を書く（中身があれば書き換えない）。
-
-   ```powershell
-   $BAT_THEME_NAME = 'ansi'   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
+   $PUBKEY = ''                          # ← この節の手順 2 の 1 行を '' の中に貼る。<PUBKEY>
    ```
 
    ```powershell
-   & {
+   'PUBKEY = {0}' -f $PUBKEY
+   ```
+
+   - 改行を入れずに 1 行のまま貼る
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この手順の 2 つのブロックを貼り直してから先へ進む
+
+1. 公開鍵を `administrators_authorized_keys` に登録する。
+
+   ```powershell
+   if ($PUBKEY -notmatch '^(ssh-|ecdsa-|sk-)') {
+     Write-Error 'この節の手順 3 の $PUBKEY が空か、公開鍵の形でない'
+   } elseif (-not (Get-LocalGroupMember -SID S-1-5-32-544 | Where-Object Name -like "*\$env:USERNAME")) {
+     Write-Error "$env:USERNAME は Administrators の一員ではない（注意点を見る）"
+   } else {
+     $f = "$env:ProgramData\ssh\administrators_authorized_keys"
+     Add-Content -Path $f -Value $PUBKEY -Encoding ascii
+     icacls.exe $f /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
-     $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
-     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この節の手順 4 で bat を入れたかを確かめる'; return }
-     if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
-       Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
-       "書いた: $f"
+     icacls.exe $f
+   }
+   ```
+
+   - 最後の `icacls` に、`NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行だけが出ればよい
+   - クライアントを足すときは、そのクライアントでこの節の手順 1・2 を行い、この節の手順 3 の `$PUBKEY` を貼り直してから、この節の手順 4 を貼る
+
+1. クライアントの PC で、鍵で入れることを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh -o PasswordAuthentication=no "${WIN_USER}@${WIN_HOST}" whoami
+   fi
+   ```
+
+   - パスワードを聞かれずに、`<hostname>\<win_user>` が出ればよい（パスフレーズを付けたなら、それを聞かれる）
+   - 既定のシェルを Git Bash にした PC では、Git の `whoami` が動き、`<WIN_USER>` だけが出る
+
+---
+
+## OpenSSH サーバーのパスワード認証を切る（任意）
+
+- 鍵を持たない相手からのパスワードを受け付けないようにする（パスワードの総当たりを受け付けない）
+- 前提: [OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)を行い、使うクライアントが鍵で入れること。切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
+- この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
+- パスワード認証に戻すときは、[OpenSSH サーバー](#openssh-サーバー)の手順 4 を貼り直す
+
+1. Windows で、パスワード認証を切り、設定を検査してから sshd を再起動する。
+
+   ```powershell
+   $c = "$env:ProgramData\ssh\sshd_config"
+   (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication no' | Set-Content $c -Encoding ascii
+   & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
+   if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match', 'administrators_authorized_keys'
+   ```
+
+   - `…sshd_config:51:PasswordAuthentication no` と、`Match Group administrators` とその次の `AuthorizedKeysFile` の行が出ればよい
+
+1. クライアントの PC で、鍵が無いと入れず、鍵ではコマンドが通ることを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}" true
+     ssh "${WIN_USER}@${WIN_HOST}" whoami
+   fi
+   ```
+
+   - 1 つ目は、パスワードを聞かずに `<WIN_USER>@<WIN_HOST>: Permission denied (publickey,keyboard-interactive).` で失敗すればよい
+   - 2 つ目は、`<hostname>\<win_user>` が出ればよい（パスフレーズを付けたなら、それを聞かれる）
+     - 既定のシェルを Git Bash にした PC では、Git の `whoami` が動き、`<WIN_USER>` だけが出る
+
+---
+
+## SSH の既定のシェルを Git Bash にする（任意）
+
+- SSH でログインしたとき・コマンドを実行するときのシェルを、cmd.exe から Git for Windows の bash に変える
+- 前提: Git for Windows が `C:\Program Files\Git` に入っていること（[Git for Windows](#git-for-windows)）
+- この節の手順 1・3 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
+
+1. Windows で、既定のシェルを Git Bash にする。
+
+   ```powershell
+   if (-not (Test-Path 'C:\Program Files\Git\bin\bash.exe')) {
+     Write-Error 'C:\Program Files\Git\bin\bash.exe が無い（Git for Windows が入っていない）'
+   } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value 'C:\Program Files\Git\bin\bash.exe' -PropertyType String -Force | Format-List DefaultShell
+   }
+   ```
+
+   - `DefaultShell : C:\Program Files\Git\bin\bash.exe` が出ればよい
+
+1. クライアントの PC で、bash になったことを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh "${WIN_USER}@${WIN_HOST}" 'echo "$BASH_VERSION $MSYSTEM"; git --version'
+     ssh "${WIN_USER}@${WIN_HOST}"
+   fi
+   ```
+
+   - 鍵を登録していなければ、パスワードを 2 回聞かれる
+   - 1 つ目で `5.3.15(1)-release MINGW64` と `git version 2.55.0.windows.3` のような 2 行が出ればよい
+   - 2 つ目は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` のプロンプトになる。`exit` で戻る
+   - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる
+   - `Shim: Could not create process …` が出るなら、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)を行う
+
+1. 元に戻すときは、`DefaultShell` を消す。
+
+   ```powershell
+   Remove-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell
+   ```
+
+   - 何も出ずに終わればよい
+
+---
+
+## scoop のツールを SSH のセッションで使う（任意）
+
+- scoop で入れたツール（`zoxide`・`rg`・`nvim` など）が、SSH のセッションでだけ起動しないときに行う
+  - 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448（信頼されていないマウントポイント）
+- 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
+  - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
+- この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[アプリを入れる](#アプリを入れる)の手順 1・2 で入れた形）
+- この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
+- `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
+
+1. Windows で、scoop のジャンクションを管理者で作り直す。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ChildItem "$env:USERPROFILE\scoop\apps" -Recurse -Depth 4 -Force -Attributes ReparsePoint -ErrorAction SilentlyContinue |
+     Where-Object { $_.LinkType -eq 'Junction' -and (Get-Acl $_.FullName).Owner -notlike '*\Administrators' } |
+     ForEach-Object {
+       $link = $_.FullName; $target = @($_.Target)[0]; $ro = $_.Attributes -band [IO.FileAttributes]::ReadOnly
+       if (Test-Path -LiteralPath $target) {
+         attrib.exe -R "$link" /L
+         cmd.exe /c rmdir "$link"
+         New-Item -ItemType Junction -Path $link -Target $target | Out-Null
+         if ($ro) { attrib.exe +R "$link" /L }
+         '{0} -> {1}' -f $link, $target
+       }
      }
-     Get-Content -LiteralPath $f
-   }
    ```
 
-   - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
-   - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
-   - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
-   - `中断:` が出たら、何も書いていない
+   - 作り直したジャンクションごとに、`…\scoop\apps\<アプリ>\current -> …\scoop\apps\<アプリ>\<版>` の形の行が出る
+   - 作り直すものが無ければ、何も出ない
 
-1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10](almalinux-setup.md#シェルのツール)のブロックを貼る。
+1. クライアントの PC で、scoop のツールが動くことを確かめる。
 
-   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の「シェルのツール」の手順 2](almalinux-setup.md#シェルのツール)の補足と同じ）
-   - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
-   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
-     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この節の手順 5 と同じ
-     - 同書の「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
-     - 同書の「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
-     - 同書の「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
-     - 同書の「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
-   - 同書の「シェルのツール」の手順 8（tmux）は行わない
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
+   fi
+   ```
 
-1. 同じタブで、[同書の「キー操作を試す」の手順 2〜5](almalinux-setup.md#キー操作を試す)のキーを押して、fzf を確かめる。
+   - 鍵を登録していなければ、パスワードを聞かれる
+   - `zoxide 0.9.9` のような版が出て、`Shim:` で始まる行が出なければよい（`zoxide` の代わりに、scoop で入れたほかのツールでもよい）
 
-   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この節の手順 7 で Git Bash の履歴に入っている
-   - 同書の「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
-   - 同書の「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
-   - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
+---
 
-1. zoxide を上げるときは、ブラウザで、Git Bash の記録を直した版が出たかを確かめる。
+## Neovim を既定のエディタにする（任意）
 
-   - `https://github.com/ajeetdsouza/zoxide/releases` を開く
-   - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
-   - 無ければ、この節の手順 10 は飛ばす（0.9.9 のまま使う）
-   - **次の手順は、この節の手順 1 の窓（Windows PowerShell 5.1）に貼る**
+- Windows PowerShell や Windows Terminal から起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら、この節の手順 1 でユーザーの環境変数にする
+- Git Bash（WezTerm の新しいタブ）では、共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にする（この節は要らない）
+  - 確かめるときは、WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「Neovim」](almalinux-setup.md#neovim)の手順 4 のブロックを貼る（`. ~/.bashrc` は読み直さない）
+- この節のブロックは、[Neovim](#neovim)と同じ管理者ではない Windows PowerShell（5.1）に貼る
 
-1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
+1. Windows の PowerShell でも使うように、`EDITOR`・`VISUAL` を `nvim` にする。
 
    ```powershell
    & {
-     scoop update
-     $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この節の手順 9 から"; return }
-     scoop unhold zoxide
-     scoop update zoxide --force
-     zoxide --version
+     $other = @(foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::GetEnvironmentVariable($n, 'User') }) | Where-Object { $_ -and $_ -ne 'nvim' }
+     if ($other) { Write-Error "中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（$($other -join ', ')）" } else {
+       foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::SetEnvironmentVariable($n, 'nvim', 'User') }
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
+     }
    }
    ```
 
-   - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
-   - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
-   - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - 新しいタブで、この節の手順 7 のうち同書の「シェルのツール」の手順 9・10 を確かめ直す
+   - `EDITOR = nvim` と `VISUAL = nvim` が出ればよい（何度貼ってもよい）
+   - `中断:` と出たら、何も変えていない。ほかのエディタを使っているなら、この手順は行わない
+   - 効くのは、この後に開いた窓とアプリから（開いている窓には入らない。WezTerm は新しいタブから）
 
-1. 元に戻すときは、この節で入れた 5 つを scoop で消す。
+1. 元に戻すときは、ユーザーの環境変数 `EDITOR`・`VISUAL` を消す。
 
    ```powershell
+   foreach ($n in 'EDITOR', 'VISUAL') { if ([Environment]::GetEnvironmentVariable($n, 'User') -eq 'nvim') { [Environment]::SetEnvironmentVariable($n, $null, 'User') } }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop uninstall fzf zoxide starship eza bat
-   (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source
-   [Environment]::GetEnvironmentVariable('BAT_CONFIG_DIR', 'User')
+   foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
    ```
 
-   - それぞれ `'<名前>' was uninstalled.` が出て、後の 2 つが何も出さなければよい（止めた zoxide も、そのまま消える）
-   - 残すものは、名前を外してから貼る（fzf は yazi も使う）
-   - `are still running` の旨のエラーが出たら、そのツールは消えていない。Git Bash で開いている一覧などを閉じてから貼り直す
-   - starship の `Path` と、bat の `BAT_CONFIG_DIR` も消える。bat の設定（`~\scoop\persist\bat`）は残る（この節の手順 12）
-   - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す
-   - starship のログ（`~\.cache\starship`）は、要らなければ手で消す
-
-1. 元に戻すときは（この節の手順 6 で書いたときだけ）、bat の設定ファイルの 3 行を消す。
-
-   ```powershell
-   & {
-     $f = Join-Path $env:USERPROFILE 'scoop\persist\bat\config'
-     if (-not (Test-Path -LiteralPath $f)) { "無い: $f"; return }
-     $text = [IO.File]::ReadAllText($f)
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not $text.Trim()) { "もう空: $f" } elseif ($text -match '\A--theme="[^"\r\n]*"\r?\n--style="numbers,changes,header"\r?\n--paging=never\r?\n?\z') {
-       [IO.File]::WriteAllText($f, '')
-       "空にした: $f"
-     } else { "この節で書いた形ではない（変えない）: $f" }
-   }
-   ```
-
-   - `空にした:` か `もう空:` が出ればよい（scoop が bat を初めて入れたときと同じ、空のファイルになる）
-   - bat を残していれば、次に動かしたときから、組み込みの既定値に戻る
-   - `この節で書いた形ではない` が出たら、手で書き換えた設定がある。要らない行は、手で消す
-
-1. 元に戻すときは（履歴も捨てるときだけ）、zoxide が覚えたディレクトリの履歴を消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:LOCALAPPDATA\zoxide" -Recurse -Force -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path -LiteralPath "$env:LOCALAPPDATA\zoxide"
-   ```
-
-   - `False` が出ればよい
-   - 消した履歴は取り戻せない。残しておけば、zoxide を入れ直したときにそのまま使える
-   - PowerShell 7 の zoxide と yazi も、同じ履歴を使う
+   - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
+   - 値が `nvim` のときだけ消す（ほかの値は残る）
 
 ---
 
 ## 更新
 
 - Windows Update は[Windows Update](#windows-update)の手順 1〜8（管理者の窓）、Microsoft Store は[Microsoft Store の更新](#microsoft-store-の更新)の手順 1〜7（通常の窓）を通す。再起動が必要な場合も、自動では再起動しない
-- scoop で入れたものは scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon・任意節の CopyQ）は winget で上げる
-  - [シェルのツールを入れる（任意）](#シェルのツールを入れる任意)の zoxide は 0.9.9 に止めてあるので、この節の手順 2 では上がらない。直った版が出たかは、その節の手順 9 で確かめ、出ていればその節の手順 10 で上げる
+- [scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)・[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)・[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)は、[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 と同じ、管理者ではない Windows PowerShell（5.1）に貼る。[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)は、管理者の Windows PowerShell（5.1）に貼る（[PC 全体の設定](#pc-全体の設定)の手順 1 と同じ）
+- scoop で入れたもの（シェルのツール・git-delta・GitHub CLI・Neovim・lazygit・yazi と、自分用の Neovim の設定が入れる外部コマンド）は scoop で、winget で入れたもの（UniGet UI・PowerToys・PowerShell 7・Autologon・任意節の CopyQ）は winget で上げる
+  - [シェルのツールを入れる](#シェルのツールを入れる)の zoxide は 0.9.9 に止めてあるので、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2 では上がらない。直った版が出たかは同じ項の手順 6 で確かめ、出ていれば同じ項の手順 7 で上げる
+  - 上げても、git の設定（`~/.gitconfig`）と gh のログイン（資格情報マネージャーと `%APPDATA%\GitHub CLI`）は変わらない
+- Firefox・Claude Code・Codex・Grok Build は、自分で新しい版に上がる。待たずに上げるときだけ、それぞれの手順を行う
+  - Firefox は、起動している間に新しい版を取り、次に起動したときに入れ替える。閉じている間も、Firefox を起動すると作られるタスク（タスク スケジューラの `\Mozilla\` の `Firefox Background Update <番号>`。7 時間ごと）が上げる。`C:\Program Files` への書き込みは Mozilla Maintenance Service が行うので、管理者の確認（UAC）は出ない。日本語版なので、言語パックは使わない（足すと、閉じている間の更新が止まる。Mozilla の Background Updates の文書）
+  - Claude Code（native installer）は、起動したときと動いている間に新しい版を確かめ、裏で入れて、次の起動から新しい版になる（公式の文書）。追う版は[Claude Code](#claude-code)の手順 1 で選んだチャンネルで、動いているセッションは終えるまで古い版のまま
+  - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
+  - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
+- WezTerm は自分では更新しない。nightly の新しい版が出ても知らせない（WezTerm の更新の確認が見るのは stable のリリースだけで、nightly の版の方が新しいので何も出ない）
+  - 上げるのは[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 1・5〜7（[WezTerm](#wezterm)の手順 3 を貼り直す。同じ場所の `C:\Program Files\WezTerm` に上書きし、設定ファイルはそのまま）
+  - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
+- HackGen Console NF は、上流が sha256 を出していないので、この文書の版と sha256（[HackGen Console NF](#hackgen-console-nf)の手順 2）を確かめて直してから入れ直す（[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)）
+- 共通の bash 設定は、WezTerm のタブ（Git Bash）で[AlmaLinux 10 の初期設定の更新](almalinux-setup.md#更新)の手順 1 を貼って上げる
+- 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる
+  - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
+- SSH のセッションで scoop のツールを使っているなら、scoop で上げた後に[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を、管理者の Windows PowerShell で貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 3 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜3 を貼り直す
 - 機能の更新の後は、任意節（[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る任意)・[表示・入力・音・ストレージを変える](#表示入力音ストレージを変える任意)・[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める任意)）の設定も戻ることがある。その節の「元に戻すときは、」より前の手順を貼り直す（控えのファイルは書き換えない）
-- Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、それぞれの手順書の「Windows 11 の更新」
+- VirtualBox・WireGuard は、それぞれの手順書の「Windows 11 の更新」
   - [SSH クライアント（Windows）](windows-ssh-client.md#更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
-  - git-delta・GitHub CLI は scoop で入れたので、この節の手順 2 でも上がる
-  - Neovim・lazygit・yazi も scoop で入れたので、この節の手順 2 でも上がる（手順書の節は、[Neovim](neovim.md#windows-11-の更新)・[lazygit](lazygit.md#windows-11-の更新)・[yazi](yazi.md#windows-11-の更新)の「Windows 11 の更新」）
-- この節の手順は、[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 と同じ、管理者ではない Windows PowerShell（5.1）に貼る
+
+### scoop・winget・WSL を上げる
 
 1. scoop とバケットを上げ、古くなったものを確かめる。
 
@@ -2771,8 +4053,8 @@
    ```
 
    - `scoop update` は `Scoop was updated successfully!` を出す
-   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [git.md](git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れる
-   - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この節の手順 2 は飛ばす
+   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [Git for Windows](#git-for-windows)で Git for Windows を入れる
+   - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この項の手順 2 は飛ばす
 
 1. 古いものがあるときだけ、scoop で入れたものを上げる。
 
@@ -2782,7 +4064,8 @@
 
    - アプリごとに `'<名前>' (<版>) was installed successfully!` の形の行が出る
    - 動いているアプリは `Running process detected, skip updating.` で飛ばされる。閉じてから貼り直す
-   - SSH のセッションで scoop のツールを使っているなら、[Windows の OpenSSH サーバー](windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節の手順 1 を、管理者の PowerShell で貼り直す
+   - SSH のセッションで scoop のツールを使っているなら、[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)の手順 1 を、管理者の PowerShell で貼り直す
+   - **Neovim の設定やプラグインは更新に追従しない**ので、メジャー更新の後は `:checkhealth` で壊れていないか見る（自分用の設定のプラグインと外部コマンドは、[LazyVimStarter の docs/setup.md の「更新」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#更新)の手順 2・4）
 
 1. winget で入れたものを上げる。
 
@@ -2823,3 +4106,159 @@
    - モジュールの版と場所が出ればよい
    - 次の Windows Update は[Windows Update](#windows-update)の手順 1 で新しく開いた管理者の窓で行う
    - この文書の前から入っていた PSWindowsUpdate は、元の導入方法で管理する
+
+1. zoxide を上げるときは、ブラウザで、Git Bash の記録を直した版が出たかを確かめる。
+
+   - `https://github.com/ajeetdsouza/zoxide/releases` を開く
+   - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
+   - 無ければ、この項の手順 7 は飛ばす（0.9.9 のまま使う）
+   - **次の手順は、管理者ではない Windows PowerShell（5.1）に貼る**
+
+1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
+
+   ```powershell
+   & {
+     scoop update
+     $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、「scoop・winget・WSL を上げる」の手順 6 から"; return }
+     scoop unhold zoxide
+     scoop update zoxide --force
+     zoxide --version
+   }
+   ```
+
+   - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
+   - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
+   - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
+   - WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「シェルのツール」](almalinux-setup.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、[シェルのツールを入れる](#シェルのツールを入れる)の手順 6 の箇条書き）
+
+### AI エージェントとプラグインを上げる
+
+1. Claude Code をすぐに上げる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   claude update
+   claude --version
+   ```
+
+   - 新しい版があれば `Successfully updated from <古い版> to version <新しい版>`、無ければ `Claude Code is up to date (2.1.288)` のように出る
+   - 更新の後に `claude` が見つからなくなったら、[注意点](extra/windows-setup.md#注意点)の `claude.exe.old.*` の項を見る
+
+1. 起動中の Codex と Grok を終了する。
+
+   - 端末の Codex と Grok は `/quit` で閉じる
+   - 知らせを待たずに上げるときだけ、この項の手順 2〜4 を行う
+
+1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
+
+   ```powershell
+   & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://chatgpt.com/codex/install.ps1')))
+   ```
+
+   - `Start Codex now?` は `n` で答える
+   - **次の手順は、PowerShell のプロンプトに戻ってから貼る**
+   - 上げた後の版は、`codex --version` で確かめる
+
+1. Grok Build の新しい版を入れ、版を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   grok update
+   grok --version
+   ```
+
+   - 新しい版が無ければ `Already up to date (…)` と出る
+
+1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   claude plugin marketplace update openai-codex
+   claude plugin marketplace update xai-grok-build
+   claude plugin update codex@openai-codex
+   claude plugin update grok-build@xai-grok-build
+   claude plugin list
+   ```
+
+   - 見方は、[AlmaLinux 10 の初期設定の更新](almalinux-setup.md#更新)の手順 9 と同じ
+
+### HackGen Console NF を上げる
+
+1. HackGen の新しい版が出ているかを確かめる。
+
+   ```powershell
+   (Invoke-RestMethod -Uri https://api.github.com/repos/yuru7/HackGen/releases/latest).tag_name
+   ```
+
+   - `v2.10.0` なら、新しい版は無い。この項の手順 2 は行わない
+   - 違う版なら、[HackGen Console NF](#hackgen-console-nf)の手順 2 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
+
+1. 新しい版にするときだけ、今の版を外してから入れ直す。
+
+   - [ロールバックの「HackGen Console NF を消す」](extra/windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3（登録を消し、サインインし直してから、ファイルを消す）を行う
+   - 続けて、直した[HackGen Console NF](#hackgen-console-nf)の手順 2 を貼り、サインアウトしてサインインし直してから、[再起動の後に確かめる](#再起動の後に確かめる)の手順 5 で確かめる
+
+### Git for Windows・Firefox・WezTerm を上げる
+
+1. Remote Control のタスクを動かしているときだけ、先にタスクを止める。
+
+   - [windows-claude-remote-control.md の止める・もう一度始める](windows-claude-remote-control.md#止めるもう一度始める)の手順 1 を行う
+   - タスクの Claude Code と WezTerm（中のシェルは Git Bash）は、Git for Windows と WezTerm を上げる間は止めておく。上げた後に、この項の手順 7 で始め直す
+
+1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget upgrade --exact --id Git.Git --source winget --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Git.Git --source winget
+   ```
+
+   - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
+   - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
+   - **注意**: Git Bash・WezTerm のタブ（自分用の設定では Git Bash）や、Git の bash を使う SSH のセッション・Claude Code が動いていると、インストーラは入れ替えずに終わるはず
+   - 上げた後は、Git Bash を開き直し、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 6 を貼り直す（`pull.ff` が `only` なら同じ項の手順 7 も）
+
+1. Firefox の今の版と、winget に新しい版があるかを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
+   winget list --exact --id Mozilla.Firefox.ja --source winget --upgrade-available
+   ```
+
+   - 1 行目が今の版
+   - winget に新しい版があれば、`Mozilla.Firefox.ja` の行に今の版と新しい版が並ぶ
+   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この項の手順 4 は飛ばす
+
+1. Firefox の新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
+
+   ```powershell
+   winget upgrade --exact --id Mozilla.Firefox.ja --source winget --accept-source-agreements --accept-package-agreements
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
+   ```
+
+   - 最後の行が新しい版になればよい
+   - **注意**: Firefox を開いたままだと、入れ替えが途中で終わることがある（参考資料を参照）
+
+1. WezTerm の今の版を確かめ、WezTerm が動いていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1').DisplayVersion
+   Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+   ```
+
+   - 1 行目に今の版が出る
+   - プロセスが出たら、その WezTerm の窓をすべて閉じる
+
+1. [WezTerm](#wezterm)の手順 3 のブロックを貼る。
+
+   - 最後に出る `wezterm <版>` が、この項の手順 5 の版より新しければ上がった
+   - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）
+
+1. この項の手順 1 でタスクを止めたときだけ、タスクを始め直す。
+
+   - [windows-claude-remote-control.md の止める・もう一度始める](windows-claude-remote-control.md#止めるもう一度始める)の手順 2 を行う

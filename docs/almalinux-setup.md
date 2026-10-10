@@ -1,33 +1,40 @@
-# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール）
+# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim・AI エージェント）
 
 ## 実施手順
 
 - [検証記録](verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
-> - **すべて、この PC の GNOME のデスクトップで、インストールのときに作った管理者（`wheel` の一員）のユーザーとして行う**。[ログインと sudo](#ログインと-sudo)の手順 2 で開く端末に貼る。`sudo -i`・`su -` のシェルでは行わない（`gsettings` はログインしているユーザーの設定だけを変え、Homebrew は root での実行を断る）
+> - **すべて、この PC の GNOME のデスクトップで、インストールのときに作った管理者（`wheel` の一員）のユーザーとして行う**。[ログインと sudo](#ログインと-sudo)の手順 2 で開く端末に貼り、[WezTerm](#wezterm)の手順 5 で WezTerm を起動し直した後は、WezTerm のタブに貼る。`sudo -i`・`su -` のシェルでは行わない（`gsettings` はログインしているユーザーの設定だけを変え、Homebrew は root での実行を断る。git の設定も root の `~/.gitconfig` に書かれる）
 > - 前提: AlmaLinux 10 の Workstation を入れた直後で、インターネットにつながっていること。インターネットに出られないホストの Homebrew は、[homebrew-offline.md](homebrew-offline.md) から入れる
+> - 前提: AI エージェントと GitHub のアカウント。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プランでは使えない）、Codex CLI は Codex を利用できる ChatGPT のアカウント（API キーで使うなら API 側の従量課金）、Grok Build は grok.com のアカウント（発表時の対象は SuperGrok と X Premium+。今の対象は xAI の案内で確かめる）、GitHub CLI は GitHub のアカウント
+> - **[Grok Build](#grok-build)の手順 2 のインストーラーは、`~/.bashrc` の末尾に PATH と補完のブロックを足す**（共通の bash 設定とは別。[参考資料](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
 > - **sudo のパスワードを聞かれるのは 1 回だけ**（[ログインと sudo](#ログインと-sudo)の手順 3。この手順から後の `sudo` は聞かない）
-> - **対話入力のある手順**: [ログインと sudo](#ログインと-sudo)の手順 3（パスワード）、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1（`[y/N]` と AlmaLinux の鍵の確認）・2（LVFS を有効にするか）・3（ファームウェアの更新があるとき）、[システムの設定](#システムの設定)の手順 8（`[y/N]`）、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 4（`[y/N]`）、[Flatpak と Flathub](#flatpak-と-flathub)の手順 4（確認 2 回）、[GNOME の表示と入力](#gnome-の表示と入力)の手順 10（`[y/N]` と EPEL の鍵の確認）、[Homebrew](#homebrew)の手順 2（RETURN）、[シェルのツール](#シェルのツール)の手順 1（`[y/n]`）、[tmux を試す](#tmux-を試す)の手順 1・2（tmux の画面）。**目で確かめてから次へ進む手順**: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2、[Flatpak と Flathub](#flatpak-と-flathub)の手順 2、[シェルのツール](#シェルのツール)の手順 9
-> - **画面で行う手順**: [ログインと sudo](#ログインと-sudo)の手順 1・2、[シェルのツール](#シェルのツール)の手順 2、[キー操作を試す](#キー操作を試す)の手順 1〜5（キーを押して確かめる）、[再起動と確認](#再起動と確認)の手順 2・4〜7（同じ項の手順 5 はキーを押して確かめる）。**再起動**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5（要るときだけ）、[再起動と確認](#再起動と確認)の手順 1。**条件付きの手順**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5、[システムの設定](#システムの設定)の手順 2・4・7、[再起動と確認](#再起動と確認)の手順 4
+> - **対話入力のある手順**: [ログインと sudo](#ログインと-sudo)の手順 3（パスワード）、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1（`[y/N]` と AlmaLinux の鍵の確認）・2（LVFS を有効にするか）・3（ファームウェアの更新があるとき）、[システムの設定](#システムの設定)の手順 8（`[y/N]`）、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 4（`[y/N]`）、[Flatpak と Flathub](#flatpak-と-flathub)の手順 4（確認 2 回）、[GNOME の表示と入力](#gnome-の表示と入力)の手順 10（`[y/N]` と EPEL の鍵の確認）、[Homebrew](#homebrew)の手順 2（RETURN）、[シェルのツール](#シェルのツール)の手順 1（`[y/n]`）、[tmux を試す](#tmux-を試す)の手順 1・2（tmux の画面）、[Firefox](#firefox)の手順 5・8・9（`[y/N]`）、[WezTerm](#wezterm)の手順 1（`[y/N]`）・3（`[y/N]` と COPR の鍵の確認）、[git-delta](#git-delta)の手順 2・[Neovim](#neovim)の手順 1・[lazygit](#lazygit)の手順 1・[yazi](#yazi)の手順 2（Homebrew の確認）、[Neovim](#neovim)の手順 3（LazyVimStarter の `[y/N]` と Neovim の画面）、[lazygit](#lazygit)の手順 4（lazygit の画面）、[GitHub CLI](#github-cli)の手順 2（鍵の確認 2 回）・3（`gh auth login`）、[yazi](#yazi)の手順 5（yazi の画面）、[Claude Code](#claude-code)の手順 3（`[y/N]` と鍵の確認）・5（Claude Code の画面）、[Codex CLI](#codex-cli)の手順 3（`Start Codex now?`）・5（ログイン）・8（Codex の画面）、[Grok Build](#grok-build)の手順 4（ログイン）・7（Grok の画面）、[再起動と確認](#再起動と確認)の手順 8（Neovim の画面）。**目で確かめてから次へ進む手順**: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2、[Flatpak と Flathub](#flatpak-と-flathub)の手順 2、[シェルのツール](#シェルのツール)の手順 9、[Firefox](#firefox)の手順 2
+> - **画面で行う手順**: [ログインと sudo](#ログインと-sudo)の手順 1・2、[シェルのツール](#シェルのツール)の手順 2、[キー操作を試す](#キー操作を試す)の手順 1〜5（キーを押して確かめる）、[Firefox](#firefox)の手順 7・11、[WezTerm](#wezterm)の手順 5（WezTerm を起動し直す）、[Neovim](#neovim)の手順 4・[yazi](#yazi)の手順 4（WezTerm の新しいタブを開く）、[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 3、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 5（ブラウザでのログイン）、[再起動と確認](#再起動と確認)の手順 2・4〜8（同じ項の手順 5 はキーを押して確かめる）。**再起動**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5（要るときだけ）、[再起動と確認](#再起動と確認)の手順 1。**条件付きの手順**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5、[システムの設定](#システムの設定)の手順 2・4・7、[Git](#git)の手順 7、[Firefox](#firefox)の手順 9、[HackGen Console NF](#hackgen-console-nf)の手順 3、[再起動と確認](#再起動と確認)の手順 4
 
 - 上から順にコードブロックを貼る。[システムの設定](#システムの設定)の手順 1 の変数は、新しい端末を開いたら貼り直す（[シェルのツール](#シェルのツール)の手順 2 より後では使わない）
+  - [Git](#git)・[Firefox](#firefox)・[HackGen Console NF](#hackgen-console-nf)・[git-delta](#git-delta)・[yazi](#yazi)・[Claude Code](#claude-code)の手順 1 の変数は、その項の中で新しい端末を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[ログインと sudo](#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、[システムの設定](#システムの設定)の手順 1、[共通の bash 設定](#共通の-bash-設定)の手順 1・2、[Homebrew](#homebrew)の手順 1〜3、[シェルのツール](#シェルのツール)の手順 1・2、[再起動と確認](#再起動と確認)の手順 1 は飛ばさない）
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[ログインと sudo](#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、[システムの設定](#システムの設定)の手順 1、[共通の bash 設定](#共通の-bash-設定)の手順 1・2、[Homebrew](#homebrew)の手順 1〜3、[シェルのツール](#シェルのツール)の手順 1・2、[Git](#git)の手順 1〜6、[Firefox](#firefox)の手順 1〜7（ブラウザでのログインに使う）、[HackGen Console NF](#hackgen-console-nf)の手順 1〜5（WezTerm とデスクトップの等幅のフォントに使う）、[WezTerm](#wezterm)の手順 1〜5、[再起動と確認](#再起動と確認)の手順 1 は飛ばさない）
   - 更新: OS は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、ファームウェアは同じ項の手順 2・3
   - PC 全体: sudo は[ログインと sudo](#ログインと-sudo)の手順 3。ほかは[システムの設定](#システムの設定)の手順で、PC の名前は 2、SSH は 3・4、journal は 5、kdump は 6・7、コマンドが無いときのパッケージの案内は 8
   - 導入元: EPEL は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1、RPM Fusion は同じ項の手順 2〜5、Flathub は[Flatpak と Flathub](#flatpak-と-flathub)の手順 1〜3（確認用の Flatseal は同じ項の手順 4・5）
-  - 日本語入力: [日本語入力](#日本語入力)の手順 1・2。確かめるのは[再起動と確認](#再起動と確認)の手順 6
+  - 日本語入力: [日本語入力](#日本語入力)の手順 1・2（入力ソースは、[Neovim](#neovim)の手順 3 で「英語 (US) + Anthy」に変わる）。確かめるのは[再起動と確認](#再起動と確認)の手順 6
   - 表示: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、フォルダーの名前は 1、ダークモードは 2、ウィンドウのボタンは 4、時計と電池は 5、Files は 6、ホットコーナーは 8、拡大率は 9 と[再起動と確認](#再起動と確認)の手順 4、トレイアイコンは 10・11、Dash のお気に入りは 13。確かめるのは[再起動と確認](#再起動と確認)の手順 2・7
-  - 入力: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、Caps Lock を Ctrl には 3、Alt+Tab は 7、Ctrl+Alt+T は 12。確かめるのは[再起動と確認](#再起動と確認)の手順 5
+  - 入力: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、Caps Lock を Ctrl には 3、Alt+Tab は 7、Ctrl+Alt+T は 12（WezTerm にするのは[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 2）。確かめるのは[再起動と確認](#再起動と確認)の手順 5
   - シェル: 共通の bash 設定は[共通の bash 設定](#共通の-bash-設定)の手順 1・2、bash の補完とキー操作は同じ項の手順 3・4 と[シェルのツール](#シェルのツール)の手順 3・[キー操作を試す](#キー操作を試す)の手順 1、Homebrew は[Homebrew](#homebrew)の手順 1〜3、starship・zoxide・fzf・eza・bat・tmux は[シェルのツール](#シェルのツール)の手順 1・4〜10・[キー操作を試す](#キー操作を試す)の手順 2〜5・[tmux を試す](#tmux-を試す)の手順 1〜3
-- Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の任意節](windows-setup.md#シェルのツールを入れる任意)で scoop から入れる。確かめるのは、Git Bash で、この文書の[シェルのツール](#シェルのツール)の手順 4〜7・9・10 と[キー操作を試す](#キー操作を試す)の手順 2〜5
-- 手順の後に、この順に通す手順書
-  - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。その手順 8〜11 の AAC・H.264 は、この文書の[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2〜5 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md) → [Grok Build](grok-build.md)
-  - HackGen Console NF と WezTerm を入れたら、[WezTerm と HackGen Console NF をデスクトップで使う（任意）](#wezterm-と-hackgen-console-nf-をデスクトップで使う任意)
-  - 必要なら: Homebrew のほかのツール（[yazi](yazi.md)・[lazygit](lazygit.md)・[git-delta](git-delta.md)・[Neovim](neovim.md)・[gdu](gdu.md)・[ShellCheck / shfmt](shellcheck.md)）、[btop](btop.md)・[GitHub CLI](gh.md)・[VS Code](vscode.md)・[Podman](podman.md)、3 つのコーディング用の CLI を 1 つのプロジェクトで使う[コーディングエージェントの共同作業](coding-agents.md)、役割ごとの手順書（[README の手順書とツール](../README.md#手順書とツール)）
+  - Git: `~/.gitconfig` の基本の設定は[Git](#git)の手順 1〜10、差分の表示（delta）は[git-delta](#git-delta)の手順 1〜4、lazygit は[lazygit](#lazygit)の手順 1〜4（自分用の設定は同じ項の手順 2）、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5
+  - ブラウザ: Firefox は[Firefox](#firefox)の手順 1〜7、AAC・H.264（RPM Fusion の FFmpeg）は同じ項の手順 8〜11
+  - 端末: HackGen Console NF は[HackGen Console NF](#hackgen-console-nf)の手順 1〜5、WezTerm は[WezTerm](#wezterm)の手順 1〜4（自分用の設定は同じ項の手順 5）、等幅のフォントと Ctrl+Alt+T・Dash の端末は[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 1〜3
+  - エディタとファイル: Neovim は[Neovim](#neovim)の手順 1・2・4、その自分用の設定（LazyVimStarter）は同じ項の手順 3 と[再起動と確認](#再起動と確認)の手順 8、yazi は[yazi](#yazi)の手順 1・2・4・5（自分用の設定は同じ項の手順 3）
+  - AI エージェント: Claude Code は[Claude Code](#claude-code)の手順 1〜5、Codex CLI は[Codex CLI](#codex-cli)の手順 1〜8、Grok Build は[Grok Build](#grok-build)の手順 1〜7、Claude Code に入れる Codex・Grok のプラグインは[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1・2（3 つを入れた後）
+- Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の「シェルのツールを入れる」](windows-setup.md#シェルのツールを入れる)で scoop から入れる。確かめるのは、Git Bash で、この文書の[シェルのツール](#シェルのツール)の手順 4〜7・9・10 と[キー操作を試す](#キー操作を試す)の手順 2〜5
+  - Windows 11 の Git Bash には、この文書の[Git](#git)の手順 1〜10 と[git-delta](#git-delta)の手順 1・3 も貼る（[Windows 11 の初期設定](windows-setup.md)から名指しする）
+- 手順の後に、必要なら通す手順書: Homebrew のほかのツール（[gdu](gdu.md)・[ShellCheck / shfmt](shellcheck.md)）、[btop](btop.md)・[VS Code](vscode.md)・[Podman](podman.md)、3 つのコーディング用の CLI を 1 つのプロジェクトで使う[コーディングエージェントの共同作業](coding-agents.md)、役割ごとの手順書（[README の手順書とツール](../README.md#手順書とツール)）
 - 手順の後: SSH を公開鍵だけにするなら[SSH を公開鍵だけにする（任意）](#ssh-を公開鍵だけにする任意)、OS を自動で更新するなら[dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)、常時動かしておく PC は[画面オフ・画面ロック・自動サスペンドを止める（任意）](#画面オフ画面ロック自動サスペンドを止める任意)、[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)
-  - Homebrew・Flatpak・starship・fzf・eza・bat・tmux の使い方と設定は、この文書の後ろの節。以後は[更新](#更新)・[ロールバック](extra/almalinux-setup.md#ロールバック)
+  - Claude Code の不具合を避けるなら[Claude Code を stable チャンネルに切り替える（任意）](#claude-code-を-stable-チャンネルに切り替える任意)、SSH を切っても動かし続けるなら[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリがあれば[改行を変換して clone したリポジトリを直す](#改行を変換して-clone-したリポジトリを直す)
+  - Homebrew・Flatpak・starship・fzf・eza・bat・tmux の使い方と設定、WezTerm・git-delta・Neovim・lazygit・yazi・Codex CLI・Grok Build の設定ファイル、Claude Code の使い方、ブラウザの無いホストでの Codex CLI と Grok Build のログインは、この文書の後ろの節。以後は[更新](#更新)・[ロールバック](extra/almalinux-setup.md#ロールバック)
 
 > [!WARNING]
 > - [ログインと sudo](#ログインと-sudo)の手順 3 の後は、**このユーザーで動くプログラム（ブラウザの拡張、AI のエージェント、`curl … | bash` のインストーラなど）が、パスワード無しで root の権限を使える**。人が触れる場所にある PC や、信用できないプログラムを動かすユーザーでは行わない。外すのは[ロールバック](extra/almalinux-setup.md#ロールバック)の最後の手順
@@ -397,8 +404,9 @@
 
    - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。戻すときのために控えておく
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
-   - **ほかの入力ソースは消える**。残したいものがあれば、`set` の値に並べて足す
+   - **ほかの入力ソースは消える**（[Neovim](#neovim)の手順 3 でも、「英語 (US)」と Anthy の 2 つに置き換わる）。残したいものは、その後に `set` の値に並べて足す
    - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜13 も同じ）
+   - **入力ソースは、[Neovim](#neovim)の手順 3 で「英語 (US)」と Anthy に変わる**（JIS 配列のキーボードでも US。Neovim の IME 連携のため）
 
 ### GNOME の表示と入力
 
@@ -905,6 +913,971 @@
 
    - `no server running on /tmp/tmux-<UID>/default` と出る
 
+### Git
+
+1. 変数を設定する（`GIT_USER_NAME` と `GIT_USER_EMAIL` は必ず値を入れる）。
+
+   ```bash
+   GIT_USER_NAME=''                     # ← コミットに載せる名前を引用符の中に書く（例: 'Taro Yamada'）。<GIT_USER_NAME>
+   ```
+
+   ```bash
+   GIT_USER_EMAIL=''                    # ← コミットに載せるメールアドレスを引用符の中に書く。<GIT_USER_EMAIL>
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in GIT_USER_NAME GIT_USER_EMAIL; do
+     printf '%-14s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 2 つとも `git log` に出る。push したリポジトリでは公開される
+   - 最後に値を読み戻して確かめる。空のままなら、この項の手順 3 で中断する
+   - **新しいシェルを開いたら**、この項の手順 1 の 3 つのブロックを貼り直してから先へ進む
+
+1. git の版と、今の設定を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git --version
+   git config --list --show-scope --show-origin
+   ```
+
+   - AlmaLinux 10.2 では `git version 2.52.0` と出る（git は[Homebrew](#homebrew)の手順 1 で入っている）
+   - 2 つ目は、設定を `<場所>	file:<ファイル>	<キー>=<値>` の形で 1 行ずつ出す。何も設定していなければ、何も出ない
+   - **この項の手順 3〜5 のキー（`user.name`・`core.autocrlf` など）と `pull.ff` は、元の値・スコープ・ファイルを控える**。`global` に無いキーは「global は未設定」と控える（[ロールバックの「Git の道具を消す」](extra/almalinux-setup.md#git-の道具を消す)で戻す）
+   - 実際に追加・変更したキーも控える。既存の値が同じなら「変更なし」、この項の手順 7 を飛ばしたら「`pull.ff` は変更なし」とする
+   - Windows では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
+
+1. 名前とメールアドレスを設定する。
+
+   ```bash
+   if [ -z "${GIT_USER_NAME}" ] || [ -z "${GIT_USER_EMAIL}" ]; then echo '中断: 「Git」の手順 1 の GIT_USER_NAME か GIT_USER_EMAIL が空のまま' >&2; else
+     git config --global user.name "${GIT_USER_NAME}"
+     git config --global user.email "${GIT_USER_EMAIL}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     git config --global --get-regexp '^user\.'
+   fi
+   ```
+
+   - `user.name <GIT_USER_NAME>` と `user.email <GIT_USER_EMAIL>` の 2 行が出る
+   - `中断:` と出たら、この項の手順 1 で値を入れて貼り直す
+
+1. pull を rebase にし、autostash を有効にし、改行を変換しないようにする。
+
+   ```bash
+   git config --global pull.rebase true
+   git config --global rebase.autoStash true
+   git config --global core.autocrlf false
+   ```
+
+   - 何も出ない。値はこの項の手順 6 でまとめて確かめる
+
+1. 推奨の設定を入れる。
+
+   ```bash
+   git config --global init.defaultBranch main
+   git config --global core.quotepath false
+   git config --global fetch.prune true
+   git config --global push.autoSetupRemote true
+   git config --global rerere.enabled true
+   git config --global merge.conflictStyle zdiff3
+   git config --global diff.algorithm histogram
+   git config --global branch.sort -committerdate
+   git config --global tag.sort version:refname
+   ```
+
+   - 何も出ない。値はこの項の手順 6 でまとめて確かめる
+
+1. 効いている値と、その値を書いた場所を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd ~
+   for k in user.name user.email pull.rebase rebase.autoStash core.autocrlf \
+            init.defaultBranch core.quotepath fetch.prune push.autoSetupRemote rerere.enabled \
+            merge.conflictStyle diff.algorithm branch.sort tag.sort pull.ff; do
+     printf '%-21s %s\n' "$k" "$(git config --show-scope --get "$k")"
+   done
+   ```
+
+   - `pull.ff` を除く 14 行が、`global` とこの項の手順 3〜5 の値になる（`pull.rebase           global	true` など）
+   - `pull.ff` 以外に `system` の行があれば、`global` に書けていない。この項の手順 3〜5 を貼り直す
+   - 最後の `pull.ff` は、何も出ないのが普通
+   - `pull.ff` が空か、`only` 以外なら、この項の手順 7 は飛ばす
+   - `only` なら、その値とスコープをこの項の手順 2 の記録と照合してから手順 7 へ進む
+
+1. この項の手順 6 で `pull.ff` が `only` だったときだけ、`true` で上書きする。
+
+   ```bash
+   git config --global pull.ff true
+   printf '\n\033[7m 確認 \033[0m\n'
+   git config --show-scope --get pull.ff
+   ```
+
+   - `global	true` と出る
+
+   - `pull.ff` を今回変更したことを、この項の手順 2 の元値の記録に書き足す
+
+1. 使い捨てのリポジトリで、改行・ブランチ名・日本語のファイル名・最初の push を確かめる。
+
+   ```bash
+   GIT_TEST_DIR=$(mktemp -d)
+   cd "$GIT_TEST_DIR"
+   git init -q --bare remote.git
+   git init -q a
+   cd a
+   printf 'line 1\r\n' > crlf.txt
+   printf '1\n' > a.txt
+   touch 日本語.txt
+   printf '\n\033[7m 確認 \033[0m\n'
+   git status --short
+   git add .
+   git commit -q -m first
+   git ls-files --eol crlf.txt
+   git branch --show-current
+   git remote add origin ../remote.git
+   git push
+   ```
+
+   - `git status --short` に `?? 日本語.txt` がそのまま出る
+   - `git ls-files --eol` は `i/crlf  w/crlf` で始まる
+   - ブランチは `main`
+   - `git push` の最後に `branch 'main' set up to track 'origin/main'.` と出る
+
+1. この項の手順 8 と同じシェルで、別の clone から pull し、rebase と autostash を確かめる。
+
+   ```bash
+   cd "$GIT_TEST_DIR"
+   git clone -q remote.git b
+   cd a
+   printf '2\n' >> a.txt
+   git commit -q -a -m 'a: 2'
+   git push -q
+   cd ../b
+   printf 'b\n' > b.txt
+   git add b.txt
+   git commit -q -m 'b: b.txt'
+   printf 'line 2\r\n' >> crlf.txt
+   printf '\n\033[7m 確認 \033[0m\n'
+   git pull
+   git log --oneline --graph
+   git status --short
+   ```
+
+   - `git pull` が `Created autostash: …`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.` を出す
+   - `git log` は枝分かれせず、`b: b.txt` → `a: 2` → `first` の 1 本になる
+   - `git status --short` に `M crlf.txt` が残る
+
+1. 使い捨てのリポジトリを消す。
+
+   ```bash
+   cd ~
+   rm -rf "${GIT_TEST_DIR:?「Git」の手順 8 と同じシェルで貼る}"
+   ```
+
+   - 何も出ない
+
+### Firefox
+
+1. 変数を設定する。
+
+   ```bash
+   FF_PKG=firefox                  # 本書は最新版（Rapid Release）の firefox だけを扱う。変更しない。<FF_PKG>
+   FF_L10N=firefox-l10n-ja         # 日本語 UI の言語パック。要らなければ空にする。<FF_L10N>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in FF_PKG FF_L10N; do printf '%-9s = %s\n' "$v" "${!v}"; done
+   ```
+
+   - **編集が必須の変数は無い**。最新版（Rapid Release）を入れるなら既定のままでよい
+   - `FF_PKG` は `firefox` のまま使う
+   - `FF_PKG` が空なら、ここで止めて直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
+1. 署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
+
+   ```bash
+   curl -fsSL https://packages.mozilla.org/rpm/firefox/signing-key.gpg | gpg --show-keys
+   ```
+
+   - `gpg` が無ければ、`sudo dnf install -y gnupg2` で入れてから貼り直す
+   - `pub` 行の fingerprint が `14F26682D0916CDD81E37B6D61B7B526D98F0353`
+   - uid が `Mozilla Software Releases <release@mozilla.com>`
+   - 違っていればここで止める
+   - **次の手順は、この 2 つを目で確かめてから貼る**
+
+1. 一致したら、鍵を rpm に取り込み、入ったか確かめる。
+
+   ```bash
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
+     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
+   }
+   ```
+
+   - `rpm --import` は期限切れの副鍵についての warning を出すが、問題ない
+   - `gpg-pubkey-d98f0353-55a94004 Mozilla Software Releases ...` の 1 行が出る
+
+1. Mozilla のリポジトリを追加し、入手できる版を見る。
+
+   ```bash
+   {
+     sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
+   [mozilla]
+   name=Mozilla Packages
+   baseurl=https://packages.mozilla.org/rpm/firefox
+   enabled=1
+   gpgcheck=1
+   repo_gpgcheck=0
+   gpgkey=https://packages.mozilla.org/rpm/firefox/signing-key.gpg
+   priority=10
+   EOF
+     printf '\n\033[7m 確認 \033[0m\n'
+     dnf -q list --showduplicates "${FF_PKG}" | tail -6
+   }
+   ```
+
+   - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
+   - `x86_64` の行も一緒に並ぶ
+
+1. Firefox を入れる。
+
+   ```bash
+   sudo dnf install "${FF_PKG:?「Firefox」の手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
+   ```
+
+   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが `Upgrading: firefox` として解決される（参考資料を参照）
+   - この文書を Firefox で見ているときは、入れ替わった後に Firefox を開き直す（この項の手順 7 で、新しい版で起動する）
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. Mozilla 公式のビルドが入ったか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' "${FF_PKG}" ${FF_L10N}
+   firefox --version
+   rpm -qi "${FF_PKG}" | sed -n '/^Vendor/p;/^Build Date/p'
+   ```
+
+   - `from_repo` が `mozilla`、`Vendor` が `Mozilla` なら、Mozilla 公式のビルドが入っている
+
+1. デスクトップのセッションで Firefox を起動し、`about:support` で公式のビルドかを確かめる。
+
+   - 次のように出ればよい（日本語 UI の表記）
+     - 「更新チャンネル」が `release`
+     - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
+   - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
+
+1. 入手できる版を見てから、RPM Fusion（[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2〜5）の FFmpeg のライブラリを入れる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q list --showduplicates ffmpeg-libs
+   sudo dnf install ffmpeg-libs
+   ```
+
+   - 版は `ffmpeg-libs.aarch64  7.1.5-1.el10  rpmfusion-free-updates` のように出る
+   - 依存として、RPM Fusion の `x264-libs`・`x265-libs` などと、EPEL のライブラリが入る
+   - EPEL の `noopenh264` も依存で入るが、H.264 の再生には影響しない（参考資料を参照）
+   - `conflicts with libswresample-free` と出て止まったら、この項の手順 9 で入れ直す。入ったときは手順 9 は飛ばす
+   - **次の手順は、トランザクション表の `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. この項の手順 8 が `libavcodec-free` との衝突で止まったときだけ、それを外して入れ直す。
+
+   ```bash
+   sudo dnf install --allowerasing ffmpeg-libs
+   ```
+
+   - トランザクション表の `Removing dependent packages:` に、`libavcodec-free`・`libavutil-free`・`libswresample-free` の 3 つが出る
+   - この 3 つのほかにも `Removing` に出たら、`N` で止める
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. FFmpeg のライブラリが入ったか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' ffmpeg-libs rpmfusion-free-release epel-release
+   ls /usr/lib64/libavcodec.so.*
+   ```
+
+   - `ffmpeg-libs 7.1.5-1.el10 rpmfusion-free-updates` の行と、`rpmfusion-free-release`・`epel-release` の行が出る
+   - `/usr/lib64/libavcodec.so.61` がある
+
+1. Firefox をすべて閉じてから起動し直し、AAC・H.264 の再生を確かめる。
+
+   - **開いていたら全部閉じてから起動し直す**
+   - `about:support` の「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
+   - 再生できなかった動画が再生できる
+
+### HackGen Console NF
+
+1. 変数を設定する。
+
+   ```bash
+   HACKGEN_FAMILY='HackGen Console NF'   # 確認と設定に使うファミリー名。<HACKGEN_FAMILY>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf '%-15s = %s\n' HACKGEN_FAMILY "${HACKGEN_FAMILY}"
+   ```
+
+   - **編集が必須の変数は無い**。この項の手順 5 の確認に使うファミリー名で、既定のまま進められる
+   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
+1. `unzip` が入っているか確かめる。
+
+   ```bash
+   command -v unzip || echo 'unzip は未導入'
+   ```
+
+   - パスが出れば、この項の手順 3 は飛ばす
+   - `unzip は未導入` と出たら、この項の手順 3 で入れる
+
+1. `unzip` が未導入のときだけ、`unzip` を入れる。
+
+   ```bash
+   sudo dnf install -y unzip
+   ```
+
+1. HackGen を Homebrew の cask で入れる。
+
+   ```bash
+   brew install --cask font-hackgen-nerd
+   ```
+
+   - `==> Moving Font 'HackGenConsoleNF-Regular.ttf' to '/home/<USER>/.local/share/fonts/HackGenConsoleNF-Regular.ttf'` のような行が 4 つ出る
+   - `font-hackgen-nerd was successfully installed!` で終わる
+
+1. HackGen が入ったか確かめ、かな・漢字・記号・アイコンが入っているかも見る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   brew list --cask --versions font-hackgen-nerd
+   ls ~/.local/share/fonts/
+   fc-list : family style file | grep HackGen
+   fc-match "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"
+   for cp in 3042 6f22 e0b0 f09b; do printf 'U+%s: ' "${cp}"; fc-list ":charset=${cp}" family | grep -c -x -F "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"; done
+   ```
+
+   - `font-hackgen-nerd 2.10.0`、4 つの `.ttf`、`HackGen Console NF` と `HackGen35 Console NF` の Regular / Bold の 4 行が出る
+   - `fc-match` が `HackGenConsoleNF-Regular.ttf: "HackGen Console NF" "Regular"` を返せばよい
+   - **ファイル名が HackGen であることを確かめる**
+   - 4 行とも `1` なら入っている（`あ` / `漢` / Powerline の三角 / GitHub のアイコン）
+
+### WezTerm
+
+1. chroot を明示して、COPR を有効化する。
+
+   ```bash
+   sudo dnf copr enable wezfurlong/wezterm-nightly "rhel-9-$(uname -m)"
+   ```
+
+   - 有効化してよいか `[y/N]` で聞かれる
+   - **次の手順は、`[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. できた repo ファイルを確かめる。
+
+   ```bash
+   cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
+   ```
+
+   - `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい
+
+1. WezTerm を入れる。
+
+   ```bash
+   sudo dnf install wezterm
+   ```
+
+   - 途中で COPR の GPG 鍵の取り込みを聞かれる
+   - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
+   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. WezTerm が入ったか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
+   dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
+   wezterm --version
+   ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
+   wezterm ls-fonts | sed -n '1,5p'
+   ```
+
+   - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
+   - アプリ一覧には「WezTerm」が出る
+
+1. 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、起動し直した WezTerm に移る。
+
+   - [その docs/install.md の実施手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#実施手順)の手順 1〜4 を、この端末に貼る（`~/.config/wezterm` に clone する）
+   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、[共通の bash 設定](#共通の-bash-設定)が読む
+   - その手順 8 で WezTerm を起動し、手順 9 を WezTerm のタブに貼って確かめる
+   - **この後の手順は、WezTerm のタブで貼る**（Nerd Font のアイコンを使う TUI の確かめも、WezTerm で見る）
+
+### WezTerm と HackGen Console NF をデスクトップで使う
+
+1. GNOME の等幅のフォントを HackGen Console NF にする。
+
+   ```bash
+   MONO_FONT='HackGen Console NF 11'   # 等幅のフォントの名前と大きさ。<MONO_FONT>
+   ```
+
+   ```bash
+   if [ -z "${MONO_FONT}" ]; then echo '中断: MONO_FONT が空のまま。値を入れて貼り直す' >&2; else
+     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
+     /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name "${MONO_FONT}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
+   fi
+   ```
+
+   - 2 つ目の `get` が `'HackGen Console NF 11'` になればよい
+
+1. Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする。
+
+   ```bash
+   kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
+   /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'wezterm start'
+   printf '\n\033[7m 確認 \033[0m\n'
+   /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
+   fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
+   /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.gnome.Ptyxis.desktop/org.wezfurlong.wezterm.desktop}"
+   /usr/bin/gsettings get org.gnome.shell favorite-apps
+   ```
+
+   - `'wezterm start'` と、端末のところが `'org.wezfurlong.wezterm.desktop'` になったお気に入りが出ればよい
+   - お気に入りに Ptyxis が無かったときは、お気に入りは変わらない
+
+1. Ctrl+Alt+T と Dash から WezTerm が開き、等幅のフォントが変わったことを確かめる。
+
+   - Ctrl+Alt+T と、Dash の WezTerm のアイコンで、WezTerm の窓が開く
+   - Ptyxis（アクティビティの画面で「端末」）の文字が HackGen Console NF になっている
+
+### git-delta
+
+1. 変数を設定する。
+
+   ```bash
+   DELTA_NAVIGATE=true       # ページャ内で n / N を「次の変更・前の変更」にする。<DELTA_NAVIGATE>
+   DELTA_LINE_NUMBERS=true   # 差分の左に行番号を出す。<DELTA_LINE_NUMBERS>
+   DELTA_SIDE_BY_SIDE=false  # true にすると左右 2 面に分けて表示する。<DELTA_SIDE_BY_SIDE>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in DELTA_NAVIGATE DELTA_LINE_NUMBERS DELTA_SIDE_BY_SIDE; do printf '%-19s = %s\n' "$v" "${!v}"; done
+   ```
+
+   - **編集が必須の変数は無い**。既定のままで進められる
+   - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
+1. brew で git-delta を入れる。
+
+   ```bash
+   brew install git-delta
+   ```
+
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+
+1. `git config --global` で git の設定を書き、読み戻す。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -z "${DELTA_NAVIGATE}" ] || [ -z "${DELTA_LINE_NUMBERS}" ] || [ -z "${DELTA_SIDE_BY_SIDE}" ]; then
+     echo '中断: 「git-delta」の手順 1 の変数が空。3 つとも設定してから貼り直す' >&2
+   else
+     git config --global core.pager delta &&
+       git config --global interactive.diffFilter 'delta --color-only' &&
+       git config --global delta.navigate "${DELTA_NAVIGATE}" &&
+       git config --global delta.line-numbers "${DELTA_LINE_NUMBERS}" &&
+       git config --global delta.side-by-side "${DELTA_SIDE_BY_SIDE}" &&
+       git config --global merge.conflictstyle zdiff3 &&
+       git config --global --get-regexp '^(core\.pager|interactive\.difffilter|delta\.(navigate|line-numbers|side-by-side)|merge\.conflictstyle)$'
+   fi
+   ```
+
+   - 設定した 6 項目が出る。`中断:` が出た場合は、どの設定も書き換えていない
+   - **`interactive.difffilter` と小文字で表示される**のが正しい
+
+1. delta の版と、共通の bash 設定の clone の最後のコミットの差分の表示を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   delta --version
+   brew list --versions git-delta
+   command -v delta
+   git -C ~/.config/bash show | delta --paging=never | head -20
+   ```
+
+   - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
+   - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
+   - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
+
+### Neovim
+
+1. brew で Neovim を入れる。
+
+   ```bash
+   brew install neovim
+   ```
+
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+
+1. Neovim が入ったか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   nvim --version | head -3
+   brew list --versions neovim
+   command -v nvim
+   ```
+
+   - `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている
+   - ここでは `nvim` を起動しない（この項の手順 3 の退避より前に起動すると、`~/.local/state/nvim` などができて、それも退避される）
+
+1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
+
+   - [その docs/setup.md の「AlmaLinux 10 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#almalinux-10-に導入する-1-度だけ)の手順 3〜6・10・11・13〜18 を、上から順に貼る
+   - 飛ばす手順: 1・2（EPEL。[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で入れた）、7〜9（Homebrew。[Homebrew](#homebrew)で入れた。手順 9 の `~/.bashrc` への追記も行わない）、12（[HackGen Console NF](#hackgen-console-nf)で入れた）
+   - その手順 3 で Node.js・ibus-anthy・wl-clipboard などを dnf で、手順 10 で lazygit・ripgrep・fd を Homebrew で入れる（Neovim は、この項の手順 1 で入っている）
+   - その手順 13〜15 で、入力ソースは「英語 (US)」と Anthy の 2 つになり、Anthy の切り替えのキーから Ctrl+Space と Ctrl+J が外れる（JIS 配列のキーボードでも US にする。Neovim の IME 連携が、英数を `xkb:us::eng` に固定するため）
+   - その手順 15 の後のログインし直しは、ここでは行わない（[再起動と確認](#再起動と確認)の手順 1 の再起動で読み直す）
+   - その手順 17 で Neovim の画面が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（その手順 18 は画面を開かない）
+   - その手順 19（日本語検索・整形・IME 連携の確かめ）は、[再起動と確認](#再起動と確認)の手順 8 で行う
+
+1. WezTerm で新しいタブを開き、既定のエディタを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf '%s / %s\n' "$EDITOR" "$VISUAL"
+   alias vi
+   ```
+
+   - `nvim / nvim` と `alias vi='nvim'` が出ればよい
+   - この 3 項目は共通の bash 設定が持つ（`nvim` があれば、開いたシェルで設定する）。元値の控えや `~/.bashrc` への追記は行わない
+   - 開いていたタブは、`nvim` を入れる前の値のまま。`. ~/.bashrc` で読み直さない（[シェルのツール](#シェルのツール)の手順 2）
+
+### lazygit
+
+1. brew で lazygit を入れる。
+
+   ```bash
+   brew install lazygit
+   ```
+
+   - [Neovim](#neovim)の手順 3 で入っていれば、`Warning: lazygit … is already installed and up-to-date.` と出て何も変えない
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+
+1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
+
+   - [その README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の Linux の例のとおりに、clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
+   - 差分の表示に delta（[git-delta](#git-delta)）、アイコンに Nerd Fonts（[HackGen Console NF](#hackgen-console-nf)）を使う設定
+   - `e` キーで開くエディタは、`EDITOR`（[Neovim](#neovim)の手順 4）から決まる
+
+1. lazygit が入ったか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   lazygit --version
+   brew list --versions lazygit
+   command -v lazygit
+   ```
+
+   - `build source=Homebrew, version=0.65.1, os=linux, arch=arm64` のように出る
+
+1. 共通の bash 設定の clone（`~/.config/bash`）で lazygit を起動して確かめる。
+
+   ```bash
+   (cd ~/.config/bash && lazygit)
+   ```
+
+   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
+   - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
+   - `q` で終了する
+   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazygit への操作として食われる）
+
+### GitHub CLI
+
+1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
+
+   ```bash
+   {
+     sudo dnf install -y 'dnf-command(config-manager)'
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+     cat /etc/yum.repos.d/gh-cli.repo
+   }
+   ```
+
+   - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
+   - `gpgcheck=1` になっていることを確認する
+
+1. gh をインストールする。
+
+   ```bash
+   sudo dnf install gh
+   ```
+
+   - 初回は署名鍵の取り込みを **2 回**聞かれる
+   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える
+     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
+     - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
+   - どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する
+   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. GitHub へのログインを始める。
+
+   ```bash
+   gh auth login
+   ```
+
+   - 対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
+   - `Authenticate Git with your GitHub credentials?` は `Y`（既定）でよい。git の HTTPS の認証に gh を使う行が `~/.gitconfig` に入る（外すのは[ロールバックの「Git の道具を消す」](extra/almalinux-setup.md#git-の道具を消す)の手順 6）
+   - ワンタイムコードが表示されたら、この項の手順 4 のブラウザで使う
+   - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
+
+1. ブラウザで、GitHub の認証を済ませる。
+
+   - この項の手順 3 のワンタイムコードを、ブラウザの `https://github.com/login/device` に入れ、画面の案内に従う
+   - SSH 越しの端末でこのホストのブラウザを開けないときは、手元のブラウザで開く
+   - **次の手順は、`gh auth login` が終わってから貼る**（続けて貼ると対話の答えとして食われる）
+
+1. 認証できたか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   gh auth status
+   gh --version
+   ```
+
+   - 認証前の `gh auth status` は `You are not logged into any GitHub hosts.` を返す
+
+### yazi
+
+1. 変数を設定する。
+
+   ```bash
+   YAZI_EXTRAS="ffmpeg-full sevenzip jq poppler fd ripgrep fzf resvg imagemagick-full font-symbols-only-nerd-font"   # プレビューと検索に使う。空にすると yazi 本体だけ
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'YAZI_EXTRAS = %s\n' "${YAZI_EXTRAS}"
+   ```
+
+   - **編集が必須の変数は無い**
+   - 最小構成にするなら、`YAZI_EXTRAS` を空にする
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
+1. brew で yazi と、プレビュー・検索に使うツールを入れる。
+
+   ```bash
+   brew install yazi ${YAZI_EXTRAS}
+   ```
+
+   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
+   - fd と ripgrep は[Neovim](#neovim)の手順 3 で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+
+1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
+
+   - [その README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)のとおりに、`custom` ブランチを `~/.config/yazi` に clone する
+   - ファイルを開くエディタは nvim（[Neovim](#neovim)）、`z` と `Z` のキーは fzf と zoxide（[シェルのツール](#シェルのツール)の手順 1）を使う
+
+1. WezTerm で新しいタブを開き、y 関数を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   type -t y
+   ```
+
+   - `function` が出ればよい。`~/.bashrc` への関数の追記は不要
+   - 共通の bash 設定は、`yazi` があるときだけ `y` を作る。開いていたタブには無いので、`. ~/.bashrc` で読み直さずに新しいタブで確かめる（[シェルのツール](#シェルのツール)の手順 2）
+
+1. 同じタブで、yazi が入ったか確かめ、`y` で起動する。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   yazi --version
+   ya --version
+   brew list --versions yazi
+   y
+   ```
+
+   - `Version: 26.9.1 (Homebrew ...)`、`Triple: aarch64-unknown-linux-gnu` のように出る
+   - プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る
+   - 画像プレビューは端末側の対応が要る（[注意点](extra/almalinux-setup.md#注意点)）
+   - 画面が出たら `q` で終了する
+   - **ほかのコマンドは、`q` で終了してから貼る**（続けて貼ると yazi への操作として食われる）
+
+### Claude Code
+
+1. 変数を設定する。
+
+   ```bash
+   CC_CHANNEL=latest               # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'CC_CHANNEL = %s\n' "${CC_CHANNEL}"
+   ```
+
+   - **編集が必須の変数は無い**。既定の `latest`（最新版）でよければ、そのまま貼る
+   - 大きな不具合のある版を避けたいなら `stable`（1 週間ほど遅れて、そうした版を飛ばすチャンネル）にする
+   - 最後に値を読み戻して確かめる
+   - `latest` か `stable` 以外が入っていたら、ここで止めて直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
+1. リポジトリを追加する。
+
+   ```bash
+   if [ -z "${CC_CHANNEL}" ]; then echo '中断: 「Claude Code」の手順 1 の CC_CHANNEL が空のまま。値を入れて貼り直す' >&2; else
+     sudo tee /etc/yum.repos.d/claude-code.repo >/dev/null <<EOF
+   [claude-code]
+   name=Claude Code
+   baseurl=https://downloads.claude.ai/claude-code/rpm/${CC_CHANNEL:?「Claude Code」の手順 1 の CC_CHANNEL が空のまま。値を入れて貼り直す}
+   enabled=1
+   gpgcheck=1
+   gpgkey=https://downloads.claude.ai/keys/claude-code.asc
+   EOF
+     printf '\n\033[7m 確認 \033[0m\n'
+     cat /etc/yum.repos.d/claude-code.repo
+   fi
+   ```
+
+   - `baseurl` の末尾がこの項の手順 1 で選んだチャンネル（既定なら `latest`）になっていることを確認する
+   - `中断:` と出たら、何も書いていない
+
+1. Claude Code をインストールする。
+
+   ```bash
+   sudo dnf install claude-code
+   ```
+
+   - トランザクション表で `claude-code` の版（既定の `latest` なら、その日の最新版）を確かめて `y` と答える
+   - 初回は続けて署名鍵の取り込みを聞かれる
+   - 表示される fingerprint が `31DD DE24 DDFA B679 F42D 7BD2 BAA9 29FF 1A7E CACE` であることを**目で確かめてから** `y` と答える
+   - 違っていれば `N` で中断する
+   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. インストールできたか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
+   dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
+   claude --version
+   rpm -ql claude-code
+   ```
+
+   - 1 行目（入っている版）と 2 行目（チャンネルにある一番新しい版）が同じなら、そのチャンネルの最新版が入っている
+   - `2.1.283 (Claude Code)` のようにバージョンが出れば動く
+   - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](verification/almalinux-setup.md#claude-code-完了時点の状態)）
+
+1. 確認用のディレクトリで `claude` を起動し、ブラウザでログインする。
+
+   ```bash
+   mkdir -p ~/claude-sandbox
+   cd ~/claude-sandbox
+   claude
+   ```
+
+   - フォルダーを信頼するか聞かれたら、`claude-sandbox` であることを確かめて信頼する
+   - 画面の案内に従ってブラウザでログインする
+   - Pro / Max / Team / Enterprise か Console のアカウントが要る（無料の claude.ai プランでは使えない）
+   - `ANTHROPIC_API_KEY` を設定している場合は、ブラウザではなくその鍵を使ってよいか 1 度だけ聞かれる
+   - **認証情報（トークン・API キー）はこの文書に載せない**
+   - `/exit` で終える
+   - **次の手順は、`/exit` で Claude Code を終えてシェルのプロンプトに戻ってから貼る**（続けて貼ると Claude Code への入力として食われる）
+
+### Codex CLI
+
+1. 既存の Codex が入っていないか確かめる。
+
+   ```bash
+   command -v codex
+   ```
+
+   - 新規の PC なら何も出ず、終了コードは 1 になる
+   - パスが出たら、元の導入方法を確認してから進める。npm・Homebrew・standalone を重ねて入れない
+   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない（この項は、既定の場所への新規の standalone インストールを前提にする。ロールバックもその場所を消す）
+   - 入れるのは端末で使う Codex CLI。デスクトップアプリとエディタの拡張機能は別に入れる
+
+1. インストーラーが使う道具を入れる。
+
+   ```bash
+   sudo dnf install -y curl-minimal ca-certificates tar gzip
+   ```
+
+   - `curl` が既に入っていて `curl-minimal` と競合するときは、`curl-minimal` を外して実行する
+
+1. 公式の standalone インストーラーで Codex CLI を入れる。
+
+   ```bash
+   curl -fsSL https://chatgpt.com/codex/install.sh | sh
+   ```
+
+   - `Codex CLI … installed successfully.` を確認する
+   - `Start Codex now?` と聞かれたら `n` で答える
+   - **次の手順は、インストーラーが終わり、シェルのプロンプトに戻ってから貼る**
+
+1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
+
+   ```bash
+   export PATH="$HOME/.local/bin:$PATH"
+   hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v codex
+   codex --version
+   ```
+
+   - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る
+   - 新しく開いた端末でも `codex --version` が通ることを確認する
+
+1. ChatGPT でのログインを始める。
+
+   ```bash
+   codex login
+   ```
+
+   - ブラウザが開く。自動で開かなければ、端末に出た URL を同じ PC のブラウザで開く
+   - コマンドはログインが完了するまで待つ
+   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)を通す
+
+1. ブラウザで ChatGPT にログインし、Codex との接続を承認する。
+
+   - 利用するアカウント・ワークスペースを選ぶ
+   - **次の手順は、端末でログインの成功を確認し、シェルのプロンプトに戻ってから貼る**
+
+1. ログイン状態を確かめる。
+
+   ```bash
+   codex login status
+   ```
+
+   - ChatGPT でログイン済みであることを確認する
+   - ログイン情報のファイルの中身を表示・共有する必要は無い
+
+1. 確認用のディレクトリで Codex を起動する。
+
+   ```bash
+   mkdir -p ~/codex-sandbox
+   cd ~/codex-sandbox
+   git init
+   codex
+   ```
+
+   - 作業場所の確認が出たら、`codex-sandbox` であることを確認する
+   - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確認する
+   - 終了するときは `/quit` を入力する
+   - **次の手順は、Codex を終了してシェルのプロンプトに戻ってから貼る**
+
+### Grok Build
+
+1. 既存の Grok と、同じ名前のコマンドが無いか確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v grok agent curl
+   ls -ld ~/.grok
+   ```
+
+   - 新規の PC なら `curl` のパスだけが出て、`ls` は `No such file or directory` になる
+   - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
+   - `grok` か `~/.grok` があれば、元の導入方法を確かめてから進める。非公式の grok-cli も同じ `grok` と `~/.grok` を使うので、先に外す
+   - `agent` のパスが出たら、それが何かを確かめる。インストーラーは `~/.local/bin/agent` を Grok へのリンクで置き換えることがある（[注意点](extra/almalinux-setup.md#注意点)）
+
+1. 公式のインストーラーで Grok Build を入れる。
+
+   ```bash
+   curl -fsSL https://x.ai/cli/install.sh | bash
+   ```
+
+   - `Grok … installed to /home/<USER>/.grok/bin/grok` を確かめる
+   - `Updated /home/<USER>/.grok/bin in PATH in /home/<USER>/.bashrc.` が出る。`~/.bashrc` の末尾に `# >>> grok installer >>>` から `# <<< grok installer <<<` までのブロックが足され、初回は元のファイルが `~/.bashrc.bak.<数字>` に控えられる
+   - `~/.local/bin` が PATH にあるホスト（[Codex CLI](#codex-cli)で Codex を入れたホストなど）では、`Symlinked /home/<USER>/.local/bin/grok -> …` と `…/agent -> …` も出る
+   - 質問は出ない
+
+1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
+
+   ```bash
+   export PATH="$HOME/.grok/bin:$PATH"
+   hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v grok
+   grok --version
+   ```
+
+   - 自分のホームの `.grok/bin/grok` と `grok 1.0.50 (…)` のような版が出る
+   - 新しく開いた端末でも `grok --version` が通ることを確かめる
+
+1. ブラウザでのログインを始める。
+
+   ```bash
+   grok login
+   ```
+
+   - ブラウザが開く。開かなければ、端末に出た `https://accounts.x.ai/oauth2/device?user_code=…` の URL を同じ PC のブラウザで開く
+   - 端末に確認用のコード（`XXXX-XXXX` の形）が出て、`Waiting for authorization...` のまま待つ
+   - ブラウザの無いホストでは、この項の手順 4・5 の代わりに[Grok Build をブラウザの無いホストでログインする](#grok-build-をブラウザの無いホストでログインする)を通す
+
+1. ブラウザで grok.com のアカウントにログインし、Grok Build との接続を承認する。
+
+   - ブラウザに出たコードが、端末のコードと同じであることを確かめてから承認する
+   - **次の手順は、端末でログインの成功を確かめ、シェルのプロンプトに戻ってから貼る**
+
+1. ログインを確かめる。
+
+   ```bash
+   grok models
+   ```
+
+   - `You are not authenticated.` が出なければ、ログインできている
+   - ログインしていなくても終了コードは 0 で、モデルの一覧は出る。終了コードでは判定しない
+   - ログインの情報は `~/.grok/auth.json` に入る。中身を表示・共有しない
+
+1. 確認用のディレクトリで Grok を起動する。
+
+   ```bash
+   mkdir -p ~/grok-sandbox
+   cd ~/grok-sandbox
+   git init
+   grok
+   ```
+
+   - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
+   - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
+   - 終了するときは `/quit` を入力する
+   - **次の手順は、Grok を終了してシェルのプロンプトに戻ってから貼る**
+
+### Codex・Grok のプラグイン
+
+1. Node.js と bubblewrap を入れる（プラグインと sandbox が使う）。
+
+   ```bash
+   {
+     sudo dnf install -y nodejs bubblewrap
+     printf '\n\033[7m 確認 \033[0m\n'
+     node --version
+     bwrap --version
+   }
+   ```
+
+   - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る）
+   - Node.js は、[Neovim](#neovim)の手順 3（LazyVimStarter の導入）で入っていれば、`Package nodejs-… is already installed.` と出る
+   - Grok の sandbox には、Landlock が有効な Linux カーネルも要る（sandbox を使うときの条件とエラーは、[注意点](extra/almalinux-setup.md#注意点)の「Grok Build: sandbox は既定で無効」）
+   - GNOME のデスクトップの PC には、Flatpak の依存として bubblewrap がもう入っている（`Package bubblewrap-… is already installed.`）
+
+1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   claude plugin marketplace add openai/codex-plugin-cc
+   claude plugin marketplace add xai-org/grok-build-plugin-cc
+   claude plugin install codex@openai-codex
+   claude plugin install grok-build@xai-grok-build
+   claude plugin list
+   ```
+
+   - `✔ Successfully added marketplace: openai-codex` と `xai-grok-build`、`✔ Successfully installed plugin: …（scope: user）` が 2 つ出る
+   - 最後の一覧に、`codex@openai-codex` と `grok-build@xai-grok-build` が `Status: ✔ enabled` で出る
+   - 動いている Claude Code には、起動し直すまで効かない
+
 ### 再起動と確認
 
 1. 再起動する。
@@ -920,8 +1893,8 @@
 
    - 上部バーの時計に曜日と秒が出る（電池のある PC では、電池の % も）
    - 上部バーの右に、入力ソースの表示が出る
-   - 画面が濃い色（ダーク）になっている。Super キーで開くアクティビティの画面の下の Dash が、[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並び
-   - 端末などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る
+   - 画面が濃い色（ダーク）になっている。Super キーで開くアクティビティの画面の下の Dash が、[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並び（端末のところは WezTerm。[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 2）
+   - Files などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る（自分用の設定の WezTerm は、タブバーの右端に自分でボタンを描く）
    - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
 
 1. 端末を開き、再起動の後の状態を確かめる。
@@ -954,20 +1927,26 @@
 
    - テキストエディターに何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）。Caps Lock だけを押しても大文字にならない
    - ウィンドウを 2 つ以上開いて Alt+Tab を押すと、ウィンドウごとに切り替わる（同じアプリの窓も別に並ぶ）。Super+Tab はアプリごと
-   - Ctrl+Alt+T で、新しい端末の窓が開く
+   - Ctrl+Alt+T で、WezTerm の新しい窓が開く（[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 2）
 
 1. 入力ソースを切り替えて、日本語を打ってみる。
 
-   - Super+Space で、上部バーの入力ソースの表示が切り替わる
+   - Super+Space で、上部バーの入力ソースの表示が「英語 (US)」と Anthy の間で切り替わる（[Neovim](#neovim)の手順 3。その手順を飛ばしたときは、[日本語入力](#日本語入力)の手順 2 の配列と Anthy の間）
    - Anthy に切り替えてからテキストエディターなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
    - Anthy は、ひらがなで始まる
-   - Anthy の中では、半角/全角キー（US 配列なら Ctrl+Space か Ctrl+J）で英字（直接入力）とひらがなを切り替える
+   - 英字と日本語の切り替えは、Super+Space と、Neovim の中の `<C-j>`（[Neovim](#neovim)の手順 3 で、Anthy の切り替えのキーから Ctrl+Space と Ctrl+J を外した）。JIS 配列のキーボードも US 配列として打つ（刻印と違う記号が出るキーがある）
 
 1. Files で、フォルダーの名前と、隠しファイルとフォルダーの並びを確かめる。
 
    - Files（アクティビティの画面で「ファイル」）でホームを開くと、`Desktop`・`Documents`・`Downloads` などの英語の名前のフォルダーが並び、日本語の名前のフォルダーは無い
    - `.bashrc`・`.config` などの隠しファイルも出て、フォルダーがファイルより先に並ぶ
    - 左のサイドバーにも `Documents`・`Downloads` などが並び、押すとそのフォルダーが開く
+
+1. Neovim で、日本語の検索・整形と IME 連携を確かめる。
+
+   - [LazyVimStarter の docs/setup.md の「AlmaLinux 10 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#almalinux-10-に導入する-1-度だけ)の手順 19 を、WezTerm のタブで行う（[Neovim](#neovim)の手順 3 の続き）
+   - `/tmp/lazyvim-check.md` が無いとき（`/tmp` を tmpfs にした PC では、再起動で消える）は、その手順 17 のブロックの 1 行目（`printf …`）を貼ってから開く
+   - Neovim の画面が開く。`o` で足した行は保存せず、`:qa!` で閉じる（その手順 19 の最後の箇条書き）
 
 ---
 
@@ -1362,67 +2341,6 @@
 
 ---
 
-## WezTerm と HackGen Console NF をデスクトップで使う（任意）
-
-- 前提: [HackGen Console NF](hackgen.md) と [WezTerm](wezterm-nightly.md) の実施手順を通してあること（どちらか一方だけなら、その手順だけを行う）
-- WezTerm 自身のフォントは、[hackgen.md の WezTerm で使う（任意）](hackgen.md#wezterm-で使う任意)で変える
-- 戻すときは、この節の手順 4
-
-1. HackGen Console NF を入れたときだけ、GNOME の等幅のフォントにする。
-
-   ```bash
-   MONO_FONT='HackGen Console NF 11'   # 等幅のフォントの名前と大きさ。<MONO_FONT>
-   ```
-
-   ```bash
-   if [ -z "${MONO_FONT}" ]; then echo '中断: MONO_FONT が空のまま。値を入れて貼り直す' >&2; else
-     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
-     /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name "${MONO_FONT}"
-     printf '\n\033[7m 確認 \033[0m\n'
-     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
-   fi
-   ```
-
-   - 2 つ目の `get` が `'HackGen Console NF 11'` になればよい
-
-1. WezTerm を入れたときだけ、Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする。
-
-   ```bash
-   kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
-   /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'wezterm start'
-   printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
-   fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
-   /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.gnome.Ptyxis.desktop/org.wezfurlong.wezterm.desktop}"
-   /usr/bin/gsettings get org.gnome.shell favorite-apps
-   ```
-
-   - `'wezterm start'` と、端末のところが `'org.wezfurlong.wezterm.desktop'` になったお気に入りが出ればよい
-   - お気に入りに Ptyxis が無かったときは、お気に入りは変わらない
-
-1. Ctrl+Alt+T と Dash から WezTerm が開き、等幅のフォントが変わったことを確かめる。
-
-   - Ctrl+Alt+T と、Dash の WezTerm のアイコンで、WezTerm の窓が開く
-   - Ptyxis（アクティビティの画面で「端末」）の文字が HackGen Console NF になっている
-
-1. 元に戻すときは、等幅のフォント・Ctrl+Alt+T・お気に入りを戻す。
-
-   ```bash
-   kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
-   /usr/bin/gsettings reset org.gnome.desktop.interface monospace-font-name
-   /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'ptyxis --new-window'
-   fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
-   /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.wezfurlong.wezterm.desktop/org.gnome.Ptyxis.desktop}"
-   printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
-   /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
-   /usr/bin/gsettings get org.gnome.shell favorite-apps
-   ```
-
-   - `'Red Hat Mono Regular 10'`・`'ptyxis --new-window'` と、端末のところが `'org.gnome.Ptyxis.desktop'` のお気に入りが出ればよい
-
----
-
 ## Flatpak の使い方の基本
 
 | コマンド | 用途 |
@@ -1464,7 +2382,7 @@
 - `sudo brew ...` は、sudo の PATH に Homebrew が無ければ `command not found` になる。[Homebrew を sudo でも使う（任意）](#homebrew-を-sudo-でも使う任意)の節を通しても、管理操作は一般ユーザーで行う
 - 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う（任意）](#homebrew-を-root-のシェルでも使う任意)の節を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う（任意）](#homebrew-を-sudo-でも使う任意)の節を通す
 - Homebrew 7.0.7 の `brew install` は、端末で依存や依存先も導入する計画なら `[y/n]` を聞く。指定したものだけの計画、または端末を使わない実行では聞かない（[注意点](extra/almalinux-setup.md#注意点)）
-- Homebrew で入れるほかの手順書（[yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)、[Dropbox（rclone）](dropbox-rclone.md)、[hadolint / dive / Trivy](image-tools.md)（Trivy だけは dnf）、[lazydocker](lazydocker.md)）は、[Homebrew](#homebrew)の手順 1〜3 を前提にする
+- この文書の[HackGen Console NF](#hackgen-console-nf)・[git-delta](#git-delta)・[Neovim](#neovim)・[lazygit](#lazygit)・[yazi](#yazi)と、Homebrew で入れるほかの手順書（[gdu](gdu.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[Dropbox（rclone）](dropbox-rclone.md)、[hadolint / dive / Trivy](image-tools.md)（Trivy だけは dnf）、[lazydocker](lazydocker.md)）は、[Homebrew](#homebrew)の手順 1〜3 を前提にする
 
 ---
 
@@ -1559,7 +2477,7 @@
    ```
 
    - `plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える
-   - `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る（[HackGen Console NF](hackgen.md) など）
+   - `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る（[HackGen Console NF](#hackgen-console-nf) など）
    - **次の手順は、使うプリセットを決めてから貼る**
 
 1. 選んだプリセットを `~/.config/starship.toml` に書き出す（`STARSHIP_PRESET` は、この節の手順 1 で選んだ名前にする）。
@@ -1665,7 +2583,7 @@
 - Ctrl+T と Alt+C の候補を、fd の一覧に変える（`.git` の中を除き、隠しファイルは含める。`.gitignore` の対象は fd が既定で除く）
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
-- bat は[シェルのツール](#シェルのツール)の手順 1 で入れてある。fd は、この節の手順 1 で入れる（[yazi.md の手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で入れてあれば飛ばす）
+- bat は[シェルのツール](#シェルのツール)の手順 1、fd は[Neovim](#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](#yazi)の手順 2 で入れてある。fd が入っていれば、この節の手順 1・2 は飛ばす
 - 戻すときは、この節の手順 5
 
 1. brew で fd を入れる。
@@ -1704,7 +2622,7 @@
    ```
 
    - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/fd/…` と出ればよい
-   - [yazi.md の手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で fd を入れてあれば、消さない
+   - [Neovim](#neovim)の手順 3 か[yazi](#yazi)の手順 2 で fd を入れてあれば、消さない（自分用の Neovim の設定のファイルピッカーと yazi も使う）
 
 ---
 
@@ -1845,7 +2763,7 @@
 
 - SSH でログインしたシェルから、tmux の中で Claude Code を動かすと、SSH を切っても Claude Code が動き続ける
 - Remote Control（`claude remote-control`）で始めると、SSH を切った後も、スマートフォンの Claude のアプリや claude.ai/code のブラウザから続けて使える
-- 前提: [Claude Code](claude-code.md) を入れ、`claude` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない（公式ドキュメント）
+- 前提: [Claude Code](#claude-code)で入れ、`claude` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない（公式ドキュメント）
 - **この節の手順 4 には対話入力がある**（ディレクトリの信頼と、初回の Remote Control の確認）
 - Windows の PC は [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)（Windows には tmux が無いので、タスク スケジューラと WezTerm を使う）
 - Remote Control でなく、対話の `claude` を動かし続けるときは、この節の手順 4 で `claude` だけを打つ。別の SSH から `tmux attach -t claude` で戻れる
@@ -1860,7 +2778,7 @@
    ```
 
    - `claude` の版、`tmux 3.7c`、`Login method: …` の行が出ればよい
-   - `Not logged in. Run claude auth login to authenticate.` なら、[claude-code.md の手順 5](claude-code.md#実施手順) でログインしてから続ける
+   - `Not logged in. Run claude auth login to authenticate.` なら、[Claude Code](#claude-code)の手順 5 でログインしてから続ける
    - `claude doctor` の `Remote Control` の段にも、使えないときは理由が出る（ログインしていないと `Not signed in to claude.ai` など）
 
 1. Claude Code を動かすディレクトリに移る。
@@ -1930,13 +2848,403 @@
 
 ---
 
+## 改行を変換して clone したリポジトリを直す
+
+- 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリは、作業ツリーのファイルが CRLF のまま残る
+- [Git](#git)の手順 4 の後は、それらが変更ありと出る。編集してコミットすると、CRLF で入る
+- Windows で、Git for Windows の既定の設定のまま clone したリポジトリが当たる
+- リポジトリごとに、そのリポジトリのトップのディレクトリで、この節の手順 1 から貼る
+- **この節の手順 3 は、作業ツリーの追跡しているファイルをすべて書き直し、未コミットの変更を消す**。この節の手順 1 で変更が出たら、手順 2 で退避してから貼る
+
+1. 直すリポジトリのトップで、未コミットの変更と、CRLF で書かれたファイルの数を見る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -c core.autocrlf=true status --short
+   git ls-files --eol | grep -c 'i/lf *w/crlf'
+   ```
+
+   - 2 つ目の数が、直すファイルの数。`0` なら、この節は要らない
+   - 1 つ目が何も出ないか、`??`（未追跡）の行だけなら、追跡しているファイルの変更は無い。この節の手順 2 と 4 は飛ばす
+   - `??` 以外の行があれば、この節の手順 2 で追跡しているファイルの変更を退避する。未追跡ファイルはそのまま残す
+
+1. この節の手順 1 で `??` 以外の変更が出たときだけ、前の設定のまま stash する。
+
+   ```bash
+   git -c core.autocrlf=true stash
+   ```
+
+   - `Saved working directory and index state WIP on …` と出る
+   - `No local changes to save` なら、この節の手順 4 は飛ばす。エラーなら、ここで止めて原因を直す
+
+1. 作業ツリーのファイルを、今の設定で書き直す。
+
+   ```bash
+   git rm -r -q --cached .
+   git reset -q --hard
+   printf '\n\033[7m 確認 \033[0m\n'
+   git ls-files --eol | grep -c 'i/lf *w/crlf'
+   git status --short
+   ```
+
+   - 数は `0` になる
+   - `git status --short` は、もともとあった `??` の行以外は出さない
+
+1. この節の手順 2 で保存成功の表示が出たときだけ、今回の変更を戻す。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git stash pop
+   git ls-files --eol
+   ```
+
+   - `git status` の形で、元の変更だけが出る
+   - 戻したファイルも `w/lf` になる
+   - この節の手順 2 からここまでは、別の stash を作らない
+
+---
+
+## WezTerm の設定ファイル
+
+- パッケージ（Windows 11 ではインストーラ）は設定ファイルを置かない。無ければ組み込みの既定値で動く
+- [WezTerm](#wezterm)の手順 5 で入れた自分用の設定は、`~/.config/wezterm/wezterm.lua`（下の表の 5）
+
+| 優先 | 場所 | 用途 |
+|---|---|---|
+| 1 | `wezterm --config-file <path>` | 一時的に別の設定で起動する |
+| 2 | 環境変数 `WEZTERM_CONFIG_FILE` | 同上（環境ごとに切り替える） |
+| 3 | `~/.wezterm.lua` | **1 ファイルで済む設定はここ**（公式の推奨） |
+| 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
+| 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
+
+- **Windows 11 では**、`~` は `%USERPROFILE%`（`C:\Users\<WIN_USER>`）。置くのは `%USERPROFILE%\.wezterm.lua` か `%USERPROFILE%\.config\wezterm\wezterm.lua`
+  - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
+- **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
+  - 入れ方は、その [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md)（本書と同じ書式の手順書。[WezTerm](#wezterm)の手順 5）。`~/.config/wezterm` に clone する。シェル統合は bash の共通設定が読むので、参照先の手順 5〜7（直接追記）は行わず、手順 8 で端末を開き直す
+  - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Windows 11 の初期設定の「Git Bash と WezTerm の設定」](windows-setup.md#git-bash-と-wezterm-の設定)）
+  - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
+  - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
+  - フォントは HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)。Windows 11 は[Windows 11 の初期設定の「HackGen Console NF」](windows-setup.md#hackgen-console-nf)）
+  - AlmaLinux 10 だけ: 本書の RPM が置く `/etc/profile.d/wezterm.sh`（公式の Bash 統合）と、この設定のシェル統合は一緒に動く（公式の統合の cwd・ユーザー変数・bash-preexec を保ったまま、この設定がプロンプトの区切りと完了通知を補う。[docs/install.md の手順 9 と注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)）
+  - Windows 11 のインストーラはシェル統合を入れない。設定が無いときに開くシェルは `cmd.exe`（`%COMSPEC%`）で、この設定は Git Bash を既定にし、Git Bash と PowerShell のシェル統合を設定の中から読ませる（[README の「シェル統合」](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
+  - `~/.wezterm.lua` があると、clone した設定は読まれない
+
+---
+
+## git-delta の設定ファイル
+
+設定の実体は `~/.gitconfig` の `[delta]` セクション（Windows 11 では `C:\Users\<WIN_USER>\.gitconfig`。Git Bash・PowerShell・cmd の git が同じファイルを読む）。[git-delta](#git-delta)の手順 3 で書いた 3 つのほかによく使うもの:
+
+| キー | 意味 |
+|---|---|
+| `features` | 名前付き設定のまとめ読み（`[delta "<名前>"]` を作って指定する） |
+| `syntax-theme` | シンタックスハイライトの配色。一覧は `delta --list-syntax-themes` |
+| `hyperlinks` | ファイル名を端末のハイパーリンクにする |
+| `true-color` | 24 bit 色を使うか（既定は端末から自動判定） |
+| `file-style` / `minus-style` / `plus-style` | ファイル名行・削除行・追加行の色 |
+
+- 今の実効値は `delta --show-config` で全部出る
+- `delta --help` にはオプションとして同じ名前が並んでおり、コマンドラインで一時的に上書きできる
+
+---
+
+## Neovim の設定ファイル
+
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値（素の Vim に近い挙動）で動く
+- 置き場所は `~/.config/nvim` で、読み込まれるのは `init.lua` か `init.vim` のどちらか一方
+  - `XDG_CONFIG_HOME` を設定していれば `$XDG_CONFIG_HOME/nvim` になる。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する
+- Windows 11 の置き場所は `%LOCALAPPDATA%\nvim`（`init.lua`）。プラグイン・undo・ログは `%LOCALAPPDATA%\nvim-data`、キャッシュは `%TEMP%\nvim-data`（設定とデータの場所は、[Windows 11 の初期設定の「Neovim」](windows-setup.md#neovim)の手順 4 で確かめる）
+  - Windows 11 では `XDG_CONFIG_HOME` を設定しない（yazi は読まず、WezTerm は `~/.config/wezterm` を読まなくなり、git は `~/.gitconfig` を読み続けるので、ツールごとに読む場所が割れる。[参考資料](reference/windows-setup.md#neovim-windows-11-では-選択した方針)）
+- **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
+  - 入れ方は [Neovim](#neovim)の手順 3 で通す [docs/setup.md の「AlmaLinux 10 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#almalinux-10-に導入する-1-度だけ)。外部コマンド・日本語入力（ibus-anthy）・フォントも入れる
+  - Windows 11 の入れ方は [docs/setup.md の「Windows 11 に導入する」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#windows-11-に導入する-1-度だけ)。既存の `%LOCALAPPDATA%\nvim` と `nvim-data` を `.bak` に退避してから clone し、Neovim・外部コマンド・lazygit も scoop で入れる
+  - Windows 11 は、[Windows 11 の初期設定の「Neovim」](windows-setup.md#neovim)の手順 3 で通す
+  - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
+- インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm-offline.md](npm-offline.md) を通す
+
+---
+
+## lazygit の設定ファイル
+
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
+- 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
+- Windows 11 の置き場所は `%LOCALAPPDATA%\lazygit\config.yml`（`%APPDATA%\lazygit\config.yml` があれば、そちらも見つける）。状態ファイル `state.yml` も同じフォルダーに入る（[Windows 11 の初期設定の「lazygit」](windows-setup.md#lazygit)の手順 5 で確かめる）
+- **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
+  - 入れ方は [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)（[lazygit](#lazygit)の手順 2）。clone した `config.yml` を `~/.config/lazygit/config.yml` にリンクする
+  - Windows 11 の入れ方は、同じ [README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の Windows の例（[Windows 11 の初期設定の「lazygit」](windows-setup.md#lazygit)の手順 4）（シンボリックリンクではなく、`%LOCALAPPDATA%\lazygit` に直接 clone する。元に戻すブロックもそこにある）
+  - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
+  - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)）にする
+    - Windows 11 で入れるのは [Windows 11 の初期設定の「HackGen Console NF」](windows-setup.md#hackgen-console-nf)。Windows Terminal のフォントにするのは [Windows 11 の初期設定の任意節](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える任意)で、WezTerm は自分用の設定で変わる
+  - 差分の表示に delta を使う（[git-delta](#git-delta)。Windows 11 は [Windows 11 の初期設定の「git-delta」](windows-setup.md#git-delta)）。Windows の設定例の引用符は [README の「Windows で使う場合」](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)
+  - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](#neovim)の手順 4）
+    - Windows 11 で Windows PowerShell から起動するなら、[Windows 11 の初期設定の「Neovim を既定のエディタにする（任意）」](windows-setup.md#neovim-を既定のエディタにする任意)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
+
+---
+
+## yazi の設定ファイル
+
+- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
+- 置き場所は `~/.config/yazi/` で、ファイル名は `yazi.toml`（全般）/ `keymap.toml`（キー割り当て）/ `theme.toml`（配色）
+- Windows 11 の置き場所は `%APPDATA%\yazi\config\`（Windows の yazi は `XDG_CONFIG_HOME` を見ない。別の場所にするなら `YAZI_CONFIG_HOME` に絶対パスを入れる）
+  - 状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`
+  - yazi が読む場所は `ya env` の `Config` の行で確かめられる（[Windows 11 の初期設定の「yazi」](windows-setup.md#yazi)の手順 6）
+- **既定値のファイルは配布物に入っていない**。変更する項目だけを設定ファイルに書く
+- 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
+- **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
+  - 入れ方は [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)（[yazi](#yazi)の手順 3）。`custom` ブランチを `~/.config/yazi` に clone する
+  - Windows 11 の入れ方は、同じ [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)の Windows の例（`custom` ブランチを `%APPDATA%\yazi\config` に clone する。[Windows 11 の初期設定の「yazi」](windows-setup.md#yazi)の手順 5）。そこにある `YAZI_FILE_ONE` と VC++ のランタイムは、同じ項の手順 2・4 で済んでいる
+  - 足したキーは [設定のリポジトリの参考資料の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、使う外部コマンドは [README の「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
+  - 外部コマンドのうち fd・ripgrep・fzf は[yazi](#yazi)の手順 2 の `YAZI_EXTRAS` で入る（Windows 11 は[Windows 11 の初期設定の「yazi」](windows-setup.md#yazi)の手順 3。fzf の bash のキー操作は[共通の bash 設定](#共通の-bash-設定)から[シェルのツール](#シェルのツール)の手順 5 までの手順で入る）。エディタの nvim は[Neovim](#neovim)、zoxide は[シェルのツール](#シェルのツール)の手順 1 で入れる
+    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定の「シェルのツールを入れる」](windows-setup.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
+  - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
+
+---
+
+## Claude Code の使い方の基本
+
+- 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
+- SSH を切っても動かし続けるには、tmux の中で起動する（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)）。Windows 11 は [windows-claude-remote-control.md](windows-claude-remote-control.md)（タスク スケジューラと WezTerm）
+
+| コマンド | すること |
+|---|---|
+| `claude` | 今のディレクトリで、対話のセッションを始める |
+| `claude "<最初の指示>"` | 最初の指示を渡して、対話のセッションを始める |
+| `claude -c` | 今のディレクトリの、いちばん最近の会話を続ける |
+| `claude -r` | 会話の一覧から選んで再開する |
+| `claude -r <名前か ID>` | `-n` で付けた名前か、セッションの ID の会話を再開する |
+| `claude -n <名前>` | セッションに名前を付けて始める（`/resume` の一覧と端末のタイトルに出る） |
+| `claude --model <別名>` | モデルを選んで始める（`opus`・`sonnet`・`haiku` などの別名か、モデルの正式な名前） |
+| `claude --permission-mode plan` | 計画だけを立てるモード（ファイルを変えない）で始める。ほかに `acceptEdits`・`auto` など |
+| `claude --add-dir <ディレクトリ>` | 今のディレクトリのほかに、読み書きしてよいディレクトリを足す |
+
+- [Windows 11 の初期設定の「Claude Code」](windows-setup.md#claude-code)で入れた `claude` にも、同じコマンドを Windows PowerShell で打つ
+
+**セッションの中の操作**（公式ドキュメントの [Interactive mode](https://code.claude.com/docs/en/interactive-mode) と [Commands](https://code.claude.com/docs/en/commands) から）
+
+| 操作 | すること |
+|---|---|
+| `Esc` | 今の応答やツールの実行を止める（ダイアログなら閉じる） |
+| `Esc` を 2 回 | 入力があれば消す。空なら、前の時点に戻すメニューを開く |
+| `Shift+Tab` | 許可のモードを順に切り替える（`default` → `acceptEdits` → `plan` …） |
+| `Ctrl+C` | 動いているものを止める。何も動いていなければ 1 回目で入力を消し、2 回目で終わる |
+| `Ctrl+J` | 改行する（どの端末でも。Shift+Enter は WezTerm などでだけ） |
+| `!` で始める | Claude を通さずにシェルのコマンドを実行し、結果を会話に入れる |
+| `@` | ファイルのパスを補完して、会話で指す |
+| `Ctrl+R` | 入力の履歴をさかのぼって探す |
+| `Ctrl+B` | 動いているコマンドを裏へ回す（tmux の中では 2 回押す） |
+| `/help` | ヘルプとコマンドの一覧 |
+| `/resume` | 会話の一覧から再開する |
+| `/clear` | 会話を空にして始め直す |
+| `/compact` | ここまでの会話を要約して、文脈を空ける |
+| `/model` | モデルを変える |
+| `/permissions` | 許可の規則を見る・変える |
+| `/status` | 版・モデル・アカウント・接続の状態 |
+| `/usage` | 使った量とプランの上限 |
+| `/init` | このディレクトリの `CLAUDE.md` を作る |
+| `/memory` | `CLAUDE.md` を編集する |
+| `/remote-control` | このセッションを Remote Control につなぐ（`/rc`） |
+| `/exit` | 終わる |
+
+**非対話（`-p`）**（1 回答えて終わる。スクリプトやパイプで使う）
+
+| コマンド | すること |
+|---|---|
+| `claude -p "<指示>"` | 答えだけを標準出力に出して終わる |
+| `<コマンド> \| claude -p "<指示>"` | 標準入力の中身を、指示と一緒に渡す |
+| `claude -p --output-format json "<指示>" \| jq -r .result` | 結果を JSON で受け取る（`result`・`session_id`・`is_error`・`num_turns`・`total_cost_usd` など） |
+| `claude -p --allowedTools "Bash(touch *)" "<指示>"` | 聞かずに使ってよいツールを足す。`-p` では許可を聞けないので、無いと断られて `permission_denials` に残る |
+| `claude -p --max-turns <数> "<指示>"` | ターンの数の上限。超えると `error_max_turns` で、終了コードは 1 |
+| `claude -c -p "<指示>"` | 今のディレクトリのいちばん最近の会話に続けて、1 回答える |
+| `claude -r <名前か ID> -p "<指示>"` | その会話に続けて、1 回答える |
+
+- **`-p` はディレクトリの信頼の確認を飛ばす**（`claude --help`）。信頼できるディレクトリでだけ使う
+- `date` のように読むだけのコマンドは、`--allowedTools` が無くても聞かずに動いた
+- **Windows PowerShell 5.1 からパイプで渡すと、ASCII でない文字は化けるはず**: native のコマンドへのパイプは `$OutputEncoding`（5.1 の既定は ASCII）で送られる（[about_Preference_Variables](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1)）。日本語の指示は引数で渡す
+
+**管理のサブコマンド**
+
+| コマンド | すること |
+|---|---|
+| `claude --version` | 版を出す |
+| `claude doctor` | 導入の状態を診る（読むだけ）。`Remote Control` の段に、使えるかと、使えない理由が出る |
+| `claude auth status --text` | ログインしているかを出す（していなければ `Not logged in.` で、終了コードは 1） |
+| `claude mcp add <名前> -- <コマンド> [<引数>…]` | 標準入出力でつなぐ MCP サーバーを足す（既定は `local`: このディレクトリで、自分だけ） |
+| `claude mcp add -s user …` / `-s project …` | `user` はどのディレクトリでも使う。`project` はこのディレクトリの `.mcp.json` に書いて共有する |
+| `claude mcp add --transport http <名前> <URL>` | HTTP でつなぐ MCP サーバーを足す |
+| `claude mcp list` | MCP サーバーの一覧（つながるかも確かめる） |
+| `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
+| `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
+| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の初期設定の更新](windows-setup.md#更新)） |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](windows-claude-remote-control.md)） |
+
+- `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
+- **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
+
+---
+
+## Claude Code を stable チャンネルに切り替える（任意）
+
+- `latest` で不具合に当たったときに、1 週間ほど遅れて大きな不具合のある版を飛ばす `stable` へ移る
+- `stable` の版は `latest` より古いので、`dnf upgrade` では下がらない（`Nothing to do.`）。この節の手順 2 の `distro-sync` で下げる
+- repo ファイルの `baseurl` の末尾を書き換えるだけで、`dnf clean` は要らない
+- [Claude Code](#claude-code)の手順 1 で `stable` を選んで入れた後に `latest` へ移るときは、この節の手順 4 だけを行う
+- この節は AlmaLinux 10 の dnf のもの。Windows 11 でチャンネルを変えるときは、[Windows 11 の初期設定の「Claude Code」](windows-setup.md#claude-code)の手順 1 の補足
+
+1. repo ファイルの `baseurl` を `stable` に書き換える。
+
+   ```bash
+   {
+     sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
+     grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
+   }
+   ```
+
+   - `baseurl` の末尾が `stable` になっていることを確認する
+
+1. 入っている版を `stable` の最新に合わせる。
+
+   ```bash
+   sudo dnf distro-sync claude-code
+   ```
+
+   - `stable` がすでに同じ版まで追いついていれば `Nothing to do.` で終わる
+   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. 入っている版を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
+   dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
+   claude --version
+   ```
+
+   - 1 行目と 2 行目が同じ版なら、`stable` の最新版に揃っている
+
+1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
+
+   ```bash
+   {
+     sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
+     grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
+     sudo dnf upgrade claude-code
+   }
+   ```
+
+   - `baseurl` の末尾が `latest` に戻ったことを確認する
+   - トランザクション表が `Upgrading:` になっていることを確かめて `y` と答える
+   - 答えた後、[Claude Code](#claude-code)の手順 4 のコマンドで版を確かめる
+
+---
+
+## Codex CLI をブラウザの無いホストでログインする
+
+- [Codex CLI](#codex-cli)の手順 5・6（`codex login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
+
+1. 手元のブラウザで、デバイスコードによるログインを有効にする。
+
+   - 個人アカウントは ChatGPT のセキュリティ設定、管理されたワークスペースは管理者の権限設定で許可する
+
+1. Codex を入れたホストでデバイスコード認証を始める。
+
+   ```bash
+   codex login --device-auth
+   ```
+
+   - 端末に URL とワンタイムコードが出る
+
+1. 手元のブラウザで表示された URL を開き、コードを入力する。
+
+   - 自分で始めたログインのコードだけを入力する
+   - **次の手順は、Codex を入れたホストでログインの成功を確認してから貼る**
+
+1. Codex を入れたホストでログイン状態を確かめる。
+
+   ```bash
+   codex login status
+   ```
+
+   - 成功したら、[Codex CLI](#codex-cli)の手順 8 へ進む（Windows 11 は、[Windows 11 の初期設定の「Codex CLI」](windows-setup.md#codex-cli)の手順 8）
+
+---
+
+## Codex CLI の設定ファイル
+
+| 用途 | AlmaLinux 10 | Windows 11 |
+|---|---|---|
+| ユーザー設定 | `~/.codex/config.toml` | `%USERPROFILE%\.codex\config.toml` |
+| standalone の配布物 | `~/.codex/packages/standalone/` | `%USERPROFILE%\.codex\packages\standalone\` |
+| ファイル保存の場合の認証情報 | `~/.codex/auth.json` | `%USERPROFILE%\.codex\auth.json` |
+
+- 認証情報は OS の資格情報ストアに保存される場合もある。`auth.json` が無いだけで未ログインとは判断しない
+- `auth.json` はパスワードと同じ扱いにし、Git・共有フォルダー・チャットへ載せない
+- 初回導入のために `config.toml` を作る必要は無い
+
+---
+
+## Grok Build をブラウザの無いホストでログインする
+
+- [Grok Build](#grok-build)の手順 4・5（`grok login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
+
+1. Grok を入れたホストで、デバイスコードでのログインを始める。
+
+   ```bash
+   grok login --device-auth
+   ```
+
+   - 端末に URL（`https://accounts.x.ai/oauth2/device?user_code=…`）と確認用のコードが出て、`Waiting for authorization...` のまま待つ
+
+1. 手元のブラウザで表示された URL を開き、コードを確かめて承認する。
+
+   - 自分で始めたログインのコードだけを承認する
+   - **次の手順は、Grok を入れたホストでログインの成功を確かめてから貼る**
+
+1. Grok を入れたホストでログインを確かめる。
+
+   ```bash
+   grok models
+   ```
+
+   - `You are not authenticated.` が出なければ、[Grok Build](#grok-build)の手順 7 へ進む（Windows 11 は、[Windows 11 の初期設定の「Grok Build」](windows-setup.md#grok-build)の手順 8）
+
+---
+
+## Grok Build の設定ファイル
+
+| 用途 | AlmaLinux 10 | Windows 11 |
+|---|---|---|
+| ユーザー設定 | `~/.grok/config.toml` | `%USERPROFILE%\.grok\config.toml` |
+| 実行ファイル | `~/.grok/bin/grok`（`~/.grok/downloads/` の配布物へのリンク） | `%USERPROFILE%\.grok\bin\grok.exe` |
+| ログイン情報 | `~/.grok/auth.json` | `%USERPROFILE%\.grok\auth.json` |
+| 会話の記録 | `~/.grok/sessions/` | `%USERPROFILE%\.grok\sessions\` |
+| 信頼したフォルダー | `~/.grok/trusted_folders.toml` | `%USERPROFILE%\.grok\trusted_folders.toml` |
+| プロジェクトの設定 | `<プロジェクト>/.grok/config.toml`（MCP サーバー・プラグイン・許可の規則） | 同じ |
+
+- `auth.json` はパスワードと同じ扱いにし、Git・共有フォルダー・チャットへ載せない
+- そのディレクトリで読まれる設定・指示書（AGENTS.md など）・MCP サーバーは、`grok inspect` で見られる（ログインしていなくても動く）
+- 初回の導入のために `config.toml` を書く必要は無い（インストーラーが `[cli]` の 2 行を書く）
+- 自動の更新を止めるときは、`config.toml` の `[cli]` の下に `auto_update = false` の行を足す。止めたら、[更新](#更新)の手順 8 で上げる
+
+---
+
 ## 更新
 
 - OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5 を、ファームウェアは同じ項の手順 2・3 を貼り直す
 - [dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)を通したなら、OS の更新は毎日自動で入る（再起動は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で行う）
 - EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1）
 - Flatpak のアプリは `dnf upgrade` では上がらない（この節の手順 4）
-- 別の手順書で入れたもの（Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build など）は、それぞれの手順書の「更新」
+- Firefox・WezTerm・GitHub CLI・Claude Code（それぞれのベンダーの dnf のリポジトリから入れたもの）と git・Node.js も、OS の更新で上がる
+  - 1 つだけ上げるなら、`sudo dnf upgrade claude-code` のように名前を指定する（Firefox は言語パックと一緒に `sudo dnf upgrade firefox firefox-l10n-ja`）
+  - Firefox の FFmpeg（RPM Fusion の `ffmpeg-libs`）も一緒に上がる。WezTerm の COPR は、`main` ブランチに追従して毎日〜数日おきにビルドされる
+  - **dnf で入れた Claude Code は自動更新しない**。起動中に更新を知らせてくるが、`claude update` も `Claude is managed by a package manager.` と出して何もしない。リポジトリにその版が届くまで、少し遅れることもある。上がった版は[Claude Code](#claude-code)の手順 4 で確かめる
+- HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、この節の手順 3 で上がる
+  - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
+- 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる（Neovim のプラグインと外部コマンドは、[LazyVimStarter の docs/setup.md の「更新」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#更新)）
+  - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
+- Codex は、端末で起動したときに新しい版を裏で確かめる。新しい版があれば、その後の起動で `Update available!` と `1. Update now` が出る。そのまま Enter を押すと公式インストーラーが動いて上がり、`Update ran successfully! Please restart Codex.` と出たら `codex` を起動し直す
+- Grok は自分で新しい版に上がる（設定の `[cli] auto_update` の既定）。確かめるのは対話の画面（`grok`）を起動したときで、新しい版は裏で `~/.grok/downloads` に入り、次に起動したときから使われる。自動の更新も `grok update` も、`~/.bashrc` を変えない
 - この節の手順は、[シェルのツール](#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 1. 共通の bash 設定を上げる。
@@ -1978,3 +3286,48 @@
 
    - 更新が無ければ `Nothing to do.` で終わる
    - 更新があれば `[Y/n]` と聞かれる。`y`
+
+1. 起動中の Codex と Grok を終了する。
+
+   - 端末の Codex と Grok は `/quit` で閉じる
+   - 知らせを待たずに上げるときだけ、この節の手順 5〜8 を行う
+
+1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
+
+   ```bash
+   curl -fsSL https://chatgpt.com/codex/install.sh | sh
+   ```
+
+   - `Start Codex now?` は `n` で答える
+   - **次の手順は、シェルのプロンプトに戻ってから貼る**
+
+1. Codex CLI の更新後の版を確かめる。
+
+   ```bash
+   codex --version
+   ```
+
+1. Grok Build の新しい版を入れ、版を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   grok update
+   grok --version
+   ```
+
+   - 新しい版が無ければ `Already up to date (…)` と出る
+   - 確かめるだけなら `grok update --check`（`(latest: …)` に最新の版が出る）
+
+1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   claude plugin marketplace update openai-codex
+   claude plugin marketplace update xai-grok-build
+   claude plugin update codex@openai-codex
+   claude plugin update grok-build@xai-grok-build
+   claude plugin list
+   ```
+
+   - `✔ Successfully updated marketplace: …` が 2 つと、`✔ … updated …` か `✔ … is already at the latest version (…)` が 2 つ出る
+   - 上がったプラグインは、Claude Code を起動し直すまで効かない（Remote Control も止めてから始め直す）

@@ -31,4 +31,4 @@ AlmaLinux 10 の環境構築を VM で通した[検証記録（2026-10-06）](..
 
 ## 端末とシェル
 
-- HackGen Console NF は、Windows 11 の PC にも同書の [Windows 11 の節](../hackgen.md#windows-11-で使う)で入れられる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる（**Windows の実機では流していない**）
+- HackGen Console NF は、Windows 11 の PC にも同書の [Windows 11 の節](../windows-setup.md#hackgen-console-nf)で入れられる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる（**Windows の実機では流していない**）

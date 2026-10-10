@@ -1,6 +1,14 @@
-# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL）の検証記録
+# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim・AI エージェント）の検証記録
 
 [手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
+
+## 2026-10-10 にまとめた手順（Windows 11 で通していない）
+
+**2026-10-10 に、12 本の手順書の Windows 11 の部分と windows-openssh-server.md を、この文書にまとめた。まとめた後の手順は、Windows 11 で通していない**（[付録](#付録-13-本の手順書をまとめた記録2026-10-10)）。
+
+- 足した項: 「HackGen Console NF」「OpenSSH サーバー」「Git for Windows」「Firefox」「WezTerm」と、再起動の後の「SSH でログインを確かめる」から「Codex・Grok のプラグイン」までの 12 項。任意節は OpenSSH サーバーの 4 つと「Neovim を既定のエディタにする（任意）」を足した。更新は 4 項に分け（3 項を足した）、ロールバックは 6 項を足した
+- 移したコマンドは、もとの手順書で確かめたもの（どこまで確かめたかは、後ろの「統合前の記録」のそれぞれの節）。窓の使い分け・再起動の回数・項の順番と、つなぎを直した手順は、静的な確認だけ
+- 次の「最新の検証範囲」は、まとめる前の 12 項（2026-10-08 の時点）の範囲
 
 ## 最新の検証範囲（2026-10-08 UTC）
 
@@ -175,7 +183,7 @@
 ### 実施手順 / ネットワークとリモート / 手順 1: 補足: プライベートにする理由
 
 - Windows のファイアウォールの受信の規則は、ネットワークの種類（プライベート・パブリック）ごとに有効にできる。OpenSSH サーバーの機能が作る規則も、Syncthing の Windows 11 の節で作る規則も、「ネットワークとリモート」の手順 2〜4 の規則も、プライベートだけで有効にする
-- Windows 11 は、新しくつないだネットワークをパブリックにすることがある。[Windows の OpenSSH サーバー](../windows-openssh-server.md)を検証した PC の有線 LAN はパブリックで、そのままでは LAN からの SSH が捨てられ、プライベートにすると通った（同書の手順 5 の補足）
+- Windows 11 は、新しくつないだネットワークをパブリックにすることがある。[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)を検証した PC の有線 LAN はパブリックで、そのままでは LAN からの SSH が捨てられ、プライベートにすると通った（同書の手順 5 の補足）
 - 同じ PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本。「ネットワークとリモート」の手順 3 で切る）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
 - この操作は、もとは Windows の OpenSSH サーバーの手順 5 と Syncthing の Windows 11 の手順 7 の両方にあった。2026-10-03 に、インストール直後の作業としてここへまとめた。ブロックは OpenSSH サーバーの手順 5（実機で通したもの）から、`Get-NetFirewallRule` の行を除いて移した（変数の手順の番号だけ変えた）
 - ノート PC を持ち出したとき: プライベートにしたのはこの接続（有線 LAN か、この Wi-Fi のネットワーク）だけ。出先の Wi-Fi は、つないだときにパブリックかプライベートかを選ぶ（既定はパブリック）
@@ -193,7 +201,7 @@
 - `AlmaLinux-10` は、WSL のディストリビューションの一覧（`wsl --list --online`）の AlmaLinux 10 の名前。イメージは AlmaLinux の `wsl-images`（GitHub）にあり、`wsl.exe` が sha256 を確かめて入れる（WSL の `DistributionInfo.json`。2026-10-03 は 10.2）
 - 最初の起動で、AlmaLinux のイメージの `oobe` がユーザーを作る。作ったユーザーは uid 1000 で、`wheel` に入る（`sudo` を使える）。systemd が動く（`wsl.conf` の `systemd=true`）
 - Linux のユーザー名とパスワードは、Windows のものとは別。パスワードは `sudo` で聞かれる
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証では、この AlmaLinux 10 からこの PC に SSH でつないで確かめた
+- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の検証では、この AlmaLinux 10 からこの PC に SSH でつないで確かめた
 
 ### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 5: 補足: Autologon のすること
 
@@ -327,7 +335,7 @@
 - **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
 - **確かめたこと**:
   - 資料: microsoft/WSL の master のソース（`WslCoreConfig.cpp`・`WslCoreConfig.h`・日本語の訳の `Resources.resw`）と、Microsoft Learn の wsl-config・networking・troubleshooting・Hyper-V Firewall・`New-NetFirewallHyperVRule` のページ。値ごとの出典は[参考資料](../reference/windows-setup.md)
-  - 同じ PC の WSL の記録は 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2）で、ネットワークは既定の NAT だった（[Windows の OpenSSH サーバーの検証記録](windows-openssh-server.md)と [VirtualBox のゲスト（bootc）の検証記録](virtualbox-guest-bootc.md)）
+  - 同じ PC の WSL の記録は 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2）で、ネットワークは既定の NAT だった（[Windows の OpenSSH サーバーの検証記録](#統合前の記録-openssh-サーバーもとは-windows-openssh-servermd)と [VirtualBox のゲスト（bootc）の検証記録](virtualbox-guest-bootc.md)）
   - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 3 の作成・控え・`[wsl2]` の行の直後への挿入（CRLF・LF・大文字の `[WSL2]`・`[wsl2]` の無いファイル・BOM 付き）と、`networkingMode` の行があるときの中断、手順 6 の戻し（控えからはバイトで一致・作ったままなら消す・手で変えたら中断）を、Linux の PowerShell 7.5.3 で模擬。`wsl.exe` を呼ぶ手順 2・4・5・7 は、偽物の関数で流れを見ただけ（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
 - **確かめていないこと**:
   - Windows で貼ること。既にある `.wslconfig`（設定の画面が書いたもの）に 1 行足して、WSL が読むこと
@@ -381,7 +389,7 @@
     - CLI による更新（「Windows Update」と「Microsoft Store の更新」の全部）: PSWindowsUpdate 2.2.1.5 の配布物のヘルプ、Windows Update Agent の検索条件、WinGet の文書と Store の製品 ID。この PC の Store 22608.1401.5.0 のヘルプで `updates`・`--apply` を確認した（[付録](#付録-cli-による更新手順の確認2026-10-04)）
     - 新しい更新・削除のブロック: Windows PowerShell 5.1 の構文解析器と、偽物のコマンドレット・CLI を使った模擬。再起動待ち・更新失敗・Store CLI 不足などで止まることを確認した。実際の更新コマンドやモジュールの導入・削除は実行していない
     - 貼り付けの設定（「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 3・4。[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）: 原因（コピーボタンの中身が LF だけで、conhost の右クリックの貼り付けが LF を Ctrl+Enter として送り、PSReadLine 2.0.0 の Ctrl+Enter が `InsertLineAbove`）と、「貼り付けの設定」の手順 1 の 1 行で直ることを、実機の Windows 11 の conhost の窓で確かめた。「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 は、もとの手順書（`windows-powershell-paste.md`）のときのブロックを、プロファイルを一時的なファイルに差し替えた実機の Windows PowerShell 5.1 で、文字コードの違うプロファイルを含めて流した。印を変えた今のブロックは、Linux の pwsh で模擬しただけ
-    - LAN をプライベートにする「ネットワークとリモート」の手順 1 のブロックは、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5（実機で通した）にあったものから、規則を確かめる行を除いて移した
+    - LAN をプライベートにする「ネットワークとリモート」の手順 1 のブロックは、[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5（実機で通した）にあったものから、規則を確かめる行を除いて移した
     - scoop・UniGet UI・Caps Lock・コンテキストメニュー（最初の版の 4 項目）: [配布物と資料の調査の付録](#付録-配布物と資料の調査2026-10-03)
     - 足した項目: Microsoft の文書（Microsoft Learn・サポートの記事・ポリシーの文書）、Microsoft の DSC のリソース（`microsoft/winget-dsc`）、winget の定義、各ツールのソース（PowerShell・sudo・WSL・winget・PSReadLine・UniGet UI など）、Microsoft Store の API（[設定の調査の付録](#付録-windows-11-の設定の調査2026-10-03)）
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。条件で止まるブロック（プロファイルの行、PC の名前、自動で起動するアプリ、リモート デスクトップなど）は、偽物のコマンドレットで模擬して流した（[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
@@ -395,7 +403,7 @@
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の実機の記録は 25H2）。x64。Pro を想定（Home では「ネットワークとリモート」の手順 2 を飛ばす） |
+| OS | Windows 11（[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の実機の記録は 25H2）。x64。Pro を想定（Home では「ネットワークとリモート」の手順 2 を飛ばす） |
 | PowerShell | Windows PowerShell 5.1（管理者ではないものと、管理者として実行したもの） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | winget | Windows 11 の「アプリ インストーラー」に入っているもの |
@@ -489,8 +497,8 @@
 - [StartupTaskState — Microsoft Learn](https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.startuptaskstate) — Teams の起動のタスクの `State`
 - [Remove provisioned apps during update — Microsoft Learn](https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update) — 外したアプリが更新で戻ること
 - [Microsoft Edge Update policies — Microsoft Learn](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-update-policies) — `RemoveDesktopShortcutDefault`
-- [hackgen.md](../hackgen.md) — HackGen Console NF（AlmaLinux 10 と Windows 11）
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md) — 同じ PC で使うことの多い手順書（scoop のツールを SSH のセッションで使う任意節。LAN がプライベートである前提）
+- [hackgen.md](../almalinux-setup.md#hackgen-console-nf) — HackGen Console NF（AlmaLinux 10 と Windows 11）
+- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー) — 同じ PC で使うことの多い手順書（scoop のツールを SSH のセッションで使う任意節。LAN がプライベートである前提）
 
 - [Force shutdown from a remote system — Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/force-shutdown-from-a-remote-system) — `SeRemoteShutdownPrivilege`、既定は Administrators、クライアントでも Administrators
 - [[MS-RSP]: Transport — Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rsp/6dfeb978-7a02-4826-b537-a1760fbf8074) — InitShutdown・WinReg は名前付きパイプ（`\PIPE\InitShutdown`）、WindowsShutdown は TCP
@@ -1165,7 +1173,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - `fDenyTSConnections` を 0 にすると、リモート デスクトップの接続を受け付ける（1 が既定で、受け付けない）。`UserAuthentication` を 1 にすると、ネットワーク レベル認証（NLA）を求める（設定の画面で有効にしたときの既定）。どちらも Microsoft の文書（Azure の VM のリモート デスクトップの切り分け）にある値
 - 受信の規則は、表示の名前が日本語に訳されるので、Microsoft の勧める形（`@FirewallAPI.dll,-28752` のグループ）で指定する。規則の名前は `RemoteDesktop-UserMode-In-TCP`・`-UDP` など（3389 番）
-- `-Profile Private` で、プライベートの LAN（「ネットワークとリモート」の手順 1）からだけ受け付ける。持ち出した先のパブリックの Wi-Fi では開かない。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC は、規則がすべてのプロファイルで有効だった
+- `-Profile Private` で、プライベートの LAN（「ネットワークとリモート」の手順 1）からだけ受け付ける。持ち出した先のパブリックの Wi-Fi では開かない。[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の検証の PC は、規則がすべてのプロファイルで有効だった
 - 設定の画面でリモート デスクトップをオンとオフにし直すと、規則のプロファイルが戻るかは確かめていない。画面で変えたら、この手順の最後の行で確かめ直す
 - 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 4
 
@@ -1226,8 +1234,8 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 **LAN をプライベートに（「ネットワークとリモート」の手順 1）**
 
-- もとは [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5 と、[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 7 の両方で、同じ操作をしていた。インストール直後に 1 度行うものなので、ここへまとめ、2 つの手順書は確かめるだけにした
-- 規則をパブリックにも広げる方法は採らない。持ち出した先でも、同じサブネットの相手に開くため（OpenSSH サーバーの[選択した方針](windows-openssh-server.md#選択した方針)）
+- もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 7 の両方で、同じ操作をしていた。インストール直後に 1 度行うものなので、ここへまとめ、2 つの手順書は確かめるだけにした
+- 規則をパブリックにも広げる方法は採らない。持ち出した先でも、同じサブネットの相手に開くため（OpenSSH サーバーの[選択した方針](#openssh-サーバー-選択した方針)）
 
 **表示・整理の設定（「表示と入力」と「自動起動と標準アプリ」）**
 
@@ -1261,14 +1269,14 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 でも使うツールなので、それぞれの手順書の Windows 11 の節に置いた（同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、1 つの手順書にする）。この文書のリードから、入れる順に案内する
 - PowerToys・PowerShell 7・Autologon・WSL・CopyQ（任意節）は、このリポジトリでは Windows でだけ使うので、この文書に置いた
-- **scoop の `git` は入れない**: git は [git.md](../git.md#windows-11-で-git-for-windows-を入れる) の Git for Windows（`C:\Program Files\Git`）にそろえる。ほかの手順書（OpenSSH サーバーの既定のシェル、Claude Code）がその場所を使う。scoop は `PATH` の `git` を使い、git 無しで入れた scoop も、Git for Windows を入れた後の `scoop update` で git の形に直る（scoop 0.6.0 の `libexec/scoop-update.ps1`）
+- **scoop の `git` は入れない**: git は [git.md](../windows-setup.md#git-for-windows) の Git for Windows（`C:\Program Files\Git`）にそろえる。ほかの手順書（OpenSSH サーバーの既定のシェル、Claude Code）がその場所を使う。scoop は `PATH` の `git` を使い、git 無しで入れた scoop も、Git for Windows を入れた後の `scoop update` で git の形に直る（scoop 0.6.0 の `libexec/scoop-update.ps1`）
 
 **窓と再起動**
 
 - **管理者ではない PowerShell と管理者の PowerShell を分けた**
   - scoop のインストーラは、管理者の PowerShell では止まる。scoop・UniGet UI・PowerToys（自分のユーザーへの導入）と、自分のユーザーの表示の設定は、どれも管理者の権限が要らない
   - PC 全体の設定（`HKLM`・ファイアウォール・電源・機能）と、管理者しか書けない `HKCU\Software\Policies` だけ、管理者の PowerShell で行う
-  - そのため、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の SSH のセッション（Administrators の一員なら管理者の権限で動く）には貼らない
+  - そのため、[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の SSH のセッション（Administrators の一員なら管理者の権限で動く）には貼らない
 - **設定のための再起動を 1 回にまとめた**: Scancode Map・PC の名前・キーボードの種類・WSL の機能は再起動、エクスプローラーの設定はエクスプローラーの起動し直しで効く。再起動 1 回で全部効く（hackgen.md の Windows のフォントも、サインインし直す代わりにこの再起動で効く）。Windows Update は先に「Windows Update」の手順 1〜8 で済ませ、必要な再起動は同じ項の手順 8 で行う
 - **Windows PowerShell 5.1 にそろえた**: Windows 11 に最初からあり、ほかの Windows の手順書とも同じ。実行ポリシーとプロファイルは PowerShell 7 と別に持つので、5.1 の値を変える
 
@@ -1277,13 +1285,13 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 ### 参考資料: 実施手順 / PC 全体の設定 / 手順 2: 補足: 変数について
 
 - `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）と「ネットワークとリモート」の手順 1（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と同じ
-- 接続の一覧は `Get-NetConnectionProfile` で見られる。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）と「ネットワークとリモート」の手順 1（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 2 と同じ
+- 接続の一覧は `Get-NetConnectionProfile` で見られる。[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の検証の PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
 
 ### 参考資料: 実施手順 / ネットワークとリモート / 手順 3: 補足: リモート アシスタンス
 
 - リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、LAN をプライベートにすると、リモート アシスタンスの受信の規則 4 本が効くようになった（「ネットワークとリモート」の手順 1 の補足）
+- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の検証の PC では、LAN をプライベートにすると、リモート アシスタンスの受信の規則 4 本が効くようになった（「ネットワークとリモート」の手順 1 の補足）
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
 - Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。「PC 全体の設定」の手順 3 の `RemoteAssistance` で、元の値を控える
 - 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 3
@@ -1291,7 +1299,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 ### 参考資料: 実施手順 / サインイン・検索・キーボード / 手順 1: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
-- オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある。[Windows の OpenSSH サーバー](../extra/windows-openssh-server.md#注意点)の検証の PC では、オンのまま SSH にパスワードで入れた（Q&A の報告とは違った）
+- オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある。[Windows の OpenSSH サーバー](../extra/windows-setup.md#注意点)の検証の PC では、オンのまま SSH にパスワードで入れた（Q&A の報告とは違った）
 - オンだと、自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
 - 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 5
 
@@ -1416,7 +1424,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と以下の読み取りは、この時点の起動後の状態として扱う
 - 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
 - 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
-- 初回導入と設定確認の時点では、後続の [Git for Windows](../git.md#windows-11-で-git-for-windows-を入れる)・[Firefox](../firefox.md#windows-11-で使う)・[WezTerm](../wezterm-nightly.md#windows-11-で使う)・[Claude Code](../claude-code.md#windows-11-で使う)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard.md#windows-11-で使う)・[HackGen Console NF](../hackgen.md#windows-11-で使う)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
+- 初回導入と設定確認の時点では、後続の [Git for Windows](../windows-setup.md#git-for-windows)・[Firefox](../windows-setup.md#firefox)・[WezTerm](../windows-setup.md#wezterm)・[Claude Code](../windows-setup.md#claude-code)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard.md#windows-11-で使う)・[HackGen Console NF](../windows-setup.md#hackgen-console-nf)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
 - VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
 - 「ネットワークとリモート」の手順 1・2・4 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
 - 「Microsoft Store の更新」の手順 5 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
@@ -1734,3 +1742,2756 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - `VBoxManage unattended install` は、渡した使い捨てのユーザー（その VM だけのもの。再起動される側の試験用のパスワードとは別）のパスワードを平文で表示した。VM と応答のファイル（`autounattend.xml`）は消した
 - ホストで UAC の確認を出して管理者の窓を開く操作は、このツールの安全の判定で止められたので、ホストの管理者の操作は利用者が行った
 - 生の証跡は、ローカルの `.verification/evidence/pr104-20261008/win2win` に控えた（この PR には含めない。検証用のパスワードを含まないことを確かめた）
+
+---
+
+## 付録: 13 本の手順書をまとめた記録（2026-10-10）
+
+### まとめたもの
+
+- git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build の Windows 11 の部分と windows-openssh-server.md を、手順書の 17 項・任意節 5 つ・更新（4 項に分けた）・ロールバックの 6 項と注意点に移し、もとの文書は消した（AlmaLinux 10 の部分は、[AlmaLinux 10 の初期設定の検証記録の付録](almalinux-setup.md#付録-12-本の手順書をまとめた記録2026-10-10)）
+- 必須にしたもの: もとは任意節の「シェルのツールを入れる」（starship・zoxide 0.9.9・fzf・eza・bat）、自分用の設定 4 つ（Neovim・WezTerm・lazygit・yazi）、Codex・Grok のプラグイン（Node.js は、自分用の Neovim の設定が scoop で入れる `nodejs` を使い、無いときだけ `nodejs-lts` を入れる）
+- 窓の使い分け: 管理者ではない窓 #1 に「HackGen Console NF」、管理者の窓 #2 に「OpenSSH サーバー」「Git for Windows」「Firefox」「WezTerm」を足した。設定のための再起動は「WSL と再起動」の 1 回のまま（フォントと WezTerm の VC++ ランタイムも、この再起動で読み直す）。再起動の後は、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 の窓・Git Bash・WezTerm のタブで行う
+
+### 手順を変えたところ
+
+- 各ツールの「管理者ではない（管理者の）PowerShell を開く」手順は外し、項の窓を使う
+- 「HackGen Console NF」: サインインし直す手順（もとの 4）を外し、フォントの確かめ（もとの 5）を「再起動の後に確かめる」の手順 5 に移した
+- 「OpenSSH サーバー」: `$LAN_IF` の手順（もとの 2）は「PC 全体の設定」の手順 2 と同じなので外した。ログインの確かめ（もとの 8・9）は、再起動の後の「SSH でログインを確かめる」に移し、クライアントの例をこの PC の WSL の AlmaLinux 10 にした
+- 「Git for Windows」: PowerShell を開き直す手順（もとの 4）を外し、確かめ（もとの 5）を「Git Bash と WezTerm の設定」の手順 1 に移した。Git Bash では、clone より前に[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)を貼る（Git for Windows の `system` の `core.autocrlf=true` のため）
+- 「WezTerm」: VC++ ランタイムが再起動を求めても、「WSL と再起動」の再起動でまとめる
+- 「シェルのツールを入れる」: もとの任意節の手順 2〜8 を項にした（もとの 1 は外した）。zoxide を上げる手順（もとの 9・10）は更新へ、戻す手順（もとの 11〜13）はロールバックへ移した
+- 「Neovim」: LazyVimStarter の「Windows 11 に導入する」の手順 1・3〜11 を通す（scoop を入れる手順 2 と、手順 7 のフォントは飛ばす）。`checkhealth` の手順（もとの 5）は、その導入の手順 10 で行う
+- 「lazygit」「yazi」: 自分用の設定を、TUI の確かめより前に入れる
+- 外したもの: git-delta の「lazygit と組み合わせる（任意）」
+- 更新: 窓ごとに 4 項に分けた（scoop・winget・WSL と zoxide、AI エージェントとプラグイン、HackGen Console NF、管理者の窓の Git for Windows・Firefox・WezTerm）
+- ロールバック: 窓ごとに 6 項に分け、今の 5 項より前に置いた。Git Bash の戻しと OpenSSH の `DefaultShell` の削除は、Git for Windows を外す前に行う
+
+### 静的な確認
+
+- 環境: AlmaLinux 10 の初期設定の検証記録の付録と同じコンテナ。Windows も Windows PowerShell 5.1 も無いので、どのブロックも Windows 11 では流していない
+- PowerShell のブロック: この文書と extra の 288 個（まとめるときに書き換えた・足したもの 11 個）を、Linux の PowerShell 7.6.6（公式の `powershell-7.6.6-linux-x64.tar.gz`。SHA256 をリリースの `hashes.sha256` と照合）の構文解析器にかけ、誤りは 0。PowerShell 7 にしか無い演算子（`&&`・`||`・`??`・`?.`・三項演算子）も 0
+- PSScriptAnalyzer 1.25.0 の、Windows PowerShell 5.1（`win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）との互換の検査（PSUseCompatibleSyntax・PSUseCompatibleCommands・PSUseCompatibleTypes）: 指摘は 75 で、73 は `Set-ItemProperty -Type`（レジストリのプロバイダーの動的なパラメーターなので当たらない。前からある指摘）、2 は「Codex・Grok のプラグイン」の手順 1 の `node`（外部のコマンドなので当たらない）
+- bash のブロック（SSH のクライアントのシェルと Git Bash に貼るもの）14 個: `bash -n` の誤りは 0。ShellCheck 0.11.0 の指摘は、変数だけのブロックの SC2034 が 2 だけ
+- 形・リンク・手順の参照・消したファイルの中身: [AlmaLinux 10 の初期設定の検証記録の付録「12 本の手順書をまとめた記録」](almalinux-setup.md#付録-12-本の手順書をまとめた記録2026-10-10)の「静的な確認」と同じ（同じスクリプトで、リポジトリ全体を確かめた）。この文書のアラートは 4 つ、extra は 2 つ
+- 見直し: 同じく、サブエージェントに点検させた。見つかったものは、次の節のとおり直した
+
+### 見直しで直したこと
+
+- 「Codex・Grok のプラグイン」の手順 1: Node.js を確かめる行と入れる行が 1 つのブロックにあり、コピーボタンで貼ると、「Neovim」の手順 3 で scoop の `nodejs` が入っていても `nodejs-lts` を入れた。版を確かめ、18.18 より古いか無いときだけ入れるブロックにした（もとの coding-agents.md のブロックも同じ形だった）
+- 「Neovim」の手順 3: LazyVimStarter の「Windows 11 に導入する」の手順 10 は画面を開かない。手順 11 は `:qa!` で閉じる
+- 「Git for Windows・Firefox・WezTerm を上げる」: 自分用の設定の WezTerm のタブは Git Bash なので、Git for Windows を上げる前に WezTerm を閉じ、Remote Control のタスクも止める。タスクを止める手順を先頭に移した（手順の番号が変わったので、統合前の記録の対応表も直した）
+- 手順の後の節: Git for Windows の既定（`core.autocrlf=true`）のまま clone したリポジトリを直す節への案内が抜けていたので、足した
+- 更新: 共通の bash 設定を上げる手順への案内を足した
+- Git Bash のタブで行う手順の後に、次の PowerShell のブロックを貼る窓を書いた（「Git Bash と WezTerm の設定」の手順 5、「シェルのツールを入れる」の手順 7、「git-delta」の手順 4）。「Codex CLI」「Grok Build」の手順 4 も、開き直す窓を書いた
+- 「WezTerm」の手順 5: OpenGL が使えないときにその場で開く方法を、管理者の窓からではなく「ファイル名を指定して実行」からにした。手順 2 で再起動を待つときは、「Git Bash と WezTerm の設定」より前に済ませることを書いた
+- リード: 飛ばさない手順に「シェルのツールを入れる」を、画面で行う手順に PowerShell を開き直す手順などを足した
+- ロールバック: `[!CAUTION]` に zoxide の履歴を消す手順を足し、`[!WARNING]` と続けて置かないようにした。「lazygit は scoop の外に残すものが無い」を、設定が `%LOCALAPPDATA%\lazygit` に残る、に直した
+- 参考資料: もとの任意節「シェルのツールを入れる」と、項に分けた「更新」の補足の見出しを、今の項と手順の番号にした
+- そのほか、同じ文書へのリンクの書き方と、「同書」の指す先を直した
+
+### 確認していないこと
+
+- Windows 11 での、この文書の順番の通し（足した 17 項・任意節 5 つ・更新の 4 項・ロールバックの 6 項）と、窓の使い分け・1 回の再起動でフォントと VC++ ランタイムが読み直されること。この確認を行った環境は Linux のコンテナで、Windows も Windows PowerShell 5.1 も無い（PowerShell のブロックは、Linux の PowerShell 7.6.6 で構文を解析しただけ）
+- 自分用の設定 4 つを、この文書の順番で入れること
+- 移したコマンドの、統合前の記録の範囲を超える確かめ（統合前の記録の「確認していないこと」は、そのまま残る）
+
+---
+
+## 統合前の記録: HackGen Console NF の Windows 11（もとは hackgen.md）
+
+もとの `hackgen.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2・3 | 「HackGen Console NF」の手順 1・2 |
+| Windows 11 で使う 4（サインインし直す） | （なし。「WSL と再起動」の手順 2 の再起動で読み直す） |
+| Windows 11 で使う 5 | 「再起動の後に確かめる」の手順 5 |
+| Windows 11 の更新 1・2 | 「HackGen Console NF を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1〜3 | ロールバックの「HackGen Console NF を消す」の手順 1〜3 |
+
+### HackGen Console NF: 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 2・3 による 4 ファイル・ユーザー登録・アプリ用の読み取り許可、再サインイン後の登録、WezTerm CLI でのフォント解決とラスタ生成（[付録](#hackgen-console-nf-付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 5 の設定のフォントの一覧（2 ファミリーのタイルと見本）、WezTerm の窓での表示、更新の手順 1、ロールバック（[付録](#hackgen-console-nf-付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - メモ帳・Windows Terminal などほかのアプリでの選択、太字・行の高さの見た目の比べ
+  - 新しい版への更新、arm64 の Windows、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### HackGen Console NF: 補足
+
+#### HackGen Console NF: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、上流の zip の sha256・中身・ファミリー名、scoop と winget の定義、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](almalinux-setup.md#hackgen-console-nf-対象と検証環境)）。
+
+#### HackGen Console NF: Windows 11 で使う / 手順 3: 補足: 確かめていることと、入れ方
+
+**版と sha256 を固定した**
+
+- HackGen の上流は、リリースの sha256 を出していない。`HackGen_NF_v2.10.0.zip` の sha256 は、[実施手順](../almalinux-setup.md#hackgen-console-nf)の手順 4 の補足で取った zip・Homebrew の cask `font-hackgen-nerd`・scoop の個人のバケット（mo-san）の定義の 3 つで同じ値だった（[付録](#hackgen-console-nf-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- そのため版（2.10.0）と sha256 をブロックに書き、一致しなければ止める。新しい版が出たら、この文書を直してから貼る（[Windows 11 の更新](../windows-setup.md#hackgen-console-nf-を上げる)）
+- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[syncthing.md の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4 の補足と同じ）
+
+**入れるもの**
+
+- zip の中の 4 つの ttf を全部入れる: `HackGenConsoleNF-{Regular,Bold}.ttf`（ファミリー名は `HackGen Console NF`）と `HackGen35ConsoleNF-{Regular,Bold}.ttf`（`HackGen35 Console NF`）。AlmaLinux 10 の cask と同じ 4 つ
+- アプリの設定に書くのはファミリー名（`HackGen Console NF`。スペースが入る）で、ファイル名ではない
+
+**自分のユーザーに入れる**（管理者の権限は要らない）
+
+- 置き場所は `%LOCALAPPDATA%\Microsoft\Windows\Fonts`、登録は `HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts` に `<ファイル名> (TrueType)` = ファイルのフルパス。Windows 10 1809 から、フォントをユーザーごとに入れられる
+- 書き方は、scoop の nerd-fonts のバケットの定義（`Hack-NF.json` など）と同じ。そこでは、パッケージのアプリ（Microsoft Store のアプリなど）からも読めるように、フォルダーに「すべてのアプリケーション パッケージ」（`S-1-15-2-1`）と「制限されたすべてのアプリケーション パッケージ」（`S-1-15-2-2`）の読み取りを足している。本書の `icacls` も同じ（足すだけで、ほかの許可は変えない）
+- 登録したフォントは、サインインのときに読み込まれる。そのため、使えるのはサインインし直した（か再起動した）後
+- 読み込まれているフォントのファイルは、置き換えも削除もできない。2 回目に貼るときに同じファイルなら置き直さないのは、そのため
+
+#### HackGen Console NF: Windows 11 の更新 / 手順 1: 補足: 更新を手作業にしている理由
+
+- 上流は sha256 を出していないので、版と sha256 をこの文書に書いて確かめている（[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 3 の補足）。新しい版の値は、この文書を直す人が確かめる
+- 2.10.0 のファイルの日付は 2024-12-29 で、2026-10-03 の時点でもこれが最新だった
+- GitHub の API は、サインインしないと 1 時間に 60 回まで
+
+#### HackGen Console NF: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物と、ほかの経路の定義を読んだ記録。
+
+`HackGen_NF_v2.10.0.zip` を GitHub のリリースから取った:
+
+```
+$ sha256sum HackGen_NF_v2.10.0.zip
+f8abd483d5edfad88a78ed511978f43c83b43c48e364aa29ebe4a68217474428  HackGen_NF_v2.10.0.zip
+$ unzip -l HackGen_NF_v2.10.0.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+        0  2024-12-29 16:11   HackGen_NF_v2.10.0/
+ 13462380  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGen35ConsoleNF-Bold.ttf
+ 12922844  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGen35ConsoleNF-Regular.ttf
+ 13464288  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGenConsoleNF-Bold.ttf
+ 12922800  2024-12-29 16:04   HackGen_NF_v2.10.0/HackGenConsoleNF-Regular.ttf
+---------                     -------
+ 52772312                     5 files
+$ fc-scan --format '%{file}: family=%{family} style=%{style}\n' HackGen_NF_v2.10.0/*.ttf
+HackGen_NF_v2.10.0/HackGen35ConsoleNF-Bold.ttf: family=HackGen35 Console NF style=Bold
+HackGen_NF_v2.10.0/HackGen35ConsoleNF-Regular.ttf: family=HackGen35 Console NF style=Regular
+HackGen_NF_v2.10.0/HackGenConsoleNF-Bold.ttf: family=HackGen Console NF style=Bold
+HackGen_NF_v2.10.0/HackGenConsoleNF-Regular.ttf: family=HackGen Console NF style=Regular
+```
+
+sha256 は、次の 3 つと同じだった:
+
+- [実施手順](../almalinux-setup.md#hackgen-console-nf)の手順 4 の補足（2026-09-24 にコンテナの Homebrew が取った zip）
+- Homebrew の cask `font-hackgen-nerd` の定義（`https://formulae.brew.sh/api/cask/font-hackgen-nerd.json` の `sha256`。版は 2.10.0）
+- scoop の個人のバケット `mo-san/scoop-bucket` の `font-hackgen-console-nf.json` の `hash`（版は 2.10.0）
+
+scoop と winget の HackGen:
+
+- `mo-san/scoop-bucket`（最後のコミットは 2026-09-11）の `font-hackgen-console-nf.json` は、`HackGenConsoleNF-(Regular|Bold)` の 2 つだけを入れる。`--global` が無ければ自分のユーザー（`%LOCALAPPDATA%\Microsoft\Windows\Fonts` と `HKCU`）に入れる。インストールのスクリプトに `Join-Path $env:LOCALAPPDATA Microsoft Windows Fonts` と `Join-Path SOFTWARE Microsoft 'Windows NT' CurrentVersion Fonts`（引数が 3 つ以上）がある
+  - Windows PowerShell 5.1 の `Join-Path` は `-Path` と `-ChildPath` の 2 つしか取らない（Microsoft Learn の 5.1 の説明）。残りの引数を受ける `-AdditionalChildPath` は PowerShell 6 から
+  - scoop 0.6.0 の `lib/install.ps1` は、定義の `installer` のスクリプトを `Invoke-Command ([scriptblock]::Create(…))` で、`scoop` を打った PowerShell の中で動かす
+  - PSScriptAnalyzer の `PSUseCompatibleCommands` は、名前を付けた `-AdditionalChildPath` は 5.1 に無いと指摘したが、名前を付けずに並べた引数は指摘しなかった。Windows PowerShell 5.1 で失敗することは、Windows では確かめていない
+- `matthewjberger/scoop-nerd-fonts`（367 の定義）に HackGen は無い。`Hack-NF.json` などのインストールのスクリプトが、[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 3 の書き方のもと（`%LOCALAPPDATA%\Microsoft\Windows\Fonts` に置き、フォルダーに `S-1-15-2-1`・`S-1-15-2-2` の `ReadAndExecute` を足し、`HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts` に `<ファイル名> (TrueType)` = フルパスを書く）
+- winget-pkgs（2026-10-03 の `master`）の `manifests` の下に、名前に `hackgen` を含むものは無かった
+
+---
+
+#### HackGen Console NF: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリースの `powershell-7.6.6-linux-x64.tar.gz`）と PSScriptAnalyzer 1.25.0 を入れて確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 5 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、ASCII でない文字を含むファイルの BOM だけ）
+
+**[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 3 のブロック**を、パスの `\` を `/` に替え、`$env:WINDIR`・`$env:LOCALAPPDATA`・`$env:TEMP` を一時的なディレクトリにして流した。`System32/curl.exe` は Linux の `curl` へのリンク、`icacls.exe` は引数を記録するだけの偽物、レジストリ（`New-ItemProperty`・`Get-ItemProperty`）は値を覚えておく偽物にした:
+
+- 1 回目: zip を取り、sha256 が一致し、4 つの ttf がフォントのフォルダーに置かれ、一時フォルダーが消えた。読み戻しに `HackGen35ConsoleNF-Bold (TrueType) : <フォントのフォルダー>/HackGen35ConsoleNF-Bold.ttf` などの 4 行が出た。`icacls.exe` には `<フォントのフォルダー> /grant *S-1-15-2-1:(OI)(CI)(RX) *S-1-15-2-2:(OI)(CI)(RX)` が渡った
+- 2 回目（同じフォルダーに）: 同じ 4 行が出て、ttf の ctime は変わらなかった（置き直していない）
+- `$sha256` を別の値にしたもの: `中断: HackGen_NF_v2.10.0.zip の sha256 が一致しない` で止まり、フォントのフォルダーには何も作らず、取った zip は一時フォルダーに残った
+- 置けなかったとき（`Copy-Item` の失敗）の分かれ道は試していない（root で動かしたので、書き込めないフォルダーを作れなかった）
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. サインインし直した後に、設定のフォントの一覧と、アプリ（WezTerm と、Windows Terminal などのパッケージのアプリ）で `HackGen Console NF` が使えること
+1. 登録を消してサインインし直した後に、ファイルを消せること（Windows 11 のロールバック）
+1. scoop の個人のバケットの HackGen が、Windows PowerShell 5.1 で本当に失敗すること（採らなかった理由の確かめ）
+1. arm64 の Windows
+
+---
+
+### HackGen Console NF: 本文から分離した確認範囲と実測
+
+#### HackGen Console NF: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの通常権限（Session 1） |
+| 配布物 | `HackGen_NF_v2.10.0.zip` |
+| zip の SHA256 | `F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428` |
+| 検証時の本文の SHA256 | `27F32F24DB057AE78FDA4C2B4783DA1572CF28A8843975F6108FCC78024D00A8`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `C6CABB3918DD87333CBD94E4CB4C06A0BBE29CCF99FDAD3FBC0CC5947DF6EFF1` |
+
+**確認したこと**:
+
+- 手順 2・3（バッチ `20261006-110024Z-28d92065`、完了 11:00:28 UTC）:
+  - 手順 2 は出力がなく、既存の HackGen のファイルと登録は見つからなかった
+  - 手順 3 は zip の SHA256 一致の検査を通過し、ユーザーのフォントフォルダーに 4 つの ttf を置き、対応する `HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts` の登録を出した
+  - PowerShell のエラーは 0、最後の終了コードと検証用タスクの終了コードは 0。要求したバッチと完了記録が対応した
+- 独立した読み戻し（11:05:43 UTC）:
+  - `HackGenConsoleNF-Regular.ttf`・`HackGenConsoleNF-Bold.ttf`・`HackGen35ConsoleNF-Regular.ttf`・`HackGen35ConsoleNF-Bold.ttf` の 4 ファイルが存在し、サイズはいずれも 0 より大きかった。4 つとも登録パスが実ファイルと一致した
+  - `PrivateFontCollection` で `HackGen Console NF` と `HackGen35 Console NF` を読み込めた
+  - フォントフォルダーの `ALL APPLICATION PACKAGES`（`S-1-15-2-1`）と `ALL RESTRICTED APPLICATION PACKAGES`（`S-1-15-2-2`）への許可を確認した。どちらも `ReadAndExecute, Synchronize`、`ObjectInherit, ContainerInherit` だった
+  - 最初の追加検査はアカウント名を SID に変換する処理で失敗したため、raw SDDL と SID を読む方法で確認し直した。本文の導入ブロックの失敗ではない
+- 再サインイン後の追加検査（2026-10-07 04:04:16〜04:04:23 UTC）:
+  - 同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、`InstalledFontCollection` が `HackGen Console NF` と `HackGen35 Console NF` を認識した
+  - 設定やメモ帳のフォント一覧の確認は利用者に依頼済みで、回答待ち。GUI の選択・描画は未確認。証跡は `.verification/evidence/remaining-local-20261007-040410-0e3dc87e/guest-result.json`
+
+**確認していないこと**:
+
+- 手順 5 の設定のフォント一覧。Windows の初期設定で再起動・サインインは済んでいるが、フォントの GUI 確認は回答待ち
+- WezTerm や Windows Terminal などのアプリでの利用と見た目。`PrivateFontCollection` と `InstalledFontCollection` の認識だけでは、アプリで選択・描画できると判定しない
+- 更新、ロールバック、arm64 の Windows
+
+---
+
+#### HackGen Console NF: 付録: Windows 11 Pro の VM での WezTerm CLI によるフォント利用の検証（2026-10-07）
+
+前の導入と同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、WezTerm の `ls-fonts --codepoints 61,3042,6f22,2192,e0b0,f07c --rasterize-ascii` を実行した。各ファミリーを指定した使い捨ての設定を `--config-file` で渡し、フォントサイズは 12.0、`custom_block_glyphs=false` と `check_for_updates=false` にした。GUI のウィンドウは検査していない。
+
+| ファミリー | DirectWrite が使ったユーザーフォント | ラスタのピクセル数 | alpha が 0 でないピクセル数 |
+|---|---|---:|---:|
+| HackGen Console NF | `HackGenConsoleNF-Regular.ttf` | 974 | 639 |
+| HackGen35 Console NF | `HackGen35ConsoleNF-Regular.ttf` | 1031 | 665 |
+
+**確認したこと**:
+
+- 両ファミリーの `a`・`あ`・`漢`・`→`・Powerline の U+E0B0・Nerd Fonts の U+F07C、計 12 glyph を確認した。glyph ID はすべて 0 以外で `notdef` がなく、セル幅は両ファミリーとも順に `1/2/2/1/1/1`。別のフォントへの fallback や WezTerm の独自 glyph ではなかった
+- stdout の ANSI `38:6` の RGBA を文字ごとに集計し、bearing・offset、ラスタの幅・高さ、各チャンネルの 0〜255 の範囲と、alpha が 0 でない領域を確認した。計 2005 ピクセル中 1304 は alpha が 0 以外、359 は 255。HackGen35 の矢印だけ最大 alpha が 254 で、すべての glyph に 255 を要求する判定はしていない
+- 2 回の CLI 終了コードは 0、stderr は空、作業フォルダーの cleanup は成功した。実ユーザーとインストール先の WezTerm 設定 3 パスは前後とも存在せず、実設定は不変だった
+- 実行時刻は 2026-10-07 09:20:26〜09:20:46 UTC。証跡は `.verification/evidence/remaining-wezterm-font-20261007-092017-4d5448f6` の `guest-result.json` と独立した `glyph-assessment.json` に保存した。raw stdout の NUL padding と ANSI は解析用のコピーだけで処理し、元の JSON は保持した
+- raw JSON の SHA256 は `9B2C1DC0A426F36FF2971561FCC041077D62EFE718D8D85403C68CB1E6A40475`、評価 JSON は `C12A3BF87D1FD9BE9C9061AD12DB6F6866B2A4141E993CC3F80221184E753C68`。文字ごとの寸法と alpha の領域は評価 JSON と[WezTerm の付録](#wezterm-付録-windows-11-pro-の-vm-での-hackgen-の-cli-ラスタ生成の検証2026-10-07)に記録した
+
+**確認していないこと**:
+
+- Windows の設定・メモ帳・WezTerm GUI のフォント一覧と選択、画面上の描画や字形・太字・行の高さ。今回の CLI ラスタ生成をスクリーン上の見た目の確認へ広げない
+- Windows Terminal などのパッケージのアプリでの利用、選んだ 6 文字以外、更新・ロールバック、arm64 の Windows。以前の付録の未確認事項はその時点の履歴として保持した
+
+---
+
+#### HackGen Console NF: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、画面のフォントの一覧と WezTerm の窓での表示、更新の確認を行った。手順は [Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の番号。
+
+- 手順 5:
+  - 設定 → 個人用設定 → フォント は、ライセンス認証していないこの VM でも開いた。ただし、画面の検索欄は使えなかった（UI Automation で `IsEnabled` が `False`）
+  - 一覧をスクロールすると、「HackGen Console NF」と「HackGen35 Console NF」のタイルが、どちらも「2 フォント フェイス」で、見本の文がこのフォントで描かれて並んだ
+  - 本文の手順 5 に、検索欄が使えないときは一覧をスクロールする旨を足した
+- WezTerm の窓での表示: 一時的な `%USERPROFILE%\.wezterm.lua` で `HackGen Console NF` を指定すると、英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が表示された（[wezterm-nightly.md の検証記録](almalinux-setup.md#統合前の記録-weztermもとは-wezterm-nightlymd)の 2026-10-08 の付録。この VM では `prefer_egl` も要った）
+- Windows 11 の更新の手順 1: `v2.10.0`。新しい版は無いので、この節の手順 2 は行っていない
+- Windows 11 のロールバック（管理者ではない窓。Windows Terminal の中に開き、複数行の警告で「強制的に貼り付け」を押した）:
+  - この節の手順 1: 最後のコマンドは何も出さなかった
+  - この節の手順 2: サインアウトの代わりに再起動した（自動サインインで戻った）
+  - この節の手順 3: 最後のコマンドは何も出さなかった（4 つの ttf が消えた）
+
+**確認していないこと**:
+
+- メモ帳・Windows Terminal などほかのアプリでの選択、太字・行の高さの見た目の比べ、新しい版への更新、arm64 の Windows、Windows の実機
+
+---
+
+## 統合前の記録: OpenSSH サーバー（もとは windows-openssh-server.md）
+
+もとの `windows-openssh-server.md` の検証記録を、内容を変えずに移したもの。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
+| 実施手順 2（`$LAN_IF`） | （なし。「PC 全体の設定」の手順 2 の変数を使う） |
+| 実施手順 3〜7 | 「OpenSSH サーバー」の手順 1〜5 |
+| 実施手順 8・9 | 「SSH でログインを確かめる」の手順 3・4 |
+| 公開鍵でもログインする（任意）の 1〜5 | OpenSSH サーバーに公開鍵でもログインする（任意）の 1〜5 |
+| パスワード認証を切る（任意）の 1・2 | OpenSSH サーバーのパスワード認証を切る（任意）の 1・2 |
+| 既定のシェルを Git Bash にする（任意）の 1〜3 | SSH の既定のシェルを Git Bash にする（任意）の 1〜3 |
+| scoop のツールを SSH のセッションで使う（任意）の 1・2 | scoop のツールを SSH のセッションで使う（任意）の 1・2 |
+| ロールバック 1・2 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 2・3 |
+| ロールバック 3 | ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 5 |
+| ロールバック 4 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 9 |
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### OpenSSH サーバー: 補足
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+   - Windows Update から取ってくるので、数分かかる（検証した PC では 8〜9 分）
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（検証した PC は 10 回で 10 分。[注意点](../extra/windows-setup.md#注意点)）
+
+#### OpenSSH サーバー: 実施手順: 検証状況の記録
+
+> [!WARNING]
+> **Administrators の一員で SSH にログインすると、そのセッションは UAC の確認無しで管理者の権限を持つ**（検証した PC では High Mandatory Level）。このユーザーのパスワードを知る人は、SSH が届くところから、この PC の管理者として操作できる（[注意点](../extra/windows-setup.md#注意点)）。
+
+#### OpenSSH サーバー: 実施手順 / 手順 2: 補足: 変数について
+
+- `$LAN_IF` は、手順 5（ネットワークがプライベートか確かめる）と手順 7（接続先の IP を出す）で使う
+- 接続の一覧は `Get-NetConnectionProfile` で見られる。検証した PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
+- 公開鍵の `$PUBKEY` は[公開鍵でもログインする（任意）](../windows-setup.md#openssh-サーバーに公開鍵でもログインする任意)でしか使わないので、手順 2 ではなくその節の手順 3 で設定する
+
+#### OpenSSH サーバー: 実施手順 / 手順 5: 補足: プライベートにする理由
+
+- プライベートにする操作は、2026-10-03 に [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) へ移し、この手順は確かめるだけにした（Windows のインストール直後の作業をまとめたため。Syncthing の Windows 11 の節も同じ前提）。下の実測は、移す前の、この手順でプライベートにしていたときのもの
+- 手順 3 でできる規則は、プライベートのネットワークだけで有効。検証した PC の有線 LAN は「パブリック」だったので、そのままでは LAN からの SSH が捨てられる
+- WSL の AlmaLinux 10 から、この PC の LAN の IP（`<WIN_HOST>`）の 22/tcp につないで確かめた
+  - パブリックのとき: 5 秒待っても応答が無い
+  - プライベートにした後: すぐにバナー（`SSH-2.0-OpenSSH_for_Windows_9.5`）が返った
+- 検証した PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
+- 規則の接続元は `Any` なので、LAN を通って届く別のサブネットの相手も受け付ける。検証した PC には、WireGuard のクライアントのアドレスからも入れた（[注意点](../extra/windows-setup.md#注意点)）
+- パブリックのまま開ける方法（規則をパブリックにも広げる）は採らなかった（[選択した方針](#openssh-サーバー-選択した方針)）
+
+#### OpenSSH サーバー: 実施手順 / 手順 7: 補足: フルパスで呼ぶ理由
+
+- Git for Windows を入れた PC では、`PATH` の順によって、`ssh-keygen` が Git の `usr\bin\ssh-keygen.exe` になる。検証した PC では、ユーザーの `PATH` の先頭側に Git の `usr\bin` があり、`ssh`・`ssh-keygen`・`whoami` がどれも Git のものになった
+- Windows の OpenSSH のものを確実に使うため、`$env:WINDIR\System32\OpenSSH\` から呼ぶ
+
+#### OpenSSH サーバー: 実施手順 / 手順 9: 補足: ログインした後のセッションと、Microsoft アカウント
+
+- `-o PubkeyAuthentication=no` は、クライアントの鍵を使わせずに、パスワードで入れることを確かめるため。[公開鍵でもログインする（任意）](../windows-setup.md#openssh-サーバーに公開鍵でもログインする任意)で鍵を登録した後も、これを付ければパスワードを聞かれる
+- 既定のシェルは cmd.exe。sshd が `PROMPT` を `<ユーザー>@<ホスト名> <パス>>` の形にする
+- 指紋が手順 7 と違えば、`no` で止める。途中の経路で別の相手につながっている
+- Windows のイベント ビューアーの「アプリケーションとサービス ログ」→「OpenSSH」→「Operational」に、`sshd: Accepted password for <WIN_USER> from <IP> port <PORT> ssh2` が残る。PowerShell では `Get-WinEvent -LogName OpenSSH/Operational -MaxEvents 10`
+- 検証した PC のユーザーは Microsoft アカウントで、設定の「Windows Hello サインインのみを許可する」がオンのまま、そのアカウントのパスワードで入れた（[注意点](../extra/windows-setup.md#注意点)）
+- ローカル アカウントの標準ユーザーでも、このブロックのまま（`WIN_USER` だけ直して）入れた。`whoami /groups` の `Mandatory Label` は `Medium Mandatory Level` だった
+
+#### OpenSSH サーバー: 公開鍵でもログインする（任意） / 手順 4: 補足: 鍵の置き場所とアクセス権
+
+- Windows の `sshd_config` の末尾には `Match Group administrators` と `AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys` がある。Administrators の一員のユーザーは、ホームの `.ssh\authorized_keys` ではなく、このファイルの鍵で認証される
+- Microsoft の文書は、このファイルのアクセス権を Administrators と SYSTEM だけにするよう求めている。`/inheritance:r` で `C:\ProgramData\ssh` から受け継ぐ `Authenticated Users` の読み取りなどを外し、2 つだけを付ける。アクセス権が違うときの sshd の振る舞いは、試していない
+- `icacls` にはグループを SID で渡した（`S-1-5-32-544` が Administrators、`S-1-5-18` が SYSTEM）。表示の言語に左右されないため
+- `-Encoding ascii` は、Windows PowerShell 5.1 の `Add-Content` が既定で使うコードページ（日本語版では Shift_JIS）で書かないため。公開鍵は ASCII の文字だけでできている
+- `Get-LocalGroupMember` は、Microsoft アカウントのユーザーも `<HOSTNAME>\<WIN_USER>` の名前で返した
+
+#### OpenSSH サーバー: 既定のシェルを Git Bash にする（任意） / 手順 2: 補足: Git Bash のセッション
+
+- 対話のログインでも、ログインシェルにはならない（`shopt login_shell` が off）。`~/.bash_profile` は読まれず、`~/.bashrc` は読まれる。プロンプトは Git の `/etc/bash.bashrc` の `PS1`
+- bash は、sshd から起動されたことを見分けて、`bash -c` のときも `~/.bashrc` を読む。検証した PC では、`~/.bashrc` の `eval "$(zoxide init bash)"` のエラーが、`ssh … <コマンド>` のたびに出た（原因と対処は[scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)）
+- `PATH` は `/mingw64/bin:/usr/bin` の後ろに Windows の `PATH` が続き、`git` は `/mingw64/bin/git` になる。ホームは `/c/Users/<WIN_USER>`
+- `scp`（既定の SFTP の方式）、`scp -O`（旧来の方式。サーバー側では、`~/.bashrc` を読んだ bash の上で `scp` が動いた）、`sftp` の 3 つで、ファイルを送って消せた
+
+#### OpenSSH サーバー: scoop のツールを SSH のセッションで使う（任意） / 手順 1: 補足: RedirectionGuard と、作り直す理由
+
+- sshd には、IFEO（`HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sshd.exe`）の `MitigationOptions` で RedirectionGuard が掛けてある（19 バイトの値の最後のバイトが `0x10`）。SYSTEM で動く sshd を、ジャンクションを使った攻撃から守るためのもので、本書では外さない
+- `GetProcessMitigationPolicy` で `ProcessRedirectionTrustPolicy` を見ると、sshd の 3 つのプロセスと、その下の bash・PowerShell はどれも `Enforce=1` で、`services.exe` とローカルのシェルは 0 だった
+- 信頼されるかどうかは、ジャンクションを作ったときに決まる
+  - 同じ向き先で、一般ユーザーが作ったものは SSH のセッションから開けず（エラー 448）、管理者が作ったものは開けた
+  - 一般ユーザーが作ったものの所有者を、後から Administrators に変えても開けなかった
+- そこで、一般ユーザーの所有のもの（= 一般ユーザーが作ったもの）だけを選び、管理者の PowerShell で消して作り直す。管理者が作ったものは所有者が `BUILTIN\Administrators` になるので、2 回目からは選ばれない
+- `cmd.exe /c rmdir` はジャンクションそのものだけを消し、向き先の中身には触れない。scoop が付けた読み取り専用の属性は、`attrib /L` で外してから消し、作り直した後に付け直す
+- Windows PowerShell 5.1 の `Get-ChildItem -Recurse` は、ジャンクションの中へは入らなかった（`current` を通った重複は出ない）
+- 管理者が作ったジャンクションも、一般ユーザーが消せた（ACL は `C:\Users\<WIN_USER>` から受け継ぐ）。scoop の更新の邪魔にはならない
+- 検証した PC では、`current` 39 個と persist（`nodejs\<版>\bin`・`python\<版>\Scripts` など）14 個の、53 個を作り直した。作り直した後も、向き先・読み取り専用の属性は前と同じだった
+
+#### OpenSSH サーバー: 対象と検証環境
+
+- **目的**: LAN のほかの PC（AlmaLinux 10 など）から、Windows 11 の PC に SSH で入れるようにする
+  - Windows のオプション機能「OpenSSH サーバー」を入れ、Windows のユーザーのパスワードで認証する
+  - 受け付けるのは、プライベートにしたネットワークからだけ（プライベートにするのは [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート)。手順 5 で確かめる）
+  - 公開鍵での認証、パスワード認証を切る方法、ログインしたときのシェルを Git Bash にする方法、scoop のツールを SSH のセッションで使う方法は、任意節にした
+- **進め方**: 値は、Windows では手順 2、クライアントでは手順 8 の変数に 1 度だけ書き、以降のコマンドをそのまま貼る
+  - Windows の手順は管理者の Windows PowerShell に、クライアントの手順は bash に貼る
+  - 読者が書き換えるのは、`WIN_HOST`（クライアント）だけ。公開鍵の任意節では `$PUBKEY`（Windows）も
+- **状態**: **実機で本実行済み（2026-09-29・2026-09-30、同じ PC）。2026-09-29 は公開鍵を主にしていた版、2026-09-30 はパスワードを主にした今の版**
+  - 2026-09-29（公開鍵が主の版。クライアントは同じ PC の WSL の AlmaLinux 10）:
+    - x86_64 のノート PC（Windows 11 Pro 25H2）で、手順 1〜5・7・8、[公開鍵でもログインする（任意）](../windows-setup.md#openssh-サーバーに公開鍵でもログインする任意)の手順 1〜4、[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)の手順 1・2、Git Bash の任意節、ロールバックを通した
+    - 当時は、手順 7 の後に鍵で対話のログインをしていた（今の手順 9 は、パスワードでのログインに変えた）
+    - scoop の任意節は、その後に原因を調べて足し、同じ PC で通した
+    - ロールバックで実施前の状態に戻した後、当時の文書から機械的に抜き出したブロックで、同じ範囲（ロールバックを除く）をもう 1 度通した
+  - 2026-09-30 の朝（公開鍵が主の版のまま。[追加の確認の付録](#openssh-サーバー-付録-追加の確認2026-09-30)）:
+    - LAN の別の IP からの接続: 同じ PC の VirtualBox の VM を LAN にブリッジ接続し、ルーターの DHCP で別の IP を受け取った AlmaLinux 10.2 をクライアントにして、手順 8、当時の鍵での対話のログイン、[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)の手順 2、Git Bash と scoop の任意節の手順 2、ロールバックの手順 4 を流した。Windows の設定は変えていない
+    - Windows の再起動の後に、sshd が自動で起動したこと（2 回の起動のどちらも、起動の 30〜40 秒後に待ち受けを始めていた）
+  - 2026-09-30 の 1 回目（今の版を、2026-09-29 の後の PC に適用）:
+    - パスワード認証を切り、鍵を登録してあった PC に、手順 2・6 を流し、`PasswordAuthentication` を `no` から `yes` にした
+    - 書き直した文書から抜き出した手順 2〜5・7 を流した（何も変わらなかった）。手順 6 の 2 回目は、スマートフォンのセッションが切れた後に流し、出力も `sshd_config` のハッシュも変わらなかった
+    - パスワードでのログインは、利用者がスマートフォンの SSH のアプリから、WireGuard 越しに行った（Microsoft アカウントのパスワード）
+  - 2026-09-30 の 2 回目（今の版を、実施前の状態から通した）:
+    - `C:\ProgramData\ssh`（アクセス権ごと）と `HKLM:\SOFTWARE\OpenSSH`、WSL の `known_hosts` を控えてから、ロールバックの手順 1〜4 で実施前の状態にした
+    - この文書から抜き出したブロックで、手順 2〜9、公開鍵の任意節の手順 1〜5、パスワード認証を切る任意節の手順 1・2、戻すための手順 6 を通した
+    - 手順 8・9 は、試験用に作ったローカル アカウントの標準ユーザーで流した（`WIN_USER` を直した）。検証した PC のユーザー（Microsoft アカウント）のパスワードは、OpenSSH の `ssh` では流していない
+    - 公開鍵の任意節は、WSL に作った試験用の Linux ユーザーで、パスフレーズ付きの鍵を新しく作って通した
+    - 試験用のユーザーで、ロックアウトを確かめた
+    - 最後に、控えからホスト鍵・登録した鍵・`DefaultShell`・`known_hosts` を戻し（ハッシュとアクセス権が控えと一致）、試験用のユーザーを消した（Windows のプロファイルのフォルダーは、読み込まれたまま外れず、残った。付録）
+  - コードブロックは端末に貼らず、Claude Code から昇格した Windows PowerShell 5.1 と、WSL の bash に、手順ごとのスクリプトにして渡した。手順 1（PowerShell を開く）は、その形で代えた（付録）
+  - 確認したこと:
+    - 機能の導入（8〜9 分、再起動無し）、sshd の自動起動の設定と待ち受け
+    - LAN の接続がパブリックのままでは LAN の IP あての接続が捨てられ、プライベートにすると通ること
+    - 手順 6 の後の `sshd_config` が、既定の `sshd_config` から作っても、`no` にしてあったものから作っても、同じになること
+    - パスワードでのログイン: ローカル アカウントの標準ユーザー（手順 8・9 のブロック、cmd）と、Microsoft アカウント（スマートフォンのアプリ。「Windows Hello サインインのみを許可する」がオンのまま）。WireGuard のクライアントのアドレスからの接続
+    - 公開鍵でのログイン（cmd と Git Bash、パスフレーズ付きの鍵を新しく作る流れも）、ホスト鍵の指紋の照合、パスワード認証を切った後に `Permission denied` ですぐ終わること、手順 6 で戻ること
+    - Administrators の一員のセッションは High Mandatory Level（2026-09-29 に確かめた）、標準ユーザーのセッションは Medium Mandatory Level
+    - ロックアウト: ローカル アカウントでは、SSH のパスワードの失敗も数えられ、10 回目でロックされること
+    - Windows の再起動の後に sshd が自動で起動すること（利用者が 2 回起動し直したときのログ）
+    - Git Bash での `git`・`scp`・`scp -O`・`sftp`、`DefaultShell` を消すと cmd に戻ること
+    - SSH のセッションで scoop のツールが起動しない原因（sshd の RedirectionGuard）と、ジャンクションを管理者で作り直すと起動すること（scoop の任意節。一般ユーザーで作り直して壊した状態から、この文書のブロックで直した）
+    - ロールバックの後に残るもの（`C:\ProgramData\ssh` とレジストリのキー）と、消した後に入れ直せること
+    - 変数が空のとき・PowerShell 7 で貼ったときに、手順 3、公開鍵の任意節の手順 4、パスワード認証を切る任意節の手順 2、ロールバックの手順 4 が何も変えずに止まること
+  - **確認していないこと**:
+    - Microsoft アカウントのパスワードで、手順 8・9 のブロック（OpenSSH の `ssh`）から入ること
+    - LAN の別の PC（実機）から、この文書の手順で入ること（LAN の別の IP からは、同じ PC の VM から、2026-09-29 の版の手順で鍵で入った。[付録](#openssh-サーバー-付録-追加の確認2026-09-30)。WSL からの接続は、sshd には送信元がこの PC の LAN の IP として届いた。[注意点](../extra/windows-setup.md#注意点)）
+    - 端末に貼る操作そのもの（PowerShell の PSReadLine での複数行の貼り付け、bash の対話の入力）
+    - 標準ユーザーの鍵での認証（`authorized_keys`）、既定の UAC の設定での振る舞い
+    - Microsoft アカウントのロックアウト
+    - Windows Update での OpenSSH の更新
+  - **2026-10-03 の変更**: LAN をプライベートにする操作を [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) へ移し、手順 5 を確かめるだけのブロックに、ロールバックの手順 3 をそこを指すコマンドの無い手順に変えた。今の手順 5 のブロックは、構文の検査（Linux の pwsh 7.6.6 と PSScriptAnalyzer 1.25.0 の 5.1 互換）と、偽物の `Get-NetConnectionProfile` での模擬だけで、実機では流していない。上と付録の「手順 5」「ロールバックの手順 3」は、当時の、プライベートにするブロックとパブリックに戻すブロックを指す
+  - 実測の記録は[付録（2026-09-29）](#openssh-サーバー-付録-実機での検証記録2026-09-29)、[追加の確認の付録（2026-09-30）](#openssh-サーバー-付録-追加の確認2026-09-30)、[パスワード認証の付録（2026-09-30）](#openssh-サーバー-付録-パスワード認証の検証記録2026-09-30)
+
+下表は実機で採取した値。
+
+| 項目 | 値 |
+|---|---|
+| 実施日 | 2026-09-29、2026-09-30 |
+| PC | x86_64 のノート PC（AMD Ryzen AI MAX+ 395） |
+| OS | Windows 11 Pro 25H2（ビルド 26200.9457、日本語） |
+| PowerShell | Windows PowerShell 5.1.26100.9444（手順で使う）/ PowerShell 7.6.6（Microsoft Store 版。手順 3 が失敗した） |
+| OpenSSH | オプション機能 `OpenSSH.Server~~~~0.0.1.0`（`OpenSSH_9.5p2 for Windows`）。クライアントは同じ版が最初から入っていた |
+| Git for Windows | 2.55.0.windows.3（GNU bash 5.3.15） |
+| ユーザー | Microsoft アカウント。Administrators の一員。「Windows Hello サインインのみを許可する」がオン（`DevicePasswordLessBuildVersion` が 2） |
+| UAC | 有効。管理者は確認無しで昇格する設定（`ConsentPromptBehaviorAdmin` が 0） |
+| アカウントのロックアウト | `net accounts` で、10 回の失敗で 10 分（観測期間 10 分） |
+| ネットワーク | 有線 LAN 1 本（IPv4、/24）。2026-09-29 の手順の前はパブリック |
+| クライアント（2026-09-29） | 同じ PC の WSL 2.7.13.0（カーネル 6.18.33.2-microsoft-standard-WSL2、既定の NAT）の AlmaLinux 10.2。`openssh-clients-9.9p1-23.el10_2.alma.1` |
+| クライアント（2026-09-30） | 1 回目のパスワード: スマートフォンの SSH のアプリ（WireGuard のクライアント）。ほかは上と同じ WSL（公開鍵の任意節は、WSL に作った試験用の Linux ユーザー） |
+| 試験用のユーザー（2026-09-30） | Windows のローカル アカウントの標準ユーザー（`Users` だけ）。WSL の Linux ユーザー。どちらも検証の後に消した（Windows のプロファイルのフォルダーは残った） |
+
+> [!NOTE]
+> 環境固有の値は**変数**で書いてある。Windows では手順 2 の PowerShell の変数に、クライアントでは手順 8 のシェル変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+>
+> | 変数 | 設定する場所 | 意味 | 例 |
+> |---|---|---|---|
+> | `$LAN_IF` | Windows（手順 2） | クライアントとつながる LAN の接続の名前（自動で入る） | `イーサネット` |
+> | `${WIN_HOST}` | クライアント（手順 8） | Windows の LAN の IP アドレス | `192.168.1.30` |
+> | `${WIN_USER}` | クライアント（手順 8） | Windows のユーザー名（既定はクライアントのユーザー名） | `${USER}` |
+> | `$PUBKEY` | Windows（公開鍵の任意節の手順 3） | クライアントの公開鍵の 1 行 | `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` |
+>
+> 出力例・ログ・表の中の値は `<WIN_HOST>` / `<WIN_USER>` / `<HOSTNAME>`（Windows のコンピューター名）/ `<hostname>` と `<win_user>`（`whoami` が小文字で出すもの）/ `<LAN_IF>` / `<USER>`（クライアントのユーザー名）/ `<IP>` / `<PORT>` のプレースホルダで書いてある。
+>
+> パスワードと秘密鍵はこの文書に載せない。
+
+手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+#### OpenSSH サーバー: 実施前の状態
+
+実機で、2026-09-29 に手順 1 の前に確かめた状態:
+
+| 項目 | 状態 |
+|---|---|
+| OpenSSH サーバー | 未導入（サービス `sshd` が無く、`Get-WindowsCapability` は `NotPresent`） |
+| OpenSSH クライアント | `C:\Windows\System32\OpenSSH` に 9.5p2。サービス `ssh-agent` は `Disabled` |
+| `C:\ProgramData\ssh` | 空 |
+| `HKLM:\SOFTWARE\OpenSSH` | 無し |
+| 受信の規則 | 名前に ssh を含むものは無し |
+| 22/tcp | 待ち受け無し |
+| LAN の接続 | `<LAN_IF>`。パブリック |
+| リモート デスクトップ | 有効（規則はすべてのプロファイル）。本書では変えない |
+| `PATH` | ユーザーの `PATH` の先頭側に Git の `usr\bin` があり、`ssh`・`ssh-keygen`・`whoami` は Git のものが動く |
+| WSL | `AlmaLinux-10`（停止中）。`~/.ssh/id_ed25519`（パスフレーズ無し）が前からあった |
+
+- 2026-09-30 の 1 回目は、[完了時点の状態](#openssh-サーバー-完了時点の状態)の PC（`PasswordAuthentication no`、鍵を 1 つ登録、既定のシェルは Git Bash、LAN はプライベート）から始めた
+- 2026-09-30 の 2 回目は、ロールバックの手順 1〜4 の後に、上の表の OpenSSH サーバー・`C:\ProgramData\ssh`・`HKLM:\SOFTWARE\OpenSSH`・受信の規則・22/tcp・LAN の接続（パブリック）が同じ状態になったことを確かめてから始めた（`C:\ProgramData\ssh` は空ではなく、無かった）
+
+#### OpenSSH サーバー: 選択した方針
+
+- **Windows のオプション機能（Feature on Demand）で入れる**
+  - `Add-WindowsCapability` の 1 つで、サービス・受信の規則・既定の `sshd_config` がそろう
+  - Microsoft の文書は、Windows Update で保守されるこの版を、ほとんどの場合に勧めている
+  - GitHub の Win32-OpenSSH（winget の `Microsoft.OpenSSH.Preview`）は新しい版を使えるが、本書では試していない
+- **パスワードで認証し、公開鍵は任意節にした**（手順 6 でパスワード認証を明示的に有効にする）
+  - クライアントで鍵を作って Windows に登録しなくても、Windows のユーザーのパスワードだけで入れる。鍵を扱いにくいクライアント（スマートフォンのアプリなど）からも入れる
+  - 受け付けるのは、プライベートにしたネットワークから届く接続だけ（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート)）
+  - パスワードの総当たりへの備えは、Windows のアカウントのロックアウトのポリシー（検証した PC は 10 回で 10 分）。ローカル アカウントでは、SSH での失敗も数えられ、10 回目でロックされた
+  - 鍵で入れるようにしたら、パスワード認証を切れる（[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)）。2026-09-29 の版は、この形（公開鍵だけ）を主にしていた
+- **LAN の接続をプライベートにし、規則は変えない**
+  - 機能が作る規則は、プライベートのネットワークだけで有効。家の LAN をプライベートにすれば、規則を変えずに LAN から入れる
+  - 持ち出した先のパブリックの Wi-Fi では、閉じたままになる
+  - 規則をパブリックにも広げる（接続元を同じサブネットに絞る）方法は採らなかった。持ち出した先でも、同じサブネットの相手に開くため
+  - プライベートにすると、プライベート向けのほかの規則（ネットワーク探索など）もこの LAN で効く（手順 5 の補足）
+  - プライベートにする操作は、Windows のインストール直後の作業として [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) にまとめた（2026-10-03。もとは手順 5 で行っていた。Syncthing の Windows 11 の節も同じ前提にした）
+- **Windows PowerShell 5.1 で貼る**
+  - Microsoft Store の PowerShell 7 では、手順 3 の Dism のコマンドが失敗した
+  - ほかの手順（NetSecurity などのコマンド）もこのシェルにそろえ、1 つの PowerShell で通せるようにした
+- **公開鍵の任意節では、ED25519 の鍵をクライアントで作る**: 秘密鍵をクライアントから出さない。Windows に渡すのは公開鍵の 1 行だけ
+- **既定のシェルは任意節にした**: 既定の cmd.exe でも使える。Git Bash にすると、Linux のクライアントからシェルの道具と `git` をそのまま使える
+
+#### OpenSSH サーバー: 完了時点の状態
+
+実機で、2026-09-29 の 2 回目の通し（既定のシェルを Git Bash にした状態）の後に確かめた状態。この後に、scoop の任意節で scoop のジャンクションを作り直した:
+
+```
+PS> Get-Service sshd, ssh-agent | Format-Table Name, Status, StartType
+Name       Status StartType
+----       ------ ---------
+ssh-agent Stopped  Disabled
+sshd      Running Automatic
+
+PS> Get-NetConnectionProfile | Format-Table InterfaceAlias, NetworkCategory
+InterfaceAlias NetworkCategory
+-------------- ---------------
+<LAN_IF>               Private
+
+PS> Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, DisplayName, Enabled, Profile, Direction, Action
+Name                  DisplayName               Enabled Profile Direction Action
+----                  -----------               ------- ------- --------- ------
+OpenSSH-Server-In-TCP OpenSSH SSH Server (sshd)    True Private   Inbound  Allow
+
+PS> Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Get-NetFirewallApplicationFilter | Format-List Program
+Program : %SystemRoot%\system32\OpenSSH\sshd.exe
+
+PS> Get-ItemProperty HKLM:\SOFTWARE\OpenSSH | Format-List DefaultShell
+DefaultShell : C:\Program Files\Git\bin\bash.exe
+
+PS> Get-ChildItem C:\ProgramData\ssh -Force | Format-Table Mode, Length, Name
+Mode  Length Name
+----  ------ ----
+d----        logs
+-a--- 98     administrators_authorized_keys
+-a--- 505    ssh_host_ecdsa_key
+-a--- 178    ssh_host_ecdsa_key.pub
+-a--- 411    ssh_host_ed25519_key
+-a--- 98     ssh_host_ed25519_key.pub
+-a--- 2602   ssh_host_rsa_key
+-a--- 570    ssh_host_rsa_key.pub
+-a--- 2295   sshd_config
+-a--- 6      sshd.pid
+```
+
+- 管理者でない PowerShell からは、`icacls C:\ProgramData\ssh\administrators_authorized_keys` が `Access is denied.` になった（公開鍵の任意節の手順 4 のアクセス権が効いている）
+- `sshd_config` は、既定の 2297 バイトから、パスワード認証を切る任意節の手順 1 の 1 行の置き換えで 2 バイト減った
+- 2026-09-30 に手順 6 を流した後は、`sshd_config` の 51 行目が `PasswordAuthentication yes` になり、2296 バイト（既定から 1 バイト減）になった。ほかは上と同じ（`sshd.pid` だけ、プロセス ID の桁が増えて 7 バイト。[付録（2026-09-30）](#openssh-サーバー-付録-パスワード認証の検証記録2026-09-30)）
+- 2026-09-30 の 2 回目の通しの後は、控えから `C:\ProgramData\ssh` と `DefaultShell` を戻したので、1 回目の後と同じ状態（ファイルのハッシュとアクセス権が一致）
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - この設定がオンだと、Microsoft アカウントのパスワードが sshd のログにエラー 1326 を残して拒否され、オフにして sshd を再起動すると通った、という報告がある（[参照](../reference/windows-setup.md#openssh-サーバー-参照)の Q&A）。検証した PC では起きなかった
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+- **パスワードを続けて間違えたとき**（ローカル アカウントの標準ユーザーで試した）
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+- **鍵で入ったセッションは、ユーザーの資格情報を持たない**（Microsoft の文書）。セッションの中から、そのユーザーとしてほかのサーバーの共有などへ認証できない。本書では、鍵でもパスワードでも試していない
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - 標準ユーザーの鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く（Microsoft の文書）。本書では試していない。公開鍵の任意節の手順 4 は、Administrators の一員でなければ止まる
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - scoop のジャンクションは、[scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)で、管理者で作り直せば通る。scoop 以外のツールのジャンクションも、同じ理由で通らないはず（試していない）
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - 検証した PC の UAC は、管理者が確認無しで昇格する設定だった。既定の UAC での振る舞いは確かめていない
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - 検証した PC では、設定の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」がオンのまま、Microsoft アカウントのパスワードで入れた
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - 検証した PC のロックアウトのポリシーは、10 回の失敗で 10 分（`net accounts`）
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - ほかのユーザーの接続には影響しなかった。Microsoft アカウントのロックアウトは試していない
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - 検証した PC には、[WireGuard VPN](../wireguard.md) のクライアントのアドレスから、パスワードで入れた
+
+#### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
+
+  - 検証した PC では、scoop の `current` を通る `zoxide.exe` と `python.exe` が Git Bash から `Is a directory` になり、scoop の shim は `Could not create process with command …` で失敗した。`PATH` のうち scoop の 7 つのディレクトリも開けなかった
+
+#### OpenSSH サーバー: 参照
+
+- [Get started with OpenSSH Server for Windows](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse)（`Add-WindowsCapability`、サービスの起動、規則 `OpenSSH-Server-In-TCP`、外し方）
+- [Key-Based Authentication in OpenSSH for Windows](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement)（`administrators_authorized_keys` とアクセス権、SID で書く `icacls`、標準ユーザーの `authorized_keys`、鍵で入ったセッションの資格情報）
+- [OpenSSH Server Configuration for Windows](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration)（`DefaultShell`、`AuthorizedKeysFile`、使える認証の方法、Windows で使えない設定）
+- [Unable to log into SSH server using Microsoft account](https://learn.microsoft.com/en-us/answers/questions/1332375/unable-to-log-into-ssh-server-using-microsoft-acco)（Microsoft Q&A。Microsoft アカウントのパスワードがエラー 1326 で拒否された例と、「Windows Hello サインインのみ」をオフにする回避策）
+- [Win32-OpenSSH の wiki](https://github.com/PowerShell/Win32-OpenSSH/wiki)
+- `Get-Help Add-WindowsCapability` / `Get-Help Set-NetConnectionProfile` / `Get-Help New-ItemProperty`
+- [WireGuard Road Warrior 設定手順](../wireguard.md#almalinux-10-の-pc-からつなぐ)（別の PC からの接続を外出先に広げるとき。本書では試していない）
+
+#### OpenSSH サーバー: 付録: 実機での検証記録（2026-09-29）
+
+この付録の手順番号は、今の番号に付け替えてある。「鍵の節」は[公開鍵でもログインする（任意）](../windows-setup.md#openssh-サーバーに公開鍵でもログインする任意)、「切る節」は[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)のこと。「当時の手順 12」は、手順 7 の後に鍵で対話のログインをしていた手順（今の文書には無い）。
+
+**流し方**:
+
+- Windows の手順は、ブロックを UTF-8（BOM 付き）の `.ps1` にし、Claude Code の PowerShell から `sudo powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ファイル>` で 1 手順ずつ実行した
+  - Windows の `sudo` はインラインのモードで、UAC は確認無しで昇格する設定
+  - 各 `.ps1` の先頭に、変数のブロック（今の手順 2 と、鍵の節の手順 3。当時は 1 つの手順）を付けた。同じ PowerShell に貼り続けたときと同じ変数にするため
+  - `$PUBKEY` は、`''` の中だけを鍵の節の手順 2 の出力に置き換えた
+- クライアントの手順は、`wsl.exe -d AlmaLinux-10 --exec bash <スクリプト>` で実行した
+  - 手順 8 は、`WIN_HOST=` の後ろだけを書き換えた
+  - 当時の手順 12 と Git Bash の任意節の手順 2 の対話は、`script` の擬似端末に `yes`・`whoami`・`exit` を流し込んだ
+- 2 回目は、この文書の `powershell` と `bash` のブロックを順に抜き出したファイルを、上の置き換えだけで使った
+
+**1 回目**（下書きのブロック）:
+
+- 手順 3 は、最初に Microsoft Store の PowerShell 7.6.6 で流し、266 秒後に `Add-WindowsCapability` と `Get-WindowsCapability` が `クラスが登録されていません` で失敗した。状態は `NotPresent` のまま
+- Windows PowerShell 5.1 で流し直すと、532 秒で `State : Installed`（`RestartNeeded : False`）になった
+- 手順 4・5、鍵の節の手順 4、切る節の手順 1、手順 7、当時の手順 12、切る節の手順 2、Git Bash の任意節の手順 1・2 を通した。ホスト鍵の指紋は、手順 7 と、クライアントの `ssh-keygen -lF <WIN_HOST>` で一致した
+- ロールバックの手順 1〜4 で、実施前の状態に戻した。`Remove-WindowsCapability` は 6 秒、`RestartNeeded : False`
+  - 外した直後に残っていたもの: `C:\ProgramData\ssh` の全ファイル（ホスト鍵・`sshd_config`・`administrators_authorized_keys`）と、`HKLM:\SOFTWARE\OpenSSH` の `DefaultShell`
+  - 消えていたもの: サービス `sshd`、`sshd.exe`、規則 `OpenSSH-Server-In-TCP`
+
+**2 回目**（この文書のブロック）:
+
+- 先に、何も変えずに止まるかを確かめた
+  - PowerShell 7 で手順 3: `Write-Error: Windows PowerShell（5.1）で貼る。…`
+  - `$PUBKEY` が空のまま鍵の節の手順 4: `手順 3 の $PUBKEY が空か、公開鍵の形でない`（`C:\ProgramData\ssh` はできなかった）
+- 手順 3 は 486 秒。導入の直後は、`C:\ProgramData\ssh` も `HKLM:\SOFTWARE\OpenSSH` もまだ無く、手順 4 で sshd を起動した後にできた
+- 鍵の節の手順 4 の後・切る節の手順 1 の前に、パスワードを聞かれることと、セッションが High Mandatory Level であることを確かめた（ホスト鍵は `UserKnownHostsFile=/dev/null` で、`known_hosts` に残さなかった）
+- 切る節の手順 1 は 2 回流し、`PasswordAuthentication` の行が 1 行のままだった
+- 当時の手順 12 で、初回の `ED25519 key fingerprint is SHA256:…` が手順 7 と一致し、`yes` の後に cmd のプロンプトになった
+- Git Bash の任意節は、手順 1 → 2 → 3（cmd に戻る）→ 1 の順に流し、Git Bash の状態で終えた
+- `WIN_HOST` が空のまま、切る節の手順 2 とロールバックの手順 4 のブロックを流し、どちらも何もしないで止まった
+
+**切り分け: WSL から届かなかった接続**:
+
+- 最初に使った試験の誤り
+  - `/dev/tcp` でつなぎ、バナーを `head -c 40` で読んでいた
+  - Windows の sshd のバナー（`SSH-2.0-OpenSSH_for_Windows_9.5` と CRLF で 33 バイト）の後は、クライアントを待つ。40 バイトがそろわず、つながっていても 5 秒のタイムアウトになった
+  - このため、しばらく「どの規則を足しても届かない」と見誤った
+- `read -t 5` で 1 行を読む形に直して、測り直した
+
+  | LAN の接続 | 規則 | `<WIN_HOST>`（LAN の IP）あて | WSL の既定の経路の先の IP あて |
+  |---|---|---|---|
+  | パブリック | 機能の規則だけ | 届かない | 届かない |
+  | プライベート | 機能の規則だけ | 届く | 届かない |
+  | プライベート | WSL の範囲（`172.25.32.0/20`）からの 22/tcp を許す一時的な規則（パブリック） | 届く | 届く |
+
+- 捨てていたのは、WFP の `Query User` のフィルター（層は `FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4`、条件は `FWPM_CONDITION_ORIGINAL_PROFILE_ID` が 1）
+  - `netsh wfp show netevents localport=22` のドロップの記録と、`netsh wfp show filters` で突き合わせた
+  - 機能の規則（プライベート）から作られたフィルターの条件は、プロファイル ID が 2
+- sshd のログ（`OpenSSH/Operational`）では、WSL から LAN の IP あての接続の送信元は `<WIN_HOST>` だった
+- 一時的な規則（`Verify-WSL-sshd`）は、確かめた後に消した
+- 途中で、どのプロファイルでも有効なブロックの規則が 1 つ見つかった。別のソフトが作ったもので、特定のローカルユーザーのプロセスだけに効き、SYSTEM で動く sshd には関係しなかった
+
+**切り分け: SSH のセッションで scoop のツールが起動しない**（2 回目の後）:
+
+- 症状
+  - Git Bash の既定のシェルで、`ssh … <コマンド>` のたびに `Shim: Could not create process with command '"C:\Users\<WIN_USER>\scoop\apps\zoxide\current\zoxide.exe"  init bash'.` が出た
+  - SSH のセッションの `cmd /c dir …\zoxide\current\zoxide.exe` は `ファイルが見つかりません`。Git Bash の `ls -la …\zoxide\current\` は、名前は出るものの、どれもディレクトリで日付が 1601 年の、壊れた属性で出た
+  - ローカルのシェルでは、昇格していてもいなくても、`current` を通して動いた
+- SSH のセッションの PowerShell で `CreateFileW` を呼ぶと、`…\zoxide\current\zoxide.exe` はエラー 448（`信頼されていないマウントポイントが含まれているため、パスをスキャンできません。`）、`…\zoxide\0.9.9\zoxide.exe` は成功した
+- 同じ PowerShell から、自分と親のプロセスの `GetProcessMitigationPolicy(ProcessRedirectionTrustPolicy)` を順にたどった
+  - PowerShell・bash 2 つ・sshd 3 つは `flags=0x1`（Enforce）、`services.exe`・`wininit.exe` は `0x0`
+  - ローカルの PowerShell は `0x0`
+  - IFEO の `sshd.exe` に `MitigationOptions`（19 バイト、最後が `0x10`）があった
+- 信頼の判定を試した（向き先はどれも `…\zoxide\0.9.9`）
+
+  | ジャンクション | 所有者 | SSH のセッションから開く |
+  |---|---|---|
+  | 一般ユーザーの PowerShell で作った | `<HOSTNAME>\<WIN_USER>` | エラー 448 |
+  | 管理者の PowerShell（`sudo`）で作った | `BUILTIN\Administrators` | 開けた |
+  | 一般ユーザーで作り、管理者で所有者を Administrators に変えた（`icacls /setowner … /L`） | `BUILTIN\Administrators` | エラー 448 |
+
+- SSH のセッションで `PATH` の各ディレクトリを開くと、scoop の `current` を通る 7 つがエラー 448 だった（ほかに、ローカルにも無い WinGet のパスが 1 つ、エラー 2）
+- 対処
+  - 作り直す処理を一時的なジャンクションで試し、向き先の中身が残ること、読み取り専用の属性が戻ること、2 回目は何もしないこと、一般ユーザーが後から消せることを確かめた
+  - scoop の 53 個を作り直し、作り直す前に控えた一覧と、向き先・属性が一致した
+  - SSH のセッションで `zoxide`・`rg`・`fd`・`nvim`・`gh`・`jq`・`lazygit`・`node`・`python` が動き、`Shim:` の行は出なくなった。`PATH` の scoop の 7 つも開けた
+  - 最後に、`zoxide` の `current` を一般ユーザーで作り直して壊し、[scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)の 2 つのブロックをそのまま流して、直ることを確かめた（手順 1 は 1 行を出し、2 回目は何も出さなかった）
+
+**残っている未確認事項**:
+
+1. LAN の別の PC（AlmaLinux 10）からの接続。送信元が LAN の別の IP になる接続は、まだ流していない
+1. 端末に貼る操作そのもの（Windows PowerShell 5.1 の PSReadLine での複数行の貼り付け、`if … else` のブロック）
+1. パスフレーズ付きの鍵と、鍵の節の手順 1 で鍵を新しく作る流れ
+1. 標準ユーザーの `authorized_keys`、パスワード（Microsoft アカウント）でのログイン
+1. 既定の UAC の設定で、SSH のセッションが High Mandatory Level になるか
+1. Windows の再起動の後に sshd が自動で起動するか、Windows Update での OpenSSH の更新
+1. `scoop update` の後に、更新したアプリが SSH のセッションで起動しなくなり、scoop の任意節の手順 1 で直ること（理屈の上ではそうなるが、実際の更新では試していない）
+
+---
+
+#### OpenSSH サーバー: 付録: 追加の確認（2026-09-30）
+
+前の付録の「残っている未確認事項」のうち、1（LAN の別の IP からの接続）と 6 の前半（再起動の後の自動起動）を、同じ PC で確かめた。Windows の設定（`sshd_config`・登録した鍵・規則・ネットワークのプロファイル）は変えていない。このときの文書は公開鍵が主の版（2026-09-29 の版）で、この付録の手順の番号は今の版に付け替えた。今の版に同じコマンドが無いものは、当時の番号で書いた。
+
+**再起動の後の自動起動**:
+
+- 手順を通した後（2026-09-29 の 13:40）に、Windows は 2 回起動し直していた（システムのイベント ログの `Microsoft-Windows-Kernel-General` の ID 12 で、2026-09-30 の 1:29:00 と 1:43:45）
+- `OpenSSH/Operational` の `sshd: Server listening on 0.0.0.0 port 22.` と `sshd: Server listening on :: port 22.` が、1:29:41 と 1:44:18 にあった（起動の 41 秒後と 33 秒後。手では起動していない）
+- `Get-Service sshd` は `Running`・`Automatic` で、WSL の AlmaLinux 10 から `<WIN_HOST>` に鍵でログインでき、Git Bash のセッションになった
+- 管理者でない PowerShell からは、sshd のプロセスの開始時刻と `C:\ProgramData\ssh\ssh_host_ed25519_key.pub` は読めなかった（`ssh-keygen -lf` は `Permission denied`）。`OpenSSH/Operational` とシステムのイベント ログは読めた
+
+**LAN の別の IP からの接続**:
+
+- クライアント: 同じ PC の VirtualBox 7.2.20 の VM の AlmaLinux 10.2（Atomic Desktop、`openssh-clients-9.9p1`。[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)の VM）
+  - VM のネットワークを、動かしたまま NAT から有線 LAN のアダプターへのブリッジ接続に切り替えた（`VBoxManage controlvm <VM> nic1 bridged <アダプター>`）
+  - VM の NetworkManager が DHCP で取り直し、ルーターから `<VM_IP>`（`<WIN_HOST>` と同じサブネットの別の IP）を受け取った
+- 鍵: VM に秘密鍵を置かず、WSL の `ssh-agent` に前からの鍵（`administrators_authorized_keys` に登録済み）を載せ、WSL から VM へエージェントを転送して入った
+  - VM の `~/.ssh` には鍵が無いので、当時の手順 12（鍵での対話のログイン）などの ssh は、転送されたエージェントの鍵で認証される
+- 流し方: WSL の tmux の擬似端末から VM に入り、この文書の `bash` のブロックを抜き出したものを、ブラケットペーストで貼った
+  - 手順 8 は、`WIN_HOST=` の後ろを書き換えた。`WIN_USER` は、VM のユーザー名が Windows と違うので、手順 8 のとおり `<WIN_USER>` に直した
+- この PC は、Git Bash の任意節（`DefaultShell`）と scoop の任意節を通した状態だった
+
+| 手順 | 結果 |
+|---|---|
+| 8 | `WIN_HOST = <WIN_HOST>`、`WIN_USER = <WIN_USER>` |
+| 当時の 12（今の手順 9 から `-o PubkeyAuthentication=no` を除いた、鍵での対話のログイン） | `ED25519 key fingerprint is SHA256:<指紋>.`（WSL の `ssh-keyscan -t ed25519 <WIN_HOST> \| ssh-keygen -lf -` と一致）→ `yes` → `<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプト。`whoami` は `<win_user>`、`echo "$SSH_CONNECTION"` は `<VM_IP> <PORT> <WIN_HOST> 22` |
+| パスワード認証を切る 2 | パスワードを聞かずに `<WIN_USER>@<WIN_HOST>: Permission denied (publickey,keyboard-interactive).`、2 つ目は `<win_user>` |
+| Git Bash の任意節 2 | `5.3.15(1)-release MINGW64`、`git version 2.55.0.windows.3`、対話のプロンプト → `exit` |
+| scoop の任意節 2 | `zoxide 0.9.9`（`Shim:` の行は無い） |
+| ロールバック 4 | `# Host <WIN_HOST> found: line 1`〜`3`（ED25519・RSA・ECDSA。ssh がログインの後にほかのホスト鍵も `known_hosts` に足していた）、`… known_hosts updated.`、`Original contents retained as …/known_hosts.old` |
+
+- Windows の `OpenSSH/Operational` には、`sshd: Accepted publickey for <WIN_USER> from <VM_IP> port <PORT> ssh2: ED25519 SHA256:…` が残った（送信元は、この PC の LAN の IP ではなく、VM の IP）
+- LAN の接続はプライベートのままで、規則 `OpenSSH-Server-In-TCP`（プライベート）で通った
+- `OpenSSH/Operational` の `Accepted publickey` のうち、LAN の別の IP からのものは、この確認の 2 分間の 5 件だけだった。[パスワード認証の付録](#openssh-サーバー-付録-パスワード認証の検証記録2026-09-30)の未確認事項の「利用者の公開鍵での接続は、LAN の別の IP からもログに残っていた」は、この確認の接続
+- 終わった後に、VM を NAT に戻し、WSL の `ssh-agent` を止めた
+
+**残っている未確認事項**:
+
+1. LAN の別の PC（実機）からの接続（今回は同じ PC の VM から確かめただけ）
+1. 端末に貼る操作そのもの（Windows PowerShell 5.1 の PSReadLine での複数行の貼り付け、`if … else` のブロック）
+1. パスフレーズ付きの鍵と、鍵の節の手順 1 で鍵を新しく作る流れ
+1. 標準ユーザーの `authorized_keys`、パスワード（Microsoft アカウント）でのログイン
+1. 既定の UAC の設定で、SSH のセッションが High Mandatory Level になるか
+1. Windows Update での OpenSSH の更新
+1. `scoop update` の後に、更新したアプリが SSH のセッションで起動しなくなり、scoop の任意節の手順 1 で直ること
+
+---
+
+#### OpenSSH サーバー: 付録: パスワード認証の検証記録（2026-09-30）
+
+**流し方**:
+
+- 前の付録と同じく、Windows の手順は `.ps1`（UTF-8、BOM 付き）にして、`sudo powershell.exe -NoProfile -ExecutionPolicy Bypass -File` で 1 手順ずつ流した。各 `.ps1` の先頭に手順 2 のブロックを付けた
+- 始めの状態は、2026-09-29 の[完了時点の状態](#openssh-サーバー-完了時点の状態)（`PasswordAuthentication no`、鍵を 1 つ登録、既定のシェルは Git Bash、LAN はプライベート）
+  - アカウントは Microsoft アカウント（`Get-LocalUser` の `PrincipalSource` が `MicrosoftAccount`）
+  - 設定の「Windows Hello サインインのみを許可する」はオン（利用者が画面で確かめた。レジストリの `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device` の `DevicePasswordLessBuildVersion` は 2）
+- 手順 6 の再起動の前に、`Get-Process sshd` が 1 つだけ（待ち受けだけで、セッションが無い）ことを確かめた
+- パスワードは利用者が自分の端末で入れ、成否は `OpenSSH/Operational` のログで確かめた
+
+**1 回目の結果**（2026-09-29 の後の PC に適用）:
+
+- 手順 6: `…:51:PasswordAuthentication yes` と `…:87:Match Group administrators` が出た。`sshd_config` は 2295 バイトから 2296 バイトになった
+- WSL から `ssh -o PubkeyAuthentication=no -o BatchMode=yes <WIN_USER>@<WIN_HOST> true`（パスワードを聞かない形）でつなぐと、`Permission denied (publickey,password,keyboard-interactive).` で終わり、sshd が `password` を返すようになった
+- 利用者がスマートフォンの SSH のアプリから WireGuard 越しにつなぎ、Microsoft アカウントのパスワードで入った。`whoami` は `<WIN_USER>`（既定のシェルが Git Bash なので、Git の `whoami`）
+  - ログには `sshd: Accepted password for <WIN_USER> from <IP> port <PORT> ssh2` が 2 回残った。`<IP>` は WireGuard のクライアントのアドレス（LAN の外のサブネット）
+  - 1 回目の切断の記録は `Received disconnect from <IP> port <PORT>:11: Normal Shutdown`（OpenSSH の `ssh` なら `disconnected by user`）
+- WSL から、公開鍵の任意節の手順 5 を流した。パスワードを聞かれずに `<WIN_USER>` が出た（既定のシェルが Git Bash なので、Git の `whoami`）
+- 文書を書き直した後に、`## 実施手順` の `powershell` のブロックを順に抜き出し、手順 2〜5・7 を流した
+  - 手順 3 は 9 秒で `RestartNeeded : False` と `State : Installed`（入っていたので取りに行かなかった）
+  - 手順 4・5 は、`sshd  Running  Automatic`、22 番の 2 行、`<LAN_IF>  Private`、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` で、何も変わらなかった
+  - 手順 7 は、`<WIN_USER>@<WIN_HOST>` と ED25519 の指紋を出した。指紋は、2026-09-29 に WSL の `known_hosts` に入った鍵（`ssh-keygen -F <WIN_HOST> -l`）と同じだった
+- 抜き出した手順 6 は、最初に流したブロックと行が同じだった（末尾の改行だけが違った）
+  - このときスマートフォンのセッションがつながっていた（`sshd` のプロセスが 3 つ）ので、再起動する 2 回目は流さなかった
+  - 代わりに、`sshd_config` の写しに手順 6 の置き換えを Windows PowerShell 5.1 でもう 1 度当て、ハッシュが変わらないことを確かめた
+- [完了時点の状態](#openssh-サーバー-完了時点の状態)の確認のコマンドを流し直し、`sshd_config` と `sshd.pid` の長さのほかは 2026-09-29 と同じ値だった
+- スマートフォンのセッションが切れた後に、抜き出した手順 6 をもう 1 度流した。出力は 1 回目と同じで、`sshd_config` のハッシュは変わらず、sshd は再起動した（プロセス ID が変わった）
+
+**2 回目: 実施前の状態からの通し**:
+
+- 試験用のユーザーを 2 つ作った
+  - Windows: ローカル アカウントの標準ユーザー（`New-LocalUser` と、`Users` への追加。Administrators には入れない）。パスワードはランダムに作り、作業用のファイルにだけ置いた
+  - WSL: Linux のユーザー（`useradd -m`）。公開鍵の任意節を、空の `~/.ssh` から通すため
+  - 一時的な `HOME` では代えられなかった。`ssh-keygen` は `$HOME` ではなく passwd のホームを見て、いつものユーザー（`<USER>`）の `~/.ssh/id_ed25519` の `Overwrite (y/n)?` で止まった（何も答えずに打ち切り、鍵が変わっていないことを確かめた）
+- 対話（ホスト鍵の確認・パスワード・パスフレーズ・cmd のプロンプト）には、WSL の Python の `pty` で動かす小さなスクリプトで答えた。ブロックは文書から抜き出したまま流した
+- 控え: `robocopy /E /COPYALL /B` で `C:\ProgramData\ssh` を、`reg export` で `HKLM\SOFTWARE\OpenSSH` を、`cp -p` で WSL の `known_hosts` と `known_hosts.old` を控えた
+- ロールバック: 手順 1 は 6 秒で `State : NotPresent`、手順 2 は `False` が 2 行、手順 3 は `<LAN_IF>  Public`、手順 4 は `found: line 4`〜`6` の 3 行と `known_hosts updated.`
+- 手順 2〜7:
+  - 手順 3 は 493 秒で `RestartNeeded : False` と `State : Installed`。直後は `C:\ProgramData\ssh` もレジストリのキーも無く、sshd は `Stopped` / `Manual`
+  - 手順 4 の後の `sshd_config` は、`C:\Windows\System32\OpenSSH\sshd_config_default` と同じ（2297 バイト、51 行目は `#PasswordAuthentication yes`）
+  - 手順 5 で `Public` から `Private` になった
+  - 手順 6 の後の `sshd_config`（2296 バイト）は、1 回目の後のもの（`no` から `yes` にしたもの）とハッシュが同じだった
+  - 手順 7 は新しいホスト鍵の指紋を出した
+- 手順 8・9（試験用の標準ユーザー。`WIN_HOST=` の後ろと、`WIN_USER` の値だけを書き換えた）:
+  - 初回の `ED25519 key fingerprint is SHA256:…` が手順 7 と一致し、`yes` の後にパスワードを聞かれた
+  - cmd のプロンプトが出て、`whoami` は `<hostname>\<試験用のユーザー>`。`whoami /groups` は `BUILTIN\Users` と `Mandatory Label\Medium Mandatory Level`
+  - ログは `Accepted password for <試験用のユーザー> from <WIN_HOST> port <PORT> ssh2`
+- 公開鍵の任意節（WSL の試験用のユーザー。`WIN_USER` は検証した PC のユーザー（`<WIN_USER>`）に直した）:
+  - 手順 1 は `Created directory '/home/<試験用のユーザー>/.ssh'.` の後にパスフレーズを 2 回聞き、手順 2 は 1 行の公開鍵を出した
+  - 手順 3・4 は、`$PUBKEY` の `''` の中だけを手順 2 の出力に置き換えて流した。`icacls` は `NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行
+  - 手順 5 は、初回のホスト鍵の確認に `yes` と答えると、パスワードではなくパスフレーズ（`Enter passphrase for key …`）を聞き、`<hostname>\<win_user>` を出した
+- パスワード認証を切る任意節:
+  - 手順 1 は `…:51:PasswordAuthentication no`、`…:87:Match Group administrators`、`…:88:       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys`
+  - 手順 2 の 1 つ目は、パスワードを聞かずに `Permission denied (publickey,keyboard-interactive).`。2 つ目はパスフレーズを聞き、`<hostname>\<win_user>` を出した
+  - 試験用の標準ユーザーも、パスワードを聞かれずに `Permission denied (publickey,keyboard-interactive).` になった
+  - 手順 6 を流し直すと、`Permission denied (publickey,password,keyboard-interactive).` に戻り、試験用の標準ユーザーがパスワードで入れた
+- 戻し: sshd を止め、`robocopy /MIR /COPYALL /B`（`sshd.pid` は除く）と `reg import` で戻し、sshd を起動した
+  - ファイルのハッシュと `icacls` の出力が控えと一致し、ホスト鍵の指紋は元に戻った。`DefaultShell` も戻った
+  - WSL の `known_hosts` を控えから戻すと、いつものユーザー（`<USER>`）の鍵で、ホスト鍵の警告無しに入れた
+  - 戻しのスクリプトを最初に流したときは、構文の誤り（Windows PowerShell 5.1 の `( a ; b )`）で何も実行されなかった。そのとき、戻した `known_hosts` の WSL から接続すると、`REMOTE HOST IDENTIFICATION HAS CHANGED!` で止まった
+
+**ロックアウト**（試験用の標準ユーザー）:
+
+- `net accounts` は、しきい値 10 回・ロックの時間 10 分・観測期間 10 分
+- 間違ったパスワードを、1 回の接続で 3 回（`ssh` の既定の `NumberOfPasswordPrompts`）ずつ送った
+
+  | 接続 | `BadPasswordAttempts` | ロック |
+  |---|---|---|
+  | 前 | 0 | 無し |
+  | 1 回目 | 3 | 無し |
+  | 2 回目 | 6 | 無し |
+  | 3 回目 | 9 | 無し |
+  | 4 回目 | 10 | 有り |
+
+- セキュリティのログ: 失敗ごとにイベント 4625（ログオンの種類 8、`Status 0xc000006d`・`SubStatus 0xc000006a`、プロセスは `sshd.exe`）。10 回目の直後にイベント 4740（ロック）
+- ロックの後は、正しいパスワードでも入れなかった
+  - `ssh -v` では、鍵交換が終わった後（ユーザー名を送った段階）で `Connection reset by <WIN_HOST> port 22` になり、パスワードを聞かれなかった
+  - sshd のログには何も残らなかった
+  - 同じときに検証した PC のユーザー（`<WIN_USER>`）でつなぐと、ふだんどおり認証の方法の一覧（`publickey,password,keyboard-interactive`）が返った
+- ロックは 10 分で解けた（20 秒ごとに確かめ、ロックの 10 分 6 秒後に解けていた）。`BadPasswordAttempts` は 0 に戻り、正しいパスワードで入れた
+
+**試験用のユーザーの後片付け**:
+
+- Windows のユーザーは `Remove-LocalUser` で消えたが、プロファイルは `Remove-CimInstance` が `別のプロセスが使用中です` で消せなかった
+  - `Win32_UserProfile` は `Loaded : True`。User Profile Service の Operational のログには、最初の SSH のログオン（パスワードで入った 1 回目）でハイブを読み込んだ記録だけがあり、外した記録が無かった
+  - そのユーザーの SID で動くプロセスは無く、`reg unload` は `Access is denied.` だった
+  - 30 秒ごとに 10 分待っても外れなかったので、プロファイルのフォルダーは残し、再起動の後に消すことにした
+- WSL の Linux ユーザーは、WSL が起こしたログインシェルが残っていて 1 回目の `userdel` が失敗し、それを止めてから消した
+
+**再起動の後の自動起動**（ログから）:
+
+- 2026-09-29 の作業の後に、利用者がこの PC を 2 回起動し直していた
+- どちらも、起動（System のイベント 6005）と同じ秒か 1 秒後に、`OpenSSH/Operational` に `Server listening on 0.0.0.0 port 22.` と `:: port 22.` が出ていた
+
+**残っている未確認事項**（2026-09-30 の時点）:
+
+1. Microsoft アカウントのパスワードで、手順 8・9 のブロック（OpenSSH の `ssh`）から入ること
+1. LAN の別の PC から、この文書の手順で入ること（利用者の公開鍵での接続は、LAN の別の IP からもログに残っていた）
+1. 端末に貼る操作そのもの（Windows PowerShell 5.1 の PSReadLine での複数行の貼り付け、bash の対話の入力）
+1. 標準ユーザーの鍵での認証（`authorized_keys`）と、既定の UAC の設定での振る舞い
+1. Microsoft アカウントのロックアウト
+1. Windows Update での OpenSSH の更新
+1. 「Windows Hello サインインのみを許可する」をオンにしたまま、パスワードで入れる理由（Q&A の報告とは違った。Microsoft アカウントのパスワードでサインインしたことがあるかどうかなど、条件は調べていない）
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - Administrators の一員でログインすると、`whoami /groups` で `Mandatory Label\High Mandatory Level` と、有効な `BUILTIN\Administrators` が出た。cmd のウィンドウのタイトルも `管理者: …` になる
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - SSH のパスワードの失敗も、1 回ずつセキュリティのログのイベント 4625（ログオンの種類 8、プロセスは `sshd.exe`）として数えられ、10 回目でロックされた（イベント 4740）
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - ロック中は、正しいパスワードでも入れない。パスワードを聞かれる前に `Connection reset by <WIN_HOST> port 22` で切られ、sshd のログにも残らなかった
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - ロックは 10 分で解け、正しいパスワードで入れた
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - パスワードの認証を有効にすると、Administrators の一員でないユーザーも、パスワードがあれば SSH で入れる。ローカル アカウントの標準ユーザーで、手順 8・9 のとおりに入れた
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - WSL の既定の NAT では、WSL の既定の経路の先（`vEthernet (WSL (Hyper-V firewall))` の IP）あての接続は、パブリックとして判定され、LAN の接続をプライベートにした後も捨てられた
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - LAN の IP あての接続は、sshd には送信元がこの PC の LAN の IP として届き、LAN のプロファイル（プライベート）で判定された
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+- **設定を変えたとき**: `sshd_config` を変えたら `Restart-Service sshd`（手順 6）。レジストリの `DefaultShell` は、再起動しなくても次のログインから効いた
+
+
+#### OpenSSH サーバー: 操作上の注意と併記されていた記録
+
+  - 検証では、`Remove-WindowsCapability` は `RestartNeeded : False` を返し、再起動せずに入れ直せた
+
+### OpenSSH サーバー: 参考資料から分離した記録
+
+#### OpenSSH サーバー: 参考資料: 実施手順 / 手順 3: 補足: 入るものと、PowerShell 7 で失敗すること
+
+- 入るのは Windows のオプション機能「OpenSSH サーバー」（設定アプリの「システム」→「オプション機能」と同じもの）。`C:\Windows\System32\OpenSSH\sshd.exe`（`OpenSSH_9.5p2 for Windows`）と、サービス `sshd`、受信の規則 `OpenSSH-Server-In-TCP` ができる
+- 入れた直後の `sshd` は `Stopped` / `Manual`。規則は `Enabled True`、`Profile Private`、TCP 22、接続元は `Any`、プログラムは `sshd.exe` に限られている
+- クライアント（`ssh.exe` など）は Windows 11 に最初から入っていて、この手順では変わらない。`ssh-agent` のサービスも `Disabled` のまま
+- Microsoft Store の PowerShell 7.6.6 の管理者のシェルでは、`Add-WindowsCapability` が約 4 分後に `クラスが登録されていません` で失敗し、`Get-WindowsCapability` も同じエラーになった。どちらも Dism モジュール（`C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\Dism`）のコマンド。Windows PowerShell 5.1 では通った
+- 先頭の `if` は、PowerShell 7（`PSEdition` が `Core`）で貼ったときに何もしないで止めるためのもの
+
+#### OpenSSH サーバー: 参考資料: 実施手順 / 手順 4: 補足: 最初の起動で作られるもの
+
+- 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。手順 3 の直後は、このディレクトリは空（1 回目）か、無かった（2 回目。ロールバックで消した後）
+- レジストリの `HKLM:\SOFTWARE\OpenSSH` も、手順 3 の直後には無く、この時点でできていた（値は無い）。[既定のシェルを Git Bash にする（任意）](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)は、ここに値を足す
+
+#### OpenSSH サーバー: 参考資料: 実施手順 / 手順 6: 補足: 既定でも有効なのに書く理由と、置き換える理由
+
+- 入れた直後の `sshd_config` の 51 行目は `#PasswordAuthentication yes`（コメント）で、パスワード認証は既定で有効。この手順はそれを明示的な行にするので、[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)で `no` にした PC も、この手順を貼れば戻る
+- `sshd_config` の末尾は `Match Group administrators` のブロックなので、末尾に足した行はそのブロックの中の設定になる。そこで、既定の行を置き換える
+- `sshd -t` は設定の検査だけをする（誤りが無ければ何も出さない）。誤りがあれば再起動しないので、動いている sshd は古い設定のまま残る
+- 元の `sshd_config` は ASCII（BOM 無し、改行は CRLF）。Windows PowerShell 5.1 の `Set-Content -Encoding ascii` も CRLF で書く
+- パスワード認証を切ってあった PC でこの手順を貼ると、sshd が返す方法は `publickey,keyboard-interactive` から `publickey,password,keyboard-interactive` になった。Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけとしている
+
+#### OpenSSH サーバー: 参考資料: 公開鍵でもログインする（任意） / 手順 1: 補足: 鍵の種類とパスフレーズ
+
+- ED25519 にしたのは、Windows の sshd（OpenSSH 9.5p2）と AlmaLinux 10 の ssh（OpenSSH 9.9p1）のどちらも扱え、鍵が短く、この節の手順 3 で 1 行のまま貼れるため
+- パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、この節の手順 5 と[パスワード認証を切る（任意）](../windows-setup.md#openssh-サーバーのパスワード認証を切る任意)の手順 2 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
+- 秘密鍵（`~/.ssh/id_ed25519`）はクライアントから出さない。Windows に渡すのは、この節の手順 2 の公開鍵だけ
+
+#### OpenSSH サーバー: 参考資料: 公開鍵でもログインする（任意） / 手順 5: 補足: 鍵で入ったときのログ
+
+- `-o PasswordAuthentication=no` は、鍵が通らなかったときにパスワードへ移らず、そこで終わらせるため
+- Windows のログには、`sshd: Accepted publickey for <WIN_USER> from <IP> port <PORT> ssh2: ED25519 SHA256:…` が残る
+
+#### OpenSSH サーバー: 参考資料: パスワード認証を切る（任意） / 手順 1: 補足: 切る前と後
+
+- 行を置き換える理由と `sshd -t` は、[手順 6](../windows-setup.md#openssh-サーバー) の補足と同じ
+- この手順の前は、`ssh -o PubkeyAuthentication=no` で `<WIN_USER>@<WIN_HOST>'s password:` と聞かれ、sshd が返す方法は `publickey,password,keyboard-interactive` だった。後は `publickey,keyboard-interactive`
+- 残る `keyboard-interactive` は、クライアントにパスワードを聞かずに、すぐ `Permission denied` で終わる（この節の手順 2 で確かめる）。Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
+
+#### OpenSSH サーバー: 参考資料: 既定のシェルを Git Bash にする（任意） / 手順 1: 補足: DefaultShell
+
+- `DefaultShell` は Windows の sshd だけの設定で、`sshd_config` ではなくレジストリに置く。この PC の全ユーザーの SSH のセッションに効く
+- `bin\bash.exe` は、Git の `usr\bin\bash.exe` を `MSYSTEM=MINGW64` と `PATH` を整えて起動する入口。コマンドの実行では、sshd が `"c:\program files\git\bin\bash.exe" -c "<コマンド>"` を起動していた（`DefaultShellCommandOption` は設定しなくてよかった）
+
+---
+
+## 統合前の記録: Git の Windows 11（もとは git.md）
+
+もとの `git.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-gitもとは-gitmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で Git for Windows を入れるの 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
+| Windows 11 で Git for Windows を入れるの 2・3 | 「Git for Windows」の手順 1・2 |
+| Windows 11 で Git for Windows を入れるの 4 | （なし。再起動の後に開く窓を使う） |
+| Windows 11 で Git for Windows を入れるの 5 | 「Git Bash と WezTerm の設定」の手順 1 |
+| Windows 11 で Git for Windows を入れるの 6（Git Bash で実施手順） | 「Git Bash と WezTerm の設定」の手順 2・3 |
+| 更新 2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 2 |
+| ロールバック 1〜5（Git Bash） | ロールバックの「Git Bash の設定を戻す」の手順 2〜6 |
+| ロールバック 6 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 4 |
+
+### Git: 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の新規導入・PATH の手順 2・3・5、非対話 Bash と隔離した `global` での共通手順 3〜7・9〜11（[付録](#git-付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: スタートから開いた対話の Git Bash に右クリックのメニューで貼り、実ユーザーの `global` で実施手順 1・3〜11（`system` の `pull.ff=only` を一時的に置いて手順 8 の分岐も）、ロールバックの手順 1〜6、更新の手順 2（[付録](#git-付録-windows-11-pro-の-vm-での対話の-git-bash-による通し検証2026-10-08)）
+- 確認していないこと
+  - 本人の名前・メールアドレスと、外部のリモートへの認証・push・pull
+  - 新しい版に上げる更新、arm64 の Windows
+- 機能試験の初回ホスト側通信の終了コード 1 と、後に回収したゲストの成功は別々に記録した。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### Git: 補足
+
+#### Git: Windows 11 で Git for Windows を入れる / 手順 3: 補足: winget の定義と、黙って入れたときの選択
+
+**winget の定義**（`Git.Git` 2.55.0.5。2026-10-03 の winget-pkgs）
+
+- インストーラは、上流の GitHub のリリースの `Git-2.55.0.5-64-bit.exe`（Inno Setup）。winget は、定義に書かれた sha256 を確かめてから動かす（[付録](#git-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- 定義のスコープは `user` と `machine` の 2 つだが、どちらも同じインストーラで、winget はスコープに合わせたスイッチを渡さない。渡すのは `/SP- /SILENT /SUPPRESSMSGBOXES /NORESTART` と `/LOG=…` だけ
+- 入れる先は、インストーラが権限で決める。管理者の権限があれば `C:\Program Files\Git` に入れ、PC 全体の `PATH` とレジストリ（`HKLM`）に書く。Administrators の一員が管理者でない窓から動かすと、インストーラが UAC で昇格を求める（定義の `ElevationRequirement: elevatesSelf`）
+- `--scope machine` は、PC 全体に入ることを winget にもそろえるため。付けないと、winget は `user` の項目を選ぶ（winget の設定の既定）
+- arm64 の Windows では、同じ定義の `Git-2.55.0.5-arm64.exe` が選ばれる
+- 上流は 2026-09-28 に 2.56.0 を出したが、2026-10-03 の winget-pkgs にはまだ無い。載ると、この手順でもそれが入る（2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった。上流のリリースノート）
+
+**黙って入れたときの選択**（画面のインストーラの既定と同じ。上流の `install.iss` を読んだ）
+
+| 画面 | 既定の選択 | 書かれるもの |
+|---|---|---|
+| PATH | Git from the command line and also from 3rd-party software | PC 全体の `PATH` に `C:\Program Files\Git\cmd` |
+| 既定のブランチ名 | Let Git decide | `system` に `init.defaultBranch=master` |
+| エディタ | Use Vim (the ubiquitous text editor) as Git's default editor | `core.editor` は書かない |
+| HTTPS | Use the native Windows Secure Channel library | `system` に `http.sslBackend=schannel` |
+| 改行 | Checkout Windows-style, commit Unix-style line endings | `system` に `core.autocrlf=true` |
+| 端末 | Use MinTTY | — |
+| `git pull` | Merge | `system` に `pull.rebase=false` |
+| 認証 | Git Credential Manager | `system` に `credential.helper=manager` |
+| ほか | ファイルシステムのキャッシュは有効、シンボリックリンクは無効（開発者モードが無いとき） | `system` に `core.fscache=true`・`core.symlinks=false` |
+| 部品 | エクスプローラーの「Open Git Bash here」「Open Git GUI here」・Git LFS・`.git*` と `.sh` の関連付け | — |
+
+- 入れない部品: デスクトップのアイコン、Windows Terminal の Git Bash のプロファイル、毎日の更新の確認
+- スタートメニューの「Git」フォルダーには、Git Bash・Git CMD・Git GUI が入る
+- `system` の改行・`git pull`・ブランチ名は、[実施手順](../almalinux-setup.md#git)の手順 5・6 で `global` に書いて上書きする
+- 上げるとき・入れ直すときは、前に入れたときの選択を引き継ぐ（インストーラが前の選択を覚えている）
+- 選択は `--custom '/o:CRLFOption=CRLFCommitAsIs'` のように渡して変えられるが、本書では渡さない（[選択した方針](../reference/almalinux-setup.md#git-選択した方針)）
+
+#### Git: 付録: Windows 11 の Git Bash での検証記録（2026-09-30）
+
+前の付録の未確認事項のうち、Windows 11 の Git Bash での実行、`global` の置き場所、PowerShell・cmd から呼ぶ git、`rerere` を、次の PC で確かめた。
+
+**環境**:
+
+- Windows 11 Pro 25H2（ビルド 26200、日本語）/ x86_64 のノート PC（AMD Ryzen AI MAX+ 395）。[windows-openssh-server.md](../windows-setup.md#openssh-サーバー) を通した PC と同じ
+- Git for Windows 2.55.0.windows.3（`C:\Program Files\Git`、GNU bash 5.3.15、`MSYSTEM=MINGW64`）
+- 流したのは Claude Code の Bash（Git for Windows の bash）。端末（mintty）ではなく、出力はパイプに出た
+
+**流し方**:
+
+- この文書の `bash` のブロックを機械的に抜き出し（リストの字下げだけ外す）、1 つのスクリプトから順に `.`（source）で読み込んだ。同じシェルに貼り続けたときと同じく、変数は残る
+- スクリプトの先頭で `export HOME=$(mktemp -d /tmp/gitmd-home.XXXXXX)` とした
+  - `global` はそこの `.gitconfig` に書かれ、その PC の `~/.gitconfig` は変わらなかった（前後の md5 が同じ）
+  - `system` は、インストーラが書いた本物（`C:/Program Files/Git/etc/gitconfig`）を読んだ
+- 書き換えたのは手順 1 の 2 つの値（`Test User` / `test@example.com`）だけ
+- 手順 2 は Windows なので飛ばした。手順 8 は、手順 7 の `pull.ff` が空なので飛ばした
+- 改行を直す節の前に、手順書の外で、LF の 2 ファイルのリポジトリを `git -c core.autocrlf=true clone` し、CRLF の 1 行を足した（前の付録と同じ作り方）
+
+| 手順 | 結果 |
+|---|---|
+| 1 | `GIT_USER_NAME  = Test User`、`GIT_USER_EMAIL = test@example.com` |
+| 3 | `git version 2.55.0.windows.3`。`system` の 13 行（[手順 3](../almalinux-setup.md#git) の補足）。`global` の行は無い |
+| 4 | `user.name Test User`、`user.email test@example.com` |
+| 5・6 | 何も出ない |
+| 7 | 14 行が `global`、`pull.ff` は空 |
+| 9 | `?? a.txt`・`?? crlf.txt`・`?? 日本語.txt`、`i/crlf  w/crlf  attr/  crlf.txt`、`main`、`* [new branch]      main -> main` と `branch 'main' set up to track 'origin/main'.` |
+| 10 | `Created autostash: <HASH>`、`Rebasing (1/1)Applied autostash.`（パイプでは同じ行に続く）、`Successfully rebased and updated refs/heads/main.`。`git log` は `b: b.txt` → `a: 2` → `first` の 1 本で、` M crlf.txt` が残った |
+| 11 | 何も出ない |
+| 改行を直す 1〜4 | 手順 1 は ` M y.txt` と `2`、手順 2 は `Saved working directory and index state WIP on main: <HASH> init`、手順 3 は `0` で `git status --short` は空、手順 4 は `modified:   y.txt` と `Dropped refs/stash@{0}`。2 つのファイルは `i/lf    w/lf` になり、差分は足した 1 行だけ（CR は付かない） |
+| ロールバック 1〜3・5 | 何も出ない。使い捨ての `HOME` の `.gitconfig` は 0 バイトになった |
+
+**手順書の外で確かめたこと**:
+
+| 確認 | 結果 |
+|---|---|
+| `global` の場所 | Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が、どれも `file:C:/Users/<WIN_USER>/.gitconfig` を示した（場所とキーの数だけを見て、値は読んでいない）。その PC では、PowerShell の `git` は `C:\Program Files\Git\mingw64\bin\git.exe`、環境変数 `HOME` は `C:\Users\<WIN_USER>` だった |
+| `rerere` | 使い捨ての `HOME` で `rerere.enabled=true`・`merge.conflictStyle=zdiff3` にし、同じ衝突を 2 回起こした。1 回目は `Recorded preimage for 'f'`、解いてコミットすると `Recorded resolution for 'f'.`。2 回目は `Resolved 'f' using previous resolution.` で、ファイルは解いた中身になり、`git status --short` は `UU f` のまま（`git add` はされない） |
+| `zdiff3` | 衝突の表示に、共通の祖先の段（`\|\|\|\|\|\|\| <HASH>` の後に元の行）が出た |
+
+##### Git: 未確認事項
+
+- AlmaLinux 10 の実機での本実行と、既存の `~/.gitconfig`（`[core] autocrlf` がある）との組み合わせ
+- Git for Windows のインストーラの既定の選択で書かれる値（`core.autocrlf=true` など）と、`git pull` の「Only ever fast-forward」で書かれる `pull.ff=only`
+- Git Bash の端末（mintty）に貼る操作そのもの、環境変数 `HOME` の無い Windows の PC
+- aarch64 での実行、[更新](../almalinux-setup.md#更新)で新しい版に上がるところ
+
+---
+
+#### Git: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義・インストーラ・上流と winget のソースを読んだ記録。[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)・[更新](../almalinux-setup.md#更新)の手順 2・[ロールバック](../extra/almalinux-setup.md#git-の道具を消す)の手順 6 は、これをもとに書いた。
+
+**winget の定義**: winget-pkgs（2026-10-03 の `master`、コミット `c612893`）の `manifests/g/Git/Git` の一番新しい版は `2.55.0.5`（`2.56.0` のディレクトリは無い）。`Git.Git.installer.yaml` の抜粋（arm64 の 2 つは、`Git-2.55.0.5-arm64.exe` で同じ形）:
+
+```
+PackageIdentifier: Git.Git
+PackageVersion: 2.55.0.5
+InstallerType: inno
+InstallerSwitches:
+  Silent: /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  SilentWithProgress: /SP- /SILENT /SUPPRESSMSGBOXES /NORESTART
+UpgradeBehavior: install
+ReleaseDate: 2026-08-20
+ElevationRequirement: elevatesSelf
+Installers:
+- Architecture: x64
+  Scope: user
+  InstallerUrl: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/Git-2.55.0.5-64-bit.exe
+  InstallerSha256: D065A4E23C3D9A6B5073D609B5BE0830227EC3CA053C083BA385061DDFAF94C6
+- Architecture: x64
+  Scope: machine
+  InstallerUrl: https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/Git-2.55.0.5-64-bit.exe
+  InstallerSha256: D065A4E23C3D9A6B5073D609B5BE0830227EC3CA053C083BA385061DDFAF94C6
+```
+
+- `Git.Git.locale.en-US.yaml` は、`Publisher: The Git Development Community`・`PackageName: Git`・`Moniker: git`。`Agreements` は無い
+- 上流のタグ（`git ls-remote --tags`）の一番新しい正式版は `v2.56.0.windows.1`。winget-pkgs にはまだ載っていなかった
+
+**インストーラ**: 定義の URL から `Git-2.55.0.5-64-bit.exe` を取った:
+
+```
+$ sha256sum Git-2.55.0.5-64-bit.exe
+d065a4e23c3d9a6b5073d609b5be0830227ec3ca053c083ba385061ddfaf94c6  Git-2.55.0.5-64-bit.exe
+```
+
+- 65,343,712 バイト。sha256 は定義の `InstallerSha256` と一致した
+- `osslsigncode verify`: Authenticode の署名者は `CN=Johannes Schindelin`（`O=Johannes Schindelin`・`L=Bruehl`・`C=DE`）、ダイジェストは一致、タイムスタンプは `Microsoft Public RSA Timestamping CA 2020` の 2026-08-20 16:05:39 GMT
+  - 証明書の連鎖は、Linux の CA の一覧に `Microsoft Identity Verification Root Certificate Authority 2020` が無く、検証できなかった
+- `innoextract` 1.9 は、このインストーラ（Inno Setup 7）を読めなかった（`Could not determine setup data version!`）。そのため、既定の選択は上流のソースで確かめた
+
+**インストーラのソース**（git-for-windows/build-extra の `installer/install.iss`。2.55.0(5) のリリースのコミット `f7c8964` と、2026-10-03 の `main` の `0ec0fba` で、下の既定は同じ）:
+
+- `PrivilegesRequired=none`、`DefaultDirName={pf}\Git`（`main` では `{commonpf}\Git`）
+  - Inno Setup のソース（jrsoftware/issrc の `Setup.MainFunc.pas`・`Setup.SpawnServer.pas`）では、`none` は管理者の権限を要求しないが、昇格できるユーザー（Administrators の一員で、UAC で分けられたトークン）なら UAC で昇格し直す。管理者の権限で動けば、管理者のモード（`HKLM`・PC 全体の `PATH`）で入れる
+  - 入れる先が書き込めないとき（管理者でないとき）は、入れる先の画面で `{userpf}\Git`（`%LOCALAPPDATA%\Programs\Git`）に変える
+- 選択（`ReplayChoice`）は、`/o:<キー>=<値>` → `/LOADINF` のファイル → 入っている Git の `system` から推した値 → 前に入れたときの選択 → 既定 の順に決まる
+- 既定: `Editor Option=VIM`・`Default Branch Option`（空）・`Path Option=Cmd`・`SSH Option=OpenSSH`・`CURL Option=WinSSL`・`CRLF Option=CRLFAlways`・`Bash Terminal Option=MinTTY`・`Git Pull Behavior Option=Merge`・`Use Credential Manager=Enabled`・`Performance Tweaks FSCache=Enabled`・`Enable Symlinks=Auto`（開発者モードが無く、管理者で動いていれば無効）
+- 部品の既定（`Types: default`）: `ext`・`ext\shellhere`・`ext\guihere`・`gitlfs`・`assoc`・`assoc_sh`。`icons`（デスクトップのアイコン）・`autoupdate`・`windowsterminal` は入っていない。スタートメニューの Git Bash・Git CMD・Git GUI は、部品によらず作る
+- `system` に書く値: `core.autocrlf`、`pull.rebase`（Merge なら `false`、Rebase なら `true`）か `pull.ff=only`（Fast-forward only）、`credential.helper=manager`、`core.fscache=true`、`core.symlinks`、`http.sslBackend`、`init.defaultBranch`（「Let Git decide」でも `master` を書く）。`core.editor` は、Vim なら書かない
+- `Path Option=Cmd` は `{app}\cmd` を `PATH` の最後に足し（管理者のモードでは PC 全体の `PATH`）、削除のときに外す
+- Git のファイル（`usr\bin\msys-2.0.dll` など）を使っているプロセスがあると、黙って動かしたときも閉じるよう求める問いを出す。`/SUPPRESSMSGBOXES` では「キャンセル」と答えたことになり、中断する
+  - Inno Setup の文書（`NextButtonClick`）: 黙って動かしたときに、入れ始める前に `NextButtonClick` が False を返すと、Setup は終わる
+
+**winget のソース**（microsoft/winget-cli、2026-10-02 のコミット `3973956`）:
+
+- `ManifestCommon.cpp`: Inno Setup の既定のスイッチは、`Silent`・`SilentWithProgress`（定義と同じ）・`Log`（`/LOG="<LOGPATH>"`）・`InstallLocation`（`/DIR="<INSTALLPATH>"`）
+- `ShellExecuteInstallerHandler.cpp`: 渡すのは、黙って動かすスイッチ（`--silent` が無ければ `SilentWithProgress`）・`Log`・定義の `Custom`・`--custom`・更新のときの `Update`・`--location` のときの `InstallLocation`。スコープに合わせたスイッチは無い。`--override` があれば、その値だけを渡す
+- `UserSettings.h`: スコープの既定（`installBehavior.preferences.scope`）は `user`
+- `UninstallFlow.cpp`: Inno Setup のパッケージは、「アプリと機能」の静かな削除のコマンドを動かす。管理者の権限で動いているときは、自分のユーザーのスコープのパッケージの削除を断る（PC 全体に入れたものは当たらない）
+  - Inno Setup が書く静かな削除のコマンドは、`"<unins000.exe>" /SILENT`（jrsoftware/issrc の `Setup.Install.pas`）
+- 日本語の文言（`Localization/Resources/ja-JP/winget.resw`）: `インストールが完了しました`・`利用可能なアップグレードが見つかりませんでした。`・`正常にアンインストールされました`・`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`
+
+**ほか**:
+
+- Git for Windows のリリースノート（build-extra の `ReleaseNotes.md`）: 2.56.0（2026-09-28）で Windows 8.1 のサポートを外し、`/mingw64/bin/git.exe` が `/ucrt64/bin/git.exe` に変わった
+- scoop（ScoopInstaller/Scoop の `lib/core.ps1`）: `Get-HelperPath -Helper Git` は、scoop の git が無ければ `Get-Command git` の場所を返す
+- Claude Code の setup の文書: Windows では Git for Windows は任意で、あれば Bash のツールに Git Bash を使い、無ければ PowerShell のツールを使う。Git Bash が見つからないときの `CLAUDE_CODE_GIT_BASH_PATH` の例は `C:\Program Files\Git\bin\bash.exe`
+
+---
+
+#### Git: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- `powershell` のブロック 5 個（[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 2・3・5、[更新](../almalinux-setup.md#更新)の手順 2、[ロールバック](../extra/almalinux-setup.md#git-の道具を消す)の手順 6）を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。指摘は 0
+
+**偽の `winget` で流した**: 5 個のブロックを、受け取った引数を数えて表示するだけの関数 `winget` を置いた pwsh で、順に流した:
+
+- `winget` には、どのブロックでも書いたとおりの引数が 1 つずつ渡った。手順 3 の `install` は 10 個（`install`・`--exact`・`--id`・`Git.Git`・`--source`・`winget`・`--scope`・`machine`・`--accept-source-agreements`・`--accept-package-agreements`）
+- 2 つのパスを渡した `Test-Path` は、`False` を 2 行出した（Linux なので、どちらも無い）。`Get-Command git -All | Format-Table Source` は、Linux の `git` の場所を表にした
+- winget そのものの動き（定義の選び方・インストーラの起動・表示）は、Windows でしか確かめられない
+
+**残っている未確認事項**:
+
+1. Windows で、[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 1〜6 を通すこと（管理者の窓から UAC が出ずに入ること、`C:\Program Files\Git` に入ること、`PATH`、Git Bash が開くこと）
+1. 黙って入れたときに `system` に書かれる値が、その節の手順 3 の補足の表のとおりになること。その後に、[実施手順](../almalinux-setup.md#git)の手順 1・3〜11 を Git Bash で通すこと
+1. [更新](../almalinux-setup.md#更新)の手順 2 で新しい版に上がること（2.56.0 が winget に載った後）と、Git Bash を開いたまま上げたときの動き
+1. [ロールバック](../extra/almalinux-setup.md#git-の道具を消す)の手順 6 で外れること（`PATH` から外れること、残るもの）
+1. 公式のインストーラで入れた PC を、winget で上げること
+1. arm64 の Windows
+
+---
+
+#### Git: 実施手順 / 手順 7: 補足: 出力と、Windows の模擬
+
+- `git config --get` は、3 つの場所のうち優先される値を返す。`--show-scope` は、その値を書いた場所を前に付ける
+- 1 行目の `cd ~` は、リポジトリの中の `local` の設定を拾わないため
+- 検証コンテナで、`/etc/gitconfig` に Git for Windows のインストーラの選択で書かれうる値（`core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master`・`pull.ff=only`）を置いて通すと、14 行は `global` になり、`pull.ff` だけが `system	only` になった:
+
+```
+user.name             global	<GIT_USER_NAME>
+user.email            global	<GIT_USER_EMAIL>
+pull.rebase           global	true
+rebase.autoStash      global	true
+core.autocrlf         global	false
+init.defaultBranch    global	main
+core.quotepath        global	false
+fetch.prune           global	true
+push.autoSetupRemote  global	true
+rerere.enabled        global	true
+merge.conflictStyle   global	zdiff3
+diff.algorithm        global	histogram
+branch.sort           global	-committerdate
+tag.sort              global	version:refname
+pull.ff               system	only
+```
+
+- Windows 11 の Git Bash（使い捨ての `HOME`）でも、14 行が `global` になり、`pull.ff` は空だった（その PC の `system` に `pull.ff` が無いので、手順 8 は飛ばした）
+  - `system` の `init.defaultbranch=master` は、`global` の `main` で上書きされた
+
+
+
+### Git: 参考資料から分離した記録
+
+#### Git: 参考資料: Windows 11 で Git for Windows を入れる / 手順 5: 補足: PATH と、ほかの git
+
+- `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
+  - 以前の検証の PC は Git の `usr\bin` も `PATH` にあり、`ssh`・`ssh-keygen` が Git のものになっていた（[windows-openssh-server.md 手順 7](../windows-setup.md#openssh-サーバー) の補足）
+- Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
+- scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
+- Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
+
+#### Git: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 2・3・5 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。手順 2・3 は管理者、手順 5 は新しい通常権限のプロセス。どちらも同じログオンユーザーの Session 1 |
+| WinGet | 1.29.380。確認の `winget list` は `--source winget` 付き |
+| 検証時の本文の SHA256 | `A14BFED2E1703FED0B083224F9012CBB631F002B8AC3E77151223F97BA73E57B`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `AF11A0B15F103A89BD9A697601A68FD62A772CCFCB43A53FA659A27356B81B55` |
+
+**確認したこと**:
+
+- 手順 2・3（バッチ `20261006-105816Z-096906b0`、完了 10:59:22 UTC）:
+  - 未導入時は `Get-Command git` に出力がなく、Git Bash のパスは `False`、一覧は `No installed package found matching input criteria.` だった。最後の winget の終了コード `-1978335212` は、この未導入の確認で期待する結果
+  - インストーラーのハッシュ検証が成功し、`Successfully installed` が出た。続く一覧は `Git.Git 2.55.0.5` で、PowerShell のエラーは 0、最後の終了コードは 0
+- 手順 5（バッチ `20261006-110243Z-62c3d475`、完了 11:02:43 UTC）:
+  - 新しい通常権限のプロセスで、`Get-Command git` は `C:\Program Files\Git\cmd\git.exe`、版は `git version 2.55.0.windows.5` だった
+  - `C:\Program Files\Git\bin\bash.exe` と `C:\Program Files\Git\git-bash.exe` の存在確認は、どちらも `True`。PowerShell のエラーは 0、最後の終了コードは 0
+- 両バッチとも検証用タスクの終了コードは 0 で、要求したバッチと完了記録が対応した
+
+**確認していないこと**:
+
+- 手順 1・4 の端末を開く画面操作と、手順 6 の Git Bash の起動・表示。手順 4 は新しいプロセスを起動して `PATH` を確認することで代替した
+- この VM の Git Bash での[実施手順](../almalinux-setup.md#git)。`GIT_USER_NAME` と `GIT_USER_EMAIL` は設定しておらず、`global` の設定も書いていない
+- インストーラーが書いた `system` の値、更新、削除、arm64 の Windows
+
+---
+
+#### Git: 付録: Windows 11 Pro の VM での非対話 Bash による設定の検証（2026-10-07）
+
+前の新規導入と同じ VM で、共通の[実施手順](../almalinux-setup.md#git)の 3・5・6・7 のコードブロックを抜き出して、そのまま実行した。2026-09-30 の実機で `HOME` を使い捨てにした検証とは別の記録で、今回は `HOME` と `CODEX_HOME` を変更していない。
+
+| 項目 | 値 |
+|---|---|
+| 環境 | Windows 11 Pro の専用 VM、通常権限の `<WIN_USER>`。PowerShell 7.6.6 が非対話の `C:\Program Files\Git\bin\bash.exe` を起動 |
+| Git | `git version 2.55.0.windows.5`。`--noprofile --norc` で起動し、プロファイルは読み込まない |
+| 実行範囲 | 共通手順 3・5・6・7。子 Bash プロセスだけの `GIT_CONFIG_GLOBAL` で専用 scratch の `global.gitconfig` を指定 |
+| 実行時刻 | 2026-10-07 04:18:58〜04:19:20 UTC |
+| 検証時の本文の SHA256 | `2541D4BE9E3CD490A2474567EC30635496610BBA507922DD25148837BF4ED6A3`（この追記より前） |
+| 実行した source manifest の SHA256 | `87AFDF5F88FA15E43C9BB851FEE6E5586EB531741191C3FA4F29B3CD4A77D180` |
+
+**確認したこと**:
+
+- 手順 3 は実物の `C:/Program Files/Git/etc/gitconfig` を読み、`system` の `core.autocrlf=true` を確認した
+- 手順 5 の 3 キーと手順 6 の 9 キー、計 12 キーはすべて指定値になった。独立した読み戻しのスコープは `global`、origin は専用 scratch のファイルで、手順 7 の出力とも一致した。本人設定を省いたため、手順 7 の 14 キーすべてを確認した結果とは扱わない
+- 実ユーザーの `.gitconfig`・`.config/git/config`、Git の `etc/gitconfig`、`C:\ProgramData\Git\config` は、前後の存在状態と SHA256 が一致した。`pull.ff` は前後とも未設定で、取得の終了コード 1 と空の出力も一致した
+- 4 ブロックの終了コードはすべて 0、補助検証は `passed=true` で CLI の終了コードも 0。作成した `C:\verify\git-config-probe-<GUID>` の scratch だけを削除し、削除成功を確認した
+- 証跡は `evidence/remaining-git-20261007-041841-0ff6f533` の `guest-result.json` と `source-manifest-executed.json` に保存した
+
+**確認していないこと**:
+
+- 本人の `GIT_USER_NAME`・`GIT_USER_EMAIL` と共通手順 4。この検証では実ユーザーの `global` に設定を書いていない
+- 対話 Git Bash の起動・表示・コピーと貼り付け。非対話 CLI の成功を画面操作の成功とは扱わない
+- 共通手順 9〜11 の使い捨てリポジトリでの改行・push・pull と後片付け、更新、削除。古い実機・コンテナの検証結果は前の付録に残す
+
+---
+
+#### Git: 付録: Windows 11 Pro の VM での非対話 Bash による push・pull と後片付けの検証（2026-10-07）
+
+前の設定検証と同じ VM で、共通の[実施手順](../almalinux-setup.md#git)の 4・5・6・9・10・11 の Bash ブロックを変更せず実行した。Windows PowerShell 5.1 の接続用 launcher が、通常権限の PowerShell 7.6.6 の検証 helper を起動し、その helper が Git Bash を非対話で起動した。手順 9・10 は 1 つの Bash セッションで続けて実行した。
+
+| 項目 | 値 |
+|---|---|
+| 実行環境 | 同じ専用 Windows 11 Pro VM、通常権限の `<WIN_USER>`、PowerShell 7.6.6、Git 2.55.0.windows.5 |
+| Bash | `C:\Program Files\Git\bin\bash.exe --noprofile --norc`。子プロセスの `LC_ALL=C` |
+| 隔離 | 子 Bash だけの `GIT_CONFIG_GLOBAL` と `TMPDIR` を専用 scratch に指定。`HOME` と `CODEX_HOME` は変更しない |
+| 名前・メール | `VM Verification`・`vm-verification@example.invalid`。合成値だけを scratch の設定へ書いた |
+| ゲストでの実行時刻 | 2026-10-07 09:27:08〜09:28:01 UTC |
+| 実行時の本文の SHA256 | `7EA606C3138280166C7F35A90AB20C7E0D14005C640D8681E87E76C209BFE736`（この追記より前） |
+| 実行した manifest の SHA256 | `2B6B05CB73AA6BF9AB78ED1E542543BFA0B34805E9BB75991D3BCCA6FDF462AB` |
+
+**確認したこと**:
+
+- 14 フェーズすべての終了コードが 0、挙動検査 9 件が PASS、Bash 全体の終了コードも 0 で `ALL_PHASES_PASS` を出した。合成の名前・メールと、設定 12 キーの値・`global` のスコープ・scratch の origin を確認した
+- 手順 9 の出力に `?? 日本語.txt` が引用や置換文字なしで出た。helper は stdout とフェーズのログを strict UTF-8 で読んだ。`main`、最初のローカル push と `origin/main` の upstream、index と作業ファイルの CRLF が一致した
+- 手順 10 は、履歴が 3 コミットの直線で merge がなく、古いローカルコミットが別の ID へ書き換わり、書き換え後の親が remote のコミットになった。設定値の読み戻しだけでなく、実際の rebase を確認した
+- autostash の作成出力と実オブジェクト、その親が古いローカルコミットであること、適用の出力と stash が残らないことを確認した。未コミットの CRLF の変更は復元され、HEAD と index の元の内容、日本語のパス、合成のコミット作者も保持された
+- 手順 11 の前に `realpath` と `cygpath` で削除先が専用 scratch の配下であることを確認した。手順 11 が fixture だけを消し、外側の scratch と `HOME` を保持した後、helper が scratch を削除した。実ユーザーの設定ファイル 4 件の存在状態と SHA256 は前後一致し、`pull.ff` も未設定のままだった
+
+**初回の接続と後の回収**:
+
+- 初回のホスト側 GuestControl には 55 秒の上限を付けた。ホスト側の CLI 終了コードは 1、直後の結果コピーも 1 だった。この値を Git の実行結果の成功へ置き換えていない
+- 後で完成したゲストの結果を回収し、2026-10-07 09:36:30 UTC のコピーは終了コード 0 だった。再実行はしていない。ゲスト自身の結果は終了コード 0・`passed=true`・cleanup 成功で、完了時刻は `guest-result.json` の値を使った
+- 証跡は `.verification/evidence/remaining-git-behavior-20261007-092648-ddbf22f4` の `guest-result.json`・実行した manifest/helper・初回の `host-execution-result.json`・後の `host-recovery-result.json`・独立した `git-behavior-assessment.json` に保存した。元の証跡は変更していない
+
+**確認していないこと**:
+
+- 本人の名前・メールを実ユーザーの設定へ反映すること、対話 Git Bash の画面・コピーと貼り付け、外部リモートへの認証や network pull
+- `pull.ff` を変更する手順 8、利用中の既存の設定との組み合わせ、更新・削除、arm64 の Windows。今回の隔離した機能テストを全手順の通し成功とは扱わない
+
+---
+
+#### Git: 付録: Windows 11 Pro の VM での対話の Git Bash による通し検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、スタートメニューから開いた Git Bash（mintty）に、本文のブロックを右クリックのメニューの「Paste」で貼り、[実施手順](../almalinux-setup.md#git)の手順 1・3〜11 とロールバックの手順 1〜5 を通した。ロールバックの手順 6 と更新の手順 2 は、管理者の Windows PowerShell に貼った。上の付録と違い、子プロセスの `GIT_CONFIG_GLOBAL` は使わず、実ユーザーの `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた。
+
+| 項目 | 値 |
+|---|---|
+| Git | `git version 2.55.0.windows.5`（上の付録で入れたもの） |
+| 始める前 | `global` の設定ファイルは無かった。`system`（`C:/Program Files/Git/etc/gitconfig`）の SHA256 は `381C2FDA5A3B5ADF7102F5B05F68D7DC3281A44171F9B40556CA56CFDD8461C3` で、`pull.ff` は無かった |
+| 名前とメールアドレス | 試験用の架空の値（`PR104 Verification`・`pr104-verification@example.invalid`） |
+| 手順 8 の分岐 | 確かめるため、管理者の窓で一時的に `git config --system pull.ff only` を足した（終わった後に外した） |
+
+**確認したこと**:
+
+- Windows 11 で Git for Windows を入れるの手順 6: スタートメニューの「Git Bash」で、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` の窓が開いた
+- 窓の中の右クリックで、`Copy`・`Paste`（`Shift+Ins`）などのメニューが出た。本文に「Paste」で貼る旨を足した
+- 手順 1・3〜7: 手順 7 で、`global` の 14 キー（名前・メールアドレスと、手順 5・6 の 12 キー）が出て、`pull.ff` は `system  only` だった
+- 手順 8: `global  true`
+- 手順 9: `?? 日本語.txt`、`i/crlf  w/crlf`（CRLF のまま入った）、ブランチは `main`、`branch 'main' set up to track 'origin/main'.`
+- 手順 10: `Created autostash`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.`、履歴は一直線、作業中の `M crlf.txt` が残った
+- 手順 11: 使い捨てのリポジトリが消えた
+- 手順 8 を行わない場合（`global` の `pull.ff` を外し、`system` の `only` だけにした場合）の分岐した pull は、`fatal: Not possible to fast-forward, aborting.`（終了コード 128）で止まった
+- ロールバックの手順 1〜4: 今回足した 15 キー（手順 4・5・6・8 のもの）を `--unset` で外した。手順 5 の `git config --global --list` は何も出さなかった。ただし `~/.gitconfig` は 0 バイトのファイルとして残った（始める前は無かった）。本文に注意を足した
+- 一時的な `system` の `pull.ff` を外し、`system` の SHA256 が始める前と同じに戻った
+- 更新の手順 2（管理者の窓）: `No available upgrade found.`、`winget list` は `Git  Git.Git  2.55.0.5`
+- ロールバックの手順 6（管理者の窓、Git Bash は閉じた状態）: `Found Git [Git.Git]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、最後は `False`。途中で「Git Uninstall」の進捗の窓（「Uninstalling Git...」）が出て、何も押さずに閉じた
+
+**検証の手順で起きたこと**:
+
+- 最初の通しでは、検証の操作が窓を前に出すために Alt を 1 回だけ押したため、mintty がメニューの操作に入り、貼った後の Enter が食われた。手順 5・6・7 の 3 つのブロックが 1 行につながって実行され、`pull.rebase` が入らず `tag.sort` が `version:refnamecd` になった。操作を直し、手順 4〜7 を貼り直して（どれも何度貼ってもよい）、正しい値になったことを手順 7 で確かめた
+
+**確認していないこと**:
+
+- 本人の名前・メールアドレスと、外部のリモート（GitHub など）への認証・push・pull
+- Ctrl+V・Shift+Insert のキーでの貼り付け（検証の操作では、Shift+Insert が正しいキーとして届かなかった）、arm64 の Windows、Windows の実機
+
+---
+
+## 統合前の記録: Firefox の Windows 11（もとは firefox.md）
+
+もとの `firefox.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-firefoxもとは-firefoxmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
+| Windows 11 で使う 2〜5 | 「Firefox」の手順 1〜4 |
+| Windows 11 の更新 1・2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 3・4 |
+| Windows 11 のロールバック 1〜3 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 5〜7 |
+
+### Firefox: 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06: Windows 節の手順 2・3 による新規導入。WinGet の一覧と本体の版、Maintenance Service と Default Browser Agent のタスク（[付録](#firefox-付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
+  - 2026-10-08: 手順 4 のスタートからの起動・`about:support`（release・日本語・H.264 と AAC のソフトウェアデコード）と、作った mp4・m4a の再生、手順 5 の既定のブラウザーの切り替え（画面の文言に本文を直した）、更新の手順 1、ロールバック（[付録](#firefox-付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - 実際の Web の動画と音の出力、ハードウェアのデコード
+  - winget で新しい版に上げる更新の手順 2、閉じている間の更新、arm64 の Windows、N エディション、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### Firefox: 補足
+
+#### Firefox: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、winget の定義、Mozilla のインストーラの sha256・署名・中身、Mozilla の文書と Firefox・winget のソース、Linux の PowerShell 7 での構文だけ（[対象と検証環境](almalinux-setup.md#firefox-対象と検証環境)）。
+
+#### Firefox: Windows 11 で使う / 手順 2: 補足: 調べている場所
+
+- Mozilla のインストーラは、アンインストールの登録に `Mozilla Firefox (<構成> <言語>)` の表示名（`DisplayName`）を書く（ESR は `Mozilla Firefox ESR (…)`）。管理者で入れたものは `HKLM`、管理者でないユーザーが自分に入れたもの（`%LOCALAPPDATA%\Mozilla Firefox`）は `HKCU` に書かれる（Firefox のソースの `shared.nsh`。[付録](#firefox-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- Microsoft Store 版と winget の `Mozilla.Firefox.MSIX` は、パッケージのアプリ（`Mozilla.MozillaFirefox`）として入る
+- 別の言語の Firefox が入っている場所に重ねて入れたときにどうなるかは、確かめていない。そのため、先に外す
+
+#### Firefox: Windows 11 で使う / 手順 3: 補足: winget の定義と、インストーラが入れるもの
+
+**winget の定義**（`Mozilla.Firefox.ja` 157.0。[付録](#firefox-付録-windows-11-の配布物と資料の調査2026-10-03)）
+
+- インストーラは、Mozilla の CDN（`download-installer.cdn.mozilla.net`）の日本語版の `Firefox Setup 157.0.exe`（NSIS）。x64・x86・arm64 があり、winget は PC の構成に合うものを選ぶ
+- `Scope` は `machine` だけ（自分のユーザーに入れる定義は無い）。`--scope machine` は、その確かめ
+- winget がインストーラに渡すのは `/S /PreventRebootRequired=true`（画面を出さない。使用中のファイルがあっても、再起動が要る処理をしない）
+- `--accept-source-agreements` と `--accept-package-agreements` は、winget を初めて使う PC で出る同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+
+**インストーラが入れるもの**（Mozilla の Full Installer Configuration の既定。スイッチで変えていない）
+
+- 本体: `C:\Program Files\Mozilla Firefox`（64 ビットの Windows の既定の場所）
+  - 場所は変えない（`--location` を付けない）。既定の場所のときだけ、アンインストールの登録のキーの名前が `Mozilla Firefox` になり、winget の定義の `ProductCode` と合う（Firefox のソースの `postupdate_helper.nsh`）
+- Mozilla Maintenance Service: 管理者で入れたときだけ入る。管理者の確認なしに、`C:\Program Files` の Firefox を更新するためのサービス（[Windows 11 の更新](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)）
+- Default Browser Agent のタスク: タスク スケジューラの `\Mozilla\` に、24 時間ごとに既定のブラウザーが何かを調べて Mozilla に送るタスクを作る（テレメトリを切っていれば送らない。Mozilla の Default Browser Agent の文書）
+- ショートカット: デスクトップ・スタートメニュー（ふつうのものとプライベート ブラウジングのもの）と、タスクバーへのピン留め
+  - 要らなければ、この手順の `winget install` に `--custom '/DesktopShortcut=false /TaskbarShortcut=false'` を足すと作らないはず（Mozilla の文書のスイッチ。確かめていない）
+
+#### Firefox: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義、配布物、資料とソースを読んだ記録。
+
+##### Firefox: winget の定義
+
+winget-pkgs の `master`（2026-10-03 16:10 UTC のコミット `c6128933`）を、`manifests/m/Mozilla/Firefox` だけ浅く取った（sparse checkout）:
+
+- `Mozilla.Firefox` と `Mozilla.Firefox.ja` の最新は、どちらも 157.0。Mozilla の `product-details` も、`LATEST_FIREFOX_VERSION` が 157.0、`LAST_RELEASE_DATE` が 2026-09-29 だった
+- `manifests/m/Mozilla/Firefox` の下には、版のフォルダーのほかに、`Beta`・`DeveloperEdition`・`ESR`・`MSIX`・`Nightly`・`Unbranded` と、言語ごとのフォルダー（`ja` など）がある
+- `Mozilla.Firefox` の定義は、137.0.1 までは `InstallerLocale` の付いたインストーラが 51 個並んでいたが、137.0.2 からは付いていない（英語版だけ）。`Mozilla.Firefox.ja` の定義は 137.0.2 からある（64 版）
+
+`Mozilla.Firefox.ja` 157.0 の `Mozilla.Firefox.ja.installer.yaml`（`Protocols` と `FileExtensions` は省いた）:
+
+```
+PackageIdentifier: Mozilla.Firefox.ja
+PackageVersion: "157.0"
+InstallerType: nullsoft
+Scope: machine
+InstallerSwitches:
+  Silent: /S /PreventRebootRequired=true
+  SilentWithProgress: /S /PreventRebootRequired=true
+  InstallLocation: /InstallDirectoryPath="<INSTALLPATH>"
+UpgradeBehavior: install
+ProductCode: Mozilla Firefox
+ReleaseDate: 2026-09-29
+Installers:
+- Architecture: x86
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win32/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: D3F2D99344550473B2FE9E9688470B2DF7D89501B6C0AF6243DEAEC689F8AC60
+- Architecture: x64
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win64/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: B3ADC7530D1B1BC383994239908E06A937AE6D2FF85DEA6C1B609A57FA86B220
+- Architecture: arm64
+  InstallerUrl: https://download-installer.cdn.mozilla.net/pub/firefox/releases/157.0/win64-aarch64/ja/Firefox%20Setup%20157.0.exe
+  InstallerSha256: 6CCED47FC296950E89803A3ACBA480C633370ACD9EAE4648ED3F47550AAC5E6A
+ManifestType: installer
+ManifestVersion: 1.12.0
+```
+
+- `Mozilla.Firefox` 157.0 の定義は、URL の `ja` が `en-US` になっているほかは同じ（`ProductCode` も `Mozilla Firefox`）。言語ごとのフォルダー 100 個の最新の版の定義も、`ProductCode` はどれも `Mozilla Firefox` だった
+- `Mozilla.Firefox.MSIX` 157.0 は、`InstallerType: msix`・`PackageFamilyName: Mozilla.MozillaFirefox_jag0gd4e3s9p2` で、URL は `…/157.0/win64/multi/Firefox%20Setup%20157.0.msix`
+- scoop の `extras/firefox`（157.0）は、`…/157.0/win64/en-US/Firefox%20Setup%20157.0.exe#/dl.7z`（英語版のインストーラを 7z で展開する）で、`persist` は `distribution`・`profile`
+
+##### Firefox: インストーラ
+
+x64 の日本語版を取った:
+
+```
+$ sha256sum ff-157.0-win64-ja.exe
+b3adc7530d1b1bc383994239908e06a937ae6d2ff85dea6c1b609a57fa86b220  ff-157.0-win64-ja.exe
+$ grep 'win64/ja/Firefox Setup 157.0.exe' SHA256SUMS
+b3adc7530d1b1bc383994239908e06a937ae6d2ff85dea6c1b609a57fa86b220  win64/ja/Firefox Setup 157.0.exe
+```
+
+- 大きさは 93,612,392 バイト。sha256 は、winget の定義と、Mozilla の `releases/157.0/SHA256SUMS` の行と一致した
+- Authenticode の署名（`osslsigncode verify` は `Succeeded`）: 署名者は `C=US, ST=California, L=San Francisco, O=Mozilla Corporation, OU=Firefox Engineering Operations, CN=Mozilla Corporation`（発行者は `DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1`）。タイムスタンプは 2026-09-24
+- 7z で中を見た（74 ファイル）: `core/maintenanceservice_installer.exe`・`core/maintenanceservice.exe`・`core/default-browser-agent.exe`・`core/updater.exe`・`core/mozavcodec.dll`（同梱の FFmpeg。`Lavc62.29.101`）・`core/wmfclearkey.dll` など
+- `core/updater.ini` の文言は日本語（`Title=Firefox の更新`）で、`core/update-settings.ini` は `ACCEPTED_MAR_CHANNEL_IDS=firefox-mozilla-release`
+
+##### Firefox: Firefox のソースと文書
+
+Firefox のソースは、GitHub の `mozilla-firefox/firefox` の `release` の枝（`browser/config/version.txt` は 157.0.1）を読んだ:
+
+- `browser/installer/windows/nsis/installer.nsi`
+  - Maintenance Service は、スイッチで指定が無ければ、管理者で `HKLM` に書けるときだけ入れる（`maintenanceservice_installer.exe`）
+  - Default Browser Agent は `default-browser-agent.exe register-task` でタスクを作る。最後に `firefox.exe --backgroundtask install` を動かす
+- `browser/installer/windows/nsis/postupdate_helper.nsh`
+  - 既定の場所は、管理者なら `$PROGRAMFILES64\Mozilla Firefox\`（64 ビットのビルド）、そうでなければ `%LOCALAPPDATA%\Mozilla Firefox\`
+  - Windows 10 以降で既定の場所に入れたときだけ、アンインストールの登録のキーが `…\Uninstall\Mozilla Firefox` になる（ほかは `Mozilla Firefox <版> (<構成> <言語>)`）
+- `browser/installer/windows/nsis/shared.nsh`
+  - アンインストールの登録の `DisplayName` は `Mozilla Firefox (<構成> <言語>)`（ESR は ` ESR` が入る）
+  - 書くのは `UninstallString`（`uninstall\helper.exe`）で、`QuietUninstallString` は書かない。管理者でないときは `HKCU` に書く
+- `browser/installer/windows/nsis/uninstaller.nsi`
+  - `firefox.exe --backgroundtask uninstall` と `default-browser-agent.exe uninstall` で、Firefox が作ったタスク（Background Update を含む）を消す
+  - ほかに Maintenance Service を使う Mozilla のアプリが無ければ、そのアンインストーラを `/S` で動かす
+  - 既定のプロファイルがあれば、リフレッシュを勧める。最後に `HKCU\Software\Mozilla\Firefox` に `Uninstalled-release` を書く（次の起動でリフレッシュを勧めるため）
+- `dom/media/platforms/wmf/WMFDecoderModule.cpp`: H.264 は `CLSID_CMSH264DecoderMFT`、AAC は `CLSID_CMSAACDecMFT` で作る。MP3 には Media Foundation を使わない（「Always use ffvpx for mp3」）
+- `media/ffvpx/libavcodec/codec_list.c`: 同梱の FFmpeg の復号器は、VP8・VP9・FLAC・MP3・AV1（libdav1d と内蔵のもの）・Vorbis・Opus・PCM と、Android の MediaCodec のもの（AAC・H.264・HEVC など）だけ
+- `toolkit/mozapps/update/common/commonupdatedir.cpp`: 更新の作業場所は `C:\ProgramData\Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38`
+
+Mozilla の文書（firefox-source-docs）:
+
+- Full Installer Configuration: どのスイッチを付けても画面を出さずに入れる。タスクバーのピン留め・デスクトップ・スタートメニュー・プライベート ブラウジングのショートカット、Maintenance Service、Default Browser Agent のタスクは、どれも既定で有効。`/PreventRebootRequired=true` を付けて動いている Firefox に重ねて入れると、入れ替えが途中で終わることがある
+- Background Updates: 閉じている間の更新は Windows だけで、既定は 7 時間ごと。条件は、`app.update.background.enabled` と `app.update.auto` が true、インストーラで入れたもの、書き込めるか Maintenance Service が使えること、プロキシの設定が無いこと、言語パックが無いこと など
+- Default Browser Agent: タスクは `Mozilla` のフォルダーに、入れた Firefox ごとに 1 つ作られ、24 時間ごとに動く。インストーラを動かしたユーザーとして、昇格せずに動く
+- Set Default: まず `UserChoice` を書こうとし、できなければ Windows の設定を開く。UCPD は `http`・`https`・`.pdf` の `UserChoice` の書き換えを止める（`htm`・`html` は対象外）。Windows 11 の設定には「既定に設定」のボタンがある
+
+日本語の訳（`mozilla-l10n/firefox-l10n` の `main` の `ja`）: about:support の「アプリケーション基本情報」「更新チャンネル」「プログラムの実行ファイル」「コーデックサポート情報」「ソフトウェアデコーディング」「対応」、設定の「既定のブラウザー」「既定のブラウザーにする」。
+
+Mozilla のサポート（support.mozilla.org）は、JavaScript の確認の画面が返ってきて読めなかった（curl と WebFetch）。
+
+##### Firefox: winget のソース
+
+winget-cli の `master`（2026-10-02 のコミット `39739564`）を読んだ:
+
+- `src/AppInstallerCommonCore/Manifest/ManifestComparator.cpp` の `LocaleComparator`
+  - `--locale` を付けると、それが「要件」になり、インストーラの言語と完全に合う（`MinimumDistanceScoreAsPerfectMatch` 以上）ものだけが候補に残る
+  - 言語の無いインストーラをそのまま許すのは、入れた後の更新で前の言語を引き継ぐときだけ。言語の無いインストーラと `ja` の距離を出す `GetDistanceOfLanguage` は読んでいない
+- `src/AppInstallerCLICore/Workflows/UninstallFlow.cpp`: NSIS（`Nullsoft`）で入れたものは、`SilentUninstallCommand` があればそれを、無ければ `StandardUninstallCommand` を使う
+  - `src/AppInstallerRepositoryCore/Microsoft/ARPHelper.cpp` で `SilentUninstallCommand` を作るのは、アンインストールの登録の `QuietUninstallString` だけ
+- `src/AppInstallerCLICore/Argument.cpp`: `winget list` の `--upgrade-available`
+
+##### Firefox: Microsoft の文書と MDN
+
+- 「Windows で既定のアプリを変更する」（日本語）: 設定アプリで [アプリ>既定のアプリ] → [アプリケーションの既定の設定] で Microsoft Edge を選ぶ → [Microsoft Edge を既定のブラウザーにする] の横の [既定に設定]。[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 は、これを Firefox に読み替えた
+- MDN の Web video codec guide は「Firefox support for AVC is dependent upon the operating system's built-in or preinstalled codecs」、Web audio codec guide は「Firefox relies upon a platform's native support for AAC」と書いている
+
+---
+
+#### Firefox: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6（GitHub のリリースの `powershell-7.6.6-linux-x64.tar.gz`）と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 6 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0 で、既定の規則の指摘も 0
+  - わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`）を入れたファイルでは、それぞれ指摘が出た
+- `winget` はコマンドレットではないので、引数はこの検査の対象外。`winget list` の `--upgrade-available` は winget のソースで確かめた。ほかの引数は [Windows 11 の初期設定](../windows-setup.md)の winget と同じ形
+
+**偽物のコマンドで流した**: 6 個のブロックを、`Get-ItemProperty`・`Get-AppxPackage`・`winget`・`Get-Item`・`Get-Service`・`Get-ScheduledTask`・`Test-Path` を「渡された引数を記録し、決まった値を返す偽物」にして流した。
+
+- [Windows 11 で使う](../windows-setup.md#firefox)の手順 2: アンインストールの登録の偽物（`Mozilla Firefox (x64 ja)`・`Mozilla Maintenance Service`・`Git`・表示名の無いもの）から、`Mozilla Firefox (x64 ja)` の行だけが出た
+- どのブロックでも、`winget` に渡る引数と、`$env:ProgramFiles` から組み立てるパス（`C:\Program Files\Mozilla Firefox\firefox.exe`）が本文のとおりだった
+- 本物の Windows の出力（winget の表示、サービスとタスクの有無）は確かめていない
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. winget が x64 の日本語版を選んで `C:\Program Files\Mozilla Firefox` に入れ、Maintenance Service と Default Browser Agent のタスクができること
+1. about:support の表示と、H.264・AAC の動画の再生
+1. 設定の画面の名前（「既定のアプリ」「既定に設定」）と、既定のブラウザーが Firefox になること。最初の起動で Firefox が既定のブラウザーにするかを聞くこと
+1. Firefox 自身の更新（起動している間と、閉じている間の Background Update）と、`winget upgrade`
+1. `winget uninstall` で窓が出ること、消えるもの・残るもの、外した後の既定のブラウザー
+1. `winget upgrade --all` などで、英語版の `Mozilla.Firefox` と取り違えないこと
+1. arm64 の Windows、N エディション
+
+#### Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由
+
+- Mozilla のサポートの記事（support.mozilla.org）は、この文書を書いた環境からは読めなかった。Windows で再生しては確かめていない
+
+- N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が要るはず（確かめていない）
+
+#### Firefox: Windows 11 の更新 / 手順 2: 補足: winget での更新
+
+- winget の定義は、Mozilla が新しい版を出してから、winget-pkgs に定義が足されたときに上がる（どれだけ遅れるかは確かめていない）。Firefox 自身の更新の方が先に上がることもある
+
+### Firefox: 本文から分離した確認範囲と実測
+
+#### Firefox: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
+
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#firefox)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro 26H2 / ビルド 26300.9457 / x64 |
+| VM | VirtualBox 7.2.20。Rufus で作った媒体からクリーンインストールした専用 VM |
+| PowerShell | Windows PowerShell 5.1.26100.9444 / Desktop / x64。ログオン中のユーザーの管理者権限（Session 1） |
+| WinGet | 1.29.380。`Mozilla.Firefox.ja` を `--source winget` で新規導入 |
+| 検証時の本文の SHA256 | `421701DAB73DA6AD10A0DCEBEF0E88692A382107A6A8086CA54F66C98E55E331`（この追記より前） |
+| 抜き出したブロックの manifest の SHA256 | `D294CB1ACBECD20715E47E6EF19194F41248360171544A2713E347CA896D926A` |
+
+**確認したこと**（バッチ `20261006-110251Z-aa3cdf07`、完了 11:03:25 UTC）:
+
+- 手順 2 は出力がなく、`HKLM`・`HKCU` のアンインストール登録と Mozilla の Appx パッケージは見つからなかった
+- 手順 3 は x64 の日本語版 `Firefox Setup 157.0.exe` を取り、インストーラーのハッシュ検証が成功し、`Successfully installed` が出た
+- 続く一覧は `Mozilla Firefox (x64 ja) / Mozilla.Firefox.ja / 157.0`。`C:\Program Files\Mozilla Firefox\firefox.exe` の `ProductVersion` も `157.0` だった
+- `MozillaMaintenance` サービスは `Stopped / Manual`、`Firefox Default Browser Agent 308046B0AF4A39CB` のタスクは `Ready` だった
+- PowerShell のエラーは 0、最後の終了コードと検証用タスクの終了コードは 0。要求したバッチと完了記録が対応した
+
+**確認していないこと**:
+
+- 手順 1 の端末を開く画面操作。検証用の起動処理で代替した
+- 手順 4 の起動と `about:support`。画面の言語、Release チャンネル、H.264・AAC の対応表示と実際の動画の再生
+- 手順 5 の既定のブラウザーへの切り替え。Default Browser Agent のタスクがあることだけでは、Firefox が既定になったと判定しない
+- ショートカット、プロファイル、Background Update のタスク、Firefox 自身の更新、`winget upgrade`、アンインストール、arm64 の Windows、N エディション
+
+---
+
+#### Firefox: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた画面の操作を確かめた。
+
+**確認したこと**:
+
+- Firefox を初めて起動したとき（この付録の操作で GitHub の文書を開くため）、「Firefox へようこそ」の画面（「続行」）、翻訳の案内、タスクバーへのピン留めの案内が出た。ピン留めは「行わない」を選んだ
+- Windows 11 で使うの手順 4:
+  - スタートメニューの「Firefox」から起動すると、「Firefox を優先ブラウザーに設定しますか？」の確認が出た。「後で」を選び、既定にするのは手順 5 で行った
+  - `about:support` の「アプリケーション基本情報」: 版は 157.0.1（winget で入れた 157.0 から、Firefox が自分で上げた）、「更新チャンネル」は `release`、「プログラムの実行ファイル」は `C:\Program Files\Mozilla Firefox\firefox.exe`。メニューと画面は日本語
+  - 「コーデックサポート情報」: `H264` と `AAC` の「ソフトウェアデコーディング」が「対応」（ハードウェアは未対応。VM の画面のアダプターに 3D は無い）
+  - 再生の試験: ホストの ffmpeg で作った 6 秒の H.264（baseline）+ AAC の mp4 と、AAC だけの m4a を、VM の中のファイルの HTML で再生した。mp4 は 6.00 秒まで進み、映像は 180 フレームで落ちたフレームは 0、どちらもエラー無し。`canPlayType` と MSE の `isTypeSupported` は対応の旨を返した
+  - 音の出力は確かめていない（VM に音声のデバイスが無く、`about:support` の音声のバックエンドは `(remote error)`）
+- Windows 11 で使うの手順 5:
+  - 設定 →「アプリ」→「既定のアプリ」の見出しは「アプリケーションの既定値を設定する」で、本文の「アプリケーションの既定の設定」と違った。一覧に「Firefox」が 2 つ並んだ（UI Automation の名前では `App_User_Firefox-308046B0AF4A39CB` と `App_Machine_Firefox-308046B0AF4A39CB`）
+  - 上の「Firefox」を開くと、「Firefox を既定のブラウザーに設定する」と「既定値に設定」のボタン（本文は「既定のブラウザーにする」「既定に設定」）。押すとチェックの印が出た。本文の文言を画面に合わせて直した
+  - 押した後、`.htm`・`.html`・`HTTP`・`HTTPS` が Firefox になった。`.pdf`・`.shtml`・`.svg`・`.xht`・`.xhtml` は Microsoft Edge のまま
+  - Win+R に `https://www.mozilla.org/ja/` を入れると、Firefox で開いた
+  - レジストリでは、`https` の `UserChoiceLatest` の `ProgId` が `FirefoxURL-308046B0AF4A39CB` になり、従来の `UserChoice` は `MSEdgeHTM` のままだった
+- Windows 11 の更新の手順 1: 1 行目は `157.0.1`、`winget list --upgrade-available` は `No installed package found matching input criteria.`（本文の「見つからない旨が出たら、新しい版は無い（Firefox が自分で先に上げていることもある）」）。この節の手順 2 は飛ばした
+- Windows 11 のロールバック（Firefox の窓を閉じてから）:
+  - この節の手順 1: winget は `Found Mozilla Firefox (x64 ja) [Mozilla.Firefox.ja]`・`Starting package uninstall...`・`Successfully uninstalled` を、アンインストーラーの窓が開いている間に出してプロンプトに戻った（本文の「winget が先に終わっても」のとおり）
+  - アンインストーラーの窓「Mozilla Firefox のアンインストール」は、「代わりに Firefox をリフレッシュしますか？」（「Firefox をリフレッシュ」は押さない）→「次へ」→「次の場所の Firefox をアンインストールします: C:\Program Files\Mozilla Firefox」→「削除」→「Mozilla Firefox のアンインストールを完了します」（「Firefox をアンインストールした理由を Mozilla に知らせる」のチェックは外れていた）→「完了」の順だった
+  - この節の手順 2: `winget list` は見つからない旨、サービスとタスクは何も出なかったが、`Test-Path` は `True` だった。`C:\Program Files\Mozilla Firefox` に `update_telemetry.json`（37 バイト。Firefox が自分で更新したときに書いたもの）だけが残っていた。本文に箇条書きを足し、検証ではフォルダーごと消した
+  - プロファイル（`%APPDATA%\Mozilla\Firefox` と `%LOCALAPPDATA%\Mozilla\Firefox`）は残った（本文のとおり）
+  - 既定のアプリの画面では、`.htm`・`.html` などはもう Microsoft Edge に戻っていた。この節の手順 3 として「Microsoft Edge を既定のブラウザーに設定する」の「既定値に設定」を押すと、`http`・`https` の `UserChoice` と `UserChoiceLatest` が `MSEdgeHTM` になった
+
+**確認していないこと**:
+
+- 実際の Web の動画（YouTube など）の再生と音の出力、ハードウェアのデコード
+- 2 つの「Firefox」のうち下のもの（`App_Machine_…`）で既定にしたときの動き、Firefox の設定の「既定のブラウザーにする」からの経路
+- Background Update のタスクによる閉じている間の更新、winget で新しい版に上げる手順 2、arm64 の Windows、N エディション、Windows の実機
+
+---
+
+## 統合前の記録: WezTerm の Windows 11（もとは wezterm-nightly.md）
+
+もとの `wezterm-nightly.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-weztermもとは-wezterm-nightlymd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
+| Windows 11 で使う 2〜6 | 「WezTerm」の手順 1〜5 |
+| Windows 11 の更新 1〜4 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 1・5〜7 |
+| Windows 11 のロールバック 1 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 8 |
+
+### WezTerm: 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06〜07: Windows 節の手順 2・4・5 による新規導入、CLI の版と登録・PATH・ショートカット、CLI でのフォント解決とラスタ生成（[付録](#wezterm-付録-windows-11-pro-の-vm-での導入検証2026-10-06)）
+  - 2026-10-08: 手順 6 のスタートからの起動（この VM では OpenGL のエラーで開かず、`prefer_egl` で開いた）、「Open WezTerm here」の実クリックと HackGen Console NF の表示、更新（同じ版の入れ直し）、ロールバック（[付録](#wezterm-付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - 3D の描画がある環境で、設定ファイル無しに手順 6 で窓が開くこと
+  - 自分用の設定と Git Bash、Visual C++ Runtime の新規導入、新しい版に上がる更新、arm64 の Windows、Windows の実機
+- 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### WezTerm: 補足
+
+#### WezTerm: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、配布物（インストーラの sha256・Inno Setup の版・署名の有無・中の実行ファイル）、インストーラの定義と作り方、Inno Setup の文書とソース、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](almalinux-setup.md#wezterm-対象と検証環境)）。
+
+#### WezTerm: Windows 11 で使う / 手順 2: 補足: 確かめていること
+
+- レジストリのキーは、WezTerm のインストーラ（Inno Setup）がアンインストールのために作る登録。名前の `{BCF6F0DA-…}` はインストーラの定義の `AppId` で、stable と nightly で同じ（winget の `wez.wezterm` と `wez.wezterm.nightly` の `ProductCode` も同じ値）。`DisplayVersion` が WezTerm の版
+- WezTerm の実行ファイル（`wezterm.exe`・`wezterm-gui.exe`・`wezterm-mux-server.exe`）は `VCRUNTIME140.dll`（Visual C++ の再頒布可能パッケージ）を読み込むが、インストーラはこれを入れない（[付録](#wezterm-付録-windows-11-の配布物と資料の調査2026-10-03)）。無いと起動できないはず（確かめていない）
+- `Get-Process` は、ほかのユーザーやセッションの WezTerm も数える
+
+#### WezTerm: Windows 11 で使う / 手順 3: 補足: winget の定義
+
+- `Microsoft.VCRedist.2015+.x64` は、2026-10-03 の winget-pkgs で 14.51.36247.0。インストーラは Microsoft の `VC_redist.x64.exe`（`download.visualstudio.microsoft.com`）で、winget は定義の sha256 を確かめてから動かす。PC 全体に入る（`Scope: machine`）
+- winget の `wez.wezterm.nightly` の定義も、これを依存に書いている（winget で入れると先にこれが入る。本書は winget で WezTerm を入れないので、ここで入れる）
+- 定義は、終了コード 3010（再起動が要る）も成功として扱う
+- Microsoft の文書では、x64 のパッケージには arm64 の分も入っている。arm64 の Windows では試していない
+
+#### WezTerm: Windows 11 で使う / 手順 4: 本文中の記録
+
+   - `取れない` と `sha256 が一致しない` は、nightly が入れ替わる最中に取ったときにも出る（毎日の入れ替えは日本時間の昼ごろで、2026-10-03 は 13 時 13 分。main が変わったときにも入れ替わる）。少し待って貼り直す
+
+#### WezTerm: Windows 11 で使う / 手順 4: 補足: 確かめていることと、インストーラの引数
+
+**sha256**
+
+- `WezTerm-nightly-setup.exe.sha256` は、同じ nightly のリリースに置かれた sha256（`<64 桁>  WezTerm-nightly-setup.exe` の 1 行）。上流の CI が、ビルドしたファイルからリリースに上げる直前に作る（[付録](#wezterm-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- 同じ場所から取るので、分かるのは壊れていないこと（途中で切れていない、入れ替えの最中のものではない）まで。インストーラにも中の `wezterm*.exe` にも Authenticode の署名は無く、本物かどうかは確かめられない（[注意点](../extra/almalinux-setup.md#注意点)）
+- sha256 を先に、インストーラを後に取る。間で nightly が入れ替わると、一致せずに止まる
+- `-ne` の比較は大文字と小文字を区別しない（`.sha256` は小文字、`Get-FileHash` は大文字）
+- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ（[hackgen.md の Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 3 の補足と同じ）
+- `curl.exe` で取ったファイルには「インターネットから来た」印（Mark of the Web）が付かないので、署名の無いインストーラでも SmartScreen の確認は出ないはず（確かめていない）
+
+**インストーラの引数**（Inno Setup の標準の引数。WezTerm の公式の文書も、これで動かせると書いている）
+
+- `/VERYSILENT`: 画面も進み具合の窓も出さない
+- `/SUPPRESSMSGBOXES`: メッセージボックスを出さず、既定の答えで進む
+- `/NORESTART`: 再起動しない
+- `/NOCLOSEAPPLICATIONS`: 使っているファイルを持つアプリを閉じない。Inno Setup は、黙って動かすと既定では動いている WezTerm を閉じる（中の Claude Code なども止まる）。このブロックは WezTerm が動いていれば先に止まるので、念のため
+- `/LOG="…"`: ログを `%TEMP%\wezterm-setup\setup.log` に書く（失敗したときに読む）
+- 終了コードは 0 が成功で、0 以外は失敗（Inno Setup の文書）
+- 管理者で入れる定義（`PrivilegesRequired` が既定の `admin`）。管理者の窓から動かすので、UAC の確認は出ないはず
+- 定義の最後の「WezTerm を起動する」は `skipifsilent` なので、黙って入れたときは WezTerm を起動しない
+
+**入るもの**（インストーラの定義 `ci/windows-installer.iss`）
+
+- `C:\Program Files\WezTerm` に、`wezterm.exe`（CLI）・`wezterm-gui.exe`（窓）・`wezterm-mux-server.exe`・`strip-ansi-escapes.exe`・`conpty.dll` と `OpenConsole.exe`（Microsoft の署名付き）・`libEGL.dll` と `libGLESv2.dll`・`mesa\opengl32.dll`。アンインストーラの `unins000.exe` と `unins000.dat`
+- PC 全体の `PATH`（`HKLM` の環境変数）の末尾に `C:\Program Files\WezTerm`
+- スタートメニューの「WezTerm」（全ユーザー）。デスクトップのアイコンは既定で作らない
+- エクスプローラーの右クリックの「Open WezTerm here」（フォルダー・フォルダーの背景・ドライブ。`HKLM\Software\Classes`）
+- 前に入れた WezTerm があれば、同じ場所に上書きする（Inno Setup の既定の `UsePreviousAppDir`）
+- シェル統合のスクリプトと補完は入らない（AlmaLinux 10 の RPM の `/etc/profile.d/wezterm.sh` に当たるものは無い）
+
+#### WezTerm: Windows 11 で使う / 手順 5: 補足: 版の読み方
+
+- 版は、ビルドした日ではなく、もとにした main の最後のコミットの日時と、そのコミットの頭 8 桁（`<年月日>-<時分秒>-<コミット>`）
+- nightly は毎日ビルドし直されるが、コミットの無い日は同じ版になる（2026-10-03 のビルドは `20260929-043349-cab25161`）
+- `DisplayName` は `WezTerm <版>`（Inno Setup の既定の形）
+- `UninstallString` は、[Windows 11 のロールバック](../extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 1 が使う
+
+#### WezTerm: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物とソースと資料を読んだ記録。
+
+##### WezTerm: nightly のリリースのファイル
+
+GitHub の `nightly` のリリースの Windows のファイルは 4 つ（`.asc`・`.sig`・`.sha512` は 404）:
+
+| ファイル | 大きさ | `Last-Modified` |
+|---|---|---|
+| `WezTerm-nightly-setup.exe` | 45,473,308 バイト | 2026-10-03 04:13:07 UTC |
+| `WezTerm-nightly-setup.exe.sha256` | 92 バイト | 2026-10-03 04:13:06 UTC |
+| `WezTerm-windows-nightly.zip` | 70,856,196 バイト | 2026-10-03 04:13:08 UTC |
+| `WezTerm-windows-nightly.zip.sha256` | 94 バイト | 2026-10-03 04:13:06 UTC |
+
+```
+$ cat WezTerm-nightly-setup.exe.sha256
+1e52712f6111c3583e37eabeeef6c8d2896fe67ec8ce1ef38585e65ca01a923c  WezTerm-nightly-setup.exe
+$ sha256sum WezTerm-nightly-setup.exe
+1e52712f6111c3583e37eabeeef6c8d2896fe67ec8ce1ef38585e65ca01a923c  WezTerm-nightly-setup.exe
+$ strings -n 8 WezTerm-nightly-setup.exe | grep 'Inno Setup' | sort -u
+Inno Setup Messages (6.5.0) (u)
+Inno Setup Setup Data (6.7.0)
+```
+
+- `.sha256` の改行は LF だけで、ハッシュとファイル名の間は空白 2 つ（`sha256sum` の形）
+- インストーラは 32 ビットの PE（Inno Setup の起動部）で、PE の証明書テーブル（Authenticode の署名）は大きさ 0。署名は無い
+- innoextract 1.9（Ubuntu 24.04 の）は、Inno Setup 6.7 の中身を読めなかった（`Could not determine setup data version!`）。入るファイルは、下のインストーラの定義と zip で見た
+
+zip の中（版のフォルダー名が `20260929-043349-cab25161`。`git ls-remote` の main の先頭も `cab25161…` だった）:
+
+```
+WezTerm-windows-20260929-043349-cab25161/conpty.dll
+WezTerm-windows-20260929-043349-cab25161/libEGL.dll
+WezTerm-windows-20260929-043349-cab25161/libGLESv2.dll
+WezTerm-windows-20260929-043349-cab25161/mesa/opengl32.dll
+WezTerm-windows-20260929-043349-cab25161/OpenConsole.exe
+WezTerm-windows-20260929-043349-cab25161/strip-ansi-escapes.exe
+WezTerm-windows-20260929-043349-cab25161/wezterm-gui.exe
+WezTerm-windows-20260929-043349-cab25161/wezterm-mux-server.exe
+WezTerm-windows-20260929-043349-cab25161/wezterm.exe
+WezTerm-windows-20260929-043349-cab25161/wezterm.pdb
+```
+
+PE を pefile で読んだ結果:
+
+- どれも x64（`Machine` が `0x8664`）。arm64 のものは無い
+- 証明書テーブルがあるのは `conpty.dll` と `OpenConsole.exe`（Microsoft のもの）だけで、`wezterm*.exe`・`strip-ansi-escapes.exe`・`libEGL.dll`・`libGLESv2.dll`・`mesa\opengl32.dll` には無い
+- `wezterm.exe`・`wezterm-gui.exe`・`wezterm-mux-server.exe`・`strip-ansi-escapes.exe` の読み込むものに `VCRUNTIME140.dll` がある（ほかは `api-ms-win-crt-*`。Windows に入っている UCRT）
+
+##### WezTerm: インストーラの定義と作り方（main の 2026-10-03 の時点）
+
+`ci/windows-installer.iss`:
+
+- `AppId={{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}`、`DefaultDirName={autopf}\WezTerm`、`ArchitecturesAllowed=x64 arm64`、`ArchitecturesInstallIn64BitMode=x64 arm64`、`MinVersion=10.0.17763`、`ChangesEnvironment=true`
+- `PrivilegesRequired=lowest` はコメントにしてあり、既定の `admin`（管理者で入れ、`{autopf}` は `C:\Program Files`）
+- `[Tasks]` の `desktopicon` は `Flags: unchecked`。`[Icons]` は `{autoprograms}\WezTerm`（`AppUserModelID: "org.wezfurlong.wezterm"`）
+- `[Run]` の `wezterm-gui.exe` の起動は `Flags: nowait postinstall skipifsilent`
+- `[Registry]` は `HKA` の `Software\Classes\{Drive,Directory\Background,Directory}\shell\Open WezTerm here`（`uninsdeletekey`）
+- `[Code]` の `CurStepChanged(ssPostInstall)` が `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment` の `Path` の末尾に `{app}` を足し、`CurUninstallStepChanged(usPostUninstall)` が消す。`InitializeSetup` で、arm64 の Windows では x64 のエミュレーションがあるかを確かめる
+- `[Files]` に Visual C++ の再頒布可能パッケージは無い
+
+`ci/deploy.sh` と `.github/workflows/gen_windows_continuous.yml`:
+
+- 毎日 03:10 UTC（と、main の Rust のファイルなどが変わったとき）に `windows-2025` でビルドし、`BUILD_REASON=Schedule` のときファイル名を `WezTerm-windows-nightly.zip`・`WezTerm-nightly-setup` にする。版（`MyAppVersion`）は `git show -s --format=%cd-%h --date=format:%Y%m%d-%H%M%S`（`core.abbrev=8`）
+- 別のジョブ（`ubuntu-latest`）が、ビルドのファイルを受け取って `sha256sum $f > $f.sha256` で `.sha256` を作り、`gh release upload --clobber nightly` で上げる
+- Windows の版に署名の手順は無い（`codesign` があるのは macOS の版だけ）
+
+##### WezTerm: Inno Setup（文書と、`jrsoftware/issrc` の 2026-10-03 のソース）
+
+- 黙って動かす引数: `/VERYSILENT`・`/SUPPRESSMSGBOXES`・`/NORESTART`・`/NOCLOSEAPPLICATIONS`・`/LOG="filename"`。終了コードは 0 が成功、1〜8 が失敗の種類
+- `CloseApplications` の既定は `yes` で、黙って動かしているときは「使用中のファイルを持つアプリを、コマンドラインで止められない限りいつも閉じて起動し直す」
+- アンインストールの登録（`Setup.Install.pas`）: `DisplayName`（`AppVerName` が無ければ `<AppName> <AppVersion>`）・`DisplayVersion`・`InstallLocation`・`UninstallString`（`"<…>\unins000.exe"`）・`QuietUninstallString`（同じものに ` /SILENT`）。キーの名前は `<AppId>_is1`
+- アンインストーラ（`unins???.exe`、既定の置き場所は `{app}`）は `/VERYSILENT`・`/SUPPRESSMSGBOXES`・`/NORESTART` を受け付け、`%TEMP%` に自分の写しを作って、写しが消す。「終了コードを受け取った時点では、アンインストールの処理がまだ動いていることがある」
+
+##### WezTerm: winget・scoop・Chocolatey
+
+- winget の `wez.wezterm.nightly`（`manifests/w/wez/wezterm/nightly/`）: `20260929-043349-cab25161` と `20260917-114457-b09b56c2` の 2 つ。どちらも `InstallerUrl` は `…/releases/download/nightly/WezTerm-nightly-setup.exe`、`InstallerType: inno`、`Scope: machine`、`ProductCode: '{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1'`、依存は `Microsoft.VCRedist.2015+.x64`
+  - `20260929-043349-cab25161` の `InstallerSha256` は、2026-10-02 06:51 UTC のコミットで `6438C905…DA474`、2026-10-03 06:02 UTC のコミットで `1E52712F…A923C`（この日のインストーラと同じ）に変わった。同じ版でも、ビルドのたびに sha256 が変わる
+  - `20260917-114457-b09b56c2` の `InstallerSha256` は `513C4271…530EA` のまま（同じ URL の今のファイルとは合わない）
+  - コミットの履歴（2026-08-21〜10-03）では、bot の更新は 1〜11 日おきで、毎日ではない（2026-09-21 の次は 10-02）
+- winget の `wez.wezterm`: 最新は `20240203-110809-5046fc22`。`ProductCode` は nightly と同じ
+- winget の `Microsoft.VCRedist.2015+.x64`: 最新は `14.51.36247.0`（`InstallerType: burn`、`Scope: machine`、`InstallerSuccessCodes: 3010`）
+- scoop の `versions/wezterm-nightly`: `"version": "nightly"`、`url` は `…/releases/download/nightly/WezTerm-windows-nightly.zip`、`hash` は無い。scoop の `lib/install.ps1` は、版が `nightly` のとき `This is a nightly version. Downloaded files won't be verified.` と出して確かめない
+- scoop の `extras/wezterm`: `20240203-110809-5046fc22`
+- Chocolatey の `wezterm`: `20240203.110809.0`。`wezterm-nightly` は無い
+
+##### WezTerm: WezTerm のソース（main）
+
+- `config/src/config.rs` の `load_with_overrides`: `~/.wezterm.lua` → `CONFIG_DIRS` の `wezterm.lua` の順に並べ、Windows だけ `current_exe()` のフォルダーの `wezterm.lua` を先頭に入れ、その前に `WEZTERM_CONFIG_FILE`、さらに前に `--config-file`。`HOME_DIR` は `dirs_next::home_dir()`（Windows では `%USERPROFILE%`）、`CONFIG_DIRS` は `XDG_CONFIG_HOME` があれば `<それ>\wezterm`、無ければ `<HOME>\.config\wezterm`
+- 作業用のフォルダー: `RUNTIME_DIR` は `dirs_next::runtime_dir()` が無い Windows では `<HOME>\.local\share\wezterm`、`DATA_DIR` は `dirs_next::data_dir()`（`%APPDATA%`）の `wezterm`、`CACHE_DIR` は `dirs_next::cache_dir()`（`%LOCALAPPDATA%`）の `wezterm`
+- `wezterm-gui/src/update.rs`: 更新の確認は `releases/latest`（stable）の `tag_name` と今の版を文字列で比べ、新しいときだけ知らせる
+- 公式の文書（`docs/install/windows.md`）: インストーラは Inno Setup で、Program Files に入れて `PATH` に登録する。Inno Setup の標準の引数で動かせる。nightly の setup.exe と zip へのリンクがある。winget・scoop・Chocolatey の案内は stable（`wez.wezterm`・`extras/wezterm`・`wezterm`）
+- 公式の文書（`docs/config/launch.md`）: Windows で `default_prog` が無いときは `%COMSPEC%`、無ければ `cmd.exe`
+
+---
+
+#### WezTerm: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 6 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）と、既定の規則を当てた。指摘は 0
+
+**[Windows 11 で使う](../windows-setup.md#wezterm)の手順 4 のブロック**を、パスの `\` を `/` に替え、`$env:WINDIR`・`$env:TEMP`・`C:\Program Files\WezTerm` を一時的なディレクトリにして流した。`System32/curl.exe` は Linux の `curl` を呼ぶ小さなスクリプト（失敗・壊れたファイル・中身の違う `.sha256` を作れる）、`Get-Process` と `Start-Process` は偽物（`Start-Process` は引数を出し、`wezterm.exe` の代わりに版を出すスクリプトを置く）、管理者の判定は値に置き換えた:
+
+- 通常: 本物の `.sha256` とインストーラを取り、sha256 が一致し、`Start-Process` に `-FilePath <一時フォルダー>/WezTerm-nightly-setup.exe` と `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG="<一時フォルダー>/setup.log"` が渡った。`WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20260929-043349-cab25161` が出て、一時フォルダーが消えた
+- 管理者でない・`vcruntime140.dll` が無い・WezTerm が動いている: それぞれの `中断:` で止まり、何も取らなかった
+- `curl` の失敗: `中断: WezTerm-nightly-setup.exe.sha256 を取れない`
+- 取ったインストーラに 1 バイト足したもの: `中断: WezTerm-nightly-setup.exe の sha256 が一致しない`（`Start-Process` は呼ばれず、取ったものは一時フォルダーに残った）
+- `.sha256` の中身が `Not Found`: `中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い`
+- インストーラの終了コードが 4: `中断: インストーラが終了コード 4 で終わった（ログは <一時フォルダー>/setup.log）`
+
+**[Windows 11 のロールバック](../extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 1 のブロック**を、`C:\Program Files\WezTerm` を一時的なディレクトリにして流した。`Get-ItemProperty`・`Test-Path`（登録のキーだけ）・`Get-Process`・`Start-Process` を偽物にし、`Start-Process` は 3 秒後に登録とフォルダーを消す（アンインストーラの写しが後から消すのをまねる）:
+
+- 通常: `Start-Process` に `-FilePath C:\Program Files\WezTerm\unins000.exe`（`UninstallString` の引用符の中）と `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` が渡り、3 秒待ってから `False` が 2 行出た
+- 登録が無い・`UninstallString` が別の形（`MsiExec.exe /X{0000}`）・WezTerm が動いている・アンインストーラの終了コードが 1: それぞれの `中断:` で止まった
+- フォルダーに `wezterm.lua` が残るとき: 60 秒待ってから `False` と `True` が出た
+
+[Windows 11 で使う](../windows-setup.md#wezterm)の手順 2 のブロックも、管理者の判定を値に置き換えて流し、`VCRuntime` が偽物の `vcruntime140.dll` の有無で `True` と `False` になることを見た。
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. インストーラが黙って入り、`PATH`・スタートメニュー・右クリックのメニュー・アンインストールの登録ができること。前の版が入っている PC で上書きできること
+1. `VCRUNTIME140.dll` の無い PC で WezTerm が起動しないことと、[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3 で起動するようになること
+1. スタートメニューから起動した WezTerm の窓と、自分用の設定での Git Bash
+1. アンインストーラが黙って消すこと
+1. arm64 の Windows
+
+### WezTerm: 本文から分離した確認範囲と実測
+
+#### WezTerm: 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
+
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの管理者の Windows PowerShell に実行した。GUI のコピー・貼り付けや WezTerm の起動は試していない。
+
+| 項目 | 確認した値 |
+|---|---|
+| OS | Windows 11 Pro 26H2、26300.9457、x64 |
+| PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、管理者、セッション 1 |
+| 初回導入前 | `Version`・`Location`・`OnPath`・`Running` は空、`Admin: True`、`VCRuntime: True` |
+| Visual C++ Runtime | Windows 初期設定の「アプリを入れる」の手順 3 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
+| 作業フォルダー | 実行前に `%TEMP%\wezterm-setup` が無いことを確認 |
+| 入った版 | `20261005-054844-37254829` |
+
+**初回導入と確認（この節の手順 2・4・5）**:
+
+- 実行記録は `20261006-110954Z-cd78c35a`。2026-10-06 11:10:17.710 UTC に完了し、手順ごとのエラーは 0、最後の CLI とタスクの終了値は 0、開始と完了の対応も確認した
+- 手順 4 は `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20261005-054844-37254829` を出した。本文の `.sha256` とインストーラの照合を通して初回導入された
+- 手順 5 の登録は `DisplayName: WezTerm version 20261005-054844-37254829`、`DisplayVersion: 20261005-054844-37254829`、`InstallLocation: C:\Program Files\WezTerm\`。`UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"` だった
+- CLI の版も登録と一致した。PC 全体の `PATH` の `C:\Program Files\WezTerm` は 1 行だけで、全ユーザーのスタートメニューの `WezTerm.lnk` は `True`
+- 導入先に `wezterm.exe`・`wezterm-gui.exe`・`wezterm-mux-server.exe`・`unins000.exe`・`unins000.dat`、`conpty.dll`・`OpenConsole.exe`・`strip-ansi-escapes.exe`・`libEGL.dll`・`libGLESv2.dll`・`mesa` が並ぶことを確認した
+- 2026-10-07 04:04:16〜04:04:23 UTC の追加読み取りは、通常権限の PowerShell 7.6.6・Session 1 で行った。`HKCR\Directory\shell\Open WezTerm here` と `HKCR\Directory\Background\shell\Open WezTerm here` のコマンド項目が存在した。メニューをクリックして実際に起動することは未確認。証跡は `.verification/evidence/remaining-local-20261007-040410-0e3dc87e/guest-result.json`
+
+**未検証の範囲**:
+
+- 手順 1 の GUI での管理者の PowerShell の開き方とコピー・貼り付け、手順 6 の WezTerm の窓・既定のシェル、「Open WezTerm here」の動作。ショートカットやファイルがあることと、GUI が動くことは別に確認する必要がある
+- 自分用の設定と Git Bash、設定ファイルの探索順、新しい PowerShell が PC 全体の `PATH` を読むこと
+- `VCRUNTIME140.dll` が無い場合と手順 3 による導入、前の版への上書き、更新・アンインストール、arm64。Windows の実機での通し実行
+
+2026-10-03 以前の付録は当時の確認範囲を記した履歴として保持した。今回も本文のコマンドは変更していない。
+
+---
+
+#### WezTerm: 付録: Windows 11 Pro の VM での HackGen の CLI ラスタ生成の検証（2026-10-07）
+
+前の初回導入と同じ VM の通常権限の PowerShell 7.6.6・Session 1 で、導入済みの `wezterm.exe` の `ls-fonts` を使った。`--config-file` で scratch の設定だけを渡し、`--codepoints 61,3042,6f22,2192,e0b0,f07c --rasterize-ascii` の stdout を採取した。設定はファミリーだけを替えた 2 通りで、フォントサイズは 12.0、`custom_block_glyphs=false` と `check_for_updates=false`。本文の導入コードと実ユーザーの設定は変更していない。
+
+**フォント解決と数値ラスタ**:
+
+- `HackGen Console NF` は `HackGenConsoleNF-Regular.ttf`、`HackGen35 Console NF` は `HackGen35ConsoleNF-Regular.ttf` を、ユーザーのフォントフォルダーから DirectWrite で使った。計 12 glyph はすべて ID が 0 以外、`notdef` なし。フォントの fallback と WezTerm の独自 glyph は出なかった
+- 各文字の bearing と offset、ANSI `38:6` の RGBA を記録した。NUL padding は解析用のコピーだけから除き、元の stdout と JSON は変更していない。glyph 名中の `#0` を ID 0 と誤認せず、カンマ後の数値を glyph ID として判定した
+- 下表のセル幅は両ファミリーで一致した。ラスタ欄は幅×高さと、alpha が 0 でないピクセル数／全ピクセル数。すべての文字に透明でないピクセルがあり、各 RGBA の値は 0〜255 に収まった
+
+| 文字・コードポイント | セル幅 | HackGen Console NF | HackGen35 Console NF |
+|---|---:|---|---|
+| a / U+0061 | 1 | 8×8、52/64 | 8×9、61/72 |
+| あ / U+3042 | 2 | 13×14、117/182 | 14×14、117/196 |
+| 漢 / U+6F22 | 2 | 15×16、144/240 | 16×16、150/256 |
+| → / U+2192 | 1 | 10×9、39/90 | 10×9、38/90 |
+| Powerline / U+E0B0 | 1 | 10×19、117/190 | 11×19、137/209 |
+| Nerd Fonts / U+F07C | 1 | 16×13、170/208 | 16×13、162/208 |
+
+- 計 2005 ピクセル中、alpha が 0 以外は 1304、255 は 359。HackGen35 の U+2192 は最大 alpha 254、他の 11 glyph は最大 255 だった。各文字に 255 のピクセルが必要という判定はしていない
+- 両 CLI の終了コードは 0、stderr は空、09:20:26〜09:20:46 UTC に実行した。scratch の削除は成功し、実ユーザーとインストール先の WezTerm 設定 3 パスの存在状態は前後不変だった
+- 証跡は `.verification/evidence/remaining-wezterm-font-20261007-092017-4d5448f6` の `guest-result.json` と `glyph-assessment.json`。raw の SHA256 は `9B2C1DC0A426F36FF2971561FCC041077D62EFE718D8D85403C68CB1E6A40475`、独立した評価 JSON は `C12A3BF87D1FD9BE9C9061AD12DB6F6866B2A4141E993CC3F80221184E753C68`。文字ごとの RGBA の範囲・透明でない領域・ラスタの SHA256 も評価 JSON に保存した
+
+**確認していないこと**:
+
+- スタートからの WezTerm GUI 起動、既定のシェル、GUI のフォントメニューと選択、スクリーン上の字形・太字・行の高さ、右クリックのメニューの実クリック。CLI の数値ラスタを画面上の描画の確認へ広げない
+- 自分用の設定と Git Bash、設定ファイルの探索順、選んだ文字以外、Visual C++ Runtime が無い場合、更新・上書き・アンインストール、arm64 の Windows。以前の付録はその時点の履歴として保持した
+
+---
+
+#### WezTerm: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、GUI の起動・右クリックの項目・更新を確かめた。手順は [Windows 11 で使う](../windows-setup.md#wezterm)の番号。WezTerm は 20261005-054844-37254829。
+
+**手順 6（スタートメニューから起動）**:
+
+- スタートメニューの「WezTerm」から起動すると、窓が開かずにプロセスが終わった。`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` に `ERROR  wezterm_gui::frontend > Failed to create window: The OpenGL implementation is too old to work with glium`
+  - この VM の画面のアダプターは VirtualBox の VBoxSVGA で、3D の描画を使っていない
+  - `wezterm-gui.exe --config front_end="Software"` でも同じエラー
+  - `wezterm-gui.exe --config prefer_egl=true` では窓が開き、中で `cmd.exe` が動いた（設定ファイルが無いときのシェル。`%COMSPEC%`）。窓の中の `wezterm --version` は `wezterm 20261005-054844-37254829`
+  - 本文の手順 6 に、ログの場所と `config.prefer_egl = true` の箇条書きを足した
+- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の「表示と入力」の手順 2）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
+  - 設定ファイルが無いままでは、同じ OpenGL のエラーで開かなかった
+  - 一時的に `%USERPROFILE%\.wezterm.lua`（`config.prefer_egl = true` と `config.font = wezterm.font 'HackGen Console NF'` だけ）を置くと、`C:\verify\gui-fixtures` で窓が開いた。英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が、HackGen Console NF で表示された（画面で確かめた）
+  - 一時的な設定と試験用の文のファイルは、確かめた後に消した
+
+**Windows 11 の更新**:
+
+- この節の手順 2: 1 行目は `20261005-054844-37254829`、WezTerm のプロセスは無し
+- この節の手順 3（手順 4 の貼り直し）: `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と `wezterm 20261005-054844-37254829`。版は同じで、本文の「同じ版なら、main に新しいコミットが無かった」に当たる
+- この節の手順 1・4 は、Remote Control のタスクが無いので飛ばした
+
+**Windows 11 のロールバック**:
+
+- この節の手順 1（WezTerm の窓は無い状態）: `False` が 2 行出て、その後は何も出なかった（登録・`C:\Program Files\WezTerm`・`PATH` の行が消えた）
+
+**確認していないこと**:
+
+- 3D の描画がある環境（実機の GPU）で、設定ファイル無しに手順 6 で窓が開くこと
+- 自分用の設定（`ryo-aoki-pc/wezterm`）と Git Bash、新しい版に上がる更新、arm64 の Windows、Windows の実機
+
+---
+
+## 統合前の記録: git-delta の Windows 11（もとは git-delta.md）
+
+もとの `git-delta.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-git-deltaもとは-git-deltamd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2〜5 | 「git-delta」の手順 1〜4 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1・3 | ロールバックの「Git の道具を消す」の手順 3・4 |
+| Windows 11 のロールバック 2 | ロールバックの「Git Bash の設定を戻す」の手順 3 |
+
+### git-delta: 補足
+
+#### git-delta: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **[Windows 11 で使う](../windows-setup.md#git-delta)と、後ろの Windows 11 の 2 節（更新・ロールバック）は、Windows の実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）。確かめたのは、scoop と winget の定義、配布物の中身と sha256、delta・Git for Windows・Scoop のソース、PowerShell の構文と偽物のコマンドでの模擬だけ（[対象と検証環境](almalinux-setup.md#git-delta-対象と検証環境)の「状態（Windows 11）」）。
+
+#### git-delta: 付録: Windows 11 の配布物と資料の調査（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、scoop と winget の定義・配布物・delta と Git for Windows と Scoop のソースを読んだ記録。**Windows の実機では未検証**。
+
+**定義**（2026-10-08 の `ScoopInstaller/Main` と `microsoft/winget-pkgs` の `master`）:
+
+- scoop の `bucket/delta.json`: `version` は `0.20.1`。`architecture` は `64bit` だけで、URL は `https://github.com/dandavison/delta/releases/download/0.20.1/delta-0.20.1-x86_64-pc-windows-msvc.zip`、hash は `c9af7484b33f1dbc1312a892fc7d5753a6d3365140a4000d49e575a2de742c25`、`extract_dir` は `delta-0.20.1-x86_64-pc-windows-msvc`
+  - `bin` は `delta.exe` の 1 つ。`depends` と `suggest` は無い（VC++ ランタイムも less も入れない）
+- winget の `manifests/d/dandavison/delta/0.20.1/dandavison.delta.installer.yaml`: `InstallerType: zip`・`NestedInstallerType: portable`・`ReleaseDate: 2026-10-04`。`InstallerSha256` は scoop と同じ値。`Dependencies` に `Microsoft.VCRedist.2015+.x64`
+- 上流のタグ（`git ls-remote --tags https://github.com/dandavison/delta`）の版の最新は `0.20.1`（その前は `0.20.0`）
+
+**配布物**（scoop の定義の URL から取った zip）:
+
+```
+$ sha256sum delta-win.zip
+c9af7484b33f1dbc1312a892fc7d5753a6d3365140a4000d49e575a2de742c25  delta-win.zip
+$ unzip -l delta-win.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+  7618048  2026-10-04 19:35   delta-0.20.1-x86_64-pc-windows-msvc/delta.exe
+     1058  2026-10-04 19:35   delta-0.20.1-x86_64-pc-windows-msvc/LICENSE
+     7991  2026-10-04 19:35   delta-0.20.1-x86_64-pc-windows-msvc/README.md
+---------                     -------
+  7627097                     3 files
+$ objdump -p delta-0.20.1-x86_64-pc-windows-msvc/delta.exe | grep 'DLL Name' | awk '{print $3}' | sort -fu | tr '\n' ' '
+advapi32.dll api-ms-win-core-handle-l1-1-0.dll api-ms-win-core-synch-l1-2-0.dll api-ms-win-crt-convert-l1-1-0.dll api-ms-win-crt-filesystem-l1-1-0.dll api-ms-win-crt-heap-l1-1-0.dll api-ms-win-crt-locale-l1-1-0.dll api-ms-win-crt-math-l1-1-0.dll api-ms-win-crt-runtime-l1-1-0.dll api-ms-win-crt-stdio-l1-1-0.dll api-ms-win-crt-string-l1-1-0.dll api-ms-win-crt-time-l1-1-0.dll bcryptprimitives.dll combase.dll iphlpapi.dll kernel32.dll netapi32.dll ntdll.dll ole32.dll oleaut32.dll pdh.dll powrprof.dll psapi.dll Secur32.dll shell32.dll VCRUNTIME140.dll ws2_32.dll
+```
+
+- `delta.exe` は `PE32+ executable (console) x86-64`（`file` の表示）。インポート表に `VCRUNTIME140.dll` がある（msvc のビルドで、CRT を静的にリンクしていない）。`api-ms-win-crt-*` は Windows 10 以降に付いている UCRT
+- PE のセキュリティのディレクトリは空で、Authenticode の署名は無い
+
+**delta 0.20.1 のソース**（`0.20.1` のタグ）:
+
+- `src/env.rs`: ページャの候補は、`DELTA_PAGER` と、bat の `get_pager_executable`（`BAT_PAGER`、無ければ `PAGER`）
+- `src/utils/bat/output.rs`: `delta.pager`（`--pager`）があればそれを、無ければ環境変数の候補を、どれも無ければ `less` を使う。`grep_cli::resolve_binary` で PATH から探し、見つからなければ、ページャを起動せずに標準出力へ書く。`less` には `--RAW-CONTROL-CHARS` と（1 画面に収まれば終わる）`--quit-if-one-screen` を渡し、Windows では less の版が 558 より前なら `--no-init` も足す
+- `src/features/navigate.rs`: `navigate` が `true` のとき、less の検索履歴の写しを作って `LESSHISTFILE` で渡す。場所は、Windows では `dirs::data_local_dir()` の下の `delta\delta.lesshst`（`%LOCALAPPDATA%\delta\delta.lesshst`）、Linux では XDG の data の下の `delta/lesshst`
+- 上流の文書（`manual/src/tips-and-tricks/using-delta-on-windows.md`）: Windows では新しい `less.exe` が要る（`jftuga/less-Windows` を案内）。色が崩れたり変な文字が出たりするときは、古い `less.exe` を拾っている
+
+**Git for Windows のソース**（`git-for-windows/MINGW-packages` の `main` の `mingw-w64-git`、2026-10-08）:
+
+- `mingw-w64-git.mak`: `cmd/git.exe` は、`git-wrapper.o` と `git.res`（版の情報）から作る
+- `git-wrapper.c`: `main` の `full_path` の既定は 1 で、`MINIMAL_PATH=1 ` の文字列のリソースがあるときだけ 0 になる。`setup_environment` は、`full_path` が 1 なら PATH の先頭に `<Git>\mingw64\bin;<Git>\usr\bin;<HOME>\bin;` を足してから、本体の git を動かす（0 なら `<Git>\cmd;` だけ）
+- そのため、PowerShell の PATH に Git の `cmd` しか無くても（Git for Windows の既定の `Path Option=Cmd`。[git.md の検証記録](#git-付録-windows-11-の配布物と資料の調査2026-10-03)）、git が起動する delta には `usr\bin` の less が見えるはず
+
+**Scoop のソース**（`ScoopInstaller/Scoop` の `master`、2026-09-30 のコミット `e6aa3b3`）:
+
+- `lib/install.ps1`: 入れ終わると `'<名前>' (<版>) was installed successfully!`。そのアプリのフォルダーのプロセスが動いていると `The following instances of "<名前>" are still running. Close them and try again.`
+- `libexec/scoop-install.ps1`: 名前を 1 つだけ渡し、そのアプリが入っていれば、`'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）。`'<名前>' (<版>) is already installed. Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
+- `libexec/scoop-update.ps1`: `scoop update` は `Scoop was updated successfully!`。名前を付けて新しい版が無いと `<名前>: <版> (latest version)`。動いているときは `Running process detected, skip updating.` で飛ばす
+- `libexec/scoop-uninstall.ps1`・`lib/core.ps1`: 成功は `'<名前>' was uninstalled.`、入っていなければ `'<名前>' isn't installed.`
+- `lib/manifest.ps1` の `Get-SupportedArchitecture`: arm64 の定義が無いアプリは、Windows 11（ビルド 22000 以降）では `64bit` の定義を使う
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. `scoop install delta` が `delta.exe` の shim を作り、`(Get-Command delta -All).Source` が scoop の shims の 1 行になること
+1. VC++ ランタイムが無い PC で、delta がどう失敗するか（[Windows 11 で使う](../windows-setup.md#git-delta)の手順 2 で止める前提）
+1. WezTerm の Git Bash で、[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 が通り、6 項目が読み戻せること
+1. Git Bash と PowerShell の `git diff` が、delta と Git for Windows の less で出ること（PowerShell の git が `usr\bin` を足すのはソースから）。色・行番号の見え方、`n` / `N`（`%LOCALAPPDATA%\delta\delta.lesshst`）
+1. `git add -p`（`interactive.diffFilter`）と、Windows の lazygit の `git.diffRenderers`
+1. 新しい版が出た後の[Windows 11 の更新](../windows-setup.md#scoopwingetwsl-を上げる)、less を開いたままの `Running process detected`、[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)
+1. arm64 の Windows（x64 の版をエミュレーションで動かす）と、SSH のセッション（scoop の shim と RedirectionGuard）
+
+---
+
+#### git-delta: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-08）
+
+Linux（クラウドのコンテナ）の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0、git 2.43.0 で確かめた。**Windows の実機では未検証**。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- 手順書の Windows 11 の 3 節の `powershell` のブロック 6 個（Windows 11 で使うの手順 2・3、更新の手順 1、ロールバックの手順 1〜3）を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）と、既定の規則の Error・Warning を当てた（指摘 0）
+  - 同じ設定で、`??` を書いたファイル・`Get-Content -AsByteStream` を書いたファイル・`}` の足りないファイルは、それぞれ指摘された
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、6 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
+
+**模擬**:
+
+- 偽物: `scoop`（渡った引数を記録し、`install` で偽物の `delta` を shims のフォルダーに置き、`update` と `uninstall` は Scoop のソースと同じ形の行を返すシェルスクリプト）と、`--version` に `delta 0.20.1` を返す `delta`
+- `HOME` は使い捨てのフォルダー（`[user]` だけの `.gitconfig`）、`WINDIR` は `System32\vcruntime140.dll` だけを置いた使い捨てのフォルダーにした。管理者の判定（`WindowsPrincipal`）は Linux では使えないので `$false` に置き換え、出力は `Out-String -Width 200` で受けた
+- Windows 11 で使うの手順 2: 入れる前は `Admin : False`・`VCRuntime : True`・`Delta` が空。入れた後は `Delta` が shims の `delta` の 1 つ。`vcruntime140.dll` を消すと `VCRuntime : False`。git を PATH から外すと `Git` が空になり、エラーは出なかった
+- 手順 3: 1 回目は偽物の `'delta' (0.20.1) was installed successfully!` の後に `delta 0.20.1` と shims の `delta` の 1 行。2 回目は偽物の `is already installed. Skipping.` の後に同じ 2 行
+  - 偽物の警告を、名前 1 つのときの形（`WARN  'delta' (0.20.1) is already installed.` と `Use 'scoop update delta' to install a new version.`）に直して流し直した（2026-10-08 の 2 回目）。2 回目はその 2 行の後に、同じ 2 行が出た
+- 手順 4 の代わりに、[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 の bash のブロックを手順書から取り出して bash で流した: 変数の 3 行と、`core.pager delta`・`interactive.difffilter delta --color-only`・`delta.navigate true`・`delta.line-numbers true`・`delta.side-by-side false`・`merge.conflictstyle zdiff3` の 6 行。`.gitconfig` の `[user]` は残った
+- 更新の手順 1: 偽物の `Scoop was updated successfully!` と `delta: 0.20.1 (latest version)` の後、`delta 0.20.1`
+- ロールバックの手順 1: 何も出さず、`.gitconfig` には `[user]` と `[merge] conflictstyle = zdiff3` だけが残った。もう一度貼ると、`fatal: no such section: delta` の 1 行だけ
+- ロールバックの手順 2: 何も出さず、`[merge]` も消えて `[user]` だけが残った
+- ロールバックの手順 3: 偽物の `'delta' was uninstalled.` の後、2 行目は何も出さなかった。もう一度貼ると偽物の `'delta' isn't installed.`
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、偽物を作り直して全部を流し直した（偽物の `scoop` の警告は、名前 1 つのときの形）。手順 2（入れる前・`vcruntime140.dll` が無いとき・git が PATH に無いとき・入れた後）、手順 3 の 1 回目と 2 回目、[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 の 6 行、更新の手順 1、ロールバックの手順 1〜3 と 2 回目は、上と同じ結果だった。`.gitconfig` には、同じ使い捨ての `HOME` で先に流した gh の模擬の `[credential "https://example.com"]` も残った（delta の手順は触らなかった）
+- 本物の scoop の表示、Windows の `Get-Command` が返す shim のパス、Windows の git・less・delta での表示は、Windows で動かしていないので確かめていない
+
+---
+
+## 統合前の記録: GitHub CLI の Windows 11（もとは gh.md）
+
+もとの `gh.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-github-cliもとは-ghmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2〜6 | 「GitHub CLI」の手順 1〜5 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1〜6 | ロールバックの「Git の道具を消す」の手順 5〜10 |
+
+### GitHub CLI: 補足
+
+#### GitHub CLI: Windows 11 で使う: 検証状況の記録
+
+- **[Windows 11 で使う](../windows-setup.md#github-cli)・[Windows 11 の更新](../windows-setup.md#scoopwingetwsl-を上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)は、Windows の実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- 確かめた範囲は[対象と検証環境](almalinux-setup.md#github-cli-対象と検証環境)の「状態（Windows 11）」と[付録](#github-cli-付録-windows-11-の節の資料と-linux-での確認2026-10-08)
+
+#### GitHub CLI: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物の定義とソースを読み、手順書の PowerShell のブロックを Linux の PowerShell で確かめた記録。**Windows の実機では未検証**。
+
+**資料**（2026-10-08 に取得）:
+
+- scoop の `ScoopInstaller/Main` の `bucket/gh.json`: `version` は `2.102.0`。64bit は `gh_2.102.0_windows_amd64.zip`（32bit と arm64 の zip もある）。`bin` は `bin\gh.exe` だけで、`persist`・`env_set`・`env_add_path`・`depends`・`suggest` は無い。`autoupdate` の hash は上流の `gh_<版>_checksums.txt` から取る
+- 上流の版: `cli/cli` のタグの最新（プレリリースを除く）は `v2.102.0`（`git ls-remote` で見た）
+- 64bit の zip: sha256 は `ae64e556ecc240b200f7eba60d550e4bb60d78e860e69dd88c449405b86067f4` で、定義の `hash` と、上流の `gh_2.102.0_checksums.txt` の行の両方と一致した。中身は `LICENSE` と `bin/gh.exe` の 2 つ
+  - `gh.exe` は `PE32+ executable (console) x86-64`。PE のインポート表は `kernel32.dll` だけ（Visual C++ のランタイムを使わない。`objdump -p` で読んだ）
+  - Authenticode の署名があり、署名者の証明書は `O = "GitHub, Inc.", CN = "GitHub, Inc."`、発行者は `Microsoft ID Verified CS AOC CA 03`（PE のセキュリティのディレクトリから取り出し、`openssl pkcs7 -print_certs` で証明書を並べただけ。Windows の `Get-AuthenticodeSignature` は通していない）
+- winget の `GitHub.cli` 2.102.0 の定義: x86・x64・arm64 のそれぞれで、先に MSI（`InstallerType: wix`、`Scope: machine`、x64 は `DefaultInstallLocation: '%ProgramFiles%/GitHub CLI'`）、次に同じ zip の portable（x64 の `InstallerSha256` は scoop と同じ値）が並ぶ
+- gh 2.102.0 のソース
+  - `pkg/cmd/auth/login/login.go`・`pkg/cmd/auth/shared/login_flow.go`: 対話の問いは `Where do you use GitHub?` → `What is your preferred protocol for Git operations on this host?`（`HTTPS` / `SSH`）→（HTTPS のときだけ）Git の認証の問い → `How would you like to authenticate GitHub CLI?` の順。終わると `Logged in as <GITHUB_USER>` を出す。資格情報ストアに置けなければ `Authentication credentials saved in plain text` を出す
+  - `internal/authflow/flow.go` と `internal/config/config.go`: 設定の `clipboard` の既定は `enabled` で、ワンタイムコードをクリップボードに入れて `One-time code (<コード>) copied to clipboard` を出す。入れられなければ `Failed to copy one-time code to clipboard` の後に `First copy your one-time code: <コード>` を出す（クリップボードを使わない設定でも、この行を出す）。続けて `Press Enter to open <URL> in your browser...` を出す。ブラウザを開けなければ `Failed opening a web browser at …`
+  - `pkg/cmd/auth/shared/git_credential.go`: Git の認証の問いは `Authenticate Git with your GitHub credentials?`（既定は Yes）。github.com の Git の資格情報のヘルパーが gh なら聞かない。Yes のときは、トークンに `workflow` の権限も求める。`Setup` は、ヘルパーが無ければ gh を書き、あれば `Updater` で資格情報を入れ替える
+  - `pkg/cmd/auth/shared/gitcredentials/helper_config.go`: ヘルパーは `git config credential.https://github.com.helper`、空なら `git config credential.helper` で読む（どちらもスコープを指定しないので、Git for Windows の `system` の `manager` も入る）。gh かどうかは、`!` の後の最初の語の名前が `gh`（`.exe` を除く）かで見る。gh を書くときは、`--global --replace-all` で空の値を置いてから、`--global --add` で `!<gh の場所> auth git-credential` を足す（gist のホストも同じ）
+  - `pkg/cmd/auth/shared/gitcredentials/updater.go`: `git credential reject`（`protocol=https`・`host=<ホスト>`）の後に `git credential approve`（アカウント名と gh のトークン）を流す
+  - `internal/config/config.go`: トークンは、資格情報ストアのサービス名 `gh:<ホスト>`（`keyringServiceName`）に置く。`Logout` は、アカウントが 1 つならホストごと消し、ストアの空の名前とアカウント名の 2 つも消す
+  - `pkg/cmd/auth/logout/logout.go`: 候補のアカウントが 1 つなら問わない。複数なら `What account do you want to log out of?` で選ばせる。ログインが無ければ `not logged in to any hosts`。終わると `Logged out of <ホスト> account <名前>`
+  - `pkg/cmd/auth/status/status.go`: `Logged in to <ホスト> account <名前> (<置き場所>)` と `Git operations protocol: <値>`。置き場所は、ストアなら `keyring`、平文なら設定の場所の `hosts.yml`（`oauth_token` を置き換える）。ログインが無ければ `You are not logged into any GitHub hosts.`
+  - `internal/ghcmd/cmd.go`: 新しい版があると、`A new release of gh is available:` と今の版と新しい版を出す。Git の資格情報のヘルパーに書く自分の場所は、`GH_PATH` が無ければ、`executable` で決める
+- go-gh 2.16.1（gh 2.102.0 の `go.mod`）の `pkg/config/config.go`: 設定の場所は `GH_CONFIG_DIR` → `XDG_CONFIG_HOME` → Windows では AppData の `GitHub CLI`。状態・データ・キャッシュは、`XDG_STATE_HOME` などが無ければ LocalAppData の `GitHub CLI`
+- go-keyring 0.2.8（同じ `go.mod`）の `keyring_windows.go`: 資格情報マネージャーの汎用資格情報に、`<サービス名>:<アカウント名>` の名前で置く（`credName`。gh では `gh:github.com:<GITHUB_USER>` と `gh:github.com:` になるはず）
+- Git for Windows の起動スクリプト（`git-for-windows/MSYS2-packages` の `filesystem/profile`・`filesystem/bash.bashrc` と、`git-for-windows/build-extra` の `git-extra/env.sh`・`aliases.sh`・`git-prompt.sh`・`bash_profile.sh`）は、`XDG_CONFIG_HOME` を含まない（`grep` で見た）。自分用の bash 設定の `bashrc`（`ryo-aoki-pc/bash` の `54af594`）と WezTerm の設定（`lua/shells.lua` の `set_environment_variables` は `WEZTERM_SHELL_INTEGRATION` だけ）も設定しない
+- Git for Windows の `system` の `credential.helper=manager` は、[Windows 11 の Git Bash での検証](almalinux-setup.md#git-実施手順--手順-3-補足-設定の-3-つの場所)で見た値
+- scoop 本体（`ScoopInstaller/Scoop` の `master`、2026-09-30 のコミット `e6aa3b3`）のメッセージ: 導入は `'<名前>' (<版>) was installed successfully!`、入っているときは、名前を 1 つだけ渡せば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.`（`libexec/scoop-install.ps1` の `$apps.length -eq 1` の分かれ。`… Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない。[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）。更新は `Scoop was updated successfully!`、新しい版が無ければ `<名前>: <版> (latest version)`、動いているときは `Running process detected, skip updating.`。削除は `'<名前>' was uninstalled.`、入っていなければ `'<名前>' isn't installed.`、動いているときは `The following instances of "<名前>" are still running. Close them and try again.`
+
+**構文と Windows PowerShell 5.1 との互換**（Linux の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0）:
+
+- 手順書の `powershell` のブロック 10 個（Windows 11 で使うの手順 2〜4・6、Windows 11 の更新の手順 1、Windows 11 のロールバックの手順 1・3〜6）を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）と、既定の規則の Error・Warning を当てた（指摘 0）。同じ設定で、`??` を書いたファイル・`Get-Content -AsByteStream` を書いたファイル・`}` の足りないファイルは、それぞれ指摘された
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、10 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
+
+**模擬**（Linux の PowerShell 7.5.3 と git 2.43.0）:
+
+- 管理者の判定（`WindowsPrincipal`。Linux では使えない）を `$false` に置き換え、出力は `Out-String -Width 200` で受けた。渡った引数を記録して Scoop のソースと同じ形の行を返す偽物の `scoop`（`install` で偽物の `gh` を shims に置き、`uninstall` で消す）と、`--version`・`auth status`・`auth login`・`auth logout` に答える偽物の `gh` を `PATH` の先頭に置いた。git は本物で、`HOME` を使い捨てのフォルダーにし、`GIT_CONFIG_SYSTEM` で `credential.helper = manager` の `system` の設定を読ませ、`manager` には受け取った操作と入力を記録するだけの偽物の `git-credential-manager` を置いた
+- Windows 11 で使うの手順 2: 入れる前は `GitCred : credential.helper manager`・`Gh` は空、入れた後は `Gh` が偽物の shim の場所。`gh auth setup-git` と同じ形の行（`--replace-all` の空の値と、`--add` の `!'C:\Users\u\scoop\apps\gh\current\bin\gh.exe' auth git-credential`。gist のホストも）を `--global` に置くと、`GitCred` にその行が並んだ。git を `PATH` から外すと、`Git` と `GitCred` が空になり、エラーは出なかった
+- Windows 11 で使うの手順 3: 1 回目は偽物の導入の行・版の 2 行・shim の場所。2 回目は偽物の `is already installed. Skipping.` の後に同じ行
+  - 偽物の警告を、名前 1 つのときの形（`WARN  'gh' (2.102.0) is already installed.` と `Use 'scoop update gh' to install a new version.`）に直して流し直した（2026-10-08 の 2 回目）。2 回目はその 2 行の後に、版の 2 行と shim の場所が出た
+- Windows 11 で使うの手順 6: ログインの前は偽物の gh の `You are not logged into any GitHub hosts.` と `credential.helper manager`、偽物の `gh auth login` の後は `(keyring)` の行と `Git operations protocol: https` と `credential.helper manager`
+- Windows 11 の更新の手順 1: 偽物の `Scoop was updated successfully!` と `gh: 2.102.0 (latest version)` の後に版の 2 行。偽物の scoop に `update` と `update gh` が渡った
+- Windows 11 のロールバックの手順 1: 偽物の gh に `auth logout` が渡った（2 回目は `not logged in to any hosts`）
+- Windows 11 のロールバックの手順 3: github.com と gist.github.com の gh の行（空の値を含む）だけが `--global` から消え、`credential.https://example.com.helper store` は残った。最後のコマンドは `credential.helper manager` と、その `example.com` の行を出した。2 回目は何も変えなかった。`credential.https://github.com.helper` が gh でない値（`store`）のときも残した
+- Windows 11 のロールバックの手順 4: 偽物の `git-credential-manager` に `erase` と、`protocol=https`・`host=github.com` の 2 行が渡った。bash から CR LF の 2 行を `git credential reject` に渡したときも、ヘルパーには CR の無い 2 行が渡った（Windows PowerShell 5.1 のパイプは CR LF で送る。5.1 では確かめていない）
+- Windows 11 のロールバックの手順 5: 偽物の `'gh' was uninstalled.` の後、`Get-Command` の行は何も出さなかった（2 回目は偽物の `'gh' isn't installed.`）
+- Windows 11 のロールバックの手順 6: `$env:APPDATA` と `$env:LOCALAPPDATA` を使い捨てのフォルダーにし、`GitHub CLI` のフォルダー（`hosts.yml` と `extensions`）を作ってから貼ると、`False` が 2 行出た。2 回目もエラー無しで `False` が 2 行
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、偽物を作り直して全部を流し直した（偽物の `scoop` の警告は、名前 1 つのときの形）。上の各項目と同じ結果だった（手順 2 の git が無いときにエラーが出ないこと、ロールバックの手順 3 で gh の行だけが消え、`store` の行が残ること、手順 4 でヘルパーに `erase` と 2 行が渡ること、手順 5・6 の 2 回目を含む）
+- 本物の scoop と gh の表示、Windows の `Get-Command` が返す shim のパス、資格情報マネージャー、Git Credential Manager は、Windows で動かしていないので確かめていない
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと（scoop での導入・更新・削除）
+1. `gh auth login` の問いを Windows PowerShell 5.1 の conhost の窓で答えること、ワンタイムコードがクリップボードに入ること、既定のブラウザが開くこと、資格情報マネージャーに置かれること
+1. Git の認証に `Y` と答えたときに、Git Credential Manager に gh のトークンが入ることと、ロールバックの手順 4 で消えること
+1. Git Bash・PowerShell 7・cmd の gh が、同じ設定（`%APPDATA%\GitHub CLI`）とログインを使うこと
+1. SSH のセッション（scoop の shim と、資格情報マネージャーを読めるか）、arm64 の Windows、winget の gh があるとき
+
+---
+
+## 統合前の記録: Neovim の Windows 11（もとは neovim.md）
+
+もとの `neovim.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-neovimもとは-neovimmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2・3 | 「Neovim」の手順 1・2 |
+| Windows 11 で使う 4 | 「Neovim」の手順 4 |
+| Windows 11 で使う 5（`checkhealth`） | （外した。自分用の設定の導入（「Neovim」の手順 3）で確かめる） |
+| 既定のエディタにする（任意）の 2・3 | Neovim を既定のエディタにする（任意）の 1・2 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1 | ロールバックの「エディタとシェルのツールを消す」の手順 5 |
+| Windows 11 のロールバック 2 | Neovim を既定のエディタにする（任意）の 2 |
+
+### Neovim: 補足
+
+#### Neovim: Windows 11 で使う: 検証状況の記録
+
+- **[Windows 11 で使う](../windows-setup.md#neovim)・[Windows 11 の更新](../windows-setup.md#scoopwingetwsl-を上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#エディタとシェルのツールを消す)と、[既定のエディタにする（任意）](../windows-setup.md#neovim-を既定のエディタにする任意)の手順 2・3 は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- 確かめた範囲は[対象と検証環境](almalinux-setup.md#neovim-対象と検証環境)の「状態（Windows 11）」と[付録](#neovim-付録-windows-11-の節の資料と-linux-での確認2026-10-08)
+
+#### Neovim: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物の定義とソースを読み、手順書の PowerShell のブロックを Linux の PowerShell で確かめた記録。**Windows 実機では未検証**。
+
+**資料**（2026-10-08 に取得）:
+
+- scoop の `ScoopInstaller/Main` の `bucket/neovim.json`: `version` は `0.12.5`。64bit は `nvim-win64.zip`（`extract_dir` は `nvim-win64`）、arm64 は `nvim-win-arm64.zip`。`bin` は `bin\nvim.exe` と `bin\xxd.exe`。`suggest` は `{"vcredist": "extras/vcredist2022"}`（ランタイムは入れず、勧めるだけ）
+- scoop 本体（`ScoopInstaller/Scoop` の `master`）の `lib/install.ps1`・`libexec/scoop-install.ps1`・`scoop-update.ps1`・`scoop-uninstall.ps1`: 手順書の箇条書きに書いた `'<名前>' (<版>) was installed successfully!`・`'<名前>' suggests installing '<候補>'.`・`'<名前>' (<版>) is already installed.`・`Scoop was updated successfully!`・`<名前>: <版> (latest version)`・`Latest versions for all apps are installed!`・`Running process detected, skip updating.`・`'<名前>' was uninstalled.`・`'<名前>' isn't installed.` の文字列。`scoop uninstall` は、そのアプリのフォルダーから動いているプロセスがあると、消さずに止まる
+  - 更新で新しい版が無いときの表示は、最初は `The latest version of '<名前>' (<版>) is already installed.` と書いていた。この文字列は `scoop-update.ps1` の `update` の中にあるが、名前を指定した `scoop update <名前>` は、最新のアプリを `update` に渡さず、`<名前>: <版> (latest version)` と `Latest versions for all apps are installed! For more information try 'scoop status'` を出す（同じファイルの 440〜473 行目。見直しで読み直して、手順書を直した）
+  - `Running process detected, skip updating.` も `update` の中にあり、新しい版があるときだけ出る
+
+**配布物のインポート表**（`objdump -p` の `DLL Name`。Windows の実行ファイルは動かしていない）:
+
+- GitHub のリリースの `nvim-win64.zip` の sha256 は `de8625ba…0de1` で、`neovim.json` の `hash` と一致した
+- `bin\nvim.exe`・`bin\lua51.dll`・`bin\xxd.exe`・`bin\win32yank.exe` は、どれも `VCRUNTIME140.dll`（と `api-ms-win-crt-*`）を読み込む。`MSVCP140.dll` は読み込まない
+- zip の `bin` には `DbgHelp.dll`・`lua51.dll`・`nvim.exe`・`tee.exe`・`win32yank.exe`・`xxd.exe` がある。scoop の `bin`（shim）は `nvim.exe` と `xxd.exe` だけ
+
+**Linux の Neovim 0.12.5 で確かめたこと**（GitHub のリリースの `nvim-linux-x86_64.tar.gz`〔sha256 `bce0f56e…6875`〕を一時的な場所に展開し、`HOME` も一時的な場所にした）:
+
+```
+$ nvim --version | head -3
+NVIM v0.12.5
+Build type: Release
+LuaJIT 2.1.1774638290
+$ nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
+<一時的な HOME>/.config/nvim
+<一時的な HOME>/.local/share/nvim
+```
+
+- `--version` の 3 行目が LuaJIT なので、Windows 11 で使うの手順 4 は `Select-Object -First 3` にした（`-First 2` では `Build type` までしか出ない）
+- `stdpath` の行は、`--clean` でも置き場所を 2 行で書き出し、終了コード 0 で終わった。Windows では `%LOCALAPPDATA%\nvim` と `%LOCALAPPDATA%\nvim-data` になるはず（同じ配布物の `runtime/doc/starting.txt` の base-directories。キャッシュは `~/AppData/Local/Temp/nvim-data`、ログは `nvim-data` の `nvim.log`）だが、Windows では流していない
+
+**構文と Windows PowerShell 5.1 との互換**（Linux の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0）:
+
+- 手順書の `powershell` のブロック 8 個を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、ASCII でない文字を含むブロックの BOM だけ）
+
+**模擬**（Linux の PowerShell 7.5.3）:
+
+- ブロックの文字列のうち、管理者の判定（`WindowsPrincipal`。Linux では使えない）を `$false` に、`[Environment]` のユーザーの環境変数（Linux の .NET では読み書きされない）を、値をハッシュテーブルに記録する偽物のクラスに置き換えた。`$env:WINDIR`・`$env:APPDATA`・`$env:TEMP` と `C:\Program Files\Git\usr\bin\file.exe` は一時的な場所にした。scoop は、渡った引数を記録してメッセージだけを出す偽物の `scoop.ps1`
+- Windows 11 で使うの手順 2: `VCRuntime` は、偽物の `System32\vcruntime140.dll` の有無で `False` / `True` になった。PATH の先に別の `nvim` を置くと、`Nvim` に 2 つの場所が `, ` でつながって出た
+- Windows 11 で使うの手順 4: Linux の Neovim で、上の 3 行・`(Get-Command nvim -All).Source` の 1 行・`stdpath` の 2 行が出た
+- 既定のエディタにするの手順 2: 値が無いときは `EDITOR = nvim`・`VISUAL = nvim` を書いた。2 回目も同じ表示で、値は変わらなかった。`EDITOR` が `code` のときは `中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（code）` で止まり、値は変わらなかった
+- 既定のエディタにするの手順 3: どちらも `nvim` のときは両方消えた。`EDITOR` が `code`・`VISUAL` が `nvim` のときは、`VISUAL` だけ消え、`EDITOR = code` が残った
+- 更新とロールバックの手順 1: 偽物の scoop に `update`・`update neovim`・`uninstall neovim` が渡った。ロールバックの手順 1 の `Get-Command` の行は、PATH に `nvim` が無いときは何も出さなかった
+
+**最後の確認**（見直しの後。レビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の `powershell` のブロックを取り出し直した。neovim.md は 8 個で、中身は直す前と同じだった（直したのは箇条書きと 1 行の説明だけで、ブロックの位置だけが変わった）
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、既定のエディタにするの手順 2 の BOM の 1 件だけ（ASCII でない文字を含む）
+- 偽物の scoop を作り直した。メッセージは scoop 本体のソース（`master`。この日に取り直し、前の取得と同じだった）から写し、入っているアプリ・最新の版・動いているアプリを記録したファイルで出し分ける。実際の scoop の出力ではない
+  - 前の模擬の偽物の scoop は、更新で新しい版が無いときに `The latest version of '<名前>' (1.0) is already installed.` を出していた。手順書の箇条書きに合わせて手で書いたもので、scoop の振る舞いから取ったものではない。そのため、前の模擬では手順書の誤りが見つからなかった
+- 模擬の結果（16 通り。表示は偽物のもの）:
+  - Windows 11 で使うの手順 2: `VCRuntime` は、偽物の `vcruntime140.dll` の有無で `False` / `True` になった。PATH の先に別の `nvim` を置くと、`Nvim` に 2 つの場所が `, ` でつながった
+  - 手順 3: 入っていないときは `'neovim' (0.12.5) was installed successfully!`、入っているときは `WARN  'neovim' (0.12.5) is already installed.` と `Use 'scoop update neovim' to install a new version.`
+  - 手順 4: Linux の Neovim で、3 行・場所の 1 行・`stdpath` の 2 行が出た（前の記録と同じ）
+  - 更新の手順 1: 新しい版が無いときは `neovim: 0.12.5 (latest version)` と `Latest versions for all apps are installed! For more information try 'scoop status'`。新しい版（0.12.6 にした）があるときは `'neovim' (0.12.6) was installed successfully!`。neovim が動いている扱いにすると `Running process detected, skip updating.` で、版は変わらなかった
+  - ロールバックの手順 1: `'neovim' was uninstalled.` の後の `Get-Command` の行は、何も出さなかった。もう一度貼ると `ERROR 'neovim' isn't installed.`
+  - 既定のエディタにするの手順 2: 値が無いときと 2 回目は `EDITOR = nvim`・`VISUAL = nvim`。`EDITOR` が `code` のときと、`VISUAL` が `nvim.exe` のときは `中断:` で止まり、値は変わらなかった
+  - 既定のエディタにするの手順 3: どちらも `nvim` なら両方消え、`EDITOR` が `code` なら `EDITOR = code` が残った
+- 取り出したブロック・偽物・模擬のスクリプトと出力は、リポジトリの外の作業用の場所に置いた（リポジトリには入れていない）
+
+**2 回目の見直しの後の確認**（2026-10-08。2 回目のレビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の変更は、Windows 11 のロールバックのリードの箇条書きだけ（LazyVimStarter のロールバックの手順 6 が取り戻せないことを足した。手順 7 が lazygit と zenhan も消すことは、前の見直しで書いてあった）。ブロックは変えていない
+  - LazyVimStarter の `custom`（`6c894ee`）の docs/setup.md の「ロールバック」を読み直した
+  - その手順 6 は、`%LOCALAPPDATA%\nvim` と `nvim-data` を `Remove-Item -Recurse -Force` で消して `.bak` を戻す（その節の `[!CAUTION]` と、1 行の説明の「取り戻せない」）
+  - その手順 7 は `scoop uninstall neovim zenhan lazygit`
+- 手順書の `powershell` のブロックを取り出し直した。neovim.md は 8 個で、中身は前の確認と同じだった
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、既定のエディタにするの手順 2 の BOM の 1 件だけ
+- 偽物の scoop での模擬を、前の確認と同じ 16 通りで流し直した。結果は前の確認と同じだった（表示は偽物のもの）
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと（scoop での導入・更新・削除）
+1. `VCRUNTIME140.dll` が無い PC で、`nvim --version` が何も出さずに終わるか、システム エラーの窓が出るか（何も出さずに終わった記録は、LazyVimStarter の検証記録の 2026-10-06 のクリーンな VM で、自動で流したものだけ）と、x64 のランタイムだけで起動すること
+1. Windows の `stdpath` の値と、Windows PowerShell 5.1 から `"+lua …"` の引数がそのまま渡ること
+1. `:checkhealth` の表示と、`:qa` で閉じた後の窓
+1. ユーザーの環境変数 `EDITOR`・`VISUAL` が、新しい Windows PowerShell・WezTerm のタブ・lazygit の `e` キー・PowerShell の `git commit` に効くこと
+1. winget の Neovim（`C:\Program Files\Neovim`）があるときに、手順 2 で見つかること
+1. SSH のセッションと、arm64 の Windows
+
+---
+
+## 統合前の記録: lazygit の Windows 11（もとは lazygit.md）
+
+もとの `lazygit.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-lazygitもとは-lazygitmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2〜4 | 「lazygit」の手順 1〜3 |
+| Windows 11 で使う 5・6 | 「lazygit」の手順 5・6 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1 | ロールバックの「Git の道具を消す」の手順 2 |
+
+### lazygit: 補足
+
+#### lazygit: Windows 11 で使う: 検証状況の記録
+
+- **[Windows 11 で使う](../windows-setup.md#lazygit)・[Windows 11 の更新](../windows-setup.md#scoopwingetwsl-を上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- 確かめた範囲は[対象と検証環境](almalinux-setup.md#lazygit-対象と検証環境)の「状態（Windows 11）」と[付録](#lazygit-付録-windows-11-の節の資料と-linux-での確認2026-10-08)
+
+#### lazygit: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物の定義とソースを読み、手順書の PowerShell のブロックを Linux の PowerShell で確かめた記録。**Windows 実機では未検証**。
+
+**資料**（2026-10-08 に取得）:
+
+- scoop の `ScoopInstaller/Extras` の `bucket/lazygit.json`: `version` は `0.66.0`。64bit は `lazygit_0.66.0_Windows_x86_64.zip`（32bit・arm64 もある）。`bin` は `lazygit.exe`。`suggest`・`depends` は無い
+- scoop 本体（`ScoopInstaller/Scoop` の `master`）の `lib/buckets.ps1` の `list_buckets`: バケットごとに `Name`・`Source`・`Updated`・`Manifests` を持つオブジェクトを返す（Windows 11 で使うの手順 2 の `Where-Object Name -eq 'extras'` が使う形）。`add_bucket` は git が無いと `Git is required for buckets.` で止まり、足せたら `The <名前> bucket was added successfully.` を出す
+- 同じく、手順書の箇条書きに書いたインストール・更新・削除のメッセージの文字列（neovim.md の検証記録の付録と同じ）
+- GitHub のリリースの `lazygit_0.66.0_Windows_x86_64.zip` の sha256 は `ed8fab4a…3e4b` で、`lazygit.json` の `hash` と一致した。中の `lazygit.exe` のインポート表（`objdump -p` の `DLL Name`）は `kernel32.dll` だけだった（Go の実行ファイル。Windows の実行ファイルは動かしていない）
+- lazygit 0.66.0 の `docs/Config.md`: Windows の既定の場所は `%LOCALAPPDATA%\lazygit\config.yml` で、`%APPDATA%\lazygit\config.yml` も見つける（古い場所の `%APPDATA%\jesseduffield\lazygit\config.yml` もある）
+- lazygit 0.66.0 の `pkg/commands/git_commands/file.go` の `guessDefaultEditor`: git の `core.editor` → `GIT_EDITOR` → `VISUAL` → `EDITOR` の順に探し、最初の空白までの語の `filepath.Base` をエディタの名前にする。`pkg/config/editor_presets.go` の `getPreset` は、その名前のプリセット（`nvim` など）が無ければ `vim` を使い、`getEditInTerminal` は `os.editInTerminal` が書いてあればプリセットより優先する
+
+**構文と Windows PowerShell 5.1 との互換**（Linux の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0）:
+
+- 手順書の `powershell` のブロック 7 個を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、ASCII でない文字を含むブロックの BOM だけ）
+
+**模擬**（Linux の PowerShell 7.5.3）:
+
+- ブロックの文字列のうち、管理者の判定（`WindowsPrincipal`。Linux では使えない）を `$false` に、`[Environment]` のユーザーの環境変数（Linux の .NET では読み書きされない）を、値をハッシュテーブルに記録する偽物のクラスに置き換えた。`$env:WINDIR`・`$env:APPDATA`・`$env:TEMP` と `C:\Program Files\Git\usr\bin\file.exe` は一時的な場所にした。scoop は、渡った引数を記録してメッセージだけを出す偽物の `scoop.ps1`
+- Windows 11 で使うの手順 2: 偽物の `scoop bucket list` が `main` だけを返すと `Extras : False`、`extras` を足した後は `True` になった。scoop が PATH に無いときは `Scoop` が空・`Extras : False` で、エラーにならずに表が出た
+- Windows 11 で使うの手順 3: 偽物の scoop に `bucket add extras` が渡り、続く `bucket list` に `extras` が出た
+- Windows 11 で使うの手順 6: パスの `\` を `/` に替えて流すと、`%TEMP%` に当たる一時的なフォルダーに `lazygit-check/.git` ができ、偽物の lazygit がそこで起動し、窓の今のフォルダーもそこになった。2 回目（同じリポジトリ）も同じだった。`%TEMP%` に当たる場所を通常のファイルにして `git init` を失敗させると、`中断: 確かめ用のリポジトリ（%TEMP%\lazygit-check）を作れない` で止まり、lazygit は起動せず、今のフォルダーも変わらなかった
+- 更新とロールバック: 偽物の scoop に `update`・`update lazygit`・`uninstall lazygit` が渡った。ロールバックの手順 1 の `Get-Command` の行は、PATH に `lazygit` が無いときは何も出さなかった
+
+**最後の確認**（見直しの後。レビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の `powershell` のブロックを取り出し直した。lazygit.md は 7 個で、中身は直す前と同じだった（直したのは箇条書きだけで、ブロックの位置だけが変わった）
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、Windows 11 で使うの手順 6 の BOM の 1 件だけ（ASCII でない文字を含む）
+- 偽物の scoop は、neovim.md の検証記録の付録の「最後の確認」と同じもの（メッセージは scoop 本体のソースから写した。実際の scoop の出力ではない）。前の模擬の偽物が、更新で新しい版が無いときに出していた `The latest version of …` は、手で書いたもので、scoop の振る舞いから取ったものではない
+- 模擬の結果（13 通り。表示は偽物のもの）:
+  - Windows 11 で使うの手順 2・3: バケットが `main` だけなら `Extras : False`、手順 3 で `The extras bucket was added successfully.` と `main`・`extras` の 2 行の一覧が出た後は `True`。scoop が PATH に無いときは `Scoop` が空・`Extras : False` で、エラーにならずに表が出た
+  - 手順 4: 入っていないときは `'lazygit' (0.66.0) was installed successfully!`、入っているときは `WARN  'lazygit' (0.66.0) is already installed.` と `Use 'scoop update lazygit' to install a new version.`
+  - 手順 6: 前の記録と同じ（新しいリポジトリ・同じリポジトリでもう一度・`git init` の失敗の 3 通り。失敗では `中断:` で止まり、lazygit は起動せず、今のフォルダーも変わらなかった）
+  - 更新の手順 1: 新しい版が無いときは `lazygit: 0.66.0 (latest version)` と `Latest versions for all apps are installed! For more information try 'scoop status'`。新しい版（0.66.1 にした）があるときは `'lazygit' (0.66.1) was installed successfully!`
+  - ロールバックの手順 1: `'lazygit' was uninstalled.` の後の `Get-Command` の行は、何も出さなかった
+
+**2 回目の見直しの後の確認**（2026-10-08。2 回目のレビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の変更は、箇条書きだけ（Windows 11 で使うの手順 6 に、`%TEMP%\lazygit-check` を消す前に `Set-Location ~` でこの窓をそこから出すことを足した）。ブロックは変えていない
+- 手順書の `powershell` のブロックを取り出し直した。lazygit.md は 7 個で、中身は前の確認と同じだった
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、Windows 11 で使うの手順 6 の BOM の 1 件だけ
+- 偽物の scoop・lazygit での模擬を、前の確認と同じ 13 通りで流し直した。結果は前の確認と同じだった（表示は偽物のもの）
+- 手順 6 の後の今のフォルダー: ブロックを流した後、模擬の窓の今のフォルダーは `%TEMP%` に当たる場所の `lazygit-check` のままだった。続けて `Set-Location ~` を流すとそこから出て、`Remove-Item -Recurse -Force` で `lazygit-check` を消せた
+  - Linux はプロセスの今のフォルダーでも消せるので、Windows で今のフォルダーのままでは消せないことは確かめていない
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと（extras のバケットの追加、scoop での導入・更新・削除）
+1. 実際の scoop の `scoop bucket list` で、手順 2 の `Extras` が正しく出ること
+1. `lazygit --version`・`--print-config-dir` の表示と、`%TEMP%\lazygit-check` での TUI の起動
+1. Windows PowerShell から起動した lazygit の `e` キーが、git の `core.editor` と `VISUAL`・`EDITOR` が無いと失敗し、ユーザーの環境変数を `nvim` にすると Neovim で開くこと
+1. `%TEMP%\lazygit-check` を、手順 6 の窓の今のフォルダーのままでは消せず、`Set-Location ~` の後なら消せること
+1. 自分用の設定（`%LOCALAPPDATA%\lazygit` への clone）と delta との組み合わせ
+1. SSH のセッションと、arm64 の Windows
+
+---
+
+## 統合前の記録: yazi の Windows 11（もとは yazi.md）
+
+もとの `yazi.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-yaziもとは-yazimd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2〜5 | 「yazi」の手順 1〜4 |
+| Windows 11 で使う 6〜9 | 「yazi」の手順 6〜9 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 のロールバック 1・2 | ロールバックの「エディタとシェルのツールを消す」の手順 2・3 |
+
+### yazi: 補足
+
+#### yazi: Windows 11 で使う: 検証状況の記録
+
+- **[Windows 11 で使う](../windows-setup.md#yazi)・[Windows 11 の更新](../windows-setup.md#scoopwingetwsl-を上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#エディタとシェルのツールを消す)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- 確かめた範囲は[対象と検証環境](almalinux-setup.md#yazi-対象と検証環境)の「状態（Windows 11）」と[付録](#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)
+
+#### yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、配布物の定義とソースを読み、手順書の PowerShell のブロックを Linux の PowerShell で確かめた記録。**Windows 実機では未検証**。
+
+**資料**（2026-10-08 に取得）:
+
+- scoop の `ScoopInstaller/Main` の `bucket/yazi.json`: `version` は `26.9.1`。64bit は `yazi-x86_64-pc-windows-msvc.zip`、arm64 は `yazi-aarch64-pc-windows-msvc.zip`。`bin` は `ya.exe` と `yazi.exe`。`suggest`・`depends` は無い（VC++ のランタイムも `file` も入れない）
+- yazi 26.9.1 の `yazi-cli/src/env/env.rs`（`ya env`）: `Config` の各行は設定のフォルダーのファイル（`yazi.toml` など）と文字数か読めない理由、`Variables` の `YAZI_FILE_ONE` は Rust の `Debug` の形（`Some("…")`。`\` は `\\` で出る）、`Dependencies` の `file` は `YAZI_FILE_ONE`（無ければ `file`）を `--version` で動かした版、最後の `Routine` は一時的なファイルに `Hello, World!` を書いて `file -bL --mime-type` を動かした結果の 1 行目
+- yazi 26.9.1 の `yazi-version/src/lib.rs`: `--version` は `Version: <版> (<コミット> <日付>)` と `Triple : <ビルドしたホストの組> (<OS>-<アーキテクチャ>)` の行を出す
+- yazi 26.9.1 の `yazi-boot/src/args.rs` と `yazi-cli/src/args.rs`: `yazi` の引数に `--debug` は無く（`--cwd-file`・`--version` など）、環境と設定を出すのは `ya env`（`Print environment and configuration information.`）
+- yazi 26.9.1 の `yazi-fs/src/xdg.rs`: Windows の設定は `YAZI_CONFIG_HOME`（絶対パスのとき）か `%APPDATA%\yazi\config`、状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。`XDG_CONFIG_HOME` を読むのは Linux などだけ
+- yazi 26.9.1 の `yazi-cli/src/env/env.rs` の `config_state`（2 回目の見直しで読んだ）: 設定のフォルダーのファイルを `read_to_string` で読み、読めなければ `<パス> (<エラー>)` を出す
+  - フォルダーを作るのは `ya pkg`（`yazi-cli/src/package/mod.rs`）と、yazi の状態のフォルダー（`yazi-dds/src/state.rs`）だけ。`yazi --version` と `ya env` は作らない
+- yazi 26.9.1 の `yazi-config/preset/yazi-default.toml` の `[opener]`（2 回目の見直しで読んだ）
+  - `edit` は `${EDITOR:-vi} %s`（`for = "unix"`）と、`code %s`（`for = "windows"`・`orphan`）・`code -w %s`（`for = "windows"`・`block`）。`text/*` などの規則は `edit` を最初に使う
+  - 自分用の設定（`ryo-aoki-pc/yazi` の `custom`、`1e6b294`）の `yazi.toml` は、Windows の `edit` を `nvim %s`（`block`）と `neovide %s`（`orphan`）にしてある
+- yazi 26.9.1 の `yazi-plugin/preset/plugins/mime-local.lua`・`file.lua`（2 回目の見直しで読んだ）: `YAZI_FILE_ONE`（無ければ `file`）を Lua の `Command` で起動する
+  - `yazi-binding/src/process/command.rs` の `Command` は `tokio::process::Command::new` で、シェルを挟まない
+- scoop 本体のメッセージの文字列（neovim.md の検証記録の付録と同じ）。複数のアプリを並べた `scoop install` は、入っていたものに `'<名前>' (<版>) is already installed. Skipping.` を出す（`libexec/scoop-install.ps1`）
+- 同じ日の scoop の main の定義で、`$YAZI_EXTRAS` の 9 個はどれもある（ffmpeg 9.0.2・7zip 26.04・jq 1.8.2・poppler 26.09.0-0・fd 10.5.0・ripgrep 15.2.0・fzf 0.74.4・resvg 0.47.0・imagemagick 7.1.2-32）。`jq` は `jid`、`ripgrep` は `extras/vcredist2022` を `suggest` に持つ。`imagemagick` は `MAGICK_HOME` などのユーザーの環境変数を足す（`env_set`）
+- GitHub のリリースの `yazi-x86_64-pc-windows-msvc.zip` の sha256 は `7c033e5f…8d21` で、`yazi.json` の `hash` と一致した。中の `yazi.exe`・`ya.exe` のインポート表（`objdump -p` の `DLL Name`）には `VCRUNTIME140.dll`（と `api-ms-win-crt-*`）がある。Windows の実行ファイルは動かしていない
+
+**構文と Windows PowerShell 5.1 との互換**（Linux の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0）:
+
+- 手順書の `powershell` のブロック 9 個を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、ASCII でない文字を含むブロックの BOM だけ）
+
+**模擬**（Linux の PowerShell 7.5.3）:
+
+- ブロックの文字列のうち、管理者の判定（`WindowsPrincipal`。Linux では使えない）を `$false` に、`[Environment]` のユーザーの環境変数（Linux の .NET では読み書きされない）を、値をハッシュテーブルに記録する偽物のクラスに置き換えた。`$env:WINDIR`・`$env:APPDATA`・`$env:TEMP` と `C:\Program Files\Git\usr\bin\file.exe` は一時的な場所にした。scoop は、渡った引数を記録してメッセージだけを出す偽物の `scoop.ps1`
+- Windows 11 で使うの手順 2・4: `$YAZI_EXTRAS` を設定すると、偽物の scoop に `install yazi ffmpeg 7zip jq poppler fd ripgrep fzf resvg imagemagick`（引数 11 個）が渡った。`$YAZI_EXTRAS = @()` では `install yazi`（引数 2 個）
+  - 比べるために、変数を確かめない `scoop install yazi @YAZI_EXTRAS` だけを、`$YAZI_EXTRAS` が無い状態（この節の手順 2 を貼っていない新しい窓に当たる）で流すと、空の引数が 1 つ足されて scoop に渡った（引数 3 個）。手順書のブロックは、変数を消して流すと、`中断: この節の手順 2 の $YAZI_EXTRAS が無い。手順 2 を貼り直す` で止まり、scoop は呼ばれなかった
+- Windows 11 で使うの手順 3: `FileExe`・`YaziFileOne`・`Config` が、偽物の `file.exe`・環境変数・`%APPDATA%\yazi\config` に当たるフォルダーの有無で変わった
+- Windows 11 で使うの手順 5: `file.exe` に当たるファイルが無いときは `中断:` で止まり、環境変数は書かなかった。あるときは、ユーザーの環境変数と今の窓の `$env:YAZI_FILE_ONE` の両方に入り、`YAZI_FILE_ONE = <パス>` が出た
+- Windows 11 で使うの手順 6・9: 偽物の yazi・ya で、3 つのコマンドと `yazi` がこの順に動いた（表示は偽物のもの。実際の `ya env` は流していない）
+- ロールバックの手順 1: yazi と ya が PATH にあるときは `Source` の表に 2 行が出て、無いときは `Get-Command` の行は何も出さなかった
+- ロールバックの手順 2: ユーザーの環境変数と今の窓の値が消え、`YAZI_FILE_ONE = ` が出た。無いときに貼り直しても、エラーにならなかった
+
+**最後の確認**（見直しの後。レビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の `powershell` のブロックを取り出し直した。yazi.md は 9 個で、中身は直す前と同じだった（直したのは箇条書きと 1 行の説明だけで、ブロックの位置だけが変わった）
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、Windows 11 で使うの手順 2・4・5 の BOM の 3 件だけ（ASCII でない文字を含む）
+- 偽物の scoop は、neovim.md の検証記録の付録の「最後の確認」と同じもの（メッセージは scoop 本体のソースから写した。実際の scoop の出力ではない）。前の模擬の偽物が、更新で新しい版が無いときに出していた `The latest version of …` は、手で書いたもので、scoop の振る舞いから取ったものではない
+- imagemagick の環境変数が今の窓にも入ることは、scoop 本体のソースで読んだだけ（`lib/install.ps1` の `env_set` の `Set-Content env:\$name`、`lib/system.ps1` の `Add-Path` の「current session」の `$env:PATH`。scoop の `.ps1` は同じ PowerShell の中で動く）。模擬はしていない
+- 模擬の結果（18 通り。表示は偽物のもの）:
+  - Windows 11 で使うの手順 4: 手順 2 の `$YAZI_EXTRAS` で、偽物の scoop に `install yazi ffmpeg 7zip jq poppler fd ripgrep fzf resvg imagemagick`（引数 11 個）が渡った。7zip を入っている扱いにすると、`WARN  '7zip' (26.04) is already installed. Skipping.` の後に残りの 9 個が入った
+  - 同じ手順 4: `@()` では `install yazi`、`@('fd')` では `install yazi fd`。`@()` を付けずに `$YAZI_EXTRAS = 'fd'` にすると、`install yazi f d`（引数 4 個）が渡った（文字列が 1 文字ずつに分かれる。手順 2 の箇条書きに足した）。変数が無いときは `中断:` で止まり、scoop は呼ばれなかった
+  - 手順 3: `YAZI_FILE_ONE` に別の値（scoop の `file` の場所に当たる文字列）を入れておくと、`YaziFileOne` にその値が出た。続く手順 5 は確かめずに Git for Windows の `file.exe` に書き換え、ユーザーの値と今の窓の値の両方が変わった（手順 3 の箇条書きに、上書きされることを足した）
+  - 手順 5: `file.exe` に当たるファイルが無いときは `中断:` で止まり、値は書かなかった（前の記録と同じ）
+  - 更新の手順 1: 新しい版が無いときは `yazi: 26.9.1 (latest version)` と `Latest versions for all apps are installed! For more information try 'scoop status'`
+  - ロールバックの手順 1・2: 前の記録と同じ（`Get-Command` の行は、yazi と ya が PATH に無ければ何も出さない。`YAZI_FILE_ONE` はユーザーと今の窓から消え、2 回目もエラーにならない）
+- ロールバックのリードに足した 2 つの確認（`git -C "$env:APPDATA\yazi\config" status --short` と `… log --oneline '@{u}..'`）:
+  - PowerShell 7.5.3 の構文解析器で誤り 0。`'@{u}..'` は 1 つの引数になった（引用符が無いと、`@{` がハッシュテーブルとして読まれる）
+  - Linux の git 2.43.0 で、上流のある使い捨ての clone を `$env:APPDATA` の下に置いて流した（`\` は `/` にした）。push 済みのときは 2 つとも何も出さなかった。push していないコミットを 1 つ足すと、`status --short` は何も出さず、`log --oneline '@{u}..'` だけがそのコミットを出した
+
+**2 回目の見直しの後の確認**（2026-10-08。2 回目のレビューの指摘で手順書・検証記録・参考資料を直した後に、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の変更: Windows 11 で使うの手順 7 は、コマンドの無い手順の箇条書きで `type -t y` と `y` を打たせていた
+  - Git Bash のタブを開く手順 7（コマンドの無い手順）と、`type -t y`・`y` の `bash` のブロックの手順 8 に分けた。PowerShell の `yazi` は手順 9 になった
+  - ほかの変更は、箇条書き・リード・1 行の説明だけ
+- 手順書の `powershell` のブロックを取り出し直した。yazi.md は 9 個で、中身は前の確認と同じだった（位置と、TUI の手順の番号だけが変わった）。`bash` のブロックは、Windows 11 で使うの手順 8 の 1 個が増えた
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、Windows 11 で使うの手順 2・4・5 の BOM の 3 件だけ
+- 偽物の scoop・yazi・ya での模擬を、前の確認と同じ 18 通りで流し直した。結果は前の確認と同じだった（TUI の手順は手順 9 として流した。表示は偽物のもの）
+  - `@()` を付けずに `$YAZI_EXTRAS = 'fd'` にすると、偽物の scoop に `install yazi f d`（引数 4 個）が渡り、`@('fd')` では `install yazi fd`（引数 3 個）だった。Linux の PowerShell 7.5.3 だけで流し、Windows PowerShell 5.1 では流していない
+- Windows 11 で使うの手順 8 の `bash` のブロック: `bash -n` で誤り 0
+  - Linux の bash 5.2.21 で、bash リポジトリ（`bdb64c2`）の `bashrc` の `y` を定義し、`--cwd-file` にフォルダーを書く偽物の yazi で、ブロックをそのまま流した
+  - `type -t y` は `function` を出した。偽物の yazi が別のフォルダー（名前に空白と日本語を含む）を書くと、`y` の後にそのフォルダーへ移った。何も書かないとき（`Q` に当たる）と、同じフォルダーを書いたときは、移らなかった
+  - Windows の Git Bash と WezTerm のタブでは流していない
+- `ya env` の `Config` の行: Linux の `ya` 26.9.1（GitHub のリリースの `yazi-x86_64-unknown-linux-gnu.zip`）を擬似端末で動かした
+  - `YAZI_CONFIG_HOME` を無いフォルダーにしても、空のフォルダーにしても、6 行とも `No such file or directory (os error 2)` だった。無いフォルダーは作られなかった
+  - Linux は、フォルダーが無いときもファイルが無いときも ENOENT（2）を返す。最初に手順書に書いた `os error 2` は、この振る舞いに当たる
+  - Windows では、フォルダーが無いと ERROR_PATH_NOT_FOUND（`os error 3`）、フォルダーがあってファイルが無いと ERROR_FILE_NOT_FOUND（`os error 2`）になるはずなので、手順書の箇条書きを両方に分けた。Windows では流していない
+
+**ロールバックの手順 2 を直した後の確認**（2026-10-08。git-delta.md などの Windows 11 の節が入った版に載せ替えた後のレビューの指摘で直してから、同じ Linux のコンテナで確かめ直した。**Windows 実機では未検証**）:
+
+- 手順書の変更: Windows 11 のロールバックの手順 2 は、`YAZI_FILE_ONE` を値に関係なく消していた
+  - 値が `C:\Program Files\Git\usr\bin\file.exe` のときだけ消し、今の窓の値はユーザーの値に合わせる形にした。Windows 11 で使うの手順 3 で控えた元の値は、その箇条書きの 1 行で戻す
+  - ほかの変更は、箇条書き・リード・1 行の説明だけ（Windows 11 で使うの手順 7・8 の条件に WezTerm の自分用の設定を足した、など）
+- 手順書の `powershell` のブロックを取り出し直した。yazi.md は 9 個で、ロールバックの手順 2 のほかは前の確認と同じだった
+- PowerShell 7.5.3 の構文解析器で、構文の誤りは 0。PSScriptAnalyzer 1.25.0 の 5.1 互換の 3 規則の指摘は 0。ほかの規則の指摘は、Windows 11 で使うの手順 2・4・5 の BOM の 3 件だけ
+- 模擬（ユーザーの環境変数は、前の記録と同じく値をハッシュテーブルに記録する偽物）:
+  - 値が Git for Windows の `file.exe` のときは、ユーザーの値と今の窓の値が消え、`YAZI_FILE_ONE = ` が出た。2 回目もエラーにならなかった。大文字と小文字だけが違う値（`c:\program files\git\usr\bin\FILE.EXE`）も消えた
+  - ほかの値（scoop の `file` の場所に当たる文字列）は残り、`YAZI_FILE_ONE = <その値>` が出て、今の窓の値もその値になった
+  - ほかの値を入れておき、Windows 11 で使うの手順 5（`file.exe` は一時的な場所の空のファイル）→ ロールバックの手順 2 → 箇条書きの 1 行（控えた値を入れたもの）の順に流すと、ユーザーの値は元の値に戻った（今の窓の値は空のまま）
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと（scoop での導入・更新・削除）
+1. `VCRUNTIME140.dll` が無い PC で、`yazi --version` が何も出さずに終わるか、システム エラーの窓が出るか
+1. `ya env` の `Routine` が `text/plain` になり、`Dependencies` に `$YAZI_EXTRAS` のツールの版が出ること
+1. `ya env` の `Config` の行が、設定のフォルダーが無いときに `os error 3`、フォルダーはあってファイルが無いときに `os error 2` になること
+1. ユーザーの環境変数 `YAZI_FILE_ONE` が、新しい窓と WezTerm のタブに効くこと
+1. TUI のプレビュー（PDF・動画・画像・書庫）と、WezTerm・Windows Terminal・conhost での画像の表示
+1. WezTerm の Git Bash のタブ（手順 7）に手順 8 の `bash` のブロックを貼り、`y`（共通の bash 設定）で閉じたフォルダーへ移ること
+1. Enter でテキストを開いたときのエディタ（自分用の設定では `nvim`、上流の既定の設定では `code`）
+1. 自分用の設定（`%APPDATA%\yazi\config` への clone）との組み合わせ
+1. SSH のセッションと、arm64 の Windows
+
+---
+
+## 統合前の記録: Claude Code の Windows 11（もとは claude-code.md）
+
+もとの `claude-code.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-claude-codeもとは-claude-codemd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
+| Windows 11 で使う 2〜9 | 「Claude Code」の手順 1〜8 |
+| Windows 11 の更新 1 | 「AI エージェントとプラグインを上げる」の手順 1 |
+| Windows 11 のロールバック 1〜4 | ロールバックの「AI エージェントとプラグインを消す」の手順 2〜5 |
+
+### Claude Code: 最新の確認範囲（Windows 11）
+
+- 通したこと（どれも Windows 11 Pro の同じクリーン VM。実機ではない）
+  - 2026-10-06: Windows 節の手順 2〜5 による native installer の新規導入とユーザー PATH、新しいプロセスでの手順 7 の版・署名・doctor の導入診断（[付録](#claude-code-付録-windows-11-pro-の-vm-での導入検証2026-10-06)）
+  - 2026-10-08: スタートから開いた窓への貼り付けで、手順 7、更新（2.1.291 → 2.1.293）、ロールバックの手順 1〜4、入れ直し（手順 2〜7。PATH の変更がスタートから開き直した窓に届いた）、手順 8 のログインの画面の手前まで、手順 9 のログインしていない分岐（[付録](#claude-code-付録-windows-11-pro-の-vm-での追加検証2026-10-08)）
+- 確認していないこと
+  - ログイン（claude.ai での承認）と、その後の手順 8・9、認証を要するコマンドと Remote Control
+  - 手順 8 でブラウザが自動で開かなかった原因（本文の `c` で URL をコピーする経路は確かめた）
+- 導入診断が正常でも認証済みとは扱わない。以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
+
+### Claude Code: 補足
+
+#### Claude Code: Windows 11 で使う / 手順 0: 本文中の記録
+
+- 手順の後: `claude` のコマンドラインは[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-claude-remote-control.md)。以後は[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)
+
+#### Claude Code: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、公式の文書、インストーラ（`install.ps1`）と Windows の `claude.exe`（2.1.288）の中身と署名、Linux の PowerShell 7 での構文と模擬の実行、Linux の同じ版の native installer の動きだけ（[対象と検証環境](almalinux-setup.md#claude-code-対象と検証環境)）。
+
+#### Claude Code: Windows 11 で使う / 手順 2: 補足: チャンネルの決まり方と、後から変える方法
+
+- この節の手順 4 のインストーラは、Claude Code の `claude install <チャンネル>` を動かす。`claude install` は、選んだチャンネルを自分のユーザーの設定（`%USERPROFILE%\.claude\settings.json`）の `autoUpdatesChannel` に書き、以後の自動の更新と `claude update` はそのチャンネルを追う（公式の文書の Install a specific version と Configure release channel。書かれることは Linux の native installer の 2.1.288 で確かめた）
+- 入れた後でチャンネルを変えるときは、`claude install stable`（戻すときは `claude install latest`）を打つ。Linux の 2.1.288 では、`latest` の 2.1.288 から `stable` の 2.1.285 に下がり、`autoUpdatesChannel` も `stable` になった（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- セッションの中の `/config` の Auto-update channel でも変えられる（公式の文書。`stable` へ移るときは、今の版に留まるか、下げるかを聞かれる）
+- [実施手順](../almalinux-setup.md#claude-code)（AlmaLinux 10）の dnf の版では、チャンネルは repo ファイルの `baseurl` で決まり、`autoUpdatesChannel` は効かない
+
+#### Claude Code: Windows 11 で使う / 手順 4: 補足: インストーラがすることと、irm | iex にしない理由
+
+`https://claude.ai/install.ps1` は `https://downloads.claude.ai/claude-code-releases/bootstrap.ps1` へ飛ぶ。2026-10-03 に読んだ中身（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）:
+
+- `claude-code-releases/latest` から一番新しい版の番号を取り、その版の `manifest.json` の `win32-x64`（arm64 の Windows なら `win32-arm64`）の sha256 と照らして、`claude.exe` を `%USERPROFILE%\.claude\downloads` に落とす。合わなければ `Checksum verification failed` で止まる
+- 落とした `claude.exe` で `claude install <チャンネル>` を動かし、終わったら落としたファイルを消す。`claude install` が、選んだチャンネルの版を `%USERPROFILE%\.local\share\claude\versions` に置き、`%USERPROFILE%\.local\bin\claude.exe` を作る
+- **インストーラは、`manifest.json` の GPG の署名も、`claude.exe` の Authenticode の署名も確かめない**（sha256 の照合だけで、`manifest.json` も同じ HTTPS のサーバーから取る）。署名はこの節の手順 7 で確かめる
+- `PATH` は変えない。`claude install` は、`PATH` に無ければ足し方を出すだけ（Windows の `claude.exe` の 2.1.288 の中に、`PATH` を書く処理の文字列は見当たらなかった）
+
+**公式の文書の既定の形 `irm https://claude.ai/install.ps1 | iex` にしない理由**:
+
+- `Invoke-Expression` はスクリプトを今のスコープで動かすので、スクリプトの先頭の `Set-StrictMode -Version Latest`・`$ErrorActionPreference = "Stop"`・`$ProgressPreference = 'SilentlyContinue'` が、入れた後の PowerShell にも残る（Linux の PowerShell 7.6.6 で確かめた。付録）。残ると、後から貼ったブロックで、未定義の変数がエラーになり、どのエラーでも止まるようになる
+- この手順の形（`& ([scriptblock]::Create(...)) <チャンネル>`）は、公式の文書がチャンネルを選ぶときに使う形で、別のスコープで動くので何も残らない。`irm` は `Invoke-RestMethod` の別名
+
+#### Claude Code: Windows 11 で使う / 手順 7: 補足: 署名と doctor の出力
+
+- 公式の文書（Binary integrity and code signing）は、Windows の `claude.exe` は「Anthropic, PBC」が署名し、`Get-AuthenticodeSignature` で確かめられるとしている
+- 2.1.288 の Windows の `claude.exe`（x64）の署名を Linux で読むと、署名者は DigiCert の Code Signing の CA が出した `CN="Anthropic, PBC"`（証明書の期限は 2026-10-20）で、DigiCert のタイムスタンプ（2026-10-02）が付いていた（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）。タイムスタンプがあるので、証明書の期限が切れた後も `Valid` のままのはず
+- `claude doctor` の行は、Linux の native installer の 2.1.288 の出力（同じ付録）から引いた。Windows では `Platform: win32-x64` になるはず（確かめていない）
+- 自動の更新は、Claude Code を起動したときと動いている間に確かめ、裏で入れて、次の起動から新しい版になる（公式の文書）。`claude doctor` の `Last update attempt` に最後の結果が出る
+
+#### Claude Code: Windows 11 の更新 / 手順 1: 補足: 更新の動き
+
+- 出力の文言は公式の文書（Update manually）から。Linux の native installer の 2.1.288 では、`Current version: 2.1.288`・`Checking for updates to latest version...`・`Claude Code is up to date (2.1.288)` と出た（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）
+- Windows では、動いている `claude.exe` を同じフォルダーの `claude.exe.old.<数字>` に名前を変えてから、新しい版を置く（公式の Troubleshoot installation）
+- 新しい版は `%USERPROFILE%\.local\share\claude\versions` に置かれる。古い版は、使っているものと新しい 2 つを残して消される（公式の文書の Install on network storage）
+- [windows-claude-remote-control.md](../windows-claude-remote-control.md) の実機では、検証の間に、自動の更新で 2.1.283 から 2.1.286 に上がった
+
+#### Claude Code: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、インストーラと配布物と資料を読んだ記録。
+
+##### Claude Code: インストーラ（`install.ps1`）
+
+```
+$ curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' https://claude.ai/install.ps1
+302 https://downloads.claude.ai/claude-code-releases/bootstrap.ps1
+$ curl -sS -o install.ps1 -L https://claude.ai/install.ps1
+$ sha256sum install.ps1
+cd17c6b555f761d60373659824bf805e1510538226e4c7028e19d7494937a333  install.ps1
+```
+
+3,189 バイトの PowerShell。読んだ中身:
+
+- `param` の位置引数 `$Target`（既定は `latest`。`^(stable|latest|\d+\.\d+\.\d+(-[^\s]+)?)$` に合わないと拒む）
+- 先頭で `Set-StrictMode -Version Latest`・`$ErrorActionPreference = "Stop"`・`$ProgressPreference = 'SilentlyContinue'`
+- `[Environment]::Is64BitProcess` が偽なら `Claude Code does not support 32-bit Windows. ...` で止まる
+- `$env:PROCESSOR_ARCHITECTURE` が `ARM64` なら `win32-arm64`、ほかは `win32-x64`
+- `https://downloads.claude.ai/claude-code-releases/latest` から版の番号を取り（`$Target` によらず一番新しい版。コメントは「最新のインストーラを持つため」）、`<版>/manifest.json` の `platforms.<プラットフォーム>.checksum` を読む
+- `<版>/<プラットフォーム>/claude.exe` を `Invoke-WebRequest` で `%USERPROFILE%\.claude\downloads\claude-<版>-<プラットフォーム>.exe` に落とし、`Get-FileHash` の sha256 が合わなければ `Checksum verification failed` で消して止まる
+- `Setting up Claude Code...` を出して `& $binaryPath install $Target` を動かし、`finally` で 1 秒待ってから落としたファイルを消す。終了コードが 0 でなければ `Installation failed (exit code <N>)`、0 なら `✅ Installation complete!`
+- `manifest.json` の署名（`manifest.json.sig`）も、`claude.exe` の Authenticode の署名も、確かめる処理は無い。`PATH` にも触らない
+
+##### Claude Code: リリースと `manifest.json`
+
+```
+$ for c in latest stable; do printf '%s: ' $c; curl -fsS https://downloads.claude.ai/claude-code-releases/$c; echo; done
+latest: 2.1.288
+stable: 2.1.285
+```
+
+2.1.288 の `manifest.json`（`buildDate` は 2026-10-02T17:00:28Z）の署名を、`https://downloads.claude.ai/keys/claude-code.asc` の鍵（fingerprint `31DD DE24 DDFA B679 F42D  7BD2 BAA9 29FF 1A7E CACE`。[実施手順](../almalinux-setup.md#claude-code)の手順 3 の dnf の鍵と同じ）で確かめた（gpg 2.4.4）:
+
+```
+gpg:                using RSA key 31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE
+gpg: Good signature from "Anthropic Claude Code Release Signing <security@anthropic.com>" [unknown]
+```
+
+Windows の行:
+
+| プラットフォーム | sha256 | 大きさ |
+|---|---|---|
+| `win32-x64` | `84304f7d4b0cd0ebcbe8318695a260151b48991a6659c3366fdd5da290c0ab91` | 249,149,600 |
+| `win32-arm64` | `5015d2b92866232b85384ac6e5eef4ff155418a92123503e52714c29186af8c6` | 236,673,184 |
+
+`2.1.288/win32-x64/claude.exe` を取り、sha256 が `manifest.json` と一致した。
+
+##### Claude Code: `claude.exe`（2.1.288、x64）の署名
+
+osslsigncode 2.8 の `verify` の出力の抜粋（Windows の `Get-AuthenticodeSignature` は通していない）:
+
+```
+Signer's certificate:
+	Signer #0:
+		Subject: /jurisdictionC=US/jurisdictionST=Delaware/businessCategory=Private Organization/serialNumber=4860621/C=US/ST=California/L=San Francisco/O=Anthropic, PBC/CN=Anthropic, PBC
+		Issuer : /C=US/O=DigiCert, Inc./CN=DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+		Certificate expiration date:
+			notBefore : Oct 14 00:00:00 2025 GMT
+			notAfter : Oct 20 23:59:59 2026 GMT
+Countersignatures:
+	Timestamp time: Oct  2 16:56:42 2026 GMT
+	Issuer: /C=US/O=DigiCert, Inc./CN=DigiCert Trusted G4 TimeStamping RSA4096 SHA256 2025 CA1
+...
+Number of verified signatures: 1
+Succeeded
+```
+
+- 署名の中の証明書を Linux の PowerShell 7.6.6 の `X509Certificate2` に読ませると、`Subject` は `CN="Anthropic, PBC", O="Anthropic, PBC", L=San Francisco, S=California, C=US, SERIALNUMBER=4860621, ...` だった（名前に `,` があるので引用符で囲まれる）。[Windows 11 で使う](../windows-setup.md#claude-code)の手順 7 の箇条書きは、この形から引いた
+- 公式の文書（Binary integrity and code signing）の「signed by "Anthropic, PBC"」と合う
+
+##### Claude Code: `claude.exe` の中の文字列
+
+`strings` で読んだ（Linux 版の 2.1.288 の実行ファイルにも同じ文字列がある）:
+
+- Windows で `PATH` に無いときの案内: `Native installation exists but ${D} is not in your PATH. Add it by opening: System Properties → Environment Variables → Edit User PATH → New → Add the path above. Then restart your terminal.`（`${D}` は `claude.exe` のフォルダー）。`SetEnvironmentVariable`・`HKCU\Environment` のような、`PATH` を書く処理の文字列は無かった
+- 置き場所: 版は `<XDG_DATA_HOME か ホーム\.local\share>\claude\versions`、更新の途中のファイルは `<XDG_CACHE_HOME か ホーム\.cache>\claude\staging`、ロックは `<XDG_STATE_HOME か ホーム\.local\state>\claude\locks`、実行ファイルは `ホーム\.local\bin\claude.exe`
+- 更新のときに退ける名前は `<実行ファイル>.old.<ミリ秒>.<PID>`
+- `claude install` は、`latest` / `stable` を渡されると、自分のユーザーの設定に `autoUpdatesChannel` を書く（`Install: Saved autoUpdatesChannel=...`）
+- 更新のときに `manifest.json` の署名を確かめる処理の文言（`predates manifest signature enforcement` など）がある。どの条件で強制されるかは読んでいない
+
+##### Claude Code: Linux の native installer の同じ版での動き
+
+一時的な `HOME` で、Linux の 2.1.288 の実行ファイル（`manifest.json` の `linux-x64` と sha256 が一致）に `install latest` を動かした（`install.ps1` が Windows で動かすのと同じ `claude install`。標準入力無し・`TERM=dumb`。空行は詰めた）:
+
+```
+Checking installation status...
+Installing Claude Code native build latest...
+Setting up launcher and shell integration...
+⚠ Setup notes:
+  ● Native installation exists but ~/.local/bin is not in your PATH. Run:
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> your shell config file && source your shell config file
+✔ Claude Code successfully installed!
+  Version: 2.1.288
+  Location: ~/.local/bin/claude
+  Next: Run claude --help to get started
+⚠ Setup notes:
+  ● Native installation exists but ~/.local/bin is not in your PATH. Run:
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> your shell config file && source your shell config file
+```
+
+- `Setup notes:` は、成功の表示の前と後に 2 回出た
+- できたもの: `~/.local/bin/claude`（`~/.local/share/claude/versions/2.1.288` へのリンク）、`~/.cache/claude/staging`、`~/.local/state/claude/locks`、`~/.claude/settings.json`（`{"autoUpdatesChannel": "latest"}`）、`~/.claude.json`。シェルの設定ファイルは変わらなかった
+- `claude doctor`: `Running: native (2.1.288)`・`Config install method: native`・`Auto-updates: enabled`・`Auto-update channel: latest`・`Last update attempt: none recorded`・`No installation issues found.`
+- `claude update`: `Current version: 2.1.288`・`Checking for updates to latest version...`・`Claude Code is up to date (2.1.288)`、終了コード 0
+- 続けて `claude install stable`: `Installing Claude Code native build stable...`・`Version: 2.1.285`。`claude --version` は `2.1.285 (Claude Code)`、`autoUpdatesChannel` は `stable` になり、`versions` には 2.1.285 と 2.1.288 が残った
+
+##### Claude Code: 公式の文書（2026-10-03）
+
+- Advanced setup の Set up on Windows: native の Windows は Git for Windows が任意（Bash のツールと Monitor のツールに Git Bash が要る。無ければ PowerShell のツール）、管理者として動かさなくてよい
+- 同じ文書: native installer は裏で自動で更新する。WinGet・Homebrew・apt・dnf・apk は自動では更新しない。`claude update` の出力は `Successfully updated from <古い版> to version <新しい版>` か `Claude Code is up to date (<版>)`。アンインストールの Windows PowerShell は `.local\bin\claude.exe` と `.local\share\claude`、設定は `.claude` と `.claude.json`
+- Troubleshoot installation: PowerShell のインストーラが終わっても `claude` が見つからないときは、`[Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')` で足して端末を開き直す。更新の後に `claude.exe` が無いときは、`claude.exe.old.*` の一番新しいものの名前を戻す（v2.1.281 より前は、退けたファイルを消すことがあった）
+- Authentication: Windows のログインの情報は `%USERPROFILE%\.claude\.credentials.json`
+
+##### Claude Code: パッケージの定義（採らなかった経路）
+
+- winget の `Anthropic.ClaudeCode`（winget-pkgs の 2026-10-03 の `master` を浅い sparse clone で見た）: 最新は 2.1.286（`ReleaseDate: 2026-09-30`）。`InstallerType: portable`、`Commands: claude`、x64 と arm64 の `InstallerUrl` は `downloads.claude.ai/claude-code-releases/2.1.286/win32-*/claude.exe`、`Publisher: Anthropic PBC`。定義の先頭のコメントは `Created with YamlCreate.ps1 Dumplings Mod`
+- scoop の `main/claude-code`: 2.1.288。`storage.googleapis.com` の `claude-code-releases/2.1.288/win32-x64/claude.exe` で、`hash` は上の `win32-x64` と同じ。`autoupdate` は `manifest.json` の `checksum` を使う。`notes` に Git と `CLAUDE_CODE_GIT_BASH_PATH`
+- Chocolatey の `claude-code`: 2.1.285（`community.chocolatey.org` のパッケージの飛び先の名前で見ただけ）
+
+---
+
+#### Claude Code: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
+
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた。
+
+**構文と Windows PowerShell 5.1 との互換**:
+
+- Windows 11 の 3 節の `powershell` のブロック 12 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。指摘は 0
+
+**[Windows 11 で使う](../windows-setup.md#claude-code)の手順 2・4**: 文書から抜き出したブロックを、`$env:USERPROFILE` を一時的なディレクトリにして、そのまま流した（本物の `install.ps1` を取って動かす）:
+
+- 手順 2 は `CC_CHANNEL = latest` を出した
+- `$CC_CHANNEL` を空にした手順 4 は、`手順 2 の $CC_CHANNEL が空` のエラーだけを出し、何も取らなかった
+- `latest` の手順 4 は、版（2.1.288）と `manifest.json` を取り、`win32-x64` の `claude.exe` を `%USERPROFILE%\.claude\downloads` に落として sha256 が合い、`Setting up Claude Code...` まで進んだ。その後の `claude.exe install latest` は、Linux では Windows の実行ファイルを動かせないので、`failed to run` のエラーで止まった。落としたファイルは消え、空の `.claude\downloads` が残った
+- 流した後の PowerShell は、`$ErrorActionPreference` が `Continue`、`$ProgressPreference` が `Continue`、未定義の変数を読んでもエラーにならなかった（インストーラの設定が残っていない）
+
+**`irm … | iex` との違い**: `install.ps1` と同じ先頭（`param` と `Set-StrictMode -Version Latest`・`$ErrorActionPreference = "Stop"`・`$ProgressPreference = "SilentlyContinue"`）の文字列を `iex` に渡すと、流した後も `$ErrorActionPreference` が `Stop`、`$ProgressPreference` が `SilentlyContinue` のままで、未定義の変数を読むと `VariableIsUndefined` のエラーになった。`& ([scriptblock]::Create(...)) stable` では何も残らず、位置引数の `stable` が `$Target` に入った。Windows PowerShell 5.1 では確かめていない
+
+**[Windows 11 で使う](../windows-setup.md#claude-code)の手順 5 と[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)の手順 2〜4**: 文書から抜き出したブロックの `[Environment]::GetEnvironmentVariable('Path', 'User')` と `SetEnvironmentVariable('Path', …, 'User')` を、値を覚えておく偽物に置き換え（Linux の .NET は `User` の環境変数を持たない）、`$env:USERPROFILE` を一時的なディレクトリにして流した（パスの `\` は Linux の pwsh がそのまま区切りとして扱った）:
+
+- 手順 5、PATH に無いとき: `PATH に <USERPROFILE>\.local\bin を足した` で、書いたのは 1 回、値は前の値の後ろに `;<USERPROFILE>\.local\bin`
+- もう 1 度: `はもうある` で、書かなかった。末尾に `\` の付いた `<USERPROFILE>\.local\bin\` があるときも `はもうある`
+- PATH が空のとき: `<USERPROFILE>\.local\bin` だけを書いた
+- `claude.exe` が無いとき: `中断: <USERPROFILE>\.local\bin\claude.exe が無い（この節の手順 4 で入っていない）` で、書かなかった
+- ロールバックの手順 2: `claude.exe`・`claude.exe.old.<数字>.<数字>`・`.local\share\claude`・`.local\state\claude`・`.cache\claude` が消え、`False` が 2 行出た。空の `.local\bin`・`.local\share`・`.local\state`・`.cache` と、`.claude`・`.claude.json` は残った
+- ロールバックの手順 3、`.local\bin` が空のとき: PATH から `<USERPROFILE>\.local\bin` だけが外れ（書いたのは 1 回）、`.local\bin` も消えた。もう 1 度流すと、書かなかった
+- `.local\bin` に別のファイル（`uv.exe`）があるとき: ロールバックの手順 2 の一覧に `uv.exe` が出て、手順 3 は `中断: <USERPROFILE>\.local\bin にほかのファイルがある（ほかのツールが使っている）` で、PATH を変えなかった
+- ロールバックの手順 4: `.claude` と `.claude.json` が消え、`False` が 2 行出た
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. `claude install` が Windows で出す文言（`Setup notes:` の `PATH` の案内と、`Location:` の表示）
+1. `PATH` を足して開き直した PowerShell で `claude` が動くこと（`SetEnvironmentVariable` の知らせが、スタートメニューから開いた PowerShell に届くこと）
+1. `Get-AuthenticodeSignature` が `Valid` を返し、署名者が `CN="Anthropic, PBC", …` で始まること
+1. Firefox でのログインと、`claude auth status --text` の表示
+1. 自動の更新と `claude update`、更新のときの `claude.exe.old.*`
+1. ロールバック（動いている `claude.exe` を消せないこと、`.local\state\claude` と `.cache\claude` が Windows でも作られること）
+1. arm64 の Windows、Git for Windows が無いとき、Windows PowerShell 5.1 での `irm … | iex` の後に設定が残ること
+
+---
+
+#### Claude Code: Windows 11 で使う / 手順 5: 補足: PATH の足し方
+
+- 読むときに `%USERPROFILE%` のような書き方は展開され、書き戻すと展開した形（`C:\Users\<WIN_USER>\...`）で残る（.NET Framework の `Environment` の動き。Windows では確かめていない）。自分のユーザーの PATH なので、困ることは無いはず
+
+#### Claude Code: Windows 11 で使う / 手順 8: 補足: ログインの流れと、ログインの情報の置き場所
+
+- 画面の文言は、公式の文書と Windows の `claude.exe`（2.1.288）の中の文字列から引いた。Windows では画面を見ていない
+
+#### Claude Code: Windows 11 のロールバック / 手順 2: 補足: 消すもの
+
+- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。この 2 つは、Linux の native installer の 2.1.288 が作ったフォルダーと、`claude.exe` の中の置き場所の決め方（`XDG_*` が無ければホームの下）から足したもので、Windows では確かめていない
+
+---
+
+#### Claude Code: 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
+
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)と Git for Windows の導入の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの通常権限で実行した。GUI のコピー・貼り付けや認証操作は試していない。
+
+| 項目 | 確認した値 |
+|---|---|
+| OS | Windows 11 Pro 26H2、26300.9457、x64 |
+| PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、通常権限、セッション 1 |
+| 前提の設定 | CurrentUser の実行ポリシー `RemoteSigned`、新しい PowerShell の Ctrl+Enter は `AddLine` |
+| 初回導入前 | `claude` のコマンドと `%USERPROFILE%\.local\bin\claude.exe` は無い。Git は `C:\Program Files\Git\cmd\git.exe`、`bin\bash.exe` も存在 |
+| チャンネル・入った版 | `latest`、2.1.291 |
+
+**初回導入（この節の手順 2〜5）**:
+
+- 実行記録は `20261006-110358Z-6b9ec610`。2026-10-06 11:04:38.473 UTC に完了し、手順ごとのエラーは 0、タスクの終了値は 0、開始と完了の対応も確認した
+- 公式の native installer が `Claude Code successfully installed!`、版 2.1.291、最後に `Installation complete!` を出した。自分のユーザーの `PATH` に `%USERPROFILE%\.local\bin` が追加された
+
+**新しい PowerShell での確認（この節の手順 7）**:
+
+- 実行記録は `20261006-111039Z-7d090b3a`。2026-10-06 11:10:46.409 UTC に完了し、手順のエラーは 0、最後の CLI とタスクの終了値は 0、開始と完了の対応も確認した
+- `Get-Command claude -All` は `%USERPROFILE%\.local\bin\claude.exe` の 1 行だけで、`claude --version` は `2.1.291 (Claude Code)`。Authenticode は `Valid` で、署名者は `CN="Anthropic, PBC", O="Anthropic, PBC", …`
+- `claude doctor` は `Running: native (2.1.291)`、`Platform: win32-x64`、導入先と一致する `Path`、`Config install method: native`、`Search: OK (bundled)`、`Auto-updates: enabled`、`Auto-update channel: latest`、`No installation issues found.` を出した
+- `doctor` の認証が要る項目は資格情報が無い旨を表示した。Managed settings と Organization policy は取得されず、Remote Control は claude.ai にサインインしていないため利用可否を確認できなかった。導入の診断が正常でも、認証が済んだことにはならない
+
+**未検証の範囲**:
+
+- 手順 1・6 の GUI での PowerShell の開き方、コピー・貼り付け、環境変更の通知がスタートメニューから開いた PowerShell に届くこと
+- 手順 8・9 の初期設定・Firefox でのログイン・認証後の状態。認証を要するコマンドや Remote Control の接続
+- 自動の更新・`claude update`・チャンネル切り替え、ロールバック、arm64、Git for Windows が無い場合。Windows の実機での通し実行
+
+2026-10-03 以前の付録は当時の確認範囲を記した履歴として保持した。今回も本文のコマンドは変更していない。
+
+---
+
+#### Claude Code: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
+
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた項目を、画面の操作と本文のブロックの貼り付けで確かめた。ログインは行っていない。
+
+| 項目 | 値 |
+|---|---|
+| 端末 | スタートメニューから開いた通常の Windows PowerShell 5.1（Windows Terminal の中に開く） |
+| 貼り方 | 本文のブロックを右クリックで貼り、複数行の警告が出たら「強制的に貼り付け」を押した（windows-setup.md の付録の「操作の方法」） |
+| Claude Code | 2.1.291（上の付録で入れたもの）から、更新で 2.1.293 |
+
+**確認したこと**:
+
+- Windows 11 で使うの手順 7: スタートから開いた窓で、`claude` の場所が `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行、署名は `Valid` で `CN="Anthropic, PBC"`、`claude doctor` は native の 2.1.291 と `No installation issues found.`
+- Windows 11 の更新の手順 1: `claude update` は `Successfully updated from 2.1.291 to version 2.1.293`
+- Windows 11 のロールバックの手順 1〜4（2.1.293 で）:
+  - 手順 1: プロセスもタスクも出なかった
+  - 手順 2: `False` が 2 行。`.local\bin` の一覧は空
+  - 手順 3: ユーザーの PATH から `C:\Users\<WIN_USER>\.local\bin` が消えた
+  - 手順 4: `%USERPROFILE%\.claude` と `%USERPROFILE%\.claude.json` の `False` が 2 行
+- 入れ直し（Windows 11 で使うの手順 2〜7）:
+  - 手順 2〜5: インストーラは `Setup notes` に PATH に無い旨を出し、手順 5 でユーザーの PATH に足した
+  - 手順 6: 窓を閉じて、スタートメニューから開き直した（再起動もサインアウトもしていない）
+  - 手順 7: 開き直した窓で `claude` が見つかり、2.1.293・署名 `Valid`・`No installation issues found.`。手順 5 の PATH の変更は、スタートから開き直した窓に届いた
+- Windows 11 で使うの手順 8（ログインの手前まで）:
+  - 文字の色の組み合わせの画面の後、`Select login method:` に 3 つの選択肢（`Claude account with subscription`・`Anthropic Console account`・ほかのプラットフォーム）が出た
+  - `Claude account with subscription` を選ぶと、ブラウザは自動では開かず、開かなかったときの案内が出た（原因は分からない）
+  - 本文の案内どおり `c` を押すと、claude.com の認可の URL がクリップボードに入った。Firefox に貼ると claude.ai のログインの画面が出た。ここでログインはしていない
+  - ログインを待つ画面は Esc でも Ctrl+C でも終わらなかったので、`claude.exe` のプロセスを止めた
+- Windows 11 で使うの手順 9: `Not logged in. Run claude auth login to authenticate.`（本文の「ログインしていない」の分岐）。ログインの情報のファイルは作られていなかった
+- 検証の最後に、Windows 11 のロールバックの手順 1〜4 をもう一度通した（2.1.293 で）。手順 1 は何も出さず、手順 2 は `False` が 2 行で `.local\bin` は空、手順 3 はユーザーの PATH から `.local\bin` が消え（`scoop\shims` などは残った）、手順 4 は `False` が 2 行
+
+**確認していないこと**:
+
+- ログイン（claude.ai のアカウントでの承認とコードの貼り付け）と、ログインした後の手順 8 の続き・手順 9 の `Login method:` の行・認証の要るコマンドと Remote Control
+- ブラウザが自動で開かなかった原因。既定のブラウザは Firefox にしてあった（[firefox.md の検証記録](almalinux-setup.md#統合前の記録-firefoxもとは-firefoxmd)の 2026-10-08 の付録）
+- `stable` のチャンネル、自動の更新、arm64 の Windows、Windows の実機
+
+---
+
+## 統合前の記録: Codex CLI の Windows 11（もとは codex.md）
+
+もとの `codex.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-codex-cliもとは-codexmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1〜8 | 「Codex CLI」の手順 1〜8 |
+| Windows 11 の更新 1 | 「AI エージェントとプラグインを上げる」の手順 2 |
+| Windows 11 の更新 2・3 | 「AI エージェントとプラグインを上げる」の手順 3（版の確かめは、その箇条書き） |
+| Windows 11 のロールバック 1〜4 | ロールバックの「AI エージェントとプラグインを消す」の手順 6〜9 |
+
+### Codex CLI: 補足
+
+#### Codex CLI: Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> Windows 11 の実機では未検証。公式資料・インストーラーの内容と構文を確認した範囲は[補足](almalinux-setup.md#codex-cli-対象と検証環境)に記載する。
+
+### Codex CLI: 本文から分離した確認範囲と実測
+
+#### Codex CLI: Windows 11 のロールバック
+
+- 設定・会話履歴と、Windows sandbox が作ったユーザー・ポリシーなどは残る。OS の sandbox 設定を元に戻す手順は未検証
+
+---
+
+## 統合前の記録: Grok Build の Windows 11（もとは grok-build.md）
+
+もとの `grok-build.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-grok-buildもとは-grok-buildmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| Windows 11 で使う 1〜8 | 「Grok Build」の手順 1〜8 |
+| Windows 11 の更新 1・2 | 「AI エージェントとプラグインを上げる」の手順 2・4 |
+| Windows 11 のロールバック 1〜5 | ロールバックの「AI エージェントとプラグインを消す」の手順 10〜14 |
+
+### Grok Build: 付録: コンテナでの検証（2026-10-09）
+
+#### Grok Build: Windows 11 の節: 構文の検査
+
+- Windows 11 で使う・Windows 11 の更新・Windows 11 のロールバックの PowerShell の 12 ブロックを、PowerShell 7.6.6 の `[System.Management.Automation.Language.Parser]::ParseInput` で解析した（エラー 0）
+- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（プロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）で指摘 0
+- `install.ps1` は読んで確かめただけで、実行していない（置く場所・MinGit の SHA-256 の確認・ユーザーの PATH の先頭に足すこと・`$ErrorActionPreference = 'Stop'`・失敗のときの `exit 1`）
+- Windows のロールバックの手順 3 は、[claude-code.md](../almalinux-setup.md#claude-code) の Windows 11 のロールバックの手順 3 と同じ書き方（その手順は Windows 11 の VM で通っている）だが、この手順書のブロックとしては Windows で流していない

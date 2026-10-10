@@ -1,4 +1,4 @@
-# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール）の参考資料
+# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim・AI エージェント）の参考資料
 
 [手順書](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
 
@@ -58,7 +58,7 @@
 
 ### 実施手順 / EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
 
-- [Firefox の AAC・H.264](../firefox.md#実施手順)（firefox.md の手順 8 から。RPM Fusion の `ffmpeg-libs` を入れる）が使えるようになる
+- [Firefox の AAC・H.264](../almalinux-setup.md#firefox)（firefox.md の手順 8 から。RPM Fusion の `ffmpeg-libs` を入れる）が使えるようになる
 
 ### 実施手順 / Flatpak と Flathub / 手順 1: 補足: flatpak と Flathub の登録
 
@@ -67,7 +67,7 @@
 
 ### 実施手順 / Flatpak と Flathub / 手順 3: 補足: 使えるようになるもの
 
-- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../firefox.md) と [VS Code](../vscode.md) は Flathub を使わず RPM で入れる
+- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../almalinux-setup.md#firefox) と [VS Code](../vscode.md) は Flathub を使わず RPM で入れる
 
 ### 実施手順 / Flatpak と Flathub / 手順 4: 補足: 確認用のアプリ
 
@@ -260,7 +260,7 @@
 - `Wake-on:` の `g` がマジック パケット
 - VirtualBox の VM の e1000 は、`Supports Wake-on: umbg` でも `d` のままだった
 
-### WezTerm と HackGen Console NF をデスクトップで使う（任意） / 手順 1: 補足: 等幅のフォント
+### 実施手順 / WezTerm と HackGen Console NF をデスクトップで使う / 手順 1: 補足: 等幅のフォント
 
 - 等幅のフォントは、端末の Ptyxis などが使う
 - 最初の `get` は変える前の値（AlmaLinux 10 の既定は `'Red Hat Mono Regular 10'`）
@@ -433,7 +433,7 @@
 #### RPM Fusion: 選択した方針
 
 - **署名を確かめて入れる**: Configuration の `--nogpgcheck` の例は使わず、keys ページの方法（鍵を先に取り込み、`localpkg_gpgcheck=1`）にした（手順 3 の補足）
-- **free だけ**: 本書を使う [Firefox の AAC・H.264](../firefox.md#実施手順) は、free の `ffmpeg-libs` で足りる。nonfree は有効にしない
+- **free だけ**: 本書を使う [Firefox の AAC・H.264](../almalinux-setup.md#firefox) は、free の `ffmpeg-libs` で足りる。nonfree は有効にしない
 - **EPEL を前提にする**: `rpmfusion-free-release` が `epel-release` を要求し、RPM Fusion の Configuration も EPEL を先に有効にする順で書いている（手順 3 の補足）
 - **独立した手順書にした**: リポジトリの有効化と、Firefox のために FFmpeg を入れることを分けた。EPEL の [epel.md](../almalinux-setup.md) と同じ扱い
 
@@ -746,7 +746,7 @@
 - `man fzf`（`--preview`・`--line-range` は bat 側）
 - [Homebrew の fzf の formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/fzf.rb)（caveat の `fzf --bash`）
 - [bash の履歴・補完・キー操作](../almalinux-setup.md) — bash-completion と Homebrew の補完、`~/.inputrc`。fzf の行との並び
-- [zoxide](../almalinux-setup.md) — `zi` が fzf を使う。[yazi](../yazi.md) — `z` / `Z` キーが fzf を使う
+- [zoxide](../almalinux-setup.md) — `zi` が fzf を使う。[yazi](../almalinux-setup.md#yazi) — `z` / `Z` キーが fzf を使う
 - [bat](../almalinux-setup.md) — プレビューに使う。[Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
 
 ---
@@ -860,6 +860,973 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 - [Homebrew の tmux の formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/t/tmux.rb)
 - [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`、`--spawn`、Limitations（SSH の切断後も残すには tmux か screen、10 分の終了）、4 時間以内の再開
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) — `Ctrl+B`（tmux では 2 回）
-- [Claude Code](../claude-code.md) — 導入とログイン、`claude` のコマンドラインの使い方
+- [Claude Code](../almalinux-setup.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — 同じことを Windows で行う手順書
 - [Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
+
+---
+
+## 統合前の参考資料: Git（もとは git.md）
+
+もとの `git.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-の-windows-11もとは-gitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1 | 「Git」の手順 1 |
+| 実施手順 2（`dnf install git`） | （外した。git は「Homebrew」の手順 1 で入る） |
+| 実施手順 3〜11 | 「Git」の手順 2〜10 |
+| 改行を変換して clone したリポジトリを直すの 1〜4 | 改行を変換して clone したリポジトリを直すの 1〜4 |
+| 更新 1 | 更新のリード（OS の更新で上がる） |
+| ロールバック 1〜5 | ロールバックの「Git の道具を消す」の手順 9〜13 |
+
+[検証記録](../verification/almalinux-setup.md#git-参考資料から分離した記録)
+
+### Git: 補足
+
+#### Git: 実施手順 / 手順 1: 補足: 変数について
+
+- GitHub に push するなら、メールアドレスに GitHub の noreply のアドレス（`<ID>+<GITHUB_USER>@users.noreply.github.com`）を使うと、私用のアドレスをコミットに載せずに済む。アドレスは GitHub の Settings の Emails で確かめる
+- 名前に空白を入れるときは、引用符の中に書く（引用符が無いと、空白の後ろがコマンドとして実行される）
+- 使うのは手順 4 だけ。後から変えるときは、手順 1 と手順 4 を貼り直す（`git config --global` は同じキーを上書きする）
+- 変数はそのシェルの中だけで有効
+
+#### Git: 実施手順 / 手順 5: 補足: 設定の意味
+
+- `pull.rebase true`: `git pull` が、取ってきた履歴の上に自分のコミットを載せ直す（マージコミットを作らない）
+- `rebase.autoStash true`: 未コミットの変更があっても pull できる（pull の前に stash し、後で戻す）
+- `core.autocrlf false`: チェックアウトでもコミットでも、改行を変換しない
+
+#### Git: 実施手順 / 手順 6: 補足: 推奨の設定と、入れなかった設定
+
+| キー | 値 | 変わること |
+|---|---|---|
+| `init.defaultBranch` | `main` | `git init` の最初のブランチを `main` にする |
+| `core.quotepath` | `false` | 日本語のファイル名を、`"\346\227\245…"` と書かずにそのまま出す |
+| `fetch.prune` | `true` | fetch・pull のたびに、リモートで消えたブランチの追跡ブランチ（`origin/…`）を消す。ローカルのブランチは消さない |
+| `push.autoSetupRemote` | `true` | 新しいブランチの最初の `git push` で、`-u origin <ブランチ>` を付けなくても追跡を設定する |
+| `rerere.enabled` | `true` | 一度解いた衝突の解き方を覚え、同じ衝突に当たったら自動で当てる。rebase で同じ衝突を何度も解かずに済む |
+| `merge.conflictStyle` | `zdiff3` | 衝突の表示に、共通の祖先の内容も出す（git 2.35 以降） |
+| `diff.algorithm` | `histogram` | 差分の取り方。既定の `myers` より、関数を動かしたときなどに読みやすい差分になりやすい |
+| `branch.sort` | `-committerdate` | `git branch` を、最近コミットしたブランチから並べる |
+| `tag.sort` | `version:refname` | `git tag` を版の順（`v1.9` の後に `v1.10`）に並べる |
+
+- 要らないものは、[ロールバック](../extra/almalinux-setup.md#git-の道具を消す)の手順 1・4 に従い、そのキーだけ元の設定に戻せる
+- `merge.conflictStyle zdiff3` は [git-delta.md 手順 3](../almalinux-setup.md#git-delta) と同じ設定で、どちらを先に通してもよい
+
+入れなかったもの:
+
+- `core.editor`: 好みで決める。未設定なら、環境変数 `VISUAL`・`EDITOR` のエディタ、どちらも無ければ `vi` が開く。Windows では、インストーラで選んだエディタが `system` に入る
+- `rerere.autoUpdate`: 覚えた解き方を当てた後に、`git add` までする。当てた結果を `git diff` で見てから add したいので入れない
+- `fetch.pruneTags`: リモートに無いタグを、ローカルからも消す
+- `pull.ff only`: 分岐したときの pull が、rebase せずに止まる（手順 8）
+- `push.default`: 既定の `simple`（今のブランチを、同じ名前の追跡ブランチにだけ push する）のままでよい
+
+#### Git: 実施手順 / 手順 7: 補足: pull.ff
+
+- 最後の `pull.ff` が何も出さないのは、設定が無いこと
+
+#### Git: 実施手順 / 手順 9: 補足: 確かめている設定
+
+- `?? 日本語.txt` がそのまま出るのは `core.quotepath`
+- `i/crlf  w/crlf` は、CRLF のまま入ったこと（`core.autocrlf`）
+- ブランチの `main` は `init.defaultBranch`
+- `branch 'main' set up to track 'origin/main'.` は `push.autoSetupRemote`
+
+#### Git: 実施手順 / 手順 10: 補足: 残る変更
+
+- `M crlf.txt` は、pull の前の、未コミットの変更
+
+#### Git: 改行を変換して clone したリポジトリを直す / 手順 2: 補足: 保存しなかったとき
+
+- `No local changes to save` は、今回は保存していないこと
+
+#### Git: 改行を変換して clone したリポジトリを直す / 手順 4: 補足: 別の stash を作らない理由
+
+- `pop` は先頭の stash を戻すため
+
+#### Git: 更新 / 手順 1: 補足: dnf upgrade
+
+- 通常の `sudo dnf upgrade` にも含まれる
+
+#### Git: ロールバック / 手順 1: 補足: 残るもの
+
+- `rerere.enabled` で覚えた解き方は、各リポジトリの `.git/rr-cache` に残る。要らなければ手で消す
+- `git init` 済みのリポジトリのブランチ名（`main`）は変わらない
+
+#### Git: 選択した方針
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `Git.Git` を `--scope machine` で** | 上流のインストーラを、winget が sha256 を確かめてから黙って動かす。`C:\Program Files\Git` に入り、`winget upgrade` で上がる。管理者の権限が要る | **採用** |
+| winget の `--scope user` | 同じインストーラで、winget はスコープのスイッチを渡さない。入る先はインストーラが権限で決める | 不採用（PC 全体に入れるので、winget にも `machine` を指定する） |
+| 上流のインストーラを落として、画面で入れる | 選択を画面で選べる。版の確認と更新は手作業 | 不採用 |
+| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows の OpenSSH サーバー](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)が `C:\Program Files\Git` を前提にしている。[Windows 11 の初期設定](../windows-setup.md)も、scoop の git を入れなくなった） |
+
+- **インストーラの選択は既定のまま**（winget の `--custom` や `--override` で `/o:` を渡さない）
+  - 本書は `system` を変えず `global` で上書きするので、`system` の `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` は既定のままでよい（[実施手順](../almalinux-setup.md#git)の手順 7 で確かめる）
+  - 既定の PATH の選択（`cmd` だけを足す）で、PowerShell・scoop・Claude Code から `git` が見つかる。Unix の道具まで足す選択は、Windows の `find`・`sort` を隠す（インストーラの画面の警告）
+  - `--override` は、winget が渡す黙って動かすスイッチ（`/SP- /SILENT …`）ごと置き換える（winget のソース）
+- **Git for Windows は、scoop の `scoop update` が使う git も兼ねる**
+  - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 5 の補足）
+
+#### Git: 参照
+
+- `git help config` — 各キーの意味と既定値、設定の場所の順（`system` / `global` / `local`）
+- `git help pull` — `--rebase`、`--autostash`、`pull.ff`
+- `git help gitattributes` — `text`・`eol` と `core.autocrlf` の関係
+- `git help rerere` — 解き方の記録と `forget`
+- [Git for Windows](https://gitforwindows.org/) — 公式のサイト
+- [winget-pkgs の `Git.Git`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/g/Git/Git) — winget の定義（スコープ・インストーラの種類・スイッチ・sha256）
+- [Silent or Unattended Installation](https://gitforwindows.org/silent-or-unattended-installation) — Git for Windows のインストーラを黙って動かすときのスイッチと、`/o:` で渡せる選択の一覧
+- [git-for-windows/build-extra の `installer/install.iss`](https://github.com/git-for-windows/build-extra/blob/main/installer/install.iss) — インストーラの既定の選択、入れる先、`system` に書く値
+- [Git for Windows のリリースノート](https://github.com/git-for-windows/build-extra/blob/main/ReleaseNotes.md) — 2.56.0 の `mingw64` から `ucrt64` への変更
+- [microsoft/winget-cli](https://github.com/microsoft/winget-cli) — `ShellExecuteInstallerHandler.cpp`（インストーラに渡すスイッチ）、`ManifestCommon.cpp`（Inno Setup の既定のスイッチ）、`UninstallFlow.cpp`（削除のコマンド）、`doc/Settings.md`（スコープの既定）
+- [Inno Setup の Uninstaller Command-Line Parameters](https://jrsoftware.org/ishelp/topic_uninstcmdline.htm) — 削除のプログラムの `/SILENT`
+- [Claude Code の Set up Claude Code](https://code.claude.com/docs/en/setup) — Windows で Git for Windows があれば Bash のツールに Git Bash を使うこと、`CLAUDE_CODE_GIT_BASH_PATH`
+- [Pro Git 8.1 Git の設定](https://git-scm.com/book/ja/v2/Git-%E3%81%AE%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA-Git-%E3%81%AE%E8%A8%AD%E5%AE%9A) — `core.autocrlf` の説明
+
+---
+
+## 統合前の参考資料: Firefox（もとは firefox.md）
+
+もとの `firefox.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-firefox-の-windows-11もとは-firefoxmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜11 | 「Firefox」の手順 1〜11 |
+| 更新 1 | 更新のリード（OS の更新で上がる） |
+| ロールバック 1〜5 | ロールバックの「Firefox を戻す」の手順 1〜5 |
+
+### Firefox: 補足
+
+#### Firefox: 実施手順 / 手順 1: 補足: 扱う範囲
+
+- ESR / Beta の導入・確認・ロールバックは本書では扱わない
+- 手順 1 のブロックは、最後の行で値を読み戻す
+
+#### Firefox: 実施手順 / 手順 3: 補足: 期限切れの副鍵の warning
+
+- `rpm --import` が出す期限切れの副鍵についての warning は、署名に使う副鍵が別にあるので問題ない
+
+#### Firefox: 実施手順 / 手順 4: 補足: priority は保険
+
+[この節の検証記録](../verification/almalinux-setup.md#firefox-実施手順--手順-4-補足-priority-は保険)
+
+Mozilla の案内する repo ファイルには `priority` が無い。`priority=10`（数字が小さいほど優先）は、将来のリポジトリ間の優先順位に備えて足している。
+
+将来 AppStream 側の ESR が Mozilla 側の版を追い越す状況（Mozilla 側でリリースが巻き戻る、ESR が別番号体系になる、など）に備えた保険として残している。
+
+`repo_gpgcheck=0` は Mozilla の案内どおりで、**パッケージの署名は検証する（`gpgcheck=1`）がリポジトリメタデータには署名が無い**、という意味。
+
+このリポジトリは `baseurl` に `$basearch` を含まない**全アーキテクチャ共通**の作りなので、`dnf list` には `firefox.x86_64` の行も出る。インストールされるのは実行中のアーキテクチャのものだけ。
+
+#### Firefox: 実施手順 / 手順 11: 補足: 起動し直す理由
+
+- 起動中の Firefox は FFmpeg を読み直さない
+
+#### Firefox: 更新 / 手順 1: 補足: RPM 版の更新
+
+- Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
+- 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
+
+#### Firefox: 選択した方針
+
+[この節の検証記録](../verification/almalinux-setup.md#firefox-選択した方針)
+
+| 経路 | EL10 aarch64 での状況 | 採否 |
+|---|---|---|
+| **Mozilla 公式 RPM リポジトリ** | `packages.mozilla.org/rpm/firefox` に `firefox` 156.0.1 / `firefox-esr` 153.3.0esr / `firefox-beta` 157.0b4 と各言語パックがあり、**aarch64 と x86_64 の両方**が揃っている。dnf 管理で更新できる | **採用** |
+| AppStream の `firefox` | 140.15.0（ESR 140 系）。AlmaLinux がセキュリティ更新を出すが、最新版の機能は入らない | 不採用（最新版ではない） |
+| Flathub の `org.mozilla.firefox` | Mozilla 公式ビルド。flathub と runtime の導入が必要で、RPM と二重管理になる | 不採用（RPM で足りる） |
+| 公式 tarball を `/opt` に展開 | `linux-aarch64` のビルドが公式にある（Firefox 136 以降）。更新は Firefox 内蔵のアップデータ任せで、`.desktop` を自作する必要がある | 不採用（dnf で管理できない） |
+| ソースビルド | 実用的でない | 不採用 |
+
+**AAC と H.264 を OS の FFmpeg で補う理由**:
+
+| 経路 | AAC | H.264 | 採否 |
+|---|---|---|---|
+| 何も足さない | 再生できない | OpenH264 が落ちるまでは再生できない。落ちた後は再生できる | —（元の状態） |
+| **RPM Fusion（free）の `ffmpeg-libs` 7.1.5** | 再生できる | 再生できる（FFmpeg で復号） | **採用** |
+| EPEL の `libavcodec-free` 7.1.2 | 再生できる | **再生できない**。H.264 を OpenH264 に任せる作りで、EL10 には中身の無い `noopenh264` しか無い。about:support には「対応」と出るのに `Couldn't open avcodec` で止まり、落ちてきた OpenH264 にも切り替わらない | 不採用 |
+| RPM Fusion の `libavcodec-freeworld` | — | — | 不採用（EPEL の `ffmpeg-free` を使い続けるときに足すもの。RPM Fusion の Howto/Multimedia の案内による） |
+
+- RPM Fusion の EL 10 向けには、`ffmpeg-libs` 7.1.5 が aarch64 と x86_64 の両方にある
+- RPM Fusion は EPEL を前提にしている（`rpmfusion-free-release` が `epel-release` を要求する）
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `Mozilla.Firefox.ja` を PC 全体に** | 157.0。Mozilla の CDN の日本語版の NSIS インストーラ（x64・x86・arm64）を、winget が sha256 を確かめて画面を出さずに入れる。`Scope` は `machine` だけ。Maintenance Service が入り、以後は Firefox が自分で更新する | **採用** |
+| winget の `Mozilla.Firefox` に `--locale ja` | 137.0.1 までは言語ごとのインストーラ（`InstallerLocale`）が 51 あったが、137.0.2 から英語（en-US）だけになり、言語ごとに `Mozilla.Firefox.<言語>` に分かれた。言語の無いインストーラは、`--locale` を付けると候補から外れるので、入らないはず | 不採用 |
+| `Mozilla.Firefox`（英語版）に日本語の言語パック | 言語パックがあると、閉じている間の更新（Background Update）が動かない（Mozilla の文書）。本体と版を揃える必要もある（AlmaLinux 10 の[注意点](../extra/almalinux-setup.md#注意点)と同じ） | 不採用 |
+| winget の `Mozilla.Firefox.MSIX`・Microsoft Store 版 | MSIX（言語は multi）で、パッケージのアプリ（`Mozilla.MozillaFirefox`）として入る | 不採用（Mozilla の通常のインストーラと、Firefox 自身の更新にそろえた） |
+| scoop の `extras/firefox` | 157.0。英語版のインストーラを 7z で展開するだけのポータブル版で、プロファイルは scoop の `persist` に作る | 不採用（日本語版でなく、PC 全体にも入らない） |
+| Mozilla のサイトからインストーラを落として実行 | 同じものが入るが、ダウンロードと実行が画面の操作になる | 不採用（winget で同じインストーラが入る） |
+
+- **PC 全体（`machine`）に入れた**: winget の定義が `machine` しか持たない。AlmaLinux 10 の dnf と同じく、PC の全ユーザーで 1 つの Firefox を使い、更新は Maintenance Service で管理者の確認なしに行える
+  - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
+- **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/almalinux-setup.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
+- **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 の補足）
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+
+#### Firefox: 参照
+
+---
+
+## 統合前の参考資料: HackGen Console NF（もとは hackgen.md）
+
+もとの `hackgen.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-hackgen-console-nf-の-windows-11もとは-hackgenmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜5 | 「HackGen Console NF」の手順 1〜5 |
+| WezTerm で使う（任意）の 1・2 | （外した。自分用の WezTerm の設定がこのフォントを使う） |
+| 更新 1 | 更新の手順 2・3 |
+| ロールバック 1 | ロールバックの「端末とエディタを消す」の手順 10 |
+| ロールバック 2 | （外した。WezTerm で使う（任意）の戻し方） |
+
+[検証記録](../verification/almalinux-setup.md#hackgen-console-nf-参考資料から分離した記録)
+
+### HackGen Console NF: 補足
+
+#### HackGen Console NF: 実施手順 / 手順 1: 補足: HackGen35 Console NF
+
+- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](../verification/almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)）
+
+#### HackGen Console NF: 実施手順 / 手順 2: 補足: unzip が要る理由
+
+- Homebrew は cask の zip を展開するのに `unzip` を使う
+
+#### HackGen Console NF: 実施手順 / 手順 5: 補足: fc-match と文字の確かめ方
+
+- `fc-match` は、名前が合わないときに別のフォントを黙って返すので、ファイル名が HackGen であることを確かめる
+- 最後の `for` で、かな・漢字・Powerline 記号・Nerd Fonts のアイコンが、このフォントに入っていることを確かめる
+
+#### HackGen Console NF: WezTerm で使う（任意） / 手順 2: 補足: 反映
+
+- 起動中の WezTerm には、保存した時点で反映される（[wezterm-nightly.md の設定ファイル](../almalinux-setup.md#wezterm-の設定ファイル)の節）
+
+#### HackGen Console NF: 選択した方針
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **Homebrew の cask `font-hackgen-nerd`** | `brew upgrade` で上がり、`brew uninstall` で消せる。自分のユーザーにだけ入る | **採用**（Homebrew 系の手順書と揃える） |
+| GitHub のリリースの zip を手で展開 | `~/.local/share/fonts` に置く。Homebrew が要らないが、**更新は手作業** | 不採用（Homebrew がある環境では cask で足りる） |
+| 全ユーザー向け（`/usr/local/share/fonts` に置く） | root で置けば全ユーザーから見えるが、cask は自分のホームに置く。複数ユーザーで使う機会が無いので要らない | 不採用 |
+
+- upstream の README は、Linux 向けの導入手順を書いていない（GitHub のリリースの ttf と、Mac の Homebrew、Windows の Chocolatey を案内している）
+- Homebrew の cask は upstream の README では Mac 向けとして紹介されている
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **上流の zip を版と sha256 を固定して、自分のユーザーに入れる** | 管理者の権限も scoop も要らず、Windows PowerShell 5.1 で動く。更新は手作業 | **採用** |
+| scoop の個人のバケット mo-san の `font-hackgen-console-nf` | リリースの zip を使い、scoop と UniGet UI で上げられる。ただし、インストールのスクリプトが `Join-Path` に 3 つ以上の引数を渡していて、Windows PowerShell 5.1 の `Join-Path`（`-Path` と `-ChildPath` だけ）では失敗するはず。scoop はそのスクリプトを、`scoop` を打った PowerShell の中で動かす | 不採用（PowerShell 7 が要り、個人の保守） |
+| scoop の nerd-fonts のバケット | HackGen は無い | — |
+| winget | 既定のソース（winget-pkgs）に HackGen は無い。winget の一覧のサイトには `yuru7.HackGen`（第三者の `dfirr/winget-hackgen` が作り直したインストーラで、PC 全体に入れる）が載っている | 不採用 |
+| Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
+| PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
+
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+
+#### HackGen Console NF: 参照
+
+- [yuru7/HackGen](https://github.com/yuru7/HackGen) — フォントの特徴、ファミリーの種類、ライセンス、リリース
+- [Homebrew Formulae — font-hackgen-nerd](https://formulae.brew.sh/cask/font-hackgen-nerd) — cask の版と中身
+- [Nerd Fonts](https://www.nerdfonts.com/) — 追加されているアイコンの一覧（コードポイントの確認に使える）
+- `man fc-list` / `man fc-match` / `man fc-cache` — fontconfig の照会と、キャッシュの作り直し
+- [wezterm-nightly.md](../almalinux-setup.md#wezterm) — WezTerm の導入と設定ファイルの置き場所
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [HackGen v2.10.0](https://github.com/yuru7/HackGen/releases/tag/v2.10.0) — Windows 11 の節で取る `HackGen_NF_v2.10.0.zip`
+- [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
+- [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）
+- [mo-san/scoop-bucket](https://github.com/mo-san/scoop-bucket) — 採らなかった scoop の個人のバケット
+- [Windows 11 の初期設定](../windows-setup.md) — Windows のインストール直後にまとめて行う設定（scoop・UniGet UI・Caps Lock・表示・電源・リモート デスクトップなど）。この節は、そのリードから案内される
+
+---
+
+## 統合前の参考資料: WezTerm（もとは wezterm-nightly.md）
+
+もとの `wezterm-nightly.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-wezterm-の-windows-11もとは-wezterm-nightlymd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜4 | 「WezTerm」の手順 1〜4 |
+| 実施手順 5（SSH のセッションから確かめる） | （外した。この文書はデスクトップで行う） |
+| 設定ファイルの 1（最小の例） | （外した。「WezTerm」の手順 5 で自分用の設定を入れる。箇条書きは「WezTerm の設定ファイル」） |
+| 更新 1 | 更新のリード（OS の更新で上がる） |
+| ロールバック 1・2 | ロールバックの「端末とエディタを消す」の手順 8・9 |
+
+### WezTerm: 補足
+
+#### WezTerm: 実施手順 / 手順 1: 補足: chroot を明示する理由
+
+`dnf copr enable` は chroot を省略すると `/etc/os-release` から推定する。EL 系は `epel-<major>-<arch>` になる（`/usr/lib/python3.12/site-packages/dnf-plugins/copr.py` の `_guess_chroot`）。このプロジェクトに `epel-10-x86_64` は無いので失敗する:
+
+エラーメッセージの言うとおり第 2 引数に chroot を渡せば通る。「repo ファイルの手直しが要るかも」とあるが、生成された repo ファイルは `baseurl` が `rhel-9-$basearch` を指すだけで、そのまま使えた:
+
+```
+[copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly]
+name=Copr repo for wezterm-nightly owned by wezfurlong
+baseurl=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/rhel-9-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+```
+
+公式ドキュメントの openSUSE 向け手順が同じ `dnf copr enable wezfurlong/wezterm-nightly <repository>` の形なので、想定内の使い方ではある。
+
+- chroot は `uname -m` から `rhel-9-x86_64` か `rhel-9-aarch64` になる（COPR に EL10 向けが無いので EL9 向けを使う）
+
+#### WezTerm: 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵
+
+[この節の検証記録](../verification/almalinux-setup.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
+
+- `wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は、`wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ
+- `dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているため。x86_64 パッケージには入っていない
+
+GPG 鍵はインストール時に COPR の `pubkey.gpg` から取り込まれる:
+
+```
+Importing GPG key 0xCEA2757D:
+ Userid     : "wezfurlong_wezterm-nightly (None) <wezfurlong#wezterm-nightly@copr.fedorahosted.org>"
+ Fingerprint: FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D
+ From       : https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
+```
+
+#### WezTerm: 実施手順 / 手順 4: 補足: wezterm ls-fonts と wezterm-gui --version
+
+- **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる
+  - 既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ
+  - `| head` で切ると `rc=101`（Rust の panic 終了コード）になるが、パイプが閉じたためで異常ではない。単体で実行すると `rc=0`
+- **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）
+  - COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
+
+#### WezTerm: 実施手順 / 手順 4: 補足: アプリ一覧の項目
+
+- アプリ一覧の「WezTerm」は、`/usr/share/applications/org.wezfurlong.wezterm.desktop` から出る
+
+#### WezTerm: 実施手順 / 手順 5: 補足: Wayland セッションでの起動試験
+
+- **Wayland セッションでの起動試験**: この検証は Claude Code のシェル（TTY もディスプレイも無い）から行ったので、`env -i` で環境を空にしてから、ログイン中の GNOME セッションの `WAYLAND_DISPLAY=wayland-0` と `XDG_RUNTIME_DIR` を渡した
+  - 値は `/proc/$(pgrep -u "$USER" -x gnome-shell)/environ` から取れる
+  - `wezterm start -- sh -c 'exit 0'` はウィンドウを開いて `sh` を走らせ、終了と同時にウィンドウを閉じる。結果 `rc=0`
+  - `timeout 30` は、描画に失敗してウィンドウが残った場合の保険
+- 手順 5 のブロックは、ログイン中の Wayland セッションを指定して、ウィンドウを開く
+- `rc=0` でウィンドウが閉じているのは、`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じるため
+
+#### WezTerm: 設定ファイル / 手順 1: 補足: 再読み込みと起動のオプション
+
+- 保存すると起動中の WezTerm に自動で反映されるのは、`automatically_reload_config` の既定が true のため
+- Lua の文法エラーで組み込みの既定値で起動するとき、別の候補ファイルには進まない
+- `wezterm -n`（`--skip-config`）で、設定を読まずに起動できる
+- `wezterm --config 'font_size=14'` のように、1 項目だけ上書きもできる
+
+#### WezTerm: 選択した方針
+
+`wezterm-gui` が要求するのは次のもの（`dnf repoquery --requires wezterm-gui`）:
+
+- `libc.so.6(GLIBC_2.34)`
+- `libssl.so.3(OPENSSL_3.0.0)` / `libcrypto.so.3`
+- `libwayland-client.so.0` / `libwayland-egl.so.1`
+- `libxkbcommon.so.0(V_0.6.0)` / `libxkbcommon-x11.so.0`
+- `libxcb.so.1` / `libxcb-image.so.0` / `libxcb-util.so.1`
+- `libX11.so.6` / `libX11-xcb.so.1`
+- `libfontconfig.so.1`、`mesa-libEGL`、`dbus`
+
+EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0` シンボルバージョンを両方提供）なので、EL9 向けバイナリがそのまま動く。
+
+##### WezTerm: Homebrew の tap を採らない理由
+
+##### WezTerm: Windows 11 で入れる経路
+
+- **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
+  - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
+  - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
+  - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+
+#### WezTerm: 参照
+
+---
+
+## 統合前の参考資料: git-delta（もとは git-delta.md）
+
+もとの `git-delta.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-delta-の-windows-11もとは-git-deltamd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜4 | 「git-delta」の手順 1〜4 |
+| lazygit と組み合わせる（任意）の 1 | （外した。自分用の lazygit の設定が delta を使う） |
+| 設定ファイル | git-delta の設定ファイル |
+| 更新 1 | 更新の手順 2・3 |
+| ロールバック 1・3 | ロールバックの「Git の道具を消す」の手順 2・3 |
+| ロールバック 2 | ロールバックの「Git の道具を消す」の手順 10 |
+
+### git-delta: 補足
+
+#### git-delta: 実施手順 / 手順 1: 補足: 変数について
+
+- 3 つとも表示の好みなので、既定のままで進められる
+- 3 つとも `~/.gitconfig` の `[delta]` に書かれる値で、後から `git config --global delta.side-by-side true` で変えられる
+- `navigate` を `true` にすると、ページャ（`less`）の中で `n` が「次の変更へ」になる。delta が `less` に渡すオプションで実現しているので、`core.pager` 経由で起動したときだけ効く
+
+#### git-delta: 実施手順 / 手順 2: 補足: 降ってくるボトル
+
+aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar.gz`。
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+
+#### git-delta: 実施手順 / 手順 2: 補足: formula 名とコマンド名
+
+- formula 名は `git-delta` だが、入るコマンドは `delta`（`brew install delta` でも同じ formula に解決される）
+
+#### git-delta: 実施手順 / 手順 3: 補足: git の設定の書き方
+
+- `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）
+- ブロックの最後の行で、書けたか読み戻す
+- `interactive.difffilter` と小文字で表示されるのは、git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま
+- `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
+- `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
+- [git.md 手順 6](../almalinux-setup.md#git) でも同じ値を入れる。先に通していても、同じキーが書き直されるだけ
+
+#### git-delta: 実施手順 / 手順 4: 補足: 差分の出し方
+
+- ブロックの最後の行で、変更のあるリポジトリの差分を出す
+
+#### git-delta: 選択した方針
+
+| 経路 | EL10 aarch64 での状況 | 採否 |
+|---|---|---|
+| **Homebrew** | `git-delta 0.19.2` の `arm64_linux` ボトルがある。upstream の最新と一致。formula に `delta` という別名が付いているので `brew install delta` でも入る | **採用** |
+| EPEL / AppStream / CRB | **`delta` も `git-delta` も無い**（`dnf list --available delta git-delta` → `Error: No matching Packages to list`）。※ `delta` という名前の無関係なパッケージも無い | 使えない |
+| GitHub Releases のバイナリ | `aarch64-unknown-linux-gnu` の tar と `.rpm` が置いてある。rpm を直接入れると dnf のリポジトリ管理外になり更新が手作業になる | 不採用（Homebrew に揃える） |
+| `cargo install git-delta` | Rust toolchain が要り、Raspberry Pi ではビルドに時間がかかる | 不採用 |
+| diff-so-fancy / difftastic | 別物（difftastic は EPEL に `0.67.0` がある）。構文木で比較する difftastic とは用途が違うので、置き換えではなく併用できる | 対象外 |
+
+#### git-delta: 参照
+
+- [dandavison/delta — README](https://github.com/dandavison/delta) — 使い方、`~/.gitconfig` の書き方、side-by-side と navigate の説明
+- [delta manual](https://dandavison.github.io/delta/) — 全設定項目、`features` による設定のまとめ方、他ツールとの連携
+- [lazygit 0.65.1 の差分表示設定](https://github.com/jesseduffield/lazygit/blob/v0.65.1/docs/Custom_DiffRenderers.md) — `git.diffRenderers` の `stdinFilter` と delta の指定
+- `delta --help` / `delta --show-config` / `delta --list-syntax-themes` — オプションと実効値、配色の一覧
+- `git help config` の `core.pager` / `interactive.diffFilter` — git 側の仕様
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [ScoopInstaller/Main — delta.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/delta.json) — scoop の版、x64 の zip と hash、`delta.exe` の shim
+- [winget-pkgs — dandavison.delta 0.20.1](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/dandavison/delta/0.20.1/dandavison.delta.installer.yaml) — 同じ zip の sha256 と、VC++ ランタイムの依存（採らなかった経路）
+- [delta manual — Using Delta on Windows](https://dandavison.github.io/delta/tips-and-tricks/using-delta-on-windows.html) — Windows では新しい less が要るという案内
+- [src/utils/bat/output.rs（0.20.1）](https://github.com/dandavison/delta/blob/0.20.1/src/utils/bat/output.rs)・[src/features/navigate.rs](https://github.com/dandavison/delta/blob/0.20.1/src/features/navigate.rs) — ページャの探し方と、Windows の less の検索履歴の写しの場所
+- [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
+- [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
+- [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節
+- [WezTerm の Windows 11 で使う](../windows-setup.md#wezterm) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
+
+---
+
+## 統合前の参考資料: Neovim（もとは neovim.md）
+
+もとの `neovim.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-neovim-の-windows-11もとは-neovimmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1 | 「Neovim」の手順 1 |
+| 実施手順 2 | 「Neovim」の手順 2（`checkhealth` の起動は外した） |
+| 既定のエディタにする（任意）の 1 | 「Neovim」の手順 4 |
+| 設定ファイルの 1（最小の例） | （外した。「Neovim」の手順 3 で自分用の設定を入れる。箇条書きは「Neovim の設定ファイル」） |
+| 更新 1 | 更新の手順 2・3 |
+| ロールバック 1・2 | ロールバックの「端末とエディタを消す」の手順 3・4 |
+
+### Neovim: 補足
+
+#### Neovim: 実施手順 / 手順 1: 補足: ボトルと依存
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+- 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
+
+#### Neovim: 実施手順 / 手順 2: 補足: :checkhealth の読み方
+
+[この節の検証記録](../verification/almalinux-setup.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
+
+`:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
+
+- `vim.provider`: node / perl / python3 / ruby のプロバイダが無い。それぞれの言語で書かれたプラグインを使わないなら無視してよい（`vim.g.loaded_node_provider = 0` などで黙らせられる）
+- `vim.deprecated`: プラグインが古い API を使っている
+- ツールの不足: `rg`（ripgrep）、`fd`、`git`、`tree-sitter` など。必要なものを各手順書で導入する（[yazi.md](../almalinux-setup.md#yazi) の依存ツール、および RPM の git）
+
+`ERROR` が出ていなければ、日常の編集には支障がない。
+
+- 手順 2 のブロックは、最後の行で起動して、`:checkhealth` で健全性を確認する
+
+#### Neovim: 既定のエディタにする（任意） / 手順 2: 補足: git commit のエディタ
+
+- git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
+
+#### Neovim: 既定のエディタにする（任意） / 手順 3: 補足: Git Bash の共通設定
+
+- Git Bash の共通設定の `EDITOR`・`VISUAL` は、この手順では変わらない
+
+#### Neovim: 設定ファイル / 手順 1: 補足: 探索先とディストリビューション
+
+- 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
+- LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
+
+#### Neovim: 参照
+
+- [Install Neovim](https://neovim.io/doc/install/) — 公式が案内する各経路（tarball / AppImage / パッケージマネージャ）
+- [neovim/neovim — INSTALL.md](https://github.com/neovim/neovim/blob/master/INSTALL.md) — tarball の展開先と PATH の通し方、glibc の要件
+- `:help nvim-defaults` / `:help checkhealth` — 既定値と健全性チェックの読み方
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は [docs/setup.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md)
+- [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
+- [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）
+- [lazygit — Config.md の Configuring File Editing](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md#configuring-file-editing) — `e` キーのエディタの決まり方（`EDITOR` とプリセット）
+- [ryo-aoki-pc/LazyVimStarter — docs/setup.md の Windows 11 に導入する](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#windows-11-に導入する-1-度だけ) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
+
+---
+
+## 統合前の参考資料: lazygit（もとは lazygit.md）
+
+もとの `lazygit.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-lazygit-の-windows-11もとは-lazygitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1（`LG_EDITOR`） | （外した。`e` キーのエディタは `EDITOR` で決まる） |
+| 実施手順 2 | 「lazygit」の手順 1 |
+| 実施手順 3 | 「lazygit」の手順 3・4 |
+| 設定ファイルの 1（最小の例） | （外した。「lazygit」の手順 2 で自分用の設定を入れる。箇条書きは「lazygit の設定ファイル」） |
+| 更新 1 | 更新の手順 2・3 |
+| ロールバック 1 | ロールバックの「Git の道具を消す」の手順 1 |
+
+### lazygit: 補足
+
+#### lazygit: 実施手順 / 手順 1: 補足: 変数について
+
+- `LG_EDITOR` を使うのは[設定ファイル](../almalinux-setup.md#lazygit-の設定ファイル)の節だけ
+- lazygit は設定が無ければ `EDITOR` 環境変数を見るので、`~/.bashrc` に `export EDITOR=nvim` があれば設定ファイルは要らない
+
+#### lazygit: 実施手順 / 手順 2: 補足: ボトル
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+
+#### lazygit: 実施手順 / 手順 3: 補足: 起動時の注意
+
+[この節の検証記録](../verification/almalinux-setup.md#lazygit-実施手順--手順-3-補足-起動時の注意)
+
+`lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。
+
+**git が入っていないと lazygit は起動しない。**
+
+- Homebrew 版は git を依存に持たないので、RPM の git か `brew install git` のどちらかが要る
+
+git 管理下でないディレクトリで起動すると `Would you like to create a new repository?` と聞かれる。意図せず `.git` を作らないよう、リポジトリのルートで起動する。
+
+#### lazygit: 設定ファイル / 手順 1: 補足: 既定値とキーバインド
+
+- 既定値の全体は `lazygit --config` で表示できる
+- アプリ内では `x` でキーバインド一覧が出る
+
+#### lazygit: 選択した方針
+
+- `atim/lazygit` でも同じ 403
+- dnf を介さず `curl -L` で `repomd.xml` を取っても同じ。COPR の配信元（`download.copr.fedorainfracloud.org`）が S3 の署名付き URL にリダイレクトし、その署名が期限切れになっている
+- 一方で COPR 全体が落ちているわけではない。同じ日に `lihaohong/yazi` の `epel-10-aarch64` はメタデータを取得できている（[yazi.md](../almalinux-setup.md#yazi)）
+- **プロジェクトごとの問題で、いずれ直る可能性がある**
+
+#### lazygit: 参照
+
+- [jesseduffield/lazygit — README](https://github.com/jesseduffield/lazygit) — 各 OS のインストール方法と機能一覧
+- [lazygit Config Docs](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) — `config.yml` の項目（`os.edit` など）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [atim/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/atim/lazygit/) / [dejan/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/dejan/lazygit/) — chroot の一覧（`epel-10-aarch64` はある）
+- [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
+- [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
+- [lazygit Config Docs（v0.66.0）](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md) — Windows の設定の場所（`%LOCALAPPDATA%\lazygit\config.yml`）と `LG_CONFIG_FILE`
+- [ryo-aoki-pc/lazygit — README の導入方法](https://github.com/ryo-aoki-pc/lazygit#導入方法) — 自分用の設定の Windows の clone の例と元に戻し方
+
+---
+
+## 統合前の参考資料: GitHub CLI（もとは gh.md）
+
+もとの `gh.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-github-cli-の-windows-11もとは-ghmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜5 | 「GitHub CLI」の手順 1〜5 |
+| 更新 1 | 更新のリード（OS の更新で上がる） |
+| ロールバック 1〜5 | ロールバックの「Git の道具を消す」の手順 4〜8 |
+
+### GitHub CLI: 補足
+
+#### GitHub CLI: 実施手順 / 手順 1: 補足: 生成される repo ファイルと、dnf4 と dnf5 の構文の違い
+
+追加するのは公式が配っている repo ファイルで、生成される `/etc/yum.repos.d/gh-cli.repo` は次のとおり:
+
+```
+[gh-cli]
+name=packages for the GitHub CLI
+baseurl=https://cli.github.com/packages/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://cli.github.com/packages/githubcli-archive-keyring.asc
+```
+
+AlmaLinux 10.2 の dnf は **4.20.0**（`dnf5` パッケージは未導入）なので `--add-repo` を使う。Fedora 41 以降の dnf5 では構文が変わり、`sudo dnf install dnf5-plugins` のうえで:
+
+```
+sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/rpm/gh-cli.repo
+```
+
+になる。公式ドキュメントは両方を併記している。EL10 でも将来 dnf5 に移れば後者になる。
+
+#### GitHub CLI: 実施手順 / 手順 2: 補足: 署名鍵
+
+- 鍵が 2 本あるので、初回は取り込みを 2 回聞かれる
+
+#### GitHub CLI: 実施手順 / 手順 4: 補足: 認証
+
+トークンは OS の資格情報ストアに保存される。ストアを使えない場合は `~/.config/gh/hosts.yml` の平文保存に切り替わる。保存先は `gh auth status` で確認する。`gh auth token` の出力は**記録しない**。
+
+#### GitHub CLI: 選択した方針
+
+- 両方が有効なら、dnf はバージョンの高い `gh-cli` 側を選ぶ
+- `armv6hl` や `i386` の行が見えるのは、このリポジトリが `baseurl` にアーキテクチャを含まない**全アーキテクチャ共通**の作りだから（Mozilla のリポジトリと同じ）
+
+#### GitHub CLI: 参照
+
+- [ScoopInstaller/Main — gh.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/gh.json) — Windows 11 の scoop の定義（版・zip と sha256・`bin\gh.exe`）
+- [winget-pkgs — GitHub.cli 2.102.0](https://github.com/microsoft/winget-pkgs/blob/master/manifests/g/GitHub/cli/2.102.0/GitHub.cli.installer.yaml) — MSI（machine）と portable（採らなかった経路）
+- [gh 2.102.0 の login_flow.go](https://github.com/cli/cli/blob/v2.102.0/pkg/cmd/auth/shared/login_flow.go)・[git_credential.go](https://github.com/cli/cli/blob/v2.102.0/pkg/cmd/auth/shared/git_credential.go)・[gitcredentials](https://github.com/cli/cli/tree/v2.102.0/pkg/cmd/auth/shared/gitcredentials) — ログインの問いと、Git の認証に Yes と答えたときの動き
+- [gh 2.102.0 の internal/config/config.go](https://github.com/cli/cli/blob/v2.102.0/internal/config/config.go)・[status.go](https://github.com/cli/cli/blob/v2.102.0/pkg/cmd/auth/status/status.go)・[logout.go（v2.102.0）](https://github.com/cli/cli/blob/v2.102.0/pkg/cmd/auth/logout/logout.go) — トークンの置き場所、状態の表示、ログアウト
+- [gh 2.102.0 の internal/ghcmd/cmd.go](https://github.com/cli/cli/blob/v2.102.0/internal/ghcmd/cmd.go) — `GH_PATH` と自分の場所、新しい版の知らせ
+- [cli/go-gh v2.16.1 — pkg/config/config.go](https://github.com/cli/go-gh/blob/v2.16.1/pkg/config/config.go) — 設定・状態・データ・キャッシュの場所
+- [zalando/go-keyring v0.2.8 — keyring_windows.go](https://github.com/zalando/go-keyring/blob/v0.2.8/keyring_windows.go) — 資格情報マネージャーの項目の名前
+- [GitHub CLI manual — gh help environment](https://cli.github.com/manual/gh_help_environment) — `GH_CONFIG_DIR`・`GH_PATH` など
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節。[Git](../almalinux-setup.md#git) — Git for Windows と、その Git Credential Manager
+
+---
+
+## 統合前の参考資料: yazi（もとは yazi.md）
+
+もとの `yazi.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-yazi-の-windows-11もとは-yazimd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1・2 | 「yazi」の手順 1・2 |
+| 実施手順 3 | 「yazi」の手順 4（`. ~/.bashrc` で読み直さず、新しいタブで確かめる） |
+| 実施手順 4 | 「yazi」の手順 5 |
+| 設定ファイルの 1（`mkdir`） | （外した。「yazi」の手順 3 で自分用の設定を入れる。箇条書きは「yazi の設定ファイル」） |
+| 更新 1 | 更新の手順 2・3 |
+| ロールバック 1 | ロールバックの「端末とエディタを消す」の手順 1 |
+
+### yazi: 補足
+
+#### yazi: 実施手順 / 手順 1: 補足: 変数について
+
+- `YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は手順 2 の補足にまとめた
+- `ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）
+- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている
+
+#### yazi: 実施手順 / 手順 2: 補足: ボトルと、依存ツールの役割
+
+[この節の検証記録](../verification/almalinux-setup.md#yazi-実施手順--手順-2-補足-ボトルと依存ツールの役割)
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+
+#### yazi: 実施手順 / 手順 3: 補足: y 関数
+
+- `y` は yazi を閉じたディレクトリへ移る。空白や日本語を含むパスも扱い、同じ場所なら移動し直さない
+
+#### yazi: 実施手順 / 手順 4: 補足: ya と y
+
+- `ya` は付属のプラグイン管理コマンド
+- ブロックの最後の `y` で起動して確認する
+- `y` で起動したときは、終了時にそのディレクトリへ移動する
+
+#### yazi: 設定ファイル / 手順 1: 補足: プラグインとテーマ
+
+- プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
+- 本書ではプラグインは扱っていない
+
+#### yazi: 更新 / 手順 1: 補足: 先に確認する
+
+- `brew outdated` で先に確認できる
+
+#### yazi: 参照
+
+- [Installation — Yazi](https://yazi-rs.github.io/docs/installation/) — 経路一覧と依存ツール（ffmpeg / 7-Zip / jq / poppler / fd / ripgrep / fzf / zoxide / ImageMagick）
+- [Quick Start — Yazi](https://yazi-rs.github.io/docs/quick-start/) — `y` シェル関数（`--cwd-file`）の原典
+- [Configuration — Yazi](https://yazi-rs.github.io/docs/configuration/overview/) — `yazi.toml` / `keymap.toml` / `theme.toml`
+- [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) — 自分用の設定。入れ方・独自のキー・上流との差分の管理は README にある
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [Installation — Yazi の Windows](https://yazi-rs.github.io/docs/installation/#windows) — scoop の経路と依存、`YAZI_FILE_ONE`（Git for Windows の `file.exe`）
+- [Image Preview — Yazi](https://yazi-rs.github.io/docs/image-preview/) — Windows で画像を出せる端末（WezTerm の nightly、Windows Terminal 1.22.10352.0 以降）と ConPTY の制約
+- [ScoopInstaller/Main — yazi.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/yazi.json) — Windows 11 の scoop の定義
+- [sxyazi/yazi — yazi-fs/src/xdg.rs（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-fs/src/xdg.rs) — Windows の設定・状態・キャッシュの場所
+- [sxyazi/yazi — yazi-cli/src/env/env.rs（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-cli/src/env/env.rs) — `ya env` の出力
+- [sxyazi/yazi — yazi-config/preset/yazi-default.toml（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-config/preset/yazi-default.toml) — 上流の既定の `[opener]`（Windows の `edit` は `code`）
+- [sxyazi/yazi — yazi-plugin/preset/plugins/mime-local.lua（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-plugin/preset/plugins/mime-local.lua)・[yazi-binding/src/process/command.rs（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-binding/src/process/command.rs) — `YAZI_FILE_ONE` の起動（シェルを挟まない）
+
+---
+
+## 統合前の参考資料: Claude Code（もとは claude-code.md）
+
+もとの `claude-code.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-claude-code-の-windows-11もとは-claude-codemd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜5 | 「Claude Code」の手順 1〜5 |
+| 使い方の基本 | Claude Code の使い方の基本 |
+| 更新 1 | 更新のリード（OS の更新で上がる） |
+| stable チャンネルに切り替える（任意）の 1〜4 | Claude Code を stable チャンネルに切り替える（任意）の 1〜4 |
+| ロールバック 1〜3 | ロールバックの「AI エージェントとプラグインを消す」の手順 2〜4 |
+
+### Claude Code: 補足
+
+#### Claude Code: 実施手順 / 手順 1: 補足: 変数について
+
+- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
+- ネイティブインストーラ版にある `autoUpdatesChannel` / `minimumVersion` の設定は dnf 版では効かない（更新を行うのが dnf のため）
+
+#### Claude Code: 更新 / 手順 1: 補足: dnf 版が自分で更新できない理由
+
+- dnf 版の更新には root 権限が要るため、起動中の Claude Code は自分で更新できない
+
+#### Claude Code: stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
+
+- 以後の `sudo dnf upgrade claude-code`（[更新](../almalinux-setup.md#更新)）は `stable` の版を追う
+
+#### Claude Code: 選択した方針
+
+[この節の検証記録](../verification/almalinux-setup.md#claude-code-選択した方針)
+
+| 経路 | EL10 aarch64 での状況 | 採否 |
+|---|---|---|
+| **公式 dnf リポジトリ** | `downloads.claude.ai/claude-code/rpm/{stable,latest}`。aarch64 の RPM があり、署名鍵で検証される。更新は `dnf upgrade`（**自動更新はしない**） | **採用**（他のツールと同じ dnf 管理に揃う） |
+| ネイティブインストーラ（`curl -fsSL https://claude.ai/install.sh \| bash`） | `~/.local/bin/claude` に入り、**バックグラウンドで自動更新する**。root 不要。ただし更新経路が dnf の外になり、`~/.local/share/claude/versions/` に版が積まれる | 不採用（自動更新が要るなら有力） |
+| npm（`npm install -g @anthropic-ai/claude-code`） | Node.js 22 以上が要る。中身は同じネイティブバイナリ | 不採用 |
+
+- どれを選んでも入るのは同じネイティブバイナリで、Node.js は実行時に使わない
+- `ripgrep` は同梱されている（Alpine など musl 系以外では別途入れなくてよい）
+
+**`stable` と `latest` の違い**:
+
+- `stable` は 1 週間ほど遅れて、大きな不具合のある版を飛ばす
+- `latest` は出た版をすぐ配る
+- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)）
+
+**既定を `latest` にした理由**:
+
+- 本書の目的が最新版を入れることだから。`stable` のままだと 1 週間ほど遅れる
+- ネイティブインストーラ（`install.sh` が取ってくる `bootstrap.sh`）も、まず `claude-code-releases/latest` が指す版を取ってくる
+- 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
+
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../windows-setup.md#claude-code)の手順 4 の補足）
+- **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ節の手順 5）
+- **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ節の手順 7）。インストーラの中で動く前の確かめにはならない
+- **Git for Windows を前提にした**: 公式の文書では任意だが、Claude Code の Bash のツール（と Monitor のツール）が Git Bash を使う。[Windows 11 の初期設定](../windows-setup.md)のリードの順で、先に入れる
+
+#### Claude Code: 参照
+
+- [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、アンインストール、署名の検証。Windows 11 の節は、Set up on Windows・Install a specific version（チャンネルを選ぶ形）・Update manually・Binary integrity and code signing・Uninstall の Windows PowerShell
+- [Troubleshoot installation and login — Claude Code Docs](https://code.claude.com/docs/en/troubleshoot-install) — インストールが失敗したときの切り分け。Windows 11 の節は、Verify your PATH・Check for conflicting installations・`claude.exe` missing after an update on Windows・Claude Code does not support 32-bit Windows・Git Bash を探す順
+- [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)）
+- [Interactive mode](https://code.claude.com/docs/en/interactive-mode) / [Commands](https://code.claude.com/docs/en/commands) — セッションの中のキーとスラッシュコマンド
+- [Run Claude Code programmatically](https://code.claude.com/docs/en/headless) — `-p` と `--output-format`
+- [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp) — `claude mcp` とスコープ
+- [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`
+- `man dnf.conf`（`gpgcheck`、`baseurl`）
+- [Authentication — Claude Code Docs](https://code.claude.com/docs/en/authentication) — 最初の起動のログインの流れと、Windows のログインの情報の置き場所（`.credentials.json`）
+- [winget-pkgs の Anthropic.ClaudeCode](https://github.com/microsoft/winget-pkgs/tree/master/manifests/a/Anthropic/ClaudeCode) / [scoop の main/claude-code](https://github.com/ScoopInstaller/Main/blob/master/bucket/claude-code.json) — Windows 11 で採らなかった経路の定義
+- [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
+- [Windows 11 の初期設定](../windows-setup.md) — 同じ PC で先に行う設定（貼り付けの設定と、この文書を通す順）
+- [windows-claude-remote-control.md](../windows-claude-remote-control.md) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
+
+---
+
+## 統合前の参考資料: Codex CLI（もとは codex.md）
+
+もとの `codex.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-codex-cli-の-windows-11もとは-codexmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜8 | 「Codex CLI」の手順 1〜8 |
+| 更新 1〜3 | 更新の手順 5〜7 |
+| ブラウザの無いホストでログインするの 1〜4 | Codex CLI をブラウザの無いホストでログインするの 1〜4 |
+| 設定ファイル | Codex CLI の設定ファイル |
+| ロールバック 1〜3 | ロールバックの「AI エージェントとプラグインを消す」の手順 5〜7 |
+
+### Codex CLI: 補足
+
+#### Codex CLI: 実施手順 / 手順 3: 補足: インストーラーが置くもの
+
+- Node.js・npm・Homebrew は不要。CPU に合う公式の配布物を取り、SHA-256 と導入後の版を確認する
+- `~/.local/bin/codex` と `~/.local/bin/codex-code-mode-host` にリンクを置き、配布物は `~/.codex/packages/standalone/` に保存する
+- `~/.local/bin` が PATH に無い場合、bash では `~/.bashrc` に `# >>> Codex installer >>>` から `# <<< Codex installer <<<` までのブロックを足す
+- 自分用の [bash の設定](https://github.com/ryo-aoki-pc/bash)を入れたホストでも、追加の設定を手書きする必要は無い
+
+#### Codex CLI: 実施手順 / 手順 3: 補足: パッケージマネージャーで入れない理由
+
+- 配布はある: Homebrew の cask `codex`（Linux でも入る）、scoop の main の `codex`、WinGet の `OpenAI.Codex`
+- どれも、そのパッケージマネージャーのコマンド（`brew upgrade --cask codex`・`scoop update codex`・`winget upgrade`）を打たないと上がらない
+- Homebrew の cask で入れた Codex（AlmaLinux 10）では、`codex update` が `Could not detect the Codex installation method.` で止まった（[検証記録](../verification/almalinux-setup.md#codex-cli-付録-起動したときの更新とパッケージマネージャー2026-10-09)）
+- standalone のインストーラーで入れたものは、起動したときの知らせから Enter 1 回で上がる（[更新: 補足](#codex-cli-更新-補足-起動したときの知らせ)）。利用者の希望（自動で最新になるなら公式の方法でよい）に近いので、こちらを採る
+
+#### Codex CLI: 実施手順 / 手順 3: 補足: Start Codex now? に n と答える理由
+
+- `Start Codex now?` に `n` と答えるのは、同じ節の手順 8 で起動するため
+
+#### Codex CLI: 実施手順 / 手順 4: 補足: 版
+
+- 検証時の版は `0.160.0`
+
+#### Codex CLI: 更新: 補足: 起動したときの知らせ
+
+- 端末の Codex は、起動したときに、最新の版を GitHub（`api.github.com/repos/openai/codex/releases/latest`）に問い合わせ、`~/.codex/version.json` に控える。控えが無いか古いときだけ問い合わせる
+- 控えた版が今の版より新しいと、起動の画面に `Update available!` を出す。`1. Update now` は、入れ方に合う更新のコマンドを動かす
+- standalone のインストーラーで入れたものでは、`sh -c 'curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh'` を動かす
+- Windows 用の `install.ps1` を使う同じ形のコマンドも、配布物の中にある
+- `codex update` も、同じインストーラーを動かす
+
+#### Codex CLI: 更新 / 手順 2: 補足: もう一度実行したとき
+
+- 公式インストーラーをもう一度実行すると、新しい配布物を導入する
+
+#### Codex CLI: 参照
+
+- [OpenAI: Codex CLI](https://learn.chatgpt.com/docs/codex/cli) — 導入・起動・更新
+- [公式 Linux/macOS インストーラー](https://chatgpt.com/codex/install.sh)
+- [公式 Windows インストーラー](https://chatgpt.com/codex/install.ps1)
+- [OpenAI: Authentication](https://learn.chatgpt.com/docs/auth) — ChatGPT・API キー・デバイスコード・資格情報の保存
+- [OpenAI: Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox) — Windows 11、初回の管理者承認
+- [OpenAI: Config basics](https://developers.openai.com/codex/config-basic) — ユーザー設定
+- [Homebrew: codex](https://formulae.brew.sh/cask/codex) — Homebrew の cask（使わなかった経路）
+
+---
+
+## 統合前の参考資料: Grok Build（もとは grok-build.md）
+
+もとの `grok-build.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-grok-build-の-windows-11もとは-grok-buildmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+
+| 当時の手順 | 今の手順 |
+|---|---|
+| 実施手順 1〜7 | 「Grok Build」の手順 1〜7 |
+| 更新 1・2 | 更新の手順 5・8 |
+| ブラウザの無いホストでログインするの 1〜3 | Grok Build をブラウザの無いホストでログインするの 1〜3 |
+| 設定ファイル | Grok Build の設定ファイル |
+| ロールバック 1〜4 | ロールバックの「AI エージェントとプラグインを消す」の手順 8〜11 |
+
+### Grok Build: 補足
+
+#### Grok Build: 実施手順 / 手順 3: 補足: 版と PATH
+
+- 検証時の版は `1.0.50`
+- 新しく開いた端末で `grok` が通るのは、`~/.bashrc` のブロックが PATH を通すため
+
+#### Grok Build: 実施手順 / 手順 6: 補足: 検証時のモデルの一覧
+
+- ログインしていなくても出るモデルの一覧は、検証時は `grok-4.6` と `grok-4.5`
+
+#### Grok Build: 更新 / 手順 2: 補足: 古い版の配布物
+
+- 古い版の配布物は `~/.grok/downloads` に残ることがある。使っている量は `grok du` で見る
+
+### Grok Build: 選択した方針
+
+- xAI の公式のインストーラー（`https://x.ai/cli/install.sh`・`install.ps1`）を使う
+  - 公式のインストーラーで入れた Grok は、対話の画面の起動のときに、自分で新しい版に上がる（[更新: 自動の更新の仕組み](#grok-build-更新-自動の更新の仕組み)）。利用者の希望（自動で最新になるなら公式の方法でよい）に合う
+  - Node.js を増やさず、両 OS で同じ配布元・同じ `grok update` で上げられる
+- パッケージマネージャーでは入れない
+  - 配布はある: Homebrew の cask `grok-build`（Linux でも入る）、WinGet の `xAI.GrokBuild`（portable）、npm の `@xai-official/grok`。scoop の main と extras には無い（2026-10-09）
+  - Homebrew と WinGet の版は、`brew upgrade --cask grok-build`・`winget upgrade` を打たないと上がらない
+  - npm の版は Node.js が要る
+  - Homebrew の cask で入れた Grok でも、`grok update` は Homebrew を使わずに Grok 自身で入れる
+  - `grok update --force-reinstall` を打つと、Homebrew の外（`~/.grok/bin`・`~/.grok/downloads`）に別の Grok が入り、Homebrew の版はそのままだった（[検証記録](../verification/almalinux-setup.md#grok-build-homebrew-の-cask)）
+  - Homebrew で使うなら、自動の更新を止め（`[cli] auto_update = false`）、`brew upgrade --cask grok-build` で上げる形になる
+  - WinGet で入れた Grok では、`grok update` は WinGet のコマンドを出すだけで何も変えない
+  - Homebrew の formula の `grok`（`brew install grok`）は Grok Build ではない（正規表現でログを読む別のツール）
+- ログインは grok.com のアカウント（ブラウザ）で行う
+  - API キー（`XAI_API_KEY`）は、ログインが無いときだけ使われ、API の従量課金になる
+  - 利用者の契約がサブスクリプション（SuperGrok / X Premium）なので、API キーの手順は置かない
+- 非公式の grok-cli（superagent-ai の `grok-dev`）は採らない。同じ `grok` の名前と `~/.grok` を使い、2026-05 から更新が止まっている（調査時）
+- 確認用のディレクトリでの起動は [codex.md](../almalinux-setup.md#codex-cli) と同じ形にした（`~/grok-sandbox`）
+
+#### Grok Build: 実施手順 / 手順 1: 名前がぶつかるもの
+
+- インストーラーは `~/.grok/bin` に `grok` と `agent` の 2 つのリンクを置く（中身は同じ）
+- `~/.local/bin` が PATH にあって `~/.grok/bin` が無いときは、`~/.local/bin/grok`・`~/.local/bin/agent` にもリンクを置く。`ln -sf` なので、同じ名前のファイルがあっても置き換える
+- Cursor の CLI も `agent` の名前を使う。両方を使うなら、PATH の順でどちらが動くかを確かめる
+
+#### Grok Build: 実施手順 / 手順 2: インストーラーが置くものと `~/.bashrc`
+
+- 置くもの（AlmaLinux 10、1.0.50）
+  - 配布物: `~/.grok/downloads/grok-linux-x86_64`（約 175 MB の実行ファイル 1 つ）
+  - リンク: `~/.grok/bin/grok`・`~/.grok/bin/agent`（どちらも `../downloads/…` を指す）
+  - 補完: `~/.grok/completions/bash/grok.bash`・`zsh/_grok`
+  - 文書: `~/.grok/docs/user-guide/*.md`（利用者向けの文書 27 本。Web の文書と同じ内容の手元の写し）
+  - 設定: `~/.grok/config.toml`（`[cli]` と `installer = "internal"` の 2 行）
+- `~/.bashrc` の末尾に足すブロック（`SHELL` が bash のとき。zsh は `~/.zshrc`、fish は `config.fish`）
+
+  ```bash
+  # >>> grok installer >>>
+  export PATH="$HOME/.grok/bin:$PATH"
+  [[ -r "$HOME/.grok/completions/bash/grok.bash" ]] && source "$HOME/.grok/completions/bash/grok.bash"
+  # <<< grok installer <<<
+  ```
+
+  - 初回は元の `~/.bashrc` を `~/.bashrc.bak.<UNIX 時刻>` に控える。2 回目からは、前のブロックを消して末尾に足し直す（ブロックの前の空行が 1 つずつ増える）
+  - 書かせない設定（環境変数など）はインストーラーに無い。`SHELL` が bash・zsh・fish 以外のときだけ書かない
+  - `~/.bashrc` がリンクなら、リンク先のファイルを書き換える
+- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../extra/almalinux-setup.md#ai-エージェントとプラグインを消す)の手順 3 で消す（codex.md のインストーラーが足すブロックと同じ扱い）
+  - 共通の bash 設定より後ろで読まれるので、`~/.grok/bin` が PATH の先頭に来る
+- インストーラー（`install.sh`）は、配布物のハッシュや署名を確かめない（Windows の `install.ps1` が同梱の Git の zip の SHA-256 を確かめるだけ）
+
+#### Grok Build: 実施手順 / 手順 4〜6: ログインの流れ
+
+- `grok login` は SpaceXAI の OAuth（`auth.x.ai`）でログインする。ブラウザが開けないときは、`https://accounts.x.ai/oauth2/device?user_code=…` の URL と確認用のコードを出して待つ（`--device-auth` と同じ画面）
+- ログインの情報は `~/.grok/auth.json`（Unix では `0600`）に入り、自動で更新される。更新できなくなると、もう一度ログインを求められる（公式の文書 02-authentication）
+- `grok models` は、ログインしていなくても終了コード 0 で、`You are not authenticated.` と既定のモデルの一覧を出す（1.0.50）。Claude Code のプラグインの `/grok-build:check` も、この終了コードだけで「ログイン済み」と判定する（[coding-agents.md の注意点](../extra/coding-agents.md#注意点)）
+
+#### Grok Build: 実施手順 / 手順 7: フォルダーの信頼
+
+- Grok は、信頼したフォルダーでだけ、起動のときにプロジェクトの指示書（AGENTS.md・CLAUDE.md など）・skills・MCP サーバー・hooks を読む
+- 信頼は `~/.grok/trusted_folders.toml` に残る。対話の画面で答えるか、`--trust` を付けて起動すると記録される
+- 信頼はそのリポジトリの下のディレクトリにも効く。入れ子の別の git のチェックアウトや、別の場所の worktree は、別に信頼する
+
+#### Grok Build: 更新: 自動の更新の仕組み
+
+- 設定の `[cli] auto_update`（既定は有効）で、対話の画面の起動のときに新しい版を確かめる。環境変数 `GROK_DISABLE_AUTOUPDATER` でも止められる（同梱の文書 05-configuration・26-config-reference）
+- 確かめた時刻は `~/.grok/version.json` の `checked_at` に残り、間もないうちは確かめない
+- 新しい版は `~/.grok/downloads/grok-<版>-<OS>-<CPU>` に入り、`~/.grok/bin` の `grok`・`agent` のリンクが付け替わる。前の配布物は残る
+- 更新の入れ方は、設定の `[cli] installer`（公式のインストーラーは `internal` を書く）で選ばれる（同梱の文書 26-config-reference）
+- 確かめた範囲は[検証記録](../verification/almalinux-setup.md#grok-build-付録-自動の更新とパッケージマネージャー2026-10-09)
+
+#### Grok Build: 注意点: Linux の sandbox を起動できないとき
+
+- Linux のファイルアクセス制限には Landlock が要る。カーネルの版が 5.13 以降でも、`CONFIG_SECURITY_LANDLOCK=y` で組み込まれ、起動中のカーネルで有効になっている必要がある。`/sys/kernel/security/lsm` に `landlock` があることを確かめる
+- bubblewrap は、拒否するパスの遮蔽などに使う。bubblewrap があることだけでは `read-only` の書き込み制限が効くと判断しない
+- `runtime-socket deny path /run/podman/podman.sock` の `Permission denied (os error 13)` は、ソケット本体に限らず、親ディレクトリを検索できないときも出る。Podman が停止し、ソケットが存在しなくても、親の検索権限が無ければ失敗する。親ディレクトリの検索権限を確かめ、ソケット本体の権限は緩めない
+- `read-only` は起動時に `/run/docker.sock` と `/run/podman/podman.sock` を調べるが、`workspace` は調べない。`workspace` が `could not apply the 'workspace' sandbox profile` で止まるときは、ソケットの親ではなく Landlock の側を確かめる（Grok 1.0.50 の起動時のシステムコールを実機で追った。[検証記録](../verification/almalinux-setup.md#grok-build-sandbox-の再起動なしの追加検証)）
+- 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](../verification/almalinux-setup.md#grok-build-sandbox-の追加原因調査と対処の準備)に分けた。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
+
+#### Grok Build: 注意点: 会話のデータの扱い
+
+- `/privacy` は、設定の Coding data, retention, and training を開き、Opt in / Opt out を選ぶ（公式の文書 04-slash-commands）
+- 2026-07 に、ベータ版の `grok` がディレクトリの中身を xAI のクラウドのストレージに送ることがあったと報告された（Simon Willison のブログ、2026-07-15。二次情報）
+  - 同じ記事が引く xAI の発表は「2026-07-12 から、すべての Grok Build の利用者で既定の保存を止めた」「それまでに送られたデータは削除する」としている
+  - その後、ソースコードが Apache-2.0 で公開された（github.com/xai-org/grok-build）
+- 秘密情報のあるディレクトリで `grok` を起動しない。sandbox（`--sandbox read-only` など。Linux と macOS だけ。Linux では有効な Landlock と bubblewrap が要る）で書き込める場所を絞れる
+
+### Grok Build: 参照
+
+- [xAI: Grok Build CLI の発表](https://x.ai/news/grok-build-cli)（2026-05-25。対象は SuperGrok と X Premium+）
+- [xAI: Grok Build の文書](https://docs.x.ai/build/overview) — 導入・ログイン・使い方
+- 手元の文書 `~/.grok/docs/user-guide/`（1.0.50 に同梱）: 01-getting-started・02-authentication・05-configuration・12-project-rules・14-headless-mode・18-sandbox・22-permissions-and-safety・26-config-reference
+- [公式の Linux / macOS のインストーラー](https://x.ai/cli/install.sh)・[公式の Windows のインストーラー](https://x.ai/cli/install.ps1)
+- [xai-org/grok-build](https://github.com/xai-org/grok-build) — ソース（Apache-2.0）
+- [Homebrew: grok-build](https://formulae.brew.sh/cask/grok-build) — Homebrew の cask（使わなかった経路）
+- [xAI: Models](https://docs.x.ai/developers/models) — モデルと料金（API キーで使うとき）
+- [Simon Willison: xai-org/grok-build, now open source](https://simonwillison.net/2026/Jul/15/grok-build/)（二次情報）

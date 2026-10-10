@@ -73,7 +73,7 @@ Is this ok [y/N]: Error: Failed to download metadata for repo 'virtualbox': repo
 - **ユーザー側のキャッシュは `/var/tmp` にあり、30 日使わないと systemd-tmpfiles に消される**（`/usr/lib/tmpfiles.d/tmp.conf` の `q /var/tmp 1777 root root 30d`）ので、そのときはまた聞かれる
 - ほかのユーザーがこの PC で `sudo` 無しの dnf を使うときも、それぞれ 1 回聞かれる
 
-ほかの手順書のリポジトリ（[firefox.md](../firefox.md) / [claude-code.md](../claude-code.md) など）はメタデータに署名が無く `repo_gpgcheck` を使っていないので、この 2 回の確認は本書だけの手順になる。
+ほかの手順書のリポジトリ（[firefox.md](../almalinux-setup.md#firefox) / [claude-code.md](../almalinux-setup.md#claude-code) など）はメタデータに署名が無く `repo_gpgcheck` を使っていないので、この 2 回の確認は本書だけの手順になる。
 
 ### 実施手順 / VirtualBox を入れる / 手順 1: 補足: パッケージ名と下見の結果、EPEL が要る理由
 

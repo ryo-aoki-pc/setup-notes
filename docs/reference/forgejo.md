@@ -164,6 +164,6 @@
 - [podman run](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--userns=keep-id`、`--user`、bind mount の所有者と SELinux の `:Z`
 - [firewalld rich language](https://firewalld.org/documentation/man-pages/firewalld.richlanguage.html) — 送信元・宛先・ポート・priority と許可の規則
 - [Netavark / firewalld の相互作用](https://github.com/containers/netavark/blob/main/docs/netavark-firewalld.7.md) — rootful の転送経路と rootless との違い
-- [Podman](../podman.md)・[linger](../linger.md)・[Git](../git.md) — 本書の前提
+- [Podman](../podman.md)・[linger](../linger.md)・[Git](../almalinux-setup.md#git) — 本書の前提
 
 ---

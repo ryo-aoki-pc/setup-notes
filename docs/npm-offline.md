@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られないホスト（以下、オフラインのホスト）にトンネルを張り、同書の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で dnf にプロキシを設定してあること（dnf の節を飛ばしていたら、手順 1 の前に行う）
-> - **前提**: 同じトンネルで、[homebrew-offline.md](homebrew-offline.md) の Homebrew と、[Neovim](neovim.md) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
+> - **前提**: 同じトンネルで、[homebrew-offline.md](homebrew-offline.md) の Homebrew と、[Neovim](almalinux-setup.md#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
 > - **手順 1〜3 は、ssh-socks-tunnel.md の手順 3 のシェル（オフラインのホストの、`sudo` できる自分のユーザー）のまま貼る**。手順 4 で同書の[トンネルを閉じる](ssh-socks-tunnel.md#トンネルを閉じる)の手順 1・2 を行い、手順 5 はログインし直したシェルで貼る
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 

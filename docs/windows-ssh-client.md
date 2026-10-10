@@ -8,7 +8,7 @@
 > - **手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**。手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、手順 2〜7・9・10 と、[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)のブロックをそこに貼る
 > - 管理者の権限は要らない。Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ（ホストでは、手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す）
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - 前提: [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる) が `C:\Program Files\Git` に入っていること（Git の ssh でも同じ config を読めるかを、手順 7・10 で確かめる）
+> - 前提: [Git for Windows](windows-setup.md#git-for-windows) が `C:\Program Files\Git` に入っていること（Git の ssh でも同じ config を読めるかを、手順 7・10 で確かめる）
 > - 前提: つなぐ先の AlmaLinux 10 のホストで sshd が動き、そのユーザーのパスワードで SSH に入れること（AlmaLinux 10 の既定。[注意点](extra/windows-ssh-client.md#注意点)）
 > - **手順 4 と手順 9 には対話入力がある**（手順 4 は鍵を作るか公開鍵を作り直すときのパスフレーズ、手順 9 はホスト鍵の確認とホストのユーザーのパスワード）。鍵にパスフレーズを付けたなら、手順 10（2 回）・11 でも聞かれる
 
@@ -17,7 +17,7 @@
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）の両方で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに（ssh・scp・ssh を使う git・WezTerm の起動メニュー）パスフレーズを聞かれる
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)
-- 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[Windows の OpenSSH サーバー](windows-openssh-server.md)
+- 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[Windows 11 の初期設定の「OpenSSH サーバー」](windows-setup.md#openssh-サーバー)
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -195,7 +195,7 @@
 
 1. WezTerm を自分用の設定で使うときだけ、起動メニューから接続先を開けることを確かめる。
 
-   - 前提は、[WezTerm の Windows 11 の節](wezterm-nightly.md#windows-11-で使う)と、自分用の設定（[設定ファイル](wezterm-nightly.md#設定ファイル)）。入れていなければ、この手順は飛ばす
+   - 前提は、[Windows 11 の初期設定の「WezTerm」](windows-setup.md#wezterm)と、自分用の設定（同書の[「Git Bash と WezTerm の設定」](windows-setup.md#git-bash-と-wezterm-の設定)の手順 5）。入れていなければ、この手順は飛ばす
    - WezTerm で Ctrl+Shift+R（設定の読み直し）を押してから、Ctrl+Shift+M で起動メニューを開く
    - `ssh <SSH_ALIAS>` が並び、選ぶと新しいタブでホストのシェルに入ればよい（パスフレーズを付けたなら聞かれる）
 
@@ -203,7 +203,7 @@
 
 ## 更新
 
-- Windows の OpenSSH クライアントは Windows Update で、Git の ssh は Git for Windows と一緒に（[git.md の更新](git.md#更新)の手順 2）上がる。この手順書で上げるものは無い
+- Windows の OpenSSH クライアントは Windows Update で、Git の ssh は Git for Windows と一緒に（[Windows 11 の初期設定の「Git for Windows・Firefox・WezTerm を上げる」](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の手順 2）上がる。この手順書で上げるものは無い
 - 上がった後と、`~/.ssh/config` を書き換えた後は、この節の手順 1 で、両方の ssh が config を読めることを確かめる
 - [手順 2](#実施手順) の変数を設定した、管理者ではない Windows PowerShell（5.1）に貼る。新しい窓なら、手順 2 のブロックを貼り直してから貼る
 

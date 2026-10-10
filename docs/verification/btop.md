@@ -57,7 +57,7 @@ color_theme = "Default"
 | 有効なリポジトリ | baseos / appstream / crb / extras / epel / raspberrypi ほか | baseos / appstream / crb / extras（→ epel を追加） |
 | btop | **未導入** | `btop 1.4.7-1.el10_2`（epel） |
 | 一緒に入る依存 | — | `hicolor-icon-theme 0.17-20.el10`（appstream） |
-| 端末 | WezTerm nightly（[wezterm-nightly.md](../wezterm-nightly.md)） | 無し（`script` で pty を与えた起動のみ） |
+| 端末 | WezTerm nightly（[wezterm-nightly.md](../almalinux-setup.md#wezterm)） | 無し（`script` で pty を与えた起動のみ） |
 
 > [!NOTE]
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`1.4.7-1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。**

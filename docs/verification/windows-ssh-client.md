@@ -13,7 +13,7 @@
 
 - **目的**: Windows 11 の PC から、LAN の AlmaLinux 10 のホストに、パスワードではなく ed25519 の鍵で SSH ログインする。短い名前（`SSH_ALIAS`）で入れるよう、`%USERPROFILE%\.ssh\config` に接続先を足す
   - 鍵・config・known_hosts は、Windows の OpenSSH クライアント（PowerShell・WezTerm の起動メニュー）と、Git for Windows の ssh（Git Bash・git）の両方で使う
-  - 逆向き（AlmaLinux 10 から Windows 11 に入る）は [Windows の OpenSSH サーバー](../windows-openssh-server.md)
+  - 逆向き（AlmaLinux 10 から Windows 11 に入る）は [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)
 - **進め方**: 管理者ではない Windows PowerShell 5.1 に、上から順に貼る。読者が編集するのは `SSH_HOST` と `SSH_ALIAS`（違えば `SSH_USER` も）
   - ホスト鍵の指紋は、ホストの画面などで見て（手順 8）、最初の接続で照合する
   - 公開鍵は、パスワードで 1 回ログインして、ホストの `~/.ssh/authorized_keys` に足す（手順 9。`ssh-copy-id` は使わない）
@@ -61,7 +61,7 @@
 Windows では流していないので、記録は無い。前の記録から分かっている利用者の PC の状態:
 
 - `%USERPROFILE%\.ssh\id_ed25519` があり、GitHub に登録してある（パスフレーズ無し。bash の設定のリポジトリの検証記録）。手順 4 は、この鍵を使って何もしないはず
-- ユーザーの `PATH` の先頭側に Git の `usr\bin` があった時期がある（[windows-openssh-server.md の記録](windows-openssh-server.md#実施手順--手順-7-補足-フルパスで呼ぶ理由)）。手順 3 の `Get-Command` で今の順を確かめる
+- ユーザーの `PATH` の先頭側に Git の `usr\bin` があった時期がある（[windows-openssh-server.md の記録](windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)）。手順 3 の `Get-Command` で今の順を確かめる
 
 ### 完了時点の状態
 
