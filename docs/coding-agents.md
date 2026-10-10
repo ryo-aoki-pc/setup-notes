@@ -916,6 +916,7 @@
 - **3 つの契約の使用量を使う**: レビュー・委任・確かめの問いのたびに、Claude（claude.ai）・Codex（ChatGPT）・Grok（grok.com）それぞれのプランの使用量が減る
 - **`/codex:rescue` と `/grok-build:delegate` は、Claude の worktree で動く**: Codex と Grok が Claude の worktree のファイルを変える。Claude 自身の作業と同じファイルを頼まない
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
+- **`/codex:cancel` の後も、Codex が始めたコマンドは動き続けることがある**: cancel はターンを中断するが、その中で始めたコマンドは裏に残ることがある。残ったコマンドは、Claude Code のセッションを終えてプラグインが Codex の共有のプロセスを止めると消える（プラグイン 1.0.6 と Codex 0.160.0。スクリプトを直接呼んだ確認。[検証記録](verification/coding-agents.md#codex-の実行中のターンの中断を伴う-cancel)）
 - **Grok Build は既定で sandbox が無い**: [分担して作業する](#分担して作業する)のリードの `[!WARNING]`。Windows には sandbox が無い
 - **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を実施手順の手順 9 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
 - **Grok は Claude の指示書も読む**: CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（信頼したフォルダーだけ）。3 つに共通の規則は AGENTS.md に書く

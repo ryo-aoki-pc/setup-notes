@@ -11,6 +11,7 @@
   - 失敗したこと: Grok の workspace sandbox は準備に失敗。プラグインの read-only review は `/run/podman/podman.sock` の拒否パスの解決で permission denied（errno 13）。bubblewrap が入っていても、レビューは起動しなかった
   - 追加の原因調査と準備: 空の `/run/podman` の検索権限不足と、カーネルの Landlock 無効を別々に確認し、試験後の権限は復元済み。対応する Image のビルドと静的検査 7 項目、検索だけを許す ACL の模擬検査 6 項目は成功。ユーザーの指示で調査・準備までで終了し、ホストへの適用・再起動・Grok の再検証は行っていない。レビュー失敗は未解消
   - 確認したこと: Grok の通常の auto 許可での実装と delegate、Claude・Codex の端末レビュー、tmux の detach と再接続、Codex の背景レビュー・結果取得・worker の取消。両 CLI の導入・更新・撤去は対応する検証記録に記載する。設定の復旧結果は今回の付録の末尾に分ける
+  - 再起動なしの追加検証（同日、#119 のマージ後）: ユーザーの指示で、再起動を伴わない範囲だけを確かめた。実行中の Grok のジョブの stop、実行中のターンの中断を伴う Codex の cancel、検索の ACL の実ホストへの一時適用と復元、`workspace` と `read-only` の失敗原因の切り分けを確認した。プラグインは Claude Code へ入れず、スクリプトを `node` で呼ぶ component の検査。Grok の sandbox によるレビューは未解消のまま（[今回の付録](#付録-raspberry-pi-5-の実機での再起動なしの追加検証2026-10-10)）
   - 今回の対象外: スマートフォンからの Remote Control・SSH と、スマートフォンからのプラグインのコマンド。Windows 11。今回のホストの結果を、2026-10-09 のコンテナの結果や Windows の成功範囲へ広げない
 
 - **状態（2026-10-09 UTC）**: AlmaLinux 10.2 / x86_64 のコンテナで、3 つの CLI のログイン無しでできる範囲を、手順書のコードブロックのまま本実行した。ログインの要る Claude Code の確かめは、クラウドのホストのログイン済みの Claude Code で行った。実機・VM ではない
@@ -171,7 +172,7 @@
 | 実施日 | 2026-10-10 UTC |
 | ホスト | Raspberry Pi 5 Model B Rev 1.0。AlmaLinux 10.2 (Lavender Lion)、aarch64、カーネル `6.12.96-20260724.v8.1.el10` |
 | CLI | Claude Code 2.1.296（RPM）、Codex CLI 0.160.0、Grok Build 1.0.50。既存の利用者のログインを使った。Codex は前回の 0.162.0 とは別の版 |
-| OS の条件 | SELinux は Disabled。ソケット本体の権限と OS の保護設定は永続変更していない。親ディレクトリの mode の一時試験と復元は後述 |
+| OS の条件 | SELinux は Enforcing（targeted）。当初は Disabled と記録していたが、ホストの値ではなかった（[訂正](#selinux-の記録の訂正)）。ソケット本体の権限と OS の保護設定は永続変更していない。親ディレクトリの mode の一時試験と復元は後述 |
 | 依存 | Node.js 22.23.2、npm 10.9.8、bubblewrap 0.10.0、tmux next-3.4 |
 | プラグイン | `codex@openai-codex` 1.0.6、`grok-build@xai-grok-build` 0.2.1 |
 | 実分担用のリポジトリ | `<VERIFY_DIR>/fixture` と、隣の `fixture.worktrees/claude`・`codex`・`grok`。`main` と `agent/claude`・`agent/codex`・`agent/grok` |
@@ -220,7 +221,7 @@
 
 - 別の試験用リポジトリに既知の欠陥 2 件を置き、Claude Code から Codex の review を実行した。2 件を検出し、前後のファイルのハッシュと git の状態は同じだった。読取レビューが勝手に修正したという結果ではない
 - Grok の review は失敗した。このホストの `/run/podman/podman.sock` を扱う sandbox の準備で permission denied（errno 13）となり、モデルのレビューまで進まなかった
-- 同じホストの Grok の workspace sandbox による実装も、`could not apply the 'workspace' sandbox profile` で失敗した。この出力だけでは read-only と同じ原因か断定しない。Podman のソケットの権限は変更していない
+- 同じホストの Grok の workspace sandbox による実装も、`could not apply the 'workspace' sandbox profile` で失敗した。この出力だけでは read-only と同じ原因か断定しない。Podman のソケットの権限は変更していない。その後、最初に当たる原因は別と特定した（[原因の切り分け](#grok-の-sandbox-の原因の切り分けと検索の-acl)）
 
 ### 使い方の基本: rescue と delegate
 
@@ -233,10 +234,10 @@
 |---|---|
 | Codex `review`・`adversarial-review` | 背景実行が completed になり、状態と結果を取得した。既知のポート上限の欠陥を指摘。前後の全ファイルのハッシュ・HEAD・git の状態は同じ |
 | Codex `cancel` 初回 | turnId の取得を待つ間にレビューが完了し、実行中の取消は未検証 |
-| Codex `cancel` 再試験 | threadId と生存中の worker PID を確認して取消。終了コード 0、running → cancelled、worker PID 消滅。`turnInterruptAttempted: false`・`turnInterrupted: false` のため、サーバー側の推論停止までは証明していない |
+| Codex `cancel` 再試験 | threadId と生存中の worker PID を確認して取消。終了コード 0、running → cancelled、worker PID 消滅。`turnInterruptAttempted: false`・`turnInterrupted: false` のため、サーバー側の推論停止までは証明していない。ターンの中断を伴う取消は[後の検証](#codex-の実行中のターンの中断を伴う-cancel)で確認 |
 | Codex 専用 broker の終了 | shutdown が終了コード 0。登録した broker と子プロセスが残っていない |
 | Grok `critique` | read-only sandbox の同じ errno 13 で failed。状態と失敗結果を取得でき、全ファイル・HEAD・git の状態は同じ |
-| Grok `stop` | 先に sandbox 起動が failed になったため、実行中の停止は未検証。停止機能の不具合とは判定しない |
+| Grok `stop` | 先に sandbox 起動が failed になったため、実行中の停止は未検証。停止機能の不具合とは判定しない。sandbox を使わないジョブの停止は[後の検証](#grok-の実行中のジョブの-stop)で確認 |
 
 ### main に取り込む / 手順 2〜7・ロールバック / 手順 2〜4: 別のリポジトリでの git 操作
 
@@ -317,3 +318,57 @@
 - 実ホストの ACL 適用は、自動承認審査が root の管理するコンテナ用パスへの変更には明示承認が必要として拒否した。別名 Image と一度限りの `tryboot` を使う適用スクリプトとロールバックを準備し、通常の `config.txt`・`kernel8.img`・`initramfs8` を保持する案を作った
 - その後、ユーザーがホスト修正を不要とし、ここまでの検証結果をマージするよう指示したため、調査・準備までで終了した。実ホストの ACL と Image は未適用で、再起動も Grok の sandbox とレビューの再検証も行っていない。Grok の sandbox によるレビューは未解消のまま。先の失敗を成功へ置き換えない
 - 手順書には、Landlock が有効なカーネルで起動してから再試行する条件と、ソケットの親の検索権限を確認する案内を追加した。カーネルの構築手順は追加していない
+
+## 付録: Raspberry Pi 5 の実機での再起動なしの追加検証（2026-10-10）
+
+| 項目 | 値 |
+|---|---|
+| 対象 | setup-notes #119 のマージコミット `cf8774d` の検証記録が、未確認・未解消として残した項目のうち、再起動を伴わないもの |
+| 実施 | 2026-10-10 05:35〜06:10 UTC。先の付録と同じ実機で、稼働カーネルも同じ `6.12.96-20260724.v8.1.el10`（Landlock は無効のまま） |
+| 範囲の決定 | Landlock を有効にした Image での試験起動は、ユーザーの指示で今回も行っていない。ホストは再起動していない |
+| CLI | Claude Code 2.1.296、Codex CLI 0.160.0、Grok Build 1.0.50。どれも更新していない（Grok は `--no-auto-update` か `GROK_DISABLE_AUTOUPDATER=1`） |
+| プラグイン | `openai/codex-plugin-cc` の `v1.0.6`（`db52e28`）と、`xai-org/grok-build-plugin-cc` の `92b76a6`（0.2.1）を一時ディレクトリへ clone した。Claude Code への marketplace とプラグインの追加はしていない |
+| 呼び方 | プラグインのスクリプト（`codex-companion.mjs`・`grok-bridge.mjs`・`session-lifecycle-hook.mjs`）を `node` で直接呼ぶ component の検査。状態は `CLAUDE_PLUGIN_DATA` に指定した一時ディレクトリに置いた。Claude Code の対話画面の slash command は通していない |
+| 試験用のリポジトリ | `<VERIFY_DIR>/fixture-review`。`main` と、ポート番号の上限を 65536 にゆるめた 1 行の差分を持つブランチ |
+
+### SELinux の記録の訂正
+
+- ホストの `getenforce` は `Enforcing`。`sestatus` は targeted・enforcing、設定ファイルも `SELINUX=enforcing`、起動時のログも `enforcing=1`。先の付録の「SELinux は Disabled」は誤りで、表を直した。再起動は挟んでいないので、先の検証の間も Enforcing だった
+- 同じホストで `codex sandbox -- /usr/sbin/getenforce` は `Disabled` と表示し、`id -Z` は SELinux が有効なカーネルでないと答える。先の記録の値はこれと一致する。エージェントの sandbox の中で調べた値を、ホストの状態として記録しない
+- 起動以降の AVC の拒否は 2 件で、どちらも sandbox の起動失敗とは別（`podman --version` の実行時のドメイン遷移と、`rg` による `/proc/<PID>/mounts` の `map`）。Grok・bubblewrap・Codex の sandbox に対応する拒否は無い
+
+### Grok の sandbox の原因の切り分けと検索の ACL
+
+- 起動時のシステムコールの追跡と、実ホストへの ACL の一時適用の詳細は [Grok Build の検証記録](grok-build.md#sandbox-の再起動なしの追加検証)に置く。ここには結果だけを書く
+- `read-only` は `/run/podman/podman.sock` の確認が `EACCES` で止まり、Landlock まで進まない。`workspace` は Podman と Docker のソケットを調べず、`landlock_create_ruleset` の `ENOSYS` で止まる。先に「同じ原因か断定しない」とした 2 つの失敗は、最初に当たる原因が別だった
+- 実ホストの `/run/podman` に、`<USER>` に検索だけを許す ACL を約 2 分適用した。`read-only` の errno 13 は解消し、`workspace` と同じ Landlock のエラーに変わった。ディレクトリの一覧と作成は拒否されたまま。外した後は、適用前の mode・ACL・一覧と一致した
+- ACL の適用中に、プラグインの `review` と `critique` を `--wait --base main --json` で呼んだ。どちらも終了コード 1 で、`grok.stderr` は `could not apply the 'read-only' sandbox profile; … Refusing to start with its protections missing.`。先の errno 13 ではなくなったが、レビューは始まらない。試験用のリポジトリの HEAD・git の状態・全ファイルのハッシュは前後で同じ
+- 検索の権限だけを直しても Grok のレビューは動かない、という先の一時 `0711` の結果を、ソケットの親に最小の権限だけを足す形で確かめ直したことになる。Landlock が有効なカーネルでの成功は未確認のまま
+
+### Grok の実行中のジョブの stop
+
+- sandbox を使わない `run --background --write`（`/grok-build:delegate` の背景実行が呼ぶ形。`--write` は sandbox 無しの `--always-approve`）で、`sleep 300` を実行して待つだけの依頼を出した。ファイルを変えないように頼んだ
+- 10 秒後、job は `running`。bridge の worker → `grok` → `bash` → `sleep 300` の親子を確かめた
+- 起動の約 22 秒後に `stop <run-id> --json` を実行した。終了コード 0、`status: cancelled`、`killAttempted`・`killDelivered` とも `true`、`killMethod` は `process-group+process+process-group-sigkill+process-group`、`claimOrder` は `claim-before-kill`
+- 3 秒後には 4 つの PID がすべて消えていた。`runs` は `cancelled`、ログの最後は `Stopped by user (claim-before-kill).`。試験用のリポジトリは前後で同じ
+- 確かめたのは、ローカルのプロセスの停止と job の状態まで。xAI の側の推論の停止は直接は見ていない。読むだけの sandbox で動くレビュー（`review`・`critique`）の job の停止は、sandbox が起動しないため未確認のまま
+
+### Codex の実行中のターンの中断を伴う cancel
+
+- `task --background`（`/codex:rescue` の背景実行が呼ぶ形。`--write` 無しなので読むだけの sandbox）で、`sleep 301` を実行して待つだけの依頼を出した
+- 7 秒後、job は `running` で、`threadId` と `turnId` が job の記録に入っていた。worker → broker → `codex app-server` → `bwrap` → sandbox の補助プロセス → `sleep 301` の親子を確かめた
+- `cancel <job-id> --json` は終了コード 0、`status: cancelled`、`turnInterruptAttempted: true`、`turnInterrupted: true`。プラグインは、job の記録に `threadId` と `turnId` の両方があるときだけ中断を要求する。先の再試験の `false` は、この条件を満たさずに取り消したときの値（先の job の記録は残っておらず、どちらが欠けていたかは確かめていない）
+- Codex のスレッドの記録（`~/.codex/sessions/` の rollout）には、同じ `turn_id` の `turn_aborted`（`reason: interrupted`）が残った。待っていたツール呼び出しの結果は `aborted by user after 1.1s` で、その後にモデルの応答は無い。job のログにも `Turn interrupted.` が残った
+- **ターンの中で始めた `sleep 301` は、中断の後も動き続けた**。Codex は `exec_command` を 1 秒で切り上げてコマンドを裏に残し、その終わりを待つ呼び出しだけが中断された。Codex 自身も、中断の記録に `Any running unified exec processes may still be running in the background.` と書く
+- worker は 1 秒以内に消えたが、broker・`codex app-server`・`bwrap`・`sleep 301` は、cancel の 60 秒後も残っていた。放っておいたときにコマンドが最後まで走るかは確かめていない
+- プラグインの `SessionEnd` の hook（`session-lifecycle-hook.mjs SessionEnd`。Claude Code のセッションの終わりに動く）を呼ぶと、終了コード 0 で、2 秒後には broker・app-server・`bwrap`・`sleep 301` がすべて消え、broker の一時ディレクトリも消えた。利用者がもとから動かしていた別の `codex app-server` は変わっていない。試験用のリポジトリは前後で同じ
+- 確かめたのは、中断の要求が受理されたことと、ローカルの app-server にターンの中断が記録されたことまで。OpenAI の側の推論の停止は直接は見ていない
+- 手順書の注意点に、cancel の後もコマンドが残ることを足した
+
+### 復旧と残る未確認
+
+- `/run/podman` の mode・ACL・一覧は実施前と同じ。`podman.socket`・`podman.service` は inactive のまま
+- Grok の `--trust` が足した試験用フォルダーの信頼 1 件、今回のセッションのディレクトリ 1 個、起動を拒否した実行が `~/.grok/` に残した空の `sandbox-blocked.<PID>` 9 個を消した。先の検証が残した 1 個はそのまま
+- Grok と Codex の `config.toml`、Grok の `trusted_folders.toml`、Claude Code の `settings.json`・marketplace の一覧のハッシュ、Claude Code の project とプラグインの一覧、OS の `rpm -qa` の一覧のハッシュは実施前と同じ。3 つの CLI の版とログインの状態も同じ。検証で起動したプロセスは残っていない
+- Codex の今回のスレッドの記録 1 個と、Codex・Grok の共有のログ・データベースは残した
+- 残る未確認: Landlock が有効なカーネルでの起動（新しい Image・既存の modules・Landlock の初期化）、Grok の sandbox が起動した状態でのレビューと書き込みの拒否、`--sandbox workspace` でのコミット、sandbox で動く job の stop、検索の ACL の永続化、対話画面の slash command からの stop・cancel、スマートフォン、Windows 11、初回のログイン
