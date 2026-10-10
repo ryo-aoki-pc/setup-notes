@@ -6,6 +6,11 @@
 
 - **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../windows-setup.md#codexgrok-のプラグイン)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
 
+- **状態（2026-10-10 UTC、規則の push と Pull Request の変更）**: 規則の文を「エージェントが自分のブランチを push し、Pull Request を作る」に変えた後、変えたブロックと git の流れだけを、クラウドの Ubuntu 24.04 のコンテナで確かめた（[付録](#付録-規則の-push-と-pull-request-の変更2026-10-10)）
+  - 確かめたこと: 実施手順の手順 4 の bash のブロック（ファイルが無いとき・末尾に改行が無いとき・貼り直したとき・変数が空のとき）、Windows 11 で使うの手順 4 の PowerShell のブロック（同じ 4 通りを PowerShell 7.6.0 で。BOM 無し・CR 無しで、bash と同じバイト列）、手順書の bash の 23 ブロックの `bash -n` と ShellCheck 0.9.0、PowerShell の 11 ブロックの構文
+  - 確かめたこと: bare のリポジトリをリモートにした使い捨てのプロジェクトで、各 worktree からの push、merge commit で取り込んだ後の `git pull --ff-only` と各 worktree の `git merge --ff-only main`、squash で取り込んだ後の `Not possible to fast-forward`
+  - 確かめたこと: ログイン済みの Claude Code 2.1.296 が新しい規則を答えること、作業を頼むと自分のブランチにコミットして push し、Pull Request を作れなかったこと（リモートがホスティングではない）を報告すること
+  - **確認していないこと**: 実際のホスティング（GitHub・Forgejo）での Pull Request の作成と、画面での取り込み。Codex と Grok の push と Pull Request。Windows 11 での実行。AlmaLinux 10 の実機
 - **状態（2026-10-10 UTC）**: AlmaLinux 10.2 / aarch64 の Raspberry Pi 5 の実機で、ログイン済みの CLI と専用の一時リポジトリを使って検証した。PR #117 のマージコミット `814b590` を対象に、操作を個別に実施した。手順書のコードブロックを抽出して一括実行していない
   - 確認したこと: 3 つの CLI が担当ファイルだけを実装すること。各担当の受入テストと ShellCheck、Claude・Grok のコミット、Codex の sandbox の `git add` 拒否を人のコミットへ引き継ぐこと。人が main に取り込んだ後の 8 テストと各 worktree の同期
   - 確認したこと: 実際の Claude Code の対話画面での `/codex:setup`・`/grok-build:check`。Codex のプラグインの review が既知の欠陥 2 件を検出し、前後のファイルのハッシュと git の状態が変わらないこと。rescue が依頼した `ports.py` だけを修正し、担当テストが通ること
@@ -374,3 +379,42 @@
 - Grok と Codex の `config.toml`、Grok の `trusted_folders.toml`、Claude Code の `settings.json`・marketplace の一覧のハッシュ、Claude Code の project とプラグインの一覧、OS の `rpm -qa` の一覧のハッシュは実施前と同じ。3 つの CLI の版とログインの状態も同じ。検証で起動したプロセスは残っていない
 - Codex の今回のスレッドの記録 1 個と、Codex・Grok の共有のログ・データベースは残した
 - 残る未確認: Landlock が有効なカーネルでの起動（新しい Image・既存の modules・Landlock の初期化）、Grok の sandbox が起動した状態でのレビューと書き込みの拒否、`--sandbox workspace` でのコミット、sandbox で動く job の stop、検索の ACL の永続化、対話画面の slash command からの stop・cancel、スマートフォン、Windows 11、初回のログイン
+
+## 付録: 規則の push と Pull Request の変更（2026-10-10）
+
+| 項目 | 値 |
+|---|---|
+| 対象 | 実施手順の手順 4・Windows 11 で使うの手順 4 の規則の文を、「`main` への取り込み・push・Pull Request の作成・ブランチの削除は人が行う」から「コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る。`main` への取り込み（マージ）とブランチの削除は人が行う」に変えた版（利用者の決定。ryo-aoki-pc の 9 つのリポジトリの AGENTS.md と同じ規則で、違いは「リモートがあれば」だけ） |
+| 実施 | 2026-10-10 UTC。クラウドの Ubuntu 24.04.5 LTS / x86_64 のコンテナ。#125（`5cbb05c`。Node.js とプラグインの手順を初期設定へ移した）の上に載せ直した版で、下のブロックの確認と git の流れを流し直した（Claude Code の確認は、規則の文が同じ載せ直す前の版で行った）。git 2.43.0（`GIT_CONFIG_GLOBAL=/dev/null` で、このコンテナの git の設定を外した）、ShellCheck 0.9.0（apt）、PowerShell 7.6.0（GitHub の release の linux-x64） |
+| CLI | Claude Code 2.1.296（ログイン済み）。Codex と Grok Build はこのコンテナに無い |
+| 試験用のプロジェクト | 使い捨ての `myproject`（`app.py` だけ）と、リモートの代わりの bare のリポジトリ `remote.git` |
+
+### 実施手順 / 手順 4・Windows 11 で使う / 手順 4: 規則を書くブロック
+
+- 手順書から抜き出したブロックを、そのまま流した
+- bash: ファイルが無いときは AGENTS.md 1,474 バイト（CR 無し・LF で終わる）。末尾に改行の無い AGENTS.md には、改行と空行を補ってから節を足した。貼り直すと `中断: AGENTS.md に「## 共同作業の規則」がもうある。中身を確かめる` で、節は 1 つのまま。`PROJECT_DIR` が空なら `中断: 手順 1 の PROJECT_DIR が空のまま。…`
+- PowerShell 7.6.0（Linux のパス）: ファイルが無いときの AGENTS.md は、bash で書いたものと同じバイト列（`cmp` で一致。BOM 無し）。CRLF の行で末尾に改行の無い AGENTS.md には、空行を挟んで節を足した（既存の行の CR はそのまま）。貼り直しと空の変数は、bash と同じ文言の `中断:` で止まった
+- 書かれた節を ryo-aoki-pc/bash の AGENTS.md の節と比べた。違いは「コミットしたら、」の後の「リモートがあれば」だけ
+- 手順書の bash の 23 ブロックは `bash -n` で誤り 0、ShellCheck 0.9.0 は、ブロックをまたぐ変数の SC2154・SC2034 を除いて指摘 0。PowerShell の 11 ブロックは、PowerShell 7.6.0 のパーサーで構文の誤り 0（Windows PowerShell 5.1 では流していない）
+
+### 分担して作業する・main に取り込む: push と取り込みの流れ（git だけ）
+
+- `remote.git` を `origin` にした `myproject` で、実施手順の手順 1・4〜7 のブロックを流した（手順 2・3・8・9 は CLI が要るので流していない）
+- エージェントの代わりに、各 worktree で 1 ファイルをコミットし、`git push -u origin agent/<名前>` した。3 つとも push でき、`remote.git` に `agent/claude`・`agent/codex`・`agent/grok` ができた
+- 画面での取り込みの代わりに、別の clone で `origin/agent/claude` と `origin/agent/codex` を `--no-ff` で取り込んで `main` を push した。`main` の窓の `git pull --ff-only` で `main` がそれに追いつき、`claude`・`codex` の worktree の `git merge --ff-only main` は `Updating …`（fast-forward）になった
+- `origin/agent/grok` を squash で取り込んで `main` を push すると、`grok` の worktree の `git merge --ff-only main` は `fatal: Not possible to fast-forward, aborting.` で止まった（注意点の「画面で取り込むときは merge commit で」の裏付け）
+
+### Claude Code が新しい規則に従うこと
+
+- 上の `claude` の worktree で `claude -p --permission-mode plan` に、ツールを使わずに「コミットした後にエージェントがすることと、人が行うこと」を聞いた。答えは「リモートがあれば今のブランチを push して `main` への Pull Request を作る（既にあれば足す）。`main` へのマージとブランチの削除は人が行う」
+- 同じ worktree で、`hello.py` を作って確かめ、規則のとおりにするよう頼んだ（`--permission-mode acceptEdits`、許可したコマンドは `git`・`gh`・`python3`・`ls`・`cat`）
+  - Claude Code は `agent/claude` に 1 つコミットし、`origin/agent/claude` に push した（`remote.git` の `agent/claude` が新しいコミットに変わった）。`main` には触れなかった
+  - リモートが GitHub ではないので Pull Request は作れず、そのことと「人が作るか、リモートを GitHub にしてからやり直す」を報告した
+  - コミットのメッセージは英語だった（試験用のプロジェクトの AGENTS.md には、言語の決まりを書いていない）
+
+### 残る未確認
+
+- 実際の GitHub での `gh pr create` による Pull Request の作成と、画面での merge commit の取り込み。手元で取り込んで `main` を push したときに、ホスティングが Pull Request をマージ済みにするか
+- Forgejo での push（Pull Request は人がブラウザで作る形にした）
+- Codex（sandbox の外での承認を伴う push と `gh`）と Grok Build の push と Pull Request
+- Windows 11 での実行と Windows PowerShell 5.1。AlmaLinux 10 の実機
