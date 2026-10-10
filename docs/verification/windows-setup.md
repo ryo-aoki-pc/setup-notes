@@ -335,7 +335,7 @@
   - ミラーを使えない PC で `wsl.exe` が出す文言（`ミラー化されたネットワーク モードはサポートされていません`。`Resources.resw` の訳から書いた）
   - ミラーで、WSL から `127.0.0.1:22` の Windows の sshd に届くことと、LAN の IP あてが届かないこと（文書の言い方からの推測。ミラーでも `127.0.0.1` に届かないというコミュニティの報告もある）
   - ミラーで、WSL からホストオンリーのネットワークの VirtualBox の VM に届くか（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の記録は NAT のとき）
-  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard-road-warrior.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
+  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
   - 対象の 24H2・25H2 と、利用者の 26H2（26300）の違い
 
 ### シェルのツールを入れる（任意）: 検証状況の記録
@@ -1416,7 +1416,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と以下の読み取りは、この時点の起動後の状態として扱う
 - 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
 - 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
-- 初回導入と設定確認の時点では、後続の [Git for Windows](../git.md#windows-11-で-git-for-windows-を入れる)・[Firefox](../firefox.md#windows-11-で使う)・[WezTerm](../wezterm-nightly.md#windows-11-で使う)・[Claude Code](../claude-code.md#windows-11-で使う)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard-road-warrior.md#windows-11-で使う)・[HackGen Console NF](../hackgen.md#windows-11-で使う)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
+- 初回導入と設定確認の時点では、後続の [Git for Windows](../git.md#windows-11-で-git-for-windows-を入れる)・[Firefox](../firefox.md#windows-11-で使う)・[WezTerm](../wezterm-nightly.md#windows-11-で使う)・[Claude Code](../claude-code.md#windows-11-で使う)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard.md#windows-11-で使う)・[HackGen Console NF](../hackgen.md#windows-11-で使う)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
 - VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
 - 「ネットワークとリモート」の手順 1・2・4 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
 - 「Microsoft Store の更新」の手順 5 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない

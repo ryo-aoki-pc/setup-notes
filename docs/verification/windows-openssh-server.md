@@ -307,7 +307,7 @@ d----        logs
 - [Unable to log into SSH server using Microsoft account](https://learn.microsoft.com/en-us/answers/questions/1332375/unable-to-log-into-ssh-server-using-microsoft-acco)（Microsoft Q&A。Microsoft アカウントのパスワードがエラー 1326 で拒否された例と、「Windows Hello サインインのみ」をオフにする回避策）
 - [Win32-OpenSSH の wiki](https://github.com/PowerShell/Win32-OpenSSH/wiki)
 - `Get-Help Add-WindowsCapability` / `Get-Help Set-NetConnectionProfile` / `Get-Help New-ItemProperty`
-- [WireGuard Road Warrior 設定手順](../wireguard-road-warrior.md)（別の PC からの接続を外出先に広げるとき。本書では試していない）
+- [WireGuard Road Warrior 設定手順](../wireguard.md#almalinux-10-の-pc-からつなぐ)（別の PC からの接続を外出先に広げるとき。本書では試していない）
 
 ### 付録: 実機での検証記録（2026-09-29）
 

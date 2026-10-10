@@ -7,7 +7,7 @@
 #        ./wg-vpn.sh [options] router A|B            ルーターに入れる値を表示（apply の末尾と同じ。補足「ルーターの設定」）
 #   sudo ./wg-vpn.sh [options] status                「状態と疎通を確かめる」の手順 1: 状態確認
 #   sudo ./wg-vpn.sh [options] remove A|B            ロールバック
-#   sudo ./wg-vpn.sh [options] client add A|B NAME   「クライアントを登録する」の手順 1〜2: クライアントを登録し、鍵とクライアント用 conf を生成する
+#   sudo ./wg-vpn.sh [options] client add A|B NAME   「クライアントを登録する」の手順 3〜4: クライアントを登録し、鍵とクライアント用 conf を生成する
 #   sudo ./wg-vpn.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する
 #   sudo ./wg-vpn.sh [options] client show NAME      クライアント用 conf を表示する
 #        ./wg-vpn.sh [options] client list           登録済みクライアントを表示する（root なら最終ハンドシェイクも）

@@ -75,7 +75,7 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 | [Samba クライアント](samba-client.md) | 別 VM から CIFS の手動マウント、読み書き、資格情報の権限、fstab / automount。再起動・未使用時の解除・再アクセスと、GNOME Files の接続・F5・切断も確認 |
 | [Syncthing](syncthing.md) | 2 台への導入・ユーザーサービス・GUI の設定、日本語名ファイルの双方向同期、バックアップ 8 個の一致と設定の復元。TLS 設定の応答が切れる問題を修正 |
 | [WireGuard](wireguard.md) | 2 台で鍵生成・apply、カーネルの WireGuard と firewalld を使用。各 LAN を模した namespace 間で双方向 ICMP、MTU 1420、TCP / HTTP を確認 |
-| [WireGuard Road Warrior](wireguard-road-warrior.md) | 別 VM で鍵生成、ホストでクライアント追加、NetworkManager への import、切断と接続。実機の回線切り替えは除外 |
+| [WireGuard Road Warrior](wireguard.md#almalinux-10-の-pc-からつなぐ) | 別 VM で鍵生成、ホストでクライアント追加、NetworkManager への import、切断と接続。実機の回線切り替えは除外 |
 
 WireGuard の拠点間通信には VM の内部ネットワークを使った。家庭のルーターのポート転送、外部の回線からの接続、実際の LAN に置いた機器は今回の検証に含まれない。
 
