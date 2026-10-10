@@ -268,7 +268,7 @@ PID     Username     Group        Machine                                   Prot
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - トンネル越しに 445/tcp へ届くことは [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)で確かめてあるが、マウントは確かめていない
+  - トンネル越しに 445/tcp へ届くことは [wireguard-road-warrior.md の付録](wireguard.md#road-warrior-付録-実機での検証記録)で確かめてあるが、マウントは確かめていない
 
 ### 注意点 / 手順 0: 本文中の記録
 

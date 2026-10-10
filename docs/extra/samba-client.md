@@ -135,7 +135,7 @@
   - **マウントしている間に届かなくなると、ファイルを開くコマンドが長時間止まることがある**。サーバーへの接続を確認してからアクセスし直す
   - 使っていなければ、届かなくても 1 分の idle-timeout で外れた
 - **外出先から WireGuard 越しに使うとき**: トンネルを張ってからアクセスする
-  - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[wireguard-road-warrior.md](../wireguard-road-warrior.md) の `AllowedIPs` に拠点の LAN が入っているため
+  - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[wireguard.md の「AlmaLinux 10 の PC からつなぐ」](../wireguard.md#almalinux-10-の-pc-からつなぐ)で取り込む conf の `AllowedIPs` に、拠点の LAN が入っているため
 - **サーバーで直接変えたもの**（サーバーのシェルや Syncthing などで、Samba を通さずに）
   - samba.md の今のサーバー（`smb3 directory leases = no`）なら、`ls` にすぐ出る。消したファイルを `stat` で引くと、約 1 秒はまだあるように見える（`actimeo=1`）
   - サーバーを変えられないときは、マウントのオプションに `nohandlecache` を足す
