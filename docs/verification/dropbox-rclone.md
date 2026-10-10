@@ -1,6 +1,6 @@
 # Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）の検証記録
 
-[手順書](../dropbox-rclone.md)
+[手順書](../dropbox-rclone.md)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -109,7 +109,7 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 - **進め方**: Homebrew で rclone を入れ、ブラウザで Dropbox を登録し、`--resync` で最初の同期をしてから、ユーザーの timer と、前提の [linger](../linger.md)（`loginctl enable-linger`）で定期的に動かす。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で rclone の導入と OAuth 待ち受けまで検証済み（2026-10-06）。現行版は新規 VM のローカル alias で、同期・timer・ロールバックも再検証した**（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）。Dropbox との認証・クラウド同期は未確認
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜10・[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)・[更新](../dropbox-rclone.md#更新)・[ロールバック](../dropbox-rclone.md#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜10・[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)・[更新](../dropbox-rclone.md#更新)・[ロールバック](../extra/dropbox-rclone.md#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
     - linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバック。当時はこの文書の手順 9・10 とロールバックの手順 1・2）も、このとき通した
   - 手順 2 は本物の Dropbox で、URL が出て、`127.0.0.1:53682` が Dropbox の認証画面へ飛ばすところまで確かめた（許可はしていない）
   - **手順 4 以降は、`dropbox` という名前で、コンテナの中のディレクトリを指す代役のリモート（種類 `alias`）で確かめた**
@@ -128,7 +128,7 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64 | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`、systemd を PID 1） |
-| Homebrew | 7.0.6（[syncthing.md](../syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](../homebrew.md) の手順 1〜3 で新規導入） |
+| Homebrew | 7.0.6（[syncthing.md](../syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 で新規導入） |
 | rclone | 未導入 | 1.75.1（`x86_64_linux` のボトル）。`arm64_linux` のボトルもある（formulae.brew.sh の JSON） |
 | Dropbox のリモート | — | 手順 2 は本物（URL が出るまで）、手順 4 以降は代役（`alias`） |
 | linger | Syncthing のために有効（syncthing.md の記録） | 無効から始めた |
@@ -200,7 +200,7 @@ $ find ~/Dropbox -type f | sort
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
-`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](../homebrew.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
+`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](../almalinux-setup.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
 
 途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜10（手順 6 は飛ばした。linger は今の [linger.md](../linger.md) の手順に当たるもの）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
 
@@ -224,7 +224,7 @@ $ find ~/Dropbox -type f | sort
 | timer | 予定（`NEXT`）の 43 秒後に timer が自分で動かし、期限の切れたロックを消して `--recover` で回復した（`Listings not found. Reverting to prior backup as --recover is set.`）。その後の `NEXT` は、終わってから 15 分後だった |
 | 任意の節 | 手順 1 は `vi` の代わりに `sed` で 3 行の `# ` を外した。`--resync` の後、代役の `Documents` に足したファイルは手元に来て、`Work` に足したファイルは来なかった。手元の `Work` は残った |
 | 更新 | `Warning: rclone 1.75.1 already installed` |
-| ロールバック | タイマーが動いている間に手順 5 を貼ると `中断: ...` が出て、何も消えなかった。手順 1・2・4・5 と linger の解除（今の [linger.md のロールバック](../linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 2）は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 5 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 5 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
+| ロールバック | タイマーが動いている間に手順 5 を貼ると `中断: ...` が出て、何も消えなかった。手順 1・2・4・5 と linger の解除（今の [linger.md のロールバック](../extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 2）は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 5 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 5 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
 
 #### 未確認事項
 

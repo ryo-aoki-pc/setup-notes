@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の参考資料
 
-[手順書](../gnome-headless-session.md)
+[手順書](../gnome-headless-session.md)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
 [検証記録](../verification/gnome-headless-session.md#参考資料から分離した記録)
 
@@ -11,6 +11,9 @@
 - `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[gnome-remote-desktop.md](../gnome-remote-desktop.md) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
 - `RDP_PORT` の判定に使う `systemctl is-enabled gnome-remote-desktop.service` は、`--user` を付けないのでシステムの unit を見る
 - リモートログインのデーモンは 3389/tcp で待ち受けるので、同じ PC ではヘッドレスのセッションの RDP を 3390/tcp にする
+- `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
+- 任意の変数のブロックは、最後に値を読み戻す
+- 変数はそのシェルの中だけで有効なので、新しいシェルでは手順 1 の 2 つのブロックを貼り直す
 
 ### 実施手順 / 手順 2: 補足: gnome-headless-session@.service と、セッションの見分け方
 
@@ -18,12 +21,13 @@
 
 - gdm の unit。`gdm` ユーザーで `gdm-new-session <USER> --headless` を動かし、GDM に、モニターの無いセッションを作らせる（RHEL 10 の文書の「1.4 headless server for a single user」と同じ unit）
 - できるセッションは、`loginctl` で `Class=user`・`Type=wayland`・`TTY=headless`・`Remote=yes`・`Service=gdm-autologin`・seat 無し
-- PAM は `gdm-autologin` で、パスワードを使わない。ログインのキーリングは開かない（[注意点](../gnome-headless-session.md#注意点)）
+- PAM は `gdm-autologin` で、パスワードを使わない。ログインのキーリングは開かない（[注意点](../extra/gnome-headless-session.md#注意点)）
 - `WantedBy=graphical.target` なので、`enable` で起動時にも作られる。`Requires=gdm.service`
 
 **セッションの見分け方と、モニターが無い間**:
 
 - `loginctl` の行の `awk` は、このユーザーのヘッドレスのセッションの行だけを出す。ほかのユーザーのヘッドレスのセッションも `TTY` が `headless` になる
+- `for` の行で、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ
 - このセッションには、RDP のクライアントがつないでいない間、モニターが 1 枚も無い。アプリはそのまま動き続ける
 - クライアントがつなぐと、そのクライアントの窓の大きさの仮想モニターができ、切ると消える
 
@@ -36,6 +40,9 @@
 - 新規生成したファイルの SHA-256 も `created.sha256` に保存する。ロールバックでは、中身が変わっていたりリンクへ置き換わっていたりすれば削除しない
 - 既存の証明書を更新する手順ではない。以前の手順で残した `.old` なども、この手順とロールバックでは消さない
 - `set -e` は丸括弧の中だけに効かせ、退避・生成・読み取りのどれかが失敗したら、そのブロックを止める
+- 既存の証明書と鍵は上書きしない
+- `中断:` のとき、生成途中で照合用の記録も作れなかった場合は、ロールバックはファイルを自動削除せず残す
+- 置き場所は、RHEL 10 の文書の 1.4 と同じ
 
 ### 実施手順 / 手順 4: 補足: grdctl --headless
 
@@ -43,11 +50,13 @@
 - 書き先は dconf。ポートなどは `/org/gnome/desktop/remote-desktop/rdp/headless/`、証明書と鍵は、デスクトップ共有と同じ `/org/gnome/desktop/remote-desktop/rdp/` に入る
 - 資格情報（手順 5）は、TPM があれば TPM に、無ければ `~/.local/share/gnome-remote-desktop/credentials.ini`（GKeyFile）に置く
 - `disable-port-negotiation` は、指定したポートが使われていたときに、次のポートを順に試すのを止める。ポートが勝手に変わって、手順 7 で開けたポートと食い違うのを防ぐ
+- 初めて設定するときだけ出る `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、設定する前の空の値を読んだもの
 
 ### 実施手順 / 手順 5: 補足: 資格情報の置き場所
 
 - TPM の無い PC では、`~/.local/share/gnome-remote-desktop/credentials.ini` に入る（0600。暗号化はされていない）
 - パスワードを変えるときも、この手順を貼り直す
+- 引数なしで打つのは、パスワードをシェルの履歴に残さないため
 
 ### 実施手順 / 手順 6: 補足: grdctl --headless rdp enable
 
@@ -58,16 +67,34 @@
 
 - firewalld の定義済みサービス `rdp` は 3389/tcp だけなので、ポートで開ける
 - public ゾーンで開けるので、public ゾーンに属するすべての NIC で開く（gnome-remote-desktop.md と同じ）
+- リモートログインと併用している PC でも、ここで 3390/tcp を足す（3389/tcp はリモートログインの `rdp` サービスで開いている）
 
 ### 実施手順 / 手順 9: 補足: TLS プローブ
 
 - スクリプトは [gnome-remote-desktop.md 手順 10](../gnome-remote-desktop.md#実施手順) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため（どちらでも動く）
+- `~/rdp_tls_probe.py` は、この手順書が作る唯一の作業ファイル
+
+### 接続元を LAN に絞る（任意） / 手順 1: 補足: 引用符
+
+- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[gnome-remote-desktop.md の同じ節](../gnome-remote-desktop.md#接続元を-lan-に絞る任意)）
+
+### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
+
+- **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](../verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
+- **ドロップインを外す**: [claude-code-gui.md](../claude-code-gui.md) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
+- **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
+- **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 5 の補足](#実施手順--手順-5-補足-資格情報の置き場所)）
+- 同じ節の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
+- 同じ節の手順 3 のドロップインの変更は、動いている gnome-shell には効かない。同じ節の手順 4・5 でセッションを終わらせ、手順 6 で入り直したときに効く
+- 同じ節の手順 3 で claude-code-gui.md のロールバックの手順 2 を行わないのは、それがヘッドレスのセッションを起動し直すため
+- 同じ節の手順 4 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ
+- 同じ節の手順 5 に `sudo` は要らない（自分のセッションは自分で終わらせられる）。終わらせると、ユーザーの D-Bus が起動し直される（[注意点](../extra/gnome-headless-session.md#注意点)）
 
 ### 選択した方針
 
 - **ヘッドレスのセッションにする**（RHEL 10 の文書の 1.4）
-  - デスクトップ共有（設定アプリの「デスクトップ共有」）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
+  - デスクトップ共有（設定アプリの「デスクトップ共有」。CLI で設定する手順は [gnome-desktop-sharing.md](../gnome-desktop-sharing.md)）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
   - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
   - ヘッドレスのセッションは RDP 接続より前から常駐し、手順 10 の接続では GDM のログイン画面を通らず、そのデスクトップへ入る
 - **証明書は openssl で作る** — SAN に IP を入れる理由は gnome-remote-desktop.md と同じ

@@ -1,6 +1,6 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../distrobox.md)
+[手順書](../distrobox.md)・[ロールバックと注意点](../extra/distrobox.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -17,7 +17,7 @@
 
 - `sudo`・`curl`・`git` など、distrobox がボックスの初期化で要るものが最初から入っていて、初期化で入れるものが少ない
 - amd64 と arm64 の両方がある（Raspberry Pi 5 でも同じイメージ）
-- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](../podman.md#注意点)）にかからない
+- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](../extra/podman.md#注意点)）にかからない
 
 distrobox の互換一覧（上流の `docs/compatibility.md`）に載っている、ほかの Toolbx 系のイメージの例:
 
@@ -36,10 +36,10 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 の上で、別のディストリ（既定は Ubuntu 24.04）のユーザーランドとパッケージを使えるようにする。EL10 の AppStream・EPEL に無いものを、そのディストリのパッケージで補う
-- **進め方**: EPEL（前提の [epel.md](../epel.md) で有効にする）の distrobox を入れ、rootless の podman（[podman.md](../podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
+- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の distrobox を入れ、rootless の podman（[podman.md](../podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](../distrobox.md#更新)、[ロールバック](../distrobox.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](../distrobox.md#更新)、[ロールバック](../extra/distrobox.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の distrobox 1.8.2.3 が入り、Ubuntu 24.04 のボックスができる
     - ボックスの中のユーザーとホームがホストと同じ
@@ -52,7 +52,7 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../podman.md) と同じ作り） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入） |
-| EPEL | 未確認 | 未設定 → [epel.md](../epel.md) の手順 2 で `epel-release-10-6.el10` を導入 |
+| EPEL | 未確認 | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | distrobox | 未導入 | `distrobox-1.8.2.3-1.el10_2`（epel） |
 | ボックス | — | `quay.io/toolbx/ubuntu-toolbox:24.04`（Ubuntu 24.04.5 LTS） |
 
@@ -103,7 +103,7 @@ $ ffmpeg -version | head -1
 ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 ```
 
-- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](../distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
+- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](../extra/distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
@@ -118,7 +118,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
   - 検証環境の cgroup v2 には pids のコントローラが無く、crun が `pids.max` に書こうとして失敗した（``controller `pids` is not available``）
   - `--pids-limit=-1` だけを `--pids-limit=0`（設定しない）に読み替える `/usr/local/bin/podman` を、手順 1 の前に置いた
   - 実機では要らない見込み（確かめていない）
-- **EPEL**: EPEL の有効化（今の epel.md の手順 2）の直後に、EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）
+- **EPEL**: EPEL の有効化（今の AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）の直後に、EPEL の metalink に `&protocol=https` を足した（プロキシが平文の HTTP を通さないため）
 - ボックスの中の apt は、`http://archive.ubuntu.com` にそのままつながった
 
 **流し方**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じく、ブロックを 1 行ずつ端末に流し、`[y/N]`・`[Y/n]` には `y` と答えた。手順 6 はボックスのシェルに入ったところで `grep PRETTY_NAME /etc/os-release` と `exit` を打った。
@@ -141,7 +141,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 
 - `--yes` を付けない `distrobox create` は `Image quay.io/toolbx/arch-toolbox:latest not found.` と `Do you want to pull the image now? [Y/n]:` を出した（`n` で中断）
 - `distrobox create --dry-run` で、podman に渡すオプション（手順 4 の補足の表）を見た
-- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](../distrobox.md#注意点)）
+- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](../extra/distrobox.md#注意点)）
 - `dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た
 
 #### 未確認事項
@@ -233,4 +233,4 @@ Container Setup Complete!
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
-- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../podman.md#ロールバック)の手順 6 に当たる）
+- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）

@@ -2,21 +2,23 @@
 
 ## 実施手順
 
-- [検証記録](verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)
+- [検証記録](verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
 
 > [!IMPORTANT]
 > - **Claude Code が動くユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない
-> - 前提は [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[gnome-power.md 手順 1・2](gnome-power.md#実施手順)（ロックされると、画面の前にいない Claude Code には解けない）
+> - 前提は [gnome-headless-session.md 手順 1・2](gnome-headless-session.md#実施手順)（ヘッドレスのセッションを動かすところまで。RDP の設定は要らない）と、[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1・2（ロックされると、画面の前にいない Claude Code には解けない）
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 手順の後: Claude Code からの使い方は[使い方の基本](#使い方の基本)。仮想モニターの大きさを変えるなら[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)。戻すときは[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: Claude Code からの使い方は[使い方の基本](#使い方の基本)。仮想モニターの大きさを変えるなら[仮想モニターの大きさを変える（任意）](#仮想モニターの大きさを変える任意)。戻すときは[ロールバック](extra/claude-code-gui.md#ロールバック)
 
 1. 変数を設定する。
 
    ```bash
    REPO=~/setup-notes                  # このリポジトリを clone した場所（scripts/gnome-gui.py を使う）。<REPO>
    VIRTUAL_MONITOR=1920x1080           # 仮想モニターの大きさ（幅x高さ）。<VIRTUAL_MONITOR>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in USER REPO VIRTUAL_MONITOR; do
      printf '%-16s = %s\n' "$v" "${!v}"
    done
@@ -25,7 +27,7 @@
    - **編集が必須の変数は無い**。clone した場所が `~/setup-notes` なら、既定のままでよい
    - 最後に値を読み戻して確かめる
    - `USER` が `root` なら、ここで止めて、Claude Code が動くユーザーのシェルで貼り直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**、手順 1 のブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、手順 1 のブロックを貼り直してから先へ進む
 
 1. gnome-shell に仮想モニターを付けるドロップインを置く。
 
@@ -38,13 +40,12 @@
    ExecStart=/usr/bin/gnome-shell --virtual-monitor ${VIRTUAL_MONITOR}
    EOF
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
    fi
    ```
 
    - `ExecStart=/usr/bin/gnome-shell`（元の行）・`ExecStart=`・`ExecStart=/usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` の 3 行が出ればよい
-   - このユーザーの GNOME のセッションすべてに効く（[注意点](#注意点)）
-   - 動いているセッションには、手順 3 で起動し直したときに効く
 
 1. セッションを止め、終わるのを待って起動し直し、仮想モニターの付いたセッションができたかを確かめる。
 
@@ -60,6 +61,7 @@
          [ -n "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break
        sleep 1
      done
+     printf '\n\033[7m 確認 \033[0m\n'
      loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"'
      pgrep -a -u "${USER}" -x gnome-shell
    fi
@@ -67,13 +69,13 @@
 
    - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<SESSION_ID> <UID> <USER> - <PID> user headless no -` の形の行と、`<PID> /usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>` が出ればよい
-   - `for` の行は、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ。`loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](gnome-headless-session.md#実施手順) の補足）
-   - `systemctl restart` は使わない（参考資料を参照）
+   - `systemctl restart` は使わない
 
 1. 画面を撮って、大きさを確かめる。
 
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
    if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
       file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
      file ~/gnome-gui-test.png
@@ -96,6 +98,7 @@
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" key Escape
    sleep 1
+   printf '\n\033[7m 確認 \033[0m\n'
    "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-desktop.png
    "${REPO}/scripts/gnome-gui.py" launch org.gnome.Calculator
    for i in $(seq 1 30); do
@@ -115,16 +118,15 @@
    fi
    ```
 
-   - `gnome-gui-org.gnome.Calculator-<PID>`（起動した unit の名前）、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
-   - 窓の一覧に電卓が出るまで待つ。固定の `sleep 3` だけで起動完了を判断しない
+   - `gnome-gui-org.gnome.Calculator-<PID>`、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
    - `~/gnome-gui-calc.png` に、電卓の窓と `12×34 = 408` が写っていればよい
-   - 最初の `key Escape` は、セッションを始めた直後に開いているアクティビティ画面を閉じる（参考資料を参照）
 
 1. ポインタの入力が届くかを確かめて、電卓を閉じる。
 
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" click 70 15
+   printf '\n\033[7m 確認 \033[0m\n'
    "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-overview.png
    "${REPO}/scripts/gnome-gui.py" key Escape
    sleep 1
@@ -138,7 +140,7 @@
    - 最後の `windows` が何も出さなければ、電卓は閉じた
    - 確かめ用の PNG は、要らなければ `rm ~/gnome-gui-*.png` で消す
 
-- **GDM を再起動すると、このセッションが消えることがある**: `sudo systemctl start gnome-headless-session@<USER>.service` で起動し直す（[注意点](gnome-headless-session.md#注意点)）
+- **GDM を再起動すると、このセッションが消えることがある**: `sudo systemctl start gnome-headless-session@<USER>.service` で起動し直す（[注意点](extra/gnome-headless-session.md#注意点)）
 ---
 
 ## 使い方の基本
@@ -183,6 +185,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
+   printf '\n\033[7m 確認 \033[0m\n'
    if "${REPO}/scripts/gnome-gui.py" shot ~/gnome-gui-test.png &&
       file --mime-type ~/gnome-gui-test.png | grep -q 'image/png'; then
      file ~/gnome-gui-test.png
@@ -194,59 +197,3 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `PNG image data, <幅> x <高さ>` が新しい大きさになっていればよい
    - PNG の画面も開いて確かめてから使う。撮れなかったときの再試行は[実施手順 4](#実施手順)と同じ
-
----
-
-## ロールバック
-
-- この手順書で足したもの（ドロップイン）だけを戻す。ヘッドレスのセッションは、仮想モニターの無い形で動き続ける
-- セッションも止めるなら、続けて [gnome-headless-session.md のロールバック](gnome-headless-session.md#ロールバック)
-- 手順 1 の変数は要らない。Claude Code が動くユーザーのシェルで、上から順に貼る
-
-1. ドロップインを消す。
-
-   ```bash
-   rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
-   rmdir ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
-   systemctl --user daemon-reload
-   systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
-   ```
-
-   - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
-   - `rmdir` が `Directory not empty` で失敗したら、ほかのドロップインがあるので、そのまま残す
-
-1. セッションを止め、終わるのを待って起動し直し、仮想モニターの無い形に戻ったかを確かめる。
-
-   ```bash
-   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
-   else
-     sudo systemctl stop "gnome-headless-session@${USER}.service"
-     for i in $(seq 1 30); do [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"')" ] && break; sleep 1; done
-     sleep 3
-     sudo systemctl start "gnome-headless-session@${USER}.service"
-     for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
-     pgrep -a -u "${USER}" -x gnome-shell
-   fi
-   ```
-
-   - `stop` と `start` は何も出さない。動いていたアプリは閉じる
-   - `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）が出ればよい
-   - `systemctl restart` は使わない（[手順 3](#実施手順) の補足）
-   - 確かめ用の PNG が残っていれば `rm ~/gnome-gui-*.png` で消す
-
----
-
-## 注意点
-
-- **Homebrew が PATH の先頭にあると、GLib のコマンドが Homebrew のものになる**（[homebrew.md の注意点](homebrew.md#注意点)）
-  - `python3` には `gi` が無い。`scripts/gnome-gui.py` は `#!/usr/bin/python3` で動く
-  - `gsettings` は dconf ではなく `~/.config/glib-2.0/settings/keyfile` に書き、GNOME には効かないのに、読み戻すと変わったように見える。[gnome-power.md](gnome-power.md) の手順は `/usr/bin/gsettings` で書く
-  - `gdbus` と `gio` も Homebrew のものになる。手で使うときは `/usr/bin/` を付ける
-- **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](gnome-headless-session.md) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
-  - 上部バーは主のモニター（`Meta-0`）にしか出ないので、クライアントの画面には上部バーが無かった
-    - 同じドロップインを置いた試験用のユーザーで、FreeRDP で同じように入ると、クライアントには壁紙だけが写った（上部バーもウィンドウも無い）
-  - RDP だけで使うなら、[ロールバック](#ロールバック)でドロップインを外すと、クライアントの画面がデスクトップ全体になる
-- **ドロップインは、このユーザーの GNOME のセッションすべてに効く**: 後からモニターをつないで、このユーザーで PC の画面からログインすると、見えない仮想モニターも足されるはず。そのときは[ロールバック](#ロールバック)で外す
-- **ログインのキーリングは開いていない**: パスワードを読もうとするアプリは、キーリングを開く窓を出す。Claude Code には答えられない
-- **手順 3 とロールバックの手順 2 は、ユーザーの D-Bus も起動し直す**: GNOME のセッションが終わると、`gnome-session-restart-dbus.service` がユーザーのセッションバスを起動し直す
-- **起動し直すのは `restart` ではなく、`stop` → 待つ → `start`**: `restart` では新しいセッションができなかった（参考資料を参照）

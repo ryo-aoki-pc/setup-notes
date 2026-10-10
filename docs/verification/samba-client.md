@@ -1,6 +1,6 @@
-# Samba の共有を AlmaLinux 10 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files）の検証記録
+# Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の検証記録
 
-[手順書](../samba-client.md)
+[手順書](../samba-client.md)・[ロールバックと注意点](../extra/samba-client.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -109,15 +109,22 @@ Password:
 - RHEL 10 の文書は「Other Locations」→「Enter server address」と書いているが、nautilus 47.6 の UI の定義はそうなっていない
 - 認証の画面（GTK）は「認証が必要です」「ドメイン」「パスワード」。URI にユーザー名を入れた今回の接続ではユーザー名の欄は出なかった。記憶のしかたが「今すぐパスワードを破棄する」「ログアウトするまでパスワードを記憶する」「期限なしで記憶する」、ボタンが「接続する」
 
+### Windows 11 で使う: 検証状況の記録
+
+> [!WARNING]
+> **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、Microsoft と Samba の資料・ソース、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](#対象と検証環境)）。
+
 ### 対象と検証環境
 
 - **目的**: [samba.md](../samba.md) で公開したホームディレクトリ（`[homes]` 共有）を、AlmaLinux 10 の PC から、ふだんのディレクトリのように読み書きする
   - `/etc/fstab` に 1 行を足し、`/mnt/<SHARE>` にアクセスしたときに systemd がマウントする（`x-systemd.automount`）。起動時にはマウントしない
   - パスワードは、root だけが読める資格情報ファイルに置く。fstab には書かない
   - GNOME Files（gvfs）でつなぐ方法は、任意節にした
+  - Windows 11 の PC では、同じ共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは Windows の資格情報マネージャーに置く（[Windows 11 で使う](../samba-client.md#windows-11-で使う)）
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `SERVER` だけ（NAS や Windows の共有なら `SMB_USER` と `SHARE` も）
-- **状態**: **x86_64 の VM で検証済み（QEMU: 2026-09-27 / クリーンインストールした VirtualBox: 2026-10-06）。実機では本実行していない**
+  - Windows 11 は、管理者ではない Windows PowerShell 5.1 に貼る。読者が編集するのは `SERVER` と `SMB_USER`
+- **状態（AlmaLinux 10）**: **x86_64 の VM で検証済み（QEMU: 2026-09-27 / クリーンインストールした VirtualBox: 2026-10-06）。実機では本実行していない**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - このクラウドのホストのカーネルには CIFS が無く、コンテナでは `mount -t cifs` を試せない。そこで QEMU の VM（KVM 無しの TCG）で、AlmaLinux 10.2 の GenericCloud イメージを動かした
   - VM の SELinux は Enforcing、firewalld は active
@@ -141,10 +148,21 @@ Password:
     - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜5 とロールバックの手順 3 を `SHARE=home` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-home-を公開する節の-vm-での検証2026-10-05)）
     - 手順 5 は、`cifs-test.txt` の書き込みが `Permission denied` になり、マウントの確かめと外すところは通った
     - `SHARE=home` での自動マウント（手順 6・7）は試していない
-  - 2026-10-01: [注意点](../samba-client.md#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
+  - 2026-10-01: [注意点](../extra/samba-client.md#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
     - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](../claude-code-gui.md) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - この文書のブロックは貼っていない。マウントは、手順 5 と同じオプションに `port=4450` を足して手で行い、GNOME Files は `/usr/bin/gio mount` でつないでから Nautilus で開いた
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+- **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-08 に書いた）**
+  - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - **確かめたこと**（[付録](#付録-windows-11-の資料の調査と-powershell-のブロックの-linux-での確認2026-10-08)）:
+    - 資料: Microsoft の SMB の署名（24H2 の Pro・Enterprise・Education は必須、Home は求めない）・`cmdkey`・`New-SmbMapping`・`Remove-SmbMapping`・管理者の窓とドライブ文字・サインインのときのつなぎ直し・SMB の NTLM のブロックの文書
+    - サーバーの設定: samba.md 手順 3 の smb.conf は `server signing` と `map to guest` を書かず、既定のまま。その既定（smb.conf(5) と、samba.md の前の `testparm -sv` の記録）は、Windows 11 Pro の署名の必須とゲストの禁止に合う
+    - `smbstatus` の `Signing` の表示: Samba 4.23.5 のソース（`source3/utils/status.c`）で、全体に署名した接続は方式の名前だけ、一部だけなら `partial(…)`、無ければ `-`
+    - PowerShell のブロック: Linux の PowerShell 7.5.3 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。Windows 11 の 3 節のブロックを、偽物の `Test-NetConnection`・`Get-SmbMapping`・`New-SmbMapping`・`Remove-SmbMapping`・`cmdkey` で流した
+  - **確かめていないこと**: Windows で貼ること（すべての手順）、`cmdkey /pass` の問い方と同じ宛先の上書き、資格情報を渡さない `New-SmbMapping` が資格情報マネージャーの資格情報でつなぐこと、エクスプローラーへの表示、サインインのときのつなぎ直しとサーバーに届かないときの表示、`smbstatus` の `SMB3_11` と署名、`Remove-SmbMapping -UpdateProfile` の後に残るもの、エラー 1219、Home の Windows、`[root]`・`[home]` の割り当て、WireGuard 越しの割り当て
+  - 2026-10-01 に、利用者の Windows の PC のエクスプローラーから samba.md の実機のサーバーにつないだときの `smbstatus` は `SMB3_11`・署名 `AES-128-GMAC` だった（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)。その PC は、同じ日の [windows-claude-remote-control.md の記録](windows-claude-remote-control.md)では Windows 11 Pro 26H2）。ドライブ文字への割り当てではない
+
+AlmaLinux 10:
 
 | 項目 | 実機 | VM |
 |---|---|---|
@@ -158,6 +176,14 @@ Password:
 | SELinux / firewalld | 未確認 | Enforcing（`selinux-policy-targeted-42.1.18-4.el10_2.3`）/ `2.4.3-4.el10_2`、active（既定ゾーン `public`。本書では変えない） |
 | サーバー | — | `quay.io/almalinuxorg/almalinux:10.2` のコンテナ、`samba-4.23.5-110.el10_2`、samba.md 手順 3 の `smb.conf`。VM からは QEMU の user ネットワークのホスト側（`10.0.2.2`）で届く |
 
+Windows 11（前提にしている環境。ほかの Windows の手順書の実機の記録と同じ PC を想定）:
+
+| 項目 | 値 |
+|---|---|
+| OS | Windows 11 Pro（24H2 以降。利用者の PC は 26H2）。Home は署名を求めない（[注意点](../extra/samba-client.md#注意点)） |
+| PowerShell | Windows PowerShell 5.1（管理者ではない窓） |
+| サーバー | samba.md 手順 3 の smb.conf の Samba（`samba-4.23.5-110.el10_2`） |
+
 > [!NOTE]
 > 環境固有の値は**シェル変数**で書いてある。[手順 1](../samba-client.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
@@ -170,11 +196,15 @@ Password:
 >
 > 出力例・ログ・表の中の値は `<SERVER>` / `<SMB_USER>` / `<SHARE>` / `<MOUNT_POINT>` / `<USER>`（この PC のユーザー名）/ `<UID>`（その uid）/ `<PORT>` のプレースホルダで書いてある。ただし、VM の出力の `uid=1000` / `gid=1000` は、そのままにしてある。
 >
+> Windows 11 の節の変数は、PowerShell の `$SERVER`・`$SMB_USER`・`$SHARE`・`$DRIVE`（割り当てるドライブ文字。既定は `Z:`。出力例では `<DRIVE>`）。
+>
 > Samba のパスワードはこの文書に載せない。検証で使ったものは `openssl rand` で作った使い捨てで、記録していない。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
 ### 実施前の状態
+
+Windows 11 の節は流していない（記録は無い）。
 
 VM で、手順 1 の前に確かめた状態:
 
@@ -190,6 +220,8 @@ VM で、手順 1 の前に確かめた状態:
 | ローカルユーザー | `<USER>`（uid 1000、`wheel`）と、確かめ用の 2 人目（uid 1001） |
 
 ### 完了時点の状態
+
+Windows 11 の節は流していない（記録は無い）。
 
 VM で、手順 7 の後に確かめた状態:
 
@@ -236,7 +268,7 @@ PID     Username     Group        Machine                                   Prot
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - トンネル越しに 445/tcp へ届くことは [wireguard-road-warrior.md の付録](wireguard-road-warrior.md#付録-実機での検証記録)で確かめてあるが、マウントは確かめていない
+  - トンネル越しに 445/tcp へ届くことは [wireguard-road-warrior.md の付録](wireguard.md#road-warrior-付録-実機での検証記録)で確かめてあるが、マウントは確かめていない
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -417,6 +449,67 @@ GNOME Files の任意節は別の新規 Workstation VM の画面で接続・認�
 
 ロールバック 1〜3 で mount/automount・fstab の該当行・資格情報・マウント先が消え、findmnt --verify も成功した。diff が変更を表示して返す終了 1 は想定どおり。既設の cifs-utils/gvfs は残した。実機、キーリング保存、Wi-Fi 切り替え、サスペンド復帰、Windows/NAS の共有はこの再検証で確認していない。
 
+
+### 付録: Windows 11 の資料の調査と PowerShell のブロックの Linux での確認（2026-10-08）
+
+Windows を動かせない環境（クラウドの Linux のコンテナ）で確かめた記録。Windows では、どのブロックも貼っていない。
+
+**資料**（2026-10-08 に取得。括弧の日付は各ページの `ms.date`）:
+
+- Microsoft の「Control SMB signing behavior」（2025-08-13）: 「Windows 11, version 24H2 Enterprise, Pro, and Education require both outbound and inbound SMB signing.」「Windows 11, version 24H2 Home edition doesn't require outbound or inbound SMB signing.」
+  - 署名を求めると、ゲストでの接続もできなくなる。署名を許さないサーバーには `STATUS_INVALID_SIGNATURE`（`0xc000a000`）で断られる
+  - 署名を確かめるコマンドは `Get-SmbClientConfiguration | FL RequireSecuritySignature`。変える例（`Set-SmbClientConfiguration -RequireSecuritySignature $false`）は、昇格した窓で行うもので、勧めないと書いてある
+  - Kerberos を使うことと、IP アドレスでつながないことを勧めている。standalone の Samba は NTLMv2 で認証するので、この勧めは当たらない
+- smb.conf(5)（samba.org の current）
+  - `server signing` の既定は `default`（AD の DC でなければ、SMB1 の署名を求めない）。「For the SMB2 protocol, by design, signing cannot be disabled.」「Setting it to mandatory will still require SMB2 clients to use signing.」
+  - `map to guest` の既定は `Never`（パスワードが違うログインは断る）。`ntlm auth` の既定は `ntlmv2-only`
+- [samba.md の付録](samba.md#付録-実機での検証記録2026-09-21)の `testparm -sv`: `map to guest = Never`・`server signing = default`・`server smb3 signing algorithms = AES-128-GMAC, AES-128-CMAC, HMAC-SHA256`・`server smb encrypt = default`。samba.md 手順 3 の smb.conf は、どれも書いていない
+- Samba 4.23.5 の `source3/utils/status.c`（GitHub の samba-team/samba の `samba-4.23.5` タグ）: `Signing` の欄は、全体に署名した接続（`CRYPTO_DEGREE_FULL`）なら方式の名前だけ、一部だけ（`CRYPTO_DEGREE_PARTIAL`）なら `partial(<方式>)`、無ければ `-`
+  - この文書の Linux の cifs（署名を求めない）の接続は `partial(AES-128-CMAC)` だった（[完了時点の状態](#完了時点の状態)）
+- Microsoft の `cmdkey`（2017-10-16）: 「/pass:<password> ... If <password> isn't supplied, it will be requested.」「/delete:<targetname>」。`/user` だけを付けた例は、つなぐたびにパスワードを聞く形として載っている
+- `New-SmbMapping`（windowsserver2025-ps の版、2024-02-22）: `-Persistent <Boolean>`。例の出力は `Status OK`。`-Credential` と `-BlockNTLM` もある（Windows 11 の SmbShare に `-Credential` があるかは確かめていない。本書では使わない）
+- `Remove-SmbMapping`（同じ版、2024-02-22）: `-UpdateProfile` は、割り当てを恒久的に外し、起動し直してもつなぎ直さない
+- 「Mapped drives aren't available from an elevated command prompt」（2026-02-12）: UAC が有効なら、サインインのときにつながった 2 つのログオン セッション（昇格したものと、そうでないもの）ができる。ドライブの割り当ては、作ったセッションの側にだけある
+- 「Mapped network drive may fail to reconnect」（2026-02-12。Windows 10 1809 の記事）: エクスプローラーのドライブに赤い ×、`net use` で `Unavailable`、通知に「Could not reconnect all network drives.」。割り当てのスクリプトは、エクスプローラーと同じ権限（昇格しない）で動かすよう書いてある
+- 「Block NTLM connections on SMB」（2024-10-25）: Windows 11 24H2 と Windows Server 2025 から、SMB のクライアントで NTLM をブロックするよう設定できる。除外は、グループ ポリシーの「Block NTLM Server Exception List」に IP アドレス・NetBIOS 名・FQDN を書く（作るのに相当する PowerShell は無い）
+- 採らなかった割り当て方の資料（`net use /savecred`、`New-PSDrive -Persist`）は、[参考資料の選択した方針](../reference/samba-client.md#選択した方針)にまとめた
+
+**PowerShell のブロック**:
+
+- Windows 11 の 3 節の `powershell` のブロック 10 個を、Linux の PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）
+- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0
+- 既定の規則の指摘は、ASCII でない文字を含むファイルの BOM（10 件）と、必須の変数の 1 変数だけのブロックの「代入して使っていない」（2 件）だけ
+- 見直しの後（Windows 11 で使うの手順 7 を `bash` のブロックにした後）にもう一度通し、3 つの数は同じだった
+- Windows 11 で使うの手順 7 の `bash` のブロック（`sudo smbstatus`）は、`bash -n` だけ（このコンテナに Samba は無い）
+
+**模擬**: Linux の pwsh で、`Test-NetConnection`・`Get-SmbMapping`・`New-SmbMapping`・`Remove-SmbMapping` を引数を表示して覚えておくだけの関数に、`cmdkey` を引数を表示する関数に置き換え、ブロックを上から順に同じセッションに流した。
+
+- 管理者かどうかの式（`IsInRole`）は Linux では使えないので、真偽の変数に置き換えた
+- `New-SmbMapping` の偽物は、一時ディレクトリを根にした `Z:` のドライブ（`New-PSDrive`）を作る
+- 見直しの後にもう一度流し、下の結果は同じだった
+
+結果:
+
+- 変数が空のまま: Windows 11 で使うの手順 3〜5、Windows 11 の更新の手順 1、Windows 11 のロールバックの手順 2 は `中断:` で止まった
+  - Windows 11 で使うの手順 6 と、Windows 11 のロールバックの手順 1 は、`DRIVE` に既定の `Z:` が入っているので流れた（前者は `Z:` が無いエラー、後者は偽物の `Remove-SmbMapping` を呼んだ）
+- Windows 11 で使うの手順 3: 管理者の窓・`DRIVE` が `Z`（コロン無し）・445/tcp に届かない・覚えている割り当てがある（`Status` が `Unavailable`）の 4 つで、それぞれの `中断:` が出た。そろったときは `<SERVER> の 445/tcp に届く。Z: は空いている` が出て、`cmdkey` に `/list:<SERVER>` の 1 つの引数が渡った
+- Windows 11 で使うの手順 4 と、Windows 11 の更新の手順 1: `cmdkey` に `/add:<SERVER>`・`/user:<SMB_USER>`・`/pass` の 3 つの引数が渡った
+- Windows 11 で使うの手順 5: `New-SmbMapping` に `-LocalPath Z:`・`-RemotePath \\<SERVER>\<SHARE>`・`-Persistent True` が渡り、`Status`・`LocalPath`・`RemotePath` の表に `OK`・`Z:`・`\\<SERVER>\<SHARE>` の 1 行が出た。この後に同じ節の手順 3 を流すと、`Z: はもう使われている` で止まった
+- Windows 11 で使うの手順 6: `smb write` と `False` が出て、共有に見立てたディレクトリにファイルは残らなかった
+- Windows 11 のロールバックの手順 1・2: `Remove-SmbMapping` に `-LocalPath Z: -UpdateProfile -Force` が、`cmdkey` に `/delete:<SERVER>` と `/list:<SERVER>` が渡った。`HKCU:\Network\Z` の確かめは `False`（Linux にはレジストリが無いので、いつも `False`）
+
+**残っている未確認事項**:
+
+1. Windows で、すべての手順を貼って通すこと
+1. `cmdkey /pass` の問い方と日本語の表示。同じ宛先にもう一度 `/add` したときに置き換わること
+1. 資格情報を渡さない `New-SmbMapping` が、資格情報マネージャーの資格情報でつなぐこと
+1. エクスプローラーにドライブが出る時期（Microsoft のコミュニティには、Windows 11 で `New-SmbMapping` のドライブがエクスプローラーを起動し直すまで出ないという報告がある）と、サインインし直した後のつなぎ直し
+1. サーバーに届かないときにサインインしたときの表示と、届くようになった後のつなぎ直し
+1. `smbstatus` で、Pro の PC の割り当てが `SMB3_11` で全体に署名されること。Home の PC の `Signing` の表示
+1. 使っていない SMB の接続を Windows が閉じるまでの時間（Windows 11 で使うの手順 7 で、この PC の行が無くなるか）
+1. `Remove-SmbMapping -UpdateProfile` で `HKCU:\Network\<文字>` が消えること。外した後のエクスプローラーの表示
+1. エラー 1219 の出方と、`[root]`・`[home]` を `[homes]` と並べて割り当てること
+1. WireGuard 越しの割り当て
 
 ### 操作上の注意と併記されていた記録
 

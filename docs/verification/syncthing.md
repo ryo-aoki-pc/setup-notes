@@ -1,6 +1,6 @@
 # Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の検証記録
 
-[手順書](../syncthing.md)
+[手順書](../syncthing.md)・[ロールバックと注意点](../extra/syncthing.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -185,7 +185,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 
 - 全体を `& { … }` で囲み、確かめられなかったら `return` でそこで止める（後ろの行を動かさない）
 - 最新の版は、`releases/latest/download/sha256sum.txt.asc`（最新のリリースへ飛ぶ）の中の zip の名前から取る。版を調べるための別の問い合わせ（GitHub の API）はしない
-- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 7 の補足と同じ理由）
+- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[Windows の OpenSSH サーバー](windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)の手順 7 の補足と同じ理由）
 - `curl.exe` で取ったファイルには、ブラウザで取ったときのような「インターネットから来た」印（Mark of the Web）が付かないので、SmartScreen の確認は出ないはず（確かめていない）
 - `%PROCESSOR_ARCHITECTURE%` が `AMD64` なら `amd64`、`ARM64` なら `arm64` の zip を取る。arm64 の版は試していない
 
@@ -272,7 +272,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（構文とコマンドの引数だけ）。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4・6 のブロックは、Linux の pwsh で偽物の署名と Linux の `syncthing` を使って流した（同じ付録）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、タスクの登録と起動・サインインでの起動・サインアウトで止まること、受信の規則と警告の窓、LAN の別の端末からの GUI と同期、自動の更新とその後のタスクの状態、arm64 の Windows、24H2 より前の Windows
   - 2026-10-03: 別の手順書（`docs/windows-syncthing.md`）として書いたものを、同じ日にこの文書の Windows 11 の節へ移した。コマンドは変えていない（手順の番号も節の中で同じ）
-  - 2026-10-03（後）: LAN をプライベートにする操作を [Windows 11 の初期設定の手順 43](../windows-setup.md#実施手順) へ移し、この節の手順 7 を確かめてから規則を作る形に、[Windows 11 のロールバック](../syncthing.md#windows-11-のロールバック)の手順 4 をそこを指す手順に変えた。手順 7 の今のブロックも、構文の検査と、偽物の `Get-NetConnectionProfile` での模擬だけ
+  - 2026-10-03（後）: LAN をプライベートにする操作を [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) へ移し、この節の手順 7 を確かめてから規則を作る形に、[Windows 11 のロールバック](../extra/syncthing.md#windows-11-のロールバック)の手順 4 をそこを指す手順に変えた。手順 7 の今のブロックも、構文の検査と、偽物の `Get-NetConnectionProfile` での模擬だけ
   - 2026-10-05: 設定を残した再導入の確認条件と、参照先の Windows の版を訂正した。Windows のコマンドは変更せず、実機未検証のまま
 
 AlmaLinux 10 の実機:
@@ -295,11 +295,11 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の実機記録は 25H2） |
+| OS | Windows 11（24H2 以降。[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の実機記録は 25H2） |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | Syncthing | 2.1.5（2026-09-08。`syncthing-windows-amd64-v2.1.5.zip`） |
-| ネットワーク | LAN の接続（[Windows 11 の初期設定の手順 43](../windows-setup.md#実施手順) でプライベートにする） |
+| ネットワーク | LAN の接続（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) でプライベートにする） |
 
 > [!NOTE]
 > 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](../syncthing.md#実施手順)のシェル変数、Windows 11 は[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
@@ -354,7 +354,7 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
   - タスクの実行ファイルと、受信の規則のプログラムが、更新の後も同じパスを指す
   - 自動の更新は、入れ替える前にリリースの署名を確かめる。稼働中に定期確認するので、`winget upgrade` や `scoop update` を自分で走らせなくてよい
   - 初回だけは本書が取ってくるので、sha256 と Authenticode の署名を確かめてから置く（[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4）
-  - AlmaLinux 10 の Homebrew 版は逆に、Syncthing 自身の更新を切ってある（`noupgrade`。[注意点](../syncthing.md#注意点)）
+  - AlmaLinux 10 の Homebrew 版は逆に、Syncthing 自身の更新を切ってある（`noupgrade`。[注意点](../extra/syncthing.md#注意点)）
 - **Windows 11 では、サインインしている間だけ、タスク スケジューラで動かした**
   - Syncthing の公式の説明は、タスク スケジューラ（「ユーザーがログオンしているかどうかにかかわらず実行する」とパスワードの保存）か、スタートアップのフォルダーのショートカット。サービスにするのは、ほとんどの使い方では勧めていない
   - 本書は、利用者の使い方（サインインしている間だけ同期すればよい）に合わせて `-LogonType Interactive` にし、パスワードを保存しない
@@ -363,9 +363,9 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
   - 公式の説明の「一度対話で起動して、警告の窓で許可する」は、窓でキャンセルを押すと拒否の規則ができ、後から気付きにくい
 - **Windows 11 でも GUI は LAN に公開した**（AlmaLinux 10 と同じく、認証 → 起動 → 待ち受けを広げる順）
   - この PC からだけ開くなら、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
-- **ネットワークをプライベートにするのは、[Windows 11 の初期設定の手順 43](../windows-setup.md#実施手順)**
-  - もとは [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
-  - そのため、[Windows 11 のロールバック](../syncthing.md#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
+- **ネットワークをプライベートにするのは、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート)**
+  - もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
+  - そのため、[Windows 11 のロールバック](../extra/syncthing.md#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
 
 - このホストは GNOME も入っていて、LAN 内の別 PC から触りたいので公開する方を採った
 
@@ -550,7 +550,7 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 | 実施日 | 2026-09-27 |
 | 土台 | クラウド上の Docker 29.3.1（ホストは cgroup v1。ホストの `/sys/fs/cgroup/unified`（cgroup2）をコンテナの `/sys/fs/cgroup` に渡した） |
 | コンテナ | `almalinux:10`（AlmaLinux 10.2、x86_64）を `--privileged --network host` で、`/sbin/init`（systemd 257）を PID 1 にして起動。イメージがマスクしている `systemd-logind` を戻し、`<USER>`（uid 1000）に `loginctl enable-linger` |
-| Homebrew | 7.0.6（[homebrew.md](../homebrew.md) と同じインストーラ） |
+| Homebrew | 7.0.6（[homebrew.md](../almalinux-setup.md) と同じインストーラ） |
 | Syncthing | `syncthing 2.1.5`（`x86_64_linux` のボトル。バージョン文字列の末尾は `[noupgrade]` で、aarch64 のボトルのような `modernc-sqlite` は付かない） |
 | 相手の端末 | 同じコンテナの 2 つ目の Syncthing（`--home=~/peer`、`tcp://127.0.0.1:22001` で待ち受け、探索・リレー・NAT は切った） |
 | 通していない手順 | [手順 7](../syncthing.md#実施手順)（firewalld を入れていない） |

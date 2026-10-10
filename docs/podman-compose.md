@@ -2,17 +2,18 @@
 
 ## 実施手順
 
-- [検証記録](verification/podman-compose.md)・[参考資料](reference/podman-compose.md)
+- [検証記録](verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順と、[EPEL](epel.md) を通してあること（podman-compose は EPEL にあり、AppStream には無い）。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順と、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)（EPEL）を通してあること（podman-compose は EPEL にあり、AppStream には無い）。`podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（コンテナを自分のユーザーの rootless の podman で動かすため）
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 > - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 
 - 上から順にコードブロックを貼る
-- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
-- PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](#注意点)）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-compose.md#ロールバック)
+- PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -25,12 +26,12 @@
    - 一緒に入るのは Python のライブラリ 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - [epel.md 手順 3](epel.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. podman-compose が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose version
    command -v podman-compose
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-compose
@@ -39,7 +40,7 @@
 
    - `podman version 5.8.2` と `podman-compose version 1.5.0` の 2 行が出る
    - `/usr/bin/podman-compose`、`podman-compose 1.5.0-1.el10_1 epel` が出る
-   - 最後の `podman compose`（podman のサブコマンド）は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
+   - 最後の `podman compose` は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
 
 1. 確認用の compose ファイルとページを置く。
 
@@ -62,23 +63,21 @@
    cat ~/compose-sample/compose.yaml
    ```
 
-   - `web` は Apache で、`127.0.0.1:8081` で開く。ページは `~/compose-sample/html` から読む
-   - `check` は、`web` にサービス名でつながるかを確かめるためだけのコンテナ（同じイメージなので、取得は 1 回で済む）
-
 1. compose ファイルのあるディレクトリで、コンテナを起動する。
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
    ```
 
-   - 初回はイメージ（285 MB）を取得する
    - 最後に `compose-sample_web_1` と `compose-sample_check_1` が出る
 
 1. 起動したコンテナと、公開したポートを確かめる。
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose ps
    podman pod ps
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8081/
@@ -86,16 +85,17 @@
 
    - `podman-compose ps` に 2 つのコンテナが `Up` で出て、`web` の `PORTS` に `127.0.0.1:8081->8080/tcp` が出る
    - `podman pod ps` に `pod_compose-sample` が `Running` で出る
-   - `hello from compose` が出ればよい（curl は、Apache が待ち受けるまで 1 秒おきに 10 回まで試し直す）
+   - `hello from compose` が出ればよい
 
 1. `check` のコンテナから、サービス名 `web` でつながるか確かめる。
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose exec check curl -s http://web:8080/
    ```
 
-   - `hello from compose` が出ればよい。`web` という名前が、compose のネットワークの中で引けている
+   - `hello from compose` が出ればよい
    - **次の節は、プロンプトが戻ってから貼る**（続けて貼るとコンテナの中のコマンドへの入力として食われる）
 
 ---
@@ -135,62 +135,8 @@
    ```bash
    cd ~/compose-sample
    podman-compose pull
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
    ```
 
-   - `pull` がイメージを取り直し、`up -d` がコンテナを作り直す
    - 新しいイメージが無いときも、`up -d` はコンテナの名前を出して終わる
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- compose で動かしていたデータを残したいときは、この節の手順 2 の前に `~/compose-sample` から取り出しておく
-
-1. コンテナ・pod・ネットワークを消す。
-
-   ```bash
-   cd ~/compose-sample
-   podman-compose down
-   podman pod ps
-   ```
-
-   - `podman pod ps` が見出しの行だけになればよい
-
-1. 確認用の compose ファイルとページを消す。
-
-   ```bash
-   cd ~
-   rm -rf ~/compose-sample
-   ```
-
-1. [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)で同じイメージを使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-compose を消す。
-
-   ```bash
-   sudo dnf remove podman-compose
-   ```
-
-   - `[y/N]` で聞かれる。依存で入った Python のライブラリも、ほかに使うものが無ければ一緒に消える
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [epel.md のロールバック](epel.md#ロールバック)
-
----
-
-## 注意点
-
-- **`podman-compose exec` が動いている間に貼った行は、コンテナへの入力になる**。`exec` が終了してプロンプトに戻ってから次の手順を貼る
-  - `-T` は擬似端末を付けないだけで、標準入力はつながったままなので、入力を止める用途には使わない
-  - 手順 6 のように、`exec` はブロックの最後に置く
-- **PC の再起動では戻らず、linger が無いとログアウトで止まる**: compose で起動したコンテナは、ふつうの `podman run -d` と同じ（[podman.md の注意点](podman.md#注意点)）。常駐させるものは Quadlet にし、[linger](linger.md) を有効にする
-- **プロジェクトの名前はディレクトリの名前**: 同じ名前のディレクトリで別の compose ファイルを動かすと、同じ名前の pod・ネットワークを使う。`-p <名前>` で変えられる
-- **`down -v` はボリュームの中身も消す**: `down` だけなら名前付きのボリュームは残る（[使い方の基本](#使い方の基本)）
-- **1024 未満のポートは使えない**: rootless の podman と同じ制限（[podman.md の注意点](podman.md#注意点)）
-- **`:Z` をホームやシステムのディレクトリに付けない**: 付けるのはコンテナ用のディレクトリだけ（[podman.md の注意点](podman.md#注意点)）

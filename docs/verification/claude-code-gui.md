@@ -1,6 +1,6 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の検証記録
 
-[手順書](../claude-code-gui.md)
+[手順書](../claude-code-gui.md)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -10,7 +10,7 @@
 
 - `key` と `type` は、Mutter の `org.gnome.Mutter.RemoteDesktop` のセッションを作り、キーを押して離す（`NotifyKeyboardKeysym`）。送り終えたらセッションを止める
 - セッションを作った直後の入力と、止める直前の入力は、Mutter に捨てられることがあった（最初の数文字や最後の 1 文字が抜けた）。スクリプトは、害の無い入力を先に送り、前後に 0.3 秒ずつ置く
-- キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。IBus の Anthy ではこの keysym の経路でローマ字が本文に入らなかった。別の検証用プローブの keycode の経路では「日本語」が確定した（[japanese-input.md の VM の付録](japanese-input.md#付録-クリーンインストールした-vm-での検証2026-10-06)）
+- キー配列に無い文字（`é`・`日本語`・`←` など）は、エラーにならずに捨てられる。IBus の Anthy ではこの keysym の経路でローマ字が本文に入らなかった。別の検証用プローブの keycode の経路では「日本語」が確定した（[japanese-input.md の VM の付録](almalinux-setup.md#日本語入力-付録-クリーンインストールした-vm-での検証2026-10-06)）
 - `launch` は、`.desktop` の `Exec` を `systemd-run --user` の一時的なサービスとして動かす
   - `gio launch` を `systemd-run` で動かすと、`gio` が終わったときにサービスごとアプリが止められて、窓が出なかった
   - 実行ファイルは、ユーザーの systemd の `PATH`（GNOME Shell から起動したときと同じ）で探す
@@ -30,7 +30,7 @@
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま貼った
     - 書き換えたのは手順 1 の `REPO`（PR #68 の作業ツリーを指した。`scripts/gnome-gui.py` がまだ main に無いため）と、任意節で書き換える `VIRTUAL_MONITOR` だけ
     - 分ける前の版（ヘッドレスのセッションの起動と、ひとつの手順書だった）で 3 回通した（ブラケットペーストの無しと有り、レビューで直した後の版。[付録](#付録-実機での検証記録2026-10-01)）
-    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1・2](../gnome-headless-session.md#実施手順) の後に、実施手順 1〜6 → [ロールバック](../claude-code-gui.md#ロールバック) → 実施手順 1〜6 → [仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
+    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1・2](../gnome-headless-session.md#実施手順) の後に、実施手順 1〜6 → [ロールバック](../extra/claude-code-gui.md#ロールバック) → 実施手順 1〜6 → [仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
   - 確認したこと
     - 仮想モニター（1920x1080 と 1280x720）の画面を撮れる
     - キーボードの入力（電卓で `12×34 = 408`）、ポインタのクリック・ダブルクリック・右クリック・スクロール、アプリの起動（ファイルを渡すときも）
@@ -39,13 +39,15 @@
     - ロールバックで、ドロップインと仮想モニターが無くなり、ヘッドレスのセッションは動き続ける
     - ほかのユーザーのヘッドレスのセッションがあっても、手順 3 とロールバックが、このユーザーのセッションだけを見る
     - SELinux が Enforcing のまま、AVC は出なかった
-    - 2026-10-02: Windows 11 のリモートログインから同じユーザーで入ると、既存のヘッドレスのセッションへ引き渡される（[注意点](../claude-code-gui.md#注意点)）
+    - 2026-10-02: Windows 11 のリモートログインから同じユーザーで入ると、既存のヘッドレスのセッションへ引き渡される（[注意点](../extra/claude-code-gui.md#注意点)）
   - 確認していないこと
     - 再起動の後の自動起動（この Pi では Claude Code と WireGuard・Samba・Syncthing が動いているので、再起動しなかった）
     - x86_64 の PC、モニターのある PC
     - IBus での日本語の入力、キーリングを開く窓が出たときの動き
     - 同じユーザーでローカルの画面にも同時にログインしたときの動き（付録の未確認事項のうち、リモートログイン側は上の 2026-10-02 に確認済み）
-  - 2026-10-02: もとの手順 3・4 と、[ロールバック](../claude-code-gui.md#ロールバック)のもとの手順 2・3 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/claude-code-gui.md#ロールバック)のもとの手順 2・3 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-08: 実機（同じ Raspberry Pi 5）では、ヘッドレスのセッションをやめてリモートログインだけにしたので、[gnome-headless-session.md の「リモートログインだけにする（併用をやめる）」](../gnome-headless-session.md#リモートログインだけにする併用をやめる)の手順 3 でドロップインを外した（ロールバックの手順 1 と同じ操作。手順 2 は行っていない）。2026-10-01 から残していた状態は、この実機にはもう無い
+    - ヘッドレスのセッションを先に止めてからリモートログインで入ると、そのセッションの gnome-shell にもドロップインが効き、RDP のモニターは `Meta-1` として足された（[gnome-headless-session.md の検証記録の付録](gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
 
 | 項目 | 値 |
 |---|---|
@@ -101,7 +103,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 ### 注意点 / 手順 0: 本文中の記録
 
-- **GDM を再起動すると、このセッションが消えることがある**: 2026-10-02 に GDM を再起動したとき、このセッションは起動し直されたが 1 秒で終わった（[gnome-headless-session.md の注意点](../gnome-headless-session.md#注意点)）。`sudo systemctl start gnome-headless-session@<USER>.service` で起動すると、ドロップインの `Meta-0` も戻った
+- **GDM を再起動すると、このセッションが消えることがある**: 2026-10-02 に GDM を再起動したとき、このセッションは起動し直されたが 1 秒で終わった（[gnome-headless-session.md の注意点](../extra/gnome-headless-session.md#注意点)）。`sudo systemctl start gnome-headless-session@<USER>.service` で起動すると、ドロップインの `Meta-0` も戻った
 
 ### 付録: 実機での検証記録（2026-10-01）
 
@@ -135,7 +137,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
   - キー配列（us）に無い文字（`é`・`ü`・`ß`・`日本語`・`←`）は、エラーにならずに捨てられた。間の空白は入った
   - スクリプトにした後は、`type` を 3 回続けて、どれも全部の文字が入った
 - アプリの起動: `systemd-run --user -- gio launch …` では窓が出なかった（`gio` が終わると unit ごと止められた）。`systemd-run` は `gio` をこのシェルの PATH で探し、Homebrew の `gio` を動かしていた
-- Homebrew: `python3`（3.14.7）には `gi` が無く、`gsettings`（glib 2.90.0）は keyfile のバックエンドだった（[gnome-power.md 手順 2 の補足](../gnome-power.md#実施手順)）
+- Homebrew: `python3`（3.14.7）には `gi` が無く、`gsettings`（glib 2.90.0）は keyfile のバックエンドだった（[gnome-power.md 手順 2 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
 - AT-SPI: 窓の一覧は取れた。GTK4 のアプリの窓は、フォーカスがあっても `active` の状態を出さなかった
 - gsd-power: 電源のキーが既定のまま（`sleep-inactive-ac-type` が `'suspend'`）だと、無操作が続いて「Automatic suspend — Suspending soon because of inactivity.」の通知が出た
   - 15 分（900 秒）で `gsd-power: Error calling suspend action: GDBus.Error:org.freedesktop.login1.SleepVerbNotSupported: Sleep verb 'suspend' is not configured or configuration is not supported by kernel` が出た
@@ -225,7 +227,7 @@ RDP の標準構成の試験とロールバックを終えた後、ヘッドレ�
 
 ### 手順中の実測・検証状況の記録
 
-- **ドロップインは、このユーザーの GNOME のセッションすべてに効く**: 後からモニターをつないで、このユーザーで PC の画面からログインすると、見えない仮想モニターも足されるはず（確かめていない）。そのときは[ロールバック](../claude-code-gui.md#ロールバック)で外す
+- **ドロップインは、このユーザーの GNOME のセッションすべてに効く**: 後からモニターをつないで、このユーザーで PC の画面からログインすると、見えない仮想モニターも足されるはず（確かめていない）。そのときは[ロールバック](../extra/claude-code-gui.md#ロールバック)で外す
 
 ### 手順中の検証状況
 

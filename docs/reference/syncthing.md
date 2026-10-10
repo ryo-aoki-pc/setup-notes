@@ -1,6 +1,6 @@
 # Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の参考資料
 
-[手順書](../syncthing.md)
+[手順書](../syncthing.md)・[ロールバックと注意点](../extra/syncthing.md)
 
 ## 補足
 
@@ -13,6 +13,9 @@
 - `ST_GUI_ADDR` を `0.0.0.0:8384` にすると**すべての NIC で待ち受ける**
 - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 7 のままでよい）
 - パスワードは変数に置かない。手順 3 でその場で読み取り、設定したら `unset` する
+- `ST_LAN_IP` は、localhost の URL には使わない
+- 変数はそのシェルの中だけで有効
+- 手順 5〜7 へ進む場合に手順 3・4 もやり直すのは、認証設定の成功を確かめるため
 
 ### 実施手順 / 手順 2: 補足: noupgrade と入るファイル
 
@@ -21,12 +24,18 @@ aarch64 で降ってくるボトルは `syncthing--2.1.5.arm64_linux.bottle.tar.
 - `noupgrade` は、**Syncthing 自身の自動アップグレード機能を無効にしてビルドされている**という印
   - 公式の tarball 版は自分で新しい版を取ってきて入れ替えるが、Homebrew の formula は `go run build.go --version ... --no-upgrade tar` でビルドするので、その機能が入らない
   - 更新は `brew upgrade` で行う（[更新](../syncthing.md#更新)）。パッケージマネージャ管理下のファイルを Syncthing が勝手に書き換えないので、こちらの方が都合がよい
-- `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](../syncthing.md#注意点)）
+- `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](../extra/syncthing.md#注意点)）
 
 実行ファイルと man ページに加え、Homebrew が生成したサービス用ファイルが入る。**上流が配る systemd の unit とは別物**:
 
 - `sh.brew.syncthing.service` は formula の `service do` ブロックから Homebrew が生成したもので、公式が配っている `etc/linux-systemd/user/syncthing.service` ではない（手順 5 の補足）
 - man は `man syncthing` / `man syncthing-config` / `man syncthing-faq` などが読める
+- aarch64 でもビルド済みのボトルが降ってくるので、Go のビルドにはならない
+- 依存は無い（静的バイナリ 1 つ、約 30 MB）
+
+### 実施手順 / 手順 4: 補足: 認証を先に入れる理由
+
+- LAN に開いたあとで認証を設定するのでは、その間 GUI が誰でも開ける状態になるため、サービスの起動より先に入れる
 
 ### 実施手順 / 手順 5: 補足: 生成される unit と、システムサービスにする道
 
@@ -56,6 +65,23 @@ StandardError=append:/home/linuxbrew/.linuxbrew/var/log/syncthing.log
 - 公式は root 管理の `syncthing@<USER>.service` も用意していて、その場合 linger は要らない
 - Homebrew 版には上流のシステムサービス用 unit が同梱されないので、自分で用意することになる。本書は Homebrew が生成するユーザーサービスを使う
 
+### 実施手順 / 手順 5: 補足: 置かれる unit と linger
+
+- `~/.config/systemd/user/sh.brew.syncthing.service` が置かれる
+- [linger](../linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、SSH を切った時点で Syncthing も止まる）
+
+### 実施手順 / 手順 6: 補足: 待ち受けを広げる順と、EOF
+
+- 手順 3〜4 で認証を入れてあるので、手順 6 で待ち受けを広げる
+- CLI が `EOF` で終わることがあるのは、GUI の設定変更が API の待ち受けも切り替えるため
+- ブロックは 3 秒待って 1 度だけ再試行し、読み戻した両方の値が一致してから再起動する。設定後は再起動して待ち受けと TLS を確かめる
+
+### 実施手順 / 手順 7: 補足: firewalld の定義済みサービス
+
+- `syncthing` は同期と探索（22000/tcp、22000/udp、21027/udp）
+- `syncthing-gui` は Web GUI（8384/tcp）
+- どちらも firewalld に最初から入っている定義済みサービスで、自分で書く必要はない
+
 ### 実施手順 / 手順 8: 補足: 認証が効いているかの確かめ方
 
 [この節の検証記録](../verification/syncthing.md#実施手順--手順-8-補足-認証が効いているかの確かめ方)
@@ -64,18 +90,87 @@ GUI のトップはログイン画面なので 200 が返る。**認証が効い
 
 API キーを付ければ通る。キーは `syncthing cli config gui apikey get` で読めるが、**パスワードと同じ重みの秘密**なので扱いに注意する。
 
+### 実施手順 / 手順 9: 補足: フォルダ
+
+- この時点で同期するフォルダが 1 つも無いのは、Syncthing 2.x が既定フォルダを作らないため
+- バックアップから戻したホストでは、フォルダのディレクトリと `.stfolder` は Syncthing が作り、中身は相手の端末から届く
+
+### 接続元を絞る（任意） / 手順 1: 補足: 先頭の if
+
+- 先頭の `if` は、`ST_ALLOW_FROM` が空のままブロックを貼ったときに、`syncthing-gui` の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
+
+### 設定を自動でバックアップする（任意） / 手順 1: 補足: スクリプト
+
+- 保存先の `~/syncthing-backup`（0700）と、スクリプト `~/.local/bin/syncthing-backup` ができる
+- スクリプトは保存先のディレクトリが無いと、作らずに失敗する
+- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](../verification/syncthing.md#設定を自動でバックアップする任意--手順-1-補足-スクリプトの作り)）
+
+### 設定を自動でバックアップする（任意） / 手順 2: 補足: ユニットの役割
+
+- `.service` がスクリプトを 1 回走らせる
+- `.path` は `config.xml` が書き換わったとき、`.timer` は毎日 0:00〜1:00 のどこかで `.service` を起動する
+
+### 設定を自動でバックアップする（任意） / 手順 3: 補足: 待ち時間と、戻したホスト
+
+- `start` が 5 秒ほど戻らないのは、`ExecStartPre` の待ち
+- バックアップから戻したホストで同じ節の手順 4〜6 が要らないのは、送信専用フォルダが戻した `config.xml` に入っているため
+
+### 設定を自動でバックアップする（任意） / 手順 4: 補足: アーカイブが増える理由
+
+- アーカイブが 1 つ増えるのは、登録で `config.xml` が変わったため。path ユニットが働いていることの確認になる
+
+### 設定を自動でバックアップする（任意） / 手順 6: 補足: ゴミ箱にする理由
+
+- こちらで 100 個を超えて消した古いアーカイブは、相手でも消えるため
+
+### 設定を自動でバックアップする（任意） / 手順 7: 補足: パスで探す理由と、残るもの
+
+- フォルダは ID ではなくパスで探す（バックアップから戻したホストでは、ID に元のホスト名が入っている）
+- 登録を消すと、Syncthing が `~/syncthing-backup/.stfolder` も消す。アーカイブは残る
+
+### バックアップから戻す / 手順 4: 補足: ST_BACKUP の既定値
+
+- `ST_BACKUP` には名前順で最後（＝最新）のアーカイブが入る
+
+### バックアップから戻す / 手順 5: 補足: path ユニットが取るアーカイブ
+
+- 同じホストで自動バックアップを有効にしてあれば、展開した `config.xml` を path ユニットが新しいアーカイブとして取る（戻した設定が最新になるだけで、害は無い）
+
+### 更新 / 手順 1: 補足: 再起動が要る理由
+
+- `brew upgrade` は実行ファイルを差し替えるだけなので、動いているプロセスは古いままになる
+
+### Windows 11 で使う / 手順 1: 補足: Windows PowerShell 5.1 にする理由
+
+- PowerShell 7（`pwsh`）では、同じ節の手順 6 のパイプの文字コードが違う
+
 ### Windows 11 で使う / 手順 2: 補足: 変数について
 
 - `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](../syncthing.md#実施手順)の `ST_GUI_USER` と同じ扱い）
-- `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の手順 36](../windows-setup.md#実施手順) と同じ
+- `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows 11 の初期設定の「PC 全体の設定」の手順 2](../windows-setup.md#pc-全体の設定) と同じ（同書の「OpenSSH サーバー」も、この変数を使う）
 - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
 - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
+- 変数はその PowerShell の中だけで有効
 
 ### Windows 11 で使う / 手順 3: 補足: ほかの Syncthing と重ならないようにする理由
 
 - Syncthing の設定と DB の置き場所は、Windows では `%LOCALAPPDATA%\Syncthing` に決まっている（ソースの `lib/locations`）。Syncthing Windows Setup の個人用の導入も、同じ場所を使う（その README）
 - 同じ設定で 2 つの Syncthing を動かすことはできない（設定のフォルダーの `syncthing.lock` で、後から起動した方が止まる）
 - 同じ待ち受けの番号（8384・22000）を、2 つの Syncthing で取り合うことにもなる
+
+### Windows 11 で使う / 手順 3: 補足: 入れ直したときのデバイス ID
+
+- ロールバックの手順 1〜4 の後に入れ直すとき、デバイス ID が前と同じになるのは、同じ節の手順 6 が前の鍵を使うため
+
+### Windows 11 で使う / 手順 4: 補足: 版・フォルダーの権限・中断したとき
+
+- 出る版は、実行した日の最新
+- `icacls` の一覧に自分のユーザーの `(F)` の行が要るのは、Syncthing の自動の更新が、このフォルダーに書くため
+- `中断:` で止まったとき、取ってきたものは `%TEMP%\syncthing-setup` に残る。次に貼ったときに消して作り直す
+
+### Windows 11 で使う / 手順 5: 補足: ASCII にする理由
+
+- ほかの文字があると、同じ節の手順 6 で止まる
 
 ### Windows 11 で使う / 手順 7: 補足: 規則の中身と、最初の起動より前に作る理由
 
@@ -87,6 +182,8 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - Syncthing の公式の自動起動の説明は、「一度対話で起動して、ファイアウォールの窓で許可する」としている。本書はその代わりに、規則を先に作る
 - Syncthing の FAQ も、パブリックのままでは直接つながらずリレー経由になりやすいので、プライベートにするよう書いている
 - グループの名前（`Syncthing (setup-notes)`）は、ほかの導入の方法が作る規則と分けるためのもの
+- `中断:` で止まったときは、規則はまだ作っていない
+- 何度貼ってもよいのは、規則を消してから作り直すため
 
 ### Windows 11 で使う / 手順 8: 補足: タスクの設定のねらい
 
@@ -101,6 +198,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - **`-ExecutionTimeLimit (New-TimeSpan)`**: 0（無制限）。既定の 3 日で止めないため（公式の説明の「長時間実行されている場合は停止」を外す）
 - **`-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries`**: ノート PC で、電池のときも起動し、電池になっても止めない（公式の説明の任意の設定）
 - **`-MultipleInstances IgnoreNew`**: 既に動いていれば、二重に起動しない
+- **`-Force`**: 同じ名前のタスクがあれば、上書きする
 - **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)の手順 5 の補足）
 
 ### Windows 11 で使う / 手順 9: 補足: 2 つのプロセス
@@ -108,6 +206,27 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - タスクが起動するのは親（モニター）で、親が子（本体）を起動する。親は子が終わったときに起動し直すためのもの
 - 子が 60 秒の間に 4 回起動すると、親はあきらめて終わる（ソースの `cmd/syncthing/monitor.go`）。止めて始め直す操作を短い間に繰り返さない
 - 窓は出ない（タスクから起動したとき）。動いているかは、この手順のようにプロセスと待ち受けで見る
+
+### Windows 11 で使う / 手順 9: 補足: 最初の起動
+
+- 新規導入で 8384 が `127.0.0.1` なのは、同じ節の手順 10 で広げるため
+- 最初の起動に数秒かかるのは、DB と HTTPS の証明書を作るため（ブロックは 30 秒まで待つ）
+
+### Windows 11 で使う / 手順 10: 補足: 待ち受けを広げる順
+
+- 同じ節の手順 6 で認証を入れてあるので、手順 10 で待ち受けを広げる
+
+### Windows 11 で使う / 手順 12: 補足: フォルダ
+
+- 新規導入で同期するフォルダが 1 つも無いのは、Syncthing 2.x が既定のフォルダを作らないため
+
+### Windows 11 で使う / 手順 13: 補足: サインアウト
+
+- サインアウトすると、Syncthing も止まる
+
+### Windows 11 で止める・もう一度始める / 手順 1: 補足: 次のサインイン
+
+- 止めても、次のサインインで、また起動する
 
 ### 選択した方針
 
@@ -156,6 +275,6 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
 - [New-ScheduledTaskPrincipal](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal)・[New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)・[New-NetFirewallRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule)
 - [linger](../linger.md) — AlmaLinux 10 の前提の手順書（ログアウト中もユーザーの systemd を動かす）
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md) — Windows 11 の同じ PC で使うことの多い手順書（LAN がプライベートである前提が同じ）
+- [Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー) — Windows 11 の同じ PC で使うことの多い手順（LAN がプライベートである前提が同じ）
 
 ---

@@ -1,6 +1,6 @@
 # ShellCheck / shfmt インストール手順（AlmaLinux 10 / Homebrew）の検証記録
 
-[手順書](../shellcheck.md)
+[手順書](../shellcheck.md)・[ロールバックと注意点](../extra/shellcheck.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -256,15 +256,15 @@ $ brew leaves | wc -l
 - [mvdan/sh — README](https://github.com/mvdan/sh) — shfmt のオプションと `.editorconfig` の対応キー
 - [shfmt 3.14.1 のオプション処理](https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/main.go) — Parser / Printer のオプションを指定した場合の EditorConfig の扱い（2026-10-05 にソースを確認）
 - `shellcheck --help` / `shfmt --help` — 全オプション
-- [Homebrew](../homebrew.md) — Homebrew 本体の導入手順、`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件、`brew` の基本操作
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 
 ### 付録: コンテナでの検証記録（2026-09-23）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../homebrew.md)と手順 2〜3、[検査を調整する（任意）](../shellcheck.md#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[検査を調整する（任意）](../shellcheck.md#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../homebrew.md)） |
+| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../almalinux-setup.md)） |
 | 2. 導入 | `Pouring shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz`（49.1 MB）と `shfmt--3.14.1.arm64_linux.bottle.tar.gz`（3.4 MB）。**依存の `gmp` / `libffi` はこちらでは新規に取得された**（実機は導入済みだった）。ソースビルドは発生しない |
 | 3. 検証 | `version: 0.11.0` / `3.14.1`。スモークテストは実機と同じく SC2086 が 1 件・`rc=1`、shfmt も差分が出て `rc=1` |
 | 検査を調整する | `mktemp -d` に `.shellcheckrc`（`disable=SC2034`）を置くと該当の指摘が消えて `rc` が `1` → `0` に変わることを確認 |

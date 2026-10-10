@@ -1,6 +1,6 @@
 # VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の検証記録
 
-[手順書](../virtualbox-guest-bootc.md)
+[手順書](../virtualbox-guest-bootc.md)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -33,7 +33,7 @@
 
 **VM での実測**（80 GB のディスクに ISO の既定のパーティション）:
 
-- `/var` は 47G で、使用量は ISO で入れた直後が 5.7G、手順 6 の後が 11G、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の後が 6.1G だった
+- `/var` は 47G で、使用量は ISO で入れた直後が 5.7G、手順 6 の後が 11G、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の後が 6.1G だった
 - 手順 6 の後の内訳は、`/var/lib/containers` が 5.2G、`/sysroot/ostree/repo` が 4.5G
 
 **`systemd-detect-virt`**: VM では `oracle` だった（`systemd-detect-virt --list` にある名前）。検証コンテナでは `podman` を返した。
@@ -116,7 +116,7 @@ Guest Additions のインストーラ（`VBoxLinuxAdditions.run`）を、ベー�
 - `/etc` のファイル: udev のルール（`60-vboxadd.rules`）、GNOME にログインしたときに `VBoxClient` を起動する `/etc/xdg/autostart/vboxclient.desktop`、`depmod.d`、`/etc/kernel/postinst.d/vboxadd`
 - SELinux: インストーラの `semanage fcontext` が、`mount.vboxsf` に `mount_exec_t` を割り当てる設定をイメージの `/etc/selinux` に書く
 - `vboxvideo.ko` もビルドされる（VirtualBox の画面を VMSVGA 以外にした場合のドライバ）
-- アンインストーラ（`/usr/sbin/vbox-uninstall-guest-additions`）も入るが、`/usr`・`/opt` に書けないので使えない。戻すときは[ロールバック](../virtualbox-guest-bootc.md#ロールバック)
+- アンインストーラ（`/usr/sbin/vbox-uninstall-guest-additions`）も入るが、`/usr`・`/opt` に書けないので使えない。戻すときは[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)
 
 **CD を入れたときの GNOME**（VM での実測）:
 
@@ -267,7 +267,7 @@ Successfully tagged localhost/vbox-ga:latest
 - `podman image trust set` は、podman 5.8.2 でも `sigstoreSigned` の規則を作れない（`signedBy`・`accept`・`reject` だけ）ので、ファイルを写した
 - 検証（手順書の外。WSL の AlmaLinux 10 で、取り込み済みのベースを `podman pull` し直した）:
   - この手順の後は、`Checking if image destination supports signatures` と `Storing signatures` が出た
-  - `~/.config/containers/pki` の 2 つの鍵を別の鍵に差し替えると、`Source image rejected: cryptographic signature verification failed: invalid signature when validating ASN.1 encoded signature` で断られた（VM で鍵を差し替えたときと同じ文。[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1 の補足）
+  - `~/.config/containers/pki` の 2 つの鍵を別の鍵に差し替えると、`Source image rejected: cryptographic signature verification failed: invalid signature when validating ASN.1 encoded signature` で断られた（VM で鍵を差し替えたときと同じ文。[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1 の補足）
   - `~/.config/containers` を外すと（ホストの `/etc/containers` の既定）、どちらの行も出ずに取り込まれた。AlmaLinux 10 の既定の `policy.json` は、このイメージの署名を確かめない
 - 「すでにある」と出たとき（試していない）:
   - 変更前の設定と公開鍵を別の場所に退避し、今回追加・変更するファイルを控える。既存の同名の鍵や設定は上書きしない
@@ -300,7 +300,7 @@ Successfully tagged localhost/vbox-ga:latest
 
 ### ロールバック / 手順 0: 本文中の記録
 
-  - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../secure-boot-mok.md)、またはホストオンリーアダプターだけの節の手順 3・4 で登録した場合）: 要らなければ、この節の後に [secure-boot-mok.md のロールバック](../secure-boot-mok.md#ロールバック)で消す（VM で確かめた手順）
+  - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../secure-boot-mok.md)、またはホストオンリーアダプターだけの節の手順 3・4 で登録した場合）: 要らなければ、この節の後に [secure-boot-mok.md のロールバック](../extra/secure-boot-mok.md#ロールバック)で消す（VM で確かめた手順）
 
 ### ロールバック / 手順 1: 補足: --enforce-container-sigpolicy を付けない理由
 
@@ -326,13 +326,13 @@ Successfully tagged localhost/vbox-ga:latest
   - この節と付録の手順番号は、今の番号で書いた。Secure Boot の鍵の手順（当時はこの文書の手順 3・4・10 と手順 13 の前半）は、今は前提の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜7 にあり、ここでは「MOK の手順」と書く（付録の表では、同書の手順 N を「MOK N」と書く）
     - 当時は、鍵の登録（今の secure-boot-mok.md の手順 6）を、手順 7 の `bootc switch` の再起動の途中の MokManager で行っていた
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
-    - 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
+    - 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
     - VM はホストの x86_64 の実機の VirtualBox 7.2.20 で動かし、公式の ISO で入れた。VM の Secure Boot は有効
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・共有フォルダーの追加・画面の大きさ）は、同じ働きの `VBoxManage` で行った
   - VM で見つかって直したこと:
     - `BASE_IMAGE` の既定を `:10` から `:latest` にした（ISO は `:latest` を追う。手順 1）
     - Containerfile に `libXt` を足した（無いと `VBoxClient --clipboard` が落ち続け、クリップボードの共有が動かない。手順 3）
-    - [ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1 から `--enforce-container-sigpolicy` を外した（Atomic Desktop の `policy.json` では取り込みを断られる）
+    - [ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1 から `--enforce-container-sigpolicy` を外した（Atomic Desktop の `policy.json` では取り込みを断られる）
     - 手順 4 の CD の合図（GNOME は何も表示しない）、MokManager の最初の画面（10 秒。今は secure-boot-mok.md の手順 6）、手順 8 の `vboxsf` と失敗したときの表、メニューの名前（日本語の表示の 2 か所と、英語の表示）
   - 確認したこと:
     - `bootc switch`、`bootc upgrade`（イメージが変わったときと、変わらないときの両方）、`bootc rollback`
@@ -350,7 +350,7 @@ Successfully tagged localhost/vbox-ga:latest
   - コンテナでの検証（2026-09-28。[付録](#付録-コンテナでの検証記録2026-09-28)）: Atomic Desktop のイメージそのものを VM の代役にし、中の podman にコードブロックを貼った
     - 確かめたのは、派生イメージのビルド（モジュールのビルドと署名、`bootc container lint`）と、切り替えた後の最初の起動を systemd を PID 1 にしたコンテナで模した結果
     - このとき実機の設定は変えていない（`sudo` を使わず、rootless の podman だけ）
-  - 2026-09-28: 鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、当時の手順 13（鍵の確認と署名の確認。今は同書の手順 7 と、この文書の手順 10）と、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、当時の手順 13（鍵の確認と署名の確認。今は同書の手順 7 と、この文書の手順 10）と、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は、2026-09-29 に VM で流した（ブラケットペーストの効く端末で）
   - 2026-09-29（VM の本実行の後）: 手順 3 の Containerfile を直した（[付録](#付録-コマンドの表示と-kernel-rt-のコンテナでの確認2026-09-29)）
@@ -361,31 +361,31 @@ Successfully tagged localhost/vbox-ga:latest
   - 2026-09-29（夜）: 直した版を、同じ実機の VirtualBox の VM で流した（[付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）
     - VM は公式の ISO で新しく入れ、検証用の kernel-rt のイメージ（ローカルのレジストリに置いた）に切り替えてから、この文書のブロックを貼った
     - Secure Boot が無効の VM で手順 1〜9（MOK の手順は、Secure Boot が無効と分かったので飛ばした）、有効の VM で手順 1〜10 と MOK の手順
-    - 有効の VM で、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないときと、ベースとカーネルが新しくなったとき）、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
+    - 有効の VM で、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないときと、ベースとカーネルが新しくなったとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
     - 確認したこと: kernel-rt での起動、`kernel-rt-devel` でのビルドと署名、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService
     - あわせて確認したこと: 共有フォルダーの読み書き、カーネルが変わる更新、切り替えた直後の `bootc rollback`
     - 見つかったこと: kernel-rt では、`vboxguest` の読み込みの直後にカーネルの `WARNING` が 1 回出る（[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足）
-    - 直したこと: カーネルも新しくなる更新では `installer exit=1` になる（[手順 6](../virtualbox-guest-bootc.md#実施手順) の箇条書き）。[ロールバック](../virtualbox-guest-bootc.md#ロールバック)のリードの「切り替えた直後」の見込みを、確かめた結果にした
+    - 直したこと: カーネルも新しくなる更新では `installer exit=1` になる（[手順 6](../virtualbox-guest-bootc.md#実施手順) の箇条書き）。[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードの「切り替えた直後」の見込みを、確かめた結果にした
   - 2026-09-30: 下表の Windows 11 のホストの VirtualBox の VM で、今の版（`6fe8b86`）を 2 回流した（[付録](#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）
     - VirtualBox は、Hyper-V の上で VM を動かした（VM のウィンドウの状態バーの説明に「実行エンジン: native API」）
-    - Secure Boot が有効の回: 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないとき）、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1〜3、切り替えた直後の `bootc rollback`
+    - Secure Boot が有効の回: 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3、切り替えた直後の `bootc rollback`
     - Secure Boot が無効の回（スナップショットに戻した VM）: 手順 1〜9（MOK の手順は飛ばした）
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・自動リサイズ・VirtualBox について）は、GUI のメニューそのもので行った（UI Automation で操作）。共有フォルダーの追加は `VBoxManage`、2 回目の CD の挿入と画面の大きさは `VBoxManage` で行った
     - 確認したこと: 既定のカーネルのイメージで、直した Containerfile のビルド（署名あり・なし）、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService、Windows とのクリップボードの両方向、ウィンドウの大きさへの追従、Windows のフォルダーとの共有フォルダーの読み書き、切り替えた直後の `bootc rollback`
     - 見つかったこと: Hyper-V の上では、手順 6 の途中で VM が 1〜7 分ずつ止まる（リードの WARNING）。既定のカーネルでも `vboxguest` の読み込みの直後に警告が出て、1 度は起動が止まった（[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足）
   - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)を、ホストから SSH のトンネルを張って VM の中でビルドする形で足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）。その節は、この後にトンネルを使わない形に書き換えた（次の項目）。この項目の「その節の手順」は、トンネルを使っていた版のもの
-    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 7・8・10、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 2・3。Secure Boot は有効
+    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 7・8・10、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3。Secure Boot は有効
     - トンネルは Windows の `ssh.exe` で張った。ただし、自動で流すために鍵でログインし、シェルを開かない `-N` を付けた
     - 確認したこと: トンネル越しのベースの取り込み（署名の検査あり）とビルドの中の dnf（AlmaLinux のミラーと EPEL）、MokManager での登録、モジュールの読み込み、ネットワークの無い VM での VBoxService の時刻の同期、トンネル越しの元のイメージへの切り替え
     - その節の手順 4 の補足の実測（`socks5` と `socks5h`、`ALL_PROXY` だけ、`export` の後の `sudo`、`--network=host` 無し、トンネルが切れているとき）も、この VM で確かめた
     - 見つかって直したこと: インストールに使った ISO がドライブに残っていると、手順 4 で CD を入れられない（[手順 4](../virtualbox-guest-bootc.md#実施手順) の箇条書き）
   - 2026-09-30（夜）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の項目と同じ VM と、同じ PC の WSL 2 の AlmaLinux 10.2 で流した（[付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
-    - 手順 1〜5 と MOK 3、その節の手順 1〜9、手順 7、MOK 6、手順 8・10 と MOK 7、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 5・7〜9 でビルドし直して運んだ後の、変わらないとき）、その節の手順 10、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 2・3、その節の手順 11。Secure Boot は有効
+    - 手順 1〜5 と MOK 3、その節の手順 1〜9、手順 7、MOK 6、手順 8・10 と MOK 7、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 5・7〜9 でビルドし直して運んだ後の、変わらないとき）、その節の手順 10、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3、その節の手順 11。Secure Boot は有効
       - 当時は、鍵の登録（MOK 6）を手順 7 の `bootc switch` の再起動で行っていた。今の文書は、その節の手順 4 の後に secure-boot-mok.md の手順 5〜7 で登録してからビルドする（この順では流していない）
       - その節の手順 3 で作る鍵の CN は、当時は `VirtualBox Guest Additions module signing key` だった。今は secure-boot-mok.md と同じ `Local kernel module signing key`（付録の出力は当時の名前のまま）
     - ホストの端末（WSL）から VM へのログインは、文書のとおりパスワードとホスト鍵の確認で行った
     - 確認したこと: ホストでの署名の検査（鍵を差し替えると断られる）、ホストで作った鍵での署名と MokManager での登録、モジュールの読み込み、ホストでビルドしても SELinux のラベル・setuid・sysusers が同じであること、運んだベースへの切り替え
-    - 見つかって直したこと: `podman save` はファイルがすでにあると書かない（その節の手順 8）。[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 2 の `sudo podman rmi` が終わる前に手順 3 を貼ると、`sudo` に読まれて捨てられた（待つ目安を `Deleted:` にした）
+    - 見つかって直したこと: `podman save` はファイルがすでにあると書かない（その節の手順 8）。[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 の `sudo podman rmi` が終わる前に手順 3 を貼ると、`sudo` に読まれて捨てられた（待つ目安を `Deleted:` にした）
 
 | 項目 | VirtualBox の VM（本実行） | Windows のホストの VM（本実行） | 検証環境（コンテナ） |
 |---|---|---|---|
@@ -553,7 +553,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - ISO には Rock Ridge が無く、オプション無しの bsdtar は `Tried to parse Rockridge extensions, but none found` で失敗した
 - キャッシュの試験に、7.2.18 の ISO（同じく照合）
 
-**VM の代役のコンテナ**（手順 1〜7 と MOK 3・4 と、[更新](../virtualbox-guest-bootc.md#更新)・[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1・2）:
+**VM の代役のコンテナ**（手順 1〜7 と MOK 3・4 と、[更新](../virtualbox-guest-bootc.md#更新)・[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1・2）:
 
 - ベースのイメージそのものを `--privileged` で起動し、中に uid 1000 のユーザー（NOPASSWD の sudo）を作った
 - 中の podman（rootful）は、実機の一時ディレクトリを `/var/lib/containers` にマウントし、入れ子で動くように `containers.conf` を足した（`netns="host"`・`cgroups="disabled"`・`cgroup_manager="cgroupfs"` など）
@@ -566,7 +566,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | `mokutil --import` | 一時パスワードを 2 回読み、登録の予約の印を置く |
 | `mokutil --test-key` | 登録済みの印があれば `is already enrolled`（MokManager での登録は、印を置いて模した） |
 
-**起動を模したコンテナ**（手順 8・10 と MOK 7、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 3）:
+**起動を模したコンテナ**（手順 8・10 と MOK 7、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 3）:
 
 - 手順 6 で代役のコンテナの中に作ったイメージを、`podman save` / `podman load` で実機の podman に移した
 - `/etc/passwd`・`/etc/group`・`/etc/shadow`・`/etc/gshadow` をベースのイメージのものに戻し、ログインするユーザーを足した（手元で変更済みの `/etc` は 3-way マージで残る、を模す）
@@ -667,7 +667,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - 端末は擬似端末の上の bash で、ブラケットペーストが効く
   - `mokutil` の一時パスワードは、入力待ちが出てから送った
 - GNOME のセッション（CD の自動マウントと VBoxClient）は、VM の画面でログインしたままにした
-- 手順書の版: 52299ac（`{ … }` で囲んだ後）の版を貼った。VM で見つけた 2 か所（`libXt`、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)の手順 1）は、直した版を貼り直した
+- 手順書の版: 52299ac（`{ … }` で囲んだ後）の版を貼った。VM で見つけた 2 か所（`libXt`、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1）は、直した版を貼り直した
 - 手順 1 は、手順 2 の分岐のとおり `:latest` に直して貼り直し、SSH をつなぎ直すたびに貼り直した
 - ホスト側のメニューの操作は、同じ働きの `VBoxManage` で行った
 
@@ -873,7 +873,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 | ロールバック 3 | 無出力。ユーザー・グループ・リンク・ログが消えた。MOK は登録されたまま |
 | 切り替えた直後の `bootc rollback`（Secure Boot が無効の回） | `Next boot: rollback deployment.` → 再起動 → kernel-rt のイメージ（Guest Additions 無し）で起動 → もう一度 `sudo bootc rollback` → 再起動 → 派生イメージに戻り、手順 8 がそろった |
 
-- 手順書を直したところ: [手順 6](../virtualbox-guest-bootc.md#実施手順) の `installer exit=1`（カーネルも新しくなったとき）、[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足の警告、[ロールバック](../virtualbox-guest-bootc.md#ロールバック)のリードと手順 1・2
+- 手順書を直したところ: [手順 6](../virtualbox-guest-bootc.md#実施手順) の `installer exit=1`（カーネルも新しくなったとき）、[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足の警告、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードと手順 1・2
 
 **手順書の外で確かめたこと**:
 
@@ -1071,7 +1071,7 @@ Secure Boot が有効の回では、続けて次を流した。
 | `sudo sshd -T`、`firewall-cmd` | `allowtcpforwarding yes`・`gatewayports no`・`disableforwarding no`・`permitlisten any`・`passwordauthentication yes`。既定のゾーンは `public` で、サービスは `cockpit dhcpv6-client ssh` |
 
 - この VM より前に、前の付録の VM（ネットワークをホストオンリーアダプターに替えた）で、同じ考え方の実験をしていた。この付録と本文の実測は、この VM で取り直したもの
-- MOK の削除（[ロールバック](../virtualbox-guest-bootc.md#ロールバック)のリード）は、この VM では行っていない
+- MOK の削除（[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリード）は、この VM では行っていない
 
 #### 未確認事項
 
@@ -1160,7 +1160,7 @@ Secure Boot が有効の回では、続けて次を流した。
 - 元に戻した後に、VM をインターネットにつないでレジストリを追い直すこと
 - GNOME の端末から `udisksctl mount -b /dev/sr0` を実行したときに、パスワードを聞かれないか
 - keepalive を送らないときに、VM での取り込みや切り替えの間に VM が止まるか
-- MOK の削除と、ホストの鍵の削除の順（[ロールバック](../virtualbox-guest-bootc.md#ロールバック)のリード）
+- MOK の削除と、ホストの鍵の削除の順（[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリード）
 
 ### 手順中の実測・検証状況の記録
 
@@ -1172,7 +1172,7 @@ Secure Boot が有効の回では、続けて次を流した。
 
 ### 実施手順 / 手順 5: 補足: CD の中身と確かめ方
 
-- ホストが VM に入れる ISO は、Oracle の rpm に同梱の `/usr/share/virtualbox/VBoxGuestAdditions.iso`（[virtualbox.md の注意点](../virtualbox.md#注意点)）
+- ホストが VM に入れる ISO は、Oracle の rpm に同梱の `/usr/share/virtualbox/VBoxGuestAdditions.iso`（[virtualbox.md の注意点](../extra/virtualbox.md#注意点)）
   - Windows のホストでは、VirtualBox のインストール先の `C:\Program Files\Oracle\VirtualBox\VBoxGuestAdditions.iso`（`VBoxManage list systemproperties` の `Default Guest Additions ISO`）。VM の中でのボリューム名とマウントされる場所は同じだった
 - ISO のボリューム名（Joliet）は `VBox_GAs_7.2.20`
 - VM では、GNOME がこれを `/run/media/<USER>/VBox_GAs_7.2.20` にマウントした（`iso9660`・`ro`・`uid=<UID>`・`dmode=500`・`fmode=400`）

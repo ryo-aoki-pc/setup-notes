@@ -9,7 +9,7 @@
 - [Homebrew Formulae](https://formulae.brew.sh/) — formula の版とボトルの一覧（JSON API は `https://formulae.brew.sh/api/formula/<名前>.json`）
 - [EPEL — Fedora Docs](https://docs.fedoraproject.org/en-US/epel/) — EPEL の方針と有効化の手順
 - [Flathub](https://flathub.org/) — アプリの検索、公開元の検証（Verified）の表示
-- [RPM Fusion — Configuration](https://rpmfusion.org/Configuration) — EL 向けの有効化の手順（本書では使っていない。有効にする手順書は [rpmfusion.md](../rpmfusion.md)）
+- [RPM Fusion — Configuration](https://rpmfusion.org/Configuration) — EL 向けの有効化の手順（本書では使っていない。有効にする手順は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 2〜5）
 - [Google Chrome の Linux 向けリポジトリ](https://www.google.com/linuxrepositories/) / [mise — Installing](https://mise.jdx.dev/installing-mise.html) — ベンダーのリポジトリの登録手順
 
 ---

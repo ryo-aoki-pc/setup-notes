@@ -1,6 +1,6 @@
 # Windows 11 でホットキーを使用しているアプリを調べる手順の参考資料
 
-[手順書](../windows-hotkey-conflict.md) / [検証記録](../verification/windows-hotkey-conflict.md)
+[手順書](../windows-hotkey-conflict.md)・[検証記録](../verification/windows-hotkey-conflict.md)・[ロールバック](../extra/windows-hotkey-conflict.md)
 
 ## 補足
 
@@ -21,6 +21,7 @@
 
 ### 実施手順 / 手順 3: 補足: Detect application の検出方式
 
+- 検証した画面の `Application` 列にある `Click to detect application` が、公式説明の `Detect application` に当たる操作
 - 公式説明では、グローバルなメッセージフックの DLL を使い、選んだホットキーの入力を模擬して、そのイベントを待つ（[Hotkey Screener](https://www.ntwind.com/freeware/hotkey-screener.html)）
 - 検出は登録情報だけを読む操作ではない。キーに割り当てられた処理が実行されることがあるため、対象キーを選んでから検出する
 - 検出前に作業を保存する。割り当てられた操作が不明なまま、複数のキーをまとめて検出しない
@@ -97,6 +98,7 @@
 
 ### ロールバック / 手順 1・2: 補足: 調査と対処の戻し方
 
+- 操作は[ロールバック](../extra/windows-hotkey-conflict.md#ロールバック)に分ける
 - 調査前に有効状態とキー設定を控え、その調査で変えた設定だけを戻せるようにする
 - 改善しなかった設定を戻す操作と、解消した競合の対処を取り消す操作は区別する。後者は競合が再び起きる可能性を含む
 - アプリの通常の設定画面で戻せる対処を優先し、診断目的でサービス停止やアプリのアンインストールを行う構成にはしない

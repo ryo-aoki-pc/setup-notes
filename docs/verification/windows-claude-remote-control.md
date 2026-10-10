@@ -1,6 +1,6 @@
 # Windows 11 で Claude Code の Remote Control を SSH の切断後も動かす手順（タスク スケジューラ + WezTerm）の検証記録
 
-[手順書](../windows-claude-remote-control.md)
+[手順書](../windows-claude-remote-control.md)・[ロールバックと注意点](../extra/windows-claude-remote-control.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -38,7 +38,7 @@
     - SSH（`ssh localhost`、使い捨ての鍵）でログインしたシェルから、手順 4（信頼と Remote Control の確認）・手順 5（タスク登録）・手順 6（開始）を通し、手順 7 で SSH を切った
     - 切断の後、タスクで起動した `claude remote-control` が動き続け、Anthropic へ接続していること（プロセスの存続・TLS の接続・claude.ai のセッションが `connected`）を確かめた
     - 別の Claude Code のセッションからそのセッションへメッセージを送り、1 ターン処理して返事を作ったこと（遠隔から操作できること）を確かめた
-    - [止める・もう一度始める](../windows-claude-remote-control.md#止めるもう一度始める)・[ロールバック](../windows-claude-remote-control.md#ロールバック)（タスクの削除まで）を通した
+    - [止める・もう一度始める](../windows-claude-remote-control.md#止めるもう一度始める)・[ロールバック](../extra/windows-claude-remote-control.md#ロールバック)（タスクの削除まで）を通した
   - 確認したこと:
     - sshd が SSH のセッションの子プロセスを切断で止めること（対照の実測）
     - `--spawn same-dir` が無いと `claude remote-control` が `Choose [1/2]` の確認で止まること
@@ -56,7 +56,7 @@
 | PC | x86_64 のノート PC（AMD Ryzen AI MAX+ 395） |
 | OS | Windows 11 Pro 26H2（ビルド 26300.9457、日本語） |
 | PowerShell | Windows PowerShell 5.1.26100.9444 |
-| OpenSSH | `OpenSSH_for_Windows_9.5p2`。`DefaultShell` は Git Bash（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の任意節） |
+| OpenSSH | `OpenSSH_for_Windows_9.5p2`。`DefaultShell` は Git Bash（[Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の任意節） |
 | WezTerm | 20260905-153129-092dcf70（`C:\Program Files\WezTerm`） |
 | Claude Code | 2.1.286（native installer、`C:\Users\<WIN_USER>\.local\bin\claude.exe`） |
 | ユーザー | Microsoft アカウント。Administrators の一員。SSH のセッションは High Mandatory Level |
@@ -175,7 +175,7 @@ x86_64 のノート PC（Windows 11 Pro 26H2）で、同じ PC から `ssh local
 
 ### 実施手順
 
-> - 前提: [Windows 11 の初期設定の手順 16〜19](../windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。このユーザーのプロファイルに書くので、SSH でログインした Windows PowerShell も読む（SSH のクライアントから貼ったときの動きは確かめていない）
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](../windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。このユーザーのプロファイルに書くので、SSH でログインした Windows PowerShell も読む（SSH のクライアントから貼ったときの動きは確かめていない）
 
 ### 補足
 

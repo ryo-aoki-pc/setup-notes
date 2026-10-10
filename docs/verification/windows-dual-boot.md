@@ -1,6 +1,6 @@
 # Windows 11 を AlmaLinux 10 とのデュアルブート向けに入れる手順（ESP を 2 GiB にし、AlmaLinux 用の空きを残す）の検証記録
 
-[手順書](../windows-dual-boot.md)
+[手順書](../windows-dual-boot.md)・[注意点](../extra/windows-dual-boot.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -155,7 +155,7 @@ VirtualBox の VM で、このブロックを打った画面（[付録](#付録-
 
 - **目的**: 1 台のディスクに Windows 11 と AlmaLinux 10 を入れるために、Windows を先に新しく入れる
   - Windows のセットアップのコマンド プロンプトで、ESP を 2 GiB で作り、Windows と回復のパーティションの後ろに AlmaLinux 用の未割り当て領域を残す
-  - AlmaLinux 10 のインストールは、この文書には含めない（[注意点](../windows-dual-boot.md#注意点)に、入れるときの要点だけを置いた）
+  - AlmaLinux 10 のインストールは、この文書には含めない（[注意点](../extra/windows-dual-boot.md#注意点)に、入れるときの要点だけを置いた）
   - 両 OS の導入後に使う任意節として、Windows の QEFI Entry Manager で次回だけ AlmaLinux を起動する方法も扱う
 - **進め方**: インストールメディアは、利用者が Rufus で作ったもの（「インストーラーをカスタムしますか?」の 7 項目をオン）を使う。手順 4・5 はセットアップのコマンド プロンプトに手で打ち、手順 9〜13 は入れた Windows の PowerShell に貼る
 - **状態（実施手順 1〜13）**: **VirtualBox の VM のみで検証**（2026-10-03。[付録](#付録-virtualbox-の-vm-での検証2026-10-03)）
@@ -170,7 +170,7 @@ VirtualBox の VM で、このブロックを打った画面（[付録](#付録-
     - Rufus が書くタイムゾーン（表示名）は無視され、日本語の ISO では東京のままになった
     - やり直し（手順 4・5 を飛ばして手順 3 から）
   - 検証のホストの不具合（メモリかと思われる）で、Rufus が書いた `install.wim` が 2 回とも化け、インストールが 2 回 `0x80070570` で失敗した。ISO の `install.wim` でメディアの 1 ファイルだけを上書きしてから通した（付録）。手順書の誤りではない
-  - **確認していないこと**: 実機（UEFI の設定画面・実物の USB メモリと起動メニュー・物理の日本語キーボード・Shift+Fn+F10）、3rd Party UEFI CA を許可しないときに止まること、Home エディション、BitLocker が有効になる PC、AlmaLinux 10 のインストール（[注意点](../windows-dual-boot.md#注意点)はソースから読んだまま）
+  - **確認していないこと**: 実機（UEFI の設定画面・実物の USB メモリと起動メニュー・物理の日本語キーボード・Shift+Fn+F10）、3rd Party UEFI CA を許可しないときに止まること、Home エディション、BitLocker が有効になる PC、AlmaLinux 10 のインストール（[注意点](../extra/windows-dual-boot.md#注意点)はソースから読んだまま）
   - 書いたときの資料（[参照](../reference/windows-dual-boot.md#参照)）: Microsoft Learn の UEFI/GPT のパーティションの文書とサンプルの `CreatePartitions-UEFI.txt`、Rufus 4.15（2026-06-30）のソース（`src/wue.c`・`src/drive.c`・`res/loc/rufus.loc`）、Microsoft の KB5028997、AlmaLinux 10.2 のインストーラ（Anaconda 40.22.3.46）の `rhel-10` ブランチと blivet のソース
   - その前に試した VM（QEMU の TCG）は、Windows のブートマネージャーの後に画面が出ないまま中止した（[付録](#付録-vm-での試み2026-10-03中止)）
 - **状態（QEFI Entry Manager の任意節）**: **本実行未検証**（2026-10-04。[付録](#付録-qefi-entry-manager-の配布物とソースの確認2026-10-04)）

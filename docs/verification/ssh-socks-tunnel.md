@@ -1,6 +1,6 @@
 # ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）の検証記録
 
-[手順書](../ssh-socks-tunnel.md)
+[手順書](../ssh-socks-tunnel.md)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -44,7 +44,7 @@ Error: remote port forwarding failed for listen port 1080
 - トンネルは Windows の外向きの接続なので、Windows の受信の規則は要らない
 - オフラインのホスト（VM）が再起動すると、Windows の ssh は `Connection to <VM_IP> closed by remote host.` で終わり、待ち受けも消えた
 
-**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](../ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)と[ロールバック](../ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
+**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](../ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)と[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
 
 ### 実施手順 / 手順 3: 補足: socks5h と ALL_PROXY
 
@@ -70,10 +70,10 @@ curl: (97) Could not resolve host: github.com
 
 ### dnf にもトンネルを使わせる（任意） / 手順 1: 補足: dnf のプロキシ
 
-**`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](gh.md#実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
+**`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](almalinux-setup.md#github-cli-実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
 
 - `[main]` の行の直後に 1 行足す。AlmaLinux の `/etc/dnf/dnf.conf` は `[main]` の節だけ
-- `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](../ssh-socks-tunnel.md#ロールバック)で元に戻せなくなるため
+- `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)で元に戻せなくなるため
 
 **dnf 4.20 は `socks5h://` を受け付け、リポジトリの設定は変えずに通った。** AlmaLinux のミラーの一覧（`mirrors.almalinux.org`）も、一覧が返したミラーも、トンネルを通った。コンテナでの実測（進み具合の行は省いた）:
 
@@ -157,7 +157,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 - オンラインのホスト: `openssh-clients` を入れ、同じ名前のユーザーで鍵を作り、公開鍵をオフラインのホストの `authorized_keys` に置いた（鍵認証）
 - このクラウドのホストの外向きの通信は、TLS を署名し直すゲートウェイを通る。その CA を、両方のコンテナの信頼ストアに足した（実際のホストでは要らない）
 
-**流し方**: この文書と [homebrew-offline.md](../homebrew-offline.md)・[homebrew.md](../homebrew.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
+**流し方**: この文書と [homebrew-offline.md](../homebrew-offline.md)・[homebrew.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
 
 - 手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた
 - ホスト鍵の確認には `yes`、インストーラの `RETURN` と brew の `[y/n]` には、表示が出てから Enter と `y` を送った

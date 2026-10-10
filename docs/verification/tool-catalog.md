@@ -23,7 +23,7 @@
 
 ### CLI: 定番の置き換え / 手順 0: 本文中の記録
 
-- 試していないこと: `~/.bashrc` に追記して使うもの（atuin など。[zoxide](../zoxide.md) と同じ形）のシェルへの組み込み、mosh のサーバー側の導入と UDP の許可
+- 試していないこと: `~/.bashrc` に追記して使うもの（atuin など。zoxide〔[AlmaLinux 10 の初期設定](../almalinux-setup.md)〕と同じ形）のシェルへの組み込み、mosh のサーバー側の導入と UDP の許可
 
 ### CLI: コンテナ / 手順 0: 本文中の記録
 
@@ -50,7 +50,7 @@
 | 調査日時 | 2026-09-24、UTC 20:51〜21:20（版の取得は 20:51〜20:57） |
 | 検証コンテナ | `quay.io/almalinuxorg/almalinux:10`（`sha256:83220192…c4c8`、AlmaLinux 10.2 (Lavender Lion) / x86_64、dnf 4.20.0） |
 | コンテナの動かし方 | Ubuntu 24.04 / x86_64 のクラウドホスト上の Docker 29.3.1。`--network host`、Flatpak だけ `--privileged`。非 root ユーザーに NOPASSWD の sudo |
-| Homebrew | 7.0.6（[homebrew.md](../homebrew.md) の手順 1〜3 をそのまま通して導入） |
+| Homebrew | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 をそのまま通して導入） |
 | EPEL | `epel-release-10-6.el10`（`extras`）。CRB はイメージの既定で有効 |
 | flatpak | `flatpak-1.16.0-9.el10_2.1`（AppStream） |
 | aarch64 の調べ方 | RPM: `dnf --forcearch=aarch64 repoquery`。Homebrew: formulae.brew.sh の JSON のボトル（`arm64_linux`）。Flathub: `flatpak remote-ls --arch=aarch64` と `flatpak remote-info --arch=aarch64` |
@@ -86,7 +86,7 @@
 | `meta` | 版の調査だけ（EPEL と flatpak を入れて照会） |
 | `cli` | Homebrew と CLI（Homebrew / EPEL / mise のリポジトリ） |
 | `gui` | GUI の RPM（ベンダー / EPEL） |
-| `fp` | [flatpak.md](../flatpak.md) の検証と、この一覧の Flathub のアプリ（`--privileged`） |
+| `fp` | [flatpak.md](../almalinux-setup.md) の検証と、この一覧の Flathub のアプリ（`--privileged`） |
 | `fps` | 再現の確認だけ（Flathub 登録直後の `flatpak search`） |
 
 **版の調査で使ったコマンド**（`meta` で実行。`$(cat /tmp/rpmnames.txt)` はパッケージ名の一覧、`"..."` は 1 行目と同じ書式、`<...>` は実際には値を入れた）:
@@ -136,8 +136,8 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 
 | コンテナ | 用途 |
 |---|---|
-| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [epel.md](../epel.md) の手順 1〜3。当時は btop.md の手順 1〜3）、[homebrew.md](../homebrew.md) の手順 1〜4 を通した |
-| `fp1` | GUI の Flathub の行。[flatpak.md](../flatpak.md) の手順 1〜5 を通してから入れた |
+| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
+| `fp1` | GUI の Flathub の行。[flatpak.md](../almalinux-setup.md) の手順 1〜5 を通してから入れた |
 
 **手順書の外で行った準備**（検証環境の都合）:
 

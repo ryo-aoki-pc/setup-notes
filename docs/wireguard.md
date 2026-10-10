@@ -2,24 +2,28 @@
 
 ## 実施手順
 
-- [検証記録](verification/wireguard.md)・[参考資料](reference/wireguard.md)
+- [検証記録](verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
 
 > [!IMPORTANT]
-> - **手順 1〜8 は両拠点の WG ホストで、手順 9 は両拠点のルーターで行う**
-> - **手順 10〜17 はクライアントを受ける拠点のホストで行う**。手順 15 と手順 18 は、クライアントで行う
-> - コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す
+> - **この実施手順は、拠点の WG ホストのもの**。外出先の PC は、AlmaLinux 10 なら[AlmaLinux 10 の PC からつなぐ](#almalinux-10-の-pc-からつなぐ)、Windows 11 なら[Windows 11 で使う](#windows-11-で使う)から通す
+> - [site.env を作る](#siteenv-を作る)の手順 1〜3 と[鍵を作って適用する](#鍵を作って適用する)の手順 1〜5 は**両拠点の WG ホストで**、同じ項の手順 6 は**両拠点のルーターで行う**
+> - [クライアントを登録する](#クライアントを登録する)の手順 1〜9 と[状態と疎通を確かめる](#状態と疎通を確かめる)の手順 1 は、**クライアントを受ける拠点のホストで行う**。[クライアントを登録する](#クライアントを登録する)の手順 8 と[状態と疎通を確かめる](#状態と疎通を確かめる)の手順 2 は、クライアントで行う
+> - コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は[site.env を作る](#siteenv-を作る)の手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す
 > - **拠点 B のホストでは、引数の `A` を `B` に読み替える**
-> - **手順 2 と手順 5 で `vi` が開く**。保存して閉じてから次の手順を行う
+> - [site.env を作る](#siteenv-を作る)の手順 2 と[鍵を作って適用する](#鍵を作って適用する)の手順 2 で、**`vi` が開く**。保存して閉じてから次の手順を行う
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
-- 手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
-- 手順の後: クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](#全部消すロールバック)
+- [site.env を作る](#siteenv-を作る)の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 外出先の PC をつなぐなら[AlmaLinux 10 の PC からつなぐ](#almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](#windows-11-で使う)、大きい通信だけ遅い・止まるなら[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)、クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](extra/wireguard.md#全部消すロールバック)
 
 > [!WARNING]
 > **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる。**
 >
-> - 該当するのは、手順 8・12 と[クライアントを削除する](#クライアントを削除する)の `apply`
-> - 切り離して実行する方法は、[wireguard-road-warrior.md の落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)にある
+> - 該当するのは、[鍵を作って適用する](#鍵を作って適用する)の手順 5、[クライアントを登録する](#クライアントを登録する)の手順 5 と、[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)・[クライアントを削除する](#クライアントを削除する)の `apply`
+> - 切り離して実行する方法は、[落とし穴](#落とし穴-apply-は作業中の-ssh-経路そのものを切る)にある
+
+### site.env を作る
 
 1. 変数を設定する。
 
@@ -35,7 +39,7 @@
    mkdir -p ~/wg && chmod 700 ~/wg
    cp "${REPO:?このリポジトリの場所を REPO に入れてから貼る}/scripts/wireguard/site.env.example" ~/wg/site.env
    chmod 600 ~/wg/site.env
-   vi ~/wg/site.env                      # 公開鍵は手順 5 で書き足す
+   vi ~/wg/site.env                      # 公開鍵は「鍵を作って適用する」の手順 2 で書き足す
    ```
 
    - **編集するのは `~/wg/site.env` だけ。** 埋める値は[設定値の表](#siteenv-に書く値)にある（クライアント帯は、クライアントを受ける拠点にだけ書く）
@@ -45,14 +49,16 @@
 
    - **次の手順は、両拠点に置いてから貼る**
 
+### 鍵を作って適用する
+
 1. 両拠点の WG ホストで、`wireguard-tools` を入れて鍵ペアを作る。
 
    ```bash
-   cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env keygen A        # 拠点 B のホストでは B
    ```
 
-   - 既存の鍵があれば上書きしない
    - `公開鍵:` の行に、このホストの公開鍵が出る
    - **次の手順は、両拠点で鍵を作ってから貼る**（両拠点の公開鍵を `site.env` に書くため）
 
@@ -84,80 +90,113 @@
    sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 拠点 B のホストでは B
    ```
 
-   - 末尾に、ルーターに入れる値（ポート転送と静的経路）が表示される（手順 9）
+   - 末尾に、ルーターに入れる値（ポート転送と静的経路）が表示される（この項の手順 6）
    - 拠点の指定（`A` / `B`）はこのホストの LAN 側 IP（`WG_x_LAN_IP`）と照合され、違えば何も変更せずに止まる
-   - 再実行しても設定は重複しない。`site.env` を変えたときやクライアントを足したときも、この `apply` で反映する（最後に必ず restart する）
-   - 拠点間の疎通は、手順 9 の後で確認できる（手順 17・18 の疎通確認）
    - **注意**: トンネル越しの ssh で作業していると、`apply` の restart で切れる（冒頭の警告）
 
-1. 両拠点のルーターに、手順 8 の `apply` の末尾に表示された値を入れる。
+1. 両拠点のルーターに、この項の手順 5 の `apply` の末尾に表示された値を入れる。
 
    - 入れるのは、ポート転送と静的経路
-   - **これが無いとトンネルは張れない**（→ [補足: ルーターの設定](reference/wireguard.md#ルーターの設定)）
    - **次の手順は、両拠点のルーターに入れてから貼る**
 
-1. 鍵をホストで作るときは、クライアントを受ける拠点のホストでクライアントを登録する。
+### クライアントを登録する
+
+1. クライアントを受ける拠点の WG ホストで変数を設定し、登録済みのクライアントを確かめる（`SITE` と `CLIENT_NAME` は必ず値を入れる）。
 
    ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env client add A laptop
+   SITE=A                               # クライアントを受ける拠点（A または B）
    ```
-
-   - **鍵をどちらで作るかで、手順 10 か手順 11 のどちらかを選ぶ**（両方を上から順に貼るものではない）
-   - `laptop` / `phone` は自分の名前に、`A` は自分の拠点に読み替える（手順 10〜17）
-
-1. 鍵をクライアント側で作ったときは（手順 10 の代わりに）、公開鍵で登録する。
 
    ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env client add A phone --pubkey 'クライアントから受け取った公開鍵'
+   CLIENT_NAME=laptop                   # 登録簿（clients.list）に載せる名前。英数字・-・_ のみ
    ```
-
-   - 公開鍵をシングルクォートの中に貼ってから実行する
-   - AlmaLinux 10 の PC なら [road-warrior の手順 3〜6](wireguard-road-warrior.md#実施手順)
-   - `--pubkey` で登録した conf の `PrivateKey` は `<CLIENT_PRIVATE_KEY>` のまま（手順 15 で置き換える）
-
-1. クライアントの台数分、手順 10 か手順 11 を繰り返したら、まとめて反映する。
 
    ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env apply A                  # 登録した [Peer] を wg0.conf に書いて restart
+   CLIENT_PUBKEY=                       # クライアント側で鍵を作ったときだけ、その公開鍵（44 文字）を貼る。鍵をホストで作るときは空のまま
    ```
 
-   - **反映は `apply`（restart）で行う。** `reload` では新しい peer の経路が入らない（[落とし穴 2](#落とし穴-2-reload-では経路が追加されない)）
-   - どちらか片方の拠点で登録すれば、そのクライアントは**両拠点の LAN に届く**（[パケットの流れ](reference/wireguard.md#パケットの流れremote-client--各拠点)）
-     - 前提: 両拠点で `apply` 済みで、両拠点のルーターにクライアント帯の静的経路がある
-   - 同じクライアントを両拠点に登録することはできない（[理由](#1-台のクライアントは-1-つの拠点にしか接続できない)）
+   ```bash
+   REPO=~/setup-notes                   # WG ホスト上でこのリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?REPO が空のまま}/scripts/wireguard" && ./wg-vpn.sh -e ~/wg/site.env client list
+   ```
+
+   - 編集が必須なのは、`SITE` と `CLIENT_NAME` の 2 ブロック。`CLIENT_PUBKEY` は、クライアント側で鍵を作ったとき（この項の手順 4）だけ入れる
+   - `REPO` は、clone 先が `~/setup-notes` なら既定のままでよい
+   - 最後に、登録済みのクライアントを一覧で確認する
+   - `CLIENT_NAME` と同じ名前が一覧に無ければ、この項の手順 2 は飛ばす
+   - 変数はそのシェルの中だけで有効。WG ホストのシェルを開き直したら、この手順のブロックを貼り直す
+   - 複数のクライアントを登録するときは、1 台ごとにこの手順から貼り直す
+
+1. `CLIENT_NAME` と同じ名前が一覧にあるときだけ、旧登録を消して反映する。
+
+   - [クライアントを削除する](#クライアントを削除する)の手順 1〜6 を行う。`CLIENT_NAME`・`SITE`・`REPO` はこの項の手順 1 と同じ値にする
+   - 削除前の公開鍵を控え、未知 peer がその鍵だけであることを確かめてから、削除を明示的に許可する。無関係の peer が出たら止める
+   - 削除が反映されると、その旧鍵では接続できなくなる。トンネル越しの ssh で作業していた場合は、別の経路から WG ホストに入り直す
+   - この項の手順 4 の `CLIENT_PUBKEY` は、クライアントで作った新しい鍵の公開鍵のままにする。WG ホストのシェルを開き直したらこの項の手順 1 の変数を設定し直す
+
+1. 鍵をホストで作るときは、クライアントを登録する。
+
+   ```bash
+   sudo ./wg-vpn.sh -e ~/wg/site.env client add "${SITE:?この項の手順 1 の SITE が空のまま}" "${CLIENT_NAME:?この項の手順 1 の CLIENT_NAME が空のまま}"
+   ```
+
+   - **鍵をどちらで作るかで、この項の手順 3・4 のどちらかを選ぶ**（両方を上から順に貼るものではない）
+
+1. 鍵をクライアント側で作ったときは（この項の手順 3 の代わりに）、公開鍵で登録する。
+
+   ```bash
+   if [ -z "${CLIENT_PUBKEY}" ]; then echo '中断: CLIENT_PUBKEY が空のまま。クライアントで作った公開鍵を、この項の手順 1 に入れて貼り直す' >&2; else
+     sudo ./wg-vpn.sh -e ~/wg/site.env client add "${SITE:?この項の手順 1 の SITE が空のまま}" "${CLIENT_NAME:?この項の手順 1 の CLIENT_NAME が空のまま}" --pubkey "${CLIENT_PUBKEY}"
+   fi
+   ```
+
+   - 公開鍵を作る手順は、AlmaLinux 10 の PC なら[鍵を作る](#鍵を作る)の手順 3、Windows 11 の PC なら[Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 6
+
+1. クライアントの台数分、この項の手順 1〜4 を繰り返したら、まとめて反映する。
+
+   ```bash
+   sudo ./wg-vpn.sh -e ~/wg/site.env apply "${SITE:?この項の手順 1 の SITE が空のまま}"      # 登録した [Peer] を wg0.conf に書いて restart
+   ```
+
+   - 同じクライアントを両拠点に登録することはできない（[理由](extra/wireguard.md#1-台のクライアントは-1-つの拠点にしか接続できない)）
    - **注意**: トンネル越しの ssh で作業していると、`apply` の restart で切れる（冒頭の警告）
    - **次の手順は、`apply` が終わってから貼る**
 
 1. PC に渡すときは、クライアント用 conf を表示する。
 
    ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env client show laptop
+   sudo ./wg-vpn.sh -e ~/wg/site.env client show "${CLIENT_NAME:?この項の手順 1 の CLIENT_NAME が空のまま}"
    ```
 
-   - 表示した内容を、手順 15 で PC に取り込む
+   - 表示した内容を、この項の手順 8 で PC に取り込む
+   - この項の手順 4 の `--pubkey` で登録した conf は、`PrivateKey` がプレースホルダのままなので、**秘密情報を含まない**
 
 1. スマートフォンに渡すときは、クライアント用 conf を QR コードで表示する。
 
    ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env client show phone --qr   # qrencode が必要。EL10 では epel-release が要る場合がある
+   sudo ./wg-vpn.sh -e ~/wg/site.env client show "${CLIENT_NAME:?この項の手順 1 の CLIENT_NAME が空のまま}" --qr   # qrencode が必要。EL10 では epel-release が要る場合がある
    ```
 
-   - 表示した QR コードを、手順 15 でスマートフォンに読み取らせる
+   - 表示した QR コードを、この項の手順 8 でスマートフォンに読み取らせる
 
-1. クライアントで、手順 13・14 の conf を取り込む。
+1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
-   - PC は、手順 13 の内容をコピーする。AlmaLinux 10 の PC で NetworkManager に取り込む手順は [wireguard-road-warrior.md](wireguard-road-warrior.md)
-   - スマートフォンは、手順 14 の QR コードを読み取る
-   - 手順 11 の `--pubkey` で登録したときは、conf の `PrivateKey`（`<CLIENT_PRIVATE_KEY>`）を、端末側で自分の秘密鍵に置き換える
+   - AlmaLinux 10 の PC は、[conf を取り込む](#conf-を取り込む)の手順 1〜4
+   - Windows 11 の PC は、[Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 3・4
+   - スマートフォンは、この項の手順 7 の QR コードを読み取る
+   - この項の手順 4 の `--pubkey` で登録したときは、conf の `PrivateKey`（`<CLIENT_PRIVATE_KEY>`）を、端末側で自分の秘密鍵に置き換える
    - **次の手順は、クライアントに取り込んでから貼る**
 
-1. 秘密鍵入りの conf をホストから消す。
+1. 鍵をホストで作ったときは、秘密鍵入りの conf をホストから消す。
 
    ```bash
-   sudo rm /etc/wireguard/clients/laptop.conf
+   sudo rm "/etc/wireguard/clients/${CLIENT_NAME:?この項の手順 1 の CLIENT_NAME が空のまま}.conf"
    ```
 
    - 取り込む前に conf を消すと再発行が必要になる（`client remove` してから登録し直す）
+
+### 状態と疎通を確かめる
 
 1. WG ホストで状態を見る。
 
@@ -185,12 +224,604 @@
 
 ---
 
+## AlmaLinux 10 の PC からつなぐ
+
+> [!IMPORTANT]
+> - **この節は AlmaLinux 10 の PC のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
+> - **拠点の WG ホストができてから始める**（[実施手順](#実施手順)の[鍵を作って適用する](#鍵を作って適用する)の手順 6 まで）
+> - **PC で実行する**。[WG ホストに登録する](#wg-ホストに登録する)の手順 1・2 と[トンネルを確かめる](#トンネルを確かめる)の手順 3 だけ WG ホストで実行する
+> - **`sudo -i` した root のシェルではなく、自分のシェルで貼る**。`~` が自分のホームになるため
+> - [conf を取り込む](#conf-を取り込む)の手順 1 で **`vi` が開く**。`client show` の出力を貼って保存し、閉じてから次の手順を貼る
+> - [conf を取り込む](#conf-を取り込む)の手順 3 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
+
+- [鍵を作る](#鍵を作る)の手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 戻すときは[AlmaLinux 10 の PC のロールバック](extra/wireguard.md#almalinux-10-の-pc-のロールバック)。注意点は[AlmaLinux 10 の PC からつなぐときの注意点](extra/wireguard.md#almalinux-10-の-pc-からつなぐときの注意点)
+
+### 鍵を作る
+
+1. 変数を設定する（4 つの IP は必ず値を入れる）。
+
+   ```bash
+   WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
+   ```
+
+   ```bash
+   WG_HOST_LAN_IP=192.168.110.2         # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
+   ```
+
+   ```bash
+   ROUTER_LAN_IP=192.168.110.1          # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
+   ```
+
+   ```bash
+   PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
+   ```
+
+   ```bash
+   WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「トンネルを確かめる」の手順 5 で秘密鍵と conf を消す）
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
+     printf '%-15s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは、1 行ずつの 4 ブロック
+   - 鍵と conf の一時置き場（`WG_DIR`）は既定のままでよい
+   - 最後に値を読み戻して確かめる
+   - 例の値は拠点 A がクライアントを受ける構成のもの。拠点 B が受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること
+   - **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 の 5 つのブロックを貼り直してから先へ進む
+
+1. `wireguard-tools` を入れる。
+
+   ```bash
+   {
+     sudo dnf install -y wireguard-tools
+     printf '\n\033[7m 確認 \033[0m\n'
+     rpm -q wireguard-tools NetworkManager systemd-resolved
+     systemctl is-enabled systemd-resolved         # disabled（依存で入るだけ。本手順では有効にしない）
+     modinfo -n wireguard                          # カーネル同梱のモジュールのパスが出る
+   }
+   ```
+
+1. 鍵ペアを作る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -e "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.key" ]; then echo '中断: wg0.key が既にある（作り直すなら先に消す。WG ホストに登録済みの公開鍵と対応しなくなる）' >&2; else
+     mkdir -p "${WG_DIR}" && chmod 700 "${WG_DIR}" &&
+     ( umask 077; wg genkey | tee "${WG_DIR}/wg0.key" | wg pubkey > "${WG_DIR}/wg0.pub" ) &&
+     ls -l "${WG_DIR}/wg0.key" "${WG_DIR}/wg0.pub" &&           # どちらも -rw------- で 45 バイト
+     cat "${WG_DIR}/wg0.pub"                                     # この 1 行（公開鍵）を WG ホストへ渡す。秘密鍵（.key）は渡さない
+   fi
+   ```
+
+   - 表示された公開鍵（44 文字）だけを、[WG ホストに登録する](#wg-ホストに登録する)の手順 1 で WG ホストに渡す
+
+### WG ホストに登録する
+
+1. WG ホストで、[クライアントを登録する](#クライアントを登録する)の手順 1・2・4・5 を行い、この PC の公開鍵を登録して反映する。
+
+   - 同じ項の手順 1 の `CLIENT_PUBKEY` には、[鍵を作る](#鍵を作る)の手順 3 で PC に表示された公開鍵（44 文字）を貼る
+   - 同じ項の手順 1 の `CLIENT_NAME` は、この PC だけの名前にする（例 `laptop`）
+   - **注意**: トンネル越しに WG ホストへ ssh して作業している場合、同じ項の手順 5 の `apply` の restart で自分のセッションが切れる（→ [落とし穴](#落とし穴-apply-は作業中の-ssh-経路そのものを切る)。切り離して実行する方法もそこにある）
+
+1. WG ホストで、[クライアントを登録する](#クライアントを登録する)の手順 6 の `client show` の出力をコピーし、PC へ持っていく。
+
+   - `PrivateKey` はプレースホルダのままなので、**秘密情報を含まない**。どの経路で運んでもよい
+   - **次の手順は、`client show` の出力を PC に持ってきてから貼る**
+
+### conf を取り込む
+
+1. PC で、[WG ホストに登録する](#wg-ホストに登録する)の手順 2 の `client show` の出力を `vi` に貼り、`wg0.conf` に保存する。
+
+   ```bash
+   ( umask 077; vi "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" )    # 「WG ホストに登録する」の手順 2 の client show の出力をそのまま貼って保存する
+   ```
+
+   - `client show` の出力は、WG ホストの端末からコピーする
+   - **ファイル名は `wg0.conf` にする**
+   - ファイルで渡すなら、WG ホストで `client show` の出力をファイルに書き出し、`scp` で `${WG_DIR}/wg0.conf` に置く
+   - **次の手順は、保存して `vi` を閉じてから貼る**（続けて貼ると `vi` への入力として食われる）
+
+1. `PrivateKey` 行だけを、[鍵を作る](#鍵を作る)の手順 3 の秘密鍵に置き換える（鍵は表示しない）。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ "$(grep -c '^PrivateKey *=' "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" 2>/dev/null)" != 1 ] || [ ! -s "${WG_DIR}/wg0.key" ]; then
+     echo '中断: wg0.conf の PrivateKey 行が 1 行ちょうどでないか、wg0.key が無い' >&2
+   else
+     sed -i "s|^PrivateKey *=.*|PrivateKey = $(cat "${WG_DIR}/wg0.key")|" "${WG_DIR}/wg0.conf" &&
+     grep -c '^PrivateKey = [A-Za-z0-9+/]\{43\}=$' "${WG_DIR}/wg0.conf" &&    # 1（置き換わった。鍵そのものは表示しない）
+     grep -v '^PrivateKey' "${WG_DIR}/wg0.conf"                                # 残りの行を目で確かめる（Address / PublicKey / Endpoint / AllowedIPs。拠点が WG_MTU を書いていれば MTU も）
+   fi
+   ```
+
+1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
+
+   - LAN 内でこの項の手順 4 を貼ると、そこで通信が切れる
+   - **次の手順は、LAN の外につないでから貼る**
+
+1. 拠点の LAN の外で、conf を NetworkManager に取り込み、自動で張られたトンネルをすぐ切る。
+
+   ```bash
+   {
+     sudo nmcli connection import type wireguard file "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" &&
+     sudo nmcli connection modify wg0 connection.autoconnect no &&
+     nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
+     nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（「トンネルを確かめる」の手順 1 で改めて張る）
+     printf '\n\033[7m 確認 \033[0m\n'
+     nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.zone,ipv4.method,ipv4.addresses,ipv4.dns,ipv6.method,wireguard connection show wg0
+     sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
+   }
+   ```
+
+   - **注意**: LAN 内でこの手順を貼ってしまうと、そこで通信が切れて、その後の手順を貼れなくなる。その場合は PC のコンソールで `sudo nmcli connection down wg0`
+   - 最後に、プロファイルの内容と秘密鍵の保存先を確認する。見るところは次のとおり
+     - `ipv4.method` が `manual`
+     - `ipv4.addresses` が `<CLIENT_TUN_IP>/32`
+     - `ipv4.dns` が `--`
+     - `wireguard.private-key` が `<hidden>`
+     - `wireguard.peer-routes` が `yes`
+     - `wireguard.peers` に接続先拠点の公開鍵
+
+### トンネルを確かめる
+
+1. 拠点の LAN の外で、トンネルを張る。
+
+   ```bash
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo nmcli connection up wg0 &&
+     nmcli device status | grep -E '^(DEVICE|wg0 )' &&                            # wireguard  connected  wg0
+     nmcli -f GENERAL.STATE,IP4.ADDRESS,IP4.ROUTE,IP4.DNS connection show wg0 &&   # activated。IP4.ROUTE に AllowedIPs の 3 経路（mt = 50）
+     ip -4 route show dev wg0 &&                                                  # 同じ 3 経路と metric
+     ip link show dev wg0 | grep -o 'mtu [0-9]*' &&                               # 1420（conf に MTU = があれば、その値）
+     sudo wg show wg0                                                             # latest handshake が数秒前、transfer の received が 0 でない
+     sudo firewall-cmd --get-active-zones           # wg0 が既定ゾーン public に入る
+     cat /etc/resolv.conf                           # 「鍵を作る」の手順 2 の前と同じ（DNS = が無いので変わらない）
+     sudo ausearch -m AVC -ts recent                # <no matches>
+   }
+   ```
+
+1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   for h in "${WG_HOST_TUN_IP:?「鍵を作る」の手順 1 の変数が空のまま}" "${WG_HOST_LAN_IP:?}" "${ROUTER_LAN_IP:?}" "${PEER_WG_LAN_IP:?}"; do
+     echo "== $h"; ping -c 3 -W 2 "$h" | tail -2
+   done
+   tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_LAN_IP> の順に出る
+   ```
+
+   - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
+   - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
+
+1. WG ホストで（[クライアントを登録する](#クライアントを登録する)の手順 1 のシェルで）、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?REPO が空のまま}/scripts/wireguard" &&
+   sudo ./wg-vpn.sh -e ~/wg/site.env client list &&                                        # LAST_HANDSHAKE が「N 秒前」
+   CLIENT_TUN_IP=$(awk -v n="${CLIENT_NAME:?CLIENT_NAME が空のまま}" '$1 == n { print $3 }' ~/wg/clients.list) &&
+   ping -c 3 "${CLIENT_TUN_IP:?clients.list にその名前が無い}"                              # 拠点 → PC（PC の public ゾーンは ping に応答する）
+   ```
+
+   - 接続先拠点の LAN 上の別のホストから `ping <CLIENT_TUN_IP>` も通る（ルーターにクライアント帯の静的経路がある前提）
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](verification/wireguard.md#症状と原因の対応実測)
+
+1. PC で、トンネルを切る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo nmcli connection down wg0 &&
+   nmcli device status | grep -E '^(DEVICE|wg0 )'         # wg0 の行が消える
+   ```
+
+   - 日常は、外出先で `sudo nmcli connection up wg0`、拠点に戻る前に `sudo nmcli connection down wg0`
+
+1. 平文の鍵と conf を消す。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   rm -f "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" &&
+   ls -l "${WG_DIR}"                                       # wg0.pub だけ残る
+   ```
+
+---
+
+## Windows 11 で使う
+
+> [!IMPORTANT]
+> - **Windows で行う**。[Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 1 で管理者の Windows PowerShell（5.1）を開き、同じ項の手順 2〜6、[Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 1・4、[Windows 11 でトンネルを確かめる](#windows-11-でトンネルを確かめる)の手順 2・3・5・6 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)のブロックをそこに貼る。ログインするユーザーは Administrators の一員（WireGuard は PC 全体に入り、トンネルを Windows のサービスとして動かす）
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - [Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 2 と[Windows 11 でトンネルを確かめる](#windows-11-でトンネルを確かめる)の手順 4 は、**WG ホストで行う**（[クライアントを登録する](#クライアントを登録する)の手順 1・2・4〜6 と、[トンネルを確かめる](#トンネルを確かめる)の手順 3 を参照する）
+> - [Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 5 で **WireGuard の窓が開く**。開いてから次の手順を貼る
+> - [Windows 11 でトンネルを確かめる](#windows-11-でトンネルを確かめる)の手順 1 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
+
+- 上から順に進める。コードブロックは、[Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 2 で変数を設定した PowerShell に貼る。[Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 3 だけは、関数名を手入力する
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)
+- WG ホストの側は、AlmaLinux 10 の PC と同じ（`client add --pubkey` で公開鍵を登録して `apply` するだけで、ほかに変えるものは無い）
+
+### Windows 11 で WireGuard と鍵を用意する
+
+1. Windows で、管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+
+1. 変数を設定する（4 つの IP は必ず値を入れる）。
+
+   ```powershell
+   $WG_HOST_TUN_IP = '10.99.0.1'         # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
+   ```
+
+   ```powershell
+   $WG_HOST_LAN_IP = '192.168.110.2'     # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
+   ```
+
+   ```powershell
+   $ROUTER_LAN_IP = '192.168.110.1'      # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
+   ```
+
+   ```powershell
+   $PEER_WG_LAN_IP = '192.168.120.2'     # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
+   ```
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   foreach ($v in 'WG_HOST_TUN_IP', 'WG_HOST_LAN_IP', 'ROUTER_LAN_IP', 'PEER_WG_LAN_IP') {
+     '{0,-15} = {1}' -f $v, (Get-Variable -Name $v -ValueOnly -ErrorAction SilentlyContinue)
+   }
+   ```
+
+   - 編集が必須なのは、1 行ずつの 4 ブロック（入れる値は、[鍵を作る](#鍵を作る)の手順 1 と同じ）
+   - 最後に値を読み戻して確かめる
+   - **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
+   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この項の手順 2 の 5 つのブロックを貼り直してから先へ進む
+
+1. この PC の WireGuard の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget list --exact --id WireGuard.WireGuard --accept-source-agreements --source winget
+   Get-Service -Name 'WireGuard*' -ErrorAction SilentlyContinue | Format-Table Name, Status, StartType
+   Get-ChildItem -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations" -ErrorAction SilentlyContinue | Format-Table Name
+   Test-Path -LiteralPath "$env:USERPROFILE\wg-client"
+   ```
+
+   - `入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）と、`False` だけが出れば、まだ入っていない
+   - `WireGuardTunnel$wg0` の行か `wg0.conf.dpapi` が出たら、同じ名前のトンネルがある。[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消してから始める（その鍵は取り戻せない）
+   - 最後が `True` なら、前に作った鍵が残っている（この項の手順 6 で止まる）。使わないなら、[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消す
+   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
+
+1. WireGuard を winget で入れる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget install --exact --id WireGuard.WireGuard --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   winget list --exact --id WireGuard.WireGuard --source winget
+   Get-AuthenticodeSignature -FilePath "$env:ProgramFiles\WireGuard\wireguard.exe", "$env:ProgramFiles\WireGuard\wg.exe" | Format-Table Status, @{ Label = 'Signer'; Expression = { $_.SignerCertificate.Subject.Split(',')[0] } }, Path -AutoSize
+   & "$env:ProgramFiles\WireGuard\wg.exe" --version
+   ```
+
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `WireGuard.WireGuard` の行が出ればよい
+   - 2 つのファイルの署名が `Valid` で、署名者が `CN=WireGuard LLC`
+   - 最後に `wireguard-tools v1.0.20260223 - https://git.zx2c4.com/wireguard-tools/` の形の 1 行が出る
+   - インストーラーの画面は出ず、入れた後に WireGuard の窓も開かない（窓は、この項の手順 5 で開く）
+
+1. WireGuard の窓を開く（マネージャーを起動する）。
+
+   ```powershell
+   & "$env:ProgramFiles\WireGuard\wireguard.exe"
+   ```
+
+   - WireGuard の窓が開き、タスク バーの通知領域に WireGuard のアイコンが出る（トンネルの一覧はまだ空）
+   - スタートメニューの「WireGuard」から開いても同じ
+   - 窓は開いたままでよい
+   - **次の手順は、WireGuard の窓が開いてから、PowerShell の窓をクリックして貼る**（窓が開く前に貼ると、開いた窓に入力が移ることがある）
+
+1. 鍵ペアを作る。
+
+   ```powershell
+   & {
+     $wg = "$env:ProgramFiles\WireGuard\wg.exe"
+     $dir = "$env:USERPROFILE\wg-client"
+     if (Test-Path -LiteralPath "$dir\wg0.key") { Write-Error '中断: wg0.key が既にある（作り直すなら先に消す。WG ホストに登録済みの公開鍵と対応しなくなる）'; return }
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null
+     icacls.exe $dir /inheritance:r /grant '*S-1-5-32-544:(OI)(CI)F' /grant '*S-1-5-18:(OI)(CI)F' | Out-Null
+     $priv = & $wg genkey
+     if ($LASTEXITCODE -ne 0 -or $priv -cnotmatch '^[A-Za-z0-9+/]{43}=$') { Write-Error '中断: 鍵を作れない'; return }
+     $pub = $priv | & $wg pubkey
+     if ($LASTEXITCODE -ne 0 -or $pub -cnotmatch '^[A-Za-z0-9+/]{43}=$') { Write-Error '中断: 公開鍵を出せない'; return }
+     [IO.File]::WriteAllText("$dir\wg0.key", "$priv`n", [Text.Encoding]::ASCII)
+     [IO.File]::WriteAllText("$dir\wg0.pub", "$pub`n", [Text.Encoding]::ASCII)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     icacls.exe $dir
+     Get-ChildItem -LiteralPath $dir | Format-Table Name, Length
+     $pub
+   }
+   ```
+
+   - `icacls` に `NT AUTHORITY\SYSTEM:(OI)(CI)(F)` と `BUILTIN\Administrators:(OI)(CI)(F)` の 2 行だけが出る
+   - `wg0.key` と `wg0.pub` がどちらも 45 バイト
+   - 最後の 1 行（公開鍵、44 文字）だけを、[Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 2 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
+   - **注意**: `%USERPROFILE%\wg-client` は、管理者の PowerShell からしか読めない（管理者ではない PowerShell やエクスプローラーでは開けない）
+
+### Windows 11 で WG ホストに登録して取り込む
+
+1. Windows の PowerShell で、conf を取り込む関数を定義する。
+
+   ```powershell
+   function Import-WgClientConf {
+     $dir = "$env:USERPROFILE\wg-client"
+     $text = Get-Clipboard -Raw
+     if (-not $text) { Write-Error '中断: クリップボードが空（この項の手順 2 の client show の出力をコピーし直す）'; return }
+     $lines = @($text.Trim() -split '\r?\n' | ForEach-Object { $_.TrimEnd() })
+     if ($lines[0] -cne '[Interface]') { Write-Error '中断: クリップボードの先頭が [Interface] ではない（client show の出力だけをコピーし直す）'; return }
+     if (@($lines -cnotmatch '^[\t\x20-\x7e]*$').Count -ne 0) { Write-Error '中断: クリップボードに ASCII でない文字がある'; return }
+     if (@($lines -cmatch '^PrivateKey *=').Count -ne 1 -or -not (Test-Path -LiteralPath "$dir\wg0.key")) { Write-Error '中断: PrivateKey の行が 1 行ちょうどでないか、wg0.key が無い'; return }
+     $key = (Get-Content -LiteralPath "$dir\wg0.key" -Raw).Trim()
+     $conf = $lines -creplace '^PrivateKey *=.*', "PrivateKey = $key"
+     [IO.File]::WriteAllText("$dir\wg0.conf", ($conf -join "`r`n") + "`r`n", [Text.Encoding]::ASCII)
+     @(Get-Content -LiteralPath "$dir\wg0.conf" | Where-Object { $_ -cmatch '^PrivateKey = [A-Za-z0-9+/]{43}=$' }).Count
+     Get-Content -LiteralPath "$dir\wg0.conf" | Where-Object { $_ -cnotmatch '^PrivateKey' }
+   }
+   ```
+
+   - この手順は関数を定義するだけで、何も表示せず、conf もまだ書かない
+   - PowerShell を開き直した場合は、[Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 2 と、この関数の定義を貼り直す
+
+1. WG ホストで、[クライアントを登録する](#クライアントを登録する)の手順 1・2・4〜6 を行い、この PC の公開鍵を登録して conf を表示する。
+
+   - [クライアントを登録する](#クライアントを登録する)の手順 1 の `CLIENT_PUBKEY` には、[Windows 11 で WireGuard と鍵を用意する](#windows-11-で-wireguard-と鍵を用意する)の手順 6 で出た公開鍵を貼る
+   - [クライアントを登録する](#クライアントを登録する)の手順 1 の `CLIENT_NAME` は、この PC だけの名前にする（例 `win-laptop`）。ほかの端末（AlmaLinux 10 の PC など）と同じ名前にすると、同じ項の手順 2 でその端末の登録を消してしまう
+   - [クライアントを登録する](#クライアントを登録する)の手順 6 の `client show` の出力を、`[Interface]` の行から `PersistentKeepalive` の行まで、この PC のクリップボードにコピーする（WG ホストに SSH でつないだ端末で選んでコピーする、など）
+   - `PrivateKey` はプレースホルダのままなので、**秘密情報を含まない**。どの経路で運んでもよい
+   - **次の手順は、`client show` の出力をこの PC でコピーしてから行う**。コピー後は、コードブロックなど別の文字列をコピーしない
+
+1. Windows の PowerShell で、`Import-WgClientConf` と手入力して Enter を押す。
+
+   - 関数名はコピーせず手で打つ。クリップボードには、この項の手順 2 の conf を残しておく
+   - `1`（置き換わった）と、`PrivateKey` 以外の行（`Address`・`PublicKey`・`Endpoint`・`AllowedIPs` など）が出ればよい
+   - 残りの行が `client show` の出力のとおりで、途中で折り返されていないことを目で確かめる
+   - `中断:` で始まるエラーが出たら、何も書いていない
+   - conf をコピーし直し、この関数をもう一度呼んでもよい（`wg0.conf` を書き直す）
+
+1. `wg0.conf` を WireGuard に取り込む。
+
+   ```powershell
+   & {
+     $dir = "$env:USERPROFILE\wg-client"
+     $store = "$env:ProgramFiles\WireGuard\Data\Configurations"
+     if ((Get-Service -Name WireGuardManager -ErrorAction SilentlyContinue).Status -ne 'Running' -or -not (Test-Path -LiteralPath $store)) { Write-Error '中断: WireGuard のマネージャーが動いていない（「Windows 11 で WireGuard と鍵を用意する」の手順 5 からやり直す）'; return }
+     if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（この項の手順 3）'; return }
+     if (Test-Path -LiteralPath "$store\wg0.conf.dpapi") { Write-Error '中断: wg0 というトンネルが既にある'; return }
+     Copy-Item -LiteralPath "$dir\wg0.conf" -Destination "$store\wg0.conf"
+     for ($i = 0; $i -lt 30 -and (Test-Path -LiteralPath "$store\wg0.conf"); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-ChildItem -LiteralPath $store | Format-Table Name, Length, LastWriteTime
+   }
+   ```
+
+   - `wg0.conf.dpapi` の 1 行だけが出ればよい
+   - WireGuard の窓のトンネルの一覧に `wg0` が出る（無効のまま）
+   - この手順は LAN の中で貼ってよい
+   - `wg0.conf` が残ったら、取り込めていない。理由を見て、残った `wg0.conf` を `Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf"` で消し、この項の手順 2・3 からやり直す
+   - （この手順の代わりに）窓の「トンネルをファイルからインポート…」で `%USERPROFILE%\wg-client\wg0.conf` を選んでも、同じ `wg0.conf.dpapi` ができるはず
+
+### Windows 11 でトンネルを確かめる
+
+1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
+
+   - LAN 内でこの項の手順 2 を貼ると、そこで LAN の通信が切れる
+   - **次の手順は、LAN の外につないでから貼る**
+
+1. 拠点の LAN の外で、トンネルを張る。
+
+   ```powershell
+   & {
+     $conf = "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf.dpapi"
+     if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（「Windows 11 で WG ホストに登録して取り込む」の手順 4）'; return }
+     & "$env:ProgramFiles\WireGuard\wireguard.exe" /installtunnelservice $conf 2>&1 | ForEach-Object { "$_" }
+     for ($i = 0; $i -lt 30 -and -not (Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Service -Name 'WireGuardTunnel$wg0' | Format-Table Name, Status, StartType
+     Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table InterfaceAlias, IPAddress, PrefixLength
+     Get-NetRoute -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table DestinationPrefix, NextHop, RouteMetric
+     Get-NetIPInterface -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table InterfaceAlias, NlMtu, InterfaceMetric
+     Get-NetConnectionProfile -InterfaceAlias wg0 -ErrorAction SilentlyContinue | Format-Table InterfaceAlias, NetworkCategory
+     Get-DnsClientServerAddress -InterfaceAlias wg0 -AddressFamily IPv4 | Format-Table InterfaceAlias, ServerAddresses
+     & "$env:ProgramFiles\WireGuard\wg.exe" show wg0
+   }
+   ```
+
+   - `WireGuardTunnel$wg0  Running  Automatic` と、`wg0` に `<CLIENT_TUN_IP>` / `32` が出ればよい
+   - 経路に、`AllowedIPs` の 3 つ（`RouteMetric` が `0`）がある
+   - `NlMtu` は、conf に `MTU =` があればその値、無ければ `1420`（今の回線の MTU が 1500 のとき）
+   - `NetworkCategory` は `Public` のはず（変えない。行が出なければ、Windows がまだネットワークを識別している）
+   - `ServerAddresses` が空（`{}`）
+   - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この項の手順 3 の通信で出る
+   - 窓で `wg0` を選び「有効化」を押しても同じ
+   - **注意**: LAN 内で貼ってしまったら、そこで LAN の通信が切れる。PC の画面の WireGuard の窓で「無効化」を押す
+
+1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   if (-not ($WG_HOST_TUN_IP -and $WG_HOST_LAN_IP -and $ROUTER_LAN_IP -and $PEER_WG_LAN_IP)) {
+     Write-Error '「Windows 11 で WireGuard と鍵を用意する」の手順 2 の変数が空のまま'
+   } else {
+     foreach ($h in $WG_HOST_TUN_IP, $WG_HOST_LAN_IP, $ROUTER_LAN_IP, $PEER_WG_LAN_IP) {
+       "== $h"
+       ping.exe -n 3 -w 2000 $h | Select-Object -Last 3
+     }
+     tracert.exe -d -h 5 -w 2000 $PEER_WG_LAN_IP
+   }
+   ```
+
+   - 4 つとも、損失が 0%（`0% の損失`）ならよい
+   - `tracert` は `<WG_HOST_TUN_IP>` → `<PEER_WG_LAN_IP>` の順に出る
+   - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>`（Windows 11 の OpenSSH クライアント）も試しておくとよい
+   - どこで止まるかで、疑う場所が変わる（[トンネルを確かめる](#トンネルを確かめる)の手順 2 と同じ）
+
+1. WG ホストで、[トンネルを確かめる](#トンネルを確かめる)の手順 3 を（[クライアントを登録する](#クライアントを登録する)の手順 1 のシェルで）貼り、ハンドシェイクを確かめる。
+
+   - `client list` の、この PC の名前の `LAST_HANDSHAKE` が「N 秒前」なら届いている
+   - 最後の `ping`（拠点 → PC）は、応答が無くてよい
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](verification/wireguard.md#症状と原因の対応実測)
+   - **次の手順は、WG ホストで確かめてから、この PC で貼る**
+
+1. PC で、トンネルを切る。
+
+   ```powershell
+   & "$env:ProgramFiles\WireGuard\wireguard.exe" /uninstalltunnelservice wg0 2>&1 | ForEach-Object { "$_" }
+   for ($i = 0; $i -lt 30 -and (Get-Service -Name 'WireGuardTunnel$wg0' -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Service -Name 'WireGuardTunnel$wg0' -ErrorAction SilentlyContinue
+   Get-NetAdapter -Name wg0 -ErrorAction SilentlyContinue
+   ```
+
+   - 最後の 2 つが何も出さなければよい
+   - 窓で `wg0` を選び「無効化」を押しても同じ
+   - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この項の手順 2・5 のコマンドでも同じ）
+   - **張ったまま再起動すると、起動したときにまた張られる**。拠点の LAN に戻る前に切る
+
+1. 平文の鍵と conf を消す。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:USERPROFILE\wg-client\wg0.key", "$env:USERPROFILE\wg-client\wg0.conf"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ChildItem -LiteralPath "$env:USERPROFILE\wg-client" | Format-Table Name, Length
+   ```
+
+   - `wg0.pub` だけが残る
+   - 後片付けを最後にしているのは、取り込みに失敗したときに、[Windows 11 で WG ホストに登録して取り込む](#windows-11-で-wg-ホストに登録して取り込む)の手順 4 をやり直すのに `wg0.conf` が要るため（[トンネルを確かめる](#トンネルを確かめる)の手順 5 と同じ）
+
+---
+
+## Windows 11 の更新
+
+- WireGuard のマネージャーは、1 時間ごとに新しい版を確かめる（起動した直後は数分待ってから）。新しい版があると、窓に「更新が利用できます！」のタブが出て、そこの「今すぐ更新」で上がる（Administrators の一員だけ）
+- 窓からの更新は、公式の署名付きの一覧（`latest.sig`）で MSI を確かめてから入れる。winget で上げても、入るのは同じ公式の MSI
+- 更新の間、マネージャーと、張っているトンネルのサービスは止まり、入れ終えると起動し直す（張っていれば数秒切れる）
+- この節の手順 1 は、管理者の Windows PowerShell（5.1）に貼る
+
+1. WireGuard を winget で上げる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget upgrade --exact --id WireGuard.WireGuard --source winget --accept-source-agreements --accept-package-agreements
+   winget list --exact --id WireGuard.WireGuard --source winget
+   Get-Service -Name 'WireGuard*' | Format-Table Name, Status, StartType
+   ```
+
+   - 上がったら `インストールが完了しました` と出て、`winget list` の `WireGuard.WireGuard` の版が新しくなる
+   - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
+   - 最後に `WireGuardManager` が `Running` で出る（張っていれば `WireGuardTunnel$wg0` も）
+   - 窓が更新を知らせているのに winget で上がらないときは、窓の「今すぐ更新」で上げる
+
+---
+
+## 回線に合わせて MTU を下げる（任意）
+
+- 小さい通信は通るのに、大きい通信だけ遅い・止まるときに行う（ssh の画面の描き直し、ファイル転送、一部の HTTPS）
+- この節の手順 1〜7 は両拠点の WG ホストで、手順 8 はクライアントで行う。`WG_MTU` は両拠点で同じ値にする
+- **トンネル越しに ssh して作業している場合、この節の手順 6 の restart で自分のセッションが切れる**（→ [落とし穴](#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
+- 配布済みのクライアントの MTU は、`apply` では変わらない（この節の手順 8 で入れる。→ [注意点の MTU](extra/wireguard.md#mtu)）
+- → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-1-補足-wg_mtu-に書く値)
+
+1. 両拠点の WG ホストで、回線の MTU と今の `wg0` の MTU を調べる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   tracepath -n -m 8 1.1.1.1 | grep -o 'pmtu [0-9]*' | tail -n 1
+   ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   ```
+
+   - `pmtu` の値を、両拠点の分とも控える
+   - `WG_MTU` に書く値は、両拠点の `pmtu` の小さいほうから 60 を引いた値以下にする（1454 なら 1394 以下。例: `1380`）
+   - `Endpoint` が IPv6 のアドレスのときは、60 ではなく 80 を引く
+   - その値が今の `wg0` の `mtu` 以上なら、下げなくてよい（この節はここで終える）
+
+1. `site.env` の `WG_MTU` に、この節の手順 1 で決めた値を書く。
+
+   ```bash
+   vi ~/wg/site.env                      # WG_MTU= の右に値を書く（例: WG_MTU=1380）
+   ```
+
+   - 書けたら、保存して `vi` を閉じる
+
+1. 両拠点の `~/wg/site.env` を、`WG_MTU` を書いた同じ内容にそろえる。
+
+   - **次の手順は、両拠点でそろえてから貼る**
+
+1. トンネルを切らずに先に効かせるときだけ、両拠点の WG ホストで動いている `wg0` の MTU を下げる。
+
+   ```bash
+   . ~/wg/site.env
+   if [ -z "${WG_MTU}" ]; then echo '中断: site.env の WG_MTU が空のまま' >&2; else
+     sudo ip link set dev wg0 mtu "${WG_MTU}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   fi
+   ```
+
+   - `mtu` が `WG_MTU` の値になっていればよい
+   - この節の手順 5・6 も、切れてよいときに必ず行う（行わないと、`wg-quick@wg0` の restart や OS の再起動で元の MTU に戻る）
+
+1. 両拠点の WG ホストで、`apply` の実行予定の内容を見る。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
+   ```
+
+   - `[Interface]` に `MTU =` の行があり、値がこの節の手順 2 で書いたものになっている
+   - **次の手順は、表示された内容でよいか確かめてから貼る**
+
+1. 両拠点の WG ホストで、設定を適用する。
+
+   ```bash
+   sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 拠点 B のホストでは B
+   ```
+
+   - `wg-quick@wg0 を起動しました` と出ればよい
+   - **注意**: トンネル越しの ssh で作業していると、`apply` の restart で切れる（冒頭の警告）
+
+1. 両拠点の WG ホストで、`wg0` の MTU と、相手拠点への ping の損失を確かめる。
+
+   ```bash
+   . ~/wg/site.env
+   printf '\n\033[7m 確認 \033[0m\n'
+   ip -o link show dev wg0 | grep -o 'mtu [0-9]*'
+   ping -c 100 -i 0.2 -q "$WG_B_TUN_IP"                                                        # 拠点 B のホストでは WG_A_TUN_IP
+   ping -c 100 -i 0.2 -q -M do -s "$(( $(cat /sys/class/net/wg0/mtu) - 28 ))" "$WG_B_TUN_IP"   # 同上
+   ```
+
+   - `mtu` が `WG_MTU` の値になっている
+   - 2 つの ping が、どちらも `0% packet loss`
+   - 後ろの ping（`wg0` の MTU いっぱいの大きさ）だけ落ちるなら、`WG_MTU` をさらに下げて、この節の手順 2 からやり直す
+   - `WG_IFACE` を変えている場合は、この節の `wg0` を読み替える
+
+1. 配布済みのクライアントに、この節の手順 2 と同じ値の MTU を入れる。
+
+   - この節の手順 2 より後に `client add` で登録したクライアントは、conf に同じ `MTU =` が入っているので、何もしなくてよい
+   - AlmaLinux 10 の PC は、`sudo nmcli connection modify wg0 wireguard.mtu 1380` の後、`sudo nmcli connection down wg0` と `sudo nmcli connection up wg0`（`1380` は手順 2 の値に読み替える）
+   - Windows 11 の PC は、トンネルを切ってから、WireGuard の窓の「編集」で `[Interface]` に `MTU = 1380` を足す（同じく読み替える）
+   - スマートフォンは、公式アプリのトンネルの編集で、インターフェースの MTU に同じ値を入れる
+   - PC の注意は、[AlmaLinux 10 の PC からつなぐときの注意点](extra/wireguard.md#almalinux-10-の-pc-からつなぐときの注意点)と[Windows 11 の注意点](extra/wireguard.md#windows-11-の注意点)の「MTU」
+
+---
+
 ## クライアントを削除する
 
 - クライアントを受ける拠点のホストで行う。登録簿から消しただけでは、動いているトンネルの接続許可は残る
 - 鍵の交換や PC のロールバックでも、この節を使う
 - `WG_USE_EXISTING_CONF=0`（既定）の、登録簿から conf を生成する構成が対象。`1` のままでは `apply` が peer を書き換えないので、この節では削除できない
-- **トンネル越しに ssh して作業している場合、この節の手順 5 の restart で自分のセッションが切れる**（→ [落とし穴](wireguard-road-warrior.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
+- **トンネル越しに ssh して作業している場合、この節の手順 5 の restart で自分のセッションが切れる**（→ [落とし穴](#落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
 
 1. 変数を設定する（`CLIENT_NAME` と `SITE` は削除する登録に合わせる）。
 
@@ -206,11 +837,12 @@
    REPO=~/setup-notes                   # WG ホスト上の clone 先
    ```
 
-   - Road Warrior 手順書から来た場合は、そこで設定した `CLIENT_NAME`・`SITE`・`REPO` と同じ値にする
+   - [クライアントを登録する](#クライアントを登録する)の手順 2 から来た場合は、同じ項の手順 1 で設定した `CLIENT_NAME`・`SITE`・`REPO` と同じ値にする
 
 1. 登録簿を表示し、削除対象の名前・拠点・IP・公開鍵を控える。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cd "${REPO:?この節の手順 1 の REPO が空のまま}/scripts/wireguard" &&
    ./wg-vpn.sh -e ~/wg/site.env client list
    ```
@@ -222,17 +854,17 @@
 1. 登録を消し、通常の dry-run で既存 conf に残る公開鍵を確認する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${CLIENT_NAME}" ] || [ -z "${SITE}" ]; then echo '中断: この節の手順 1 を貼り直す' >&2; else
      sudo ./wg-vpn.sh -e ~/wg/site.env client remove "${CLIENT_NAME}" &&
      sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply "${SITE}"
    fi
    ```
 
-   - `client remove` は登録簿と配布用 conf を消す。ホストの conf と動作中の peer は、まだ変わらない
    - 反映済みの登録なら、`登録簿に無い [Peer]` のエラーと、既存 conf の行番号・公開鍵が出て止まる。これは削除を確認するための停止
    - **表示された未知 peer が、この節の手順 2 で控えた公開鍵だけであることを確認する**。まだ反映していない登録なら、未知 peer は出ない
    - 未知 peer 以外のエラーが出た場合も、原因を直して通常の dry-run が検査を通るまで進まない
-   - ほかの公開鍵も出たら、手順 4・5 へ進まない。残す peer を、表示された案内に従って `client add --pubkey … --ip …` で登録簿へ取り込み、通常の dry-run をやり直す
+   - ほかの公開鍵も出たら、この節の手順 4・5 へ進まない。残す peer を、表示された案内に従って `client add --pubkey … --ip …` で登録簿へ取り込み、通常の dry-run をやり直す
    - **次の手順は、未知 peer が削除対象だけ、または未知 peer が無いことを確かめてから貼る**
 
 1. 未知 peer の確認が済んだ場合だけ、削除を許可した dry-run の全変更を確認する。
@@ -250,18 +882,19 @@
    sudo ./wg-vpn.sh -e ~/wg/site.env --drop-unknown-peers apply "${SITE:?この節の手順 1 の SITE が空のまま}"
    ```
 
-   - この節の手順 4 の後に登録簿や conf を変更した場合は、手順 3 の `--dry-run apply` の行だけを実行して確認し直す（`client remove` は済んでいるので繰り返さない）
+   - この節の手順 4 の後に登録簿や conf を変更した場合は、この節の手順 3 の `--dry-run apply` の行だけを実行して確認し直す（`client remove` は済んでいるので繰り返さない）
    - `wg-quick@wg0 を起動しました` と出れば反映が終わった
 
 1. 登録簿と動作中の peer から、削除対象の公開鍵が消えたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ./wg-vpn.sh -e ~/wg/site.env client list &&
    sudo wg show wg0 peers
    ```
 
    - この節の手順 2 で控えた名前が登録簿に無く、公開鍵が `wg show` に無ければよい（`WG_IFACE` を変えている場合は `wg0` も読み替える）
-   - ルーターのクライアント帯の静的経路は、ほかのクライアントも使うので残す
+   - ルーターのクライアント帯の静的経路は残す
 
 ---
 
@@ -274,7 +907,7 @@
 1. 両拠点でそれぞれ、バックアップを取る。
 
    ```bash
-   cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run backup &&       # まとめる内容を表示するだけ
    sudo ./wg-vpn.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホスト名>-<日時>.tar.gz（0600）
    ```
@@ -293,7 +926,8 @@
    ```
 
    ```bash
-   cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}"
    ```
 
@@ -307,8 +941,6 @@
    sudo ./wg-vpn.sh restore "${BACKUP:?この節の手順 3 の BACKUP が空のまま}"
    ```
 
-   - `restore` は必要なら wireguard-tools を導入し、鍵と `site.env` の公開鍵の一致を検査してからファイルを戻す。サービスは起動しない
-   - ホストの鍵が同じなら、クライアント conf の公開鍵を変更する必要は無い
    - WG ホストの LAN 側 IP が変わっていなければ、この節の手順 5・6・9 は飛ばす
 
 1. WG ホストの LAN 側 IP が変わったときだけ、`site.env` を直す。
@@ -351,305 +983,19 @@
 
 ---
 
-## 全部消す（ロールバック）
+## 落とし穴: `apply` は作業中の ssh 経路そのものを切る
 
-- 各拠点の WG ホストで、**必要なところまで**貼る（後の手順ほど戻しにくい）
-- ルーター側の設定は、この節の手順 5 で消す
-- → [全部消すときの補足](reference/wireguard.md#全部消すときの補足)
+- `apply` は最後に `wg-quick@wg0` を再起動する。トンネル越しに WG ホストへ ssh して作業すると、その接続が切れる
+- 切れたまま戻らない場合に備えて、LAN 側の ssh やコンソールなど別の経路を用意しておく
 
-> [!CAUTION]
-> **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](#バックアップと復旧os-の再インストール)を取る。**この節の手順 2 で鍵が消え、そこから先は戻せない。** 鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
+1. WG ホストで、`apply` を SSH セッションから切り離して実行する。
 
-1. サービスを止めて、firewalld と sysctl を戻す。
-
-   ```bash
-   cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
-   sudo ./wg-vpn.sh -e ~/wg/site.env remove A            # 拠点 B のホストでは B
-   ```
-
-   - conf・鍵・クライアント用 conf は残るので、この手順までなら `apply` でやり直せる
-
-1. 鍵も消すときだけ、conf・鍵・クライアント用 conf を消す（取り戻せない）。
-
-   ```bash
-   sudo ./wg-vpn.sh -e ~/wg/site.env remove A --purge    # conf・鍵・クライアント用 conf も消す（clients.list は残る）
-   ```
-
-1. `site.env` と `clients.list` も要らないときだけ、`~/wg` を消す。
-
-   ```bash
-   rm -rf ~/wg
-   ```
-
-1. パッケージも要らないときだけ、`wireguard-tools` と `systemd-resolved` を消す。
-
-   ```bash
-   sudo dnf remove wireguard-tools systemd-resolved
-   ```
-
-1. 両拠点のルーターから、ポート転送と静的経路を消す。
-
-   - 消す値は、[手順 8](#実施手順) の `apply` の末尾に表示されたもの（[補足: ルーターの設定](reference/wireguard.md#ルーターの設定)）
+   - `sudo systemd-run --unit=wg-apply-rw -p Type=oneshot /bin/bash <REPO>/scripts/wireguard/wg-vpn.sh -e <ENV_FILE> apply B` を使う。`<REPO>`・`<ENV_FILE>` と拠点 `B` は対象の値に合わせる
+   - ホーム配下のスクリプトは、パスを直接渡さず `/bin/bash` の引数にする
+   - 再接続したら `journalctl -u wg-apply-rw` で結果を読み、`systemctl show wg-apply-rw -p Result -p ExecMainStatus` で終了状態を確認する
+   - 戻れない場合は、用意した LAN 側の ssh またはコンソールで状態を確認する
 
 ---
-
-## 注意点
-
-#### 落とし穴 1: 秘密鍵を conf の外に出すと reload で消える
-
-`wg0.conf` に秘密鍵を書かず、次のように別ファイルから読む書き方がよく紹介されている。
-
-```ini
-[Interface]
-PostUp = wg set %i private-key /etc/wireguard/%i.key
-```
-
-`wg-quick up`（`systemctl start`）では動く。しかし `wg-quick@.service` の reload は次のとおり:
-
-```
-ExecReload=/bin/bash -c 'exec /usr/bin/wg syncconf %i <(exec /usr/bin/wg-quick strip %i)'
-```
-
-`wg-quick strip` の出力には `PrivateKey` が無い（`PostUp` は wg-quick だけが解釈する設定で、`wg` には渡らない）ため、**`systemctl reload wg-quick@wg0` や `wg syncconf` を実行すると秘密鍵が消え、トンネルが止まる**:
-
-```
-$ sudo systemctl reload wg-quick@wg0
-$ sudo wg show wg0 public-key
-(none)
-$ sudo ip netns exec clientA ping -c2 -W1 192.168.120.100
-2 packets transmitted, 0 received, 100% packet loss
-```
-
-このため本書では `PrivateKey` を `wg0.conf`（0600）に直接書く。そうすれば reload しても鍵は残る。
-
-#### 落とし穴 2: reload では経路が追加されない
-
-```
-$ sudo wg show wg0 allowed-ips
-${SITE_B_PUBKEY}	10.99.0.2/32 192.168.120.0/24
-<CLIENT1_PUBKEY>	10.99.1.1/32
-<CLIENT2_PUBKEY>	10.99.1.2/32
-$ ip route show dev wg0
-10.99.0.0/30 proto kernel scope link src 10.99.0.1
-10.99.1.1 scope link
-192.168.120.0/24 scope link                         ← 10.99.1.2 が無い
-```
-
-`systemctl restart wg-quick@wg0` すると入る:
-
-```
-$ ip route show dev wg0
-10.99.0.0/30 proto kernel scope link src 10.99.0.1
-10.99.1.1 scope link
-10.99.1.2 scope link
-192.168.120.0/24 scope link
-```
-
-`AllowedIPs`・`Address` を変えたときは **`systemctl restart wg-quick@wg0`** を使う（一瞬トンネルが切れる）。reload で済むのは、鍵・Endpoint・keepalive だけを変えたときに限られる。
-
-#### 落とし穴 3: 登録簿に無い peer は apply で消える
-
-`apply` は `clients.list` からクライアントの `[Peer]` を**毎回組み立て直す**。手で `wg0.conf` に書いた `[Peer]` は、登録簿に無ければ書き換えのときに消える。手で組んだ構成から `wg-vpn.sh` に移るときは、`apply` の前に既存のクライアントを登録簿へ写す:
-
-```
-sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
-  --pubkey <クライアントの公開鍵> --ip <そのクライアントのトンネル IP>
-```
-
-- `--pubkey` を付けると秘密鍵はホストで作らないので、**クライアント端末の設定はそのままでよい**（`--ip` に既存のトンネル IP を指定すること）
-- 生成される `<名前>.conf` の `PrivateKey` は、プレースホルダのままになる
-
-現在は、既存の `wg0.conf` に登録簿にも相手拠点にも無い `[Peer]` があると、`apply` は鍵と行番号を表示して**何も変更せずに止まる**。消してよい場合だけ `--drop-unknown-peers` を付ける。
-
-#### 転送を絞りたい場合
-
-本書の方針は **WG ホストでは絞らない**。
-
-- 誰がどこへ入れるかは、宛先ホストのファイアウォール（`firewalld` のゾーンや rich rule、アプリの認証）で決める
-- トンネル越しの通信は送信元 IP がそのまま届く（NAT しない）ので、宛先ホストで送信元の帯（相手拠点 LAN、クライアント帯）ごとに許可・拒否できる
-
-それでも WG ホストで絞りたい場合は、LAN 側ゾーンに rich rule を足す（例: 拠点 B のクライアント帯から拠点 A の LAN への転送を拒否する）。実行範囲は[検証記録](verification/wireguard.md)を参照する
-
-```bash
-{
-  sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
-    --add-rich-rule="rule family=ipv4 source address=$WG_B_CLIENT_NET destination address=$SITE_A_LAN reject"
-  sudo firewall-cmd --reload
-}
-```
-
-方向ごと・組み合わせごとに細かく絞る構成が要るなら、専用ゾーン + policy の旧レイアウト（履歴 `d364840` 以前の `docs/wireguard.md` と `wg-vpn.sh`）が参考になる。
-
-#### `AllowedIPs` が cryptokey routing の要
-
-`AllowedIPs` は次の 2 つの役割を持つ。
-
-- **受信時**: トンネルから届いたパケットの送信元がこの範囲外なら捨てる
-- **送信時**: この範囲宛てのパケットをこの peer に送る。**wg-quick はこの範囲をそのまま `wg0` への経路としても追加する**
-
-そのため、相手の**トンネル IP だけでなく相手の LAN も**書く。
-
-- クライアント帯を使う場合は、それも入る。スクリプトが相手 peer の `AllowedIPs` にこれを組み立てる
-- `journalctl -u wg-quick@wg0` で、起動時に経路が追加されるのを確認できる
-
-この対応表は **1 インターフェース内で peer ごとに排他**で、1 つのアドレスを 2 つの peer に対応づけることはできない。だからクライアントは拠点に所属させ、拠点ごとに帯を分ける（[選択した方針](verification/wireguard.md#選択した方針)）。
-
-> `0.0.0.0/0` を書くと、WG ホスト自身の通信も含めてすべてがトンネルに向かう（wg-quick が policy routing で差し替える）。拠点間接続では相手 LAN だけを書く。
-
-#### ルーターの静的経路とヘアピン（非対称経路）
-
-この構成では、Client A の最初のパケットは Router A に行き、**同じ LAN 側インターフェースへ折り返して**（ヘアピン）WG host A に届く。このとき:
-
-- ICMP Redirect を返すルーターでは、それを受け入れたクライアントが以降 WG host A に直接送る（`ip route get` に `<redirected>` と出る）
-- Redirect を受け入れないクライアントでは、毎回 Router A 経由のままになる
-- いずれの場合も戻りのパケットは WG host A から Client A へ直接届くため、**Router A から見ると片方向しか通らない非対称経路**になる
-
-市販ルーターや UTM のなかには、LAN 内で折り返す転送を拒否するもの、戻りが見えない TCP セッションを途中で切るものがある。つながらない、あるいは TCP だけが不安定な場合は、ルーター側で折り返し転送を許可する設定を探すか、次の代替策をとる。
-
-- **(a) クライアントに経路を追加する** — 通信するクライアントにだけ `${SITE_B_LAN} via ${WG_A_LAN_IP}` を入れる。ルーターを通らないので非対称経路も起きない
-  - 台数が多いと管理が大変になる（DHCP option 121 を配布できるルーターなら一括で配れる）
-- **(b) WG ホストで NAT する（masquerade）** — 相手拠点から届いた通信の送信元を WG ホストの IP に書き換えれば、戻りは WG ホスト宛てになるので、自拠点ルーターの静的経路は不要になる
-  - ただし **(1) 送信元のクライアントが相手からは区別できなくなり、(2) NAT した側への着信はできない**（片方向になる）
-  - 双方向に通信する要件は満たせないので、**最後の手段**としてだけ使う
-
-#### ルーターにはクライアント帯の静的経路も要る
-
-NAT をしない構成なので、LAN 側ホストの返事はデフォルトゲートウェイ（ルーター）に向かう。ルーターがクライアント帯を知らないと、そこで行き場を失う。
-
-- **両拠点のルーター**に要る
-- `${WG_TUNNEL_NET}` とクライアント帯を 1 つの大きな帯に取っておけば、静的経路は 1 本で済む
-
-#### 相手拠点のホストが帯を知らないと黙って捨てる
-
-WireGuard は、`AllowedIPs` の範囲外から届いたパケットを **ICMP も返さずに**捨てる。相手拠点のホストの `AllowedIPs` にクライアント帯が入っていないと、ハンドシェイクも転送も正常に見えたまま届かない。**両拠点の** `site.env` に帯を書き、両拠点で `apply` すること。
-
-#### WG ホスト自身から相手 LAN へ送る場合
-
-WG ホスト自身が送るパケットは、`wg0` の経路により**送信元がトンネル IP（`${WG_A_TUN_IP}`）になる**。相手拠点のクライアントは `${WG_TUNNEL_NET}` への経路を持たないので、返事をデフォルトゲートウェイの Router B に送り、そこで行き場を失う。
-
-**クライアント同士の通信には影響しない。** WG ホスト自身からも相手 LAN を使いたい場合は、次のどちらかにする。
-
-- **送信元を LAN 側 IP にする**（`ping -I`、アプリ側での bind など）。設定変更が要らないので簡単
-- 相手ルーターに `${WG_TUNNEL_NET}` via `${WG_x_LAN_IP}` の静的経路を追加する（[ルーターの設定](reference/wireguard.md#ルーターの設定)のとおり、トンネル網とクライアント帯を 1 つの大きな帯に取っておけば静的経路 1 本で済む）
-
-#### トンネル越しに WG ホスト自身の ssh や Cockpit へ入る場合
-
-`wg0` は LAN 側ゾーン（`${LAN_ZONE}`）に入っているので、**LAN から入れるものはトンネル越しにも入れる**。
-
-- `public` の既定なら ssh・cockpit・dhcpv6-client が開いている
-- WG ホスト自身も「宛先ホストのファイアウォールだけを気にする」の例外ではなく、開ける・絞るは LAN と同じゾーン操作で行う
-
-```bash
-sudo firewall-cmd --info-zone="$LAN_ZONE"   # interfaces に wg0、services に ssh / cockpit があるか
-```
-
-`services` に `cockpit` が無ければ、開けて読み直す（LAN からも開く）。
-
-```bash
-sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-service=cockpit && sudo firewall-cmd --reload
-```
-
-送信元を絞りたい場合は、LAN 側ゾーンの rich rule で行う（例: ssh はトンネル網からだけ拒否する）。
-
-```bash
-{
-  sudo firewall-cmd --permanent --zone="$LAN_ZONE" \
-    --add-rich-rule="rule family=ipv4 source address=$WG_A_CLIENT_NET service name=ssh reject"
-  sudo firewall-cmd --reload
-}
-```
-
-- Cockpit は `9090/tcp`（firewalld の `cockpit` サービス）。ホスト側で動いているかは `systemctl is-active cockpit.socket` で確認する。ブラウザからは `https://${WG_x_LAN_IP}:9090`
-- 旧レイアウトでは、`wg0` を入れた専用ゾーンが**何も開いていなかった**
-  - 転送用の policy は**ホスト自身宛ての通信には効かない**ので、専用ゾーンに service を開ける必要があった
-- ssh はトンネルの向こう側全体から届く。公開鍵認証のみにする（`PasswordAuthentication no`）などの対策は別途行う
-
-#### 片側がグローバル IP を持たない場合（CGNAT など）
-
-着信を受けられない側（例: 拠点 A）が常にトンネルを張りに行く構成にする。`site.env` では、着信を受けられない拠点の `SITE_x_PUBLIC` を空にする。
-
-| | 着信を受けられない側（A） | グローバル IP がある側（B） |
-|---|---|---|
-| `[Peer]` の `Endpoint` | **必須**（`${SITE_B_PUBLIC}:${WG_PORT}`） | 省略する |
-| `PersistentKeepalive` | **必須**（NAT のマッピングを維持するため） | 不要 |
-| ルーターのポート転送 | 不要 | **必須** |
-| firewalld の `${WG_PORT}/udp` | 不要 | **必須** |
-
-スクリプトは、相手拠点の `SITE_x_PUBLIC` が空なら `Endpoint` 行を書かない。
-
-WireGuard は、正しく認証できたパケットの送信元を peer の endpoint として覚える。そのため、`Endpoint` を書いていない側もハンドシェイクを受けた後は返信先がわかる。
-
-- ただし、**着信を受けた側から先に通信を始めることはできない**。A の keepalive でトンネルが維持されている間だけ、B 側のクライアントから A 側へ接続できる
-- **両側とも `Endpoint` を省略すると、どちらからもトンネルを張れない**
-
-#### 1 台のクライアントは 1 つの拠点にしか接続できない
-
-cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allowedips-が-cryptokey-routing-の要)）。両拠点に同時に直接つなぐ構成は成立しない。接続先を変えたい場合は、その拠点用の conf を別に作って切り替える（トンネル IP も別の帯のものになる）。
-
-#### 着信を受けられない拠点はクライアントを受けられない
-
-クライアントは `Endpoint` を指定して接続しに行くので、接続先拠点にはグローバル IP（または DDNS 名）とポート転送が要る。CGNAT の拠点（`SITE_x_PUBLIC` が空）では `WG_x_CLIENT_NET` も空にする。
-
-#### クライアントが拠点の LAN 内にいるとき
-
-ノート PC を持ち帰って拠点 A の LAN 内で VPN を張ると、`${SITE_A_PUBLIC}` 宛ての通信が自拠点のルーターに出て折り返す（ヘアピン）。
-
-- ルーターが対応していないと接続できない。LAN 内では VPN を切る運用にするのが簡単
-- しかも NetworkManager は `import` した時点でトンネルを張るので、`up` する前から起きる（[Road Warrior 手順書の注意点](wireguard-road-warrior.md#注意点)）
-
-#### クライアントの秘密鍵の扱い
-
-ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手順 16 の `rm`）。
-
-- より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す
-- AlmaLinux 10 の PC でその流れにするなら、[Road Warrior 手順書](wireguard-road-warrior.md)の手順 3〜6
-
-#### `DNS =` を書く場合
-
-クライアント conf の `[Interface]` に `DNS = ${WG_CLIENT_DNS}` を書くと、VPN 接続中の名前解決を拠点側の DNS に向けられる。
-
-- **Linux の `wg-quick`**: このとき `resolvconf` を呼ぶので、`systemd-resolved` が有効である必要がある
-  - EL10 では `wireguard-tools` の依存で入るが **disabled のまま**なので、使うなら `systemctl enable --now systemd-resolved`
-- **公式アプリ**（Windows / macOS / iOS / Android）: 追加の設定は要らない
-- **NetworkManager に `nmcli connection import` で取り込む場合**: `DNS =` が `ipv4.dns` になり resolv.conf は NetworkManager が書くので、`systemd-resolved` は要らないはず（要確認。[Road Warrior 手順書](wireguard-road-warrior.md#注意点)）
-
-#### 全トラフィックを VPN 経由にする場合（対象外）
-
-クライアント conf の `AllowedIPs` を `0.0.0.0/0` にすると、そのクライアントの通信がすべてトンネルに入る。拠点側で NAT（masquerade）と外向きの転送許可（例: `external` ゾーンへの policy）が追加で要る。本書の構成（拠点の LAN にだけ届く）とは別物なので扱わない。
-
-#### クライアント同士を通す場合
-
-クライアント A → クライアント B は、どちらも同じ `wg0` にぶら下がる `wg0 → wg0` の転送になる。
-
-- ホストのゾーンの forward はこれも許可するが、**生成したクライアント conf の `AllowedIPs` は両拠点 LAN とホスト間のトンネル帯だけ**で、クライアント帯は含まない
-- 通すには、通信する各クライアントの `AllowedIPs` に必要なクライアント帯を追加して、経路と受信元の許可をそろえる必要がある
-- 隔離したい場合は、LAN 側ゾーンに rich rule を足す（例: `rule family=ipv4 source address=$WG_A_CLIENT_NET destination address=$WG_A_CLIENT_NET reject`）
-- 旧レイアウトでは、policy を作らない限り通らなかった
-
-#### Endpoint に DDNS 名を書く場合
-
-`Endpoint` のホスト名は **`wg-quick up` の時点で一度だけ名前解決される**（`wg(8)` の仕様）。相手のグローバル IP が変わると、再起動するまで古い IP に送り続ける。対策:
-
-- `wireguard-tools` 同梱の `/usr/share/doc/wireguard-tools/contrib/reresolve-dns/reresolve-dns.sh` を systemd timer で定期実行する
-- 片側だけでも固定 IP にし、そちらを常に接続を受ける側にする（上記の CGNAT 構成と同じ形）。動的 IP の側が張りに行くので、その側の IP が変わっても、固定 IP の側は新しい送信元を endpoint として覚え直す
-
-クライアント conf の `Endpoint` に DDNS 名を書いた場合も同じだが、**公式アプリは接続のたびに名前解決する**ので `reresolve-dns.sh` のような仕組みは要らない
-
-#### MTU
-
-wg-quick は `MTU` を指定しない場合、外側の経路の MTU から自動で決める
-
-- PPPoE（MTU 1454 / 1492 など）の回線では、トンネル内の最大サイズの通信だけが通らないことがある（ping は通るが、大きなファイル転送や一部の HTTPS が止まる）
-- その場合は `site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す（`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）
-- 外出先のクライアントでも、モバイル回線によっては同じことが起きる（クライアント conf の `[Interface]` に `MTU =` を書く）
-
-#### LAN サブネットの重複
-
-両拠点の LAN が同じサブネット（例: どちらも `192.168.1.0/24`）だと経路を区別できないので、この構成は成立しない。家庭用ルーターの初期値のままの拠点同士を結ぶ場合は、どちらかの LAN のアドレスを変える必要がある。
-
-#### 再起動後の自動起動
-
-`systemctl enable` 済みなので、OS 起動時に `wg-quick@wg0` が上がる。
 
 ## site.env に書く値
 
@@ -670,3 +1016,4 @@ wg-quick は `MTU` を指定しない場合、外側の経路の MTU から自�
 | `${WG_IFACE}` / `${WG_FW_ZONE}` | インターフェース名 / 旧レイアウトで `wg0` を入れていた専用ゾーン名（残っていれば `apply` / `remove` が消す。[移行](reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)） |
 | `${WG_A_CLIENT_NET}` / `${WG_B_CLIENT_NET}` | 各拠点に接続するクライアントに割り当てるトンネル内のアドレス帯（**LAN・`${WG_TUNNEL_NET}`・互いに重複不可**、`/30` またはそれより広く。クライアントを受けない拠点は空） |
 | `${WG_CLIENT_DNS}` | クライアント用 conf に書く DNS サーバー（任意） |
+| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)の手順 1）。値があれば、`client add` が作るクライアント用 conf にも同じ `MTU =` を書く |

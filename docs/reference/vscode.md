@@ -1,8 +1,16 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の参考資料
 
-[手順書](../vscode.md)
+[手順書](../vscode.md)・[ロールバックと注意点](../extra/vscode.md)
 
 ## 補足
+
+### 実施手順 / 手順 3: 補足: ヒアドキュメント
+
+- ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い
+
+### 実施手順 / 手順 4: 補足: 弱い依存
+
+- 弱い依存として `socat` が一緒に入る
 
 ### 実施手順 / 手順 5: 補足: .el8 タグの rpm が EL10 で解決できる理由
 
@@ -14,8 +22,16 @@
 根拠は依存の下限。aarch64 向けに要求される glibc のうち最も新しいものが **2.28**（EL8 の版）で、EL10 の 2.39 が余裕で満たす:
 
 - つまり **EL8 を最低ラインにして EL8 / EL9 / EL10 を 1 本でカバーする**作りで、Microsoft の公式ドキュメントも RHEL / CentOS / Fedora のすべてでこの同じリポジトリを案内している
-- [WezTerm](../wezterm-nightly.md) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
+- [WezTerm](../almalinux-setup.md#wezterm) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
 - dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く
+
+### 実施手順 / 手順 7: 補足: 設定のディレクトリ
+
+- `~/.config/Code` は設定と履歴
+
+### 更新 / 手順 1: 補足: 内蔵のアップデータを使わない理由
+
+- rpm 版で VS Code 内蔵のアップデータを使わないのは、dnf が管理しているため。[AlmaLinux 10 の初期設定の「Firefox」](../almalinux-setup.md#firefox)と同じ論点
 
 ### 選択した方針
 

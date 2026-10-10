@@ -1,8 +1,17 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）の参考資料
 
-[手順書](../dropbox.md)
+[手順書](../dropbox.md)・[ロールバックと注意点](../extra/dropbox.md)
 
 ## 補足
+
+### 実施手順 / 手順 1: 補足: ファイルシステムと容量
+
+- `stat` の `xfs` は AlmaLinux の既定
+- `df` の `Avail` を見るのは、リンクすると全部落ちてくるため
+
+### 実施手順 / 手順 2: 補足: gpg
+
+- gpg は、GNOME のデスクトップには入っている
 
 ### 実施手順 / 手順 5: 補足: dropbox.py について
 
@@ -13,11 +22,19 @@
   - `autostart y` は `/usr/share/applications/dropbox.desktop`（RPM が置く）をコピーするだけなので、tarball の構成では何もしない
 - `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` が PATH に足している。ディレクトリが無くても足すので、作った直後から名前で呼べる
 
+### 実施手順 / 手順 6: 補足: linger
+
+- [linger](../linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
+
 ### 実施手順 / 手順 7: 補足: URL が出るまでの時間と、journal
 
 [この節の検証記録](../verification/dropbox.md#実施手順--手順-7-補足-url-が出るまでの時間とjournal)
 
 URL は、リンクするまで journal にも繰り返し出る。
+
+### 更新 / 手順 1: 補足: 入れ直し
+
+- コンテナで、268.4.4124 から 270.4.3312 に入れ直せた
 
 ### 選択した方針
 
