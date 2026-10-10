@@ -1248,6 +1248,7 @@
    - スタートメニューで「WezTerm」を探し、クリックして開く
    - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 で入れる）
    - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
+   - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](windows-hotkey-conflict.md)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
      - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
      - その場で開くなら、Win+R の「ファイル名を指定して実行」に `"C:\Program Files\WezTerm\wezterm-gui.exe" --config prefer_egl=true` を入れて開く（管理者の窓からは起動しない）
