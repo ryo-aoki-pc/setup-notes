@@ -7,6 +7,7 @@
 ### 実施手順 / イメージを取得して localhost で起動する / 手順 1: 補足: 変数
 
 - `SERVER_IP` は、Forgejo の Web・Git の接続先にも使う
+- `LAN_SUBNET` は送信元 IPv4 の CIDR。`0.0.0.0/0` を明示すると送信元を制限しない。待ち受け IP・宛先・ポートの制限とは別の指定になる
 - `FW_ZONE` は自動で入る
 
 ### 実施手順 / イメージを取得して localhost で起動する / 手順 2: 補足: 同じシェルで続ける理由
@@ -90,15 +91,17 @@
 - `INSTALL_LOCK` は初期設定が終わったときに `app.ini` に保存される。環境変数で `false` を指定し続けると再起動で反映されるため、本書の Quadlet には置かない
 - `REQUIRE_SIGNIN_VIEW=true` はログイン前の閲覧を制限する。リポジトリの公開範囲は、それぞれのリポジトリの設定でも決まる
 - v16 では、コンテナの `security.REVERSE_PROXY_TRUSTED_PROXIES=*` の既定指定が廃止された。本書も信頼するプロキシを localhost に明示し、リバースプロキシ認証を有効にしない
-- `app.ini` には最初のセクション見出しより前に root のキーがある。確認コマンドの Python は、読み取り時に `[DEFAULT]` を付けて `configparser` で扱う。設定内容全体は表示しない
+- `app.ini` にはトークンの署名鍵などが入るため、エージェントの確認では内容を読み取らない。ファイルと DB の存在、CLI の有効な管理者、初期設定画面の閉鎖、登録画面の拒否、OpenID の入口が無いこと、`/api/healthz` の応答で動作を確かめる
+- この確認は実効状態を判定するもので、INI の `INSTALL_LOCK` などの値を読み戻した結果ではない。LAN への切り替え直前にも同じ確認を行い、Quadlet の登録・閲覧制限の行を確かめてから書き換える
 
 ### 実施手順 / LAN に公開する / 手順 1・3: 通信の範囲
 
 - 本書の rich rule は `family=ipv4`・送信元 CIDR・宛先 IPv4・対象ポート・`priority=100` を組にする。最初から存在する同じ規則には重ねず、撤去ではその組に一致する規則だけを外す
 - runtime と permanent の両方へ追加・削除する。既存のほかの runtime の設定も保存してしまう `--runtime-to-permanent` は使わない
-- 許可の規則を追加しても、既存の `trusted` zone や `target=ACCEPT`、ポートやサービスへの広い許可を打ち消すものにはならない。許可外の送信元から接続できないことの確認を別に行う
+- 送信元を CIDR で制限する場合、許可の規則を追加しても、既存の `trusted` zone や `target=ACCEPT`、ポートやサービスへの広い許可を打ち消すものにはならない。許可外の送信元から接続できないことの確認を別に行う
+- `LAN_SUBNET=0.0.0.0/0` は全 IPv4 の送信元を許可する。その場合には許可外の送信元が無いため、拒否試験は行わない。runtime・permanent の規則確認と、指定 IP・ポートへの LAN・VPN クライアントの接続を確かめる
 - rootful Podman の Netavark はコンテナ向けに転送の許可を設定する。本書の rootless Podman は別の経路で、rootful 用の firewalld 転送ポリシーや `StrictForwardPorts` を採用しない
-- LAN の IPv4 を待ち受けたまま VPN のクライアントから使うときは、VPN にその LAN への経路があり、サーバーから見える送信元が許可 CIDR に入る必要がある。VPN 経由の SNAT があると送信元は変わる
+- LAN の IPv4 を待ち受けたまま VPN のクライアントから使うときは、VPN にその LAN への経路が必要になる。送信元を制限した場合は、サーバーから見える送信元が許可 CIDR に入る必要もある。VPN 経由の SNAT があると送信元は変わる
 - HTTP の内容は暗号化されない。VPN や SSH トンネルの外で Web を使う運用へ広げるときは、HTTPS の構築と公開範囲を別に設計する
 
 ### 実施手順 / Git の接続を確かめる / 手順 1〜5: Git とアカウント
@@ -123,6 +126,7 @@
 - Forgejo が `inactive` のときは、手作業（バックアップ・復元）の途中とみなして何もせずに終わる。手作業の側は、自動更新が `activating` の間は止める（`is-active` は `activating` を active として扱わないので、`ActiveState` を見る）。プログラムは `flock` で重ねて動かさない
 - 時刻は毎日 4:00 から 30 分の間。`Persistent=true` は付けない。止めていた PC を起動した直後（昼間）に更新が走るのと、ユーザーのユニットからシステムの `network-online.target` を待てないため
 - サービスの `PATH` は `/usr/bin` に固定する（GNOME のセッションから Homebrew の `PATH` を受け取らないため）。`TimeoutStartSec=2h` で、止まったままの実行が次の実行を塞ぎ続けないようにする
+- 実行経路によっては通常の `systemctl --user` がユーザーの bus へ接続できない。自動更新は失敗の stderr に `Failed to connect to user scope bus` があるときだけ、現在の UID に対応するユーザーの `--machine=<ユーザー>@.host` を付けて再試行する。最終結果には従来と同じ終了コード検査を行い、unit 自体の失敗では再試行しない
 - `/api/healthz` は、`REQUIRE_SIGNIN_VIEW=true` でもログイン無しで `pass` を返す（2026-10-10 に確認。検証記録）。プロキシの環境変数があっても、確認の通信はプロキシを通さない
 - 古いものの整理
   - 自動更新のアーカイブ（`forgejo-auto-*`）は新しい 3 つを残し、手動のバックアップには触れない
@@ -141,6 +145,8 @@
 - 設定と SSH のホスト鍵も保存するため、復元後は同じアカウントと指紋を使える。Quadlet も保存し、その時点のイメージ版・パス・URL・待ち受けへ戻す
 - `forgejo dump` などで稼働中の状態を集める方法は本書の経路には入れない。外部 DB や S3、Redis などを追加した構成では、それらのバックアップも同じ時点へそろえる必要がある
 - 復元は空の作業場所へ展開してから、停止中のデータ全体と入れ替える。元のデータは退避し、既存 DB と復元 DB のファイルを混ぜない
+- 復元前は、設定ファイルと DB の存在・保存版のイメージを確かめ、展開データの一時コピーで初期設定済みの実効状態と管理者を確認する。保存データの INI を直接読まず、検証による起動処理も復元用データに反映させない
+- 検証用コンテナは localhost のランダムポートで待ち受け、専用の internal ネットワークで外向き通信を止める。コピー・コンテナ・ネットワークは確認後に外す。このコピー分の空き容量も必要になる
 - DB の移行を伴う更新後に、旧イメージだけを起動しても元へは戻らない。旧イメージの定義と更新前データをセットで復元する。更新後に受け付けた操作は、更新前バックアップには含まれない
 - 初回作成用の上書きガードと、更新用の置き換えは用途が異なる。既存の導入へ実施手順の「イメージを取得して localhost で起動する」の手順 3 を再実行するのではなく、後ろの更新・復元の節を使う
 - 自動更新のアーカイブも、手動のバックアップと同じ中身なので、復元の節でそのまま使える
@@ -150,6 +156,7 @@
 - [Forgejo 16.x releases](https://forgejo.org/releases/16.x/) — 通常系列の最新安定版とサポート期限
 - [Forgejo releases](https://forgejo.org/releases/) — 新しい通常系列を含むリリース一覧
 - [Forgejo release schedule](https://forgejo.org/docs/latest/admin/release-schedule/) — 通常版の更新・期限
+- [Installation with Docker（最新版）](https://forgejo.org/docs/latest/admin/installation/docker/) — 最新版の公式コンテナ資料
 - [Installation with Docker（v16）](https://forgejo.org/docs/v16.0/admin/installation/docker/) — 公式イメージ、Podman の Quadlet 例、rootless イメージのパスと内部 SSH、環境変数
 - [Forgejo v16.0 is available](https://forgejo.org/2026-07-release-v16-0/) — コンテナの信頼するプロキシの既定変更と主要な変更
 - [Forgejo v15.0 is available](https://forgejo.org/2026-04-release-v15-0/) — rootless イメージの旧設定パスの互換処理撤去
