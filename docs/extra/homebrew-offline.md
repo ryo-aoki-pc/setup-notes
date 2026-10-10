@@ -8,7 +8,7 @@
 ## ロールバック
 
 - オフラインのホストで貼る。トンネルは要らない
-- Homebrew ごと消すなら、この節の手順 1 の代わりに、[ssh-socks-tunnel.md の手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 24〜26 を行う（アンインストーラを取得するため。本書では実行していない）
+- Homebrew ごと消すなら、この節の手順 1 の代わりに、[ssh-socks-tunnel.md の手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで [AlmaLinux 10 の初期設定のロールバックの「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 1〜3 を行う（アンインストーラを取得するため。本書では実行していない）
 - [手順 2](../homebrew-offline.md#実施手順) で dnf にプロキシを設定したときは、[ssh-socks-tunnel.md のロールバック](ssh-socks-tunnel.md#ロールバック)で dnf の行を消す
 
 1. 手順 4 で入れた jq を使わないときだけ、jq と、一緒に入った依存を消す。

@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（Windows PowerShell 5.1 に貼る。管理者の権限は要らない）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、フォントも自分のホームの `~/.local/share/fonts` に入るため）
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -116,13 +116,13 @@
 
 > [!IMPORTANT]
 > - **すべて Windows で行う**。この節の手順 1 で Windows PowerShell（5.1）を開き、この節の手順 2・3 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/hackgen.md#windows-11-のロールバック)のブロックをそこに貼る。管理者の権限は要らない（自分のユーザーに入れる）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **この節の手順 4 で、サインアウトしてサインインし直す**（登録したフォントは、サインインのときに読み込まれる）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `HACKGEN_FAMILY` は AlmaLinux 10 だけで使う）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/hackgen.md#windows-11-のロールバック)
-- [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その手順 55 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
+- [Windows 11 の初期設定](windows-setup.md)と一緒に行うなら、その「WSL と再起動」の手順 2 の再起動より前にこの節の手順 3 までを行えば、この節の手順 4 は要らない
 
 1. Windows で、Windows PowerShell（5.1）を開く。
 
@@ -182,7 +182,7 @@
 1. この PC でサインアウトし、サインインし直す。
 
    - スタートメニューのユーザーのアイコンから「サインアウト」し、サインインし直す（再起動でもよい）
-   - [Windows 11 の初期設定](windows-setup.md)の手順 55 の再起動をこの後に行うなら、この手順は要らない
+   - [Windows 11 の初期設定の「WSL と再起動」](windows-setup.md#wsl-と再起動)の手順 2 の再起動をこの後に行うなら、この手順は要らない
 
 1. 設定のフォントの一覧で、HackGen Console NF が出ることを確かめる。
 

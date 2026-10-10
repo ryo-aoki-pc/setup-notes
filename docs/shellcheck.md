@@ -5,7 +5,7 @@
 - [検証記録](verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
 
 > [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: 手順 5 の JSON 集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る

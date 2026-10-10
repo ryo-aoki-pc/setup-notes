@@ -285,7 +285,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [Latest supported Visual C++ Redistributable downloads — Microsoft Learn](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) — `VCRUNTIME140.dll` を入れる再頒布可能パッケージ
 - [microsoft/winget-pkgs の wez.wezterm.nightly](https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/wez/wezterm/nightly) — 採らなかった winget の定義
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（手順 16〜19）と、この文書を通す順
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）と、この文書を通す順
 
 ### 付録: AppImage の実測
 
@@ -514,7 +514,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
 | OS | Windows 11 Pro 26H2、26300.9457、x64 |
 | PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、管理者、セッション 1 |
 | 初回導入前 | `Version`・`Location`・`OnPath`・`Running` は空、`Admin: True`、`VCRuntime: True` |
-| Visual C++ Runtime | Windows 初期設定の手順 22 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
+| Visual C++ Runtime | Windows 初期設定の「アプリを入れる」の手順 3 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
 | 作業フォルダー | 実行前に `%TEMP%\wezterm-setup` が無いことを確認 |
 | 入った版 | `20261005-054844-37254829` |
 
@@ -578,7 +578,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
   - `wezterm-gui.exe --config front_end="Software"` でも同じエラー
   - `wezterm-gui.exe --config prefer_egl=true` では窓が開き、中で `cmd.exe` が動いた（設定ファイルが無いときのシェル。`%COMSPEC%`）。窓の中の `wezterm --version` は `wezterm 20261005-054844-37254829`
   - 本文の手順 6 に、ログの場所と `config.prefer_egl = true` の箇条書きを足した
-- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の手順 26）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
+- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の「表示と入力」の手順 2）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
   - 設定ファイルが無いままでは、同じ OpenGL のエラーで開かなかった
   - 一時的に `%USERPROFILE%\.wezterm.lua`（`config.prefer_egl = true` と `config.font = wezterm.font 'HackGen Console NF'` だけ）を置くと、`C:\verify\gui-fixtures` で窓が開いた。英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が、HackGen Console NF で表示された（画面で確かめた）
   - 一時的な設定と試験用の文のファイルは、確かめた後に消した

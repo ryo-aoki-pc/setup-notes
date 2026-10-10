@@ -5,23 +5,25 @@
 - [検証記録](verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[ロールバックと注意点](extra/gnome-desktop-sharing.md)
 
 > [!IMPORTANT]
-> - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は手順 16 で RDP のクライアントから確かめる
-> - PC の画面のセッションは、GDM の自動ログインで作る（手順 11〜13）。PC の前でログインしておく必要は無い
+> - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#再起動の後に確かめてつなぐ)の手順 3 で RDP のクライアントから確かめる
+> - PC の画面のセッションは、GDM の自動ログインで作る（[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 1〜3）。PC の前でログインしておく必要は無い
 > - **そのユーザー本人のシェルで貼る**。`sudo -i` / `su -` したシェルでは貼らない（設定と資格情報は、貼ったユーザーのものになるため）
 > - 前提は [AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1〜4（遠隔の PC は、眠ると起こせない）。画面が暗くなるかロックされると、RDP の接続が切れる
-> - **手順 4・7 はパスワードなどの対話入力があり、手順 13 は PC を再起動する**（OS のパスワードを聞かれる）。入力し終えてから次の手順を貼る
-> - 手順 16（クライアントからの接続）だけ別のマシンで行う
-> - 同じユーザーの[ヘッドレスのセッション](gnome-headless-session.md)とは併用できない。[リモートログイン](gnome-remote-desktop.md)と同じ PC で使うときは、手順 1 でポートが自動で 3390 になる（後からリモートログインを有効にするときは[注意点](extra/gnome-desktop-sharing.md#注意点)）
+> - [前提を確かめる](#前提を確かめる)の手順 4 と [RDP を設定する](#rdp-を設定する)の手順 3 は**パスワードなどの対話入力があり**、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 は **PC を再起動する**（OS のパスワードを聞かれる）。入力し終えてから次の手順を貼る
+> - [再起動の後に確かめてつなぐ](#再起動の後に確かめてつなぐ)の手順 3（クライアントからの接続）だけ別のマシンで行う
+> - 同じユーザーの[ヘッドレスのセッション](gnome-headless-session.md)とは併用できない。[リモートログイン](gnome-remote-desktop.md)と同じ PC で使うときは、[前提を確かめる](#前提を確かめる)の手順 1 でポートが自動で 3390 になる（後からリモートログインを有効にするときは[注意点](extra/gnome-desktop-sharing.md#注意点)）
 
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- [前提を確かめる](#前提を確かめる)の手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: [見るだけにする（任意）](#見るだけにする任意)・[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)。つながらなくなったら[つながらなくなったとき](#つながらなくなったとき)。戻すときは[ロールバック](extra/gnome-desktop-sharing.md#ロールバック)
 - 2026-10-07 に、x86_64 の VirtualBox の VM で、PC の画面を一度も操作せずに通した（[記録](verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）。PC の前でパスワードでログインしていた以前の版の記録（aarch64 の実機と VM を含む）も、同じ検証記録にある
 
 > [!WARNING]
 > - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める節で、ロックもしない）
-> - 手順 7 で入れる RDP のユーザー名とパスワードは、暗号化されずに `~/.local/share/keyrings/` に置かれる
+> - [RDP を設定する](#rdp-を設定する)の手順 3 で入れる RDP のユーザー名とパスワードは、暗号化されずに `~/.local/share/keyrings/` に置かれる
 > - PC を置く場所を信用できるときだけ行う
+
+### 前提を確かめる
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -41,7 +43,7 @@
 
    - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
    - `USER` が `root` なら、ここで止めて、共有するユーザーのシェルで貼り直す
-   - **新しいシェルを開いたら**（手順 13 の再起動の後も）、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**（[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 の再起動の後も）、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. 再起動の後も SSH で入り直せて、GNOME が自動で起動するかを確かめる。
 
@@ -58,18 +60,18 @@
    ```
 
    - `enabled`・`yes`・`graphical.target`・`enabled`・`1` 以上・`0` の 6 行が出ればよい
-   - 1 行目が `enabled` でなければ、`sudo systemctl enable sshd.service` を貼る（手順 13 の再起動の後に SSH で入れなくなる）
+   - 1 行目が `enabled` でなければ、`sudo systemctl enable sshd.service` を貼る（[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 の再起動の後に SSH で入れなくなる）
    - 2 行目が `no` なら、`sudo firewall-cmd --permanent --add-service=ssh` を貼る。SSH を別のポートやゾーンで通しているなら、それが永続の設定にあることを確かめる
    - 3 行目が `graphical.target` でなければ、`sudo systemctl set-default graphical.target` を貼る
    - 4 行目が `enabled` でなければ、GDM が起動しない。先に GDM を使える状態にする
    - 5 行目は、PC につながっているモニターの数。`0` なら、写す画面が無い。モニターの無い PC は[ヘッドレスのセッション](gnome-headless-session.md)を使う
    - 6 行目は、暗号化したディスクの数。`0` でなければ、起動のときにパスフレーズを PC の画面で入れるかを確かめる
-     - 入れるなら、手順 13 の再起動から戻らないので、この手順書は使えない（TPM などで自動で開くなら続けてよい）
+     - 入れるなら、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 の再起動から戻らないので、この手順書は使えない（TPM などで自動で開くなら続けてよい）
 
 1. 共有するユーザーの画面の設定・共有とヘッドレスの状態・ポート・自動ログインの設定・資格情報を確かめる。
 
    ```bash
-   if [ -z "${USER}" ] || [ "${USER}" = root ] || [ -z "${RDP_PORT}" ]; then echo '中断: USER が空か root、または手順 1 の RDP_PORT が空のまま。共有するユーザーのシェルで手順 1 を貼り直す' >&2
+   if [ -z "${USER}" ] || [ "${USER}" = root ] || [ -z "${RDP_PORT}" ]; then echo '中断: USER が空か root、または「前提を確かめる」の手順 1 の RDP_PORT が空のまま。共有するユーザーのシェルで「前提を確かめる」の手順 1 を貼り直す' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.session idle-delay
@@ -97,17 +99,17 @@
      - `0`（GDM の自動ログインはまだ無い）
      - `aoao 0 0`（RDP の資格情報はまだ無い）
    - 最後の行は、PC の画面のセッション。誰もログインしていなければ、ログイン画面の `gdm` の行（`greeter`）だけが出る
-     - ほかのユーザーの行があれば、手順 13 の再起動で、そのセッションは閉じる
+     - ほかのユーザーの行があれば、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 の再起動で、そのセッションは閉じる
    - 1〜3 行目が `uint32 0`・`false`・`masked` でなければ、[画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1〜4 を行う
    - 4 行目が `true` なら、設定アプリなどでデスクトップ共有を有効にしてある
      - 先に `grdctl rdp disable` で止めてから貼り直す
    - ヘッドレスの unit が有効か起動中なら、ここで止める。利用状況を確認してから、どちらを使うか決める
    - `RDP_PORT` の行が `0` でなければ、ほかのもの（ほかのユーザーの[ヘッドレスのセッション](gnome-headless-session.md)など）がそのポートを使っている
-     - 手順 1 の 2 つ目のブロックの `RDP_PORT` の行を、空いているポート（`3391` など）に書き換えて貼り直し、この手順を貼り直す
-   - `AutomaticLogin` の行が `0` でなければ、自動ログインがすでに設定してある。手順 11 で、このユーザーかを確かめる
-   - `aoao 0 0` なら、手順 4 は飛ばす。それ以外なら、RDP の資格情報がすでにあるので、手順 4 を行う
+     - この項の手順 1 の 2 つ目のブロックの `RDP_PORT` の行を、空いているポート（`3391` など）に書き換えて貼り直し、この手順を貼り直す
+   - `AutomaticLogin` の行が `0` でなければ、自動ログインがすでに設定してある。[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 1 で、このユーザーかを確かめる
+   - `aoao 0 0` なら、この項の手順 4 は飛ばす。それ以外なら、RDP の資格情報がすでにあるので、この項の手順 4 を行う
 
-1. 前に入れた RDP の資格情報が残っているときだけ、手順 7 のキーリングの外にあるものを消す。
+1. 前に入れた RDP の資格情報が残っているときだけ、[RDP を設定する](#rdp-を設定する)の手順 3 のキーリングの外にあるものを消す。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -159,19 +161,21 @@
 
    - 資格情報が閉じたキーリング（自動ログインのときのログインのキーリングなど）にあれば、そのパスワードを聞かれる。ログインのキーリングなら、ふつうは OS のパスワード
    - `消した: <コレクションのパス>/<N>` の形の行が出ればよい。開いたキーリングは、消した後に閉じ直す（`閉じ直した:` の行）
-   - 手順 7 で作るキーリング（`~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録したもの）の項目は消さない。ほかに無ければ `ほかのキーリングに RDP の資格情報は無い` と出る
+   - [RDP を設定する](#rdp-を設定する)の手順 3 で作るキーリング（`~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録したもの）の項目は消さない。ほかに無ければ `ほかのキーリングに RDP の資格情報は無い` と出る
    - キーリングを開けないときの `中断:`（`を開けない`）では、何も消していない。パスワードが違うときは、貼り直す
    - **次の手順は、パスワードを聞かれたなら、入力し終えてから貼る**（続けて貼ると入力として食われる）
+
+### RDP を設定する
 
 1. 変える設定の元値と共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
 
    ```bash
    if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
-     echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
+     echo '中断: 「前提を確かめる」の手順 1 の変数が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
    else
      (
        set -e
-       trap 'echo "中断: 手順 5 が失敗した。手順 6 へ進まない" >&2' ERR
+       trap 'echo "中断: 「RDP を設定する」の手順 1 が失敗した。「RDP を設定する」の手順 2 へ進まない" >&2' ERR
        umask 077
        if [ -e ~/.local/state/gnome-desktop-sharing-setup ] || [ -L ~/.local/state/gnome-desktop-sharing-setup ]; then
          if [ -L ~/.local/state/gnome-desktop-sharing-setup ] ||
@@ -225,18 +229,18 @@
    fi
    ```
 
-   - 最後に `設定の退避と証明書の準備が完了` と出れば、手順 6 へ進む
+   - 最後に `設定の退避と証明書の準備が完了` と出れば、この項の手順 2 へ進む
    - その前に `証明書と秘密鍵の公開鍵: 一致` と出る
    - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る
-   - `中断:` が出たら、手順 6 以降へ進まない。原因を直してから、この手順を貼り直す
+   - `中断:` が出たら、この項の手順 2 以降へ進まない。原因を直してから、この手順を貼り直す
    - `設定の退避が不完全` と出たら、`~/.local/state/gnome-desktop-sharing-setup` の中身を手で確かめる。何も変えていなければ、このディレクトリを消してから貼り直す
 
 1. `grdctl` で、証明書と鍵・ポートと、リモートからの操作を設定する。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2
+   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
    elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then
-     echo '中断: 手順 5 が完了していない。設定は変更しない' >&2
+     echo '中断: 「RDP を設定する」の手順 1 が完了していない。設定は変更しない' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
      rm -f ~/.local/state/gnome-desktop-sharing-setup/restored &&
@@ -256,7 +260,7 @@
 
    - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
    - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
-   - `中断:` が出たら、手順 7 以降へ進まない
+   - `中断:` が出たら、この項の手順 3 以降へ進まない
    - 既にデーモンが起動していれば、再起動する。接続中の RDP クライアントは切れる
    - デーモンが起動した後に貼り直すと、再起動のときに `Warning: The unit file, … of gnome-remote-desktop.service changed on disk.` が出ることがある。再起動はされ、害は無い
 
@@ -273,7 +277,7 @@
    marker = state / 'autologin-keyring'
    if (state.is_symlink() or not (state / 'ready').is_file() or marker.is_symlink()
            or (marker.exists() and not marker.is_file())):
-       raise SystemExit('中断: 手順 5 が完了していないか、キーリングの記録が不正。資格情報は入れない')
+       raise SystemExit('中断: 「RDP を設定する」の手順 1 が完了していないか、キーリングの記録が不正。資格情報は入れない')
    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
    svc = '/org/freedesktop/secrets'
    def call(path, iface, method, args, rtype):
@@ -297,7 +301,7 @@
            raise SystemExit('中断: 記録したキーリングをパスワードなしで開けない。既存の項目は変更しない')
    unlocked, locked = call(svc, 'org.freedesktop.Secret.Service', 'SearchItems', GLib.Variant('(a{ss})', (attrs,)), '(aoao)')
    if [i for i in unlocked + locked if not (cols and i.startswith(cols[0] + '/'))]:
-       raise SystemExit('中断: ほかのキーリングに RDP の資格情報がある。手順 4 で消してから貼る')
+       raise SystemExit('中断: ほかのキーリングに RDP の資格情報がある。「前提を確かめる」の手順 4 で消してから貼る')
    sys.stdin = open('/dev/tty')
    username = input('RDP のユーザー名: ').strip()
    password = getpass.getpass('RDP のパスワード: ')
@@ -329,7 +333,7 @@
    - `中断:` やエラーが出たら、次へ進まない
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
-1. RDP の資格情報が、手順 7 のキーリングにだけあることを確かめる。
+1. RDP の資格情報が、この項の手順 3 のキーリングにだけあることを確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -340,14 +344,14 @@
    ```
 
    - `aoao 1 "<コレクションのパス>/<N>" 0` と `記録したキーリング: <コレクションのパス>`、`b false` が出ればよい。項目のパスが、記録したキーリングの直下であることを確かめる
-   - 記録したキーリングの外のパスがあれば、手順 4 を行ってから、この手順を貼り直す
+   - 記録したキーリングの外のパスがあれば、[前提を確かめる](#前提を確かめる)の手順 4 を行ってから、この手順を貼り直す
 
 1. デスクトップ共有を有効にする。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
-   elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then echo '中断: 手順 5 が完了していない。有効にしない' >&2
-   elif [ ! -s ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring ]; then echo '中断: 手順 7 が完了していない。有効にしない' >&2
+   elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then echo '中断: 「RDP を設定する」の手順 1 が完了していない。有効にしない' >&2
+   elif [ ! -s ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring ]; then echo '中断: 「RDP を設定する」の手順 3 が完了していない。有効にしない' >&2
    elif systemctl --user is-enabled --quiet gnome-remote-desktop-headless.service ||
         systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
      echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効か起動中。有効にしない' >&2
@@ -359,12 +363,12 @@
    ```
 
    - `enabled` と出ればよい
-   - PC の画面にこのユーザーのセッションがまだ無ければ、デーモンは待ち受けない。待ち受けは、再起動の後の手順 14 で確かめる
+   - PC の画面にこのユーザーのセッションがまだ無ければ、デーモンは待ち受けない。待ち受けは、[再起動の後に確かめてつなぐ](#再起動の後に確かめてつなぐ)の手順 1 で確かめる
 
 1. ファイアウォールで、`RDP_PORT` の TCP を開ける。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2; else
+   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2; else
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --add-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --reload
@@ -373,6 +377,8 @@
    ```
 
    - `success` が 2 行出て、最後に `<RDP_PORT>/tcp` を含む行が出ればよい
+
+### 自動ログインにして再起動する
 
 1. GDM の自動ログインを、このユーザーで有効にする。
 
@@ -414,13 +420,15 @@
 
    - `sudo` は付けない。`==== AUTHENTICATING FOR org.freedesktop.login1.…` と出てパスワードを聞かれるので、このユーザーの OS のパスワードを入れる
    - SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
-   - 数分待っても SSH で入れないときは、PC の前での対処が要る（手順 2 の確認を見直す）
-   - **次の手順は、PC が起動してから SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから貼る**
+   - 数分待っても SSH で入れないときは、PC の前での対処が要る（[前提を確かめる](#前提を確かめる)の手順 2 の確認を見直す）
+   - **次の手順は、PC が起動してから SSH で入り直し、変数の 2 つのブロックを貼り直してから貼る**（[前提を確かめる](#前提を確かめる)の手順 1）
+
+### 再起動の後に確かめてつなぐ
 
 1. 自動でログインしたセッションと、デーモンの待ち受けを確かめる。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 手順 1 の RDP_PORT が空のまま。手順 1 を貼り直す' >&2
+   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
    elif [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
@@ -437,7 +445,7 @@
          fi
          sleep 1
        done
-       echo "中断: ${RDP_PORT}/tcp の待ち受けを 30 秒以内に確認できない。手順 15 へ進まず、デーモンのログを確認する" >&2
+       echo "中断: ${RDP_PORT}/tcp の待ち受けを 30 秒以内に確認できない。「再起動の後に確かめてつなぐ」の手順 2 へ進まず、デーモンのログを確認する" >&2
        exit 1
      )
    fi
@@ -445,11 +453,11 @@
 
    - `Service=gdm-autologin` と `Active=yes`、`ScreenCast: ok`、`active` が出る
    - `ss` が `LISTEN … *:<RDP_PORT> … users:(("gnome-remote-de",…))` の 1 行を出せばよい
-   - `Active=no` なら、PC の画面に GDM のログイン画面が出ていて、RDP の画面は真っ黒になる。手順 12 を確かめ（`sudo grubby --info=DEFAULT`）、[つながらなくなったとき](#つながらなくなったとき)の手順 2 で前に戻す
-   - セッションが無いと出たら、手順 11 の `/etc/gdm/custom.conf` を確かめる
-   - `中断:` が出たら、手順 15 へ進まない。`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` で理由を見る
+   - `Active=no` なら、PC の画面に GDM のログイン画面が出ていて、RDP の画面は真っ黒になる。[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 2 を確かめ（`sudo grubby --info=DEFAULT`）、[つながらなくなったとき](#つながらなくなったとき)の手順 2 で前に戻す
+   - セッションが無いと出たら、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 1 の `/etc/gdm/custom.conf` を確かめる
+   - `中断:` が出たら、この項の手順 2 へ進まない。`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` で理由を見る
      - ほかのプロセスがポートを使っていると、`Error binding to address [::]:<RDP_PORT>: Address already in use` が出ている
-     - 原因を直したら、手順 6 を貼り直し（起動中のデーモンを再起動する）、この手順を貼り直す
+     - 原因を直したら、[RDP を設定する](#rdp-を設定する)の手順 2 を貼り直し（起動中のデーモンを再起動する）、この手順を貼り直す
 
 1. 設定を読み戻し、TLS のハンドシェイクと、提示される証明書を確かめる。
 
@@ -486,22 +494,22 @@
 
    - プローブで、`selectedProtocol=0x2` でネゴシエーションが成立し、SAN に接続に使う名前が `DNS:` エントリとして含まれていればよい
    - `grdctl status` で、`Unit status: active`・`Status: enabled`・`Port: <RDP_PORT>`・`View-only: no`・`Negotiate port: no`・`Username: (hidden)`・`Password: (hidden)` を確かめる
-   - プローブの `fingerprint:` の行が、`grdctl status` の `TLS fingerprint:` の行と**完全一致**すればよい。この値を手順 16 で使う
-   - 最後の `sha1 Fingerprint=` の行は、Windows のクライアントで証明書を確かめるときに使う（手順 16）
-   - **注意**: `grdctl status` の `Port:` は設定した値で、実際に待ち受けたポートではない。ポートは手順 14 の `ss` で見る
+   - プローブの `fingerprint:` の行が、`grdctl status` の `TLS fingerprint:` の行と**完全一致**すればよい。この値をこの項の手順 3 で使う
+   - 最後の `sha1 Fingerprint=` の行は、Windows のクライアントで証明書を確かめるときに使う（この項の手順 3）
+   - **注意**: `grdctl status` の `Port:` は設定した値で、実際に待ち受けたポートではない。ポートはこの項の手順 1 の `ss` で見る
    - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい
 
 1. 別のマシンから、RDP クライアントでつなぐ。
 
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` の形でつなぐ
    - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
-   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 7 の値に読み替える
-   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。手順 15 の `TLS fingerprint` と同じなら `Y` で受け入れる
+   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、[前提を確かめる](#前提を確かめる)の手順 1 と [RDP を設定する](#rdp-を設定する)の手順 3 の値に読み替える
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。この項の手順 2 の `TLS fingerprint` と同じなら `Y` で受け入れる
      - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
    - Windows は、拇印を出さずに「このリモート コンピューターの ID を識別できません」と聞く
-     - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、手順 15 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
+     - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 2 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
-   - パスワードは手順 7 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
+   - パスワードは [RDP を設定する](#rdp-を設定する)の手順 3 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
    - このユーザーが初めてデスクトップにログインしたなら、「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出ている。RDP の画面で「スキップ」を押す
    - RDP の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
    - クライアントでの操作は、PC の画面にもそのまま出る。PC の上部バーには、共有中の印が出る
@@ -539,8 +547,8 @@
 ## 接続元を LAN に絞る（任意）
 
 - **接続元を制限しないなら、この節は不要**
-- [手順 10](#実施手順) は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
-- 手順 1 の変数を設定したシェルで貼る
+- [RDP を設定する](#rdp-を設定する)の手順 6 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
+- [前提を確かめる](#前提を確かめる)の手順 1 の変数を設定したシェルで貼る
 - WireGuard などで別の拠点からつなぐなら、`LAN_SUBNET` には、PC に届くときの接続元のサブネットを入れる（この節は 1 つのサブネットだけを通す）
 
 1. LAN に絞るなら、送信元サブネットを入れ、ポートの開放を rich rule に置き換える。
@@ -550,7 +558,7 @@
    ```
 
    ```bash
-   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、「前提を確かめる」の手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
@@ -567,7 +575,7 @@
 ## つながらなくなったとき
 
 - **PC の画面を触らずに、SSH から直す**。共有するユーザーで SSH でログインしたシェルで貼る
-- 当てはまる手順だけを貼る。どれも手順 1 の変数は要らない
+- 当てはまる手順だけを貼る。どれも[前提を確かめる](#前提を確かめる)の手順 1 の変数は要らない
 - 理由が分からないときは、`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る
 
 1. 画面がロックされて切れたとき（クライアントから Super+L を押したときなど）は、ロックを解く。
@@ -599,7 +607,7 @@
    ```
 
    - `Active=yes` と出ればよい。つないだままのクライアントにも、また画面が写る（切れていれば、つなぎ直す）
-   - 再起動のたびに起きるなら、[手順 12](#実施手順) の起動の引数を確かめる
+   - 再起動のたびに起きるなら、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 2 の起動の引数を確かめる
 
 1. PC の画面のセッションが無いとき（クライアントから「ログアウト」を選んだときなど）は、PC を再起動して自動ログインさせる。
 
@@ -607,5 +615,5 @@
    systemctl reboot -i
    ```
 
-   - パスワードの聞かれ方は、[手順 13](#実施手順) と同じ
-   - 起動したら SSH で入り直し、手順 1 の 2 つのブロックを貼り直してから、[手順 14](#実施手順) で確かめる
+   - パスワードの聞かれ方は、[自動ログインにして再起動する](#自動ログインにして再起動する)の手順 3 と同じ
+   - 起動したら SSH で入り直し、[前提を確かめる](#前提を確かめる)の手順 1 の 2 つのブロックを貼り直してから、[再起動の後に確かめてつなぐ](#再起動の後に確かめてつなぐ)の手順 1 で確かめる

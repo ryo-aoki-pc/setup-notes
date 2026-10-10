@@ -2,13 +2,13 @@
 
 [手順書](../forgejo.md)・[検証記録](../verification/forgejo.md)・[参考資料](../reference/forgejo.md)
 
-- 「手順 N」は[手順書](../forgejo.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - Forgejo の起動・自動更新のタイマーと、この文書が追加した firewalld の 2 規則を解除する。データとバックアップは既定で残す
-- サーバーを動かすユーザーのシェルで行う。手順 1 の `SERVER_IP`・`LAN_SUBNET`・ポート・`FW_ZONE` は、追加したときと同じ値を貼り直す
+- サーバーを動かすユーザーのシェルで行う。「イメージを取得して localhost で起動する」の手順 1 の `SERVER_IP`・`LAN_SUBNET`・ポート・`FW_ZONE` は、追加したときと同じ値を貼り直す
 - Podman と linger はほかのサービスも使うので、この節では削除・無効化しない
 
 1. 必要なデータをバックアップする。
@@ -47,7 +47,7 @@
 
    ```bash
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
-     echo '中断: 追加したときの手順 1 の変数を設定する' >&2
+     echo '中断: 追加したときの「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
    else
      for port in "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}"; do
        rule="rule family=\"ipv4\" priority=\"100\" source address=\"${LAN_SUBNET}\" destination address=\"${SERVER_IP}\" port port=\"${port}\" protocol=\"tcp\" accept"
@@ -70,7 +70,7 @@
 
    ```bash
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
-     echo '中断: 手順 1 のポートを設定する' >&2
+     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 のポートを設定する' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
      systemctl --user status forgejo.service --no-pager

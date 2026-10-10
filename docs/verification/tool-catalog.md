@@ -136,7 +136,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 
 | コンテナ | 用途 |
 |---|---|
-| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
+| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
 | `fp1` | GUI の Flathub の行。[flatpak.md](../almalinux-setup.md) の手順 1〜5 を通してから入れた |
 
 **手順書の外で行った準備**（検証環境の都合）:

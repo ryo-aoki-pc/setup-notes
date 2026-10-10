@@ -6,11 +6,11 @@
 
 ## 補足
 
-### 実施手順 / 手順 18: 本文中の記録
+### 実施手順 / 状態と疎通を確かめる / 手順 2: 本文中の記録
 
    - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](#症状と原因の対応実測) を見る
 
-### 実施手順 / 手順 18: 補足: 疎通確認
+### 実施手順 / 状態と疎通を確かめる / 手順 2: 補足: 疎通確認
 
 `latest handshake` が表示されない場合は、トンネルが張れていない。調べる順番は次のとおり:
 
@@ -579,8 +579,8 @@ firewalld の方式を「`wg0` を LAN 側ゾーンに入れてゾーン内転�
 ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM 2 台で、現行の `wg-vpn.sh` を本実行した。カーネルは `6.12.0-211.61.1.el10_2.x86_64`、SELinux Enforcing、firewalld active。管理用の NAT NIC を残し、隔離 LAN の別 NIC に検証用の LAN IP を足した。鍵・登録名・IP はすべて検証用。
 
 - `site.env` の編集は、例をコピーしたあと検証専用の値を入れ、両 VM に同じファイルを置いた。Endpoint は隔離 LAN の IP、拠点 LAN・トンネル・クライアント帯は例と同じ別々の帯にした。エディター操作の検証は含めていない
-- 手順 4 の `keygen` で `wireguard-tools 1.0.20250521-1.el10` と `systemd-resolved` が入り、ホストの鍵ができた。resolved は disabled のまま
-- 手順 7・8 の dry-run と apply が通り、`wg-quick@wg0` は enabled/active。実カーネルの WireGuard がハンドシェイクし、firewalld は LAN と wg0 を public に入れた
+- 「鍵を作って適用する」の手順 1 の `keygen` で `wireguard-tools 1.0.20250521-1.el10` と `systemd-resolved` が入り、ホストの鍵ができた。resolved は disabled のまま
+- 「鍵を作って適用する」の手順 4・5 の dry-run と apply が通り、`wg-quick@wg0` は enabled/active。実カーネルの WireGuard がハンドシェイクし、firewalld は LAN と wg0 を public に入れた
 - LAN 上の相手は、それぞれの VM 内の network namespace と veth で用意した。試験用の veth も public に入れ、相手 LAN への往復経路を設定した。両 LAN の間の ping は双方向 0% 損失、tracepath は相手 wg0 を経由する 3 ホップ、MTU 1420。TCP の HTTP 応答も 200
 - 3 台目の VM を Road Warrior にし、クライアント生成の公開鍵登録・apply・conf 発行・両 LAN への通信・LAN からの逆方向を確認した（[同日の Road Warrior の記録](wireguard-road-warrior.md#付録-クリーンインストールした-vm-での検証2026-10-06)）
 - 登録を消した後の通常の dry-run は、削除したクライアントの鍵だけを未知 peer として列挙して停止した。控えた鍵と照合してから `--drop-unknown-peers` の dry-run と apply を通し、登録簿と動作中の peer から消えた
@@ -588,15 +588,15 @@ ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM 2 台で、現行�
 
 - 両 VM の再起動後、`wg-quick@wg0` は SSH ログイン前に active になり、`ip_forward=1` とハンドシェイクが復帰した。トンネル IP と相手のホストの LAN IP への ping が双方向 0% 損失だった。試験用 namespace は再起動で消えるため、この起動後の確認は LAN の端末役への通信ではない
 
-`router A` のルーター向け案内表示、手順 16 のホスト上のクライアント用 conf 削除と、手順 17 の status も通した。status は経路・enabled/active・ip_forward・public ゾーン・登録したクライアントの一覧を表示した。秘密鍵をクライアント側で生成する経路を選んだため、この conf の PrivateKey は置き換え前のプレースホルダーだった。
+`router A` のルーター向け案内表示、「クライアントを登録する」の手順 7 のホスト上のクライアント用 conf 削除と、「状態と疎通を確かめる」の手順 1 の status も通した。status は経路・enabled/active・ip_forward・public ゾーン・登録したクライアントの一覧を表示した。秘密鍵をクライアント側で生成する経路を選んだため、この conf の PrivateKey は置き換え前のプレースホルダーだった。
 
 #### 間欠的な終了 141 の原因と修正
 
-クライアントを登録する Road Warrior の手順 6 で、`client add` は成功したが、続く apply が出力なしで終了 141 になった。`iface_of_ip` の `ip -o -4 addr show | awk ... { print $2; exit }` が、最初の一致でパイプを閉じ、`ip` が SIGPIPE で終わることが原因。`set -o pipefail` により関数全体が失敗する。実 VM でこの読み取りだけを 1000 回繰り返し、117 回が 141、883 回が成功だった。
+クライアントを登録する Road Warrior の「WG ホストに登録する」の手順 3 で、`client add` は成功したが、続く apply が出力なしで終了 141 になった。`iface_of_ip` の `ip -o -4 addr show | awk ... { print $2; exit }` が、最初の一致でパイプを閉じ、`ip` が SIGPIPE で終わることが原因。`set -o pipefail` により関数全体が失敗する。実 VM でこの読み取りだけを 1000 回繰り返し、117 回が 141、883 回が成功だった。
 
 最初の一致を変数に控え、最後まで読んで `END` で表示する形に直した。同じ VM の 1000 回はすべて成功。`bash -n` と ShellCheck 0.11.0 の `shellcheck -x` は指摘なし。登録の無い状態に戻したうえで、クライアント登録 → apply → conf 表示のブロックも終了 0 で通した。
 
-物理ルーターのポート転送・静的経路、インターネットの NAT/CGNAT、スマートフォンの QR 読み込み、実機の起動は今回の検証に含めていない。手順 9 の実ルーター操作が不要な隔離 LAN での確認であり、その手順を検証済みにはしていない。
+物理ルーターのポート転送・静的経路、インターネットの NAT/CGNAT、スマートフォンの QR 読み込み、実機の起動は今回の検証に含めていない。「鍵を作って適用する」の手順 6 の実ルーター操作が不要な隔離 LAN での確認であり、その手順を検証済みにはしていない。
 
 ### 付録: 新規 VM での現行手順の再検証（2026-10-06）
 
@@ -604,7 +604,7 @@ ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM 2 台で、現行�
 
 新しい VM 2 台を A/B とし、管理用 NAT NIC と検証 VM 間だけの隔離 LAN を使った。現行スクリプトを LF のまま VM に配置し、`site.env.example` に新規公開鍵・隔離 LAN の Endpoint を入れて両側へ写した。エディター操作と実ルーターの設定は含めていない。
 
-- `keygen`、手順 7 の dry-run の目視確認、8 の apply、17 の status が成功した。wireguard-tools は `1.0.20250521-1.el10`、resolved は追加依存として入り disabled のまま。public の自動検出・wg0 の所属・ゾーン内転送・51820/udp・ip_forward=1・サービスの enabled/active を確認した
+- `keygen`、「鍵を作って適用する」の手順 4 の dry-run の目視確認、同じ項の手順 5 の apply、「状態と疎通を確かめる」の手順 1 の status が成功した。wireguard-tools は `1.0.20250521-1.el10`、resolved は追加依存として入り disabled のまま。public の自動検出・wg0 の所属・ゾーン内転送・51820/udp・ip_forward=1・サービスの enabled/active を確認した
 - 各 VM 内に veth と network namespace で LAN の端末役を用意した。両 LAN の間の ping は双方向 0% 損失。HTTP/TCP は双方 200、tracepath は相手 wg0 を含む 3 ホップ・PMTU 1420、経路は wg0 だった。実カーネルでハンドシェイクと送受信を確認した
 - 3 台目の VM では Road Warrior のクライアント生成の公開鍵を登録した。両 LAN の ICMP/TCP と、両拠点・端末役からの逆方向 ping も成功した（[今回の Road Warrior の記録](wireguard-road-warrior.md#付録-新規-vm-での現行手順の再検証2026-10-06)）
 - 削除 1〜3 の通常 dry-run は、削除した検証用クライアントの公開鍵だけを未知 peer として表示して終了 1 になった。鍵を照合して 4 の明示的な dry-run を確認し、5・6 の適用・一覧で登録簿と動作中の peer から消えた

@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > - **手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**。手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、手順 2〜7・9・10 と、[更新](#更新)・[ロールバック](extra/windows-ssh-client.md#ロールバック)のブロックをそこに貼る
 > - 管理者の権限は要らない。Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ（ホストでは、手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる) が `C:\Program Files\Git` に入っていること（Git の ssh でも同じ config を読めるかを、手順 7・10 で確かめる）
 > - 前提: つなぐ先の AlmaLinux 10 のホストで sshd が動き、そのユーザーのパスワードで SSH に入れること（AlmaLinux 10 の既定。[注意点](extra/windows-ssh-client.md#注意点)）
 > - **手順 4 と手順 9 には対話入力がある**（手順 4 は鍵を作るか公開鍵を作り直すときのパスフレーズ、手順 9 はホスト鍵の確認とホストのユーザーのパスワード）。鍵にパスフレーズを付けたなら、手順 10（2 回）・11 でも聞かれる

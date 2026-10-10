@@ -2,13 +2,13 @@
 
 [手順書](../wireguard-road-warrior.md)・[検証記録](../verification/wireguard-road-warrior.md)・[参考資料](../reference/wireguard-road-warrior.md)
 
-- 「手順 N」は[手順書](../wireguard-road-warrior.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - この節は AlmaLinux 10 の PC のもの。Windows 11 の PC は[Windows 11 のロールバック](#windows-11-のロールバック)
-- **PC で、手順 1 の変数を設定したシェルで貼る**（`WG_DIR` が空だと `${WG_DIR:?…}` で止まる）
+- **PC で、「鍵を作る」の手順 1 の変数を設定したシェルで貼る**（`WG_DIR` が空だと `${WG_DIR:?…}` で止まる）
 - この節の手順 3 だけは WG ホストで貼る
 
 > [!CAUTION]
@@ -19,7 +19,7 @@
    ```bash
    {
      sudo nmcli connection down wg0 2>/dev/null; sudo nmcli connection delete wg0
-     rm -f "${WG_DIR:?手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
+     rm -f "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" "${WG_DIR}/wg0.pub" && rmdir "${WG_DIR}"
      printf '\n\033[7m 確認 \033[0m\n'
      sudo ls /etc/NetworkManager/system-connections/             # wg0.nmconnection が無い
    }
@@ -37,7 +37,7 @@
 
 1. WG ホストで、登録を消して反映する。
 
-   - [wireguard.md のクライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6 を行う。対象は、手順 4 で登録した `CLIENT_NAME` と `SITE`
+   - [wireguard.md のクライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6 を行う。対象は、「WG ホストに登録する」の手順 1 で登録した `CLIENT_NAME` と `SITE`
    - 削除前の公開鍵を控え、未知 peer と照合する。`--drop-unknown-peers` を確認なしに付けない
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
@@ -89,14 +89,14 @@
 
 1. WG ホストで、[ロールバック](#ロールバック)の手順 3 の案内に従い、登録を消して反映する。
 
-   - 手順 4 の `CLIENT_NAME` は、[Windows 11 で使う](../wireguard-road-warrior.md#windows-11-で使う)の手順 8 で登録した、この PC の名前にする
+   - 「WG ホストに登録する」の手順 1 の `CLIENT_NAME` は、[Windows 11 で WG ホストに登録して取り込む](../wireguard-road-warrior.md#windows-11-で-wg-ホストに登録して取り込む)の手順 2 で登録した、この PC の名前にする
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
 ---
 
 ## 注意点
 
-- **拠点の LAN 内では切る**: 手順 10 以降は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので、すぐ切る
+- **拠点の LAN 内では切る**: 「conf を取り込む」の手順 4 と「トンネルを確かめる」の全部は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので、すぐ切る
   - `Endpoint` 宛ての通信が、ルーターで折り返す[ヘアピン](wireguard.md#クライアントが拠点の-lan-内にいるとき)になる
   - NetworkManager が入れる拠点 LAN の経路が Wi-Fi の直結経路より優先されると、LAN 宛ての通信がすべてトンネルに入る
   - `AllowedIPs` には**両拠点の LAN**が入るので、接続先ではない方の拠点の LAN にいるときも同じことが起きる（その LAN のデフォルトゲートウェイに届かなくなり、`Endpoint` 自体も見えなくなってトンネルごと死ぬ）
@@ -118,7 +118,7 @@
 - **Windows 11 の注意点**
   - **拠点の LAN 内では張らない**: `AllowedIPs` の経路は、ルートのメトリック 0 で `wg0` に入る（ソースの `tunnel/addressconfig.go`）。LAN の直結の経路（Windows の既定ではルートのメトリック 256）より優先されるはずなので、AlmaLinux 10 と同じく LAN 宛ての通信がトンネルに入る
   - **張ったまま再起動すると、また張られる**: トンネルのサービスは自動で起動する（ソースの `manager/install.go`）。拠点の LAN に戻る前に切る
-  - **ほかの端末と同じ名前で登録しない**: [実施手順](../wireguard-road-warrior.md#実施手順)の手順 5 は、`CLIENT_NAME` と同じ名前の登録を消す。AlmaLinux 10 の PC と両方使うなら、別々の名前と鍵で登録する
+  - **ほかの端末と同じ名前で登録しない**: 実施手順の[WG ホストに登録する](../wireguard-road-warrior.md#wg-ホストに登録する)の手順 2 は、`CLIENT_NAME` と同じ名前の登録を消す。AlmaLinux 10 の PC と両方使うなら、別々の名前と鍵で登録する
   - **秘密鍵は、管理者なら読める**: 張っている間の `wg.exe show wg0 private-key`、窓の「編集」（設定の全文を出す）と「すべてのトンネルをzipにエクスポート」。WireGuard の窓は Administrators の一員にしか出ない。Windows のサインインのパスワードが鍵の守りになる
   - **WireGuard を外すと、ほかのトンネルの設定も消える**: MSI のアンインストールは `C:\Program Files\WireGuard\Data` を丸ごと消す（ソースの `installer/customactions.c` の `RemoveConfigFolder`）
   - **MTU**: conf に `MTU =` が無いと、既定の経路のインターフェースの MTU から 80 を引いた値になる（1500 なら 1420。WireGuard の文書の「Network Configuration Quirks」）。大きい通信だけ止まるなら、トンネルを切ってから窓の「編集」で `[Interface]` に `MTU = 1380` を足す

@@ -4,18 +4,20 @@
 
 > [!IMPORTANT]
 > - **サーバーを動かす一般ユーザー自身の bash（デスクトップの端末か SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
-> - 先に [AlmaLinux 10 の初期設定の手順 3](almalinux-setup.md#実施手順)（NOPASSWD の sudo）、[Podman](podman.md)・[linger](linger.md) を通す。常時動かす PC は、初期設定の[画面オフ・画面ロック・自動サスペンドを止める任意節](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)も通す
+> - 先に [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](almalinux-setup.md#ログインと-sudo)（NOPASSWD の sudo）、[Podman](podman.md)・[linger](linger.md) を通す。常時動かす PC は、初期設定の[画面オフ・画面ロック・自動サスペンドを止める任意節](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)も通す
 > - 別の PC からホストの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
-> - 手順 6・7・11・12・14〜16・18〜20 は別の PC やブラウザで行う。Git の確認に使う PC は、先に [Git](git.md) を通す
-> - 手順 21 でサーバーを再起動する。ログインし直した後は、手順 1 の変数だけを貼り直す
+> - [初期設定と管理者の作成](#初期設定と管理者の作成)の手順 1・2、[LAN に公開する](#lan-に公開する)の手順 3、[Git の接続を確かめる](#git-の接続を確かめる)の手順 1・3〜5、[再起動しても残ることを確かめる](#再起動しても残ることを確かめる)の手順 2〜4 は別の PC やブラウザで行う。Git の確認に使う PC は、先に [Git](git.md) を通す
+> - [再起動しても残ることを確かめる](#再起動しても残ることを確かめる)の手順 5 でサーバーを再起動する。ログインし直した後は、[イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1 の変数だけを貼り直す
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバック](extra/forgejo.md)
-- 手順 2 で公式の最新安定版を調べて入れる。手順 24〜26 で、毎日最新の安定版へ自動で更新するタイマーを有効にする（[更新](#更新)）
+- [イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 2 で公式の最新安定版を調べて入れる。[自動更新を有効にする](#自動更新を有効にする)の手順 1〜3 で、毎日最新の安定版へ自動で更新するタイマーを有効にする（[更新](#更新)）
 - 手順の後: [使い方の基本](#使い方の基本)・[設定ファイル](#設定ファイル)・[バックアップ](#バックアップ)・[バックアップから復元する](#バックアップから復元する)・[更新](#更新)・[ロールバック](extra/forgejo.md#ロールバック)
 - Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
 - 初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない。インターネット向けのポート転送は設定しない
+
+### イメージを取得して localhost で起動する
 
 1. 変数を設定する（`SERVER_IP` と `LAN_SUBNET` は必ず値を入れる）。
 
@@ -41,7 +43,7 @@
    - ホストの SSH のポート 22 は変えない
    - `LAN_SUBNET` は、サーバーから見えるクライアントの送信元に合わせる。VPN の相手だけに許可するときは、その VPN の CIDR にする
    - 待ち受ける NIC が別の zone に属しているなら、任意変数のブロックの `FW_ZONE=` をその名前に変える
-   - ポートを変えたら、別の PC で打つ手順 6・14・16 の番号も同じにする
+   - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#初期設定と管理者の作成)の手順 1 と[Git の接続を確かめる](#git-の接続を確かめる)の手順 3・5 の番号も同じにする
    - 空のままなら先へ進まない
 
 1. 値と前提を確かめ、公式の最新安定版の rootless イメージを取得する。
@@ -50,7 +52,7 @@
    unset FORGEJO_VERSION
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
-     echo '中断: 手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${LAN_SUBNET}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
    import ipaddress
    import json
@@ -107,24 +109,24 @@
        podman run --rm --entrypoint /usr/local/bin/gitea "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}-rootless" --version
      fi
    else
-     echo '中断: 手順 1 の値を直す' >&2
+     echo '中断: この項の手順 1 の値を直す' >&2
    fi
    ```
 
    - 値の確認が `OK` で、firewalld が `running`、`導入する版:` と同じ番号の Forgejo の版が表示されればよい
    - 調べられないときは `urllib.error.URLError` などを表示し、何も取得せずに止まる。サーバーから `codeberg.org` へ HTTPS で接続できるか確かめてから貼り直す
-   - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、手順 1 の値を直す
+   - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
    - zone の `target` が `ACCEPT`、zone が `trusted`、または Web・Git 用 SSH ポートへの広い許可があれば、公開前に管理者へ確認する
    - **`sudo podman` は使わない**
-   - **手順 3 は、同じシェルに続けて貼る**
+   - **この項の手順 3 は、同じシェルに続けて貼る**
 
 1. 既存の設定やデータが無いことを確かめ、localhost 用の Quadlet を置く。
 
    ```bash
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
-     echo '中断: 手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    elif [[ ! ${FORGEJO_VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-     echo '中断: 同じシェルで手順 2 を通す' >&2
+     echo '中断: 同じシェルでこの項の手順 2 を通す' >&2
    elif [ -e ~/.config/containers/systemd/forgejo.container ] || [ -L ~/.config/containers/systemd/forgejo.container ] ||
         [ -e ~/.config/containers/systemd/forgejo.container.d ] || [ -L ~/.config/containers/systemd/forgejo.container.d ] ||
         [ -e ~/.config/systemd/user/forgejo.service ] || [ -L ~/.config/systemd/user/forgejo.service ] ||
@@ -176,7 +178,7 @@
    fi
    ```
 
-   - **中断したときは手順 4 へ進まない**。既存の構築を使うか、必要なデータを退避してからやり直す
+   - **中断したときはこの項の手順 4 へ進まない**。既存の構築を使うか、必要なデータを退避してからやり直す
    - `INSTALL_LOCK` と `AutoUpdate` は定義に追加しない
 
 1. 定義を読み直し、localhost でサービスを起動する。
@@ -198,7 +200,7 @@
 
    ```bash
    if [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
-     echo '中断: 手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
      curl -fsS --retry 10 --retry-delay 1 --retry-all-errors -o /dev/null -w '%{http_code}\n' \
@@ -210,9 +212,11 @@
 
    - 初期設定のページが HTTP 200 を返し、2 つの公開ポートが `127.0.0.1` に限定されていればよい
 
+### 初期設定と管理者の作成
+
 1. 別の PC で、初期設定用の SSH トンネルを開く。
 
-   - クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3000:127.0.0.1:3000 <OSユーザー>@<SERVER_IP>` を実行する。`<OSユーザー>` はサーバーを動かす一般ユーザー、`<SERVER_IP>` は手順 1 の IPv4 に置き換える
+   - クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3000:127.0.0.1:3000 <OSユーザー>@<SERVER_IP>` を実行する。`<OSユーザー>` はサーバーを動かす一般ユーザー、`<SERVER_IP>` は[イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1 の IPv4 に置き換える
    - Web ポートを変えたら、`-L` の最初と最後の `3000` を両方ともその番号にする
    - クライアントのローカルポートが使用中なら、そのサービスを止めるか、同じ番号のポートが空いている別の PC で行う
    - トンネルの端末は開いたままにする
@@ -222,7 +226,7 @@
    - `http://localhost:3000/` を開く。Web ポートを変えたらその番号にする
    - 表示言語が違う場合は、画面下部の言語メニューで English を選ぶ
    - DB は SQLite3、DB のパスは `/var/lib/gitea/data/forgejo.db`、ドメインは `localhost`、ベース URL は `http://localhost:3000/`（ホストの Web ポートに合わせる）を確かめる
-   - HTTP ポートはコンテナ内部の `3000`、SSH ポートは手順 1 のホスト側の番号にする。リポジトリとアプリケーションのデータの場所は自動で入った値を使う
+   - HTTP ポートはコンテナ内部の `3000`、SSH ポートは[イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1 のホスト側の番号にする。リポジトリとアプリケーションのデータの場所は自動で入った値を使う
    - 自己登録を無効にする項目を有効にし、「Administrator account settings」を開いてユーザー名・メールアドレス・パスワードを入力する
    - 「Install Forgejo」を押し、作った管理者でログインできることを確かめる
    - **次の手順は、管理者でログインできてから貼る**
@@ -252,19 +256,21 @@
    then
      podman exec forgejo /usr/local/bin/gitea --config /var/lib/gitea/custom/conf/app.ini admin user list
    else
-     echo '中断: 手順 7 の初期設定を完了する' >&2
+     echo '中断: この項の手順 2 の初期設定を完了する' >&2
    fi
    ```
 
    - ロックと自己登録無効が `true` で、ユーザーの一覧に作成した管理者があり、管理者の列が有効ならよい
    - **`app.ini` を `cat` しない**。トークンの署名鍵などの秘密が入る
 
+### LAN に公開する
+
 1. 送信元と宛先を限定した、この手順専用の firewalld の規則を追加する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
-     echo '中断: 手順 1 の変数を設定する' >&2
+     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
    else
      FORGEJO_RULES=(
        "rule family=\"ipv4\" priority=\"100\" source address=\"${LAN_SUBNET}\" destination address=\"${SERVER_IP}\" port port=\"${FORGEJO_HTTP_PORT}\" protocol=\"tcp\" accept"
@@ -292,14 +298,14 @@
 
    - runtime と permanent に、指定した送信元・宛先・Web と Git 用 SSH の 2 規則があればよい
    - **既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは送信元を絞れない**。公開前に管理者へ既存の許可を確認する
-   - **中断や失敗が出たら手順 10 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
+   - **中断や失敗が出たらこの項の手順 2 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
 
 1. 初期設定済みの Quadlet を LAN 用に変え、サービスを再起動する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
-     echo '中断: 手順 1 の変数を設定する' >&2
+     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
    import configparser
    import ipaddress
@@ -353,11 +359,13 @@
 
 1. 別の PC でトンネルを閉じ、LAN の URL で管理者のログインを確かめる。
 
-   - 手順 6 の端末で `Ctrl+C` を押してトンネルを閉じる
+   - [初期設定と管理者の作成](#初期設定と管理者の作成)の手順 1 の端末で `Ctrl+C` を押してトンネルを閉じる
    - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
    - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
    - サーバーへ届く別の許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことを確かめる。ルーターのポート転送は作らない
    - 接続できないときは、サーバーの IP・FW_ZONE・クライアントの送信元と VPN の経路を確かめる
+
+### Git の接続を確かめる
 
 1. 別の PC のブラウザで、Git に使う公開鍵を Forgejo に登録する。
 
@@ -382,8 +390,8 @@
 
 1. 別の PC で、ホスト鍵を照合して Git 用 SSH へ接続する。
 
-   - `ssh -T -p 2222 git@<SERVER_IP>` を実行する。`<SERVER_IP>` は手順 1 の IPv4、`2222` はホスト側の Git 用 SSH ポートに置き換える
-   - 初回に表示される指紋を手順 13 と照合し、一致したときだけ `yes` と答える
+   - `ssh -T -p 2222 git@<SERVER_IP>` を実行する。`<SERVER_IP>` は[イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1 の IPv4、`2222` はホスト側の Git 用 SSH ポートに置き換える
+   - 初回に表示される指紋をこの項の手順 2 と照合し、一致したときだけ `yes` と答える
    - 公開鍵で認証され、Forgejo のユーザー名を含む案内が表示されればよい。シェルは開かない
    - パスワードを聞かれるときは、ホストのポート 22 へ接続していないか、登録した公開鍵に対応する秘密鍵をクライアントが使っているか確かめる
    - `REMOTE HOST IDENTIFICATION HAS CHANGED` が出たら、鍵を消して進めず、サーバーの指紋と再構築の有無を照合する
@@ -396,11 +404,13 @@
 
 1. 別の PC で clone と push を行い、ブラウザでコミットを確かめる。
 
-   - 空の作業場所で `git clone ssh://git@<SERVER_IP>:2222/<Forgejoユーザー>/forgejo-test.git` を実行する。URL は手順 15 の画面からコピーしてもよい
+   - 空の作業場所で `git clone ssh://git@<SERVER_IP>:2222/<Forgejoユーザー>/forgejo-test.git` を実行する。URL はこの項の手順 4 の画面からコピーしてもよい
    - `cd forgejo-test`、`printf 'Forgejo の接続確認\n' > connection-check.txt`、`git add connection-check.txt`、`git commit -m 'Forgejo の接続確認'`、`git push` の順に実行する
    - ブラウザで `connection-check.txt` と作成したコミットが見えればよい
    - `forgejo-test` が既に作業場所にあるときは、別の空の場所を使い、既存の作業を上書きしない
    - **次の手順は、clone と push の両方を確かめてから貼る**
+
+### 再起動しても残ることを確かめる
 
 1. サーバーでサービスを再起動し、設定とデータが残ることを確かめる。
 
@@ -417,7 +427,7 @@
 1. 別の PC で、再起動後のログインと Git の接続を確かめる。
 
    - ブラウザで LAN の URL を開き、作成した管理者でログインする
-   - `forgejo-test` と手順 16 のコミットが残ることを確かめる
+   - `forgejo-test` と[Git の接続を確かめる](#git-の接続を確かめる)の手順 5 のコミットが残ることを確かめる
    - clone した作業場所で `git fetch` を実行する。再起動のたびに SSH のホスト鍵の確認を求められないことを確かめる
 
 1. サーバーを動かすユーザーをログアウトし、別の PC から接続する。
@@ -429,7 +439,7 @@
 1. サーバーを動かすユーザーで、ホストの SSH にログインし直す。
 
    - ポート 22 の通常の SSH で、サーバーを動かす OS のユーザーにログインする。`git` や Forgejo の管理者名ではログインしない
-   - 手順 1 の変数を貼り直す
+   - [イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1 の変数を貼り直す
    - **次の手順は、再起動してよい時間に貼る**
 
 1. サーバーを再起動する。
@@ -439,14 +449,14 @@
    ```
 
    - Web と Git の接続がいったん切れる
-   - **次の手順は、再起動後に同じ OS のユーザーでログインし直し、手順 1 の変数を貼り直してから貼る**
+   - **次の手順は、再起動後に同じ OS のユーザーでログインし直し、変数を貼り直してから貼る**（変数は[イメージを取得して localhost で起動する](#イメージを取得して-localhost-で起動する)の手順 1）
 
 1. 再起動後の自動起動と待ち受けを確かめる。
 
    ```bash
    {
      if [ -z "${FW_ZONE}" ]; then
-       echo '中断: 手順 1 の変数を貼り直す' >&2
+       echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を貼り直す' >&2
      else
        printf '\n\033[7m 確認 \033[0m\n'
        systemctl --user is-active forgejo.service
@@ -461,13 +471,15 @@
    ```
 
    - `active`・`generated`・`Linger=yes` が出て、サービスが起動した時刻がログインした時刻より前ならよい
-   - LAN 向けの 2 つのポートと、手順 9 の 2 規則が残っていればよい
+   - LAN 向けの 2 つのポートと、[LAN に公開する](#lan-に公開する)の手順 1 の 2 規則が残っていればよい
 
 1. 別の PC で、OS の再起動後の Web と Git を確かめる。
 
    - LAN または VPN の URL で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
    - 作業場所で `git fetch` を実行する。許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことも確かめる
    - **次の手順は、Web と Git を確かめてから貼る**
+
+### 自動更新を有効にする
 
 1. 自動更新のプログラムを置く。
 
@@ -481,7 +493,7 @@
      (umask 077; cat > ~/.local/bin/forgejo-auto-update <<'EOF'
    #!/usr/bin/python3 -I
    # setup-notes: forgejo
-   # Forgejo を公式の最新安定版へ自動で更新する（docs/forgejo.md の手順 24〜26）。
+   # Forgejo を公式の最新安定版へ自動で更新する（docs/forgejo.md の「自動更新を有効にする」の手順 1〜3）。
    # 新しい版があれば、停止バックアップ → イメージの行の更新 → 起動 → 確認を行う。
    # 確認に失敗したら直前のバックアップへ戻し、その版を保留する。
    # 終了コード: 0 最新・更新済み・停止中で何もしない / 1 変更せずに中断・保留中 / 2 戻して保留した / 3 戻せなかった
@@ -868,7 +880,7 @@
 1. ブラウザで、自分のアカウントに SSH 公開鍵を登録する。
 
    - 右上のアカウントメニューから「Settings」を開き、「SSH / GPG keys」の「Add key」で公開鍵を登録する。名前は利用する PC を識別できるものにする
-   - [実施手順の手順 12](#実施手順)で、同じ Forgejo アカウントに同じ PC の鍵を登録済みなら、この節の手順 2 は飛ばす
+   - 実施手順の[Git の接続を確かめる](#git-の接続を確かめる)の手順 1 で、同じ Forgejo アカウントに同じ PC の鍵を登録済みなら、この節の手順 2 は飛ばす
    - 公開鍵が無ければ、その PC で `ssh-keygen -t ed25519` を実行し、保存先とパスフレーズに答える。既存の鍵へ上書きしない
    - `.pub` の内容を末尾まで貼る。秘密鍵は登録しない
    - 登録した鍵の名前と指紋が一覧に出ればよい
@@ -876,8 +888,8 @@
 
 1. 利用する PC の端末で、Git 用 SSH の接続先を確かめる。
 
-   - 管理者から、[実施手順の手順 13](#実施手順)で表示したサーバーのホスト鍵の指紋を受け取る
-   - [実施手順の手順 14](#実施手順)の初回接続時に表示される指紋と照合し、一致したときだけ接続を許可する。同じサーバーへ照合済みなら、この節の手順 3 は飛ばす
+   - 管理者から、実施手順の[Git の接続を確かめる](#git-の接続を確かめる)の手順 2 で表示したサーバーのホスト鍵の指紋を受け取る
+   - 実施手順の[Git の接続を確かめる](#git-の接続を確かめる)の手順 3 の初回接続時に表示される指紋と照合し、一致したときだけ接続を許可する。同じサーバーへ照合済みなら、この節の手順 3 は飛ばす
    - 接続先は `git@<SERVER_IP>` と Git 用 SSH ポート（既定は 2222）
    - 自分の Forgejo のユーザー名を含む認証成功の案内が出ればよい。シェルは開かない
 
@@ -985,8 +997,8 @@
 | `~/.local/share/forgejo/custom/conf/app.ini` | 初期設定の結果と秘密を含む Forgejo の設定 |
 | `~/.local/share/forgejo/data/forgejo.db` | SQLite の DB |
 | `~/.local/share/forgejo/` の残り | リポジトリ、添付、SSH のホスト鍵などの永続データ |
-| `~/.local/bin/forgejo-auto-update` | 毎日の自動更新のプログラム（手順 24） |
-| `~/.config/systemd/user/forgejo-auto-update.service`・`.timer` | 自動更新を毎日 4:00〜4:30 に動かすユーザーユニット（手順 25） |
+| `~/.local/bin/forgejo-auto-update` | 毎日の自動更新のプログラム（[自動更新を有効にする](#自動更新を有効にする)の手順 1） |
+| `~/.config/systemd/user/forgejo-auto-update.service`・`.timer` | 自動更新を毎日 4:00〜4:30 に動かすユーザーユニット（[自動更新を有効にする](#自動更新を有効にする)の手順 2） |
 | `~/.local/state/forgejo-auto-update/` | 保留した版（`skip-version`）と、自動更新を重ねて動かさないためのロック |
 | `~/.local/state/forgejo-backups/forgejo-<日時>.tar.gz` | [バックアップ](#バックアップ)で作る停止中のバックアップ |
 | `~/.local/state/forgejo-backups/forgejo-auto-<日時>-<旧版>.tar.gz` | 自動更新が更新の直前に作る停止中のバックアップ。新しい 3 つを残す |
@@ -1231,7 +1243,7 @@
 
 ## 更新
 
-- [手順 24〜26](#実施手順)のタイマーが、毎日 4:00〜4:30（サーバーの時刻）に公式の最新安定版を調べる。今の版が最新なら何もしない
+- [自動更新を有効にする](#自動更新を有効にする)の手順 1〜3 のタイマーが、毎日 4:00〜4:30（サーバーの時刻）に公式の最新安定版を調べる。今の版が最新なら何もしない
 - 新しい版があれば、Forgejo を止めてバックアップを取り、イメージの行を新しい版に変えて起動する。続けて、Web の `/api/healthz`・Git 用 SSH・動いている版・`doctor check --all` を確かめる。止まるのは数分で、DB の移行があると長くなる
 - 確かめられなければ、直前のバックアップへ自動で戻し、その版を保留する（`~/.local/state/forgejo-auto-update/skip-version`）。さらに新しい版が出たら、また自動で更新する
 - 自動更新のバックアップは `~/.local/state/forgejo-backups/forgejo-auto-<日時>-<旧版>.tar.gz` で、新しい 3 つを残す。戻したときは、更新後のデータと定義を同じ場所の `failed-update-<日時>` に残す
@@ -1241,7 +1253,7 @@
   - `1`: 何も変えずに中断した（最新版を調べられない・イメージを取得できない・空きが足りないなど）、または保留中
   - `2`: 更新に失敗し、前の版とデータに戻して保留した
   - `3`: 戻せなかった。journal の `バックアップ:` のアーカイブを、[バックアップから復元する](#バックアップから復元する)で戻す
-- この文書の前の版で構築したサーバー（自動更新の無いもの）は、[手順 24〜26](#実施手順)を通すと自動更新になる
+- この文書の前の版で構築したサーバー（自動更新の無いもの）は、[自動更新を有効にする](#自動更新を有効にする)の手順 1〜3 を通すと自動更新になる
 
 > [!WARNING]
 > メジャー版の更新と DB の移行も、確認無しで自動で入る。自動の確認で見つからない不具合に気付いたら、[バックアップから復元する](#バックアップから復元する)で更新直前のアーカイブを戻し、その節の手順 7 で新しい版を保留する。戻すと、更新後に受け付けた変更は失われる。

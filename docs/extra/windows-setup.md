@@ -2,40 +2,42 @@
 
 [手順書](../windows-setup.md)・[検証記録](../verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)
 
-- 「手順 N」は[手順書](../windows-setup.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
-- この節の手順 1〜17・21 は手順 9 と同じ管理者ではない Windows PowerShell（5.1）に、この節の手順 19・20・22〜38 はこの節の手順 18 で開く管理者の Windows PowerShell に貼る（この節の手順 21 の分だけ、管理者ではない窓も開いたままにしておく）
-- PSWindowsUpdate だけを外すなら、この節の手順 40・41 を行う（管理者ではない窓）。この文書で初めて入れた場合だけが対象
+- [表示と入力を戻す](#表示と入力を戻す)・[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)のすべての手順と、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 4 は、[Microsoft Store の更新](../windows-setup.md#microsoft-store-の更新)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 2・3・5〜11、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)のすべての手順、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 は、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 1 で開く管理者の Windows PowerShell に貼る（同じ項の手順 4 の分だけ、管理者ではない窓も開いたままにしておく）
+- PSWindowsUpdate だけを外すなら、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 3・4 を行う（管理者ではない窓）。この文書で初めて入れた場合だけが対象
 - Windows Update や Store の更新を一括で取り消す手順ではない。Store 本体と、ほかのモジュールも使う NuGet のプロバイダーは外さない
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - 表示と入力: エクスプローラーは 1、コンテキストメニューは 2、スタートは 3・23、タスクバーは 4、ダークモードは 5、既定の端末は 6、IME は 7、キーボードは 26・28
-  - 整理: 自動で起動するアプリは 8、標準アプリとウィジェットは 9、ショートカットのポリシーは 24
-  - 入れたもの: PowerShell 7 は 10、PowerToys は 11、UniGet UI は 12、scoop は 13・14、WSL は 17・25、Autologon は 20・21
-  - 貼り付けの設定: 15・16
-  - PC 全体: PC の名前は 37、長いパス・開発者モード・sudo は 36、電源とロックは 35、アダプターは 34、時計は 27
-  - ネットワークとサインイン: 配信の最適化は 29、ping は 30、リモート アシスタンスは 31、リモート デスクトップは 32、LAN の種類は 33、Windows Hello は 22
-- 多くは、元に戻すかを手順 37 で控えた値で決める
+  - 表示と入力: エクスプローラーは[表示と入力を戻す](#表示と入力を戻す)の手順 1、コンテキストメニューは同じ項の手順 2、スタートは同じ項の手順 3 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 6、タスクバーは[表示と入力を戻す](#表示と入力を戻す)の手順 4、ダークモードは同じ項の手順 5、既定の端末は同じ項の手順 6、IME は同じ項の手順 7、キーボードは[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 9・11
+  - 整理: 自動で起動するアプリは[表示と入力を戻す](#表示と入力を戻す)の手順 8、標準アプリとウィジェットは同じ項の手順 9、ショートカットのポリシーは[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 7
+  - 入れたもの: PowerShell 7 は[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1、PowerToys は同じ項の手順 2、UniGet UI は同じ項の手順 3、scoop は同じ項の手順 4・5、WSL は同じ項の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8、Autologon は同じ項の手順 3・4
+  - 貼り付けの設定: [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 6・7
+  - PC 全体: PC の名前は[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 9、長いパス・開発者モード・sudo は同じ項の手順 8、電源とロックは同じ項の手順 7、アダプターは同じ項の手順 6、時計は[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 10
+  - ネットワークとサインイン: 配信の最適化は[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 1、ping は同じ項の手順 2、リモート アシスタンスは同じ項の手順 3、リモート デスクトップは同じ項の手順 4、LAN の種類は同じ項の手順 5、Windows Hello は[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 5
+- 多くは、元に戻すかを[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で控えた値で決める
 - Git for Windows など、ほかの手順書で入れたものは、それぞれの手順書の「Windows 11 のロールバック」
   - [SSH クライアント（Windows）](windows-ssh-client.md#ロールバック)は「ロールバック」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-のロールバック)は「Windows 11 のロールバック」
-  - この節の手順 13 で scoop ごと消すなら、先に [git-delta の Windows 11 のロールバック](git-delta.md#windows-11-のロールバック)の手順 1 と、[GitHub CLI の Windows 11 のロールバック](gh.md#windows-11-のロールバック)の手順 1〜4 を行う
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと消すなら、先に [git-delta の Windows 11 のロールバック](git-delta.md#windows-11-のロールバック)の手順 1 と、[GitHub CLI の Windows 11 のロールバック](gh.md#windows-11-のロールバック)の手順 1〜4 を行う
     - `~/.gitconfig` の `core.pager` と、資格情報マネージャーの gh のトークンは、scoop を消しても残る
-  - この節の手順 13 で scoop ごと消すなら、先に [Neovim の Windows 11 のロールバック](neovim.md#windows-11-のロールバック)の手順 2 と、[yazi の Windows 11 のロールバック](yazi.md#windows-11-のロールバック)の手順 2 を行う
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと消すなら、先に [Neovim の Windows 11 のロールバック](neovim.md#windows-11-のロールバック)の手順 2 と、[yazi の Windows 11 のロールバック](yazi.md#windows-11-のロールバック)の手順 2 を行う
     - ユーザーの環境変数 `EDITOR`・`VISUAL`（Neovim の任意節）と `YAZI_FILE_ONE` は、scoop を消しても残る。lazygit は scoop の外に残すものが無い
-  - この節の手順 13 で scoop ごと消すなら、先に [コーディングエージェントの共同作業の Windows 11 のロールバック](coding-agents.md#windows-11-のロールバック)の手順 5（Claude Code のプラグインを外す）を行う
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと消すなら、先に [コーディングエージェントの共同作業の Windows 11 のロールバック](coding-agents.md#windows-11-のロールバック)の手順 5（Claude Code のプラグインを外す）を行う
     - プラグインは、Claude Code の起動と終了のたびに、scoop の `nodejs-lts` の `node` を動かす
 - 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
   - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・シェルのツール
-  - この節の手順 10 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、この節の手順 10 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)の手順 7・8
-  - この節の手順 17・25 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](../windows-setup.md#wsl-のネットワークをミラーにする任意)の手順 6・7
-  - この節の手順 13・14 で scoop ごと消すなら、[シェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる任意)の手順 11・12 は要らない
-    - 止めた zoxide もこの節の手順 13 で消え、bat の設定はこの節の手順 14 で `persist` ごと消える
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)の手順 7・8
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](../windows-setup.md#wsl-のネットワークをミラーにする任意)の手順 6・7
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4・5 で scoop ごと消すなら、[シェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる任意)の手順 11・12 は要らない
+    - 止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える
     - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、その任意節の手順 13（scoop を消した後でもよい）
 
 > [!CAUTION]
-> **この節の手順 13 は、scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。**この節の手順 14 は、それらの設定（`~\scoop\persist`）を、この節の手順 17 は WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
+> [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 は、**scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 5 は**それらの設定（`~\scoop\persist`）を**、同じ項の手順 8 は **WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。
+
+### 表示と入力を戻す
 
 1. エクスプローラーの表示を既定に戻す。
 
@@ -64,7 +66,7 @@
    ```
 
    - `False` が出ればよい
-   - エクスプローラーに効くのは、サインインし直すか、この節の手順 38 の再起動の後
+   - エクスプローラーに効くのは、サインインし直すか、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 の再起動の後
 
 1. スタートと設定の、おすすめ・提案・ヒントを既定に戻す。
 
@@ -80,7 +82,7 @@
    ```
 
    - 並んだ値がすべて `1` ならよい
-   - スタートの検索の Web の結果は、この節の手順 23 で戻す
+   - スタートの検索の Web の結果は、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 6 で戻す
 
 1. タスクバーを既定に戻す。
 
@@ -93,7 +95,7 @@
    ```
 
    - 3 つの値が空ならよい（値が無いと既定の、中央・タスク ビューあり・秒なし・検索ボックス）
-   - ウィジェットは、この節の手順 9 で入れ直す
+   - ウィジェットは、この項の手順 9 で入れ直す
 
 1. 淡色（ライトモード）に戻す。
 
@@ -154,6 +156,8 @@
    - `No package found matching input criteria.`（ストアにその ID が無い）や `0x80073cfb` で入らないアプリは、PC に残っているものを `Add-AppxPackage -RegisterByFamilyName -MainPackage <パッケージ ファミリー名>` で登録し直す（例: `Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe`）
    - 要らないアプリは、その ID を消してから貼る（ID とアプリの対応は[検証記録](../verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)の表。`9MSSGKG348SP` がウィジェット）
 
+### アプリと貼り付けの設定を外す
+
 1. PowerShell 7 を外す。
 
    ```powershell
@@ -199,7 +203,7 @@
    - `Are you sure? (yN)` と聞かれるので、`y` を入れる
    - 最後に `Scoop has been uninstalled.` が出ればよい（`~\scoop\persist` は残る）
    - 消せないアプリがあると `Couldn't remove` の旨の行で止まる。そのアプリを閉じて、この手順を貼り直す
-     - `scoop` が見つからない旨が出たら、scoop 本体が先に消えている。この節の手順 14 で残りを消す（`persist` も消える）
+     - `scoop` が見つからない旨が出たら、scoop 本体が先に消えている。この項の手順 5 で残りを消す（`persist` も消える）
      - 途中で止まったときは、ユーザーの PATH に `~\scoop\shims` が残る。要らなければ手で外す
    - **次の手順は、`Scoop has been uninstalled.` が出てから貼る**（続けて貼ると `y` の答えとして食われる）
 
@@ -212,9 +216,9 @@
    ```
 
    - `False` が 2 行出ればよい
-   - この手順を行わないと、scoop を入れ直すときに手順 20 が `exists and is not empty` で止まる
+   - この手順を行わないと、scoop を入れ直すときに[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 1 が `exists and is not empty` で止まる
 
-1. プロファイルから、手順 19 で足した行を消す。
+1. プロファイルから、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 で足した行を消す。
 
    ```powershell
    & {
@@ -232,17 +236,17 @@
 
    - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
    - 前の版の手順書（`windows-powershell-paste.md`）の印の行も消す
-   - 開いている窓の設定（手順 16・19）は、窓を閉じるまで残る。戻した後は、Windows の PowerShell のブロックを、conhost の窓では Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
+   - 開いている窓の設定（[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1・4）は、窓を閉じるまで残る。戻した後は、Windows の PowerShell のブロックを、conhost の窓では Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
 
 1. 実行ポリシーを戻すときだけ、元の値にする（`OLD_EXECUTION_POLICY` は必ず値を入れる）。
 
    ```powershell
-   $OLD_EXECUTION_POLICY = ''   # 手順 17 で控えた CurrentUser の値（Undefined・Restricted・AllSigned・RemoteSigned・Unrestricted・Bypass）
+   $OLD_EXECUTION_POLICY = ''   # 「貼り付けの設定」の手順 2 で控えた CurrentUser の値（Undefined・Restricted・AllSigned・RemoteSigned・Unrestricted・Bypass）
    ```
 
    ```powershell
    if ($OLD_EXECUTION_POLICY -notin 'Undefined', 'Restricted', 'AllSigned', 'RemoteSigned', 'Unrestricted', 'Bypass') {
-     Write-Error '中断: $OLD_EXECUTION_POLICY に手順 17 で控えた CurrentUser の値を入れる'
+     Write-Error '中断: $OLD_EXECUTION_POLICY に「貼り付けの設定」の手順 2 で控えた CurrentUser の値を入れる'
    } else {
      Set-ExecutionPolicy -ExecutionPolicy $OLD_EXECUTION_POLICY -Scope CurrentUser -Force -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -250,8 +254,8 @@
    }
    ```
 
-   - 手順 18 で値を変えなかった場合は、この手順を飛ばす。元の値を控えていなければ、推測で戻さない
-   - 表の `CurrentUser` が、手順 17 で控えた値に戻ればよい。`Undefined` は自分のユーザーの設定を消す値
+   - [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 3 で値を変えなかった場合は、この手順を飛ばす。元の値を控えていなければ、推測で戻さない
+   - 表の `CurrentUser` が、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2 で控えた値に戻ればよい。`Undefined` は自分のユーザーの設定を消す値
    - **注意**: 戻した後の実効値が `Restricted` なら、scoop などのスクリプトやプロファイルは動かない。`AllSigned` なら署名が必要になる
 
 1. WSL の AlmaLinux 10 を消すときだけ、登録を外す（取り戻せない）。
@@ -266,6 +270,8 @@
    - AlmaLinux 10 の中のファイルは、すべて消える
    - 最後の一覧に `AlmaLinux-10` が無ければよい（ほかのディストリビューションが無ければ、無い旨の行）
 
+### サインイン・検索・キーボードを戻す
+
 1. 管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く
@@ -277,8 +283,8 @@
    'LAN_IF = {0}' -f $LAN_IF
    ```
 
-   - 手順 36 の 2 つ目のブロックと同じ（`LAN_IF` が違えば直す）
-   - `LAN_IF` は、この節の手順 33・34 で使う
+   - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 2 の 2 つ目のブロックと同じ（`LAN_IF` が違えば直す）
+   - `LAN_IF` は、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5・6 で使う
 
 1. 自動サインインを止めるときは、Autologon を起動し、`Disable` を押す。
 
@@ -290,7 +296,7 @@
    - Autologon の窓で `Disable` を押す。自動ログオンの設定と、置いてあったパスワード（LSA のシークレット）が消える
    - **次の手順は、Autologon の窓が閉じてから貼る**
 
-1. この節の手順 1〜17 の管理者ではない窓で、Autologon を外す。
+1. [表示と入力を戻す](#表示と入力を戻す)から[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)までの手順の管理者ではない窓で、Autologon を外す。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -299,10 +305,10 @@
    ```
 
    - アンインストールの成功の行と、`0` が出ればよい（自動ログオンが無効）
-   - 手順 64 で自分のユーザーに入れたので、管理者の窓では `The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れない
-   - `1` が出たら、この節の手順 20 で `Disable` を押していない。外す前に戻って押す（外した後は、もう一度入れてから）
+   - [WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 で自分のユーザーに入れたので、管理者の窓では `The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れない
+   - `1` が出たら、この項の手順 3 で `Disable` を押していない。外す前に戻って押す（外した後は、もう一度入れてから）
 
-1. 手順 37 で `HelloOnly` が `2` だったときだけ、「Windows Hello サインインのみを許可する」をオンに戻す。
+1. [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `HelloOnly` が `2` だったときだけ、「Windows Hello サインインのみを許可する」をオンに戻す。
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' -Name DevicePasswordLessBuildVersion -Type DWord -Value 2
@@ -341,11 +347,11 @@
    Disable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
    ```
 
-   - `Disable-WindowsOptionalFeature` の結果に `RestartNeeded : True` が出る（この節の手順 38 で再起動する）
+   - `Disable-WindowsOptionalFeature` の結果に `RestartNeeded : True` が出る（[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 で再起動する）
    - ほかのディストリビューションを使っているなら、この手順は行わない
    - メモリ整合性などで、Hyper-V は動き続けることがある（VirtualBox は Hyper-V の上のまま）
 
-1. 手順 53 を行ったときだけ、キーボードの種類を JIS 配列に戻す。
+1. [サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 6 を行ったときだけ、キーボードの種類を JIS 配列に戻す。
 
    ```powershell
    $k = 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters'
@@ -358,9 +364,9 @@
    ```
 
    - `kbd106.dll`・`PCAT_106KEY`・`7`・`2` が出ればよい
-   - 手順 37 の `Keyboard` が `kbd106.dll` でなかったなら、その値に直してから貼る
+   - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 の `Keyboard` が `kbd106.dll` でなかったなら、その値に直してから貼る
 
-1. 手順 52 を行ったときだけ、時計の扱いを地方時に戻す。
+1. [サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 5 を行ったときだけ、時計の扱いを地方時に戻す。
 
    ```powershell
    Remove-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' -Name RealTimeIsUniversal -ErrorAction SilentlyContinue
@@ -377,7 +383,7 @@
      $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
      $want = '00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00'
      $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この節の手順 18 から）'; return }
+     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（「サインイン・検索・キーボードを戻す」の手順 1 から）'; return }
      $now = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).'Scancode Map'
      $nowHex = if ($now) { ($now | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -391,15 +397,17 @@
    - `Scancode Map を消した` が出ればよい
    - `中断:` が出たら、本書の後でほかの割り当てを足している。消さずに止めている
 
+### ネットワークと PC 全体の設定を戻す
+
 1. 配信の最適化を元に戻す（`OLD_DOWNLOAD_MODE` は必ず値を入れる）。
 
    ```powershell
-   $OLD_DOWNLOAD_MODE = ''   # 手順 37 で控えたモード（Internet・Lan・CdnOnly）
+   $OLD_DOWNLOAD_MODE = ''   # 「PC 全体の設定」の手順 3 で控えたモード（Internet・Lan・CdnOnly）
    ```
 
    ```powershell
    if ($OLD_DOWNLOAD_MODE -notin 'Internet', 'Lan', 'CdnOnly') {
-     Write-Error '中断: $OLD_DOWNLOAD_MODE に手順 37 で控えた Internet・Lan・CdnOnly のいずれかを入れる'
+     Write-Error '中断: $OLD_DOWNLOAD_MODE に「PC 全体の設定」の手順 3 で控えた Internet・Lan・CdnOnly のいずれかを入れる'
    } else {
      Set-DODownloadMode -DownloadMode $OLD_DOWNLOAD_MODE -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -407,7 +415,7 @@
    }
    ```
 
-   - 手順 37 で控えたモードが出ればよい
+   - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で控えたモードが出ればよい
    - `Lan`（既定）だったなら、この手順は飛ばしてよい。`CdnOnly` なら、ほかの PC と共有しない設定に戻る
    - 元の値を控えていない場合や、上の 3 つ以外だった場合は、推測で値を選ばず、管理元の設定を確かめる
 
@@ -421,7 +429,7 @@
 
    - 何も出なければよい
 
-1. 手順 37 で `RemoteAssistance` が `1` だったときだけ、システムのプロパティでリモート アシスタンスを戻す。
+1. [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `RemoteAssistance` が `1` だったときだけ、システムのプロパティでリモート アシスタンスを戻す。
 
    ```powershell
    SystemPropertiesRemote.exe
@@ -431,7 +439,7 @@
    - 「OK」を押すと窓が閉じ、`fAllowToGetHelp` が 1 になり、リモート アシスタンスの規則（パブリック向けも含む 15 個）がまとめて有効になる
    - **次の手順は、システムのプロパティを閉じてから貼る**
 
-1. 手順 37 で `RemoteDesktop` が `1`（無効）だったときだけ、リモート デスクトップを無効に戻す。
+1. [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `RemoteDesktop` が `1`（無効）だったときだけ、リモート デスクトップを無効に戻す。
 
    ```powershell
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Type DWord -Value 1
@@ -448,7 +456,7 @@
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error 'この節の手順 19 の $LAN_IF が空'
+     Write-Error '「サインイン・検索・キーボードを戻す」の手順 2 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Public
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -457,14 +465,14 @@
    ```
 
    - `<LAN_IF>  Public` が出ればよい
-   - 手順 37 で `LanCategory` が `Private` だったなら（もとからプライベート）、この手順は飛ばす
+   - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `LanCategory` が `Private` だったなら（もとからプライベート）、この手順は飛ばす
    - [Windows の OpenSSH サーバー](../windows-openssh-server.md)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
 
 1. アダプターを、電力の節約のために止められるように戻す。
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error 'この節の手順 19 の $LAN_IF が空'
+     Write-Error '「サインイン・検索・キーボードを戻す」の手順 2 の $LAN_IF が空'
    } else {
      $pm = Get-NetAdapterPowerManagement -Name $LAN_IF
      if ($pm.AllowComputerToTurnOffDevice -ne 'Unsupported') {
@@ -477,7 +485,7 @@
    ```
 
    - `AllowComputerToTurnOffDevice : Enabled` が出ればよい（このアダプターに設定が無ければ `Unsupported` のまま）
-   - 効くのは、この節の手順 38 の再起動の後
+   - 効くのは、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 の再起動の後
 
 1. 電源の設定を既定に戻し、休止状態を戻し、放置したときのロックを戻す。
 
@@ -510,7 +518,7 @@
 1. PC の名前を戻すときだけ、元の名前にする（`OLD_PC_NAME` は必ず値を入れる）。
 
    ```powershell
-   $OLD_PC_NAME = ''   # 手順 37 で控えた元の名前。<HOSTNAME>
+   $OLD_PC_NAME = ''   # 「PC 全体の設定」の手順 3 で控えた元の名前。<HOSTNAME>
    ```
 
    ```powershell
@@ -528,7 +536,9 @@
    ```
 
    - `再起動の後に <HOSTNAME> になる` が出ればよい
-   - 効くのは、この節の手順 38 の再起動の後
+   - 効くのは、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 の再起動の後
+
+### 再起動と PSWindowsUpdate
 
 1. 再起動する。
 
@@ -536,20 +546,20 @@
    Restart-Computer
    ```
 
-   - この節の手順 20〜37 の多くは、再起動の後に効く（この節の手順 1〜9 だけなら、サインインし直すだけでよい）
+   - [サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 3〜11 と[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 1〜9 の多くは、再起動の後に効く（[表示と入力を戻す](#表示と入力を戻す)の手順 1〜9 だけなら、サインインし直すだけでよい）
    - **次の手順は、起動してサインインしてから行う**
 
 1. 元に戻ったことを確かめる。
 
-   - Caps Lock を押すとランプが点き、大文字になる（この節の手順 28 を行ったとき）
-   - 右クリックで新しい形のメニューが出る（この節の手順 2 を行ったとき）
-   - エクスプローラー・タスクバー・スタートが既定の見た目に戻る（この節の手順 1・3〜5 を行ったとき）
+   - Caps Lock を押すとランプが点き、大文字になる（[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 11 を行ったとき）
+   - 右クリックで新しい形のメニューが出る（[表示と入力を戻す](#表示と入力を戻す)の手順 2 を行ったとき）
+   - エクスプローラー・タスクバー・スタートが既定の見た目に戻る（[表示と入力を戻す](#表示と入力を戻す)の手順 1・3〜5 を行ったとき）
 
 1. PSWindowsUpdate を外すときだけ、管理者ではない Windows PowerShell を開く。
 
-   - PSWindowsUpdate を読み込んだ窓を閉じてから、手順 9 と同じ方法で新しい窓を開く
-   - 手順 3 で初めて入れたモジュールが不要になった場合だけ、この節の手順 41 へ。もとから入っていた場合は消さない
-   - この節の手順 15 で貼り付けの設定も外した場合は、Ctrl+V で貼る
+   - PSWindowsUpdate を読み込んだ窓を閉じてから、[Microsoft Store の更新](../windows-setup.md#microsoft-store-の更新)の手順 1 と同じ方法で新しい窓を開く
+   - [Windows Update](../windows-setup.md#windows-update)の手順 3 で初めて入れたモジュールが不要になった場合だけ、この項の手順 4 へ。もとから入っていた場合は消さない
+   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 6 で貼り付けの設定も外した場合は、Ctrl+V で貼る
 
 1. この文書で初めて入れた PSWindowsUpdate が不要なときだけ、外す。
 
@@ -557,7 +567,7 @@
    & {
      $ErrorActionPreference = 'Stop'
      if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       throw '中断: この節の手順 40 で管理者ではない窓を開く'
+       throw '中断: 「再起動と PSWindowsUpdate」の手順 3 で管理者ではない窓を開く'
      }
      if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -579,27 +589,27 @@
 
 ## 注意点
 
-- **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（手順 41）・自動サインイン（手順 64）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（手順 40）・リモート デスクトップ（手順 44）・Windows Hello 以外のサインイン（手順 48）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、手順 41・64 は行わない
+- **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）・自動サインイン（[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 2）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 1）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
 - **Caps Lock の働きは無くなる**: Caps Lock を左 Ctrl にするだけで、Caps Lock をほかのキーに割り当てない。大文字を続けて打つときは Shift を押す
 - **Scancode Map は、すべてのユーザー・すべてのキーボードにかかる**: PC 全体の設定。この PC にサインインするほかのユーザーと、つないだ外付けのキーボードにもかかる
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](../verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)）
   - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)の手順 3）
-- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（手順 30）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、手順 16〜19 のプロファイルの設定による
-- **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（手順 33・34）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。手順 27・32〜34 を貼り直す
-- **サポート外の設定**: 旧形式のコンテキストメニュー（手順 26）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、手順 17 の `ClassicMenu` と手順 26 の `reg.exe query` で、設定が残っているかを見る。手順 25・27・32 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
+- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](../windows-setup.md#表示と入力)の手順 6）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜4 のプロファイルの設定による
+- **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 2・3）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。[表示と入力](../windows-setup.md#表示と入力)の手順 3 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1〜3 を貼り直す
+- **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 2）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 2 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 1・3 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[Windows の OpenSSH サーバー](../windows-openssh-server.md#scoop-のツールを-ssh-のセッションで使う任意)の任意節を、`scoop install`・`scoop update` の後に貼る
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
-- **PowerShell 7 のプロファイルは別**: 手順 19 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 24）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
+- **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 5）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
   - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
-- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。手順 16〜19 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
+- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜4 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
 - **このユーザーの Windows PowerShell のコンソールの窓すべてに効く**: 管理者の窓も同じプロファイルを読む
-- **任意節にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを変える（任意）](../windows-setup.md#表示入力音ストレージを変える任意)の手順 6）は、手順 26 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
-- **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める（任意）](../windows-setup.md#edge-の常駐をポリシーで止める任意)の手順 2 のポリシーで出る。消すには、その節の手順 5 で 2 つの値を消す（ほかの Edge のポリシーが無ければ消えるはず。手順 50 の `EdgeUpdate` だけで出るかも含め、確かめていない）
-- **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを変える（任意）](../windows-setup.md#表示入力音ストレージを変える任意)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、その節の手順 12 で外さないと、オンラインだけにされうる
+- **任意節にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 6）は、[表示と入力](../windows-setup.md#表示と入力)の手順 2 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
+- **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める（任意）](../windows-setup.md#edge-の常駐をポリシーで止める任意)の手順 2 のポリシーで出る。消すには、その節の手順 5 で 2 つの値を消す（ほかの Edge のポリシーが無ければ消えるはず。[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 3 の `EdgeUpdate` だけで出るかも含め、確かめていない）
+- **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 12 で外さないと、オンラインだけにされうる
 - **CopyQ の履歴は暗号化されない**: [CopyQ を使う（任意）](../windows-setup.md#copyq-を使う任意)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
 - **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える（任意）](../windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える任意)の手順 4

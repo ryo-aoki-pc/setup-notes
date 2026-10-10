@@ -7,7 +7,7 @@
 ### 実施手順 / 手順 2: 補足: 一緒に入るものと鍵
 
 - 一緒に入るのが `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
-- 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の手順 17](../almalinux-setup.md#実施手順) に書いた鍵
+- 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
@@ -88,6 +88,6 @@ fi
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
 - [Podman](../podman.md) — 前提の rootless の podman
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

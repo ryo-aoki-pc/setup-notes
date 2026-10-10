@@ -540,7 +540,7 @@
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
 > - 前提: [Claude Code](claude-code.md#windows-11-で使う)・[Codex CLI](codex.md#windows-11-で使う)・[Grok Build](grok-build.md#windows-11-で使う) の Windows 11 の節で入れて、それぞれログインしてある。Git は [git.md の Windows 11 の節](git.md#windows-11-で-git-for-windows-を入れる)
-> - 前提: [Windows 11 の初期設定](windows-setup.md#実施手順)の手順 16〜19（貼り付けの設定）と、手順 20・21（scoop）
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）と、「アプリを入れる」の手順 1・2（scoop）
 > - **この節の手順 12 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
 - 上から順に貼る。手順 1 で変数を設定した PowerShell に貼る

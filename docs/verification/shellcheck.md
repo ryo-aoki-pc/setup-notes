@@ -256,7 +256,7 @@ $ brew leaves | wc -l
 - [mvdan/sh — README](https://github.com/mvdan/sh) — shfmt のオプションと `.editorconfig` の対応キー
 - [shfmt 3.14.1 のオプション処理](https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/main.go) — Parser / Printer のオプションを指定した場合の EditorConfig の扱い（2026-10-05 にソースを確認）
 - `shellcheck --help` / `shfmt --help` — 全オプション
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 46〜48 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 
 ### 付録: コンテナでの検証記録（2026-09-23）
 

@@ -10,7 +10,7 @@ podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requ
 
 ### 実施手順 / 手順 1: 補足: 署名鍵
 
-- fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の手順 17](../almalinux-setup.md#実施手順) に書いた鍵
+- fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
 ### 実施手順 / 手順 3: 補足: 確認用のコンテナ
 
@@ -46,6 +46,6 @@ podman.sock: connect: connection refused
 - [podman-tui v2.0.0 のリリースノート](https://github.com/containers/podman-tui/releases/tag/v2.0.0) — podman v6 への対応、接続を podman の設定からだけ読むこと
 - `podman-tui --help`、画面の `F1`
 - [Podman](../podman.md) — 前提の rootless の podman と API ソケット
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

@@ -2,7 +2,7 @@
 
 [手順書](../wireguard.md)・[検証記録](../verification/wireguard.md)・[参考資料](../reference/wireguard.md)
 
-- 「手順 N」は[手順書](../wireguard.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 
 ## 全部消す（ロールバック）
 
@@ -16,7 +16,7 @@
 1. サービスを止めて、firewalld と sysctl を戻す。
 
    ```bash
-   cd "${REPO:?手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env remove A            # 拠点 B のホストでは B
    ```
 
@@ -44,7 +44,7 @@
 
 1. 両拠点のルーターから、ポート転送と静的経路を消す。
 
-   - 消す値は、[手順 8](../wireguard.md#実施手順) の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
+   - 消す値は、[鍵を作って適用する](../wireguard.md#鍵を作って適用する)の手順 5 の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
 
 ---
 
@@ -254,10 +254,10 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 
 #### クライアントの秘密鍵の扱い
 
-ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（手順 16 の `rm`）。
+ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（「クライアントを登録する」の手順 7 の `rm`）。
 
 - より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す
-- AlmaLinux 10 の PC でその流れにするなら、[Road Warrior 手順書](../wireguard-road-warrior.md)の手順 3〜6
+- AlmaLinux 10 の PC でその流れにするなら、[Road Warrior 手順書の「鍵を作る」の手順 3](../wireguard-road-warrior.md#鍵を作る)と[「WG ホストに登録する」の手順 1〜3](../wireguard-road-warrior.md#wg-ホストに登録する)
 
 #### `DNS =` を書く場合
 

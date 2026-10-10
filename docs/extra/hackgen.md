@@ -8,7 +8,7 @@
 ## ロールバック
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
-- **Homebrew そのものを消すとき**（[AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 24〜26）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
+- **Homebrew そのものを消すとき**（[AlmaLinux 10 の初期設定のロールバックの「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 1〜3）は、先にこの節の手順 1 の `brew uninstall --cask` を実行しておく
   - `~/.local/share/fonts` は Homebrew の外なので、このフォントを外すときは上の削除手順も行う
 
 1. HackGen を消し、fontconfig から消えたか確かめる。

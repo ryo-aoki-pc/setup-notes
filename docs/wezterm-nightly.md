@@ -138,7 +138,7 @@
 
 > [!IMPORTANT]
 > - **すべて、この PC のデスクトップで行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜5 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/wezterm-nightly.md#windows-11-のロールバック)のブロックをそこに貼る。ログインするユーザーは Administrators の一員（インストーラが `C:\Program Files\WezTerm` に入れ、PC 全体の `PATH` に書くため）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **WezTerm の窓をすべて閉じてから始める**（動いていると、この節の手順 4 が止まる）。[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)のタスクが動いていれば、先に同書の[止める・もう一度始める](windows-claude-remote-control.md#止めるもう一度始める)の手順 1 で止める
 > - **この節の手順 6 は画面で行う**（スタートメニューから WezTerm を起動する）
 

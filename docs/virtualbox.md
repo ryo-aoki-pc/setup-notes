@@ -6,17 +6,19 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。下の EPEL と Secure Boot の前提、KVM の設定は要らない）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) で EPEL を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion) で EPEL を有効にしてあること（依存の `liblzf` が EPEL にしか無い）。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **前提（Secure Boot が有効な PC）**: [secure-boot-mok.md](secure-boot-mok.md) で、モジュールの署名鍵を MOK に登録してあること（VirtualBox を入れるより前に。同書で再起動し、起動の途中の MokManager を操作する）。Secure Boot が有効かは、同書の手順 3 で分かる
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **途中で再起動が 1 回入る**（手順 13）。再起動した後は新しい端末を開いて続ける
-> - **手順 4・5・9 には対話入力がある**（鍵の確認・`[y/N]`）。答えてから次の手順を貼る
-> - **手順 17 で GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから手順 18 を貼る
+> - **途中で再起動が 1 回入る**（[KVM と USB の設定](#kvm-と-usb-の設定)の手順 3）。再起動した後は新しい端末を開いて続ける
+> - [リポジトリを置く](#リポジトリを置く)の手順 4・5 と[VirtualBox を入れる](#virtualbox-を入れる)の手順 4 には、**対話入力がある**（鍵の確認・`[y/N]`）。答えてから次の手順を貼る
+> - [動作を確かめる](#動作を確かめる)の手順 4 で **GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから[動作を確かめる](#動作を確かめる)の手順 5 を貼る
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: カーネルを更新したときは[カーネルを更新したとき](#カーネルを更新したとき)、以後の VirtualBox の更新は[更新](#更新)、戻すときは[ロールバック](extra/virtualbox.md#ロールバック)
+
+### リポジトリを置く
 
 1. この PC に入るかを確かめる。
 
@@ -79,7 +81,7 @@
    ```
 
    - 最初の 1 回だけ鍵の取り込みを聞かれる
-   - `Importing GPG key 0x2980AECF:` の `Fingerprint:` が、手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
+   - `Importing GPG key 0x2980AECF:` の `Fingerprint:` が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
    - `Metadata cache created.` で終わる
    - **次の手順は、鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -89,8 +91,10 @@
    dnf makecache --repo virtualbox
    ```
 
-   - 手順 4 と同じ fingerprint を確かめて `y` と答える
+   - この項の手順 4 と同じ fingerprint を確かめて `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+
+### VirtualBox を入れる
 
 1. 何が入るかを見る（`--assumeno` は必ず中断する）。
 
@@ -99,7 +103,7 @@
    ```
 
    - `VirtualBox-7.2 ... 7.2.20_175154_el10-1 ... virtualbox ... 105 M` と、依存の中に `liblzf ... epel` が出れば解決できている
-   - `nothing provides liblzf.so.1()(64bit)` と出たら、EPEL が有効になっていない（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)）
+   - `nothing provides liblzf.so.1()(64bit)` と出たら、EPEL が有効になっていない（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)）
 
 1. 動いているカーネルが、入っている中で一番新しいものかを見る。
 
@@ -134,7 +138,7 @@
    ```
 
    - トランザクション表を見て、`[y/N]` に `y` と答える
-   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵）
+   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
    - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
@@ -153,6 +157,8 @@
    - `enabled` と `active`、`vboxnetadp` / `vboxnetflt` / `vboxdrv` の 3 行、root だけが読み書きできる `/dev/vboxdrv` が出ればよい
    - `dnf install` の途中で `There were problems setting up VirtualBox.` が出ていた、または `active` にならないときは、ログ（`/var/log/vbox-setup.log`）で原因を見る
    - 原因を直してから、`sudo /sbin/vboxconfig` を実行し直す
+
+### KVM と USB の設定
 
 1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置いて確かめる。
 
@@ -178,16 +184,18 @@
    }
    ```
 
-   - **VM を動かすだけなら要らない**（この手順は飛ばして手順 13 へ）
+   - **VM を動かすだけなら要らない**（この手順は飛ばしてこの項の手順 3 へ）
    - `vboxusers:x:<GID>:<USER>` のように、自分の名前が出ればよい
 
-1. 再起動して、手順 11 の KVM の設定と、手順 12 のグループを反映させる。
+1. 再起動して、この項の手順 1 の KVM の設定と、この項の手順 2 のグループを反映させる。
 
    ```bash
    sudo systemctl reboot
    ```
 
    - **次の手順は、起動したら新しい端末を開いてから貼る**
+
+### 動作を確かめる
 
 1. VirtualBox の版と、モジュールと KVM の状態を確かめる。
 
@@ -201,8 +209,8 @@
    ```
 
    - `7.2.20r175154` のような版、`active`、vbox の 3 行、`N`（または `kvm は未ロード`）が出ればよい
-   - 最後の行は、手順 12 を行ったときだけ `vboxusers` になる
-   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（手順 10 に戻る）
+   - 最後の行は、[KVM と USB の設定](#kvm-と-usb-の設定)の手順 2 を行ったときだけ `vboxusers` になる
+   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（[VirtualBox を入れる](#virtualbox-を入れる)の手順 5 に戻る）
 
 1. Secure Boot が有効なときだけ、モジュールの署名を見る。
 
@@ -300,17 +308,17 @@
    ```
 
    - トランザクション表を見て `[y/N]` に答える
-   - [手順 10](#実施手順) と同じ確認をする
-   - **[手順 10](#実施手順) の確認は、`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - [VirtualBox を入れる](#virtualbox-を入れる)の手順 5 と同じ確認をする
+   - [VirtualBox を入れる](#virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは（この節の手順 2 の代わりに）、[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 だけを行う。
 
    - [ロールバック](extra/virtualbox.md#ロールバック)の手順 2 は `sudo dnf remove VirtualBox-7.2`
    - `[y/N]` に答えてから、この節の手順 4 に進む
 
-1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[手順 6](#実施手順) の下見と手順 9 からやり直す。
+1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[VirtualBox を入れる](#virtualbox-を入れる)の手順 1 の下見と同じ項の手順 4 からやり直す。
 
-   - 手順 6・9 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
+   - [VirtualBox を入れる](#virtualbox-を入れる)の手順 1・4 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
    - 以後は、この節の手順 2 と[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 も同じく置き換える
 
 ---
@@ -318,10 +326,10 @@
 ## Windows 11 で使う
 
 > [!IMPORTANT]
-> - **すべて Windows 11 の PC のデスクトップで行う**。SSH やリモート デスクトップのセッションからは行わない（この節の手順 3 の途中でネットワークがいったん切れ、手順 7 は画面で行う）
-> - この節の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、この節の手順 2〜4 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/virtualbox.md#windows-11-のロールバック)のブロックをそこに貼る。この節の手順 5 で**管理者ではない** Windows PowerShell を開き、手順 6・8 をそこに貼る
+> - **すべて Windows 11 の PC のデスクトップで行う**。SSH やリモート デスクトップのセッションからは行わない（この節の手順 3 の途中でネットワークがいったん切れ、この節の手順 7 は画面で行う）
+> - この節の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、この節の手順 2〜4 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/virtualbox.md#windows-11-のロールバック)のブロックをそこに貼る。この節の手順 5 で**管理者ではない** Windows PowerShell を開き、この節の手順 6・8 をそこに貼る
 > - ログインするユーザーは Administrators の一員（VirtualBox は PC 全体に入り、ドライバーを入れる）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **AlmaLinux 10 の前提（EPEL・Secure Boot の MOK の鍵）と KVM の設定は要らない**。Windows のドライバーは、Microsoft の署名付きでインストーラに入っている
 
 - 上から順にコードブロックを貼る。変数は無い
@@ -444,7 +452,7 @@
 
 > [!IMPORTANT]
 > - **この節は Android の Windows App の画面で行う**。PC と VirtualBox の設定は変えない
-> - 前提: この PC がリモート デスクトップを受け付けていること（[Windows 11 の初期設定の手順 44](windows-setup.md#実施手順)）と、[Windows 11 で使う](#windows-11-で使う)で入れた VirtualBox
+> - 前提: この PC がリモート デスクトップを受け付けていること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 2](windows-setup.md#ネットワークとリモート)）と、[Windows 11 で使う](#windows-11-で使う)で入れた VirtualBox
 
 - Windows App は既定で、打った文字を Unicode で送る。VirtualBox の VM のウィンドウはその文字コードをキーとして読むので、別のキーになる（`1.,2` が `nczm`。[参考資料](reference/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意--手順-1-補足-文字が別のキーになる理由)）
 - この節で、Windows App がキーの位置（スキャンコード）を送るようにする。Windows App のすべての接続にかかる

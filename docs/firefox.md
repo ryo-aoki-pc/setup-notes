@@ -6,13 +6,13 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る。AAC・H.264 のための手順 8〜11 に当たる手順は無い）
-> - **前提（手順 8 から）**: [AlmaLinux 10 の初期設定の手順 18〜21](almalinux-setup.md#実施手順) で RPM Fusion（free）を有効にしてあること（その前提の同書の手順 17 の EPEL も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
+> - **前提（手順 8 から）**: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5](almalinux-setup.md#epel-と-rpm-fusion) で RPM Fusion（free）を有効にしてあること（その前提の同じ項の手順 1 の EPEL も）。`dnf repolist enabled | grep -E '^rpmfusion'` で何も出なければ、手順 7 の後に先に通す
 > - **すべて対象ホスト上で実行する**。手順 7 と手順 11 の GUI の確認だけ、デスクトップセッションで行う
 > - **手順 5・8・9 には対話入力がある**（トランザクション表の `[y/N]`。手順 8 は EPEL の鍵の確認も）。答えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[AlmaLinux 10 の初期設定の手順 17〜21](almalinux-setup.md#実施手順)（EPEL と RPM Fusion）を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
+- Firefox を入れ済みのホストに AAC・H.264 の再生だけ足すなら、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1〜5](almalinux-setup.md#epel-と-rpm-fusion)（EPEL と RPM Fusion）を通してから、手順 8 から貼る（手順 8 以降は変数を使わない）
 - 手順の後: 以後は[更新](#更新)・[ロールバック](extra/firefox.md#ロールバック)
 
 1. 変数を設定する。
@@ -166,7 +166,7 @@
 
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2・3 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/firefox.md#windows-11-のロールバック)のブロックをそこに貼る。ログインするユーザーは Administrators の一員（Firefox を PC 全体の `C:\Program Files\Mozilla Firefox` に入れ、Mozilla Maintenance Service も入れるため）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **この節の手順 4・5 は画面の操作**（Firefox を起動して確かめる、Windows の設定で既定のブラウザーにする）
 
 - 上から順にコードブロックを貼る。変数は無い（[実施手順](#実施手順)の手順 1 の `FF_PKG`・`FF_L10N` は AlmaLinux 10 だけで使う）

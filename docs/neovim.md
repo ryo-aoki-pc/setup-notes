@@ -8,7 +8,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（scoop で入れる。管理者ではない Windows PowerShell 5.1 に貼る）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理と自分の設定は、`sudo -i` した root のシェルでは行わない
 > - **手順 1 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 2 を貼る
 > - **手順 2 で TUI が開く**。`:q` で終了してから、ほかのコマンドを貼る
@@ -46,7 +46,7 @@
 
 - この節では、bash リポジトリが持つ既定のエディタ設定を確認する
 - Windows 11 の Git Bash（WezTerm の自分用の設定の新しいタブ）も、同じ共通設定で `EDITOR`・`VISUAL` が `nvim` になる
-  - 確かめるときは、WezTerm の新しいタブで、この節の手順 1 の `printf` と `alias vi` の 2 行を打つ（`. ~/.bashrc` は読み直さない。[AlmaLinux 10 の初期設定の手順 50](almalinux-setup.md#実施手順)の補足と同じ）
+  - 確かめるときは、WezTerm の新しいタブで、この節の手順 1 の `printf` と `alias vi` の 2 行を打つ（`. ~/.bashrc` は読み直さない。[AlmaLinux 10 の初期設定の「シェルのツール」の手順 2](almalinux-setup.md#シェルのツール)の補足と同じ）
 - Windows 11 で、Windows PowerShell や Windows Terminal から起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら、この節の手順 2 でユーザーの環境変数にする
   - この節の手順 2・3 は、[Windows 11 で使う](#windows-11-で使う)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
 
@@ -144,7 +144,7 @@
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、この節の手順 2〜5 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/neovim.md#windows-11-のロールバック)のブロックをそこに貼る
 >   - SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動き、scoop は自分のユーザーに入れるため）
-> - 前提: [Windows 11 の初期設定の手順 16〜19 と手順 20・21](windows-setup.md#実施手順)（貼り付けの設定と scoop）。手順 16〜19 を通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)と[「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる)（貼り付けの設定と scoop）。「貼り付けの設定」の手順 1〜4 を通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)（`C:\Program Files\Git`。scoop の更新に git が要る）
 > - 前提: Visual C++ のランタイム（`VCRUNTIME140.dll`。Neovim が使い、scoop は入れない）。この節の手順 2 で確かめ、無ければ [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行う
 > - **この節の手順 5 で Neovim の画面（TUI）が開く**。`:qa` で閉じてから、ほかのブロックを貼る
@@ -175,7 +175,7 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じてこの節の手順 1 から
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる) で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : False` なら、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める

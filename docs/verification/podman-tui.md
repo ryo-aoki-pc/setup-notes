@@ -18,10 +18,10 @@
 ### 対象と検証環境
 
 - **目的**: podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作できるようにする
-- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17 で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
+- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜5を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時はこの文書の手順だった）、手順 1〜5、[更新](../podman-tui.md#更新)、[ロールバック](../extra/podman-tui.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜5、[更新](../podman-tui.md#更新)、[ロールバック](../extra/podman-tui.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-tui 1.10.0 が 1 パッケージで入り、podman 5.8.2 の API ソケットに `STATUS_OK` でつながる
     - 画面のメニューの `stop` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る

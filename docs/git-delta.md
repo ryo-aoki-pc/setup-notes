@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（scoop で入れる。管理者ではない Windows PowerShell 5.1 に貼り、git の設定はその節から Git Bash で手順 1・3 を貼る）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、設定も自分の `~/.gitconfig` に書く
 > - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
 
@@ -135,7 +135,7 @@
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、この節の手順 2・3 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/git-delta.md#windows-11-のロールバック)のブロックをそこに貼る
 > - SSH のセッションには貼らない（scoop は自分のユーザーに入れる。Administrators の一員の SSH のセッションは管理者の権限で動く）
-> - 前提: [Windows 11 の初期設定の手順 16〜19 と手順 20・21](windows-setup.md#実施手順)（貼り付けの設定と scoop）。手順 16〜19 を通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)と[「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる)（貼り付けの設定と scoop）。「貼り付けの設定」の手順 1〜4 を通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)と、[README の共通の bash 設定を先に入れる](../README.md#共通の-bash-設定を先に入れる)（Git Bash で）、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)と自分用の WezTerm の設定（新しいタブが Git Bash で開く。[設定ファイル](wezterm-nightly.md#設定ファイル)）
 > - 前提: VC++ ランタイム（`VCRUNTIME140.dll`。Windows の delta が使う）。この節の手順 2 で確かめ、無ければ [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を、管理者の Windows PowerShell で行う
 > - **この節の手順 4・5 は、WezTerm の Git Bash のタブで行う**（この節の手順 4 で[実施手順](#実施手順)の手順 1・3 を貼る。PowerShell には貼らない）。この節の手順 5 で開く less は `q` で閉じる
@@ -167,7 +167,7 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : True` ならよい。`False` なら、先に [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める

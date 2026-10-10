@@ -86,7 +86,7 @@
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、この節の手順 2〜4・6 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/gh.md#windows-11-のロールバック)のブロックをそこに貼る
 > - SSH のセッションには貼らない（scoop は自分のユーザーに入れる。Administrators の一員の SSH のセッションは管理者の権限で動く）
-> - 前提: [Windows 11 の初期設定の手順 16〜19 と手順 20・21](windows-setup.md#実施手順)（貼り付けの設定と scoop）。手順 16〜19 を通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)と[「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる)（貼り付けの設定と scoop）。「貼り付けの設定」の手順 1〜4 を通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)（gh は git を呼ぶ。git の HTTPS の認証は、Git for Windows の Git Credential Manager のまま使う）
 > - **この節の手順 4 には対話入力があり、この節の手順 5 は既定のブラウザで行う**（`gh auth login` の問いと、ブラウザでの認証）。`gh auth login` が終わってから、この節の手順 6 を貼る
 
@@ -117,7 +117,7 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に [Windows 11 の初期設定の「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `GitCred` が `credential.helper manager` ならよい
    - `GitCred` が空なら、この節の手順 4 の Git の認証には `Y` と答えてよい

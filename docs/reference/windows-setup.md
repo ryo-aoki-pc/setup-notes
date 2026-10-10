@@ -6,18 +6,18 @@
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 先に更新する理由
+### 実施手順 / Windows Update / 手順 1: 補足: 先に更新する理由
 
-- インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（手順 40 の sudo は 24H2 以降、手順 28 の時計の秒など）
-- この後の手順 55 の再起動より前に、Windows Update の再起動を済ませておく。途中で更新の再起動が入ると、手順 36〜54 の設定が効く時期が読みにくくなる
+- インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（「PC 全体の設定」の手順 6 の sudo は 24H2 以降、「表示と入力」の手順 4 の時計の秒など）
+- この後の「WSL と再起動」の手順 2 の再起動より前に、Windows Update の再起動を済ませておく。途中で更新の再起動が入ると、「PC 全体の設定」の手順 2 から「WSL と再起動」の手順 1 までの設定が効く時期が読みにくくなる
 
-### 実施手順 / 手順 2: 補足: 今の窓だけにする理由
+### 実施手順 / Windows Update / 手順 2: 補足: 今の窓だけにする理由
 
-- `Process` の実行ポリシーと TLS 1.2 の追加は、この窓を閉じると無くなる。手順 17 で控える `CurrentUser` の実行ポリシーは変えない
-- 再起動したら手順 1・2・3 をもう一度通す。モジュールのファイルは残るが、新しい窓では読み込み直す必要がある
+- `Process` の実行ポリシーと TLS 1.2 の追加は、この窓を閉じると無くなる。「貼り付けの設定」の手順 2 で控える `CurrentUser` の実行ポリシーは変えない
+- 再起動したら「Windows Update」の手順 1・2・3 をもう一度通す。モジュールのファイルは残るが、新しい窓では読み込み直す必要がある
 - グループ ポリシーによる制限は、この手順では変えない
 
-### 実施手順 / 手順 4: 補足: 更新の対象
+### 実施手順 / Windows Update / 手順 4: 補足: 更新の対象
 
 - Windows Update Agent の条件で、未導入（`IsInstalled=0`）・非表示でない（`IsHidden=0`）・自動更新の配信対象（`IsAssigned=1`）・オプションでない（`BrowseOnly=0`）ものに絞る
 - オプションのドライバーやプレビュー更新は含めない。通常の自動配信に含まれるドライバーは対象になる
@@ -25,62 +25,62 @@
 - 更新の取得先はこの PC の既定のまま。`-MicrosoftUpdate` による対象の拡大や、WSUS・Windows Update のポリシーの変更は行わない
 - この手順はダウンロードとインストールを行わない
 
-### 実施手順 / 手順 5: 補足: 自動では再起動しない
+### 実施手順 / Windows Update / 手順 5: 補足: 自動では再起動しない
 
-- `-AcceptAll` は対象の更新を承認する。検索条件は手順 4 と同じで、オプションの更新は増やさない
+- `-AcceptAll` は対象の更新を承認する。検索条件は「Windows Update」の手順 4 と同じで、オプションの更新は増やさない
 - `-IgnoreReboot` は、必要になっても再起動せず、再起動するかを聞く対話も出さない（PSWindowsUpdate のヘルプ）
-- `-AutoReboot`・`-RecurseCycle` は使わない。再起動と再検索は手順 8 の後に自分で行い、再開用のタスクも作らない
+- `-AutoReboot`・`-RecurseCycle` は使わない。再起動と再検索は「Windows Update」の手順 8 の後に自分で行い、再開用のタスクも作らない
 
-### 実施手順 / 手順 5: 補足: Result の段階
+### 実施手順 / Windows Update / 手順 5: 補足: Result の段階
 
 - `Result` は、受け付け・ダウンロード・インストールの段階ごとに出る
 
-### 実施手順 / 手順 9: 補足: 5.1 にする理由
+### 実施手順 / Microsoft Store の更新 / 手順 1: 補足: 5.1 にする理由
 
 - 実行ポリシーとプロファイルは、5.1 と 7 で別々に持つ
 
-### 実施手順 / 手順 11: 補足: インストール直後の winget
+### 実施手順 / Microsoft Store の更新 / 手順 3: 補足: インストール直後の winget
 
 - Microsoft の WinGet の文書は、初回サインイン後に Store が非同期で登録するため、まだ使えない場合にこの `Add-AppxPackage` を挙げている
 - この文書は、アプリ インストーラーと Microsoft Store が含まれる Windows 11 を前提にする。これらを削ったイメージの復旧は扱わない
 
-### 実施手順 / 手順 12: 補足: CLI を使えるようにする準備だけを winget で行う
+### 実施手順 / Microsoft Store の更新 / 手順 4: 補足: CLI を使えるようにする準備だけを winget で行う
 
 - 製品 ID はアプリ インストーラーが `9NBLGGH4NNS1`、Microsoft Store が `9WZDNCRFJBMP`。`--exact` と `--source msstore` で、この 2 つだけを対象にする
 - Store の配布情報は版が `Unknown` の場合があるので `--include-unknown` を付ける。`winget upgrade --all` に置き換えない
 - `-1978335189`（`0x8A15002B`）は、winget の `UPDATE_NOT_APPLICABLE`（適用する更新が無い）。それ以外の失敗では中断する
 - アプリ インストーラー、Microsoft Store の順に更新する
 
-### 実施手順 / 手順 14: 補足: 対象
+### 実施手順 / Microsoft Store の更新 / 手順 6: 補足: 対象
 
 - 名前や発行元のフィルターは付けず、すべての Store アプリを対象にする
 
-### 実施手順 / 手順 16: 補足: 行を足す理由
+### 実施手順 / 貼り付けの設定 / 手順 1: 補足: 行を足す理由
 
-- 同じ節の手順 17 から後の複数行のブロックを、この窓に右クリックで貼れるようにするため
+- 「貼り付けの設定」の手順 2 から後の複数行のブロックを、この窓に右クリックで貼れるようにするため
 
-### 実施手順 / 手順 17: 補足: 見ているもの
+### 実施手順 / 貼り付けの設定 / 手順 2: 補足: 見ているもの
 
 - `Admin` は、この PowerShell が管理者の権限で動いているか（UAC で昇格しているか）。Administrators の一員でも、普通に開いた PowerShell は `False` になる
-- `ClassicMenu` は、手順 26 で作るキー（`HKCU:\Software\Classes\CLSID\{86ca1aa0-…}`）があるか
-- `ScancodeMap` は、手順 51 で書く値（`HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout` の `Scancode Map`）を 16 進で並べたもの。読むだけなら管理者は要らない
+- `ClassicMenu` は、「表示と入力」の手順 2 で作るキー（`HKCU:\Software\Classes\CLSID\{86ca1aa0-…}`）があるか
+- `ScancodeMap` は、「サインイン・検索・キーボード」の手順 4 で書く値（`HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout` の `Scancode Map`）を 16 進で並べたもの。読むだけなら管理者は要らない
 - `$PROFILE` は、このユーザーの、Windows PowerShell のコンソールのプロファイル（`Microsoft.PowerShell_profile.ps1`）。管理者で開いた窓も、同じユーザーなら同じファイルを読む。PowerShell 7・PowerShell ISE・VS Code は別のファイルを読む（about_Profiles）。OneDrive でドキュメントをバックアップしていると、`OneDrive` の下のパスになる
-- `Get-ExecutionPolicy -List` は、範囲（`MachinePolicy`・`UserPolicy`・`Process`・`CurrentUser`・`LocalMachine`）ごとの実行ポリシー。上の範囲ほど優先される。`MachinePolicy` か `UserPolicy` が `Undefined` でなければ、グループ ポリシーで決まっていて、手順 18 では変えられない
+- `Get-ExecutionPolicy -List` は、範囲（`MachinePolicy`・`UserPolicy`・`Process`・`CurrentUser`・`LocalMachine`）ごとの実行ポリシー。上の範囲ほど優先される。`MachinePolicy` か `UserPolicy` が `Undefined` でなければ、グループ ポリシーで決まっていて、「貼り付けの設定」の手順 3 では変えられない
 - プロファイルもスクリプト（`.ps1`）なので、実行ポリシーが `Restricted` だと読まれない（Microsoft の about_Execution_Policies。`Restricted` は Windows のクライアントの既定）
 - `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [git.md](../git.md#windows-11-で-git-for-windows-を入れる) で入れる）
-- `ProfileExists : False` なら、同じ節の手順 19 で作る
-- `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、同じ節の手順 18 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
+- `ProfileExists : False` なら、「貼り付けの設定」の手順 4 で作る
+- `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、「貼り付けの設定」の手順 3 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
 
-### 実施手順 / 手順 18: 補足: 何も書かないとき
+### 実施手順 / 貼り付けの設定 / 手順 3: 補足: 何も書かないとき
 
 - 今の値が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、何も書かない
 
-### 実施手順 / 手順 19: 補足: ほかの行と、この行を読む窓
+### 実施手順 / 貼り付けの設定 / 手順 4: 補足: ほかの行と、この行を読む窓
 
 - プロファイルにほかの行があれば、そのまま残る
-- これより後に開く Windows PowerShell の窓（同じ節の手順 35 の管理者の窓も）は、この行を読む
+- これより後に開く Windows PowerShell の窓（「PC 全体の設定」の手順 1 の管理者の窓も）は、この行を読む
 
-### 実施手順 / 手順 20: 補足: インストーラのすること
+### 実施手順 / アプリを入れる / 手順 1: 補足: インストーラのすること
 
 - `https://get.scoop.sh` は、公式のインストーラ（`https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1`）へ飛ぶ。`Invoke-Expression` で、取ったスクリプトをそのまま動かす（公式の README の方法）
 - 中身を読んでから動かすなら、`Invoke-RestMethod -Uri https://get.scoop.sh -OutFile install.ps1` で保存して読み、`.\install.ps1` で動かす（同じ README の方法）。インストーラに Authenticode の署名は無い
@@ -93,17 +93,17 @@
 - git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [git.md](../git.md#windows-11-で-git-for-windows-を入れる) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない。[選択した方針](../verification/windows-setup.md#選択した方針)）
 - 管理者で入れる方法（インストーラの `-RunAsAdmin`）は、公式の README が安全のために既定で止めているので、使わない
 
-### 実施手順 / 手順 21: 補足: 版
+### 実施手順 / アプリを入れる / 手順 2: 補足: 版
 
 - `Current Scoop version:` の次の版は、実行した日の最新
 
-### 実施手順 / 手順 22: 補足: winget のハッシュの確認と、版とショートカット
+### 実施手順 / アプリを入れる / 手順 3: 補足: winget のハッシュの確認と、版とショートカット
 
 - winget はインストーラのハッシュを確かめてから入れる
 - 最後の表の版は、実行した日の最新
-- デスクトップに UniGetUI のショートカットができる（同じ節の手順 50 で消す）
+- デスクトップに UniGetUI のショートカットができる（「サインイン・検索・キーボード」の手順 3 で消す）
 
-### 実施手順 / 手順 23: 補足: 入れ方と入る場所
+### 実施手順 / アプリを入れる / 手順 4: 補足: 入れ方と入る場所
 
 - winget の定義（`Microsoft.PowerToys` 0.101.2362.0）には、自分のユーザーに入れるインストーラ（`PowerToysUserSetup-<版>-x64.exe`。管理者の確認の指定が無い）と、PC 全体に入れるインストーラ（`PowerToysSetup-<版>-x64.exe`。`elevatesSelf`）がある。`--scope user` を付けて、自分のユーザーのほうを選ばせる
 - インストーラの形式は WiX の Burn で、winget は `/quiet /norestart` を渡す
@@ -114,98 +114,98 @@
 - PowerToys のいくつかの機能は、PowerToys を管理者として動かしていないと、管理者の窓には効かない（PowerToys の設定の「常に管理者として実行」）
 - WebView2 のランタイムが無ければ一緒に入れる（Windows 11 には最初からある）
 
-### 実施手順 / 手順 23: 補足: 版と、Caps Lock を変える所
+### 実施手順 / アプリを入れる / 手順 4: 補足: 版と、Caps Lock を変える所
 
 - 最後の表の版は、実行した日の最新
-- Caps Lock は、PowerToys の Keyboard Manager ではなく、同じ節の手順 51 の Scancode Map で変える（[選択した方針](../verification/windows-setup.md#選択した方針)）
+- Caps Lock は、PowerToys の Keyboard Manager ではなく、「サインイン・検索・キーボード」の手順 4 の Scancode Map で変える（[選択した方針](../verification/windows-setup.md#選択した方針)）
 
-### 実施手順 / 手順 24: 補足: MSIX と MSI
+### 実施手順 / アプリを入れる / 手順 5: 補足: MSIX と MSI
 
 - Microsoft の文書は、winget のパッケージは 7.6.0 から既定で MSIX を入れると書いている。winget の定義（`Microsoft.PowerShell` 7.6.6.0）も、MSIX（自分のユーザー）を先に、MSI（PC 全体。`elevatesSelf`）を後に並べている
 - MSIX は自分のユーザーだけに入り、更新は winget かストアで行う。PC 全体の実行ポリシーやリモートの受け口は設定できない（Microsoft の文書）。このリポジトリの使い方では足りる
 - PC 全体の MSI（`$Env:ProgramFiles\PowerShell\7`、Microsoft Update で更新）にするなら `--installer-type wix` を付ける。ただし Microsoft の文書では、7.7.0 から MSI は無くなる
-- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（手順 19 は PowerShell 7 のプロファイルには書かない。[注意点](../extra/windows-setup.md#注意点)）
+- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（「貼り付けの設定」の手順 4 は PowerShell 7 のプロファイルには書かない。[注意点](../extra/windows-setup.md#注意点)）
 - winget の既定の範囲: 設定（`settings.json`）の `installBehavior.preferences.scope` は、書かなくても `user`（winget の `UserSettings.h`）で、user のインストーラが無ければ machine を選ぶ。そのため、範囲を変える設定は足さない
   - PowerShell 7 の MSIX（範囲の宣言が無い）と MSI（machine）は、どちらも user に当たらない。インストーラの種類の順（MSIX が MSI より先）で MSIX が選ばれる
   - `installBehavior.requirements.scope` は絞り込みで、machine だけのパッケージと、範囲を宣言しないインストーラ（MSIX・Store・持ち運び版・フォントを除く）が外れるので書かない。UniGet UI のスコープも「デフォルト」のまま（「ユーザー | ローカル」は `--scope user` を付ける）
 - 管理者の確認（UAC）が出ないのは、MSIX のパッケージで、自分のユーザーに入るため
 
-### 実施手順 / 手順 24: 補足: 版とスタートメニュー
+### 実施手順 / アプリを入れる / 手順 5: 補足: 版とスタートメニュー
 
 - 最後の表の版は、実行した日の最新
 - スタートメニューに「PowerShell 7」ができる
 
-### 実施手順 / 手順 27: 補足: 貼る順と、Web の結果
+### 実施手順 / 表示と入力 / 手順 3: 補足: 貼る順と、Web の結果
 
-- 同じ節の手順 33 より前に貼るのは、外したアプリが戻らないようにするため（`SilentInstalledAppsEnabled`）
-- スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、同じ節の手順 49 で切る
+- 「自動起動と標準アプリ」の手順 2 より前に貼るのは、外したアプリが戻らないようにするため（`SilentInstalledAppsEnabled`）
+- スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、「サインイン・検索・キーボード」の手順 2 で切る
 
-### 実施手順 / 手順 28: 補足: ウィジェットのボタン
+### 実施手順 / 表示と入力 / 手順 4: 補足: ウィジェットのボタン
 
-- ウィジェットのボタンは、同じ節の手順 34 でウィジェットを外すと消える（この手順では書けない）
+- ウィジェットのボタンは、「自動起動と標準アプリ」の手順 3 でウィジェットを外すと消える（この手順では書けない）
 
-### 実施手順 / 手順 29: 補足: 値の意味
+### 実施手順 / 表示と入力 / 手順 5: 補足: 値の意味
 
 - `AppsUseLightTheme` はアプリ、`SystemUsesLightTheme` はタスクバー・スタート・通知の色。0 で濃色、1 で淡色（Windows 11 の既定）
-- Microsoft の DSC のリソース（`Microsoft.Windows.Settings`）も同じ 2 つを書き、すぐに効かせるために `WM_SETTINGCHANGE`（`ImmersiveColorSet`）を全部の窓に送る。本書は、手順 55 で再起動するので送らない
+- Microsoft の DSC のリソース（`Microsoft.Windows.Settings`）も同じ 2 つを書き、すぐに効かせるために `WM_SETTINGCHANGE`（`ImmersiveColorSet`）を全部の窓に送る。本書は、「WSL と再起動」の手順 2 で再起動するので送らない
 - 設定の「個人用設定」→「色」から変えると、すぐに効く
 
-### 実施手順 / 手順 30: 補足: 値と、管理者の窓が conhost になる理由
+### 実施手順 / 表示と入力 / 手順 6: 補足: 値と、管理者の窓が conhost になる理由
 
 - 値は、Windows Terminal の文書（グループ ポリシーの「既定のターミナル アプリケーション」）にある GUID。Windows Terminal は `DelegationConsole` が `{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}`、`DelegationTerminal` が `{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}`
 - Windows 11 22H2 以降の既定は「Windows に任せる」（2 つとも `{00000000-0000-0000-0000-000000000000}`）で、Windows Terminal が入っていればそれを使う（Microsoft のサポートの記事）。この手順は、それを Windows Terminal に決める
 - 管理者として起動したコンソールは、既定の端末に引き渡されず、conhost で開く。Windows Terminal の課題（microsoft/terminal の #13392。「管理者のコマンド ラインの受け手として登録できる端末は無く、COM の側の対応が要る」）が開いたまま。管理者の Windows Terminal は、Win+X の「ターミナル (管理者)」で開ける
 - 設定の「システム」→「開発者向け」→「ターミナル」と、Windows Terminal の設定の「スタートアップ」→「既定のターミナル アプリケーション」でも変えられる
 
-### 実施手順 / 手順 32: 補足: タスク マネージャーと同じ所に書く
+### 実施手順 / 自動起動と標準アプリ / 手順 1: 補足: タスク マネージャーと同じ所に書く
 
 - タスク マネージャーの「スタートアップ アプリ」と設定の「アプリ」→「スタートアップ」は、`Run` の値を消さずに、`Explorer\StartupApproved\Run` に同じ名前の値（バイナリ）を書く。先頭の 1 バイトが 2 なら起動し、3（と、止めた日時の 8 バイト）なら止める。Microsoft の文書には無いが、広く知られた形（UniGet UI のインストーラも同じ所に書く）
 - OneDrive の値の名前は `OneDrive`、Edge は `MicrosoftEdgeAutoLaunch_<文字列>`。OneDrive は OneDrive の設定の「Windows にサインインしたときに OneDrive を自動的に開始する」でも止められる
-- Teams（新しい Teams。手順 33 で外す）はパッケージのアプリで、起動のタスク `TeamsTfwStartupTask` の `State` を 1（「ユーザーが無効にした」）にする。値の意味は Microsoft の文書（`StartupTaskState`）にある
-- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバック](../extra/windows-setup.md#ロールバック)の手順 8）
+- Teams（新しい Teams。「自動起動と標準アプリ」の手順 2 で外す）はパッケージのアプリで、起動のタスク `TeamsTfwStartupTask` の `State` を 1（「ユーザーが無効にした」）にする。値の意味は Microsoft の文書（`StartupTaskState`）にある
+- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバックの「表示と入力を戻す」](../extra/windows-setup.md#表示と入力を戻す)の手順 8）
 - 初回導入用の `OneDriveSetup` の項目も、残っていれば止める。実行ファイルがある場合は初回インストールも延期される
 - UniGet UI（`WingetUI`）は、更新を知らせるために起動する
 
-### 実施手順 / 手順 33: 補足: 外さないもの
+### 実施手順 / 自動起動と標準アプリ / 手順 2: 補足: 外さないもの
 
 - Copilot（`Microsoft.Copilot`）は外さない。`Microsoft.MicrosoftOfficeHub` はストアの名前が「Microsoft 365 Copilot」になった別のアプリ（Office の入口）
 
-### 実施手順 / 手順 34: 補足: ウィジェットを外すこと
+### 実施手順 / 自動起動と標準アプリ / 手順 3: 補足: ウィジェットを外すこと
 
 - ウィジェットの本体は、ストアのアプリ「Windows Web Experience Pack」（`MicrosoftWindows.Client.WebExperience`、ストアの ID は `9MSSGKG348SP`）。外すとボタンも消えると広く報告されている（Microsoft の文書には無い）
-- ボタンだけを消す値（`TaskbarDa`）は、PowerShell からは書けない（手順 28 の補足）
+- ボタンだけを消す値（`TaskbarDa`）は、PowerShell からは書けない（「表示と入力」の手順 4 の補足）
 - Microsoft が説明している止め方は、管理者のポリシー（「ウィジェットを許可する」）。本書では使わない
 
-### 実施手順 / 手順 35: 補足: プロファイルの行
+### 実施手順 / PC 全体の設定 / 手順 1: 補足: プロファイルの行
 
-- この窓は、同じ節の手順 19 でプロファイルに書いた行を読む（同じ節の手順 37 で確かめる）
+- この窓は、「貼り付けの設定」の手順 4 でプロファイルに書いた行を読む（「PC 全体の設定」の手順 3 で確かめる）
 
-### 実施手順 / 手順 36: 補足: 変数について
+### 実施手順 / PC 全体の設定 / 手順 2: 補足: 変数について
 
-- `$PC_NAME` は手順 39（PC の名前を変える）で使う
-- `$LAN_IF` は、手順 37（今の状態）・手順 42（アダプターの省電力）・手順 43（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と同じ
+- `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）と「ネットワークとリモート」の手順 1（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と同じ
 - 接続の一覧は `Get-NetConnectionProfile` で見られる
 
-### 実施手順 / 手順 37: 補足: 見ているもの
+### 実施手順 / PC 全体の設定 / 手順 3: 補足: 見ているもの
 
-- `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。手順 19 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
+- `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。「貼り付けの設定」の手順 4 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
 - `Edition` は `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion` の `EditionID`。`Core`・`CoreN`・`CoreSingleLanguage`・`CoreCountrySpecific` が Home、`Professional` などが Pro。Microsoft の文書では、Home はリモート デスクトップでつながれる側になれない
 - `Sudo` は、Windows に入っている `sudo.exe` の場所。Microsoft の文書では、sudo は 24H2 以降
-- `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（手順 54）・メモリ整合性・Credential Guard などで動く
+- `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（「WSL と再起動」の手順 1）・メモリ整合性・Credential Guard などで動く
 - `Get-DODownloadMode` は、配信の最適化のモード（`CdnOnly`・`Lan`・`Internet` など）
-- `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、同じ節の手順 40 の sudo の行は何もしない
+- `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、「PC 全体の設定」の手順 6 の sudo の行は何もしない
 - `Hypervisor : True` なら、Hyper-V がもう動いている（[VirtualBox の Windows 11 の節](../virtualbox.md#windows-11-で使う)の VM は、その上で動く）
 
-### 実施手順 / 手順 39: 補足: 名前の決まりと、確認の問いを出さないこと
+### 実施手順 / PC 全体の設定 / 手順 5: 補足: 名前の決まりと、確認の問いを出さないこと
 
 - Windows の PC の名前は 15 文字まで（NetBIOS の名前の長さ）で、使える文字は英字・数字・ハイフン。先頭は英数字で、末尾はハイフンにしない（Microsoft の文書。数字だけの名前はドメインに入れない）
 - `Rename-Computer` は、15 文字を超える名前だと「短くするが続けるか」を聞く（`-Force` で聞かない）。聞かれると、続けて貼った行が答えとして食われるので、ブロックで先に 15 文字までかを確かめて止める
 - 今と同じ名前を渡すと、`Rename-Computer` はエラー（`NewNameIsOldName`）を出すので、先に比べる
 - SSH・リモート デスクトップ・Syncthing は、この名前でこの PC を見分ける。Syncthing のデバイスの名前は最初の起動のときの PC の名前になるので、Syncthing より先に変える
 
-### 実施手順 / 手順 40: 補足: 3 つの設定
+### 実施手順 / PC 全体の設定 / 手順 6: 補足: 3 つの設定
 
-- **長いパス**: `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem` の `LongPathsEnabled` を 1 にすると、260 文字を超えるパスを、それを宣言したアプリ（マニフェストの `longPathAware`）が使える（Microsoft の文書）。エクスプローラーなど、宣言していないアプリは変わらない。プロセスが最初に使うときに読むので、効くのは手順 55 の再起動の後。Git for Windows には別に `core.longpaths` がある
+- **長いパス**: `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem` の `LongPathsEnabled` を 1 にすると、260 文字を超えるパスを、それを宣言したアプリ（マニフェストの `longPathAware`）が使える（Microsoft の文書）。エクスプローラーなど、宣言していないアプリは変わらない。プロセスが最初に使うときに読むので、効くのは「WSL と再起動」の手順 2 の再起動の後。Git for Windows には別に `core.longpaths` がある
 - **開発者モード**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock` の `AllowDevelopmentWithoutDevLicense` を 1（Microsoft の文書の `reg add` と同じ値）。管理者でなくてもシンボリック リンクを作れる（`mklink` や Git for Windows のように、作る側がその印を渡すとき）。Microsoft の文書では、レジストリで有効にしても、設定の画面で有効にしたときと違い、デバイスのポータルなどは入らない
 - **sudo**: Windows 11 24H2 から Windows に入っている `sudo.exe`。`sudo config --enable` の形は 3 つ（Microsoft の文書）
   - `forceNewWindow`（既定）: 管理者のコマンドを新しい窓で動かす。Microsoft が勧める形
@@ -215,7 +215,7 @@
 - 3 つとも、設定の「システム」→「開発者向け」（25H2 では「システム」→「詳細設定」）でも変えられる
 - 管理者ではない窓で `sudo <コマンド>` を打つと、UAC の確認の後に、同じ窓でそのコマンドが管理者の権限で動く
 
-### 実施手順 / 手順 41: 補足: どの設定で何が変わるか
+### 実施手順 / PC 全体の設定 / 手順 7: 補足: どの設定で何が変わるか
 
 - `standby-timeout-ac 0`: 電源につないでいる間、放置しても眠らない（`SUB_SLEEP` の `STANDBYIDLE` を 0 にするのと同じ。Microsoft の文書）
 - `/hibernate off`: 休止状態を切り、`hiberfil.sys` を消す。高速スタートアップもこのファイルを使うので、使えなくなる（ハイブリッド スリープも）。Wake on LAN でシャットダウンから起こす（[任意節](../windows-setup.md#wake-on-lan-を使う任意)）には、高速スタートアップを切る必要がある
@@ -223,67 +223,67 @@
 - `CONSOLELOCK` を 0: 電源につないでいる間、眠りから戻ったときにサインインを求めない（既定は 1）。眠らないようにしても、手で眠らせたときのため
 - `DelayLockInterval` を `0xFFFFFFFF`: Modern Standby（S0）の PC で、画面が消えた後のロック（設定の「アカウント」→「サインイン オプション」の「一定時間不在にした場合、もう一度サインインを求めるタイミング」）を「しない」にする。この値は Microsoft の文書に無く、広く使われているもの。S3 の PC では、画面が消えるだけではロックしない（ロックするのは、眠り・パスワード付きのスクリーン セーバー・ポリシー・動的ロック）
 - Modern Standby の PC かは、`powercfg /a` に「スタンバイ (S0 低電力アイドル)」が出るかで分かる
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 35（電源プランを既定に戻す。ほかに変えた電源の設定も戻る）
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 7（電源プランを既定に戻す。ほかに変えた電源の設定も戻る）
 - 画面を消す時間は変えない
 - バッテリー用の電源プランの値（スリープ時間・蓋を閉じたときの動作・`CONSOLELOCK`）は変えない
 - 休止状態の無効化と `DelayLockInterval` は電源接続中だけに限定されない（バッテリーのときもかかる）
 
-### 実施手順 / 手順 42: 補足: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」
+### 実施手順 / PC 全体の設定 / 手順 8: 補足: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」
 
 - この手順は、デバイス マネージャーのアダプターの「電源の管理」タブの、上の項目を外すのと同じ
 - `Set-NetAdapterPowerManagement` の文書にこの項目の引数は無く、`Get-NetAdapterPowerManagement` で取ったものの `AllowComputerToTurnOffDevice` を変えて渡す形は、広く使われているもの（Microsoft の文書には無い）
 - `Set-NetAdapterPowerManagement` は、`-NoRestart` が無いとアダプターを起動し直す（Microsoft の文書）。SSH・リモート デスクトップでつないでいると切れるので、付ける
 - この項目を外すと、Windows がアダプターに「この PC を起こす」を任せる設定（眠りからの Wake on LAN）も使えなくなる（Microsoft の古いサポートの記事）。シャットダウンからの Wake on LAN は UEFI とアダプターが行い、Windows は関わらないので、[任意節](../windows-setup.md#wake-on-lan-を使う任意)はこの手順と両立する
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 34
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 6
 
-### 実施手順 / 手順 43: 補足: もとからプライベートのときと、前提にする手順
+### 実施手順 / ネットワークとリモート / 手順 1: 補足: もとからプライベートのときと、前提にする手順
 
 - 既にプライベートなら、何も変わらない
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・同じ節の手順 44〜46 は、この LAN がプライベートであることを前提にする
+- [Windows の OpenSSH サーバー](../windows-openssh-server.md)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・「ネットワークとリモート」の手順 2〜4 は、この LAN がプライベートであることを前提にする
 
-### 実施手順 / 手順 44: 補足: つなぐときのユーザーと、前提にする手順書
+### 実施手順 / ネットワークとリモート / 手順 2: 補足: つなぐときのユーザーと、前提にする手順書
 
-- つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。同じ節の手順 48 も）
+- つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。「サインイン・検索・キーボード」の手順 1 も）
 - [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)は、この手順を前提にする
 
-### 実施手順 / 手順 45: 補足: リモート アシスタンス
+### 実施手順 / ネットワークとリモート / 手順 3: 補足: リモート アシスタンス
 
 - リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
-- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。手順 37 の `RemoteAssistance` で、元の値を控える
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 31
+- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。「PC 全体の設定」の手順 3 の `RemoteAssistance` で、元の値を控える
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 3
 
-### 実施手順 / 手順 46: 補足: 自分で規則を作る理由
+### 実施手順 / ネットワークとリモート / 手順 4: 補足: 自分で規則を作る理由
 
 - Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
 - その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で使う)の規則と同じ形）
 - 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 30
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 2
 - 何度貼ってもよいのは、規則を消してから作り直すため
 
-### 実施手順 / 手順 47: 補足: 配信の最適化
+### 実施手順 / ネットワークとリモート / 手順 5: 補足: 配信の最適化
 
 - 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
 - `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
 - `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 29
-- Windows の既定も `Lan` なので、同じ節の手順 37 で `Lan` だったなら何も変わらない
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 1
+- Windows の既定も `Lan` なので、「PC 全体の設定」の手順 3 で `Lan` だったなら何も変わらない
 
-### 実施手順 / 手順 48: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
+### 実施手順 / サインイン・検索・キーボード / 手順 1: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
 - オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある
-- オンだと、自動サインイン（手順 64）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 22
+- オンだと、自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 5
 
-### 実施手順 / 手順 49: 補足: 管理者の窓で書く理由と、効き目
+### 実施手順 / サインイン・検索・キーボード / 手順 2: 補足: 管理者の窓で書く理由と、効き目
 
 - 自分のユーザーの設定（`HKCU`）だが、`HKCU\Software\Policies` の下は、管理者の権限が無いと書けない。管理者の窓も同じユーザーなので、自分の `HKCU` に書かれる
 - Microsoft の文書では、このポリシーは「エクスプローラーの検索ボックスに最近の検索の項目を出さない」。スタートの検索から Web の結果が消えることは、広く報告されているもの（24H2 でも効くという報告と、効かないことがあるという報告がある）
 - Windows 10 の `BingSearchEnabled` は、Windows 11 で効く根拠が見つからないので使わない
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 23
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 6
 
-### 実施手順 / 手順 51: 補足: Scancode Map の値
+### 実施手順 / サインイン・検索・キーボード / 手順 4: 補足: Scancode Map の値
 
 Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイトずつのリトルエンディアン:
 
@@ -298,70 +298,70 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 割り当てるのは Caps Lock だけで、左 Ctrl はそのまま（入れ替えではない）。そのため Caps Lock の働きは無くなる
 - 書く場所は `HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout`（`Keyboard Layouts` ではない）。PC 全体の設定なので、管理者の権限が要る
 - 文書のとおり、効くのは再起動の後で、すべてのユーザーとすべてのキーボードにかかる。ユーザーごと・キーボードごとには分けられない
-- スキャン コードはキーの位置で決まるので、US 配列（手順 53）でも JIS 配列でも、Caps Lock の位置のキー（`0x3A`）が Ctrl になる
+- スキャン コードはキーの位置で決まるので、US 配列（「サインイン・検索・キーボード」の手順 6）でも JIS 配列でも、Caps Lock の位置のキー（`0x3A`）が Ctrl になる
 - 値を 16 進の文字列で比べるのは、もう同じ値があるか（2 回目）と、ほかの割り当てがあるかを分けるため
 - `中断: 別の Scancode Map がある` で止めるのは、ほかのキーの割り当てを消さないため
 
-### 実施手順 / 手順 52: 補足: AlmaLinux のインストーラの時計
+### 実施手順 / サインイン・検索・キーボード / 手順 5: 補足: AlmaLinux のインストーラの時計
 
 - AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[windows-dual-boot.md の注意点](../extra/windows-dual-boot.md#注意点)）
 
-### 実施手順 / 手順 53: 補足: キーボードの種類の値
+### 実施手順 / サインイン・検索・キーボード / 手順 6: 補足: キーボードの種類の値
 
 - 日本語の Windows は、キーボードの種類（配列のドライバー）を PC 全体で 1 つ持つ。`HKLM\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters` の 4 つの値で決まり、名前は i8042prt（PS/2）だが、USB のキーボードにもかかる
 - US 配列の値は、Microsoft の日本の社員のブログ（Learn に残っている「英語キーボードを快適に使う」）と同じ。設定の「時刻と言語」→「言語と地域」→「日本語」の「言語のオプション」→「キーボード レイアウト」の「英語キーボード (101/102 キー)」も、同じ値を書くと報告されている
-- JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）。手順 37 の `Keyboard` で、元の値を控える
-- 手順 51 の Scancode Map は、キーの位置（スキャン コード）で変えるので、US 配列でも Caps Lock の位置のキーが Ctrl になる
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 26
-- US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは、同じ節の手順 31 の Ctrl+Space で行う
+- JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）。「PC 全体の設定」の手順 3 の `Keyboard` で、元の値を控える
+- 「サインイン・検索・キーボード」の手順 4 の Scancode Map は、キーの位置（スキャン コード）で変えるので、US 配列でも Caps Lock の位置のキーが Ctrl になる
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 9
+- US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは、「表示と入力」の手順 7 の Ctrl+Space で行う
 
-### 実施手順 / 手順 54: 補足: 入るもの
+### 実施手順 / WSL と再起動 / 手順 1: 補足: 入るもの
 
 - Windows 11 では、`wsl --install --no-distribution` は Windows の機能「仮想マシン プラットフォーム」（`VirtualMachinePlatform`）を入れ、WSL のパッケージを入れる（WSL のソースの `WslInstall.cpp`）。WSL 1 の機能（`Microsoft-Windows-Subsystem-Linux`）は `--enable-wsl1` を付けたときだけ
-- 機能を入れたときは、再起動が要る。この文書では手順 55 の再起動で済ませ、AlmaLinux 10 は手順 62 で入れる
+- 機能を入れたときは、再起動が要る。この文書では「WSL と再起動」の手順 2 の再起動で済ませ、AlmaLinux 10 は「WSL の AlmaLinux 10 と自動サインイン」の手順 3 で入れる
 - VirtualBox は、Hyper-V が動いていると、それを通して VM を動かす（NEM）。仮想マシン プラットフォームを外しても、メモリ整合性などで Hyper-V が動き続けることがある
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 25
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 8
 
-### 実施手順 / 手順 57: 補足: Web の結果が出たとき
+### 実施手順 / 再起動の後に確かめる / 手順 2: 補足: Web の結果が出たとき
 
-- スタートの検索に Web（Bing）の結果が出たら、[検証記録](../verification/windows-setup.md)と、同じ節の手順 49 の補足を見る
+- スタートの検索に Web（Bing）の結果が出たら、[検証記録](../verification/windows-setup.md)と、「サインイン・検索・キーボード」の手順 2 の補足を見る
 
-### 実施手順 / 手順 58: 補足: コマンドで外さない理由
+### 実施手順 / 再起動の後に確かめる / 手順 3: 補足: コマンドで外さない理由
 
 - 自分のユーザーのピン留めを外す、サポートされたコマンドは無い。Microsoft の文書にある方法は、どれもポリシー（`ConfigureStartPins` やタスクバーのレイアウトの XML）か、新しいユーザーにだけかかるファイル
 - タスクバーの設定（`Taskband`）やスタートのファイル（`start2.bin`）を消す方法は、Microsoft の説明が無く、形も決まっていないので採らない
 - Copilot を外さないのは、利用者の選択
 
-### 実施手順 / 手順 60: 補足: Windows Terminal の中に開く
+### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 1: 補足: Windows Terminal の中に開く
 
-- 同じ節の手順 30 の後なので、Windows Terminal の中に開く
+- 「表示と入力」の手順 6 の後なので、Windows Terminal の中に開く
 
-### 実施手順 / 手順 61: 補足: Hypervisor
+### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 2: 補足: Hypervisor
 
-- `Hypervisor : True` になるのは、同じ節の手順 54 で WSL の機能を入れたため
+- `Hypervisor : True` になるのは、「WSL と再起動」の手順 1 で WSL の機能を入れたため
 
-### 実施手順 / 手順 63: 補足: 版と、冒頭の 2 行
+### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 4: 補足: 版と、冒頭の 2 行
 
 - `VERSION="10.2 …"` の版は、入れた日のイメージ
-- 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（同じ節の手順 62 も同じ）
+- 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（「WSL の AlmaLinux 10 と自動サインイン」の手順 3 も同じ）
 
 ### Wake on LAN を使う（任意） / 手順 2: 補足: 式
 
-- [実施手順](../windows-setup.md#実施手順)の手順 36 の 2 つ目のブロックと同じ式
+- [実施手順の「PC 全体の設定」](../windows-setup.md#pc-全体の設定)の手順 2 の 2 つ目のブロックと同じ式
 
 ### Wake on LAN を使う（任意） / 手順 3: 補足: シャットダウンからの Wake on LAN
 
 - Microsoft の文書では、Windows 10 以降の既定のシャットダウン（高速スタートアップ）では、Windows はアダプターに起動を任せない。シャットダウン（S5）からの起動は、UEFI とアダプターだけが行い、Windows は関わらない
-- そのため、高速スタートアップを切り（手順 41）、UEFI の Wake on LAN（機種によって「Power On By PCI-E」など）を有効にし、アダプターの詳細設定でマジック パケットを受けるようにする
+- そのため、高速スタートアップを切り（「PC 全体の設定」の手順 7）、UEFI の Wake on LAN（機種によって「Power On By PCI-E」など）を有効にし、アダプターの詳細設定でマジック パケットを受けるようにする
 - `*WakeOnMagicPacket` は、Microsoft の文書の標準の詳細設定の名前（1 で有効）。機種独自の項目（シャットダウンからの起動、リンクでの起動など）は、名前がアダプターごとに違う
 - `-NoRestart` で、アダプターを起動し直さない（効くのは次の再起動から）
-- 眠り（S3・Modern Standby）からの起動は、手順 41 で眠らないようにしたので扱わない
+- 眠り（S3・Modern Standby）からの起動は、「PC 全体の設定」の手順 7 で眠らないようにしたので扱わない
 
 ### Wake on LAN を使う（任意） / 手順 4: 補足: 203 のエラー
 
 - `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある
 
-### ロールバック / 手順 13: 補足: 先に current の読み取り専用を外す理由
+### ロールバック / アプリと貼り付けの設定を外す / 手順 4: 補足: 先に current の読み取り専用を外す理由
 
 - scoop はアプリを入れるたびに、`~\scoop\apps\<アプリ>\current` を版のフォルダーへのジャンクションにし、読み取り専用の属性を付ける（`lib/install.ps1` の `link_current` の `attrib $currentdir +R /L`）
 - scoop 0.6.0 の `scoop uninstall scoop`（`bin/uninstall.ps1`）は、アプリごとに `unlink_current (appdir $app $global)` を呼ぶ。`unlink_current` は渡されたフォルダーの親の `current` を探すので、`~\scoop\apps\current` を探して何もしない（ふつうの `scoop uninstall <アプリ>` は版のフォルダーを渡すので、読み取り専用を外してから消す）
@@ -369,7 +369,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `~\scoop\apps` の中は名前の順に消すので、消せないアプリが `scoop` より後ろ（`scoop-search` など）なら、scoop 本体は先に消えている。前（`7zip`・`git` など）なら、scoop 本体は残る
 - 1 行目で `attrib.exe -R /L` を先に当てると、`Remove-Item` がジャンクションを消せて、最後まで進む（2026-10-08 に VM で確かめた。[検証記録](../verification/windows-setup.md)）
 
-### ロールバック / 手順 15: 補足: 文字コードを変えずに消す
+### ロールバック / アプリと貼り付けの設定を外す / 手順 6: 補足: 文字コードを変えずに消す
 
 - ファイルをバイトのまま読み、消す行のほかのバイトは変えずに書き戻す
 - 先頭が `FF FE`（UTF-16 LE の BOM）なら UTF-16 LE として、それ以外は 1 バイトを 1 文字にする Latin-1（コードページ 28591）として読み書きする。消す行は ASCII の文字だけなので、UTF-8（BOM の有無によらない）・Shift_JIS のどちらでも同じバイトで見つかる
@@ -386,7 +386,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### リモートから再起動する手段を増やす（任意） / 手順 4: 補足: SMB のリモートシャットダウンの仕組み
 
 - `shutdown /m \\<host>`（Windows）も `net rpc shutdown`（Samba）も、MS-RSP の InitShutdown インターフェイスを使う。これは名前付きパイプ `\PIPE\InitShutdown` を SMB（TCP 445）の上で呼ぶ（ncacn_np）。WindowsShutdown インターフェイスだけが TCP（ncacn_ip_tcp の動的ポート）で、`shutdown`・`net rpc` はそちらを使わないので、開けるのは 445 だけでよい
-- 組み込みの受信規則「ファイルとプリンターの共有 (SMB 受信)」（`FPS-SMB-In-TCP`、TCP 445）を有効にする。既定では無効。ping の規則（手順 46）と同じく `-Profile Private` に絞る
+- 組み込みの受信規則「ファイルとプリンターの共有 (SMB 受信)」（`FPS-SMB-In-TCP`、TCP 445）を有効にする。既定では無効。ping の規則（「ネットワークとリモート」の手順 4）と同じく `-Profile Private` に絞る
 - 再起動には 2 つの許可が要る
   - 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）。Administrators が既定で持つ。スタンドアロンのクライアントでは Administrators だけ
   - `LocalAccountTokenFilterPolicy = 1`。これが無いと、ローカル・Microsoft アカウントの管理者がネットワークログオンしたとき、UAC のリモート制限で絞られたトークンになり、再起動の権限を使えない（アクセス拒否になる）。1 にすると完全な管理者のトークンになる（UAC のリモート制限が緩む）
@@ -429,7 +429,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### リモートから再起動する手段を増やす（任意） / 手順 7: 補足: Remote Control を再起動後も使う
 
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
-- ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（手順 64）と組み合わせると、無人の再起動の後も戻る
+- ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
 - タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
 
 ### リモートから再起動する手段を増やす（任意）: 選択した方針
@@ -468,8 +468,8 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - 「カスタム手書き入力と入力の辞書」: 画面で切ると、覚えた単語の一覧が消える（サポートの記事）。レジストリの値を書いても、既にある辞書は消えない（広く）
 - 「オプションの診断データを送信する」: 画面が書く値は資料が無い。ポリシー（`AllowTelemetry`）は画面を灰色にするので使わない。Windows 10 1903 以降の既定は「必須」だけ（文書）。Rufus の「データ収集を無効化」で入れた PC は、既に切れている見込み（確かめていない）
-- 「設定アプリで通知を表示する」: 値（`SystemSettings\AccountNotifications` の `EnableAccountNotifications`）の資料は ElevenForum などだけ（広く）。24H2・25H2 の画面にあるかも確かめていない。手順 27 の `Start_AccountNotifications`（スタートのアカウントの通知）とは別
-- 「検索のハイライトを表示する」: 手順 49 の `DisableSearchBoxSuggestions` で灰色になる（Microsoft Q&A の回答）。ポリシー（`EnableDynamicContentInWSB`）は管理者の窓が要り、同じく灰色にする
+- 「設定アプリで通知を表示する」: 値（`SystemSettings\AccountNotifications` の `EnableAccountNotifications`）の資料は ElevenForum などだけ（広く）。24H2・25H2 の画面にあるかも確かめていない。「表示と入力」の手順 3 の `Start_AccountNotifications`（スタートのアカウントの通知）とは別
+- 「検索のハイライトを表示する」: 「サインイン・検索・キーボード」の手順 2 の `DisableSearchBoxSuggestions` で灰色になる（Microsoft Q&A の回答）。ポリシー（`EnableDynamicContentInWSB`）は管理者の窓が要り、同じく灰色にする
 - この節の手順 2 の値が画面でオンのまま出たら、その画面でオフにすれば、画面が値を書き直す
 
 ### プライバシーと広告の表示を切る（任意）: 選択した方針
@@ -487,15 +487,15 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 | 位置情報 | 入れない | 文書にあるのは `HKLM` のポリシーだけで、「組織によって管理」の表示が出る |
 | 値を戻す方法 | 元の値をファイルに控えて、そのとおりに戻す | 既定の値に戻す: Rufus で入れた PC などでは、元が 0 のことがある |
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 2: 補足: 控えのファイル
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 2: 補足: 控えのファイル
 
 - `%LOCALAPPDATA%\setup-notes\display-before.csv` に、この節で変える値の、変える前の値を `Name`・`Value` の 2 列で書く。初めて貼ったときだけ作り、2 回目からは書き換えない（機能の更新の後に貼り直しても、元の値が残る）
-- 控えを使うのは、この節の手順 16（切り替えのキー）・17（Alt+Tab とシェイク）・18（ギャラリーとホームのキーがあったか）・19（タスクの終了）。値が空なら、もとは値が無かった（戻すときは消す）
-- 固定キーなどの `Flags`・`MinAnimate`・効果音のスキームは、確かめるために並べるだけ。戻すときは、`Flags` は今の値に 0x4 を立て（この節の手順 15）、アニメーションは決まった値（オンと `1`）に戻し（この節の手順 20）、効果音はこの節の手順 9 の `.reg` の控えを使う
+- 控えを使うのは、「表示・入力・音・ストレージを元に戻す」の手順 2（切り替えのキー）・3（Alt+Tab とシェイク）・4（ギャラリーとホームのキーがあったか）・5（タスクの終了）。値が空なら、もとは値が無かった（戻すときは消す）
+- 固定キーなどの `Flags`・`MinAnimate`・効果音のスキームは、確かめるために並べるだけ。戻すときは、`Flags` は今の値に 0x4 を立て（「表示・入力・音・ストレージを元に戻す」の手順 1）、アニメーションは決まった値（オンと `1`）に戻し（同じ項の手順 6）、効果音は「表示・入力・音・ストレージを控えて変える」の手順 9 の `.reg` の控えを使う
 - 読者が値を控えて手で入れる形にしなかったのは、値が多く、打ち間違えやすいため
 - `{e88865ea-…}`（ギャラリー）と `{f874310e-…}`（ホーム）は、自分のユーザーにキーが既にあったか（ふつうは `False`）
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 3: 補足: Flags のビット
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 3: 補足: Flags のビット
 
 - `HKCU\Control Panel\Accessibility` の `StickyKeys`・`Keyboard Response`・`ToggleKeys` の `Flags`（REG_SZ の 10 進の数）。0x4 のビット（`SKF_HOTKEYACTIVE`・`FKF_HOTKEYACTIVE`・`TKF_HOTKEYACTIVE`）が、ショートカットで機能をオンにできるかを決める（文書。`STICKYKEYS`・`FILTERKEYS`・`TOGGLEKEYS` の構造体）
 - 既定の 510 と、ショートカットを切った 506 は、Microsoft の 2007 年の Windows XP Embedded のブログ（文書。Windows 11 の既定かは確かめていない。広くも 510 とする）。126 → 122 と 62 → 58 は広く
@@ -507,41 +507,41 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 同じ値は、Microsoft の DSC のリソース（`microsoft/winget-dsc` の `Microsoft.Windows.Setting.Accessibility`）も読み書きする（コード）
 - 切るのは、Shift を 5 回・右 Shift の長押し・Num Lock の長押しで機能をオンにするショートカットだけ。機能そのものはオフのまま
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 4: 補足: 切り替えのキーの値
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 4: 補足: 切り替えのキーの値
 
 - `HKCU\Keyboard Layout\Toggle` の 3 つの値（REG_SZ）。`1` が Alt+Shift、`2` が Ctrl+Shift、`3` が割り当てなし（文書。SystemParametersInfo の `SPI_SETLANGTOGGLE`）
 - `Language Hotkey` が入力言語の切り替え、`Layout Hotkey` が同じ言語の中のキー配列の切り替え、`Hotkey` は古い名前で `Language Hotkey` と同じ値（ReactOS の input.cpl のコード。値の名前は Microsoft の文書に無い）
-- 既定は広く `1`・`1`・`2` とされる（日本語版の値は確かめていない）。キーが無いユーザーもあるので、この節の手順 2 で控える
+- 既定は広く `1`・`1`・`2` とされる（日本語版の値は確かめていない）。キーが無いユーザーもあるので、「表示・入力・音・ストレージを控えて変える」の手順 2 で控える
 - 日本語の IME だけの PC では、ふだんは切り替える先が無い。タスクバーに「英語 (米国)」が勝手に出たときや、後で英語の配列を足したときに、Ctrl+Shift・Alt+Shift を押して離すだけで切り替わるのを防ぐ。WezTerm の自分用の設定は、Ctrl+Shift の組み合わせを多く使う
 - Win+Space（入力言語とキー配列を順に切り替える）は、この値では消えない（サポートの記事）。誤って切り替わったときに戻す手段として残る
 - 文書では、値を書いてから `SPI_SETLANGTOGGLE` を呼ぶと読み直す。この節では呼ばず、サインインし直して効かせる
-- 半角/全角と、[実施手順](../windows-setup.md#実施手順)の手順 31 の Ctrl+Space（IME のオン・オフ）には関係しない
+- 半角/全角と、[実施手順の「表示と入力」](../windows-setup.md#表示と入力)の手順 7 の Ctrl+Space（IME のオン・オフ）には関係しない
 - タスクバーに「英語 (米国)」のキーボードが勝手に出るのは、この設定では防げない（言語の一覧から消す）
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 5: 補足: Alt+Tab とシェイクの値
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 5: 補足: Alt+Tab とシェイクの値
 
 - `Explorer\Advanced` の `MultiTaskingAltTabFilter`: 0 がすべて（今は最新の 20 個）、1 が 5 個、2 が 3 個、3 が窓だけ（広く。Winaero・ElevenForum）。値が無いときの既定は、資料で 3 個と 5 個に割れる
 - 同じことをするポリシー（`BrowserAltTabBlowout`）は文書にあるが、番号が 1 つずれ（4 が窓だけ）、preview の扱いで、Alt+Tab にだけ効く。ユーザーの値は、スナップの候補にも効く
 - `DisallowShaking` が 1 でシェイクを切る。build 21286 から既定で切れている（Windows Insider のブログ）。1 がオフの意味は広く。日本語の画面の名前は「タイトル バー ウィンドウのシェイク」（広く）
 - Alt+Tab とスナップの候補に、Edge のタブを出さず、窓だけを並べる（設定の「システム」→「マルチタスク」の「タブを表示しない」）
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 6: 補足: ギャラリーとホームを消す仕組み
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 6: 補足: ギャラリーとホームを消す仕組み
 
 - `System.IsPinnedToNameSpaceTree` が 0 だと、その名前空間の拡張を消さずに、ナビゲーション ウィンドウに既定では出さない。「すべてのフォルダーを表示」で出る（文書。Integrate a Cloud Storage Provider）
 - `HKCR` は `HKLM\SOFTWARE\Classes` と `HKCU\Software\Classes` を合わせた見え方で、両方にあるキーは合わさり、`HKCU` の値が勝つ（文書。Merged View of HKEY_CLASSES_ROOT の例）
-- ギャラリーの CLSID `{e88865ea-…}` とホームの `{f874310e-…}` は広く（winutil・WinSetView・winscript など）。手順 26 と同じく、Microsoft が説明していない使い方
+- ギャラリーの CLSID `{e88865ea-…}` とホームの `{f874310e-…}` は広く（winutil・WinSetView・winscript など）。「表示と入力」の手順 2 と同じく、Microsoft が説明していない使い方
 - `HKCU\Software\Classes\CLSID` は WOW64 でリダイレクトされる（文書）ので、32 ビットの PowerShell から書くと別の場所に入る。32 ビットのアプリのファイルを開く画面には、残ることがある（推測）
 - 2024 年 6 月の更新の後に効かなくなったという報告と、25H2 に上げた後にホームが戻ったという報告が 1 件ずつある（広く。確かめていない）
-- 2 つを 1 つの手順にしたのは、同じ値・同じ仕組みで、確かめ方も同じため。手順 25 の `LaunchTo` = 1 で、エクスプローラーを開いたときも「PC」になる
+- 2 つを 1 つの手順にしたのは、同じ値・同じ仕組みで、確かめ方も同じため。「表示と入力」の手順 1 の `LaunchTo` = 1 で、エクスプローラーを開いたときも「PC」になる
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 7: 補足: タスクの終了
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 7: 補足: タスクの終了
 
 - `Explorer\Advanced\TaskbarDeveloperSettings` の `TaskbarEndTask` = 1。Microsoft の WindowsDeveloperConfig の設定スクリプトが、同じキーと値を書く（コード）
 - 機能は KB5031455（2023-10、22621.2506・22631.2506）で足された（文書）。25H2 以降は「開発者向け」のページが「詳細設定」に変わった（文書。Windows の詳細設定）
-- 開発者モード（手順 40）は要らない
+- 開発者モード（「PC 全体の設定」の手順 6）は要らない
 - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 8: 補足: UserPreferencesMask ではなく SystemParametersInfo を使う理由
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 8: 補足: UserPreferencesMask ではなく SystemParametersInfo を使う理由
 
 - 設定の「アニメーション効果」は、アプリには `SPI_GETCLIENTAREAANIMATION`（0x1042）として見える（MDN の `prefers-reduced-motion` の説明と、Chromium の `animation_win.cc`）。値は `HKCU\Control Panel\Desktop` の `UserPreferencesMask`（8 バイトの REG_BINARY）の 5 バイト目の 0x02 のビット（Wine の `sysparams.c`）
 - `UserPreferencesMask` は、メニューのフェード・ClearType など多くのビットを 1 つの値に詰めている。丸ごと書く例（Microsoft Q&A の回答など）は、ほかのビットまで変える
@@ -550,24 +550,24 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `Add-Type` で `user32.dll` の `SystemParametersInfo` をその場でコンパイルして呼ぶ。同じ定義なら、同じ窓で貼り直しても止まらない。制約付き言語モードの PC では使えない
 - 設定の画面がほかに何を書くか（メニュー・コンボ ボックスのアニメーションのビットなど）は、文書に無い。この手順では変えない
 - 切ると、Firefox・Chromium は Web ページに `prefers-reduced-motion: reduce` を返す
-- 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」に当たる（この節の手順 14 で確かめる）
+- 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」に当たる（「表示・入力・音・ストレージを控えて変える」の手順 14 で確かめる）
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 9: 補足: 効果音の控えとスキーム
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 9: 補足: 効果音の控えとスキーム
 
 - サウンドの画面でスキームを選ぶと、`HKCU\AppEvents\Schemes` の既定の値にスキームの名前（「サウンドなし」は `.None`、「Windows 標準」は `.Default`）を書き、`Schemes\Apps\<アプリ>\<イベント>` ごとに、そのスキームの音を `.Current` に写す。`.None` には音が無いので、`.Current` を空にするのと同じ（古い Microsoft の文書・Scripting Guy の記事と、広く使われているスクリプト）
 - 先に `reg.exe export` で `HKCU\AppEvents` を丸ごと控えるのは、イベントごとの元の音を、`.Default` が無いものやアプリが自分で書いたものも含めて戻すため。画面で「Windows 標準」に戻すと、`.Default` が無いイベントは空のまま残る
 - 控えは初めて貼ったときだけ作る。2 回目に貼っても、「サウンドなし」にした後の状態で上書きしない
 - 戻すときの `reg.exe import` は、控えにある値を書き戻す。控えの後に足されたイベントは、空のまま残る
-- 設定の「システム」→「通知」の「通知で音を鳴らす」と、起動音（この節の手順 10）は別の設定
+- 設定の「システム」→「通知」の「通知で音を鳴らす」と、起動音（「表示・入力・音・ストレージを控えて変える」の手順 10）は別の設定
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 10: 補足: 起動音をレジストリで変えない理由
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 10: 補足: 起動音をレジストリで変えない理由
 
 - 起動音はサインインの前に鳴るので、ユーザーごとではなく PC 全体の設定（`HKLM`）
 - レジストリの値は、資料どうしで食い違う（`BootAnimation` の `DisableStartupSound` と `EditionOverrides` の `UserSetting_DisableStartupSound`。多くは 1 が鳴らさない側だが、Winaero は別の値を書く。どれも広く）。ポリシー（「Windows スタートアップのサウンドをオフにする」）は Policy CSP の一覧に無い
 - そのため、サウンドの画面のチェックで行う。`control.exe mmsys.cpl,,2` は、サウンドの画面を「サウンド」のタブで開く（広く）。PowerShell ではカンマが配列の区切りになるので、引数を引用符で囲む
-- 手順 41 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
+- 「PC 全体の設定」の手順 7 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 11: 補足: ストレージ センサーの値
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを控えて変える / 手順 11: 補足: ストレージ センサーの値
 
 `HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy` の DWORD:
 
@@ -585,13 +585,13 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `04` の向きは、stealthpuppy の表だけが逆に書いている（同じ記事のスクリプトは 1 で消す）
 - 掃除の本体は `StorageSensor\Parameters\StorageSensorV2` を読み、`StoragePolicy` は画面の表示だけ、という Microsoft Q&A の回答（社員ではない）があるが、出典が無い。書いた値で掃除が動くかは確かめていない
 - 動くのはシステムのドライブだけで、サインインしてオンラインの状態が 10 分以上続いたとき（サポートの記事）
-- 22H2 以降の既定では、OneDrive のファイルは 30 日開かないとオンラインだけになる（サポートの記事）。OneDrive のアカウントごとの値（`StoragePolicy` の下の `OneDrive!…` のサブキー）は、名前がアカウントで変わり、資料も少ないので、画面で外す（この節の手順 12）
+- 22H2 以降の既定では、OneDrive のファイルは 30 日開かないとオンラインだけになる（サポートの記事）。OneDrive のアカウントごとの値（`StoragePolicy` の下の `OneDrive!…` のサブキー）は、名前がアカウントで変わり、資料も少ないので、画面で外す（「表示・入力・音・ストレージを控えて変える」の手順 12）
 - キーが無いときだけ作る。既にあるキーを作り直すと、OneDrive のサブキーなども消える
 - PC 全体のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Windows\StorageSense` の `AllowStorageSenseGlobal`）があると、そちらが勝つ
 
-### 表示・入力・音・ストレージを変える（任意） / 手順 18: 補足: 消すもの
+### 表示・入力・音・ストレージを変える（任意） / 表示・入力・音・ストレージを元に戻す / 手順 4: 補足: 消すもの
 
-- この節の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
+- 「表示・入力・音・ストレージを控えて変える」の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
 
 ### 表示・入力・音・ストレージを変える（任意）: 選択した方針
 
@@ -611,10 +611,10 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `StartupBoostEnabled`（Edge 88 から）と `BackgroundModeEnabled`（Edge 77 から）。どちらも REG_DWORD のブールで、必須にも推奨にもでき、Dynamic Policy Refresh が Yes（開き直さずに読み直せる）、Per Profile が No（文書。Microsoft Edge のポリシーの文書）
 - スタートアップ ブーストは、サインインのときに Edge を裏で起動しておく。4 GB を超えるメモリ（または 1 GB を超え、新しいディスク）で、Edge を数日おきに使う PC では、Edge が自分でオンにする（サポートの記事）
 - バックグラウンドの実行が残ると、スタートアップ ブーストの扱いと関係なく、窓を閉じても Edge が終わらないことがある（文書）。そのため 2 つを組で切る
-- 手順 32 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
+- 「自動起動と標準アプリ」の手順 1 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
 - Edge Update の、サインインのときのコマンド（`on-logon-startup-boost`・`on-logon-autolaunch`）でも、Edge が起動することがある（広く）。文書に無いので変えない
 - 必須のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Edge`）を置くと、Edge は組織が管理している旨を出し、その切り替えを灰色にする（表示の日本語の文言は広く）
-- 手順 50 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
+- 「サインイン・検索・キーボード」の手順 3 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
 - `Edge` のキーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）。戻すときも、キーは消さずに 2 つの値だけを消す
 - ドメイン参加か MDM の登録が要るポリシーには、その旨の注記がある。2 つのポリシーの文書には無いので、家庭の PC でも効くはず（確かめていない）
 
@@ -622,7 +622,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 経路 | 状況 | 採否 |
 |---|---|---|
-| **`HKLM` の必須のポリシー** | 手順 50 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
+| **`HKLM` の必須のポリシー** | 「サインイン・検索・キーボード」の手順 3 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
 | 推奨のポリシー（`Edge\Recommended`） | 利用者が一度でも切り替えていると効かない（文書）。管理の表示が出るかは資料が無い | 不採用 |
 | `HKCU` のポリシー | 書くのに管理者が要るのは同じ。両方あると `HKLM` が勝つ（Chromium の文書） | 不採用 |
 | Edge の設定の画面 | 管理の表示は出ない。Edge が自分でオンに戻すことがあるかは、資料が無い | 代わりの手順（この節の手順 3） |
@@ -634,14 +634,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `/CURRENTUSER` は winget の定義。入る場所は、`copyq.iss` の `{autopf}\CopyQ` を、Inno Setup が自分のユーザーの導入で `%LOCALAPPDATA%\Programs` にするため
 - インストーラは `PrivilegesRequiredOverridesAllowed=dialog` なので、管理者の確認を出さずに自分のユーザーに入れられる（`shared/copyq.iss` と Inno Setup の文書）。winget の定義は `elevatesSelf` で、winget は UAC が出るかもしれない旨を出すだけで、自分では昇格しない（winget の文書）
 - デスクトップのショートカットとスタートアップのタスクは既定で外れていて、入れた後の起動は `postinstall skipifsilent` なので、黙って入れると起動しない。PATH には入らない
-- 自分のユーザーにしたのは、手順 22・23 の UniGet UI・PowerToys と同じく、管理者が要らず、ほかのユーザーにかからないため。更新も、管理者ではない窓の `## 更新` の winget で上がる
+- 自分のユーザーにしたのは、「アプリを入れる」の手順 3・4 の UniGet UI・PowerToys と同じく、管理者が要らず、ほかのユーザーにかからないため。更新も、管理者ではない窓の `## 更新` の winget で上がる
 - 17.0.0 は、データを `%LOCALAPPDATA%\copyq` に移し、前の版では読めなくなる（`CHANGES.md`）
 - 前に別の場所へ入れた CopyQ があると、インストーラはその場所に入れる（`UsePreviousAppDir`）。そのときは、この節の手順 3・4・7 の決め打ちのパスが外れる
 - 最後の表の版は、実行した日の最新
 
 ### CopyQ を使う（任意） / 手順 4: 補足: 自動の起動の仕組み
 
-- `copyq config autostart true` は、スタートアップ フォルダー（`CSIDL_STARTUP`）に `copyq.lnk` を作る（`winplatform.cpp`）。手順 32 の `Run` とは別の所なので、手順 32 の一覧には出ない
+- `copyq config autostart true` は、スタートアップ フォルダー（`CSIDL_STARTUP`）に `copyq.lnk` を作る（`winplatform.cpp`）。「自動起動と標準アプリ」の手順 1 の `Run` とは別の所なので、同じ項の手順 1 の一覧には出ない
 - CLI の `config` は、値が変わったときだけショートカットを作る（`ConfigurationManager::setOptionValue`）。`copyq.ini` に `autostart=true` が残っていて `copyq.lnk` が無いと、`true` を送っても作られない。先に `false` を送るのはそのため
 - アンインストーラは `copyq.lnk` を消さない（スタートアップのタスクを選んだときだけ、アンインストールの記録に入る）
 - `copyq.exe` は窓を持つアプリ（GUI のサブシステム）なので、PowerShell は結果を出さずに戻る。`| Write-Output` を付けると、終わるまで待って結果を出す（CopyQ の known-issues）。`| Out-Null` は、終わるまで待って結果を捨てる
@@ -651,7 +651,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### CopyQ を使う（任意） / 手順 6: 補足: 避けるキーと貼り付け
 
 - CopyQ のグローバル ショートカットは `RegisterHotKey` を使う。Windows キーを含むキーは OS が予約していて、ほかが登録済みのキーと同じく失敗することがある（文書）。失敗はサーバーの記録に出るだけで、画面には出ない（コード）
-- 手順 23 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
+- 「アプリを入れる」の手順 4 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
 - CopyQ は Ctrl+V などのキーを `SendInput` で送って貼る。`SendInput` は、同じか低い整合性のレベルの窓にしか届かないので、管理者の窓には貼れない（文書。UIPI）
 - CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP で窓が見えない不具合は 16.0.0 で直った（`CHANGES.md`）
 - パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
@@ -672,16 +672,16 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### PowerToys のユーティリティを絞る（任意） / 手順 2: 補足: 入る場所と、切るユーティリティの案
 
-- 入る場所は、Microsoft の情報どうしで食い違う（[手順 23 の補足](#実施手順--手順-23-補足-入れ方と入る場所)）。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
+- 入る場所は、Microsoft の情報どうしで食い違う（[「アプリを入れる」の手順 4 の補足](#実施手順--アプリを入れる--手順-4-補足-入れ方と入る場所)）。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
 - 設定ファイルの `enabled` の名前は、設定の画面のコード（`EnabledModules.cs`）の JSON の名前。`Measure Tool`・`File Locksmith`・`Image Resizer` などは空白を含む。DSC の文書の App の例の名前（`MeasureTool`・`PowerOCR` など）とは違う
 - 既定で有効なもの（main のソース）: FancyZones・Image Resizer・File Explorer Preview・PowerRename・ColorPicker・Awake・FindMyMouse・MouseHighlighter・AlwaysOnTop・Measure Tool・File Locksmith・Peek・CmdNotFound・CmdPal。ほかは既定で無効。0.101.2362.0 で同じかは、この節の手順 3 の表で確かめる
 - `$PT_OFF` の案（利用者の好みで変えてよい）
-  - FindMyMouse: 既定は左 Ctrl を 2 回で出る。手順 51 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
+  - FindMyMouse: 既定は左 Ctrl を 2 回で出る。「サインイン・検索・キーボード」の手順 4 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
   - MouseHighlighter（Win+Shift+H）・ColorPicker（Win+Shift+C）・Measure Tool: 使わないなら、Win のキーの割り当てを空ける
   - FancyZones: Windows のスナップで足りるなら要らない
-  - Awake: 手順 41 で、電源接続中は眠らないようにした。既定のモードは何もしない
+  - Awake: 「PC 全体の設定」の手順 7 で、電源接続中は眠らないようにした。既定のモードは何もしない
 - 残す案: Always On Top（Win+Ctrl+T）・コマンド パレット（Win+Alt+Space）・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer。Text Extractor（Win+Shift+T。画面の文字を読み取ってコピーする）は既定で無効で、使うなら画面でオンにする
-- LightSwitch（既定で無効）は、時刻で明暗を切り替えるので、手順 29 のダークモードとぶつかる。オンにしない
+- LightSwitch（既定で無効）は、時刻で明暗を切り替えるので、「表示と入力」の手順 5 のダークモードとぶつかる。オンにしない
 - WezTerm の自分用の設定は Win のキーを使わないので、PowerToys の Win+ のショートカットとはぶつからない
 
 ### PowerToys のユーティリティを絞る（任意） / 手順 5: 補足: 設定ファイルを書く順と、変えない設定
@@ -698,7 +698,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### PowerToys のユーティリティを絞る（任意） / 手順 6: 補足: Peek・Find My Mouse・Command Not Found
 
-- Peek の起動のキーの既定は Ctrl+Space だが、「Space で開く」（`EnableSpaceToActivate`）が既定でオンの間は Space だけになる（0.95 から。`PeekProperties.cs`・`dllmain.cpp`）。オフにすると Ctrl+Space に戻り、手順 31 の IME とぶつかる。0.95 より前の設定を引き継いだ PC も同じ
+- Peek の起動のキーの既定は Ctrl+Space だが、「Space で開く」（`EnableSpaceToActivate`）が既定でオンの間は Space だけになる（0.95 から。`PeekProperties.cs`・`dllmain.cpp`）。オフにすると Ctrl+Space に戻り、「表示と入力」の手順 7 の IME とぶつかる。0.95 より前の設定を引き継いだ PC も同じ
 - Find My Mouse の起動の方法は、設定ファイル（`FindMyMouse\settings.json`）の `activation_method`（0 が左 Ctrl を 2 回、1 が右 Ctrl を 2 回、2 が振る、3 がショートカット）と `include_win_key`（Windows キーを押しているときだけ。0 と 1 のときだけ画面に出る）。この節では画面で変える
 - Command Not Found は、有効の印があっても、画面で「インストール」を押すまで何もしない。押すと、PowerShell 7 のプロファイルに行を足す（Microsoft の文書）
 - 通知領域のアイコンを 1 回クリックすると、クイック アクセス（`enable_quick_access` が既定で true）が開く。設定の窓は、右クリックのメニューの「設定」か、ダブルクリックで開く（`src/runner/tray_icon.cpp`）
@@ -712,14 +712,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 | 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | この節の手順 6 で確かめに使う |
 | `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
 | `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
-| Keyboard Manager で Caps Lock を変える | 手順 51 の Scancode Map を採った（[選択した方針](../verification/windows-setup.md#選択した方針)） | 不採用 |
+| Keyboard Manager で Caps Lock を変える | 「サインイン・検索・キーボード」の手順 4 の Scancode Map を採った（[選択した方針](../verification/windows-setup.md#選択した方針)） | 不採用 |
 | 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
 
 ### PowerShell 7 のプロファイルを設定する（任意） / 手順 2: 補足: 足す行
 
 - プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。5.1 から書くので、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
 - Ctrl+Enter: PowerShell 7.5 の PSReadLine 2.3.6 と、7.6 の 2.4.5 も、Windows モードの Ctrl+Enter は `InsertLineAbove`（`KeyBindings.cs`）
-  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（手順 30 の補足）、右クリックで貼ると 5.1 と同じく行が逆順になるはず
+  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（「表示と入力」の手順 6 の補足）、右クリックで貼ると 5.1 と同じく行が逆順になるはず
   - Windows Terminal は、貼るときに LF を CR に直す（`ControlCore::PasteText`）ので起きない。WezTerm（Windows では、貼るときに改行を CRLF に直す）は確かめていない
 - ↑/↓: `HistorySearchBackward`・`HistorySearchForward`（既定は F8・Shift+F8 に割り当て）。bash-settings.md の `~/.inputrc` の `history-search-backward` と同じく、打った文字で始まる履歴だけを出す
   - `-HistorySearchCursorMovesToEnd` は付けない（既定の False で、カーソルは打った文字の後ろに残る。bash と同じ）。Microsoft の `SamplePSReadLineProfile.ps1` は付けている
@@ -744,7 +744,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### PowerShell 7 のプロファイルを設定する（任意） / 手順 3: 補足: Tab の一覧
 
 - 既定の Tab は、候補を 1 つずつ入れ替える
-- 一覧を出す既定のキーの Ctrl+Space は、[実施手順](../windows-setup.md#実施手順)の手順 31 で IME が受け取るので、Tab がその代わりになる
+- 一覧を出す既定のキーの Ctrl+Space は、[実施手順の「表示と入力」](../windows-setup.md#表示と入力)の手順 7 で IME が受け取るので、Tab がその代わりになる
 
 ### PowerShell 7 のプロファイルを設定する（任意） / 手順 4: 補足: 5.1 から確かめる形と実行ポリシー
 
@@ -752,14 +752,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 結果は、子の pwsh で `Out-String` にして文字列で受け取る。オブジェクトのまま受け取ると、5.1 は最初に届いた実行ポリシーの列で表を作るので、キーの行が空になる
   - `-Width 120` を付けるのは、子が端末の幅を取れないと、`Out-String` が空の行だけを返すため
 - `-NoProfile` でも `$PROFILE` は設定される（`ConsoleHost.cs`）ので、`. $PROFILE` で読む
-- Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。手順 18 の 5.1 の値（レジストリ）は効かない
+- Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。「貼り付けの設定」の手順 3 の 5.1 の値（レジストリ）は効かない
 - すべてが `Undefined` なら `Restricted` になり、プロファイルが読まれない。そのときだけ、この節の手順 5 で `CurrentUser` を `RemoteSigned` にする（`Documents\PowerShell\powershell.config.json` に書かれる）。MSIX では `LocalMachine` に書けない
 - `Set-ExecutionPolicy` に `-Force` を付けるのは、確認の問いで止まらないようにするため
 - UniGet UI は scoop を `-NoProfile -ExecutionPolicy Bypass` で動かすので、このプロファイルと実行ポリシーに依らない
 
 ### PowerShell 7 のプロファイルを設定する（任意） / 手順 7: 補足: 印の行だけを消す
 
-- [ロールバック](../extra/windows-setup.md#ロールバック)の手順 15 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバック / 手順 15 の補足](#ロールバック--手順-15-補足-文字コードを変えずに消す)）
+- [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバックの「アプリと貼り付けの設定を外す」の手順 6 の補足](#ロールバック--アプリと貼り付けの設定を外す--手順-6-補足-文字コードを変えずに消す)）
 - 消すのは、行末が `  # windows-setup.md` の行。印が行の途中にある行は消さない
 - PowerToys の Command Not Found が足した行は、印が無いので残る
 - `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
@@ -771,9 +771,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
   - Claude Code の Bash ツールと、sshd の `DefaultShell`（[Windows の OpenSSH サーバー](../windows-openssh-server.md#既定のシェルを-git-bash-にする任意)の任意節）も Git Bash なので、bash の設定 1 つで済む
 - **PowerShell 7 は補助**: この節で、starship と zoxide だけを、入っているときだけ読む。PSFzf・eza の関数・gh の補完・yazi の `y` は入れない（主のシェルの Git Bash に同じ機能がある。PSFzf はコミュニティのモジュール）
-- **Windows PowerShell 5.1 には何も足さない**: 手順書を貼る窓で、プロファイルは管理者の conhost の窓も読む。見た目と起動の時間が変わり、SSH のセッションでは scoop の shim が RedirectionGuard で起動できないことがある。5.1 のプロファイルは手順 19 の 1 行のまま
+- **Windows PowerShell 5.1 には何も足さない**: 手順書を貼る窓で、プロファイルは管理者の conhost の窓も読む。見た目と起動の時間が変わり、SSH のセッションでは scoop の shim が RedirectionGuard で起動できないことがある。5.1 のプロファイルは「貼り付けの設定」の手順 4 の 1 行のまま
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
-- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows の OpenSSH サーバーの `Add-WindowsCapability` など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。手順 9 の窓で Windows Terminal が先に設定を作るので、手順 24 の後も既定は Windows PowerShell のままのはず（コードからの推測）
+- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows の OpenSSH サーバーの `Add-WindowsCapability` など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 5 の後も既定は Windows PowerShell のままのはず（コードからの推測）
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -798,7 +798,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### Windows Terminal のフォントと貼り付けの警告を変える（任意） / 手順 3: 補足: フォント
 
 - `profiles.defaults.font.face`。既定は `Cascadia Mono`（見つからなければ Consolas）、大きさは 12（WezTerm の自分用の設定も 12）
-- 手順 30 で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
+- 「表示と入力」の手順 6 で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
 - 管理者として開いた窓（conhost）のフォントは、`HKCU\Console` などの別の設定で、この節では扱わない
 - hackgen.md は自分のユーザーのフォントに入れ、パッケージのアプリ向けに読み取りの権限（`S-1-15-2-1`・`S-1-15-2-2`）を足す。MSIX の Windows Terminal から見えるかは確かめていない
 - 見つからないと、設定の画面に「見つからないフォント:」、端末に「次のフォントが見つかりません: …」が出る（`Resources.resw` の日本語の訳）
@@ -856,7 +856,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - UDP 68・TCP 135/1900/2869/5004/3702/5357/5358 は、WSL に届かない
   - WSL が `accept_local`・`route_localnet`・`rp_filter` などの sysctl を自分で設定する
   - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
-- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、手順 44・46 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
+- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、「ネットワークとリモート」の手順 2・4 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
 - **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
 - [VirtualBox のゲスト（bootc）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
 
@@ -890,7 +890,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - **版の指定と止め方**（Scoop v0.6.0 のソース）
   - `scoop install zoxide@0.9.9` は、バケットの今の定義と版が違うと、バケットの git の履歴から `0.9.9` の定義を探し（`git log --follow -n 1 -G …` で見つけたコミットと、その親）、`~\scoop\workspace\zoxide.json` に書いてから入れる（v0.6.0 の #6370）。見つからなければ `WARN` の行を出して、定義の `autoupdate` で作る
   - 履歴を探すのは、main のバケットが git のリポジトリのときだけ（`lib/manifest.ps1` の `Find-HistoricalManifestInGit`）。そうでなければ `WARN  Bucket 'main' is not a git repository. Cannot search historical versions.` を出して `autoupdate` に移り、hash はバケットの履歴の定義のものではなく、そのときに取ったものになる。`autoupdate` も失敗すると、`Could not install: zoxide@0.9.9` で止まる
-  - 本書の手順 20・21 は Git for Windows より前に scoop を入れるので、main のバケットは zip で置かれる（ScoopInstaller/Install の `install.ps1`）。git の形になるのは、最初の `scoop update`（`scoop-update.ps1` の `Sync-Bucket` の `Converting 'main' bucket to git repo...`）。`scoop install` が自分で `scoop update` を動かすのは、前の更新から 3 時間たったとき（`is_scoop_outdated`）だけなので、この節の手順 4 の先頭で `scoop update` を貼る
+  - 本書の「アプリを入れる」の手順 1・2 は Git for Windows より前に scoop を入れるので、main のバケットは zip で置かれる（ScoopInstaller/Install の `install.ps1`）。git の形になるのは、最初の `scoop update`（`scoop-update.ps1` の `Sync-Bucket` の `Converting 'main' bucket to git repo...`）。`scoop install` が自分で `scoop update` を動かすのは、前の更新から 3 時間たったとき（`is_scoop_outdated`）だけなので、この節の手順 4 の先頭で `scoop update` を貼る
   - main のバケットでは、`73b1eafab`（2026-01-31）で 0.9.9 に、`f8683b6ce`（2026-07-04）で 0.10.0 になった。`f8683b6ce` の親の定義が 0.9.9
   - こうして入れたものは、`install.json` に `bucket` が無く、`url` が `workspace` の定義を指す。`scoop status` と `scoop update` は、その定義の版（0.9.9）を最新とみなすので、それだけでも上がらない。`scoop list` の `Source` は `<auto-generated>`
   - そのうえで `scoop hold` を付けた（`install.json` に `hold` を書く）。`scoop list` の `Info` が `Held package` になり、止めてあることが見える。`scoop update * --force` でも、止めたものは上げない
@@ -923,8 +923,8 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### シェルのツールを入れる（任意） / 手順 7・8: 補足: Git Bash での確かめ方
 
-- AlmaLinux 10 の初期設定の手順 52〜55・57・58・60〜63 は、`brew` の行を含まず、共通の bash 設定が読んだ結果を確かめるだけなので、Git Bash でもそのまま使える。この節には bash のブロックを足さず、Windows で違うところだけを箇条書きにした（同じブロックを書き写すと、片方だけ直したときに食い違う）
-  - 手順 56（tmux）は、Windows では入れない。手順 59 は bash-completion と `~/.inputrc`（AlmaLinux 10 の手順 44・45）を確かめるもので、この節では入れていない
+- AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5 は、`brew` の行を含まず、共通の bash 設定が読んだ結果を確かめるだけなので、Git Bash でもそのまま使える。この節には bash のブロックを足さず、Windows で違うところだけを箇条書きにした（同じブロックを書き写すと、片方だけ直したときに食い違う）
+  - 「シェルのツール」の手順 8（tmux）は、Windows では入れない。「キー操作を試す」の手順 1 は bash-completion と `~/.inputrc`（AlmaLinux 10 の「共通の bash 設定」の手順 3・4）を確かめるもので、この節では入れていない
 - WezTerm は Windows で新しいタブを開くたびに、レジストリのシステムとユーザーの環境変数を読み直す（WezTerm の `pty/src/cmdbuilder.rs` の `get_base_env`）。そのため、この節の手順 4 の後に開いた新しいタブには、WezTerm を起動し直さなくても、starship の `Path` と `BAT_CONFIG_DIR` が入るはず（確かめていない）。起動し直すのは、プロンプトが starship にならなかったときだけにした
 - 違うところの出どころ
   - `bind -X` のコロンと、WezTerm のシェル統合のマウス報告よけの行: ryo-aoki-pc/bash の `docs/install.md`（Git Bash の bash 5.3 の記録）
@@ -946,7 +946,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### シェルのツールを入れる（任意）: 選択した方針
 
-- **1 つの任意節にまとめた**: AlmaLinux 10 の starship・zoxide・fzf・eza・bat は、2026-10-08 に [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 49 などにまとめられ、ツールごとの手順書は無くなった。Windows 11 も同じく、初期設定の手順書の任意節にし、5 つを 1 つの手順（`scoop install` は、版を指定しない 4 つと zoxide の 2 回）で入れる
+- **1 つの任意節にまとめた**: AlmaLinux 10 の starship・zoxide・fzf・eza・bat は、2026-10-08 に [AlmaLinux 10 の初期設定の「シェルのツール」](../almalinux-setup.md#シェルのツール)の手順 1 などにまとめられ、ツールごとの手順書は無くなった。Windows 11 も同じく、初期設定の手順書の任意節にし、5 つを 1 つの手順（`scoop install` は、版を指定しない 4 つと zoxide の 2 回）で入れる
   - git-delta と GitHub CLI は、それぞれの手順書（[git-delta.md](../git-delta.md)・[gh.md](../gh.md)）にある
 - **導入元は scoop の main のバケット**（README の「導入の基盤」の、CLI ツールは scoop）
   - 管理者が要らず、[更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
@@ -1014,7 +1014,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 文書: [about_Profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.6)・[about_Execution_Policies](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.6)・[about_PowerShell_Config](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_config?view=powershell-7.6)・[about_PSReadLine](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline?view=powershell-7.6)・[about_PSReadLine_Functions](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline_functions?view=powershell-7.6)・[Set-PSReadLineOption](https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.6)・[Using predictors in PSReadLine](https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/using-predictors)・[about_Update_Notifications](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_update_notifications?view=powershell-7.6)・[about_Telemetry](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.6) — Microsoft Learn
 - コード: [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell)（`CorePsPlatform.cs`・`ConsoleHost.cs`・`build.psm1`・`src/Modules/PSGalleryModules.csproj`）・[PowerShell/PSReadLine](https://github.com/PowerShell/PSReadLine)（`KeyBindings.cs`・`History.cs`・`Cmdlets.cs`・`SamplePSReadLineProfile.ps1`）
 - コード: [zoxide の templates/powershell.txt](https://github.com/ajeetdsouza/zoxide/blob/v0.10.0/templates/powershell.txt)（0.9.9 も同じ形）・[starship の src/init/starship.ps1](https://github.com/starship/starship/blob/v1.26.0/src/init/starship.ps1)、自分用の設定の [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)（`lua/shells.lua`・`shell/wezterm.ps1`）と [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)（`bashrc`）
-- 文書: [winget settings](https://learn.microsoft.com/en-us/windows/package-manager/winget/settings)（Microsoft Learn）と、コードの [microsoft/winget-cli](https://github.com/microsoft/winget-cli)（`doc/Settings.md`・`src/AppInstallerCommonCore/Public/winget/UserSettings.h`・`Manifest/ManifestComparator.cpp`）、[Devolutions/UniGetUI](https://github.com/Devolutions/UniGetUI)（`WinGetPkgOperationHelper.cs`） — winget の既定の範囲（手順 24 の補足）
+- 文書: [winget settings](https://learn.microsoft.com/en-us/windows/package-manager/winget/settings)（Microsoft Learn）と、コードの [microsoft/winget-cli](https://github.com/microsoft/winget-cli)（`doc/Settings.md`・`src/AppInstallerCommonCore/Public/winget/UserSettings.h`・`Manifest/ManifestComparator.cpp`）、[Devolutions/UniGetUI](https://github.com/Devolutions/UniGetUI)（`WinGetPkgOperationHelper.cs`） — winget の既定の範囲（「アプリを入れる」の手順 5 の補足）
 - 文書: [Windows Terminal の settings.json の場所](https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file)・[JSON fragment extensions](https://learn.microsoft.com/en-us/windows/terminal/json-fragment-extensions)・[Profile - Appearance](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/profile-appearance)・[Interaction](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/interaction)・[Startup](https://learn.microsoft.com/en-us/windows/terminal/customize-settings/startup) — Microsoft Learn（interaction のページは古い名前だけ）
 - コード: [microsoft/terminal](https://github.com/microsoft/terminal)（`TerminalSettingsModel/MTSMSettings.h`・`CascadiaSettingsSerialization.cpp`・`CascadiaSettings.cpp`・`userDefaults.json`・`TerminalApp/TerminalPage.cpp`・`src/host/VtIo.cpp`・`src/types/utils.cpp`、日本語の訳の `Resources.resw`）
 - 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
@@ -1032,11 +1032,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ## VM での確認に伴う手順修正の根拠
 
-- 手順 4・7: PSWindowsUpdate 2.2.1.5 は複数件の結果を 1 つの `Collection` として返す場合がある。`ForEach-Object { $_ }` で各更新を展開してから件数を数える。更新対象の Criteria と実際の適用コマンドは変えない。
-- 手順 22〜24: 確認の [`winget list`](https://learn.microsoft.com/en-us/windows/package-manager/winget/list) も `--source winget` で導入元に絞る。source 未指定では `msstore` の初回の規約と地域情報の同意待ちになる場合がある。
+- 「Windows Update」の手順 4・7: PSWindowsUpdate 2.2.1.5 は複数件の結果を 1 つの `Collection` として返す場合がある。`ForEach-Object { $_ }` で各更新を展開してから件数を数える。更新対象の Criteria と実際の適用コマンドは変えない。
+- 「アプリを入れる」の手順 3〜5: 確認の [`winget list`](https://learn.microsoft.com/en-us/windows/package-manager/winget/list) も `--source winget` で導入元に絞る。source 未指定では `msstore` の初回の規約と地域情報の同意待ちになる場合がある。
 - UniGet UI のユーザー向け [winget 定義](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/Devolutions/UniGetUI/2026.3.0/Devolutions.UniGetUI.installer.yaml)も `elevatesSelf` で、[インストーラー](https://github.com/Devolutions/UniGetUI/blob/v2026.3.0/InstallerExtras/CodeDependencies.iss)は Visual C++ Runtime などを必要に応じて導入する。共有 DLL の導入には[管理者権限が必要](https://learn.microsoft.com/en-us/cpp/windows/choosing-a-deployment-method?view=msvc-170)なため、ユーザー領域への導入でも管理者確認が出る場合がある。
-- 手順 32 とロールバック 8: `OneDriveSetup` は初回導入の項目で、対象へ正確な名前を追加した。`Run` の値・実行ファイルを削除せず、`RunOnce` と Active Setup も変えない。[Run と RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)と [OneDriveSetup を初回導入に使う例](https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/cannot-open-onedrive-on-images-using-sysprep)を参照（後者は Windows 10 の Sysprep の例）。実アプリの次回起動の確認とは分けて扱う。
-- 手順 41: 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
-- 手順 62・63: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
+- 「自動起動と標準アプリ」の手順 1 とロールバックの「表示と入力を戻す」の手順 8: `OneDriveSetup` は初回導入の項目で、対象へ正確な名前を追加した。`Run` の値・実行ファイルを削除せず、`RunOnce` と Active Setup も変えない。[Run と RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)と [OneDriveSetup を初回導入に使う例](https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/cannot-open-onedrive-on-images-using-sysprep)を参照（後者は Windows 10 の Sysprep の例）。実アプリの次回起動の確認とは分けて扱う。
+- 「PC 全体の設定」の手順 7: 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
+- 「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
 
 実施環境と再実行の結果は[検証記録](../verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。

@@ -2,27 +2,29 @@
 
 [手順書](../almalinux-setup.md)・[検証記録](../verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - 表示と入力: ダークモードは 1、ボタンは 2、時計と電池は 3、Files は 4、Alt+Tab は 5、ホットコーナーは 6、Caps Lock は 7、拡大率は 8、Ctrl+Alt+T は 9、Dash のお気に入りは 10、トレイアイコンは 11・12
-  - 日本語入力: 入力ソースは 13、ibus-anthy は 14。フォルダーの名前は 15
-  - シェル: tmux のセッションは 16、履歴の控えは 17、ツールは 18・19（Homebrew ごと消すなら飛ばしてよい）、ツールの設定とキャッシュは 20、`~/.inputrc` は 21、共通の bash 設定は 22・23、Homebrew は 24〜26、bash-completion は 27
-  - 導入元: Flathub は 28〜31、RPM Fusion は 32・33、EPEL は 34・35
-  - PC 全体: パッケージの案内は 36、kdump は 37、journal は 38、PC の名前は 39、再起動と確かめは 40・41、sudo は 42
-- 拡大率を 100% 以外にしていたら、この節の手順 8 の前に、設定の「ディスプレイ」の「スケーリング」で 100% に戻す
-- gsettings の値は、変える前の値ではなく**既定値**に戻る。手順 28・41 で控えた値に戻すなら、`reset` の代わりに `set` を使う
-- OS とファームウェアの更新、SSH（Workstation の既定のまま）、手順 46 の依存パッケージは戻さない
+  - 表示と入力: [表示と入力を戻す](#表示と入力を戻す)の手順で、ダークモードは 1、ボタンは 2、時計と電池は 3、Files は 4、Alt+Tab は 5、ホットコーナーは 6、Caps Lock は 7、拡大率は 8、Ctrl+Alt+T は 9、Dash のお気に入りは 10、トレイアイコンは 11・12
+  - 日本語入力: [表示と入力を戻す](#表示と入力を戻す)の手順で、入力ソースは 13、ibus-anthy は 14。フォルダーの名前は 15
+  - シェル: [シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順で、tmux のセッションは 1、履歴の控えは 2、ツールは 3・4（Homebrew ごと消すなら飛ばしてよい）、ツールの設定とキャッシュは 5、`~/.inputrc` は 6、共通の bash 設定は 7・8。[Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順で、Homebrew は 1〜3、bash-completion は 4
+  - 導入元: [Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順で、Flathub は 1〜4、RPM Fusion は 5・6、EPEL は 7・8
+  - PC 全体: [システムの設定を戻す](#システムの設定を戻す)の手順で、パッケージの案内は 1、kdump は 2、journal は 3、PC の名前は 4、再起動と確かめは 5・6、sudo は 7
+- 拡大率を 100% 以外にしていたら、[表示と入力を戻す](#表示と入力を戻す)の手順 8 の前に、設定の「ディスプレイ」の「スケーリング」で 100% に戻す
+- gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 2 と「GNOME の表示と入力」の手順 13 で控えた値に戻すなら、`reset` の代わりに `set` を使う
+- OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない
 - 任意節で変えたものは、その節の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)を通したなら、先にその節の手順 2 を行う
 - 別の手順書で入れたものは、それぞれの手順書のロールバックで先に戻す（Homebrew を消す前に HackGen Console NF などの Homebrew のもの、RPM Fusion を消す前に [firefox.md のロールバック](firefox.md#ロールバック)の手順 1 の FFmpeg）
 - **EPEL・RPM Fusion を消しても、そこから入れたパッケージ（btop・distrobox・podman-compose・podman-tui・VirtualBox の `liblzf`・Firefox の FFmpeg など）は残り、更新されなくなる**。要らないものは、先に各手順書のロールバックで消す
-- 手順 1〜23 は、手順 50 と同じ、開き直した端末に貼る
+- [表示と入力を戻す](#表示と入力を戻す)と[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順は、「シェルのツール」の手順 2 と同じ、開き直した端末に貼る
 
 > [!CAUTION]
-> **この節の手順 25 は、Homebrew で入れたものを全部消す**（この文書の外で入れた yazi・Neovim・HackGen Console NF なども）。**この節の手順 38 は、ディスクに残した journal（前の起動のログ）を消す**。**この節の手順 22 の後に閉じたシェルは、`~/.bash_history` を既定の 1,000 行に切り詰める**（残す履歴は、この節の手順 17 で控える）。どれも取り戻せない。
+> [Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順 2 は、**Homebrew で入れたものを全部消す**（この文書の外で入れた yazi・Neovim・HackGen Console NF なども）。[システムの設定を戻す](#システムの設定を戻す)の手順 3 は、**ディスクに残した journal（前の起動のログ）を消す**。[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順 7 の後に閉じたシェルは、**`~/.bash_history` を既定の 1,000 行に切り詰める**（残す履歴は、同じ項の手順 2 で控える）。どれも取り戻せない。
+
+### 表示と入力を戻す
 
 1. ダークモードを既定（淡色）に戻す。
 
@@ -148,7 +150,7 @@
    ```
 
    - `['firefox.desktop', 'org.gnome.Calendar.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Software.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop', 'org.gnome.Calculator.desktop']`（Workstation の既定）が出ればよい
-   - 手順 41 で控えた並びに戻すなら、`reset` の代わりに `/usr/bin/gsettings set org.gnome.shell favorite-apps "<控えた値>"` を貼る（`<控えた値>` を置き換える）
+   - 「GNOME の表示と入力」の手順 13 で控えた並びに戻すなら、`reset` の代わりに `/usr/bin/gsettings set org.gnome.shell favorite-apps "<控えた値>"` を貼る（`<控えた値>` を置き換える）
 
 1. トレイアイコンの拡張を無効にする。
 
@@ -179,15 +181,15 @@
    ```
 
    - `@a(ss) []`（既定値）になればよい
-   - 手順 28 で控えた値に戻すなら、`/usr/bin/gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
+   - 「日本語入力」の手順 2 で控えた値に戻すなら、`/usr/bin/gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
 
-1. 手順 27 で ibus-anthy を入れたときだけ、ibus-anthy を消す。
+1. 「日本語入力」の手順 1 で ibus-anthy を入れたときだけ、ibus-anthy を消す。
 
    ```bash
    sudo dnf remove ibus-anthy
    ```
 
-   - `anthy-unicode`・`ibus-anthy-python`・`kasumi-common`・`kasumi-unicode` も一緒に消える。`ibus` 本体と、手順 27 で入ったフォントは残る
+   - `anthy-unicode`・`ibus-anthy-python`・`kasumi-common`・`kasumi-unicode` も一緒に消える。`ibus` 本体と、「日本語入力」の手順 1 で入ったフォントは残る
    - 最初から入っていた PC（Workstation）では貼らない
    - **次の手順は、`[y/N]` に `y` と答えて、プロンプトに戻ってから貼る**
 
@@ -228,8 +230,10 @@
    grep '^XDG_' ~/.config/user-dirs.dirs
    ```
 
-   - 手順 29 と同じ形で、`/home/<USER>/Downloads → /home/<USER>/ダウンロード` のような行が 8 つ出る
+   - 「GNOME の表示と入力」の手順 1 と同じ形で、`/home/<USER>/Downloads → /home/<USER>/ダウンロード` のような行が 8 つ出る
    - `user-dirs.dirs` の 8 行が日本語の名前に戻ればよい
+
+### シェルのツールと bash の設定を戻す
 
 1. tmux のセッションを全部終わらせる。
 
@@ -256,11 +260,11 @@
    brew uninstall starship zoxide eza bat tmux
    ```
 
-   - Homebrew ごと消すなら、この手順と手順 19 は飛ばしてよい（手順 25 で全部消える）
+   - Homebrew ごと消すなら、この手順とこの項の手順 4 は飛ばしてよい（[Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順 2 で全部消える）
    - 残すツールは、名前を外してから貼る
    - 依存は、ほかの formula（[git-delta](../git-delta.md) など）が必要とする間は残る。Homebrew 7 では、不要になった依存は自動で削除される（`Autoremoving … unneeded formulae:`）
    - 同じシェルでは、`command -v tmux` などがまだ前のパスを返す（bash が覚えている）。`hash -r` の後か新しいシェルでは、何も返さない
-   - starship を消した後のこの端末では、プロンプトを出すたびに `-bash: /home/linuxbrew/.linuxbrew/bin/starship: そのようなファイルやディレクトリはありません` と出て、プロンプトの文字が消える。コマンドは動くので、この節の手順 23 で端末を開き直すまで、そのまま貼ってよい
+   - starship を消した後のこの端末では、プロンプトを出すたびに `-bash: /home/linuxbrew/.linuxbrew/bin/starship: そのようなファイルやディレクトリはありません` と出て、プロンプトの文字が消える。コマンドは動くので、この項の手順 8 で端末を開き直すまで、そのまま貼ってよい
 
 1. fzf を使うツールがほかに無いときだけ、fzf を消す。
 
@@ -280,13 +284,13 @@
 
    - zoxide の履歴（`~/.local/share/zoxide/db.zo`）は、残しておけば、入れ直したときにそのまま使える
 
-1. 手順 45 で作った `~/.inputrc` を消す。
+1. 「共通の bash 設定」の手順 4 で作った `~/.inputrc` を消す。
 
    ```bash
    rm -f ~/.inputrc
    ```
 
-   - 手順 45 が `中断:` で、すでにあった `~/.inputrc` に手で足したホストでは、足した行だけを手で消す
+   - 「共通の bash 設定」の手順 4 が `中断:` で、すでにあった `~/.inputrc` に手で足したホストでは、足した行だけを手で消す
 
 1. 共通の bash 設定も戻すときだけ、bash リポジトリの設定を戻す。
 
@@ -298,6 +302,8 @@
    - 削除したツールの設定は、次のシェルでは共通設定から読み込まれない
    - 今のシェルには `bind -f` した設定と `shopt` が残っている。新しいシェルで効く
 
+### Homebrew と bash-completion を消す
+
 1. Homebrew を消す前に、何が消えるか見る。
 
    ```bash
@@ -308,7 +314,7 @@
    bash /tmp/uninstall.sh --dry-run
    ```
 
-   - `brew` はフルパスで呼ぶ（この節の手順 22 で共通の bash 設定を戻した後は、`brew` が PATH に無い）
+   - `brew` はフルパスで呼ぶ（[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順 7 で共通の bash 設定を戻した後は、`brew` が PATH に無い）
    - 公式のアンインストーラを `/tmp/uninstall.sh` に落として、**まず `--dry-run` で何が消えるか見る**
    - `brew leaves` に出るものは、すべて使えなくなる
    - **次の手順は、内容を確かめてから貼る**
@@ -320,8 +326,8 @@
    ```
 
    - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y`
-   - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この節の手順 26 で消す
-   - インターネットに出られないホストでは、[ssh-socks-tunnel.md 手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで、この節の手順 24 から貼る
+   - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この項の手順 3 で消す
+   - インターネットに出られないホストでは、[ssh-socks-tunnel.md の手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
 1. アンインストーラと、残った `/home/linuxbrew` を消して、端末を開き直す。
@@ -339,7 +345,7 @@
    - 最後に `ls: '/home/linuxbrew' にアクセスできません: そのようなファイルやディレクトリはありません` と出ればよい
    - 共通設定は Homebrew が無ければ何もしない。`~/.bashrc` の編集は不要
 
-1. 手順 44 で bash-completion を入れたホストだけ、RPM を消す。
+1. 「共通の bash 設定」の手順 3 で bash-completion を入れたホストだけ、RPM を消す。
 
    ```bash
    sudo dnf remove bash-completion
@@ -348,6 +354,8 @@
    - `削除中:` に `bash-completion`、`未使用の依存関係の削除:` に `pkgconf` 系の 4 つが出る。`[y/N]` に `y`
    - 最初から入っていたホスト（Workstation）では貼らない
    - **次の手順は、`y` と答えてプロンプトに戻ってから行う**
+
+### Flatpak・RPM Fusion・EPEL を消す
 
 1. 確認用のアプリ（Flatseal）を消す。
 
@@ -420,7 +428,9 @@
    sudo rpm -e gpg-pubkey-e37ed158-65785fa9
    ```
 
-   - 鍵は、EPEL からパッケージを入れたことがあるとき（手順 38）だけ登録されている
+   - 鍵は、EPEL からパッケージを入れたことがあるとき（「GNOME の表示と入力」の手順 10）だけ登録されている
+
+### システムの設定を戻す
 
 1. コマンドが無いときにパッケージを案内する機能を、入れ直す。
 
@@ -430,7 +440,7 @@
 
    - 開き直した端末から、無いコマンドを打つと、パッケージを探して案内する
 
-1. 手順 15 で kdump を止めたときだけ、元に戻す（効くのは再起動の後）。
+1. 「システムの設定」の手順 7 で kdump を止めたときだけ、元に戻す（効くのは再起動の後）。
 
    ```bash
    {
@@ -462,14 +472,14 @@
    - `/var/log/journal` を残すと、既定の `Storage=auto` のまま、ディスクに書き続ける
    - `journalctl --relinquish-var` で、journald に `/var/log/journal` を手放させてから消す（手放させずに消すと、動いている journald がすぐに作り直し、再起動の後もディスクに書き続けた）
 
-1. 手順 10 で PC の名前を変えたときだけ、元の名前に戻す（`OLD_HOST_NAME` は必ず値を入れる）。
+1. 「システムの設定」の手順 2 で PC の名前を変えたときだけ、元の名前に戻す（`OLD_HOST_NAME` は必ず値を入れる）。
 
    ```bash
-   OLD_HOST_NAME=''   # 手順 10 で控えた「変える前:」の名前。<HOSTNAME>
+   OLD_HOST_NAME=''   # 「システムの設定」の手順 2 で控えた「変える前:」の名前。<HOSTNAME>
    ```
 
    ```bash
-   if [ -z "${OLD_HOST_NAME}" ]; then echo '中断: OLD_HOST_NAME が空のまま。手順 10 で控えた名前を入れて貼り直す' >&2; else
+   if [ -z "${OLD_HOST_NAME}" ]; then echo '中断: OLD_HOST_NAME が空のまま。「システムの設定」の手順 2 で控えた名前を入れて貼り直す' >&2; else
      sudo hostnamectl hostname "${OLD_HOST_NAME}"
      printf '\n\033[7m 確認 \033[0m\n'
      hostnamectl --static
@@ -496,9 +506,9 @@
    xdg-user-dir DOWNLOAD
    ```
 
-   - この節の手順 37 を行ったなら、0 でない数（`268435456` など）が出る
+   - この項の手順 2 を行ったなら、0 でない数（`268435456` など）が出る
    - `journalctl --list-boots` は、見出しの行（`IDX BOOT ID …`）と、`0` で始まる今の起動の 1 行だけ
-   - この節の手順 39 の名前と、この節の手順 15 を行ったなら日本語の名前（`/home/<USER>/ダウンロード`）が出る
+   - この項の手順 4 の名前と、[表示と入力を戻す](#表示と入力を戻す)の手順 15 を行ったなら日本語の名前（`/home/<USER>/ダウンロード`）が出る
    - 画面は淡色で、時計は時刻だけ、ウィンドウのボタンは閉じるだけに戻る
 
 1. sudo のパスワード無しの設定を外す。
@@ -519,17 +529,17 @@
 
 ## 注意点
 
-- **パスワードを聞かない sudo**: [手順 3](../almalinux-setup.md#実施手順) の後は、このユーザーで動くものがパスワード無しで root の権限を使える（リードの `[!WARNING]`）。外すのは[ロールバック](#ロールバック)の手順 42
+- **パスワードを聞かない sudo**: [手順書の「ログインと sudo」の手順 3](../almalinux-setup.md#ログインと-sudo) の後は、このユーザーで動くものがパスワード無しで root の権限を使える（リードの `[!WARNING]`）。外すのは[システムの設定を戻す](#システムの設定を戻す)の手順 7
 - **アプリが再起動を止めることがある**: `sudo systemctl reboot` が `Operation inhibited by …` で断られたら、保存していない文書のあるアプリを閉じてから貼り直す
 - **PC の名前を変えた後**: 開いている端末のプロンプトは前の名前のまま。ほかの PC の `~/.ssh/known_hosts` は名前でつないでいれば、新しい名前で鍵を聞かれる
 - **SSH はパスワードでもログインできる**: Workstation の既定。公開鍵だけにするなら[SSH を公開鍵だけにする（任意）](../almalinux-setup.md#ssh-を公開鍵だけにする任意)
 - **journal は rsyslog と二重に残る**: `/var/log/messages`（rsyslog）にも同じ内容が残る。journal の大きさは、既定でファイルシステムの 10%（4 GiB まで）
-- **kdump を止めると、カーネルが落ちたときの記録（vmcore）は残らない**: 原因を調べるときは、[ロールバック](#ロールバック)の手順 37 で戻す
-- **コマンドが見つからないときに、パッケージを案内しない**: 手順 16 の後は、`dnf provides '*/bin/<コマンド>'` で探す
+- **kdump を止めると、カーネルが落ちたときの記録（vmcore）は残らない**: 原因を調べるときは、[システムの設定を戻す](#システムの設定を戻す)の手順 2 で戻す
+- **コマンドが見つからないときに、パッケージを案内しない**: 「システムの設定」の手順 8 の後は、`dnf provides '*/bin/<コマンド>'` で探す
 - **EPEL・RPM Fusion は AlmaLinux の配布物ではない**: EPEL は Fedora のプロジェクトが作るリポジトリ。AppStream / BaseOS にあるパッケージは、そちらを使う
-  - RPM Fusion の free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）。鍵は手順 18 で照合し、`rpmfusion-free-release` の署名も手順 20 で確かめる
+  - RPM Fusion の free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）。鍵は「EPEL と RPM Fusion」の手順 2 で照合し、`rpmfusion-free-release` の署名も同じ項の手順 4 で確かめる
   - EL10 向けの RPM Fusion は中身が少ない。調べた範囲では、free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）がある（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
-  - RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[firefox.md 手順 9](../firefox.md#実施手順)）
+  - RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[firefox.md の手順 9](../firefox.md#実施手順)）
 - **Homebrew と同じ名前の実行ファイルを、EPEL から二重に入れない**: 例えば EPEL の `fd-find` は `/usr/bin/fd` を置く。両方入れると、PATH の先頭の Homebrew 版が使われ、`dnf upgrade` で上がるのは使われないほうになる（[btop.md の注意点](btop.md#注意点)）
 - **ほかの手順書のロールバックでは、EPEL・RPM Fusion を消さない**: 使う手順書が複数ある。消すときはこの文書の[ロールバック](#ロールバック)で行う
 - **Flatpak は容量が大きい**: アプリ本体に加え、runtime・翻訳・GL ドライバ・コーデックの拡張の容量も確保する。`sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
@@ -539,14 +549,14 @@
   - Microsoft Edge などは Flathub でも x86_64 だけ（[導入元一覧](../tool-catalog.md#aarch64-で使えないもの)）
   - [Firefox](../firefox.md) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 読み戻しで確かめる。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（Homebrew の `gsettings` は、dconf ではなくファイルに書き、読み戻しでは変わったように見える）
-- **ほかの入力ソースは消える**: 手順 28 の `set` は一覧をまるごと置き換える
+- **ほかの入力ソースは消える**: 「日本語入力」の手順 2 の `set` は一覧をまるごと置き換える
 - **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列に戻すか、半角/全角キーで直接入力にする
   - 変換は Mozc に比べて弱いと言われる（本書では比べていない）。よく使う語は、一緒に入る辞書のツール `kasumi-unicode` で登録する
   - 入力モードやキーの割り当ての設定画面は `/usr/libexec/ibus-setup-anthy`（アプリの一覧には出ない）
-- **Caps Lock の働きは無くなる**: 手順 31 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる
+- **Caps Lock の働きは無くなる**: 「GNOME の表示と入力」の手順 3 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる
 - **Alt+Tab はウィンドウを切り替える**: アプリごとに切り替えるのは Super+Tab
-- **拡大率の設定は mutter の実験的な機能**: GNOME の更新で、名前や働きが変わることがある。うまく動かなければ、[ロールバック](#ロールバック)の手順 8 で外す
-- **トレイアイコンの拡張は EPEL のもの**: GNOME Shell の更新に遅れることがある。拡張が動かなくなったら、[ロールバック](#ロールバック)の手順 11 で無効にする
+- **拡大率の設定は mutter の実験的な機能**: GNOME の更新で、名前や働きが変わることがある。うまく動かなければ、[表示と入力を戻す](#表示と入力を戻す)の手順 8 で外す
+- **トレイアイコンの拡張は EPEL のもの**: GNOME Shell の更新に遅れることがある。拡張が動かなくなったら、[表示と入力を戻す](#表示と入力を戻す)の手順 11 で無効にする
 - **フォルダーの名前を聞かれたら**: ログインのときに「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓が出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す（日本語の名前に戻さない）
 - **画面オフ・画面ロック・自動サスペンドを止める節の dconf のファイルの型**: 文字列は `'nothing'` のように引用符で囲む。`idle-delay` のような uint32 は `uint32 0` と書く
   - 引用符が無いと `dconf update` が失敗し、データベースは前の内容のまま残る。`uint32` が無いと、エラーにならずに無視される

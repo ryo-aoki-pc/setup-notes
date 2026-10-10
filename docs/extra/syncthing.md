@@ -89,7 +89,7 @@
 
    - `False` が出ればよい（`syncthing.exe.old` も消える）
 
-1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 33 を行う。
+1. LAN の接続をパブリックに戻すときだけ、[Windows 11 の初期設定のロールバックの「ネットワークと PC 全体の設定を戻す」](windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 5 を行う。
 
    - [Windows の OpenSSH サーバー](../windows-openssh-server.md)やリモート デスクトップをこの LAN で使っているなら、戻さない（パブリックにすると SSH も届かなくなる）
 

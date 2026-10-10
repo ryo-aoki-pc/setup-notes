@@ -7,11 +7,11 @@
 **Windows の実機では全手順を通していない。新規の Windows 11 Pro 26H2 の VM での検証結果。**
 
 - 2026-10-08 の追加検証（[付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)）
-  - GitHub のコピーボタンからの貼り付け（管理者の conhost・Windows Terminal）、手順 35・55〜61・64 の画面、手順 39・52・53 の分岐
+  - GitHub のコピーボタンからの貼り付け（管理者の conhost・Windows Terminal）、画面（「PC 全体の設定」の手順 1、「WSL と再起動」の手順 2、「再起動の後に確かめる」の手順 1〜4、「WSL の AlmaLinux 10 と自動サインイン」の手順 1・2・5）、分岐（「PC 全体の設定」の手順 5、「サインイン・検索・キーボード」の手順 5・6）
   - 2 枚目の NIC（ホストオンリー）での ping と、RDP のログイン・`tscon`
   - Wake on LAN の節の手順 2〜4・8、リモートから再起動する節の手順 2〜11（AlmaLinux の VM からの SMB・WinRM の実トリガーと、見張りタスクによる再起動）
-  - 更新の手順 1〜5、ロールバックの手順 1〜41
-  - 直した本文: 手順 9・58・59・60、Wake on LAN の節の手順 4、再起動の節の手順 5・6・9・11、ロールバックの手順 9・13・21（管理者ではない窓で行う）・31・35・36 とリード
+  - 更新の手順 1〜5、ロールバックの全部（5 項）
+  - 直した本文: 「Microsoft Store の更新」の手順 1、「再起動の後に確かめる」の手順 3・4、「WSL の AlmaLinux 10 と自動サインイン」の手順 1、Wake on LAN の節の手順 4、再起動の節の手順 5・6・9・11、ロールバックの「表示と入力を戻す」の手順 9、「アプリと貼り付けの設定を外す」の手順 4、「サインイン・検索・キーボードを戻す」の手順 4（管理者ではない窓で行う）、「ネットワークと PC 全体の設定を戻す」の手順 3・7・8 とリード
   - 撤去の前にスナップショット `pr104-before-rollback-20261008` を撮った
 - 2026-10-08 の追加検証その 2（[付録](#付録-別の-windows-からの再起動とwinrm-の手順-5-の貼り直しを確かめた記録2026-10-08)）
   - 別の Windows（ホストの実機）から、再起動の節の手順 4 の `net use` と `shutdown /m`、手順 5 の `TrustedHosts` と `Invoke-Command` で、VM を実際に再起動した
@@ -19,13 +19,13 @@
   - 直した本文: 再起動の節の手順 4・5・9
   - 相手の VM のリンク クローンは、正しい資格情報でも NTLM が拒否され（4625 の状態 `0xc000006d`・副状態 `0x0`）、送る側に使えなかった。sysprep をしていないのでマシンの SID の重複が原因とみたが、確かめていない
 - 2026-10-08 の時点で確認していないこと
-  - Store の CLI の準備と更新の適用（手順 11・12・14）、Windows Update の再起動の分岐（手順 8）。2026-10-08 には対象の更新が無かった（手順 5 の適用は 2026-10-06 に確かめた）
-  - WSL 2 の AlmaLinux 10（手順 62・63、更新の手順 4 の `dnf -y upgrade`、ロールバックの手順 17）。この VM の仮想化の制約で動かない
+  - Store の CLI の準備と更新の適用（「Microsoft Store の更新」の手順 3・4・6）、Windows Update の再起動の分岐（「Windows Update」の手順 8）。2026-10-08 には対象の更新が無かった（「Windows Update」の手順 5 の適用は 2026-10-06 に確かめた）
+  - WSL 2 の AlmaLinux 10（「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4、更新の手順 4 の `dnf -y upgrade`、ロールバックの「アプリと貼り付けの設定を外す」の手順 8）。この VM の仮想化の制約で動かない
   - Wake on LAN の UEFI の設定とマジック パケットでの起動
   - 別の Windows の `Get-Credential` の窓での資格情報の入力（`PSCredential` で渡した）、`-ComputerName`・`TrustedHosts` を IP にしたとき、この PC と同じ名前・同じパスワードのローカル アカウントから `net use` 無しで `shutdown /m` を送ったとき、Microsoft アカウントの PC を再起動される側にしたとき
   - Windows の実機での通し実行
 - 以下は 2026-10-06〜07 の検証の要約（[付録](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)）。そのときの「未検証」は、2026-10-08 の付録で多くを確かめた
-- 初期設定は Windows Update の 4 件の適用と残り 0 件、Store の更新なし、Scoop・UniGet UI・PowerToys・PowerShell 7 の導入、指定値の読み戻しと一部の実画面を確認した。56〜60 と通常権限の Windows PowerShell 5.1 への LF 3 行の貼り付け順は、利用者の手動確認を含む。343 文字のパスとシンボリックリンクの作成・読み取り・削除も、通常権限の PowerShell 7.6.6 で確認した。
+- 初期設定は Windows Update の 4 件の適用と残り 0 件、Store の更新なし、Scoop・UniGet UI・PowerToys・PowerShell 7 の導入、指定値の読み戻しと一部の実画面を確認した。「再起動の後に確かめる」の手順 1〜4、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 と通常権限の Windows PowerShell 5.1 への LF 3 行の貼り付け順は、利用者の手動確認を含む。343 文字のパスとシンボリックリンクの作成・読み取り・削除も、通常権限の PowerShell 7.6.6 で確認した。
 - 追加の 5 項目は次の限定した範囲で成功した。
 
   1. Git: 子 Bash の global 設定と使い捨てリポジトリに隔離し、12 キーの設定と、実 rebase・autostash・日本語ファイル名・CRLF・最初の push を確認した。機能試験は 14 フェーズ・9 検査が成功した。初回のホストの待ち時間切れとコピー失敗を残し、同じ実行の正常終了を後から回収した。本人の設定・対話的な Git Bash・外部の認証を伴う接続は未検証。
@@ -67,29 +67,29 @@
 
 > [!WARNING]
 > - **この手順書は Windows の実機で通していない**。貼り付けの設定は原因と直し方を実機で確かめた。CLI による更新は、配布物のヘルプ・Store CLI のヘルプと、Windows PowerShell 5.1 での構文・模擬の確認までで、更新の適用と再起動は未検証（[対象と検証環境](#対象と検証環境)）
-> - **手順 40 のインラインの sudo、手順 41 の放置でロックしない設定、手順 44 のリモート デスクトップ、手順 48 の Windows Hello 以外のサインイン、手順 64 の自動サインインを重ねると、PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、手順 41・64 は行わない
+> - **「PC 全体の設定」の手順 6 のインラインの sudo、同じ項の手順 7 の放置でロックしない設定、「ネットワークとリモート」の手順 2 のリモート デスクトップ、「サインイン・検索・キーボード」の手順 1 の Windows Hello 以外のサインイン、「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の自動サインインを重ねると、PC に触れる人と、このユーザーのパスワードを知る人は、このユーザー（管理者）として操作できる**。人が触れる場所にある PC では、「PC 全体の設定」の手順 7 と「WSL の AlmaLinux 10 と自動サインイン」の手順 5 は行わない
 
-### 実施手順 / 手順 3: 補足: 導入元と残るもの
+### 実施手順 / Windows Update / 手順 3: 補足: 導入元と残るもの
 
 - PSWindowsUpdate は Microsoft 標準のコマンドではなく、PowerShell Gallery に公開されている外部モジュール。2026-10-04 にヘルプを調べた版は 2.2.1.5
 - `CurrentUser` は、このユーザーのドキュメントの `WindowsPowerShell\Modules` に置く。NuGet のプロバイダーも、無ければ自分のユーザーに入れる
 - `-Force` は今回の導入の確認を省く。PSGallery 全体を `Trusted` にする設定は書かない
 - `Import-Module -Global` は、この PowerShell の次の手順でもコマンドを使えるようにする指定。PC 全体へのインストールではない
 
-### 実施手順 / 手順 10: 補足: ストアのアプリと CLI
+### 実施手順 / Microsoft Store の更新 / 手順 2: 補足: ストアのアプリと CLI
 
 - 同梱の Store CLI は `store.exe`。2026-10-04 にヘルプを確かめた Store 22608.1401.5.0 では、CLI 自体が `Preview` 表記だった
-- 手順 13〜15 は Store の全アプリを対象にする。winget が認識できるアプリだけの更新ではない
-- 「アプリ インストーラー」（`winget`）と、手順 30 で既定の端末にする Windows Terminal も、先に更新しておく
+- 「Microsoft Store の更新」の手順 5〜7 は Store の全アプリを対象にする。winget が認識できるアプリだけの更新ではない
+- 「アプリ インストーラー」（`winget`）と、「表示と入力」の手順 6 で既定の端末にする Windows Terminal も、先に更新しておく
 - Windows Insider への参加や、Store の配布チャネルの変更は行わない
 
-### 実施手順 / 手順 15: 補足: 確認できている範囲
+### 実施手順 / Microsoft Store の更新 / 手順 7: 補足: 確認できている範囲
 
 - `updates` と `--apply` の存在は同梱のヘルプで確認した。古い Store からの準備、更新の適用、進行中・失敗・更新なしの場合の実際の表示は未検証
 - `Get-AppxPackage` の版と `Status` は、インストールされているパッケージの状態。これだけでは、新しい版が無いことや、全アプリの更新完了は分からない
 - CLI の再検索の結果と併せて判定する。終了コードが 0 だったことだけを根拠に、完了の行は出さない
 
-### 実施手順 / 手順 16: 補足: 行が逆順になる理由
+### 実施手順 / 貼り付けの設定 / 手順 1: 補足: 行が逆順になる理由
 
 - GitHub のコピーボタンは、ブロックの改行を LF だけにしてクリップボードに入れる（末尾の改行も無い）。マウスで選んで Ctrl+C でコピーしたものは、改行が CR LF になる
 - conhost の窓（Windows Terminal ではない窓。検証した PC では、スタートメニューから管理者として開いた Windows PowerShell）に右クリックで貼ると、LF は Ctrl+Enter のキーとして届く
@@ -98,15 +98,15 @@
 - 管理者でない窓（検証した PC では Windows Terminal の中に開く）と、conhost の窓に Ctrl+V で貼ったときは、設定が無くても逆順にならなかった（利用者が確かめた）
 - 実測は[付録](#付録-原因の確認と貼り付けの試験2026-10-03)
 
-### 実施手順 / 手順 18: 補足: 実行ポリシーと scoop・プロファイル
+### 実施手順 / 貼り付けの設定 / 手順 3: 補足: 実行ポリシーと scoop・プロファイル
 
 - `scoop` のコマンドは PowerShell のスクリプト（`~\scoop\shims\scoop.ps1`）なので、`RemoteSigned`・`Unrestricted`・`Bypass` のどれかでないと動かない。scoop のインストーラも、これを確かめて止まる（[付録](#付録-配布物と資料の調査2026-10-03)）
-- 手順 19 のプロファイルも、同じ理由で、このポリシーでないと読まれない
+- 「貼り付けの設定」の手順 4 のプロファイルも、同じ理由で、このポリシーでないと読まれない
 - `RemoteSigned` は、この PC で書いたスクリプトはそのまま動かし、インターネットから取ったファイル（Mark of the Web の付いたもの）には署名を求める
 - `-Scope CurrentUser` は自分のユーザーだけの設定で、管理者の権限は要らない。`-Force` は確認の問い（`[Y] はい` など）を出さないため
 - PowerShell 7 は、実行ポリシーを Windows PowerShell 5.1 とは別に持つ。PowerShell 7 で scoop を使うときは、そちらの `Get-ExecutionPolicy` も見る
 
-### 実施手順 / 手順 19: 補足: プロファイルの書き方
+### 実施手順 / 貼り付けの設定 / 手順 4: 補足: プロファイルの書き方
 
 - プロファイルが無ければ、`New-Item -Force` がフォルダ（`WindowsPowerShell`）ごと作る
 - 行の末尾の `# windows-setup.md` は、[ロールバック](../extra/windows-setup.md#ロールバック)で消す行を見分けるための印。2026-10-03 の前の版（貼り付けの設定が別の手順書 `windows-powershell-paste.md` だったとき）は、印が `# windows-powershell-paste.md` だった。どちらの印の行も、この手順は「すでにある」とみなし、ロールバックは消す
@@ -115,7 +115,7 @@
 - 対話でない起動（標準入力をリダイレクトした `powershell -Command`）でも、この行はエラーを出さなかった
 - 実測は[付録](#付録-原因の確認と貼り付けの試験2026-10-03)（印を変える前のブロックで試した）
 
-### 実施手順 / 手順 22: 補足: 入れ方と入る場所
+### 実施手順 / アプリを入れる / 手順 3: 補足: 入れ方と入る場所
 
 - `Devolutions.UniGetUI` は、UniGet UI の公式の README が最初に挙げる入れ方（UniGet UI は Devolutions 社に移った。もとの `MartiCliment.UniGetUI` ではない）
 - winget の定義では、`--scope user` のときに Inno Setup のインストーラへ `/CURRENTUSER /NoWinGet /NoAutoStart` を渡す（自分のユーザーに入れる、winget を入れ直さない、入れた後に起動しない）。インストーラは `cdn.devolutions.net` から取り、sha256 を winget が確かめる（[付録](#付録-配布物と資料の調査2026-10-03)）
@@ -125,7 +125,7 @@
 - scoop-search は、UniGet UI が scoop のパッケージを検索するのに使う道具（ソースの `Scoop.cs` が「検索に要る」とする依存）。無いと、UniGet UI が起動したときに入れるかを聞く。ここで先に入れておく
 - scoop の `extras/unigetui` を採らなかった理由は、[選択した方針](../verification/windows-setup.md#選択した方針)
 
-### 実施手順 / 手順 25: 補足: 値の意味
+### 実施手順 / 表示と入力 / 手順 1: 補足: 値の意味
 
 - `Explorer\Advanced` の値（フォルダー オプションの「表示」タブと、設定の「個人用設定」→「スタート」に当たる）
   - `HideFileExt` が 0: 「登録されている拡張子は表示しない」を外す（既定は 1）
@@ -136,7 +136,7 @@
 - `HideFileExt`・`Hidden`・`Start_TrackDocs` は、Microsoft が出している DSC のリソース（`microsoft/winget-dsc` の `Microsoft.Windows.Developer`）が同じ値を書く。`LaunchTo`・`ShowRecent`・`ShowFrequent` は Microsoft の文書には無く、広く使われている値（[付録](#付録-windows-11-の設定の調査2026-10-03)）
 - 同じことは、設定の「システム」→「開発者向け」→「エクスプローラー」と、フォルダー オプションの画面からもできる
 
-### 実施手順 / 手順 27: 補足: 値と設定の画面の対応
+### 実施手順 / 表示と入力 / 手順 3: 補足: 値と設定の画面の対応
 
 - `Explorer\Advanced`（設定の「個人用設定」→「スタート」）
   - `Start_IrisRecommendations`: 「ヒント、ショートカット、新しいアプリなどのおすすめを表示する」
@@ -151,7 +151,7 @@
 - どれも Microsoft の文書には値が書かれておらず、広く使われている値（画面の文言は Microsoft のサポートの記事にある）。2025 年の終わりにスタートの作りが変わり、そこで足された切り替えの値は確かめられなかった（[付録](#付録-windows-11-の設定の調査2026-10-03)）
 - スタートの「おすすめ」の欄を丸ごと消すのは、管理者のポリシー（`HideRecommendedSection`）が要る。本書では使わない
 
-### 実施手順 / 手順 33: 補足: 外すアプリと、戻ってくること
+### 実施手順 / 自動起動と標準アプリ / 手順 2: 補足: 外すアプリと、戻ってくること
 
 | アプリ | パッケージの名前 | 戻すときのストアの ID |
 |---|---|---|
@@ -170,40 +170,40 @@
 - 名前とストアの ID は、Microsoft Store の API で確かめた（[付録](#付録-windows-11-の設定の調査2026-10-03)）。名前は `*` を使わずに書く（`*Copilot*` のように書くと、残す Copilot も当たる）
 - `Remove-AppxPackage` は、自分のユーザーからだけ外す。管理者の権限は要らない。PC に置かれた元（プロビジョニングされたパッケージ）は残るので、新しく作ったユーザーには入る
 - Microsoft の文書では、Windows の更新で入れ直さない印は、管理者が元ごと外したとき（プロビジョニングの解除）にだけ付く。自分のユーザーから外しただけのアプリは、機能の更新の後に戻ってくることがあると広く報告されている
-- 戻すときは、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 9 で、ストアの ID を指定して winget で入れる
+- 戻すときは、[ロールバックの「表示と入力を戻す」](../extra/windows-setup.md#表示と入力を戻す)の手順 9 で、ストアの ID を指定して winget で入れる
 
-### 実施手順 / 手順 43: 補足: プライベートにする理由
+### 実施手順 / ネットワークとリモート / 手順 1: 補足: プライベートにする理由
 
-- Windows のファイアウォールの受信の規則は、ネットワークの種類（プライベート・パブリック）ごとに有効にできる。OpenSSH サーバーの機能が作る規則も、Syncthing の Windows 11 の節で作る規則も、手順 44〜46 の規則も、プライベートだけで有効にする
+- Windows のファイアウォールの受信の規則は、ネットワークの種類（プライベート・パブリック）ごとに有効にできる。OpenSSH サーバーの機能が作る規則も、Syncthing の Windows 11 の節で作る規則も、「ネットワークとリモート」の手順 2〜4 の規則も、プライベートだけで有効にする
 - Windows 11 は、新しくつないだネットワークをパブリックにすることがある。[Windows の OpenSSH サーバー](../windows-openssh-server.md)を検証した PC の有線 LAN はパブリックで、そのままでは LAN からの SSH が捨てられ、プライベートにすると通った（同書の手順 5 の補足）
-- 同じ PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本。手順 45 で切る）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
+- 同じ PC では、パブリックからプライベートにすると、それまで効いていなかった許可の規則 45 本がこの LAN で効くようになった。主なものは、ネットワーク探索（10 本）、リモート アシスタンス（4 本。「ネットワークとリモート」の手順 3 で切る）、デバイス キャスト機能（3 本）。ファイルとプリンターの共有は無効のままだった
 - この操作は、もとは Windows の OpenSSH サーバーの手順 5 と Syncthing の Windows 11 の手順 7 の両方にあった。2026-10-03 に、インストール直後の作業としてここへまとめた。ブロックは OpenSSH サーバーの手順 5（実機で通したもの）から、`Get-NetFirewallRule` の行を除いて移した（変数の手順の番号だけ変えた）
 - ノート PC を持ち出したとき: プライベートにしたのはこの接続（有線 LAN か、この Wi-Fi のネットワーク）だけ。出先の Wi-Fi は、つないだときにパブリックかプライベートかを選ぶ（既定はパブリック）
 
-### 実施手順 / 手順 52: 補足: Windows と Linux の時計の扱い
+### 実施手順 / サインイン・検索・キーボード / 手順 5: 補足: Windows と Linux の時計の扱い
 
 - Windows は、ハードウェアの時計（RTC）を地方時として読み書きする。Linux は UTC として扱うのが普通で、両方が違う扱いのままデュアル ブートすると、起動し直すたびに 9 時間ずれる。2 つの OS のどちらかにそろえればよい
 - AlmaLinux 10 のインストーラ（anaconda）は、NTFS のパーティションを見つけると、AlmaLinux の側を地方時にする（`/etc/adjtime` に `LOCAL`。[windows-dual-boot.md の注意点](../extra/windows-dual-boot.md#注意点)。インストーラのソースから読んだこと）。その流れで入れたなら、もうそろっているので、この手順は要らない（行うと、かえって 9 時間ずれる）
 - AlmaLinux の側を UTC にした（`timedatectl set-local-rtc 0`）ときだけ、Windows も UTC にそろえる。`HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation` の `RealTimeIsUniversal` を 1 にすると、Windows も UTC として扱う。Microsoft の文書には無い値で、Arch Linux の wiki が勧める形（DWORD。64 ビットの Windows では QWORD という古い勧めは、wiki から消えた）
 - Arch Linux の wiki は、両方を UTC にする形を勧めている（Linux の側を地方時にする `timedatectl set-local-rtc 1` は勧めていない）。本書は、AlmaLinux のインストーラの既定（地方時）に合わせ、2026-10-03 に [windows-dual-boot.md](../windows-dual-boot.md) とそろえた
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 27
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 10
 
-### 実施手順 / 手順 62: 補足: AlmaLinux 10 の WSL のイメージ
+### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 3: 補足: AlmaLinux 10 の WSL のイメージ
 
 - `AlmaLinux-10` は、WSL のディストリビューションの一覧（`wsl --list --online`）の AlmaLinux 10 の名前。イメージは AlmaLinux の `wsl-images`（GitHub）にあり、`wsl.exe` が sha256 を確かめて入れる（WSL の `DistributionInfo.json`。2026-10-03 は 10.2）
 - 最初の起動で、AlmaLinux のイメージの `oobe` がユーザーを作る。作ったユーザーは uid 1000 で、`wheel` に入る（`sudo` を使える）。systemd が動く（`wsl.conf` の `systemd=true`）
 - Linux のユーザー名とパスワードは、Windows のものとは別。パスワードは `sudo` で聞かれる
 - [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証では、この AlmaLinux 10 からこの PC に SSH でつないで確かめた
 
-### 実施手順 / 手順 64: 補足: Autologon のすること
+### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 5: 補足: Autologon のすること
 
 - Autologon は Microsoft の Sysinternals の道具で、Windows の自動ログオンの設定（`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` の `AutoAdminLogon` など）を書き、パスワードは LSA のシークレットとして、暗号にして置く（Microsoft の文書。管理者は取り出せる）
 - winget の定義（`Microsoft.Sysinternals.Autologon` 3.10）は zip の持ち運び版で、`%LOCALAPPDATA%\Microsoft\WinGet\Packages` の下に展開する。定義の取り先は版の付かない URL で、2026-10-03 は sha256 が一致した。Microsoft が zip を差し替えると、定義が直るまで winget が失敗する
 - コマンド ラインでパスワードを渡す形（`autologon <ユーザー> <ドメイン> <パスワード>`）は、パスワードがプロセスのコマンド ラインに見え、履歴にも残りうるので使わず、窓で入れる
 - `-accepteula` は、使用許諾の窓を出さないため
-- Microsoft アカウントでは、`Username` をメールアドレスにし、`Domain` を `MicrosoftAccount` か PC の名前にする、という報告があるが、確かめていない。パスワード（PIN ではない）が要り、手順 48 でパスワードのサインインを使えるようにしておく
+- Microsoft アカウントでは、`Username` をメールアドレスにし、`Domain` を `MicrosoftAccount` か PC の名前にする、という報告があるが、確かめていない。パスワード（PIN ではない）が要り、「サインイン・検索・キーボード」の手順 1 でパスワードのサインインを使えるようにしておく
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
-- 止めるのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 20
+- 止めるのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 3
 
 ### リモートから再起動する手段を増やす（任意）: 検証状況の記録
 
@@ -224,7 +224,7 @@
   - Windows で貼ること、控えのファイルの書き出しと読み戻しを Windows PowerShell 5.1 で流すこと
   - `HKCU` に書いた値が画面の切り替えに出ることと、サインインし直した後に効くこと（`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は広くだけ）
   - `IsDeviceSearchHistoryEnabled` の 0 がオフであること（資料どうしで食い違う）
-  - 手順 49 の `DisableSearchBoxSuggestions` で「検索のハイライトを表示する」が灰色になること（Microsoft Q&A の回答だけ）
+  - 「サインイン・検索・キーボード」の手順 2 の `DisableSearchBoxSuggestions` で「検索のハイライトを表示する」が灰色になること（Microsoft Q&A の回答だけ）
   - 「フィードバックの頻度」を「1 日 1 回」などにしていた PC で、`PeriodInNanoSeconds` が QWORD であることと、この節の手順 5 がその型で戻すこと
   - 画面の切り替えで戻したときに、書いた `HKCU` の値も直ること
   - 日本語の画面の文言（「おすすめとオファー」と「推奨事項 & オファー」の表記の割れ、「パーソナライズされたオファー」の置き場所、「設定アプリで通知を表示する」・同期プロバイダーの通知の項目の名前）
@@ -236,7 +236,7 @@
 - **Windows の実機では通していない（未実施。2026-10-08 に書いた）**。どのブロックも、Windows では貼っていない
 - **確かめたこと**:
   - 資料: Microsoft の文書（`STICKYKEYS`・`FILTERKEYS`・`TOGGLEKEYS`・`SystemParametersInfo`・`ANIMATIONINFO`・Integrate a Cloud Storage Provider・WOW64 のリダイレクト・KB5031455・Policy CSP の Storage・ストレージ センサーのサポートの記事）、コード（`microsoft/winget-dsc`・`microsoft/WindowsDeveloperConfig`・ReactOS・Wine・Chromium）、広く使われている情報（winutil・Disassembler0・stealthpuppy・cyberdrain など）。値ごとの出典は[参考資料](../reference/windows-setup.md)
-  - この節のブロック 21 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。この節の手順 3・15 の `Flags` のビット、手順 9・21 の控えの有無と書き戻し、手順 11・23 のストレージ センサー、手順 2・4・16 の切り替えのキー、手順 6・18 のギャラリーとホームを、偽物のコマンドレットと `reg.exe` で模擬。この節の手順 8・20 の `Add-Type` の宣言のコンパイルと、多重定義の選ばれ方（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
+  - この節のブロック 21 個の構文（誤り 0）と 5.1 互換（`Set-ItemProperty` の `-Type` の指摘だけ）。「表示・入力・音・ストレージを控えて変える」の手順 3 と「表示・入力・音・ストレージを元に戻す」の手順 1 の `Flags` のビット、「表示・入力・音・ストレージを控えて変える」の手順 9 と「表示・入力・音・ストレージを元に戻す」の手順 7 の控えの有無と書き戻し、「表示・入力・音・ストレージを控えて変える」の手順 11 と「表示・入力・音・ストレージを元に戻す」の手順 9 のストレージ センサー、「表示・入力・音・ストレージを控えて変える」の手順 2・4 と「表示・入力・音・ストレージを元に戻す」の手順 2 の切り替えのキー、「表示・入力・音・ストレージを控えて変える」の手順 6 と「表示・入力・音・ストレージを元に戻す」の手順 4 のギャラリーとホームを、偽物のコマンドレットと `reg.exe` で模擬。「表示・入力・音・ストレージを控えて変える」の手順 8 と「表示・入力・音・ストレージを元に戻す」の手順 6 の `Add-Type` の宣言のコンパイルと、多重定義の選ばれ方（[付録](#付録-プライバシー表示入力音ストレージedgecopyq-の任意節のブロックの確認2026-10-08)）
 - **確かめていないこと**:
   - Windows で貼ること、控えのファイル（`display-before.csv`・`appevents.reg`）の書き出しと読み戻しを Windows で流すこと
   - 固定キーなどの Windows 11 の既定（510・126・62）、サインアウトのときに書き戻されないこと、サインインし直す前に設定の画面で上書きされること
@@ -257,7 +257,7 @@
 - **確かめていないこと**:
   - Windows で貼ること、家庭の PC（ドメイン・MDM なし）で 2 つのポリシーが効くこと
   - 「組織によって管理」の表示の日本語の文言と、ポリシーを消した後に表示が消えるか
-  - 手順 32 の `Run` の `MicrosoftEdgeAutoLaunch_*` が消えるか、Edge Update のサインインのときのコマンドで Edge が起動するか
+  - 「自動起動と標準アプリ」の手順 1 の `Run` の `MicrosoftEdgeAutoLaunch_*` が消えるか、Edge Update のサインインのときのコマンドで Edge が起動するか
   - 画面で切った値を、Edge が自分でオンに戻すか
 
 ### CopyQ を使う（任意）: 検証状況の記録
@@ -298,14 +298,14 @@
   - この節のブロック 6 個の構文（誤り 0）と 5.1 互換（指摘 0）。この節の手順 2・3 の足し方（無いときに作る・2 回目は `すでにある:` で変わらない・末尾に改行の無いファイル・BOM 付きのファイル・5 行のうち 2 行があるファイル）と、手順 7 の消し方（BOM 付きの UTF-8・UTF-16LE・CRLF・LF。印の行だけならファイルを消し、印の形の違う行と PowerToys の Command Not Found の行は残る）を、Linux の PowerShell 7.5.3 で模擬（[付録](#付録-powertoyspowershell-7windows-terminalwsl-の任意節のブロックの確認2026-10-08)）
   - 足したプロファイルを、Linux の PowerShell 7.5.3（PSReadLine 2.3.6）と Linux 版の starship 1.26.0・zoxide 0.10.0 で読んだ。この節の手順 4 のキーの表が `AddLine`・`HistorySearchBackward`・`HistorySearchForward`・`MenuComplete` になり、新しいディレクトリで `prompt` を呼ぶと zoxide に記録された（`Invoke-Starship-PreCommand` を除いた形では記録されない）。2 つが無いと、どちらも読まなかった。実行ポリシーの手順 5・8 は、Linux では流せない（同じ付録）
 - **確かめていないこと**:
-  - Windows で貼ること。5.1 の `Add-Content` と `Get-Content -Raw` が、PowerShell 7 のプロファイルに行を足すこと（手順 19 と同じ形）
+  - Windows で貼ること。5.1 の `Add-Content` と `Get-Content -Raw` が、PowerShell 7 のプロファイルに行を足すこと（「貼り付けの設定」の手順 4 と同じ形）
   - 5.1 から `pwsh.exe -NoLogo -NoProfile -Command { … }` を呼ぶ形（minishell）で、結果が表で出ること。非対話の起動で `Set-PSReadLineKeyHandler` が通ること
   - MSIX の PowerShell 7 の `$PSHOME` に `powershell.config.json`（`RemoteSigned`）があること
   - スタートメニューから管理者として開いた PowerShell 7（conhost の窓）に右クリックで貼ると、この節の行が無ければ逆順になり、あれば正しい順になること。WezTerm（ConPTY）の PowerShell 7 に複数行を貼ったときに Ctrl+Enter の行が要るか
   - zoxide → starship の順（`Invoke-Starship-PreCommand` で zoxide の記録を呼ぶ）で、`z` が移動先を記録し、失敗したコマンドの後に starship のエラーの印が出ること。README の starship → zoxide の順で `$?` が崩れるか
   - Tab の `MenuComplete` を既定で入れるか（条件付きの手順のままにした）
   - OneDrive でドキュメントをバックアップしている PC のプロファイルの場所
-  - スタートメニューの PowerShell 7 の表示名（MSIX の表示名は「PowerShell」のはず。PowerShell のソースの `packaging.psm1` から書いた。手順 24 の「PowerShell 7」とは違う）
+  - スタートメニューの PowerShell 7 の表示名（MSIX の表示名は「PowerShell」のはず。PowerShell のソースの `packaging.psm1` から書いた。「アプリを入れる」の手順 5 の「PowerShell 7」とは違う）
 
 ### Windows Terminal のフォントと貼り付けの警告を変える（任意）: 検証状況の記録
 
@@ -319,7 +319,7 @@
   - 管理者ではない 5.1 の窓（Windows Terminal 1.25）に複数行を貼るたびに「警告」が出ること（コードからの推測）。出るなら、ほかの手順書のリードにも書くか
   - 自分のユーザーに入れた HackGen Console NF が、MSIX の Windows Terminal から見えること（hackgen.md の検証記録でも未確認）
   - 日本語の画面の文言（`Resources.resw` の訳から書いた）と、「見つからないフォント:」の出方
-  - 手順 9 の窓で Windows Terminal が先に設定を作り、手順 24 の後も既定のプロファイルが Windows PowerShell のままであること
+  - 「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作り、「アプリを入れる」の手順 5 の後も既定のプロファイルが Windows PowerShell のままであること
   - 管理者の窓（conhost）のフォントは、この節の範囲外
 
 ### WSL のネットワークをミラーにする（任意）: 検証状況の記録
@@ -353,7 +353,7 @@
   - Git for Windows より前に zip で置いた main のバケットを、この節の手順 4 の `scoop update` が git の形に直すこと
   - 5.1 の `Set-Content -Encoding ASCII` と `[IO.File]::WriteAllText` が、NTFS のハードリンクの控え（`persist`）にも同じ中身を書くこと
   - WezTerm の新しいタブが、起動し直さずに starship の `Path` と `BAT_CONFIG_DIR` を読むこと
-  - Git Bash で、AlmaLinux 10 の初期設定の手順 52〜55・57・58・60〜63 を通すこと（zoxide の Windows の形のパスでの記録、eza の見出しと `Git` の列、bat のプレビュー、Git for Windows に `/etc/os-release` があるか、fzf の ASCII 以外の文字）
+  - Git Bash で、AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5 を通すこと（zoxide の Windows の形のパスでの記録、eza の見出しと `Git` の列、bat のプレビュー、Git for Windows に `/etc/os-release` があるか、fzf の ASCII 以外の文字）
   - 0.10.0 で記録されないことの再現と、直った版への上げ方（まだ出ていない）
   - Git Bash で、AlmaLinux 10 の初期設定の後ろの節（starship・fzf・eza・bat）を貼ること（リードで案内した、fd を scoop で入れる形を含む）
   - `VCRUNTIME140.dll` が無いときの `bat --version` の出方
@@ -378,14 +378,14 @@
 - **状態**: **Windows の実機では通していない**（2026-10-03 に作成、2026-10-04 に更新を CLI 化）
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも、この文書の形のまま Windows で貼ってはいない
   - **確かめたこと**:
-    - CLI による更新（手順 1〜15）: PSWindowsUpdate 2.2.1.5 の配布物のヘルプ、Windows Update Agent の検索条件、WinGet の文書と Store の製品 ID。この PC の Store 22608.1401.5.0 のヘルプで `updates`・`--apply` を確認した（[付録](#付録-cli-による更新手順の確認2026-10-04)）
+    - CLI による更新（「Windows Update」と「Microsoft Store の更新」の全部）: PSWindowsUpdate 2.2.1.5 の配布物のヘルプ、Windows Update Agent の検索条件、WinGet の文書と Store の製品 ID。この PC の Store 22608.1401.5.0 のヘルプで `updates`・`--apply` を確認した（[付録](#付録-cli-による更新手順の確認2026-10-04)）
     - 新しい更新・削除のブロック: Windows PowerShell 5.1 の構文解析器と、偽物のコマンドレット・CLI を使った模擬。再起動待ち・更新失敗・Store CLI 不足などで止まることを確認した。実際の更新コマンドやモジュールの導入・削除は実行していない
-    - 貼り付けの設定（手順 16〜19・37・38。[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）: 原因（コピーボタンの中身が LF だけで、conhost の右クリックの貼り付けが LF を Ctrl+Enter として送り、PSReadLine 2.0.0 の Ctrl+Enter が `InsertLineAbove`）と、手順 16 の 1 行で直ることを、実機の Windows 11 の conhost の窓で確かめた。手順 19 とロールバックの手順 15 は、もとの手順書（`windows-powershell-paste.md`）のときのブロックを、プロファイルを一時的なファイルに差し替えた実機の Windows PowerShell 5.1 で、文字コードの違うプロファイルを含めて流した。印を変えた今のブロックは、Linux の pwsh で模擬しただけ
-    - LAN をプライベートにする手順 43 のブロックは、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5（実機で通した）にあったものから、規則を確かめる行を除いて移した
+    - 貼り付けの設定（「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 3・4。[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）: 原因（コピーボタンの中身が LF だけで、conhost の右クリックの貼り付けが LF を Ctrl+Enter として送り、PSReadLine 2.0.0 の Ctrl+Enter が `InsertLineAbove`）と、「貼り付けの設定」の手順 1 の 1 行で直ることを、実機の Windows 11 の conhost の窓で確かめた。「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 は、もとの手順書（`windows-powershell-paste.md`）のときのブロックを、プロファイルを一時的なファイルに差し替えた実機の Windows PowerShell 5.1 で、文字コードの違うプロファイルを含めて流した。印を変えた今のブロックは、Linux の pwsh で模擬しただけ
+    - LAN をプライベートにする「ネットワークとリモート」の手順 1 のブロックは、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5（実機で通した）にあったものから、規則を確かめる行を除いて移した
     - scoop・UniGet UI・Caps Lock・コンテキストメニュー（最初の版の 4 項目）: [配布物と資料の調査の付録](#付録-配布物と資料の調査2026-10-03)
     - 足した項目: Microsoft の文書（Microsoft Learn・サポートの記事・ポリシーの文書）、Microsoft の DSC のリソース（`microsoft/winget-dsc`）、winget の定義、各ツールのソース（PowerShell・sudo・WSL・winget・PSReadLine・UniGet UI など）、Microsoft Store の API（[設定の調査の付録](#付録-windows-11-の設定の調査2026-10-03)）
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。条件で止まるブロック（プロファイルの行、PC の名前、自動で起動するアプリ、リモート デスクトップなど）は、偽物のコマンドレットで模擬して流した（[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
-    - 2026-10-05 に直したロールバックの手順 16・29: Linux の PowerShell 7.6.6 で、記録した元値の復元と、空・不正値・書き込み失敗の分岐を模擬確認した。Windows の設定は変更していない（[付録](#付録-ロールバックの元値復元の模擬確認2026-10-05)）
+    - 2026-10-05 に直したロールバックの「アプリと貼り付けの設定を外す」の手順 7 と「ネットワークと PC 全体の設定を戻す」の手順 1: Linux の PowerShell 7.6.6 で、記録した元値の復元と、空・不正値・書き込み失敗の分岐を模擬確認した。Windows の設定は変更していない（[付録](#付録-ロールバックの元値復元の模擬確認2026-10-05)）
   - **確かめていないこと**:
     - PSWindowsUpdate の初回導入・実更新・再起動後の再検索、古い Store から CLI を用意すること、Store の実更新と完了・失敗の表示。CLI 自体は `Preview` 表記
     - Windows で貼ること（すべての手順）と、画面の文言（設定・ストア・UniGet UI・Autologon）
@@ -395,7 +395,7 @@
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の実機の記録は 25H2）。x64。Pro を想定（Home では手順 44 を飛ばす） |
+| OS | Windows 11（[Windows の OpenSSH サーバー](../windows-openssh-server.md)の実機の記録は 25H2）。x64。Pro を想定（Home では「ネットワークとリモート」の手順 2 を飛ばす） |
 | PowerShell | Windows PowerShell 5.1（管理者ではないものと、管理者として実行したもの） |
 | ユーザー | Administrators の一員（Microsoft アカウントでもローカル アカウントでもよい） |
 | winget | Windows 11 の「アプリ インストーラー」に入っているもの |
@@ -412,7 +412,7 @@
 | シェルのツール（任意節） | scoop の main の fzf 0.74.4・starship 1.26.0・eza 0.23.5・bat 0.26.1（2026-10-08 の定義）と、バケットの履歴の zoxide 0.9.9（main の定義は 0.10.0） |
 | WSL の AlmaLinux 10 | `AlmaLinux-10`（2026-10-03 のイメージは 10.2） |
 
-貼り付けの設定（手順 16〜19・37・38）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
+貼り付けの設定（「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 3・4）の原因を確かめた環境（[付録](#付録-原因の確認と貼り付けの試験2026-10-03)）:
 
 | 項目 | 値 |
 |---|---|
@@ -422,15 +422,15 @@
 | コピー | GitHub の Web のコードブロックのコピーボタン（Firefox） |
 
 > [!NOTE]
-> 環境固有の値は**変数**で書いてある。手順 36 の PowerShell の変数に 1 度だけ設定すれば、手順 37〜54 のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**変数**で書いてある。「PC 全体の設定」の手順 2 の PowerShell の変数に 1 度だけ設定すれば、同じ項の手順 3 から「WSL と再起動」の手順 1 までのコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
-> | `$PC_NAME` | 手順 36 | この PC の新しい名前（名前を変えるときに入れる。変えないなら空のままにして手順 39 を飛ばす） | `<HOSTNAME>` |
-> | `$LAN_IF` | 手順 36（[ロールバック](../extra/windows-setup.md#ロールバック)では手順 19、[Wake on LAN を使う（任意）](../windows-setup.md#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
-> | `$OLD_PC_NAME` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 37 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
-> | `$OLD_EXECUTION_POLICY` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 16 | 手順 17 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
-> | `$OLD_DOWNLOAD_MODE` | [ロールバック](../extra/windows-setup.md#ロールバック)の手順 29 | 手順 37 で控えた配信の最適化のモード | `CdnOnly` |
+> | `$PC_NAME` | 「PC 全体の設定」の手順 2 | この PC の新しい名前（名前を変えるときに入れる。変えないなら空のままにして「PC 全体の設定」の手順 5 を飛ばす） | `<HOSTNAME>` |
+> | `$LAN_IF` | 「PC 全体の設定」の手順 2（[ロールバック](../extra/windows-setup.md#ロールバック)では「サインイン・検索・キーボードを戻す」の手順 2、[Wake on LAN を使う（任意）](../windows-setup.md#wake-on-lan-を使う任意)では手順 2） | ほかの PC とつながる LAN の接続の名前（自動で入る） | `イーサネット` |
+> | `$OLD_PC_NAME` | [ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 9 | 元の PC の名前（名前を戻すときに入れる） | `<HOSTNAME>` |
+> | `$OLD_EXECUTION_POLICY` | [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 7 | 「貼り付けの設定」の手順 2 で控えた `CurrentUser` の実行ポリシー | `Undefined` |
+> | `$OLD_DOWNLOAD_MODE` | [ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 1 | 「PC 全体の設定」の手順 3 で控えた配信の最適化のモード | `CdnOnly` |
 >
 > 出力例・表の中の値は `<WIN_USER>`（Windows のユーザー名）/ `<HOSTNAME>`（コンピューター名）/ `<hostname>`（`whoami` が小文字で出すコンピューター名）/ `<HOST_PC>`（VM を動かしたホストの PC のコンピューター名。別の Windows から再起動した付録では送る側）/ `<OTHER_PC>`（引き継ぎ先として準備した別の PC の名前）/ `<LAN_IF>` / `<名前>` / `<版>` のプレースホルダで書いてある。パスワード・回復キーはこの文書に載せない。
 
@@ -455,16 +455,16 @@
   - 窓の種類（conhost・Windows Terminal）と貼り方（右クリック・Ctrl+V）を選ばずに、コピーボタンのブロックをそのまま貼れる
   - プロファイルに書くので、窓を開くたびに貼り直さなくてよい
 - **採らなかった案**
-  - 管理者の Windows PowerShell を Windows Terminal で開く（Win+X の「ターミナル (管理者)」）: 設定は変えずに済むが、開き方を変える必要がある。既定の端末を Windows Terminal にしても（手順 30）、スタートメニューから管理者で開くと conhost になる（手順 30 の補足）
-  - conhost の窓では Ctrl+V で貼る: 設定は変えずに済むが、右クリックで貼ると逆順になるのは残る（[ロールバック](../extra/windows-setup.md#ロールバック)の後の貼り方として、その手順 15 に書いた）
+  - 管理者の Windows PowerShell を Windows Terminal で開く（Win+X の「ターミナル (管理者)」）: 設定は変えずに済むが、開き方を変える必要がある。既定の端末を Windows Terminal にしても（「表示と入力」の手順 6）、スタートメニューから管理者で開くと conhost になる（「表示と入力」の手順 6 の補足）
+  - conhost の窓では Ctrl+V で貼る: 設定は変えずに済むが、右クリックで貼ると逆順になるのは残る（[ロールバック](../extra/windows-setup.md#ロールバック)の後の貼り方として、その「アプリと貼り付けの設定を外す」の手順 6 に書いた）
   - ブロックを 1 行に書く: 手順書が読みにくくなる
   - 選んで Ctrl+C でコピーする: コピーボタンを使えない
   - コピーボタンの中身の改行を変える: 中身は GitHub が作る（改行は LF）
-- **この文書にまとめた**: もとは別の手順書（`windows-powershell-paste.md`）で、Windows の PowerShell のブロックを貼る手順書の共有の前提だった。Windows のインストール直後に行うものなので、2026-10-03 に、この文書の手順 16〜19 にまとめた（実行ポリシーの手順も重なっていた）。ほかの手順書は、この文書の手順 16〜19 を前提にする
+- **この文書にまとめた**: もとは別の手順書（`windows-powershell-paste.md`）で、Windows の PowerShell のブロックを貼る手順書の共有の前提だった。Windows のインストール直後に行うものなので、2026-10-03 に、この文書の「貼り付けの設定」の手順 1〜4 にまとめた（実行ポリシーの手順も重なっていた）。ほかの手順書は、この文書の「貼り付けの設定」の手順 1〜4 を前提にする
 
 ### 操作上の注意と併記されていた記録
 
-- **PowerShell 7 のプロファイルは別**: 手順 19 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（手順 24）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読み、貼り付けの設定の原因を確かめた PC の PowerShell 7.6.6（PSReadLine 2.4.5）でも Ctrl+Enter は `InsertLineAbove` だった（もとの手順書 `windows-powershell-paste.md` の注意点の記録）。この文書の手順書群は、Windows PowerShell 5.1 に貼る
+- **PowerShell 7 のプロファイルは別**: 「貼り付けの設定」の手順 4 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（「アプリを入れる」の手順 5）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読み、貼り付けの設定の原因を確かめた PC の PowerShell 7.6.6（PSReadLine 2.4.5）でも Ctrl+Enter は `InsertLineAbove` だった（もとの手順書 `windows-powershell-paste.md` の注意点の記録）。この文書の手順書群は、Windows PowerShell 5.1 に貼る
 
 ### 参照
 
@@ -591,20 +591,20 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 - 当時の本書の `powershell` のブロック 19 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0
-  - ほかの規則の指摘は、手順 20 の `Invoke-Expression`（公式のインストーラの方法なので、そのまま）と、ASCII でない文字を含むファイルの BOM（貼るので関係が無い）だけ
+  - ほかの規則の指摘は、「アプリを入れる」の手順 1 の `Invoke-Expression`（公式のインストーラの方法なので、そのまま）と、ASCII でない文字を含むファイルの BOM（貼るので関係が無い）だけ
   - わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`、`ForEach-Object -Parallel`、`Join-Path -AdditionalChildPath`）を入れたファイルでは、それぞれ指摘が出た
-- `(Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass'`（手順 18）は、列挙の値と文字列を比べて、`RemoteSigned` で `False`、`Restricted` で `True` になった
+- `(Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass'`（「貼り付けの設定」の手順 3）は、列挙の値と文字列を比べて、`RemoteSigned` で `False`、`Restricted` で `True` になった
 
-**手順 51 と[ロールバック](../extra/windows-setup.md#ロールバック)の手順 28 のブロック**を、管理者の判定を `$true` に替え、レジストリ（`Get-ItemProperty`・`New-ItemProperty`・`Remove-ItemProperty`）を値を覚えておく偽物にして、`Scancode Map` が無いとき・本書の値のとき・別の値（`00 00 00 00 00 00 00 00 02 00 00 00 00 00 5B E0 00 00 00 00`）のときで流した:
+**「サインイン・検索・キーボード」の手順 4 と[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 11 のブロック**を、管理者の判定を `$true` に替え、レジストリ（`Get-ItemProperty`・`New-ItemProperty`・`Remove-ItemProperty`）を値を覚えておく偽物にして、`Scancode Map` が無いとき・本書の値のとき・別の値（`00 00 00 00 00 00 00 00 02 00 00 00 00 00 5B E0 00 00 00 00`）のときで流した:
 
 | ブロック | 無い | 本書の値 | 別の値 |
 |---|---|---|---|
-| 手順 51 | 書き（1 回）、`Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` | 書かずに同じ行 | `中断: 別の Scancode Map がある（…）` で止まり、書かない |
-| ロールバックの手順 28 | `Scancode Map は無い` | 消して `Scancode Map を消した` | `中断: 本書の値ではない Scancode Map がある（…）` で止まり、消さない |
+| 「サインイン・検索・キーボード」の手順 4 | 書き（1 回）、`Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` | 書かずに同じ行 | `中断: 別の Scancode Map がある（…）` で止まり、書かない |
+| ロールバックの「サインイン・検索・キーボードを戻す」の手順 11 | `Scancode Map は無い` | 消して `Scancode Map を消した` | `中断: 本書の値ではない Scancode Map がある（…）` で止まり、消さない |
 
 **残っている未確認事項**:
 
-1. Windows で、すべての手順を貼って通すこと（手順 17 の判定、scoop のインストーラ、winget の表示、UniGet UI の画面）
+1. Windows で、すべての手順を貼って通すこと（「貼り付けの設定」の手順 2 の判定、scoop のインストーラ、winget の表示、UniGet UI の画面）
 1. `HKCU` の CLSID の設定で、今の Windows 11（25H2・26H2）のエクスプローラーが旧形式のメニューを出すこと
 1. Scancode Map で、Caps Lock が Ctrl になること（JIS 配列のキーボード、リモート デスクトップでつないだときも）
 1. 更新（scoop・UniGet UI）とロールバック、arm64 の Windows
@@ -613,7 +613,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 ### 付録: 原因の確認と貼り付けの試験（2026-10-03）
 
-この付録は、もとの手順書 `docs/windows-powershell-paste.md`（2026-10-03 にこの文書へまとめて消した）の付録を移したもの。手順の番号だけ、この文書の番号に付け替えた（当時の手順 1〜7 は今の手順 16・17・18・19・35・37・38、当時のロールバックの手順 1・2 は今の[ロールバック](../extra/windows-setup.md#ロールバック)の手順 15・16）。試験したブロックは当時のもの（プロファイルの行の印は `# windows-powershell-paste.md`。今の手順 19 とロールバックの手順 15 は、印を変え、古い印の行も見つけるようにした。その確認は[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）。
+この付録は、もとの手順書 `docs/windows-powershell-paste.md`（2026-10-03 にこの文書へまとめて消した）の付録を移したもの。手順の番号だけ、この文書の番号に付け替えた（当時の手順 1〜7 は今の「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 1・3・4、当時のロールバックの手順 1・2 は今の[ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6・7）。試験したブロックは当時のもの（プロファイルの行の印は `# windows-powershell-paste.md`。今の「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 は、印を変え、古い印の行も見つけるようにした。その確認は[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）。
 
 **利用者の観察**: Firefox で開いた GitHub の [RDP をロックせずに切断](../windows-rdp-disconnect.md)の PowerShell のブロックを、コピーボタンでコピーして、スタートメニューから管理者として開いた Windows PowerShell（conhost の窓）に右クリックで貼ると、行が逆順になった。選んで Ctrl+C でコピーしたもの、管理者でない Windows PowerShell の窓、conhost の窓に Ctrl+V で貼ったものは、元の順に入った。
 
@@ -637,29 +637,29 @@ Ctrl+v           Paste
 | 貼ったもの | 窓の設定 | 貼った直後の画面 | Enter の後のファイル |
 |---|---|---|---|
 | LF だけ（末尾に改行無し） | 無し | 逆順（`& {` が最後の行） | 作られない |
-| LF だけ（末尾に改行無し） | `-Command` で手順 16 の 1 行 | 元の順（`}` が最後の行） | `1 行目` / `2 行目` / `3 行目` |
+| LF だけ（末尾に改行無し） | `-Command` で「貼り付けの設定」の手順 1 の 1 行 | 元の順（`}` が最後の行） | `1 行目` / `2 行目` / `3 行目` |
 | LF だけ（末尾に改行無し） | 同じ行（印のコメント付き）を書いたファイルを `-Command` の `.` で読ませた | 元の順 | `1 行目` / `2 行目` / `3 行目` |
 | CR LF（末尾に改行あり） | 無し | — | `1 行目` / `2 行目` / `3 行目` |
-| CR LF（末尾に改行あり） | `-Command` で手順 16 の 1 行 | — | `1 行目` / `2 行目` / `3 行目` |
+| CR LF（末尾に改行あり） | `-Command` で「貼り付けの設定」の手順 1 の 1 行 | — | `1 行目` / `2 行目` / `3 行目` |
 
 **対話でない起動**: 標準入力をリダイレクトした `powershell.exe -NoProfile -Command "Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine; 'ok'"` は、エラー無しで `ok` を出した。
 
-**`Add-Content` の書き足し方**: Windows PowerShell 5.1 で、末尾に改行の無いファイル（`Set-Alias ll Get-ChildItem`）に `Add-Content` で 1 行を足すと、`Set-Alias ll Get-ChildItemX-LINE` と最後の行につながった。手順 19 のブロックは、そのときに行の前へ CR LF を付ける。
+**`Add-Content` の書き足し方**: Windows PowerShell 5.1 で、末尾に改行の無いファイル（`Set-Alias ll Get-ChildItem`）に `Add-Content` で 1 行を足すと、`Set-Alias ll Get-ChildItemX-LINE` と最後の行につながった。「貼り付けの設定」の手順 4 のブロックは、そのときに行の前へ CR LF を付ける。
 
-**手順 19 とロールバックの手順 15 のブロック**: 当時の文書から `powershell` のブロックを抜き出し（リストの字下げを外した）、Windows PowerShell 5.1 で、`$PROFILE` を一時的なディレクトリの `WindowsPowerShell\Microsoft.PowerShell_profile.ps1` に差し替えて `Invoke-Expression` で流した。どの場合も手順 19 を 2 回（2 回目は `すでにある:`）、ロールバックの手順 15 を 2 回（2 回目は `その行は無い:` か `プロファイルが無い:`）流した。既存のプロファイルの中身は、日本語のコメントと `Set-Alias ll Get-ChildItem` の 2 行:
+**「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 のブロック**: 当時の文書から `powershell` のブロックを抜き出し（リストの字下げを外した）、Windows PowerShell 5.1 で、`$PROFILE` を一時的なディレクトリの `WindowsPowerShell\Microsoft.PowerShell_profile.ps1` に差し替えて `Invoke-Expression` で流した。どの場合も「貼り付けの設定」の手順 4 を 2 回（2 回目は `すでにある:`）、ロールバックの「アプリと貼り付けの設定を外す」の手順 6 を 2 回（2 回目は `その行は無い:` か `プロファイルが無い:`）流した。既存のプロファイルの中身は、日本語のコメントと `Set-Alias ll Get-ChildItem` の 2 行:
 
-| 既存のプロファイル | 手順 19 の後 | ロールバックの手順 15 の後 |
+| 既存のプロファイル | 「貼り付けの設定」の手順 4 の後 | ロールバックの「アプリと貼り付けの設定を外す」の手順 6 の後 |
 |---|---|---|
 | 無い | `足した:`。ASCII の 1 行（93 バイト） | `消した:`（ファイルが消えた） |
 | 空のファイル | 同じ | `消した:` |
 | UTF-16 LE（BOM あり） | 先頭は `FF FE` のまま。足した行は 3 行目 | `その行だけ消した:`。前と同じバイト |
 | UTF-8（BOM あり） | 先頭は `EF BB BF` のまま。足した行は 3 行目 | 前と同じバイト |
-| UTF-8（BOM 無し）、末尾に改行無し | 足した行は 3 行目（前に CR LF を付けた）。5.1 の `Get-Content` では日本語が化けて見えた（ANSI として読む）が、バイトは変わらない | 日本語を含め前と同じバイトに、手順 19 で付けた CR LF だけが残った |
+| UTF-8（BOM 無し）、末尾に改行無し | 足した行は 3 行目（前に CR LF を付けた）。5.1 の `Get-Content` では日本語が化けて見えた（ANSI として読む）が、バイトは変わらない | 日本語を含め前と同じバイトに、「貼り付けの設定」の手順 4 で付けた CR LF だけが残った |
 | Shift_JIS | 足した行は 3 行目 | 前と同じバイト |
-| UTF-16 LE・UTF-8（BOM あり）で、手順 19 の行だけ | `すでにある:` | `消した:`（ファイルが消えた） |
-| UTF-16 LE・UTF-8（BOM あり）で、1 行目が手順 19 の行、2 行目が `Set-Alias` | — | `その行だけ消した:`。BOM と `Set-Alias` の行だけが残った |
+| UTF-16 LE・UTF-8（BOM あり）で、「貼り付けの設定」の手順 4 の行だけ | `すでにある:` | `消した:`（ファイルが消えた） |
+| UTF-16 LE・UTF-8（BOM あり）で、1 行目が「貼り付けの設定」の手順 4 の行、2 行目が `Set-Alias` | — | `その行だけ消した:`。BOM と `Set-Alias` の行だけが残った |
 
-最初に書いたロールバックの手順 15 は、正規表現が `(?m)^` と行だけだったので、BOM の直後（ファイルの 1 行目）にある行を見つけられず、BOM のあるファイルで `その行は無い:` を出した。BOM を許して残すように直し、上の表はすべて直した後のもの。
+最初に書いたロールバックの「アプリと貼り付けの設定を外す」の手順 6 は、正規表現が `(?m)^` と行だけだったので、BOM の直後（ファイルの 1 行目）にある行を見つけられず、BOM のあるファイルで `その行は無い:` を出した。BOM を許して残すように直し、上の表はすべて直した後のもの。
 
 **構文**: 当時の文書の `powershell` のブロック 8 個を、Windows PowerShell 5.1 の `[System.Management.Automation.Language.Parser]::ParseInput` に通した（構文の誤りは 0）。
 
@@ -669,38 +669,38 @@ Ctrl+v           Paste
 
 インストール直後の作業をこの文書にまとめたとき（2026-10-03）に、Windows を動かせない環境（クラウドの Linux のコンテナ）で、文書・ソース・定義を読んだ記録。確かさは、Microsoft の文書かソース（「文書」）、Microsoft の書いたコードや配布物の中身（「コード」）、それ以外の広く使われている情報（「広く」）で書く。
 
-**自分のユーザーの設定（手順 25〜34）**
+**自分のユーザーの設定（「表示と入力」と「自動起動と標準アプリ」）**
 
-- エクスプローラー（手順 25）: `HideFileExt`・`Hidden`・`Start_TrackDocs` は、Microsoft の DSC のリソース `microsoft/winget-dsc`（コミット `8a8387e`）の `Microsoft.Windows.Developer` が同じ値を書く（コード）。`Start_TrackDocs` を 0 にするのは、Microsoft Learn の「Manage connections from Windows operating system components to Microsoft services」の 33 節にもある（文書）。`LaunchTo`・`ShowRecent`・`ShowFrequent` は広く
-- スタートと提案（手順 27）: 設定の画面の文言は Microsoft のサポートの記事（文書）。値（`Start_IrisRecommendations`・`Start_AccountNotifications`・`ContentDeliveryManager` の `SubscribedContent-*`・`SystemPaneSuggestionsEnabled`・`SilentInstalledAppsEnabled`・`UserProfileEngagement\ScoobeSystemSettingEnabled`）は広く。2025 年の終わりのスタートの作り直しで足された切り替えの値は、見つからなかった
-- スタートの検索の Web の結果（手順 49）: `HKCU\Software\Policies\Microsoft\Windows\Explorer` の `DisableSearchBoxSuggestions` は、ポリシーの文書（`WindowsExplorer.admx`）では「エクスプローラーの検索ボックスに最近の検索を出さない」。スタートの検索の Web の結果が消えるのは広く。`HKCU\Software\Policies` は、管理者でないと書けない（Microsoft のフォーラムの回答）
-- タスクバー（手順 28）: `TaskbarAl`・`ShowTaskViewButton`・`SearchboxTaskbarMode`（0 が消す、1 がアイコン、2 が検索ボックス、3 がアイコンとラベル）は DSC の `Taskbar`（コード）。ポリシーの `ConfigureSearchOnTaskbarMode` は番号の意味が違う（文書）。`ShowSecondsInSystemClock` は 22H2 の 2023 年 5 月のプレビューの更新（KB5026446）から（広く）。`TaskbarDa` は UCPD（`ucpd.sys`）が守っていて、`powershell.exe`・`reg.exe` などからの書き込みは拒まれる（広く。ドライバーを解析した記事）
-- ダークモード（手順 29）: `AppsUseLightTheme`・`SystemUsesLightTheme` は DSC の `Microsoft.Windows.Settings` が書き、`WM_SETTINGCHANGE`（`ImmersiveColorSet`）を送る（コード）
-- 既定の端末（手順 30）: `HKCU\Console\%%Startup` の GUID は Windows Terminal の文書の `group-policy.md`（文書）。22H2 以降の既定（「Windows に任せる」）は Microsoft のサポートの記事（文書）。管理者のコンソールが引き渡されないことは、microsoft/terminal の #13392（「管理者のコマンド ラインの受け手として登録できる端末は無い」）と #10276・#10682・#15126 で、開いたまま
-- IME（手順 31）: 設定の画面（`ms-settings:regionlanguage-jpnime`）は Microsoft のサポートの記事（文書）。レジストリの値は、ある開発者が画面の前後で見比べた記録だけ（`cuzic/awase`）。Ctrl+Space を Windows が使うのは中国語の IME だけ（Microsoft のキーボード ショートカットの文書）
-- 自動で起動するアプリ（手順 32）: `StartupApproved\Run` の先頭の 1 バイト（2 が起動、3 が停止）は広く（UniGet UI のインストーラも同じ所に書く）。Teams の起動のタスクの名前 `TeamsTfwStartupTask` は、Teams の MSIX の `AppxManifest.xml`（26198.304.4946.9672）にある（コード）。`State` の値は `StartupTaskState`（文書）。UniGet UI を winget で入れると、`Run` に `WingetUI`（`--daemon`）ができる（winget の定義が `/NoRunOnStartup` を渡さない。インストーラの定義 `UniGetUI.iss`）
-- 標準アプリ（手順 33・34）: パッケージの名前・パッケージ ファミリー名・ストアの ID は、Microsoft Store の API（`storeedgefd.dsx.mp.microsoft.com`）で確かめた（文書）。「Microsoft 365 Copilot」は `Microsoft.MicrosoftOfficeHub`（`9WZDNCRD29V9`）で、Copilot（`Microsoft.Copilot`、`9NHT9RB2F4HD`）とは別のパッケージ。自分のユーザーから外しただけのアプリは機能の更新で戻りうる（「Remove provisioned apps during update」。文書）
-- PowerToys（手順 23）: winget の定義 0.101.2362.0 に、自分のユーザーのインストーラ（`PowerToysUserSetup`、管理者の指定無し）と PC 全体のインストーラ（`elevatesSelf`）がある。形式は Burn、渡す引数は `/quiet /norestart`
-- ピン留め（手順 58）: 自分のユーザーで使える、サポートされたコマンドは見つからなかった。Microsoft の文書の方法は、タスクバーのレイアウトの XML、`ConfigureStartPins`（24H2 の KB5062660 から `applyOnce`）などのポリシーとプロビジョニングだけ
+- エクスプローラー（「表示と入力」の手順 1）: `HideFileExt`・`Hidden`・`Start_TrackDocs` は、Microsoft の DSC のリソース `microsoft/winget-dsc`（コミット `8a8387e`）の `Microsoft.Windows.Developer` が同じ値を書く（コード）。`Start_TrackDocs` を 0 にするのは、Microsoft Learn の「Manage connections from Windows operating system components to Microsoft services」の 33 節にもある（文書）。`LaunchTo`・`ShowRecent`・`ShowFrequent` は広く
+- スタートと提案（「表示と入力」の手順 3）: 設定の画面の文言は Microsoft のサポートの記事（文書）。値（`Start_IrisRecommendations`・`Start_AccountNotifications`・`ContentDeliveryManager` の `SubscribedContent-*`・`SystemPaneSuggestionsEnabled`・`SilentInstalledAppsEnabled`・`UserProfileEngagement\ScoobeSystemSettingEnabled`）は広く。2025 年の終わりのスタートの作り直しで足された切り替えの値は、見つからなかった
+- スタートの検索の Web の結果（「サインイン・検索・キーボード」の手順 2）: `HKCU\Software\Policies\Microsoft\Windows\Explorer` の `DisableSearchBoxSuggestions` は、ポリシーの文書（`WindowsExplorer.admx`）では「エクスプローラーの検索ボックスに最近の検索を出さない」。スタートの検索の Web の結果が消えるのは広く。`HKCU\Software\Policies` は、管理者でないと書けない（Microsoft のフォーラムの回答）
+- タスクバー（「表示と入力」の手順 4）: `TaskbarAl`・`ShowTaskViewButton`・`SearchboxTaskbarMode`（0 が消す、1 がアイコン、2 が検索ボックス、3 がアイコンとラベル）は DSC の `Taskbar`（コード）。ポリシーの `ConfigureSearchOnTaskbarMode` は番号の意味が違う（文書）。`ShowSecondsInSystemClock` は 22H2 の 2023 年 5 月のプレビューの更新（KB5026446）から（広く）。`TaskbarDa` は UCPD（`ucpd.sys`）が守っていて、`powershell.exe`・`reg.exe` などからの書き込みは拒まれる（広く。ドライバーを解析した記事）
+- ダークモード（「表示と入力」の手順 5）: `AppsUseLightTheme`・`SystemUsesLightTheme` は DSC の `Microsoft.Windows.Settings` が書き、`WM_SETTINGCHANGE`（`ImmersiveColorSet`）を送る（コード）
+- 既定の端末（「表示と入力」の手順 6）: `HKCU\Console\%%Startup` の GUID は Windows Terminal の文書の `group-policy.md`（文書）。22H2 以降の既定（「Windows に任せる」）は Microsoft のサポートの記事（文書）。管理者のコンソールが引き渡されないことは、microsoft/terminal の #13392（「管理者のコマンド ラインの受け手として登録できる端末は無い」）と #10276・#10682・#15126 で、開いたまま
+- IME（「表示と入力」の手順 7）: 設定の画面（`ms-settings:regionlanguage-jpnime`）は Microsoft のサポートの記事（文書）。レジストリの値は、ある開発者が画面の前後で見比べた記録だけ（`cuzic/awase`）。Ctrl+Space を Windows が使うのは中国語の IME だけ（Microsoft のキーボード ショートカットの文書）
+- 自動で起動するアプリ（「自動起動と標準アプリ」の手順 1）: `StartupApproved\Run` の先頭の 1 バイト（2 が起動、3 が停止）は広く（UniGet UI のインストーラも同じ所に書く）。Teams の起動のタスクの名前 `TeamsTfwStartupTask` は、Teams の MSIX の `AppxManifest.xml`（26198.304.4946.9672）にある（コード）。`State` の値は `StartupTaskState`（文書）。UniGet UI を winget で入れると、`Run` に `WingetUI`（`--daemon`）ができる（winget の定義が `/NoRunOnStartup` を渡さない。インストーラの定義 `UniGetUI.iss`）
+- 標準アプリ（「自動起動と標準アプリ」の手順 2・3）: パッケージの名前・パッケージ ファミリー名・ストアの ID は、Microsoft Store の API（`storeedgefd.dsx.mp.microsoft.com`）で確かめた（文書）。「Microsoft 365 Copilot」は `Microsoft.MicrosoftOfficeHub`（`9WZDNCRD29V9`）で、Copilot（`Microsoft.Copilot`、`9NHT9RB2F4HD`）とは別のパッケージ。自分のユーザーから外しただけのアプリは機能の更新で戻りうる（「Remove provisioned apps during update」。文書）
+- PowerToys（「アプリを入れる」の手順 4）: winget の定義 0.101.2362.0 に、自分のユーザーのインストーラ（`PowerToysUserSetup`、管理者の指定無し）と PC 全体のインストーラ（`elevatesSelf`）がある。形式は Burn、渡す引数は `/quiet /norestart`
+- ピン留め（「再起動の後に確かめる」の手順 3）: 自分のユーザーで使える、サポートされたコマンドは見つからなかった。Microsoft の文書の方法は、タスクバーのレイアウトの XML、`ConfigureStartPins`（24H2 の KB5062660 から `applyOnce`）などのポリシーとプロビジョニングだけ
 
-**PC 全体の設定（手順 39〜54）**
+**PC 全体の設定（「PC 全体の設定」の手順 5 から「WSL と再起動」の手順 1 まで）**
 
-- PC の名前（手順 39）: `Rename-Computer` は、15 文字を超える名前で `ShouldContinue` の問いを出し（`-Force` で出さない）、今と同じ名前で `NewNameIsOldName` のエラーを出す（PowerShell のソースの `Computer.cs`。5.1 は文書の文言が同じ）。名前の決まりは Microsoft Learn の「Naming conventions in Active Directory」（文書）
-- 長いパス・開発者モード（手順 40）: `LongPathsEnabled` と `AllowDevelopmentWithoutDevLicense` は Microsoft Learn（「Maximum Path Length Limitation」と「Developer Mode」）の値（文書）
-- sudo（手順 40）: 24H2 から（文書）。`sudo config --enable` の 3 つの形と、インラインの危うさは Microsoft Learn（文書）。レジストリの値（`HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` の `Enabled`。0〜3）は microsoft/sudo の `helpers.rs`（コード）。Home で使えるかは書かれていない
-- 電源（手順 41）: `powercfg` の別名（`SUB_BUTTONS`・`LIDACTION`・`SUB_NONE`・`CONSOLELOCK`）と値は、Microsoft Learn の電源の設定の文書（文書）。休止状態を切ると高速スタートアップのファイルも無くなる（文書から言えること。1 文で書いた文書は無い）。`DelayLockInterval` は広く（Microsoft の文書は見つからなかった）。S3 の PC では、画面が消えるだけではロックしない（眠り・パスワード付きのスクリーン セーバー・`InactivityTimeoutSecs`・動的ロックだけがロックする。文書からの推論）
-- アダプター（手順 42）: `Set-NetAdapterPowerManagement` は `-NoRestart` が無いとアダプターを起動し直す（文書）。`AllowComputerToTurnOffDevice` は WMI のクラスの文書では読み取り専用で、変えて渡す形は広く。この項目を外すと、Windows が任せる Wake on LAN も効かなくなる（Windows 7 の頃のサポートの記事 KB2740020。2026-05 に消え、MicrosoftDocs の履歴から読んだ）
-- リモート デスクトップ（手順 44）: Home はつながれる側になれない（文書）。`fDenyTSConnections`・`UserAuthentication`、規則のグループ `@FirewallAPI.dll,-28752` と規則の名前 `RemoteDesktop-UserMode-In-TCP` は、Azure の VM の切り分けの文書と無人インストールの文書（文書）。画面でオンとオフにし直したときに規則のプロファイルが戻るかは、分からなかった
-- リモート アシスタンス（手順 45）: `fAllowToGetHelp`（無人インストールの文書）。規則のグループ `@FirewallAPI.dll,-33002` は、Windows の `racpldlg.dll` の文字列にある（コード。Learn には無い）
-- ping（手順 46）: `New-NetFirewallRule` の `-Protocol ICMPv4 -IcmpType 8` と `ICMPv6`・`128`（文書）
-- 配信の最適化（手順 47）: 既定は LAN（配信の最適化の文書。ポリシーの文書は 0 と書いていて食い違う）。`Set-DODownloadMode`・`Get-DODownloadMode`（文書）
-- Windows Hello（手順 48）: `DevicePasswordLessBuildVersion` は広く（Microsoft の文書は見つからなかった）
-- Edge のショートカット（手順 50）: `RemoveDesktopShortcutDefault`（Edge Update 1.3.155.1 から）と、`CreateDesktopShortcutDefault` が入っていると効かないことは、Edge Update のポリシーの文書（文書）
-- 時計（手順 52）: `RealTimeIsUniversal` は Microsoft の文書に無い。Arch Linux の wiki は DWORD を勧める（QWORD の古い勧めは消えた）
-- キーボードの種類（手順 53）: US 配列の 4 つの値は、Microsoft の日本の社員のブログ（Learn の archive の「英語キーボードを快適に使う」）。JIS の値は広く
-- WSL（手順 54・62）: `--no-distribution` は Windows 11 では仮想マシン プラットフォームだけを入れる（WSL のソースの `WslInstall.cpp`）。`AlmaLinux-10` は `DistributionInfo.json`（2026-10-03、10.2.20260526.0）。最初の起動のユーザーの作成は AlmaLinux の `wsl-images` の `oobe`（uid 1000、`wheel`、`systemd=true`）
-- Autologon（手順 64）: winget の定義 3.10 は版の付かない `AutoLogon.zip` を取り、2026-10-03 は sha256 が一致した。パスワードは LSA のシークレットに置く（Microsoft Learn の Autologon と「Protecting the automatic logon password」）。Microsoft アカウントの `Domain` の入れ方は分からなかった
-- PowerShell 7（手順 24）: 7.6.0 から winget は MSIX を既定で入れ、7.7.0 から MSI は無くなる（Microsoft Learn の Windows への入れ方）。winget の選び方（MSIX が MSI より先）は winget のソースの `ManifestComparator.cpp`。PowerShell 7.6.6 の PSReadLine は 2.4.5 で、Ctrl+Enter は `InsertLineAbove`（PSReadLine の `KeyBindings.cs`）
+- PC の名前（「PC 全体の設定」の手順 5）: `Rename-Computer` は、15 文字を超える名前で `ShouldContinue` の問いを出し（`-Force` で出さない）、今と同じ名前で `NewNameIsOldName` のエラーを出す（PowerShell のソースの `Computer.cs`。5.1 は文書の文言が同じ）。名前の決まりは Microsoft Learn の「Naming conventions in Active Directory」（文書）
+- 長いパス・開発者モード（「PC 全体の設定」の手順 6）: `LongPathsEnabled` と `AllowDevelopmentWithoutDevLicense` は Microsoft Learn（「Maximum Path Length Limitation」と「Developer Mode」）の値（文書）
+- sudo（「PC 全体の設定」の手順 6）: 24H2 から（文書）。`sudo config --enable` の 3 つの形と、インラインの危うさは Microsoft Learn（文書）。レジストリの値（`HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` の `Enabled`。0〜3）は microsoft/sudo の `helpers.rs`（コード）。Home で使えるかは書かれていない
+- 電源（「PC 全体の設定」の手順 7）: `powercfg` の別名（`SUB_BUTTONS`・`LIDACTION`・`SUB_NONE`・`CONSOLELOCK`）と値は、Microsoft Learn の電源の設定の文書（文書）。休止状態を切ると高速スタートアップのファイルも無くなる（文書から言えること。1 文で書いた文書は無い）。`DelayLockInterval` は広く（Microsoft の文書は見つからなかった）。S3 の PC では、画面が消えるだけではロックしない（眠り・パスワード付きのスクリーン セーバー・`InactivityTimeoutSecs`・動的ロックだけがロックする。文書からの推論）
+- アダプター（「PC 全体の設定」の手順 8）: `Set-NetAdapterPowerManagement` は `-NoRestart` が無いとアダプターを起動し直す（文書）。`AllowComputerToTurnOffDevice` は WMI のクラスの文書では読み取り専用で、変えて渡す形は広く。この項目を外すと、Windows が任せる Wake on LAN も効かなくなる（Windows 7 の頃のサポートの記事 KB2740020。2026-05 に消え、MicrosoftDocs の履歴から読んだ）
+- リモート デスクトップ（「ネットワークとリモート」の手順 2）: Home はつながれる側になれない（文書）。`fDenyTSConnections`・`UserAuthentication`、規則のグループ `@FirewallAPI.dll,-28752` と規則の名前 `RemoteDesktop-UserMode-In-TCP` は、Azure の VM の切り分けの文書と無人インストールの文書（文書）。画面でオンとオフにし直したときに規則のプロファイルが戻るかは、分からなかった
+- リモート アシスタンス（「ネットワークとリモート」の手順 3）: `fAllowToGetHelp`（無人インストールの文書）。規則のグループ `@FirewallAPI.dll,-33002` は、Windows の `racpldlg.dll` の文字列にある（コード。Learn には無い）
+- ping（「ネットワークとリモート」の手順 4）: `New-NetFirewallRule` の `-Protocol ICMPv4 -IcmpType 8` と `ICMPv6`・`128`（文書）
+- 配信の最適化（「ネットワークとリモート」の手順 5）: 既定は LAN（配信の最適化の文書。ポリシーの文書は 0 と書いていて食い違う）。`Set-DODownloadMode`・`Get-DODownloadMode`（文書）
+- Windows Hello（「サインイン・検索・キーボード」の手順 1）: `DevicePasswordLessBuildVersion` は広く（Microsoft の文書は見つからなかった）
+- Edge のショートカット（「サインイン・検索・キーボード」の手順 3）: `RemoveDesktopShortcutDefault`（Edge Update 1.3.155.1 から）と、`CreateDesktopShortcutDefault` が入っていると効かないことは、Edge Update のポリシーの文書（文書）
+- 時計（「サインイン・検索・キーボード」の手順 5）: `RealTimeIsUniversal` は Microsoft の文書に無い。Arch Linux の wiki は DWORD を勧める（QWORD の古い勧めは消えた）
+- キーボードの種類（「サインイン・検索・キーボード」の手順 6）: US 配列の 4 つの値は、Microsoft の日本の社員のブログ（Learn の archive の「英語キーボードを快適に使う」）。JIS の値は広く
+- WSL（「WSL と再起動」の手順 1 と「WSL の AlmaLinux 10 と自動サインイン」の手順 3）: `--no-distribution` は Windows 11 では仮想マシン プラットフォームだけを入れる（WSL のソースの `WslInstall.cpp`）。`AlmaLinux-10` は `DistributionInfo.json`（2026-10-03、10.2.20260526.0）。最初の起動のユーザーの作成は AlmaLinux の `wsl-images` の `oobe`（uid 1000、`wheel`、`systemd=true`）
+- Autologon（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）: winget の定義 3.10 は版の付かない `AutoLogon.zip` を取り、2026-10-03 は sha256 が一致した。パスワードは LSA のシークレットに置く（Microsoft Learn の Autologon と「Protecting the automatic logon password」）。Microsoft アカウントの `Domain` の入れ方は分からなかった
+- PowerShell 7（「アプリを入れる」の手順 5）: 7.6.0 から winget は MSIX を既定で入れ、7.7.0 から MSI は無くなる（Microsoft Learn の Windows への入れ方）。winget の選び方（MSIX が MSI より先）は winget のソースの `ManifestComparator.cpp`。PowerShell 7.6.6 の PSReadLine は 2.4.5 で、Ctrl+Enter は `InsertLineAbove`（PSReadLine の `KeyBindings.cs`）
 
 ---
 
@@ -713,23 +713,23 @@ Ctrl+v           Paste
 - この文書の `powershell` のブロック 90 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた
   - `Set-ItemProperty` の `-Type` が 5.1 に無いという指摘が 54 個出た。`-Type` はレジストリのプロバイダーが足す動的なパラメーターで、5.1 の `Set-ItemProperty` の文書にもある（`reference/5.1/Microsoft.PowerShell.Management/Set-ItemProperty.md` の「This is a dynamic parameter made available by the Registry provider」）。互換の検査は動的なパラメーターを見ないので、指摘は当たらない
-  - ほかは、手順 20 の `Invoke-Expression`（公式のインストーラの方法）と、1 つの変数だけのブロック（手順 36・ロールバックの手順 37 の `$PC_NAME`・`$OLD_PC_NAME`）の「代入して使っていない」だけ
-- 手順 19 とロールバックの手順 15 の正規表現と文字列、手順 39 の名前の正規表現も、この構文解析器で読めた
+  - ほかは、「アプリを入れる」の手順 1 の `Invoke-Expression`（公式のインストーラの方法）と、1 つの変数だけのブロック（「PC 全体の設定」の手順 2・ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 9 の `$PC_NAME`・`$OLD_PC_NAME`）の「代入して使っていない」だけ
+- 「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 の正規表現と文字列、「PC 全体の設定」の手順 5 の名前の正規表現も、この構文解析器で読めた
 
 **偽物のコマンドレットで流したブロック**（Linux の pwsh。レジストリは、値を覚えておく偽物の `Set-ItemProperty`・`Get-ItemProperty`・`Get-Item`・`Test-Path`・`New-Item` にした）:
 
 | ブロック | 流した場合 | 結果 |
 |---|---|---|
-| 手順 19（プロファイルに足す） | 無い・空・UTF-8（BOM の有無）・Shift_JIS の既存のファイル、新しい印の行がある、古い印（`# windows-powershell-paste.md`）の行がある、両方ある | 無いときだけ `足した:`、2 回目と印の行があるときは `すでにある:` |
-| ロールバックの手順 15（プロファイルから消す） | 上の各場合と、UTF-16 LE、BOM の直後の行、新旧の両方の行。正規表現の BOM は、もとの手順書と同じく `\uFEFF` などの ASCII の書き方（文字をそのまま書くと、コピーと貼り付けで落ちうる） | どちらの印の行も消え、ほかの行と BOM はバイトのまま残った。残りが BOM と空白だけならファイルを消した。UTF-8（BOM 無し、末尾に改行無し）では、手順 19 で付けた CR LF だけが残った（もとの手順書の付録と同じ） |
-| 手順 39（PC の名前） | 空、`my-pc`、今と同じ名前（大文字と小文字の違いも）、16 文字以上、数字だけ、先頭か末尾がハイフン、`_` を含む、1 文字 | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer -NewName <名前>` を 1 回呼んだ |
-| ロールバックの手順 37（名前を戻す） | 空、今と同じ名前、別の名前、16 文字以上、数字だけ | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer` を 1 回（`-Force` は付けない） |
-| 手順 32（自動で起動するアプリ） | `Run` に `OneDrive`・`MicrosoftEdgeAutoLaunch_ABC`・`WingetUI`、Teams の起動のタスクあり。もう 1 回は `OneDrive` だけで Teams 無し | `OneDrive` と Edge に `03 00 00 00` と 8 バイトの日時を書き、Teams の `State` を 1 にした。一覧は 2 つが `止めている`、`WingetUI` が `起動する`。2 回目は `OneDrive` だけを止めた |
-| ロールバックの手順 8 | 上の後 | 2 つを `02` と 11 バイトの 0 に、Teams を 2 に戻した |
-| 手順 33・34（標準アプリ・ウィジェット） | 11 個のうち 3 個と Copilot だけが入っている。ウィジェットは無い場合とある場合 | 入っている 3 個だけ `Remove-AppxPackage` に渡し、ほかは `無い:`。Copilot には触れなかった |
-| 手順 42・ロールバックの手順 34（アダプター） | `$LAN_IF` が空、`Enabled` のアダプター、`Unsupported` のアダプター | 空は止まり、`Unsupported` は `対象外:`。ほかは `AllowComputerToTurnOffDevice` を `Disabled`（戻すときは `Enabled`）にして、`-NoRestart` 付きで渡した |
-| 手順 44（リモート デスクトップ） | `EditionID` が `Core`・`CoreSingleLanguage`・`Professional` | Home の 2 つは `中断:` で何も書かず、`Professional` だけ 2 つの値を書いて規則を `-Profile Private` にした |
-| 手順 50（ショートカット） | すべてのユーザーのデスクトップに `Microsoft Edge.lnk` があり、自分のデスクトップに `UniGetUI.lnk` が無い。2 回 | ポリシーを書き、1 回目は Edge を `消した:`、UniGet UI を `無い:`。2 回目はどちらも `無い:` |
+| 「貼り付けの設定」の手順 4（プロファイルに足す） | 無い・空・UTF-8（BOM の有無）・Shift_JIS の既存のファイル、新しい印の行がある、古い印（`# windows-powershell-paste.md`）の行がある、両方ある | 無いときだけ `足した:`、2 回目と印の行があるときは `すでにある:` |
+| ロールバックの「アプリと貼り付けの設定を外す」の手順 6（プロファイルから消す） | 上の各場合と、UTF-16 LE、BOM の直後の行、新旧の両方の行。正規表現の BOM は、もとの手順書と同じく `\uFEFF` などの ASCII の書き方（文字をそのまま書くと、コピーと貼り付けで落ちうる） | どちらの印の行も消え、ほかの行と BOM はバイトのまま残った。残りが BOM と空白だけならファイルを消した。UTF-8（BOM 無し、末尾に改行無し）では、「貼り付けの設定」の手順 4 で付けた CR LF だけが残った（もとの手順書の付録と同じ） |
+| 「PC 全体の設定」の手順 5（PC の名前） | 空、`my-pc`、今と同じ名前（大文字と小文字の違いも）、16 文字以上、数字だけ、先頭か末尾がハイフン、`_` を含む、1 文字 | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer -NewName <名前>` を 1 回呼んだ |
+| ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 9（名前を戻す） | 空、今と同じ名前、別の名前、16 文字以上、数字だけ | 空と使えない名前は `中断:`、同じ名前は `すでにこの名前:`、ほかは `Rename-Computer` を 1 回（`-Force` は付けない） |
+| 「自動起動と標準アプリ」の手順 1（自動で起動するアプリ） | `Run` に `OneDrive`・`MicrosoftEdgeAutoLaunch_ABC`・`WingetUI`、Teams の起動のタスクあり。もう 1 回は `OneDrive` だけで Teams 無し | `OneDrive` と Edge に `03 00 00 00` と 8 バイトの日時を書き、Teams の `State` を 1 にした。一覧は 2 つが `止めている`、`WingetUI` が `起動する`。2 回目は `OneDrive` だけを止めた |
+| ロールバックの「表示と入力を戻す」の手順 8 | 上の後 | 2 つを `02` と 11 バイトの 0 に、Teams を 2 に戻した |
+| 「自動起動と標準アプリ」の手順 2・3（標準アプリ・ウィジェット） | 11 個のうち 3 個と Copilot だけが入っている。ウィジェットは無い場合とある場合 | 入っている 3 個だけ `Remove-AppxPackage` に渡し、ほかは `無い:`。Copilot には触れなかった |
+| 「PC 全体の設定」の手順 8・ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 6（アダプター） | `$LAN_IF` が空、`Enabled` のアダプター、`Unsupported` のアダプター | 空は止まり、`Unsupported` は `対象外:`。ほかは `AllowComputerToTurnOffDevice` を `Disabled`（戻すときは `Enabled`）にして、`-NoRestart` 付きで渡した |
+| 「ネットワークとリモート」の手順 2（リモート デスクトップ） | `EditionID` が `Core`・`CoreSingleLanguage`・`Professional` | Home の 2 つは `中断:` で何も書かず、`Professional` だけ 2 つの値を書いて規則を `-Profile Private` にした |
+| 「サインイン・検索・キーボード」の手順 3（ショートカット） | すべてのユーザーのデスクトップに `Microsoft Edge.lnk` があり、自分のデスクトップに `UniGetUI.lnk` が無い。2 回 | ポリシーを書き、1 回目は Edge を `消した:`、UniGet UI を `無い:`。2 回目はどちらも `無い:` |
 | OpenSSH サーバーの手順 5・Syncthing の Windows 11 の手順 7（LAN がプライベートかを確かめる） | `$LAN_IF` が空、パブリック、プライベート | 空とパブリックは止まり（Syncthing は規則を作らない）、プライベートだけ規則を確かめた（作った） |
 
 **Wake on LAN の 1 行**（任意節の手順 7）: Linux の Python 3.11 で、MAC アドレスの例を入れて流し、102 バイト（`FF` が 6 個と MAC が 16 回）のパケットを送れた（受け取る側は確かめていない）。
@@ -738,10 +738,10 @@ Ctrl+v           Paste
 
 1. Windows で、すべての手順を貼って通すこと（画面の手順と、設定・ストア・UniGet UI・Autologon の文言を含む）
 1. Microsoft の文書に無いレジストリの値（[状態](#対象と検証環境)の「確かめていないこと」）が、24H2・25H2・26H2 で効くこと
-1. 手順 42 の `AllowComputerToTurnOffDevice` を変えて渡す形が、今の Windows 11 の `Set-NetAdapterPowerManagement` で効くこと
-1. 手順 44 の後に、設定の画面でリモート デスクトップをオンとオフにしたとき、規則のプロファイルが戻るか
-1. Modern Standby の PC で、手順 41 の後に放置してもロックしないこと
-1. Microsoft アカウントでの自動サインイン（手順 64）と、Wake on LAN（任意節）
+1. 「PC 全体の設定」の手順 8 の `AllowComputerToTurnOffDevice` を変えて渡す形が、今の Windows 11 の `Set-NetAdapterPowerManagement` で効くこと
+1. 「ネットワークとリモート」の手順 2 の後に、設定の画面でリモート デスクトップをオンとオフにしたとき、規則のプロファイルが戻るか
+1. Modern Standby の PC で、「PC 全体の設定」の手順 7 の後に放置してもロックしないこと
+1. Microsoft アカウントでの自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と、Wake on LAN（任意節）
 1. 更新とロールバック、Home の PC、arm64 の Windows
 
 ### 付録: CLI による更新手順の確認（2026-10-04）
@@ -763,7 +763,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 **構文と既存の動作**:
 
 - Windows PowerShell 5.1.26100.9444 の構文解析器で、この文書の PowerShell ブロック 105 個を解析し、構文の誤りは 0 だった
-- もとの手順 4〜52（今の手順 16〜64）と、既存の任意節・更新・ロールバックのコマンドを、変更前の文書と比較した。手順参照の番号以外は変わっていない
+- もとの手順 4〜52（今の「貼り付けの設定」の手順 1 から「WSL の AlmaLinux 10 と自動サインイン」の手順 5 まで）と、既存の任意節・更新・ロールバックのコマンドを、変更前の文書と比較した。手順参照の番号以外は変わっていない
 - 既存の付録も、手順参照の番号以外は変わっていない。別の手順書の番号・ロールバックの番号・当時の番号は、元の参照先を保った
 - 関連する 12 本の手順書は、初期設定を参照する番号だけの変更であることを比較した。実施手順は 64、ロールバックは 41 手順になった
 
@@ -774,10 +774,10 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 | 対象 | 確認した分岐 |
 |---|---|
-| 準備（手順 2・3） | 5.1／7、管理者／通常の窓、実行ポリシーの制限、モジュールと NuGet の有無、違う PSGallery の URL、導入と読み込みの失敗 |
-| Windows Update（手順 4〜8） | 対象 0 件／通常の更新あり、オプション・プレビュー・非表示・導入済みの除外、検索と導入の失敗、再起動待ちと判定できない場合、検索中に再起動待ちになる場合 |
-| Store（手順 10〜15） | CLI の有無・一括更新への対応、登録の失敗、2 製品だけの準備、更新なしの終了コード、検索・適用・再検索の失敗、必要なパッケージの欠落・不正常な状態 |
-| モジュールの保守（更新の手順 5・ロールバックの手順 41） | モジュールだけの更新・削除、失敗時の中断、管理者の窓で削除しないこと、ほかの場所に残ったモジュールを続けて消さないこと |
+| 準備（「Windows Update」の手順 2・3） | 5.1／7、管理者／通常の窓、実行ポリシーの制限、モジュールと NuGet の有無、違う PSGallery の URL、導入と読み込みの失敗 |
+| Windows Update（「Windows Update」の手順 4〜8） | 対象 0 件／通常の更新あり、オプション・プレビュー・非表示・導入済みの除外、検索と導入の失敗、再起動待ちと判定できない場合、検索中に再起動待ちになる場合 |
+| Store（「Microsoft Store の更新」の手順 2〜7） | CLI の有無・一括更新への対応、登録の失敗、2 製品だけの準備、更新なしの終了コード、検索・適用・再検索の失敗、必要なパッケージの欠落・不正常な状態 |
+| モジュールの保守（更新の手順 5・ロールバックの「再起動と PSWindowsUpdate」の手順 4） | モジュールだけの更新・削除、失敗時の中断、管理者の窓で削除しないこと、ほかの場所に残ったモジュールを続けて消さないこと |
 
 - 検索・導入・再検索で同じ条件を渡すこと、`AcceptAll` と `IgnoreReboot` を渡すこと、自動再起動や再開タスクを作らないことを検査した
 - 更新が残る場合、検索に失敗した場合、再起動待ちの場合に、Windows Update の完了の行を出さないことを確認した
@@ -793,7 +793,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 ### 付録: ロールバックの元値復元の模擬確認（2026-10-05）
 
 - Linux の PowerShell 7.6.6 の構文解析器で、修正後の本書の PowerShell ブロック 107 個を解析し、構文の誤りは 0 だった
-- 実施手順 18・47 とロールバックの手順 16・29 を本文から抜き出し、設定の読み書きだけを偽物のコマンドレットに置き換えた
+- 実施手順の「貼り付けの設定」の手順 3 と「ネットワークとリモート」の手順 5、ロールバックの「アプリと貼り付けの設定を外す」の手順 7 と「ネットワークと PC 全体の設定を戻す」の手順 1 を本文から抜き出し、設定の読み書きだけを偽物のコマンドレットに置き換えた
   - 実行ポリシー: 元の `CurrentUser` が `Undefined`・`Restricted`・`AllSigned`・`RemoteSigned`・`Unrestricted`・`Bypass` の 6 通りで、実施後に元値へ戻った
   - 配信の最適化: 元の値が `Internet`・`Lan`・`CdnOnly` の 3 通りで、実施後に元値へ戻った
   - どちらも、元値が空または不正なら設定の読み書きを呼ばず、設定の書き込みが失敗した場合はその後の読み戻しへ進まなかった
@@ -842,26 +842,26 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 **対象のブロック**:
 
 - `origin/main` との差分で、足したか変えた `powershell` のブロック 34 個（手順書のブロックは 117 個から 150 個になった）
-  - プライバシーと広告の節の 4 個（その節の手順 2・4・5・6）、表示・入力・音・ストレージの節の 21 個（その節の手順 2〜12・14〜23）、Edge の常駐の節の 2 個（その節の手順 2・5）、CopyQ の節の 6 個（その節の手順 2〜5・7・8）
+  - プライバシーと広告の節の 4 個（その節の手順 2・4・5・6）、表示・入力・音・ストレージの節の 21 個（その節の「表示・入力・音・ストレージを控えて変える」の手順 2〜12・14 と「表示・入力・音・ストレージを元に戻す」の手順 1〜9）、Edge の常駐の節の 2 個（その節の手順 2・5）、CopyQ の節の 6 個（その節の手順 2〜5・7・8）
   - [更新](../windows-setup.md#更新)の手順 3 の 1 個（winget の一覧に `hluk.CopyQ` を足した）
-- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 1〜41、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
+- [実施手順](../windows-setup.md#実施手順)の全部（12 項）、[ロールバック](../extra/windows-setup.md#ロールバック)の全部（5 項）、Wake on LAN とリモートからの再起動の任意節の手順は、`origin/main` と 1 行も変わっていない
 
 **構文と Windows PowerShell 5.1 との互換**:
 
-- 34 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）。表示・入力・音・ストレージの手順 8・20 の here-string（閉じの `'@` はリストの字下げの位置）も、字下げを外した形で読めた
+- 34 個を、PowerShell 7.5.3 の構文解析器に通した（構文の誤りは 0）。表示・入力・音・ストレージの「表示・入力・音・ストレージを控えて変える」の手順 8 と「表示・入力・音・ストレージを元に戻す」の手順 6 の here-string（閉じの `'@` はリストの字下げの位置）も、字下げを外した形で読めた
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）を当てた
   - 互換の指摘は 16 個で、すべて `PSUseCompatibleCommands` の `Set-ItemProperty` の `-Type`（ブロックの中の 16 か所すべて）。レジストリのプロバイダーが足す動的なパラメーターで、ほかの手順と同じ既知の偽陽性（[付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）
   - `PSUseCompatibleSyntax` と `PSUseCompatibleTypes` の指摘は 0
   - わざと PowerShell 7 だけの書き方（`??`・`Get-Content -AsByteStream`・`ForEach-Object -Parallel`）を入れたファイルでは、3 つとも指摘が出た
 - 既定の規則の指摘は 12 個で、すべて `PSUseBOMForUnicodeEncodedFile`（日本語を含むファイルに BOM が無い。貼るので関係が無い）
 
-**`Add-Type` の宣言**（表示・入力・音・ストレージの手順 8・20。2 つの宣言は同じ文字列）:
+**`Add-Type` の宣言**（表示・入力・音・ストレージの「表示・入力・音・ストレージを控えて変える」の手順 8 と「表示・入力・音・ストレージを元に戻す」の手順 6。2 つの宣言は同じ文字列）:
 
 - 宣言（`ANIMATIONINFO` の構造体と、`SystemParametersInfo` の 3 つの多重定義）は、PowerShell 7.5.3 の `Add-Type` でそのままコンパイルできた。構造体の大きさは 8 バイト（`cbSize` の 8 と同じ）。Linux では、呼び出しは例外になった（`user32.dll` は Windows の DLL）
-- 同じ窓で同じ宣言の `Add-Type` を 2 回流しても、誤りは出なかった（手順 8 の後に手順 20 を貼る場合）
+- 同じ窓で同じ宣言の `Add-Type` を 2 回流しても、誤りは出なかった（「表示・入力・音・ストレージを控えて変える」の手順 8 の後に「表示・入力・音・ストレージを元に戻す」の手順 6 を貼る場合）
 - 同じ 3 つの形で、中身を「受け取った値を覚えるだけ」にした型に差し替えて、2 つのブロックを流した:
   - `0x1043`（`SPI_SETCLIENTAREAANIMATION`）は `IntPtr` の形、`0x0049`（`SPI_SETANIMATION`）は `ref ANIMATIONINFO` の形（`uiParam` と `cbSize` が 8）、`0x1042`（`SPI_GETCLIENTAREAANIMATION`）は `ref int` の形が選ばれた。`fWinIni` は、設定の 2 つが 3、読み戻しが 0
-  - 手順 8 は `pvParam` が 0・`iMinAnimate` が 0 で、`ClientAreaAnimation : 0`・`MinAnimate : 0` を出した。手順 20 は 1・1 で、`1`・`1` を出した（`MinAnimate` の行は、偽物の型が覚えた値を返す偽物の `Get-ItemProperty` で出した）
+  - 「表示・入力・音・ストレージを控えて変える」の手順 8 は `pvParam` が 0・`iMinAnimate` が 0 で、`ClientAreaAnimation : 0`・`MinAnimate : 0` を出した。「表示・入力・音・ストレージを元に戻す」の手順 6 は 1・1 で、`1`・`1` を出した（`MinAnimate` の行は、偽物の型が覚えた値を返す偽物の `Get-ItemProperty` で出した）
 
 **偽物のコマンドレットで流したブロック**（Linux の pwsh）:
 
@@ -872,23 +872,23 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 | 対象 | 流した場合 | 結果 |
 |---|---|---|
-| 表示・入力・音・ストレージの手順 3（固定キーなど） | `Flags` が `510`・`126`・`62`。続けてもう 1 回 | `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` を出し、文字列（REG_SZ）で書いた。2 回目は `506 -> 506` などで変わらない |
-| 同じ手順 3 | `StickyKeys` のキーが無い、`Keyboard Response` に `Flags` が無い、`ToggleKeys` が `abc` | 3 つとも `無い:` を出し、何も書かなかった |
-| 同じ節の手順 15（戻す） | 手順 3 の後。続けてもう 1 回。上の無い・`abc` の場合 | `506 -> 510`・`122 -> 126`・`58 -> 62`。2 回目は変わらない。無い・`abc` は `無い:` で、何も書かなかった |
+| 「表示・入力・音・ストレージを控えて変える」の手順 3（固定キーなど） | `Flags` が `510`・`126`・`62`。続けてもう 1 回 | `StickyKeys: 510 -> 506`・`Keyboard Response: 126 -> 122`・`ToggleKeys: 62 -> 58` を出し、文字列（REG_SZ）で書いた。2 回目は `506 -> 506` などで変わらない |
+| 同じ「表示・入力・音・ストレージを控えて変える」の手順 3 | `StickyKeys` のキーが無い、`Keyboard Response` に `Flags` が無い、`ToggleKeys` が `abc` | 3 つとも `無い:` を出し、何も書かなかった |
+| 「表示・入力・音・ストレージを元に戻す」の手順 1（戻す） | 「表示・入力・音・ストレージを控えて変える」の手順 3 の後。続けてもう 1 回。上の無い・`abc` の場合 | `506 -> 510`・`122 -> 126`・`58 -> 62`。2 回目は変わらない。無い・`abc` は `無い:` で、何も書かなかった |
 | プライバシーと広告の手順 2 | `Enabled`（`AdvertisingInfo`）・`NumberOfSIUFInPeriod`・`HasAccepted`・`IsDeviceSearchHistoryEnabled` が 1、`PeriodInNanoSeconds` が QWORD の `864000000000`。`Privacy` と `Input\TIPC` のキーが無い。ほかの 4 つは値だけが無い（同じキーにほかの値がある） | `控えた:` と 11 行を出した。あった値は `AdvertisingInfo\Enabled: 1 -> 0` の形、無かった値は `User Profile\HttpAcceptLanguageOptOut:  -> 1` の形（左が空）。`New-Item` は無い 2 つのキーにだけ呼び、ほかの値は残った。控えの CSV は 11 行（無かった値は値と種類が空、`PeriodInNanoSeconds` は `QWord`） |
 | 同じ手順 2 の 2 回目 | 上の後 | `控えはもうある（書き換えない）` を出し、CSV は変わらない。`->` の左は今の値（`0 -> 0` など） |
 | 同じ節の手順 5（戻す） | 上の後。控えのファイルを消した後 | あった 5 つを元の値に（`PeriodInNanoSeconds` は QWORD で）書き、無かった 6 つは消した。値と種類が、流す前とすべて一致した（手順 2 で作った 2 つのキーは、値の無いまま残る）。控えが無いときは `中断: 控えが無い:` で止まった |
-| 表示・入力・音・ストレージの手順 11（ストレージ センサー） | キーが無い | キーを作り、`01:  -> 1` から `2048:  -> 30` の 7 行（左は空）を出した |
-| 同じ手順 11 | `01=0`・`256=1`・`2048=0` と、ほかの値（`StoragePoliciesNotified`）がある | `01: 0 -> 1`・`256: 1 -> 30`・`2048: 0 -> 30` と、左が空の 4 行。`New-Item` は呼ばず、ほかの値は残った |
-| 同じ節の手順 23（戻す） | 上の後。キーが無い | 7 つだけを消し、`StoragePoliciesNotified` は残った。キーが無いときは、何も出さず、誤りも出なかった |
-| 同じ節の手順 9（効果音） | 控えが無い。`.Current` のあるイベントが 4 つ、無いイベントが 1 つ | `reg.exe export HKCU\AppEvents <控え> /y` を 1 回呼び、`Scheme : .None` と `空にしたイベント : 4` を出した。`.Default` の値と、`.Current` の無いイベントは変えなかった |
-| 同じ手順 9 の 2 回目 | 控えがある | `控えはもうある（書き換えない）` を出し、`reg.exe export` を呼ばずに同じ 2 行を出した |
-| 同じ手順 9 | 控えが無く、`reg.exe export` が失敗する（ファイルができない） | `中断: 控えを作れなかった:` で止まり、スキームとイベントを変えなかった |
-| 同じ節の手順 21（戻す） | 1 回目の控えがある。控えが無い | `reg.exe import <控え>` を 1 回呼び、`Scheme : .Default` を出した（イベントの値と種類も戻った）。控えが無いときは `中断: 控えが無い:` で止まった |
-| 同じ節の手順 2・4・16（切り替えのキー） | `Hotkey`・`Language Hotkey` が `1`、`Layout Hotkey` が `2`。キーが無い。控えが無い | 手順 2 は `控えた:` と 13 行の表。手順 4 は `1 -> 3`・`1 -> 3`・`2 -> 3`、手順 16 は控えの `1`・`1`・`2` に戻した。キーが無いときは手順 4 がキーを作り、控えが無いときは手順 16 が `控えが無い（既定の値にする）` を出して `1`・`1`・`2` にした |
-| 同じ節の手順 6・18（ギャラリーとホーム） | ギャラリーのキーが無く、ホームのキーがある | 手順 6 は `既にあった …: False`・`True` を出し、2 つに `System.IsPinnedToNameSpaceTree` の 0 を書いた。手順 18 は、無かったギャラリーをキーごと消し（`残っている …: False`）、あったホームは値だけを消した（`True`） |
+| 「表示・入力・音・ストレージを控えて変える」の手順 11（ストレージ センサー） | キーが無い | キーを作り、`01:  -> 1` から `2048:  -> 30` の 7 行（左は空）を出した |
+| 同じ「表示・入力・音・ストレージを控えて変える」の手順 11 | `01=0`・`256=1`・`2048=0` と、ほかの値（`StoragePoliciesNotified`）がある | `01: 0 -> 1`・`256: 1 -> 30`・`2048: 0 -> 30` と、左が空の 4 行。`New-Item` は呼ばず、ほかの値は残った |
+| 「表示・入力・音・ストレージを元に戻す」の手順 9（戻す） | 上の後。キーが無い | 7 つだけを消し、`StoragePoliciesNotified` は残った。キーが無いときは、何も出さず、誤りも出なかった |
+| 「表示・入力・音・ストレージを控えて変える」の手順 9（効果音） | 控えが無い。`.Current` のあるイベントが 4 つ、無いイベントが 1 つ | `reg.exe export HKCU\AppEvents <控え> /y` を 1 回呼び、`Scheme : .None` と `空にしたイベント : 4` を出した。`.Default` の値と、`.Current` の無いイベントは変えなかった |
+| 同じ「表示・入力・音・ストレージを控えて変える」の手順 9 の 2 回目 | 控えがある | `控えはもうある（書き換えない）` を出し、`reg.exe export` を呼ばずに同じ 2 行を出した |
+| 同じ「表示・入力・音・ストレージを控えて変える」の手順 9 | 控えが無く、`reg.exe export` が失敗する（ファイルができない） | `中断: 控えを作れなかった:` で止まり、スキームとイベントを変えなかった |
+| 「表示・入力・音・ストレージを元に戻す」の手順 7（戻す） | 1 回目の控えがある。控えが無い | `reg.exe import <控え>` を 1 回呼び、`Scheme : .Default` を出した（イベントの値と種類も戻った）。控えが無いときは `中断: 控えが無い:` で止まった |
+| 「表示・入力・音・ストレージを控えて変える」の手順 2・4 と「表示・入力・音・ストレージを元に戻す」の手順 2（切り替えのキー） | `Hotkey`・`Language Hotkey` が `1`、`Layout Hotkey` が `2`。キーが無い。控えが無い | 「表示・入力・音・ストレージを控えて変える」の手順 2 は `控えた:` と 13 行の表。「表示・入力・音・ストレージを控えて変える」の手順 4 は `1 -> 3`・`1 -> 3`・`2 -> 3`、「表示・入力・音・ストレージを元に戻す」の手順 2 は控えの `1`・`1`・`2` に戻した。キーが無いときは「表示・入力・音・ストレージを控えて変える」の手順 4 がキーを作り、控えが無いときは「表示・入力・音・ストレージを元に戻す」の手順 2 が `控えが無い（既定の値にする）` を出して `1`・`1`・`2` にした |
+| 「表示・入力・音・ストレージを控えて変える」の手順 6 と「表示・入力・音・ストレージを元に戻す」の手順 4（ギャラリーとホーム） | ギャラリーのキーが無く、ホームのキーがある | 「表示・入力・音・ストレージを控えて変える」の手順 6 は `既にあった …: False`・`True` を出し、2 つに `System.IsPinnedToNameSpaceTree` の 0 を書いた。「表示・入力・音・ストレージを元に戻す」の手順 4 は、無かったギャラリーをキーごと消し（`残っている …: False`）、あったホームは値だけを消した（`True`） |
 
-- 手順 9 の `Get-ChildItem -Path '…\Apps\*\*'` が、2 段下のキーそのもの（イベント）を返すことは、Linux のファイル システムのプロバイダーで確かめた（レジストリのプロバイダーでは確かめていない）
+- 「表示・入力・音・ストレージを控えて変える」の手順 9 の `Get-ChildItem -Path '…\Apps\*\*'` が、2 段下のキーそのもの（イベント）を返すことは、Linux のファイル システムのプロバイダーで確かめた（レジストリのプロバイダーでは確かめていない）
 
 **残っている未確認事項**:
 
@@ -906,7 +906,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - `origin/main` との差分で、足した `powershell` のブロック 20 個（手順書のブロックは 150 個から 170 個になった。既にあるブロックで変えたものは無い）
   - PowerToys の節の 4 個（その節の手順 2・3・5・8）、PowerShell 7 の節の 6 個（その節の手順 2〜5・7・8）、Windows Terminal の節の 4 個（その節の手順 2〜4・6）、WSL の節の 6 個（その節の手順 2〜7）
-- [実施手順](../windows-setup.md#実施手順)の手順 1〜64、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 1〜41、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
+- [実施手順](../windows-setup.md#実施手順)の全部（12 項）、[ロールバック](../extra/windows-setup.md#ロールバック)の全部（5 項）、既にある任意節 6 つ（Wake on LAN〜CopyQ）、[更新](../windows-setup.md#更新)は、`origin/main` と 1 行も変わっていない（変えたのは、実施手順とロールバックのリードと、注意点）。手順書のアラートは 5 つのまま
 
 **構文と Windows PowerShell 5.1 との互換**:
 
@@ -1130,28 +1130,28 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
    - Microsoft アカウントのときの `Username` と `Domain` の入れ方は確かめていない（この手順の補足）
 
 
-### 実施手順 / 手順 26: 補足: この設定の仕組み
+### 実施手順 / 表示と入力 / 手順 2: 補足: この設定の仕組み
 
 - Windows 11 のエクスプローラーは、右クリックで新しい形のメニューを出し、その中の「その他のオプションを確認」（Shift+F10 か Shift+右クリックでも）で旧形式のメニューを出す
 - 新しい形のメニューは、CLSID `{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}` の COM のクラスが出している。自分のユーザーの `HKCU\Software\Classes\CLSID` に同じ CLSID の `InprocServer32` を空の既定の値で置くと、そのクラスを読めなくなり、エクスプローラーは最初から旧形式のメニューを出す
 - Microsoft が説明している設定ではない（サポート外）。広く使われている方法で、25H2 でも効くという記事が複数ある（本書では確かめていない）
-- 自分のユーザーだけにかかり、管理者の権限は要らない。消せば元に戻る（[ロールバック](../extra/windows-setup.md#ロールバック)の手順 2）
+- 自分のユーザーだけにかかり、管理者の権限は要らない。消せば元に戻る（[ロールバックの「表示と入力を戻す」](../extra/windows-setup.md#表示と入力を戻す)の手順 2）
 - PowerShell の `New-Item -Force` で作らず `reg.exe` を使うのは、`New-Item -Force` が既にあるキーを作り直して中の値を消すため。`reg.exe add /f /ve` は既定の値だけを書く
 
 
 
-### 実施手順 / 手順 28: 補足: 値の意味とウィジェットのボタン
+### 実施手順 / 表示と入力 / 手順 4: 補足: 値の意味とウィジェットのボタン
 
 - `TaskbarAl`: 0 で左、1（か値が無い）で中央
 - `ShowTaskViewButton`: 0 でタスク ビューのボタンを消す
 - `ShowSecondsInSystemClock`: 1 で時計に秒を出す（22H2 の 2023 年 5 月の更新から。設定の「個人用設定」→「タスク バー」→「タスク バーの動作」の「システム トレイの時計に秒を表示する」）
 - `SearchboxTaskbarMode`（`Explorer\Advanced` ではなく `Search` の下）: 0 で消す、1 でアイコンだけ、2 で検索ボックス、3 でアイコンとラベル。スタートを開いて文字を打てば、検索はそのまま使える
 - 4 つとも、Microsoft の DSC のリソース（`Microsoft.Windows.Developer` の `Taskbar`）が同じ値を書く。同じリソースはこの 4 つでエクスプローラーを起動し直さないので、タスクバーはすぐに読み直すはず（確かめていない）
-- ウィジェットのボタンの値（`TaskbarDa`）は、24H2 から UCPD（ユーザーの選択を守るドライバー）が守っていて、PowerShell・`reg.exe` からは書けない（「アクセスが拒否されました」になると広く報告されている）。設定の画面（「個人用設定」→「タスク バー」→「ウィジェット」）からは切れる。本書は、手順 34 でウィジェットそのものを外す
+- ウィジェットのボタンの値（`TaskbarDa`）は、24H2 から UCPD（ユーザーの選択を守るドライバー）が守っていて、PowerShell・`reg.exe` からは書けない（「アクセスが拒否されました」になると広く報告されている）。設定の画面（「個人用設定」→「タスク バー」→「ウィジェット」）からは切れる。本書は、「自動起動と標準アプリ」の手順 3 でウィジェットそのものを外す
 
 
 
-### 実施手順 / 手順 31: 補足: レジストリに書かない理由と、Ctrl+Space の取り合い
+### 実施手順 / 表示と入力 / 手順 7: 補足: レジストリに書かない理由と、Ctrl+Space の取り合い
 
 - この設定のレジストリの値は、Microsoft の文書に無い。ある開発者が設定の画面の前後で見比べた記録（`HKCU\Software\Microsoft\IME\15.0\IMEJP\MSIME` の `IsKeyAssignmentEnabled` を 1、`KeyAssignmentCtrlSpace` を 2）はあるが、同じ人が「動いている IME に効く時期が保証されない」として書くのを避けている。本書も画面で変える
 - 割り当てられるキーは、無変換・変換・Ctrl+Space・Shift+Space。Ctrl+Space には、最初は何も割り当てられていない
@@ -1161,30 +1161,30 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 
 
-### 実施手順 / 手順 44: 補足: 有効にする値と、規則を絞ること
+### 実施手順 / ネットワークとリモート / 手順 2: 補足: 有効にする値と、規則を絞ること
 
 - `fDenyTSConnections` を 0 にすると、リモート デスクトップの接続を受け付ける（1 が既定で、受け付けない）。`UserAuthentication` を 1 にすると、ネットワーク レベル認証（NLA）を求める（設定の画面で有効にしたときの既定）。どちらも Microsoft の文書（Azure の VM のリモート デスクトップの切り分け）にある値
 - 受信の規則は、表示の名前が日本語に訳されるので、Microsoft の勧める形（`@FirewallAPI.dll,-28752` のグループ）で指定する。規則の名前は `RemoteDesktop-UserMode-In-TCP`・`-UDP` など（3389 番）
-- `-Profile Private` で、プライベートの LAN（手順 43）からだけ受け付ける。持ち出した先のパブリックの Wi-Fi では開かない。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC は、規則がすべてのプロファイルで有効だった
+- `-Profile Private` で、プライベートの LAN（「ネットワークとリモート」の手順 1）からだけ受け付ける。持ち出した先のパブリックの Wi-Fi では開かない。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC は、規則がすべてのプロファイルで有効だった
 - 設定の画面でリモート デスクトップをオンとオフにし直すと、規則のプロファイルが戻るかは確かめていない。画面で変えたら、この手順の最後の行で確かめ直す
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 32
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 4
 
 
 
-### 実施手順 / 手順 50: 補足: 場所とポリシー
+### 実施手順 / サインイン・検索・キーボード / 手順 3: 補足: 場所とポリシー
 
 - Edge のショートカットは、すべてのユーザーのデスクトップ（`C:\Users\Public\Desktop`）にある。ここは管理者でないと消せない。名前は `Microsoft Edge.lnk`（製品の名前なので訳されないはず。確かめていない）
-- UniGet UI のショートカットは、手順 22 で入れたときに自分のデスクトップにできる（インストーラの定義の `{autodesktop}\UniGetUI`）。OneDrive でデスクトップをバックアップしていると場所が変わるので、`GetFolderPath('Desktop')` で探す
+- UniGet UI のショートカットは、「アプリを入れる」の手順 3 で入れたときに自分のデスクトップにできる（インストーラの定義の `{autodesktop}\UniGetUI`）。OneDrive でデスクトップをバックアップしていると場所が変わるので、`GetFolderPath('Desktop')` で探す
 - Edge のショートカットは、Edge の更新で作り直されることがある。Edge Update のポリシー `RemoveDesktopShortcutDefault` を 1 にすると、Edge の更新や再起動のときに、すべてのユーザーのデスクトップの Edge のショートカットを消す（Microsoft の文書。Edge Update 1.3.155.1 から）。`CreateDesktopShortcutDefault` は、Edge が入っていると効かない（同じ文書）
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 24（ポリシーだけ。消したショートカットは戻らない）
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 7（ポリシーだけ。消したショートカットは戻らない）
 
 
 
-### 実施手順 / 手順 59: 補足: UniGet UI と scoop
+### 実施手順 / 再起動の後に確かめる / 手順 4: 補足: UniGet UI と scoop
 
 - UniGet UI は、`PATH` から `scoop.ps1` を探して scoop を見つける。PowerShell 7（`pwsh.exe`）があればそれで、無ければ Windows PowerShell 5.1 で、`-ExecutionPolicy Bypass` を付けて動かす（ソースの `Scoop.cs`）
 - UniGet UI は、scoop の更新に git が要るとして、無ければ `scoop install main/git` を勧める（同じソース）。本書は git を Git for Windows にそろえるので、勧めに従わない（[選択した方針](../verification/windows-setup.md#選択した方針)）
-- UniGet UI は、手順 22 で入れたときに、サインインのときに起動する設定（`Run` の `WingetUI`）も作る。手順 32 では止めていない
+- UniGet UI は、「アプリを入れる」の手順 3 で入れたときに、サインインのときに起動する設定（`Run` の `WingetUI`）も作る。「自動起動と標準アプリ」の手順 1 では止めていない
 - 画面の文言と並びは、Windows で確かめていない
 
 
@@ -1212,7 +1212,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 | 経路 | 状況 | 採否 |
 |---|---|---|
 | **Scancode Map（レジストリ）** | Microsoft の文書の方法。常駐するアプリが要らない（サインインの画面や管理者の窓でも効くはず。確かめていない）。管理者の権限と再起動が要り、すべてのユーザー・すべてのキーボードにかかる | **採用** |
-| PowerToys の Keyboard Manager | 再起動が要らず、ユーザーごと。PowerToys が動いている間だけ効き、サインインの画面では効かず、管理者の窓には PowerToys を管理者で動かさないと効かない（Microsoft の文書） | 不採用（PowerToys は手順 23 で入れるが、Caps Lock には使わない） |
+| PowerToys の Keyboard Manager | 再起動が要らず、ユーザーごと。PowerToys が動いている間だけ効き、サインインの画面では効かず、管理者の窓には PowerToys を管理者で動かさないと効かない（Microsoft の文書） | 不採用（PowerToys は「アプリを入れる」の手順 4 で入れるが、Caps Lock には使わない） |
 | Sysinternals の Ctrl2Cap | キーボードのフィルター ドライバーを入れる | 不採用（ドライバーを足さずに済む方法がある） |
 
 **旧形式のコンテキストメニュー**
@@ -1222,24 +1222,24 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 | **`HKCU\Software\Classes\CLSID\{86ca1aa0-…}\InprocServer32` を空にする** | 自分のユーザーだけ、管理者は要らない。サポート外 | **採用** |
 | 何もしない（「その他のオプションを確認」か Shift+右クリック） | 毎回 1 手間かかる | 不採用 |
 
-**貼り付けの設定（手順 16〜19）**
+**貼り付けの設定（「貼り付けの設定」の手順 1〜4）**
 
-**LAN をプライベートに（手順 43）**
+**LAN をプライベートに（「ネットワークとリモート」の手順 1）**
 
 - もとは [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 5 と、[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 7 の両方で、同じ操作をしていた。インストール直後に 1 度行うものなので、ここへまとめ、2 つの手順書は確かめるだけにした
 - 規則をパブリックにも広げる方法は採らない。持ち出した先でも、同じサブネットの相手に開くため（OpenSSH サーバーの[選択した方針](windows-openssh-server.md#選択した方針)）
 
-**表示・整理の設定（手順 25〜34）**
+**表示・整理の設定（「表示と入力」と「自動起動と標準アプリ」）**
 
 - **レジストリに書けるものは書き、書けないもの・Microsoft の文書が無く効く時期が読めないものは画面で行う**
   - エクスプローラー・スタート・タスクバー・ダークモード・既定の端末・自動で起動するアプリは、自分のユーザーのレジストリに書く。多くは Microsoft の DSC のリソース（`microsoft/winget-dsc`）が同じ値を書いている
-  - IME の Ctrl+Space（手順 31）は、レジストリの値が Microsoft の文書に無く、効く時期も分からないので、設定の画面を開いて変える
-  - タスクバーとスタートのピン留め（手順 58）は、自分のユーザーで使える、サポートされたコマンドが無い（ポリシーとプロビジョニングだけ）ので、画面で外す
-  - ウィジェットのボタン（`TaskbarDa`）は UCPD が守っていて書けないので、ウィジェットそのものを外す（手順 34）
+  - IME の Ctrl+Space（「表示と入力」の手順 7）は、レジストリの値が Microsoft の文書に無く、効く時期も分からないので、設定の画面を開いて変える
+  - タスクバーとスタートのピン留め（「再起動の後に確かめる」の手順 3）は、自分のユーザーで使える、サポートされたコマンドが無い（ポリシーとプロビジョニングだけ）ので、画面で外す
+  - ウィジェットのボタン（`TaskbarDa`）は UCPD が守っていて書けないので、ウィジェットそのものを外す（「自動起動と標準アプリ」の手順 3）
 - **標準アプリは、自分のユーザーから外す（`Remove-AppxPackage`）**: 管理者の権限が要らず、ストアからいつでも入れ直せる。PC に置かれた元（プロビジョニング）を外す方法は、ほかのユーザーにもかかるので採らない。そのため、機能の更新の後に戻ってくることがある
 - **自動で起動するアプリは、消さずに止める**: タスク マネージャーと同じ所（`StartupApproved\Run`）に書き、いつでもタスク マネージャーから戻せるようにした
 
-**PC 全体・ネットワーク・サインイン（手順 39〜54・64）**
+**PC 全体・ネットワーク・サインイン（「PC 全体の設定」の手順 5 から「WSL と再起動」の手順 1 までと、「WSL の AlmaLinux 10 と自動サインイン」の手順 5）**
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -1269,61 +1269,61 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
   - scoop のインストーラは、管理者の PowerShell では止まる。scoop・UniGet UI・PowerToys（自分のユーザーへの導入）と、自分のユーザーの表示の設定は、どれも管理者の権限が要らない
   - PC 全体の設定（`HKLM`・ファイアウォール・電源・機能）と、管理者しか書けない `HKCU\Software\Policies` だけ、管理者の PowerShell で行う
   - そのため、[Windows の OpenSSH サーバー](../windows-openssh-server.md)の SSH のセッション（Administrators の一員なら管理者の権限で動く）には貼らない
-- **設定のための再起動を 1 回にまとめた**: Scancode Map・PC の名前・キーボードの種類・WSL の機能は再起動、エクスプローラーの設定はエクスプローラーの起動し直しで効く。再起動 1 回で全部効く（hackgen.md の Windows のフォントも、サインインし直す代わりにこの再起動で効く）。Windows Update は先に手順 1〜8 で済ませ、必要な再起動は手順 8 で行う
+- **設定のための再起動を 1 回にまとめた**: Scancode Map・PC の名前・キーボードの種類・WSL の機能は再起動、エクスプローラーの設定はエクスプローラーの起動し直しで効く。再起動 1 回で全部効く（hackgen.md の Windows のフォントも、サインインし直す代わりにこの再起動で効く）。Windows Update は先に「Windows Update」の手順 1〜8 で済ませ、必要な再起動は同じ項の手順 8 で行う
 - **Windows PowerShell 5.1 にそろえた**: Windows 11 に最初からあり、ほかの Windows の手順書とも同じ。実行ポリシーとプロファイルは PowerShell 7 と別に持つので、5.1 の値を変える
 
 ## 参考資料から分離した記録
 
-### 参考資料: 実施手順 / 手順 36: 補足: 変数について
+### 参考資料: 実施手順 / PC 全体の設定 / 手順 2: 補足: 変数について
 
-- `$PC_NAME` は手順 39（PC の名前を変える）で使う
-- `$LAN_IF` は、手順 37（今の状態）・手順 42（アダプターの省電力）・手順 43（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と同じ
+- `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）と「ネットワークとリモート」の手順 1（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と同じ
 - 接続の一覧は `Get-NetConnectionProfile` で見られる。[Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、WSL を動かしていても `vEthernet (WSL (Hyper-V firewall))` は一覧に出ず、有線 LAN の 1 行だけだった
 
-### 参考資料: 実施手順 / 手順 45: 補足: リモート アシスタンス
+### 参考資料: 実施手順 / ネットワークとリモート / 手順 3: 補足: リモート アシスタンス
 
 - リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
-- [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、LAN をプライベートにすると、リモート アシスタンスの受信の規則 4 本が効くようになった（手順 43 の補足）
+- [Windows の OpenSSH サーバー](../windows-openssh-server.md)の検証の PC では、LAN をプライベートにすると、リモート アシスタンスの受信の規則 4 本が効くようになった（「ネットワークとリモート」の手順 1 の補足）
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
-- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。手順 37 の `RemoteAssistance` で、元の値を控える
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 31
+- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。「PC 全体の設定」の手順 3 の `RemoteAssistance` で、元の値を控える
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 3
 
-### 参考資料: 実施手順 / 手順 48: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
+### 参考資料: 実施手順 / サインイン・検索・キーボード / 手順 1: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
 - オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある。[Windows の OpenSSH サーバー](../extra/windows-openssh-server.md#注意点)の検証の PC では、オンのまま SSH にパスワードで入れた（Q&A の報告とは違った）
-- オンだと、自動サインイン（手順 64）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
-- 元に戻すのは[ロールバック](../extra/windows-setup.md#ロールバック)の手順 22
+- オンだと、自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
+- 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 5
 
 ## 本文から分離した確認範囲と実測
 
 以下は文書分離前の本文に記載されていた記録です。新たな検証結果ではありません。
 
-### 実施手順 / 手順 12
+### 実施手順 / Microsoft Store の更新 / 手順 4
 
-   - 終わったら手順 13 へ。まだ CLI が使えない場合は止める（この準備からの通し実行は未検証）
+   - 終わったら「Microsoft Store の更新」の手順 5 へ。まだ CLI が使えない場合は止める（この準備からの通し実行は未検証）
 
-### 実施手順 / 手順 31
+### 実施手順 / 表示と入力 / 手順 7
 
    - 設定の Microsoft IME の画面が開く。「キーとタッチのカスタマイズ」を開き、「キーの割り当て」をオンにして、「Ctrl + Space」を「IME-オン/オフ」にする（画面の文言は確かめていない）
 
-### 実施手順 / 手順 54
+### 実施手順 / WSL と再起動 / 手順 1
 
    - 必要な機能（仮想マシン プラットフォーム）を入れた旨と、再起動を求める旨の行が出ればよい（出力は確かめていない）
 
-### 実施手順 / 手順 58
+### 実施手順 / 再起動の後に確かめる / 手順 3
 
    - 画面の文言は確かめていない
 
-### ロールバック / 手順 7
+### ロールバック / 表示と入力を戻す / 手順 7
 
    - 「キーとタッチのカスタマイズ」で、「Ctrl + Space」を「なし」にするか、「キーの割り当て」をオフにする（画面の文言は確かめていない）
 
-### ロールバック / 手順 31
+### ロールバック / ネットワークと PC 全体の設定を戻す / 手順 3
 
    - システムのプロパティの「リモート」タブが開く。「このコンピューターへのリモート アシスタンス接続を許可する」にチェックを入れて「OK」を押す（画面の文言は確かめていない）
 
-   - この画面は、`fAllowToGetHelp` と、リモート アシスタンスの受信の規則をまとめて戻すはず（確かめていない）。規則をコマンドでまとめて有効にすると、手順 45 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す
+   - この画面は、`fAllowToGetHelp` と、リモート アシスタンスの受信の規則をまとめて戻すはず（確かめていない）。規則をコマンドでまとめて有効にすると、「ネットワークとリモート」の手順 3 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す
 
 ### 補足
 
@@ -1335,7 +1335,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 ## 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
 
-**VM での部分検証結果**。利用者の希望で一度中断し、`<OTHER_PC>` への引き継ぎを準備した。その後の「やはりこのホストで作業を再開してください。」により、`<HOST_PC>` の元の VM で再開した。手順 2〜7・10・13・15〜30・32〜34・61 の CLI 実行と値の読み戻し、管理者設定（40〜51）を確認した。31 の設定と 56 の Caps Lock・Ctrl+Space は利用者が手動で確認した。32 は修正版の実行と値の読み戻し、55 の OS 再起動はログで確認し、57 の Explorer・タスクバーなどの一部を実画面で確認した。WSL（54）はパッケージ・機能の導入まで成功したが、62・63 と VirtualBox の入れ子の VM の実起動は検証環境の制約で未達。64 は Autologon の導入・実体・署名・UAC の画面を確認したが、本文と補助タスクの起動要求は取消で終了した。その後、利用者が Explorer から手動で起動・設定し、2 CPU の通常再起動で無入力の自動サインインを確認した。本文の起動経路が成功した結果とは扱わない。その後、Bing の結果なし（57）、不要な Edge/Store のピン解除（58）、WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧（59）を利用者が手動で確認した。さらに、59 のスタートからの起動と WinGet/Scoop の GUI の版表示、60 の通常権限の Windows PowerShell 5.1 のスタートからの起動、LF 3 行の右クリック貼り付け順を利用者が手動確認した。貼り付けは 16〜19・38 の確認として今回の fixture の範囲に限定する。AI の画面確認、ピン解除の正確な文言、GitHub の直接コピー経路・管理者窓への貼り付けと残る GUI の効果、認証後の RDP ログインと ping は未確認。追加の事前交渉では TCP 到達と CredSSP の選択・必須を確認し、通常権限の PowerShell 7 で長いパスとシンボリックリンクの実操作も確認した。Git の共通手順による 12 キーは試験用の global 設定で検証し、本人の設定には反映していない。14 は条件により飛ばし、実適用は未確認。57〜60 と貼り付け fixture の手動確認は回答済みで、この範囲の結果を記録した。追加の Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager は回答待ち。Windows の実機で全手順を通した記録ではない。
+**VM での部分検証結果**。利用者の希望で一度中断し、`<OTHER_PC>` への引き継ぎを準備した。その後の「やはりこのホストで作業を再開してください。」により、`<HOST_PC>` の元の VM で再開した。「Windows Update」の手順 2〜7、「Microsoft Store の更新」の手順 2・5・7、「貼り付けの設定」の手順 1〜4、「アプリを入れる」の手順 1〜5、「表示と入力」の手順 1〜6、「自動起動と標準アプリ」の手順 1〜3、「WSL の AlmaLinux 10 と自動サインイン」の手順 2 の CLI 実行と値の読み戻し、管理者設定（「PC 全体の設定」の手順 6〜8、「ネットワークとリモート」の手順 1〜5、「サインイン・検索・キーボード」の手順 1〜4）を確認した。「表示と入力」の手順 7 の設定と「再起動の後に確かめる」の手順 1 の Caps Lock・Ctrl+Space は利用者が手動で確認した。「自動起動と標準アプリ」の手順 1 は修正版の実行と値の読み戻し、「WSL と再起動」の手順 2 の OS 再起動はログで確認し、「再起動の後に確かめる」の手順 2 の Explorer・タスクバーなどの一部を実画面で確認した。WSL（「WSL と再起動」の手順 1）はパッケージ・機能の導入まで成功したが、「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 と VirtualBox の入れ子の VM の実起動は検証環境の制約で未達。「WSL の AlmaLinux 10 と自動サインイン」の手順 5 は Autologon の導入・実体・署名・UAC の画面を確認したが、本文と補助タスクの起動要求は取消で終了した。その後、利用者が Explorer から手動で起動・設定し、2 CPU の通常再起動で無入力の自動サインインを確認した。本文の起動経路が成功した結果とは扱わない。その後、Bing の結果なし（「再起動の後に確かめる」の手順 2）、不要な Edge/Store のピン解除（同じ項の手順 3）、WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧（同じ項の手順 4）を利用者が手動で確認した。さらに、「再起動の後に確かめる」の手順 4 のスタートからの起動と WinGet/Scoop の GUI の版表示、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 の通常権限の Windows PowerShell 5.1 のスタートからの起動、LF 3 行の右クリック貼り付け順を利用者が手動確認した。貼り付けは「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 4 の確認として今回の fixture の範囲に限定する。AI の画面確認、ピン解除の正確な文言、GitHub の直接コピー経路・管理者窓への貼り付けと残る GUI の効果、認証後の RDP ログインと ping は未確認。追加の事前交渉では TCP 到達と CredSSP の選択・必須を確認し、通常権限の PowerShell 7 で長いパスとシンボリックリンクの実操作も確認した。Git の共通手順による 12 キーは試験用の global 設定で検証し、本人の設定には反映していない。「Microsoft Store の更新」の手順 6 は条件により飛ばし、実適用は未確認。「再起動の後に確かめる」の手順 2〜4、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 と貼り付け fixture の手動確認は回答済みで、この範囲の結果を記録した。追加の Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager は回答待ち。Windows の実機で全手順を通した記録ではない。
 
 **環境と導入元**:
 
@@ -1347,7 +1347,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 | VM | VirtualBox 7.2.20、メモリ 8 GiB、当初 CPU 4 個、復旧比較後は 2 個のままで 4 個に戻す再試験は未実施、EFI・Secure Boot・TPM 2.0。Hyper-V の NEM バックエンド |
 | 導入先 | 新規の 256 GiB ディスク。単独の Windows の VM で、デュアルブート向けのパーティション作成は試していない |
 | ユーザー | ローカル アカウント `<WIN_USER>`、Administrators の一員 |
-| PowerShell | Windows PowerShell 5.1、x64。デスクトップにサインインした対話タスクで実行した。当初は Session 2、手順 15 は復旧後の Session 1 |
+| PowerShell | Windows PowerShell 5.1、x64。デスクトップにサインインした対話タスクで実行した。当初は Session 2、「Microsoft Store の更新」の手順 7 は復旧後の Session 1 |
 | 検証用の追加物 | Guest Additions と検証コードは別の DVD から導入した。Rufus の元媒体は変更していない。利用者の要望により、専用 VM の検証用パスワードを変更した |
 | 導入前の基準記録 | Guest Additions の導入前に採取した読み取りの JSON。保護した原記録の SHA256 は `F0465DE273E11E84517816E20DEAFC71A87520875C6D8DD017ABF29B47211C0C` |
 
@@ -1355,99 +1355,99 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 **実行方法**:
 
-- 本文の折り畳みの外にある PowerShell ブロックを抽出し、コマンドを変えずに `Invoke-Expression` で順番に実行した。同じ実行グループ内では、手順 20 を除いてスコープを共有した。手順 20 はインストーラーが dot-source と判定しないよう別のスコープで呼び、同じプロセスの環境変数を引き継いだ
-- 手順 2〜7 と PC 全体の設定は管理者、手順 10・13・15〜30・32〜34 は通常権限の対話タスクで実行した。手順 31 の IME の設定は利用者が画面で行った。手順 1・9・35 の画面操作と本文の貼り付けはタスクで代替した。その後、60 の通常窓の起動と、メモ帳からの LF 3 行 fixture の右クリック貼り付けは利用者が手動確認した。GitHub の直接経路・管理者窓への貼り付けは未試験
+- 本文の折り畳みの外にある PowerShell ブロックを抽出し、コマンドを変えずに `Invoke-Expression` で順番に実行した。同じ実行グループ内では、「アプリを入れる」の手順 1 を除いてスコープを共有した。「アプリを入れる」の手順 1 はインストーラーが dot-source と判定しないよう別のスコープで呼び、同じプロセスの環境変数を引き継いだ
+- 「Windows Update」の手順 2〜7 と PC 全体の設定は管理者、「Microsoft Store の更新」の手順 2・5・7、「貼り付けの設定」の手順 1〜4、「アプリを入れる」の手順 1〜5、「表示と入力」の手順 1〜6、「自動起動と標準アプリ」の手順 1〜3 は通常権限の対話タスクで実行した。「表示と入力」の手順 7 の IME の設定は利用者が画面で行った。「Windows Update」の手順 1、「Microsoft Store の更新」の手順 1、「PC 全体の設定」の手順 1 の画面操作と本文の貼り付けはタスクで代替した。その後、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 の通常窓の起動と、メモ帳からの LF 3 行 fixture の右クリック貼り付けは利用者が手動確認した。GitHub の直接経路・管理者窓への貼り付けは未試験
 - 出力・エラー・終了コードと、実行前後の読み取りの状態を採取した。検証用コードの実行準備は、本文の設定が効いたという判定には使っていない
 
 **確認できた結果**:
 
 | 手順 | 実際の結果 |
 |---|---|
-| 2・3 | NuGet 2.8.5.208 と PSWindowsUpdate 2.2.1.5 の初回導入・読み込みが成功した |
-| 4（修正前） | 表には KB5007651・KB890830・KB2267602 の 3 件が出たが、件数の表示は 1 件だった。検索結果の 1 要素が `Collection<PSObject>` で、その中に 3 件を持つことを診断で確認した |
-| 4・7（修正後） | 検索結果を `ForEach-Object { $_ }` で展開するように直した。実検索の 1 件・0 件は正しく表示・判定した。修正後の 3 件の表示は、型の診断と Windows PowerShell 5.1 の模擬で確認した範囲で、実更新前の 3 件では再検索していない |
-| 5・6 | 元の手順のまま 2 回実行した。KB5007651・KB890830・KB2267602・KB4052623 の計 4 件がすべて `Installed` になり、再起動待ちは `False` だった |
-| 7（修正前） | 最初の 3 件を適用した後は KB4052623 が残り、再度適用した後は残り 0 件・確認完了・再起動待ちなしになった。0 件は元のコードでも正しく判定した |
-| 7（復旧の再起動後） | 管理者の手順 2・3・7 のバッチ `20261006-084631Z-30eaa70d` はすべて完了し、エラーは 0 件。手順 7 の実出力は更新 0 件・再起動待ちなしだった |
-| 10 | 通常権限の Session 2 で成功した。`winget.exe` と `store.exe` が使えた |
-| 11・12 | Windows Update の作業中に Store が 22506.1400.2.0 から 22608.1401.5.0 へ自動更新されたため飛ばした。古い Store から CLI を準備する分岐は未検証 |
-| 13（初回） | `updates --help` の終了と `--apply` 対応を確認した。再起動後に回収した初回のログには `Updates available (31 found)` と `Store-managed updates available for bulk installation`、App Installer・Terminal など 31 件の全一覧があった。この初回は CLI の自然終了と終了コードを確認できず、強制停止で中断した |
-| 13（再起動後の再実行） | 通常権限の手順 10・13 のバッチ `20261006-084901Z-83141775` は正常終了し、手順 13 は `No updates found.` を明示した。エラーの記録は空配列、CLI の終了コードは 0 だった |
-| 14 | 手順 13 で更新なしを明示したため、条件により飛ばした。`store updates --apply` の実適用は未検証 |
-| 15 | 再サインイン後の通常権限の Session 1、Windows PowerShell 5.1.26100.9444 でバッチ `20261006-101014Z-da3b4e6d` を実行した。`No updates found.`、App Installer 1.29.379.0 と Terminal 1.24.12741.0 の `Ok`、winget v1.29.380 を確認。エラー 0 件・CLI の終了コード 0・タスク結果 0 で正常終了し、終了記録も今回のバッチに対応した |
-| 16・17 | バッチ `20261006-101122Z-361fe6d7` を通常権限で実行した。初期状態は Scoop・Git なし、ClassicMenu は `False`、Scancode Map なし、プロファイルなし。実行ポリシーの全範囲は `Undefined`、実効値は `Restricted` だった。手順 16 の設定コマンドはエラーなく無出力で終了した |
-| 18・19 | 実効の実行ポリシーは `RemoteSigned` になり、既定のプロファイルへ印付きの 1 行だけを追加した。バッチ全体はエラー 0 件・タスク結果 0 で終了記録も一致した。続く新しい PowerShell のバッチで `RemoteSigned` と Ctrl+Enter の `AddLine` を確認し、プロファイルが読み込まれることを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認した。GitHub の直接経路・管理者窓は未試験 |
-| 20・21 | 通常権限の Session 1 のバッチ `20261006-102102Z-85dd008c` で、`Initializing...` に続き `Scoop was installed successfully!` を確認した。Scoop v0.6.0（2026-09-30）、main バケット（1,669 件）、ユーザーの `PATH` に `C:\Users\<WIN_USER>\scoop\shims` を確認。エラー 0 件、手順 21 の終了コード 0・タスク結果 0 で終了記録も一致した |
-| 22（初回の一覧確認中断） | バッチ `20261006-102229Z-e5e945ca` で scoop-search 2.1.0 と UniGet UI 2026.3.0 の導入が成功した。利用者が Visual C++ ランタイムの管理者確認を許可した後、`Successfully installed` が出た。続く source 未指定の `winget list` は `msstore` の規約と地域情報の初回同意待ちになり、対象 CLI を操作側で中断した |
-| 22（修正後の再実行） | 通常権限の Session 1 のバッチ `20261006-103736Z-d0d5c6cc` は、scoop-search は既存、UniGet UI は既存で新しい版なしと表示した。`--source winget` を付けた一覧は UniGetUI・Devolutions.UniGetUI・2026.3.0 を正常に表示した。エラー 0 件・終了コード 0・タスク結果 0 で終了記録も一致した。初回導入のやり直しではなく、既存の導入の確認だった |
-| 23 | 通常権限の Session 1 のバッチ `20261006-103844Z-c2c5935a` で PowerToys 0.101.2362.0 のハッシュ確認・初回導入・一覧表示が成功した。HKCU の登録と `%LOCALAPPDATA%\PowerToys` の本体の存在・FileVersion 0.101.2362.0 を確認。10:40:04.713 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
-| 24 | 通常権限の Session 1 のバッチ `20261006-104359Z-4a9f9dd6` で PowerShell 7.6.6.0 のハッシュ確認・初回導入・一覧表示が成功した。ユーザーの MSIX は `Microsoft.PowerShell_8wekyb3d8bbwe`、Status は `Ok`、版は 7.6.6.0。WindowsApps の `pwsh.exe` と `PowerShell 7.6.6` の表示を確認した。10:45:16.137 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
-| 25〜30 | バッチ `20261006-104548Z-b74ba246` はすべてエラー 0 件・タスク結果 0 で終了記録も一致した。10:54:13.309 UTC の独立の読み取りもエラー 0 件で、指定したレジストリの全値と型を確認した。GUI の効果は未確認 |
-| 31 | 利用者が IME のオン・オフを Ctrl+Space に設定し、設定画面を閉じたことを確認した。IsKeyAssignmentEnabled=1・KeyAssignmentCtrlSpace=2 を DWORD で読み戻した。その後の手順 56 では利用者が実際のキー入力も確認した |
-| 32（修正前） | 通常権限のバッチ `20261006-111347Z-f222f42c` で Edge の MicrosoftEdgeAutoLaunch_* の StartupApproved の先頭バイトが 3 になった。OneDrive の正確な名前と Teams のキーはなく、該当部分は何もしなかった。出力には `OneDriveSetup: 起動する` が残った。11:19:49 UTC の独立の読み取りでは Run の項目が実在したが、参照先の `C:\Windows\System32\OneDriveSetup.exe` はなく、動いているインストーラーを確認した結果ではない |
-| 32（修正後） | 手順 32 と対応するロールバック 8 の対象へ正確な名前 `OneDriveSetup` を追加した。修正版のバッチ `20261006-112432Z-9ca3808b` はエラー 0 件・終了コード 0・タスク結果 0 で終了した。11:26:39.6657555 UTC の独立の読み取りで OneDriveSetup と Edge の StartupApproved の先頭バイト 3 を確認した。Run の値と実行ファイルは消さず、RunOnce と Active Setup は変更していない。参照先の実行ファイルは不在で、署名は確認していない |
-| 33・34 | 同じバッチは 11:14:32.816 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。33 は Clipchamp・BingNews・BingWeather・Solitaire・OfficeHub・Todos・FeedbackHub・GetHelp・PowerAutomateDesktop の 9 個、34 は Web Experience Pack を外した。Outlook と Teams は最初から不在だった。独立の読み取りでも対象 11 個と Web Experience Pack はすべて不在で、最初から不在の Copilot も不在のままだった |
-| 36・37 | バッチ `20261006-104738Z-a4ee1724` は管理者・Session 1・Ctrl+Enter `AddLine`。Professional、26H2、26300.9457、PC_NAME は空、対象 LAN は「イーサネット」（index 13）で Public、RemoteDesktop は 1、RemoteAssistance は 1、HelloOnly は 2、キーボードは `kbd106.dll`、配信の最適化は Lan だった |
-| 38・40〜42・45・47〜51 | バッチ `20261006-105215Z-41e42451` はエラー 0 件・タスク結果 0 で終了記録も一致し、10:52:34.809 UTC に終了した。独立の読み取りでも変更した値と型を確認した。このバッチの 38 は CLI の順だけを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認したが、管理者窓は未試験 |
-| 41（確認の修正後） | 元の `/q` では LIDACTION と CONSOLELOCK の確認値が空だった。`/qh` に直したバッチ `20261006-105558Z-e052cc85` は 10:55:59.198 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。AC の STANDBYIDLE・LIDACTION・CONSOLELOCK はすべて 0、HibernateEnabled は 0 だった |
-| 39・52・53 | PC_NAME が空、単独の Windows、JIS 106/109 キーの条件により飛ばした。キーボードの `kbd106.dll`・PCAT_106KEY・7・2 を保持した。改名・UTC・US 配列への変更の分岐は未検証 |
-| 43・44・46 | 利用者がこの VM に限って許可した後、手順 36 を含むバッチ `20261006-111436Z-5b60cb90` は 11:14:48.986 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。11:16:41.776 UTC の読み取りもエラー 0 件で、LAN のイーサネット・index 13 は Private、RDP の fDenyTSConnections=0・UserAuthentication=1、RDP の 3 規則と ICMP の 2 規則は有効・Private・Inbound・Allow を確認した。追加の TCP 到達・事前交渉は確認したが、認証情報送信・実際の RDP ログインと ping は未確認 |
-| 54（再起動前の導入確認） | バッチ `20261006-105428Z-57f1244c` は 10:55:24.498 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。WSL 3.0.1 の導入と VirtualMachinePlatform の DISM が成功し、再起動を求めた。11:07:33.958 UTC の独立の読み取りもエラー 0 件で、WSL 3.0.1.0 の登録・`Ok` と VirtualMachinePlatform の `Enabled` を確認した。この時点では再起動後の WSL 2 の実起動はまだ試していなかった |
-| 55（後回収のログで再起動を確認） | 11:33:51 UTC に通常の `Restart-Computer` を実行し、CLI はエラー 0 件・タスク結果 0 だった。後回収のイベントでは User32 1074 が 11:33:53.778 UTC、Kernel-General 13 の終了が 11:34:13.593 UTC、Kernel-General 12 が OS の起動を 11:39:02.500 UTC と記録し、EventLog 6005 は 11:39:13.762 UTC だった。約 5 分遅れて OS が再起動したことを確認した。最初の起動のロック画面・対話画面への到達は直接確認していない |
-| 55 後の復旧起動 | 利用者の明示承認後、11:45:29.857 UTC に対象 VM の強制停止が成功した。停止後の退避を経て起動し、VM の状態は 11:48:17.364 UTC に running、ゲスト OS の LastBoot は 11:48:29.5 UTC だった。GuestControl は終了コード 0 で応答し、Explorer は 0・未サインイン、管理者と通常権限のタスクは Ready。20:49 JST のロック画面を確認し、手動サインインを依頼した。手順 55 による 11:39 の起動とは別の、強制停止後の起動として扱う |
-| 56（利用者の手動確認） | ツールの Caps_Lock+A と Ctrl+A は入力の到達を確認できなかった。その後、利用者が「その通りになりました。」と回答し、実際の入力で Caps Lock+A の全選択、Caps Lock 単独で大文字にならないこと、Ctrl+Space による IME の A/あ と文字入力の切り替えを確認した。利用者の手動確認として合格とし、自動入力の試験が成功した結果とは扱わない |
-| 57（一部） | 新しい Explorer は PC を開き、`gui-fixtures-visible.txt` の拡張子と Hidden 属性の `hidden.txt` の薄色表示を確認した。ファイルの右クリックで直接、送る・プロパティのある旧形式のメニューが開いた。タスクバーは左寄せ・検索/タスクビュー/ウィジェットなし・時計に秒、全体はダークモード、Edge と UniGet UI のデスクトップのショートカットなしを実画面で確認した。Bing の結果なしは、後の「問題ありませんでした。」という利用者の手動回答で確認した。AI はその検索画面を確認できていない |
-| 58（利用者の手動確認） | 不要な Edge/Store のピン解除について、利用者が「問題ありませんでした。」と回答した。手動確認は合格。AI の画面確認と、ピン解除メニューの正確な文言は未確認 |
-| 59（利用者の手動確認） | WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧について、利用者が「問題ありませんでした。」と回答した。追加の起動経路・GUI の版表示についても「確認しました。」と回答し、スタートからの起動と WinGet/Scoop の GUI の版表示を手動確認PASSとした。AI の画面確認は未実施 |
-| 60・16〜19/38（通常窓の fixture） | 利用者の「確認しました。」により、スタートから通常権限の Windows PowerShell 5.1 を開き、メモ帳の LF 3 行を右クリックで貼って paste-line-1→2→3 の順で実行できたことを手動確認PASSとした。今回の fixture の範囲であり、GitHub の直接コピー経路・管理者窓・AI の画面確認は未試験 |
-| 61 | 通常権限の Session 1 のバッチ `20261006-120810Z-1dab0034` は 12:08:13.075 UTC にエラー 0 件・タスク結果 0 で正常終了した。CtrlEnter=AddLine・20 バイトの Scancode Map・kbd106.dll・LongPaths=1・DeveloperMode=1・Sudo=3・Hibernate=0・RemoteDesktop=0・LanCategory=Private を確認した |
-| 62・63（文字コード修正前） | 62 の CLI は終了コード -1・`HCS_E_HYPERV_NOT_INSTALLED`、63 は終了コード -1・`WSL_E_DISTRO_NOT_FOUND` だった。AlmaLinux 10 の導入と実起動は成功していない |
-| 62・63（文字コード修正後） | `WSL_UTF8` と `Console.OutputEncoding` の UTF-8 を併用する修正版を、バッチ `20261006-122748Z-427db2bf` で実行した。12:27:55.850 UTC に終了し、両手順の PowerShell のエラー記録 0 件・タスク結果 0 だったが、CLI は終了コード -1 で同じ仮想化エラー・ディストリビューションなしだった。両手順の日本語出力は読めた。文字コードの修正は確認したが、WSL の実起動は合格としていない |
-| 64（再開後・起動要求取消） | 通常権限の UTF-8 修正版 manifest のバッチ `20261006-173336Z-f88f0701` で、Autologon の導入成功・winget の終了コード 0 を確認した。17:33:57.0822889 UTC に、`%LOCALAPPDATA%\Microsoft\WinGet\Packages` の下に初めてできた Autologon64.exe の 3.10・署名 Valid・Microsoft Corporation を確認し、UAC の実画面でも製品 Autologon・発行元 Microsoft Corporation を確認した。その後、`Start-Process` が「この操作はユーザーによって取り消されました。」を記録し、17:35:47.0813252 UTC にエラー 1 件・タスク結果 1 で終了、タスクは Ready になった。起動要求取消の原因は未特定で、この試行では Autologon の設定は未実施・自動サインインは未検証だった |
-| 64（Explorer の手動起動・設定後の再起動） | 利用者が手動起動・UAC・Enable・成功表示・終了を報告し、指定した Winlogon の 3 値を読み戻した。2 CPU の条件で通常の OS 再起動を 1 回要求し、VM への入力なしで LastBoot 23:18:13.5 UTC と `<WIN_USER>`・Explorer・PowerToys の Session 1 を確認した。手動設定後の自動サインインは合格。本文と補助タスクの取消履歴は維持し、その起動経路の成功とは扱わない |
+| 「Windows Update」の手順 2・3 | NuGet 2.8.5.208 と PSWindowsUpdate 2.2.1.5 の初回導入・読み込みが成功した |
+| 「Windows Update」の手順 4（修正前） | 表には KB5007651・KB890830・KB2267602 の 3 件が出たが、件数の表示は 1 件だった。検索結果の 1 要素が `Collection<PSObject>` で、その中に 3 件を持つことを診断で確認した |
+| 「Windows Update」の手順 4・7（修正後） | 検索結果を `ForEach-Object { $_ }` で展開するように直した。実検索の 1 件・0 件は正しく表示・判定した。修正後の 3 件の表示は、型の診断と Windows PowerShell 5.1 の模擬で確認した範囲で、実更新前の 3 件では再検索していない |
+| 「Windows Update」の手順 5・6 | 元の手順のまま 2 回実行した。KB5007651・KB890830・KB2267602・KB4052623 の計 4 件がすべて `Installed` になり、再起動待ちは `False` だった |
+| 「Windows Update」の手順 7（修正前） | 最初の 3 件を適用した後は KB4052623 が残り、再度適用した後は残り 0 件・確認完了・再起動待ちなしになった。0 件は元のコードでも正しく判定した |
+| 「Windows Update」の手順 7（復旧の再起動後） | 管理者の「Windows Update」の手順 2・3・7 のバッチ `20261006-084631Z-30eaa70d` はすべて完了し、エラーは 0 件。「Windows Update」の手順 7 の実出力は更新 0 件・再起動待ちなしだった |
+| 「Microsoft Store の更新」の手順 2 | 通常権限の Session 2 で成功した。`winget.exe` と `store.exe` が使えた |
+| 「Microsoft Store の更新」の手順 3・4 | Windows Update の作業中に Store が 22506.1400.2.0 から 22608.1401.5.0 へ自動更新されたため飛ばした。古い Store から CLI を準備する分岐は未検証 |
+| 「Microsoft Store の更新」の手順 5（初回） | `updates --help` の終了と `--apply` 対応を確認した。再起動後に回収した初回のログには `Updates available (31 found)` と `Store-managed updates available for bulk installation`、App Installer・Terminal など 31 件の全一覧があった。この初回は CLI の自然終了と終了コードを確認できず、強制停止で中断した |
+| 「Microsoft Store の更新」の手順 5（再起動後の再実行） | 通常権限の「Microsoft Store の更新」の手順 2・5 のバッチ `20261006-084901Z-83141775` は正常終了し、「Microsoft Store の更新」の手順 5 は `No updates found.` を明示した。エラーの記録は空配列、CLI の終了コードは 0 だった |
+| 「Microsoft Store の更新」の手順 6 | 「Microsoft Store の更新」の手順 5 で更新なしを明示したため、条件により飛ばした。`store updates --apply` の実適用は未検証 |
+| 「Microsoft Store の更新」の手順 7 | 再サインイン後の通常権限の Session 1、Windows PowerShell 5.1.26100.9444 でバッチ `20261006-101014Z-da3b4e6d` を実行した。`No updates found.`、App Installer 1.29.379.0 と Terminal 1.24.12741.0 の `Ok`、winget v1.29.380 を確認。エラー 0 件・CLI の終了コード 0・タスク結果 0 で正常終了し、終了記録も今回のバッチに対応した |
+| 「貼り付けの設定」の手順 1・2 | バッチ `20261006-101122Z-361fe6d7` を通常権限で実行した。初期状態は Scoop・Git なし、ClassicMenu は `False`、Scancode Map なし、プロファイルなし。実行ポリシーの全範囲は `Undefined`、実効値は `Restricted` だった。「貼り付けの設定」の手順 1 の設定コマンドはエラーなく無出力で終了した |
+| 「貼り付けの設定」の手順 3・4 | 実効の実行ポリシーは `RemoteSigned` になり、既定のプロファイルへ印付きの 1 行だけを追加した。バッチ全体はエラー 0 件・タスク結果 0 で終了記録も一致した。続く新しい PowerShell のバッチで `RemoteSigned` と Ctrl+Enter の `AddLine` を確認し、プロファイルが読み込まれることを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認した。GitHub の直接経路・管理者窓は未試験 |
+| 「アプリを入れる」の手順 1・2 | 通常権限の Session 1 のバッチ `20261006-102102Z-85dd008c` で、`Initializing...` に続き `Scoop was installed successfully!` を確認した。Scoop v0.6.0（2026-09-30）、main バケット（1,669 件）、ユーザーの `PATH` に `C:\Users\<WIN_USER>\scoop\shims` を確認。エラー 0 件、「アプリを入れる」の手順 2 の終了コード 0・タスク結果 0 で終了記録も一致した |
+| 「アプリを入れる」の手順 3（初回の一覧確認中断） | バッチ `20261006-102229Z-e5e945ca` で scoop-search 2.1.0 と UniGet UI 2026.3.0 の導入が成功した。利用者が Visual C++ ランタイムの管理者確認を許可した後、`Successfully installed` が出た。続く source 未指定の `winget list` は `msstore` の規約と地域情報の初回同意待ちになり、対象 CLI を操作側で中断した |
+| 「アプリを入れる」の手順 3（修正後の再実行） | 通常権限の Session 1 のバッチ `20261006-103736Z-d0d5c6cc` は、scoop-search は既存、UniGet UI は既存で新しい版なしと表示した。`--source winget` を付けた一覧は UniGetUI・Devolutions.UniGetUI・2026.3.0 を正常に表示した。エラー 0 件・終了コード 0・タスク結果 0 で終了記録も一致した。初回導入のやり直しではなく、既存の導入の確認だった |
+| 「アプリを入れる」の手順 4 | 通常権限の Session 1 のバッチ `20261006-103844Z-c2c5935a` で PowerToys 0.101.2362.0 のハッシュ確認・初回導入・一覧表示が成功した。HKCU の登録と `%LOCALAPPDATA%\PowerToys` の本体の存在・FileVersion 0.101.2362.0 を確認。10:40:04.713 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
+| 「アプリを入れる」の手順 5 | 通常権限の Session 1 のバッチ `20261006-104359Z-4a9f9dd6` で PowerShell 7.6.6.0 のハッシュ確認・初回導入・一覧表示が成功した。ユーザーの MSIX は `Microsoft.PowerShell_8wekyb3d8bbwe`、Status は `Ok`、版は 7.6.6.0。WindowsApps の `pwsh.exe` と `PowerShell 7.6.6` の表示を確認した。10:45:16.137 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した |
+| 「表示と入力」の手順 1〜6 | バッチ `20261006-104548Z-b74ba246` はすべてエラー 0 件・タスク結果 0 で終了記録も一致した。10:54:13.309 UTC の独立の読み取りもエラー 0 件で、指定したレジストリの全値と型を確認した。GUI の効果は未確認 |
+| 「表示と入力」の手順 7 | 利用者が IME のオン・オフを Ctrl+Space に設定し、設定画面を閉じたことを確認した。IsKeyAssignmentEnabled=1・KeyAssignmentCtrlSpace=2 を DWORD で読み戻した。その後の「再起動の後に確かめる」の手順 1 では利用者が実際のキー入力も確認した |
+| 「自動起動と標準アプリ」の手順 1（修正前） | 通常権限のバッチ `20261006-111347Z-f222f42c` で Edge の MicrosoftEdgeAutoLaunch_* の StartupApproved の先頭バイトが 3 になった。OneDrive の正確な名前と Teams のキーはなく、該当部分は何もしなかった。出力には `OneDriveSetup: 起動する` が残った。11:19:49 UTC の独立の読み取りでは Run の項目が実在したが、参照先の `C:\Windows\System32\OneDriveSetup.exe` はなく、動いているインストーラーを確認した結果ではない |
+| 「自動起動と標準アプリ」の手順 1（修正後） | 「自動起動と標準アプリ」の手順 1 と対応するロールバックの「表示と入力を戻す」の手順 8 の対象へ正確な名前 `OneDriveSetup` を追加した。修正版のバッチ `20261006-112432Z-9ca3808b` はエラー 0 件・終了コード 0・タスク結果 0 で終了した。11:26:39.6657555 UTC の独立の読み取りで OneDriveSetup と Edge の StartupApproved の先頭バイト 3 を確認した。Run の値と実行ファイルは消さず、RunOnce と Active Setup は変更していない。参照先の実行ファイルは不在で、署名は確認していない |
+| 「自動起動と標準アプリ」の手順 2・3 | 同じバッチは 11:14:32.816 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。「自動起動と標準アプリ」の手順 2 は Clipchamp・BingNews・BingWeather・Solitaire・OfficeHub・Todos・FeedbackHub・GetHelp・PowerAutomateDesktop の 9 個、同じ項の手順 3 は Web Experience Pack を外した。Outlook と Teams は最初から不在だった。独立の読み取りでも対象 11 個と Web Experience Pack はすべて不在で、最初から不在の Copilot も不在のままだった |
+| 「PC 全体の設定」の手順 2・3 | バッチ `20261006-104738Z-a4ee1724` は管理者・Session 1・Ctrl+Enter `AddLine`。Professional、26H2、26300.9457、PC_NAME は空、対象 LAN は「イーサネット」（index 13）で Public、RemoteDesktop は 1、RemoteAssistance は 1、HelloOnly は 2、キーボードは `kbd106.dll`、配信の最適化は Lan だった |
+| 「PC 全体の設定」の手順 4・6〜8、「ネットワークとリモート」の手順 3・5、「サインイン・検索・キーボード」の手順 1〜4 | バッチ `20261006-105215Z-41e42451` はエラー 0 件・タスク結果 0 で終了記録も一致し、10:52:34.809 UTC に終了した。独立の読み取りでも変更した値と型を確認した。このバッチの「PC 全体の設定」の手順 4 は CLI の順だけを確認した。その後、通常窓での LF 3 行 fixture の右クリック貼り付け順を利用者が手動確認したが、管理者窓は未試験 |
+| 「PC 全体の設定」の手順 7（確認の修正後） | 元の `/q` では LIDACTION と CONSOLELOCK の確認値が空だった。`/qh` に直したバッチ `20261006-105558Z-e052cc85` は 10:55:59.198 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。AC の STANDBYIDLE・LIDACTION・CONSOLELOCK はすべて 0、HibernateEnabled は 0 だった |
+| 「PC 全体の設定」の手順 5、「サインイン・検索・キーボード」の手順 5・6 | PC_NAME が空、単独の Windows、JIS 106/109 キーの条件により飛ばした。キーボードの `kbd106.dll`・PCAT_106KEY・7・2 を保持した。改名・UTC・US 配列への変更の分岐は未検証 |
+| 「ネットワークとリモート」の手順 1・2・4 | 利用者がこの VM に限って許可した後、「PC 全体の設定」の手順 2 を含むバッチ `20261006-111436Z-5b60cb90` は 11:14:48.986 UTC にすべてエラー 0 件・タスク結果 0 で終了し、終了記録も一致した。11:16:41.776 UTC の読み取りもエラー 0 件で、LAN のイーサネット・index 13 は Private、RDP の fDenyTSConnections=0・UserAuthentication=1、RDP の 3 規則と ICMP の 2 規則は有効・Private・Inbound・Allow を確認した。追加の TCP 到達・事前交渉は確認したが、認証情報送信・実際の RDP ログインと ping は未確認 |
+| 「WSL と再起動」の手順 1（再起動前の導入確認） | バッチ `20261006-105428Z-57f1244c` は 10:55:24.498 UTC にエラー 0 件・終了コード 0・タスク結果 0 で終了し、終了記録も一致した。WSL 3.0.1 の導入と VirtualMachinePlatform の DISM が成功し、再起動を求めた。11:07:33.958 UTC の独立の読み取りもエラー 0 件で、WSL 3.0.1.0 の登録・`Ok` と VirtualMachinePlatform の `Enabled` を確認した。この時点では再起動後の WSL 2 の実起動はまだ試していなかった |
+| 「WSL と再起動」の手順 2（後回収のログで再起動を確認） | 11:33:51 UTC に通常の `Restart-Computer` を実行し、CLI はエラー 0 件・タスク結果 0 だった。後回収のイベントでは User32 1074 が 11:33:53.778 UTC、Kernel-General 13 の終了が 11:34:13.593 UTC、Kernel-General 12 が OS の起動を 11:39:02.500 UTC と記録し、EventLog 6005 は 11:39:13.762 UTC だった。約 5 分遅れて OS が再起動したことを確認した。最初の起動のロック画面・対話画面への到達は直接確認していない |
+| 「WSL と再起動」の手順 2 後の復旧起動 | 利用者の明示承認後、11:45:29.857 UTC に対象 VM の強制停止が成功した。停止後の退避を経て起動し、VM の状態は 11:48:17.364 UTC に running、ゲスト OS の LastBoot は 11:48:29.5 UTC だった。GuestControl は終了コード 0 で応答し、Explorer は 0・未サインイン、管理者と通常権限のタスクは Ready。20:49 JST のロック画面を確認し、手動サインインを依頼した。「WSL と再起動」の手順 2 による 11:39 の起動とは別の、強制停止後の起動として扱う |
+| 「再起動の後に確かめる」の手順 1（利用者の手動確認） | ツールの Caps_Lock+A と Ctrl+A は入力の到達を確認できなかった。その後、利用者が「その通りになりました。」と回答し、実際の入力で Caps Lock+A の全選択、Caps Lock 単独で大文字にならないこと、Ctrl+Space による IME の A/あ と文字入力の切り替えを確認した。利用者の手動確認として合格とし、自動入力の試験が成功した結果とは扱わない |
+| 「再起動の後に確かめる」の手順 2（一部） | 新しい Explorer は PC を開き、`gui-fixtures-visible.txt` の拡張子と Hidden 属性の `hidden.txt` の薄色表示を確認した。ファイルの右クリックで直接、送る・プロパティのある旧形式のメニューが開いた。タスクバーは左寄せ・検索/タスクビュー/ウィジェットなし・時計に秒、全体はダークモード、Edge と UniGet UI のデスクトップのショートカットなしを実画面で確認した。Bing の結果なしは、後の「問題ありませんでした。」という利用者の手動回答で確認した。AI はその検索画面を確認できていない |
+| 「再起動の後に確かめる」の手順 3（利用者の手動確認） | 不要な Edge/Store のピン解除について、利用者が「問題ありませんでした。」と回答した。手動確認は合格。AI の画面確認と、ピン解除メニューの正確な文言は未確認 |
+| 「再起動の後に確かめる」の手順 4（利用者の手動確認） | WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧について、利用者が「問題ありませんでした。」と回答した。追加の起動経路・GUI の版表示についても「確認しました。」と回答し、スタートからの起動と WinGet/Scoop の GUI の版表示を手動確認PASSとした。AI の画面確認は未実施 |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 1、「貼り付けの設定」の手順 1〜4/「PC 全体の設定」の手順 4（通常窓の fixture） | 利用者の「確認しました。」により、スタートから通常権限の Windows PowerShell 5.1 を開き、メモ帳の LF 3 行を右クリックで貼って paste-line-1→2→3 の順で実行できたことを手動確認PASSとした。今回の fixture の範囲であり、GitHub の直接コピー経路・管理者窓・AI の画面確認は未試験 |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 2 | 通常権限の Session 1 のバッチ `20261006-120810Z-1dab0034` は 12:08:13.075 UTC にエラー 0 件・タスク結果 0 で正常終了した。CtrlEnter=AddLine・20 バイトの Scancode Map・kbd106.dll・LongPaths=1・DeveloperMode=1・Sudo=3・Hibernate=0・RemoteDesktop=0・LanCategory=Private を確認した |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4（文字コード修正前） | 「WSL の AlmaLinux 10 と自動サインイン」の手順 3 の CLI は終了コード -1・`HCS_E_HYPERV_NOT_INSTALLED`、同じ項の手順 4 は終了コード -1・`WSL_E_DISTRO_NOT_FOUND` だった。AlmaLinux 10 の導入と実起動は成功していない |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4（文字コード修正後） | `WSL_UTF8` と `Console.OutputEncoding` の UTF-8 を併用する修正版を、バッチ `20261006-122748Z-427db2bf` で実行した。12:27:55.850 UTC に終了し、両手順の PowerShell のエラー記録 0 件・タスク結果 0 だったが、CLI は終了コード -1 で同じ仮想化エラー・ディストリビューションなしだった。両手順の日本語出力は読めた。文字コードの修正は確認したが、WSL の実起動は合格としていない |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 5（再開後・起動要求取消） | 通常権限の UTF-8 修正版 manifest のバッチ `20261006-173336Z-f88f0701` で、Autologon の導入成功・winget の終了コード 0 を確認した。17:33:57.0822889 UTC に、`%LOCALAPPDATA%\Microsoft\WinGet\Packages` の下に初めてできた Autologon64.exe の 3.10・署名 Valid・Microsoft Corporation を確認し、UAC の実画面でも製品 Autologon・発行元 Microsoft Corporation を確認した。その後、`Start-Process` が「この操作はユーザーによって取り消されました。」を記録し、17:35:47.0813252 UTC にエラー 1 件・タスク結果 1 で終了、タスクは Ready になった。起動要求取消の原因は未特定で、この試行では Autologon の設定は未実施・自動サインインは未検証だった |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 5（Explorer の手動起動・設定後の再起動） | 利用者が手動起動・UAC・Enable・成功表示・終了を報告し、指定した Winlogon の 3 値を読み戻した。2 CPU の条件で通常の OS 再起動を 1 回要求し、VM への入力なしで LastBoot 23:18:13.5 UTC と `<WIN_USER>`・Explorer・PowerToys の Session 1 を確認した。手動設定後の自動サインインは合格。本文と補助タスクの取消履歴は維持し、その起動経路の成功とは扱わない |
 
 - 貼り付けの fixture は `C:\verify\paste-order-check-20261007.txt`（45 バイト、LF、UTF-8 BOM なし）。SHA256 は `1AE3B7504E8FA11B8A7A23EFB9DA9230DFA946A4FB418BE10EA2D22B5416DBB0`。利用者のメモ帳からの貼り付け確認で、AI が本文の GitHub コピーボタンを操作した試験ではない
-- 手順 4・7 の修正は、複数更新の件数表示の誤差を直すもの。手順 5 は変更していない
-- 手順 25 は DWORD の HideFileExt=0・Hidden=1・LaunchTo=1・Start_TrackDocs=0・ShowRecent=0・ShowFrequent=0、26 は String の既定値が空、27 は指定した 11 個の DWORD が 0 だった。28 は TaskbarAl=0・TaskView=0・秒=1・検索=0、29 は明暗の 2 値が 0、30 は 2 つの委譲の GUID が本文と完全に一致した。その後の実画面で Explorer・旧形式のメニュー・タスクバー・ダークモードを確認したが、既定の端末など、すべての効果を確認したわけではない
+- 「Windows Update」の手順 4・7 の修正は、複数更新の件数表示の誤差を直すもの。「Windows Update」の手順 5 は変更していない
+- 「表示と入力」の手順 1 は DWORD の HideFileExt=0・Hidden=1・LaunchTo=1・Start_TrackDocs=0・ShowRecent=0・ShowFrequent=0、同じ項の手順 2 は String の既定値が空、同じ項の手順 3 は指定した 11 個の DWORD が 0 だった。「表示と入力」の手順 4 は TaskbarAl=0・TaskView=0・秒=1・検索=0、同じ項の手順 5 は明暗の 2 値が 0、同じ項の手順 6 は 2 つの委譲の GUID が本文と完全に一致した。その後の実画面で Explorer・旧形式のメニュー・タスクバー・ダークモードを確認したが、既定の端末など、すべての効果を確認したわけではない
 - 管理者設定の読み取りでは、LongPathsEnabled=1・AllowDevelopmentWithoutDevLicense=1・Sudo Enabled=3、DelayLockInterval=4294967295・HibernateEnabled=0 を DWORD で確認した。NIC の AllowComputerToTurnOffDevice は Disabled、RemoteAssistance は 0 で対象の 15 規則はすべて False、HelloOnly は 0、Bing の提案抑止は 1、Edge のショートカット抑止は 1 だった。Edge と UniGet UI の 2 つのショートカットは削除後も不在で、Scancode Map の 20 バイトは本文と一致した
-- 配信の最適化は導入前から Lan で、手順 47 は同じ値を確認した。VM のファームウェアはスリープと休止状態を使えず、手順 41 の実際の眠り・復帰・蓋の動作は試していない
-- 手順 54 後の `wsl --version` は終了コード 0 で WSL 3.0.1.0・カーネル 6.18.40.1-1・WSLg 1.0.79、`wsl --status` は終了コード 0 で既定のバージョン 2 を表示した。同時に「このコンピューターで仮想化が有効になっていないため、WSL2を開始できません」と表示した。CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True だった。この読み取り時点では手順 54 後の再起動をまだしておらず、復旧起動後の WSL 2 の結果とは分けて扱う
-- WSL 1 の機能 `Microsoft-Windows-Subsystem-Linux` は Disabled で、この手順では不要なので正常。`wsl --list --verbose` はディストリビューションなしと表示して終了コード -1 だった。手順 54 は `--no-distribution` なので、これも導入失敗とは判定しない
-- 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の手順 61 と以下の読み取りは、この時点の起動後の状態として扱う
+- 配信の最適化は導入前から Lan で、「ネットワークとリモート」の手順 5 は同じ値を確認した。VM のファームウェアはスリープと休止状態を使えず、「PC 全体の設定」の手順 7 の実際の眠り・復帰・蓋の動作は試していない
+- 「WSL と再起動」の手順 1 後の `wsl --version` は終了コード 0 で WSL 3.0.1.0・カーネル 6.18.40.1-1・WSLg 1.0.79、`wsl --status` は終了コード 0 で既定のバージョン 2 を表示した。同時に「このコンピューターで仮想化が有効になっていないため、WSL2を開始できません」と表示した。CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True だった。この読み取り時点では「WSL と再起動」の手順 1 後の再起動をまだしておらず、復旧起動後の WSL 2 の結果とは分けて扱う
+- WSL 1 の機能 `Microsoft-Windows-Subsystem-Linux` は Disabled で、この手順では不要なので正常。`wsl --list --verbose` はディストリビューションなしと表示して終了コード -1 だった。「WSL と再起動」の手順 1 は `--no-distribution` なので、これも導入失敗とは判定しない
+- 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と以下の読み取りは、この時点の起動後の状態として扱う
 - 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
-- 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。62・63 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
+- 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
 - 初回導入と設定確認の時点では、後続の [Git for Windows](../git.md#windows-11-で-git-for-windows-を入れる)・[Firefox](../firefox.md#windows-11-で使う)・[WezTerm](../wezterm-nightly.md#windows-11-で使う)・[Claude Code](../claude-code.md#windows-11-で使う)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard-road-warrior.md#windows-11-で使う)・[HackGen Console NF](../hackgen.md#windows-11-で使う)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
 - VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
-- 手順 43・44・46 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
-- 手順 13 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
-- live snapshot は約 8 分進まず、対象 VM の `IProgress.Cancel` で取り消した（`VERR_SSM_CANCELLED`）。snapshot は保存できていない。この検証環境の復旧経過を、手順 13 の CLI 障害とは断定しない
+- 「ネットワークとリモート」の手順 1・2・4 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
+- 「Microsoft Store の更新」の手順 5 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
+- live snapshot は約 8 分進まず、対象 VM の `IProgress.Cancel` で取り消した（`VERR_SSM_CANCELLED`）。snapshot は保存できていない。この検証環境の復旧経過を、「Microsoft Store の更新」の手順 5 の CLI 障害とは断定しない
 - 05:09 UTC の pause 中に差分 VDI 11.7 GB・USB VHD 188 MB と VM 情報をホストの一時保存先へコピーし、resume した。`clonemedium` は書き込みロックで失敗し、独立した全ディスク clone は取得できていない。既存の親ディスク・過去 snapshot は維持した
 - ユーザーの承認後、05:29:11 UTC に `poweroff` が成功した。最初の再起動は接続中の Rufus USB から Windows Setup の言語・キーボード画面へ戻った。「次へ」やインストールは操作していない
 - 05:31:53 UTC に再び `poweroff` し、Rufus USB の接続を `none` にした。媒体ファイルは削除・変更していない。05:32:22 UTC に Windows のルート差分 VDI から起動した
 - Guest Additions 7.2.20 のサービスは Running・Automatic で、認証した GuestControl の読み取り probe は終了コード 0 で戻った。読み取り記録の最終起動は 05:36:42.500 UTC。05:38:02 UTC に起動時の更新画面が終了し、Windows のロック画面へ移った。この時点で UI 入力を止め、`<WIN_USER>` の手動サインインを待った
-- 認証した GuestControl の monitor は成功し、管理者・通常権限の両タスクは Ready、原基準記録の SHA256 も一致した。再起動前の手順 13 の記録は `step_started`・`running` のまま。`finished` の時刻は前の手順 10 より古く、手順 13 の終了を示していない
-- 復旧直後の読み取りでは Store プロセスは 0 個だった。初回の手順 13 は更新 31 件の全一覧を採取できたが、CLI の自然終了と終了コードは確認できず、強制停止による中断として扱う
-- サインイン後に管理者の手順 2・3・7 と通常権限の手順 10・13 を再実行した。手順 7 は更新 0 件・再起動待ちなし、手順 13 はエラーなし・終了コード 0 で正常終了した。この時点では手順 13 の出力の回収を待っていた
-- 手順 13 の再実行が完了した後、08:51:06 UTC に VirtualBox の VM が aborted になった。ホストのログは画面数の変更の直後に例外 `0xc0000005` を記録していた。ログを保存し、対象 UUID を指定して GUI で起動し直した。Store コマンドのエラーとは判定していない
+- 認証した GuestControl の monitor は成功し、管理者・通常権限の両タスクは Ready、原基準記録の SHA256 も一致した。再起動前の「Microsoft Store の更新」の手順 5 の記録は `step_started`・`running` のまま。`finished` の時刻は前の「Microsoft Store の更新」の手順 2 より古く、「Microsoft Store の更新」の手順 5 の終了を示していない
+- 復旧直後の読み取りでは Store プロセスは 0 個だった。初回の「Microsoft Store の更新」の手順 5 は更新 31 件の全一覧を採取できたが、CLI の自然終了と終了コードは確認できず、強制停止による中断として扱う
+- サインイン後に管理者の「Windows Update」の手順 2・3・7 と通常権限の「Microsoft Store の更新」の手順 2・5 を再実行した。「Windows Update」の手順 7 は更新 0 件・再起動待ちなし、「Microsoft Store の更新」の手順 5 はエラーなし・終了コード 0 で正常終了した。この時点では「Microsoft Store の更新」の手順 5 の出力の回収を待っていた
+- 「Microsoft Store の更新」の手順 5 の再実行が完了した後、08:51:06 UTC に VirtualBox の VM が aborted になった。ホストのログは画面数の変更の直後に例外 `0xc0000005` を記録していた。ログを保存し、対象 UUID を指定して GUI で起動し直した。Store コマンドのエラーとは判定していない
 - 08:54:41.069 UTC に VM が起動し、再び Windows のロック画面を確認した。手動サインインを再依頼して待っていた。この時点では指定ユーザーのログオン失敗でゲストのファイルを回収できなかった
 - ホストに出た以前の無人インストール用ファイルの削除確認は Escape で取り消し、ファイルは削除していない
-- その後、ホストの接続用の認証情報の不一致を確認し、GuestControl の接続を復旧した。ゲストのパスワードは再変更していない。回収した手順 13 の出力は `No updates found.` で、エラーの記録は空配列だった。手順 14 は飛ばし、手順 15 は手動サインイン後に実行する予定
+- その後、ホストの接続用の認証情報の不一致を確認し、GuestControl の接続を復旧した。ゲストのパスワードは再変更していない。回収した「Microsoft Store の更新」の手順 5 の出力は `No updates found.` で、エラーの記録は空配列だった。「Microsoft Store の更新」の手順 6 は飛ばし、同じ項の手順 7 は手動サインイン後に実行する予定
 - 接続復旧後の読み取りでは Explorer・VBoxTray のプロセスがなく、`Win32_ComputerSystem.UserName` は空だった。この時点はログオフ状態で、再サインインを待った
-- ログオン前の補助読み取りでは、Store 22608.1401.5.0・App Installer 1.29.379.0・Terminal 1.24.12741.0 は Status 0（Ok）だった。その後、利用者の再サインインを確認して手順 15 を実行し、10:10:39.719 UTC に正常終了した
-- 手順 20・21 の初回バッチ `20261006-101239Z-3352f6ed` では、手順 20 の出力は空でエラー 0 件、手順 21 は `scoop` 未検出でエラー 1 件・タスク結果 1 だった。補助ハーネスの dot-source 呼び出しが、Scoop の公式インストーラーの「関数だけを読み込む」分岐に入り、実インストールを行っていなかった。手順 20 の呼び出しだけをハーネス側で直し、本文のコマンドは変えずに再実行すると導入と確認が成功した
-- 手順 22 では、依存関係の `vcredist2022_x64.exe` と管理者確認のプロセスを確認した。実ファイルは Microsoft Corporation の有効な署名で、製品は Microsoft Visual C++ v14 Redistributable x64 14.51.36247、版は 14.51.36247.0 だった。取得した GUI の画面は黒く、実際の UAC の文言は観察できていない。利用者が管理者確認を許可した後、VC x64 の HKLM の `Installed=1` と `Version=v14.51.36247.00`、UniGet UI の導入成功の出力を確認した
+- ログオン前の補助読み取りでは、Store 22608.1401.5.0・App Installer 1.29.379.0・Terminal 1.24.12741.0 は Status 0（Ok）だった。その後、利用者の再サインインを確認して「Microsoft Store の更新」の手順 7 を実行し、10:10:39.719 UTC に正常終了した
+- 「アプリを入れる」の手順 1・2 の初回バッチ `20261006-101239Z-3352f6ed` では、「アプリを入れる」の手順 1 の出力は空でエラー 0 件、同じ項の手順 2 は `scoop` 未検出でエラー 1 件・タスク結果 1 だった。補助ハーネスの dot-source 呼び出しが、Scoop の公式インストーラーの「関数だけを読み込む」分岐に入り、実インストールを行っていなかった。「アプリを入れる」の手順 1 の呼び出しだけをハーネス側で直し、本文のコマンドは変えずに再実行すると導入と確認が成功した
+- 「アプリを入れる」の手順 3 では、依存関係の `vcredist2022_x64.exe` と管理者確認のプロセスを確認した。実ファイルは Microsoft Corporation の有効な署名で、製品は Microsoft Visual C++ v14 Redistributable x64 14.51.36247、版は 14.51.36247.0 だった。取得した GUI の画面は黒く、実際の UAC の文言は観察できていない。利用者が管理者確認を許可した後、VC x64 の HKLM の `Installed=1` と `Version=v14.51.36247.00`、UniGet UI の導入成功の出力を確認した
 - 補助のユーザー別アプリの読み取りでは、UniGet UI 2026.3.0 の HKCU 登録と `%LOCALAPPDATA%\Programs\UniGetUI` の本体、`UniGetUI.exe` の版 2026.3.0.0、scoop-search の実ファイルを確認した
-- 続く source 未指定の `winget list` は `msstore` の初回同意待ちになった。対象の引数と親プロセスを確かめて一覧確認の CLI を中断した。これは操作側による中断として扱い、自然な検索失敗とは判定しない。手順 22・23・24 の一覧確認の 3 行だけに `--source winget` を足し、手順 22 の再実行で一覧の正常表示と終了を確認した
-- 手順 23・24 の実体確認は読み取りエラー 0 件だった。画面の取得は対象を選び直しても 2 回 `foreground window did not report a process id` となり、CLI は正常に応答していた。GUI の操作や表示は確認済みにはしていない
-- 手順 55 の再起動要求後、黒画面・GuestControl 未応答から暫定的に新しい起動を未確認としていた。後回収のイベントと停止時に保存した VBox.log で、11:39 に OS が再起動していたことを確認し、記録を訂正した。VBox.log には HyperV Reset・ACPI Reset と RESETTING/RUNNING、ゲスト VBoxService の 11:39:13.394 UTC のログ開始、graphics capability Yes があった
-- 検証側の最後の GuestControl の失敗確認は新しい起動より前の 11:38:45 UTC で、強制停止直前の再応答の確認が不足していた。強制停止案は当初、別の明示承認が必要として自動承認レビューに拒否された。その後、利用者が「承認します」と明示して強制停止・退避・復旧起動を行った。イベント 41・6008 は後の強制停止後の復旧起動時に発生したもので、手順 55 の自然な再起動の失敗を示すものとして扱わない。Minidump は 0 件、読み取りエラーは 0 件だった
-- 停止後に差分 VDI（約 22.95 GB）・設定・NVRAM・ログの計 4 ファイルを退避し、すべて元と退避先の SHA256 が一致した。11:47:42 UTC に退避の記録を保存した。差分ディスクなので既存の immutable の親が必要で、独立した全ディスク clone ではない。その後に利用者の手動サインインと、手順 61・57 の一部を確認した
-- 手順 61 の確認時点では CLI が正常に応答した。画面が黒くなった際は 1 回のクリックで戻り、表示が消えていた状態として扱う。この時点の観察を VM のハングとは判定しない
-- 利用者の希望で検証を一度中断し、`<OTHER_PC>` へ引き継いで続行する予定とした。この中断中は追加の VM 操作を行わず、検証結果の保存と未実施の範囲の整理のみを行った。中断時点では手順 64 は実行していなかった
+- 続く source 未指定の `winget list` は `msstore` の初回同意待ちになった。対象の引数と親プロセスを確かめて一覧確認の CLI を中断した。これは操作側による中断として扱い、自然な検索失敗とは判定しない。「アプリを入れる」の手順 3・4・5 の一覧確認の 3 行だけに `--source winget` を足し、「アプリを入れる」の手順 3 の再実行で一覧の正常表示と終了を確認した
+- 「アプリを入れる」の手順 4・5 の実体確認は読み取りエラー 0 件だった。画面の取得は対象を選び直しても 2 回 `foreground window did not report a process id` となり、CLI は正常に応答していた。GUI の操作や表示は確認済みにはしていない
+- 「WSL と再起動」の手順 2 の再起動要求後、黒画面・GuestControl 未応答から暫定的に新しい起動を未確認としていた。後回収のイベントと停止時に保存した VBox.log で、11:39 に OS が再起動していたことを確認し、記録を訂正した。VBox.log には HyperV Reset・ACPI Reset と RESETTING/RUNNING、ゲスト VBoxService の 11:39:13.394 UTC のログ開始、graphics capability Yes があった
+- 検証側の最後の GuestControl の失敗確認は新しい起動より前の 11:38:45 UTC で、強制停止直前の再応答の確認が不足していた。強制停止案は当初、別の明示承認が必要として自動承認レビューに拒否された。その後、利用者が「承認します」と明示して強制停止・退避・復旧起動を行った。イベント 41・6008 は後の強制停止後の復旧起動時に発生したもので、「WSL と再起動」の手順 2 の自然な再起動の失敗を示すものとして扱わない。Minidump は 0 件、読み取りエラーは 0 件だった
+- 停止後に差分 VDI（約 22.95 GB）・設定・NVRAM・ログの計 4 ファイルを退避し、すべて元と退避先の SHA256 が一致した。11:47:42 UTC に退避の記録を保存した。差分ディスクなので既存の immutable の親が必要で、独立した全ディスク clone ではない。その後に利用者の手動サインインと、「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と「再起動の後に確かめる」の手順 2 の一部を確認した
+- 「WSL の AlmaLinux 10 と自動サインイン」の手順 2 の確認時点では CLI が正常に応答した。画面が黒くなった際は 1 回のクリックで戻り、表示が消えていた状態として扱う。この時点の観察を VM のハングとは判定しない
+- 利用者の希望で検証を一度中断し、`<OTHER_PC>` へ引き継いで続行する予定とした。この中断中は追加の VM 操作を行わず、検証結果の保存と未実施の範囲の整理のみを行った。中断時点では「WSL の AlmaLinux 10 と自動サインイン」の手順 5 は実行していなかった
 - 2026-10-07 JST に、利用者の指示で `<HOST_PC>` の元の VM で再開した（以下の時刻は 2026-10-06 UTC）。元の VM は poweroff、状態変更時刻は 14:54:57 UTC だった。同じ UUID を `--type separate` で起動し、ゲストの LastBoot は 17:09:21.5 UTC。利用者の手動サインイン「完了」の後、CIM のユーザーと Explorer・PowerToys・UniGet UI の Session 1 の実プロセス、両検証タスクの Ready を確認した
-- 手順 64 の Autologon64.exe の SHA256 は `5D96BBC4E5B726D87C7CF547F5FE98F8F05434EC2130BD60CBF5671FD3A7381B`。17:33:57.0822889 UTC の確認ではタスクは Running、Consent は Session 1 で、利用者の UAC と有効化の操作を待っていた。自動入力の `u` はスタートの検索に届かず画面が閉じ、GUI のキー入力の到達は未確認のまま。この時点では 57 の Bing・58・59 は合格としていなかった。最新の VBox ログでも NEM の Hyper-V mode を確認し、WSL と入れ子の VM は再実行せず、ホストのセキュリティ設定も変更していない
-- 手順 64 は導入成功の後、Autologon の起動要求が取り消されて終了した。利用者は UAC・パスワード・Enable の依頼に「VMが無かった」と回答し、取消の原因は未特定。設定は未実施で、自動サインインも未検証のまま
-- `<HOST_PC>` のホストのイベント 1000 は 17:35:36 UTC に VirtualBoxVM.exe の Qt6GuiVBox.dll+0xd5c74・0xc0000005、17:35:41 UTC に 0xc000041d を記録した。直前の VBoxUI.log には host-screen count changed が 6 回あった。一方、VBoxHeadless は running、ゲストの LastBoot 17:09:21.5 UTC と Explorer のログインを維持していた。表示プロセスの障害として記録し、手順 64 の取消原因の確定とは扱わない。証跡を `evidence/frontend-crash-20261006-173536` に保存した
+- 「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の Autologon64.exe の SHA256 は `5D96BBC4E5B726D87C7CF547F5FE98F8F05434EC2130BD60CBF5671FD3A7381B`。17:33:57.0822889 UTC の確認ではタスクは Running、Consent は Session 1 で、利用者の UAC と有効化の操作を待っていた。自動入力の `u` はスタートの検索に届かず画面が閉じ、GUI のキー入力の到達は未確認のまま。この時点では「再起動の後に確かめる」の手順 2 の Bing・同じ項の手順 3・4 は合格としていなかった。最新の VBox ログでも NEM の Hyper-V mode を確認し、WSL と入れ子の VM は再実行せず、ホストのセキュリティ設定も変更していない
+- 「WSL の AlmaLinux 10 と自動サインイン」の手順 5 は導入成功の後、Autologon の起動要求が取り消されて終了した。利用者は UAC・パスワード・Enable の依頼に「VMが無かった」と回答し、取消の原因は未特定。設定は未実施で、自動サインインも未検証のまま
+- `<HOST_PC>` のホストのイベント 1000 は 17:35:36 UTC に VirtualBoxVM.exe の Qt6GuiVBox.dll+0xd5c74・0xc0000005、17:35:41 UTC に 0xc000041d を記録した。直前の VBoxUI.log には host-screen count changed が 6 回あった。一方、VBoxHeadless は running、ゲストの LastBoot 17:09:21.5 UTC と Explorer のログインを維持していた。表示プロセスの障害として記録し、「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の取消原因の確定とは扱わない。証跡を `evidence/frontend-crash-20261006-173536` に保存した
 - 21:57:23.0140619 UTC の最初の GUI だけの再接続は、VBoxUI.log の aboutToQuit が 10.346 秒で、ウィンドウの復旧を確認できなかった。その後、利用者は表示しているホスト PC が `<HOST_PC>` と回答した
 - 2 回目は `VBoxManage startvm <VM_UUID> --type separate` で GUI のウィンドウが戻り、PID 14420・ウィンドウ 1507508 のホストメニューを実画面で確認した。ただしゲストは黒画面だった。VBox.log には `DetachFramebuffer: Invalid framebuffer object` と `AttachFramebuffer: Framebuffer already attached to 0` があり、経過時間 01:37:41 の実際の heartbeat unresponsive は回復を確認できていない。この検知だけでゲスト OS の停止を確定しない
 - GuestControl の新しいセッションは starting のままタイムアウトした。22:04:23.928 UTC の ACPI による通常終了要求から約 3 分後も VM は running で、通常終了は未確認だった。強制停止による復旧だけを利用者に明確に確認した
@@ -1456,14 +1456,14 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - この 4 CPU の起動では Guest Additions は level 1・base driver までロードした。bootmgfw.efi・Windows の kernel ID・WDDM/USB の記録はあるが、経過時間 28.940 秒以降は 5 分を超えて進展を確認できず、約 11 分 55 秒の観測でも VBoxService に到達しなかった。この試験ではデスクトップとサインインは復旧しなかった
 - 切り分けとして提案した CPU 数 4→2 は、自動承認レビューが「CPU の永続設定変更の明示承認がなく、再起動の許可だけでは不足」として実行前に拒否した。その時点では変更せず、この変更について利用者に明確な承認を依頼した
 - 利用者が CPU 数の比較に「承認します。」と回答した後、22:40:04.323245 UTC に poweroff を確認し、4→2 の設定と読み戻しを行った。separate の起動要求は 22:40:04.5050719 UTC、VMStateChangeTime は 22:40:09.392 UTC、22:40:45.3348627 UTC に running を確認した
-- 2 CPU の起動は、経過 57.677 秒に VBoxGuest、62.560 秒に WDDM、83.716 秒に VBoxService（ゲストの時刻 22:41:30.328 UTC）、84.340 秒に graphics まで進み、Windows のロック画面を実画面で確認した。22:42:21.189987 UTC に GuestControl が成功し、LastBoot 22:40:23.5 UTC を読み戻した。この時点では CIM のユーザーは空、LogonUI は Session 1 で、手動サインインは未完了だった。両検証タスクは Ready で、通常権限タスクの結果 1 は前の手順 64 の取消を保持していた。証跡は `evidence/restart-20261006-222804/VBox-cpu2-ready.log`・`cpu2-diagnostic.json` に保存した。CPU 数以外のハードウェアとホストのセキュリティ設定は変更していない。比較で復旧した結果であり、原因を確定したものではない
+- 2 CPU の起動は、経過 57.677 秒に VBoxGuest、62.560 秒に WDDM、83.716 秒に VBoxService（ゲストの時刻 22:41:30.328 UTC）、84.340 秒に graphics まで進み、Windows のロック画面を実画面で確認した。22:42:21.189987 UTC に GuestControl が成功し、LastBoot 22:40:23.5 UTC を読み戻した。この時点では CIM のユーザーは空、LogonUI は Session 1 で、手動サインインは未完了だった。両検証タスクは Ready で、通常権限タスクの結果 1 は前の「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の取消を保持していた。証跡は `evidence/restart-20261006-222804/VBox-cpu2-ready.log`・`cpu2-diagnostic.json` に保存した。CPU 数以外のハードウェアとホストのセキュリティ設定は変更していない。比較で復旧した結果であり、原因を確定したものではない
 - この時点では 2 CPU のままで検証を続けることにし、4 CPU に戻す再試験は行っていなかった。利用者の「完了」の回答後、22:52:26.7068317 UTC の読み取りでユーザー `<HOSTNAME>\<WIN_USER>`、Explorer（PID 2676・7916）と VBoxTray（PID 8868）の Session 1 を確認し、手動サインインは完了した。LastBoot は 22:40:23.5 UTC のままで、通常権限タスクは Ready、前の取消による結果 1 を保持していた。この時点では Autologon は未設定で、再び開く補助コード `relaunch-autologon.ps1` も VM では実行していなかった
 - 通常権限タスクで Autologon の新しい起動要求 `20261006-225840-29f9cb04` を 1 回行い、22:58:52.2323842 UTC に要求を完了した。補助コードは実体のハッシュ・Microsoft の署名の確認を通過し、22:59:32.8630346 UTC は Consent の Session 1・通常権限タスク Running だった。今回の UAC 文言は画面取得で確認できず、利用者は「VMの画面にはデスクトップしか映っていません」と回答した
 - この要求の完了記録は、開始 22:58:55.1901170 UTC・終了 23:00:58.8458588 UTC・result fail、Start-Process の「この操作はユーザーによって取り消されました」、native_code null だった。利用者が取消を押したかどうかと、取消の原因は未確認。23:05:02.7386707 UTC の GuestControl は同じ LastBoot 22:40:23.5 UTC と `<WIN_USER>`・Explorer の Session 1、Autologon64 と Consent の不在、通常権限タスク Ready・結果 1 を確認した。完了記録は `evidence/autologon-relaunch-20261006-225840-29f9cb04/guest-launch-result.json` に保存した。同じ裏のタスクからは起動を繰り返さず、署名済みの実体を Explorer で選択表示する要求を 1 回行った。この時点では表示成功は未確認で、Autologon の設定と次回起動の自動サインインも未確認だった
 - 選択表示の補助コードの記録は 23:07:24.3667475 UTC で、実体の SHA256 一致・有効な Microsoft の署名・`<WIN_USER>` の Session 1 を確認し、Autologon 自体の起動と設定操作は行っていない。23:08:18.8449035 UTC の GuestControl では、通常権限タスク Ready・結果 0、対象 Autologon フォルダーを開いた Explorer（PID 4156）の Session 1、Autologon と Consent の不在を確認した。完了記録 `explorer-display-result.json` を保存した。Explorer を開く処理は成功したが、画面取得は新しく選び直しても 2 回 CreateForMonitor の 0x80070057 で失敗し、画面の視認は未確認。UI 入力を止め、利用者にタスクバーの Explorer から選択された実体を手動で起動し、製品・発行元を確認して設定する操作を依頼した。この時点では Autologon の設定と次回起動の自動サインインは未確認だった
 
 - 利用者が Explorer から Autologon を手動で起動し、UAC・パスワードと Enable・成功表示・終了を行ったと「完了」で報告した。23:16:09.4770037 UTC の読み取りでは、Winlogon の指定した 3 値だけ（AutoAdminLogon=1・DefaultUserName=`<WIN_USER>`・DefaultDomainName=`<HOSTNAME>`）を確認した。秘密値は読み取っていない。Autologon と Consent は不在、両検証タスクは Ready・結果 0、LastBoot は 22:40:23.5 UTC だった
-- 23:17:36.0232656 UTC に通常の OS 再起動 `shutdown.exe /r /t 10` を 1 回要求し、終了コードは 0、ホストからの poweroff は行っていない。利用者には検証中の VM に入力しないよう事前に伝え、検証側も GUI 入力・認証操作を行っていない。23:19:40.9676058 UTC の GuestControl は終了コード 0 で、LastBoot 23:18:13.5 UTC、ユーザー `<HOSTNAME>\<WIN_USER>`、Explorer（PID 5656・7920）と PowerToys（PID 5528）の Session 1、LogonUI・LockApp・Autologon・Consent の不在、両タスク Ready・結果 0 と指定 3 値の保持を確認した。2 CPU の条件で、手動設定後の無入力の自動サインインを合格とした。本文と補助タスクの Start-Process の取消履歴は維持し、元の起動経路の成功に置き換えない。前後の読み取りと再起動要求は `evidence/autologon-reboot-20261006-2316` に保存した。その後、利用者はホストの通常デスクトップと、VM が見えないことを報告した。ホストのイベントでは VirtualBoxVM（PID 26348）が 23:28:23.7379115 UTC に Qt6GuiVBox.dll+0xd5ec6・0xc0000005、23:28:27.2549383 UTC に 0xc000041d を記録した。原因は未確定で、ゲストは同じ起動とサインインを維持した。表示の再接続 1 回は終了コード 0 だったが、別の表示プロセスは 10.330 秒で aboutToQuit となり、ウィンドウは戻らなかった。強制オプションなしの通常 OS 終了要求はホスト時刻 23:33:55.791 UTC に終了コード 0、VM の poweroff は 23:34:08.177 UTC。同じ 2 CPU の設定で separate 起動を 1 回要求した時刻は 23:34:45.0165607 UTC、終了コード 0、running の状態変更は 23:34:50.521 UTC だった。ゲスト時刻 23:36:42.8632541 UTC の読み取りでは LastBoot 23:35:01.5 UTC、`<WIN_USER>`、Explorer・PowerToys の Session 1、両タスク Ready・結果 0、認証画面なしを確認した。新しいウィンドウで Windows の起動画面から実際のデスクトップを視認し、再度の自動サインインも CLI で確認した。証跡は `evidence/frontend-reattach-20261006-2330` に保存した。その後、利用者の手動の最大化・前面表示の「完了」を受け、その時点で実際のデスクトップ（1057×1143）の最大化を視認した。Edge のピンの右クリックは対象を選び直した 1 回の再試行でも failed to activate captured window となり、GUI 入力を停止した。この時点では 57 の Bing、58 のピン、59 の UniGet UI の操作は未確認で、利用者にまとめて手動の確認を依頼し、UniGet UI を開いたままの報告を待っていた。ゲスト時刻 23:50:04.3380797 UTC の読み取りでは同じ LastBoot 23:35:01.5 UTC と `<WIN_USER>`、UniGet UI 2026.3.0.0・有効な Devolutions Inc の署名・Session 1 のプロセスを確認した。23:50:48.0115251 UTC に Get-StartApps の Name=UniGetUI・AppID=Devolutions.UniGetUI でスタートの入口も確認したが、これらは GUI の起動・検出・一覧確認の代用にはしない。最新のウィンドウを選び直した画面取得は 1057×1143 の内部が黒く、1 回の再取得も黒かった。23:57:21.8597671 UTC の GuestControl は同じ LastBoot 23:35:01.5 UTC、`<WIN_USER>`、Explorer と UniGet UI の Session 1 で正常に応答した。この時点では画面内容を確認できず、57〜59 の結果待ちを維持していた。その後、最後の 3 点について利用者が「問題ありませんでした。」と回答し、Bing/Web の結果なし、不要な Edge/Store のピン解除、UniGet UI の WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧を、利用者の手動確認として合格とした。AI はこれらの画面を確認できていない。この質問では、ピン解除の正確な文言、UniGet UI のスタートからの起動と WinGet/Scoop の GUI の版表示は未確認だった。その後に後者と通常窓での LF 3 行の右クリック貼り付けを依頼し、利用者が「確認しました。」と回答した。59 の起動経路と GUI の版表示、60 のスタートから開く通常権限の Windows PowerShell 5.1、16〜19・38 の今回の fixture による paste-line-1→2→3 の順序を利用者手動確認として合格とした。AI の画面確認は未実施、GitHub のコピーボタンからの直接経路・管理者窓への貼り付け・ピン解除の正確な文言は未試験
+- 23:17:36.0232656 UTC に通常の OS 再起動 `shutdown.exe /r /t 10` を 1 回要求し、終了コードは 0、ホストからの poweroff は行っていない。利用者には検証中の VM に入力しないよう事前に伝え、検証側も GUI 入力・認証操作を行っていない。23:19:40.9676058 UTC の GuestControl は終了コード 0 で、LastBoot 23:18:13.5 UTC、ユーザー `<HOSTNAME>\<WIN_USER>`、Explorer（PID 5656・7920）と PowerToys（PID 5528）の Session 1、LogonUI・LockApp・Autologon・Consent の不在、両タスク Ready・結果 0 と指定 3 値の保持を確認した。2 CPU の条件で、手動設定後の無入力の自動サインインを合格とした。本文と補助タスクの Start-Process の取消履歴は維持し、元の起動経路の成功に置き換えない。前後の読み取りと再起動要求は `evidence/autologon-reboot-20261006-2316` に保存した。その後、利用者はホストの通常デスクトップと、VM が見えないことを報告した。ホストのイベントでは VirtualBoxVM（PID 26348）が 23:28:23.7379115 UTC に Qt6GuiVBox.dll+0xd5ec6・0xc0000005、23:28:27.2549383 UTC に 0xc000041d を記録した。原因は未確定で、ゲストは同じ起動とサインインを維持した。表示の再接続 1 回は終了コード 0 だったが、別の表示プロセスは 10.330 秒で aboutToQuit となり、ウィンドウは戻らなかった。強制オプションなしの通常 OS 終了要求はホスト時刻 23:33:55.791 UTC に終了コード 0、VM の poweroff は 23:34:08.177 UTC。同じ 2 CPU の設定で separate 起動を 1 回要求した時刻は 23:34:45.0165607 UTC、終了コード 0、running の状態変更は 23:34:50.521 UTC だった。ゲスト時刻 23:36:42.8632541 UTC の読み取りでは LastBoot 23:35:01.5 UTC、`<WIN_USER>`、Explorer・PowerToys の Session 1、両タスク Ready・結果 0、認証画面なしを確認した。新しいウィンドウで Windows の起動画面から実際のデスクトップを視認し、再度の自動サインインも CLI で確認した。証跡は `evidence/frontend-reattach-20261006-2330` に保存した。その後、利用者の手動の最大化・前面表示の「完了」を受け、その時点で実際のデスクトップ（1057×1143）の最大化を視認した。Edge のピンの右クリックは対象を選び直した 1 回の再試行でも failed to activate captured window となり、GUI 入力を停止した。この時点では「再起動の後に確かめる」の手順 2 の Bing、同じ項の手順 3 のピン、同じ項の手順 4 の UniGet UI の操作は未確認で、利用者にまとめて手動の確認を依頼し、UniGet UI を開いたままの報告を待っていた。ゲスト時刻 23:50:04.3380797 UTC の読み取りでは同じ LastBoot 23:35:01.5 UTC と `<WIN_USER>`、UniGet UI 2026.3.0.0・有効な Devolutions Inc の署名・Session 1 のプロセスを確認した。23:50:48.0115251 UTC に Get-StartApps の Name=UniGetUI・AppID=Devolutions.UniGetUI でスタートの入口も確認したが、これらは GUI の起動・検出・一覧確認の代用にはしない。最新のウィンドウを選び直した画面取得は 1057×1143 の内部が黒く、1 回の再取得も黒かった。23:57:21.8597671 UTC の GuestControl は同じ LastBoot 23:35:01.5 UTC、`<WIN_USER>`、Explorer と UniGet UI の Session 1 で正常に応答した。この時点では画面内容を確認できず、「再起動の後に確かめる」の手順 2〜4 の結果待ちを維持していた。その後、最後の 3 点について利用者が「問題ありませんでした。」と回答し、Bing/Web の結果なし、不要な Edge/Store のピン解除、UniGet UI の WinGet/Scoop 有効と scoop-search/UniGetUI の導入済み一覧を、利用者の手動確認として合格とした。AI はこれらの画面を確認できていない。この質問では、ピン解除の正確な文言、UniGet UI のスタートからの起動と WinGet/Scoop の GUI の版表示は未確認だった。その後に後者と通常窓での LF 3 行の右クリック貼り付けを依頼し、利用者が「確認しました。」と回答した。「再起動の後に確かめる」の手順 4 の起動経路と GUI の版表示、「WSL の AlmaLinux 10 と自動サインイン」の手順 1 のスタートから開く通常権限の Windows PowerShell 5.1、「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 4 の今回の fixture による paste-line-1→2→3 の順序を利用者手動確認として合格とした。AI の画面確認は未実施、GitHub のコピーボタンからの直接経路・管理者窓への貼り付け・ピン解除の正確な文言は未試験
 
 **追加検証（2026-10-07 UTC）**:
 
@@ -1478,18 +1478,18 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - Git の共通手順 4・5・6・9・10・11 を通常権限の PowerShell 7 から同じ非対話の Git Bash で実行した。identity は検証専用の架空値とし、子プロセスの `GIT_CONFIG_GLOBAL` だけを隔離した。日本語ファイル名・CRLF・最初の push と upstream、分岐した履歴の実 rebase、autostash の作成・適用と未コミット変更の復元、手順 11 による試験用リポジトリの削除を確認した。14 フェーズの終了コードと 9 検査はすべて成功し、実設定も保持した。ホストの 55 秒の待ち時間が先に切れ、最初の実行と結果コピーは終了コード 1 だった。その記録を残し、同じ実行が終了コード 0 で完了した結果を後からコピーした。再実行はしていない。証跡は `evidence/remaining-git-behavior-20261007-092648-ddbf22f4`。
 - WezTerm の `ls-fonts --codepoints ... --rasterize-ascii` で、HackGen Console NF と HackGen35 Console NF の各 6 文字（英字・かな・漢字・矢印・Powerline・フォルダーアイコン）が自身の DirectWrite フォントを使い、欠損でない glyph と画素を生成した。日本語 2 文字は各 2 セル、他は各 1 セルだった。終了コード 0、一時設定の削除と実設定の保持を確認した。GUI の窓や表示の見た目の確認には広げない。証跡は `evidence/remaining-wezterm-font-20261007-092017-4d5448f6`。
-- WireGuard は管理者の Windows PowerShell 5.1 で手順 6 を変更せず実行し、45 bytes・ASCII・LF の鍵ペアと公開鍵の対応、Administrators と SYSTEM だけの ACL を確認した。管理サービスは公式 CLI による一時的な起動・削除で検証した。鍵とサービスとプロセスは削除し、検証タスクの要求ファイルも元に戻した。新しくできた管理サービスの Data は残し、設定ファイルは 0 件だった。鍵の内容・ハッシュは記録していない。手順 5 の GUI と VPN 接続は未確認。証跡は `evidence/remaining-wireguard-local-20261007-094630-d8f8efb9`。
+- WireGuard は管理者の Windows PowerShell 5.1 で wireguard-road-warrior.md の「Windows 11 で WireGuard と鍵を用意する」の手順 6 を変更せず実行し、45 bytes・ASCII・LF の鍵ペアと公開鍵の対応、Administrators と SYSTEM だけの ACL を確認した。管理サービスは公式 CLI による一時的な起動・削除で検証した。鍵とサービスとプロセスは削除し、検証タスクの要求ファイルも元に戻した。新しくできた管理サービスの Data は残し、設定ファイルは 0 件だった。鍵の内容・ハッシュは記録していない。「Windows 11 で WireGuard と鍵を用意する」の手順 5 の GUI と VPN 接続は未確認。証跡は `evidence/remaining-wireguard-local-20261007-094630-d8f8efb9`。
 - RDP は、ゲストに設定された公開証明書を読み取り、SHA256・名前・有効期間を照合して TLS 1.3（`TLS_AES_256_GCM_SHA384`）を確立した。CredSSP の選択後の TLS までで、RDP の資格情報は送信していない。終了コード 0、一時的なループバック転送と待受けの撤去を確認した。認証後のログインと ping は未確認。証跡は `evidence/remaining-rdp-tls-20261007-095055-a37a84b1`。
 
 - スタートアップの追加試験では、新規の Run 項目 2 つに StartupApproved の先頭バイト 2（有効）・3（無効）を設定し、通常の OS 再起動を 1 回行った。起動から 122 秒の最初の読み取りは両記録がなく、確認不能・VBox CLI 終了コード 33 だった。その失敗記録を保持した。有効側は遅れて Explorer の Session 1 から起動し、その記録から 160.754 秒後の読み取りで無効側の記録がないことを確認した。後の観測と後片付けは終了コード 0、今回の Run 2 値・承認 2 値と専用ディレクトリを削除した。既存 OneDriveSetup の参照先は存在しないため、この結果を OneDrive・Teams 本体の次回起動の合格には広げない。証跡は `evidence/remaining-startup-20261007-f0126d5a`。
 
 **未試験・環境未達の範囲**:
 
-1. Windows Update の再起動の分岐（手順 8）
-1. Store の初回 CLI 準備（手順 11・12）、手順 14 の更新適用
+1. Windows Update の再起動の分岐（「Windows Update」の手順 8）
+1. Store の初回 CLI 準備（「Microsoft Store の更新」の手順 3・4）、「Microsoft Store の更新」の手順 6 の更新適用
 1. GUI の残る効果、GitHub の直接コピー経路と管理者窓への貼り付け、ピン解除の正確なメニュー文言
-1. 認証情報送信・認証後の RDP ログインと ping（TCP 到達・事前交渉・証明書の照合による TLS の確立まで追加検証済み）。手順 39・52・53 の変更する分岐は条件により飛ばした
-1. 手順 55 による最初の起動の対話画面への到達、64 の本文と補助タスクからの起動経路、任意節、更新とロールバック。後続ツールは Firefox の既定・コーデック、VirtualBox Manager、WezTerm の GUI、Claude Code の認証、WireGuard の実接続などが未確認。62・63 の WSL 2 と入れ子の VM の実起動は、この検証環境では未達
+1. 認証情報送信・認証後の RDP ログインと ping（TCP 到達・事前交渉・証明書の照合による TLS の確立まで追加検証済み）。「PC 全体の設定」の手順 5 と「サインイン・検索・キーボード」の手順 5・6 の変更する分岐は条件により飛ばした
+1. 「WSL と再起動」の手順 2 による最初の起動の対話画面への到達、「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の本文と補助タスクからの起動経路、任意節、更新とロールバック。後続ツールは Firefox の既定・コーデック、VirtualBox Manager、WezTerm の GUI、Claude Code の認証、WireGuard の実接続などが未確認。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の WSL 2 と入れ子の VM の実起動は、この検証環境では未達
 1. すべての本文の GUI 貼り付け、Windows の実機での通し実行
 
 ## 付録: PR #104 の未検証項目を同じ VM で確かめた記録（2026-10-08）
@@ -1521,34 +1521,34 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 | 手順 | 結果 |
 |---|---|
-| 1〜7（Windows Update） | 管理者の窓で手順 2〜4・6・7 を貼った。対象の更新は 0 件で、`Windows Update の確認完了（対象の更新なし・再起動待ちなし）`。手順 5・8 は条件に当たらなかった |
-| 9〜15（Store） | 手順 10 で Store 22608.1401.5.0 と `store.exe`・`winget.exe`。手順 13 は `No updates found.`。手順 11・12・14 は条件に当たらなかった |
-| 35 | スタートで「Windows PowerShell」を右クリック →「管理者として実行」。UAC の確認（Windows PowerShell、発行元 Microsoft Windows。既定のボタンは「いいえ」）で「はい」を選ぶと、「管理者: Windows PowerShell」の conhost の窓（`ConsoleWindowClass`）が開き、プロファイルのエラーは出なかった |
-| 36・37 | GitHub のコピーボタンから管理者の窓に貼った。`Admin : True`・`CtrlEnter : AddLine`・Professional・26H2・26300.9457・`LanCategory : Private`・`RemoteDesktop : 0`・`RemoteAssistance : 0`・`HelloOnly : 0`・`Keyboard : kbd106.dll`・`Hypervisor : True`・配信の最適化 `Lan` |
-| 38 | 管理者の conhost の窓に右クリックで貼ると、最後の `}` の後で止まり、Enter で `1 行目`・`2 行目`・`3 行目` の順に出た（逆順にならない） |
-| 39（PC の名前を変える分岐） | `$PC_NAME = 'PR104-VERIFY'` で手順 36 を貼り直し、手順 39 は警告と `再起動の後に PR104-VERIFY になる`。再起動の前に貼り直しても同じ出力 |
-| 52・53（UTC と US 配列の分岐） | 手順 52 で `RealTimeIsUniversal : 1`、手順 53 で `kbd101.dll`・`PCAT_101KEY`・`7`・`0` |
-| 55 | `Restart-Computer` の後、自動サインインでデスクトップに戻った（Autologon の `DefaultDomainName` が元の名前 `<HOSTNAME>` のままでも通った） |
-| 56 | ホストからのキーで確かめた。US 配列で Shift+2 が `@`、Caps Lock+A で全選択（Caps Lock だけでは大文字にならない）、Ctrl+Space で IME がオン（「あ」、変換の候補が出る）とオフに入れ替わった |
-| 57 | スタートの検索に Web の結果が出なかった。エクスプローラーは「PC」を開き、拡張子と隠しファイルが見え、ファイルの右クリックで「送る」「プロパティ」のある旧形式のメニュー。タスクバーは左寄せで、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒。全体が濃い色 |
-| 58 | タスクバーのアイコンの右クリックのメニューの文言は「タスクバーからピン留めを外す」で、本文の「タスク バーからピン留めを外す」と違ったので直した。スタートのピン留めの右クリックは「スタートからピン留めを外す」で、本文どおり。Edge はスタートにピン留めされたまま残した |
-| 59 | スタートから UniGet UI 2026.3.0 を起動した。左の「パッケージマネージャー」で WinGet と Scoop が有効・「利用可能」。版はそれぞれの「バージョンを表示」で出た（WinGet v1.29.380、Scoop v0.6.0 - Released at 2026-09-30）。本文の「見つかっている（版が出ている）」と違ったので直した。インストール済みの一覧に `scoop-search` 2.1.0（Scoop: main）と `Devolutions.UniGetUI` 2026.3.0 |
-| 60・61 | スタートから開いた通常の Windows PowerShell は、Windows Terminal の中に開いた。手順 61 を GitHub のコピーボタンからコピーして右クリックで貼ると、「警告 複数の行を含むテキストを貼り付けようとしています…」の確認（「強制的に貼り付け」「キャンセル」）が出た。強制的に貼り付けると、完結した行から順に動いた。`ComputerName : PR104-VERIFY`・`Keyboard : kbd101.dll` などが出た |
-| 64（本文の起動経路） | Windows Terminal の通常の窓に貼った。winget は入っている旨（`Found an existing package already installed.`・`No available upgrade found.`、英語）を出し、UAC の確認（Autologon、Microsoft Corporation、このコンピューター上のハード ドライブ）で「はい」を選ぶと Autologon の窓が開いた（`Username` が <WIN_USER>、`Domain` が <HOSTNAME>）。パスワードを入れて `Enable` を押すと `Autologon successfully configured.` の旨。以後の再起動で、入力無しに自動サインインした |
+| 「Windows Update」の手順 1〜7 | 管理者の窓で「Windows Update」の手順 2〜4・6・7 を貼った。対象の更新は 0 件で、`Windows Update の確認完了（対象の更新なし・再起動待ちなし）`。「Windows Update」の手順 5・8 は条件に当たらなかった |
+| 「Microsoft Store の更新」の手順 1〜7 | 「Microsoft Store の更新」の手順 2 で Store 22608.1401.5.0 と `store.exe`・`winget.exe`。「Microsoft Store の更新」の手順 5 は `No updates found.`。「Microsoft Store の更新」の手順 3・4・6 は条件に当たらなかった |
+| 「PC 全体の設定」の手順 1 | スタートで「Windows PowerShell」を右クリック →「管理者として実行」。UAC の確認（Windows PowerShell、発行元 Microsoft Windows。既定のボタンは「いいえ」）で「はい」を選ぶと、「管理者: Windows PowerShell」の conhost の窓（`ConsoleWindowClass`）が開き、プロファイルのエラーは出なかった |
+| 「PC 全体の設定」の手順 2・3 | GitHub のコピーボタンから管理者の窓に貼った。`Admin : True`・`CtrlEnter : AddLine`・Professional・26H2・26300.9457・`LanCategory : Private`・`RemoteDesktop : 0`・`RemoteAssistance : 0`・`HelloOnly : 0`・`Keyboard : kbd106.dll`・`Hypervisor : True`・配信の最適化 `Lan` |
+| 「PC 全体の設定」の手順 4 | 管理者の conhost の窓に右クリックで貼ると、最後の `}` の後で止まり、Enter で `1 行目`・`2 行目`・`3 行目` の順に出た（逆順にならない） |
+| 「PC 全体の設定」の手順 5（PC の名前を変える分岐） | `$PC_NAME = 'PR104-VERIFY'` で「PC 全体の設定」の手順 2 を貼り直し、「PC 全体の設定」の手順 5 は警告と `再起動の後に PR104-VERIFY になる`。再起動の前に貼り直しても同じ出力 |
+| 「サインイン・検索・キーボード」の手順 5・6（UTC と US 配列の分岐） | 「サインイン・検索・キーボード」の手順 5 で `RealTimeIsUniversal : 1`、同じ項の手順 6 で `kbd101.dll`・`PCAT_101KEY`・`7`・`0` |
+| 「WSL と再起動」の手順 2 | `Restart-Computer` の後、自動サインインでデスクトップに戻った（Autologon の `DefaultDomainName` が元の名前 `<HOSTNAME>` のままでも通った） |
+| 「再起動の後に確かめる」の手順 1 | ホストからのキーで確かめた。US 配列で Shift+2 が `@`、Caps Lock+A で全選択（Caps Lock だけでは大文字にならない）、Ctrl+Space で IME がオン（「あ」、変換の候補が出る）とオフに入れ替わった |
+| 「再起動の後に確かめる」の手順 2 | スタートの検索に Web の結果が出なかった。エクスプローラーは「PC」を開き、拡張子と隠しファイルが見え、ファイルの右クリックで「送る」「プロパティ」のある旧形式のメニュー。タスクバーは左寄せで、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒。全体が濃い色 |
+| 「再起動の後に確かめる」の手順 3 | タスクバーのアイコンの右クリックのメニューの文言は「タスクバーからピン留めを外す」で、本文の「タスク バーからピン留めを外す」と違ったので直した。スタートのピン留めの右クリックは「スタートからピン留めを外す」で、本文どおり。Edge はスタートにピン留めされたまま残した |
+| 「再起動の後に確かめる」の手順 4 | スタートから UniGet UI 2026.3.0 を起動した。左の「パッケージマネージャー」で WinGet と Scoop が有効・「利用可能」。版はそれぞれの「バージョンを表示」で出た（WinGet v1.29.380、Scoop v0.6.0 - Released at 2026-09-30）。本文の「見つかっている（版が出ている）」と違ったので直した。インストール済みの一覧に `scoop-search` 2.1.0（Scoop: main）と `Devolutions.UniGetUI` 2026.3.0 |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 1・2 | スタートから開いた通常の Windows PowerShell は、Windows Terminal の中に開いた。「WSL の AlmaLinux 10 と自動サインイン」の手順 2 を GitHub のコピーボタンからコピーして右クリックで貼ると、「警告 複数の行を含むテキストを貼り付けようとしています…」の確認（「強制的に貼り付け」「キャンセル」）が出た。強制的に貼り付けると、完結した行から順に動いた。`ComputerName : PR104-VERIFY`・`Keyboard : kbd101.dll` などが出た |
+| 「WSL の AlmaLinux 10 と自動サインイン」の手順 5（本文の起動経路） | Windows Terminal の通常の窓に貼った。winget は入っている旨（`Found an existing package already installed.`・`No available upgrade found.`、英語）を出し、UAC の確認（Autologon、Microsoft Corporation、このコンピューター上のハード ドライブ）で「はい」を選ぶと Autologon の窓が開いた（`Username` が <WIN_USER>、`Domain` が <HOSTNAME>）。パスワードを入れて `Enable` を押すと `Autologon successfully configured.` の旨。以後の再起動で、入力無しに自動サインインした |
 
-- 手順 39・52・53 の分岐は、[ロールバック](../extra/windows-setup.md#ロールバック)の手順 18・19・26・27・37・38 で戻した。手順 38 の再起動の後、名前は `<HOSTNAME>`、キーボードは `kbd106.dll`・`PCAT_106KEY`・`7`・`2`、`RealTimeIsUniversal` は無し。手順 27 は何も出さなかった
+- 「PC 全体の設定」の手順 5 と「サインイン・検索・キーボード」の手順 5・6 の分岐は、[ロールバック](../extra/windows-setup.md#ロールバック)の「サインイン・検索・キーボードを戻す」の手順 1・2・9・10、「ネットワークと PC 全体の設定を戻す」の手順 9、「再起動と PSWindowsUpdate」の手順 1 で戻した。ロールバックの「再起動と PSWindowsUpdate」の手順 1 の再起動の後、名前は `<HOSTNAME>`、キーボードは `kbd106.dll`・`PCAT_106KEY`・`7`・`2`、`RealTimeIsUniversal` は無し。ロールバックの「サインイン・検索・キーボードを戻す」の手順 10 は何も出さなかった
 - 時計: `RealTimeIsUniversal=1` で起動すると、システムの時刻が 9 時間進み、VBoxService が 32,369,482 ミリ秒戻した（VM の RTC は地方時）。ロールバックの再起動では逆に 9 時間遅れ、32,418,700 ミリ秒進めた。本文の「再起動の後に、時刻を同期し直す」に当たる
-- 実施手順 62・63 の WSL 2 は扱っていない（この VM では動かない。上の付録）
+- 実施手順の「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の WSL 2 は扱っていない（この VM では動かない。上の付録）
 
 **ping とリモート デスクトップ（2 枚目の NIC で）**:
 
 - 2 枚目の NIC を足した直後（パブリック）は、外からの ping が届かなかった
-- 管理者の窓で、手順 36 の `$LAN_IF` を `'イーサネット 3'` に直して貼り、手順 42（`AllowComputerToTurnOffDevice : Disabled`。`WakeOnMagicPacket` は `Unsupported`）・43（Private）・44（RDP の 3 規則が Private）・46（ping の 2 規則）を貼った
+- 管理者の窓で、「PC 全体の設定」の手順 2 の `$LAN_IF` を `'イーサネット 3'` に直して貼り、同じ項の手順 8（`AllowComputerToTurnOffDevice : Disabled`。`WakeOnMagicPacket` は `Unsupported`）と「ネットワークとリモート」の手順 1（Private）・2（RDP の 3 規則が Private）・4（ping の 2 規則）を貼った
 - AlmaLinux の 2 台とホストからの ping は、どれも 0% loss
 - RDP: AlmaLinux の VM の FreeRDP から、試験用の資格情報で 192.168.56.107 につないだ。Kerberos は失敗して NTLM で認証され、ログインできた
   - `quser` で `rdp-tcp#0` が Active。RDP のセッションの画面（1280x800、`TerminalServerSession : True`）を撮った。PC の画面はロック画面になった
   - 切断すると `Disc`。昇格したプロセスから `tscon.exe <ID> /dest:console` を実行すると、`console` が Active に戻り、PC の画面はロックされていなかった
-- 再起動すると、ホストオンリーのネットワーク（既定ゲートウェイの無い「識別されていないネットワーク」）の「イーサネット 3」はパブリックに戻った。NAT の「イーサネット」はプライベートのまま。以後、2 枚目の NIC を使う確認の前に手順 43 を貼り直した
+- 再起動すると、ホストオンリーのネットワーク（既定ゲートウェイの無い「識別されていないネットワーク」）の「イーサネット 3」はパブリックに戻った。NAT の「イーサネット」はプライベートのまま。以後、2 枚目の NIC を使う確認の前に「ネットワークとリモート」の手順 1 を貼り直した
 
 **Wake on LAN を使う（任意）**:
 
@@ -1602,61 +1602,61 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - 始める前に、ゲストの「イーサネット 2」を有効に戻し、OS を止めて 2 枚目の NIC を外し、スナップショット `pr104-before-rollback-20261008` を撮った（利用者はここへ戻せる）
 - 各ツールの Windows 11 のロールバックを先に流した（それぞれの検証記録の 2026-10-08 の付録）
-- この節の手順 1〜17 は、管理者ではない Windows PowerShell（Windows Terminal の中）に貼った
+- この節の「表示と入力を戻す」の手順 1〜9 と「アプリと貼り付けの設定を外す」の手順 1〜8 は、管理者ではない Windows PowerShell（Windows Terminal の中）に貼った
 
 | この節の手順 | 結果 |
 |---|---|
-| 1 | `HideFileExt : 1`・`Hidden : 2`・`Start_TrackDocs : 1`、`LaunchTo` は出なかった |
-| 2 | `この操作を正しく終了しました。` と `False` |
-| 3 | 8 つの値がすべて `1` |
-| 4 | 3 つの値は何も出なかった。画面のタスクバーは中央寄せで、検索ボックスとタスク ビューのボタンが出た |
-| 5 | `1` が 2 つ。画面が淡色になった |
-| 6 | 2 つの値は何も出なかった |
-| 7 | Microsoft IME の設定の画面が開いた。「キーとタッチのカスタマイズ」を開くと、「キーの割り当て」の「各キー / キーの組み合わせに好みの機能を割り当てます」のスイッチが「オン」で、「Ctrl + Space」は「IME-オン/オフ」（選択肢は「IME-オン/オフ」と「なし」）。本文の 2 つの方法のうち、スイッチをオフにした。`IsKeyAssignmentEnabled` が 0 になった（`KeyAssignmentCtrlSpace` は 2 のまま） |
-| 8 | `戻した: MicrosoftEdgeAutoLaunch_<番号>` と `戻した: OneDriveSetup`（Teams のキーは無かった） |
-| 9 | 約 15 分かかった。11 個の ID のうち 9 個と Teams（`Microsoft.Teams` 26198.304.4946.9672）は `Successfully installed` で入った（Clipchamp・天気・Office Hub・To Do・フィードバック Hub・問い合わせ・Power Automate・Outlook・ウィジェットの Windows Web Experience Pack）。入らなかった 2 つは次のとおり |
-| 9（ニュース `9WZDNCRFHVFW`） | `Failed to install or upgrade Microsoft Store package. Error code: 0x80073cfb`。AppX のイベント 404・474 は、イメージに残っていた `Microsoft.BingNews_1.0.2.0_x64__8wekyb3d8bbwe`（SYSTEM 用に Staged）と同じ ID で中身が違うので展開を止めた、というものだった |
-| 9（Solitaire `9WZDNCRFHWD2`） | `No package found matching input criteria.`（msstore のソースにその ID が無い。名前で探しても見つからなかった） |
-| 9（登録し直し） | どちらも PC にプロビジョニングされたパッケージとして残っていたので、`Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.BingNews_8wekyb3d8bbwe`（と Solitaire の同じ形）で登録し直すと、`Microsoft.BingNews` 1.0.2.0 と `Microsoft.MicrosoftSolitaireCollection` 4.27.9181.0 が `Ok` になった。本文に箇条書きを足した |
-| 10〜12 | PowerShell 7・PowerToys（`PowerToys (Preview) x64`）・UniGet UI とも `Successfully uninstalled`、続く `winget list` は `No installed package found matching input criteria.`。動いていた PowerToys と UniGet UI は閉じられた |
-| 13（本文のまま） | `Are you sure? (yN):` に `y` を入れると、`Uninstalling 'scoop-search'` の後に `WARN  Couldn't remove ~\scoop\apps\scoop-search: 項目 …\current を削除できません: パス 'current' へのアクセスが拒否されました。` と、`Couldn't remove ~\scoop\apps: …` で止まった。`Scoop has been uninstalled.` は出ず、scoop 本体は消えていた（貼り直すと `scoop.ps1` が見つからない旨）。ユーザーの PATH に `scoop\shims` が残った |
-| 13（原因） | `current` のジャンクションに読み取り専用の属性が付いていた。scoop 0.6.0 の `bin/uninstall.ps1` は、アプリの `current` の読み取り専用を外さずに消そうとする（[参考資料](../reference/windows-setup.md)） |
-| 14（本文のまま、13 が止まった後） | `Remove-Item … -ErrorAction SilentlyContinue` も消せず、`True`・`False`。`attrib.exe -R /L` で `current` の読み取り専用を外してから貼り直すと、`False` が 2 行になった。PATH の `scoop\shims` は残った |
-| 13（直した形） | 手順 20・21 と `scoop install scoop-search` で入れ直し（`current` は `ReadOnly, Directory, ReparsePoint`）、1 行目に `current` の読み取り専用を外す行を足したブロックを貼った。`y` を入れると `Uninstalling 'scoop-search'`・`Removing ~\scoop\shims from your path.`・`Scoop has been uninstalled.` で終わり、ユーザーの PATH から `scoop\shims` も消えた。本文をこの形に直した |
-| 14（直した 13 の後） | `False` が 2 行 |
-| 15 | `消した: C:\Users\<WIN_USER>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（プロファイルにはその 1 行だけがあった） |
-| 16 | `$OLD_EXECUTION_POLICY = 'Undefined'`（2026-10-06 の実施手順 17 の記録）で、表の `CurrentUser` を含むすべてが `Undefined` |
-| 17 | `WSL_E_DISTRO_NOT_FOUND`（AlmaLinux-10 は入れられていなかった）。一覧はディストリビューションが無い旨 |
-| 18 | スタートで「Windows PowerShell」を探し、右側の「管理者として実行」を押した。UAC の確認（Windows PowerShell、発行元 Microsoft Windows）で「はい」を選び、conhost の窓が開いた |
-| 18 の後の貼り付け | この節の手順 15 でプロファイルの行を消したので、実施手順 38 の 3 行の試験を右クリックで貼ると、`}`・`'3 行目'`・`'2 行目'`・`'1 行目'`・`& {` の逆順に入った（本文のこの節の手順 15 の「右クリックで貼ると、行が逆順になる」のとおり）。Ctrl+C で捨て、Ctrl+V で貼ると `1 行目`・`2 行目`・`3 行目` の順に動いた。この節の手順 19〜38 は Ctrl+V で貼った |
-| 19 | `LAN_IF = イーサネット` |
-| 20 | 管理者の窓から起動したので UAC の確認は出ず、Autologon の窓（`Username` <WIN_USER>、`Domain` <HOSTNAME>）が開いた。`Disable` を押すと「AutoLogon is disabled.」の窓が出て、「OK」で Autologon も閉じた。`AutoAdminLogon` は 0 |
-| 21（本文のまま、管理者の窓） | `Found Autologon [Microsoft.Sysinternals.Autologon]` の後、`The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れなかった（手順 64 は管理者ではない窓で `--scope user` で入れる）。続く `AutoAdminLogon` は 0 |
-| 21（管理者ではない窓） | 同じブロックをこの節の手順 1〜17 の窓に貼ると、`Successfully uninstalled` と `0`。`Autologon64.exe` も消えた。本文のこの節の手順 21 を管理者ではない窓で行う形に直し、節のリードも直した |
-| 22 | `DevicePasswordLessBuildVersion : 2`（2026-10-06 の実施手順 37 の記録では `HelloOnly` は 2） |
-| 23・24 | どちらも何も出なかった |
-| 25 | `wsl.exe --uninstall` は何も表示しなかった。`Disable-WindowsOptionalFeature` は `RestartNeeded : True`。WSL のパッケージは消え、仮想マシン プラットフォームは `Disabled` になった |
-| 26 | `kbd106.dll`・`PCAT_106KEY`・`7`・`2`（手順 53 は前の分岐の確認の後に戻してあったので、同じ値の書き直し） |
-| 27 | 何も出なかった |
-| 28 | `Scancode Map を消した` |
-| 29 | `$OLD_DOWNLOAD_MODE = 'Lan'`（2026-10-06 の実施手順 37 の記録）で `Lan` |
-| 30 | 何も出なかった |
-| 31 | システムのプロパティの「リモート」タブが開き、「このコンピューターへのリモート アシスタンス接続を許可する(R)」のチェックを入れて「OK」を押すと、窓が閉じた。`fAllowToGetHelp` は 1、リモート アシスタンスの規則 15 個がすべて有効になった（パブリック向けの `RemoteAssistance-In-TCP-EdgeScope` なども）。手順 45 の前の規則の状態は記録していないので、元に戻ったかは確かめられない。本文の「手順 45 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す」の理由は観察と合わないので、箇条書きを観察に合わせて直した |
-| 32 | 3 つの規則が `False  Any` |
-| 33 | `イーサネット  Public`（2026-10-06 の実施手順 37 の `LanCategory` は `Public`） |
-| 34 | `AllowComputerToTurnOffDevice : Enabled` |
-| 35 | `powercfg /hibernate on` が「システム ファームウェアは休止状態をサポートしていません。」の旨で失敗し、`HibernateEnabled: 0`。本文に箇条書きを足した |
-| 36 | `このコンピューターでは sudo が無効化されています。`（本文の「無効になった旨の英語の行を出す」を直した）、`LongPathsEnabled : 0`、`AllowDevelopmentWithoutDevLicense : 0` |
-| 37 | `$OLD_PC_NAME = '<HOSTNAME>'` で `すでにこの名前: <HOSTNAME>`（名前は前の分岐の確認の後に戻してあった） |
-| 38 | `Restart-Computer` の後、起動の途中の「機能をカスタマイズしています。100% 完了。」（この節の手順 25 の仮想マシン プラットフォームを外す処理）のまま 20 分進まなかった。下の「起動が止まったこと」 |
-| 39 | 電源を入れ直した後、自動サインインはされずロック画面になり（この節の手順 20 のとおり）、パスワードでサインインした。メモ帳で、Caps Lock の位置のキー（0x3A）を押しても Ctrl にはならず（`a` を押すと全選択ではなく文字が入った）、JIS 配列の Caps Lock（Shift+英数）でオンにすると `A`・`B` と大文字になり、もう一度で小文字に戻った（JIS 配列の PC では Caps Lock は Shift+英数）。ファイルの右クリックは新しい形のメニュー（最後に「その他のオプションを確認」）。エクスプローラーは「ホーム」で開き、隠しファイルは見えず、淡色で、タスクバーは中央寄せ（検索ボックス・タスク ビューあり）、時計に秒は無かった |
-| 40・41 | 新しく開いた管理者ではない窓（Windows Terminal の中。この節の手順 15 の後なので Ctrl+V で貼った）で、`PSWindowsUpdate を外した`。`Documents\WindowsPowerShell\Modules` は空になった |
+| 「表示と入力を戻す」の手順 1 | `HideFileExt : 1`・`Hidden : 2`・`Start_TrackDocs : 1`、`LaunchTo` は出なかった |
+| 「表示と入力を戻す」の手順 2 | `この操作を正しく終了しました。` と `False` |
+| 「表示と入力を戻す」の手順 3 | 8 つの値がすべて `1` |
+| 「表示と入力を戻す」の手順 4 | 3 つの値は何も出なかった。画面のタスクバーは中央寄せで、検索ボックスとタスク ビューのボタンが出た |
+| 「表示と入力を戻す」の手順 5 | `1` が 2 つ。画面が淡色になった |
+| 「表示と入力を戻す」の手順 6 | 2 つの値は何も出なかった |
+| 「表示と入力を戻す」の手順 7 | Microsoft IME の設定の画面が開いた。「キーとタッチのカスタマイズ」を開くと、「キーの割り当て」の「各キー / キーの組み合わせに好みの機能を割り当てます」のスイッチが「オン」で、「Ctrl + Space」は「IME-オン/オフ」（選択肢は「IME-オン/オフ」と「なし」）。本文の 2 つの方法のうち、スイッチをオフにした。`IsKeyAssignmentEnabled` が 0 になった（`KeyAssignmentCtrlSpace` は 2 のまま） |
+| 「表示と入力を戻す」の手順 8 | `戻した: MicrosoftEdgeAutoLaunch_<番号>` と `戻した: OneDriveSetup`（Teams のキーは無かった） |
+| 「表示と入力を戻す」の手順 9 | 約 15 分かかった。11 個の ID のうち 9 個と Teams（`Microsoft.Teams` 26198.304.4946.9672）は `Successfully installed` で入った（Clipchamp・天気・Office Hub・To Do・フィードバック Hub・問い合わせ・Power Automate・Outlook・ウィジェットの Windows Web Experience Pack）。入らなかった 2 つは次のとおり |
+| 「表示と入力を戻す」の手順 9（ニュース `9WZDNCRFHVFW`） | `Failed to install or upgrade Microsoft Store package. Error code: 0x80073cfb`。AppX のイベント 404・474 は、イメージに残っていた `Microsoft.BingNews_1.0.2.0_x64__8wekyb3d8bbwe`（SYSTEM 用に Staged）と同じ ID で中身が違うので展開を止めた、というものだった |
+| 「表示と入力を戻す」の手順 9（Solitaire `9WZDNCRFHWD2`） | `No package found matching input criteria.`（msstore のソースにその ID が無い。名前で探しても見つからなかった） |
+| 「表示と入力を戻す」の手順 9（登録し直し） | どちらも PC にプロビジョニングされたパッケージとして残っていたので、`Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.BingNews_8wekyb3d8bbwe`（と Solitaire の同じ形）で登録し直すと、`Microsoft.BingNews` 1.0.2.0 と `Microsoft.MicrosoftSolitaireCollection` 4.27.9181.0 が `Ok` になった。本文に箇条書きを足した |
+| 「アプリと貼り付けの設定を外す」の手順 1〜3 | PowerShell 7・PowerToys（`PowerToys (Preview) x64`）・UniGet UI とも `Successfully uninstalled`、続く `winget list` は `No installed package found matching input criteria.`。動いていた PowerToys と UniGet UI は閉じられた |
+| 「アプリと貼り付けの設定を外す」の手順 4（本文のまま） | `Are you sure? (yN):` に `y` を入れると、`Uninstalling 'scoop-search'` の後に `WARN  Couldn't remove ~\scoop\apps\scoop-search: 項目 …\current を削除できません: パス 'current' へのアクセスが拒否されました。` と、`Couldn't remove ~\scoop\apps: …` で止まった。`Scoop has been uninstalled.` は出ず、scoop 本体は消えていた（貼り直すと `scoop.ps1` が見つからない旨）。ユーザーの PATH に `scoop\shims` が残った |
+| 「アプリと貼り付けの設定を外す」の手順 4（原因） | `current` のジャンクションに読み取り専用の属性が付いていた。scoop 0.6.0 の `bin/uninstall.ps1` は、アプリの `current` の読み取り専用を外さずに消そうとする（[参考資料](../reference/windows-setup.md)） |
+| 「アプリと貼り付けの設定を外す」の手順 5（本文のまま、同じ項の手順 4 が止まった後） | `Remove-Item … -ErrorAction SilentlyContinue` も消せず、`True`・`False`。`attrib.exe -R /L` で `current` の読み取り専用を外してから貼り直すと、`False` が 2 行になった。PATH の `scoop\shims` は残った |
+| 「アプリと貼り付けの設定を外す」の手順 4（直した形） | 「アプリを入れる」の手順 1・2 と `scoop install scoop-search` で入れ直し（`current` は `ReadOnly, Directory, ReparsePoint`）、1 行目に `current` の読み取り専用を外す行を足したブロックを貼った。`y` を入れると `Uninstalling 'scoop-search'`・`Removing ~\scoop\shims from your path.`・`Scoop has been uninstalled.` で終わり、ユーザーの PATH から `scoop\shims` も消えた。本文をこの形に直した |
+| 「アプリと貼り付けの設定を外す」の手順 5（直した同じ項の手順 4 の後） | `False` が 2 行 |
+| 「アプリと貼り付けの設定を外す」の手順 6 | `消した: C:\Users\<WIN_USER>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（プロファイルにはその 1 行だけがあった） |
+| 「アプリと貼り付けの設定を外す」の手順 7 | `$OLD_EXECUTION_POLICY = 'Undefined'`（2026-10-06 の実施手順の「貼り付けの設定」の手順 2 の記録）で、表の `CurrentUser` を含むすべてが `Undefined` |
+| 「アプリと貼り付けの設定を外す」の手順 8 | `WSL_E_DISTRO_NOT_FOUND`（AlmaLinux-10 は入れられていなかった）。一覧はディストリビューションが無い旨 |
+| 「サインイン・検索・キーボードを戻す」の手順 1 | スタートで「Windows PowerShell」を探し、右側の「管理者として実行」を押した。UAC の確認（Windows PowerShell、発行元 Microsoft Windows）で「はい」を選び、conhost の窓が開いた |
+| 「サインイン・検索・キーボードを戻す」の手順 1 の後の貼り付け | この節の「アプリと貼り付けの設定を外す」の手順 6 でプロファイルの行を消したので、実施手順の「PC 全体の設定」の手順 4 の 3 行の試験を右クリックで貼ると、`}`・`'3 行目'`・`'2 行目'`・`'1 行目'`・`& {` の逆順に入った（本文のこの節の「アプリと貼り付けの設定を外す」の手順 6 の「右クリックで貼ると、行が逆順になる」のとおり）。Ctrl+C で捨て、Ctrl+V で貼ると `1 行目`・`2 行目`・`3 行目` の順に動いた。この節の「サインイン・検索・キーボードを戻す」の手順 2 から「再起動と PSWindowsUpdate」の手順 1 までは Ctrl+V で貼った |
+| 「サインイン・検索・キーボードを戻す」の手順 2 | `LAN_IF = イーサネット` |
+| 「サインイン・検索・キーボードを戻す」の手順 3 | 管理者の窓から起動したので UAC の確認は出ず、Autologon の窓（`Username` <WIN_USER>、`Domain` <HOSTNAME>）が開いた。`Disable` を押すと「AutoLogon is disabled.」の窓が出て、「OK」で Autologon も閉じた。`AutoAdminLogon` は 0 |
+| 「サインイン・検索・キーボードを戻す」の手順 4（本文のまま、管理者の窓） | `Found Autologon [Microsoft.Sysinternals.Autologon]` の後、`The package installed for user scope cannot be uninstalled when running with administrator privileges.` で外れなかった（「WSL の AlmaLinux 10 と自動サインイン」の手順 5 は管理者ではない窓で `--scope user` で入れる）。続く `AutoAdminLogon` は 0 |
+| 「サインイン・検索・キーボードを戻す」の手順 4（管理者ではない窓） | 同じブロックをこの節の「表示と入力を戻す」の手順 1〜9 と「アプリと貼り付けの設定を外す」の手順 1〜8 の窓に貼ると、`Successfully uninstalled` と `0`。`Autologon64.exe` も消えた。本文のこの節の「サインイン・検索・キーボードを戻す」の手順 4 を管理者ではない窓で行う形に直し、節のリードも直した |
+| 「サインイン・検索・キーボードを戻す」の手順 5 | `DevicePasswordLessBuildVersion : 2`（2026-10-06 の実施手順の「PC 全体の設定」の手順 3 の記録では `HelloOnly` は 2） |
+| 「サインイン・検索・キーボードを戻す」の手順 6・7 | どちらも何も出なかった |
+| 「サインイン・検索・キーボードを戻す」の手順 8 | `wsl.exe --uninstall` は何も表示しなかった。`Disable-WindowsOptionalFeature` は `RestartNeeded : True`。WSL のパッケージは消え、仮想マシン プラットフォームは `Disabled` になった |
+| 「サインイン・検索・キーボードを戻す」の手順 9 | `kbd106.dll`・`PCAT_106KEY`・`7`・`2`（「サインイン・検索・キーボード」の手順 6 は前の分岐の確認の後に戻してあったので、同じ値の書き直し） |
+| 「サインイン・検索・キーボードを戻す」の手順 10 | 何も出なかった |
+| 「サインイン・検索・キーボードを戻す」の手順 11 | `Scancode Map を消した` |
+| 「ネットワークと PC 全体の設定を戻す」の手順 1 | `$OLD_DOWNLOAD_MODE = 'Lan'`（2026-10-06 の実施手順の「PC 全体の設定」の手順 3 の記録）で `Lan` |
+| 「ネットワークと PC 全体の設定を戻す」の手順 2 | 何も出なかった |
+| 「ネットワークと PC 全体の設定を戻す」の手順 3 | システムのプロパティの「リモート」タブが開き、「このコンピューターへのリモート アシスタンス接続を許可する(R)」のチェックを入れて「OK」を押すと、窓が閉じた。`fAllowToGetHelp` は 1、リモート アシスタンスの規則 15 個がすべて有効になった（パブリック向けの `RemoteAssistance-In-TCP-EdgeScope` なども）。「ネットワークとリモート」の手順 3 の前の規則の状態は記録していないので、元に戻ったかは確かめられない。本文の「手順 45 の前に無効だった規則（パブリック向けなど）まで有効になりうるので、画面で戻す」の理由は観察と合わないので、箇条書きを観察に合わせて直した |
+| 「ネットワークと PC 全体の設定を戻す」の手順 4 | 3 つの規則が `False  Any` |
+| 「ネットワークと PC 全体の設定を戻す」の手順 5 | `イーサネット  Public`（2026-10-06 の実施手順の「PC 全体の設定」の手順 3 の `LanCategory` は `Public`） |
+| 「ネットワークと PC 全体の設定を戻す」の手順 6 | `AllowComputerToTurnOffDevice : Enabled` |
+| 「ネットワークと PC 全体の設定を戻す」の手順 7 | `powercfg /hibernate on` が「システム ファームウェアは休止状態をサポートしていません。」の旨で失敗し、`HibernateEnabled: 0`。本文に箇条書きを足した |
+| 「ネットワークと PC 全体の設定を戻す」の手順 8 | `このコンピューターでは sudo が無効化されています。`（本文の「無効になった旨の英語の行を出す」を直した）、`LongPathsEnabled : 0`、`AllowDevelopmentWithoutDevLicense : 0` |
+| 「ネットワークと PC 全体の設定を戻す」の手順 9 | `$OLD_PC_NAME = '<HOSTNAME>'` で `すでにこの名前: <HOSTNAME>`（名前は前の分岐の確認の後に戻してあった） |
+| 「再起動と PSWindowsUpdate」の手順 1 | `Restart-Computer` の後、起動の途中の「機能をカスタマイズしています。100% 完了。」（この節の「サインイン・検索・キーボードを戻す」の手順 8 の仮想マシン プラットフォームを外す処理）のまま 20 分進まなかった。下の「起動が止まったこと」 |
+| 「再起動と PSWindowsUpdate」の手順 2 | 電源を入れ直した後、自動サインインはされずロック画面になり（この節の「サインイン・検索・キーボードを戻す」の手順 3 のとおり）、パスワードでサインインした。メモ帳で、Caps Lock の位置のキー（0x3A）を押しても Ctrl にはならず（`a` を押すと全選択ではなく文字が入った）、JIS 配列の Caps Lock（Shift+英数）でオンにすると `A`・`B` と大文字になり、もう一度で小文字に戻った（JIS 配列の PC では Caps Lock は Shift+英数）。ファイルの右クリックは新しい形のメニュー（最後に「その他のオプションを確認」）。エクスプローラーは「ホーム」で開き、隠しファイルは見えず、淡色で、タスクバーは中央寄せ（検索ボックス・タスク ビューあり）、時計に秒は無かった |
+| 「再起動と PSWindowsUpdate」の手順 3・4 | 新しく開いた管理者ではない窓（Windows Terminal の中。この節の「アプリと貼り付けの設定を外す」の手順 6 の後なので Ctrl+V で貼った）で、`PSWindowsUpdate を外した`。`Documents\WindowsPowerShell\Modules` は空になった |
 
-**起動が止まったこと（ロールバックの手順 38）**:
+**起動が止まったこと（ロールバックの「再起動と PSWindowsUpdate」の手順 1）**:
 
 - 05:06 UTC に再起動し、05:07 に VBoxService が動き出した後、05:08〜05:12 にゲストが 240 秒止まった（VBox.log の `TM: Giving up catch-up attempt at a 240 078 329 157 ns lag`）。その後はハートビートが戻ったが、ディスクの読み書きが 0 のまま、画面は「機能をカスタマイズしています。100% 完了。」で止まり、ゲストのセッションも始められなかった
 - 05:28 に `VBoxManage controlvm reset` でリセットした。ファームウェアは `BdsDxe: failed to load Boot0003 "Windows Boot Manager" from HD(2,GPT,…)/\EFI\Microsoft\Boot\bootmgfw.efi: Not Found` を出した後（外した USB の VHD の起動項目とみている）、Windows の起動の回転表示のまま、また 11 分進まなかった（CPU は 5% ほどで、待っている状態）
-- 05:40 に電源を切って入れ直すと、2 分でロック画面まで起動した。サインインの後、この節の手順 25 の結果（WSL のパッケージ無し、仮想マシン プラットフォームは `Disabled`）は保たれていた
+- 05:40 に電源を切って入れ直すと、2 分でロック画面まで起動した。サインインの後、この節の「サインイン・検索・キーボードを戻す」の手順 8 の結果（WSL のパッケージ無し、仮想マシン プラットフォームは `Disabled`）は保たれていた
 - 実施手順の確認の途中（Wake on LAN の節の手順 4 の後）でも同じような停止があった。Hyper-V の上の VirtualBox（NEM）でゲストが止まる問題とみていて、手順の誤りとは扱っていない
 
 **検証の手順で起きたこと（ロールバック）**:
@@ -1709,7 +1709,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 **送る側がホストの実機のとき**:
 
-- つなぎ替えた直後の再起動される側の接続（`イーサネット`）は、`識別されていないネットワーク`・`Public` だった。管理者の conhost の窓で `$LAN_IF = 'イーサネット'` を入れてから実施手順 43 を貼り、`Private` にしてから試した（再起動の節の手順 4・5 の受信規則はプライベートだけで有効）。SMB での再起動の後は `Public` に戻ったので、WinRM を試す前に `Set-NetConnectionProfile` で `Private` に戻した
+- つなぎ替えた直後の再起動される側の接続（`イーサネット`）は、`識別されていないネットワーク`・`Public` だった。管理者の conhost の窓で `$LAN_IF = 'イーサネット'` を入れてから実施手順の「ネットワークとリモート」の手順 1 を貼り、`Private` にしてから試した（再起動の節の手順 4・5 の受信規則はプライベートだけで有効）。SMB での再起動の後は `Public` に戻ったので、WinRM を試す前に `Set-NetConnectionProfile` で `Private` に戻した
 - `<HOSTNAME>` は mDNS（`<HOSTNAME>.local`）で、VM の IPv6 のリンクローカル アドレスと 192.168.56.108 に解決された。ping と TCP 445・5985 は届いた（`Test-NetConnection` は IPv6 のリンクローカルを使った）
 - 始める前のホスト: WinRM のサービスは `Stopped`・`Manual`、`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` に `trusted_hosts` の値は無かった。受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効
 - SMB（再起動の節の手順 4）

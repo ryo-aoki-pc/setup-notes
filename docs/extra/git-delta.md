@@ -43,7 +43,7 @@
 
 - この節のブロックは、管理者ではない Windows PowerShell（5.1）に、上から順に貼る
 - **先に git の設定から delta を外してから（この節の手順 1）、delta を消す（この節の手順 3）**。`core.pager` が delta のまま delta を消すと、`git diff` などが delta を起動できない
-- [Windows 11 の初期設定のロールバック](windows-setup.md#ロールバック)の手順 13 で scoop ごと外すときも、先にこの節の手順 1 を行う（scoop を外しても `~/.gitconfig` の `core.pager` は残る）。そのときは、この節の手順 3 は要らない（delta も一緒に消える）
+- [Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外すときも、先にこの節の手順 1 を行う（scoop を外しても `~/.gitconfig` の `core.pager` は残る）。そのときは、この節の手順 3 は要らない（delta も一緒に消える）
 
 1. git の設定から delta を外し、消えたか確かめる。
 

@@ -114,7 +114,7 @@ Retry count: 3
 - [lazydocker — Config.md](https://github.com/jesseduffield/lazydocker/blob/master/docs/Config.md) — `customCommands`・`commandTemplates` の書き方、設定ファイルの場所（Linux は `~/.config/lazydocker/config.yml`）
 - [lazydocker — Keybindings](https://github.com/jesseduffield/lazydocker/blob/master/docs/keybindings/Keybindings_en.md) — 枠ごとのキー
 - `lazydocker --config` — 既定の設定の全体
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（手順 46〜48 の Homebrew） / [Podman](../podman.md) / [podman-compose](../podman-compose.md) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜3 の Homebrew） / [Podman](../podman.md) / [podman-compose](../podman-compose.md) — 前提の手順書
 - [podman-system-service(1)](https://docs.podman.io/en/latest/markdown/podman-system-service.1.html) — root の API ソケット（`unix:///run/podman/podman.sock`）
 - `man sudo`（`-i`）・`man sudoers`（`env_reset`・`env_keep`） — [root でも使う](../lazydocker.md#root-でも使う任意)の節で、`-i` の無い `sudo` に `DOCKER_HOST` が渡らない理由
 

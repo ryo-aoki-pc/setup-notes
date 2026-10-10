@@ -8,7 +8,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（scoop で入れる。管理者ではない Windows PowerShell 5.1 に貼る）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わない）
 > - **手順 4 で TUI が開く**。`q` で終了してから、ほかのコマンドを貼る
 
@@ -79,7 +79,7 @@
   - 入れ方は [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)。`custom` ブランチを `~/.config/yazi` に clone する
   - Windows 11 の入れ方は、同じ [README の「インストール」](https://github.com/ryo-aoki-pc/yazi#インストール)の Windows の例（`custom` ブランチを `%APPDATA%\yazi\config` に clone する）。そこにある `YAZI_FILE_ONE` と VC++ のランタイムは、[Windows 11 で使う](#windows-11-で使う)の手順 3・5 で済んでいる
   - 足したキーは [設定のリポジトリの参考資料の「独自キーバインド」](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、使う外部コマンドは [README の「依存コマンド」](https://github.com/ryo-aoki-pc/yazi#依存コマンド)
-  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（Windows 11 は[Windows 11 で使う](#windows-11-で使う)の手順 4。fzf の bash のキー操作は [AlmaLinux 10 の初期設定の手順 42〜53](almalinux-setup.md#実施手順) で入る）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [AlmaLinux 10 の初期設定の手順 49](almalinux-setup.md#実施手順) で入れる
+  - 外部コマンドのうち fd・ripgrep・fzf は手順 2 の `YAZI_EXTRAS` で入る（Windows 11 は[Windows 11 で使う](#windows-11-で使う)の手順 4。fzf の bash のキー操作は [AlmaLinux 10 の初期設定の「共通の bash 設定」](almalinux-setup.md#共通の-bash-設定)から[「シェルのツール」の手順 5](almalinux-setup.md#シェルのツール)までの手順で入る）。エディタの nvim は [neovim.md](neovim.md)、zoxide は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](almalinux-setup.md#シェルのツール) で入れる
     - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定のシェルのツールを入れる（任意）](windows-setup.md#シェルのツールを入れる任意)で入る（zoxide は 0.9.9 に止める）
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
   - この設定を入れるなら、この節の手順 1 は要らない（clone が `~/.config/yazi` を作る）
@@ -111,7 +111,7 @@
 > [!IMPORTANT]
 > - **すべて Windows のデスクトップで行う**。この節の手順 1 で**管理者ではない** Windows PowerShell（5.1）を開き、この節の手順 2〜6・9 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/yazi.md#windows-11-のロールバック)のブロックをそこに貼る
 >   - SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動き、scoop は自分のユーザーに入れるため）
-> - 前提: [Windows 11 の初期設定の手順 16〜19 と手順 20・21](windows-setup.md#実施手順)（貼り付けの設定と scoop）。手順 16〜19 を通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)と[「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる)（貼り付けの設定と scoop）。「貼り付けの設定」の手順 1〜4 を通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)（`C:\Program Files\Git`）。yazi はファイルの種類の判定に、同梱の `C:\Program Files\Git\usr\bin\file.exe` を使う
 > - 前提: Visual C++ のランタイム（`VCRUNTIME140.dll`。`yazi.exe` と `ya.exe` が使い、scoop は入れない）。この節の手順 3 で確かめ、無ければ [wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行う
 > - **この節の手順 7 で WezTerm の Git Bash のタブを開き、手順 8 の `bash` のブロックはそこに貼る**。手順 8 と手順 9 で yazi の画面（TUI）が開く。`q` で閉じてから、ほかのブロックを貼る
@@ -163,7 +163,7 @@
    ```
 
    - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じてこの節の手順 1 から
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れる
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に [Windows 11 の初期設定の「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる) で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)
    - `VCRuntime : False` なら、[wezterm-nightly.md の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `Yazi` が空なら、yazi は入っていない。`C:\Users\<WIN_USER>\scoop\shims\yazi.exe` だけなら、もう scoop で入っている。ほかの場所が出たら、外してから始める
@@ -241,7 +241,7 @@
 
    - プレビューを確かめるには、PDF・動画・画像・書庫のあるフォルダーで右のペインを見る
    - 画像のプレビューは、WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）の中で出る。conhost の窓では出ない
-   - [Windows 11 の初期設定の手順 30](windows-setup.md#実施手順)で既定の端末を Windows Terminal にした PC では、この節の手順 1 の窓も Windows Terminal で開く
+   - [Windows 11 の初期設定の「表示と入力」の手順 6](windows-setup.md#表示と入力)で既定の端末を Windows Terminal にした PC では、この節の手順 1 の窓も Windows Terminal で開く
    - `q` で閉じる
    - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると yazi への操作として食われる）
 

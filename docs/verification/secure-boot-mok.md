@@ -16,7 +16,7 @@
 
 ### 実施手順 / 手順 4: 補足: 鍵の作り方と、登録した鍵の行き先
 
-**鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md 手順 9](../virtualbox.md#実施手順) の補足の実測）:
+**鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md の「VirtualBox を入れる」の手順 4](../virtualbox.md#virtualbox-を入れる) の補足の実測）:
 
 ```
     sudo mkdir -m 0700 -p /var/lib/shim-signed/mok

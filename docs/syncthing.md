@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **前提**: [linger](linger.md) を有効にしてあること（ログアウト中も Syncthing を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、Syncthing も同期するファイルの持ち主として動かす
 > - **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
@@ -521,8 +521,8 @@
 
 > [!IMPORTANT]
 > - **すべて Windows で行う**。この節の手順 1 で管理者の Windows PowerShell（5.1）を開き、この節の手順 2〜11・14 と、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/syncthing.md#windows-11-のロールバック)をそこに貼る。ログインするユーザーは Administrators の一員（この節の手順 7 の受信の規則と手順 8 のタスクの登録に、管理者の権限が要る）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - 前提: 相手とつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の手順 43](windows-setup.md#実施手順)）。この節の手順 7 で確かめる
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - 前提: 相手とつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)）。この節の手順 7 で確かめる
 > - Syncthing そのものは、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節の手順 8 のタスク）
 > - **この節の手順 5 には対話入力がある**（GUI のパスワード）。入力し終えてから手順 6 を貼る
 > - **この節の手順 12 は LAN の別の端末のブラウザで、手順 13 はこの PC で行う**（サインアウトしてサインインし直す）
@@ -653,7 +653,7 @@
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
-     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の手順 43 でプライベートにする）'
+     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の「ネットワークとリモート」の手順 1 でプライベートにする）'
    } else {
      Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
      New-NetFirewallRule -Name 'Syncthing-In-TCP' -DisplayName 'Syncthing (TCP 22000)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol TCP -LocalPort 22000 | Out-Null
@@ -665,7 +665,7 @@
    ```
 
    - `<LAN_IF>  Private` と、3 つの規則が `True  Private  Inbound  Allow` で出ればよい
-   - `中断:` が出たら、[Windows 11 の初期設定の手順 43](windows-setup.md#実施手順) でプライベートにしてから、この手順を貼り直す
+   - `中断:` が出たら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート) でプライベートにしてから、この手順を貼り直す
    - 何度貼ってもよい
    - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows の OpenSSH サーバー](windows-openssh-server.md)の手順 5 の補足）
 

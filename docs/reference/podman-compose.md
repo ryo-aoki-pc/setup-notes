@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: 署名鍵
 
-- fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の手順 17](../almalinux-setup.md#実施手順) に書いた鍵
+- fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
 ### 実施手順 / 手順 2: 補足: podman compose
 
@@ -52,6 +52,6 @@ podman-compose は、ディレクトリの名前（`compose-sample`）をプロ�
 - [Compose Specification](https://compose-spec.io/) — compose ファイルの書式
 - `man podman-compose`（podman のパッケージに入っている `podman compose` の説明）/ `podman-compose --help` / `podman-compose <サブコマンド> --help`
 - [Podman](../podman.md) — 前提の rootless の podman と、自動起動の Quadlet
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

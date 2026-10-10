@@ -129,7 +129,7 @@
 
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う（64 ビットの Windows 11、x64 または ARM64）
-> - [Windows 11 の初期設定](windows-setup.md#実施手順)の手順 16〜19（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
+> - [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
 > - Git は [git.md の Windows 11 の節](git.md#windows-11-で-git-for-windows-を入れる)で先に入れる
 > - Codex を利用できる ChatGPT アカウントとインターネット接続が必要。`CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` を変更していない新規導入を対象にする
 

@@ -38,7 +38,7 @@ Error: font-hackgen-nerd: Download failed for font-hackgen-nerd.
 ```
 
 - `PATH` の先頭が `/home/linuxbrew/.linuxbrew/opt/unzip/bin` なので、Homebrew の `unzip`（`brew install unzip`）でも足りるはずだが、本書では BaseOS の `unzip`（`unzip-6.0-69.el10`）を入れた
-- **Homebrew のインストーラも、AlmaLinux 10 の初期設定の手順 46 の依存パッケージも `unzip` を入れない**ので、formula（ボトル）だけ使ってきた環境では、cask を初めて入れるときにここで引っかかる
+- **Homebrew のインストーラも、AlmaLinux 10 の初期設定の「Homebrew」の手順 1 の依存パッケージも `unzip` を入れない**ので、formula（ボトル）だけ使ってきた環境では、cask を初めて入れるときにここで引っかかる
 
 ### 実施手順 / 手順 4: 補足: Linux ではフォントが ~/.local/share/fonts に入る
 

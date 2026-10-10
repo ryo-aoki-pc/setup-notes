@@ -147,7 +147,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 ### Windows 11 で使う / 手順 2: 補足: 変数について
 
 - `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](../syncthing.md#実施手順)の `ST_GUI_USER` と同じ扱い）
-- `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の手順 36](../windows-setup.md#実施手順) と同じ
+- `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows の OpenSSH サーバー](../windows-openssh-server.md)の手順 2 と [Windows 11 の初期設定の「PC 全体の設定」の手順 2](../windows-setup.md#pc-全体の設定) と同じ
 - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
 - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
 - 変数はその PowerShell の中だけで有効

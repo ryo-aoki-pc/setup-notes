@@ -2,7 +2,7 @@
 
 [手順書](../virtualbox.md)・[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
 
-- 「手順 N」は[手順書](../virtualbox.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -12,7 +12,7 @@
   - **Oracle の署名鍵** `gpg-pubkey-2980aecf-5719f4e1`: 消すなら `sudo rpm -e gpg-pubkey-2980aecf-5719f4e1`
   - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../secure-boot-mok.md) で登録した場合）: ほかにその鍵で署名したモジュールを使っていなければ、[secure-boot-mok.md のロールバック](secure-boot-mok.md#ロールバック)で消す
   - **ログ** `/var/log/vbox-setup.log`（と `.1`〜`.4`）: 要らなければ手で消す
-  - **前提の EPEL と、手順 8 の gcc / kernel-devel など**: ほかでも使うので消さない
+  - **前提の EPEL と、「VirtualBox を入れる」の手順 3 の gcc / kernel-devel など**: ほかでも使うので消さない
 
 > [!CAUTION]
 > **この節の手順 4 で、VM とその設定（`~/.config/VirtualBox` と `~/VirtualBox VMs`）が消える**。消した VM は取り戻せない。
@@ -43,8 +43,8 @@
    }
    ```
 
-   - `vboxusers` グループは rpm を消しても残るので、ここで消す（手順 12 で自分を入れていても、グループごと消える）
-   - 最後の 2 行は、手順 4・5 で取り込んだメタデータ用の鍵（`pubring/A2F683C52980AECF.pub`）を含む dnf のキャッシュを消す（root の分とユーザーの分）
+   - `vboxusers` グループは rpm を消しても残るので、ここで消す（「KVM と USB の設定」の手順 2 で自分を入れていても、グループごと消える）
+   - 最後の 2 行は、「リポジトリを置く」の手順 4・5 で取り込んだメタデータ用の鍵（`pubring/A2F683C52980AECF.pub`）を含む dnf のキャッシュを消す（root の分とユーザーの分）
    - **`dnf clean all` ではこの鍵は削除されないので、上の削除手順も行う**
    - KVM の設定を消したことは、次の起動から効く
 
@@ -119,15 +119,15 @@
 
 ## 注意点
 
-- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の手順 17](../almalinux-setup.md#実施手順) で有効にする
-- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[手順 9・10](../virtualbox.md#実施手順)）
+- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
+- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../virtualbox.md#virtualbox-を入れる)の手順 4・5）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [secure-boot-mok.md](../secure-boot-mok.md) で作って登録する
 - **MokManager でキーボードが効かなければ、[secure-boot-mok.md](../secure-boot-mok.md) の手順 6 に従って対処する**。Secure Boot を無効にするとモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する
-- **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[手順 11](../virtualbox.md#実施手順)）
+- **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[KVM と USB の設定](../virtualbox.md#kvm-と-usb-の設定)の手順 1）
 - **カーネルを更新した後の最初の起動は遅くなる**: `vboxdrv.service` がモジュールをビルドし直す（[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)）
 - **系列がパッケージ名に入っている**: 7.2 → 7.3 は `dnf upgrade` では移らない（[更新](../virtualbox.md#更新)）
-- **vboxusers は USB のためだけ**: VM の起動には要らない（[手順 12](../virtualbox.md#実施手順)）
+- **vboxusers は USB のためだけ**: VM の起動には要らない（[KVM と USB の設定](../virtualbox.md#kvm-と-usb-の設定)の手順 2）
 - **Extension Pack は本書では扱わない**: 追加機能（マニュアルによれば VRDP のサーバー、ホストの Web カメラの受け渡し、Intel の PXE ブート ROM、ディスクイメージの暗号化、クラウド連携）をまとめた別配布
   - ライセンスは GPL ではなく **PUEL（個人利用と教育利用に限って無償）**
   - rpm の `%postun` が `/usr/lib/virtualbox/ExtensionPacks` を消すので、入れた場合は **VirtualBox の更新のたびに入れ直す**ことになる（rpm のスクリプトからの推定）

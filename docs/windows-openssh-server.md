@@ -6,8 +6,8 @@
 
 > [!IMPORTANT]
 > - **手順 1〜7 は Windows で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2〜7 をそこに貼る
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、Windows のブロックは Ctrl+V で貼る
-> - 前提: クライアントとつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の手順 43](windows-setup.md#実施手順)）。手順 5 で確かめる
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、Windows のブロックは Ctrl+V で貼る
+> - 前提: クライアントとつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)）。手順 5 で確かめる
 > - **手順 8・9 は、クライアントの PC（AlmaLinux 10 など）の自分のユーザーのシェルに貼る**
 > - SSH でログインするのは、この PC の Windows のユーザー。パスワードは、そのユーザーの Windows のパスワード（Microsoft アカウントなら、そのアカウントのパスワード）。Administrators の一員でないユーザーも入れる（[注意点](extra/windows-openssh-server.md#注意点)）
 > - **手順 9 には対話入力がある**（ホスト鍵の確認とパスワード）
@@ -73,7 +73,7 @@
    if (-not $LAN_IF) {
      Write-Error '手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
-     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の手順 43 でプライベートにする）'
+     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の「ネットワークとリモート」の手順 1 でプライベートにする）'
    } else {
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
      Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
@@ -81,7 +81,7 @@
    ```
 
    - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
-   - `中断:` が出たら、[Windows 11 の初期設定の手順 43](windows-setup.md#実施手順) でプライベートにしてから、この手順を貼り直す（手順 2 の変数はそのまま使える）
+   - `中断:` が出たら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート) でプライベートにしてから、この手順を貼り直す（手順 2 の変数はそのまま使える）
    - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[選択した方針](verification/windows-openssh-server.md#選択した方針)）
 
 1. パスワード認証を有効にし、設定を検査してから sshd を再起動する。
@@ -304,7 +304,7 @@
 - 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
   - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
 - この節は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
-- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[Windows 11 の初期設定の手順 20・21](windows-setup.md#実施手順) で入れた形）
+- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[Windows 11 の初期設定の「アプリを入れる」の手順 1・2](windows-setup.md#アプリを入れる) で入れた形）
 - この節の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの手順 8 のシェルに貼る
 - `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この節の手順 1 を貼り直す
 

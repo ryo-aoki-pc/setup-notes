@@ -27,7 +27,7 @@ aarch64 で降ってくるボトルは `yazi--26.9.1.arm64_linux.bottle.tar.gz`�
 | `imagemagick-full` | 画像・フォントの変換 |
 | `font-symbols-only-nerd-font` | アイコン表示用のフォント |
 
-`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では別の手順（[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 49）で入れている。
+`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では別の手順（[AlmaLinux 10 の初期設定の「シェルのツール」](../almalinux-setup.md#シェルのツール)の手順 1）で入れている。
 
 ボトルが降りたことの確認（実測、コンテナ）:
 

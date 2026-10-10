@@ -5,32 +5,34 @@
 - [検証記録](verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
-> - **すべて、この PC の GNOME のデスクトップで、インストールのときに作った管理者（`wheel` の一員）のユーザーとして行う**。手順 2 で開く端末に貼る。`sudo -i`・`su -` のシェルでは行わない（`gsettings` はログインしているユーザーの設定だけを変え、Homebrew は root での実行を断る）
+> - **すべて、この PC の GNOME のデスクトップで、インストールのときに作った管理者（`wheel` の一員）のユーザーとして行う**。[ログインと sudo](#ログインと-sudo)の手順 2 で開く端末に貼る。`sudo -i`・`su -` のシェルでは行わない（`gsettings` はログインしているユーザーの設定だけを変え、Homebrew は root での実行を断る）
 > - 前提: AlmaLinux 10 の Workstation を入れた直後で、インターネットにつながっていること。インターネットに出られないホストの Homebrew は、[homebrew-offline.md](homebrew-offline.md) から入れる
-> - **手順 3 で、sudo のパスワードを 1 回だけ聞かれる**（手順 3 から後の `sudo` は聞かない）
-> - **対話入力のある手順**: 3（パスワード）・4・16・20・38（`[y/N]`。手順 4 では AlmaLinux の鍵、手順 38 では EPEL の鍵の確認も）・5（LVFS を有効にするか）・6（ファームウェアの更新があるとき）・25（確認 2 回）・47（RETURN）・49（`[y/n]`）・64・65（tmux の画面）。**目で確かめてから次へ進む手順**: 18・23・57
-> - **画面で行う手順**: 1・2・50・59〜63・68・70〜73（59〜63・71 はキーを押して確かめる）。**再起動**: 8（要るときだけ）・67。**条件付きの手順**: 8・10・12・15・70
+> - **sudo のパスワードを聞かれるのは 1 回だけ**（[ログインと sudo](#ログインと-sudo)の手順 3。この手順から後の `sudo` は聞かない）
+> - **対話入力のある手順**: [ログインと sudo](#ログインと-sudo)の手順 3（パスワード）、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1（`[y/N]` と AlmaLinux の鍵の確認）・2（LVFS を有効にするか）・3（ファームウェアの更新があるとき）、[システムの設定](#システムの設定)の手順 8（`[y/N]`）、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 4（`[y/N]`）、[Flatpak と Flathub](#flatpak-と-flathub)の手順 4（確認 2 回）、[GNOME の表示と入力](#gnome-の表示と入力)の手順 10（`[y/N]` と EPEL の鍵の確認）、[Homebrew](#homebrew)の手順 2（RETURN）、[シェルのツール](#シェルのツール)の手順 1（`[y/n]`）、[tmux を試す](#tmux-を試す)の手順 1・2（tmux の画面）。**目で確かめてから次へ進む手順**: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2、[Flatpak と Flathub](#flatpak-と-flathub)の手順 2、[シェルのツール](#シェルのツール)の手順 9
+> - **画面で行う手順**: [ログインと sudo](#ログインと-sudo)の手順 1・2、[シェルのツール](#シェルのツール)の手順 2、[キー操作を試す](#キー操作を試す)の手順 1〜5（キーを押して確かめる）、[再起動と確認](#再起動と確認)の手順 2・4〜7（同じ項の手順 5 はキーを押して確かめる）。**再起動**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5（要るときだけ）、[再起動と確認](#再起動と確認)の手順 1。**条件付きの手順**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5、[システムの設定](#システムの設定)の手順 2・4・7、[再起動と確認](#再起動と確認)の手順 4
 
-- 上から順にコードブロックを貼る。手順 9 の変数は、新しい端末を開いたら貼り直す（手順 50 より後では使わない）
+- 上から順にコードブロックを貼る。[システムの設定](#システムの設定)の手順 1 の変数は、新しい端末を開いたら貼り直す（[シェルのツール](#シェルのツール)の手順 2 より後では使わない）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。手順 1〜4・7〜9・42・43・46〜50・67 は飛ばさない）
-  - 更新: OS は 4・7・8、ファームウェアは 5・6
-  - PC 全体: sudo は 3、PC の名前は 10、SSH は 11・12、journal は 13、kdump は 14・15、コマンドが無いときのパッケージの案内は 16
-  - 導入元: EPEL は 17、RPM Fusion は 18〜21、Flathub は 22〜24（確認用の Flatseal は 25・26）
-  - 日本語入力: 27・28。確かめるのは 72
-  - 表示: フォルダーの名前は 29、ダークモードは 30、ウィンドウのボタンは 32、時計と電池は 33、Files は 34、ホットコーナーは 36、拡大率は 37・70、トレイアイコンは 38・39、Dash のお気に入りは 41。確かめるのは 68・73
-  - 入力: Caps Lock を Ctrl には 31、Alt+Tab は 35、Ctrl+Alt+T は 40。確かめるのは 71
-  - シェル: 共通の bash 設定は 42・43、bash の補完とキー操作は 44・45・51・59、Homebrew は 46〜48、starship・zoxide・fzf・eza・bat・tmux は 49・52〜58・60〜66
-- Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の任意節](windows-setup.md#シェルのツールを入れる任意)で scoop から入れる。確かめるのは、Git Bash で、この文書の手順 52〜55・57・58・60〜63
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[ログインと sudo](#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、[システムの設定](#システムの設定)の手順 1、[共通の bash 設定](#共通の-bash-設定)の手順 1・2、[Homebrew](#homebrew)の手順 1〜3、[シェルのツール](#シェルのツール)の手順 1・2、[再起動と確認](#再起動と確認)の手順 1 は飛ばさない）
+  - 更新: OS は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、ファームウェアは同じ項の手順 2・3
+  - PC 全体: sudo は[ログインと sudo](#ログインと-sudo)の手順 3。ほかは[システムの設定](#システムの設定)の手順で、PC の名前は 2、SSH は 3・4、journal は 5、kdump は 6・7、コマンドが無いときのパッケージの案内は 8
+  - 導入元: EPEL は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1、RPM Fusion は同じ項の手順 2〜5、Flathub は[Flatpak と Flathub](#flatpak-と-flathub)の手順 1〜3（確認用の Flatseal は同じ項の手順 4・5）
+  - 日本語入力: [日本語入力](#日本語入力)の手順 1・2。確かめるのは[再起動と確認](#再起動と確認)の手順 6
+  - 表示: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、フォルダーの名前は 1、ダークモードは 2、ウィンドウのボタンは 4、時計と電池は 5、Files は 6、ホットコーナーは 8、拡大率は 9 と[再起動と確認](#再起動と確認)の手順 4、トレイアイコンは 10・11、Dash のお気に入りは 13。確かめるのは[再起動と確認](#再起動と確認)の手順 2・7
+  - 入力: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、Caps Lock を Ctrl には 3、Alt+Tab は 7、Ctrl+Alt+T は 12。確かめるのは[再起動と確認](#再起動と確認)の手順 5
+  - シェル: 共通の bash 設定は[共通の bash 設定](#共通の-bash-設定)の手順 1・2、bash の補完とキー操作は同じ項の手順 3・4 と[シェルのツール](#シェルのツール)の手順 3・[キー操作を試す](#キー操作を試す)の手順 1、Homebrew は[Homebrew](#homebrew)の手順 1〜3、starship・zoxide・fzf・eza・bat・tmux は[シェルのツール](#シェルのツール)の手順 1・4〜10・[キー操作を試す](#キー操作を試す)の手順 2〜5・[tmux を試す](#tmux-を試す)の手順 1〜3
+- Windows 11 の Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の任意節](windows-setup.md#シェルのツールを入れる任意)で scoop から入れる。確かめるのは、Git Bash で、この文書の[シェルのツール](#シェルのツール)の手順 4〜7・9・10 と[キー操作を試す](#キー操作を試す)の手順 2〜5
 - 手順の後に、この順に通す手順書
-  - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。手順 8〜11 の AAC・H.264 は、この文書の手順 18〜21 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md) → [Grok Build](grok-build.md)
+  - [Git](git.md)（`~/.gitconfig` の基本の設定）→ [Firefox](firefox.md)（最新版。その手順 8〜11 の AAC・H.264 は、この文書の[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2〜5 の RPM Fusion を使う）→ [HackGen Console NF](hackgen.md) → [WezTerm](wezterm-nightly.md) → [Claude Code](claude-code.md) → [Codex CLI](codex.md) → [Grok Build](grok-build.md)
   - HackGen Console NF と WezTerm を入れたら、[WezTerm と HackGen Console NF をデスクトップで使う（任意）](#wezterm-と-hackgen-console-nf-をデスクトップで使う任意)
   - 必要なら: Homebrew のほかのツール（[yazi](yazi.md)・[lazygit](lazygit.md)・[git-delta](git-delta.md)・[Neovim](neovim.md)・[gdu](gdu.md)・[ShellCheck / shfmt](shellcheck.md)）、[btop](btop.md)・[GitHub CLI](gh.md)・[VS Code](vscode.md)・[Podman](podman.md)、3 つのコーディング用の CLI を 1 つのプロジェクトで使う[コーディングエージェントの共同作業](coding-agents.md)、役割ごとの手順書（[README の手順書とツール](../README.md#手順書とツール)）
 - 手順の後: SSH を公開鍵だけにするなら[SSH を公開鍵だけにする（任意）](#ssh-を公開鍵だけにする任意)、OS を自動で更新するなら[dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)、常時動かしておく PC は[画面オフ・画面ロック・自動サスペンドを止める（任意）](#画面オフ画面ロック自動サスペンドを止める任意)、[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)
   - Homebrew・Flatpak・starship・fzf・eza・bat・tmux の使い方と設定は、この文書の後ろの節。以後は[更新](#更新)・[ロールバック](extra/almalinux-setup.md#ロールバック)
 
 > [!WARNING]
-> - **手順 3 の後は、このユーザーで動くプログラム（ブラウザの拡張、AI のエージェント、`curl … | bash` のインストーラなど）が、パスワード無しで root の権限を使える**。人が触れる場所にある PC や、信用できないプログラムを動かすユーザーでは行わない。外すのは[ロールバック](extra/almalinux-setup.md#ロールバック)の最後の手順
+> - [ログインと sudo](#ログインと-sudo)の手順 3 の後は、**このユーザーで動くプログラム（ブラウザの拡張、AI のエージェント、`curl … | bash` のインストーラなど）が、パスワード無しで root の権限を使える**。人が触れる場所にある PC や、信用できないプログラムを動かすユーザーでは行わない。外すのは[ロールバック](extra/almalinux-setup.md#ロールバック)の最後の手順
+
+### ログインと sudo
 
 1. インストールのときに作ったユーザーで GNOME にログインし、「ようこそ」の窓を閉じる。
 
@@ -40,7 +42,7 @@
 1. 端末を開く。
 
    - Super キー（Windows キー）でアクティビティの画面を開き、「端末」と打って Enter。左の Dash の端末のアイコンでもよい
-   - 端末のアプリは Ptyxis（「端末」）。手順 3 から、この端末に貼る
+   - 端末のアプリは Ptyxis（「端末」）。この項の手順 3 から、この端末に貼る
 
 1. sudo をパスワード無しで使えるようにする（パスワードを 1 回聞かれる）。
 
@@ -61,8 +63,10 @@
 
    - 最初の `sudo` で `[sudo] <USER> のパスワード:` と聞かれる。ログインのパスワードを入れる（このユーザーで初めての `sudo` なら、その前に「あなたはシステム管理者から通常の講習を受けたはずです。」の注意が出る）
    - `stdin: 正しく構文解析されました` と、`/etc/sudoers` と `/etc/sudoers.d/nopasswd` の行（英語の環境では `parsed OK`）、最後に `sudo はパスワードを聞かない` が出ればよい
-   - `中断:` が出たら、何も書いていない。インストールのときに管理者にしたユーザーでログインし直して、手順 2 から
+   - `中断:` が出たら、何も書いていない。インストールのときに管理者にしたユーザーでログインし直して、この項の手順 2 から
    - **次の手順は、パスワードを入れて、プロンプトに戻ってから貼る**（続けて貼ると、パスワードとして食われる）
+
+### OS とファームウェアの更新
 
 1. OS を最新にする。
 
@@ -94,7 +98,7 @@
    ```
 
    - 更新が無ければ `No updatable devices` と出て終わる
-   - 更新があれば、機器ごとに確認を聞かれる。`y`。再起動するかを聞かれたら `n`（手順 8 で再起動する）
+   - 更新があれば、機器ごとに確認を聞かれる。`y`。再起動するかを聞かれたら `n`（この項の手順 5 で再起動する）
    - **注意**: 更新の途中で電源を切らない。ノート PC は電源につないでおく
    - **次の手順は、問いに答え終わってプロンプトに戻ってから貼る**（続けて貼ると、答えとして食われる）
 
@@ -104,8 +108,8 @@
    dnf needs-restarting -r
    ```
 
-   - `再起動な必要ありません。`（表示のとおり）と出て、手順 6 でファームウェアを更新していなければ、手順 8 は飛ばす
-   - `再起動が必要です` の形の行（カーネルや systemd などを更新したとき）が出たか、手順 6 でファームウェアを更新したなら、手順 8 で再起動する
+   - `再起動な必要ありません。`（表示のとおり）と出て、この項の手順 3 でファームウェアを更新していなければ、この項の手順 5 は飛ばす
+   - `再起動が必要です` の形の行（カーネルや systemd などを更新したとき）が出たか、この項の手順 3 でファームウェアを更新したなら、この項の手順 5 で再起動する
 
 1. 再起動が要るときだけ、再起動する。
 
@@ -114,7 +118,9 @@
    ```
 
    - 保存していない文書のあるアプリが開いていると、`Operation inhibited by …` で断られることがある。そのアプリを閉じてから貼り直す
-   - **次の手順は、起動してログインし、手順 2 のように端末を開いてから貼る**
+   - **次の手順は、起動してログインし、端末を開いてから貼る**（端末の開き方は[ログインと sudo](#ログインと-sudo)の手順 2）
+
+### システムの設定
 
 1. 変数を設定する（PC の名前を変えるなら、`HOST_NAME` に値を入れる）。
 
@@ -132,15 +138,15 @@
    ```
 
    - 最後に値を読み戻して確かめる
-   - `HOST_NAME` を変えないなら空のままにして、手順 10 を飛ばす
+   - `HOST_NAME` を変えないなら空のままにして、この項の手順 2 を飛ばす
    - `XKB_LAYOUT` が空か、手元のキーボードと違うなら、`XKB_LAYOUT=jp`（JIS 配列）か `XKB_LAYOUT=us`（US 配列）を貼ってから先へ進む
    - `USER` が `root` になっているなら、ここで止めて、自分のユーザーの端末で貼り直す
-   - **新しい端末を開いたら**、手順 9 を貼り直してから先へ進む
+   - **新しい端末を開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. PC の名前を変えるときだけ、名前を変える。
 
    ```bash
-   if [ -z "${HOST_NAME}" ]; then echo '中断: 手順 9 の HOST_NAME が空のまま。名前を変えないなら、この手順は飛ばす' >&2; else
+   if [ -z "${HOST_NAME}" ]; then echo '中断: この項の手順 1 の HOST_NAME が空のまま。名前を変えないなら、この手順は飛ばす' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      echo "変える前: $(hostnamectl --static)"
      sudo hostnamectl hostname "${HOST_NAME}"
@@ -148,8 +154,8 @@
    fi
    ```
 
-   - `変える前:` の名前を控える（[ロールバック](extra/almalinux-setup.md#ロールバック)の手順 39 で使う）
-   - `変えた後:` に、手順 9 の名前が出ればよい
+   - `変える前:` の名前を控える（[ロールバックの「システムの設定を戻す」](extra/almalinux-setup.md#システムの設定を戻す)の手順 4 で使う）
+   - `変えた後:` に、この項の手順 1 の名前が出ればよい
    - 開いている端末のプロンプトは、開き直すまで前の名前のまま
 
 1. SSH の待ち受けとファイアウォールを確かめ、この PC の IP アドレスを見る。
@@ -165,8 +171,8 @@
    }
    ```
 
-   - `enabled`・`active`・`yes`・`yes` と、この PC の IP アドレスが出ればよい（手順 12 は飛ばす）
-   - どれかが違えば、手順 12 で直す
+   - `enabled`・`active`・`yes`・`yes` と、この PC の IP アドレスが出ればよい（この項の手順 4 は飛ばす）
+   - どれかが違えば、この項の手順 4 で直す
 
 1. SSH の待ち受けか、ファイアウォールの ssh が違うときだけ、直す。
 
@@ -210,8 +216,8 @@
    grep -o 'crashkernel=[^ ]*' /proc/cmdline
    ```
 
-   - `enabled` と、0 でない数と、`crashkernel=…` が出たら、手順 15 で止める
-   - `disabled` と `0` が出て、`crashkernel=` が無ければ、手順 15 は飛ばす
+   - `enabled` と、0 でない数と、`crashkernel=…` が出たら、この項の手順 7 で止める
+   - `disabled` と `0` が出て、`crashkernel=` が無ければ、この項の手順 7 は飛ばす
 
 1. kdump が有効なときだけ、止めて、カーネルが落ちたときのために予約しているメモリーを外す（効くのは再起動の後）。
 
@@ -238,6 +244,8 @@
    - `削除中:` が `PackageKit-command-not-found` の 1 つだけになる。`これでよろしいですか? [y/N]:` に `y`
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
+### EPEL と RPM Fusion
+
 1. EPEL が無ければ入れ、有効になったか確かめる。
 
    ```bash
@@ -251,7 +259,7 @@
 
    - `epel-release` の版と、`epel` の行が出れば有効になっている
    - 最後に出る「CRB を有効にすることを推奨」は、気にしなくてよい
-   - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では手順 38）に、dnf が 1 回だけ確認を求める
+   - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 10）に、dnf が 1 回だけ確認を求める
      - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y`。違っていれば `N` で中断する
 
 1. RPM Fusion（free）の署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
@@ -285,7 +293,7 @@
    sudo dnf --setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm
    ```
 
-   - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、手順 19 の鍵で署名を確かめずに入る）
+   - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、この項の手順 3 の鍵で署名を確かめずに入る）
    - EPEL が有効なホストでは、`インストール:` が `rpmfusion-free-release` の 1 つだけになる
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -298,6 +306,8 @@
    ```
 
    - `rpmfusion-free-release` の版と、`rpmfusion-free-updates` の行が出れば有効になっている
+
+### Flatpak と Flathub
 
 1. flatpak を確かめ（無ければ入れ）、登録されているリモートを見る。
 
@@ -344,7 +354,7 @@
    - **確認を 2 回聞かれる**。どちらも `y` で進める
      - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
      - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
-   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 2.5 GB ほどになる。要らなければ、この手順と手順 26 は飛ばしてよい
+   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 2.5 GB ほどになる。要らなければ、この手順とこの項の手順 5 は飛ばしてよい
    - **次の手順は、2 回の確認に答え、完了してから貼る**（続けて貼ると答えとして食われる）
 
 1. 確認用のアプリが入り、サンドボックスが起動できるか確かめる。
@@ -360,7 +370,9 @@
    - `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出る
    - `sandbox OK` が出れば、アプリのサンドボックスが起動できている
    - 最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている
-   - メニューに載るのは、手順 67 の再起動の後
+   - メニューに載るのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
+
+### 日本語入力
 
 1. ibus-anthy と日本語のフォントが無ければ入れる。
 
@@ -369,12 +381,12 @@
    ```
 
    - 3 つとも版が出れば、入っている
-   - `package … is not installed` が出たときは、続けて AppStream から入る。入れたときは、手順 67 の再起動の後に使えるようになる
+   - `package … is not installed` が出たときは、続けて AppStream から入る。入れたときは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後に使えるようになる
 
 1. 入力ソースを「キーボードの配列 + Anthy」にする。
 
    ```bash
-   if [ -z "${XKB_LAYOUT}" ]; then echo '中断: 手順 9 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${XKB_LAYOUT}" ]; then echo '中断: 「システムの設定」の手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
      /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT}'), ('ibus', 'anthy')]"
@@ -386,7 +398,9 @@
    - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。戻すときのために控えておく
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
    - **ほかの入力ソースは消える**。残したいものがあれば、`set` の値に並べて足す
-   - **注意**: `/usr/bin/` を外さない（手順 29〜41 も同じ）
+   - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜13 も同じ）
+
+### GNOME の表示と入力
 
 1. ホームのフォルダーの名前を、日本語から英語にする（中身ごと移す）。
 
@@ -541,7 +555,7 @@
    ```
 
    - `これでよろしいですか? [y/N]:` に `y`
-   - EPEL からパッケージを入れるのが初めてなら、続けて EPEL の鍵の取り込みを聞かれる。fingerprint が手順 17 の値なら `y`、違っていれば `N`
+   - EPEL からパッケージを入れるのが初めてなら、続けて EPEL の鍵の取り込みを聞かれる。fingerprint が[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 の値なら `y`、違っていれば `N`
    - 入るのは `gnome-shell-extension-appindicator`
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
@@ -581,10 +595,10 @@
 
    - 一覧に `'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/'` があり、`binding '<Control><Alt>t'`・`command 'ptyxis --new-window'`・`name '端末'` が出ればよい。すぐに効く
 
-1. Dash のお気に入り（左の並び）を、手順 9 のアプリにする。
+1. Dash のお気に入り（左の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
 
    ```bash
-   if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 手順 9 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 「システムの設定」の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.shell favorite-apps
      /usr/bin/gsettings set org.gnome.shell favorite-apps "${DASH_FAVORITES}"
@@ -593,7 +607,9 @@
    ```
 
    - 最初の `get` は変える前の並び（Workstation では Firefox・カレンダー・Files・ソフトウェア・端末・テキストエディター・電卓）。戻すときのために控えておく
-   - 2 つ目の `get` が手順 9 の値になればよい。すぐに効く
+   - 2 つ目の `get` が[システムの設定](#システムの設定)の手順 1 の値になればよい。すぐに効く
+
+### 共通の bash 設定
 
 1. 共通の bash 設定を入れる。
 
@@ -659,6 +675,8 @@
    - `beginning-of-line` に `"\e[1~"` が無ければ、`$include /etc/inputrc` の行が読まれていない
    - `中断:` が出たら、すでにある `~/.inputrc` に、`$include /etc/inputrc` が無ければ先頭に足し、`set` の 4 行と矢印の 4 行を手で足す。足したら `bind -f ~/.inputrc`
 
+### Homebrew
+
 1. Homebrew の依存パッケージを入れる。
 
    ```bash
@@ -690,6 +708,8 @@
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
    - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
+### シェルのツール
+
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
 
    ```bash
@@ -702,10 +722,10 @@
 
 1. 開いている端末を閉じて、開き直す。
 
-   - Ctrl+Alt+T（手順 40）でも開ける
+   - Ctrl+Alt+T（[GNOME の表示と入力](#gnome-の表示と入力)の手順 12）でも開ける
    - 開き直した端末から、プロンプトが starship に変わり、zoxide・fzf・eza のエイリアス・bat の `MANPAGER` も効く
    - 今の端末で `. ~/.bashrc` を読み直さない（starship が、そのシェルで既に読んだ WezTerm のシェル統合より後ろで初期化され、WezTerm のフックが 2 回ずつ動く）
-   - 手順 9 の変数は、この後は使わない
+   - [システムの設定](#システムの設定)の手順 1 の変数は、この後は使わない
    - **次の手順は、開き直した端末で貼る**
 
 1. bash の履歴・補完・キー操作の設定が効いていることを確かめる。
@@ -806,7 +826,7 @@
 
    - `function` が 2 行と、`zoxide 0.10.0` のような版、`/home/linuxbrew/.linuxbrew/bin/zoxide` が出る
    - **注意**: 対話のシェル（端末に貼る）で行う。スクリプトの中では記録されない
-   - **次の手順は、プロンプトが戻ってから貼る**（zoxide はプロンプトを出すときに今のディレクトリを記録する。続けて貼ると、プロンプトが出る前に手順 58 が動き、`/usr/share` がまだ無い）
+   - **次の手順は、プロンプトが戻ってから貼る**（zoxide はプロンプトを出すときに今のディレクトリを記録する。続けて貼ると、プロンプトが出る前にこの項の手順 10 が動き、`/usr/share` がまだ無い）
 
 1. zoxide のデータベースに記録されたか確かめ、ホームに戻る。
 
@@ -818,17 +838,19 @@
 
    - `/usr/share` が出れば動いている
 
+### キー操作を試す
+
 1. キーを押して、補完と履歴の検索を確かめる。
 
    - `systemctl star` と打って Tab: `systemctl start ` になる（bash-completion）
    - `ls /usr/s` と打って Tab: 1 回で `sbin/ share/ src/` の一覧が色付きで出る（`show-all-if-ambiguous`・`colored-stats`）
    - `cd /usr/SH` と打って Tab: `cd /usr/share/` になる（`completion-ignore-case`）
-   - `printf` と打って ↑: 手順 55 の `printf '%s\n' "$MANPAGER"` の行が出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。Ctrl+C で捨てる
+   - `printf` と打って ↑: [シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"` の行が出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。Ctrl+C で捨てる
    - `/usr/share` と打って Enter: `cd -- /usr/share` と出て移る（`autocd`）。`cd /usr/shaer` と打って Enter: `/usr/share` と出て移る（`cdspell`）。`cd` で戻る
    - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: サブディレクトリの `.md` も出る（`globstar`）
    - `eza --gi` と打って Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` の一覧が出て、`eza --git` まで入る（Homebrew のコマンドの補完）
 
-1. Ctrl+R を押し、履歴から手順 53 の `fzf --version` を選んで実行する。
+1. Ctrl+R を押し、履歴から[シェルのツール](#シェルのツール)の手順 5 の `fzf --version` を選んで実行する。
 
    - 画面の下から fzf の一覧が開き、最下行の `>` の右に打った文字で絞り込める。`fzf --v` と打ち、上下キーで `fzf --version` の行を選ぶ
    - Enter でその行がプロンプトに入る（**実行はされない**）。もう一度 Enter で実行する
@@ -850,6 +872,8 @@
    - 端末が Alt を ESC の前置きとして送る設定のときに届く（届かなければ、`ESC` を押してから `c`）
    - `cd -` で元のディレクトリに戻る
 
+### tmux を試す
+
 1. tmux のセッションを作って入る。
 
    ```bash
@@ -869,7 +893,7 @@
    ```
 
    - `tmux ls` の `work: 1 windows (created …)` は、tmux の画面を出た後のシェルに見える
-   - `tmux attach -t work` で、手順 64 の画面に戻る
+   - `tmux attach -t work` で、この項の手順 1 の画面に戻る
    - 中で `exit` と打つと、シェルが終わってセッションも終わる。`[exited]` と出てシェルに戻る
    - **次の手順は、`exit` でシェルに戻ってから貼る**（続けて貼ると、tmux の中のシェルへの入力になる）
 
@@ -880,6 +904,8 @@
    ```
 
    - `no server running on /tmp/tmux-<UID>/default` と出る
+
+### 再起動と確認
 
 1. 再起動する。
 
@@ -894,7 +920,7 @@
 
    - 上部バーの時計に曜日と秒が出る（電池のある PC では、電池の % も）
    - 上部バーの右に、入力ソースの表示が出る
-   - 画面が濃い色（ダーク）になっている。Super キーで開くアクティビティの画面の下の Dash が、手順 41 の並び
+   - 画面が濃い色（ダーク）になっている。Super キーで開くアクティビティの画面の下の Dash が、[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並び
    - 端末などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る
    - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
 
@@ -911,9 +937,9 @@
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
 
-   - `journalctl --list-boots` に 2 行出る（前の起動のログが残っている。手順 13）
-   - `0` が出る（手順 15 で kdump を止めたとき）
-   - 手順 10 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
+   - `journalctl --list-boots` に 2 行出る（前の起動のログが残っている。[システムの設定](#システムの設定)の手順 5）
+   - `0` が出る（[システムの設定](#システムの設定)の手順 7 で kdump を止めたとき）
+   - [システムの設定](#システムの設定)の手順 2 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
    - `anthy - Anthy` が出る
    - トレイアイコンの拡張が `ACTIVE` になっている
    - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る
@@ -1019,7 +1045,7 @@
 
 ## dnf-automatic で自動で更新する（任意）
 
-- BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[手順 7・8](#実施手順)で自分で再起動する）
+- BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で再起動する）
 - GNOME Software の自動の更新（裏でダウンロードし、再起動のときに入れる）は、この節の手順 3 で止める（二重にしない）
 - 戻すときは、この節の手順 5・6
 
@@ -1096,7 +1122,7 @@
 
 - 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - WireGuard・Samba・Syncthing・Dropbox のホストや、RDP で待ち受ける PC は、眠るとサービスが止まる
-  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)はこの節の手順 1・2（サスペンドできる PC では手順 3・4 も）、[Claude Code で GUI を確かめる](claude-code-gui.md)は手順 1・2、[GNOME のデスクトップ共有](gnome-desktop-sharing.md)は手順 1〜4 を前提にしている
+  - [GNOME のヘッドレスのセッション](gnome-headless-session.md)はこの節の手順 1・2（サスペンドできる PC ではこの節の手順 3・4 も）、[Claude Code で GUI を確かめる](claude-code-gui.md)はこの節の手順 1・2、[GNOME のデスクトップ共有](gnome-desktop-sharing.md)はこの節の手順 1〜4 を前提にしている
 - **人が触れる場所にある PC では行わない**（画面をロックしないので、前にいる人がそのまま使える）
 - GNOME を入れていない（デスクトップの無い）機械では、この節の手順 4・5 だけを行う
 - GNOME にログインするユーザー本人の端末で、この節の手順 1 で変数を設定してから、上から順に貼る
@@ -1438,7 +1464,7 @@
 - `sudo brew ...` は、sudo の PATH に Homebrew が無ければ `command not found` になる。[Homebrew を sudo でも使う（任意）](#homebrew-を-sudo-でも使う任意)の節を通しても、管理操作は一般ユーザーで行う
 - 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う（任意）](#homebrew-を-root-のシェルでも使う任意)の節を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う（任意）](#homebrew-を-sudo-でも使う任意)の節を通す
 - Homebrew 7.0.7 の `brew install` は、端末で依存や依存先も導入する計画なら `[y/n]` を聞く。指定したものだけの計画、または端末を使わない実行では聞かない（[注意点](extra/almalinux-setup.md#注意点)）
-- Homebrew で入れるほかの手順書（[yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)、[Dropbox（rclone）](dropbox-rclone.md)、[hadolint / dive / Trivy](image-tools.md)（Trivy だけは dnf）、[lazydocker](lazydocker.md)）は、[手順 46〜48](#実施手順) を前提にする
+- Homebrew で入れるほかの手順書（[yazi](yazi.md)、[lazygit](lazygit.md)、[Neovim](neovim.md)、[git-delta](git-delta.md)、[gdu](gdu.md)、[ShellCheck / shfmt](shellcheck.md)、[Syncthing](syncthing.md)、[HackGen Console NF](hackgen.md)、[Dropbox（rclone）](dropbox-rclone.md)、[hadolint / dive / Trivy](image-tools.md)（Trivy だけは dnf）、[lazydocker](lazydocker.md)）は、[Homebrew](#homebrew)の手順 1〜3 を前提にする
 
 ---
 
@@ -1473,7 +1499,7 @@
 - sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う（任意）](#homebrew-を-root-のシェルでも使う任意)の節を通す
 - RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
 - `brew install` などの管理操作は、この節を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
-- [手順 46〜48](#実施手順) を終えた、Homebrew を入れたユーザーのシェルで貼る
+- [Homebrew](#homebrew)の手順 1〜3 を終えた、Homebrew を入れたユーザーのシェルで貼る
 - 補足: [参考資料](reference/almalinux-setup.md#homebrew-sudo-で使うときの補足)
 
 > [!WARNING]
@@ -1497,7 +1523,7 @@
    ```
 
    - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出る
-     - `/etc/sudoers.d` にほかのファイル（[手順 3](#実施手順) の `nopasswd` など）があれば、その行も出る
+     - `/etc/sudoers.d` にほかのファイル（[ログインと sudo](#ログインと-sudo)の手順 3 の `nopasswd` など）があれば、その行も出る
      - 日本語のロケール（`ja_JP.UTF-8`）では、`parsed OK` は `正しく構文解析されました` と出る
    - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
    - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
@@ -1524,7 +1550,7 @@
 
 - 公式が配っている設定一式を `~/.config/starship.toml` に書き出す
 - **この節の手順 2 で、既存の設定は上書きされる**。自分で書いたものがあれば、先に退避する
-- [手順 50](#実施手順) で開き直した端末（starship を読み込んだ端末）で貼る
+- [シェルのツール](#シェルのツール)の手順 2 で開き直した端末（starship を読み込んだ端末）で貼る
 
 1. 当てられるプリセットの一覧を見る。
 
@@ -1637,9 +1663,9 @@
 ## fzf で fd と bat を候補とプレビューに使う（任意）
 
 - Ctrl+T と Alt+C の候補を、fd の一覧に変える（`.git` の中を除き、隠しファイルは含める。`.gitignore` の対象は fd が既定で除く）
-- 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[手順 49](#実施手順) の後から出ている。`~/.bashrc` への追記は要らない
+- 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
-- bat は[手順 49](#実施手順) で入れてある。fd は、この節の手順 1 で入れる（[yazi.md 手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で入れてあれば飛ばす）
+- bat は[シェルのツール](#シェルのツール)の手順 1 で入れてある。fd は、この節の手順 1 で入れる（[yazi.md の手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で入れてあれば飛ばす）
 - 戻すときは、この節の手順 5
 
 1. brew で fd を入れる。
@@ -1678,7 +1704,7 @@
    ```
 
    - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/fd/…` と出ればよい
-   - [yazi.md 手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で fd を入れてあれば、消さない
+   - [yazi.md の手順 2](yazi.md#実施手順) の `YAZI_EXTRAS` で fd を入れてあれば、消さない
 
 ---
 
@@ -1834,7 +1860,7 @@
    ```
 
    - `claude` の版、`tmux 3.7c`、`Login method: …` の行が出ればよい
-   - `Not logged in. Run claude auth login to authenticate.` なら、[claude-code.md 手順 5](claude-code.md#実施手順) でログインしてから続ける
+   - `Not logged in. Run claude auth login to authenticate.` なら、[claude-code.md の手順 5](claude-code.md#実施手順) でログインしてから続ける
    - `claude doctor` の `Remote Control` の段にも、使えないときは理由が出る（ログインしていないと `Not signed in to claude.ai` など）
 
 1. Claude Code を動かすディレクトリに移る。
@@ -1850,7 +1876,7 @@
 
    - 左下に `[claude]` が出る。新規セッションのシェルは、この節の手順 2 のディレクトリから始まる
    - 同じ名前のセッションがあれば、そこで動いていたコマンドと作業場所のまま戻る（`-A`）。Claude Code がすでに動いているなら、この節の手順 4 は飛ばしてその画面を使う
-   - シェルに戻っている場合は、中で `pwd` を確かめ、必要なら `cd <PROJECT_DIR>` で作業場所へ移る。ほかのコマンドが動いていれば、そこへ手順 4 を貼らない
+   - シェルに戻っている場合は、中で `pwd` を確かめ、必要なら `cd <PROJECT_DIR>` で作業場所へ移る。ほかのコマンドが動いていれば、そこへこの節の手順 4 を貼らない
    - **次の手順は、tmux の中のシェルで作業場所を確かめてから貼る**（動いているアプリへ貼ると、その入力として食われる）
 
 1. tmux の中で Remote Control を始める。
@@ -1906,12 +1932,12 @@
 
 ## 更新
 
-- OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は、[手順 4・7・8](#実施手順)を貼り直す。ファームウェアは[手順 5・6](#実施手順)
-- [dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)を通したなら、OS の更新は毎日自動で入る（再起動は手順 7・8 で自分で行う）
-- EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[手順 17](#実施手順)）
+- OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5 を、ファームウェアは同じ項の手順 2・3 を貼り直す
+- [dnf-automatic で自動で更新する（任意）](#dnf-automatic-で自動で更新する任意)を通したなら、OS の更新は毎日自動で入る（再起動は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で行う）
+- EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1）
 - Flatpak のアプリは `dnf upgrade` では上がらない（この節の手順 4）
 - 別の手順書で入れたもの（Git・Firefox・HackGen Console NF・WezTerm・Claude Code・Codex CLI・Grok Build など）は、それぞれの手順書の「更新」
-- この節の手順は、[手順 50](#実施手順) と同じ、開き直した端末に貼る
+- この節の手順は、[シェルのツール](#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 1. 共通の bash 設定を上げる。
 
