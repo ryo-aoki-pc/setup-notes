@@ -2,17 +2,18 @@
 
 ## 実施手順
 
-- [検証記録](verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)
+- [検証記録](verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[ロールバックと注意点](extra/gnome-remote-desktop.md)
 
 > [!IMPORTANT]
 > - **すべてサーバー上で実行する**。手順 11（クライアントからのログイン）だけ別マシン
 > - **手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 手順の後: 接続元を LAN に絞る場合は、最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 接続元を LAN に絞る場合は、最後に[接続元を LAN に絞る（任意）](#接続元を-lan-に絞る任意)を行う。戻すときは[ロールバック](extra/gnome-remote-desktop.md#ロールバック)
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[gnome-headless-session.md](gnome-headless-session.md)。この手順書と同じ PC で併用できる（ポートは 3390）
 - PC の画面のデスクトップ（自動ログインで作る）を、PC の画面を触らずにそのまま RDP で共有するなら、[gnome-desktop-sharing.md](gnome-desktop-sharing.md)。今の版は [x86_64 VM](verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07) で、以前の版は aarch64 の[実機](verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照
-  - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
+  - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -23,15 +24,15 @@
    ```bash
    SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
    SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in SERVER_IP SERVER_NAME SERVER_FQDN; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
    ```
 
    - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
-   - 最後に値を読み戻して確かめる
    - `SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. `gnome-remote-desktop` ユーザーとして、TLS 証明書と鍵を openssl で生成する。
 
@@ -49,7 +50,6 @@
    fi
    ```
 
-   - 所有権を最初から正しくするため、`gnome-remote-desktop` ユーザー自身として生成する
    - `中断:` と出たら、何も変更していない。手順 1 を貼り直してから、この手順をやり直す
 
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
@@ -59,6 +59,7 @@
      sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
      sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
      sudo restorecon -Rv /var/lib/gnome-remote-desktop
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    }
    ```
@@ -74,7 +75,6 @@
    ```
 
    - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10 で使う）
-   - `rdp enable` はデーモンも起動する。このため、この後に設定する資格情報は再起動するまで反映されない（手順 7 で再起動する）
 
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
@@ -102,7 +102,6 @@
    ```
 
    - ユーザー名とパスワードを聞かれる
-   - 引数なしで打つのは、パスワードをシェル履歴・ログに残さないため
    - 対話入力は TTY 必須。スクリプトやパイプ、Claude Code の `!` 実行では**何も設定されないまま exit 0 で終わる**（[落とし穴 1](verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
@@ -117,6 +116,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo grdctl --system status              # Status: enabled / Username: (hidden)
      systemctl status gnome-remote-desktop    # active (running)
      ss -lntp | grep 3389                     # *:3389 で LISTEN
@@ -128,6 +128,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
      sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
    }
@@ -162,21 +163,21 @@
    print(subprocess.run(['openssl', 'x509', '-noout', '-subject', '-ext', 'subjectAltName'], input=pem, capture_output=True, text=True).stdout, end='')
    ts.close()
    PY
+   printf '\n\033[7m 確認 \033[0m\n'
    python3 ~/rdp_tls_probe.py "${SERVER_IP}"
    ```
 
-   - `~/rdp_tls_probe.py` を書き出して、`${SERVER_IP}` に対して実行する（FreeRDP も RDP のパスワードも要らない）
    - 次の 3 つがそろえばよい
      - `selectedProtocol=0x2` でネゴシエーションが成立する
      - `fingerprint` が `grdctl --system status` の TLS fingerprint と**完全一致**する
      - SAN に、接続に使う名前が `DNS:` エントリとして含まれている
-   - サーバー側には `nla_recv() error` などのログが出るが、プローブが TLS 直後に切断しただけで正常（この手順の補足の「TLS プローブ」）
-   - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい（この手順書が作る唯一の作業ファイル）
+   - サーバー側には `nla_recv() error` などのログが出るが正常（この手順の補足の「TLS プローブ」）
+   - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい
 
 1. LAN 内の別マシンから、RDP クライアントでログインする。
 
    - `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
-   - 手順 1 の変数は無いので、`<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
+   - `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
    - システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする
    - 問題があれば、サーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る
 
@@ -198,12 +199,10 @@
    sudo firewall-cmd --permanent --remove-service=rdp
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
    sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
    fi
    ```
-
-   - 先頭の `if` は、`LAN_SUBNET` が空のままブロックを貼ったときに、`rdp` サービスだけ消えて rich rule が空アドレスで入るのを防ぐ
-   - rich rule は**二重引用符**で囲む。単一引用符だと `${LAN_SUBNET}` が展開されず、firewalld は `$LAN_SUBNET` という文字列のままの rule を `success` で受理してしまう
 
 ---
 
@@ -223,6 +222,7 @@
    After=gdm.service
    CONF
      sudo systemctl daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl show gnome-remote-desktop.service -p After | grep -ow 'gdm\.service'
    }
    ```
@@ -246,12 +246,12 @@
      sleep 5
      sudo systemctl start gnome-remote-desktop.service
      sleep 5
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -E 'GetManagedObjects|RDP server started'
    }
    ```
 
    - `RDP server started` の 1 行だけが出ればよい
-   - 真っ暗なまま残っていたリモートログインのログイン画面のセッションは、止めたときに閉じる（`loginctl list-sessions` の `gdm` の `greeter` で、SEAT が `-` のもの）
    - **注意**: `systemctl restart` にしない（参考資料を参照）
 
 1. ヘッドレスのセッションがある PC では、そのユーザーのシェルで、受け渡し役のデーモンを再起動する。
@@ -260,13 +260,13 @@
    {
      systemctl --user restart gnome-remote-desktop-handover.service
      sleep 3
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo journalctl --no-pager _PID="$(systemctl --user show -p MainPID --value gnome-remote-desktop-handover.service)" | grep 'RDP server started'
    }
    ```
 
    - `RDP server started` と出ればよい
    - ヘッドレスのセッションは [gnome-headless-session.md](gnome-headless-session.md) のもの。無い PC では、この手順は飛ばす
-   - この節の手順 3 の後、このデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある（参考資料を参照）
 
 1. 元に戻すときは、ドロップインを消して読み込ませる。
 
@@ -275,115 +275,9 @@
      sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
      sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
      sudo systemctl daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl show gnome-remote-desktop.service -p After | grep -cw 'gdm\.service'   # 0
    }
    ```
 
    - 最後に `0` と出ればよい
-   - 次の起動からの順番が戻るだけで、今動いているデーモンはそのまま
-
----
-
-## ロールバック
-
-- 利用を止めるときは、この節の手順 1 と、LAN に絞っていた場合は手順 2 を行う
-- 証明書だけを戻すときは、この節の手順 1・2 を飛ばし、手順 3・4 を行う
-
-> [!WARNING]
-> **この節の**手順 3 で証明書を差し替え前に戻すには、旧ファイルが要る。差し替えのときに旧ファイルを消していると、証明書は戻せない。[手順 2](#実施手順) は同じ名前で上書きするので、残すなら先にコピーしておく。
-
-1. サービスと RDP を止め、資格情報とファイアウォールの開放と、手順 5 のドロップインを消す。
-
-   ```bash
-   {
-     sudo systemctl disable --now gnome-remote-desktop.service
-     sudo grdctl --system rdp disable
-     sudo grdctl --system rdp clear-credentials
-     sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
-     sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
-     sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
-     sudo systemctl daemon-reload
-     sudo firewall-cmd --list-services
-     sudo firewall-cmd --permanent --list-services
-   }
-   ```
-
-   - runtime・permanent のどちらのサービス一覧にも `rdp` が無ければよい
-
-1. [接続元を LAN に絞る](#接続元を-lan-に絞る任意)を行ったときは、追加した rich rule も消す。
-
-   ```bash
-   if [ -z "${LAN_SUBNET}" ]; then echo '中断: LAN_SUBNET が空のまま。LAN に絞る節の変数ブロックを貼り直す' >&2; else
-     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
-     sudo firewall-cmd --reload
-     sudo firewall-cmd --list-rich-rules
-     sudo firewall-cmd --permanent --list-rich-rules
-   fi
-   ```
-
-   - `LAN_SUBNET` は、[接続元を LAN に絞る](#接続元を-lan-に絞る任意)の手順 1 の変数ブロックで、設定時と同じ値を入れる
-   - runtime・permanent のどちらにも、その送信元と 3389/tcp の rich rule が無ければよい
-
-1. 証明書だけを差し替え前に戻すときは（この節の手順 1・2 の代わりに）、旧ファイル名を入れてパスを戻す。
-
-   ```bash
-   OLD_BASENAME=                        # ← 差し替え前の証明書・鍵のファイル名（拡張子なし）
-   ```
-
-   ```bash
-   if [ -z "${OLD_BASENAME}" ]; then echo '中断: OLD_BASENAME を設定してから貼り直す' >&2; else
-   sudo grdctl --system rdp set-tls-key  "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.key"
-   sudo grdctl --system rdp set-tls-cert "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.crt"
-   fi
-   ```
-
-   - `OLD_BASENAME` には、差し替え前の証明書・鍵のファイル名（拡張子なし）を入れる
-   - `OLD_BASENAME` が空のまま貼ると、先頭の `if` で中断し、`grdctl` は実行されない
-
-1. この節の手順 3 で証明書を戻したときは、デーモンを起動し直して反映する。
-
-   - [設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3 と、ヘッドレスのセッションがある場合は手順 4 を行う
-   - その節の手順 1・2・5 は行わない
-
----
-
-## 注意点
-
-- **TPM 警告**: `grdctl --system` 実行時と service 起動時に毎回 `Init TPM credentials failed ... using GKeyFile as fallback` が出るが、TPM が使えない機体での正常なフォールバック
-  - 資格情報は `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/credentials.ini` に保存される
-- **設定レイヤーの食い違い**
-  - システムデーモンの設定は、`/usr/share/gnome-remote-desktop/grd.conf`（既定）→ `/etc/gnome-remote-desktop/grd.conf`（`grdctl` が書く）の順に読まれる
-  - ただし、`~gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf` が作られることがある
-  - `/etc` 側の `enabled=true` と、このファイルの `enabled=false` が食い違うと、サービスを再起動しても有効にならないことがある。次の確認方法で設定を読み戻す
-  - 食い違う場合は、デーモン稼働中にもう一度 `sudo grdctl --system rdp enable` を実行し、設定と待ち受けを確認する
-
-  確認方法:
-
-  ```bash
-  {
-    sudo cat /etc/gnome-remote-desktop/grd.conf
-    sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
-  }
-  ```
-
-- **リモートログインのセッション**: そのユーザーのセッションが無ければ、ログインで新しいセッションができる
-  - ローカルでログイン中のユーザーと同一ユーザーで接続すると、GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある
-  - PC の物理モニターに表示しているデスクトップを見る用途は「デスクトップ共有」方式（ユーザーのデーモン）。本書では扱わず、[gnome-desktop-sharing.md](gnome-desktop-sharing.md) に分けた。aarch64 の[実機](verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照（物理 HDMI への表示は未確認）
-- **ヘッドレスのセッションを常駐させている PC**（[gnome-headless-session.md](gnome-headless-session.md)）
-  - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
-  - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、そのユーザーでログインしたときに、ログイン画面が名前とアイコンのまま進まない
-    - RHEL の `gnome-remote-desktop` 49.3-3 からの機能（パッケージの changelog の「Support remote login to sessions from gnome-headless-session@.service」）
-    - クライアントには、ヘッドレスのセッションに足された仮想モニターが写る。[claude-code-gui.md](claude-code-gui.md) のドロップインがある PC では、`Meta-0` の右に足された `Meta-1` になり、壁紙だけが写る（上部バーもウィンドウも無い）
-    - 切断すると足されたモニターは消え、ヘッドレスのセッションは残った
-  - ヘッドレスのセッションの RDP（gnome-headless-session.md、3390）と同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
-  - 起動のときと同じすれ違い（[手順 5](#実施手順) の補足）は、タイミングによっては起きるはず（コードからの推定）。真っ暗なまま切れるようになったら、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 2〜4 で直す
-  - ヘッドレスのセッションは、GDM と一緒に止まって起動し直される。前のセッションの片付けとぶつかって、消えることがある（[gnome-headless-session.md の注意点](gnome-headless-session.md#注意点)）
-  - ヘッドレスのセッションをやめてリモートログインだけにするときは、[gnome-headless-session.md の「リモートログインだけにする（併用をやめる）」](gnome-headless-session.md#リモートログインだけにする併用をやめる)。claude-code-gui.md のドロップインも外し、外す前に入ったリモートログインのセッションは終わらせる
-- **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は、手順 2〜4 でそちらのパスを指定する
-- **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す
-  - **クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある
-  - 差し替え後は、[設定済みのサーバーで GDM の後に起動させる](#設定済みのサーバーで-gdm-の後に起動させる)の手順 3 と、ヘッドレスのセッションがある場合は手順 4 で反映する（接続中の RDP セッションは切断されるので、利用者がいないときに行う）
-- **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。接続元を制限しない場合はそのままでよい
-  - LAN 限定に絞る手順は[接続元を LAN に絞る](#接続元を-lan-に絞る任意)
-- **ログイン画面のまま置くと眠ることがある**: Workstation で入れた PC のログイン画面は、電源につないでいても 15 分でサスペンドする
-  - 眠ると RDP でつなげない。止めるなら [AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)

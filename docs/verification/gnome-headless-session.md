@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の検証記録
 
-[手順書](../gnome-headless-session.md)
+[手順書](../gnome-headless-session.md)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -17,7 +17,7 @@
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜10・LAN 限定・ロールバック 2〜5 を本実行し、再起動後の自動起動と RDP の画面操作を確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末、ブラケットペースト無し）にそのまま貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
-    - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](../gnome-headless-session.md#接続元を-lan-に絞る任意) → [ロールバック](../gnome-headless-session.md#ロールバック)の手順 2〜5
+    - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](../gnome-headless-session.md#接続元を-lan-に絞る任意) → [ロールバック](../extra/gnome-headless-session.md#ロールバック)の手順 2〜5
     - `grep headless` を直した後の版で、実施手順 1・2 → ロールバックの手順 5 → 実施手順 1・2 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
   - 確認したこと
     - リモートログイン（3389）が有効な PC で、`RDP_PORT` が 3390 になり、このセッションの RDP が 3390/tcp で待ち受ける
@@ -33,8 +33,8 @@
     - x86_64 の PC、サスペンドできる PC（ログイン画面が眠らせないこと）
     - 同じユーザーのローカルのログインとの重なり、後からリモートログインを有効にしたとき
   - 2026-10-02: リモートログインのログイン画面から同じユーザーで入ると、このセッションに引き渡された（Windows 11 の「リモートデスクトップ接続」で。[gnome-remote-desktop.md の付録](gnome-remote-desktop.md#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
-    - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](../gnome-headless-session.md#注意点)）
-  - 2026-10-02: もとの手順 2・3 と、[ロールバック](../gnome-headless-session.md#ロールバック)のもとの手順 5・6 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
+    - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](../extra/gnome-headless-session.md#注意点)）
+  - 2026-10-02: もとの手順 2・3 と、[ロールバック](../extra/gnome-headless-session.md#ロールバック)のもとの手順 5・6 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 手順 3・4 とロールバックの手順 3・4 に、共用 TLS 設定の退避・復元と、新規生成した証明書だけの削除を追加した。構文検査と一時ディレクトリ・スタブでの確認だけで、実機の RDP では流していない
   - 2026-10-08: 節「[リモートログインだけにする（併用をやめる）](../gnome-headless-session.md#リモートログインだけにする併用をやめる)」を足し、aarch64 の実機（同じ Raspberry Pi 5）で本実行した（[付録](#付録-実機でリモートログインだけにした記録2026-10-08)）
     - 通したもの: この節の手順 1・3〜5・7（手順 2 は、ヘッドレスのセッションの RDP を設定していなかったので飛ばした）。手順 6 は利用者の Windows の「リモート デスクトップ接続」
@@ -109,7 +109,7 @@ $ sudo firewall-cmd --list-ports
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）のログイン画面から同じユーザーで入ると、新しいセッションは作られず、このセッションに引き渡された（2026-10-02。同書の[注意点](../gnome-remote-desktop.md#注意点)）
+  - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）のログイン画面から同じユーザーで入ると、新しいセッションは作られず、このセッションに引き渡された（2026-10-02。同書の[注意点](../extra/gnome-remote-desktop.md#注意点)）
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -223,7 +223,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 - 続けて利用者が Windows のリモートログインで入ると、新しいセッション（`Service=gdm-password`・`Remote=yes`・`Type=wayland`・`TTY=headless`）ができた
   - その gnome-shell は `--virtual-monitor 1920x1080` 付きで起動し、RDP のモニターは `Meta-1` として足された（journal の `Added virtual monitor Meta-1`）
   - 利用者は 1 分ほどで切断した。そのときクライアントに何が写っていたかは聞いていない
-- Claude Code が、[claude-code-gui.md の注意点](../claude-code-gui.md#注意点)（ドロップインがあるとリモートログインのクライアントには壁紙だけが写る）に当たる状態だと判断し、この節を書いて続きを流した
+- Claude Code が、[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)（ドロップインがあるとリモートログインのクライアントには壁紙だけが写る）に当たる状態だと判断し、この節を書いて続きを流した
 
 **流し方**: この節のブロックを、SSH で入ったこのユーザーの Claude Code の Bash ツール（非対話の bash）で、手順ごとに出力を見てから実行した。手順 6 は利用者が行った。
 
@@ -276,7 +276,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 - gdm の unit。`gdm` ユーザーで `gdm-new-session <USER> --headless` を動かし、GDM に、モニターの無いセッションを作らせる（RHEL 10 の文書の「1.4 headless server for a single user」と同じ unit）
 - できるセッションは、`loginctl` で `Class=user`・`Type=wayland`・`TTY=headless`・`Remote=yes`・`Service=gdm-autologin`・seat 無し
-- PAM は `gdm-autologin` で、パスワードを使わない。ログインのキーリングは開かない（[注意点](../gnome-headless-session.md#注意点)）
+- PAM は `gdm-autologin` で、パスワードを使わない。ログインのキーリングは開かない（[注意点](../extra/gnome-headless-session.md#注意点)）
 - `WantedBy=graphical.target` なので、`enable` で起動時にも作られる。`Requires=gdm.service`
 - 起動して 3 秒ほどで gnome-shell が動き、描画には GPU（Raspberry Pi 5 では `/dev/dri/renderD128` の v3d）を使った
 

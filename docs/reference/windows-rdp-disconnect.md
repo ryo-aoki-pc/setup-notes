@@ -1,6 +1,6 @@
 # Windows 11 のリモートデスクトップを、画面をロックせずに切断する手順（tscon）の参考資料
 
-[手順書](../windows-rdp-disconnect.md)
+[手順書](../windows-rdp-disconnect.md)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
 
 ## 補足
 
@@ -29,6 +29,10 @@
 - セッションの ID は、`quser` の出力を切り出さずに、この PowerShell のプロセスのセッションの ID（`Process.SessionId`。ターミナル サービスのセッションの ID）から取る。出力の列の位置に頼らないため
 - PC の画面は、ロック画面を通らずにデスクトップになる。開いていたアプリはそのまま
 
+### 実施手順 / 手順 5: 補足: Remote Control の確認
+
+- 同じ節の手順 5 で `console` の行が `Active` になれば、[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md#実施手順)の手順 3 の確認（`console` の行が `Active`）も通る
+
 ### ショートカットで切断する（任意） / 手順 1: 補足: ショートカットの作り
 
 [この節の検証記録](../verification/windows-rdp-disconnect.md#ショートカットで切断する任意--手順-1-補足-ショートカットの作り)
@@ -41,6 +45,11 @@
   - Microsoft の資料は、この印を「別のユーザーとして動かす」とだけ書いている。チェック項目との対応については検証記録を参照する
 - アイコンは「リモート デスクトップ接続」（`mstsc.exe`）のもの
 - デスクトップの場所は `[Environment]::GetFolderPath('Desktop')` で取る（OneDrive に移したデスクトップも、この値になる）
+- 何度貼っても、同じショートカットを作り直すだけ
+
+### ショートカットで切断する（任意） / 手順 2: 補足: 切れないとき
+
+- ショートカットは窓を隠して動かすので、切れないときのエラーが見えない。そのため、[実施手順](../windows-rdp-disconnect.md#実施手順)の手順 1〜3 で切ってエラーを見る
 
 ### 選択した方針
 

@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/grok-build.md)・[参考資料](reference/grok-build.md)
+- [検証記録](verification/grok-build.md)・[参考資料](reference/grok-build.md)・[ロールバックと注意点](extra/grok-build.md)
 
 > [!IMPORTANT]
 > - **Windows 11 は、[Windows 11 で使う](#windows-11-で使う)から始める**
@@ -12,13 +12,15 @@
 > - **手順 2 のインストーラーは、`~/.bashrc` の末尾に PATH と補完のブロックを足す**（共通の bash 設定とは別。[参考資料](reference/grok-build.md#実施手順--手順-2-インストーラーが置くものと-bashrc)）
 
 - 上から順に貼る。操作に使うコードブロックだけを上から順に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 対象は端末で使う Grok Build の CLI（`grok`）。名前の似た非公式の grok-cli（npm の `grok-dev` など）とは別物
 - SSH 先などブラウザの無いホストでは、手順 4・5 の代わりに[ブラウザの無いホストでログインする](#ブラウザの無いホストでログインする)を通す
-- 手順の後: Claude Code・Codex と同じプロジェクトで使うなら [coding-agents.md](coding-agents.md)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 手順の後: Claude Code・Codex と同じプロジェクトで使うなら [coding-agents.md](coding-agents.md)。以後は[更新](#更新)・[ロールバック](extra/grok-build.md#ロールバック)
 
 1. 既存の Grok と、同じ名前のコマンドが無いか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v grok agent curl
    ls -ld ~/.grok
    ```
@@ -26,7 +28,7 @@
    - 新規の PC なら `curl` のパスだけが出て、`ls` は `No such file or directory` になる
    - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
    - `grok` か `~/.grok` があれば、元の導入方法を確かめてから進める。非公式の grok-cli も同じ `grok` と `~/.grok` を使うので、先に外す
-   - `agent` のパスが出たら、それが何かを確かめる。インストーラーは `~/.local/bin/agent` を Grok へのリンクで置き換えることがある（[注意点](#注意点)）
+   - `agent` のパスが出たら、それが何かを確かめる。インストーラーは `~/.local/bin/agent` を Grok へのリンクで置き換えることがある（[注意点](extra/grok-build.md#注意点)）
 
 1. 公式のインストーラーで Grok Build を入れる。
 
@@ -44,12 +46,13 @@
    ```bash
    export PATH="$HOME/.grok/bin:$PATH"
    hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v grok
    grok --version
    ```
 
-   - 自分のホームの `.grok/bin/grok` と `grok 1.0.50 (…)` のような版が出る（検証時は `1.0.50`）
-   - 新しく開いた端末でも `grok --version` が通ることを確かめる（`~/.bashrc` のブロックが PATH を通す）
+   - 自分のホームの `.grok/bin/grok` と `grok 1.0.50 (…)` のような版が出る
+   - 新しく開いた端末でも `grok --version` が通ることを確かめる
 
 1. ブラウザでのログインを始める。
 
@@ -72,7 +75,7 @@
    ```
 
    - `You are not authenticated.` が出なければ、ログインできている
-   - ログインしていなくても終了コードは 0 で、モデルの一覧（検証時は `grok-4.6` と `grok-4.5`）は出る。終了コードでは判定しない
+   - ログインしていなくても終了コードは 0 で、モデルの一覧は出る。終了コードでは判定しない
    - ログインの情報は `~/.grok/auth.json` に入る。中身を表示・共有しない
 
 1. 確認用のディレクトリで Grok を起動する。
@@ -84,7 +87,7 @@
    grok
    ```
 
-   - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する（信頼しないと、そのフォルダーの AGENTS.md などを読まない）
+   - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
    - 終了するときは `/quit` を入力する
    - **後ろの節のコマンドは、Grok を終了してシェルのプロンプトに戻ってから貼る**
@@ -107,74 +110,13 @@
 1. 新しい版を入れ、版を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    grok update
    grok --version
    ```
 
    - 新しい版が無ければ `Already up to date (…)` と出る
    - 確かめるだけなら `grok update --check`（`(latest: …)` に最新の版が出る）
-   - 古い版の配布物は `~/.grok/downloads` に残ることがある。使っている量は `grok du` で見る
-
----
-
-## ロールバック
-
-- Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)へ進む
-- この節の手順 1〜3 で、ログイン・CLI・PATH の設定を外す。ログイン情報・会話の記録・設定（`~/.grok` の残り）は残る
-
-> [!CAUTION]
-> **この節の手順 4 で `~/.grok` を消すと、ログイン情報・会話の記録（セッション）・設定・信頼したフォルダーの記録・Grok が作った worktree がすべて消える**（取り戻せない）。入れ直すかもしれないなら、手順 4 は行わない。
-
-1. 起動中の Grok を終了し、ログイン情報も外すならログアウトする。
-
-   ```bash
-   grok logout
-   ```
-
-   - ログインしていなければ `No cached session to log out of.` と出る
-
-1. この手順で入れたリンクと配布物を消す。
-
-   ```bash
-   for f in ~/.local/bin/grok ~/.local/bin/agent; do
-     case "$(readlink "$f")" in
-       "$HOME/.grok/"*) rm -f "$f" ;;
-     esac
-   done
-   rm -f ~/.grok/bin/grok ~/.grok/bin/agent
-   rm -rf ~/.grok/downloads ~/.grok/completions
-   hash -r
-   command -v grok agent
-   ```
-
-   - 最後に何も出なければ、PATH 上に Grok は無い
-   - `~/.local/bin` の `grok`・`agent` は、`~/.grok` を指すリンクだけを消す（ほかのツールの `agent` は残る）
-   - パスが出る場合は、別の導入方法の Grok か、別のツールの `agent` が残っている
-
-1. インストーラーが `~/.bashrc` に足したブロックを消す。
-
-   ```bash
-   if grep -qx '# >>> grok installer >>>' ~/.bashrc && grep -qx '# <<< grok installer <<<' ~/.bashrc; then
-     sed -i --follow-symlinks '/^# >>> grok installer >>>$/,/^# <<< grok installer <<<$/d' ~/.bashrc
-     grep -c 'grok' ~/.bashrc
-   else
-     echo '中断: ~/.bashrc に grok installer の印が 2 つそろっていない。エディタで確かめる' >&2
-   fi
-   ```
-
-   - 最後に `0` が出れば、`~/.bashrc` に Grok の行は無い（ほかに grok を含む行を自分で書いていれば、その数が出る）
-   - ブロックの前の空行は残る。`~/.bashrc.bak.<数字>` も残るので、要らなければ手で消す
-   - 新しい端末を開いて確かめる
-
-1. 完全に消すときだけ、`~/.grok` を消す（取り戻せない）。
-
-   ```bash
-   rm -rf ~/.grok
-   ls -ld ~/.grok
-   ```
-
-   - `No such file or directory` になればよい
-   - Grok が作った worktree（`~/.grok/worktrees` の下）も消える。中の作業が要るなら、先に取り込む
 
 ---
 
@@ -182,17 +124,19 @@
 
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
-> - [Windows 11 の初期設定](windows-setup.md#実施手順)の手順 16〜19（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
+> - [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
 > - Git は [git.md の Windows 11 の節](git.md#windows-11-で-git-for-windows-を入れる)で先に入れる
 > - Grok Build を使える grok.com のアカウントとインターネット接続が要る（[実施手順](#実施手順)のリードと同じ）
 
 - 上から順に貼る。WSL・Node.js・npm は、この方法では要らない
 - 操作に使うコードブロックだけを上から順に貼る
-- Windows には Grok の sandbox（`--sandbox`）が無い（公式の文書は Linux と macOS だけ。[注意点](#注意点)）
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- Windows には Grok の sandbox（`--sandbox`）が無い（公式の文書は Linux と macOS だけ。[注意点](extra/grok-build.md#注意点)）
 
 1. 既存の Grok が入っていないか確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok, agent -All -ErrorAction SilentlyContinue
    Test-Path "$env:USERPROFILE\.grok"
    ```
@@ -207,13 +151,13 @@
    ```
 
    - `Grok … installed to C:\Users\<WIN_USER>\.grok\bin\grok.exe` を確かめる
-   - 初回は `Added C:\Users\<WIN_USER>\.grok\bin to your User PATH.` も出る（自分のユーザーの PATH の先頭に足す）
-   - Grok が使う Git（MinGit）を `%LOCALAPPDATA%\grok\git` に置く
+   - 初回は `Added C:\Users\<WIN_USER>\.grok\bin to your User PATH.` も出る
    - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
 
 1. 実行ファイルと版を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok -All
    grok --version
    ```
@@ -269,78 +213,17 @@
 
 1. 起動中の Grok を終了する。
 
-   - 端末の Grok は `/quit` で閉じる（動いている `grok.exe` は置き換えられない）
+   - 端末の Grok は `/quit` で閉じる
 
 1. 新しい版を入れ、版を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    grok update
    grok --version
    ```
 
    - 新しい版が無ければ `Already up to date (…)` と出る
-
----
-
-## Windows 11 のロールバック
-
-- この節は本書の既定の場所に入れた Grok を対象にする（WinGet で入れたものは WinGet で外す）
-- この節の手順 1〜4 では、設定・会話の記録・ログイン情報（`%USERPROFILE%\.grok` の残り）は残る
-
-> [!CAUTION]
-> **この節の手順 5 で `%USERPROFILE%\.grok` を消すと、ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree がすべて消える**（取り戻せない）。入れ直すかもしれないなら、手順 5 は行わない。
-
-1. 動いている Grok が無いことを確かめ、ログイン情報も外すならログアウトする。
-
-   ```powershell
-   Get-Process -Name grok, agent -ErrorAction SilentlyContinue | Format-Table Id, Path
-   grok logout
-   ```
-
-   - 1 行目で何も出なければよい。プロセスが出たら、その Grok を `/quit` で終えてから、このブロックを貼り直す
-   - ログインしていなければ `No cached session to log out of.` と出る
-
-1. 実行ファイル・配布物・Grok が使う Git を消す。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.grok\bin", "$env:USERPROFILE\.grok\downloads", "$env:USERPROFILE\.grok\completions", "$env:LOCALAPPDATA\grok\git" -Recurse -Force -ErrorAction SilentlyContinue
-   Test-Path "$env:USERPROFILE\.grok\bin", "$env:LOCALAPPDATA\grok\git"
-   ```
-
-   - `False` が 2 行出ればよい
-   - `True` が出たら、`grok.exe` がまだ動いている。この節の手順 1 からやり直す
-
-1. 自分のユーザーの PATH から `%USERPROFILE%\.grok\bin` を外す。
-
-   ```powershell
-   & {
-     $bin = "$env:USERPROFILE\.grok\bin"
-     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
-     $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
-     if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
-     [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-   }
-   ```
-
-   - 自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.grok\bin` が無ければよい
-
-1. PowerShell を閉じ、スタートメニューから開き直してから、PATH 上に Grok が残っていないか確かめる。
-
-   ```powershell
-   Get-Command grok, agent -All -ErrorAction SilentlyContinue
-   ```
-
-   - 何も出なければ、この CLI の入口は外れている
-   - パスが出る場合は、別の導入方法の Grok か、別のツールの `agent` が残っている
-
-1. 完全に消すときだけ、`%USERPROFILE%\.grok` を消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.grok" -Recurse -Force
-   Test-Path "$env:USERPROFILE\.grok"
-   ```
-
-   - `False` が出ればよい
 
 ---
 
@@ -386,16 +269,3 @@
 - そのディレクトリで読まれる設定・指示書（AGENTS.md など）・MCP サーバーは、`grok inspect` で見られる（ログインしていなくても動く）
 - 初回の導入のために `config.toml` を書く必要は無い（インストーラーが `[cli]` の 2 行を書く）
 - 自動の更新を止めるときは、`config.toml` の `[cli]` の下に `auto_update = false` の行を足す。止めたら、[更新](#更新)の手順で上げる
-
----
-
-## 注意点
-
-- **非公式の grok-cli と名前がぶつかる**: npm の `grok-dev`（もとは `@vibe-kit/grok-cli`）も `grok` のコマンドと `~/.grok` を使う。両方は入れない
-- **`agent` のコマンドも入る**: 中身は `grok` と同じ。インストーラーは、`~/.local/bin` に `agent` があっても `ln -sf` で置き換える（Cursor の CLI など、ほかの `agent` を使っているなら、入れた後に確かめる）
-- **`XAI_API_KEY` を設定すると、ログインが無いときに API キーで動く**（API の従量課金になる）。サブスクリプションで使うなら設定しない
-- **sandbox は既定で無効**: `--sandbox workspace`・`--sandbox read-only` などで、書ける場所を絞れる。Linux では Landlock が有効なカーネルと bubblewrap が要る（`sudo dnf install -y bubblewrap`。GNOME のデスクトップの PC には Flatpak と一緒に入っている）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）
-  - `runtime-socket deny path` と `Permission denied (os error 13)` が出たら、ソケットの親ディレクトリの検索権限を確かめる。ソケット本体の権限を緩める必要は無い
-  - カーネルの保護を適用できないエラー（`could not apply the '<プロファイル>' sandbox profile`）が出たら、Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。bubblewrap を入れただけで解決したとは扱わない（[起動できないときの補足](reference/grok-build.md#注意点-linux-の-sandbox-を起動できないとき)）
-- **Claude Code の指示書も読む**: AGENTS.md のほかに、CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（読み込まれたものは `grok --trust inspect` の `Project Instructions`）。読むのは信頼したフォルダーだけ
-- **会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](reference/grok-build.md#注意点-会話のデータの扱い)）

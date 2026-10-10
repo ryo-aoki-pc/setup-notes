@@ -1,6 +1,6 @@
 # Windows 11 で OpenSSH クライアントを使う手順（ed25519 の鍵と ssh の config で AlmaLinux 10 のホストに入る）の検証記録
 
-[手順書](../windows-ssh-client.md)
+[手順書](../windows-ssh-client.md)・[ロールバックと注意点](../extra/windows-ssh-client.md)
 
 ## 補足
 

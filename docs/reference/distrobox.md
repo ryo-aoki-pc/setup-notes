@@ -1,8 +1,13 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../distrobox.md)
+[手順書](../distrobox.md)・[ロールバックと注意点](../extra/distrobox.md)
 
 ## 補足
+
+### 実施手順 / 手順 2: 補足: 一緒に入るものと鍵
+
+- 一緒に入るのが `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
+- 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
@@ -10,7 +15,7 @@
 
 `rpm -q --requires distrobox` の中身は `(podman or /usr/bin/docker)` と `hicolor-icon-theme` など。
 
-- podman を消すと distrobox も消える（[podman.md のロールバック](../podman.md#ロールバック)の手順 6 に当たる）
+- podman を消すと distrobox も消える（[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
 - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり
 
 ### 実施手順 / 手順 4: 補足: ボックスは隔離されていない
@@ -25,17 +30,22 @@
 | `--volume /:/run/host/` | ホストのファイルシステム全体を `/run/host` に見せる |
 | `--pids-limit=-1` | プロセス数を制限しない |
 
-**ボックスは「別のディストリのユーザーランドを使うための道具」で、安全のための隔離ではない**（[注意点](../distrobox.md#注意点)）。
+**ボックスは「別のディストリのユーザーランドを使うための道具」で、安全のための隔離ではない**（[注意点](../extra/distrobox.md#注意点)）。
 
 ### 実施手順 / 手順 5: 補足: 初期化で行われること
 
 - ボックスの中に自分と同じ名前のユーザーを作り、`sudo` をパスワード無しで使えるようにする（ボックスの中の `sudo -l` は `(root) NOPASSWD: ALL`）
 - 本書の `--userns keep-id` では、ボックスの root はホストの subordinate UID に対応する。自分の UID に対応するのはボックス内の同じ UID で、ボックスの root にホストの root の権限は無い
 - コンテナが止まっていれば、次の `distrobox enter` でも起動と初期化の確認が走る（2 回目からは速い）
+- 同じ節の手順 5 で出るユーザー名とホームは、ホストと同じ
 
 ### 実施手順 / 手順 6: 補足: host-spawn: command not found
 
 ボックスの中の `/etc/profile.d/distrobox_profile.sh` は、`DISPLAY`・`WAYLAND_DISPLAY`・`XAUTHORITY` などが空のとき、`host-spawn` でホストの値を読みに行く。
+
+### ボックスのコマンドをホストから呼ぶ（任意） / 手順 2: 補足: ボックスの中の sudo
+
+- ボックスの中の `sudo` はパスワードを聞かない（[実施手順 / 手順 5 の補足](#実施手順--手順-5-補足-初期化で行われること)の初期化で、パスワード無しにしてある）
 
 ### ボックスのコマンドをホストから呼ぶ（任意） / 手順 4: 補足: 書き出されたもの
 
@@ -56,6 +66,11 @@ fi
 
 - 呼ぶたびに `distrobox enter` を通るので、ボックスが止まっていれば起動から始まる
 - ホームはボックスと共有しているので、ホームの中のファイルはそのままのパスで渡せる
+- `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` で PATH に入っている
+
+### 更新 / 手順 2: 補足: ボックスの中の更新
+
+- Ubuntu のボックスでは `apt-get update` と `apt-get upgrade` が確認なしで走る
 
 ### 選択した方針
 
@@ -73,6 +88,6 @@ fi
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
 - [Podman](../podman.md) — 前提の rootless の podman
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（手順 17）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

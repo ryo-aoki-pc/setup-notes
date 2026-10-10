@@ -1,6 +1,6 @@
 # lazydocker インストール手順（AlmaLinux 10 / Homebrew）の検証記録
 
-[手順書](../lazydocker.md)
+[手順書](../lazydocker.md)・[ロールバックと注意点](../extra/lazydocker.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -41,8 +41,8 @@ Retry count: 26
   - 任意節で、root のコンテナ（`sudo podman` で動かしたもの）も、`sudo -i lazydocker` で見られるようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **aarch64 の実機で基本操作・podman exec・既存設定を使った root の表示と停止を検証済み（2026-10-06）。x86_64 の新規 VM では、現行 `5da3478` 版と共通 bash `3d5323e` で実施手順 1〜5 とロールバックを再検証した（同日）**。実機は導入済みの環境で、一時設定と確認用コンテナを使った。[実機の範囲と後片付け](#付録-aarch64-の実機での検証記録2026-10-06)、[現行版の VM 記録](#付録-現行版を新規-vm-で再検証2026-10-06)を参照。更新・compose の任意節は、この新規 VM では再実行していない。以前の `0dbb522` 版の VM 記録とコンテナ記録も付録に残した
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](../lazydocker.md#更新)、[ロールバック](../lazydocker.md#ロールバック)を通した
-  - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 17。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](../podman-compose.md) の手順 1〜6 を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](../lazydocker.md#更新)、[ロールバック](../extra/lazydocker.md#ロールバック)を通した
+  - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](../podman-compose.md) の手順 1〜6 を通した
   - 検証コンテナで確認したこと:
     - lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 の API ソケットにつながり、コンテナ・イメージ・ボリューム・ネットワークとログを出す
     - 画面の `s` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
@@ -165,7 +165,7 @@ commandTemplates:
 | 4. 画面 | 4 つの枠と右のログ。`running  lazydocker-web` の行。`←` / `→` で枠を移れた。`s` → `Are you sure you want to stop this container?` → `y` で `exited (0)`。`q` でプロンプトに戻った |
 | 5. 確かめる | `lazydocker-web Exited (0) 13 seconds ago`、`config.yml`（0 バイト） |
 | podman exec の節 | 手順 1 は `lazydocker-web`、手順 2 の読み戻しに 5 行。手順 3 は `c` → `podman exec sh` → Enter で `sh-5.2$`、`id` で `uid=1001(default) gid=0(root) groups=0(root)`、`exit` と Enter で画面に戻り、`q` |
-| compose の節 | 先に EPEL の有効化（今の AlmaLinux 10 の初期設定の手順 17）と、podman-compose.md の手順 1〜6 を通した。手順 1 の読み戻しに 2 行。手順 2 は `[1]─Project`（`compose-sample`）・`[2]─Services`（`check`・`web`）・`[3]─Standalone Containers`（`lazydocker-web`）で、`web` を選んで `r`。手順 3 は `compose-sample_web_1 Up 14 seconds` と `compose-sample_check_1 Up 48 seconds` |
+| compose の節 | 先に EPEL の有効化（今の AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）と、podman-compose.md の手順 1〜6 を通した。手順 1 の読み戻しに 2 行。手順 2 は `[1]─Project`（`compose-sample`）・`[2]─Services`（`check`・`web`）・`[3]─Standalone Containers`（`lazydocker-web`）で、`web` を選んで `r`。手順 3 は `compose-sample_web_1 Up 14 seconds` と `compose-sample_check_1 Up 48 seconds` |
 | 更新 | `Warning: lazydocker 0.25.2 already installed` |
 | ロールバック | 先に podman-compose.md のロールバック手順 1〜2 を通した。手順 1 は `lazydocker-web`、手順 2 は `Untagged:` と `Deleted:`、手順 3 は `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/lazydocker/0.25.2... (6 files, 13.2MB)`、手順 4 は何も出ずに終わった。最後に podman-compose.md のロールバック手順 4 を通した |
 
@@ -340,7 +340,7 @@ AlmaLinux 10.2 の aarch64 ホストで、導入済みの lazydocker 0.25.2 を�
 - **root の設定ファイルは `/root/.config/lazydocker/config.yml`**: 自分の設定（任意節で足した `c` のコマンドなど）は使わない
   - root でも `c` からシェルを開くなら、[podman exec の節](../lazydocker.md#podman-exec-でシェルを開く任意)の手順 2 の 5 行を、`sudo` で root の設定ファイルに書く
   - 書いたコンテナでは、root の画面の `c` → `podman exec sh` で `sh-5.2$` が開いた
-- **`E` と `a` は root でも何も起きない**: `docker` コマンドが無いため（[注意点](../lazydocker.md#注意点)）
+- **`E` と `a` は root でも何も起きない**: `docker` コマンドが無いため（[注意点](../extra/lazydocker.md#注意点)）
 - **root のシェルの `DOCKER_HOST` は、ほかのツールにも効く**: root のシェルで動かす Docker の API を使うツールも、root の podman につながる。podman 自身は `DOCKER_HOST` を読まない
 - **podman-docker を入れたホストでは**: `/etc/profile.d/podman-docker.sh` が、`DOCKER_HOST` の無い root のログインシェルに同じ値を入れ、`/run/docker.sock` を root のソケットへのリンクにする
   - その節の手順 2 の確かめの行は、書く前から同じ 2 行を出した。`if` は `/root/.bashrc` しか見ないので、同じ行を書き足す（害は無い）

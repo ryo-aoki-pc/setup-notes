@@ -1,6 +1,6 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の検証記録
 
-[手順書](../samba-client.md)
+[手順書](../samba-client.md)・[ロールバックと注意点](../extra/samba-client.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -148,7 +148,7 @@ Password:
     - samba.md の VM（サーバーと同じ VM から `127.0.0.1` あて）で、手順 1〜5 とロールバックの手順 3 を `SHARE=home` で貼って通した（ブラケットペーストの有りと無しで 1 回ずつ。[samba.md の付録](samba.md#付録-home-を公開する節の-vm-での検証2026-10-05)）
     - 手順 5 は、`cifs-test.txt` の書き込みが `Permission denied` になり、マウントの確かめと外すところは通った
     - `SHARE=home` での自動マウント（手順 6・7）は試していない
-  - 2026-10-01: [注意点](../samba-client.md#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
+  - 2026-10-01: [注意点](../extra/samba-client.md#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
     - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](../claude-code-gui.md) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - この文書のブロックは貼っていない。マウントは、手順 5 と同じオプションに `port=4450` を足して手で行い、GNOME Files は `/usr/bin/gio mount` でつないでから Nautilus で開いた
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
@@ -180,7 +180,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11 Pro（24H2 以降。利用者の PC は 26H2）。Home は署名を求めない（[注意点](../samba-client.md#注意点)） |
+| OS | Windows 11 Pro（24H2 以降。利用者の PC は 26H2）。Home は署名を求めない（[注意点](../extra/samba-client.md#注意点)） |
 | PowerShell | Windows PowerShell 5.1（管理者ではない窓） |
 | サーバー | samba.md 手順 3 の smb.conf の Samba（`samba-4.23.5-110.el10_2`） |
 

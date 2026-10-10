@@ -1,6 +1,6 @@
 # Codex CLI を AlmaLinux 10・Windows 11 に入れるの参考資料
 
-[手順書](../codex.md)
+[手順書](../codex.md)・[ロールバック](../extra/codex.md)
 
 ## 補足
 
@@ -18,6 +18,14 @@
 - Homebrew の cask で入れた Codex（AlmaLinux 10）では、`codex update` が `Could not detect the Codex installation method.` で止まった（[検証記録](../verification/codex.md#付録-起動したときの更新とパッケージマネージャー2026-10-09)）
 - standalone のインストーラーで入れたものは、起動したときの知らせから Enter 1 回で上がる（[更新: 補足](#更新-補足-起動したときの知らせ)）。利用者の希望（自動で最新になるなら公式の方法でよい）に近いので、こちらを採る
 
+### 実施手順 / 手順 3: 補足: Start Codex now? に n と答える理由
+
+- `Start Codex now?` に `n` と答えるのは、同じ節の手順 8 で起動するため
+
+### 実施手順 / 手順 4: 補足: 版
+
+- 検証時の版は `0.160.0`
+
 ### 更新: 補足: 起動したときの知らせ
 
 - 端末の Codex は、起動したときに、最新の版を GitHub（`api.github.com/repos/openai/codex/releases/latest`）に問い合わせ、`~/.codex/version.json` に控える。控えが無いか古いときだけ問い合わせる
@@ -25,6 +33,10 @@
 - standalone のインストーラーで入れたものでは、`sh -c 'curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh'` を動かす
 - Windows 用の `install.ps1` を使う同じ形のコマンドも、配布物の中にある
 - `codex update` も、同じインストーラーを動かす
+
+### 更新 / 手順 2: 補足: もう一度実行したとき
+
+- 公式インストーラーをもう一度実行すると、新しい配布物を導入する
 
 ### Windows 11 で使う / 手順 2: 補足: 置き場所と PowerShell の設定
 

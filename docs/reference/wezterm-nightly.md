@@ -1,6 +1,6 @@
 # WezTerm Nightly インストール手順（AlmaLinux 10 は公式 COPR の EL9 ビルドを流用 / Windows 11 は nightly のインストーラ）の参考資料
 
-[手順書](../wezterm-nightly.md)
+[手順書](../wezterm-nightly.md)・[ロールバックと注意点](../extra/wezterm-nightly.md)
 
 ## 補足
 
@@ -24,6 +24,8 @@ enabled_metadata=1
 ```
 
 公式ドキュメントの openSUSE 向け手順が同じ `dnf copr enable wezfurlong/wezterm-nightly <repository>` の形なので、想定内の使い方ではある。
+
+- chroot は `uname -m` から `rhel-9-x86_64` か `rhel-9-aarch64` になる（COPR に EL10 向けが無いので EL9 向けを使う）
 
 ### 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵
 
@@ -49,12 +51,48 @@ Importing GPG key 0xCEA2757D:
 - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）
   - COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
 
+### 実施手順 / 手順 4: 補足: アプリ一覧の項目
+
+- アプリ一覧の「WezTerm」は、`/usr/share/applications/org.wezfurlong.wezterm.desktop` から出る
+
 ### 実施手順 / 手順 5: 補足: Wayland セッションでの起動試験
 
 - **Wayland セッションでの起動試験**: この検証は Claude Code のシェル（TTY もディスプレイも無い）から行ったので、`env -i` で環境を空にしてから、ログイン中の GNOME セッションの `WAYLAND_DISPLAY=wayland-0` と `XDG_RUNTIME_DIR` を渡した
   - 値は `/proc/$(pgrep -u "$USER" -x gnome-shell)/environ` から取れる
   - `wezterm start -- sh -c 'exit 0'` はウィンドウを開いて `sh` を走らせ、終了と同時にウィンドウを閉じる。結果 `rc=0`
   - `timeout 30` は、描画に失敗してウィンドウが残った場合の保険
+- 手順 5 のブロックは、ログイン中の Wayland セッションを指定して、ウィンドウを開く
+- `rc=0` でウィンドウが閉じているのは、`exit_behavior` の既定が `Close` なので、子プロセスが終わるとウィンドウも閉じるため
+
+### 設定ファイル / 手順 1: 補足: 再読み込みと起動のオプション
+
+- 保存すると起動中の WezTerm に自動で反映されるのは、`automatically_reload_config` の既定が true のため
+- Lua の文法エラーで組み込みの既定値で起動するとき、別の候補ファイルには進まない
+- `wezterm -n`（`--skip-config`）で、設定を読まずに起動できる
+- `wezterm --config 'font_size=14'` のように、1 項目だけ上書きもできる
+
+### Windows 11 で使う / 手順 1: 補足: WezTerm の中の PowerShell を使わない理由
+
+- WezTerm が動いていると、同じ節の手順 4 が止まる
+
+### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+
+- `Version` が `20240203-110809-5046fc22` なら stable（winget の `wez.wezterm` など）。同じ登録なので、nightly で上書きされる
+- ほかの方法で入れた WezTerm を外すのは、混ざらないようにするため
+
+### Windows 11 で使う / 手順 4: 補足: 版と、中断・貼り直し
+
+- 最後に出る `wezterm <版>` の版は、実行した日の nightly
+- `中断:` で止まったとき、取ってきたものとログは `%TEMP%\wezterm-setup` に残る。次に貼ったときに消して作り直す
+- 何度貼ってもよいのは、同じ場所に上書きするため
+
+### Windows 11 で使う / 手順 6: 補足: 右クリックのメニュー
+
+- エクスプローラーでフォルダーを右クリックすると「Open WezTerm here」がある（Windows 11 の新しいメニューでは「その他のオプションを確認」の中）
+
+### Windows 11 の更新 / 手順 2: 補足: 窓を閉じる理由
+
+- WezTerm が動いていると、同じ節の手順 3（[Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 4 のブロック）が止まる
 
 ### Windows 11 のロールバック / 手順 1: 補足: アンインストーラの動き
 

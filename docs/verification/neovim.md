@@ -1,6 +1,6 @@
 # Neovim 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の検証記録
 
-[手順書](../neovim.md)
+[手順書](../neovim.md)・[ロールバックと注意点](../extra/neovim.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -31,7 +31,7 @@
 
 ### Windows 11 で使う: 検証状況の記録
 
-- **[Windows 11 で使う](../neovim.md#windows-11-で使う)・[Windows 11 の更新](../neovim.md#windows-11-の更新)・[Windows 11 のロールバック](../neovim.md#windows-11-のロールバック)と、[既定のエディタにする（任意）](../neovim.md#既定のエディタにする任意)の手順 2・3 は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- **[Windows 11 で使う](../neovim.md#windows-11-で使う)・[Windows 11 の更新](../neovim.md#windows-11-の更新)・[Windows 11 のロールバック](../extra/neovim.md#windows-11-のロールバック)と、[既定のエディタにする（任意）](../neovim.md#既定のエディタにする任意)の手順 2・3 は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
 - 確かめた範囲は[対象と検証環境](#対象と検証環境)の「状態（Windows 11）」と[付録](#付録-windows-11-の節の資料と-linux-での確認2026-10-08)
 
 ### 対象と検証環境

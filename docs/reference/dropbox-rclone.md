@@ -1,10 +1,23 @@
 # Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）の参考資料
 
-[手順書](../dropbox-rclone.md)
+[手順書](../dropbox-rclone.md)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
 [検証記録](../verification/dropbox-rclone.md#参考資料から分離した記録)
 
 ## 補足
+
+### 実施手順 / 手順 1: 補足: ask mode
+
+- 依存の一覧と `[y/n]` が出るのは、Homebrew 7.0.7 の ask mode（[AlmaLinux 10 の初期設定の注意点](../extra/almalinux-setup.md#注意点)）
+
+### 実施手順 / 手順 2: 補足: 設定を画面に出さない
+
+- `>/dev/null` は、登録が終わったときに出る設定（トークン入り）を画面に出さないため
+
+### 実施手順 / 手順 4: 補足: 出力の項目
+
+- `listremotes` の `dropbox: dropbox` は、名前と種類
+- `rclone about` の `Used:` が Dropbox で使っている容量、`df` の `Avail` が手元の空き
 
 ### 実施手順 / 手順 5: 補足: フィルタの中身
 
@@ -12,6 +25,10 @@
 - **`- *.partial` は本書で足した**。rclone は転送中のファイルを `<名前>.<16 進>.partial` として書き、終わってから名前を変える
   - `kill -9` や電源断で止まると書きかけが残るため、`*.partial` を除外する
 - このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)）
+
+### 実施手順 / 手順 6: 補足: 最後の行
+
+- `- **` は、並べたフォルダ以外を外す行
 
 ### 実施手順 / 手順 7: 補足: Path1 と Path2、--resync の意味
 
@@ -34,6 +51,14 @@
   - `OnUnitInactiveSec` は 1 回動いた後から効く。手順 10 で 1 回動かしておく
   - 動く時刻は最大 1 分ずれる（systemd の既定の `AccuracySec=1min`）
 - ユーザーの systemd からは `network-online.target` を使えないので、起動直後はつながっていないことがある。`OnBootSec` で 5 分待ち、失敗しても `--resilient` で次の回に続ける
+
+### 実施手順 / 手順 9: 補足: linger
+
+- [linger](../linger.md) が有効なので、ログアウトしても timer は動く
+
+### 更新 / 手順 2: 補足: 新しい版で動くとき
+
+- timer の次の回から、新しい版で動く（oneshot なので、再起動は要らない）
 
 ### 選択した方針
 

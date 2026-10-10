@@ -1,10 +1,45 @@
 # HackGen Console NF インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は上流の zip）の参考資料
 
-[手順書](../hackgen.md)
+[手順書](../hackgen.md)・[ロールバックと注意点](../extra/hackgen.md)
 
 [検証記録](../verification/hackgen.md#参考資料から分離した記録)
 
 ## 補足
+
+### 実施手順 / 手順 1: 補足: HackGen35 Console NF
+
+- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](../verification/hackgen.md)）
+
+### 実施手順 / 手順 2: 補足: unzip が要る理由
+
+- Homebrew は cask の zip を展開するのに `unzip` を使う
+
+### 実施手順 / 手順 5: 補足: fc-match と文字の確かめ方
+
+- `fc-match` は、名前が合わないときに別のフォントを黙って返すので、ファイル名が HackGen であることを確かめる
+- 最後の `for` で、かな・漢字・Powerline 記号・Nerd Fonts のアイコンが、このフォントに入っていることを確かめる
+
+### WezTerm で使う（任意） / 手順 2: 補足: 反映
+
+- 起動中の WezTerm には、保存した時点で反映される（[wezterm-nightly.md の設定ファイル](../wezterm-nightly.md#設定ファイル)の節）
+
+### Windows 11 で使う / 手順 2: 補足: 出た結果の意味
+
+- 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、この節の手順で入れたもの（同じ節の手順 3 は何度貼ってもよい）
+- `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っていて、そのまま使える
+
+### Windows 11 で使う / 手順 3: 補足: 中断したときと貼り直したとき
+
+- `中断:` で止まったとき、取ってきたものは `%TEMP%\hackgen-setup` に残る。次に貼ったときに消して作り直す
+- 何度貼ってもよいのは、同じファイルは置き直さないため
+
+### Windows 11 の更新 / 手順 1: 補足: 版と sha256 を直す理由
+
+- `$ver` と `$sha256` を直さなければ、固定した旧版を再び入れるだけで更新にはならない
+
+### Windows 11 の更新 / 手順 2: 補足: 外してから入れ直す理由
+
+- [Windows 11 のロールバック](../extra/hackgen.md#windows-11-のロールバック)の手順 1〜3 を先に行うのは、読み込まれているファイルは置き換えられないため
 
 ### 選択した方針
 
@@ -35,7 +70,7 @@
 - [Nerd Fonts](https://www.nerdfonts.com/) — 追加されているアイコンの一覧（コードポイントの確認に使える）
 - `man fc-list` / `man fc-match` / `man fc-cache` — fontconfig の照会と、キャッシュの作り直し
 - [wezterm-nightly.md](../wezterm-nightly.md) — WezTerm の導入と設定ファイルの置き場所
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 46〜48 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [HackGen v2.10.0](https://github.com/yuru7/HackGen/releases/tag/v2.10.0) — Windows 11 の節で取る `HackGen_NF_v2.10.0.zip`
 - [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
 - [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）

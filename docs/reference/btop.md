@@ -1,8 +1,12 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../btop.md)
+[手順書](../btop.md)・[ロールバックと注意点](../extra/btop.md)
 
 ## 補足
+
+### 実施手順 / 手順 1: 補足: 依存
+
+- 依存として `hicolor-icon-theme`（デスクトップエントリのアイコン用）が、まだ無ければ一緒に入る
 
 ### 設定ファイル / 手順 1: 補足: よく使う起動オプション
 
@@ -22,7 +26,7 @@
 ### 参照
 
 - [aristocratos/btop — README](https://github.com/aristocratos/btop) — 機能、キーバインド、設定項目、テーマの書式
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の手順書（手順 17 の `epel-release` の入れ方と、CRB の案内）
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の手順書（「EPEL と RPM Fusion」の手順 1 の `epel-release` の入れ方と、CRB の案内）
 - `btop --help` / `btop --default-config` — 起動オプションと既定の設定
 - `man btop` — RPM に同梱
 

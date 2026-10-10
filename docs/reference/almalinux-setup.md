@@ -1,8 +1,344 @@
 # AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール）の参考資料
 
-[手順書](../almalinux-setup.md)
+[手順書](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
 
 ## 補足
+
+### 実施手順 / ログインと sudo / 手順 1: 補足: 日本語の名前のフォルダー
+
+- このログインで、ホームに日本語の名前のフォルダー（`ダウンロード`・`ドキュメント` など）ができる。「GNOME の表示と入力」の手順 1 で英語の名前にする
+
+### 実施手順 / ログインと sudo / 手順 3: 補足: 貼り直し
+
+- 貼り直しても同じ内容で置き直すだけ（何度貼ってもよい）
+
+### 実施手順 / OS とファームウェアの更新 / 手順 2: 補足: fwupd の起動待ち
+
+- `デーモンへの接続に失敗しました: … タイムアウトしました` が出るのは、起動の直後に fwupd の起動が間に合わないことがあるため
+
+### 実施手順 / システムの設定 / 手順 1: 補足: 変数の意味
+
+- `HOST_NAME` は、SSH・RDP・Samba・Syncthing などで、この PC を見分ける名前
+- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で左の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
+- 変数はその端末の中だけで有効なので、新しい端末を開いたら貼り直す
+
+### 実施手順 / システムの設定 / 手順 3: 補足: SSH の既定とログイン
+
+- `enabled`・`active`・`yes`・`yes` は、Workstation の既定
+- 別の PC からは `ssh <USER>@<IP>` でログインできる（初めてつなぐときは、ホストの鍵の fingerprint を聞かれる）
+
+### 実施手順 / システムの設定 / 手順 5: 補足: journal の置き場所
+
+- AlmaLinux 10 の既定では `/var/log/journal` が無く、journal は `/run/log/journal`（メモリー）にだけ書かれて、再起動で消える
+- journald が作った `/var/log/journal` に付かない ACL は、`wheel`・`adm` のグループが読めるもの（付け直す仕組みは[選択した方針](#選択した方針)）
+- 前の起動のログが読めることは、「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 3 で確かめる
+
+### 実施手順 / システムの設定 / 手順 6: 補足: 予約しているメモリー
+
+- `/sys/kernel/kexec_crash_size` の数は、予約しているメモリーのバイト数（`268435456` で 256 MiB）
+
+### 実施手順 / システムの設定 / 手順 7: 補足: 効く時期
+
+- メモリーが空くのは、「再起動と確認」の手順 1 の再起動の後
+
+### 実施手順 / システムの設定 / 手順 8: 補足: 外した後
+
+- 外すと、無いコマンドを打ったときは `bash: <コマンド>: コマンドが見つかりません...` とだけ出て、パッケージを探して待たされない
+
+### 実施手順 / EPEL と RPM Fusion / 手順 1: 補足: EPEL の入手元と使う手順書
+
+- `epel-release` は AlmaLinux の `extras` リポジトリにあるので、追加のリポジトリの設定は要らない
+- 最後に出る「CRB を有効にすることを推奨」を気にしなくてよいのは、AlmaLinux 10 では CRB が既定で有効なため（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
+- EPEL を使う手順書（[btop](../btop.md)・[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[podman-tui](../podman-tui.md)・[VirtualBox](../virtualbox.md)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
+
+### 実施手順 / EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
+
+- `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](../verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#rpm-fusion-選択した方針)
+- 有効にするのは free だけ。nonfree は扱わない
+
+### 実施手順 / EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
+
+- [Firefox の AAC・H.264](../firefox.md#実施手順)（firefox.md の手順 8 から。RPM Fusion の `ffmpeg-libs` を入れる）が使えるようになる
+
+### 実施手順 / Flatpak と Flathub / 手順 1: 補足: flatpak と Flathub の登録
+
+- Workstation には flatpak が最初から入っている
+- `flathub` の行が既にあれば、「Flatpak と Flathub」の手順 3 は何もしない（`--if-not-exists` のため）
+
+### 実施手順 / Flatpak と Flathub / 手順 3: 補足: 使えるようになるもの
+
+- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../firefox.md) と [VS Code](../vscode.md) は Flathub を使わず RPM で入れる
+
+### 実施手順 / Flatpak と Flathub / 手順 4: 補足: 確認用のアプリ
+
+- 確認用のアプリは、小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール）にしてある
+
+### 実施手順 / 日本語入力 / 手順 1: 補足: 入っているときと入れたとき
+
+- Workstation で入れた PC には、3 つとも最初から入っている
+- 入れたときに「再起動と確認」の手順 1 の再起動を待つのは、動いている IBus が、ログインし直すまで Anthy を使えないため
+
+### 実施手順 / 日本語入力 / 手順 2: 補足: 入力ソースを切り替えるキー
+
+- 最後の `get` の `['<Super>space', 'XF86Keyboard']` が、入力ソースを切り替えるキー（Super+Space）
+
+### 実施手順 / GNOME の表示と入力 / 手順 1: 補足: 中身とログインの窓
+
+- 中身は、フォルダーごと移る
+- 次のログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない（`~/.config/user-dirs.locale` は今の言語のまま）
+
+### 実施手順 / GNOME の表示と入力 / 手順 2: 補足: 設定アプリとの対応
+
+- 設定の「外観」の「スタイル」の「ダーク」と同じで、すぐに効く
+
+### 実施手順 / GNOME の表示と入力 / 手順 3: 補足: 効く範囲
+
+- 自分のセッションだけの設定。ログイン画面と、ほかのユーザーには効かない
+
+### 実施手順 / GNOME の表示と入力 / 手順 4: 補足: 既定値
+
+- `button-layout` の既定は `'appmenu:close'`
+
+### 実施手順 / GNOME の表示と入力 / 手順 6: 補足: 2 つのスキーマ
+
+- Files と GTK4 のアプリは `org.gtk.gtk4`、GTK3 のアプリは `org.gtk` を読む
+- Files では Ctrl+H で、隠しファイルを出す・隠すを切り替えられる
+
+### 実施手順 / GNOME の表示と入力 / 手順 7: 補足: アプリごとの切り替え
+
+- アプリごとの切り替えは Super+Tab に残る
+
+### 実施手順 / GNOME の表示と入力 / 手順 8: 補足: アクティビティの画面
+
+- ホットコーナーを切った後も、アクティビティの画面は Super キーで開く
+
+### 実施手順 / GNOME の表示と入力 / 手順 9: 補足: 拡大率を選ぶ時期
+
+- 拡大率を選ぶのは、「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 4 で行う
+
+### 実施手順 / GNOME の表示と入力 / 手順 10: 補足: 版
+
+- 入る `gnome-shell-extension-appindicator` は、AlmaLinux 10.2 では 61
+
+### 実施手順 / GNOME の表示と入力 / 手順 11: 補足: 効く時期
+
+- 動いている GNOME Shell は、ログインし直すまで、入れたばかりの拡張を読まない。「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 3 で確かめる
+
+### 実施手順 / GNOME の表示と入力 / 手順 12: 補足: 設定アプリでの表示
+
+- 足したショートカットは、設定の「キーボード」→「キーボードショートカット」→「カスタムショートカット」にも出る
+
+### 実施手順 / 共通の bash 設定 / 手順 1: 補足: 共通の bash 設定
+
+- [README の共通の bash 設定を先に入れる](../../README.md#共通の-bash-設定を先に入れる)と同じ（Workstation には git が最初から入っている）
+- 元の `~/.bashrc` は `~/.bashrc.before-bash` に残る
+- `~/.bashrc` の末尾に、`~/.config/bash/bashrc` を読む 1 行が足される。ツールごとの設定（Homebrew・starship・zoxide・fzf・eza・bat の `MANPAGER`・履歴と `shopt` など）は、この設定がまとめて読む。この文書では `~/.bashrc` に追記しない
+
+### 実施手順 / 共通の bash 設定 / 手順 3: 補足: 入っているときと入れたとき
+
+- Workstation で入れた PC は、bash-completion が最初から入っている
+- BaseOS から入れるときは、依存の `pkgconf` 系 4 つも入る
+
+### 実施手順 / Homebrew / 手順 2: 補足: Next steps を行わない理由
+
+- `Next steps` の `~/.bashrc` への追記を行わないのは、共通の bash 設定が `brew shellenv` を読むため
+
+### 実施手順 / Homebrew / 手順 3: 補足: 日々の操作
+
+- 日々の操作は[Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)
+
+### 実施手順 / シェルのツール / 手順 1: 補足: 確認とボトル
+
+- 依存も入れる計画なので、`[y/n]` と聞かれる
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+- 要らないツールの名前を外してよいのは、共通の bash 設定が、入っているものだけを読むため
+
+### 実施手順 / シェルのツール / 手順 2: 補足: 開き直した端末で効く理由
+
+- 開き直した端末で starship・zoxide・fzf・eza・bat が効くのは、共通の bash 設定が、入っているツールを読むため
+
+### 実施手順 / シェルのツール / 手順 3: 補足: 補完の順
+
+- `-F _brew brew` が出るのは、共通の bash 設定が Homebrew の補完を fzf より前に読むため
+
+### 実施手順 / シェルのツール / 手順 4: 補足: 初期化の順と starship explain
+
+- starship → WezTerm → zoxide の順は、共通の bash 設定が初期化の順番を持つ。`~/.bashrc` の編集は不要
+- `starship explain` は、今のプロンプトに出ている各部分の意味を 1 行ずつ説明する
+- 見た目を変えるなら[starship のプリセットを当てる（任意）](../almalinux-setup.md#starship-のプリセットを当てる任意)、細かい調整は[starship の設定ファイル](../almalinux-setup.md#starship-の設定ファイル)
+
+### 実施手順 / シェルのツール / 手順 6: 補足: 出力の意味
+
+- `[+git]` は git の連携込みのビルド
+- `Git` の列が出るのは、`~/.config/bash` が git のリポジトリだから
+- `ll`・`la`・`lt` は共通の bash 設定が足す。`ls` は置き換えない
+
+### 実施手順 / シェルのツール / 手順 7: 補足: bat の出力と MANPAGER
+
+- `--color=always` を外してパイプに繋ぐと、装飾の無い `cat` と同じ出力になる
+- `MANPAGER` の `bat -plman` は共通の bash 設定が持つ。`man bash` が bat の色で開く（`q` で閉じる）
+
+### 実施手順 / シェルのツール / 手順 8: 補足: BaseOS の tmux
+
+- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](../verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
+
+### 実施手順 / シェルのツール / 手順 10: 補足: z と zi の使い方
+
+- 以後は `z share` のように末尾の一部を書けば `/usr/share` に飛ぶ。`zi` で候補を fzf で選べる
+
+### 実施手順 / キー操作を試す / 手順 3: 補足: プレビューと複数の選択
+
+- 右側のプレビューは、共通の bash 設定が、bat があるときに入れる
+- Tab で複数を選べる（選んだ行に印が付き、Enter で全部入る）
+
+### 実施手順 / キー操作を試す / 手順 4: 補足: ** の補完
+
+- `**` を付けなければ、今までどおりの補完
+- `ssh **<Tab>` は `~/.ssh/config` と `known_hosts` のホスト名、`export **<Tab>` は変数名の一覧になる
+
+### 実施手順 / tmux を試す / 手順 1: 補足: デタッチ
+
+- デタッチしても、セッションの中のシェルと、そこで動かしているコマンドは動き続ける
+
+### 実施手順 / tmux を試す / 手順 2: 補足: tmux の使い方
+
+- キーとコマンドは[tmux の使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)
+
+### 実施手順 / tmux を試す / 手順 3: 補足: tmux のサーバー
+
+- セッションが 1 つも無くなると、tmux のサーバーも終わる
+
+### 実施手順 / 再起動と確認 / 手順 1: 補足: 再起動で効くもの
+
+- 「システムの設定」の手順 7 の kdump のメモリー（外したとき）、「日本語入力」の手順 1 で入れた ibus-anthy（入れたとき）、「GNOME の表示と入力」の手順 9 の拡大率、同じ項の手順 11 のトレイアイコン、「Flatpak と Flathub」の手順 4 の Flatseal のメニュー
+
+### SSH を公開鍵だけにする（任意） / 手順 1: 補足: restorecon
+
+- `restorecon` は、`~/.ssh` の SELinux のラベルを、sshd が読めるものに合わせる
+
+### SSH を公開鍵だけにする（任意） / 手順 5: 補足: 既定値
+
+- `passwordauthentication yes` と `kbdinteractiveauthentication no` は、AlmaLinux 10 の既定
+
+### dnf-automatic で自動で更新する（任意） / 手順 2: 補足: 入れる更新の設定
+
+- 何を入れるか（`upgrade_type`）などは `/etc/dnf/automatic.conf` にある。このタイマーは、その設定の `apply_updates` に関わらず、更新を入れる
+
+### dnf-automatic で自動で更新する（任意） / 手順 3: 補足: GNOME Software の設定
+
+- `download-updates` を `false` にすると、GNOME Software の「設定」の「自動更新」がオフになる
+- 更新があることの通知と、手で入れる更新は、そのまま使える
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 1: 補足: 変数の有効な範囲
+
+- 変数はそのシェルの中だけで有効なので、新しいシェルを開いたら貼り直す
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 2: 補足: 読み戻し
+
+- 最後の 3 つのコマンドで読み戻す
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 3: 補足: ログイン画面の設定ファイル
+
+- ファイルには、自動サスペンドと電源ボタンの設定を書く
+- 文字列の値は引用符（`'`）で囲む。囲まないと、`dconf update` が失敗する
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 4: 補足: mask の効き目
+
+- GNOME のメニュー・蓋・電源ボタンなど、どこから頼まれてもサスペンドが始まらなくなる
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 5: 補足: 蓋の既定値
+
+- `HandleLidSwitch` の既定は `s "suspend"`
+- 蓋の無い PC では何も変わらない（置いても害は無い）
+
+### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 9: 補足: 残るディレクトリ
+
+- 空の `/etc/systemd/logind.conf.d` は残る
+
+### Wake on LAN を使う（任意） / 手順 2: 補足: Wake-on の値
+
+- `Wake-on:` の `g` がマジック パケット
+- VirtualBox の VM の e1000 は、`Supports Wake-on: umbg` でも `d` のままだった
+
+### WezTerm と HackGen Console NF をデスクトップで使う（任意） / 手順 1: 補足: 等幅のフォント
+
+- 等幅のフォントは、端末の Ptyxis などが使う
+- 最初の `get` は変える前の値（AlmaLinux 10 の既定は `'Red Hat Mono Regular 10'`）
+- Ptyxis は既定でこのフォントを使うので、開いている端末もすぐに変わる
+
+### Homebrew を root のシェルでも使う（任意） / 手順 2: 補足: Homebrew を消したとき
+
+- Homebrew 自体を削除した場合は、共通設定が自動で読み込みを省略する
+
+### Homebrew を sudo でも使う（任意） / 手順 1: 補足: 使い方
+
+- Homebrew で入れたコマンドを、`sudo jq --version` のように打てる
+- `sudo` でどれが使われるかは、`sudo bash -c 'type -a <コマンド>'` で見る（先頭の行が使われる）
+
+### Homebrew を sudo でも使う（任意） / 手順 2: 補足: root のシェルの PATH
+
+- [Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節も通していれば、root のシェル（`sudo -i` も）では、root の共通の bash 設定が Homebrew を PATH に入れたまま
+
+### starship のプリセットを当てる（任意） / 手順 2: 補足: --force と再初期化
+
+- starship は設定ファイルをプロンプトのたびに読む
+- `--force` は既存のファイルを置き換える。付けないと既存設定がある場合に拒否されるので、節の先頭のとおり先に退避する
+- 共通設定は初期化済みの starship を再初期化しない。手で `eval "$(starship init bash)"` を重ねると `PS0` が重複するため、追加で実行しない
+
+### starship の設定ファイル / 手順 1: 補足: 編集と置き場所
+
+- `starship config` で `$EDITOR` が開く
+- 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する
+
+### starship でユーザー名とホスト名を常に表示する（任意） / 手順 1: 補足: starship config
+
+- 既存の設定を保ち、常時表示に必要な 2 項目だけを更新する。設定ファイルが無ければ作られる
+
+### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 1: 補足: fd-find と二重に入れない理由
+
+- EPEL の `fd-find` も Homebrew の fd も `fd` で、PATH の先頭の Homebrew 版が使われる
+
+### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 2: 補足: 変数を入れる時期
+
+- 共通の bash 設定は、端末を開くときに fd と bat を見つけて変数を入れる
+
+### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 4: 補足: コマンドの中のプレビュー
+
+- コマンドの中で同じプレビューを使うなら、`fzf --preview 'bat --color=always --style=numbers {}'`
+
+### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 5: 補足: 消した後
+
+- 開き直した端末から、共通の bash 設定は候補の 3 つの変数を入れず、候補は fzf の既定の一覧に戻る
+- yazi.md の `YAZI_EXTRAS` で入れた fd を消さないのは、yazi の検索が使うため
+
+### bat の設定ファイル / 手順 1: 補足: テーマと言語とキャッシュ
+
+- テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
+- 自前のシンタックス定義やテーマを足したときだけ `bat cache --build` が要る（キャッシュの場所は `bat --cache-dir`）
+
+### tmux の設定ファイル（任意） / 手順 2: 補足: 読み込みとホイール
+
+- 既存・新規のどちらの設定ファイルも、起動時と同じ順で読み込む。既存セッションのマウス設定にも反映する
+- tmux の中でホイールを上へ回すと、さかのぼって読める（右上に `[5/258]` のような位置が出る）。下まで回すか `q` で戻る
+
+### Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
+
+- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../windows-claude-remote-control.md#実施手順)の手順 2）
+- 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
+
+### Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
+
+- tmux のセッションと、その中の Claude Code は、このホストで動き続ける
+
+### 更新 / 手順 2: 補足: 自動更新
+
+- `brew install` / `brew upgrade` は既定で自動更新が走るので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）
+
+### 更新 / 手順 3: 補足: 確認と、上げた後の tmux・fzf・zoxide
+
+- `[y/n]` を聞く条件は[注意点](../extra/almalinux-setup.md#注意点)
+- 動いている tmux のサーバーは、前の版のまま動き続ける。新しい版を使うのは、セッションを全部閉じて `tmux ls` が `no server running on …` になってから
+- fzf は、開いているシェルには前の版の `fzf --bash` が読まれたまま。新しい端末から新しい版になる。zoxide のデータベース（`~/.local/share/zoxide/db.zo`）は更新で消えない
 
 ### 選択した方針
 
@@ -11,31 +347,31 @@
   - 13 本（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）は、この文書に入れて消した。もとの参考資料は、この文書の[統合前の参考資料](#統合前の参考資料-epelもとは-epelmd)以下に、中身を変えずに移した
   - ほかの手順書が前提にしていたもの（EPEL・RPM Fusion・Homebrew・Flathub・画面オフの設定）は、使う側の手順書がこの文書の手順番号か節を名指しする
   - AlmaLinux 10 と Windows 11 の両方を対象にする手順書（git・firefox・hackgen・wezterm-nightly・claude-code・codex・grok-build）は、OS ごとの節があるので残し、リードから順に案内する
-- **sudo をパスワード無しにする（手順 3）**: このリポジトリの手順書は、`sudo` の後ろに続く行がパスワードの入力に食われないように、NOPASSWD を前提に書いてある（README の記法）。それを設定する手順が無かったので、最初に置いた
+- **sudo をパスワード無しにする（「ログインと sudo」の手順 3）**: このリポジトリの手順書は、`sudo` の後ろに続く行がパスワードの入力に食われないように、NOPASSWD を前提に書いてある（README の記法）。それを設定する手順が無かったので、最初に置いた
   - `/etc/sudoers.d/nopasswd` に、このユーザーだけの 2 行を置く。`/etc/sudoers` の `%wheel ALL=(ALL) ALL` は残す（ロールバックで、ファイルを消せば元に戻る）
   - `Defaults:<USER> verifypw=any` も置く。`sudo -v`（`-v` は資格を更新するだけ）は、`verifypw` の既定の `all` では、そのユーザーに当たるすべての行が NOPASSWD のときだけパスワードを聞かない。`%wheel` の行が残るので、`verifypw=any` が無いと Homebrew のインストーラの `sudo -v` がパスワードを聞いた（sudoers(5) の `verifypw`）
   - 書く前に `visudo -cf -` で確かめ、`install -m 0440` で置き、最後に `visudo -c` で全体を確かめる（書式の誤りがあると `sudo` そのものが使えなくなるため）
-- **ファームウェアは fwupd（手順 5・6）**: Workstation に入っている `fwupdmgr` で、LVFS から入れる。AlmaLinux 10 の既定では LVFS のリモートが無効で、`refresh` が有効にするかを聞く
+- **ファームウェアは fwupd（「OS とファームウェアの更新」の手順 2・3）**: Workstation に入っている `fwupdmgr` で、LVFS から入れる。AlmaLinux 10 の既定では LVFS のリモートが無効で、`refresh` が有効にするかを聞く
   - `--assume-yes` を付けても、この問いは出た。問いに答える手順として、`refresh` と `update` を分けた
-- **journal を永続にする（手順 13）**: `/etc/systemd/journald.conf.d/` のドロップインで `Storage=persistent` にする（`/etc/systemd/journald.conf` は書き換えない）
+- **journal を永続にする（「システムの設定」の手順 5）**: `/etc/systemd/journald.conf.d/` のドロップインで `Storage=persistent` にする（`/etc/systemd/journald.conf` は書き換えない）
   - journald が作った `/var/log/journal` には、`systemd-journal` のグループと ACL が付かなかった。`systemd-tmpfiles --create --prefix /var/log/journal` で、パッケージの tmpfiles の定義どおりに付け直す
   - tmpfiles の定義（`/usr/lib/tmpfiles.d/systemd.conf` の `z`・`a+`）は、すでにあるものだけを直す。`/var/log/journal` は `journalctl --flush` のときに作られるので、tmpfiles はその後に行う（前に行うと、何も直らなかった）
   - 元に戻すときは、`journalctl --relinquish-var` で journald に `/var/log/journal` を手放させてから消す。手放させずに消すと、動いている journald がすぐに作り直し、`Storage=auto` のまま書き続けた
-- **kdump を止める（手順 14・15）**: カーネルが落ちたときの記録が要らない PC では、予約されるメモリー（`crashkernel=`）を空ける
+- **kdump を止める（「システムの設定」の手順 6・7）**: カーネルが落ちたときの記録が要らない PC では、予約されるメモリー（`crashkernel=`）を空ける
   - `/etc/kdump.conf` の `auto_reset_crashkernel` を `no` にする。`yes` のままだと、カーネルを入れたときに kernel-install の `92-crashkernel.install` が `crashkernel=` を付け直す
   - `crashkernel=` は `grubby --update-kernel=ALL --remove-args=crashkernel` で、入っているすべてのカーネルの起動の項目から外す
-- **PackageKit-command-not-found を外す（手順 16）**: 無いコマンドを打つたびにリポジトリを探して待たされるため。パッケージは `dnf provides` で探す
-- **ホームのフォルダーの名前を英語にする（手順 29）**: 端末で打ちやすく、Homebrew・WezTerm などの既定の場所と合わせるため
+- **PackageKit-command-not-found を外す（「システムの設定」の手順 8）**: 無いコマンドを打つたびにリポジトリを探して待たされるため。パッケージは `dnf provides` で探す
+- **ホームのフォルダーの名前を英語にする（「GNOME の表示と入力」の手順 1）**: 端末で打ちやすく、Homebrew・WezTerm などの既定の場所と合わせるため
   - `xdg-user-dirs-update --force` は空のフォルダーを作り直すだけで、中身を移さない。中身を残すために、フォルダーを `mv` してから `xdg-user-dirs-update --set` で場所を書き換える
   - Files のサイドバーのブックマーク（`~/.config/gtk-3.0/bookmarks`）も、日本語の名前の URI のままになるので書き換える
   - `~/.config/user-dirs.locale` を今のロケールに合わせる。xdg-user-dirs-gtk は、このファイルのロケールが今のロケールと違うときに、ログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓を出す（xdg-user-dirs-gtk のソース）
 - **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。統合前の[画面オフ・ロック・サスペンドの記録](../verification/almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
   - 一覧の値（`xkb-options`・`experimental-features`・`custom-keybindings`）は、まるごと置き換えず、無ければ足す。ほかの設定で入っている値を消さないため
-- **Caps Lock を Ctrl に（手順 31）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
-- **拡大率（手順 37）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
-- **トレイアイコン（手順 38・39）**: EPEL の `gnome-shell-extension-appindicator`（AppIndicator と KStatusNotifierItem を扱う）。AppStream の `gnome-shell-extension-status-icons` は、旧来の XEmbed のトレイアイコンだけを扱い、今のアプリが使う AppIndicator / KStatusNotifierItem を出さない
-- **Ctrl+Alt+T（手順 40）**: GNOME 49 の media-keys には端末を開くキーが無いので、カスタムのショートカットにする。コマンドは、新しい窓を開く `ptyxis --new-window`
-- **シェルのツールは 1 回の `brew install` にまとめた（手順 49）**: 依存の確認（`[y/n]`）が 1 回で済む。初期化は共通の bash 設定が持つので、入れた後は端末を開き直すだけ
+- **Caps Lock を Ctrl に（「GNOME の表示と入力」の手順 3）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
+- **拡大率（「GNOME の表示と入力」の手順 9）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
+- **トレイアイコン（「GNOME の表示と入力」の手順 10・11）**: EPEL の `gnome-shell-extension-appindicator`（AppIndicator と KStatusNotifierItem を扱う）。AppStream の `gnome-shell-extension-status-icons` は、旧来の XEmbed のトレイアイコンだけを扱い、今のアプリが使う AppIndicator / KStatusNotifierItem を出さない
+- **Ctrl+Alt+T（「GNOME の表示と入力」の手順 12）**: GNOME 49 の media-keys には端末を開くキーが無いので、カスタムのショートカットにする。コマンドは、新しい窓を開く `ptyxis --new-window`
+- **シェルのツールは 1 回の `brew install` にまとめた（「シェルのツール」の手順 1）**: 依存の確認（`[y/n]`）が 1 回で済む。初期化は共通の bash 設定が持つので、入れた後は端末を開き直すだけ
 - **SSH を公開鍵だけにする（任意節）**: ドロップインのファイル名を `40-pubkey-only.conf` にする。sshd は最初に読んだ値を使い、Workstation の `50-redhat.conf` より前に読ませるため
 - **dnf-automatic（任意節）**: `dnf-automatic-install.timer` で、毎日更新を入れる（再起動はしない）。GNOME Software の自動の更新（`download-updates`）は切る。2 つの仕組みが同じ更新を落とし合わないようにするため
 - **Wake on LAN（任意節）**: NetworkManager の接続の `802-3-ethernet.wake-on-lan` に `magic` を入れる。`ethtool -s` で変えた値は再起動で消えるが、接続の設定は接続を上げるたびに入る
@@ -52,7 +388,7 @@
 - [gnome-shell-extension-appindicator](https://github.com/ubuntu/gnome-shell-extension-appindicator) — AppIndicator / KStatusNotifierItem のトレイアイコン（EPEL のパッケージの上流）
 - [dnf-automatic](https://dnf.readthedocs.io/en/latest/automatic.html) — `dnf-automatic-install.timer` と `/etc/dnf/automatic.conf`
 - `man sshd_config`（最初に読んだ値が使われる）と `man nm-settings-nmcli`（`802-3-ethernet.wake-on-lan`）
-- [README の共通の bash 設定を先に入れる](../../README.md#共通の-bash-設定を先に入れる) と [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) — 手順 42〜45 の共通の bash 設定
+- [README の共通の bash 設定を先に入れる](../../README.md#共通の-bash-設定を先に入れる) と [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) — 「共通の bash 設定」の手順 1〜4
 - [Windows 11 の初期設定](../windows-setup.md) — Windows 11 側の同じ形の手順書
 
 ---
@@ -63,9 +399,9 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1〜3 | 実施手順 17 |
-| 更新 1 | 更新のリード（OS は実施手順 4） |
-| ロールバック 1・2 | ロールバック 34・35 |
+| 実施手順 1〜3 | 「EPEL と RPM Fusion」の手順 1 |
+| 更新 1 | 更新のリード（OS は「OS とファームウェアの更新」の手順 1） |
+| ロールバック 1・2 | ロールバックの「Flatpak・RPM Fusion・EPEL を消す」の手順 7・8 |
 
 ### EPEL: 補足
 
@@ -73,7 +409,7 @@
 
 `epel-release` は、repo ファイル（`/etc/yum.repos.d/epel.repo` と、無効の `epel-testing.repo`）と、鍵のファイル `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` を置く。
 
-取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る（[ロールバック](../almalinux-setup.md#ロールバック)の手順 2 で使う）。
+取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る（[ロールバック](../extra/almalinux-setup.md#flatpakrpm-fusionepel-を消す)の手順 2 で使う）。
 
 #### EPEL: 参照
 
@@ -89,8 +425,8 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1〜4 | 実施手順 18〜21 |
-| ロールバック 1・2 | ロールバック 32・33 |
+| 実施手順 1〜4 | 「EPEL と RPM Fusion」の手順 2〜5 |
+| ロールバック 1・2 | ロールバックの「Flatpak・RPM Fusion・EPEL を消す」の手順 5・6 |
 
 ### RPM Fusion: 補足
 
@@ -116,19 +452,19 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 44 |
-| 実施手順 2 | 実施手順 51（今のシェルへの読み込みはやめた） |
-| 実施手順 3 | 実施手順 43・51 |
-| 実施手順 4 | 実施手順 51 |
-| 実施手順 5 | 実施手順 45 |
-| 実施手順 6 | 実施手順 50 |
-| 実施手順 7 | 実施手順 51 |
-| 実施手順 8 | 実施手順 59 |
-| ロールバック 1 | ロールバック 17 |
-| ロールバック 2 | ロールバック 22 |
-| ロールバック 3 | ロールバック 21 |
-| ロールバック 4 | ロールバック 27 |
-| ロールバック 5 | ロールバック 23 |
+| 実施手順 1 | 「共通の bash 設定」の手順 3 |
+| 実施手順 2 | 「シェルのツール」の手順 3（今のシェルへの読み込みはやめた） |
+| 実施手順 3 | 「共通の bash 設定」の手順 2 と「シェルのツール」の手順 3 |
+| 実施手順 4 | 「シェルのツール」の手順 3 |
+| 実施手順 5 | 「共通の bash 設定」の手順 4 |
+| 実施手順 6 | 「シェルのツール」の手順 2 |
+| 実施手順 7 | 「シェルのツール」の手順 3 |
+| 実施手順 8 | 「キー操作を試す」の手順 1 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 2 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 7 |
+| ロールバック 3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 6 |
+| ロールバック 4 | ロールバックの「Homebrew と bash-completion を消す」の手順 4 |
+| ロールバック 5 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 8 |
 
 ### bash の設定: 補足
 
@@ -140,7 +476,7 @@
 - **採らなかった設定**
   - `HISTTIMEFORMAT`（`history` に時刻を出す）: 履歴ファイルに `#<epoch>` の行が増える。本書は履歴の見え方を変えない範囲にとどめる。欲しければ `HISTTIMEFORMAT='%F %T '` を手順 3 の行に足せばよい
   - `HISTCONTROL=…:erasedups`（同じ行を全部消して 1 つにする）: 覚えている一覧の中だけを直し、ファイルの古い重複は残る。効き目が分かりにくいので入れない
-  - `PROMPT_COMMAND` に `history -a`（コマンドごとにファイルへ書き、別の端末ですぐ使う）: AlmaLinux 10 の `PROMPT_COMMAND` は配列で、starship・WezTerm のシェル統合・zoxide が順番に意味を持って触っている（[starship.md 手順 3](../almalinux-setup.md#実施手順) の補足）。そこへ足す形は本書では扱わない
+  - `PROMPT_COMMAND` に `history -a`（コマンドごとにファイルへ書き、別の端末ですぐ使う）: AlmaLinux 10 の `PROMPT_COMMAND` は配列で、starship・WezTerm のシェル統合・zoxide が順番に意味を持って触っている（[starship.md 手順 3](../almalinux-setup.md#シェルのツール) の補足）。そこへ足す形は本書では扱わない
   - `set bell-style none`（ベルを消す）、`menu-complete`（Tab で候補を順に入れる）: 好みの幅が大きいので入れない
   - `shopt -s histappend`: `/etc/bashrc` が対話のシェルで入れている（手順 3 の補足）
 - **atuin（履歴を SQLite に持ち、同期もする）は使わない**: 履歴の検索は [fzf](../almalinux-setup.md) の Ctrl+R で足りる。[導入元一覧](../tool-catalog.md#cli-定番の置き換え)の行のまま
@@ -163,20 +499,20 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 46 |
-| 実施手順 2 | 実施手順 47 |
-| 実施手順 3・4 | 実施手順 48 |
+| 実施手順 1 | 「Homebrew」の手順 1 |
+| 実施手順 2 | 「Homebrew」の手順 2 |
+| 実施手順 3・4 | 「Homebrew」の手順 3 |
 | 使い方の基本 | Homebrew の使い方の基本 |
 | root のシェルでも使う（任意）の 1・2 | Homebrew を root のシェルでも使う（任意）の 1・2 |
 | sudo でも使う（任意）の 1・2 | Homebrew を sudo でも使う（任意）の 1・2 |
 | 更新 1・2 | 更新 2・3 |
-| ロールバック 1〜3 | ロールバック 24〜26 |
+| ロールバック 1〜3 | ロールバックの「Homebrew と bash-completion を消す」の手順 1〜3 |
 
 ### Homebrew: 補足
 
 #### Homebrew: 選択した方針
 
-**Homebrew に揃える判断の実質は「更新の一元化」**。`brew upgrade` 1 本で、17 本の手順書（統合前の数。今はこの文書の手順 49 と、11 本の手順書）で Homebrew から入れたものがまとめて上がる。
+**Homebrew に揃える判断の実質は「更新の一元化」**。`brew upgrade` 1 本で、17 本の手順書（統合前の数。今はこの文書の「シェルのツール」の手順 1 と、11 本の手順書）で Homebrew から入れたものがまとめて上がる。
 
 #### Homebrew: root のシェルで使うときの補足
 
@@ -188,7 +524,7 @@
 | `sudo <コマンド>` | 読まない。PATH は `secure_path` の `/sbin:/bin:/usr/sbin:/usr/bin` | 使えない（`sudo: jq: command not found`）。[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節で使える |
 
 - **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わり、その末尾に足される
-- **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
+- **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../extra/almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
 - **RPM と同じ名前のコマンドは、root では RPM が先**: AppStream の `jq` も入れると、`type -a jq` の並びが root と Homebrew のユーザーで逆になる
 
   ```
@@ -224,11 +560,11 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1〜3 | 実施手順 22 |
-| 実施手順 4〜7 | 実施手順 23〜26 |
+| 実施手順 1〜3 | 「Flatpak と Flathub」の手順 1 |
+| 実施手順 4〜7 | 「Flatpak と Flathub」の手順 2〜5 |
 | 使い方の基本 | Flatpak の使い方の基本 |
 | 更新 1 | 更新 4 |
-| ロールバック 1〜4 | ロールバック 28〜31 |
+| ロールバック 1〜4 | ロールバックの「Flatpak・RPM Fusion・EPEL を消す」の手順 1〜4 |
 
 ### Flatpak: 補足
 
@@ -248,13 +584,13 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1（変数） | 実施手順 9 |
-| 実施手順 2・3 | 実施手順 27 |
-| 実施手順 4 | 実施手順 28 |
-| 実施手順 5（ログインし直す） | 実施手順 67（再起動） |
-| 実施手順 6 | 実施手順 69 |
-| 実施手順 7 | 実施手順 72 |
-| ロールバック 1・2 | ロールバック 13・14 |
+| 実施手順 1（変数） | 「システムの設定」の手順 1 |
+| 実施手順 2・3 | 「日本語入力」の手順 1 |
+| 実施手順 4 | 「日本語入力」の手順 2 |
+| 実施手順 5（ログインし直す） | 「再起動と確認」の手順 1（再起動） |
+| 実施手順 6 | 「再起動と確認」の手順 3 |
+| 実施手順 7 | 「再起動と確認」の手順 6 |
+| ロールバック 1・2 | ロールバックの「表示と入力を戻す」の手順 13・14 |
 
 ### 日本語入力: 補足
 
@@ -302,15 +638,15 @@
 | 当時の手順 | 今の手順 |
 |---|---|
 | 実施手順 1（変数） | starship のプリセットを当てる（任意）の 2 |
-| 実施手順 2 | 実施手順 49 |
-| 実施手順 3・5 | 実施手順 52 |
-| 実施手順 4 | 実施手順 50 |
+| 実施手順 2 | 「シェルのツール」の手順 1 |
+| 実施手順 3・5 | 「シェルのツール」の手順 4 |
+| 実施手順 4 | 「シェルのツール」の手順 2 |
 | プリセットを当てる（任意）の 1・2 | starship のプリセットを当てる（任意）の 1・2 |
 | 設定ファイルの 1 | starship の設定ファイルの 1 |
 | ユーザー名とホスト名を常に表示するの 1 | starship でユーザー名とホスト名を常に表示する（任意）の 1 |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 18 |
-| ロールバック 2・3 | ロールバック 20 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
+| ロールバック 2・3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
 
 ### starship: 補足
 
@@ -357,14 +693,14 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 43 |
-| 実施手順 2 | 実施手順 49 |
-| 実施手順 3・4 | 実施手順 57 |
-| 実施手順 5 | 実施手順 58 |
+| 実施手順 1 | 「共通の bash 設定」の手順 2 |
+| 実施手順 2 | 「シェルのツール」の手順 1 |
+| 実施手順 3・4 | 「シェルのツール」の手順 9 |
+| 実施手順 5 | 「シェルのツール」の手順 10 |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 18 |
-| ロールバック 2 | ロールバック 23 |
-| ロールバック 3 | ロールバック 20 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 8 |
+| ロールバック 3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
 
 ### zoxide: 補足
 
@@ -385,14 +721,14 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 49 |
-| 実施手順 2・3 | 実施手順 53 |
-| 実施手順 4〜7 | 実施手順 60〜63 |
+| 実施手順 1 | 「シェルのツール」の手順 1 |
+| 実施手順 2・3 | 「シェルのツール」の手順 5 |
+| 実施手順 4〜7 | 「キー操作を試す」の手順 2〜5 |
 | 使い方の基本 | fzf の使い方の基本 |
 | fd と bat を候補とプレビューに使う（任意）の 1・2 | fzf で fd と bat を候補とプレビューに使う（任意）の 3・4（fd を入れる 1 と、開き直す 2 を足した） |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 19 |
-| ロールバック 2 | ロールバック 23 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 4 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 8 |
 
 ### fzf: 補足
 
@@ -421,14 +757,14 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 43 |
-| 実施手順 2 | 実施手順 49 |
-| 実施手順 3 | 実施手順 54 |
-| エイリアスを足す（任意）の 1 | 実施手順 54 |
+| 実施手順 1 | 「共通の bash 設定」の手順 2 |
+| 実施手順 2 | 「シェルのツール」の手順 1 |
+| 実施手順 3 | 「シェルのツール」の手順 6 |
+| エイリアスを足す（任意）の 1 | 「シェルのツール」の手順 6 |
 | 表示を調整する | eza の表示を調整する |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 18 |
-| ロールバック 2 | ロールバック 23 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 8 |
 
 ### eza: 補足
 
@@ -464,15 +800,15 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | 当時の手順 | 今の手順 |
 |---|---|
 | 実施手順 1（変数） | bat の設定ファイルの 1 |
-| 実施手順 2 | 実施手順 49 |
-| 実施手順 3 | 実施手順 55 |
-| ページャに使う（任意）の 1 | 実施手順 55 |
+| 実施手順 2 | 「シェルのツール」の手順 1 |
+| 実施手順 3 | 「シェルのツール」の手順 7 |
+| ページャに使う（任意）の 1 | 「シェルのツール」の手順 7 |
 | ページャに使う（任意）の 2 | fzf で fd と bat を候補とプレビューに使う（任意）の 4 の箇条書き |
 | 設定ファイルの 1 | bat の設定ファイルの 1 |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 18 |
-| ロールバック 2 | ロールバック 20 |
-| ロールバック 3 | ロールバック 23 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
+| ロールバック 3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 8 |
 
 ### bat: 補足
 
@@ -495,16 +831,16 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | 実施手順 49 |
-| 実施手順 2 | 実施手順 56 |
-| 実施手順 3〜5 | 実施手順 64〜66 |
+| 実施手順 1 | 「シェルのツール」の手順 1 |
+| 実施手順 2 | 「シェルのツール」の手順 8 |
+| 実施手順 3〜5 | 「tmux を試す」の手順 1〜3 |
 | 使い方の基本 | tmux の使い方の基本 |
 | 設定ファイル（任意）の 1・2 | tmux の設定ファイル（任意）の 1・2 |
 | Claude Code を tmux の中で動かす（任意）の 1〜8 | 同じ節の 1〜8 |
 | 更新 1 | 更新 3 |
-| ロールバック 1 | ロールバック 16 |
-| ロールバック 2 | ロールバック 18 |
-| ロールバック 3 | ロールバック 20 |
+| ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 1 |
+| ロールバック 2 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
+| ロールバック 3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
 
 ### tmux: 補足
 

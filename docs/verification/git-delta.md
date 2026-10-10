@@ -1,6 +1,6 @@
 # git-delta（delta）インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の検証記録
 
-[手順書](../git-delta.md)
+[手順書](../git-delta.md)・[ロールバックと注意点](../extra/git-delta.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -111,7 +111,7 @@ index de98044..a7bc997 100644
     - delta 0.20.1 のソース: ページャの決まり方と、less が見つからないときに標準出力へ書くこと（`src/utils/bat/output.rs`・`src/env.rs`）、Windows の less の検索履歴の写しの場所（`src/features/navigate.rs`）
     - Git for Windows のソース: `cmd\git.exe`（git-wrapper）が `mingw64\bin`・`usr\bin` を PATH の先頭に足すこと
     - Scoop のソース: `install`・`update`・`uninstall` の表示と、arm64 で x64 の定義を使うこと
-    - PowerShell のブロック 6 個: Linux の PowerShell 7.5.3 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。偽物の `scoop`・`delta` と本物の git で、[Windows 11 で使う](../git-delta.md#windows-11-で使う)の手順 2・3、[Windows 11 の更新](../git-delta.md#windows-11-の更新)、[Windows 11 のロールバック](../git-delta.md#windows-11-のロールバック)を流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-08)）
+    - PowerShell のブロック 6 個: Linux の PowerShell 7.5.3 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。偽物の `scoop`・`delta` と本物の git で、[Windows 11 で使う](../git-delta.md#windows-11-で使う)の手順 2・3、[Windows 11 の更新](../git-delta.md#windows-11-の更新)、[Windows 11 のロールバック](../extra/git-delta.md#windows-11-のロールバック)を流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-08)）
   - 関連する確認（この文書の手順ではない）:
     - 自分用の bash の設定の、Windows 11 の実機の Git Bash での検証（ryo-aoki-pc/bash の[2026-10-01 の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md#付録-windows-11-の-git-bash-での検証記録2026-10-01)・[2026-10-06 の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md#付録-windows-ホストでの設定の再検証2026-10-06)）は、delta を扱っていない（共通の bash 設定は delta を読まない）
     - `~/.gitconfig` が Git Bash・PowerShell 7・cmd で同じファイルになることは、[git.md の検証記録](git.md#付録-windows-11-の-git-bash-での検証記録2026-09-30)で確かめてある
@@ -121,7 +121,7 @@ index de98044..a7bc997 100644
     - WezTerm の Git Bash で[実施手順](../git-delta.md#実施手順)の手順 1・3 を貼ること
     - Git Bash と PowerShell の `git diff` が、delta と Git for Windows の less で出ること。色・行番号の見え方と `n` / `N`、`git add -p`
     - [lazygit と組み合わせる（任意）](../git-delta.md#lazygit-と組み合わせる任意)の Windows の lazygit
-    - 新しい版が出た後の[Windows 11 の更新](../git-delta.md#windows-11-の更新)と、[Windows 11 のロールバック](../git-delta.md#windows-11-のロールバック)
+    - 新しい版が出た後の[Windows 11 の更新](../git-delta.md#windows-11-の更新)と、[Windows 11 のロールバック](../extra/git-delta.md#windows-11-のロールバック)
     - arm64 の Windows と、SSH のセッション
 
 AlmaLinux 10:
@@ -309,7 +309,7 @@ advapi32.dll api-ms-win-core-handle-l1-1-0.dll api-ms-win-core-synch-l1-2-0.dll 
 1. WezTerm の Git Bash で、[実施手順](../git-delta.md#実施手順)の手順 1・3 が通り、6 項目が読み戻せること
 1. Git Bash と PowerShell の `git diff` が、delta と Git for Windows の less で出ること（PowerShell の git が `usr\bin` を足すのはソースから）。色・行番号の見え方、`n` / `N`（`%LOCALAPPDATA%\delta\delta.lesshst`）
 1. `git add -p`（`interactive.diffFilter`）と、Windows の lazygit の `git.diffRenderers`
-1. 新しい版が出た後の[Windows 11 の更新](../git-delta.md#windows-11-の更新)、less を開いたままの `Running process detected`、[Windows 11 のロールバック](../git-delta.md#windows-11-のロールバック)
+1. 新しい版が出た後の[Windows 11 の更新](../git-delta.md#windows-11-の更新)、less を開いたままの `Running process detected`、[Windows 11 のロールバック](../extra/git-delta.md#windows-11-のロールバック)
 1. arm64 の Windows（x64 の版をエミュレーションで動かす）と、SSH のセッション（scoop の shim と RedirectionGuard）
 
 ---

@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/dropbox.md)・[参考資料](reference/dropbox.md)
+- [検証記録](verification/dropbox.md)・[参考資料](reference/dropbox.md)・[ロールバックと注意点](extra/dropbox.md)
 
 > [!IMPORTANT]
 > - **x86_64 の PC で実行する**。Dropbox は Linux の ARM 版を出していないので、Raspberry Pi 5（aarch64）では [dropbox-rclone.md](dropbox-rclone.md) を使う
@@ -13,11 +13,13 @@
 > - **ログアウト中も同期するなら、PC を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める（任意）」](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
 
 - 上から順にコードブロックを貼る
-- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)。以後は[更新](#更新)・[ロールバック](extra/dropbox.md#ロールバック)
 
 1. この PC で公式クライアントが動くかを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    uname -m
    stat -f -c %T "${HOME}"
    df -h "${HOME}"
@@ -25,17 +27,18 @@
 
    - `uname -m` が `x86_64` ならよい
    - **`aarch64` ならここで止め、[dropbox-rclone.md](dropbox-rclone.md) へ進む**
-   - `stat` が `xfs`（AlmaLinux の既定）・`ext2/ext3`（ext4 もこう出る）・`btrfs` のどれかなら、Dropbox が対応するファイルシステム
-   - `df` の `Avail` が、Dropbox で使っている容量より大きいこと（リンクすると全部落ちてくる）
+   - `stat` が `xfs`・`ext2/ext3`（ext4 もこう出る）・`btrfs` のどれかなら、Dropbox が対応するファイルシステム
+   - `df` の `Avail` が、Dropbox で使っている容量より大きいこと
 
 1. Dropbox の署名鍵を落として、fingerprint を見る。
 
    ```bash
    curl -fsSL https://linux.dropbox.com/fedora/rpm-public-key.asc -o /tmp/dropbox-key.asc
+   printf '\n\033[7m 確認 \033[0m\n'
    gpg --show-keys --with-fingerprint /tmp/dropbox-key.asc
    ```
 
-   - `gpg: command not found` と出たら、`sudo dnf install -y gnupg2` で入れてから貼り直す（GNOME のデスクトップには入っている）
+   - `gpg: command not found` と出たら、`sudo dnf install -y gnupg2` で入れてから貼り直す
    - 次の値と一致することを目で確かめる
      - fingerprint `1C61 A265 6FB5 7B7E 4DE0  F4C1 FC91 8B33 5044 912E`
      - uid `Dropbox Automatic Signing Key <linux@dropbox.com>`
@@ -46,6 +49,7 @@
 
    ```bash
    DBX_URL=$(curl -fsS -o /dev/null -w '%{redirect_url}' 'https://www.dropbox.com/download?plat=lnx.x86_64')
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "${DBX_URL}"
    curl -fL -o /tmp/dropbox-lnx.tar.gz "${DBX_URL:?URL を取れなかった。この手順を貼り直す}"
    curl -fsSL -o /tmp/dropbox-lnx.tar.gz.asc "${DBX_URL}.asc"
@@ -60,6 +64,7 @@
 1. 展開した版を確かめ、落としたファイルを消す。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls ~/.dropbox-dist
    du -sh ~/.dropbox-dist
    rm -f /tmp/dropbox-lnx.tar.gz /tmp/dropbox-lnx.tar.gz.asc /tmp/dropbox-key.asc /tmp/dropbox-key.gpg
@@ -74,6 +79,7 @@
    mkdir -p ~/.local/bin
    curl -fsSL -o ~/.local/bin/dropbox https://linux.dropbox.com/packages/dropbox.py
    chmod +x ~/.local/bin/dropbox
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v dropbox
    dropbox version
    ```
@@ -100,6 +106,7 @@
    WantedBy=default.target
    EOF
    systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user enable --now dropbox.service
    systemctl --user is-enabled dropbox.service   # enabled
    systemctl --user is-active dropbox.service    # active
@@ -107,12 +114,12 @@
 
    - `Created symlink '.../default.target.wants/dropbox.service' → ...` が出る
    - `enabled`・`active` が出ればよい
-   - [linger](linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
 
 1. リンク用の URL を出す。
 
    ```bash
    sleep 30
+   printf '\n\033[7m 確認 \033[0m\n'
    dropbox status
    ```
 
@@ -128,6 +135,7 @@
 1. 同期が始まったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dropbox status
    ls ~/Dropbox
    journalctl --user -u dropbox.service -n 20 --no-pager
@@ -170,7 +178,7 @@
    dropbox version
    ```
 
-   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから [手順 2〜4](#実施手順) をやり直し、`systemctl --user start dropbox.service` で動かす（コンテナで、268.4.4124 から 270.4.3312 に入れ直せた）
+   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから [手順 2〜4](#実施手順) をやり直し、`systemctl --user start dropbox.service` で動かす
    - 入れ直すと、古い版のディレクトリ（`~/.dropbox-dist/dropbox-lnx.x86_64-<古い版>`）が残る。新しい版で動いているのを `dropbox version` で確かめてから、`rm -rf` で消してよい
 
 1. CLI（dropbox.py）を取り直す。
@@ -179,60 +187,3 @@
    curl -fsSL -o ~/.local/bin/dropbox https://linux.dropbox.com/packages/dropbox.py
    dropbox version
    ```
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- 同期していたファイルはクラウドに残る。この PC の `~/Dropbox` を消すのは、この節の手順 4 だけ
-- 手順 2 で作られた `~/.gnupg` は、ほかでも使うので消さない
-- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
-
-> [!CAUTION]
-> **この節の**手順 4 で、`~/.dropbox`（リンクの情報）と `~/Dropbox`（この PC の複製）を消す。まだ同期していない変更があれば失われる。
->
-> - **デーモンが動いている間に `~/Dropbox` を消すと、クラウドからも消える**。手順 4 は、デーモンが動いていれば `中断:` で止まる
-> - 入れ直す可能性があるなら残す
-
-1. サービスを止めて外す。
-
-   ```bash
-   systemctl --user disable --now dropbox.service
-   rm -f ~/.config/systemd/user/dropbox.service
-   systemctl --user daemon-reload
-   ```
-
-   - `Removed '.../default.target.wants/dropbox.service'.` が出る
-
-1. ブラウザで Dropbox の Web を開き、この PC のリンクを解除する。
-
-   - アカウントの設定 → セキュリティ → デバイス にある
-
-1. デーモンと CLI を消す。
-
-   ```bash
-   rm -rf ~/.dropbox-dist ~/.local/bin/dropbox
-   ```
-
-1. 完全に消すときだけ、リンクの情報とこの PC の複製を消す（取り戻せない）。
-
-   ```bash
-   if pgrep -u "$(id -un)" -x dropbox >/dev/null; then echo '中断: Dropbox のデーモンがまだ動いている。この節の手順 1 を先に貼る' >&2; else
-   rm -rf ~/.dropbox ~/Dropbox
-   fi
-   ```
-
----
-
-## 注意点
-
-- **Basic（無料）プランは同時に 3 台まで**: 公式クライアントは、そのうちの 1 台に数えられる（公式ヘルプ。dropbox.com へのログインは数えない）
-- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](#使い方の基本)）
-- **LAN 同期の受信は開けていない**: firewalld の定義済みサービス `dropbox-lansync`（17500/tcp・udp）は開けていない
-  - LAN 内にほかの公式クライアントが無ければ要らない（Raspberry Pi 5 は rclone なので、LAN 同期に加わらない）
-  - 使うなら `sudo firewall-cmd --permanent --add-service=dropbox-lansync` と `sudo firewall-cmd --reload`
-- **`dropbox stop` は戻される**: `Restart=always` なので 10 秒後に起こし直される。止めるなら `systemctl --user stop dropbox.service`
-- **リンク用の URL は他人に見せない**: 開いた人のアカウントにこの PC がつながる。リンクするまでは journal にも 5 秒ごとに残る
-- **眠ると止まる**: サスペンド中は同期しない。常時動かす PC は [画面オフ・画面ロック・自動サスペンドを止める（任意）](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) の節で眠らないようにする
-- **フォルダの場所は `~/Dropbox` のまま**: headless の `dropbox` コマンドには、場所を移す機能が無い

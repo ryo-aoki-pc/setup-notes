@@ -1,6 +1,6 @@
 # yazi 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
-[手順書](../yazi.md)
+[手順書](../yazi.md)・[ロールバックと注意点](../extra/yazi.md)
 
 ## 補足
 
@@ -8,6 +8,48 @@
 
 - `YAZI_EXTRAS` に並べているのは、yazi が外部コマンドとして呼ぶツール。役割は手順 2 の補足にまとめた
 - `ffmpeg-full` と `imagemagick-full` は、Homebrew の `ffmpeg` / `imagemagick` に対してコーデック・フォーマットを広く有効にしたビルド（どちらも `homebrew/core` の formula）
+- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている
+
+### 実施手順 / 手順 2: 補足: ボトルと、依存ツールの役割
+
+[この節の検証記録](../verification/yazi.md#実施手順--手順-2-補足-ボトルと依存ツールの役割)
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+
+### 実施手順 / 手順 3: 補足: y 関数
+
+- `y` は yazi を閉じたディレクトリへ移る。空白や日本語を含むパスも扱い、同じ場所なら移動し直さない
+
+### 実施手順 / 手順 4: 補足: ya と y
+
+- `ya` は付属のプラグイン管理コマンド
+- ブロックの最後の `y` で起動して確認する
+- `y` で起動したときは、終了時にそのディレクトリへ移動する
+
+### 設定ファイル / 手順 1: 補足: プラグインとテーマ
+
+- プラグインとテーマは `ya pkg add`（引数はリポジトリ名）で入れる。`~/.config/yazi/package.toml` に記録される
+- 本書ではプラグインは扱っていない
+
+### 更新 / 手順 1: 補足: 先に確認する
+
+- `brew outdated` で先に確認できる
+
+### Windows 11 で使う / 手順 2: 補足: 変数について
+
+- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている（どれも scoop の main のバケットにある）
+- 1 つだけにするときも `@('fd')` の形のままにするのは、`'fd'` だけにすると、1 文字ずつ別の名前として scoop に渡るため
+
+### Windows 11 で使う / 手順 3: 補足: 確かめる値の意味
+
+- ほかの場所の yazi を外すのは、混ざらないようにするため
+- `Config : True` なら、設定がもうある（[設定ファイル](../yazi.md#設定ファイル)）
+
+### Windows 11 で使う / 手順 4: 補足: 版と、出る行・環境変数
+
+- 同じ節の手順 4 の `'yazi' (<版>) was installed successfully!` と、手順 6 の `Version:` の版は、実行した日の最新
+- `suggests installing` の行のものを入れなくてよいのは、VC++ のランタイムを同じ節の手順 3 で確かめてあるため
+- imagemagick が足すユーザーの環境変数（`MAGICK_HOME` など）と `PATH` は、今の窓にも入る。ほかの開いている窓は、開き直してから効く
 
 ### Windows 11 では: 選択した方針
 
@@ -15,7 +57,7 @@
 
 - **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
 - **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
-  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の手順 49](../almalinux-setup.md#実施手順)、Windows 11 は [Windows 11 の初期設定のシェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる任意)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
+  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../almalinux-setup.md#シェルのツール)、Windows 11 は [Windows 11 の初期設定のシェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる任意)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
   - Homebrew の `font-symbols-only-nerd-font` の代わりは、[hackgen.md の Windows 11 で使う](../hackgen.md#windows-11-で使う)の HackGen Console NF
   - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。[検証記録の付録](../verification/yazi.md#付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
     - そのため、Windows 11 で使うの手順 4 は、同じ節の手順 2 を貼っていない窓では止める
@@ -47,7 +89,7 @@
 - [Quick Start — Yazi](https://yazi-rs.github.io/docs/quick-start/) — `y` シェル関数（`--cwd-file`）の原典
 - [Configuration — Yazi](https://yazi-rs.github.io/docs/configuration/overview/) — `yazi.toml` / `keymap.toml` / `theme.toml`
 - [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) — 自分用の設定。入れ方・独自のキー・上流との差分の管理は README にある
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 46〜48 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [Installation — Yazi の Windows](https://yazi-rs.github.io/docs/installation/#windows) — scoop の経路と依存、`YAZI_FILE_ONE`（Git for Windows の `file.exe`）
 - [Image Preview — Yazi](https://yazi-rs.github.io/docs/image-preview/) — Windows で画像を出せる端末（WezTerm の nightly、Windows Terminal 1.22.10352.0 以降）と ConPTY の制約
 - [ScoopInstaller/Main — yazi.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/yazi.json) — Windows 11 の scoop の定義

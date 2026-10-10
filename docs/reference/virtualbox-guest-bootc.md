@@ -1,12 +1,27 @@
 # VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の参考資料
 
-[手順書](../virtualbox-guest-bootc.md)
+[手順書](../virtualbox-guest-bootc.md)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
 ## 補足
+
+### 実施手順 / 手順 2: 補足: 空き容量
+
+- `/var` に 10 GB 以上の空きが要るのは、手順 6 でベースのイメージをもう 1 つ取り込むため
+
+### 実施手順 / 手順 4: 補足: CD の挿入
+
+- CD を入れるのは VirtualBox のホスト側の操作。ホストの VirtualBox に同梱の ISO が、VM の光学ドライブに入る
 
 ### 実施手順 / 手順 5: 補足: CD の中身と確かめ方
 
 [この節の検証記録](../verification/virtualbox-guest-bootc.md#実施手順--手順-5-補足-cd-の中身と確かめ方)
+
+- 7.2.8 より古い版を使わないのは、EL10.1・10.2 のカーネルへの対応が 7.2.8 で入ったため
+
+### 実施手順 / 手順 6: 補足: ビルドの表示
+
+- 途中の `+` で始まる行は、Containerfile の中で実行したコマンド（Containerfile の `set -x`）
+- 途中の `unable to load vboxguest kernel module` と `installer exit=1` が出るのは、ビルドの中ではモジュールを読み込めないため
 
 ### 実施手順 / 手順 7: 補足: 切り替えで起きること
 
@@ -28,8 +43,32 @@
 - `MOK.priv` は、この鍵を登録した VM が信頼するモジュールを作れる鍵になる。ホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない
 - AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[secure-boot-mok.md](../secure-boot-mok.md) で作るもの）とは別のもの
 - **鍵を作り直したら**、この節の手順 7 のビルドに `--no-cache` を足す（[更新](../virtualbox-guest-bootc.md#更新)のリードと同じ）
+- この節の手順 3 のブロックは、`openssl` が入っていなければ `sudo dnf` で入れる
+- すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
 
 - 初めてつなぐときは、ホスト鍵の確認に答えると `known_hosts` に登録され、パスワードを聞かれる
+
+### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 5: 補足: tar の時刻の警告
+
+- `tar: … time stamp … is … s in the future` が混ざるのは、VM の時計が進んでいるため
+
+### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 10: 補足: 切り替えた後の表示
+
+- 切り替えた後の `● Booted image:` が `containers-storage:…` になるのは、レジストリではなく、この VM の podman のイメージを追うため
+- `Digest:` がレジストリのものと違うのは、ファイルから取り込んだイメージの digest だから
+
+### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 11: 補足: 自動で消すもの
+
+- 同じ節の手順 6 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
+- `~/.config/containers` は、ほかのファイルが無ければ消える
+
+### 共有フォルダーを使う（任意） / 手順 2: 補足: vboxsf グループ
+
+- `vboxsf` グループは、切り替えた後の最初の起動で `systemd-sysusers` が作っている
+
+### 更新 / 手順 2: 補足: ベースの取り込み
+
+- `--pull=newer` なので、ベースが新しくなっていれば取り込み直す
 
 ### ロールバック / 手順 3: 補足: これらが自然には消えない理由
 

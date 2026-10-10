@@ -1,6 +1,6 @@
 # Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の参考資料
 
-[手順書](../podman.md)
+[手順書](../podman.md)・[ロールバックと注意点](../extra/podman.md)
 
 ## 補足
 
@@ -29,6 +29,12 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 
 - 本書は podman だけを入れ、ほかは[ツール一覧](../tool-catalog.md#cli-コンテナ)から要るものを足す形にした
 
+### 実施手順 / 手順 4: 補足: 割り当てる範囲
+
+- `SUBID_START=` の行で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
+- `usermod` の行で、そこから 65536 個を不足する側だけに割り当てる。既存の UID・GID の範囲は変更しない
+- `podman system migrate` は、それまでに podman を使っていたときに、新しい範囲を反映させる
+
 ### 実施手順 / 手順 5: 補足: podman info の読み方
 
 3 行目の 6 つの値の意味:
@@ -42,6 +48,15 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 | `pasta` | rootless のネットワークと、ポートの公開 |
 | `v2` | cgroup v2 |
 
+### 実施手順 / 手順 7: 補足: このソケットを使うもの
+
+- [Trivy](../image-tools.md)、[podman-tui](../podman-tui.md)、[lazydocker](../lazydocker.md)、GUI の Pods・Podman Desktop
+
+### Docker 向けのツールから使う（任意） / 手順 1: 補足: 共通設定とソケット
+
+- 共通設定はソケットがあるときだけ `DOCKER_HOST` を入れる
+- ソケットの有効化は[実施手順](../podman.md#実施手順)の手順 7 で行う
+
 ### Quadlet で自動起動する（任意） / 手順 1: 補足: 定義の中身
 
 | 行 | 意味 |
@@ -53,6 +68,12 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 | `AutoUpdate=registry` | `podman auto-update` の対象にする（[更新](../podman.md#更新)） |
 | `TimeoutStartSec=300` | 初回はイメージの取得を待つので、起動の待ち時間を延ばす |
 | `WantedBy=default.target` | ユーザーの systemd が起動したときに、このサービスも起動する |
+
+### Quadlet で自動起動する（任意） / 手順 2: 補足: 起動の待ち時間と、enable を使わない理由
+
+- 初回の `start` に数十秒かかるのは、イメージの取得を待つため
+- `start` から戻った直後は、Apache がまだ待ち受けていないことがある。curl は、応答が来るまで 1 秒おきに 10 回まで試し直す
+- `systemctl --user enable` を使わないのは、自動で起動するかが定義の `[Install]` で決まるため
 
 ### 参照
 

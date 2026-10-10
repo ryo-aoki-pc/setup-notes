@@ -1,6 +1,6 @@
 # Homebrew をインターネットに出られないホストで使う手順（AlmaLinux 10 / ssh -R の SOCKS プロキシ）の検証記録
 
-[手順書](../homebrew-offline.md)
+[手順書](../homebrew-offline.md)・[ロールバックと注意点](../extra/homebrew-offline.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -11,7 +11,7 @@
 > [!WARNING]
 > **x86_64 のクリーンインストール VM でも検証した手順書**（2026-10-06、SELinux Enforcing）で、実機では本実行していない。今回のオフラインのホストは、既定経路を無くした VM（[対象と検証環境](#対象と検証環境)）。
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[ssh-socks-tunnel.md の注意点](../ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
+> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[ssh-socks-tunnel.md の注意点](../extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
 
 ### 実施手順 / 手順 1: 補足: 4 つの URL と、brew のプロキシ
 
@@ -44,7 +44,7 @@ Failed to download https://formulae.brew.sh/api/internal/packages.x86_64_linux.j
 
 ### 実施手順 / 手順 4: 補足: brew の確認（ask mode）と、トンネル越しの取得
 
-**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[AlmaLinux 10 の初期設定の注意点](../almalinux-setup.md#注意点)）。
+**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[AlmaLinux 10 の初期設定の注意点](../extra/almalinux-setup.md#注意点)）。
 
 - `brew` の環境変数の説明（`Library/Homebrew/env_config.rb` の `HOMEBREW_ASK`）: 既定で有効。一覧に依存など、名前を挙げたもの以外が入るときだけ聞き、端末でない（TTY が無い）ときは聞かない
 - 答えは Enter を待たずに 1 文字で読む（`Library/Homebrew/ask.rb` の `$stdin.getch`）。`y` で続け、`n`・Esc・Ctrl+C・Ctrl+D で中止、ほかの文字は `Invalid input` と出して読み直す
@@ -83,7 +83,7 @@ oniguruma
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした
   - オンラインのホストは、外に出られるネットワークと、その `--internal` のネットワークの両方につないだ別のコンテナ
-  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](../homebrew-offline.md#更新)、[ロールバック](../homebrew-offline.md#ロールバック)を通した
+  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](../homebrew-offline.md#更新)、[ロールバック](../extra/homebrew-offline.md#ロールバック)を通した
     - 当時の手順 1〜9 は、今の ssh-socks-tunnel.md の手順 1〜3・dnf の節・トンネルを閉じる節と、この文書の手順 1・3〜6（手順 3 は homebrew.md の手順 1〜4）。今の手順 2 は、当時の手順 4（dnf の設定）に当たる
   - 貼り方はブラケットペースト無し。dnf の設定とその行の削除（当時の手順 4 とロールバックの手順 2）は、ブラケットペースト有りでも通した
   - 2026-09-30 に、ssh-socks-tunnel.md に移した後のブロックで、同じ作りのコンテナでもう一度通した（[ssh-socks-tunnel.md の付録](ssh-socks-tunnel.md#付録-コンテナでの検証記録2026-09-30)）
@@ -147,7 +147,7 @@ curl: (6) Could not resolve host: github.com
 届かない（期待どおり）
 ```
 
-- 手順 2 で dnf の設定をしたときは、`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` が 2 行目に残る（[ssh-socks-tunnel.md のロールバック](../ssh-socks-tunnel.md#ロールバック)で消す）
+- 手順 2 で dnf の設定をしたときは、`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` が 2 行目に残る（[ssh-socks-tunnel.md のロールバック](../extra/ssh-socks-tunnel.md#ロールバック)で消す）
 - オンラインのホストに残るのは、`~/.ssh/known_hosts` のオフラインのホストの行だけ
 - `/home/linuxbrew/.linuxbrew` は、検証の最後（bat と HackGen が入り、jq を消した状態）で 286 MB
 
@@ -262,7 +262,7 @@ curl: (6) Could not resolve host: github.com
 
 ### 手順中の検証状況
 
-- **トンネルそのものの注意は、[ssh-socks-tunnel.md の注意点](../ssh-socks-tunnel.md#注意点)**: 転送中はオフラインのホストのどのユーザーもプロキシを使える、出口はオンラインのホスト、`socks5h` の `h`、`https_proxy` が勝つ、`sudo` は `ALL_PROXY` を渡さない、dnf の行が残る、SELinux は確かめていない
+- **トンネルそのものの注意は、[ssh-socks-tunnel.md の注意点](../extra/ssh-socks-tunnel.md#注意点)**: 転送中はオフラインのホストのどのユーザーもプロキシを使える、出口はオンラインのホスト、`socks5h` の `h`、`https_proxy` が勝つ、`sudo` は `ALL_PROXY` を渡さない、dnf の行が残る、SELinux は確かめていない
 
 ### 選択した方針
 

@@ -2,20 +2,21 @@
 
 ## 実施手順
 
-- [検証記録](verification/lazydocker.md)・[参考資料](reference/lazydocker.md)
+- [検証記録](verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
 
 - **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の手順 46〜48](almalinux-setup.md#実施手順)（Homebrew）と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
+> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew)（Homebrew）と、[Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と [Docker 向けのツールから使う（任意）](podman.md#docker-向けのツールから使う任意)の節を通してあること。`command -v brew podman` が 2 行を返し、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
 - 上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後:
   - 画面からコンテナのシェルを開くなら[podman exec でシェルを開く（任意）](#podman-exec-でシェルを開く任意)、compose のサービスを見るなら[compose のプロジェクトを見る（任意）](#compose-のプロジェクトを見る任意)
   - root のコンテナ（`sudo podman` で動かしたもの）も見るなら[root でも使う（任意）](#root-でも使う任意)
-  - 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+  - 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/lazydocker.md#ロールバック)
 - pod やシークレットも画面で扱うなら [podman-tui](podman-tui.md)（違いは[選択した方針](verification/lazydocker.md#選択した方針)）
 
 1. brew で lazydocker を入れる。
@@ -24,13 +25,12 @@
    brew install lazydocker
    ```
 
-   - ビルド済みのボトルが降ってくる。依存は無い
-   - aarch64 でもソースからのビルドにはならない
    - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
 
 1. lazydocker が入ったことと、つなぐ先を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    lazydocker --version
    command -v lazydocker
    echo "${DOCKER_HOST}"
@@ -46,12 +46,11 @@
 
    ```bash
    podman run -d --name lazydocker-web --label name=lazydocker-web registry.access.redhat.com/ubi10/httpd-24:latest
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
    ```
 
    - `lazydocker-web Up Less than a second` のように出る
-   - 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) などで取得済みなら、取り直さない
-   - `--label name=lazydocker-web` は、lazydocker の画面にこの名前で出すため（参考資料を参照）
 
 1. lazydocker を起動し、確認用のコンテナを画面から止める。
 
@@ -69,18 +68,19 @@
 1. 確認用のコンテナが止まったことと、設定ファイルができたことを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps -a --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
    ls -l ~/.config/lazydocker
    ```
 
-   - `lazydocker-web Exited (0) ...` と出ればよい。画面の操作が、API を通して podman に届いている
-   - `config.yml`（0 バイト）がある。lazydocker が最初の起動で作った空のファイルで、中身が無ければ既定の設定で動く
+   - `lazydocker-web Exited (0) ...` と出ればよい
+   - `config.yml`（0 バイト）がある
 
 ---
 
 ## podman exec でシェルを開く（任意）
 
-- lazydocker の `E`（シェルを開く）と `a`（アタッチ）は、`docker` コマンドを直接呼ぶ。podman だけの PC では、`+ docker exec -it ...` と出るだけで何も起きない（[注意点](#注意点)）
+- lazydocker の `E`（シェルを開く）と `a`（アタッチ）は、`docker` コマンドを直接呼ぶ。podman だけの PC では、`+ docker exec -it ...` と出るだけで何も起きない（[注意点](extra/lazydocker.md#注意点)）
 - この節で、`c`（自分で足したコマンドのメニュー）に、`podman exec` でシェルを開くコマンドを足す
 
 1. [手順 4](#実施手順) で止めた確認用のコンテナを、起動し直す。
@@ -101,11 +101,11 @@
          attach: true
          command: 'podman exec -it {{ .Container.ID }} sh'
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    cat ~/.config/lazydocker/config.yml
    ```
 
    - 読み戻した中身に、足した 5 行が出る
-   - `{{ .Container.ID }}` は、lazydocker が選んだコンテナの ID に置き換える（シェルの変数ではない）
    - **注意**: 既に `customCommands:` があるなら、`cat >>` で足さずに手で中身をまとめる。同じキーが 2 つあると、後ろのものだけが使われ、前の定義は黙って無視される（参考資料を参照）
 
 1. lazydocker を起動し、足したコマンドでコンテナのシェルを開く。
@@ -116,7 +116,7 @@
 
    - `running` の `lazydocker-web` の行を選び、`c` を押す
    - `Custom Command:` の枠の `podman exec sh` で Enter を押すと、`sh-5.2$` のプロンプトになる
-   - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る（Apache のコンテナのユーザー）
+   - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る
    - `exit` で抜け、`Press enter to return to lazydocker ...` で Enter を押すと画面に戻る
    - `q` で終了する
    - **後ろの節の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
@@ -136,11 +136,12 @@
    commandTemplates:
      dockerCompose: podman-compose
    EOF
+   printf '\n\033[7m 確認 \033[0m\n'
    cat ~/.config/lazydocker/config.yml
    ```
 
    - 読み戻した中身に、足した 2 行が出る
-   - **注意**: 既に `commandTemplates:` があるなら、`cat >>` で足さずに手で中身をまとめる（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 と同じ理由）
+   - **注意**: 既に `commandTemplates:` があるなら、`cat >>` で足さずに手で中身をまとめる
 
 1. compose ファイルのあるディレクトリで lazydocker を起動し、`web` のサービスを再起動する。
 
@@ -160,6 +161,7 @@
 
    ```bash
    cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-compose ps --format '{{.Names}} {{.Status}}'
    ```
 
@@ -170,7 +172,7 @@
 ## root でも使う（任意）
 
 - **root のコンテナを lazydocker で見ないなら、この節は不要**
-- `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](podman.md#注意点)。root で動かすのは[例外](verification/podman.md#選択した方針)）
+- `sudo podman` で動かした root のコンテナは、自分のユーザーのコンテナと保管場所（`/var/lib/containers`）が別で、[手順 4](#実施手順) の画面には出ない（[podman.md の注意点](extra/podman.md#注意点)。root で動かすのは[例外](verification/podman.md#選択した方針)）
 - この節で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
 - root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
@@ -190,6 +192,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl enable --now podman.socket
      systemctl is-active podman.socket
      sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
@@ -198,7 +201,6 @@
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
-   - 自分のユーザーのソケット（[podman.md 手順 7](podman.md#実施手順) の `systemctl --user`）とは別のソケット
    - `Created symlink …` が出なければ、前から有効だった。元に戻すときは、この節の手順 8 を飛ばす
 
 1. root の共通設定が接続先を設定したことを確かめる。
@@ -215,14 +217,13 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
      sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
    }
    ```
 
    - コンテナの ID の後に、`lazydocker-root-web Up Less than a second` のように出る
-   - root の保管場所に、イメージ（285 MB）を取得する。自分のユーザーで取得したイメージは使われない
-   - 名前を[手順 3](#実施手順) の `lazydocker-web` と分けて、どちらのコンテナの画面かを見分ける
 
 1. root で lazydocker を起動し、確認用のコンテナを止める。
 
@@ -240,13 +241,14 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
      sudo ls -l /root/.config/lazydocker
    }
    ```
 
    - `lazydocker-root-web Exited (0) ...` と出ればよい
-   - `config.yml`（0 バイト）は root の設定ファイル。自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
+   - `config.yml`（0 バイト）は root の設定ファイル
 
 1. 元に戻すときは、root の確認用コンテナと lazydocker の設定を消す。
 
@@ -257,7 +259,6 @@
 
    - root の設定ファイルに手で足したものも消える
    - 共通設定と `~/.bashrc` は変更しない。ソケットはこの節の手順 8 で止める
-   - ソケットのファイルが再起動まで残る間は、共通設定が `DOCKER_HOST` を入れる
 
 1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
 
@@ -272,6 +273,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo systemctl disable --now podman.socket
      systemctl is-active podman.socket
    }
@@ -313,62 +315,3 @@
 
    - 新しい版が無ければ `Warning: lazydocker 0.25.2 already installed` のように出て、何もしない
    - すべてまとめて上げるなら `brew upgrade`
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- [root でも使う](#root-でも使う任意)の節を通したなら、先にその節の手順 6〜8 で戻す（この節の手順 3 で、root の lazydocker も消える）
-- `DOCKER_HOST` の行と API ソケットは、ほかのツールも使うので残す。消すなら [podman.md のロールバック](podman.md#ロールバック)の手順 2・3
-- compose の任意節で使った `~/compose-sample` は、[podman-compose のロールバック](podman-compose.md#ロールバック)で消す
-
-1. 確認用のコンテナを消す。
-
-   ```bash
-   podman rm -f lazydocker-web
-   ```
-
-   - `lazydocker-web` と出る
-
-1. 同じイメージをほかで使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 同じイメージを使うもの: [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)、[podman-compose](podman-compose.md)、[podman-tui](podman-tui.md)
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. lazydocker を消す。
-
-   ```bash
-   brew uninstall lazydocker
-   ```
-
-   - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/lazydocker/0.25.2...` と出る
-
-1. 設定も消すときだけ、`~/.config/lazydocker` を消す。
-
-   ```bash
-   rm -rf ~/.config/lazydocker
-   ```
-
-   - 任意節で足した設定も消える
-
----
-
-## 注意点
-
-- **`E` と `a` は `docker` コマンドを呼ぶ**: podman だけの PC では、`+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` が出るだけで、エラーも出ない
-  - シェルは [podman exec の節](#podman-exec-でシェルを開く任意)の `c` で開く
-  - `a` は `-it` で起動したコンテナにだけ使える。`-it` でないコンテナでは `Container does not support attaching. ...` と出る
-- **UBI のイメージのコンテナは、イメージの名前で並ぶ**: lazydocker はコンテナの `name` ラベルを名前として出す（参考資料を参照）
-  - 同じイメージのコンテナが並ぶと見分けにくい。操作する前に、右の枠の `Config` タブの `ID` を `podman ps` と見比べる
-  - 自分で動かすコンテナなら、手順 3 のように `podman run` の `--label name=<名前>` で分けられる
-- **`r` は確認なしで再起動する**: `s`（止める）は確認が出るが、`r` はすぐに実行する
-- **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 手順 2 の補足のエラーが出る
-- **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](podman-tui.md) で見る
-- **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（[podman exec の節](#podman-exec-でシェルを開く任意)の手順 2 の補足）
-- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
-  - root のコンテナは、[root でも使う](#root-でも使う任意)の節を通して `sudo -i lazydocker` で見る

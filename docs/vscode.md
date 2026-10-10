@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/vscode.md)・[参考資料](reference/vscode.md)
+- [検証記録](verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
 
 > [!IMPORTANT]
 > - **すべて対象ホスト上で実行する**。デスクトップが要るのは手順 6（GUI の起動）だけ
@@ -10,7 +10,8 @@
 > - **手順 4 と手順 6 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。答えるかウィンドウを閉じてから、次の手順を貼る
 
 - 上から順にコードブロックを貼る
-- 手順の後: 拡張機能は[拡張機能を入れる（任意）](#拡張機能を入れる任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 拡張機能は[拡張機能を入れる（任意）](#拡張機能を入れる任意)。以後は[更新](#更新)・[ロールバック](extra/vscode.md#ロールバック)
 
 1. 署名鍵を落として、取り込む前に fingerprint を見る。
 
@@ -48,16 +49,16 @@
    gpgcheck=1
    gpgkey=https://packages.microsoft.com/keys/microsoft.asc
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/yum.repos.d/vscode.repo
    }
    ```
-
-   - ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い
 
 1. 何が入るかを先に見てから、VS Code を入れる。
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo dnf install --assumeno code
      sudo dnf install code
    }
@@ -65,12 +66,12 @@
 
    - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
    - `code ... 318 M` と `Installed size: 953 M` が出る。よければ、続く `dnf install` の `[y/N]` に答えて入れる
-   - 弱い依存として `socat` が一緒に入る
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. VS Code が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    code --version
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' code
    rpm -qi code | sed -n '/^Vendor/p;/^Build Date/p'
@@ -97,11 +98,12 @@
 1. 初回起動で設定のディレクトリができたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -d ~/.config/Code ~/.vscode
    code --list-extensions
    ```
 
-   - 初回起動で `~/.config/Code`（設定と履歴）ができる
+   - 初回起動で `~/.config/Code` ができる
    - `~/.vscode` は、起動を試みた時点で `argv.json` だけ作られる
    - 拡張を入れていなければ、`code --list-extensions` は何も返さない
 
@@ -134,50 +136,4 @@
    ```
 
    - システム全体なら `sudo dnf upgrade`
-   - **rpm 版では VS Code 内蔵のアップデータは使わない**（dnf が管理しているため。[firefox.md](firefox.md) と同じ論点）
-
----
-
-## ロールバック
-
-> [!CAUTION]
-> **この節の**手順 3 の `rm -rf ~/.config/Code ~/.vscode` は、**VS Code の設定・履歴・拡張機能を消す**。残すなら、この節の手順 3 は貼らない。
-
-1. VS Code を消す。
-
-   ```bash
-   sudo dnf remove code
-   ```
-
-   - `socat` がほかから使われていなければ、dnf の自動掃除で一緒に消える（クリーンインストールの VM では `code` と `socat` の 2 パッケージだけが消えた）
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. リポジトリのファイルを消す。
-
-   ```bash
-   sudo rm -f /etc/yum.repos.d/vscode.repo
-   ```
-
-   - Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
-   - 消すなら `sudo rpm -e gpg-pubkey-be1229cf-5631588c`。**ほかに Microsoft のリポジトリを使っていないことを確かめてから**にする
-
-1. 設定・履歴・拡張機能も消すときだけ、`~/.config/Code` と `~/.vscode` を消す（取り戻せない）。
-
-   ```bash
-   rm -rf ~/.config/Code ~/.vscode      # 設定・履歴・拡張機能も消す場合
-   ```
-
----
-
-## 注意点
-
-- **`.el8` のタグに驚かなくてよい**: Microsoft が EL 共通に 1 本だけ出している rpm で、EL10 向けの別ビルドは存在しない。`rpm -qi` の `Vendor` が `Microsoft Corporation` であることを確かめれば十分（[手順 5 の補足](#実施手順)）
-- **`~/.config/code-flags.conf` は効かない**: Microsoft の rpm のラッパーは読まない（[手順 6 の補足](#実施手順)）
-- 容量が不足する場合は、インストール前にトランザクション表と空き容量を確かめる
-- **内蔵のアップデータは使わない**: rpm 版は dnf が管理する。VS Code が更新を促してきても `sudo dnf upgrade code` で上げる
-- **`code-insiders` と併存できる**: コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別
-- **Electron なので X11 のライブラリを要求する**: `libX11` / `libXcomposite` などが rpm の requires に並ぶ
-  - これは XWayland 経由でも動くようにするためで、**ライブラリが入っていることは「X11 で動いている」ことを意味しない**
-- **root では起動できない**: ラッパーが `--user-data-dir` の指定を要求する。そもそも root で使うものではない
-- **TTY もディスプレイも無いシェルからは GUI を起動できなかった**: デスクトップの端末からは起動する
-  - 原因は特定できていない
+   - **rpm 版では VS Code 内蔵のアップデータは使わない**

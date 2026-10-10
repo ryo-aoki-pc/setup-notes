@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）の検証記録
 
-[手順書](../image-tools.md)
+[手順書](../image-tools.md)・[ロールバックと注意点](../extra/image-tools.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -79,14 +79,14 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 - **進め方**: hadolint と dive は Homebrew、Trivy は公式の dnf リポジトリから入れる（[選択した方針](../reference/image-tools.md#選択した方針)）。確認用のイメージを 1 つ作って、3 つを当てる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../image-tools.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../extra/image-tools.md#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
     - Trivy が API ソケット経由でイメージを読み、データベースを取得して結果の表を出す
   - **確認していないこと**: dive の画面の見た目と操作（表示された文字を読み取っただけ）、脆弱性が見つかるイメージでの Trivy の出力
   - aarch64（Raspberry Pi 5）では通していない
-  - 2026-10-02: もとの手順 3・4 と、[ロールバック](../image-tools.md#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/image-tools.md#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -181,7 +181,7 @@ Report Summary
 | 更新 | `brew upgrade hadolint dive` は `Warning: hadolint 2.15.1 already installed` など。`sudo dnf upgrade trivy` は `Nothing to do.` |
 | ロールバック | イメージ 2 つを消し、`brew uninstall` で 2 つと依存の 4 つ（`==> Autoremoving 4 unneeded formulae:`）、`dnf remove` で Trivy、手順 5 で repo ファイルと鍵を消した。手順 5 の確かめの行（もとの手順 6）の一覧は AlmaLinux の鍵 1 つだけ |
 
-**最初の試行で見つけて直したこと**: [ロールバック](../image-tools.md#ロールバック)の手順 5 は、はじめ `sudo rm`・`sudo rpm -e`・`rpm -q` の 3 行だった。
+**最初の試行で見つけて直したこと**: [ロールバック](../extra/image-tools.md#ロールバック)の手順 5 は、はじめ `sudo rm`・`sudo rpm -e`・`rpm -q` の 3 行だった。
 
 - 1 行ずつ流すと、`sudo` が後ろの 2 行を端末の入力として取り込み、2 行目以降が実行されなかった
 - EL10 の sudo 1.9.17 は、既定でコマンドを擬似端末の中で動かす（`sudo -V` の `Always run commands in a pseudo-tty`）
@@ -272,4 +272,4 @@ Result:FAIL [Total:3] [Passed:0] [Failed:2] [Warn:0] [Skipped:1]
 
 ### 手順内の実測・検証状況
 
-- **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](../image-tools.md#ロールバック)の手順 2 で消す
+- **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](../extra/image-tools.md#ロールバック)の手順 2 で消す

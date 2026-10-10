@@ -1,6 +1,6 @@
 # Git のセットアップ手順（AlmaLinux 10 は AppStream / Windows 11 は winget の Git for Windows）の検証記録
 
-[手順書](../git.md)
+[手順書](../git.md)・[ロールバックと注意点](../extra/git.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -21,7 +21,7 @@
 > [!WARNING]
 > - **AlmaLinux 10 は x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）で、コンテナでも検証した**。実機では本実行していない
 > - **Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）
-> - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../git.md#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
+> - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../extra/git.md#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
 
 ### 実施手順 / 手順 3: 補足: 設定の 3 つの場所
 
@@ -135,14 +135,14 @@ You can run "git stash pop" or "git stash drop" at any time.
 - **目的**: AlmaLinux 10 と Windows 11 の git を、同じ `global` の設定にする。pull は rebase で autostash を有効にし、改行は変換しない（`core.autocrlf=false`）。ほかに推奨の設定を入れる
 - **進め方**: AlmaLinux 10 は AppStream の `git` を入れる。Windows 11 は、Git for Windows を winget の `Git.Git` で PC 全体（`C:\Program Files\Git`）に入れ（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)）、Git Bash に同じブロックを貼る。どちらの OS でも `git config --global` で書く。**読者が書き換えるのは手順 1 の 2 つの変数だけ**
 - **状態**: **AlmaLinux 10 は x86_64 のクリーン VM で実施手順を本実行済み（2026-10-06）、コンテナでも検証済み（2026-09-29）。Windows 11 は、実機の Git Bash で流した（2026-09-30。`global` は使い捨ての `HOME`）。Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない（2026-10-03 に足した）**
-  - 下表の検証コンテナで、**この文書のコードブロックを抜き出したもの**を、一般ユーザーで手順 1〜11 → [改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す) → [ロールバック](../git.md#ロールバック)の順に流した
+  - 下表の検証コンテナで、**この文書のコードブロックを抜き出したもの**を、一般ユーザーで手順 1〜11 → [改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す) → [ロールバック](../extra/git.md#ロールバック)の順に流した
   - Windows の模擬として、`/etc/gitconfig` に Git for Windows のインストーラの選択で書かれうる値（`core.autocrlf=true` など 4 つ）を置いて、手順 1・3〜11 をもう 1 度流した
   - 確認したこと: 14 のキーが `global` で効く、`system` の値に勝つ、`pull.ff=only` が rebase を止め手順 8 で通る、CRLF のファイルが変換されずに入る、pull が rebase と autostash をする
   - 2026-09-30: 下表の Windows 11 の PC の Git Bash で、この文書のブロックを抜き出したものを流した（[付録](#付録-windows-11-の-git-bash-での検証記録2026-09-30)）
     - `HOME` を使い捨てのディレクトリにしたので、`global` はそこに書かれた。その PC の `~/.gitconfig` は変えていない（前後で md5 が同じ）。`system` はインストーラが書いた本物
-    - 手順 1・3〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[ロールバック](../git.md#ロールバック)の手順 1〜3・5
+    - 手順 1・3〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[ロールバック](../extra/git.md#ロールバック)の手順 1〜3・5
     - 確認したこと: インストーラが書いた `system` の値（手順 3 の補足）、`global` の場所（Git Bash・PowerShell・cmd で同じ）、日本語のファイル名がそのまま出ること、CRLF のファイルが変換されずに入ること、pull の rebase と autostash、`rerere` が覚えた解き方を当てること
-  - 2026-10-03: [Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)と、[更新](../git.md#更新)の手順 2（winget で上げる）・[ロールバック](../git.md#ロールバック)の手順 6（winget で外す）を足した。**Windows の実機では流していない**（書いた環境のクラウドの Linux のコンテナでは、Windows を動かせない）
+  - 2026-10-03: [Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)と、[更新](../git.md#更新)の手順 2（winget で上げる）・[ロールバック](../extra/git.md#ロールバック)の手順 6（winget で外す）を足した。**Windows の実機では流していない**（書いた環境のクラウドの Linux のコンテナでは、Windows を動かせない）
     - 確かめたこと: winget の定義（`Git.Git` 2.55.0.5 のスコープ・インストーラの種類・スイッチ・sha256）、インストーラの sha256 と Authenticode の署名者、上流の `install.iss`（入れる先・権限・黙って入れたときの選択・`system` に書く値・使われているときの動き）、winget のソース（Inno Setup のインストーラに渡すスイッチ・スコープの既定・削除のコマンド）（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査、偽の `winget` に渡る引数（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
     - 確かめていないこと: Windows で貼ること（その節のすべての手順・更新・削除）、UAC が出ないこと、`system` に書かれる値、Git Bash が開くこと、公式のインストーラで入れた PC を winget で上げること、arm64 の Windows
@@ -269,7 +269,7 @@ x86_64 のクラウドホストで `dockerd` を動かし、`docker run -d --net
 
 | 実行 | `/etc/gitconfig` | 流した手順 | 結果 |
 |---|---|---|---|
-| 1 | 無し | 手順 1〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[更新](../git.md#更新)の手順 1、[ロールバック](../git.md#ロールバック)の手順 1〜3・5 | 手順 2 は `Package git-2.52.0-1.el10.x86_64 is already installed.`（実行 1 の前に、別のユーザーで同じ `sudo dnf install -y git` を流して入れた。そのときは依存を合わせて 74 パッケージが入った）。手順 7 は 14 行が `global`、`pull.ff` は空。手順 9 は `i/crlf  w/crlf`・`main`・`branch 'main' set up to track 'origin/main'.`。手順 10 は `Created autostash` → `Applied autostash.` → `Successfully rebased`、履歴は 1 本、` M crlf.txt` が残った。直す節は、`git -c core.autocrlf=true clone` した 2 ファイルのリポジトリに、CRLF の 1 行を足してから流し、手順 1 で ` M y.txt` と `2`、手順 3 で `0`、手順 4 の後は `w/lf` で差分は足した 1 行だけ。更新は `Nothing to do.`。ロールバックの手順 5 は何も出さなかった |
+| 1 | 無し | 手順 1〜7・9〜11（手順 8 は `pull.ff` が空なので飛ばした）、[改行を変換して clone したリポジトリを直す](../git.md#改行を変換して-clone-したリポジトリを直す)の手順 1〜4、[更新](../git.md#更新)の手順 1、[ロールバック](../extra/git.md#ロールバック)の手順 1〜3・5 | 手順 2 は `Package git-2.52.0-1.el10.x86_64 is already installed.`（実行 1 の前に、別のユーザーで同じ `sudo dnf install -y git` を流して入れた。そのときは依存を合わせて 74 パッケージが入った）。手順 7 は 14 行が `global`、`pull.ff` は空。手順 9 は `i/crlf  w/crlf`・`main`・`branch 'main' set up to track 'origin/main'.`。手順 10 は `Created autostash` → `Applied autostash.` → `Successfully rebased`、履歴は 1 本、` M crlf.txt` が残った。直す節は、`git -c core.autocrlf=true clone` した 2 ファイルのリポジトリに、CRLF の 1 行を足してから流し、手順 1 で ` M y.txt` と `2`、手順 3 で `0`、手順 4 の後は `w/lf` で差分は足した 1 行だけ。更新は `Nothing to do.`。ロールバックの手順 5 は何も出さなかった |
 | 2 | Windows の模擬 | 手順 1・3〜11 | 手順 3 で `system` の 4 行が出た。手順 7 は 14 行が `global`、`pull.ff` だけ `system	only`。手順 8 で `global	true`。手順 9・10 は実行 1 と同じ結果。`~/.gitconfig` の `[pull]` に `ff = true` が加わった |
 | 3 | Windows の模擬 | 手順 1・4〜7・9〜11（手順 8 を飛ばした） | 手順 10 の `git pull` が `fatal: Not possible to fast-forward, aborting.` で止まり、履歴は分かれたまま、` M crlf.txt` は残った |
 | 4 | 無し | 擬似端末の中で、手順 1・4〜6・9〜11 | 手順 9 の `git push` と手順 10 の `git pull` の、端末での出力を取った（手順 9・10 の補足） |
@@ -353,7 +353,7 @@ x86_64 のクラウドホストで `dockerd` を動かし、`docker run -d --net
 
 ### 付録: Windows 11 の配布物と資料の調査（2026-10-03）
 
-Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義・インストーラ・上流と winget のソースを読んだ記録。[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../git.md#ロールバック)の手順 6 は、これをもとに書いた。
+Windows を動かせない環境（クラウドの Linux のコンテナ）で、winget の定義・インストーラ・上流と winget のソースを読んだ記録。[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../extra/git.md#ロールバック)の手順 6 は、これをもとに書いた。
 
 **winget の定義**: winget-pkgs（2026-10-03 の `master`、コミット `c612893`）の `manifests/g/Git/Git` の一番新しい版は `2.55.0.5`（`2.56.0` のディレクトリは無い）。`Git.Git.installer.yaml` の抜粋（arm64 の 2 つは、`Git-2.55.0.5-arm64.exe` で同じ形）:
 
@@ -429,7 +429,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 **構文と Windows PowerShell 5.1 との互換**:
 
-- `powershell` のブロック 5 個（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)の手順 2・3・5、[更新](../git.md#更新)の手順 2、[ロールバック](../git.md#ロールバック)の手順 6）を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
+- `powershell` のブロック 5 個（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)の手順 2・3・5、[更新](../git.md#更新)の手順 2、[ロールバック](../extra/git.md#ロールバック)の手順 6）を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。指摘は 0
 
 **偽の `winget` で流した**: 5 個のブロックを、受け取った引数を数えて表示するだけの関数 `winget` を置いた pwsh で、順に流した:
@@ -443,7 +443,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 1. Windows で、[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)の手順 1〜6 を通すこと（管理者の窓から UAC が出ずに入ること、`C:\Program Files\Git` に入ること、`PATH`、Git Bash が開くこと）
 1. 黙って入れたときに `system` に書かれる値が、その節の手順 3 の補足の表のとおりになること。その後に、[実施手順](../git.md#実施手順)の手順 1・3〜11 を Git Bash で通すこと
 1. [更新](../git.md#更新)の手順 2 で新しい版に上がること（2.56.0 が winget に載った後）と、Git Bash を開いたまま上げたときの動き
-1. [ロールバック](../git.md#ロールバック)の手順 6 で外れること（`PATH` から外れること、残るもの）
+1. [ロールバック](../extra/git.md#ロールバック)の手順 6 で外れること（`PATH` から外れること、残るもの）
 1. 公式のインストーラで入れた PC を、winget で上げること
 1. arm64 の Windows
 
@@ -470,7 +470,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 > [!WARNING]
 > - **Windows 11 は、実機の Git Bash で `HOME` を使い捨てのディレクトリにして流した**（その PC の `~/.gitconfig` には書いていない）
-> - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../git.md#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
+> - **Git for Windows を winget で入れる・上げる・外すブロックは、Windows で流していない**（[Windows 11 で Git for Windows を入れる](../git.md#windows-11-で-git-for-windows-を入れる)・[更新](../git.md#更新)の手順 2・[ロールバック](../extra/git.md#ロールバック)の手順 6）。詳しくは[対象と検証環境](#対象と検証環境)
 
 
 ### 実施手順 / 手順 7: 補足: 出力と、Windows の模擬

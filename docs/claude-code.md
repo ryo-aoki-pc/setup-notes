@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/claude-code.md)・[参考資料](reference/claude-code.md)
+- [検証記録](verification/claude-code.md)・[参考資料](reference/claude-code.md)・[ロールバックと注意点](extra/claude-code.md)
 
 > [!IMPORTANT]
 > - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で使う)から通す（管理者ではない Windows PowerShell 5.1 に貼る）
@@ -10,12 +10,14 @@
 > - **手順 3 には対話入力がある**（トランザクション表と署名鍵の取り込みの確認）。答えてから手順 4 を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: `claude` のコマンドラインは[使い方の基本](#使い方の基本)。SSH を切っても動かし続ける（Remote Control も）なら [AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。以後は[更新](#更新)・[ロールバック](extra/claude-code.md#ロールバック)。最新版で不具合に当たったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
 
 1. 変数を設定する。
 
    ```bash
    CC_CHANNEL=latest               # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   printf '\n\033[7m 確認 \033[0m\n'
    printf 'CC_CHANNEL = %s\n' "${CC_CHANNEL}"
    ```
 
@@ -37,6 +39,7 @@
    gpgcheck=1
    gpgkey=https://downloads.claude.ai/keys/claude-code.asc
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      cat /etc/yum.repos.d/claude-code.repo
    fi
    ```
@@ -59,6 +62,7 @@
 1. インストールできたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
    dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
    claude --version
@@ -68,7 +72,6 @@
    - 1 行目（入っている版）と 2 行目（チャンネルにある一番新しい版）が同じなら、そのチャンネルの最新版が入っている
    - `2.1.283 (Claude Code)` のようにバージョンが出れば動く
    - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](verification/claude-code.md#完了時点の状態)）
-   - Node.js は要らない
 
 1. 作業したいディレクトリで `claude` を起動し、ブラウザでログインする。
 
@@ -175,7 +178,7 @@
    sudo dnf upgrade claude-code
    ```
 
-   - 起動中に新しい版が出ると Claude Code が更新を知らせてくるが、dnf 版は自分で更新できない（root 権限が要るため）
+   - 起動中に新しい版が出ると Claude Code が更新を知らせてくるが、dnf 版は自分で更新できない
    - `claude update` も、`Claude is managed by a package manager.` と出して何もしない
    - リポジトリ側にその版が届くまで、少し遅れることもある
    - 上がった版は[手順 4](#実施手順)のコマンドで確かめる
@@ -195,6 +198,7 @@
    ```bash
    {
      sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
      grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
    }
    ```
@@ -213,19 +217,20 @@
 1. 入っている版を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
    dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
    claude --version
    ```
 
    - 1 行目と 2 行目が同じ版なら、`stable` の最新版に揃っている
-   - 以後の `sudo dnf upgrade claude-code`（[更新](#更新)）は `stable` の版を追う
 
 1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
 
    ```bash
    {
      sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
+     printf '\n\033[7m 確認 \033[0m\n'
      grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
      sudo dnf upgrade claude-code
    }
@@ -237,57 +242,29 @@
 
 ---
 
-## ロールバック
-
-- この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
-- 設定・履歴（`~/.claude/`、`~/.claude.json`、プロジェクト側の `.claude/`、`.mcp.json`）は残る
-
-> [!CAUTION]
-> 設定・履歴のファイルを消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える。消す前に中身を確認する。
-
-1. Claude Code を消す。
-
-   ```bash
-   sudo dnf remove claude-code
-   ```
-
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. repo ファイルを消す。
-
-   ```bash
-   sudo rm -f /etc/yum.repos.d/claude-code.repo
-   ```
-
-1. 鍵も消すときだけ、署名鍵を消す。
-
-   ```bash
-   sudo rpm -e gpg-pubkey-1a7ecace-69caef70          # 鍵も消す場合
-   ```
-
----
-
 ## Windows 11 で使う
 
 > [!IMPORTANT]
-> - **すべて Windows で行う**。この節の手順 1 で管理者ではない Windows PowerShell（5.1）を開き、手順 2〜5 をそこに貼る。手順 6 で開き直した PowerShell に、手順 7〜9 と、後ろの Windows 11 の 2 節（更新・ロールバック）を貼る。管理者の権限は要らない（自分のユーザーの `%USERPROFILE%` に入る）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
+> - **すべて Windows で行う**。この節の手順 1 で管理者ではない Windows PowerShell（5.1）を開き、手順 2〜5 をそこに貼る。手順 6 で開き直した PowerShell に、手順 7〜9 と、[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/claude-code.md#windows-11-のロールバック)を貼る。管理者の権限は要らない（自分のユーザーの `%USERPROFILE%` に入る）
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: [Git for Windows](git.md#windows-11-で-git-for-windows-を入れる)（Claude Code の Bash のツールが Git Bash を使う）と、既定のブラウザにした [Firefox](firefox.md#windows-11-で使う)（この節の手順 8 のログインで開く）。[Windows 11 の初期設定](windows-setup.md)のリードの順に通していれば、どちらも入っている
 > - **この節の手順 8 には対話入力がある**（Claude Code の最初の設定と、ブラウザでのログイン）。`/exit` で Claude Code を終えてから手順 9 を貼る
 
 - 上から順にコードブロックを貼る。この節の手順 2 で変数を設定した PowerShell に、手順 5 までを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - Pro / Max / Team / Enterprise か Console のアカウントが要る（無料の claude.ai プランでは使えない）
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」でなくてよい）
-   - 「Windows PowerShell (x86)」は開かない（32 ビットで動き、インストーラが `Claude Code does not support 32-bit Windows` で止まる）
+   - 「Windows PowerShell (x86)」は開かない
    - Windows Terminal の中に開いた窓に複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 変数を設定する。
 
    ```powershell
    $CC_CHANNEL = 'latest'                # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'CC_CHANNEL = {0}' -f $CC_CHANNEL
    ```
 
@@ -299,6 +276,7 @@
 1. Claude Code と Git for Windows があるか、64 ビットの PowerShell かを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    [Environment]::Is64BitProcess
    Get-Command claude -All -ErrorAction SilentlyContinue | Format-Table Source
    Test-Path "$env:USERPROFILE\.local\bin\claude.exe"
@@ -309,9 +287,9 @@
    - `True`、（claude は何も出ずに）`False`、`C:\Program Files\Git\cmd\git.exe`、`True` の順に出ればよい
    - 最初が `False` なら、32 ビットの PowerShell（x86）を開いている。閉じて、この節の手順 1 からやり直す
    - claude の行が `C:\Users\<WIN_USER>\.local\bin\claude.exe` だけで、3 つ目が `True` なら、もう native installer で入っている。この節の手順 4 は入れ直しになる（設定とログインは残る）
-   - claude の行にほかの場所（WinGet・npm・scoop で入れたものなど）が出たら、そちらを先に外す（[注意点](#注意点)）
+   - claude の行にほかの場所（WinGet・npm・scoop で入れたものなど）が出たら、そちらを先に外す（[注意点](extra/claude-code.md#注意点)）
    - `WindowsApps` の `Claude.exe` が出たら、古い Claude Desktop が `claude` の名前を取っている。Claude Desktop を最新にする（公式の Troubleshoot installation）
-   - git が出ず、最後が `False` なら、Git for Windows が無い。先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)を通す（無くても Claude Code は動き、Bash のツールの代わりに PowerShell のツールを使う）
+   - git が出ず、最後が `False` なら、Git for Windows が無い。先に [git.md の Windows 11 で Git for Windows を入れる](git.md#windows-11-で-git-for-windows-を入れる)を通す
 
 1. Claude Code を公式の native installer で入れる。
 
@@ -319,13 +297,14 @@
    if (-not $CC_CHANNEL) {
      Write-Error '手順 2 の $CC_CHANNEL が空'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      & ([scriptblock]::Create((Invoke-RestMethod -Uri https://claude.ai/install.ps1))) $CC_CHANNEL
    }
    ```
 
    - `Claude Code successfully installed!` と版（`Version: 2.1.288` など）の後に、最後に `Installation complete!`（前に絵文字の ✅ が付く）が出ればよい
    - `Setup notes:` に `Native installation exists but C:\Users\<WIN_USER>\.local\bin is not in your PATH.` と出ても、この節の手順 5 で足すので、ここでは何もしない
-   - 赤いエラー（`Checksum verification failed`、`Failed to download binary` など）が出たら、そこで止まっている。[注意点](#注意点)と公式の [Troubleshoot installation](https://code.claude.com/docs/en/troubleshoot-install) を見る
+   - 赤いエラー（`Checksum verification failed`、`Failed to download binary` など）が出たら、そこで止まっている。[注意点](extra/claude-code.md#注意点)と公式の [Troubleshoot installation](https://code.claude.com/docs/en/troubleshoot-install) を見る
 
 1. 自分のユーザーの PATH に `%USERPROFILE%\.local\bin` が無ければ足す。
 
@@ -334,6 +313,7 @@
      $bin = "$env:USERPROFILE\.local\bin"
      $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
      if (-not (Test-Path -LiteralPath "$bin\claude.exe")) { Write-Error "中断: $bin\claude.exe が無い（この節の手順 4 で入っていない）"; return }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($entries | Where-Object { $_.TrimEnd('\') -eq $bin }) {
        "PATH に $bin はもうある"
      } else {
@@ -346,18 +326,17 @@
 
    - `PATH に C:\Users\<WIN_USER>\.local\bin を足した`（か `はもうある`）の後に、自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.local\bin` があればよい
    - 何度貼ってもよい（あれば足さない）
-   - 開いている PowerShell には効かない。この節の手順 6 で開き直す
 
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
 
    - ウィンドウを閉じ（`exit` と打ってもよい）、この節の手順 1 と同じように、管理者ではない Windows PowerShell を開く
-   - 開き直した PowerShell は、この節の手順 5 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
    - この節の手順 2 の変数は、この後は使わない
    - **次の手順は、開き直した PowerShell に貼る**（前の PowerShell の `PATH` には、`.local\bin` が無いことがある）
 
 1. Claude Code の場所・版・署名と、導入の状態を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command claude -All | Format-Table Source
    claude --version
    $sig = Get-AuthenticodeSignature -LiteralPath "$env:USERPROFILE\.local\bin\claude.exe"
@@ -367,7 +346,7 @@
 
    - `claude` の場所は `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行だけ
    - `2.1.288 (Claude Code)` のように版が出る（`stable` を選んだら、`latest` より古い版）
-   - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに、[Windows 11 のロールバック](#windows-11-のロールバック)の手順 1・2 で消す
+   - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに、[Windows 11 のロールバック](extra/claude-code.md#windows-11-のロールバック)の手順 1・2 で消す
    - `claude doctor` に `Running: native (...)`・`Auto-updates: enabled`・`Auto-update channel: latest`（`stable` を選んだら `stable`）・`No installation issues found.` が出ればよい
 
 1. `claude` を起動し、最初の設定とブラウザでのログインを行う。
@@ -394,7 +373,7 @@
 
    - `Login method: Claude Max account` のように、プランの行が出ればよい（ほかにメールアドレスと組織の行も出る）
    - `Not logged in. Run claude auth login to authenticate.` なら、ログインしていない。この節の手順 8 をやり直す
-   - このコマンドの後ろに、別のコマンドを続けて貼らない（AlmaLinux 10 では、ブラケットペースト無しで、後ろに貼った行を読んで捨てた。[使い方の基本](#使い方の基本)）
+   - このコマンドの後ろに、別のコマンドを続けて貼らない
 
 ---
 
@@ -407,97 +386,10 @@
 1. Claude Code をすぐに更新する。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude update
    claude --version
    ```
 
    - 新しい版があれば `Successfully updated from <古い版> to version <新しい版>`、無ければ `Claude Code is up to date (2.1.288)` のように出る
-   - 更新の後に `claude` が見つからなくなったら、[注意点](#注意点)の `claude.exe.old.*` の項を見る
-
----
-
-## Windows 11 のロールバック
-
-- 上から順に、Windows PowerShell（5.1）に貼る（変数は使わない）
-- 公式の文書（Uninstall Claude Code の Native installation と Remove configuration files）の手順に、本書で見つけた置き場所（更新の名残・キャッシュ・ロック）と `PATH` を足したもの
-- [windows-claude-remote-control.md](windows-claude-remote-control.md) のタスクがあれば、先にそのロールバックを行う
-- この節の手順 1〜3 では、設定・履歴・ログインの情報（`%USERPROFILE%\.claude`、`%USERPROFILE%\.claude.json`）と、プロジェクトの `.claude` と `.mcp.json` は残る
-
-> [!CAUTION]
-> **この節の手順 4 で `%USERPROFILE%\.claude` と `%USERPROFILE%\.claude.json` を消すと、設定・許可済みのツール・MCP サーバーの定義・セッションの履歴・ログインの情報・ディレクトリの信頼がすべて消える**。入れ直すかもしれないなら、手順 4 は行わない。
-
-1. 動いている Claude Code と、Remote Control のタスクが無いことを確かめる。
-
-   ```powershell
-   Get-Process -Name claude -ErrorAction SilentlyContinue | Where-Object Path -like "$env:USERPROFILE\.local\*" | Format-Table Id, Path
-   Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue | Format-Table TaskName, State
-   ```
-
-   - どちらも何も出なければよい
-   - プロセスが出たら、その Claude Code を `/exit` で終える（動いている `claude.exe` は消せない）
-   - タスクが出たら、[windows-claude-remote-control.md のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
-
-1. Claude Code の実行ファイルと、版・キャッシュ・ロックのフォルダーを消す。
-
-   ```powershell
-   Remove-Item -Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\bin\claude.exe.old.*" -Force -ErrorAction SilentlyContinue
-   Remove-Item -LiteralPath "$env:USERPROFILE\.local\share\claude", "$env:USERPROFILE\.local\state\claude", "$env:USERPROFILE\.cache\claude" -Recurse -Force -ErrorAction SilentlyContinue
-   Test-Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\share\claude"
-   Get-ChildItem -LiteralPath "$env:USERPROFILE\.local\bin" -Force -ErrorAction SilentlyContinue | Format-Table Name
-   ```
-
-   - `False` が 2 行出ればよい
-   - `True` が出たら、`claude.exe` がまだ動いている。この節の手順 1 からやり直す
-   - 最後の一覧が空なら、`.local\bin` にはほかのものが無い（この節の手順 3 で PATH から外せる）
-
-1. [Windows 11 で使う](#windows-11-で使う)の手順 5 で足したときだけ、PATH から `.local\bin` を外す。
-
-   ```powershell
-   & {
-     $bin = "$env:USERPROFILE\.local\bin"
-     if (Get-ChildItem -LiteralPath $bin -Force -ErrorAction SilentlyContinue) { Write-Error "中断: $bin にほかのファイルがある（ほかのツールが使っている）"; return }
-     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
-     $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
-     if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
-     Remove-Item -LiteralPath $bin -ErrorAction SilentlyContinue
-     [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-   }
-   ```
-
-   - 自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.local\bin` が無ければよい
-   - `中断:` が出たら、`.local\bin` をほかのツール（uv など）も使っている。PATH は外さない
-
-1. 完全に消すときだけ、設定・履歴・ログインの情報を消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.claude" -Recurse -Force
-   Remove-Item -LiteralPath "$env:USERPROFILE\.claude.json" -Force
-   Test-Path "$env:USERPROFILE\.claude", "$env:USERPROFILE\.claude.json"
-   ```
-
-   - `False` が 2 行出ればよい
-   - Claude Desktop・VS Code の拡張機能・JetBrains のプラグインが入っていると、次に動いたときに `%USERPROFILE%\.claude` がまた作られる（公式の文書。全部消すなら、先にそれらを外す）
-   - プロジェクトの `.claude` と `.mcp.json` は、それぞれのプロジェクトのディレクトリで手で消す
-
----
-
-## 注意点
-
-- **`latest` は不具合のある版もそのまま届く**: `stable` なら飛ばされる版も入る。困ったら [stable チャンネルに切り替える（任意）](#stable-チャンネルに切り替える任意)
-- **自動更新しない**: ネイティブインストーラ版と違い、dnf 版は自分では更新しない
-  - `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` は Homebrew / WinGet 向けで、apt / dnf / apk は root 権限が要るため対象外
-- **更新の通知が先に来ることがある**: リポジトリに新しい版が届く前に「更新がある」と言われることがある。その場合は時間をおいて `sudo dnf upgrade claude-code`
-- **`claude` が 2 つ入ると混乱する**: ネイティブインストーラや npm で入れたものが `~/.local/bin/claude` にあると、PATH の順序でそちらが勝つ。`command -v claude` と `claude doctor` で確認する
-- **アカウントが要る**: 無料の claude.ai プランでは使えない
-- **設定ファイルは残る**: `dnf remove` しても `~/.claude` は消えない
-- **`-p` は許可を聞けない**: 許可の要るツールは断られ、JSON の `permission_denials` に残る。要るものは `--allowedTools` で渡す（[使い方の基本](#使い方の基本)）
-- **SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[AlmaLinux 10 の初期設定の tmux の任意節](almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)）
-- **Windows 11 の注意点**
-  - **`PATH` は自分で足す**: インストーラも `claude install` も足さない（[Windows 11 で使う](#windows-11-で使う)の手順 5）。足さないと、開き直した PowerShell でも `claude` が見つからない
-  - **Windows PowerShell (x86) では入らない**: `Claude Code does not support 32-bit Windows` で止まる。x86 の付かない「Windows PowerShell」で入れ直す
-  - **`claude` が 2 つ入ると混乱する**: WinGet・npm・scoop で入れたものが `PATH` の先にあると、そちらが動く。`Get-Command claude -All` で確かめ、`winget uninstall Anthropic.ClaudeCode` や `npm uninstall -g @anthropic-ai/claude-code` で外す。古い Claude Desktop は `WindowsApps` に `Claude.exe` を置き、`claude` で Desktop が開くので、最新にする（公式の Troubleshoot installation）
-  - **更新の後に `claude` が見つからないとき**: Windows の更新は、`claude.exe` を `claude.exe.old.<数字>` に名前を変えてから新しい版を置く。置けず、名前も戻せなかったときは `claude.exe` が無くなる。公式の文書は、一番新しい `claude.exe.old.*` の名前を戻す（`Get-ChildItem "$env:USERPROFILE\.local\bin\claude.exe.old.*" | Sort-Object Name | Select-Object -Last 1 | Rename-Item -NewName claude.exe`）か、入れ直すとしている
-  - **`The process cannot access the file` で止まるとき**: 前のインストーラが動いているか、ウイルス対策が `%USERPROFILE%\.claude\downloads` のファイルを調べている。ほかの PowerShell を閉じ、そのフォルダーを消してから入れ直す（公式の Troubleshoot installation）
-  - **`irm … | iex` で入れた PowerShell には、インストーラの設定が残る**: `Set-StrictMode -Version Latest` などが残るので、その窓は閉じて開き直す（[Windows 11 で使う](#windows-11-で使う)の手順 4 の補足）
-  - **ログインの情報は `%USERPROFILE%\.claude\.credentials.json`**: パスワードと同じ重みで扱い、ログや issue に貼らない
-  - **Windows PowerShell 5.1 のパイプ**: `<コマンド> | claude -p` で日本語を渡すと化けるはず（[使い方の基本](#使い方の基本)の非対話の注意）
+   - 更新の後に `claude` が見つからなくなったら、[注意点](extra/claude-code.md#注意点)の `claude.exe.old.*` の項を見る

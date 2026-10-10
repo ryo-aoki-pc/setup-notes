@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/codex.md)・[参考資料](reference/codex.md)
+- [検証記録](verification/codex.md)・[参考資料](reference/codex.md)・[ロールバック](extra/codex.md)
 
 > [!IMPORTANT]
 > - **Windows 11 は、[Windows 11 で使う](#windows-11-で使う)から始める**
@@ -12,6 +12,7 @@
 > - 本書は `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` を変更していない、新規の standalone インストールを対象にする
 
 - 上から順に貼る。操作に使うコードブロックだけを上から順に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 対象は端末で使う **Codex CLI**。デスクトップアプリとエディタの拡張機能は別途導入する
 - SSH 先などブラウザの無いホストでは、手順 5・6 の代わりに[ブラウザの無いホストでログインする](#ブラウザの無いホストでログインする)を通す
 
@@ -39,7 +40,7 @@
    ```
 
    - `Codex CLI … installed successfully.` を確認する
-   - `Start Codex now?` と聞かれたら `n` で答える（手順 8 で起動する）
+   - `Start Codex now?` と聞かれたら `n` で答える
    - **次の手順は、インストーラーが終わり、シェルのプロンプトに戻ってから貼る**
 
 1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
@@ -47,11 +48,12 @@
    ```bash
    export PATH="$HOME/.local/bin:$PATH"
    hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
    command -v codex
    codex --version
    ```
 
-   - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る（検証時は `0.160.0`）
+   - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る
    - 新しく開いた端末でも `codex --version` が通ることを確認する
 
 1. ChatGPT でのログインを始める。
@@ -112,7 +114,7 @@
    curl -fsSL https://chatgpt.com/codex/install.sh | sh
    ```
 
-   - 新しい配布物を導入する。`Start Codex now?` は `n` で答える
+   - `Start Codex now?` は `n` で答える
    - **次の手順は、シェルのプロンプトに戻ってから貼る**
 
 1. 更新後の版を確かめる。
@@ -123,50 +125,17 @@
 
 ---
 
-## ロールバック
-
-- Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)へ進む
-- ここでは CLI の配布物だけを消し、設定と会話履歴は残す
-
-1. 起動中の Codex を終了し、ログイン情報も外す場合はログアウトする。
-
-   ```bash
-   codex logout
-   ```
-
-   - ログイン情報を共有するエディタの拡張機能なども、次回ログインが必要になる
-
-1. この手順で入れたリンクと配布物を消す。
-
-   ```bash
-   rm -f ~/.local/bin/codex ~/.local/bin/codex-code-mode-host
-   rm -rf ~/.codex/packages/standalone
-   hash -r
-   command -v codex
-   ```
-
-   - 最後に何も出なければ、PATH 上に Codex は無い
-   - パスが出る場合は、別の導入方法の Codex が残っている
-   - `~/.codex` 全体は消さない（設定・会話履歴などが入っている）
-
-1. インストーラーが PATH のブロックを足した場合だけ、シェルの設定を戻す。
-
-   - `~/.bashrc` の `# >>> Codex installer >>>` から `# <<< Codex installer <<<` までをエディタで削除する
-   - `~/.local/bin` 自体や、ほかのツールが書いた PATH の行は消さない
-   - 新しい端末を開いて確認する
-
----
-
 ## Windows 11 で使う
 
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う（64 ビットの Windows 11、x64 または ARM64）
-> - [Windows 11 の初期設定](windows-setup.md#実施手順)の手順 16〜19（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
+> - [Windows 11 の初期設定の「貼り付けの設定」](windows-setup.md#貼り付けの設定)の手順 1〜4（貼り付けの設定）を先に通す。未設定なら Ctrl+V で貼る
 > - Git は [git.md の Windows 11 の節](git.md#windows-11-で-git-for-windows-を入れる)で先に入れる
 > - Codex を利用できる ChatGPT アカウントとインターネット接続が必要。`CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` を変更していない新規導入を対象にする
 
 - 上から順に貼る。WSL・Node.js・npm は、この方法では不要
 - 操作に使うコードブロックだけを上から順に貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 1. 既存の Codex が入っていないか確かめる。
 
@@ -190,6 +159,7 @@
 1. 実行ファイルと版を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command codex -All
    codex --version
    ```
@@ -262,42 +232,6 @@
    ```powershell
    codex --version
    ```
-
----
-
-## Windows 11 のロールバック
-
-- この節は本書の既定の場所に入れた standalone 版を対象にする
-- 設定・会話履歴と、Windows sandbox が作ったユーザー・ポリシーなどは残る。OS の sandbox 設定を元に戻す操作は、この手順には含めない
-
-1. 起動中の Codex を終了し、ログイン情報も外す場合はログアウトする。
-
-   ```powershell
-   codex logout
-   ```
-
-   - ログイン情報を共有するエディタの拡張機能なども、次回ログインが必要になる
-
-1. Codex の入口と配布物をエクスプローラーで削除する。
-
-   - `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` のジャンクションを削除する（リンク先の中へ入って削除しない）
-   - `%USERPROFILE%\.codex\packages\standalone` を削除する
-   - `%USERPROFILE%\.codex` 全体は削除しない（設定・会話履歴などが入っている）
-
-1. ユーザー用 PATH から Codex の入口を外す。
-
-   - スタートメニューで「環境変数」を検索し、自分のアカウントの環境変数を開く
-   - ユーザー環境変数の `Path` から `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` に相当する行だけを削除する
-   - PowerShell と、その親の Windows Terminal などを閉じて開き直す
-
-1. PATH 上に Codex が残っていないか確かめる。
-
-   ```powershell
-   Get-Command codex -All -ErrorAction SilentlyContinue
-   ```
-
-   - 何も出なければ、この CLI の入口は外れている
-   - パスが出る場合は、別の導入方法の Codex が残っている
 
 ---
 

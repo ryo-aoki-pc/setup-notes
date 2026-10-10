@@ -1,6 +1,6 @@
 # npm をインターネットに出られないホストで使う手順（AlmaLinux 10 / AppStream の Node.js / Neovim の Mason）の参考資料
 
-[手順書](../npm-offline.md)
+[手順書](../npm-offline.md)・[ロールバックと注意点](../extra/npm-offline.md)
 
 ## 補足
 
@@ -27,6 +27,8 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 **`~/.bashrc` や `~/.npmrc` には書かない。** トンネルがあるのは ssh-socks-tunnel.md の手順 2 の ssh の間だけなので、このシェルにだけ入れる（[選択した方針](#選択した方針)）。
 
+- `export` はこのシェルの中だけで有効
+
 ### 実施手順 / 手順 3: 補足: Mason が npm を動かす仕組みと、ファイルを開く理由
 
 [この節の検証記録](../verification/npm-offline.md#実施手順--手順-3-補足-mason-が-npm-を動かす仕組みとファイルを開く理由)
@@ -45,6 +47,10 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 **LazyVim は、入れる LSP サーバーを Mason のパッケージの一覧から選ぶ。** 開いた時点で一覧がまだ無い（初めて取るところ）と、その回は LSP サーバーを入れない。
 
 **入れている途中で `:qa` すると、確認は出ず、その導入は止まる。** 次に開いたときに、Mason がやり直す。
+
+### 実施手順 / 手順 5: 補足: プロキシの変数
+
+- `env` が何も出さないのは、プロキシの変数が同じ節の手順 2 のシェルと一緒に消えたため
 
 ### 選択した方針
 

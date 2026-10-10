@@ -1,32 +1,120 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-[手順書](../virtualbox.md)
+[手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](../verification/virtualbox.md#参考資料から分離した記録)
 
 ## 補足
 
-### 実施手順 / 手順 4: 補足: repo ファイルは Oracle 公式のものとほぼ同じ
+### 実施手順 / リポジトリを置く / 手順 2: 補足: gpg と sub の fingerprint
+
+- `gpg`（`gnupg2`）は、GNOME のデスクトップには入っている
+- `sub` の下にも fingerprint が出るのは、Homebrew の gnupg が先に見つかる PC（[検証記録](../verification/virtualbox.md)）
+
+### 実施手順 / リポジトリを置く / 手順 4: 補足: repo ファイルは Oracle 公式のものとほぼ同じ
 
 **repo ファイルは Oracle 公式のもの（`https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo`）とほぼ同じ**。
 
 - 変えたのは、`baseurl` の `http://` を `https://` にしたこと（同じホストが HTTPS でも応答する）と、`name` だけ
 - `gpgcheck` / `repo_gpgcheck` / `gpgkey` は公式どおり
 - `$releasever` は AlmaLinux 10 では `10` に展開されるので、`.../rpm/el/10/x86_64` を見に行く
+- ヒアドキュメントは `<<'EOF'`（クォート付き）。`$releasever` / `$basearch` は dnf が展開するので、シェルに展開させない
 
-### 実施手順 / 手順 7: 補足: 動いているカーネルを最新にしておく理由
+### 実施手順 / リポジトリを置く / 手順 4: 補足: メタデータの署名と鍵の確認
+
+- このリポジトリは、メタデータにも署名がある（`repo_gpgcheck=1`）
+- dnf はそれを確かめるための鍵を rpm とは別に持つので、最初の 1 回だけ鍵の取り込みを聞かれる
+
+### 実施手順 / リポジトリを置く / 手順 5: 補足: sudo を付けない dnf にも通す理由
+
+- `sudo` を付けない dnf は、ユーザーごとの別のキャッシュを使う
+- 通しておかないと、`sudo` を付けない `dnf list` などが関係の無いパッケージでも失敗する
+
+### 実施手順 / VirtualBox を入れる / 手順 2: 補足: 動いているカーネルを最新にしておく理由
 
 `kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)）。
+
+### 実施手順 / VirtualBox を入れる / 手順 3: 補足: 先に入れる理由
+
+- VirtualBox は、自分のカーネルモジュール（`vboxdrv` / `vboxnetflt` / `vboxnetadp`）をインストールの途中で、この PC の上でビルドする
+
+### 実施手順 / VirtualBox を入れる / 手順 5: 補足: Complete! だけでは成功とは限らない理由
+
+- モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる
+
+### 実施手順 / KVM と USB の設定 / 手順 1: 補足: KVM の設定
+
+- EL10 のカーネル（6.12 系）では、KVM のモジュールが読み込まれた時点で VT-x / AMD-V を確保し、VirtualBox の VM が起動できなくなる
+- KVM を使っていなくても、VT-x / AMD-V のある PC では起動時に自動で読み込まれる
+- この設定で、KVM が自分の VM を動かす間だけ確保するように変える
+- `modprobe -c` が出すのは、modprobe が読んだ設定
+- 効くのは次に kvm が読み込まれたとき。「KVM と USB の設定」の手順 3 の再起動で反映させる
+- KVM（libvirt / GNOME Boxes など）はこの後も使えるが、KVM の VM と VirtualBox の VM は同時には動かせない
+
+### 実施手順 / KVM と USB の設定 / 手順 2: 補足: 効く時期
+
+- `vboxusers` に入ったことが効くのはログインし直してから（「KVM と USB の設定」の手順 3 の再起動で済む）
+
+### 実施手順 / 動作を確かめる / 手順 3: 補足: 使い捨ての VM
+
+- VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
+- 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
+- 起動するディスクが無いので、VM の中では何も動かない
+
+### 実施手順 / 動作を確かめる / 手順 4: 補足: 一覧が空の理由
+
+- VirtualBox マネージャーの一覧が空なのは、「動作を確かめる」の手順 3 の VM を消してあるため
+
+### 更新 / 手順 2: 補足: 同じ系列の中で上げたとき
+
+- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../virtualbox.md#virtualbox-を入れる)の手順 5 と同じ確認をする
+- コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
+- モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
+- `/sbin/vboxconfig` と udev のルールも残った
+
+### 更新 / 手順 4: 補足: そのまま使えるもの
+
+- 系列を変えても、repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
+
+### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+
+- `Hypervisor` が `True` なら、Hyper-V のハイパーバイザーが動いている（WSL 2 を使う PC など）。VirtualBox の VM は Hyper-V の上で動き、遅くなる（[注意点](../extra/virtualbox.md#注意点)）
+- 最後の表は、Hyper-V を使う Windows の機能の状態（`Enabled` / `Disabled`）。一覧を作るのに数秒かかる
+
+### Windows 11 で使う / 手順 3: 補足: winget で入れるときに起きること
+
+- 依存の Microsoft Visual C++ の再頒布可能パッケージ（`Microsoft.VCRedist.2015+.x64`）が無ければ、先にそれが入る
+- 途中でネットワークがいったん切れるのは、VirtualBox のネットワークのドライバーを入れるため
+- デスクトップとスタートメニューに「Oracle VirtualBox」のショートカットができる
 
 ### Windows 11 で使う / 手順 4: 補足: winget のソースを限定する理由
 
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
+
+### Windows 11 で使う / 手順 4: 補足: 版と VBoxManage の場所
+
+- 版は、実行した日の最新
+- `VBoxManage` は `PATH` に入らないので、場所を付けて呼ぶ
 
 ### Windows 11 で使う / 手順 5: 補足: 管理者ではない窓で動かす理由
 
 - 管理者の窓から起動したもの（`VBoxManage`・`VirtualBox.exe`）は、管理者の権限で動く。AlmaLinux 10 で VM を root ではなく自分のユーザーで動かすのと同じく、VM は自分のユーザーで動かす
 - VirtualBox のマニュアルは、管理者の権限で動かした VirtualBox と、普通の権限で動くエクスプローラーの間では、ドラッグ＆ドロップができないと書いている
 - VM と設定の場所（`%USERPROFILE%\VirtualBox VMs` と `%USERPROFILE%\.VirtualBox`）はユーザーごと。管理者の窓でも同じユーザーなので、場所は変わらない
+
+### Windows 11 で使う / 手順 6: 補足: 使い捨ての VM
+
+- VirtualBox が VT-x / AMD-V（か Hyper-V）を使えるかは、ここで初めて分かる
+- 起動するディスクが無いので、VM の中では何も動かない
+- 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
+
+### Windows 11 で使う / 手順 7: 補足: 一覧が空の理由
+
+- VirtualBox マネージャーの一覧が空なのは、同じ節の手順 6 の VM を消してあるため
+
+### Windows 11 で使う / 手順 8: 補足: 設定の場所
+
+- Windows の VirtualBox は、全体の設定を `%USERPROFILE%\.VirtualBox` に置く（AlmaLinux 10 の `~/.config/VirtualBox` に当たる。マニュアルの 13.1.2「Global Settings」）
 
 ### Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意） / 手順 1: 補足: 文字が別のキーになる理由
 
@@ -47,6 +135,14 @@
 - スキャンコードのモードでは、クライアントがキーの位置を送り、VirtualBox はそれをそのままゲストに渡す。どの文字になるかは、ゲストのキー配列で決まる
 - Android の IME は、Unicode のモードでしか使えない（Microsoft の文書）
 
+### Windows 11 の更新 / 手順 2: 補足: VBoxSVC が残る理由
+
+- `VBoxSVC` は、VirtualBox マネージャーや VM を閉じた後、しばらく残る。ソースでは、使われなくなってから 5 秒で終わる
+
+### Windows 11 の更新 / 手順 3: 補足: 今の版の上から入れる
+
+- 新しい版のインストーラを、今の版の上から動かす（winget の定義の `UpgradeBehavior: install`）。VM と設定は残る
+
 ### 選択した方針
 
 | 経路 | EL10 での状況 | 採否 |
@@ -58,7 +154,7 @@
 | RPM Fusion | EL10 には VirtualBox が無い（EL9 に 7.1.18） | 不採用 |
 | Flathub | 無い（カーネルモジュールが要るため） | — |
 | 7.1 系（`VirtualBox-7.1`） | 同じリポジトリにある保守版。7.2 と同時には入らない | 対象外 |
-| KVM（libvirt / virt-manager / GNOME Boxes） | AlmaLinux 標準の仮想化。カーネルに組み込み済みでモジュールのビルドも署名も要らない | 対象外（本書は VirtualBox を入れる）。VirtualBox と同時には動かない（手順 11） |
+| KVM（libvirt / virt-manager / GNOME Boxes） | AlmaLinux 標準の仮想化。カーネルに組み込み済みでモジュールのビルドも署名も要らない | 対象外（本書は VirtualBox を入れる）。VirtualBox と同時には動かない（「KVM と USB の設定」の手順 1） |
 
 aarch64 には入らない:
 

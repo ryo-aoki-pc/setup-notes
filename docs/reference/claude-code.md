@@ -1,6 +1,6 @@
 # Claude Code 最新版インストール手順（AlmaLinux 10 は公式 dnf リポジトリ / Windows 11 は公式の native installer）の参考資料
 
-[手順書](../claude-code.md)
+[手順書](../claude-code.md)・[ロールバックと注意点](../extra/claude-code.md)
 
 ## 補足
 
@@ -8,6 +8,18 @@
 
 - `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../claude-code.md#stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
 - ネイティブインストーラ版にある `autoUpdatesChannel` / `minimumVersion` の設定は dnf 版では効かない（更新を行うのが dnf のため）
+
+### 更新 / 手順 1: 補足: dnf 版が自分で更新できない理由
+
+- dnf 版の更新には root 権限が要るため、起動中の Claude Code は自分で更新できない
+
+### stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
+
+- 以後の `sudo dnf upgrade claude-code`（[更新](../claude-code.md#更新)）は `stable` の版を追う
+
+### Windows 11 で使う / 手順 1: 補足: x86 の PowerShell
+
+- 「Windows PowerShell (x86)」は 32 ビットで動き、インストーラが `Claude Code does not support 32-bit Windows` で止まる
 
 ### Windows 11 で使う / 手順 3: 補足: 確かめていることと、Git for Windows の役割
 
@@ -25,6 +37,11 @@
 - 読むときに `%USERPROFILE%` のような書き方は展開され、書き戻すと展開した形（`C:\Users\<WIN_USER>\...`）で残る（.NET Framework の `Environment` の動き）。自分のユーザーの PATH なので、困ることは無いはず
 - 足すのは自分のユーザーの PATH だけで、システムの PATH（管理者の権限が要る）は変えない
 - 公式の文書は、画面からでも同じことができるとしている（システムのプロパティ → 環境変数 → ユーザー環境変数の `Path` → 新規）
+- 開いている PowerShell には効かない。同じ節の手順 6 で開き直す
+
+### Windows 11 で使う / 手順 6: 補足: 開き直した PowerShell が読む PATH
+
+- 開き直した PowerShell は、同じ節の手順 5 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
 
 ### Windows 11 で使う / 手順 8: 補足: ログインの流れと、ログインの情報の置き場所
 
@@ -35,6 +52,10 @@
 - 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../windows-claude-remote-control.md)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
 - ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
 - Remote Control（[windows-claude-remote-control.md](../windows-claude-remote-control.md)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
+
+### Windows 11 で使う / 手順 9: 補足: 後ろに続けて貼らない理由
+
+- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../claude-code.md#使い方の基本)）
 
 ### Windows 11 のロールバック / 手順 2: 補足: 消すもの
 

@@ -1,17 +1,37 @@
 # git-delta（delta）インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の参考資料
 
-[手順書](../git-delta.md)
+[手順書](../git-delta.md)・[ロールバックと注意点](../extra/git-delta.md)
 
 ## 補足
 
 ### 実施手順 / 手順 1: 補足: 変数について
 
+- 3 つとも表示の好みなので、既定のままで進められる
 - 3 つとも `~/.gitconfig` の `[delta]` に書かれる値で、後から `git config --global delta.side-by-side true` で変えられる
 - `navigate` を `true` にすると、ページャ（`less`）の中で `n` が「次の変更へ」になる。delta が `less` に渡すオプションで実現しているので、`core.pager` 経由で起動したときだけ効く
 
 ### 実施手順 / 手順 2: 補足: 降ってくるボトル
 
 aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar.gz`。
+
+- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
+
+### 実施手順 / 手順 2: 補足: formula 名とコマンド名
+
+- formula 名は `git-delta` だが、入るコマンドは `delta`（`brew install delta` でも同じ formula に解決される）
+
+### 実施手順 / 手順 3: 補足: git の設定の書き方
+
+- `~/.gitconfig` を直接編集せず、`git config --global` で書く（既にある `[user]` や `[core]` を壊さない）
+- ブロックの最後の行で、書けたか読み戻す
+- `interactive.difffilter` と小文字で表示されるのは、git がキー名を正規化するため。`~/.gitconfig` の中では `diffFilter` のまま
+- `merge.conflictstyle zdiff3` は delta とは独立した設定だが、コンフリクト表示が読みやすくなるので一緒に入れている
+- `zdiff3` は git 2.35 以降で使える（AlmaLinux 10 の RPM は 2.52.0）
+- [git.md 手順 6](../git.md#実施手順) でも同じ値を入れる。先に通していても、同じキーが書き直されるだけ
+
+### 実施手順 / 手順 4: 補足: 差分の出し方
+
+- ブロックの最後の行で、変更のあるリポジトリの差分を出す
 
 ### Windows 11 で使う / 手順 2: 補足: VC++ ランタイム
 
@@ -22,12 +42,27 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
   - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
 - 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
 
+### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+
+- `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
+- ほかの方法で入れた delta を外すのは、混ざらないようにするため
+
+### Windows 11 で使う / 手順 3: 補足: scoop の名前と版
+
+- scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
+- `'delta' (<版>) was installed successfully!` の版は、実行した日の最新
+
 ### Windows 11 で使う / 手順 4: 補足: 実施手順の手順 1・3 を Git Bash で貼る
 
 - 手順 1・3 のブロックは bash と git だけを使うので、Git Bash にそのまま貼れる。PowerShell 向けに書き分けない（[git.md](../git.md) と同じ考え方）
 - `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、[git.md の検証記録](../verification/git.md#付録-windows-11-の-git-bash-での検証記録2026-09-30)で確かめてある
 - 手順 2（`brew install`）と手順 4（`brew list` を含む）は指さない。入れることと版・場所は、Windows 11 の節の手順 3 で PowerShell から確かめる
 - 手順 3 は `merge.conflictstyle zdiff3` も書く。[git.md](../git.md#実施手順) の手順 6 と同じ値なので、どちらを先に通してもよい（AlmaLinux 10 と同じ）
+- 手順 1 の変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
+
+### Windows 11 で使う / 手順 5: 補足: 変更のあるリポジトリが無いとき
+
+- `git -C ~/.config/bash show` が出すのは、[共通の bash 設定](../../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分
 
 ### Windows 11 で使う / 手順 5: 補足: ページャの less と PowerShell の git
 
@@ -39,6 +74,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - **scoop の less は入れなかった**: 設計の段階では、PowerShell から git を使うときだけ scoop の less（main の `less.json`。上流の文書が勧める `jftuga/less-Windows` の配布物）を入れる任意の手順を考えた。上のとおり、git が起動する delta には、Git Bash でも PowerShell でも Git の `usr\bin` が scoop の shims より前に来るので、入れても使われない（`DELTA_PAGER` か `delta.pager` で場所を指したときと、PowerShell で delta を直に動かしたときだけ使われる）
 - PowerShell で delta を直に動かす（`git diff | delta` など）と、PATH に less が無いので、delta はページャを使わずに出す（上の `output.rs` の動き）
 - `delta.navigate`（手順 1 の `DELTA_NAVIGATE`）が `true` だと、delta は less の検索履歴の写しを `%LOCALAPPDATA%\delta\delta.lesshst` に作り、`LESSHISTFILE` で less に渡す（ソースの `src/features/navigate.rs`。Linux では `~/.local/share/delta/lesshst`）。Windows で `n` / `N` が効くかは確かめていない
+- PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](../extra/git-delta.md#注意点)）
 - どれも、ソースを読んだだけで、Windows では確かめていない（[検証記録](../verification/git-delta.md#windows-11-で使う-検証状況の記録)）
 
 ### 選択した方針
@@ -66,12 +102,12 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
   - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[実施手順](../git-delta.md#実施手順)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
   - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 の初期設定の PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)が読むのは starship と zoxide だけ
-  - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 の初期設定の手順 19 の 1 行のまま
+  - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 の初期設定の「貼り付けの設定」の手順 4 の 1 行のまま
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[実施手順](../git-delta.md#実施手順)を WSL の中で通す
 - **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#windows-11-で使う--手順-2-補足-vc-ランタイム)
 - **scoop の less は入れない**: [Windows 11 で使う / 手順 5 の補足](#windows-11-で使う--手順-5-補足-ページャの-less-と-powershell-の-git)
 - **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
-- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバック](../windows-setup.md#ロールバック)の手順 13（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
+- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
 - **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
 
@@ -82,7 +118,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [lazygit 0.65.1 の差分表示設定](https://github.com/jesseduffield/lazygit/blob/v0.65.1/docs/Custom_DiffRenderers.md) — `git.diffRenderers` の `stdinFilter` と delta の指定
 - `delta --help` / `delta --show-config` / `delta --list-syntax-themes` — オプションと実効値、配色の一覧
 - `git help config` の `core.pager` / `interactive.diffFilter` — git 側の仕様
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 46〜48 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [ScoopInstaller/Main — delta.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/delta.json) — scoop の版、x64 の zip と hash、`delta.exe` の shim
 - [winget-pkgs — dandavison.delta 0.20.1](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/dandavison/delta/0.20.1/dandavison.delta.installer.yaml) — 同じ zip の sha256 と、VC++ ランタイムの依存（採らなかった経路）
 - [delta manual — Using Delta on Windows](https://dandavison.github.io/delta/tips-and-tricks/using-delta-on-windows.html) — Windows では新しい less が要るという案内
@@ -90,7 +126,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（手順 16〜19）、scoop（手順 20・21）、PowerShell 7 のプロファイルの任意節
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節
 - [WezTerm の Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
 
 ---

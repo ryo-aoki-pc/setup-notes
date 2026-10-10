@@ -1,6 +1,6 @@
 # WezTerm Nightly インストール手順（AlmaLinux 10 は公式 COPR の EL9 ビルドを流用 / Windows 11 は nightly のインストーラ）の検証記録
 
-[手順書](../wezterm-nightly.md)
+[手順書](../wezterm-nightly.md)・[ロールバックと注意点](../extra/wezterm-nightly.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -63,7 +63,7 @@
 **sha256**
 
 - `WezTerm-nightly-setup.exe.sha256` は、同じ nightly のリリースに置かれた sha256（`<64 桁>  WezTerm-nightly-setup.exe` の 1 行）。上流の CI が、ビルドしたファイルからリリースに上げる直前に作る（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）
-- 同じ場所から取るので、分かるのは壊れていないこと（途中で切れていない、入れ替えの最中のものではない）まで。インストーラにも中の `wezterm*.exe` にも Authenticode の署名は無く、本物かどうかは確かめられない（[注意点](../wezterm-nightly.md#注意点)）
+- 同じ場所から取るので、分かるのは壊れていないこと（途中で切れていない、入れ替えの最中のものではない）まで。インストーラにも中の `wezterm*.exe` にも Authenticode の署名は無く、本物かどうかは確かめられない（[注意点](../extra/wezterm-nightly.md#注意点)）
 - sha256 を先に、インストーラを後に取る。間で nightly が入れ替わると、一致せずに止まる
 - `-ne` の比較は大文字と小文字を区別しない（`.sha256` は小文字、`Get-FileHash` は大文字）
 - `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ（[hackgen.md の Windows 11 で使う](../hackgen.md#windows-11-で使う)の手順 3 の補足と同じ）
@@ -94,7 +94,7 @@
 - 版は、ビルドした日ではなく、もとにした main の最後のコミットの日時と、そのコミットの頭 8 桁（`<年月日>-<時分秒>-<コミット>`）
 - nightly は毎日ビルドし直されるが、コミットの無い日は同じ版になる（2026-10-03 のビルドは `20260929-043349-cab25161`）
 - `DisplayName` は `WezTerm <版>`（Inno Setup の既定の形）
-- `UninstallString` は、[Windows 11 のロールバック](../wezterm-nightly.md#windows-11-のロールバック)の手順 1 が使う
+- `UninstallString` は、[Windows 11 のロールバック](../extra/wezterm-nightly.md#windows-11-のロールバック)の手順 1 が使う
 
 ### 対象と検証環境
 
@@ -109,7 +109,7 @@
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 確認したこと: ウィンドウの起動・終了まで
   - **aarch64 は未検証**（COPR に `rhel-9-aarch64` はあるので、同じ手順で通る見込み）
-  - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](../wezterm-nightly.md#注意点)を見る
+  - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](../extra/wezterm-nightly.md#注意点)を見る
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
   - 利用者の PC には、nightly の `20260905-153129-092dcf70` が `C:\Program Files\WezTerm` に入っている（[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)の実機の記録。入れ方の記録は無い）。その PC では、[Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順は上書きになる
@@ -117,7 +117,7 @@
     - 配布物: 2026-10-03 の `WezTerm-nightly-setup.exe` の sha256 と `.sha256` の一致、Inno Setup 6.7.0 で作られていること、Authenticode の署名が無いこと。同じ日の zip の中の実行ファイルが x64 で、`VCRUNTIME140.dll` を読み込むこと
     - インストーラの定義（`ci/windows-installer.iss`）と作り方（`ci/deploy.sh`・`gen_windows_continuous.yml`）、Inno Setup の文書とソース（引数・終了コード・アンインストールの登録・アンインストーラの動き）、WezTerm のソース（Windows の設定ファイルの探索順、更新の確認）
     - ほかの経路: winget の `wez.wezterm.nightly`（定義の sha256 の直され方）・`wez.wezterm`・`Microsoft.VCRedist.2015+.x64`、scoop の `versions/wezterm-nightly`・`extras/wezterm`、Chocolatey の `wezterm`
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 4 と[Windows 11 のロールバック](../wezterm-nightly.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のインストーラとレジストリを使って流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 4 と[Windows 11 のロールバック](../extra/wezterm-nightly.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のインストーラとレジストリを使って流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、インストーラが黙って入ることと、`PATH`・スタートメニュー・右クリックのメニュー、`VCRUNTIME140.dll` の無い PC と[Windows 11 で使う](../wezterm-nightly.md#windows-11-で使う)の手順 3、WezTerm の窓が開くこと、更新（上書き）とアンインストール、arm64 の Windows
 
 AlmaLinux 10 の実機:
@@ -285,7 +285,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [Latest supported Visual C++ Redistributable downloads — Microsoft Learn](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) — `VCRUNTIME140.dll` を入れる再頒布可能パッケージ
 - [microsoft/winget-pkgs の wez.wezterm.nightly](https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/wez/wezterm/nightly) — 採らなかった winget の定義
 - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（手順 16〜19）と、この文書を通す順
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）と、この文書を通す順
 
 ### 付録: AppImage の実測
 
@@ -415,7 +415,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 - `.sha256` の中身が `Not Found`: `中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い`
 - インストーラの終了コードが 4: `中断: インストーラが終了コード 4 で終わった（ログは <一時フォルダー>/setup.log）`
 
-**[Windows 11 のロールバック](../wezterm-nightly.md#windows-11-のロールバック)の手順 1 のブロック**を、`C:\Program Files\WezTerm` を一時的なディレクトリにして流した。`Get-ItemProperty`・`Test-Path`（登録のキーだけ）・`Get-Process`・`Start-Process` を偽物にし、`Start-Process` は 3 秒後に登録とフォルダーを消す（アンインストーラの写しが後から消すのをまねる）:
+**[Windows 11 のロールバック](../extra/wezterm-nightly.md#windows-11-のロールバック)の手順 1 のブロック**を、`C:\Program Files\WezTerm` を一時的なディレクトリにして流した。`Get-ItemProperty`・`Test-Path`（登録のキーだけ）・`Get-Process`・`Start-Process` を偽物にし、`Start-Process` は 3 秒後に登録とフォルダーを消す（アンインストーラの写しが後から消すのをまねる）:
 
 - 通常: `Start-Process` に `-FilePath C:\Program Files\WezTerm\unins000.exe`（`UninstallString` の引用符の中）と `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` が渡り、3 秒待ってから `False` が 2 行出た
 - 登録が無い・`UninstallString` が別の形（`MsiExec.exe /X{0000}`）・WezTerm が動いている・アンインストーラの終了コードが 1: それぞれの `中断:` で止まった
@@ -514,7 +514,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
 | OS | Windows 11 Pro 26H2、26300.9457、x64 |
 | PowerShell | Windows PowerShell 5.1.26100.9444、64 ビット、管理者、セッション 1 |
 | 初回導入前 | `Version`・`Location`・`OnPath`・`Running` は空、`Admin: True`、`VCRuntime: True` |
-| Visual C++ Runtime | Windows 初期設定の手順 22 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
+| Visual C++ Runtime | Windows 初期設定の「アプリを入れる」の手順 3 の依存関係として導入済み。この節の手順 3 は条件により飛ばした |
 | 作業フォルダー | 実行前に `%TEMP%\wezterm-setup` が無いことを確認 |
 | 入った版 | `20261005-054844-37254829` |
 
@@ -578,7 +578,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
   - `wezterm-gui.exe --config front_end="Software"` でも同じエラー
   - `wezterm-gui.exe --config prefer_egl=true` では窓が開き、中で `cmd.exe` が動いた（設定ファイルが無いときのシェル。`%COMSPEC%`）。窓の中の `wezterm --version` は `wezterm 20261005-054844-37254829`
   - 本文の手順 6 に、ログの場所と `config.prefer_egl = true` の箇条書きを足した
-- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の手順 26）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
+- エクスプローラーでフォルダーの背景を右クリックすると、旧形式のメニュー（windows-setup.md の「表示と入力」の手順 2）に「Open WezTerm here」がそのまま出た。レジストリのコマンドは `wezterm-gui.exe start --no-auto-connect --cwd "%V"`
   - 設定ファイルが無いままでは、同じ OpenGL のエラーで開かなかった
   - 一時的に `%USERPROFILE%\.wezterm.lua`（`config.prefer_egl = true` と `config.font = wezterm.font 'HackGen Console NF'` だけ）を置くと、`C:\verify\gui-fixtures` で窓が開いた。英字・かな・漢字・矢印・Powerline の記号・Nerd Font のフォルダーのアイコン・日本語の文が、HackGen Console NF で表示された（画面で確かめた）
   - 一時的な設定と試験用の文のファイルは、確かめた後に消した

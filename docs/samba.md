@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/samba.md)・[参考資料](reference/samba.md)
+- [検証記録](verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
 
 > [!IMPORTANT]
 > - **すべてサーバー上で実行する**。手順 9（クライアントからの接続）だけ別マシン
@@ -10,33 +10,36 @@
 > - **手順を終えたサーバーでは、手順 3 を貼り直さない**（smb.conf が丸ごと置き換わり、`[root]`・`[home]` なども消える）。smb.conf に `smb3 directory leases` の行が無いサーバーには、[設定済みのサーバーでディレクトリのリースを切る](#設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後の節:
   - root のホーム（`/root`）も公開するなら、[root のホームも公開する（任意）](#root-のホームも公開する任意)を行う
   - `/home` の下のすべてのホーム（ほかのユーザーのホームも）を 1 つの共有で開くなら、[/home も公開する（任意）](#home-も公開する任意)を行う
   - サーバーの上で読み書きを確かめるとき（クライアントでつなげないときの切り分けにも）は、[サーバーの上で動作を確かめる](#サーバーの上で動作を確かめる)を行う
   - 接続元を絞る場合は、最後に[接続元を絞る（任意）](#接続元を絞る任意)を行う
-  - 戻すときは[ロールバック](#ロールバック)
+  - 戻すときは[ロールバック](extra/samba.md#ロールバック)
 
 1. 公開するユーザー自身のシェルで、変数を設定する（`sudo -i` した root のシェルでは貼らない）。
 
    ```bash
    WORKGROUP=WORKGROUP                 # Windows 側のワークグループ名。既定のままでよいことが多い
    SERVER_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 検証と案内に使う（自動）。<SERVER_IP>
+   printf '\n\033[7m 確認 \033[0m\n'
    for v in WORKGROUP USER SERVER_IP; do
      printf '%-10s = %s\n' "$v" "${!v}"
    done
    ```
 
    - 最後に値を読み戻して確かめる
-   - `USER` が `root` になっている（root のホームを公開してしまう）、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
+   - `USER` が `root` になっている、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
    - root のホームも公開したいときも、ここでは自分のユーザーで進める。root のホームは、手順の後の[root のホームも公開する（任意）](#root-のホームも公開する任意)で足す
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
 1. samba・samba-client・cifs-utils を入れる。
 
    ```bash
    {
      sudo dnf install -y samba samba-client cifs-utils
+     printf '\n\033[7m 確認 \033[0m\n'
      rpm -q samba samba-client cifs-utils
    }
    ```
@@ -65,6 +68,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -77,6 +81,7 @@
    ```bash
    {
      sudo setsebool -P samba_enable_home_dirs on
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
    }
    ```
@@ -86,6 +91,7 @@
    ```bash
    {
      sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo firewall-cmd --list-ports               # 445/tcp が含まれる
    }
    ```
@@ -93,13 +99,13 @@
 1. OS のアカウントを確かめ、Samba ユーザーを登録する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    id "${USER}"
    sudo smbpasswd -a "${USER}"
    ```
 
    - `id` で、OS のアカウントが存在することを確かめる
    - **端末で対話入力する**。新しいパスワードを 2 回聞かれる
-   - Samba のパスワードは、OS のパスワードとは別に保存される
    - **次の手順は、2 回の入力を終えてから貼る**（続けて貼るとパスワードとして食われる）
 
 1. Samba ユーザーが登録されたか確かめる。
@@ -115,6 +121,7 @@
    ```bash
    {
      sudo systemctl enable --now smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-active smb.service              # active
      ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
    }
@@ -124,7 +131,6 @@
 
    - `<SERVER_IP>` と `<USER>` は値に読み替える
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
-     - サーバーで変えたファイルやディレクトリは、F5 を押さなくても出る（手順 3 の `smb3 directory leases = no`）
      - ドライブ文字に割り当てて、サインインのたびにつなぐなら、[samba-client.md の Windows 11 で使う](samba-client.md#windows-11-で使う)
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
@@ -163,6 +169,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -181,6 +188,7 @@
    EOF
      sudo semodule -i /tmp/samba_root_home.cil
      rm /tmp/samba_root_home.cil
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo semodule -l | grep -x samba_root_home   # samba_root_home
    }
    ```
@@ -200,7 +208,7 @@
 1. 別のマシンから、共有名 `root` でつなぐ。
 
    - [手順 9](#実施手順) の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
-   - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`。`\\<SERVER_IP>\<USER>` と同じ資格情報なので、両方を同時に開けるはず（別のユーザー名で同じサーバーにつなぐと、Windows はエラー 1219 で断る）
+   - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`
    - AlmaLinux 10 の PC なら、[samba-client.md](samba-client.md) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
 1. 元に戻すときは、`[root]` の節とモジュールを消し、smb.service を再起動する。
@@ -208,13 +216,14 @@
    ```bash
    {
      sudo sed -i '/^\[root\]$/,/^\[/{/^\[root\]$/d;/^\[/!d}' /etc/samba/smb.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo semodule -r samba_root_home
      sudo systemctl restart smb.service
      testparm -s 2>/dev/null | grep -c '^\[root\]'   # 0
    }
    ```
 
-   - 最後に `0` と出ればよい（`[root]` の節が残っていない）
+   - 最後に `0` と出ればよい
    - `semodule -r` は約 50 秒（VM）かかり、`libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と出る。エラーではない
 
 ---
@@ -251,6 +260,7 @@
        read only = No
        create mask = 0644
    EOF
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s
    fi
    ```
@@ -279,11 +289,12 @@
    {
      sudo sed -i '/^\[home\]$/,/^\[/{/^\[home\]$/d;/^\[/!d}' /etc/samba/smb.conf
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep -c '^\[home\]'   # 0
    }
    ```
 
-   - 最後に `0` と出ればよい（`[home]` の節が残っていない）
+   - 最後に `0` と出ればよい
 
 ---
 
@@ -309,15 +320,14 @@
 
    ```bash
    ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
    ```
-
-   - このファイルを、`smbclient` と `mount.cifs` の両方で使う
-   - パスワードをコマンドラインに書かないのは、`ps` に見えるため
 
 1. `smbclient` で、共有の一覧と読み書きを確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
@@ -332,6 +342,7 @@
    {
      sudo mkdir -p /mnt/smbtest
      sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+     printf '\n\033[7m 確認 \033[0m\n'
      mount | grep cifs                            # vers=3.1.1
      echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
      ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
@@ -339,7 +350,6 @@
    }
    ```
 
-   - `smbstatus` はセッションが生きている間しか見えない
    - **次の手順は、`smbstatus` の出力を確かめてから貼る**（この節の手順 5 でアンマウントすると見えなくなる）
 
 1. アンマウントして、マウントポイントを消す。
@@ -352,6 +362,7 @@
 
    ```bash
    rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo ausearch -m AVC -ts today               # <no matches>
    ```
 
@@ -372,6 +383,7 @@
 
    ```bash
    {
+     printf '\n\033[7m 確認 \033[0m\n'
      sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
      sudo rm /root/smb-root-test.txt
      sudo ausearch -m AVC -ts recent              # <no matches>
@@ -395,6 +407,7 @@
 1. `/home` も公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -lZ ~/smb-home-test.txt                   # -rw-r--r--. <USER> root … user_home_t
    rm ~/smb-home-test.txt
    sudo ausearch -m AVC -ts recent              # <no matches>
@@ -424,12 +437,10 @@
      sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
    done
    sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
    fi
    ```
-
-   - 先頭の `if` は、`ALLOW_FROM` が空のままブロックを貼ったときに、445/tcp の開放だけ消えて rich rule が 1 本も入らないのを防ぐ
-   - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されず、firewalld は `$src` という文字列のままの rule を `success` で受理してしまう
 
 1. 元に戻すときは、絞ったときと同じ `ALLOW_FROM` を入れてから、public ゾーン全体の 445/tcp に戻す。
 
@@ -458,6 +469,7 @@
    elif ! grep -q '^\[global\]$' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [global] の行が無い' >&2
    else
      sudo sed -i '/^\[global\]$/a\    smb3 directory leases = no' /etc/samba/smb.conf
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep 'smb3 directory leases'
    fi
    ```
@@ -471,12 +483,12 @@
    ```bash
    {
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      systemctl is-active smb.service              # active
    }
    ```
 
    - `active` と出ればよい
-   - Windows のエクスプローラーは、次の F5 でつなぎ直す
 
 1. 元に戻すときは、足した行を消して smb.service を再起動する。
 
@@ -484,6 +496,7 @@
    {
      sudo sed -i '/^[[:space:]]*smb3 directory leases = no$/d' /etc/samba/smb.conf
      sudo systemctl restart smb.service
+     printf '\n\033[7m 確認 \033[0m\n'
      testparm -s 2>/dev/null | grep -c 'smb3 directory leases'   # 0
    }
    ```
@@ -491,69 +504,3 @@
    - 最後に `0` と出ればよい
    - 今の手順 3 で置いた smb.conf の行も消える
    - 再起動すると、つないでいるクライアントの接続が一度切れる
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[接続元を絞る（任意）](#接続元を絞る任意)の手順 2 を貼る
-
-> [!CAUTION]
-> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。[検証記録](verification/samba.md)・[参考資料](reference/samba.md)）。**この節の**手順 3 の「完全に消すなら」で消すと、中の登録は取り戻せない。
-
-1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
-
-   ```bash
-   {
-     sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
-     sudo systemctl disable --now smb.service
-     sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
-     sudo smbpasswd -x "${USER}"
-     sudo setsebool -P samba_enable_home_dirs off
-     sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
-   }
-   ```
-
-   - 公開したユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
-   - 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
-   - [root のホームも公開した](#root-のホームも公開する任意)ときの `[root]` の節と、[/home も公開した](#home-も公開する任意)ときの `[home]` の節も、最後の `smb.conf` の復元で消える
-
-1. root のホームも公開していたときだけ、SELinux のモジュールを外す。
-
-   ```bash
-   sudo semodule -r samba_root_home
-   ```
-
-   - `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` の 1 行が出て終わればよい
-
-1. パッケージも消すときだけ、samba・samba-client・cifs-utils を消す。
-
-   ```bash
-   sudo dnf remove -y samba samba-client cifs-utils
-   ```
-
-   - `samba-common` は実施前から入っていたので残す
-   - Workstation などで `cifs-utils` も実施前から入っていたなら、上のコマンドから `cifs-utils` を外す（ほかの共有のマウントにも使うため）
-   - `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
-   - 完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`（取り戻せない）
-
----
-
-## 注意点
-
-- **公開範囲は public ゾーンの全 NIC**: この環境では `wg0` も public にあるので、VPN 越しのクライアント（拠点 A の LAN や外出先の端末）からも 445 に届く。それを望まないなら[接続元を絞る](#接続元を絞る任意)
-- **LAN 上の通信は暗号化されない**: 署名だけ（`smbstatus` の `Encryption` 欄が `-`）。VPN 越しは WireGuard が暗号化する
-- **自ホストからの検証は firewalld を通らない**: 445 の開け忘れは、別ホストか network namespace から接続して初めて分かる
-- **Samba のパスワードは OS と別**: OS のパスワードを変えても Samba 側は変わらない。変えるときは `sudo smbpasswd "${USER}"`
-- **ユーザー名は OS アカウントと一致が必須**
-  - 存在しないユーザー、間違ったパスワードは、どちらも `NT_STATUS_LOGON_FAILURE`
-  - 他人のホーム（`//<SERVER_IP>/<別のユーザー>`。`[root]` を足していなければ `//<SERVER_IP>/root` も）は、認証が通っても `tree connect failed: NT_STATUS_ACCESS_DENIED`
-- **root の共有は root と同じ重み**: [root のホームも公開した](#root-のホームも公開する任意)ら、`<USER>` の Samba のパスワードで `/root/.bashrc` や `/root/.ssh/authorized_keys` を書き換えられる
-- **`/home` の共有は、ほかのユーザーのホームも書ける**: [/home も公開した](#home-も公開する任意)ら、`<USER>` の Samba のパスワードで、ほかのユーザーの `~/.bashrc` や `~/.ssh/authorized_keys` も書き換えられる。`sudo` を使えるユーザーがいれば、root と同じ重みになる
-- **`create mask` を変えても既存ファイルのモードは変わらない**: 手順 3 の前にホームに置いていたファイルのモードはそのまま
-- **`nmb` を起動しない構成なので、Windows のエクスプローラーで「ネットワーク」から見つけることはできない**: `\\<SERVER_IP>\<USER>` を直接入力する。一覧に出したいなら `wsdd`
-- **クライアントにも、サーバーとは別の一覧のキャッシュがある**
-  - GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない。F5 ですぐ出る（[samba-client.md の注意点](samba-client.md#注意点)）
-  - Windows は、ディレクトリのリースが無いときも、一覧を最長 10 秒キャッシュする（Microsoft の文書の `DirectoryCacheLifetime`）
-  - macOS は、SMB 2/3 の一覧を手元にキャッシュする（Apple の文書。止めるには `nsmb.conf` の `dir_cache_max_cnt=0`）

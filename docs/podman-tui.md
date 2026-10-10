@@ -2,16 +2,17 @@
 
 ## 実施手順
 
-- [検証記録](verification/podman-tui.md)・[参考資料](reference/podman-tui.md)
+- [検証記録](verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
 
 > [!IMPORTANT]
-> - **前提**: [Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と、[AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順)（EPEL）を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
+> - **前提**: [Podman](podman.md) の実施手順（手順 7 の API ソケットまで）と、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)（EPEL）を通してあること（podman-tui は EPEL にあり、AppStream には無い）。`systemctl --user is-active podman.socket` が `active` を返さないか、`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 > - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
 
 - 上から順にコードブロックを貼る
-- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後: 日々の操作は[使い方の基本](#使い方の基本)、以後は[更新](#更新)・[ロールバック](extra/podman-tui.md#ロールバック)
 - Docker の API でつなぐ TUI なら [lazydocker](lazydocker.md)（違いは[選択した方針](verification/podman-tui.md#選択した方針)）
 
 1. 入手できる版を見てから、podman-tui を入れる。
@@ -25,12 +26,12 @@
    - 入るのは `podman-tui` の 1 パッケージだけ（ダウンロード 9.5 MB、展開後 32 MB）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える。違っていれば `N` で中断する
-   - [AlmaLinux 10 の初期設定の手順 17](almalinux-setup.md#実施手順) に書いた鍵
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. podman-tui が入ったか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    podman-tui version
    command -v podman-tui
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-tui
@@ -42,12 +43,11 @@
 
    ```bash
    podman run -d --name podman-tui-web registry.access.redhat.com/ubi10/httpd-24:latest
+   printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
    ```
 
    - `podman-tui-web Up Less than a second` のように出る
-   - 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](podman.md#quadlet-で自動起動する任意) などで取得済みなら、取り直さない
-   - ポートは公開しない（画面から止めるためだけのコンテナ）
 
 1. podman-tui を起動し、確認用のコンテナを画面から止める。
 
@@ -69,7 +69,7 @@
    podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
    ```
 
-   - `podman-tui-web Exited (0) ...` と出ればよい。画面の操作が、API を通して podman に届いている
+   - `podman-tui-web Exited (0) ...` と出ればよい
 
 ---
 
@@ -104,50 +104,4 @@
 
    - システム全体なら `sudo dnf upgrade`
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - EPEL の podman-tui が 2.x に上がったときは、上流の互換表で podman の版と合うかを確かめる（[注意点](#注意点)）
-
----
-
-## ロールバック
-
-- 上から順に実行する
-- API ソケットは止めない。ほかの手順書も使う（止めるなら [podman.md のロールバック](podman.md#ロールバック)の手順 3）
-
-1. 確認用のコンテナを消す。
-
-   ```bash
-   podman rm -f podman-tui-web
-   ```
-
-   - `podman-tui-web` と出る
-
-1. 同じイメージをほかで使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 同じイメージを使うもの: [podman.md の Quadlet](podman.md#quadlet-で自動起動する任意)、[podman-compose](podman-compose.md)、[lazydocker](lazydocker.md)
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-tui を消す。
-
-   ```bash
-   sudo dnf remove podman-tui
-   ```
-
-   - `[y/N]` で聞かれる。消えるのは `podman-tui` の 1 パッケージだけ
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ロールバック)の手順 34・35
-
----
-
-## 注意点
-
-- **終了は `Ctrl+C`**: `q` を押しても何も起きない
-- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（参考資料を参照）。`systemctl --user start podman.socket` で直る
-- **podman に接続を登録していると、そちらを使う**: `podman system connection add` で登録した接続があると、podman-tui は `localhost` の代わりにそれを出す
-  - 接続を消す（`podman system connection remove`）と、`localhost` に戻る
-- **Homebrew の 2.x と二重に入れない**: `brew install podman-tui` の 2.0.0 は `/home/linuxbrew/.linuxbrew/bin` に入り、PATH の先頭で `/usr/bin/podman-tui` を隠す
-  - 2.0.0 は接続を podman の設定からだけ読むため、使う場合は先に接続を登録する
-  - 2.0.0 と podman 5.8.2 は上流の互換表の外の組み合わせなので、互換表に合う版を選ぶ
-- **EPEL が 2.x に上がったら、互換表を確かめる**: 2.x は podman 6 向け。AlmaLinux の podman が 5.x のうちに EPEL だけが上がったら、動きを確かめてから使う
+   - EPEL の podman-tui が 2.x に上がったときは、上流の互換表で podman の版と合うかを確かめる（[注意点](extra/podman-tui.md#注意点)）

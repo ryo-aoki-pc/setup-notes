@@ -1,6 +1,6 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の検証記録
 
-[手順書](../vscode.md)
+[手順書](../vscode.md)・[ロールバックと注意点](../extra/vscode.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 

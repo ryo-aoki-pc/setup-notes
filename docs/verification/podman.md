@@ -1,6 +1,6 @@
 # Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の検証記録
 
-[手順書](../podman.md)
+[手順書](../podman.md)・[ロールバックと注意点](../extra/podman.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -100,11 +100,11 @@ curl に再試行を付けたのは、最初の検証で `start` の直後の `c
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[hadolint / dive / Trivy](../image-tools.md)・[podman-tui](../podman-tui.md)・[lazydocker](../lazydocker.md) の前提になる（CLI にとっての Homebrew〔[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 46〜48〕と同じ位置づけ）
+- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[hadolint / dive / Trivy](../image-tools.md)・[podman-tui](../podman-tui.md)・[lazydocker](../lazydocker.md) の前提になる（CLI にとっての Homebrew〔[AlmaLinux 10 の初期設定の「Homebrew」](../almalinux-setup.md#homebrew)の手順 1〜3〕と同じ位置づけ）
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **現行 `5da3478` 版を、共通 bash `3d5323e` を新規導入した x86_64 の VM で再検証済み（2026-10-06、SELinux Enforcing）**。実施手順 1〜3・5〜7、Docker API、Quadlet の再起動後の自動起動、ロールバックを通した。subuid/subgid の追加は設定済みのため飛ばした。実機での適用とは別の記録（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](../podman.md#更新)、[ロールバック](../podman.md#ロールバック)を通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](../podman.md#更新)、[ロールバック](../extra/podman.md#ロールバック)を通した
     - Quadlet の節の linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
   - 手順 4 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜6 を通した
   - 2026-10-02: もとの手順 4・5 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
@@ -321,7 +321,7 @@ idMappings:
 
 ### Quadlet で自動起動する（任意） / 手順 1: 補足: 定義の中身
 
-- `:Z` は、SELinux のラベルをこのコンテナ専用に付け替える指定。ホームそのもの（`%h`）には付けず、コンテナ用のディレクトリにだけ付ける（[注意点](../podman.md#注意点)）
+- `:Z` は、SELinux のラベルをこのコンテナ専用に付け替える指定。ホームそのもの（`%h`）には付けず、コンテナ用のディレクトリにだけ付ける（[注意点](../extra/podman.md#注意点)）
 - 検証環境は SELinux が無効だったので、`:Z` の効果は確かめていない
 - `ubi10/httpd-24` の Apache は、コンテナの中で root ではないユーザー（`uid=1001(default)`）として動き、8080 で待ち受ける。コンテナの中でも 1024 未満のポートを使わない作りになっている
 

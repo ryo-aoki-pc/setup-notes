@@ -1,6 +1,6 @@
 # yazi 最新版インストール手順（AlmaLinux 10 は Homebrew / Windows 11 は scoop）の検証記録
 
-[手順書](../yazi.md)
+[手順書](../yazi.md)・[ロールバックと注意点](../extra/yazi.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -27,7 +27,7 @@ aarch64 で降ってくるボトルは `yazi--26.9.1.arm64_linux.bottle.tar.gz`�
 | `imagemagick-full` | 画像・フォントの変換 |
 | `font-symbols-only-nerd-font` | アイコン表示用のフォント |
 
-`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では別の手順（[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順 49）で入れている。
+`zoxide` も yazi から使える（`z` キーでのジャンプ）。本書では別の手順（[AlmaLinux 10 の初期設定の「シェルのツール」](../almalinux-setup.md#シェルのツール)の手順 1）で入れている。
 
 ボトルが降りたことの確認（実測、コンテナ）:
 
@@ -51,7 +51,7 @@ Bash completion has been installed to:
 
 ### Windows 11 で使う: 検証状況の記録
 
-- **[Windows 11 で使う](../yazi.md#windows-11-で使う)・[Windows 11 の更新](../yazi.md#windows-11-の更新)・[Windows 11 のロールバック](../yazi.md#windows-11-のロールバック)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
+- **[Windows 11 で使う](../yazi.md#windows-11-で使う)・[Windows 11 の更新](../yazi.md#windows-11-の更新)・[Windows 11 のロールバック](../extra/yazi.md#windows-11-のロールバック)は、Windows 実機では未検証**（2026-10-08 に書いた。Windows を動かせないクラウドの Linux のコンテナで書き、どのブロックも Windows では貼っていない）
 - 確かめた範囲は[対象と検証環境](#対象と検証環境)の「状態（Windows 11）」と[付録](#付録-windows-11-の節の資料と-linux-での確認2026-10-08)
 
 ### 対象と検証環境

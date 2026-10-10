@@ -2,21 +2,22 @@
 
 ## 実施手順
 
-- [検証記録](verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
+- [検証記録](verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)・[ロールバックと注意点](extra/windows-claude-remote-control.md)
 
 > [!IMPORTANT]
-> - **すべて、SSH でログインした Windows の PC で行う**。手順 1 で Windows PowerShell（5.1）を起動し、手順 2〜7・9 と後ろの節をそこに貼る。デスクトップで開いた PowerShell には貼らない
-> - ログインするユーザーは **Administrators の一員**（手順 5 のタスク登録に管理者の権限が要る。Administrators の一員の SSH のセッションは、UAC の確認無しで管理者の権限を持つ。[Windows の OpenSSH サーバー](windows-openssh-server.md#注意点)）
+> - **すべて、SSH でログインした Windows の PC で行う**。手順 1 で Windows PowerShell（5.1）を起動し、手順 2〜7・9 と、[止める・もう一度始める](#止めるもう一度始める)・[ロールバック](extra/windows-claude-remote-control.md#ロールバック)をそこに貼る。デスクトップで開いた PowerShell には貼らない
+> - ログインするユーザーは **Administrators の一員**（手順 5 のタスク登録に管理者の権限が要る。Administrators の一員の SSH のセッションは、UAC の確認無しで管理者の権限を持つ。[Windows の OpenSSH サーバー](extra/windows-openssh-server.md#注意点)）
 > - 前提: [Windows の OpenSSH サーバー](windows-openssh-server.md)で SSH でログインできること。Claude Code を公式の native installer で入れ（[Claude Code の Windows 11 で使う](claude-code.md#windows-11-で使う)。この手順書の検証の PC は、PowerShell で `irm https://claude.ai/install.ps1 | iex` で入れた）、`claude` の `/login` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない。WezTerm が `C:\Program Files\WezTerm` に入っていること（[WezTerm の Windows 11 で使う](wezterm-nightly.md#windows-11-で使う)）
-> - 前提: [Windows 11 の初期設定の手順 16〜19](windows-setup.md#実施手順)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。このユーザーのプロファイルに書くので、SSH でログインした Windows PowerShell も読む
-> - **この PC のデスクトップにログインしたままにしておくこと**。タスクはログオン中のデスクトップのセッションで WezTerm を開く。ログオフすると動かない（[注意点](#注意点)）。再起動の後に自動でサインインさせるのは [Windows 11 の初期設定の手順 64](windows-setup.md#実施手順)
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。このユーザーのプロファイルに書くので、SSH でログインした Windows PowerShell も読む
+> - **この PC のデスクトップにログインしたままにしておくこと**。タスクはログオン中のデスクトップのセッションで WezTerm を開く。ログオフすると動かない（[注意点](extra/windows-claude-remote-control.md#注意点)）。再起動の後に自動でサインインさせるのは [Windows 11 の初期設定の「WSL の AlmaLinux 10 と自動サインイン」の手順 5](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)
 > - **手順 4 には対話入力がある**（ディレクトリの信頼のダイアログと、初回の Remote Control の確認。URL が出たら Ctrl+C）
 
 - 上から順にコードブロックを貼る。手順 2 で変数を設定した PowerShell に貼る
-- 手順の後に、止めるとき・もう一度始めるときは[止める・もう一度始める](#止めるもう一度始める)、全部消すときは[ロールバック](#ロールバック)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 手順の後に、止めるとき・もう一度始めるときは[止める・もう一度始める](#止めるもう一度始める)、全部消すときは[ロールバック](extra/windows-claude-remote-control.md#ロールバック)
 
 > [!WARNING]
-> **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザからこの PC の `<PROJECT_DIR>` で、このユーザーとして Claude Code を動かせる**（ファイルの読み書きとコマンドの実行。SSH のセッションから登録するので、タスクは管理者の権限を持ちうる）。会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される（[注意点](#注意点)）。タスクが開く WezTerm の窓はデスクトップに見える。窓を閉じる・中で Ctrl+C すると Claude Code が止まる。
+> **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザからこの PC の `<PROJECT_DIR>` で、このユーザーとして Claude Code を動かせる**（ファイルの読み書きとコマンドの実行。SSH のセッションから登録するので、タスクは管理者の権限を持ちうる）。会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される（[注意点](extra/windows-claude-remote-control.md#注意点)）。タスクが開く WezTerm の窓はデスクトップに見える。窓を閉じる・中で Ctrl+C すると Claude Code が止まる。
 
 1. クライアントの PC から Windows に SSH でログインし、Windows PowerShell を起動する。
 
@@ -33,17 +34,19 @@
 
    ```powershell
    $RC_NAME = if ($PROJECT_DIR) { Split-Path $PROJECT_DIR -Leaf }   # claude.ai/code とアプリに出るセッション名（既定はディレクトリ名）。<RC_NAME>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
    'RC_NAME     = {0}' -f $RC_NAME
    ```
 
    - 最後に値を読み戻して確かめる
-   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない（Claude Code はホームの信頼を保存しない）
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
+   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない
+   - **新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
 
 1. Claude Code・WezTerm・ログインと、デスクトップのセッションを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude --version
    claude auth status --text
    & 'C:\Program Files\WezTerm\wezterm.exe' --version
@@ -51,9 +54,9 @@
    ```
 
    - `claude` の版と、ログイン済みを示す行、`wezterm 2026…` が出ればよい
-   - `quser` に、自分のユーザーの `console` の行が `Active` で出ること（デスクトップにログインしている）。出なければ、この PC にログインしてから続ける
+   - `quser` に、自分のユーザーの `console` の行が `Active` で出ること。出なければ、この PC にログインしてから続ける
    - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-rdp-disconnect.md)で切ると `console` に戻る
-   - `claude remote-control --help` は貼らない（help を出した後に終わらない。[注意点](#注意点)）
+   - `claude remote-control --help` は貼らない
 
 1. 初回だけ、対話で起動して信頼と Remote Control の確認に答え、URL が出たら止める。
 
@@ -72,7 +75,7 @@
    - 信頼のダイアログ（`Is this a project you created or one you trust?`）が出たら、**↓ で `Yes, I trust this folder` を選び Enter**（既定は `No, exit`）
    - 初めて Remote Control を使うときは `Enable Remote Control? (y/n)` が出る。`y`
    - `https://claude.ai/code/<SESSION_ID>` の URL と `space to show QR code` が出れば、起動できている
-   - **Ctrl+C** で止める（この起動は信頼と確認を一度受けるためのもの。タスクが同じことを無人で起動する）
+   - **Ctrl+C** で止める
    - **次の手順は、Ctrl+C で止めてプロンプトに戻ってから貼る**（続けて貼ると Claude Code への入力として食われる）
 
 1. タスクを登録する（WezTerm で `claude remote-control` を起動するタスク）。
@@ -89,18 +92,19 @@
      $action = New-ScheduledTaskAction -Execute $wt -Argument $arg
      $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive
      $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Register-ScheduledTask -TaskName 'claude-remote-control' -Action $action -Principal $principal -Settings $settings -Force | Format-List TaskName, State
    }
    ```
 
    - `State : Ready` が出ればよい
-   - トリガーは付けない（手で `Start-ScheduledTask` したときだけ動く。起動時の自動起動は本書では扱わない）
 
 1. タスクを開始し、動いていることを確かめる。
 
    ```powershell
    Start-ScheduledTask -TaskName 'claude-remote-control'
    Start-Sleep -Seconds 8
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId, ParentProcessId | Format-Table -AutoSize
    ```
@@ -128,6 +132,7 @@
 1. 必要なら SSH でログインし直し、タスクとプロセスが残っていることを確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
@@ -146,6 +151,7 @@
 
    ```powershell
    Stop-ScheduledTask -TaskName 'claude-remote-control'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
 
@@ -160,40 +166,3 @@
 
    - 止めてから約 4 時間以内なら、claude.ai/code の同じセッションが戻る（それを過ぎると新しいセッションになる。公式ドキュメント）
    - ネットワークが約 10 分切れると、Claude Code のサーバーは自分で終わり WezTerm の窓が閉じる（公式ドキュメント）。そのときもこの手順で始め直す
-
----
-
-## ロールバック
-
-- この節は、SSH でログインした PowerShell に貼る（変数は要らない）
-- タスクを消しても、`~/.claude.json` のディレクトリの信頼と Remote Control の確認、claude.ai のセッションの一覧は残る（ほかの用途でも使うので消さない）。WezTerm と Claude Code 自体も消さない
-
-1. セッションを止めてタスクを消す。
-
-   ```powershell
-   Stop-ScheduledTask -TaskName 'claude-remote-control'
-   Start-Sleep -Seconds 2
-   Unregister-ScheduledTask -TaskName 'claude-remote-control' -Confirm:$false
-   Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue
-   ```
-
-   - 最後の `Get-ScheduledTask` が何も出さなければよい
-
----
-
-## 注意点
-
-- **Remote Control の性質**
-  - この PC からは外向きの HTTPS だけで、受信のポートは開けない（公式ドキュメント）
-  - つないでいる間、会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される
-  - この claude.ai のアカウントで入れる人は、スマートフォンやブラウザから `<PROJECT_DIR>` でこのユーザーとして Claude Code を動かせる。アカウントのパスワードと端末の扱いは、この PC の管理者のパスワードと同じにする。Trusted Devices（claude.ai の設定）を使うと、登録した端末からしか操作できなくなる
-- **デスクトップにログオンしている必要がある**: タスクは `Interactive` で、ログオン中のデスクトップのセッションに WezTerm を開く。ログオフすると動かない
-- **WezTerm の窓が見える**: タスクはデスクトップに WezTerm の窓を開く。窓を閉じると Claude Code が止まる。最小化してよい
-- **Claude Code のサーバーが止まるとき**
-  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる（公式ドキュメント）。[止める・もう一度始める](#止めるもう一度始める)の手順 2 で始め直す
-  - PC がスリープすると、その間は使えない。公式ドキュメントは、復帰すれば自動でつなぎ直すと書いている（Windows の電源の設定は本書の対象外）
-- **一度きりの確認**: ディレクトリの信頼（`~/.claude.json`）と Remote Control の確認（`remoteDialogSeen`）を手順 4 で受ける。別の `PROJECT_DIR` にするときは信頼を受け直す
-- **`--spawn same-dir` を外さない**: 外すと `Choose [1/2]` の確認でタスクが止まる
-- **Remote Control を使えない設定**: `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`・`DISABLE_GROWTHBOOK`・`ANTHROPIC_BASE_URL` が環境変数か settings.json の `env` にあると使えない（公式ドキュメント）
-- **Claude Code の自動更新**: native installer は背景で更新する。動いているサーバーは古い版のままで、次に始め直したときから新しい版になる
-- **起動時の自動起動**: タスクにログオンのトリガー（`New-ScheduledTaskTrigger -AtLogOn`）を足せば、ログオンで自動で始められる
