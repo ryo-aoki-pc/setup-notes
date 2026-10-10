@@ -26,7 +26,7 @@
    ```
 
    ```bash
-   LAN_SUBNET=''                      # 許可する送信元 IPv4 の CIDR（例: 192.168.1.0/24）
+   LAN_SUBNET=''                      # 許可する送信元 IPv4 の CIDR（例: 192.168.1.0/24、制限なしは 0.0.0.0/0）
    ```
 
    ```bash
@@ -42,6 +42,7 @@
 
    - ホストの SSH のポート 22 は変えない
    - `LAN_SUBNET` は、サーバーから見えるクライアントの送信元に合わせる。VPN の相手だけに許可するときは、その VPN の CIDR にする
+   - 送信元 IPv4 を制限しないときは、`LAN_SUBNET='0.0.0.0/0'` と明示する。待ち受ける IP とポートは引き続き限定する
    - 待ち受ける NIC が別の zone に属しているなら、任意変数のブロックの `FW_ZONE=` をその名前に変える
    - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#初期設定と管理者の作成)の手順 1 と[Git の接続を確かめる](#git-の接続を確かめる)の手順 3・5 の番号も同じにする
    - 空のままなら先へ進まない
@@ -64,8 +65,6 @@
    ports = [int(value) for value in sys.argv[3:]]
    if address.is_loopback or address.is_unspecified or address.is_multicast:
        raise SystemExit('中断: SERVER_IP は LAN または VPN の待ち受け IPv4 にする')
-   if network.prefixlen == 0:
-       raise SystemExit('中断: LAN_SUBNET に全 IPv4 の許可は指定しない')
    if any(not 1024 <= port <= 65535 for port in ports) or ports[0] == ports[1]:
        raise SystemExit('中断: 2 つのポートは異なる 1024〜65535 の番号にする')
    links = json.loads(subprocess.check_output(['ip', '-j', '-4', 'addr', 'show']))
@@ -116,7 +115,7 @@
    - 値の確認が `OK` で、firewalld が `running`、`導入する版:` と同じ番号の Forgejo の版が表示されればよい
    - 調べられないときは `urllib.error.URLError` などを表示し、何も取得せずに止まる。サーバーから `codeberg.org` へ HTTPS で接続できるか確かめてから貼り直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
-   - zone の `target` が `ACCEPT`、zone が `trusted`、または Web・Git 用 SSH ポートへの広い許可があれば、公開前に管理者へ確認する
+   - `LAN_SUBNET` が `0.0.0.0/0` 以外のときに、zone の `target` が `ACCEPT`、zone が `trusted`、または Web・Git 用 SSH ポートへの広い許可があれば、公開前に管理者へ確認する
    - **`sudo podman` は使わない**
    - **この項の手順 3 は、同じシェルに続けて貼る**
 
@@ -194,6 +193,7 @@
 
    - `active`・`generated` が出て、コンテナ内の UID・GID が 1000 ならよい
    - **`systemctl --user enable` は使わない**
+   - 本書の `systemctl --user` が `Failed to connect to user scope bus` で失敗したときは、`--machine="$(id -un)@.host"` を付け、同じ一般ユーザーでそのコマンドを実行し直す
    - 起動に失敗したら `journalctl --user -u forgejo.service -n 100 --no-pager` と `podman logs forgejo` を見る。SELinux の拒否は `sudo ausearch -m AVC -ts recent` で確かめ、SELinux を無効にしない
 
 1. 初期設定のページと localhost の待ち受けを確かめる。
@@ -231,41 +231,76 @@
    - 「Install Forgejo」を押し、作った管理者でログインできることを確かめる
    - **次の手順は、管理者でログインできてから貼る**
 
-1. 初期設定のロックと自己登録の無効化をサーバーで確かめる。
+1. 初期設定の完了と登録の拒否をサーバーで確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if /usr/bin/python3 - <<'PY'
-   import configparser
+   if [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
+   elif /usr/bin/python3 - "${FORGEJO_HTTP_PORT}" <<'PY'
+   import json
    from pathlib import Path
+   import re
+   import subprocess
+   import urllib.error
+   import urllib.request
+   import sys
 
    data = Path.home() / '.local/share/forgejo'
-   config = configparser.ConfigParser(interpolation=None)
-   path = data / 'custom/conf/app.ini'
-   if not path.is_file():
-       raise SystemExit('中断: app.ini が見つからない')
-   config.read_string('[DEFAULT]\n' + path.read_text())
-   for section, key in [('security', 'INSTALL_LOCK'), ('service', 'DISABLE_REGISTRATION')]:
-       if not config.getboolean(section, key, fallback=False):
-           raise SystemExit(f'中断: {section}.{key} が true ではない')
-       print(f'{section}.{key}=true')
-   if not (data / 'data/forgejo.db').is_file():
-       raise SystemExit('中断: SQLite の DB が見つからない')
-   print('SQLite の DB: OK')
+   if not (data / 'custom/conf/app.ini').is_file() or not (data / 'data/forgejo.db').is_file():
+       raise SystemExit('中断: 設定ファイルまたは SQLite の DB が見つからない')
+
+   class NoRedirect(urllib.request.HTTPRedirectHandler):
+       def redirect_request(self, req, fp, code, msg, headers, newurl):
+           return None
+
+
+   def require_initialized(url, admin_command):
+       opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+       def get(route):
+           request = urllib.request.Request(url + route, headers={'Cookie': 'lang=en-US'})
+           try:
+               response = opener.open(request, timeout=10)
+           except urllib.error.HTTPError as error:
+               response = error
+           with response:
+               return response.status, response.headers, response.read().decode('utf-8')
+
+       status, _, body = get('/api/healthz')
+       if status != 200 or json.loads(body).get('status') != 'pass':
+           raise SystemExit('中断: ヘルスチェックが成功しない')
+       status, headers, _ = get('/install')
+       if status not in (302, 303, 404) or '/install' in headers.get('Location', ''):
+           raise SystemExit('中断: 初期設定画面が閉じていない')
+       status, _, body = get('/user/sign_up?lang=en-US')
+       if status not in (200, 403) or 'registration is disabled' not in body.lower():
+           raise SystemExit('中断: 自己登録の拒否を確認できない')
+       if '/user/login/openid' in body or '/user/sign_up?openid' in body:
+           raise SystemExit('中断: OpenID の入口が残っている')
+       result = subprocess.run(admin_command, capture_output=True, text=True, timeout=60)
+       if result.returncode or not re.search(r'^\s*\d+\s+.*\btrue\s*$', result.stdout, re.M):
+           raise SystemExit('中断: 有効な管理者を確認できない')
+       print('初期設定画面の閉鎖・自己登録拒否・OpenID 入口なし・healthz・有効な管理者: OK')
+
+
+   require_initialized('http://127.0.0.1:' + sys.argv[1],
+                       ['podman', 'exec', 'forgejo', '/usr/local/bin/gitea', '--config',
+                        '/var/lib/gitea/custom/conf/app.ini', 'admin', 'user', 'list', '--admin'])
    PY
    then
-     podman exec forgejo /usr/local/bin/gitea --config /var/lib/gitea/custom/conf/app.ini admin user list
+     podman exec forgejo /usr/local/bin/gitea --config /var/lib/gitea/custom/conf/app.ini admin user list --admin
    else
-     echo '中断: この項の手順 2 の初期設定を完了する' >&2
+     echo '中断: この項の手順 2 の初期設定とログインを確認する' >&2
    fi
    ```
 
-   - ロックと自己登録無効が `true` で、ユーザーの一覧に作成した管理者があり、管理者の列が有効ならよい
-   - **`app.ini` を `cat` しない**。トークンの署名鍵などの秘密が入る
+   - 実効確認が `OK` で、`--admin` で絞った一覧に作成したユーザーがあり、`IsActive` が `true` ならよい
+   - **`app.ini` の内容は読まない・表示しない**。トークンの署名鍵などの秘密が入る
 
 ### LAN に公開する
 
-1. 送信元と宛先を限定した、この手順専用の firewalld の規則を追加する。
+1. 指定した送信元 CIDR・宛先・ポートで、この手順専用の firewalld の規則を追加する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -287,8 +322,10 @@
        echo '中断: 同じ規則が既にあるので、既存の構築と重ねない' >&2
      else
        for rule in "${FORGEJO_RULES[@]}"; do
-         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --add-rich-rule="${rule}" &&
-         sudo firewall-cmd --zone="${FW_ZONE}" --add-rich-rule="${rule}" || break
+         if ! sudo firewall-cmd --permanent --zone="${FW_ZONE}" --add-rich-rule="${rule}" ||
+            ! sudo firewall-cmd --zone="${FW_ZONE}" --add-rich-rule="${rule}"; then
+           break
+         fi
        done
        sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
        sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
@@ -297,7 +334,8 @@
    ```
 
    - runtime と permanent に、指定した送信元・宛先・Web と Git 用 SSH の 2 規則があればよい
-   - **既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは送信元を絞れない**。公開前に管理者へ既存の許可を確認する
+   - `LAN_SUBNET='0.0.0.0/0'` のときは、指定した宛先とポートへの全 IPv4 送信元を許可する
+   - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない。公開前に管理者へ既存の許可を確認する
    - **中断や失敗が出たらこの項の手順 2 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
 
 1. 初期設定済みの Quadlet を LAN 用に変え、サービスを再起動する。
@@ -307,24 +345,73 @@
    if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
      echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
-   import configparser
    import ipaddress
+   import json
    import os
    from pathlib import Path
+   import re
+   import subprocess
    import sys
+   import urllib.error
+   import urllib.request
 
    address = str(ipaddress.IPv4Address(sys.argv[1]))
    http_port, ssh_port = sys.argv[2:]
-   config = configparser.ConfigParser(interpolation=None)
-   config.read_string('[DEFAULT]\n' + (Path.home() / '.local/share/forgejo/custom/conf/app.ini').read_text())
-   if not config.getboolean('security', 'INSTALL_LOCK', fallback=False):
-       raise SystemExit('中断: 初期設定が終わっていない')
-   if not config.getboolean('service', 'DISABLE_REGISTRATION', fallback=False):
-       raise SystemExit('中断: 自己登録が無効ではない')
+   data = Path.home() / '.local/share/forgejo'
+   if not (data / 'custom/conf/app.ini').is_file() or not (data / 'data/forgejo.db').is_file():
+       raise SystemExit('中断: 設定ファイルまたは SQLite の DB が見つからない')
+
+   class NoRedirect(urllib.request.HTTPRedirectHandler):
+       def redirect_request(self, req, fp, code, msg, headers, newurl):
+           return None
+
+
+   def require_initialized(url, admin_command):
+       opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+       def get(route):
+           request = urllib.request.Request(url + route, headers={'Cookie': 'lang=en-US'})
+           try:
+               response = opener.open(request, timeout=10)
+           except urllib.error.HTTPError as error:
+               response = error
+           with response:
+               return response.status, response.headers, response.read().decode('utf-8')
+
+       status, _, body = get('/api/healthz')
+       if status != 200 or json.loads(body).get('status') != 'pass':
+           raise SystemExit('中断: ヘルスチェックが成功しない')
+       status, headers, _ = get('/install')
+       if status not in (302, 303, 404) or '/install' in headers.get('Location', ''):
+           raise SystemExit('中断: 初期設定画面が閉じていない')
+       status, _, body = get('/user/sign_up?lang=en-US')
+       if status not in (200, 403) or 'registration is disabled' not in body.lower():
+           raise SystemExit('中断: 自己登録の拒否を確認できない')
+       if '/user/login/openid' in body or '/user/sign_up?openid' in body:
+           raise SystemExit('中断: OpenID の入口が残っている')
+       result = subprocess.run(admin_command, capture_output=True, text=True, timeout=60)
+       if result.returncode or not re.search(r'^\s*\d+\s+.*\btrue\s*$', result.stdout, re.M):
+           raise SystemExit('中断: 有効な管理者を確認できない')
+       print('初期設定画面の閉鎖・自己登録拒否・OpenID 入口なし・healthz・有効な管理者: OK')
+
+
+   require_initialized(f'http://127.0.0.1:{http_port}',
+                       ['podman', 'exec', 'forgejo', '/usr/local/bin/gitea', '--config',
+                        '/var/lib/gitea/custom/conf/app.ini', 'admin', 'user', 'list', '--admin'])
    path = Path.home() / '.config/containers/systemd/forgejo.container'
    text = path.read_text()
    if not text.startswith('# setup-notes: forgejo\n'):
        raise SystemExit('中断: この手順が作った Quadlet ではない')
+   for line in [
+       'Environment=FORGEJO__service__DISABLE_REGISTRATION=true',
+       'Environment=FORGEJO__service__REQUIRE_SIGNIN_VIEW=true',
+       'Environment=FORGEJO__openid__ENABLE_OPENID_SIGNIN=false',
+       'Environment=FORGEJO__openid__ENABLE_OPENID_SIGNUP=false',
+   ]:
+       if text.splitlines().count(line) != 1:
+           raise SystemExit('中断: 公開後の登録・閲覧制限の定義が一致しない')
+   if re.search(r'^Environment=.*FORGEJO__security__INSTALL_LOCK=', text, re.M):
+       raise SystemExit('中断: 初期設定ロックを環境変数で上書きしない')
    replacements = {
        f'PublishPort=127.0.0.1:{http_port}:3000': f'PublishPort={address}:{http_port}:3000',
        f'PublishPort=127.0.0.1:{ssh_port}:2222': f'PublishPort={address}:{ssh_port}:2222',
@@ -362,7 +449,8 @@
    - [初期設定と管理者の作成](#初期設定と管理者の作成)の手順 1 の端末で `Ctrl+C` を押してトンネルを閉じる
    - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
    - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
-   - サーバーへ届く別の許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことを確かめる。ルーターのポート転送は作らない
+   - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、サーバーへ届く許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
+   - LAN と VPN の両方で使う場合は、それぞれのクライアントでログインを確かめる。ルーターのポート転送は作らない
    - 接続できないときは、サーバーの IP・FW_ZONE・クライアントの送信元と VPN の経路を確かめる
 
 ### Git の接続を確かめる
@@ -476,7 +564,8 @@
 1. 別の PC で、OS の再起動後の Web と Git を確かめる。
 
    - LAN または VPN の URL で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
-   - 作業場所で `git fetch` を実行する。許可外の送信元からは、Web と Git 用 SSH の両方へ接続できないことも確かめる
+   - 作業場所で `git fetch` を実行する
+   - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことも確かめる
    - **次の手順は、Web と Git を確かめてから貼る**
 
 ### 自動更新を有効にする
@@ -502,6 +591,7 @@
    import json
    import os
    from pathlib import Path
+   import pwd
    import re
    import shutil
    import socket
@@ -544,8 +634,15 @@
 
 
    def systemctl(*args, check=True, timeout=600):
-       return subprocess.run(['systemctl', '--user', *args], check=check, timeout=timeout,
-                             capture_output=True, text=True).stdout.strip()
+       result = subprocess.run(['systemctl', '--user', *args], check=False, timeout=timeout,
+                               capture_output=True, text=True)
+       if result.returncode and 'Failed to connect to user scope bus' in result.stderr:
+           username = pwd.getpwuid(os.getuid()).pw_name
+           result = subprocess.run(['systemctl', '--user', f'--machine={username}@.host', *args],
+                                   check=False, timeout=timeout, capture_output=True, text=True)
+       if check:
+           result.check_returncode()
+       return result.stdout.strip()
 
 
    def unit_state():
@@ -1112,11 +1209,17 @@
      tar --extract --gzip --file="${FORGEJO_RESTORE}" --directory="${FORGEJO_RESTORE_WORK}" \
        --no-same-owner .local/share/forgejo .config/containers/systemd/forgejo.container &&
      /usr/bin/python3 - "${FORGEJO_RESTORE_WORK}" <<'PY'
-   import configparser
+   import json
    from pathlib import Path
    import re
+   import shutil
    import subprocess
    import sys
+   import tempfile
+   import time
+   import urllib.error
+   import urllib.request
+   import uuid
 
    work = Path(sys.argv[1])
    quadlet = work / '.config/containers/systemd/forgejo.container'
@@ -1126,14 +1229,82 @@
    images = re.findall(r'^Image=(codeberg\.org/forgejo/forgejo:\d+\.\d+\.\d+-rootless)$', text, re.M)
    if len(images) != 1:
        raise SystemExit('中断: 固定した rootless イメージの行が一意ではない')
-   config = configparser.ConfigParser(interpolation=None)
    data = work / '.local/share/forgejo'
-   config.read_string('[DEFAULT]\n' + (data / 'custom/conf/app.ini').read_text())
-   if not config.getboolean('security', 'INSTALL_LOCK', fallback=False) or not (data / 'data/forgejo.db').is_file():
-       raise SystemExit('中断: 初期設定済みのデータが入っていない')
-   print('復元するイメージ: ' + images[0])
+   if not (data / 'custom/conf/app.ini').is_file() or not (data / 'data/forgejo.db').is_file():
+       raise SystemExit('中断: 設定ファイルまたは SQLite の DB が入っていない')
+   if re.search(r'^Environment=.*FORGEJO__security__INSTALL_LOCK=', text, re.M):
+       raise SystemExit('中断: 初期設定ロックを環境変数で上書きした定義は使わない')
+   print('復元するイメージ: ' + images[0], flush=True)
    subprocess.run(['podman', 'pull', images[0]], check=True)
-   print('復元前の構成確認: OK')
+   subprocess.run(['podman', 'run', '--rm', '--entrypoint', '/usr/local/bin/gitea',
+                   images[0], '--version'], check=True)
+
+   class NoRedirect(urllib.request.HTTPRedirectHandler):
+       def redirect_request(self, req, fp, code, msg, headers, newurl):
+           return None
+
+
+   def require_initialized(url, admin_command):
+       opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+       def get(route):
+           request = urllib.request.Request(url + route, headers={'Cookie': 'lang=en-US'})
+           try:
+               response = opener.open(request, timeout=10)
+           except urllib.error.HTTPError as error:
+               response = error
+           with response:
+               return response.status, response.headers, response.read().decode('utf-8')
+
+       status, _, body = get('/api/healthz')
+       if status != 200 or json.loads(body).get('status') != 'pass':
+           raise SystemExit('中断: ヘルスチェックが成功しない')
+       status, headers, _ = get('/install')
+       if status not in (302, 303, 404) or '/install' in headers.get('Location', ''):
+           raise SystemExit('中断: 初期設定画面が閉じていない')
+       status, _, body = get('/user/sign_up?lang=en-US')
+       if status not in (200, 403) or 'registration is disabled' not in body.lower():
+           raise SystemExit('中断: 自己登録の拒否を確認できない')
+       if '/user/login/openid' in body or '/user/sign_up?openid' in body:
+           raise SystemExit('中断: OpenID の入口が残っている')
+       result = subprocess.run(admin_command, capture_output=True, text=True, timeout=60)
+       if result.returncode or not re.search(r'^\s*\d+\s+.*\btrue\s*$', result.stdout, re.M):
+           raise SystemExit('中断: 有効な管理者を確認できない')
+       print('初期設定画面の閉鎖・自己登録拒否・OpenID 入口なし・healthz・有効な管理者: OK')
+
+
+   name = 'forgejo-restore-check-' + uuid.uuid4().hex
+   with tempfile.TemporaryDirectory(prefix='.check-', dir=work) as temporary:
+       check_data = Path(temporary) / 'data'
+       shutil.copytree(data, check_data, symlinks=True)
+       subprocess.run(['podman', 'network', 'create', '--internal', '--disable-dns', name],
+                      check=True, capture_output=True)
+       try:
+           subprocess.run(['podman', 'run', '-d', '--name', name, '--network', name,
+                           '--userns=keep-id:uid=1000,gid=1000', '--user=1000:1000',
+                           '--volume', f'{check_data}:/var/lib/gitea:Z',
+                           '--publish', '127.0.0.1::3000',
+                           '--env', 'FORGEJO__server__HTTP_ADDR=0.0.0.0',
+                           '--env', 'FORGEJO__server__HTTP_PORT=3000',
+                           '--env', 'FORGEJO__server__START_SSH_SERVER=false', images[0]],
+                          check=True, capture_output=True)
+           port = subprocess.check_output(['podman', 'port', name, '3000/tcp'], text=True).strip()
+           if not re.fullmatch(r'127\.0\.0\.1:[0-9]+', port):
+               raise SystemExit('中断: 検証用ポートが localhost に限定されていない')
+           for attempt in range(60):
+               try:
+                   require_initialized('http://' + port,
+                                       ['podman', 'exec', name, '/usr/local/bin/gitea', '--config',
+                                        '/var/lib/gitea/custom/conf/app.ini', 'admin', 'user', 'list', '--admin'])
+                   break
+               except (SystemExit, OSError, ValueError) as error:
+                   if attempt == 59:
+                       raise SystemExit(f'中断: 復元前の隔離確認に失敗した: {error}') from error
+                   time.sleep(1)
+       finally:
+           subprocess.run(['podman', 'rm', '-f', name], capture_output=True)
+           subprocess.run(['podman', 'network', 'rm', name], check=True, capture_output=True)
+   print('復元前のファイル・版・隔離環境での実効確認: OK')
    PY
    then
      FORGEJO_RESTORE_READY="${FORGEJO_RESTORE_WORK}"
@@ -1142,8 +1313,10 @@
    fi
    ```
 
-   - `復元前の構成確認: OK` が出て、バックアップ当時のイメージが取得できればよい
-   - **次の手順は、復元する版が正しく、構成確認が完了してから貼る**
+   - バックアップ当時の版が表示され、`復元前のファイル・版・隔離環境での実効確認: OK` が出ればよい
+   - 展開したデータの一時コピーで確認する。検証用コンテナは localhost のみで待ち受け、外向き通信のできない専用ネットワークを使う
+   - 空き容量不足や隔離確認の失敗が出たら、本番データは入れ替えずに止める
+   - **次の手順は、復元する版が正しく、隔離確認が完了してから貼る**
 
 1. サービスを停止する。
 
@@ -1206,7 +1379,8 @@
 
    - Web にログインし、バックアップ時点のリポジトリとコミットが見えることを確かめる
    - `git fetch` を実行し、確認用の新しいコミットを push する。SSH のホスト鍵の指紋もバックアップ当時と一致することを確かめる
-   - 自己登録が無効なことと、許可外の送信元から接続できないことを確かめる
+   - 初期設定画面が開かず、通常の自己登録と OpenID の登録ができないことを確かめる
+   - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
    - 退避した現在のデータと展開用の作業場所は、復元を確認するまで消さない
 
 1. 新しい版の不具合で戻したときだけ、その版への自動更新を保留する。
@@ -1289,7 +1463,8 @@
 1. 更新したときは、別の PC で更新後の Web と Git を確かめる。
 
    - 管理者のログイン、リポジトリの一覧・既存のコミット、`git fetch`、新しいコミットの push を確かめる
-   - 自己登録が無効で、許可外の送信元から接続できないことを確かめる
+   - 初期設定画面が開かず、通常の自己登録と OpenID の登録ができないことを確かめる
+   - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
    - 問題があれば、この節のリードの WARNING のとおり、更新直前のアーカイブを戻して新しい版を保留する
 
 1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。

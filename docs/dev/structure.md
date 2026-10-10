@@ -112,6 +112,12 @@
   - 「自動更新を有効にする」の手順 1〜3 で `~/.local/bin/forgejo-auto-update`（Python）とユーザーの `forgejo-auto-update.service`・`.timer`（毎日 4:00〜4:30、`Persistent` 無し）を置く。新しい版があれば停止バックアップ（`forgejo-auto-*`、新しい 3 つを残す）→ イメージの行の更新 → 起動 → `/api/healthz`・Git 用 SSH・版・`doctor check --all` の確認を行い、失敗したら自動で戻して `~/.local/state/forgejo-auto-update/skip-version` に保留する。Forgejo が止まっている間は何もしない
   - バックアップの手順 1・復元の手順 3・ロールバックの手順 2 は、自動更新の実行中（`ActiveState=activating`）なら止める。復元の手順 7 は、新しい版の不具合で戻したときにその版を保留する。更新の節は、結果の確認・今すぐ更新・別の PC での確認・保留の解除の 4 手順
   - LAN・VPN 内の HTTP 3000/tcp・SSH 2222/tcp に公開する。初期設定中は localhost に限定し、管理者作成後に指定 IPv4 へ切り替える
+  - 送信元は `LAN_SUBNET` で指定し、`0.0.0.0/0` を明示指定した場合は IPv4 の送信元を制限しない。拒否試験は CIDR を制限した場合だけ行う
+  - **実機での検証状態（2026-10-11 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で 16.0.5-rootless を構築した
+    - Quadlet、SELinux Enforcing の `:Z`、実 firewalld の runtime / permanent、サービス再起動、停止バックアップと隔離コピーの復元、最新版での自動更新確認とタイマー有効化を通した
+    - 管理者作成とログイン、LAN/VPN の Web・Git 操作は利用者が確認した。ホスト側でリポジトリと Git 参照の再起動後の保持、コミットを含む隔離復元と `git fsck` も確認した。復元側への認証・Git 通信と OS 再起動・全ログアウトは未検証
+  - 初期設定完了・LAN 公開前・復元前の確認は、秘密入り `app.ini` を直接読まず、有効な管理者一覧・初期画面閉鎖・登録拒否・OpenID 入口なし・healthz を使う。復元前はデータの一時コピーを `--internal --disable-dns` の専用ネットワークと localhost のコンテナで確かめる
+  - 実機のユーザー unit で `systemctl --user` の bus 接続拒否が出たため、自動更新はそのエラーの場合だけ現在のユーザーの `--machine=<ユーザー>@.host` で再試行する。修正後の unit 内の状態確認と最新版確認を実機で通した
   - 前提は podman.md・linger.md と、常時動かす PC のサスペンドを止める almalinux-setup.md の任意節
   - 永続データは `~/.local/share/forgejo`、Quadlet は `~/.config/containers/systemd/forgejo.container`
   - 更新・停止バックアップと復元・ロールバックを案内し、撤去しても Podman と linger の共有前提は残す。理由・公式資料は `docs/reference/forgejo.md`、検証状態と実行結果は `docs/verification/forgejo.md` に置く
