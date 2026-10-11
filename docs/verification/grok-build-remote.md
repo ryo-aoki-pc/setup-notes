@@ -1,8 +1,8 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy）の検証記録
 
-[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/497bb823606053e5c08d4f7d59bde4e3274707e8/docs/grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
-Windows 11 の現行手順: [Codeg の導入](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[Claude Code・Codex CLI の操作](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)。
+現行手順: AlmaLinux 10 の [Codeg 導入](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Claude Code・Codex CLI 操作](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)、Windows 11 の [Codeg 導入](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[Claude Code・Codex CLI 操作](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)。
 
 ## 対象と検証環境
 
