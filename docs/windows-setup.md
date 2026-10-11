@@ -325,7 +325,10 @@
 > - PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常（管理者ではない）の窓は、窓を開く手順に従って切り替える
 >   - 管理者: [Windows Update](#windows-update)、[PC 全体の設定](#pc-全体の設定)から[WSL と再起動](#wsl-と再起動)まで
 >   - 通常: [Microsoft Store の更新](#microsoft-store-の更新)から[HackGen Console NF](#hackgen-console-nf)まで、再起動後の PowerShell の手順
-> - bash は Git Bash に貼る。[SSH でログインを確かめる](#ssh-でログインを確かめる)だけはクライアントの bash、それより後は WezTerm の新しい Git Bash のタブを使う
+> - bash の貼り先は次の 3 段階
+>   - [SSH でログインを確かめる](#ssh-でログインを確かめる): クライアントの bash（この PC の WSL の AlmaLinux 10 など）
+>   - [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定): 同じ項の手順 2 で開く Git Bash の窓
+>   - それより後: 設定を入れた WezTerm の新しい Git Bash のタブ
 > - 前提: AI エージェントと GitHub のアカウント（[AlmaLinux 10 の初期設定](almalinux-setup.md#実施手順)のリードと同じ）
 > - [貼り付けの設定](#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 > - [WSL と再起動](#wsl-と再起動)の手順 2 で **再起動する**。Windows Update の再起動は[Windows Update](#windows-update)に従う
@@ -1783,9 +1786,8 @@
 
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)の全項を、この項で指定した端末で通す
-   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 4 の共通の bash 設定が読む
-   - その手順 8 で、スタートメニューの「WezTerm」から起動し、手順 9 を WezTerm のタブに貼って確かめる（新しいタブは Git Bash で開く）
+   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 4 で導入済み
+   - その項の手順 5 で WezTerm を起動し、手順 6 を新しい Git Bash のタブに貼って確かめる
    - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
    - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
 
@@ -5407,7 +5409,8 @@
    - 起動用のスクリプトとトークンは、そのまま残る
    - 失敗時は現行の本体と `codeg-server.prev` を残す。退避先の `codeg-server.exe`・`codeg-mcp.exe`・`web` が揃っているか確かめる
    - 揃っていれば、[停止](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 1 で止める
-   - 3 つが揃っていれば、現行の `codeg-server` のその 3 つだけを消し、`codeg-server.prev` から同じ場所に戻す。起動用のスクリプトとトークンは消さない。その後、同じ項の手順 2 で始める
+   - 3 つが揃っていれば、現行の `codeg-server` のその 3 つだけを消し、`codeg-server.prev` から同じ場所に戻す。起動用のスクリプトとトークンは消さない
+   - 復旧後は[Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 2 で始める
    - 退避先が揃っていなければ、どちらのディレクトリも消さず、移動やコピーが止まった原因を確かめる。前の版は一部が現行の場所、一部が退避先に残っていることがある
 
 1. ブラウザで動くことを確かめてから、前の版を消す。
@@ -5966,6 +5969,7 @@
 
 > [!IMPORTANT]
 > - **Administrators のユーザーが Windows で行う**。この項の手順 1 で開く **管理者の Windows PowerShell 5.1** に、以後と停止・更新・ロールバックのブロックを貼る
+> - フォルダー追加は[同期フォルダとデバイスを追加する](almalinux-setup.md#syncthing-同期フォルダとデバイスを追加する任意)に従い、**ホーム全体は同期しない**
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - 前提: 相手とつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](#ネットワークとリモート)）。この項の手順 7 で確かめる
 > - Syncthing そのものは、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この項の手順 8 のタスク）
@@ -7953,6 +7957,8 @@
 
 WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)を先に入れ、自分のユーザーの bash（Windows 11 は Git Bash）で行う。シェル統合は共通 bash 設定が読む。HackGen Console NF は任意。
 
+この項の手順 1〜4 は WezTerm の外の Git Bash の窓で行い、手順 2 の退避前に WezTerm のウィンドウをすべて閉じる。
+
 [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
 1. 既存の WezTerm の設定があるか確かめる。
@@ -7968,17 +7974,23 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
 1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
 
    ```bash
-   for f in ~/.wezterm.lua ~/.config/wezterm; do
-     if [ -e "$f.bak" ]; then echo "中断: $f.bak が既にある" >&2
-     elif [ -e "$f" ]; then mv -v "$f" "$f.bak"
-     fi
-   done
-   ls -ld ~/.wezterm.lua ~/.config/wezterm
+   (
+     for f in ~/.wezterm.lua ~/.config/wezterm; do
+       if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
+         echo "中断: $f.bak が既にある。何も退避していない" >&2
+         exit 1
+       fi
+     done
+     for f in ~/.wezterm.lua ~/.config/wezterm; do
+       if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
+     done
+     ls -ld ~/.wezterm.lua ~/.config/wezterm
+   )
    ```
 
    - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `中断:` と出たら、前に作った `.bak` を片付けて（要らなければ消して）から貼り直す
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
    - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
@@ -8088,6 +8100,8 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 [Git for Windows](#git-for-windows)・[アプリを入れる](#アプリを入れる)の scoop・[HackGen Console NF](#hackgen-console-nf)・[Neovim](#neovim)を先に済ませる。管理者ではない PowerShell で行い、VC++ ランタイムの導入時だけ UAC を許可する。
 
+この項の手順 2 の退避前に、Neovim を閉じる。
+
 [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
 
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
@@ -8103,13 +8117,23 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 1. 既存の Neovim の設定とデータがあれば、`.bak` を付けて退避する。
 
    ```powershell
-   foreach ($d in "$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data") {
-     if (Test-Path "$d.bak") { Write-Warning "$d.bak がすでにある" } elseif (Test-Path $d) { Move-Item $d "$d.bak"; "moved: $d" }
+   & {
+     $nvimPaths = @("$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data")
+     foreach ($d in $nvimPaths) {
+       if (Test-Path -LiteralPath "$d.bak") { throw "中断: $d.bak がすでにある。何も退避していない" }
+     }
+     foreach ($d in $nvimPaths) {
+       if (Test-Path -LiteralPath $d) {
+         Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop
+         "moved: $d"
+       }
+     }
+     $nvimPaths | ForEach-Object { '{0}: {1}' -f $_, (Test-Path -LiteralPath $_) }
    }
    ```
 
-   - 退避したものは `moved: …` と出る。何も出なければ、退避するものは無かった
-   - **注意**: `.bak` がすでにあると退避しない (警告が出る)。古い `.bak` を片付けてから、この手順を貼り直す
+   - 退避したものは `moved: …` と出る。最後の 2 行がどちらも `False` なら、元の設定とデータは残っていない
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
    - `nvim` は設定、`nvim-data` はプラグイン・Mason のツール・undo など
 
 1. この設定を `%LOCALAPPDATA%\nvim` に clone する。
@@ -8122,7 +8146,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - `custom` と出ればよい
    - すでに clone してあれば、`git clone` は飛ばされる
 
-1. Visual C++ のランタイムが無いときだけ入れ、外部コマンド・Neovim・zenhan・lazygit を scoop で入れる。
+1. Visual C++ のランタイムが無いときだけ入れ、外部コマンド・zenhan・lazygit を scoop で入れる。
 
    ```powershell
    if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { scoop install vcredist2022 }
@@ -8345,21 +8369,28 @@ Python 3.9 以上・Git が必要。部分ステージには lazygit 0.66.0 以�
 1. 設定リポジトリへ移り、Excel の差分表示を導入して確かめる。
 
    ```powershell
-   Set-Location -LiteralPath "$env:LOCALAPPDATA\lazygit"
-   python --version
-   python scripts/setup-excel-diff.py
-   python scripts/setup-excel-diff.py --check
+   & {
+     Push-Location -LiteralPath "$env:LOCALAPPDATA\lazygit" -ErrorAction Stop
+     try {
+       python --version
+       python scripts/setup-excel-diff.py
+       python scripts/setup-excel-diff.py --check
+     } finally {
+       Pop-Location
+     }
+   }
    ```
 
    - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
    - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する
    - `--check` は読み取りだけの確認
+   - 終わると元の作業ディレクトリへ戻る
 
 ---
 
 ### lazygit で Excel の差分を確かめる
 
-Excel のある Git リポジトリで行う。例のファイル名は実際の名前に置き換える。属性の仕様は [Excel 差分の説明](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#excel-の差分表示)を参照する。
+対象の Excel がある Git リポジトリへ移ってから行う。例のファイル名は実際の名前に置き換える。属性の仕様は [Excel 差分の説明](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#excel-の差分表示)を参照する。
 
 > [!CAUTION]
 > - **通常の Excel 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Excel にテキストのパッチは適用できず、新規ファイルでは Excel の代わりに変換後のテキストをステージする場合がある
@@ -8384,7 +8415,7 @@ Excel のある Git リポジトリで行う。例のファイル名は実際の
 ### lazygit で Excel のセル変更を部分ステージする
 
 
-lazygit・delta・Excel 差分表示を導入済みのリポジトリで行う。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてから使う。
+lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git リポジトリへ移ってから行う。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてから使う。
 
 1. lazygit のファイル一覧で対象を選び、`E` を押す。
 
@@ -8408,7 +8439,7 @@ lazygit・delta・Excel 差分表示を導入済みのリポジトリで行う�
 
 ### lazygit で大きな Excel の変換を待つ（任意）
 
-変換中のブックは、完了後にファイルを選び直すか `R` で表示する。例のファイル名は実際の名前に置き換える。
+対象の Excel がある Git リポジトリへ移ってから行う。変換中のブックは、完了後にファイルを選び直すか `R` で表示する。例のファイル名は実際の名前に置き換える。
 
 1. 全セルの変換を待って差分を表示する。
 
@@ -8465,21 +8496,46 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    ```powershell
    git clone https://github.com/ryo-aoki-pc/md-table-excel.git "$env:USERPROFILE\md-table-excel"
-   Set-Location -LiteralPath "$env:USERPROFILE\md-table-excel"
-   python scripts/setup-mdtable.py
-   python scripts/setup-mdtable.py --check
+   & {
+     Push-Location -LiteralPath "$env:USERPROFILE\md-table-excel" -ErrorAction Stop
+     try {
+       python scripts/setup-mdtable.py
+       python scripts/setup-mdtable.py --check
+     } finally {
+       Pop-Location
+     }
+   }
    ```
 
    - 依存はリポジトリ外の専用仮想環境へ入る
    - 起動コマンドは `%USERPROFILE%\.local\bin`。PATH に無いときは案内に従って加える
    - `--check` は何も変更せず状態を確かめる
    - 更新時は clone 先で `git pull --ff-only` し、導入・確認コマンドを再実行する
+   - 終わると元の作業ディレクトリへ戻る
+
+---
+
+### mdtable のブックを Excel で編集するときの注意
+
+- セルは文字列書式（`@`）。書式を消したり「すべて貼り付け」したりすると、`1/2` が日付・`3.10` が 3.1 などに変わることがある。日付のセルがあると取り込みは止まる
+- 貼り付けは「値のみ」か、セルの編集中（F2・数式バー）に行う
+- オートコレクト（`(c)` → `©` など）は入力を変える。コードを書くなら Excel の [ファイル] → [オプション] で切る
+- 見出し行の直下に行を挿入すると、見出しの書式が写る（HTML の表では `<th>` になる）。[挿入オプション] で「下と同じ書式を適用」を選ぶ
+- [セルを結合して中央揃え] は中央揃えも付く。結合だけなら [セルを結合]
+- 「テーブルとして書式設定」（Ctrl+T）は使わない
+- セルの一部だけの書式（文字の色・斜体など）は書き戻さない。強調は `**` などで書く
+- シート名の変更・並べ替えはよい。シートを消した表は変更なしとして扱う。足したシートは読まない
+- 表から離れたセルに書いた値は無視する（警告を出す）
+- フォントは、書き出す PC に HackGen Console NF が入っていればそれ、無ければ BIZ UDゴシック（`\` が `¥` に見える）。環境変数 `MDTABLE_FONT` にフォント名を入れると、そのフォントにする
 
 ---
 
 ### mdtable で Markdown の表を Excel と往復する
 
-編集する文書のあるディレクトリで行う。例の `README.md` は実際の文書名に置き換える。Excel が必要。
+編集する自分の Markdown があるディレクトリへ移ってから行う。例の `README.md` と `README.tables.xlsx` は、対象の文書名と対応するブック名に置き換える。Excel が必要。
+
+> [!CAUTION]
+> この項の手順 1・2 で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
 
 1. 表を一覧にし、Excel で開いて編集する。
 
@@ -8512,18 +8568,3 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 ### 共通の bash 設定を手動で移行する（任意）
 
 通常の導入が中断した場合は、[AlmaLinux 側の共通 bash 手動移行](almalinux-setup.md#共通の-bash-設定を手動で移行する任意)の全節を自分のユーザーの Git Bash で行う。WSL は WSL 側で別に行う。
-
----
-
-### mdtable のブックを Excel で編集するときの注意
-
-- セルは文字列書式（`@`）。書式を消したり「すべて貼り付け」したりすると、`1/2` が日付・`3.10` が 3.1 などに変わることがある。日付のセルがあると取り込みは止まる
-- 貼り付けは「値のみ」か、セルの編集中（F2・数式バー）に行う
-- オートコレクト（`(c)` → `©` など）は入力を変える。コードを書くなら Excel の [ファイル] → [オプション] で切る
-- 見出し行の直下に行を挿入すると、見出しの書式が写る（HTML の表では `<th>` になる）。[挿入オプション] で「下と同じ書式を適用」を選ぶ
-- [セルを結合して中央揃え] は中央揃えも付く。結合だけなら [セルを結合]
-- 「テーブルとして書式設定」（Ctrl+T）は使わない
-- セルの一部だけの書式（文字の色・斜体など）は書き戻さない。強調は `**` などで書く
-- シート名の変更・並べ替えはよい。シートを消した表は変更なしとして扱う。足したシートは読まない
-- 表から離れたセルに書いた値は無視する（警告を出す）
-- フォントは、書き出す PC に HackGen Console NF が入っていればそれ、無ければ BIZ UDゴシック（`\` が `¥` に見える）。環境変数 `MDTABLE_FONT` にフォント名を入れると、そのフォントにする

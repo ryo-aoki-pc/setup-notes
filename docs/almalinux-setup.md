@@ -6,6 +6,8 @@
 
 > [!IMPORTANT]
 > - 前提: AlmaLinux 10 Workstation のインストール直後とインターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入-実施手順)を使う
+> - AI エージェントと GitHub のアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
+> - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - [WezTerm](#wezterm)を起動し直した後は、そのタブに貼る
 
@@ -1292,8 +1294,7 @@
 1. 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、起動し直した WezTerm に移る。
 
    - [WezTerm の設定を導入する](#wezterm-の設定を導入する)の全項を、この項で指定した端末で通す
-   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、[共通の bash 設定](#共通の-bash-設定)が読む
-   - その手順 8 で WezTerm を起動し、手順 9 を WezTerm のタブに貼って確かめる
+   - 参照先の手順 5 で WezTerm を起動し、手順 6 を WezTerm のタブに貼って確かめる
    - **この後の手順は、WezTerm のタブで貼る**（Nerd Font のアイコンを使う TUI の確かめも、WezTerm で見る）
 
 ### WezTerm と HackGen Console NF をデスクトップで使う
@@ -1419,11 +1420,10 @@
 1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
 
    - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の全項を、この項で指定した端末で通す
-   - 参照先の手順 1・2（EPEL）・7〜9（Homebrew と `~/.bashrc` 追記）・12（フォント）は飛ばす
-   - 参照先の手順 3 で Node.js・ibus-anthy・wl-clipboard、手順 10 で lazygit・ripgrep・fd を入れる（Neovim はこの項の手順 1 で導入済み）
-   - 参照先で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
-   - その手順 15 の後のログインし直しは、ここでは行わない（[再起動と確認](#再起動と確認)の手順 1 の再起動で読み直す）
-   - その手順 17 で Neovim の画面が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（その手順 18 は画面を開かない）
+   - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 5 で lazygit・ripgrep・fd を入れる
+   - 参照先の手順 7〜9 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
+   - 参照先の手順 9 の後はログインし直さず、[再起動と確認](#再起動と確認)の手順 1 の再起動で読み直す
+   - 参照先の手順 11 で Neovim が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（手順 12 は画面を開かない）
    - [日本語検索・整形・IME 連携の確認](#lazyvim-の日本語検索整形ime-連携を確かめる)は、[再起動と確認](#再起動と確認)の手順 8 で行う
 
 1. WezTerm で新しいタブを開き、既定のエディタを確かめる。
@@ -2905,7 +2905,7 @@
 - **Windows 11 では**、`~` は `%USERPROFILE%`（`C:\Users\<WIN_USER>`）。置くのは `%USERPROFILE%\.wezterm.lua` か `%USERPROFILE%\.config\wezterm\wezterm.lua`
   - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
-  - 導入は[WezTerm](#wezterm)の手順 5。参照先の手順 5〜7（直接追記）は行わず、手順 8 で端末を開き直す
+  - 導入は[WezTerm](#wezterm)の手順 5。[設定を導入する](#wezterm-の設定を導入する)の手順 5 で端末を開き直す
   - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Windows 11 の初期設定の「Git Bash と WezTerm の設定」](windows-setup.md#git-bash-と-wezterm-の設定)）
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
@@ -4124,7 +4124,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!IMPORTANT]
 > - 前提: [Podman](#podman-実施手順)と[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `podman info --format '{{.Host.Security.Rootless}}'` が `true`、`dnf repolist enabled | grep -E '^epel'` が EPEL を出さなければ、先に前提を通す
+> - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（ボックスは自分のユーザーの rootless の podman で動かすため）
 > - **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
 > - **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
@@ -8365,6 +8365,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ## 画像の道具（任意）
 
+- Dockerfile とコンテナイメージの検査（hadolint・dive・Trivy）に使う
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/image-tools.md)・[参考資料](reference/image-tools.md)・[ロールバックと注意点](extra/image-tools.md)
 
@@ -8373,7 +8374,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!IMPORTANT]
 > - 前提: [Homebrew](#homebrew)の手順 1〜3 と[Podman](#podman-実施手順)の手順 7（API ソケット）までを通す
-> - `command -v brew podman` が 2 行、`systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
+> - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
 > - **手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
 > - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
@@ -8559,7 +8560,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 前提: [Homebrew](#homebrew)の手順 1〜3、[Podman](#podman-実施手順)の手順 7（API ソケット）までを通す
 > - [Docker 向けツールの設定](#podman-docker-向けのツールから使う任意)も通す
-> - `command -v brew podman` が 2 行、`echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
+> - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 > - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 
@@ -9050,7 +9051,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!IMPORTANT]
 > - 前提: [Podman](#podman-実施手順)と[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `podman info --format '{{.Host.Security.Rootless}}'` が `true`、`dnf repolist enabled | grep -E '^epel'` が EPEL を出さなければ、先に前提を通す
+> - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（コンテナを自分のユーザーの rootless の podman で動かすため）
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 > - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
@@ -9198,7 +9199,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!IMPORTANT]
 > - 前提: [Podman](#podman-実施手順)の手順 7（API ソケット）までと、[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `systemctl --user is-active podman.socket` が `active`、`dnf repolist enabled | grep -E '^epel'` が EPEL を出さなければ、先に前提を通す
+> - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
 > - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 > - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
@@ -11213,10 +11214,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - **VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いて自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
 > - **Secure Boot が有効な VM は先に[署名鍵](#secure-boot-の署名鍵-実施手順)を MOK に登録する**
-> - 再起動時の MokManager を VM のウィンドウで操作する。最初の画面は 10 秒で消える
-> - 有効な VM は、`mokutil --sb-state` が `SecureBoot enabled` であることを確認する
-> - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
-> - ホストオンリーだけの VM は署名鍵の手順 3 まで通し、[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3・4 でホストに鍵を作る。署名鍵の手順 5〜7 で登録する
+>   - 再起動時の MokManager を VM のウィンドウで操作する。最初の画面は 10 秒で消える
+>   - `mokutil --sb-state` が `SecureBoot enabled` であることを確認する
+>   - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
+>   - ホストオンリーだけなら、署名鍵の手順 3 まで通す
+>     - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)の手順 3・4 でホストに鍵を作り、署名鍵の手順 5〜7 で登録する
 > - **dnf では入れない**。Guest Additions を焼き込んだ派生イメージをこの VM でビルドし、`bootc switch` で切り替える（手順 3〜7）
 > - **手順 4 と手順 9 は、VM のウィンドウで行う**（手順 4 の CD の挿入は、ホスト側の操作）
 > - **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
@@ -13189,6 +13191,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に入れ、自分のユーザーの bash で行う。シェル統合は共通 bash 設定が読む。HackGen Console NF は任意。
 
+この項の手順 1〜4 は WezTerm の外の端末で行い、手順 2 の退避前に WezTerm のウィンドウをすべて閉じる。
+
 [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
 1. 既存の WezTerm の設定があるか確かめる。
@@ -13204,17 +13208,24 @@ WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に
 1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
 
    ```bash
-   for f in ~/.wezterm.lua ~/.config/wezterm; do
-     if [ -e "$f.bak" ]; then echo "中断: $f.bak が既にある" >&2
-     elif [ -e "$f" ]; then mv -v "$f" "$f.bak"
-     fi
-   done
-   ls -ld ~/.wezterm.lua ~/.config/wezterm
+   (
+     for f in ~/.wezterm.lua ~/.config/wezterm; do
+       if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
+         echo "中断: $f.bak が既にある。何も退避していない" >&2
+         exit 1
+       fi
+     done
+     for f in ~/.wezterm.lua ~/.config/wezterm; do
+       if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
+     done
+     ls -ld ~/.wezterm.lua ~/.config/wezterm
+   )
    ```
 
    - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `中断:` と出たら、前に作った `.bak` を片付けて（要らなければ消して）から貼り直す
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
+   - `中断:` や `mv` のエラーが出たら、手順 3 へ進まない。原因を直して手順 2 を貼り直す
    - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
@@ -13438,7 +13449,7 @@ WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に
 1. 作った値を Anthy の設定に書き戻す。
 
    ```bash
-   /usr/bin/gsettings set org.freedesktop.ibus.engine.anthy.shortcut default "${ANTHY_SHORTCUT:?AlmaLinux 導入の手順 8 の ANTHY_SHORTCUT が空のまま。AlmaLinux 導入の手順 8 を貼り直す}"
+   /usr/bin/gsettings set org.freedesktop.ibus.engine.anthy.shortcut default "${ANTHY_SHORTCUT:?この節の手順 8 の ANTHY_SHORTCUT が空のまま。この節の手順 8 を貼り直す}"
    /usr/bin/gsettings get org.freedesktop.ibus.engine.anthy.shortcut default | grep -o "'on_off': <\[[^]]*\]>"
    ```
 
@@ -13903,6 +13914,7 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 - [導入の手順 1](#kvm-container-を導入する任意) の変数を設定したシェル (リポジトリ直下) で貼る。コンテナが止まっていれば、先に [VM 利用の手順 1](#kvm-container-の-vm-を使う) で起動する
 - 2 台目からは、導入の手順 1 の `VM_NAME` (ISO を変えるなら `ISO` も) を変えて貼り直してから、この節の手順 1 から貼る
 - VM をホストのブリッジにつなぐなら、先に[ブリッジの節](#kvm-container-の-vm-をホストのブリッジにつなぐ任意)の手順 1〜8 を行う
+- ブリッジ利用時は `BRIDGE` に利用中の名前を入れる。手順 4 の `viewer` はこの値を渡す
 
 1. ISO があるか確かめ、`data/` にコピーする。
 
@@ -13940,10 +13952,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - **注意**: aarch64 のホストでは通らない想定。qemu-kvm に SATA と e1000e が無い
 
 
-1. virt-viewer で画面を開き、インストールする。
+1. virt-viewer で画面を開き、インストールする（ブリッジ利用時は `BRIDGE` を設定してから貼る）。
 
    ```bash
-   ./kvm.sh viewer "${VM_NAME}"
+   KVM_BRIDGE="${BRIDGE:-}" ./kvm.sh viewer "${VM_NAME}"
    ```
 
    - ホストのデスクトップに virt-viewer のウィンドウが開き、インストーラの画面が出る。ウィンドウの中でインストールを進める
@@ -13987,7 +13999,9 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 - コンテナと VM を起動し、画面を見て、止めるまでの流れ。ホストの起動後やログインのたびに、要る手順だけを貼る
 - [導入の手順 1](#kvm-container-を導入する任意) の変数を設定したシェルで貼る。新しいシェルでは、導入の手順 1 の 2 つのブロックを貼り直してから始める
-- ブリッジの節を通したホストでは、この節の手順 1 の `./kvm.sh up` を `KVM_BRIDGE=br0 ./kvm.sh up` に変えて貼る
+- ブリッジ利用時は `BRIDGE` に利用中の名前を入れる。手順 3 の `viewer` はこの値を渡す
+- ブリッジ利用時は手順 1 のブロックを貼らず、`cd "${REPO:?導入の手順 1 の REPO を設定する}" && KVM_BRIDGE="${BRIDGE}" ./kvm.sh up` を使う
+- `KVM_BRIDGE` を付けずに `kvm` を起動すると `bridged` は削除される。ブリッジを使わないときは `BRIDGE` を未設定か空にする
 
 1. コンテナを起動する (動いていれば何もしない)。
 
@@ -14011,10 +14025,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - `domstate` が `running` になる
    - 自動起動などで動いていれば、`start` はエラーになる。`domstate` が `running` ならそのまま先へ進む
 
-1. VM の画面を開く。
+1. VM の画面を開く（ブリッジ利用時は `BRIDGE` を設定してから貼る）。
 
    ```bash
-   ./kvm.sh viewer "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
+   KVM_BRIDGE="${BRIDGE:-}" ./kvm.sh viewer "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
    ```
 
    - ホストのデスクトップに virt-viewer のウィンドウが開き、VM の画面が出る
@@ -14177,8 +14191,8 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - 最後に `>> ready. VMs: ...` で戻る
    - **注意**: 以後、`kvm` を起動するすべての経路に毎回 `KVM_BRIDGE=` を付ける
    - 付けずに `kvm` を起動すると `bridged` は削除される (`>> KVM_BRIDGE is not set: removing the libvirt network "bridged"`)
-   - `./kvm.sh viewer` も内部で `up` を呼ぶので、`KVM_BRIDGE=br0 ./kvm.sh viewer` にする
-   - [VM 利用の手順 1](#kvm-container-の-vm-を使う) の `up` も同じで、`KVM_BRIDGE=br0` を付けて貼る
+   - `viewer` も内部で `up` を呼ぶので、`KVM_BRIDGE="${BRIDGE}" ./kvm.sh viewer` を使う
+   - [VM 利用の手順 1](#kvm-container-の-vm-を使う) は通常ブロックを貼らず、同節リードのブリッジ用コマンドを使う
    - `./kvm.sh up gui` (再ログイン後の `kvm-gui` の作り直し) は `bridged` に影響しない。`kvm` が動いている限り `bridged` はそのまま
    - **次の手順は、`>> ready.` が出てから貼る**
 
@@ -14314,6 +14328,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 - 前提: lazygit・git-delta・HackGen Console NF を入れる
 
+> [!CAUTION]
+> - この節の手順 1 は既存の `~/.config/lazygit/config.yml` を置き換える
+> - 残す通常ファイルがある場合は止め、別名へ退避してから手順 1 を貼る
+
 1. 設定を clone してリンクする。
 
    ```bash
@@ -14332,13 +14350,15 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 - 前提: Python 3.9 以上・Git。部分ステージには lazygit 0.66.0 以上・delta 0.20.1 以上も必要
 
-1. 設定リポジトリへ移り、Excel の差分表示を導入して確かめる。
+1. 設定リポジトリで Excel の差分表示を導入して確かめる。
 
    ```bash
-   cd ~/lazygit-config
-   python3 --version
-   python3 scripts/setup-excel-diff.py
-   python3 scripts/setup-excel-diff.py --check
+   (
+     cd ~/lazygit-config &&
+       python3 --version &&
+       python3 scripts/setup-excel-diff.py &&
+       python3 scripts/setup-excel-diff.py --check
+   )
    ```
 
    - 仮想環境の作成が ensurepip で止まる場合は `sudo dnf install python3-pip` を行って再実行する
@@ -14444,9 +14464,11 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    git clone https://github.com/ryo-aoki-pc/md-table-excel.git ~/md-table-excel
-   cd ~/md-table-excel
-   python3 scripts/setup-mdtable.py
-   python3 scripts/setup-mdtable.py --check
+   (
+     cd ~/md-table-excel &&
+       python3 scripts/setup-mdtable.py &&
+       python3 scripts/setup-mdtable.py --check
+   )
    ```
 
    - ensurepip で止まったら `sudo dnf install python3-pip` を行う
@@ -14457,9 +14479,27 @@ yazi と依存ツールを先に入れる。
 
 ---
 
+### mdtable のブックを Excel で編集するときの注意
+
+- セルは文字列の書式（`@`）になっている。書式をクリアしたセルや、別のブック・Web から「すべて貼り付け」したセルでは、Excel が入力を数値や日付に変えることがある（`1/2` → 日付、`3.10` → 3.1 など）。日付になったセルがあると取り込みは止まる
+- 貼り付けは「値のみ」か、セルの編集中（F2・数式バー）に行う
+- オートコレクト（`(c)` → `©` など）は入力を変える。コードを書くなら Excel の [ファイル] → [オプション] で切る
+- 見出し行の直下に行を挿入すると、見出しの書式が写る（HTML の表では `<th>` になる）。[挿入オプション] で「下と同じ書式を適用」を選ぶ
+- [セルを結合して中央揃え] は中央揃えも付く。結合だけなら [セルを結合]
+- 「テーブルとして書式設定」（Ctrl+T）は使わない
+- セルの一部だけの書式（文字の色・斜体など）は書き戻さない。強調は `**` などで書く
+- シート名の変更・並べ替えはよい。シートを消した表は変更なしとして扱う。足したシートは読まない
+- 表から離れたセルに書いた値は無視する（警告を出す）
+- フォントは、書き出す PC に HackGen Console NF が入っていればそれ、無ければ BIZ UDゴシック（`\` が `¥` に見える）。環境変数 `MDTABLE_FONT` にフォント名を入れると、そのフォントにする
+
+---
+
 ### mdtable で Markdown の表を Excel と往復する
 
-- 編集する文書のあるディレクトリで行う。`README.md` は実際の文書名に置き換える
+- 編集する文書のあるディレクトリへ移ってから行う。`README.md` と `README.tables.xlsx` は、対象の文書名とブック名に置き換える
+
+> [!CAUTION]
+> この項の手順 1 の後で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
 
 1. Markdown の表を Excel ブックへ書き出す。
 
@@ -14488,18 +14528,3 @@ yazi と依存ツールを先に入れる。
    - ブックに記録した Markdown に書き戻す。書き戻す先は `--md` で変えられる
    - 書き出し後に Markdown の表を変えていたら、衝突として書き戻さない。**`--force` はブックの内容で上書きする**
    - 取り込み済みのブックは「適用済み」になる。取り込み後のブックは消してよい
-
----
-
-### mdtable のブックを Excel で編集するときの注意
-
-- セルは文字列の書式（`@`）になっている。書式をクリアしたセルや、別のブック・Web から「すべて貼り付け」したセルでは、Excel が入力を数値や日付に変えることがある（`1/2` → 日付、`3.10` → 3.1 など）。日付になったセルがあると取り込みは止まる
-- 貼り付けは「値のみ」か、セルの編集中（F2・数式バー）に行う
-- オートコレクト（`(c)` → `©` など）は入力を変える。コードを書くなら Excel の [ファイル] → [オプション] で切る
-- 見出し行の直下に行を挿入すると、見出しの書式が写る（HTML の表では `<th>` になる）。[挿入オプション] で「下と同じ書式を適用」を選ぶ
-- [セルを結合して中央揃え] は中央揃えも付く。結合だけなら [セルを結合]
-- 「テーブルとして書式設定」（Ctrl+T）は使わない
-- セルの一部だけの書式（文字の色・斜体など）は書き戻さない。強調は `**` などで書く
-- シート名の変更・並べ替えはよい。シートを消した表は変更なしとして扱う。足したシートは読まない
-- 表から離れたセルに書いた値は無視する（警告を出す）
-- フォントは、書き出す PC に HackGen Console NF が入っていればそれ、無ければ BIZ UDゴシック（`\` が `¥` に見える）。環境変数 `MDTABLE_FONT` にフォント名を入れると、そのフォントにする
