@@ -142,3 +142,16 @@ Grok Build は公開した[参照補修差分](https://github.com/ryo-aoki-pc/se
 今回の確認は文書移植と構文・参照の検査であり、Codeg の画面や両エージェントの実機検証を追加で行ったという意味ではない。
 
 Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[追加操作の移植差分](https://github.com/ryo-aoki-pc/setup-notes/commit/d95bcf322e95cfd7815ff54c723f1809e2df5bac)をレビューした。各10手順・元322件・危険と共有設定の注意・停止と履歴取り込み・失敗時の分岐は保持との回答だった。案内3点の指摘を受け、検証記録の手順書リンクを新しい原文全体の固定版497bb823へ戻し、現行の2冊への案内は別段落にした。README の一覧と末尾の案内、extra の末尾にも Windows の直接リンクを補った。
+
+公開した[案内補修差分](https://github.com/ryo-aoki-pc/setup-notes/commit/ea2385822d56c7027c8e9db7674e9fdfb9d5176f)の再レビューは「指摘なし」だった。固定原文と独立した現行案内、両 OS の直接リンクを確認した。補修後の GitHub 参照は931件で、削除38文書・元322件・過去記録56文書の検査と `git diff --check` も成功した。
+
+## Windows SSH の管理者・非管理者操作と WezTerm 貼り付けの取り込み（2026-10-12）
+
+最終確認中に本体の [main 6ea3df6](https://github.com/ryo-aoki-pc/setup-notes/commit/6ea3df6926dae09bff3ada8d2dfd4cb3fa3e96eb)（PR #139）と WezTerm の [main f7fe6b3](https://github.com/ryo-aoki-pc/wezterm/commit/f7fe6b33b36e806e99148d9551f16f0ee01e4949)（PR #41）が入り、既存 PR の競合を解消するため作業ブランチへ取り込んだ。Windows の SSH 操作は Windows 正本へ、接続元 Linux・Windows に共通する WezTerm の貼り付け操作は AlmaLinux 正本へ集約し、双方から直接案内する。
+
+- Windows の追加12手順・11コードと WezTerm の追加9手順・7コード、extra の撤去コード1個は原文と一致した。追加前のコード・手順・見出しを保持し、2冊は計1217コード（Windows 446・AlmaLinux 771）となった
+- 貼り付け前の実行場所・権限・最大64 KiB・待機と取消・中止条件、BusyBox の x64 前提と固定ハッシュ、子シェル終了後の管理者への復帰の注意を保持した。Linux 接続元の GUI クリップボード前提と SSH の接続先置換もコードの前に置いた
+- 追加・撤去の bash 8コードは `bash -n`、PowerShell 11コードは Windows PowerShell 5.1.26100.9444 の構文解析が成功した。SSH 接続・降格・実機への設定適用は行っていない
+- WezTerm の実装・テスト14ファイルは main f7fe6b3 と全バイト一致した。Lua 103件、PowerShell 5.1・7 の各60件（ローカル21・SSH状態16・受信23）、設定の読み込み、bash・zsh の構文検査が成功した。zsh は公式 AlmaLinux の RPM を一時領域へ展開して構文検査後に削除し、OS へ導入していない。実 GUI・SSH・クリップボード操作は未実施
+- 元の対応322件は不変。WezTerm の新節の固定原文と移動先を追補し、追補は計11件となった。削除38文書・残る197 Markdown文書・相対リンクと画像・固定版を含む GitHub 参照949件・過去記録56文書に不整合なし。個別37文書の最新780手順・636コードにも欠落なし
+- WezTerm の追加検証99行と4付録、本体の追加検証106行を含め、過去本文・当時番号・出力を最新 main と照合した。過去の原文参照だけ固定版へ付け替え、現行の操作は2冊へ案内した。2冊と extra の手順順序、全8リポジトリの `git diff --check` も成功した

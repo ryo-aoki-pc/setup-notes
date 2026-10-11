@@ -13421,6 +13421,106 @@ WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に
 
 ---
 
+### WezTerm: Windows の SSH 先で PowerShell に貼り付ける（任意）
+
+接続元は Linux または Windows の WezTerm、接続先は Windows OpenSSH と Git Bash。両側にこの版の設定を置く。Linux では GUI セッションから WezTerm を起動する。
+
+Windows 接続先は [OpenSSH サーバー](windows-setup.md#openssh-サーバー)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)・[SSH の既定シェル](windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)を先に通す。通常の PowerShell プロファイルには追記しない。
+
+PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)を使う。**この項の手順 3 の `surface` は検証環境の SSH 接続名。貼る前に、自分の設定済み接続名へ置き換える**。
+
+[参照情報](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
+
+1. 接続元と Windows 接続先の設定を、[WezTerm の設定を更新する](#wezterm-の設定を更新する)の手順 1 で更新する。
+
+   - Windows 接続先では Git Bash で、[Windows の設定更新](windows-setup.md#wezterm-の設定を更新する)の手順 1 を通す
+   - 接続元は `Ctrl+Shift+R` で設定を読み直す
+   - 通常の PowerShell プロファイルには追記しない
+
+1. Linux の接続元では、セッションに対応するクリップボード取得コマンドがあるか確かめる。
+
+   ```bash
+   if [ -n "${WAYLAND_DISPLAY-}" ]; then
+     command -v wl-paste
+   elif [ -n "${DISPLAY-}" ]; then
+     command -v xclip
+   else
+     echo 'GUI セッションから WezTerm を起動してください'
+   fi
+   ```
+
+   - Wayland は `wl-paste`、X11 は `xclip` のパスが出ればよい
+   - 無ければ接続元の dnf で `wl-clipboard`（Wayland）か `xclip`（X11）を導入し、この項の手順 2 をやり直す。GUI セッションが無い場合も先へ進まない
+   - Windows 接続元ではこの手順を飛ばす。標準の Windows PowerShell を `-NoProfile` で使う
+
+1. 接続元の WezTerm の新しいペインで Windows に接続する。
+
+   ```bash
+   ssh surface
+   ```
+
+   - `surface` はこの環境の SSH エイリアス。別の接続先では自分のホスト名を使う
+   - Windows OpenSSH の既定シェルは Git Bash とする
+   - **次の手順は、接続先の Git Bash のプロンプトが出てから貼る**
+
+1. 接続先の Git Bash で統合を読み、Windows PowerShell 5.1 を起動する。
+
+   ```bash
+   export TERM_PROGRAM=WezTerm
+   . ~/.config/wezterm/shell/wezterm.sh
+   powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   ```
+
+   - PowerShell 7 を使う場合は、最後の行の `powershell.exe` を `pwsh.exe` に替える
+   - **次の手順は、PowerShell のプロンプトが出てから貼る**
+
+1. 接続先 PowerShell で、専用受信キーが登録されたか確かめる。
+
+   ```powershell
+   Get-Module PSReadLine | Select-Object Name, Version; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq WezTermSshPaste
+   ```
+
+   - `Ctrl+Shift+F12` の `WezTermSshPaste` が出ればよい。このキーは配送用で、手動では押さない
+   - キーが無ければ PSReadLine を読み込み、統合を読み直してから確認する
+
+1. 接続元で無害な複数行をコピーし、右クリックまたは `Ctrl+Shift+V` で貼る。
+
+   ```powershell
+   & {
+     '一行目'
+
+     '二行目'
+   }
+   ```
+
+   - このブロックは入力欄に残り、Enter を押すまで実行しない
+   - 空行・日本語・末尾改行を保持する。PSReadLine の Paste と同じく CR を除き、タブを空白 4 個にする
+   - 準備応答・取得・検証が失敗すると通知し、本文を挿入しない。自動で通常貼り付けに切り替えない
+   - 本文は UTF-8 で 64 KiB まで。途中で `Ctrl+C` を押すと終端まで受信して捨てる。配送が止まった場合は受信待機が続くため、本文を追加で貼らず、接続元でその SSH ペインを閉じて接続し直す
+
+1. 入力欄を確認し、Enter を押して実行する。
+
+   - `一行目`・`二行目` が一度ずつ出ればよい
+   - **次の手順は、PowerShell のプロンプトが戻ってから行う**
+
+1. PowerShell を終了して Git Bash に戻る。
+
+   ```powershell
+   exit
+   ```
+
+   - **次の手順は、Git Bash のプロンプトに戻ってから貼る**
+
+1. 接続先の Git Bash で接続を閉じる。
+
+   ```bash
+   exit
+   ```
+
+   - 接続元のプロンプトに戻ればよい
+
+---
+
 ### WezTerm の設定を更新する
 
 自分のユーザーの bash（Windows 11 は Git Bash）で行う。WezTerm 本体の更新は同じ冊の更新節で行う。

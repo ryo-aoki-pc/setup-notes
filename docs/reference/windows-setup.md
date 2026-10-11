@@ -1043,6 +1043,26 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ---
 
+## SSH で管理者・非管理者の PowerShell を使う（任意）: 選択した方針
+
+- 対象は[手順書の任意節](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)。実施手順のデスクトップでの初期設定とは検証範囲を分け、SSH の操作と貼り付けの結果は[今回の検証記録](../verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)へ置く
+- **管理者かどうかは実効トークンで確かめる**: Administrators のユーザーで SSH に入ると、通常のデスクトップの非管理者シェルと同じ権限にはならない。ユーザー名だけで判断せず、`WindowsPrincipal.IsInRole(Administrator)` と Windows 標準の `whoami.exe /groups` の整合性レベル・管理者 SID の属性を確認する。[Win32-OpenSSH の issue #1652](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **同じユーザーの子だけ降格する**: busybox-w32 の `drop` で起動し、Medium、管理者 SID が拒否専用、`Admin : False` を確認する。同じユーザーの設定・ファイルを引き続き使える。親は管理者のまま待つので、子を `exit` で閉じて親へ戻る。UAC の対話的な昇格を SSH 内に作らず、この往復を使う。[busybox-w32 の drop の実装](https://github.com/rmyorston/busybox-w32/blob/master/miscutils/drop.c)、[OpenSSH のネットワークログオンと UAC の説明](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **専用の固定版を照合して置く**: [公式配布ファイル](https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe)の x64 用 `FRP-6075-g169694ebd` と SHA-256 を組にし、`%LOCALAPPDATA%\setup-notes\bin\busybox.exe` に置く。[Scoop の busybox の定義](https://github.com/ScoopInstaller/Main/blob/master/bucket/busybox.json)は多数の shim とシェルの初期化を伴うため、降格だけに使う今回は採らない。既存の別ファイルは上書きせず、取得した一時ファイルを照合してから移す。撤去も同じハッシュに一致した実行ファイルだけを削除する
+- **drop の後ろに `--` を置く**: 固定版は後続の `-NoLogo` なども自身のオプションとして読むため、`drop -- powershell.exe …`／`drop -- pwsh.exe …` にする。失敗した呼び出しと修正後の結果は検証記録に保持する
+- **先に対話 SSH、次に PowerShell**: SSH 先の Git Bash でシェル統合を読み、5.1 または 7 を起動する。[Windows OpenSSH の PTY のコマンド生成](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32-doexec.c)は、シェル・`-c`・コマンド本文を空白で連結する。`ssh -tt <host> '<複数のコマンド>'` では Bash の `-c` の引数の囲みが失われるため、本文では接続先の対話プロンプトから起動する
+- **接続元のクリップボードを渡す**: [WezTerm PR #39](https://github.com/ryo-aoki-pc/wezterm/pull/39) のローカル Windows 向けの Paste は、SSH 先の PowerShell にはそのまま適用できない。接続元では Linux の Wayland の `wl-paste`／X11 の `xclip`、Windows の標準 PowerShell を使い、同じ右クリック・Ctrl+Shift+V の操作から渡す
+- **本文を送る前に二段階で確認する（V2）**: 専用の Ctrl+Shift+F12 で受信ハンドラーを開き、識別子付きの `READY` を照合して、本文を含まない `WZP2:<nonce>:` のヘッダーだけを送る。正しいヘッダー全体を受信した `BODYREADY` を照合してから、改行を含まない `<Base64長>:<Base64>~WZE2:<nonce>~` の本文を送る。長さは UTF-8 のバイト数ではなく Base64 の文字数。受信処理が始まる前に本文を送らず、終端の nonce も同じ値にする
+- **PSReadLine の入力欄へ挿入する**: 検証・復号後の本文は PSReadLine の `Insert`／選択範囲の `Replace` で挿入し、Enter は送らない。CR とタブは既存の `Paste` と同じ扱いにし、空行・日本語・末尾改行を保持する
+- **本文の上限は UTF-8 で 64 KiB にする**: SSH 先の入力処理の負荷を限定し、65,536 バイトを超える本文は送らない。大きな本文はブロックを分ける。上限までの受信時間と、開発中に試した 1 MiB の結果は検証記録に分けて残す
+- **準備待ちに期限を設ける**: SSH 先は正しいヘッダーを受け取るまで開始から 5 秒を上限にし、ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさない。接続元の `READY`・`BODYREADY` 待ちはそれぞれ 3 秒にし、応答処理でも期限を確認する。同じ入力待機の識別子（epoch）で専用キーを再発火せず、版が違う応答も拒否する
+- **更新後は新しい SSH と PowerShell を起動する**: 受信処理の C# の型は読み込み済みのプロセス内では入れ替えられない。統合ファイルを更新した後は、手順どおり SSH へログインし直し、新しい PowerShell から読む。V1 の型が残る状態から V2 を初めて読むことと、同じ最終版を再びドットソースすることは、既存の V2 の型を更新する操作とは区別する
+- **終端も nonce で照合する**: 本文の受信開始後は、単独の `~` や別の nonce の終端では入力欄に戻らず、同じ `~WZE2:<nonce>~` まで読み捨てる。利用者が先に `~` を打っても、遅れて届く本文を親の入力欄へ流さない
+- **本文送信と受信の例外でも入力欄へ流さない**: 本文を送れた判定は送信処理が正常に終わった後で立て、途中で送信が失敗したときは取消用の `~WZE2:<nonce>~` を送る処理を行う。SSH 先の Console IO に例外が出たときも、正しいヘッダーを受信した後は同じ nonce の終端まで読み捨ててから入力欄へ戻る。ヘッダー受信前の例外では 5 秒の期限を延ばさない
+- **失敗時に本文を別のシェルへ送らない**: 取得失敗・無応答・取り消し・不正フレームでは通常貼り付けへ切り替えない。SSH 先の PSReadLine が無い、または専用キーの登録に失敗した場合は `unavailable` の目印を出し、貼り付けは通知して止める。ペインごとに配送状態と識別子を照合し、コマンド開始・例外・終了・親 Bash 復帰で SSH の PowerShell の目印を解除する。正しいヘッダーを受信した後の Ctrl+C は本文を末尾まで読み捨てるので、その後に配送が止まった場合は待機が続く可能性がある
+
+---
+
 ## 統合前の参考資料: HackGen Console NF の Windows 11（もとは hackgen.md）
 
 もとの `hackgen.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-hackgen-console-nfもとは-hackgenmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
