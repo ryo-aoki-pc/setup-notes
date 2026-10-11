@@ -172,3 +172,9 @@ Grok Build が公開した [bash の補修](https://github.com/ryo-aoki-pc/bash/
 - 追加コード9個（bash 1・PowerShell 8）は main 原文と一致し、`bash -n` と Windows PowerShell 5.1.26100.9444 の構文解析が成功した。Windows は451コード・586手順、AlmaLinux は771コード・894手順で、追加以外の掲載コードと操作を保持した。extra の83コードも main と一致した
 - 削除38文書・残る197 Markdown文書・元322対応と追補11件・相対リンクと画像・GitHub参照952件・過去検証56文書の検査に不整合なし。個別37文書の780手順・636コードにも欠落はない。短い文書規則に Sandbox の権限を追記し、2冊と extra の手順順序と `git diff --check` も確認した
 - 追加の検証記録79行・参考資料39行・構成履歴は最新 main と照合し、本文・当時番号・出力を保持した。今回の再確認は移植・構文・参照の検査で、実機の機能変更・再起動・Sandbox 起動・Git 設定は実行していない
+
+Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[取り込み差分](https://github.com/ryo-aoki-pc/setup-notes/commit/acb3c80b080eb8704635652eb16bef914eb8594c)をレビューした。Sandbox の8手順・解除5手順・実行場所・状態と再起動・破棄と共有ファイル・解除対象の条件は保持との回答だった。長いパス設定の記録条件と、構成メモの現行案内について2件の指摘を受けた。
+
+Git for Windows の隔離した設定で、include 先だけが `true` の場合と、global の `false` の後で include 先が `yes` の場合を確認した。どちらも include 先は `global` と表示され、実効真偽値は `true`、ファイルは変更されなかった。記録条件を「include 先も global」「最後の global の値」と明記し、変更なしのキーは復元で触らないことを補った。コードは原文のまま保持した。
+
+共通 Git と Windows 専用 `core.longpaths` の復元の違いを現行手順へ補い、構成メモの現在の一覧に Git →長いパス→bash→WezTerm と復元の案内を追加した。構成メモの履歴部分は原文と当時の番号を保持した。

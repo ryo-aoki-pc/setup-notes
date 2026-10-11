@@ -1771,7 +1771,7 @@
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
    - **この手順は、この項の手順 5・6 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
-   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)で行う（同書の「Git」の手順 2 の箇条書きが案内する AlmaLinux 10 のロールバックと同じ内容を、Git Bash で行う）
+   - 戻すときは、[Git Bash の設定を戻す](extra/windows-setup.md#git-bash-の設定を戻す)で行う。共通設定に加え、次の手順 4 で変更した Windows 専用 `core.longpaths` も記録に合わせて戻す
 
 1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
 
@@ -1786,8 +1786,8 @@
    git config --type=bool --show-scope --show-origin --get core.longpaths
    ```
 
-   - 「変更前」の値・スコープ・ファイルを控える。`global` の行が無ければ「global は未設定」と控える
-   - 元の `global` が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える
+   - 「変更前」の値・スコープ・ファイルを控える。include 先も `global` の行に出る。`global` が無ければ「未設定」と控える
+   - 最後の `global` の値が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える。変更しなかったキーは復元で触らない
    - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
    - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
    - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く

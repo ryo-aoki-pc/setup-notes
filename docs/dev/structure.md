@@ -11,6 +11,7 @@
 - `docs/verification/consolidation.md` — 集約の静的検査・回帰検査・Grok のレビューと、実機では未実施の範囲
 - 新しい手順は2冊の該当用途へ追加し、対応する記録とこの構成一覧を更新する
 - Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
+- Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ## 統合前の文書構成と検証範囲（履歴）
 
