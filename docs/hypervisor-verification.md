@@ -120,6 +120,7 @@ R6 の C15 では Mason が開始時 5 件、本文で 9 件、更新の画面�
 | 単位 | 成功した範囲 | 失敗・条件未該当 | 未実施・未確認 |
 |---|---|---|---|
 | N1 / hv/N1 | 報告では AlmaLinux の VirtualBox 実施手順 18 と、kvm-container `d71c65c` の導入手順 1〜9 を通過。MOK 登録済みの状態で VirtualBox の空 VM、`/dev/kvm`、`kvm.sh up`、KVM の内側 VM と Anaconda の初画面を確認 | 範囲外の内側 VM 作成で既定ディスク容量が空き超過。容量を減らして再実行。インストーラー途中の媒体取り外しもエラー | **内側 KVM の OS インストール完了と、導入済み OS の起動は未確認**。GUI 経路・autostart・ブリッジ・運用全体は未実施。内側 VirtualBox も OS 導入は未実施 |
+| V2 / queued-units/V2 | N1 の停止中の `after-N1` から専用 clone を作成。Hyper-V → AlmaLinux → VirtualBox の内側へ公式 Atomic Desktop GNOME を導入し、派生イメージの起動・モジュール・2 サービス・GUI の双方向 clipboard とリサイズ、更新なし、指定ロールバックを確認 | **partial**。手順 6 の lint は 11 passed・1 skipped・警告 2 件で本文の条件不成立。共有の GNOME 再ログインだけではグループが反映されず、追加再起動で読み書きを確認。手順 7 の担当による接続中断と再試行も保持 | Bash は SSH の対話シェルで原文を貼付。GNOME 端末での原文通し、内側 Secure Boot 有効時の署名、新版のカーネル・Guest Additions への更新は未確認。詳細は [V2 の付録](verification/virtualbox-guest-bootc.md#付録-hyper-v-の内側の-virtualbox-ゲストで確かめた記録v22026-10-11-utc) |
 | FXA / hv/FXA | 報告は 6 手順すべて成功。Homebrew の Python 導入前に IBus の PATH 対処を置き、yazi の依存導入・再起動後に日本語変換を確認 | 指定範囲の失敗・未実施は 0 | 初期設定全体の修正後の通し、VMware・VirtualBox での再検証は未実施 |
 | FXB / hv/FXB | 報告は 10 手順中 9 成功・条件未該当 1。既存の Anthy 失敗を再現し、PATH 対処・再起動後の Text Editor と Neovim 入力、delta 表示、Homebrew 撤去後の対処解除と入力を確認 | bash-completion は OS 導入済みのため撤去を飛ばした。撤去時の追加 Enter と一時的な starship エラーも記録 | Neovim の整形はファイルが既に整形済みで効果を判別できない。delta の確認時は短いコミットで、長い説明を含む全条件を網羅していない |
 
@@ -182,9 +183,9 @@ N1 は、2026-10-06 に仮想化拡張が無く `modprobe kvm_amd` で停止し�
 |---|---|
 | R8 | 未実施 |
 | Windows ゲストの構築・後続手順の今回の通し | 未実施。過去の Windows 検証と、C17 の Windows ホスト上の VM 操作は別の範囲 |
-| V2 | 未実施 |
+| V2 | partial。公式 Atomic GNOME の導入・Guest Additions の起動と GUI・指定撤去まで部分確認。lint の正常条件不成立、GNOME 端末での原文通し等を残す。内側・外側を停止し、専用外側へ `after-V2` を保存 |
 | 実アカウントの認証 | 未実施。GitHub、Claude、ChatGPT、grok.com、Dropbox 等の認証後の操作・クラウド同期を含めない |
-| 内側 KVM・VirtualBox の OS 導入と運用 | 起動・インストーラー到達等の部分確認のみ。OS インストール完了、導入済み OS の起動・autostart・運用の完了は未確認 |
+| 内側 KVM・VirtualBox の OS 導入と運用 | N1 の内側 KVM は OS インストール完了・導入済み OS の起動が未確認のまま。V2 の内側 VirtualBox は Atomic GNOME の導入と起動を確認したが、全手順の正常条件・autostart・運用全体の完了とは扱わない |
 | VMware・VirtualBox での CL・R・N・FX | この横断報告に同じ範囲の実行結果は無い。Hyper-V の結果を転用しない |
 | 修正後の初期設定全体とオフライン経路 | FXA・FXB の部分確認を実施。全体の通しと、修正後の前提・取得順での再検証は残る |
 | 正式な性能比較 | 測定・集計が進行中。構成、hostcache、各巡の結果、ホストのメモリエラー履歴を含む条件の確定が必要 |
