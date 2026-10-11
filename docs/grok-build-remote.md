@@ -573,7 +573,9 @@
 | `~/.local/share/codeg/` | `%APPDATA%\codeg\` | 会話と設定の DB（`codeg.db`）と、ログ（`logs`） |
 | `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル |
 | `~/.config/caddy/Caddyfile` | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先、認証局の名前 |
-| `~/.config/systemd/user/codeg-caddy.service` | タスク `codeg-caddy` | Caddy の起動のしかた |
+| `~/.config/systemd/user/codeg-caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた |
+| — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | 両タスクで使う、コンソールを作らないランチャー |
+| — | `%LOCALAPPDATA%\codeg-server\startup-backup-*\` | 既存のタスクを切り替えるときの XML の控え |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](almalinux-setup.md#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
@@ -663,7 +665,7 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 通信は HTTPS。AlmaLinux 10 と同じく、Caddy を同じ PC に置いて、Codeg へ渡す
 - Windows 11 では、Caddy が待ち受ける IP を決めない。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
-- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
+- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 の既存のタスクを非表示起動に切り替える](#windows-11-の既存のタスクを非表示起動に切り替える)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
 
 > [!WARNING]
 > **アクセストークンを知っている人は、ブラウザからこの PC で、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。Windows の Grok Build には sandbox が無い。受信の規則でネットワークと送信元を絞り、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**（[注意点](extra/grok-build-remote.md#注意点)）。
@@ -805,12 +807,72 @@
    - `$env:CODEG_HOST = '127.0.0.1'` の行が出ればよい
    - スクリプトは、トークンのファイルが無いと起動しない。Codeg にトークンを作らせない
 
+1. ウィンドウを作らないランチャーのソースを書き、コンパイルする。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
+     $cs = Join-Path $dir 'HiddenLauncher.cs'
+     $exe = Join-Path $dir 'codeg-hidden-launcher.exe'
+     $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+     if (-not (Test-Path -LiteralPath "$dir\start-codeg-server.ps1")) { Write-Error '中断: 起動用のスクリプトが無い'; return }
+     if ((Test-Path -LiteralPath $cs) -or (Test-Path -LiteralPath $exe)) { Write-Error '中断: ランチャーのソースか実行ファイルが既にある。上書きしない'; return }
+     if (-not (Test-Path -LiteralPath $csc)) { Write-Error '中断: .NET Framework の csc.exe が無い'; return }
+     [IO.File]::WriteAllText($cs, @'
+   using System;
+   using System.Diagnostics;
+   using System.IO;
+
+   internal static class HiddenLauncher
+   {
+       [STAThread]
+       private static int Main(string[] args)
+       {
+           if (args.Length != 1 || !File.Exists(args[0])) return 2;
+           try
+           {
+               var info = new ProcessStartInfo();
+               info.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+               info.Arguments = "-NoProfile -NonInteractive -WindowStyle Hidden -File \"" + args[0] + "\"";
+               info.UseShellExecute = false;
+               info.CreateNoWindow = true;
+               info.RedirectStandardOutput = true;
+               info.RedirectStandardError = true;
+               using (var child = new Process())
+               {
+                   child.StartInfo = info;
+                   child.OutputDataReceived += delegate(object sender, DataReceivedEventArgs e) { };
+                   child.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs e) { };
+                   child.Start();
+                   child.BeginOutputReadLine();
+                   child.BeginErrorReadLine();
+                   child.WaitForExit();
+                   return child.ExitCode;
+               }
+           }
+           catch { return 1; }
+       }
+   }
+   '@, (New-Object Text.UTF8Encoding($true)))
+     & $csc /nologo /target:winexe ("/out:" + $exe) $cs
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: コンパイルに失敗した'; return }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Item -LiteralPath $cs, $exe | Select-Object Name, Length
+   }
+   ```
+
+   - `HiddenLauncher.cs` と `codeg-hidden-launcher.exe` の 2 行が出ればよい
+   - 失敗した場合は、この手順が作ったソースだけを消し、原因を直してから貼り直す
+
 1. タスクを登録して開始し、localhost の待ち受けを確かめる。
 
    ```powershell
    if (-not $CODEG_DIR) { Write-Error '中断: この項の手順 2 の変数を設定する' } elseif (Get-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue) { Write-Error '中断: codeg-server のタスクが既にある' } else {
      $me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-     $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -WindowStyle Hidden -File "{0}"' -f "$CODEG_DIR\start-codeg-server.ps1")
+     $launcher = Join-Path $CODEG_DIR 'codeg-hidden-launcher.exe'
+     if (-not (Test-Path -LiteralPath $launcher)) { Write-Error '中断: この項の手順 7 のランチャーが無い'; return }
+     $action = New-ScheduledTaskAction -Execute $launcher -Argument ('"{0}"' -f "$CODEG_DIR\start-codeg-server.ps1")
      $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited
      $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
      $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
@@ -825,6 +887,7 @@
 
    - `Running` と、`127.0.0.1` の 3080 の 1 行だけが出ればよい
    - タスクは、サインインのたびに自動で始まる
+   - タスクが新しい Terminal のウィンドウを開かないことも確かめる
    - `Ready` のままで待ち受けが出ないときは、`powershell.exe -NoProfile -File "$CODEG_DIR\start-codeg-server.ps1"` をこの窓で実行して、表示されたエラーを見る（止めるときは Ctrl+C）
    - **その画面を人に見せない**。Codeg は、起動のたびに標準エラーへトークンを出す
 
@@ -962,8 +1025,16 @@
    $root = "$env:APPDATA\Caddy\pki\authorities\local\root.crt"
    if (-not (Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue)) { Write-Error '中断: この項の手順 3 の規則が無い' } elseif (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { Write-Error '中断: codeg-caddy のタスクが既にある' } else {
      $me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-     $arg = '-NoProfile -WindowStyle Hidden -Command "& ''{0}\caddy.exe'' run --config ''{0}\Caddyfile'' --adapter caddyfile; exit $LASTEXITCODE"' -f $cdir.Replace("'", "''")
-     $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arg
+     $launcher = Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-hidden-launcher.exe'
+     if (-not (Test-Path -LiteralPath $launcher)) { Write-Error '中断: ランチャーが無い'; return }
+     $script = Join-Path $cdir 'start-caddy-hidden.ps1'
+     if (Test-Path -LiteralPath $script) { Write-Error '中断: start-caddy-hidden.ps1 が既にある。上書きしない'; return }
+     [IO.File]::WriteAllText($script, @'
+   $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
+   & (Join-Path $dir 'caddy.exe') run --config (Join-Path $dir 'Caddyfile') --adapter caddyfile
+   exit $LASTEXITCODE
+   '@, (New-Object Text.UTF8Encoding($true)))
+     $action = New-ScheduledTaskAction -Execute $launcher -Argument ('"{0}"' -f $script)
      $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited
      $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
      $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
@@ -982,6 +1053,7 @@
    - `Running`、待ち受けが `127.0.0.1` の 3080 と `::` の 3443 の 2 行、`401`、規則が 3 本、最後に `https://<有線 LAN の IPv4>:3443` が出ればよい
    - `::` は、この PC のすべてのアドレス（IPv4 を含む）で待ち受けていることを示す
    - 最後の行が、ほかの端末からつなぐ URL。有線 LAN につながっていなければ出ない
+   - タスクが新しい Terminal のウィンドウを開かないことも確かめる
    - 規則が 3 本より多く出たら、Windows が自動で作った規則がある。名前を確かめて外す
    - 認証局の鍵と証明書は、Caddy が初回の起動で `%APPDATA%\Caddy\` に作る。**`root.key` を、読まない・写さない・人に渡さない**
 
@@ -1022,6 +1094,95 @@
    - Caddy の設定・タスク・受信の規則・端末のルート証明書は、変えなくてよい。新しい IP 宛ての証明書は、Caddy がその場で作る
    - その拠点の LAN の帯が `ALLOW_FROM` に無ければ届かない。規則の `RemoteAddress` に足す
    - ブラウザは、IP が違う URL を別のサイトとして扱う。はじめて開く IP では、トークンを入れ直す
+
+---
+
+## Windows 11 の既存のタスクを非表示起動に切り替える
+
+- 以前の手順でタスクを作り、ログオン時に Terminal が開く場合に通す。管理者ではない Windows PowerShell（5.1）で行う
+- この節の手順 3 で、Codeg と Caddy を短時間止める。実行中の会話は中断されるので、作業が終わってから通す
+
+1. ランチャーを用意する。
+
+   - `%LOCALAPPDATA%\codeg-server\codeg-hidden-launcher.exe` が無いときだけ、[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 7 を通す
+   - その項の手順 8 は通さない。既存のタスクは、この節の手順 3 で切り替える
+
+1. Caddy のタスクがあるときだけ、Caddy の起動用スクリプトを用意する。
+
+   ```powershell
+   $script = Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1'
+   if (Test-Path -LiteralPath $script) {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Item -LiteralPath $script | Select-Object Name, Length
+   } else {
+     [IO.File]::WriteAllText($script, @'
+   $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
+   & (Join-Path $dir 'caddy.exe') run --config (Join-Path $dir 'Caddyfile') --adapter caddyfile
+   exit $LASTEXITCODE
+   '@, (New-Object Text.UTF8Encoding($true)))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Item -LiteralPath $script | Select-Object Name, Length
+   }
+   ```
+
+   - `start-caddy-hidden.ps1` の行が出ればよい
+   - 既にファイルがある場合は、Caddy の起動用であることを確かめてから進む。上書きはしない
+
+1. タスクの控えを取り、起動するプログラムだけを切り替えて再開する。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
+     $launcher = Join-Path $dir 'codeg-hidden-launcher.exe'
+     $names = @('codeg-server')
+     if (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { $names += 'codeg-caddy' }
+     $scripts = @{ 'codeg-server' = (Join-Path $dir 'start-codeg-server.ps1'); 'codeg-caddy' = (Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1') }
+     if (-not (Test-Path -LiteralPath $launcher)) { Write-Error '中断: ランチャーが無い'; return }
+     $oldActions = @{}
+     foreach ($name in $names) {
+       $oldActions[$name] = (Get-ScheduledTask -TaskName $name).Actions
+       if (-not (Test-Path -LiteralPath $scripts[$name])) { Write-Error "中断: 起動用のスクリプトが無い: $name"; return }
+     }
+     $backup = Join-Path $dir ('startup-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+     New-Item -ItemType Directory -Path $backup | Out-Null
+     foreach ($name in $names) { Export-ScheduledTask -TaskName $name | Set-Content -LiteralPath (Join-Path $backup ($name + '.xml')) -Encoding Unicode }
+     try {
+       $targets = @(Get-CimInstance Win32_Process | Where-Object {
+         ($_.Name -eq 'codeg-server.exe' -and $_.ExecutablePath -eq (Join-Path $dir 'codeg-server.exe')) -or
+         ($names -contains 'codeg-caddy' -and $_.Name -eq 'caddy.exe' -and $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'))
+       })
+       foreach ($target in $targets) {
+         & "$env:WINDIR\System32\taskkill.exe" /PID $target.ProcessId /T /F | Out-Null
+         if ($LASTEXITCODE -ne 0) { throw "停止に失敗: $($target.Name)" }
+       }
+       foreach ($name in $names) { Stop-ScheduledTask -TaskName $name }
+       foreach ($name in $names) {
+         $action = New-ScheduledTaskAction -Execute $launcher -Argument ('"{0}"' -f $scripts[$name])
+         Set-ScheduledTask -TaskName $name -Action $action | Out-Null
+       }
+       foreach ($name in $names) { Start-ScheduledTask -TaskName $name }
+     } catch {
+       foreach ($name in $names) {
+         Stop-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
+         Set-ScheduledTask -TaskName $name -Action $oldActions[$name] | Out-Null
+         Start-ScheduledTask -TaskName $name
+       }
+       Write-Error "中断: 以前の起動方法へ戻した。$($_.Exception.Message)"
+       return
+     }
+     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $backup
+     Get-ScheduledTask -TaskName $names | Select-Object TaskName, State, @{ Name = 'Execute'; Expression = { $_.Actions.Execute } }
+     Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
+   }
+   ```
+
+   - 控えのフォルダー、`Running` とランチャーのパス、`127.0.0.1:3080` が出ればよい
+   - Caddy のタスクもある場合は、`Running` が 2 行と `::` の 3443 の待ち受けも出ればよい
+   - 新しい Terminal のウィンドウが開かないことを確かめ、いつもの URL でブラウザから開く
+   - 控えの XML とランチャーは、ふだんの Codeg の更新では消さない
 
 ---
 
