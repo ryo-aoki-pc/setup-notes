@@ -36,7 +36,7 @@
   - AI エージェント: Claude Code は[Claude Code](#claude-code)の手順 1〜8、Codex CLI は[Codex CLI](#codex-cli)の手順 1〜8、Grok Build は[Grok Build](#grok-build)の手順 1〜8、Claude Code に入れる Codex・Grok のプラグインは[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1〜3（3 つを入れた後）
 - Windows を AlmaLinux 10 とのデュアルブート向けに入れるときは、先に [Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)を通してから、この文書を[Windows Update](#windows-update)の手順 1 から始める
 - 手順の後に、この順に通す手順書（どれも Windows 11 の節がある）: [VirtualBox](virtualbox.md#windows-11-で使う) → [WireGuard](wireguard.md#windows-11-で使う)
-  - 必要なら: [Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)・[コーディングエージェントの共同作業](coding-agents.md#windows-11-で使う)
+  - 必要なら: [Syncthing の Windows 11 で使う](syncthing.md#windows-11-で使う)・[Claude Code の Remote Control（Windows）](windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](windows-rdp-disconnect.md)・[SSH クライアント（Windows）](windows-ssh-client.md)・[Samba の共有をネットワーク ドライブに](samba-client.md#windows-11-で使う)・[コーディングエージェントの共同作業](coding-agents.md#windows-11-で使う)・[Grok Build をブラウザから操作](grok-build-remote.md#windows-11-で使う)
 - 手順の後の節
   - Wake on LAN は[Wake on LAN を使う（任意）](#wake-on-lan-を使う任意)、リモートからの再起動を増やすなら[リモートから再起動する手段を増やす（任意）](#リモートから再起動する手段を増やす任意)
   - 広告 ID などのプライバシーと宣伝の表示は[プライバシーと広告の表示を切る（任意）](#プライバシーと広告の表示を切る任意)、誤って押しやすいキー・Alt+Tab・ギャラリーとホーム・タスクの終了・アニメーション・効果音・ストレージ センサーは[表示・入力・音・ストレージを変える（任意）](#表示入力音ストレージを変える任意)

@@ -11,7 +11,7 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 以後は[ロールバック](extra/linger.md#ロールバック)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
-  - [Syncthing](syncthing.md)、[Dropbox（公式クライアント）](dropbox.md)、[Dropbox（rclone）](dropbox-rclone.md)、[Forgejo](forgejo.md)
+  - [Syncthing](syncthing.md)、[Dropbox（公式クライアント）](dropbox.md)、[Dropbox（rclone）](dropbox-rclone.md)、[Forgejo](forgejo.md)、[Grok Build をブラウザから操作](grok-build-remote.md)
   - [Podman の Quadlet（任意）](podman.md#quadlet-で自動起動する任意)で動かすコンテナ
 
 1. linger が有効になっているか確かめる。
