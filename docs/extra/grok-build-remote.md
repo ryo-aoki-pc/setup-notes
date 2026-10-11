@@ -1,8 +1,8 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[AlmaLinux 10 の手順](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
-- 本書の「<項>の手順 N」は、手順書の `## 実施手順` と `## Windows 11 で使う` の項の手順を指す
+- 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
 - この文書のロールバックは、実機では流していない（[検証記録](../verification/grok-build-remote.md)）
 
 ## ロールバック
@@ -104,12 +104,16 @@
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
    ```powershell
-   Remove-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi'
+   $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
+   Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue |
+     Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe } |
+     Remove-NetFirewallRule
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Name 'codeg-caddy-*' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
    ```
 
    - 「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 を通していなければ、この手順は飛ばす
+   - 新構成の 2 本と、旧構成の Wi-Fi 遮断規則が残っている場合はその 1 本だけを消す。ほかのプログラムの規則は変更しない
    - 何も出なければよい
 
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
@@ -144,6 +148,7 @@
 #### 権限モードと承認の確認
 
 - Codeg の「権限モード」は、Grok Build の `config.toml` の `permission_mode` を書き換える。端末の `grok` と同じ設定になる
+- 承認を減らして使う本書の用途では「スマート自動承認」（`auto`）を選ぶ。Grok の自動審査が許可しない操作は、確認が出るか拒否される。設定の保存と、新しい会話での応答が未確認なら、その部分は未完了として扱う
 - 「常に許可」のとき、Codeg は Grok Build を `--permission-mode bypassPermissions` で起動する。承認の確認は出ない
 - 「毎回確認」のとき、ファイルの変更と `rm` は確認が出た。**`mkdir` は確認なしで実行された**（Grok Build が確認を求めなかった）。確認が出ることを、安全の境界にしない
 - 承認の選択肢の「Yes, allow all edits during this session」「Yes, and don't ask again for bash commands」は、その会話の以後の確認を省く
@@ -171,11 +176,12 @@
 - 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
 - ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、許可した送信元なら誰でも取れる
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
-- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。守りは、トークンと、待ち受ける IP（Windows 11 は受信の規則のネットワークの種類と有線の指定）と、送信元の制限
+- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 は待ち受ける IP と送信元を絞る。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う
 - インターネットへ公開しない
 
-#### 送信元に LAN の帯を入れるとき
+#### AlmaLinux 10 の送信元に LAN の帯を入れるとき
 
+- この項は AlmaLinux 10 の `ALLOW_FROM` に対する注意。Windows 11 は送信元 CIDR の指定が不要で、受信インターフェースが Private なら全送信元を許可する
 - その LAN につながる端末はすべて、ログインの画面まで届く。守りはトークンだけになる
 - ルート証明書を入れていない端末からは、警告が出る
 
@@ -190,11 +196,13 @@
 - ランチャーのソース・実行ファイル・タスクの XML の控えは、`%LOCALAPPDATA%\codeg-server` の中にある。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 3 で、このフォルダーとともに消す
 - Caddy の起動用 `start-caddy-hidden.ps1` は、`%LOCALAPPDATA%\codeg-caddy` の中にある
 - 非表示起動のランチャーに切り替えた後の、OS 再起動・サインアウト後の動作は未確認
-- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動してサインインした後は、2 つとも自動で始まった。サインアウトの後の動きは、確かめていない
-- Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。届くのは、受信の規則が通す「プライベートのネットワーク・有線・指定した送信元」だけ
-- パブリックのネットワーク、Wi-Fi、VPN のアドレス宛てには届かない。別の拠点の有線 LAN は、プライベートにするまで届かない
+- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動した後も、本人のサインインが必要。再起動・サインアウト後の実測は、検証記録の対象・実施日ごとの範囲を参照する
+- Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。受信インターフェースが Private なら、IPv4・IPv6 の全送信元・全接続種別で 3443/tcp に届く。有線 LAN・Wi-Fi・VPN を区別しない
+- LAN には有線 LAN と Wi-Fi が含まれる。VPN からの通信も、ホスト側で実際に受信するインターフェースが Private であることが必要
+- 信頼する接続だけを Private にする。公衆 Wi-Fi などほかの接続は Public のままにし、Codeg に届かせるために Private へ変えない
+- Public・Domain の受信インターフェースは遮断する。Private にした接続に到達できる端末はすべて、ログインの画面と公開のルート証明書まで届く。Edge Traversal は許可しない
 - PC の IP が変わると、つなぐ URL が変わる。ブラウザは別のサイトとして扱うので、トークンを入れ直す
-- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。送信元を絞ることで抑える
+- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。Windows の新構成は送信元を制限しないので、Private にした接続へ届く端末はすべてこの機能を利用できる
 - 受信の規則より先に Caddy を起動しない。Windows が許可を尋ねる画面を出す
 - タスク スケジューラの「失敗時の再起動」は使っていない。終了コードが 0 でないだけのタスクは、再起動されなかった
 

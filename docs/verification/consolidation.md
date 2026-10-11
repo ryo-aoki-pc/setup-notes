@@ -89,3 +89,14 @@ PowerShell の文字列中の `$d.bak` が空になるという指摘は、Windo
 Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が、公開済み8リポジトリの削除差分をレビューし、「指摘なし」と回答した。対象は本体の [ed5360b](https://github.com/ryo-aoki-pc/setup-notes/commit/ed5360bf60a38f9976b40eb446ad18728943b39b)、bash の [b8129e6](https://github.com/ryo-aoki-pc/bash/commit/b8129e6c6ddec14d78243f9e9b8528e2a354f455) と関連6リポジトリの公開差分。繰り返す削除案内・対応表・過去記録のリンク変更は、独立照合結果と代表行も併せて確認した。
 
 追加点検で残っていた平文の旧ファイル名、コード内の参照コメント9行、図4組の再生成案内、bash の導入スクリプトの案内2文も正本・関連資料へ更新した。案内2文以外の `install.sh` は変更前と完全一致した。これらの公開追補（本体 [e39bd04](https://github.com/ryo-aoki-pc/setup-notes/commit/e39bd040a2f4ef298962133fe4e59e3227ee1a25)、bash [d4d985f](https://github.com/ryo-aoki-pc/bash/commit/d4d985ffd29006c859abc2af69f5ad27890429ad)）も Grok Build が同じモデルで再レビューし、「指摘なし」と回答した。今回も固定した公開本文だけを渡し、ローカル読取・編集・Web のツールを無効にした。
+
+## 最新 main の取り込みと競合解消（2026-10-12）
+
+最終確認で本体 PR に競合があったため、作業ブランチへ [main の 0e8dc65](https://github.com/ryo-aoki-pc/setup-notes/commit/0e8dc6589485cd4205ff5d0d0618511a156da0b4)を取り込んだ。main 側の Codeg の更新を2冊と関連資料へ反映し、案内だけの旧文書は削除した状態を保った。
+
+- Windows の Private の全送信元・全接続種別を許可する2規則、既存規則の移行3手順、現在 URL の確認、Caddy 停止前の注意を保持した。共通ブラウザ操作のスマート自動承認も反映した
+- Windows の変更・追加 PowerShell 6ブロックは最新 main の原文と一致し、ほかの415ブロックは内容・順序が一致した。AlmaLinux の763ブロックは不変。2冊合計1184ブロックを保持し、Windows の手順数だけ3増えた
+- 個別37文書の最新手順756件・コード621ブロックを正本へ照合し、欠落は0。旧322件の移動元・見出し・基準コミットは保持し、新しい移行節も現在のリンクで確認した
+- Grok の検証記録は最新 main の本文・出力・当時番号と一致し、原文へのリンクだけ同じ固定コミットへ変更した。ほかの55件の過去検証本文は削除前と一致した
+- 38文書の削除、197 Markdown文書、対応表322件、GitHub参照631件、相対リンク・画像・アンカー、2冊と extra の手順順序を再確認し、不整合は0だった
+- Windows 正本の PowerShell 392ブロックと関連 extra の3ブロックを Windows PowerShell 5.1.26100.9444 の構文パーサーで検査し、エラーは0。実機への設定適用はしていない

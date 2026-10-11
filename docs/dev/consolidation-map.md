@@ -7,6 +7,8 @@ Windows・AlmaLinux の実施手順の正本は2冊のセットアップ。案�
 - 既存の設定内の識別印・バックアップ名・ツールの実装は変更しない
 - 集約時の静的検査・回帰検査と削除後の確認は [検証記録](../verification/consolidation.md) に記録する
 
+集約後に main へ入った [Codeg の Windows 公開範囲の更新（0e8dc65）](https://github.com/ryo-aoki-pc/setup-notes/commit/0e8dc6589485cd4205ff5d0d0618511a156da0b4)も正本と関連資料へ反映した。下表の移動元は当初の基準を保つ。
+
 ## 移動元の基準
 
 | リポジトリ | ブランチ | コミット |
