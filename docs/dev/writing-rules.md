@@ -35,7 +35,7 @@
 
 ### 手順の形
 
-手順（`## 実施手順` と、その後ろの節の番号付きリストの項目）は、次の 3 つをこの順に置く。コマンドの無い手順（下の「コマンドの無い操作」）は、コマンドを除いた 2 つを置く。
+手順（`## 実施手順` と、その後ろの節の番号付きリストの項目）は、次の 3 つをこの順に置く。extra のロールバックにも同じ順を適用する。コマンドの無い手順（下の「コマンドの無い操作」）は、コマンドを除いた 2 つを置く。
 
 ````
 1. 1 行の説明。
@@ -57,6 +57,7 @@
   - 変数の手順は「変数を設定する（`SERVER_IP` は必ず値を入れる）。」のように、必須の変数を括弧で示す
 - **コマンド**
   - 説明の直後に置き、ブロックの間に何も挟まない。コマンドの無い手順には置かない
+  - コマンドのある手順では、箇条書きを最初のコードブロックより前や、複数のコードブロックの間に置かない。確認・分岐・注意の箇条書きは、最後のコードブロックの後ろにまとめる
   - 並べてよいのは「1 変数だけのブロック（0 個以上）→ ほかのブロック 1 つ」だけ
   - 言語は bash。手で書き足す設定の断片（lazygit の yaml など）だけは、その言語のブロックでよい
   - Windows で実行する手順（windows-claude-remote-control.md・windows-rdp-disconnect.md・windows-setup.md・windows-dual-boot.md の手順 9〜13・windows-ssh-client.md と、samba-client.md・syncthing.md・coding-agents.md・grok-build-remote.md・virtualbox.md・wireguard.md の Windows 11 の節）のブロックは `powershell` にし、管理者の Windows PowerShell 5.1 に貼る前提で書く（windows-claude-remote-control.md は SSH でログインした昇格済みの Windows PowerShell、windows-rdp-disconnect.md は RDP でつないだセッションの中の管理者の Windows PowerShell。windows-setup.md は「Windows Update」の手順 2〜8 と、「PC 全体の設定」の手順 2 から「WSL と再起動」まで〔「OpenSSH サーバー」「Git for Windows」「Firefox」「WezTerm」を含む〕だけ管理者〔ロールバックは「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 2〜8、「サインイン・検索・キーボードを戻す」の手順 2・3・5〜11、「ネットワークと PC 全体の設定を戻す」、「再起動と PSWindowsUpdate」の手順 1。自分のユーザーに入れた Autologon を外す「サインイン・検索・キーボードを戻す」の手順 4 は管理者ではない窓〕。Store・scoop などの「Microsoft Store の更新」から「HackGen Console NF」までと、再起動の後の項は管理者ではない（scoop のインストーラは管理者では止まる）。再起動の後の項のうち、「SSH でログインを確かめる」の手順 2〜4 はクライアント〔この PC の WSL の AlmaLinux 10 など〕の `bash`、「Git Bash と WezTerm の設定」の手順 3〜5 などは Git Bash と WezTerm のタブに貼る `bash` のブロックか、almalinux-setup.md の項の手順を名指しするコマンドの無い手順。任意節は節のリードのとおりで、Wake on LAN・リモートからの再起動・Edge の常駐のポリシー・OpenSSH サーバーの 4 つ（公開鍵・パスワード認証・既定のシェル・scoop のツールを SSH のセッションで使う。クライアントで貼る手順もある）は管理者、プライバシーと広告・表示と入力と音とストレージ・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・Neovim を既定のエディタにする節は管理者ではない。貼り付け設定前の「Windows Update」の手順 2〜8 と「Microsoft Store の更新」の手順 2〜7 は Ctrl+V で貼る。coding-agents.md の Windows 11 の節は管理者でなくてよく（Codex の sandbox の初回設定は管理者の承認が必要。両 OS に共通の節〔分担して作業する・相互にレビューする・main に取り込む〕の `bash` のブロックは、Windows ではそのまま PowerShell に貼る同じコマンドで、OS で違う手順だけ `powershell`）、windows-ssh-client.md と samba-client.md の Windows 11 の節は管理者ではない窓に貼り（samba-client.md は、管理者の窓で割り当てたドライブがエクスプローラーに出ないため）、grok-build-remote.md の Windows 11 の節も管理者ではない窓に貼り（管理者の窓や SSH のセッションから始めると、Codeg と Grok Build が管理者の権限で動くため。受信の規則を足す「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 だけ管理者の窓）、windows-dual-boot.md の手順 9〜13 は windows-setup.md より前なので Ctrl+V で貼り、virtualbox.md の Windows 11 の節は VM を動かす手順だけ管理者ではない窓）。GitHub のコピーボタンの中身は LF だけで、conhost の窓に右クリックで貼ると、windows-setup.md の「貼り付けの設定」の手順 1〜4 を通していない PC では行が逆順になる。下の `sudo` と `{ }` の規則はかからない。変数の空は `if (-not $X) { Write-Error '…' } else { … }` で弾き、`}` と `else` / `elseif` は同じ行に書く（1 行ずつ読まれると、`}` で終わった行で if 文が閉じるため）
@@ -125,6 +126,7 @@
 
 - **手順の本文は「操作 → 確認」だけにする。** コマンドの後は箇条書き（1 項目に 1 つの事実。末尾に「。」を付けない）だけにし、実測は検証記録へ、理由・背景は参考資料へ移す。手順書の注意も、150 字を超える段落を残さない
 - **アラート（`> [!NOTE]` など）は本文の最上位にだけ置く。** GitHub は番号付きリストの中のアラートを描画しない（公式ドキュメントの「Alerts cannot be nested within other elements」）。手順の中の注意は `- **注意**: …` の箇条書きにし、複数の手順にかかわる注意はリードのアラートにまとめる。`## 実施手順` の後ろの節の手順にかかわるアラートは、その節のリードに置いて手順を名指しする（「**この節の**手順 3 で〜」）
+  - 実行前に読む必要がある警告は、1 手順だけにかかわる場合も対象の節のリードに置き、節・項の名前と手順番号を示す。箇条書きの順序を直すために、警告を危険なコマンドの後ろへ移すだけの修正はしない
 - 使い分け:
   - `[!IMPORTANT]`: リードの前提（上の骨格の最後の項目。OS で節を分けた手順書は、`## Windows 11 で使う` のリードにも置く）
   - `[!WARNING]`: 複数の手順にかかわる危険（wireguard.md の `apply` の restart で ssh が切れる、など）、手順の外の節（任意節・更新・ロールバック）で事故につながる注意（同期対象にホームを丸ごと入れない、など）
