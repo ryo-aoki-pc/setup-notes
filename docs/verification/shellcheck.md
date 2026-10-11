@@ -1,6 +1,6 @@
 # ShellCheck / shfmt インストール手順（AlmaLinux 10 / Homebrew）の検証記録
 
-[手順書](../shellcheck.md)・[ロールバックと注意点](../extra/shellcheck.md)
+[手順書](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)・[ロールバックと注意点](../extra/shellcheck.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -151,8 +151,8 @@ $ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
 - **進め方**: Homebrew で 2 つ同時に入れ、`scripts/wireguard/wg-vpn.sh` を実際に検査する。**読者が書き換えるのは冒頭の変数ブロック（検査対象のパス）だけ**
 - **状態**: **実機で本実行済み（2026-09-23）**。**x86_64 のクリーン VM でも現行の実施手順を本実行済み（2026-10-06）**
   - 下表のホストで `brew install shellcheck shfmt` を実行し、`shellcheck 0.11.0` と `shfmt 3.14.1` が入って常用中
-  - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](../shellcheck.md#実施手順)）
-  - 手順 2〜3 と[検査を調整する（任意）](../shellcheck.md#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)）
+  - 手順 2〜3 と[検査を調整する（任意）](../almalinux-setup.md#shellcheck-と-shfmt-検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - コンテナで確認したこと: ボトルが降りる、スモークテストが同じ結果になる、EPEL 版の版と名前
   - **コンテナでは手順 4〜5（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
   - 2026-10-05: `jq` の前提と空値の確認、`SC_TARGET` の親ディレクトリを調べる形に直した。スタブで、別パスへの変更・JSON の件数集計・`jq` が無い場合の中断を確認した
@@ -170,7 +170,7 @@ $ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
 | jq | `jq 1.7.1`（RPM。`--format json` の集計に使う） | 無し（集計はしていない） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../shellcheck.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#shellcheck-と-shfmt-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -246,7 +246,7 @@ $ brew leaves | wc -l
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - 本書の[手順 4 の実測](../shellcheck.md#実施手順)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
+  - 本書の[手順 4 の実測](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
 
 ### 参照
 
@@ -260,7 +260,7 @@ $ brew leaves | wc -l
 
 ### 付録: コンテナでの検証記録（2026-09-23）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[検査を調整する（任意）](../shellcheck.md#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[検査を調整する（任意）](../almalinux-setup.md#shellcheck-と-shfmt-検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
@@ -280,7 +280,7 @@ $ brew leaves | wc -l
 - `# shellcheck source=` による `source` 先の明示（`-x` が効かない件の解決策として挙げただけ）
 - `-f gcc` / `-f diff` / `-f checkstyle` の出力（`tty` と `json` だけ実測した）
 - `--list-optional` で有効にできる追加の検査
-- エディタ連携（[VS Code](../vscode.md) の `timonwong.shellcheck` 拡張など）
+- エディタ連携（[VS Code](../almalinux-setup.md#vs-code-実施手順) の `timonwong.shellcheck` 拡張など）
 - ロールバック（`brew uninstall shellcheck shfmt`）の本実行
 
 ---
@@ -363,4 +363,4 @@ rc=1
 
 ### 検査を調整する（任意） / 手順 2
 
-   - **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](shellcheck.md#未確認事項)）
+   - **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](#未確認事項)）

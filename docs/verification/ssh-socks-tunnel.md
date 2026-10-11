@@ -1,6 +1,6 @@
 # ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）の検証記録
 
-[手順書](../ssh-socks-tunnel.md)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
+[手順書](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -9,7 +9,7 @@
 ### 実施手順: 検証状況の記録
 
 > [!WARNING]
-> **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)。
+> **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)。
 >
 > - Linux のオンラインのホストは、x86_64 のコンテナでのみ確かめた。Windows 11 のホストから、SELinux Enforcing のクリーンインストール VM への転送も再検証した（2026-10-06）（[対象と検証環境](#対象と検証環境)）
 
@@ -37,14 +37,14 @@ Error: remote port forwarding failed for listen port 1080
 **`-o ControlPath=none`: この ssh では、接続の共有を使わない。** オンラインのホストの `~/.ssh/config` で `ControlMaster auto` と `ControlPersist` を使っていると、転送は裏に残るマスターの接続に付く。
 
 - 検証環境で `~/.ssh/config` に `ControlMaster auto`・`ControlPath ~/.ssh/cm-%r@%h:%p`・`ControlPersist 10m` を書き、`ControlPath=none` を外して入ると、`exit` の後（`Shared connection to <OFFLINE_HOST> closed.`）も、オフラインのホストに `127.0.0.1:1080` の待ち受けが残った
-- 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
+- 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
 
 **Windows のオンラインのホスト**: Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）で、VirtualBox の VM へ同じ転送を張れた（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。その文書のホストオンリーアダプターの節は、その後トンネルを使わない形に変わった）。
 
 - トンネルは Windows の外向きの接続なので、Windows の受信の規則は要らない
 - オフラインのホスト（VM）が再起動すると、Windows の ssh は `Connection to <VM_IP> closed by remote host.` で終わり、待ち受けも消えた
 
-**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](../ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)と[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
+**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)と[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
 
 ### 実施手順 / 手順 3: 補足: socks5h と ALL_PROXY
 
@@ -59,14 +59,14 @@ curl: (97) Could not resolve host: github.com
 
 - curl は、プロトコルを問わずに使う
 - git は、`http.proxy` の設定も `https_proxy` も無いときに `ALL_PROXY` を使い、`socks5h` を解る。`GIT_TRACE_CURL=1 git ls-remote https://github.com/Homebrew/brew HEAD` の出力に `SOCKS5 connect to github.com:443 (remotely resolved)` が出た
-- Homebrew（[homebrew-offline.md 手順 1](../homebrew-offline.md#実施手順) の補足）
+- Homebrew（[homebrew-offline.md 手順 1](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の補足）
 - `https_proxy`（`HTTPS_PROXY`）や git の `http.proxy` が既に入っていると、curl と git はそちらを使う。`env | grep -i proxy` と `git config --get http.proxy` が何も出さないことを確かめておく
 
 **`ALL_PROXY` を読まないもの**:
 
-- **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](../ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
+- **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
 - **podman**: `https_proxy`（`HTTPS_PROXY`）を読み、`ALL_PROXY` だけでは取り込めなかった。`sudo https_proxy=socks5h://127.0.0.1:1080 podman …` のように、コマンドの前に変数を置いて渡す（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。トンネルを使っていた版の、その節の手順 4 の補足の実測）
-- **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](../npm-offline.md#実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
+- **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
 
 ### dnf にもトンネルを使わせる（任意） / 手順 1: 補足: dnf のプロキシ
 
@@ -102,8 +102,8 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
   - 入れる・取り込む・上げるときだけ使う。入れたものは、トンネルが無くても動く
 - **進め方**: オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う（dnf は `/etc/dnf/dnf.conf` の `proxy=`、podman と npm は `https_proxy`）
   - 読者が編集するのは `OFFLINE_HOST` だけ
-  - もとは [homebrew-offline.md](../homebrew-offline.md) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
-  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](../npm-offline.md)
+  - もとは [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
+  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入-実施手順)
 - **状態**: **Windows 11 のオンラインのホストから、x86_64 のクリーンインストール VM への現行の転送・dnf・転送終了・dnf 設定のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。Linux 発のオンラインのホストは従来のコンテナのみ**
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - コマンドは、この文書に移す前に、次の検証で通したもの
@@ -112,7 +112,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
     - Windows 11 のホストの VirtualBox の VM（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)、2026-09-30）: 手順 2 の Windows の 1 行（ただし、自動で流すために鍵でログインし、`-N` を付けた）。VM の端末での `ss` と、`curl -x socks5h://127.0.0.1:1080 https://quay.io/v2/` の `401`
     - コンテナ（[npm-offline.md の付録](npm-offline.md#付録-コンテナでの検証記録2026-09-30)、2026-09-30）: npm-offline.md の前提として、手順 1〜3・dnf の節・トンネルを閉じる節の手順 1・2（当時の homebrew-offline.md の手順）。npm は `ALL_PROXY` だけでは届かず、`https_proxy` を足すと届くこと
   - 2026-09-30 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
-    - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](../homebrew-offline.md) の手順 1〜6・更新・ロールバック
+    - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の手順 1〜6・更新・ロールバック
   - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、Linux 発で SELinux が Enforcing のオフラインのホストへの接続、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
 
 | 項目 | コンテナ（2026-09-29・30） | Windows のホストの VM（2026-09-30） |
@@ -123,7 +123,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | — |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../ssh-socks-tunnel.md#実施手順) で、オンラインのホストのシェルに 1 度だけ設定する。オフラインのホストには変数が無い。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で、オンラインのホストのシェルに 1 度だけ設定する。オフラインのホストには変数が無い。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -157,7 +157,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 - オンラインのホスト: `openssh-clients` を入れ、同じ名前のユーザーで鍵を作り、公開鍵をオフラインのホストの `authorized_keys` に置いた（鍵認証）
 - このクラウドのホストの外向きの通信は、TLS を署名し直すゲートウェイを通る。その CA を、両方のコンテナの信頼ストアに足した（実際のホストでは要らない）
 
-**流し方**: この文書と [homebrew-offline.md](../homebrew-offline.md)・[homebrew.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
+**流し方**: この文書と [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)・[homebrew.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
 
 - 手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた
 - ホスト鍵の確認には `yes`、インストーラの `RETURN` と brew の `[y/n]` には、表示が出てから Enter と `y` を送った
@@ -213,7 +213,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 ### 手順中の実測・検証状況の記録
 
-- **転送中は、オフラインのホストのどのユーザーもプロキシを使える**: 待ち受けは loopback だけだが、ユーザーを区別しない。検証では、2 人目のユーザーの `curl` も `200` を返した。使い終わったら[トンネルを閉じる](../ssh-socks-tunnel.md#トンネルを閉じる)
+- **転送中は、オフラインのホストのどのユーザーもプロキシを使える**: 待ち受けは loopback だけだが、ユーザーを区別しない。検証では、2 人目のユーザーの `curl` も `200` を返した。使い終わったら[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)
 
 ### 手順中の実測・検証状況の記録
 

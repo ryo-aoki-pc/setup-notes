@@ -1,6 +1,6 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../distrobox.md)・[ロールバックと注意点](../extra/distrobox.md)
+[手順書](../almalinux-setup.md#distrobox-実施手順)・[ロールバックと注意点](../extra/distrobox.md)
 
 ## 補足
 
@@ -87,7 +87,7 @@ fi
 - [distrobox — README](https://github.com/89luca89/distrobox) — 概要、コマンドの一覧、互換のあるイメージ（`docs/compatibility.md`）
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
-- [Podman](../podman.md) — 前提の rootless の podman
+- [Podman](../almalinux-setup.md#podman-実施手順) — 前提の rootless の podman
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

@@ -1,6 +1,6 @@
 # Windows 11 でホットキーを使用しているアプリを調べる手順のロールバック
 
-[手順書](../windows-hotkey-conflict.md)・[検証記録](../verification/windows-hotkey-conflict.md)・[参考資料](../reference/windows-hotkey-conflict.md)
+[手順書](../windows-setup.md#windows-のホットキー競合-実施手順)・[検証記録](../verification/windows-hotkey-conflict.md)・[参考資料](../reference/windows-hotkey-conflict.md)
 
 - 「手順 N」「本書」は、手順書の実施手順を指す
 

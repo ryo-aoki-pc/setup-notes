@@ -1,6 +1,6 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の検証記録
 
-[手順書](../vscode.md)・[ロールバックと注意点](../extra/vscode.md)
+[手順書](../almalinux-setup.md#vs-code-実施手順)・[ロールバックと注意点](../extra/vscode.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -110,7 +110,7 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
-  - **[手順 6](../vscode.md#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
+  - **[手順 6](../almalinux-setup.md#vs-code-実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
   - **ただし TTY もディスプレイも無いシェルからの起動は、6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）
   - **VS Code は実機に入れたまま残してある**
   - 手順 1〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
@@ -153,7 +153,7 @@ AlmaLinux 10 aarch64 で VS Code を入れる経路を比べた（2026-09-23 時
 
 | Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](../almalinux-setup.md#firefox) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../vscode.md#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../almalinux-setup.md#vs-code-実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
 
 ### 完了時点の状態
 

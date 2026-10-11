@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-[手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
+[手順書](../almalinux-setup.md#virtualbox-実施手順)・[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](../verification/virtualbox.md#参考資料から分離した記録)
 
@@ -32,7 +32,7 @@
 
 ### 実施手順 / VirtualBox を入れる / 手順 2: 補足: 動いているカーネルを最新にしておく理由
 
-`kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)）。
+`kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../almalinux-setup.md#virtualbox-カーネルを更新したとき)）。
 
 ### 実施手順 / VirtualBox を入れる / 手順 3: 補足: 先に入れる理由
 
@@ -67,7 +67,7 @@
 
 ### 更新 / 手順 2: 補足: 同じ系列の中で上げたとき
 
-- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../virtualbox.md#virtualbox-を入れる)の手順 5 と同じ確認をする
+- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../almalinux-setup.md#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
 - コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
 - モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
 - `/sbin/vboxconfig` と udev のルールも残った
@@ -169,7 +169,7 @@ Android からリモート デスクトップでつないで、PC の上の VM �
 | VirtualBox のソフトキーボード | VM のウィンドウに出るキーをタップして打つ。画面のキーボードで出ない Shift の記号に使う | 併用 |
 | Extension Pack の VRDE（VM の画面に直接 RDP でつなぐ） | Extension Pack が要る（ライセンスが PUEL。本書では扱わない） | 不採用 |
 | PC の上で、Unicode の入力をスキャンコードに直す常駐 | VirtualBox のフックは、VM の画面にフォーカスが来るたびに入れ直されて先に呼ばれ、捕捉中は入力をそこで使ってしまう | 不採用 |
-| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../gnome-remote-desktop.md)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
+| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../almalinux-setup.md#gnome-のリモートログイン-実施手順)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
 
 - PC（RDP サーバー）の側で、クライアントに Unicode を使わせない設定は見つからなかった
 - 設定は Windows App のすべての接続にかかる。PC の上のアプリでも、画面のキーボードの Shift の記号が出なくなる。Android の IME で日本語を打ちたいときは、オフに戻す

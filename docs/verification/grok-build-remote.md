@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy）の検証記録
 
-[手順書](../grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 ## 対象と検証環境
 

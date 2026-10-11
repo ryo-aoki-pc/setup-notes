@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）の検証記録
 
-[手順書](../image-tools.md)・[ロールバックと注意点](../extra/image-tools.md)
+[手順書](../almalinux-setup.md#画像の道具-実施手順)・[ロールバックと注意点](../extra/image-tools.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -56,7 +56,7 @@ rc=1
 
 データベースは `mirror.gcr.io/aquasec/trivy-db:2` から落ち、`~/.cache/trivy` に置かれる（展開後 1.4 GB）。
 
-`--image-src podman` の Trivy は、[podman.md 手順 7](../podman.md#実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
+`--image-src podman` の Trivy は、[podman.md 手順 7](../almalinux-setup.md#podman-実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
 
 ```
 FATAL	Fatal error	run error: image scan error: ... unable to find the specified image "localhost/image-check:1" in ["podman"]: 1 error occurred:
@@ -68,7 +68,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 
 ### ロールバック / 手順 5: 本文中の記録
 
-   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](../image-tools.md#実施手順)の手順 3 で取り込まれた鍵の名前（検証で確かめた値）
+   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](../almalinux-setup.md#画像の道具-実施手順)の手順 3 で取り込まれた鍵の名前（検証で確かめた値）
 
 ### 対象と検証環境
 
@@ -79,7 +79,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 - **進め方**: hadolint と dive は Homebrew、Trivy は公式の dnf リポジトリから入れる（[選択した方針](../reference/image-tools.md#選択した方針)）。確認用のイメージを 1 つ作って、3 つを当てる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../extra/image-tools.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../almalinux-setup.md#画像の道具-更新)、[ロールバック](../extra/image-tools.md#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
@@ -91,8 +91,8 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../podman.md) と同じ作り） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入） |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../almalinux-setup.md#podman-実施手順) と同じ作り） |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順で導入） |
 | Homebrew | 未確認 | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜4 で導入） |
 | hadolint / dive | 未導入 | 2.15.1 / 0.13.1（`x86_64_linux` のボトル） |
 | Trivy | 未導入 | `trivy-0.74.0-1`（公式の dnf リポジトリ） |
@@ -105,7 +105,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../podman.md) の実施手順と Homebrew の導入の後）の状態:
+検証コンテナ（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順と Homebrew の導入の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -193,7 +193,7 @@ Report Summary
 - 層が 1 つの `quay.io/almalinuxorg/10-minimal:10.2` を元にしたイメージでは、`dive --ci` が `efficiency: 100.0000 %` で `Result:PASS`
 - EPEL を有効にした状態の `dnf -q list --showduplicates trivy`（手順 3 の補足）
 - API ソケットを止めた状態の `trivy image --image-src podman`（手順 9 の補足）
-- `trivy image` でレジストリのイメージを直接調べること、`trivy config`（[使い方の基本](../image-tools.md#使い方の基本)）
+- `trivy image` でレジストリのイメージを直接調べること、`trivy config`（[使い方の基本](../almalinux-setup.md#画像の道具-使い方の基本)）
 - 鍵の自己署名のハッシュ（`gpg --list-packets` の `digest algo 8`）
 
 #### 未確認事項

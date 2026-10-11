@@ -1,6 +1,6 @@
 # Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）の検証記録
 
-[手順書](../secure-boot-mok.md)・[ロールバックと注意点](../extra/secure-boot-mok.md)
+[手順書](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)・[ロールバックと注意点](../extra/secure-boot-mok.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -16,7 +16,7 @@
 
 ### 実施手順 / 手順 4: 補足: 鍵の作り方と、登録した鍵の行き先
 
-**鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md の「VirtualBox を入れる」の手順 4](../virtualbox.md#virtualbox-を入れる) の補足の実測）:
+**鍵の作り方は、VirtualBox のスクリプトが出す案内に `-subj` と `-days` を足しただけ。** `vboxdrv.sh` は、Secure Boot で鍵が無いと次の案内を出す（[virtualbox.md の「VirtualBox を入れる」の手順 4](../almalinux-setup.md#virtualbox-virtualbox-を入れる) の補足の実測）:
 
 ```
     sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
@@ -31,7 +31,7 @@
 **CN（`Local kernel module signing key`）は名札で、`modinfo -F signer` に出る。**
 
 - 1 つの鍵で、この PC（VM）でビルドするモジュールのどれにも署名する。カーネルが確かめるのは鍵そのもので、名前ではない
-- この文書を独立させる前（2026-09-30 より前）は、[virtualbox.md](../virtualbox.md) が `VirtualBox module signing key`、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) が `VirtualBox Guest Additions module signing key` で作っていた。その名前で作った鍵も、そのまま使える（手順 4 は既にある鍵を作り直さない）
+- この文書を独立させる前（2026-09-30 より前）は、[virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) が `VirtualBox module signing key`、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) が `VirtualBox Guest Additions module signing key` で作っていた。その名前で作った鍵も、そのまま使える（手順 4 は既にある鍵を作り直さない）
 
 **登録した鍵は `.platform` キーリングに入る。**
 
@@ -62,7 +62,7 @@
 - 検証した PC（ASUS の ROG Flow Z13 GZ302EA、BIOS 311）では、MokManager の画面は出たが、キーボードの操作が効かず、鍵を登録できなかった（利用者の報告）
   - つながっていたのは、着脱式の Asus Keyboard と、外付けの USB のキーボード（ZMK）
   - 起動した後は、予約（`sudo mokutil --list-new`）が消えていて、鍵も登録されていなかった
-- 利用者は UEFI（BIOS）の設定で Secure Boot を無効にし、[virtualbox.md](../virtualbox.md) を無効の分岐で進めた
+- 利用者は UEFI（BIOS）の設定で Secure Boot を無効にし、[virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) を無効の分岐で進めた
 - 別のキーボードや、UEFI の設定（Fast Boot など）でキーが効くようになるかは、確かめていない
 
 ### ロールバック / 手順 0: 本文中の記録
@@ -77,7 +77,7 @@ VM で確かめた並び: `Delete MOK` → 「[Delete MOK]」（`View key 0` / `
 
 - **目的**: Secure Boot が有効な AlmaLinux 10 の PC（または VM）で、自分でビルドするカーネルモジュール（VirtualBox のホストのモジュール、Guest Additions のモジュール）を読み込めるようにする。そのために、署名用の鍵を作って UEFI の MOK（Machine Owner Key）に登録する
 - **進め方**: `openssl` で鍵を `/var/lib/shim-signed/mok/` に作り、`mokutil --import` で予約して、再起動の途中の MokManager で登録する。読者が編集する変数は無い
-  - もとは [virtualbox.md](../virtualbox.md) と [virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の中にあった同じ手順を、共有の前提として 1 本にした。鍵の CN は、どちらのモジュールにも使える `Local kernel module signing key` にそろえた
+  - もとは [virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) と [virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の中にあった同じ手順を、共有の前提として 1 本にした。鍵の CN は、どちらのモジュールにも使える `Local kernel module signing key` にそろえた
 - **状態**: **手順 3〜7 のコマンドは、この文書に移す前に、次の検証で通したもの**（CN はそれぞれの手順書の名前だった）
   - 2026-10-06 の[クリーンインストール VM](../almalinux-vm-verification.md)では、`mokutil --sb-state` が `SecureBoot disabled` と `Platform is in Setup Mode` を返した。本文の条件に従って登録は行わず、今回の VM 試験に MOK 登録の結果は含めない
   - x86_64 の実機（[virtualbox.md の本実行](virtualbox.md#付録-実機での本実行2026-09-29)、2026-09-28。AMD のノート PC）

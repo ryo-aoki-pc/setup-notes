@@ -1,6 +1,6 @@
 # Homebrew をインターネットに出られないホストで使う手順（AlmaLinux 10 / ssh -R の SOCKS プロキシ）の検証記録
 
-[手順書](../homebrew-offline.md)・[ロールバックと注意点](../extra/homebrew-offline.md)
+[手順書](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/homebrew-offline.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -31,7 +31,7 @@ package git is not installed
 - raw.githubusercontent.com の `/` は `301`、ghcr.io はトークンが無いので `401`。届いているかだけを見るので、`200` でなくてよい
 - `curl -I`（HEAD）だと、ghcr.io は `405` を返した。`curl -f` を付けると、どちらも失敗扱いになる
 
-**brew も `ALL_PROXY` を読む**（curl と git は [ssh-socks-tunnel.md 手順 3](../ssh-socks-tunnel.md#実施手順) の補足）。Homebrew の `bin/brew` は、環境変数を絞ってから動くが、`all_proxy` と `ALL_PROXY` は通す（307 行目: `http_proxy https_proxy ftp_proxy no_proxy all_proxy HTTPS_PROXY FTP_PROXY ALL_PROXY`）。`man brew` の「USING HOMEBREW BEHIND A PROXY」も、SOCKS5 のプロキシには `all_proxy` を使う例を挙げている。
+**brew も `ALL_PROXY` を読む**（curl と git は [ssh-socks-tunnel.md 手順 3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の補足）。Homebrew の `bin/brew` は、環境変数を絞ってから動くが、`all_proxy` と `ALL_PROXY` は通す（307 行目: `http_proxy https_proxy ftp_proxy no_proxy all_proxy HTTPS_PROXY FTP_PROXY ALL_PROXY`）。`man brew` の「USING HOMEBREW BEHIND A PROXY」も、SOCKS5 のプロキシには `all_proxy` を使う例を挙げている。
 
 **`ALL_PROXY` を入れずに brew を使うと、外に届かない。** トンネルのシェルで `( unset ALL_PROXY; brew update )` を実行したときの出力:
 
@@ -76,14 +76,14 @@ oniguruma
 - **目的**: インターネットに出られない AlmaLinux 10 のホストで、Homebrew と、Homebrew で入れるコマンドを使えるようにする
   - 入れる・上げるときだけ、そのホストへ ssh でログインしてくるオンラインのホストを経由して外に出る
   - 入れたコマンドは、トンネルが無くても動く
-- **進め方**: 前提の [ssh-socks-tunnel.md](../ssh-socks-tunnel.md) で、オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う。Homebrew の導入は、homebrew.md をそのシェルのまま貼る
+- **進め方**: 前提の [ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で、オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う。Homebrew の導入は、homebrew.md をそのシェルのまま貼る
   - この文書には変数が無い。読者が編集するのは、ssh-socks-tunnel.md の `OFFLINE_HOST` だけ
-  - トンネルの張り方・dnf の設定・閉じ方は、もとはこの文書の手順 1〜4・7〜9 だった（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) と共有するため、ssh-socks-tunnel.md に移した）
+  - トンネルの張り方・dnf の設定・閉じ方は、もとはこの文書の手順 1〜4・7〜9 だった（[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) と共有するため、ssh-socks-tunnel.md に移した）
 - **状態**: **x86_64 のクリーンインストール VM で現行の実施手順と jq のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。実機の AlmaLinux・aarch64 は未実施**
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした
   - オンラインのホストは、外に出られるネットワークと、その `--internal` のネットワークの両方につないだ別のコンテナ
-  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](../homebrew-offline.md#更新)、[ロールバック](../extra/homebrew-offline.md#ロールバック)を通した
+  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](../almalinux-setup.md#homebrew-のオフライン導入-更新)、[ロールバック](../extra/homebrew-offline.md#ロールバック)を通した
     - 当時の手順 1〜9 は、今の ssh-socks-tunnel.md の手順 1〜3・dnf の節・トンネルを閉じる節と、この文書の手順 1・3〜6（手順 3 は homebrew.md の手順 1〜4）。今の手順 2 は、当時の手順 4（dnf の設定）に当たる
   - 貼り方はブラケットペースト無し。dnf の設定とその行の削除（当時の手順 4 とロールバックの手順 2）は、ブラケットペースト有りでも通した
   - 2026-09-30 に、ssh-socks-tunnel.md に移した後のブロックで、同じ作りのコンテナでもう一度通した（[ssh-socks-tunnel.md の付録](ssh-socks-tunnel.md#付録-コンテナでの検証記録2026-09-30)）
@@ -109,7 +109,7 @@ oniguruma
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | 同左 |
 
 > [!NOTE]
-> この文書には変数が無い。オフラインのホストの名前とユーザーは、[ssh-socks-tunnel.md 手順 1](../ssh-socks-tunnel.md#実施手順) の変数で設定する。
+> この文書には変数が無い。オフラインのホストの名前とユーザーは、[ssh-socks-tunnel.md 手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の変数で設定する。
 >
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`7.0.7` など）は実行日によって変わる。
 
@@ -254,11 +254,11 @@ curl: (6) Could not resolve host: github.com
 
 ### 手順中の実測・検証状況の記録
 
-- **ssh が切れると、トンネルも消える**: 途中の `brew install` や dnf は、取得の途中なら失敗するはず（本書では確かめていない）。そのときは [ssh-socks-tunnel.md 手順 2](../ssh-socks-tunnel.md#実施手順) から張り直して、同じコマンドを貼り直す
+- **ssh が切れると、トンネルも消える**: 途中の `brew install` や dnf は、取得の途中なら失敗するはず（本書では確かめていない）。そのときは [ssh-socks-tunnel.md 手順 2](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) から張り直して、同じコマンドを貼り直す
 
 ### 手順中の実測・検証状況の記録
 
-- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば [dropbox-rclone.md](../dropbox-rclone.md) の同期（Dropbox の API）や、[syncthing.md](../syncthing.md) の LAN の外の端末との同期（本書では確かめていない）
+- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば [dropbox-rclone.md](../almalinux-setup.md#dropbox-と-rclone-実施手順) の同期（Dropbox の API）や、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) の LAN の外の端末との同期（本書では確かめていない）
 
 ### 手順中の検証状況
 
@@ -266,7 +266,7 @@ curl: (6) Could not resolve host: github.com
 
 ### 選択した方針
 
-| **ssh の SOCKS トンネル（[ssh-socks-tunnel.md](../ssh-socks-tunnel.md) の `ssh -R 1080`）で、オフラインのホストから取得する** | オンラインのホストからオフラインのホストへ ssh でログインできること。どちらのホストにも追加のソフトは要らない | **採用。** オフラインのホストで curl・git・brew・dnf がそのまま外に届き、homebrew.md とほかの Homebrew 系の手順書を変えずに貼れる。オフラインのホストが自分のアーキのボトルを取るので、2 台のアーキが違ってもよい（ただし本書は x86_64 でしか確かめていない）。トンネルの張り方どうしの比較（`-D`・HTTP プロキシ）は、同書の[選択した方針](ssh-socks-tunnel.md#選択した方針) |
+| **ssh の SOCKS トンネル（[ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の `ssh -R 1080`）で、オフラインのホストから取得する** | オンラインのホストからオフラインのホストへ ssh でログインできること。どちらのホストにも追加のソフトは要らない | **採用。** オフラインのホストで curl・git・brew・dnf がそのまま外に届き、homebrew.md とほかの Homebrew 系の手順書を変えずに貼れる。オフラインのホストが自分のアーキのボトルを取るので、2 台のアーキが違ってもよい（ただし本書は x86_64 でしか確かめていない）。トンネルの張り方どうしの比較（`-D`・HTTP プロキシ）は、同書の[選択した方針](ssh-socks-tunnel.md#選択した方針) |
 
 | `/home/linuxbrew/.linuxbrew` を tar にして運ぶ | 同じ OS・同じアーキのホストで Homebrew と formula を入れる。上げるたびに作り直して運ぶ | 本書では扱わない（ネットワークで届かないときの方法。確かめていない） |
 

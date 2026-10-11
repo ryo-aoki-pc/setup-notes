@@ -1,6 +1,6 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）の検証記録
 
-[手順書](../dropbox.md)・[ロールバックと注意点](../extra/dropbox.md)
+[手順書](../almalinux-setup.md#dropbox-実施手順)・[ロールバックと注意点](../extra/dropbox.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -93,11 +93,11 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 ### 対象と検証環境
 
 - **目的**: x86_64 の AlmaLinux 10 で Dropbox の公式クライアントを headless で動かし、ログインしていない間も `~/Dropbox` をクラウドと同期し続ける
-- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](../linger.md)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
+- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜7を検証済み（2026-10-06）。アカウントのリンクと同期は未確認。実機には入れていない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](../dropbox.md#更新)・[ロールバック](../extra/dropbox.md#ロールバック)を通した
-    - linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](../almalinux-setup.md#dropbox-更新)・[ロールバック](../extra/dropbox.md#ロールバック)を通した
+    - linger の有効化と解除（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
   - 確認したこと:
     - 署名が合えば展開され、版が食い違って `BAD signature` のときは展開されない
     - デーモンがユーザーサービスとして動き、`dropbox status` がリンク用の URL を出す（検証のときだけサービスにプロキシを渡した）
@@ -172,7 +172,7 @@ Linger=yes
 - プロキシの CA を信頼ストアに足した
 - 非 root ユーザー（uid 1000、NOPASSWD の sudo）を作り、ホームはホストの ext4 のディレクトリを bind mount した
 
-途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](../linger.md) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
+途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
 
 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、手順ごとに `docker exec` で、そのユーザーのログインシェル（`bash -l`）へ標準入力から流した。`docker exec` はログインセッションを作らないので、`XDG_RUNTIME_DIR` と `DBUS_SESSION_BUS_ADDRESS` を渡して `systemctl --user` を使えるようにした。
 
@@ -290,8 +290,8 @@ Sep 27 15:58:30 <HOSTNAME> dropboxd[2263]: Please visit https://www.dropbox.com/
 
 ### 手順中の検証状況
 
-- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](../dropbox.md#使い方の基本)。動作は確かめていない）
+- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](../almalinux-setup.md#dropbox-使い方の基本)。動作は確かめていない）
 
 ### 手順中の検証状況
 
-- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](../syncthing.md) の実機では、ユーザーサービスは `unconfined` として動いた
+- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](../almalinux-setup.md#syncthing-実施手順) の実機では、ユーザーサービスは `unconfined` として動いた

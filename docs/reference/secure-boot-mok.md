@@ -1,6 +1,6 @@
 # Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）の参考資料
 
-[手順書](../secure-boot-mok.md)・[ロールバックと注意点](../extra/secure-boot-mok.md)
+[手順書](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)・[ロールバックと注意点](../extra/secure-boot-mok.md)
 
 ## 補足
 
@@ -32,13 +32,13 @@
 - **鍵の場所は `/var/lib/shim-signed/mok/MOK.{der,priv}` に固定する**: VirtualBox の `vboxdrv.sh` と Guest Additions の `vboxadd` が、この場所を決め打ちで使う
 - **鍵は 1 つにし、作り直さない**: 登録済みの鍵を作り直すと、その鍵で署名したモジュールと合わなくなる。手順 4 は、鍵があれば `中断:` で止まる
 - **CN は用途を問わない名前にする**: 1 つの鍵で、この PC（VM）のモジュールのどれにも署名するため
-- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[virtualbox.md](../virtualbox.md) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[virtualbox.md の「VirtualBox を入れる」の手順 4](../virtualbox.md#virtualbox-を入れる) の補足）
+- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[virtualbox.md の「VirtualBox を入れる」の手順 4](../almalinux-setup.md#virtualbox-virtualbox-を入れる) の補足）
 - **独立した手順書にした**: VirtualBox のホストと、bootc のゲストの Guest Additions の 2 本で、同じ鍵の作り方・MokManager・確認の手順が重なっていたため
 
 ### 参照
 
 - [RHEL 10 — Managing, monitoring, and updating the kernel](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/managing_monitoring_and_updating_the_kernel/index) — Secure Boot でのモジュールの署名、MOK への鍵の登録、`.platform` キーリング
 - `man mokutil`（`--sb-state` / `--import` / `--test-key` / `--list-new` / `--delete` / `--list-delete`）
-- [VirtualBox](../virtualbox.md) / [VirtualBox Guest Additions（bootc のゲスト）](../virtualbox-guest-bootc.md) — この鍵で署名したモジュールを使う手順書
+- [VirtualBox](../almalinux-setup.md#virtualbox-実施手順) / [VirtualBox Guest Additions（bootc のゲスト）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) — この鍵で署名したモジュールを使う手順書
 
 ---

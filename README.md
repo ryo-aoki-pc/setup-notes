@@ -1,52 +1,38 @@
 # setup-notes
 
-実機で検証した構築・設定手順と、失敗時の切り分けを記録するリポジトリ。
-手順書には操作・前提・成功条件を記載する。実施日・環境・結果・失敗例は `docs/verification/<文書名>.md`、採用理由や背景説明は `docs/reference/<文書名>.md`、ロールバックと注意点は `docs/extra/<文書名>.md` に分け、各手順書の冒頭から参照する。
+構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。
 
-検証の実施範囲と過去の結果は、[README の検証記録](docs/verification/readme.md)と[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)を参照する。各手順書の冒頭からも対応する検証記録を開ける。
+実施範囲・成功と失敗は [検証記録](docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。
 
 ## 手順書とツール
 
-- 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)・[Hyper-V](docs/hyper-v.md)・[VMware Workstation Pro](docs/vmware.md)は Windows 11 だけ、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[コーディングエージェントの共同作業](docs/coding-agents.md)・[Grok Build をブラウザから操作](docs/grok-build-remote.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard VPN の外出先の PC](docs/wireguard.md#almalinux-10-の-pc-からつなぐ) は Windows 11 も。Git・Firefox・HackGen Console NF・WezTerm・git-delta・GitHub CLI・Neovim・lazygit・yazi・Claude Code・Codex CLI・Grok Build は、2 つの初期設定の手順書に両 OS の手順がある）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
-- インストールした直後に、AlmaLinux 10 は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)、Windows 11 は [Windows 11 の初期設定](docs/windows-setup.md)を通す。下の手順書の多くは、その手順で入れたもの（Homebrew・EPEL・NOPASSWD の sudo など）を前提にする
-- 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
-  - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
-  - 各節の「手順書の無いツール」の表は、この一覧のツールを役割で振り分けたもの。版・導入コマンド・ほかの経路は、名前のリンク先の一覧の行にある
-- Neovim・WezTerm・lazygit・yazi の自分用の設定（カスタマイズ）は、ツールごとの別のリポジトリにある。2 つの初期設定の手順の中で、それぞれのリポジトリの導入手順を範囲で名指しして入れる（AlmaLinux 10 の初期設定では[「Neovim」](docs/almalinux-setup.md#neovim)の手順 3 など。clone のコマンドは手順書に載せない）。置き場所は同書の「設定ファイル」の節（[Neovim](docs/almalinux-setup.md#neovim-の設定ファイル)・[WezTerm](docs/almalinux-setup.md#wezterm-の設定ファイル)・[lazygit](docs/almalinux-setup.md#lazygit-の設定ファイル)・[yazi](docs/almalinux-setup.md#yazi-の設定ファイル)）
-- シェルの設定は [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) で管理する。各手順書では同じ設定を `~/.bashrc` に追記しない。先に次の導入を行う（AlmaLinux 10 は、[AlmaLinux 10 の初期設定の「共通の bash 設定」の手順 1・2](docs/almalinux-setup.md#共通の-bash-設定)に同じブロックがある）
+- 基本設定は「実施手順」を順に通す。追加ツール・VPN・VM・リモート操作は任意節から選ぶ
+- 任意節を単独で通すときは、対象・前提・実行場所・権限を先に確認する
+- 設定とスクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は各リポジトリにある
+- 旧文書は移動先の案内。[集約対応表](docs/dev/consolidation-map.md) で旧見出しから探せる
+- 導入元や版を比べるときは [ツール導入元一覧](docs/tool-catalog.md) を見る
 
 ### 共通の bash 設定を先に入れる
 
-Git を入れたら、自分のユーザーの bash（Windows 11 は Git Bash、WSL は WSL 側）で初回だけ実行する。
-
-```bash
-git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
-  bash ~/.config/bash/install.sh
-```
-
-端末を開き直せば、インストール済みのツールの設定が効く。既に clone 済みなら `git -C ~/.config/bash pull --ff-only` で更新し、`install.sh` を実行する。既知の追記は控えを取って移行し、同じ状態での再実行では重複を増やさない。手で変えた行は残るので、[導入手順](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md)に従って確認する。
-
-- **各ツールの `~/.bashrc` への追記は不要**。Homebrew、Neovim、bat、eza、gdu、yazi、fzf、starship、zoxide、Podman の `DOCKER_HOST`、履歴・`shopt`・Homebrew の補完を含む。[追記箇所の照合結果](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/quick-start.md#setup-notes-の追記との対応)を参照
-- ツール本体のインストール、Podman のソケットの有効化、`bash-completion` の導入、`~/.inputrc`、Git などの別ファイルの設定は各手順書で行う（AlmaLinux 10 の `bash-completion` と `~/.inputrc` は、[AlmaLinux 10 の初期設定の「共通の bash 設定」の手順 3・4](docs/almalinux-setup.md#共通の-bash-設定)）
-- root 用は root 自身の clone と読み込み設定が必要。[root の導入条件](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)を先に確認する
+- 導入と確認は [AlmaLinux 10 の「共通の bash 設定」](docs/almalinux-setup.md#共通の-bash-設定)、Windows は [Git Bash と WezTerm の設定](docs/windows-setup.md#git-bash-と-wezterm-の設定) で行う
+- 各ツールで `~/.bashrc` に設定を重ねて追記しない。ツール本体・ソケット・別形式の設定ファイルは該当項で導入する
 
 ### OS のインストール
 
 - Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
 - AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある。入れた後は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す
-- 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-dual-boot.md#次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
+- 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
 - インストールと QEFI Entry Manager の実施範囲は、[検証記録](docs/verification/windows-dual-boot.md)を参照する
 
 | 手順書 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
 |---|---|---|---|---|
-| [Windows 11（AlmaLinux 10 とのデュアルブート向け）](docs/windows-dual-boot.md) | Windows 11（24H2 以降） | Rufus で作った USB（「インストーラーをカスタムしますか?」の 7 項目をオン、「サイレント」はオフ） | セットアップのコマンド プロンプトの diskpart で、ESP 2 GiB・MSR・Windows・回復を作り、残りを未割り当てにする | 未割り当て領域に AlmaLinux 10 を入れる。入れた後は、それぞれの OS で [Windows 11 の初期設定](docs/windows-setup.md)・[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す |
+| [Windows 11（AlmaLinux 10 とのデュアルブート向け）](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順) | Windows 11（24H2 以降） | Rufus で作った USB（「インストーラーをカスタムしますか?」の 7 項目をオン、「サイレント」はオフ） | セットアップのコマンド プロンプトの diskpart で、ESP 2 GiB・MSR・Windows・回復を作り、残りを未割り当てにする | 未割り当て領域に AlmaLinux 10 を入れる。入れた後は、それぞれの OS で [Windows 11 の初期設定](docs/windows-setup.md)・[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す |
 
 ### 導入の基盤
 
 - RPM に無いか古いツールの入れ先。CLI とフォントは Homebrew、GUI アプリは Flathub
-- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/homebrew-offline.md)。トンネルは[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
-- 同じトンネルで、Neovim の Mason が npm で入れる LSP サーバー・リンターも入れられる（[npm-offline.md](docs/npm-offline.md)。npm は `ALL_PROXY` を読まないので、`https_proxy` を足す）
+- インターネットに出られないホストでも、そこへ ssh でログインできるホストを経由すれば Homebrew を使える（[homebrew-offline.md](docs/almalinux-setup.md#homebrew-のオフライン導入-実施手順)。トンネルは[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル-実施手順)）。経由するのは入れる・上げるときだけで、入れたコマンドは ssh を閉じた後も動く
+- 同じトンネルで、Neovim の Mason が npm で入れる LSP サーバー・リンターも入れられる（[npm-offline.md](docs/almalinux-setup.md#npm-のオフライン導入-実施手順)。npm は `ALL_PROXY` を読まないので、`https_proxy` を足す）
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
@@ -68,8 +54,8 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | 手順書 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
 | [Homebrew（AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3）](docs/almalinux-setup.md#homebrew) | CLI ツール、フォント（cask） | `/home/linuxbrew/.linuxbrew` | 導入・更新は一般ユーザーで行う（入れたコマンドは、任意の節で root のシェルや `sudo` からも使える） | `brew upgrade` | 同書の「シェルのツール」の手順 1 の 6 つ（starship・zoxide・fzf・eza・bat・tmux）と、同書の HackGen Console NF・git-delta・Neovim・lazygit・yazi、導入元が Homebrew の手順書 6 本、手順書の無いツールの Homebrew の行 |
-| [Homebrew（インターネットに出られないホスト）](docs/homebrew-offline.md) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/npm-offline.md) |
-| [npm（インターネットに出られないホスト）](docs/npm-offline.md) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
+| [Homebrew（インターネットに出られないホスト）](docs/almalinux-setup.md#homebrew-のオフライン導入-実施手順) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル-実施手順)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の手順書とツール、[npm（インターネットに出られないホスト）](docs/almalinux-setup.md#npm-のオフライン導入-実施手順) |
+| [npm（インターネットに出られないホスト）](docs/almalinux-setup.md#npm-のオフライン導入-実施手順) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル-実施手順)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
 | [Flatpak / Flathub（AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3）](docs/almalinux-setup.md#flatpak-と-flathub) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（「GNOME の表示と入力」の手順 10）、btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free。AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5）](docs/almalinux-setup.md#epel-と-rpm-fusion) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | 同書の[「Firefox」](docs/almalinux-setup.md#firefox)の AAC・H.264（手順 8〜11） |
@@ -88,9 +74,9 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 | 手順書 | すること | 変わるもの | これを前提にするもの |
 |---|---|---|---|
-| [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Grok Build をブラウザから操作・Podman の Quadlet（任意節） |
-| [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
-| [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
+| [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Grok Build をブラウザから操作・Podman の Quadlet（任意節） |
+| [ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル-実施手順) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
+| [Secure Boot の MOK 登録](docs/almalinux-setup.md#secure-boot-の署名鍵-実施手順) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
 | [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4）](docs/windows-setup.md#貼り付けの設定) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows 11 の初期設定の、貼り付けの設定より後の項。Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）・Hyper-V・VMware Workstation Pro と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・Grok Build をブラウザから操作・VirtualBox・WireGuard VPN の Windows 11 の節） |
 | [LAN をプライベートにする（Windows 11 の初期設定の「ネットワークとリモート」の手順 1）](docs/windows-setup.md#ネットワークとリモート) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
 
@@ -130,16 +116,16 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 | 手順書 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
-| [WireGuard VPN](docs/wireguard.md) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
-| [WireGuard VPN の外出先の PC（WireGuard VPN の「AlmaLinux 10 の PC からつなぐ」と「Windows 11 で使う」）](docs/wireguard.md#almalinux-10-の-pc-からつなぐ) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down`。Windows 11 は winget の `WireGuard.WireGuard`（公式の MSI）で、`/installtunnelservice` / `/uninstalltunnelservice` | 無し（PC の firewalld は変えない） |
-| [GNOME Remote Desktop](docs/gnome-remote-desktop.md) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（GDM で認証し、既存セッションへ戻るか、無ければ作る） | 3389/tcp |
-| [GNOME のヘッドレスのセッション](docs/gnome-headless-session.md) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
-| [GNOME のデスクトップ共有](docs/gnome-desktop-sharing.md) | RDP クライアントと、遠隔の PC の画面に自動ログインした GNOME のデスクトップ | 接続される PC（共有するユーザーの SSH のシェル。PC の画面は使わない） | `grdctl`（オプション無し）とユーザーの `gnome-remote-desktop.service`、GDM の自動ログイン。資格情報はパスワードの無いキーリング `rdp` | 3389/tcp（リモートログインと併用なら 3390/tcp） |
+| [WireGuard VPN](docs/almalinux-setup.md#wireguard-実施手順) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
+| [WireGuard VPN の外出先の PC（WireGuard VPN の「AlmaLinux 10 の PC からつなぐ」と「Windows 11 で使う」）](docs/almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down`。Windows 11 は winget の `WireGuard.WireGuard`（公式の MSI）で、`/installtunnelservice` / `/uninstalltunnelservice` | 無し（PC の firewalld は変えない） |
+| [GNOME Remote Desktop](docs/almalinux-setup.md#gnome-のリモートログイン-実施手順) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（GDM で認証し、既存セッションへ戻るか、無ければ作る） | 3389/tcp |
+| [GNOME のヘッドレスのセッション](docs/almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
+| [GNOME のデスクトップ共有](docs/almalinux-setup.md#gnome-のデスクトップ共有-実施手順) | RDP クライアントと、遠隔の PC の画面に自動ログインした GNOME のデスクトップ | 接続される PC（共有するユーザーの SSH のシェル。PC の画面は使わない） | `grdctl`（オプション無し）とユーザーの `gnome-remote-desktop.service`、GDM の自動ログイン。資格情報はパスワードの無いキーリング `rdp` | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー（Windows 11 の初期設定の「OpenSSH サーバー」）](docs/windows-setup.md#openssh-サーバー) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
-| [SSH クライアント（Windows）](docs/windows-ssh-client.md) | Windows 11 の PC と AlmaLinux 10 のホスト（SSH の鍵と接続先） | 接続する PC（Windows。指紋を見るところだけホスト。公開鍵はホストの `authorized_keys` に Windows から足す） | Windows の OpenSSH クライアント（`System32\OpenSSH`）と Git for Windows の ssh。`%USERPROFILE%\.ssh` の ed25519 の鍵と config | 無し |
-| [Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
-| [Grok Build をブラウザから操作](docs/grok-build-remote.md) | スマートフォン・PC のブラウザと、AlmaLinux 10 のサーバーや Windows 11 の PC で動く Grok Build | 接続されるホスト（Grok Build を使う一般ユーザーのシェル。Windows 11 は管理者ではない PowerShell。確認は別の PC のブラウザとスマートフォン） | Codeg の `codeg-server` と、HTTPS を受ける Caddy（どちらも GitHub の配布物をチェックサムで照合して置く）。アクセストークンで認証。AlmaLinux 10 は systemd のユーザーサービスと [linger](docs/linger.md)、Windows 11 はタスク スケジューラ | 3443/tcp（送信元を指定した CIDR に絞る。AlmaLinux 10 は宛先をホストの IP に、Windows 11 はプライベートのネットワークの有線 LAN に絞る） |
-| [RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、[Windows 11 の初期設定の「ネットワークとリモート」の手順 2](docs/windows-setup.md#ネットワークとリモート)か、Windows の設定のリモート デスクトップが開ける） |
+| [SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順) | Windows 11 の PC と AlmaLinux 10 のホスト（SSH の鍵と接続先） | 接続する PC（Windows。指紋を見るところだけホスト。公開鍵はホストの `authorized_keys` に Windows から足す） | Windows の OpenSSH クライアント（`System32\OpenSSH`）と Git for Windows の ssh。`%USERPROFILE%\.ssh` の ed25519 の鍵と config | 無し |
+| [Claude Code の Remote Control（Windows）](docs/windows-setup.md#claude-code-の-remote-control-実施手順) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
+| [Grok Build をブラウザから操作](docs/almalinux-setup.md#grok-build-のブラウザ操作-実施手順) | スマートフォン・PC のブラウザと、AlmaLinux 10 のサーバーや Windows 11 の PC で動く Grok Build | 接続されるホスト（Grok Build を使う一般ユーザーのシェル。Windows 11 は管理者ではない PowerShell。確認は別の PC のブラウザとスマートフォン） | Codeg の `codeg-server` と、HTTPS を受ける Caddy（どちらも GitHub の配布物をチェックサムで照合して置く）。アクセストークンで認証。AlmaLinux 10 は systemd のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順)、Windows 11 はタスク スケジューラ | 3443/tcp（送信元を指定した CIDR に絞る。AlmaLinux 10 は宛先をホストの IP に、Windows 11 はプライベートのネットワークの有線 LAN に絞る） |
+| [RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、[Windows 11 の初期設定の「ネットワークとリモート」の手順 2](docs/windows-setup.md#ネットワークとリモート)か、Windows の設定のリモート デスクトップが開ける） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -150,20 +136,20 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 - Samba は、サーバーにある自分のホームを LAN・WireGuard 越しに SMB3 で読み書きする（任意で root のホームも、自分のユーザーのまま）。Syncthing は、指定したフォルダを端末同士で同期する
 - Samba クライアントは、その共有を AlmaLinux 10 の PC の `/mnt/<共有名>` に、アクセスしたときにマウントする。GNOME Files（`smb://`）で開く方法も同書にある
-  - Windows 11 の PC では、同書の [Windows 11 の節](docs/samba-client.md#windows-11-で使う)で、共有をドライブ文字に割り当て、サインインのたびにつなぎ直す（資格情報マネージャーと `New-SmbMapping`。管理者ではない窓で行う）。**Windows の実機では流していない**（未検証）
+  - Windows 11 の PC では、同書の [Windows 11 の節](docs/windows-setup.md#samba-クライアント-windows-11-で使う)で、共有をドライブ文字に割り当て、サインインのたびにつなぎ直す（資格情報マネージャーと `New-SmbMapping`。管理者ではない窓で行う）。**Windows の実機では流していない**（未検証）
 - 同じホストで両方使うときは、Syncthing の同期対象にホームを丸ごと入れない（Samba と同じ領域を二重に扱うことになる）
-- Syncthing の鍵と設定は、[syncthing.md の任意節](docs/syncthing.md#設定を自動でバックアップする任意)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
-- Syncthing は、Windows 11 の PC にも同書の [Windows 11 の節](docs/syncthing.md#windows-11-で使う)で入れられる。公式の zip の `syncthing.exe` を置き、サインインしている間だけタスク スケジューラで動かす（AlmaLinux 10 の Syncthing の相手にもなる）。更新は Syncthing 自身の自動の更新。**Windows の実機では流していない**（未検証）
+- Syncthing の鍵と設定は、[syncthing.md の任意節](docs/almalinux-setup.md#syncthing-設定を自動でバックアップする任意)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
+- Syncthing は、Windows 11 の PC にも同書の [Windows 11 の節](docs/windows-setup.md#syncthing-windows-11-で使う)で入れられる。公式の zip の `syncthing.exe` を置き、サインインしている間だけタスク スケジューラで動かす（AlmaLinux 10 の Syncthing の相手にもなる）。更新は Syncthing 自身の自動の更新。**Windows の実機では流していない**（未検証）
 - Dropbox は、どちらの手順書も `~/Dropbox` をクラウドと同期する。公式クライアントは x86_64 にしか無いので、Raspberry Pi 5（aarch64）では rclone を使う
 - `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）
 
 | 手順書 | 方式 | 導入元 | 常駐 | 開けるポート |
 |---|---|---|---|---|
-| [Samba](docs/samba.md) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]`、`/home` 全体を `[home]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
-| [Samba クライアント](docs/samba-client.md) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける。Windows 11 はネットワーク ドライブに割り当てる | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`）。Windows 11 は Windows に入っている SMB のクライアント | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す）。Windows 11 はサインインのたびにつなぎ直す | 無し（サーバーの 445/tcp へ出るだけ） |
-| [Syncthing](docs/syncthing.md) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/linger.md)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
-| [Dropbox（公式クライアント）](docs/dropbox.md) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと [linger](docs/linger.md) | 無し（LAN 同期の `dropbox-lansync` は開けない） |
-| [Dropbox（rclone）](docs/dropbox-rclone.md) | `rclone bisync` で `~/Dropbox` と Dropbox を 15 分ごとに双方向同期する（Raspberry Pi 5 向け） | Homebrew（EPEL 版は古い） | systemd ユーザータイマーと [linger](docs/linger.md) | 無し |
+| [Samba](docs/almalinux-setup.md#samba-サーバー-実施手順) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]`、`/home` 全体を `[home]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
+| [Samba クライアント](docs/almalinux-setup.md#samba-クライアント-実施手順) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける。Windows 11 はネットワーク ドライブに割り当てる | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`）。Windows 11 は Windows に入っている SMB のクライアント | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す）。Windows 11 はサインインのたびにつなぎ直す | 無し（サーバーの 445/tcp へ出るだけ） |
+| [Syncthing](docs/almalinux-setup.md#syncthing-実施手順) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
+| [Dropbox（公式クライアント）](docs/almalinux-setup.md#dropbox-実施手順) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順) | 無し（LAN 同期の `dropbox-lansync` は開けない） |
+| [Dropbox（rclone）](docs/almalinux-setup.md#dropbox-と-rclone-実施手順) | `rclone bisync` で `~/Dropbox` と Dropbox を 15 分ごとに双方向同期する（Raspberry Pi 5 向け） | Homebrew（EPEL 版は古い） | systemd ユーザータイマーと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順) | 無し |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -209,8 +195,8 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [bat（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/almalinux-setup.md#シェルのツール) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/windows-setup.md#シェルのツールを入れる)） |
 | [eza（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/almalinux-setup.md#シェルのツール) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、共通の bash 設定のエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/windows-setup.md#シェルのツールを入れる)） |
 | [yazi（AlmaLinux 10 の初期設定の「yazi」）](docs/almalinux-setup.md#yazi) | ファイルの閲覧と操作（プレビュー、検索） | — | `y`（終了した場所へ移るシェル関数）、`yazi` | TUI | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の main |
-| [gdu](docs/gdu.md) | ディスク使用量 | `du` | `gdu-go`（`gdu` ではない） | TUI | Homebrew（EPEL は 5.32 系で、コマンド名は `gdu`） |
-| [btop](docs/btop.md) | CPU・メモリ・ディスク・ネットワーク・プロセス | `top` | `btop` | TUI | EPEL（Homebrew と同じ 1.4.7） |
+| [gdu](docs/almalinux-setup.md#gdu-実施手順) | ディスク使用量 | `du` | `gdu-go`（`gdu` ではない） | TUI | Homebrew（EPEL は 5.32 系で、コマンド名は `gdu`） |
+| [btop](docs/almalinux-setup.md#btop-実施手順) | CPU・メモリ・ディスク・ネットワーク・プロセス | `top` | `btop` | TUI | EPEL（Homebrew と同じ 1.4.7） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -240,18 +226,18 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - lazygit の `e` キーで開くエディタは、`EDITOR` で決まる（共通の bash 設定では `nvim`）
   - Windows 11 の PowerShell から起動するときは、[Windows 11 の初期設定の「Neovim を既定のエディタにする（任意）」](docs/windows-setup.md#neovim-を既定のエディタにする任意)の手順 1 で、ユーザーの環境変数 `EDITOR` を `nvim` にする（Git Bash では、共通の bash 設定が `nvim` にする）
 - Homebrew の nvim は、そのままでは `sudo` の PATH に無く、`EDITOR=nvim` でも `sudoedit` は黙って `vi` で開く。[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すと、`sudoedit` が自分の設定の nvim で開く（通さないなら `SUDO_EDITOR` にフルパスを渡す）
-- インターネットに出られないホストでは、Neovim は [homebrew-offline.md](docs/homebrew-offline.md) のトンネルで入れ、Mason の npm のパッケージは [npm-offline.md](docs/npm-offline.md) で入れる
+- インターネットに出られないホストでは、Neovim は [homebrew-offline.md](docs/almalinux-setup.md#homebrew-のオフライン導入-実施手順) のトンネルで入れ、Mason の npm のパッケージは [npm-offline.md](docs/almalinux-setup.md#npm-のオフライン導入-実施手順) で入れる
 
 | 手順書 | 形 | 導入元 | 設定の置き場所 | 更新 |
 |---|---|---|---|---|
 | [Neovim（AlmaLinux 10 の初期設定の「Neovim」）](docs/almalinux-setup.md#neovim) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系）。Windows 11 は scoop の main | `~/.config/nvim`（`init.lua` か `init.vim`）。Windows 11 は `%LOCALAPPDATA%\nvim` | `brew upgrade neovim`（Windows 11 は `scoop update neovim`） |
-| [VS Code](docs/vscode.md) | GUI（Electron） | Microsoft 公式 dnf リポジトリ（EL 共通の rpm） | `~/.config/Code`、`~/.vscode`（`~/.config/code-flags.conf` は読まれない） | `sudo dnf upgrade code`（内蔵のアップデータは使わない） |
+| [VS Code](docs/almalinux-setup.md#vs-code-実施手順) | GUI（Electron） | Microsoft 公式 dnf リポジトリ（EL 共通の rpm） | `~/.config/Code`、`~/.vscode`（`~/.config/code-flags.conf` は読まれない） | `sudo dnf upgrade code`（内蔵のアップデータは使わない） |
 
 ### git と GitHub
 
 - 役割が違うので、併用できる
 - Git（[AlmaLinux 10 の初期設定の「Git」](docs/almalinux-setup.md#git)）は git 本体と `~/.gitconfig` の基本の設定（pull は rebase と autostash、改行を変換しない、推奨の設定）。AlmaLinux 10 と Windows 11 の Git for Windows で同じ設定にする
-- [Forgejo](docs/forgejo.md) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。公式の最新安定版を入れ、毎日自動で最新版へ更新する（失敗したら自動で戻す）。[使い方の基本](docs/forgejo.md#使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
+- [Forgejo](docs/almalinux-setup.md#forgejo-実施手順) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。公式の最新安定版を入れ、毎日自動で最新版へ更新する（失敗したら自動で戻す）。[使い方の基本](docs/almalinux-setup.md#forgejo-使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
 - `merge.conflictStyle zdiff3` は、初期設定の「Git」と「git-delta」の両方で入れる（同じ値）
 - lazygit は git の `core.pager` を読まない。自分用の lazygit の設定（[AlmaLinux 10 の初期設定の「lazygit」](docs/almalinux-setup.md#lazygit)の手順 2）が、`git.diffRenderers` で delta を使う
 
@@ -261,7 +247,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [lazygit（AlmaLinux 10 の初期設定の「lazygit」）](docs/almalinux-setup.md#lazygit) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の extras | `~/.config/lazygit/config.yml`。Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml` |
 | [git-delta（AlmaLinux 10 の初期設定の「git-delta」）](docs/almalinux-setup.md#git-delta) | `git diff` / `show` / `log -p` の表示（ページャ） | `delta`（formula 名は `git-delta`。ふだんは git が呼ぶ） | Homebrew（RPM 無し）。Windows 11 は scoop の main（`delta`） | `~/.gitconfig`（`git config --global` で書く。Windows 11 は `C:\Users\<WIN_USER>\.gitconfig` で、Git Bash・PowerShell・cmd の git が同じものを読む） |
 | [GitHub CLI（AlmaLinux 10 の初期設定の「GitHub CLI」）](docs/almalinux-setup.md#github-cli) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い）。Windows 11 は scoop の main（`gh`） | `~/.config/gh/hosts.yml`（トークンは OS の資格情報ストアを優先し、使えない場合はファイルに平文保存）。Windows 11 は `%APPDATA%\GitHub CLI`（トークンは資格情報マネージャーを優先） |
-| [Forgejo](docs/forgejo.md) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo`。自動更新は `~/.config/systemd/user/forgejo-auto-update.timer` と `~/.local/bin/forgejo-auto-update` |
+| [Forgejo](docs/almalinux-setup.md#forgejo-実施手順) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo`。自動更新は `~/.config/systemd/user/forgejo-auto-update.timer` と `~/.local/bin/forgejo-auto-update` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -271,16 +257,16 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 ### 開発の補助
 
 - 言語処理系は AppStream / BaseOS にある（Node.js・Python・Go・Rust）。別の版が要るときに mise を使う
-- Claude Code・Codex CLI・Grok Build と、Claude Code から Codex と Grok に頼む公式のプラグインは、初期設定（[AlmaLinux 10](docs/almalinux-setup.md#claude-code)・[Windows 11](docs/windows-setup.md#claude-code)）で入れてログインする。そのうえで、[コーディングエージェントの共同作業](docs/coding-agents.md)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree。スマートフォンからは Remote Control で Claude に頼む）
+- Claude Code・Codex CLI・Grok Build と、Claude Code から Codex と Grok に頼む公式のプラグインは、初期設定（[AlmaLinux 10](docs/almalinux-setup.md#claude-code)・[Windows 11](docs/windows-setup.md#claude-code)）で入れてログインする。そのうえで、[コーディングエージェントの共同作業](docs/almalinux-setup.md#コーディングエージェントの共同作業-実施手順)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree。スマートフォンからは Remote Control で Claude に頼む）
 
 | 手順書 | 用途 | 導入元 | 更新 |
 |---|---|---|---|
-| [ShellCheck / shfmt](docs/shellcheck.md) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
+| [ShellCheck / shfmt](docs/almalinux-setup.md#shellcheck-と-shfmt-実施手順) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
 | [Claude Code（AlmaLinux 10 の初期設定の「Claude Code」）](docs/almalinux-setup.md#claude-code) | Claude Code の CLI（Node.js 不要）と、`claude` のコマンドラインの使い方（起動と再開・`-p`・MCP） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる）。Windows 11 は公式の native installer（`%USERPROFILE%\.local\bin\claude.exe`。PATH は手順書で足す） | `sudo dnf upgrade claude-code`（自動更新しない）。Windows 11 は自動の更新（`claude update` で今すぐ） |
 | [Codex CLI（AlmaLinux 10 の初期設定の「Codex CLI」）](docs/almalinux-setup.md#codex-cli) | OpenAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・認証・起動 | OpenAI 公式の standalone インストーラー（Linux は `~/.local/bin/codex`、Windows は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`） | 起動したときの `Update available!` で上げる（公式インストーラーの再実行でも上がる） |
 | [Grok Build（AlmaLinux 10 の初期設定の「Grok Build」）](docs/almalinux-setup.md#grok-build) | xAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・ログイン・起動 | xAI 公式のインストーラー（Linux は `~/.grok/bin/grok` で、`~/.bashrc` に PATH のブロックを足す。Windows は `%USERPROFILE%\.grok\bin\grok.exe`） | 自動の更新（対話の画面の起動時。`grok update` で今すぐ） |
-| [コーディングエージェントの共同作業](docs/coding-agents.md) | Claude Code・Codex・Grok Build を 1 つのプロジェクトで使う（AGENTS.md の規則、エージェントごとの git worktree、相互のレビュー、main への取り込み、スマートフォンからの指示） | OpenAI と xAI の Claude Code 用の公式プラグイン（初期設定の「Codex・Grok のプラグイン」で入れる）。プラグインが使う Node.js は AppStream（Windows 11 は scoop の `nodejs`。無ければ `nodejs-lts`）、Grok の sandbox が使う bubblewrap は BaseOS | 初期設定の更新（`claude plugin update`。Node.js は OS の更新と `scoop update`） |
-| [Claude Code で GUI を確かめる](docs/claude-code-gui.md) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
+| [コーディングエージェントの共同作業](docs/almalinux-setup.md#コーディングエージェントの共同作業-実施手順) | Claude Code・Codex・Grok Build を 1 つのプロジェクトで使う（AGENTS.md の規則、エージェントごとの git worktree、相互のレビュー、main への取り込み、スマートフォンからの指示） | OpenAI と xAI の Claude Code 用の公式プラグイン（初期設定の「Codex・Grok のプラグイン」で入れる）。プラグインが使う Node.js は AppStream（Windows 11 は scoop の `nodejs`。無ければ `nodejs-lts`）、Grok の sandbox が使う bubblewrap は BaseOS | 初期設定の更新（`claude plugin update`。Node.js は OS の更新と `scoop update`） |
+| [Claude Code で GUI を確かめる](docs/almalinux-setup.md#claude-code-の-gnome-操作-実施手順) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -293,24 +279,24 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### コンテナ
 
-- 土台は [Podman](docs/podman.md)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。ほかの 6 本（下表の 5 本と [Forgejo](docs/forgejo.md)）と手順書の無いツールは、これを前提にしている
+- 土台は [Podman](docs/almalinux-setup.md#podman-実施手順)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。ほかの 6 本（下表の 5 本と [Forgejo](docs/almalinux-setup.md#forgejo-実施手順)）と手順書の無いツールは、これを前提にしている
 - podman 本体と、システムの podman と組んで使うもの（podman-compose・podman-tui・distrobox・toolbox・buildah・skopeo）は RPM にしている
   - Homebrew 版の podman-compose は別の podman を連れてきて、システムの podman を隠した
   - Homebrew の podman・skopeo は、`/etc/containers` の設定を読まない
   - Homebrew の podman-tui は 2.x で、podman 6 向け（AlmaLinux 10 の podman は 5）
-- podman の API ソケット（[podman.md 手順 7](docs/podman.md#実施手順)）を、Trivy・podman-tui・Pods・Podman Desktop が使う
+- podman の API ソケット（[podman.md 手順 7](docs/almalinux-setup.md#podman-実施手順)）を、Trivy・podman-tui・Pods・Podman Desktop が使う
   - lazydocker など Docker の API を使うツールは、`DOCKER_HOST` で同じソケットに向ける
   - dive は podman のコマンドでイメージを読むので、ソケットは要らない
-- PC の起動時に動かしておくコンテナは、podman.md の任意節（Quadlet）で動かす（[linger](docs/linger.md) が前提）。[Forgejo](docs/forgejo.md) も同じ仕組みで常駐させる
+- PC の起動時に動かしておくコンテナは、podman.md の任意節（Quadlet）で動かす（[linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順) が前提）。[Forgejo](docs/almalinux-setup.md#forgejo-実施手順) も同じ仕組みで常駐させる
 
 | 手順書 | 用途 | 打つコマンド | 導入元 | 前提 |
 |---|---|---|---|---|
-| [Podman](docs/podman.md) | コンテナを自分のユーザーで動かす。API ソケット、Quadlet での自動起動（任意） | `podman` | AppStream（Homebrew 版はシステムの podman を隠すので使わない） | — |
-| [distrobox](docs/distrobox.md) | 別のディストリ（既定は Ubuntu 24.04）の端末とパッケージを使う。入れたコマンドはホストから呼べる | `distrobox create` / `enter` | EPEL | Podman、EPEL |
-| [podman-compose](docs/podman-compose.md) | compose ファイルで、複数のコンテナをまとめて動かす | `podman-compose`（`podman compose` からも呼ばれる） | EPEL | Podman、EPEL |
-| [hadolint / dive / Trivy](docs/image-tools.md) | イメージを作るときの検査（Containerfile の書き方、層の無駄、脆弱性） | `hadolint` / `dive` / `trivy`（作るのは `podman build`） | Homebrew と Trivy の公式 dnf リポジトリ | Podman、Homebrew |
-| [podman-tui](docs/podman-tui.md) | podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作する | `podman-tui`（終了は `Ctrl+C`） | EPEL（Homebrew の 2.x は podman 6 向け） | Podman、EPEL |
-| [lazydocker](docs/lazydocker.md) | コンテナの TUI。ログと CPU の使用率が見やすい。compose のサービスと、root のコンテナも見られる（任意節） | `lazydocker`（root のコンテナは `sudo -i lazydocker`） | Homebrew（RPM 無し） | Podman（Docker 向けの節まで）、Homebrew |
+| [Podman](docs/almalinux-setup.md#podman-実施手順) | コンテナを自分のユーザーで動かす。API ソケット、Quadlet での自動起動（任意） | `podman` | AppStream（Homebrew 版はシステムの podman を隠すので使わない） | — |
+| [distrobox](docs/almalinux-setup.md#distrobox-実施手順) | 別のディストリ（既定は Ubuntu 24.04）の端末とパッケージを使う。入れたコマンドはホストから呼べる | `distrobox create` / `enter` | EPEL | Podman、EPEL |
+| [podman-compose](docs/almalinux-setup.md#podman-compose-実施手順) | compose ファイルで、複数のコンテナをまとめて動かす | `podman-compose`（`podman compose` からも呼ばれる） | EPEL | Podman、EPEL |
+| [hadolint / dive / Trivy](docs/almalinux-setup.md#画像の道具-実施手順) | イメージを作るときの検査（Containerfile の書き方、層の無駄、脆弱性） | `hadolint` / `dive` / `trivy`（作るのは `podman build`） | Homebrew と Trivy の公式 dnf リポジトリ | Podman、Homebrew |
+| [podman-tui](docs/almalinux-setup.md#podman-tui-実施手順) | podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作する | `podman-tui`（終了は `Ctrl+C`） | EPEL（Homebrew の 2.x は podman 6 向け） | Podman、EPEL |
+| [lazydocker](docs/almalinux-setup.md#lazydocker-実施手順) | コンテナの TUI。ログと CPU の使用率が見やすい。compose のサービスと、root のコンテナも見られる（任意節） | `lazydocker`（root のコンテナは `sudo -i lazydocker`） | Homebrew（RPM 無し） | Podman（Docker 向けの節まで）、Homebrew |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -328,21 +314,21 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 ### 仮想化
 
 - Windows 11 の PC では、Hyper-V（Pro に含まれる）と VMware Workstation Pro でも VM を動かせる。Hyper-V を有効にすると、同じ PC の VirtualBox と VMware Workstation の VM は Windows のハイパーバイザーの上で動く
-- VirtualBox は x86_64 だけ。[EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion)・モジュールのビルドの道具・（Secure Boot が有効なら）[MOK の登録](docs/secure-boot-mok.md)を先に用意する。EL10 のカーネルでは KVM と同時に動かない
+- VirtualBox は x86_64 だけ。[EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion)・モジュールのビルドの道具・（Secure Boot が有効なら）[MOK の登録](docs/almalinux-setup.md#secure-boot-の署名鍵-実施手順)を先に用意する。EL10 のカーネルでは KVM と同時に動かない
 - ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
-  - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/secure-boot-mok.md)を先に行う（鍵はホストとは別）
+  - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/almalinux-setup.md#secure-boot-の署名鍵-実施手順)を先に行う（鍵はホストとは別）
   - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
   - VM がホストオンリーアダプターだけでインターネットに出られないときは、ホスト（Windows では WSL の AlmaLinux 10）の rootless の podman で同じ Containerfile をビルドし、`podman save` のファイルを ssh で VM に運んで `podman load` する。ベースの署名は VM の `policy.json` と公開鍵をホストに写して確かめ、Secure Boot の鍵はホストで作る
-- Windows 11 の PC に Android の Windows App からリモート デスクトップでつないで VM に打つときは、Windows App の「使用可能な場合にスキャンコード入力を使用する」をオンにする（[VirtualBox の任意節](docs/virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)）
+- Windows 11 の PC に Android の Windows App からリモート デスクトップでつないで VM に打つときは、Windows App の「使用可能な場合にスキャンコード入力を使用する」をオンにする（[VirtualBox の任意節](docs/windows-setup.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)）
   - 既定の Unicode の入力では、打った文字が VM で別のキーになる（`1.,2` が `nczm`）
   - 画面のキーボード（Gboard）では Shift で打つ記号が出ないので、VirtualBox のソフトキーボードで打つ。物理キーボードは記号まで出る
 
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
-| [VirtualBox](docs/virtualbox.md) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
-| [Hyper-V](docs/hyper-v.md) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
-| [VMware Workstation Pro](docs/vmware.md) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
-| [VirtualBox Guest Additions（bootc のゲスト）](docs/virtualbox-guest-bootc.md) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
+| [VirtualBox](docs/almalinux-setup.md#virtualbox-実施手順) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
+| [Hyper-V](docs/windows-setup.md#hyper-v-実施手順) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
+| [VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
+| [VirtualBox Guest Additions（bootc のゲスト）](docs/almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
 
 ### ブラウザ
 
@@ -364,7 +350,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 | 手順書 | 調べること | 主に使うツール | 対象 |
 |---|---|---|---|
-| [ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md) | 調べたいキーを選び、使用アプリ名と PID を確認する。未検出の場合は入力条件と常駐アプリを切り分ける | Hotkey Screener（公式 ZIP） | Windows 11 |
+| [ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合-実施手順) | 調べたいキーを選び、使用アプリ名と PID を確認する。未検出の場合は入力条件と常駐アプリを切り分ける | Hotkey Screener（公式 ZIP） | Windows 11 |
 
 ### パスワード管理
 
@@ -386,7 +372,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)・[Hyper-V](docs/hyper-v.md)・[VMware Workstation Pro](docs/vmware.md)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/windows-setup.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合-実施手順)・[Hyper-V](docs/windows-setup.md#hyper-v-実施手順)・[VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、「Windows Update」の手順 2〜8 と、「PC 全体の設定」の手順 2 から「WSL と再起動」までの手順（OpenSSH サーバー・Git for Windows・Firefox・WezTerm を含む）が管理者。Store・scoop と、再起動の後の項は通常の窓（Git Bash と WezTerm のタブに貼る `bash` のブロックもある）。貼り付け設定前の「Windows Update」の手順 2〜8 と「Microsoft Store の更新」の手順 1〜7 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐・OpenSSH サーバーの節は管理者。ほかは通常の窓）
   - コーディングエージェントの共同作業は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）

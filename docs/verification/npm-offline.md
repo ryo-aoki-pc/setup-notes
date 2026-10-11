@@ -1,6 +1,6 @@
 # npm をインターネットに出られないホストで使う手順（AlmaLinux 10 / AppStream の Node.js / Neovim の Mason）の検証記録
 
-[手順書](../npm-offline.md)・[ロールバックと注意点](../extra/npm-offline.md)
+[手順書](../almalinux-setup.md#npm-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/npm-offline.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -35,7 +35,7 @@ Complete!
 ### 対象と検証環境
 
 - **目的**: インターネットに出られない AlmaLinux 10 のホストで、Neovim の Mason が、npm で配られているパッケージ（LSP サーバー・リンターなど）を入れられるようにする
-  - 入れる・上げるときだけ、[ssh-socks-tunnel.md](../ssh-socks-tunnel.md) のトンネルで外に出る
+  - 入れる・上げるときだけ、[ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) のトンネルで外に出る
   - 入れたパッケージは、トンネルが無くても動く
 - **進め方**: AppStream の Node.js と npm を dnf で入れ、npm には `https_proxy` でトンネル（`socks5h://127.0.0.1:1080`）を使わせる。そのシェルから Neovim を開き、Mason に入れさせる
   - この文書には変数が無い。オンラインのホストの変数は、ssh-socks-tunnel.md の手順 1 にある
@@ -43,7 +43,7 @@ Complete!
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした（homebrew-offline.md と同じ形）
   - Mason を使う設定は、上流の [LazyVim/starter](https://github.com/LazyVim/starter) に、LazyVim の extra の `lang.json` と `lang.markdown` を足したもの。自分用の設定（LazyVimStarter）では確かめていない
-  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1（今の AlmaLinux 10 の初期設定の「Neovim」の手順 1）、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](../npm-offline.md#更新)、[ロールバック](../extra/npm-offline.md#ロールバック)を通した
+  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1（今の AlmaLinux 10 の初期設定の「Neovim」の手順 1）、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](../almalinux-setup.md#npm-のオフライン導入-更新)、[ロールバック](../extra/npm-offline.md#ロールバック)を通した
   - 貼り方はブラケットペースト無し。手順 1 とロールバックの手順 1 は、ブラケットペースト有りでも通した
   - このクラウドの出口からは Mason のパッケージの一覧の版を調べる先（api.mason-registry.dev）に届かなかったので、検証のときだけ、オンラインのホストのその名前をセッションのプロキシへ中継した（[付録](#付録-コンテナでの検証記録2026-09-30)）
   - 確認したこと:
@@ -67,7 +67,7 @@ Complete!
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | 同左 |
 
 > [!NOTE]
-> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[ssh-socks-tunnel.md 手順 1](../ssh-socks-tunnel.md#実施手順) で設定する。
+> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[ssh-socks-tunnel.md 手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で設定する。
 >
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`22.23.2` など）は実行日によって変わる。
 
@@ -87,7 +87,7 @@ Complete!
 
 ### 完了時点の状態
 
-**検証のコンテナでの出力**（[手順 5](../npm-offline.md#実施手順)。転送無しでログインし直したオフラインのホストのシェル）:
+**検証のコンテナでの出力**（[手順 5](../almalinux-setup.md#npm-のオフライン導入-実施手順)。転送無しでログインし直したオフラインのホストのシェル）:
 
 ```
 $ env | grep -i _proxy
@@ -181,7 +181,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 - 実機（x86_64 の PC・Raspberry Pi 5）での本実行と、aarch64
 - SELinux が Enforcing のホスト
 - 自分用の設定（LazyVimStarter）が Mason に入れさせるパッケージ
-- Homebrew の node が入っているホスト（[手順 2](../npm-offline.md#実施手順) の `command -v`）
+- Homebrew の node が入っているホスト（[手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `command -v`）
 - install スクリプトの中で自分でファイルを取る npm のパッケージ
 - キャッシュ（`~/.npm`）が無いホストで、`https_proxy` を入れ忘れたときに Mason の npm の導入がどう終わるか
 - 長い導入の途中で ssh が切れたとき
@@ -212,11 +212,11 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 
 ### 手順中の実測・検証状況の記録
 
-- **npm だけは `ALL_PROXY` では足りない**: [手順 2](../npm-offline.md#実施手順) の `export` を飛ばすと、Mason の npm のパッケージだけが、試し直しを繰り返してなかなか終わらない（検証では 29 分。[手順 3](../npm-offline.md#実施手順) の補足）
+- **npm だけは `ALL_PROXY` では足りない**: [手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `export` を飛ばすと、Mason の npm のパッケージだけが、試し直しを繰り返してなかなか終わらない（検証では 29 分。[手順 3](../almalinux-setup.md#npm-のオフライン導入-実施手順) の補足）
 
 ### 手順中の実測・検証状況の記録
 
-- **Homebrew の node が入っていると、Mason はそちらの npm を使う**: Mason は PATH の先頭の `npm` を使い、`brew shellenv` は Homebrew の `bin` を PATH の先頭に置く。[手順 2](../npm-offline.md#実施手順) の `command -v` で確かめる（本書では、Homebrew の node が入ったホストを確かめていない）
+- **Homebrew の node が入っていると、Mason はそちらの npm を使う**: Mason は PATH の先頭の `npm` を使い、`brew shellenv` は Homebrew の `bin` を PATH の先頭に置く。[手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `command -v` で確かめる（本書では、Homebrew の node が入ったホストを確かめていない）
 
 ### 手順中の実測・検証状況の記録
 

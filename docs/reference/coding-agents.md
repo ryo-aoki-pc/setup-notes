@@ -1,6 +1,6 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../coding-agents.md)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](../verification/coding-agents.md)
+[手順書](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](../verification/coding-agents.md)
 
 ## 補足
 
@@ -72,7 +72,7 @@
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
 | スマートフォンから指示する | Codex のリモート接続（ChatGPT のアプリ） | 採らない | ホストは macOS・Windows の ChatGPT のデスクトップアプリだけ（Linux は無い）。Codex CLI からは設定できない |
-| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../grok-build-remote.md)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる（2026-10-11 に手順書にした） |
+| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる（2026-10-11 に手順書にした） |
 | GitHub で分担する | GitHub の Agent HQ（Issue に Claude と Codex を割り当てる） | 採らない | Copilot の有料プラン。Grok はエージェントとしては無く、Copilot のモデルとしてだけ選べる |
 | GitHub で分担する | Pull Request に `@codex review`、`anthropics/claude-code-action` | 採らない | GitHub の App・シークレットの設定。Grok の公式の Action は無い（`grok -p` を API キーで動かす例だけ） |
 | 並べて動かす道具を使う | Zed の Parallel Agents（ACP） | 採らない | 3 つとも ACP のレジストリにある。エディタを Zed にすることになる |
@@ -85,8 +85,8 @@
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
 - エージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
   - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
-  - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../coding-agents.md#main-に取り込む)の手順で手元で取り込んでもよい
-- GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md) など）でも同じに使えることを優先した
+  - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../almalinux-setup.md#コーディングエージェントの共同作業-main-に取り込む)の手順で手元で取り込んでもよい
+- GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../almalinux-setup.md#forgejo-実施手順) など）でも同じに使えることを優先した
 
 ### 実施手順 / 手順 4〜6: 各 CLI が読む指示書
 
@@ -114,7 +114,7 @@
   | Codex | `codex --worktree`（0.154.0 から。0.156.0 から既定で有効） | 文書に書かれていない | — |
   | Grok Build | `grok -w <名前>` | `~/.grok/worktrees/<リポジトリ>/<名前>` | — |
 
-- ブランチは `agent/claude`・`agent/codex`・`agent/grok` に固定した。分担のたびに作り直さず、[main に取り込む](../coding-agents.md#main-に取り込む)の手順 7 で `main` にそろえてから次の作業を始める
+- ブランチは `agent/claude`・`agent/codex`・`agent/grok` に固定した。分担のたびに作り直さず、[main に取り込む](../almalinux-setup.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で `main` にそろえてから次の作業を始める
 
 ### main でないブランチを基準にするとき
 
@@ -156,7 +156,7 @@
 ### main に取り込む: 画面で取り込むとき
 
 - Pull Request を GitHub などの画面で取り込むときは、merge commit で取り込む
-  - merge commit は、エージェントのブランチのコミットをそのまま `main` の祖先に入れる。[main に取り込む](../coding-agents.md#main-に取り込む)の手順 7 の `git merge --ff-only main` で、各 worktree が `main` に追いつける
+  - merge commit は、エージェントのブランチのコミットをそのまま `main` の祖先に入れる。[main に取り込む](../almalinux-setup.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 の `git merge --ff-only main` で、各 worktree が `main` に追いつける
   - squash と rebase は、同じ変更の新しいコミットを `main` に作る。エージェントのブランチのコミットは `main` に入らないので、`--ff-only` は `Not possible to fast-forward` で止まる（検証記録）
 - 手元で取り込んで `main` を push したときは、Pull Request が開いたまま残ることがある。そのときは閉じる（ホスティングがマージ済みと見なすかどうかは、確かめていない）
 
@@ -170,7 +170,7 @@
   - 確認や完了をスマートフォンに知らせるには、Claude Code の `/config` で通知（Push when actions required など）を有効にする
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
-- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../grok-build-remote.md)（2026-10-11）
+- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)（2026-10-11）
 
 ### GitHub で分担する（この手順書では使わない）
 

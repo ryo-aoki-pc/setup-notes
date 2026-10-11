@@ -1,6 +1,6 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../btop.md)・[ロールバックと注意点](../extra/btop.md)
+[手順書](../almalinux-setup.md#btop-実施手順)・[ロールバックと注意点](../extra/btop.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -42,7 +42,7 @@ color_theme = "Default"
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [btop](https://github.com/aristocratos/btop)（CPU・メモリ・ディスク・ネットワーク・プロセスをまとめて見る TUI。`htop` の後継的な位置づけ）を入れる
-- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](../verification/btop.md#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
+- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
 - **状態**: **x86_64 のクリーン VM で実施手順 1〜3 を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-22）。実機には入れていない**
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）と手順 1〜3 を通した
   - 確認したこと: `epel-release` が `extras` から入る、`btop 1.4.7-1.el10_2` が EPEL から解決される、署名鍵の fingerprint が本文の値と一致する、pty を与えた起動で `btop.conf` が生成される
@@ -165,8 +165,8 @@ ayu.theme
 **この文書が Homebrew を使わないのは、EPEL 版が upstream に追いついているため。**
 
 - ほかの Homebrew 系の手順書（当時の homebrew.md の冒頭に挙げた 17 本）は、どれも RPM（BaseOS・AppStream・EPEL）に無いか古いので Homebrew を選んでいる
-- 同じ規則（同版なら RPM）で、[image-tools.md](../image-tools.md) の Trivy は公式の dnf リポジトリにした
-- [distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[podman-tui](../podman-tui.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）
+- 同じ規則（同版なら RPM）で、[image-tools.md](../almalinux-setup.md#画像の道具-実施手順) の Trivy は公式の dnf リポジトリにした
+- [distrobox](../almalinux-setup.md#distrobox-実施手順)・[podman-compose](../almalinux-setup.md#podman-compose-実施手順)・[podman-tui](../almalinux-setup.md#podman-tui-実施手順) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）
 - EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](../extra/btop.md#注意点)）
 
 ```

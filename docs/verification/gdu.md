@@ -1,6 +1,6 @@
 # gdu インストール手順（AlmaLinux 10 / Homebrew）の検証記録
 
-[手順書](../gdu.md)・[ロールバックと注意点](../extra/gdu.md)
+[手順書](../almalinux-setup.md#gdu-実施手順)・[ロールバックと注意点](../extra/gdu.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -60,8 +60,8 @@ $ gdu-go -n /usr/share | tail -8
 - **状態**: **`0dbb522` の直接追記版の実施手順 1・2 を x86_64 のクリーン VM で本実行済み（2026-10-06）。コンテナでも通し検証済み（2026-09-22）**。現行版 `5da3478` は、共通 bash 新規導入後の別の VM でも再検証した（末尾の再検証記録）。既存ホストの手動移行は行っていない。
   - ただし**実機には本書と同じ経路のもの（`brew install gdu` による `gdu 5.37.0`）が 2026-09-21 から入っている**
     - [yazi](../almalinux-setup.md#yazi) 周辺のツールをまとめて入れた流れで導入したもので、**本書の手順を順に実行した結果ではない**
-    - 実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](../gdu.md#gdu-の名前で呼ぶ任意)も実機には入れていない
-  - コンテナでは、[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[エイリアス](../gdu.md#gdu-の名前で呼ぶ任意)を通した
+    - 実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](../almalinux-setup.md#gdu-gdu-の名前で呼ぶ任意)も実機には入れていない
+  - コンテナでは、[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[エイリアス](../almalinux-setup.md#gdu-gdu-の名前で呼ぶ任意)を通した
   - 確認したこと: `arm64_linux` のボトルが降りる、`gdu-go --version` が `v5.37.0` を返す、`gdu-go -n` の非対話モードが走る
   - TUI の起動・一覧の表示・`q` での終了は、2026-10-06 のクリーン VM で確認した。**確認していないこと**: EPEL 版（5.32.0）との併用、シンボリックリンク方式（張ると `gdu` で動き、`sudo gdu` では見つからないことだけ、[homebrew.md の付録](almalinux-setup.md#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)で確かめた）
 
@@ -120,7 +120,7 @@ alias gdu='gdu-go'
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[gdu の名前で呼ぶ（任意）](../gdu.md#gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[gdu の名前で呼ぶ（任意）](../almalinux-setup.md#gdu-gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
@@ -199,7 +199,7 @@ lrwxrwxrwx. 1 <USER> <USER> 31 Sep 21 09:41 /home/linuxbrew/.linuxbrew/bin/gdu-g
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
-| **Homebrew** | `gdu 5.37.0` の `arm64_linux` ボトルがある。upstream の最新と一致。**ただし入るコマンドは `gdu-go`**（formula 側の都合。[手順 1 の補足](../gdu.md#実施手順)） | **採用**（実機もこの経路） |
+| **Homebrew** | `gdu 5.37.0` の `arm64_linux` ボトルがある。upstream の最新と一致。**ただし入るコマンドは `gdu-go`**（formula 側の都合。[手順 1 の補足](../almalinux-setup.md#gdu-実施手順)） | **採用**（実機もこの経路） |
 | EPEL の `gdu` | `gdu.aarch64 5.32.0-1.el10_2`。コマンド名は素直に `/usr/bin/gdu` で、dnf 管理なので root でも使えて `dnf upgrade` に乗る。ただし **5 マイナー古い** | 不採用。**名前を優先するならこちら** |
 | GitHub Releases のバイナリ | `linux-arm64` の tar がある。展開して PATH に置くだけで名前も自由だが、更新は手作業 | 不採用（Homebrew に揃える） |
 | `go install github.com/dundee/gdu/...` | Go toolchain が要る（AppStream に `golang` あり） | 不採用 |

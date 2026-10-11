@@ -55,7 +55,7 @@
 | flatpak | `flatpak-1.16.0-9.el10_2.1`（AppStream） |
 | aarch64 の調べ方 | RPM: `dnf --forcearch=aarch64 repoquery`。Homebrew: formulae.brew.sh の JSON のボトル（`arm64_linux`）。Flathub: `flatpak remote-ls --arch=aarch64` と `flatpak remote-info --arch=aarch64` |
 | コンテナの節の調査日時 | 2026-09-27、UTC 16:26〜17:40 |
-| コンテナの節の検証コンテナ | `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を `--privileged` で立て、systemd を PID 1 にした。中で rootless の podman を動かすため（[podman.md](../podman.md) の付録と同じ作り） |
+| コンテナの節の検証コンテナ | `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を `--privileged` で立て、systemd を PID 1 にした。中で rootless の podman を動かすため（[podman.md](../almalinux-setup.md#podman-実施手順) の付録と同じ作り） |
 | コンテナの節の aarch64 の調べ方 | RPM: AppStream・BaseOS・EPEL 10.2・Trivy のリポジトリの `primary.xml` を直接読んだ。Homebrew と Flathub は上と同じ |
 
 - これまでの手順書の「コンテナのみ」の検証は、実機（Raspberry Pi 5）の上の podman で `docker.io/library/almalinux:10` を使っていた
@@ -118,7 +118,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 - aarch64 での導入と起動（本書の aarch64 列はすべてメタデータ）
 - GUI アプリの画面の表示と操作（コンテナに画面が無い）
 - Raspberry Pi 5 で Flathub のアプリ（Electron 系・ブラウザ・GPU を使うもの）が実際に動くか
-- 実機（x86_64 PC）での導入。デスクトップの環境では依存の数が変わる（[vscode.md](../vscode.md) の実測では、コンテナより大幅に少なかった）
+- 実機（x86_64 PC）での導入。デスクトップの環境では依存の数が変わる（[vscode.md](../almalinux-setup.md#vs-code-実施手順) の実測では、コンテナより大幅に少なかった）
 - RPM Fusion（EL10）の有効化
 - atuin・direnv など、`~/.bashrc` に追記して使うツールのシェルへの組み込み
 - lazydocker・dive を podman の API ソケットで使うこと
@@ -136,7 +136,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 
 | コンテナ | 用途 |
 |---|---|
-| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
+| `cat1` | CLI の行と Cockpit。先に [podman.md](../almalinux-setup.md#podman-実施手順) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
 | `fp1` | GUI の Flathub の行。[flatpak.md](../almalinux-setup.md) の手順 1〜5 を通してから入れた |
 
 **手順書の外で行った準備**（検証環境の都合）:
@@ -165,7 +165,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 最初の調査の[未確認事項](#未確認事項)にあった「lazydocker・dive を podman の API ソケットで使うこと」は、この調査で片付いた。
 
 - lazydocker は、`DOCKER_HOST` で podman の API ソケットにつないで動いた（上の表）
-- dive は API ソケットを使わず、`--source podman` で podman のコマンドからイメージを読んだ（[image-tools.md](../image-tools.md)）
+- dive は API ソケットを使わず、`--source podman` で podman のコマンドからイメージを読んだ（[image-tools.md](../almalinux-setup.md#画像の道具-実施手順)）
 
 #### 未確認事項（2026-09-27 の調査）
 

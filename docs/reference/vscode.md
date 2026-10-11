@@ -1,6 +1,6 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の参考資料
 
-[手順書](../vscode.md)・[ロールバックと注意点](../extra/vscode.md)
+[手順書](../almalinux-setup.md#vs-code-実施手順)・[ロールバックと注意点](../extra/vscode.md)
 
 ## 補足
 
@@ -44,7 +44,7 @@
 | Flathub `com.visualstudio.code` | リモートと runtime の導入が必要で、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 | Snap | EL10 に snapd を入れることになる | 不採用 |
 | VSCodium / `code-oss` | Marketplace と一部の拡張（Remote-SSH など）が使えない | 対象外（本書は Microsoft のビルドを入れる） |
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../vscode.md#実施手順) 以降の `code` を `code-insiders` に読み替える |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../almalinux-setup.md#vs-code-実施手順) 以降の `code` を `code-insiders` に読み替える |
 
 ### 参照
 

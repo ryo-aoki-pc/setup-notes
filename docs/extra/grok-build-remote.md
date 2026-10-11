@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
 
-[手順書](../grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 - 本書の「<項>の手順 N」は、手順書の `## 実施手順` と `## Windows 11 で使う` の項の手順を指す
 - この文書のロールバックは、実機では流していない（[検証記録](../verification/grok-build-remote.md)）
@@ -139,7 +139,7 @@
 
 - トークンのファイルを消して作り直し（AlmaLinux 10 は「Codeg のサーバーを入れて localhost で起動する」の手順 5、Windows 11 は「Windows 11 で Codeg のサーバーを入れて起動する」の手順 5）、サービス（Windows 11 はタスク）を起動し直す
 - 新しいトークンで起動し直すと、前のトークンは使えなくなる（使い捨てのインスタンスで確かめた。検証記録）
-- WireGuard のクライアントの登録も消す（[WireGuard VPN の「クライアントを削除する」](../wireguard.md#クライアントを削除する)）
+- WireGuard のクライアントの登録も消す（[WireGuard VPN の「クライアントを削除する」](../almalinux-setup.md#wireguard-クライアントを削除する)）
 
 #### 権限モードと承認の確認
 

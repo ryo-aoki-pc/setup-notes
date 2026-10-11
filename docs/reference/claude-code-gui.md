@@ -1,6 +1,6 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の参考資料
 
-[手順書](../claude-code-gui.md)・[ロールバックと注意点](../extra/claude-code-gui.md)
+[手順書](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
 ## 補足
 
@@ -9,8 +9,8 @@
 [この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-1-補足-変数について)
 
 - `VIRTUAL_MONITOR` は、手順 2 で gnome-shell に付ける `--virtual-monitor` の値。Claude Code が撮る画面の大きさになる
-- 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)
-- `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
+- 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)
+- `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
 - 変数はそのシェルの中だけで有効
 
 ### 実施手順 / 手順 2: 補足: 仮想モニターが要る理由
@@ -18,7 +18,7 @@
 - ヘッドレスのセッションには、モニターが 1 枚も無い。撮る画面が無く、窓も置き場所が無い
 - `--virtual-monitor` は gnome-shell 49（Mutter）の「消えない仮想モニターを足す」オプション。セッションの間ずっと `Meta-0` という名前のモニターがあり、主のモニターになる
   - 起動のログ: `No seat assigned, running headlessly` の後に `Added virtual monitor Meta-0`
-- RDP（[gnome-headless-session.md](../gnome-headless-session.md) の `grdctl --headless`）でつないだときにも仮想モニターはできるが、つないでいる間だけ（[注意点](../extra/claude-code-gui.md#注意点)）
+- RDP（[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の `grdctl --headless`）でつないだときにも仮想モニターはできるが、つないでいる間だけ（[注意点](../extra/claude-code-gui.md#注意点)）
 - `ExecStart=` の空の行は、元の `ExecStart` を消すため（systemd のドロップインの決まり）
 - 置き場所は、ユーザーの systemd のドロップイン（`~/.config/systemd/user/<unit>.d/`）。`/usr/lib/systemd/user/org.gnome.Shell@wayland.service` は変えない
 
@@ -39,7 +39,7 @@
 ### 実施手順 / 手順 3: 補足: 待ち方と loginctl の行
 
 - `for` の行は、gnome-shell のバス名と `loginctl` のセッションの両方が出るまで、30 秒まで待つ
-- `loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](../gnome-headless-session.md#実施手順) の補足）
+- `loginctl` の行は、このユーザーのヘッドレスのセッションの行だけを出す（[gnome-headless-session.md 手順 2](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の補足）
 
 ### 実施手順 / 手順 4: 補足: 画面の撮り方
 
@@ -71,7 +71,7 @@
   - Mutter の ScreenCast と RemoteDesktop は、gnome-remote-desktop や xdg-desktop-portal-gnome が使う口。使っている間は、上部バーに画面共有の表示が出る
 - **仮想モニターを gnome-shell のオプションで付ける**: ヘッドレスのセッションには、RDP のクライアントがつないでいる間しかモニターが無い。常に 1 枚あれば、いつでも撮れ、窓の位置も変わらない
 - **人が同じ画面を見るときは、Claude Code が撮った画面を送る**: RDP（gnome-headless-session.md）でつなぐと、Claude Code が見ている仮想モニターとは別のモニターが足され、同じ画面は写らなかった（[注意点](../extra/claude-code-gui.md#注意点)）
-- **ヘッドレスのセッションの手順書から分けた**: もとはひとつの手順書だった。利用者の依頼で、セッションの動かし方と RDP でつなぐところを [gnome-headless-session.md](../gnome-headless-session.md) に残し、Claude Code にかかわるところをこの手順書にした
+- **ヘッドレスのセッションの手順書から分けた**: もとはひとつの手順書だった。利用者の依頼で、セッションの動かし方と RDP でつなぐところを [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) に残し、Claude Code にかかわるところをこの手順書にした
 
 ### 参照
 

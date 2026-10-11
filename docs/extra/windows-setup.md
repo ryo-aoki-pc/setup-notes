@@ -219,7 +219,7 @@
 
 1. 自分用の lazygit の設定を外し、退避した設定に戻す。
 
-   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の、元に戻す 2 つのブロックを貼る（1 つ目が何も出さないことを確かめてから、2 つ目）
+   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の README の「導入方法」](../windows-setup.md#lazygit-の設定を導入する)の、元に戻す 2 つのブロックを貼る（1 つ目が何も出さないことを確かめてから、2 つ目）
    - `%LOCALAPPDATA%\lazygit` を消し、退避した `lazygit.bak` があれば戻す
 
 1. scoop で lazygit を消す。
@@ -540,7 +540,7 @@
    ```
 
    - `False` が 2 行出ればよい
-   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で使う)、リモート デスクトップなど）があれば、戻さない）
+   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../windows-setup.md#syncthing-windows-11-で使う)、リモート デスクトップなど）があれば、戻さない）
 
 1. Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
 
@@ -1069,7 +1069,7 @@
 
    - 規則が `False  Any` で並べばよい
    - **注意**: リモート デスクトップでつないでいるときに貼ると、その場で切れる
-   - [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)を使っているなら、この手順は飛ばす
+   - [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断-実施手順)を使っているなら、この手順は飛ばす
 
 1. LAN の接続をパブリックに戻すときだけ、パブリックにする。
 
@@ -1085,7 +1085,7 @@
 
    - `<LAN_IF>  Public` が出ればよい
    - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `LanCategory` が `Private` だったなら（もとからプライベート）、この手順は飛ばす
-   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
+   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
 
 1. アダプターを、電力の節約のために止められるように戻す。
 

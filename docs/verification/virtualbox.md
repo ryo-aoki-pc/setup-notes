@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の検証記録
 
-[手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
+[手順書](../almalinux-setup.md#virtualbox-実施手順)・[ロールバックと注意点](../extra/virtualbox.md)
 
 ## 最新の確認範囲（Windows 11）
 
@@ -18,7 +18,7 @@
 
 ### 操作上の注意と併記されていた記録
 
-   - `Local kernel module signing key` が出れば、[secure-boot-mok.md](../secure-boot-mok.md) の鍵で署名したモジュールが使われている（2026-09-30 より前にこの文書で作った鍵なら `VirtualBox module signing key`）
+   - `Local kernel module signing key` が出れば、[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の鍵で署名したモジュールが使われている（2026-09-30 より前にこの文書で作った鍵なら `VirtualBox module signing key`）
 
 ### 操作上の注意と併記されていた記録
 
@@ -27,7 +27,7 @@
 ### 実施手順: 検証状況の記録
 
 > [!WARNING]
-> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](../secure-boot-mok.md) と「動作を確かめる」の手順 2）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
+> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) と「動作を確かめる」の手順 2）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
 >
 > - 検証した PC では、secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、鍵を登録できなかった
 > - UEFI の設定で Secure Boot を無効にし、無効の分岐で「VirtualBox を入れる」の手順 4 から最後まで本実行した
@@ -81,7 +81,7 @@ Is this ok [y/N]: Error: Failed to download metadata for repo 'virtualbox': repo
 
 - 系列の無い `VirtualBox` という名前は無く、`sudo dnf install --assumeno VirtualBox` は `No match for argument: VirtualBox` で終わる（実測）
 - 調査日（2026-09-24）のリポジトリには `VirtualBox-7.2`（7.2.0〜7.2.20）と `VirtualBox-7.1`（7.1.10〜7.1.18）がある
-- **7.1 と 7.2 は同時には入れられない**（[更新](../virtualbox.md#更新)）。本書は 7.2 だけを検証している
+- **7.1 と 7.2 は同時には入れられない**（[更新](../almalinux-setup.md#virtualbox-更新)）。本書は 7.2 だけを検証している
 
 **デスクトップの実機（GNOME）での下見**: 16 パッケージ（ダウンロード 135 M、展開後 350 M）だった。
 
@@ -149,7 +149,7 @@ The distribution packages containing the headers are probably:
 **`mokutil` と `openssl` は Secure Boot のときに要る。**
 
 - VirtualBox のスクリプト（`/usr/lib/virtualbox/vboxdrv.sh`）は **`mokutil --sb-state` の出力だけで Secure Boot を判定する**。mokutil が無いと Secure Boot が有効でも「無効」と扱い、署名していないモジュールを作る（読み込みは拒否される）
-- openssl は、[secure-boot-mok.md 手順 4](../secure-boot-mok.md#実施手順) の鍵の作成と、スクリプトの署名の確認に使う（Secure Boot が有効な PC では、前提の同書で入っている）
+- openssl は、[secure-boot-mok.md 手順 4](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の鍵の作成と、スクリプトの署名の確認に使う（Secure Boot が有効な PC では、前提の同書で入っている）
 - Secure Boot が無効でも、入れておいて害は無い
 
 **`kernel-devel` は installonly**（`installonlypkg(kernel)` を提供する）なので、`sudo dnf upgrade` で新しいカーネルが来ると、同じ版の kernel-devel が**古いものと並べて**入る。
@@ -170,12 +170,12 @@ rpm の `%post` は、`vboxusers` グループを作ったあと `/usr/lib/virtu
   - 実機では、`rpm -qf` が `is not owned by any package` を返し、`systemctl cat vboxdrv` に上の 3 行（と `SourcePath=/usr/lib/virtualbox/vboxdrv.sh`・`Type=forking`）があり、`enabled` / `active` になった
 - **ビルドは数十秒**: コンテナでは 3 つのモジュールを 11 秒でビルドした。実機では、`[y/N]` に答えてから `Complete!` まで約 20 秒（ダウンロードを含む）。`/lib/modules/$(uname -r)/misc/` に `vboxdrv.ko` / `vboxnetflt.ko` / `vboxnetadp.ko` ができる
 - 実機での表示は、`Creating group 'vboxusers'. VM users must be member of that group!` の後に空行が続き、`Installed:` の一覧と `Complete!` が出ただけだった（ビルドの経過は標準出力なので出ない）
-- **Secure Boot が無効なら署名しない**: 実機では、[secure-boot-mok.md](../secure-boot-mok.md) の手順 4 の鍵のファイルがあっても、3 つのモジュールの `modinfo -F signer` は空だった
+- **Secure Boot が無効なら署名しない**: 実機では、[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 4 の鍵のファイルがあっても、3 つのモジュールの `modinfo -F signer` は空だった
 - **`/dev/vboxdrv` は `root:root` の `0600`**（`%post` が書く `/etc/udev/rules.d/60-vboxdrv.rules` の実測）。VM を動かす `VirtualBoxVM` と `VBoxHeadless` が setuid root（`-r-s--x--x`）なので、一般ユーザーは直接触らない
 - **`vboxdrv.sh setup`（= `vboxconfig`）は、ほかのカーネル用も含めて vbox のモジュールを全部消してから、動いているカーネル用だけを作り直す**。別のカーネル用に作る目的では使わない
 - SELinux のラベルは `chcon` で付けている。実機（Enforcing）では、モジュールが `modules_object_t` になり、`sudo restorecon -nv` は何も変えなかった（`restorecon` で戻ってもラベルは同じ）。VirtualBox にかかわる AVC の拒否も無かった
 
-**Secure Boot のときは、[secure-boot-mok.md](../secure-boot-mok.md) の鍵で署名する。** `/usr/lib/virtualbox/vboxdrv.sh` は、次の 2 つがそろうと、ビルドしたモジュールを `/var/lib/shim-signed/mok/MOK.priv` と `MOK.der` で署名する（道具は kernel-devel の `scripts/sign-file`）。
+**Secure Boot のときは、[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の鍵で署名する。** `/usr/lib/virtualbox/vboxdrv.sh` は、次の 2 つがそろうと、ビルドしたモジュールを `/var/lib/shim-signed/mok/MOK.priv` と `MOK.der` で署名する（道具は kernel-devel の `scripts/sign-file`）。
 
 - `mokutil --sb-state` が `SecureBoot enabled` を返す
 - カーネルの設定が署名を求める（EL10 のカーネルは `CONFIG_MODULE_SIG=y`・`CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT=y`・`CONFIG_MODULE_SIG_HASH="sha512"`。kernel-devel の `.config` で確認）
@@ -243,10 +243,10 @@ sha512
 
 | 出るもの | 意味 | 対処 |
 |---|---|---|
-| `WARNING: The vboxdrv kernel module is not loaded. Either there is no module available for the current kernel (...) or it failed to load.` | モジュールが無いか、読み込めていない。`VBoxManage` などを包むスクリプト（`VBox.sh`）が、コマンドの前に標準出力へ出す | `sudo tail -n 20 /var/log/vbox-setup.log` で原因を見て `sudo /sbin/vboxconfig`。Secure Boot なら [secure-boot-mok.md 手順 3〜7](../secure-boot-mok.md#実施手順) |
+| `WARNING: The vboxdrv kernel module is not loaded. Either there is no module available for the current kernel (...) or it failed to load.` | モジュールが無いか、読み込めていない。`VBoxManage` などを包むスクリプト（`VBox.sh`）が、コマンドの前に標準出力へ出す | `sudo tail -n 20 /var/log/vbox-setup.log` で原因を見て `sudo /sbin/vboxconfig`。Secure Boot なら [secure-boot-mok.md 手順 3〜7](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) |
 | `VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot`（`VERR_VMX_IN_VMX_ROOT_MODE`） | Intel: KVM が VT-x を確保している | `enable_virt_at_load` が `N` か見る（「KVM と USB の設定」の手順 1）。KVM の VM が動いていれば止める |
 | `AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と、続けて `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` | AMD: 同上 | 同上 |
-| `Key was rejected by service`（`sudo modprobe vboxdrv` や `dmesg`） | Secure Boot で署名が受け入れられない | `sudo mokutil --test-key`（[secure-boot-mok.md 手順 7](../secure-boot-mok.md#実施手順)）。**この文は一般的なカーネルのエラーで、本書では出していない**。鍵が登録されていないときの EL10 の文は `Loading of module with unavailable key is rejected`（VM の中で出た） |
+| `Key was rejected by service`（`sudo modprobe vboxdrv` や `dmesg`） | Secure Boot で署名が受け入れられない | `sudo mokutil --test-key`（[secure-boot-mok.md 手順 7](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)）。**この文は一般的なカーネルのエラーで、本書では出していない**。鍵が登録されていないときの EL10 の文は `Loading of module with unavailable key is rejected`（VM の中で出た） |
 | `There were problems setting up VirtualBox.  To re-start the set-up process, run /sbin/vboxconfig as root.` | `dnf install` の途中でビルド・署名・読み込みのどこかが失敗した | `/var/log/vbox-setup.log` を見る |
 
 - AMD の 2 行は、実機（AMD）で「KVM と USB の設定」の手順 1 の設定を再起動で効かせる前に、この手順を貼って出した（後ろに `Details: code NS_ERROR_FAILURE (0x80004005), component ConsoleWrap, interface IConsole`、`VMState="poweroff"`、`Machine 'vbox-selftest' is not currently running.` が続いた）
@@ -272,7 +272,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 - **実機の GNOME の Wayland セッションでは、XWayland 経由で動いた**（プロセスが読み込んでいたのは `platforms/libqxcb.so`。`WAYLAND_DISPLAY` はあり、`QT_QPA_PLATFORM` は無かった）
 - 実機では、利用者がウィンドウの表示を確かめて閉じた（`Qt WARNING` は 3 行）
 - コンテナには画面が無く、`No active display server, X11 or Wayland, detected. Exiting.` で終わった
-- メニューの名前（手順書の本文の日本語と英語）は、`/usr/share/virtualbox/nls/VirtualBox_ja.qm` と `/usr/lib/virtualbox/UICommon.so` の文字列で確かめた（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の付録）
+- メニューの名前（手順書の本文の日本語と英語）は、`/usr/share/virtualbox/nls/VirtualBox_ja.qm` と `/usr/lib/virtualbox/UICommon.so` の文字列で確かめた（[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の付録）
 
 ### カーネルを更新したとき / 手順 0: 本文中の記録
 
@@ -280,7 +280,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 
 ### 更新 / 手順 0: 本文中の記録
 
-  - **7.3 系はまだ出ていないので、本書では 7.1 と 7.2 で試した**（コンテナ。[更新の補足](../verification/virtualbox.md#更新の補足)）
+  - **7.3 系はまだ出ていないので、本書では 7.1 と 7.2 で試した**（コンテナ。[更新の補足](#更新の補足)）
 
 ### ロールバック / 手順 0: 本文中の記録
 
@@ -291,7 +291,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 > [!WARNING]
 > **この節と、後ろの Windows 11 の 2 節は、Windows の実機で流していない**（Windows を動かせない環境で書いた）。確かめたのは、winget の定義、インストーラの中身と署名、VirtualBox のソースと同梱のマニュアル、Linux の PowerShell 7 での構文と模擬の実行だけ（[対象と検証環境](#対象と検証環境)）。
 >
-> - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM を動かした（入れた方法の記録は無い）
+> - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の VM を動かした（入れた方法の記録は無い）
 > - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../extra/virtualbox.md#注意点)）
 
 ### Windows 11 で使う / 手順 3: 補足: winget の定義と、インストーラがすること
@@ -318,7 +318,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 
 ### Windows 11 で使う / 手順 6: 補足: Hyper-V の上かの見分け方と、出るエラー
 
-AlmaLinux 10 の[動作を確かめる](../virtualbox.md#動作を確かめる)の手順 3 と同じ VM で、VM のログ（`showvminfo --log 0` は VM の `VBox.log` を出す。マニュアルの 15.44.2.2）から 1 行を探すところだけが違う。
+AlmaLinux 10 の[動作を確かめる](../almalinux-setup.md#virtualbox-動作を確かめる)の手順 3 と同じ VM で、VM のログ（`showvminfo --log 0` は VM の `VBox.log` を出す。マニュアルの 15.44.2.2）から 1 行を探すところだけが違う。
 
 **Hyper-V の上かの見分け方**
 
@@ -344,26 +344,26 @@ AlmaLinux 10 の[動作を確かめる](../virtualbox.md#動作を確かめる)�
   - AlmaLinux 10 では、Oracle 公式の dnf リポジトリから入れ、カーネルモジュールをこの PC でビルドする
   - **Linux の arm64 版は無い**ので、Raspberry Pi 5 は対象外
 - **進め方**: **読者が書き換える値は無い**
-  - **AlmaLinux 10**（[実施手順](../virtualbox.md#実施手順)）: 前提の [EPEL](../almalinux-setup.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
-    - Secure Boot なら、前提の [secure-boot-mok.md](../secure-boot-mok.md) で MOK の鍵も先に登録する
+  - **AlmaLinux 10**（[実施手順](../almalinux-setup.md#virtualbox-実施手順)）: 前提の [EPEL](../almalinux-setup.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
+    - Secure Boot なら、前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) で MOK の鍵も先に登録する
     - 最後に KVM の設定を足して再起動する
-  - **Windows 11**（[Windows 11 で使う](../virtualbox.md#windows-11-で使う)）: winget の `Oracle.VirtualBox` を管理者の Windows PowerShell 5.1 で入れる（PC 全体の `C:\Program Files\Oracle\VirtualBox`）。使い捨ての VM は、管理者ではない窓で動かす
+  - **Windows 11**（[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)）: winget の `Oracle.VirtualBox` を管理者の Windows PowerShell 5.1 で入れる（PC 全体の `C:\Program Files\Oracle\VirtualBox`）。使い捨ての VM は、管理者ではない窓で動かす
     - ドライバーは Microsoft の署名付きで配られるので、MOK の鍵も KVM の設定も要らない
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-28〜29）。ただし Secure Boot が有効な分岐は、MokManager で鍵を登録できず、最後まで通せていない**。その前に x86_64 のコンテナで検証した（2026-09-24）
   - 2026-10-06 の[クリーンインストール VM](../almalinux-vm-verification.md)では、「リポジトリを置く」の手順 1 の `lscpu` に仮想化支援が出なかった。本文の条件に従ってそこで止め、AlmaLinux のゲスト内への VirtualBox の導入・入れ子の VM 起動は行っていない。この試験を導入成功とは扱わない
   - 下表の実機で、**この文書のコードブロックを 1 つずつ中身を確かめてから貼った**（[実機の付録](#付録-実機での本実行2026-09-29)）
-    - 「リポジトリを置く」の手順 1、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) の確かめる部分。EPEL を入れる部分は、EPEL が有効なので飛ばした）、「リポジトリを置く」の手順 2〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
+    - 「リポジトリを置く」の手順 1、EPEL の有効化の確認（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) の確かめる部分。EPEL を入れる部分は、EPEL が有効なので飛ばした）、「リポジトリを置く」の手順 2〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順（今の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 3〜6。当時はこの文書の手順 11〜14）。同書の手順 3 で Secure Boot が有効だったので、手順 4 で鍵を作って登録を予約し、手順 5 で再起動した
     - secure-boot-mok.md の手順 6 の MokManager でキーボードが効かず、登録できなかった。利用者が UEFI の設定で Secure Boot を無効にした
     - 以降は無効の分岐で、「VirtualBox を入れる」の手順 4・5、「KVM と USB の設定」の手順 1・3、「動作を確かめる」の手順 1・3〜5（secure-boot-mok.md の手順 7 と「動作を確かめる」の手順 2 は無効の分岐で飛ばし、「KVM と USB の設定」の手順 2 は USB を使わないので飛ばした）
-    - 入れた VirtualBox で、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM（Secure Boot 有効）も動かした
+    - 入れた VirtualBox で、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の VM（Secure Boot 有効）も動かした
   - 確認したこと:
     - `lscpu` の `Virtualization: AMD-V`、鍵の確認が `sudo` の有無で 1 回ずつ要ること、デスクトップの PC での依存（16 パッケージ）
     - `%post` が `vboxdrv.service` を作って有効にし、3 つのモジュールをビルドして読み込むこと（Secure Boot が無効なら署名しない）
     - `enable_virt_at_load=0` を modprobe.d に置いて再起動すると `N` になり、VM が起動すること。置く前は `VERR_SVM_IN_USE` で起動に失敗すること
     - GUI が XWayland 経由で開くこと、SELinux（Enforcing）で AVC の拒否が無いこと
     - MOK の確認（今の secure-boot-mok.md の手順 7）は `sudo` が無いと `Failed to open` になること（`sudo` を付けた形に直した）
-  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、「動作を確かめる」の手順 2、USB（「KVM と USB の設定」の手順 2）、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)、[更新](../virtualbox.md#更新)（新しい版が無い）、[ロールバック](../extra/virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
-  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 「リポジトリを置く」の手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion)）、「リポジトリを置く」の手順 2〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順（今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3・4・7）、「VirtualBox を入れる」の手順 4・5、「KVM と USB の設定」の手順 1・2、「動作を確かめる」の手順 1〜5、[カーネルを更新したとき](../virtualbox.md#カーネルを更新したとき)・[更新](../virtualbox.md#更新)・[ロールバック](../extra/virtualbox.md#ロールバック)を、コードブロックのまま通した
+  - **確認していないこと**: MokManager での鍵の登録と、署名したモジュールの受け入れ（この PC ではキーボードが効かなかった。VM の中では確かめた）、「動作を確かめる」の手順 2、USB（「KVM と USB の設定」の手順 2）、[カーネルを更新したとき](../almalinux-setup.md#virtualbox-カーネルを更新したとき)、[更新](../almalinux-setup.md#virtualbox-更新)（新しい版が無い）、[ロールバック](../extra/virtualbox.md#ロールバック)（VirtualBox を残した）、MOK の削除
+  - コンテナでの検証（2026-09-24。[付録](#付録-コンテナでの検証記録2026-09-24)）: 「リポジトリを置く」の手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion)）、「リポジトリを置く」の手順 2〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順（今の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 3・4・7）、「VirtualBox を入れる」の手順 4・5、「KVM と USB の設定」の手順 1・2、「動作を確かめる」の手順 1〜5、[カーネルを更新したとき](../almalinux-setup.md#virtualbox-カーネルを更新したとき)・[更新](../almalinux-setup.md#virtualbox-更新)・[ロールバック](../extra/virtualbox.md#ロールバック)を、コードブロックのまま通した
     - コンテナのカーネルは別物なので `uname -r` を、Secure Boot の状態は `mokutil` をスタブにした。`--privileged` は付けていない（`modprobe` がホストのカーネルに触れないように）
     - 確かめたのは、依存の解決と導入、スタブの Secure Boot での署名、KVM と共存する仕組みが入らないこと、更新・系列の切り替え・ロールバックの結果
   - 2026-09-28: 「リポジトリを置く」の手順 4 と、鍵を作るブロック（今の secure-boot-mok.md の手順 4）と、[ロールバック](../extra/virtualbox.md#ロールバック)の手順 3 のブロックを `{ … }` で囲んだ
@@ -372,8 +372,8 @@ AlmaLinux 10 の[動作を確かめる](../virtualbox.md#動作を確かめる)�
   - 2026-10-02: もとの手順 3・4、手順 9・10、手順 13・14、手順 15・16 をそれぞれつないで `{ … }` で囲んだ（今の「リポジトリを置く」の手順 3、「VirtualBox を入れる」の手順 3、「KVM と USB の設定」の手順 1・2。つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 「動作を確かめる」の手順 3 に、既存の `vbox-selftest` と作成失敗を弾く条件を加えた
     - `bash -n` と VBoxManage のスタブで、既存 VM・作成失敗時に変更や削除をしないこと、変更・起動の失敗時も新規作成分だけを片付けることを確認した。変更後のブロックは実機では流していない
-- **状態（Windows 11）**: **[Windows 11 で使う](../virtualbox.md#windows-11-で使う)と、後ろの更新・ロールバックの 2 節は、Windows の実機では流していない（未検証。2026-10-03 に書いた）**
-  - 2026-10-08: 任意節の[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)を、利用者の Windows 11 の PC（実機）と Android で確かめた（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）
+- **状態（Windows 11）**: **[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)と、後ろの更新・ロールバックの 2 節は、Windows の実機では流していない（未検証。2026-10-03 に書いた）**
+  - 2026-10-08: 任意節の[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](../windows-setup.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)を、利用者の Windows 11 の PC（実機）と Android で確かめた（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）
     - 確かめたこと: 既定の設定では、画面のキーボードでも物理キーボードでも `1.,2` が VM で `nczm` になること。設定をオンにすると、つなぎ直さずに `1.,2` が出ること
     - 確かめたこと: 物理キーボード（US 配列）は Shift の記号まで出て、画面のキーボード（Gboard）は Shift の記号に Shift が付かないこと（PC のメモ帳でも）。VirtualBox のソフトキーボードで `@` が出ること
     - 確かめたこと: PC の IME は物理キーボードの `` Alt+` `` で切り替わり、Ctrl+Space は Android が受け取ること
@@ -385,7 +385,7 @@ AlmaLinux 10 の[動作を確かめる](../virtualbox.md#動作を確かめる)�
     - winget の定義: `Oracle.VirtualBox` 7.2.20 と、依存の `Microsoft.VCRedist.2015+.x64`
     - 配布物: インストーラの sha256（winget の定義と公式の `SHA256SUMS`）と Authenticode の署名。中の MSI の機能・起動の条件・カスタム アクション・環境変数・サービス・画面の文言、ドライバーの INF とカタログの署名、`VBoxVMM.dll` の中の文字列、同梱のマニュアル（PDF）
     - VirtualBox 7.2.20 のソース: インストーラ（`--silent` と証明書）、MSI の補助（Visual C++ と Python の確かめ方）、`VBoxManage --version`、`VBoxSVC` が終わるまでの時間
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2・6 と[Windows 11 のロールバック](../extra/virtualbox.md#windows-11-のロールバック)の手順 2 は、偽物のコマンドで流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 2・6 と[Windows 11 のロールバック](../extra/virtualbox.md#windows-11-のロールバック)の手順 2 は、偽物のコマンドで流した（[付録](#付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、winget の表示と、依存の入り方、ネットワークが切れる長さ、ドライバーとアダプターの出方、管理者ではない窓での VM の起動、`showvminfo --log` に NEM の行が出ること、VirtualBox マネージャーの表示と更新の知らせ、更新とロールバック、Hyper-V が動いていない PC、Intel の CPU、arm64 の Windows
 
 AlmaLinux 10:
@@ -404,7 +404,7 @@ AlmaLinux 10:
 | sudo | パスワード無し（NOPASSWD） | NOPASSWD |
 | 入った VirtualBox | `VirtualBox-7.2-7.2.20_175154_el10-1.x86_64` | 同左 |
 
-Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の Windows のホストと同じ PC を想定）:
+Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の Windows のホストと同じ PC を想定）:
 
 | 項目 | 値 |
 |---|---|
@@ -423,7 +423,7 @@ Windows 11（前提にしている環境。[virtualbox-guest-bootc.md](../virtua
 
 ### 実施前の状態
 
-Windows 11 の PC は、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2 で確かめる（流していないので、記録は無い）。
+Windows 11 の PC は、[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 2 で確かめる（流していないので、記録は無い）。
 
 Android の任意節の前（2026-10-08）は、Windows App の「使用可能な場合にスキャンコード入力を使用する」がオフ（既定）だった。VM のウィンドウに画面のキーボードでも物理キーボードでも `1.,2` を打つと、`nczm` になった（[付録](#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)）。
 
@@ -464,14 +464,14 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 | scoop の `nonportable/virtualbox-np` | 7.2.20（同じ sha256）。管理者の権限で scoop を動かす必要があり、MSI を直接 `/qn` で入れる（ショートカットは作らない） | 不採用（[Windows 11 の初期設定](../windows-setup.md)の scoop は管理者ではない窓で使う） |
 | Chocolatey の `virtualbox` | 7.2.20（コミュニティの保守） | 不採用（別のパッケージ マネージャーを足す） |
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 - **Windows 11 でも Extension Pack は入れない**: ライセンスが PUEL（個人利用・教育利用・評価に限って無償。[注意点](../extra/virtualbox.md#注意点)）
   - winget に Extension Pack のパッケージは無い（winget-pkgs の `manifests/o/Oracle` の下は `VirtualBox` だけ）
   - scoop には、本体と一緒に入れる `nonportable/virtualbox-with-extension-pack-np` がある
 - **入れる・上げる・消すのは管理者の窓、VM は管理者ではない窓にした**
   - winget の定義は PC 全体（`Scope: machine`）なので、管理者の窓なら UAC の確認が出ない
-  - VM は自分のユーザーで動かす（AlmaLinux 10 で root ではなく自分で動かすのと同じ。[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 5 の補足）
-- **機能は既定のまま、すべて入れた**: ブリッジ接続とホストオンリーのアダプターは、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) のホストオンリーアダプターの節などで使う
+  - VM は自分のユーザーで動かす（AlmaLinux 10 で root ではなく自分で動かすのと同じ。[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 5 の補足）
+- **機能は既定のまま、すべて入れた**: ブリッジ接続とホストオンリーのアダプターは、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) のホストオンリーアダプターの節などで使う
   - 要らない機能は、マニュアルの `ADDLOCAL`（`-msiparams ADDLOCAL=VBoxApplication,VBoxUSB` など）で外せるが、本書では試していない
 - **Hyper-V は止めない**: VirtualBox のマニュアルは、Hyper-V と一緒に使うと遅くなるので、Hyper-V を使う Windows の機能を切るよう勧めている（[注意点](../extra/virtualbox.md#注意点)）
   - 本書は切らない。WSL 2 が Virtual Machine Platform を使うため（[Windows 11 の初期設定](../windows-setup.md)で WSL を入れた PC も）
@@ -565,7 +565,7 @@ vboxusers:x:<GID>:
 
 ### 操作上の注意と併記されていた記録
 
-- **MokManager でキーボードが効かない PC がある**: 検証した PC では登録できず、Secure Boot を無効にして進めた（[secure-boot-mok.md 手順 6](../secure-boot-mok.md#実施手順) の補足）。無効のままならモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する（[VirtualBox を入れる](../virtualbox.md#virtualbox-を入れる)の手順 4 の補足）
+- **MokManager でキーボードが効かない PC がある**: 検証した PC では登録できず、Secure Boot を無効にして進めた（[secure-boot-mok.md 手順 6](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の補足）。無効のままならモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する（[VirtualBox を入れる](../almalinux-setup.md#virtualbox-virtualbox-を入れる)の手順 4 の補足）
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -628,7 +628,7 @@ vboxusers:x:<GID>:
 | GUI のライブラリ | `/usr/lib/virtualbox` の ELF 48 個すべてで `ldd` の `not found` が 0。Qt 6 は `/lib64/libQt6*.so.6`（AppStream） |
 | `kernel-devel` の installonly | 古い `kernel-devel-6.12.0-211.55.1.el10_2` を入れた状態で `dnf upgrade --assumeno kernel-devel` → `Installing: kernel-devel 6.12.0-211.56.1.el10_2` |
 | 更新 | 7.2.18 → 7.2.20 の `dnf upgrade` でモジュールが `7.2.20 r175154` になり、`/sbin/vboxconfig` と udev のルールが残った |
-| 系列の切り替え | 7.2 を入れたまま 7.1 → ファイルの衝突 501 件。`dnf swap` → 新しい系列のモジュールと設定が消えた。remove → install → 揃った（[更新の補足](../verification/virtualbox.md#更新の補足)） |
+| 系列の切り替え | 7.2 を入れたまま 7.1 → ファイルの衝突 501 件。`dnf swap` → 新しい系列のモジュールと設定が消えた。remove → install → 揃った（[更新の補足](#更新の補足)） |
 | ロールバックの残り物 | 本体と依存を消した後に、`vboxusers` グループ・`/var/log/vbox-setup.log`・`~/.config/VirtualBox`・dnf のキャッシュ（鍵を含む）・rpm の鍵・MOK の鍵のファイルが残った。本文のロールバックはこれを消す形にしてある |
 | systemd を PID 1 にしたコンテナ | 立ち上がらなかった（ログを出さずに終了コード 255。ホストは cgroup v1 で、EL10 の systemd 257 は cgroup v1 では起動しない見込み）。そのため `vboxdrv.service` の生成と有効化は確かめていない |
 
@@ -654,7 +654,7 @@ vboxusers:x:<GID>:
 
 ### 付録: 実機での本実行（2026-09-29）
 
-前の付録の後、実機で本実行した（「リポジトリを置く」の手順 1〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順〔今の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜6〕、EPEL の有効化の確認〔今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) の確かめる部分〕は 2026-09-28、MOK の確認〔同書の手順 7〕と「VirtualBox を入れる」の手順 4 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
+前の付録の後、実機で本実行した（「リポジトリを置く」の手順 1〜5 と「VirtualBox を入れる」の手順 1〜3、MOK の手順〔今の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 3〜6〕、EPEL の有効化の確認〔今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) の確かめる部分〕は 2026-09-28、MOK の確認〔同書の手順 7〕と「VirtualBox を入れる」の手順 4 から後は 2026-09-29）。この付録の手順番号は今の番号で、MOK の手順は secure-boot-mok.md の番号で書いた。前の付録の未確認事項のうち、次のものはこれで済んだ。
 
 - 実機での本実行（Secure Boot が有効な分岐は、MokManager での登録〔今の secure-boot-mok.md の手順 6〕まで）
 - VT-x / AMD-V のある PC での `lscpu` の表示、デスクトップの PC での依存の数
@@ -707,7 +707,7 @@ vboxusers:x:<GID>:
 | setuid | `VirtualBoxVM`・`VBoxHeadless` が `-r-s--x--x root root` |
 | MOK の予約 | `mokutil --list-new` は、`sudo` が無いと何も出さない |
 | `gpg` | `type -a gpg` は `/home/linuxbrew/.linuxbrew/bin/gpg`、`/usr/bin/gpg` の順 |
-| VM を動かす | 入れた VirtualBox で、Atomic Desktop の VM（UEFI・Secure Boot 有効、4 vCPU・8 GB）を GUI のウィンドウで動かした（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の付録）。VM の中の MokManager の登録と削除も確かめた |
+| VM を動かす | 入れた VirtualBox で、Atomic Desktop の VM（UEFI・Secure Boot 有効、4 vCPU・8 GB）を GUI のウィンドウで動かした（[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の付録）。VM の中の MokManager の登録と削除も確かめた |
 
 #### 未確認事項
 
@@ -716,7 +716,7 @@ vboxusers:x:<GID>:
 - Secure Boot を後で有効に戻したときの動作と、登録し直して `sudo /sbin/vboxconfig` を実行したときの動作
 - 「動作を確かめる」の手順 2、USB の受け渡し（「KVM と USB の設定」の手順 2）
 - EPEL の鍵の確認（取り込み済みだった）
-- カーネルを更新して再起動したときの自動ビルド、[更新](../virtualbox.md#更新)、[ロールバック](../extra/virtualbox.md#ロールバック)（実機では行っていない）
+- カーネルを更新して再起動したときの自動ビルド、[更新](../almalinux-setup.md#virtualbox-更新)、[ロールバック](../extra/virtualbox.md#ロールバック)（実機では行っていない）
 - Intel の PC（VT-x）で KVM とぶつかったときの文の実際の出方
 - GUI の HiDPI と日本語の表示、日本語入力
 
@@ -871,8 +871,8 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 **条件で止まるブロックの模擬**（パスの `\` を `/` に替え、`$env:ProgramFiles` を一時的なディレクトリにして流した。管理者かどうかの式は `$true` / `$false` に置き換え、`Get-CimInstance`・`Get-WindowsOptionalFeature`・`Get-Process`・`winget` は値を返すだけの偽物の関数、`VBoxManage.exe` は引数を記録して決まった文字列を返す bash のスクリプトにした）:
 
-- [Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2: `Admin`・`Arch`・`Winget`・`VirtualBox`・`Hypervisor`・`VirtFirmware` の 6 行と、偽物の 5 つの機能から 3 つ（`Microsoft-Hyper-V-All`・`VirtualMachinePlatform`・`HypervisorPlatform`）だけの表が出た
-- [Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 6:
+- [Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 2: `Admin`・`Arch`・`Winget`・`VirtualBox`・`Hypervisor`・`VirtFirmware` の 6 行と、偽物の 5 つの機能から 3 つ（`Microsoft-Hyper-V-All`・`VirtualMachinePlatform`・`HypervisorPlatform`）だけの表が出た
+- [Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 6:
   - 管理者でないとき: `VBoxManage` に `createvm` → `modifyvm` → `startvm` → `showvminfo --machinereadable` → `showvminfo --log 0` → `controlvm … poweroff` → `unregistervm … --delete` の 7 回が、本文の引数のまま渡った
   - `showvminfo --machinereadable` の出力からは `VMState="running"` の行だけが残った
   - 偽物のログに NEM の 2 行（`HM: HMR3Init: Attempting fall back to NEM: AMD-V is not available` と `NEM: NEMR3Init: Snail execution mode is active!`）を入れたときはその 2 行が出て、入れないときは何も出なかった
@@ -900,7 +900,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 ### 付録: Android の Windows App からリモート デスクトップでつないだときのキー入力（2026-10-08）
 
-利用者の Android から Windows 11 の PC（実機）にリモート デスクトップでつなぎ、PC の上の VirtualBox の VM のウィンドウに打った文字を、VM の画面で確かめた。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）](../virtualbox.md#windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)の手順 1〜3 に当たる。
+利用者の Android から Windows 11 の PC（実機）にリモート デスクトップでつなぎ、PC の上の VirtualBox の VM のウィンドウに打った文字を、VM の画面で確かめた。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意）](../windows-setup.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う任意)の手順 1〜3 に当たる。
 
 | 項目 | 値 |
 |---|---|
@@ -957,18 +957,18 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 ### 分離前の検証状況の記録
 
 > [!WARNING]
-> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](../secure-boot-mok.md) と「動作を確かめる」の手順 2）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
+> **Secure Boot が有効な分岐（前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) と「動作を確かめる」の手順 2）は、実機では最後まで通せていない**（[対象と検証環境](#対象と検証環境)）。
 >
 
 > [!WARNING]
 >
-> - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の VM を動かした（入れた方法の記録は無い）
+> - 同じ版（7.2.20）は利用者の Windows 11 の PC に入っていて、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の VM を動かした（入れた方法の記録は無い）
 > - **その PC では Hyper-V が動いていて（WSL 2 を使う PC）、VM は Hyper-V の上で動き、重い処理の間に 1〜7 分ずつ止まった**。この節の手順 6 で、VM が Hyper-V の上で動くかが分かる（[注意点](../extra/virtualbox.md#注意点)）
 
 
 ### 操作上の注意と併記されていた記録
 
-> 系列の切り替え（この節の手順 3・4）に **`dnf swap` は使わない**。`Complete!` で終わるが、コンテナで試したときは新しい系列のモジュールと設定が消え、動かない状態になった（[更新の補足](../verification/virtualbox.md#更新の補足)）。
+> 系列の切り替え（この節の手順 3・4）に **`dnf swap` は使わない**。`Complete!` で終わるが、コンテナで試したときは新しい系列のモジュールと設定が消え、動かない状態になった（[更新の補足](#更新の補足)）。
 
 
 ### 操作上の注意と併記されていた記録
@@ -1064,7 +1064,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - [Oracle VirtualBox User Guide 7.2 — Working with Virtual Machines](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html) — 状態バーのプロセッサーのアイコンの緑の亀（Hyper-V などが動いている）
 - [VirtualBox/virtualbox の v7.2.20](https://github.com/VirtualBox/virtualbox/tree/v7.2.20) — `src/VBox/Installer/win/Stub/VBoxStub.cpp`（`--silent` と証明書）、`src/VBox/Installer/win/InstallHelper/VBoxInstallHelper.cpp`（Visual C++ 2019 以上の確かめ方、Python のバインディング）、`src/VBox/Frontends/VBoxManage/VBoxManage.cpp`（`--version`）、`src/VBox/Main/src-server/win/svcmain.cpp`（`VBoxSVC` が 5 秒で終わる）
 - [Win32_ComputerSystem](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystem)（`HypervisorPresent`）・[Win32_Processor](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processor)（`VirtualizationFirmwareEnabled`）— Microsoft Learn
-- [virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) — Windows のホストで VirtualBox の VM を動かした記録（Hyper-V の上で止まる現象）
+- [virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) — Windows のホストで VirtualBox の VM を動かした記録（Hyper-V の上で止まる現象）
 
 ---
 
@@ -1128,7 +1128,7 @@ aarch64 には入らない:
 
 ### 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
 
-[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../virtualbox.md#windows-11-で使う)の手順 2〜4 のコードブロックを抜き出して、そのまま実行した。導入後に手順 6 の使い捨て VM の起動を試したが、入れ子の仮想化を利用できず失敗した。手順 8 の全体設定ファイルの確認は成功した。利用者の希望でここで検証を中断し、入れ子の VM の再検証は `<OTHER_PC>` の環境へ引き継ぐ。
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 2〜4 のコードブロックを抜き出して、そのまま実行した。導入後に手順 6 の使い捨て VM の起動を試したが、入れ子の仮想化を利用できず失敗した。手順 8 の全体設定ファイルの確認は成功した。利用者の希望でここで検証を中断し、入れ子の VM の再検証は `<OTHER_PC>` の環境へ引き継ぐ。
 
 | 項目 | 値 |
 |---|---|
@@ -1166,7 +1166,7 @@ aarch64 には入らない:
 
 ### 付録: Windows 11 の実機と VM での追加検証（2026-10-08）
 
-上の付録が「確認していないこと」に挙げた項目を確かめた。手順はすべて [Windows 11 で使う](../virtualbox.md#windows-11-で使う)の番号。
+上の付録が「確認していないこと」に挙げた項目を確かめた。手順はすべて [Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の番号。
 
 **手順 6（使い捨ての VM）を、VM ではなく実機で**:
 

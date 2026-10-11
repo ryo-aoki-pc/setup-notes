@@ -1,6 +1,6 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）の検証記録
 
-[手順書](../wireguard.md)・[ロールバックと注意点](../extra/wireguard.md)
+[手順書](../almalinux-setup.md#wireguard-実施手順)・[ロールバックと注意点](../extra/wireguard.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -78,7 +78,7 @@ $ tracepath -n 192.168.120.100
     - 2 つに分けた（目視で確かめてから次を貼るため）: `--info-zone` の後の Cockpit の開放、`--dry-run` の後の `apply`
     - Cockpit の開放は、`--add-service` と `--reload` を `&&` でつないだ 1 行にした
     - どのブロックも、直した後は構文の検査だけで、流していない
-  - 2026-10-10: 任意節[回線に合わせて MTU を下げる](../wireguard.md#回線に合わせて-mtu-を下げる任意)を足した（[付録](#付録-実機の-2-拠点で-wg0-の-mtu-を下げた記録2026-10-10)）
+  - 2026-10-10: 任意節[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)を足した（[付録](#付録-実機の-2-拠点で-wg0-の-mtu-を下げた記録2026-10-10)）
     - 実機の 2 拠点で通したこと: この節の手順 1・4〜7 のブロック（本文の形のまま。手順 6 の `apply` は、拠点 A では落とし穴の節の `systemd-run` で ssh から切り離した）と、手順 2・3 に当たる `site.env` の書き換え（`vi` ではなく `sed`）
     - 確認したこと: 下げる前は拠点 B から拠点 A への MTU いっぱいの ping だけが約 5% 落ち、両拠点の `wg0` を 1380 にした後は落ちないこと、動いている `wg0` の MTU を変えてもトンネルと ssh が切れないこと、`apply` が conf に `MTU = 1380` を書き、restart で作り直された `wg0` が 1380 になること
     - **確認していないこと**: 手順 2 の `vi` での編集、OS の再起動、クライアント側の MTU、`Endpoint` が IPv6 の構成
@@ -86,10 +86,10 @@ $ tracepath -n 192.168.120.100
       - スタブ環境と、実機の dry-run で確かめた
       - `MTU =` 入りの conf をクライアントに取り込むことと、手順 8 の操作は、どのクライアントでも流していない
   - 2026-10-11: Road Warrior の手順書（`wireguard-road-warrior.md`）を、この手順書に統合した（[付録](#付録-road-warrior-の手順書を統合した記録2026-10-11)）
-    - 外出先の PC の手順は、[AlmaLinux 10 の PC からつなぐ](../wireguard.md#almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](../wireguard.md#windows-11-で使う)などの節に、コマンドを変えずに移した。検証範囲は変えていない
+    - 外出先の PC の手順は、[AlmaLinux 10 の PC からつなぐ](../almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](../windows-setup.md#wireguard-windows-11-で使う)などの節に、コマンドを変えずに移した。検証範囲は変えていない
       - AlmaLinux 10 の PC は、実機（2026-09-22）と新規の VM（2026-10-06）で通している。Windows 11 は VM だけで、実機では流していない
       - もとの検証記録は、[統合前の記録: Road Warrior](#統合前の記録-road-warriorもとは-wireguard-road-warriormd)に中身を変えずに移した
-    - ホスト側の登録は、実施手順の[クライアントを登録する](../wireguard.md#クライアントを登録する)の 9 手順に作り直した
+    - ホスト側の登録は、実施手順の[クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の 9 手順に作り直した
       - **作り直した形で通したのは、スタブ環境だけ**（鍵をホストで作る経路と、クライアントの公開鍵で登録する経路）
       - 実機・VM で通してあるのは、統合前の形（この手順書の手順 1〜7 と、Road Warrior の「WG ホストに登録する」の手順 1〜3）。作り直した手順は、その同じコマンドの組み替え
   - 2026-10-05: クライアント削除と鍵交換の反映、無関係の未知 peer による停止、LAN 側 IP の変更前後の検査を、一時ファイルとホスト操作のスタブで確認した。稼働中の WireGuard・firewalld・systemd には適用していない
@@ -103,7 +103,7 @@ $ tracepath -n 192.168.120.100
 | firewalld | 2.4.3 |
 | NetworkManager | 1.56.0 |
 | SELinux | Enforcing |
-| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定。AlmaLinux 10 の PC を NetworkManager でつなぐ手順は [wireguard-road-warrior.md](../wireguard.md#almalinux-10-の-pc-からつなぐ)（2026-09-22 に実機で本実行） |
+| クライアント | 検証は Linux の `wg-quick`。WireGuard 公式アプリ（Windows / macOS / iOS / Android）も同じ conf で使える想定。AlmaLinux 10 の PC を NetworkManager でつなぐ手順は [wireguard-road-warrior.md](../almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ)（2026-09-22 に実機で本実行） |
 
 ![構成](../diagrams/wireguard-remote-client.svg)
 
@@ -208,7 +208,7 @@ $ tracepath -n 192.168.120.100
 | 手で `wg0.conf` に書いた `[Peer]` が、`apply` の後で消えている | `clients.list` が唯一の登録簿で、`apply` はそこから `[Peer]` を毎回組み立て直す（[落とし穴 3](../extra/wireguard.md#落とし穴-3-登録簿に無い-peer-は-apply-で消える)） |
 | 拠点の LAN からクライアントへ接続できない（逆方向だけ失敗） | ルーターにクライアント帯の静的経路が無い |
 | クライアントから WG ホスト自身（`${MY_TUN_IP}`）に届かない | クライアント conf の `AllowedIPs` に `${WG_TUNNEL_NET}` が入っていない |
-| OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < /etc/wireguard/wg0.key` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](../wireguard.md#バックアップと復旧os-の再インストール)） |
+| OS を入れ直した後、相手拠点とハンドシェイクが成立しない | 鍵を戻していない（`wg genkey` で別の鍵を作った）。`sudo wg pubkey < /etc/wireguard/wg0.key` が `site.env` の `SITE_x_PUBKEY` と一致するか確かめる（[バックアップと復旧](../almalinux-setup.md#wireguard-バックアップと復旧os-の再インストール)） |
 
 ### 落とし穴 2: reload では経路が追加されない / 手順 0: 本文中の記録
 
@@ -713,7 +713,7 @@ $ ping -c1 -W2 -I 192.168.110.2 192.168.120.100      ← 送信元を LAN 側 IP
 - 拠点 B の WG ホストへ外出先の PC から ssh すると操作が非常に遅い、という症状から調べた
 - ホスト自体（CPU・メモリ・ディスク）に問題は無く、トンネルの中の MTU いっぱいのパケットだけが落ちていた
 - 両拠点の `wg0` の MTU を 1420 から 1380 に下げ、落ちなくなることを確かめた
-- この記録をもとに、手順書に[回線に合わせて MTU を下げる](../wireguard.md#回線に合わせて-mtu-を下げる任意)の節を足した。以下の「手順 N」は、この節の手順を指す
+- この記録をもとに、手順書に[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)の節を足した。以下の「手順 N」は、この節の手順を指す
 
 | 項目 | 値 |
 |---|---|
@@ -797,7 +797,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
   - 拠点 A とのハンドシェイクは、`apply` を始めてから 20 秒で戻った（拠点 B は拠点 A の `Endpoint` を持たないので、拠点 A から張り直されるのを待つ）
   - 拠点 B の LAN からの ssh は切れなかった。拠点 A の LAN からトンネル越しに張ってあった ssh は、送信元のポートが変わっていた（切れて、つなぎ直されたとみた）
   - クライアントのスマートフォンは、約 2 分でハンドシェイクし直した
-- **拠点 A**（22:05 JST、スクリプトは `cf8774d`。`2697a08` との違いはヘッダーのコメントだけ）: 拠点 B からトンネル越しの ssh で入り、[落とし穴の節](../wireguard.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)の `sudo systemd-run --unit=wg-apply-rw -p Type=oneshot /bin/bash <REPO>/scripts/wireguard/wg-vpn.sh -e <ENV_FILE> apply A` で切り離して流した
+- **拠点 A**（22:05 JST、スクリプトは `cf8774d`。`2697a08` との違いはヘッダーのコメントだけ）: 拠点 B からトンネル越しの ssh で入り、[落とし穴の節](../almalinux-setup.md#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)の `sudo systemd-run --unit=wg-apply-rw -p Type=oneshot /bin/bash <REPO>/scripts/wireguard/wg-vpn.sh -e <ENV_FILE> apply A` で切り離して流した
   - `journalctl -u wg-apply-rw` に拠点 B と同じ並びの出力が残り、`systemctl show wg-apply-rw -p Result -p ExecMainStatus` は `Result=success`・`ExecMainStatus=0`。始まりから終わりまで 4.5 秒
   - この ssh は切れず、5 秒後に `systemd-run` が戻った（この 1 回の結果で、切れない保証ではない）
 - 両拠点の適用後:
@@ -875,7 +875,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 #### 移したもの
 
-- 手順書: 外出先の PC の節（[AlmaLinux 10 の PC からつなぐ](../wireguard.md#almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](../wireguard.md#windows-11-で使う)・[Windows 11 の更新](../wireguard.md#windows-11-の更新)）と[落とし穴](../wireguard.md#落とし穴-apply-は作業中の-ssh-経路そのものを切る)を、実施手順の後ろの節にした
+- 手順書: 外出先の PC の節（[AlmaLinux 10 の PC からつなぐ](../almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](../windows-setup.md#wireguard-windows-11-で使う)・[Windows 11 の更新](../windows-setup.md#wireguard-windows-11-の更新)）と[落とし穴](../almalinux-setup.md#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)を、実施手順の後ろの節にした
   - コードブロックは、次の 2 つを除いて 1 字も変えていない
   - 「クライアントを登録する」に吸収した、もとの「WG ホストに登録する」の手順 1・3 のブロック（下の「作り直した項」）
   - 「conf を取り込む」の手順 1 の `vi` の行のコメントにある手順番号（「WG ホストに登録する」の手順 3 → 手順 2）
@@ -936,7 +936,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 ## 統合前の記録: Road Warrior（もとは wireguard-road-warrior.md）
 
-もとの `wireguard-road-warrior.md` の検証記録を、内容を変えずに移したもの。見出しはこの文書の中で重ならないように、頭に `Road Warrior:` を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [WireGuard VPN 構築手順](../wireguard.md)の手順の対応は次のとおり。
+もとの `wireguard-road-warrior.md` の検証記録を、内容を変えずに移したもの。見出しはこの文書の中で重ならないように、頭に `Road Warrior:` を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [WireGuard VPN 構築手順](../almalinux-setup.md#wireguard-実施手順)の手順の対応は次のとおり。
 
 | 当時の手順（wireguard-road-warrior.md） | 今の手順（wireguard.md） |
 |---|---|
@@ -1019,7 +1019,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 - (3) ルーターは `wg0 → LAN` の転送と、ルーターのクライアント帯の静的経路
 - (4) 相手拠点の WG ホストは、拠点間トンネルと相手ホストの `AllowedIPs`（クライアント帯）
 
-→ [wireguard.md の「状態と疎通を確かめる」の手順 2 の補足](../wireguard.md#状態と疎通を確かめる)、[症状と原因の対応](#症状と原因の対応実測)。トンネル越しの ssh は [WG ホスト自身の ssh へ入る場合](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)。
+→ [wireguard.md の「状態と疎通を確かめる」の手順 2 の補足](../almalinux-setup.md#wireguard-状態と疎通を確かめる)、[症状と原因の対応](#症状と原因の対応実測)。トンネル越しの ssh は [WG ホスト自身の ssh へ入る場合](../extra/wireguard.md#トンネル越しに-wg-ホスト自身の-ssh-や-cockpit-へ入る場合)。
 
 #### Road Warrior: 実施手順 / トンネルを確かめる / 手順 4: 補足: down と日常の使い方
 
@@ -1051,7 +1051,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 - `InstallerType: wix`（MSI）、`Scope: machine`。x64 のインストーラーは `https://download.wireguard.com/windows-client/wireguard-amd64-1.1.1.msi` で、winget が sha256 を確かめてから黙って入れる。x86 と arm64 の MSI もある
 - `InstallerSwitches` の `Custom: DO_NOT_LAUNCH=1` を MSI に渡す。MSI は、入れ終えたときに `wireguard.exe` を起動して窓を出すが、この値があると起動しない（WireGuard の文書の「Enterprise Usage」）。そのため、マネージャーのサービスもまだ作られない（「Windows 11 で WireGuard と鍵を用意する」の手順 5）
-- `UpgradeBehavior: install`（新しい版の MSI を上から入れる。[Windows 11 の更新](../wireguard.md#windows-11-の更新)）
+- `UpgradeBehavior: install`（新しい版の MSI を上から入れる。[Windows 11 の更新](../windows-setup.md#wireguard-windows-11-の更新)）
 - `--accept-source-agreements` と `--accept-package-agreements` は、winget を初めて使う PC で出る同意の問いに答えるため
 
 **入るもの**（MSI の定義 `installer/wireguard.wxs` と、MSI から取り出した中身）
@@ -1063,7 +1063,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 #### Road Warrior: Windows 11 で使う / Windows 11 で WireGuard と鍵を用意する / 手順 6: 補足: 鍵ペアと置き場所
 
-- 実施手順の[鍵を作る](../wireguard.md#鍵を作る)の手順 3 と同じく、既に `wg0.key` があれば止まる（上書きすると、WG ホストに登録済みの公開鍵と対応しなくなる）
+- 実施手順の[鍵を作る](../almalinux-setup.md#wireguard-鍵を作る)の手順 3 と同じく、既に `wg0.key` があれば止まる（上書きすると、WG ホストに登録済みの公開鍵と対応しなくなる）
 - 秘密鍵は、ブロックを囲む `& { … }` の中の変数で受けて、ファイルに書くだけ。ブロックが終わると変数は消える。PowerShell の履歴に残るのはコマンドの文字列で、鍵は残らない
 - ファイルは `[IO.File]::WriteAllText` で ASCII（BOM 無し）で書く。Windows PowerShell 5.1 の `>` と `Out-File` は UTF-16 で書く
 - `$priv | & $wg pubkey` は、末尾に CR LF を付けて ASCII で送る（Windows PowerShell 5.1 のパイプ）。`wg pubkey` は鍵の 44 文字の後ろの空白（CR と LF を含む）を読み飛ばす（wireguard-tools のソースの `pubkey.c` と `ctype.h`。Linux の `wg` で、CR LF 付きの入力から同じ公開鍵が出た。[付録](#road-warrior-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
@@ -1073,7 +1073,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 #### Road Warrior: Windows 11 で使う / Windows 11 で WG ホストに登録して取り込む / 手順 3: 補足: conf と秘密鍵
 
-- 実施手順の[conf を取り込む](../wireguard.md#conf-を取り込む)の手順 1・2（`vi` に貼って保存し、`sed` で `PrivateKey` 行を置き換える）を、「Windows 11 で WG ホストに登録して取り込む」の手順 1 の関数にまとめた。エディタを開かずに、クリップボードの中身を読む（`Get-Clipboard -Raw` は、複数行を 1 つの文字列で返す。Windows PowerShell 5.1 にもある）
+- 実施手順の[conf を取り込む](../almalinux-setup.md#wireguard-conf-を取り込む)の手順 1・2（`vi` に貼って保存し、`sed` で `PrivateKey` 行を置き換える）を、「Windows 11 で WG ホストに登録して取り込む」の手順 1 の関数にまとめた。エディタを開かずに、クリップボードの中身を読む（`Get-Clipboard -Raw` は、複数行を 1 つの文字列で返す。Windows PowerShell 5.1 にもある）
 - 先頭が `[Interface]` でなければ止めるのは、端末からコピーしたときにプロンプトの行が入りやすいため。行の末尾の空白は落とす
 - 2 つの確かめは、AlmaLinux 10 と同じ「置き換え前に `PrivateKey` 行がちょうど 1 行あること」と「置き換え後に 44 文字の鍵になったこと」
 - ASCII（BOM 無し）・CR LF で書く。WireGuard の読み込みは行を LF で分けて前後の空白を落とすので、CR LF でも読める（ソースの `conf/parser.go`）。BOM 付きの UTF-8 は、先頭の行が `[Interface]` と見なされずに読めない（その読み込みの部分を Linux で動かして確かめた。[付録](#road-warrior-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
@@ -1089,14 +1089,14 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 
 #### Road Warrior: 対象と検証環境
 
-- **目的**: [WireGuard VPN 構築手順](../wireguard.md)で建てた拠点の WG ホストに、外出先の AlmaLinux 10 または Windows 11 のノート PC から接続し、両拠点の LAN に届くようにする
+- **目的**: [WireGuard VPN 構築手順](../almalinux-setup.md#wireguard-実施手順)で建てた拠点の WG ホストに、外出先の AlmaLinux 10 または Windows 11 のノート PC から接続し、両拠点の LAN に届くようにする
   - 鍵は PC で作り、**公開鍵だけ**を WG ホストに登録する
   - AlmaLinux 10 では、トンネルを NetworkManager のプロファイル `wg0` として持ち、`nmcli connection up wg0` / `down wg0` で張る・切る（`wg-quick` は使わない。→ [代替](../reference/wireguard.md#代替-wg-quick-で張る場合)）
   - Windows 11 では、公式の WireGuard for Windows のトンネル `wg0` として持ち、`wireguard.exe /installtunnelservice` / `/uninstalltunnelservice`（窓の「有効化」「無効化」と同じ）で張る・切る
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 「WG ホストに登録する」の手順 1〜3 と「トンネルを確かめる」の手順 3 だけは WG ホスト上で実行する（WG ホスト側の変数は「WG ホストに登録する」の手順 1 で設定する）
-  - WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の「クライアントを登録する」の手順 2〜4](../wireguard.md#クライアントを登録する) と同じ
-  - **Windows 11**（[Windows 11 で使う](../wireguard.md#windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。管理者の Windows PowerShell 5.1 で関数を先に定義し、conf コピー後に関数名を手入力する。WG ホストでは同じ「WG ホストに登録する」の手順 1〜3 と「トンネルを確かめる」の手順 3 を使う
+  - WG ホスト側は `wg-vpn.sh` の `client add --pubkey` → `apply` → `client show` で、[wireguard.md の「クライアントを登録する」の手順 2〜4](../almalinux-setup.md#wireguard-クライアントを登録する) と同じ
+  - **Windows 11**（[Windows 11 で使う](../windows-setup.md#wireguard-windows-11-で使う)）: WireGuard for Windows を winget で入れ、鍵はその `wg.exe` で作る。`client show` の conf をクリップボードから読んで秘密鍵を入れ、WireGuard の設定の置き場所に写して暗号化させてから張る。管理者の Windows PowerShell 5.1 で関数を先に定義し、conf コピー後に関数名を手入力する。WG ホストでは同じ「WG ホストに登録する」の手順 1〜3 と「トンネルを確かめる」の手順 3 を使う
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-22）。クリーンインストールした x86_64 の VM でも現行ブロックを本実行した（2026-10-06）**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#road-warrior-付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - 拠点 A の LAN にあるノート PC を**スマートフォンのテザリング回線に移してから**、拠点 B の WG ホストへ実施手順の全部（4 項）を通した
@@ -1118,7 +1118,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
     - 配布物: winget の `WireGuard.WireGuard` 1.1.1 の定義、公式の MSI（amd64）の sha256（winget の定義と一致）・BLAKE2b（公式の署名付きの `latest.sig` と一致。その署名も）・Authenticode の署名者、MSI の中の `wireguard.exe`（GUI のプログラム）と `wg.exe`（コンソールのプログラム）
     - WireGuard for Windows 1.1.1 のソースと文書: MSI の定義（`DO_NOT_LAUNCH`、アンインストールで `Data` を消す）、設定の置き場所への取り込みと暗号化・アクセス権、`/installtunnelservice` と窓の「有効化」が同じこと、トンネルの経路・MTU・キルスイッチの条件
     - `wg pubkey` が CR LF 付きの入力を受けること（Linux の wireguard-tools 1.0.20210914 と、ソースで）
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で WireGuard と鍵を用意する](../wireguard.md#windows-11-で-wireguard-と鍵を用意する)の手順 6、[Windows 11 で WG ホストに登録して取り込む](../wireguard.md#windows-11-で-wg-ホストに登録して取り込む)の手順 3（現在は同じ項の手順 1 の関数内）・4、[Windows 11 でトンネルを確かめる](../wireguard.md#windows-11-でトンネルを確かめる)の手順 2・3・5・6 と[Windows 11 のロールバック](../extra/wireguard.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（「Windows 11 でトンネルを確かめる」の手順 2・5 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#road-warrior-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で WireGuard と鍵を用意する](../windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 6、[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3（現在は同じ項の手順 1 の関数内）・4、[Windows 11 でトンネルを確かめる](../windows-setup.md#wireguard-windows-11-でトンネルを確かめる)の手順 2・3・5・6 と[Windows 11 のロールバック](../extra/wireguard.md#windows-11-のロールバック)の手順 1 のブロックは、Linux の pwsh で偽物のコマンドを使って流した（「Windows 11 でトンネルを確かめる」の手順 2・5 は、`wireguard.exe` と Windows のネットワークのコマンドレットも偽物。[付録](#road-warrior-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
     - 「Windows 11 で WG ホストに登録して取り込む」の手順 3 で書いた `wg0.conf` が、WireGuard for Windows 1.1.1 の conf の読み込みの部分（Linux でビルドできるように写したもの）で読めること（BOM 付きの UTF-8 は読めないことも。同じ付録）
   - 2026-10-05: 取込みを、「Windows 11 で WG ホストに登録して取り込む」の手順 1 で関数定義 → 同じ項の手順 2 で conf をコピー → 同じ項の手順 3 で関数名を手入力、に分けた。18 ブロックの構文と、この操作順、空・コード・非 ASCII・PrivateKey 重複の拒否を Linux の PowerShell 7.6.6 とクリップボードのスタブで確認した。Windows の端末では貼っていない
   - 2026-10-10: 「Windows 11 でトンネルを確かめる」の手順 2 の `NlMtu` の箇条書きと注意点「MTU」を、conf に `MTU =` がある場合に合わせた。WireGuard for Windows の `conf/parser.go` が `mtu` を読むことを見ただけで、Windows では流していない
@@ -1136,7 +1136,7 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 | firewalld | 2.4.3-4.el10_2（既定ゾーン `public`） |
 | SELinux | Enforcing |
 | 接続時の回線 | スマートフォンのテザリング（`<TETHER_NET>` を受領。両拠点の LAN・トンネル網と重ならないことを確認してから張った） |
-| WG ホスト側 | [wireguard.md](../wireguard.md) の構成（`wg-vpn.sh`。AlmaLinux 10.2 aarch64、カーネル 6.12 系）。**実測では拠点 B がクライアントを受ける**（`WG_B_CLIENT_NET` を設定、`WG_A_CLIENT_NET` は空）。本文の例の値は `site.env.example`（拠点 A が受ける構成）のままにしてある |
+| WG ホスト側 | [wireguard.md](../almalinux-setup.md#wireguard-実施手順) の構成（`wg-vpn.sh`。AlmaLinux 10.2 aarch64、カーネル 6.12 系）。**実測では拠点 B がクライアントを受ける**（`WG_B_CLIENT_NET` を設定、`WG_A_CLIENT_NET` は空）。本文の例の値は `site.env.example`（拠点 A が受ける構成）のままにしてある |
 
 Windows 11 の手順が前提にしている環境（流していない）:
 
@@ -1154,7 +1154,7 @@ Windows 11 の手順が前提にしている環境（流していない）:
 図の Remote client が本書の PC。接続先拠点（図では拠点 A）の WG ホストにトンネルを張り、拠点 A・B の LAN に届く（→ [パケットの流れ](../reference/wireguard.md#パケットの流れremote-client--各拠点)）。
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。PC 側は[「鍵を作る」の手順 1](../wireguard.md#鍵を作る)、WG ホスト側は[「WG ホストに登録する」の手順 1](../wireguard.md#wg-ホストに登録する)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。Windows 11 の PC は、[Windows 11 で WireGuard と鍵を用意する](../wireguard.md#windows-11-で-wireguard-と鍵を用意する)の手順 2 で、同じ名前の PowerShell の変数（`$WG_HOST_TUN_IP` など 4 つ）を設定する（鍵と conf の一時置き場は `%USERPROFILE%\wg-client` に決めてあり、変数にしていない）。
+> 環境固有の値は**シェル変数**で書いてある。PC 側は[「鍵を作る」の手順 1](../almalinux-setup.md#wireguard-鍵を作る)、WG ホスト側は[「WG ホストに登録する」の手順 1](../almalinux-setup.md#wireguard-wg-ホストに登録する)の先頭で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。例は `site.env.example`（拠点 A がクライアントを受ける構成）の値。Windows 11 の PC は、[Windows 11 で WireGuard と鍵を用意する](../windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 2 で、同じ名前の PowerShell の変数（`$WG_HOST_TUN_IP` など 4 つ）を設定する（鍵と conf の一時置き場は `%USERPROFILE%\wg-client` に決めてあり、変数にしていない）。
 >
 > | 変数 | 設定する場所 | 意味 | 例 |
 > |---|---|---|---|
@@ -1177,7 +1177,7 @@ Windows 11 の手順が前提にしている環境（流していない）:
 
 #### Road Warrior: 実施前の状態
 
-AlmaLinux 10 の実機で、2026-09-22、「鍵を作る」の手順 2 の前に採取（採取コマンドは[付録](#road-warrior-付録-実機での検証記録)の「記録用ブロック」）。Windows 11 の PC は、[Windows 11 で WireGuard と鍵を用意する](../wireguard.md#windows-11-で-wireguard-と鍵を用意する)の手順 3 で確かめる（流していないので記録は無い）。
+AlmaLinux 10 の実機で、2026-09-22、「鍵を作る」の手順 2 の前に採取（採取コマンドは[付録](#road-warrior-付録-実機での検証記録)の「記録用ブロック」）。Windows 11 の PC は、[Windows 11 で WireGuard と鍵を用意する](../windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 3 で確かめる（流していないので記録は無い）。
 
 | 項目 | 状態 |
 |---|---|
@@ -1220,7 +1220,7 @@ AlmaLinux 10 の実機で、2026-09-22、「鍵を作る」の手順 2 の前に
 - **秘密鍵の置き場所は NetworkManager のプロファイルだけ** — `/etc/NetworkManager/system-connections/wg0.nmconnection`（root の 0600）
   - 取り出すときは `sudo nmcli -s -g wireguard.private-key connection show wg0`
   - バックアップは取らず、失ったら「鍵を作る」の手順 3 からやり直す（ホスト側は「WG ホストに登録する」の手順 2 の共通の削除手順で反映した後、同じ項の手順 3 で `client add --pubkey`）
-  - WG ホストの[バックアップ](../wireguard.md#バックアップと復旧os-の再インストール)に、クライアントの鍵は含まれない
+  - WG ホストの[バックアップ](../almalinux-setup.md#wireguard-バックアップと復旧os-の再インストール)に、クライアントの鍵は含まれない
 
 Windows 11 で WireGuard を入れる経路を比べた（2026-10-03 時点。どれも中身は公式の MSI）:
 
@@ -1488,7 +1488,7 @@ Installers:
 
 #### Road Warrior: 付録: Windows 11 の PowerShell のブロックの Linux での確認（2026-10-03）
 
-Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた（[hackgen.md](windows-setup.md#統合前の記録-hackgen-console-nf-の-windows-11もとは-hackgenmd) の付録と同じ環境）。この付録の手順は、どれも[Windows 11 で使う](../wireguard.md#windows-11-で使う)のもの。
+Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 1.25.0 で確かめた（[hackgen.md](windows-setup.md#統合前の記録-hackgen-console-nf-の-windows-11もとは-hackgenmd) の付録と同じ環境）。この付録の手順は、どれも[Windows 11 で使う](../windows-setup.md#wireguard-windows-11-で使う)のもの。
 
 **構文と Windows PowerShell 5.1 との互換**:
 
@@ -1553,7 +1553,7 @@ Endpoint は隔離された仮想 LAN であり、テザリング回線、実ル
 
 - 「conf を取り込む」の手順 4 の import 直後は activated、自動接続を no にして down した。「トンネルを確かめる」の手順 1 の up、同じ項の手順 2 の ping が成功した。アドレスは /32、ipv6 は disabled、MTU 1420、経路の metric 50、DNS 指定無し。NM の keyfile は root の 0600 で秘密は hidden だった
 - A/B の両 LAN の端末役へ HTTP/TCP が 200、tracepath は A/B の WG ホストを通る。両拠点と双方の LAN の端末役から PC への ping も成功した
-- A のトンネル IP を Samba の接続先として [samba-client.md](../samba-client.md) の手順 1〜5 を通し、SMB 3.1.1 で作成・読み戻し・削除・unmount が成功した。経路は wg0 だった。WireGuard 越しの fstab 自動マウントは行っていない
+- A のトンネル IP を Samba の接続先として [samba-client.md](../almalinux-setup.md#samba-クライアント-実施手順) の手順 1〜5 を通し、SMB 3.1.1 で作成・読み戻し・削除・unmount が成功した。経路は wg0 だった。WireGuard 越しの fstab 自動マウントは行っていない
 - ホストの登録削除は wireguard.md の 6 手順で未知 peer の公開鍵を照合して反映した。PC の「トンネルを確かめる」の手順 4・5 とロールバック 1 でリンク・平文の鍵/conf・NM プロファイル・作業ディレクトリが消えた。ロールバック 2 の対話 dnf で新規 wireguard-tools と追加依存の resolved だけが消えた
 
 クライアント VM の OS 再起動、サスペンド、Wi-Fi 切り替え、DDNS、DNS 指定、GNOME の VPN 表示、Windows の節はこの再検証の対象外。自動接続 no の読み戻しを、再起動で張られないことの実測とはしていない。
@@ -1653,7 +1653,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 #### Road Warrior: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
 
-[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で WireGuard と鍵を用意する](../wireguard.md#windows-11-で-wireguard-と鍵を用意する)の手順 3・4 のコードブロックを抜き出して、そのまま実行した。本体の新規導入だけを検証し、鍵やトンネルの設定は作っていない。
+[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で WireGuard と鍵を用意する](../windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 3・4 のコードブロックを抜き出して、そのまま実行した。本体の新規導入だけを検証し、鍵やトンネルの設定は作っていない。
 
 | 項目 | 値 |
 |---|---|
@@ -1684,7 +1684,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 #### Road Warrior: 付録: Windows 11 Pro の VM でのマネージャーのサービスと鍵生成の検証（2026-10-07）
 
-前の新規導入と同じ専用 VM で、[Windows 11 で WireGuard と鍵を用意する](../wireguard.md#windows-11-で-wireguard-と鍵を用意する)の手順 6 のコードブロックを変更せず、管理者の Windows PowerShell 5.1 で実行した。「Windows 11 で WireGuard と鍵を用意する」の手順 5 のマネージャーの画面は操作せず、[公式の CLI](https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md) による一時的なサービスの作成・確認・削除で代替した。
+前の新規導入と同じ専用 VM で、[Windows 11 で WireGuard と鍵を用意する](../windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 6 のコードブロックを変更せず、管理者の Windows PowerShell 5.1 で実行した。「Windows 11 で WireGuard と鍵を用意する」の手順 5 のマネージャーの画面は操作せず、[公式の CLI](https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md) による一時的なサービスの作成・確認・削除で代替した。
 
 | 項目 | 値 |
 |---|---|
@@ -1717,7 +1717,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 #### Road Warrior: 付録: Windows 11 Pro の VM での VPN の通し検証（2026-10-08）
 
-上の付録と同じ Windows の VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、[Windows 11 で使う](../wireguard.md#windows-11-で使う)の 3 項の全部と更新・ロールバックを、2 拠点の WG ホストの検証環境に向けて通した。物理のルーター・NAT・DDNS・インターネット越しの接続は使っていない。
+上の付録と同じ Windows の VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、[Windows 11 で使う](../windows-setup.md#wireguard-windows-11-で使う)の 3 項の全部と更新・ロールバックを、2 拠点の WG ホストの検証環境に向けて通した。物理のルーター・NAT・DDNS・インターネット越しの接続は使っていない。
 
 **検証環境**:
 
@@ -1725,7 +1725,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 |---|---|
 | WG ホスト（拠点 A・B） | 同じホストの AlmaLinux 10.2 の VM 2 台（`alma10-pr100-client-20261007` を拠点 A、`alma10-pr100-pc-20261007` を拠点 B）。ホストオンリーのネットワークの 192.168.56.82・.81 を `SITE_A_PUBLIC`・`SITE_B_PUBLIC` にした |
 | 拠点の LAN | それぞれの VM に veth の対を作り、片方を拠点の LAN 側（`lanA` 192.168.110.2/24・`lanB` 192.168.120.2/24）、もう片方を network namespace のルーター役（`routerA` 192.168.110.1・`routerB` 192.168.120.1、既定の経路は WG ホスト）にした。`lanA`・`lanB` は firewalld の public ゾーンに入れた（一時的な設定） |
-| WG ホストの手順 | このリポジトリの 8a79aff を clone し、`site.env.example` から `site.env` を作って `SITE_A_PUBLIC`・`SITE_B_PUBLIC` だけを直し、[wireguard.md](../wireguard.md#実施手順) の `keygen` → 公開鍵を `site.env` に書く → `--dry-run apply` → `apply` を両拠点で行った（`wireguard-tools` 1.0.20250521 と `systemd-resolved` が入った）。`routerA` から `routerB` まで届いた（経路 MTU 1420、3 ホップ） |
+| WG ホストの手順 | このリポジトリの 8a79aff を clone し、`site.env.example` から `site.env` を作って `SITE_A_PUBLIC`・`SITE_B_PUBLIC` だけを直し、[wireguard.md](../almalinux-setup.md#wireguard-実施手順) の `keygen` → 公開鍵を `site.env` に書く → `--dry-run apply` → `apply` を両拠点で行った（`wireguard-tools` 1.0.20250521 と `systemd-resolved` が入った）。`routerA` から `routerB` まで届いた（経路 MTU 1420、3 ホップ） |
 | Windows の PC | 2 枚目の NIC（「イーサネット 3」、192.168.56.107）で拠点 A の WG ホストに届く。拠点の LAN（192.168.110.0/24・192.168.120.0/24）の外にいる形 |
 | 変数 | 「Windows 11 で WireGuard と鍵を用意する」の手順 2 の本文の例の値（`10.99.0.1`・`192.168.110.2`・`192.168.110.1`・`192.168.120.2`）が、検証環境の値と同じだったので、そのまま貼った |
 
@@ -1752,7 +1752,7 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 - Windows 11 の更新: winget は `No available upgrade found.`、マネージャーは `Running` のまま
 - Windows 11 のロールバックの手順 1: 最後に `False` だけが出た
 - Windows 11 のロールバックの手順 2（WG ホストの手順 3 の後に行った）: `Found WireGuard [WireGuard.WireGuard]`・`Starting package uninstall...`・`Successfully uninstalled`、`winget list` は `No installed package found matching input criteria.`、サービスは何も出ず、`False`。WireGuard の窓と `wireguard.exe` のプロセスも消えた
-- Windows 11 のロールバックの手順 3（WG ホストで、[wireguard.md のクライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6）: 手順 3 は `client remove` の後の dry-run が、その公開鍵の未知の peer だけを挙げて終了コード 1 で止まった。手順 4 の `--drop-unknown-peers --dry-run`、手順 5 の本適用の後、手順 6 でクライアントは無く、`wg show wg0 peers` は拠点 B だけ
+- Windows 11 のロールバックの手順 3（WG ホストで、[wireguard.md のクライアントを削除する](../almalinux-setup.md#wireguard-クライアントを削除する)の手順 1〜6）: 手順 3 は `client remove` の後の dry-run が、その公開鍵の未知の peer だけを挙げて終了コード 1 で止まった。手順 4 の `--drop-unknown-peers --dry-run`、手順 5 の本適用の後、手順 6 でクライアントは無く、`wg show wg0 peers` は拠点 B だけ
 - 検証環境は、両拠点で [wireguard.md の全部消す](../extra/wireguard.md#全部消すロールバック)の手順 1〜4 と、veth・namespace・clone の削除で片付けた。拠点 A の `remove A --purge` の後も `/etc/wireguard` に `wg0.conf.bak-<日時>` の 2 つ（`client add`・`client remove` の `apply` が作った控えで、秘密鍵を含む）が残った。`--purge` は控えを消さない（`scripts/wireguard/wg-vpn.sh` の `cmd_remove`）。検証用の鍵なので手で消した
 
 **確認していないこと**:

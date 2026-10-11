@@ -1,6 +1,6 @@
 # linger 有効化手順（AlmaLinux 10 / ログアウト中も自分のユーザーの systemd を動かす）の参考資料
 
-[手順書](../linger.md)・[ロールバックと注意点](../extra/linger.md)
+[手順書](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)・[ロールバックと注意点](../extra/linger.md)
 
 ## 補足
 

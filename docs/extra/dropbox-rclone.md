@@ -1,8 +1,8 @@
 # Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）のロールバックと注意点
 
-[手順書](../dropbox-rclone.md)・[検証記録](../verification/dropbox-rclone.md)・[参考資料](../reference/dropbox-rclone.md)
+[手順書](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[検証記録](../verification/dropbox-rclone.md)・[参考資料](../reference/dropbox-rclone.md)
 
-- 「手順 N」は[手順書](../dropbox-rclone.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#dropbox-と-rclone-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -66,7 +66,7 @@
 
 ## 注意点
 
-- **bisync は rclone の「advanced command」**: rclone の文書は、注意して使うよう書いている。削除も伝わる双方向同期なので、[使い方の基本](../dropbox-rclone.md#使い方の基本)の削除と競合の扱いを先に読んでおく
+- **bisync は rclone の「advanced command」**: rclone の文書は、注意して使うよう書いている。削除も伝わる双方向同期なので、[使い方の基本](../almalinux-setup.md#dropbox-と-rclone-使い方の基本)の削除と競合の扱いを先に読んでおく
 - **毎回すべてを一覧する**: 15 分ごとに Dropbox の全体を一覧するので、ファイルが多いと時間と API の呼び出しが増える
   - 既定では rclone 全体で共有の Dropbox の app key を使う。`too_many_requests` が続くなら、間隔を広げるか、rclone の文書のとおり自分の app key を作る
 - **Dropbox は大文字と小文字を区別しない**: 手元で大文字と小文字だけが違う 2 つのファイルは、Dropbox 側でぶつかる。Dropbox が受け付けない名前もある
@@ -75,6 +75,6 @@
   - ロックは `--max-lock 2m` で 2 分後に切れ、timer の次の回が `--recover` で回復を試みる
 - **トークンは平文で入る**: `~/.config/rclone/rclone.conf`（権限 600）にある。`rclone config create` はトークン入りの設定を画面に出すので、手順 2 では `>/dev/null` を付けた
 - **Raspberry Pi 5 の linger は Syncthing と共有している**: linger を切るのは、どちらも使わなくなったときだけ（[linger.md のロールバック](linger.md#ロールバック)で確かめる）
-- **Syncthing・Samba と重ねない**: `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）。[Samba](../samba.md) でホームを公開していると、`~/Dropbox` も SMB から見える
+- **Syncthing・Samba と重ねない**: `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）。[Samba](../almalinux-setup.md#samba-サーバー-実施手順) でホームを公開していると、`~/Dropbox` も SMB から見える
 - **端末の上限**: Basic（無料）プランは同時に 3 台まで。rclone のような連携アプリが数えられるかは、公式ヘルプに書かれていない
 - **眠ると止まる**: サスペンド中は同期しない。常時動かすなら [画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) の節で眠らないようにする

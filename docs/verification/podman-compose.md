@@ -1,6 +1,6 @@
 # podman-compose インストール手順（AlmaLinux 10 / EPEL）の検証記録
 
-[手順書](../podman-compose.md)・[ロールバックと注意点](../extra/podman-compose.md)
+[手順書](../almalinux-setup.md#podman-compose-実施手順)・[ロールバックと注意点](../extra/podman-compose.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -32,7 +32,7 @@
 - **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜6、[更新](../podman-compose.md#更新)、[ロールバック](../extra/podman-compose.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜6、[更新](../almalinux-setup.md#podman-compose-更新)、[ロールバック](../extra/podman-compose.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼ばれる
     - `up -d` で pod・ネットワーク・2 つのコンテナができ、公開したポートとサービス名で `web` に届く
@@ -43,8 +43,8 @@
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../podman.md) と同じ作り） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入） |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../almalinux-setup.md#podman-実施手順) と同じ作り） |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順で導入） |
 | EPEL | 未確認 | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-compose | 未導入 | `podman-compose-1.5.0-1.el10_1`（epel） |
 
@@ -55,7 +55,7 @@
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../podman.md) の実施手順の後）の状態:
+検証コンテナ（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -72,7 +72,7 @@
 | Homebrew の podman-compose（1.6.0） | 不採用。依存として podman 6.1.2 などを連れてきて、PATH の先頭でシステムの podman を隠す（[ツール一覧の注意点](../tool-catalog.md#注意点)の実測） |
 | pip で入れる（`pip install podman-compose`） | 不採用。`dnf` の管理の外に入り、更新も別になる |
 | Docker 社の docker-compose を `podman compose` から使う | 対象外。`podman compose` は docker-compose が入っていればそちらを優先する（手順 2 の補足）。本書では入れていない |
-| PC の起動時に自動で動かす | compose では行わない。[podman.md の Quadlet](../podman.md#quadlet-で自動起動する任意)で動かす。compose ファイルから Quadlet の定義を作る podlet は[ツール一覧](../tool-catalog.md#cli-コンテナ)に載せた |
+| PC の起動時に自動で動かす | compose では行わない。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)で動かす。compose ファイルから Quadlet の定義を作る podlet は[ツール一覧](../tool-catalog.md#cli-コンテナ)に載せた |
 
 ### 完了時点の状態
 
@@ -169,8 +169,8 @@ hello from compose
 
 | 行 | 意味 |
 |---|---|
-| `image:` | 完全な名前で書く（[podman.md 手順 6](../podman.md#実施手順) の補足） |
-| `ports: "127.0.0.1:8081:8080"` | この PC の 127.0.0.1 の 8081 を、コンテナの 8080 につなぐ。[podman.md の Quadlet](../podman.md#quadlet-で自動起動する任意)の 8080 と重ならないようにした |
+| `image:` | 完全な名前で書く（[podman.md 手順 6](../almalinux-setup.md#podman-実施手順) の補足） |
+| `ports: "127.0.0.1:8081:8080"` | この PC の 127.0.0.1 の 8081 を、コンテナの 8080 につなぐ。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の 8080 と重ならないようにした |
 | `volumes: ./html:/var/www/html:Z` | compose ファイルのある場所からの相対パスで、ページのディレクトリを渡す。`:Z` は SELinux のラベルの付け替え |
 | `command: sleep infinity` | 何もせずに動き続ける |
 | `init: true` | コンテナの PID 1 に小さな init を置き、止めるときの信号を `sleep` に届ける |

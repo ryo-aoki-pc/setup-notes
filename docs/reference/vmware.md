@@ -1,6 +1,6 @@
 # VMware Workstation Pro のインストールと VM の作成（Windows 11）の参考資料
 
-[手順書](../vmware.md)・[検証記録](../verification/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
+[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](../verification/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
 
 ## 補足
 

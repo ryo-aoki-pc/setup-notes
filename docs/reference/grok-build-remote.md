@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
 
-[手順書](../grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
+[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
 
 ## 補足
 
@@ -73,7 +73,7 @@
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
 - Codeg は `127.0.0.1` のままにする。暗号化されない HTTP は、ホストの外に出ない
-- 規則は、[Forgejo](../forgejo.md) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
+- 規則は、[Forgejo](../almalinux-setup.md#forgejo-実施手順) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
 - `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
 
@@ -130,7 +130,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | 画面から Grok Build を動かす | Happier | 採らない | MIT。Web の画面に HTTPS が必須。プッシュ通知が第三者（Expo）を通る。Grok ではセッションの一覧が使えない |
 | 画面から Grok Build を動かす | Zed の外部エージェント（SSH のリモート） | 採らない | PC のデスクトップアプリだけ。スマートフォンから使えない |
 | 画面から Grok Build を動かす | Grok Build の `grok agent serve` に直接つなぐ | 採らない | つなぎ方の仕様が公式の文書に無い。公式の例は always-approve 付き |
-| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../coding-agents.md#スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
+| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../almalinux-setup.md#コーディングエージェントの共同作業-スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
 | 端末をそのまま使う | ttyd などの Web の端末 | 採らない | 端末がそのままブラウザに出る。スマートフォンで Ctrl・Esc・矢印が打ちにくい |
 | 端末をそのまま使う | zellij の Web クライアント | 採らない | Windows 版に未解決の不具合がある（[Claude Code の Remote Control（Windows）の検証記録](../verification/windows-claude-remote-control.md)） |
 | Codeg の置き方 | 配布物を取得して SHA-256 を照合し、ホームに置く | 採った | 版を決めて入れる。`sudo` を使わない |
@@ -157,13 +157,13 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 画面は、端末をそのまま映すものではなく、会話・承認・変更されたファイルを扱うチャット形式のものにする（利用者の指定）
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
-- まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../forgejo.md) と同じ順）
+- まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../almalinux-setup.md#forgejo-実施手順) と同じ順）
 - Windows 11 の PC は、ノート PC を複数の拠点の有線 LAN につなぐ使い方に合わせ、待ち受ける IP を決めない（利用者の指定）。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 承認を自動で通す設定は、離れた場所から使うなら勧めない。ただし、確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS を 1 本の手順書にまとめ、Windows 11 は後ろの節に置く（[Syncthing](../syncthing.md) と同じ形）
+- 両 OS を 1 本の手順書にまとめ、Windows 11 は後ろの節に置く（[Syncthing](../almalinux-setup.md#syncthing-実施手順) と同じ形）
 
 ## 参照
 

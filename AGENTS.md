@@ -6,11 +6,11 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。成果物は `docs/*.md` の手順書で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
-共通の bash 設定は、README の「共通の bash 設定を先に入れる」から clone + `install.sh` で導入する（AlmaLinux 10 では、同じブロックが `docs/almalinux-setup.md` の「共通の bash 設定」の手順 1・2 にある）。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/quick-start.md` の対応表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
+共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/quick-start.md` の対応表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
 
 2026-10-06 の現行版再検証では、公式 ISO の Workstation クリーンインストールのスナップショットから 6 台の VM を新規作成し、`5da3478` の手順と共通 bash `3d5323e`、設定サブモジュールを前提から通した。結果は `docs/almalinux-vm-verification.md` の後半と各文書の `docs/verification/` の今回の付録にある。前半の `0dbb522` の結果と、従来の実機・コンテナの付録は別の履歴。実アカウント、Windows / bootc 固有の手順、VM が条件を満たさない入れ子の仮想化や MOK 登録は実施済みと扱わない。
 
@@ -46,6 +46,14 @@ scripts/gnome-gui.py windows
 GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `docs/gnome-headless-session.md` の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。 実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから gnome-headless-session.md の手順 1・2 と claude-code-gui.md の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
 
 `wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、`docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
+
+## 手順を集約する正本
+
+- 既存・新規の Windows 11・AlmaLinux 10 の操作は、2冊の該当項または用途別の任意節へ集約する
+- 個別ツール・VPN・VM・リモート操作・共同作業も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
+- 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は2冊と元リポジトリの案内を合わせる
+- 冒頭で対話・GUI・条件付き操作の全番号を列挙しない。各手順には成功条件・中断・分岐・停止・危険を短く残す
+- 旧見出しと移動先は [集約対応表](docs/dev/consolidation-map.md) で管理する。過去の検証本文と実施範囲を保持する
 
 ## 文書を書く・直すとき
 

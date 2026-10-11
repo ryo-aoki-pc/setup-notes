@@ -1,6 +1,6 @@
 # Windows 11 を AlmaLinux 10 とのデュアルブート向けに入れる手順（ESP を 2 GiB にし、AlmaLinux 用の空きを残す）の参考資料
 
-[手順書](../windows-dual-boot.md)・[注意点](../extra/windows-dual-boot.md)
+[手順書](../windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[注意点](../extra/windows-dual-boot.md)
 
 [検証記録](../verification/windows-dual-boot.md#参考資料から分離した記録)
 
@@ -55,7 +55,7 @@
 
 - `Set reboot` は、その場で `BootNext` を書いてから再起動の確認を出す。`Save` は通常の起動順（`BootOrder`）を書く別の操作
 - v0.5.0 は、`BootNext` の書き込みの成否を確認せずに再起動の確認を出す。そのため `Yes` ですぐ再起動せず、この節の手順 8 で読み戻す
-- 対象を間違えた場合も `No` を選び、[取り消す節](../windows-dual-boot.md#次回起動の指定を取り消す任意)で自分が指定した対象を確認して解除してからやり直す
+- 対象を間違えた場合も `No` を選び、[取り消す節](../windows-setup.md#windows-と-almalinux-のデュアルブート-次回起動の指定を取り消す任意)で自分が指定した対象を確認して解除してからやり直す
 
 ### 次回だけ AlmaLinux で起動する（任意） / 手順 9: 補足: GRUB の項目
 
