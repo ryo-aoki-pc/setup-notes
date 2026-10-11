@@ -51,6 +51,9 @@
 
 1. ユニット・本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
+   - **貼る前に**、ほかの用途と共有している Caddy のパスを確かめる。共有している `~/.local/opt/caddy`（本体）・`~/.config/caddy`（設定）・`~/.local/share/caddy`（認証局データ）は、下の `rm` と `ls` の両方から外す
+   - `~/.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこのホストで使っているなら、`rm` の行から外す
+
    ```bash
    rm -f ~/.config/systemd/user/codeg-server.service ~/.config/systemd/user/codeg-caddy.service
    systemctl --user daemon-reload
@@ -60,9 +63,8 @@
    ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/opt/caddy ~/.config/caddy ~/.local/share/caddy
    ```
 
-   - `ls` が 7 つとも `No such file or directory` になればよい
-   - `~/.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこのホストで使っているなら、ブロックから外す
-   - `~/.config/caddy` と `~/.local/share/caddy` は、このホストでほかの用途の Caddy を自分のユーザーで動かしているなら、ブロックから外す
+   - `ls` に残したパスが、すべて `No such file or directory` になればよい（外したパスが無ければ 7 つ）
+   - Caddy の認証局をほかの用途のために残したときは、手順 4 の端末からのルート証明書の削除も飛ばす
    - ブラウザとスマートフォンに残るトークンは、もう使えない
 
 1. つないでいた端末から、このホストのルート証明書を消す。
@@ -83,6 +85,8 @@
 
 1. Caddy と Codeg を止めて、タスクを消す。
 
+   - ほかの用途の Caddy をこの PC で動かしているなら、下の 2 行目は貼らず、確認の `Get-Process` の名前からも `caddy` を外す
+
    ```powershell
    Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
    Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
@@ -98,7 +102,6 @@
    ```
 
    - 何も出なければよい
-   - ほかの用途の Caddy をこの PC で動かしているなら、2 行目は貼らない
 
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
@@ -113,15 +116,17 @@
 
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
+   - **貼る前に**、ほかの用途と共有している Caddy のパスを確かめる。共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は、下の `Remove-Item` と `Test-Path` の両方から外す
+   - `%USERPROFILE%\.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこの PC で使っているなら、`Remove-Item` の行から外す
+
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-server.prev", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy" -Recurse -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path "$env:LOCALAPPDATA\codeg-server", "$env:APPDATA\codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy"
    ```
 
-   - `False` が 4 行出ればよい
-   - `%USERPROFILE%\.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこの PC で使っているなら、ブロックから外す
-   - `%APPDATA%\Caddy` は、この PC でほかの用途の Caddy を動かしているなら、ブロックから外す
+   - `Test-Path` に残したパスが、すべて `False` になればよい（外したパスが無ければ 4 行）
+   - Caddy の認証局をほかの用途のために残したときは、端末からのルート証明書の削除も飛ばす
 
 ---
 

@@ -441,7 +441,8 @@
 - 両 OS に共通の節。Codeg を置いたホストごとに、そのホストの Caddy が作った認証局のルート証明書を、つなぐ端末に 1 つずつ入れる
 - 入れると、ブラウザが警告を出さなくなり、偽のサーバーを見分けられる
 - ルート証明書（`root.crt`）は公開してよい。各ホストが `https://<ホストの IP>:3443/caddy-root.crt` で配る
-- **入れる前か後に、必ず指紋を照合する**。この節の手順 1・2 でホストに出した指紋と、端末に出た指紋が同じであること
+- **入れる前に、必ず指紋を照合する**。この節の手順 1・2 でホストに出した SHA-256 の指紋と、この節の手順 3 で取得した証明書の指紋が同じであること
+- Android には、Windows の PC で照合したファイルを USB で渡す。PC と USB ケーブルを用意する
 
 1. AlmaLinux 10 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
 
@@ -464,13 +465,6 @@
 
    - `CN=Codeg <PC の名前> - <年> ECC Root`、期限、`:` で区切った指紋が出る。指紋を控える
 
-1. スマートフォン（Android）で、ルート証明書を取り込む。
-
-   - ブラウザで `https://<ホストの IP>:3443/caddy-root.crt` を開く。警告が出たら「詳細設定」から進む（この 1 回だけ）。証明書のファイルがダウンロードされる
-   - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、ダウンロードしたファイルを選ぶ（メニューの名前は機種で少し違う）
-   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの節の手順 1・2 のものと同じことを確かめる
-   - 違っていたら、その証明書を削除する
-
 1. Windows の PC で、ルート証明書を取得して、名前と指紋を表示する。
 
    ```powershell
@@ -485,13 +479,21 @@
      $c = New-Object Security.Cryptography.X509Certificates.X509Certificate2($crt)
      $c.Subject
      (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
+     $crt
    }
    ```
 
    - 管理者ではない Windows PowerShell に貼る。Codeg を置いた PC 自身にも、同じ手順で入れる
-   - 名前と指紋が、この節の手順 1・2 でホストに出したものと同じなら、手順 5 へ進む
+   - 名前・SHA-256 の指紋・保存先のパスが出る。名前と指紋が、この節の手順 1・2 でホストに出したものと同じなら、手順 4・5 へ進む
    - **違っていたら、取り込まない**（途中で差し替えられている）
-   - ホストが 2 台あるときは、この節の手順 4・5 を、`$CODEG_URL` を変えて 2 回通す
+   - ホストが 2 台あるときは、この節の手順 3〜5 を、`$CODEG_URL` を変えて 2 回通す
+
+1. スマートフォン（Android）で、照合したルート証明書を取り込む。
+
+   - この節の手順 3 で指紋が一致したファイルを、PC から [USB でスマートフォンにコピーする](https://support.google.com/android/answer/9064445?hl=ja)。置き場は `Download` フォルダーにする。PC 上のファイルは、手順 3 の最後に出たパスにある
+   - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、コピーしたファイルを選ぶ（メニューの名前は機種で少し違う）
+   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの節の手順 1・2 のものと同じことを確かめる
+   - 違っていたら、その証明書を削除する
 
 1. Windows の PC で、指紋が同じだったルート証明書を取り込む。
 
@@ -599,7 +601,7 @@
    elif [ -e ~/.local/opt/codeg-server.prev ]; then
      echo '中断: ~/.local/opt/codeg-server.prev が既にある。前の更新の残りを確かめて消す' >&2
    else
-     CODEG_X=$(mktemp -d ~/.cache/codeg-server-x.XXXXXX) &&
+     if CODEG_X=$(mktemp -d ~/.cache/codeg-server-x.XXXXXX) &&
      tar -xzf ~/.cache/codeg-server-dl/"${CODEG_ASSET}.tar.gz" -C "${CODEG_X}" &&
      systemctl --user stop codeg-server.service &&
      mv ~/.local/opt/codeg-server ~/.local/opt/codeg-server.prev &&
@@ -607,18 +609,23 @@
      install -m 755 "${CODEG_X}/${CODEG_ASSET}/codeg-server" "${CODEG_X}/${CODEG_ASSET}/codeg-mcp" ~/.local/opt/codeg-server/ &&
      cp -r "${CODEG_X}/${CODEG_ASSET}/web" ~/.local/opt/codeg-server/web &&
      rm -r "${CODEG_X}" ~/.cache/codeg-server-dl &&
-     systemctl --user start codeg-server.service
-     for i in $(seq 1 30); do ss -ltn '( sport = :3080 )' | grep -q LISTEN && break; sleep 1; done
-     printf '\n\033[7m 確認 \033[0m\n'
-     ~/.local/opt/codeg-server/codeg-server --version
-     systemctl --user is-active codeg-server.service
-     ss -ltn '( sport >= :3080 and sport <= :3090 )'
+     systemctl --user start codeg-server.service; then
+       for i in $(seq 1 30); do ss -ltn '( sport = :3080 )' | grep -q LISTEN && break; sleep 1; done
+       printf '\n\033[7m 確認 \033[0m\n'
+       ~/.local/opt/codeg-server/codeg-server --version
+       systemctl --user is-active codeg-server.service
+       ss -ltn '( sport >= :3080 and sport <= :3090 )'
+     else
+       echo '中断: 更新が途中で止まった。前の版の退避先の有無と、直前のエラーを確かめる' >&2
+       false
+     fi
    fi
    ```
 
    - 上げた版の番号、`active`、今までと同じ待ち受けの 1 行が出ればよい
    - 動いていた Grok Build のプロセスは、サービスと一緒に止まる。会話の履歴は残り、ブラウザは入り直さずに使える
-   - 起動しないときは、`systemctl --user stop codeg-server.service` の後、`~/.local/opt/codeg-server` を消して `~/.local/opt/codeg-server.prev` を元の名前に戻し、`start` する
+   - 起動しないときは、まず `~/.local/opt/codeg-server.prev/codeg-server` が残っていることを確かめる。残っていれば、`systemctl --user stop codeg-server.service` の後、`~/.local/opt/codeg-server` を消して `~/.local/opt/codeg-server.prev` を元の名前に戻し、`start` する
+   - 退避先が無ければ、現行の `~/.local/opt/codeg-server` は消さない。直前のエラーの原因を直し、現行の本体が残っていることを確かめてから `systemctl --user start codeg-server.service` で再開する
 
 1. ブラウザで動くことを確かめてから、前の版を消す。
 
