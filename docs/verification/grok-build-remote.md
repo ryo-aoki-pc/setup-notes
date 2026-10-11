@@ -32,9 +32,12 @@
   - **確認していないこと**: 切り替え後の OS 再起動・サインアウト後の起動、更新とロールバックの通し、新規導入からの全手順の通し
 
 - **Windows 11 Home への新規導入（2026-10-12 JST）**:
-  - 通したこと: Codeg v0.35.1 と Caddy v2.11.7 の配布物の取得・照合・配置、非表示ランチャーのコンパイル、管理者ではないタスクの登録、Private の全送信元・全接続種別を許可する受信規則の作成
-  - 確認したこと: 起動用スクリプトの Windows PowerShell 5.1 での構文解析、Caddy の設定解析、両タスクの `Interactive`・`Limited`、Private の Allow と Public・Domain の Block の読み戻し
-  - **まだ完了していないこと**: 利用者によるトークンの作成、Codeg と Caddy の起動、ブラウザへのログイン、Grok 4.7 とスマート自動承認の保存・会話、ルート証明書の取り込み、別の端末からの接続
+  - 通したこと: Codeg v0.35.1 と Caddy v2.11.7 の配布物の取得・照合、非表示ランチャーのコンパイル、管理者ではないタスクの登録、Private の全送信元・全接続種別を許可する受信規則の作成、両タスクの起動、Grok 4.7 での会話
+  - 確認したこと: 起動用スクリプトの Windows PowerShell 5.1 での構文解析、Caddy の設定解析、両タスクの `Interactive`・`Limited`・`Running`、Private の Allow と Public・Domain の Block の読み戻し、待ち受け、トークン無しの API の 401、ルート証明書で検証した HTTPS の 200
+  - 配置の訂正: Codex から通常の AppData に見えたファイルの実体は、Codex の MSIX パッケージの LocalCache にあった。通常の PowerShell から公開ファイルだけを配置する補助手順に直し、利用者が実行した。最後に `CIM_DataFile` で通常の AppData の本体・ランチャー・スクリプトの存在を確かめた
+  - 画面で確認したこと: 利用者の HTTP ログイン後、Grok の「スマート自動承認」を保存し、保存後に開いた新しい会話で「Grok 4.7」と接続済みの表示・応答を確認した。秘密の設定ファイルは読んでいない
+  - 利用者が確認したこと: 通常の Windows PowerShell での本体の配置とトークンの作成、ルート証明書の本人の信頼ストアへの取り込み、この PC の通常のブラウザでの HTTPS ログイン、自宅 Wi-Fi の別端末からの HTTPS のログイン画面の表示。トークンの値はエージェントに渡していない
+  - **確認していないこと**: 別端末でのログイン・Grok への指示送信、スマート自動承認でのファイル変更・コマンド実行
   - **確認していないこと**: 既存規則の移行の実行、Public・Domain での接続拒否、有線 LAN・VPN・IPv6 の接続、再起動・サインアウト後の起動、更新・ロールバック
 
 - **手順書のブロックの形について**: 検証では、同じコマンドを、値を直接書いた形や、複数の手順をまとめた形で実行した。手順書の変数つきのブロックを、そのままの形で上から通してはいない。ブロックは、下の「文書の静的な確認」で構文を確かめた
@@ -62,7 +65,7 @@
 - どちらのホストにも、Codeg の配置先・データ・ユニット（タスク）・規則は無く、3080〜3090 番の待ち受けも無かった
 - Grok Build は、どちらも公式のインストーラーで入れてログイン済みだった
 
-### 完了時点の状態
+### 完了時点の状態（2026-10-11 の 2 ホスト）
 
 - どちらのホストも、Codeg v0.35.1 が `127.0.0.1:3080` で、Caddy v2.11.7 がホストの IPv4 の 3443 番（HTTPS）で常駐している。外から届くのは 3443/tcp だけで、送信元は、VPN のクライアントの帯と、2 つの拠点の LAN の帯の、3 つに絞ってある
 - スマートフォンと Windows 11 の PC に、2 台のホストのルート証明書が入っている
@@ -552,26 +555,47 @@
 
 ### 配置・タスク・受信規則の確認
 
-- Codeg の ZIP はリリース付属の SHA-256、Caddy の ZIP は公式のチェックサムの SHA-512 と一致した。本体は `%LOCALAPPDATA%\codeg-server` と `%LOCALAPPDATA%\codeg-caddy` に配置した。`codeg-computer-helper.exe` は置かず、PATH は変更していない
-- `codeg-server.exe --version` は `0.35.1`、`caddy.exe version` は `v2.11.7`。`caddy adapt` は成功した（整形の警告は出た）
+- Codeg の ZIP はリリース付属の SHA-256、Caddy の ZIP は公式のチェックサムの SHA-512 と一致した。`codeg-computer-helper.exe` は置かず、PATH は変更していない
+- Codex からは、本体を `%LOCALAPPDATA%\codeg-server` と `%LOCALAPPDATA%\codeg-caddy` に配置したように見えた。後の配置監査で、実体は MSIX パッケージの LocalCache にあると分かった。通常の AppData に配置できたという判断は誤りだった
+- Codex から見えた配布本体の `codeg-server.exe --version` は `0.35.1`、`caddy.exe version` は `v2.11.7`。`caddy adapt` は成功した（整形の警告は出た）。この時点では通常の AppData への配置を確認できていなかった。後の利用者による配置・起動は、下に記録する
 - 起動用の 2 スクリプトは Windows PowerShell 5.1 で構文解析し、エラー 0。ランチャーは .NET Framework の `csc.exe /target:winexe` でコンパイルし、PE の Subsystem は 2（Windows GUI）だった
-- 両タスクを登録した。`Interactive`・`Limited`、本人のログオンをトリガーにし、実行期限は `PT0S`、バッテリーでの開始・継続を許可し、重複した開始は `IgnoreNew`。Action はランチャーと、それぞれの起動スクリプト。読み戻しで本人との SID の一致、有効なログオントリガー 1 個ずつを確認した。失敗時の再試行は設定していない（`RestartCount=0`）
-- 受信規則は、Public・Domain の遮断を先に作り、Private の許可を作った。読み戻しでは、両方が有効で、Allow は `Private`・TCP 3443・`LocalAddress Any`・`RemoteAddress Any`・`InterfaceType Any`・`InterfaceAlias Any`・`EdgeTraversalPolicy Block`、Block は `Domain, Public`。プログラムは配置した `caddy.exe`。Caddy の規則は、この 2 本だけだった
+- 両タスクの登録は確認した。`Interactive`・`Limited`、本人のログオンをトリガーにし、実行期限は `PT0S`、バッテリーでの開始・継続を許可し、重複した開始は `IgnoreNew`
+- タスクの読み戻しで本人との SID の一致、有効なログオントリガー 1 個ずつを確認した。失敗時の再試行は設定していない（`RestartCount=0`）。Action は通常の AppData のランチャーと、それぞれの起動スクリプトを指す。登録時はその場所への配置が未完了で、稼働は利用者による配置後に確認した
+- 受信規則は、Public・Domain の遮断を先に作り、Private の許可を作った。読み戻しでは両方が有効で、Caddy の規則はこの 2 本だけだった
+- Allow は `Private`・TCP 3443・`LocalAddress Any`・`RemoteAddress Any`・`InterfaceType Any`・`InterfaceAlias Any`・`EdgeTraversalPolicy Block`、Block は `Domain, Public`・プロトコルとポートはすべて `Any`。Program は通常の AppData の `caddy.exe` のパスを指す。配置後にも同じ条件と、Caddy の規則がこの 2 本だけであることを読み戻した
 - このホストは新規導入のため、既存規則の XML の控えと切り替えは実行していない
 - Private の InterfaceIndex から有効な IPv4 を表示する新しい URL の確認ブロックは、Wi-Fi の接続名と `https://<PC_IP>:3443` を出した。到達できた結果ではなく、アドレスの読み戻し
 
+### 配置先の誤判定と利用者側の失敗
+
+- 利用者が通常の Windows PowerShell で起動した補助スクリプトは、初回に `Codeg is not installed yet` で止まった。通常の AppData の固定パスを指定し直した後の実行も、同じエラーで止まった。どちらもトークンを作る前の停止だった
+- 固定パスへの変更は原因を確かめるための試行で、この失敗だけでは配置先を特定できない。後の配置監査は、Codex の `Get-Item` だけで存在を判断せず、`CIM_DataFile` で通常の論理パスと MSIX 配下の物理パスを区別して行った
+- 監査した既知の 8 ファイルは、Codex の `Get-Item` では通常の AppData のパスで見えた。`CIM_DataFile` では、その論理パスに対応するファイルは無く、`<USER_LOCALAPPDATA>\Packages\<CODEX_PACKAGE>\LocalCache\Local` 配下の物理パスでは存在を確認した。ユーザー名・ホスト名・パッケージ ID・SID の値は記録しない
+- この結果から、その時点では通常の AppData への配置は完了していないと訂正した。タスクと受信規則の登録メタデータだけでは、起動対象の実在と稼働を判断できない
+- 対処として、公開の本体・web・ランチャー・起動用スクリプトだけ（1,061 ファイル）を、作業用の `codeg-user-steps/payload` に用意した。チェックサムを照合した配布物から作り、各ファイルの SHA-256 のマニフェストを付けた。既存のファイルを上書きせず、利用者が通常の PowerShell で配置・照合した後にトークンを作る補助手順に直した
+- 最初の配置用の補助スクリプトは、Windows PowerShell 5.1 で JSON 配列を外側の配列に包んだため、Group の検査で `Invalid public payload manifest` になった。`ConvertFrom-Json` の結果をそのまま変数に入れる形に直し、5.1 で 1,061 件・不正な Group 0 件を確かめた
+- 修正後、利用者は補助スクリプトの正常終了を報告した。`CIM_DataFile` で通常の AppData の既知の公開ファイル 8 個の存在と、`token.txt` の存在・64 バイトを確かめた。トークンの内容は読んでいない
+
 ### 起動・画面・接続の状態
 
-- トークンは利用者が作成する手順を用意し、実行を待っている。エージェントは値を作成・閲覧・記録していない
-- 両タスクは登録後の `Ready`。トークンが無いので Codeg は開始しておらず、Caddy もまだ開始していない
-- ブラウザへのログイン、Grok 4.7 の選択、スマート自動承認の保存と新しい会話での利用、ルート証明書の取り込み、別の端末からの接続は未完了
-- 再起動・サインアウト・ロック・RDP 切断、Public・Domain での拒否、有線 LAN・VPN・IPv6、更新・ロールバックは未確認
+- トークンは利用者が通常の Windows PowerShell で作り、メモ帳からコピーしてブラウザに入力した。エージェントは値を作成・閲覧・記録していない。起動時の標準出力・標準エラーは非表示ランチャーで読み捨て、取得していない
+- 両タスクは `Running`。配置後も `Interactive`・`Limited`、有効なログオントリガー 1 個、期限 `PT0S`、バッテリーでの開始・継続、`IgnoreNew`、`RestartCount=0` を読み戻した
+- 待ち受けは Codeg の `127.0.0.1:3080` と Caddy の `::3443`。3081〜3090 の待ち受けは無い。HTTP の `GET /` は 200、トークン無しの `POST /api/health` は 401
+- 公開の `/caddy-root.crt` から得たルート証明書で検証し、`https://127.0.0.1:3443/api/health` のトークン無しの `POST` は 401、Wi-Fi の `https://<PC_IP>:3443/` の `GET` は 200。ルート証明書は `CN=Codeg <HOST> - 2026 ECC Root`、期限は 2036-08-20。秘密鍵は取得していない
+- 利用者がルート証明書の SHA-256 を突き合わせ、`Cert:\CurrentUser\Root` に取り込んだと報告した。取り込み後、`--cacert` を指定しない Windows の curl でも、Wi-Fi の HTTPS が証明書検証を通って 200 になった。これはこの PC 自身からの確認で、別端末から届いた結果ではない
+- Codex の組み込みブラウザでは、HTTPS を開くと `ERR_CERT_AUTHORITY_INVALID` になった。警告をエージェントが通過させる操作はしていない。利用者は通常のブラウザで HTTPS を開き、ログイン後の画面が表示されたと報告した
+- Codeg の HTTP 画面では、利用者のログイン後にエージェントが Grok の「スマート自動承認」を保存し、保存完了の表示を確認した。保存後に開いた新しい会話は「Grok 4.7」・接続済みになった。初回は接続に数分かかり、Codeg → Grok → codeg-mcp の起動をプロセス名と親子関係で確かめた。秘密の設定ファイル・ログ・コマンドラインは読んでいない
+- ツール・ファイル・設定を使わない短文の接続確認に「Grok Build の接続確認ができました。」と応答した。スマート自動承認でのファイル変更やコマンドの実行は、このホストでは試していない
+- 利用者は、同じ自宅 Wi-Fi の別端末からも HTTPS のログイン画面が開いたと報告した。別端末での認証・Grok への指示送信や証明書検証の詳細は確認していない
+- 別端末でのログイン・Grok への指示送信、再起動・サインアウト・ロック・RDP 切断、Public・Domain での接続拒否、有線 LAN・VPN・IPv6、更新・ロールバックは未確認
 
 ### 共同レビューと文書の確認
 
 - Grok Build 1.0.50 の `grok-4.7` と、公開仕様だけを用いた読み取り専用の共同レビューを行った。受信規則の移行順、Private の URL の抽出、接続確認の範囲を手順へ反映した
-- 文書の変更差分を追加で送る操作は、自動承認レビューで拒否された。具体的な差分の送信許可を利用者に求めており、この時点では差分の Grok レビューは未実施
-- 今回変更した 6 文書の相対リンクと見出しのアンカー 330 件は不一致 0。PowerShell の 28 ブロックは Windows PowerShell 5.1.26100.9444 で構文解析し、エラー 0。`git diff --check` は出力なし
-- 本体と extra のコード付きの操作 48 手順を、説明から最後の箇条書きまで点検し、「説明 → コード → 確認・分岐・注意」の順序違反は無かった
-- URL のモック検査では Private の Wi-Fi・有線 LAN を表示し、Disconnected・Public・Domain・loopback・link-local・SkipAsSource を除外した。新規 Allow と移行の 3 段階は Windows PowerShell 5.1 の `WhatIf` で引数の束縛を確かめた（実機の規則は変更していない）
+- 文書の変更差分を追加で送る操作は、当初は自動承認レビューで拒否された。その後、利用者が送信を明示的に許可し、5 文書の差分を `--tools=`（全ツール無効）・`--model grok-4.7`・計画モード・1 ターンで送信した。ホスト名・ユーザー名・実機 IP は置き換え、Grok にファイルの閲覧や変更はさせていない。終了コードは 0
+- 差分レビューの 5 指摘のうち、受信 NIC と IP ごとの接続確認、旧 Wi-Fi 遮断規則の削除前の読み戻し、現在の URL の参照、Private の LAN・VPN の条件を反映した。`InterfaceAlias Any` を無効とする指摘は、Microsoft の公式資料の使用例と合わないため採用しなかった。複数の規則名を指定し、旧規則が無いと取得全体が失敗するという指摘も、Windows PowerShell 5.1 で既存 2 本が返ることを確かめて採用しなかった
+- 既存の Public・Domain 遮断規則のプロトコルとポートは、変更前にすべて `Any` と検査する形にした。通常と違う条件なら無変更で中断し、既存規則の更新では不要なポートの再指定を外した
+- 今回変更した 6 文書の相対リンクと見出しのアンカー 330 件は不一致 0。PowerShell の 29 ブロックは Windows PowerShell 5.1.26100.9444 で構文解析し、エラー 0。`git diff --check` は出力なし
+- 本体と extra のコード付きの操作 49 手順を、説明から最後の箇条書きまで点検し、「説明 → コード → 確認・分岐・注意」の順序違反は無かった
+- URL のモック検査では Private の Wi-Fi・有線 LAN・VPN を表示し、Disconnected・Public・Domain・loopback・link-local・SkipAsSource・Tentative を除外した。移行は Windows PowerShell 5.1 で 7 ケースを検査し、控えと変更の順、手順 1 で旧 Wi-Fi 遮断を残すこと、独立した手順 2 でだけ削除すること、通常と違う規則と Program 不一致で無変更中断、削除直前の Program の再検査、旧規則が無い場合のスキップを確認した。モック検査で実機の規則は変更していない
 - 手順書のブロックをそのまま実機で機械的に流した検証ではない。同じ操作を、新規導入用のスクリプトと個別のコマンドで行った
