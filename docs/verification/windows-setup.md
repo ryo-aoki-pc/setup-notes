@@ -1798,6 +1798,75 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 ---
 
+## 付録: SSH の PowerShell 操作と貼り付けの検証（2026-10-12 JST）
+
+- 対象は[SSH で管理者・非管理者の PowerShell を使う（任意）](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)の手順 1〜12 と、[降格用実行ファイルの撤去](../extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)。デスクトップでの初期設定全体の再検証ではない
+- SSH 貼り付けの実装は [WezTerm PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41)。この手順の導入前に main への取り込みが必要
+- Windows の SSH 先の受信処理と Linux の WezTerm からの実 SSH 貼り付けを検証した。Windows の WezTerm では専用の子 PowerShell を使う GUI 検証を行い、実 SSH 接続の未確認事項は末尾に分けた
+
+### 対象と検証環境
+
+- SSH の接続名は `surface`。Windows の既定のシェルは Git Bash、対象の PowerShell は Windows PowerShell 5.1 と PowerShell 7.6.6
+- 降格用の固定版は x64 の busybox-w32 `FRP-6075-g169694ebd`。ARM64 は今回の通し検証の対象外
+- 通常の PowerShell のプロファイル・常用の WezTerm の設定を変更せず、試験専用の TEMP の統合を起動コマンドから読んだ。試験には無害な本文を使った
+- 最終受信スクリプトの SHA-256 は `5f4b84bc493adb9a948983c0ffebe8f0719ef01b6ee7e5cfd2649e98c0858f07`。キー登録に失敗したときの `unavailable` の識別を加える直前の版で行った上限試験は、最終版の通常試験と区別する
+
+### 途中で確かめたこと
+
+- 公式の x64 用固定版を取得し、本文の SHA-256 と一致することを確認した
+- 開発中の旧受信ループでは、PS5.1 の 64 KiB の本文は準備完了から完了応答まで約 41 秒で受信できた。1 MiB のフレームは数分待っても応答が得られなかったため、現行の本文の上限を UTF-8 で 64 KiB にした
+- 最初の `drop powershell.exe -NoLogo …` は、busybox が `-N` を自身のオプションと読んで失敗した。本文の手順 8 を `drop -- powershell.exe …` に直し、7 の代替も同じ `--` を使う形にした。修正後は両 PowerShell で同じユーザーの降格と親への復帰を確認した
+- キーの表示は `Ctrl+Shift+F12` ではなく `Shift+Ctrl+F12` だった。手順 5 の検索をキー文字列の一致から `Function -eq 'WezTermSshPaste'` に直した
+
+### 文書と構文の検査
+
+- 追加した任意節の PowerShell の 7 ブロックと extra の削除 1 ブロックを、SSH 先の Windows PowerShell 5.1.26100.9444 と PowerShell 7.6.6 の `Parser.ParseInput` で解析した。各 8 ブロックとも構文エラーは 0
+- 手順 8 に起動直前の SHA-256 の一致確認を追加した後、そのブロックだけを同じ 5.1／7 で再解析し、どちらも構文エラーは 0
+- 手順 5 のキー検索を修正した後、最終版の統合を試験専用の TEMP から読む 5.1／7 で登録情報を取得した。両方とも `Function` が `WezTermSshPaste` の行は 1 件、`Key` は `Shift+Ctrl+F12`。変更したブロックの構文エラーも 0
+- PSScriptAnalyzer はどちらの PowerShell にも未導入のため実行していない。今回の検査のための導入は行っていない
+- 新しい Bash 4 ブロックは接続元の `bash -n` で構文エラー 0。変更した 6 ファイルの相対リンクとコードフェンス、任意節 12 手順と extra の削除手順の「説明 → コマンド → 確認・分岐・注意」の順序、`git diff --check` を確認した
+- 最初に全 8 ブロックを 15,280 文字の `-EncodedCommand` で一括配送した試験は、終端引用符のパーサーエラーで失敗した。コマンド長の制限が原因と推測し、各ブロックを 8,000 文字未満のコマンドに分けて上記の構文検査を行った。本文のブロックのエラーとは扱わない
+
+### 実機の結果
+
+| 対象 | 成功条件 | 状態 |
+|---|---|---|
+| 管理者の親 PowerShell | 5.1／7 の版、ログインユーザー、`Admin : True`、High と有効な Administrators SID | 両 PowerShell で成功 |
+| 非管理者の子 PowerShell | 同じユーザー、`Admin : False`、Medium、Administrators SID が拒否専用 | 両 PowerShell の `drop --` で成功 |
+| 子を閉じた後 | 元の親へ戻り、同じユーザーで `Admin : True`、親の入力欄が空 | 通常のプロファイルを読む子からの復帰も両 PowerShell で成功 |
+| Linux の WezTerm からの実 SSH 貼り付け | 入力バッファが一致し、Enter 前は未実行、Enter 後は 1 回だけ実行 | 最終版の 5.1／7 × 管理者／降格 × 3 操作経路の 12/12 が成功 |
+| Windows の WezTerm からの貼り付け | 同じバッファ・実行回数の条件 | 期限確認追加前の GUI 48/48 と 6/6 が成功。実 SSH 接続は未確認 |
+| LF／CRLF・空行・日本語・絵文字・here-string・タブ・末尾改行 | CR とタブは既存 Paste と同じ処理、ほかの本文を保持 | 5.1／7 × 管理者／降格の SSH 受信試験で成功 |
+| 取消・無応答・古い／偽の応答・不正フレーム・大きな本文 | 通常貼り付けへ切り替わらず、親に本文が残らない | SSH 受信・状態検証で成功。クライアントの状態検証は [WezTerm 側の記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/tests/paste/README.md)も参照 |
+| PowerShell を閉じて親 Bash に戻る | 全貼り付けマーカーと Bash の入力欄が空 | 通常のプロファイルを読む 5.1／7 からの復帰で成功 |
+| 固定版の配置・再実行・ハッシュ不一致・撤去 | 一致したファイルだけを配置・削除し、別のファイルを上書きしない | 実際の配置と SHA-256 の一致を確認。本文のコードを専用 TEMP に対して流す 5/5 も成功 |
+
+- 最終版の SSH 受信試験は 76/76。5.1／7 × 管理者／降格の 4 条件で、本文の一致、Enter 前の未実行・Enter 後の 1 回実行、不正データと取消、通常のプロファイルを読む子から管理者の親への復帰、親 Bash のマーカー解除を確認した。接続元のクリップボードを読まず、Linux の PTY → SSH → Windows の ConPTY へ試験本文を送った
+- 上限試験は 74/74。65,536 バイトの本文の一致・未実行・1 回実行と、65,537 バイトの拒否を 4 条件で確認した。最大本文の配送から挿入完了までは、5.1 の管理者で 42.333 秒、降格で 54.755 秒、7 の管理者で 40.277 秒、降格で 54.403 秒だった。LF を含む不正なフレームも拒否した
+- UI 遅延の期限確認を追加した Lua でも、Linux の実 SSH GUI の 4 条件 × 3 経路は 12/12 が成功した。実 WezTerm の時刻 API は Linux と Windows で成功した
+- Linux の実 GUI → SSH → PowerShell 7 から起動した Neovim の通常貼り付けと `Read-Host` 待機は 2/2 が成功した。どちらも 3 マーカーが空、Neovim では日本語・絵文字・空行を含む UTF-8 27 バイトの保存内容が完全一致し、PowerShell に戻ると入力待機の目印が復帰した。初回の GUI 内 clipboard 更新直後の空貼り付けは、専用 Wayland の `wl-copy` で既知データを提供して再検証した
+- Linux GUI の先行試験は 48 条件相当が成功（36 件と、分離して再実行した 7 の降格 12 件）。最終版では 12/12 と、7 の降格の診断 3/3 が成功した
+- SSH の状態検証は 5.1／7 の各 16/16。キー登録失敗の `unavailable`、例外後の解除、StrictMode、再読み込みを確認した
+- Lua の状態検証は API の stub を使う最終 78/78 が成功した。UI の処理が遅れて timer より先に古い READY を受け取る競合を見つけ、送信待ちに時刻と 3 秒期限を保存した。応答処理でも期限の到達・超過・時計の後戻りを検査し、本文を送らず失効させる。Neovim・実行中・PSReadLine なしの既存ローカル経路、alternate screen・key table、能力マーカーなしの従来貼り付け、未知・準備失敗のマーカー、ペインの切替・閉鎖、クリップボード取得失敗、応答の識別子・古い／二重応答・timeout を確認した。これらは GUI の実機件数に含めない
+- 固定版の導入・撤去の文書コードは、子プロセスの `LOCALAPPDATA` を専用の TEMP に置き換えて実行した。新規導入・同じ固定版の再実行・照合付きの撤去が成功し、異なる SHA-256 のファイルの導入・削除はいずれも拒否した（5/5、終了コード 0）。実際に配置した降格用の実行ファイルは削除していない
+
+### 関連する既存の回帰検証
+
+- `tests/paste/check-powershell.ps1` は、Windows PowerShell 5.1.26100.9444／PSReadLine 2.0.0 と PowerShell 7.6.6／PSReadLine 2.4.5 で各 21/21 が成功した。NoProfile の試験用の子プロセスで `SSH_CONNECTION` を空にし、ローカルの既存の経路を検証した
+- `tests/starship/bash-compat-check.py` は Windows の Python と実際の Git Bash・Starship 1.26.0・zoxide 0.10.0 を使い、recommended 37/37、control 26/26、nounset 34/34、array-before 35/35 が成功した。試験用の rc・キャッシュ・zoxide データだけを使い、履歴は `/dev/null` にした
+- 初回の 20 条件の並列実行は recommended が 150 秒で未完了だった。単独の追試でも負荷がある間は再初期化が 2 秒の通知閾値に達して 35/37 だった。同条件の `main` の recommended は 37/37、重い SSH／GUI 検証が終わった後の変更版の単独試験も 37/37。最後の成功を全 20 条件の成功とは扱わない
+- PowerShell / Starship の既存標準回帰は 74 プロセスケース・34 callback、494/494 が成功し、既知失敗は両版の `integration-first` / `threshold-large` の 4 件、予期しない失敗は 0。初回 PS5 checker は BOM なし UTF-8 の callback JSON の集計が崩れたため、採取済み JSON を既存 PS7 checker で読み直して確定した
+- `shell/wezterm.sh` は `bash -n` と zsh 5.9 の `zsh -n` が成功した。zsh は公式の AlmaLinux の RPM を試験用の `/tmp` に展開して使い、システムへ導入していない
+
+### 未確認事項
+
+- Windows クライアントからの実 SSH ペイン。許可された一時的な `ssh -A` でも、接続先 Windows の検証用プロセスで `SSH_AUTH_SOCK` は空だった。転送 agent を利用する実 SSH 認証の検証に進めなかったため、今回の Windows GUI 試験は実 SSH 接続として数えない
+- 期限確認追加後の Windows GUI 再試験は、既存の Python が WindowsApps エイリアスから起動できず未実施。Windows 実 WezTerm の時刻 API を含む Lua 78/78 は成功し、追加前の GUI 48/48 と 6/6 を区別する。追加インストールはしていない
+- 入れ子 SSH と tmux の固有経路。Lua では能力マーカー・alternate screen・key table の一般分岐までを検査し、専用の条件と実機の試験は行っていない
+- ARM64 の降格、Bash の既存 20 条件すべての完了
+
+---
+
 ## 統合前の記録: HackGen Console NF の Windows 11（もとは hackgen.md）
 
 もとの `hackgen.md` の検証記録のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の検証記録](almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)に移した）。見出しはこの文書の中で重ならないように、頭にツールの名前を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。

@@ -1206,6 +1206,31 @@
 
 ---
 
+## SSH の降格用の実行ファイルを外す
+
+- [SSH で管理者・非管理者の PowerShell を使う（任意）](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)の手順 7 で配置した実行ファイルを、同じ Windows ユーザーで外す
+- 非管理者の子 PowerShell を `exit` で閉じてから行う。**専用の場所に別のファイルがある場合は削除せず止まる**
+
+1. 降格用の実行ファイルが不要なときだけ、SHA-256 を照合して外す。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $exe = Join-Path $env:LOCALAPPDATA 'setup-notes\bin\busybox.exe'
+     if (Test-Path -LiteralPath $exe) {
+       if ((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075') { throw '中断: 別のファイルなので削除しない' }
+       Remove-Item -LiteralPath $exe
+     }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Test-Path -LiteralPath $exe
+   }
+   ```
+
+   - `False` が出ればよい
+   - PowerShell の統合は起動コマンドで読むものなので、通常のプロファイルから削除する行は無い
+
+---
+
 ## 注意点
 
 - **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）・自動サインイン（[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 2）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 1）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
@@ -1219,6 +1244,9 @@
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 2・3）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。[表示と入力](../windows-setup.md#表示と入力)の手順 3 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1〜3 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 2）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 2 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 1・3 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)を、`scoop install`・`scoop update` の後に貼る
+  - 非管理者の SSH の PowerShell は、[SSH で管理者・非管理者の PowerShell を使う（任意）](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)の `drop` で開く。デスクトップでの導入や GUI 操作を検証した手順を、SSH でも通したとは扱わない
+- **SSH の PowerShell の貼り付けを取り消すとき**: 受信中に Ctrl+C を押すと本文を挿入せず読み捨てる。配送が途中で止まった場合は受信待ちが続くことがあるので、そこでコマンドを貼り足さず SSH を接続し直す
+  - 本文の上限は UTF-8 で 64 KiB（65,536 バイト）。大きなブロックは分け、受信中は次のコマンドを貼り足さない
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 5）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
   - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)
