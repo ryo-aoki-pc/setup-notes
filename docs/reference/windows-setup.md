@@ -6,6 +6,16 @@
 
 ## 補足
 
+### 実施手順 / Git Bash と WezTerm の設定 / 手順 4: 補足: Git for Windows の長いパス対応
+
+- `core.longpaths=true` は Git for Windows の C で実装されたコマンドの長いパス対応を有効にする。初期設定の clone より前に、自分のユーザーの `global` に設定する
+- [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6 の `LongPathsEnabled=1` とは別の設定。Windows の一般的な長いパス対応には、OS 側の値に加えてアプリ側の対応も必要
+- Git for Windows の公式資料は、スクリプトで実装された Git のコマンドや、エクスプローラー・IDE などには制限が残ると説明している。この設定だけで周辺ツールも長いパスを扱えるとは限らない
+- リポジトリの `local` は `global` より優先される。ホームでの設定確認に加え、既存のリポジトリでは有効な値と出どころを確かめる
+- `--global --includes` で、`global` のファイルが読み込む別の設定も含めて判定する。真偽値がすでに `true` なら書き換えず、元の表記と設定ファイルを保つ
+- [Git for Windows: Git cannot create a file or directory with a long path](https://gitforwindows.org/git-cannot-create-a-file-or-directory-with-a-long-path.html)
+- [Microsoft Learn: Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)
+
 ### 実施手順 / Windows Update / 手順 1: 補足: 先に更新する理由
 
 - インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（「PC 全体の設定」の手順 6 の sudo は 24H2 以降、「表示と入力」の手順 4 の時計の秒など）

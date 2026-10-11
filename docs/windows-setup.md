@@ -7,19 +7,19 @@
 > [!IMPORTANT]
 > - **すべて、この PC のデスクトップで行う**。SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動くので、[アプリを入れる](#アプリを入れる)の手順 1 の scoop のインストーラが止まる）
 > - 窓の使い分け: [Windows Update](#windows-update)の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、同じ項の手順 2〜8 で Windows Update を行う。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 で**管理者ではない** Windows PowerShell を開き、同じ項の手順 2〜7 と、[貼り付けの設定](#貼り付けの設定)から[HackGen Console NF](#hackgen-console-nf)までの手順をそこに貼る。[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き、同じ項の手順 2〜8 と、[ネットワークとリモート](#ネットワークとリモート)から[WSL と再起動](#wsl-と再起動)までの手順（[OpenSSH サーバー](#openssh-サーバー)・[Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)も）を貼る。再起動の後は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開く管理者ではない窓に、同じ項の手順 2〜5 と、それより後の項の PowerShell のブロックを貼る（[Claude Code](#claude-code)・[Codex CLI](#codex-cli)・[Grok Build](#grok-build)・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)は、項の中で開き直した窓に貼る）
-> - bash のブロックの貼り先: [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2〜4 はクライアント（この PC の WSL の AlmaLinux 10 など）のシェル、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3〜5 は Git Bash。それより後の bash のブロックは、WezTerm の新しいタブ（Git Bash）に貼る
+> - bash のブロックの貼り先: [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2〜4 はクライアント（この PC の WSL の AlmaLinux 10 など）のシェル、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3〜6 は Git Bash。それより後の bash のブロックは、WezTerm の新しいタブ（Git Bash）に貼る
 > - ログインするユーザーは Administrators の一員（[Windows Update](#windows-update)の手順 2〜8 の Windows Update と、[PC 全体の設定](#pc-全体の設定)の手順 2〜8 から[WSL と再起動](#wsl-と再起動)までの PC 全体の設定に管理者の権限が要る。OpenSSH サーバー・Git for Windows・Firefox・WezTerm も PC 全体に入れる）
 > - 前提: AI エージェントと GitHub のアカウント（[AlmaLinux 10 の初期設定](almalinux-setup.md#実施手順)のリードと同じ）
 > - [Windows Update](#windows-update)の手順 2〜8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 は、**Ctrl+V で貼る**。貼り付けの設定をまだ通していないため、conhost の窓に右クリックで貼ると行が逆順になる
 > - [貼り付けの設定](#貼り付けの設定)の手順 1 は、**1 行なので、どの貼り方でもそのまま貼れる**。この 1 行を貼った窓には、それより後の複数行のブロックを、GitHub のコピーボタンでコピーして右クリックで貼れる。Windows の PowerShell のブロックを貼るほかの手順書も、[貼り付けの設定](#貼り付けの設定)の手順 1〜4 を前提にする
 > - [WSL と再起動](#wsl-と再起動)の手順 2 で、**再起動する**（設定のための再起動はこの 1 回。HackGen Console NF のフォントと WezTerm の VC++ ランタイムも、この再起動で読み直す。Windows Update は、必要なときだけ[Windows Update](#windows-update)の手順 8 で手動で再起動し、更新が無くなるまで繰り返す）
-> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[Firefox](#firefox)の手順 3・4（起動して確かめる・既定のブラウザー）、[WezTerm](#wezterm)の手順 5、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜5、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2・5（Git Bash と WezTerm を開く）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7（キーを押して確かめる）、[yazi](#yazi)の手順 7（WezTerm のタブを開く）、[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 4・[Grok Build](#grok-build)の手順 4・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（PowerShell を開き直す）、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 7・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 6（ブラウザでのログイン）。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1（WSL のシェルに入る）・2（`sudo` のパスワード）・4（ホスト鍵の確認とパスワード）、[git-delta](#git-delta)の手順 4（less）、[GitHub CLI](#github-cli)の手順 3（`gh auth login`）、[Neovim](#neovim)の手順 3（Neovim の画面）、[lazygit](#lazygit)の手順 6・[yazi](#yazi)の手順 8・9（TUI の画面）、[Claude Code](#claude-code)の手順 7（最初の設定とログイン）、[Codex CLI](#codex-cli)の手順 2（`Start Codex now?`）・5・8、[Grok Build](#grok-build)の手順 5・8。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）、[Git for Windows](#git-for-windows)の手順 2（入っていないとき）、[WezTerm](#wezterm)の手順 2（VC++ ランタイムが無いとき）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2（`ssh` が無いとき）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 2（zoxide が 0.9.9 でないとき）、[lazygit](#lazygit)の手順 2（extras のバケットが無いとき）、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（同じ項の手順 1 で Node.js を入れたとき）
+> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[Firefox](#firefox)の手順 3・4（起動して確かめる・既定のブラウザー）、[WezTerm](#wezterm)の手順 5、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜5、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2・6（Git Bash と WezTerm を開く）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7（キーを押して確かめる）、[yazi](#yazi)の手順 7（WezTerm のタブを開く）、[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 4・[Grok Build](#grok-build)の手順 4・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（PowerShell を開き直す）、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 7・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 6（ブラウザでのログイン）。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1（WSL のシェルに入る）・2（`sudo` のパスワード）・4（ホスト鍵の確認とパスワード）、[git-delta](#git-delta)の手順 4（less）、[GitHub CLI](#github-cli)の手順 3（`gh auth login`）、[Neovim](#neovim)の手順 3（Neovim の画面）、[lazygit](#lazygit)の手順 6・[yazi](#yazi)の手順 8・9（TUI の画面）、[Claude Code](#claude-code)の手順 7（最初の設定とログイン）、[Codex CLI](#codex-cli)の手順 2（`Start Codex now?`）・5・8、[Grok Build](#grok-build)の手順 5・8。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）、[Git for Windows](#git-for-windows)の手順 2（入っていないとき）、[WezTerm](#wezterm)の手順 2（VC++ ランタイムが無いとき）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2（`ssh` が無いとき）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 2（zoxide が 0.9.9 でないとき）、[lazygit](#lazygit)の手順 2（extras のバケットが無いとき）、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（同じ項の手順 1 で Node.js を入れたとき）
 
 - 上から順にコードブロックを貼る。[PC 全体の設定](#pc-全体の設定)の手順 2 の変数は、管理者の PowerShell を開き直したら貼り直す（[OpenSSH サーバー](#openssh-サーバー)の手順 3・5 も使う）
   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3・[yazi](#yazi)の手順 1・[Claude Code](#claude-code)の手順 1 の変数も、その項の中で新しいシェルや窓を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[Git for Windows](#git-for-windows)の手順 1・2、[Firefox](#firefox)の手順 1〜4（ブラウザでのログインに使う）、[WezTerm](#wezterm)の手順 1〜5、[WSL と再起動](#wsl-と再起動)の手順 2、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜5、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4 は飛ばさない）
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[Git for Windows](#git-for-windows)の手順 1・2、[Firefox](#firefox)の手順 1〜4（ブラウザでのログインに使う）、[WezTerm](#wezterm)の手順 1〜5、[WSL と再起動](#wsl-と再起動)の手順 2、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜6、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4 は飛ばさない）
   - 更新: Windows Update は[Windows Update](#windows-update)の手順 1〜8、Microsoft Store は[Microsoft Store の更新](#microsoft-store-の更新)の手順 1〜7。貼り付けの設定: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[PC 全体の設定](#pc-全体の設定)の手順 3・4
   - 入れるもの: scoop は[アプリを入れる](#アプリを入れる)の手順 1・2、UniGet UI は同じ項の手順 3 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 4、PowerToys は[アプリを入れる](#アプリを入れる)の手順 4、PowerShell 7 は同じ項の手順 5、WSL の AlmaLinux 10 は[WSL と再起動](#wsl-と再起動)の手順 1 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3・4、自動サインイン（Autologon）は同じ項の手順 5
   - 表示: エクスプローラーは[表示と入力](#表示と入力)の手順 1、旧形式のコンテキストメニューは同じ項の手順 2、スタートと検索は同じ項の手順 3 と[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2、タスクバーは[表示と入力](#表示と入力)の手順 4 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 3、ダークモードは[表示と入力](#表示と入力)の手順 5、既定の端末は同じ項の手順 6
@@ -30,8 +30,8 @@
   - サインイン: Windows Hello だけのサインインを切るのは[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 1、自動サインインは[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5
   - フォント: HackGen Console NF は[HackGen Console NF](#hackgen-console-nf)の手順 1・2。確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5
   - リモート: OpenSSH サーバーは[OpenSSH サーバー](#openssh-サーバー)の手順 1〜5。確かめるのは[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1〜4
-  - Git: Git for Windows は[Git for Windows](#git-for-windows)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1、`~/.gitconfig` は同じ項の手順 2・3、共通の bash 設定は同じ項の手順 4、git-delta は[git-delta](#git-delta)の手順 1〜4、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5、lazygit は[lazygit](#lazygit)の手順 1〜6（自分用の設定は同じ項の手順 4）
-  - ブラウザと端末: Firefox は[Firefox](#firefox)の手順 1〜4、WezTerm は[WezTerm](#wezterm)の手順 1〜5（自分用の設定は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5）、Git Bash の starship・zoxide・fzf・eza・bat は[シェルのツールを入れる](#シェルのツールを入れる)の手順 1〜7
+  - Git: Git for Windows は[Git for Windows](#git-for-windows)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1、`~/.gitconfig` は同じ項の手順 2〜4、共通の bash 設定は同じ項の手順 5、git-delta は[git-delta](#git-delta)の手順 1〜4、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5、lazygit は[lazygit](#lazygit)の手順 1〜6（自分用の設定は同じ項の手順 4）
+  - ブラウザと端末: Firefox は[Firefox](#firefox)の手順 1〜4、WezTerm は[WezTerm](#wezterm)の手順 1〜5（自分用の設定は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6）、Git Bash の starship・zoxide・fzf・eza・bat は[シェルのツールを入れる](#シェルのツールを入れる)の手順 1〜7
   - エディタとファイル: Neovim は[Neovim](#neovim)の手順 1・2・4（自分用の設定は同じ項の手順 3）、yazi は[yazi](#yazi)の手順 1〜9（自分用の設定は同じ項の手順 5）
   - AI エージェント: Claude Code は[Claude Code](#claude-code)の手順 1〜8、Codex CLI は[Codex CLI](#codex-cli)の手順 1〜8、Grok Build は[Grok Build](#grok-build)の手順 1〜8、Claude Code に入れる Codex・Grok のプラグインは[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1〜3（3 つを入れた後）
 - Windows を AlmaLinux 10 とのデュアルブート向けに入れるときは、先に [Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)を通してから、この文書を[Windows Update](#windows-update)の手順 1 から始める
@@ -1246,7 +1246,7 @@
 1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
 
    - スタートメニューで「WezTerm」を探し、クリックして開く
-   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 で入れる）
+   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 で入れる）
    - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
    - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](windows-hotkey-conflict.md)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
@@ -1469,9 +1469,29 @@
 
    - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
-   - **この手順は、この項の手順 4・5 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
+   - **この手順は、この項の手順 5・6 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
    - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)で行う（同書の「Git」の手順 2 の箇条書きが案内する AlmaLinux 10 のロールバックと同じ内容を、Git Bash で行う）
+
+1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
+
+   ```bash
+   printf '変更前の core.longpaths（スコープ・ファイル・値）:\n'
+   git config --show-scope --show-origin --get-all core.longpaths
+   if [ "$(git config --global --includes --type=bool --get core.longpaths)" != true ]; then
+     git config --global core.longpaths true
+   fi
+   printf '\n\033[7m 確認 \033[0m\n'
+   git config --global --includes --type=bool --get core.longpaths
+   git config --type=bool --show-scope --show-origin --get core.longpaths
+   ```
+
+   - 「変更前」の値・スコープ・ファイルを控える。`global` の行が無ければ「global は未設定」と控える
+   - 元の `global` が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える
+   - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
+   - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
+   - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く
+   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)の手順 2・5・6 で行う
 
 1. 同じ Git Bash で、共通の bash 設定を入れる。
 
@@ -1488,7 +1508,7 @@
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
    - [その docs/install.md の実施手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#実施手順)の手順 1〜4 を、この Git Bash に貼る（`~/.config/wezterm` に clone する）
-   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 4 の共通の bash 設定が読む
+   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 5 の共通の bash 設定が読む
    - その手順 8 で、スタートメニューの「WezTerm」から起動し、手順 9 を WezTerm のタブに貼って確かめる（新しいタブは Git Bash で開く）
    - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
    - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
@@ -1514,7 +1534,7 @@
    - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
    - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
-   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 4 を通す
+   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 を通す
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 3 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める

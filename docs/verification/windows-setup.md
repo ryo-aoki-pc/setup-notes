@@ -2,6 +2,12 @@
 
 [手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
+## 2026-10-12 JST に追加した Git for Windows の長いパス対応
+
+- **状態**: [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 に、`core.longpaths=true` を追加した
+  - Linux の隔離した Git 設定で、設定・優先順位・元値の保持と復元を確認した（[付録](#付録-git-for-windows-の長いパス設定の静的検査と隔離検証2026-10-12-jst)）
+  - Windows の実機・VM では実行していない。Windows での長いパスの checkout と、周辺ツールの動作は未検証
+
 ## 2026-10-10 にまとめた手順（Windows 11 で通していない）
 
 **2026-10-10 に、12 本の手順書の Windows 11 の部分と windows-openssh-server.md を、この文書にまとめた。まとめた後の手順は、Windows 11 で通していない**（[付録](#付録-13-本の手順書をまとめた記録2026-10-10)）。
@@ -4495,3 +4501,33 @@ Rufus で作ったインストールメディアからクリーンインスト�
 - PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（プロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）で指摘 0
 - `install.ps1` は読んで確かめただけで、実行していない（置く場所・MinGit の SHA-256 の確認・ユーザーの PATH の先頭に足すこと・`$ErrorActionPreference = 'Stop'`・失敗のときの `exit 1`）
 - Windows のロールバックの手順 3 は、[claude-code.md](../almalinux-setup.md#claude-code) の Windows 11 のロールバックの手順 3 と同じ書き方（その手順は Windows 11 の VM で通っている）だが、この手順書のブロックとしては Windows で流していない
+
+---
+
+## 付録: Git for Windows の長いパス設定の静的検査と隔離検証（2026-10-12 JST）
+
+- **対象と検証環境**: [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4。クラウドの Linux コンテナ（Debian 13、Git 2.52.0、Bash 5.2.37）で確かめた
+- **実施前の状態**: `GIT_CONFIG_GLOBAL` と `GIT_CONFIG_SYSTEM` を、一時ディレクトリの専用ファイルに向けた。`local` の検査も一時リポジトリを使い、作業用リポジトリとユーザーの設定は変更していない
+- **完了時点の状態**: 一時ファイルと一時リポジトリは、ケースごとに削除した。Windows の実機・VM には接続していない
+
+### 静的検査と資料の確認
+
+- 手順 4 の実際の `bash` ブロックを抽出し、`bash -n` に通した（構文の誤り 0）
+- [Git for Windows の長いパスの説明](https://gitforwindows.org/git-cannot-create-a-file-or-directory-with-a-long-path.html)と、[Microsoft のパス長制限の説明](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)を確認した。Git 固有の設定と OS 側の設定を区別し、周辺ツールの制限を本体と参考資料に記載した
+- 変更した手順を、説明から最後の箇条書きまで点検した。`docs/windows-setup.md` と `docs/extra/windows-setup.md` は「1 行の説明 → コードブロック（あれば）→ 確認・分岐・注意」の順にそろっている
+- 「Git Bash と WezTerm の設定」は、新しい手順 4 を clone より前に追加し、旧手順 4・5 を手順 5・6 にした。本体・extra・文書規則の現行番号を合わせ、過去の検証付録の旧番号は履歴として保持した
+
+### 隔離した Git 設定での検証
+
+| 実施前の設定 | 確認した結果 |
+|---|---|
+| `global`・`system` とも未設定 | `global=true` を書き、元値の表示は空。unset で未設定に戻った |
+| `global=false` | 元の生の値を表示し、`global=true` に変更。`false` に戻った |
+| `global=true` | 書き込みを省略し、元のファイル内容が変わらない。再実行でも内容は変わらない |
+| `global=yes` | 真偽値の確認は `true`。書き込みを省略し、生の表記 `yes` と元のファイル内容を保持した |
+| `global` の include 先が `true` | `--includes` で読み取り、書き込みを省略。元の global ファイルと include 先の内容を保持した |
+| `system=false`、`global` は未設定 | `global=true` が優先され、unset の後は元の `system=false` が有効になった |
+| リポジトリの `local=false` | ホーム相当の場所では `global=true`、対象リポジトリでは `local=false` が優先された。設定と復元で local ファイルは変わらない |
+
+- 7 ケース、57 検査がすべて成功した。設定ブロックの標準エラーは空、無関係な global のキーと system のファイルもすべてのケースで保持した
+- **確認していないこと**: Git for Windows でのブロックの貼り付け、Windows での長いパスの clone・checkout、エクスプローラー・IDE・スクリプトなどでの長いパスの扱い。Linux での設定検証を Windows の動作確認として扱わない

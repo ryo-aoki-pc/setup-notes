@@ -455,13 +455,14 @@
    - Git Bash の窓に貼るときは、窓の中を右クリックして出るメニューの「Paste」を選ぶ。最後の行は、貼った後に Enter を押す
    - **次の手順は、この Git Bash に貼る**
 
-1. [AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 4・5・7 で今回追加・変更したキーだけ、元に戻す（`merge.conflictStyle` を除く）。
+1. 共通の Git 設定と Windows の長いパス対応で、今回追加・変更したキーだけ元に戻す（`merge.conflictStyle` を除く）。
 
-   - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 3 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
-   - 同書の「Git」の手順 2 で控えた元の値・スコープと、今回変更したキーの記録を使う。変更しなかったキーはそのまま残す
-   - 同書の「Git」の手順 2 の記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
+   - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 3・4 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
+   - 共通の設定は[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2、`core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で控えた元の値・スコープと変更の記録を使う。変更しなかったキーは残す
+   - 控えた記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
    - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、同書の「Git」の手順 7 を飛ばした場合の `pull.ff` は触らない
    - 対象は `pull.rebase`・`rebase.autoStash`・`core.autocrlf`・`init.defaultBranch`・`core.quotepath`・`fetch.prune`・`push.autoSetupRemote`・`rerere.enabled`・`diff.algorithm`・`branch.sort`・`tag.sort`・`pull.ff`
+   - `core.longpaths` も今回変更したときだけ対象にする。元の `global` が未設定なら `git config --global --unset core.longpaths`、値があったなら、この項の手順 5 で戻す
    - 例: 今回初めて追加した `core.autocrlf` なら `git config --global --unset core.autocrlf`
    - 外すと何も出ない。最後のキーを外した `~/.gitconfig` の節も消える
 
@@ -477,10 +478,11 @@
    - 元の `global` に値があったものは、この項の手順 5 で書き戻す。変更なしのものは触らない
    - 外すと、`git commit` が `Author identity unknown` で止まることがある（検証コンテナでは止まった）
 
-1. この項の手順 2〜4 で戻すと決めたキーのうち、元の `global` に値があったものは、同書の「Git」の手順 2 で控えた値で書き戻す。
+1. この項の手順 2〜4 で戻すと決めたキーのうち、元の `global` に値があったものを、控えた値で書き戻す。
 
    - `git config --global <キー> <元の値>` の形で、キーごとに 1 行ずつ貼る
    - 例: 元の `core.autocrlf` を戻すなら `git config --global core.autocrlf <元の値>`
+   - `core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4、ほかのキーは[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2 の記録を使う
    - 空白を含む値は引用符で囲む。元の値が `system` や `local` だけにあった場合は、それを `global` に写さない（今回追加した `global` を外せば、元のスコープの値がまた効く）
    - 残すと決めた `merge.conflictStyle`・名前・メールアドレスと、今回変更しなかったキーは書き戻さない
 
@@ -490,7 +492,7 @@
    git config --global --list
    ```
 
-   - 今回戻すキーが、同書の「Git」の手順 2 で記録した元の `global` と一致すればよい（元が未設定なら出ない、元の値があればその値が出る）
+   - 今回戻すキーが、この項の手順 2・5 が示す記録の元の `global` と一致すればよい（元が未設定なら出ない、元の値があればその値が出る）
    - 残すと決めたキーと、本書で変更しなかったキーはそのまま。元の設定が空で、今回の設定をすべて外した場合だけ、何も出ない
    - 元は `~/.gitconfig` が無かった場合も、空のファイルが残る（中身が無いので、git の動きは変わらない）
 
@@ -501,7 +503,7 @@
 
 1. 共通の bash 設定も外すときだけ、外す。
 
-   - [ryo-aoki-pc/bash の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で入れたもの）
+   - [ryo-aoki-pc/bash の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5 で入れたもの）
    - その手順 5 は `~/.config/bash` を消す（commit・push していないものは取り戻せない）。その手順 4 で確かめてから行う
    - 終わったら、Git Bash の窓は閉じてよい
 
