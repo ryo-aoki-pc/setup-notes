@@ -51,7 +51,7 @@
    }
    ```
 
-   - 入っていれば、`Package cifs-utils-… is already installed.` と出る
+   - 入っていれば、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
    - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[samba.md 手順 5・8](samba.md#実施手順)）を確かめる
@@ -155,7 +155,7 @@
    rpm -q gvfs-smb gvfs-fuse
    ```
 
-   - `package … is not installed` が出たら、この節の手順 2 で入れる
+   - `パッケージ … はインストールされていません`（英語の環境では `package … is not installed`）が出たら、この節の手順 2 で入れる
    - 2 つとも版が出たら、この節の手順 2 は飛ばす
 
 1. どちらかが未導入のときだけ、gvfs-smb と gvfs-fuse を入れる。
@@ -172,7 +172,7 @@
    /usr/bin/gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
-   - ドメインとパスワードを聞かれる（英語では `Domain [SAMBA]:` と `Password:`）
+   - ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）
    - ドメインは、Enter で既定のままでよい
    - パスワードは、手順 3 と同じもの
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
@@ -188,8 +188,8 @@
    /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
    ```
 
-   - `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい
-   - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>` と、共有の中の一覧（隠しファイルは出ない）が出る
+   - `Mount(0): <SERVER> 上の <SHARE> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい（英語の環境では `<SHARE> on <SERVER>`）
+   - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>`（端末では、`'` で囲まれて出る）と、共有の中の一覧（隠しファイルは出ない）が出る
    - 画面では、サイドバーに共有が出る
 
 1. 共有を外す。

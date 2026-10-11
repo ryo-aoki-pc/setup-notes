@@ -95,6 +95,12 @@
   - `smb.conf` は既定ファイルを退避したうえで、最小構成に置き換える
 - **状態**: **2026-09-21 に下表の実機で本実行し、公開を継続中。2026-10-06 にクリーンインストールした x86_64 の VM でも現行ブロックを本実行した**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
+  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)・[linger](../linger.md)・[Podman](../podman.md) を通した後の状態）で、`114c2b2` の実施手順 1〜9 と[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜10 の 19 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+    - 結果: 通した 15、通らなかった 0、条件に当たらず飛ばした 4（動作を確かめる節の手順 7〜10。root のホームも `/home` も公開していない）、未実施 0
+    - 手順 9 は、同じ仮想スイッチの別の VM（AlmaLinux 10.2）から [samba-client.md](../samba-client.md) の手順 1〜7 でつないだ分だけ。Windows・macOS・Android / iOS・WireGuard 越しでは、つないでいない
+    - 確認したこと: Workstation に `samba`・`samba-client` 4.23.5-111 が依存の 5 個と入る、`smb3 directory leases = No`、445/tcp だけの待ち受け、サーバーの上の `smbclient` と `mount.cifs`（SMB 3.1.1、`partial(AES-128-CMAC)`、`user_home_t`・`cifs_t`）、別の VM からの firewalld 越しの接続、サーバーの再起動の後も smbd・445/tcp・boolean が残り、別の VM の自動マウントがつながり直すこと
+    - 直した所: 無い（「確認」の後ろの出力は、どの手順も手順書のとおりだった。手順書・ロールバックと注意点・参考資料は変えていない）
+    - 未実施の範囲: 「root のホームも公開する（任意）」「/home も公開する（任意）」「接続元を絞る（任意）」「設定済みのサーバーでディレクトリのリースを切る」、[ロールバック](../extra/samba.md#ロールバック)、Windows・macOS・Android / iOS のクライアント、WireGuard 越し、各ブロックの `中断:` の側、実機、aarch64
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
   - **確認していないこと**: macOS / iOS / Android の実クライアントからの接続（Windows のエクスプローラーは、2026-10-01 に確かめた）
   - 2026-09-28: 手順 2〜5・8、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 4、[ロールバック](../extra/samba.md#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
@@ -1026,6 +1032,142 @@ Windows の接続、キーリング、物理 NIC、実ルーター越しの動�
 新規のデスクトップ VM の GNOME Files で Network → Server address から認証し、Ctrl+C/Ctrl+V で共有へコピーした。サーバーの実体と内容が一致した。サーバーで別ファイルを作ると F5 前は見えず、F5 後に現れ、内容も一致した。取り出し後はサイドバー・GIO・GVFS から消えた。キーリング保存は選んでいない。
 
 home の解除 4、root の解除 5、既存サーバーのディレクトリリース節 3・1・2、ロールバック 1・3 を通した。ゼロ件の grep が終了 1 を返す箇所は、表示 0 という確認の想定どおりだった。smb は停止・disabled、445 の開放無し、boolean は off、root のモジュール無し、smb.conf は orig と一致。パッケージ解除は本文の指示で既設 cifs-utils を除外し、新規 samba/samba-client を削除した。実機、macOS/iOS/Android、今回の VM で Windows のクライアントから使うことは確認していない。
+
+### 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+この付録は、検証の担当の報告と、証跡のファイルから書いた（VM を操作したのは担当）。
+
+- **何を**: [手順書](../samba.md)の実施手順（9 手順）と「サーバーの上で動作を確かめる」（10 手順）を、コミット `114c2b2` の本文で、上から通した
+  - 「root のホームも公開する（任意）」「/home も公開する（任意）」「接続元を絞る（任意）」「設定済みのサーバーでディレクトリのリースを切る」と[ロールバック](../extra/samba.md#ロールバック)は、この通しの範囲の外（流していない）
+- **結果**: 19 手順のうち、通した 15、通らなかった 0、条件に当たらず飛ばした 4（動作を確かめる節の手順 7〜10。root のホームも `/home` も公開していない）、未実施 0
+  - 手順 9（クライアントからの接続）は、箇条書きのうち「AlmaLinux 10 の PC なら samba-client.md」の側だけを通した（[samba-client.md の検証記録の付録](samba-client.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。Windows・macOS・Android / iOS・WireGuard 越しでは、つないでいない
+  - 「確認」の後ろの出力は、どの手順も、手順書の箇条書きとブロックのコメントのとおりだった
+- **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` からのクローン（`server/meta.json`）。Kickstart で入れた AlmaLinux 10.2 の Workstation に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順と任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」、[linger](../linger.md)、[Podman](../podman.md) を通した状態（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)の続き）
+  - `samba` と `samba-client` は入っていなかった。`samba-common`・`libsmbclient`・`cifs-utils` は入っていた。firewalld は `public` で、サービスは `cockpit dhcpv6-client ssh`、ポートは空（`server/guest-facts-start.txt`）
+- **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、公開するユーザーの SSH の対話の bash に、ブラケットペーストで 1 つずつ貼った
+  - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ）
+  - sudo は NOPASSWD（初期設定の「ログインと sudo」の手順 3）で、パスワードは 1 度も聞かれなかった
+  - Samba のパスワードは、その場で作った検証用の値。手順 6 の 2 回と、動作を確かめる節の手順 1 の 1 回は、問いが出て待っているのを見てから、ドライバ（`rb.mjs send --text-file … --mask`）がファイルから SSH の対話の端末に送った（記録の上では伏せてある）
+  - サーバーの VM のコンソールは、GDM のログイン画面のまま（キーは送っていない）。実アカウントでのログインは無い
+- Hyper-V だけで通したのは、同じ日の利用者の指示による（[初期設定の検証記録の付録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）。VMware と VirtualBox では、この日は通していない
+- **証跡**: 追跡していない `.verification/campaign/hv/R3/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl`（サーバーの VM）の番号、`after-confirm/` は `session/after-confirm/`
+- この VM の値は `<USER>`・`<SERVER_IP>`・`<CLIENT_IP>`（クライアントの VM の IP）・`<HOSTNAME>` で書いた。パスワードと鍵は載せていない
+
+#### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（第 2 世代の VM、VM の構成の版 12.0。`server/meta.json`）。`vmms.exe` は 10.0.26100.8875（`host-vm-facts.txt`） |
+| サーバーの VM | UEFI、Secure Boot オフ、vTPM 無し、2 vCPU、3072 MB（動的メモリは無効。ゲストの `free -m` の合計は 2900 MB）、ディスク 64 GB、NIC 1 枚（Default Switch、`eth0`）（`host-vm-facts.txt`・`server/meta.json`） |
+| クライアントの VM（手順 9） | 同じスナップショットからの別のクローンで、2048 MB。同じ Default Switch につないだ（`peer2/meta.json`） |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux Enforcing（`selinux-policy-42.1.18-4.el10_2.4`）、`firewalld-2.4.3-4.el10_2`（`public`、`eth0`）、`systemd-257-23.el10_2.2.alma.1`。表示は日本語（dnf・`ls`・`smbstatus` の日付）。プロンプトは starship |
+| 入ったもの | `samba-4.23.5-111.el10_2`・`samba-client-4.23.5-111.el10_2` と、依存の 5 個（`libnetapi`・`samba-common-tools`・`samba-dcerpc`・`samba-ldb-ldap-modules`・`samba-libs`。どれも `4.23.5-111.el10_2`）。`cifs-utils-7.7-1.el10_2`・`samba-common-4.23.5-111.el10_2`・`libsmbclient-4.23.5-111.el10_2` は、初めから入っていた |
+| 手順書 | `docs/samba.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`。`steps.jsonl` の `docCommit`） |
+| 実施の日時 | 2026-10-11 12:02:25〜12:04:06 UTC（ゲストの時計で 21:02〜21:04 JST。終わりは、最後のブロックを貼った 12:04:05 に、ドライバの記録の所要 1.8 秒を足した時刻）。手順 9 のクライアントは 12:04:20〜12:05:03、サーバーの再起動は 12:18:23 |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ。検証用に変えた値は無い（`WORKGROUP` は既定、`SERVER_IP` は自動で入った値のまま） |
+
+#### 手順ごとの結果（Hyper-V、2026-10-11）
+
+| 節 | 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `WORKGROUP = WORKGROUP`・`USER = <USER>`・`SERVER_IP = <SERVER_IP>` | seq 1、`after-confirm/0001-実施手順-1.txt` |
+| 実施手順 | 2 | 通した | 7 パッケージが入って `完了しました!`。「確認」の後ろは `samba-4.23.5-111.el10_2.x86_64`・`samba-client-4.23.5-111.el10_2.x86_64`・`cifs-utils-7.7-1.el10_2.x86_64`。プロンプトの表示で 4 秒 | seq 2、`after-confirm/0002-実施手順-2.txt`、`session/session-001.raw` |
+| 実施手順 | 3 | 通した | `Loaded services file OK.`・`Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)`・`Server role: ROLE_STANDALONE`、`[global]` に `smb3 directory leases = No`、共有は `[homes]` だけ。`/etc/samba/smb.conf.orig`（969 バイト）ができた | seq 3、`after-confirm/0003-実施手順-3.txt`、`server/facts-samba-server.txt` |
+| 実施手順 | 4 | 通した | `samba_enable_home_dirs --> on` | seq 4、`after-confirm/0004-実施手順-4.txt` |
+| 実施手順 | 5 | 通した | `445/tcp` | seq 5、`after-confirm/0005-実施手順-5.txt` |
+| 実施手順 | 6 | 通した | `uid=1000(<USER>) gid=1000(<USER>) groups=1000(<USER>),10(wheel)` の後に、`New SMB password:` → `Retype new SMB password:` → `Added user <USER>.`。2 回の入力を終えるまで、プロンプトの表示で 18 秒 | seq 6〜8、`after-confirm/0006-実施手順-6.txt` |
+| 実施手順 | 7 | 通した | `<USER>:1000:` の 1 行 | seq 9、`session/session-001.raw` |
+| 実施手順 | 8 | 通した | `active`、`0.0.0.0:445` と `[::]:445` が `LISTEN`（139 は出ない）。「確認」の見出しより前に、`Created symlink '/etc/systemd/system/multi-user.target.wants/smb.service' → '/usr/lib/systemd/system/smb.service'.` | seq 10、`after-confirm/0010-実施手順-8.txt`、`session/session-001.raw` |
+| 実施手順 | 9 | 通した（AlmaLinux 10 のクライアントだけ） | コマンドの無い手順。別の VM で samba-client.md の手順 1〜7 を通し、サーバーの `smbstatus` に、その VM（`<CLIENT_IP>`）からの `SMB3_11`・`partial(AES-128-CMAC)` の接続が出た | seq 11（メモの行）、`peer2/session/steps.jsonl` の seq 1〜9、`server/facts-smbstatus-from-peer2-automount.txt` |
+| サーバーの上で動作を確かめる | 1 | 通した | `Samba password for <USER>:` で止まり、入力の後にプロンプトへ戻った | seq 12・13、`session/session-001.raw` |
+| サーバーの上で動作を確かめる | 2 | 通した | `-rw-------. 1 <USER> <USER> 48 … /run/user/1000/smb-auth` | seq 14、`after-confirm/0014-サーバーの上で動作を確かめる-2.txt` |
+| サーバーの上で動作を確かめる | 3 | 通した | 共有の一覧は `IPC$` と `<USER>` の 2 つで、続けて `SMB1 disabled -- no workgroup available`。ホームの一覧、`putting file /etc/hostname as \smb-test.txt`、`getting file \smb-test.txt of size 15 as /tmp/smb-test.txt`、`ls -lZ` は 2 つとも `-rw-r--r--.`（ホーム側は `user_home_t`、`/tmp` 側は `user_tmp_t`）、`content identical`、`//<SERVER_IP>/<USER>` でも `smb-test.txt` の行 | seq 15、`after-confirm/0015-サーバーの上で動作を確かめる-3.txt` |
+| サーバーの上で動作を確かめる | 4 | 通した | `//127.0.0.1/<USER> on /mnt/smbtest type cifs (… vers=3.1.1 …)`、`cifs write`、ホーム側は `user_home_t`・マウント側は `cifs_t`。`smbstatus` は `SMB3_11`、`Encryption` は `-`、`Signing` は `partial(AES-128-CMAC)` | seq 16、`after-confirm/0016-サーバーの上で動作を確かめる-4.txt` |
+| サーバーの上で動作を確かめる | 5 | 通した | 何も出ずにプロンプトへ戻った | seq 17、`session/session-001.raw` |
+| サーバーの上で動作を確かめる | 6 | 通した | `<no matches>` | seq 18、`after-confirm/0018-サーバーの上で動作を確かめる-6.txt` |
+| サーバーの上で動作を確かめる | 7・8 | 条件に当たらず飛ばした | root のホームを公開していない（手順 3 の `testparm -s` の節は `[global]` と `[homes]` だけ）。貼っていない | seq 19・20（メモの行）、seq 3 の出力 |
+| サーバーの上で動作を確かめる | 9・10 | 条件に当たらず飛ばした | `/home` を公開していない。貼っていない | seq 21・22（メモの行）、seq 3 の出力 |
+
+- 手順 2 で入った 7 パッケージは、`samba`・`samba-client` と、依存の `libnetapi`・`samba-common-tools`・`samba-dcerpc`・`samba-ldb-ldap-modules`・`samba-libs`（`session/session-001.raw` の `インストール済み:` の下）
+- 手順 9 の `smbstatus` は、クライアントの VM が自動マウントでつないでいる最中（21:05:03 JST）に、別の SSH で読んだ。サービスは `<USER>` と `IPC$`、`Encryption` は `-`、`No locked files`
+- 手順書には無い確かめ（サーバーの VM は、別の SSH で読んだだけ。書いたのは、再起動の後にクライアントの VM から共有に置いて、すぐ消した 1 ファイルだけ。`server/facts-samba-server.txt`・`server/facts-reboot.txt`・`server/guest-facts-end.txt`）
+  - 動作を確かめる節の手順 6 の後（21:04:18 JST）: `/etc/samba/smb.conf` は 367 バイトで `samba_etc_t`、`testparm -s` の節は `[global]` と `[homes]`、`pdbedit -L` は `<USER>:1000:`。検証で作ったもの（`~/smb-test.txt`・`~/cifs-test.txt`・`/tmp/smb-test.txt`・`/run/user/1000/smb-auth`・`/mnt/smbtest`）は、どれも残っていない
+  - サーバーの VM の再起動（手順書に再起動の手順は無い。別の節の通しを終えた後に、`sudo systemctl reboot`。seq 38・39）: boot ID が変わり、IP は同じ。ドライバの SSH は、17 秒でつながり直した
+  - 起動（21:18:28 JST）から 24 秒後の読み取りで、`enabled`・`active`、`0.0.0.0:445` と `[::]:445` が `LISTEN`、firewalld のポートは `445/tcp`、`samba_enable_home_dirs --> on`（`enabled`・`active` の行に、ユニットの名前は付いていない。担当の報告では `smb.service`）
+  - 再起動の後、クライアントの VM から自動マウントの先を読むと、`autofs` と `cifs`（`vers=3.1.1`）の 2 行になり、書いて消せた（`automount: 読めた`・`automount: 書いて消せた`）
+- SELinux の拒否
+  - 手順書のブロックの `ausearch`（動作を確かめる節の手順 6。対話の端末に貼った `sudo ausearch -m AVC -ts today`。21:04 JST）は `<no matches>`
+  - 終わりに、担当が別の SSH から、`ausearch` に `--input-logs` を付けて読み直した（21:22:47 JST。担当の報告では `ausearch --input-logs -m AVC -ts today`）。サーバーの VM もクライアントの VM も `<no matches>`（`rc=1`）だった（`facts-avc.txt`。このファイルに、コマンドの行そのものは無い）
+  - `--input-logs` を付けない `ausearch` を、端末の無い SSH から打つと、監査ログではなく標準入力を読み、ログを見ないまま `<no matches>` を返す。その形で読んだ `<no matches>`（`server/facts-reboot.txt` などの中の行）は、根拠にしていない
+  - 監査ログのファイルを直接数える確かめ（同じ日に、ほかの手順書の VM で行ったもの）は、この 2 台では行っていない
+
+#### 通らなかった手順と、手順書の前提と違えた所（Hyper-V、2026-10-11）
+
+- 通らなかった手順は無い
+- 手順書の前提と違えた所も無い。手順書は「公開するユーザー自身のシェルで貼る」と書いていて、SSH の対話の bash はそれに当たる（`smbpasswd` と `read` の問いは、SSH の端末に出た）
+- 手順書の外で行ったこと
+  - サーバーの VM の再起動と、その後の読み取り（上の「手順書には無い確かめ」）。再起動の後は、ブロックを貼っていない
+  - ドライバとは別の SSH（鍵で、パスワードなし）で、状態を読んだ
+
+#### Hyper-V に左右されたと思われる値（2026-10-11）
+
+担当の報告が挙げた値を、値のまま並べた。ほかのハイパーバイザと比べて確かめたものではない。手順の「確認」の出力に出るのは、IP だけ。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`。`hostnamectl` は `Chassis: vm`・`Hardware Vendor: Microsoft Corporation`・`Hardware Model: Virtual Machine`・`Firmware Version: Hyper-V UEFI Release v4.1` |
+| NIC と IP | `eth0`、`<SERVER_IP>/20`（Default Switch が配った IP。ゲストを再起動しても同じ）。手順 1 の `SERVER_IP` には、この IP が自動で入った。クライアントの VM からは、この IP で直接届いた（ping は 0.49 ミリ秒。`peer2/prep-hostname.txt`） |
+| ホスト名 | クローン元と同じ名前のまま（`hostname -f` は `<HOSTNAME>.mshome.net`）。手順書は IP でつなぐので、響かない |
+| 起動の時間 | 再起動の後の `systemd-analyze` は `649ms (kernel) + 1.714s (initrd) + 14.406s (userspace) = 16.770s` |
+| メモリとディスク | 終わりの `free -m` は合計 2900・使用 932・available 1967。`/` は 39G のうち 8.1G、`/home` は 19G のうち 6.2G |
+| 失敗しているユニット | `mcelog.service`（起動のたびに failed。初期設定の通しのときから同じ。手順には影響しない。Hyper-V によるかは確かめていない） |
+
+- 時間は、静かなホストで測ったものではない（担当の報告では、同じ時刻に、ほかの検証の VM が同じホストで動いていた）
+- 担当の報告は、ハイパーバイザのせいで「確認」の出力が変わった所は無い、とみている
+
+#### 過去の記録と違った所（Hyper-V、2026-10-11）
+
+どれも、手順の判定は変えない。
+
+| 所 | 今回（Hyper-V の VM。Workstation） | 過去の記録 |
+|---|---|---|
+| 版 | `samba-4.23.5-111.el10_2`、kernel `6.12.0-211.64.1.el10_2` | 2026-10-06 の 2 回の VM は `4.23.5-110.el10_2`、kernel `6.12.0-211.61.1.el10_2` |
+| 手順 1 の `SERVER_IP` | NIC は 1 枚で、自動で入った値をそのまま使えた | 2026-10-06 のクリーンインストールの VM（VirtualBox）は、NAT と隔離 LAN の NIC があり、自動では NAT の IP が入るので、隔離 LAN の IP に直した |
+| 手順 2 で入るもの | 7 パッケージ。`samba-common`・`libsmbclient`・`cifs-utils` は初めから入っていた | 2026-10-06 のクリーンインストールの VM も、`samba-common` と `cifs-utils 7.7` が初めから入っていた。2026-09-28 の VM は `samba-common` が無く、手順 2 で一緒に入った |
+| 貼り方 | ブラケットペースト | 2026-10-06 の 2 回は、ブラケットペースト無し |
+| 再起動の後の smbd | 起動の 24 秒後の読み取りで `active`（`active` になった時刻は取っていない。最初の SSH のログインは起動の 9 秒後で、それより前だったかは分からない） | 2026-10-06 のクリーンインストールの VM は、起動の 46 秒後に active。2026-10-06 の 2 回とも、SSH の再ログインより前 |
+
+#### 指摘と状態（Hyper-V、2026-10-11）
+
+- 手順書（[手順書](../samba.md)・[ロールバックと注意点](../extra/samba.md)・[参考資料](../reference/samba.md)）への指摘は無い。担当の報告も、この手順書には挙げていない
+- 環境と道具（手順書の指摘ではない）
+  - 別の SSH から打つ `ausearch` は、`--input-logs` を付けないと監査ログを読まない（上の「SELinux の拒否」）。手順書のブロックの `ausearch` は、対話の端末に貼るので当たらない
+  - `mcelog.service` が、起動のたびに failed になる
+
+#### 手順書を直した所（Hyper-V、2026-10-11）
+
+- 無い。手順書・ロールバックと注意点・参考資料は、変えていない
+
+#### 報告と証跡の照合（Hyper-V、2026-10-11）
+
+- 19 手順の判定と、「確認」の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+- 手順 2 の時間: 報告は 5.9 秒（ドライバの記録で、落ち着くのを待つ時間を含む）。プロンプトの表示は `took 4s`。この記録には 4 秒と書いた
+- 報告だけにあって、証跡のファイルでは確かめられないもの
+  - パスワードを送る前に、入力待ちの端末のエコーが切れていること（`stty -a` の `-echo`）を、別の SSH で見たこと
+  - 終わりに 2 台の VM を止めて、サーバーの VM のスナップショット `after-R3` を取ったこと
+  - 記録のディレクトリに、パスワードと鍵の中身が写っていないことの数え（125 ファイル、0 件）
+
+#### 確かめていないこと（Hyper-V、2026-10-11）
+
+- 手順 9 の、Windows・macOS・Android / iOS のクライアントと、WireGuard 越しの接続。`smbclient "//<SERVER_IP>/<USER>" -U <USER>` と `mount -t cifs … -o username=<USER>` の形
+- 「root のホームも公開する（任意）」「/home も公開する（任意）」と、動作を確かめる節の手順 7〜10
+- 「接続元を絞る（任意）」「設定済みのサーバーでディレクトリのリースを切る」、ロールバック
+- 各ブロックの `中断:` の側、手順 3 を 2 回目に貼ったとき
+- 445/tcp を開け忘れたときの現れ方（今回、別の VM からつないだのは、手順 5 の後だけ）
+- デスクトップの端末（Ptyxis・WezTerm）に貼る形、ブラケットペーストが効かない端末
+- 監査ログのファイルを直接数える確かめ
+- 実機、aarch64。VMware と VirtualBox の VM では、この日は通していない
 
 
 ### 操作上の注意と併記されていた記録

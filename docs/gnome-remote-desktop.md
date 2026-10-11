@@ -64,6 +64,8 @@
    }
    ```
 
+   - `rdp-tls.key` が `-rw-------`、`rdp-tls.crt` が `-rw-r--r--` で、どちらも所有者が `gnome-remote-desktop`、コンテキストに `gnome_remote_desktop_var_lib_t` が出ればよい
+
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
@@ -74,7 +76,8 @@
    }
    ```
 
-   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10 で使う）
+   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10・11 で使う）
+   - TPM の無い PC では、`grdctl --system` のコマンドごとに `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` が出る（手順 6・8 でも出る）。害は無い（[注意点](extra/gnome-remote-desktop.md#注意点)）
 
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
@@ -176,8 +179,14 @@
 
 1. LAN 内の別マシンから、RDP クライアントでログインする。
 
-   - `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
+   - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
    - `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。手順 4 で控えた `TLS fingerprint` と同じなら `Y` で受け入れる
+     - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
+     - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
+   - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
+   - FreeRDP の `Password:` には、手順 6 のシステム共通パスワードを入れる
+     - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。GDM のログイン画面が出れば、害は無い
    - システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする
    - 問題があれば、サーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る
 

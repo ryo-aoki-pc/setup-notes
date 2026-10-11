@@ -40,6 +40,7 @@
    brew install syncthing
    ```
 
+   - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
 1. GUI のパスワードを読み取る。
@@ -70,7 +71,7 @@
    ```
 
    - `中断:` が出たら手順 5〜7 へ進まない。認証設定に成功した同じシェルだけで、手順 5〜7 を実行できる
-   - `Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
+   - `Generating key and certificate` の行に続いて、`Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
    - [バックアップから戻した](#バックアップから戻す)ホストでは、先頭が `Key exists; will not overwrite` になり、鍵を作り直さない（デバイス ID は元のまま。ログイン名が同じなら `Updated GUI authentication user` の行は出ない）
    - 最後の `syncthing device-id` が出す 7 桁 x 8 の文字列が、**このホストのデバイス ID**。相手デバイスに教える値で、秘密ではない
 
@@ -88,7 +89,7 @@
    fi
    ```
 
-   - `Successfully started 'syncthing' (label: sh.brew.syncthing)` が出る
+   - ``Successfully started `syncthing` (label: sh.brew.syncthing)`` が出る
 
 1. GUI の待ち受けと HTTPS を設定し、再起動して確かめる。
 
@@ -166,8 +167,9 @@
 1. ブラウザで GUI に入り、デバイス ID を確かめる。
 
    - 手順 8 の URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
+   - 初めて入ると、「匿名で使用状況をレポートすることを許可しますか？」と聞かれる。「はい」「いいえ」のどちらでもよい
    - `ST_GUI_ADDR=127.0.0.1:8384` の場合は、このホストのブラウザで開く。LAN に公開した場合は、LAN の別の端末から開いて firewalld 越しの到達も確かめる
-   - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
+   - 「メニュー」→「IDを表示」（英語の表示では Actions → Show ID）で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
    - **この時点では同期するフォルダは 1 つも無い**
    - バックアップから戻したホストでは、戻したフォルダが並ぶ
 
@@ -177,9 +179,10 @@
 
 - **Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない**。入れただけでは何も同期しないので、GUI から足す
 - 操作は AlmaLinux 10 でも Windows 11 でも同じ。相手もどちらでもよい
+- ボタン・欄・通知の名前は、GUI の表示が日本語のときのもの
 
 > [!WARNING]
-> **この節の手順 4 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
+> **この節の手順 4・5 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
 >
 > - 同期したいものを入れる専用のディレクトリを作る（例: `~/Sync`、`C:\Users\<WIN_USER>\Sync`）
 > - このホストは [Samba](samba.md) でホームを公開しているので、同じ領域を二重に扱うことになる点にも注意する
@@ -189,16 +192,23 @@
 
    - 相手が AlmaLinux 10 なら[実施手順](#実施手順)、Windows 11 の PC なら [Windows 11 で使う](#windows-11-で使う)で入れる
 
-1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。
+1. GUI の「接続先デバイスを追加」を押し、「デバイスID」の欄に相手のデバイス ID を貼って保存する。
 
-   - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
+   - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる（欄の下の「近くに検出された以下のデバイス」に ID が並ぶ）
+   - その一覧には、同じ LAN のほかの Syncthing の ID も並ぶ。欄に入れた ID が、相手の `syncthing device-id` と同じであることを確かめてから保存する
    - VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000`（`tcp://<相手の IP>:22000`）のように直接書く
 
 1. 相手側の GUI に出る承認の通知で、このデバイスを承認する。
 
-1. 「フォルダーを追加」でパス（例: `~/Sync`、Windows 11 では `C:\Users\<WIN_USER>\Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる。
+   - 通知は「新規デバイス」（「デバイス「<このホストの名前>」 (…) が接続を求めています。新しいデバイスとして追加しますか？」）。「デバイスを追加」を押し、開いた画面で「保存」を押す
 
-1. 相手側に「このデバイスがフォルダーを共有しようとしています」と出るので受け入れる。
+1. 「フォルダーを追加」でパス（例: `~/Sync`、Windows 11 では `C:\Users\<WIN_USER>\Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れて保存する。
+
+1. 相手側の GUI に出る「新規フォルダー」の通知で「追加」を押し、フォルダーパスを入れて保存する。
+
+   - 通知の文は「<このホストの名前> がフォルダー「<フォルダー名>」 (<フォルダー ID>) を共有するよう求めています。新しいフォルダーとして追加しますか？」
+   - 「追加」で開く画面は、フォルダー名とフォルダー ID が入っていて、「フォルダーパス」が空。相手側で同期するディレクトリ（例: `~/Sync`）を入れるまで、「保存」を押せない
+   - 保存した後、両方の GUI でフォルダーが「最新」になればよい
 
 ---
 

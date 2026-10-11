@@ -126,6 +126,12 @@ Password:
   - Windows 11 は、管理者ではない Windows PowerShell 5.1 に貼る。読者が編集するのは `SERVER` と `SMB_USER`
 - **状態（AlmaLinux 10）**: **x86_64 の VM で検証済み（QEMU: 2026-09-27 / クリーンインストールした VirtualBox: 2026-10-06）。実機では本実行していない**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
+  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)などを通した後の状態）で、`114c2b2` の実施手順 1〜7 と [GNOME Files で開く（任意）](../samba-client.md#gnome-files-で開く任意)の手順 1〜5 の 12 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）。サーバーは、同じ仮想スイッチの別の VM で [samba.md](../samba.md) を通したもの
+    - 結果: 通した 11、通らなかった 0、条件に当たらず飛ばした 1（GNOME Files の節の手順 2。2 つとも入っていた）、未実施 0
+    - 確認したこと: 手でのマウント（SMB 3.1.1、`cifs_t`）と、アクセスしたときの自動マウント（SMB 3.1.1）、サーバーの VM を再起動した後のつながり直し、PC の画面で GNOME にログインした状態での `gio mount`、つないだ後に開いた「ファイル」のサイドバーに共有が出ていて、外すと消えること
+    - GNOME Files の節のうち、画面から開く側（「Network」→「Server address」→「接続」、認証の画面、キーリング、取り出しのボタン）は行っていない
+    - 直した所: 手順 2 と、GNOME Files の節の手順 1・3・4 の箇条書きを、日本語の表示に合わせた（文言だけ。ブロックは変えていない。GNOME Files の節の手順 1 の未導入のときの文は、その分岐を通さずに、同じ VM の `rpm -q` の出力から直した）
+    - 未実施の範囲: `SHARE=root`・`SHARE=home`、各ブロックの `中断:` の側と `mount error(…)`、クライアントの再起動、[ロールバック](../extra/samba-client.md#ロールバック)、WireGuard 越し、Windows 11 の節（通していない）、実機、aarch64
   - このクラウドのホストのカーネルには CIFS が無く、コンテナでは `mount -t cifs` を試せない。そこで QEMU の VM（KVM 無しの TCG）で、AlmaLinux 10.2 の GenericCloud イメージを動かした
   - VM の SELinux は Enforcing、firewalld は active
   - サーバーは、samba.md 手順 3 の `smb.conf` をそのまま置いたコンテナ（同じホストの Docker）
@@ -154,6 +160,7 @@ Password:
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-08 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - 2026-10-11 の Hyper-V の VM の通し（AlmaLinux 10 の節。[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）でも、Windows 11 の節は通していない。未検証のまま
   - **確かめたこと**（[付録](#付録-windows-11-の資料の調査と-powershell-のブロックの-linux-での確認2026-10-08)）:
     - 資料: Microsoft の SMB の署名（24H2 の Pro・Enterprise・Education は必須、Home は求めない）・`cmdkey`・`New-SmbMapping`・`Remove-SmbMapping`・管理者の窓とドライブ文字・サインインのときのつなぎ直し・SMB の NTLM のブロックの文書
     - サーバーの設定: samba.md 手順 3 の smb.conf は `server signing` と `map to guest` を書かず、既定のまま。その既定（smb.conf(5) と、samba.md の前の `testparm -sv` の記録）は、Windows 11 Pro の署名の必須とゲストの禁止に合う
@@ -510,6 +517,164 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 1. `Remove-SmbMapping -UpdateProfile` で `HKCU:\Network\<文字>` が消えること。外した後のエクスプローラーの表示
 1. エラー 1219 の出方と、`[root]`・`[home]` を `[homes]` と並べて割り当てること
 1. WireGuard 越しの割り当て
+
+### 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+この付録は、検証の担当の報告と、証跡のファイルから書いた（VM を操作したのは担当）。
+
+- **何を**: [手順書](../samba-client.md)の実施手順（7 手順）と「GNOME Files で開く（任意）」（5 手順）を、コミット `114c2b2` の本文で、上から通した
+  - Windows 11 の節（「Windows 11 で使う」「Windows 11 の更新」「Windows 11 のロールバック」）は、通していない。[ロールバック](../extra/samba-client.md#ロールバック)も、この通しの範囲の外（流していない）
+- **結果**: 12 手順のうち、通した 11、通らなかった 0、条件に当たらず飛ばした 1（GNOME Files の節の手順 2。gvfs-smb と gvfs-fuse が、2 つとも入っていた）、未実施 0
+  - GNOME Files の節は、端末の `gio` のブロックを通した。箇条書きの「画面から開くとき」「画面では」の側のうち、見たのは、サイドバーに共有が出ることと、外すと消えることだけ（[確かめていないこと](#確かめていないことhyper-v2026-10-11)）
+  - 「確認」の後ろの出力が、手順書の箇条書きと違ったのは、3 か所（表示の言語によるものと、`ls` が付ける `'`。[指摘と状態](#指摘と状態hyper-v2026-10-11)の 1〜3）。判定は変わらない
+- **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` からのクローン（`peer2/meta.json`）。Kickstart で入れた AlmaLinux 10.2 の Workstation に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順などを通した状態
+  - `cifs-utils`・`gvfs-smb`・`gvfs-fuse` は入っていた。`samba-client` は入っていない（`peer2/guest-facts-start.txt`）
+  - サーバーは、同じスナップショットからの別のクローンで、[samba.md](../samba.md) の実施手順を通した VM（[samba.md の検証記録の付録](samba.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。2 台は、同じ仮想スイッチ（Default Switch）につないだ
+- **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、クライアントの VM の自分のユーザーの SSH の対話の bash に、ブラケットペーストで 1 つずつ貼った
+  - 変えたのは、手順 1 の `SERVER` の 1 行だけ（サーバーの VM の IP）。ほかのブロックは、手順書のものと 1 文字も違わない（`peer2/session/steps.jsonl` の `sha256` と `pastedSha256` が同じ）
+  - sudo は NOPASSWD（初期設定の「ログインと sudo」の手順 3）で、パスワードは 1 度も聞かれなかった
+  - Samba のパスワードは、サーバーの VM で登録した検証用の値。手順 3 の `read` と、GNOME Files の節の手順 3 の `Password:` には、問いが出て待っているのを見てから、ドライバ（`rb.mjs send --text-file … --mask`）がファイルから SSH の対話の端末に送った（記録の上では伏せてある）。`Domain [SAMBA]:` には Enter を送った
+  - GNOME Files の節の前に、クライアントの VM のコンソールで、同じユーザーが GNOME にログインした（OS のパスワードは、検証の道具の `Login-Console.ps1` が、コンソールへのキー送信で入れた）。GNOME Files の節のブロックは、その状態で、SSH のシェルに貼った
+  - 実アカウントでのログインは無い
+- **証跡**: 追跡していない `.verification/campaign/hv/R3/`（このリポジトリには入っていない。画面の PNG も、ここにだけある）。下のファイルの名前は、そこからの相対パス。`seq` は `peer2/session/steps.jsonl`（クライアントの VM）の番号、`after-confirm/` は `peer2/session/after-confirm/`
+- この VM の値は `<USER>`・`<UID>`・`<SERVER>`・`<SMB_USER>`・`<SHARE>`・`<MOUNT_POINT>` で書いた（`<SMB_USER>` と `<SHARE>` は、既定のまま `<USER>` と同じ値。`<MOUNT_POINT>` は `/mnt/<SHARE>`）。パスワードと鍵は載せていない
+
+#### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（第 2 世代の VM、VM の構成の版 12.0。`peer2/meta.json`）。`vmms.exe` は 10.0.26100.8875（`host-vm-facts.txt`） |
+| クライアントの VM | UEFI、Secure Boot オフ、vTPM 無し、2 vCPU、2048 MB（動的メモリは無効。ゲストの `free -m` の合計は 1895 MB）、ディスク 64 GB、NIC 1 枚（Default Switch、`eth0`）（`host-vm-facts.txt`・`peer2/meta.json`） |
+| サーバーの VM | 同じ構成で 3072 MB。`samba-4.23.5-111.el10_2`、samba.md の手順 3 の smb.conf（共有は `[homes]` だけ） |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux Enforcing（`selinux-policy-42.1.18-4.el10_2.4`）、`firewalld-2.4.3-4.el10_2`、`systemd-257-23.el10_2.2.alma.1`。表示は日本語。プロンプトは starship |
+| 使ったもの | `cifs-utils-7.7-1.el10_2`、`gvfs-smb-1.54.4-4.el10_2.1`、`gvfs-fuse-1.54.4-4.el10_2.1`、`nautilus-47.6-2.el10`（どれも、初めから入っていた。今回、入ったパッケージは無い） |
+| 手順書 | `docs/samba-client.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`。`steps.jsonl` の `docCommit`） |
+| 実施の日時 | 2026-10-11 12:04:20〜12:05:03 UTC（実施手順。ゲストの時計で 21:04〜21:05 JST）、12:05:49〜12:06:43 UTC（GNOME Files の節）。コンソールのログインは 12:05:11 UTC |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ。検証用に変えた値は `SERVER` だけ。`SMB_USER`・`SHARE`・`MOUNT_POINT` は既定のまま |
+
+#### 手順ごとの結果（Hyper-V、2026-10-11）
+
+| 節 | 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `SERVER = <SERVER>`、`USER`・`SMB_USER`・`SHARE` は `<USER>`、`MOUNT_POINT = /mnt/<SHARE>` | seq 1・2、`after-confirm/0002-実施手順-1.txt` |
+| 実施手順 | 2 | 通した | `パッケージ cifs-utils-7.7-1.el10_2.x86_64 は既にインストールされています。`・`依存関係が解決しました。`・`行うべきことはありません。`・`完了しました!` の後に、`cifs-utils-7.7-1.el10_2.x86_64`、`/lib/modules/6.12.0-211.64.1.el10_2.x86_64/kernel/fs/smb/client/cifs.ko.xz`、`445/tcp に届く` | seq 3、`after-confirm/0003-実施手順-2.txt` |
+| 実施手順 | 3 | 通した | `Samba password for <SMB_USER>@<SERVER>:` で止まり、入力の後にプロンプトへ戻った | seq 4・5、`peer2/session/session-001.raw` |
+| 実施手順 | 4 | 通した | `-rw-------. 1 root root system_u:object_r:admin_home_t:s0 48 … /root/smb-<SMB_USER>@<SERVER>.cred` | seq 6、`after-confirm/0006-実施手順-4.txt` |
+| 実施手順 | 5 | 通した | `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1`、`file_mode=0600,dir_mode=0700`）、`cifs write`、`drwx------. 2 <USER> <USER> system_u:object_r:cifs_t:s0 … <MOUNT_POINT>` | seq 7、`after-confirm/0007-実施手順-5.txt` |
+| 実施手順 | 6 | 通した | 足した 1 行（`//<SERVER>/<SHARE> <MOUNT_POINT> cifs credentials=/root/smb-<SMB_USER>@<SERVER>.cred,uid=1000,gid=1000,file_mode=0600,dir_mode=0700,x-systemd.automount,x-systemd.idle-timeout=1min 0 0`）と `Success, no errors or warnings detected` | seq 8、`after-confirm/0008-実施手順-6.txt` |
+| 実施手順 | 7 | 通した | `active`、`autofs`（`timeout=60`）と `cifs`（`vers=3.1.1`）の 2 行、`automount write`、`<no matches>` | seq 9、`after-confirm/0009-実施手順-7.txt` |
+| GNOME Files で開く（任意） | 1 | 通した | `gvfs-smb-1.54.4-4.el10_2.1.x86_64` と `gvfs-fuse-1.54.4-4.el10_2.1.x86_64` | seq 10、`peer2/session/session-001.raw` |
+| GNOME Files で開く（任意） | 2 | 条件に当たらず飛ばした | 手順 1 で 2 つとも版が出たので、貼っていない | seq 11（メモの行） |
+| GNOME Files で開く（任意） | 3 | 通した | `認証が必要です`・`“<SERVER>”の共有名“<SHARE>”のパスワードを入力してください:` の 2 行の後に、`Domain [SAMBA]:`（Enter）→ `Password:` → 何も出ずにプロンプトへ戻った | seq 12〜14、`peer2/session/session-001.raw` |
+| GNOME Files で開く（任意） | 4 | 通した | `Mount(0): <SERVER> 上の <SHARE> -> smb://<SMB_USER>@<SERVER>/<SHARE>/`、`'smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>'`（`'` で囲まれて出た）、共有の中の一覧（14 個。隠しファイルは出ない）。コンソールの「ファイル」のサイドバーに、共有の行と取り出しのボタンが出た | seq 15、`after-confirm/0015-GNOME_Files_で開く（任意）-4.txt`、`screens/peer2-02-files-sidebar-gio-mounted.png` |
+| GNOME Files で開く（任意） | 5 | 通した | 何も出ずにプロンプトへ戻った。「ファイル」のサイドバーから、共有の行が消えた | seq 16、`peer2/session/session-001.raw`、`screens/peer2-03-files-sidebar-after-gio-unmount.png` |
+
+- 手順 5・7 の `findmnt` の行は、端末の幅で後ろが切れている。オプションの全体は `rw,relatime,vers=3.1.1,cache=strict,upcall_target=app,username=<SMB_USER>,uid=1000,forceuid,gid=1000,forcegid,addr=<SERVER>,file_mode=0600,dir_mode=0700,soft,nounix,serverino,mapposix,reparse=nfs,nativesocket,symlink=native,rsize=4194304,wsize=4194304,bsize=1048576,echo_interval=60,actimeo=1,closetimeo=1`（`peer2/facts-after-gio-unmount.txt`）
+- 手順 7 のとき、サーバーの `smbstatus` には、この VM からの `SMB3_11`・`Signing` が `partial(AES-128-CMAC)`・`Encryption` が `-` の接続が出た（`server/facts-smbstatus-from-peer2-automount.txt`）
+- GNOME Files の節の手順 5 の後に、別の SSH で読んだ `peer2/facts-after-gio-unmount.txt` の先頭は `0` が 2 行（行に名前は付いていない。担当の報告では、`gio mount -l` と `/run/user/<UID>/gvfs/` から消えたことの確かめ）
+- 画面で見たこと（コンソールの画面の PNG。`screens/`）
+  - 「ファイル」のサイドバーは、上から「ホーム・Recent・星付き・Network・ゴミ箱」、区切りの下に「Documents・Music・Pictures・Videos・Downloads」。`gio mount` の後は、そのいちばん下に共有の行（名前は、幅に収まらず、途中から `…` になる）と取り出しのボタンが出ていて、`gio mount -u` の後は消えた（`peer2-02-…`・`peer2-03-…`）
+    - 「ファイル」の窓は、GNOME Files の節の手順 4 を貼った後に開いた（PNG の時計は 21:06:32。手順 4 は 21:06:10、手順 5 は 21:06:41 JST）。窓を開いたまま、後からつないだ共有がサイドバーに足されるところは、見ていない
+  - 「Network」の画面は `No Known Connections`・`Enter an address to connect to a network location.` で、下に `Server address` の欄と「接続(N)」のボタンがある（`peer2-07-files-network-server-address.png`）。欄には何も入れていない
+- 手順書には無い確かめ（別の SSH で読んだ。`server/facts-reboot.txt`・`peer2/guest-facts-end.txt`）
+  - サーバーの VM を再起動した後（21:19:01 JST）、`<MOUNT_POINT>` を読むと `autofs` と `cifs` の 2 行になり、書いて消せた（`automount: 読めた`・`automount: 書いて消せた`）
+  - その 3 分あまり後（21:22:33 JST）の読み取りでは、`<MOUNT_POINT>` は `autofs` の行だけだった（使わないまま置くと、`cifs` が外れる）
+  - 終わりの `/root` の資格情報ファイルは、`-rw-------. 1 root root … admin_home_t … 48` のまま
+- SELinux の拒否
+  - 手順書のブロックの `ausearch`（手順 7。対話の端末に貼った `sudo ausearch -m AVC -ts recent`。21:05 JST）は `<no matches>`
+  - 終わりに、担当が別の SSH から、`ausearch` に `--input-logs` を付けて読み直した（21:22:47 JST。担当の報告では `ausearch --input-logs -m AVC -ts today`）。クライアントの VM もサーバーの VM も `<no matches>`（`rc=1`）だった（`facts-avc.txt`。このファイルに、コマンドの行そのものは無い）
+  - `--input-logs` を付けない `ausearch` を、端末の無い SSH から打つと、監査ログではなく標準入力を読み、ログを見ないまま `<no matches>` を返す。その形で読んだ `<no matches>`（`peer2/facts-after-gio-unmount.txt` などの中の行）は、根拠にしていない
+  - 監査ログのファイルを直接数える確かめ（同じ日に、ほかの手順書の VM で行ったもの）は、この 2 台では行っていない
+
+#### 通らなかった手順と、手順書の前提と違えた所（Hyper-V、2026-10-11）
+
+- 通らなかった手順は無い
+- 手順書の前提と違えた所は無い。手順書は「クライアントの PC で、自分のユーザーのシェルで貼る」と書いていて、SSH の対話の bash はそれに当たる（`read` と `gio mount` の問いは、SSH の端末に出た）
+  - GNOME Files の節は「ログインしたユーザーがつなぐ」仕組み。今回は、コンソールで GNOME にログインした状態で、SSH のシェルから `gio mount` が通った。コンソールでログインしていない状態では、試していない
+- 手順書の外で行ったこと
+  - クライアントの VM のホスト名を変えた（`sudo hostnamectl set-hostname`。2 台が同じクローン元で、同じ名前だったため。Syncthing の通しのための準備で、この手順書の手順には関わらない。`peer2/prep-hostname.txt`）
+  - コンソールで GNOME にログインし、アクティビティ画面の検索から「ファイル」を開いた（キー送信）。「Network」の画面は、別の SSH から `nautilus` を起動して出した
+  - `Server address` の欄に入れるつもりで URL をキー送信したが、欄ではなく、窓の検索に入った（`screens/peer2-08-files-server-address-typed.png`。Esc で消した）。検証の道具にマウスの操作が無く、欄にフォーカスを移せなかった。画面からの接続は、ここでやめた
+  - 別の SSH から `findmnt -R <MOUNT_POINT>` を 1 回打った（自動マウントを 1 回起こした。`peer2/facts-after-gio-unmount.txt`）
+  - サーバーの VM の再起動と、その後の読み取り（上の「手順書には無い確かめ」）
+
+#### Hyper-V に左右されたと思われる値（2026-10-11）
+
+担当の報告が挙げた値を、値のまま並べた。ほかのハイパーバイザと比べて確かめたものではない。手順の「確認」の出力に出るのは、IP だけ。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft` |
+| NIC と IP | `eth0`。サーバーの VM もクライアントの VM も、Default Switch が配った `/20` の IP。手順 1 の `SERVER` には、サーバーの VM のこの IP を入れた。2 台のあいだは、この IP で直接届いた（ping は 0.49 ミリ秒、445/tcp） |
+| 名前の解決 | クローンの 2 台は同じホスト名で始まり、クライアントの VM の名前を変えた後も、古い名前（`<クローン元の名前>.mshome.net`）は、クライアントの VM 自身の IP を返した（Default Switch の DNS に残った登録。`peer2/prep-hostname.txt`）。手順書どおり IP でつないだので、響いていない |
+| メモリとディスク | 終わりの `free -m` は合計 1895・使用 1008・available 886（コンソールで GNOME にログインした後）。`/` は 39G のうち 8.1G、`/home` は 19G のうち 6.2G |
+| 失敗しているユニット | `mcelog.service`（起動のたびに failed。初期設定の通しのときから同じ。手順には影響しない。Hyper-V によるかは確かめていない） |
+
+- Default Switch の IP が変わると、`SERVER` と fstab の行がずれる。今回は、サーバーの VM を再起動しても同じ IP だった（変わった場合は、確かめていない）
+- 担当の報告は、ハイパーバイザのせいで「確認」の出力が変わった所は無い、とみている
+
+#### 過去の記録と違った所（Hyper-V、2026-10-11）
+
+どれも、手順の判定は変えない。
+
+| 所 | 今回（Hyper-V の VM。Workstation、表示は日本語） | 過去の記録 |
+|---|---|---|
+| 手順 2 の dnf の文 | `パッケージ cifs-utils-7.7-1.el10_2.x86_64 は既にインストールされています。`・`行うべきことはありません。` | 2026-09-27 の VM（GenericCloud）は `Package cifs-utils-7.7-1.el10_2.x86_64 is already installed.`・`Nothing to do.` |
+| GNOME Files の節の手順 3 の問い | `認証が必要です`・`“<SERVER>”の共有名“<SHARE>”のパスワードを入力してください:` の後に、`Domain [SAMBA]:` と `Password:`（この 2 つは、英語のまま） | 2026-09-27 の VM は `Authentication Required`・`Enter password for share “<SHARE>” on “<SERVER>”:` の後に、同じ `Domain [SAMBA]:` と `Password:`。「操作上の注意と併記されていた記録」は「日本語の VM では日本語で表示された」と書いている（どの行が日本語だったかは、書いていない） |
+| GNOME Files の節の手順 4 のマウントの名前 | `<SERVER> 上の <SHARE>` | 2026-09-27 の VM は `<SHARE> on <SERVER>`。2026-10-06 のクリーンインストールの VM は、今回と同じ `<SERVER> 上の <SHARE>` |
+| GNOME Files の節の手順 4 の `ls` の行 | `'smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>'`（`'` で囲まれる） | 2026-09-27 の記録は、`'` の無い形で書いている |
+| 版 | `gvfs-smb`・`gvfs-fuse` は `1.54.4-4.el10_2.1`、kernel `6.12.0-211.64.1.el10_2` | 2026-09-27 の VM は `1.54.4-3.el10`・`6.12.0-211.56.1.el10_2`。2026-10-06 の VM は kernel `6.12.0-211.61.1.el10_2` |
+| 貼り方 | ブラケットペースト | 2026-10-06 の 2 回は、ブラケットペースト無し |
+| GNOME Files の画面 | `gio` でつないだ共有が、サイドバーに出て消えることだけを見た | 2026-10-06 の 2 回は、画面から「Network」→「Server address」でつなぎ、認証の画面と取り出しのボタンも操作した |
+
+#### 指摘と状態（Hyper-V、2026-10-11）
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 低 | 実施手順の手順 2 の箇条書き（`114c2b2` の `docs/samba-client.md:54`） | 入っているときの dnf の文が、日本語だった（`パッケージ cifs-utils-… は既にインストールされています。`）。箇条書きは、英語の `Package cifs-utils-… is already installed.` だけを書いていた | 手順書の書き方。OS の表示の言語で決まる（初期設定を通した PC は、日本語）。SSH にも Hyper-V にもよらないとみる（見立て） | 直した（日本語の文を先に書き、英語の文を括弧に入れた。文言だけ） |
+| 2 | 低 | GNOME Files の節の手順 4 の箇条書き（`:191`・`:192`） | マウントの名前が、日本語の形（`<SERVER> 上の <SHARE>`。英語の形と、順番が逆）だった。`ls` の行は、`'` で囲まれて出た | 手順書の書き方。名前は表示の言語で決まり、`'` は、`ls` が端末に出すときに付ける（見立て）。2026-10-06 の記録も、日本語の名前を書いている | 直した（日本語の形を書き、英語の形を括弧に入れた。`'` のことを足した。文言だけ） |
+| 3 | 低 | GNOME Files の節の手順 3 の箇条書き（`:175`） | `Domain [SAMBA]:` の前に、`認証が必要です` と、パスワードの入力を求める行の 2 行が出た。`Domain [SAMBA]:` と `Password:` は、日本語の表示でも英語のままだった。箇条書きは「英語では `Domain [SAMBA]:` と `Password:`」と書いていた | 手順書の書き方。gvfs の文の翻訳による（見立て）。2026-09-27 の英語の VM でも、前に `Authentication Required` と、パスワードの入力を求める行の 2 行が出ている | 直した（「英語では」を外し、前に出る 2 行のことを足した。1 行目は、日本語の文を書き、英語の文を括弧に入れた。文言だけ） |
+| 4 | 低 | GNOME Files の節の手順 1 の箇条書き（`:158`） | 今回は、2 つとも版が出たので、当たっていない。同じ VM の `rpm -q` は、入っていないパッケージに `パッケージ samba はインストールされていません` と出す（`peer2/guest-facts-start.txt`）。箇条書きは、英語の `package … is not installed` だけを書いていた | 手順書の書き方。指摘 1 と同じく、表示の言語で決まる。担当の報告は挙げていない（証跡と照らして気付いた） | 直した（日本語の文を先に書き、英語の文を括弧に入れた。文言だけ。gvfs が入っていない PC では、流していない） |
+
+- 環境と道具（手順書の指摘ではない）
+  - 検証の道具（VM を操作する層）にマウスの操作が無く、「ファイル」の `Server address` の欄にフォーカスを移せなかった。GNOME Files の節の、画面から開く側は進めていない
+  - 別の SSH から打つ `ausearch` は、`--input-logs` を付けないと監査ログを読まない（上の「SELinux の拒否」）。手順書のブロックの `ausearch` は、対話の端末に貼るので当たらない
+  - Default Switch の DNS に、クローン元の名前の登録が残った（上の表）
+
+#### 手順書を直した所（Hyper-V、2026-10-11）
+
+- `docs/samba-client.md` の実施手順の手順 2: 入っているときの文を、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）に（指摘 1）
+- 同じ文書の「GNOME Files で開く（任意）」の手順 1: 入っていないときの文を、`パッケージ … はインストールされていません`（英語の環境では `package … is not installed`）に（指摘 4）
+- 同じ節の手順 3: 「ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）」に（指摘 3）
+- 同じ節の手順 4: マウントの名前を `<SERVER> 上の <SHARE>`（英語の環境では `<SHARE> on <SERVER>`）に、`smb-share:…` の行に「端末では、`'` で囲まれて出る」を足した（指摘 2）
+- どれも文言だけの直し。コードブロックは変えていないので、貼り直す所は無い
+- 英語の環境の文は、2026-09-27 の VM の記録のもの。今回の VM では、英語の環境にして確かめていない
+- [ロールバックと注意点](../extra/samba-client.md)と[参考資料](../reference/samba-client.md)は、変えていない
+  - [注意点](../extra/samba-client.md#注意点)の「サーバーに届かないとき」の `ls: cannot open directory …` も英語の文だが、今回は当たっていないので、変えていない
+
+#### 報告と証跡の照合（Hyper-V、2026-10-11）
+
+- 12 手順の判定と、「確認」の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+- 報告だけにあって、証跡のファイルでは確かめられないもの
+  - GNOME Files の節の手順 3 のとき、SSH のシェルの `DBUS_SESSION_BUS_ADDRESS` が `unix:path=/run/user/<UID>/bus` で、`gvfsd` と `gvfsd-fuse` が動いていたこと
+  - パスワードを送る前に、入力待ちの端末のエコーが切れていること（`stty -a` の `-echo`）を、別の SSH で見たこと
+  - 21:17:27 JST に `/proc/self/mountinfo` を読んで、`<MOUNT_POINT>` が `autofs` の 1 行だけだったこと（同じことは、21:22:33 JST の `peer2/guest-facts-end.txt` にある）
+  - 「Network」の画面を出したコマンド（`nautilus network:///` と `nautilus -w x-network-view:///`）
+- 報告は、クライアントの VM のスナップショットを取っていない、と書いている（fstab の自動マウントの行と、root の資格情報ファイルが入ったまま、止めてある）
+
+#### 確かめていないこと（Hyper-V、2026-10-11）
+
+- GNOME Files の節の、画面から開く側: 「Network」→「Server address」に URL を入れて「接続」を押すこと、認証の画面と「期限なしで記憶する」（キーリングへの保存）、サイドバーの取り出しのボタン
+- コンソールでログインしていない状態での `gio mount`、GNOME Files の節の手順 2（gvfs を入れる側）
+- 手順 1 の `SHARE=root`・`SHARE=home`、`SMB_USER` がこの PC のユーザー名と違うとき、`SERVER` を DNS 名にしたとき
+- 各ブロックの `中断:` の側、手順 5 の `mount error(…)`、手順 6 を 2 回目に貼ったとき
+- クライアントの VM の再起動（起動の後に、自動マウントが有効になること）、Wi-Fi の切り替え、サスペンドからの復帰
+- サーバーに届かないときの待ち時間と表示、WireGuard 越し、Windows や NAS の共有
+- ロールバック、Windows 11 の節
+- デスクトップの端末（Ptyxis・WezTerm）に貼る形、ブラケットペーストが効かない端末
+- 監査ログのファイルを直接数える確かめ
+- 実機、aarch64。VMware と VirtualBox の VM では、この日は通していない
 
 ### 操作上の注意と併記されていた記録
 

@@ -14,6 +14,7 @@
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
 - [site.env を作る](#siteenv-を作る)の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
+  - `./wg-vpn.sh` で始まるブロックは、その項の最初のブロックの `cd` で移った先（`<REPO>/scripts/wireguard`）で貼る。項の途中でシェルを開き直したら、`REPO` を設定し直した後に `cd "$REPO/scripts/wireguard"` を打ってから続ける（`sudo: ./wg-vpn.sh: コマンドが見つかりません` と出たら、これが抜けている）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後: 外出先の PC をつなぐなら[AlmaLinux 10 の PC からつなぐ](#almalinux-10-の-pc-からつなぐ)・[Windows 11 で使う](#windows-11-で使う)、大きい通信だけ遅い・止まるなら[回線に合わせて MTU を下げる](#回線に合わせて-mtu-を下げる任意)、クライアントを消すなら[クライアントを削除する](#クライアントを削除する)、OS の入れ直しに備えるなら[バックアップと復旧](#バックアップと復旧os-の再インストール)、やめるなら[全部消す（ロールバック）](extra/wireguard.md#全部消すロールバック)
 
@@ -79,6 +80,8 @@
 1. 両拠点の WG ホストで、`apply` の実行予定の内容を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
    ```
 
@@ -179,6 +182,8 @@
    ```
 
    - 表示した QR コードを、この項の手順 8 でスマートフォンに読み取らせる
+   - `ERROR: qrencode がありません` と出て止まったら、`sudo dnf install -y qrencode` で入れてから、この手順を貼り直す
+     - AlmaLinux 10 では、`qrencode` は EPEL にある（EPEL は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)で有効にする）
 
 1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
@@ -201,6 +206,8 @@
 1. WG ホストで状態を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env status
    ```
 
@@ -358,12 +365,13 @@
    ```
 
    - **注意**: LAN 内でこの手順を貼ってしまうと、そこで通信が切れて、その後の手順を貼れなくなる。その場合は PC のコンソールで `sudo nmcli connection down wg0`
+   - 日本語の表示では、コメントの `activated` は `アクティベート済み`、`no` は `いいえ` と出る
    - 最後に、プロファイルの内容と秘密鍵の保存先を確認する。見るところは次のとおり
      - `ipv4.method` が `manual`
      - `ipv4.addresses` が `<CLIENT_TUN_IP>/32`
      - `ipv4.dns` が `--`
      - `wireguard.private-key` が `<hidden>`
-     - `wireguard.peer-routes` が `yes`
+     - `wireguard.peer-routes` が `yes`（日本語の表示では `はい`）
      - `wireguard.peers` に接続先拠点の公開鍵
 
 ### トンネルを確かめる
@@ -385,6 +393,8 @@
    }
    ```
 
+   - 日本語の表示では、コメントの `connected` は `接続済み`、`activated` は `アクティベート済み` と出る
+
 1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
 
    ```bash
@@ -395,6 +405,7 @@
    tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_LAN_IP> の順に出る
    ```
 
+   - `tracepath` の `<PEER_WG_LAN_IP>` の行が `!H` で終わっても、4 つの `ping` が `0% packet loss` なら届いている
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
    - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
 
