@@ -10,7 +10,7 @@
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
-共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/quick-start.md` の対応表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
+共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
 
 2026-10-06 の現行版再検証では、公式 ISO の Workstation クリーンインストールのスナップショットから 6 台の VM を新規作成し、`5da3478` の手順と共通 bash `3d5323e`、設定サブモジュールを前提から通した。結果は `docs/almalinux-vm-verification.md` の後半と各文書の `docs/verification/` の今回の付録にある。前半の `0dbb522` の結果と、従来の実機・コンテナの付録は別の履歴。実アカウント、Windows / bootc 固有の手順、VM が条件を満たさない入れ子の仮想化や MOK 登録は実施済みと扱わない。
 
