@@ -2946,7 +2946,7 @@
   - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる
   - Windows 11 は、[Windows 11 の初期設定の「Neovim」](windows-setup.md#neovim)の手順 3 で通す
   - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
-- インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm-offline.md](#npm-のオフライン導入-実施手順) を通す
+- インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm のオフライン導入](#npm-のオフライン導入-実施手順) を通す
 
 ---
 
@@ -3063,7 +3063,7 @@
 | `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
 | `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
 | `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の初期設定の更新](windows-setup.md#更新)） |
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](windows-setup.md#claude-code-の-remote-control-実施手順)） |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](windows-setup.md#claude-code-の-remote-control-実施手順)） |
 
 - `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
 - **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
@@ -3255,7 +3255,7 @@
    ```
 
    - `brew update` が `Already up-to-date.` を返し、`brew outdated` が無出力なら、上げるものは無いので、この節の手順 3 は飛ばす
-   - インターネットに出られないホストでは、[homebrew-offline.md の更新](#homebrew-のオフライン導入-更新)で行う
+   - インターネットに出られないホストでは、[Homebrew のオフライン導入の更新](#homebrew-のオフライン導入-更新)で行う
 
 1. 上げるものがあるときだけ、入れたものを上げる。
 
@@ -4295,7 +4295,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- x86_64 の PC では、公式クライアントの [dropbox.md](#dropbox-実施手順) を勧める（この手順も同じように動く）
+- x86_64 の PC では、公式クライアントの [Dropbox](#dropbox-実施手順) を勧める（この手順も同じように動く）
 
 1. brew で rclone を入れる。
 
@@ -4347,7 +4347,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    mkdir -p ~/.config/rclone ~/Dropbox
    cat > ~/.config/rclone/dropbox-filters.txt <<'EOF'
    # rclone bisync のフィルタ（書き方は https://rclone.org/filtering/ ）
-   # このファイルを変えたら、次の同期は --resync で行う（dropbox-rclone.md の「同期するフォルダを変える（任意）」）
+   # このファイルを変えたら、次の同期は --resync で行う（Dropbox と rclone の「同期するフォルダを変える（任意）」）
 
    # Dropbox が同期しないファイル（rclone の bisync の文書の例から）
    - .dropbox.attr
@@ -4542,7 +4542,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 
 > [!IMPORTANT]
-> - **x86_64 の PC で実行する**。Dropbox は Linux の ARM 版を出していないので、Raspberry Pi 5（aarch64）では [dropbox-rclone.md](#dropbox-と-rclone-実施手順) を使う
+> - **x86_64 の PC で実行する**。Dropbox は Linux の ARM 版を出していないので、Raspberry Pi 5（aarch64）では [Dropbox と rclone](#dropbox-と-rclone-実施手順) を使う
 > - **前提**: [linger](#ユーザーサービスの常駐-実施手順) を有効にしてあること（ログアウト中も Dropbox を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（デーモンは自分のホームに入り、同期するファイルの持ち主として動く）
 > - **手順 2 で止まる**（fingerprint の目視）
@@ -4562,7 +4562,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `uname -m` が `x86_64` ならよい
-   - **`aarch64` ならここで止め、[dropbox-rclone.md](#dropbox-と-rclone-実施手順) へ進む**
+   - **`aarch64` ならここで止め、[Dropbox と rclone](#dropbox-と-rclone-実施手順) へ進む**
    - `stat` が `xfs`・`ext2/ext3`（ext4 もこう出る）・`btrfs` のどれかなら、Dropbox が対応するファイルシステム
    - `df` の `Avail` が、Dropbox で使っている容量より大きいこと
 
@@ -5322,7 +5322,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      (umask 077; cat > ~/.local/bin/forgejo-auto-update <<'EOF'
    #!/usr/bin/python3 -I
    # setup-notes: forgejo
-   # Forgejo を公式の最新安定版へ自動で更新する（docs/forgejo.md の「自動更新を有効にする」の手順 1〜3）。
+   # Forgejo を公式の最新安定版へ自動で更新する（Forgejo の「自動更新を有効にする」の手順 1〜3）。
    # 新しい版があれば、停止バックアップ → イメージの行の更新 → 起動 → 確認を行う。
    # 確認に失敗したら直前のバックアップへ戻し、その版を保留する。
    # 終了コード: 0 最新・更新済み・停止中で何もしない / 1 変更せずに中断・保留中 / 2 戻して保留した / 3 戻せなかった
@@ -7203,11 +7203,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - [リモートログイン](#gnome-のリモートログイン-実施手順)とこの手順書のヘッドレスのセッションを併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
 - リモートログインの設定（システムのデーモン・証明書・資格情報・3389/tcp）は変えない
 - ヘッドレスのセッションで動いていたアプリは閉じる
-- [claude-code-gui.md](#claude-code-の-gnome-操作-実施手順) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
+- [Claude Code の GNOME 操作](#claude-code-の-gnome-操作-実施手順) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
 - やめた後は、リモートログインで入ると新しいセッションができる。切断してもセッションは残り、次のログインでそこへ戻る
-- ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [linger.md](#ユーザーサービスの常駐-実施手順) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
+- ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [ユーザーサービスの常駐](#ユーザーサービスの常駐-実施手順) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
 - 実施手順 1 の変数は、この節の手順 2 を行うときだけ要る
-- 元に戻すときは、[手順 2](#gnome-のヘッドレスセッション-実施手順)（ヘッドレスのセッションの RDP も使うなら手順 3〜10）と、[claude-code-gui.md 手順 1〜3](#claude-code-の-gnome-操作-実施手順)
+- 元に戻すときは、[手順 2](#gnome-のヘッドレスセッション-実施手順)（ヘッドレスのセッションの RDP も使うなら手順 3〜10）と、[Claude Code の GNOME 操作 手順 1〜3](#claude-code-の-gnome-操作-実施手順)
 
 1. 今の状態を確かめる。
 
@@ -7228,7 +7228,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `grdctl --headless status` では確かめない
    - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この節の手順 2 は飛ばす
-   - `ls` が `virtual-monitor.conf` を出せば、claude-code-gui.md のドロップインがある。`No such file or directory` なら、この節の手順 3 は飛ばす
+   - `ls` が `virtual-monitor.conf` を出せば、Claude Code の GNOME 操作のドロップインがある。`No such file or directory` なら、この節の手順 3 は飛ばす
    - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この節の手順 5 を行う。そうでなければ、この節の手順 5 は飛ばす
 
 1. ヘッドレスのセッションの RDP を設定してあるときだけ、その設定を外す。
@@ -7236,7 +7236,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - [手順 1](#gnome-のヘッドレスセッション-実施手順) の 2 つのブロックを貼ってから、[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 1（LAN に絞ったときは手順 2）・手順 3・手順 4 を順に貼る
    - ロールバックの手順 5 は貼らない（この節の手順 4 で行う）
 
-1. claude-code-gui.md のドロップインがあるときだけ、外す。
+1. Claude Code の GNOME 操作のドロップインがあるときだけ、外す。
 
    ```bash
    rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
@@ -7247,7 +7247,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
-   - claude-code-gui.md の[ロールバック](extra/claude-code-gui.md#ロールバック)の手順 2 は行わない
+   - Claude Code の GNOME 操作の[ロールバック](extra/claude-code-gui.md#ロールバック)の手順 2 は行わない
 
 1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
@@ -7290,7 +7290,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. クライアントの PC から、リモートログインでつなぎ直してログインする。
 
-   - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[gnome-remote-desktop.md 手順 11](#gnome-のリモートログイン-実施手順) と同じ）
+   - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[GNOME のリモートログイン 手順 11](#gnome-のリモートログイン-実施手順) と同じ）
    - 上部バーのあるデスクトップが、クライアントの窓の大きさで出ればよい
    - 切断してつなぎ直すと、同じデスクトップに戻る
    - **次の手順は、ログインし終えてから貼る**
@@ -7328,7 +7328,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[gnome-headless-session.md](#gnome-のヘッドレスセッション-実施手順)。この手順書と同じ PC で併用できる（ポートは 3390）
+- モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション-実施手順)。この手順書と同じ PC で併用できる（ポートは 3390）
 - PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有-実施手順)を通す。現行版・以前の版の実施範囲は[検証記録](verification/gnome-desktop-sharing.md)を参照する
   - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
@@ -7583,7 +7583,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `RDP server started` と出ればよい
-   - ヘッドレスのセッションは [gnome-headless-session.md](#gnome-のヘッドレスセッション-実施手順) のもの。無い PC では、この手順は飛ばす
+   - ヘッドレスのセッションは [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション-実施手順) のもの。無い PC では、この手順は飛ばす
 
 1. 元に戻すときは、ドロップインを消して読み込ませる。
 
@@ -8284,13 +8284,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
 > - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
 
-- 上から順に、ssh-socks-tunnel.md の手順 3 のシェルで貼る
+- 上から順に、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 3 のシェルで貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Neovim の Mason に npm のパッケージを入れるなら、手順 5 でトンネルを閉じる前に、このシェルで [npm-offline.md](#npm-のオフライン導入-実施手順) を貼る（npm は `ALL_PROXY` を読まない）
+- Neovim の Mason に npm のパッケージを入れるなら、手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入-実施手順) を貼る（npm は `ALL_PROXY` を読まない）
 
 > [!WARNING]
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[ssh-socks-tunnel.md の注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
+> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
 
 1. トンネルのシェルで、Homebrew の取得先に届くかと、Homebrew が使うパッケージを確かめる。
 
@@ -8307,7 +8307,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `rpm -q` の 4 つがどれも入っていれば、**手順 2 は飛ばし、手順 3 でも AlmaLinux 10 の初期設定の「Homebrew」の手順 1 を飛ばす**
    - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、手順 2 は飛ばす
 
-1. 手順 1 で入っていないパッケージがあったときだけ、[ssh-socks-tunnel.md の「dnf にもトンネルを使わせる（任意）」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)を行う。
+1. 手順 1 で入っていないパッケージがあったときだけ、[SSH の SOCKS トンネルの「dnf にもトンネルを使わせる（任意）」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)を行う。
 
    - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
 
@@ -8329,7 +8329,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - ほかの Homebrew 系の手順書も、手順 5 の前に、このシェルで貼る
    - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
-1. [ssh-socks-tunnel.md の「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜3 で、トンネルを閉じて、転送を付けずにログインし直す。
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜3 で、トンネルを閉じて、転送を付けずにログインし直す。
 
    - 同書のその節の手順 1 の `exit` の後、手順 2 のログインはオンラインのホストで行う
    - 同書のその節の手順 3 で、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
@@ -8350,7 +8350,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Homebrew のオフライン導入: 更新
 
-- [ssh-socks-tunnel.md の手順 1〜3](#ssh-の-socks-トンネル-実施手順) でトンネルを張り、同書の手順 3 のシェルで貼る
+- [SSH の SOCKS トンネルの手順 1〜3](#ssh-の-socks-トンネル-実施手順) でトンネルを張り、同書の手順 3 のシェルで貼る
 
 1. [AlmaLinux 10 の初期設定の更新](#更新)の手順 2・3 を貼る。
 
@@ -8358,7 +8358,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[手順 4](#homebrew-のオフライン導入-実施手順) と同じ確認）
    - **次の手順は、上げ終わってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
-1. [ssh-socks-tunnel.md の「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
 
 
 ---
@@ -8589,7 +8589,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 1 行目で `Version: 0.25.2` と `BuildSource: Homebrew` が出る
    - `/home/linuxbrew/.linuxbrew/bin/lazydocker` が出る
    - `unix:///run/user/<UID>/podman/podman.sock` と `OK` が出れば、lazydocker は podman の API ソケットにつなぐ
-   - 3 行目が空なら、`DOCKER_HOST` が無い。[podman.md の Docker 向けの節](#podman-docker-向けのツールから使う任意)を通す（参考資料を参照）
+   - 3 行目が空なら、`DOCKER_HOST` が無い。[Podman の Docker 向けの節](#podman-docker-向けのツールから使う任意)を通す（参考資料を参照）
 
 1. 画面で操作する、確認用のコンテナを動かす。
 
@@ -8924,7 +8924,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 で、オフラインのホストへ接続する
 > - 手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)も通す
-> - **前提**: 同じトンネルで、[homebrew-offline.md](#homebrew-のオフライン導入-実施手順) の Homebrew と、[Neovim](#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
+> - **前提**: 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入-実施手順) の Homebrew と、[Neovim](#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
 > - **手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
 > - 手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
@@ -8934,9 +8934,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!WARNING]
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](extra/ssh-socks-tunnel.md#注意点)）
+> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）
 
-1. ssh-socks-tunnel.md の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
+1. [SSH の SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
 
    ```bash
    sudo dnf install -y nodejs nodejs-npm
@@ -8944,7 +8944,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!` で終わる
    - `Failed to download metadata for repo` で止まったら、dnf がトンネルを通っていない
-     - `Curl error (6)`（名前を引けない）なら、ssh-socks-tunnel.md の[dnf にもトンネルを使わせる（任意）](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)の設定が無い
+     - `Curl error (6)`（名前を引けない）なら、SSH の SOCKS トンネルの[dnf にもトンネルを使わせる（任意）](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)の設定が無い
      - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（同書の手順 2 から張り直す）
 
 1. Node.js と npm を確かめ、npm にトンネルを使わせて、レジストリに届くか確かめる。
@@ -8965,7 +8965,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `npm config get` の 2 行は、どちらも `null`
    - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される
    - `npm notice PONG 148ms` のように `PONG` が出れば、npm はトンネルを通ってレジストリに届いている
-   - **トンネルを張り直したら、ssh-socks-tunnel.md の手順 3 に続けて、この手順を貼り直す**
+   - **トンネルを張り直したら、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 3 に続けて、この手順を貼り直す**
 
 1. 手順 2 のシェルで Neovim でファイルを開き、Mason に足りないパッケージを入れさせる。
 
@@ -8983,7 +8983,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
-1. [ssh-socks-tunnel.md の「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
 
    - その節の手順 1（`exit`）はオフラインのホストで、手順 2 はオンラインのホストで貼る
    - オンラインのホストのシェルで同書の手順 1 の変数が消えていたら（新しいシェルなど）、先に同書の手順 1 を貼る
@@ -9008,7 +9008,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### npm のオフライン導入: 更新
 
-- [ssh-socks-tunnel.md 手順 1〜3](#ssh-の-socks-トンネル-実施手順) でトンネルを張り、そのシェルで[手順 2](#npm-のオフライン導入-実施手順) を貼ってから、この節を貼る
+- [SSH の SOCKS トンネル 手順 1〜3](#ssh-の-socks-トンネル-実施手順) でトンネルを張り、そのシェルで[手順 2](#npm-のオフライン導入-実施手順) を貼ってから、この節を貼る
 - Node.js と npm は `sudo dnf upgrade` でも上がる（トンネルか、dnf が届くリポジトリが要る）
 
 1. Node.js と npm を上げる。
@@ -9058,7 +9058,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- PC を再起動しても動かしておきたいものは、compose ではなく [podman.md の Quadlet](#podman-quadlet-で自動起動する任意) で動かす（[注意点](extra/podman-compose.md#注意点)）
+- PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する任意) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -9416,7 +9416,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ### Podman: Docker 向けのツールから使う（任意）
 
 - Docker の API に `DOCKER_HOST` でつなぐツール（[lazydocker](#lazydocker-実施手順) など）のための設定
-- [image-tools.md](#画像の道具-実施手順) の dive と Trivy、[podman-tui](#podman-tui-実施手順) は podman を直接読むので、この節は要らない
+- [画像の道具](#画像の道具-実施手順) の dive と Trivy、[podman-tui](#podman-tui-実施手順) は podman を直接読むので、この節は要らない
 
 1. 共通設定を読み直し、ソケットが Docker の API に答えるか確かめる。
 
@@ -9562,7 +9562,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](windows-setup.md#samba-クライアント-windows-11-で使う)を、管理者ではない Windows PowerShell 5.1 で通す
 > - **クライアントの PC で、自分のユーザーのシェルで貼る**。`sudo -i` した root のシェルでは貼らない（`$(id -u)` が 0 になり、マウントしたファイルが root の所有に見えるため）
-> - 前提: サーバーで [samba.md](#samba-サーバー-実施手順) の手順を終えていること（Windows や NAS の共有でもよい）
+> - 前提: サーバーで [Samba サーバー](#samba-サーバー-実施手順) の手順を終えていること（Windows や NAS の共有でもよい）
 > - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -9571,12 +9571,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
    ```bash
-   SERVER=192.168.1.10                  # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（samba.md の SERVER_IP）。<SERVER>
+   SERVER=192.168.1.10                  # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
    ```
 
    ```bash
-   SMB_USER=${USER}                     # サーバーの Samba ユーザー。samba.md のサーバーなら、サーバーの OS のユーザー名。<SMB_USER>
-   SHARE=${SMB_USER}                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
+   SMB_USER=${USER}                     # サーバーの Samba ユーザー。AlmaLinux の「Samba サーバー」の設定なら、サーバーの OS のユーザー名。<SMB_USER>
+   SHARE=${SMB_USER}                    # 共有名。Samba サーバーの [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
    MOUNT_POINT=/mnt/${SHARE}            # マウント先（無ければ手順 5 で作る）。<MOUNT_POINT>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in SERVER USER SMB_USER SHARE MOUNT_POINT; do
@@ -9586,8 +9586,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 編集が必須なのは `SERVER` だけ
    - サーバーのユーザー名がこの PC と違うとき、NAS や Windows の共有のときは、`SMB_USER` と `SHARE` も書き換える
-   - samba.md の[root のホーム](#samba-サーバー-root-のホームも公開する任意)につなぐときは、`SHARE` を `root` に書き換える（`SMB_USER` は自分のまま）
-   - samba.md の[/home](#samba-サーバー-home-も公開する任意)につなぐときは、`SHARE` を `home` に書き換える（`SMB_USER` は自分のまま）
+   - Samba サーバーの[root のホーム](#samba-サーバー-root-のホームも公開する任意)につなぐときは、`SHARE` を `root` に書き換える（`SMB_USER` は自分のまま）
+   - Samba サーバーの[/home](#samba-サーバー-home-も公開する任意)につなぐときは、`SHARE` を `home` に書き換える（`SMB_USER` は自分のまま）
    - 最後に値を読み戻して確かめる
    - `SERVER` を書き換えたかをここで確かめる
    - `USER` が `root` なら、ここで止めて、自分のユーザーのシェルで貼り直す
@@ -9608,7 +9608,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 入っていれば、`Package cifs-utils-… is already installed.` と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
-   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[samba.md 手順 5・8](#samba-サーバー-実施手順)）を確かめる
+   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー-実施手順)）を確かめる
    - 外出先から使うなら、先に WireGuard のトンネルを張る（[注意点](extra/samba-client.md#注意点)）
 
 1. 資格情報ファイルを作るため、共有のパスワードを入力する。
@@ -9617,7 +9617,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    IFS= read -rsp "Samba password for ${SMB_USER}@${SERVER}: " PW; echo
    ```
 
-   - samba.md のサーバーなら、[samba.md 手順 6](#samba-サーバー-実施手順) で `smbpasswd -a` に入れたパスワード
+   - AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー 手順 6](#samba-サーバー-実施手順) で `smbpasswd -a` に入れたパスワード
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
 1. 資格情報ファイルを、root だけが読めるように置く。
@@ -9653,7 +9653,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1` を含む）、続いて `cifs write` が出ればよい
    - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`
    - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は[検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)）
-   - `SHARE=home`（samba.md の `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる。`findmnt` の行が出ていればよい
+   - `SHARE=home`（Samba サーバーの `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる。`findmnt` の行が出ていればよい
 
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
 
@@ -9896,7 +9896,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `<SERVER_IP>` と `<USER>` は値に読み替える
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
-     - ドライブ文字に割り当てて、サインインのたびにつなぐなら、[samba-client.md の Windows 11 で使う](windows-setup.md#samba-クライアント-windows-11-で使う)
+     - ドライブ文字に割り当てて、サインインのたびにつなぐなら、[Samba クライアントの Windows 11 で使う](windows-setup.md#samba-クライアント-windows-11-で使う)
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
    - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: AlmaLinux 10 なら[Samba クライアント](#samba-クライアント-実施手順)を通す（自動マウント・GNOME Files）
@@ -9976,7 +9976,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - [手順 9](#samba-サーバー-実施手順) の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`
-   - AlmaLinux 10 の PC なら、[samba-client.md](#samba-クライアント-実施手順) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
+   - AlmaLinux 10 の PC なら、[Samba クライアント](#samba-クライアント-実施手順) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
 1. 元に戻すときは、`[root]` の節とモジュールを消し、smb.service を再起動する。
 
@@ -10621,7 +10621,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### SSH の SOCKS トンネル: dnf にもトンネルを使わせる（任意）
 
-- オフラインのホストで、dnf で外のリポジトリから入れるときだけ行う（[homebrew-offline.md](#homebrew-のオフライン導入-実施手順) では、Homebrew の依存が足りないとき）
+- オフラインのホストで、dnf で外のリポジトリから入れるときだけ行う（[Homebrew のオフライン導入](#homebrew-のオフライン導入-実施手順) では、Homebrew の依存が足りないとき）
 - 社内のミラーなど、dnf がトンネル無しで届くリポジトリを使うホストでは行わない（その通信もトンネルに向かってしまう）
 - 手順 3 のシェルで貼る。足した行は、[ロールバック](extra/ssh-socks-tunnel.md#ロールバック)で消すまで残る
 
@@ -10908,7 +10908,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `ST_ALLOW_FROM` には、送信元を空白区切りで入れる
-   - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されないまま `success` で受理される（[samba.md](#samba-サーバー-実施手順) と同じ落とし穴）
+   - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されないまま `success` で受理される（[Samba サーバー](#samba-サーバー-実施手順) と同じ落とし穴）
 
 1. 元に戻すときは、絞ったときと同じ `ST_ALLOW_FROM` を入れてから、`syncthing-gui` の開放に戻す。
 
@@ -11268,7 +11268,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    mkdir -p ~/vbox-ga-image
    cat > ~/vbox-ga-image/Containerfile <<'EOF'
-   # VirtualBox Guest Additions を焼き込んだ派生イメージ（docs/virtualbox-guest-bootc.md）
+   # VirtualBox Guest Additions を焼き込んだ派生イメージ（VirtualBox の bootc ゲスト）
    ARG BASE_IMAGE=quay.io/almalinuxorg/atomic-desktop-gnome:10
 
    FROM scratch AS ctx
@@ -11437,7 +11437,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    modinfo -F signer vboxguest
    ```
 
-   - モジュールが読み込まれていないときは、secure-boot-mok.md の手順 7 で鍵が登録されているか見る（手順 8 の補足の表）
+   - モジュールが読み込まれていないときは、[Secure Boot の署名鍵](#secure-boot-の署名鍵-実施手順)の手順 7 で鍵が登録されているか見る（手順 8 の補足の表）
 
 ---
 
@@ -11448,12 +11448,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
   - そのままの手順 6 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
 - ホスト（VirtualBox を動かしている PC）で派生イメージをビルドし、1 つのファイルにして ssh で VM に運ぶ。VM はインターネットに出ない
   - ビルドの材料（手順 3 の Containerfile と、手順 5 でコピーしたインストーラ）は、VM から写して使う
-- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[podman.md](#podman-実施手順) の手順 1〜6）
+- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[Podman](#podman-実施手順) の手順 1〜6）
   - Windows ホストでは WSL の AlmaLinux 10 の端末で行う。既定の NAT でホストオンリーの VM に届くことを確認済み
   - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする任意)での接続は未確認
 - 手順 6 と違うところ:
   - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この節の手順 6）
-  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この節の手順 3・4。登録は secure-boot-mok.md の手順 5〜7）
+  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この節の手順 3・4。登録は [Secure Boot の署名鍵](#secure-boot-の署名鍵-実施手順)の手順 5〜7）
   - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
 - この節の手順 1・4・9・10 は VM の端末（先に[手順 1](#virtualbox-の-bootc-ゲスト-実施手順) を貼っておく）、手順 2・3・5〜8・11 はホストの端末に貼る
 - ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 2 の代わりに、この節の手順 5・7〜9。元のイメージに戻すときは、この節の手順 10・11
@@ -11496,7 +11496,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - Secure Boot が有効かは、VM で [secure-boot-mok.md 手順 3](#secure-boot-の署名鍵-実施手順) の `mokutil --sb-state` で見たもの
+   - Secure Boot が有効かは、VM で [Secure Boot の署名鍵 手順 3](#secure-boot-の署名鍵-実施手順) の `mokutil --sb-state` で見たもの
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）が並び、`scp` が `MOK.der` を VM のホームに送る
    - **秘密鍵 `MOK.priv` はホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない**。VM へ送るのは証明書 `MOK.der` だけ
    - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
@@ -11516,12 +11516,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `MOK.der` だけが並ぶ（秘密鍵は VM に置かない）
-   - 置き場所は [secure-boot-mok.md 手順 4](#secure-boot-の署名鍵-実施手順) と同じなので、同書の手順 7 と[ロールバック](extra/secure-boot-mok.md#ロールバック)はそのまま使える
-   - `MOK.priv` も並ぶなら、[secure-boot-mok.md 手順 4](#secure-boot-の署名鍵-実施手順) で VM に作った鍵が残っている。この節ではホストの鍵で署名するので、使われない
-   - **一時パスワードを 2 回聞かれる**（secure-boot-mok.md の手順 6 の MokManager で 1 回だけ使う。本書には残さない）
-   - 続けて、VM で [secure-boot-mok.md 手順 5〜7](#secure-boot-の署名鍵-実施手順) を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
+   - 置き場所は [Secure Boot の署名鍵 手順 4](#secure-boot-の署名鍵-実施手順) と同じなので、同書の手順 7 と[ロールバック](extra/secure-boot-mok.md#ロールバック)はそのまま使える
+   - `MOK.priv` も並ぶなら、[Secure Boot の署名鍵 手順 4](#secure-boot-の署名鍵-実施手順) で VM に作った鍵が残っている。この節ではホストの鍵で署名するので、使われない
+   - **一時パスワードを 2 回聞かれる**（[Secure Boot の署名鍵](#secure-boot-の署名鍵-実施手順)の手順 6 の MokManager で 1 回だけ使う。本書には残さない）
+   - 続けて、VM で [Secure Boot の署名鍵 手順 5〜7](#secure-boot-の署名鍵-実施手順) を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
    - 同書の手順 7 の後、この節の手順 5 はホストの端末で貼る（VM の端末を開き直したら、[手順 1](#virtualbox-の-bootc-ゲスト-実施手順) を貼り直す）
-   - **次の手順（secure-boot-mok.md 手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順（Secure Boot の署名鍵 手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. ホストの端末で、ビルドの材料と、署名を確かめる設定を VM から写す。
 
@@ -12037,7 +12037,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - この節は AlmaLinux 10 だけのもの（Windows 11 のドライバーは、ビルド済みのものをインストーラが入れる）
 - `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
-- **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [secure-boot-mok.md](#secure-boot-の署名鍵-実施手順) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
+- **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [Secure Boot の署名鍵](#secure-boot-の署名鍵-実施手順) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
   - スクリプトは、動いているカーネル用の vbox のモジュールが無ければ、その場でビルドする
   - 最後に「もう入っていないカーネル」用のモジュールを消す
 

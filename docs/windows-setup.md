@@ -4512,7 +4512,7 @@
 
 1. Remote Control のタスクを動かしているときだけ、先にタスクを止める。
 
-   - [windows-claude-remote-control.md の止める・もう一度始める](#claude-code-の-remote-control-止めるもう一度始める)の手順 1 を行う
+   - [Claude Code の Remote Control の止める・もう一度始める](#claude-code-の-remote-control-止めるもう一度始める)の手順 1 を行う
    - タスクの Claude Code と WezTerm（中のシェルは Git Bash）は、Git for Windows と WezTerm を上げる間は止めておく。上げた後に、この項の手順 7 で始め直す
 
 1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。
@@ -4569,7 +4569,7 @@
 
 1. この項の手順 1 でタスクを止めたときだけ、タスクを始め直す。
 
-   - [windows-claude-remote-control.md の止める・もう一度始める](#claude-code-の-remote-control-止めるもう一度始める)の手順 2 を行う
+   - [Claude Code の Remote Control の止める・もう一度始める](#claude-code-の-remote-control-止めるもう一度始める)の手順 2 を行う
 
 ---
 
@@ -5796,7 +5796,7 @@
 > [!IMPORTANT]
 > - **Windows の手順は、この項の手順 1 で開く管理者ではない Windows PowerShell 5.1 に貼る**。更新・ロールバックも同じ窓を使う
 > - 管理者の窓で割り当てたドライブは、エクスプローラーに出ない
-> - 前提: サーバーで [samba.md](almalinux-setup.md#samba-サーバー-実施手順) の手順を終えていること
+> - 前提: サーバーで [Samba サーバー](almalinux-setup.md#samba-サーバー-実施手順) の手順を終えていること
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
 > - **この項の手順 4 には対話入力がある**（共有のパスワード）。入力し終えてから手順 5 を貼る
 > - **この項の手順 7 はサーバーのシェルで、手順 8 はこの PC で行う**（サインアウトしてサインインし直す）
@@ -5804,7 +5804,7 @@
 - 上から順にコードブロックを貼る。Windows の手順は、この項の手順 2 で変数を設定した PowerShell に、この項の手順 7 はサーバーのシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは、Windows の資格情報マネージャーに置く
-- samba.md の `[root]`・`[home]` も割り当てるなら、この節を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
+- Samba サーバーの `[root]`・`[home]` も割り当てるなら、この節を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5814,15 +5814,15 @@
 1. 変数を設定する（`SERVER` と `SMB_USER` は必ず値を入れる）。
 
    ```powershell
-   $SERVER = ''                          # ← サーバーの IP アドレスか DNS 名（samba.md の SERVER_IP）。<SERVER>
+   $SERVER = ''                          # ← サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
    ```
 
    ```powershell
-   $SMB_USER = ''                        # ← サーバーの Samba ユーザー（samba.md のサーバーなら、サーバーの OS のユーザー名）。<SMB_USER>
+   $SMB_USER = ''                        # ← サーバーの Samba ユーザー（AlmaLinux の「Samba サーバー」の設定なら、サーバーの OS のユーザー名）。<SMB_USER>
    ```
 
    ```powershell
-   $SHARE = $SMB_USER                    # 共有名。samba.md の [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
+   $SHARE = $SMB_USER                    # 共有名。Samba サーバーの [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
    $DRIVE = 'Z:'                         # 割り当てるドライブ文字（コロンまで書く）。<DRIVE>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'SERVER   = {0}' -f $SERVER
@@ -5860,7 +5860,7 @@
 
    - `<SERVER> の 445/tcp に届く。<DRIVE> は空いている` と、`<SERVER>` の資格情報の一覧が出ればよい
    - 一覧にある `<SERVER>` の保存済み資格情報は、この項の手順 4 で置き換わり、[ロールバック](extra/samba-client.md#windows-11-のロールバック)の手順 2 で消える
-   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[samba.md 手順 5・8](almalinux-setup.md#samba-サーバー-実施手順)）を確かめる。外出先なら、先に WireGuard のトンネルを張る
+   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](almalinux-setup.md#samba-サーバー-実施手順)）を確かめる。外出先なら、先に WireGuard のトンネルを張る
    - `もう使われている` ときは、`DRIVE` を別の文字にして、この項の手順 2 の 3 つ目のブロックを貼り直す。前にこの節で同じ共有を割り当てたなら、この節は済んでいる
 
 1. 資格情報マネージャーに、共有のユーザー名とパスワードを登録する。
@@ -5874,7 +5874,7 @@
    }
    ```
 
-   - パスワードを聞かれる。samba.md のサーバーなら、[samba.md 手順 6](almalinux-setup.md#samba-サーバー-実施手順) で `smbpasswd -a` に入れたパスワード
+   - パスワードを聞かれる。AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー 手順 6](almalinux-setup.md#samba-サーバー-実施手順) で `smbpasswd -a` に入れたパスワード
    - 資格情報を追加した旨の 1 行が出ればよい
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
@@ -5911,7 +5911,7 @@
    ```
 
    - 共有の中の名前（5 つまで。隠しファイルは出ない）、`smb write`、`False` の順に出ればよい
-   - `SHARE=home`（samba.md の `[home]`）では、書き込みが拒否される。名前の一覧が出ていればよい
+   - `SHARE=home`（Samba サーバーの `[home]`）では、書き込みが拒否される。名前の一覧が出ていればよい
 
 1. サーバーで、署名付きの SMB3_11 でつながっていることを確かめる。
 
@@ -5921,7 +5921,7 @@
 
    - サーバーのシェルに貼る
    - この PC の IP アドレスの行の `Protocol Version` が `SMB3_11` で、`Signing` が `AES-128-GMAC` などの方式の名前だけ（`partial(…)` でも `-` でもない）ならよい
-   - `Encryption` は `-`（LAN の上の通信は暗号化されない。[samba.md の注意点](extra/samba.md#注意点)）
+   - `Encryption` は `-`（LAN の上の通信は暗号化されない。[Samba サーバーの注意点](extra/samba.md#注意点)）
    - Windows 11 Home の PC では、`Signing` が `partial(…)` か `-` になりうる（[注意点](extra/samba-client.md#注意点)）
    - この PC の行が無ければ、エクスプローラーかこの PC の PowerShell で `<DRIVE>` を開いてから、貼り直す
 
@@ -5937,7 +5937,7 @@
 ### Samba クライアント: Windows 11 の更新
 
 - SMB のクライアントは Windows に入っているもので、Windows Update で上がる。この節で上げるものは無い
-- Samba のパスワードを変えたとき（samba.md では `sudo smbpasswd <SMB_USER>`）だけ、この項の手順を行う
+- Samba のパスワードを変えたとき（Samba サーバー では `sudo smbpasswd <SMB_USER>`）だけ、この項の手順を行う
 - この項の手順 1 は、[Windows 11 で使う](#samba-クライアント-windows-11-で使う)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
 
 1. Samba のパスワードを変えたときだけ、資格情報を登録し直す。
@@ -6471,7 +6471,7 @@
 - 7.2 の中の更新も、系列が変わる更新（7.3 など。まだ出ていない）も、winget の同じ ID（`Oracle.VirtualBox`）で上がる。AlmaLinux 10 と違い、名前に系列が入らない
 - VirtualBox マネージャーも、決まった間隔で新しい版を確かめる（環境設定の Update のタブ。マニュアル）。入れ替えは、この項の手順で行う
 - **更新の途中でも、ネットワークがいったん切れるはず**（ドライバーを入れ直すため）
-- VM の中の Guest Additions は、この節では上がらない（Atomic Desktop の VM は [virtualbox-guest-bootc.md の更新](almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)）
+- VM の中の Guest Additions は、この節では上がらない（Atomic Desktop の VM は [VirtualBox の bootc ゲストの更新](almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)）
 
 1. VirtualBox の VM と VirtualBox マネージャーをすべて閉じる。
 
