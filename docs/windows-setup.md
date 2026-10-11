@@ -44,6 +44,7 @@
   - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
   - Windows Terminal のフォントは[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
   - OpenSSH サーバーは、鍵でも入るなら[OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)、その後にパスワードを受け付けないなら[OpenSSH サーバーのパスワード認証を切る（任意）](#openssh-サーバーのパスワード認証を切る任意)、ログインのシェルを Git Bash にするなら[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)、scoop のツールが SSH のセッションで起動しないなら[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)
+  - SSH から管理者・非管理者の PowerShell を同じユーザーで使うなら、[SSH で管理者・非管理者の PowerShell を使う（任意）](#ssh-で管理者非管理者の-powershell-を使う任意)
   - PowerShell などから起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら[Neovim を既定のエディタにする（任意）](#neovim-を既定のエディタにする任意)
   - Git for Windows の既定（`core.autocrlf=true`）のまま clone したリポジトリ（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3 より前に clone したもの）があれば、[AlmaLinux 10 の初期設定の「改行を変換して clone したリポジトリを直す」](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を、Git Bash でそのリポジトリに行う
   - starship・fzf・eza・bat・WezTerm・git-delta・Neovim・lazygit・yazi・Codex CLI・Grok Build の使い方と設定ファイル、Claude Code の使い方は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（両 OS で同じ）。Git Bash のタブに、同じブロックを貼る
@@ -1440,6 +1441,7 @@
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
      - [SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<WIN_USER>` だけを出す
    - `exit` でクライアントのシェルに戻る
+   - Git Bash を既定にした後、PowerShell の操作をするなら、[SSH で管理者・非管理者の PowerShell を使う（任意）](#ssh-で管理者非管理者の-powershell-を使う任意)を行う
    - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（[注意点](extra/windows-setup.md#注意点)）
    - WSL の AlmaLinux 10 をクライアントにしたときは、続けてもう一度 `exit` を打ち、PowerShell に戻る
    - **次の手順は、`exit` で PowerShell に戻ってから貼る**（続けて貼ると Windows の cmd への入力として食われる）
@@ -3976,6 +3978,178 @@
 
    - 鍵を登録していなければ、パスワードを聞かれる
    - `zoxide 0.9.9` のような版が出て、`Shim:` で始まる行が出なければよい（`zoxide` の代わりに、scoop で入れたほかのツールでもよい）
+
+---
+
+## SSH で管理者・非管理者の PowerShell を使う（任意）
+
+- 前提: [OpenSSH サーバー](#openssh-サーバー)、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)を通してあること。Windows のログインユーザーは Administrators の一員
+- 接続元は Linux または Windows の WezTerm。手順 2 は接続元の Bash、手順 3・4 は SSH 先の Git Bash、手順 5〜11 は SSH 先の PowerShell、手順 12 は SSH 先の Git Bash に貼る
+- 管理者の親 PowerShell から、同じユーザーの非管理者の子 PowerShell を開く。子で `exit` すると管理者の親へ戻るので、手順 10 の後は権限を確かめてから操作する
+- Windows PowerShell 5.1 を基本にする。PowerShell 7 を使うときは、[アプリを入れる](#アプリを入れる)の手順 5 も前提にし、手順 3 の代わりに手順 4 を行う
+- 手順 6 の貼り付け確認が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない。貼り付けには右クリックか Ctrl+Shift+V を使い、Enter は内容を確かめてから押す
+- SSH の貼り付けは UTF-8 で 64 KiB（65,536 バイト）まで。超える本文は貼り付けず通知が出るので、ブロックを分ける
+- 大きなブロックは入力欄に入るまで数十秒から 1 分以上かかることがある。受信中は次のコマンドを貼らず、挿入された内容を確かめてから Enter を押す
+- 降格用の実行ファイルは x64 用の固定版を専用の場所へ置く。ARM64 の Windows では手順 7 を行わない
+- [検証記録](verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+
+1. 接続元と Windows の両方で、WezTerm の設定を更新する。
+
+   - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
+   - [WezTerm の設定の更新](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#更新)をそれぞれの PC で行い、接続元の WezTerm を開き直す
+   - 接続元の Linux では、Wayland のときは `wl-paste`、X11 のときは `xclip` が必要。導入は[Windows の SSH 先で PowerShell に貼り付ける手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#windows-の-ssh-先で-powershell-に貼り付ける任意)に従う
+   - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
+   - **次の手順は、接続元の WezTerm の Bash に貼る**
+
+1. 接続元の Bash で、Windows にログインする。
+
+   ```bash
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh "${WIN_USER}@${WIN_HOST}"
+   fi
+   ```
+
+   - `WIN_HOST`・`WIN_USER` は[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値。新しいシェルなら、同じ項の手順 3 のブロックを先に貼る
+   - この検証環境では SSH の接続名 `surface` を設定済みなので、上のブロックの代わりに `ssh surface` でも入れる
+   - Windows の Git Bash の `$` のプロンプトが出ればよい。cmd のプロンプトなら、前提の既定シェルの設定を確かめる
+   - 5.1 を使うなら手順 3、7 を使うなら手順 3 を飛ばして手順 4 へ進む
+   - **次の手順は、ログインした Windows の Git Bash に貼る**（続けて貼ると、パスワードなどの入力として食われる）
+
+1. 5.1 を使うときは、SSH 先の Git Bash で統合を読み、PowerShell を開く。
+
+   ```bash
+   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
+     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
+   else
+     export TERM_PROGRAM=WezTerm
+     . ~/.config/wezterm/shell/wezterm.sh
+     powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   fi
+   ```
+
+   - `PS C:\Users\…>` のプロンプトが出ればよい。読み込みエラーが出たら、そこで止めて設定の更新と実行ポリシーを確かめる
+   - 手順 4 は飛ばす
+   - **次の手順 5 は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. 7 を使うときは、手順 3 の代わりに Git Bash から PowerShell を開く。
+
+   ```bash
+   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
+     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
+   else
+     export TERM_PROGRAM=WezTerm
+     . ~/.config/wezterm/shell/wezterm.sh
+     pwsh.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   fi
+   ```
+
+   - `PS C:\Users\…>` のプロンプトが出ればよい。`pwsh.exe: command not found` なら、PowerShell 7 の導入と PATH を確かめる
+   - **次の手順は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. SSH 先の PowerShell で、版・ユーザー・管理者の権限を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq 'WezTermSshPaste'; & "$env:WINDIR\System32\whoami.exe" /groups
+   ```
+
+   - `Version` が 5.1 または 7 の版、`User` がこの Windows のユーザー、`Admin : True` が出ればよい。`User` の値を控える
+   - Ctrl+Shift+F12 の `Function` が `WezTermSshPaste` の行が出ることを確かめる。出ないなら、設定を更新し、手順 2 からやり直す
+   - `whoami.exe /groups` の `S-1-16-12288` は High、`S-1-5-32-544` は Administrators で、有効なグループとして出る
+   - `Admin : False` なら管理者の操作と手順 7・8 は行わず、ログインユーザーを確かめる
+
+1. 管理者の PowerShell で、無害な複数行を右クリックか Ctrl+Shift+V で貼る。
+
+   ```powershell
+   "ssh-paste: first"
+
+   "ssh-paste: 日本語"
+   ```
+
+   - Enter を押す前は、2 行の式と間の空行 1 行が入力欄にあり、結果はまだ出ない
+   - Enter を 1 回押すと、`ssh-paste: first` と `ssh-paste: 日本語` が順に 1 回ずつ出る
+   - 空行が増える、途中で実行される、通知が出て貼れない場合は先へ進まない。接続元・Windows の両方の設定、Linux のクリップボード取得コマンドを確かめる
+
+1. 管理者の PowerShell で、降格用の固定版を照合して配置する。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw '中断: 管理者の親 PowerShell で行う' }
+     if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw '中断: この手順は x64 の Windows 用' }
+     $exe = Join-Path $env:LOCALAPPDATA 'setup-notes\bin\busybox.exe'
+     $expected = '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075'
+     if (Test-Path -LiteralPath $exe) {
+       if ((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne $expected) { throw '中断: 専用の場所に別のファイルがある。上書きしない' }
+     } else {
+       $temp = [IO.Path]::GetTempFileName()
+       try {
+         Invoke-WebRequest -UseBasicParsing -Uri 'https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe' -OutFile $temp
+         if ((Get-FileHash -LiteralPath $temp -Algorithm SHA256).Hash -ne $expected) { throw '中断: ダウンロードしたファイルの SHA-256 が違う' }
+         New-Item -ItemType Directory -Path (Split-Path -Parent $exe) -Force | Out-Null
+         Move-Item -LiteralPath $temp -Destination $exe
+       } finally {
+         if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
+       }
+     }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-FileHash -LiteralPath $exe -Algorithm SHA256 | Format-List
+     & $exe --help | Select-Object -First 1
+   }
+   ```
+
+   - `Hash` が `07BB1E5B…78F075`、`Path` が `%LOCALAPPDATA%\setup-notes\bin\busybox.exe`、版の行に `FRP-6075-g169694ebd` が出ればよい
+   - SHA-256 が違う、取得できない、別のファイルがある場合は、配置せず止まる
+   - 普段の PATH や PowerShell のプロファイルは変えない
+
+1. 管理者の親 PowerShell で、非管理者の子 PowerShell を開く。
+
+   ```powershell
+   if ((Get-FileHash -LiteralPath "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" -Algorithm SHA256).Hash -ne '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075') { throw '中断: 降格用実行ファイルの SHA-256 が違う' }
+   & "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" drop -- powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   ```
+
+   - 7 を使っているなら、起動コマンドの `powershell.exe` を `pwsh.exe` にして貼る
+   - `--` は必ず付ける
+   - 新しい PowerShell のプロンプトが出ればよい。`drop` や統合のエラーが出たら、そのまま非管理者の操作を始めない
+   - **次の手順は、新しく開いた非管理者の子 PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. 非管理者の子 PowerShell で、ユーザーと実効権限を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; & "$env:WINDIR\System32\whoami.exe" /groups
+   ```
+
+   - `User` が手順 5 と同じで、`Admin : False` が出ればよい
+   - `S-1-16-8192` は Medium、`S-1-5-32-544` は Administrators で「拒否のみに使用するグループ」（英語では `Group used for deny only`）として出る
+   - どれかが違う場合は非管理者の操作を始めず、`exit` で親へ戻る
+   - この節の手順 6 のブロックも貼り、Enter の前には実行されず、Enter の後に 1 回だけ出ることを確かめてから、通常の権限で行う操作を貼る
+
+1. 非管理者の操作を終えたら、子 PowerShell を閉じる。
+
+   ```powershell
+   exit
+   ```
+
+   - 管理者の親 PowerShell のプロンプトに戻る
+   - **次の手順は、親 PowerShell のプロンプトに戻ってから貼る**（続けて貼ると、子への入力として食われる）
+
+1. 親 PowerShell で、管理者の権限に戻ったことを確かめて閉じる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List
+   ```
+
+   - `User` が手順 5 と同じで、`Admin : True` なら管理者の操作を再開できる
+   - 今回の操作を終えるなら `exit` を打ち、SSH 先の Git Bash へ戻る
+   - **次の手順は、SSH 先の Git Bash に戻ってから貼る**（続けて貼ると、PowerShell の入力として食われる）
+
+1. SSH 先の Git Bash で、SSH の接続を閉じる。
+
+   ```bash
+   exit
+   ```
+
+   - 接続元のプロンプトに戻ればよい
 
 ---
 
