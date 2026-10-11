@@ -19,7 +19,7 @@
 ### 実施手順 / システムの設定 / 手順 1: 補足: 変数の意味
 
 - `HOST_NAME` は、SSH・RDP・Samba・Syncthing などで、この PC を見分ける名前
-- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で左の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
+- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で、アクティビティの画面の下の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
 - 変数はその端末の中だけで有効なので、新しい端末を開いたら貼り直す
 
 ### 実施手順 / システムの設定 / 手順 3: 補足: SSH の既定とログイン
@@ -147,6 +147,17 @@
 
 - 日々の操作は[Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)
 
+### 実施手順 / Homebrew / 手順 4: 補足: IBus の PATH を OS のものにする理由
+
+- Anthy のエンジン（`/usr/libexec/ibus-engine-anthy`）は、`exec python3 /usr/share/ibus-anthy/engine/main.py` と書かれた sh の包みで、PATH で最初に見つかった `python3` で動く
+- 共通の bash 設定は、Homebrew のディレクトリを PATH の先頭に置く。GNOME のセッション（`gnome-shell` と、そこから起動される `ibus-daemon`）も、ログインのシェルからこの PATH を受け継ぐ
+- Homebrew の `python3` は、formula の依存として入る（2026-10-11 は、「yazi」の手順 2 の既定のツールで `python@3.15` が入った）。この `python3` には `gi`（PyGObject）が無いので、エンジンが `ModuleNotFoundError: No module named 'gi'` で起動しない
+  - 上部バーの表示は `あ` に変わるが、打った字は英字のまま入り、Space でも変換されない
+  - `ibus list-engine` は通るので、打ってみるまで気付かない
+- IBus のユーザーサービス（`org.freedesktop.IBus.session.GNOME.service`）のドロップインで PATH を OS のものにすると、`ibus-daemon` と、そこから起動されるエンジンだけが OS の `python3` を使う。端末の PATH は変わらない
+  - セッションの PATH のまま起動されるものは、この設定の対象の外。同じく PATH の `python3` を使う `/usr/libexec/ibus-setup-anthy`（Anthy の設定）が開くかは、確かめていない
+- 2026-10-11 に、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できないことを確かめ、Hyper-V の VM で、設定の後は再起動をまたいで変換できることを確かめた（[検証記録](../verification/almalinux-setup.md)）
+
 ### 実施手順 / シェルのツール / 手順 1: 補足: 確認とボトル
 
 - 依存も入れる計画なので、`[y/n]` と聞かれる
@@ -207,6 +218,12 @@
 ### 実施手順 / tmux を試す / 手順 3: 補足: tmux のサーバー
 
 - セッションが 1 つも無くなると、tmux のサーバーも終わる
+
+### 実施手順 / yazi / 手順 2: 補足: 一緒に入る python3 と curl
+
+- 既定の `YAZI_EXTRAS` では、依存として Homebrew の `python3`（2026-10-11 は `python@3.15`）と `curl` も入る
+- 共通の bash 設定が Homebrew のディレクトリを PATH の先頭に置くので、端末では、どちらも `/usr/bin` のものより先に見つかるようになる（2026-10-11 の 3 つの VM で、この後の `command -v curl` は `/home/linuxbrew/.linuxbrew/bin/curl` を返した）
+- 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 4
 
 ### 実施手順 / 再起動と確認 / 手順 1: 補足: 再起動で効くもの
 

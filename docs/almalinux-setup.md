@@ -10,20 +10,20 @@
 > - 前提: AI エージェントと GitHub のアカウント。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プランでは使えない）、Codex CLI は Codex を利用できる ChatGPT のアカウント（API キーで使うなら API 側の従量課金）、Grok Build は grok.com のアカウント（発表時の対象は SuperGrok と X Premium+。今の対象は xAI の案内で確かめる）、GitHub CLI は GitHub のアカウント
 > - **[Grok Build](#grok-build)の手順 2 のインストーラーは、`~/.bashrc` の末尾に PATH と補完のブロックを足す**（共通の bash 設定とは別。[参考資料](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
 > - **sudo のパスワードを聞かれるのは 1 回だけ**（[ログインと sudo](#ログインと-sudo)の手順 3。この手順から後の `sudo` は聞かない）
-> - **対話入力のある手順**: [ログインと sudo](#ログインと-sudo)の手順 3（パスワード）、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1（`[y/N]` と AlmaLinux の鍵の確認）・2（LVFS を有効にするか）・3（ファームウェアの更新があるとき）、[システムの設定](#システムの設定)の手順 8（`[y/N]`）、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 4（`[y/N]`）、[Flatpak と Flathub](#flatpak-と-flathub)の手順 4（確認 2 回）、[GNOME の表示と入力](#gnome-の表示と入力)の手順 10（`[y/N]` と EPEL の鍵の確認）、[Homebrew](#homebrew)の手順 2（RETURN）、[シェルのツール](#シェルのツール)の手順 1（`[y/n]`）、[tmux を試す](#tmux-を試す)の手順 1・2（tmux の画面）、[Firefox](#firefox)の手順 5・8・9（`[y/N]`）、[WezTerm](#wezterm)の手順 1（`[y/N]`）・3（`[y/N]` と COPR の鍵の確認）、[git-delta](#git-delta)の手順 2・[Neovim](#neovim)の手順 1・[lazygit](#lazygit)の手順 1・[yazi](#yazi)の手順 2（Homebrew の確認）、[Neovim](#neovim)の手順 3（LazyVimStarter の `[y/N]` と Neovim の画面）、[lazygit](#lazygit)の手順 4（lazygit の画面）、[GitHub CLI](#github-cli)の手順 2（鍵の確認 2 回）・3（`gh auth login`）、[yazi](#yazi)の手順 5（yazi の画面）、[Claude Code](#claude-code)の手順 3（`[y/N]` と鍵の確認）・5（Claude Code の画面）、[Codex CLI](#codex-cli)の手順 3（`Start Codex now?`）・5（ログイン）・8（Codex の画面）、[Grok Build](#grok-build)の手順 4（ログイン）・7（Grok の画面）、[再起動と確認](#再起動と確認)の手順 8（Neovim の画面）。**目で確かめてから次へ進む手順**: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2、[Flatpak と Flathub](#flatpak-と-flathub)の手順 2、[シェルのツール](#シェルのツール)の手順 9、[Firefox](#firefox)の手順 2
+> - **対話入力のある手順**: [ログインと sudo](#ログインと-sudo)の手順 3（パスワード）、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1（`[y/N]` と AlmaLinux の鍵の確認）・2（LVFS を有効にするか）・3（ファームウェアの更新があるとき）、[システムの設定](#システムの設定)の手順 8（`[y/N]`）、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 4（`[y/N]`）、[Flatpak と Flathub](#flatpak-と-flathub)の手順 4（確認 2 回）、[GNOME の表示と入力](#gnome-の表示と入力)の手順 10（`[y/N]` と EPEL の鍵の確認）、[Homebrew](#homebrew)の手順 2（RETURN）、[シェルのツール](#シェルのツール)の手順 1（`[y/n]`）、[tmux を試す](#tmux-を試す)の手順 1・2（tmux の画面）、[Firefox](#firefox)の手順 5・8・9（`[y/N]`）、[WezTerm](#wezterm)の手順 1（`[y/N]`）・3（`[y/N]` と COPR の鍵の確認）、[git-delta](#git-delta)の手順 2・[Neovim](#neovim)の手順 1・[lazygit](#lazygit)の手順 1・[yazi](#yazi)の手順 2（Homebrew の確認）、[Neovim](#neovim)の手順 3（LazyVimStarter の `[y/N]` と Neovim の画面）、[lazygit](#lazygit)の手順 4（lazygit の画面）、[GitHub CLI](#github-cli)の手順 2（`[y/N]` と鍵の確認 2 回）・3（`gh auth login`）、[yazi](#yazi)の手順 5（yazi の画面）、[Claude Code](#claude-code)の手順 3（`[y/N]` と鍵の確認）・5（Claude Code の画面）、[Codex CLI](#codex-cli)の手順 3（`Start Codex now?`）・5（ログイン）・8（Codex の画面）、[Grok Build](#grok-build)の手順 4（ログイン）・7（Grok の画面）、[再起動と確認](#再起動と確認)の手順 8（Neovim の画面）。**目で確かめてから次へ進む手順**: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2、[Flatpak と Flathub](#flatpak-と-flathub)の手順 2、[シェルのツール](#シェルのツール)の手順 9、[Firefox](#firefox)の手順 2
 > - **画面で行う手順**: [ログインと sudo](#ログインと-sudo)の手順 1・2、[シェルのツール](#シェルのツール)の手順 2、[キー操作を試す](#キー操作を試す)の手順 1〜5（キーを押して確かめる）、[Firefox](#firefox)の手順 7・11、[WezTerm](#wezterm)の手順 5（WezTerm を起動し直す）、[Neovim](#neovim)の手順 4・[yazi](#yazi)の手順 4（WezTerm の新しいタブを開く）、[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 3、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 5（ブラウザでのログイン）、[再起動と確認](#再起動と確認)の手順 2・4〜8（同じ項の手順 5 はキーを押して確かめる）。**再起動**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5（要るときだけ）、[再起動と確認](#再起動と確認)の手順 1。**条件付きの手順**: [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 5、[システムの設定](#システムの設定)の手順 2・4・7、[Git](#git)の手順 7、[Firefox](#firefox)の手順 9、[HackGen Console NF](#hackgen-console-nf)の手順 3、[再起動と確認](#再起動と確認)の手順 4
 
 - 上から順にコードブロックを貼る。[システムの設定](#システムの設定)の手順 1 の変数は、新しい端末を開いたら貼り直す（[シェルのツール](#シェルのツール)の手順 2 より後では使わない）
   - [Git](#git)・[Firefox](#firefox)・[HackGen Console NF](#hackgen-console-nf)・[git-delta](#git-delta)・[yazi](#yazi)・[Claude Code](#claude-code)の手順 1 の変数は、その項の中で新しい端末を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[ログインと sudo](#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、[システムの設定](#システムの設定)の手順 1、[共通の bash 設定](#共通の-bash-設定)の手順 1・2、[Homebrew](#homebrew)の手順 1〜3、[シェルのツール](#シェルのツール)の手順 1・2、[Git](#git)の手順 1〜6、[Firefox](#firefox)の手順 1〜7（ブラウザでのログインに使う）、[HackGen Console NF](#hackgen-console-nf)の手順 1〜5（WezTerm とデスクトップの等幅のフォントに使う）、[WezTerm](#wezterm)の手順 1〜5、[再起動と確認](#再起動と確認)の手順 1 は飛ばさない）
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[ログインと sudo](#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、[システムの設定](#システムの設定)の手順 1、[共通の bash 設定](#共通の-bash-設定)の手順 1・2、[Homebrew](#homebrew)の手順 1〜4、[シェルのツール](#シェルのツール)の手順 1・2、[Git](#git)の手順 1〜6、[Firefox](#firefox)の手順 1〜7（ブラウザでのログインに使う）、[HackGen Console NF](#hackgen-console-nf)の手順 1〜5（WezTerm とデスクトップの等幅のフォントに使う）、[WezTerm](#wezterm)の手順 1〜5、[再起動と確認](#再起動と確認)の手順 1 は飛ばさない）
   - 更新: OS は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5、ファームウェアは同じ項の手順 2・3
   - PC 全体: sudo は[ログインと sudo](#ログインと-sudo)の手順 3。ほかは[システムの設定](#システムの設定)の手順で、PC の名前は 2、SSH は 3・4、journal は 5、kdump は 6・7、コマンドが無いときのパッケージの案内は 8
   - 導入元: EPEL は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1、RPM Fusion は同じ項の手順 2〜5、Flathub は[Flatpak と Flathub](#flatpak-と-flathub)の手順 1〜3（確認用の Flatseal は同じ項の手順 4・5）
-  - 日本語入力: [日本語入力](#日本語入力)の手順 1・2（入力ソースは、[Neovim](#neovim)の手順 3 で「英語 (US) + Anthy」に変わる）。確かめるのは[再起動と確認](#再起動と確認)の手順 6
+  - 日本語入力: [日本語入力](#日本語入力)の手順 1・2（入力ソースは、[Neovim](#neovim)の手順 3 で「英語 (US) + Anthy」に変わる）。Homebrew を入れるなら、[Homebrew](#homebrew)の手順 4 も。確かめるのは[再起動と確認](#再起動と確認)の手順 6
   - 表示: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、フォルダーの名前は 1、ダークモードは 2、ウィンドウのボタンは 4、時計と電池は 5、Files は 6、ホットコーナーは 8、拡大率は 9 と[再起動と確認](#再起動と確認)の手順 4、トレイアイコンは 10・11、Dash のお気に入りは 13。確かめるのは[再起動と確認](#再起動と確認)の手順 2・7
   - 入力: [GNOME の表示と入力](#gnome-の表示と入力)の手順で、Caps Lock を Ctrl には 3、Alt+Tab は 7、Ctrl+Alt+T は 12（WezTerm にするのは[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 2）。確かめるのは[再起動と確認](#再起動と確認)の手順 5
-  - シェル: 共通の bash 設定は[共通の bash 設定](#共通の-bash-設定)の手順 1・2、bash の補完とキー操作は同じ項の手順 3・4 と[シェルのツール](#シェルのツール)の手順 3・[キー操作を試す](#キー操作を試す)の手順 1、Homebrew は[Homebrew](#homebrew)の手順 1〜3、starship・zoxide・fzf・eza・bat・tmux は[シェルのツール](#シェルのツール)の手順 1・4〜10・[キー操作を試す](#キー操作を試す)の手順 2〜5・[tmux を試す](#tmux-を試す)の手順 1〜3
+  - シェル: 共通の bash 設定は[共通の bash 設定](#共通の-bash-設定)の手順 1・2、bash の補完とキー操作は同じ項の手順 3・4 と[シェルのツール](#シェルのツール)の手順 3・[キー操作を試す](#キー操作を試す)の手順 1、Homebrew は[Homebrew](#homebrew)の手順 1〜3（IBus の PATH は同じ項の手順 4）、starship・zoxide・fzf・eza・bat・tmux は[シェルのツール](#シェルのツール)の手順 1・4〜10・[キー操作を試す](#キー操作を試す)の手順 2〜5・[tmux を試す](#tmux-を試す)の手順 1〜3
   - Git: `~/.gitconfig` の基本の設定は[Git](#git)の手順 1〜10、差分の表示（delta）は[git-delta](#git-delta)の手順 1〜4、lazygit は[lazygit](#lazygit)の手順 1〜4（自分用の設定は同じ項の手順 2）、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5
   - ブラウザ: Firefox は[Firefox](#firefox)の手順 1〜7、AAC・H.264（RPM Fusion の FFmpeg）は同じ項の手順 8〜11
   - 端末: HackGen Console NF は[HackGen Console NF](#hackgen-console-nf)の手順 1〜5、WezTerm は[WezTerm](#wezterm)の手順 1〜4（自分用の設定は同じ項の手順 5）、等幅のフォントと Ctrl+Alt+T・Dash の端末は[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)の手順 1〜3
@@ -48,8 +48,8 @@
 
 1. 端末を開く。
 
-   - Super キー（Windows キー）でアクティビティの画面を開き、「端末」と打って Enter。左の Dash の端末のアイコンでもよい
-   - 端末のアプリは Ptyxis（「端末」）。この項の手順 3 から、この端末に貼る
+   - Super キー（Windows キー）でアクティビティの画面を開き、`terminal` と打って Enter（「ターミナル」が出る）。アクティビティの画面の下の Dash の、ターミナルのアイコンでもよい
+   - 端末のアプリは Ptyxis（画面の表示は「ターミナル」）。この項の手順 3 から、この端末に貼る
 
 1. sudo をパスワード無しで使えるようにする（パスワードを 1 回聞かれる）。
 
@@ -84,7 +84,8 @@
    - 更新するものの一覧（トランザクション表）の後に `これでよろしいですか? [y/N]:` と聞かれる。`y`
    - インストールの後の最初の更新では、続けて AlmaLinux の署名鍵の取り込みを聞かれる（`GPG 鍵 0xC2A1E572 をインポート中:`）
      - `Userid : "AlmaLinux OS 10 <packager@almalinux.org>"` と `Fingerprint: EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` を確かめてから `y`（[AlmaLinux の Security のページ](https://almalinux.org/security/)の値と同じ）。違っていれば `N` で中断する
-   - `何もしません。` と出たら、更新は無い
+   - `行うべきことはありません。` と出たら、更新は無い（`[y/N]` も、署名鍵の確認も出ない）
+     - このときは、AlmaLinux の署名鍵は、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で取り込まれる
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
 1. ファームウェアの情報（LVFS のメタデータ）を取り直す。
@@ -94,7 +95,7 @@
    ```
 
    - 初めてのときは `現在リモートが有効になっていないため、メタデータが利用できません。` に続けて `このリモートを有効にしますか? [Y|n]:` と聞かれる。`Y`
-   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（仮想マシンでは `更新可能なデバイスはありません`）
+   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（VirtualBox の VM では `更新可能なデバイスはありません`。Hyper-V と VMware の VM では `N 個のデバイスが更新可能です` と出て、この項の手順 3 で `UEFI dbx` の更新を聞かれることがある）
    - `デーモンへの接続に失敗しました: … タイムアウトしました` と出たら、少し待ってから貼り直す
    - **次の手順は、問いに答えてプロンプトに戻ってから貼る**（続けて貼ると、答えとして食われる）
 
@@ -266,6 +267,8 @@
 
    - `epel-release` の版と、`epel` の行が出れば有効になっている
    - 最後に出る「CRB を有効にすることを推奨」は、気にしなくてよい
+   - [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1 で更新が無かったときは、ここで AlmaLinux の署名鍵が、確認を求めずに取り込まれる（「確認」の見出しより前の dnf の出力に、`GPG 鍵 0xC2A1E572 をインポート中:` と出る）
+     - その出力の `Fingerprint:` が `EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` であることを確かめる。違っていれば、ここで中断する（鍵は取り込まれた後なので、次の手順へ進まない）
    - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 10）に、dnf が 1 回だけ確認を求める
      - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y`。違っていれば `N` で中断する
 
@@ -361,7 +364,7 @@
    - **確認を 2 回聞かれる**。どちらも `y` で進める
      - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
      - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
-   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 2.5 GB ほどになる。要らなければ、この手順とこの項の手順 5 は飛ばしてよい
+   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 1.7 GB ほどになる（runtime が GNOME 50 のとき）。要らなければ、この手順とこの項の手順 5 は飛ばしてよい
    - **次の手順は、2 回の確認に答え、完了してから貼る**（続けて貼ると答えとして食われる）
 
 1. 確認用のアプリが入り、サンドボックスが起動できるか確かめる。
@@ -564,7 +567,7 @@
 
    - `これでよろしいですか? [y/N]:` に `y`
    - EPEL からパッケージを入れるのが初めてなら、続けて EPEL の鍵の取り込みを聞かれる。fingerprint が[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 の値なら `y`、違っていれば `N`
-   - 入るのは `gnome-shell-extension-appindicator`
+   - 入るのは `gnome-shell-extension-appindicator` と、依存の 3 つ（`libappindicator-gtk3`・`libdbusmenu`・`libdbusmenu-gtk3`）
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
 1. 入れた拡張を有効にする（効くのは再起動の後）。
@@ -603,7 +606,7 @@
 
    - 一覧に `'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/'` があり、`binding '<Control><Alt>t'`・`command 'ptyxis --new-window'`・`name '端末'` が出ればよい。すぐに効く
 
-1. Dash のお気に入り（左の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
+1. Dash のお気に入り（アクティビティの画面の下の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
 
    ```bash
    if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 「システムの設定」の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
@@ -691,7 +694,7 @@
    sudo dnf install -y procps-ng curl file git
    ```
 
-   - Workstation では、どれも入っている（`すでにインストールされています` と出る）
+   - Workstation では、どれも入っている（`は既にインストールされています。` と出る）
 
 1. Homebrew の公式のインストーラを実行する。
 
@@ -716,6 +719,22 @@
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
    - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
+1. 日本語入力（IBus）が、Homebrew の `python3` ではなく OS の `python3` で動くようにする。
+
+   ```bash
+   {
+     mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
+     printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+     systemctl --user daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
+   }
+   ```
+
+   - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
+   - 日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を-os-のものにする理由)）
+   - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
+
 ### シェルのツール
 
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
@@ -725,6 +744,7 @@
    ```
 
    - 入れるものの一覧の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y`（Enter は要らない）
+   - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
    - 要らないツールは、名前を外してから貼る
    - **次の手順は、`y` と答えて、プロンプトに戻ってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
@@ -853,9 +873,9 @@
    - `systemctl star` と打って Tab: `systemctl start ` になる（bash-completion）
    - `ls /usr/s` と打って Tab: 1 回で `sbin/ share/ src/` の一覧が色付きで出る（`show-all-if-ambiguous`・`colored-stats`）
    - `cd /usr/SH` と打って Tab: `cd /usr/share/` になる（`completion-ignore-case`）
-   - `printf` と打って ↑: [シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"` の行が出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。Ctrl+C で捨てる
+   - `printf` と打って ↑: `printf` で始まる履歴の行が、新しい順に出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。1 回目は「確認」の見出しの `printf '\n\033[7m 確認 \033[0m\n'`、もう 1 回 ↑ で[シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"`。Ctrl+C で捨てる
    - `/usr/share` と打って Enter: `cd -- /usr/share` と出て移る（`autocd`）。`cd /usr/shaer` と打って Enter: `/usr/share` と出て移る（`cdspell`）。`cd` で戻る
-   - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: サブディレクトリの `.md` も出る（`globstar`）
+   - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: `CONTRIBUTING.md` と `README.md` が出る（`globstar`。効いていないと、`そのようなファイルやディレクトリはありません` になる）
    - `eza --gi` と打って Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` の一覧が出て、`eza --git` まで入る（Homebrew のコマンドの補完）
 
 1. Ctrl+R を押し、履歴から[シェルのツール](#シェルのツール)の手順 5 の `fzf --version` を選んで実行する。
@@ -1140,7 +1160,7 @@
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
-   - `x86_64` の行も一緒に並ぶ
+   - `aarch64` と `x86_64` の両方の行が並ぶ
 
 1. Firefox を入れる。
 
@@ -1148,7 +1168,7 @@
    sudo dnf install "${FF_PKG:?「Firefox」の手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
    ```
 
-   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが `Upgrading: firefox` として解決される（参考資料を参照）
+   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る。参考資料を参照）
    - この文書を Firefox で見ているときは、入れ替わった後に Firefox を開き直す（この項の手順 7 で、新しい版で起動する）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -1165,6 +1185,7 @@
 
 1. デスクトップのセッションで Firefox を起動し、`about:support` で公式のビルドかを確かめる。
 
+   - 最初の起動では、窓いっぱいに「Firefox へようこそ」が出る（続行すると、Firefox の利用規約とプライバシー通知に同意したことになる、と書かれている）。「続行」を押すまで、`about:support` は開けない
    - 次のように出ればよい（日本語 UI の表記）
      - 「更新チャンネル」が `release`
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
@@ -1352,7 +1373,7 @@
 1. Ctrl+Alt+T と Dash から WezTerm が開き、等幅のフォントが変わったことを確かめる。
 
    - Ctrl+Alt+T と、Dash の WezTerm のアイコンで、WezTerm の窓が開く
-   - Ptyxis（アクティビティの画面で「端末」）の文字が HackGen Console NF になっている
+   - Ptyxis（アクティビティの画面で `terminal`）の文字が HackGen Console NF になっている
 
 ### git-delta
 
@@ -1406,7 +1427,7 @@
    delta --version
    brew list --versions git-delta
    command -v delta
-   git -C ~/.config/bash show | delta --paging=never | head -20
+   git -C ~/.config/bash show --format= | delta --paging=never | head -20
    ```
 
    - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
@@ -1432,8 +1453,9 @@
    command -v nvim
    ```
 
-   - `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている
+   - `NVIM v0.12.…` と `LuaJIT 2.1...` が出れば入っている
    - ここでは `nvim` を起動しない（この項の手順 3 の退避より前に起動すると、`~/.local/state/nvim` などができて、それも退避される）
+     - この手順の `nvim --version` だけでも、空の `~/.local/state/nvim/nvim.log` ができる。この項の手順 3 で、`~/.local/state/nvim.bak` に退避される
 
 1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
 
@@ -1491,7 +1513,7 @@
    (cd ~/.config/bash && lazygit)
    ```
 
-   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
+   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる（この項の手順 2 の設定を入れていれば、出ない）。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
    - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
    - `q` で終了する
    - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazygit への操作として食われる）
@@ -1509,7 +1531,7 @@
    }
    ```
 
-   - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
+   - `repo の追加: https://cli.github.com/packages/rpm/gh-cli.repo` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
    - `gpgcheck=1` になっていることを確認する
 
 1. gh をインストールする。
@@ -1518,11 +1540,13 @@
    sudo dnf install gh
    ```
 
-   - 初回は署名鍵の取り込みを **2 回**聞かれる
-   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える
-     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
+   - 入るパッケージの一覧の後に `これでよろしいですか? [y/N]` と聞かれる。`y`
+   - 初回は、続けて署名鍵の取り込みを **2 回**聞かれる
+   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える（この順に出る）
      - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
+     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
    - どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する
+   - 1 つ目の鍵を取り込むと、`警告: Certificate 23F3D4EA75716059:` と、次の行に `The certificate is expired: …` が出る（2026-09-05 に期限が切れている）。導入は続く
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. GitHub へのログインを始める。
@@ -1574,7 +1598,8 @@
    ```
 
    - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
-   - fd と ripgrep は[Neovim](#neovim)の手順 3 で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+   - fd・ripgrep・fzf は、先の項で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+   - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
 
 1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
 
@@ -1677,6 +1702,7 @@
    claude
    ```
 
+   - 初めての起動では、テーマの選択と、ログインの方法の選択（`Select login method:`）が先に出る
    - フォルダーを信頼するか聞かれたら、`claude-sandbox` であることを確かめて信頼する
    - 画面の案内に従ってブラウザでログインする
    - Pro / Max / Team / Enterprise か Console のアカウントが要る（無料の claude.ai プランでは使えない）
@@ -1704,6 +1730,7 @@
    sudo dnf install -y curl-minimal ca-certificates tar gzip
    ```
 
+   - `curl` が既に入っているときは、`パッケージ curl-… は既にインストールされています。` と出て終わる
    - `curl` が既に入っていて `curl-minimal` と競合するときは、`curl-minimal` を外して実行する
 
 1. 公式の standalone インストーラーで Codex CLI を入れる。
@@ -1777,7 +1804,7 @@
    ls -ld ~/.grok
    ```
 
-   - 新規の PC なら `curl` のパスだけが出て、`ls` は `No such file or directory` になる
+   - 新規の PC なら `curl` のパスだけが出て、`ls` は `ls: '/home/<USER>/.grok' にアクセスできません: そのようなファイルやディレクトリはありません` になる
    - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
    - `grok` か `~/.grok` があれば、元の導入方法を確かめてから進める。非公式の grok-cli も同じ `grok` と `~/.grok` を使うので、先に外す
    - `agent` のパスが出たら、それが何かを確かめる。インストーラーは `~/.local/bin/agent` を Grok へのリンクで置き換えることがある（[注意点](extra/almalinux-setup.md#注意点)）
@@ -1840,6 +1867,7 @@
    grok
    ```
 
+   - `Approve in your browser to finish signing in.` と確認用のコードが出たら、ログインできていない。Ctrl+Q で抜けて（画面に `ctrl+q quit` と出る）、この項の手順 4 からやり直す
    - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
    - 終了するときは `/quit` を入力する
@@ -1906,6 +1934,7 @@
    hostnamectl --static
    xdg-user-dir DOWNLOAD
    ibus list-engine | grep -w anthy
+   tr '\0' '\n' < "/proc/$(pgrep -u "$(id -u)" -x ibus-daemon | head -n 1)/environ" | grep '^PATH='
    gnome-extensions info appindicatorsupport@rgcjonas.gmail.com | grep -E '^ *(状態|State)'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
@@ -1914,6 +1943,7 @@
    - `0` が出る（[システムの設定](#システムの設定)の手順 7 で kdump を止めたとき）
    - [システムの設定](#システムの設定)の手順 2 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
    - `anthy - Anthy` が出る
+   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出る（[Homebrew](#homebrew)の手順 4）。`/home/linuxbrew/` が入っていたら、同じ手順を貼って、この項の手順 1 の再起動からやり直す
    - トレイアイコンの拡張が `ACTIVE` になっている
    - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る
 
