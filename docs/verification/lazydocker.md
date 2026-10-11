@@ -42,7 +42,7 @@ Retry count: 26
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **aarch64 の実機で基本操作・podman exec・既存設定を使った root の表示と停止を検証済み（2026-10-06）。x86_64 の新規 VM では、現行 `5da3478` 版と共通 bash `3d5323e` で実施手順 1〜5 とロールバックを再検証した（同日）**。実機は導入済みの環境で、一時設定と確認用コンテナを使った。[実機の範囲と後片付け](#付録-aarch64-の実機での検証記録2026-10-06)、[現行版の VM 記録](#付録-現行版を新規-vm-で再検証2026-10-06)を参照。更新・compose の任意節は、この新規 VM では再実行していない。以前の `0dbb522` 版の VM 記録とコンテナ記録も付録に残した
   - これは 2026-10-06 の時点の状態
-  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/lazydocker.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/lazydocker.md#ロールバック)を通した
   - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-compose.md) の手順 1〜6 を通した
   - 検証コンテナで確認したこと:
     - lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 の API ソケットにつながり、コンテナ・イメージ・ボリューム・ネットワークとログを出す
@@ -69,7 +69,7 @@ Retry count: 26
 | 実施日 | 2026-10-06（aarch64 の導入済み環境） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
 | podman | aarch64 は 5.8.2（`podman-5.8.2-9.el10_2.alma.1.aarch64`、rootless と root を確認） | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入。入れ子の rootless） |
-| Homebrew | aarch64 は 7.0.8 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜4 で導入） |
+| Homebrew | aarch64 は 7.0.8 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 で導入） |
 | lazydocker | aarch64 は導入済みの 0.25.2（Homebrew、arm64、ボトルから導入した記録あり） | 0.25.2（`x86_64_linux` のボトル） |
 | podman-compose | aarch64 は未導入 | `podman-compose-1.5.0-1.el10_1`（epel。compose の任意節だけで使った） |
 | `docker` コマンド | aarch64 は無し（`podman-docker` も無し） | 無し（`podman-docker` は入れていない） |
@@ -157,7 +157,7 @@ commandTemplates:
 
 **流し方**:
 
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 を流した
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、ブラケットペーストで 1 ブロックずつ貼って Enter を送った
 - 画面の手順は、画面の文字を読みながらキーを送った
 
@@ -209,7 +209,7 @@ commandTemplates:
 - **プロキシ**: CA を信頼ストアに足し、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=`（https）、ログインシェルとシステム・ユーザーの systemd のプロキシの環境変数を入れた。`sudo` はプロキシの環境変数を消すので、root の podman のイメージの取得のために、同じ `90-verify.conf` の `[engine]` の `env` にも書いた
 - **保管場所**: `/home` と `/var/lib/containers` に Docker のボリューム（ext4）を付けた
 - **ログイン**: `systemd-logind` の mask を戻し、コンテナの中の `sshd` に、`<USER>`（wheel、`/etc/sudoers.d` に NOPASSWD の設定）で鍵を使ってログインした
-- **前提の手順書**: [podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜4（インストーラだけ `NONINTERACTIVE=1`）、この文書の手順 1〜3 は、端末の無い ssh からスクリプトで流した（貼ってはいない）
+- **前提の手順書**: [podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4（インストーラだけ `NONINTERACTIVE=1`）、この文書の手順 1〜3 は、端末の無い ssh からスクリプトで流した（貼ってはいない）
   - その ssh を閉じたとき、linger が無いので自分の `lazydocker-web` が止まった。入口の確認の前に `podman start` で起動し直した
 - homebrew.md の [root のシェルでも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の手順 1 は、下の端末に貼った
 

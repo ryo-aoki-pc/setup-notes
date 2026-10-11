@@ -119,3 +119,11 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開済みの[�
 - AlmaLinux の更新対象116 bashブロックの `bash -n` が成功した。2冊と extra の手順順序と全8リポジトリの `git diff --check` も成功した
 
 今回の検証記録の取り込みは、main にある過去の記録の保持とリンク修正であり、実機の再検証を行ったという意味ではない。
+
+### 最新 main 取り込み差分の Grok レビュー
+
+Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[取り込み差分](https://github.com/ryo-aoki-pc/setup-notes/commit/dd88cc7ca0ad3ab6241efa38d66ac7aa19c33581)をレビューした。VirtualBox の検証記録へ Windows の導入と VM 使用の現行案内を追加した。操作・権限・変数・確認・復元と削除の注意・クローンのポート変更と識別情報は保持されているとの回答だった。
+
+固定版の参照も照合した。421be2d の2冊には基本設定の項が既にあるが、旧 Homebrew の4手順と旧 WezTerm の手順5は、集約後の番号と一致しない。過去の旧ファイル名を指す32リンクを、削除直前の [83ad79e](https://github.com/ryo-aoki-pc/setup-notes/commit/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0)（21件）と [a2b9fd13](https://github.com/ryo-aoki-pc/setup-notes/commit/a2b9fd13c71d47fe9155964b490f06bdadc49fc9)（11件）の原文へ付け替えた。一般名の12リンクには、421be2d の該当項のアンカーを補った。VirtualBox の過去操作は421be2dの旧文書を指しており、誤URLはなかった。
+
+補修44件のファイル・アンカーと、旧 Homebrew の4手順・旧 WezTerm の5手順（`env -i` を含む）を確認した。Windows の現行案内は過去本文と分離した1段落だけを追加し、それ以外の本文・コード・番号・出力はリンク先を除いて最新 main と一致した。

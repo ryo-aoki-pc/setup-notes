@@ -62,7 +62,7 @@ $ gdu-go -n /usr/share | tail -8
   - ただし**実機には本書と同じ経路のもの（`brew install gdu` による `gdu 5.37.0`）が 2026-09-21 から入っている**
     - [yazi](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#yazi) 周辺のツールをまとめて入れた流れで導入したもので、**本書の手順を順に実行した結果ではない**
     - 実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/gdu.md#gdu-の名前で呼ぶ任意)も実機には入れていない
-  - コンテナでは、[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)と手順 1〜2、[エイリアス](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/gdu.md#gdu-の名前で呼ぶ任意)を通した
+  - コンテナでは、[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)と手順 1〜2、[エイリアス](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/gdu.md#gdu-の名前で呼ぶ任意)を通した
   - 確認したこと: `arm64_linux` のボトルが降りる、`gdu-go --version` が `v5.37.0` を返す、`gdu-go -n` の非対話モードが走る
   - TUI の起動・一覧の表示・`q` での終了は、2026-10-06 のクリーン VM で確認した。**確認していないこと**: EPEL 版（5.32.0）との併用、シンボリックリンク方式（張ると `gdu` で動き、`sudo gdu` では見つからないことだけ、[homebrew.md の付録](almalinux-setup.md#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)で確かめた）
 - 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
@@ -77,7 +77,7 @@ $ gdu-go -n /usr/share | tail -8
 | gdu | `gdu 5.37.0`（Homebrew）。コマンドは `gdu-go` のみ | 同じ（`5.37.0`） |
 | エイリアス / リンク | **未設定**（`command -v gdu` は何も返さない） | 手順どおり `alias gdu=gdu-go` を設定 |
 | EPEL 版の `gdu` | 未導入（EPEL は有効なので入手はできる） | 未導入 |
-| 端末 | WezTerm nightly（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#wezterm)） | 無し（pty を与えずに実行） |
+| 端末 | WezTerm nightly（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/wezterm-nightly.md#実施手順)） | 無し（pty を与えずに実行） |
 
 > [!NOTE]
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`5.37.0`）は実行日によって変わる。
@@ -124,11 +124,11 @@ alias gdu='gdu-go'
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)と手順 1〜2、[gdu の名前で呼ぶ（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/gdu.md#gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)と手順 1〜2、[gdu の名前で呼ぶ（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/gdu.md#gdu-の名前で呼ぶ任意)のエイリアス部分を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)） |
+| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順)） |
 | 1. gdu | `Pouring gdu--5.37.0.arm64_linux.bottle.tar.gz` → `7 files, 20.6MB`。**依存は 0**（`brew deps --tree gdu` の出力が `gdu` の 1 行だけ）。caveat が本文に引用したとおり出た |
 | 2. 検証 | `gdu-go --version` → `v5.37.0`（ビルドは 2026-08-18、`Built user: linuxbrew`）。`command -v gdu` は空。`gdu-go -n /usr/share` でサイズ順の一覧が出た |
 | エイリアス | `~/.bashrc` に `alias gdu=gdu-go` を追記して読み込み直し、`alias gdu` で展開を確認。**`type -t gdu` は非対話シェルでは失敗する**ことも確認した（`bash -i` 越しなら `alias` を返す） |

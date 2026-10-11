@@ -2,6 +2,8 @@
 
 [手順書](../almalinux-setup.md#virtualbox-実施手順)・[ロールバックと注意点](../extra/virtualbox.md)
 
+Windows 11 の現行手順: [VirtualBox の導入](../windows-setup.md#virtualbox-windows-11-で使う)・[VM の作成と使用](../windows-setup.md#virtualbox-windows-11-で-vm-を作って使う)。
+
 ## 最新の確認範囲（AlmaLinux 10）
 
 - 2026-10-11: Secure Boot と入れ子の仮想化を有効にした Hyper-V の VM で、AlmaLinux 10 の実施手順 18 手順を通した。VirtualBox のモジュールの署名・読み込み、AMD-V による空の VM の起動、マネージャーの起動を確認した（[記録](#付録-入れ子の仮想化を有効にした-hyper-v-の-vm-でalmalinux-10-の実施手順を通した2026-10-11)）
@@ -155,7 +157,7 @@ Is this ok [y/N]: Error: Failed to download metadata for repo 'virtualbox': repo
 - **ユーザー側のキャッシュは `/var/tmp` にあり、30 日使わないと systemd-tmpfiles に消される**（`/usr/lib/tmpfiles.d/tmp.conf` の `q /var/tmp 1777 root root 30d`）ので、そのときはまた聞かれる
 - ほかのユーザーがこの PC で `sudo` 無しの dnf を使うときも、それぞれ 1 回聞かれる
 
-ほかの手順書のリポジトリ（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#firefox) / [claude-code.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#claude-code) など）はメタデータに署名が無く `repo_gpgcheck` を使っていないので、この 2 回の確認は本書だけの手順になる。
+ほかの手順書のリポジトリ（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/firefox.md#実施手順) / [claude-code.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/claude-code.md#実施手順) など）はメタデータに署名が無く `repo_gpgcheck` を使っていないので、この 2 回の確認は本書だけの手順になる。
 
 ### 実施手順 / VirtualBox を入れる / 手順 1: 補足: パッケージ名と下見の結果、EPEL が要る理由
 
@@ -426,7 +428,7 @@ AlmaLinux 10 の[動作を確かめる](https://github.com/ryo-aoki-pc/setup-not
   - AlmaLinux 10 では、Oracle 公式の dnf リポジトリから入れ、カーネルモジュールをこの PC でビルドする
   - **Linux の arm64 版は無い**ので、Raspberry Pi 5 は対象外
 - **進め方**: **読者が書き換える値は無い**
-  - **AlmaLinux 10**（[実施手順](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#実施手順)）: 前提の [EPEL](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
+  - **AlmaLinux 10**（[実施手順](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#実施手順)）: 前提の [EPEL](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion) を有効にしたうえで（依存の `liblzf` のため）、鍵を照合して取り込み、repo ファイルを置いて解決を確かめ、ビルドの道具を用意してから `dnf install` する
     - Secure Boot なら、前提の [secure-boot-mok.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/secure-boot-mok.md) で MOK の鍵も先に登録する
     - 最後に KVM の設定を足して再起動する
   - **Windows 11**（[Windows 11 で使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#windows-11-で使う)）: winget の `Oracle.VirtualBox` を管理者の Windows PowerShell 5.1 で入れる（PC 全体の `C:\Program Files\Oracle\VirtualBox`）。使い捨ての VM は、管理者ではない窓で動かす
@@ -479,7 +481,7 @@ AlmaLinux 10:
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64 | 同左（`quay.io/almalinuxorg/almalinux:10`、`sha256:83220192…c4c8`） |
 | カーネル | `6.12.0-211.56.1.el10_2.x86_64` | クラウドのホスト（6.18 系）のカーネルを共有。`uname -r` だけスタブで `6.12.0-211.56.1.el10_2.x86_64` を返させ、その版の `kernel-core` / `kernel-modules-core` を先に入れた（`kernel-devel` は「VirtualBox を入れる」の手順 3 で入る） |
 | デスクトップ | GNOME Shell 49.4 / Wayland（ロケールは en_US.UTF-8） | 無し |
-| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で有効化 |
+| EPEL | 有効（`epel-release-10-8.el10_2`。鍵も取り込み済み） | [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/epel.md#実施手順) の手順 2 で有効化 |
 | CPU の仮想化支援 / KVM | AMD-V。`kvm_amd` が起動時に読み込まれていた（KVM の VM は使っていない） | 無し（`/dev/kvm` が無く、`lscpu` に `Virtualization:` の行が無い） |
 | Secure Boot | 有効 → secure-boot-mok.md の手順 6 の後に無効にした | 無し（`mokutil --sb-state` → `EFI variables are not supported on this system`）。分岐は `mokutil` のスタブで確かめた |
 | SELinux | Enforcing | 無効（コンテナ） |
@@ -543,7 +545,7 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 |---|---|---|
 | **winget の `Oracle.VirtualBox`** | 7.2.20（2026-09-22）。公式のインストーラを sha256 を確かめて `--silent` で動かし、依存の Visual C++ の再頒布可能パッケージも入れる。`winget upgrade` で上がる | **採用** |
 | 公式サイトの exe を手で入れる | 同じインストーラ。画面で機能と置き場所を選べる。更新のたびに手で落とす | 不採用 |
-| scoop の `nonportable/virtualbox-np` | 7.2.20（同じ sha256）。管理者の権限で scoop を動かす必要があり、MSI を直接 `/qn` で入れる（ショートカットは作らない） | 不採用（[Windows 11 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/windows-setup.md)の scoop は管理者ではない窓で使う） |
+| scoop の `nonportable/virtualbox-np` | 7.2.20（同じ sha256）。管理者の権限で scoop を動かす必要があり、MSI を直接 `/qn` で入れる（ショートカットは作らない） | 不採用（[Windows 11 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/windows-setup.md#貼り付けの設定)の scoop は管理者ではない窓で使う） |
 | Chocolatey の `virtualbox` | 7.2.20（コミュニティの保守） | 不採用（別のパッケージ マネージャーを足す） |
 
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/syncthing.md) と同じく後ろの節に分けた
@@ -556,7 +558,7 @@ Windows 11 で VirtualBox を入れる経路を比べた（2026-10-03 時点。�
 - **機能は既定のまま、すべて入れた**: ブリッジ接続とホストオンリーのアダプターは、[virtualbox-guest-bootc.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox-guest-bootc.md) のホストオンリーアダプターの節などで使う
   - 要らない機能は、マニュアルの `ADDLOCAL`（`-msiparams ADDLOCAL=VBoxApplication,VBoxUSB` など）で外せるが、本書では試していない
 - **Hyper-V は止めない**: VirtualBox のマニュアルは、Hyper-V と一緒に使うと遅くなるので、Hyper-V を使う Windows の機能を切るよう勧めている（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/virtualbox.md#注意点)）
-  - 本書は切らない。WSL 2 が Virtual Machine Platform を使うため（[Windows 11 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/windows-setup.md)で WSL を入れた PC も）
+  - 本書は切らない。WSL 2 が Virtual Machine Platform を使うため（[Windows 11 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/windows-setup.md#wsl-と再起動)で WSL を入れた PC も）
   - 切ると VM が速くなるかは、試していない
 
 ### 完了時点の状態
@@ -1139,7 +1141,7 @@ ls: cannot access '/etc/udev/rules.d/60-vboxdrv.rules': No such file or director
 - [VirtualBox — Downloads](https://www.virtualbox.org/wiki/Downloads) / [PUEL](https://www.virtualbox.org/wiki/VirtualBox_PUEL) — Extension Pack とそのライセンス
 - `/usr/lib/virtualbox/vboxdrv.sh` / `/usr/lib/virtualbox/postinst-common.sh` / `/usr/lib/virtualbox/check_module_dependencies.sh` / `/usr/share/virtualbox/src/vboxhost/vboxdrv/linux/SUPDrv-linux.c` — 本書の説明の元にした、rpm が入れるスクリプトとソース
 - `man dnf.conf`（`repo_gpgcheck`）/ `man modprobe.d` / `man mokutil`
-- [AlmaLinux 10 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1。依存の `liblzf`）
+- [AlmaLinux 10 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1。依存の `liblzf`）
 - [winget-pkgs の `Oracle.VirtualBox`](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/Oracle/VirtualBox) — Windows 11 の節で使う winget の定義
 - [winget の install — Microsoft Learn](https://learn.microsoft.com/en-us/windows/package-manager/winget/install) — `--accept-source-agreements`・`--accept-package-agreements`、依存を止める `--skip-dependencies`、既定は進み具合を出す
 - Oracle VirtualBox User Guide 7.2（インストーラに同梱の `UserManual.pdf`）— 2.2 Installing on Windows Hosts（機能・`ADDLOCAL`・公開プロパティ）、11.30 Using Hyper-V with Oracle VirtualBox、13.1.2 Global Settings（Windows は `$HOME/.VirtualBox`）、13.7.6.7 Poor performance when using Oracle VirtualBox and Hyper-V on the same host、15.44.2.2 Viewing Virtual Machine Log Contents（`showvminfo --log`）、15.52 VBoxManage updatecheck

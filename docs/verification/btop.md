@@ -57,11 +57,11 @@ color_theme = "Default"
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-22 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 は不要） | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release 10-6.el10` を導入 |
+| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/epel.md#実施手順) の手順 2 は不要） | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/epel.md#実施手順) の手順 2 で `epel-release 10-6.el10` を導入 |
 | 有効なリポジトリ | baseos / appstream / crb / extras / epel / raspberrypi ほか | baseos / appstream / crb / extras（→ epel を追加） |
 | btop | **未導入** | `btop 1.4.7-1.el10_2`（epel） |
 | 一緒に入る依存 | — | `hicolor-icon-theme 0.17-20.el10`（appstream） |
-| 端末 | WezTerm nightly（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#wezterm)） | 無し（`script` で pty を与えた起動のみ） |
+| 端末 | WezTerm nightly（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/wezterm-nightly.md#実施手順)） | 無し（`script` で pty を与えた起動のみ） |
 
 > [!NOTE]
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`1.4.7-1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。**

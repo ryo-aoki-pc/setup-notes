@@ -39,7 +39,7 @@
 | 実施日 | —（未実施） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入。入れ子の rootless） |
-| EPEL | 未確認 | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
+| EPEL | 未確認 | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/epel.md#実施手順) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-tui | 未導入 | `podman-tui-1.10.0-1.el10_2`（epel） |
 | 端末 | — | 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`）の SSH のログインシェル |
 

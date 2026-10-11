@@ -92,7 +92,7 @@ oniguruma
     - トンネルを張る前は、オフラインのホストから外の名前を引けず、IP アドレスでもつながらない
     - トンネル越しに、dnf（homebrew.md の手順 1 の 73 パッケージを含む）、Homebrew のインストーラ、`brew install`、`brew update` が通る
     - トンネルを閉じた後も jq が動き、外には届かない
-    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜3、[hackgen.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#hackgen-console-nf) の手順 1〜5（今の AlmaLinux 10 の初期設定の「HackGen Console NF」の手順 1〜5）。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
+    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/bat.md#実施手順) の手順 1〜3、[hackgen.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/hackgen.md#実施手順) の手順 1〜5（今の AlmaLinux 10 の初期設定の「HackGen Console NF」の手順 1〜5）。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
     - 1080 番がふさがっているときと、sshd が転送を禁じている（`AllowTcpForwarding no`）ときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること
     - `sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること、トンネルが無いときの dnf と brew の失敗の出方
   - **確認していないこと**: 実機（x86_64 の PC・Raspberry Pi 5）、aarch64、SELinux が Enforcing のホスト（コンテナに SELinux が無い）、IPv6、パスワード認証（検証は鍵認証）、Windows・macOS の ssh、長い導入の途中で ssh が切れたとき、homebrew.md のロールバック
@@ -255,7 +255,7 @@ curl: (6) Could not resolve host: github.com
 
 ### 手順中の実測・検証状況の記録
 
-- 検証では [bat](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
+- 検証では [bat](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#シェルのツール) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
 
 ### 手順中の実測・検証状況の記録
 

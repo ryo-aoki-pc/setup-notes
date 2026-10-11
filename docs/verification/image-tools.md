@@ -80,7 +80,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
   - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と [Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と [Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
@@ -97,7 +97,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) と同じ作り） |
 | podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入） |
-| Homebrew | 未確認 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜4 で導入） |
+| Homebrew | 未確認 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 で導入） |
 | hadolint / dive | 未導入 | 2.15.1 / 0.13.1（`x86_64_linux` のボトル） |
 | Trivy | 未導入 | `trivy-0.74.0-1`（公式の dnf リポジトリ） |
 | 端末 | — | pty（160 桁 × 50 行、`TERM=xterm-256color`） |
@@ -166,7 +166,7 @@ Report Summary
 **環境**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じ作りの使い捨てのコンテナ。実機で加えた変更は無い。
 
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 を流した
 
 **手順書の外で行った準備**: podman.md の付録の準備と同じ。Homebrew のインストーラは、`NONINTERACTIVE=1` を付けずに流し、`Press RETURN/ENTER to continue` に pty 越しに Enter を送った。
 
