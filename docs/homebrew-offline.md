@@ -39,12 +39,13 @@
 
    - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
 
-1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](almalinux-setup.md#homebrew) を貼る。
+1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜4](almalinux-setup.md#homebrew) を貼る。
 
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、Homebrew は入っているので、この手順は飛ばす
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、同書の「Homebrew」の手順 1〜3 は飛ばす
    - 同書の「Homebrew」の手順 1 の dnf は、手順 2 の設定で通る（手順 1 で 4 つとも入っていたなら飛ばす）
    - 同書の「Homebrew」の手順 3 は、共通の bash 設定（同書の「共通の bash 設定」の手順 1・2）を入れてあるシェルで貼る
-   - **次の手順は、同書の「Homebrew」の手順 3 まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
+   - 同書の「Homebrew」の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
+   - **次の手順は、同書の「Homebrew」の手順 3（GNOME で日本語入力を使う PC は手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。
 

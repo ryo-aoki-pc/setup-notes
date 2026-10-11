@@ -719,7 +719,7 @@
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
    - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
-1. 日本語入力（IBus）が、Homebrew の `python3` ではなく OS の `python3` で動くようにする。
+1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
 
    ```bash
    {
@@ -732,7 +732,7 @@
    ```
 
    - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
-   - 日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を-os-のものにする理由)）
+   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
    - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
 
 ### シェルのツール
@@ -1432,6 +1432,7 @@
 
    - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
    - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
+   - 差分の行が出ないときは、`git -C ~/.config/bash log -1 --oneline` で最後のコミットを確かめる。差分を持たないコミット（マージコミットなど）なら、この差分表示の確認は飛ばす（その場合の出力は VM では確かめていない）
    - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
 
 ### Neovim
@@ -1934,7 +1935,14 @@
    hostnamectl --static
    xdg-user-dir DOWNLOAD
    ibus list-engine | grep -w anthy
-   tr '\0' '\n' < "/proc/$(pgrep -u "$(id -u)" -x ibus-daemon | head -n 1)/environ" | grep '^PATH='
+   IBUS_PID="$(pgrep -u "$(id -u)" -x ibus-daemon | head -n 1)"
+   if [ -n "$IBUS_PID" ]; then
+     IBUS_PATH="$(tr '\0' '\n' < "/proc/$IBUS_PID/environ" | grep '^PATH=')"
+     printf '%s\n' "$IBUS_PATH"
+     env "$IBUS_PATH" /usr/libexec/ibus-engine-anthy --xml | grep -m 1 -o '<name>[^<]*</name>'
+   else
+     echo 'ibus-daemon が動いていない（GNOME にログインしてから貼り直す）'
+   fi
    gnome-extensions info appindicatorsupport@rgcjonas.gmail.com | grep -E '^ *(状態|State)'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
@@ -1943,7 +1951,9 @@
    - `0` が出る（[システムの設定](#システムの設定)の手順 7 で kdump を止めたとき）
    - [システムの設定](#システムの設定)の手順 2 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
    - `anthy - Anthy` が出る
-   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出る（[Homebrew](#homebrew)の手順 4）。`/home/linuxbrew/` が入っていたら、同じ手順を貼って、この項の手順 1 の再起動からやり直す
+   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[Homebrew](#homebrew)の手順 4）
+   - PATH に `/home/linuxbrew/` が入っていたり、`ModuleNotFoundError: No module named 'gi'` が出たりしたら、[Homebrew](#homebrew)の手順 4 を貼って、この項の手順 1 の再起動からやり直す
+   - `ibus-daemon が動いていない` と出たら、GNOME にログインしてから、この手順を貼り直す
    - トレイアイコンの拡張が `ACTIVE` になっている
    - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る
 

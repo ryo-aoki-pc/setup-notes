@@ -9,7 +9,7 @@
 - **目的**: AlmaLinux 10 の Workstation を入れた直後の PC で、更新・sudo・ファームウェア・SSH・journal・kdump、導入元（EPEL・RPM Fusion・Flathub・Homebrew）、日本語入力と GNOME の表示・入力、共通の bash 設定とシェルのツールを、1 本の手順で整える。2026-10-10 からは、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build と Codex・Grok のプラグイン、Neovim・WezTerm・lazygit・yazi の自分用の設定も、同じ手順で入れる
 - **方式**: 上から順に貼る 153 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
   - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../coding-agents.md)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
-  - 2026-10-11 に、「Homebrew」の手順 4（IBus のユーザーサービスのドロップインで、PATH を OS のものにする）を足して、153 の手順・27 項になった。同じ日に 3 つの VM で通したのは、足す前の 152 の手順（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
+  - 2026-10-11 に、「Homebrew」の手順 4（IBus の GNOME 向けユーザーサービスのドロップインで、PATH を Homebrew を含まない固定値にする）を足して、153 の手順・27 項になった。同じ日に 3 つの VM で通したのは、足す前の 152 の手順（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
 - **状態**: **2026-10-08 に、x86_64 の VirtualBox の VM（公式 ISO の Workstation のクリーンインストールから新しく作ったもの）で、その時点の 13 項を通した**（[付録](#付録-x86_64-の-virtualbox-の-vm-で通した記録2026-10-08)）
   - **2026-10-10 に足した 14 項・「再起動と確認」の手順 8・ロールバックの 4 項（「AI エージェントとプラグインを消す」から「Firefox を戻す」まで）・更新の手順 5〜9 は、この文書の順番では通していない**。コマンドは、もとの手順書で確かめたものを移した（どこまで確かめたかは、後ろの「統合前の記録」のそれぞれの節）。つなぎを直した手順と新しい順番は、静的な確認だけ（[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
     - これは 2026-10-10 の時点の状態。このうち、14 項と「再起動と確認」の手順 8 は、2026-10-11 に 3 つの VM で、今の順番で流した。合格したという意味ではない（手順 8 は、3 つとも通らなかった。14 項の中にも、通らなかった手順と未実施がある。下の 2026-10-11 の行）。ロールバックの 4 項と更新の手順 5〜9 は、2026-10-11 の通しでも流していない
@@ -22,9 +22,11 @@
     - 通らなかった手順: 3 つとも、「キー操作を試す」の手順 1、「git-delta」の手順 4、「再起動と確認」の手順 6・8（「yazi」の手順 2 で Homebrew の `python3` が入った後、Anthy のエンジンが起動しない）。VirtualBox は、ほかに「再起動と確認」の手順 3・7
     - 未実施の範囲: 実アカウントが要る手順（「GitHub CLI」の手順 3・4、「Claude Code」の手順 5、「Codex CLI」の手順 5〜8、「Grok Build」の手順 4・5・7）と、「Firefox」の手順 7・11（最初の起動の同意の窓を進めていない）。VirtualBox は、このうち 4 手順を「通した」（起動して取り消した・未ログインの側の確認）に数え、「再起動と確認」の手順 5（Caps Lock を送れない）を未実施にした
     - 2026-10-08 に当たらなかった分岐: 「OS とファームウェアの更新」の手順 3 のファームウェアの更新（`UEFI dbx`）と、同じ項の手順 5 の再起動は、Hyper-V と VMware で通した。OS の更新は 3 つとも無く、同じ項の手順 1 の `[y/N]` と AlmaLinux の鍵の確認は出ていない
-    - 直した所: 見つかった 30 の指摘のうち、25 を直した（未対応は 5）。文言だけの直しが 23、新しい手順（「Homebrew」の手順 4）が 1、ブロックの直し（「git-delta」の手順 4 の `--format=`）が 1。30 の指摘の外に、文言の直しが 1 つ（「Grok Build」の手順 1 の `ls` の表示）
-    - 直しの確かめ: 新しい手順とブロックの直しは、Hyper-V の VM で確かめた（ドロップインを置いて再起動した後に `nihongo` が「日本語」に変換される、`head -20` の中に背景色の付いた差分の行が出る）。文言だけの直しは、VM では流していない
-    - 確認していないこと: VMware と VirtualBox の VM での直しの確かめ、「Homebrew」の手順 4 を手順書の順番（Homebrew を入れた直後）で通すこと、ログインし直しだけ（再起動なし）で手順 4 が効くこと、直した後の「再起動と確認」の手順 8（Neovim の IME 連携）、ロールバックの「Homebrew と bash-completion を消す」の手順 3 のブロック（足した 4 行だけを実行したという担当の報告はあるが、出力の記録が無い。ブロックの全体は貼っていない）、GNOME の端末にブロックを貼る形での通し、実アカウントでのログインとその後ろ、実機
+    - 直した所（`7c3f88a` の時点）: 見つかった 30 の指摘のうち、25 を直した（未対応は 5）。文言だけの直しが 23、新しい手順（「Homebrew」の手順 4）が 1、ブロックの直し（「git-delta」の手順 4 の `--format=`）が 1。30 の指摘の外に、文言の直しが 1 つ（「Grok Build」の手順 1 の `ls` の表示）
+    - 直しの確かめ: 前の `FIX-ibus-delta` の記録を保持し、Hyper-V の新しいクローン 2 台で `7c3f88a` を確かめた FXA・FXB の結果を足した（[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)）。FXA は範囲の 6 手順とも通した。FXB は通した 9・条件に当たらず飛ばした 1（通らなかった・未実施はどちらも 0）
+    - 確認したこと: Homebrew の `python3` が無い状態で「Homebrew」の手順 4 を置き、その後の「yazi」の導入と再起動を経てもテキストエディターで日本語入力できる（FXA）。入力不能の再現から手順 4 と再起動を通し、テキストエディターと Neovim の IME 連携、「git-delta」の手順 4、Homebrew とドロップインを消すロールバックの手順 1〜3、その後の再起動と日本語入力を確かめた（FXB）
+    - 追加の文書変更: Grok Build のレビュー V3（9 指摘）を採否どおり反映した。ブロックを変えたのは「再起動と確認」の手順 3（IBus の PATH で Anthy を `--xml` 付きで呼ぶ確認）。直した後のブロックは、VM で貼り直していない。ほかは文言と記録の直しで、VM では流していない
+    - 確認していないこと: 上の `--xml` を足したブロック、VMware と VirtualBox の VM での直し、ログインし直しだけ（再起動なし）で効くこと、Neovim の整形の変化（FXB は開始前から整形済み）、ロールバックのほかの項と bash-completion を消す分岐、GNOME の端末へ直接ブロックを貼る形での通し、実アカウントでのログインとその後ろ、オフライン経路での手順 4、実機
   - **2026-10-11 に、Hyper-V の VM（上の通しを終えた VM の続き）で、任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」の手順 1〜9 を通した**（[付録](#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
     - 通し方: コンソールは GNOME にログインした状態で、ブロックは SSH の対話の bash に貼った（手順書は、GNOME にログインするユーザー本人の端末に貼る前提）。手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5 の順に貼った
     - 結果: 9 手順とも通した（通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い）。確認の出力は、どれも箇条書きのとおり
@@ -311,14 +313,14 @@
   - 「Grok Build」の手順 7: ログインしていないときの承認の画面と、抜けるキー（画面の案内の Ctrl+Q。指摘 27）
   - 「Grok Build」の手順 1: `ls` の表示を、日本語の `ls: '/home/<USER>/.grok' にアクセスできません: そのようなファイルやディレクトリはありません` に（30 の指摘には入っていない。3 つの列の `after-confirm` に、この文がある）
 - **新しい手順**: 「Homebrew」の手順 4（指摘 1）
-  - IBus のユーザーサービス `org.freedesktop.IBus.session.GNOME.service` のドロップイン `10-system-path.conf` で、PATH を OS のもの（`/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`）にする
+  - IBus の GNOME 向けユーザーサービス `org.freedesktop.IBus.session.GNOME.service` のドロップイン `10-system-path.conf` で、PATH を Homebrew を含まない固定値（`/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`）にする
   - 手順 4 の箇条書きには、日本語入力を使う PC では飛ばさないことと、効くのは「再起動と確認」の手順 1 の再起動の後であることを書いた（ログインし直しだけで効くかは、確かめていない）
   - リードの「項目ごとの手順」: 飛ばさない手順を「Homebrew」の手順 1〜4 にし、「日本語入力」と「シェル」の行に、手順 4 を足した
   - あわせて、「再起動と確認」の手順 3 のブロックに、`ibus-daemon` の PATH を出す 1 行を足した（`/home/linuxbrew/` が入っていたら、手順 4 を貼って再起動からやり直す、と書いた）
   - ロールバックの「Homebrew と bash-completion を消す」の手順 3 に、ドロップインを消す 3 行と、確認の 1 行を足した（1 行の説明にも、IBus の PATH の設定を消すことを足した）
-  - 参考資料に、[理由の補足](../reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を-os-のものにする理由)を足した（`python@3.15` を入れる元の formula は決めていない。`ibus-setup-anthy` など、セッションの PATH のまま起動されるものは対象の外で、確かめていない）
+  - 参考資料に、[理由の補足](../reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を固定する理由)を足した（`python@3.15` を入れる元の formula は決めていない。`ibus-setup-anthy` など、セッションの PATH のまま起動されるものは対象の外で、確かめていない）
   - 実施手順は、152 手順から 153 手順になった（27 項のまま）
-  - 直していない所: `docs/homebrew-offline.md` の手順 3 は、「Homebrew」の手順 1〜3 だけを貼らせる。日本語入力を使う PC がこの道を通ると、手順 4 を通らない（この文書は、今回の変更の範囲の外。未対応）
+  - `7c3f88a` の時点で直していなかった所: `docs/homebrew-offline.md` の手順 3 は、「Homebrew」の手順 1〜3 だけを貼らせる。日本語入力を使う PC がこの道を通ると、手順 4 を通らない（当時は変更の範囲の外。下の Grok レビューの反映で、案内を直した）
 - **ブロックの直し**: 「git-delta」の手順 4 の `git show` に `--format=` を足した（指摘 8）
 
 新しい手順とブロックの直しは、2026-10-11 に Hyper-V の VM で確かめた。証跡は、追跡していない `.verification/campaign/hv/FIX-ibus-delta/`（下のファイルの名前は、ここからの相対パス）。
@@ -331,7 +333,7 @@
   - その PATH で `/usr/libexec/ibus-engine-anthy --xml` を動かすと、`ModuleNotFoundError: No module named 'gi'`
   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` で動かすと、`<engines>` が出た
 - **VM A でドロップインを置いた後**（`candidate-b.sh`）
-  - IBus のサービスを起こし直すと、`ibus-daemon` の PATH が OS のものになった（担当の報告による）
+  - IBus のサービスを起こし直すと、`ibus-daemon` の PATH が上の固定値になった（担当の報告による）
   - コンソールで Super+Space → `nihongo` → Space が「日本語」になった（`hv/screens/t2-converted.png`。打った先は、アクティビティの画面の検索の欄）
   - エンジンのプロセスの実行ファイルは `/usr/bin/python3.12`（担当の報告による）
   - 再起動してログインし直した後の 1 回目は、上部バーが `en` のまま `kensaku` と打っていて、英字のまま「一致するものがありません」になった（`hv/screens/t3-after-reboot-converted.png`）
@@ -346,10 +348,10 @@
     - エンジンの実行ファイルは `/usr/bin/python3.12`、journal の `No module named 'gi'` は 0 行（担当の報告による）
   - 「再起動と確認」の手順 3（直したブロック）を、コンソールの WezTerm のタブに貼って Enter（`wezterm cli send-text`。`hv2/step3.sh` と `hv2/step3-output.txt`）
     - 出たのは、起動の 2 行、`0`、ホスト名、`/home/<USER>/Downloads`、`anthy - Anthy`、`PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`、`状態: ACTIVE`、`['scale-monitor-framebuffer', 'xwayland-native-scaling']`
-- **ロールバックに足した行**: 確かめたとは扱わない（下の「確かめていないこと」）
+- **ロールバックに足した行（`FIX-ibus-delta` の時点）**: この証跡だけでは、確かめたとは扱わない（後の FXB で、ブロックの全体を確かめた）
   - 担当の報告では、足した 3 行と確認の 1 行を、VM A でその 4 行だけ実行し、`10-system-path.conf` とディレクトリが消えて、`Environment=` だけが出た。出力のファイルは残していない
   - ロールバックのブロックの全体（Homebrew を消す所を含む）は、貼っていない
-- **確かめていないこと**
+- **`FIX-ibus-delta` の時点で確かめていなかったこと**（この時点の記録は保持する。後の FXA・FXB の確認と、現在の未確認範囲は次に分けて書く）
   - VMware と VirtualBox の VM での、直しの確かめ（直す前の症状は、3 つとも見た）
   - 実機
   - 手順書の順番（Homebrew を入れた直後で、「yazi」の手順 2 より前）に、この手順を通した場合（VM B は、Homebrew も yazi も入った後に貼った）
@@ -357,6 +359,59 @@
   - ロールバックに足した 4 行と、ロールバックのブロックの全体（次に Hyper-V の VM でロールバックを流すときに、出力を残す）
   - 直した後の「再起動と確認」の手順 8（Neovim の IME 連携）。`FIX-ibus-delta` の証跡に、Neovim で確かめた記録は無い
   - 文言だけの直し（VM では流していない）
+
+**FXA・FXB の追加確認（2026-10-11 UTC）**。
+
+- 環境: どちらも Hyper-V の第 2 世代の新しいクローン（vCPU 2、メモリ 4096 MB、UEFI、Secure Boot オフ）
+- ゲスト: AlmaLinux 10.2、カーネル `6.12.0-211.64.1.el10_2.x86_64`、IBus 1.5.32、ibus-anthy 1.5.17、GNOME Shell 49.4
+- 貼った文書: `7c3f88a` の本体と extra
+- 証跡: `.verification/campaign/hv/FXA/` と `FXB/` の `result.md`・`out/`・`session/after-confirm/`・`screens/`（追跡していない）。次のファイル名は、それぞれの単位のディレクトリからの相対パス
+
+| 単位 | 開始時点と通した順 | 結果 |
+| --- | --- | --- |
+| FXA | `after-AS2`（「tmux を試す」まで済み。Homebrew 7.0.9 はあるが、Homebrew の `python3`・ドロップイン・Neovim は無い）→「Homebrew」の手順 4 →「yazi」の手順 1・2 →「再起動と確認」の手順 1・3・6 | 範囲の 6 手順を通した（通らなかった 0・未実施 0） |
+| FXB | `after-AS4`（27 項を通したが、ドロップインは無く、日本語入力が効かない）→ 入力不能の再現 →「Homebrew」の手順 4 →「再起動と確認」の手順 1・3・6・8 →「git-delta」の手順 4 → ロールバックの「Homebrew と bash-completion を消す」の手順 1〜3 → 再起動後の日本語入力 | 範囲の 10 手順のうち通した 9・条件に当たらず飛ばした 1（ロールバックの同じ項の手順 4）。通らなかった 0・未実施 0 |
+
+- 貼り方: GNOME にログインしたコンソールを用意し、ブロックは SSH の対話の bash に貼った。画面の手順はコンソールにキーを送って PNG で確認した。「再起動と確認」の手順 3 は、同じブロックをファイルに取り出し、FXA はコンソールの Ptyxis、FXB は WezTerm で読み込ませて確かめ直した（直接貼り付けたのではない）
+- **FXA: 手順書の順番での確認**
+  - 開始前の `type -a python3` は `/usr/bin/python3` だけ。「Homebrew」の手順 4 の出力は `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`。貼った直後の `ibus-daemon` は、まだ Homebrew を含む PATH だった（`out/00b-pre-type-a-python3.txt`・`out/11-after-step4-state.txt`、`session/after-confirm/0005-実施手順-Homebrew-4.txt`）
+  - 「yazi」の手順 2 で `python@3.15 3.15.0`・`yazi 26.9.1`・`glib 2.90.1` が入った。Homebrew の `python3` が先に見つかり、`import gi` は `ModuleNotFoundError`。`/usr/bin/python3`（3.12.15）では `gi` を読み込めた（`out/22a-brew-versions-python-yazi.txt`）
+  - 再起動の後、手順 3 の PATH は固定値になった。手順 6 は、テキストエディターで Super+Space → `nihongo` →「にほんご」→ Space →「日本語」→ Enter で確定し、もう 1 度 Super+Space で英字に戻った（`out/53-step3-console-terminal-output.txt`、`screens/43-after-super-space.png`〜`48-back-to-en-typed-ascii.png`）
+  - 変換中の Anthy のエンジンは、`ibus-daemon` の子で、実行ファイルは `/usr/bin/python3.12`、PATH は固定値、読み込んだ `gi` は RPM の `/usr/lib64/python3.12/site-packages/gi/` にあった（`out/46-engine-process-while-converting.txt`）
+- **FXB: 入力不能の再現と修正後の確認**
+  - 初めは上部バーが `あ` でも `nihongo` が英字のまま入り、Space で変換されなかった。`ibus engine` は `xkb:us::eng` のまま、Anthy のエンジンは居ないが、`ibus list-engine` は `anthy - Anthy` を出した（`out/02b-start-state-after-typing.txt`、`screens/14-start-after-space.png`）
+  - その `ibus-daemon` の PATH で包みを `--xml` 付きで呼ぶと `ModuleNotFoundError: No module named 'gi'`（終了コード 1）。固定値の PATH では `<engines>` と `<name>anthy</name>` が出た（`out/02c-start-wrapper-with-session-path.txt`。AS4 の `ibus-anthy-python-path.txt` にも同じタグがある）
+  - journal の `ModuleNotFoundError` は、入力不能でも 0 行（ユーザーとシステム、当該起動と全部の起動）。gnome-shell の `Gio.IOErrorEnum: タイムアウトしました`（`_setEngine`）は 1 件だった。前の `FIX-ibus-delta` の「0 行」という報告は保持するが、復旧の根拠には使わない（`out/02b-start-state-after-typing.txt`・`out/02d-start-system-journal-count.txt`）
+  - 手順 4 と再起動の後は、手順 3 の PATH が固定値、手順 6 のテキストエディターで「日本語」への変換と確定が通った。変換中の `ibus engine` は `anthy`、エンジンの実行ファイルは `/usr/bin/python3.12`、`_setEngine` のタイムアウトは 0 件（`out/44-step3-wezterm-output.txt`・`out/54-step6-engine-while-converting.txt`、`screens/55-step6-after-enter-committed.png`）
+  - 手順 8（LazyVimStarter `8e4a074` の手順 19）は、WezTerm の Neovim で `/kensaku` の検索と Tab、挿入時の `<C-j>` で `A` → `あ`、Esc で `A`、検索欄の `<C-j>` と次の `/` の IME 保持、ファイルピッカーのアイコン、`:qa!` まで確認した。手順の外で `nihongo` → Space → Enter を打ち、行に「日本語」が入ることも見た（`out/70-step8-engine-in-nvim.txt`、`screens/61-step8-kensaku-enter.png`〜`81-step8-after-qa.png`）
+    - 整形で 1 行目が直る所だけは、見分けられなかった。始めから `# 動作確認` で、前後のファイルの sha256 は同じ（`out/59-before-step8.txt`・`out/82-after-step8.txt`）。手順 8 の全部を再検証済みとは扱わない
+  - 「git-delta」の手順 4 は、`delta 0.20.1`・`git-delta 0.20.1`、`Δ AGENTS.md` のヘッダと、20 行の中に背景色（`48;5;22`）の付いた差分が 2 行出た。最後のコミットは 2 行を足した `67abb84` で、delta の出力は全部で 15 行（`session/after-confirm/0008-実施手順-git-delta-4.txt`、`out/92-git-delta-4-escapes-visible.txt`・`out/93-git-delta-4-commit-shape.txt`、`screens/95-git-delta-4-in-wezterm.png`）
+- **FXB: ロールバックの確認**（「Homebrew と bash-completion を消す」の項だけ。その前後の項は通していない）
+  - 手順 1 は `brew leaves` が 18 個、`brew list --versions` が 204 行、アンインストーラの `--dry-run` の一覧。手順 2 は `y` だけでは進まず、Enter で進み、`Homebrew uninstalled!` と残った `etc/`・`lib/`・`share/`・`var/` が出た（`session/after-confirm/0009-ロールバック-Homebrew_と_bash-completion_を消す-1.txt`、`out/120b-rollback-hb-2-y-no-newline.txt`・`out/120c-rollback-hb-2-enter.txt`）
+  - 手順 3 のブロックの全体を貼り、`/home/linuxbrew` とドロップインのファイル・ディレクトリが消え、`Environment=` だけ、`DropInPaths=` は空になった（`session/after-confirm/0013-ロールバック-Homebrew_と_bash-completion_を消す-3.txt`、`out/131-after-step3-dropin-gone.txt`）
+  - 手順 4 は条件に当たらず飛ばした（bash-completion は OS のインストール時に入っていた）。`--assumeno` の予告では bash-completion だけが消える計画で、`pkgconf` 系 4 つを消す分岐は確かめていない（`out/140-rollback-hb-4-condition.txt`）
+  - 追加で再起動してログインし、テキストエディターで「日本語」への変換と確定を確認した。`ibus-daemon` の PATH は `/home/<USER>/.grok/bin:/home/<USER>/.local/bin:/home/<USER>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin`、エンジンは `/usr/bin/python3.12`（`out/165-final-engine-while-converting.txt`、`screens/164-final-after-space.png`・`166-final-after-enter.png`）
+  - 前の項を飛ばしたため、Git の `core.pager delta`・フォント・WezTerm・設定の clone・`~/.inputrc` などは残った。端末での `git log` は `fatal: unable to execute pager 'delta'`。ロールバック全部を通した結果ではない（`out/170-after-rollback-git-pager.txt`・`out/171-after-rollback-leftovers.txt`）
+- **追加で見つかったことと採否**
+  - FXA の「yazi」の手順 2 は、`/usr/bin/cc` が無く、gcc の post-install が警告になった。「Neovim」の項を飛ばしたためで、順番どおりの AS4 では警告が無い。fd・ripgrep も FXA では初めて入った。yazi・ffmpeg・ImageMagick の起動は通ったが、`brew postinstall gcc` による復旧は試していない。手順書は順番を前提にしているので、記録にだけ残した（`out/21e-yazi-2-gcc-postinstall-warning.txt`・`out/54-yazi-extras-smoke.txt`、FXA の `result.md` の F1）
+  - FXA・FXB とも、SSH では `ibus list-engine` が `IBus に接続できません。`。同じブロックをコンソールの端末で読み込むと `anthy - Anthy` が出た。手順書は GNOME の端末に貼る前提なので、手順は変えていない
+  - FXA・FXB とも、クローンの最初の起動の journal の開始時刻が実際より 9 時間先で、終了時刻より後に見えた。再起動の後は正しい時刻。2 行出るという成功条件には影響せず、原因は確かめていない
+  - FXB のアンインストーラで Enter が必要なことと、starship を消した後のプロンプトのエラーを、extra の手順 2 に文言だけ足した。エラーが出ても手順 3 は通り、端末を開き直すと出なくなった
+
+**Grok レビュー V3 の反映（2026-10-11、Grok Build）**。対象は `7c3f88a`、指摘は 9（中 6・低 3）。指摘 1・3〜7 を採り、2 は `python3` の注意だけ採った。8・9 は手順書を変えず、再起動とロールバックを確かめた範囲を上に記録した。
+
+- **ブロックを変えた所**: 「再起動と確認」の手順 3 の PATH を出す 1 行を、PID が空のときの案内と、その PATH で `/usr/libexec/ibus-engine-anthy --xml` を呼んで `<name>anthy</name>` を抜く形に替えた（指摘 4）。タグの出力は上の FXB と AS4 の証跡で裏付けたが、**直した後のブロックは、VM で貼り直していない**。静的な構文検査だけ
+- **文言を変えた所**: 起動元を GNOME のユーザーサービスに揃え、PATH は Homebrew を含まない固定値であり、ユーザーマネージャーの既定値ではないと書いた。参考資料の検証範囲も FXA・FXB に揃えた（指摘 1・3・6）。extra に Homebrew の `python3` と `gi` の注意を足した（指摘 2 の一部）
+- **オフラインの案内を直した所**: `docs/homebrew-offline.md` の手順 3 は「Homebrew」の手順 1〜4 を案内し、GNOME で日本語入力を使う PC は、Homebrew が既に入っていても手順 4 を通すようにした（指摘 5）。同書のほかの手順と、対応する extra・参考資料・検証記録は変えていない。この経路で手順 4 を貼ることは、まだ確かめていない
+- **git-delta の案内**: 差分の行が出ないときは最後のコミットを見て、差分を持たない場合の確認を飛ばす旨を足した（指摘 7）。マージコミット・空コミットの出力は、確かめていない。ブロックは変えていない
+- **現在、確かめていないこと**
+  - `--xml` を足した「再起動と確認」の手順 3 のブロック全体を VM で貼ること。IBus が居ないとき・PID が複数のとき・`gi` を読めないときの、新しいブロックの実出力も未確認
+  - VMware・VirtualBox・実機での直しの確認、GNOME 以外のセッションや別の経路で起動する IBus、aarch64
+  - ログインし直しだけ、またはサービスの再起動だけ（OS の再起動なし）で、手順 4 とロールバックが効くこと。ロールバックの直後（再起動前）の日本語入力
+  - Neovim の整形の変化、ロールバックのほかの項を順番に全部通した結果と bash-completion を消す分岐
+  - `ibus-setup-anthy`・`firewall-config`・`dnf` などへの Homebrew の Python の影響。`python3` の例から、これらの成否は推定しない
+  - オフライン経路での手順 4、マージコミット・空コミットでの git-delta の出力、ほかの文言だけの直しを貼り直すこと
+  - GNOME の端末へ直接ブロックを貼る形での通し、実アカウントでのログインとその後ろ
 
 ### 見つかった指摘
 
@@ -373,7 +428,9 @@
   - 「直した」: 箇条書きと 1 行の説明の文言だけを直した。コードブロックは変えておらず、VM では流していない
   - 「直して、Hyper-V の VM で確かめた」: 手順かコードブロックを変え、Hyper-V の VM で確かめた
   - 「未対応」: 指摘の場所を直していない。括弧の中は、残っている事情
-- 手順書の指摘は 30（高 1・中 7・低 22）。直した 25（うち、Hyper-V の VM で確かめたのは 2）、未対応 5。参照先の別のリポジトリの文書への指摘は 4（別の表）
+  - 「一部対応」: 採否に合わせて一部だけ直した。残した所と未確認の範囲は、括弧の中に書いた
+- 手順書の指摘は 30（高 1・中 7・低 22）。`7c3f88a` の時点では、直した 25（うち、Hyper-V の VM で確かめたのは 2）、未対応 5。参照先の別のリポジトリの文書への指摘は 4（別の表）
+  - 今回の Grok レビューの反映で、指摘 26 を一部対応にした。現在は、直した 25・一部対応 1・未対応 4。指摘 1 に足した `--xml` のブロックは、VM で貼り直していない
 - VM の値は `<USER>`・`<HOSTNAME>`・`<OLD_HOSTNAME>`・`<SERVER_IP>` で書いた。パスワード・鍵・認証の URL とコードは載せていない
 - 実アカウントでのログインは、3 つの列とも 1 つもしていない。「再起動と確認」の手順 6・8（指摘 1）は、3 つの列とも同じ形で通らなかった
 
@@ -381,7 +438,7 @@
 
 | 連番 | 重大度 | 場所 | 何が起きたか | 見た列 | 切り分け | 直し方の案 | 状態 |
 |---|---|---|---|---|---|---|---|
-| 1 | 高 | 「yazi」の手順 1・2（`:1560`・`:1573`）。現れるのは「再起動と確認」の手順 6（`:1934`〜`:1936`）と手順 8（`:1947`） | 既定の `YAZI_EXTRAS` で `brew install` すると、依存の `python@3.15` が入り、`/home/linuxbrew/.linuxbrew/bin/python3`（3.15.0）ができる。再起動の後、Super+Space で上部バーは `en` から `あ` に変わるが、`nihongo` は英字のまま入り、Space でも変換されない。Neovim の `<C-j>` でも `あ` にならない。「再起動と確認」の手順 3（`:1908`・`:1916`）の `ibus list-engine \| grep -w anthy` は `anthy - Anthy` を出すので、そこでは気付かない | 3 つとも（手順 6・8 が通らなかった）。原因まで切り分けたのは Hyper-V と VMware。VirtualBox は原因を切り分けていない | 手順書のせい（「yazi」の手順 2 と、PATH の順）。コンソールの画面で起きたので、SSH から貼ったせいではない。3 つの列で同じ現れ方なので、ハイパーバイザのせいでもない。根拠は「いちばん大きい指摘」の節 | どれも試していない。(a) 共通の bash 設定で、Homebrew を PATH の先頭に置くのを対話のシェルだけにする (b) IBus のユーザーサービスに、PATH を決めるドロップインを置く手順を「yazi」の手順 2 の後に足す (c) 「yazi」の手順 2 の後に `brew unlink python@3.15` を足す（更新のたびに戻る恐れ） (d) 「再起動と確認」の手順 3 の確かめを、エンジンが起動できるかを見る形（例: `/usr/libexec/ibus-engine-anthy --xml \| head -n 1`）に変える | 直して、Hyper-V の VM で確かめた（(b) の形で、ドロップインを置く手順を「Homebrew」の手順 4 として足した。「再起動と確認」の手順 3 には、`ibus-daemon` の PATH を出す 1 行を足した。リードの飛ばさない手順も、「Homebrew」の手順 1〜4 にした。(a)・(c) と、(d) の `--xml` の形は採っていない） |
+| 1 | 高 | 「yazi」の手順 1・2（`:1560`・`:1573`）。現れるのは「再起動と確認」の手順 6（`:1934`〜`:1936`）と手順 8（`:1947`） | 既定の `YAZI_EXTRAS` で `brew install` すると、依存の `python@3.15` が入り、`/home/linuxbrew/.linuxbrew/bin/python3`（3.15.0）ができる。再起動の後、Super+Space で上部バーは `en` から `あ` に変わるが、`nihongo` は英字のまま入り、Space でも変換されない。Neovim の `<C-j>` でも `あ` にならない。「再起動と確認」の手順 3（`:1908`・`:1916`）の `ibus list-engine \| grep -w anthy` は `anthy - Anthy` を出すので、そこでは気付かない | 3 つとも（手順 6・8 が通らなかった）。原因まで切り分けたのは Hyper-V と VMware。VirtualBox は原因を切り分けていない | 手順書のせい（「yazi」の手順 2 と、PATH の順）。コンソールの画面で起きたので、SSH から貼ったせいではない。3 つの列で同じ現れ方なので、ハイパーバイザのせいでもない。根拠は「いちばん大きい指摘」の節 | どれも試していない。(a) 共通の bash 設定で、Homebrew を PATH の先頭に置くのを対話のシェルだけにする (b) IBus のユーザーサービスに、PATH を決めるドロップインを置く手順を「yazi」の手順 2 の後に足す (c) 「yazi」の手順 2 の後に `brew unlink python@3.15` を足す（更新のたびに戻る恐れ） (d) 「再起動と確認」の手順 3 の確かめを、エンジンが起動できるかを見る形（例: `/usr/libexec/ibus-engine-anthy --xml \| head -n 1`）に変える | 直して、Hyper-V の VM で確かめた（(b) の形を「Homebrew」の手順 4 として足し、FXA で Python 導入前に置く順番、FXB でテキストエディターと Neovim の IME 連携を確かめた。(a)・(c) は採っていない。「再起動と確認」の手順 3 は、初めは PATH を出す 1 行だけだったが、Grok レビュー後に (d) の `--xml` 確認も足した。この最新のブロックは VM で貼り直していない） |
 | 2 | 中 | 「ログインと sudo」の手順 2（`:51`・`:52`）、「WezTerm と HackGen Console NF をデスクトップで使う」の手順 3（`:1355`）、`docs/extra/almalinux-setup.md:34` | 「「端末」と打って Enter」「Ptyxis（「端末」）」とあるが、Ptyxis 47.13 の日本語の名前は「ターミナル」（`Name[ja]=ターミナル`。`Keywords` に日本語は無い）。`Gio.DesktopAppInfo.search` は、`端末` で `[]`、`ターミナル`・`terminal`・`ptyxis` で `org.gnome.Ptyxis.desktop`。この時点の入力ソースは `[('xkb', 'us')]` だけ | Hyper-V（`ptyxis` で開いた）と VMware（`terminal`）が、検索の API と `.desktop` で確かめた。VirtualBox は `terminal`・`Ptyxis` で開き、表示名が「ターミナル」であることだけを見た。画面で「端末」と打つことは、3 つとも試していない（キー送信で日本語を打てない） | 手順書のせい（アプリの名前と、まだ日本語を打てない順番）。パッケージの翻訳なので、ハイパーバイザにも SSH にもよらない。入力ソースの値は Kickstart のベースのもので、画面のインストーラで入れた PC では違うかもしれない | `terminal` と打つ形にし、アプリの名前は「ターミナル」と書く | 直した（4 か所とも。「端末」では出ない、とは書いていない。画面では打っていないため） |
 | 3 | 中 | 「キー操作を試す」の手順 1（`:856`） | 「`printf` と打って ↑」の 1 回目に出たのは `printf '\n\033[7m 確認 \033[0m\n'`。手順書の `printf '%s\n' "$MANPAGER"` は、2 回目の ↑ で出た。カーソルが `printf` の後ろに残るのは、手順書のとおり | 3 つとも（SSH のシェルで）。VMware は、コンソールの Ptyxis でも 1 回目が同じ行だった。Hyper-V と VirtualBox は、Ptyxis では試していない | 手順書のせい。「シェルのツール」の手順 8〜10 のブロックも「確認」の `printf` で始まるので、手順 7 より新しい `printf` の行が履歴にある。履歴は 1 行ずつ入っていた（Ctrl+R の一覧）。SSH にもハイパーバイザにもよらない | 1 回目と 2 回目に出る行を書く。または、ほかの行と始まりが重ならない語（`bat --c` と打って ↑）に変える | 直した（1 回目と 2 回目を書く形） |
 | 4 | 中 | 「Firefox」の手順 7（`:1166`）・手順 11（`:1208`） | 入れた Firefox 157.0.1 の最初の起動で、窓いっぱいに「Firefox へようこそ」（続行すると、利用規約とプライバシー通知に同意したものとみなされる）が出る。Esc では閉じず、閉じて起動し直しても、また出る。「続行」を押すまで `about:support` を開けない。手順書に書かれていない | Hyper-V と VMware（同意は行わず、手順 7・11 は未実施）。VirtualBox は、日本語の最初の画面を見て手順 7・11 を未実施としたが、指摘には挙げていない | Firefox（Mozilla のビルド）の最初の起動の動き。SSH にもハイパーバイザにもよらない | 手順 7 に、この窓が出ることと、同意するなら「続行」を押すことを足す（同じ窓の「診断情報と対話データを管理する」の中身は、どの列も見ていない） | 直した（手順 7 に 1 行。手順 11 とリードは変えていない）。「続行」を押した後に `about:support` を開けることは、確かめていない（3 つの列とも、同意していない） |
@@ -406,7 +463,7 @@
 | 23 | 低 | 「GitHub CLI」の手順 1（`:1512`） | 「`Adding repo from: ...` と出て」とあるが、日本語のロケールでは `repo の追加: https://cli.github.com/packages/rpm/gh-cli.repo` | Hyper-V と VMware（指摘）。VirtualBox も、日本語の文が出たと書く | 手順書の書き方 | 「`repo の追加: …`（英語の表示では `Adding repo from: …`）」 | 直した（日本語の表示に。英語の表示は併記していない） |
 | 24 | 低 | 「yazi」の手順 2（`:1577`） | (1) fzf にも `already installed` が出る（箇条書きは fd と ripgrep） (2) 入る量が書かれていない。7 formulae と依存（`ffmpeg-full` が 129、`poppler` が 65、`imagemagick-full` が 67）で、Hyper-V では合わせて 172 個、`/home/linuxbrew/.linuxbrew` が 415M から 2.7G になった (3) cask の `font-symbols-only-nerd-font` は、`Would install 7 formulae` の一覧に出ず、最後に入る | Hyper-V と VMware。VirtualBox の報告には無い（確かめていない） | 手順書の書き方。かかった時間は列で違う（「ハイパーバイザで結果が違った所」の表） | 「fd・ripgrep・fzf は」にし、入る量と、`python3`・`curl` などの Homebrew 版が入って `/usr/bin` のものより先に見つかることを足す（指摘 1 の直し方と合わせて決める） | 直した（(1) と (2)。入る数は「170 個ほど」、時間は「数分から 10 分ほど」と書いた。Homebrew の `python3` と `curl` が先に見つかるようになることは、参考資料の「yazi」の手順 2 の補足に書いた。大きさと、(3) の cask の出方は足していない） |
 | 25 | 低 | 「Codex CLI」の手順 2（`:1707`） | 「`curl` が既に入っていて `curl-minimal` と競合するときは」とあるが、`パッケージ curl-8.12.1-4.el10_2.6.x86_64 は既にインストールされています。` で終わり、競合は出ない | Hyper-V と VMware。VirtualBox は「依存は導入済み」とだけ書く | 手順書の書き方（AlmaLinux 10.2 の Workstation では、入っている `curl` で満たされる） | 「`curl` が入っていれば、既にインストールされていると出る」と足す | 直した（`curl` が入っているときの表示を 1 行） |
-| 26 | 低 | 「Grok Build」の手順 1（`:1780`。関連は `:1704`・`:1712`・`:1788`） | `command -v curl` が出すのは `/home/linuxbrew/.linuxbrew/bin/curl`（8.22.0。「yazi」の手順 2 で入る）。Codex と Grok のインストーラは、dnf の curl ではなく、この curl で動いた（どちらも成功） | Hyper-V と VMware（指摘）。VirtualBox は、報告には「curl のみ」と書くが、`after-confirm` に同じパスがある | 指摘 1 と同じ仕組み（PATH の先頭の Homebrew）。害は見ていない | 「「yazi」を通した PC では Homebrew の `curl`」と書く。注意点の「PATH の先頭が Homebrew になる」（`docs/extra/almalinux-setup.md:971`）に、`python3` と `curl` を例として足す | 未対応（「Grok Build」の手順 1 の `curl` の書き方と、注意点は変えていない。Homebrew の `curl` が先に見つかるようになることは、参考資料の「yazi」の手順 2 の補足に書いた〔指摘 24〕。害は見ていない） |
+| 26 | 低 | 「Grok Build」の手順 1（`:1780`。関連は `:1704`・`:1712`・`:1788`） | `command -v curl` が出すのは `/home/linuxbrew/.linuxbrew/bin/curl`（8.22.0。「yazi」の手順 2 で入る）。Codex と Grok のインストーラは、dnf の curl ではなく、この curl で動いた（どちらも成功） | Hyper-V と VMware（指摘）。VirtualBox は、報告には「curl のみ」と書くが、`after-confirm` に同じパスがある | 指摘 1 と同じ仕組み（PATH の先頭の Homebrew）。害は見ていない | 「「yazi」を通した PC では Homebrew の `curl`」と書く。注意点の「PATH の先頭が Homebrew になる」（`docs/extra/almalinux-setup.md:971`）に、`python3` と `curl` を例として足す | 一部対応（`7c3f88a` では未対応だった。Grok レビューの採否に合わせ、extra の注意点に、証跡で確かめた Homebrew の `python3` と `gi` の例だけ足した。「Grok Build」の手順 1 の `curl` の書き方は変えていない。Homebrew の `curl` が先に見つかることは、参考資料の「yazi」の手順 2 の補足に残す〔指摘 24〕。害は見ていない） |
 | 27 | 低 | 「Grok Build」の手順 7（`:1843`〜`:1845`）・手順 3（`:1806`） | (1) ログインしていない状態で `grok` を起動すると、フォルダーの信頼より先に、ブラウザでの承認の画面（確認用のコード、`Waiting for approval...`、`ctrl+q quit`）になる (2) 1 度起動した後の `grok --version` は、末尾に ` [stable]` が付く | (1) は 3 つとも。(2) は Hyper-V と VMware | Grok Build 1.0.50 の動き。手順 4・5 を済ませていれば出ないはずだが、見ていない（実アカウントが要る） | 手順 7 に「ログインしていないと承認の画面になる。`ctrl+q` で抜けて手順 4 から」と足す | 直した（(1) を手順 7 に 1 行。抜けるキーは、画面の案内（`ctrl+q quit`）の Ctrl+Q と書いた。Hyper-V と VMware は ctrl+q で、VirtualBox は Ctrl+C で抜けた。(2) の `[stable]` は足していない） |
 | 28 | 低 | 「Claude Code」の手順 5（`:1680`〜`:1681`） | 最初に出るのはテーマの選択、次に `Select login method:` の 3 つの選択。箇条書きはフォルダーの信頼から始まり、この 2 つが無い | 3 つとも同じ画面を見た（指摘に挙げたのは VMware） | Claude Code 2.1.296 の動き。信頼の問いの順番は、ログインしていないので見ていない | テーマの選択と、ログインの方法の選択を足す | 直した（1 行） |
 | 29 | 低 | 「Codex CLI」の手順 8（`:1762`） | ログインしていない `codex` を起動して抜けた後、`codex app-server --listen unix:// … --managed-daemon` と `codex app-server daemon pid-update-loop` の 2 つのプロセスが、再起動するまで残った | VMware。Hyper-V と VirtualBox は確かめていない | ログイン済みでも残るかは、見ていない | 検証記録か注意点に書く | 未対応（手順書は変えていない。見たのは VMware だけで、ログイン済みでも残るかは見ていない） |

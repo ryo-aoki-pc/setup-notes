@@ -723,9 +723,10 @@
    bash /tmp/uninstall.sh
    ```
 
-   - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y`
+   - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y` と打って Enter
    - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この項の手順 3 で消す
    - インターネットに出られないホストでは、[ssh-socks-tunnel.md の手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
+   - starship を読み込んだ端末では、消した後に `-bash: /home/linuxbrew/.linuxbrew/bin/starship: そのようなファイルやディレクトリはありません` と出ることがある。そのままこの項の手順 3 を貼り、端末を開き直す
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
 1. アンインストーラ・残った `/home/linuxbrew`・IBus の PATH の設定を消して、端末を開き直す。
@@ -974,6 +975,7 @@
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](../verification/almalinux-setup.md#統合前の記録-homebrewもとは-homebrewmd)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../gdu.md) で実際に問題になる）
+  - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 4 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
   - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す
