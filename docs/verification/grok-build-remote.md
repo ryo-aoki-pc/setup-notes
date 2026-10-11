@@ -1,8 +1,14 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy）の検証記録
 
-[手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/0e8dc6589485cd4205ff5d0d0618511a156da0b4/docs/grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[手順書](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+
+Windows 11 の現行手順: [Codeg の導入](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[Claude Code・Codex CLI の操作](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)。
 
 ## 対象と検証環境
+
+- **Claude Code・Codex の追加の状態（2026-10-12 JST）**: [今回の付録](#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に、公式資料・対応版のソース・隔離した ACP 接続試験・文書の静的検査を記録する
+  - AlmaLinux 10 の隔離試験では、両エージェントの接続と会話の作成、Codex の短文の応答を確認した。Claude の応答はエラーで未確認
+  - Codeg の画面からの接続・応答、自動審査、承認・拒否・中断、CLI 履歴の取り込み・再開、Windows 11 の実機操作は未確認。以下の Grok Build の成功を流用しない
 
 共同レビュー後に変えた部分の確認範囲は、末尾の「PR #132 の共同レビューでの修正と静的確認」に記録する。その修正の確認と、Windows 11 を IP が変わっても使える形にした変更は、その次の付録に記録する。2026-10-12 の Windows 11 Home への新規導入と Private の全送信元への変更は、末尾の今回の付録に記録する。変更後の更新・ロールバックを、実機で通した結果はまだ無い。以前の記録の手順番号は、実施当時の番号として残す。
 
@@ -599,3 +605,67 @@
 - 本体と extra のコード付きの操作 49 手順を、説明から最後の箇条書きまで点検し、「説明 → コード → 確認・分岐・注意」の順序違反は無かった
 - URL のモック検査では Private の Wi-Fi・有線 LAN・VPN を表示し、Disconnected・Public・Domain・loopback・link-local・SkipAsSource・Tentative を除外した。移行は Windows PowerShell 5.1 で 7 ケースを検査し、控えと変更の順、手順 1 で旧 Wi-Fi 遮断を残すこと、独立した手順 2 でだけ削除すること、通常と違う規則と Program 不一致で無変更中断、削除直前の Program の再検査、旧規則が無い場合のスキップを確認した。モック検査で実機の規則は変更していない
 - 手順書のブロックをそのまま実機で機械的に流した検証ではない。同じ操作を、新規導入用のスクリプトと個別のコマンドで行った
+
+## 付録: Claude Code・Codex の操作手順の追加（2026-10-12 JST）
+
+### 対象と変更の範囲
+
+| 項目 | 値 |
+|---|---|
+| 手順書の基点 | `setup-notes` の `main`、`421be2d`。独立 clone の `codex/codeg-claude-codex-guide` で文書だけを変更 |
+| 対象の Codeg | v0.35.1。対応版の確認は公開タグ `e21eb6b38eea9405cdfa3b2d99df216d101d1344` |
+| 試験ホスト | AlmaLinux 10.2、aarch64。Windows 11 は今回の試験に使用していない |
+| Node.js / npm | `v26.11.0` / `11.20.0`。ホストで版の確認を実行 |
+| 既存の CLI | Claude Code `2.1.296`、Codex CLI `0.160.0`。本人のサブスクリプションでログイン済み |
+| 隔離導入したもの | Claude ACP `0.89.1` / Agent SDK `0.3.293` / 付属 CLI `2.1.293`、Codex ACP `2.2.2` / 付属 CLI `0.160.1` |
+
+- 本体に両 OS 共通の任意節「Claude Code と Codex CLI も操作する」を追加し、参考資料・注意点・README・共同作業の案内・構成のメモを同期した
+- Caddy・Codeg のアクセストークン・公開範囲・既存の Grok 手順は変更していない。親リポジトリと既存のサブモジュールの checkout も変更していない
+- 操作に要る認証方法とモデル・モード、接続失敗の分岐、元の会話を閉じてから同じエージェントで再開することを案内した。ログイン・設定・履歴の共有と、設定を保存したときの CLI への影響を参考資料と注意点に記録した
+
+### 公式資料と対応版の確認
+
+- [Codeg の認証方式](https://docs.codeg.app/guide/authentication)で、Claude の既存ログインの再利用と、Codex の ChatGPT ログインを確認した。「公式サブスクリプション」を使い、API キー・モデルプロバイダーを追加しない形にした
+- [Claude の契約での SDK 利用](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan)の 2026-10-07 更新と [OpenAI の認証の説明](https://learn.chatgpt.com/docs/auth)を確認し、本人の契約の利用枠を消費することを明記した
+- Codeg v0.35.1 のレジストリで対応アダプター版を、各アダプターのソースで依存ランタイムとモード名を確認した。Claude の `Auto` が使えないときの警告と `Accept edits` への切り替え、手動運用時の `Manual` を区別した
+- 履歴の取り込みは、公式の [Conversation Aggregation](https://docs.codeg.app/guide/aggregation)と、Codeg v0.35.1 の画面・取り込み処理のソースを確認した。接続先ホストの履歴を同じエージェントで再開する仕様の確認で、画面での実測ではない
+- Codeg・CloudCLI・Happy の比較は公開ソースと公式案内の確認。CloudCLI の Codex の非対話実行による承認の制約、Happy の外部 relay と従来 CLI の保守モードを[参考資料](../reference/grok-build-remote.md#claude-codecodex-を遠隔操作する-oss-の比較)に記録した。両候補の導入・実機試験は行っていない
+
+### 隔離した ACP 接続試験
+
+- `/tmp` の専用 npm prefix・cache・空の作業ディレクトリを使用し、固定版を `--ignore-scripts` で導入した。既存の npm の設定を読ませず、userconfig は `/dev/null`、globalconfig は専用の空ファイルにした
+- 最初は userconfig と globalconfig を両方 `/dev/null` にしたが、npm 11 が二重読み込みとして停止した。別の空ファイルに分けると導入できた。123 パッケージが入り、両アダプターと依存ランタイムの版を確認した
+- API キーの環境を継承せず、各ランタイムの通常の機構で既存の本人の認証を再利用した。エージェントが認証ファイルの中身を閲覧・コピー・出力する操作は行っていない
+- Claude は試験の session options でツールと設定の読み込み元を空にし、`Manual` を選んだ。Codex は `Read-only` を選び、フック・MCP を無効にする設定値を指定した。有効設定や MCP の起動状態の読み戻しは行っていない
+- クライアント側もツール・承認の要求を拒否する構成にし、空の場所で「ツールを使わず OK のみ」と 1 回ずつ指示した
+- ツール・承認の要求は両方とも 0 件。通常の Codeg の設定や `Auto`・`Auto review` を使う試験ではない。既存のグローバル npm・Codeg の設定は変更していない
+- 試験後に専用 prefix・cache・作業ディレクトリを削除した。通常の仕組みで各 CLI の会話の履歴が残る可能性はある。秘密情報を含む生のログは記録していない
+
+| 操作・機能 | AlmaLinux 10 の Claude | AlmaLinux 10 の Codex | Windows 11 の両エージェント |
+|---|---|---|---|
+| 付属ランタイムで本人の契約の認証を再利用 | 確認済み | 確認済み | 未確認 |
+| ACP の `initialize`・新しい会話の作成 | 成功 | 成功 | 未確認 |
+| 試験用の手動・読み取りモードの選択 | `Manual` の選択成功 | `Read-only` の選択成功 | 未確認 |
+| ツールを使わない短文の応答 | RPC `-32603` で失敗。応答未確認 | `OK` と応答、`end_turn` で終了 | 未確認 |
+| Codeg の画面でのアダプター導入・接続・応答 | 未確認 | 未確認 | 未確認 |
+| `Auto`・`Auto review` の自動審査、承認・拒否・中断 | 未確認 | 未確認 | 未確認 |
+| CLI 履歴の取り込み・同じエージェントでの再開 | 未確認 | 未確認 | 未確認 |
+
+- Claude の応答のエラーには `limit` の語があった。原因を確定する情報が無いため、利用枠の上限と断定しない。再試行や API キーを追加する回避は行わなかった
+- Claude が返した `Manual`・`Accept edits`・`Plan`・`Auto`、Codex が返した `Read-only`・`Workspace access`・`Auto review`・`Full access` のモード名を確認した。モードの一覧を取得できたことは、自動審査の判断の成功とは扱わない
+- HTTPS 越しの画面、スマートフォン、Windows 11、新しい節の実機での通しは未確認。以前の Grok の成功を、今回の両エージェントの成功へ読み替えない
+
+### 文書の静的な確認
+
+- 本体の bash 21 ブロックと extra の 3 ブロック、計 24 ブロックを Bash 5.2.26 の `bash -n` で確認し、構文エラー 0
+- ShellCheck 0.11.0 で新規の bash ブロックの指摘は 0。全体の既存 7 件（SC2034 が 6 件、SC2009 が 1 件）は変更前の `421be2d` と一致し、新たな指摘は無かった
+- 本体の PowerShell 27 ブロックと extra の 3 ブロック、計 30 ブロックを Linux arm64 の PowerShell 7.6.6 の `Parser.ParseFile` で確認し、構文エラー 0。Windows PowerShell 5.1 の実行と PSScriptAnalyzer は今回の検査に含めない
+- 変更した 8 文書の相対リンク・見出しのアンカー 435 件を確認し、不一致 0。変更前の見出しが同じ名前・順序で残っていることも確認した
+- 本体と extra の操作 83 手順（コード付きは 51 手順）を、説明から最後の箇条書きまで点検し、「説明 → コード → 確認・分岐・注意」の順序違反は無かった。共同作業の手順書は案内をリードに追加し、操作の順序は変更していない
+- `git diff --check` は出力なし。掲載したブロックを実機で機械的に流す検査は行っていない。AlmaLinux 10 の版の確認だけは、同じコマンドを別途実行した
+
+### Grok Build との共同レビュー
+
+- Grok Build 1.0.50 の `grok-4.7` に、公開文書 8 ファイルの差分を渡した。計画モード・1 ターン、ツール・Web 検索・subagent を無効にした読み取り専用のレビューで、終了コードは 0
+- 本体の警告が Grok だけを指していた点と、構成のメモの共通見出しの並びが本体と違った点の 2 指摘を反映した。任意節からも、同じトークンで Claude・Codex を操作できることが分かる注意点へ案内した
+- 本人のサブスクリプションの再利用、契約枠の消費、API キーの非追加、ACP 試験と画面での未実測の区別、OS・機能ごとの未確認、Claude の手動運用、履歴の同時再開を避ける案内には、追加の指摘は無かった

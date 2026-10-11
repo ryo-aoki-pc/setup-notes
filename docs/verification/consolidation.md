@@ -127,3 +127,16 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[取�
 固定版の参照も照合した。421be2d の2冊には基本設定の項が既にあるが、旧 Homebrew の4手順と旧 WezTerm の手順5は、集約後の番号と一致しない。過去の旧ファイル名を指す32リンクを、削除直前の [83ad79e](https://github.com/ryo-aoki-pc/setup-notes/commit/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0)（21件）と [a2b9fd13](https://github.com/ryo-aoki-pc/setup-notes/commit/a2b9fd13c71d47fe9155964b490f06bdadc49fc9)（11件）の原文へ付け替えた。一般名の12リンクには、421be2d の該当項のアンカーを補った。VirtualBox の過去操作は421be2dの旧文書を指しており、誤URLはなかった。
 
 補修44件のファイル・アンカーと、旧 Homebrew の4手順・旧 WezTerm の5手順（`env -i` を含む）を確認した。Windows の現行案内は過去本文と分離した1段落だけを追加し、それ以外の本文・コード・番号・出力はリンク先を除いて最新 main と一致した。
+
+Grok Build は公開した[参照補修差分](https://github.com/ryo-aoki-pc/setup-notes/commit/548da13ef4a1530f3a854ccab82664182478de30)を再レビューし、「指摘なし」と回答した。32件の原文参照・12件の基本設定アンカー・Windows の現行案内と、過去本文を保持したことを確認した。
+
+### Codeg の Claude Code・Codex 操作が加わった main の取り込み
+
+最終確認中に [main 497bb823](https://github.com/ryo-aoki-pc/setup-notes/commit/497bb823606053e5c08d4f7d59bde4e3274707e8)（PR #140）が入り、競合したため作業ブランチへ取り込んだ。旧 `grok-build-remote.md` と `coding-agents.md` の削除を維持し、新しい共通操作は2冊へ移した。原文11手順の Node.js 確認を OS 別に1手順ずつ置き、共通ブラウザ操作9手順を合わせて各10手順にした。設定保存前の共有設定の注意を保持し、認証・保存を手順3、アダプターを手順2へ合わせた。
+
+- 個別37文書の最新780手順・636コードを照合し、欠落なし。新節の2コードは原文と一致し、それ以外の掲載コードと既存見出しは追加前と同一。2冊は計1199コード（AlmaLinux 764・Windows 435）
+- 新しい bash 1ブロックの `bash -n` と PowerShell 1ブロックの Windows PowerShell 5.1.26100.9444 構文解析が成功。各本の追加10手順と「説明→コード→確認・分岐・注意」の順序も確認した
+- 元の対応表322件は変更なし。新しい見出しの OS 別2件を足し、追補は計10件。削除38文書・残る197 Markdown文書・固定版を含むGitHub参照930件・過去記録56文書の検査に不整合なし
+- main の補助資料・構成履歴・新しい検証記録68行を保持した。過去記録の本文・番号・結果・出力はリンク先を除いて原文と一致。Codeg の Windows 現行案内だけ、冒頭に独立した1段落を加えた
+
+今回の確認は文書移植と構文・参照の検査であり、Codeg の画面や両エージェントの実機検証を追加で行ったという意味ではない。
