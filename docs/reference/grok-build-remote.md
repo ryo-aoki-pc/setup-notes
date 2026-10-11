@@ -44,6 +44,8 @@
 
 - Codeg の「権限モード」を保存すると、`~/.grok/config.toml` の `[ui]` の `permission_mode` が書き換わる。ほかの行は変わらなかった
 - 「毎回確認」は `"default"`、「常に許可」は `"bypassPermissions"` と書かれた。Grok Build の文書では、`"always-approve"` と `"bypassPermissions"` は同じモード
+- 本書では、対話の承認を減らして使う用途として「スマート自動承認」（`"auto"`）を選ぶ。Grok Build の文書では、自動審査が許可した操作は実行され、許可しない操作は確認へ回るか拒否される。保存した値は端末の `grok` にも反映され、次の会話から効く
+- Codeg での保存と、そのモードで新しい会話を動かす確認は分ける。機能を選べない・保存できない・まだ使っていない場合は、対応する確認を未完了として記録する
 - Codeg は、「常に許可」のとき `--permission-mode bypassPermissions` を付けて Grok Build を起動し、「毎回確認」のときは付けなかった
 - Grok Build の文書では、既定（ask）で確認なしに動くのは、読み取り専用のツールと、決まった読み取り専用のコマンドだけ。`mkdir` はその一覧に無いが、検証では確認なしで実行された
 
@@ -100,16 +102,17 @@
 - サイトのアドレスを `https://:3443` にして `bind` を書かないと、Caddy は、すべてのアドレスの 3443 番で待ち受ける
 - `tls internal` の `on_demand` は、TLS の接続が来たときに、その宛先の証明書を作る指定。IP アドレスで開いた接続は名前（SNI）を持たず、Caddy は、接続を受けたローカルの IP 宛ての証明書を作った
 - 認証局は変わらない。端末のルート証明書は、PC の IP が変わっても入れ直さない
-- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。本書では、受信の規則で送信元を絞ることで抑える
+- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。Windows の新構成では送信元を制限せず、受信インターフェースの Private という条件だけで公開するので、その接続へ届く端末は任意の名前の証明書を要求できる
 - AlmaLinux 10 のサーバーは IP が固定なので、IP 宛てのサイトと `bind` のままにしてある
 
 ### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 規則とタスク
 
 - `-Program` で `caddy.exe` 宛てに限る。同じ PC のほかのプログラムが 3443 番で待ち受けても、この規則では通らない
-- `-Profile Private` と `-InterfaceType Wired` で、プライベートにした有線 LAN から届く通信だけを通す。PC の IP が変わるので、`-LocalAddress` は付けない
-- `Block` の 2 本は、パブリック・ドメインのネットワークと、プライベートの Wi-Fi を、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
+- `-Profile Private`・`-RemoteAddress Any`・`-InterfaceType Any` で、ホスト側の受信インターフェースが Private なら、IPv4・IPv6 の全送信元、有線 LAN・Wi-Fi・VPN を含む全接続種別を通す。PC の IP が変わるので、宛先 IP は絞らない。`-EdgeTraversalPolicy Block` で Edge Traversal は許可しない
+- `Block` の 1 本は、Public・Domain のネットワークを、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
 - どのネットワークにいても `caddy.exe` 宛ての規則がある状態にして、Caddy が待ち受けを始めたときに Windows が許可を尋ねる画面を出さないようにする狙いもある（パブリックのネットワークで Caddy を起動しての確認は、していない）
-- Wi-Fi からも使うなら、`codeg-caddy-block-wifi` を作らず、`codeg-caddy-in` から `-InterfaceType Wired` を外す（確かめていない）
+- 既存構成の切り替えでは、規則とフィルターを XML に控える。Public・Domain の遮断を固定し、Allow を Private に限定してから、送信元と接続種別を Any にする。旧 `codeg-caddy-block-wifi` だけを消す。控えの XML は読み戻し用で、`Import-Clixml` は規則を復元しない
+- URL の表示は、接続中の Private のプロファイルに対応する InterfaceIndex から、有効な IPv4 を拾う。接続名を添え、loopback・link-local・SkipAsSource のアドレスは出さない。物理アダプターだけには絞らない
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
 - Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
 - タスクの引数は、スクリプトのパスを二重引用符で囲む。ランチャーは、そのパスを 1 個の引数として受け取り、PowerShell の `-File` に渡す
@@ -142,7 +145,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | つなぐ側 | ブラウザ | 採った | スマートフォンと PC で同じ画面 |
 | つなぐ側 | Codeg のデスクトップアプリ（リモートのワークスペース） | 採らない（確かめていない） | Windows の署名が無い。サーバーの `CODEG_BROWSER_TUNNEL` を見直す必要がある |
 | つなぐ側 | Codeg の Android のアプリ | 採らない（確かめていない） | Apache-2.0。APK を GitHub から入れる。testing の段階 |
-| 経路 | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
+| 経路（AlmaLinux 10） | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
+| 経路（Windows 11） | Private の全送信元・全接続種別に開ける | 採った | IPv4・IPv6 と、有線 LAN・Wi-Fi・VPN を区別しない。Public・Domain と Edge Traversal は遮断する（利用者の指定） |
 | 通信の暗号化 | 同じホストの Caddy が HTTPS で受けて、Codeg へ渡す。証明書は Caddy の認証局（`tls internal`） | 採った | Apache-2.0。ドメインも外部のサービスも要らない。端末にルート証明書を入れる |
 | 通信の暗号化 | 公的な証明書（Let's Encrypt の DNS-01） | 採らない | 自分のドメインと、DNS 事業者の API トークンが要る |
 | 通信の暗号化 | HTTP のまま使う | 採らない（はじめの形） | VPN の区間しか暗号化されない。LAN の区間は、トークンも平文で流れる |
@@ -157,8 +161,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 画面は、端末をそのまま映すものではなく、会話・承認・変更されたファイルを扱うチャット形式のものにする（利用者の指定）
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
-- まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../forgejo.md) と同じ順）
-- Windows 11 の PC は、ノート PC を複数の拠点の有線 LAN につなぐ使い方に合わせ、待ち受ける IP を決めない（利用者の指定）。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
+- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../forgejo.md) と同じ順）
+- Windows 11 の PC は待ち受ける IP を決めない。利用者の指定で、受信インターフェースが Private なら全送信元・全接続種別を許可し、Public・Domain は遮断する。送信元 CIDR と有線限定は使わない
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う

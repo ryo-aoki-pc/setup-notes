@@ -243,14 +243,14 @@
    - 会話の画面（「今日は何をしましょうか？」）が出ればよい
    - ブラウザは、このトークンを覚える。共用の PC のブラウザでは開かない
 
-1. ブラウザで、Grok の権限モードを確かめる。
+1. ブラウザで、Grok の権限モードをスマート自動承認にする。
 
    - アドレス欄の `/workspace` を `/settings/agents` に変えて開き、「エージェント一覧」の `Grok` を選ぶ
-   - 「権限モード」は「デフォルトを使用」「毎回確認」「編集を自動承認」「スマート自動承認」「常に許可」から選ぶ。変えたら「Grok 設定を保存」を押す
-   - **「常に許可」のままだと、ブラウザから送った指示は確認なしで実行される**。離れた場所から使うなら「毎回確認」にする
+   - 承認を減らして使うこの手順では、「権限モード」で「スマート自動承認」（`auto`）を選び、「Grok 設定を保存」を押す
+   - 保存後に「スマート自動承認」が選ばれていればよい。選べない・保存できない場合は、権限モードの設定は未完了として先へ進まない
    - **ここで保存すると、`~/.grok/config.toml` の `permission_mode` が書き換わり、端末の `grok` にも効く**
    - `permission_mode` の行が無い Grok Build（入れたままの状態）は、確認を出すモードで動く
-   - 変えた設定は、新しく開いた会話から効く
+   - 変えた設定は、新しく開いた会話から効く。この項の手順 5・6 で、そのモードで会話を始め、応答を確かめるまでは利用の確認は未完了
    - 終わったら、アドレス欄を `/workspace` に戻す
 
 1. ブラウザで、プロジェクトのフォルダを開き、Grok を選ぶ。
@@ -657,18 +657,18 @@
 > - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と Grok Build が管理者の権限で動く
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)、[「Grok Build」](windows-setup.md#grok-build)（導入とログイン）、[「Codex・Grok のプラグイン」](windows-setup.md#codexgrok-のプラグイン)の Node.js、[「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)（LAN の接続をプライベートにする。つなぐ拠点ごとに行う）
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）
-> - PC の IPv4 は、固定でなくてよい（ノート PC を、拠点ごとに違う有線 LAN につなぐ使い方を含む）。届くのは、プライベートにした有線 LAN からだけ
-> - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#クライアントを登録する)でクライアントにしておく
+> - PC の IP は、固定でなくてよい。ホスト側の受信インターフェースがプライベートなら、有線 LAN・Wi-Fi・VPN を含む全接続種別で、全送信元の IPv4・IPv6 を許可する
+> - スマートフォンから LAN の外で使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#クライアントを登録する)でクライアントにしておく
 > - [Windows 11 で HTTPS で LAN・VPN に公開する](#windows-11-で-https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末で、手順 6・8 はスマートフォンと PC で行う
 
 - 上から順にコードブロックを貼る。[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 で変数を設定した PowerShell に貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 通信は HTTPS。AlmaLinux 10 と同じく、Caddy を同じ PC に置いて、Codeg へ渡す
-- Windows 11 では、Caddy が待ち受ける IP を決めない。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
-- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 の既存のタスクを非表示起動に切り替える](#windows-11-の既存のタスクを非表示起動に切り替える)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
+- Windows 11 では、Caddy が待ち受ける IP を決めない。受信の規則は Private の全送信元を許可し、Public・Domain を遮断する
+- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 の既存の受信規則を Private の全送信元に切り替える](#windows-11-の既存の受信規則を-private-の全送信元に切り替える)・[Windows 11 の既存のタスクを非表示起動に切り替える](#windows-11-の既存のタスクを非表示起動に切り替える)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
 
 > [!WARNING]
-> **アクセストークンを知っている人は、ブラウザからこの PC で、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。Windows の Grok Build には sandbox が無い。受信の規則でネットワークと送信元を絞り、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**（[注意点](extra/grok-build-remote.md#注意点)）。
+> **アクセストークンを知っている人は、ブラウザからこの PC で、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。Windows の Grok Build には sandbox が無い。Private の全送信元が接続画面へ届くので、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**（[注意点](extra/grok-build-remote.md#注意点)）。
 
 ### Windows 11 で Codeg のサーバーを入れて起動する
 
@@ -677,27 +677,19 @@
    - スタートメニューの「Windows PowerShell」をそのまま開く（「管理者として実行」にしない）
    - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
 
-1. 変数を設定する（`$ALLOW_FROM` は必ず値を入れる）。
-
-   ```powershell
-   $ALLOW_FROM = @()                     # 許可する送信元 IPv4 の CIDR（例: '10.0.2.0/24', '192.168.1.0/24'）。<ALLOW_FROM>
-   ```
+1. 変数を設定する。
 
    ```powershell
    $CODEG_VERSION = 'v0.35.1'            # 入れる Codeg の版（GitHub のリリースのタグ）
    $CADDY_VERSION = '2.11.7'             # 入れる Caddy の版（v を付けない）
    $CODEG_DIR = "$env:LOCALAPPDATA\codeg-server"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'ALLOW_FROM    = {0}' -f ($ALLOW_FROM -join ', ')
    'CODEG_VERSION = {0}' -f $CODEG_VERSION
    'CADDY_VERSION = {0}' -f $CADDY_VERSION
    'CODEG_DIR     = {0}' -f $CODEG_DIR
    ```
 
-   - `ALLOW_FROM` は、この PC から見えるクライアントの送信元に合わせる。VPN のクライアントの帯と LAN の帯を、`,` で区切って並べられる
-   - PC を複数の拠点で使うなら、それぞれの拠点の LAN の帯を入れる
    - `CODEG_VERSION` と `CADDY_VERSION` は、[Codeg のリリースの一覧](https://github.com/spacering-net/codeg/releases)と [Caddy のリリースの一覧](https://github.com/caddyserver/caddy/releases)で新しい版を確かめて変える
-   - 空のままなら先へ進まない
    - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. Grok Build・Node.js・LAN の接続と、Codeg がまだ無いことを確かめる。
@@ -990,31 +982,32 @@
    - 届く範囲は、この項の手順 3 の受信の規則で絞る
    - 認証局の名前は `Codeg <PC の名前>` になる
 
-1. 管理者の Windows PowerShell で、受信の規則を 3 本追加する。
-
-   ```powershell
-   $ALLOW_FROM = @()                     # 許可する送信元 IPv4 の CIDR（例: '10.0.2.0/24', '192.168.1.0/24'）。<ALLOW_FROM>
-   ```
+1. 管理者の Windows PowerShell で、受信の規則を 2 本追加する。
 
    ```powershell
    $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-   if (-not $ALLOW_FROM) { Write-Error '中断: この手順の変数を設定する' } elseif (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue) { Write-Error '中断: 同じ名前の規則が既にある' } else {
-     New-NetFirewallRule -Name 'codeg-caddy-in' -DisplayName 'Codeg (HTTPS)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3443 -RemoteAddress $ALLOW_FROM -Profile Private -InterfaceType Wired -Program $exe | Out-Null
-     New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe | Out-Null
-     New-NetFirewallRule -Name 'codeg-caddy-block-wifi' -DisplayName 'Codeg (HTTPS) block: wireless' -Direction Inbound -Action Block -Profile Private -InterfaceType Wireless -Program $exe | Out-Null
+   if (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue) { Write-Error '中断: 既存の規則がある。既存規則の切り替え節を通す' } else {
+     New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe -ErrorAction Stop | Out-Null
+     try {
+       New-NetFirewallRule -Name 'codeg-caddy-in' -DisplayName 'Codeg (HTTPS)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3443 -RemoteAddress Any -Profile Private -InterfaceType Any -Program $exe -EdgeTraversalPolicy Block -ErrorAction Stop | Out-Null
+     } catch {
+       Remove-NetFirewallRule -Name 'codeg-caddy-block-public' -ErrorAction Stop
+       throw
+     }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' | Format-Table Name, Action, Profile, Enabled -AutoSize
+     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled, EdgeTraversalPolicy -AutoSize
      Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallAddressFilter | Format-List RemoteAddress
      Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceTypeFilter | Format-List InterfaceType
      Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
    }
    ```
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開いた窓に貼る。変数には、[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 と同じ値を入れる
-   - `Allow` が 1 行と `Block` が 2 行、指定した `RemoteAddress`、`InterfaceType : Wired`、`LocalPort : 3443` が出ればよい
-   - 通すのは、プライベートのネットワークの有線 LAN に、指定した送信元から届く 3443/tcp だけ。パブリックのネットワークと Wi-Fi は、`Block` の 2 本で遮断する
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開いた窓に貼る。Codeg を入れたユーザーの窓にする
+   - `Allow`・`Private` が 1 行と `Block`・`Domain, Public` が 1 行、`RemoteAddress : Any`、`InterfaceType : Any`、`LocalPort : 3443`、Allow の `EdgeTraversalPolicy : Block` が出ればよい
+   - 通すのは、ホスト側の受信インターフェースが Private の 3443/tcp。IPv4・IPv6 の全送信元、有線 LAN・Wi-Fi・VPN を含む全接続種別を許可し、Public・Domain は遮断する
    - **規則は、この項の手順 4 より先に足す**。規則が無いまま Caddy が待ち受けると、Windows が許可を尋ねる画面を出し、そこで別の規則が作られる
    - 3080 番の規則は作らない。Codeg へは、Caddy を通してだけ届く
+   - エラーが出たら中断する。Allow の追加に失敗した場合は、この手順で作った Block だけを消して止まる
    - 貼り終えたら、管理者の窓は閉じる
    - **次の手順は、管理者ではない窓（変数を設定した PowerShell）に貼る**
 
@@ -1046,22 +1039,27 @@
      Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.LocalPort -in 3080, 3443 } | Sort-Object LocalPort, LocalAddress | Format-Table LocalAddress, LocalPort -AutoSize
      & "$env:WINDIR\System32\curl.exe" -s --cacert $root --ssl-no-revoke -o NUL -w "%{http_code}`n" -X POST "https://127.0.0.1:3443/api/health"
      Get-NetFirewallApplicationFilter -Program "$cdir\caddy.exe" | Get-NetFirewallRule | Format-Table Name, Action, Profile -AutoSize
-     Get-NetAdapter -Physical | Where-Object { $_.Status -eq 'Up' -and $_.PhysicalMediaType -eq '802.3' } | Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | ForEach-Object { "https://$($_.IPAddress):3443" }
+     Get-NetConnectionProfile | Where-Object { $_.NetworkCategory -eq 'Private' -and $_.IPv4Connectivity -ne 'Disconnected' } | ForEach-Object {
+       $profile = $_
+       Get-NetIPAddress -InterfaceIndex $profile.InterfaceIndex -AddressFamily IPv4 -AddressState Preferred -ErrorAction SilentlyContinue |
+         Where-Object { -not $_.SkipAsSource -and $_.IPAddress -notmatch '^(127\.|169\.254\.)' } |
+         ForEach-Object { '{0}: https://{1}:3443' -f $profile.InterfaceAlias, $_.IPAddress }
+     }
    }
    ```
 
-   - `Running`、待ち受けが `127.0.0.1` の 3080 と `::` の 3443 の 2 行、`401`、規則が 3 本、最後に `https://<有線 LAN の IPv4>:3443` が出ればよい
+   - `Running`、待ち受けが `127.0.0.1` の 3080 と `::` の 3443 の 2 行、`401`、規則が 2 本、最後に `<接続名>: https://<Private の IPv4>:3443` が出ればよい
    - `::` は、この PC のすべてのアドレス（IPv4 を含む）で待ち受けていることを示す
-   - 最後の行が、ほかの端末からつなぐ URL。有線 LAN につながっていなければ出ない
+   - 最後の行が、ほかの端末からつなぐ URL。接続中の Private の IPv4 が無ければ出ない
    - タスクが新しい Terminal のウィンドウを開かないことも確かめる
-   - 規則が 3 本より多く出たら、Windows が自動で作った規則がある。名前を確かめて外す
+   - 規則が 2 本より多く出たら、名前と目的を確かめる。この手順以外の規則は変更しない
    - 認証局の鍵と証明書は、Caddy が初回の起動で `%APPDATA%\Caddy\` に作る。**`root.key` を、読まない・写さない・人に渡さない**
 
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
-   - `ALLOW_FROM` に入っている端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<PC の IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
+   - ホストの Private の接続へ届く別の端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<PC の IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
    - `<PC の IP>` は、この項の手順 4 の最後に出た URL の IP
-   - `ALLOW_FROM` に入っていない端末があれば、同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることも確かめる
+   - 有線 LAN と Wi-Fi を使う場合は、それぞれ Private の接続で確かめる。Public・Domain の接続を試せる場合は、別の端末から同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることを確かめる
 
 1. スマートフォンと PC に、この PC のルート証明書を入れる。
 
@@ -1081,19 +1079,86 @@
    - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る
    - この PC 自身のブラウザからも、同じ URL で開ける
 
-1. PC の IP が変わったとき（別の拠点の有線 LAN につないだときなど）は、今の URL を表示して、その URL で開き直す。
+1. PC の IP が変わったときは、今の URL を表示して、その URL で開き直す。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetAdapter -Physical | Where-Object { $_.Status -eq 'Up' -and $_.PhysicalMediaType -eq '802.3' } | Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | ForEach-Object { "https://$($_.IPAddress):3443" }
+   Get-NetConnectionProfile | Where-Object { $_.NetworkCategory -eq 'Private' -and $_.IPv4Connectivity -ne 'Disconnected' } | ForEach-Object {
+     $profile = $_
+     Get-NetIPAddress -InterfaceIndex $profile.InterfaceIndex -AddressFamily IPv4 -AddressState Preferred -ErrorAction SilentlyContinue |
+       Where-Object { -not $_.SkipAsSource -and $_.IPAddress -notmatch '^(127\.|169\.254\.)' } |
+       ForEach-Object { '{0}: https://{1}:3443' -f $profile.InterfaceAlias, $_.IPAddress }
+   }
    Get-NetConnectionProfile | Format-Table InterfaceAlias, NetworkCategory -AutoSize
    ```
 
-   - 有線 LAN の IPv4 ごとに URL が 1 行と、接続ごとのネットワークの種類が出る。URL が出なければ、有線 LAN につながっていない
-   - 有線 LAN の接続が `Public` なら届かない。[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)でプライベートにする
+   - 接続中の Private の IPv4 ごとに接続名と URL が 1 行、接続ごとのネットワークの種類が出る。URL が出なければ、Private の有効な IPv4 が無い
+   - 接続が `Public`・`DomainAuthenticated` なら、別の端末から届かない。自分の LAN の接続を Private にする場合は、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)を通す
    - Caddy の設定・タスク・受信の規則・端末のルート証明書は、変えなくてよい。新しい IP 宛ての証明書は、Caddy がその場で作る
-   - その拠点の LAN の帯が `ALLOW_FROM` に無ければ届かない。規則の `RemoteAddress` に足す
    - ブラウザは、IP が違う URL を別のサイトとして扱う。はじめて開く IP では、トークンを入れ直す
+
+---
+
+## Windows 11 の既存の受信規則を Private の全送信元に切り替える
+
+- 以前の手順で `codeg-caddy-in` を作ったときだけ通す。Codeg を入れたユーザーの、管理者の Windows PowerShell（5.1）で行う
+- この節の手順 1 は、Private の全送信元・全接続種別に公開する。XML の控えは `%LOCALAPPDATA%\codeg-caddy` に残す。名前とプログラムが一致する既知の規則だけを変え、ほかの規則は変更しない
+
+1. 既存の規則を XML に控え、Private の全送信元へ切り替える。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
+     $exe = Join-Path $dir 'caddy.exe'
+     $names = @('codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi')
+     if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw '中断: caddy.exe が無い' }
+     $oldRules = @(Get-NetFirewallRule -Name $names -ErrorAction SilentlyContinue)
+     if (-not ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-in' })) { throw '中断: codeg-caddy-in が無い。新規導入の手順を通す' }
+     $saved = foreach ($rule in $oldRules) {
+       $application = $rule | Get-NetFirewallApplicationFilter
+       if ($application.Program -ne $exe) { throw ('中断: プログラムが一致しない規則: ' + $rule.Name) }
+       [pscustomobject]@{
+         Rule = $rule
+         Application = $application
+         Address = $rule | Get-NetFirewallAddressFilter
+         Port = $rule | Get-NetFirewallPortFilter
+         InterfaceType = $rule | Get-NetFirewallInterfaceTypeFilter
+         Interface = $rule | Get-NetFirewallInterfaceFilter
+         Service = $rule | Get-NetFirewallServiceFilter
+       }
+     }
+     $backup = Join-Path $dir ('firewall-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '.xml')
+     if (Test-Path -LiteralPath $backup) { throw '中断: XML の控えが既にある' }
+     $saved | Export-Clixml -LiteralPath $backup -Depth 6
+     if ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-block-public' }) {
+       Set-NetFirewallRule -Name 'codeg-caddy-block-public' -Direction Inbound -Action Block -Enabled True -Profile Public, Domain -Program $exe -Protocol Any -LocalPort Any -RemotePort Any -LocalAddress Any -RemoteAddress Any -InterfaceType Any -InterfaceAlias Any
+     } else {
+       New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe | Out-Null
+     }
+     Set-NetFirewallRule -Name 'codeg-caddy-in' -Direction Inbound -Action Allow -Enabled True -Profile Private -Program $exe -Protocol TCP -LocalPort 3443 -EdgeTraversalPolicy Block
+     Set-NetFirewallRule -Name 'codeg-caddy-in' -LocalAddress Any -RemoteAddress Any -RemotePort Any -InterfaceType Any -InterfaceAlias Any
+     Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $backup
+     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled, EdgeTraversalPolicy -AutoSize
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallAddressFilter | Format-List LocalAddress, RemoteAddress
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceTypeFilter | Format-List InterfaceType
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
+     Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue | Format-Table Name
+   }
+   ```
+
+   - XML の控えのパス、`Allow`・`Private` が 1 行と `Block`・`Domain, Public` が 1 行、両方の `Enabled : True` が出ればよい
+   - Allow の `LocalAddress`・`RemoteAddress`・`InterfaceType` が `Any`、`LocalPort : 3443`、`EdgeTraversalPolicy : Block` が出て、最後の Wi-Fi 遮断規則の表が出なければよい
+   - エラーが出たら中断する。XML の控えと既存の規則を残し、原因を確かめてからやり直す
+   - 控えは規則と関連フィルターの読み戻し用。`Import-Clixml` だけではファイアウォールへ復元されない
+
+1. 別の端末で、Private の接続へ HTTPS で届くことを確かめる。
+
+   - [Windows 11 で HTTPS で LAN・VPN に公開する](#windows-11-で-https-で-lanvpn-に公開する)の手順 9 で URL を表示し、同じ項の手順 5 の接続確認を行う
+   - Caddy の設定・タスク・認証局・端末に入れたルート証明書は変えない
+   - 終わったら、管理者の窓を閉じる
 
 ---
 
