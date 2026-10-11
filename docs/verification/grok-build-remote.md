@@ -1,26 +1,29 @@
-# Grok Build をブラウザから操作する手順（Codeg）の検証記録
+# Grok Build をブラウザから操作する手順（Codeg と Caddy）の検証記録
 
 [手順書](../grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 ## 対象と検証環境
 
-- **状態（AlmaLinux 10。2026-10-11 JST）**: Raspberry Pi 5 の AlmaLinux 10.2 / aarch64 に Codeg の `codeg-server` v0.35.0 を入れ、localhost での起動、ブラウザからの Grok Build の操作、VPN への公開、スマートフォンからの操作、v0.35.1 への更新を通した。詳細は末尾の付録
-  - 通したこと: 「Codeg のサーバーを入れて localhost で起動する」の手順 2〜7、「ブラウザで開いて Grok を動かす」の手順 1〜3・5〜7、「VPN に公開する」の手順 1〜6、「端末の grok のセッションを取り込む」の手順 1〜3、「更新」の手順 2〜4 に当たる操作
+- **状態（AlmaLinux 10。2026-10-11 JST）**: Raspberry Pi 5 の AlmaLinux 10.2 / aarch64 に Codeg の `codeg-server` v0.35.0 を入れ、localhost での起動、ブラウザからの Grok Build の操作、VPN への公開、スマートフォンからの操作、v0.35.1 への更新、送信元への LAN の帯の追加、Caddy 2.11.7 での HTTPS への切り替えを通した。詳細は末尾の付録
+  - 通したこと: 「Codeg のサーバーを入れて localhost で起動する」の手順 2〜7、「ブラウザで開いて Grok を動かす」の手順 1〜3・5〜7、「HTTPS で LAN・VPN に公開する」の手順 1〜8、「端末にルート証明書を入れる」の手順 1・3〜6、「端末の grok のセッションを取り込む」の手順 1〜3、「更新」の手順 2〜4 に当たる操作
+  - 公開の順は、手順書と違う。はじめは HTTP のまま VPN の帯だけに公開し（そのときの手順書の形）、その後に LAN の帯を足し、最後に HTTPS へ切り替えた。手順書は、はじめから HTTPS で公開する形に書き直してある
   - 確認したこと: aarch64 の配布物の SHA-256 と起動、ユーザーサービスと linger、SELinux Enforcing で拒否が無いこと、待ち受ける IP、トークン無しの拒否、トークンが journal・プロセスの一覧・Codeg のログ・DB に出ないこと
   - 確認したこと: 既存の Grok Build 1.0.50 での会話、承認の確認（ファイルの作成と `rm`）への許可と拒否、`mkdir` が確認なしで実行されること、端末のセッションの取り込みと継続
-  - 確認したこと: firewalld の runtime / permanent の rich rule、許可していない送信元（LAN の PC）からの拒否、サービスの再起動と更新の後に会話が残ること
-  - 利用者が確認したこと: スマートフォン（Android）で WireGuard を張り、ブラウザで開いてログインし、Grok に指示を送れた。エージェントによる端末の直接操作ではなく、利用者の報告として記録する
-  - **確認していないこと**: すべてのセッションを閉じた後の稼働、OS の再起動の後の自動起動、x86_64、ロールバック、権限モードの設定の画面（Windows 11 のホストの画面でだけ操作した）
+  - 確認したこと: firewalld の runtime / permanent の rich rule、許可していない送信元（LAN の PC。LAN の帯を足す前）からの拒否、サービスの再起動と更新の後に会話が残ること
+  - 確認したこと: Caddy の配布物の SHA-512、TLS 1.3 と IP アドレス宛ての証明書、ルート証明書での検証、信頼していない相手としての検証の失敗、HTTPS 越しのトークンの確認、以前の HTTP が外から届かないこと
+  - 利用者が確認したこと: スマートフォン（Android）で WireGuard を張り、ブラウザで開いてログインし、Grok に指示を送れた（HTTP の時点）。HTTPS にした後、スマートフォンと Windows の PC にルート証明書を入れて、問題なく使えた。エージェントによる端末の直接操作ではなく、利用者の報告として記録する
+  - **確認していないこと**: すべてのセッションを閉じた後の稼働、OS の再起動の後の自動起動、x86_64、ロールバック、権限モードの設定の画面（Windows 11 のホストの画面でだけ操作した）、もう一方の拠点の LAN の帯からの接続、サーバーの証明書の期限（12 時間）をまたいだ後の動き、Caddy の更新
 
-- **Windows 11 では（2026-10-11 JST）**: Windows 11 Pro（x64）の PC に同じ v0.35.0 を入れ、タスク スケジューラでの起動、ブラウザからの Grok Build の操作、権限モードの切り替え、VPN への公開、スマートフォンからの操作、v0.35.1 への更新を通した。詳細は末尾の付録
-  - 通したこと: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 3〜9、「Windows 11 で VPN に公開する」の手順 1〜6、「Windows 11 で止める・もう一度始める」の手順 1・2、「Windows 11 の更新」の手順 2・3 に当たる操作
+- **Windows 11 では（2026-10-11 JST）**: Windows 11 Pro（x64）の PC に同じ v0.35.0 を入れ、タスク スケジューラでの起動、ブラウザからの Grok Build の操作、権限モードの切り替え、VPN への公開、スマートフォンからの操作、v0.35.1 への更新、送信元への LAN の帯の追加、Caddy 2.11.7 での HTTPS への切り替えを通した。詳細は末尾の付録
+  - 通したこと: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 3〜9、「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 1〜8、「端末にルート証明書を入れる」の手順 2〜6、「Windows 11 で止める・もう一度始める」の手順 1・2、「Windows 11 の更新」の手順 2・3 に当たる操作。公開の順は、AlmaLinux 10 と同じく手順書と違う（HTTP → LAN の帯を追加 → HTTPS）
   - 確認したこと: 配布物の SHA-256、タスクが管理者ではない権限・デスクトップのセッションで動くこと、待ち受ける IP、トークン無しの拒否、受信の規則が 1 本だけであること、許可していない送信元（LAN のサーバー）からの拒否
   - 確認したこと: Grok Build 1.0.46 と 1.0.50 での会話、権限モード「常に許可」と「毎回確認」の違い、Codeg の設定が `config.toml` を書き換えること、端末のセッションの取り込みと継続
-  - 利用者が確認したこと: トークンの作成（値はエージェントに渡していない）、受信の規則の追加、スマートフォンからのログインと指示。Windows 側のトークンは、SSH 経由の `qrencode` の QR コードで渡した
-  - **確認していないこと**: サインアウト・再起動の後の自動起動、ロック・RDP の切断の後の稼働、Windows PowerShell 5.1 での実行（検証は PowerShell 7 で行い、5.1 は構文の解析だけ）、ロールバック、arm64 の Windows
+  - 確認したこと: Caddy の配布物の SHA-512、Caddy のタスクが管理者ではない権限・デスクトップのセッションで動くこと、受信の規則が `caddy.exe` 宛ての 1 本だけであること、IP アドレス宛ての証明書、以前の HTTP が外から届かないこと
+  - 利用者が確認したこと: トークンの作成（値はエージェントに渡していない）、受信の規則の追加と入れ替え、スマートフォンからのログインと指示。Windows 側のトークンは、SSH 経由の `qrencode` の QR コードで渡した。HTTPS にした後、スマートフォンと、この PC 自身に、ルート証明書を入れて、問題なく使えた
+  - **確認していないこと**: サインアウト・再起動の後の自動起動、ロック・RDP の切断の後の稼働、Windows PowerShell 5.1 での実行（検証は PowerShell 7 で行った。5.1 では、構文の解析と、3 つのブロックの動きだけを確かめた）、ロールバック、arm64 の Windows、Caddy の更新
 
 - **手順書のブロックの形について**: 検証では、同じコマンドを、値を直接書いた形や、複数の手順をまとめた形で実行した。手順書の変数つきのブロックを、そのままの形で上から通してはいない。ブロックは、下の「文書の静的な確認」で構文を確かめた
-- **確かめていない機能**: Codeg のデスクトップアプリ・Android のアプリからの接続、Codeg の画面からの入れ替え（Software Update）、Grok Build 以外のエージェント、TLS
+- **確かめていない機能**: Codeg のデスクトップアプリ・Android のアプリからの接続、Codeg の画面からの入れ替え（Software Update）、Grok Build 以外のエージェント、AlmaLinux 10 の PC（つなぐ側）へのルート証明書の取り込み
 
 ### 検証環境
 
@@ -29,11 +32,12 @@
 | 実施日 | 2026-10-11 JST | 2026-10-11 JST |
 | ホスト | Raspberry Pi 5 Model B Rev 1.0、AlmaLinux 10.2、aarch64 | Windows 11 Pro ビルド 26300、AMD64 |
 | Codeg | `codeg-server` v0.35.0 → v0.35.1 | `codeg-server` v0.35.0 → v0.35.1 |
+| Caddy | v2.11.7（`caddy_2.11.7_linux_arm64.tar.gz`） | v2.11.7（`caddy_2.11.7_windows_amd64.zip`） |
 | Grok Build | 1.0.50 | 1.0.46 → 1.0.50 |
 | Node.js | v22.23.2 | v26.10.0 |
 | 常駐 | systemd のユーザーサービス、`Linger=yes` | タスク スケジューラ（`Interactive`・`Limited`） |
 | ファイアウォール | firewalld、`public` ゾーン、SELinux は Enforcing | Windows Defender ファイアウォール、`Private` |
-| つないだ端末 | Windows 11 の PC のブラウザ（SSH のトンネル）、Android のスマートフォン（WireGuard） | この PC のブラウザ、Android のスマートフォン（WireGuard） |
+| つないだ端末 | Windows 11 の PC のブラウザ（SSH のトンネル。HTTPS にした後は LAN から）、Android のスマートフォン（WireGuard） | この PC のブラウザ、Android のスマートフォン（WireGuard） |
 
 > [!NOTE]
 > 出力・接続先は `<USER>`・`<HOST>`・`<SERVER_IP>`・`<PC_IP>`・`<ALLOW_FROM>`・`<TOKEN>`・`<UUID>`・`<PROJECT_DIR>` などで表す。アクセストークンの値は、エージェントは読まず、記録もしていない（長さ・権限・含まれるかどうかだけを確かめた）。画面の操作は、利用者がブラウザにトークンを入れた後、利用者の了承を得てエージェントが行った。
@@ -45,7 +49,8 @@
 
 ### 完了時点の状態
 
-- どちらのホストも、Codeg v0.35.1 が常駐し、ホストの IPv4 の 3080 番だけで待ち受けている。送信元は VPN のクライアントの帯に絞ってある
+- どちらのホストも、Codeg v0.35.1 が `127.0.0.1:3080` で、Caddy v2.11.7 がホストの IPv4 の 3443 番（HTTPS）で常駐している。外から届くのは 3443/tcp だけで、送信元は、VPN のクライアントの帯と、2 つの拠点の LAN の帯の、3 つに絞ってある
+- スマートフォンと Windows 11 の PC に、2 台のホストのルート証明書が入っている
 - Windows 11 の Grok Build の `config.toml` は、検証の前と同じ内容に戻した（SHA-256 の一致を確かめた）
 - 試験用のプロジェクト（AlmaLinux 10 は `~/codeg-test-project`、Windows 11 はエージェントの作業用の場所）と、その会話が残っている
 
@@ -147,6 +152,7 @@
 
 ### LAN と VPN から開く
 
+- この項は、HTTP のまま VPN の帯だけに公開していた、はじめの形の記録。その後の HTTPS への切り替えは、末尾の付録
 - 切り替える前、`codeg-server.exe` 向けの受信の規則と、3080 番の規則は無かった
 - 利用者が、管理者の PowerShell で受信の規則 `codeg-server-in` を足した（`Allow`・`Private`・TCP 3080・`LocalAddress` は `<PC_IP>`・`RemoteAddress` は `<ALLOW_FROM>`・`Program` は `codeg-server.exe`）
 - 規則を確かめてから、起動用のスクリプトの `CODEG_HOST` を `127.0.0.1` から `<PC_IP>` に変え、タスクを起動し直した
@@ -238,6 +244,7 @@
 
 ### VPN に公開する
 
+- この項は、HTTP のまま VPN の帯だけに公開していた、はじめの形の記録。その後の HTTPS への切り替えは、末尾の付録
 - 利用者が、`public` ゾーンの runtime と permanent に、送信元 `<ALLOW_FROM>`・宛先 `<SERVER_IP>`・3080/tcp の rich rule を 1 本ずつ足した（`priority="100"`）。足す前の rich rule は 0 本だった
 - 規則が両方にあることを確かめてから、ユニットの `CODEG_HOST` を `127.0.0.1` から `<SERVER_IP>` に変え、`daemon-reload` と `restart` をした
 - 待ち受けは `<SERVER_IP>:3080` だけになった。サーバー自身から、`127.0.0.1:3080` は接続できず（curl の終了コード 7）、`<SERVER_IP>:3080` はトークン無しで HTTP 401、トークン付きで HTTP 200
@@ -272,6 +279,72 @@
 - `codeg.db` はそのまま残った。更新の後の画面は、確かめていない（この PC のブラウザは、待ち受けを変えた後に入り直していない）
 - 確かめた後、`codeg-server.prev` と取得用のディレクトリを消した
 
+## 付録: 送信元への LAN の帯の追加と、HTTPS への切り替え（2026-10-11 JST）
+
+### 送信元に LAN の帯を足す（HTTP の時点）
+
+- 利用者の指定で、送信元に 2 つの拠点の LAN の帯を足した。利用者が、サーバーでは帯ごとの rich rule を足し（`read -r -a` と `for` で 1 本ずつ。3080/tcp）、Windows 11 では `Set-NetFirewallRule` で `RemoteAddress` を 3 つにした
+- サーバーの規則は、runtime と permanent に 3 本ずつ。Windows 11 の規則の `RemoteAddress` は 3 つ
+- LAN 越しに、Windows 11 の PC からサーバーへ、サーバーから Windows 11 の PC へ、どちらも `GET /` が HTTP 200、トークン無しの `POST /api/health` が HTTP 401
+- もう一方の拠点の LAN の帯からの接続は、確かめていない
+
+### Caddy の取得と配置
+
+- AlmaLinux 10: `curl -fsSL -O` で `caddy_2.11.7_linux_arm64.tar.gz`（16,485,181 バイト）と `caddy_2.11.7_checksums.txt` を取得した。一覧の SHA-512 で `sha512sum -c` が `OK`、GitHub の digest（`d8fc6d179a5d283028a472a5618564f6ad8a86fed513e64f032b3b0b7cc45e42`）とも一致した。tar の中身は `LICENSE`・`README.md`・`caddy`。`~/.local/opt/caddy/caddy` に置き、`caddy version` は `v2.11.7`。足りないライブラリは無い
+- Windows 11: `curl.exe` で `caddy_2.11.7_windows_amd64.zip`（18,479,498 バイト）と一覧を取得した。`Get-FileHash -Algorithm SHA512` が一覧の値と一致し、GitHub の digest（`0a1edc0b799512051c57071ce0e798d3f2cf67dc98171366f1d2b326072e3b06`）とも一致した。`%LOCALAPPDATA%\codeg-caddy\caddy.exe` に置き、`caddy version` は `v2.11.7`。Authenticode の署名は無い
+- `brew info caddy` と `scoop search caddy` で、Homebrew と scoop にも 2.11.7 があることは確かめた（使っていない）
+
+### 設定と起動
+
+- `Caddyfile` は、`admin off`・`auto_https disable_redirects`・`skip_install_trust`・`pki` の `name`、サイトは `https://<ホストの IP>:3443` で `bind`・`tls internal`・`/caddy-root.crt` の配布・`reverse_proxy 127.0.0.1:3080`。`caddy validate` は `Valid configuration`
+- AlmaLinux 10: Codeg の `CODEG_HOST` を `127.0.0.1` に戻して起動し直し、`codeg-caddy.service` を `enable --now` した。待ち受けは `127.0.0.1:3080` と `<SERVER_IP>:3443` の 2 つだけで、80 番と 2019 番は無い。AVC の拒否は 0 件、Caddy の journal に warn・error は無い
+- Windows 11: 起動用のスクリプトの `CODEG_HOST` を `127.0.0.1` に戻してタスクを起動し直し、Caddy のタスク `codeg-caddy`（`Interactive`・`Limited`・ログオン時）を登録して開始した。待ち受けは `127.0.0.1:3080` と `<PC_IP>:3443` の 2 つだけ。`caddy.exe` はセッション 1 で動いた
+- Caddy のデータ（`~/.local/share/caddy`）と認証局のディレクトリは 0700、`root.key`・`root.crt` などは 0600 だった（中身は読んでいない。`root.crt` は公開してよい証明書なので、名前・期限・指紋だけを `openssl x509` で読んだ）
+
+### 証明書
+
+- どちらも TLS 1.3。サーバーの証明書の SAN は、ホストの IP アドレス 1 つ。期限は、作ってから 12 時間後だった
+- ルート証明書の期限は 2036-08-19（10 年後）
+- ルート証明書を `--cacert` に渡すと、検証が通り（`Verify return code: 0 (ok)`）、トークン無しの `POST /api/health` は HTTP 401、トークン付きは HTTP 200（AlmaLinux 10。トークンは `curl -K -` で渡した）
+- ルート証明書を渡さないと、`curl` は終了コード 60 で止まった
+- `https://<ホストの IP>:3443/caddy-root.crt` の中身は、ホストの `root.crt` と同じだった
+- はじめは `pki` の `name` を書かず、2 台のルート証明書がどちらも `Caddy Local Authority - 2026 ECC Root` になった。端末に入れる前に、Caddy を止めてデータを消し、`name` を足して作り直した（`Codeg <ホスト名> - 2026 ECC Root`）。はじめの認証局は、どの端末にも入れていない
+
+### ファイアウォールの規則の入れ替え
+
+- 利用者が、サーバーでは 3080/tcp の rich rule 3 本を外して 3443/tcp の 3 本を足し、Windows 11 では `caddy.exe` 宛ての規則 `codeg-caddy-in`（TCP 3443・`LocalAddress` は `<PC_IP>`・`RemoteAddress` は 3 つ・`Private`）を足して、`codeg-server-in` を消した
+- 入れ替えの後、サーバーの規則は 3443/tcp の 3 本だけ（runtime と permanent）。Windows 11 の `codeg-*` の規則は `codeg-caddy-in` の 1 本だけで、Caddy を起動した後も増えなかった
+- Windows 11 では、規則を足してから Caddy を起動した
+
+### 互いのホストから HTTPS で確かめる
+
+- Windows 11 の PC からサーバーへ、サーバーから Windows 11 の PC へ、LAN 越しに、相手のルート証明書を `--cacert` に渡して `GET /` が HTTP 200、トークン無しの `POST /api/health` が HTTP 401（Windows の `curl.exe` には `--ssl-no-revoke` を付けた）
+- ルート証明書を渡さないと、どちらも終了コード 60
+- 以前の HTTP（`http://<ホストの IP>:3080/`）は、どちらも届かなかった（時間切れで終了コード 28）
+
+### 端末にルート証明書を入れる
+
+- 利用者が確認したこと: スマートフォン（Android）に 2 台のルート証明書を入れ、問題なかったと回答した
+- 利用者が確認したこと: Windows 11 の PC に、サーバーのルート証明書を入れて、問題なかった。この PC 自身のルート証明書は、1 回目は失敗し、2 回目に入った
+  - 1 回目の失敗は、エージェントの案内のしかたが原因。URL とファイル名を手で書き換える案内にしたため、1 行目の保存先だけが元の名前のまま残り、2・3 行目が探すファイルが無かった
+  - 書き換えずに貼れるブロックを渡して、入った。手順書は、URL を 1 つの変数に入れ、保存先をそこから作る形にした
+- エージェントが確かめたこと: `Cert:\CurrentUser\Root` に、2 台のルート証明書（指紋が、ホストに出したものと同じ）が入っている。`--cacert` を付けない `Invoke-WebRequest` で、2 台の `https://<ホストの IP>:3443/` がどちらも HTTP 200
+
+### 手順書の形での確認
+
+- 空白で字下げした `Caddyfile`（手順書の形）を、サーバーの一時的な写しで `caddy validate` に通した（`Valid configuration`）。動いている設定は、タブで字下げしたもの
+- Windows 11 の「Caddy の設定を書いて、検査する」のブロック（ヒア文字列の形）を、Windows PowerShell 5.1 で、一時的な場所に書いて `caddy validate` に通した
+- 「端末にルート証明書を入れる」の手順 4 のブロックを、Windows PowerShell 5.1 で実行し、名前と指紋が出ることを確かめた（取り込みは、利用者が 3 行の形で行った）
+- 手順書の「Caddy の配布物を取得して…」のブロックは、`tar -xzf` の後に `install` する形。検証では、一時ディレクトリに展開してから `install` した
+
+### 確認していないこと
+
+- もう一方の拠点の LAN の帯からの接続
+- サーバーの証明書の期限（12 時間）をまたいだ後の動き（Caddy が自動で作り直すかどうか）
+- はじめから HTTPS で公開する、手順書の順での通し（検証では、HTTP で公開してから切り替えた）
+- Caddy の更新、ロールバック、OS の再起動やサインアウトの後の Caddy の自動起動
+- AlmaLinux 10 の PC（つなぐ側）と、Firefox へのルート証明書の取り込み
+
 ## 付録: そのほかの確認（2026-10-11 JST）
 
 ### トークンを替える
@@ -289,12 +362,13 @@
 
 ### 文書の静的な確認
 
-- 手順書と extra の `bash` のブロック 20 個を抜き出し、`bash -n` に通した（Windows の Git Bash の bash 5.3.15 と、AlmaLinux 10 の bash 5.2.26。失敗 0）
-- 同じ 20 個を、AlmaLinux 10 の ShellCheck 0.11.0（`-s bash`）に通した。指摘は 7 件で、どれも直していない
-  - SC2034 が 6 件: 別の手順のブロックで使う変数（`SERVER_IP`・`ALLOW_FROM`・`CODEG_VERSION`）と、待つためだけのループの変数 `i`
+- HTTPS に書き直した後の文書で行った（2026-10-11 JST）
+- 手順書と extra の `bash` のブロック 23 個を抜き出し、`bash -n` に通した（Windows の Git Bash の bash 5.3.15 と、AlmaLinux 10 の bash 5.2.26。失敗 0）
+- 同じ 23 個を、AlmaLinux 10 の ShellCheck 0.11.0（`-s bash`）に通した。指摘は 7 件で、どれも直していない
+  - SC2034 が 6 件: 別の手順のブロックで使う変数（`SERVER_IP`・`ALLOW_FROM`・`CODEG_VERSION`）が 3 件と、待つためだけのループの変数 `i` が 3 件
   - SC2009 が 1 件: `ps -eo args | grep -cFf <(…)`。トークンを引数に書かずに数えるための形で、`pgrep` では代えられない
-- `powershell` のブロック 21 個を、Windows PowerShell 5.1.26100.9444 と PowerShell 7.6.6 の構文解析（`Parser.ParseInput`）に通した（エラー 0）。PSScriptAnalyzer には通していない
-- 「Windows 11 で VPN に公開する」の手順 2 の `-replace` の式は、Windows PowerShell 5.1 で、ファイルを書き換えずに結果だけを確かめた（`CODEG_HOST` の 1 行だけが変わる）
+- `powershell` のブロック 27 個を、Windows PowerShell 5.1.26100.9444 と PowerShell 7.6.6 の構文解析（`Parser.ParseInput`）に通した（エラー 0）。PSScriptAnalyzer には通していない
+- Windows PowerShell 5.1 で動きを確かめたブロックは 3 つ: 起動用のスクリプトの `CODEG_HOST` を書き換える `-replace` の式（HTTP で公開していたときの形。今の手順書には無い）、「Caddy の設定を書いて、検査する」のヒア文字列、「端末にルート証明書を入れる」の手順 4
 - 新しい 4 つの文書と、案内を足した 6 つの文書（`README.md`・`docs/linger.md`・`docs/coding-agents.md`・`docs/reference/coding-agents.md`・`docs/almalinux-setup.md`・`docs/windows-setup.md`）の相対リンクと見出しのアンカーを突き合わせた（不一致 0）
 - アラートは、手順書が 4 つ（OS ごとに 2 つ）、extra が 2 つ。`[!TIP]` は無い
 - `git diff --check` は出力なし

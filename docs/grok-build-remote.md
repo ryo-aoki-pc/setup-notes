@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で使う）
+# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）
 
 ## 実施手順
 
@@ -10,13 +10,14 @@
 > - 前提: [AlmaLinux 10 の初期設定の「Grok Build」](almalinux-setup.md#grok-build)で Grok Build を入れてログインしてあること（ブラウザの無いホストは [Grok Build をブラウザの無いホストでログインする](almalinux-setup.md#grok-build-をブラウザの無いホストでログインする)）。[「Codex・Grok のプラグイン」の手順 1](almalinux-setup.md#codexgrok-のプラグイン)の Node.js、[linger](linger.md)、[「ログインと sudo」の手順 3](almalinux-setup.md#ログインと-sudo)（NOPASSWD の sudo）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#クライアントを登録する)でクライアントにしておく
-> - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 1・3〜6 は別の PC とそのブラウザで、[VPN に公開する](#vpn-に公開する)の手順 3 は LAN の別の端末で、手順 4・6 はスマートフォンで行う
+> - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 1・3〜6 は別の PC とそのブラウザで、[HTTPS で LAN・VPN に公開する](#https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末で、手順 6・8 はスマートフォンと PC で行う
 
 - 上から順にコードブロックを貼る。[Codeg のサーバーを入れて localhost で起動する](#codeg-のサーバーを入れて-localhost-で起動する)の手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - Grok Build には、公式の遠隔操作の画面が無い。OSS の [Codeg](https://github.com/spacering-net/codeg)（Apache-2.0）のサーバーを Grok Build と同じホストに常駐させ、ブラウザのチャット形式の画面から Grok Build を動かす。外部のサーバーは通らない
-- 通信は HTTP で、内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される。インターネット向けのポート転送は設定しない
-- 手順の後: [使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[設定ファイル](#設定ファイル)・[更新](#更新)・[ロールバック](extra/grok-build-remote.md#ロールバック)
+- 通信は HTTPS。OSS の [Caddy](https://caddyserver.com/)（Apache-2.0）を同じホストに置き、Caddy が自分で作る認証局の証明書で受けて、Codeg へ渡す。つなぐ端末には、その認証局のルート証明書を入れる
+- 開けるのは 3443/tcp だけで、送信元を指定した帯に絞る。インターネット向けのポート転送は設定しない
+- 手順の後: [端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[設定ファイル](#設定ファイル)・[更新](#更新)・[ロールバック](extra/grok-build-remote.md#ロールバック)
 
 > [!WARNING]
 > **アクセストークンを知っている人は、ブラウザからこのサーバーで、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。NOPASSWD の sudo があるホストでは、root と同じ重みになる。待ち受ける IP と送信元を絞り、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**。「毎回確認」でも、`mkdir` は確認なしで実行された（[注意点](extra/grok-build-remote.md#注意点)）。
@@ -30,23 +31,23 @@
    ```
 
    ```bash
-   ALLOW_FROM=''                      # 許可する送信元 IPv4 の CIDR（例: VPN のクライアントの帯 10.0.2.0/24）
+   ALLOW_FROM=''                      # 許可する送信元 IPv4 の CIDR。複数は空白で区切る（例: '10.0.2.0/24 192.168.1.0/24'）
    ```
 
    ```bash
    {
-     CODEG_VERSION=v0.35.1             # 入れる版（GitHub のリリースのタグ）
+     CODEG_VERSION=v0.35.1             # 入れる Codeg の版（GitHub のリリースのタグ）
+     CADDY_VERSION=2.11.7              # 入れる Caddy の版（v を付けない）
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
-     printf '待ち受け: %s:3080\n許可する送信元: %s\n版: %s\nfirewalld: %s\n' \
-       "${SERVER_IP}" "${ALLOW_FROM}" "${CODEG_VERSION}" "${FW_ZONE}"
+     printf '待ち受け: https://%s:3443\n許可する送信元: %s\n版: Codeg %s / Caddy %s\nfirewalld: %s\n' \
+       "${SERVER_IP}" "${ALLOW_FROM}" "${CODEG_VERSION}" "${CADDY_VERSION}" "${FW_ZONE}"
    }
    ```
 
    - `SERVER_IP` は、スマートフォンや PC から届くサーバーの IPv4。`ip -4 -br addr` で確かめる
-   - `ALLOW_FROM` は、サーバーから見えるクライアントの送信元に合わせる。VPN のクライアントだけに許可するときは、その VPN のクライアントの帯にする
-   - LAN の端末にも許可すると、その区間の通信（トークンを含む）は暗号化されない
-   - `CODEG_VERSION` は、[リリースの一覧](https://github.com/spacering-net/codeg/releases)で新しい版を確かめて変える
+   - `ALLOW_FROM` は、サーバーから見えるクライアントの送信元に合わせる。VPN のクライアントの帯と LAN の帯を、空白で区切って並べられる
+   - `CODEG_VERSION` と `CADDY_VERSION` は、[Codeg のリリースの一覧](https://github.com/spacering-net/codeg/releases)と [Caddy のリリースの一覧](https://github.com/caddyserver/caddy/releases)で新しい版を確かめて変える
    - 待ち受ける NIC が別の zone に属しているなら、`FW_ZONE=` をその名前に変える
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直す
@@ -56,7 +57,7 @@
    ```bash
    {
      printf '\n\033[7m 確認 \033[0m\n'
-     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${CODEG_VERSION}" ] || [ -z "${FW_ZONE}" ]; then
+     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${CODEG_VERSION}" ] || [ -z "${CADDY_VERSION}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: この項の手順 1 の変数を設定する' >&2
      else
        uname -m
@@ -65,16 +66,16 @@
        loginctl show-user "$(id -u)" -p Linger
        sudo firewall-cmd --state
        sudo firewall-cmd --get-active-zones
-       ss -ltn '( sport >= :3080 and sport <= :3090 )'
-       ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
+       ss -ltn '( sport >= :3080 and sport <= :3090 ) or ( sport = :3443 )'
+       ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/opt/caddy ~/.config/caddy
      fi
    }
    ```
 
    - `aarch64` か `x86_64`、`grok` と `node` の版、`Linger=yes`、`running` が出ればよい
-   - `ss` は見出しの 1 行だけ、`ls` は 4 つとも `No such file or directory` になればよい
+   - `ss` は見出しの 1 行だけ、`ls` は 6 つとも `No such file or directory` になればよい
    - `Linger=no` なら、先に [linger](linger.md) を通す
-   - 3080 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[ロールバック](extra/grok-build-remote.md#ロールバック)で消してからやり直す
+   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[ロールバック](extra/grok-build-remote.md#ロールバック)で消してからやり直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
 
 1. 配布物を取得して、SHA-256 を照合する。
@@ -265,7 +266,120 @@
    - `…/.grok/bin/grok --no-auto-update agent stdio` の行が出ればよい。Codeg が、開いている会話ごとに Grok Build を起動する
    - `--permission-mode bypassPermissions` が付いていたら、「常に許可」で動いている
 
-### VPN に公開する
+### HTTPS で LAN・VPN に公開する
+
+1. Caddy の配布物を取得してチェックサムを照合し、自分のホームに置く。
+
+   ```bash
+   if [ -z "${CADDY_VERSION}" ]; then
+     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+   elif [ -e ~/.cache/caddy-dl ] || [ -e ~/.local/opt/caddy ]; then
+     echo '中断: ~/.cache/caddy-dl か ~/.local/opt/caddy が既にある。上書きしない' >&2
+   else
+     case "$(uname -m)" in
+       aarch64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_arm64.tar.gz" ;;
+       x86_64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_amd64.tar.gz" ;;
+       *) CADDY_ASSET='' ;;
+     esac
+     mkdir -p ~/.cache/caddy-dl &&
+     (
+       cd ~/.cache/caddy-dl &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/${CADDY_ASSET}" &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_checksums.txt" &&
+       printf '\n\033[7m 確認 \033[0m\n' &&
+       grep -E "  ${CADDY_ASSET}\$" "caddy_${CADDY_VERSION}_checksums.txt" | sha512sum -c - &&
+       tar -xzf "${CADDY_ASSET}" &&
+       install -d -m 755 ~/.local/opt/caddy &&
+       install -m 755 caddy ~/.local/opt/caddy/caddy
+     ) &&
+     rm -r ~/.cache/caddy-dl &&
+     ~/.local/opt/caddy/caddy version
+   fi
+   ```
+
+   - `caddy_…_linux_….tar.gz: OK` と、`v` で始まる `CADDY_VERSION` と同じ番号が出ればよい
+   - `OK` が出なければ中断する
+
+1. Caddy の設定とユーザーサービスを書いて、設定を検査する。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ]; then
+     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+   elif [ -e ~/.config/caddy/Caddyfile ] || [ -e ~/.config/systemd/user/codeg-caddy.service ]; then
+     echo '中断: Caddyfile か codeg-caddy.service が既にある。上書きしない' >&2
+   else
+     mkdir -p ~/.config/caddy ~/.config/systemd/user &&
+     cat > ~/.config/caddy/Caddyfile <<EOF
+   # setup-notes: grok-build-remote
+   {
+       admin off
+       auto_https disable_redirects
+       skip_install_trust
+       pki {
+           ca local {
+               name "Codeg $(hostname -s)"
+           }
+       }
+   }
+
+   https://${SERVER_IP}:3443 {
+       bind ${SERVER_IP}
+       tls internal
+       handle /caddy-root.crt {
+           root * {\$HOME}/.local/share/caddy/pki/authorities/local
+           rewrite * /root.crt
+           file_server
+       }
+       handle {
+           reverse_proxy 127.0.0.1:3080
+       }
+   }
+   EOF
+     cat > ~/.config/systemd/user/codeg-caddy.service <<'EOF'
+   # setup-notes: grok-build-remote
+   [Unit]
+   Description=Caddy (HTTPS for Codeg)
+
+   [Service]
+   Type=simple
+   ExecStart=%h/.local/opt/caddy/caddy run --config %h/.config/caddy/Caddyfile --adapter caddyfile
+   Restart=on-failure
+   RestartSec=5
+
+   [Install]
+   WantedBy=default.target
+   EOF
+     printf '\n\033[7m 確認 \033[0m\n'
+     ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile 2>&1 | tail -n 1
+   fi
+   ```
+
+   - `Valid configuration` が出ればよい
+   - Caddy は `https://<SERVER_IP>:3443` で受け、同じホストの Codeg（`127.0.0.1:3080`）へ渡す。Codeg の待ち受けは `127.0.0.1` のまま変えない
+   - 認証局の名前は `Codeg <ホスト名>` になる。端末に入れたルート証明書を、ホストごとに見分けるための名前
+
+1. Caddy を起動し、2 つのサービスの自動起動を有効にして、サーバー自身から HTTPS を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ]; then
+     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+   else
+     systemctl --user daemon-reload &&
+     systemctl --user enable codeg-server.service &&
+     systemctl --user enable --now codeg-caddy.service
+     for i in $(seq 1 30); do [ -s ~/.local/share/caddy/pki/authorities/local/root.crt ] && ss -ltn '( sport = :3443 )' | grep -q LISTEN && break; sleep 1; done
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active codeg-server.service codeg-caddy.service
+     ss -ltn '( sport = :3080 or sport = :3443 )'
+     curl -s --cacert ~/.local/share/caddy/pki/authorities/local/root.crt -o /dev/null -w '%{http_code}\n' -X POST "https://${SERVER_IP}:3443/api/health"
+     curl -s -o /dev/null "https://${SERVER_IP}:3443/"
+     echo "curl の終了コード: $?"
+   fi
+   ```
+
+   - `Created symlink …` が 2 回出た後、`active` が 2 行、待ち受けが `127.0.0.1:3080` と `<SERVER_IP>:3443` の 2 行、`401`、`curl の終了コード: 60` が出ればよい
+   - `60` は、ルート証明書を信頼していない相手として、証明書の検証で止まったことを示す（正常）
+   - 認証局の鍵と証明書は、Caddy が初回の起動で `~/.local/share/caddy/` に作る。**`root.key` を、読まない・写さない・人に渡さない**
 
 1. 指定した送信元・宛先・ポートで、この手順専用の firewalld の規則を追加する。
 
@@ -275,57 +389,33 @@
      if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
      else
-       CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${ALLOW_FROM}\" destination address=\"${SERVER_IP}\" port port=\"3080\" protocol=\"tcp\" accept"
-       sudo firewall-cmd --permanent --zone="${FW_ZONE}" --add-rich-rule="${CODEG_RULE}" &&
-       sudo firewall-cmd --zone="${FW_ZONE}" --add-rich-rule="${CODEG_RULE}"
+       read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+       for src in "${CODEG_SRCS[@]}"; do
+         CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --add-rich-rule="${CODEG_RULE}" &&
+         sudo firewall-cmd --zone="${FW_ZONE}" --add-rich-rule="${CODEG_RULE}"
+       done
        sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
        sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
      fi
    }
    ```
 
-   - `success` が 2 回出た後、runtime と permanent に、指定した送信元・宛先・3080/tcp の規則が 1 本ずつあればよい
+   - 送信元ごとに `success` が 2 回ずつ出た後、runtime と permanent に、送信元ごとの 3443/tcp の規則があればよい
+   - 3080 番は開けない。Codeg へは、Caddy を通してだけ届く
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない
-   - **中断や失敗が出たらこの項の手順 2 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/grok-build-remote.md#ロールバック)の手順 2 を使う
+   - 追加できた規則を外す場合は[ロールバック](extra/grok-build-remote.md#ロールバック)の手順 2 を使う
 
-1. 待ち受けをサーバーの IP に変え、自動起動を有効にして、サービスを起動し直す。
+1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     if [ -z "${SERVER_IP}" ] || [ -z "${FW_ZONE}" ]; then
-       echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
-     elif [ "$(sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules | grep -c 'port="3080"')" != 1 ]; then
-       echo '中断: この項の手順 1 の規則が runtime に 1 本だけある状態にする' >&2
-     else
-       sed -i "s/^Environment=CODEG_HOST=.*$/Environment=CODEG_HOST=${SERVER_IP}/" ~/.config/systemd/user/codeg-server.service &&
-       systemctl --user daemon-reload &&
-       systemctl --user enable codeg-server.service &&
-       systemctl --user restart codeg-server.service
-       for i in $(seq 1 30); do ss -ltn '( sport = :3080 )' | grep -q LISTEN && break; sleep 1; done
-       systemctl --user is-active codeg-server.service
-       systemctl --user is-enabled codeg-server.service
-       ss -ltn '( sport >= :3080 and sport <= :3090 )'
-       curl -s -o /dev/null -w '%{http_code}\n' -X POST "http://${SERVER_IP}:3080/api/health"
-     fi
-   }
-   ```
+   - `ALLOW_FROM` に入っている端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<SERVER_IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
+   - `ALLOW_FROM` に入っていない端末があれば、同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることも確かめる
+   - `http://<SERVER_IP>:3080/` は、どの端末からも開けない
 
-   - `Created symlink …`、`active`、`enabled`、待ち受けが `<SERVER_IP>:3080` の 1 行だけ、最後に `401` が出ればよい
-   - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 1 のトンネルは、ここから先は使えない（`127.0.0.1` では待ち受けなくなる）
-   - 会話の履歴は残る
+1. スマートフォンと PC に、このサーバーのルート証明書を入れる。
 
-1. LAN の別の端末で、許可していない送信元から開けないことを確かめる。
-
-   - `ALLOW_FROM` に入っていない端末で `curl -m 6 -s -o /dev/null -w '%{http_code}\n' http://<SERVER_IP>:3080/` を実行する
-   - 6 秒待って `000` が出ればよい。`200` が出たら、[ロールバック](extra/grok-build-remote.md#ロールバック)の手順 1 でサービスを止めてから、この項の手順 1 の規則と zone を確かめる
-   - `ALLOW_FROM` に LAN の帯も入れたときは、この手順は飛ばす
-
-1. スマートフォンで、WireGuard を張ってブラウザで開く。
-
-   - WireGuard のアプリでトンネルを有効にし、ブラウザで `http://<SERVER_IP>:3080` を開く
-   - ログインの画面（「アクセストークン」と「接続」）が出ればよい
-   - 開けないときは、スマートフォンの VPN のアドレスが `ALLOW_FROM` に入っているかを確かめる
+   - [端末にルート証明書を入れる](#端末にルート証明書を入れる)の手順 1・3〜6 を通す
+   - スマートフォンは、先に WireGuard のアプリでトンネルを有効にする（LAN の Wi-Fi にいて、LAN の帯を `ALLOW_FROM` に入れてあれば要らない）
 
 1. サーバーで、トークンを QR コードで表示する。
 
@@ -337,11 +427,86 @@
    - `qrencode` が無ければ `brew install qrencode` で入れる（[Homebrew](almalinux-setup.md#homebrew)）
    - **画面を人に見せない。読み終えたら `clear` で消す**
 
-1. スマートフォンで、トークンを入れて、指示を送る。
+1. スマートフォンで、ブラウザで開いてトークンを入れ、指示を送る。
 
+   - ブラウザで `https://<SERVER_IP>:3443` を開く。警告が出ずに、ログインの画面（「アクセストークン」と「接続」）が出ればよい
    - 「アクセストークン」にコピーした 64 文字を貼り、「接続」を押す
    - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る
-   - PC で開いた会話も、同じ一覧に出る
+   - PC のブラウザからも、同じ URL とトークンで開ける。PC で開いた会話も、同じ一覧に出る
+
+---
+
+## 端末にルート証明書を入れる
+
+- 両 OS に共通の節。Codeg を置いたホストごとに、そのホストの Caddy が作った認証局のルート証明書を、つなぐ端末に 1 つずつ入れる
+- 入れると、ブラウザが警告を出さなくなり、偽のサーバーを見分けられる
+- ルート証明書（`root.crt`）は公開してよい。各ホストが `https://<ホストの IP>:3443/caddy-root.crt` で配る
+- **入れる前か後に、必ず指紋を照合する**。この節の手順 1・2 でホストに出した指紋と、端末に出た指紋が同じであること
+
+1. AlmaLinux 10 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256
+   ```
+
+   - `subject=CN=Codeg <ホスト名> - <年> ECC Root`、期限（10 年後）、`sha256 Fingerprint=` の 3 行が出る。指紋を控える
+
+1. Windows 11 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
+
+   ```powershell
+   $c = New-Object Security.Cryptography.X509Certificates.X509Certificate2("$env:APPDATA\Caddy\pki\authorities\local\root.crt")
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   $c.Subject
+   $c.NotAfter
+   (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
+   ```
+
+   - `CN=Codeg <PC の名前> - <年> ECC Root`、期限、`:` で区切った指紋が出る。指紋を控える
+
+1. スマートフォン（Android）で、ルート証明書を取り込む。
+
+   - ブラウザで `https://<ホストの IP>:3443/caddy-root.crt` を開く。警告が出たら「詳細設定」から進む（この 1 回だけ）。証明書のファイルがダウンロードされる
+   - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、ダウンロードしたファイルを選ぶ（メニューの名前は機種で少し違う）
+   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの節の手順 1・2 のものと同じことを確かめる
+   - 違っていたら、その証明書を削除する
+
+1. Windows の PC で、ルート証明書を取得して、名前と指紋を表示する。
+
+   ```powershell
+   $CODEG_URL = ''                       # ホストの URL（例: https://192.168.1.10:3443）。<CODEG_URL>
+   ```
+
+   ```powershell
+   if (-not $CODEG_URL) { Write-Error '中断: $CODEG_URL が空のまま' } else {
+     $crt = Join-Path $env:TEMP ('codeg-root-' + ([Uri]$CODEG_URL).Host + '.crt')
+     & "$env:WINDIR\System32\curl.exe" -sk -o $crt "$CODEG_URL/caddy-root.crt"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $c = New-Object Security.Cryptography.X509Certificates.X509Certificate2($crt)
+     $c.Subject
+     (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
+   }
+   ```
+
+   - 管理者ではない Windows PowerShell に貼る。Codeg を置いた PC 自身にも、同じ手順で入れる
+   - 名前と指紋が、この節の手順 1・2 でホストに出したものと同じなら、手順 5 へ進む
+   - **違っていたら、取り込まない**（途中で差し替えられている）
+   - ホストが 2 台あるときは、この節の手順 4・5 を、`$CODEG_URL` を変えて 2 回通す
+
+1. Windows の PC で、指紋が同じだったルート証明書を取り込む。
+
+   ```powershell
+   Import-Certificate -FilePath $crt -CertStoreLocation Cert:\CurrentUser\Root
+   ```
+
+   - 「セキュリティ警告」の画面が出たら、拇印を確かめて「はい」を押す
+   - 取り込んだ証明書の `Thumbprint` と `Subject` が出ればよい
+   - 取り込む先は、このユーザーの「信頼されたルート証明機関」。PC のほかのユーザーには効かない
+
+1. 端末のブラウザを開き直して、警告が出ずに開けることを確かめる。
+
+   - `https://<ホストの IP>:3443` を開き、警告が出ずにログインの画面が出ればよい
+   - 警告が出るときは、URL の IP が、ホストの待ち受けの IP と同じかを確かめる（証明書は、その IP 宛てに作られる）
 
 ---
 
@@ -349,6 +514,7 @@
 
 | したいこと | 操作 |
 |---|---|
+| 開く | ルート証明書を入れた端末のブラウザで `https://<ホストの IP>:3443` |
 | 会話を始める | 左の一覧のフォルダの行の「新しい会話」（どの画面でも `Ctrl+T`）。エージェントの一覧で `Grok` を選ぶ |
 | 別のプロジェクトで使う | 左の「フォルダを開く」で、ホストの中のディレクトリを足す |
 | 前の会話に戻る | 左の一覧の会話を押す。サービスを起動し直しても、会話は残る |
@@ -357,7 +523,7 @@
 | 確認の出方を変える | `/settings/agents` の `Grok` の「権限モード」（[ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 4） |
 | 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む) |
 | ブラウザで始めた会話を、端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
-| 止める・始める | `systemctl --user stop codeg-server.service`・`systemctl --user start codeg-server.service`（Windows 11 は [Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)） |
+| 止める・始める | `systemctl --user stop codeg-caddy.service codeg-server.service`・`systemctl --user start codeg-server.service codeg-caddy.service`（Windows 11 は [Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)） |
 
 ---
 
@@ -392,11 +558,16 @@
 | `~/.config/codeg-server/token.env` | `%LOCALAPPDATA%\codeg-server\token.txt` | アクセストークン。持ち主だけが読める |
 | `~/.config/systemd/user/codeg-server.service` | `%LOCALAPPDATA%\codeg-server\start-codeg-server.ps1` と、タスク `codeg-server` | 待ち受ける IP（`CODEG_HOST`）などの設定と、起動のしかた |
 | `~/.local/share/codeg/` | `%APPDATA%\codeg\` | 会話と設定の DB（`codeg.db`）と、ログ（`logs`） |
+| `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル |
+| `~/.config/caddy/Caddyfile` | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先、認証局の名前 |
+| `~/.config/systemd/user/codeg-caddy.service` | タスク `codeg-caddy` | Caddy の起動のしかた |
+| `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](almalinux-setup.md#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
 
 - `CODEG_BRIDGE_PORTS=off` は、開発サーバー用の追加のポート（3081〜3090）を開けない設定。`CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリからの中継を止める設定
-- トークンを替えるときは、トークンのファイルを作り直して、サービス（Windows 11 はタスク）を起動し直す。ブラウザは入り直しになる
+- トークンを替えるときは、トークンのファイルを作り直して、Codeg のサービス（Windows 11 はタスク）を起動し直す。ブラウザは入り直しになる
+- ホストの IP を変えたときは、`Caddyfile` の 2 か所の IP と、ファイアウォールの規則の宛先を直して、Caddy を起動し直す。サーバーの証明書は、その IP 宛てに作られる
 
 ---
 
@@ -405,6 +576,7 @@
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#windows-11-の更新)
 - 画面の右下に「新バージョン」と出たら、新しい版がある。画面からは入れ替えず、この節の手順で、SHA-256 を照合してから置き換える
 - Grok Build は、Codeg からは上がらない（Codeg は `--no-auto-update` を付けて起動する）。端末で `grok update` を実行して上げる
+- この節は Codeg の更新。Caddy の更新は、この手順書では確かめていない（配布物を取得して照合し、`codeg-caddy.service` を止めて `~/.local/opt/caddy/caddy` を置き換え、始める形になる）
 
 1. 上げる版を設定する。
 
@@ -461,16 +633,17 @@
 ## Windows 11 で使う
 
 > [!IMPORTANT]
-> - **すべて Windows の PC のデスクトップで行う**。[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 1 で開いた、**管理者ではない** Windows PowerShell（5.1）に貼る。[Windows 11 で VPN に公開する](#windows-11-で-vpn-に公開する)の手順 1 だけは、管理者の Windows PowerShell に貼る
+> - **すべて Windows の PC のデスクトップで行う**。[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 1 で開いた、**管理者ではない** Windows PowerShell（5.1）に貼る。[Windows 11 で HTTPS で LAN・VPN に公開する](#windows-11-で-https-で-lanvpn-に公開する)の手順 3 だけは、管理者の Windows PowerShell に貼る
 > - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と Grok Build が管理者の権限で動く
 > - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](windows-setup.md#貼り付けの設定)、[「Grok Build」](windows-setup.md#grok-build)（導入とログイン）、[「Codex・Grok のプラグイン」](windows-setup.md#codexgrok-のプラグイン)の Node.js、[「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)（LAN の接続をプライベートにする）
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）。PC の IPv4 が固定されていることを前提にする
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#クライアントを登録する)でクライアントにしておく
-> - [Windows 11 で VPN に公開する](#windows-11-で-vpn-に公開する)の手順 3 は LAN の別の端末で、手順 4・6 はスマートフォンで行う
+> - [Windows 11 で HTTPS で LAN・VPN に公開する](#windows-11-で-https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末で、手順 6・8 はスマートフォンと PC で行う
 
 - 上から順にコードブロックを貼る。[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 で変数を設定した PowerShell に貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
+- 通信は HTTPS。AlmaLinux 10 と同じく、Caddy を同じ PC に置いて、Codeg へ渡す
+- 画面の操作は、[実施手順](#実施手順)の AlmaLinux 10 と同じ。手順の後は[端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)・[Windows 11 の更新](#windows-11-の更新)・[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)
 
 > [!WARNING]
 > **アクセストークンを知っている人は、ブラウザからこの PC で、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。Windows の Grok Build には sandbox が無い。待ち受ける IP と送信元を絞り、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**（[注意点](extra/grok-build-remote.md#注意点)）。
@@ -489,22 +662,24 @@
    ```
 
    ```powershell
-   $ALLOW_FROM = ''                      # 許可する送信元 IPv4 の CIDR（例: VPN のクライアントの帯 10.0.2.0/24）。<ALLOW_FROM>
+   $ALLOW_FROM = @()                     # 許可する送信元 IPv4 の CIDR（例: '10.0.2.0/24', '192.168.1.0/24'）。<ALLOW_FROM>
    ```
 
    ```powershell
-   $CODEG_VERSION = 'v0.35.1'            # 入れる版（GitHub のリリースのタグ）
+   $CODEG_VERSION = 'v0.35.1'            # 入れる Codeg の版（GitHub のリリースのタグ）
+   $CADDY_VERSION = '2.11.7'             # 入れる Caddy の版（v を付けない）
    $CODEG_DIR = "$env:LOCALAPPDATA\codeg-server"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PC_IP         = {0}' -f $PC_IP
-   'ALLOW_FROM    = {0}' -f $ALLOW_FROM
+   'ALLOW_FROM    = {0}' -f ($ALLOW_FROM -join ', ')
    'CODEG_VERSION = {0}' -f $CODEG_VERSION
+   'CADDY_VERSION = {0}' -f $CADDY_VERSION
    'CODEG_DIR     = {0}' -f $CODEG_DIR
    ```
 
    - `PC_IP` は、スマートフォンから届くこの PC の IPv4。`Get-NetIPAddress -AddressFamily IPv4` で確かめる
-   - `ALLOW_FROM` は、この PC から見えるクライアントの送信元に合わせる。VPN のクライアントだけに許可するときは、その VPN のクライアントの帯にする
-   - `CODEG_VERSION` は、[リリースの一覧](https://github.com/spacering-net/codeg/releases)で新しい版を確かめて変える
+   - `ALLOW_FROM` は、この PC から見えるクライアントの送信元に合わせる。VPN のクライアントの帯と LAN の帯を、`,` で区切って並べられる
+   - `CODEG_VERSION` と `CADDY_VERSION` は、[Codeg のリリースの一覧](https://github.com/spacering-net/codeg/releases)と [Caddy のリリースの一覧](https://github.com/caddyserver/caddy/releases)で新しい版を確かめて変える
    - 空のままなら先へ進まない
    - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -516,13 +691,13 @@
    node --version
    ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
    Get-NetConnectionProfile | Format-Table InterfaceAlias, NetworkCategory -AutoSize
-   Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.LocalPort -ge 3080 -and $_.LocalPort -le 3090 } | Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize
-   Test-Path $CODEG_DIR, "$env:APPDATA\codeg"
-   Get-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.LocalPort -eq 3443 -or ($_.LocalPort -ge 3080 -and $_.LocalPort -le 3090) } | Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize
+   Test-Path $CODEG_DIR, "$env:APPDATA\codeg", "$env:LOCALAPPDATA\codeg-caddy"
+   Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
 
    - `grok` と `node` の版、`False`（管理者ではない）、LAN の接続の `Private` が出ればよい
-   - その後は、待ち受けの表が出ず、`False` が 2 行出て、タスクの表も出なければよい
+   - その後は、待ち受けの表が出ず、`False` が 3 行出て、タスクの表も出なければよい
    - 最初の `False` が `True` なら、管理者の窓で開いている。この項の手順 1 からやり直す
    - `Public` なら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)を通す
    - 待ち受け・`True`・タスクのどれかが出たら、既存の構築がある。[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)で消してからやり直す
@@ -659,7 +834,80 @@
    - Windows では、ファイルの変更の確認の見出しが「Write `<パス>`」になる
    - **次の手順は、ブラウザで Grok が応答してから貼る**
 
-### Windows 11 で VPN に公開する
+### Windows 11 で HTTPS で LAN・VPN に公開する
+
+1. Caddy の配布物を取得してチェックサムを照合し、自分のユーザーの場所に置く。
+
+   ```powershell
+   & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $dir = "$env:LOCALAPPDATA\codeg-caddy"
+     $curl = "$env:WINDIR\System32\curl.exe"
+     $tmp = "$env:TEMP\codeg-caddy-setup"
+     if (-not $CADDY_VERSION) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する'; return }
+     if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { Write-Error "中断: この手順は $env:PROCESSOR_ARCHITECTURE の Windows を扱わない"; return }
+     if (Test-Path -LiteralPath $dir) { Write-Error "中断: $dir が既にある。上書きしない"; return }
+     if (Test-Path -LiteralPath $tmp) { Write-Error "中断: $tmp が既にある。中を確かめて消してから貼り直す"; return }
+     $zip = "caddy_${CADDY_VERSION}_windows_amd64.zip"
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & $curl -fsSL -o "$tmp\$zip" "https://github.com/caddyserver/caddy/releases/download/v$CADDY_VERSION/$zip"
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: zip を取れない'; return }
+     & $curl -fsSL -o "$tmp\checksums.txt" "https://github.com/caddyserver/caddy/releases/download/v$CADDY_VERSION/caddy_${CADDY_VERSION}_checksums.txt"
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: チェックサムの一覧を取れない'; return }
+     $m = Select-String -LiteralPath "$tmp\checksums.txt" -CaseSensitive -Pattern "^([0-9a-f]{128})  $([regex]::Escape($zip))$" | Select-Object -First 1
+     if (-not $m) { Write-Error '中断: チェックサムの一覧に zip の行が無い'; return }
+     if ((Get-FileHash -LiteralPath "$tmp\$zip" -Algorithm SHA512).Hash -ne $m.Matches[0].Groups[1].Value) { Write-Error '中断: sha512 が一致しない'; return }
+     Expand-Archive -LiteralPath "$tmp\$zip" -DestinationPath "$tmp\x"
+     New-Item -ItemType Directory -Path $dir | Out-Null
+     Copy-Item -LiteralPath "$tmp\x\caddy.exe" -Destination $dir
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     'sha512 一致'
+     & "$dir\caddy.exe" version
+   }
+   ```
+
+   - `sha512 一致` と、`v` で始まる `CADDY_VERSION` と同じ番号が出ればよい
+   - 実行ファイルに Authenticode の署名は無い。SHA-512 の照合だけで確かめる
+
+1. Caddy の設定を書いて、検査する。
+
+   ```powershell
+   $cf = "$env:LOCALAPPDATA\codeg-caddy\Caddyfile"
+   if (-not $PC_IP) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する' } elseif (Test-Path -LiteralPath $cf) { Write-Error '中断: Caddyfile が既にある。上書きしない' } else {
+     [IO.File]::WriteAllText($cf, @"
+   # setup-notes: grok-build-remote
+   {
+       admin off
+       auto_https disable_redirects
+       skip_install_trust
+       pki {
+           ca local {
+               name "Codeg $env:COMPUTERNAME"
+           }
+       }
+   }
+
+   https://${PC_IP}:3443 {
+       bind ${PC_IP}
+       tls internal
+       handle /caddy-root.crt {
+           root * {`$APPDATA}/Caddy/pki/authorities/local
+           rewrite * /root.crt
+           file_server
+       }
+       handle {
+           reverse_proxy 127.0.0.1:3080
+       }
+   }
+   "@, (New-Object Text.UTF8Encoding($false)))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     & "$env:LOCALAPPDATA\codeg-caddy\caddy.exe" validate --config $cf --adapter caddyfile 2>&1 | ForEach-Object { [string]$_ } | Select-Object -Last 1
+   }
+   ```
+
+   - `Valid configuration` が出ればよい
+   - Caddy は `https://<PC_IP>:3443` で受け、同じ PC の Codeg（`127.0.0.1:3080`）へ渡す。Codeg の待ち受けは `127.0.0.1` のまま変えない
+   - 認証局の名前は `Codeg <PC の名前>` になる
 
 1. 管理者の Windows PowerShell で、指定した送信元・宛先・ポートの受信の規則を追加する。
 
@@ -668,60 +916,62 @@
    ```
 
    ```powershell
-   $ALLOW_FROM = ''                      # 許可する送信元 IPv4 の CIDR。<ALLOW_FROM>
+   $ALLOW_FROM = @()                     # 許可する送信元 IPv4 の CIDR（例: '10.0.2.0/24', '192.168.1.0/24'）。<ALLOW_FROM>
    ```
 
    ```powershell
-   $exe = Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe'
-   if (-not $PC_IP -or -not $ALLOW_FROM) { Write-Error '中断: この手順の 2 つの変数を設定する' } elseif (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: codeg-server.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-server-in' -ErrorAction SilentlyContinue) { Write-Error '中断: 同じ名前の規則が既にある' } else {
-     New-NetFirewallRule -Name 'codeg-server-in' -DisplayName 'Codeg server (VPN)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3080 -LocalAddress $PC_IP -RemoteAddress $ALLOW_FROM -Profile Private -Program $exe | Out-Null
+   $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
+   if (-not $PC_IP -or -not $ALLOW_FROM) { Write-Error '中断: この手順の 2 つの変数を設定する' } elseif (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue) { Write-Error '中断: 同じ名前の規則が既にある' } else {
+     New-NetFirewallRule -Name 'codeg-caddy-in' -DisplayName 'Codeg (HTTPS)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3443 -LocalAddress $PC_IP -RemoteAddress $ALLOW_FROM -Profile Private -Program $exe | Out-Null
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetFirewallRule -Name 'codeg-server-in' | Format-List Name, Enabled, Direction, Action, Profile
-     Get-NetFirewallRule -Name 'codeg-server-in' | Get-NetFirewallAddressFilter | Format-List LocalAddress, RemoteAddress
-     Get-NetFirewallRule -Name 'codeg-server-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Format-List Name, Enabled, Direction, Action, Profile
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallAddressFilter | Format-List LocalAddress, RemoteAddress
+     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
    }
    ```
 
    - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開いた窓に貼る。2 つの変数には、[Windows 11 で Codeg のサーバーを入れて起動する](#windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 と同じ値を入れる
-   - `Enabled : True`・`Action : Allow`・`Profile : Private`、指定した `LocalAddress` と `RemoteAddress`、`LocalPort : 3080` が出ればよい
-   - **規則は、この項の手順 2 より先に足す**。規則が無いまま待ち受けを変えると、Windows が許可を尋ねる画面を出し、そこで別の規則が作られる
+   - `Enabled : True`・`Action : Allow`・`Profile : Private`、指定した `LocalAddress` と `RemoteAddress`、`LocalPort : 3443` が出ればよい
+   - **規則は、この項の手順 4 より先に足す**。規則が無いまま Caddy が待ち受けると、Windows が許可を尋ねる画面を出し、そこで別の規則が作られる
+   - 3080 番の規則は作らない。Codeg へは、Caddy を通してだけ届く
    - 貼り終えたら、管理者の窓は閉じる
    - **次の手順は、管理者ではない窓（変数を設定した PowerShell）に貼る**
 
-1. 待ち受けを PC の IP に変えて、タスクを起動し直す。
+1. Caddy のタスクを登録して開始し、この PC 自身から HTTPS を確かめる。
 
    ```powershell
-   $w = "$CODEG_DIR\start-codeg-server.ps1"
-   if (-not $PC_IP -or -not $CODEG_DIR) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する' } elseif (-not (Get-NetFirewallRule -Name 'codeg-server-in' -ErrorAction SilentlyContinue)) { Write-Error '中断: この項の手順 1 の規則が無い' } else {
-     $txt = [IO.File]::ReadAllText($w) -replace "(?m)^\`$env:CODEG_HOST = '.*'", "`$env:CODEG_HOST = '$PC_IP'"
-     [IO.File]::WriteAllText($w, $txt, (New-Object Text.ASCIIEncoding))
-     Stop-ScheduledTask -TaskName 'codeg-server'
-     Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
-     Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-     Start-Sleep -Seconds 2
-     Start-ScheduledTask -TaskName 'codeg-server'
-     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+   $cdir = "$env:LOCALAPPDATA\codeg-caddy"
+   $root = "$env:APPDATA\Caddy\pki\authorities\local\root.crt"
+   if (-not $PC_IP) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する' } elseif (-not (Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue)) { Write-Error '中断: この項の手順 3 の規則が無い' } elseif (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { Write-Error '中断: codeg-caddy のタスクが既にある' } else {
+     $me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+     $arg = '-NoProfile -WindowStyle Hidden -Command "& ''{0}\caddy.exe'' run --config ''{0}\Caddyfile'' --adapter caddyfile"' -f $cdir
+     $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arg
+     $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited
+     $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+     $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
+     Register-ScheduledTask -TaskName 'codeg-caddy' -Action $action -Principal $principal -Settings $settings -Trigger $trigger | Out-Null
+     Start-ScheduledTask -TaskName 'codeg-caddy'
+     for ($i = 0; $i -lt 30 -and -not ((Test-Path -LiteralPath $root) -and (Get-NetTCPConnection -State Listen -LocalPort 3443 -ErrorAction SilentlyContinue)); $i++) { Start-Sleep -Seconds 1 }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Select-String -LiteralPath $w -Pattern 'CODEG_HOST' | ForEach-Object { $_.Line }
-     Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort -AutoSize
-     & "$env:WINDIR\System32\curl.exe" -s -o NUL -w "%{http_code}`n" -X POST "http://${PC_IP}:3080/api/health"
-     Get-NetFirewallApplicationFilter -Program "$CODEG_DIR\codeg-server.exe" | Get-NetFirewallRule | Format-Table Name, Action, Profile -AutoSize
+     (Get-ScheduledTask -TaskName 'codeg-caddy').State
+     Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.LocalPort -in 3080, 3443 } | Sort-Object LocalPort | Format-Table LocalAddress, LocalPort -AutoSize
+     & "$env:WINDIR\System32\curl.exe" -s --cacert $root --ssl-no-revoke -o NUL -w "%{http_code}`n" -X POST "https://${PC_IP}:3443/api/health"
+     Get-NetFirewallApplicationFilter -Program "$cdir\caddy.exe" | Get-NetFirewallRule | Format-Table Name, Action, Profile -AutoSize
    }
    ```
 
-   - `CODEG_HOST` の行が `<PC_IP>` になり、待ち受けが `<PC_IP>` の 3080 の 1 行だけ、`401`、規則が `codeg-server-in` の 1 本だけ出ればよい
-   - この PC 自身のブラウザからも、ここから先は `http://<PC_IP>:3080/` で開く（`127.0.0.1` では待ち受けなくなる）。ブラウザは入り直しになる
+   - `Running`、待ち受けが `127.0.0.1` の 3080 と `<PC_IP>` の 3443 の 2 行、`401`、規則が `codeg-caddy-in` の 1 本だけ出ればよい
    - 規則がほかにも出たら、Windows が自動で作った規則がある。名前を確かめて外す
+   - 認証局の鍵と証明書は、Caddy が初回の起動で `%APPDATA%\Caddy\` に作る。**`root.key` を、読まない・写さない・人に渡さない**
 
-1. LAN の別の端末で、許可していない送信元から開けないことを確かめる。
+1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
-   - `ALLOW_FROM` に入っていない端末で `curl -m 6 -s -o /dev/null -w '%{http_code}\n' http://<PC_IP>:3080/` を実行する
-   - 6 秒待って `000` が出ればよい。`200` が出たら、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1 で止めてから、この項の手順 1 の規則を確かめる
+   - `ALLOW_FROM` に入っている端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<PC_IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
+   - `ALLOW_FROM` に入っていない端末があれば、同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることも確かめる
 
-1. スマートフォンで、WireGuard を張ってブラウザで開く。
+1. スマートフォンと PC に、この PC のルート証明書を入れる。
 
-   - WireGuard のアプリでトンネルを有効にし、ブラウザで `http://<PC_IP>:3080` を開く
-   - ログインの画面（「アクセストークン」と「接続」）が出ればよい
+   - [端末にルート証明書を入れる](#端末にルート証明書を入れる)の手順 2〜6 を通す。この PC 自身のブラウザで開くなら、この PC にも入れる
 
 1. トークンをスマートフォンに渡す。
 
@@ -730,32 +980,37 @@
    - ほかの方法で渡すときは、`notepad "$env:LOCALAPPDATA\codeg-server\token.txt"` で開く
    - **画面を人に見せない。読み終えたら `Clear-Host` で消す**
 
-1. スマートフォンで、トークンを入れて、指示を送る。
+1. スマートフォンで、ブラウザで開いてトークンを入れ、指示を送る。
 
+   - ブラウザで `https://<PC_IP>:3443` を開く。警告が出ずに、ログインの画面が出ればよい
    - 「アクセストークン」にコピーした 64 文字を貼り、「接続」を押す
    - [ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る
+   - この PC 自身のブラウザからも、`https://<PC_IP>:3443` で開ける
 
 ---
 
 ## Windows 11 で止める・もう一度始める
 
 - 管理者ではない PowerShell に貼る。変数は要らない
-- タスクを終了しただけでは、Codeg の本体が残る。止めるのはこの節の手順 1
+- タスクを終了しただけでは、Codeg と Caddy の本体が残る。止めるのはこの節の手順 1
 
-1. Codeg を止める。
+1. Caddy と Codeg を止める。
 
    ```powershell
+   Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
+   Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
    Stop-ScheduledTask -TaskName 'codeg-server'
    Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
    Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
    Start-Sleep -Seconds 2
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name codeg-server, codeg-mcp -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
-   (Get-ScheduledTask -TaskName 'codeg-server').State
-   Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
+   Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+   (Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue).State
+   Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
    ```
 
-   - プロセスと待ち受けの表は出ず、`Ready` だけが出ればよい
+   - プロセスと待ち受けの表は出ず、`Ready` が 2 行出ればよい（公開の項を通していなければ 1 行）
+   - ほかの用途の Caddy をこの PC で動かしているなら、2 行目は貼らない（名前が `caddy` のプロセスをすべて止める）
    - 端末で自分が動かしている `grok` は止めない（止めるのは、引数が `agent stdio` のものだけ）
    - 実行中の会話は中断される。会話の履歴は残る
 
@@ -766,21 +1021,24 @@
      Write-Error 'Codeg はもう動いている'
    } else {
      Start-ScheduledTask -TaskName 'codeg-server'
+     Start-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
      for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
+     Start-Sleep -Seconds 2
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     (Get-ScheduledTask -TaskName 'codeg-server').State
-     Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize
+     (Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue).State
+     Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize
    }
    ```
 
-   - `Running` と、3080 の待ち受けが出ればよい
+   - `Running` が 2 行と、3080 と 3443 の待ち受けが出ればよい
 
 ---
 
 ## Windows 11 の更新
 
 - Windows 版の Codeg は、画面から自分を入れ替えない。この節の手順で、SHA-256 を照合してから置き換える
-- 同じ場所（`%LOCALAPPDATA%\codeg-server`）に置き換えるので、タスクと受信の規則はそのまま使える
+- 同じ場所（`%LOCALAPPDATA%\codeg-server`）に置き換えるので、タスクはそのまま使える。Caddy と受信の規則には触れない
+- この節は Codeg の更新。Caddy の更新は、この手順書では確かめていない
 - 管理者ではない PowerShell に貼る
 - Grok Build は、Codeg からは上がらない。[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1 で Codeg を止めてから、端末で `grok update` を実行して上げる
 
@@ -829,12 +1087,10 @@
      & "$dir\codeg-server.exe" --version
      (Get-ScheduledTask -TaskName 'codeg-server').State
      Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort -AutoSize
-     Get-NetFirewallApplicationFilter -Program "$dir\codeg-server.exe" -ErrorAction SilentlyContinue | Get-NetFirewallRule | Format-Table Name, Action, Profile -AutoSize
    }
    ```
 
    - `sha256 一致`、上げた版の番号、`Running`、今までと同じ待ち受けの 1 行が出ればよい
-   - [Windows 11 で VPN に公開する](#windows-11-で-vpn-に公開する)を通していれば、規則は `codeg-server-in` の 1 本のまま
    - 起動用のスクリプトとトークンは、そのまま残る
    - 起動しないときは、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1 で止め、`codeg-server.prev` の 3 つを `codeg-server` に戻してから、同じ節の手順 2 で始める
 

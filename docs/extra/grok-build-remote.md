@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で使う）のロールバックと注意点
+# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
 
 [手順書](../grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
@@ -12,18 +12,18 @@
 - linger を、ほかに使うものが無くて戻すときは、[linger のロールバック](linger.md#ロールバック)
 
 > [!CAUTION]
-> **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）と、アクセストークンを消す。取り戻せない。**
+> **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）、アクセストークン、Caddy の認証局の鍵（`~/.local/share/caddy`）を消す。取り戻せない。** 認証局を消すと、端末に入れたルート証明書は役に立たなくなる。
 
-1. サービスを止めて、自動起動を外す。
+1. 2 つのサービスを止めて、自動起動を外す。
 
    ```bash
-   systemctl --user disable --now codeg-server.service
+   systemctl --user disable --now codeg-caddy.service codeg-server.service
    printf '\n\033[7m 確認 \033[0m\n'
-   systemctl --user is-active codeg-server.service
-   ss -ltn '( sport >= :3080 and sport <= :3090 )'
+   systemctl --user is-active codeg-caddy.service codeg-server.service
+   ss -ltn '( sport = :3080 or sport = :3443 )'
    ```
 
-   - `inactive` と、`ss` の見出しの 1 行だけが出ればよい
+   - `inactive` が 2 行と、`ss` の見出しの 1 行だけが出ればよい
 
 1. firewalld の規則を外す。
 
@@ -33,32 +33,42 @@
      if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
      else
-       CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${ALLOW_FROM}\" destination address=\"${SERVER_IP}\" port port=\"3080\" protocol=\"tcp\" accept"
-       sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
-       sudo firewall-cmd --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+       read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+       for src in "${CODEG_SRCS[@]}"; do
+         CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+         sudo firewall-cmd --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+       done
        sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
        sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
      fi
    }
    ```
 
-   - 「VPN に公開する」の手順 1 を通していなければ、この手順は飛ばす
-   - `success` が 2 回出た後、3080/tcp の規則が runtime と permanent のどちらにも無ければよい
+   - 「HTTPS で LAN・VPN に公開する」の手順 4 を通していなければ、この手順は飛ばす
+   - 送信元ごとに `success` が 2 回ずつ出た後、3443/tcp の規則が runtime と permanent のどちらにも無ければよい
    - 変数の値を控えていなければ、`sudo firewall-cmd --zone="$(sudo firewall-cmd --get-default-zone)" --list-rich-rules` で規則を見て、「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数に同じ値を入れる
 
-1. ユニット・本体・トークン・会話の履歴を消す（取り戻せない）。
+1. ユニット・本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
    ```bash
-   rm -f ~/.config/systemd/user/codeg-server.service
+   rm -f ~/.config/systemd/user/codeg-server.service ~/.config/systemd/user/codeg-caddy.service
    systemctl --user daemon-reload
    rm -rf ~/.local/opt/codeg-server ~/.local/opt/codeg-server.prev ~/.config/codeg-server ~/.local/share/codeg ~/.codeg ~/.cache/codeg-server-dl
+   rm -rf ~/.local/opt/caddy ~/.config/caddy ~/.local/share/caddy ~/.cache/caddy-dl
    printf '\n\033[7m 確認 \033[0m\n'
-   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
+   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/opt/caddy ~/.config/caddy ~/.local/share/caddy
    ```
 
-   - `ls` が 4 つとも `No such file or directory` になればよい
+   - `ls` が 7 つとも `No such file or directory` になればよい
    - `~/.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこのホストで使っているなら、ブロックから外す
+   - `~/.config/caddy` と `~/.local/share/caddy` は、このホストでほかの用途の Caddy を自分のユーザーで動かしているなら、ブロックから外す
    - ブラウザとスマートフォンに残るトークンは、もう使えない
+
+1. つないでいた端末から、このホストのルート証明書を消す。
+
+   - Android は、設定の「信頼できる認証情報」→「ユーザー」で、`Codeg <ホスト名>` の証明書を開いて削除する
+   - Windows の PC は、管理者ではない PowerShell で `Get-ChildItem Cert:\CurrentUser\Root | Where-Object Subject -like 'CN=Codeg *'` で一覧を見て、消すものの `Thumbprint` を確かめてから、「ユーザー証明書の管理」（`certmgr.msc`）の「信頼されたルート証明機関」で削除する
 
 ---
 
@@ -66,45 +76,51 @@
 
 - 手順 1・3 は管理者ではない PowerShell に、手順 2 は管理者の PowerShell に貼る
 - Grok Build と、そのセッション（`%USERPROFILE%\.grok`）は消さない
+- 端末に入れたルート証明書は、[ロールバック](#ロールバック)の手順 4 と同じ操作で消す
 
 > [!CAUTION]
-> **この節の手順 3 は、Codeg の会話の履歴と設定（`%APPDATA%\codeg`）と、アクセストークンを消す。取り戻せない。**
+> **この節の手順 3 は、Codeg の会話の履歴と設定（`%APPDATA%\codeg`）、アクセストークン、Caddy の認証局の鍵（`%APPDATA%\Caddy`）を消す。取り戻せない。**
 
-1. Codeg を止めて、タスクを消す。
+1. Caddy と Codeg を止めて、タスクを消す。
 
    ```powershell
+   Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
+   Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
    Stop-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue
    Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
    Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+   Unregister-ScheduledTask -TaskName 'codeg-caddy' -Confirm:$false -ErrorAction SilentlyContinue
    Unregister-ScheduledTask -TaskName 'codeg-server' -Confirm:$false
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name codeg-server, codeg-mcp -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
-   Get-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+   Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
 
    - 何も出なければよい
+   - ほかの用途の Caddy をこの PC で動かしているなら、2 行目は貼らない
 
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
    ```powershell
-   Remove-NetFirewallRule -Name 'codeg-server-in'
+   Remove-NetFirewallRule -Name 'codeg-caddy-in'
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Name 'codeg-server-in' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
+   Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
    ```
 
-   - 「Windows 11 で VPN に公開する」の手順 1 を通していなければ、この手順は飛ばす
+   - 「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 を通していなければ、この手順は飛ばす
    - 何も出なければよい
 
-1. 本体・トークン・会話の履歴を消す（取り戻せない）。
+1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
    ```powershell
-   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-server.prev", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg" -Recurse -Force -ErrorAction SilentlyContinue
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-server.prev", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy" -Recurse -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:LOCALAPPDATA\codeg-server", "$env:APPDATA\codeg"
+   Test-Path "$env:LOCALAPPDATA\codeg-server", "$env:APPDATA\codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy"
    ```
 
-   - `False` が 2 行出ればよい
+   - `False` が 4 行出ればよい
    - `%USERPROFILE%\.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこの PC で使っているなら、ブロックから外す
+   - `%APPDATA%\Caddy` は、この PC でほかの用途の Caddy を動かしているなら、ブロックから外す
 
 ---
 
@@ -144,11 +160,22 @@
 - Codeg 自身のログ（`logs`）と DB には、トークンは入らなかった
 - 確認のコマンドでも、トークンを引数に書かない。`curl -H`・`grep` の引数は、実行中のプロセスの一覧に出る
 
-#### 通信
+#### 通信と証明書
 
-- HTTP のままで、内容は暗号化されない。VPN の区間だけが暗号化される。LAN の端末を `ALLOW_FROM` に入れると、その区間はトークンも平文で流れる
+- 外から届くのは、Caddy が待ち受ける 3443/tcp の HTTPS だけ。Codeg の 3080 番は `127.0.0.1` だけで待ち受け、ファイアウォールでも開けない
+- ホストごとに、Caddy が自分の認証局を作る。ルート証明書の期限は 10 年、サーバーの証明書の期限は 12 時間だった。Caddy の文書では、動いている間に自動で作り直す（期限をまたいだ後の動きは、確かめていない）
+- サーバーの証明書は、ホストの IP 宛てに作られる。別の名前や IP で開くと、警告が出る
+- **認証局の鍵（`root.key`）を、読まない・写さない・人に渡さない**。ルート証明書を入れた端末は、その認証局が署名した証明書を、どのサイトのものでも信じる
+- 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
+- ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、許可した送信元なら誰でも取れる
+- ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
 - Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。守りは、トークンと、待ち受ける IP と、送信元の制限
-- インターネットへ公開しない。公開するなら、TLS を終端するリバースプロキシが要る（本書の範囲外）
+- インターネットへ公開しない
+
+#### 送信元に LAN の帯を入れるとき
+
+- その LAN につながる端末はすべて、ログインの画面まで届く。守りはトークンだけになる
+- ルート証明書を入れていない端末からは、警告が出る
 
 #### systemd-analyze --user verify を使わない
 
@@ -159,8 +186,8 @@
 
 - SSH でログインしたシェルから Codeg を始めない。Administrators の一員の SSH のセッションは管理者の権限を持つ
 - タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。サインアウトと再起動の後の動きは、確かめていない
-- PC の IPv4 が変わると、待ち受けと受信の規則の両方が合わなくなる。ルーターで固定の割り当てにする
-- 受信の規則より先に待ち受けを変えない。Windows が許可を尋ねる画面を出す
+- PC の IPv4 が変わると、Caddy の待ち受け・証明書の宛先・受信の規則が合わなくなる。ルーターで固定の割り当てにする
+- 受信の規則より先に Caddy を起動しない。Windows が許可を尋ねる画面を出す
 
 #### そのほか
 

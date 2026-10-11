@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で使う）の参考資料
+# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
 
 [手順書](../grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
 
@@ -7,8 +7,8 @@
 ### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 1: 補足: 変数
 
 - `SERVER_IP` は、Codeg が待ち受ける IP と、firewalld の規則の宛先の両方に使う
-- `ALLOW_FROM` は送信元 IPv4 の CIDR。WG ホスト自身で動かすときは、VPN のクライアントの通信が `wg0` から入り、送信元はクライアントの VPN のアドレスになる
-- ポートは Codeg の既定の 3080 のまま使う。変数にしていない
+- `ALLOW_FROM` は送信元 IPv4 の CIDR。空白で区切って複数を並べられ、1 つにつき規則を 1 本作る。WG ホスト自身で動かすときは、VPN のクライアントの通信が `wg0` から入り、送信元はクライアントの VPN のアドレスになる
+- ポートは、Codeg が既定の 3080（ホストの中だけ）、Caddy が 3443（外から届く口）。どちらも変数にしていない
 - `FW_ZONE` は自動で入る
 
 ### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 3: 補足: SHA-256 の照合
@@ -52,11 +52,36 @@
 - Codeg を起動して最初の会話は、モデルの欄が Grok 4.6 で、Grok Build のセッションの記録（`events.jsonl`）の `modelId` も `grok-4.6` だった。同じ時点の `grok models` の既定は `grok-4.7`
 - Codeg の Issue に、Grok の ACP の接続で、後から届くモデルの一覧が反映されない不具合の報告がある（#876。2026-10-02 に閉じられている）。同じ原因かは確かめていない
 
-### 実施手順 / VPN に公開する / 手順 1・2: 補足: 規則と待ち受け
+### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 1: 補足: Caddy の入手
 
+- Caddy は、Codeg と同じく、GitHub の配布物を版を決めて取得し、ホームに置く。チェックサムの一覧（`caddy_<版>_checksums.txt`）は SHA-512
+- GitHub のリリースが出す digest（`sha256:…`）とも一致することを、検証で確かめた
+- EPEL・Homebrew・scoop にも Caddy はある。置き場所を固定するために使っていない（scoop は版ごとにディレクトリが変わり、Windows の受信の規則をプログラムに限れなくなる）
+- 配布物の `caddy` は、ほかのライブラリを要らない 1 つの実行ファイル
+
+### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 2: 補足: Caddyfile の各行
+
+- `admin off` は、Caddy の管理用の API（既定は `localhost:2019`）を開けない設定。設定を変えたら、サービスを起動し直す
+- `auto_https disable_redirects` は、HTTP から HTTPS へ送るための 80 番の待ち受けを作らない設定
+- `skip_install_trust` は、ルート証明書を OS の信頼の置き場へ自動で入れさせない設定（入れるには `sudo` や管理者の権限が要る）。端末には、手で入れる
+- `pki` の `name` は、認証局の名前。ルート証明書の名前が `<名前> - <年> ECC Root` になる。既定の名前のままだと、2 台のホストのルート証明書が、端末の一覧で見分けられない
+- `bind` は、待ち受ける IP を 1 つに絞る。`tls internal` は、Caddy の認証局で証明書を作る指定。IP アドレス宛ての証明書になる
+- `handle /caddy-root.crt` は、ルート証明書（公開してよいもの）を配る口。`{$HOME}`・`{$APPDATA}` は、Caddy が起動のときに環境変数で置き換える
+- `reverse_proxy 127.0.0.1:3080` で、そのほかの通信を Codeg へ渡す。WebSocket も通る
+- 字下げは、空白でもタブでもよい
+
+### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
+
+- Codeg は `127.0.0.1` のままにする。暗号化されない HTTP は、ホストの外に出ない
 - 規則は、[Forgejo](../forgejo.md) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
-- 待ち受けを `SERVER_IP` だけにするのは、ほかの NIC のアドレスで待ち受けないため。規則と二重に絞る
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
+- `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
+
+### 端末にルート証明書を入れる / 手順 3〜5: 補足: 指紋の照合
+
+- ルート証明書は、まだ信頼していない相手から取る（Android は警告を進み、Windows は `curl -k`）。途中で差し替えられていないことは、ホストに出した指紋と比べて確かめる
+- Android は、取り込む画面に指紋が出ないので、取り込んだ後に「信頼できる認証情報」で確かめる
+- Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーが使う Edge・Chrome が信じる。Firefox は、設定によっては自分の置き場だけを使う（確かめていない）
 
 ### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 6・7: 補足: スクリプトとタスク
 
@@ -65,11 +90,12 @@
 - タスクは、管理者ではない窓から、ログオン時のトリガー付きで登録できた。`-RunLevel Limited` で、Codeg はデスクトップのセッションの、管理者ではない権限で動く
 - `-WindowStyle Hidden` で、窓を隠して起動する。標準エラーに出るトークンは、ファイルにも journal にも残らない
 
-### Windows 11 で使う / Windows 11 で VPN に公開する / 手順 1: 補足: 規則
+### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 規則とタスク
 
-- `-Program` で `codeg-server.exe` 宛てに限る。同じ PC のほかのプログラムが 3080 番で待ち受けても、この規則では通らない
+- `-Program` で `caddy.exe` 宛てに限る。同じ PC のほかのプログラムが 3443 番で待ち受けても、この規則では通らない
 - `-Profile Private` は、LAN の接続がプライベートであることを前提にする
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
+- Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
 
 ## 方法のまとめ
 
@@ -77,7 +103,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 
 | 目的 | 方法 | この手順書 | 要るもの・制約 |
 |---|---|---|---|
-| 画面から Grok Build を動かす | Codeg のサーバー（`codeg-server`）を同じホストに置き、ブラウザで開く | 採った | Apache-2.0。Grok は内蔵の対応エージェント。Linux の x64・arm64 と Windows の x64 の配布物がある。外部のサーバーを通らない。通信は HTTP |
+| 画面から Grok Build を動かす | Codeg のサーバー（`codeg-server`）を同じホストに置き、ブラウザで開く | 採った | Apache-2.0。Grok は内蔵の対応エージェント。Linux の x64・arm64 と Windows の x64 の配布物がある。外部のサーバーを通らない。Codeg 自身は TLS を持たない |
 | 画面から Grok Build を動かす | Paseo のデーモンを同じホストに置く | 採らない（Codeg が動かなかったときの代わりとして調べた） | Apache-2.0。Grok は ACP のカタログの扱い。Windows で端末のコマンドの引用が壊れる不具合の報告（#5947）がある。実機では試していない |
 | 画面から Grok Build を動かす | Grok UI | 採らない | MIT。Grok Build 専用だが、Windows と aarch64 の対応が文書に無い。個人の小規模なプロジェクト |
 | 画面から Grok Build を動かす | Happier | 採らない | MIT。Web の画面に HTTPS が必須。プッシュ通知が第三者（Expo）を通る。Grok ではセッションの一覧が使えない |
@@ -95,8 +121,13 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | つなぐ側 | ブラウザ | 採った | スマートフォンと PC で同じ画面 |
 | つなぐ側 | Codeg のデスクトップアプリ（リモートのワークスペース） | 採らない（確かめていない） | Windows の署名が無い。サーバーの `CODEG_BROWSER_TUNNEL` を見直す必要がある |
 | つなぐ側 | Codeg の Android のアプリ | 採らない（確かめていない） | Apache-2.0。APK を GitHub から入れる。testing の段階 |
-| 経路 | WireGuard の内側だけに開ける | 採った | 構築済みの VPN を使う。送信元をクライアントの帯に絞る |
-| 経路 | リバースプロキシで TLS を足す | 採らない | 証明書の配布が要る。VPN の区間は暗号化されている |
+| 経路 | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
+| 通信の暗号化 | 同じホストの Caddy が HTTPS で受けて、Codeg へ渡す。証明書は Caddy の認証局（`tls internal`） | 採った | Apache-2.0。ドメインも外部のサービスも要らない。端末にルート証明書を入れる |
+| 通信の暗号化 | 公的な証明書（Let's Encrypt の DNS-01） | 採らない | 自分のドメインと、DNS 事業者の API トークンが要る |
+| 通信の暗号化 | HTTP のまま使う | 採らない（はじめの形） | VPN の区間しか暗号化されない。LAN の区間は、トークンも平文で流れる |
+| 通信の暗号化 | ルート証明書を入れず、ブラウザの警告を進んで使う | 採らない | 暗号化はされるが、相手が本物かを確かめられない |
+| Caddy の置き方 | GitHub の配布物を SHA-512 で照合して、ホームに置く | 採った | 置き場所が版で変わらない。`sudo` を使わない |
+| Caddy の置き方 | EPEL・Homebrew・scoop | 採らない | scoop は版ごとにディレクトリが変わり、Windows の受信の規則をプログラムに限れない |
 | 経路 | インターネットへ公開する | 採らない | トークン 1 つが、ホストでコマンドを実行できる鍵になる |
 
 ## 選択した方針
@@ -106,6 +137,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
 - まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../forgejo.md) と同じ順）
+- 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
+- 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 承認を自動で通す設定は、離れた場所から使うなら勧めない。ただし、確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
 - 両 OS を 1 本の手順書にまとめ、Windows 11 は後ろの節に置く（[Syncthing](../syncthing.md) と同じ形）
@@ -116,6 +149,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - [Codeg: Supported Agents](https://docs.codeg.app/guide/supported-agents)・[Working with Agents](https://docs.codeg.app/guide/agents)
 - [Codeg: Deployment](https://docs.codeg.app/getting-started/deployment)・[Configuration](https://docs.codeg.app/getting-started/configuration)・[Installation](https://docs.codeg.app/getting-started/installation)・[Privacy & Security](https://docs.codeg.app/reference/privacy)
 - [Codeg の Issue #436](https://github.com/spacering-net/codeg/issues/436)（Grok の拒否の規則と sandbox が、Codeg の下で効かなかった報告）・[#876](https://github.com/spacering-net/codeg/issues/876)（Grok のモデルの一覧）
+- [caddyserver/caddy](https://github.com/caddyserver/caddy)（Caddy。Apache-2.0）・[Caddyfile の `tls`](https://caddyserver.com/docs/caddyfile/directives/tls)・[Caddyfile の全体の設定（`admin`・`auto_https`・`skip_install_trust`・`pki`）](https://caddyserver.com/docs/caddyfile/options)
 - [xai-org/grok-build](https://github.com/xai-org/grok-build)（Grok Build。Apache-2.0）
 - Grok Build の同梱の文書（`~/.grok/docs/user-guide/`）: `15-agent-mode.md`（ACP）・`22-permissions-and-safety.md`（権限モード）
 - [Agent Client Protocol](https://agentclientprotocol.com)
