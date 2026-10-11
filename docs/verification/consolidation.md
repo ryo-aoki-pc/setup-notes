@@ -178,3 +178,5 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[取�
 Git for Windows の隔離した設定で、include 先だけが `true` の場合と、global の `false` の後で include 先が `yes` の場合を確認した。どちらも include 先は `global` と表示され、実効真偽値は `true`、ファイルは変更されなかった。記録条件を「include 先も global」「最後の global の値」と明記し、変更なしのキーは復元で触らないことを補った。コードは原文のまま保持した。
 
 共通 Git と Windows 専用 `core.longpaths` の復元の違いを現行手順へ補い、構成メモの現在の一覧に Git →長いパス→bash→WezTerm と復元の案内を追加した。構成メモの履歴部分は原文と当時の番号を保持した。
+
+Grok Build が公開した[記録条件と現行案内の補修](https://github.com/ryo-aoki-pc/setup-notes/commit/0d246034ee3b842bb0fd3953d60cf62edd72879b)を同じモデルで再レビューし、「指摘なし」と回答した。補修後も2冊と extra のコード・操作数、構成メモの履歴は補修前と一致し、残る197文書の相対リンク・画像・アンカーと `git diff --check` に不整合はない。
