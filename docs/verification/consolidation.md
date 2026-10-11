@@ -159,3 +159,5 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した[追�
 Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した本体の[SSH 集約差分](https://github.com/ryo-aoki-pc/setup-notes/commit/99646d2632c1782ffee4f37612a6e632c6443777)と WezTerm の[文書集約差分](https://github.com/ryo-aoki-pc/wezterm/commit/43f433811609c992ce7f2eec21d458a59c8c564b)をレビューし、「指摘なし」と回答した。実行場所・権限・x64 と固定ハッシュ・管理者への復帰・貼り付けの前提と停止条件の説明・順序と、過去本文の保持を確認した。
 
 最後の参照監査で、LazyVim の README に残っていた旧導入手順16を正本の手順10へ、bash の補足表の WezTerm 手順6を固定原文の旧手順6と現行の共通 bash 設定へ付け替えた。コマンドと過去検証本文は変更していない。
+
+Grok Build が公開した [bash の補修](https://github.com/ryo-aoki-pc/bash/commit/334f810307edaa09294b3e2e6fc584ab00531886)と [LazyVim の補修](https://github.com/ryo-aoki-pc/LazyVimStarter/commit/eac14f81be7aecb89bd8549f62bb88fdec748994)を同じモデルで再レビューし、「指摘なし」と回答した。補修後も削除38文書・残る197文書・元322対応・GitHub参照951件・過去検証56文書の検査に不整合はない。
