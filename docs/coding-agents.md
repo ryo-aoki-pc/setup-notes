@@ -438,6 +438,7 @@
 - claude.ai のアカウント（Pro / Max / Team / Enterprise）のログインが要る。API キーでは使えない
 - PC は動かしたままにする（スリープ・ネットワークの切断で止まる）
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ
+- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、[Grok Build をブラウザから操作する手順書](grok-build-remote.md)（OSS の Codeg の画面。両 OS）
 
 > [!WARNING]
 > **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザから、この PC の Claude の worktree で Claude Code を動かせる**（ファイルの読み書きとコマンドの実行）。プラグインを通して Codex と Grok も動く。会話は Anthropic のサーバーに保存される。

@@ -72,7 +72,7 @@
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
 | スマートフォンから指示する | Codex のリモート接続（ChatGPT のアプリ） | 採らない | ホストは macOS・Windows の ChatGPT のデスクトップアプリだけ（Linux は無い）。Codex CLI からは設定できない |
-| スマートフォンから指示する | Grok Build に直接つなぐ | 無い | 1.0.50 にスマートフォンからつなぐ機能は無い（同梱の文書） |
+| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../grok-build-remote.md)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる（2026-10-11 に手順書にした） |
 | GitHub で分担する | GitHub の Agent HQ（Issue に Claude と Codex を割り当てる） | 採らない | Copilot の有料プラン。Grok はエージェントとしては無く、Copilot のモデルとしてだけ選べる |
 | GitHub で分担する | Pull Request に `@codex review`、`anthropics/claude-code-action` | 採らない | GitHub の App・シークレットの設定。Grok の公式の Action は無い（`grok -p` を API キーで動かす例だけ） |
 | 並べて動かす道具を使う | Zed の Parallel Agents（ACP） | 採らない | 3 つとも ACP のレジストリにある。エディタを Zed にすることになる |
@@ -170,6 +170,7 @@
   - 確認や完了をスマートフォンに知らせるには、Claude Code の `/config` で通知（Push when actions required など）を有効にする
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
+- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../grok-build-remote.md)（2026-10-11）
 
 ### GitHub で分担する（この手順書では使わない）
 
