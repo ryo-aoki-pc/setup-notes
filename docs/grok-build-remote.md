@@ -98,7 +98,12 @@
        curl -fsSL -O "https://github.com/spacering-net/codeg/releases/download/${CODEG_VERSION}/${CODEG_ASSET}.tar.gz.sha256" &&
        printf '\n\033[7m 確認 \033[0m\n' &&
        sha256sum -c "${CODEG_ASSET}.tar.gz.sha256" &&
-       tar -tzf "${CODEG_ASSET}.tar.gz" | grep -cE '^/|(^|/)\.\.(/|$)'
+       if CODEG_LIST=$(tar -tzf "${CODEG_ASSET}.tar.gz"); then
+         printf '%s\n' "${CODEG_LIST}" | awk '/^\/|(^|\/)\.\.(\/|$)/ { bad++ } END { print bad+0; exit (bad > 0) }'
+       else
+         echo '中断: 配布物の一覧を読めない' >&2
+         false
+       fi
      )
    fi
    ```
@@ -199,7 +204,14 @@
    curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:3080/api/health
    printf 'header = "Authorization: Bearer %s"\n' "$(sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env)" |
      curl -sS -K - -X POST -w ' %{http_code}\n' http://127.0.0.1:3080/api/health
-   journalctl --user -u codeg-server.service --no-pager | grep -cFf <(sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env)
+   (
+     if CODEG_JOURNAL=$(journalctl --user -u codeg-server.service --no-pager); then
+       printf '%s\n' "${CODEG_JOURNAL}" | grep -cFf <(sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env)
+     else
+       echo '中断: journal を読めない' >&2
+       false
+     fi
+   )
    ps -eo args | grep -cFf <(sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env)
    ```
 
@@ -1039,7 +1051,8 @@
    }
    ```
 
-   - `Running` が 2 行と、3080 と 3443 の待ち受けが出ればよい
+   - HTTPS で公開しているときは、`Running` が 2 行と、`127.0.0.1:3080` と `<PC_IP>:3443` の待ち受けが出ればよい
+   - localhost でだけ使っているときは、`Running` が 1 行と、`127.0.0.1:3080` の待ち受けだけでよい
 
 ---
 
@@ -1063,6 +1076,7 @@
 
    ```powershell
    & {
+     $ErrorActionPreference = 'Stop'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      $dir = "$env:LOCALAPPDATA\codeg-server"
      $prev = "$env:LOCALAPPDATA\codeg-server.prev"
@@ -1070,7 +1084,7 @@
      $tmp = "$env:TEMP\codeg-server-setup"
      if (-not $CODEG_VERSION) { Write-Error '中断: この節の手順 1 の変数を設定する'; return }
      if (-not (Test-Path -LiteralPath "$dir\codeg-server.exe")) { Write-Error '中断: Codeg が入っていない'; return }
-     if (Test-Path -LiteralPath $prev) { Write-Error "中断: $prev が既にある。前の更新の残りを確かめて消す"; return }
+     if (Test-Path -LiteralPath $prev) { Write-Error "中断: $prev が既にある。前の更新と復旧を終えるまで消さない"; return }
      if (Test-Path -LiteralPath $tmp) { Write-Error "中断: $tmp が既にある。中を確かめて消してから貼り直す"; return }
      New-Item -ItemType Directory -Path $tmp | Out-Null
      $url = "https://github.com/spacering-net/codeg/releases/download/$CODEG_VERSION/codeg-server-windows-x64.zip"
@@ -1081,9 +1095,14 @@
      $want = ((Get-Content -LiteralPath "$tmp\codeg-server-windows-x64.zip.sha256" -Raw) -split '\s+')[0]
      if ((Get-FileHash -LiteralPath "$tmp\codeg-server-windows-x64.zip" -Algorithm SHA256).Hash -ne $want) { Write-Error '中断: sha256 が一致しない'; return }
      Expand-Archive -LiteralPath "$tmp\codeg-server-windows-x64.zip" -DestinationPath $tmp
+     $payload = Join-Path $tmp 'codeg-server-windows-x64'
+     if (-not (Test-Path -LiteralPath "$payload\codeg-server.exe" -PathType Leaf) -or -not (Test-Path -LiteralPath "$payload\codeg-mcp.exe" -PathType Leaf) -or -not (Test-Path -LiteralPath "$payload\web" -PathType Container)) { throw '中断: 配布物の本体と web が揃っていない' }
      Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
        Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
-       ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
+       ForEach-Object {
+         & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null
+         if ($LASTEXITCODE -ne 0) { throw '中断: Codeg と子プロセスを止められない' }
+       }
      Stop-ScheduledTask -TaskName 'codeg-server'
      Start-Sleep -Seconds 2
      New-Item -ItemType Directory -Path $prev | Out-Null
@@ -1102,7 +1121,9 @@
 
    - `sha256 一致`、上げた版の番号、`Running`、今までと同じ待ち受けの 1 行が出ればよい
    - 起動用のスクリプトとトークンは、そのまま残る
-   - 起動しないときは、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1 で止め、`codeg-server.prev` の 3 つを `codeg-server` に戻してから、同じ節の手順 2 で始める
+   - 失敗したときは、現行の本体と `codeg-server.prev` を残す。`codeg-server.prev` の `codeg-server.exe`・`codeg-mcp.exe`・`web` が揃っていることを確かめてから、[Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)の手順 1 で止める
+   - 3 つが揃っていれば、現行の `codeg-server` のその 3 つだけを消し、`codeg-server.prev` から同じ場所に戻す。起動用のスクリプトとトークンは消さない。その後、同じ節の手順 2 で始める
+   - 退避先が揃っていなければ、どちらのディレクトリも消さず、移動やコピーが止まった原因を確かめる。前の版は一部が現行の場所、一部が退避先に残っていることがある
 
 1. ブラウザで動くことを確かめてから、前の版を消す。
 
