@@ -23,7 +23,7 @@
    ```
 
    - 版は `podman-compose.noarch  1.5.0-1.el10_1  epel` のように 1 つだけ出る
-   - 一緒に入るのは Python のライブラリ 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
+   - 一緒に入るのは未導入の Python のライブラリで、最大 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -38,7 +38,7 @@
    podman compose version
    ```
 
-   - `podman version 5.8.2` と `podman-compose version 1.5.0` の 2 行が出る
+   - `podman-compose version 1.5.0` と `podman version 5.8.2` の 2 行が出る
    - `/usr/bin/podman-compose`、`podman-compose 1.5.0-1.el10_1 epel` が出る
    - 最後の `podman compose` は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
 
