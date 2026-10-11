@@ -74,6 +74,9 @@
 - 初めて設定するときの `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、`grdctl` が設定を読み込むとき（49.3 の `src/grd-settings.c` の `update_rdp_server_fingerprint`）に、まだ空の `tls-cert` で証明書を読もうとして出すもの
   - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[gnome-headless-session.md 手順 4](../gnome-headless-session.md#実施手順) と同じ）
 - `port` と `negotiate-port` は、次に待ち受けるときに効く。「RDP を設定する」の手順 2 は、既に起動しているデーモンを再起動してポートと TLS の設定を反映する。`view-only` 自体は、つないでいるクライアントにもすぐ効く
+- 読み戻しの `gsettings list-recursively` は、このスキーマのキーを全部出す。手順書の箇条書きの 5 つのほかに、`enable` と `screen-share-mode` の行も並ぶ
+  - 2026-10-11 の Hyper-V の VM では、`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert`・`tls-key`・`view-only false` の 7 行だった（[検証記録](../verification/gnome-desktop-sharing.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - `enable` が `true` になるのは、「RDP を設定する」の手順 5 の後（同じ VM で、手順 5 の後の dconf は `enable=true`）
 
 ### 実施手順 / RDP を設定する / 手順 3: 補足: パスワードの無いキーリングに直接入れる
 
@@ -143,6 +146,9 @@
 - スクリプトは [gnome-remote-desktop.md 手順 10](../gnome-remote-desktop.md#実施手順) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため
 - `grdctl status` は資格情報を読み出す（`Username: (hidden)` と出るのは、読めたとき）。「RDP を設定する」の手順 3 のキーリングはパスワードが無いので、PC の画面に窓は出ない
+- プローブは、TLS のハンドシェイクで証明書を受け取ると、NLA の認証をせずに接続を閉じる。デーモンは、この接続をエラーの行としてログに残す
+  - 2026-10-11 の Hyper-V の VM では、プローブを貼った時刻に `BIO_read returned a system error 104: Connection reset by peer`・`[transport_accept_nla]: client authentication failure`・`[RDP] Network or intentional disconnect, stopping session` などの 7 行が残った。待ち受けと、その後の接続には響かなかった
+  - 2026-10-07 の VirtualBox の VM でも、`client authentication failure` と `Network or intentional disconnect` が残った（[検証記録](../verification/gnome-desktop-sharing.md#実施手順81012d3-と-f3450e6-で-1-回ずつ)）
 - 最後の `openssl x509 … -fingerprint -sha1` は、Windows のクライアントで比べるための値
   - `grdctl status` の `TLS fingerprint` と、FreeRDP の `Thumbprint:` は SHA-256（コロン区切りの小文字）
   - Windows の「リモート デスクトップ接続」の警告の窓は、証明書の名前とエラーだけを出し、拇印を出さない。「証明書の表示」→「詳細」の「拇印」は SHA-1 で、コロンの無い小文字（例: `de7964917c…`）。openssl は同じ値をコロン区切りの大文字（`DE:79:64:91:7C:…`）で出す
@@ -154,9 +160,14 @@
 - 認証は NLA だけ（TLS だけ・RDP のセキュリティは受け付けない）。ユーザー名とパスワードは「RDP を設定する」の手順 3 の RDP の資格情報で、OS のアカウントではない
 - FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_<RDP_PORT>.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、新しい証明書としての確認（`Do you trust the above certificate? (Y/T/N)`）を出す。`Y` で保存した後は聞かない
   - 証明書を作り直した後は、`!!!Certificate for … has changed!!!` と新旧の `Thumbprint:` を並べて聞く
+- FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、つながった（2026-10-11 の Hyper-V の VM）
+  - 同じ VM では、違うパスワードの `/auth-only` でも同じ 2 行が出て、その後に `ERRCONNECT_AUTHENTICATION_FAILED` で断られた
+  - 2026-10-07 の VirtualBox の VM の記録にも、`krb5_parse_name (Configuration file does not specify default realm)` の後に NTLM でつながった、とある
+  - Kerberos を先に試し、クライアントに既定の realm が無いので次の方式に移る動き、とみる（今回は確かめていない）
 - 画面で一度もログインしていないユーザーの最初の自動ログインでは、`gnome-tour` の「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出た（gnome-initial-setup の窓は出なかった）。RDP の画面で「スキップ」を押して閉じた
 - ログの見方: AlmaLinux 10 の既定は `/var/log/journal` が無く、journal は揮発（`/run/log/journal`）。揮発のときはユーザーごとの journal のファイルが分かれないので、`journalctl --user` は `No journal files were found.` になる
   - `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` は、システムの journal から、このユーザーの unit の行を読む（`wheel` と `adm` のグループは ACL で読める）。ヘッドレスの手順書と同じ形
+  - [AlmaLinux 10 の初期設定の「システムの設定」](../almalinux-setup.md#システムの設定)の手順 5 で journal をディスクに書くようにした PC では、`journalctl --user` でもデーモンの行が読めた（2026-10-11 の Hyper-V の VM。`/var/log/journal` の下に `user-<UID>.journal` がある）。同じ日の、初期設定を通していない VM は `No journal files were found.` だった
 
 ### 接続元を LAN に絞る（任意） / 手順 1: 補足: 引用符
 

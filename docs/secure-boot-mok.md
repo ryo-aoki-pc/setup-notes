@@ -71,13 +71,14 @@
    ```
 
    - 起動の途中で青い **MokManager** の画面が出る（手順 6）
+   - VM に SSH でつないで貼るときは、貼る前に VM のウィンドウを開いておく
 
 1. 起動の途中の MokManager で、鍵を登録する。
 
    - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す（VM なら、VM のウィンドウで押す）
    - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは `sudo mokutil --import /var/lib/shim-signed/mok/MOK.der`（手順 4 の最後の行）を貼り直してから、手順 5 からやり直す
-   - **注意**: MokManager でキーボードが効かない PC がある（参考資料を参照）
+   - **注意**: MokManager でキーボードが効かない PC がある（[検証記録](verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足を参照）
    - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
 
 1. 鍵が登録されたか確かめる。

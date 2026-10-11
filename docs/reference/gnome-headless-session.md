@@ -74,6 +74,15 @@
 - スクリプトは [gnome-remote-desktop.md 手順 10](../gnome-remote-desktop.md#実施手順) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため（どちらでも動く）
 - `~/rdp_tls_probe.py` は、この手順書が作る唯一の作業ファイル
+- プローブは、TLS のハンドシェイクで証明書を受け取ると、認証をせずに接続を閉じる。デーモンは、この接続を `client authentication failure` などのエラーの行としてログに残す（2026-10-11 の Hyper-V の VM では 7 行。待ち受けと、その後の接続には響かなかった）
+  - 同じスクリプトを使う [gnome-remote-desktop.md の参考資料](gnome-remote-desktop.md#実施手順--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)にも、この行が出て正常とある
+
+### 実施手順 / 手順 10: 補足: FreeRDP の証明書の確認と、つなぐときの表示
+
+- FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_<RDP_PORT>.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
+- `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない（[検証記録](../verification/gnome-headless-session.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`T` と `N` で答えたときの動きは、確かめていない
+- FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、つながった（2026-10-11 の Hyper-V の VM。この行が出る理由は、確かめていない）
+  - [gnome-remote-desktop.md の検証記録](../verification/gnome-remote-desktop.md#常に出るが無害なログ)には、近い行（`kerberos_AcquireCredentialsHandleA: krb5_init_context ...`）が、Kerberos を設定していない環境で NTLM に切り替わるときの出力として載っている
 
 ### 接続元を LAN に絞る（任意） / 手順 1: 補足: 引用符
 

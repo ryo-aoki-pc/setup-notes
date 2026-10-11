@@ -17,7 +17,7 @@
   - 確認したこと: パスワードを聞くのが「ログインと sudo」の手順 3 の 1 回だけ、再起動の後も設定が残る（2 回）、GNOME の画面とキー（時計・ダークモード・ボタン・Ctrl+Alt+T・Alt+Tab・Caps Lock・拡大率・日本語入力・Files）、ロールバックの後に実施前の値へ戻る（最後に sudo がパスワードを聞く）
   - 確認していないこと: 実機・aarch64・Raspberry Pi・Server with GUI、JIS の物理キーボード、Wake on LAN の実際の起動と UEFI の設定、ファームウェアの実際の更新、Claude Code のログインが要る節、インターネットに出られないホスト
   - **2026-10-11 に、Hyper-V・VMware Workstation Pro・VirtualBox の VM（どれも x86_64。Kickstart で入れた Workstation のクローン）で、実施手順の 27 項（その時点の 152 の手順）を、今の順番で上から通した**（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
-    - 通し方: ブロックは、GNOME の端末ではなく、SSH の対話の bash に貼った（コンソールは GNOME にログインした状態）。実アカウントでのログインは、1 つもしていない。任意節・更新・ロールバックは流していない
+    - 通し方: ブロックは、GNOME の端末ではなく、SSH の対話の bash に貼った（コンソールは GNOME にログインした状態）。実アカウントでのログインは、1 つもしていない。任意節・更新・ロールバックは、この通しでは流していない（任意節のうち「画面オフ・画面ロック・自動サスペンドを止める（任意）」だけは、同じ日に、Hyper-V の VM で別に通した。下の 2026-10-11 の 2 つ目の行）
     - 結果（通した・通らなかった・条件に当たらず飛ばした・未実施）: Hyper-V は 131・4・5・12、VMware は 131・4・5・12、VirtualBox は 131・6・6・9。数え方が列で違う（付録の冒頭）
     - 通らなかった手順: 3 つとも、「キー操作を試す」の手順 1、「git-delta」の手順 4、「再起動と確認」の手順 6・8（「yazi」の手順 2 で Homebrew の `python3` が入った後、Anthy のエンジンが起動しない）。VirtualBox は、ほかに「再起動と確認」の手順 3・7
     - 未実施の範囲: 実アカウントが要る手順（「GitHub CLI」の手順 3・4、「Claude Code」の手順 5、「Codex CLI」の手順 5〜8、「Grok Build」の手順 4・5・7）と、「Firefox」の手順 7・11（最初の起動の同意の窓を進めていない）。VirtualBox は、このうち 4 手順を「通した」（起動して取り消した・未ログインの側の確認）に数え、「再起動と確認」の手順 5（Caps Lock を送れない）を未実施にした
@@ -25,6 +25,12 @@
     - 直した所: 見つかった 30 の指摘のうち、25 を直した（未対応は 5）。文言だけの直しが 23、新しい手順（「Homebrew」の手順 4）が 1、ブロックの直し（「git-delta」の手順 4 の `--format=`）が 1。30 の指摘の外に、文言の直しが 1 つ（「Grok Build」の手順 1 の `ls` の表示）
     - 直しの確かめ: 新しい手順とブロックの直しは、Hyper-V の VM で確かめた（ドロップインを置いて再起動した後に `nihongo` が「日本語」に変換される、`head -20` の中に背景色の付いた差分の行が出る）。文言だけの直しは、VM では流していない
     - 確認していないこと: VMware と VirtualBox の VM での直しの確かめ、「Homebrew」の手順 4 を手順書の順番（Homebrew を入れた直後）で通すこと、ログインし直しだけ（再起動なし）で手順 4 が効くこと、直した後の「再起動と確認」の手順 8（Neovim の IME 連携）、ロールバックの「Homebrew と bash-completion を消す」の手順 3 のブロック（足した 4 行だけを実行したという担当の報告はあるが、出力の記録が無い。ブロックの全体は貼っていない）、GNOME の端末にブロックを貼る形での通し、実アカウントでのログインとその後ろ、実機
+  - **2026-10-11 に、Hyper-V の VM（上の通しを終えた VM の続き）で、任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」の手順 1〜9 を通した**（[付録](#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
+    - 通し方: コンソールは GNOME にログインした状態で、ブロックは SSH の対話の bash に貼った（手順書は、GNOME にログインするユーザー本人の端末に貼る前提）。手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5 の順に貼った
+    - 結果: 9 手順とも通した（通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い）。確認の出力は、どれも箇条書きのとおり
+    - 確認したこと: SSH から変えた値が、ログインし直さずにコンソールのセッションに効く（無操作 314 秒で、画面オフもロックも起きない。再起動してログインし直したセッションでも、無操作 421 秒まで同じ）。再起動の後も、手順 2〜5 の読み戻しが同じ
+    - 直した所: 無い（指摘は低が 1 つで、未対応）
+    - 確認していないこと: 無操作 15 分を越える放置、ログイン画面を放置したときの動き、電源ボタン、蓋と電池のある機械、手順を当てないまま 15 分置いたときにこの VM が眠るか、GNOME の端末に貼る形。ほかの任意節・更新・ロールバックは、このときも流していない
 - **統合前の記録**: もとの 13 本の検証記録は、この文書の後ろの「統合前の記録」に、中身を変えずに移した（[EPEL](#統合前の記録-epelもとは-epelmd) から [tmux](#統合前の記録-tmuxもとは-tmuxmd) まで）。各節の冒頭に、当時の手順と今の手順の対応表を置いた
   - 2026-10-10 にまとめた 12 本の記録も、同じ形で移した（[Git](#統合前の記録-gitもとは-gitmd) から [Grok Build](#統合前の記録-grok-buildもとは-grok-buildmd) まで）。見出しに Windows 11 を含む節は、[Windows 11 の初期設定の検証記録](windows-setup.md)に移した
 
@@ -244,6 +250,7 @@
   - 2026-10-10 に足した 14 項（「Git」から「Codex・Grok のプラグイン」まで）と「再起動と確認」の手順 8 を、この文書の順番で通したのは、これが初めて
   - 通したのは、「Homebrew」の手順 4 を足す前の 152 手順（手順 4 は、この通しの後に足した。[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)）
   - 任意節・更新・ロールバックは、この通しでは流していない
+    - 任意節のうち「画面オフ・画面ロック・自動サスペンドを止める（任意）」は、同じ日に、この通しを終えた Hyper-V の VM で別に通した（[後ろの付録](#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
 - **どの状態から**: Kickstart で入れた AlmaLinux 10.2 の Workstation（キー配列は `us`）のスナップショット `clean-install` からのリンククローン
   - ネットワークから入れたベースなので、入れた時点でパッケージが最新だった（OS の更新は、3 つとも無かった）
   - VirtualBox の列は、ベースの作り方を証跡では確かめていない（依頼で示された前提として書いている）
@@ -1166,6 +1173,101 @@
 - GitHub・Claude・Codex・Grok の実アカウント認証、AI 応答、ログイン後のプラグイン動作。未ログイン確認や起動・取消だけを認証完了とは扱わない
 - Grok の通常起動では何も選ばず認証コードが出た。手順 4 のログイン開始ブロックは貼っていない。値は転記せず、C09/session/session-001.raw の所在だけ司令塔へ報告済み。認証出力が保存されない仕組みの解決は、この検証記録では確認していない
 - 実機、他のハイパーバイザ、任意節、更新節、ロールバック。2026-10-08 の別の付録の成功を今回の範囲へ加算しない。C10 の途中結果と性能測定の結果は対象外
+
+---
+
+## 付録: Hyper-V の VM で、画面オフの任意節を通した記録（2026-10-11）
+
+- **何を**: [手順書](../almalinux-setup.md)の任意節「[画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)」の手順 1〜9（コミット `114c2b2` の本文。この節は、その後の直しでも変わっていない）
+  - ほかの任意節・更新・ロールバックは、このときも流していない
+- **結果**: 9 手順とも通した。通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い
+- **どの状態から**: [上の付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列を通し終えた VM（スナップショット `after-AS4` の続き）。値は、どれも既定のままだった（下の表）
+  - `after-AS4` を取った後、この通しの前に、範囲の変更で止めた試行が 1 度ある（09:36〜09:37 UTC。証跡は、追跡していない `.verification/campaign/hv/CL1-stopped-scope-change/`）。同じ VM を起動し、コンソールで GNOME にログインして、この節の手順 1（変数を入れるだけ）を貼った所で止めている。設定を変える手順は貼っていない
+- **誰が・どう通したか**: Claude Code のサブエージェントが、コンソールで GNOME にログインした状態で、手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った
+  - 手順書は「GNOME にログインするユーザー本人の端末で」貼る前提。SSH のシェルに貼ったのは、手順書の前提と違う所
+  - 貼った順は、手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5。戻す手順を確かめた後、同じ VM を使う後ろの検証の前提（手順 1〜5 を当てた状態）にするため
+  - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）。変数は、手順書の既定のまま
+  - sudo は、パスワードを 1 度も聞かなかった
+- 続けて、同じ VM で [linger](../linger.md) と [Podman](../podman.md) の手順書を通した（[linger の検証記録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)・[Podman の検証記録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。下の「再起動の後」は、Podman の Quadlet の節の手順 3 の再起動
+- **証跡**: 追跡していない `.verification/campaign/hv/CL1/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl` の番号で、`session/after-confirm/` のファイルは、名前の頭の 4 桁が seq
+- 環境は、上の付録の「環境（Hyper-V）」と同じ VM（2 vCPU、4096 MB、AlmaLinux 10.2、kernel `6.12.0-211.64.1.el10_2.x86_64`）。この節にかかわる版は、`gnome-shell-49.4-9.el10_2.alma.1`・`gdm-47.0-24.el10_2`・`gnome-settings-daemon-47.2-10.el10_2.alma.1`・`systemd-257-23.el10_2.2.alma.1`・`dconf-0.40.0-17.el10`
+- 実施は 2026-10-11 10:47〜10:49 UTC（ゲストの時計で 19:47〜19:49 JST）。無操作の時間の読みは、11:01 UTC まで
+- この VM の値は `<USER>` で書いた。パスワードと鍵は載せていない
+
+始めの値（`guest-facts-start.txt`）:
+
+| 項目 | 値 |
+|---|---|
+| `idle-delay`・`lock-enabled`・`idle-dim` | `uint32 300`・`true`・`true` |
+| `sleep-inactive-ac-type`・`sleep-inactive-battery-type`・`power-button-action` | 3 つとも `'suspend'` |
+| 5 つの sleep のターゲット | `static` が 5 つ |
+| `HandleLidSwitch` | `s "suspend"`。`/etc/systemd/logind.conf.d` は無い |
+| `/etc/dconf/db/gdm.d/` | `locks` だけ |
+
+### 手順ごとの結果（画面オフの任意節、Hyper-V）
+
+| 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `USER = <USER>`・`IDLE_DELAY = 0`・`LOCK_ENABLED = false`・`POWER_BUTTON = interactive` | seq 1・10 |
+| 2 | 通した | `uint32 0`、`false`、続いて `org.gnome.settings-daemon.plugins.power idle-dim false`・`… power-button-action 'interactive'`・`… sleep-inactive-ac-type 'nothing'`・`… sleep-inactive-battery-type 'nothing'` の 4 行 | seq 2・11、`idle-check.txt`、`screens/idle-over-300s-before-reboot.png`・`screens/idle-over-300s-after-reboot.png` |
+| 3 | 通した | `dconf update` は何も出さず、`org.gnome.settings-daemon.plugins.power power-button-action 'interactive'`・`… sleep-inactive-ac-type 'nothing'`・`… sleep-inactive-battery-type 'nothing'` の 3 行。`/etc/dconf/db/gdm.d/90-power`（147 バイト）ができ、`/etc/dconf/db/gdm` が作り直された | seq 3・12、`facts-after-screen-steps-1-5.txt` |
+| 4 | 通した | `Created symlink '/etc/systemd/system/sleep.target' → '/dev/null'.` の形が 5 行と、`masked` が 5 行。logind の `CanSuspend`・`CanHibernate` は、`s "challenge"` から `s "no"` になった | seq 4・13、`guest-facts-start.txt`・`facts-after-screen-steps-1-5.txt` |
+| 5 | 通した | `s "ignore"`。`/etc/systemd/logind.conf.d/90-lid.conf`（31 バイト）ができた | seq 5・14、`facts-after-screen-steps-1-5.txt` |
+| 6 | 通した | `uint32 300`、`true`、続いて `… idle-dim true`・`… power-button-action 'suspend'`・`… sleep-inactive-ac-type 'suspend'`・`… sleep-inactive-battery-type 'suspend'` の 4 行 | seq 6 |
+| 7 | 通した | 3 行とも `'suspend'` | seq 7 |
+| 8 | 通した | `Removed '/etc/systemd/system/sleep.target'.` の形が 5 行と、`static` が 5 行 | seq 8 |
+| 9 | 通した | `s "suspend"` | seq 9 |
+
+- 確認の出力は、どれも手順書の箇条書きのとおり。手順 2 の「値が変わっていなければ、デスクトップの端末でこの節の手順 1 から貼り直す」には当たらなかった
+- **SSH から貼った値が、ログインし直さずに、コンソールの GNOME のセッションに効いた**（`idle-check.txt` と PNG）
+  - コンソールには、ログインの操作の後、キーを送っていない（担当の報告。Mutter の無操作の時間の読みは、113 秒・244 秒・298 秒・314 秒と途切れずに伸びていて、報告と合う）。無操作 314 秒の時点で、セッションは `IdleHint=no`・`LockedHint=no`、スクリーンセーバーは動いていなかった（`(false,)`）。7 秒後の PNG は、上部バーの時計が撮った時刻（19:52:01）で、画面は消えていない
+  - 既定のままだった実施手順の通しでは、同じ VM のコンソールが、無操作 5 分でロックされていた（上の付録の「手順書の外で行ったこと（Hyper-V）」）。画面が消えているあいだの PNG は、時計が止まったままになる（同じ付録の「ハイパーバイザに左右された出力（Hyper-V）」）
+  - 手順 6〜9 で戻していたのは 17 秒（10:48:41〜10:48:58 UTC）で、無操作が 300 秒に届く前
+  - 再起動してコンソールにログインし直したセッションでも、無操作 342 秒と 421 秒で `IdleHint=no`・`LockedHint=no`・`(false,)`。342 秒の読みの 5 秒後の PNG の時計は、撮った時刻（20:00:21）だった
+- 再起動の後も、手順 2〜5 の読み戻しは同じだった（`uint32 0`・`false`・手順 2 の 4 行・手順 3 の 3 行・`masked` が 5 つ・`s "no"` が 2 つ・`s "ignore"`。`facts-after-reboot.txt`）
+- 終わりの状態は、手順 1〜5 を当てたまま（後ろの検証の前提）
+
+### 通らなかった手順と見立て（画面オフの任意節、Hyper-V）
+
+- 通らなかった手順は無い
+- SSH のシェルに貼ったこと（手順書の前提と違う所）は、結果に響かなかった。`gsettings` の書き込みは、同じユーザーの dconf に入り（`dconf dump` に 6 つの値。`facts-after-screen-steps-1-5.txt`）、コンソールのセッションの動きも変わった
+  - 2026-10-01 の実機（Raspberry Pi 5）の記録でも、SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いている（[統合前の記録](#画面オフロックサスペンド-対象と検証環境)）
+- Hyper-V のせいで変わった確認の出力は無い（担当の報告の見立て。ほかのハイパーバイザと比べてはいない）
+
+### Hyper-V に左右されたと思われる値（画面オフの任意節）
+
+担当の報告が挙げた値を、値のまま並べた。どれも、確認の出力には出ない。
+
+| 項目 | 値 |
+|---|---|
+| サスペンド | 手順の前は、`/sys/power/state` が `freeze mem disk`、`/sys/power/mem_sleep` が `[s2idle]`、logind の `CanSuspend`・`CanHibernate` が `s "challenge"`。OS からは、サスペンドできる PC に見える。手順 4 の後は、どちらも `s "no"` |
+| 蓋 | 無い（`/proc/acpi/button/` が無い）。手順 5 の `HandleLidSwitch` は、蓋が無くても `s "ignore"` に変わる |
+| 電池 | 無い（`upower -e` は `DisplayDevice` だけ）。`sleep-inactive-battery-type` は、書けるが、効く場面が無い |
+| 機械の見え方 | `systemd-detect-virt` は `microsoft`、`hostnamectl` は `Chassis: vm` |
+
+- [GNOME のヘッドレスのセッション](../gnome-headless-session.md)の前提の「サスペンドできる PC では、同じ節の手順 3・4 も」に当たる側の VM。手順を当てないまま 15 分置いたときに、実際に眠るかは、確かめていない（眠ると SSH が切れ、起こす手段を用意していなかった）
+
+### 指摘と状態（画面オフの任意節、Hyper-V）
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 低 | この節の手順 2・3・6 の箇条書き（`114c2b2` の `docs/almalinux-setup.md:2142`・`:2163`・`:2211`） | 箇条書きは `idle-dim false` のように鍵と値だけを書くが、出力の行は `org.gnome.settings-daemon.plugins.power idle-dim false` のように、頭にスキーマの名前が付く | `gsettings list-recursively` の出力の形で、SSH にも Hyper-V にもよらない（統合前の記録の「[完了時点の状態](#画面オフロックサスペンド-完了時点の状態)」の出力も、同じ形）。箇条書きの文字は出力の行に含まれていて、読み違えは起きないとみる（担当の報告も「そのままでもよい」としている。2026-10-08 の VirtualBox の VM の記録は、同じ読み戻しを「手順書のとおり」と書いている） | 未対応（手順書は変えていない） |
+
+- 手順書・[ロールバックと注意点](../extra/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)を直した所は無い
+- 報告と証跡の照合
+  - 9 手順の判定と、確認の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+  - 報告は「既定のままのときは、同じ VM が 5 分で `IdleHint=yes`・`LockedHint=yes` になっていた」と書き、根拠に実施手順の通しの `AS4/unlock-log.txt` を挙げる。このファイルにあるのは、ロックされていた 2 回の時刻と、そのときの `IdleHint=yes`・`LockedHint=yes` だけで、置いた時間は無い。「5 分」は、上の付録の記録のほうにある
+  - 報告だけにあって、証跡のファイルでは確かめられないもの: 手順 6 の後に `dconf dump /org/gnome/settings-daemon/plugins/power/` が空になったこと、手順 7 の後に `/etc/dconf/db/gdm.d/` が `locks` だけに戻ったこと、手順 8 の後に `CanSuspend` が `s "challenge"` に戻ったこと、手順 9 の後に空の `/etc/systemd/logind.conf.d` が残ること（戻していた 17 秒のあいだの読みは、ファイルに残っていない）
+- 道具: 無操作 900 秒を越えるまで待つつもりの読みは、数字の取り出しを誤って、すぐに抜けた（`idle-check.txt` に、誤った `idle_ms=64377941` と、その訂正がある）。待ち直していない
+
+### 確かめていないこと（画面オフの任意節、Hyper-V）
+
+- 無操作 15 分（`sleep-inactive-ac-timeout` の既定の 900 秒）を越える放置。手順を当てた後も、既定のままでも
+- ログイン画面（GDM）を放置したときの動き（手順 3 は、値の読み戻しだけ）
+- 電源ボタンを押したときの動き（`power-button-action`）、蓋と電池のある機械、物理のモニター
+- GNOME の端末（Ptyxis・WezTerm）に貼る形。GNOME にログインしていない状態で、SSH から貼る形
+- 変数を既定から変えた場合（`IDLE_DELAY`・`LOCK_ENABLED`・`POWER_BUTTON`）と、各手順の `中断:` の分岐
+- 実機、aarch64。今回は、VMware と VirtualBox の VM では通していない
 
 ---
 

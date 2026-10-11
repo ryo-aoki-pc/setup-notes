@@ -259,6 +259,7 @@
    ```
 
    - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
+     - ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、この項の手順 5 で有効にするまで `false`）
    - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
    - `中断:` が出たら、この項の手順 3 以降へ進まない
    - 既にデーモンが起動していれば、再起動する。接続中の RDP クライアントは切れる
@@ -510,10 +511,12 @@
      - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 2 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
    - パスワードは [RDP を設定する](#rdp-を設定する)の手順 3 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
+     - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
    - このユーザーが初めてデスクトップにログインしたなら、「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出ている。RDP の画面で「スキップ」を押す
    - RDP の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
    - クライアントでの操作は、PC の画面にもそのまま出る。PC の上部バーには、共有中の印が出る
    - 問題があれば、PC で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る（`journalctl --user` は、既定の構成では `No journal files were found.` になる）
+     - この項の手順 2 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
 ---
 
