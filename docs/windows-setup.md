@@ -45,6 +45,7 @@
   - Windows Terminal のフォントは[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
   - OpenSSH サーバーは、鍵でも入るなら[OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)、その後にパスワードを受け付けないなら[OpenSSH サーバーのパスワード認証を切る（任意）](#openssh-サーバーのパスワード認証を切る任意)、ログインのシェルを Git Bash にするなら[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)、scoop のツールが SSH のセッションで起動しないなら[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)
   - PowerShell などから起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら[Neovim を既定のエディタにする（任意）](#neovim-を既定のエディタにする任意)
+  - クリーンな Windows で配布物を試すなら[Windows Sandbox で配布物を試す（任意）](#windows-sandbox-で配布物を試す任意)
   - Git for Windows の既定（`core.autocrlf=true`）のまま clone したリポジトリ（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3 より前に clone したもの）があれば、[AlmaLinux 10 の初期設定の「改行を変換して clone したリポジトリを直す」](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を、Git Bash でそのリポジトリに行う
   - starship・fzf・eza・bat・WezTerm・git-delta・Neovim・lazygit・yazi・Codex CLI・Grok Build の使い方と設定ファイル、Claude Code の使い方は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（両 OS で同じ）。Git Bash のタブに、同じブロックを貼る
     - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、管理者ではない窓で `scoop install fd`・`scoop uninstall fd` にする（[yazi](#yazi)の手順 3 で入っていれば、入れなくてよい）
@@ -4033,6 +4034,101 @@
 
    - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
    - 値が `nvim` のときだけ消す（ほかの値は残る）
+
+---
+
+## Windows Sandbox で配布物を試す（任意）
+
+- 実施手順を通した後に、必要なときだけ行う
+- **前提**: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）、UEFI / BIOS で仮想化を有効にした PC。RAM は 4 GB 以上、ディスクの空きは 1 GB 以上、CPU は 2 コア以上が要る
+- Windows の VM の中で使う場合は、入れ子の仮想化も有効にしておく
+- この節の手順 2〜5 は管理者の Windows PowerShell（5.1）に貼る。手順 6〜8 は、通常のデスクトップから行う
+- **再起動**: この節の手順 4 は、状態の確認または有効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- **閉じる前に**: この節の手順 8 で、Sandbox の内部のファイルとアプリの状態が消える。残す結果は、ホストへコピーしてから閉じる
+- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](verification/windows-setup.md)
+
+1. スタートメニューから、管理者の Windows PowerShell を開く。
+
+   - 「Windows PowerShell」を検索し、右クリック →「管理者として実行」で開き、UAC の確認に答える
+   - タスク マネージャー →「パフォーマンス」→「CPU」で「仮想化」が「有効」になっていることを確かめる。無効なら、UEFI / BIOS で有効にしてから、この節を始め直す
+   - Windows のエディション・アーキテクチャと、RAM・ディスクの空き・CPU のコア数が、この節の前提を満たすことを確かめる
+   - **次の手順は、管理者の Windows PowerShell が開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox の変更前の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `FeatureName` が `Containers-DisposableClientVM` であることを確かめ、`State` を控える（[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)で使う）
+   - `Disabled` または `DisabledWithPayloadRemoved` なら、この節の手順 3 に進む
+   - `Enabled` なら、この節の手順 3・4 は飛ばす
+   - `EnablePending` または `DisablePending` なら、この節の手順 3 は飛ばし、手順 4 で再起動する。再起動したらこの節の手順 2 に戻り、変更前の状態を控え直す
+   - エラーや、ここに挙げていない `State` が出たら中断する
+
+1. 無効だったときだけ、Windows Sandbox を有効にする。
+
+   ```powershell
+   & {
+     $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
+     if ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+     } elseif ($feature.State -eq 'Enabled') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       $feature | Select-Object FeatureName, State
+     } else {
+       Write-Error '中断: 状態が変わった。この節の手順 2 に戻って確かめる'
+     }
+   }
+   ```
+
+   - エラーが無く、最後の `State` が `Enabled` または `EnablePending` なら適用できている
+   - `RestartNeeded` が `True`、または `State` が `EnablePending` なら、この節の手順 4 で再起動する
+   - `RestartNeeded` が `False` で `State` が `Enabled` なら、この節の手順 4 は飛ばす
+   - 既に `Enabled` だった場合も変更せず、この節の手順 4 は飛ばす
+   - エラー・`中断:`・ここに挙げていない結果が出たら、再起動と起動確認へ進まず、この節の手順 2 に戻る
+
+1. 再起動が必要なときだけ、作業を保存してホストを再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - Windows が起動したらサインインし、この節の手順 1 と同じ管理者の Windows PowerShell を開く
+   - この節の手順 2 で `EnablePending` または `DisablePending` だった場合は、同じ手順 2 に戻る
+   - **次の手順は、Windows が起動して管理者の Windows PowerShell を開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox が有効になったことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Enabled` なら、この節の手順 6 に進む
+   - エラーや `Enabled` 以外の状態なら中断し、この節の手順 2 に戻る
+
+1. 通常のデスクトップのスタートメニューから、Windows Sandbox を起動する。
+
+   - 管理者の PowerShell を閉じ、スタートメニューで「Windows Sandbox」を検索して開く
+   - Windows Sandbox の窓の中に、別の Windows のデスクトップが表示されればよい
+   - 起動に失敗したら、表示されたエラーを控え、この節の手順 7・8 へ進まない
+
+1. Sandbox の中で、配布物の起動と必要な操作を試す。
+
+   - ホストで配布物をコピーし、Sandbox の中のデスクトップへ貼り付ける
+   - Sandbox の中で配布物を起動し、必要な操作ができることを確かめる。エラーや不足する依存ライブラリがあれば控える
+   - Sandbox の中のデスクトップで右クリック →「新規作成」→「フォルダー」を選び、`sandbox-check` という名前にする（この節の手順 8 で使う）
+
+1. Sandbox の窓を閉じて起動し直し、内部の状態が消えたことを確かめる。
+
+   - 残す結果をホストへコピーし、Sandbox の窓の右上の「×」を押す。内容を破棄する確認に答える
+   - 通常のデスクトップのスタートメニューから「Windows Sandbox」をもう一度開く
+   - Sandbox の中のデスクトップに、配布物と `sandbox-check` フォルダーが無ければよい
+   - 確かめ終わったら、Sandbox の窓を閉じる
 
 ---
 

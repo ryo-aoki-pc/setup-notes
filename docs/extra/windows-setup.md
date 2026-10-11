@@ -41,7 +41,7 @@
   - Claude Code のプラグインは[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1（プラグインは、Claude Code の起動と終了のたびに、scoop の `node` を動かす）
   - そのときは、scoop で消す手順（[Git の道具を消す](#git-の道具を消す)の手順 2・4・9、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 2・5〜8）は要らない（止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える）。lazygit の設定（`%LOCALAPPDATA%\lazygit`）は scoop の外に残る（外すなら[Git の道具を消す](#git-の道具を消す)の手順 1）
   - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9（scoop を消した後でもよい）
-- 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
+- 任意節で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](#windows-sandbox-を無効にする)で、ほかはそれぞれの節の最後の「元に戻すときは、」の手順で戻す
   - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
   - [SSH の既定のシェルを Git Bash にする（任意）](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)を通し、OpenSSH サーバーを残して Git for Windows を外すなら、先にその節の手順 3 で `DefaultShell` を消す
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)の手順 7・8
@@ -1208,7 +1208,81 @@
 
 ---
 
+## Windows Sandbox を無効にする
+
+- [Windows Sandbox で配布物を試す（任意）](../windows-setup.md#windows-sandbox-で配布物を試す任意)の手順 2 で控えた `State` が `Disabled` または `DisabledWithPayloadRemoved` で、この手順書で有効にした場合だけ行う。元から `Enabled` だった場合は変更しない
+- この節の手順 2〜5 は、管理者の Windows PowerShell（5.1）に貼る
+- **再起動**: この節の手順 4 は、状態の確認または無効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- 対象は `Containers-DisposableClientVM` だけ。Hyper-V・WSL・Virtual Machine Platform など、ほかの機能は外さない
+
+1. Sandbox を閉じ、スタートメニューから管理者の Windows PowerShell を開く。
+
+   - Sandbox の中に残す結果があればホストへコピーしてから、Sandbox の窓を閉じる
+   - 「Windows PowerShell」を検索し、右クリック →「管理者として実行」で開き、UAC の確認に答える
+   - **次の手順は、管理者の Windows PowerShell が開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox の現在の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Enabled` なら、この節の手順 3 に進む
+   - `Disabled` または `DisabledWithPayloadRemoved` なら、この節の手順 3・4 は飛ばす
+   - `EnablePending` または `DisablePending` なら、この節の手順 3 は飛ばし、手順 4 で再起動する。再起動したら、この節の手順 2 に戻る
+   - エラーや、ここに挙げていない `State` が出たら中断する
+
+1. この手順書で有効にしてまだ有効なときだけ、Windows Sandbox を無効にする。
+
+   ```powershell
+   & {
+     $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
+     if ($feature.State -eq 'Enabled') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       Disable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+     } elseif ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       $feature | Select-Object FeatureName, State
+     } else {
+       Write-Error '中断: 状態が変わった。この節の手順 2 に戻って確かめる'
+     }
+   }
+   ```
+
+   - エラーが無く、最後の `State` が `Disabled` または `DisablePending` なら無効化できている
+   - `RestartNeeded` が `True`、または `State` が `DisablePending` なら、この節の手順 4 で再起動する
+   - `RestartNeeded` が `False` で `State` が `Disabled` なら、この節の手順 4 は飛ばす
+   - 既に `Disabled` または `DisabledWithPayloadRemoved` だった場合も変更せず、この節の手順 4 は飛ばす
+   - エラー・`中断:`・ここに挙げていない結果が出たら、再起動と完了確認へ進まず、この節の手順 2 に戻る
+
+1. 再起動が必要なときだけ、作業を保存してホストを再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - Windows が起動したらサインインし、この節の手順 1 と同じ管理者の Windows PowerShell を開く
+   - この節の手順 2 で `EnablePending` または `DisablePending` だった場合は、同じ手順 2 に戻る
+   - **次の手順は、Windows が起動して管理者の Windows PowerShell を開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox が無効になったことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Disabled` または `DisabledWithPayloadRemoved` ならよい
+   - エラーや、それ以外の状態なら中断し、この節の手順 2 に戻る
+
+---
+
 ## 注意点
+
+- **Windows Sandbox の窓を閉じると、内部の状態が消える**: Sandbox の内部だけに置いたファイルと、インストールしたアプリは破棄される。Windows 11 22H2 以降では、Sandbox の中で Windows を再起動しただけなら状態は残る
+- **Sandbox から共有したホストのファイルは残る**: ホストへコピーした結果や、`.wsb` の `MappedFolders` で共有したホスト側のファイルは、Sandbox の窓を閉じても消えない。書き込みを許可した共有フォルダーへの変更もホスト側に残る
 
 - **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）・自動サインイン（[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 2）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 1）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
 - **Caps Lock の働きは無くなる**: Caps Lock を左 Ctrl にするだけで、Caps Lock をほかのキーに割り当てない。大文字を続けて打つときは Shift を押す

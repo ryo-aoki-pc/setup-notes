@@ -2,6 +2,12 @@
 
 [手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
+## 2026-10-12 JST に追加した Windows Sandbox の任意節
+
+- **状態**: [Windows Sandbox で配布物を試す（任意）](../windows-setup.md#windows-sandbox-で配布物を試す任意)の 8 手順と、extra の[Windows Sandbox を無効にする](../extra/windows-setup.md#windows-sandbox-を無効にする)の 5 手順を追加した
+  - 公式仕様との照合、Linux の PowerShell での構文・5.1 互換性検査、偽物の DISM コマンドレットによる状態分岐の模擬を行った（[付録](#付録-windows-sandbox-の静的検査と状態分岐の模擬2026-10-12-jst)）
+  - Windows の実機・VM での機能の有効化・無効化、再起動、Sandbox の起動・配布物の試験・終了後の消去は未検証。入れ子の仮想化と VirtualBox との併用も確認していない
+
 ## 2026-10-12 JST に追加した Git for Windows の長いパス対応
 
 - **状態**: [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 に、`core.longpaths=true` を追加した
@@ -4531,3 +4537,40 @@ Rufus で作ったインストールメディアからクリーンインスト�
 
 - 7 ケース、57 検査がすべて成功した。設定ブロックの標準エラーは空、無関係な global のキーと system のファイルもすべてのケースで保持した
 - **確認していないこと**: Git for Windows でのブロックの貼り付け、Windows での長いパスの clone・checkout、エクスプローラー・IDE・スクリプトなどでの長いパスの扱い。Linux での設定検証を Windows の動作確認として扱わない
+
+---
+
+## 付録: Windows Sandbox の静的検査と状態分岐の模擬（2026-10-12 JST）
+
+- **対象と検証環境**: [Windows Sandbox で配布物を試す（任意）](../windows-setup.md#windows-sandbox-で配布物を試す任意)の 8 手順と、extra の[Windows Sandbox を無効にする](../extra/windows-setup.md#windows-sandbox-を無効にする)の 5 手順。クラウドの Linux コンテナ（Debian 13、x86_64、PowerShell 7.6.6、PSScriptAnalyzer 1.25.0）で確かめた
+- **実施前の状態**: PowerShell と PSScriptAnalyzer は公式 GitHub Release の配布物を一時ディレクトリに取得し、Release API の SHA256 digest と照合した。本文の PowerShell 8 ブロックを抽出し、模擬用の DISM コマンドレットを検査プロセス内に定義した
+- **完了時点の状態**: 検査物は `/tmp/windows-sandbox-check` と `/tmp/windows-sandbox-validation` に置いた。Windows の実機・VM へは接続せず、機能の変更と再起動は実行していない
+
+### 静的検査と資料の確認
+
+- 実際の PowerShell 8 ブロックを `[System.Management.Automation.Language.Parser]` で構文解析した（エラー 0）
+- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（対象 5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes` で指摘 0。コマンドと型は同梱の Windows 10 Pro / Windows PowerShell 5.1 のプロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework` を使った。Windows PowerShell 5.1 自体を実行した結果ではない
+- `Restart-Computer` は、本体と extra の手順 4 の独立した 2 ブロックだけにあることを構文木で確認した。`RestartNeeded` と最後の `State` による手動再起動の判断、失敗時に再起動・起動確認へ進まない案内も点検した
+- [Microsoft の導入手順](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-install)、[概要](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/)、[有効化](https://learn.microsoft.com/en-us/powershell/module/dism/enable-windowsoptionalfeature?view=windowsserver2025-ps)・[無効化](https://learn.microsoft.com/en-us/powershell/module/dism/disable-windowsoptionalfeature?view=windowsserver2025-ps)の仕様を照合した。対応エディション・仮想化の前提・再起動と、窓を閉じた場合の内部の消去を記載した
+- 変更した手順を説明から最後の箇条書きまで点検した。`docs/windows-setup.md` の 8 手順と `docs/extra/windows-setup.md` の 5 手順は「1 行の説明 → コードブロック（あれば）→ 確認・分岐・注意」の順にそろっている
+
+### 偽物の DISM コマンドレットでの状態分岐
+
+| 対象 | 初期状態・模擬した結果 | 確認した動作 |
+|---|---|---|
+| 有効化 | `Disabled` → `EnablePending`、`RestartNeeded=True` | 有効化を 1 回行い、再起動の必要性と後の状態を表示する |
+| 有効化 | `DisabledWithPayloadRemoved` → `Enabled`、`RestartNeeded=False` | 有効化を 1 回行い、後の状態を表示する |
+| 有効化 | `Enabled` | 有効化を呼び出さない |
+| 有効化 | `EnablePending` | 変更せず中断する |
+| 有効化 | 変更前の状態取得が失敗 | 有効化を呼び出さず停止する |
+| 有効化 | 有効化が失敗 | 後の状態取得へ進まず停止する |
+| 有効化 | 変更後の状態取得が失敗 | 取得の失敗を成功として扱わない |
+| 無効化 | `Enabled` → `DisablePending`、`RestartNeeded=True` | 無効化を 1 回行い、再起動の必要性と後の状態を表示する |
+| 無効化 | `Enabled` → `Disabled`、`RestartNeeded=False` | 無効化を 1 回行い、後の状態を表示する |
+| 無効化 | `DisabledWithPayloadRemoved` | 無効化を呼び出さない |
+| 無効化 | `DisablePending` | 変更せず中断する |
+| 無効化 | 未知の状態 | 変更せず中断する |
+| 無効化 | 無効化が失敗 | 後の状態取得へ進まず停止する |
+
+- 13 ケースがすべて成功した。変更の対象は `Containers-DisposableClientVM` だけで、すべての変更呼び出しが `-Online`・`-ErrorAction Stop`・`-NoRestart` を使い、有効化では `-All` も指定することを確認した
+- **確認していないこと**: Windows PowerShell 5.1 の窓への貼り付け、実際の DISM の状態取得・機能変更と再起動、Sandbox の GUI 起動・配布物の試験・終了後の消去・無効化、VM の入れ子の仮想化、VirtualBox との併用。Linux の構文・互換性検査と模擬の成功を、Windows の動作確認として扱わない
