@@ -8471,3 +8471,14 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 - 片付け: `--trust` が `~/.grok/trusted_folders.toml` に足した試験用フォルダー 1 件と、今回の実行が残した `sandbox-blocked.<PID>` 9 個を消した（先の検証の 1 個は残した）。`config.toml` と `trusted_folders.toml` のハッシュ、版（1.0.50）、ログインの状態は実施前と同じ。
 - 未確認のまま: Landlock が有効なカーネルでの起動、sandbox が起動した状態でのレビュー・プロジェクトへの書き込みの拒否・`workspace` でのコミット、検索の ACL の永続化。Grok の sandbox レビューの失敗は未解消のまま。
+
+
+## 付録: IBus の追加確認ブロックを貼り直した記録（2026-10-11、C20 / FXC）
+
+- **状態**: e5e1afb の「再起動と確認」の手順 3 を、after-FXA の Hyper-V VM で、rb.mjs paste により SSH の対話 bash に原文のまま貼り直した
+  - Login-Console.ps1 で GNOME にログインした後、IBus の PATH が /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin で、追加した --xml の確認が `<name>anthy</name>` を返した
+  - 同じブロックの ibus list-engine は SSH シェルから IBus に接続できず、anthy - Anthy は出なかった。手順全体の成功とは数えず、追加した PATH と XML の確認だけを成功範囲にする
+
+環境は Hyper-V / Generation 2 / 2 vCPU / 4096 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。最初の貼り付けでは GNOME にログインしておらず、ibus-daemon が動いていない旨を確認した。指定の Login-Console.ps1 が LoggedIn=true を返してから再実行した。パスワードの内容は表示していない。
+
+根拠は queued-units/C20/FXC-fxa の steps.jsonl の seq 1（ログイン前）・2（ログイン後）と after-confirm/、login/ の VM の画面。ログイン後は、前後 2 回の起動ログ、kdump の 0、Downloads、拡張の ACTIVE、mutter の 2 値も出た。GNOME の端末に直接貼った形、日本語の実入力、Neovim、実機・他列は今回未実施。セッションを閉じて VM を停止した。

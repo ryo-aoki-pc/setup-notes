@@ -234,3 +234,20 @@ Container Setup Complete!
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
 - podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
+
+## 付録: PR #134 の ffmpeg 確認を貼り直した記録（2026-10-11、C20 / FXC）
+
+- **状態**: PR #134 のコミット 4a1788d の「ボックスのコマンドをホストから呼ぶ（任意）」の手順 4 を、既存の C13 / R1 の Hyper-V VM（after-R1）で原文のまま貼り、成功条件を確認した
+  - command -v ffmpeg は /home/linuxbrew/.linuxbrew/bin/ffmpeg を返し、明示した ~/.local/bin/ffmpeg -version は 6.1.1-3ubuntu5 を返した
+  - PR #133 の distrobox.md は旧ブロックのままなので、それを再検証したという意味ではない。PR #134 の手順書変更をこのブランチへ重複実装していない
+
+環境は Hyper-V / Generation 2 / 2 vCPU / 3072 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。別 clone の指定コミットを git show で読み、バイト列を queued-units/C20/distrobox-4a1788d.md に保存した。別 clone のファイルやブランチは変更していない。rb.mjs paste の入力はこの写しで、手順 4 の 3 行を変更していない。
+
+| 原文 | SHA256 |
+|---|---|
+| 4a1788d:docs/distrobox.md | ec0cf4c598214f3713eed533a9c796c7ecc72c8b22095aa40fa1e1435b52932d |
+| 手順 4 のブロック | 906307aaf20d9cbaa183098e491438ff339f7e5fc65d80af9ab344d4b19ba992 |
+
+根拠は queued-units/C20/source-sha256.json、ffmpeg-block.sh、FXC-containers/steps.jsonl の seq 1 と after-confirm/。ブロックのハッシュはドライバの記録とも一致した。写しの docCommit は保存先を含む親リポジトリの値なので、原文の出典には使わず、source-sha256.json の 4a1788d と文書の SHA256 を使う。
+
+Ubuntu ボックスの起動と初期化が完了し、書き出したラッパーがボックス内の ffmpeg を呼んだ。新規導入・更新・撤去・GUI の書き出しは今回未実施。セッションを閉じて VM を停止した。
