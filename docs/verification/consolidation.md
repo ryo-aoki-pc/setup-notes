@@ -161,3 +161,14 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開した本体
 最後の参照監査で、LazyVim の README に残っていた旧導入手順16を正本の手順10へ、bash の補足表の WezTerm 手順6を固定原文の旧手順6と現行の共通 bash 設定へ付け替えた。コマンドと過去検証本文は変更していない。
 
 Grok Build が公開した [bash の補修](https://github.com/ryo-aoki-pc/bash/commit/334f810307edaa09294b3e2e6fc584ab00531886)と [LazyVim の補修](https://github.com/ryo-aoki-pc/LazyVimStarter/commit/eac14f81be7aecb89bd8549f62bb88fdec748994)を同じモデルで再レビューし、「指摘なし」と回答した。補修後も削除38文書・残る197文書・元322対応・GitHub参照951件・過去検証56文書の検査に不整合はない。
+
+## Git の長いパス対応と Windows Sandbox の取り込み（2026-10-12）
+
+公開 PR の最終確認で新たに競合していたため、[main f40d67c](https://github.com/ryo-aoki-pc/setup-notes/commit/f40d67c55ed1db0cba69022557355bc104fd8df1)（PR #141）を作業ブランチへ取り込んだ。Git for Windows 専用の `core.longpaths` 設定を clone の前に置き、Windows Sandbox の任意8手順と解除5手順を正本と関連資料へ反映した。
+
+- Git Bash と WezTerm の設定は、新しい長いパス設定を手順4に置き、共通 bash 導入を5、WezTerm 設定を6にした。現行の番号参照も追従し、元値・スコープと変更したキーだけを戻す条件を保持した
+- Sandbox の対応エディション・仮想化・アーキテクチャなどの前提、管理者と通常デスクトップの実行場所、元の状態の記録、pending とエラーの分岐、成功後だけの再起動を保持した。窓を閉じると内部は消去され、内部再起動では保持し、共有ホストファイルは残るという違いも保持した
+- 初めて有効にした場合だけ解除し、`Containers-DisposableClientVM` だけを変更する。共有の Hyper-V・WSL などは外さず、元の削除ペイロードへは戻さない。通常の共通 bash 復元と、任意のリポジトリ削除の確認・危険の案内を区別した
+- 追加コード9個（bash 1・PowerShell 8）は main 原文と一致し、`bash -n` と Windows PowerShell 5.1.26100.9444 の構文解析が成功した。Windows は451コード・586手順、AlmaLinux は771コード・894手順で、追加以外の掲載コードと操作を保持した。extra の83コードも main と一致した
+- 削除38文書・残る197 Markdown文書・元322対応と追補11件・相対リンクと画像・GitHub参照952件・過去検証56文書の検査に不整合なし。個別37文書の780手順・636コードにも欠落はない。短い文書規則に Sandbox の権限を追記し、2冊と extra の手順順序と `git diff --check` も確認した
+- 追加の検証記録79行・参考資料39行・構成履歴は最新 main と照合し、本文・当時番号・出力を保持した。今回の再確認は移植・構文・参照の検査で、実機の機能変更・再起動・Sandbox 起動・Git 設定は実行していない

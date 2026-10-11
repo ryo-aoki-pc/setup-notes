@@ -41,7 +41,7 @@
   - Claude Code のプラグインは[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1（プラグインは、Claude Code の起動と終了のたびに、scoop の `node` を動かす）
   - そのときは、scoop で消す手順（[Git の道具を消す](#git-の道具を消す)の手順 2・4・9、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 2・5〜8）は要らない（止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える）。lazygit の設定（`%LOCALAPPDATA%\lazygit`）は scoop の外に残る（外すなら[Git の道具を消す](#git-の道具を消す)の手順 1）
   - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9（scoop を消した後でもよい）
-- 任意節で変えたものは、この節では戻さない。それぞれの節の最後の「元に戻すときは、」の手順で戻す
+- 任意節で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](#windows-sandbox-を無効にする)で、ほかはそれぞれの節の最後の「元に戻すときは、」の手順で戻す
   - 対象の任意節: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
   - [SSH の既定のシェルを Git Bash にする（任意）](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)を通し、OpenSSH サーバーを残して Git for Windows を外すなら、先にその節の手順 3 で `DefaultShell` を消す
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する（任意）](../windows-setup.md#powershell-7-のプロファイルを設定する任意)の手順 7・8
@@ -455,13 +455,14 @@
    - Git Bash の窓に貼るときは、窓の中を右クリックして出るメニューの「Paste」を選ぶ。最後の行は、貼った後に Enter を押す
    - **次の手順は、この Git Bash に貼る**
 
-1. [AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 4・5・7 で今回追加・変更したキーだけ、元に戻す（`merge.conflictStyle` を除く）。
+1. 共通の Git 設定と Windows の長いパス対応で、今回追加・変更したキーだけ元に戻す（`merge.conflictStyle` を除く）。
 
-   - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 3 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
-   - 同書の「Git」の手順 2 で控えた元の値・スコープと、今回変更したキーの記録を使う。変更しなかったキーはそのまま残す
-   - 同書の「Git」の手順 2 の記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
-   - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、同書の「Git」の手順 7 を飛ばした場合の `pull.ff` は触らない
+   - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 3・4 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
+   - 共通の設定は[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2、`core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で控えた元の値・スコープと変更の記録を使う。変更しなかったキーは残す
+   - 控えた記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
+   - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、[AlmaLinux 10 の「Git」](../almalinux-setup.md#git)の手順 7 を飛ばした場合の `pull.ff` は触らない
    - 対象は `pull.rebase`・`rebase.autoStash`・`core.autocrlf`・`init.defaultBranch`・`core.quotepath`・`fetch.prune`・`push.autoSetupRemote`・`rerere.enabled`・`diff.algorithm`・`branch.sort`・`tag.sort`・`pull.ff`
+   - `core.longpaths` も今回変更したときだけ対象にする。元の `global` が未設定なら `git config --global --unset core.longpaths`、値があったなら、この項の手順 5 で戻す
    - 例: 今回初めて追加した `core.autocrlf` なら `git config --global --unset core.autocrlf`
    - 外すと何も出ない。最後のキーを外した `~/.gitconfig` の節も消える
 
@@ -477,10 +478,11 @@
    - 元の `global` に値があったものは、この項の手順 5 で書き戻す。変更なしのものは触らない
    - 外すと、`git commit` が `Author identity unknown` で止まることがある（検証コンテナでは止まった）
 
-1. この項の手順 2〜4 で戻すと決めたキーのうち、元の `global` に値があったものは、同書の「Git」の手順 2 で控えた値で書き戻す。
+1. この項の手順 2〜4 で戻すと決めたキーのうち、元の `global` に値があったものを、控えた値で書き戻す。
 
    - `git config --global <キー> <元の値>` の形で、キーごとに 1 行ずつ貼る
    - 例: 元の `core.autocrlf` を戻すなら `git config --global core.autocrlf <元の値>`
+   - `core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4、ほかのキーは[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2 の記録を使う
    - 空白を含む値は引用符で囲む。元の値が `system` や `local` だけにあった場合は、それを `global` に写さない（今回追加した `global` を外せば、元のスコープの値がまた効く）
    - 残すと決めた `merge.conflictStyle`・名前・メールアドレスと、今回変更しなかったキーは書き戻さない
 
@@ -490,7 +492,7 @@
    git config --global --list
    ```
 
-   - 今回戻すキーが、同書の「Git」の手順 2 で記録した元の `global` と一致すればよい（元が未設定なら出ない、元の値があればその値が出る）
+   - 今回戻すキーが、この項の手順 2・5 が示す記録の元の `global` と一致すればよい（元が未設定なら出ない、元の値があればその値が出る）
    - 残すと決めたキーと、本書で変更しなかったキーはそのまま。元の設定が空で、今回の設定をすべて外した場合だけ、何も出ない
    - 元は `~/.gitconfig` が無かった場合も、空のファイルが残る（中身が無いので、git の動きは変わらない）
 
@@ -501,8 +503,8 @@
 
 1. 共通の bash 設定も外すときだけ、外す。
 
-   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で入れたもの）
-   - その手順 5 は `~/.config/bash` を消す（commit・push していないものは取り戻せない）。その手順 4 で確かめてから行う
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5 で入れたもの）
+   - 設定リポジトリも消すなら、[手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)の手順 4 で確かめ、手順 5 を行う。`~/.config/bash` の未 commit・未 push の変更は取り戻せない
    - 終わったら、Git Bash の窓は閉じてよい
 
 ### OpenSSH・Git for Windows・Firefox・WezTerm を外す
@@ -1206,6 +1208,77 @@
 
 ---
 
+## Windows Sandbox を無効にする
+
+- [Windows Sandbox で配布物を試す（任意）](../windows-setup.md#windows-sandbox-で配布物を試す任意)の手順 2 で控えた `State` が `Disabled` または `DisabledWithPayloadRemoved` で、この手順書で有効にした場合だけ行う。元から `Enabled` だった場合は変更しない
+- この節の手順 2〜5 は、管理者の Windows PowerShell（5.1）に貼る
+- **再起動**: この節の手順 4 は、状態の確認または無効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- 対象は `Containers-DisposableClientVM` だけ。Hyper-V・WSL・Virtual Machine Platform など、ほかの機能は外さない
+
+1. Sandbox を閉じ、スタートメニューから管理者の Windows PowerShell を開く。
+
+   - Sandbox の中に残す結果があればホストへコピーしてから、Sandbox の窓を閉じる
+   - 「Windows PowerShell」を検索し、右クリック →「管理者として実行」で開き、UAC の確認に答える
+   - **次の手順は、管理者の Windows PowerShell が開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox の現在の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Enabled` なら、この節の手順 3 に進む
+   - `Disabled` または `DisabledWithPayloadRemoved` なら、この節の手順 3・4 は飛ばす
+   - `EnablePending` または `DisablePending` なら、この節の手順 3 は飛ばし、手順 4 で再起動する。再起動したら、この節の手順 2 に戻る
+   - エラーや、ここに挙げていない `State` が出たら中断する
+
+1. この手順書で有効にしてまだ有効なときだけ、Windows Sandbox を無効にする。
+
+   ```powershell
+   & {
+     $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
+     if ($feature.State -eq 'Enabled') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       Disable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+     } elseif ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       $feature | Select-Object FeatureName, State
+     } else {
+       Write-Error '中断: 状態が変わった。この節の手順 2 に戻って確かめる'
+     }
+   }
+   ```
+
+   - エラーが無く、最後の `State` が `Disabled` または `DisablePending` なら無効化できている
+   - `RestartNeeded` が `True`、または `State` が `DisablePending` なら、この節の手順 4 で再起動する
+   - `RestartNeeded` が `False` で `State` が `Disabled` なら、この節の手順 4 は飛ばす
+   - 既に `Disabled` または `DisabledWithPayloadRemoved` だった場合も変更せず、この節の手順 4 は飛ばす
+   - エラー・`中断:`・ここに挙げていない結果が出たら、再起動と完了確認へ進まず、この節の手順 2 に戻る
+
+1. 再起動が必要なときだけ、作業を保存してホストを再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - Windows が起動したらサインインし、この節の手順 1 と同じ管理者の Windows PowerShell を開く
+   - この節の手順 2 で `EnablePending` または `DisablePending` だった場合は、同じ手順 2 に戻る
+   - **次の手順は、Windows が起動して管理者の Windows PowerShell を開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox が無効になったことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Disabled` または `DisabledWithPayloadRemoved` ならよい
+   - エラーや、それ以外の状態なら中断し、この節の手順 2 に戻る
+
+---
+
 ## SSH の降格用の実行ファイルを外す
 
 - [SSH で管理者・非管理者の PowerShell を使う（任意）](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)の手順 7 で配置した実行ファイルを、同じ Windows ユーザーで外す
@@ -1232,6 +1305,9 @@
 ---
 
 ## 注意点
+
+- **Windows Sandbox の窓を閉じると、内部の状態が消える**: Sandbox の内部だけに置いたファイルと、インストールしたアプリは破棄される。Windows 11 22H2 以降では、Sandbox の中で Windows を再起動しただけなら状態は残る
+- **Sandbox から共有したホストのファイルは残る**: ホストへコピーした結果や、`.wsb` の `MappedFolders` で共有したホスト側のファイルは、Sandbox の窓を閉じても消えない。書き込みを許可した共有フォルダーへの変更もホスト側に残る
 
 - **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）・自動サインイン（[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 2）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 1）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
 - **Caps Lock の働きは無くなる**: Caps Lock を左 Ctrl にするだけで、Caps Lock をほかのキーに割り当てない。大文字を続けて打つときは Shift を押す

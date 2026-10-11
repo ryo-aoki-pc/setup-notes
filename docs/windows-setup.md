@@ -1545,7 +1545,7 @@
 1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
 
    - スタートメニューで「WezTerm」を探し、クリックして開く
-   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 で入れる）
+   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 で入れる）
    - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
    - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](#windows-のホットキー競合-実施手順)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
@@ -1769,9 +1769,29 @@
 
    - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
-   - **この手順は、この項の手順 4・5 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
+   - **この手順は、この項の手順 5・6 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
    - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)で行う（同書の「Git」の手順 2 の箇条書きが案内する AlmaLinux 10 のロールバックと同じ内容を、Git Bash で行う）
+
+1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
+
+   ```bash
+   printf '変更前の core.longpaths（スコープ・ファイル・値）:\n'
+   git config --show-scope --show-origin --get-all core.longpaths
+   if [ "$(git config --global --includes --type=bool --get core.longpaths)" != true ]; then
+     git config --global core.longpaths true
+   fi
+   printf '\n\033[7m 確認 \033[0m\n'
+   git config --global --includes --type=bool --get core.longpaths
+   git config --type=bool --show-scope --show-origin --get core.longpaths
+   ```
+
+   - 「変更前」の値・スコープ・ファイルを控える。`global` の行が無ければ「global は未設定」と控える
+   - 元の `global` が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える
+   - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
+   - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
+   - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く
+   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)の手順 2・5・6 で行う
 
 1. 同じ Git Bash で、共通の bash 設定を入れる。
 
@@ -1787,7 +1807,7 @@
 
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 4 で導入済み
+   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 5 で導入済み
    - その項の手順 5 で WezTerm を起動し、手順 6 を新しい Git Bash のタブに貼って確かめる
    - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
    - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
@@ -1813,7 +1833,7 @@
    - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
    - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
-   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 4 を通す
+   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 を通す
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 3 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
@@ -4498,6 +4518,104 @@
 
    - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
    - 値が `nvim` のときだけ消す（ほかの値は残る）
+
+---
+
+## Windows Sandbox で配布物を試す（任意）
+
+- 実施手順を通した後に、必要なときだけ行う
+- **前提**: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）
+- UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意する
+- Windows の VM の中で使う場合は、入れ子の仮想化も有効にしておく
+- この節の手順 2〜5 は管理者の Windows PowerShell（5.1）に貼る。手順 6〜8 は、通常のデスクトップから行う
+- **再起動**: この節の手順 4 は、状態の確認または有効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](verification/windows-setup.md)
+
+> [!CAUTION]
+> **この節の手順 8 で Sandbox 内のファイルとアプリの状態が消える**。残す結果をホストへコピーしてから閉じる。
+
+1. スタートメニューから、管理者の Windows PowerShell を開く。
+
+   - 「Windows PowerShell」を検索し、右クリック →「管理者として実行」で開き、UAC の確認に答える
+   - タスク マネージャー →「パフォーマンス」→「CPU」で「仮想化」が「有効」になっていることを確かめる。無効なら、UEFI / BIOS で有効にしてから、この節を始め直す
+   - Windows のエディション・アーキテクチャと、RAM・ディスクの空き・CPU のコア数が、この節の前提を満たすことを確かめる
+   - **次の手順は、管理者の Windows PowerShell が開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox の変更前の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `FeatureName` が `Containers-DisposableClientVM` であることを確かめ、`State` を控える（[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)で使う）
+   - `Disabled` または `DisabledWithPayloadRemoved` なら、この節の手順 3 に進む
+   - `Enabled` なら、この節の手順 3・4 は飛ばす
+   - `EnablePending` または `DisablePending` なら、この節の手順 3 は飛ばし、手順 4 で再起動する。再起動したらこの節の手順 2 に戻り、変更前の状態を控え直す
+   - エラーや、ここに挙げていない `State` が出たら中断する
+
+1. 無効だったときだけ、Windows Sandbox を有効にする。
+
+   ```powershell
+   & {
+     $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
+     if ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+     } elseif ($feature.State -eq 'Enabled') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       $feature | Select-Object FeatureName, State
+     } else {
+       Write-Error '中断: 状態が変わった。この節の手順 2 に戻って確かめる'
+     }
+   }
+   ```
+
+   - エラーが無く、最後の `State` が `Enabled` または `EnablePending` なら適用できている
+   - `RestartNeeded` が `True`、または `State` が `EnablePending` なら、この節の手順 4 で再起動する
+   - `RestartNeeded` が `False` で `State` が `Enabled` なら、この節の手順 4 は飛ばす
+   - 既に `Enabled` だった場合も変更せず、この節の手順 4 は飛ばす
+   - エラー・`中断:`・ここに挙げていない結果が出たら、再起動と起動確認へ進まず、この節の手順 2 に戻る
+
+1. 再起動が必要なときだけ、作業を保存してホストを再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - Windows が起動したらサインインし、この節の手順 1 と同じ管理者の Windows PowerShell を開く
+   - この節の手順 2 で `EnablePending` または `DisablePending` だった場合は、同じ手順 2 に戻る
+   - **次の手順は、Windows が起動して管理者の Windows PowerShell を開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox が有効になったことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Enabled` なら、この節の手順 6 に進む
+   - エラーや `Enabled` 以外の状態なら中断し、この節の手順 2 に戻る
+
+1. 通常のデスクトップのスタートメニューから、Windows Sandbox を起動する。
+
+   - 管理者の PowerShell を閉じ、スタートメニューで「Windows Sandbox」を検索して開く
+   - Windows Sandbox の窓の中に、別の Windows のデスクトップが表示されればよい
+   - 起動に失敗したら、表示されたエラーを控え、この節の手順 7・8 へ進まない
+
+1. Sandbox の中で、配布物の起動と必要な操作を試す。
+
+   - ホストで配布物をコピーし、Sandbox の中のデスクトップへ貼り付ける
+   - Sandbox の中で配布物を起動し、必要な操作ができることを確かめる。エラーや不足する依存ライブラリがあれば控える
+   - Sandbox の中のデスクトップで右クリック →「新規作成」→「フォルダー」を選び、`sandbox-check` という名前にする（この節の手順 8 で使う）
+
+1. Sandbox の窓を閉じて内部の状態を消し（取り戻せない）、起動し直して確かめる。
+
+   - 残す結果をホストへコピーし、Sandbox の窓の右上の「×」を押す。内容を破棄する確認に答える
+   - 通常のデスクトップのスタートメニューから「Windows Sandbox」をもう一度開く
+   - Sandbox の中のデスクトップに、配布物と `sandbox-check` フォルダーが無ければよい
+   - 確かめ終わったら、Sandbox の窓を閉じる
 
 ---
 
@@ -8202,7 +8320,7 @@
 
 1. WezTerm を自分用の設定で使うときだけ、起動メニューから接続先を開けることを確かめる。
 
-   - 前提は、[Windows 11 の初期設定の「WezTerm」](#wezterm)と、自分用の設定（同書の[「Git Bash と WezTerm の設定」](#git-bash-と-wezterm-の設定)の手順 5）。入れていなければ、この手順は飛ばす
+   - 前提は、[Windows 11 の初期設定の「WezTerm」](#wezterm)と、自分用の設定（同書の[「Git Bash と WezTerm の設定」](#git-bash-と-wezterm-の設定)の手順 6）。入れていなければ、この手順は飛ばす
    - WezTerm で Ctrl+Shift+R（設定の読み直し）を押してから、Ctrl+Shift+M で起動メニューを開く
    - `ssh <SSH_ALIAS>` が並び、選ぶと新しいタブでホストのシェルに入ればよい（パスフレーズを付けたなら聞かれる）
 

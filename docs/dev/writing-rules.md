@@ -73,6 +73,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - 貼り付け設定前の conhost は Ctrl+V を使う。scoop の導入は管理者ではない窓で行い、SSH の昇格済みセッションには貼らない
   - PowerShell の変数が空ならブロック先頭で中断する。`}` と `else` / `elseif` は同じ行に置く
   - windows-setup.md の「Windows と AlmaLinux のデュアルブート: 実施手順」の手順 4・5 は、Windows のセットアップのコマンド プロンプト（diskpart）に手で打つ（貼れない）ので、`text` のブロックに 1 行ずつ書く。値（ディスクの番号・大きさ）は変数にできないのでコマンドに直接書き、変える値を箇条書きで名指しする（変数ブロックと `<...>` の規則の例外）
+  - Windows Sandbox の状態確認・有効化・無効化・再起動は管理者の Windows PowerShell 5.1、起動・試験・窓を閉じた後の確認は通常のデスクトップで行う
   - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。windows-setup.md の「Git Bash と WezTerm の設定」の手順 3 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 3 と「シェルのツールを入れる」の手順 6・7 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ
