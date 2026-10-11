@@ -81,8 +81,8 @@
    ```
 
    - 最初の 1 回だけ鍵の取り込みを聞かれる
-   - `Importing GPG key 0x2980AECF:` の `Fingerprint:` が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
-   - `Metadata cache created.` で終わる
+   - `Importing GPG key 0x2980AECF:`（日本語では `GPG 鍵 0x2980AECF をインポート中:`）の fingerprint が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
+   - `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）で終わる
    - **次の手順は、鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. `sudo` を付けない dnf にも、同じ鍵の確認を 1 回だけ通す。
@@ -141,9 +141,9 @@
    - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
-   - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
-1. `Complete!` だけでは成功とは限らないので、モジュールが動いているか確かめる。
+1. `Complete!`（日本語では `完了しました!`）だけでは成功とは限らないので、モジュールが動いているか確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -309,7 +309,7 @@
 
    - トランザクション表を見て `[y/N]` に答える
    - [VirtualBox を入れる](#virtualbox-を入れる)の手順 5 と同じ確認をする
-   - [VirtualBox を入れる](#virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - [VirtualBox を入れる](#virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは（この節の手順 2 の代わりに）、[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 だけを行う。
 
@@ -687,7 +687,7 @@
    ```
 
    - 新しい名前・設定とディスクのパス・クローン用の転送ポートが出ればよい
-   - クローンのゲストのユーザー・ホスト名・SSH のホスト鍵は元と同じ。別の PC として使う前にゲスト側で変更する
+   - クローンにはディスク内のユーザー・ホスト名・SSH のホスト鍵がコピーされることがある。別の PC として使う前に、ゲスト側で元との同一性を確かめ、ホスト名と SSH のホスト鍵を変更する
    - 起動は `& $vbm startvm $VB_CLONE --type headless`、SSH は `ssh -p $VB_CLONE_PORT <ゲストのユーザー>@127.0.0.1`
 
 ---

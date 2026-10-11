@@ -1303,10 +1303,17 @@ aarch64 には入らない:
 | 動作を確かめる | 4・5 | 「Oracle VirtualBox マネージャー」の窓が開き、Alt+F4 で閉じると端末がプロンプトに戻った（`Qt WARNING` は 1 行。XWayland 経由）。`~/.config/VirtualBox` に `VirtualBox.xml` などができた |
 
 - 別の空の VM を画面無しで起動して `VBox.log` を読むと、`HM: HMR3Init: AMD-V w/ nested paging`・`HM: Using AMD-V implementation 2.0`・`HM: Enabled SVM`・`HM: VT-x/AMD-V enable method: VirtualBox` があり、`controlvm screenshotpng` の画面は BIOS の `Could not read from the boot medium! Please insert a bootable medium and reboot.` だった
-- 同じ VM に kvm-container を入れ、KVM の VM が動いているあいだに「動作を確かめる」の手順 3 を貼ると、`AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` で起動しなかった（KVM の VM は動いたまま、`vbox-selftest` は残らなかった）。KVM の VM を止めて消すと、再起動を挟まずに、手順 3 の VM がまた起動した。VirtualBox の VM を止めた後に KVM の VM を作ることも、再起動を挟まずにできた
+- 同じ VM に kvm-container を入れ、KVM の VM が動いているあいだに「動作を確かめる」の手順 3 を貼ると、`AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` で起動しなかった（KVM の VM は動いたまま、`vbox-selftest` は残らなかった）。KVM の VM を止めて消すと、再起動を挟まずに、手順 3 の VM がまた起動した。VirtualBox の VM を止めた後に KVM の VM を作ると、再起動を挟まずにインストーラーが起動し、Anaconda の `WELCOME TO ALMALINUX 10.2.` 画面まで見えた。OS のインストール完了は未確認
 
 ### 確かめていないこと
 
 - VirtualBox の VM に OS を入れて動かすこと、USB 機器を VM に渡すこと、アプリ一覧からの起動と窓の中の操作
+- KVM の内側 VM の OS インストール完了と、導入した OS の起動
 - VirtualBox の VM が動いているあいだに KVM の VM を作ること、Intel の CPU
 - 「カーネルを更新したとき」「更新」、ロールバック
+
+### Grok Build の文書レビューの反映（2026-10-11）
+
+- N1 の KVM ゲストはインストーラーの最初の画面までだったので、OS のインストール完了は未確認と明記した
+- N1 で出た日本語の鍵取り込み・キャッシュ作成・完了の表示を、本文の英語の成功条件に併記した。コードブロックは変えていない
+- C17 ではクローンの独立したディスク、転送ポートの変更、鍵を指定した SSH を確認したが、元とのホスト名・SSH のホスト鍵の同一性は照合していない。その断定を本文と注意点から除き、使う前にゲスト側で確かめる形にした

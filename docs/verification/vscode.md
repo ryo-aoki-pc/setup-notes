@@ -345,7 +345,7 @@ $ ldd /usr/share/code/code | grep -c 'not found'
 | 実施手順 | 3 | 通した | `session/steps.jsonl` seq 33 | repo読み戻し |
 | 実施手順 | 4 | 通した（版・容量の差） | `session/steps.jsonl` seq 34–35 | assumenoで中断→yで導入。1.141.0、343 M、導入後1.0 G（本文例318 M / 953 Mとは異なる） |
 | 実施手順 | 5 | 通した | `session/steps.jsonl` seq 36 | x64、from_repo=vscode、Vendor Microsoft、not found=0、desktopファイル |
-| 実施手順 | 6 | 通した | `session/steps.jsonl` seq 39、screens/vscode-ready.png、vscode-closed.png | コンソールのWezTermへ原文codeをキー入力。WelcomeとContinue without Signing InをPNGで確認。サインインせずAlt+F4で閉じた |
+| 実施手順 | 6 | 通した（起動と表示まで） | `session/steps.jsonl` seq 39、screens/vscode-ready.png、vscode-closed.png | コンソールのWezTermへ原文codeをキー入力。WelcomeとContinue without Signing Inのボタン表示をPNGで確認。ボタンは選ばずAlt+F4で閉じた。選択後は未確認 |
 | 実施手順 | 7 | 通した | `session/steps.jsonl` seq 40 | ~/.config/Code・~/.vscode、拡張一覧は空 |
 | 拡張機能を入れる（任意） | 1・箇条書きの導入例 | 通した | `session/steps.jsonl` seq 41–43 | 空一覧→timonwong.shellcheck導入→0.48.0一覧 |
 | 更新 | 1 | 通した | `session/steps.jsonl` seq 44 | 行うべきことなし |
