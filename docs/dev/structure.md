@@ -4,7 +4,7 @@
 
 - `docs/windows-setup.md` — Windows 11 の基本設定と用途別の任意手順。導入前のデュアルブートを分け、実行する窓・権限を各節で指定する
 - `docs/almalinux-setup.md` — AlmaLinux 10 の基本設定と用途別の任意手順。通常の Workstation と bootc ゲスト、実行するホストを区別する
-- 既存の個別手順書は旧見出しと移動先の案内。対象は [集約対応表](consolidation-map.md) を参照する
+- 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する
 - `docs/verification/`・`docs/reference/`・`docs/extra/` は既存の場所を保つ。集約は新たな実機検証を意味しない
 - `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから2冊の新見出しへの対応表

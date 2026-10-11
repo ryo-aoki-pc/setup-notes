@@ -501,7 +501,7 @@
 
 1. 共通の bash 設定も外すときだけ、外す。
 
-   - [ryo-aoki-pc/bash の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で入れたもの）
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で入れたもの）
    - その手順 5 は `~/.config/bash` を消す（commit・push していないものは取り戻せない）。その手順 4 で確かめてから行う
    - 終わったら、Git Bash の窓は閉じてよい
 

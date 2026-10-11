@@ -21,7 +21,7 @@
 ## よく使うコマンド
 
 ```bash
-# シェルスクリプトの静的検査（導入は docs/shellcheck.md。最新の実測は docs/verification/shellcheck.md）
+# シェルスクリプトの静的検査（導入は docs/almalinux-setup.md の「ShellCheck と shfmt: 実施手順」。最新の実測は docs/verification/shellcheck.md）
 bash -n scripts/wireguard/wg-vpn.sh
 shellcheck -x scripts/wireguard/wg-vpn.sh
 
@@ -34,7 +34,7 @@ sudo dnf install -y google-noto-sans-cjk-vf-fonts
 python3 -m pip install --user nwdiag seqdiag
 python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
 
-# GUI の動作を確かめる（docs/claude-code-gui.md を通したホストで。撮った PNG を開いて見る）
+# GUI の動作を確かめる（docs/almalinux-setup.md の「Claude Code の GNOME 操作: 実施手順」を通したホストで。撮った PNG を開いて見る）
 scripts/gnome-gui.py shot /tmp/gnome-gui.png
 scripts/gnome-gui.py key Escape                 # セッションを始めた直後に開いているアクティビティ画面を閉じる
 scripts/gnome-gui.py launch org.gnome.TextEditor
@@ -43,7 +43,7 @@ scripts/gnome-gui.py click 70 15                # 座標は shot の PNG の画�
 scripts/gnome-gui.py windows
 ```
 
-GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `docs/gnome-headless-session.md` の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。 実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから gnome-headless-session.md の手順 1・2 と claude-code-gui.md の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
+GUI の動作を確かめるときは、[AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](docs/almalinux-setup.md#claude-code-の-gnome-操作-実施手順)（前提は同書の[「GNOME のヘッドレスセッション: 実施手順」](docs/almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから同書の「GNOME のヘッドレスセッション: 実施手順」の手順 1・2 と「Claude Code の GNOME 操作: 実施手順」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
 
 `wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、`docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
 
@@ -54,6 +54,7 @@ GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `d
 - 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は2冊と元リポジトリの案内を合わせる
 - 冒頭で対話・GUI・条件付き操作の全番号を列挙しない。各手順には成功条件・中断・分岐・停止・危険を短く残す
 - 旧見出しと移動先は [集約対応表](docs/dev/consolidation-map.md) で管理する。過去の検証本文と実施範囲を保持する
+- 集約後に案内だけとなった文書は削除する。参照元を2冊へ更新し、旧原文は対応表に記録した移動元コミットで確認する
 
 ## 文書を書く・直すとき
 
@@ -81,7 +82,7 @@ GUI の動作を確かめるときは、`docs/claude-code-gui.md`（前提は `d
 - `PrivateKey` は conf に直接書く。`PostUp` で読み込む方式は reload で鍵が消える
 - `firewall-cmd --query-policy` は 2.4.3 に存在しない。存在確認は `--info-policy` の終了コードで行う
 
-スクリプトの挙動を変えたら、`docs/wireguard.md` の「スクリプトの動作」節と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）、必要なら README の知見リストも合わせて直す。
+スクリプトの挙動を変えたら、[WireGuard の参考資料の「スクリプトの動作」](docs/reference/wireguard.md#スクリプトの動作)と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）、必要なら README の知見リストも合わせて直す。
 
 ## 共同作業の規則
 
