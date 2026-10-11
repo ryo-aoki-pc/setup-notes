@@ -2,6 +2,11 @@
 
 [手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
 
+## 最新の確認範囲（AlmaLinux 10）
+
+- 2026-10-11: Secure Boot と入れ子の仮想化を有効にした Hyper-V の VM で、AlmaLinux 10 の実施手順 18 手順を通した。VirtualBox のモジュールの署名・読み込み、AMD-V による空の VM の起動、マネージャーの起動を確認した（[記録](#付録-入れ子の仮想化を有効にした-hyper-v-の-vm-でalmalinux-10-の実施手順を通した2026-10-11)）
+- OS を入れた VirtualBox の VM の稼働、USB、Intel の CPU、更新、ロールバックは、この通しでは未確認
+
 ## 最新の確認範囲（Windows 11）
 
 - 状態（VM を作って使う節）: Windows 11 Pro の実機・VirtualBox 7.2.20・Hyper-V 経由で、新規 VM の作成と ISO の起動、インストーラーの言語選択画面を確認した。別のクリーンインストールから作った検証用 VM で、画面無し起動・鍵を指定した SSH・ACPI 停止・スナップショットの取得と復元・完全クローン・削除を通した。画面でのインストール完了は未確認（[2026-10-11 の付録](#付録-windows-11-のホストで-vm-を作って使う検証2026-10-11)）
@@ -1268,3 +1273,40 @@ aarch64 には入らない:
 
 - VM の中での手順 6（入れ子の仮想化）と、Hyper-V が動いていない PC・Intel の CPU での手順 6
 - 新しい版に上げる更新の手順 3・4、arm64 の Windows
+
+## 付録: 入れ子の仮想化を有効にした Hyper-V の VM で、AlmaLinux 10 の実施手順を通した（2026-10-11）
+
+**対象**: `setup-notes` の `114c2b2` 版。Windows 11 Pro の Hyper-V の第 2 世代の VM（Secure Boot 有効、入れ子の仮想化を有効にしたもの。ホストの CPU は AMD Ryzen 9 5900X）に Kickstart で Workstation を入れ、[secure-boot-mok.md](../secure-boot-mok.md) の実施手順 1〜7 で MOK に鍵を登録した状態から始めた。初期設定（almalinux-setup.md）は通していない。
+
+| 項目 | 値 |
+|---|---|
+| 実施日 | 2026-10-11 |
+| ハイパーバイザ | Hyper-V（Windows 11 Pro 10.0.26300）。第 2 世代、vCPU 4、メモリ 6144 MB、`ExposeVirtualizationExtensions` が有効 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / x86_64、カーネル `6.12.0-211.64.1.el10_2.x86_64`、`LANG=ja_JP.UTF-8`、SELinux Enforcing |
+| Secure Boot | 有効。MOK に `Local kernel module signing key` を登録済み |
+| VirtualBox | `VirtualBox-7.2-7.2.20_175154_el10-1`（`VBoxManage --version` は `7.2.20r175154`） |
+
+**流し方**: 実施手順のブロックを、SSH の対話シェルに 1 つずつ、変えずに貼った。「動作を確かめる」の手順 4 だけは、VM のコンソールで GNOME にログインし、その端末に Hyper-V のキー送信で `VirtualBox` と打った。`sudo` は、この VM ではパスワードを聞く設定だった。
+
+| 項 | 手順 | 結果 |
+|---|---|---|
+| （前提） | EPEL | 有効でなかったので、almalinux-setup.md の「EPEL と RPM Fusion」の手順 1 を先に通した |
+| リポジトリを置く | 1 | `x86_64`、`Virtualization: AMD-V`（`Hypervisor vendor: Microsoft`） |
+| リポジトリを置く | 2・3 | fingerprint と uid が一致し、`gpg-pubkey-2980aecf-5719f4e1 …` が入った |
+| リポジトリを置く | 4・5 | 鍵の確認は 1 回ずつ。この環境の表示は `GPG 鍵 0x2980AECF をインポート中:`・`メタデータキャッシュを作成しました。` |
+| VirtualBox を入れる | 1〜3 | 下見に `7.2.20_175154_el10-1 … 105 M` と `liblzf … epel`。カーネルの 2 つの版は同じ。6 つとも版が出た |
+| VirtualBox を入れる | 4 | `[y/N]` と EPEL の鍵の確認（`7D8D 15CB … E37E D158`）に答え、`Creating group 'vboxusers'. …` の後、`完了しました!` |
+| VirtualBox を入れる | 5 | `enabled`・`active`、vbox の 3 行、`crw-------. 1 root root 10, 118 … /dev/vboxdrv`。Secure Boot が有効なまま読み込まれた |
+| KVM と USB の設定 | 1〜3 | 設定の 2 行が出た（再起動の前の `enable_virt_at_load` は `Y`）。`vboxusers:x:980:<USER>`。再起動で MokManager は出なかった |
+| 動作を確かめる | 1・2 | `7.2.20r175154`・`active`・vbox の 3 行・`N`・`vboxusers`。`modinfo -F signer vboxdrv` は `Local kernel module signing key` |
+| 動作を確かめる | 3 | `VM "vbox-selftest" has been successfully started.`・`VMState="running"`、`0%...100%` が 2 行 |
+| 動作を確かめる | 4・5 | 「Oracle VirtualBox マネージャー」の窓が開き、Alt+F4 で閉じると端末がプロンプトに戻った（`Qt WARNING` は 1 行。XWayland 経由）。`~/.config/VirtualBox` に `VirtualBox.xml` などができた |
+
+- 別の空の VM を画面無しで起動して `VBox.log` を読むと、`HM: HMR3Init: AMD-V w/ nested paging`・`HM: Using AMD-V implementation 2.0`・`HM: Enabled SVM`・`HM: VT-x/AMD-V enable method: VirtualBox` があり、`controlvm screenshotpng` の画面は BIOS の `Could not read from the boot medium! Please insert a bootable medium and reboot.` だった
+- 同じ VM に kvm-container を入れ、KVM の VM が動いているあいだに「動作を確かめる」の手順 3 を貼ると、`AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` で起動しなかった（KVM の VM は動いたまま、`vbox-selftest` は残らなかった）。KVM の VM を止めて消すと、再起動を挟まずに、手順 3 の VM がまた起動した。VirtualBox の VM を止めた後に KVM の VM を作ることも、再起動を挟まずにできた
+
+### 確かめていないこと
+
+- VirtualBox の VM に OS を入れて動かすこと、USB 機器を VM に渡すこと、アプリ一覧からの起動と窓の中の操作
+- VirtualBox の VM が動いているあいだに KVM の VM を作ること、Intel の CPU
+- 「カーネルを更新したとき」「更新」、ロールバック
