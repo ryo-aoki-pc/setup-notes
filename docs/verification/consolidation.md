@@ -102,3 +102,5 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が、公開済み8�
 - Windows 正本の PowerShell 392ブロックと関連 extra の3ブロックを Windows PowerShell 5.1.26100.9444 の構文パーサーで検査し、エラーは0。実機への設定適用はしていない
 
 Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開済みの[競合解消差分](https://github.com/ryo-aoki-pc/setup-notes/commit/0a343b0d7d4fe66b2b173671e59e252fedffc4ae)をレビューした。README の Windows 手順への直接リンクを追加し、extra の証明書取得範囲を AlmaLinux の許可 CIDR と Windows の Private の受信インターフェースへ届く全送信元に書き分けた。2件とも案内の補修で、コマンド・設定・過去の検証本文は変更していない。
+
+公開した[案内補修差分](https://github.com/ryo-aoki-pc/setup-notes/commit/280c7b230a310571be9d99ddb0dee598acc08bae)も同じモデルで再レビューし、「指摘なし」と回答した。固定した公開差分だけを渡し、ローカル読取・編集・Web のツールは無効にした。
