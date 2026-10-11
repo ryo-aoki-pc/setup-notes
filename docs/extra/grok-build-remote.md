@@ -86,9 +86,10 @@
    ```powershell
    Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
    Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
+   Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
+     Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
+     ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
    Stop-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue
-   Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
-   Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
    Unregister-ScheduledTask -TaskName 'codeg-caddy' -Confirm:$false -ErrorAction SilentlyContinue
    Unregister-ScheduledTask -TaskName 'codeg-server' -Confirm:$false
    "`n$([char]27)[7m 確認 $([char]27)[0m"

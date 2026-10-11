@@ -326,7 +326,7 @@
        bind ${SERVER_IP}
        tls internal
        handle /caddy-root.crt {
-           root * {\$HOME}/.local/share/caddy/pki/authorities/local
+           root * "{\$HOME}/.local/share/caddy/pki/authorities/local"
            rewrite * /root.crt
            file_server
        }
@@ -891,7 +891,7 @@
        bind ${PC_IP}
        tls internal
        handle /caddy-root.crt {
-           root * {`$APPDATA}/Caddy/pki/authorities/local
+           root * "{`$APPDATA}/Caddy/pki/authorities/local"
            rewrite * /root.crt
            file_server
        }
@@ -944,10 +944,10 @@
    $root = "$env:APPDATA\Caddy\pki\authorities\local\root.crt"
    if (-not $PC_IP) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する' } elseif (-not (Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue)) { Write-Error '中断: この項の手順 3 の規則が無い' } elseif (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { Write-Error '中断: codeg-caddy のタスクが既にある' } else {
      $me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-     $arg = '-NoProfile -WindowStyle Hidden -Command "& ''{0}\caddy.exe'' run --config ''{0}\Caddyfile'' --adapter caddyfile"' -f $cdir
+     $arg = '-NoProfile -WindowStyle Hidden -Command "& ''{0}\caddy.exe'' run --config ''{0}\Caddyfile'' --adapter caddyfile; exit $LASTEXITCODE"' -f $cdir.Replace("'", "''")
      $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arg
      $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited
-     $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
+     $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1)
      $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
      Register-ScheduledTask -TaskName 'codeg-caddy' -Action $action -Principal $principal -Settings $settings -Trigger $trigger | Out-Null
      Start-ScheduledTask -TaskName 'codeg-caddy'
@@ -963,6 +963,7 @@
    - `Running`、待ち受けが `127.0.0.1` の 3080 と `<PC_IP>` の 3443 の 2 行、`401`、規則が `codeg-caddy-in` の 1 本だけ出ればよい
    - 規則がほかにも出たら、Windows が自動で作った規則がある。名前を確かめて外す
    - 認証局の鍵と証明書は、Caddy が初回の起動で `%APPDATA%\Caddy\` に作る。**`root.key` を、読まない・写さない・人に渡さない**
+   - 起動に失敗したら、1 分おきに最大 999 回やり直す。待ち受けが出ないときは、タスクの「前回の実行結果」と Caddyfile の検査結果を確かめる
 
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
@@ -999,9 +1000,10 @@
    ```powershell
    Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
    Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
+   Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
+     Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
+     ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
    Stop-ScheduledTask -TaskName 'codeg-server'
-   Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
-   Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
    Start-Sleep -Seconds 2
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
@@ -1011,7 +1013,7 @@
 
    - プロセスと待ち受けの表は出ず、`Ready` が 2 行出ればよい（公開の項を通していなければ 1 行）
    - ほかの用途の Caddy をこの PC で動かしているなら、2 行目は貼らない（名前が `caddy` のプロセスをすべて止める）
-   - 端末で自分が動かしている `grok` は止めない（止めるのは、引数が `agent stdio` のものだけ）
+   - 止めるのは、この手順で置いた Codeg と、その子プロセスだけ。端末や、ほかの ACP クライアントで動かしている `grok` は止めない
    - 実行中の会話は中断される。会話の履歴は残る
 
 1. もう一度始めるときは、タスクを開始する。
@@ -1072,9 +1074,10 @@
      $want = ((Get-Content -LiteralPath "$tmp\codeg-server-windows-x64.zip.sha256" -Raw) -split '\s+')[0]
      if ((Get-FileHash -LiteralPath "$tmp\codeg-server-windows-x64.zip" -Algorithm SHA256).Hash -ne $want) { Write-Error '中断: sha256 が一致しない'; return }
      Expand-Archive -LiteralPath "$tmp\codeg-server-windows-x64.zip" -DestinationPath $tmp
+     Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
+       Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
+       ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
      Stop-ScheduledTask -TaskName 'codeg-server'
-     Get-Process -Name codeg-server -ErrorAction SilentlyContinue | Stop-Process -Force
-     Get-CimInstance Win32_Process -Filter "Name='grok.exe' OR Name='codeg-mcp.exe'" | Where-Object { $_.CommandLine -like '*agent stdio*' -or $_.CommandLine -like '*codeg-delegation*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
      Start-Sleep -Seconds 2
      New-Item -ItemType Directory -Path $prev | Out-Null
      Move-Item -LiteralPath "$dir\codeg-server.exe", "$dir\codeg-mcp.exe", "$dir\web" -Destination $prev

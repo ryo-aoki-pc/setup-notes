@@ -6,7 +6,7 @@
 
 ### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 1: 補足: 変数
 
-- `SERVER_IP` は、Codeg が待ち受ける IP と、firewalld の規則の宛先の両方に使う
+- `SERVER_IP` は、Caddy が待ち受ける IP と、firewalld の規則の宛先の両方に使う。Codeg は `127.0.0.1` のまま
 - `ALLOW_FROM` は送信元 IPv4 の CIDR。空白で区切って複数を並べられ、1 つにつき規則を 1 本作る。WG ホスト自身で動かすときは、VPN のクライアントの通信が `wg0` から入り、送信元はクライアントの VPN のアドレスになる
 - ポートは、Codeg が既定の 3080（ホストの中だけ）、Caddy が 3443（外から届く口）。どちらも変数にしていない
 - `FW_ZONE` は自動で入る
@@ -33,7 +33,7 @@
 - `CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリをつないだときに、そのアプリの内蔵ブラウザがサーバー経由で届く範囲を無くす設定（既定は `all`）
 - `--supervise` は、画面から Codeg を入れ替えたときに、起動に失敗した版を前の版へ戻す仕組み（公式の文書）。本書の更新は画面を使わないが、公式の起動のしかたに合わせた
 - `StandardError=null` は、起動のたびに標準エラーへ出るトークンを journal に残さないため。Codeg のログは、別に `~/.local/share/codeg/logs/` に出る
-- `Restart=on-failure` と `RestartSec=5` は、起動の時点で `SERVER_IP` がまだ付いていないときに、待ってやり直すため
+- `Restart=on-failure` と `RestartSec=5` は、異常終了したときに起動し直すため。Caddy のユニットにも同じ設定を置き、起動の時点で `SERVER_IP` がまだ付いていないときも、待ってやり直す
 
 ### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 7: 補足: トークンを引数に書かない
 
@@ -66,7 +66,7 @@
 - `skip_install_trust` は、ルート証明書を OS の信頼の置き場へ自動で入れさせない設定（入れるには `sudo` や管理者の権限が要る）。端末には、手で入れる
 - `pki` の `name` は、認証局の名前。ルート証明書の名前が `<名前> - <年> ECC Root` になる。既定の名前のままだと、2 台のホストのルート証明書が、端末の一覧で見分けられない
 - `bind` は、待ち受ける IP を 1 つに絞る。`tls internal` は、Caddy の認証局で証明書を作る指定。IP アドレス宛ての証明書になる
-- `handle /caddy-root.crt` は、ルート証明書（公開してよいもの）を配る口。`{$HOME}`・`{$APPDATA}` は、Caddy が起動のときに環境変数で置き換える
+- `handle /caddy-root.crt` は、ルート証明書（公開してよいもの）を配る口。`{$HOME}`・`{$APPDATA}` は、Caddyfile の解析より前に環境変数で置き換える。パス全体を二重引用符で囲み、空白を含むホームでも 1 つのパスとして扱う
 - `reverse_proxy 127.0.0.1:3080` で、そのほかの通信を Codeg へ渡す。WebSocket も通る
 - 字下げは、空白でもタブでもよい
 
@@ -96,6 +96,9 @@
 - `-Profile Private` は、LAN の接続がプライベートであることを前提にする
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
 - Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
+- Caddy の起動コマンドへ入れるパスは、単引用符を 2 つに置き換える。ユーザーのパスに `'` があっても、PowerShell の文字列を途中で閉じない
+- Caddy の終了コードをタスクへ返し、失敗時は 1 分おきに最大 999 回やり直す。サインイン時に待ち受ける IP がまだ付いていなくても、後から起動できる
+- Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントの Grok を巻き込まない
 
 ## 方法のまとめ
 
@@ -150,6 +153,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - [Codeg: Deployment](https://docs.codeg.app/getting-started/deployment)・[Configuration](https://docs.codeg.app/getting-started/configuration)・[Installation](https://docs.codeg.app/getting-started/installation)・[Privacy & Security](https://docs.codeg.app/reference/privacy)
 - [Codeg の Issue #436](https://github.com/spacering-net/codeg/issues/436)（Grok の拒否の規則と sandbox が、Codeg の下で効かなかった報告）・[#876](https://github.com/spacering-net/codeg/issues/876)（Grok のモデルの一覧）
 - [caddyserver/caddy](https://github.com/caddyserver/caddy)（Caddy。Apache-2.0）・[Caddyfile の `tls`](https://caddyserver.com/docs/caddyfile/directives/tls)・[Caddyfile の全体の設定（`admin`・`auto_https`・`skip_install_trust`・`pki`）](https://caddyserver.com/docs/caddyfile/options)
+- [Caddyfile の環境変数と引用](https://caddyserver.com/docs/caddyfile/concepts#environment-variables)・[待ち受ける IP の指定（`bind`）](https://caddyserver.com/docs/caddyfile/directives/bind)
+- [Microsoft: New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)（失敗時の再試行）・[taskkill](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill)（`/T` は子プロセスも止める）
 - [xai-org/grok-build](https://github.com/xai-org/grok-build)（Grok Build。Apache-2.0）
 - Grok Build の同梱の文書（`~/.grok/docs/user-guide/`）: `15-agent-mode.md`（ACP）・`22-permissions-and-safety.md`（権限モード）
 - [Agent Client Protocol](https://agentclientprotocol.com)
