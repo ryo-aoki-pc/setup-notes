@@ -7990,7 +7990,7 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
 
    - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。この項の手順 3 へ進まず、中身を確かめて片付けてから手順 2 を貼り直す
    - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
@@ -8120,11 +8120,11 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    & {
      $nvimPaths = @("$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data")
      foreach ($d in $nvimPaths) {
-       if (Test-Path -LiteralPath "$d.bak") { throw "中断: $d.bak がすでにある。何も退避していない" }
+       if (Test-Path -LiteralPath "${d}.bak") { throw "中断: ${d}.bak がすでにある。何も退避していない" }
      }
      foreach ($d in $nvimPaths) {
        if (Test-Path -LiteralPath $d) {
-         Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop
+         Move-Item -LiteralPath $d -Destination "${d}.bak" -ErrorAction Stop
          "moved: $d"
        }
      }
@@ -8510,7 +8510,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - 依存はリポジトリ外の専用仮想環境へ入る
    - 起動コマンドは `%USERPROFILE%\.local\bin`。PATH に無いときは案内に従って加える
    - `--check` は何も変更せず状態を確かめる
-   - 更新時は clone 先で `git pull --ff-only` し、導入・確認コマンドを再実行する
+   - 更新時は `git -C "$env:USERPROFILE\md-table-excel" pull --ff-only` を実行し、この項の手順 1 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
    - 終わると元の作業ディレクトリへ戻る
 
 ---
