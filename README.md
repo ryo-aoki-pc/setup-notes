@@ -8,7 +8,7 @@
 ## 手順書とツール
 
 - 役割ごとに分けてある。同じ役割の手順書は、表の列で違いを比べられる
-- 対象は AlmaLinux 10.2（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)は Windows 11 だけ、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[コーディングエージェントの共同作業](docs/coding-agents.md)・[Grok Build をブラウザから操作](docs/grok-build-remote.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard VPN の外出先の PC](docs/wireguard.md#almalinux-10-の-pc-からつなぐ) は Windows 11 も。Git・Firefox・HackGen Console NF・WezTerm・git-delta・GitHub CLI・Neovim・lazygit・yazi・Claude Code・Codex CLI・Grok Build は、2 つの初期設定の手順書に両 OS の手順がある）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
+- 対象は AlmaLinux 10.2（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)・[Hyper-V](docs/hyper-v.md)・[VMware Workstation Pro](docs/vmware.md)は Windows 11 だけ、[Samba クライアント](docs/samba-client.md)・[Syncthing](docs/syncthing.md)・[コーディングエージェントの共同作業](docs/coding-agents.md)・[Grok Build をブラウザから操作](docs/grok-build-remote.md)・[VirtualBox](docs/virtualbox.md)・[WireGuard VPN の外出先の PC](docs/wireguard.md#almalinux-10-の-pc-からつなぐ) は Windows 11 も。Git・Firefox・HackGen Console NF・WezTerm・git-delta・GitHub CLI・Neovim・lazygit・yazi・Claude Code・Codex CLI・Grok Build は、2 つの初期設定の手順書に両 OS の手順がある）。検証範囲（実機・VM・コンテナなど）は各手順書から案内する検証記録の「状態」に書いてある
 - インストールした直後に、AlmaLinux 10 は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)、Windows 11 は [Windows 11 の初期設定](docs/windows-setup.md)を通す。下の手順書の多くは、その手順で入れたもの（Homebrew・EPEL・NOPASSWD の sudo など）を前提にする
 - 導入元（AppStream / EPEL / Homebrew / Flathub / ベンダーのリポジトリ）で選ぶなら、先に [CLI / GUI ツール導入元一覧](docs/tool-catalog.md) を見る
   - CLI・GUI の約 45 本について、推奨する導入元・版・aarch64 での提供の有無を比べた一覧で、手順書ではない
@@ -91,7 +91,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | [linger](docs/linger.md) | ログアウトしている間も、自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かす | `/var/lib/systemd/linger/<USER>`（`sudo loginctl enable-linger`） | Syncthing・Dropbox・Dropbox（rclone）・Grok Build をブラウザから操作・Podman の Quadlet（任意節） |
 | [ssh の SOCKS トンネル](docs/ssh-socks-tunnel.md) | インターネットに出られないホストから、そこへ ssh でログインしてくるホストを経由して外に出る（`ssh -R 1080`） | 無し（ssh の間だけ。任意で `/etc/dnf/dnf.conf` の `proxy=`） | Homebrew（インターネットに出られないホスト）・npm（インターネットに出られないホスト） |
 | [Secure Boot の MOK 登録](docs/secure-boot-mok.md) | Secure Boot のまま、自分でビルドしたカーネルモジュールを読み込めるようにする（署名鍵を作り、起動の途中の MokManager で登録する） | `/var/lib/shim-signed/mok/MOK.{der,priv}` と UEFI の MOK | VirtualBox・VirtualBox Guest Additions（bootc のゲスト）。どちらも Secure Boot が有効なときだけ |
-| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4）](docs/windows-setup.md#貼り付けの設定) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows 11 の初期設定の、貼り付けの設定より後の項。Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・Grok Build をブラウザから操作・VirtualBox・WireGuard VPN の Windows 11 の節） |
+| [Windows PowerShell の貼り付けの設定（Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4）](docs/windows-setup.md#貼り付けの設定) | GitHub のコピーボタンでコピーした複数行のブロックを、Windows PowerShell 5.1 の conhost の窓に右クリックで貼っても、行が逆順にならないようにする（PSReadLine の Ctrl+Enter を `AddLine` にする） | このユーザーの `$PROFILE`（`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`）に 1 行。実行ポリシーが `Restricted` なら、このユーザーだけ `RemoteSigned` に | Windows の PowerShell のブロックを貼る手順書すべて（Windows 11 の初期設定の、貼り付けの設定より後の項。Claude Code の Remote Control（Windows）・RDP をロックせずに切断（Windows）・SSH クライアント（Windows）・Hyper-V・VMware Workstation Pro と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・Grok Build をブラウザから操作・VirtualBox・WireGuard VPN の Windows 11 の節） |
 | [LAN をプライベートにする（Windows 11 の初期設定の「ネットワークとリモート」の手順 1）](docs/windows-setup.md#ネットワークとリモート) | Windows 11 の LAN の接続を、ネットワークの種類「プライベート」にする（プライベートだけで有効な受信の規則が、この LAN で効く） | LAN の接続のネットワークの種類（`Set-NetConnectionProfile`） | Windows の OpenSSH サーバー（手順 5 で確かめる）・Syncthing（Windows 11 の節の手順 7 で確かめる） |
 
 ### デスクトップ（GNOME）の設定
@@ -327,6 +327,7 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 
 ### 仮想化
 
+- Windows 11 の PC では、Hyper-V（Pro に含まれる）と VMware Workstation Pro でも VM を動かせる。Hyper-V を有効にすると、同じ PC の VirtualBox と VMware Workstation の VM は Windows のハイパーバイザーの上で動く
 - VirtualBox は x86_64 だけ。[EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion)・モジュールのビルドの道具・（Secure Boot が有効なら）[MOK の登録](docs/secure-boot-mok.md)を先に用意する。EL10 のカーネルでは KVM と同時に動かない
 - ゲスト側の Guest Additions は、VM が bootc（AlmaLinux Atomic Desktop）なら dnf では入らない。派生イメージを VM でビルドし、`bootc switch` で切り替える（`/usr`・`/opt` は読み取り専用で、`/var` はイメージから更新されない）
   - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/secure-boot-mok.md)を先に行う（鍵はホストとは別）
@@ -339,6 +340,8 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 | 手順書 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
 | [VirtualBox](docs/virtualbox.md) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
+| [Hyper-V](docs/hyper-v.md) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
+| [VMware Workstation Pro](docs/vmware.md) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
 | [VirtualBox Guest Additions（bootc のゲスト）](docs/virtualbox-guest-bootc.md) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
 
 ### ブラウザ
@@ -383,11 +386,12 @@ git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/windows-claude-remote-control.md)・[RDP をロックせずに切断（Windows）](docs/windows-rdp-disconnect.md)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-dual-boot.md)・[SSH クライアント（Windows）](docs/windows-ssh-client.md)・[ホットキーを使用しているアプリの調査](docs/windows-hotkey-conflict.md)・[Hyper-V](docs/hyper-v.md)・[VMware Workstation Pro](docs/vmware.md)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、「Windows Update」の手順 2〜8 と、「PC 全体の設定」の手順 2 から「WSL と再起動」までの手順（OpenSSH サーバー・Git for Windows・Firefox・WezTerm を含む）が管理者。Store・scoop と、再起動の後の項は通常の窓（Git Bash と WezTerm のタブに貼る `bash` のブロックもある）。貼り付け設定前の「Windows Update」の手順 2〜8 と「Microsoft Store の更新」の手順 1〜7 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐・OpenSSH サーバーの節は管理者。ほかは通常の窓）
   - コーディングエージェントの共同作業は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）
   - コーディングエージェントの共同作業の、両 OS に共通の節（分担して作業する・相互にレビューする・main に取り込む）の `bash` のブロックは、Windows 11 ではそのまま PowerShell に貼る（同じコマンド。OS で違う手順だけ `powershell` のブロックにした）
+  - Hyper-V は「Hyper-V を有効にして再起動する」まで、VMware Workstation Pro は「インストールする」までが管理者。その後ろの VM の操作は、管理者ではない窓に貼る
   - SSH クライアント（Windows）と Samba クライアントの Windows 11 の節は、管理者ではない窓に貼る（Samba のドライブは、管理者の窓で割り当てるとエクスプローラーに出ない）
   - ホットキーの調査の任意コードは、通常権限の Windows PowerShell 5.1 に貼る。Hotkey Screener の検出で権限要求が出た場合は、本人が画面で確認して承認する
   - デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある
