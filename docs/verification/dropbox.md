@@ -41,7 +41,7 @@ uid                      Dropbox Automatic Signing Key <linux@dropbox.com>
 
 - 同じ鍵が、この URL・公式 RPM の `%post`・手順 5 で入れる `dropbox.py` の中（`DROPBOX_PUBLIC_KEY`）の 3 か所にある。`dropbox.py` の中の鍵も同じ fingerprint だった（コンテナで確認）
 - 自己署名は 2 つある。2010 年のものは SHA-1、2025-12-23 に足されたものは SHA-256（`gpg --list-packets` の `digest algo 2` と `8`）
-- この手順では鍵を rpm に取り込まず、手順 3 の `gpgv` で署名を確かめるだけに使う。EL10 の rpm が SHA-1 の自己署名の鍵を取り込まない問題（[tool-catalog.md の注意点](../tool-catalog.md#注意点)）とは関係しない
+- この手順では鍵を rpm に取り込まず、手順 3 の `gpgv` で署名を確かめるだけに使う。EL10 の rpm が SHA-1 の自己署名の鍵を取り込まない問題（[tool-catalog.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#注意点)）とは関係しない
 
 ### 実施手順 / 手順 3: 補足: 飛び先を 1 回だけ引く理由
 
@@ -80,7 +80,7 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 ```
 
 - `dropbox.pid` はデーモンの PID で、`dropbox` コマンドはこれを見て動いているかを判断する
-- リンクの情報もここに入る（[ロールバック](../extra/dropbox.md#ロールバック)の手順 4 で消すと、リンクし直すことになる）
+- リンクの情報もここに入る（[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/dropbox.md#ロールバック)の手順 4 で消すと、リンクし直すことになる）
 
 ### 更新 / 手順 2: 本文中の記録
 
@@ -93,11 +93,11 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 ### 対象と検証環境
 
 - **目的**: x86_64 の AlmaLinux 10 で Dropbox の公式クライアントを headless で動かし、ログインしていない間も `~/Dropbox` をクラウドと同期し続ける
-- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
+- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜7を検証済み（2026-10-06）。アカウントのリンクと同期は未確認。実機には入れていない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](../almalinux-setup.md#dropbox-更新)・[ロールバック](../extra/dropbox.md#ロールバック)を通した
-    - linger の有効化と解除（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox.md#更新)・[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/dropbox.md#ロールバック)を通した
+    - linger の有効化と解除（今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
   - 確認したこと:
     - 署名が合えば展開され、版が食い違って `BAD signature` のときは展開されない
     - デーモンがユーザーサービスとして動き、`dropbox status` がリンク用の URL を出す（検証のときだけサービスにプロキシを渡した）
@@ -118,6 +118,10 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 > 出力例・ログの値は `<USER>`（OS のアカウント名）/ `<HOSTNAME>` / `<NONCE>`（リンク用 URL の、1 回限りの値）のプレースホルダで書いてある。版（`270.4.3312`）は、実行日と配信の振り分けで変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Hyper-V の VM で認証前まで確認した（Codex）
+  - 実施手順 1〜6（アカウント使用容量との比較を除く）、版確認・CLI 再取得、認証不要の撤去を確認。リンク・認証・同期は未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で認証前まで通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -172,7 +176,7 @@ Linger=yes
 - プロキシの CA を信頼ストアに足した
 - 非 root ユーザー（uid 1000、NOPASSWD の sudo）を作り、ホームはホストの ext4 のディレクトリを bind mount した
 
-途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
+途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
 
 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、手順ごとに `docker exec` で、そのユーザーのログインシェル（`bash -l`）へ標準入力から流した。`docker exec` はログインセッションを作らないので、`XDG_RUNTIME_DIR` と `DBUS_SESSION_BUS_ADDRESS` を渡して `systemctl --user` を使えるようにした。
 
@@ -193,7 +197,7 @@ Linger=yes
 | 自己更新（手順書の外） | サービスを止めて、署名を確かめた 268.4.4124 に入れ替えて起動し、8 分待ったが、`~/.dropbox-dist` は 268.4.4124 のままだった（リンクしていない。更新の間隔も分からない）。確かめた後、270.4.3312 に戻した |
 | 更新 | `dropbox version` は手順 5 と同じ。dropbox.py を取り直しても `2026.05.06` のまま |
 | 手での入れ直し | 署名を確かめた 268.4.4124 を入れてサービスで動かした状態から、更新の手順 1 の箇条書きのとおり止める → 手順 2〜4 → 動かすで、`dropbox version` と主プロセスが 270.4.3312 になった。古い 268.4.4124 のディレクトリは残り、`du` は `304M` になった |
-| ロールバック | デーモンが動いている間に手順 4 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3・4 と linger の解除（今の [linger.md のロールバック](../extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 3）を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
+| ロールバック | デーモンが動いている間に手順 4 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3・4 と linger の解除（今の [linger.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 3）を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
 
 #### 未確認事項
 
@@ -290,8 +294,67 @@ Sep 27 15:58:30 <HOSTNAME> dropboxd[2263]: Please visit https://www.dropbox.com/
 
 ### 手順中の検証状況
 
-- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](../almalinux-setup.md#dropbox-使い方の基本)。動作は確かめていない）
+- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox.md#使い方の基本)。動作は確かめていない）
 
 ### 手順中の検証状況
 
-- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](../almalinux-setup.md#syncthing-実施手順) の実機では、ユーザーサービスは `unconfined` として動いた
+- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/syncthing.md) の実機では、ユーザーサービスは `unconfined` として動いた
+
+## 付録: Hyper-V の VM で認証前まで通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V、26H2、build 26300.9457（証跡の ProductName は Windows 10 Pro と表示） |
+| VM | `<HOSTNAME>`、Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GB、UEFI、Secure Boot disabled、eth0 1 枚 |
+| 開始 | desktop の after-CL1 からのクローン（依頼の前提）。`meta.json` の snapshot=clean-install は Existing 呼出しの既定値で、今回その状態から作成・復元した証拠ではない |
+| ゲスト | AlmaLinux 10.2 / x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64`、ホーム XFS、空き 13 GB |
+| 前提 | Homebrew 導入済み、Linger=yes、SELinux Enforcing、firewalld active、GNOME コンソール未ログイン |
+| 導入版 | Dropbox 272.4.3798、CLI 2026.09.28、rclone 1.75.2 linux/amd64 |
+| 貼り方 | SSH の対話の bash にドライバで手順のブロックを貼った。GUI・ブラウザの操作はしていない |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C16\` の下。以下のファイル名はそこからの相対パス。seq は `session/steps.jsonl` の番号
+- 認証前までの検証。実アカウントのリンク・認証・同期はしていない。Dropbox のリンク用の URL は出たことだけを確認し、値は表示・転載していない
+- 報告末尾の負の所要時間は開始・終了時刻と整合しないので採用しない。証跡のホスト ProductName と依頼の Windows 11 Pro の表記の違いは上の表に残した
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した（容量比較を除く） | seq 1、`session/after-confirm/0001-実施手順-1.txt`。x86_64・XFS・空き 13 GB。アカウント使用量との比較は未実施 |
+| 実施手順 2 | 通した | seq 2・3、`session/after-confirm/0002-実施手順-2.txt`。fingerprint と uid を本文と目視照合し一致 |
+| 実施手順 3 | 通した | seq 4、`session/after-confirm/0004-実施手順-3.txt`。272.4.3798 の取得、日本語の「正しい署名」、展開 |
+| 実施手順 4 | 通した | seq 5、`session/after-confirm/0005-実施手順-4.txt`。VERSION・版のディレクトリ・dropboxd |
+| 実施手順 5 | 通した（版の差あり） | seq 6、`session/after-confirm/0006-実施手順-5.txt`。自分の ~/.local/bin/dropbox、272.4.3798 / 2026.09.28 |
+| 実施手順 6 | 通した | seq 7、`session/after-confirm/0007-実施手順-6.txt`。enabled / active |
+| 実施手順 7・8 | 未実施 | seq 33。実アカウントが必要。認証 URL を出す手順 7 は貼っていない |
+| 実施手順 9 | 未実施 | seq 33。リンク・認証に依存する |
+| 使い方の基本 / help・systemctl stop / start | 通した（補助確認） | seq 12〜14、`session/session-002.raw`。一覧・inactive → active |
+| 使い方の基本 / status・journal 追跡 | 未実施 | seq 8・11・33。URL を表示する操作は避け、`outside.md` の件数だけの補助確認に置き換えた |
+| 使い方の基本 / filestatus・exclude・sharelink・lansync | 未実施 | seq 33。同期対象未作成・リンク未実施 |
+| 更新 1・2 | 通した（版確認と CLI 再取得） | seq 15・16、`session/session-003.raw`。272.4.3798 / 2026.09.28、再取得後も同じ CLI |
+| extra ロールバック 1 | 通した | seq 17、`session/after-confirm/0017-ロールバック-1.txt`。停止・unit と symlink 撤去 |
+| extra ロールバック 2 | 未実施 | seq 18。未リンクなので Web 側解除は不要、実アカウント未使用 |
+| extra ロールバック 3・4 | 通した | seq 19〜21、`session/after-confirm/0021-撤去確認-1.txt`。本体・CLI・設定・unit とプロセス不在。稼働中削除の保護分岐は未実施 |
+
+### 通らなかった手順と見立て
+
+- 実施した範囲で通らなかった手順は無い。固定の版の成功条件と取得された版の違いは配布物更新によるもので、SSH・Hyper-V 固有の失敗ではない
+- `outside.md` の認証前補助確認では、journal の件数だけを読み、リンク用 URL が出たことを確認。seq 8・11 の `0008-認証前-1.txt`・`0011-認証前-3.txt` は 5 件、再起動後は通算 9 件。値は書かない
+- OS 再起動後も enabled / active。短い SSH 切断後の `logout-check.txt` では同じ MainPID が active/running のまま。seq 32 の `0032-セッション補足-1.txt` は残る session が systemd-user / Class=manager であることを確認。認証後の同期・長時間のログアウト稼働の確認ではない
+- この再起動・短いログアウト確認は手順書の外の補助操作。GNOME 画面の確認は行っていない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| 署名確認の文言が英語だけ | 直した（文言） | 実施手順 3 に日本語の「正しい署名」を併記。`0004-実施手順-3.txt` で確認 |
+| 手順 5 の版が固定の成功条件 | 直した（文言） | 272.4.3798 / 2026.09.28 の例にして「のように」を追加。`0006-実施手順-5.txt` で確認。貼るブロックは変更無し |
+| meta.json の開始元の表示・報告の所要時間 | 未対応（道具・報告） | 表示値を開始元・所要時間の根拠として採用しない |
+
+### 確かめていないこと
+
+- アカウント容量との比較、リンク・認証・同期、リンク後の使い方、Web 側解除、自己更新の発生、手動の本体再導入、稼働中削除の保護分岐は未実施
+- 実機・aarch64・長時間のログアウト稼働は未確認。過去の導入・リンク待ちの記録と同じ認証前の範囲で、今回の補助確認から同期成功へ広げない

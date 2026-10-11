@@ -18,24 +18,28 @@
 ### 対象と検証環境
 
 - **目的**: podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作できるようにする
-- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
+- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜5を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
+  - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜5、[更新](../almalinux-setup.md#podman-tui-更新)、[ロールバック](../extra/podman-tui.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜5、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-tui.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman-tui.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-tui 1.10.0 が 1 パッケージで入り、podman 5.8.2 の API ソケットに `STATUS_OK` でつながる
     - 画面のメニューの `stop` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
-    - [使い方の基本](../almalinux-setup.md#podman-tui-使い方の基本)の表のキー
-    - Homebrew の 2.0.0 と、API ソケットが止まっているときの画面（[注意点](../extra/podman-tui.md#注意点)）
+    - [使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-tui.md#使い方の基本)の表のキー
+    - Homebrew の 2.0.0 と、API ソケットが止まっているときの画面（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman-tui.md#注意点)）
   - **確認していないこと**: 色や罫線の見た目、デスクトップの端末での F キー、SELinux が有効なとき、SSH でほかのホストの podman につなぐこと
   - aarch64（Raspberry Pi 5）では通していない
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順 1〜5・更新を通した。代替キー l と stop メニューで停止、Ctrl+C で終了を確認。
+  - 未確認: F4 自体（本文の代替キー l を使用）、更新がある場合、ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順で導入。入れ子の rootless） |
-| EPEL | 未確認 | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入。入れ子の rootless） |
+| EPEL | 未確認 | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-tui | 未導入 | `podman-tui-1.10.0-1.el10_2`（epel） |
 | 端末 | — | 160 桁 × 50 行の擬似端末（`TERM=xterm-256color`、`LANG=C.UTF-8`）の SSH のログインシェル |
 
@@ -48,7 +52,7 @@
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順の後）の状態:
+検証コンテナ（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -95,7 +99,7 @@ podman-tui-web Exited (0) 19 seconds ago
 - `/` を shared にし、`10-init` のイメージが mask している `systemd-logind` を戻した
 - `openssh-server` と `sudo` を入れ、`<USER>`（NOPASSWD の sudo）を作った
 - **subuid / subgid**: 外側のコンテナに割り当てられた UID は 65537 個（0〜65536）しか無いので、`<USER>:1:999` と `<USER>:1001:64535` にした（`quay.io/podman/stable` と同じ割り当て）
-  - そのため、[podman.md 手順 3](../almalinux-setup.md#podman-実施手順) の出力は 2 行ではなく 4 行になった
+  - そのため、[podman.md 手順 3](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#実施手順) の出力は 2 行ではなく 4 行になった
 - ログイン: コンテナの中の `sshd`（127.0.0.1）に、`<USER>` で鍵を使ってログインした。pam_systemd が、`XDG_RUNTIME_DIR` とユーザーの systemd を用意する
 - 端末: 実機の tmux（EL10 の `tmux-3.3a-13`）は `capture-pane -p` でサーバーごと落ちたので、Python の擬似端末と `pyte`（端末の模倣）で画面の文字を読んだ
 - cgroup v2 の `cpu`・`memory`・`pids` が委譲されていたので、これまでの検証と違い、PID 数の制限は外していない
@@ -120,7 +124,7 @@ podman-tui-web Exited (0) 19 seconds ago
 
 **別に確かめたこと**（同じ作りの別のコンテナで、手順書の外のコマンドとして実行）:
 
-- [使い方の基本](../almalinux-setup.md#podman-tui-使い方の基本)の表のキーを 1 つずつ押した。`s` の並べ替えのダイアログは、項目にいるうちは `Esc` で閉じず、`Tab` で `Cancel` に移って Enter で閉じた
+- [使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-tui.md#使い方の基本)の表のキーを 1 つずつ押した。`s` の並べ替えのダイアログは、項目にいるうちは `Esc` で閉じず、`Tab` で `Cancel` に移って Enter で閉じた
 - 起動の前後で `find ~ -newer <印のファイル>` を比べ、podman-tui がホームにファイルを作らないこと（`~/.config/podman-tui` も `podman-tui.log` も無い）
 - API ソケットを止めた状態の画面（手順 4 の補足）
 - Homebrew の podman-tui 2.0.0（`podman-tui--2.0.0.x86_64_linux.bottle.tar.gz`、31.4 MB）: そのままでは `❌ DISCONNECTED` と `SYSTEM CONNECTIONS[0]`。`podman system connection add` の後は `STATUS_OK`・API の版 `5.8.2` で、コンテナの一覧と `start` ができた
@@ -162,18 +166,18 @@ podman-tui-web Exited (0) 19 seconds ago
 ### 実施手順 / 手順 1: 補足: 依存と、podman との関係
 
 - 入るファイルは `/usr/bin/podman-tui` とライセンスの 2 つ
-- podman のパッケージには依存しない。podman のコマンドも呼ばず、API ソケット（[podman.md 手順 7](../almalinux-setup.md#podman-実施手順)）にだけつなぐ
+- podman のパッケージには依存しない。podman のコマンドも呼ばず、API ソケット（[podman.md 手順 7](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#実施手順)）にだけつなぐ
 - そのため、podman を消しても podman-tui は残る（検証では、`sudo dnf remove --assumeno podman` が消す 30 パッケージに入っていなかった）
 
 ### 選択した方針
 
 | 選択肢 | 採否 |
 |---|---|
-| **EPEL の podman-tui（1.10.0）** | **採用。** 上流の互換表で、1.x は podman 5.x 向け（AlmaLinux 10 は 5.8.2）。システムの podman と組んで使うので RPM にした（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）。`dnf upgrade` で上がる |
-| Homebrew の podman-tui（2.0.0） | 不採用。上流の互換表で、2.x は podman 6.x 向け。接続を podman の設定からだけ読むので、podman.md を通しただけの PC では `❌ DISCONNECTED` で、接続が 0 件だった（[注意点](../extra/podman-tui.md#注意点)） |
+| **EPEL の podman-tui（1.10.0）** | **採用。** 上流の互換表で、1.x は podman 5.x 向け（AlmaLinux 10 は 5.8.2）。システムの podman と組んで使うので RPM にした（[ツール一覧の選び方](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#選び方)の規則 3）。`dnf upgrade` で上がる |
+| Homebrew の podman-tui（2.0.0） | 不採用。上流の互換表で、2.x は podman 6.x 向け。接続を podman の設定からだけ読むので、podman.md を通しただけの PC では `❌ DISCONNECTED` で、接続が 0 件だった（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman-tui.md#注意点)） |
 | GitHub のリリースの実行ファイル | 不採用。`dnf upgrade` に乗らない |
-| [lazydocker](../almalinux-setup.md#lazydocker-実施手順) | 別の手順書。Docker の API（`DOCKER_HOST`）でつなぐので、pod とシークレットの画面は無い。ログと CPU の使用率は見やすい |
-| GUI（Pods・Podman Desktop・Cockpit） | 対象外。[ツール一覧](../tool-catalog.md#コンテナ)にある |
+| [lazydocker](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md) | 別の手順書。Docker の API（`DOCKER_HOST`）でつなぐので、pod とシークレットの画面は無い。ログと CPU の使用率は見やすい |
+| GUI（Pods・Podman Desktop・Cockpit） | 対象外。[ツール一覧](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#コンテナ)にある |
 
 ### 手順内の実測・検証状況
 
@@ -207,3 +211,57 @@ podman-tui-web Exited (0) 19 seconds ago
 ║fcb0527cb46f   registry.access.redhat.com/ubi10/http…        47 seconds ago   ▼ Exited (0) 9 seconds ago   podman-tui-web
 ```
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | podman-tui 1.10.0-1.el10_2、Podman 5.8.2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 28 | 1.10.0 を 1 パッケージで導入。`session/steps.jsonl` seq 29 で y |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 30 | v1.10.0、/usr/bin/podman-tui、epel が一致 |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 31 | podman-tui-web Up |
+| 実施手順 | — | 4 | 通した | `session/steps.jsonl` seq 32 | SYSTEM の STATUS_OK / 5.8.2 / localhost connected。l を 2 回で CONTAINERS へ（本文の代替キー）。m → down 19 回 → Enter。`session/steps.jsonl` seq 55 で対象 Exited(0)、`session/steps.jsonl` seq 56 の Ctrl+C で終了 |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 57 | CLI でも podman-tui-web Exited(0) |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 58 | 更新なし |
+| extra / ロールバック | — | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- `podman-tui-system.txt` は STATUS_OK・API 5.8.2・localhost connected。
+- l を 2 回で CONTAINERS へ移り、m の stop を選んだ。
+- `podman-tui-command-menu.txt` と `podman-tui-stopped.txt`、CLI で Exited (0)、Ctrl+C で終了を確認した。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| — | 対象文書 | 手順書の直しを要する食い違いは確認しなかった | 直しなし |
+
+### 手順書を直した所
+
+- 手順書・extra・参考資料の直しは無い。
+
+### 確かめていないこと
+
+- F4 自体（本文の代替キー l を使用）、更新がある場合、ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

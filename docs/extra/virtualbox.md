@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#virtualbox-実施手順)・[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
+手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -118,6 +118,12 @@
 ---
 
 ## 注意点
+
+- **Windows 11 で作った VM を戻す・消すとき**: スナップショットへの復元は[スナップショットとクローン](../windows-setup.md#virtualbox-スナップショットとクローン)、VM とディスクの削除は[VM を消す](../windows-setup.md#virtualbox-vm-を消す)で行う。削除は停止した VM だけで行う。途中まで作って失敗した VM も同じ手順で消せる
+- **NAT の SSH 転送はクローンにもコピーされる**。本書は完全クローンを作った後にポートを変える。同じポートのまま両方を起動しない
+- **完全クローンにはゲストの識別情報もコピーされることがある**。MAC アドレスを再生成しただけで済ませず、別の PC として使う前にホスト名や SSH のホスト鍵をゲスト側で確かめて変更する
+- **スナップショットはバックアップの代わりにならない**。元の VM のディスクと一緒に失われる。必要なデータは別の場所に退避する
+- **ホストオンリー・ブリッジ・Extension Pack・USB の受け渡しは、VM を作って使う節の対象外**。この節の検証では確かめていない
 
 - **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../almalinux-setup.md#virtualbox-virtualbox-を入れる)の手順 4・5）

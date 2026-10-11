@@ -9,7 +9,7 @@
 ### 実施手順: 検証状況の記録
 
 > [!WARNING]
-> **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)。
+> **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#トンネルを閉じる)。
 >
 > - Linux のオンラインのホストは、x86_64 のコンテナでのみ確かめた。Windows 11 のホストから、SELinux Enforcing のクリーンインストール VM への転送も再検証した（2026-10-06）（[対象と検証環境](#対象と検証環境)）
 
@@ -37,14 +37,14 @@ Error: remote port forwarding failed for listen port 1080
 **`-o ControlPath=none`: この ssh では、接続の共有を使わない。** オンラインのホストの `~/.ssh/config` で `ControlMaster auto` と `ControlPersist` を使っていると、転送は裏に残るマスターの接続に付く。
 
 - 検証環境で `~/.ssh/config` に `ControlMaster auto`・`ControlPath ~/.ssh/cm-%r@%h:%p`・`ControlPersist 10m` を書き、`ControlPath=none` を外して入ると、`exit` の後（`Shared connection to <OFFLINE_HOST> closed.`）も、オフラインのホストに `127.0.0.1:1080` の待ち受けが残った
-- 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
+- 同じ設定のまま手順 2 のとおりに入ると、[トンネルを閉じる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#トンネルを閉じる)の手順 1 の `exit` で待ち受けが消えた
 
 **Windows のオンラインのホスト**: Windows 11 の `C:\Windows\System32\OpenSSH\ssh.exe`（`OpenSSH_for_Windows_9.5p2`）で、VirtualBox の VM へ同じ転送を張れた（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。その文書のホストオンリーアダプターの節は、その後トンネルを使わない形に変わった）。
 
 - トンネルは Windows の外向きの接続なので、Windows の受信の規則は要らない
 - オフラインのホスト（VM）が再起動すると、Windows の ssh は `Connection to <VM_IP> closed by remote host.` で終わり、待ち受けも消えた
 
-**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)と[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
+**1080 番を変えるとき**は、手順 2 の `-R 1080`、手順 3 の `ALL_PROXY` と `ss` の `1080`、[dnf の節](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)と[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#ロールバック)の `127.0.0.1:1080`、[トンネルを閉じる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#トンネルを閉じる)の手順 3 の `ss` の `1080`、使う側の手順書の `127.0.0.1:1080` を、どれも同じ番号にする。
 
 ### 実施手順 / 手順 3: 補足: socks5h と ALL_PROXY
 
@@ -59,21 +59,21 @@ curl: (97) Could not resolve host: github.com
 
 - curl は、プロトコルを問わずに使う
 - git は、`http.proxy` の設定も `https_proxy` も無いときに `ALL_PROXY` を使い、`socks5h` を解る。`GIT_TRACE_CURL=1 git ls-remote https://github.com/Homebrew/brew HEAD` の出力に `SOCKS5 connect to github.com:443 (remotely resolved)` が出た
-- Homebrew（[homebrew-offline.md 手順 1](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の補足）
+- Homebrew（[homebrew-offline.md 手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/homebrew-offline.md#実施手順) の補足）
 - `https_proxy`（`HTTPS_PROXY`）や git の `http.proxy` が既に入っていると、curl と git はそちらを使う。`env | grep -i proxy` と `git config --get http.proxy` が何も出さないことを確かめておく
 
 **`ALL_PROXY` を読まないもの**:
 
-- **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
+- **`sudo` を付けたコマンド**: `sudo printenv ALL_PROXY` は何も出さず、終了コード 1 だった（AlmaLinux の `/etc/sudoers` は `env_reset` で、`env_keep` にプロキシの変数が無い）。dnf には、[dnf の節](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で設定ファイルから渡す
 - **podman**: `https_proxy`（`HTTPS_PROXY`）を読み、`ALL_PROXY` だけでは取り込めなかった。`sudo https_proxy=socks5h://127.0.0.1:1080 podman …` のように、コマンドの前に変数を置いて渡す（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)。トンネルを使っていた版の、その節の手順 4 の補足の実測）
-- **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
+- **npm**: `https_proxy` を読む（[npm-offline.md 手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順) の補足）。npm には、`ALL_PROXY` と同じ値の `https_proxy` を足す
 
 ### dnf にもトンネルを使わせる（任意） / 手順 1: 補足: dnf のプロキシ
 
 **`dnf config-manager --save --setopt=proxy=…` ではなく `sed` で書く。** `dnf config-manager` は `dnf-plugins-core` が無いと使えず、実機に入っていなかったことがある（[gh.md の実施前の状態](almalinux-setup.md#github-cli-実施前の状態)）。オフラインのホストでは、それを入れるにもこの設定が要る。
 
 - `[main]` の行の直後に 1 行足す。AlmaLinux の `/etc/dnf/dnf.conf` は `[main]` の節だけ
-- `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](../extra/ssh-socks-tunnel.md#ロールバック)で元に戻せなくなるため
+- `proxy` で始まる行が既にあれば止める。書き換えると、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#ロールバック)で元に戻せなくなるため
 
 **dnf 4.20 は `socks5h://` を受け付け、リポジトリの設定は変えずに通った。** AlmaLinux のミラーの一覧（`mirrors.almalinux.org`）も、一覧が返したミラーも、トンネルを通った。コンテナでの実測（進み具合の行は省いた）:
 
@@ -102,9 +102,10 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
   - 入れる・取り込む・上げるときだけ使う。入れたものは、トンネルが無くても動く
 - **進め方**: オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う（dnf は `/etc/dnf/dnf.conf` の `proxy=`、podman と npm は `https_proxy`）
   - 読者が編集するのは `OFFLINE_HOST` だけ
-  - もとは [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
-  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入-実施手順)
+  - もとは [homebrew-offline.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/homebrew-offline.md) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
+  - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md)
 - **状態**: **Windows 11 のオンラインのホストから、x86_64 のクリーンインストール VM への現行の転送・dnf・転送終了・dnf 設定のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。Linux 発のオンラインのホストは従来のコンテナのみ**
+  - これは 2026-10-06 の時点の状態
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - コマンドは、この文書に移す前に、次の検証で通したもの
     - コンテナ（[homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)、2026-09-29）: 手順 1〜3（手順 3 の確かめる URL は Homebrew の 4 つだった）、dnf の節、トンネルを閉じる節（jq の確かめを含んでいた）、ロールバック
@@ -112,7 +113,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
     - Windows 11 のホストの VirtualBox の VM（[virtualbox-guest-bootc.md の付録](virtualbox-guest-bootc.md#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)、2026-09-30）: 手順 2 の Windows の 1 行（ただし、自動で流すために鍵でログインし、`-N` を付けた）。VM の端末での `ss` と、`curl -x socks5h://127.0.0.1:1080 https://quay.io/v2/` の `401`
     - コンテナ（[npm-offline.md の付録](npm-offline.md#付録-コンテナでの検証記録2026-09-30)、2026-09-30）: npm-offline.md の前提として、手順 1〜3・dnf の節・トンネルを閉じる節の手順 1・2（当時の homebrew-offline.md の手順）。npm は `ALL_PROXY` だけでは届かず、`https_proxy` を足すと届くこと
   - 2026-09-30 に、この文書のブロックを x86_64 のコンテナでもう一度通した（[付録](#付録-コンテナでの検証記録2026-09-30)）
-    - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の手順 1〜6・更新・ロールバック
+    - 手順 1〜3、dnf の節、トンネルを閉じる節、ロールバックと、それを使う [homebrew-offline.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/homebrew-offline.md) の手順 1〜6・更新・ロールバック
   - **確認していないこと**: Linux のオンラインのホストの実機、aarch64、Linux 発で SELinux が Enforcing のオフラインのホストへの接続、IPv6、パスワード認証（検証は鍵認証）、macOS の ssh、長い取得の途中で ssh が切れたとき
 
 | 項目 | コンテナ（2026-09-29・30） | Windows のホストの VM（2026-09-30） |
@@ -123,7 +124,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | — |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で、オンラインのホストのシェルに 1 度だけ設定する。オフラインのホストには変数が無い。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#実施手順) で、オンラインのホストのシェルに 1 度だけ設定する。オフラインのホストには変数が無い。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -133,6 +134,10 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<OFFLINE_USER>` / `<VM_IP>` / `<USER>` のプレースホルダで書いてある。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Linux 2 台の Hyper-V VM で実施手順 1〜3・dnf の任意節・トンネルを閉じる手順 1〜3 を通した（2026-10-11、Codex）
+  - loopback の待ち受け、GitHub 200、dnf のキャッシュ作成、転送終了後の通信失敗を確認。実機・aarch64・異常系は今回未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -157,7 +162,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 - オンラインのホスト: `openssh-clients` を入れ、同じ名前のユーザーで鍵を作り、公開鍵をオフラインのホストの `authorized_keys` に置いた（鍵認証）
 - このクラウドのホストの外向きの通信は、TLS を署名し直すゲートウェイを通る。その CA を、両方のコンテナの信頼ストアに足した（実際のホストでは要らない）
 
-**流し方**: この文書と [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)・[homebrew.md](../almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
+**流し方**: この文書と [homebrew-offline.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/homebrew-offline.md)・[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の bash のブロックをファイルから抜き出し、`docker exec -it` で開いたオンラインのホストの対話の bash（擬似端末）に、1 ブロックずつ 1 行ごとに送った（ブラケットペースト無し）。
 
 - 手順 1 の `OFFLINE_HOST` は、コンテナの名前に書き換えた
 - ホスト鍵の確認には `yes`、インストーラの `RETURN` と brew の `[y/n]` には、表示が出てから Enter と `y` を送った
@@ -213,7 +218,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 ### 手順中の実測・検証状況の記録
 
-- **転送中は、オフラインのホストのどのユーザーもプロキシを使える**: 待ち受けは loopback だけだが、ユーザーを区別しない。検証では、2 人目のユーザーの `curl` も `200` を返した。使い終わったら[トンネルを閉じる](../almalinux-setup.md#ssh-の-socks-トンネル-トンネルを閉じる)
+- **転送中は、オフラインのホストのどのユーザーもプロキシを使える**: 待ち受けは loopback だけだが、ユーザーを区別しない。検証では、2 人目のユーザーの `curl` も `200` を返した。使い終わったら[トンネルを閉じる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#トンネルを閉じる)
 
 ### 手順中の実測・検証状況の記録
 
@@ -229,3 +234,52 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 | オフラインのホストから `ssh -D 1080` | オフラインのホストからオンラインのホストへ ssh でログインできること（オンラインのホストで sshd を動かす） | 不採用。ssh の向きが逆のときの代わりになる形だが、確かめていない |
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V |
+| VM | Generation 2、構成版 12.0、各 2 vCPU・64 GB・Default Switch の eth0 1 枚、Secure Boot disabled |
+| メモリ | オンライン 1536 MB。オフラインは C14 が 2048 MB、C15 が 3072 MB |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64` |
+| 開始 | オンライン `<HOSTNAME>` は after-AS4、オフライン `<OFFLINE_HOST>` は clean-install（依頼の前提）。C15 は C14 終了時の partial-R6 を保存した既存ディスクから続行し、復元・再作成はしていない |
+| 状態 | オフラインの SELinux Enforcing・firewalld active。既定経路・DNS を外し、IPv6 を無効にしたのは手順書の外の準備 |
+| 導入版 | Homebrew 7.0.9、jq 1.8.2、Neovim 0.12.6、LazyVimStarter `8e4a074`、Mason 2.3.1、共通 bash `67abb84` |
+| 貼り方 | SSH の対話の bash にドライバでブロックを順に貼り、オンラインからオフラインの `<USER>` にパスワード SSH。C14 は両 VM の GNOME に画面操作でログインし、C15 は GNOME にログインしなかった |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C14\`・`C15\` の下。表の C14・C15 はその単位からの相対パスで、seq は `session/steps.jsonl` の番号
+- `meta.json` の snapshot はどちらも clean-install と書くが、Existing 呼出しの既定値。開始元の復元を裏付ける値ではない
+- R6 は 2 回に分かれた。C14 は npm の前提導入中にオフライン VM が応答しなくなり中止。C15 はメモリを 2048 MB から 3072 MB にし、GNOME にログインせず続けたところ再発しなかった。原因は分かっていない（[npm の記録](npm-offline.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- C14 のログイン後の PNG は、`screens/online/login-20261011-113934-3-after.png` がアクティビティ画面、`screens/offline/login-20261011-114023-3-after.png` がようこそ画面。本文の操作は GNOME の端末への貼り付けではない
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した | C14 `online/session/steps.jsonl` seq 1・2、`online/session/after-confirm/0002-実施手順-1.txt`。変数を読み戻した |
+| 実施手順 2 | 通した | 同 seq 3〜5、`online/session/session-001.raw`。ホスト鍵確認とパスワード入力後にオフラインのプロンプト |
+| 実施手順 3 | 通した | 同 seq 6、`online/session/after-confirm/0006-実施手順-3.txt`。127.0.0.1 と [::1] の 1080、GitHub 200 |
+| dnf にもトンネルを使わせる（任意）1 | 通した | 同 seq 7・8、`online/session/after-confirm/0007-dnf_にもトンネルを使わせる（任意）-1.txt`。proxy 行と日本語のキャッシュ作成完了 |
+| トンネルを閉じる 1〜3 | 通した | 同 seq 18〜21、`online/session/after-confirm/0021-トンネルを閉じる-3.txt`。転送無しで再ログインし、ss 無出力・curl 終了 6 |
+| Homebrew 更新・npm 前提の張り直し | 通した | C14 同 seq 24〜26・30〜32、C15 `online/session/steps.jsonl` seq 1〜5・20〜22、`online/session/after-confirm/0005-実施手順-3.txt`・`0022-実施手順-3.txt`。loopback と 200 |
+| extra ロールバック | 未実施 | C14・C15 の steps に実施記録無し。dnf proxy 行は C15 にも残った |
+
+### 通らなかった手順と見立て
+
+- この文書の実施範囲で通らなかった手順は無い。入れ子 SSH のためドライバは foreground=ssh / waiting と表示したが、ゲストのプロンプトと確認出力で完了を判定した
+- C14 の npm 前提中の応答喪失を、SSH の貼り方や Hyper-V による障害とは断定していない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| dnf の確認文が英語だけ | 直した（文言） | 任意節の手順 1 に日本語の `メタデータキャッシュを作成しました。` を併記。C14 の `0007-dnf_にもトンネルを使わせる（任意）-1.txt` で確認。ブロックは変更無し |
+| 入れ子 SSH のドライバの状態表示 | 未対応（道具） | 完了の出力とプロセス名による表示を区別。手順書の実行失敗とは扱わない |
+
+### 確かめていないこと
+
+- 実機・aarch64・macOS 発・IPv6 の外向き通信・転送の異常系・extra のロールバックは今回未実施
+- 従来の Windows 発と今回の Linux 発は別の結果。GNOME 端末への貼り付け・フォント・IME は確認していない

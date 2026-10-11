@@ -11,7 +11,7 @@
 > [!WARNING]
 > **x86_64 のクリーンインストール VM でも検証した手順書**（2026-10-06、SELinux Enforcing）で、実機では本実行していない。今回のオフラインのホストは、既定経路を無くした VM（[対象と検証環境](#対象と検証環境)）。
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[ssh-socks-tunnel.md の注意点](../extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
+> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[ssh-socks-tunnel.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
 
 ### 実施手順 / 手順 1: 補足: 4 つの URL と、brew のプロキシ
 
@@ -31,7 +31,7 @@ package git is not installed
 - raw.githubusercontent.com の `/` は `301`、ghcr.io はトークンが無いので `401`。届いているかだけを見るので、`200` でなくてよい
 - `curl -I`（HEAD）だと、ghcr.io は `405` を返した。`curl -f` を付けると、どちらも失敗扱いになる
 
-**brew も `ALL_PROXY` を読む**（curl と git は [ssh-socks-tunnel.md 手順 3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の補足）。Homebrew の `bin/brew` は、環境変数を絞ってから動くが、`all_proxy` と `ALL_PROXY` は通す（307 行目: `http_proxy https_proxy ftp_proxy no_proxy all_proxy HTTPS_PROXY FTP_PROXY ALL_PROXY`）。`man brew` の「USING HOMEBREW BEHIND A PROXY」も、SOCKS5 のプロキシには `all_proxy` を使う例を挙げている。
+**brew も `ALL_PROXY` を読む**（curl と git は [ssh-socks-tunnel.md 手順 3](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#実施手順) の補足）。Homebrew の `bin/brew` は、環境変数を絞ってから動くが、`all_proxy` と `ALL_PROXY` は通す（307 行目: `http_proxy https_proxy ftp_proxy no_proxy all_proxy HTTPS_PROXY FTP_PROXY ALL_PROXY`）。`man brew` の「USING HOMEBREW BEHIND A PROXY」も、SOCKS5 のプロキシには `all_proxy` を使う例を挙げている。
 
 **`ALL_PROXY` を入れずに brew を使うと、外に届かない。** トンネルのシェルで `( unset ALL_PROXY; brew update )` を実行したときの出力:
 
@@ -44,7 +44,7 @@ Failed to download https://formulae.brew.sh/api/internal/packages.x86_64_linux.j
 
 ### 実施手順 / 手順 4: 補足: brew の確認（ask mode）と、トンネル越しの取得
 
-**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[AlmaLinux 10 の初期設定の注意点](../extra/almalinux-setup.md#注意点)）。
+**Homebrew 7.0.7 の `brew install` は、依存なども含む計画なら、端末で一覧を出してから `[y/n]` を聞く**（ask mode。[AlmaLinux 10 の初期設定の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/almalinux-setup.md#注意点)）。
 
 - `brew` の環境変数の説明（`Library/Homebrew/env_config.rb` の `HOMEBREW_ASK`）: 既定で有効。一覧に依存など、名前を挙げたもの以外が入るときだけ聞き、端末でない（TTY が無い）ときは聞かない
 - 答えは Enter を待たずに 1 文字で読む（`Library/Homebrew/ask.rb` の `$stdin.getch`）。`y` で続け、`n`・Esc・Ctrl+C・Ctrl+D で中止、ほかの文字は `Invalid input` と出して読み直す
@@ -76,14 +76,15 @@ oniguruma
 - **目的**: インターネットに出られない AlmaLinux 10 のホストで、Homebrew と、Homebrew で入れるコマンドを使えるようにする
   - 入れる・上げるときだけ、そのホストへ ssh でログインしてくるオンラインのホストを経由して外に出る
   - 入れたコマンドは、トンネルが無くても動く
-- **進め方**: 前提の [ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で、オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う。Homebrew の導入は、homebrew.md をそのシェルのまま貼る
+- **進め方**: 前提の [ssh-socks-tunnel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md) で、オンラインのホストから `ssh -R 1080` でログインし、オフラインのホストにできた SOCKS の待ち受けを `ALL_PROXY` で使う。Homebrew の導入は、homebrew.md をそのシェルのまま貼る
   - この文書には変数が無い。読者が編集するのは、ssh-socks-tunnel.md の `OFFLINE_HOST` だけ
-  - トンネルの張り方・dnf の設定・閉じ方は、もとはこの文書の手順 1〜4・7〜9 だった（[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) と共有するため、ssh-socks-tunnel.md に移した）
+  - トンネルの張り方・dnf の設定・閉じ方は、もとはこの文書の手順 1〜4・7〜9 だった（[virtualbox-guest-bootc.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox-guest-bootc.md) と共有するため、ssh-socks-tunnel.md に移した）
 - **状態**: **x86_64 のクリーンインストール VM で現行の実施手順と jq のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。実機の AlmaLinux・aarch64 は未実施**
+  - これは 2026-10-06 の時点の状態
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした
   - オンラインのホストは、外に出られるネットワークと、その `--internal` のネットワークの両方につないだ別のコンテナ
-  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](../almalinux-setup.md#homebrew-のオフライン導入-更新)、[ロールバック](../extra/homebrew-offline.md#ロールバック)を通した
+  - **この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、当時の手順 1〜9、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/homebrew-offline.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/homebrew-offline.md#ロールバック)を通した
     - 当時の手順 1〜9 は、今の ssh-socks-tunnel.md の手順 1〜3・dnf の節・トンネルを閉じる節と、この文書の手順 1・3〜6（手順 3 は homebrew.md の手順 1〜4）。今の手順 2 は、当時の手順 4（dnf の設定）に当たる
   - 貼り方はブラケットペースト無し。dnf の設定とその行の削除（当時の手順 4 とロールバックの手順 2）は、ブラケットペースト有りでも通した
   - 2026-09-30 に、ssh-socks-tunnel.md に移した後のブロックで、同じ作りのコンテナでもう一度通した（[ssh-socks-tunnel.md の付録](ssh-socks-tunnel.md#付録-コンテナでの検証記録2026-09-30)）
@@ -91,7 +92,7 @@ oniguruma
     - トンネルを張る前は、オフラインのホストから外の名前を引けず、IP アドレスでもつながらない
     - トンネル越しに、dnf（homebrew.md の手順 1 の 73 パッケージを含む）、Homebrew のインストーラ、`brew install`、`brew update` が通る
     - トンネルを閉じた後も jq が動き、外には届かない
-    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](../almalinux-setup.md) の手順 1〜3、[hackgen.md](../almalinux-setup.md#hackgen-console-nf) の手順 1〜5（今の AlmaLinux 10 の初期設定の「HackGen Console NF」の手順 1〜5）。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
+    - ほかの手順書も、トンネルのシェルでそのまま通る（[bat.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 1〜3、[hackgen.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#hackgen-console-nf) の手順 1〜5（今の AlmaLinux 10 の初期設定の「HackGen Console NF」の手順 1〜5）。hackgen.md の手順 3 は dnf、手順 4 は GitHub からの cask の取得）
     - 1080 番がふさがっているときと、sshd が転送を禁じている（`AllowTcpForwarding no`）ときに ssh が止まること、接続の共有（`ControlPersist`）で転送が残ること
     - `sudo` が `ALL_PROXY` を渡さないこと、転送中は別のユーザーもプロキシを使えること、トンネルが無いときの dnf と brew の失敗の出方
   - **確認していないこと**: 実機（x86_64 の PC・Raspberry Pi 5）、aarch64、SELinux が Enforcing のホスト（コンテナに SELinux が無い）、IPv6、パスワード認証（検証は鍵認証）、Windows・macOS の ssh、長い導入の途中で ssh が切れたとき、homebrew.md のロールバック
@@ -109,11 +110,15 @@ oniguruma
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | 同左 |
 
 > [!NOTE]
-> この文書には変数が無い。オフラインのホストの名前とユーザーは、[ssh-socks-tunnel.md 手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の変数で設定する。
+> この文書には変数が無い。オフラインのホストの名前とユーザーは、[ssh-socks-tunnel.md 手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#実施手順) の変数で設定する。
 >
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`7.0.7` など）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Hyper-V VM で実施手順 1〜6と更新を判定した（2026-10-11、Codex）
+  - Homebrew 7.0.9・jq 1.8.2 の bottle 導入と転送終了後の実行を確認。依存導入と upgrade は条件に当たらず飛ばした。ロールバック・実機・aarch64 は今回未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -147,7 +152,7 @@ curl: (6) Could not resolve host: github.com
 届かない（期待どおり）
 ```
 
-- 手順 2 で dnf の設定をしたときは、`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` が 2 行目に残る（[ssh-socks-tunnel.md のロールバック](../extra/ssh-socks-tunnel.md#ロールバック)で消す）
+- 手順 2 で dnf の設定をしたときは、`/etc/dnf/dnf.conf` に `proxy=socks5h://127.0.0.1:1080` が 2 行目に残る（[ssh-socks-tunnel.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#ロールバック)で消す）
 - オンラインのホストに残るのは、`~/.ssh/known_hosts` のオフラインのホストの行だけ
 - `/home/linuxbrew/.linuxbrew` は、検証の最後（bat と HackGen が入り、jq を消した状態）で 286 MB
 
@@ -250,25 +255,76 @@ curl: (6) Could not resolve host: github.com
 
 ### 手順中の実測・検証状況の記録
 
-- 検証では [bat](../almalinux-setup.md) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
+- 検証では [bat](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) も入れていたので、jq の依存の `oniguruma` は bat の依存として残った
 
 ### 手順中の実測・検証状況の記録
 
-- **ssh が切れると、トンネルも消える**: 途中の `brew install` や dnf は、取得の途中なら失敗するはず（本書では確かめていない）。そのときは [ssh-socks-tunnel.md 手順 2](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) から張り直して、同じコマンドを貼り直す
+- **ssh が切れると、トンネルも消える**: 途中の `brew install` や dnf は、取得の途中なら失敗するはず（本書では確かめていない）。そのときは [ssh-socks-tunnel.md 手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#実施手順) から張り直して、同じコマンドを貼り直す
 
 ### 手順中の実測・検証状況の記録
 
-- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば [dropbox-rclone.md](../almalinux-setup.md#dropbox-と-rclone-実施手順) の同期（Dropbox の API）や、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) の LAN の外の端末との同期（本書では確かめていない）
+- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば [dropbox-rclone.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox-rclone.md) の同期（Dropbox の API）や、[syncthing.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/syncthing.md) の LAN の外の端末との同期（本書では確かめていない）
 
 ### 手順中の検証状況
 
-- **トンネルそのものの注意は、[ssh-socks-tunnel.md の注意点](../extra/ssh-socks-tunnel.md#注意点)**: 転送中はオフラインのホストのどのユーザーもプロキシを使える、出口はオンラインのホスト、`socks5h` の `h`、`https_proxy` が勝つ、`sudo` は `ALL_PROXY` を渡さない、dnf の行が残る、SELinux は確かめていない
+- **トンネルそのものの注意は、[ssh-socks-tunnel.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#注意点)**: 転送中はオフラインのホストのどのユーザーもプロキシを使える、出口はオンラインのホスト、`socks5h` の `h`、`https_proxy` が勝つ、`sudo` は `ALL_PROXY` を渡さない、dnf の行が残る、SELinux は確かめていない
 
 ### 選択した方針
 
-| **ssh の SOCKS トンネル（[ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の `ssh -R 1080`）で、オフラインのホストから取得する** | オンラインのホストからオフラインのホストへ ssh でログインできること。どちらのホストにも追加のソフトは要らない | **採用。** オフラインのホストで curl・git・brew・dnf がそのまま外に届き、homebrew.md とほかの Homebrew 系の手順書を変えずに貼れる。オフラインのホストが自分のアーキのボトルを取るので、2 台のアーキが違ってもよい（ただし本書は x86_64 でしか確かめていない）。トンネルの張り方どうしの比較（`-D`・HTTP プロキシ）は、同書の[選択した方針](ssh-socks-tunnel.md#選択した方針) |
+| **ssh の SOCKS トンネル（[ssh-socks-tunnel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md) の `ssh -R 1080`）で、オフラインのホストから取得する** | オンラインのホストからオフラインのホストへ ssh でログインできること。どちらのホストにも追加のソフトは要らない | **採用。** オフラインのホストで curl・git・brew・dnf がそのまま外に届き、homebrew.md とほかの Homebrew 系の手順書を変えずに貼れる。オフラインのホストが自分のアーキのボトルを取るので、2 台のアーキが違ってもよい（ただし本書は x86_64 でしか確かめていない）。トンネルの張り方どうしの比較（`-D`・HTTP プロキシ）は、同書の[選択した方針](ssh-socks-tunnel.md#選択した方針) |
 
 | `/home/linuxbrew/.linuxbrew` を tar にして運ぶ | 同じ OS・同じアーキのホストで Homebrew と formula を入れる。上げるたびに作り直して運ぶ | 本書では扱わない（ネットワークで届かないときの方法。確かめていない） |
 
 | `brew fetch` でボトルだけを運ぶ | Homebrew 本体（git のリポジトリと portable-ruby）と、formula の API の JSON も要る | 本書では扱わない（確かめていない） |
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V |
+| VM | Generation 2、構成版 12.0、各 2 vCPU・64 GB・Default Switch の eth0 1 枚、Secure Boot disabled |
+| メモリ | オンライン 1536 MB。オフラインは C14 が 2048 MB、C15 が 3072 MB |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64` |
+| 開始 | オンライン `<HOSTNAME>` は after-AS4、オフライン `<OFFLINE_HOST>` は clean-install（依頼の前提）。C15 は C14 終了時の partial-R6 を保存した既存ディスクから続行し、復元・再作成はしていない |
+| 状態 | オフラインの SELinux Enforcing・firewalld active。既定経路・DNS を外し、IPv6 を無効にしたのは手順書の外の準備 |
+| 導入版 | Homebrew 7.0.9、jq 1.8.2、Neovim 0.12.6、LazyVimStarter `8e4a074`、Mason 2.3.1、共通 bash `67abb84` |
+| 貼り方 | SSH の対話の bash にドライバでブロックを順に貼り、オンラインからオフラインの `<USER>` にパスワード SSH。C14 は両 VM の GNOME に画面操作でログインし、C15 は GNOME にログインしなかった |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C14\`・`C15\` の下。表の C14・C15 はその単位からの相対パスで、seq は `session/steps.jsonl` の番号
+- `meta.json` の snapshot はどちらも clean-install と書くが、Existing 呼出しの既定値。開始元の復元を裏付ける値ではない
+- R6 は 2 回に分かれた。C14 は npm の前提導入中にオフライン VM が応答しなくなり中止。C15 はメモリを 2048 MB から 3072 MB にし、GNOME にログインせず続けたところ再発しなかった。原因は分かっていない（[npm の記録](npm-offline.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- C14 のログイン後の PNG は、`screens/online/login-20261011-113934-3-after.png` がアクティビティ画面、`screens/offline/login-20261011-114023-3-after.png` がようこそ画面。本文の操作は GNOME の端末への貼り付けではない
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した | C14 `online/session/steps.jsonl` seq 9、`online/session/after-confirm/0009-実施手順-1.txt`。取得先 200 / 301 / 200 / 401、依存 4 つ導入済み |
+| 実施手順 2 | 条件に当たらず飛ばした | 同 seq 9・10。procps-ng・curl・file・git が揃っていた。dnf proxy は ssh-socks-tunnel の任意節で設定済み |
+| 実施手順 3 | 通した | 同 seq 11〜15、`online/session/after-confirm/0011-実施手順-共通の_bash_設定-1.txt`・`0012-実施手順-共通の_bash_設定-2.txt`・`0015-実施手順-Homebrew-3.txt`。共通 bash を入れ、Homebrew 手順 1 は依存導入済みで飛ばし、2 の RETURN 入力後に 3 で 7.0.9・場所・PREFIX を確認 |
+| 実施手順 4 | 通した | 同 seq 16・17、`online/session/session-001.raw`。y を 1 文字送り、jq・oniguruma を bottle 導入。ソースビルド無し |
+| 実施手順 5 | 通した | 同 seq 18〜21、`online/session/after-confirm/0021-トンネルを閉じる-3.txt`。参照先の終了・転送無し再ログイン・通信失敗 |
+| 実施手順 6 | 通した | 同 seq 22、`online/session/after-confirm/0022-実施手順-6.txt`。jq 1.8.2、Homebrew の場所、offline |
+| 更新 1 | 通した（upgrade を除く） | 同 seq 27・28、`online/session/after-confirm/0027-更新-2.txt`。参照先の更新 2 は Already up-to-date、outdated 無出力。更新 3 は条件に当たらず飛ばした |
+| 更新 2 | 通した | 同 seq 29、`online/session/session-001.raw`。参照先の exit でオンラインに戻った |
+| extra ロールバック | 未実施 | C14・C15 の steps に実施記録無し |
+
+### 通らなかった手順と見立て
+
+- この文書の実施範囲で通らなかった手順は無い。C15 では Homebrew を再導入しておらず、C14 の結果を引き継いだ
+- 日本語入力や GNOME の PATH はこの検証の成功範囲に入らない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 対応 |
+|---|---|---|
+| この文書の証跡で確定した食い違い | 該当無し | 手順書・extra・参考資料は変更無し |
+| 初期設定の Homebrew に手順 4 が加わる場合の参照番号 | 未対応（司令塔に渡す） | 手順 3 の「1〜3」は依頼どおり保持。今回は手順 4 を通した結果ではない |
+
+### 確かめていないこと
+
+- 不足依存の導入・更新対象を用意した upgrade・Homebrew 本体と jq の撤去、実機・aarch64 は今回未実施
+- 従来のコンテナ・2026-10-06 の VM での撤去と、今回の更新確認は別の履歴。ほかの Homebrew 文書全部のオフライン通し・GUI・IME は確認していない

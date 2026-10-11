@@ -17,7 +17,7 @@
 
 - `sudo`・`curl`・`git` など、distrobox がボックスの初期化で要るものが最初から入っていて、初期化で入れるものが少ない
 - amd64 と arm64 の両方がある（Raspberry Pi 5 でも同じイメージ）
-- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](../extra/podman.md#注意点)）にかからない
+- Docker Hub ではなく quay.io にあるので、Docker Hub の取得回数の上限（[podman.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman.md#注意点)）にかからない
 
 distrobox の互換一覧（上流の `docs/compatibility.md`）に載っている、ほかの Toolbx 系のイメージの例:
 
@@ -27,7 +27,7 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 | Debian 13 | `quay.io/toolbx-images/debian-toolbox:13` |
 | Arch Linux | `quay.io/toolbx/arch-toolbox:latest` |
 
-本書で確かめたのは Ubuntu 24.04 だけ。[ボックスのコマンドをホストから呼ぶ（任意）](../almalinux-setup.md#distrobox-ボックスのコマンドをホストから呼ぶ任意)は apt を使うので、Ubuntu か Debian のときだけそのまま使える。
+本書で確かめたのは Ubuntu 24.04 だけ。[ボックスのコマンドをホストから呼ぶ（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/distrobox.md#ボックスのコマンドをホストから呼ぶ任意)は apt を使うので、Ubuntu か Debian のときだけそのまま使える。
 
 ### ボックスのコマンドをホストから呼ぶ（任意） / 手順 0: 本文中の記録
 
@@ -36,28 +36,32 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 の上で、別のディストリ（既定は Ubuntu 24.04）のユーザーランドとパッケージを使えるようにする。EL10 の AppStream・EPEL に無いものを、そのディストリのパッケージで補う
-- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の distrobox を入れ、rootless の podman（[podman.md](../almalinux-setup.md#podman-実施手順)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
+- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の distrobox を入れ、rootless の podman（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md)）でボックスを作る。**読者が書き換える値は冒頭の変数ブロックだけで、既定のままでもよい**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
+  - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](../almalinux-setup.md#distrobox-更新)、[ロールバック](../extra/distrobox.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順 2〜4）、手順 2〜6、任意節、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/distrobox.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/distrobox.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の distrobox 1.8.2.3 が入り、Ubuntu 24.04 のボックスができる
     - ボックスの中のユーザーとホームがホストと同じ
     - apt で入れた ffmpeg を書き出すと、ホストのシェルから呼べる
   - **確認していないこと**: GUI のアプリの書き出し（`--app`）とデスクトップのメニュー、SELinux が有効なときの動き、Ubuntu 以外のイメージ
   - aarch64（Raspberry Pi 5）では通していない
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順・ffmpeg の書き出し・更新を確認。任意節の手順 4 は既存 Homebrew 版が選ばれ、通らなかった。
+  - 未確認: GUI アプリの書き出し、他ディストリ、更新がある場合、ロールバック、実機・aarch64・Secure Boot 有効環境は今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../almalinux-setup.md#podman-実施手順) と同じ作り） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順で導入） |
-| EPEL | 未確認 | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) と同じ作り） |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入） |
+| EPEL | 未確認 | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | distrobox | 未導入 | `distrobox-1.8.2.3-1.el10_2`（epel） |
 | ボックス | — | `quay.io/toolbx/ubuntu-toolbox:24.04`（Ubuntu 24.04.5 LTS） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#distrobox-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/distrobox.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -70,7 +74,7 @@ distrobox の互換一覧（上流の `docs/compatibility.md`）に載ってい�
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順の後）の状態:
+検証コンテナ（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -103,7 +107,7 @@ $ ffmpeg -version | head -1
 ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 ```
 
-- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](../extra/distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
+- `distrobox list` は手順 4 の直後の表示。初期化の後はコンテナが動き続ける（[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/distrobox.md#ロールバック)の手順 2 で `running` と聞かれる）
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
@@ -141,7 +145,7 @@ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
 
 - `--yes` を付けない `distrobox create` は `Image quay.io/toolbx/arch-toolbox:latest not found.` と `Do you want to pull the image now? [Y/n]:` を出した（`n` で中断）
 - `distrobox create --dry-run` で、podman に渡すオプション（手順 4 の補足の表）を見た
-- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](../extra/distrobox.md#注意点)）
+- `distrobox enter <名前> -- <コマンド>` の後ろに行を続けて流すと、それらの行は実行されなかった（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/distrobox.md#注意点)）
 - `dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た
 
 #### 未確認事項
@@ -233,4 +237,109 @@ Container Setup Complete!
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存
 
-- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
+- podman を消すと distrobox も消える（`dnf remove --assumeno podman` の `Removing dependent packages:` に `distrobox` が出た。[podman.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman.md#ロールバック)の手順 6 に当たる）
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | distrobox 1.8.2.3-1.el10_2、Ubuntu 24.04.5 LTS、ffmpeg 6.1.1-3ubuntu5（既存 Homebrew 版 9.0.2） |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 1 | DBX_NAME=ubuntu、公開の Ubuntu 24.04 イメージ。既定値のまま |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 2 | 1.8.2.3 を導入。`session/steps.jsonl` seq 3 で y。追加依存なし（hicolor-icon-theme は導入済み） |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 4 | 版・/usr/bin/distrobox・epel が一致。list は見出しだけ |
+| 実施手順 | — | 4 | 通した | `session/steps.jsonl` seq 5 | `session/steps.jsonl` seq 7 まで待機。successfully created、ubuntu / Created / 指定イメージ |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 8 | `session/steps.jsonl` seq 10 まで待機。Container Setup Complete!、Ubuntu 24.04.5 LTS、<USER>、/home/<USER> |
+| 実施手順 | — | 6 | 通した | `session/steps.jsonl` seq 11 | ボックスのプロンプトへ移り、`session/steps.jsonl` seq 12 の exit でホストへ戻った。host-spawn エラーなし |
+| ボックスのコマンドをホストから呼ぶ（任意） | — | 1 | 通した | `session/steps.jsonl` seq 13 | apt-get update 完了。LANG が日本語なので英語の Reading package lists 相当は日本語で出た |
+| ボックスのコマンドをホストから呼ぶ（任意） | — | 2 | 通した | `session/steps.jsonl` seq 14 | ffmpeg 7:6.1.1-3ubuntu5 と依存の導入完了 |
+| ボックスのコマンドをホストから呼ぶ（任意） | — | 3 | 通した | `session/steps.jsonl` seq 15 | exported successfully と OK! |
+| ボックスのコマンドをホストから呼ぶ（任意） | — | 4 | 通らなかった | `session/steps.jsonl` seq 16 | Homebrew の /home/linuxbrew/.linuxbrew/bin/ffmpeg 9.0.2 が選ばれた。書き出した実体は直接呼ぶと 6.1.1-3ubuntu5（prereq-diagnostics.txt） |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 17 | 更新なしで正常終了 |
+| 更新 | — | 2 | 通した | `session/steps.jsonl` seq 18 | Ubuntu の更新 0、新規 0、削除 0、保留 0 |
+| extra / ロールバック | — | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+Ubuntu の初期化、対話シェルへの移動と exit、ffmpeg の導入と書き出しは成功した。Ubuntu の更新は 0 件。
+
+### 通らなかった手順と見立て
+
+- 任意節の手順 4 は通らなかった。
+- `command -v ffmpeg` は `/home/linuxbrew/.linuxbrew/bin/ffmpeg`、版は 9.0.2。
+- `prereq-diagnostics.txt` の type -a と書き出し先の直接呼び出しでは Ubuntu 版 6.1.1-3ubuntu5 を確認した。
+- 既存プログラムと PATH の優先順による差で、SSH や Hyper-V 固有とする証拠は無い。
+- 過去のコンテナで通常の ffmpeg 呼び出しが通った記録も保持する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/distrobox.md / 実施手順 / 手順 2 | 文言の直し | 直した |
+| 低 | docs/reference/distrobox.md / 補足 / 実施手順 / 手順 2 | 文言の直し | 直した |
+| 低 | docs/distrobox.md / 実施手順 / 手順 6 | 文言の直し | 直した |
+| 低 | docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 1 | 文言の直し | 直した |
+| 中 | docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 4 | ブロックの直し | 直した。ブロック全体の貼り直しは未実施 |
+| 低 | docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 4 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/distrobox.md / 実施手順 / 手順 2: 文言。根拠: C13/session/after-confirm/0002-実施手順-2.txt、prereq-diagnostics.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/reference/distrobox.md / 補足 / 実施手順 / 手順 2: 文言。
+- 根拠: C13/session/after-confirm/0002-実施手順-2.txt、prereq-diagnostics.txt。
+- 対応する出力を VM の証跡で確認。
+- 文言の直しで、ブロックは変更していない。
+- docs/distrobox.md / 実施手順 / 手順 6: 文言。根拠: C13/session/session-001.raw seq 11・12。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 1: 文言。根拠: C13/session/session-001.raw seq 13。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 4: ブロック。
+- 根拠: C13/session/after-confirm/0016-ボックスのコマンドをホストから呼ぶ（任意）-4.txt、prereq-diagnostics.txt。
+- 直した後のブロックは、VM で貼り直していない。
+- docs/distrobox.md / ボックスのコマンドをホストから呼ぶ（任意）/ 手順 4: 文言。
+- 根拠: C13/prereq-diagnostics.txt、session/after-confirm/0016-ボックスのコマンドをホストから呼ぶ（任意）-4.txt。
+- 対応する出力を VM の証跡で確認。
+- 文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- GUI アプリの書き出し、他ディストリ、更新がある場合、ロールバック、実機・aarch64・Secure Boot 有効環境は今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。
+
+## 付録: 修正した ffmpeg 確認ブロックの貼り直し（2026-10-11）
+
+- **状態**: 「ボックスのコマンドをホストから呼ぶ（任意）」の手順 4 を、修正後の原文どおりに貼り直して通した
+  - Homebrew の ffmpeg が優先される環境でも、明示した `~/.local/bin/ffmpeg` は Ubuntu の 6.1.1-3ubuntu5 を返した
+  - 上の C13 の失敗と、修正直後の未再検証の記録は、その時点の結果として保持する
+- 実施: Codex、2026-10-11 17:47 UTC。対象原文はコミット `4a1788d2b41000782ab75a12b46bb253f5b3b200` の `docs/distrobox.md`
+- 環境: Hyper-V、Generation 2、2 vCPU、3072 MB、64 GiB。AlmaLinux 10.2、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64。C13 / after-R1 の既存 VM の現在状態を起動して使い、snapshot の復元はしていない
+- 貼り方: `git show` で保存した原文の写しからドライバで抽出し、SSH の対話 bash に bracketed paste でブロック全体を貼った。確認見出しの後の出力を成功条件と照合した
+
+| 対象 | 判定 | 保存した確認出力 |
+|---|---|---|
+| `command -v ffmpeg` | PATH の優先順を確認 | `/home/linuxbrew/.linuxbrew/bin/ffmpeg` |
+| `~/.local/bin/ffmpeg -version \| head -1` | 修正後の成功条件を満たした | `ffmpeg version 6.1.1-3ubuntu5 ...` |
+
+証跡は司令塔の worktree 内の `verification-work/queued-units/C20/` に保存し、このリポジトリには含めていない。
+
+- `source-sha256.json`: 原文のコミットと文書・ブロックの SHA-256
+- `distrobox-4a1788d.md`・`ffmpeg-block.sh`: 原文の写しと抽出したブロック
+- `FXC-containers/steps.jsonl` seq 1: 抽出したブロックと貼った内容の SHA-256 がともに `906307aaf20d9cbaa183098e491438ff339f7e5fc65d80af9ab344d4b19ba992`
+- `FXC-containers/after-confirm/0001-*`: 上表の確認出力
+- 文書の SHA-256 は `ec0cf4c598214f3713eed533a9c796c7ecc72c8b22095aa40fa1e1435b52932d`。写しを入力にしたドライバの `docCommit` は親リポジトリの値なので、原文の出典は `source-sha256.json` のコミットを使う
+
+今回の追加確認はこの 1 ブロックだけ。新規導入からの通し直し、GUI アプリの書き出し、他ディストリ、ロールバック、実機での実行を追加で確かめたものではない。

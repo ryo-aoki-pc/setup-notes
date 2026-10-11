@@ -1,10 +1,24 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-[手順書](../almalinux-setup.md#virtualbox-実施手順)・[ロールバックと注意点](../extra/virtualbox.md)
+手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](../verification/virtualbox.md#参考資料から分離した記録)
 
 ## 補足
+
+### Windows 11 で VM を作って使う / VM を作る / 手順 2・3: 補足: 選んだ構成
+
+- `createvm --basefolder` で VM ごとの置き場所を指定する。`setproperty machinefolder` は全体の既定を変えるため使わない
+- AlmaLinux 用の OS 種類は `RedHat_64`。EFI、PIIX3、I/O APIC、2 vCPU、4096 MB、64 GiB の可変 VDI、SATA（Intel AHCI）で構成する。容量は Workstation を入れるための例で、必要な量に変更できる
+- Linux 用に VMSVGA と KVM の準仮想化インターフェースを指定し、3D と音声は使わない。`--paravirt-provider kvm` はゲストに見せるインターフェースの指定で、Windows のホストで KVM を動かす指定ではない
+- NIC は Intel PRO/1000 MT Desktop（`82540EM`）の NAT。ホストのネットワーク用ドライバーやアダプターを追加せず、VM から外へ接続できる構成にする
+- SSH は NAT の転送を `127.0.0.1` に限定する。ゲストの DHCP が割り当てる IP は指定せず、Guest Additions による IP の読み取りも前提にしない（[Virtual Networking](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html)）
+
+### スナップショットとクローン / 手順 4: 補足: 完全クローン
+
+- `clonevm --snapshot clean-install --mode machine` は、そのスナップショットの状態を、履歴を含めずコピーする。`--options link` を付けないので、元の VM のディスクに依存しない完全クローンになる
+- MAC アドレスは既定で再生成される。NAT の転送設定はコピーされるため、クローン用のポートに変える
+- コマンドの一次情報は [Oracle VirtualBox User Guide 7.2 — VBoxManage Command Reference](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html) の各節と、Windows 11 に入った `VBoxManage.exe help createvm`・`help modifyvm`・`help createmedium`・`help storagectl`・`help storageattach`・`help startvm`・`help controlvm`・`help snapshot`・`help clonevm`・`help unregistervm`。一部のサブコマンドは `--help` を受け付けないため、`help <コマンド>` で読む
 
 ### 実施手順 / リポジトリを置く / 手順 2: 補足: gpg と sub の fingerprint
 

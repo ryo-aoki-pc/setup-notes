@@ -16,7 +16,7 @@
 ### 実施手順 / 手順 2: 補足: 鍵を先に入れる理由
 
 - Microsoft の公式手順が「鍵 → repo」の順で、**318 MB を落とし終えた後に鍵の取り込みプロンプトで止まらずに済む**
-- `gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](../almalinux-setup.md#github-cli) の「`dnf install` の途中で照合する」形より一歩早い）
+- `gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#github-cli) の「`dnf install` の途中で照合する」形より一歩早い）
 
 実測:
 
@@ -27,7 +27,7 @@ pub   rsa2048 2015-10-28 [SC]
 uid                      Microsoft (Release signing) <gpgsecurity@microsoft.com>
 ```
 
-Microsoft の鍵は**この 1 本だけ**（[gh.md](../almalinux-setup.md#github-cli) の GitHub CLI は 2 本ある）。
+Microsoft の鍵は**この 1 本だけ**（[gh.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#github-cli) の GitHub CLI は 2 本ある）。
 
 ### 実施手順 / 手順 4: 本文中の記録
 
@@ -107,10 +107,11 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
 - **目的**: AlmaLinux 10 に [Visual Studio Code](https://code.visualstudio.com/) を Microsoft 公式の dnf リポジトリから入れる。**aarch64 のパッケージが公式に用意されている**
 - **進め方**: 鍵を照合して取り込み、repo ファイルを置いて `dnf install`。**読者が書き換える変数は無い**
 - **状態**: **実機で本実行済み（2026-09-23）、クリーンインストールの x86_64 VM でも導入・GUI 起動・ロールバックを本実行済み（2026-10-06）**
+  - これは 2026-10-06 の時点の状態
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
-  - **[手順 6](../almalinux-setup.md#vs-code-実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
+  - **[手順 6](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
   - **ただし TTY もディスプレイも無いシェルからの起動は、6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）
   - **VS Code は実機に入れたまま残してある**
   - 手順 1〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
@@ -119,6 +120,9 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順・拡張導入・更新を通した。手順 6 はコンソールで起動し、PNG で Welcome 表示と終了を確認。
+  - 未確認: 実アカウントの認証、Settings Sync、Copilot、エディタ内で拡張が働くこと、実機・aarch64、更新がある場合、ロールバックは今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -145,15 +149,15 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
 | `~/.config/Code` / `~/.vscode` | **どちらも無い** |
 | ディスクの空き | 49 GB（`/`、117 GB 中 69 GB 使用） |
 | デスクトップ | GNOME Shell 49.4。`loginctl` の session 20 が `Type=wayland` `Active=yes` `Remote=yes`（RDP ログイン）、`/run/user/1000/wayland-0` あり |
-| 既存の GUI アプリ | `firefox 156.0`（[firefox.md](../almalinux-setup.md#firefox)）、`wezterm`（[wezterm-nightly.md](../almalinux-setup.md#wezterm)） |
+| 既存の GUI アプリ | `firefox 156.0`（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#firefox)）、`wezterm`（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#wezterm)） |
 
 ### 選択した方針
 
 AlmaLinux 10 aarch64 で VS Code を入れる経路を比べた（2026-09-23 時点）:
 
-| Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](../almalinux-setup.md#firefox) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
+| Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#firefox) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../almalinux-setup.md#vs-code-実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
 
 ### 完了時点の状態
 
@@ -220,7 +224,7 @@ $ head -3 ~/.config/Code/logs/20260923T071537/main.log
 
 `~/.config/Code/GPUCache/` も作られているので、GPU プロセスは動いている。**ただしログに表示バックエンドは記録されないので、Wayland ネイティブか XWayland 経由かはこれでは分からない**（[未確認事項](#未確認事項)）。
 
-以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md 手順 5](../almalinux-setup.md#wezterm)（検証する。AlmaLinux 10 の初期設定にまとめたときに外した）と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
+以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md 手順 5](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#wezterm)（検証する。AlmaLinux 10 の初期設定にまとめたときに外した）と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
 
 | # | 渡したもの | 待った時間 | 結果 |
 |---|---|---|---|
@@ -311,3 +315,70 @@ $ ldd /usr/share/code/code | grep -c 'not found'
 ### 手順内の実測・検証状況
 
 - **大きい**: ダウンロード 318 MB、展開後 953 MB。Raspberry Pi の microSD では取得にも展開にも時間がかかる。`sudo dnf clean packages` でキャッシュを消せる
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C12\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | 依頼で示された after-AS4 由来の既存クローン。meta.json の snapshot=clean-install は準備ツールの既定値で、開始スナップショットの証拠ではない |
+| 共通 bash | 導入済み。C12 の対象証跡からコミットの値は確定しない |
+| 対象版 | Microsoft code 1.141.0-1791276813.el8（x64）、timonwong.shellcheck 0.48.0 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。手順 6 はコンソールの WezTerm でキー入力し、PNG で確認した |
+
+### 手順ごとの結果
+
+| 節 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `session/steps.jsonl` seq 31 | 本文の公開署名鍵のfingerprint・uidと一致 |
+| 実施手順 | 2 | 通した | `session/steps.jsonl` seq 32 | Microsoft公開鍵の登録を確認、取得ファイル削除 |
+| 実施手順 | 3 | 通した | `session/steps.jsonl` seq 33 | repo読み戻し |
+| 実施手順 | 4 | 通した（版・容量の差） | `session/steps.jsonl` seq 34–35 | assumenoで中断→yで導入。1.141.0、343 M、導入後1.0 G（本文例318 M / 953 Mとは異なる） |
+| 実施手順 | 5 | 通した | `session/steps.jsonl` seq 36 | x64、from_repo=vscode、Vendor Microsoft、not found=0、desktopファイル |
+| 実施手順 | 6 | 通した（起動と表示まで） | `session/steps.jsonl` seq 39、screens/vscode-ready.png、vscode-closed.png | コンソールのWezTermへ原文codeをキー入力。WelcomeとContinue without Signing Inのボタン表示をPNGで確認。ボタンは選ばずAlt+F4で閉じた。選択後は未確認 |
+| 実施手順 | 7 | 通した | `session/steps.jsonl` seq 40 | ~/.config/Code・~/.vscode、拡張一覧は空 |
+| 拡張機能を入れる（任意） | 1・箇条書きの導入例 | 通した | `session/steps.jsonl` seq 41–43 | 空一覧→timonwong.shellcheck導入→0.48.0一覧 |
+| 更新 | 1 | 通した | `session/steps.jsonl` seq 44 | 行うべきことなし |
+| extra / ロールバック | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- 手順 6 は SSH から起動せず、GNOME コンソールの WezTerm に code をキー入力した。
+- `screens/vscode-ready.png` の Welcome と Continue without Signing In の表示、`screens/vscode-closed.png` の閉じた状態を確認した。
+- ボタンの選択・その後の画面は確認していない。
+- ライブラリ不足は 0、拡張一覧は空から timonwong.shellcheck@0.48.0 に変わった。
+
+C12/result.md は「サインインせず進められる」とする付録案を含むが、PNG と操作記録に残るのはボタンの表示と Alt+F4 による終了。ボタン選択後の画面を確かめたとは書かない。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/vscode.md / 実施手順 / 手順 4 | 文言の直し | 直した |
+| 低 | docs/vscode.md / 実施手順 / 手順 6 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/vscode.md / 実施手順 / 手順 4: 文言。根拠: C12/session/session-001.raw seq 34・35。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/vscode.md / 実施手順 / 手順 6: 文言。根拠: C12/screens/vscode-ready.png、session/after-confirm/0036-実施手順-5.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- 実アカウントの認証、Settings Sync、Copilot、エディタ内で拡張が働くこと、実機・aarch64、更新がある場合、ロールバックは今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。
+
+### 文書レビューの追加修正（2026-10-11）
+
+- Codex の別担当が、手順 6 の箇条書きと証跡の範囲のずれを指摘した。1.141.0 ではボタンの表示と Alt+F4 で閉じるところまでしか確認していないため、「選ぶとサインインせず進められる」を、Welcome 画面とボタンの表示までの記述に直した。コードブロックは変えていない。

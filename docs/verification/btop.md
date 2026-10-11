@@ -42,22 +42,26 @@ color_theme = "Default"
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [btop](https://github.com/aristocratos/btop)（CPU・メモリ・ディスク・ネットワーク・プロセスをまとめて見る TUI。`htop` の後継的な位置づけ）を入れる
-- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
+- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](../verification/btop.md#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
 - **状態**: **x86_64 のクリーン VM で実施手順 1〜3 を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-22）。実機には入れていない**
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）と手順 1〜3 を通した
+  - これは 2026-10-06 の時点の状態
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）と手順 1〜3 を通した
   - 確認したこと: `epel-release` が `extras` から入る、`btop 1.4.7-1.el10_2` が EPEL から解決される、署名鍵の fingerprint が本文の値と一致する、pty を与えた起動で `btop.conf` が生成される
   - コンテナで未確認だった TUI の各欄の表示と `q` での終了は、2026-10-06 のクリーン VM で確認した。テーマを変えた見え方は未確認
   - **実機（Raspberry Pi 5）では本実行していない**ので、下表の実機列は「この手順を適用した結果」ではなく**現時点の状態**を書いてある
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順 1〜3・設定ファイル・更新、TUI の m / Esc / q と設定生成を確認。
+  - 未確認: GPU 測定・テーマや設定の変更、実機・aarch64、更新がある場合、ロールバックは今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-22 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
-| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](../almalinux-setup.md) の手順 2 は不要） | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release 10-6.el10` を導入 |
+| EPEL | **有効**（`epel-release 10-8.el10_2`。[epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 は不要） | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release 10-6.el10` を導入 |
 | 有効なリポジトリ | baseos / appstream / crb / extras / epel / raspberrypi ほか | baseos / appstream / crb / extras（→ epel を追加） |
 | btop | **未導入** | `btop 1.4.7-1.el10_2`（epel） |
 | 一緒に入る依存 | — | `hicolor-icon-theme 0.17-20.el10`（appstream） |
-| 端末 | WezTerm nightly（[wezterm-nightly.md](../almalinux-setup.md#wezterm)） | 無し（`script` で pty を与えた起動のみ） |
+| 端末 | WezTerm nightly（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#wezterm)） | 無し（`script` で pty を与えた起動のみ） |
 
 > [!NOTE]
 > 出力例の値は `<HOSTNAME>` / `<USER>` のプレースホルダで書いてある。バージョン（`1.4.7-1.el10_2`）は実行日によって変わる。**鍵の fingerprint は公開情報なので本文に書いてある。**
@@ -111,7 +115,7 @@ ayu.theme
 
 ### 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順 1〜3）と手順 1〜3 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順 1〜3）と手順 1〜3 を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、`dnf install` に `-y` を付け、起動の 1 行だけ `timeout 5 script -qec "btop" /dev/null` に置き換えている。
 
 | 手順 | 結果 |
 |---|---|
@@ -165,9 +169,9 @@ ayu.theme
 **この文書が Homebrew を使わないのは、EPEL 版が upstream に追いついているため。**
 
 - ほかの Homebrew 系の手順書（当時の homebrew.md の冒頭に挙げた 17 本）は、どれも RPM（BaseOS・AppStream・EPEL）に無いか古いので Homebrew を選んでいる
-- 同じ規則（同版なら RPM）で、[image-tools.md](../almalinux-setup.md#画像の道具-実施手順) の Trivy は公式の dnf リポジトリにした
-- [distrobox](../almalinux-setup.md#distrobox-実施手順)・[podman-compose](../almalinux-setup.md#podman-compose-実施手順)・[podman-tui](../almalinux-setup.md#podman-tui-実施手順) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）
-- EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](../extra/btop.md#注意点)）
+- 同じ規則（同版なら RPM）で、[image-tools.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md) の Trivy は公式の dnf リポジトリにした
+- [distrobox](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/distrobox.md)・[podman-compose](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-compose.md)・[podman-tui](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-tui.md) も EPEL だが、理由は版ではなく、システムの podman と組むため（[ツール一覧の選び方](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#選び方)の規則 3）
+- EPEL が遅れ始めたら Homebrew に移せるが、**そのときは片方だけにする**（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/btop.md#注意点)）
 
 ```
 $ dnf -q list --showduplicates btop
@@ -178,3 +182,54 @@ $ brew info btop | head -2
 Resource monitor that shows usage and stats for processor, memory, disks, network and processes
 ```
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C12\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | 依頼で示された after-AS4 由来の既存クローン。meta.json の snapshot=clean-install は準備ツールの既定値で、開始スナップショットの証拠ではない |
+| 共通 bash | 導入済み。C12 の対象証跡からコミットの値は確定しない |
+| 対象版 | EPEL btop 1.4.7-1.el10_2、rocm-smi 7.1.1-2.el10_2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `session/steps.jsonl` seq 1–2 | EPEL 1.4.7-1.el10_2、y に回答、rocm-smi とともに導入。鍵の再確認は出なかった |
+| 実施手順 | 2 | 通した | `session/steps.jsonl` seq 3–6、raw | /usr/bin/btop、from_repo=epel。CPU・メモリ・ディスク・ネットワーク・プロセスの TUI。m で画面変化、Esc で戻り、q で prompt |
+| 実施手順 | 3 | 通した | `session/steps.jsonl` seq 7 | btop.conf（10913 bytes）と themes/ |
+| 設定ファイル | 1 | 通した | `session/steps.jsonl` seq 8 | 既定設定の先頭20行 |
+| 更新 | 1 | 通した | `session/steps.jsonl` seq 9 | 行うべきことなし |
+| extra / ロールバック | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+TUI の CPU・メモリ・ディスク・ネットワーク・プロセスを表示し、m → Esc → q を確認した。btop.conf は 10,913 バイト。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| — | 対象文書 | 手順書の直しを要する食い違いは確認しなかった | 直しなし |
+
+### 手順書を直した所
+
+- 手順書・extra・参考資料の直しは無い。
+
+### 確かめていないこと
+
+- GPU 測定・テーマや設定の変更、実機・aarch64、更新がある場合、ロールバックは今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

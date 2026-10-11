@@ -29,23 +29,27 @@
 ### 対象と検証環境
 
 - **目的**: compose ファイル（`compose.yaml`）で書いた複数のコンテナを、AlmaLinux 10 の rootless の podman でまとめて動かす
-- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
+- **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-compose を入れ、確認用の compose ファイル（Apache と、つながりを確かめるコンテナ）を起動する。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜6を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
+  - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜6、[更新](../almalinux-setup.md#podman-compose-更新)、[ロールバック](../extra/podman-compose.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に流して**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜6、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-compose.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman-compose.md#ロールバック)を通した
   - 確認したこと:
     - EPEL の podman-compose 1.5.0 が入り、`podman compose` からも呼ばれる
     - `up -d` で pod・ネットワーク・2 つのコンテナができ、公開したポートとサービス名で `web` に届く
     - `down` で元に戻る
   - **確認していないこと**: SELinux が有効なときの `:Z`、docker-compose をプロバイダにしたとき、再起動の後の動き
   - aarch64（Raspberry Pi 5）では通していない
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順 1〜6・更新を通した。公開ポートとサービス名の HTTP 応答を確認。
+  - 未確認: 新しい内容のイメージへの更新、ロールバック、実機・aarch64・Secure Boot 有効環境は今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../almalinux-setup.md#podman-実施手順) と同じ作り） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順で導入） |
-| EPEL | 未確認 | 未設定 → [epel.md](../almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) と同じ作り） |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入） |
+| EPEL | 未確認 | 未設定 → [epel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) の手順 2 で `epel-release-10-6.el10` を導入 |
 | podman-compose | 未導入 | `podman-compose-1.5.0-1.el10_1`（epel） |
 
 > [!NOTE]
@@ -55,7 +59,7 @@
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../almalinux-setup.md#podman-実施手順) の実施手順の後）の状態:
+検証コンテナ（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -68,11 +72,11 @@
 
 | 選択肢 | 採否 |
 |---|---|
-| **EPEL の podman-compose（1.5.0）** | **採用。** システムの podman と組んで使うので RPM にした（[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 3）。`dnf upgrade` で上がる |
-| Homebrew の podman-compose（1.6.0） | 不採用。依存として podman 6.1.2 などを連れてきて、PATH の先頭でシステムの podman を隠す（[ツール一覧の注意点](../tool-catalog.md#注意点)の実測） |
+| **EPEL の podman-compose（1.5.0）** | **採用。** システムの podman と組んで使うので RPM にした（[ツール一覧の選び方](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#選び方)の規則 3）。`dnf upgrade` で上がる |
+| Homebrew の podman-compose（1.6.0） | 不採用。依存として podman 6.1.2 などを連れてきて、PATH の先頭でシステムの podman を隠す（[ツール一覧の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#注意点)の実測） |
 | pip で入れる（`pip install podman-compose`） | 不採用。`dnf` の管理の外に入り、更新も別になる |
 | Docker 社の docker-compose を `podman compose` から使う | 対象外。`podman compose` は docker-compose が入っていればそちらを優先する（手順 2 の補足）。本書では入れていない |
-| PC の起動時に自動で動かす | compose では行わない。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)で動かす。compose ファイルから Quadlet の定義を作る podlet は[ツール一覧](../tool-catalog.md#cli-コンテナ)に載せた |
+| PC の起動時に自動で動かす | compose では行わない。[podman.md の Quadlet](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#quadlet-で自動起動する任意)で動かす。compose ファイルから Quadlet の定義を作る podlet は[ツール一覧](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#cli-コンテナ)に載せた |
 
 ### 完了時点の状態
 
@@ -169,13 +173,13 @@ hello from compose
 
 | 行 | 意味 |
 |---|---|
-| `image:` | 完全な名前で書く（[podman.md 手順 6](../almalinux-setup.md#podman-実施手順) の補足） |
-| `ports: "127.0.0.1:8081:8080"` | この PC の 127.0.0.1 の 8081 を、コンテナの 8080 につなぐ。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の 8080 と重ならないようにした |
+| `image:` | 完全な名前で書く（[podman.md 手順 6](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#実施手順) の補足） |
+| `ports: "127.0.0.1:8081:8080"` | この PC の 127.0.0.1 の 8081 を、コンテナの 8080 につなぐ。[podman.md の Quadlet](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#quadlet-で自動起動する任意)の 8080 と重ならないようにした |
 | `volumes: ./html:/var/www/html:Z` | compose ファイルのある場所からの相対パスで、ページのディレクトリを渡す。`:Z` は SELinux のラベルの付け替え |
 | `command: sleep infinity` | 何もせずに動き続ける |
 | `init: true` | コンテナの PID 1 に小さな init を置き、止めるときの信号を `sleep` に届ける |
 
-`init: true` が無いと、`sleep infinity` が止める信号（SIGTERM）を無視し、[ロールバック](../extra/podman-compose.md#ロールバック)の `down` が 10 秒待たされた。付けると 1 秒かからなかった。
+`init: true` が無いと、`sleep infinity` が止める信号（SIGTERM）を無視し、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/podman-compose.md#ロールバック)の `down` が 10 秒待たされた。付けると 1 秒かからなかった。
 
 ```
 level=warning msg="StopSignal SIGTERM failed to stop container compose-sample_check_1 in 10 seconds, resorting to SIGKILL"
@@ -188,3 +192,63 @@ level=warning msg="StopSignal SIGTERM failed to stop container compose-sample_ch
 ### 補足
 
   - `-T` を付けても同じだった（`-T` は擬似端末を付けないだけで、標準入力はつながったまま）
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | podman-compose 1.5.0-1.el10_1、Podman 5.8.2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 19 | 1.5.0 を導入。`session/steps.jsonl` seq 20 で y。Python 3 個を追加、pyyaml は導入済み |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 21 | 1.5.0 / Podman 5.8.2 / epel / 外部 provider を確認。表示順は compose → podman |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 22 | compose.yaml 読み戻し一致。web は 127.0.0.1:8081、:Z。check は init:true |
+| 実施手順 | — | 4 | 通した | `session/steps.jsonl` seq 23 | web と check の名前が出た |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 24 | 2 コンテナ Up、pod Running、8081 の公開、hello from compose |
+| 実施手順 | — | 6 | 通した | `session/steps.jsonl` seq 25 | サービス名 web:8080 から hello from compose |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 26 | 更新なし |
+| 更新 | — | 2 | 通した | `session/steps.jsonl` seq 27 | 公開イメージ pull 完了、up -d は 2 コンテナ名を返した |
+| extra / ロールバック | — | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- web・check の 2 コンテナが Up、pod は Running。
+- 127.0.0.1:8081 の HTTP とサービス名 web:8080 は hello from compose を返した。
+- 既存の hello-web（127.0.0.1:8080）と併存した。
+- pull と up -d は実施したが、新しい内容へ変わったことは確認していない。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/podman-compose.md / 実施手順 / 手順 1 | 文言の直し | 直した |
+| 低 | docs/podman-compose.md / 実施手順 / 手順 2 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/podman-compose.md / 実施手順 / 手順 1: 文言。根拠: C13/session/session-001.raw seq 19・20、environment-extra.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/podman-compose.md / 実施手順 / 手順 2: 文言。根拠: C13/session/after-confirm/0021-実施手順-2.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- 新しい内容のイメージへの更新、ロールバック、実機・aarch64・Secure Boot 有効環境は今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

@@ -325,7 +325,7 @@
 
 | 手順・用途 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
-| [VirtualBox](docs/almalinux-setup.md#virtualbox-実施手順) | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
+| VirtualBox（[AlmaLinux 10](docs/almalinux-setup.md#virtualbox-実施手順)・[Windows 11](docs/windows-setup.md#virtualbox-windows-11-で使う)） | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
 | [Hyper-V](docs/windows-setup.md#hyper-v-実施手順) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
 | [VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
 | [VirtualBox Guest Additions（bootc のゲスト）](docs/almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |

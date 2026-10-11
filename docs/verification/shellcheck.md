@@ -150,13 +150,17 @@ $ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
 - **目的**: AlmaLinux 10 に [ShellCheck](https://www.shellcheck.net/)（シェルスクリプトの静的検査）と [shfmt](https://github.com/mvdan/sh)（整形）を入れる。**このリポジトリの `CLAUDE.md` が「よく使うコマンド」として `shellcheck -x scripts/wireguard/wg-vpn.sh` を挙げているのに、実機に入っていなかった**のが動機
 - **進め方**: Homebrew で 2 つ同時に入れ、`scripts/wireguard/wg-vpn.sh` を実際に検査する。**読者が書き換えるのは冒頭の変数ブロック（検査対象のパス）だけ**
 - **状態**: **実機で本実行済み（2026-09-23）**。**x86_64 のクリーン VM でも現行の実施手順を本実行済み（2026-10-06）**
+  - これは 2026-10-06 の時点の状態
   - 下表のホストで `brew install shellcheck shfmt` を実行し、`shellcheck 0.11.0` と `shfmt 3.14.1` が入って常用中
-  - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)）
-  - 手順 2〜3 と[検査を調整する（任意）](../almalinux-setup.md#shellcheck-と-shfmt-検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
+  - **`wg-vpn.sh`（1,300 行）を 0.11.0 で検査して警告 1 件（SC2034）を見つけ、同じ変更でそれを直して 0 件にした**（[手順 4 の補足](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/shellcheck.md#実施手順)）
+  - 手順 2〜3 と[検査を調整する（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/shellcheck.md#検査を調整する任意)・[shfmt と `.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)は、2026-09-23 に同じ OS のコンテナで**この文書のコードブロックをそのまま貼って**通し直した
   - コンテナで確認したこと: ボトルが降りる、スモークテストが同じ結果になる、EPEL 版の版と名前
   - **コンテナでは手順 4〜5（`wg-vpn.sh` の検査）は実行していない**（リポジトリを置いていないため）
   - 2026-10-05: `jq` の前提と空値の確認、`SC_TARGET` の親ディレクトリを調べる形に直した。スタブで、別パスへの変更・JSON の件数集計・`jq` が無い場合の中断を確認した
   - shfmt 3.14.1 の公式ソースと配布バイナリを確認し、一時ファイルで EditorConfig の優先順位を検証した。オプションなし・`-d`・`-l`・`-w` は設定の空白 2、`-i 4` は空白 4、`-s` は既定のタブになった。実機のスクリプトは変更していない
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順・整形と検査調整の任意節・更新を通した。検査対象は wg-vpn.sh の複製。警告 0 件。
+  - 未確認: SC2034 の抑制による終了コードの変化は、元から警告 0 件なので未確認。実機・aarch64、更新がある場合、ロールバックは今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -170,7 +174,7 @@ $ diff /tmp/a.txt /tmp/b.txt && echo '差分なし'
 | jq | `jq 1.7.1`（RPM。`--format json` の集計に使う） | 無し（集計はしていない） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#shellcheck-と-shfmt-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/shellcheck.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -246,7 +250,7 @@ $ brew leaves | wc -l
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - 本書の[手順 4 の実測](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
+  - 本書の[手順 4 の実測](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/shellcheck.md#実施手順)が 0.11.0 での再検査で、そこで見つかった SC2034 を直した結果、**いまは再び 0 件**になっている
 
 ### 参照
 
@@ -256,15 +260,15 @@ $ brew leaves | wc -l
 - [mvdan/sh — README](https://github.com/mvdan/sh) — shfmt のオプションと `.editorconfig` の対応キー
 - [shfmt 3.14.1 のオプション処理](https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/main.go) — Parser / Printer のオプションを指定した場合の EditorConfig の扱い（2026-10-05 にソースを確認）
 - `shellcheck --help` / `shfmt --help` — 全オプション
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 
 ### 付録: コンテナでの検証記録（2026-09-23）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[検査を調整する（任意）](../almalinux-setup.md#shellcheck-と-shfmt-検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)と手順 2〜3、[検査を調整する（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/shellcheck.md#検査を調整する任意)・[`.editorconfig` の優先順位](#shfmt-と-editorconfig-の優先順位実測)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。
 
 | 手順 | 結果 |
 |---|---|
-| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](../almalinux-setup.md)） |
+| 前提. Homebrew | `NONINTERACTIVE=1` 付きの公式インストーラ → `Homebrew 7.0.6`（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md)） |
 | 2. 導入 | `Pouring shellcheck--0.11.0.arm64_linux.bottle.1.tar.gz`（49.1 MB）と `shfmt--3.14.1.arm64_linux.bottle.tar.gz`（3.4 MB）。**依存の `gmp` / `libffi` はこちらでは新規に取得された**（実機は導入済みだった）。ソースビルドは発生しない |
 | 3. 検証 | `version: 0.11.0` / `3.14.1`。スモークテストは実機と同じく SC2086 が 1 件・`rc=1`、shfmt も差分が出て `rc=1` |
 | 検査を調整する | `mktemp -d` に `.shellcheckrc`（`disable=SC2034`）を置くと該当の指摘が消えて `rc` が `1` → `0` に変わることを確認 |
@@ -280,7 +284,7 @@ $ brew leaves | wc -l
 - `# shellcheck source=` による `source` 先の明示（`-x` が効かない件の解決策として挙げただけ）
 - `-f gcc` / `-f diff` / `-f checkstyle` の出力（`tty` と `json` だけ実測した）
 - `--list-optional` で有効にできる追加の検査
-- エディタ連携（[VS Code](../almalinux-setup.md#vs-code-実施手順) の `timonwong.shellcheck` 拡張など）
+- エディタ連携（[VS Code](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md) の `timonwong.shellcheck` 拡張など）
 - ロールバック（`brew uninstall shellcheck shfmt`）の本実行
 
 ---
@@ -363,4 +367,71 @@ rc=1
 
 ### 検査を調整する（任意） / 手順 2
 
-   - **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](#未確認事項)）
+   - **本書ではリポジトリに `.shellcheckrc` を置いていない**（[未確認事項](shellcheck.md#未確認事項)）
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C12\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | 依頼で示された after-AS4 由来の既存クローン。meta.json の snapshot=clean-install は準備ツールの既定値で、開始スナップショットの証拠ではない |
+| 共通 bash | 導入済み。C12 の対象証跡からコミットの値は確定しない |
+| 対象版 | ShellCheck 0.11.0、shfmt 3.14.1、既存 jq 1.8.2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---|---|---|
+| 前提確認 | jq | 通した | `session/steps.jsonl` seq 19、58 | brew の jq を利用 |
+| 実施手順 | 1（2ブロック） | 通した | `session/steps.jsonl` seq 20–21 | 検証用のパスを --set で指定、値読み戻し |
+| 実施手順 | 2 | 通した | `session/steps.jsonl` seq 22 | ShellCheck 0.11.0 / shfmt 3.14.1 |
+| 実施手順 | 3 | 通した | `session/steps.jsonl` seq 23 | SC2086 1件・rc=1、整形差分・rc=1 |
+| 実施手順 | 4 | 通した | `session/steps.jsonl` seq 24 | bash -n / shellcheck -x ともrc=0 |
+| 実施手順 | 5 | 通した | `session/steps.jsonl` seq 25 | JSON length=0、重大度別・style出力なし |
+| shfmt で整形を確かめる（任意） | 1 | 通した | `session/steps.jsonl` seq 26 | 差分889行、ファイル一覧 |
+| 同上 | 2 | 通した | `session/steps.jsonl` seq 27 | 一時複製で1304→1453行、後片付け |
+| 検査を調整する（任意） | 1 | 通した | `session/steps.jsonl` seq 28 | 76行目のdisable=SC1090 |
+| 同上 | 2 | 通した（効果の確認に限界） | `session/steps.jsonl` seq 29 | 一時 .shellcheckrc でrc=0。元から0件なのでSC2034抑制によるrcの変化は観測できない |
+| 更新 | 1 | 通した | `session/steps.jsonl` seq 30 | 両方already installed |
+| 前提 / jq の追加導入 | — | 条件に当たらず飛ばした | `session/steps.jsonl` seq 19・58 | 既存 jq 1.8.2 を使用 |
+| extra / ロールバック | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- 検査対象は同じコミットの wg-vpn.sh の複製（`/home/<USER>/C12-target/wg-vpn.sh`）。
+- SC_SEVERITY=style、SHFMT_INDENT=2。
+- 構文・ShellCheck は rc=0、JSON は 0 件。
+- 意図した SC2086 と整形差分は rc=1。
+- 整形は一時複製だけで 1304 → 1453 行、元の SHA-256 は一致した（seq 58）。
+- jq は既存の Homebrew 版を使い、追加導入は条件に当たらず飛ばした。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/shellcheck.md / 検査を調整する（任意）/ 手順 2 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/shellcheck.md / 検査を調整する（任意）/ 手順 2: 文言。
+- 根拠: C12/session/steps.jsonl seq 24・25・29、after-confirm/0029-検査を調整する（任意）-2.txt。
+- 対応する出力を VM の証跡で確認。
+- 文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- SC2034 の抑制による終了コードの変化は、元から警告 0 件なので未確認。実機・aarch64、更新がある場合、ロールバックは今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

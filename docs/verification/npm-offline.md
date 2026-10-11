@@ -11,7 +11,7 @@
 > [!WARNING]
 > **x86_64 のクリーンインストール VM でも検証した手順書**（2026-10-06、SELinux Enforcing）で、実機では本実行していない。Mason は、上流の LazyVim starter に加え、今回の新規 VM では自分用の LazyVimStarter でも確かめた（[対象と検証環境](#対象と検証環境)）。
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](../extra/ssh-socks-tunnel.md#注意点)）
+> - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[ssh-socks-tunnel.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#注意点)）
 
 ### 実施手順 / 手順 1: 本文中の記録
 
@@ -35,15 +35,16 @@ Complete!
 ### 対象と検証環境
 
 - **目的**: インターネットに出られない AlmaLinux 10 のホストで、Neovim の Mason が、npm で配られているパッケージ（LSP サーバー・リンターなど）を入れられるようにする
-  - 入れる・上げるときだけ、[ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) のトンネルで外に出る
+  - 入れる・上げるときだけ、[ssh-socks-tunnel.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md) のトンネルで外に出る
   - 入れたパッケージは、トンネルが無くても動く
 - **進め方**: AppStream の Node.js と npm を dnf で入れ、npm には `https_proxy` でトンネル（`socks5h://127.0.0.1:1080`）を使わせる。そのシェルから Neovim を開き、Mason に入れさせる
   - この文書には変数が無い。オンラインのホストの変数は、ssh-socks-tunnel.md の手順 1 にある
 - **状態**: **x86_64 のクリーンインストール VM で現行の実施手順 1〜5 とロールバック 1・2 を検証済み（2026-10-06、SELinux Enforcing）。個人用 LazyVimStarter `ae7f049` の Mason 11 ツールも導入完了。実機・aarch64 は未実施**
+  - これは 2026-10-06 の時点の状態
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした（homebrew-offline.md と同じ形）
   - Mason を使う設定は、上流の [LazyVim/starter](https://github.com/LazyVim/starter) に、LazyVim の extra の `lang.json` と `lang.markdown` を足したもの。自分用の設定（LazyVimStarter）では確かめていない
-  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1（今の AlmaLinux 10 の初期設定の「Neovim」の手順 1）、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](../almalinux-setup.md#npm-のオフライン導入-更新)、[ロールバック](../extra/npm-offline.md#ロールバック)を通した
+  - 前提（当時の homebrew-offline.md の手順 1〜5。今の ssh-socks-tunnel.md の手順 1〜3・dnf の節と homebrew-offline.md の手順 1〜3。neovim.md の手順 1（今の AlmaLinux 10 の初期設定の「Neovim」の手順 1）、LazyVim の starter）をトンネル越しに通した状態から、**この文書のコードブロックをそのまま**、擬似端末で開いたオンラインのホストの対話の bash に貼って、手順 1〜5、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/npm-offline.md#ロールバック)を通した
   - 貼り方はブラケットペースト無し。手順 1 とロールバックの手順 1 は、ブラケットペースト有りでも通した
   - このクラウドの出口からは Mason のパッケージの一覧の版を調べる先（api.mason-registry.dev）に届かなかったので、検証のときだけ、オンラインのホストのその名前をセッションのプロキシへ中継した（[付録](#付録-コンテナでの検証記録2026-09-30)）
   - 確認したこと:
@@ -67,11 +68,15 @@ Complete!
 | コンテナのホスト | Ubuntu 24.04 / x86_64 のクラウドの VM、Docker 29.3.1（cgroup v1） | 同左 |
 
 > [!NOTE]
-> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[ssh-socks-tunnel.md 手順 1](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) で設定する。
+> この文書には変数が無い。オンラインのホストの変数（`OFFLINE_HOST`・`OFFLINE_USER`）は、[ssh-socks-tunnel.md 手順 1](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/ssh-socks-tunnel.md#実施手順) で設定する。
 >
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`22.23.2` など）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Hyper-V の R6 を C14 の途中終了と C15 の続行に分けて記録した（2026-10-11、Codex）
+  - C14 は前提導入中に応答喪失し本文・更新未実施。C15 は実施手順 1〜5・更新 1〜3を通し、npm 4 件と更新時の Mason 11 件を確認。ロールバック・実機・aarch64 は今回未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -87,7 +92,7 @@ Complete!
 
 ### 完了時点の状態
 
-**検証のコンテナでの出力**（[手順 5](../almalinux-setup.md#npm-のオフライン導入-実施手順)。転送無しでログインし直したオフラインのホストのシェル）:
+**検証のコンテナでの出力**（[手順 5](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順)。転送無しでログインし直したオフラインのホストのシェル）:
 
 ```
 $ env | grep -i _proxy
@@ -106,8 +111,8 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 ```
 
 - 同じシェルで JSON のファイルを開くと、json-lsp の LSP（`jsonls`）が動いた
-- `/etc/dnf/dnf.conf` の `proxy=socks5h://127.0.0.1:1080` は残る（[ssh-socks-tunnel.md のロールバック](../extra/ssh-socks-tunnel.md#ロールバック)の手順 1 で消す）
-- `~/.npm` に npm のキャッシュが残る（[ロールバック](../extra/npm-offline.md#ロールバック)の手順 2 で消す）
+- `/etc/dnf/dnf.conf` の `proxy=socks5h://127.0.0.1:1080` は残る（[ssh-socks-tunnel.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/ssh-socks-tunnel.md#ロールバック)の手順 1 で消す）
+- `~/.npm` に npm のキャッシュが残る（[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/npm-offline.md#ロールバック)の手順 2 で消す）
 
 ### 付録: コンテナでの検証記録（2026-09-30）
 
@@ -181,7 +186,7 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 - 実機（x86_64 の PC・Raspberry Pi 5）での本実行と、aarch64
 - SELinux が Enforcing のホスト
 - 自分用の設定（LazyVimStarter）が Mason に入れさせるパッケージ
-- Homebrew の node が入っているホスト（[手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `command -v`）
+- Homebrew の node が入っているホスト（[手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順) の `command -v`）
 - install スクリプトの中で自分でファイルを取る npm のパッケージ
 - キャッシュ（`~/.npm`）が無いホストで、`https_proxy` を入れ忘れたときに Mason の npm の導入がどう終わるか
 - 長い導入の途中で ssh が切れたとき
@@ -212,11 +217,11 @@ npm error network request to https://registry.npmjs.org/-/ping failed, reason: g
 
 ### 手順中の実測・検証状況の記録
 
-- **npm だけは `ALL_PROXY` では足りない**: [手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `export` を飛ばすと、Mason の npm のパッケージだけが、試し直しを繰り返してなかなか終わらない（検証では 29 分。[手順 3](../almalinux-setup.md#npm-のオフライン導入-実施手順) の補足）
+- **npm だけは `ALL_PROXY` では足りない**: [手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順) の `export` を飛ばすと、Mason の npm のパッケージだけが、試し直しを繰り返してなかなか終わらない（検証では 29 分。[手順 3](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順) の補足）
 
 ### 手順中の実測・検証状況の記録
 
-- **Homebrew の node が入っていると、Mason はそちらの npm を使う**: Mason は PATH の先頭の `npm` を使い、`brew shellenv` は Homebrew の `bin` を PATH の先頭に置く。[手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の `command -v` で確かめる（本書では、Homebrew の node が入ったホストを確かめていない）
+- **Homebrew の node が入っていると、Mason はそちらの npm を使う**: Mason は PATH の先頭の `npm` を使い、`brew shellenv` は Homebrew の `bin` を PATH の先頭に置く。[手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/npm-offline.md#実施手順) の `command -v` で確かめる（本書では、Homebrew の node が入ったホストを確かめていない）
 
 ### 手順中の実測・検証状況の記録
 
@@ -298,3 +303,68 @@ npm error   code: 'ECONNREFUSED',
 ### 選択した方針
 
 | npm のキャッシュ・Mason のディレクトリを運ぶ、社内に npm のミラー（Verdaccio など）を建てる | 同じアーキのホスト、運ぶ手段、ミラーのサーバー | 本書では扱わない（ネットワークで届かないときの方法。確かめていない） |
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V |
+| VM | Generation 2、構成版 12.0、各 2 vCPU・64 GB・Default Switch の eth0 1 枚、Secure Boot disabled |
+| メモリ | オンライン 1536 MB。オフラインは C14 が 2048 MB、C15 が 3072 MB |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64` |
+| 開始 | オンライン `<HOSTNAME>` は after-AS4、オフライン `<OFFLINE_HOST>` は clean-install（依頼の前提）。C15 は C14 終了時の partial-R6 を保存した既存ディスクから続行し、復元・再作成はしていない |
+| 状態 | オフラインの SELinux Enforcing・firewalld active。既定経路・DNS を外し、IPv6 を無効にしたのは手順書の外の準備 |
+| 導入版 | Homebrew 7.0.9、jq 1.8.2、Neovim 0.12.6、LazyVimStarter `8e4a074`、Mason 2.3.1、共通 bash `67abb84` |
+| 貼り方 | SSH の対話の bash にドライバでブロックを順に貼り、オンラインからオフラインの `<USER>` にパスワード SSH。C14 は両 VM の GNOME に画面操作でログインし、C15 は GNOME にログインしなかった |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C14\`・`C15\` の下。表の C14・C15 はその単位からの相対パスで、seq は `session/steps.jsonl` の番号
+- `meta.json` の snapshot はどちらも clean-install と書くが、Existing 呼出しの既定値。開始元の復元を裏付ける値ではない
+- R6 は 2 回に分かれた。C14 は npm の前提導入中にオフライン VM が応答しなくなり中止。C15 はメモリを 2048 MB から 3072 MB にし、GNOME にログインせず続けたところ再発しなかった。原因は分かっていない（[npm の記録](npm-offline.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- C14 のログイン後の PNG は、`screens/online/login-20261011-113934-3-after.png` がアクティビティ画面、`screens/offline/login-20261011-114023-3-after.png` がようこそ画面。本文の操作は GNOME の端末への貼り付けではない
+
+### 手順ごとの結果
+
+| 回・節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| C14 前提 / Neovim 1・2 | 通した | C14 `online/session/steps.jsonl` seq 33〜35、`online/session/after-confirm/0035-実施手順-Neovim-2.txt`。0.12.6 の bottle と場所 |
+| C14 前提 / 設定の依存導入 | 初回は通らなかった、補完後は通した | 同 seq 36〜42、`online/session/session-001.raw`。EPEL 無しで wl-clipboard が見つからず、参照先の EPEL 1・2 を補い、同じ依存ブロックが完了 |
+| C14 前提 / 設定配置・プラグイン取得 | 通した | 同 seq 43〜52、`offline/session/steps.jsonl` seq 5。設定 HEAD `8e4a074`、headless 取得と lock 復元 |
+| C14 前提 / LazyVimStarter 手順 17 | 通らなかった | 同 seq 53〜56、`online/session/session-001.raw`、`offline/session/steps.jsonl` seq 6・7。Mason Installed 5 / Installing 4 / Queued 2、操作応答を失った |
+| C14 実施手順 1〜5・更新 1〜3 | 未実施 | C14 の steps は前提で終了。Node/npm が依存として入ったことと、本文を貼ったことは別 |
+| C15 実施手順 1 | 通した | C15 `online/session/steps.jsonl` seq 6・7、`online/session/session-001.raw`。Node/npm 導入済み、「行うべきことはありません」「完了しました!」 |
+| C15 実施手順 2 | 通した | 同 seq 8、`online/session/after-confirm/0008-実施手順-2.txt`。v22.23.2 / 10.9.8、/usr/bin/node・npm、null 2 行、PONG 233ms |
+| C15 実施手順 3 | 通した（npm 4 件） | 同 seq 9〜13、`online/session/session-001.raw`。Installed 9、bash-language-server・json-lsp・markdownlint-cli2・yaml-language-server の成功ログ。lua-language-server・marksman は残存 lockfile で失敗 |
+| C15 実施手順 4 | 通した | 同 seq 14〜16・18。参照先の exit と転送無し再ログインを実施。seq 18 は手順を行ったことの後からの記録で、操作は手順 5 の前 |
+| C15 実施手順 5 | 通した | 同 seq 17、`online/session/after-confirm/0017-実施手順-5.txt`。env 無出力、bin 9 コマンド、markdownlint-cli2 v0.23.3 (markdownlint v0.41.1)、ENOTFOUND と「届かない（期待どおり）」 |
+| C15 更新 1 | 通した | 同 seq 24・25、raw。Node/npm の更新対象無し |
+| C15 更新 2 | 通した（一覧更新） | 同 seq 26〜32、raw、`mason-update-notice.txt`。Successfully updated 1 registry.、Installed 11。U の案内無しで、パッケージ更新は条件に当たらず飛ばした |
+| C15 更新 3 | 通した | 同 seq 33、raw。exit でオンラインに戻った |
+| extra ロールバック | 未実施 | C14・C15 の steps に実施記録無し |
+
+### 通らなかった手順と見立て
+
+- C14 は EPEL 未導入で依存導入に失敗した。EPEL を補うと同じブロックが通ったため、clean-install と初期設定の「EPEL 済み」の仮定の違いと判断した
+- C14 の Mason は ALL_PROXY がある一方、本文手順 2 の https_proxy はまだ無かった。npm が使うプロキシの順序に問題がある見立てだが、npm のエラーを読む要求も timeout になったので、今回の通信失敗の理由は確定していない
+- C14 の応答喪失後の `screens/offline-mason-state.png` は黒い画面。Mason の確認には使えない。新規 SSH の banner timeout は C14 の報告にあり、steps にその診断の出力は無い。停止原因を SSH の貼り方・Hyper-V・OOM のいずれとも断定しない
+- C15 `offline/session/session-001.raw` の前回起動の journal 読み取りは `no persistent journal was found`。OOM の有無は確かめられなかった。3072 MB・GNOME 未ログインで再発しなかったことだけを確認した
+- C15 は設定導入済みを前提にして開始した。開始時の Mason packages は 5 件で、本文で npm 4 件が加わった。残存ロックの 2 件は更新で開き直すと自動で成功した。手動削除はしていない。C14 の前提導入の失敗判定を上書きしない
+- TUI の件数・通知は raw の画面文字で確認。GNOME の PNG による Mason の確認ではない。C15 の報告末尾の負の所要時間は記録時刻と整合しないので、所要時間の根拠にしない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| 前提で npm の導入完了まで必要に見える | 直した（文言） | 実施手順のリードに「Mason の npm のパッケージは、まだ入っていなくてよい」を追加。C15 `offline/session/steps.jsonl` seq 2 と本文 seq 9〜13 で、設定のみの開始と後からの npm 導入を確認 |
+| dnf の導入済み・更新無しの出力が英語だけ | 直した（文言） | 実施手順 1・更新 1 に日本語の完了・更新無しを併記。C15 raw の seq 6・24 に対応する出力。ブロックは変更無し |
+| 初期設定の EPEL 前提と clean-install の違い・Neovim の版の例 | 未対応（司令塔に渡す） | 対象外の初期設定の修正案として報告 |
+| 初期設定の Neovim 参照で npm の導入を先に要求する順序 | 未対応（司令塔に渡す） | 本文の前提の一文だけでは参照先の成功条件は変わらない |
+| 応答喪失の原因・入れ子 SSH の状態表示 | 未対応 | 原因未確定。道具の表示はゲストの確認出力と区別 |
+
+### 確かめていないこと
+
+- LazyVimStarter の手順 18、初期設定の Neovim 手順 4、JSON 編集の LSP 動作、GUI のフォント・IME、実機・aarch64・PyPI・Homebrew の node が先にある環境は今回未実施
+- 更新対象を用意した Node/npm・Mason の更新、ロールバック、設定ファイル競合、キャッシュ無しの取得、長い取得中の意図的切断は未実施
+- 従来の VM の 11 件導入・撤去と、今回の 5→9→11 件および残存ロックの結果は別の履歴

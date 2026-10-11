@@ -6576,6 +6576,243 @@
 
 ---
 
+### VirtualBox: Windows 11 で VM を作って使う
+
+> [!IMPORTANT]
+> - **管理者ではない Windows PowerShell（5.1）に貼る**。[Windows 11 で使う](#virtualbox-windows-11-で使う)で VirtualBox を入れてから行う
+> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)。通していなければ Ctrl+V で貼る
+> - AlmaLinux 10 の x86_64 の ISO を使う。インストーラーの画面は人が操作する
+
+- 上から順に貼り、反転表示の「確認」から後ろを箇条書きで確かめる
+- [検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)。AlmaLinux 10 のホストでこの節は確かめていない
+- ふだんの操作は[使い方の基本](#virtualbox-使い方の基本)、状態を残す・複製するなら[スナップショットとクローン](#virtualbox-スナップショットとクローン)、要らなくなったら[VM を消す](#virtualbox-vm-を消す)
+
+#### VirtualBox: VM を作る
+
+1. 変数を設定する（`VB_ISO` は必ず値を入れる）。
+
+   ```powershell
+   $VB_ISO = ''
+   ```
+
+   ```powershell
+   $VB_VM = 'alma10'
+   $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
+   $VB_CPU = 2
+   $VB_MEM_MB = 4096
+   $VB_DISK_MB = 65536
+   $VB_SSH_PORT = 2222
+   $VB_CLONE_PORT = 2223
+   $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ ISO = $VB_ISO; VM = $VB_VM; Base = $VB_BASE; CPU = $VB_CPU; MemoryMB = $VB_MEM_MB; DiskMB = $VB_DISK_MB; SshPort = $VB_SSH_PORT; ClonePort = $VB_CLONE_PORT } | Format-List
+   ```
+
+   - `VB_ISO` はインストール用の ISO のパス
+   - `VB_BASE` の下に VM の名前のフォルダーを作る。VirtualBox 全体の既定の置き場所は変えない
+   - SSH のポートはこの PC で使っていない番号にする。クローン用は別の番号にする
+   - 新しい窓を開いたら、この手順を貼り直す
+
+1. VM を登録し、EFI・CPU・メモリ・画面・NAT を設定する。
+
+   ```powershell
+   if (-not $VB_ISO -or -not (Test-Path -LiteralPath $VB_ISO -PathType Leaf)) { throw '中断: ISO のパスを入れて貼り直す' }
+   if (Test-Path -LiteralPath "$VB_BASE\$VB_VM") { throw '中断: 同じ名前のフォルダーがある' }
+   $registered = & $vbm list vms
+   if ($registered | Where-Object { $_.StartsWith('"' + $VB_VM + '" {') }) { throw '中断: 同じ名前の VM がある' }
+   & $vbm createvm --name $VB_VM --ostype RedHat_64 --basefolder $VB_BASE --register
+   if ($LASTEXITCODE -ne 0) { throw '中断: VM を作れなかった' }
+   & $vbm modifyvm $VB_VM --firmware efi --chipset piix3 --ioapic on --cpus $VB_CPU --memory $VB_MEM_MB --paravirt-provider kvm --graphicscontroller vmsvga --vram 128 --accelerate-3d off --audio-enabled off --nic1 nat --nictype1 82540EM --cable-connected1 on --nat-pf1 "ssh,tcp,127.0.0.1,$VB_SSH_PORT,,22" --boot1 dvd --boot2 disk --boot3 none --boot4 none
+   if ($LASTEXITCODE -ne 0) { throw '中断: 設定に失敗した' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^(name|CfgFile|firmware|chipset|cpus|memory|graphicscontroller|nic1|nictype1|boot[1-4])=|^Forwarding'
+   ```
+
+   - `firmware="EFI"`、`chipset="piix3"`、指定した `cpus`・`memory`、`graphicscontroller="vmsvga"`、`nic1="nat"` が出ればよい
+   - `Forwarding(0)="ssh,tcp,127.0.0.1,<指定したポート>,,22"` は、この PC の中だけから SSH を受け付ける設定
+   - エラーが出たら中断する。途中まで作った VM は[VM を消す](#virtualbox-vm-を消す)で消してから作り直す
+
+1. 可変のディスクと光学ドライブを作り、ISO を付ける。
+
+   ```powershell
+   & $vbm createmedium disk --filename "$VB_BASE\$VB_VM\$VB_VM.vdi" --size $VB_DISK_MB --format VDI --variant Standard
+   if ($LASTEXITCODE -ne 0) { throw '中断: ディスクを作れなかった' }
+   & $vbm storagectl $VB_VM --name SATA --add sata --controller IntelAhci --portcount 2
+   if ($LASTEXITCODE -ne 0) { throw '中断: コントローラーを作れなかった' }
+   & $vbm storageattach $VB_VM --storagectl SATA --port 0 --device 0 --type hdd --medium "$VB_BASE\$VB_VM\$VB_VM.vdi"
+   if ($LASTEXITCODE -ne 0) { throw '中断: ディスクを付けられなかった' }
+   & $vbm storageattach $VB_VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium $VB_ISO
+   if ($LASTEXITCODE -ne 0) { throw '中断: ISO を付けられなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^"SATA-[01]-0"='
+   Get-ChildItem -LiteralPath "$VB_BASE\$VB_VM" | Format-Table Name, Length
+   ```
+
+   - `SATA-0-0` に `.vdi`、`SATA-1-0` に ISO のパスが出ればよい
+   - フォルダーに `.vbox` と `.vdi` が並べばよい
+
+#### VirtualBox: VM を起動して OS を入れる
+
+1. VM のウィンドウを開いて起動する。
+
+   ```powershell
+   & $vbm startvm $VB_VM --type gui
+   ```
+
+   - `has been successfully started` が出て、VM のウィンドウにインストーラーの起動メニューが出ればよい
+
+1. VM の画面で AlmaLinux のインストーラーを最後まで進める。
+
+   - `Install AlmaLinux` を選び、言語・インストール先・ソフトウェア・ユーザーを設定する
+   - SSH で入るなら、ゲスト側で OpenSSH サーバーを有効にし、ゲストのファイアウォールで SSH を許可する
+   - マウスとキーが VM に入ったら、右 Ctrl（既定のホスト キー）でこの PC に戻る
+   - **次の手順は、インストールを終え、ゲストの操作で電源を切ってから貼る**
+
+1. 停止した VM の光学ドライブから ISO を外す。
+
+   ```powershell
+   & $vbm storageattach $VB_VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive
+   if ($LASTEXITCODE -ne 0) { throw '中断: ISO を外せなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^"SATA-1-0"='
+   ```
+
+   - `"SATA-1-0"="emptydrive"` が出ればよい
+
+#### VirtualBox: Windows のホストで VM の動作を確かめる
+
+1. VM を画面無しで起動し、状態と仮想化の載り方を確かめる。
+
+   ```powershell
+   & $vbm startvm $VB_VM --type headless
+   if ($LASTEXITCODE -ne 0) { throw '中断: VM が起動しなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^VMState='
+   & $vbm showvminfo $VB_VM --log 0 | Select-String -Pattern 'fall back to NEM|Snail execution mode'
+   ```
+
+   - `VMState="running"` が出ればよい
+   - `fall back to NEM` か `Snail execution mode` が出たら Hyper-V 経由で動いている（[注意点](extra/virtualbox.md#注意点)）
+
+1. この PC から SSH でゲストに入れるか確かめる。
+
+   - この窓で `ssh -p $VB_SSH_PORT <ゲストのユーザー>@127.0.0.1` を打つ
+   - 初回はホスト鍵の指紋をゲスト側と照合して承認する。ゲストのプロンプトが出ればよい。`exit` で戻る
+   - つながらなければ起動を待ち、ゲストの SSH サーバーとファイアウォールを確かめる
+
+---
+
+### VirtualBox: 使い方の基本
+
+- 以下は Windows 11 のホスト用。管理者ではない Windows PowerShell（5.1）で、[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
+
+| すること | コマンド |
+|---|---|
+| 登録した VM の一覧 | `& $vbm list vms` |
+| 動いている VM の一覧 | `& $vbm list runningvms` |
+| ウィンドウを開いて起動 | `& $vbm startvm $VB_VM --type gui` |
+| 画面無しで起動 | `& $vbm startvm $VB_VM --type headless` |
+| ゲストに電源ボタンを送る | `& $vbm controlvm $VB_VM acpipowerbutton` |
+| 状態を読む | `& $vbm showvminfo $VB_VM --machinereadable` |
+| 強制的に電源を切る（未保存の内容は失われる） | `& $vbm controlvm $VB_VM poweroff` |
+
+---
+
+### VirtualBox: スナップショットとクローン
+
+> [!WARNING]
+> **この項の手順 3 の復元では、スナップショットより後の変更は消える**。
+
+- Windows 11 の管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
+- スナップショットは停止した VM で取る。クローンはスナップショットの時点から独立したディスクを持つ完全クローンを作る
+
+1. ゲストに電源ボタンを送り、停止を確かめる。
+
+   ```powershell
+   & $vbm controlvm $VB_VM acpipowerbutton
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^VMState='
+   ```
+
+   - `VMState="poweroff"` になるまで、最後のコマンドを打ち直して待つ
+   - すでに停止していたら電源ボタンはエラーになる。その場合も状態を確かめる
+   - **次の手順は、`poweroff` になってから貼る**
+
+1. 停止した VM のスナップショットを取る。
+
+   ```powershell
+   & $vbm snapshot $VB_VM take clean-install
+   if ($LASTEXITCODE -ne 0) { throw '中断: スナップショットを取れなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm snapshot $VB_VM list
+   ```
+
+   - `Name: clean-install` と UUID が出ればよい
+
+1. 元に戻すときは、VM を停止してからスナップショットを復元する。
+
+   ```powershell
+   & $vbm snapshot $VB_VM restore clean-install
+   if ($LASTEXITCODE -ne 0) { throw '中断: 復元できなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm snapshot $VB_VM list
+   ```
+
+   - `Name: clean-install` の行の末尾に `*` が付けばよい
+
+1. スナップショットから完全クローンを作り、SSH の転送ポートを変える。
+
+   ```powershell
+   $VB_CLONE = "$VB_VM-clone"
+   if (Test-Path -LiteralPath "$VB_BASE\$VB_CLONE") { throw '中断: クローン先のフォルダーがある' }
+   $registered = & $vbm list vms
+   if ($registered | Where-Object { $_.StartsWith('"' + $VB_CLONE + '" {') }) { throw '中断: 同じ名前の VM がある' }
+   & $vbm clonevm $VB_VM --snapshot clean-install --name $VB_CLONE --basefolder $VB_BASE --mode machine --register
+   if ($LASTEXITCODE -ne 0) { throw '中断: クローンを作れなかった' }
+   & $vbm modifyvm $VB_CLONE --nat-pf1 delete ssh
+   if ($LASTEXITCODE -ne 0) { throw '中断: 転送を外せなかった' }
+   & $vbm modifyvm $VB_CLONE --nat-pf1 "ssh,tcp,127.0.0.1,$VB_CLONE_PORT,,22"
+   if ($LASTEXITCODE -ne 0) { throw '中断: 転送を設定できなかった' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm showvminfo $VB_CLONE --machinereadable | Select-String -Pattern '^(name|CfgFile|Forwarding)|^"SATA-0-0"='
+   ```
+
+   - 新しい名前・設定とディスクのパス・クローン用の転送ポートが出ればよい
+   - クローンにはディスク内のユーザー・ホスト名・SSH のホスト鍵がコピーされることがある。別の PC として使う前に、ゲスト側で元との同一性を確かめ、ホスト名と SSH のホスト鍵を変更する
+   - 起動は `& $vbm startvm $VB_CLONE --type headless`、SSH は `ssh -p $VB_CLONE_PORT <ゲストのユーザー>@127.0.0.1`
+
+---
+
+### VirtualBox: VM を消す
+
+> [!CAUTION]
+> **この項の手順 1 は、指定した VM のディスクとスナップショットも消す（取り戻せない）**。必要なデータを先に退避する。
+
+- Windows 11 の管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
+
+1. 停止した VM の登録とディスクを消す（取り戻せない。`VB_REMOVE` は必ず値を入れる）。
+
+   ```powershell
+   $VB_REMOVE = ''
+   ```
+
+   ```powershell
+   if (-not $VB_REMOVE) { throw '中断: 消す VM の名前を VB_REMOVE に入れる' }
+   $info = & $vbm showvminfo $VB_REMOVE --machinereadable
+   if ($LASTEXITCODE -ne 0) { throw '中断: VM が見つからない' }
+   if ($info -notcontains 'VMState="poweroff"') { throw '中断: ゲストの操作で電源を切ってから貼り直す' }
+   & $vbm unregistervm $VB_REMOVE --delete
+   if ($LASTEXITCODE -ne 0) { throw '中断: 削除に失敗した' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   & $vbm list vms
+   Get-ChildItem -LiteralPath "$VB_BASE\$VB_REMOVE" -Force -ErrorAction SilentlyContinue | Format-Table Name
+   ```
+
+   - 一覧から指定した VM が消え、`.vbox`・`.vdi`・`Snapshots` が無くなればよい
+   - `Logs` だけ残ることがある。要らなければ、消した VM のフォルダーであることを確かめ、エクスプローラーでそのフォルダーを消す
+
+---
+
 ### VirtualBox: Windows 11 の更新
 
 - この節は、[Windows 11 で使う](#virtualbox-windows-11-で使う)の手順 1 と同じ管理者の Windows PowerShell（5.1）に貼る

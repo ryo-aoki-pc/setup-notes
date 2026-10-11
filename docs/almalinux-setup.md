@@ -4155,7 +4155,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 版は `distrobox.noarch  1.8.2.3-1.el10_2  epel` のように 1 つだけ出る
-   - 一緒に入るのは `hicolor-icon-theme` だけ
+   - `hicolor-icon-theme` が未導入なら一緒に入る。導入済みなら追加されない
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -4202,7 +4202,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - プロンプトが `📦[<USER>@ubuntu ~]$` に変わる。ここから先はボックスの中のシェル
-   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が 4 行出る
+   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が出ることがある。出なくても、ボックスのプロンプトに入れればよい
    - `exit` でホストに戻る
    - **後ろの節の手順は、`exit` でホストに戻ってから貼る**
 
@@ -4220,7 +4220,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get update
    ```
 
-   - `Reading package lists...` で終わる
+   - `Reading package lists...` または `パッケージリストを読み込んでいます... 完了` で終わる
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 1. ボックスに ffmpeg を入れる。
@@ -4245,10 +4245,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v ffmpeg
-   ffmpeg -version | head -1
+   ~/.local/bin/ffmpeg -version | head -1
    ```
 
-   - `/home/<USER>/.local/bin/ffmpeg` と `ffmpeg version 6.1.1-3ubuntu5 ...` が出ればよい
+   - 最後の行が `ffmpeg version 6.1.1-3ubuntu5 ...` なら、書き出したコマンドを呼べている
+   - `command -v ffmpeg` が `/home/<USER>/.local/bin/ffmpeg` 以外なら、通常の `ffmpeg` は既存の別の版を呼ぶ。ボックスの版を使うときは `~/.local/bin/ffmpeg` で呼ぶ
 
 ---
 
@@ -4316,7 +4317,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    rclone config create dropbox dropbox >/dev/null
    ```
 
-   - `rclone v1.75.1` と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
+   - `rclone v1.75.2` のような版と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
    - `http://127.0.0.1:53682/auth?state=...` が表示され、`Waiting for code...` で許可を待つ（手順 3 で許可する）
    - SSH で入っているときは、`ssh -L` でトンネルを張った端末で貼る
 
@@ -4518,7 +4519,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    brew upgrade rclone
    ```
 
-   - 新しい版が無ければ `Warning: rclone 1.75.1 already installed` と出る
+   - 新しい版が無ければ `Warning: rclone 1.75.2 already installed` のように出る
    - 依存の一覧と `[y/n]` が出たら、更新するものを見て `y` と答える
    - **次の手順は、更新が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
 
@@ -4594,7 +4595,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `echo` が出す URL の末尾に版が入っている（例 `dropbox-lnx.x86_64-270.4.3312.tar.gz`、約 87 MiB）
-   - `gpgv: Good signature from "Dropbox Automatic Signing Key <linux@dropbox.com>"` が出れば、`~/.dropbox-dist` に展開されている
+   - `gpgv: Good signature from "Dropbox Automatic Signing Key <linux@dropbox.com>"`（日本語では同じ署名者からの `正しい署名`）が出れば、`~/.dropbox-dist` に展開されている
    - `BAD signature` のときは展開されない（`tar` は `&&` の後ろにある）ので、ここで止める
 
 1. 展開した版を確かめ、落としたファイルを消す。
@@ -4621,7 +4622,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `command -v` が `/home/<USER>/.local/bin/dropbox` を出す
-   - `Dropbox daemon version: 270.4.3312` と `Dropbox command-line interface version: 2026.05.06` が出る
+   - `Dropbox daemon version: 272.4.3798` と `Dropbox command-line interface version: 2026.09.28` のように、本体と CLI の版が出る
 
 1. ユーザーサービスを置いて、Dropbox を起動する。
 
@@ -6262,7 +6263,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    gdu-go -n /usr/share | tail -5
    ```
 
-   - `Version: v5.37.0` と出る
+   - `Version: v5.38.0` のように版が出る
    - `command -v gdu` の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ（任意）](#gdu-gdu-の名前で呼ぶ任意)をやるまでは、これが正しい状態
    - 最後の `gdu-go -n` では、サイズの大きい順に並んだ一覧が出る
 
@@ -8422,7 +8423,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - ファイルに `gpgcheck=1` があることを確かめる
-   - 版は `trivy.x86_64  0.74.0-1  trivy` のように出る
+   - 公式の候補は `trivy.x86_64  0.75.0-1  trivy` のように出る。EPEL の候補も並ぶことがある
    - 初回は署名鍵の取り込みを 1 回聞かれる
    - fingerprint が `825A D903 6F7C 850E 6A6F ED49 35B8 ACA4 4FD9 CA9F`（`trivy-repo <oss@aquasec.com>`）であることを確かめてから `y` と答える。違っていれば `N` で中断する
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -8436,7 +8437,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    rpm -q trivy
    ```
 
-   - 1 行目が `Version: 0.74.0` で、`/usr/bin/trivy` と `trivy-0.74.0-1.x86_64` が出る
+   - 1 行目の `Version:` が、手順 3 で導入した RPM の版と一致し、`/usr/bin/trivy` とその RPM の名前が出ればよい
 
 1. わざと欠陥のある Containerfile を hadolint に渡し、指摘が出ることを確かめる。
 
@@ -8488,7 +8489,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    trivy image --image-src podman --severity HIGH,CRITICAL localhost/image-check:1
    ```
 
-   - 初回は脆弱性のデータベース（117.64 MiB）を落とす
+   - 初回は脆弱性のデータベースを落とす（容量は取得時点で変わる）
    - `Detected OS  family="redhat" version="10.1"` の後に、`Report Summary` の表が出る
    - 脆弱性の結果は、データベースの日付とイメージの中身で変わる
 
@@ -8924,7 +8925,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 で、オフラインのホストへ接続する
 > - 手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)も通す
-> - **前提**: 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入-実施手順) の Homebrew と、[Neovim](#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
+> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入-実施手順)・[Neovim](#neovim) と Mason を使う設定（LazyVim など）を導入する。Mason の npm パッケージは未導入でよい
 > - **手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
 > - 手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
@@ -8942,7 +8943,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    sudo dnf install -y nodejs nodejs-npm
    ```
 
-   - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!` で終わる
+   - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!`（日本語では `完了しました!`）で終わる。導入済みなら `Nothing to do.`（`行うべきことはありません。`）も出る
    - `Failed to download metadata for repo` で止まったら、dnf がトンネルを通っていない
      - `Curl error (6)`（名前を引けない）なら、SSH の SOCKS トンネルの[dnf にもトンネルを使わせる（任意）](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)の設定が無い
      - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（同書の手順 2 から張り直す）
@@ -9017,7 +9018,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    sudo dnf upgrade -y nodejs nodejs-npm
    ```
 
-   - 上げるものが無ければ `Nothing to do.` で終わる
+   - 上げるものが無ければ `Nothing to do.`（日本語では `行うべきことはありません。`）と `Complete!`（`完了しました!`）で終わる
 
 1. Neovim でファイルを開き、Mason のパッケージを上げる。
 
@@ -9068,7 +9069,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 版は `podman-compose.noarch  1.5.0-1.el10_1  epel` のように 1 つだけ出る
-   - 一緒に入るのは Python のライブラリ 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
+   - 一緒に入るのは未導入の Python のライブラリで、最大 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -9083,7 +9084,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    podman compose version
    ```
 
-   - `podman version 5.8.2` と `podman-compose version 1.5.0` の 2 行が出る
+   - `podman-compose version 1.5.0` と `podman version 5.8.2` の 2 行が出る
    - `/usr/bin/podman-compose`、`podman-compose 1.5.0-1.el10_1 epel` が出る
    - 最後の `podman compose` は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
 
@@ -10526,7 +10527,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - **リポジトリ全体に効かせる**なら `.shellcheckrc` を置く
-   - `disable` に挙げたコードが消えて `rc` が変わる
+   - `disable` に挙げたコードの指摘が消える。元から対象の指摘が無い場合は `rc` は変わらない
 
 ---
 
@@ -10636,7 +10637,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.` が出ればよい
+   - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）が出ればよい
 
 ---
 
@@ -11849,8 +11850,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 最初の 1 回だけ鍵の取り込みを聞かれる
-   - `Importing GPG key 0x2980AECF:` の `Fingerprint:` が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
-   - `Metadata cache created.` で終わる
+   - 鍵の表示は `Importing GPG key 0x2980AECF:`（日本語は `GPG 鍵 0x2980AECF をインポート中:`）
+   - fingerprint が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
+   - `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）で終わる
    - **次の手順は、鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. `sudo` を付けない dnf にも、同じ鍵の確認を 1 回だけ通す。
@@ -11909,9 +11911,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](#epel-と-rpm-fusion) に書いた鍵）
      - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
    - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
-   - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
-1. `Complete!` だけでは成功とは限らないので、モジュールが動いているか確かめる。
+1. `Complete!`（日本語では `完了しました!`）だけでは成功とは限らないので、モジュールが動いているか確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -12077,7 +12079,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - トランザクション表を見て `[y/N]` に答える
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
-   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!` が出てから貼る**（続けて貼ると答えとして食われる）
+   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは（この節の手順 2 の代わりに）、[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 だけを行う。
 
@@ -12162,7 +12164,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
-   - `code ... 318 M` と `Installed size: 953 M` が出る。よければ、続く `dnf install` の `[y/N]` に答えて入れる
+   - `code ... 343 M` と `Installed size: 1.0 G` のように容量が出る。よければ、続く `dnf install` の `[y/N]` に答えて入れる
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. VS Code が入ったか確かめる。
@@ -12188,7 +12190,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - アプリ一覧の「Visual Studio Code」からでも同じ
    - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（冒頭の前提と、この手順の補足）
-   - ウィンドウが開き、初回は Welcome 画面が出る。1.140.0 では `Continue without Signing In` を選ぶとサインインせず進められる
+   - ウィンドウが開き、初回は Welcome 画面と `Continue without Signing In` のボタンが表示される
    - ウィンドウが出たことを確かめる
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VS Code への操作として食われる）
 

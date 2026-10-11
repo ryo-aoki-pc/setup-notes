@@ -9,6 +9,8 @@ Windows・AlmaLinux の実施手順の正本は2冊のセットアップ。案�
 
 集約後に main へ入った [Codeg の Windows 公開範囲の更新（0e8dc65）](https://github.com/ryo-aoki-pc/setup-notes/commit/0e8dc6589485cd4205ff5d0d0618511a156da0b4)も正本と関連資料へ反映した。下表の移動元は当初の基準を保つ。
 
+[VirtualBox の使用手順と Hyper-V の検証記録の追加（421be2d）](https://github.com/ryo-aoki-pc/setup-notes/commit/421be2df74f6120da0168d8e9b5cbeac9af8dda1)も反映した。当初の対応322件を保持し、後から加わった見出し8件は末尾の追補に記録する。
+
 ## 移動元の基準
 
 | リポジトリ | ブランチ | コミット |
@@ -348,3 +350,16 @@ Windows・AlmaLinux の実施手順の正本は2冊のセットアップ。案�
 | md-table-excel | [README.md: 使い方](https://github.com/ryo-aoki-pc/md-table-excel/blob/6f049421dc41132604f13546caca6362d85daad4/README.md#使い方) | [Windows 11: mdtable-で-markdown-の表を-excel-と往復する](../windows-setup.md#mdtable-で-markdown-の表を-excel-と往復する) |
 | md-table-excel | [README.md: excel-で編集するときの注意](https://github.com/ryo-aoki-pc/md-table-excel/blob/6f049421dc41132604f13546caca6362d85daad4/README.md#excel-で編集するときの注意) | [AlmaLinux 10: mdtable-のブックを-excel-で編集するときの注意](../almalinux-setup.md#mdtable-のブックを-excel-で編集するときの注意) |
 | md-table-excel | [README.md: excel-で編集するときの注意](https://github.com/ryo-aoki-pc/md-table-excel/blob/6f049421dc41132604f13546caca6362d85daad4/README.md#excel-で編集するときの注意) | [Windows 11: mdtable-のブックを-excel-で編集するときの注意](../windows-setup.md#mdtable-のブックを-excel-で編集するときの注意) |
+
+## main の更新で加わった見出しの追補
+
+| リポジトリ | 移動前の原文と見出し | 現在の節 |
+| --- | --- | --- |
+| setup-notes | [docs/grok-build-remote.md: Windows 11 の既存の受信規則を Private の全送信元に切り替える](https://github.com/ryo-aoki-pc/setup-notes/blob/0e8dc6589485cd4205ff5d0d0618511a156da0b4/docs/grok-build-remote.md#windows-11-の既存の受信規則を-private-の全送信元に切り替える) | [Windows 11: Grok Build の受信規則の移行](../windows-setup.md#grok-build-のブラウザ操作-windows-11-の既存の受信規則を-private-の全送信元に切り替える) |
+| setup-notes | [docs/virtualbox.md: Windows 11 で VM を作って使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#windows-11-で-vm-を作って使う) | [Windows 11: VirtualBox で VM を作って使う](../windows-setup.md#virtualbox-windows-11-で-vm-を作って使う) |
+| setup-notes | [docs/virtualbox.md: VM を作る](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#vm-を作る) | [Windows 11: VirtualBox の VM を作る](../windows-setup.md#virtualbox-vm-を作る) |
+| setup-notes | [docs/virtualbox.md: VM を起動して OS を入れる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#vm-を起動して-os-を入れる) | [Windows 11: VirtualBox の VM を起動して OS を入れる](../windows-setup.md#virtualbox-vm-を起動して-os-を入れる) |
+| setup-notes | [docs/virtualbox.md: Windows のホストで VM の動作を確かめる](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#windows-のホストで-vm-の動作を確かめる) | [Windows 11: VirtualBox の VM の動作確認](../windows-setup.md#virtualbox-windows-のホストで-vm-の動作を確かめる) |
+| setup-notes | [docs/virtualbox.md: 使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#使い方の基本) | [Windows 11: VirtualBox の使い方](../windows-setup.md#virtualbox-使い方の基本) |
+| setup-notes | [docs/virtualbox.md: スナップショットとクローン](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#スナップショットとクローン) | [Windows 11: VirtualBox のスナップショットとクローン](../windows-setup.md#virtualbox-スナップショットとクローン) |
+| setup-notes | [docs/virtualbox.md: VM を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/virtualbox.md#vm-を消す) | [Windows 11: VirtualBox の VM を消す](../windows-setup.md#virtualbox-vm-を消す) |
