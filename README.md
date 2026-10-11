@@ -3,7 +3,7 @@
 実機で検証した構築・設定手順と、失敗時の切り分けを記録するリポジトリ。
 手順書には操作・前提・成功条件を記載する。実施日・環境・結果・失敗例は `docs/verification/<文書名>.md`、採用理由や背景説明は `docs/reference/<文書名>.md`、ロールバックと注意点は `docs/extra/<文書名>.md` に分け、各手順書の冒頭から参照する。
 
-検証の実施範囲と過去の結果は、[README の検証記録](docs/verification/readme.md)と[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)、[3 方式の共同 VM 検証](docs/hypervisor-verification.md)を参照する。各手順書の冒頭からも対応する検証記録を開ける。
+検証の実施範囲と過去の結果は、[README の検証記録](docs/verification/readme.md)と[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)、[3 方式の共同 VM 検証（正式測定の観測値と未完の範囲）](docs/hypervisor-verification.md)を参照する。各手順書の冒頭からも対応する検証記録を開ける。
 
 ## 手順書とツール
 
