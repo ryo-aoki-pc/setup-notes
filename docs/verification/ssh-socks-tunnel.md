@@ -105,6 +105,7 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
   - もとは [homebrew-offline.md](../homebrew-offline.md) の手順 1〜4・7〜9 と、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意) のホストオンリーアダプターの節の手順 2・3 にあった同じ仕組みを、共有の前提として 1 本にした
   - bootc のその節は、その後トンネルを使わずにホストでビルドする形に変わった。今これを前提にするのは、homebrew-offline.md と [npm-offline.md](../npm-offline.md)
 - **状態**: **Windows 11 のオンラインのホストから、x86_64 のクリーンインストール VM への現行の転送・dnf・転送終了・dnf 設定のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。Linux 発のオンラインのホストは従来のコンテナのみ**
+  - これは 2026-10-06 の時点の状態
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - コマンドは、この文書に移す前に、次の検証で通したもの
     - コンテナ（[homebrew-offline.md の付録](homebrew-offline.md#付録-コンテナでの検証記録2026-09-29)、2026-09-29）: 手順 1〜3（手順 3 の確かめる URL は Homebrew の 4 つだった）、dnf の節、トンネルを閉じる節（jq の確かめを含んでいた）、ロールバック
@@ -133,6 +134,10 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<OFFLINE_USER>` / `<VM_IP>` / `<USER>` のプレースホルダで書いてある。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Linux 2 台の Hyper-V VM で実施手順 1〜3・dnf の任意節・トンネルを閉じる手順 1〜3 を通した（2026-10-11、Codex）
+  - loopback の待ち受け、GitHub 200、dnf のキャッシュ作成、転送終了後の通信失敗を確認。実機・aarch64・異常系は今回未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -229,3 +234,52 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 | オフラインのホストから `ssh -D 1080` | オフラインのホストからオンラインのホストへ ssh でログインできること（オンラインのホストで sshd を動かす） | 不採用。ssh の向きが逆のときの代わりになる形だが、確かめていない |
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V |
+| VM | Generation 2、構成版 12.0、各 2 vCPU・64 GB・Default Switch の eth0 1 枚、Secure Boot disabled |
+| メモリ | オンライン 1536 MB。オフラインは C14 が 2048 MB、C15 が 3072 MB |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64` |
+| 開始 | オンライン `<HOSTNAME>` は after-AS4、オフライン `<OFFLINE_HOST>` は clean-install（依頼の前提）。C15 は C14 終了時の partial-R6 を保存した既存ディスクから続行し、復元・再作成はしていない |
+| 状態 | オフラインの SELinux Enforcing・firewalld active。既定経路・DNS を外し、IPv6 を無効にしたのは手順書の外の準備 |
+| 導入版 | Homebrew 7.0.9、jq 1.8.2、Neovim 0.12.6、LazyVimStarter `8e4a074`、Mason 2.3.1、共通 bash `67abb84` |
+| 貼り方 | SSH の対話の bash にドライバでブロックを順に貼り、オンラインからオフラインの `<USER>` にパスワード SSH。C14 は両 VM の GNOME に画面操作でログインし、C15 は GNOME にログインしなかった |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C14\`・`C15\` の下。表の C14・C15 はその単位からの相対パスで、seq は `session/steps.jsonl` の番号
+- `meta.json` の snapshot はどちらも clean-install と書くが、Existing 呼出しの既定値。開始元の復元を裏付ける値ではない
+- R6 は 2 回に分かれた。C14 は npm の前提導入中にオフライン VM が応答しなくなり中止。C15 はメモリを 2048 MB から 3072 MB にし、GNOME にログインせず続けたところ再発しなかった。原因は分かっていない（[npm の記録](npm-offline.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- C14 のログイン後の PNG は、`screens/online/login-20261011-113934-3-after.png` がアクティビティ画面、`screens/offline/login-20261011-114023-3-after.png` がようこそ画面。本文の操作は GNOME の端末への貼り付けではない
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した | C14 `online/session/steps.jsonl` seq 1・2、`online/session/after-confirm/0002-実施手順-1.txt`。変数を読み戻した |
+| 実施手順 2 | 通した | 同 seq 3〜5、`online/session/session-001.raw`。ホスト鍵確認とパスワード入力後にオフラインのプロンプト |
+| 実施手順 3 | 通した | 同 seq 6、`online/session/after-confirm/0006-実施手順-3.txt`。127.0.0.1 と [::1] の 1080、GitHub 200 |
+| dnf にもトンネルを使わせる（任意）1 | 通した | 同 seq 7・8、`online/session/after-confirm/0007-dnf_にもトンネルを使わせる（任意）-1.txt`。proxy 行と日本語のキャッシュ作成完了 |
+| トンネルを閉じる 1〜3 | 通した | 同 seq 18〜21、`online/session/after-confirm/0021-トンネルを閉じる-3.txt`。転送無しで再ログインし、ss 無出力・curl 終了 6 |
+| Homebrew 更新・npm 前提の張り直し | 通した | C14 同 seq 24〜26・30〜32、C15 `online/session/steps.jsonl` seq 1〜5・20〜22、`online/session/after-confirm/0005-実施手順-3.txt`・`0022-実施手順-3.txt`。loopback と 200 |
+| extra ロールバック | 未実施 | C14・C15 の steps に実施記録無し。dnf proxy 行は C15 にも残った |
+
+### 通らなかった手順と見立て
+
+- この文書の実施範囲で通らなかった手順は無い。入れ子 SSH のためドライバは foreground=ssh / waiting と表示したが、ゲストのプロンプトと確認出力で完了を判定した
+- C14 の npm 前提中の応答喪失を、SSH の貼り方や Hyper-V による障害とは断定していない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| dnf の確認文が英語だけ | 直した（文言） | 任意節の手順 1 に日本語の `メタデータキャッシュを作成しました。` を併記。C14 の `0007-dnf_にもトンネルを使わせる（任意）-1.txt` で確認。ブロックは変更無し |
+| 入れ子 SSH のドライバの状態表示 | 未対応（道具） | 完了の出力とプロセス名による表示を区別。手順書の実行失敗とは扱わない |
+
+### 確かめていないこと
+
+- 実機・aarch64・macOS 発・IPv6 の外向き通信・転送の異常系・extra のロールバックは今回未実施
+- 従来の Windows 発と今回の Linux 発は別の結果。GNOME 端末への貼り付け・フォント・IME は確認していない

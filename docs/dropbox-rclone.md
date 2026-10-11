@@ -37,7 +37,7 @@
    rclone config create dropbox dropbox >/dev/null
    ```
 
-   - `rclone v1.75.1` と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
+   - `rclone v1.75.2` のような版と `os/arch:` などの行、`/home/linuxbrew/.linuxbrew/bin/rclone` が出ればよい
    - `http://127.0.0.1:53682/auth?state=...` が表示され、`Waiting for code...` で許可を待つ（手順 3 で許可する）
    - SSH で入っているときは、`ssh -L` でトンネルを張った端末で貼る
 
@@ -239,7 +239,7 @@
    brew upgrade rclone
    ```
 
-   - 新しい版が無ければ `Warning: rclone 1.75.1 already installed` と出る
+   - 新しい版が無ければ `Warning: rclone 1.75.2 already installed` のように出る
    - 依存の一覧と `[y/n]` が出たら、更新するものを見て `y` と答える
    - **次の手順は、更新が終わってプロンプトが戻ってから貼る**（問い合わせ中に続けて貼ると、後ろの文字が答えとして読まれる）
 

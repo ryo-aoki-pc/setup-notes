@@ -2,8 +2,14 @@
 
 [手順書](../virtualbox.md)・[ロールバックと注意点](../extra/virtualbox.md)
 
+## 最新の確認範囲（AlmaLinux 10）
+
+- 2026-10-11: Secure Boot と入れ子の仮想化を有効にした Hyper-V の VM で、AlmaLinux 10 の実施手順 18 手順を通した。VirtualBox のモジュールの署名・読み込み、AMD-V による空の VM の起動、マネージャーの起動を確認した（[記録](#付録-入れ子の仮想化を有効にした-hyper-v-の-vm-でalmalinux-10-の実施手順を通した2026-10-11)）
+- OS を入れた VirtualBox の VM の稼働、USB、Intel の CPU、更新、ロールバックは、この通しでは未確認
+
 ## 最新の確認範囲（Windows 11）
 
+- 状態（VM を作って使う節）: Windows 11 Pro の実機・VirtualBox 7.2.20・Hyper-V 経由で、新規 VM の作成と ISO の起動、インストーラーの言語選択画面を確認した。別のクリーンインストールから作った検証用 VM で、画面無し起動・鍵を指定した SSH・ACPI 停止・スナップショットの取得と復元・完全クローン・削除を通した。画面でのインストール完了は未確認（[2026-10-11 の付録](#付録-windows-11-のホストで-vm-を作って使う検証2026-10-11)）
 - 通したこと
   - 2026-10-06（Windows 11 Pro のクリーン VM）: Windows 節の手順 2〜4 による新規導入・ドライバー・ホストオンリーアダプター、手順 8 の設定ファイル。手順 6 の入れ子の VM は `VERR_NEM_NOT_AVAILABLE` / `VERR_SVM_NO_SVM` で失敗（[付録](#付録-windows-11-pro-の-vm-での新規導入の検証2026-10-06)）
   - 2026-10-08: 手順 6 をホストの実機（AMD・Hyper-V）で流し、Hyper-V の上で動く分岐を確かめた（後に `Logs` のフォルダーが残るので本文を直した）。同じ VM で手順 7 のマネージャーの画面、更新の手順 2、ロールバック（[付録](#付録-windows-11-の実機と-vm-での追加検証2026-10-08)）
@@ -11,6 +17,82 @@
   - VM の中での手順 6、Hyper-V が動いていない PC・Intel の CPU での手順 6
   - 新しい版に上げる更新の手順 3・4、arm64 の Windows
 - 以降の既存記録は、各実施日・対象版・範囲に従う履歴として保持した
+
+## 付録: Windows 11 のホストで VM を作って使う検証（2026-10-11）
+
+- 対象: 本体の「Windows 11 で VM を作って使う」「使い方の基本」「スナップショットとクローン」「VM を消す」を追加した版
+- 環境: Windows 11 Pro（build 26300）、x64、VirtualBox `7.2.20r175154`。昇格していない Windows PowerShell `5.1.26100.9444` で実行した。ホストオンリーとブリッジのドライバーは無く、Hyper-V 経由（NEM）で動く PC
+- 方法: `Invoke-DocStep.ps1` で文書の PowerShell ブロックを 1 つずつ取り出して実行し、箇条書きと出力を照らした。ISO・名前・置き場所・SSH のポートなどは `-PreambleFile` で検証用の値を入れた。実際の端末に手で貼る操作は確かめていない
+- 記録: `D:\vmverify\codex\units\C17\` にブロックごとの出力・一次情報のヘルプ・PNG・`result.md` を残した。PNG は VM の画面を `controlvm screenshotpng` で撮り、開いて確認した。今回、リポジトリに画像は追加していない
+
+### VM と検証範囲の区別
+
+| VM | 作り方と用途 |
+|---|---|
+| `vmv-vb-cx-doc` | 文書の `createvm` から空の 64 GiB 可変 VDI を作った。EFI、PIIX3、2 vCPU、4096 MB、VMSVGA、3D 無効、SATA、NAT、SSH 転送は `127.0.0.1:24239`。ISO の起動とインストーラーの画面、ISO の取り外しを確認。OS はインストールしていない |
+| `vmv-vb-cx-doc2` | `vmv-vb-base` の `clean-install` から作ったリンククローン。2 vCPU・4096 MB にし、SSH 転送は `127.0.0.1:24238`。OS を入れた後の停止・画面無し起動・SSH・スナップショット・完全クローンを確かめるために使った |
+| `vmv-vb-cx-doc2-clone` | 文書の完全クローンの手順で、`vmv-vb-cx-doc2` のスナップショットから作った。SSH 転送は `127.0.0.1:24240`。元を削除した後も起動・SSH が成功した。最終の取得・復元・クローンの逐次実行でも使った |
+| `vmv-vb-cx-doc2-clone-clone` | 最終の逐次実行で作った完全クローン。SSH 転送は `127.0.0.1:24239`。元を削除した後も起動・SSH が成功した |
+
+- クローンの準備は、`VBoxManage clonevm --basefolder D:\vmverify\codex\vb --options link` で作り、`New-CloneReady.ps1 -Column vb -Existing` で起動と SSH を待った。層の `New-VmvClone` は元の VM と同じ `C:\vmverify\vb` に作るため、今回指定された置き場所には使わなかった。元の VM は起動・設定変更・復元していない
+- クリーンインストール済みの OS は AlmaLinux 10.2、kernel `6.12.0-211.64.1.el10_2.x86_64`、`systemd-detect-virt` は `oracle`。この OS を、本体の画面の手順でインストールしたとは扱わない
+
+### Windows 11 で VM を作って使う / VM を作る / 手順 1〜3
+
+- 手順 1 の 2 ブロックは実行して構文と読み戻しを確かめた。以降のブロックでは検証用の値を先に入れた
+- 手順 2 は登録成功、EFI・PIIX3・CPU・メモリ・VMSVGA・NAT と転送設定を読み戻した。最初の確認用正規表現は `Forwarding(0)` を拾わなかったため、修正して VM を消してから手順 2・3 を実行し直した
+- 手順 3 はディスク作成が `100%` で完了し、`SATA-0-0` が VDI、`SATA-1-0` が ISO。`.vbox` と `.vdi` が並んだ
+
+### Windows 11 で VM を作って使う / VM を起動して OS を入れる / 手順 1〜3
+
+- 手順 1 は GUI 起動成功。ウィンドウの題は `vmv-vb-cx-doc [実行中] - Oracle VirtualBox`。起動要求からコマンドが戻るまで 8.23 秒
+- `installer-menu.png` に `Install AlmaLinux 10.2` と `Test this media & install AlmaLinux 10.2` の GRUB のメニュー。上矢印・Enter を送って通常のインストールを選び、`installer-screen3.png` に「ALMALINUX 10.2 へようこそ。」「インストール時に使用する言語を選択してください。」と「続行」を確認した（起動コマンドが戻った時点から約 79 秒後の撮影）
+- **手順 2 は言語選択画面が出るところまで**。言語・インストール先・ソフトウェア・ユーザーの画面操作とインストール完了、右 Ctrl で入力をホストへ戻す操作は確かめていない
+- 検証のため `poweroff` で止め、手順 3 で ISO を外した。`"SATA-1-0"="emptydrive"` を確認した。ゲストをインストールして停止した後の取り外しとは区別する
+- `VBox.log` は `HM: HMR3Init: Attempting fall back to NEM: AMD-V is not available` と `NEM: NEMR3Init: Snail execution mode is active!`
+
+### Windows 11 で VM を作って使う / Windows のホストで VM の動作を確かめる / 手順 1・2
+
+- `vmv-vb-cx-doc2` の最初の起動は `New-CloneReady.ps1` で SSH が通るまで 112.8 秒。待っている間の個別の SSH は banner exchange でタイムアウトした。黒い画面の待機中に Shift の押下・解放を送った（パスワードは送っていない）。ログには `Giving up catch-up attempt` と約 83 秒の遅れがある。キー入力が遅れを解消したかは切り分けていない
+- 電源ボタンで停止してから、手順 1 のブロックを文書どおりに実行した。`has been successfully started`、`VMState="running"` と NEM の 2 行を確認した
+- 手順 2 の手で打つ SSH と指紋の照合・承認は未確認。エージェントは試験用の鍵を指定した SSH で接続し、`SSH_OK`・仮想化の種類・kernel・OS を読んだ。2 回目は `running` から 54.3 秒時点の接続確認（SSH が最初に通った時刻の測定ではない）
+
+### スナップショットとクローン / 手順 1〜4
+
+- 手順 1 は電源ボタンの送信成功。直後は `VMState="running"` で、状態を読み直すと `poweroff` になった
+- 手順 2 は `Snapshot taken. UUID: ...`、一覧に `Name: clean-install` と UUID
+- 手順 3 は復元成功。最初の箇条書きは `(current)` を想定していたが、実物は一覧の行末の `*` だった。箇条書きを直し、実行し直して一致した
+- 最初の復元の再実行がクローンのコピー待ちと重なったため、その実行は逐次実行の結果とは扱わない。クローンの作成自体は成功したが、最終確認として `vmv-vb-cx-doc2-clone` で停止→取得→復元→完全クローンを、各ブロックの終了を待って順に実行し直した。途中の抽出コマンドの節名の誤入力で 1 回 `extract failed` になったが、文書のブロックはそのとき実行されていない
+- 手順 4 の最初の実行は `Machine has been successfully cloned as "vmv-vb-cx-doc2-clone"`、新しい設定とディスクのパス、クローン用ポートを読み戻した。VDI は 64 GiB の可変、実ファイルは 6,988,759,040 バイト、`Parent UUID: base`、`Type: normal (base)`。MAC は既定で再生成される設定で実行したが、ホスト名・SSH のホスト鍵を変更する操作は実施していない
+- 元の `vmv-vb-cx-doc2` を文書の削除手順で消した後に、`vmv-vb-cx-doc2-clone` を画面無しで起動して SSH が通った。`running` から 121.3 秒。起動待ちに Shift の押下・解放を送った。`clone-after-key.png` は `verifier` の GNOME のログイン画面（試験用のユーザー。パスワードは送信していない）
+- 最終の逐次実行も取得・復元・クローンがすべて終了コード 0。`vmv-vb-cx-doc2-clone-clone` の VDI は `Parent UUID: base`。元の `vmv-vb-cx-doc2-clone` を消した後に、画面無しで起動し、`running` から 23.0 秒で鍵を指定した SSH が通った。この起動ではキーを送っていない
+
+### 使い方の基本
+
+- 登録一覧・実行中の一覧・GUI 起動・画面無し起動・状態取得・ACPI 電源ボタン・強制電源断を、今回の検証用 VM で実行した
+- 電源ボタンの送信は停止完了を待たない。文書は状態を読み直して `poweroff` まで待つ形にした
+
+### VM を消す / 手順 1
+
+- `vmv-vb-cx-doc` と `vmv-vb-cx-doc2` は、停止後に文書の第 2 ブロックで削除した。`unregistervm --delete` は `100%` まで進み、登録一覧から消えた
+- `vmv-vb-cx-doc` は、転送の確認用正規表現を直したブロックを通すため、削除後に同じ名前で作り直した。最終版の作成ブロックを通した後、同じ削除手順で再び消した
+- 消す名前の変数を空に戻す第 1 ブロックは代入だけで、削除はしない。検証では第 2 ブロックの直前に `-PreambleFile` で削除対象を入れた
+- クローン 2 台も ACPI で停止し、同じ削除手順で消した。最後に `VBoxManage list vms` に今回の 4 つの名前が無く、`D:\vmverify\codex\vb\` の各 VM のフォルダーの `Test-Path` がすべて `False` だった。残ったログの手動削除は必要なかった
+
+### 静的検査
+
+- 変更した 5 ファイルの相対リンクとアンカーは `check-links.mjs` でエラー 0
+- PowerShell の 24 ブロック（本体 21、extra 3）は Windows PowerShell 5.1 と PowerShell 7 の両方で構文エラー 0
+- 本体と extra の bash の 23 ブロックは `bashn-docs.mjs` でエラー 0。`git diff --check` も通った
+
+### 確かめていない範囲
+
+- AlmaLinux 10 のホスト、Hyper-V が動いていないホスト、Intel の CPU、arm64 の Windows、入れ子の仮想化
+- インストーラーを画面で進めて OS を入れ終える流れ、手で貼る操作、対話 SSH の認証と指紋確認
+- ホストオンリー・ブリッジ・Extension Pack・USB の受け渡し、Secure Boot・仮想 TPM・Windows のゲスト・3D 有効の構成
+- 既存の導入・更新・アンインストールの節は今回実行していない。今回の VM 操作の結果から、それらの検証範囲を広げない
+
+---
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -1191,3 +1273,47 @@ aarch64 には入らない:
 
 - VM の中での手順 6（入れ子の仮想化）と、Hyper-V が動いていない PC・Intel の CPU での手順 6
 - 新しい版に上げる更新の手順 3・4、arm64 の Windows
+
+## 付録: 入れ子の仮想化を有効にした Hyper-V の VM で、AlmaLinux 10 の実施手順を通した（2026-10-11）
+
+**対象**: `setup-notes` の `114c2b2` 版。Windows 11 Pro の Hyper-V の第 2 世代の VM（Secure Boot 有効、入れ子の仮想化を有効にしたもの。ホストの CPU は AMD Ryzen 9 5900X）に Kickstart で Workstation を入れ、[secure-boot-mok.md](../secure-boot-mok.md) の実施手順 1〜7 で MOK に鍵を登録した状態から始めた。初期設定（almalinux-setup.md）は通していない。
+
+| 項目 | 値 |
+|---|---|
+| 実施日 | 2026-10-11 |
+| ハイパーバイザ | Hyper-V（Windows 11 Pro 10.0.26300）。第 2 世代、vCPU 4、メモリ 6144 MB、`ExposeVirtualizationExtensions` が有効 |
+| OS | AlmaLinux 10.2 (Lavender Lion) / x86_64、カーネル `6.12.0-211.64.1.el10_2.x86_64`、`LANG=ja_JP.UTF-8`、SELinux Enforcing |
+| Secure Boot | 有効。MOK に `Local kernel module signing key` を登録済み |
+| VirtualBox | `VirtualBox-7.2-7.2.20_175154_el10-1`（`VBoxManage --version` は `7.2.20r175154`） |
+
+**流し方**: 実施手順のブロックを、SSH の対話シェルに 1 つずつ、変えずに貼った。「動作を確かめる」の手順 4 だけは、VM のコンソールで GNOME にログインし、その端末に Hyper-V のキー送信で `VirtualBox` と打った。`sudo` は、この VM ではパスワードを聞く設定だった。
+
+| 項 | 手順 | 結果 |
+|---|---|---|
+| （前提） | EPEL | 有効でなかったので、almalinux-setup.md の「EPEL と RPM Fusion」の手順 1 を先に通した |
+| リポジトリを置く | 1 | `x86_64`、`Virtualization: AMD-V`（`Hypervisor vendor: Microsoft`） |
+| リポジトリを置く | 2・3 | fingerprint と uid が一致し、`gpg-pubkey-2980aecf-5719f4e1 …` が入った |
+| リポジトリを置く | 4・5 | 鍵の確認は 1 回ずつ。この環境の表示は `GPG 鍵 0x2980AECF をインポート中:`・`メタデータキャッシュを作成しました。` |
+| VirtualBox を入れる | 1〜3 | 下見に `7.2.20_175154_el10-1 … 105 M` と `liblzf … epel`。カーネルの 2 つの版は同じ。6 つとも版が出た |
+| VirtualBox を入れる | 4 | `[y/N]` と EPEL の鍵の確認（`7D8D 15CB … E37E D158`）に答え、`Creating group 'vboxusers'. …` の後、`完了しました!` |
+| VirtualBox を入れる | 5 | `enabled`・`active`、vbox の 3 行、`crw-------. 1 root root 10, 118 … /dev/vboxdrv`。Secure Boot が有効なまま読み込まれた |
+| KVM と USB の設定 | 1〜3 | 設定の 2 行が出た（再起動の前の `enable_virt_at_load` は `Y`）。`vboxusers:x:980:<USER>`。再起動で MokManager は出なかった |
+| 動作を確かめる | 1・2 | `7.2.20r175154`・`active`・vbox の 3 行・`N`・`vboxusers`。`modinfo -F signer vboxdrv` は `Local kernel module signing key` |
+| 動作を確かめる | 3 | `VM "vbox-selftest" has been successfully started.`・`VMState="running"`、`0%...100%` が 2 行 |
+| 動作を確かめる | 4・5 | 「Oracle VirtualBox マネージャー」の窓が開き、Alt+F4 で閉じると端末がプロンプトに戻った（`Qt WARNING` は 1 行。XWayland 経由）。`~/.config/VirtualBox` に `VirtualBox.xml` などができた |
+
+- 別の空の VM を画面無しで起動して `VBox.log` を読むと、`HM: HMR3Init: AMD-V w/ nested paging`・`HM: Using AMD-V implementation 2.0`・`HM: Enabled SVM`・`HM: VT-x/AMD-V enable method: VirtualBox` があり、`controlvm screenshotpng` の画面は BIOS の `Could not read from the boot medium! Please insert a bootable medium and reboot.` だった
+- 同じ VM に kvm-container を入れ、KVM の VM が動いているあいだに「動作を確かめる」の手順 3 を貼ると、`AMD-V is being used by another hypervisor (VERR_SVM_IN_USE).` と `VirtualBox can't enable the AMD-V extension. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_SVM_IN_USE)` で起動しなかった（KVM の VM は動いたまま、`vbox-selftest` は残らなかった）。KVM の VM を止めて消すと、再起動を挟まずに、手順 3 の VM がまた起動した。VirtualBox の VM を止めた後に KVM の VM を作ると、再起動を挟まずにインストーラーが起動し、Anaconda の `WELCOME TO ALMALINUX 10.2.` 画面まで見えた。OS のインストール完了は未確認
+
+### 確かめていないこと
+
+- VirtualBox の VM に OS を入れて動かすこと、USB 機器を VM に渡すこと、アプリ一覧からの起動と窓の中の操作
+- KVM の内側 VM の OS インストール完了と、導入した OS の起動
+- VirtualBox の VM が動いているあいだに KVM の VM を作ること、Intel の CPU
+- 「カーネルを更新したとき」「更新」、ロールバック
+
+### Grok Build の文書レビューの反映（2026-10-11）
+
+- N1 の KVM ゲストはインストーラーの最初の画面までだったので、OS のインストール完了は未確認と明記した
+- N1 で出た日本語の鍵取り込み・キャッシュ作成・完了の表示を、本文の英語の成功条件に併記した。コードブロックは変えていない
+- C17 ではクローンの独立したディスク、転送ポートの変更、鍵を指定した SSH を確認したが、元とのホスト名・SSH のホスト鍵の同一性は照合していない。その断定を本文と注意点から除き、使う前にゲスト側で確かめる形にした

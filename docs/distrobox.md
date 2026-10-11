@@ -37,7 +37,7 @@
    ```
 
    - 版は `distrobox.noarch  1.8.2.3-1.el10_2  epel` のように 1 つだけ出る
-   - 一緒に入るのは `hicolor-icon-theme` だけ
+   - `hicolor-icon-theme` が未導入なら一緒に入る。導入済みなら追加されない
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -84,7 +84,7 @@
    ```
 
    - プロンプトが `📦[<USER>@ubuntu ~]$` に変わる。ここから先はボックスの中のシェル
-   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が 4 行出る
+   - SSH など画面の無いログインから入ると、`host-spawn: command not found` が出ることがある。出なくても、ボックスのプロンプトに入れればよい
    - `exit` でホストに戻る
    - **後ろの節の手順は、`exit` でホストに戻ってから貼る**
 
@@ -102,7 +102,7 @@
    distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get update
    ```
 
-   - `Reading package lists...` で終わる
+   - `Reading package lists...` または `パッケージリストを読み込んでいます... 完了` で終わる
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 1. ボックスに ffmpeg を入れる。
@@ -127,10 +127,11 @@
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v ffmpeg
-   ffmpeg -version | head -1
+   ~/.local/bin/ffmpeg -version | head -1
    ```
 
-   - `/home/<USER>/.local/bin/ffmpeg` と `ffmpeg version 6.1.1-3ubuntu5 ...` が出ればよい
+   - 最後の行が `ffmpeg version 6.1.1-3ubuntu5 ...` なら、書き出したコマンドを呼べている
+   - `command -v ffmpeg` が `/home/<USER>/.local/bin/ffmpeg` 以外なら、通常の `ffmpeg` は既存の別の版を呼ぶ。ボックスの版を使うときは `~/.local/bin/ffmpeg` で呼ぶ
 
 ---
 
