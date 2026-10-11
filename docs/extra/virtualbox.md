@@ -119,6 +119,12 @@
 
 ## 注意点
 
+- **Windows 11 で作った VM を戻す・消すとき**: スナップショットへの復元は[スナップショットとクローン](../virtualbox.md#スナップショットとクローン)、VM とディスクの削除は[VM を消す](../virtualbox.md#vm-を消す)で行う。削除は停止した VM だけで行う。途中まで作って失敗した VM も同じ手順で消せる
+- **NAT の SSH 転送はクローンにもコピーされる**。本書は完全クローンを作った後にポートを変える。同じポートのまま両方を起動しない
+- **完全クローンでもゲストの識別情報はコピーされる**。MAC アドレスの再生成だけでは、ホスト名や SSH のホスト鍵は変わらない
+- **スナップショットはバックアップの代わりにならない**。元の VM のディスクと一緒に失われる。必要なデータは別の場所に退避する
+- **ホストオンリー・ブリッジ・Extension Pack・USB の受け渡しは、VM を作って使う節の対象外**。この節の検証では確かめていない
+
 - **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../virtualbox.md#virtualbox-を入れる)の手順 4・5）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
