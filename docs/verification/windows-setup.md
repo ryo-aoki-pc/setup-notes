@@ -1809,7 +1809,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - SSH の接続名は `surface`。Windows の既定のシェルは Git Bash、対象の PowerShell は Windows PowerShell 5.1 と PowerShell 7.6.6
 - 降格用の固定版は x64 の busybox-w32 `FRP-6075-g169694ebd`。ARM64 は今回の通し検証の対象外
 - 通常の PowerShell のプロファイル・常用の WezTerm の設定を変更せず、試験専用の TEMP の統合を起動コマンドから読んだ。試験には無害な本文を使った
-- 最終受信スクリプトの SHA-256 は `5f4b84bc493adb9a948983c0ffebe8f0719ef01b6ee7e5cfd2649e98c0858f07`。キー登録に失敗したときの `unavailable` の識別を加える直前の版で行った上限試験は、最終版の通常試験と区別する
+- V2 へ変更する前の受信スクリプトの SHA-256 は `5f4b84bc493adb9a948983c0ffebe8f0719ef01b6ee7e5cfd2649e98c0858f07`。以降の V1 の結果は修正前の記録として保持し、V2 の追試は別の項に置く。V1 の `unavailable` の識別を加える直前の上限試験も区別する
 
 ### 途中で確かめたこと
 
@@ -1822,47 +1822,84 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - 追加した任意節の PowerShell の 7 ブロックと extra の削除 1 ブロックを、SSH 先の Windows PowerShell 5.1.26100.9444 と PowerShell 7.6.6 の `Parser.ParseInput` で解析した。各 8 ブロックとも構文エラーは 0
 - 手順 8 に起動直前の SHA-256 の一致確認を追加した後、そのブロックだけを同じ 5.1／7 で再解析し、どちらも構文エラーは 0
-- 手順 5 のキー検索を修正した後、最終版の統合を試験専用の TEMP から読む 5.1／7 で登録情報を取得した。両方とも `Function` が `WezTermSshPaste` の行は 1 件、`Key` は `Shift+Ctrl+F12`。変更したブロックの構文エラーも 0
+- 手順 5 のキー検索を修正した後、V1 の受信版の統合を試験専用の TEMP から読む 5.1／7 で登録情報を取得した。両方とも `Function` が `WezTermSshPaste` の行は 1 件、`Key` は `Shift+Ctrl+F12`。変更したブロックの構文エラーも 0
 - PSScriptAnalyzer はどちらの PowerShell にも未導入のため実行していない。今回の検査のための導入は行っていない
 - 新しい Bash 4 ブロックは接続元の `bash -n` で構文エラー 0。変更した 6 ファイルの相対リンクとコードフェンス、任意節 12 手順と extra の削除手順の「説明 → コマンド → 確認・分岐・注意」の順序、`git diff --check` を確認した
 - 最初に全 8 ブロックを 15,280 文字の `-EncodedCommand` で一括配送した試験は、終端引用符のパーサーエラーで失敗した。コマンド長の制限が原因と推測し、各ブロックを 8,000 文字未満のコマンドに分けて上記の構文検査を行った。本文のブロックのエラーとは扱わない
 
-### 実機の結果
+### V2 への変更前の実機の結果（V1）
 
 | 対象 | 成功条件 | 状態 |
 |---|---|---|
 | 管理者の親 PowerShell | 5.1／7 の版、ログインユーザー、`Admin : True`、High と有効な Administrators SID | 両 PowerShell で成功 |
 | 非管理者の子 PowerShell | 同じユーザー、`Admin : False`、Medium、Administrators SID が拒否専用 | 両 PowerShell の `drop --` で成功 |
 | 子を閉じた後 | 元の親へ戻り、同じユーザーで `Admin : True`、親の入力欄が空 | 通常のプロファイルを読む子からの復帰も両 PowerShell で成功 |
-| Linux の WezTerm からの実 SSH 貼り付け | 入力バッファが一致し、Enter 前は未実行、Enter 後は 1 回だけ実行 | 最終版の 5.1／7 × 管理者／降格 × 3 操作経路の 12/12 が成功 |
-| Windows の WezTerm からの貼り付け | 同じバッファ・実行回数の条件 | 期限確認追加前の GUI 48/48 と 6/6 が成功。実 SSH 接続は未確認 |
+| Linux の WezTerm からの実 SSH 貼り付け | 入力バッファが一致し、Enter 前は未実行、Enter 後は 1 回だけ実行 | V1 の 5.1／7 × 管理者／降格 × 3 操作経路の 12/12 が成功 |
+| Windows の WezTerm からの貼り付け | 同じバッファ・実行回数の条件 | V1 の期限確認追加前の GUI 48/48 と 6/6 が成功。実 SSH 接続は未確認 |
 | LF／CRLF・空行・日本語・絵文字・here-string・タブ・末尾改行 | CR とタブは既存 Paste と同じ処理、ほかの本文を保持 | 5.1／7 × 管理者／降格の SSH 受信試験で成功 |
 | 取消・無応答・古い／偽の応答・不正フレーム・大きな本文 | 通常貼り付けへ切り替わらず、親に本文が残らない | SSH 受信・状態検証で成功。クライアントの状態検証は [WezTerm 側の記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/tests/paste/README.md)も参照 |
 | PowerShell を閉じて親 Bash に戻る | 全貼り付けマーカーと Bash の入力欄が空 | 通常のプロファイルを読む 5.1／7 からの復帰で成功 |
 | 固定版の配置・再実行・ハッシュ不一致・撤去 | 一致したファイルだけを配置・削除し、別のファイルを上書きしない | 実際の配置と SHA-256 の一致を確認。本文のコードを専用 TEMP に対して流す 5/5 も成功 |
 
-- 最終版の SSH 受信試験は 76/76。5.1／7 × 管理者／降格の 4 条件で、本文の一致、Enter 前の未実行・Enter 後の 1 回実行、不正データと取消、通常のプロファイルを読む子から管理者の親への復帰、親 Bash のマーカー解除を確認した。接続元のクリップボードを読まず、Linux の PTY → SSH → Windows の ConPTY へ試験本文を送った
-- 上限試験は 74/74。65,536 バイトの本文の一致・未実行・1 回実行と、65,537 バイトの拒否を 4 条件で確認した。最大本文の配送から挿入完了までは、5.1 の管理者で 42.333 秒、降格で 54.755 秒、7 の管理者で 40.277 秒、降格で 54.403 秒だった。LF を含む不正なフレームも拒否した
-- UI 遅延の期限確認を追加した Lua でも、Linux の実 SSH GUI の 4 条件 × 3 経路は 12/12 が成功した。実 WezTerm の時刻 API は Linux と Windows で成功した
+- V1 の SSH 受信試験は 76/76。5.1／7 × 管理者／降格の 4 条件で、本文の一致、Enter 前の未実行・Enter 後の 1 回実行、不正データと取消、通常のプロファイルを読む子から管理者の親への復帰、親 Bash のマーカー解除を確認した。接続元のクリップボードを読まず、Linux の PTY → SSH → Windows の ConPTY へ試験本文を送った
+- V1 の上限試験は 74/74。65,536 バイトの本文の一致・未実行・1 回実行と、65,537 バイトの拒否を 4 条件で確認した。最大本文の配送から挿入完了までは、5.1 の管理者で 42.333 秒、降格で 54.755 秒、7 の管理者で 40.277 秒、降格で 54.403 秒だった。LF を含む不正なフレームも拒否した
+- V1 に UI 遅延の期限確認を追加した Lua でも、Linux の実 SSH GUI の 4 条件 × 3 経路は 12/12 が成功した。実 WezTerm の時刻 API は Linux と Windows で成功した
 - Linux の実 GUI → SSH → PowerShell 7 から起動した Neovim の通常貼り付けと `Read-Host` 待機は 2/2 が成功した。どちらも 3 マーカーが空、Neovim では日本語・絵文字・空行を含む UTF-8 27 バイトの保存内容が完全一致し、PowerShell に戻ると入力待機の目印が復帰した。初回の GUI 内 clipboard 更新直後の空貼り付けは、専用 Wayland の `wl-copy` で既知データを提供して再検証した
-- Linux GUI の先行試験は 48 条件相当が成功（36 件と、分離して再実行した 7 の降格 12 件）。最終版では 12/12 と、7 の降格の診断 3/3 が成功した
+- Linux GUI の先行試験は 48 条件相当が成功（36 件と、分離して再実行した 7 の降格 12 件）。V1 の受信版では 12/12 と、7 の降格の診断 3/3 が成功した
 - SSH の状態検証は 5.1／7 の各 16/16。キー登録失敗の `unavailable`、例外後の解除、StrictMode、再読み込みを確認した
-- Lua の状態検証は API の stub を使う最終 78/78 が成功した。UI の処理が遅れて timer より先に古い READY を受け取る競合を見つけ、送信待ちに時刻と 3 秒期限を保存した。応答処理でも期限の到達・超過・時計の後戻りを検査し、本文を送らず失効させる。Neovim・実行中・PSReadLine なしの既存ローカル経路、alternate screen・key table、能力マーカーなしの従来貼り付け、未知・準備失敗のマーカー、ペインの切替・閉鎖、クリップボード取得失敗、応答の識別子・古い／二重応答・timeout を確認した。これらは GUI の実機件数に含めない
+- V1 の Lua の状態検証は、実 WezTerm の時刻 API 1 件と API の stub の状態検証 77 件の計 78/78 が Linux／Windows で成功した。UI の処理が遅れて timer より先に古い READY を受け取る競合を見つけ、送信待ちに時刻と 3 秒期限を保存した。応答処理でも期限の到達・超過・時計の後戻りを検査し、本文を送らず失効させる。Neovim・実行中・PSReadLine なしの既存ローカル経路、alternate screen・key table、能力マーカーなしの従来貼り付け、未知・準備失敗のマーカー、ペインの切替・閉鎖、クリップボード取得失敗、応答の識別子・古い／二重応答・timeout を確認した。これらは GUI の実機件数に含めない
 - 固定版の導入・撤去の文書コードは、子プロセスの `LOCALAPPDATA` を専用の TEMP に置き換えて実行した。新規導入・同じ固定版の再実行・照合付きの撤去が成功し、異なる SHA-256 のファイルの導入・削除はいずれも拒否した（5/5、終了コード 0）。実際に配置した降格用の実行ファイルは削除していない
+
+### V2 への修正と追試（nonce 付き終端への変更前）
+
+- Grok Build（grok-4.7）の最初の差分レビューで、V1 は早い `~` やヘッダー前の Ctrl+C の後に遅れて届く本文が管理者の親へ残る可能性、ヘッダー前の普通の文字で無期限に待つ条件、同じ epoch の再発火を指摘された。V1 の成功件数は、これらの追加条件を解消した結果とは扱わない
+- V2 は `READY` → 本文を含まない `WZP2:<nonce>:` → ヘッダー全体の受信を示す `BODYREADY` → `<length>:<Base64>~` の順にした。SSH 先のヘッダー受信前は開始から 5 秒、接続元の準備応答は各 3 秒を上限にする。ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさず、本文受信を始めた後の取消は終端まで読み捨てる。同じ epoch の再発火と、版の違う応答は拒否する
+- 送信失敗・Console IO の例外を修正する前の V2 の `shell/wezterm.ps1` の SHA-256 は `334beaa83d8f87f816c8446bc9aed6ee5304f3125b16e758fb14a1f06e672787`、`lua/paste.lua` は `8de4a8e5a4f43da4b47d33aab036ec53171e05a65354c8f41a423285a543a225`
+- Linux の実 WezTerm GUI → SSH の 5.1／7 × 管理者／降格 × 3 操作経路は 12/12 が成功した。記録は WezTerm の `tests/paste/results/linux-gui-ssh-20261012-032011-ce8e32e7/summary.json`
+- V2 の Lua の状態検証は、実 WezTerm の時刻 API 1 件と API の stub の状態検証 99 件の計 100/100 が Linux／Windows の両方で成功した。二段階の準備確認、両準備段階の期限、同じ epoch の再発火拒否、受信処理の終了後に余分な `~` を送らない条件も検査した。旧 Windows の採取ファイルは後の 102 件の追試で上書きされているため、100 件の記録の参照先にはしない
+- V2 の SSH 受信は 108/108 が成功した。5.1／7 × 管理者／降格の各 26 件（既存 18 件と新しい回帰 8 件）の計 104 件に、通常のプロファイルを読む非管理者の子から管理者の親への復帰 2 件、PowerShell から専用の Git Bash への復帰 2 件を加えた。新しい回帰では元の空の入力欄・Enter 前の未実行・5 秒の絶対期限・完全なヘッダーの後の終端待ち・本文の前の取消後に管理者の親と Bash の入力欄が空であることを確認した。記録は WezTerm の `tests/paste/results/ssh-20261012-032034-430fdfbf/summary.json`
+- 上記の V2 で SSH の状態単体は 5.1／7 の各 16/16、PR #39 の既存ローカル貼り付けの単体も各 21/21 が成功した。両 PowerShell のパーサーの構文エラーは 0。専用の NoProfile・TEMP の試験では通常のプロファイルとクリップボードに触れず、終了後に片付けた
+- 手順のコードを変更せず、新節の 12 手順と SSH → PowerShell → 権限確認 → 取得 → 降格の順序を再検査した。変更対象の Markdown のコードフェンス・インラインコードを除く相対リンク 851 件は、参照先がすべて存在した
+- Console IO の例外への修正前の V2（SHA-256 `334bea…672787`）で、上限を含む追試は 112/112 が成功した。65,536 バイトの配送・挿入は 5.1 の管理者で 34.287 秒、降格で 53.101 秒、7 の管理者で 37.009 秒、降格で 56.204 秒。各条件の 65,537 バイトは拒否した。記録は WezTerm の `tests/paste/results/ssh-20261012-032350-f7469421/summary.json`。この結果は後続の IO 修正版とは区別する
+- この追試では V1 の Reader 型をあらかじめ読み込んだプロセスから V2 を使い、同じ試験版の再ドットソースも確認した。既存の V2 の C# 型を後から別の V2 の実装へ入れ替える試験ではない。実際の導入・更新は新しい SSH と PowerShell を起動する
+- tmux は Linux の隔離 GUI → 専用 tmux → 実 SSH → 7 の管理者・右クリックの 1 条件を試した。既定の `allow-passthrough=off` と、明示的な on／DCS 包みの試験コピーで、LF・日本語・絵文字・末尾 LF の一致、Enter 前 0・後 1 回を確認した。どちらも外側の alternate screen が有効で、能力・READY・RESULT は空、受信ハンドラーの呼び出しは 0。通常 `PasteFrom` の成功であり、専用配送や DCS 通過の成功とは扱わない。記録は WezTerm の `tests/paste/results/tmux-gui-20261012-032930-default` と `tests/paste/results/tmux-gui-20261012-032822-wrapped`
+- Windows クライアントの実 SSH GUI は V2 でも未確認。V1 の GUI 48/48 と 6/6 は変更前の記録で、V2 の GUI 再試験は行っていない
+
+### V2 の送信失敗・IO 例外修正の追試（nonce 付き終端への変更前）
+
+- Grok Build（grok-4.7）の差分レビューで、本文の送信完了判定に関する重大度「高」と、Console IO 例外に関する重大度「中」の指摘を各 1 件採用した。二段階の準備確認・ヘッダー前の絶対期限・同じ epoch の再発火拒否に加え、本文送信前に送信済み扱いにしていた判定を正常終了後へ移し、完全・部分送信の失敗でも取消用の `~` を送る処理にした。Console IO の例外でも、ヘッダー受信後は終端まで読み捨ててから戻る
+- 再レビューの「ヘッダー待ちの期限に達したとき本文がすでにキューにある」という指摘は採らなかった。接続元は `BODYREADY` の前に本文を送らず、SSH 先は完全なヘッダーの後に `started = true` にしてから `BODYREADY` を出す。`started` の後はヘッダーの期限を適用しないため、通常の配送では指摘の前提となる状態に入らない。送信失敗と Console IO の例外は、上記の別の条件として修正した
+- 修正後の `shell/wezterm.ps1` の SHA-256 は `b79886ec05c756f5c6ef01acde5ac996170f107351d030c862c19d43f0d4dfa4`、`lua/paste.lua` は `e08ef96636a3d1eab0c6371e49ed3995550612f272a8765086aebc2d626144ac`
+- Lua は実 WezTerm の時刻 API 1 件と API の stub の状態検証 101 件の計 102/102 が Linux／Windows の両方で成功した。本文の完全・部分送信失敗を追加で確認した。Windows の記録は WezTerm の `tests/paste/results/windows-lua-v2-body-failure/lua.json`
+- 修正後の Linux 実 GUI → SSH → PowerShell 7 の管理者で、共有操作・右クリック・キーの代表 3 経路が 3/3 成功した。記録は WezTerm の `tests/paste/results/linux-gui-ssh-20261012-033356-d523a110/summary.json`。先の 4 条件の 12/12 は送信失敗・IO 例外修正前の V2 の結果
+- nonce 付き終端への変更前の Console IO の shim 試験は 5.1 の 17/17 が成功した。nonce 付き終端への変更後の両 PowerShell の試験は、次の項に記録する
+
+### nonce 付き終端への修正と追試
+
+- 追加の実機試験で、`BODYREADY` の後に利用者の `~` が本文より先に届くと、受信処理が早く戻り、遅れて届く本文が入力欄へ残る条件を再現した。記録は WezTerm の `tests/paste/results/early-body-terminator-20261012-033544-ac43ae59`。前の V2 の成功件数は、この条件を解消した結果とは扱わない
+- 本文の終端を `~WZE2:<nonce>~` にし、取消も同じ nonce の終端を送る。単独の `~` では戻らず、一致する終端まで読み捨てる。プロトコルの版は V2 のままにし、手順のコマンドは変えない
+- nonce 付き終端の `shell/wezterm.ps1` の SHA-256 は `2ee03930cbe59d08c244b124b4c07dab8f16963fe921d17cc609697cefe46a7b`、`lua/paste.lua` は `b1c701930fe2f00caf509d541f69f54bc17e86b8d92993d87b87552804916e4b`。5.1／7 のそれぞれで SSH 状態 16/16、既存ローカル貼り付け 21/21、Console IO・早い `~`・偽／部分終端を含む shim 23/23 が成功し、パーサーの構文エラーは 0。終端の途中の IOException／InvalidOperationException 2 件も追加し、nonce の照合位置が保たれることを確認した。受信スクリプトは変更していない
+- 最終 nonce 付き終端の Lua は実 WezTerm の時刻 API 1 件と API の stub の状態検証 102 件の計 103/103 が Linux／Windows で成功した。Windows の記録は WezTerm の `tests/paste/results/windows-lua-v2-nonce/lua.json`。前の 100/100 と 102/102 は中間版の結果
+- 最終 nonce 付き終端で、Linux 実 GUI → SSH の 5.1／7 × 管理者／降格 × 共有操作／右クリック／キーの 12/12 が成功した。記録は WezTerm の `tests/paste/results/linux-gui-ssh-20261012-034501-0cdaaeb6/summary.json`。前の修正途中の代表 3/3 と区別する
+- 修正前に再現した早い本文終端の実機試験も、同じ nonce の終端で再検証した。`BODYREADY` 後の単独の `~` では復帰せず、遅れた既知の本文と正しい nonce の終端まで読み捨て、`error:invalid`、入力欄は空、実行は 0 を確認した。記録は WezTerm の `tests/paste/results/early-body-terminator-fixed-20261012-034019-f1fb633e/summary.json`
+- Grok Build の送信失敗・IO 例外修正後（PS `b79886…d4dfa4`、Lua `e08ef9…6144ac`）の再レビューでは追加の指摘はなく、ヘッダー期限の指摘を不採用にした不変条件の根拠も認められた。このレビューは nonce 付き終端への変更前で、変更後の再レビューと区別する
+- nonce 付き終端の最終版（PS `2ee039…e46a7b`、Lua `b1c701…916e4b`）に対する Grok Build（grok-4.7）の再レビューは追加指摘なし。完全な `~WZE2:<nonce>~` の一致、不一致時の invalid と終端への再同期、正常・取消に同じ nonce を使うこと、早い `~`・偽／部分終端・取消・上限超過・IO 例外後の読み捨ての整合性を確認した
+- nonce 付き終端を含む最終版の実 SSH 受信・上限試験は 128/128 が成功した。5.1／7 × 管理者／降格の各 31 件の計 124 件に、通常のプロファイルを読む非管理者の子から管理者の親への復帰 2 件、PowerShell から専用の Git Bash への復帰 2 件を加えた。65,536 バイトの本文は入力欄が一致し、Enter 前は未実行・後は 1 回だけ実行した。配送・挿入は 5.1 の管理者で 51.102 秒、降格で 67.589 秒、7 の管理者で 55.017 秒、降格で 70.672 秒だった。各条件で 65,537 バイトを拒否して読み捨て、V1 の型を読み込んだ状態からの V2 と同じ最終版の再読み込み、ヘッダー前の 5 秒期限、新しい終端の 4 回帰、取消後の管理者の親と Bash の空の入力欄も確認した。記録は WezTerm の `tests/paste/results/ssh-20261012-034151-07712eee/summary.json`
+- 最終実 SSH 試験は接続を閉じ、専用 TEMP を削除した。同じ試験ディレクトリ名を使う PowerShell の残留はなく、確認用プロセス自身を除いた一覧は空。片付けの記録は同じ結果ディレクトリの `cleanup.json`
 
 ### 関連する既存の回帰検証
 
 - `tests/paste/check-powershell.ps1` は、Windows PowerShell 5.1.26100.9444／PSReadLine 2.0.0 と PowerShell 7.6.6／PSReadLine 2.4.5 で各 21/21 が成功した。NoProfile の試験用の子プロセスで `SSH_CONNECTION` を空にし、ローカルの既存の経路を検証した
 - `tests/starship/bash-compat-check.py` は Windows の Python と実際の Git Bash・Starship 1.26.0・zoxide 0.10.0 を使い、recommended 37/37、control 26/26、nounset 34/34、array-before 35/35 が成功した。試験用の rc・キャッシュ・zoxide データだけを使い、履歴は `/dev/null` にした
 - 初回の 20 条件の並列実行は recommended が 150 秒で未完了だった。単独の追試でも負荷がある間は再初期化が 2 秒の通知閾値に達して 35/37 だった。同条件の `main` の recommended は 37/37、重い SSH／GUI 検証が終わった後の変更版の単独試験も 37/37。最後の成功を全 20 条件の成功とは扱わない
-- PowerShell / Starship の既存標準回帰は 74 プロセスケース・34 callback、494/494 が成功し、既知失敗は両版の `integration-first` / `threshold-large` の 4 件、予期しない失敗は 0。初回 PS5 checker は BOM なし UTF-8 の callback JSON の集計が崩れたため、採取済み JSON を既存 PS7 checker で読み直して確定した
+- PowerShell / Starship の既存標準回帰は 74 プロセスケース・34 callback、494/494 が成功し、既知失敗は両版の `integration-first` / `threshold-large` の 4 件、予期しない失敗は 0。初回 PS5 checker は BOM なし UTF-8 の callback JSON の集計が崩れたため、採取済み JSON を既存 PS7 checker で読み直して確定した。nonce 付き終端への変更前の PS `b79886…d4dfa4` と、変更後の `2ee039…e46a7b` でも同じ件数の成功・既知失敗 4 件・予期しない失敗 0 を確認した。最終版の採取記録は `starship-20261012-034025-2196716b/regression-summary.json`
 - `shell/wezterm.sh` は `bash -n` と zsh 5.9 の `zsh -n` が成功した。zsh は公式の AlmaLinux の RPM を試験用の `/tmp` に展開して使い、システムへ導入していない
 
 ### 未確認事項
 
 - Windows クライアントからの実 SSH ペイン。許可された一時的な `ssh -A` でも、接続先 Windows の検証用プロセスで `SSH_AUTH_SOCK` は空だった。転送 agent を利用する実 SSH 認証の検証に進めなかったため、今回の Windows GUI 試験は実 SSH 接続として数えない
-- 期限確認追加後の Windows GUI 再試験は、既存の Python が WindowsApps エイリアスから起動できず未実施。Windows 実 WezTerm の時刻 API を含む Lua 78/78 は成功し、追加前の GUI 48/48 と 6/6 を区別する。追加インストールはしていない
-- 入れ子 SSH と tmux の固有経路。Lua では能力マーカー・alternate screen・key table の一般分岐までを検査し、専用の条件と実機の試験は行っていない
+- V1 の期限確認追加後と V2 の Windows GUI 再試験は、既存の Python が WindowsApps エイリアスから起動できず未実施。V1 の Lua 78/78 と最終 V2 の Lua 103/103 は Windows の実 WezTerm の時刻 API も含めて成功し、V1 の GUI 48/48 と 6/6 を区別する。追加インストールはしていない
+- 入れ子 SSH と tmux の専用配送。Lua では能力マーカー・alternate screen・key table の一般分岐を検査した。tmux の実機は上記の 7 の管理者・通常 `PasteFrom` 1 条件に限り、ほかの組合せや専用配送の実機試験は行っていない
 - ARM64 の降格、Bash の既存 20 条件すべての完了
 
 ---

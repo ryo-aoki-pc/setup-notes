@@ -1245,7 +1245,7 @@
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 2）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 2 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 1・3 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)を、`scoop install`・`scoop update` の後に貼る
   - 非管理者の SSH の PowerShell は、[SSH で管理者・非管理者の PowerShell を使う（任意）](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)の `drop` で開く。デスクトップでの導入や GUI 操作を検証した手順を、SSH でも通したとは扱わない
-- **SSH の PowerShell の貼り付けを取り消すとき**: 受信中に Ctrl+C を押すと本文を挿入せず読み捨てる。配送が途中で止まった場合は受信待ちが続くことがあるので、そこでコマンドを貼り足さず SSH を接続し直す
+- **SSH の PowerShell の貼り付けを取り消すとき**: 正しいヘッダーの受信前は、Ctrl+C を押しても開始から 5 秒の期限を延ばさない。本文受信の開始後は、Ctrl+C で本文を挿入せず末尾まで読み捨てる。その後に配送が止まると受信待ちが続くことがあるので、そこでコマンドを貼り足さず SSH を接続し直す
   - 本文の上限は UTF-8 で 64 KiB（65,536 バイト）。大きなブロックは分け、受信中は次のコマンドを貼り足さない
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 5）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
