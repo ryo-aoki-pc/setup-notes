@@ -58,7 +58,7 @@
    ```
 
    - `echo` が出す URL の末尾に版が入っている（例 `dropbox-lnx.x86_64-270.4.3312.tar.gz`、約 87 MiB）
-   - `gpgv: Good signature from "Dropbox Automatic Signing Key <linux@dropbox.com>"` が出れば、`~/.dropbox-dist` に展開されている
+   - `gpgv: Good signature from "Dropbox Automatic Signing Key <linux@dropbox.com>"`（日本語では同じ署名者からの `正しい署名`）が出れば、`~/.dropbox-dist` に展開されている
    - `BAD signature` のときは展開されない（`tar` は `&&` の後ろにある）ので、ここで止める
 
 1. 展開した版を確かめ、落としたファイルを消す。
@@ -85,7 +85,7 @@
    ```
 
    - `command -v` が `/home/<USER>/.local/bin/dropbox` を出す
-   - `Dropbox daemon version: 270.4.3312` と `Dropbox command-line interface version: 2026.05.06` が出る
+   - `Dropbox daemon version: 272.4.3798` と `Dropbox command-line interface version: 2026.09.28` のように、本体と CLI の版が出る
 
 1. ユーザーサービスを置いて、Dropbox を起動する。
 
