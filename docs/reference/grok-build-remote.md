@@ -84,12 +84,16 @@
 - 共同レビューでは、PC で照合したファイルを USB で Android に渡す形（取り込む前に照合できる）も挙がった。利用者の指定で、ブラウザで取得する形にしている
 - Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーが使う Edge・Chrome が信じる。Firefox は、設定によっては自分の置き場だけを使う（確かめていない）
 
-### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 6・7: 補足: スクリプトとタスク
+### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 6〜8: 補足: スクリプトとタスク
 
 - 環境変数を利用者の環境（レジストリ）に入れると、すべてのプロセスにトークンが渡る。起動用のスクリプトの中だけで設定する
 - スクリプトは ASCII で書く。Windows PowerShell 5.1 は、BOM の無いスクリプトを既定のコードページで読む
 - タスクは、管理者ではない窓から、ログオン時のトリガー付きで登録できた。`-RunLevel Limited` で、Codeg はデスクトップのセッションの、管理者ではない権限で動く
-- `-WindowStyle Hidden` で、窓を隠して起動する。標準エラーに出るトークンは、ファイルにも journal にも残らない
+- PowerShell をタスクから直接起動する形では、`-WindowStyle Hidden` を指定していても、このホストで Terminal が開いた
+- Windows 標準の .NET Framework の `csc.exe` で、`/target:winexe` のランチャーを作る。タスクはこの実行ファイルを起動する
+- ランチャーは `UseShellExecute=false`・`CreateNoWindow=true` で PowerShell を始める。標準出力と標準エラーは読み捨て、Codeg が出すトークンを表示・保存しない
+- 子プロセスが終わるまで待ち、その終了コードを返す。ログオンのトリガーと `Limited` の権限は変えない
+- コンソールを作らない指定は [ProcessStartInfo.CreateNoWindow](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.createnowindow?view=netframework-4.8.1) を使う
 
 ### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 2: 補足: 待ち受ける IP を決めない設定
 
@@ -108,8 +112,8 @@
 - Wi-Fi からも使うなら、`codeg-caddy-block-wifi` を作らず、`codeg-caddy-in` から `-InterfaceType Wired` を外す（確かめていない）
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
 - Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
-- Caddy の起動コマンドへ入れるパスは、単引用符を 2 つに置き換える。ユーザーのパスに `'` があっても、PowerShell の文字列を途中で閉じない
-- Caddy の終了コードをタスクへ返す（`exit $LASTEXITCODE`）。タスクの「前回の実行結果」で、Caddy が失敗したことが分かる
+- タスクの引数は、スクリプトのパスを二重引用符で囲む。ランチャーは、そのパスを 1 個の引数として受け取り、PowerShell の `-File` に渡す
+- Caddy は `start-caddy-hidden.ps1` から始め、Codeg と同じランチャーを使う。`exit $LASTEXITCODE` とランチャーを通して、Caddy の終了コードをタスクへ返す
 - タスク スケジューラの「失敗時の再起動」（`-RestartCount`・`-RestartInterval`）は使わない。終了コード 1 で終わる使い捨てのタスクで試すと、再起動されなかった（検証記録）
 - 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
 - Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントの Grok を巻き込まない
