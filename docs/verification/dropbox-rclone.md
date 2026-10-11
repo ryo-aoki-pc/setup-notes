@@ -138,6 +138,10 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
+- **状態（2026-10-11）**: Hyper-V の VM で認証前まで確認した（Codex）
+  - rclone 1.75.2 の導入、手順 5 のフィルタ、手順 9 の unit 設置・timer 有効化、更新確認と unit 撤去を確認。リンク・認証・同期は未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で認証前まで通した記録2026-10-11)
+
 ### 実施前の状態
 
 検証コンテナの状態:
@@ -333,3 +337,60 @@ INFO  : Bisync successful
   - ロックは `--max-lock 2m` で 2 分後に切れ、timer の次の回が `--recover` で回復した（コンテナで確認）
 
 - **端末の上限**: Basic（無料）プランは同時に 3 台まで。rclone のような連携アプリが数えられるかは、公式ヘルプに書かれていない（確かめていない）
+
+## 付録: Hyper-V の VM で認証前まで通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V、26H2、build 26300.9457（証跡の ProductName は Windows 10 Pro と表示） |
+| VM | `<HOSTNAME>`、Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GB、UEFI、Secure Boot disabled、eth0 1 枚 |
+| 開始 | desktop の after-CL1 からのクローン（依頼の前提）。`meta.json` の snapshot=clean-install は Existing 呼出しの既定値で、今回その状態から作成・復元した証拠ではない |
+| ゲスト | AlmaLinux 10.2 / x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64`、ホーム XFS、空き 13 GB |
+| 前提 | Homebrew 導入済み、Linger=yes、SELinux Enforcing、firewalld active、GNOME コンソール未ログイン |
+| 導入版 | Dropbox 272.4.3798、CLI 2026.09.28、rclone 1.75.2 linux/amd64 |
+| 貼り方 | SSH の対話の bash にドライバで手順のブロックを貼った。GUI・ブラウザの操作はしていない |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C16\` の下。以下のファイル名はそこからの相対パス。seq は `session/steps.jsonl` の番号
+- 認証前までの検証。実アカウントのリンク・認証・同期はしていない。Dropbox のリンク用の URL は出たことだけを確認し、値は表示・転載していない
+- 報告末尾の負の所要時間は開始・終了時刻と整合しないので採用しない。証跡のホスト ProductName と依頼の Windows 11 Pro の表記の違いは上の表に残した
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 開始前の公式クライアント撤去 | 通した（補助確認） | seq 21、`session/after-confirm/0021-撤去確認-1.txt`。同じ ~/Dropbox に 2 つの道具を同時に触らせていない |
+| 実施手順 1 | 通した | seq 22、`session/session-003.raw`。x86_64_linux bottle の 1.75.2、y/n 無しでプロンプト復帰 |
+| 実施手順 2 | 未実施（版確認だけ別に実施） | seq 23・24、`session/after-confirm/0023-rclone版確認-1.txt`。`outside.md` に前半の版・場所確認だけ切り出した。config create 未実行 |
+| 実施手順 3 | 未実施 | seq 33。実アカウントの許可が必要 |
+| 実施手順 4 | 未実施 | seq 33。未認証に依存する |
+| 実施手順 5 | 通した | seq 25・31、`session/after-confirm/0025-実施手順-5.txt`。フィルタ有効 7 行一致、空の ~/Dropbox 作成 |
+| 実施手順 6〜8 | 未実施 | seq 33。使用量・対象フォルダを決められず、初回同期も未実施 |
+| 実施手順 9 | 通した（unit 設置・有効化まで） | seq 26・27、`session/after-confirm/0026-実施手順-9.txt`・`0027-rclone状態-1.txt`。依頼の例外で初回同期無しで設置。enabled / active、次回予定あり、LAST は - |
+| 実施手順 10 | 未実施 | seq 33。同期成功を確かめられない |
+| 同期するフォルダを変える（任意）1〜3 | 未実施 | seq 33。認証・初回同期に依存する |
+| 更新 1・2 | 通した（更新対象無し） | seq 28・29、`session/session-003.raw`。1.75.2 already installed、rclone v1.75.2 |
+| extra ロールバック 1 | 通した | seq 30・31、`session/after-confirm/0030-ロールバック-1.txt`・`0031-撤去確認-2.txt`。timer / service 停止・unit 撤去、両方 inactive |
+| extra ロールバック 2〜5 | 未実施 | 今回の撤去範囲外。未認証で設定無し、本体・フィルタ・空の同期先と共有 linger を残した |
+
+### 通らなかった手順と見立て
+
+- 実施した範囲で通らなかった手順は無い。Homebrew は Landlock ABI 10 要求に対し kernel ABI 6 の警告を出したが、対応する制限で導入が完了した。Hyper-V による導入失敗とは扱わない
+- timer 確認時の service は inactive、journal は No entries、LAST は -。Result=success / ExecMainStatus=0 は未実行の初期値で、成功した同期ではない
+- rclone.conf は存在せず、listremotes は空。認証の待ち受けも起動していない。次回予定の前にロールバックしたため、周期的な失敗も観測していない
+- 2026-10-06 のローカル alias の代役による双方向同期成功と今回は別の検証。今回は代役・スタブを使わず、クラウド同期もしていない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| 実施手順 2 の版が固定の成功条件 | 直した（文言） | 1.75.2 の例にして「のような」を追加。`0023-rclone版確認-1.txt` の補助確認で版と場所を確認。登録を含む手順 2 全体は VM で確かめていない |
+| 更新 1 の版が古い | 直した（文言） | 1.75.2 already installed の例に変更。seq 28 の raw で確認。貼るブロックは変更無し |
+| meta.json の開始元の表示・報告の所要時間 | 未対応（道具・報告） | 表示値を開始元・所要時間の根拠として採用しない |
+
+### 確かめていないこと
+
+- リンク・OAuth 認証・クラウド同期・初回 resync・bisync・対象変更、更新対象を用意した upgrade、再起動後の rclone timer、15 分ごとの実行は未実施
+- 実機・Raspberry Pi 5 / aarch64 の導入実行と、認証情報・本体・同期先の撤去は未実施。過去の代役での成功範囲や aarch64 の bottle 存在確認を今回の実行結果へ広げない

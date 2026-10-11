@@ -41,6 +41,7 @@ Retry count: 26
   - 任意節で、root のコンテナ（`sudo podman` で動かしたもの）も、`sudo -i lazydocker` で見られるようにする
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **aarch64 の実機で基本操作・podman exec・既存設定を使った root の表示と停止を検証済み（2026-10-06）。x86_64 の新規 VM では、現行 `5da3478` 版と共通 bash `3d5323e` で実施手順 1〜5 とロールバックを再検証した（同日）**。実機は導入済みの環境で、一時設定と確認用コンテナを使った。[実機の範囲と後片付け](#付録-aarch64-の実機での検証記録2026-10-06)、[現行版の VM 記録](#付録-現行版を新規-vm-で再検証2026-10-06)を参照。更新・compose の任意節は、この新規 VM では再実行していない。以前の `0dbb522` 版の VM 記録とコンテナ記録も付録に残した
+  - これは 2026-10-06 の時点の状態
   - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](../lazydocker.md#更新)、[ロールバック](../extra/lazydocker.md#ロールバック)を通した
   - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](../podman-compose.md) の手順 1〜6 を通した
   - 検証コンテナで確認したこと:
@@ -59,6 +60,9 @@ Retry count: 26
     - 確認していないこと: root の Quadlet のコンテナ。実機でのソケットの新規有効化、bash 設定の追加・撤去、再起動後の動作
     - 2026-10-05: 自分用の bash の設定を root のシェルにも入れたホストの箇条書き（その節の手順 2・6）は、その設定の検証の中で、代わりのコマンドと、その節の手順 6〜8 を x86_64 のコンテナで流して確かめた（[ryo-aoki-pc/bash の docs/install.md の付録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md#付録-root-のシェルでも読む節の検証記録2026-10-05)）
     - 同日、手順 2・6 を、今回追加した行に目印を付け、その行だけ消す形に直した。未設定・既存の同値・既存の別値の 3 通りと繰り返し適用を、一時ファイルと `sudo`・`podman` のスタブで確認した（いずれも撤去後のファイルは元と同じ）。既存の別値は上書きせずに手順を止める。この変更後のブロックは実際の root の環境では未実行
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順・podman exec・compose・root の任意節・更新を通した。root の任意節の後片付けも確認。
+  - 未確認: 更新がある場合、ユーザー側の全面ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。root の共通 bash 設定と控えは残した。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -389,3 +393,76 @@ PgUp/PgDn: scroll, b: view bulk commands, q: quit, x: menu, ← → ↑ ↓: nav
 │registry.access.redhat.com/ubi10/httpd-24 latest 285││Linux) OpenSSL/3.5.8 configured -- resuming    │
 ...
 ```
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | Homebrew lazydocker 0.25.2、Podman 5.8.2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 59 | Homebrew 0.25.2 導入完了。Landlock ABI の警告は出たが完了 |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 60 | 0.25.2 / Homebrew / rootless DOCKER_HOST / OK |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 61 | lazydocker-web Up |
+| 実施手順 | — | 4 | 通した | `session/steps.jsonl` seq 62 | Containers・Images・Volumes・Networks とログ。対象を s → 確認文 → y で停止。`session/steps.jsonl` seq 64 の exited(0)、`session/steps.jsonl` seq 65 の q で終了 |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 66 | CLI で Exited(0)、config.yml 0 バイト |
+| podman exec でシェルを開く（任意） | — | 1 | 通した | `session/steps.jsonl` seq 67 | lazydocker-web を再開 |
+| podman exec でシェルを開く（任意） | — | 2 | 通した | `session/steps.jsonl` seq 68 | customCommands の 5 行を読み戻し |
+| podman exec でシェルを開く（任意） | — | 3 | 通した | `session/steps.jsonl` seq 69 | c → podman exec sh → Enter、sh-5.2$。`session/steps.jsonl` seq 72 の id は uid=1001(default) gid=0(root)。exit → Enter で戻り、`session/steps.jsonl` seq 75 の q で終了 |
+| compose のプロジェクトを見る（任意） | — | 1 | 通した | `session/steps.jsonl` seq 76 | dockerCompose: podman-compose を読み戻し |
+| compose のプロジェクトを見る（任意） | — | 2 | 通した | `session/steps.jsonl` seq 77 | Project=compose-sample / Services=check,web / Standalone を表示。2 → down で web、Apache ログ。`session/steps.jsonl` seq 80 の r で確認なしの再起動、`session/steps.jsonl` seq 81 の q で終了 |
+| compose のプロジェクトを見る（任意） | — | 3 | 通した | `session/steps.jsonl` seq 82 | web Up 13 seconds、check Up 5 minutes |
+| root でも使う（任意） | — | 1 | 通した | `session/steps.jsonl` seq 94 | 新規 symlink、active / OK / 5.8.2 |
+| root でも使う（任意） | — | 2 | 通した | `session/steps.jsonl` seq 95 | root の DOCKER_HOST と Homebrew lazydocker が一致 |
+| root でも使う（任意） | — | 3 | 通した | `session/steps.jsonl` seq 96 | 公開イメージを root に取得、lazydocker-root-web Up |
+| root でも使う（任意） | — | 4 | 通した | `session/steps.jsonl` seq 97 | root の対象だけを表示。ユーザー側対象は出ない。s → y、`session/steps.jsonl` seq 99 の exited(0)、`session/steps.jsonl` seq 100 の q で終了 |
+| root でも使う（任意） | — | 5 | 通した | `session/steps.jsonl` seq 101 | root 対象 Exited(0)、root config.yml 0 バイト |
+| root でも使う（任意） | — | 6 | 通した | `session/steps.jsonl` seq 102 | 元へ戻す分岐を選択。root 対象と lazydocker 設定を削除（最終状態も確認） |
+| root でも使う（任意） | — | 7 | 通した | `session/steps.jsonl` seq 103 | root にほかのコンテナが無いことを画面と最終一覧で確認。root イメージは Untagged / Deleted |
+| root でも使う（任意） | — | 8 | 通した | `session/steps.jsonl` seq 104 | 手順 1 で新規有効化したソケットを disable。Removed / inactive |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 105 | 0.25.2 already installed |
+| extra / ユーザー側の全面ロールバック | — | — | 未実施 | 今回の対象外 | root 任意節の後片付けは上表の手順 6〜8 |
+
+- `lazydocker-*.txt` と raw で、ユーザー・root の対象を s → y で停止し、q で終了したことを確認した。
+- podman exec sh は id が uid=1001(default) gid=0(root)、exit → Enter で TUI に戻れた。
+- compose の web を r で再起動し、web Up 13 seconds / check Up 5 minutes（seq 82）を確認した。
+- root の前提が無かったため、共通 bash の参照先 docs/install.md を seq 83〜93 で先に通した（導入の手順 6・7 は条件に当たらず飛ばした）。
+- root のソケットは新規有効化後、任意節の手順 6〜8 で専用コンテナ・設定・イメージを撤去し、ソケットを disabled / inactive に戻した（`final-guest-state.txt`）。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+Homebrew は Landlock ABI 10 以上を要求し、ゲストは ABI 6 という警告を出したが導入は完了した。カーネル由来の警告で、Hyper-V 自体が原因と確かめたものではない。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| — | 対象文書 | 手順書の直しを要する食い違いは確認しなかった | 直しなし |
+
+### 手順書を直した所
+
+- 手順書・extra・参考資料の直しは無い。
+
+### 確かめていないこと
+
+- 更新がある場合、ユーザー側の全面ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。root の共通 bash 設定と控えは残した。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

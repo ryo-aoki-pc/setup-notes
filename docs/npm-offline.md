@@ -6,7 +6,7 @@
 
 > [!IMPORTANT]
 > - **前提**: [ssh-socks-tunnel.md](ssh-socks-tunnel.md) の手順 1〜3 で、インターネットに出られないホスト（以下、オフラインのホスト）にトンネルを張り、同書の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)で dnf にプロキシを設定してあること（dnf の節を飛ばしていたら、手順 1 の前に行う）
-> - **前提**: 同じトンネルで、[homebrew-offline.md](homebrew-offline.md) の Homebrew と、[Neovim](almalinux-setup.md#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること
+> - **前提**: 同じトンネルで、[homebrew-offline.md](homebrew-offline.md) の Homebrew と、[Neovim](almalinux-setup.md#neovim) と、Mason を使う設定（LazyVim をもとにした自分用の設定など）を入れてあること（Mason の npm のパッケージは、まだ入っていなくてよい）
 > - **手順 1〜3 は、ssh-socks-tunnel.md の手順 3 のシェル（オフラインのホストの、`sudo` できる自分のユーザー）のまま貼る**。手順 4 で同書の[トンネルを閉じる](ssh-socks-tunnel.md#トンネルを閉じる)の手順 1・2 を行い、手順 5 はログインし直したシェルで貼る
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 
@@ -24,7 +24,7 @@
    sudo dnf install -y nodejs nodejs-npm
    ```
 
-   - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!` で終わる
+   - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!`（日本語では `完了しました!`）で終わる。導入済みなら `Nothing to do.`（`行うべきことはありません。`）も出る
    - `Failed to download metadata for repo` で止まったら、dnf がトンネルを通っていない
      - `Curl error (6)`（名前を引けない）なら、ssh-socks-tunnel.md の[dnf にもトンネルを使わせる（任意）](ssh-socks-tunnel.md#dnf-にもトンネルを使わせる任意)の設定が無い
      - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（同書の手順 2 から張り直す）
@@ -99,7 +99,7 @@
    sudo dnf upgrade -y nodejs nodejs-npm
    ```
 
-   - 上げるものが無ければ `Nothing to do.` で終わる
+   - 上げるものが無ければ `Nothing to do.`（日本語では `行うべきことはありません。`）と `Complete!`（`完了しました!`）で終わる
 
 1. Neovim でファイルを開き、Mason のパッケージを上げる。
 

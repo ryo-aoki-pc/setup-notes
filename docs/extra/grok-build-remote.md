@@ -104,12 +104,16 @@
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
    ```powershell
-   Remove-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi'
+   $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
+   Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue |
+     Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe } |
+     Remove-NetFirewallRule
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-NetFirewallRule -Name 'codeg-caddy-*' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
    ```
 
    - 「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 を通していなければ、この手順は飛ばす
+   - 新構成の 2 本と、旧構成の Wi-Fi 遮断規則が残っている場合はその 1 本だけを消す。ほかのプログラムの規則は変更しない
    - 何も出なければよい
 
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
@@ -129,7 +133,7 @@
 
 #### アクセストークンの重み
 
-- トークンを知っている人は、ブラウザから、そのホストでそのユーザーとして Grok Build を動かせる（ファイルの読み書きとコマンドの実行）
+- トークンを知っている人は、ブラウザから、そのホストでそのユーザーとして有効なエージェントを動かせる（Grok Build・Claude Code・Codex によるファイルの読み書きとコマンドの実行）
 - AlmaLinux 10 の初期設定は NOPASSWD の sudo を入れる。そのホストでは、トークンが root と同じ重みになる
 - Codeg の画面には、端末のパネルを開くボタンがある（開いての確認はしていない）
 - トークンは 1 つで、利用者ごとの区別や、有効期限は無い
@@ -144,10 +148,21 @@
 #### 権限モードと承認の確認
 
 - Codeg の「権限モード」は、Grok Build の `config.toml` の `permission_mode` を書き換える。端末の `grok` と同じ設定になる
+- 承認を減らして使う本書の用途では「スマート自動承認」（`auto`）を選ぶ。Grok の自動審査が許可しない操作は、確認が出るか拒否される。設定の保存と、新しい会話での応答が未確認なら、その部分は未完了として扱う
 - 「常に許可」のとき、Codeg は Grok Build を `--permission-mode bypassPermissions` で起動する。承認の確認は出ない
 - 「毎回確認」のとき、ファイルの変更と `rm` は確認が出た。**`mkdir` は確認なしで実行された**（Grok Build が確認を求めなかった）。確認が出ることを、安全の境界にしない
 - 承認の選択肢の「Yes, allow all edits during this session」「Yes, and don't ask again for bash commands」は、その会話の以後の確認を省く
 - Windows の Grok Build には sandbox が無い。AlmaLinux 10 でも、Codeg は sandbox を足さない
+
+#### Claude Code・Codex の共有設定と履歴
+
+- [任意節](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)の手順 4 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
+- 認証方法を変える前に、本人が既存の方式と必要な設定を確かめる。既に「公式サブスクリプション」なら保存し直さない。別のアカウントへのログインも、端末の CLI に影響する
+- 既存の API 用の項目がある場合は、認証方法の保存で削除・変更されることがある。エージェントへ設定ファイルの全文やログイン情報を渡さない
+- 接続アダプターには別のランタイムが入る。CLI と同じホームの設定・MCP・フックなどを使い得るので、Codeg に追加しただけで既存設定から隔離されたとは扱わない
+- `Auto`・`Auto review` では、自動審査が許可した操作は確認無しで進む。Claude の `Auto` が使えない状態では、手動運用を選ぶ場合に `Manual` へ変える。既存の Grok の承認の結果を、両エージェントの結果として扱わない
+- 履歴を取り込む前に元の CLI・アプリで同じ会話を閉じ、同時に書き込まない。中断しても実行済みの変更は戻らないため、再開前に差分を確かめる
+- Codeg を止める・撤去するだけでは、各 CLI の認証・設定・履歴は元に戻らない。元に戻す場合は本人が変更した設定を確かめ、各 CLI の設定手順で戻す。履歴やログイン情報をまとめて削除する操作は行わない
 
 #### 最初の会話のモデル
 
@@ -171,11 +186,12 @@
 - 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
 - ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、許可した送信元なら誰でも取れる
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
-- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。守りは、トークンと、待ち受ける IP（Windows 11 は受信の規則のネットワークの種類と有線の指定）と、送信元の制限
+- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 は待ち受ける IP と送信元を絞る。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う
 - インターネットへ公開しない
 
-#### 送信元に LAN の帯を入れるとき
+#### AlmaLinux 10 の送信元に LAN の帯を入れるとき
 
+- この項は AlmaLinux 10 の `ALLOW_FROM` に対する注意。Windows 11 は送信元 CIDR の指定が不要で、受信インターフェースが Private なら全送信元を許可する
 - その LAN につながる端末はすべて、ログインの画面まで届く。守りはトークンだけになる
 - ルート証明書を入れていない端末からは、警告が出る
 
@@ -190,11 +206,13 @@
 - ランチャーのソース・実行ファイル・タスクの XML の控えは、`%LOCALAPPDATA%\codeg-server` の中にある。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 3 で、このフォルダーとともに消す
 - Caddy の起動用 `start-caddy-hidden.ps1` は、`%LOCALAPPDATA%\codeg-caddy` の中にある
 - 非表示起動のランチャーに切り替えた後の、OS 再起動・サインアウト後の動作は未確認
-- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動してサインインした後は、2 つとも自動で始まった。サインアウトの後の動きは、確かめていない
-- Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。届くのは、受信の規則が通す「プライベートのネットワーク・有線・指定した送信元」だけ
-- パブリックのネットワーク、Wi-Fi、VPN のアドレス宛てには届かない。別の拠点の有線 LAN は、プライベートにするまで届かない
+- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動した後も、本人のサインインが必要。再起動・サインアウト後の実測は、検証記録の対象・実施日ごとの範囲を参照する
+- Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。受信インターフェースが Private なら、IPv4・IPv6 の全送信元・全接続種別で 3443/tcp に届く。有線 LAN・Wi-Fi・VPN を区別しない
+- LAN には有線 LAN と Wi-Fi が含まれる。VPN からの通信も、ホスト側で実際に受信するインターフェースが Private であることが必要
+- 信頼する接続だけを Private にする。公衆 Wi-Fi などほかの接続は Public のままにし、Codeg に届かせるために Private へ変えない
+- Public・Domain の受信インターフェースは遮断する。Private にした接続に到達できる端末はすべて、ログインの画面と公開のルート証明書まで届く。Edge Traversal は許可しない
 - PC の IP が変わると、つなぐ URL が変わる。ブラウザは別のサイトとして扱うので、トークンを入れ直す
-- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。送信元を絞ることで抑える
+- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。Windows の新構成は送信元を制限しないので、Private にした接続へ届く端末はすべてこの機能を利用できる
 - 受信の規則より先に Caddy を起動しない。Windows が許可を尋ねる画面を出す
 - タスク スケジューラの「失敗時の再起動」は使っていない。終了コードが 0 でないだけのタスクは、再起動されなかった
 
@@ -205,4 +223,4 @@
 - 「ファイルとコマンドをエージェント自身に処理させる」は、既定の無効のまま使う。有効にしても、`mkdir` が確認なしで実行される結果は変わらなかった
 - 取り込みの画面は、そのホストのほかのエージェントとプロジェクトのセッションの題名も一覧に出す
 - Codeg の子プロセス（`codeg-mcp`）の引数に、内部用の値（`--token <UUID>`）が出る。アクセストークンとは別のもの
-- Codeg は Grok Build 以外のエージェント（Claude Code・Codex など）も扱える。本書は Grok Build だけを扱う
+- Claude Code・Codex も使う場合は、[両 OS 共通の任意節](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)を通す。エージェントごとの実測と未確認の範囲は[検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する

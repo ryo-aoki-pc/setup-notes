@@ -20,6 +20,7 @@
 - **目的**: podman のコンテナ・pod・イメージ・ボリューム・ネットワーク・シークレットを、端末の画面（TUI）で見て操作できるようにする
 - **進め方**: EPEL（前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1 で有効にする）の podman-tui 1.10.0 を入れ、podman の API ソケットにつないで、確認用のコンテナを画面から止める。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜5を検証済み（2026-10-06、SELinux Enforcing）。実機では本実行していない**
+  - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
   - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）、手順 1〜5、[更新](../podman-tui.md#更新)、[ロールバック](../extra/podman-tui.md#ロールバック)を通した
   - 確認したこと:
@@ -29,6 +30,9 @@
     - Homebrew の 2.0.0 と、API ソケットが止まっているときの画面（[注意点](../extra/podman-tui.md#注意点)）
   - **確認していないこと**: 色や罫線の見た目、デスクトップの端末での F キー、SELinux が有効なとき、SSH でほかのホストの podman につなぐこと
   - aarch64（Raspberry Pi 5）では通していない
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順 1〜5・更新を通した。代替キー l と stop メニューで停止、Ctrl+C で終了を確認。
+  - 未確認: F4 自体（本文の代替キー l を使用）、更新がある場合、ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -207,3 +211,57 @@ podman-tui-web Exited (0) 19 seconds ago
 ║fcb0527cb46f   registry.access.redhat.com/ubi10/http…        47 seconds ago   ▼ Exited (0) 9 seconds ago   podman-tui-web
 ```
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | podman-tui 1.10.0-1.el10_2、Podman 5.8.2 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 28 | 1.10.0 を 1 パッケージで導入。`session/steps.jsonl` seq 29 で y |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 30 | v1.10.0、/usr/bin/podman-tui、epel が一致 |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 31 | podman-tui-web Up |
+| 実施手順 | — | 4 | 通した | `session/steps.jsonl` seq 32 | SYSTEM の STATUS_OK / 5.8.2 / localhost connected。l を 2 回で CONTAINERS へ（本文の代替キー）。m → down 19 回 → Enter。`session/steps.jsonl` seq 55 で対象 Exited(0)、`session/steps.jsonl` seq 56 の Ctrl+C で終了 |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 57 | CLI でも podman-tui-web Exited(0) |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 58 | 更新なし |
+| extra / ロールバック | — | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- `podman-tui-system.txt` は STATUS_OK・API 5.8.2・localhost connected。
+- l を 2 回で CONTAINERS へ移り、m の stop を選んだ。
+- `podman-tui-command-menu.txt` と `podman-tui-stopped.txt`、CLI で Exited (0)、Ctrl+C で終了を確認した。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| — | 対象文書 | 手順書の直しを要する食い違いは確認しなかった | 直しなし |
+
+### 手順書を直した所
+
+- 手順書・extra・参考資料の直しは無い。
+
+### 確かめていないこと
+
+- F4 自体（本文の代替キー l を使用）、更新がある場合、ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

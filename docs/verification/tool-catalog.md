@@ -4,12 +4,14 @@
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
+
 ## 補足
 
 ### AlmaLinux 10 の CLI / GUI ツール導入元一覧: 検証状況の記録
 
 > [!WARNING]
 > **状態**: **調査は 2026-09-24（UTC 20:51〜21:20）**。検証の方法と環境は[補足](../reference/tool-catalog.md#補足)にまとめた。
+> - これは 2026-09-24 の時点の状態
 >
 > - x86_64 は AlmaLinux 10.2 のコンテナで、**表の導入コマンドを実行して入ることを確かめた**。確かめた深さは行ごとの「確認」列に書いてある
 > - **aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない
@@ -20,6 +22,10 @@
 > - [CLI: 定番の置き換え](../tool-catalog.md#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
 > - 同じ表にあった fzf は、2026-10-02 に手順書にした（bash への組み込みまで。[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
 > - 2026-10-03 に、zoxide の dnf（COPR）の経路を zoxide.md から外し、[文書化済みのツール](../tool-catalog.md#文書化済みのツール)の「zoxide（dnf）」の行を消した
+
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 6 本の導入と取得元、ベンダー節の 2 ブロック、更新の 3 ブロックを確認。Chrome の警告も記録。
+  - 未確認: 全ツールの導入、Extension Manager と Chrome の GUI 起動、skopeo の Podman 連携、実機・aarch64、Chrome の警告の別クローンでの再現は未実施。表全体の版・確認の深さを今回の 6 本の結果で更新していない。
 
 ### CLI: 定番の置き換え / 手順 0: 本文中の記録
 
@@ -198,3 +204,68 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 ### 操作上の注意と併記されていた記録
 
 - Pods と BoxBuddy の 2 本で、`/var/lib/flatpak` は 2.5 GB になった（GNOME 50 の runtime）
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C12\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | 依頼で示された after-AS4 由来の既存クローン。meta.json の snapshot=clean-install は準備ツールの既定値で、開始スナップショットの証拠ではない |
+| 共通 bash | 導入済み。C12 の対象証跡からコミットの値は確定しない |
+| 対象版 | skopeo 1.22.2-5.el10_2、duf 0.9.1-3.el10_2、direnv 2.38.2、Extension Manager 0.6.5、Chrome 155.0.8059.39、mise 2026.10.8 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節・経路 | 対象 | 判定 | 根拠 | メモ |
+|---|---|---|---|---|
+| 事前確認 | 未導入状態 | 通した | `session/steps.jsonl` seq 45 | skopeo/duf/direnv/Extension Manager/miseの導入前確認 |
+| AppStream / BaseOS | skopeo | 通した（導入のみ） | `session/steps.jsonl` seq 46、58 | 1.22.2-5.el10_2、from_repo=appstream。Podmanは未導入、Podman前提の運用は対象外 |
+| EPEL | duf | 通した | `session/steps.jsonl` seq 47、58 | 0.9.1-3.el10_2、from_repo=epel |
+| Homebrew | direnv | 通した | `session/steps.jsonl` seq 48–49、58 | 2.38.2、bash5.3.20も依存導入。yに回答 |
+| Flathub | Extension Manager | 通した（導入のみ） | `session/steps.jsonl` seq 50、58 | 0.6.5、Origin=flathub、GNOME50、2.4MB。GUI起動は未実施 |
+| ベンダーの dnf リポジトリ | Google Chrome ブロック | 通した（警告あり） | `session/steps.jsonl` seq 51、58 | 155.0.8059.39、from_repo=google-chrome。scriptletの鍵再取り込みにrpmロックエラー、導入と版表示は成功 |
+| 同上 | mise ブロック | 通した | `session/steps.jsonl` seq 52–53、58 | 2026.10.8、from_repo=mise-repo、公開鍵fingerprintは本文一致 |
+| 更新 | brew upgrade | 通した | `session/steps.jsonl` seq 54 | 追加更新なし |
+| 更新 | sudo dnf upgrade | 通した | `session/steps.jsonl` seq 55–56 | yに回答、btrfs-progs6.12-3.el10_0とepel-release10-8.el10_2へ更新 |
+| 更新 | sudo flatpak update | 通した | `session/steps.jsonl` seq 57 | Nothing to do |
+| 対象外のツール・GUI | — | 未実施 | 今回の対象外 | 全ツールの導入・GUI 起動はしていない |
+
+- 各導入元から未導入のものを選び、ベンダー節は 2 ブロックとも実行した。
+- `catalog-origins.json` と `catalog-procedures.md` に表の原文とブロックの対応がある。
+- dnf 更新は btrfs-progs 6.12-3.el10_0 と epel-release 10-8.el10_2 を適用。
+- brew と Flatpak は更新なし。
+- skopeo と Extension Manager は導入のみの確認。
+
+### 通らなかった手順と見立て
+
+- Chrome の導入中に RPM ロックと鍵の再取り込みエラーが出た（seq 51）。
+- 導入完了・版表示・取得元の読み戻しは成功した。
+- seq 58 の scriptlet のコメントと rpm --import が、パッケージ導入中の再帰実行の失敗を示す。
+- scriptlet 由来という見立てで、別クローンの再現はしていない。
+- SSH・Hyper-V 固有とする証拠は無い。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/tool-catalog.md / ベンダーの dnf リポジトリ / Chrome | scriptlet の警告 | 未対応。導入成功と警告を併記 |
+
+### 手順書を直した所
+
+- 手順書・extra・参考資料の直しは無い。
+
+### 確かめていないこと
+
+- 全ツールの導入、Extension Manager と Chrome の GUI 起動、skopeo の Podman 連携、実機・aarch64、Chrome の警告の別クローンでの再現は未実施。表全体の版・確認の深さを今回の 6 本の結果で更新していない。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

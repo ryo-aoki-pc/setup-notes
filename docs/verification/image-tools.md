@@ -78,6 +78,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
   - Trivy: 脆弱性と設定の問題
 - **進め方**: hadolint と dive は Homebrew、Trivy は公式の dnf リポジトリから入れる（[選択した方針](../reference/image-tools.md#選択した方針)）。確認用のイメージを 1 つ作って、3 つを当てる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
+  - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
   - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../extra/image-tools.md#ロールバック)を通した
   - 確認したこと:
@@ -87,6 +88,9 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
   - **確認していないこと**: dive の画面の見た目と操作（表示された文字を読み取っただけ）、脆弱性が見つかるイメージでの Trivy の出力
   - aarch64（Raspberry Pi 5）では通していない
   - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/image-tools.md#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 導入・検査・TUI・更新を実行。手順 4 は固定版の条件と不一致。hadolint・dive の想定した失敗と Trivy の検査を確認。
+  - 未確認: ほかのイメージの安全性、更新がある場合、全面ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。dive の文字への復元には一部重なりがあり、描画全体が正しく復元されたとは扱わない。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -273,3 +277,73 @@ Result:FAIL [Total:3] [Passed:0] [Failed:2] [Warn:0] [Skipped:1]
 ### 手順内の実測・検証状況
 
 - **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](../extra/image-tools.md#ロールバック)の手順 2 で消す
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C13\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | after-CL1 の新規クローン（初期設定・linger・Podman・Docker API・Quadlet の後）、SELinux Enforcing・rootless=true |
+| 共通 bash | 67abb84ed5601b242870841ff1da381388f5427a（一般ユーザーと今回導入した root） |
+| 対象版 | hadolint 2.15.1、dive 0.13.1、公式 Trivy 0.75.0-1（EPEL 候補 0.64.1-2.el10_1） |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 項 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---:|---|---|---|
+| 実施手順 | — | 1 | 通した | `session/steps.jsonl` seq 106 | hadolint / dive の導入完了 |
+| 実施手順 | — | 2 | 通した | `session/steps.jsonl` seq 107 | hadolint 2.15.1 / dive 0.13.1 / Homebrew のパス |
+| 実施手順 | — | 3 | 通した | `session/steps.jsonl` seq 108 | gpgcheck=1。公式 0.75.0 と EPEL 0.64.1 が候補。`session/steps.jsonl` seq 109 で鍵の fingerprint 一致を確認し、`session/steps.jsonl` seq 110 の y で取り込み・導入成功 |
+| 実施手順 | — | 4 | 通らなかった | `session/steps.jsonl` seq 111 | Version:0.75.0、/usr/bin/trivy、trivy-0.75.0-1.x86_64。固定版 0.74.0 の成功条件とは不一致 |
+| 実施手順 | — | 5 | 通した | `session/steps.jsonl` seq 112 | DL3006 / DL3040 / DL3041 の warning、rc=1（想定した失敗） |
+| 実施手順 | — | 6 | 通した | `session/steps.jsonl` seq 113 | 正常例は指摘なし、rc=0 |
+| 実施手順 | — | 7 | 通した | `session/steps.jsonl` seq 114 | `session/steps.jsonl` seq 115 まで待機。Successfully tagged localhost/image-check:1、283 MB |
+| 実施手順 | — | 8 | 通した | `session/steps.jsonl` seq 116 | podman ソース。efficiency=85.4470%、wastedBytes=58951134（59 MB）、Result:FAIL、rc=1（想定どおり） |
+| 実施手順 | — | 9 | 通した | `session/steps.jsonl` seq 117 | DB 121.04 MiB 取得。redhat 10.1、Report Summary の HIGH/CRITICAL=0 |
+| 実施手順 | — | 10 | 通した | `session/steps.jsonl` seq 118 | Layers / Image Details / Current Layer Contents / 85% / 59 MB / キー案内。down で層移動、Tab で枠切替、`session/steps.jsonl` seq 121 の q で終了 |
+| 更新 | — | 1 | 通した | `session/steps.jsonl` seq 122 | hadolint / dive は already installed |
+| 更新 | — | 2 | 通した | `session/steps.jsonl` seq 123 | Trivy は更新なし |
+| extra / ロールバック | — | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+- hadolint の欠陥例は DL3006・DL3040・DL3041 と rc=1、正常例は rc=0。
+- 283 MB の確認イメージを作成した。
+- dive --ci は 85.4470%、58951134 bytes（59 MB）、Result:FAIL / rc=1（想定どおり）。
+- Trivy は DB 121.04 MiB を取得し、redhat 10.1 の HIGH・CRITICAL は 0 件。
+- この時点・このイメージ・この severity の結果。
+- `dive-initial.txt`・`dive-down.txt`・`dive-tab.txt` と raw で層移動・枠切替・q 終了を確認した。
+
+### 通らなかった手順と見立て
+
+実施手順 4 は、導入された 0.75.0 と本文の固定版 0.74.0 が一致せず通らなかった。実行ファイルと RPM の版は一致し、後続の検査は通った。取得元の候補の差で、SSH や Hyper-V が原因とする証拠は無い。過去の 0.74.0 の記録はその時点の結果として保持する。
+
+Homebrew は Landlock ABI 10 以上を要求し、ゲストは ABI 6 という警告を出したが導入は完了した。カーネル由来の警告で、Hyper-V 自体が原因と確かめたものではない。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/image-tools.md / 実施手順 / 手順 3 | 文言の直し | 直した |
+| 低 | docs/image-tools.md / 実施手順 / 手順 4 | 文言の直し | 直した |
+| 低 | docs/image-tools.md / 実施手順 / 手順 9 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/image-tools.md / 実施手順 / 手順 3: 文言。根拠: C13/session/after-confirm/0108-実施手順-3.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/image-tools.md / 実施手順 / 手順 4: 文言。根拠: C13/session/after-confirm/0108-実施手順-3.txt、0111-実施手順-4.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+- docs/image-tools.md / 実施手順 / 手順 9: 文言。根拠: C13/session/session-001.raw seq 117。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- ほかのイメージの安全性、更新がある場合、全面ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。dive の文字への復元には一部重なりがあり、描画全体が正しく復元されたとは扱わない。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。

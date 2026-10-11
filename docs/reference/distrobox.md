@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 2: 補足: 一緒に入るものと鍵
 
-- 一緒に入るのが `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
+- 未導入なら一緒に入る依存が `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
 - 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
 ### 実施手順 / 手順 3: 補足: distrobox の依存

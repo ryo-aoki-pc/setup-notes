@@ -58,12 +58,16 @@ $ gdu-go -n /usr/share | tail -8
 - **目的**: AlmaLinux 10 に [gdu](https://github.com/dundee/gdu)（ディスク使用量を見る TUI。`ncdu` と同じ用途で、並列処理で速い）を入れる
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **`0dbb522` の直接追記版の実施手順 1・2 を x86_64 のクリーン VM で本実行済み（2026-10-06）。コンテナでも通し検証済み（2026-09-22）**。現行版 `5da3478` は、共通 bash 新規導入後の別の VM でも再検証した（末尾の再検証記録）。既存ホストの手動移行は行っていない。
+  - これは 2026-10-06 の時点の状態
   - ただし**実機には本書と同じ経路のもの（`brew install gdu` による `gdu 5.37.0`）が 2026-09-21 から入っている**
     - [yazi](../almalinux-setup.md#yazi) 周辺のツールをまとめて入れた流れで導入したもので、**本書の手順を順に実行した結果ではない**
     - 実機で使えるコマンドは `gdu-go` だけで `gdu` は存在せず、[エイリアス](../gdu.md#gdu-の名前で呼ぶ任意)も実機には入れていない
   - コンテナでは、[Homebrew の導入](../almalinux-setup.md)と手順 1〜2、[エイリアス](../gdu.md#gdu-の名前で呼ぶ任意)を通した
   - 確認したこと: `arm64_linux` のボトルが降りる、`gdu-go --version` が `v5.37.0` を返す、`gdu-go -n` の非対話モードが走る
   - TUI の起動・一覧の表示・`q` での終了は、2026-10-06 のクリーン VM で確認した。**確認していないこと**: EPEL 版（5.32.0）との併用、シンボリックリンク方式（張ると `gdu` で動き、`sudo gdu` では見つからないことだけ、[homebrew.md の付録](almalinux-setup.md#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)で確かめた）
+- 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
+  - 実施・確認: 実施手順・alias とリンクの任意節・更新、追加の TUI 起動・移動・終了を確認。
+  - 未確認: 削除操作、実機・aarch64、更新がある場合、ロールバックは今回未実施。
 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
@@ -213,3 +217,55 @@ $ dnf -q repoquery -l gdu | grep bin/
 /usr/bin/gdu
 ```
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- 実施したのは Codex。対象は手順書のコミット `d69f1130f94d831b60bc9bd38a568d2cfb71659e`。下表は直す前の手順を通した結果。
+- 証跡は `D:\vmverify\codex\units\C12\` の下にあり、このリポジトリには入っていない。
+- 表の seq は `session/steps.jsonl` の連番。
+- 確認出力は `session/after-confirm/`、TUI・対話・確認見出しの無い手順は `session/session-001.raw` の rawFrom / rawTo に対応する箇所で照合した。
+- VM の値は `<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<UID>` で書く。
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 11 Pro、build 26300、Hyper-V |
+| VM | Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch・eth0 1 枚、Secure Boot 無効 |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 開始状態 | 依頼で示された after-AS4 由来の既存クローン。meta.json の snapshot=clean-install は準備ツールの既定値で、開始スナップショットの証拠ではない |
+| 共通 bash | 導入済み。C12 の対象証跡からコミットの値は確定しない |
+| 対象版 | Homebrew gdu 5.38.0 |
+| 貼り方 | GNOME コンソールにログインした状態で、SSH の対話の bash にドライバでブロックを順に貼った。TUI は SSH の端末の文字とキー操作で確認した |
+
+### 手順ごとの結果
+
+| 節 | 手順 | 判定 | 根拠 | メモ |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `session/steps.jsonl` seq 10 | 5.38.0。gdu-go の caveat |
+| 実施手順 | 2 | 通した（版の差） | `session/steps.jsonl` seq 11 | 本文例5.37.0に対して5.38.0。gdu名は無し、非対話走査一覧 |
+| gdu の名前で呼ぶ（任意） | 1 | 通した | `session/steps.jsonl` seq 12 | alias gdu='gdu-go' |
+| gdu の名前で呼ぶ（任意） | 2 | 通した | `session/steps.jsonl` seq 13 | ~/.local/bin/gdu のリンクを作成 |
+| 更新 | 1 | 通した | `session/steps.jsonl` seq 14 | already installed |
+| TUI（依頼による追加確認） | 起動・移動・終了 | 通した | `session/steps.jsonl` seq 15–18、raw | gdu-go /usr/share、down→right で /usr/share/doc へ移動、q で終了 |
+| extra / ロールバック | 全手順 | 未実施 | 今回の対象外 | 過去のロールバック記録は保持 |
+
+非対話走査、共通 alias、リンクを確認した。追加の TUI 確認では down → right で /usr/share/doc に移り、q で終了した。
+
+### 通らなかった手順と見立て
+
+対象手順で通らなかったものは無い。更新コマンドの正常終了と、新しい版への入れ替えは区別する。
+
+### 指摘と状態
+
+| 重大度 | 場所 | 指摘 | 状態 |
+|---|---|---|---|
+| 低 | docs/gdu.md / 実施手順 / 手順 2 | 文言の直し | 直した |
+
+### 手順書を直した所
+
+- docs/gdu.md / 実施手順 / 手順 2: 文言。根拠: C12/session/after-confirm/0011-実施手順-2.txt。対応する出力を VM の証跡で確認。文言の直しで、ブロックは変更していない。
+
+### 確かめていないこと
+
+- 削除操作、実機・aarch64、更新がある場合、ロールバックは今回未実施。
+- 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。
