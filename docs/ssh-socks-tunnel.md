@@ -89,7 +89,7 @@
    fi
    ```
 
-   - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.` が出ればよい
+   - `2:proxy=socks5h://127.0.0.1:1080` と `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）が出ればよい
 
 ---
 
