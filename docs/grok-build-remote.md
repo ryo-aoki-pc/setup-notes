@@ -17,10 +17,14 @@
 - Grok Build には、公式の遠隔操作の画面が無い。OSS の [Codeg](https://github.com/spacering-net/codeg)（Apache-2.0）のサーバーを Grok Build と同じホストに常駐させ、ブラウザのチャット形式の画面から Grok Build を動かす。外部のサーバーは通らない
 - 通信は HTTPS。OSS の [Caddy](https://caddyserver.com/)（Apache-2.0）を同じホストに置き、Caddy が自分で作る認証局の証明書で受けて、Codeg へ渡す。つなぐ端末には、その認証局のルート証明書を入れる
 - 開けるのは 3443/tcp だけで、送信元を指定した帯に絞る。インターネット向けのポート転送は設定しない
-- 手順の後: [端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[設定ファイル](#設定ファイル)・[更新](#更新)・[ロールバック](extra/grok-build-remote.md#ロールバック)
+- 手順の後: [端末にルート証明書を入れる](#端末にルート証明書を入れる)・[使い方の基本](#使い方の基本)・[端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む)・[Claude Code と Codex CLI も操作する](#claude-code-と-codex-cli-も操作する)・[設定ファイル](#設定ファイル)・[更新](#更新)・[ロールバック](extra/grok-build-remote.md#ロールバック)
 
 > [!WARNING]
-> **アクセストークンを知っている人は、ブラウザからこのサーバーで、このユーザーとして Grok Build を動かせる**（ファイルの読み書きとコマンドの実行）。NOPASSWD の sudo があるホストでは、root と同じ重みになる。待ち受ける IP と送信元を絞り、トークンは人に見せない。**Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**。「毎回確認」でも、`mkdir` は確認なしで実行された（[注意点](extra/grok-build-remote.md#注意点)）。
+> **アクセストークンを知っている人は、ブラウザからこのサーバーで、このユーザーとして有効なエージェントを動かせる**（ファイルの読み書きとコマンドの実行）。Claude Code・Codex を有効にした場合も、同じトークンで動かせる。
+>
+> NOPASSWD の sudo があるホストでは、root と同じ重みになる。待ち受ける IP と送信元を絞り、トークンは人に見せない。
+>
+> **Grok の権限モードが「常に許可」だと、送った指示は確認なしで実行される**。「毎回確認」でも、`mkdir` は確認なしで実行された（[注意点](extra/grok-build-remote.md#注意点)）。
 
 ### Codeg のサーバーを入れて localhost で起動する
 
@@ -536,6 +540,7 @@
 | 確認の出方を変える | `/settings/agents` の `Grok` の「権限モード」（[ブラウザで開いて Grok を動かす](#ブラウザで開いて-grok-を動かす)の手順 4） |
 | 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#端末の-grok-のセッションを取り込む) |
 | ブラウザで始めた会話を、端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
+| Claude Code・Codex で会話し、端末の履歴を取り込む | [Claude Code と Codex CLI も操作する](#claude-code-と-codex-cli-も操作する)。作業時は Claude の `Auto`・Codex の `Auto review` を選ぶ |
 | 止める・始める | `systemctl --user stop codeg-caddy.service codeg-server.service`・`systemctl --user start codeg-server.service codeg-caddy.service`（Windows 11 は [Windows 11 で止める・もう一度始める](#windows-11-で止めるもう一度始める)） |
 
 ---
@@ -563,6 +568,101 @@
 
 ---
 
+## Claude Code と Codex CLI も操作する
+
+- 任意。Codeg を構築済みのホストに、使うエージェントの CLI を入れて本人の契約でログインしておく（[AlmaLinux 10 の Claude Code](almalinux-setup.md#claude-code)・[Codex CLI](almalinux-setup.md#codex-cli)、[Windows 11 の Claude Code](windows-setup.md#claude-code)・[Codex CLI](windows-setup.md#codex-cli)）
+- Node.js 22 以上と npm が必要。導入は、使う OS の初期設定の「Codex・Grok のプラグイン」の Node.js の手順を通す
+- ブラウザの操作は両 OS で同じ。ログイン済みの `https://<ホストの IP>:3443` の Codeg を使う。アクセストークンと Caddy は既存のものを使う（[トークンの効力](extra/grok-build-remote.md#アクセストークンの重み)）
+- API キーを追加せず、「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使う。利用枠に達したら、契約の案内に従う（[仕組みと採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認した範囲](verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）
+- **この節の手順 4 で設定を保存すると、端末の CLI と共有する設定にも効く**。変更前の認証方法と設定を本人が確かめ、必要な項目だけ変える（[注意点](extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)）
+
+1. AlmaLinux 10 のホストで、一般ユーザーのシェルから Node.js と npm の版を確かめる（Windows 11 はこの節の手順 2 へ）。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   node --version
+   npm --version
+   ```
+
+   - Node.js が `v22` 以上で、npm の版も出ればよい
+   - 見つからない、または Node.js が古ければ、[初期設定の「Codex・Grok のプラグイン」の手順 1](almalinux-setup.md#codexgrok-のプラグイン)を通してからやり直す
+   - 確かめたら、この節の手順 2 は飛ばす
+
+1. Windows 11 のホストで、管理者ではない PowerShell から Node.js と npm の版を確かめる（AlmaLinux 10 では飛ばす）。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   node --version
+   npm --version
+   ```
+
+   - Node.js が `v22` 以上で、npm の版も出ればよい
+   - 見つからない、または Node.js が古ければ、[初期設定の「Codex・Grok のプラグイン」の手順 1](windows-setup.md#codexgrok-のプラグイン)を通し、新しい PowerShell でやり直す
+
+1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
+
+   - `/settings/agents` を開き、エージェント一覧の `Claude Code`・`Codex` で、使うものを有効にする
+   - 「バージョン状態」の「インストール」を押す。Codeg v0.35.1 の対応版は、Claude の `claude-agent-acp` が `0.89.1`、Codex の `codex-acp` が `2.2.2`
+   - 「再チェック」で対応版が検出され、エラーが無ければよい。既に対応版が入っているものは、入れ直さない
+   - 最新版への「アップグレード」は押さない。既に違う版が入っている場合も、上書きせず、使う版と検証範囲を先に確かめる
+   - 入らない・検出されない場合は「診断」を開く。Codeg が使う Node.js と npm の場所・版を確かめ、問題を解消するまで先へ進まない
+
+1. ブラウザで、各エージェントの認証方法を確かめる。
+
+   - `Claude Code`・`Codex` の認証方法で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
+   - 認証方法を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
+   - Claude のログイン切れは、使う OS の初期設定の「Claude Code」のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](almalinux-setup.md#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
+   - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
+
+1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
+
+   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選ぶ。共同作業では、[共同作業の手順](coding-agents.md)で作った、その担当の worktree を選ぶ
+   - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
+   - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
+   - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
+   - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの節の手順 4、アダプターの問題は手順 3 へ戻る
+
+1. ブラウザで、接続を確かめる指示を送る。
+
+   - 「ツールやファイルを使わずに、接続確認ができたと一文で答えて」と入力して送る
+   - 選んだエージェントから応答があり、選んだモデルとモードで会話が続けばよい
+   - Claude の「Auto mode unavailable」が出る、またはモードが `Accept edits` に変わる場合は、自動審査の設定は未完了。対応するモデルでやり直す。手動運用を選ぶ場合は、`Manual` に変えて個別に承認する
+   - 最初の送信後にエージェントを間違えていたと分かったら、新しい会話を作り直す
+
+1. ブラウザで、作業の指示を送り、必要になった承認に答える。
+
+   - 変更するファイル・成功条件を指示して送る。共同作業では担当の worktree とブランチで作業するよう指示する
+   - 承認カードが出たら、対象のファイル・差分・コマンドを読み、その操作だけ許可するか拒否するかを選ぶ
+   - 自動審査で許可された操作は、カード無しで進む。拒否・失敗が出たら、その理由を確かめて指示を直す
+   - 終了後は「変更されたファイル」で差分を確かめる
+
+1. 作業を中断するときは、ブラウザで送信欄の停止ボタンを押す。
+
+   - 応答中の会話で停止を押し、応答が止まったことを確かめる
+   - 開き直すときは、左の一覧から同じ会話を開く。既に実行した変更は差分で確かめる
+
+1. 端末の履歴を続けるときは、接続先ホストの元の CLI・アプリで、その会話を閉じる。
+
+   - 同じセッションを端末・IDE・ほかの画面で同時に進めない
+   - 取り込む対象は、Codeg が動くホストに保存された履歴。つなぐ PC の履歴ではない
+
+1. ブラウザで、Claude Code・Codex のローカルセッションを取り込む。
+
+   - 対象フォルダの右クリックまたは「⋯」から「ローカルセッションをインポート」を開く（`/import-sessions` からも開ける）
+   - エージェントと作業ディレクトリを確かめ、本人の対象セッションだけ選び、「選択項目をインポート」を押す
+   - 「インポート完了」で選んだ件数と「失敗 0」を確かめ、「閉じる」を押す
+   - 対象が出ない場合は、接続先ホストと作業ディレクトリを確かめる。取り込めていない履歴を、再開できたものとして扱わない
+
+1. ブラウザで、取り込んだ会話を同じエージェントで再開する。
+
+   - `/workspace` で取り込んだ会話を開き、前の指示・応答を確かめて続きを送る
+   - 元の文脈を踏まえて応答すればよい。別のエージェントへの切り替えは、新しい会話で行う
+   - 「別の場所で開かれています」と出たら、元の CLI・アプリで閉じてから再読み込みする
+   - 元のセッションが消えた・期限切れで再開できない場合は、再開は未完了として記録し、新しい会話で必要な指示を送り直す
+
+---
+
 ## 設定ファイル
 
 | 場所（AlmaLinux 10） | 場所（Windows 11） | 中身 |
@@ -579,6 +679,8 @@
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](almalinux-setup.md#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
+| `~/.claude/` と `~/.claude.json` | `%USERPROFILE%\.claude\` と `%USERPROFILE%\.claude.json` | Claude Code と接続アダプターが共有するログイン・設定・履歴。秘密のファイルは開かない |
+| `~/.codex/` | `%USERPROFILE%\.codex\` | Codex CLI と接続アダプターが共有するログイン・設定・履歴。秘密のファイルは開かない |
 
 - `CODEG_BRIDGE_PORTS=off` は、開発サーバー用の追加のポート（3081〜3090）を開けない設定。`CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリからの中継を止める設定
 - トークンを替えるときは、トークンのファイルを作り直して、Codeg のサービス（Windows 11 はタスク）を起動し直す。ブラウザは入り直しになる
