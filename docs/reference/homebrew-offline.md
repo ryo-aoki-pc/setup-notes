@@ -18,6 +18,8 @@
 - AlmaLinux 10 の初期設定の「Homebrew」の手順 2 のインストーラも、中で使う curl と git が `ALL_PROXY` を読むので、そのまま通る
 - 同書の「Homebrew」の手順 3 を共通の bash 設定を入れてあるシェルで貼るのは、`brew shellenv` を共通設定が実行するため
 
+- GNOME で日本語入力を使う PC は、同書の「Homebrew」の手順 4 も通す。このオフライン経路での実行は未確認。
+
 ### 選択した方針
 
 [この節の検証記録](../verification/homebrew-offline.md#選択した方針)
