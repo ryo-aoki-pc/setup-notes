@@ -100,3 +100,5 @@ Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が、公開済み8�
 - Grok の検証記録は最新 main の本文・出力・当時番号と一致し、原文へのリンクだけ同じ固定コミットへ変更した。ほかの55件の過去検証本文は削除前と一致した
 - 38文書の削除、197 Markdown文書、対応表322件、GitHub参照631件、相対リンク・画像・アンカー、2冊と extra の手順順序を再確認し、不整合は0だった
 - Windows 正本の PowerShell 392ブロックと関連 extra の3ブロックを Windows PowerShell 5.1.26100.9444 の構文パーサーで検査し、エラーは0。実機への設定適用はしていない
+
+Grok Build（grok 4.7、応答モデル `grok-4.7-build`）が公開済みの[競合解消差分](https://github.com/ryo-aoki-pc/setup-notes/commit/0a343b0d7d4fe66b2b173671e59e252fedffc4ae)をレビューした。README の Windows 手順への直接リンクを追加し、extra の証明書取得範囲を AlmaLinux の許可 CIDR と Windows の Private の受信インターフェースへ届く全送信元に書き分けた。2件とも案内の補修で、コマンド・設定・過去の検証本文は変更していない。
