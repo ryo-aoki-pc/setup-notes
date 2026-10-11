@@ -4,6 +4,10 @@
 
 ## 対象と検証環境
 
+- **状態（2026-10-11 UTC、Hyper-V の R8）**: `e5e1afb` の手順を、初期設定の `after-AS4` から作った AlmaLinux 10.2 / x86_64 の VM で、ログイン無しで確認できる範囲まで実行した
+  - 指示書の作成とコミット、3 つの worktree、tmux の 4 ウィンドウ、手で作ったコミットの取り込み・fast-forward・競合の abort を確認した
+  - 3 CLI は未認証。規則を読んだエージェントの応答、プラグインからの作業・レビュー、push・Pull Request は未実施。過去の実機検証とは別の範囲（[今回の付録](#付録-hyper-v-の-vm-でログイン無しの範囲を通した記録2026-10-11)）
+
 - **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../windows-setup.md#codexgrok-のプラグイン)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
 
 - **状態（2026-10-10 UTC、規則の push と Pull Request の変更）**: 規則の文を「エージェントが自分のブランチを push し、Pull Request を作る」に変えた後、変えたブロックと git の流れだけを、クラウドの Ubuntu 24.04 のコンテナで確かめた（[付録](#付録-規則の-push-と-pull-request-の変更2026-10-10)）
@@ -418,3 +422,43 @@
 - Forgejo での push（Pull Request は人がブラウザで作る形にした）
 - Codex（sandbox の外での承認を伴う push と `gh`）と Grok Build の push と Pull Request
 - Windows 11 での実行と Windows PowerShell 5.1。AlmaLinux 10 の実機
+
+## 付録: Hyper-V の VM でログイン無しの範囲を通した記録（2026-10-11）
+
+Codex が司令塔を引き継いだ後の C20 / R8。過去の実機・コンテナの記録は変更していない。
+
+| 項目 | 値 |
+|---|---|
+| VM | Hyper-V、Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GiB、Default Switch の NIC 1 枚 |
+| 元の状態 | desktop の after-AS4 から作った専用クローン。元の VM とスナップショットは変更していない |
+| ゲスト | AlmaLinux 10.2、x86_64、6.12.0-211.64.1.el10_2.x86_64、SELinux Enforcing、Secure Boot disabled |
+| 手順書 | e5e1afbf7f7c7efcc15af89fb173f42ee46c5201 |
+| CLI | Claude Code 2.1.296、codex-cli 0.162.1、Grok 1.0.50。3 つとも未認証 |
+| 実行 | rb.mjs paste で SSH の対話 bash に、原文のブロックを順番に貼った。変数だけ検証用の絶対パスに置換 |
+
+証跡は共同検証の単位フォルダー queued-units/C20/R8 の meta.json、steps.jsonl、after-confirm/、session-001.raw。以下の seq は steps.jsonl の連番。
+
+| 節 / 手順 | 判定 | 根拠 / 結果 |
+|---|---|---|
+| 実施手順 / 1 | 通した | seq 2・3。PROJECT_DIR と隣の WT_ROOT を読み戻した |
+| 実施手順 / 2 | 通らなかった | seq 4。版は出たが、3 CLI とも未認証。ログイン済みの成功条件を満たさない |
+| 実施手順 / 3 | 通した | seq 5。main は clean、指示書と worktree のディレクトリはまだ無い。日本語の「そのようなファイルやディレクトリはありません」を確認 |
+| 実施手順 / 4〜7 | 通した | seq 6〜9。AGENTS.md、CLAUDE.md の @AGENTS.md、コミット、main と 3 つの agent ブランチの計 4 worktree を確認 |
+| 実施手順 / 8・9 | 未実施 | seq 10・11。エージェントの応答・対話起動とプラグインの setup/check は認証が必要。ログイン URL や device code を出す起動は行っていない |
+| 分担して作業する / 1 | 通した | seq 12・13・16。tmux の main・claude・codex・grok と各作業ディレクトリ、デタッチを確認 |
+| 分担して作業する / 2 | 条件外 | AlmaLinux の VM なので Windows の窓は開かない |
+| 分担して作業する / 3〜6 | 未実施 | 実際のエージェントへの分担と応答は認証が必要 |
+| 分担して作業する / 7 | 通した（Git 操作だけ） | seq 19・21・23。手で作った各ブランチのコミットと残りの変更なしを確認 |
+| 相互にレビューする / 1〜4 | 未実施 | エージェントの応答が必要 |
+| main に取り込む / 1 | 未実施 | 検証用プロジェクトには受入テストを用意していない。実装やテストの成功を作っていない |
+| main に取り込む / 2〜5 | 通した（Git 操作だけ） | seq 25〜28。main は clean、3 つのコミットを --no-ff で取り込み、ort の成功表示を確認 |
+| main に取り込む / 6 | 条件外 → 通した（追加試験） | 最初の取り込みに競合なし（seq 29）。別に手で add/add 競合を作り、同じ手順 3 の CONFLICT（seq 38）の後、手順 6 の abort で clean な main に戻った（seq 39）。エージェントへの修正依頼は未実施 |
+| main に取り込む / 7 | 通した | seq 31・33・35。各 worktree が Fast-forward、seq 36 の 4 worktree が同じコミット |
+
+手順書の外では、VM のホームにリモートの無い使い捨てのリポジトリを作り、ローカルの user.name と user.email に検証用の値を設定した。設定の読み戻しに加え、実際のコミットまで確認した（seq 1・8・17・40）。Node と bubblewrap の存在、2 つのプラグインの enabled の一覧を確認した（seq 1）。プラグインが実行できたという判定ではない。
+
+tmux の中ではドライバが外側の tmux を前面のプロセスと判定し、分担の手順 7 の最初の貼り付けが timeout / accepted=false になった（seq 14）。画面の文字にシェルのプロンプトは戻っていた。デタッチ後、同じ作業ディレクトリへ移って原文を貼り直した（seq 18〜23）。tmux の窓に貼った形と、デタッチ後の成功を分けている。手順書本体は修正していない。
+
+Git の取り込みに使ったコミットと追加の競合は、人の操作を検証者が代行して作った。エージェントの実分担とは数えない。競合の abort 後は、意図した未取り込みのコミットが残るが、4 worktree に未コミットの変更は無い（seq 40）。tmux を終了し、SSH セッションを閉じ、専用 VM を停止した。
+
+認証ログに scrub-auth を適用し、対象は 0 件だった。実アカウント、実際の作業・レビュー、push と Pull Request、スマートフォン、Windows、実機、更新とロールバックは今回未実施。
