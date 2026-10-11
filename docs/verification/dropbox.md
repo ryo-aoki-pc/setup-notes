@@ -119,6 +119,10 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
 
+- **状態（2026-10-11）**: Hyper-V の VM で認証前まで確認した（Codex）
+  - 実施手順 1〜6（アカウント使用容量との比較を除く）、版確認・CLI 再取得、認証不要の撤去を確認。リンク・認証・同期は未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で認証前まで通した記録2026-10-11)
+
 ### 実施前の状態
 
 検証コンテナの状態:
@@ -295,3 +299,62 @@ Sep 27 15:58:30 <HOSTNAME> dropboxd[2263]: Please visit https://www.dropbox.com/
 ### 手順中の検証状況
 
 - **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](../syncthing.md) の実機では、ユーザーサービスは `unconfined` として動いた
+
+## 付録: Hyper-V の VM で認証前まで通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V、26H2、build 26300.9457（証跡の ProductName は Windows 10 Pro と表示） |
+| VM | `<HOSTNAME>`、Generation 2、構成版 12.0、2 vCPU、3072 MB、64 GB、UEFI、Secure Boot disabled、eth0 1 枚 |
+| 開始 | desktop の after-CL1 からのクローン（依頼の前提）。`meta.json` の snapshot=clean-install は Existing 呼出しの既定値で、今回その状態から作成・復元した証拠ではない |
+| ゲスト | AlmaLinux 10.2 / x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64`、ホーム XFS、空き 13 GB |
+| 前提 | Homebrew 導入済み、Linger=yes、SELinux Enforcing、firewalld active、GNOME コンソール未ログイン |
+| 導入版 | Dropbox 272.4.3798、CLI 2026.09.28、rclone 1.75.2 linux/amd64 |
+| 貼り方 | SSH の対話の bash にドライバで手順のブロックを貼った。GUI・ブラウザの操作はしていない |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C16\` の下。以下のファイル名はそこからの相対パス。seq は `session/steps.jsonl` の番号
+- 認証前までの検証。実アカウントのリンク・認証・同期はしていない。Dropbox のリンク用の URL は出たことだけを確認し、値は表示・転載していない
+- 報告末尾の負の所要時間は開始・終了時刻と整合しないので採用しない。証跡のホスト ProductName と依頼の Windows 11 Pro の表記の違いは上の表に残した
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した（容量比較を除く） | seq 1、`session/after-confirm/0001-実施手順-1.txt`。x86_64・XFS・空き 13 GB。アカウント使用量との比較は未実施 |
+| 実施手順 2 | 通した | seq 2・3、`session/after-confirm/0002-実施手順-2.txt`。fingerprint と uid を本文と目視照合し一致 |
+| 実施手順 3 | 通した | seq 4、`session/after-confirm/0004-実施手順-3.txt`。272.4.3798 の取得、日本語の「正しい署名」、展開 |
+| 実施手順 4 | 通した | seq 5、`session/after-confirm/0005-実施手順-4.txt`。VERSION・版のディレクトリ・dropboxd |
+| 実施手順 5 | 通した（版の差あり） | seq 6、`session/after-confirm/0006-実施手順-5.txt`。自分の ~/.local/bin/dropbox、272.4.3798 / 2026.09.28 |
+| 実施手順 6 | 通した | seq 7、`session/after-confirm/0007-実施手順-6.txt`。enabled / active |
+| 実施手順 7・8 | 未実施 | seq 33。実アカウントが必要。認証 URL を出す手順 7 は貼っていない |
+| 実施手順 9 | 未実施 | seq 33。リンク・認証に依存する |
+| 使い方の基本 / help・systemctl stop / start | 通した（補助確認） | seq 12〜14、`session/session-002.raw`。一覧・inactive → active |
+| 使い方の基本 / status・journal 追跡 | 未実施 | seq 8・11・33。URL を表示する操作は避け、`outside.md` の件数だけの補助確認に置き換えた |
+| 使い方の基本 / filestatus・exclude・sharelink・lansync | 未実施 | seq 33。同期対象未作成・リンク未実施 |
+| 更新 1・2 | 通した（版確認と CLI 再取得） | seq 15・16、`session/session-003.raw`。272.4.3798 / 2026.09.28、再取得後も同じ CLI |
+| extra ロールバック 1 | 通した | seq 17、`session/after-confirm/0017-ロールバック-1.txt`。停止・unit と symlink 撤去 |
+| extra ロールバック 2 | 未実施 | seq 18。未リンクなので Web 側解除は不要、実アカウント未使用 |
+| extra ロールバック 3・4 | 通した | seq 19〜21、`session/after-confirm/0021-撤去確認-1.txt`。本体・CLI・設定・unit とプロセス不在。稼働中削除の保護分岐は未実施 |
+
+### 通らなかった手順と見立て
+
+- 実施した範囲で通らなかった手順は無い。固定の版の成功条件と取得された版の違いは配布物更新によるもので、SSH・Hyper-V 固有の失敗ではない
+- `outside.md` の認証前補助確認では、journal の件数だけを読み、リンク用 URL が出たことを確認。seq 8・11 の `0008-認証前-1.txt`・`0011-認証前-3.txt` は 5 件、再起動後は通算 9 件。値は書かない
+- OS 再起動後も enabled / active。短い SSH 切断後の `logout-check.txt` では同じ MainPID が active/running のまま。seq 32 の `0032-セッション補足-1.txt` は残る session が systemd-user / Class=manager であることを確認。認証後の同期・長時間のログアウト稼働の確認ではない
+- この再起動・短いログアウト確認は手順書の外の補助操作。GNOME 画面の確認は行っていない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 直した所と根拠 |
+|---|---|---|
+| 署名確認の文言が英語だけ | 直した（文言） | 実施手順 3 に日本語の「正しい署名」を併記。`0004-実施手順-3.txt` で確認 |
+| 手順 5 の版が固定の成功条件 | 直した（文言） | 272.4.3798 / 2026.09.28 の例にして「のように」を追加。`0006-実施手順-5.txt` で確認。貼るブロックは変更無し |
+| meta.json の開始元の表示・報告の所要時間 | 未対応（道具・報告） | 表示値を開始元・所要時間の根拠として採用しない |
+
+### 確かめていないこと
+
+- アカウント容量との比較、リンク・認証・同期、リンク後の使い方、Web 側解除、自己更新の発生、手動の本体再導入、稼働中削除の保護分岐は未実施
+- 実機・aarch64・長時間のログアウト稼働は未確認。過去の導入・リンク待ちの記録と同じ認証前の範囲で、今回の補助確認から同期成功へ広げない

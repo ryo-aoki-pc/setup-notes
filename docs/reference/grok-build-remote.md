@@ -44,6 +44,8 @@
 
 - Codeg の「権限モード」を保存すると、`~/.grok/config.toml` の `[ui]` の `permission_mode` が書き換わる。ほかの行は変わらなかった
 - 「毎回確認」は `"default"`、「常に許可」は `"bypassPermissions"` と書かれた。Grok Build の文書では、`"always-approve"` と `"bypassPermissions"` は同じモード
+- 本書では、対話の承認を減らして使う用途として「スマート自動承認」（`"auto"`）を選ぶ。Grok Build の文書では、自動審査が許可した操作は実行され、許可しない操作は確認へ回るか拒否される。保存した値は端末の `grok` にも反映され、次の会話から効く
+- Codeg での保存と、そのモードで新しい会話を動かす確認は分ける。機能を選べない・保存できない・まだ使っていない場合は、対応する確認を未完了として記録する
 - Codeg は、「常に許可」のとき `--permission-mode bypassPermissions` を付けて Grok Build を起動し、「毎回確認」のときは付けなかった
 - Grok Build の文書では、既定（ask）で確認なしに動くのは、読み取り専用のツールと、決まった読み取り専用のコマンドだけ。`mkdir` はその一覧に無いが、検証では確認なしで実行された
 
@@ -100,23 +102,91 @@
 - サイトのアドレスを `https://:3443` にして `bind` を書かないと、Caddy は、すべてのアドレスの 3443 番で待ち受ける
 - `tls internal` の `on_demand` は、TLS の接続が来たときに、その宛先の証明書を作る指定。IP アドレスで開いた接続は名前（SNI）を持たず、Caddy は、接続を受けたローカルの IP 宛ての証明書を作った
 - 認証局は変わらない。端末のルート証明書は、PC の IP が変わっても入れ直さない
-- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。本書では、受信の規則で送信元を絞ることで抑える
+- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。Windows の新構成では送信元を制限せず、受信インターフェースの Private という条件だけで公開するので、その接続へ届く端末は任意の名前の証明書を要求できる
 - AlmaLinux 10 のサーバーは IP が固定なので、IP 宛てのサイトと `bind` のままにしてある
+
+### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 1: 補足: MSIX からの配置
+
+- MSIX のパッケージは、AppData への書き込みを、パッケージ専用の `LocalCache` へ転送することがある。パッケージ内では元のパスに見えても、通常の Windows のプロセスからは見えない
+- 今回の Codex からの配置はこの形になった。通常の AppData の `Get-Item` の結果だけでは、タスクが起動する本体の存在を確認できなかった。既知のファイルの実体パスと、システム側の `CIM_DataFile` の存在確認で区別した（実測は検証記録）
+- 手順書は、スタートメニューから開いた Windows PowerShell で行う形にしてある。Grok Build を動かすタスクは、通常の AppData にあるランチャーとスクリプトを使う
 
 ### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 規則とタスク
 
 - `-Program` で `caddy.exe` 宛てに限る。同じ PC のほかのプログラムが 3443 番で待ち受けても、この規則では通らない
-- `-Profile Private` と `-InterfaceType Wired` で、プライベートにした有線 LAN から届く通信だけを通す。PC の IP が変わるので、`-LocalAddress` は付けない
-- `Block` の 2 本は、パブリック・ドメインのネットワークと、プライベートの Wi-Fi を、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
+- `-Profile Private`・`-RemoteAddress Any`・`-InterfaceType Any` で、ホスト側の受信インターフェースが Private なら、IPv4・IPv6 の全送信元、有線 LAN・Wi-Fi・VPN を含む全接続種別を通す。PC の IP が変わるので、宛先 IP は絞らない。`-EdgeTraversalPolicy Block` で Edge Traversal は許可しない
+- `Block` の 1 本は、Public・Domain のネットワークを、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
 - どのネットワークにいても `caddy.exe` 宛ての規則がある状態にして、Caddy が待ち受けを始めたときに Windows が許可を尋ねる画面を出さないようにする狙いもある（パブリックのネットワークで Caddy を起動しての確認は、していない）
-- Wi-Fi からも使うなら、`codeg-caddy-block-wifi` を作らず、`codeg-caddy-in` から `-InterfaceType Wired` を外す（確かめていない）
+- 既存構成の切り替えでは、規則とフィルターを XML に控える。Public・Domain の遮断を固定し、Allow を Private に限定してから、送信元と接続種別を Any にする。読み戻しがすべて一致したことを確かめ、別の手順で旧 `codeg-caddy-block-wifi` だけを消す。控えの XML は読み戻し用で、`Import-Clixml` は規則を復元しない
+- 既存の Public・Domain 遮断規則は、手順書由来の全プロトコル・全ポートの規則だけを扱う。`Protocol`・`LocalPort`・`RemotePort` がすべて `Any` であることを変更前に確認し、異なる条件なら中断する。設定時は `Protocol Any` を指定し、ポートの条件は変更しない
+- URL の表示は、接続中の Private のプロファイルに対応する InterfaceIndex から、有効な IPv4 を拾う。接続名を添え、loopback・link-local・SkipAsSource のアドレスは出さない。物理アダプターだけには絞らない
+- Private の URL に接続できた結果は、その受信インターフェースの許可を示す。Public・Domain の遮断は、それぞれの受信インターフェースと現在の IP、接続経路、サーバーの稼働を別に確認して試す。タイムアウトだけでは遮断の確認にならない
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
+- VPN からの通信にも、ホスト側で実際に受信するインターフェースの Private が必要。WG ホストが LAN へ転送する場合は LAN 側、PC 自身で VPN を受ける場合はその VPN 側の種類で判定する。信頼する接続だけを Private にし、公衆 Wi-Fi などほかの接続は Public のままにする
 - Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
 - タスクの引数は、スクリプトのパスを二重引用符で囲む。ランチャーは、そのパスを 1 個の引数として受け取り、PowerShell の `-File` に渡す
 - Caddy は `start-caddy-hidden.ps1` から始め、Codeg と同じランチャーを使う。`exit $LASTEXITCODE` とランチャーを通して、Caddy の終了コードをタスクへ返す
 - タスク スケジューラの「失敗時の再起動」（`-RestartCount`・`-RestartInterval`）は使わない。終了コード 1 で終わる使い捨てのタスクで試すと、再起動されなかった（検証記録）
 - 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
 - Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントの Grok を巻き込まない
+
+### Claude Code と Codex CLI も操作する / 補足
+
+[手順書の「Claude Code と Codex CLI も操作する」](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
+
+### Claude Code と Codex CLI も操作する / 手順 3: 補足: 接続アダプターとランタイム
+
+| エージェント | Codeg v0.35.1 の対応アダプター | アダプターが使うランタイム |
+|---|---|---|
+| Claude Code | `@agentclientprotocol/claude-agent-acp@0.89.1` | Claude Agent SDK `0.3.293` と、それに付属する Claude Code `2.1.293` |
+| Codex | `@agentclientprotocol/codex-acp@2.2.2` | 依存する `@openai/codex`。今回の隔離導入では `0.160.1` |
+
+- ACP は、Codeg の画面とエージェントをつなぐ通信の仕様。Claude Code・Codex は、それぞれの接続アダプターを介して動く
+- Claude のアダプターは Node.js 22 以上、Codex は 20.3 以上が必要。両方を使うこの節では 22 以上にそろえる
+- 初期設定で入れた CLI を置き換えるものではない。Codeg 用には別のランタイムが入り、同じ OS ユーザーのホームにあるログイン・設定・履歴を共有する。既存 CLI と Codeg 側の版は別に確認する
+- Codex の依存指定は `^0.160.1`。同じアダプター版でも、導入時に入る Codex の版が変わり得る。Codeg の対応版を、すべての依存が固定されたものとは扱わない
+- Codeg は npm のグローバル領域へ導入を試み、権限不足なら `~/.codeg/npm-global` を使う。アダプターの更新は、同じ実行ファイルを使うほかの ACP クライアントにも影響し得る
+
+対応版は [Codeg v0.35.1 のレジストリ](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/acp/registry.rs)で確認した。実際に導入した版と試験条件は[今回の検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に分ける。
+
+### Claude Code と Codex CLI も操作する / 手順 4: 補足: 本人の契約と共有設定
+
+- Codeg の「公式サブスクリプション」は、Claude の既存の CLI ログイン、Codex の本人の ChatGPT ログインを使う方式。Codeg 用の API キーは追加しない（[Codeg の認証方式](https://docs.codeg.app/guide/authentication)）
+- Claude の公式案内（2026-10-07 更新）では、Claude Agent SDK・`claude -p`・第三者のアプリを契約の利用枠で引き続き使える。この手順はその方式を使う（[Claude の契約での SDK 利用](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan)）
+- Codex の ChatGPT ログインは契約による利用、API キーのログインは API の従量課金として区別される。この手順は本人の ChatGPT の利用枠を消費する（[OpenAI の認証の説明](https://learn.chatgpt.com/docs/auth)）
+- API キーを設定しないことは、外部へのモデル通信が無い・無料・無制限という意味ではない。利用枠に達した場合も、API キーを入れて回避する手順にはしない
+- Codeg で Claude の設定を保存すると `~/.claude/settings.json`、Codex の設定を保存すると `~/.codex/config.toml` など、端末の CLI と共有する設定にも反映される。認証方法の変更では、以前の API 用の設定が削除・変更されることもある
+- ログインのやり直しも同じユーザーの CLI に効く。別のアカウントへ切り替える操作は、Codeg の会話だけに閉じない（[共有設定と履歴の注意](../extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)）
+
+### Claude Code と Codex CLI も操作する / 手順 5〜8: 補足: モードと中断
+
+- Claude のアダプターが返すモードは `Manual`・`Accept edits`・`Plan`・`Auto`。環境・管理設定などで許可される場合にだけ `Bypass permissions` も出る。手順では `Auto` を選ぶ
+- モデルが対応せず「Auto mode unavailable」になったときは、`Accept edits` に切り替わる実装がある
+- `Accept edits` は `Auto` の確認完了と扱わない。手動運用を選ぶときは `Manual` に変える。`Auto` の可否は、最初の応答とモデルの変更後にも確かめる
+- Codex のモードは `Read-only`・`Workspace access`・`Auto review`・`Full access`。手順では `Auto review` を選ぶ。開始時のモードは、既存の Codex 設定や Windows の sandbox の状態にも左右される
+- 自動審査は、すべての操作への確認を省く指定ではない。審査結果に応じて確認・拒否が残る。停止ボタンを押しても、既に行ったファイル変更やコマンドの効果は巻き戻らない
+
+表示名と切り替えの条件は、[Claude のモードの実装](https://github.com/agentclientprotocol/claude-agent-acp/blob/4e1fc1e8df2b9af3b1b2d6880ba90c5862283ba8/src/session-mode.ts)と [Codex のモードの実装](https://github.com/agentclientprotocol/codex-acp/blob/202e66e63343ec4f5a5e35ab590251d813d129ca/src/AgentMode.ts)で確認した。Codeg の画面での自動審査・拒否・中断の実測とは区別する。
+
+### Claude Code と Codex CLI も操作する / 手順 9〜11: 補足: 履歴の取り込みと再開
+
+- ブラウザで操作していても、取り込むのは Codeg のサーバーが動くホストの履歴。ブラウザを開く PC の履歴や、もう一方の OS の履歴は同期されない
+- Codeg は元の会話の ID とエージェントを使って再開する。取り込みで元の CLI の履歴は削除されない。別のエージェントへ履歴を変換する操作ではない
+- 同じ会話を元の CLI・アプリと Codeg で同時に進めない。元の会話を閉じてから再開する。元の履歴が削除された、またはセッションが使えなくなった場合は、一覧にあっても再開できないことがある（[Codeg の会話の取り込み](https://docs.codeg.app/guide/aggregation)）
+
+## Claude Code・Codex を遠隔操作する OSS の比較
+
+2026-10-12 に公式資料と実装を比較した。今回は、既に Grok Build で使う Codeg と Caddy を共用できる Codeg を推奨する。CloudCLI と Happy の導入・実機での操作は試していない。既存の表にある Happier と、ここで比べる Happy は別のツール。
+
+| ツール | ライセンス | 向く用途・今回の判断 |
+|---|---|---|
+| Codeg | Apache-2.0 | Claude Code・Codex を同じ画面から操作でき、Linux arm64 と Windows の配布物がある。既存の HTTPS 構成を使えるので、今回の手順に採用する |
+| CloudCLI（Claude Code UI） | AGPL-3.0-or-later | Claude・Codex の Web UI を簡単に用意したい場合の候補。Codex のチャットは SDK の非対話実行で、対話的な承認要求に答える操作に制約がある |
+| Happy | MIT | スマートフォンや Web からの遠隔操作が中心。標準では外部の relay を使う。従来の CLI は保守モードで、新機能は desktop へ移っているため、今回の主手順にはしない |
+
+- CloudCLI の [Codex の実装（確認したコミット）](https://github.com/siteboon/claudecodeui/blob/7c3049fe8e157f12b7add3e496d8d2fe6fa5c014/server/modules/providers/list/codex/codex-runtime.provider.ts#L247)には、`exec` から対話的な承認要求へ許可を返せないと記載がある。今回の承認・拒否を含む用途では、この制約を先に確かめる必要がある
+- Happy は [CLI の relay の説明](https://github.com/slopus/happy/blob/99f415fa0d12d233a80a77fd88122bfb19b17477/packages/happy-cli/README.md#L128)と[公式案内](https://happy.engineering/docs/)を確認した。self-host もできるが、中継サーバーの準備と保守が追加で必要になる
+- OSS なのは画面・接続ツール。Claude・ChatGPT のサービスを無料・無制限で使えるという意味ではない
 
 ## 方法のまとめ
 
@@ -142,7 +212,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | つなぐ側 | ブラウザ | 採った | スマートフォンと PC で同じ画面 |
 | つなぐ側 | Codeg のデスクトップアプリ（リモートのワークスペース） | 採らない（確かめていない） | Windows の署名が無い。サーバーの `CODEG_BROWSER_TUNNEL` を見直す必要がある |
 | つなぐ側 | Codeg の Android のアプリ | 採らない（確かめていない） | Apache-2.0。APK を GitHub から入れる。testing の段階 |
-| 経路 | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
+| 経路（AlmaLinux 10） | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
+| 経路（Windows 11） | Private の全送信元・全接続種別に開ける | 採った | IPv4・IPv6 と、有線 LAN・Wi-Fi・VPN を区別しない。Public・Domain と Edge Traversal は遮断する（利用者の指定） |
 | 通信の暗号化 | 同じホストの Caddy が HTTPS で受けて、Codeg へ渡す。証明書は Caddy の認証局（`tls internal`） | 採った | Apache-2.0。ドメインも外部のサービスも要らない。端末にルート証明書を入れる |
 | 通信の暗号化 | 公的な証明書（Let's Encrypt の DNS-01） | 採らない | 自分のドメインと、DNS 事業者の API トークンが要る |
 | 通信の暗号化 | HTTP のまま使う | 採らない（はじめの形） | VPN の区間しか暗号化されない。LAN の区間は、トークンも平文で流れる |
@@ -157,12 +228,12 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 画面は、端末をそのまま映すものではなく、会話・承認・変更されたファイルを扱うチャット形式のものにする（利用者の指定）
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
-- まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../forgejo.md) と同じ順）
-- Windows 11 の PC は、ノート PC を複数の拠点の有線 LAN につなぐ使い方に合わせ、待ち受ける IP を決めない（利用者の指定）。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
+- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../forgejo.md) と同じ順）
+- Windows 11 の PC は待ち受ける IP を決めない。利用者の指定で、受信インターフェースが Private なら全送信元・全接続種別を許可し、Public・Domain は遮断する。送信元 CIDR と有線限定は使わない
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
-- 承認を自動で通す設定は、離れた場所から使うなら勧めない。ただし、確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
+- 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
 - 両 OS を 1 本の手順書にまとめ、Windows 11 は後ろの節に置く（[Syncthing](../syncthing.md) と同じ形）
 
 ## 参照
@@ -174,6 +245,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - [caddyserver/caddy](https://github.com/caddyserver/caddy)（Caddy。Apache-2.0）・[Caddyfile の `tls`](https://caddyserver.com/docs/caddyfile/directives/tls)・[Caddyfile の全体の設定（`admin`・`auto_https`・`skip_install_trust`・`pki`）](https://caddyserver.com/docs/caddyfile/options)
 - [Caddyfile の環境変数と引用](https://caddyserver.com/docs/caddyfile/concepts#environment-variables)・[待ち受ける IP の指定（`bind`）](https://caddyserver.com/docs/caddyfile/directives/bind)・[On-Demand TLS](https://caddyserver.com/docs/automatic-https#on-demand-tls)
 - [Microsoft: New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)・[taskkill](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill)（`/T` は子プロセスも止める）・[New-NetFirewallRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule)（`-Profile`・`-InterfaceType`）
+- [Microsoft: MSIX のデスクトップアプリの実行環境](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes)・[Flexible virtualization](https://learn.microsoft.com/en-us/windows/msix/desktop/flexible-virtualization)（AppData への書き込みの転送）
 - [xai-org/grok-build](https://github.com/xai-org/grok-build)（Grok Build。Apache-2.0）
 - Grok Build の同梱の文書（`~/.grok/docs/user-guide/`）: `15-agent-mode.md`（ACP）・`22-permissions-and-safety.md`（権限モード）
 - [Agent Client Protocol](https://agentclientprotocol.com)

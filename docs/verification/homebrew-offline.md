@@ -80,6 +80,7 @@ oniguruma
   - この文書には変数が無い。読者が編集するのは、ssh-socks-tunnel.md の `OFFLINE_HOST` だけ
   - トンネルの張り方・dnf の設定・閉じ方は、もとはこの文書の手順 1〜4・7〜9 だった（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) と共有するため、ssh-socks-tunnel.md に移した）
 - **状態**: **x86_64 のクリーンインストール VM で現行の実施手順と jq のロールバックを再検証済み（2026-10-06、SELinux Enforcing）。実機の AlmaLinux・aarch64 は未実施**
+  - これは 2026-10-06 の時点の状態
   - 現行版を新規 VM で通した範囲は[今回の再検証の付録](#付録-現行版を新規-vm-で再検証2026-10-06)。以前の VM・コンテナの付録と未確認事項は、当時の範囲の記録。
   - このクラウドのホスト（Ubuntu 24.04）の Docker で、外に出られないネットワーク（`--internal`）だけにつないだコンテナをオフラインのホストにした
   - オンラインのホストは、外に出られるネットワークと、その `--internal` のネットワークの両方につないだ別のコンテナ
@@ -114,6 +115,10 @@ oniguruma
 > 出力例・ログ・表の中の値は `<OFFLINE_HOST>` / `<USER>`（ユーザー名）のプレースホルダで書いてある。バージョン（`7.0.7` など）は実行日によって変わる。
 
 手順書全体に関わる理由・実測・落とし穴と検証記録（手順ごとのものは各手順の末尾の「補足」にある）。手順を実行するだけなら読まなくてよい。
+
+- **状態（2026-10-11）**: Hyper-V VM で実施手順 1〜6と更新を判定した（2026-10-11、Codex）
+  - Homebrew 7.0.9・jq 1.8.2 の bottle 導入と転送終了後の実行を確認。依存導入と upgrade は条件に当たらず飛ばした。ロールバック・実機・aarch64 は今回未実施
+  - 詳細は[今回の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
 
 ### 実施前の状態
 
@@ -272,3 +277,54 @@ curl: (6) Could not resolve host: github.com
 
 | `brew fetch` でボトルだけを運ぶ | Homebrew 本体（git のリポジトリと portable-ruby）と、formula の API の JSON も要る | 本書では扱わない（確かめていない） |
 
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+### 環境
+
+| 項目 | 値 |
+|---|---|
+| 実施 | Codex、2026-10-11 UTC。対象は setup-notes `d69f113` |
+| ホスト | Windows 11 Pro、Hyper-V |
+| VM | Generation 2、構成版 12.0、各 2 vCPU・64 GB・Default Switch の eth0 1 枚、Secure Boot disabled |
+| メモリ | オンライン 1536 MB。オフラインは C14 が 2048 MB、C15 が 3072 MB |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、kernel `6.12.0-211.64.1.el10_2.x86_64` |
+| 開始 | オンライン `<HOSTNAME>` は after-AS4、オフライン `<OFFLINE_HOST>` は clean-install（依頼の前提）。C15 は C14 終了時の partial-R6 を保存した既存ディスクから続行し、復元・再作成はしていない |
+| 状態 | オフラインの SELinux Enforcing・firewalld active。既定経路・DNS を外し、IPv6 を無効にしたのは手順書の外の準備 |
+| 導入版 | Homebrew 7.0.9、jq 1.8.2、Neovim 0.12.6、LazyVimStarter `8e4a074`、Mason 2.3.1、共通 bash `67abb84` |
+| 貼り方 | SSH の対話の bash にドライバでブロックを順に貼り、オンラインからオフラインの `<USER>` にパスワード SSH。C14 は両 VM の GNOME に画面操作でログインし、C15 は GNOME にログインしなかった |
+
+- 証跡はリポジトリに入らない `D:\vmverify\codex\units\C14\`・`C15\` の下。表の C14・C15 はその単位からの相対パスで、seq は `session/steps.jsonl` の番号
+- `meta.json` の snapshot はどちらも clean-install と書くが、Existing 呼出しの既定値。開始元の復元を裏付ける値ではない
+- R6 は 2 回に分かれた。C14 は npm の前提導入中にオフライン VM が応答しなくなり中止。C15 はメモリを 2048 MB から 3072 MB にし、GNOME にログインせず続けたところ再発しなかった。原因は分かっていない（[npm の記録](npm-offline.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- C14 のログイン後の PNG は、`screens/online/login-20261011-113934-3-after.png` がアクティビティ画面、`screens/offline/login-20261011-114023-3-after.png` がようこそ画面。本文の操作は GNOME の端末への貼り付けではない
+
+### 手順ごとの結果
+
+| 節・手順 | 結果 | 根拠・確認 |
+|---|---|---|
+| 実施手順 1 | 通した | C14 `online/session/steps.jsonl` seq 9、`online/session/after-confirm/0009-実施手順-1.txt`。取得先 200 / 301 / 200 / 401、依存 4 つ導入済み |
+| 実施手順 2 | 条件に当たらず飛ばした | 同 seq 9・10。procps-ng・curl・file・git が揃っていた。dnf proxy は ssh-socks-tunnel の任意節で設定済み |
+| 実施手順 3 | 通した | 同 seq 11〜15、`online/session/after-confirm/0011-実施手順-共通の_bash_設定-1.txt`・`0012-実施手順-共通の_bash_設定-2.txt`・`0015-実施手順-Homebrew-3.txt`。共通 bash を入れ、Homebrew 手順 1 は依存導入済みで飛ばし、2 の RETURN 入力後に 3 で 7.0.9・場所・PREFIX を確認 |
+| 実施手順 4 | 通した | 同 seq 16・17、`online/session/session-001.raw`。y を 1 文字送り、jq・oniguruma を bottle 導入。ソースビルド無し |
+| 実施手順 5 | 通した | 同 seq 18〜21、`online/session/after-confirm/0021-トンネルを閉じる-3.txt`。参照先の終了・転送無し再ログイン・通信失敗 |
+| 実施手順 6 | 通した | 同 seq 22、`online/session/after-confirm/0022-実施手順-6.txt`。jq 1.8.2、Homebrew の場所、offline |
+| 更新 1 | 通した（upgrade を除く） | 同 seq 27・28、`online/session/after-confirm/0027-更新-2.txt`。参照先の更新 2 は Already up-to-date、outdated 無出力。更新 3 は条件に当たらず飛ばした |
+| 更新 2 | 通した | 同 seq 29、`online/session/session-001.raw`。参照先の exit でオンラインに戻った |
+| extra ロールバック | 未実施 | C14・C15 の steps に実施記録無し |
+
+### 通らなかった手順と見立て
+
+- この文書の実施範囲で通らなかった手順は無い。C15 では Homebrew を再導入しておらず、C14 の結果を引き継いだ
+- 日本語入力や GNOME の PATH はこの検証の成功範囲に入らない
+
+### 指摘と状態・手順書を直した所
+
+| 指摘 | 状態 | 対応 |
+|---|---|---|
+| この文書の証跡で確定した食い違い | 該当無し | 手順書・extra・参考資料は変更無し |
+| 初期設定の Homebrew に手順 4 が加わる場合の参照番号 | 未対応（司令塔に渡す） | 手順 3 の「1〜3」は依頼どおり保持。今回は手順 4 を通した結果ではない |
+
+### 確かめていないこと
+
+- 不足依存の導入・更新対象を用意した upgrade・Homebrew 本体と jq の撤去、実機・aarch64 は今回未実施
+- 従来のコンテナ・2026-10-06 の VM での撤去と、今回の更新確認は別の履歴。ほかの Homebrew 文書全部のオフライン通し・GUI・IME は確認していない

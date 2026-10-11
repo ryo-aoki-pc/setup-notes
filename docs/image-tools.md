@@ -54,7 +54,7 @@
    ```
 
    - ファイルに `gpgcheck=1` があることを確かめる
-   - 版は `trivy.x86_64  0.74.0-1  trivy` のように出る
+   - 公式の候補は `trivy.x86_64  0.75.0-1  trivy` のように出る。EPEL の候補も並ぶことがある
    - 初回は署名鍵の取り込みを 1 回聞かれる
    - fingerprint が `825A D903 6F7C 850E 6A6F ED49 35B8 ACA4 4FD9 CA9F`（`trivy-repo <oss@aquasec.com>`）であることを確かめてから `y` と答える。違っていれば `N` で中断する
    - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
@@ -68,7 +68,7 @@
    rpm -q trivy
    ```
 
-   - 1 行目が `Version: 0.74.0` で、`/usr/bin/trivy` と `trivy-0.74.0-1.x86_64` が出る
+   - 1 行目の `Version:` が、手順 3 で導入した RPM の版と一致し、`/usr/bin/trivy` とその RPM の名前が出ればよい
 
 1. わざと欠陥のある Containerfile を hadolint に渡し、指摘が出ることを確かめる。
 
@@ -120,7 +120,7 @@
    trivy image --image-src podman --severity HIGH,CRITICAL localhost/image-check:1
    ```
 
-   - 初回は脆弱性のデータベース（117.64 MiB）を落とす
+   - 初回は脆弱性のデータベースを落とす（容量は取得時点で変わる）
    - `Detected OS  family="redhat" version="10.1"` の後に、`Report Summary` の表が出る
    - 脆弱性の結果は、データベースの日付とイメージの中身で変わる
 

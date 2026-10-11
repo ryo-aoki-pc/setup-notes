@@ -6,6 +6,45 @@
 
 ## 補足
 
+### 実施手順 / Git Bash と WezTerm の設定 / 手順 4: 補足: Git for Windows の長いパス対応
+
+- `core.longpaths=true` は Git for Windows の C で実装されたコマンドの長いパス対応を有効にする。初期設定の clone より前に、自分のユーザーの `global` に設定する
+- [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6 の `LongPathsEnabled=1` とは別の設定。Windows の一般的な長いパス対応には、OS 側の値に加えてアプリ側の対応も必要
+- Git for Windows の公式資料は、スクリプトで実装された Git のコマンドや、エクスプローラー・IDE などには制限が残ると説明している。この設定だけで周辺ツールも長いパスを扱えるとは限らない
+- リポジトリの `local` は `global` より優先される。ホームでの設定確認に加え、既存のリポジトリでは有効な値と出どころを確かめる
+- `--global --includes` で、`global` のファイルが読み込む別の設定も含めて判定する。真偽値がすでに `true` なら書き換えず、元の表記と設定ファイルを保つ
+- [Git for Windows: Git cannot create a file or directory with a long path](https://gitforwindows.org/git-cannot-create-a-file-or-directory-with-a-long-path.html)
+- [Microsoft Learn: Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)
+
+### Windows Sandbox で配布物を試す（任意） / 手順 2: 補足: 対応環境
+
+- クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後の任意節にした
+- Microsoft の導入手順は、Windows 11 Pro・Enterprise・Education などの対応エディションを対象とし、Home は対象外としている。AMD64 と、Windows 11 22H2 以降の ARM64 に対応する
+- 最低要件は、UEFI / BIOS で有効にした仮想化、RAM 4 GB、ディスクの空き 1 GB、CPU 2 コア。Microsoft は RAM 8 GB、SSD、ハイパースレッディングを含む 4 コアを推奨している
+- Windows の VM の中で使う場合は入れ子の仮想化が要る。この任意節は、前提を満たす PC を対象にしており、VM 側の仮想化設定を変える手順は含めない
+- [Microsoft Learn: Install Windows Sandbox](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-install)
+
+### Windows Sandbox で配布物を試す（任意） / 手順 3・4: 補足: 変更前の状態と再起動
+
+- `Containers-DisposableClientVM` は Windows Sandbox のオプション機能の名前。`-All` は必要な親機能も有効にし、`-NoRestart` は自動の再起動を止める
+- 導入前に `State` を控え、`Disabled` または `DisabledWithPayloadRemoved` の場合だけ有効にする。`Enabled` は変更しない。`EnablePending`・`DisablePending` の場合は再起動してから状態を読み直し、導入前の状態を判定し直す
+- 適用後は `RestartNeeded` と機能の `State` を読み、成功を確かめてから、別の手順の `Restart-Computer` で必要な再起動を行う。失敗の後に続けて再起動しない
+- [無効にする手順](../extra/windows-setup.md#windows-sandbox-を無効にする)は、この手順書で初めて有効にした場合だけ `Containers-DisposableClientVM` を無効にする。`-All` で有効になった親機能は、Hyper-V や WSL などからも使われうるので、そのまま残す
+- `Disable-WindowsOptionalFeature` に `-Remove` は付けない。導入前が `DisabledWithPayloadRemoved` だった場合も、ペイロードを削除し直す手順ではない
+- [Microsoft Learn: Get-WindowsOptionalFeature](https://learn.microsoft.com/en-us/powershell/module/dism/get-windowsoptionalfeature?view=windowsserver2025-ps)
+- [Microsoft Learn: Enable-WindowsOptionalFeature](https://learn.microsoft.com/en-us/powershell/module/dism/enable-windowsoptionalfeature?view=windowsserver2025-ps)
+- [Microsoft Learn: Disable-WindowsOptionalFeature](https://learn.microsoft.com/en-us/powershell/module/dism/disable-windowsoptionalfeature?view=windowsserver2025-ps)
+
+### Windows Sandbox で配布物を試す（任意） / 手順 6〜8: 補足: 起動・試験・状態の消去
+
+- Microsoft の起動手順は、スタートメニューで Windows Sandbox を開く形。機能の導入後は、管理者の PowerShell を閉じて通常のデスクトップから起動する
+- ホストからコピーした配布物を Sandbox の中で試す。Windows 11 24H2 以降の Sandbox にはメモ帳などの標準アプリが無いため、確認用のフォルダーはエクスプローラーで作る
+- Sandbox の窓を閉じると、内部のファイル・インストールしたアプリ・状態が破棄される。次の起動は新しい環境になる。Windows 11 22H2 以降では、Sandbox の中の Windows を再起動した場合は状態が残る
+- `.wsb` の `MappedFolders` で共有するホスト側のフォルダーは別に管理される。窓を閉じても、ホスト側に保存したものや共有フォルダーへの変更は消えない
+- [Microsoft Learn: Windows Sandbox overview](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-overview)
+- [Microsoft Learn: Install Windows Sandbox — Usage](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-install#usage)
+- [Microsoft Learn: Windows Sandbox configuration — Mapped folders](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file#mapped-folders)
+
 ### 実施手順 / Windows Update / 手順 1: 補足: 先に更新する理由
 
 - インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（「PC 全体の設定」の手順 6 の sudo は 24H2 以降、「表示と入力」の手順 4 の時計の秒など）
@@ -1040,6 +1079,26 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
 
 実施環境と再実行の結果は[検証記録](../verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。
+
+---
+
+## SSH で管理者・非管理者の PowerShell を使う（任意）: 選択した方針
+
+- 対象は[手順書の任意節](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)。実施手順のデスクトップでの初期設定とは検証範囲を分け、SSH の操作と貼り付けの結果は[今回の検証記録](../verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)へ置く
+- **管理者かどうかは実効トークンで確かめる**: Administrators のユーザーで SSH に入ると、通常のデスクトップの非管理者シェルと同じ権限にはならない。ユーザー名だけで判断せず、`WindowsPrincipal.IsInRole(Administrator)` と Windows 標準の `whoami.exe /groups` の整合性レベル・管理者 SID の属性を確認する。[Win32-OpenSSH の issue #1652](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **同じユーザーの子だけ降格する**: busybox-w32 の `drop` で起動し、Medium、管理者 SID が拒否専用、`Admin : False` を確認する。同じユーザーの設定・ファイルを引き続き使える。親は管理者のまま待つので、子を `exit` で閉じて親へ戻る。UAC の対話的な昇格を SSH 内に作らず、この往復を使う。[busybox-w32 の drop の実装](https://github.com/rmyorston/busybox-w32/blob/master/miscutils/drop.c)、[OpenSSH のネットワークログオンと UAC の説明](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **専用の固定版を照合して置く**: [公式配布ファイル](https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe)の x64 用 `FRP-6075-g169694ebd` と SHA-256 を組にし、`%LOCALAPPDATA%\setup-notes\bin\busybox.exe` に置く。[Scoop の busybox の定義](https://github.com/ScoopInstaller/Main/blob/master/bucket/busybox.json)は多数の shim とシェルの初期化を伴うため、降格だけに使う今回は採らない。既存の別ファイルは上書きせず、取得した一時ファイルを照合してから移す。撤去も同じハッシュに一致した実行ファイルだけを削除する
+- **drop の後ろに `--` を置く**: 固定版は後続の `-NoLogo` なども自身のオプションとして読むため、`drop -- powershell.exe …`／`drop -- pwsh.exe …` にする。失敗した呼び出しと修正後の結果は検証記録に保持する
+- **先に対話 SSH、次に PowerShell**: SSH 先の Git Bash でシェル統合を読み、5.1 または 7 を起動する。[Windows OpenSSH の PTY のコマンド生成](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32-doexec.c)は、シェル・`-c`・コマンド本文を空白で連結する。`ssh -tt <host> '<複数のコマンド>'` では Bash の `-c` の引数の囲みが失われるため、本文では接続先の対話プロンプトから起動する
+- **接続元のクリップボードを渡す**: [WezTerm PR #39](https://github.com/ryo-aoki-pc/wezterm/pull/39) のローカル Windows 向けの Paste は、SSH 先の PowerShell にはそのまま適用できない。接続元では Linux の Wayland の `wl-paste`／X11 の `xclip`、Windows の標準 PowerShell を使い、同じ右クリック・Ctrl+Shift+V の操作から渡す
+- **本文を送る前に二段階で確認する（V2）**: 専用の Ctrl+Shift+F12 で受信ハンドラーを開き、識別子付きの `READY` を照合して、本文を含まない `WZP2:<nonce>:` のヘッダーだけを送る。正しいヘッダー全体を受信した `BODYREADY` を照合してから、改行を含まない `<Base64長>:<Base64>~WZE2:<nonce>~` の本文を送る。長さは UTF-8 のバイト数ではなく Base64 の文字数。受信処理が始まる前に本文を送らず、終端の nonce も同じ値にする
+- **PSReadLine の入力欄へ挿入する**: 検証・復号後の本文は PSReadLine の `Insert`／選択範囲の `Replace` で挿入し、Enter は送らない。CR とタブは既存の `Paste` と同じ扱いにし、空行・日本語・末尾改行を保持する
+- **本文の上限は UTF-8 で 64 KiB にする**: SSH 先の入力処理の負荷を限定し、65,536 バイトを超える本文は送らない。大きな本文はブロックを分ける。上限までの受信時間と、開発中に試した 1 MiB の結果は検証記録に分けて残す
+- **準備待ちに期限を設ける**: SSH 先は正しいヘッダーを受け取るまで開始から 5 秒を上限にし、ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさない。接続元の `READY`・`BODYREADY` 待ちはそれぞれ 3 秒にし、応答処理でも期限を確認する。同じ入力待機の識別子（epoch）で専用キーを再発火せず、版が違う応答も拒否する
+- **更新後は新しい SSH と PowerShell を起動する**: 受信処理の C# の型は読み込み済みのプロセス内では入れ替えられない。統合ファイルを更新した後は、手順どおり SSH へログインし直し、新しい PowerShell から読む。V1 の型が残る状態から V2 を初めて読むことと、同じ最終版を再びドットソースすることは、既存の V2 の型を更新する操作とは区別する
+- **終端も nonce で照合する**: 本文の受信開始後は、単独の `~` や別の nonce の終端では入力欄に戻らず、同じ `~WZE2:<nonce>~` まで読み捨てる。利用者が先に `~` を打っても、遅れて届く本文を親の入力欄へ流さない
+- **本文送信と受信の例外でも入力欄へ流さない**: 本文を送れた判定は送信処理が正常に終わった後で立て、途中で送信が失敗したときは取消用の `~WZE2:<nonce>~` を送る処理を行う。SSH 先の Console IO に例外が出たときも、正しいヘッダーを受信した後は同じ nonce の終端まで読み捨ててから入力欄へ戻る。ヘッダー受信前の例外では 5 秒の期限を延ばさない
+- **失敗時に本文を別のシェルへ送らない**: 取得失敗・無応答・取り消し・不正フレームでは通常貼り付けへ切り替えない。SSH 先の PSReadLine が無い、または専用キーの登録に失敗した場合は `unavailable` の目印を出し、貼り付けは通知して止める。ペインごとに配送状態と識別子を照合し、コマンド開始・例外・終了・親 Bash 復帰で SSH の PowerShell の目印を解除する。正しいヘッダーを受信した後の Ctrl+C は本文を末尾まで読み捨てるので、その後に配送が止まった場合は待機が続く可能性がある
 
 ---
 

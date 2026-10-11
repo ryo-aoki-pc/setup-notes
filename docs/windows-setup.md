@@ -7,19 +7,19 @@
 > [!IMPORTANT]
 > - **すべて、この PC のデスクトップで行う**。SSH のセッションには貼らない（Administrators の一員の SSH のセッションは管理者の権限で動くので、[アプリを入れる](#アプリを入れる)の手順 1 の scoop のインストーラが止まる）
 > - 窓の使い分け: [Windows Update](#windows-update)の手順 1 で**管理者の** Windows PowerShell（5.1）を開き、同じ項の手順 2〜8 で Windows Update を行う。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 で**管理者ではない** Windows PowerShell を開き、同じ項の手順 2〜7 と、[貼り付けの設定](#貼り付けの設定)から[HackGen Console NF](#hackgen-console-nf)までの手順をそこに貼る。[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き、同じ項の手順 2〜8 と、[ネットワークとリモート](#ネットワークとリモート)から[WSL と再起動](#wsl-と再起動)までの手順（[OpenSSH サーバー](#openssh-サーバー)・[Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)も）を貼る。再起動の後は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開く管理者ではない窓に、同じ項の手順 2〜5 と、それより後の項の PowerShell のブロックを貼る（[Claude Code](#claude-code)・[Codex CLI](#codex-cli)・[Grok Build](#grok-build)・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)は、項の中で開き直した窓に貼る）
-> - bash のブロックの貼り先: [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2〜4 はクライアント（この PC の WSL の AlmaLinux 10 など）のシェル、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3〜5 は Git Bash。それより後の bash のブロックは、WezTerm の新しいタブ（Git Bash）に貼る
+> - bash のブロックの貼り先: [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2〜4 はクライアント（この PC の WSL の AlmaLinux 10 など）のシェル、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3〜6 は Git Bash。それより後の bash のブロックは、WezTerm の新しいタブ（Git Bash）に貼る
 > - ログインするユーザーは Administrators の一員（[Windows Update](#windows-update)の手順 2〜8 の Windows Update と、[PC 全体の設定](#pc-全体の設定)の手順 2〜8 から[WSL と再起動](#wsl-と再起動)までの PC 全体の設定に管理者の権限が要る。OpenSSH サーバー・Git for Windows・Firefox・WezTerm も PC 全体に入れる）
 > - 前提: AI エージェントと GitHub のアカウント（[AlmaLinux 10 の初期設定](almalinux-setup.md#実施手順)のリードと同じ）
 > - [Windows Update](#windows-update)の手順 2〜8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 は、**Ctrl+V で貼る**。貼り付けの設定をまだ通していないため、conhost の窓に右クリックで貼ると行が逆順になる
 > - [貼り付けの設定](#貼り付けの設定)の手順 1 は、**1 行なので、どの貼り方でもそのまま貼れる**。この 1 行を貼った窓には、それより後の複数行のブロックを、GitHub のコピーボタンでコピーして右クリックで貼れる。Windows の PowerShell のブロックを貼るほかの手順書も、[貼り付けの設定](#貼り付けの設定)の手順 1〜4 を前提にする
 > - [WSL と再起動](#wsl-と再起動)の手順 2 で、**再起動する**（設定のための再起動はこの 1 回。HackGen Console NF のフォントと WezTerm の VC++ ランタイムも、この再起動で読み直す。Windows Update は、必要なときだけ[Windows Update](#windows-update)の手順 8 で手動で再起動し、更新が無くなるまで繰り返す）
-> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[Firefox](#firefox)の手順 3・4（起動して確かめる・既定のブラウザー）、[WezTerm](#wezterm)の手順 5、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜5、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2・5（Git Bash と WezTerm を開く）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7（キーを押して確かめる）、[yazi](#yazi)の手順 7（WezTerm のタブを開く）、[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 4・[Grok Build](#grok-build)の手順 4・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（PowerShell を開き直す）、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 7・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 6（ブラウザでのログイン）。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1（WSL のシェルに入る）・2（`sudo` のパスワード）・4（ホスト鍵の確認とパスワード）、[git-delta](#git-delta)の手順 4（less）、[GitHub CLI](#github-cli)の手順 3（`gh auth login`）、[Neovim](#neovim)の手順 3（Neovim の画面）、[lazygit](#lazygit)の手順 6・[yazi](#yazi)の手順 8・9（TUI の画面）、[Claude Code](#claude-code)の手順 7（最初の設定とログイン）、[Codex CLI](#codex-cli)の手順 2（`Start Codex now?`）・5・8、[Grok Build](#grok-build)の手順 5・8。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）、[Git for Windows](#git-for-windows)の手順 2（入っていないとき）、[WezTerm](#wezterm)の手順 2（VC++ ランタイムが無いとき）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2（`ssh` が無いとき）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 2（zoxide が 0.9.9 でないとき）、[lazygit](#lazygit)の手順 2（extras のバケットが無いとき）、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（同じ項の手順 1 で Node.js を入れたとき）
+> - **画面で行う手順**: [Windows Update](#windows-update)・[Microsoft Store の更新](#microsoft-store-の更新)・[PC 全体の設定](#pc-全体の設定)のそれぞれの手順 1、[Firefox](#firefox)の手順 3・4（起動して確かめる・既定のブラウザー）、[WezTerm](#wezterm)の手順 5、[再起動の後に確かめる](#再起動の後に確かめる)の手順 1〜5、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2・6（Git Bash と WezTerm を開く）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7（キーを押して確かめる）、[yazi](#yazi)の手順 7（WezTerm のタブを開く）、[Claude Code](#claude-code)の手順 5・[Codex CLI](#codex-cli)の手順 4・[Grok Build](#grok-build)の手順 4・[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（PowerShell を開き直す）、[GitHub CLI](#github-cli)の手順 4・[Claude Code](#claude-code)の手順 7・[Codex CLI](#codex-cli)の手順 6・[Grok Build](#grok-build)の手順 6（ブラウザでのログイン）。[表示と入力](#表示と入力)の手順 7 は設定の画面を開いて変える。**対話入力のある手順**: [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3（WSL のユーザー名とパスワード）・同じ項の手順 5（自動サインインのパスワード）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1（WSL のシェルに入る）・2（`sudo` のパスワード）・4（ホスト鍵の確認とパスワード）、[git-delta](#git-delta)の手順 4（less）、[GitHub CLI](#github-cli)の手順 3（`gh auth login`）、[Neovim](#neovim)の手順 3（Neovim の画面）、[lazygit](#lazygit)の手順 6・[yazi](#yazi)の手順 8・9（TUI の画面）、[Claude Code](#claude-code)の手順 7（最初の設定とログイン）、[Codex CLI](#codex-cli)の手順 2（`Start Codex now?`）・5・8、[Grok Build](#grok-build)の手順 5・8。**条件付きの手順**: [Windows Update](#windows-update)の手順 5・7・8 と[Microsoft Store の更新](#microsoft-store-の更新)の手順 3・4・6（更新の結果による分岐）、[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変えるとき）、[ネットワークとリモート](#ネットワークとリモート)の手順 2（Pro 以上）、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5（デュアル ブートで、AlmaLinux の時計を UTC にしたとき）・同じ項の手順 6（US 配列のキーボード）、[Git for Windows](#git-for-windows)の手順 2（入っていないとき）、[WezTerm](#wezterm)の手順 2（VC++ ランタイムが無いとき）、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 2（`ssh` が無いとき）、[シェルのツールを入れる](#シェルのツールを入れる)の手順 2（zoxide が 0.9.9 でないとき）、[lazygit](#lazygit)の手順 2（extras のバケットが無いとき）、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 2（同じ項の手順 1 で Node.js を入れたとき）
 
 - 上から順にコードブロックを貼る。[PC 全体の設定](#pc-全体の設定)の手順 2 の変数は、管理者の PowerShell を開き直したら貼り直す（[OpenSSH サーバー](#openssh-サーバー)の手順 3・5 も使う）
   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3・[yazi](#yazi)の手順 1・[Claude Code](#claude-code)の手順 1 の変数も、その項の中で新しいシェルや窓を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[Git for Windows](#git-for-windows)の手順 1・2、[Firefox](#firefox)の手順 1〜4（ブラウザでのログインに使う）、[WezTerm](#wezterm)の手順 1〜5、[WSL と再起動](#wsl-と再起動)の手順 2、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜5、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4 は飛ばさない）
+- 項目ごとの手順（要らない項目の手順は飛ばしてよい。[Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3、[Git for Windows](#git-for-windows)の手順 1・2、[Firefox](#firefox)の手順 1〜4（ブラウザでのログインに使う）、[WezTerm](#wezterm)の手順 1〜5、[WSL と再起動](#wsl-と再起動)の手順 2、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜6、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4 は飛ばさない）
   - 更新: Windows Update は[Windows Update](#windows-update)の手順 1〜8、Microsoft Store は[Microsoft Store の更新](#microsoft-store-の更新)の手順 1〜7。貼り付けの設定: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[PC 全体の設定](#pc-全体の設定)の手順 3・4
   - 入れるもの: scoop は[アプリを入れる](#アプリを入れる)の手順 1・2、UniGet UI は同じ項の手順 3 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 4、PowerToys は[アプリを入れる](#アプリを入れる)の手順 4、PowerShell 7 は同じ項の手順 5、WSL の AlmaLinux 10 は[WSL と再起動](#wsl-と再起動)の手順 1 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3・4、自動サインイン（Autologon）は同じ項の手順 5
   - 表示: エクスプローラーは[表示と入力](#表示と入力)の手順 1、旧形式のコンテキストメニューは同じ項の手順 2、スタートと検索は同じ項の手順 3 と[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2、タスクバーは[表示と入力](#表示と入力)の手順 4 と[再起動の後に確かめる](#再起動の後に確かめる)の手順 3、ダークモードは[表示と入力](#表示と入力)の手順 5、既定の端末は同じ項の手順 6
@@ -30,8 +30,8 @@
   - サインイン: Windows Hello だけのサインインを切るのは[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 1、自動サインインは[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5
   - フォント: HackGen Console NF は[HackGen Console NF](#hackgen-console-nf)の手順 1・2。確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5
   - リモート: OpenSSH サーバーは[OpenSSH サーバー](#openssh-サーバー)の手順 1〜5。確かめるのは[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 1〜4
-  - Git: Git for Windows は[Git for Windows](#git-for-windows)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1、`~/.gitconfig` は同じ項の手順 2・3、共通の bash 設定は同じ項の手順 4、git-delta は[git-delta](#git-delta)の手順 1〜4、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5、lazygit は[lazygit](#lazygit)の手順 1〜6（自分用の設定は同じ項の手順 4）
-  - ブラウザと端末: Firefox は[Firefox](#firefox)の手順 1〜4、WezTerm は[WezTerm](#wezterm)の手順 1〜5（自分用の設定は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5）、Git Bash の starship・zoxide・fzf・eza・bat は[シェルのツールを入れる](#シェルのツールを入れる)の手順 1〜7
+  - Git: Git for Windows は[Git for Windows](#git-for-windows)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1、`~/.gitconfig` は同じ項の手順 2〜4、共通の bash 設定は同じ項の手順 5、git-delta は[git-delta](#git-delta)の手順 1〜4、GitHub CLI は[GitHub CLI](#github-cli)の手順 1〜5、lazygit は[lazygit](#lazygit)の手順 1〜6（自分用の設定は同じ項の手順 4）
+  - ブラウザと端末: Firefox は[Firefox](#firefox)の手順 1〜4、WezTerm は[WezTerm](#wezterm)の手順 1〜5（自分用の設定は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6）、Git Bash の starship・zoxide・fzf・eza・bat は[シェルのツールを入れる](#シェルのツールを入れる)の手順 1〜7
   - エディタとファイル: Neovim は[Neovim](#neovim)の手順 1・2・4（自分用の設定は同じ項の手順 3）、yazi は[yazi](#yazi)の手順 1〜9（自分用の設定は同じ項の手順 5）
   - AI エージェント: Claude Code は[Claude Code](#claude-code)の手順 1〜8、Codex CLI は[Codex CLI](#codex-cli)の手順 1〜8、Grok Build は[Grok Build](#grok-build)の手順 1〜8、Claude Code に入れる Codex・Grok のプラグインは[Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1〜3（3 つを入れた後）
 - Windows を AlmaLinux 10 とのデュアルブート向けに入れるときは、先に [Windows 11 のデュアルブート向けの導入](windows-dual-boot.md)を通してから、この文書を[Windows Update](#windows-update)の手順 1 から始める
@@ -44,7 +44,9 @@
   - PowerToys は[PowerToys のユーティリティを絞る（任意）](#powertoys-のユーティリティを絞る任意)、PowerShell 7 の貼り付け・履歴の検索・starship と zoxide は[PowerShell 7 のプロファイルを設定する（任意）](#powershell-7-のプロファイルを設定する任意)
   - Windows Terminal のフォントは[Windows Terminal のフォントと貼り付けの警告を変える（任意）](#windows-terminal-のフォントと貼り付けの警告を変える任意)、WSL のネットワークは[WSL のネットワークをミラーにする（任意）](#wsl-のネットワークをミラーにする任意)
   - OpenSSH サーバーは、鍵でも入るなら[OpenSSH サーバーに公開鍵でもログインする（任意）](#openssh-サーバーに公開鍵でもログインする任意)、その後にパスワードを受け付けないなら[OpenSSH サーバーのパスワード認証を切る（任意）](#openssh-サーバーのパスワード認証を切る任意)、ログインのシェルを Git Bash にするなら[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)、scoop のツールが SSH のセッションで起動しないなら[scoop のツールを SSH のセッションで使う（任意）](#scoop-のツールを-ssh-のセッションで使う任意)
+  - SSH から管理者・非管理者の PowerShell を同じユーザーで使うなら、[SSH で管理者・非管理者の PowerShell を使う（任意）](#ssh-で管理者非管理者の-powershell-を使う任意)
   - PowerShell などから起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら[Neovim を既定のエディタにする（任意）](#neovim-を既定のエディタにする任意)
+  - クリーンな Windows で配布物を試すなら[Windows Sandbox で配布物を試す（任意）](#windows-sandbox-で配布物を試す任意)
   - Git for Windows の既定（`core.autocrlf=true`）のまま clone したリポジトリ（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 3 より前に clone したもの）があれば、[AlmaLinux 10 の初期設定の「改行を変換して clone したリポジトリを直す」](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を、Git Bash でそのリポジトリに行う
   - starship・fzf・eza・bat・WezTerm・git-delta・Neovim・lazygit・yazi・Codex CLI・Grok Build の使い方と設定ファイル、Claude Code の使い方は、[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節（両 OS で同じ）。Git Bash のタブに、同じブロックを貼る
     - [fzf で fd と bat を候補とプレビューに使う（任意）](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う任意)の `brew install fd`・`brew uninstall fd` は、管理者ではない窓で `scoop install fd`・`scoop uninstall fd` にする（[yazi](#yazi)の手順 3 で入っていれば、入れなくてよい）
@@ -1246,7 +1248,7 @@
 1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
 
    - スタートメニューで「WezTerm」を探し、クリックして開く
-   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 で入れる）
+   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 で入れる）
    - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
    - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](windows-hotkey-conflict.md)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
@@ -1440,6 +1442,7 @@
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
      - [SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<WIN_USER>` だけを出す
    - `exit` でクライアントのシェルに戻る
+   - Git Bash を既定にした後、PowerShell の操作をするなら、[SSH で管理者・非管理者の PowerShell を使う（任意）](#ssh-で管理者非管理者の-powershell-を使う任意)を行う
    - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（[注意点](extra/windows-setup.md#注意点)）
    - WSL の AlmaLinux 10 をクライアントにしたときは、続けてもう一度 `exit` を打ち、PowerShell に戻る
    - **次の手順は、`exit` で PowerShell に戻ってから貼る**（続けて貼ると Windows の cmd への入力として食われる）
@@ -1469,9 +1472,29 @@
 
    - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
-   - **この手順は、この項の手順 4・5 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
+   - **この手順は、この項の手順 5・6 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
    - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)で行う（同書の「Git」の手順 2 の箇条書きが案内する AlmaLinux 10 のロールバックと同じ内容を、Git Bash で行う）
+
+1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
+
+   ```bash
+   printf '変更前の core.longpaths（スコープ・ファイル・値）:\n'
+   git config --show-scope --show-origin --get-all core.longpaths
+   if [ "$(git config --global --includes --type=bool --get core.longpaths)" != true ]; then
+     git config --global core.longpaths true
+   fi
+   printf '\n\033[7m 確認 \033[0m\n'
+   git config --global --includes --type=bool --get core.longpaths
+   git config --type=bool --show-scope --show-origin --get core.longpaths
+   ```
+
+   - 「変更前」の値・スコープ・ファイルを控える。`global` の行が無ければ「global は未設定」と控える
+   - 元の `global` が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える
+   - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
+   - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
+   - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く
+   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)の手順 2・5・6 で行う
 
 1. 同じ Git Bash で、共通の bash 設定を入れる。
 
@@ -1488,7 +1511,7 @@
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
    - [その docs/install.md の実施手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#実施手順)の手順 1〜4 を、この Git Bash に貼る（`~/.config/wezterm` に clone する）
-   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 4 の共通の bash 設定が読む
+   - その手順 5〜7（`~/.bashrc` への直接の追記）は飛ばす。シェル統合は、この項の手順 5 の共通の bash 設定が読む
    - その手順 8 で、スタートメニューの「WezTerm」から起動し、手順 9 を WezTerm のタブに貼って確かめる（新しいタブは Git Bash で開く）
    - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
    - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
@@ -1514,7 +1537,7 @@
    - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
    - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
-   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 4 を通す
+   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 を通す
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 3 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
@@ -3979,6 +4002,178 @@
 
 ---
 
+## SSH で管理者・非管理者の PowerShell を使う（任意）
+
+- 前提: [OpenSSH サーバー](#openssh-サーバー)、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、[SSH の既定のシェルを Git Bash にする（任意）](#ssh-の既定のシェルを-git-bash-にする任意)を通してあること。Windows のログインユーザーは Administrators の一員
+- 接続元は Linux または Windows の WezTerm。手順 2 は接続元の Bash、手順 3・4 は SSH 先の Git Bash、手順 5〜11 は SSH 先の PowerShell、手順 12 は SSH 先の Git Bash に貼る
+- 管理者の親 PowerShell から、同じユーザーの非管理者の子 PowerShell を開く。子で `exit` すると管理者の親へ戻るので、手順 10 の後は権限を確かめてから操作する
+- Windows PowerShell 5.1 を基本にする。PowerShell 7 を使うときは、[アプリを入れる](#アプリを入れる)の手順 5 も前提にし、手順 3 の代わりに手順 4 を行う
+- 手順 6 の貼り付け確認が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない。貼り付けには右クリックか Ctrl+Shift+V を使い、Enter は内容を確かめてから押す
+- SSH の貼り付けは UTF-8 で 64 KiB（65,536 バイト）まで。超える本文は貼り付けず通知が出るので、ブロックを分ける
+- 大きなブロックは入力欄に入るまで数十秒から 1 分以上かかることがある。受信中は次のコマンドを貼らず、挿入された内容を確かめてから Enter を押す
+- 降格用の実行ファイルは x64 用の固定版を専用の場所へ置く。ARM64 の Windows では手順 7 を行わない
+- [検証記録](verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+
+1. 接続元と Windows の両方で、WezTerm の設定を更新する。
+
+   - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
+   - [WezTerm の設定の更新](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#更新)をそれぞれの PC で行い、接続元の WezTerm を開き直す
+   - 接続元の Linux では、Wayland のときは `wl-paste`、X11 のときは `xclip` が必要。導入は[Windows の SSH 先で PowerShell に貼り付ける手順](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#windows-の-ssh-先で-powershell-に貼り付ける任意)に従う
+   - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
+   - **次の手順は、接続元の WezTerm の Bash に貼る**
+
+1. 接続元の Bash で、Windows にログインする。
+
+   ```bash
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+     ssh "${WIN_USER}@${WIN_HOST}"
+   fi
+   ```
+
+   - `WIN_HOST`・`WIN_USER` は[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値。新しいシェルなら、同じ項の手順 3 のブロックを先に貼る
+   - この検証環境では SSH の接続名 `surface` を設定済みなので、上のブロックの代わりに `ssh surface` でも入れる
+   - Windows の Git Bash の `$` のプロンプトが出ればよい。cmd のプロンプトなら、前提の既定シェルの設定を確かめる
+   - 5.1 を使うなら手順 3、7 を使うなら手順 3 を飛ばして手順 4 へ進む
+   - **次の手順は、ログインした Windows の Git Bash に貼る**（続けて貼ると、パスワードなどの入力として食われる）
+
+1. 5.1 を使うときは、SSH 先の Git Bash で統合を読み、PowerShell を開く。
+
+   ```bash
+   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
+     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
+   else
+     export TERM_PROGRAM=WezTerm
+     . ~/.config/wezterm/shell/wezterm.sh
+     powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   fi
+   ```
+
+   - `PS C:\Users\…>` のプロンプトが出ればよい。読み込みエラーが出たら、そこで止めて設定の更新と実行ポリシーを確かめる
+   - 手順 4 は飛ばす
+   - **次の手順 5 は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. 7 を使うときは、手順 3 の代わりに Git Bash から PowerShell を開く。
+
+   ```bash
+   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
+     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
+   else
+     export TERM_PROGRAM=WezTerm
+     . ~/.config/wezterm/shell/wezterm.sh
+     pwsh.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   fi
+   ```
+
+   - `PS C:\Users\…>` のプロンプトが出ればよい。`pwsh.exe: command not found` なら、PowerShell 7 の導入と PATH を確かめる
+   - **次の手順は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. SSH 先の PowerShell で、版・ユーザー・管理者の権限を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq 'WezTermSshPaste'; & "$env:WINDIR\System32\whoami.exe" /groups
+   ```
+
+   - `Version` が 5.1 または 7 の版、`User` がこの Windows のユーザー、`Admin : True` が出ればよい。`User` の値を控える
+   - Ctrl+Shift+F12 の `Function` が `WezTermSshPaste` の行が出ることを確かめる。出ないなら、設定を更新し、手順 2 からやり直す
+   - `whoami.exe /groups` の `S-1-16-12288` は High、`S-1-5-32-544` は Administrators で、有効なグループとして出る
+   - `Admin : False` なら管理者の操作と手順 7・8 は行わず、ログインユーザーを確かめる
+
+1. 管理者の PowerShell で、無害な複数行を右クリックか Ctrl+Shift+V で貼る。
+
+   ```powershell
+   "ssh-paste: first"
+
+   "ssh-paste: 日本語"
+   ```
+
+   - Enter を押す前は、2 行の式と間の空行 1 行が入力欄にあり、結果はまだ出ない
+   - Enter を 1 回押すと、`ssh-paste: first` と `ssh-paste: 日本語` が順に 1 回ずつ出る
+   - 空行が増える、途中で実行される、通知が出て貼れない場合は先へ進まない。接続元・Windows の両方の設定、Linux のクリップボード取得コマンドを確かめる
+
+1. 管理者の PowerShell で、降格用の固定版を照合して配置する。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw '中断: 管理者の親 PowerShell で行う' }
+     if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw '中断: この手順は x64 の Windows 用' }
+     $exe = Join-Path $env:LOCALAPPDATA 'setup-notes\bin\busybox.exe'
+     $expected = '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075'
+     if (Test-Path -LiteralPath $exe) {
+       if ((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne $expected) { throw '中断: 専用の場所に別のファイルがある。上書きしない' }
+     } else {
+       $temp = [IO.Path]::GetTempFileName()
+       try {
+         Invoke-WebRequest -UseBasicParsing -Uri 'https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe' -OutFile $temp
+         if ((Get-FileHash -LiteralPath $temp -Algorithm SHA256).Hash -ne $expected) { throw '中断: ダウンロードしたファイルの SHA-256 が違う' }
+         New-Item -ItemType Directory -Path (Split-Path -Parent $exe) -Force | Out-Null
+         Move-Item -LiteralPath $temp -Destination $exe
+       } finally {
+         if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
+       }
+     }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-FileHash -LiteralPath $exe -Algorithm SHA256 | Format-List
+     & $exe --help | Select-Object -First 1
+   }
+   ```
+
+   - `Hash` が `07BB1E5B…78F075`、`Path` が `%LOCALAPPDATA%\setup-notes\bin\busybox.exe`、版の行に `FRP-6075-g169694ebd` が出ればよい
+   - SHA-256 が違う、取得できない、別のファイルがある場合は、配置せず止まる
+   - 普段の PATH や PowerShell のプロファイルは変えない
+
+1. 管理者の親 PowerShell で、非管理者の子 PowerShell を開く。
+
+   ```powershell
+   if ((Get-FileHash -LiteralPath "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" -Algorithm SHA256).Hash -ne '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075') { throw '中断: 降格用実行ファイルの SHA-256 が違う' }
+   & "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" drop -- powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
+   ```
+
+   - 7 を使っているなら、起動コマンドの `powershell.exe` を `pwsh.exe` にして貼る
+   - `--` は必ず付ける
+   - 新しい PowerShell のプロンプトが出ればよい。`drop` や統合のエラーが出たら、そのまま非管理者の操作を始めない
+   - **次の手順は、新しく開いた非管理者の子 PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+
+1. 非管理者の子 PowerShell で、ユーザーと実効権限を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; & "$env:WINDIR\System32\whoami.exe" /groups
+   ```
+
+   - `User` が手順 5 と同じで、`Admin : False` が出ればよい
+   - `S-1-16-8192` は Medium、`S-1-5-32-544` は Administrators で「拒否のみに使用するグループ」（英語では `Group used for deny only`）として出る
+   - どれかが違う場合は非管理者の操作を始めず、`exit` で親へ戻る
+   - この節の手順 6 のブロックも貼り、Enter の前には実行されず、Enter の後に 1 回だけ出ることを確かめてから、通常の権限で行う操作を貼る
+
+1. 非管理者の操作を終えたら、子 PowerShell を閉じる。
+
+   ```powershell
+   exit
+   ```
+
+   - 管理者の親 PowerShell のプロンプトに戻る
+   - **次の手順は、親 PowerShell のプロンプトに戻ってから貼る**（続けて貼ると、子への入力として食われる）
+
+1. 親 PowerShell で、管理者の権限に戻ったことを確かめて閉じる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List
+   ```
+
+   - `User` が手順 5 と同じで、`Admin : True` なら管理者の操作を再開できる
+   - 今回の操作を終えるなら `exit` を打ち、SSH 先の Git Bash へ戻る
+   - **次の手順は、SSH 先の Git Bash に戻ってから貼る**（続けて貼ると、PowerShell の入力として食われる）
+
+1. SSH 先の Git Bash で、SSH の接続を閉じる。
+
+   ```bash
+   exit
+   ```
+
+   - 接続元のプロンプトに戻ればよい
+
+---
+
 ## Neovim を既定のエディタにする（任意）
 
 - Windows PowerShell や Windows Terminal から起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら、この節の手順 1 でユーザーの環境変数にする
@@ -4013,6 +4208,101 @@
 
    - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
    - 値が `nvim` のときだけ消す（ほかの値は残る）
+
+---
+
+## Windows Sandbox で配布物を試す（任意）
+
+- 実施手順を通した後に、必要なときだけ行う
+- **前提**: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）、UEFI / BIOS で仮想化を有効にした PC。RAM は 4 GB 以上、ディスクの空きは 1 GB 以上、CPU は 2 コア以上が要る
+- Windows の VM の中で使う場合は、入れ子の仮想化も有効にしておく
+- この節の手順 2〜5 は管理者の Windows PowerShell（5.1）に貼る。手順 6〜8 は、通常のデスクトップから行う
+- **再起動**: この節の手順 4 は、状態の確認または有効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- **閉じる前に**: この節の手順 8 で、Sandbox の内部のファイルとアプリの状態が消える。残す結果は、ホストへコピーしてから閉じる
+- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](verification/windows-setup.md)
+
+1. スタートメニューから、管理者の Windows PowerShell を開く。
+
+   - 「Windows PowerShell」を検索し、右クリック →「管理者として実行」で開き、UAC の確認に答える
+   - タスク マネージャー →「パフォーマンス」→「CPU」で「仮想化」が「有効」になっていることを確かめる。無効なら、UEFI / BIOS で有効にしてから、この節を始め直す
+   - Windows のエディション・アーキテクチャと、RAM・ディスクの空き・CPU のコア数が、この節の前提を満たすことを確かめる
+   - **次の手順は、管理者の Windows PowerShell が開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox の変更前の状態を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `FeatureName` が `Containers-DisposableClientVM` であることを確かめ、`State` を控える（[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)で使う）
+   - `Disabled` または `DisabledWithPayloadRemoved` なら、この節の手順 3 に進む
+   - `Enabled` なら、この節の手順 3・4 は飛ばす
+   - `EnablePending` または `DisablePending` なら、この節の手順 3 は飛ばし、手順 4 で再起動する。再起動したらこの節の手順 2 に戻り、変更前の状態を控え直す
+   - エラーや、ここに挙げていない `State` が出たら中断する
+
+1. 無効だったときだけ、Windows Sandbox を有効にする。
+
+   ```powershell
+   & {
+     $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
+     if ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+     } elseif ($feature.State -eq 'Enabled') {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       $feature | Select-Object FeatureName, State
+     } else {
+       Write-Error '中断: 状態が変わった。この節の手順 2 に戻って確かめる'
+     }
+   }
+   ```
+
+   - エラーが無く、最後の `State` が `Enabled` または `EnablePending` なら適用できている
+   - `RestartNeeded` が `True`、または `State` が `EnablePending` なら、この節の手順 4 で再起動する
+   - `RestartNeeded` が `False` で `State` が `Enabled` なら、この節の手順 4 は飛ばす
+   - 既に `Enabled` だった場合も変更せず、この節の手順 4 は飛ばす
+   - エラー・`中断:`・ここに挙げていない結果が出たら、再起動と起動確認へ進まず、この節の手順 2 に戻る
+
+1. 再起動が必要なときだけ、作業を保存してホストを再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - Windows が起動したらサインインし、この節の手順 1 と同じ管理者の Windows PowerShell を開く
+   - この節の手順 2 で `EnablePending` または `DisablePending` だった場合は、同じ手順 2 に戻る
+   - **次の手順は、Windows が起動して管理者の Windows PowerShell を開いてから貼る**
+
+1. 管理者の Windows PowerShell で、Windows Sandbox が有効になったことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
+   ```
+
+   - `State` が `Enabled` なら、この節の手順 6 に進む
+   - エラーや `Enabled` 以外の状態なら中断し、この節の手順 2 に戻る
+
+1. 通常のデスクトップのスタートメニューから、Windows Sandbox を起動する。
+
+   - 管理者の PowerShell を閉じ、スタートメニューで「Windows Sandbox」を検索して開く
+   - Windows Sandbox の窓の中に、別の Windows のデスクトップが表示されればよい
+   - 起動に失敗したら、表示されたエラーを控え、この節の手順 7・8 へ進まない
+
+1. Sandbox の中で、配布物の起動と必要な操作を試す。
+
+   - ホストで配布物をコピーし、Sandbox の中のデスクトップへ貼り付ける
+   - Sandbox の中で配布物を起動し、必要な操作ができることを確かめる。エラーや不足する依存ライブラリがあれば控える
+   - Sandbox の中のデスクトップで右クリック →「新規作成」→「フォルダー」を選び、`sandbox-check` という名前にする（この節の手順 8 で使う）
+
+1. Sandbox の窓を閉じて起動し直し、内部の状態が消えたことを確かめる。
+
+   - 残す結果をホストへコピーし、Sandbox の窓の右上の「×」を押す。内容を破棄する確認に答える
+   - 通常のデスクトップのスタートメニューから「Windows Sandbox」をもう一度開く
+   - Sandbox の中のデスクトップに、配布物と `sandbox-check` フォルダーが無ければよい
+   - 確かめ終わったら、Sandbox の窓を閉じる
 
 ---
 
