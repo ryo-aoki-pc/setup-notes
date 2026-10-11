@@ -79,8 +79,9 @@
 
 ### 端末にルート証明書を入れる / 手順 3〜5: 補足: 指紋の照合
 
-- ルート証明書は、まだ信頼していない相手から Windows の `curl -k` で取る。途中で差し替えられていないことは、取り込む前に、ホストに出した SHA-256 の指紋と比べて確かめる
-- Android は、取り込む画面に指紋が出ないので、PC で照合したファイルを USB で渡す。取り込んだ後の「信頼できる認証情報」の確認は、事前の照合に加えて行う
+- ルート証明書は、まだ信頼していない相手から取る（Android は警告を進み、Windows は `curl -k`）。途中で差し替えられていないことは、ホストに出した指紋と比べて確かめる
+- Android は、取り込む画面に指紋が出ないので、取り込んだ後に「信頼できる認証情報」で確かめる。違っていたら、すぐに削除する
+- 共同レビューでは、PC で照合したファイルを USB で Android に渡す形（取り込む前に照合できる）も挙がった。利用者の指定で、ブラウザで取得する形にしている
 - Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーが使う Edge・Chrome が信じる。Firefox は、設定によっては自分の置き場だけを使う（確かめていない）
 
 ### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 6・7: 補足: スクリプトとタスク
@@ -155,7 +156,6 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - [caddyserver/caddy](https://github.com/caddyserver/caddy)（Caddy。Apache-2.0）・[Caddyfile の `tls`](https://caddyserver.com/docs/caddyfile/directives/tls)・[Caddyfile の全体の設定（`admin`・`auto_https`・`skip_install_trust`・`pki`）](https://caddyserver.com/docs/caddyfile/options)
 - [Caddyfile の環境変数と引用](https://caddyserver.com/docs/caddyfile/concepts#environment-variables)・[待ち受ける IP の指定（`bind`）](https://caddyserver.com/docs/caddyfile/directives/bind)
 - [Microsoft: New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)（失敗時の再試行）・[taskkill](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill)（`/T` は子プロセスも止める）
-- [Android: PC と端末の間でファイルを転送する](https://support.google.com/android/answer/9064445?hl=ja)・[AOSP の CA 証明書の取り込み](https://android.googlesource.com/platform/packages/apps/CertInstaller.git/+/f164f397e781c6abd719e4318b0f5c09362f4368/src/com/android/certinstaller/CertInstaller.java)（認証局を信頼する前に照合する）
 - [xai-org/grok-build](https://github.com/xai-org/grok-build)（Grok Build。Apache-2.0）
 - Grok Build の同梱の文書（`~/.grok/docs/user-guide/`）: `15-agent-mode.md`（ACP）・`22-permissions-and-safety.md`（権限モード）
 - [Agent Client Protocol](https://agentclientprotocol.com)

@@ -10,6 +10,7 @@
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)
 - Grok Build と、そのセッション（`~/.grok`）は消さない。端末の `grok` は、そのまま使える
 - linger を、ほかに使うものが無くて戻すときは、[linger のロールバック](linger.md#ロールバック)
+- 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している Caddy の `~/.local/opt/caddy`（本体）・`~/.config/caddy`（設定）・`~/.local/share/caddy`（認証局データ）は `rm` と `ls` の両方から、Codeg のデスクトップアプリをこのホストで使っているときの `~/.codeg`（Codeg が置いたスキル）は `rm` から外す
 
 > [!CAUTION]
 > **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）、アクセストークン、Caddy の認証局の鍵（`~/.local/share/caddy`）を消す。取り戻せない。** 認証局を消すと、端末に入れたルート証明書は役に立たなくなる。
@@ -51,9 +52,6 @@
 
 1. ユニット・本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
-   - **貼る前に**、ほかの用途と共有している Caddy のパスを確かめる。共有している `~/.local/opt/caddy`（本体）・`~/.config/caddy`（設定）・`~/.local/share/caddy`（認証局データ）は、下の `rm` と `ls` の両方から外す
-   - `~/.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこのホストで使っているなら、`rm` の行から外す
-
    ```bash
    rm -f ~/.config/systemd/user/codeg-server.service ~/.config/systemd/user/codeg-caddy.service
    systemctl --user daemon-reload
@@ -79,13 +77,13 @@
 - 手順 1・3 は管理者ではない PowerShell に、手順 2 は管理者の PowerShell に貼る
 - Grok Build と、そのセッション（`%USERPROFILE%\.grok`）は消さない
 - 端末に入れたルート証明書は、[ロールバック](#ロールバック)の手順 4 と同じ操作で消す
+- 手順 1 を貼る前に、ほかの用途の Caddy をこの PC で動かしているなら、2 行目（`Get-Process -Name caddy` の行）を外し、確認の `Get-Process` の名前からも `caddy` を外す
+- 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は `Remove-Item` と `Test-Path` の両方から、Codeg のデスクトップアプリをこの PC で使っているときの `%USERPROFILE%\.codeg`（Codeg が置いたスキル）は `Remove-Item` から外す
 
 > [!CAUTION]
 > **この節の手順 3 は、Codeg の会話の履歴と設定（`%APPDATA%\codeg`）、アクセストークン、Caddy の認証局の鍵（`%APPDATA%\Caddy`）を消す。取り戻せない。**
 
 1. Caddy と Codeg を止めて、タスクを消す。
-
-   - ほかの用途の Caddy をこの PC で動かしているなら、下の 2 行目は貼らず、確認の `Get-Process` の名前からも `caddy` を外す
 
    ```powershell
    Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
@@ -115,9 +113,6 @@
    - 何も出なければよい
 
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
-
-   - **貼る前に**、ほかの用途と共有している Caddy のパスを確かめる。共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は、下の `Remove-Item` と `Test-Path` の両方から外す
-   - `%USERPROFILE%\.codeg` は、Codeg が置いたスキル。Codeg のデスクトップアプリをこの PC で使っているなら、`Remove-Item` の行から外す
 
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-server.prev", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy" -Recurse -Force -ErrorAction SilentlyContinue
