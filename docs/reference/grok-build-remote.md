@@ -91,14 +91,27 @@
 - タスクは、管理者ではない窓から、ログオン時のトリガー付きで登録できた。`-RunLevel Limited` で、Codeg はデスクトップのセッションの、管理者ではない権限で動く
 - `-WindowStyle Hidden` で、窓を隠して起動する。標準エラーに出るトークンは、ファイルにも journal にも残らない
 
+### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 2: 補足: 待ち受ける IP を決めない設定
+
+- サイトのアドレスを `https://:3443` にして `bind` を書かないと、Caddy は、すべてのアドレスの 3443 番で待ち受ける
+- `tls internal` の `on_demand` は、TLS の接続が来たときに、その宛先の証明書を作る指定。IP アドレスで開いた接続は名前（SNI）を持たず、Caddy は、接続を受けたローカルの IP 宛ての証明書を作った
+- 認証局は変わらない。端末のルート証明書は、PC の IP が変わっても入れ直さない
+- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。本書では、受信の規則で送信元を絞ることで抑える
+- AlmaLinux 10 のサーバーは IP が固定なので、IP 宛てのサイトと `bind` のままにしてある
+
 ### Windows 11 で使う / Windows 11 で HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 規則とタスク
 
 - `-Program` で `caddy.exe` 宛てに限る。同じ PC のほかのプログラムが 3443 番で待ち受けても、この規則では通らない
-- `-Profile Private` は、LAN の接続がプライベートであることを前提にする
+- `-Profile Private` と `-InterfaceType Wired` で、プライベートにした有線 LAN から届く通信だけを通す。PC の IP が変わるので、`-LocalAddress` は付けない
+- `Block` の 2 本は、パブリック・ドメインのネットワークと、プライベートの Wi-Fi を、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
+- どのネットワークにいても `caddy.exe` 宛ての規則がある状態にして、Caddy が待ち受けを始めたときに Windows が許可を尋ねる画面を出さないようにする狙いもある（パブリックのネットワークで Caddy を起動しての確認は、していない）
+- Wi-Fi からも使うなら、`codeg-caddy-block-wifi` を作らず、`codeg-caddy-in` から `-InterfaceType Wired` を外す（確かめていない）
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
 - Caddy のタスクも、Codeg と同じく、サインイン中に管理者ではない権限で動かす。`curl.exe` の `--ssl-no-revoke` は、失効の確認ができない自前の認証局のために付ける
 - Caddy の起動コマンドへ入れるパスは、単引用符を 2 つに置き換える。ユーザーのパスに `'` があっても、PowerShell の文字列を途中で閉じない
-- Caddy の終了コードをタスクへ返し、失敗時は 1 分おきに最大 999 回やり直す。サインイン時に待ち受ける IP がまだ付いていなくても、後から起動できる
+- Caddy の終了コードをタスクへ返す（`exit $LASTEXITCODE`）。タスクの「前回の実行結果」で、Caddy が失敗したことが分かる
+- タスク スケジューラの「失敗時の再起動」（`-RestartCount`・`-RestartInterval`）は使わない。終了コード 1 で終わる使い捨てのタスクで試すと、再起動されなかった（検証記録）
+- 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
 - Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントの Grok を巻き込まない
 
 ## 方法のまとめ
@@ -141,6 +154,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
 - まず localhost で起動して確かめ、それから待ち受ける IP と送信元を絞って公開する（[Forgejo](../forgejo.md) と同じ順）
+- Windows 11 の PC は、ノート PC を複数の拠点の有線 LAN につなぐ使い方に合わせ、待ち受ける IP を決めない（利用者の指定）。届く範囲は、受信の規則（プライベートのネットワーク・有線・送信元）で絞る
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
@@ -154,8 +168,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - [Codeg: Deployment](https://docs.codeg.app/getting-started/deployment)・[Configuration](https://docs.codeg.app/getting-started/configuration)・[Installation](https://docs.codeg.app/getting-started/installation)・[Privacy & Security](https://docs.codeg.app/reference/privacy)
 - [Codeg の Issue #436](https://github.com/spacering-net/codeg/issues/436)（Grok の拒否の規則と sandbox が、Codeg の下で効かなかった報告）・[#876](https://github.com/spacering-net/codeg/issues/876)（Grok のモデルの一覧）
 - [caddyserver/caddy](https://github.com/caddyserver/caddy)（Caddy。Apache-2.0）・[Caddyfile の `tls`](https://caddyserver.com/docs/caddyfile/directives/tls)・[Caddyfile の全体の設定（`admin`・`auto_https`・`skip_install_trust`・`pki`）](https://caddyserver.com/docs/caddyfile/options)
-- [Caddyfile の環境変数と引用](https://caddyserver.com/docs/caddyfile/concepts#environment-variables)・[待ち受ける IP の指定（`bind`）](https://caddyserver.com/docs/caddyfile/directives/bind)
-- [Microsoft: New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)（失敗時の再試行）・[taskkill](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill)（`/T` は子プロセスも止める）
+- [Caddyfile の環境変数と引用](https://caddyserver.com/docs/caddyfile/concepts#environment-variables)・[待ち受ける IP の指定（`bind`）](https://caddyserver.com/docs/caddyfile/directives/bind)・[On-Demand TLS](https://caddyserver.com/docs/automatic-https#on-demand-tls)
+- [Microsoft: New-ScheduledTaskSettingsSet](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset)・[taskkill](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill)（`/T` は子プロセスも止める）・[New-NetFirewallRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule)（`-Profile`・`-InterfaceType`）
 - [xai-org/grok-build](https://github.com/xai-org/grok-build)（Grok Build。Apache-2.0）
 - Grok Build の同梱の文書（`~/.grok/docs/user-guide/`）: `15-agent-mode.md`（ACP）・`22-permissions-and-safety.md`（権限モード）
 - [Agent Client Protocol](https://agentclientprotocol.com)

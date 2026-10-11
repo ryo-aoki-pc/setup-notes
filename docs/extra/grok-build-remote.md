@@ -104,9 +104,9 @@
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
    ```powershell
-   Remove-NetFirewallRule -Name 'codeg-caddy-in'
+   Remove-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi'
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Name 'codeg-caddy-in' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
+   Get-NetFirewallRule -Name 'codeg-caddy-*' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
    ```
 
    - 「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 を通していなければ、この手順は飛ばす
@@ -165,12 +165,13 @@
 
 - 外から届くのは、Caddy が待ち受ける 3443/tcp の HTTPS だけ。Codeg の 3080 番は `127.0.0.1` だけで待ち受け、ファイアウォールでも開けない
 - ホストごとに、Caddy が自分の認証局を作る。ルート証明書の期限は 10 年、サーバーの証明書の期限は 12 時間だった。Caddy の文書では、動いている間に自動で作り直す（期限をまたいだ後の動きは、確かめていない）
-- サーバーの証明書は、ホストの IP 宛てに作られる。別の名前や IP で開くと、警告が出る
+- AlmaLinux 10 のサーバーの証明書は、ホストの IP 宛てに作られる。別の名前や IP で開くと、警告が出る
+- Windows 11 の PC の証明書は、接続された IP アドレスごとに、その場で作られる
 - **認証局の鍵（`root.key`）を、読まない・写さない・人に渡さない**。ルート証明書を入れた端末は、その認証局が署名した証明書を、どのサイトのものでも信じる
 - 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
 - ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、許可した送信元なら誰でも取れる
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
-- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。守りは、トークンと、待ち受ける IP と、送信元の制限
+- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。守りは、トークンと、待ち受ける IP（Windows 11 は受信の規則のネットワークの種類と有線の指定）と、送信元の制限
 - インターネットへ公開しない
 
 #### 送信元に LAN の帯を入れるとき
@@ -186,9 +187,13 @@
 #### Windows 11
 
 - SSH でログインしたシェルから Codeg を始めない。Administrators の一員の SSH のセッションは管理者の権限を持つ
-- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。サインアウトと再起動の後の動きは、確かめていない
-- PC の IPv4 が変わると、Caddy の待ち受け・証明書の宛先・受信の規則が合わなくなる。ルーターで固定の割り当てにする
+- タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動してサインインした後は、2 つとも自動で始まった。サインアウトの後の動きは、確かめていない
+- Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。届くのは、受信の規則が通す「プライベートのネットワーク・有線・指定した送信元」だけ
+- パブリックのネットワーク、Wi-Fi、VPN のアドレス宛てには届かない。別の拠点の有線 LAN は、プライベートにするまで届かない
+- PC の IP が変わると、つなぐ URL が変わる。ブラウザは別のサイトとして扱うので、トークンを入れ直す
+- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。送信元を絞ることで抑える
 - 受信の規則より先に Caddy を起動しない。Windows が許可を尋ねる画面を出す
+- タスク スケジューラの「失敗時の再起動」は使っていない。終了コードが 0 でないだけのタスクは、再起動されなかった
 
 #### そのほか
 
