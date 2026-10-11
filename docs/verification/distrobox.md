@@ -319,3 +319,27 @@ Ubuntu の初期化、対話シェルへの移動と exit、ffmpeg の導入と�
 
 - GUI アプリの書き出し、他ディストリ、更新がある場合、ロールバック、実機・aarch64・Secure Boot 有効環境は今回未実施。
 - 今回の Hyper-V の結果を、別のハイパーバイザや実機の成功範囲に広げない。過去の付録はその当時の検証範囲として残す。
+
+## 付録: 修正した ffmpeg 確認ブロックの貼り直し（2026-10-11）
+
+- **状態**: 「ボックスのコマンドをホストから呼ぶ（任意）」の手順 4 を、修正後の原文どおりに貼り直して通した
+  - Homebrew の ffmpeg が優先される環境でも、明示した `~/.local/bin/ffmpeg` は Ubuntu の 6.1.1-3ubuntu5 を返した
+  - 上の C13 の失敗と、修正直後の未再検証の記録は、その時点の結果として保持する
+- 実施: Codex、2026-10-11 17:47 UTC。対象原文はコミット `4a1788d2b41000782ab75a12b46bb253f5b3b200` の `docs/distrobox.md`
+- 環境: Hyper-V、Generation 2、2 vCPU、3072 MB、64 GiB。AlmaLinux 10.2、x86_64、kernel 6.12.0-211.64.1.el10_2.x86_64。C13 / after-R1 の既存 VM の現在状態を起動して使い、snapshot の復元はしていない
+- 貼り方: `git show` で保存した原文の写しからドライバで抽出し、SSH の対話 bash に bracketed paste でブロック全体を貼った。確認見出しの後の出力を成功条件と照合した
+
+| 対象 | 判定 | 保存した確認出力 |
+|---|---|---|
+| `command -v ffmpeg` | PATH の優先順を確認 | `/home/linuxbrew/.linuxbrew/bin/ffmpeg` |
+| `~/.local/bin/ffmpeg -version \| head -1` | 修正後の成功条件を満たした | `ffmpeg version 6.1.1-3ubuntu5 ...` |
+
+証跡は司令塔の worktree 内の `verification-work/queued-units/C20/` に保存し、このリポジトリには含めていない。
+
+- `source-sha256.json`: 原文のコミットと文書・ブロックの SHA-256
+- `distrobox-4a1788d.md`・`ffmpeg-block.sh`: 原文の写しと抽出したブロック
+- `FXC-containers/steps.jsonl` seq 1: 抽出したブロックと貼った内容の SHA-256 がともに `906307aaf20d9cbaa183098e491438ff339f7e5fc65d80af9ab344d4b19ba992`
+- `FXC-containers/after-confirm/0001-*`: 上表の確認出力
+- 文書の SHA-256 は `ec0cf4c598214f3713eed533a9c796c7ecc72c8b22095aa40fa1e1435b52932d`。写しを入力にしたドライバの `docCommit` は親リポジトリの値なので、原文の出典は `source-sha256.json` のコミットを使う
+
+今回の追加確認はこの 1 ブロックだけ。新規導入からの通し直し、GUI アプリの書き出し、他ディストリ、ロールバック、実機での実行を追加で確かめたものではない。
