@@ -283,3 +283,33 @@ Error: Failed to download metadata for repo 'appstream': Cannot prepare internal
 
 - 実機・aarch64・macOS 発・IPv6 の外向き通信・転送の異常系・extra のロールバックは今回未実施
 - 従来の Windows 発と今回の Linux 発は別の結果。GNOME 端末への貼り付け・フォント・IME は確認していない
+
+
+## 付録: 既存2VMでオフライン経路を継続した記録（2026-10-12、OFFLINE-FULL）
+
+- **状態**: 旧workerの停止と所有旧ロックの解放後、既存の専用2VMから継続した。新規clean-installからの通し実行ではない
+  - 原文は setup-notes `6a4520d` と開始前からの案内2箇所。main集約後の [AlmaLinux本文](../almalinux-setup.md)を原文ドライバで実行した
+  - 公開本文・工具35件、固定snapshot ID・親鎖・全Hyper-V参照、停止親5ファイルを開始時と終了時に照合。元の安定性baselineと一致し、expectedは変更していない
+  - 過去との歴史的内容一致はこのbaselineだけでは証明しない。旧C14/C15の失敗・未確認範囲、旧workerの記録と前回承認拒否の履歴を保持した
+
+| 環境 | 内容 |
+|---|---|
+| ホスト・VM | Windows 11 Pro / Hyper-V / Generation 2 / 構成版12.0。online 2 vCPU・2048MB、offline 4 vCPU・4096MB、各64GiB、Default SwitchのNIC、Secure Boot disabled |
+| ゲスト | AlmaLinux10.2 / x86_64 / kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 起点 | onlineの元固定snapshotはafter-AS4、offlineはclean-install。今回はその子の既存状態を続け、復元・再作成していない |
+| 貼付 | onlineの対話bashからofflineの `<USER>` へ入れ子SSH。同じシェルでALL_PROXY/https_proxyを設定。54貼付中、51は原文一致、3は許可されたOFFLINE_HOSTの単一変数置換 |
+| 証跡 | `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。表のseqはonline-session/steps.jsonl、補助観測はoffline-observe/steps.jsonl。rawは公開・commitしない |
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| SSH の SOCKS トンネル: 実施手順 / 1 | 通した | seq2–3。今回の `<OFFLINE_HOST>` / `<USER>` を読み戻し |
+| 同じ項 / 2 | 初回は接続終了、再試行は通した | seq4–7。host-key確認後に接続終了、原因未断定。再試行でpassword欄、opaque工具で入力、offlineプロンプト到達 |
+| 同じ項 / 3 | 通した | seq8。待受のlocal addressは127.0.0.1/[::1]のみ、GitHub200。ssの対向addressのwildcardを外部待受と数えない |
+| dnf にもトンネルを使わせる（任意） / 1 | 既存設定で追記を飛ばした | seq9。proxy既存の原文ガード。補助seq20のmakecacheでメタデータキャッシュ作成完了、重複追記なし |
+| トンネルを閉じる / 1–3 | 通した | seq44–47。offline exit→online→転送なしSSH→offline、1080無出力/curl終了6 |
+| 更新時の張り直し・閉鎖 | 通した | seq58–64、65–70/80。各トンネルはloopback/200。閉鎖後の補助offline seq4/6で1080なし、実外部IPv4直接curl000/終了7 |
+
+- 永続NM設定はnever-default/ignore-auto-dns、DNS空、IPv6 disabled。再起動後もdefault IPv4/IPv6経路なし。DNS失敗だけでなく、onlineで引いた実外部IPv4へのroute unreachableとproxy-offの固定IP curl失敗を確認した
+- 入れ子SSHはdriverがforeground=ssh/waitingを返す。各実プロンプトを確認してforceを使い、driverの終了0だけで成否を決めていない
+- 全セッションを閉じ、担当2VMは通常停止でOff。`after-OFFLINE-FULL-continuation-20261012` を新規保存。Hard・削除・復元・既存snapshot上書きなし
+- 異常系の転送、実機、aarch64/macOS発、IPv6の外部到達、extraロールバックは今回未実施。旧応答喪失の原因は未確定のまま

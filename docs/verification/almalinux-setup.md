@@ -8509,3 +8509,26 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 証跡は `verification-work/queued-units/C20-FOLLOWUP/` の versions.json・blocks.json・source/ibus.sh と fxa/ の PNG・安全な PTY ログ。PTY ログは実 GNOME 端末で script を起動して原文を実行した範囲だけを保存し、終了値 0 と全出力を確認した。環境全体の dump・秘密・元 session/認証ログは読んでいない。原文ブロックの変更、DBus 補助設定、IBus の再起動や起動失敗の回避は不要だった。
 
 最初の Stop-VmvVm は Off になるまで待機が続いた。試験用「日本語」の未保存文書を破棄して閉じ、ゲストの通常の systemctl poweroff で停止し、Off を確認した。待機の原因は確定していない。Hard は使わず after-FXA を保持した。Unicode 原文の直接貼付、SSH の IBus 接続の改善、Neovim、他列・実機、初期設定全体の修正後の通しは今回未実施。
+
+
+## 付録: OFFLINE-FULL既存2VM継続の前提とIBus確認（2026-10-12）
+
+- **状態**: `6a4520d` と開始前の案内2箇所から、専用offline VMの既存状態を継続した。初期設定全体の新規通しではない
+  - [Homebrewの継続記録](homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)と[npmの継続記録](npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)が対象と全前提を示す
+  - 証跡は `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。以下のseqはonline-session/steps.jsonl
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| システムの設定 / 1 | 通した | seq10–11、HOST_NAME空/USER一般ユーザー/XKB_LAYOUT us。改名なし |
+| 日本語入力 / 1・2 | 通した（既存RPM） | seq12–13。3RPM既存、入力ソース前後us/AnthyとSuper+Space |
+| 共通の bash 設定 / 1・2 | 既存cloneの案内を通した | seq15–17。公開commit1b4067cb07709667e92827f5e54f64e3ac4c82a1、install変更なし、loaded/履歴/shopt一致 |
+| Homebrew / 1–3・4 | 1–3は条件スキップ、4を通した | brew既存。seq18で固定IBus Environment、再起動後seq55で実PATH/XMLを別確認 |
+| EPEL と RPM Fusion / 1 | 通した（既存有効） | seq21の版/epel行。RPM Fusionの残りは対象外 |
+| Neovim / 1・2・3 | 既存状態から部分確認 | seq22–40。0.12.6、依存/設定/restore/Installed11/health。既存データ退避と初回cloneは今回再現せず、3全体の新規導入成功にしない |
+| 再起動と確認 / 1 | 通した | seq51のoffline reboot、nested SSHのみ切断しonlineへ復帰。seq52–54で転送なし再ログイン/実offline identity |
+| 同じ項 / 3 | 部分確認 | seq55。実ibus-daemon PATH固定、XML anthy。SSHのibus接続不能、1bootのみ、kdump/日本語Download/拡張/mutterの条件未達を保持 |
+| 同じ項 / 6 | GUI変換を通した | 再起動後PNGでTextEditor編集カーソルと入力ソースを各操作前に確認。Super+Space後あ、nihongo→にほんご→Spaceで日本語→Enter確定/下線なし |
+
+- オフラインでもMason取得前にnpmの経路を設定する案内2箇所を採用。npm1/2はseq24–25、今回の最初のNeovim取得はseq36。同じnested shellで先に設定した
+- 初期設定の残り、GNOME端末へのUnicode原文直接貼付、Neovim内IME、実機/他列は今回未実施。既存2VMの継続結果やGUI変換を、初期設定全体・過去の応答喪失原因へ広げない
+- 公開原文/工具と停止親の開始/終了照合は一致。2VMを通常停止でOff確認後、after-OFFLINE-FULL-continuation-20261012を新規保存。旧baseline/snapshot/過去本文を上書きしていない

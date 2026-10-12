@@ -328,3 +328,35 @@ curl: (6) Could not resolve host: github.com
 
 - 不足依存の導入・更新対象を用意した upgrade・Homebrew 本体と jq の撤去、実機・aarch64 は今回未実施
 - 従来のコンテナ・2026-10-06 の VM での撤去と、今回の更新確認は別の履歴。ほかの Homebrew 文書全部のオフライン通し・GUI・IME は確認していない
+
+
+## 付録: 既存2VMでオフライン経路を継続した記録（2026-10-12、OFFLINE-FULL）
+
+- **状態**: 旧workerの停止と所有旧ロックの解放後、既存の専用2VMから継続した。新規clean-installからの通し実行ではない
+  - 原文は setup-notes `6a4520d` と開始前からの案内2箇所。main集約後の [AlmaLinux本文](../almalinux-setup.md)を原文ドライバで実行した
+  - 公開本文・工具35件、固定snapshot ID・親鎖・全Hyper-V参照、停止親5ファイルを開始時と終了時に照合。元の安定性baselineと一致し、expectedは変更していない
+  - 過去との歴史的内容一致はこのbaselineだけでは証明しない。旧C14/C15の失敗・未確認範囲、旧workerの記録と前回承認拒否の履歴を保持した
+
+| 環境 | 内容 |
+|---|---|
+| ホスト・VM | Windows 11 Pro / Hyper-V / Generation 2 / 構成版12.0。online 2 vCPU・2048MB、offline 4 vCPU・4096MB、各64GiB、Default SwitchのNIC、Secure Boot disabled |
+| ゲスト | AlmaLinux10.2 / x86_64 / kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 起点 | onlineの元固定snapshotはafter-AS4、offlineはclean-install。今回はその子の既存状態を続け、復元・再作成していない |
+| 貼付 | onlineの対話bashからofflineの `<USER>` へ入れ子SSH。同じシェルでALL_PROXY/https_proxyを設定。54貼付中、51は原文一致、3は許可されたOFFLINE_HOSTの単一変数置換 |
+| 証跡 | `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。表のseqはonline-session/steps.jsonl、補助観測はoffline-observe/steps.jsonl。rawは公開・commitしない |
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| Homebrew のオフライン導入: 実施手順 / 1 | 通した | seq14。公開取得先200/301/200/401、procps-ng/curl/file/git既存 |
+| 同じ項 / 2 | 条件に当たらず飛ばした | 同seq14の4依存が揃う。dnf proxyは既存、補助makecacheはseq20 |
+| 同じ項 / 3 | 既存導入の分岐とHomebrew4を確認 | 共通bash1/2 seq15–17、clone既存時の原文案内はAlready up to date/変更なし、loaded1・履歴値・5shopt on。brew既存なので初期Homebrew1–3は飛ばし、4をseq18で実行、固定Environment一致 |
+| 同じ項 / 4 | 既存最新を確認 | seq19。API取得後jq1.8.2 already installed/up-to-date。今回の新規bottle導入は未再現、再導入なし |
+| 同じ項 / 5 | 通した | seq44–47の閉鎖をnpm実施4と共用。1回の実行を二重計数しない |
+| 同じ項 / 6 | 通した | seq48。転送なしshellでjq1.8.2、Homebrewの実行パス、JSON結果offline |
+| Homebrew のオフライン導入: 更新 / 1 | 索引確認、upgradeは条件スキップ | seq63の参照先Alma更新2がAlready up-to-date、outdated無出力。参照先更新3は飛ばした |
+| 同じ項 / 2 | 通した | seq64の原文閉鎖1。補助offline seq4で1080消失/proxyなし/実IPv4直接失敗 |
+
+- GNOMEログイン後に初期Homebrew4を通し、再起動後seq55の実IBusプロセスPATHが `/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`、XMLは `<name>anthy</name>`。設定読み戻しと次回ログインの確認を分けた
+- 再起動後のGUIではTextEditorのフォーカス/上部バーをPNGで確認してから、Super+Space、nihongo、Space、Enter。「にほんご」→「日本語」→下線なしの確定まで目視確認した
+- 初期設定「再起動と確認」3は部分確認。SSHのibus接続や、今回用意していないjournal/フォルダー/拡張等の条件は未達で、項全体の成功に広げない
+- 全セッションを閉じ、担当2VMは通常停止でOff、継続名の新snapshotを保存。Homebrew本体の新規導入、jqの新規bottle、不足依存、更新対象があるupgrade、ロールバック、実機/aarch64は今回未実施

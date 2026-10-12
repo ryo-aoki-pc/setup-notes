@@ -43,3 +43,8 @@
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 3 で貼る Homebrew 本体の導入手順（「Homebrew」の手順 1〜3）
 
 ---
+
+## 追加確認（2026-10-12）
+
+- 2026-10-11に案内を加えた時点ではオフライン経路のHomebrew4は未確認だった。今回、既存2VMから同じトンネルのシェルで設定を実行し、再起動後の実IBus PATH/XMLとGUIの日本語変換を確認した
+- [今回の継続記録](../verification/homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)。新規Homebrew本体導入・jqの新規bottle・実機を確認した結果ではない

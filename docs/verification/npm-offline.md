@@ -368,3 +368,37 @@ npm error   code: 'ECONNREFUSED',
 - LazyVimStarter の手順 18、初期設定の Neovim 手順 4、JSON 編集の LSP 動作、GUI のフォント・IME、実機・aarch64・PyPI・Homebrew の node が先にある環境は今回未実施
 - 更新対象を用意した Node/npm・Mason の更新、ロールバック、設定ファイル競合、キャッシュ無しの取得、長い取得中の意図的切断は未実施
 - 従来の VM の 11 件導入・撤去と、今回の 5→9→11 件および残存ロックの結果は別の履歴
+
+
+## 付録: 既存2VMでオフライン経路を継続した記録（2026-10-12、OFFLINE-FULL）
+
+- **状態**: 旧workerの停止と所有旧ロックの解放後、既存の専用2VMから継続した。新規clean-installからの通し実行ではない
+  - 原文は setup-notes `6a4520d` と開始前からの案内2箇所。main集約後の [AlmaLinux本文](../almalinux-setup.md)を原文ドライバで実行した
+  - 公開本文・工具35件、固定snapshot ID・親鎖・全Hyper-V参照、停止親5ファイルを開始時と終了時に照合。元の安定性baselineと一致し、expectedは変更していない
+  - 過去との歴史的内容一致はこのbaselineだけでは証明しない。旧C14/C15の失敗・未確認範囲、旧workerの記録と前回承認拒否の履歴を保持した
+
+| 環境 | 内容 |
+|---|---|
+| ホスト・VM | Windows 11 Pro / Hyper-V / Generation 2 / 構成版12.0。online 2 vCPU・2048MB、offline 4 vCPU・4096MB、各64GiB、Default SwitchのNIC、Secure Boot disabled |
+| ゲスト | AlmaLinux10.2 / x86_64 / kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 起点 | onlineの元固定snapshotはafter-AS4、offlineはclean-install。今回はその子の既存状態を続け、復元・再作成していない |
+| 貼付 | onlineの対話bashからofflineの `<USER>` へ入れ子SSH。同じシェルでALL_PROXY/https_proxyを設定。54貼付中、51は原文一致、3は許可されたOFFLINE_HOSTの単一変数置換 |
+| 証跡 | `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。表のseqはonline-session/steps.jsonl、補助観測はoffline-observe/steps.jsonl。rawは公開・commitしない |
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| npm のオフライン導入: 実施手順 / 1 | 既存導入を確認 | seq24。AppStream nodejs/nodejs-npmが既存、Nothing to do/完了 |
+| 同じ項 / 2 | 通した | seq25。Node22.23.2/npm10.9.8、/usr/bin、設定null/null、PONG232ms。今回最初のNeovim取得より前に同じshellでhttps_proxy設定 |
+| 同じ項 / 3 | 実TUIの導入完了状態を確認 | seq41–43。原文nvim -R init.lua、:MasonのInstalled11にmarkdownlint/json等、:qaでoffline shell。Installing→Installed遷移と新規取得通知は未捕捉、初回取得の成功にしない |
+| 同じ項 / 4 | 通した | seq44–46の原文閉鎖1/2。続くseq47で1080なし/curl失敗。Homebrew実施5と共用 |
+| 同じ項 / 5 | 通した | seq49。proxy環境出力なし、Mason11コマンド、markdownlint-cli2 v0.23.3、npm ENOTFOUND後に期待どおり失敗 |
+| npm のオフライン導入: 更新 / 1 | 更新対象なしで完了 | seq71。dnf upgradeはNothing to do/完了。新版導入はしていない |
+| 同じ項 / 2 | レジストリ更新を確認、package更新は条件スキップ | seq72–79。:MasonでInstalled11/U案内なし。driver表示が重なったため表示中の公開Noice通知bufferだけを実抽出し、補助offline seq5でSuccessfully updated 1 registry.を確認 |
+| 同じ項 / 3 | 通した | seq80のexitでonline復帰。補助offline seq6で1080/proxyなし、実IPv4直接curl000/終了7、ローカル版と設定git status空を確認 |
+
+- 前提: EPEL1はseq21でenabled。Neovim1/2はseq22–23で既存0.12.6。既存LazyVim設定はf1d5363c624280bf863893324a1b7954f8a884de/custom、公開docs/setup.mdの集約先を確認した
+- 現Alma「LazyVim の設定を導入する」1/2・4–12を継続し、依存12RPMと4Homebrew実行パス、us/Anthy、on_off、lock restore、実Mason Installed11、healthの許容fzf警告だけを確認。3の既存データ退避と初回cloneは再実行せず、初期Neovim3全体の新規導入成功にしない
+- 開始前からの案内2箇所を採用: 初期Neovim3からnpm1/2を先行させ、npm用途節も初回headless起動より先に経路を設定する案内へ揃える。今回seq25→36の順で検証した。過去実行やキャッシュなし初回取得を証明するものではない
+- E1568の端末応答警告と通知の重複は道具/表示上の問題として残す。成功通知は推測せず実公開bufferで確認し、旧privateログやMasonLogを読んでいない
+- 旧C14/C15と旧workerの応答喪失原因は未確定。今回のメモリ/依存順序/GNOME条件から、昔の原因や修正効果を断定しない
+- 全セッションを閉じ担当2VMは通常停止でOff、継続名の新snapshotを保存。更新対象ありのNode/npm/Mason更新、キャッシュなし初回取得、PyPI、JSON編集LSP、Neovim内IME、フォント、ロールバック、実機/aarch64/他列は今回未実施
