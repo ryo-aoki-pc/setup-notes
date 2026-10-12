@@ -6,6 +6,10 @@
 
 ### 対象と検証環境
 
+- **現在の追加確認（2026-10-12、C20-FOLLOWUP）**: after-FXA の現在状態の Hyper-V VM で「再起動と確認」の手順 3 の原文ファイルを実 GNOME 端末で実行し、全成功条件を確認した
+  - 同じ GNOME の手順 6 で、Super+Space → Anthy → `nihongo` → Space → 「日本語」 → Enter の実入力も確認した（[今回の付録](#付録-実-gnome-端末で-ibus-確認と日本語入力を再確認した記録2026-10-12c20-followup)）
+  - ASCII の source 呼出しで SHA が一致する原文ファイル全体を実行した。GNOME 端末への Unicode 原文の直接貼付は未確認。C20 の SSH での失敗、他列・実機・初期設定全体の未確認は保持する
+
 - **目的**: AlmaLinux 10 の Workstation を入れた直後の PC で、更新・sudo・ファームウェア・SSH・journal・kdump、導入元（EPEL・RPM Fusion・Flathub・Homebrew）、日本語入力と GNOME の表示・入力、共通の bash 設定とシェルのツールを、1 本の手順で整える。2026-10-10 からは、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build と Codex・Grok のプラグイン、Neovim・WezTerm・lazygit・yazi の自分用の設定も、同じ手順で入れる
 - **方式**: 上から順に貼る 153 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
   - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../coding-agents.md)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
@@ -8482,3 +8486,26 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 環境は Hyper-V / Generation 2 / 2 vCPU / 4096 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。最初の貼り付けでは GNOME にログインしておらず、ibus-daemon が動いていない旨を確認した。指定の Login-Console.ps1 が LoggedIn=true を返してから再実行した。パスワードの内容は表示していない。
 
 根拠は queued-units/C20/FXC-fxa の steps.jsonl の seq 1（ログイン前）・2（ログイン後）と after-confirm/、login/ の VM の画面。ログイン後は、前後 2 回の起動ログ、kdump の 0、Downloads、拡張の ACTIVE、mutter の 2 値も出た。GNOME の端末に直接貼った形、日本語の実入力、Neovim、実機・他列は今回未実施。セッションを閉じて VM を停止した。
+
+## 付録: 実 GNOME 端末で IBus 確認と日本語入力を再確認した記録（2026-10-12、C20-FOLLOWUP）
+
+- **状態**: `9ad1b0a` の「再起動と確認」の手順 3 のブロックは変更せず、全体を実 GNOME 端末で実行した
+  - 搬送 SHA を SSH と GNOME 端末の両方で照合し、ASCII の `source ~/c20-ibus.sh` で原文ファイル全体を実行。GNOME 端末で原文ファイル実行、貼付そのものは未確認
+  - SSH の DBus 環境を整えた実行ではない。本人の seat0 / Wayland / Active=yes / LockedHint=no を確認し、コンソールの端末を開いて、フォーカス・入力・出力を PNG で確認した
+
+| 環境 | 内容 |
+|---|---|
+| VM | 既存 after-FXA の現在状態。Hyper-V / Generation 2 / 構成版 12.0 / 2 vCPU / 4096 MB / 64 GiB、Default Switch の NIC。復元・snapshot 上書きは無し |
+| ゲスト | AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64 |
+| 原文 | commit `9ad1b0aec24a4cf0e3da239f7730806886654c46`、almalinux-setup.md の SHA256 `d45d66f865e353dfd03a634fd533fb3d01d1a33cafd9b4f149b62195389c16ba` |
+| 原文ブロック | 抽出・転送 SHA256 `c13c45a012e51bfa294e4c87da71524d5ec6dec08905122c080ba23145d945a8`。ASCII の source 呼出しを TypeScancodes で送り、日本語原文を変形して送っていない |
+
+| 対象 | 判定 | 根拠と確認 |
+|---|---|---|
+| GNOME ログイン（手順書外の補助） | 確認した | 専用 Login-Console.ps1 の GDM 判定後、LoggedIn=true。正しい password の opaque path だけを渡し、内容・hash は読んでいない。login/ と gnome-initial.png |
+| 実施手順 / 再起動と確認 / 3 | 通した（原文ファイル実行） | gnome-source-sha.png・gnome-source-result.png・gnome-pty.txt。前後 2 起動、kdump=0、設定済みホスト名、Downloads、anthy - Anthy、実 ibus-daemon の固定 PATH、XML の anthy、拡張 ACTIVE、mutter の 2 値を確認 |
+| 同じ項 / 6 | 通した | anthy-selected.png の「あ」、nihongo-preedit.png の「にほんご」、nihongo-converted.png の「日本語」、nihongo-committed.png の下線無しの確定文字と文書タイトルを目視確認 |
+
+証跡は `verification-work/queued-units/C20-FOLLOWUP/` の versions.json・blocks.json・source/ibus.sh と fxa/ の PNG・安全な PTY ログ。PTY ログは実 GNOME 端末で script を起動して原文を実行した範囲だけを保存し、終了値 0 と全出力を確認した。環境全体の dump・秘密・元 session/認証ログは読んでいない。原文ブロックの変更、DBus 補助設定、IBus の再起動や起動失敗の回避は不要だった。
+
+最初の Stop-VmvVm は Off になるまで待機が続いた。試験用「日本語」の未保存文書を破棄して閉じ、ゲストの通常の systemctl poweroff で停止し、Off を確認した。待機の原因は確定していない。Hard は使わず after-FXA を保持した。Unicode 原文の直接貼付、SSH の IBus 接続の改善、Neovim、他列・実機、初期設定全体の修正後の通しは今回未実施。

@@ -4,6 +4,10 @@
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
+- **現在の追加確認（2026-10-12、C20-FOLLOWUP）**: 既存 Hyper-V の両拠点で元 CL5 の一時 LAN を再構成した
+  - A の dry-run 原文と B の案内どおりの読み替え、両拠点の status 原文と 2 分以内の handshake、LAN 端末役どうしの双方向 ping・tracepath を確認した（[今回の付録](#付録-一時-lan-を戻して修正ブロックを確認した記録2026-10-12c20-followup)）
+  - LAN の再構成は手順書外の fixture。C20 の失敗を保持し、実ルーター・インターネット越し・外出先クライアントの成功範囲は追加しない
+
 ## 補足
 
 ### 実施手順 / 状態と疎通を確かめる / 手順 2: 本文中の記録
@@ -2031,3 +2035,29 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 環境は Hyper-V / Generation 2 / 2 vCPU / 1536 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。VM の WAN 側 NIC と wg0 は残っていたが、以前の検証で作った veth-lan は存在しなかった。site.env は読んでいない。namespace や veth の再作成、鍵の作成と本適用、相手との疎通は今回行っていない。
 
 根拠は queued-units/C20/FXC-wga の steps.jsonl の seq 2（REPO）、4（dry-run）、5（status）、6（LAN インターフェースの確認）と after-confirm/。秘密鍵は (hidden) で、公開鍵も保存する証跡では伏せた。公開鍵を伏せる処理で raw の長さが変わったため、伏字化した raw のオフセットは再利用せず、手順ごとの確認ファイルを根拠にする。セッションを閉じて VM を停止した。新しい cd の動作を確認した結果であり、VPN 全体の成功範囲は広げない。
+
+## 付録: 一時 LAN を戻して修正ブロックを確認した記録（2026-10-12、C20-FOLLOWUP）
+
+- **状態**: `9ad1b0a` の対象ブロックは変更せず、既存の拠点 A・B の現在状態を使って再確認した
+  - A は after-CL5 の snapshot を保持し、B は元 CL5 から停止していた状態を起動した。復元・snapshot の上書き・鍵の再作成・本適用は行っていない
+  - 両 VM の元 CL5 の公開準備スクリプトは同じ SHA256。WAN の専用 NIC と試験用アドレスを公開記録と照合して、同じ引数で namespace・veth を戻した。SELinux は Enforcing、firewalld は active のまま
+
+| 環境 | 内容 |
+|---|---|
+| ホストと VM | Hyper-V / Generation 2 / 構成版 12.0、各 2 vCPU・1536 MB・64 GiB、Default Switch と閉じた検証 WAN の NIC |
+| ゲスト | AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64 |
+| 原文 | commit `9ad1b0aec24a4cf0e3da239f7730806886654c46`、wireguard.md の SHA256 `fb4f9270b8fdad8b2f04b777ef59fdcf2240e8c4deed242c3a337771c992cc5b` |
+| fixture | 元 campaign の `hv/CL5/tools/cl5-prep.sh`、SHA256 `a24cb4a365fe00c0b69e99775d0fccf822554d607ffbd14dce6499a3e03f6453`。ゲストの既存ファイルも同値 |
+
+| 対象 | 判定 | 根拠と確認 |
+|---|---|---|
+| 実施手順 / site.env を作る / 1 | 通した（両拠点） | A seq 1、B seq 1。新しい SSH 対話 bash で REPO を設定。site.env の存在だけを確認し、内容は開いていない |
+| 実施手順 / 鍵を作って適用する / 4 | 通した（両拠点。B は案内どおりの読み替え） | A seq 3、B の追加確認 seq 3。ホームから A は原文、B は引数だけ読み替えた全ブロックを貼付。LAN ゾーン public を veth-lan から検出し、conf・sysctl・firewalld・enable/restart・ルーター値の実行予定まで表示。秘密鍵は hidden |
+| 実施手順 / 状態と疎通を確かめる / 1 | 通した（両拠点） | A seq 4、B seq 2。handshake は 75 秒・112 秒前。enabled/active、ip_forward=1、経路、public の interfaces・51820/udp・forward=yes を確認。A の登録済み外出先クライアントは「なし」で、接続成功には数えない |
+| 同じ項 / 2 の LAN 端末役間 | 通した（双方向） | `ping-a.sh.output.txt`・`ping-b.sh.output.txt`。双方 3/3、0% 損失。tracepath は相手のトンネル IP を通り、相手端末役に到達、pmtu 1420・3 ホップ |
+
+証跡は `verification-work/queued-units/C20-FOLLOWUP/` の `versions.json`・`blocks.json`、`wga/session/steps.jsonl`・`wgb/session/steps.jsonl` と確認ファイル、fixture の前後の出力。A dry-run の抽出・貼付 SHA256 は `370ccc6ea6f0b92a49452934856c4e0b3c2b716f5153184813da58fc9de59dc1`、status は両拠点とも `eb259a5d47ed0e0af5579ee7bf7b5a490a1c6e37811e3e982a2898f60ebd7858` で一致した。公開鍵も自動伏字化し、raw のサイズは保持した。元 campaign の session・認証ログは読んでいない。
+
+手順書外の準備は、元 CL5 と同じ一時 namespace・veth の再構成と LAN 端末役からの疎通確認。ホストのスイッチ・route・NIC、実ルーター、実ユーザーの機器には触れていない。本適用、外出先クライアント、実回線・実機の通しは今回未実施。証跡保存後に両 VM を通常停止し、Off と元 snapshot の保持を確認した。
+
+拠点 B の dry-run は、本体の「拠点 B のホストでは B」の案内どおり、引数 A だけを B に読み替えた写しをドライバで貼った。原文は保持し、`source/wireguard-siteB.md` と `site-b-history.json` に別履歴を保存した。抽出・貼付 SHA256 は `8636bb151c5cd624039987a2a4239b4fac46d9f5e8383215eff0404a7d46b52c` で一致。`wgb-dryrun/session/steps.jsonl` seq 1（新しいシェルの REPO）・2（ホームと存在確認）・3（全ブロック）の出力で、B の public ゾーンと実行予定の末尾まで確認した。B の追加起動でも同じ fixture を戻し、A は停止を維持した。これは先の両拠点稼働時の status・双方向疎通とは別の確認で、最後に B を通常停止した。

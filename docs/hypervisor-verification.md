@@ -6,6 +6,7 @@
   - 初期設定の AS1〜AS4 は、Hyper-V・VMware Workstation Pro・VirtualBox の 3 方式で実施した
   - CL1〜CL5、R1〜R7、N1、FXA・FXB は、主に Hyper-V で対象範囲を判定した。失敗・代替操作・途中中断・認証前で止めた範囲を含む
   - 正式 B/C の測定と集計は終了。観測値を記録したが、ホスト作業の重複により方式間の性能比較は未完
+  - C20-FOLLOWUP（2026-10-12）で、元 CL5 の一時 LAN を戻した WireGuard の原文確認と双方向疎通、本人の GNOME 端末での IBus 原文ファイル実行と日本語変換を追加確認した。下の付録に実行方法と範囲を分けて記録する
 
 この文書は、既存証跡に基づく結果の一覧。実行するときは各手順書を使い、個別の範囲は対応する `verification/` の記録を参照する。[2026-10-06 の VM 検証](almalinux-vm-verification.md)とは別の試験で、過去の成功・失敗を今回の結果に置き換えない。
 
@@ -295,3 +296,16 @@ C20-FOLLOWUP と recovery-mode.json の完成記録は無く、旧 partial を�
 再開先は verification-work/recovery-preflight.md と queued-units の各 result/completion。W0 は媒体の固定観測との 3 回比較から、AS-FULL は clean-install の全親鎖・全参照と新規安定性 baseline から全 153 手順、OFFLINE-FULL は同じ照合と after-AS4/clean-install からの新規 2 台で続ける。これは資料不足の解消後の実行で、利用者の再承認を要求するものではない。C20-FOLLOWUP は WireGuard の namespace/veth・相手稼働時の handshake、GNOME 端末の IBus を確認する。V2 は lint の正常条件と GNOME 端末での原文通しが残る。実アカウント・機器固有・VMware/VirtualBox の IME 再確認は未実施。
 
 ffmpeg の C20 原文は 4a1788d、文書 SHA256 ec0cf4c598214f3713eed533a9c796c7ecc72c8b22095aa40fa1e1435b52932d、ブロック SHA256 906307aaf20d9cbaa183098e491438ff339f7e5fc65d80af9ab344d4b19ba992。[記録](verification/distrobox.md)には PR133 とマージ済み PR134 の付録をともに保持した。同じ実行を 2 回と数えない。GROK-REVIEW はレビュー完了であり指摘なしではなく、6 件を原文・C20/V2 の証跡と照合して採用した。警告位置と共有の分岐を修正し、VM の再実行はしていない。
+
+## 付録: C20 の LAN と GNOME 端末の追加確認（2026-10-12、C20-FOLLOWUP）
+
+C20 の部分成功を保持し、既存 Hyper-V VM の現在状態で以下を追加確認した。復元・snapshot 上書き・本体ブロックの変更は無い。旧手順数の集計へ重複加算しない。
+
+| 対象 | 今回の実判定 | 証跡と限界 |
+|---|---|---|
+| WireGuard / site.env を作る / 1、鍵を作って適用する / 4 | 両拠点の新しい対話 bash で REPO を設定し、ホームから dry-run 全ブロックを実行。B は本体の案内どおり拠点引数だけ読み替えた写し | 原文・写し・抽出・貼付 SHA を区別して一致確認。元 CL5 と同じ SHA の fixture による一時 LAN 復旧は手順書外。本適用は未実施 |
+| 同書 / 状態と疎通を確かめる / 1・2 の LAN 端末役間 | 両拠点で 2 分以内の handshake、enabled/active、転送設定。双方向 ping 3/3 と tracepath の到達 | 閉じた検証 WAN とゲストの namespace/veth。外出先・実回線・実ルーターを追加の成功範囲にしない |
+| AlmaLinux 初期設定 / 再起動と確認 / 3 | 本人の実 GNOME 端末で、SHA 一致原文ファイル全体を ASCII の source 呼出しにより実行。IBus 一覧・実プロセス PATH・XML を含む全成功条件を確認 | GNOME 端末で原文ファイル実行、貼付そのものは未確認。SSH の DBus 補助による実行ではない |
+| 同じ項 / 6 | 同じ GNOME の Anthy で「にほんご」→ Space →「日本語」→ Enter の確定を PNG で確認 | PATH/XML の確認と実入力を別に判定。他列・実機・初期設定全体は今回未実施 |
+
+個別の環境・SHA・証跡は [WireGuard の追加付録](verification/wireguard.md#付録-一時-lan-を戻して修正ブロックを確認した記録2026-10-12c20-followup)と [IBus の追加付録](verification/almalinux-setup.md#付録-実-gnome-端末で-ibus-確認と日本語入力を再確認した記録2026-10-12c20-followup)。B/C の正常 end、STOP/QUIESCE 無しと全方式の VM 停止を確認して開始した。最大稼働メモリは WG の 3072 MB、FXA は単独 4096 MB。証跡保存後は指定の 3 VM が Off、Hard は使わず snapshot を保持した。FXA の最初の停止要求の待機は原因未確定として保持した。
