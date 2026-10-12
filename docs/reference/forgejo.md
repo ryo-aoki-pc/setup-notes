@@ -1,6 +1,6 @@
 # Forgejo 構築手順（AlmaLinux 10 / rootless Podman + Quadlet / LAN・VPN 内で使う）の参考資料
 
-[手順書](../forgejo.md)・[ロールバック](../extra/forgejo.md)・[検証記録](../verification/forgejo.md)
+[手順書](../almalinux-setup.md#forgejo-実施手順)・[ロールバック](../extra/forgejo.md)・[検証記録](../verification/forgejo.md)
 
 ## 補足
 
@@ -32,7 +32,7 @@
 
 ### 実施手順 / 自動更新を有効にする / 手順 3: 補足: linger
 
-- [linger](../linger.md) が有効なので、ログアウトしていてもタイマーは動く
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) が有効なので、ログアウトしていてもタイマーは動く
 
 ### 使い方の基本 / 手順 1: 補足: アカウント
 
@@ -48,7 +48,7 @@
 
 ## 選択した方針
 
-- 既存の [Podman の手順](../podman.md)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../linger.md)を使う
+- 既存の [Podman の手順](../almalinux-setup.md#podman-実施手順)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)を使う
 - Forgejo は公式の `-rootless` イメージを使い、コンテナ内も UID・GID 1000 で動かす。ホストの一般ユーザーとコンテナのユーザーを `keep-id` で対応させる
 - DB は SQLite にする。小規模で同時操作が多くない構成では外部 DB の導入・保守が不要になる。Forgejo の公式バイナリとイメージは SQLite に対応している。高い同時負荷では PostgreSQL または MySQL / MariaDB を検討するが、既存 DB の変更は単純な設定変更だけではできない
 - HTTP 3000 と Git 用 SSH 2222 を、初期設定中は localhost、管理者作成後は指定した LAN / VPN の IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
@@ -171,6 +171,6 @@
 - [podman run](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--userns=keep-id`、`--user`、bind mount の所有者と SELinux の `:Z`
 - [firewalld rich language](https://firewalld.org/documentation/man-pages/firewalld.richlanguage.html) — 送信元・宛先・ポート・priority と許可の規則
 - [Netavark / firewalld の相互作用](https://github.com/containers/netavark/blob/main/docs/netavark-firewalld.7.md) — rootful の転送経路と rootless との違い
-- [Podman](../podman.md)・[linger](../linger.md)・[Git](../almalinux-setup.md#git) — 本書の前提
+- [Podman](../almalinux-setup.md#podman-実施手順)・[linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)・[Git](../almalinux-setup.md#git) — 本書の前提
 
 ---

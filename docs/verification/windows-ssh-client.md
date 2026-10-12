@@ -1,6 +1,6 @@
 # Windows 11 で OpenSSH クライアントを使う手順（ed25519 の鍵と ssh の config で AlmaLinux 10 のホストに入る）の検証記録
 
-[手順書](../windows-ssh-client.md)・[ロールバックと注意点](../extra/windows-ssh-client.md)
+[手順書](../windows-setup.md#windows-の-openssh-クライアント-実施手順)・[ロールバックと注意点](../extra/windows-ssh-client.md)
 
 ## 補足
 
@@ -42,7 +42,7 @@
 | つなぐ先 | AlmaLinux 10.2 のホスト（`openssh-server-9.9p1-28.el10_2.alma.1`）。パスワードでの SSH ログインを受け付けること |
 
 > [!NOTE]
-> 環境固有の値は**PowerShell の変数**で書いてある。[手順 2](../windows-ssh-client.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**PowerShell の変数**で書いてある。[手順 2](../windows-setup.md#windows-の-openssh-クライアント-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|

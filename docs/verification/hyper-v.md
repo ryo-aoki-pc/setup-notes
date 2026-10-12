@@ -1,29 +1,29 @@
 # Hyper-V の有効化と VM の作成（Windows 11 Pro）の検証記録
 
-[手順書](../hyper-v.md)・[参考資料](../reference/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
+[手順書](../windows-setup.md#hyper-v-実施手順)・[参考資料](../reference/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
 
 ## 対象と検証環境
 
 - **目的**: Windows 11 Pro の PC で Hyper-V を有効にし、管理者ではない窓から VM を作る・入れる・チェックポイントを取る・複製する・消すまでを、手順書のブロックで確かめる
 - **状態**: **Windows 11 Pro の実機で、有効化から VM の削除までを通した（2026-10-11、JST）**
   - 利用者が実施したこと
-    - [この PC で使えるかを確かめる](../hyper-v.md#この-pc-で使えるかを確かめる)の手順 1・2 と、[Hyper-V を有効にして再起動する](../hyper-v.md#hyper-v-を有効にして再起動する)の手順 1〜4 を、管理者の Windows PowerShell に貼って実行し、再起動した
+    - [この PC で使えるかを確かめる](../windows-setup.md#hyper-v-この-pc-で使えるかを確かめる)の手順 1・2 と、[Hyper-V を有効にして再起動する](../windows-setup.md#hyper-v-hyper-v-を有効にして再起動する)の手順 1〜4 を、管理者の Windows PowerShell に貼って実行し、再起動した
     - エージェントは、そのときの出力を見ていない。再起動の後に、状態を読み戻して確かめた
   - エージェントが、管理者ではない Windows PowerShell 5.1 で、手順書のブロックを 1 つずつ実行したこと
-    - [再起動の後に確かめる](../hyper-v.md#再起動の後に確かめる)の手順 2
-    - [VM を作る](../hyper-v.md#vm-を作る)の手順 1〜4（変数は検証用の値に置き換えた）
-    - [VM を起動して OS を入れる](../hyper-v.md#vm-を起動して-os-を入れる)の手順 1 と、手順 3
-    - [動作を確かめる](../hyper-v.md#動作を確かめる)の手順 1
-    - [チェックポイントとクローン](../hyper-v.md#チェックポイントとクローン)の手順 1〜3、[VM どうしだけがつながるスイッチを作る（任意）](../hyper-v.md#vm-どうしだけがつながるスイッチを作る任意)の手順 1、[VM を消す](../hyper-v.md#vm-を消す)の手順 1
+    - [再起動の後に確かめる](../windows-setup.md#hyper-v-再起動の後に確かめる)の手順 2
+    - [VM を作る](../windows-setup.md#hyper-v-vm-を作る)の手順 1〜4（変数は検証用の値に置き換えた）
+    - [VM を起動して OS を入れる](../windows-setup.md#hyper-v-vm-を起動して-os-を入れる)の手順 1 と、手順 3
+    - [動作を確かめる](../windows-setup.md#hyper-v-動作を確かめる)の手順 1
+    - [チェックポイントとクローン](../windows-setup.md#hyper-v-チェックポイントとクローン)の手順 1〜3、[VM どうしだけがつながるスイッチを作る（任意）](../windows-setup.md#hyper-v-vm-どうしだけがつながるスイッチを作る任意)の手順 1、[VM を消す](../windows-setup.md#hyper-v-vm-を消す)の手順 1
     - [ロールバック](../extra/hyper-v.md#ロールバック)の手順 1
   - 確認したこと
     - 管理者ではない窓から、VM の作成・起動・停止・チェックポイント・差分ディスクでの複製・削除、Private のスイッチの作成と削除、仮想 TPM の追加ができた
     - AlmaLinux 10.2 が、Secure Boot を切った VM と、Secure Boot を有効にした VM（Linux 用のテンプレート）の両方に入り、起動した
     - 掲載した PowerShell のブロックは、Windows PowerShell 5.1 と PowerShell 7 の構文解析でエラー 0
   - **確認していないこと**
-    - [VM を起動して OS を入れる](../hyper-v.md#vm-を起動して-os-を入れる)の手順 2（画面でのインストーラーの操作）。OS は、応答ファイルを載せた 2 枚目の ISO で、画面を操作せずに入れた
+    - [VM を起動して OS を入れる](../windows-setup.md#hyper-v-vm-を起動して-os-を入れる)の手順 2（画面でのインストーラーの操作）。OS は、応答ファイルを載せた 2 枚目の ISO で、画面を操作せずに入れた
     - 手順 1 の `vmconnect.exe` は、ウィンドウが開くことだけを確かめた。ウィンドウの中の表示と、キーとマウスの操作は確かめていない
-    - [動作を確かめる](../hyper-v.md#動作を確かめる)の手順 2 の、手で打つ `ssh`（エージェントは、鍵を指定した `ssh` で入った）
+    - [動作を確かめる](../windows-setup.md#hyper-v-動作を確かめる)の手順 2 の、手で打つ `ssh`（エージェントは、鍵を指定した `ssh` で入った）
     - Windows 11 をゲストに入れること、入れ子の仮想化、Internal と External のスイッチ
     - Hyper-V の機能を無効に戻すことと、Hyper-V Administrators から外すこと
     - Home エディションでの表示、Intel の CPU

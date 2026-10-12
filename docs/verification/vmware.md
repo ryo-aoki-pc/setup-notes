@@ -1,6 +1,6 @@
 # VMware Workstation Pro のインストールと VM の作成（Windows 11）の検証記録
 
-[手順書](../vmware.md)・[参考資料](../reference/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
+[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[参考資料](../reference/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
 
 ## 対象と検証環境
 
@@ -8,23 +8,23 @@
 - **状態**: **Hyper-V を有効にした Windows 11 Pro の実機で、26H1u1 のインストールから VM の削除までを通した（2026-10-11、JST）**
   - 利用者が実施したこと
     - インストーラーを Broadcom のサポート ポータルから取得した
-    - [インストーラーを取得して確かめる](../vmware.md#インストーラーを取得して確かめる)の手順 3・4 と、[インストールする](../vmware.md#インストールする)の手順 1 に当たるブロックを、管理者の Windows PowerShell に貼って実行し、`ExitCode = 0` を報告した
-    - Hyper-V と Windows ハイパーバイザー プラットフォームを有効にした直後（再起動待ち）にインストールし、その後に 1 回再起動した（[インストールする](../vmware.md#インストールする)の手順 2 の「機能が再起動待ち」の分岐）
+    - [インストーラーを取得して確かめる](../windows-setup.md#vmware-workstation-pro-インストーラーを取得して確かめる)の手順 3・4 と、[インストールする](../windows-setup.md#vmware-workstation-pro-インストールする)の手順 1 に当たるブロックを、管理者の Windows PowerShell に貼って実行し、`ExitCode = 0` を報告した
+    - Hyper-V と Windows ハイパーバイザー プラットフォームを有効にした直後（再起動待ち）にインストールし、その後に 1 回再起動した（[インストールする](../windows-setup.md#vmware-workstation-pro-インストールする)の手順 2 の「機能が再起動待ち」の分岐）
     - エージェントは、そのときの出力を見ていない。順序と時刻は、再起動の後にイベント ログから読んだ
   - エージェントが、管理者ではない Windows PowerShell 5.1 で、手順書のブロックを 1 つずつ実行したこと
-    - [入ったかを確かめる](../vmware.md#入ったかを確かめる)の手順 2
-    - [VM を作る](../vmware.md#vm-を作る)の手順 1〜3（変数は検証用の値に置き換えた）
-    - [VM を起動して OS を入れる](../vmware.md#vm-を起動して-os-を入れる)の手順 1 と、手順 3
-    - [動作を確かめる](../vmware.md#動作を確かめる)の手順 1
-    - [スナップショットとクローン](../vmware.md#スナップショットとクローン)の手順 1〜3、[VM を消す](../vmware.md#vm-を消す)の手順 1
+    - [入ったかを確かめる](../windows-setup.md#vmware-workstation-pro-入ったかを確かめる)の手順 2
+    - [VM を作る](../windows-setup.md#vmware-workstation-pro-vm-を作る)の手順 1〜3（変数は検証用の値に置き換えた）
+    - [VM を起動して OS を入れる](../windows-setup.md#vmware-workstation-pro-vm-を起動して-os-を入れる)の手順 1 と、手順 3
+    - [動作を確かめる](../windows-setup.md#vmware-workstation-pro-動作を確かめる)の手順 1
+    - [スナップショットとクローン](../windows-setup.md#vmware-workstation-pro-スナップショットとクローン)の手順 1〜3、[VM を消す](../windows-setup.md#vmware-workstation-pro-vm-を消す)の手順 1
   - 確認したこと
     - 管理者ではない窓から、VM の作成・起動・停止・スナップショット・リンククローン・削除ができた
     - VM は Windows のハイパーバイザーの上で動いた（`Monitor Mode: ULM`）。AlmaLinux 10.2 が入り、起動した
     - 掲載した PowerShell のブロックは、Windows PowerShell 5.1 と PowerShell 7 の構文解析でエラー 0
   - **確認していないこと**
-    - [VM を起動して OS を入れる](../vmware.md#vm-を起動して-os-を入れる)の手順 2（画面でのインストーラーの操作）。OS は、応答ファイルを載せた 2 枚目の ISO を付け、画面無し（`nogui`）で入れた
+    - [VM を起動して OS を入れる](../windows-setup.md#vmware-workstation-pro-vm-を起動して-os-を入れる)の手順 2（画面でのインストーラーの操作）。OS は、応答ファイルを載せた 2 枚目の ISO を付け、画面無し（`nogui`）で入れた
     - 手順 1 は、ウィンドウが開いて VM が起動することだけを確かめた。ウィンドウの中での、キーとマウスの操作は確かめていない
-    - [動作を確かめる](../vmware.md#動作を確かめる)の手順 2 の、手で打つ `ssh`（エージェントは、鍵を指定した `ssh` で入った）
+    - [動作を確かめる](../windows-setup.md#vmware-workstation-pro-動作を確かめる)の手順 2 の、手で打つ `ssh`（エージェントは、鍵を指定した `ssh` で入った）
     - インストーラーを画面で進める形、`ExitCode = 3010` の分岐、機能を有効にして再起動した後にインストールする順
     - Windows 11 をゲストに入れること（仮想 TPM）、Secure Boot を有効にした VM、3D のアクセラレーションを有効にした場合
     - アンインストール、版を上げる更新
@@ -64,7 +64,7 @@
 | 確認 | 結果 |
 |---|---|
 | 利用者の報告 | `ExitCode = 0` |
-| [入ったかを確かめる](../vmware.md#入ったかを確かめる)の手順 2 | インストール先、`ProductVersion : 26.0.1 build-25688693`、`Total running VMs: 0`、`VMnet8` と `VMnet1` の 2 行 |
+| [入ったかを確かめる](../windows-setup.md#vmware-workstation-pro-入ったかを確かめる)の手順 2 | インストール先、`ProductVersion : 26.0.1 build-25688693`、`Total running VMs: 0`、`VMnet8` と `VMnet1` の 2 行 |
 | インストーラーの署名（エージェントが後から読んだ） | `Status : Valid`、`Signer` は `CN=Broadcom Inc, O=Broadcom Inc, …` |
 | インストーラーのログ | `%TEMP%` に `vminst.log` と `vmmsi.log_<日時>.log` |
 | インストール中のネットワーク（イベント ログ） | ドライバー `VMnetBridge`・`VMnetuserif`・`VMnetAdapter`・`vmx86` が 14:34:05〜14:34:17 に始まった。ネットワークの状態の変更（NetworkProfile の ID 4004）が 2 回記録されたが、接続のレベルは変わっていない。切断は記録されていない |

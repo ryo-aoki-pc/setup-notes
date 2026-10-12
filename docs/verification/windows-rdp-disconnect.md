@@ -1,6 +1,6 @@
 # Windows 11 のリモートデスクトップを、画面をロックせずに切断する手順（tscon）の検証記録
 
-[手順書](../windows-rdp-disconnect.md)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
+[手順書](../windows-setup.md#rdp-をロックせずに切断-実施手順)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -16,7 +16,7 @@
 
 - **目的**: Windows 11 の PC に RDP でつないで使った後、PC の画面をロックさせずに切断する。セッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする
   - ふつうに切断すると、セッションは `Disc`（切断）で残り、PC の画面はロック画面になる
-  - デスクトップにサインインしていて、`quser` で `console` が `Active` であることを前提にするもの（[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)の手順 3）や、画面を使う自動の操作を、RDP で使った後も続けるため
+  - デスクトップにサインインしていて、`quser` で `console` が `Active` であることを前提にするもの（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 3）や、画面を使う自動の操作を、RDP で使った後も続けるため
 - **進め方**: RDP でつないだセッションの中の管理者の Windows PowerShell 5.1 で、`tscon.exe <このセッションの ID> /dest:console` を実行する
   - 変数は無い。読者が書き換える値も無い
   - 毎回の切断を、デスクトップのショートカットにもできる（任意）
@@ -27,7 +27,7 @@
     - PowerShell のブロック: Linux の PowerShell 7.6.2 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査
     - 手順 3 とショートカットのコマンドが、`tscon.exe` に、セッションの ID と `/dest:console` の 2 つの引数を渡すこと（Linux の pwsh で、引数を表示するだけの偽の `tscon.exe` を使った）
     - ショートカットのバイトの直し方: Python の pylnk3 で作った `.lnk` で、オフセット `0x15` の `0x20` を立てると `RunAsUser` が立つこと
-    - [ショートカットで切断する（任意）](../windows-rdp-disconnect.md#ショートカットで切断する任意)の手順 1 と[ロールバック](../extra/windows-rdp-disconnect.md#ロールバック)のブロック: Linux の pwsh で、`WScript.Shell` を、pylnk3 で `.lnk` を書く偽物にして流したこと
+    - [ショートカットで切断する（任意）](../windows-setup.md#rdp-をロックせずに切断-ショートカットで切断する任意)の手順 1 と[ロールバック](../extra/windows-rdp-disconnect.md#ロールバック)のブロック: Linux の pwsh で、`WScript.Shell` を、pylnk3 で `.lnk` を書く偽物にして流したこと
   - **確かめていないこと**: Windows で貼ること（すべての手順）、RDP が切れて PC の画面がロックされずに残ること、管理者でないときのエラー、ショートカットの UAC と動き、`WScript.Shell` が作る `.lnk`、PC の画面の解像度、モニターをつないでいない PC と蓋を閉じたノート PC、24H2 より前の Windows
 - 下表は、本書が前提にしている環境（ほかの Windows の手順書の実機の記録と同じ PC を想定）
 
@@ -81,7 +81,7 @@ tscon.exe に渡った引数 2 個: [792] [/dest:console]
 
 **ショートカットとロールバックのブロック**: Linux の pwsh で、`$env:WINDIR` に `C:\Windows` を入れ、`New-Object -ComObject WScript.Shell` を、pylnk3 で `.lnk` を書く偽物の関数に置き換えて流した（デスクトップは一時的な `HOME` の `Desktop`）:
 
-- [ショートカットで切断する（任意）](../windows-rdp-disconnect.md#ショートカットで切断する任意)の手順 1 のブロックを 2 回続けて流し、どちらも `<一時的な HOME>/Desktop/RDP をロックせずに切断.lnk（管理者として実行: True）` が出た
+- [ショートカットで切断する（任意）](../windows-setup.md#rdp-をロックせずに切断-ショートカットで切断する任意)の手順 1 のブロックを 2 回続けて流し、どちらも `<一時的な HOME>/Desktop/RDP をロックせずに切断.lnk（管理者として実行: True）` が出た
 - できた `.lnk` を pylnk3 で読むと、`RunAsUser` が `True` で、ターゲット（`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`）・引数・アイコン（`C:\Windows\System32\mstsc.exe` の 0）が手順のとおりだった
 - 偽物の `Save` が `.lnk` でないファイル（先頭が `0x01`）を書くようにすると、`中断: … がショートカットの形式でない` で止まり、ファイルは変えなかった（ブロックの後ろの行は動いた）
 - [ロールバック](../extra/windows-rdp-disconnect.md#ロールバック)の手順 1 のブロックは `False` を出し、ファイルが消えた

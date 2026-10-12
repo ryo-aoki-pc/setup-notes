@@ -1,6 +1,6 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）の検証記録
 
-[手順書](../gnome-remote-desktop.md)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+[手順書](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -8,7 +8,7 @@
 
 ### 実施手順 / 手順 0: 本文中の記録
 
-- 2026-10-02 より前にこの手順を終えたサーバーは、[設定済みのサーバーで GDM の後に起動させる](../gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)を行う（手順 5 のドロップインが無い）
+- 2026-10-02 より前にこの手順を終えたサーバーは、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)を行う（手順 5 のドロップインが無い）
 
 ### 実施手順 / 手順 2: 補足: 証明書
 
@@ -110,7 +110,7 @@ Alternative names:
   - 2026-09-28: 手順 2〜5・8・9、[ロールバック](../extra/gnome-remote-desktop.md#ロールバック)の手順 1、[注意点](../extra/gnome-remote-desktop.md#注意点)の「設定レイヤーの食い違い」の確認方法のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
-  - 2026-10-02: 手順 5 に GDM の後に起動させるドロップインを足し、[設定済みのサーバーで GDM の後に起動させる](../gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)を足した
+  - 2026-10-02: 手順 5 に GDM の後に起動させるドロップインを足し、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)を足した
     - 環境 2 で、Windows 11 からのリモートログインが真っ暗な画面のまま切れたため（[付録](#付録-真っ暗な画面のまま切れた原因の調査記録環境-22026-10-02)）
     - その節の手順 1〜5 は、環境 2 の実機で流した（手順 5 の後は、手順 1 で置き直した）
     - 直した後、利用者が Windows 11 の「リモートデスクトップ接続」でつなぎ、GDM のログイン画面が出て、ログインできた（ヘッドレスのセッションに引き渡された。[注意点](../extra/gnome-remote-desktop.md#注意点)）
@@ -128,15 +128,15 @@ Alternative names:
 | `gdm` | 47.0-22.el10_2 | 47.0-22.el10_2 |
 | OpenSSL | 3.5 | 3.5.8 |
 | 証明書 | 当初 `winpr-makecert` → 後に openssl 製へ差し替え | 最初から本書の openssl 手順で構築 |
-| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（[手順 10 の補足](../gnome-remote-desktop.md#実施手順)）。2026-10-02 に、実クライアント（Windows 11）と FreeRDP 3.10.3 から GDM ログインまで |
+| 確認範囲 | 実クライアント（Android）から GDM ログインまで | TLS ハンドシェイク・証明書提示まで（[手順 10 の補足](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）。2026-10-02 に、実クライアント（Windows 11）と FreeRDP 3.10.3 から GDM ログインまで |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../gnome-remote-desktop.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#gnome-のリモートログイン-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの IP アドレス | `192.168.10.100` |
-> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../gnome-remote-desktop.md#接続元を-lan-に絞る任意)場合だけ、その節の冒頭で設定する | `192.168.10.0/24` |
+> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る任意)場合だけ、その節の冒頭で設定する | `192.168.10.0/24` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | サーバーのホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-server` / `my-server.lan` |
 >
 > 出力例・ログ・表の中の値は `<HOSTNAME>` / `<HOSTNAME>.<DOMAIN>` / `<SERVER_IP>` / `<USER>`（OS アカウント名）/ `<FINGERPRINT>`（証明書の TLS fingerprint）のプレースホルダで書いてある。
@@ -408,7 +408,7 @@ sudo systemctl show gnome-remote-desktop -p Environment   # 空であること�
 
 → `freerdp-2:3.10.3-12.el10_2.10.x86_64` をインストール。
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。[手順 1](../gnome-remote-desktop.md#実施手順) の変数を設定したうえで:
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。rootless podman で動作確認済み（環境 1）。[手順 1](../almalinux-setup.md#gnome-のリモートログイン-実施手順) の変数を設定したうえで:
 
 - イメージ pull に約 200 MB のダウンロードが発生する
 
@@ -467,7 +467,7 @@ Windows 11 の「リモートデスクトップ接続」から環境 2 にリモ
 - システムデーモンの引き渡し口（`busctl --system tree org.gnome.RemoteDesktop`）
   - `/org/gnome/RemoteDesktop/Rdp/Handovers/` に、ログイン画面のセッションの口が無かった
   - ヘッドレスのセッションの口（`session62` など）はあった。終わったヘッドレスのセッションの分も、17 個消えずに残っていた
-- 起動のときのログ（GDM が立ち上がったのと同じ秒）に、[設定済みのサーバーで GDM の後に起動させる](../gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 2 の補足の警告が出ていた
+- 起動のときのログ（GDM が立ち上がったのと同じ秒）に、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 2 の補足の警告が出ていた
   - `gnome-remote-desktop.service` は 00:09:12、`gdm.service` は 00:09:18 に始まっていた。ユニットの `After=` に GDM は無い
 
 #### 原因
@@ -490,7 +490,7 @@ gnome-remote-desktop 49.3（と CentOS Stream 10 の独自パッチ）・gdm 47.
 
 **1 回目（06:04。その節の手順 3 は、当時は `restart` だった）**
 
-- [設定済みのサーバーで GDM の後に起動させる](../gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 1〜3 を流した
+- [設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 1〜3 を流した
   - その節の手順 2 は `1`、手順 3 の後は `RDP server started` の 1 行だけだった
   - 残っていた 4 つのログイン画面のセッションは閉じた（ログイン画面の handover デーモンは、システムデーモンが消えると logout する）
   - ただし、閉じたログイン画面の口が 1 つ（`sessionc44`）、新しいシステムデーモンに残った
@@ -533,10 +533,10 @@ gnome-remote-desktop 49.3（と CentOS Stream 10 の独自パッチ）・gdm 47.
 
 同じ日の 07:13〜07:31 に、まだ確かめていなかった組み合わせを、試験用のユーザー（`grdtest`。終わってから消した）とコンテナの FreeRDP 3.10.3 で確かめた。
 
-- クライアントの窓は常駐しているヘッドレスのセッションの画面に出し、[claude-code-gui.md](../claude-code-gui.md) の `scripts/gnome-gui.py` で撮って操作した
+- クライアントの窓は常駐しているヘッドレスのセッションの画面に出し、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で撮って操作した
 - システム共通の RDP の資格情報は、`credentials.ini` を中身を読まずに控え、テスト用の値に差し替えた。終わってから控えを戻し、ハッシュが同じことを確かめた
-- 試験用のユーザーのヘッドレスのセッションの RDP は、[gnome-headless-session.md](../gnome-headless-session.md) と同じ設定で 3390 にした（ドロップインは最後の確認でだけ置いた）
-- 差し替えた後、[設定済みのサーバーで GDM の後に起動させる](../gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる)の手順 3・4 で起動し直してから始めた
+- 試験用のユーザーのヘッドレスのセッションの RDP は、[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と同じ設定で 3390 にした（ドロップインは最後の確認でだけ置いた）
+- 差し替えた後、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3・4 で起動し直してから始めた
 
 | 確かめたこと | 結果 |
 |---|---|
@@ -651,7 +651,7 @@ X509v3 Subject Alternative Name:
 
 ### 実施手順 / 手順 6: 補足: 資格情報
 
-環境 2 では資格情報を `systemctl enable --now` の**前**に設定したが、手順 4 の `rdp enable` で既にデーモンが起動していたため、やはり再起動するまで反映されなかった。落とし穴の詳細は[付録の調査記録](../verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)。
+環境 2 では資格情報を `systemctl enable --now` の**前**に設定したが、手順 4 の `rdp enable` で既にデーモンが起動していたため、やはり再起動するまで反映されなかった。落とし穴の詳細は[付録の調査記録](#落とし穴-1-grdctl-の対話入力は-tty-必須)。
 
 ### 実施手順 / 手順 9: 補足: 鍵と証明書
 

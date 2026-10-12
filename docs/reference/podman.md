@@ -1,6 +1,6 @@
 # Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の参考資料
 
-[手順書](../podman.md)・[ロールバックと注意点](../extra/podman.md)
+[手順書](../almalinux-setup.md#podman-実施手順)・[ロールバックと注意点](../extra/podman.md)
 
 ## 補足
 
@@ -50,12 +50,12 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 
 ### 実施手順 / 手順 7: 補足: このソケットを使うもの
 
-- [Trivy](../image-tools.md)、[podman-tui](../podman-tui.md)、[lazydocker](../lazydocker.md)、GUI の Pods・Podman Desktop
+- [Trivy](../almalinux-setup.md#画像の道具-実施手順)、[podman-tui](../almalinux-setup.md#podman-tui-実施手順)、[lazydocker](../almalinux-setup.md#lazydocker-実施手順)、GUI の Pods・Podman Desktop
 
 ### Docker 向けのツールから使う（任意） / 手順 1: 補足: 共通設定とソケット
 
 - 共通設定はソケットがあるときだけ `DOCKER_HOST` を入れる
-- ソケットの有効化は[実施手順](../podman.md#実施手順)の手順 7 で行う
+- ソケットの有効化は[実施手順](../almalinux-setup.md#podman-実施手順)の手順 7 で行う
 
 ### Quadlet で自動起動する（任意） / 手順 1: 補足: 定義の中身
 
@@ -65,7 +65,7 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 | `ContainerName=` | コンテナの名前。`podman ps` に出る |
 | `PublishPort=127.0.0.1:8080:8080` | この PC の 127.0.0.1 の 8080 を、コンテナの 8080 につなぐ。`127.0.0.1:` を付けているので、この PC の中からしか開けない |
 | `Volume=%h/hello-web:/var/www/html:Z` | ホームの `hello-web` を、コンテナの公開ディレクトリにする。`%h` はホームディレクトリ |
-| `AutoUpdate=registry` | `podman auto-update` の対象にする（[更新](../podman.md#更新)） |
+| `AutoUpdate=registry` | `podman auto-update` の対象にする（[更新](../almalinux-setup.md#podman-更新)） |
 | `TimeoutStartSec=300` | 初回はイメージの取得を待つので、起動の待ち時間を延ばす |
 | `WantedBy=default.target` | ユーザーの systemd が起動したときに、このサービスも起動する |
 
@@ -83,6 +83,6 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 - [podman-run(1)](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--volume` の `:Z`、`--publish`
 - [RHEL 10 — Building, running, and managing containers](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/building_running_and_managing_containers/index) — RHEL の podman の文書
 - `man containers-registries.conf` — 短い名前の扱い（`unqualified-search-registries`・`short-name-mode`）
-- [linger](../linger.md) — [Quadlet の節](../podman.md#quadlet-で自動起動する任意)の前提の手順書
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) — [Quadlet の節](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の前提の手順書
 
 ---

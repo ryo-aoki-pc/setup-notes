@@ -1,6 +1,6 @@
-// パケットの流れ: Client A → Client B と、その戻り（docs/wireguard.md の「#### パケットの流れ（Client A → Client B）」）
+// パケットの流れ: Client A → Client B と、その戻り（docs/reference/wireguard.md の「#### パケットの流れ（Client A → Client B）」）
 // 実線 = 平文のホップ、破線 = 暗号化された UDP のホップ。行きの番号は本文の箇条書きに対応する
-// 再生成コマンドは docs/wireguard.md の「### 付録: 構成図の再生成」を参照
+// 再生成コマンドは docs/reference/wireguard.md の「### 付録: 構成図の再生成」を参照
 seqdiag {
   activation = none;   // 呼び出しの活性区間は使わない
   edge_length = 200;   // ライフラインの中心間隔（px）。ラベルはこの幅の中に収める

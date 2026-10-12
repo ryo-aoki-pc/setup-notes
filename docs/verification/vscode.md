@@ -1,6 +1,6 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の検証記録
 
-[手順書](../vscode.md)・[ロールバックと注意点](../extra/vscode.md)
+[手順書](../almalinux-setup.md#vs-code-実施手順)・[ロールバックと注意点](../extra/vscode.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -16,7 +16,7 @@
 ### 実施手順 / 手順 2: 補足: 鍵を先に入れる理由
 
 - Microsoft の公式手順が「鍵 → repo」の順で、**318 MB を落とし終えた後に鍵の取り込みプロンプトで止まらずに済む**
-- `gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](../almalinux-setup.md#github-cli) の「`dnf install` の途中で照合する」形より一歩早い）
+- `gpg --show-keys` は**キーリングに取り込まずに** fingerprint を表示するので、照合してから `rpm --import` できる（[gh.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/gh.md#実施手順) の「`dnf install` の途中で照合する」形より一歩早い）
 
 実測:
 
@@ -27,7 +27,7 @@ pub   rsa2048 2015-10-28 [SC]
 uid                      Microsoft (Release signing) <gpgsecurity@microsoft.com>
 ```
 
-Microsoft の鍵は**この 1 本だけ**（[gh.md](../almalinux-setup.md#github-cli) の GitHub CLI は 2 本ある）。
+Microsoft の鍵は**この 1 本だけ**（[gh.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/gh.md#実施手順) の GitHub CLI は 2 本ある）。
 
 ### 実施手順 / 手順 4: 本文中の記録
 
@@ -111,7 +111,7 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 下表のホストに公式リポジトリを足して `dnf install code` し、`code-1.138.0-1789458729.el8.aarch64` が入った（318 MB / 展開後 953 MB、所要 1 分 14 秒）
   - 確認したこと: `code --version` が `1.138.0` / `arm64` を返す、`ldd /usr/share/code/code` の未解決ライブラリが 0
-  - **[手順 6](../vscode.md#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
+  - **[手順 6](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md#実施手順) のウィンドウ起動も実機で確認した**: gnome-remote-desktop の RDP セッションのデスクトップから `code` を起動してウィンドウが開き、`~/.config/Code` と `logs/<日時>/main.log` が作られた
   - **ただし TTY もディスプレイも無いシェルからの起動は、6 通り試して 1 つも成功していない**（[付録](#付録-実機での-gui-起動試験2026-09-23)）
   - **VS Code は実機に入れたまま残してある**
   - 手順 1〜4 は同じ日に同じ OS のコンテナで `--assumeno` まで通し、鍵の fingerprint・repo の追加・依存解決を確認した。**コンテナでは本実行していない**（GUI が無く、318 MB の取得に見合わないため）
@@ -149,15 +149,15 @@ $ grep -n 'flags.conf' /usr/bin/code /usr/share/code/bin/code
 | `~/.config/Code` / `~/.vscode` | **どちらも無い** |
 | ディスクの空き | 49 GB（`/`、117 GB 中 69 GB 使用） |
 | デスクトップ | GNOME Shell 49.4。`loginctl` の session 20 が `Type=wayland` `Active=yes` `Remote=yes`（RDP ログイン）、`/run/user/1000/wayland-0` あり |
-| 既存の GUI アプリ | `firefox 156.0`（[firefox.md](../almalinux-setup.md#firefox)）、`wezterm`（[wezterm-nightly.md](../almalinux-setup.md#wezterm)） |
+| 既存の GUI アプリ | `firefox 156.0`（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/firefox.md#実施手順)）、`wezterm`（[wezterm-nightly.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/wezterm-nightly.md#実施手順)） |
 
 ### 選択した方針
 
 AlmaLinux 10 aarch64 で VS Code を入れる経路を比べた（2026-09-23 時点）:
 
-| Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](../almalinux-setup.md#firefox) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
+| Flathub `com.visualstudio.code` | このホストは flatpak にリモートが**1 つも登録されていない**（[firefox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/firefox.md#実施手順) と同じ状況）。追加と runtime の導入から始まり、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../vscode.md#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md#実施手順) 以降の `code` を `code-insiders` に読み替える。**未検証** |
 
 ### 完了時点の状態
 
@@ -224,7 +224,7 @@ $ head -3 ~/.config/Code/logs/20260923T071537/main.log
 
 `~/.config/Code/GPUCache/` も作られているので、GPU プロセスは動いている。**ただしログに表示バックエンドは記録されないので、Wayland ネイティブか XWayland 経由かはこれでは分からない**（[未確認事項](#未確認事項)）。
 
-以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md 手順 5](../almalinux-setup.md#wezterm)（検証する。AlmaLinux 10 の初期設定にまとめたときに外した）と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
+以下は**うまくいかなかったほう**の記録。この文書を書いているシェルには TTY もディスプレイも無いため、[wezterm-nightly.md 手順 5](https://github.com/ryo-aoki-pc/setup-notes/blob/a2b9fd13c71d47fe9155964b490f06bdadc49fc9/docs/wezterm-nightly.md#実施手順)（検証する。AlmaLinux 10 の初期設定にまとめたときに外した）と同じく `env -i` で環境を空にしてから、稼働中のセッション（`loginctl` の session 20、`Type=wayland` `Active=yes` `Remote=yes`、`/run/user/1000/wayland-0` あり、gnome-shell の pid 5615）の値を渡して起動を試みた。**設定を汚さないよう、毎回 `mktemp -d` の下に `--user-data-dir` と `--extensions-dir` を置いている。**
 
 | # | 渡したもの | 待った時間 | 結果 |
 |---|---|---|---|

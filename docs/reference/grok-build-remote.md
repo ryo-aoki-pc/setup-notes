@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
 
-[手順書](../grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
+[AlmaLinux 10 の手順](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
 
 ## 補足
 
@@ -75,7 +75,7 @@
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
 - Codeg は `127.0.0.1` のままにする。暗号化されない HTTP は、ホストの外に出ない
-- 規則は、[Forgejo](../forgejo.md) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
+- 規則は、[Forgejo](../almalinux-setup.md#forgejo-実施手順) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
 - `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
 
@@ -132,9 +132,9 @@
 
 ### Claude Code と Codex CLI も操作する / 補足
 
-[手順書の「Claude Code と Codex CLI も操作する」](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
+「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
 
-### Claude Code と Codex CLI も操作する / 手順 3: 補足: 接続アダプターとランタイム
+### Claude Code と Codex CLI も操作する / 手順 2: 補足: 接続アダプターとランタイム
 
 | エージェント | Codeg v0.35.1 の対応アダプター | アダプターが使うランタイム |
 |---|---|---|
@@ -149,7 +149,7 @@
 
 対応版は [Codeg v0.35.1 のレジストリ](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/acp/registry.rs)で確認した。実際に導入した版と試験条件は[今回の検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に分ける。
 
-### Claude Code と Codex CLI も操作する / 手順 4: 補足: 本人の契約と共有設定
+### Claude Code と Codex CLI も操作する / 手順 3: 補足: 本人の契約と共有設定
 
 - Codeg の「公式サブスクリプション」は、Claude の既存の CLI ログイン、Codex の本人の ChatGPT ログインを使う方式。Codeg 用の API キーは追加しない（[Codeg の認証方式](https://docs.codeg.app/guide/authentication)）
 - Claude の公式案内（2026-10-07 更新）では、Claude Agent SDK・`claude -p`・第三者のアプリを契約の利用枠で引き続き使える。この手順はその方式を使う（[Claude の契約での SDK 利用](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan)）
@@ -158,7 +158,7 @@
 - Codeg で Claude の設定を保存すると `~/.claude/settings.json`、Codex の設定を保存すると `~/.codex/config.toml` など、端末の CLI と共有する設定にも反映される。認証方法の変更では、以前の API 用の設定が削除・変更されることもある
 - ログインのやり直しも同じユーザーの CLI に効く。別のアカウントへ切り替える操作は、Codeg の会話だけに閉じない（[共有設定と履歴の注意](../extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)）
 
-### Claude Code と Codex CLI も操作する / 手順 5〜8: 補足: モードと中断
+### Claude Code と Codex CLI も操作する / 手順 4〜7: 補足: モードと中断
 
 - Claude のアダプターが返すモードは `Manual`・`Accept edits`・`Plan`・`Auto`。環境・管理設定などで許可される場合にだけ `Bypass permissions` も出る。手順では `Auto` を選ぶ
 - モデルが対応せず「Auto mode unavailable」になったときは、`Accept edits` に切り替わる実装がある
@@ -168,7 +168,7 @@
 
 表示名と切り替えの条件は、[Claude のモードの実装](https://github.com/agentclientprotocol/claude-agent-acp/blob/4e1fc1e8df2b9af3b1b2d6880ba90c5862283ba8/src/session-mode.ts)と [Codex のモードの実装](https://github.com/agentclientprotocol/codex-acp/blob/202e66e63343ec4f5a5e35ab590251d813d129ca/src/AgentMode.ts)で確認した。Codeg の画面での自動審査・拒否・中断の実測とは区別する。
 
-### Claude Code と Codex CLI も操作する / 手順 9〜11: 補足: 履歴の取り込みと再開
+### Claude Code と Codex CLI も操作する / 手順 8〜10: 補足: 履歴の取り込みと再開
 
 - ブラウザで操作していても、取り込むのは Codeg のサーバーが動くホストの履歴。ブラウザを開く PC の履歴や、もう一方の OS の履歴は同期されない
 - Codeg は元の会話の ID とエージェントを使って再開する。取り込みで元の CLI の履歴は削除されない。別のエージェントへ履歴を変換する操作ではない
@@ -200,7 +200,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | 画面から Grok Build を動かす | Happier | 採らない | MIT。Web の画面に HTTPS が必須。プッシュ通知が第三者（Expo）を通る。Grok ではセッションの一覧が使えない |
 | 画面から Grok Build を動かす | Zed の外部エージェント（SSH のリモート） | 採らない | PC のデスクトップアプリだけ。スマートフォンから使えない |
 | 画面から Grok Build を動かす | Grok Build の `grok agent serve` に直接つなぐ | 採らない | つなぎ方の仕様が公式の文書に無い。公式の例は always-approve 付き |
-| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../coding-agents.md#スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
+| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../almalinux-setup.md#コーディングエージェントの共同作業-スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
 | 端末をそのまま使う | ttyd などの Web の端末 | 採らない | 端末がそのままブラウザに出る。スマートフォンで Ctrl・Esc・矢印が打ちにくい |
 | 端末をそのまま使う | zellij の Web クライアント | 採らない | Windows 版に未解決の不具合がある（[Claude Code の Remote Control（Windows）の検証記録](../verification/windows-claude-remote-control.md)） |
 | Codeg の置き方 | 配布物を取得して SHA-256 を照合し、ホームに置く | 採った | 版を決めて入れる。`sudo` を使わない |
@@ -228,13 +228,13 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 画面は、端末をそのまま映すものではなく、会話・承認・変更されたファイルを扱うチャット形式のものにする（利用者の指定）
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
-- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../forgejo.md) と同じ順）
+- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../almalinux-setup.md#forgejo-実施手順) と同じ順）
 - Windows 11 の PC は待ち受ける IP を決めない。利用者の指定で、受信インターフェースが Private なら全送信元・全接続種別を許可し、Public・Domain は遮断する。送信元 CIDR と有線限定は使わない
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS を 1 本の手順書にまとめ、Windows 11 は後ろの節に置く（[Syncthing](../syncthing.md) と同じ形）
+- 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)）
 
 ## 参照
 

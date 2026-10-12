@@ -1,8 +1,8 @@
 # Windows 11 で Claude Code の Remote Control を SSH の切断後も動かす手順（タスク スケジューラ + WezTerm）のロールバックと注意点
 
-[手順書](../windows-claude-remote-control.md)・[検証記録](../verification/windows-claude-remote-control.md)・[参考資料](../reference/windows-claude-remote-control.md)
+[手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)・[検証記録](../verification/windows-claude-remote-control.md)・[参考資料](../reference/windows-claude-remote-control.md)
 
-- 「手順 N」は[手順書](../windows-claude-remote-control.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -33,7 +33,7 @@
 - **デスクトップにログオンしている必要がある**: タスクは `Interactive` で、ログオン中のデスクトップのセッションに WezTerm を開く。ログオフすると動かない
 - **WezTerm の窓が見える**: タスクはデスクトップに WezTerm の窓を開く。窓を閉じると Claude Code が止まる。最小化してよい
 - **Claude Code のサーバーが止まるとき**
-  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる（公式ドキュメント）。[止める・もう一度始める](../windows-claude-remote-control.md#止めるもう一度始める)の手順 2 で始め直す
+  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる（公式ドキュメント）。[止める・もう一度始める](../windows-setup.md#claude-code-の-remote-control-止めるもう一度始める)の手順 2 で始め直す
   - PC がスリープすると、その間は使えない。公式ドキュメントは、復帰すれば自動でつなぎ直すと書いている（Windows の電源の設定は本書の対象外）
 - **一度きりの確認**: ディレクトリの信頼（`~/.claude.json`）と Remote Control の確認（`remoteDialogSeen`）を手順 4 で受ける。別の `PROJECT_DIR` にするときは信頼を受け直す
 - **`--spawn same-dir` を外さない**: 外すと `Choose [1/2]` の確認でタスクが止まる

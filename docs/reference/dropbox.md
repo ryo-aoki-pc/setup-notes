@@ -1,6 +1,6 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）の参考資料
 
-[手順書](../dropbox.md)・[ロールバックと注意点](../extra/dropbox.md)
+[手順書](../almalinux-setup.md#dropbox-実施手順)・[ロールバックと注意点](../extra/dropbox.md)
 
 ## 補足
 
@@ -24,7 +24,7 @@
 
 ### 実施手順 / 手順 6: 補足: linger
 
-- [linger](../linger.md) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) が有効なので、ログアウトしても止まらない（linger が無いと、ログアウトした時点で Dropbox も止まる）
 
 ### 実施手順 / 手順 7: 補足: URL が出るまでの時間と、journal
 
@@ -44,7 +44,7 @@ URL は、リンクするまで journal にも繰り返し出る。
 | 公式 RPM（`nautilus-dropbox`、`linux.dropbox.com/fedora/`） | 2026.05.06（fc44 のビルド）。`libgnome >= 2.32.1` を要求するが、AlmaLinux 10（BaseOS / AppStream / CRB）にも EPEL 10 にも無いので入らない | 不採用（入らない） |
 | `dropbox start -i`（`dropbox.py` がデーモンを落とす） | 画面が無いと `[y/n]` を聞き、画面があると GTK のダイアログになる。署名の確認は `python3-gpg` があるときだけで、tarball と署名を別々に引く（手順 3 の補足の食い違いが起こりうる） | 不採用（同じ tarball を手順 3 で確かめて展開する） |
 | Flathub `com.dropbox.Client` | 272.4.3731。公開元が未検証（有志がまとめたもの）で、x86_64 のみ。GNOME 50 の runtime を使う | 不採用（[導入元一覧](../tool-catalog.md#選び方)の GUI の選び方で、未検証の公開元は採らない） |
-| rclone（[dropbox-rclone.md](../dropbox-rclone.md)） | x86_64 でも動くが、常駐はせず、timer で定期的に双方向同期する | x86_64 では公式を採る（Raspberry Pi 5 では rclone） |
+| rclone（[dropbox-rclone.md](../almalinux-setup.md#dropbox-と-rclone-実施手順)） | x86_64 でも動くが、常駐はせず、timer で定期的に双方向同期する | x86_64 では公式を採る（Raspberry Pi 5 では rclone） |
 
 公式 RPM について、さらに分かったこと:
 
@@ -68,6 +68,6 @@ URL は、リンクするまで journal にも繰り返し出る。
 - [How many devices can I use with my Dropbox account? — Dropbox Help](https://help.dropbox.com/account-access/computer-limit) — Basic の台数の上限
 - [Install Dropbox for Linux](https://www.dropbox.com/install-linux) — 公式の配布ページ
 - `man systemd.service`（`Restart=`）/ `man systemd.exec`（`UnsetEnvironment=`）/ `man loginctl`（`enable-linger`）/ `man gpgv`
-- [linger](../linger.md) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
 
 ---

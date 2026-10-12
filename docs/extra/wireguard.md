@@ -1,6 +1,6 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）のロールバックと注意点
 
-[手順書](../wireguard.md)・[検証記録](../verification/wireguard.md)・[参考資料](../reference/wireguard.md)
+[手順書](../almalinux-setup.md#wireguard-実施手順)・[検証記録](../verification/wireguard.md)・[参考資料](../reference/wireguard.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -12,7 +12,7 @@
 - → [全部消すときの補足](../reference/wireguard.md#全部消すときの補足)
 
 > [!CAUTION]
-> **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](../wireguard.md#バックアップと復旧os-の再インストール)を取る。**この節の手順 2 で鍵が消え、そこから先は戻せない。** 鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
+> **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](../almalinux-setup.md#wireguard-バックアップと復旧os-の再インストール)を取る。**この節の手順 2 で鍵が消え、そこから先は戻せない。** 鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
 
 1. サービスを止めて、firewalld と sysctl を戻す。
 
@@ -45,7 +45,7 @@
 
 1. 両拠点のルーターから、ポート転送と静的経路を消す。
 
-   - 消す値は、[鍵を作って適用する](../wireguard.md#鍵を作って適用する)の手順 5 の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
+   - 消す値は、[鍵を作って適用する](../almalinux-setup.md#wireguard-鍵を作って適用する)の手順 5 の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
 
 ---
 
@@ -81,7 +81,7 @@
 
 1. WG ホストで、登録を消して反映する。
 
-   - [クライアントを削除する](../wireguard.md#クライアントを削除する)の手順 1〜6 を行う。対象は、「クライアントを登録する」の手順 1 で登録した `CLIENT_NAME` と `SITE`
+   - [クライアントを削除する](../almalinux-setup.md#wireguard-クライアントを削除する)の手順 1〜6 を行う。対象は、「クライアントを登録する」の手順 1 で登録した `CLIENT_NAME` と `SITE`
    - 削除前の公開鍵を控え、未知 peer と照合する。`--drop-unknown-peers` を確認なしに付けない
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
@@ -133,7 +133,7 @@
 
 1. WG ホストで、[AlmaLinux 10 の PC のロールバック](#almalinux-10-の-pc-のロールバック)の手順 3 の案内に従い、登録を消して反映する。
 
-   - 「クライアントを登録する」の手順 1 の `CLIENT_NAME` は、[Windows 11 で WG ホストに登録して取り込む](../wireguard.md#windows-11-で-wg-ホストに登録して取り込む)の手順 2 で登録した、この PC の名前にする
+   - 「クライアントを登録する」の手順 1 の `CLIENT_NAME` は、[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 2 で登録した、この PC の名前にする
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
 ---
@@ -347,7 +347,7 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 ホスト側で鍵を作ると、秘密鍵入りの conf が一時的にホストに残る。**クライアントに取り込んだら消す**（「クライアントを登録する」の手順 9 の `rm`）。
 
 - より厳密にするなら、クライアント側で鍵を作って公開鍵だけをホストに渡す
-- AlmaLinux 10 の PC でその流れにするなら、[「鍵を作る」の手順 3](../wireguard.md#鍵を作る)と[「WG ホストに登録する」の手順 1・2](../wireguard.md#wg-ホストに登録する)
+- AlmaLinux 10 の PC でその流れにするなら、[「鍵を作る」の手順 3](../almalinux-setup.md#wireguard-鍵を作る)と[「WG ホストに登録する」の手順 1・2](../almalinux-setup.md#wireguard-wg-ホストに登録する)
 
 #### `DNS =` を書く場合
 
@@ -386,10 +386,10 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 
 - PPPoE（MTU 1454 / 1492 など）のように MTU が 1500 より小さい回線では、トンネル内の最大サイズのパケットが回線の MTU を超え、分割されて送られる
 - 分割されたパケットが途中で落ちると、**小さい通信は通るのに、大きい通信だけ遅い・止まる**（ping と ssh のキー入力は通るが、ssh の画面の描き直し・大きなファイル転送・一部の HTTPS が再送待ちになる）
-- 調べ方と直し方は、[回線に合わせて MTU を下げる](../wireguard.md#回線に合わせて-mtu-を下げる任意)（`site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す。`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）
+- 調べ方と直し方は、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)（`site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す。`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）
 - 外出先のクライアントも、接続先の拠点の回線を通るので同じことが起きる。モバイル回線の側で起きることもある（クライアント conf の `[Interface]` に `MTU =` を書く）
   - `WG_MTU` に値を書いた後に `client add` で作る conf には、同じ `MTU =` が入る
-  - 配布済みのクライアントは作り直されないので、[回線に合わせて MTU を下げる](../wireguard.md#回線に合わせて-mtu-を下げる任意)の手順 8 で入れる
+  - 配布済みのクライアントは作り直されないので、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)の手順 8 で入れる
 
 #### LAN サブネットの重複
 
@@ -408,7 +408,7 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 - **`DNS =` の扱いが wg-quick と違う**: 本書は `DNS =` 無し
   - NetworkManager では `ipv4.dns` になり、接続中は resolv.conf を NetworkManager が書き換えるので、`systemd-resolved` は不要と考えられる
   - wg-quick は `resolvconf` 経由で resolved が要る（→ [wireguard.md](#dns--を書く場合)）
-- **MTU**: 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../wireguard.md#回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする
+- **MTU**: 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする
   - 拠点が `WG_MTU` を書いた後に `client add` で登録した conf には `MTU =` が入っていて、取り込むと `wireguard.mtu` になる
   - それより前に取り込んだプロファイルは、`sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（`1380` は拠点の値に読み替える）
   - 拠点が下げていなくても、PPPoE やモバイル回線で大きい通信だけ遅い・止まるなら、同じ操作で下げる（→ [wireguard.md: MTU](#mtu)）
@@ -428,11 +428,11 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 
 - **拠点の LAN 内では張らない**: `AllowedIPs` の経路は、ルートのメトリック 0 で `wg0` に入る（ソースの `tunnel/addressconfig.go`）。LAN の直結の経路（Windows の既定ではルートのメトリック 256）より優先されるはずなので、AlmaLinux 10 と同じく LAN 宛ての通信がトンネルに入る
 - **張ったまま再起動すると、また張られる**: トンネルのサービスは自動で起動する（ソースの `manager/install.go`）。拠点の LAN に戻る前に切る
-- **ほかの端末と同じ名前で登録しない**: [クライアントを登録する](../wireguard.md#クライアントを登録する)の手順 2 は、`CLIENT_NAME` と同じ名前の登録を消す。AlmaLinux 10 の PC と両方使うなら、別々の名前と鍵で登録する
+- **ほかの端末と同じ名前で登録しない**: [クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の手順 2 は、`CLIENT_NAME` と同じ名前の登録を消す。AlmaLinux 10 の PC と両方使うなら、別々の名前と鍵で登録する
 - **秘密鍵は、管理者なら読める**: 張っている間の `wg.exe show wg0 private-key`、窓の「編集」（設定の全文を出す）と「すべてのトンネルをzipにエクスポート」。WireGuard の窓は Administrators の一員にしか出ない。Windows のサインインのパスワードが鍵の守りになる
 - **WireGuard を外すと、ほかのトンネルの設定も消える**: MSI のアンインストールは `C:\Program Files\WireGuard\Data` を丸ごと消す（ソースの `installer/customactions.c` の `RemoveConfigFolder`）
 - **MTU**: conf に `MTU =` が無いと、既定の経路のインターフェースの MTU から 80 を引いた値になる（1500 なら 1420。WireGuard の文書の「Network Configuration Quirks」）
-  - 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../wireguard.md#回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする。拠点が `WG_MTU` を書いた後に `client add` で登録した conf には、はじめから `MTU =` が入っている
+  - 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする。拠点が `WG_MTU` を書いた後に `client add` で登録した conf には、はじめから `MTU =` が入っている
   - それより前に取り込んだトンネルと、大きい通信だけ遅い・止まるときは、トンネルを切ってから窓の「編集」で `[Interface]` に `MTU = 1380` を足す（`1380` は拠点の値に読み替える）
 - **`DNS =` を書いた場合**: `wg0` の DNS サーバーになり、Windows の通常の名前解決の扱い（複数の DNS サーバーを使う）に任される。DNS を絞る規則は、キルスイッチが掛かる構成（`/0` の peer が 1 つ）でだけ入る（同じ文書）。本書は `DNS =` 無し
 - **`Endpoint` が DDNS 名のとき**: トンネルを張るたびに名前を引く（ソースの `tunnel/service.go`）

@@ -1,6 +1,6 @@
 # VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の検証記録
 
-[手順書](../virtualbox-guest-bootc.md)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
+[手順書](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -107,7 +107,7 @@ Guest Additions のインストーラ（`VBoxLinuxAdditions.run`）を、ベー�
   - `libXt` の行を足す前の Containerfile で、ベースのイメージとパッケージの一覧が同じになることを確かめた（検証コンテナ）
   - 今の Containerfile では、`libXt` の 1 つが増える（kernel と kernel-rt のイメージの両方で確かめた）
 - `dnf history undo` にしなかったのは、道具を入れるときにベースのパッケージが上がっていた場合に、それを下げてしまうため
-- 道具が無いので、VM の上ではモジュールを作り直せない。カーネルが変わったら、イメージごとビルドし直す（[更新](../virtualbox-guest-bootc.md#更新)）
+- 道具が無いので、VM の上ではモジュールを作り直せない。カーネルが変わったら、イメージごとビルドし直す（[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)）
 
 **そのまま残るもの**:
 
@@ -132,7 +132,7 @@ Guest Additions のインストーラ（`VBoxLinuxAdditions.run`）を、ベー�
   - `udisksctl unmount -b /dev/sr0` でマウントを外しただけでは、同じエラーのままだった
 - VM の中の `eject /dev/sr0`（`sudo` は要らない。GNOME にログインしているユーザーは `/dev/sr0` を読み書きできる）で、ホスト側のドライブが空になり、続けて CD を入れられた
 - 別の回（Guest Additions の CD が入ったままの VM）では、`eject /dev/sr0` の後に同じ働きの `VBoxManage storageattach … --medium additions` で入れた CD が、30 秒たっても自動ではマウントされなかった
-  - [手順 5](../virtualbox-guest-bootc.md#実施手順) が `install: cannot stat` になり、その箇条書きの `udisksctl mount -b /dev/sr0` でマウントしてから貼り直すと通った
+  - [手順 5](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) が `install: cannot stat` になり、その箇条書きの `udisksctl mount -b /dev/sr0` でマウントしてから貼り直すと通った
   - `udisksctl` は、検証で使った SSH の端末からでは polkit のパスワードを聞いた（GNOME の端末からは試していない）
 
 ### 実施手順 / 手順 6: 補足: ビルドの表示と所要時間
@@ -174,7 +174,7 @@ Successfully tagged localhost/vbox-ga:latest
   - VM（4 vCPU・8 GB）では、ベースの取り込みを含めて 305 秒だった。Containerfile を変えた後のビルドし直しは 161 秒、何も変えないビルドし直しは 5 秒
   - VM では、ベースの取り込みの `Getting image source signatures` の後に `Storing signatures` が出た（`policy.json` の署名の検査）
   - Windows のホスト（Hyper-V の上）の VM（同じ 4 vCPU・8 GB）では、ベースの取り込みを含めて約 25 分と約 17 分だった。どちらも、VM が止まっていた時間（合わせて 10 分ほど）を含む（[付録](#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）
-- **Secure Boot のときの署名**: Guest Additions のインストーラは、Secure Boot なら自分でモジュールに署名する処理を持つが、判定は `mokutil --sb-state` の答えだけで、ビルドの中（コンテナ）では `EFI variables are not supported on this system` になるので署名しない。そのため、このビルドに [secure-boot-mok.md](../secure-boot-mok.md) の鍵を `--secret` で渡し、ビルドの中の `sign-file`（kernel-devel）で署名する。鍵はイメージに入れない
+- **Secure Boot のときの署名**: Guest Additions のインストーラは、Secure Boot なら自分でモジュールに署名する処理を持つが、判定は `mokutil --sb-state` の答えだけで、ビルドの中（コンテナ）では `EFI variables are not supported on this system` になるので署名しない。そのため、このビルドに [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の鍵を `--secret` で渡し、ビルドの中の `sign-file`（kernel-devel）で署名する。鍵はイメージに入れない
 - **署名**: 検証では、署名したモジュールから署名を取り出し、secure-boot-mok.md 手順 4 と同じ作り方の証明書で `openssl dgst -sha512 -verify` を通して `Verified OK` になった（Guest Additions の起動スクリプトが署名を確かめるのと同じ方法）
 - **Secure Boot が無効なとき**は `MOK_SIGN=1` も `--secret` も渡らない。Containerfile の secret のマウントは、渡されなければ何もしない（`signer=` が空のまま成功することを確かめた）
   - Secure Boot が無効の VM（kernel-rt と、Windows のホストの既定のカーネル）でも、`signer=` が空のまま成功した
@@ -194,11 +194,11 @@ Successfully tagged localhost/vbox-ga:latest
 | 出るもの | 意味 | 対処 |
 |---|---|---|
 | 切り替えた後の起動が、ロゴの画面のまま進まない。Esc で出す起動のメッセージに `rcu_preempt detected expedited stalls on CPUs/tasks` と `task … blocked for more than 122 seconds` | `vboxguest` を読み込んだときの警告（下の「カーネルの警告」）の後に、RCU が止まった | VM のウィンドウのメニューの「仮想マシン」→「リセット」（英語の表示では Machine → Reset）で起動し直す。検証では次の起動は通った |
-| `lsmod` に何も出ず、`systemctl is-active vboxadd` が `failed` | モジュールを読み込めていない | `journalctl -b -u vboxadd` と `sudo dmesg \| grep -i vbox` を見る。Secure Boot なら手順 10 と [secure-boot-mok.md 手順 7](../secure-boot-mok.md#実施手順) |
-| `Loading of module with unavailable key is rejected`（`sudo dmesg`） | Secure Boot で、署名の鍵が登録されていない | [secure-boot-mok.md 手順 7](../secure-boot-mok.md#実施手順) で鍵が登録されているか見る。登録できていなければ同書の手順 6 の箇条書き |
+| `lsmod` に何も出ず、`systemctl is-active vboxadd` が `failed` | モジュールを読み込めていない | `journalctl -b -u vboxadd` と `sudo dmesg \| grep -i vbox` を見る。Secure Boot なら手順 10 と [secure-boot-mok.md 手順 7](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) |
+| `Loading of module with unavailable key is rejected`（`sudo dmesg`） | Secure Boot で、署名の鍵が登録されていない | [secure-boot-mok.md 手順 7](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) で鍵が登録されているか見る。登録できていなければ同書の手順 6 の箇条書き |
 | `Configuration file /var/lib/VBoxGuestAdditions/config not found`（`journalctl -b -u vboxadd`） | 起動時のリンクが張られていない | `sudo systemd-tmpfiles --create --prefix=/var/lib/VBoxGuestAdditions` の後に `sudo systemctl restart vboxadd vboxadd-service` |
 | `vboxclient.desktop[...]: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable`（`journalctl --user -b`） | ログインした時点で `/dev/vboxguest` が無かった。`VBoxClient-all` が出そうとした通知も、出せずに終わった | モジュールを直してから、ログインし直す |
-| `coredumpctl list` に `/usr/bin/VBoxClient` が 5 秒ごとに並ぶ（`SIGTRAP`） | `libXt` の無いイメージで、`VBoxClient --clipboard` が落ち続けている（手順 3 の補足） | 手順 3 の Containerfile（`libXt` の行がある版）を置き直し、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3 を行う |
+| `coredumpctl list` に `/usr/bin/VBoxClient` が 5 秒ごとに並ぶ（`SIGTRAP`） | `libXt` の無いイメージで、`VBoxClient --clipboard` が落ち続けている（手順 3 の補足） | 手順 3 の Containerfile（`libXt` の行がある版）を置き直し、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 2・3 を行う |
 
 - 表の 1 行目は、Windows のホストの VM（Secure Boot が無効、既定のカーネル）で、切り替えた後の最初の起動で出たもの（[付録](#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）
 - 表の 3 行目と 5 行目は、VM で MokManager をわざと見送ったときに出たもの
@@ -234,7 +234,7 @@ Successfully tagged localhost/vbox-ga:latest
 
 ### 実施手順 / 手順 10: 本文中の記録
 
-   - `Local kernel module signing key` が出ればよい（[secure-boot-mok.md](../secure-boot-mok.md) の鍵。2026-09-30 より前にこの文書で作った鍵なら `VirtualBox Guest Additions module signing key`）
+   - `Local kernel module signing key` が出ればよい（[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の鍵。2026-09-30 より前にこの文書で作った鍵なら `VirtualBox Guest Additions module signing key`）
 
 ### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 0: 本文中の記録
 
@@ -252,7 +252,7 @@ Successfully tagged localhost/vbox-ga:latest
 
 ### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 5: 補足: 写すもの
 
-- `vbox-ga-image`: [手順 3](../virtualbox-guest-bootc.md#実施手順) の Containerfile と、[手順 5](../virtualbox-guest-bootc.md#実施手順) でコピーしたインストーラ。`ssh` のコマンドは VM のホームで動くので、ホームからの相対パスで指定している
+- `vbox-ga-image`: [手順 3](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の Containerfile と、[手順 5](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) でコピーしたインストーラ。`ssh` のコマンドは VM のホームで動くので、ホームからの相対パスで指定している
 - `etc/containers/policy.json`・`etc/containers/registries.d`・`etc/pki/containers`: VM のイメージの署名の設定（この節の手順 6 で使う）
   - `policy.json` は `quay.io/almalinuxorg/atomic-desktop-gnome` に、`/etc/pki/containers` の 2 つの公開鍵（`atomic-desktop-gnome.pub`・`atomic-sig-backup.pub`）のどちらかでの sigstore の署名を求める
   - `registries.d` の `almalinuxorg-atomic-desktop-gnome.yaml` の `use-sigstore-attachments: true` で、署名をレジストリから取る
@@ -282,7 +282,7 @@ Successfully tagged localhost/vbox-ga:latest
 - WSL の AlmaLinux 10（podman 5.8.2、rootless）での実測:
   - ベースの取り込み（`Trying to pull` → `Getting image source signatures` → `Checking if image destination supports signatures` → `Storing signatures`）からビルドの終わりまで、約 5 分だった
   - `+ kver=6.12.0-211.56.1.el10_2.x86_64`、道具は `kernel-devel` を含む 15 パッケージ（AppStream から）、`+` の行は 126 で、VM でビルドしたときと同じ
-  - 動いているのは WSL のカーネル（`6.18.33.2-microsoft-standard-WSL2`）なので、`depmod: ERROR: could not open directory /lib/modules/6.18.33.2-microsoft-standard-WSL2: No such file or directory` と `depmod: FATAL` が 2 回ずつ出た。モジュールはイメージのカーネル向けにできた（[手順 6](../virtualbox-guest-bootc.md#実施手順) の補足の「動いているカーネルとイメージのカーネルが違うとき」と同じ）
+  - 動いているのは WSL のカーネル（`6.18.33.2-microsoft-standard-WSL2`）なので、`depmod: ERROR: could not open directory /lib/modules/6.18.33.2-microsoft-standard-WSL2: No such file or directory` と `depmod: FATAL` が 2 回ずつ出た。モジュールはイメージのカーネル向けにできた（[手順 6](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足の「動いているカーネルとイメージのカーネルが違うとき」と同じ）
   - rootless のビルドでは、インストーラの `semanage fcontext` が `libsemanage.semanage_rename: WARNING: rename(/etc/selinux/targeted/active, /etc/selinux/targeted/previous) failed: Invalid cross-device link, fall back to non-atomic semanage_copy_dir_flags()` を出した。切り替えた VM でも、`mount.vboxsf` は `mount_exec_t` だった
   - `Failed to connect to system scope bus via local transport: No such file or directory` も 2 回出たが、結果には影響しなかった
   - できたイメージは 5.07 GB（ベースは 4.92 GB）で、VM でビルドしたものと同じ大きさ
@@ -292,7 +292,7 @@ Successfully tagged localhost/vbox-ga:latest
 ### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 8: 補足: 2 つのイメージを 1 つのファイルにする理由と、実測
 
 - `podman save -m` は、複数のイメージを 1 つの docker-archive に入れる。層は共有されるので、ベースを足しても大きさは派生イメージとほぼ同じ（4.8G。派生イメージは 5.07 GB、ベースは 4.92 GB）
-- ベースも VM の podman に入るので、[手順 6](../virtualbox-guest-bootc.md#実施手順) で VM がビルドしたときと同じく、VM に派生イメージとベースの 2 つがそろう。元に戻すとき（この節の手順 10）は、このベースを使う
+- ベースも VM の podman に入るので、[手順 6](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) で VM がビルドしたときと同じく、VM に派生イメージとベースの 2 つがそろう。元に戻すとき（この節の手順 10）は、このベースを使う
 - **ファイルがすでにあると、`podman save` は書かない**（`Error: docker-archive doesn't support modifying existing images`）
   - 検証では、消す行を入れる前の版で更新を流したとき、この表示の後に前の回のファイルを `scp` で送っていた
   - そのため、書く前に消し、書けたときだけ送り、送った後にも消す
@@ -300,7 +300,7 @@ Successfully tagged localhost/vbox-ga:latest
 
 ### ロールバック / 手順 0: 本文中の記録
 
-  - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../secure-boot-mok.md)、またはホストオンリーアダプターだけの節の手順 3・4 で登録した場合）: 要らなければ、この節の後に [secure-boot-mok.md のロールバック](../extra/secure-boot-mok.md#ロールバック)で消す（VM で確かめた手順）
+  - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)、またはホストオンリーアダプターだけの節の手順 3・4 で登録した場合）: 要らなければ、この節の後に [secure-boot-mok.md のロールバック](../extra/secure-boot-mok.md#ロールバック)で消す（VM で確かめた手順）
 
 ### ロールバック / 手順 1: 補足: --enforce-container-sigpolicy を付けない理由
 
@@ -318,15 +318,15 @@ Successfully tagged localhost/vbox-ga:latest
   - 使えるようにするもの: クリップボードの共有、画面サイズの自動変更、共有フォルダー、時刻の同期（VBoxService）
 - **進め方**: dnf では入れられないので、Guest Additions を焼き込んだ派生イメージを VM の上でビルドし、`bootc switch` で切り替える
   - bootc の公式文書の「Booting local builds」と同じ形
-  - VM がインターネットに出られない（ホストオンリーアダプターだけの）ときは、ホストで同じ Containerfile をビルドし、ファイルにして ssh で VM に運ぶ。VM は外に出ない（[ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)）
+  - VM がインターネットに出られない（ホストオンリーアダプターだけの）ときは、ホストで同じ Containerfile をビルドし、ファイルにして ssh で VM に運ぶ。VM は外に出ない（[ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)）
   - 読者が変える値は無い（`BASE_IMAGE` は、GNOME 以外の Atomic Desktop と、自作の kernel-rt のイメージのときだけ変える）。ホストオンリーアダプターの節では、ホストの端末の `VM_SSH` に VM のユーザー名と IP を入れる
 - **状態**: **VirtualBox の VM で本実行済み（2026-09-29 は AlmaLinux 10 のホスト、2026-09-30 は Windows 11 のホスト）**。その前に x86_64 のコンテナで検証した（2026-09-28）
   - 2026-10-05: ホストオンリーの節の手順 6・11 に、既存の `pki` の保護、作成した設定の控え、控えと内容が一致するときだけ消す条件を加えた
     - `bash -n` と一時ディレクトリで、既存設定・公開鍵、コピー失敗、再実行、後からの変更、比較失敗、空の変数で既存のものを消さないことを確認した。podman はスタブで代え、変更後のブロックは実機では流していない
-  - この節と付録の手順番号は、今の番号で書いた。Secure Boot の鍵の手順（当時はこの文書の手順 3・4・10 と手順 13 の前半）は、今は前提の [secure-boot-mok.md](../secure-boot-mok.md) の手順 3〜7 にあり、ここでは「MOK の手順」と書く（付録の表では、同書の手順 N を「MOK N」と書く）
+  - この節と付録の手順番号は、今の番号で書いた。Secure Boot の鍵の手順（当時はこの文書の手順 3・4・10 と手順 13 の前半）は、今は前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 3〜7 にあり、ここでは「MOK の手順」と書く（付録の表では、同書の手順 N を「MOK N」と書く）
     - 当時は、鍵の登録（今の secure-boot-mok.md の手順 6）を、手順 7 の `bootc switch` の再起動の途中の MokManager で行っていた
   - 下表の VM で、**この文書のコードブロックを上から順にそのまま貼った**（[VM の付録](#付録-virtualbox-の-vm-での本実行2026-09-29)）
-    - 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
+    - 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-共有フォルダーを使う任意)、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 2・3、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
     - VM はホストの x86_64 の実機の VirtualBox 7.2.20 で動かし、公式の ISO で入れた。VM の Secure Boot は有効
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・共有フォルダーの追加・画面の大きさ）は、同じ働きの `VBoxManage` で行った
   - VM で見つかって直したこと:
@@ -342,11 +342,11 @@ Successfully tagged localhost/vbox-ga:latest
     - 元のイメージに戻すと、イメージが足した `/etc` のファイルが消えること
   - **確認していないこと**:
     - VirtualBox の GUI の設定の画面での操作（共有フォルダーの追加など。メニューの操作は Windows のホストで確かめた）
-    - [更新](../virtualbox-guest-bootc.md#更新)の手順 1（ホストの VirtualBox の新しい版が無い）、KDE・COSMIC の Atomic Desktop
+    - [更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1（ホストの VirtualBox の新しい版が無い）、KDE・COSMIC の Atomic Desktop
     - 認証の要るレジストリにある、自作のイメージ
     - Hyper-V を止めた Windows のホスト（VirtualBox が AMD-V・VT-x を直接使う形）と、Intel の CPU の Windows のホスト
     - Windows のホストで VM が止まる原因と、止まらないようにする設定。`vboxguest` の警告の原因と、起動が止まる頻度
-    - [ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の、AlmaLinux 10 のホスト（ホストオンリーアダプターが `vboxnet0`）でのビルド、Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、その節の手順 6 で「すでにある」と出たときの手作業、元に戻した後にレジストリを追い直すこと
+    - [ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)の、AlmaLinux 10 のホスト（ホストオンリーアダプターが `vboxnet0`）でのビルド、Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、その節の手順 6 で「すでにある」と出たときの手作業、元に戻した後にレジストリを追い直すこと
   - コンテナでの検証（2026-09-28。[付録](#付録-コンテナでの検証記録2026-09-28)）: Atomic Desktop のイメージそのものを VM の代役にし、中の podman にコードブロックを貼った
     - 確かめたのは、派生イメージのビルド（モジュールのビルドと署名、`bootc container lint`）と、切り替えた後の最初の起動を systemd を PID 1 にしたコンテナで模した結果
     - このとき実機の設定は変えていない（`sudo` を使わず、rootless の podman だけ）
@@ -361,26 +361,26 @@ Successfully tagged localhost/vbox-ga:latest
   - 2026-09-29（夜）: 直した版を、同じ実機の VirtualBox の VM で流した（[付録](#付録-kernel-rt-のイメージの-vm-での本実行2026-09-29)）
     - VM は公式の ISO で新しく入れ、検証用の kernel-rt のイメージ（ローカルのレジストリに置いた）に切り替えてから、この文書のブロックを貼った
     - Secure Boot が無効の VM で手順 1〜9（MOK の手順は、Secure Boot が無効と分かったので飛ばした）、有効の VM で手順 1〜10 と MOK の手順
-    - 有効の VM で、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないときと、ベースとカーネルが新しくなったとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
+    - 有効の VM で、[共有フォルダーを使う（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-共有フォルダーを使う任意)の手順 1〜4、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 2・3（変わらないときと、ベースとカーネルが新しくなったとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3
     - 確認したこと: kernel-rt での起動、`kernel-rt-devel` でのビルドと署名、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService
     - あわせて確認したこと: 共有フォルダーの読み書き、カーネルが変わる更新、切り替えた直後の `bootc rollback`
-    - 見つかったこと: kernel-rt では、`vboxguest` の読み込みの直後にカーネルの `WARNING` が 1 回出る（[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足）
-    - 直したこと: カーネルも新しくなる更新では `installer exit=1` になる（[手順 6](../virtualbox-guest-bootc.md#実施手順) の箇条書き）。[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードの「切り替えた直後」の見込みを、確かめた結果にした
+    - 見つかったこと: kernel-rt では、`vboxguest` の読み込みの直後にカーネルの `WARNING` が 1 回出る（[手順 8](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足）
+    - 直したこと: カーネルも新しくなる更新では `installer exit=1` になる（[手順 6](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の箇条書き）。[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードの「切り替えた直後」の見込みを、確かめた結果にした
   - 2026-09-30: 下表の Windows 11 のホストの VirtualBox の VM で、今の版（`6fe8b86`）を 2 回流した（[付録](#付録-windows-のホストの-virtualbox-の-vm-での本実行2026-09-30)）
     - VirtualBox は、Hyper-V の上で VM を動かした（VM のウィンドウの状態バーの説明に「実行エンジン: native API」）
-    - Secure Boot が有効の回: 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)の手順 1〜4、[更新](../virtualbox-guest-bootc.md#更新)の手順 2・3（変わらないとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3、切り替えた直後の `bootc rollback`
+    - Secure Boot が有効の回: 手順 1〜10 と MOK の手順、[共有フォルダーを使う（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-共有フォルダーを使う任意)の手順 1〜4、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 2・3（変わらないとき）、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1〜3、切り替えた直後の `bootc rollback`
     - Secure Boot が無効の回（スナップショットに戻した VM）: 手順 1〜9（MOK の手順は飛ばした）
     - ホスト側のメニューの操作（CD の挿入・クリップボードの共有・自動リサイズ・VirtualBox について）は、GUI のメニューそのもので行った（UI Automation で操作）。共有フォルダーの追加は `VBoxManage`、2 回目の CD の挿入と画面の大きさは `VBoxManage` で行った
     - 確認したこと: 既定のカーネルのイメージで、直した Containerfile のビルド（署名あり・なし）、MokManager での登録、モジュールの読み込み、VBoxClient・VBoxService、Windows とのクリップボードの両方向、ウィンドウの大きさへの追従、Windows のフォルダーとの共有フォルダーの読み書き、切り替えた直後の `bootc rollback`
-    - 見つかったこと: Hyper-V の上では、手順 6 の途中で VM が 1〜7 分ずつ止まる（リードの WARNING）。既定のカーネルでも `vboxguest` の読み込みの直後に警告が出て、1 度は起動が止まった（[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足）
-  - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)を、ホストから SSH のトンネルを張って VM の中でビルドする形で足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）。その節は、この後にトンネルを使わない形に書き換えた（次の項目）。この項目の「その節の手順」は、トンネルを使っていた版のもの
-    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 7・8・10、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3。Secure Boot は有効
+    - 見つかったこと: Hyper-V の上では、手順 6 の途中で VM が 1〜7 分ずつ止まる（リードの WARNING）。既定のカーネルでも `vboxguest` の読み込みの直後に警告が出て、1 度は起動が止まった（[手順 8](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足）
+  - 2026-09-30（午後）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)を、ホストから SSH のトンネルを張って VM の中でビルドする形で足し、同じ Windows のホストで、ホストオンリーアダプターだけにつないで ISO から入れた新しい VM で流した（[付録](#付録-ホストオンリーアダプターだけの-vm-での本実行2026-09-30)）。その節は、この後にトンネルを使わない形に書き換えた（次の項目）。この項目の「その節の手順」は、トンネルを使っていた版のもの
+    - 手順 1〜5 と MOK の手順、そのままの手順 6（`lookup quay.io` で止まるのを見た）、その節の手順 1〜4、手順 7・8・10、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 3（その節の手順 2〜4 でビルドし直した後の、変わらないとき）、その節の手順 5、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3。Secure Boot は有効
     - トンネルは Windows の `ssh.exe` で張った。ただし、自動で流すために鍵でログインし、シェルを開かない `-N` を付けた
     - 確認したこと: トンネル越しのベースの取り込み（署名の検査あり）とビルドの中の dnf（AlmaLinux のミラーと EPEL）、MokManager での登録、モジュールの読み込み、ネットワークの無い VM での VBoxService の時刻の同期、トンネル越しの元のイメージへの切り替え
     - その節の手順 4 の補足の実測（`socks5` と `socks5h`、`ALL_PROXY` だけ、`export` の後の `sudo`、`--network=host` 無し、トンネルが切れているとき）も、この VM で確かめた
-    - 見つかって直したこと: インストールに使った ISO がドライブに残っていると、手順 4 で CD を入れられない（[手順 4](../virtualbox-guest-bootc.md#実施手順) の箇条書き）
-  - 2026-09-30（夜）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の項目と同じ VM と、同じ PC の WSL 2 の AlmaLinux 10.2 で流した（[付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
-    - 手順 1〜5 と MOK 3、その節の手順 1〜9、手順 7、MOK 6、手順 8・10 と MOK 7、[更新](../virtualbox-guest-bootc.md#更新)の手順 3（その節の手順 5・7〜9 でビルドし直して運んだ後の、変わらないとき）、その節の手順 10、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3、その節の手順 11。Secure Boot は有効
+    - 見つかって直したこと: インストールに使った ISO がドライブに残っていると、手順 4 で CD を入れられない（[手順 4](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の箇条書き）
+  - 2026-09-30（夜）: [ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の項目と同じ VM と、同じ PC の WSL 2 の AlmaLinux 10.2 で流した（[付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
+    - 手順 1〜5 と MOK 3、その節の手順 1〜9、手順 7、MOK 6、手順 8・10 と MOK 7、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 3（その節の手順 5・7〜9 でビルドし直して運んだ後の、変わらないとき）、その節の手順 10、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 2・3、その節の手順 11。Secure Boot は有効
       - 当時は、鍵の登録（MOK 6）を手順 7 の `bootc switch` の再起動で行っていた。今の文書は、その節の手順 4 の後に secure-boot-mok.md の手順 5〜7 で登録してからビルドする（この順では流していない）
       - その節の手順 3 で作る鍵の CN は、当時は `VirtualBox Guest Additions module signing key` だった。今は secure-boot-mok.md と同じ `Local kernel module signing key`（付録の出力は当時の名前のまま）
     - ホストの端末（WSL）から VM へのログインは、文書のとおりパスワードとホスト鍵の確認で行った
@@ -390,7 +390,7 @@ Successfully tagged localhost/vbox-ga:latest
 | 項目 | VirtualBox の VM（本実行） | Windows のホストの VM（本実行） | 検証環境（コンテナ） |
 |---|---|---|---|
 | 実施日 | 2026-09-29 | 2026-09-30 | 2026-09-28 |
-| ホスト | AlmaLinux 10.2 / x86_64 のノート PC の VirtualBox 7.2.20（[virtualbox.md](../virtualbox.md) で導入）。Guest Additions の CD はホストのもの | Windows 11 Pro 25H2（ビルド 26200、日本語）/ x86_64 のノート PC（AMD Ryzen AI MAX+ 395）の VirtualBox 7.2.20 r175154。Hyper-V が動いていて、VM は Hyper-V の上で動いた。Guest Additions の CD はホストのもの | VirtualBox は無し。Guest Additions は公式サイトの `VBoxGuestAdditions_7.2.20.iso`（`SHA256SUMS` で照合） |
+| ホスト | AlmaLinux 10.2 / x86_64 のノート PC の VirtualBox 7.2.20（[virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) で導入）。Guest Additions の CD はホストのもの | Windows 11 Pro 25H2（ビルド 26200、日本語）/ x86_64 のノート PC（AMD Ryzen AI MAX+ 395）の VirtualBox 7.2.20 r175154。Hyper-V が動いていて、VM は Hyper-V の上で動いた。Guest Additions の CD はホストのもの | VirtualBox は無し。Guest Additions は公式サイトの `VBoxGuestAdditions_7.2.20.iso`（`SHA256SUMS` で照合） |
 | ゲストの OS | 公式の ISO（`atomic-desktop-gnome-amd64.iso`、2026-09-21）で入れた Atomic Desktop GNOME（10.2.20260918.1）。派生イメージのベースは `:latest`（10.2.20260926.0） | 同じ ISO（sha256 が一致）で入れた。版は左と同じ | 同じイメージ（10.2.20260924.1、`sha256:7be643fe…dcff`）を podman のコンテナとして起動した代役 |
 | VM | 4 vCPU・8 GB・VMSVGA（128 MB）・SATA の 80 GB の VDI・NAT。UEFI とセキュアブート（`modifynvram` で Microsoft と Oracle の鍵を登録） | 左と同じ設定。ホストオンリーアダプターの節は、NAT の代わりに「VirtualBox Host-Only Ethernet Adapter」だけにつないだ VM を新しく作った。その節のホストの端末は、同じ PC の WSL 2 の AlmaLinux 10.2（podman 5.8.2 の rootless） | — |
 | カーネル | ISO の `6.12.0-211.55.1.el10_2` → 派生イメージの `6.12.0-211.56.1.el10_2` | 左と同じ | 実機（AlmaLinux 10.2 / x86_64 のノート PC）の `6.12.0-211.56.1.el10_2` を共有 |
@@ -437,7 +437,7 @@ VM に公式の ISO から入れた直後の状態（2026-09-29）:
 
 AlmaLinux 10 の bootc の VM に Guest Additions を入れる経路を比べた（2026-09-28 時点）:
 
-VM がホストオンリーアダプターだけで、インターネットに出られないときの経路（2026-09-30。[ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)）:
+VM がホストオンリーアダプターだけで、インターネットに出られないときの経路（2026-09-30。[ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)）:
 
 - **ホストでビルドし、`podman save` のファイルを ssh で VM に運ぶ（採用）**
   - VM はインターネットに出ない。VM に要るのは、ホストからの ssh だけ（sshd は ISO で入れた直後から動いている）
@@ -492,7 +492,7 @@ g vboxdrmipc -
 - udev のルールは `KERNEL=="vboxguest", OWNER="vboxadd", MODE="0660"` と `KERNEL=="vboxuser", OWNER="vboxadd", MODE="0666"`
 - `/etc/selinux/targeted/contexts/files/file_contexts.local` に `mount.vboxsf` の `mount_exec_t` が入り、`matchpathcon` もそう答える
 
-**VM での状態**（手順 10 の後。鍵の CN は、この文書で鍵を作っていたときのもの。`lsmod` から `pgrep -a VBoxClient` までは、`libXt` を足した版へ[更新](../virtualbox-guest-bootc.md#更新)した後のもの。`pgrep -a VBoxService` から下は手順書の外のコマンドで、更新の前に見た）:
+**VM での状態**（手順 10 の後。鍵の CN は、この文書で鍵を作っていたときのもの。`lsmod` から `pgrep -a VBoxClient` までは、`libXt` を足した版へ[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)した後のもの。`pgrep -a VBoxService` から下は手順書の外のコマンドで、更新の前に見た）:
 
 ```
 $ lsmod | grep -E '^vbox'
@@ -522,7 +522,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 
 ### 注意点 / 手順 0: 本文中の記録
 
-- **kernel-rt のイメージでも、同じ手順で入る**: `kernel-rt-devel` のある `rt` のリポジトリをイメージで有効にしておく。VM で確かめた（[手順 3](../virtualbox-guest-bootc.md#実施手順) の補足）
+- **kernel-rt のイメージでも、同じ手順で入る**: `kernel-rt-devel` のある `rt` のリポジトリをイメージで有効にしておく。VM で確かめた（[手順 3](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足）
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -539,7 +539,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - [VirtualBox — Changelog 7.2](https://www.virtualbox.org/wiki/Changelog-7.2) — RHEL 10.1・10.2（7.2.8）と RHEL 10.3（7.2.18）のカーネルへの対応、Wayland のクリップボード
 - [VirtualBox のソース（GitHub の v7.2.20）](https://github.com/VirtualBox/virtualbox/tree/v7.2.20/src/VBox/Additions/linux/installer) — `vboxadd.sh`・`install.sh.in`・`vboxadd-x11.sh` と `src/VBox/Installer/linux/routines.sh`。ISO の中のスクリプトと同じ中身であることを確かめた
 - `man tmpfiles.d`（`L+`）/ `man sysusers.d`（`uid:gid`）/ `man Containerfile`（`RUN --mount=type=secret`）
-- [Secure Boot の MOK 登録](../secure-boot-mok.md) — Secure Boot の VM の前提の手順書（署名鍵の作成と MokManager での登録）
+- [Secure Boot の MOK 登録](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) — Secure Boot の VM の前提の手順書（署名鍵の作成と MokManager での登録）
 
 ### 付録: コンテナでの検証記録（2026-09-28）
 
@@ -553,7 +553,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - ISO には Rock Ridge が無く、オプション無しの bsdtar は `Tried to parse Rockridge extensions, but none found` で失敗した
 - キャッシュの試験に、7.2.18 の ISO（同じく照合）
 
-**VM の代役のコンテナ**（手順 1〜7 と MOK 3・4 と、[更新](../virtualbox-guest-bootc.md#更新)・[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1・2）:
+**VM の代役のコンテナ**（手順 1〜7 と MOK 3・4 と、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)・[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 1・2）:
 
 - ベースのイメージそのものを `--privileged` で起動し、中に uid 1000 のユーザー（NOPASSWD の sudo）を作った
 - 中の podman（rootful）は、実機の一時ディレクトリを `/var/lib/containers` にマウントし、入れ子で動くように `containers.conf` を足した（`netns="host"`・`cgroups="disabled"`・`cgroup_manager="cgroupfs"` など）
@@ -566,7 +566,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 | `mokutil --import` | 一時パスワードを 2 回読み、登録の予約の印を置く |
 | `mokutil --test-key` | 登録済みの印があれば `is already enrolled`（MokManager での登録は、印を置いて模した） |
 
-**起動を模したコンテナ**（手順 8・10 と MOK 7、[共有フォルダーを使う（任意）](../virtualbox-guest-bootc.md#共有フォルダーを使う任意)、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 3）:
+**起動を模したコンテナ**（手順 8・10 と MOK 7、[共有フォルダーを使う（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-共有フォルダーを使う任意)、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)の手順 3）:
 
 - 手順 6 で代役のコンテナの中に作ったイメージを、`podman save` / `podman load` で実機の podman に移した
 - `/etc/passwd`・`/etc/group`・`/etc/shadow`・`/etc/gshadow` をベースのイメージのものに戻し、ログインするユーザーを足した（手元で変更済みの `/etc` は 3-way マージで残る、を模す）
@@ -641,7 +641,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 **環境**:
 
 - ホスト: AlmaLinux 10.2 / x86_64 のノート PC（カーネル `6.12.0-211.56.1.el10_2`、GNOME 49.4 / Wayland、SELinux は Enforcing、ロケールは en_US.UTF-8）
-  - VirtualBox 7.2.20 は、同じ日に [virtualbox.md](../virtualbox.md) を実機で通して入れた（ホストの Secure Boot は無効。virtualbox.md の付録）
+  - VirtualBox 7.2.20 は、同じ日に [virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) を実機で通して入れた（ホストの Secure Boot は無効。virtualbox.md の付録）
 - VM は[対象と検証環境](#対象と検証環境)の表のとおり
 - ISO: 公式の `atomic-desktop-gnome-amd64.iso`（3,062,765,568 バイト、2026-09-21）を、同じ場所の `atomic-desktop-gnome-amd64.iso-CHECKSUM` の sha256 で照合した
 
@@ -723,7 +723,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - VirtualBox の GUI のメニューそのものでの操作と、ウィンドウの大きさを手で変えたときの追従（同じ働きの `VBoxManage` で確かめた）
 - Secure Boot が無効の VM での手順（MOK 4〜7 と手順 10 を飛ばす分岐。ビルドはコンテナで確かめた）
 - 切り替えた直後の `bootc rollback`（`Rollback image:` が元のイメージであることだけ見た）
-- [更新](../virtualbox-guest-bootc.md#更新)の手順 1（ホストの VirtualBox の新しい版がまだ無い）と、ベースのイメージが新しくなったときの更新
+- [更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1（ホストの VirtualBox の新しい版がまだ無い）と、ベースのイメージが新しくなったときの更新
 - KDE・COSMIC の Atomic Desktop と、素の `almalinux-bootc:10` での動作
 - ホストが Wayland でない場合のクリップボード
 - VirtualBox の画面の日本語の表示（ホストのロケールが en_US.UTF-8 のため。名前は翻訳ファイルで確かめた）
@@ -784,7 +784,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
 - **`rt` が無効の kernel-rt のイメージ**（`:rt-disabled`）では、27 秒で止まった
   - `+ dnf -y install gcc make 'kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64+rt'` の後に `No match for argument: kernel-devel-uname-r = 6.12.0-211.56.1.el10_2.x86_64+rt` と `Error: Unable to find a match: …`
 - `--repo` を付けていた途中の版は、公式のイメージと `rt` が無効の検証用のイメージで流し、どちらも表の「6 の結果」と同じ行が出て、パッケージの差も `libXt` だけだった（`--repo=rt` が無効の `rt` も使うため、止まらなかった）
-- 所要時間の多くは、最後のイメージの書き出し（`COMMIT`）だった。この環境の入れ子の podman での値で、[手順 6](../virtualbox-guest-bootc.md#実施手順) の補足の時間とは比べられない
+- 所要時間の多くは、最後のイメージの書き出し（`COMMIT`）だった。この環境の入れ子の podman での値で、[手順 6](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足の時間とは比べられない
 - この環境では、インストーラの始めに `libkmod: ERROR … could not open /proc/modules` と `Error: could not get list of modules` が出た。ホストのカーネルがモジュールに対応していない（`/proc/modules` が無い）ためで、ビルドの結果は変わらなかった
 - 検証用のイメージのレジストリ（`localhost:5000`）は `policy.json` に載っていないので、取り込みで `Storing signatures` は出なかった（公式のイメージの取り込みでは出た）
 
@@ -820,7 +820,7 @@ $ sudo keyctl list %:.platform | grep -i virtualbox
   - 作り方: `rpm -e --nodeps` で kernel の 5 つを外し、`dnf -y --repo=baseos --repo=appstream --repo=rt install kernel-rt-<版> kernel-rt-modules-extra-<版>` で入れた
   - そのうえで `[rt]` を `enabled=1` にし、lint の警告を直した
   - 1 つ目: ISO と同じ `10.2.20260918.1` に kernel-rt `6.12.0-211.55.1.el10_2`（ビルド 52 秒）。初めの `:latest`
-  - 2 つ目: `10.2.20260926.0`（今の `:latest`）に kernel-rt `6.12.0-211.56.1.el10_2`（ビルド 56 秒）。[更新](../virtualbox-guest-bootc.md#更新)を試すときに `:latest` にした
+  - 2 つ目: `10.2.20260926.0`（今の `:latest`）に kernel-rt `6.12.0-211.56.1.el10_2`（ビルド 56 秒）。[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)を試すときに `:latest` にした
 - どちらも `Generating initramfs`（rpm-ostree の kernel-install）で initramfs ができ、`Checks passed: 13`（警告なし）だった
 - 送り出す前に、元のイメージと比べた
   - `/usr/lib/modules` は `…+rt` の 1 つだけ、`/boot` は空、`CONFIG_PREEMPT_RT=y`・`CONFIG_MODULE_SIG=y`・`CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT=y`
@@ -873,7 +873,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 | ロールバック 3 | 無出力。ユーザー・グループ・リンク・ログが消えた。MOK は登録されたまま |
 | 切り替えた直後の `bootc rollback`（Secure Boot が無効の回） | `Next boot: rollback deployment.` → 再起動 → kernel-rt のイメージ（Guest Additions 無し）で起動 → もう一度 `sudo bootc rollback` → 再起動 → 派生イメージに戻り、手順 8 がそろった |
 
-- 手順書を直したところ: [手順 6](../virtualbox-guest-bootc.md#実施手順) の `installer exit=1`（カーネルも新しくなったとき）、[手順 8](../virtualbox-guest-bootc.md#実施手順) の補足の警告、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードと手順 1・2
+- 手順書を直したところ: [手順 6](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の `installer exit=1`（カーネルも新しくなったとき）、[手順 8](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の補足の警告、[ロールバック](../extra/virtualbox-guest-bootc.md#ロールバック)のリードと手順 1・2
 
 **手順書の外で確かめたこと**:
 
@@ -894,7 +894,7 @@ Secure Boot が有効の回では、続けて次を流した。無効の回で�
 - `rt` が無効の kernel-rt のイメージを VM で使ったとき（前の付録のコンテナでは、手順 6 で止まることを確かめた）
 - 検証用ではない、利用者が作った kernel-rt のイメージ
 - 認証の要るレジストリ（bootc の文書では、bootc は `/etc/ostree/auth.json` などを読む。手順 6 の `sudo podman` が同じ認証で取り込めるかは確かめていない）
-- kernel-rt の VM を長く動かしたとき（今回は 1 回の起動で長くて 16 分ほど）、kernel-rt での MOK の削除、[更新](../virtualbox-guest-bootc.md#更新)の手順 1
+- kernel-rt の VM を長く動かしたとき（今回は 1 回の起動で長くて 16 分ほど）、kernel-rt での MOK の削除、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1
 
 ---
 
@@ -1007,12 +1007,12 @@ Secure Boot が有効の回では、続けて次を流した。
 - Windows のホストで VM が止まる原因と、止まらないようにする VM の設定（準仮想化インターフェース、x2APIC など）
 - `vboxguest` の警告の原因と、起動が止まる頻度。AlmaLinux 10 のホストの VM（既定のカーネル）で警告が出るか
 - VirtualBox の GUI の設定の画面での操作（共有フォルダーの追加は `VBoxManage` で行った。設定の画面の中を UI Automation でたどるのが遅すぎたため）
-- [更新](../virtualbox-guest-bootc.md#更新)の手順 1、既定のカーネルのイメージでベースとカーネルが新しくなるときの更新、MOK の削除
+- [更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1、既定のカーネルのイメージでベースとカーネルが新しくなるときの更新、MOK の削除
 - KDE・COSMIC の Atomic Desktop
 
 ### 付録: ホストオンリーアダプターだけの VM での本実行（2026-09-30）
 
-[ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、前の付録と同じ Windows 11 のホストで確かめた。表の「ホストオンリー N」は、その節の手順 N。
+[ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、前の付録と同じ Windows 11 のホストで確かめた。表の「ホストオンリー N」は、その節の手順 N。
 
 この付録は、ホストから SSH のトンネルを張って VM の中でビルドしていた版（`c511dac`）の記録で、「ホストオンリー N」はその版の節の手順を指す（今の節とは番号も中身も違う。今の形の記録は[次の付録](#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）。
 
@@ -1078,12 +1078,12 @@ Secure Boot が有効の回では、続けて次を流した。
 - Linux のホスト（AlmaLinux 10 の ssh）からのトンネル、ホストオンリーアダプターが `vboxnet0` のとき
 - ホストオンリーの節の手順 2 の、パスワードでのログインとホスト鍵の確認（検証は鍵で、`-N` を付けてつないだ）
 - keepalive を送らないときに、トンネル越しのビルドの間に VM が止まるか
-- Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、[更新](../virtualbox-guest-bootc.md#更新)の手順 1（Guest Additions の版が変わるとき）
+- Secure Boot が無効の VM、ベースやカーネルが新しくなる更新、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1（Guest Additions の版が変わるとき）
 - ホストがプロキシの内側にある場合
 
 ### 付録: ホストでビルドして VM に運ぶ形の本実行（2026-09-30）
 
-[ホストオンリーアダプターだけの VM でビルドする（任意）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の付録と同じ Windows 11 のホストの同じ VM で確かめた。表の「ホストオンリー N」は、今の節の手順 N。
+[ホストオンリーアダプターだけの VM でビルドする（任意）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)（以下、ホストオンリーの節）を、トンネルを使わずにホストでビルドして VM に運ぶ形に書き換え、前の付録と同じ Windows 11 のホストの同じ VM で確かめた。表の「ホストオンリー N」は、今の節の手順 N。
 
 **環境**:
 
@@ -1117,7 +1117,7 @@ Secure Boot が有効の回では、続けて次を流した。
 | 手順 4 | 前の回の Guest Additions の CD がドライブに入ったままで、GNOME にログインしたときにマウントされた。手順 4 の操作に合わせるため、VM で `eject /dev/sr0`（ホスト側は `emptydrive`）の後に、同じ働きの `VBoxManage storageattach … --medium additions` で入れ直した。**入れ直した CD は、30 秒たっても自動ではマウントされなかった**（`lsblk` の `sr0` は 50.7M） |
 | 手順 5 | `install: cannot stat '/run/media/<USER>/VBox_GAs_*/VBoxLinuxAdditions.run'` → 箇条書きの `udisksctl mount -b /dev/sr0`。SSH の擬似端末からは polkit が `Authentication is required to mount VBOX CD-ROM (/dev/sr0)` とパスワードを聞いた（1 回目は、続けて貼ったブロックがパスワードとして食われて `AUTHENTICATION FAILED`）。答えてマウントした後に貼り直すと、`MD5 checksums are OK. All good.`、`Identification: VirtualBox 7.2.20 Guest Additions for Linux` |
 | ホストオンリー 1 | `enp0s3  UP  192.168.56.102/24` |
-| ホストオンリー 2 | ホストの端末に[手順 1](../virtualbox-guest-bootc.md#実施手順) と、`VM_SSH=<USER>@<VM_IP>` にしたこの手順を貼った |
+| ホストオンリー 2 | ホストの端末に[手順 1](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) と、`VM_SSH=<USER>@<VM_IP>` にしたこの手順を貼った |
 | ホストオンリー 3 | `openssl` が無く、`sudo dnf install -y openssl` が進んだ（`openssl` 3.5.8 が入り、`openssl-libs`・`openssl-fips-provider` が 3.5.5 から 3.5.8 に上がった）。`MOK.der`（876 バイト）と `MOK.priv`（1704 バイト、`-rw-------`）。`scp` は `The authenticity of host … can't be established.`・`ED25519 key fingerprint is SHA256:…` → `yes` → `Warning: Permanently added '<VM_IP>' (ED25519) to the list of known hosts.` → パスワード → `MOK.der  100%  876` |
 | ホストオンリー 4 | `-rw-r--r--. 1 root root 876 … MOK.der`（ディレクトリは `drwx------`）、一時パスワードを 2 回。手順書の外の `mokutil --list-new` に `CN=VirtualBox Guest Additions module signing key` |
 | ホストオンリー 5 | パスワードの後に、`vbox-ga-image/` から `etc/pki/containers/atomic-sig-backup.pub` まで 13 の名前。VM の時計が 4 時間進んでいたので、`tar: … time stamp 2026-10-01 00:33:56 is 14169.640948876 s in the future` が混ざった |
@@ -1155,7 +1155,7 @@ Secure Boot が有効の回では、続けて次を流した。
 
 - AlmaLinux 10 のホスト（ホストオンリーアダプターが `vboxnet0`）でのビルドと運び方
 - Secure Boot が無効の VM（ホストに鍵が無く、署名しないビルド）
-- ベースやカーネルが新しくなる更新、[更新](../virtualbox-guest-bootc.md#更新)の手順 1（Guest Additions の版が変わるとき）
+- ベースやカーネルが新しくなる更新、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)の手順 1（Guest Additions の版が変わるとき）
 - ホストオンリーの節の手順 6 で「すでにある」と出たときの手作業
 - 元に戻した後に、VM をインターネットにつないでレジストリを追い直すこと
 - GNOME の端末から `udisksctl mount -b /dev/sr0` を実行したときに、パスワードを聞かれないか
@@ -1177,7 +1177,7 @@ Secure Boot が有効の回では、続けて次を流した。
 - ISO のボリューム名（Joliet）は `VBox_GAs_7.2.20`
 - VM では、GNOME がこれを `/run/media/<USER>/VBox_GAs_7.2.20` にマウントした（`iso9660`・`ro`・`uid=<UID>`・`dmode=500`・`fmode=400`）
 - ISO には Rock Ridge が無く、中のファイルは読み取り専用になる
-- `install -m 0644` にしてあるのは、`cp` だと写しも読み取り専用のままで、[更新](../virtualbox-guest-bootc.md#更新)で上書きできないため
+- `install -m 0644` にしてあるのは、`cp` だと写しも読み取り専用のままで、[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)で上書きできないため
   - 検証で再現した自動マウント（所有者だけが読める 0400。VM の自動マウントと同じ）では、2 回目の `cp` が `Permission denied` で失敗し、`install -m 0644` は何度でも通った
 - `VBoxLinuxAdditions.run` は makeself 2.7.1 の自己展開アーカイブで、`--check` は中の MD5 を確かめる
 - ホームの場所: ISO のインストーラで作ったユーザーは `/home/<USER>`（`/home` は `var/home` へのリンク）。イメージの `/etc/default/useradd` は `HOME=/var/home` なので、`useradd` で足したユーザーは `/var/home/<USER>` になる（検証コンテナ）
@@ -1203,7 +1203,7 @@ Identification: VirtualBox 7.2.20 Guest Additions for Linux
 **VM での結果**:
 
 - `bootc switch` は `layers already present: 65; layers needed: 20 (1.7 GB)` から取り込みを始め、`Deploying: done (8 seconds)` と `Queued for next boot: ostree-unverified-image:containers-storage:localhost/vbox-ga:latest` を出して再起動した（端末の SSH は切れた）
-- 検証では、Secure Boot の VM の鍵の登録を、この再起動の途中の MokManager で行った（当時はこの文書の手順だった。今は前提の [secure-boot-mok.md](../secure-boot-mok.md) で先に登録するので、この再起動では出ない。画面の並びは同書の手順 6 の補足）
+- 検証では、Secure Boot の VM の鍵の登録を、この再起動の途中の MokManager で行った（当時はこの文書の手順だった。今は前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) で先に登録するので、この再起動では出ない。画面の並びは同書の手順 6 の補足）
 - 切り替えた後の最初の起動では、コンテナで模したときと同じく、`systemd-sysusers` がユーザーとグループを作り、`/var/lib/VBoxGuestAdditions` のリンクが張られた
   - `vboxadd` は `VirtualBox Guest Additions: Starting.` から作り直しに入らずに終わり、`vboxadd-service` が `Starting VirtualBox Guest Addition service.` を出した
 

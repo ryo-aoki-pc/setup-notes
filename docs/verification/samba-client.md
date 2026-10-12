@@ -1,6 +1,6 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の検証記録
 
-[手順書](../samba-client.md)・[ロールバックと注意点](../extra/samba-client.md)
+[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[ロールバックと注意点](../extra/samba-client.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -116,11 +116,11 @@ Password:
 
 ### 対象と検証環境
 
-- **目的**: [samba.md](../samba.md) で公開したホームディレクトリ（`[homes]` 共有）を、AlmaLinux 10 の PC から、ふだんのディレクトリのように読み書きする
+- **目的**: [samba.md](../almalinux-setup.md#samba-サーバー-実施手順) で公開したホームディレクトリ（`[homes]` 共有）を、AlmaLinux 10 の PC から、ふだんのディレクトリのように読み書きする
   - `/etc/fstab` に 1 行を足し、`/mnt/<SHARE>` にアクセスしたときに systemd がマウントする（`x-systemd.automount`）。起動時にはマウントしない
   - パスワードは、root だけが読める資格情報ファイルに置く。fstab には書かない
   - GNOME Files（gvfs）でつなぐ方法は、任意節にした
-  - Windows 11 の PC では、同じ共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは Windows の資格情報マネージャーに置く（[Windows 11 で使う](../samba-client.md#windows-11-で使う)）
+  - Windows 11 の PC では、同じ共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは Windows の資格情報マネージャーに置く（[Windows 11 で使う](../windows-setup.md#samba-クライアント-windows-11-で使う)）
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `SERVER` だけ（NAS や Windows の共有なら `SMB_USER` と `SHARE` も）
   - Windows 11 は、管理者ではない Windows PowerShell 5.1 に貼る。読者が編集するのは `SERVER` と `SMB_USER`
@@ -149,7 +149,7 @@ Password:
     - 手順 5 は、`cifs-test.txt` の書き込みが `Permission denied` になり、マウントの確かめと外すところは通った
     - `SHARE=home` での自動マウント（手順 6・7）は試していない
   - 2026-10-01: [注意点](../extra/samba-client.md#注意点)に、サーバーで直接変えたものが見えるまでと、GNOME Files の再読み込みを足した。GNOME Files の節の手順 4 の、サイドバーの表示も確かめた
-    - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](../claude-code-gui.md) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
+    - aarch64 の実機（Raspberry Pi 5、カーネル 6.12.96）の cifs と、同じ実機のヘッドレスの GNOME のセッションの Nautilus（[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) で撮った）で、実機の上のコンテナの Samba（samba.md 手順 3 の smb.conf）につないで測った（[samba.md の付録](samba.md#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - この文書のブロックは貼っていない。マウントは、手順 5 と同じオプションに `port=4450` を足して手で行い、GNOME Files は `/usr/bin/gio mount` でつないでから Nautilus で開いた
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-08 に書いた）**
@@ -185,7 +185,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 | サーバー | samba.md 手順 3 の smb.conf の Samba（`samba-4.23.5-110.el10_2`） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../samba-client.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#samba-クライアント-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -416,7 +416,7 @@ x86_64 のクラウドホストの上で、使い捨ての VM とコンテナを
 - ブラケットペーストで貼ると、`sudo true` の後ろの 2 行は実行された。`{ … }` で囲んだ形も実行された
 - 失われた行は、画面に表示されたが、実行されなかった
 - このため、ほかの手順書では `sudo` の形によらず、後ろに行が続くブロックを `{ … }` で囲んだ（[README の記法](../../README.md#記法)）
-- 囲んだ samba.md を同じ貼り方で流したとき、ヒアドキュメントの行頭の TAB が bash の補完で `.` に置き換わることも分かった（[samba.md 手順 3](../samba.md#実施手順) の補足）
+- 囲んだ samba.md を同じ貼り方で流したとき、ヒアドキュメントの行頭の TAB が bash の補完で `.` に置き換わることも分かった（[samba.md 手順 3](../almalinux-setup.md#samba-サーバー-実施手順) の補足）
 
 ### 付録: クリーンインストールした VM 同士での検証（2026-10-06）
 
@@ -632,7 +632,7 @@ VM で測ったこと:
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
   - VM では、dontaudit の規則を外して（`semodule -DB`）自動マウントと手でのマウントをしても、AVC は出なかった
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 4 の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。VM では、ほかのユーザーは `Permission denied`、root は読めた
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる（VM で確認）
   - `vers=` は書かない。既定でサーバーの最も新しい版を使い、samba.md のサーバーとは SMB 3.1.1 になった

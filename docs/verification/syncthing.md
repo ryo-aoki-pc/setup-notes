@@ -1,6 +1,6 @@
 # Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の検証記録
 
-[手順書](../syncthing.md)・[ロールバックと注意点](../extra/syncthing.md)
+[手順書](../almalinux-setup.md#syncthing-実施手順)・[ロールバックと注意点](../extra/syncthing.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -31,7 +31,7 @@ $ ls -la ~/.local/state/syncthing/
 
 ### 実施手順 / 手順 6: 本文中の記録
 
-   - 本手順は実機検証時と同様に再起動して確かめる。同じ版の Linux で、待ち受けと TLS は再起動前に変わった実測もある（[Windows 11 の節の補足](../syncthing.md#windows-11-で使う)）
+   - 本手順は実機検証時と同様に再起動して確かめる。同じ版の Linux で、待ち受けと TLS は再起動前に変わった実測もある（[Windows 11 の節の補足](../windows-setup.md#syncthing-windows-11-で使う)）
 
 ### 実施手順 / 手順 6: 補足: 自己署名証明書と、別のやり方
 
@@ -62,7 +62,7 @@ syncthing-gui
 ```
 
 - 22000/tcp は同期本体、22000/udp は QUIC、21027/udp は同じ LAN にいる相手を見つけるためのブロードキャスト / マルチキャスト
-- **公開範囲は public ゾーンの全 NIC**。この環境では `wg0` も public にあるので、VPN 越しの拠点からも 22000 と 8384 に届く。絞るなら[接続元を絞る（任意）](../syncthing.md#接続元を絞る任意)
+- **公開範囲は public ゾーンの全 NIC**。この環境では `wg0` も public にあるので、VPN 越しの拠点からも 22000 と 8384 に届く。絞るなら[接続元を絞る（任意）](../almalinux-setup.md#syncthing-接続元を絞る任意)
 - **自ホストからの `curl https://<SERVER_IP>:8384/` は firewalld を通らない**（ローカル宛のパケットは `lo` 経由で先に受理される）。開け忘れはサーバー上の確認では見つからないので、別ホストか network namespace から試す（[付録](#付録-実機での検証記録2026-09-24)）
 
 ### 設定を自動でバックアップする（任意） / 手順 0: 本文中の記録
@@ -133,7 +133,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 
 - `Process:` の行に、`ExecStartPre` と `ExecStart` の終了コードが出る（保存先が無いときは `status=1/FAILURE`）
 - `journalctl --user -u syncthing-backup.service` は、ユーザーの journal を読めない環境では何も出ない。コンテナでは `No journal files were opened due to insufficient permissions.` だった（実機でも `sh.brew.syncthing.service` について `No journal files were found.` の実測がある。[付録](#付録-実機での検証記録2026-09-24)）
-- [linger](../linger.md) が有効なので、ログアウト中も path ユニットとタイマーは動く
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) が有効なので、ログアウト中も path ユニットとタイマーは動く
 
 ### 設定を自動でバックアップする（任意） / 手順 4: 補足: 送信専用にする理由と、コマンドで入る値
 
@@ -199,7 +199,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 
 **パスワードは標準入力で渡す**（`--gui-password=-`）。
 
-- コマンドラインに書くと、その間だけとはいえ、ほかのプロセスからコマンドラインが見える。AlmaLinux 10 の[手順 4](../syncthing.md#実施手順)と同じ渡し方
+- コマンドラインに書くと、その間だけとはいえ、ほかのプロセスからコマンドラインが見える。AlmaLinux 10 の[手順 4](../almalinux-setup.md#syncthing-実施手順)と同じ渡し方
 - Windows PowerShell 5.1 は、文字列をパイプで渡すときに、末尾に改行（CR LF）を足し、ASCII の文字コードで送る（`$OutputEncoding` の既定）。Syncthing は 1 行目だけを読み、末尾の CR LF を捨てる（ソースは `bufio.Reader.ReadLine`。Linux の同じ版で、CR LF 付きで渡したパスワードでログインできた。[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）
 - ASCII でない文字は `?` に置き換わって送られるはずなので、先に弾いている（`-cmatch` は大文字と小文字を区別する比較。区別しない `-match` だと、ケルビン記号などが通る）
 - `config.xml` に入るのは bcrypt のハッシュで、平文は残らない
@@ -212,7 +212,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 
 ### Windows 11 で使う / 手順 10: 補足: syncthing cli と、起動し直さなくてよい理由
 
-- `syncthing cli` は、動いている Syncthing に REST API で話しかける。API キーは `config.xml` から自分で読むので、渡さなくてよい（AlmaLinux 10 の[手順 6](../syncthing.md#実施手順)の補足と同じ）
+- `syncthing cli` は、動いている Syncthing に REST API で話しかける。API キーは `config.xml` から自分で読むので、渡さなくてよい（AlmaLinux 10 の[手順 6](../almalinux-setup.md#syncthing-実施手順)の補足と同じ）
 - Linux の同じ版（2.1.5）では、この 2 つを入れた直後から、起動し直さずに `0.0.0.0:8384` で HTTPS の待ち受けに変わった（平文の `http://` は 307 で `https://` へ飛ばされた。[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）
 - 証明書は Syncthing が作る自己署名のもの（`%LOCALAPPDATA%\Syncthing\https-cert.pem`）。ブラウザは警告を出す
 - Go は `0.0.0.0` の待ち受けを IPv4 と IPv6 の両方で開くので、`Get-NetTCPConnection` では `::` と出るはず（確かめていない）
@@ -220,7 +220,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
 ### Windows 11 で使う / 手順 11: 補足: ログと、自分の PC から開いた GUI
 
 - Windows の Syncthing は、ログを `%LOCALAPPDATA%\Syncthing\syncthing.log` に書く（10 MiB ごとに切り替え、古いものを 3 つ残す。ソースの既定値）。文字コードは UTF-8 なので、`-Encoding UTF8` を付けて読む（付けないと、Windows PowerShell 5.1 は日本語の Windows の既定の文字コードで読む）
-- この PC のブラウザで `https://127.0.0.1:8384/` を開いても GUI は使えるが、ファイアウォールを通らないので、この節の手順 7 の規則を確かめたことにはならない（AlmaLinux 10 の[手順 7](../syncthing.md#実施手順)の補足と同じ）
+- この PC のブラウザで `https://127.0.0.1:8384/` を開いても GUI は使えるが、ファイアウォールを通らないので、この節の手順 7 の規則を確かめたことにはならない（AlmaLinux 10 の[手順 7](../almalinux-setup.md#syncthing-実施手順)の補足と同じ）
 
 ### Windows 11 の更新 / 手順 2: 補足: 更新の動き
 
@@ -235,15 +235,15 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
   - AlmaLinux 10 では、ログインしていない間も動き続けるファイル同期デーモンにする
   - Windows 11 では、サインインしている間だけ動かす
 - **進め方**: どちらも **GUI の認証を先に設定してから**待ち受けを LAN に広げる。読者が書き換える値は無い（既定のままで通る）
-  - **AlmaLinux 10**（[実施手順](../syncthing.md#実施手順)）: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと、前提の [linger](../linger.md)（`loginctl enable-linger`）で常駐させる。最後に firewalld を開ける
-  - **Windows 11**（[Windows 11 で使う](../syncthing.md#windows-11-で使う)）: 公式の zip の `syncthing.exe` を `%LOCALAPPDATA%\Programs\Syncthing` に置き、タスク スケジューラのタスクで、サインインしている間だけ動かす
+  - **AlmaLinux 10**（[実施手順](../almalinux-setup.md#syncthing-実施手順)）: Homebrew で入れ、`brew services` が作る systemd ユーザーサービスと、前提の [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)（`loginctl enable-linger`）で常駐させる。最後に firewalld を開ける
+  - **Windows 11**（[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)）: 公式の zip の `syncthing.exe` を `%LOCALAPPDATA%\Programs\Syncthing` に置き、タスク スケジューラのタスクで、サインインしている間だけ動かす
     - 受信の規則は、最初の起動より前に作る
     - 更新は、Syncthing 自身の自動の更新に任せる
     - すべて管理者の Windows PowerShell 5.1 に貼る
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）。クリーンインストールした x86_64 の VM でも現行ブロックと、設定バックアップ・同じホストへの復元を本実行した（2026-10-06）**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - 下表のホストで、AlmaLinux 10 の各手順のコマンドを上から順に実行した。AlmaLinux 10 の手順はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
-    - linger の有効化（今の [linger.md](../linger.md) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
+    - linger の有効化（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
     - `syncthing 2.1.5`（Homebrew、`arm64_linux` のボトル）が入っている
     - `sh.brew.syncthing.service` が `enabled` / `active`
@@ -251,10 +251,10 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
     - firewalld に `syncthing` と `syncthing-gui` が入っている
   - **firewalld 越しの到達は、network namespace から 8384/tcp と 22000/tcp について確認済み**（[付録](#付録-実機での検証記録2026-09-24)）
   - このホストは**一度構築したあとクリーンインストールした直後**の環境で、Homebrew に formula が 1 本も入っていない状態から始めている
-  - **2026-09-24 の実機で本実行していないこと**: ブラウザでの GUI ログイン、別デバイスとの実際の同期（フォルダ共有・競合処理）、再起動後の自動起動、21027/udp と 22000/udp の実疎通、[接続元を絞る（任意）](../syncthing.md#接続元を絞る任意)、ロールバック
+  - **2026-09-24 の実機で本実行していないこと**: ブラウザでの GUI ログイン、別デバイスとの実際の同期（フォルダ共有・競合処理）、再起動後の自動起動、21027/udp と 22000/udp の実疎通、[接続元を絞る（任意）](../almalinux-setup.md#syncthing-接続元を絞る任意)、ロールバック
   - **バックアップと復旧の 2 節は、コンテナのみで検証した（2026-09-27）**
-    - 対象は[設定を自動でバックアップする（任意）](../syncthing.md#設定を自動でバックアップする任意)と[バックアップから戻す](../syncthing.md#バックアップから戻す)、[手順 4](../syncthing.md#実施手順)・[手順 9](../syncthing.md#実施手順) に足した「戻したホスト」の箇条書き
-    - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜6（と、[linger.md](../linger.md) に移した linger の有効化）のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
+    - 対象は[設定を自動でバックアップする（任意）](../almalinux-setup.md#syncthing-設定を自動でバックアップする任意)と[バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)、[手順 4](../almalinux-setup.md#syncthing-実施手順)・[手順 9](../almalinux-setup.md#syncthing-実施手順) に足した「戻したホスト」の箇条書き
+    - AlmaLinux 10.2 x86_64 のコンテナ（systemd を PID 1）に Homebrew と `syncthing 2.1.5` を入れ、実施手順 1〜6（と、[linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) に移した linger の有効化）のあとに両節のコードブロックを貼って通した（[付録](#付録-コンテナでのバックアップと復旧の検証2026-09-27)）
     - 確認したこと: path ユニットとタイマーで取れる、中身が同じなら作らない、100 個を超えたら古いものから消す、送信専用フォルダから受信専用の相手（同じコンテナの 2 つ目の Syncthing）へ届く、同じホストで戻せる、新しいコンテナで戻すとデバイス ID・API キー・フォルダが戻って中身が相手から届く
     - 確認していないこと: 実機（aarch64 を含む）、別のマシンの相手、GUI での共有と受け入れ、実際の 0 時台のタイマーと `Persistent=true` の追いかけ実行
   - 2026-09-28: 手順 7 のブロックを `{ … }` で囲んだ
@@ -268,8 +268,8 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
     - 配布物: 2.1.5 の Windows の zip の中身、`sha256sum.txt.asc` の行との一致（その GPG の署名も）、`syncthing.exe` の Authenticode の署名者・証明書の連なり・タイムスタンプ・埋め込みの設定（`consoleAllocationPolicy`）。Linux で PE を読んだだけで、Windows の `Get-AuthenticodeSignature` は通していない
     - Syncthing 2.1.5 のソース: 設定とログの場所、`--no-console`、`generate` のパスワードの読み方、モニターの起動し直しと自動の更新の動き
-    - Linux の公式の tarball の同じ版（2.1.5）での CLI（[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）: CR LF 付きのパスワードの `generate`、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 10 の 4 つのコマンドと起動し直さずに変わること、`cli operations restart` / `shutdown` / `upgrade`（新しい版が無いとき）、`upgrade --check-only`
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（構文とコマンドの引数だけ）。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4・6 のブロックは、Linux の pwsh で偽物の署名と Linux の `syncthing` を使って流した（同じ付録）
+    - Linux の公式の tarball の同じ版（2.1.5）での CLI（[付録](#付録-windows-11-の-cli-と-powershell-のブロックの-linux-での確認2026-10-03)）: CR LF 付きのパスワードの `generate`、[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 10 の 4 つのコマンドと起動し直さずに変わること、`cli operations restart` / `shutdown` / `upgrade`（新しい版が無いとき）、`upgrade --check-only`
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査（構文とコマンドの引数だけ）。[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 4・6 のブロックは、Linux の pwsh で偽物の署名と Linux の `syncthing` を使って流した（同じ付録）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、タスクの登録と起動・サインインでの起動・サインアウトで止まること、受信の規則と警告の窓、LAN の別の端末からの GUI と同期、自動の更新とその後のタスクの状態、arm64 の Windows、24H2 より前の Windows
   - 2026-10-03: 別の手順書（`docs/windows-syncthing.md`）として書いたものを、同じ日にこの文書の Windows 11 の節へ移した。コマンドは変えていない（手順の番号も節の中で同じ）
   - 2026-10-03（後）: LAN をプライベートにする操作を [Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) へ移し、この節の手順 7 を確かめてから規則を作る形に、[Windows 11 のロールバック](../extra/syncthing.md#windows-11-のロールバック)の手順 4 をそこを指す手順に変えた。手順 7 の今のブロックも、構文の検査と、偽物の `Get-NetConnectionProfile` での模擬だけ
@@ -302,18 +302,18 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 | ネットワーク | LAN の接続（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート) でプライベートにする） |
 
 > [!NOTE]
-> 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](../syncthing.md#実施手順)のシェル変数、Windows 11 は[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](../almalinux-setup.md#syncthing-実施手順)のシェル変数、Windows 11 は[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${ST_GUI_USER}` | Web GUI のログイン名。OS のアカウントとは別物（自動で同じ名前が入る） | `<USER>` |
 > | `${ST_GUI_ADDR}` | GUI の待ち受けアドレス | `0.0.0.0:8384`（既定）/ `127.0.0.1:8384` |
 > | `${ST_LAN_IP}` | 案内と検証にだけ使う LAN 側 IP（デフォルト経路の送信元から自動で入る） | `192.168.1.10` |
-> | `${ST_ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](../syncthing.md#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
-> | `${ST_BACKUP}` | 戻すアーカイブ。[バックアップから戻す](../syncthing.md#バックアップから戻す)場合だけ、その節の手順 4 で設定する（自動で最新が入る） | `~/syncthing-backup/syncthing-config-<日時>.tar.gz` |
-> | `$ST_GUI_USER` | Windows 11 の Web GUI のログイン名。Windows のアカウントとは別物（自動で同じ名前が入る）。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 2 で設定する | `<WIN_USER>` |
-> | `$LAN_IF` | Windows 11 で、相手とつながる LAN の接続の名前（自動で入る）。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 2 で設定する | `イーサネット` |
-> | `$ST_GUI_PASS` | Windows 11 の GUI のパスワード。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 5 で読み取り、手順 6 で消す | — |
+> | `${ST_ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](../almalinux-setup.md#syncthing-接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
+> | `${ST_BACKUP}` | 戻すアーカイブ。[バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)場合だけ、その節の手順 4 で設定する（自動で最新が入る） | `~/syncthing-backup/syncthing-config-<日時>.tar.gz` |
+> | `$ST_GUI_USER` | Windows 11 の Web GUI のログイン名。Windows のアカウントとは別物（自動で同じ名前が入る）。[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 2 で設定する | `<WIN_USER>` |
+> | `$LAN_IF` | Windows 11 で、相手とつながる LAN の接続の名前（自動で入る）。[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 2 で設定する | `イーサネット` |
+> | `$ST_GUI_PASS` | Windows 11 の GUI のパスワード。[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 5 で読み取り、手順 6 で消す | — |
 >
 > 出力例・ログ・表の中の値は `<HOSTNAME>`（Windows ではコンピューター名）/ `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）/ `<WIN_USER>`（Windows のユーザー名）/ `<LAN_IF>` / `<IP>` / `<DEVICE_ID>` / `<APIKEY>` のプレースホルダで書いてある。バージョン（`2.1.5`）は実行日によって変わる。
 >
@@ -323,7 +323,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 ### 実施前の状態
 
-AlmaLinux 10 の実機（2026-09-24）。Windows 11 の PC は、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 3 で確かめる。
+AlmaLinux 10 の実機（2026-09-24）。Windows 11 の PC は、[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 3 で確かめる。
 
 | 項目 | 状態 |
 |---|---|
@@ -335,7 +335,7 @@ AlmaLinux 10 の実機（2026-09-24）。Windows 11 の PC は、[Windows 11 で
 | EPEL | 未設定（`epel-release` も未導入） |
 | Go | 未導入（`go` 無し、`golang` RPM も無し） |
 
-[samba.md](../samba.md) の「実施前の状態」には firewalld の ports に `8384/tcp` が載っているが、**あれはクリーンインストール前の環境の記録**で、今回の実施前には開いていない。
+[samba.md](../almalinux-setup.md#samba-サーバー-実施手順) の「実施前の状態」には firewalld の ports に `8384/tcp` が載っているが、**あれはクリーンインストール前の環境の記録**で、今回の実施前には開いていない。
 
 ### 選択した方針
 
@@ -353,16 +353,16 @@ Windows 11 で Syncthing を入れる経路を比べた（2026-10-03 時点。�
 - **Windows 11 では、固定の場所に置き、Syncthing 自身に更新させた**
   - タスクの実行ファイルと、受信の規則のプログラムが、更新の後も同じパスを指す
   - 自動の更新は、入れ替える前にリリースの署名を確かめる。稼働中に定期確認するので、`winget upgrade` や `scoop update` を自分で走らせなくてよい
-  - 初回だけは本書が取ってくるので、sha256 と Authenticode の署名を確かめてから置く（[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4）
+  - 初回だけは本書が取ってくるので、sha256 と Authenticode の署名を確かめてから置く（[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 4）
   - AlmaLinux 10 の Homebrew 版は逆に、Syncthing 自身の更新を切ってある（`noupgrade`。[注意点](../extra/syncthing.md#注意点)）
 - **Windows 11 では、サインインしている間だけ、タスク スケジューラで動かした**
   - Syncthing の公式の説明は、タスク スケジューラ（「ユーザーがログオンしているかどうかにかかわらず実行する」とパスワードの保存）か、スタートアップのフォルダーのショートカット。サービスにするのは、ほとんどの使い方では勧めていない
   - 本書は、利用者の使い方（サインインしている間だけ同期すればよい）に合わせて `-LogonType Interactive` にし、パスワードを保存しない
   - スタートアップのフォルダーより、タスクの方が、電池・実行時間・二重起動の設定と、`Start-ScheduledTask` での開始ができる
-- **Windows 11 の受信の規則は、プログラムとプライベートに絞り、最初の起動より前に作った**（[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 7 の補足）
+- **Windows 11 の受信の規則は、プログラムとプライベートに絞り、最初の起動より前に作った**（[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 7 の補足）
   - 公式の説明の「一度対話で起動して、警告の窓で許可する」は、窓でキャンセルを押すと拒否の規則ができ、後から気付きにくい
 - **Windows 11 でも GUI は LAN に公開した**（AlmaLinux 10 と同じく、認証 → 起動 → 待ち受けを広げる順）
-  - この PC からだけ開くなら、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
+  - この PC からだけ開くなら、[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 10 を貼らない（`127.0.0.1:8384` のまま）。そのときは同じ節の手順 7 の `Syncthing-GUI-In-TCP` は要らない
 - **ネットワークをプライベートにするのは、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](../windows-setup.md#ネットワークとリモート)**
   - もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、この文書の Windows 11 の手順 7 の両方で同じ操作をしていた。2026-10-03 に、Windows のインストール直後の作業として Windows 11 の初期設定にまとめ、この文書は確かめるだけにした
   - そのため、[Windows 11 のロールバック](../extra/syncthing.md#windows-11-のロールバック)の手順 4 は、OpenSSH サーバーを使っているなら飛ばす
@@ -480,7 +480,7 @@ $ curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:8384/rest/system/s
 
 #### network namespace から firewalld 越しに到達する
 
-自ホストから `https://<SERVER_IP>:8384/` を叩いてもローカル宛として処理され、firewalld を通らない。そこで veth で結んだ network namespace から接続した。ゾーン未割り当ての veth は既定ゾーン（public）の扱いになるので、public に開けたポートがそのまま効く（[samba.md](../samba.md) の付録と同じ手法）:
+自ホストから `https://<SERVER_IP>:8384/` を叩いてもローカル宛として処理され、firewalld を通らない。そこで veth で結んだ network namespace から接続した。ゾーン未割り当ての veth は既定ゾーン（public）の扱いになるので、public に開けたポートがそのまま効く（[samba.md](../almalinux-setup.md#samba-サーバー-実施手順) の付録と同じ手法）:
 
 ```bash
 sudo ip netns add sttest
@@ -532,7 +532,7 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 - 再起動後に linger でサービスが自動起動すること（再起動していない）
 - 21027/udp（ローカル探索）と 22000/udp（QUIC）の実疎通。TCP の 22000 と 8384 しか試していない
 - VPN 越し（`wg0`）の相手デバイスとの接続
-- [接続元を絞る（任意）](../syncthing.md#接続元を絞る任意)の rich rule
+- [接続元を絞る（任意）](../almalinux-setup.md#syncthing-接続元を絞る任意)の rich rule
 - ロールバック（`brew services stop` / `disable-linger` / `brew uninstall`）の本実行
 - EPEL 版（2.1.3）との併用や、そこからの乗り換え
 - 1.x からの DB 移行と、移行後に 1.x へ戻せるか（今回は新規導入なので移行そのものが走っていない）
@@ -541,7 +541,7 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 
 ### 付録: コンテナでのバックアップと復旧の検証（2026-09-27）
 
-[設定を自動でバックアップする（任意）](../syncthing.md#設定を自動でバックアップする任意)と[バックアップから戻す](../syncthing.md#バックアップから戻す)を、コンテナで貼って通したときの記録。実機では試していない。
+[設定を自動でバックアップする（任意）](../almalinux-setup.md#syncthing-設定を自動でバックアップする任意)と[バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)を、コンテナで貼って通したときの記録。実機では試していない。
 
 #### 環境
 
@@ -553,9 +553,9 @@ Syncthing は設定を一時ファイルに書いてから `rename` する。そ
 | Homebrew | 7.0.6（[homebrew.md](../almalinux-setup.md) と同じインストーラ） |
 | Syncthing | `syncthing 2.1.5`（`x86_64_linux` のボトル。バージョン文字列の末尾は `[noupgrade]` で、aarch64 のボトルのような `modernc-sqlite` は付かない） |
 | 相手の端末 | 同じコンテナの 2 つ目の Syncthing（`--home=~/peer`、`tcp://127.0.0.1:22001` で待ち受け、探索・リレー・NAT は切った） |
-| 通していない手順 | [手順 7](../syncthing.md#実施手順)（firewalld を入れていない） |
+| 通していない手順 | [手順 7](../almalinux-setup.md#syncthing-実施手順)（firewalld を入れていない） |
 
-実施手順 1〜6 と linger の有効化（今の [linger.md](../linger.md) の手順 2）のあと（手順 3 のパスワードはブロックに直接書いた）、両節のコードブロックをそのまま貼った。相手の端末での操作（共有の受け入れ、受信専用、ゴミ箱）は、GUI の代わりに `syncthing cli --home=~/peer config ...` で同じ設定を入れた。
+実施手順 1〜6 と linger の有効化（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2）のあと（手順 3 のパスワードはブロックに直接書いた）、両節のコードブロックをそのまま貼った。相手の端末での操作（共有の受け入れ、受信専用、ゴミ箱）は、GUI の代わりに `syncthing cli --home=~/peer config ...` で同じ設定を入れた。
 
 #### スクリプトの動き
 
@@ -606,7 +606,7 @@ syncthing-config-20260927-161817.tar.gz
 - 0.5 秒おきに 5 回変えると、アーカイブは 1 つだけ増え、中身の `<theme>` は最後に入れた値だった（`ExecStartPre` の 5 秒の待ちの間に書き換えが終わる）
 - 送受信フォルダ `docs` の追加と、その相手との共有を 1 秒の間に続けて入れたときも、アーカイブは 1 つだった。直後にスクリプトを手で走らせると「変更なし」で、両方の変更が入っていた
 - `brew services restart syncthing` を 3 回続けても、アーカイブは増えなかった。起動では `config.xml` は書き換わらない（inode と更新時刻が同じ）
-- `tar -x` で `config.xml` を上書きしたとき（[バックアップから戻す](../syncthing.md#バックアップから戻す)の手順 5）も、path ユニットが走った
+- `tar -x` で `config.xml` を上書きしたとき（[バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)の手順 5）も、path ユニットが走った
 - `docker restart` のあと、ログインしないまま `sh.brew.syncthing.service`・`syncthing-backup.path`・`syncthing-backup.timer` が `active` になった（linger）
 - `systemd-analyze calendar daily` は `*-*-* 00:00:00`。`RandomizedDelaySec=1h` なので、`list-timers` の `NEXT` は 0:00〜1:00 のどこかになる（2 つのコンテナで 00:47 と 00:40）
 - `journalctl --user -u syncthing-backup.service` は `No journal files were opened due to insufficient permissions.`（コンテナに `/var/log/journal` が無く、journal は揮発）。`systemctl --user status` の `Process:` の行には終了コードが出る
@@ -631,7 +631,7 @@ Failed to connect to user scope bus via local transport: Connection refused
 
 #### 送信専用フォルダと相手
 
-[設定を自動でバックアップする（任意）](../syncthing.md#設定を自動でバックアップする任意)の手順 4 で入った `config.xml` のフォルダ:
+[設定を自動でバックアップする（任意）](../almalinux-setup.md#syncthing-設定を自動でバックアップする任意)の手順 4 で入った `config.xml` のフォルダ:
 
 ```
 <folder id="syncthing-backup-<HOSTNAME>" label="syncthing-backup (<HOSTNAME>)" path="/home/<USER>/syncthing-backup" type="sendonly" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" fsWatcherTimeoutS="0" ignorePerms="false" autoNormalize="true">
@@ -643,7 +643,7 @@ Failed to connect to user scope bus via local transport: Connection refused
 
 #### 同じホストで戻す
 
-GUI の待ち受けを `127.0.0.1:9999` に変えて壊した（壊した設定も path ユニットが取った）。壊す前のアーカイブを `ST_BACKUP` に入れ直して、[バックアップから戻す](../syncthing.md#バックアップから戻す)の手順 3〜6 を貼った:
+GUI の待ち受けを `127.0.0.1:9999` に変えて壊した（壊した設定も path ユニットが取った）。壊す前のアーカイブを `ST_BACKUP` に入れ直して、[バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)の手順 3〜6 を貼った:
 
 ```
 $ tar -tzvf "${ST_BACKUP}"
@@ -667,10 +667,10 @@ true
 
 元のコンテナの Syncthing を止め（相手の 2 つ目の Syncthing は動かしたまま）、Homebrew だけ入れた新しいコンテナで戻した。元のコンテナには、送信専用フォルダのほかに、相手と共有した送受信フォルダ `docs`（`~/Sync`、ファイル 2 つ）を足しておいた。
 
-- [バックアップから戻す](../syncthing.md#バックアップから戻す)の手順 1・2・4・5 を、Syncthing を入れる前に貼った。アーカイブは相手の受信専用フォルダから全部（9 個）コピーした（`scp` の代わりに `docker exec` の `tar` のパイプを使った）
-- そのあと実施手順 2〜6 と 8（と、今の [linger.md](../linger.md) の手順 2 に当たる linger の有効化）を通した
+- [バックアップから戻す](../almalinux-setup.md#syncthing-バックアップから戻す)の手順 1・2・4・5 を、Syncthing を入れる前に貼った。アーカイブは相手の受信専用フォルダから全部（9 個）コピーした（`scp` の代わりに `docker exec` の `tar` のパイプを使った）
+- そのあと実施手順 2〜6 と 8（と、今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 に当たる linger の有効化）を通した
 
-[手順 4](../syncthing.md#実施手順) の `syncthing generate`:
+[手順 4](../almalinux-setup.md#syncthing-実施手順) の `syncthing generate`:
 
 ```
 WRN Key exists; will not overwrite (log.pkg=github)
@@ -681,7 +681,7 @@ INF Updated GUI authentication password (log.pkg=github)
 - `cert.pem` / `key.pem` の sha256 は戻したものと同じ。デバイス ID も元のコンテナと同じ
 - `config.xml` の API キー・フォルダ（`docs` と `syncthing-backup-<HOSTNAME>`）・`<address>0.0.0.0:8384</address>`・`tls="true"` は残り、パスワードのハッシュだけ変わった
 
-[手順 5](../syncthing.md#実施手順) で起動したあとのログ（抜粋）:
+[手順 5](../almalinux-setup.md#syncthing-実施手順) で起動したあとのログ（抜粋）:
 
 ```
 INF Ready to synchronize (folder.id=docs folder.type=sendreceive log.pkg=model)
@@ -695,7 +695,7 @@ INF Synced file (folder.id=docs folder.type=sendreceive file.name=a.txt ...)
 - `~/Sync` は無かったが、Syncthing が `.stfolder` ごと作り、`a.txt` / `b.txt` を相手から受け取った。`~/syncthing-backup` にも `.stfolder` が作られた
 - REST の `/rest/db/status` で、`docs` も送信専用フォルダも `idle`、`needFiles` 0。相手から見たこちらの完了率は 100
 - 相手の `/rest/cluster/pending/devices` は `{}`。新しいデバイスとしての承認待ちにはならなかった
-- そのあと[設定を自動でバックアップする（任意）](../syncthing.md#設定を自動でバックアップする任意)の手順 1〜3 を貼ると、アーカイブが 1 つ増えた（`generate` でパスワードのハッシュが変わったため）
+- そのあと[設定を自動でバックアップする（任意）](../almalinux-setup.md#syncthing-設定を自動でバックアップする任意)の手順 1〜3 を貼ると、アーカイブが 1 つ増えた（`generate` でパスワードのハッシュが変わったため）
 
 #### アーカイブを 1 つだけ戻したとき
 
@@ -710,7 +710,7 @@ state=idle needFiles=8 localFiles=1 globalFiles=9
 
 #### 元に戻す
 
-[設定を自動でバックアップする（任意）](../syncthing.md#設定を自動でバックアップする任意)の手順 7 を、戻したコンテナで貼った:
+[設定を自動でバックアップする（任意）](../almalinux-setup.md#syncthing-設定を自動でバックアップする任意)の手順 7 を、戻したコンテナで貼った:
 
 ```
 Removed '/home/<USER>/.config/systemd/user/paths.target.wants/syncthing-backup.path'.
@@ -748,7 +748,7 @@ $ curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' https://github.com/s
 302 https://github.com/syncthing/syncthing/releases/download/v2.1.5/sha256sum.txt.asc
 ```
 
-`sha256sum.txt.asc` の Windows の行（改行は LF。[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4 の正規表現で、amd64 と arm64 の行がそれぞれ 1 つだけ合った）:
+`sha256sum.txt.asc` の Windows の行（改行は LF。[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 4 の正規表現で、amd64 と arm64 の行がそれぞれ 1 つだけ合った）:
 
 ```
 39571e4d0900c2a2cab14c0b170f49751340a869e49734ccc8079d9b98a7974b  syncthing-windows-amd64-v2.1.5.zip
@@ -802,9 +802,9 @@ issuer=C = US, O = Microsoft Corporation, CN = Microsoft Identity Verification R
 
 ### 付録: Windows 11 の CLI と PowerShell のブロックの Linux での確認（2026-10-03）
 
-本書の[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 6・10 と、後ろの Windows 11 の節で使う `syncthing` のコマンドが 2.1.5 でそのとおり動くかを、Linux の公式の tarball（`syncthing-linux-amd64-v2.1.5.tar.gz`、`syncthing v2.1.5 "Hafnium Hornet" (go1.27.1 linux-amd64) builder@github.syncthing.net 2026-09-08 06:57:55 UTC`）で確かめた。一時的な `HOME` で、親（モニター）付き（`--no-restart` 無し）で動かした。Windows だけのもの（`--no-console`・タスク・ファイアウォール・ログのファイル）は確かめられない。最後に、本書の PowerShell のブロックを Linux の PowerShell 7 で確かめた記録を置く。
+本書の[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 6・10 と、後ろの Windows 11 の節で使う `syncthing` のコマンドが 2.1.5 でそのとおり動くかを、Linux の公式の tarball（`syncthing-linux-amd64-v2.1.5.tar.gz`、`syncthing v2.1.5 "Hafnium Hornet" (go1.27.1 linux-amd64) builder@github.syncthing.net 2026-09-08 06:57:55 UTC`）で確かめた。一時的な `HOME` で、親（モニター）付き（`--no-restart` 無し）で動かした。Windows だけのもの（`--no-console`・タスク・ファイアウォール・ログのファイル）は確かめられない。最後に、本書の PowerShell のブロックを Linux の PowerShell 7 で確かめた記録を置く。
 
-**`generate` に CR LF 付きでパスワードを渡す**（[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 6 の Windows PowerShell 5.1 のパイプに当たる）:
+**`generate` に CR LF 付きでパスワードを渡す**（[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 6 の Windows PowerShell 5.1 のパイプに当たる）:
 
 ```
 $ printf 'pw-Test_1\r\n' | syncthing generate --gui-user=winuser --gui-password=-
@@ -826,7 +826,7 @@ POST /rest/noauth/auth/password  {"username":"winuser","password":"pw-Test_1\r"}
 
 CR を落としたパスワードでだけログインできた。`generate` の直後の設定は `<gui enabled="true" tls="false" …>` と `<address>127.0.0.1:8384</address>` で、空の `.syncthing.tmp.<数字>` が残った。
 
-**[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 10 のコマンド**: 4 つとも終了コード 0 で、`0.0.0.0:8384` と `true` を読み戻した。起動し直す前から、待ち受けは `0.0.0.0:8384` に変わり、HTTPS になっていた:
+**[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 10 のコマンド**: 4 つとも終了コード 0 で、`0.0.0.0:8384` と `true` を読み戻した。起動し直す前から、待ち受けは `0.0.0.0:8384` に変わり、HTTPS になっていた:
 
 ```
 https://127.0.0.1:8384/                  → 200
@@ -853,9 +853,9 @@ $ syncthing cli operations upgrade; echo $?
 **PowerShell のブロック**:
 
 - 本書の `powershell` のブロック 20 個を、Linux の PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
-- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（Windows PowerShell 5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、[Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 5 の `$ST_GUI_PASS` を手順 6 で使うことへの 1 つだけ）。わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`、`ForEach-Object -Parallel`）を入れたファイルでは、それぞれ指摘が出た
-- [Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4 のブロックを、Linux の pwsh で、パスの `\` を `/` に替え、`Get-AuthenticodeSignature` と `icacls.exe` を偽物にして流した。最新の版の行を `sha256sum.txt.asc` から取り、zip を取って sha256 が一致し、展開した `syncthing.exe` を `%LOCALAPPDATA%` に当たる場所へ置いて、一時フォルダーを消した。偽物の署名の `Status` を `Valid` 以外にすると、`中断: syncthing.exe の署名を確かめられない（HashMismatch）` で止まり、何も置かなかった
-- [Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 6 のブロックを、Linux の pwsh で、`$exe` を Linux の `syncthing` にして流した。`ConvertTo-SecureString` で作ったパスワードで `generate` が通り、起動した後にそのパスワードでログインできた（204）。`パス1` は `パスワードに ASCII でない文字がある` で止まった。どちらも最後に `$ST_GUI_PASS` が消えていた。PowerShell 7 はパイプの文字コードが UTF-8 で、改行は LF なので、Windows PowerShell 5.1 と同じではない
+- PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（Windows PowerShell 5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。互換の指摘は 0（ほかの規則の指摘は、[Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 5 の `$ST_GUI_PASS` を手順 6 で使うことへの 1 つだけ）。わざと PowerShell 7 だけの書き方（`??`、`Get-Content -AsByteStream`、`ForEach-Object -Parallel`）を入れたファイルでは、それぞれ指摘が出た
+- [Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 4 のブロックを、Linux の pwsh で、パスの `\` を `/` に替え、`Get-AuthenticodeSignature` と `icacls.exe` を偽物にして流した。最新の版の行を `sha256sum.txt.asc` から取り、zip を取って sha256 が一致し、展開した `syncthing.exe` を `%LOCALAPPDATA%` に当たる場所へ置いて、一時フォルダーを消した。偽物の署名の `Status` を `Valid` 以外にすると、`中断: syncthing.exe の署名を確かめられない（HashMismatch）` で止まり、何も置かなかった
+- [Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 6 のブロックを、Linux の pwsh で、`$exe` を Linux の `syncthing` にして流した。`ConvertTo-SecureString` で作ったパスワードで `generate` が通り、起動した後にそのパスワードでログインできた（204）。`パス1` は `パスワードに ASCII でない文字がある` で止まった。どちらも最後に `$ST_GUI_PASS` が消えていた。PowerShell 7 はパイプの文字コードが UTF-8 で、改行は LF なので、Windows PowerShell 5.1 と同じではない
 
 **残っている未確認事項**:
 

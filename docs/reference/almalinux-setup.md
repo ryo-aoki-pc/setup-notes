@@ -49,7 +49,7 @@
 
 - `epel-release` は AlmaLinux の `extras` リポジトリにあるので、追加のリポジトリの設定は要らない
 - 最後に出る「CRB を有効にすることを推奨」を気にしなくてよいのは、AlmaLinux 10 では CRB が既定で有効なため（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
-- EPEL を使う手順書（[btop](../btop.md)・[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[podman-tui](../podman-tui.md)・[VirtualBox](../virtualbox.md)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
+- EPEL を使う手順書（[btop](../almalinux-setup.md#btop-実施手順)・[distrobox](../almalinux-setup.md#distrobox-実施手順)・[podman-compose](../almalinux-setup.md#podman-compose-実施手順)・[podman-tui](../almalinux-setup.md#podman-tui-実施手順)・[VirtualBox](../almalinux-setup.md#virtualbox-実施手順)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
 
 ### 実施手順 / EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 
@@ -67,7 +67,7 @@
 
 ### 実施手順 / Flatpak と Flathub / 手順 3: 補足: 使えるようになるもの
 
-- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../almalinux-setup.md#firefox) と [VS Code](../vscode.md) は Flathub を使わず RPM で入れる
+- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../almalinux-setup.md#firefox) と [VS Code](../almalinux-setup.md#vs-code-実施手順) は Flathub を使わず RPM で入れる
 
 ### 実施手順 / Flatpak と Flathub / 手順 4: 補足: 確認用のアプリ
 
@@ -323,7 +323,7 @@
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
 
-- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../windows-claude-remote-control.md#実施手順)の手順 2）
+- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 2）
 - 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
@@ -570,7 +570,7 @@
 
 #### Flatpak: 実施手順 / 手順 4: 補足: 鍵は登録ファイルの中にある
 
-`flathub.flatpakrepo` は鍵を**本文に base64 で埋め込んで**いて、`flatpak remote-add` はこの鍵をリモートの設定に取り込む。以後の取得はすべてこの鍵で署名を検証する。したがって、確かめるべきは「登録ファイルの中の鍵が Flathub のものか」の 1 点になる（[VS Code](../vscode.md) の手順で rpm の鍵を確かめているのと同じ考え方）。
+`flathub.flatpakrepo` は鍵を**本文に base64 で埋め込んで**いて、`flatpak remote-add` はこの鍵をリモートの設定に取り込む。以後の取得はすべてこの鍵で署名を検証する。したがって、確かめるべきは「登録ファイルの中の鍵が Flathub のものか」の 1 点になる（[VS Code](../almalinux-setup.md#vs-code-実施手順) の手順で rpm の鍵を確かめているのと同じ考え方）。
 
 `gpg --show-keys` は鍵を**鍵束に取り込まずに表示するだけ**。ただし `~/.gnupg` が無ければ最初の実行で作られる（`gpg: directory '/home/<USER>/.gnupg' created`）。
 
@@ -861,7 +861,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 - [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`、`--spawn`、Limitations（SSH の切断後も残すには tmux か screen、10 分の終了）、4 時間以内の再開
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) — `Ctrl+B`（tmux では 2 回）
 - [Claude Code](../almalinux-setup.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
-- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — 同じことを Windows で行う手順書
+- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — 同じことを Windows で行う手順書
 - [Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
 
 ---
@@ -1066,7 +1066,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
 - **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/almalinux-setup.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
 - **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 の補足）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 
 #### Firefox: 参照
 
@@ -1125,7 +1125,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 | Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
 | PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 
 #### HackGen Console NF: 参照
 
@@ -1243,10 +1243,10 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ##### WezTerm: Windows 11 で入れる経路
 
 - **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
-  - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
+  - [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 
 #### WezTerm: 参照
 
@@ -1383,7 +1383,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
 - [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）
 - [lazygit — Config.md の Configuring File Editing](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md#configuring-file-editing) — `e` キーのエディタの決まり方（`EDITOR` とプリセット）
-- [ryo-aoki-pc/LazyVimStarter — docs/setup.md の Windows 11 に導入する](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#windows-11-に導入する-1-度だけ) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
+- [ryo-aoki-pc/LazyVimStarter — docs/setup.md の Windows 11 に導入する](../windows-setup.md#lazyvim-の設定を導入する) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
 
 ---
 
@@ -1444,7 +1444,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
 - [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
 - [lazygit Config Docs（v0.66.0）](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md) — Windows の設定の場所（`%LOCALAPPDATA%\lazygit\config.yml`）と `LG_CONFIG_FILE`
-- [ryo-aoki-pc/lazygit — README の導入方法](https://github.com/ryo-aoki-pc/lazygit#導入方法) — 自分用の設定の Windows の clone の例と元に戻し方
+- [ryo-aoki-pc/lazygit — README の導入方法](../almalinux-setup.md#lazygit-の設定を導入する) — 自分用の設定の Windows の clone の例と元に戻し方
 
 ---
 
@@ -1623,7 +1623,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - ネイティブインストーラ（`install.sh` が取ってくる `bootstrap.sh`）も、まず `claude-code-releases/latest` が指す版を取ってくる
 - 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 - **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../windows-setup.md#claude-code)の手順 4 の補足）
 - **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ節の手順 5）
 - **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ節の手順 7）。インストーラの中で動く前の確かめにはならない
@@ -1643,7 +1643,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - [winget-pkgs の Anthropic.ClaudeCode](https://github.com/microsoft/winget-pkgs/tree/master/manifests/a/Anthropic/ClaudeCode) / [scoop の main/claude-code](https://github.com/ScoopInstaller/Main/blob/master/bucket/claude-code.json) — Windows 11 で採らなかった経路の定義
 - [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
 - [Windows 11 の初期設定](../windows-setup.md) — 同じ PC で先に行う設定（貼り付けの設定と、この文書を通す順）
-- [windows-claude-remote-control.md](../windows-claude-remote-control.md) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
+- [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
 
 ---
 
@@ -1830,3 +1830,14 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - [Homebrew: grok-build](https://formulae.brew.sh/cask/grok-build) — Homebrew の cask（使わなかった経路）
 - [xAI: Models](https://docs.x.ai/developers/models) — モデルと料金（API キーで使うとき）
 - [Simon Willison: xai-org/grok-build, now open source](https://simonwillison.net/2026/Jul/15/grok-build/)（二次情報）
+
+## 省略できない初期設定
+
+必要な項だけを通す場合も、次の手順は省略しない。
+
+- [ログインと sudo](../almalinux-setup.md#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](../almalinux-setup.md#os-とファームウェアの更新)の手順 1・4・5
+- [システムの設定](../almalinux-setup.md#システムの設定)の手順 1、[共通の bash 設定](../almalinux-setup.md#共通の-bash-設定)の手順 1・2
+- [Homebrew](../almalinux-setup.md#homebrew)の手順 1〜3、[シェルのツール](../almalinux-setup.md#シェルのツール)の手順 1・2
+- [Git](../almalinux-setup.md#git)の手順 1〜6、[Firefox](../almalinux-setup.md#firefox)の手順 1〜7（ブラウザ認証に使う）
+- [HackGen Console NF](../almalinux-setup.md#hackgen-console-nf)の手順 1〜5（WezTerm と等幅のフォントに使う）、[WezTerm](../almalinux-setup.md#wezterm)の手順 1〜5
+- [再起動と確認](../almalinux-setup.md#再起動と確認)の手順 1

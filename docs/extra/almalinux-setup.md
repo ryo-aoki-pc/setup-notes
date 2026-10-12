@@ -317,7 +317,7 @@
    ```
 
    - [Codex・Grok のプラグイン](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1 と、自分用の Neovim の設定（その導入の手順 3）が入れたもの。プラグイン（[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1）と自分用の設定（この項の手順 2）を外してから行う
-   - [npm-offline.md](../npm-offline.md) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
+   - [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入-実施手順) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
    - bubblewrap は外さない（Flatpak と GNOME のデスクトップも使う）
    - トランザクション表の `Removing:` に `nodejs` と `nodejs-npm`、`Removing unused dependencies:` に一緒に入った `nodejs-libs`・`libuv` などが出る。ほかに使っているパッケージが出たら `N` で止める。よければ `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
@@ -389,7 +389,7 @@
 
    - 「Firefox」の手順 8 で一緒に入った依存も、ほかに使うものが無ければ一緒に消える
    - AAC・H.264 のための FFmpeg だけ外すなら、この手順だけ行う。RPM Fusion 自体も外すなら、続けて[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 5・6 を行う
-   - EPEL は外さない（[btop.md](../btop.md) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
+   - EPEL は外さない（[btop.md](../almalinux-setup.md#btop-実施手順) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Mozilla の repo ファイルを消す。
@@ -725,7 +725,7 @@
 
    - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y`
    - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この項の手順 3 で消す
-   - インターネットに出られないホストでは、[ssh-socks-tunnel.md の手順 1〜3](../ssh-socks-tunnel.md#実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
+   - インターネットに出られないホストでは、[ssh-socks-tunnel.md の手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
 1. アンインストーラと、残った `/home/linuxbrew` を消して、端末を開き直す。
@@ -968,7 +968,7 @@
 - **`show-all-if-ambiguous` は候補が多いと長い一覧になる**: `ls /usr/share/<Tab>` のような場所では、既定と同じく `Display all 123 possibilities? (y or n)` と聞かれる
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](../verification/almalinux-setup.md#統合前の記録-homebrewもとは-homebrewmd)
-- **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../gdu.md) で実際に問題になる）
+- **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu-実施手順) で実際に問題になる）
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
   - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す
@@ -1117,7 +1117,7 @@
 - **Grok Build: `agent` のコマンドも入る**: 中身は `grok` と同じ。インストーラーは、`~/.local/bin` に `agent` があっても `ln -sf` で置き換える（Cursor の CLI など、ほかの `agent` を使っているなら、入れた後に確かめる）
 - **Grok Build: `XAI_API_KEY` を設定すると、ログインが無いときに API キーで動く**（API の従量課金になる）。サブスクリプションで使うなら設定しない
 - **Grok Build: sandbox は既定で無効**: `--sandbox workspace`・`--sandbox read-only` などで、書ける場所を絞れる。Linux では Landlock が有効なカーネルと bubblewrap が要る（`sudo dnf install -y bubblewrap`。GNOME のデスクトップの PC には Flatpak と一緒に入っている）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）
-  - `runtime-socket deny path` と `Permission denied (os error 13)` が出たら、ソケットの親ディレクトリの検索権限を確かめる。ソケット本体の権限を緩める必要は無い。このときの Grok のレビューは動いていないので、[コーディングエージェントの共同作業の「相互にレビューする」](../coding-agents.md#相互にレビューする)の代替へ進む
+  - `runtime-socket deny path` と `Permission denied (os error 13)` が出たら、ソケットの親ディレクトリの検索権限を確かめる。ソケット本体の権限を緩める必要は無い。このときの Grok のレビューは動いていないので、[コーディングエージェントの共同作業の「相互にレビューする」](../almalinux-setup.md#コーディングエージェントの共同作業-相互にレビューする)の代替へ進む
   - カーネルの保護を適用できないエラー（`could not apply the '<プロファイル>' sandbox profile`）が出たら、Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。bubblewrap を入れただけで解決したとは扱わない（[起動できないときの補足](../reference/almalinux-setup.md#grok-build-注意点-linux-の-sandbox-を起動できないとき)）
 - **Grok Build: Claude Code の指示書も読む**: AGENTS.md のほかに、CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（読み込まれたものは `grok --trust inspect` の `Project Instructions`）。読むのは信頼したフォルダーだけ
 - **Grok Build: 会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](../reference/almalinux-setup.md#grok-build-注意点-会話のデータの扱い)）

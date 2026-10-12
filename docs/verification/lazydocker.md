@@ -1,6 +1,6 @@
 # lazydocker インストール手順（AlmaLinux 10 / Homebrew）の検証記録
 
-[手順書](../lazydocker.md)・[ロールバックと注意点](../extra/lazydocker.md)
+[手順書](../almalinux-setup.md#lazydocker-実施手順)・[ロールバックと注意点](../extra/lazydocker.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -27,7 +27,7 @@ Retry count: 26
 ### root でも使う（任意）: 検証状況の記録
 
 > [!WARNING]
-> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の導入条件と同じ）
+> - root の lazydocker は、Homebrew を入れたユーザーが書き換えられるプログラムを、root の権限で動かす（[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の導入条件と同じ）
 > - システムの API ソケットにつなげるのは root だけ。権限を緩めない（つなげると、root と同じことができる）
 > - この節の検証の範囲は[コンテナの付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)と[実機の付録](#付録-aarch64-の実機での検証記録2026-10-06)
 
@@ -42,16 +42,16 @@ Retry count: 26
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **aarch64 の実機で基本操作・podman exec・既存設定を使った root の表示と停止を検証済み（2026-10-06）。x86_64 の新規 VM では、現行 `5da3478` 版と共通 bash `3d5323e` で実施手順 1〜5 とロールバックを再検証した（同日）**。実機は導入済みの環境で、一時設定と確認用コンテナを使った。[実機の範囲と後片付け](#付録-aarch64-の実機での検証記録2026-10-06)、[現行版の VM 記録](#付録-現行版を新規-vm-で再検証2026-10-06)を参照。更新・compose の任意節は、この新規 VM では再実行していない。以前の `0dbb522` 版の VM 記録とコンテナ記録も付録に残した
   - これは 2026-10-06 の時点の状態
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](../lazydocker.md#更新)、[ロールバック](../extra/lazydocker.md#ロールバック)を通した
-  - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](../podman-compose.md) の手順 1〜6 を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と Docker 向けの節、[Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)を通したうえで、**この文書のコードブロックをそのまま端末に貼って**、手順 1〜5、2 つの任意節、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/lazydocker.md#ロールバック)を通した
+  - compose の任意節の前には、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は podman-compose.md の手順 1〜3）と、[podman-compose.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-compose.md) の手順 1〜6 を通した
   - 検証コンテナで確認したこと:
     - lazydocker 0.25.2 が `DOCKER_HOST` で podman 5.8.2 の API ソケットにつながり、コンテナ・イメージ・ボリューム・ネットワークとログを出す
     - 画面の `s` でコンテナが止まり、`podman ps` にも `Exited (0)` で出る
     - `c` に足した `podman exec` でシェルが開き、`dockerCompose: podman-compose` で Project と Services の枠が出て、`r` で `web` が再起動する
-    - [使い方の基本](../lazydocker.md#使い方の基本)の表のキーと、`E`・`a` が何も起こさないこと
+    - [使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#使い方の基本)の表のキーと、`E`・`a` が何も起こさないこと
   - **確認していないこと**: 色や罫線の見た目、デスクトップの端末での表示、`w`（ブラウザで開く）・`b`（まとめての操作）・`p`（一時停止）・`/`（絞り込み）
   - aarch64 の実機では、手順書全体をコードブロックのまま順に貼る検証はしていない
-  - [root でも使う](../lazydocker.md#root-でも使う任意)の節は、**目印付きの追記・撤去への修正前の手順 1〜8 を、x86_64 のコンテナで検証した**（2026-10-05。[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。当時の目印付き追記・撤去ブロックは一時ファイルとスタブでの検証のみ。現行手順は共通設定の確認を行い、直接追記・撤去はしない。aarch64 の実機では、既存のソケット・bash の設定を使った表示と停止だけを追加で検証した（2026-10-06）
+  - [root でも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#root-でも使う任意)の節は、**目印付きの追記・撤去への修正前の手順 1〜8 を、x86_64 のコンテナで検証した**（2026-10-05。[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。当時の目印付き追記・撤去ブロックは一時ファイルとスタブでの検証のみ。現行手順は共通設定の確認を行い、直接追記・撤去はしない。aarch64 の実機では、既存のソケット・bash の設定を使った表示と停止だけを追加で検証した（2026-10-06）
     - 検証コンテナで通したこと: その節の手順 1〜8 を、この文書のコードブロックのまま、`sudo` のユーザーの端末に、ブラケットペーストの無しと有りで 1 回ずつ貼った。手順 1・2 は重ねても貼った
     - 検証コンテナで確認したこと:
       - root の画面に root のコンテナだけが出て、`s` で止まる。`su -`・`sudo -s` の root のシェルでも同じ
@@ -68,8 +68,8 @@ Retry count: 26
 |---|---|---|
 | 実施日 | 2026-10-06（aarch64 の導入済み環境） | 2026-09-28 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2` を、x86_64 の実機の rootless の podman 5.8.2 で `--privileged` にして起動。systemd が PID 1） |
-| podman | aarch64 は 5.8.2（`podman-5.8.2-9.el10_2.alma.1.aarch64`、rootless と root を確認） | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入。入れ子の rootless） |
-| Homebrew | aarch64 は 7.0.8 | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜4 で導入） |
+| podman | aarch64 は 5.8.2（`podman-5.8.2-9.el10_2.alma.1.aarch64`、rootless と root を確認） | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入。入れ子の rootless） |
+| Homebrew | aarch64 は 7.0.8 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 で導入） |
 | lazydocker | aarch64 は導入済みの 0.25.2（Homebrew、arm64、ボトルから導入した記録あり） | 0.25.2（`x86_64_linux` のボトル） |
 | podman-compose | aarch64 は未導入 | `podman-compose-1.5.0-1.el10_1`（epel。compose の任意節だけで使った） |
 | `docker` コマンド | aarch64 は無し（`podman-docker` も無し） | 無し（`podman-docker` は入れていない） |
@@ -84,7 +84,7 @@ Retry count: 26
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../podman.md) の実施手順と Docker 向けの節、Homebrew の導入の後）の状態:
+検証コンテナ（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と Docker 向けの節、Homebrew の導入の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -102,8 +102,8 @@ Retry count: 26
 | GitHub のリリースの実行ファイル / `go install` | 不採用。更新が手作業になる |
 | `podman-docker`（AppStream）で `docker` を podman に読み替える | 不採用。入れると、既定の設定のまま `E`・`a`・compose の判定が動いた（検証で確認）。ただし `/usr/bin/docker` がシステム全体に入り、呼ぶたびに `Emulate Docker CLI using podman. ...` が出る。本書は自分の設定ファイルだけで補った |
 | Docker Engine（docker-ce） | 対象外（[podman.md](podman.md#選択した方針) と同じ） |
-| [podman-tui](../podman-tui.md) | 別の手順書。podman の API でつなぎ、pod とシークレットも扱える。`DOCKER_HOST` は要らない |
-| **root のコンテナは `sudo -i lazydocker` で見る**（`/root/.bashrc` の `DOCKER_HOST` で、システムの API ソケットにつなぐ） | **採用**（[root でも使う](../lazydocker.md#root-でも使う任意)の節）。自分の `~/.bashrc` と同じ形で、効くのは root のシェルだけ |
+| [podman-tui](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman-tui.md) | 別の手順書。podman の API でつなぎ、pod とシークレットも扱える。`DOCKER_HOST` は要らない |
+| **root のコンテナは `sudo -i lazydocker` で見る**（`/root/.bashrc` の `DOCKER_HOST` で、システムの API ソケットにつなぐ） | **採用**（[root でも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#root-でも使う任意)の節）。自分の `~/.bashrc` と同じ形で、効くのは root のシェルだけ |
 | `/run/docker.sock` を root のソケットへのリンクにして、`sudo lazydocker` で起動する | 不採用。root で動く Docker の API を使うツールが、どれも root の podman につながる（podman-docker の tmpfiles.d と同じ仕組み） |
 | 毎回 `sudo DOCKER_HOST=unix:///run/podman/podman.sock lazydocker` と打つ | 不採用。設定は残らないが長い（動くことは確かめた） |
 | システムの `podman.socket` の `SocketGroup` を変え、自分の lazydocker から直接つなぐ | 不採用。`sudo` を経ずに、root と同じことができるようになる |
@@ -147,7 +147,7 @@ commandTemplates:
 
 ### root で使うときの補足
 
-[root でも使う](../lazydocker.md#root-でも使う任意)の節の補足。実測は x86_64 のコンテナで、その節の手順 5 の後のもの（[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。
+[root でも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#root-でも使う任意)の節の補足。実測は x86_64 のコンテナで、その節の手順 5 の後のもの（[付録](#付録-root-でも使う節のコンテナでの検証記録2026-10-05)）。
 
 ### 付録: コンテナでの検証記録（2026-09-28）
 
@@ -157,7 +157,7 @@ commandTemplates:
 
 **流し方**:
 
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 を流した
 - 本文の折り畳みの外にある bash のブロックを上から順に抜き出し、ブラケットペーストで 1 ブロックずつ貼って Enter を送った
 - 画面の手順は、画面の文字を読みながらキーを送った
 
@@ -181,7 +181,7 @@ commandTemplates:
 - `customCommands:` を 2 回書いたとき（podman exec の節の手順 2 の補足）
 - 既定の設定のまま `~/compose-sample` で起動すると、Project と Services の枠が出ないこと
 - `podman-docker` を入れると、既定の設定のまま `E`（`bash-5.2$`）・`a`（`Ctrl+P` `Ctrl+Q` で抜けた）・compose の判定が動くこと。確かめた後に `sudo dnf remove -y podman-docker` で外した
-- [使い方の基本](../lazydocker.md#使い方の基本)の表のキー
+- [使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#使い方の基本)の表のキー
 
 #### 未確認事項
 
@@ -193,7 +193,7 @@ commandTemplates:
 
 ### 付録: root でも使う節のコンテナでの検証記録（2026-10-05）
 
-[root でも使う（任意）](../lazydocker.md#root-でも使う任意)を足したときの記録。x86_64 のクラウドホスト（Ubuntu 24.04、cgroup v1）上の Docker 29.6.2 で、使い捨てのコンテナを立てて行った。実機で加えた変更は無い。
+[root でも使う（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#root-でも使う任意)を足したときの記録。x86_64 のクラウドホスト（Ubuntu 24.04、cgroup v1）上の Docker 29.6.2 で、使い捨てのコンテナを立てて行った。実機で加えた変更は無い。
 
 **環境**:
 
@@ -209,9 +209,9 @@ commandTemplates:
 - **プロキシ**: CA を信頼ストアに足し、dnf の `proxy=`、`almalinux-*.repo` の `baseurl=`（https）、ログインシェルとシステム・ユーザーの systemd のプロキシの環境変数を入れた。`sudo` はプロキシの環境変数を消すので、root の podman のイメージの取得のために、同じ `90-verify.conf` の `[engine]` の `env` にも書いた
 - **保管場所**: `/home` と `/var/lib/containers` に Docker のボリューム（ext4）を付けた
 - **ログイン**: `systemd-logind` の mask を戻し、コンテナの中の `sshd` に、`<USER>`（wheel、`/etc/sudoers.d` に NOPASSWD の設定）で鍵を使ってログインした
-- **前提の手順書**: [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](../almalinux-setup.md) の手順 1〜4（インストーラだけ `NONINTERACTIVE=1`）、この文書の手順 1〜3 は、端末の無い ssh からスクリプトで流した（貼ってはいない）
+- **前提の手順書**: [podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の手順 1〜3・5〜7 と Docker 向けの節、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4（インストーラだけ `NONINTERACTIVE=1`）、この文書の手順 1〜3 は、端末の無い ssh からスクリプトで流した（貼ってはいない）
   - その ssh を閉じたとき、linger が無いので自分の `lazydocker-web` が止まった。入口の確認の前に `podman start` で起動し直した
-- homebrew.md の [root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の手順 1 は、下の端末に貼った
+- homebrew.md の [root のシェルでも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節の手順 1 は、下の端末に貼った
 
 **流し方**:
 
@@ -233,7 +233,7 @@ commandTemplates:
 | `sudo lazydocker` | root のシェルの節だけのときは `sudo: lazydocker: command not found`（終了コード 1）。homebrew.md の sudo の節の手順 1 の後は、`Error` の枠に `Cannot connect to the Docker daemon at unix:///var/run/docker.sock` が出て、`Retry count` が増えた |
 | `sudo -E lazydocker` | `sudo -E printenv` は `HOME` が `/root`、`DOCKER_HOST` が `unix:///run/user/<UID>/podman/podman.sock`。画面は `running  lazydocker-web`（自分のコンテナ）。自分のホームに root の持ち物のファイルはできなかった |
 | `sudo DOCKER_HOST=unix:///run/podman/podman.sock lazydocker` | `running  lazydocker-root-web` |
-| root の `c`・`E` | root の設定ファイルに [podman exec の節](../lazydocker.md#podman-exec-でシェルを開く任意)の手順 2 の 5 行を書くと、`c` → `podman exec sh` → Enter で `+ podman exec -it <ID> sh` と `sh-5.2$`、`id` は `uid=1001(default) gid=0(root) groups=0(root)`、`exit` と Enter で画面に戻った。`E` は `+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` だけ |
+| root の `c`・`E` | root の設定ファイルに [podman exec の節](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#podman-exec-でシェルを開く任意)の手順 2 の 5 行を書くと、`c` → `podman exec sh` → Enter で `+ podman exec -it <ID> sh` と `sh-5.2$`、`id` は `uid=1001(default) gid=0(root) groups=0(root)`、`exit` と Enter で画面に戻った。`E` は `+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` だけ |
 | 6 | `lazydocker-root-web`、`0`。`/root/.bashrc` の SHA-256 が、この節の前（homebrew.md の root のシェルの節の後）と一致し、その節の `case` の行は残った。空の `/root/.config` は残った |
 | 7 | `Untagged: registry.access.redhat.com/ubi10/httpd-24:latest`、`Deleted: 8b178ff9bc02…` |
 | 8 | `Removed '/etc/systemd/system/sockets.target.wants/podman.socket'.`、`inactive`。`/run/podman/podman.sock` のファイルは残り、つなぐと `curl` は終了コード 7 |
@@ -285,7 +285,7 @@ AlmaLinux 10.2 の aarch64 ホストで、導入済みの lazydocker 0.25.2 を�
 
 **後片付け**: 今回のコンテナだけを `podman rm -f lazydocker-verify-20261005` と `sudo -n podman rm lazydocker-root-verify-20261005` で撤去し、今回取得した UBI httpd のイメージをユーザーと root の保管場所からそれぞれ `podman rmi` で撤去した。ユーザーのソケットは `systemctl --user stop podman.socket` で `inactive/disabled` に戻した。root のソケットは元の `active/enabled` を維持した。通常の設定ディレクトリはユーザー・root とも作られず、既存の bash 設定と lazydocker 本体は残った。ユーザーのコンテナ・イメージは 0 件、root のコンテナは 0 件、root の既存イメージは開始前と同じ 3 件。一時設定と検証用の端末も撤去した。
 
-**このホストで実施する場合**: 一般ユーザーの手順は、前提の [Podman 手順 7](../podman.md#実施手順)でユーザーの API ソケットを有効にし、既存の bash 設定を読み直せば実施できる。root の任意節は既存のソケットと設定で動いた。compose の任意節は `podman-compose` と確認用プロジェクトが未導入なので、そのままでは実施できない。
+**このホストで実施する場合**: 一般ユーザーの手順は、前提の [Podman 手順 7](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#実施手順)でユーザーの API ソケットを有効にし、既存の bash 設定を読み直せば実施できる。root の任意節は既存のソケットと設定で動いた。compose の任意節は `podman-compose` と確認用プロジェクトが未導入なので、そのままでは実施できない。
 
 #### 今回確認していないこと
 
@@ -336,15 +336,15 @@ AlmaLinux 10.2 の aarch64 ホストで、導入済みの lazydocker 0.25.2 を�
 
 ### root で使うときの補足
 
-- **入口と前提の節**: `-i` の無い 3 つは、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通したときだけ動く（通さないと `sudo: lazydocker: command not found`）
-  - `su -` は、[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節が要る
+- **入口と前提の節**: `-i` の無い 3 つは、[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通したときだけ動く（通さないと `sudo: lazydocker: command not found`）
+  - `su -` は、[AlmaLinux 10 の初期設定の Homebrew を root のシェルでも使う](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節が要る
   - `sudo -i lazydocker` は、どちらの節だけでも動いた。どちらも無いと `-bash: line 1: lazydocker: command not found`
 - **`sudo -E` は使わない**: `HOME` は `/root`（`/etc/sudoers` の `always_set_home`）で root の設定を読みながら、root の権限で自分のコンテナを操作する
   - 自分の `~/.config/lazydocker` に、root の持ち物のファイルはできなかった
 - **root の設定ファイルは `/root/.config/lazydocker/config.yml`**: 自分の設定（任意節で足した `c` のコマンドなど）は使わない
-  - root でも `c` からシェルを開くなら、[podman exec の節](../lazydocker.md#podman-exec-でシェルを開く任意)の手順 2 の 5 行を、`sudo` で root の設定ファイルに書く
+  - root でも `c` からシェルを開くなら、[podman exec の節](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/lazydocker.md#podman-exec-でシェルを開く任意)の手順 2 の 5 行を、`sudo` で root の設定ファイルに書く
   - 書いたコンテナでは、root の画面の `c` → `podman exec sh` で `sh-5.2$` が開いた
-- **`E` と `a` は root でも何も起きない**: `docker` コマンドが無いため（[注意点](../extra/lazydocker.md#注意点)）
+- **`E` と `a` は root でも何も起きない**: `docker` コマンドが無いため（[注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/lazydocker.md#注意点)）
 - **root のシェルの `DOCKER_HOST` は、ほかのツールにも効く**: root のシェルで動かす Docker の API を使うツールも、root の podman につながる。podman 自身は `DOCKER_HOST` を読まない
 - **podman-docker を入れたホストでは**: `/etc/profile.d/podman-docker.sh` が、`DOCKER_HOST` の無い root のログインシェルに同じ値を入れ、`/run/docker.sock` を root のソケットへのリンクにする
   - その節の手順 2 の確かめの行は、書く前から同じ 2 行を出した。`if` は `/root/.bashrc` しか見ないので、同じ行を書き足す（害は無い）

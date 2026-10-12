@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の参考資料
 
-[手順書](../gnome-headless-session.md)・[ロールバックと注意点](../extra/gnome-headless-session.md)
+[手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
 [検証記録](../verification/gnome-headless-session.md#参考資料から分離した記録)
 
@@ -8,7 +8,7 @@
 
 ### 実施手順 / 手順 1: 補足: 変数について
 
-- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[gnome-remote-desktop.md](../gnome-remote-desktop.md) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
+- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
 - `RDP_PORT` の判定に使う `systemctl is-enabled gnome-remote-desktop.service` は、`--user` を付けないのでシステムの unit を見る
 - リモートログインのデーモンは 3389/tcp で待ち受けるので、同じ PC ではヘッドレスのセッションの RDP を 3390/tcp にする
 - `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
@@ -33,7 +33,7 @@
 
 ### 実施手順 / 手順 3: 補足: 証明書
 
-- 中身は [gnome-remote-desktop.md 手順 2](../gnome-remote-desktop.md#実施手順) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
+- 中身は [gnome-remote-desktop.md 手順 2](../almalinux-setup.md#gnome-のリモートログイン-実施手順) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る
 - TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - 貼り直しても退避は上書きしない。`backup-complete` は退避完了、`ready` は証明書の準備完了、`created-certificate` はこの手順が新規生成したことの目印
@@ -71,18 +71,18 @@
 
 ### 実施手順 / 手順 9: 補足: TLS プローブ
 
-- スクリプトは [gnome-remote-desktop.md 手順 10](../gnome-remote-desktop.md#実施手順) と同じもの。第 2 引数でポートを渡す
+- スクリプトは [gnome-remote-desktop.md 手順 10](../almalinux-setup.md#gnome-のリモートログイン-実施手順) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため（どちらでも動く）
 - `~/rdp_tls_probe.py` は、この手順書が作る唯一の作業ファイル
 
 ### 接続元を LAN に絞る（任意） / 手順 1: 補足: 引用符
 
-- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[gnome-remote-desktop.md の同じ節](../gnome-remote-desktop.md#接続元を-lan-に絞る任意)）
+- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[gnome-remote-desktop.md の同じ節](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る任意)）
 
 ### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
 
 - **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](../verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
-- **ドロップインを外す**: [claude-code-gui.md](../claude-code-gui.md) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
+- **ドロップインを外す**: [claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
 - **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
 - **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 5 の補足](#実施手順--手順-5-補足-資格情報の置き場所)）
 - 同じ節の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
@@ -94,8 +94,8 @@
 ### 選択した方針
 
 - **ヘッドレスのセッションにする**（RHEL 10 の文書の 1.4）
-  - デスクトップ共有（設定アプリの「デスクトップ共有」。CLI で設定する手順は [gnome-desktop-sharing.md](../gnome-desktop-sharing.md)）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
-  - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
+  - デスクトップ共有（設定アプリの「デスクトップ共有」。CLI で設定する手順は [gnome-desktop-sharing.md](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
+  - リモートログイン（[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
   - ヘッドレスのセッションは RDP 接続より前から常駐し、手順 10 の接続では GDM のログイン画面を通らず、そのデスクトップへ入る
 - **証明書は openssl で作る** — SAN に IP を入れる理由は gnome-remote-desktop.md と同じ
 - **ポートを固定し、ポートのネゴシエーションを切る** — ファイアウォールで開けたポートと食い違わないように
