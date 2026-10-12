@@ -370,3 +370,13 @@ offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが�
 2 VM を通常停止で Off と確認し、自己 lock を解放、6 GiB の枠を返却した。通常の sudo 対話認証による続行案は準備であり、実認証・後続導入の結果ではない。この時点の中断を、後日の成功で書き換えない。
 
 根拠は今回専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012` の公開判定表・画面、`sudo3-auto-approval-rejection.json`、`post-stop-check.json`、`frame-return-receipt.json`。モデルは秘密内容・個別 hash・旧 raw/認証ログを読んでいない。
+
+## 付録: 通常sudo認証で前提を追加確認した記録（2026-10-12 12:27 UTC）
+
+凍結原文 `2785798` で、11:17に停止した同じ専用2VMを続行した。旧GUI2件に、システムの設定1の変数読み戻し・同3のSSH待受とfirewall確認・SOCKSトンネル実施手順1の変数読み戻しを追加した。計61番号は5通過／1条件skip／1未達partial／54未実施（元sudo3を含む）。追加3件はSSH TTY搬送で、GNOME/Ptyxisへの原文貼付成功ではない。
+
+設定3の通常sudo対話認証は、実TTY・前面sudo・echo無効を確認して既存masked helperで通した。元sudo3のNOPASSWD ALL設定は未実施。SOCKS2のSSHパスワード送信は「前面sudo限定の許可がSSH認証を含まない」と自動審査が拒否し、秘密未送信で中断した。
+
+Homebrew本体・jq bottle・LazyVim・npm・Masonの初回取得は未開始。Homebrewオフライン実施1〜6・更新の成功は追加せず、旧既存継続の成功とも合算しない。2VMを通常Off、自己lock解放、6GiB返却。旧11:17の付録は当時の記録として保持する。
+
+根拠は専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012/normal-auth-20261012T115622Z/` の公開番号台帳・completion、通常sudoのauth-facts、`nested-ssh-auto-approval-rejection.json`、終了時照合・解放receipt。原文132MD／工具20／停止親5件の全体SHA・親鎖は開始・終了とも保持baselineに一致し、expectedは変更していない。

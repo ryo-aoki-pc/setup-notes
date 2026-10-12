@@ -10,7 +10,7 @@
 - `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから2冊の新見出しへの対応表
 - `docs/verification/consolidation.md` — 集約の静的検査・回帰検査・Grok のレビューと、実機では未実施の範囲
 - [README](../../README.md) — 2冊の索引と、環境構築・共同 VM 検証の横断報告への案内。個別の実測は既存の検証記録へ残す
-- [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLはAS3まで113手順を判定、残40手順を継続。OFFLINE-FULLの既存継続と初回試行の2確認/59未実施を分ける。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
+- [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLはAS3まで113手順を判定、残40手順を継続。OFFLINE-FULLの既存継続と初回試行の旧2確認/59未実施と、通常認証後の現在5通過/1条件skip/1未達partial/54未実施を分ける。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
 - 新しい手順は2冊の該当用途へ追加し、対応する記録とこの構成一覧を更新する
 - Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
 - Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
@@ -286,7 +286,7 @@
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
   - 2026-10-11 の Hyper-V の VM での通しで気付いた、未対応の 2 点（スクリプトと例のファイルは変えていない）: `site.env.example` の 44 行目と `clients.list.example` の 1 行目のコメントが、項に分ける前の手順番号（「docs/wireguard.md の手順 2」「手順 10〜11」）のまま。`client add` の後の案内の行（`表示するには`・`ホストに反映するには`。`wg-vpn.sh` の 1191・1192・1215 行目）が、`-e` の無い形で出る（手順書のブロックは、どれも `-e ~/wg/site.env` を付ける。案内のとおりに打ったときの動きは、確かめていない）
 
-- `docs/hypervisor-verification.md` — 3方式の初期設定と、主にHyper-Vの追加試験の横断報告。成功・失敗・条件未該当・未実施、比較条件、正式性能測定の観測値と比較未完を記録。担当報告由来の分母を重複合算しない。R8は認証なし範囲の部分確認。W0の元媒体署名拒否を保持しWindows導入は未完。AS-FULL旧partialと新clean-install起点113手順の107確認/4条件外/1説明不一致/1未実施を分け、残40手順を継続。OFFLINE-FULLは既存継続判定を完了し、別初回試行のGUI前提2確認/59未実施を保持。初回導入・新規Mason取得と正式B/Cの静穏な再訪問は残る
+- `docs/hypervisor-verification.md` — 3方式の初期設定と、主にHyper-Vの追加試験の横断報告。成功・失敗・条件未該当・未実施、比較条件、正式性能測定の観測値と比較未完を記録。担当報告由来の分母を重複合算しない。R8は認証なし範囲の部分確認。W0の元媒体署名拒否を保持しWindows導入は未完。AS-FULL旧partialと新clean-install起点113手順の107確認/4条件外/1説明不一致/1未実施を分け、残40手順を継続。OFFLINE-FULLは既存継続判定を完了し、別初回試行の旧GUI2確認/59未実施を保持し、通常sudo認証後の前提3件を追加して現在5/61通過・1条件skip・1未達partial・54未実施を記録。追加3件はSSH搬送、SOCKS2のSSH認証は審査拒否で秘密未送信。初回導入・新規Mason取得と正式B/Cの静穏な再訪問は残る
   - C20-FOLLOWUP（2026-10-12）で一時 LAN 復旧後の WireGuard 原文確認と双方向疎通、実 GNOME 端末の IBus 原文ファイル実行と日本語変換を追記。C20 の部分成功と未確認、搬送方法の違いを保持し、旧集計へ重複加算しない
   - 2026-10-12のオフライン継続結果と最新の並行割当を追記。旧FINALの未実施は当時の履歴として保持。実行原文を凍結し、AS4GiB/Windows8GiBとV2の後続8GiB枠を分け、性能測定は全担当の作業終了後に行う
   - 修正後の初回オフライン導入は別fresh起点の再試行を残す。既存継続のcompleted・onlineのAS-FULLとは分け、初回Homebrew/jq/LazyVim/Mason取得を成功に読み替えない
