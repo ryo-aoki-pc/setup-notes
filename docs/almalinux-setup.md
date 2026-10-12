@@ -13685,10 +13685,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    brew install lazygit ripgrep fd
    ```
 
-   - 入るものの一覧 (依存を含む) の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y` と答える
+   - `Do you want to proceed with the installation? [y/n]` と聞かれたら、入るものの一覧 (依存を含む) を見て `y` と答える
    - lazygit は任意 (無ければ `<leader>gg` が定義されないだけ)
    - ripgrep (`rg`) と fd は、ピッカーと Migemo の候補が使う。EPEL の `ripgrep` / `fd-find` と二重に入れない (実行ファイルの名前が同じで、PATH の先頭の Homebrew 版が使われる)
-   - **次の手順は、`[y/n]` に答えてインストールが終わってから貼る** (続けて貼ると答えとして食われる)
+   - **次の手順は、確認が出たら答え、インストールが成功してプロンプトに戻ってから貼る** (確認に答える前に続けて貼ると、答えとして食われる)
 
 1. Neovim・lazygit・ripgrep・fd が入ったか確かめる。
 
