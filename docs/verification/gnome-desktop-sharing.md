@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）の検証記録
 
-[手順書](../gnome-desktop-sharing.md)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
+[手順書](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
 
 ## 補足
 
@@ -54,14 +54,14 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 | （無し） | ロールバックの手順 6（PC の画面のセッションを終わらせる）、つながらなくなったときの手順 1〜3（手順 2 は、自動ログインで使う 6 の箇条書きから移した） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[前提を確かめる](../gnome-desktop-sharing.md#前提を確かめる)の手順 1 で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[前提を確かめる](../almalinux-setup.md#gnome-のデスクトップ共有-前提を確かめる)の手順 1 で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${SERVER_IP}` | クライアントが接続に使う PC の IP アドレス | `192.168.10.100` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | PC のホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-pc` / `my-pc.lan` |
 > | `${RDP_PORT}` | RDP で待ち受けるポート（リモートログインのデーモンが有効なら 3390、無ければ 3389。自動で入る） | `3389` |
-> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
+> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
 >
 > 出力例・ログの中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<RDP_PORT>` / `<USER>` / `<UID>` / `<SESSION_ID>` / `<N>` のプレースホルダで書いてある。`<...>` を含むコマンドは bash のコードブロックには置かない。
 
@@ -91,7 +91,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
     - gnome-shell 49.4（ロック画面で画面の共有を止めること）、gnome-control-center 47.7（同じキーリングの項目と証明書のパスを使うこと）、libsecret 0.21.2・gnome-keyring 42.1 のソース
     - RHEL 10 の文書の 1.1・1.3・1.4
     - 手順書の bash のブロック 24 個が `bash -n` を通ること
-    - [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の当時の手順 1・2 と、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
+    - [自動ログインで使う（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)の当時の手順 1・2 と、同節の手順 7 の `busctl` の行を、AlmaLinux 10.2 のコンテナの gnome-keyring と grdctl で模擬したこと（PC の画面も GDM も無い）
   - 確かめていないこと
     - 実施手順のすべて（PC の画面のセッションでの `grdctl` の設定・資格情報の保存・有効化・ファイアウォール・待ち受け・TLS のプローブ・クライアントからの接続）
     - 任意節（見るだけにする・接続元を LAN に絞る・自動ログイン）を GNOME のセッションで流すこと。自動ログインの後に、PC の画面にキーリングの窓が出ずにつながること
@@ -122,7 +122,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 **ブロックの構文と、部品の確かめ**:
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` にかけた。どれも通った
-- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の当時の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
+- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)の当時の手順 3 と同節の手順 7 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
 - コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
@@ -161,7 +161,7 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 **ブロックの構文と、部品の確かめ**:
 
 - 手順書の `bash` のブロック 24 個を抜き出し、ホスト（Ubuntu 24.04 の bash 5.2）の `bash -n` と ShellCheck 0.9.0（`-s bash`。変数のブロックのために SC2034・SC2154 は外した）にかけた。どれも通った
-- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の当時の手順 3 と同節の手順 8 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
+- `gdm-47.0-24.el10_2` の RPM の `/etc/gdm/custom.conf` には `[daemon]` の行がある。その写しに、[自動ログインで使う（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)の当時の手順 3 と同節の手順 8 の `sed` をかけ、`[daemon]` の直後に 2 行が入り、消すと元に戻ることを確かめた（コンテナの GNU sed）
 - コンテナの dconf 0.40.0 で、`grdctl rdp set-port 3390` の後の `dconf read …/rdp/port` が `uint16 3390` になり、その文字列を `dconf write` で書き戻せ、`dconf reset` で読み出しが空に戻ることを確かめた（[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 3 の戻し方）。`/usr/bin/gsettings list-recursively org.gnome.desktop.remote-desktop.rdp` は `port uint16 3389` の形で出す
 
 **自動ログインの節のキーリングの操作の模擬**:
@@ -192,8 +192,8 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 
 - **状態**: **x86_64 の VirtualBox の VM（AlmaLinux 10.2 の Workstation のクリーンインストール）で本実行した（2026-10-07。[付録](#付録-virtualbox-の-vm-での本実行2026-10-07)）。実機では流していない**
   - 通したもの: この文書のブロックを、SSH でログインした共有するユーザーの対話の bash に、ブラケットペーストで貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
-    - PR の最初の版（`81012d3`）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10 → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
-    - レビューで直した版（`f3450e6`）: 実施手順 1〜10 → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)
+    - PR の最初の版（`81012d3`）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10 → [見るだけにする（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-見るだけにする任意) → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
+    - レビューで直した版（`f3450e6`）: 実施手順 1〜10 → [接続元を LAN に絞る（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意) → [自動ログインで使う（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)
     - この検証で直した版: 直した 5 つのブロック（実施手順 9、自動ログインで使うの手順 4・5・6・8）を流し直し、続けて PC を再起動して PC の画面でパスワードでログインし、ロールバックの手順 2〜4
   - 確認したこと
     - 実施手順 2・6〜9 と各任意節の確認の箇条書きの出力が、手順書の記載どおりに出る（手順 2 の 8 行、`grdctl status` の各行、`ss` の 1 行、TLS のプローブの 3 つ）
@@ -228,14 +228,14 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 | クライアント | 別の VM の AppStream の `freerdp-3.10.3-12.el10_2.13`（`xfreerdp`）と、ホストの Windows 11 Pro 10.0.26300 の「リモート デスクトップ接続」（`mstsc.exe` 10.0.26100.8875） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[前提を確かめる](../gnome-desktop-sharing.md#前提を確かめる)の手順 1 で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[前提を確かめる](../almalinux-setup.md#gnome-のデスクトップ共有-前提を確かめる)の手順 1 で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${SERVER_IP}` | クライアントが接続に使う PC の IP アドレス | `192.168.10.100` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | PC のホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-pc` / `my-pc.lan` |
 > | `${RDP_PORT}` | RDP で待ち受けるポート（リモートログインのデーモンが有効なら 3390、無ければ 3389。自動で入る） | `3389` |
-> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
+> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
 >
 > 出力例・ログの中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<RDP_PORT>` / `<USER>` / `<UID>` / `<SESSION_ID>` / `<N>` のプレースホルダで書いてある。`<...>` を含むコマンドは bash のコードブロックには置かない。2026-10-07 の付録の値（`verifier`・`pr100-pc.test`・`192.168.56.81` など）は、検証用の VM の試験用の値。
 
@@ -463,7 +463,7 @@ TLS fingerprint: <SHA256_FINGERPRINT>
 
 - 2 つの network namespace に異なる送信元サブネットを用意し、ゾーンの個別指定の無い検証用 veth に既定の public ゾーンが適用される状態で、ホストへの TCP 接続を試した
 - 手順 7 のポートの開放前は、許可対象にする側の送信元で `errno 113` になった。開放後は両方から TLS のプローブが成立した
-- [接続元を LAN に絞る](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意)のブロックで、ポート全体の開放を一方の送信元の `/24` を許可する rich rule に置き換えた。許可した側からは接続でき、別のサブネットからは接続できなかった
+- [接続元を LAN に絞る](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意)のブロックで、ポート全体の開放を一方の送信元の `/24` を許可する rich rule に置き換えた。許可した側からは接続でき、別のサブネットからは接続できなかった
 
 | 状態 | `<ALLOWED_SOURCE_IP>` から | `<OTHER_SOURCE_IP>` から |
 |---|---|---|
@@ -723,9 +723,9 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 - **状態**: **統合後の手順を、新しく作った x86_64 の Workstation の VM で通した（2026-10-07）。実機・aarch64 では流していない**
   - 通したもの
-    - 1 回目（`16b22bb` のブロック）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10（中断の分岐を含む）→ [自動ログインで使う（任意）](../gnome-desktop-sharing.md#実施手順)の当時の手順 1〜8
+    - 1 回目（`16b22bb` のブロック）: 前提の gnome-power.md 手順 1〜4 → 実施手順 1〜10（中断の分岐を含む）→ [自動ログインで使う（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)の当時の手順 1〜8
       - 続けて、PC の画面でパスワードでログインし直す → 実施手順 1・5 → 後からリモートログインを有効にした試験 → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 1・3・4
-    - 2 回目（直した注意点の流れ）: 実施手順 1〜9 → [リモートログイン](../gnome-remote-desktop.md)の実施手順 1〜8 → 直した[注意点](../extra/gnome-desktop-sharing.md#注意点)のとおりに 3390 へ移す → クライアントから 3390 へ接続 → リモートログインの接続元を LAN に絞る → 両方のロールバック
+    - 2 回目（直した注意点の流れ）: 実施手順 1〜9 → [リモートログイン](../almalinux-setup.md#gnome-のリモートログイン-実施手順)の実施手順 1〜8 → 直した[注意点](../extra/gnome-desktop-sharing.md#注意点)のとおりに 3390 へ移す → クライアントから 3390 へ接続 → リモートログインの接続元を LAN に絞る → 両方のロールバック
   - 確認したこと
     - 実施手順 2・3・6 の中断（同じユーザーのヘッドレスの unit が起動中、証明書と鍵の組み合わせの不一致）。原因を戻した後は、貼り直して先へ進めた
     - 実施手順 8 は、ほかのプロセスがポートを使っていると、30 秒待って `中断:` を出す。手順 9 も終了コード 1 で止まる。ポートを空けて手順 4 を貼り直すと、手順 8・9 が通る
@@ -740,7 +740,7 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
     - Windows の「リモート デスクトップ接続」（この付録では流していない。[VirtualBox の付録](#windows-のリモート-デスクトップ接続)は統合前の版）
     - リモートログインの側の、画面でのログイン（3389 は TLS のプローブだけ）
     - クライアントがつないでいる間に実施手順 4 を貼り直して、接続が切れること
-    - 統合後の版での[見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意)・[接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意)。LAN に絞ってからリモートログインを有効にしたとき（注意点の「手順 2」の場合）
+    - 統合後の版での[見るだけにする（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-見るだけにする任意)・[接続元を LAN に絞る（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意)。LAN に絞ってからリモートログインを有効にしたとき（注意点の「手順 2」の場合）
     - 実機・aarch64、物理のモニター、ほかのユーザーのヘッドレスのセッションとの併用
 
 ### 環境と準備（統合後の x86_64 VM）
@@ -855,7 +855,7 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 - **状態**: **今の版の手順書を、新しく作った x86_64 の Workstation の VM で、PC の画面を 1 度も操作せずに通した（2026-10-07）。実機・aarch64 では流していない**
   - 通したもの
-    - 1 回目（書き直した版。「RDP を設定する」の手順 3 と表示の 1 行を、この検証で直した）: 前提の gnome-power.md 手順 1〜5 → 実施手順の全部（4 項） → [見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意) → [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意) → [つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)の手順 1〜3 → 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ → 「前提を確かめる」の手順 3・4 と「RDP を設定する」の手順 3・4 の分岐 → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 2〜6
+    - 1 回目（書き直した版。「RDP を設定する」の手順 3 と表示の 1 行を、この検証で直した）: 前提の gnome-power.md 手順 1〜5 → 実施手順の全部（4 項） → [見るだけにする（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-見るだけにする任意) → [接続元を LAN に絞る（任意）](../almalinux-setup.md#gnome-のデスクトップ共有-接続元を-lan-に絞る任意) → [つながらなくなったとき](../almalinux-setup.md#gnome-のデスクトップ共有-つながらなくなったとき)の手順 1〜3 → 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ → 「前提を確かめる」の手順 3・4 と「RDP を設定する」の手順 3・4 の分岐 → [ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 2〜6
     - 2 回目（最終版のブロック）: 同じ VM で、ロールバックした後から、「前提を確かめる」の手順 1〜3 と、「RDP を設定する」から「再起動の後に確かめてつなぐ」までの項の全部 → ロールバックの手順 1・3〜6
   - 確認したこと
     - PC 役の VM には、VirtualBox のキーボード・マウスの入力を 1 度も送らなかった。PC の画面の操作は、すべてクライアント役の FreeRDP の窓から行った
@@ -1016,8 +1016,8 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 この付録は、今の版の手順書の実施手順（4 項）と「見るだけにする（任意）」を、Hyper-V の VM で上から通した記録。手順番号は今の版の番号（実施手順は、項の名前と項ごとの番号で書く）。VM を操作したのは検証の担当で、この付録は、その報告と証跡のファイルから書いた。
 
-- **何を**: [手順書](../gnome-desktop-sharing.md)（コミット `114c2b2`）の実施手順の 4 項（16 手順）と、[見るだけにする（任意）](../gnome-desktop-sharing.md#見るだけにする任意)（2 手順）の、合わせて 18 手順
-  - [接続元を LAN に絞る（任意）](../gnome-desktop-sharing.md#接続元を-lan-に絞る任意)・[つながらなくなったとき](../gnome-desktop-sharing.md#つながらなくなったとき)・[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)は、この通しの範囲の外（流していない）
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md)（コミット `114c2b2`）の実施手順の 4 項（16 手順）と、[見るだけにする（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#見るだけにする任意)（2 手順）の、合わせて 18 手順
+  - [接続元を LAN に絞る（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#接続元を-lan-に絞る任意)・[つながらなくなったとき](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#つながらなくなったとき)・[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)は、この通しの範囲の外（流していない）
 - **結果**: 通した 17、通らなかった 0、条件に当たらず飛ばした 1（「前提を確かめる」の手順 4）、未実施 0
   - 確認の出力は、どの手順も手順書の箇条書きのとおりだった（証跡の `session/after-confirm/`・`peer/session/session-001.raw`・`screens/` で確かめた）
 - **どの状態から**: Kickstart で入れた AlmaLinux 10.2 の Workstation のクローンに、[初期設定](../almalinux-setup.md)の実施手順と、前提の[画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1〜5、linger、podman を通した VM のスナップショットから作ったクローン
@@ -1189,7 +1189,7 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 通した後（`114c2b2` より後）に直した。どれも文言だけで、コードブロックは変えていない。直した後に、VM では流していない（足した文は、この通しの証跡にある出力を書いたもの）。
 
-- [手順書](../gnome-desktop-sharing.md)
+- [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md)
   - 「RDP を設定する」の手順 2: 読み戻しの箇条書きの下に、`enable` と `screen-share-mode` の行も出ること（`enable` は、同じ項の手順 5 で有効にするまで `false`）を足した（指摘 1。`after-confirm/0007-…-2.txt`・`facts-before-autologin.txt`）
   - 「再起動の後に確かめてつなぐ」の手順 3: パスワードの箇条書きの下に、FreeRDP が `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがあり、デスクトップが出れば害は無いことを足した（指摘 3。`peer/session/session-001.raw`）
   - 同じ手順: journal を見る箇条書きの下に、同じ項の手順 2 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、プローブが残したもので害は無いことを足した（指摘 2。`facts-connected.txt`）

@@ -1,6 +1,6 @@
 # linger 有効化手順（AlmaLinux 10 / ログアウト中も自分のユーザーの systemd を動かす）の検証記録
 
-[手順書](../linger.md)・[ロールバックと注意点](../extra/linger.md)
+[手順書](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)・[ロールバックと注意点](../extra/linger.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -10,12 +10,12 @@
 
 - **目的**: AlmaLinux 10 で、ログインしていない間も自分のユーザーの systemd（ユーザーのサービス・タイマー・Quadlet のコンテナ）を動かし続ける
 - **進め方**: `loginctl enable-linger` を自分のユーザーに対して 1 度だけ行う。読者が編集する変数は無い
-  - もとは [syncthing.md](../syncthing.md)・[dropbox.md](../dropbox.md)・[dropbox-rclone.md](../dropbox-rclone.md)・[podman.md の Quadlet](../podman.md#quadlet-で自動起動する任意)の中にあった手順を、共有の前提として 1 本にした
+  - もとは [syncthing.md](../almalinux-setup.md#syncthing-実施手順)・[dropbox.md](../almalinux-setup.md#dropbox-実施手順)・[dropbox-rclone.md](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の中にあった手順を、共有の前提として 1 本にした
 - **状態**: **手順 2 の最初の 2 行は実機で本実行済み（2026-09-24）。現行の手順 1・2 とロールバックは、クリーンインストールした x86_64 の VM で本実行済み（2026-10-06）**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
   - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順を通した後の状態）で、`114c2b2` の手順 1・2 を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
     - 通らなかった手順は無い。手順 1 は `Linger=no`、手順 2 の後は `Linger=yes` と `<USER>`
-    - 続けて通した [Podman の Quadlet の節](../podman.md#quadlet-で自動起動する任意)の再起動で、ユーザーの systemd と Quadlet のサービスが、最初のログイン（わざと遅らせた SSH）の 59 秒前に起動した
+    - 続けて通した [Podman の Quadlet の節](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md#quadlet-で自動起動する任意)の再起動で、ユーザーの systemd と Quadlet のサービスが、最初のログイン（わざと遅らせた SSH）の 59 秒前に起動した
     - 未実施: [ロールバック](../extra/linger.md#ロールバック)（この通しの範囲の外）、手順 1 が `Linger=yes` を返して手順 2 を飛ばす側、実機、aarch64
   - 手順 2 のコマンドは、この文書に移す前に、次の検証でも通したもの
     - コンテナ: [dropbox.md](dropbox.md#付録-コンテナでの検証記録2026-09-27)・[dropbox-rclone.md](dropbox-rclone.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman.md](podman.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27、Quadlet の節）
@@ -24,7 +24,7 @@
     - 手順 1・2（手順 1 は `Linger=no` から）、[ロールバック](../extra/linger.md#ロールバック)
     - `podman.socket` を有効にしたときに、ロールバックの手順 1 の `ls` に何が出るか
   - 2026-10-02: もとの手順 2・3 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
-  - **確認していないこと**: linger で、再起動の後にユーザーのサービスが起動すること（実機）。コンテナでは [podman.md の Quadlet](../podman.md#quadlet-で自動起動する任意) と [syncthing.md のバックアップの節](syncthing.md#付録-コンテナでのバックアップと復旧の検証2026-09-27)で、コンテナの再起動の後に起動した
+  - **確認していないこと**: linger で、再起動の後にユーザーのサービスが起動すること（実機）。コンテナでは [podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意) と [syncthing.md のバックアップの節](syncthing.md#付録-コンテナでのバックアップと復旧の検証2026-09-27)で、コンテナの再起動の後に起動した
 
 | 項目 | 実機（syncthing.md） | 検証コンテナ（2026-09-30） |
 |---|---|---|
@@ -86,7 +86,7 @@ Syncthing と設定バックアップを導入して OS を再起動した。サ
 
 ### 付録: Hyper-V の VM で通した記録（2026-10-11）
 
-- **何を**: [手順書](../linger.md)の実施手順の手順 1・2（コミット `114c2b2`）を、上から通した
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)の実施手順の手順 1・2（コミット `114c2b2`）を、上から通した
   - [ロールバック](../extra/linger.md#ロールバック)は、この通しの範囲の外（流していない）
 - **結果**: 2 手順とも通した。通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い
 - **どの状態から**: Hyper-V の VM（Kickstart で入れた AlmaLinux 10.2 の Workstation のクローン）に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順を通した後の状態（[その記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列の、スナップショット `after-AS4` の続き）
@@ -96,7 +96,7 @@ Syncthing と設定バックアップを導入して OS を再起動した。サ
   - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）
   - VM のコンソールは、同じユーザーで GNOME にログインした状態だった
   - sudo は NOPASSWD（初期設定の「ログインと sudo」の手順 3）で、パスワードは聞かれなかった
-- 続けて、同じ VM で [Podman の手順書](../podman.md)を Quadlet の節まで通した（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。linger の効き目は、その節の再起動で見た
+- 続けて、同じ VM で [Podman の手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md)を Quadlet の節まで通した（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。linger の効き目は、その節の再起動で見た
 - **証跡**: 追跡していない `.verification/campaign/hv/CL1/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl` の番号
 - この VM の値は `<USER>` で書いた。パスワードと鍵は載せていない
 
@@ -125,7 +125,7 @@ Syncthing と設定バックアップを導入して OS を再起動した。サ
 
 #### 再起動の後の起動（Hyper-V、2026-10-11）
 
-手順書には、効き目を確かめる手順が無い。[Podman の Quadlet の節](../podman.md#quadlet-で自動起動する任意)の手順 3（再起動）・手順 4 を通したときに、別の SSH で読んだ（`quadlet-after-reboot.txt`・`facts-after-reboot.txt`）。
+手順書には、効き目を確かめる手順が無い。[Podman の Quadlet の節](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md#quadlet-で自動起動する任意)の手順 3（再起動）・手順 4 を通したときに、別の SSH で読んだ（`quadlet-after-reboot.txt`・`facts-after-reboot.txt`）。
 
 - 再起動のブロックを貼ったのは 19:52:17 JST（`session/session-001.raw` の、再起動の知らせの行の時刻）。起動し直した後の起動の時刻は 19:52:24（`quadlet-after-reboot.txt` の boot ID の次の行。`idle-check.txt` の journal の抜粋には 19:52:22 のカーネルの行があり、`last` の `reboot` の行は 19:52:26 で、数秒の幅がある）
 - `<USER>` のユーザーの systemd と、logind の `manager` のセッション（Id 1）は 19:52:29 にできた。だれもログインしていない時点（コンソールは GDM のログイン画面で、それができたのは 19:52:40）
@@ -174,7 +174,7 @@ $ ls /var/lib/systemd/linger
 
 - `systemctl --user list-unit-files --state=enabled` は、OS が既定で有効にしているユーザーのユニット（`dbus-broker.service` など。GNOME のデスクトップではさらに多い）まで出すので、自分で足したものを見分けにくい
 - 自分で `enable` したものは `~/.config/systemd/user/<target>.wants/` のリンクになるので、そこだけを見る
-- Quadlet の定義から作られるサービスは `enable` できず（[podman.md](../podman.md#quadlet-で自動起動する任意)）、`.wants/` にリンクができない。定義の置き場所を見る
+- Quadlet の定義から作られるサービスは `enable` できず（[podman.md](../almalinux-setup.md#podman-quadlet-で自動起動する任意)）、`.wants/` にリンクができない。定義の置き場所を見る
 - 何も無ければ `ls` は何も出さない（終了コードは 0 のことも 2 のこともあったが、どちらでもよい）
 
 検証のコンテナで、`podman.socket` を有効にし、確かめ用のユーザーのサービスと Quadlet の定義を置いたときの出力:

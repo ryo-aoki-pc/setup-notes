@@ -1,7 +1,7 @@
 // パケットの流れ: Remote client → Client A（接続先拠点の LAN）と、その戻り
-// （docs/wireguard.md の「#### パケットの流れ（Remote client → 各拠点）」）
+// （docs/reference/wireguard.md の「#### パケットの流れ（Remote client → 各拠点）」）
 // 実線 = 平文のホップ、破線 = 暗号化された UDP のホップ。行きの番号は本文の箇条書きに対応する
-// 再生成コマンドは docs/wireguard.md の「### 付録: 構成図の再生成」を参照
+// 再生成コマンドは docs/reference/wireguard.md の「### 付録: 構成図の再生成」を参照
 seqdiag {
   activation = none;
   edge_length = 240;

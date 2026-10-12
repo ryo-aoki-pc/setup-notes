@@ -1,10 +1,10 @@
 # Forgejo 構築手順の検証記録
 
-[手順書](../forgejo.md)・[ロールバック](../extra/forgejo.md)・[参考資料](../reference/forgejo.md)
+[手順書](../almalinux-setup.md#forgejo-実施手順)・[ロールバック](../extra/forgejo.md)・[参考資料](../reference/forgejo.md)
 
 ## 対象と検証環境
 
-- **Hyper-V の VM での検証状態（2026-10-11 UTC）**: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[初期設定](../almalinux-setup.md)・[linger](../linger.md)・[Podman](../podman.md) を通した後の状態）で、`114c2b2` の実施手順（6 項・26 手順）→ 使い方の基本（13 手順）→ バックアップ（4 手順）→ バックアップから復元する（7 手順）を、公式 16.0.5-rootless で上から通した。別の PC の役は、同じ仮想スイッチの別の VM。詳細は末尾の [Hyper-V の VM の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
+- **Hyper-V の VM での検証状態（2026-10-11 UTC）**: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[初期設定](../almalinux-setup.md)・[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)・[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した後の状態）で、`114c2b2` の実施手順（6 項・26 手順）→ 使い方の基本（13 手順）→ バックアップ（4 手順）→ バックアップから復元する（7 手順）を、公式 16.0.5-rootless で上から通した。別の PC の役は、同じ仮想スイッチの別の VM。詳細は末尾の [Hyper-V の VM の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
   - 結果: 50 手順のうち、通した 47、通らなかった 0、条件に当たらず飛ばした 3（「使い方の基本」の手順 2・3、「バックアップから復元する」の手順 7）、未実施 0
   - 通し方: サーバーのブロックは、SSH の対話の bash に貼った。ブラウザで行う操作は、人の手ではなく、クライアントの VM のヘッドレスの Firefox をスクリプトで操作した
   - 手順書の書く形と違えた所: サーバーの IPv4 は固定していない（仮想スイッチの DHCP）。「バックアップ」の手順 4 は、クライアントの VM への `scp` で代えた（同じ PC の上なので、サーバーのディスクを失っても残る保管先ではない）。許可外の送信元には、VM を動かしている Windows の PC を使った
@@ -544,14 +544,14 @@ firewalld は、IPv4・送信元 CIDR・宛先 IPv4・priority 100・TCP ポー�
 
 ## 付録: Hyper-V の VM で通した記録（2026-10-11）
 
-- **何を**: [手順書](../forgejo.md)の実施手順（6 項・26 手順）→「使い方の基本」（13 手順）→「バックアップ」（4 手順）→「バックアップから復元する」（7 手順）を、コミット `114c2b2` の本文で、上から通した
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/forgejo.md)の実施手順（6 項・26 手順）→「使い方の基本」（13 手順）→「バックアップ」（4 手順）→「バックアップから復元する」（7 手順）を、コミット `114c2b2` の本文で、上から通した
   - 「更新」の節・「設定ファイル」の表・[ロールバック](../extra/forgejo.md)は、この通しの範囲の外（流していない）
   - 入った版は、「イメージを取得して localhost で起動する」の手順 2 がその場で調べた 16.0.5
 - **結果**: 50 手順のうち、通した 47、通らなかった 0、条件に当たらず飛ばした 3、未実施 0
   - 飛ばした 3 つ: 「使い方の基本」の手順 2・3（同じ PC の鍵を登録済み・同じサーバーへ照合済み）、「バックアップから復元する」の手順 7（新しい版の不具合で戻したのではない）
   - 「通した」に数えた中に、手順書の書く形と違えたものがある: ブラウザで行う操作の全部（人の手ではなく、スクリプトで操作した）、「バックアップ」の手順 4（別の VM への `scp` で代えた）、許可外の送信元（VM を動かしている Windows の PC を使った）。サーバーの IPv4 も固定していない（[通らなかった手順と、手順書の前提と違えた所](#通らなかった手順と手順書の前提と違えた所hyper-v2026-10-11)）
 - **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` のクローン
-  - Kickstart で入れた AlmaLinux 10.2 の Workstation に、[初期設定](../almalinux-setup.md)の実施手順（[記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）、同書の任意節「画面オフ・画面ロック・自動サスペンドを止める」、[linger](../linger.md)、[Podman](../podman.md) を通した後の状態
+  - Kickstart で入れた AlmaLinux 10.2 の Workstation に、[初期設定](../almalinux-setup.md)の実施手順（[記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）、同書の任意節「画面オフ・画面ロック・自動サスペンドを止める」、[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)、[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した後の状態
   - 始めの状態: `Linger=yes`、rootless の Podman 5.8.2、podman.md の Quadlet の `hello-web`（`127.0.0.1:8080`）が動いている、`~/.local/share/forgejo` は無い、firewalld は `public`（`eth0`）、sudo は NOPASSWD（`guest-facts-start.txt`）。`public` のサービスは `cockpit dhcpv6-client ssh` で、rich rule は無い（「イメージを取得して localhost で起動する」の手順 2 の出力。`session/after-confirm/0004-…-2.txt`）
 - **どう通したか**
   - サーバー（主の VM）: 手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った（手順書のリードの「デスクトップの端末か SSH」のうち、SSH の側）
@@ -798,7 +798,7 @@ firewalld は、IPv4・送信元 CIDR・宛先 IPv4・priority 100・TCP ポー�
 
 通した後（`114c2b2` より後）に直した。どれも箇条書きの文言だけで、コードブロックは変えていない（4 つとも、コマンドの無い手順）。VM で貼り直すものは無い。
 
-- [手順書](../forgejo.md)の「初期設定と管理者の作成」の手順 2: 「「Install Forgejo」を押し、作った管理者でログインできることを確かめる」を、2 つの箇条書きに分けた（指摘 2）
+- [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/forgejo.md)の「初期設定と管理者の作成」の手順 2: 「「Install Forgejo」を押し、作った管理者でログインできることを確かめる」を、2 つの箇条書きに分けた（指摘 2）
   - 「Install Forgejo」を押すと、作った管理者でログインした状態のダッシュボードが開く
   - パスワードでログインできることは、右上のアカウントメニューの「Sign out」の後、「Sign in」で確かめる
 - 「LAN に公開する」の手順 3: トンネルを閉じる箇条書きの下に、同じ項の手順 2 の後に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがあり、正常なのでそのまま閉じる、という 1 行を足した（指摘 3）

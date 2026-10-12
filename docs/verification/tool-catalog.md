@@ -17,11 +17,11 @@
 > - **aarch64 の列は、リポジトリのメタデータと API から調べただけ**で、どの行も実機にもコンテナにも入れていない
 > - GUI アプリはどれも画面を出していない
 > - 実機（Raspberry Pi 5 と x86_64 PC）には何も入れていない
-> - **[CLI: コンテナ](../tool-catalog.md#cli-コンテナ)と GUI の[コンテナ](../tool-catalog.md#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
-> - 2026-09-28 に、[ベンダーの dnf リポジトリ](../tool-catalog.md#ベンダーの-dnf-リポジトリ)と[更新](../tool-catalog.md#更新)のブロックを `{ … }` で囲んだ（[README の記法](../../README.md#記法)）。中のコマンドは変えていない
-> - [CLI: 定番の置き換え](../tool-catalog.md#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
-> - 同じ表にあった fzf は、2026-10-02 に手順書にした（bash への組み込みまで。[文書化済みのツール](../tool-catalog.md#文書化済みのツール)）
-> - 2026-10-03 に、zoxide の dnf（COPR）の経路を zoxide.md から外し、[文書化済みのツール](../tool-catalog.md#文書化済みのツール)の「zoxide（dnf）」の行を消した
+> - **[CLI: コンテナ](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#cli-コンテナ)と GUI の[コンテナ](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#コンテナ)の節は 2026-09-27（UTC 16:26〜17:40）に調べた**。このとき表にあった podman-tui と lazydocker は、2026-09-28 に手順書にした（[文書化済みのツール](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#文書化済みのツール)）
+> - 2026-09-28 に、[ベンダーの dnf リポジトリ](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#ベンダーの-dnf-リポジトリ)と[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#更新)のブロックを `{ … }` で囲んだ（[README の記法](../../README.md#記法)）。中のコマンドは変えていない
+> - [CLI: 定番の置き換え](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#cli-定番の置き換え)の表にあった tmux は、2026-10-01 に手順書にした（[文書化済みのツール](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#文書化済みのツール)）
+> - 同じ表にあった fzf は、2026-10-02 に手順書にした（bash への組み込みまで。[文書化済みのツール](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#文書化済みのツール)）
+> - 2026-10-03 に、zoxide の dnf（COPR）の経路を zoxide.md から外し、[文書化済みのツール](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#文書化済みのツール)の「zoxide（dnf）」の行を消した
 
 - 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
   - 実施・確認: 6 本の導入と取得元、ベンダー節の 2 ブロック、更新の 3 ブロックを確認。Chrome の警告も記録。
@@ -29,7 +29,7 @@
 
 ### CLI: 定番の置き換え / 手順 0: 本文中の記録
 
-- 試していないこと: `~/.bashrc` に追記して使うもの（atuin など。zoxide〔[AlmaLinux 10 の初期設定](../almalinux-setup.md)〕と同じ形）のシェルへの組み込み、mosh のサーバー側の導入と UDP の許可
+- 試していないこと: `~/.bashrc` に追記して使うもの（atuin など。zoxide〔[AlmaLinux 10 の初期設定](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#シェルのツール)〕と同じ形）のシェルへの組み込み、mosh のサーバー側の導入と UDP の許可
 
 ### CLI: コンテナ / 手順 0: 本文中の記録
 
@@ -56,12 +56,12 @@
 | 調査日時 | 2026-09-24、UTC 20:51〜21:20（版の取得は 20:51〜20:57） |
 | 検証コンテナ | `quay.io/almalinuxorg/almalinux:10`（`sha256:83220192…c4c8`、AlmaLinux 10.2 (Lavender Lion) / x86_64、dnf 4.20.0） |
 | コンテナの動かし方 | Ubuntu 24.04 / x86_64 のクラウドホスト上の Docker 29.3.1。`--network host`、Flatpak だけ `--privileged`。非 root ユーザーに NOPASSWD の sudo |
-| Homebrew | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 をそのまま通して導入） |
+| Homebrew | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜3 をそのまま通して導入） |
 | EPEL | `epel-release-10-6.el10`（`extras`）。CRB はイメージの既定で有効 |
 | flatpak | `flatpak-1.16.0-9.el10_2.1`（AppStream） |
 | aarch64 の調べ方 | RPM: `dnf --forcearch=aarch64 repoquery`。Homebrew: formulae.brew.sh の JSON のボトル（`arm64_linux`）。Flathub: `flatpak remote-ls --arch=aarch64` と `flatpak remote-info --arch=aarch64` |
 | コンテナの節の調査日時 | 2026-09-27、UTC 16:26〜17:40 |
-| コンテナの節の検証コンテナ | `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を `--privileged` で立て、systemd を PID 1 にした。中で rootless の podman を動かすため（[podman.md](../podman.md) の付録と同じ作り） |
+| コンテナの節の検証コンテナ | `quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を `--privileged` で立て、systemd を PID 1 にした。中で rootless の podman を動かすため（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の付録と同じ作り） |
 | コンテナの節の aarch64 の調べ方 | RPM: AppStream・BaseOS・EPEL 10.2・Trivy のリポジトリの `primary.xml` を直接読んだ。Homebrew と Flathub は上と同じ |
 
 - これまでの手順書の「コンテナのみ」の検証は、実機（Raspberry Pi 5）の上の podman で `docker.io/library/almalinux:10` を使っていた
@@ -92,7 +92,7 @@
 | `meta` | 版の調査だけ（EPEL と flatpak を入れて照会） |
 | `cli` | Homebrew と CLI（Homebrew / EPEL / mise のリポジトリ） |
 | `gui` | GUI の RPM（ベンダー / EPEL） |
-| `fp` | [flatpak.md](../almalinux-setup.md) の検証と、この一覧の Flathub のアプリ（`--privileged`） |
+| `fp` | [flatpak.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/flatpak.md#実施手順) の検証と、この一覧の Flathub のアプリ（`--privileged`） |
 | `fps` | 再現の確認だけ（Flathub 登録直後の `flatpak search`） |
 
 **版の調査で使ったコマンド**（`meta` で実行。`$(cat /tmp/rpmnames.txt)` はパッケージ名の一覧、`"..."` は 1 行目と同じ書式、`<...>` は実際には値を入れた）:
@@ -116,7 +116,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 | mise（`cli`） | `dnf config-manager --add-repo` の後の `dnf install -y mise` で鍵 `0x7413A06D` が取り込まれ、`mise --version` → `2026.9.13 linux-x64 (2026-09-24)` |
 | ベンダーの GUI（`gui`） | `google-chrome-stable --version` → `Google Chrome 154.0.8037.57` |
 | EPEL の GUI（`gui`） | `chromium-browser --version` → `Chromium 153.0.8010.52`、`keepassxc-cli --version` → `2.7.11`、`gnome-tweaks --version` → `46.1`。`meld --version` は画面が無いため GTK の初期化で落ちた（`AttributeError: 'NoneType' object has no attribute 'props'`）。`remmina --version` は案内文だけで版を出さなかった。この 2 つは `rpm -q` で版を確認した |
-| 更新（`cli` / `fp`） | [更新](../tool-catalog.md#更新)の 3 行を実行した。`brew upgrade` は無出力で終了コード 0（導入直後なので上げるものが無い）、`sudo dnf upgrade` はイメージの作成後に出た更新を当てて `Complete!`、`sudo flatpak update` は `Nothing to do.` |
+| 更新（`cli` / `fp`） | [更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#更新)の 3 行を実行した。`brew upgrade` は無出力で終了コード 0（導入直後なので上げるものが無い）、`sudo dnf upgrade` はイメージの作成後に出た更新を当てて `Complete!`、`sudo flatpak update` は `Nothing to do.` |
 | Flathub（`fp`） | 13 本（一覧に載っていないアプリを含む）を `sudo flatpak install -y --noninteractive flathub <ID>` で入れ、すべて終了コード 0、`flatpak run --command=true` もすべて成功。`--noninteractive` は進捗表示を抑えるためだけに足した。`/var/lib/flatpak` は GNOME 50 の 6 本で 3.4 GB、FDO 25.08 の 4 本を足して 5.7 GB、FDO 26.08 の 3 本を足して 8.1 GB |
 
 #### 未確認事項
@@ -124,7 +124,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 - aarch64 での導入と起動（本書の aarch64 列はすべてメタデータ）
 - GUI アプリの画面の表示と操作（コンテナに画面が無い）
 - Raspberry Pi 5 で Flathub のアプリ（Electron 系・ブラウザ・GPU を使うもの）が実際に動くか
-- 実機（x86_64 PC）での導入。デスクトップの環境では依存の数が変わる（[vscode.md](../vscode.md) の実測では、コンテナより大幅に少なかった）
+- 実機（x86_64 PC）での導入。デスクトップの環境では依存の数が変わる（[vscode.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/vscode.md) の実測では、コンテナより大幅に少なかった）
 - RPM Fusion（EL10）の有効化
 - atuin・direnv など、`~/.bashrc` に追記して使うツールのシェルへの組み込み
 - lazydocker・dive を podman の API ソケットで使うこと
@@ -135,15 +135,15 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 
 ### 付録: コンテナ関連の追加調査（2026-09-27）
 
-[CLI: コンテナ](../tool-catalog.md#cli-コンテナ)と GUI の[コンテナ](../tool-catalog.md#コンテナ)の節のために、同じクラウドホストの Docker で使い捨てのコンテナを 2 つ使った。
+[CLI: コンテナ](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#cli-コンテナ)と GUI の[コンテナ](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#コンテナ)の節のために、同じクラウドホストの Docker で使い捨てのコンテナを 2 つ使った。
 
 - どちらも `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にした
 - 非 root ユーザー（NOPASSWD の sudo）に SSH でログインして、表の導入コマンドをそのまま実行した
 
 | コンテナ | 用途 |
 |---|---|
-| `cat1` | CLI の行と Cockpit。先に [podman.md](../podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](../almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](../almalinux-setup.md) の手順 1〜4 を通した |
-| `fp1` | GUI の Flathub の行。[flatpak.md](../almalinux-setup.md) の手順 1〜5 を通してから入れた |
+| `cat1` | CLI の行と Cockpit。先に [podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の手順 1〜3・5〜7 と Docker 向けの節、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時は btop.md の手順 1〜3）、[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 を通した |
+| `fp1` | GUI の Flathub の行。[flatpak.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/flatpak.md#実施手順) の手順 1〜5 を通してから入れた |
 
 **手順書の外で行った準備**（検証環境の都合）:
 
@@ -171,7 +171,7 @@ curl -s https://flathub.org/api/v2/verification/<ID>/status
 最初の調査の[未確認事項](#未確認事項)にあった「lazydocker・dive を podman の API ソケットで使うこと」は、この調査で片付いた。
 
 - lazydocker は、`DOCKER_HOST` で podman の API ソケットにつないで動いた（上の表）
-- dive は API ソケットを使わず、`--source podman` で podman のコマンドからイメージを読んだ（[image-tools.md](../image-tools.md)）
+- dive は API ソケットを使わず、`--source podman` で podman のコマンドからイメージを読んだ（[image-tools.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md)）
 
 #### 未確認事項（2026-09-27 の調査）
 

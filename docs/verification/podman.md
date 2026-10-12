@@ -1,6 +1,6 @@
 # Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の検証記録
 
-[手順書](../podman.md)・[ロールバックと注意点](../extra/podman.md)
+[手順書](../almalinux-setup.md#podman-実施手順)・[ロールバックと注意点](../extra/podman.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -100,18 +100,18 @@ curl に再試行を付けたのは、最初の検証で `start` の直後の `c
 
 ### 対象と検証環境
 
-- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../distrobox.md)・[podman-compose](../podman-compose.md)・[hadolint / dive / Trivy](../image-tools.md)・[podman-tui](../podman-tui.md)・[lazydocker](../lazydocker.md) の前提になる（CLI にとっての Homebrew〔[AlmaLinux 10 の初期設定の「Homebrew」](../almalinux-setup.md#homebrew)の手順 1〜3〕と同じ位置づけ）
+- **目的**: AlmaLinux 10 で、コンテナを自分のユーザー（rootless）で動かせるようにする。[distrobox](../almalinux-setup.md#distrobox-実施手順)・[podman-compose](../almalinux-setup.md#podman-compose-実施手順)・[hadolint / dive / Trivy](../almalinux-setup.md#画像の道具-実施手順)・[podman-tui](../almalinux-setup.md#podman-tui-実施手順)・[lazydocker](../almalinux-setup.md#lazydocker-実施手順) の前提になる（CLI にとっての Homebrew〔[AlmaLinux 10 の初期設定の「Homebrew」](../almalinux-setup.md#homebrew)の手順 1〜3〕と同じ位置づけ）
 - **進め方**: ツール本体とサービスは本書で導入し、シェルの設定は bash リポジトリから読む。共通設定と別の設定ファイルは、それぞれの節で扱う
 - **状態**: **現行 `5da3478` 版を、共通 bash `3d5323e` を新規導入した x86_64 の VM で再検証済み（2026-10-06、SELinux Enforcing）**。実施手順 1〜3・5〜7、Docker API、Quadlet の再起動後の自動起動、ロールバックを通した。subuid/subgid の追加は設定済みのため飛ばした。実機での適用とは別の記録（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順と [linger](../linger.md) を通した後の状態）で、`114c2b2` の実施手順・「Docker 向けのツールから使う（任意）」・「Quadlet で自動起動する（任意）」の 12 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順と [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) を通した後の状態）で、`114c2b2` の実施手順・「Docker 向けのツールから使う（任意）」・「Quadlet で自動起動する（任意）」の 12 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
     - 結果: 通した 11、通らなかった 0、条件に当たらず飛ばした 1（実施手順の手順 4。subuid / subgid が両方あった）、未実施 0
     - 確認したこと: Workstation に AppStream の podman 5.8.2 が 16 パッケージで入る、`true overlay crun netavark pasta v2`、API ソケット、`DOCKER_HOST`、Quadlet のサービスが OS の再起動の後に最初のログイン（わざと遅らせた SSH）の 59 秒前に起動する、SELinux Enforcing のまま `:Z` の先が `container_file_t` になる
     - SELinux の拒否: 通しの中の読み（別の SSH から打った `ausearch` の `<no matches>`）は、読み方のせいで当てにならない。後から、この VM のスナップショットのクローンで監査ログのファイルを数え直して、AVC の行は 0 行だった（[数え直し](#selinux-の拒否の数え直しhyper-v2026-10-11)）
     - 直した所: 実施手順の手順 7 の箇条書きに、初めて有効にしたときに出る `Created symlink …` の行を足した（文言だけ。ブロックは変えていない）
-    - 未実施の範囲: 実施手順の手順 4 の不足を補う側（今回も当たらなかった）、「使い方の基本」の表、[更新](../podman.md#更新)、[ロールバック](../extra/podman.md#ロールバック)、デスクトップの端末に貼る形、実機、aarch64
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](../podman.md#更新)、[ロールバック](../extra/podman.md#ロールバック)を通した
-    - Quadlet の節の linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
+    - 未実施の範囲: 実施手順の手順 4 の不足を補う側（今回も当たらなかった）、「使い方の基本」の表、[更新](../almalinux-setup.md#podman-更新)、[ロールバック](../extra/podman.md#ロールバック)、デスクトップの端末に貼る形、実機、aarch64
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜3・5〜7、2 つの任意節、[更新](../almalinux-setup.md#podman-更新)、[ロールバック](../extra/podman.md#ロールバック)を通した
+    - Quadlet の節の linger の有効化と解除（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 とロールバックの手順 2。当時は Quadlet の節とロールバックの手順だった）も、このとき通した
   - 手順 4 は、範囲の無いユーザーを同じコンテナに作って、手順 3〜6 を通した
   - 2026-10-02: もとの手順 4・5 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 手順 3・4 を、subuid / subgid の不足する側だけ補う形に直した。一時ファイルと `sudo`・`usermod`・`podman` のスタブで、両方無し・UID のみ有り・GID のみ有り・両方有りを確認した。既存の範囲を変えず、`usermod` が失敗した場合は migrate を呼ばない。実際のユーザー設定と podman では未実行
@@ -238,7 +238,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 - 短い名前の問い合わせ（手順 6 の補足。TTY の有無で比べた）
 - 1024 未満のポートのエラー、linger の無いユーザーのログアウト（約 10 秒後にコンテナが止まった）、`sudo podman images`（空の一覧）
 - `podman generate systemd` の `DEPRECATED command:`、生成された unit への `systemctl --user enable` のエラー
-- [使い方の基本](../podman.md#使い方の基本)の表のコマンド（`podman image prune` は `-a` の有無で消えるものが変わった）
+- [使い方の基本](../almalinux-setup.md#podman-使い方の基本)の表のコマンド（`podman image prune` は `-a` の有無で消えるものが変わった）
 
 **残っている差**（検証環境と実機の違い）:
 
@@ -287,11 +287,11 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 ### 付録: Hyper-V の VM で通した記録（2026-10-11）
 
-- **何を**: [手順書](../podman.md)の実施手順（7 手順）・「Docker 向けのツールから使う（任意）」（1 手順）・「Quadlet で自動起動する（任意）」（4 手順）を、コミット `114c2b2` の本文で、上から通した
-  - 「使い方の基本」の表・[更新](../podman.md#更新)・[ロールバック](../extra/podman.md#ロールバック)は、この通しの範囲の外（流していない）
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md)の実施手順（7 手順）・「Docker 向けのツールから使う（任意）」（1 手順）・「Quadlet で自動起動する（任意）」（4 手順）を、コミット `114c2b2` の本文で、上から通した
+  - 「使い方の基本」の表・[更新](../almalinux-setup.md#podman-更新)・[ロールバック](../extra/podman.md#ロールバック)は、この通しの範囲の外（流していない）
 - **結果**: 12 手順のうち、通した 11、通らなかった 0、条件に当たらず飛ばした 1（実施手順の手順 4。subuid / subgid が両方あった）、未実施 0
 - **どの状態から**: Hyper-V の VM（Kickstart で入れた AlmaLinux 10.2 の Workstation のクローン）に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順を通した後の状態（[その記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列の、スナップショット `after-AS4` の続き）
-  - 同じ起動の中で、先に、初期設定の任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」と [linger](../linger.md) の手順 1・2 を通した（[linger の検証記録の付録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`Linger=yes` になっていた
+  - 同じ起動の中で、先に、初期設定の任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」と [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 1・2 を通した（[linger の検証記録の付録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`Linger=yes` になっていた
   - podman は未導入で、`~/.config/containers` は無かった。共通の bash 設定は、初期設定で導入済み
 - **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った（手順書の「デスクトップの端末か SSH」のうち、SSH の側）
   - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）
@@ -441,7 +441,7 @@ $ podman --remote version --format '{{.Server.Version}}'
 
 ### 手順中の実測・検証状況の記録
 
-- **linger が無いと、ログアウトでコンテナが止まる**: linger の無いユーザーで `podman run -d` を動かしてログアウトすると、約 10 秒後にユーザーの systemd と一緒にコンテナが止まった（検証コンテナで再現）。止めたくないものは Quadlet の節で動かし、[linger](../linger.md) を有効にする
+- **linger が無いと、ログアウトでコンテナが止まる**: linger の無いユーザーで `podman run -d` を動かしてログアウトすると、約 10 秒後にユーザーの systemd と一緒にコンテナが止まった（検証コンテナで再現）。止めたくないものは Quadlet の節で動かし、[linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) を有効にする
 
 ### 手順中の実測・検証状況の記録
 

@@ -1,6 +1,6 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の参考資料
 
-[手順書](../samba-client.md)・[ロールバックと注意点](../extra/samba-client.md)
+[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[ロールバックと注意点](../extra/samba-client.md)
 
 [検証記録](../verification/samba-client.md#参考資料から分離した記録)
 
@@ -89,7 +89,7 @@
 ### Windows 11 で使う / 手順 4: 補足: 資格情報マネージャーに置く
 
 - `cmdkey /add:<SERVER> /user:<SMB_USER> /pass` は、`<SERVER>` を宛先にした Windows の資格情報（資格情報マネージャーの「Windows 資格情報」）を作る。`/pass` に値を書かなければ、`cmdkey` がパスワードを聞く（Microsoft の文書）
-- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[samba.md のサーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 2 と同じ考え）
+- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 2 と同じ考え）
 - この節の手順 5 の `New-SmbMapping` に資格情報を渡さないと、Windows はこの資格情報でつなぐ（Microsoft の Azure Files の文書も、`cmdkey /add` の後に資格情報を渡さずに割り当てている）
 - 資格情報はこのユーザーのものなので、ほかのユーザーには使われない。サインインし直しても残る
 
@@ -101,7 +101,7 @@
 
 ### Windows 11 で使う / 手順 6: 補足: [home] の書き込み
 
-- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[実施手順](../samba-client.md#実施手順)の手順 5 と同じ）
+- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[実施手順](../almalinux-setup.md#samba-クライアント-実施手順)の手順 5 と同じ）
 
 ### Windows 11 で使う / 手順 7: 補足: 署名と、サーバーの設定を変えない理由
 
@@ -132,7 +132,7 @@
   - fstab に `password=` を書かない。fstab は誰でも読める（0644）
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 4 の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる
   - `vers=` は書かない。既定でサーバーの最も新しい版を使う
@@ -176,7 +176,7 @@
 - `man systemd.mount`（`x-systemd.automount`、`x-systemd.idle-timeout`、`nofail`、`_netdev`）/ `man systemd-fstab-generator`
 - `man findmnt`（`--verify`）/ `man gio`
 - cifs-utils 7.7 のソース（`mount.cifs.c` の `open_cred_file`・`parse_cred_line`・`set_password`・`parse_opt_token`）
-- [Samba でホームディレクトリを公開する手順](../samba.md)（サーバー側）
+- [Samba でホームディレクトリを公開する手順](../almalinux-setup.md#samba-サーバー-実施手順)（サーバー側）
 - [Control SMB signing behavior — Windows Server (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-signing)（24H2 の版ごとの署名の要求、ゲストの禁止）
 - [Block NTLM connections on SMB — Windows Server (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ntlm-blocking)
 - [cmdkey (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey) / [New-SmbMapping](https://learn.microsoft.com/en-us/powershell/module/smbshare/new-smbmapping?view=windowsserver2025-ps) / [Remove-SmbMapping](https://learn.microsoft.com/en-us/powershell/module/smbshare/remove-smbmapping?view=windowsserver2025-ps)

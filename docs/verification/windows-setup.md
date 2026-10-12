@@ -143,7 +143,7 @@
 - スタートメニューとデスクトップにショートカットを作る。winget の定義はデスクトップのショートカットを止めるスイッチ（`/NoDesktopShortcut`）を渡さない
 - `--accept-source-agreements` と `--accept-package-agreements` は、winget を初めて使う PC で出る同意の問いに答えるため（続けて貼った行が答えとして食われないように）
 - scoop-search は、UniGet UI が scoop のパッケージを検索するのに使う道具（ソースの `Scoop.cs` が「検索に要る」とする依存）。無いと、UniGet UI が起動したときに入れるかを聞く。ここで先に入れておく
-- scoop の `extras/unigetui` を採らなかった理由は、[選択した方針](../verification/windows-setup.md#選択した方針)
+- scoop の `extras/unigetui` を採らなかった理由は、[選択した方針](#選択した方針)
 
 ### 実施手順 / 表示と入力 / 手順 1: 補足: 値の意味
 
@@ -205,7 +205,7 @@
 - Windows は、ハードウェアの時計（RTC）を地方時として読み書きする。Linux は UTC として扱うのが普通で、両方が違う扱いのままデュアル ブートすると、起動し直すたびに 9 時間ずれる。2 つの OS のどちらかにそろえればよい
 - AlmaLinux 10 のインストーラ（anaconda）は、NTFS のパーティションを見つけると、AlmaLinux の側を地方時にする（`/etc/adjtime` に `LOCAL`。[windows-dual-boot.md の注意点](../extra/windows-dual-boot.md#注意点)。インストーラのソースから読んだこと）。その流れで入れたなら、もうそろっているので、この手順は要らない（行うと、かえって 9 時間ずれる）
 - AlmaLinux の側を UTC にした（`timedatectl set-local-rtc 0`）ときだけ、Windows も UTC にそろえる。`HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation` の `RealTimeIsUniversal` を 1 にすると、Windows も UTC として扱う。Microsoft の文書には無い値で、Arch Linux の wiki が勧める形（DWORD。64 ビットの Windows では QWORD という古い勧めは、wiki から消えた）
-- Arch Linux の wiki は、両方を UTC にする形を勧めている（Linux の側を地方時にする `timedatectl set-local-rtc 1` は勧めていない）。本書は、AlmaLinux のインストーラの既定（地方時）に合わせ、2026-10-03 に [windows-dual-boot.md](../windows-dual-boot.md) とそろえた
+- Arch Linux の wiki は、両方を UTC にする形を勧めている（Linux の側を地方時にする `timedatectl set-local-rtc 1` は勧めていない）。本書は、AlmaLinux のインストーラの既定（地方時）に合わせ、2026-10-03 に [windows-dual-boot.md](../windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順) とそろえた
 - 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 10
 
 ### 実施手順 / WSL の AlmaLinux 10 と自動サインイン / 手順 3: 補足: AlmaLinux 10 の WSL のイメージ
@@ -222,7 +222,7 @@
 - コマンド ラインでパスワードを渡す形（`autologon <ユーザー> <ドメイン> <パスワード>`）は、パスワードがプロセスのコマンド ラインに見え、履歴にも残りうるので使わず、窓で入れる
 - `-accepteula` は、使用許諾の窓を出さないため
 - Microsoft アカウントでは、`Username` をメールアドレスにし、`Domain` を `MicrosoftAccount` か PC の名前にする、という報告があるが、確かめていない。パスワード（PIN ではない）が要り、「サインイン・検索・キーボード」の手順 1 でパスワードのサインインを使えるようにしておく
-- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
+- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
 - 止めるのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 3
 
 ### リモートから再起動する手段を増やす（任意）: 検証状況の記録
@@ -354,8 +354,8 @@
   - AlmaLinux 10 の WSL のイメージで `wslinfo --networking-mode` が使えること（無ければ `ip` で比べる）
   - ミラーを使えない PC で `wsl.exe` が出す文言（`ミラー化されたネットワーク モードはサポートされていません`。`Resources.resw` の訳から書いた）
   - ミラーで、WSL から `127.0.0.1:22` の Windows の sshd に届くことと、LAN の IP あてが届かないこと（文書の言い方からの推測。ミラーでも `127.0.0.1` に届かないというコミュニティの報告もある）
-  - ミラーで、WSL からホストオンリーのネットワークの VirtualBox の VM に届くか（[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の記録は NAT のとき）
-  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../wireguard.md#windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
+  - ミラーで、WSL からホストオンリーのネットワークの VirtualBox の VM に届くか（[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の記録は NAT のとき）
+  - Docker・VPN との相性（[WireGuard Road Warrior の Windows 11 の節](../windows-setup.md#wireguard-windows-11-で使う)のトンネルを張った PC での WSL の通信を含む）
   - 対象の 24H2・25H2 と、利用者の 26H2（26300）の違い
 
 ### シェルのツールを入れる（任意）: 検証状況の記録
@@ -389,7 +389,7 @@
   - PC 全体: PC の名前・長いパス・開発者モード・sudo・電源とロック・LAN のアダプターの省電力・デュアル ブートの時計
   - ネットワーク: LAN をプライベートに（もとは Windows の OpenSSH サーバーと Syncthing の Windows 11 の節にあった）・リモート デスクトップ・リモート アシスタンス・ping・配信の最適化
   - サインイン: Windows Hello だけのサインインを切る・自動サインイン
-  - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](../verification/windows-setup.md#選択した方針)）。この文書のリードから順に案内する
+  - Git for Windows・Firefox・WezTerm・Claude Code・VirtualBox・WireGuard・HackGen Console NF は、AlmaLinux 10 と同じツールなので、それぞれの手順書の Windows 11 の節にある（[選択した方針](#選択した方針)）。この文書のリードから順に案内する
   - 任意節（2026-10-08）: プライバシーと広告の表示・表示と入力と音とストレージ センサー・Edge の常駐のポリシー・CopyQ
   - 任意節（2026-10-08 の 2 つ目）: PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォントと貼り付けの警告・WSL のネットワークのミラー
   - 任意節（2026-10-08 の 3 つ目）: Git Bash のシェルのツール（starship・zoxide・fzf・eza・bat）
@@ -519,7 +519,7 @@
 - [Enable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enable-psremoting?view=powershell-5.1)・[Disable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/disable-psremoting?view=powershell-5.1) — Microsoft Learn。WinRM の有効化・無効化と、後始末（サービス・リスナー・規則・`LocalAccountTokenFilterPolicy`）
 - [net(8) — Samba](https://www.samba.org/samba/docs/current/man-html/net.8.html) — `net rpc shutdown [-t timeout] [-r] [-f] [-C message]`、`-I`、`-U`
 - [shutdown — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/shutdown) — `/r`・`/f`・`/t`・`/m \\<host>`
-- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — 手順 7 で再起動後も使えるようにするタスク
+- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — 手順 7 で再起動後も使えるようにするタスク
 
 ### 付録: 配布物と資料の調査（2026-10-03）
 
@@ -635,7 +635,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 この付録は、もとの手順書 `docs/windows-powershell-paste.md`（2026-10-03 にこの文書へまとめて消した）の付録を移したもの。手順の番号だけ、この文書の番号に付け替えた（当時の手順 1〜7 は今の「貼り付けの設定」の手順 1〜4 と「PC 全体の設定」の手順 1・3・4、当時のロールバックの手順 1・2 は今の[ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6・7）。試験したブロックは当時のもの（プロファイルの行の印は `# windows-powershell-paste.md`。今の「貼り付けの設定」の手順 4 とロールバックの「アプリと貼り付けの設定を外す」の手順 6 は、印を変え、古い印の行も見つけるようにした。その確認は[ブロックの確認の付録](#付録-足した項目の-powershell-のブロックの確認2026-10-03)）。
 
-**利用者の観察**: Firefox で開いた GitHub の [RDP をロックせずに切断](../windows-rdp-disconnect.md)の PowerShell のブロックを、コピーボタンでコピーして、スタートメニューから管理者として開いた Windows PowerShell（conhost の窓）に右クリックで貼ると、行が逆順になった。選んで Ctrl+C でコピーしたもの、管理者でない Windows PowerShell の窓、conhost の窓に Ctrl+V で貼ったものは、元の順に入った。
+**利用者の観察**: Firefox で開いた GitHub の [RDP をロックせずに切断](../windows-setup.md#rdp-をロックせずに切断-実施手順)の PowerShell のブロックを、コピーボタンでコピーして、スタートメニューから管理者として開いた Windows PowerShell（conhost の窓）に右クリックで貼ると、行が逆順になった。選んで Ctrl+C でコピーしたもの、管理者でない Windows PowerShell の窓、conhost の窓に Ctrl+V で貼ったものは、元の順に入った。
 
 **コピーボタンの中身**:
 
@@ -1142,7 +1142,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 ### 操作上の注意と併記されていた記録
 
-   - **注意**: この後は Hyper-V が動くので、[VirtualBox](../virtualbox.md#windows-11-で使う) の VM は Hyper-V の上で動く（遅くなり、[virtualbox-guest-bootc.md](../virtualbox-guest-bootc.md) の検証では VM が数分ずつ止まった）
+   - **注意**: この後は Hyper-V が動くので、[VirtualBox](../windows-setup.md#virtualbox-windows-11-で使う) の VM は Hyper-V の上で動く（遅くなり、[virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) の検証では VM が数分ずつ止まった）
 
 
 ### 操作上の注意と併記されていた記録
@@ -1203,7 +1203,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 ### 実施手順 / 再起動の後に確かめる / 手順 4: 補足: UniGet UI と scoop
 
 - UniGet UI は、`PATH` から `scoop.ps1` を探して scoop を見つける。PowerShell 7（`pwsh.exe`）があればそれで、無ければ Windows PowerShell 5.1 で、`-ExecutionPolicy Bypass` を付けて動かす（ソースの `Scoop.cs`）
-- UniGet UI は、scoop の更新に git が要るとして、無ければ `scoop install main/git` を勧める（同じソース）。本書は git を Git for Windows にそろえるので、勧めに従わない（[選択した方針](../verification/windows-setup.md#選択した方針)）
+- UniGet UI は、scoop の更新に git が要るとして、無ければ `scoop install main/git` を勧める（同じソース）。本書は git を Git for Windows にそろえるので、勧めに従わない（[選択した方針](#選択した方針)）
 - UniGet UI は、「アプリを入れる」の手順 3 で入れたときに、サインインのときに起動する設定（`Run` の `WingetUI`）も作る。「自動起動と標準アプリ」の手順 1 では止めていない
 - 画面の文言と並びは、Windows で確かめていない
 
@@ -1246,7 +1246,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 **LAN をプライベートに（「ネットワークとリモート」の手順 1）**
 
-- もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 7 の両方で、同じ操作をしていた。インストール直後に 1 度行うものなので、ここへまとめ、2 つの手順書は確かめるだけにした
+- もとは [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 5 と、[Syncthing の Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 7 の両方で、同じ操作をしていた。インストール直後に 1 度行うものなので、ここへまとめ、2 つの手順書は確かめるだけにした
 - 規則をパブリックにも広げる方法は採らない。持ち出した先でも、同じサブネットの相手に開くため（OpenSSH サーバーの[選択した方針](#openssh-サーバー-選択した方針)）
 
 **表示・整理の設定（「表示と入力」と「自動起動と標準アプリ」）**
@@ -1436,7 +1436,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と以下の読み取りは、この時点の起動後の状態として扱う
 - 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
 - 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
-- 初回導入と設定確認の時点では、後続の [Git for Windows](../windows-setup.md#git-for-windows)・[Firefox](../windows-setup.md#firefox)・[WezTerm](../windows-setup.md#wezterm)・[Claude Code](../windows-setup.md#claude-code)・[VirtualBox](../virtualbox.md#windows-11-で使う)・[WireGuard](../wireguard.md#windows-11-で使う)・[HackGen Console NF](../windows-setup.md#hackgen-console-nf)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
+- 初回導入と設定確認の時点では、後続の [Git for Windows](../windows-setup.md#git-for-windows)・[Firefox](../windows-setup.md#firefox)・[WezTerm](../windows-setup.md#wezterm)・[Claude Code](../windows-setup.md#claude-code)・[VirtualBox](../windows-setup.md#virtualbox-windows-11-で使う)・[WireGuard](../windows-setup.md#wireguard-windows-11-で使う)・[HackGen Console NF](../windows-setup.md#hackgen-console-nf)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
 - VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
 - 「ネットワークとリモート」の手順 1・2・4 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
 - 「Microsoft Store の更新」の手順 5 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
@@ -1523,7 +1523,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 | ホストと VM | 上の付録と同じ。ホストは Windows 11 Pro の x86_64 の PC、VirtualBox 7.2.20（Hyper-V の NEM）。VM は `windows11-verify-20261006`（Windows 11 Pro 26H2、26300.9457、2 CPU、メモリ 8 GiB） |
 | 始める前の控え | 2026-10-07 22:26 ごろに OS を止めて、スナップショット `pr104-baseline-20261008` を撮った |
 | 2 枚目の NIC | 利用者の許可を得て足した。内部ネットワークで足してスナップショット `pr104-nic2-added-20261008` を撮り、動かしたままホストオンリーのネットワーク（192.168.56.0/24）に付け替えた。ゲストでは「イーサネット 3」、DHCP で 192.168.56.107 |
-| ゲストの中の重なり | VirtualBox（[virtualbox.md の Windows 11 で使う](../virtualbox.md#windows-11-で使う)）が作ったホストオンリーのアダプター「イーサネット 2」が 192.168.56.1/24 を持ち、2 枚目の NIC と重なったので、検証の間だけ無効にした |
+| ゲストの中の重なり | VirtualBox（[virtualbox.md の Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)）が作ったホストオンリーのアダプター「イーサネット 2」が 192.168.56.1/24 を持ち、2 枚目の NIC と重なったので、検証の間だけ無効にした |
 | 相手の VM | 同じホストの AlmaLinux 10.2 の VM 2 台（PR #100 の検証で作った `alma10-pr100-client-20261007`・`alma10-pr100-pc-20261007`、192.168.56.82・.81）。前の記録が挙げた `alma10-current-20261006-server`・`-peer` は、ログインの資格情報が分からず使わなかった（起動して ACPI で止めただけ） |
 | RDP のクライアント | `alma10-pr100-client-20261007` の FreeRDP 3.10.3（`wlfreerdp`。`mutter --wayland --headless --virtual-monitor 1280x800` の中で動かした） |
 
@@ -1954,7 +1954,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 
 - HackGen の上流は、リリースの sha256 を出していない。`HackGen_NF_v2.10.0.zip` の sha256 は、[実施手順](../almalinux-setup.md#hackgen-console-nf)の手順 4 の補足で取った zip・Homebrew の cask `font-hackgen-nerd`・scoop の個人のバケット（mo-san）の定義の 3 つで同じ値だった（[付録](#hackgen-console-nf-付録-windows-11-の配布物と資料の調査2026-10-03)）
 - そのため版（2.10.0）と sha256 をブロックに書き、一致しなければ止める。新しい版が出たら、この文書を直してから貼る（[Windows 11 の更新](../windows-setup.md#hackgen-console-nf-を上げる)）
-- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[syncthing.md の Windows 11 で使う](../syncthing.md#windows-11-で使う)の手順 4 の補足と同じ）
+- `curl.exe` は `C:\Windows\System32\curl.exe` を呼ぶ。Git for Windows や scoop の `curl` が `PATH` の先にある PC でも、同じものを使うため（[syncthing.md の Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)の手順 4 の補足と同じ）
 
 **入れるもの**
 
@@ -2047,7 +2047,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 #### HackGen Console NF: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
 
-[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+[Windows 11 の初期設定](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
 
 | 項目 | 値 |
 |---|---|
@@ -2108,7 +2108,7 @@ Linux（クラウドのコンテナ）に PowerShell 7.6.6（GitHub のリリー
 
 #### HackGen Console NF: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
 
-上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、画面のフォントの一覧と WezTerm の窓での表示、更新の確認を行った。手順は [Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の番号。
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、画面のフォントの一覧と WezTerm の窓での表示、更新の確認を行った。手順は [Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の番号。
 
 - 手順 5:
   - 設定 → 個人用設定 → フォント は、ライセンス認証していないこの VM でも開いた。ただし、画面の検索欄は使えなかった（UI Automation で `IsEnabled` が `False`）
@@ -2436,7 +2436,7 @@ d----        logs
 
 #### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
 
-  - 検証した PC には、[WireGuard VPN](../wireguard.md) のクライアントのアドレスから、パスワードで入れた
+  - 検証した PC には、[WireGuard VPN](../almalinux-setup.md#wireguard-実施手順) のクライアントのアドレスから、パスワードで入れた
 
 #### OpenSSH サーバー: 注意点 / 手順 0: 本文中の記録
 
@@ -2450,7 +2450,7 @@ d----        logs
 - [Unable to log into SSH server using Microsoft account](https://learn.microsoft.com/en-us/answers/questions/1332375/unable-to-log-into-ssh-server-using-microsoft-acco)（Microsoft Q&A。Microsoft アカウントのパスワードがエラー 1326 で拒否された例と、「Windows Hello サインインのみ」をオフにする回避策）
 - [Win32-OpenSSH の wiki](https://github.com/PowerShell/Win32-OpenSSH/wiki)
 - `Get-Help Add-WindowsCapability` / `Get-Help Set-NetConnectionProfile` / `Get-Help New-ItemProperty`
-- [WireGuard Road Warrior 設定手順](../wireguard.md#almalinux-10-の-pc-からつなぐ)（別の PC からの接続を外出先に広げるとき。本書では試していない）
+- [WireGuard Road Warrior 設定手順](../almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ)（別の PC からの接続を外出先に広げるとき。本書では試していない）
 
 #### OpenSSH サーバー: 付録: 実機での検証記録（2026-09-29）
 
@@ -3042,7 +3042,7 @@ pull.ff               system	only
 
 #### Git: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
 
-[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 2・3・5 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+[Windows 11 の初期設定](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 2・3・5 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
 
 | 項目 | 値 |
 |---|---|
@@ -3137,7 +3137,7 @@ pull.ff               system	only
 
 #### Git: 付録: Windows 11 Pro の VM での対話の Git Bash による通し検証（2026-10-08）
 
-上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、スタートメニューから開いた Git Bash（mintty）に、本文のブロックを右クリックのメニューの「Paste」で貼り、[実施手順](../almalinux-setup.md#git)の手順 1・3〜11 とロールバックの手順 1〜5 を通した。ロールバックの手順 6 と更新の手順 2 は、管理者の Windows PowerShell に貼った。上の付録と違い、子プロセスの `GIT_CONFIG_GLOBAL` は使わず、実ユーザーの `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた。
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、スタートメニューから開いた Git Bash（mintty）に、本文のブロックを右クリックのメニューの「Paste」で貼り、[実施手順](../almalinux-setup.md#git)の手順 1・3〜11 とロールバックの手順 1〜5 を通した。ロールバックの手順 6 と更新の手順 2 は、管理者の Windows PowerShell に貼った。上の付録と違い、子プロセスの `GIT_CONFIG_GLOBAL` は使わず、実ユーザーの `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた。
 
 | 項目 | 値 |
 |---|---|
@@ -3378,7 +3378,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6（GitHub のリリー
 
 #### Firefox: 付録: Windows 11 Pro の VM での新規導入の検証（2026-10-06）
 
-[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#firefox)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
+[Windows 11 の初期設定](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を検証中の専用 VM で、[Windows 11 で使う](../windows-setup.md#firefox)の手順 2・3 のコードブロックを抜き出して、そのまま実行した。画面で端末を開いて貼る操作は試していない。
 
 | 項目 | 値 |
 |---|---|
@@ -3408,7 +3408,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6（GitHub のリリー
 
 #### Firefox: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
 
-上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた画面の操作を確かめた。
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた画面の操作を確かめた。
 
 **確認したこと**:
 
@@ -3662,7 +3662,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 #### WezTerm: 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
 
-Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの管理者の Windows PowerShell に実行した。GUI のコピー・貼り付けや WezTerm の起動は試していない。
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの管理者の Windows PowerShell に実行した。GUI のコピー・貼り付けや WezTerm の起動は試していない。
 
 | 項目 | 確認した値 |
 |---|---|
@@ -3724,7 +3724,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
 
 #### WezTerm: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
 
-上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、GUI の起動・右クリックの項目・更新を確かめた。手順は [Windows 11 で使う](../windows-setup.md#wezterm)の番号。WezTerm は 20261005-054844-37254829。
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、GUI の起動・右クリックの項目・更新を確かめた。手順は [Windows 11 で使う](../windows-setup.md#wezterm)の番号。WezTerm は 20261005-054844-37254829。
 
 **手順 6（スタートメニューから起動）**:
 
@@ -3821,7 +3821,7 @@ advapi32.dll api-ms-win-core-handle-l1-1-0.dll api-ms-win-core-synch-l1-2-0.dll 
 **Scoop のソース**（`ScoopInstaller/Scoop` の `master`、2026-09-30 のコミット `e6aa3b3`）:
 
 - `lib/install.ps1`: 入れ終わると `'<名前>' (<版>) was installed successfully!`。そのアプリのフォルダーのプロセスが動いていると `The following instances of "<名前>" are still running. Close them and try again.`
-- `libexec/scoop-install.ps1`: 名前を 1 つだけ渡し、そのアプリが入っていれば、`'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）。`'<名前>' (<版>) is already installed. Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
+- `libexec/scoop-install.ps1`: 名前を 1 つだけ渡し、そのアプリが入っていれば、`'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）。`'<名前>' (<版>) is already installed. Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない（[windows-setup.md の付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
 - `libexec/scoop-update.ps1`: `scoop update` は `Scoop was updated successfully!`。名前を付けて新しい版が無いと `<名前>: <版> (latest version)`。動いているときは `Running process detected, skip updating.` で飛ばす
 - `libexec/scoop-uninstall.ps1`・`lib/core.ps1`: 成功は `'<名前>' was uninstalled.`、入っていなければ `'<名前>' isn't installed.`
 - `lib/manifest.ps1` の `Get-SupportedArchitecture`: arm64 の定義が無いアプリは、Windows 11（ビルド 22000 以降）では `64bit` の定義を使う
@@ -3848,7 +3848,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.5.3 と PSScriptAnalyzer 
 - 手順書の Windows 11 の 3 節の `powershell` のブロック 6 個（Windows 11 で使うの手順 2・3、更新の手順 1、ロールバックの手順 1〜3）を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）と、既定の規則の Error・Warning を当てた（指摘 0）
   - 同じ設定で、`??` を書いたファイル・`Get-Content -AsByteStream` を書いたファイル・`}` の足りないファイルは、それぞれ指摘された
-- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、6 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、6 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
 
 **模擬**:
 
@@ -3911,13 +3911,13 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 - go-keyring 0.2.8（同じ `go.mod`）の `keyring_windows.go`: 資格情報マネージャーの汎用資格情報に、`<サービス名>:<アカウント名>` の名前で置く（`credName`。gh では `gh:github.com:<GITHUB_USER>` と `gh:github.com:` になるはず）
 - Git for Windows の起動スクリプト（`git-for-windows/MSYS2-packages` の `filesystem/profile`・`filesystem/bash.bashrc` と、`git-for-windows/build-extra` の `git-extra/env.sh`・`aliases.sh`・`git-prompt.sh`・`bash_profile.sh`）は、`XDG_CONFIG_HOME` を含まない（`grep` で見た）。自分用の bash 設定の `bashrc`（`ryo-aoki-pc/bash` の `54af594`）と WezTerm の設定（`lua/shells.lua` の `set_environment_variables` は `WEZTERM_SHELL_INTEGRATION` だけ）も設定しない
 - Git for Windows の `system` の `credential.helper=manager` は、[Windows 11 の Git Bash での検証](almalinux-setup.md#git-実施手順--手順-3-補足-設定の-3-つの場所)で見た値
-- scoop 本体（`ScoopInstaller/Scoop` の `master`、2026-09-30 のコミット `e6aa3b3`）のメッセージ: 導入は `'<名前>' (<版>) was installed successfully!`、入っているときは、名前を 1 つだけ渡せば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.`（`libexec/scoop-install.ps1` の `$apps.length -eq 1` の分かれ。`… Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない。[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）。更新は `Scoop was updated successfully!`、新しい版が無ければ `<名前>: <版> (latest version)`、動いているときは `Running process detected, skip updating.`。削除は `'<名前>' was uninstalled.`、入っていなければ `'<名前>' isn't installed.`、動いているときは `The following instances of "<名前>" are still running. Close them and try again.`
+- scoop 本体（`ScoopInstaller/Scoop` の `master`、2026-09-30 のコミット `e6aa3b3`）のメッセージ: 導入は `'<名前>' (<版>) was installed successfully!`、入っているときは、名前を 1 つだけ渡せば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.`（`libexec/scoop-install.ps1` の `$apps.length -eq 1` の分かれ。`… Skipping.` は名前を並べたときの分かれのもので、main のアプリには出ない。[windows-setup.md の付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)）。更新は `Scoop was updated successfully!`、新しい版が無ければ `<名前>: <版> (latest version)`、動いているときは `Running process detected, skip updating.`。削除は `'<名前>' was uninstalled.`、入っていなければ `'<名前>' isn't installed.`、動いているときは `The following instances of "<名前>" are still running. Close them and try again.`
 
 **構文と Windows PowerShell 5.1 との互換**（Linux の PowerShell 7.5.3 と PSScriptAnalyzer 1.25.0）:
 
 - 手順書の `powershell` のブロック 10 個（Windows 11 で使うの手順 2〜4・6、Windows 11 の更新の手順 1、Windows 11 のロールバックの手順 1・3〜6）を取り出し、PowerShell 7.5.3 の構文解析器に通した（構文の誤り 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）と、既定の規則の Error・Warning を当てた（指摘 0）。同じ設定で、`??` を書いたファイル・`Get-Content -AsByteStream` を書いたファイル・`}` の足りないファイルは、それぞれ指摘された
-- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、10 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
+- 最後に（2026-10-08、手順書の今のブロックを取り出し直して）、10 個を構文解析器にもう一度通し（誤り 0）、互換の規則を `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows PowerShell 5.1 のプロファイル 3 つ。Windows Server 2016・Windows Server 2019・Windows 10 Pro）・`PSUseCompatibleCmdlets`（`desktop-5.1.14393.206-windows`）にして当てた。互換の指摘も既定の規則の指摘も 0 個（[windows-setup.md の付録](#付録-シェルのツールの任意節のブロックの確認2026-10-08)と同じ回）
 
 **模擬**（Linux の PowerShell 7.5.3 と git 2.43.0）:
 
@@ -4275,7 +4275,7 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 
 #### Claude Code: Windows 11 で使う / 手順 0: 本文中の記録
 
-- 手順の後: `claude` のコマンドラインは[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-claude-remote-control.md)。以後は[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)
+- 手順の後: `claude` のコマンドラインは[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)。以後は[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)
 
 #### Claude Code: Windows 11 で使う: 検証状況の記録
 
@@ -4315,7 +4315,7 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 - 出力の文言は公式の文書（Update manually）から。Linux の native installer の 2.1.288 では、`Current version: 2.1.288`・`Checking for updates to latest version...`・`Claude Code is up to date (2.1.288)` と出た（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）
 - Windows では、動いている `claude.exe` を同じフォルダーの `claude.exe.old.<数字>` に名前を変えてから、新しい版を置く（公式の Troubleshoot installation）
 - 新しい版は `%USERPROFILE%\.local\share\claude\versions` に置かれる。古い版は、使っているものと新しい 2 つを残して消される（公式の文書の Install on network storage）
-- [windows-claude-remote-control.md](../windows-claude-remote-control.md) の実機では、検証の間に、自動の更新で 2.1.283 から 2.1.286 に上がった
+- [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の実機では、検証の間に、自動の更新で 2.1.283 から 2.1.286 に上がった
 
 #### Claude Code: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
 
@@ -4498,7 +4498,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 #### Claude Code: 付録: Windows 11 Pro の VM での導入検証（2026-10-06）
 
-Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)と Git for Windows の導入の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの通常権限で実行した。GUI のコピー・貼り付けや認証操作は試していない。
+Rufus で作ったインストールメディアからクリーンインストールした専用 VM で、[Windows 11 の初期設定](#付録-windows-11-pro-の-vm-での導入検証2026-10-06)と Git for Windows の導入の後に実行した。本文の PowerShell のブロックを抽出して、サインイン中の同じユーザーの通常権限で実行した。GUI のコピー・貼り付けや認証操作は試していない。
 
 | 項目 | 確認した値 |
 |---|---|
@@ -4532,7 +4532,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
 
 #### Claude Code: 付録: Windows 11 Pro の VM での追加検証（2026-10-08）
 
-上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた項目を、画面の操作と本文のブロックの貼り付けで確かめた。ログインは行っていない。
+上の付録と同じ VM（[windows-setup.md の検証記録の 2026-10-08 の付録](#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08)の環境）で、上の付録が「確認していないこと」に挙げた項目を、画面の操作と本文のブロックの貼り付けで確かめた。ログインは行っていない。
 
 | 項目 | 値 |
 |---|---|

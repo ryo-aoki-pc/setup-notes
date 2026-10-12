@@ -1,6 +1,6 @@
 # Hyper-V の有効化と VM の作成（Windows 11 Pro）の参考資料
 
-[手順書](../hyper-v.md)・[検証記録](../verification/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
+[手順書](../windows-setup.md#hyper-v-実施手順)・[検証記録](../verification/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
 
 ## 補足
 

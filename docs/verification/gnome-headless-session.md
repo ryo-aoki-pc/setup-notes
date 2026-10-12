@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の検証記録
 
-[手順書](../gnome-headless-session.md)・[ロールバックと注意点](../extra/gnome-headless-session.md)
+[手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -17,7 +17,7 @@
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜10・LAN 限定・ロールバック 2〜5 を本実行し、再起動後の自動起動と RDP の画面操作を確認した（2026-10-06。[今回の付録](#付録-クリーンインストールした-vm-での検証2026-10-06)）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末、ブラケットペースト無し）にそのまま貼った。書き換えたのは手順 1 の `SERVER_IP` と、任意節の `LAN_SUBNET` だけ
-    - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](../gnome-headless-session.md#接続元を-lan-に絞る任意) → [ロールバック](../extra/gnome-headless-session.md#ロールバック)の手順 2〜5
+    - 実施手順 1〜9 → 手順 10（別のセッションの FreeRDP で接続）→ [接続元を LAN に絞る（任意）](../almalinux-setup.md#gnome-のヘッドレスセッション-接続元を-lan-に絞る任意) → [ロールバック](../extra/gnome-headless-session.md#ロールバック)の手順 2〜5
     - `grep headless` を直した後の版で、実施手順 1・2 → ロールバックの手順 5 → 実施手順 1・2 をもう一度通した（ほかのユーザーのヘッドレスのセッションがある状態で）
   - 確認したこと
     - リモートログイン（3389）が有効な PC で、`RDP_PORT` が 3390 になり、このセッションの RDP が 3390/tcp で待ち受ける
@@ -36,11 +36,11 @@
     - 同じ日に、試験用のユーザーとコンテナの FreeRDP 3.10.3 で、3390 と 3389 の同時の接続と GDM の再起動を確かめた（[同書の付録の追加の確認](gnome-remote-desktop.md#追加の確認)。[注意点](../extra/gnome-headless-session.md#注意点)）
   - 2026-10-02: もとの手順 2・3 と、[ロールバック](../extra/gnome-headless-session.md#ロールバック)のもとの手順 5・6 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-05: 手順 3・4 とロールバックの手順 3・4 に、共用 TLS 設定の退避・復元と、新規生成した証明書だけの削除を追加した。構文検査と一時ディレクトリ・スタブでの確認だけで、実機の RDP では流していない
-  - 2026-10-08: 節「[リモートログインだけにする（併用をやめる）](../gnome-headless-session.md#リモートログインだけにする併用をやめる)」を足し、aarch64 の実機（同じ Raspberry Pi 5）で本実行した（[付録](#付録-実機でリモートログインだけにした記録2026-10-08)）
+  - 2026-10-08: 節「[リモートログインだけにする（併用をやめる）](../almalinux-setup.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)」を足し、aarch64 の実機（同じ Raspberry Pi 5）で本実行した（[付録](#付録-実機でリモートログインだけにした記録2026-10-08)）
     - 通したもの: この節の手順 1・3〜5・7（手順 2 は、ヘッドレスのセッションの RDP を設定していなかったので飛ばした）。手順 6 は利用者の Windows の「リモート デスクトップ接続」
     - 確認したこと: リモートログインで入ると新しいセッション（`gdm-password`）ができ、gnome-shell は `--virtual-monitor` 無しで、モニターは RDP の 1 枚だけ。上部バーのあるデスクトップが出た（利用者の目視）。切断してつなぎ直すと、同じセッションへ 2 回とも引き渡された
     - 見つけたこと: リモートログインのセッションも `loginctl` の `TTY` の列が `headless` で、もとのロールバックの手順 5 の数え方では、ヘッドレスのセッションが無くても `1` になる。`Service=gdm-autologin` で数える形に直した（直した後の形は、この節の手順 4 として実機で流した）
-    - 確認していないこと: ヘッドレスのセッションが動いている状態から、この節の手順 4 で止めること（利用者が先に止めていた）。この節の手順 2。もとの[手順 2](../gnome-headless-session.md#実施手順) の確かめの行は直していない
+    - 確認していないこと: ヘッドレスのセッションが動いている状態から、この節の手順 4 で止めること（利用者が先に止めていた）。この節の手順 2。もとの[手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/ae1981a48fee0e26540d82224d4c195492bae782/docs/gnome-headless-session.md#実施手順) の確かめの行は直していない
   - **2026-10-11 に、Hyper-V の VM（x86_64。Kickstart で入れた Workstation に、初期設定・画面オフの任意節の手順 1〜5・linger・Podman を通したもののクローン）で、実施手順 1〜10 を上から通した**（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
     - 通し方: ブロックは、SSH の対話の bash に 1 つずつ貼った（書き換えたのは手順 1 の `SERVER_IP` だけ）。VM のコンソールにはログインしていない。手順 10 は、同じ仮想スイッチの別の VM（AlmaLinux 10.2）の FreeRDP 3.10.3 から行った
     - 結果: 通した 10、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
@@ -61,14 +61,14 @@
 
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../gnome-headless-session.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${SERVER_IP}` | クライアントが接続に使う PC の IP アドレス | `192.168.10.100` |
 > | `${SERVER_NAME}` / `${SERVER_FQDN}` | PC のホスト名 / FQDN（`hostname` / `hostname -f` から自動で入る） | `my-pc` / `my-pc.lan` |
 > | `${RDP_PORT}` | RDP で待ち受けるポート（リモートログインのデーモンが有効なら 3390、無ければ 3389。自動で入る） | `3390` |
-> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../gnome-headless-session.md#接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
+> | `${LAN_SUBNET}` | LAN のサブネット。[接続元を LAN に絞る](../almalinux-setup.md#gnome-のヘッドレスセッション-接続元を-lan-に絞る任意)ときだけ、その節で設定する | `192.168.10.0/24` |
 >
 > 出力例・ログの中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<RDP_PORT>` / `<USER>` / `<UID>` / `<SESSION_ID>` / `<PID>` / `<FINGERPRINT>`（証明書の TLS fingerprint）のプレースホルダで書いてある。`<...>` を含むコマンドは bash のコードブロックには置かない。
 
@@ -117,7 +117,7 @@ $ sudo firewall-cmd --list-ports
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）のログイン画面から同じユーザーで入ると、新しいセッションは作られず、このセッションに引き渡された（2026-10-02。同書の[注意点](../extra/gnome-remote-desktop.md#注意点)）
+  - リモートログイン（[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）のログイン画面から同じユーザーで入ると、新しいセッションは作られず、このセッションに引き渡された（2026-10-02。同書の[注意点](../extra/gnome-remote-desktop.md#注意点)）
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -129,7 +129,7 @@ $ sudo firewall-cmd --list-ports
 
 **クライアントの作り方**（検証の都合。手順書では要らない）:
 
-- 同じ Pi に試験用のユーザーを作り、そのユーザーにもヘッドレスのセッションを起動した。そのセッションには、[claude-code-gui.md](../claude-code-gui.md) と同じドロップインで 1600x900 の仮想モニターを付けた
+- 同じ Pi に試験用のユーザーを作り、そのユーザーにもヘッドレスのセッションを起動した。そのセッションには、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) と同じドロップインで 1600x900 の仮想モニターを付けた
 - root の podman で、AlmaLinux 10 に `freerdp` を入れたコンテナを作り、そのセッションの Xwayland（`DISPLAY`・`XAUTHORITY`）に `xfreerdp /v:192.168.1.10:3390 /u:<RDP のユーザー名> /f` を描かせた（ネットワークは `--network host`）
 - クライアントの画面は、試験用のユーザーのセッションで `scripts/gnome-gui.py shot` で撮り、入力も同じスクリプトで送った（クライアントの FreeRDP の窓へ）
 - ファイアウォールの確かめには、veth でつないだ network namespace（`192.168.252.0/24` と `192.168.253.0/24`。[samba.md の付録](samba.md#network-namespace-から-firewalld-越しに到達する)と同じ手法）から、手順 9 のプローブを 192.168.1.10:3390 へ当てた
@@ -221,8 +221,8 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 **実施前の状態**:
 
-- リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)。3389/tcp、手順 5 の `After=gdm.service` のドロップインあり）が有効
-- 2026-10-02 の起動から、このユーザーのヘッドレスのセッション（実施手順 1・2 だけ。ヘッドレスのセッションの RDP は設定していない）と、[claude-code-gui.md](../claude-code-gui.md) の `--virtual-monitor 1920x1080` のドロップインが動いていた
+- リモートログイン（[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順)。3389/tcp、手順 5 の `After=gdm.service` のドロップインあり）が有効
+- 2026-10-02 の起動から、このユーザーのヘッドレスのセッション（実施手順 1・2 だけ。ヘッドレスのセッションの RDP は設定していない）と、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor 1920x1080` のドロップインが動いていた
 - このユーザーの linger は `yes`
 
 **節を書く前に起きていたこと**:
@@ -269,20 +269,20 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 - ヘッドレスのセッションが動いている状態から、この節の手順 4 で止めること（利用者が先に止めていた）
 - この節の手順 2（ヘッドレスのセッションの RDP を外す流れ）
 - linger が無い PC での動き
-- もとの[手順 2](../gnome-headless-session.md#実施手順) の確かめの行（`TTY` の列だけで見る）が、リモートログインのセッションがあると早く抜けること。手順 2 は直していない
+- もとの[手順 2](https://github.com/ryo-aoki-pc/setup-notes/blob/ae1981a48fee0e26540d82224d4c195492bae782/docs/gnome-headless-session.md#実施手順) の確かめの行（`TTY` の列だけで見る）が、リモートログインのセッションがあると早く抜けること。手順 2 は直していない
 
 ---
 
 ### 付録: Hyper-V の VM で通した記録（2026-10-11）
 
-- **何を**: [手順書](../gnome-headless-session.md)の実施手順 1〜10（コミット `114c2b2`）を、上から最後まで通した
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-headless-session.md)の実施手順 1〜10（コミット `114c2b2`）を、上から最後まで通した
   - 任意節「接続元を LAN に絞る」、節「リモートログインだけにする（併用をやめる）」、ロールバックは、この通しでは流していない
-  - 続けて、同じ VM で [claude-code-gui.md](../claude-code-gui.md) の実施手順 1〜6 を通した（[同書の検証記録の付録](claude-code-gui.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 続けて、同じ VM で [claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の実施手順 1〜6 を通した（[同書の検証記録の付録](claude-code-gui.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - **結果**: 10 手順のうち、通した 10、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
   - 手順 1〜9 の出力は、どれも手順書の箇条書きのとおりだった
   - 手順 10 に、箇条書きに無い出力が 3 つあった（FreeRDP が初めての接続でも出す警告、パスワードの後に出す Kerberos の `[ERROR]` の行、手順 10 で見るログに残る手順 9 のプローブの行。[指摘と状態](#指摘と状態2026-10-11)）
 - **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` のクローン
-  - Kickstart で入れた AlmaLinux 10.2 の Workstation に、[初期設定](../almalinux-setup.md)の実施手順（[記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）、同書の任意節「画面オフ・画面ロック・自動サスペンドを止める」の手順 1〜5、[linger.md](../linger.md)、[podman.md](../podman.md) を通した後の状態
+  - Kickstart で入れた AlmaLinux 10.2 の Workstation に、[初期設定](../almalinux-setup.md)の実施手順（[記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）、同書の任意節「画面オフ・画面ロック・自動サスペンドを止める」の手順 1〜5、[linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)、[podman.md](../almalinux-setup.md#podman-実施手順) を通した後の状態
   - 前提（同じ任意節の手順 1・2。サスペンドできる PC では手順 3・4 も）は、満たしている
 - **どう通したか**: 手順書から抜き出したブロックを、SSH の対話の bash に 1 つずつ貼った（手順書の「本人のシェル（SSH でよい）」のとおり）
   - VM のコンソールでは、GNOME にログインしていない（終わりまで GDM のログイン画面のまま）
@@ -397,7 +397,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 | 連番 | 重大度 | 場所 | 何が起きたか | 切り分け | 直し方の案 | 状態 |
 |---|---|---|---|---|---|---|
-| 1 | 低 | 手順 10 の、証明書の確認の箇条書き（`:226`） | FreeRDP 3.10.3 は、初めてつなぐときも、証明書の確認の前に `WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`・`Host key verification failed.` などを 12 行出す。その後に `Thumbprint:` と `Do you trust the above certificate? (Y/T/N)` が出る。箇条書きには、この警告も、`Y`・`T`・`N` のどれで答えるかも書いていなかった。`Y` と答えた後は、つなぎ直しても確認が出ず、`Domain:` から始まる（担当は、これに気付かずに 1 度まちがえた） | 手順書の書き落とし。クライアントは入れたばかりで、`~/.config/freerdp` は無かった。SSH にも Hyper-V にもよらない: 2026-10-01 の実機の記録でも、保存済みの証明書の無いコンテナの FreeRDP 3.10.3 が `The host key for … has changed` の警告を出している（[付録](#付録-実機での検証記録2026-10-01)）。[gnome-desktop-sharing.md](../gnome-desktop-sharing.md) の「再起動の後に確かめてつなぐ」の手順 3 には、同じことがもう書いてある。警告の直前に `[x509_utils_from_pem]: BIO_new failed for certificate` が出ていて、保存した証明書が無いことを「変わった」と扱っているとみる（担当の見立て。確かめていない） | gnome-desktop-sharing.md と同じ 2 つの文を、手順 10 の箇条書きに足す | 直した（文言だけ。手順 10 の証明書の箇条書きの下に、入れ子の箇条書きを 3 つ足した。コードブロックは無い手順。参考資料にも補足を足した） |
+| 1 | 低 | 手順 10 の、証明書の確認の箇条書き（`:226`） | FreeRDP 3.10.3 は、初めてつなぐときも、証明書の確認の前に `WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`・`Host key verification failed.` などを 12 行出す。その後に `Thumbprint:` と `Do you trust the above certificate? (Y/T/N)` が出る。箇条書きには、この警告も、`Y`・`T`・`N` のどれで答えるかも書いていなかった。`Y` と答えた後は、つなぎ直しても確認が出ず、`Domain:` から始まる（担当は、これに気付かずに 1 度まちがえた） | 手順書の書き落とし。クライアントは入れたばかりで、`~/.config/freerdp` は無かった。SSH にも Hyper-V にもよらない: 2026-10-01 の実機の記録でも、保存済みの証明書の無いコンテナの FreeRDP 3.10.3 が `The host key for … has changed` の警告を出している（[付録](#付録-実機での検証記録2026-10-01)）。[gnome-desktop-sharing.md](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順) の「再起動の後に確かめてつなぐ」の手順 3 には、同じことがもう書いてある。警告の直前に `[x509_utils_from_pem]: BIO_new failed for certificate` が出ていて、保存した証明書が無いことを「変わった」と扱っているとみる（担当の見立て。確かめていない） | gnome-desktop-sharing.md と同じ 2 つの文を、手順 10 の箇条書きに足す | 直した（文言だけ。手順 10 の証明書の箇条書きの下に、入れ子の箇条書きを 3 つ足した。コードブロックは無い手順。参考資料にも補足を足した） |
 | 2 | 低 | 手順 3 の `openssl`（`:95`・`:105`・`:106`）と、手順 9 のスクリプトの中の `openssl`（`:208`） | 初期設定を通した PC では、PATH で Homebrew が `/usr/bin` より前にあるので、`openssl` は Homebrew のもの（この VM では 4.0.3）に解決される。OS のものは `/usr/bin/openssl`（3.5.8）。この通しでは、作った証明書と鍵を GNOME Remote Desktop がそのまま読め、手順 4〜10 まで通った | 対話のシェルの `type -a openssl` が、Homebrew のものを先に返した（主の seq 21。`facts-after-step2.txt` も同じ）。同じ手順 9 は、`python3` には `/usr/bin/python3` と書いて Homebrew のものを避けている。害は出ていない。Homebrew の OpenSSL の版が上がると、作られる証明書の形が OS の側と離れうる、というのが担当の見立て | 手順 3 の 3 か所と、手順 9 のスクリプトの `['openssl', …]` を `/usr/bin/openssl` にそろえる。そのままにするなら、「Homebrew の OpenSSL 4.0.3 でも通った」を検証記録に残す | 未対応（コードブロックを変える直しで、変えた形は VM で貼っていない。害は見ていない。Homebrew の OpenSSL 4.0.3 で作った証明書と鍵で通ったことを、ここに残す） |
 | 3 | 低 | 手順 10 の、パスワードの箇条書き（`:228`） | FreeRDP 3.10.3 は、`Password:` に答えた後、つながる前に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出す。エラーに見えるが、そのままつながった。箇条書きに無い | つながった 2 回（1 回目と 3 回目）と、`/auth-only` の 2 回（正しいパスワードと、わざと違う値）の、どれでも出た。クライアントは入れたばかりの AlmaLinux 10.2 で、Kerberos の設定はしていない。行が出る理由は、確かめていない。SSH にも Hyper-V にもよらないとみる: 2026-10-07 の VirtualBox の VM の記録（[gnome-desktop-sharing.md の検証記録](gnome-desktop-sharing.md)）にも、`krb5_parse_name (Configuration file does not specify default realm)` の後につながったとある | 箇条書きに「デスクトップが出れば、害は無い」と足す | 直した（文言だけ。パスワードの箇条書きの下に 1 つ足した。参考資料にも 1 行） |
 | 4 | 低 | 手順 10 の、ログを見る箇条書き（`:230`） | 箇条書きが見るように言う `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop-headless.service` には、うまくいっているときも、手順 9 のプローブの時刻に `client authentication failure` と `Network or intentional disconnect, stopping session` などの 7 行が残っている。認証の失敗に見える | 手順 9 のプローブは、TLS のハンドシェイクで証明書を受け取ると、認証をせずに接続を閉じる（スクリプトのとおり）。時刻が、プローブを貼った時刻と合う。Hyper-V にもよらない: 同じスクリプトを使う [gnome-remote-desktop.md の参考資料](../reference/gnome-remote-desktop.md#実施手順--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)にも、この行が出て正常とある。担当の報告も、この行を「違う値のときだけ出る」と読み違えていた（[報告と証跡が食い違っていた所](#報告と証跡が食い違っていた所2026-10-11)） | 箇条書きに、プローブが残した行であることを足す | 直した（文言だけ。ログを見る箇条書きの下に 1 つ足した。参考資料の手順 9 の補足にも 1 行） |
@@ -413,7 +413,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 通した後（`114c2b2` より後）に直した。どれも箇条書きの文言だけで、コードブロックは変えていない（手順 10 は、コマンドの無い手順）。VM で貼り直すものは無い。
 
-- [手順書](../gnome-headless-session.md)の手順 10: 「証明書の確認を聞かれたら…」の箇条書きの下に、入れ子の箇条書きを 3 つ足した（指摘 1）
+- [手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 10: 「証明書の確認を聞かれたら…」の箇条書きの下に、入れ子の箇条書きを 3 つ足した（指摘 1）
   - FreeRDP は、`Thumbprint:` の後に `Do you trust the above certificate? (Y/T/N)` と聞く。同じなら `Y` で答える
   - FreeRDP は、初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告を出す。続く `Thumbprint:` で判断する
   - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
@@ -490,7 +490,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 ### 参考資料: 実施手順 / 手順 3: 補足: 証明書
 
-- 中身は [gnome-remote-desktop.md 手順 2](../gnome-remote-desktop.md#実施手順) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
+- 中身は [gnome-remote-desktop.md 手順 2](../almalinux-setup.md#gnome-のリモートログイン-実施手順) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る
 - `certificates` のディレクトリは、SELinux のラベルが `home_cert_t` になった。gnome-remote-desktop のユーザーのデーモンは `unconfined_t` で動き、Enforcing のまま読めた
 - TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す

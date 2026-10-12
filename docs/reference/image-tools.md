@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）の参考資料
 
-[手順書](../image-tools.md)・[ロールバックと注意点](../extra/image-tools.md)
+[手順書](../almalinux-setup.md#画像の道具-実施手順)・[ロールバックと注意点](../extra/image-tools.md)
 
 ## 補足
 
@@ -60,7 +60,7 @@
 | Trivy | **公式の dnf リポジトリ（0.74.0）** | Homebrew と同じ版なので、[ツール一覧の選び方](../tool-catalog.md#選び方)の規則 1 で RPM にした。EPEL は 0.64.1 と古い |
 | syft / grype（SBOM と脆弱性） | 対象外 | Trivy と役割が重なる |
 
-- 3 つの経路が混ざるので、更新も `brew upgrade` と `sudo dnf upgrade` の 2 つになる（[更新](../image-tools.md#更新)）
+- 3 つの経路が混ざるので、更新も `brew upgrade` と `sudo dnf upgrade` の 2 つになる（[更新](../almalinux-setup.md#画像の道具-更新)）
 - Trivy だけ RPM なので、`sudo trivy` がそのまま動く。hadolint と dive は Homebrew なので、root で使うなら [AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスで呼ぶ
 
 ### 参照
@@ -69,6 +69,6 @@
 - [dive — README](https://github.com/wagoodman/dive) — `--source`、`--ci` と `.dive-ci`、キー操作
 - [Trivy — Installation](https://trivy.dev/docs/latest/getting-started/installation/) — RHEL/CentOS の公式 dnf リポジトリの登録
 - [Trivy — Container Image](https://trivy.dev/docs/latest/guide/target/container_image/) — `--image-src`（podman は API ソケットを使う）
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜3 の Homebrew） / [Podman](../podman.md) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜3 の Homebrew） / [Podman](../almalinux-setup.md#podman-実施手順) — 前提の手順書
 
 ---

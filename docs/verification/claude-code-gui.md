@@ -1,6 +1,6 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の検証記録
 
-[手順書](../claude-code-gui.md)・[ロールバックと注意点](../extra/claude-code-gui.md)
+[手順書](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -22,7 +22,7 @@
 
 ### 対象と検証環境
 
-- **目的**: [gnome-headless-session.md](../gnome-headless-session.md) で常駐させた GNOME のヘッドレスのセッションを、同じ PC の上で動く Claude Code（リモートコントロールで使うときも）が、画面を撮り、キーボードとポインタで操作して、GUI の動作を確かめられるようにする
+- **目的**: [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) で常駐させた GNOME のヘッドレスのセッションを、同じ PC の上で動く Claude Code（リモートコントロールで使うときも）が、画面を撮り、キーボードとポインタで操作して、GUI の動作を確かめられるようにする
 - **方式**: gnome-shell に `--virtual-monitor` で仮想モニターを常に付け、Mutter の ScreenCast と RemoteDesktop の D-Bus で撮って操作する（[`scripts/gnome-gui.py`](../../scripts/gnome-gui.py)）
 - **状態**: **aarch64 の実機（Raspberry Pi 5）で本実行済み（2026-10-01）。クリーンインストールした x86_64 の VM でも実施手順 1〜6・1280x720 への変更・ロールバックを本実行し、1920x1080 へ戻して再起動後の自動起動と撮影・入力を確認した（2026-10-06）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#付録-現行版の新規-vm-での再検証2026-10-06)に記録した
@@ -30,7 +30,7 @@
   - 通したもの: この文書のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま貼った
     - 書き換えたのは手順 1 の `REPO`（PR #68 の作業ツリーを指した。`scripts/gnome-gui.py` がまだ main に無いため）と、任意節で書き換える `VIRTUAL_MONITOR` だけ
     - 分ける前の版（ヘッドレスのセッションの起動と、ひとつの手順書だった）で 3 回通した（ブラケットペーストの無しと有り、レビューで直した後の版。[付録](#付録-実機での検証記録2026-10-01)）
-    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1・2](../gnome-headless-session.md#実施手順) の後に、実施手順 1〜6 → [ロールバック](../extra/claude-code-gui.md#ロールバック) → 実施手順 1〜6 → [仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
+    - 分けた後のこの版（ブラケットペースト無し）: [gnome-headless-session.md 手順 1・2](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の後に、実施手順 1〜6 → [ロールバック](../extra/claude-code-gui.md#ロールバック) → 実施手順 1〜6 → [仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)で 1280x720 にして、1920x1080 に戻した。**この状態を残した**
   - 確認したこと
     - 仮想モニター（1920x1080 と 1280x720）の画面を撮れる
     - キーボードの入力（電卓で `12×34 = 408`）、ポインタのクリック・ダブルクリック・右クリック・スクロール、アプリの起動（ファイルを渡すときも）
@@ -46,10 +46,10 @@
     - IBus での日本語の入力、キーリングを開く窓が出たときの動き
     - 同じユーザーでローカルの画面にも同時にログインしたときの動き（付録の未確認事項のうち、リモートログイン側は上の 2026-10-02 に確認済み）
   - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/claude-code-gui.md#ロールバック)のもとの手順 2・3 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
-  - 2026-10-08: 実機（同じ Raspberry Pi 5）では、ヘッドレスのセッションをやめてリモートログインだけにしたので、[gnome-headless-session.md の「リモートログインだけにする（併用をやめる）」](../gnome-headless-session.md#リモートログインだけにする併用をやめる)の手順 3 でドロップインを外した（ロールバックの手順 1 と同じ操作。手順 2 は行っていない）。2026-10-01 から残していた状態は、この実機にはもう無い
+  - 2026-10-08: 実機（同じ Raspberry Pi 5）では、ヘッドレスのセッションをやめてリモートログインだけにしたので、[gnome-headless-session.md の「リモートログインだけにする（併用をやめる）」](../almalinux-setup.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)の手順 3 でドロップインを外した（ロールバックの手順 1 と同じ操作。手順 2 は行っていない）。2026-10-01 から残していた状態は、この実機にはもう無い
     - ヘッドレスのセッションを先に止めてからリモートログインで入ると、そのセッションの gnome-shell にもドロップインが効き、RDP のモニターは `Meta-1` として足された（[gnome-headless-session.md の検証記録の付録](gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
   - **2026-10-11 に、Hyper-V の VM（x86_64）で、実施手順 1〜6 を上から通した**（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
-    - 通し方: [gnome-headless-session.md](../gnome-headless-session.md) の実施手順 1〜10 を通した直後の同じ VM で、ブロックを SSH の対話の bash に 1 つずつ貼った（変数は既定のまま）。`REPO` の `~/setup-notes` は、GitHub から clone した（`scripts/gnome-gui.py` は、検証する版と同じ中身）
+    - 通し方: [gnome-headless-session.md](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-headless-session.md) の実施手順 1〜10 を通した直後の同じ VM で、ブロックを SSH の対話の bash に 1 つずつ貼った（変数は既定のまま）。`REPO` の `~/setup-notes` は、GitHub から clone した（`scripts/gnome-gui.py` は、検証する版と同じ中身）
     - 結果: 通した 6、通らなかった 0、条件に当たらず飛ばした 0、未実施 0。確認の出力は 6 手順とも箇条書きのとおりで、手順書は直していない
     - 確認したこと: 1920x1080 の仮想モニターの画面を 1 回で撮れる。電卓に `12×34 = 408` が出る。クリックでアクティビティ画面が開き、`ctrl+q` で電卓が閉じる。手順 3 の後も、ヘッドレスのセッションの RDP のデーモンは 3389/tcp を待ち受けていた（つないではいない）
     - 通らなかったもの: 無い
@@ -65,7 +65,7 @@
 | そのほか | `sudo-1.9.17-10.p2.el10_2.6`（このユーザーは NOPASSWD）、`systemd-257-23.el10_2.2.alma.1`。リモートログイン（`gnome-remote-desktop-49.3-4.el10_2` のシステムのデーモン）が有効。PATH の先頭は Homebrew（`python3` 3.14.7、`glib` 2.90.0） |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../claude-code-gui.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -80,7 +80,7 @@
 
 | 項目 | 状態 |
 |---|---|
-| ヘッドレスのセッション | [gnome-headless-session.md 手順 1・2](../gnome-headless-session.md#実施手順) の後。gnome-shell は `--virtual-monitor` 無しで動いている |
+| ヘッドレスのセッション | [gnome-headless-session.md 手順 1・2](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の後。gnome-shell は `--virtual-monitor` 無しで動いている |
 | ユーザーの systemd | `org.gnome.Shell@wayland.service` のドロップインは無い |
 | dconf | 前提の gnome-power.md 手順 1・2 を済ませてあった |
 | PATH | 先頭が Homebrew（`python3`・`gsettings`・`gdbus`・`gio` が Homebrew のもの） |
@@ -105,7 +105,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 ### 注意点 / 手順 0: 本文中の記録
 
-  - リモートログイン（[gnome-remote-desktop.md](../gnome-remote-desktop.md)）のログイン画面からこのユーザーで入ったときも、このセッションに引き渡され、gnome-shell のログに `Added virtual monitor Meta-1` が出た（2026-10-02、Windows 11 の「リモートデスクトップ接続」）
+  - リモートログイン（[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）のログイン画面からこのユーザーで入ったときも、このセッションに引き渡され、gnome-shell のログに `Added virtual monitor Meta-1` が出た（2026-10-02、Windows 11 の「リモートデスクトップ接続」）
 
 ### 注意点 / 手順 0: 本文中の記録
 
@@ -113,7 +113,7 @@ ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080
 
 ### 付録: 実機での検証記録（2026-10-01）
 
-**分けた後のこの版の検証**（ブラケットペースト無し。[gnome-headless-session.md](../gnome-headless-session.md) の検証のすぐ後に、ほかのユーザーのヘッドレスのセッションがある状態で）:
+**分けた後のこの版の検証**（ブラケットペースト無し。[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の検証のすぐ後に、ほかのユーザーのヘッドレスのセッションがある状態で）:
 
 | 手順 | 結果 |
 |---|---|
@@ -235,7 +235,7 @@ RDP の標準構成の試験とロールバックを終えた後、ヘッドレ�
 
 ### 付録: Hyper-V の VM で通した記録（2026-10-11）
 
-- **何を**: [手順書](../claude-code-gui.md)の実施手順 1〜6（コミット `114c2b2`）を、上から最後まで通した
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/claude-code-gui.md)の実施手順 1〜6（コミット `114c2b2`）を、上から最後まで通した
   - 「使い方の基本」の表、任意節「仮想モニターの大きさを変える」、ロールバックは、この通しでは流していない
 - **結果**: 6 手順のうち、通した 6、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
   - 「確認」から後ろの出力は、6 手順とも手順書の箇条書きのとおりだった。手順書への指摘は無く、手順書は直していない
@@ -343,7 +343,7 @@ RDP の標準構成の試験とロールバックを終えた後、ヘッドレ�
 
 ### 実施手順 / 手順 1: 補足: 変数について
 
-- 小さくすると、画面の写しの PNG も小さくなる（1920x1080 で約 0.7 MB）。後から変えるときは[仮想モニターの大きさを変える（任意）](../claude-code-gui.md#仮想モニターの大きさを変える任意)
+- 小さくすると、画面の写しの PNG も小さくなる（1920x1080 で約 0.7 MB）。後から変えるときは[仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)
 
 ### 実施手順 / 手順 4: 補足: 画面の撮り方
 

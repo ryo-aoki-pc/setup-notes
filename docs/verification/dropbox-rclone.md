@@ -1,6 +1,6 @@
 # Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）の検証記録
 
-[手順書](../dropbox-rclone.md)・[ロールバックと注意点](../extra/dropbox-rclone.md)
+[手順書](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -67,7 +67,7 @@ Free:    28.480 GiB
 
 フィルタは上の行から順に当てはめ、最初に当たった行で決まる。`+ /Documents/**` と `+ /Photos/**` の後に `- **` を置くと、その 2 つのフォルダだけが同期の対象になる。
 
-コンテナでは、[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)で同じ 3 行を有効にして（`vi` の代わりに `sed` で書き換えた）、次を確かめた:
+コンテナでは、[同期するフォルダを変える（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox-rclone.md#同期するフォルダを変える任意)で同じ 3 行を有効にして（`vi` の代わりに `sed` で書き換えた）、次を確かめた:
 
 - Dropbox 側の `Documents` に足したファイルは手元に来て、`Work` に足したファイルは来なかった
 - 外した `Work` の手元の複製は、消えずに残った（同期されなくなるだけ）
@@ -106,11 +106,11 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 ### 対象と検証環境
 
 - **目的**: Raspberry Pi 5（aarch64）の AlmaLinux 10 で、ログインしていない間も `~/Dropbox` を Dropbox と同期し続ける。Dropbox の公式クライアントは ARM の Linux で動かないので、rclone の双方向同期（bisync）を systemd の timer で 15 分ごとに回す
-- **進め方**: Homebrew で rclone を入れ、ブラウザで Dropbox を登録し、`--resync` で最初の同期をしてから、ユーザーの timer と、前提の [linger](../linger.md)（`loginctl enable-linger`）で定期的に動かす。**読者が書き換える変数は無い**
+- **進め方**: Homebrew で rclone を入れ、ブラウザで Dropbox を登録し、`--resync` で最初の同期をしてから、ユーザーの timer と、前提の [linger](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md)（`loginctl enable-linger`）で定期的に動かす。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で rclone の導入と OAuth 待ち受けまで検証済み（2026-10-06）。現行版は新規 VM のローカル alias で、同期・timer・ロールバックも再検証した**（[今回の付録](#付録-現行版を新規-vm-で再検証2026-10-06)）。Dropbox との認証・クラウド同期は未確認
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜10・[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)・[更新](../dropbox-rclone.md#更新)・[ロールバック](../extra/dropbox-rclone.md#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
-    - linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバック。当時はこの文書の手順 9・10 とロールバックの手順 1・2）も、このとき通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1・2・4〜10・[同期するフォルダを変える（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox-rclone.md#同期するフォルダを変える任意)・[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox-rclone.md#更新)・[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/dropbox-rclone.md#ロールバック)を通した（手順 6 は飛ばし、同じ編集は任意の節で `vi` の代わりに `sed` で行った）
+    - linger の有効化と解除（今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) の手順 2 とロールバック。当時はこの文書の手順 9・10 とロールバックの手順 1・2）も、このとき通した
   - 手順 2 は本物の Dropbox で、URL が出て、`127.0.0.1:53682` が Dropbox の認証画面へ飛ばすところまで確かめた（許可はしていない）
   - **手順 4 以降は、`dropbox` という名前で、コンテナの中のディレクトリを指す代役のリモート（種類 `alias`）で確かめた**
   - 確認したこと:
@@ -128,7 +128,7 @@ Sun 2026-09-27 16:18:26 UTC 4min 58s -         - dropbox-rclone.timer dropbox-rc
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64 | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`、systemd を PID 1） |
-| Homebrew | 7.0.6（[syncthing.md](../syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜3 で新規導入） |
+| Homebrew | 7.0.6（[syncthing.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/syncthing.md) の 2026-09-24 の記録） | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜3 で新規導入） |
 | rclone | 未導入 | 1.75.1（`x86_64_linux` のボトル）。`arm64_linux` のボトルもある（formulae.brew.sh の JSON） |
 | Dropbox のリモート | — | 手順 2 は本物（URL が出るまで）、手順 4 以降は代役（`alias`） |
 | linger | Syncthing のために有効（syncthing.md の記録） | 無効から始めた |
@@ -160,8 +160,8 @@ Raspberry Pi 5（aarch64）の AlmaLinux 10 で Dropbox と同期する経路を
 | 経路 | aarch64 での状況 | 採否 |
 |---|---|---|
 | **Homebrew の rclone** | 1.75.1。`arm64_linux` のボトルがある。`brew upgrade` で上がる | **採用** |
-| EPEL 10 の rclone | 1.74.3 | 不採用（Homebrew より古い。[導入元一覧](../tool-catalog.md#選び方)の CLI の選び方） |
-| Dropbox の公式クライアント | 無い（`download?plat=lnx.aarch64` が 404。公式ヘルプも ARM は非対応） | —（x86_64 では [dropbox.md](../dropbox.md)） |
+| EPEL 10 の rclone | 1.74.3 | 不採用（Homebrew より古い。[導入元一覧](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#選び方)の CLI の選び方） |
+| Dropbox の公式クライアント | 無い（`download?plat=lnx.aarch64` が 404。公式ヘルプも ARM は非対応） | —（x86_64 では [dropbox.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox.md)） |
 | Maestral | オープンソースの Dropbox クライアント（1.9.6、2025-11-04）。公式と同じく常駐して同期する。RPM も Linux 向けの Homebrew の formula も無く（cask は macOS だけ）、pip か uv で入れる | 不採用（dnf にも brew にも乗らない） |
 | Flathub `com.dropbox.Client` | x86_64 のみ | — |
 
@@ -204,9 +204,9 @@ $ find ~/Dropbox -type f | sort
 
 ### 付録: コンテナでの検証記録（2026-09-27）
 
-`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](../almalinux-setup.md) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
+`quay.io/almalinuxorg/10-init:10.2`（`sha256:a91c1066…fd73`）を x86_64 のクラウドホスト上の Docker 29.3.1（cgroup v1）で `--privileged`・`--network host` で立て、systemd を PID 1 で動かした。実機で加えた変更は無い。検証の準備（`systemd-logind` を戻す、`/var/log/journal` を作る、プロキシの CA、非 root ユーザー、ホームの bind mount）と、コードブロックの流し方は [dropbox.md の付録](dropbox.md#付録-コンテナでの検証記録2026-09-27)と同じ。Homebrew は [homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜3 を、インストーラだけ `NONINTERACTIVE=1` を付けて通した。
 
-途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜10（手順 6 は飛ばした。linger は今の [linger.md](../linger.md) の手順に当たるもの）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
+途中で手順のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1・2・4〜10（手順 6 は飛ばした。linger は今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) の手順に当たるもの）・任意の節・更新・ロールバックをもう一度通した。下の表はその結果と、途中の確かめ（中断・競合など）をまとめたもの。
 
 **代役のリモート**: 手順 2 を打ち切った後、`rclone config create dropbox alias remote=/home/<USER>/fake-dropbox` で、同じ名前 `dropbox` のリモートを作った。`fake-dropbox` には、`Documents`（2 ファイルと `~memo.tmp`）・`Photos/2026`（2 ファイル）・`Work`（`old/2019.txt` を含む 2 ファイル）・`desktop.ini` を置いた。
 
@@ -228,7 +228,7 @@ $ find ~/Dropbox -type f | sort
 | timer | 予定（`NEXT`）の 43 秒後に timer が自分で動かし、期限の切れたロックを消して `--recover` で回復した（`Listings not found. Reverting to prior backup as --recover is set.`）。その後の `NEXT` は、終わってから 15 分後だった |
 | 任意の節 | 手順 1 は `vi` の代わりに `sed` で 3 行の `# ` を外した。`--resync` の後、代役の `Documents` に足したファイルは手元に来て、`Work` に足したファイルは来なかった。手元の `Work` は残った |
 | 更新 | `Warning: rclone 1.75.1 already installed` |
-| ロールバック | タイマーが動いている間に手順 5 を貼ると `中断: ...` が出て、何も消えなかった。手順 1・2・4・5 と linger の解除（今の [linger.md のロールバック](../extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 2）は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 5 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 5 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
+| ロールバック | タイマーが動いている間に手順 5 を貼ると `中断: ...` が出て、何も消えなかった。手順 1・2・4・5 と linger の解除（今の [linger.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 2）は `Removed ...`、`ls` は無出力、`Linger=no`、`listremotes` は無出力、`Uninstalling ... rclone/1.75.1`、手順 5 で `~/Dropbox` などが消えた。空の `rclone.conf` と `~/.cache/rclone` は残った。linger を切った後は、`docker exec` にはログインセッションが無いのでユーザーの systemd が止まり、手順 5 の `systemctl --user is-active` は `Failed to connect to user scope bus` を出した（実機でログインしていれば、ユーザーの systemd は動いている） |
 
 #### 未確認事項
 
@@ -267,7 +267,7 @@ $ find ~/Dropbox -type f | sort
 
 - コンテナでは `rclone--1.75.1.x86_64_linux.bottle` のボトルが入った（11 ファイル、110.4 MB。依存は無い）
 - Raspberry Pi 5 向けの `arm64_linux` のボトルもある（formulae.brew.sh の JSON で確認。aarch64 には入れていない）
-- EPEL 10 にも `rclone` があるが 1.74.3 で、1 マイナー古い（[導入元一覧](../tool-catalog.md#選び方)の CLI の選び方で Homebrew にした）
+- EPEL 10 にも `rclone` があるが 1.74.3 で、1 マイナー古い（[導入元一覧](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#選び方)の CLI の選び方で Homebrew にした）
 - bash の補完は `/home/linuxbrew/.linuxbrew/etc/bash_completion.d` に入る
 
 ## 参考資料から分離した記録
@@ -278,7 +278,7 @@ $ find ~/Dropbox -type f | sort
 - **`- *.partial` は本書で足した**。rclone は転送中のファイルを `<名前>.<16 進>.partial` として書き、終わってから名前を変える
   - `kill -9` や電源断で止まるとこれが残り、フィルタに無いと、次の回で新しいファイルとして Dropbox に上がった（コンテナで確認）
   - 足した後は、残った書きかけは上がらず、次の回で本物のファイルがコピーされた
-- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](../dropbox-rclone.md#同期するフォルダを変える任意)）
+- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox-rclone.md#同期するフォルダを変える任意)）
 
 ### 参考資料: 実施手順 / 手順 7: 補足: Path1 と Path2、--resync の意味
 

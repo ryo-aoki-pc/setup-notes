@@ -1,6 +1,6 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の検証記録
 
-[手順書](../coding-agents.md)・[ロールバックと注意点](../extra/coding-agents.md)・[参考資料](../reference/coding-agents.md)
+[手順書](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
 ## 対象と検証環境
 
@@ -34,7 +34,7 @@
   - 確かめたこと: Grok の `--sandbox read-only` は、bubblewrap が無いと起動しない。入れると、別の特権のコンテナでログインの確認まで進んだ（手順 9 に bubblewrap を足した）
   - 確かめたこと: bash の 33 ブロックの `bash -n` と ShellCheck 0.9.0（ブロックをまたぐ変数の SC2154・SC2034 を除き指摘 0）。PowerShell の 20 ブロックの構文（PowerShell 7.6.6、エラー 0）と PSScriptAnalyzer 1.25.0 の 5.1 互換の検査、AGENTS.md と CLAUDE.md を書く 2 ブロックの模擬（BOM と CR が無いこと）
   - **確認していないこと**: Codex と Grok のログイン後のすべて（手順 8 の Codex の答え、`codex review`・`grok -p` のレビュー、プラグインの review・rescue・delegate・status、手順 11 の画面）。3 つのエージェントが実際に分担して作業し、コミットすること
-  - **確認していないこと**: スマートフォンから指示するの全部（Remote Control は、既存の [almalinux-setup.md の tmux の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)と [windows-claude-remote-control.md](../windows-claude-remote-control.md) の範囲）。プラグインのコマンドがスマートフォンから動くか
+  - **確認していないこと**: スマートフォンから指示するの全部（Remote Control は、既存の [almalinux-setup.md の tmux の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)と [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の範囲）。プラグインのコマンドがスマートフォンから動くか
   - **確認していないこと**: Windows 11 での実行すべて。aarch64。実機・VM。Homebrew の tmux（今回は BaseOS の 3.3a）
 
 | 項目 | 値 |

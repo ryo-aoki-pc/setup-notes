@@ -1,8 +1,8 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
 
-[手順書](../grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[AlmaLinux 10 の手順](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
-- 本書の「<項>の手順 N」は、手順書の `## 実施手順` と `## Windows 11 で使う` の項の手順を指す
+- 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
 - この文書のロールバックは、実機では流していない（[検証記録](../verification/grok-build-remote.md)）
 
 ## ロールバック
@@ -143,7 +143,7 @@
 
 - トークンのファイルを消して作り直し（AlmaLinux 10 は「Codeg のサーバーを入れて localhost で起動する」の手順 5、Windows 11 は「Windows 11 で Codeg のサーバーを入れて起動する」の手順 5）、サービス（Windows 11 はタスク）を起動し直す
 - 新しいトークンで起動し直すと、前のトークンは使えなくなる（使い捨てのインスタンスで確かめた。検証記録）
-- WireGuard のクライアントの登録も消す（[WireGuard VPN の「クライアントを削除する」](../wireguard.md#クライアントを削除する)）
+- WireGuard のクライアントの登録も消す（[WireGuard VPN の「クライアントを削除する」](../almalinux-setup.md#wireguard-クライアントを削除する)）
 
 #### 権限モードと承認の確認
 
@@ -156,7 +156,7 @@
 
 #### Claude Code・Codex の共有設定と履歴
 
-- [任意節](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)の手順 4 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
+- 任意節（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
 - 認証方法を変える前に、本人が既存の方式と必要な設定を確かめる。既に「公式サブスクリプション」なら保存し直さない。別のアカウントへのログインも、端末の CLI に影響する
 - 既存の API 用の項目がある場合は、認証方法の保存で削除・変更されることがある。エージェントへ設定ファイルの全文やログイン情報を渡さない
 - 接続アダプターには別のランタイムが入る。CLI と同じホームの設定・MCP・フックなどを使い得るので、Codeg に追加しただけで既存設定から隔離されたとは扱わない
@@ -184,7 +184,7 @@
 - Windows 11 の PC の証明書は、接続された IP アドレスごとに、その場で作られる
 - **認証局の鍵（`root.key`）を、読まない・写さない・人に渡さない**。ルート証明書を入れた端末は、その認証局が署名した証明書を、どのサイトのものでも信じる
 - 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
-- ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、許可した送信元なら誰でも取れる
+- ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、AlmaLinux 10 では許可した送信元 CIDR 内、Windows 11 では Private の受信インターフェースへ届く全送信元から、トークンなしで取得できる
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
 - Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 は待ち受ける IP と送信元を絞る。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う
 - インターネットへ公開しない
@@ -223,4 +223,4 @@
 - 「ファイルとコマンドをエージェント自身に処理させる」は、既定の無効のまま使う。有効にしても、`mkdir` が確認なしで実行される結果は変わらなかった
 - 取り込みの画面は、そのホストのほかのエージェントとプロジェクトのセッションの題名も一覧に出す
 - Codeg の子プロセス（`codeg-mcp`）の引数に、内部用の値（`--token <UUID>`）が出る。アクセストークンとは別のもの
-- Claude Code・Codex も使う場合は、[両 OS 共通の任意節](../grok-build-remote.md#claude-code-と-codex-cli-も操作する)を通す。エージェントごとの実測と未確認の範囲は[検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する
+- Claude Code・Codex も使う場合は、任意節（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する

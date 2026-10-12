@@ -1,6 +1,6 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）の検証記録
 
-[手順書](../dropbox.md)・[ロールバックと注意点](../extra/dropbox.md)
+[手順書](../almalinux-setup.md#dropbox-実施手順)・[ロールバックと注意点](../extra/dropbox.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -41,7 +41,7 @@ uid                      Dropbox Automatic Signing Key <linux@dropbox.com>
 
 - 同じ鍵が、この URL・公式 RPM の `%post`・手順 5 で入れる `dropbox.py` の中（`DROPBOX_PUBLIC_KEY`）の 3 か所にある。`dropbox.py` の中の鍵も同じ fingerprint だった（コンテナで確認）
 - 自己署名は 2 つある。2010 年のものは SHA-1、2025-12-23 に足されたものは SHA-256（`gpg --list-packets` の `digest algo 2` と `8`）
-- この手順では鍵を rpm に取り込まず、手順 3 の `gpgv` で署名を確かめるだけに使う。EL10 の rpm が SHA-1 の自己署名の鍵を取り込まない問題（[tool-catalog.md の注意点](../tool-catalog.md#注意点)）とは関係しない
+- この手順では鍵を rpm に取り込まず、手順 3 の `gpgv` で署名を確かめるだけに使う。EL10 の rpm が SHA-1 の自己署名の鍵を取り込まない問題（[tool-catalog.md の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#注意点)）とは関係しない
 
 ### 実施手順 / 手順 3: 補足: 飛び先を 1 回だけ引く理由
 
@@ -80,7 +80,7 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 ```
 
 - `dropbox.pid` はデーモンの PID で、`dropbox` コマンドはこれを見て動いているかを判断する
-- リンクの情報もここに入る（[ロールバック](../extra/dropbox.md#ロールバック)の手順 4 で消すと、リンクし直すことになる）
+- リンクの情報もここに入る（[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/dropbox.md#ロールバック)の手順 4 で消すと、リンクし直すことになる）
 
 ### 更新 / 手順 2: 本文中の記録
 
@@ -93,11 +93,11 @@ events  iface_socket  instance1  instance_db  logs  machine_storage  metrics
 ### 対象と検証環境
 
 - **目的**: x86_64 の AlmaLinux 10 で Dropbox の公式クライアントを headless で動かし、ログインしていない間も `~/Dropbox` をクラウドと同期し続ける
-- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](../linger.md)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
+- **進め方**: 公式の tarball を、署名を確かめてから `~/.dropbox-dist` に展開する。操作用の `dropbox.py` を `~/.local/bin` に置き、自分で書いた systemd のユーザーサービスと、前提の [linger](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md)（`loginctl enable-linger`）で常駐させる。**読者が書き換える変数は無い**
 - **状態**: **x86_64 の VM で実施手順 1〜7を検証済み（2026-10-06）。アカウントのリンクと同期は未確認。実機には入れていない**
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](../dropbox.md#更新)・[ロールバック](../extra/dropbox.md#ロールバック)を通した
-    - linger の有効化と解除（今の [linger.md](../linger.md) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
+  - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、手順 1〜7・9・[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox.md#更新)・[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/dropbox.md#ロールバック)を通した
+    - linger の有効化と解除（今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) の手順 2 とロールバック。当時はこの文書の手順 6・7 とロールバックの手順 1・3）も、このとき通した
   - 確認したこと:
     - 署名が合えば展開され、版が食い違って `BAD signature` のときは展開されない
     - デーモンがユーザーサービスとして動き、`dropbox status` がリンク用の URL を出す（検証のときだけサービスにプロキシを渡した）
@@ -176,7 +176,7 @@ Linger=yes
 - プロキシの CA を信頼ストアに足した
 - 非 root ユーザー（uid 1000、NOPASSWD の sudo）を作り、ホームはホストの ext4 のディレクトリを bind mount した
 
-途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](../linger.md) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
+途中で手順 3 と手順 7 のブロックを直したので、書き上げた後に、コードブロックを文書から直接抜き出して手順 1〜7・9（と、今の [linger.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/linger.md) に移した linger の手順）・更新・ロールバックをもう一度通した（下の表の結果と同じになった。手順 2 は `gnupg2` を入れた後なのでそのまま通り、手順 7 は再起動から 23 秒で URL が出た）。
 
 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、手順ごとに `docker exec` で、そのユーザーのログインシェル（`bash -l`）へ標準入力から流した。`docker exec` はログインセッションを作らないので、`XDG_RUNTIME_DIR` と `DBUS_SESSION_BUS_ADDRESS` を渡して `systemctl --user` を使えるようにした。
 
@@ -197,7 +197,7 @@ Linger=yes
 | 自己更新（手順書の外） | サービスを止めて、署名を確かめた 268.4.4124 に入れ替えて起動し、8 分待ったが、`~/.dropbox-dist` は 268.4.4124 のままだった（リンクしていない。更新の間隔も分からない）。確かめた後、270.4.3312 に戻した |
 | 更新 | `dropbox version` は手順 5 と同じ。dropbox.py を取り直しても `2026.05.06` のまま |
 | 手での入れ直し | 署名を確かめた 268.4.4124 を入れてサービスで動かした状態から、更新の手順 1 の箇条書きのとおり止める → 手順 2〜4 → 動かすで、`dropbox version` と主プロセスが 270.4.3312 になった。古い 268.4.4124 のディレクトリは残り、`du` は `304M` になった |
-| ロールバック | デーモンが動いている間に手順 4 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3・4 と linger の解除（今の [linger.md のロールバック](../extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 3）を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
+| ロールバック | デーモンが動いている間に手順 4 を貼ると `中断: ...` が出て、`~/Dropbox`（目印のファイルを置いた）も `~/.dropbox` も残った。検証用の drop-in を消してから手順 1・3・4 と linger の解除（今の [linger.md のロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/linger.md#ロールバック)の手順 1・2。当時はこの文書の手順 1 の最後の `ls` と手順 3）を流すと、`Removed ...`、`ls` は無出力（終了コード 2。追加の確かめの後にもう一度流した回では 0）、`Linger=no`、`~/.dropbox-dist`・`~/.local/bin/dropbox`・`~/.dropbox`・`~/Dropbox` が消えた。空の `~/.config/systemd/user` と `~/.local/bin`、手順 2 の `~/.gnupg` は残った |
 
 #### 未確認事項
 
@@ -294,11 +294,11 @@ Sep 27 15:58:30 <HOSTNAME> dropboxd[2263]: Please visit https://www.dropbox.com/
 
 ### 手順中の検証状況
 
-- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](../dropbox.md#使い方の基本)。動作は確かめていない）
+- **リンクすると全部落ちてくる**: headless では、最初に同期するフォルダを選べない。要らないフォルダは、リンクした直後に `dropbox exclude add` で外す（[使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/dropbox.md#使い方の基本)。動作は確かめていない）
 
 ### 手順中の検証状況
 
-- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](../syncthing.md) の実機では、ユーザーサービスは `unconfined` として動いた
+- **SELinux**: Enforcing の実機では確かめていない。[syncthing.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/syncthing.md) の実機では、ユーザーサービスは `unconfined` として動いた
 
 ## 付録: Hyper-V の VM で認証前まで通した記録（2026-10-11）
 

@@ -1,8 +1,8 @@
 # linger 有効化手順（AlmaLinux 10 / ログアウト中も自分のユーザーの systemd を動かす）のロールバックと注意点
 
-[手順書](../linger.md)・[検証記録](../verification/linger.md)・[参考資料](../reference/linger.md)
+[手順書](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)・[検証記録](../verification/linger.md)・[参考資料](../reference/linger.md)
 
-- 「手順 N」は[手順書](../linger.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -23,8 +23,8 @@
 
    - どちらも何も出さなければ、この節の手順 2 で linger を切る
    - 1 つ目の `ls` が何か出す（Syncthing の `sh.brew.syncthing.service`、Dropbox（rclone）の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 2 は飛ばす
-   - 2 つ目の `ls` が何か出す（`hello-web.container`・[Forgejo](../forgejo.md) の `forgejo.container` など）なら、[Podman の Quadlet](../podman.md#quadlet-で自動起動する任意) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
-   - 1 つ目の `ls` が `podman.socket` だけを出すときは、linger を切ってよい（[podman.md 手順 7](../podman.md#実施手順) の API ソケット。ログインしている間に使うもの）
+   - 2 つ目の `ls` が何か出す（`hello-web.container`・[Forgejo](../almalinux-setup.md#forgejo-実施手順) の `forgejo.container` など）なら、[Podman の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
+   - 1 つ目の `ls` が `podman.socket` だけを出すときは、linger を切ってよい（[podman.md 手順 7](../almalinux-setup.md#podman-実施手順) の API ソケット。ログインしている間に使うもの）
 
 1. ほかにユーザーのサービスを常駐させていないときだけ、linger を切る。
 

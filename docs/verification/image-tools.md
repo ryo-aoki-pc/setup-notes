@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）の検証記録
 
-[手順書](../image-tools.md)・[ロールバックと注意点](../extra/image-tools.md)
+[手順書](../almalinux-setup.md#画像の道具-実施手順)・[ロールバックと注意点](../extra/image-tools.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -24,7 +24,7 @@ Is this ok [y/N]: y
 Key imported successfully
 ```
 
-- この鍵は rsa4096（2026-04-16 作成、2029-04-15 まで）で、自己署名のハッシュは SHA-256（`gpg --list-packets` の `digest algo 8`）。EL10 の rpm が取り込まない SHA-1 の鍵（[ツール一覧の注意点](../tool-catalog.md#注意点)）ではない
+- この鍵は rsa4096（2026-04-16 作成、2029-04-15 まで）で、自己署名のハッシュは SHA-256（`gpg --list-packets` の `digest algo 8`）。EL10 の rpm が取り込まない SHA-1 の鍵（[ツール一覧の注意点](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/tool-catalog.md#注意点)）ではない
 - 入るのは `trivy` 1 つで、ダウンロード 48 MB、展開後 161 MB（Go の静的バイナリ）
 
 EPEL にも `trivy` がある（0.64.1）。EPEL を有効にした状態で確かめた:
@@ -56,7 +56,7 @@ rc=1
 
 データベースは `mirror.gcr.io/aquasec/trivy-db:2` から落ち、`~/.cache/trivy` に置かれる（展開後 1.4 GB）。
 
-`--image-src podman` の Trivy は、[podman.md 手順 7](../podman.md#実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
+`--image-src podman` の Trivy は、[podman.md 手順 7](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md#実施手順) の API ソケットでイメージを読む。ソケットを止めた状態での実測:
 
 ```
 FATAL	Fatal error	run error: image scan error: ... unable to find the specified image "localhost/image-check:1" in ["podman"]: 1 error occurred:
@@ -68,7 +68,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 
 ### ロールバック / 手順 5: 本文中の記録
 
-   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](../image-tools.md#実施手順)の手順 3 で取り込まれた鍵の名前（検証で確かめた値）
+   - `gpg-pubkey-4fd9ca9f-69e0b811` は、[実施手順](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md#実施手順)の手順 3 で取り込まれた鍵の名前（検証で確かめた値）
 
 ### 対象と検証環境
 
@@ -80,14 +80,14 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 - **状態**: **x86_64 の VM で実施手順 1〜10を検証済み（2026-10-06）。実機では本実行していない**
   - これは 2026-10-06 の時点の状態
   - VM の実測は[今回の付録](#付録-vm-での検証記録2026-10-06)。以下のコンテナでの結果と未確認事項は、当時の検証範囲の記録。
-  - 下表の検証コンテナで、[podman.md](../podman.md) の実施手順と [Homebrew の導入](../almalinux-setup.md)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](../image-tools.md#更新)、[ロールバック](../extra/image-tools.md#ロールバック)を通した
+  - 下表の検証コンテナで、[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と [Homebrew の導入](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#homebrew)を通したうえで、**この文書のコードブロックをそのまま端末に流して**、手順 1〜10、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md#更新)、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)を通した
   - 確認したこと:
     - 3 つが入り、hadolint が欠陥を指摘する
     - dive が podman のイメージを直接読み、判定と画面を出す
     - Trivy が API ソケット経由でイメージを読み、データベースを取得して結果の表を出す
   - **確認していないこと**: dive の画面の見た目と操作（表示された文字を読み取っただけ）、脆弱性が見つかるイメージでの Trivy の出力
   - aarch64（Raspberry Pi 5）では通していない
-  - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/image-tools.md#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
+  - 2026-10-02: もとの手順 3・4 と、[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)のもとの手順 5・6 をつないで `{ … }` で囲んだ（つないだ形は貼っていない。`bash -n` だけ）
 - 2026-10-11: Hyper-V の VM で Codex が再検証した（末尾の付録）。
   - 実施・確認: 導入・検査・TUI・更新を実行。手順 4 は固定版の条件と不一致。hadolint・dive の想定した失敗と Trivy の検査を確認。
   - 未確認: ほかのイメージの安全性、更新がある場合、全面ロールバック、デスクトップ端末での描画、実機・aarch64・Secure Boot 有効環境は今回未実施。dive の文字への復元には一部重なりがあり、描画全体が正しく復元されたとは扱わない。
@@ -95,9 +95,9 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 | 項目 | 実機 | 検証コンテナ |
 |---|---|---|
 | 実施日 | —（未実施） | 2026-09-27 |
-| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](../podman.md) と同じ作り） |
-| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](../podman.md) の実施手順で導入） |
-| Homebrew | 未確認 | 7.0.6（[homebrew.md](../almalinux-setup.md) の手順 1〜4 で導入） |
+| OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5）・x86_64 PC | AlmaLinux 10.2 (Lavender Lion) / x86_64（`quay.io/almalinuxorg/10-init:10.2`、Docker 29.3.1、`--privileged`。[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) と同じ作り） |
+| podman | 未確認 | `podman-5.8.2-9.el10_2.alma.1`（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順で導入） |
+| Homebrew | 未確認 | 7.0.6（[homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 で導入） |
 | hadolint / dive | 未導入 | 2.15.1 / 0.13.1（`x86_64_linux` のボトル） |
 | Trivy | 未導入 | `trivy-0.74.0-1`（公式の dnf リポジトリ） |
 | 端末 | — | pty（160 桁 × 50 行、`TERM=xterm-256color`） |
@@ -109,7 +109,7 @@ FATAL	Fatal error	run error: image scan error: ... unable to find the specified 
 
 ### 実施前の状態
 
-検証コンテナ（[podman.md](../podman.md) の実施手順と Homebrew の導入の後）の状態:
+検証コンテナ（[podman.md](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/podman.md) の実施手順と Homebrew の導入の後）の状態:
 
 | 項目 | 状態 |
 |---|---|
@@ -166,7 +166,7 @@ Report Summary
 **環境**: [podman.md の付録](podman.md#付録-コンテナでの検証記録2026-09-27)と同じ作りの使い捨てのコンテナ。実機で加えた変更は無い。
 
 - `quay.io/almalinuxorg/10-init:10.2` で systemd を PID 1 にし（`--privileged`）、SSH でログインした
-- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](../almalinux-setup.md) の手順 1〜4 を流した
+- 同じ SSH のセッションで、先に podman.md の手順 1〜3・5〜7 と [homebrew.md](https://github.com/ryo-aoki-pc/setup-notes/blob/83ad79eb96222754ee5ae8ff17c1fa5a027f4cb0/docs/homebrew.md#実施手順) の手順 1〜4 を流した
 
 **手順書の外で行った準備**: podman.md の付録の準備と同じ。Homebrew のインストーラは、`NONINTERACTIVE=1` を付けずに流し、`Press RETURN/ENTER to continue` に pty 越しに Enter を送った。
 
@@ -185,7 +185,7 @@ Report Summary
 | 更新 | `brew upgrade hadolint dive` は `Warning: hadolint 2.15.1 already installed` など。`sudo dnf upgrade trivy` は `Nothing to do.` |
 | ロールバック | イメージ 2 つを消し、`brew uninstall` で 2 つと依存の 4 つ（`==> Autoremoving 4 unneeded formulae:`）、`dnf remove` で Trivy、手順 5 で repo ファイルと鍵を消した。手順 5 の確かめの行（もとの手順 6）の一覧は AlmaLinux の鍵 1 つだけ |
 
-**最初の試行で見つけて直したこと**: [ロールバック](../extra/image-tools.md#ロールバック)の手順 5 は、はじめ `sudo rm`・`sudo rpm -e`・`rpm -q` の 3 行だった。
+**最初の試行で見つけて直したこと**: [ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)の手順 5 は、はじめ `sudo rm`・`sudo rpm -e`・`rpm -q` の 3 行だった。
 
 - 1 行ずつ流すと、`sudo` が後ろの 2 行を端末の入力として取り込み、2 行目以降が実行されなかった
 - EL10 の sudo 1.9.17 は、既定でコマンドを擬似端末の中で動かす（`sudo -V` の `Always run commands in a pseudo-tty`）
@@ -197,7 +197,7 @@ Report Summary
 - 層が 1 つの `quay.io/almalinuxorg/10-minimal:10.2` を元にしたイメージでは、`dive --ci` が `efficiency: 100.0000 %` で `Result:PASS`
 - EPEL を有効にした状態の `dnf -q list --showduplicates trivy`（手順 3 の補足）
 - API ソケットを止めた状態の `trivy image --image-src podman`（手順 9 の補足）
-- `trivy image` でレジストリのイメージを直接調べること、`trivy config`（[使い方の基本](../image-tools.md#使い方の基本)）
+- `trivy image` でレジストリのイメージを直接調べること、`trivy config`（[使い方の基本](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/image-tools.md#使い方の基本)）
 - 鍵の自己署名のハッシュ（`gpg --list-packets` の `digest algo 8`）
 
 #### 未確認事項
@@ -276,7 +276,7 @@ Result:FAIL [Total:3] [Passed:0] [Failed:2] [Warn:0] [Skipped:1]
 
 ### 手順内の実測・検証状況
 
-- **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](../extra/image-tools.md#ロールバック)の手順 2 で消す
+- **Trivy のデータベースは大きい**: `~/.cache/trivy` が 1.4 GB になった。要らなくなったら[ロールバック](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/extra/image-tools.md#ロールバック)の手順 2 で消す
 
 ## 付録: Hyper-V の VM で通した記録（2026-10-11）
 

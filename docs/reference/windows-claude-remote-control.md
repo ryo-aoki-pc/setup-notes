@@ -1,6 +1,6 @@
 # Windows 11 で Claude Code の Remote Control を SSH の切断後も動かす手順（タスク スケジューラ + WezTerm）の参考資料
 
-[手順書](../windows-claude-remote-control.md)・[ロールバックと注意点](../extra/windows-claude-remote-control.md)
+[手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)・[ロールバックと注意点](../extra/windows-claude-remote-control.md)
 
 ## 補足
 
@@ -42,6 +42,6 @@
 - [Avoid killing child processes by sshd after session ended · PowerShell/Win32-OpenSSH #1642](https://github.com/PowerShell/Win32-OpenSSH/issues/1642)（SSH の切断でセッションのプロセスが止まること）
 - [Windows implementation issues · zellij-org/zellij #4745](https://github.com/zellij-org/zellij/issues/4745)（zellij の Windows 版の既知の問題）
 - [Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)（前提。SSH のセッションの権限。`DefaultShell` は同書の任意節）
-- [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)（RDP で使った後、デスクトップのセッションを `console` に戻して切る）
+- [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断-実施手順)（RDP で使った後、デスクトップのセッションを `console` に戻して切る）
 
 ---

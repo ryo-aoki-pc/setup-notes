@@ -8,7 +8,9 @@
   - 正式 B/C の測定と集計は終了。観測値を記録したが、ホスト作業の重複により方式間の性能比較は未完
   - C20-FOLLOWUP（2026-10-12）で、元 CL5 の一時 LAN を戻した WireGuard の原文確認と双方向疎通、本人の GNOME 端末での IBus 原文ファイル実行と日本語変換を追加確認した。下の付録に実行方法と範囲を分けて記録する
 
-この文書は、既存証跡に基づく結果の一覧。実行するときは各手順書を使い、個別の範囲は対応する `verification/` の記録を参照する。[2026-10-06 の VM 検証](almalinux-vm-verification.md)とは別の試験で、過去の成功・失敗を今回の結果に置き換えない。
+この文書は、既存証跡に基づく結果の一覧。現在の操作は [AlmaLinux 10](almalinux-setup.md)・[Windows 11](windows-setup.md) の2冊を使い、個別の範囲は対応する `verification/` の記録を参照する。[2026-10-06 の VM 検証](almalinux-vm-verification.md)とは別の試験で、過去の成功・失敗を今回の結果に置き換えない。
+
+以下の操作リンクは集約後の移動先を案内する。検証時の版・手順番号・分母は当時のままで、現在の2冊を通した結果には読み替えない。旧見出しとの対応と固定した旧原文は [集約対応表](dev/consolidation-map.md)、各試験の対象版は「検証した版と追加試験の起点」と各検証記録で確認する。
 
 表の手順数・成功数・失敗数と環境の値は、担当の `result.md` または既存の検証記録から転記した**報告由来**の値。初期集計では一次の端末ログ・PNG と再照合していない。FINAL では C20 の確認出力、V2 の公開結果、正式 B/C の report/summary/visit/facts/host-samples を必要な範囲で照合した。未照合の集計を一次証跡で確定した数値とは扱わない。
 
@@ -92,11 +94,11 @@ Syncthing のブラウザは相手 VM のコンソール上の Firefox、Forgejo
 
 | 単位 | 対象 | 分母 | 成功 | 失敗 | 条件未該当 | 未実施 | 成功した範囲と制限 |
 |---|---|---:|---:|---:|---:|---:|---|
-| CL1 | [画面オフの任意節](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)、[linger](linger.md)、[Podman](podman.md) | 23 | 22 | 0 | 1 | 0 | 設定・解除・再適用、rootless socket、Docker API、Quadlet。物理の蓋・電源・実サスペンドの検証ではない |
-| CL2 | [ヘッドレスのセッション](gnome-headless-session.md)、[GUI の操作](claude-code-gui.md) | 16 | 16 | 0 | 0 | 0 | FreeRDP 接続、仮想モニター、撮影・キー・クリック。モニター設定後の RDP 再接続、OS 再起動後の復帰、長時間放置は未確認 |
-| CL3 | [デスクトップ共有](gnome-desktop-sharing.md)と見るだけの任意節 | 18 | 17 | 0 | 1 | 0 | 自動ログイン、RDP、再起動、共有画面と入力制限。クライアントのマウス・音・クリップボード、Windows クライアントは未確認 |
-| CL4 | [Secure Boot の MOK 登録](secure-boot-mok.md) | 7 | 6 | 0 | 1 | 0 | Secure Boot 有効 VM で MokManager をキー操作し、登録と電源を入れ直した後の保持を確認 |
-| CL5 | [WireGuard](wireguard.md)の拠点間と AlmaLinux クライアント | 34 | 30 | 1 | 1 | 2 | 拠点と LAN の namespace、Road Warrior の接続・経路・ICMP。`qrencode` 不足で QR 表示が失敗し、追加導入後は表示。ルーター操作と回線のつなぎ替えは未実施 |
+| CL1 | [画面オフの任意節](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)、[linger](almalinux-setup.md#ユーザーサービスの常駐-実施手順)、[Podman](almalinux-setup.md#podman-実施手順) | 23 | 22 | 0 | 1 | 0 | 設定・解除・再適用、rootless socket、Docker API、Quadlet。物理の蓋・電源・実サスペンドの検証ではない |
+| CL2 | [ヘッドレスのセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)、[GUI の操作](almalinux-setup.md#claude-code-の-gnome-操作-実施手順) | 16 | 16 | 0 | 0 | 0 | FreeRDP 接続、仮想モニター、撮影・キー・クリック。モニター設定後の RDP 再接続、OS 再起動後の復帰、長時間放置は未確認 |
+| CL3 | [デスクトップ共有](almalinux-setup.md#gnome-のデスクトップ共有-実施手順)と見るだけの任意節 | 18 | 17 | 0 | 1 | 0 | 自動ログイン、RDP、再起動、共有画面と入力制限。クライアントのマウス・音・クリップボード、Windows クライアントは未確認 |
+| CL4 | [Secure Boot の MOK 登録](almalinux-setup.md#secure-boot-の署名鍵-実施手順) | 7 | 6 | 0 | 1 | 0 | Secure Boot 有効 VM で MokManager をキー操作し、登録と電源を入れ直した後の保持を確認 |
+| CL5 | [WireGuard](almalinux-setup.md#wireguard-実施手順)の拠点間と AlmaLinux クライアント | 34 | 30 | 1 | 1 | 2 | 拠点と LAN の namespace、Road Warrior の接続・経路・ICMP。`qrencode` 不足で QR 表示が失敗し、追加導入後は表示。ルーター操作と回線のつなぎ替えは未実施 |
 
 CL5 は `clean-install` からの準備を中断し、NOPASSWD と EPEL のある `after-AS1` から作り直した結果。初期状態からそのまま通ったとは扱わない。再起動後に LAN の namespace を作り直す必要もあり、家庭のルーター・インターネット越しの VPN・実機の回線切り替えを代替してはいない。
 
@@ -106,13 +108,13 @@ CL5 は `clean-install` からの準備を中断し、NOPASSWD と EPEL のあ�
 
 | 単位・担当証跡 | 対象 | 成功した範囲 | 失敗・条件不一致 | 未実施・条件未該当・制限 |
 |---|---|---|---|---|
-| R1 / C13・C18 | [Distrobox](distrobox.md)、[Compose](podman-compose.md)、[podman-tui](podman-tui.md)、[lazydocker](lazydocker.md)、[イメージ検査](image-tools.md) | 報告の 58 手順を判定し、56 成功・2 失敗。対話シェル、サービス名の通信、TUI 停止、root の分離、検査・更新を実行 | 通常の `ffmpeg` は書き出した Ubuntu 版より Homebrew 版が先。Trivy は固定の成功条件の版と不一致 | 更新無しの分岐を含む。全面撤去・認証付きレジストリは未実施。C20 では PR #134 の 4a1788d の修正ブロックを原文で再実行し、Homebrew の PATH 優先と明示した Ubuntu ラッパーの版を確認した |
-| R2 / C12・C18 | [btop](btop.md)、[gdu](gdu.md)、[ShellCheck](shellcheck.md)、[VS Code](vscode.md)、[導入元一覧](tool-catalog.md) | 指定節の導入・版・取得元、TUI、静的検査、VS Code の起動・拡張導入。カタログは指定した導入経路だけ | Chrome 導入で scriptlet の RPM ロック・鍵再取り込みの警告。導入・版表示は成功 | VS Code のサインイン不要ボタンは表示と終了までで、選択後は未確認。拡張の実動作、カタログの全ツールは未実施 |
-| R3 / hv/R3 | [Samba](samba.md)、[クライアント](samba-client.md)、[Syncthing](syncthing.md) | 報告は 40 成功・失敗 0・条件未該当 5・未実施 0。2 台で共有、CIFS、GUI 登録と同期を確認 | Syncthing の日本語 UI とフォルダーパス入力が本文の案内と相違 | root・home 共有、Syncthing のバックアップ・復元、相手の再起動後の fstab、Windows クライアントは未実施。Files の GUI 認証等は未確認 |
-| R4 / hv/R4 | [GNOME のリモートログイン](gnome-remote-desktop.md) | 原文の成功は 10 手順、失敗は 1。`xfreerdp` への読み替え後は 11 手順の到達点を確認。GDM からログイン、再接続、ゲスト再起動後の接続を確認 | 原文の `xfreerdp3` は終了 127。同じ引数の `xfreerdp` への読み替えで成功 | 原文コマンドの成功ではない。クライアントは AlmaLinux の FreeRDP。Windows からの接続へ広げない |
-| R5 / hv/R5 | [Forgejo](forgejo.md)の導入・基本操作・バックアップ・復元 | 報告は 50 手順中 47 成功・条件未該当 3・失敗 0・未実施 0 | ブラウザ操作は相手 VM のヘッドレス Firefox をスクリプトで操作。固定 IP の前提は未充足 | バックアップ先は同じホストの別 VM。別媒体への保管、別版への移行、実際の自動更新、長期運用は未確認 |
-| R6 / C14・C15・C19 | [SOCKS](ssh-socks-tunnel.md)、[Homebrew](homebrew-offline.md)、[npm](npm-offline.md)のオフライン導入 | C14 で SOCKS・dnf・Homebrew。C15 で npm 本文 1〜5・更新 1〜3 を判定し、npm の 4 ツールとトンネル終了後の直接通信失敗を確認 | C14 の Neovim 前提導入で EPEL 不足、プロキシ設定前の npm 取得の完了未確認、SSH 応答喪失。取得順が通信失敗の原因という判断は担当の推定 | C15 は既存の途中ディスクから、メモリ増・GNOME 未ログインで続行。前回 journal が無く OOM の有無と原因は未確定。前提からの通し直し・新版への更新は未実施 |
-| R7 / C16・C19 | [Dropbox](dropbox.md)、[rclone](dropbox-rclone.md) | 署名・配置、未リンクのサービス、再起動後と短い SSH 切断中の保持、認証不要のフィルタ・timer 設置と指定した撤去 | 報告された実行範囲に方式由来の失敗は無い。版の固定例と配布版は相違 | リンク・OAuth・クラウド同期・bisync は未実施。rclone の timer は未実行で撤去。`Result=success` は初期値で、同期成功の証拠ではない |
+| R1 / C13・C18 | [Distrobox](almalinux-setup.md#distrobox-実施手順)、[Compose](almalinux-setup.md#podman-compose-実施手順)、[podman-tui](almalinux-setup.md#podman-tui-実施手順)、[lazydocker](almalinux-setup.md#lazydocker-実施手順)、[イメージ検査](almalinux-setup.md#画像の道具-実施手順) | 報告の 58 手順を判定し、56 成功・2 失敗。対話シェル、サービス名の通信、TUI 停止、root の分離、検査・更新を実行 | 通常の `ffmpeg` は書き出した Ubuntu 版より Homebrew 版が先。Trivy は固定の成功条件の版と不一致 | 更新無しの分岐を含む。全面撤去・認証付きレジストリは未実施。C20 では PR #134 の 4a1788d の修正ブロックを原文で再実行し、Homebrew の PATH 優先と明示した Ubuntu ラッパーの版を確認した |
+| R2 / C12・C18 | [btop](almalinux-setup.md#btop-実施手順)、[gdu](almalinux-setup.md#gdu-実施手順)、[ShellCheck](almalinux-setup.md#shellcheck-と-shfmt-実施手順)、[VS Code](almalinux-setup.md#vs-code-実施手順)、[導入元一覧](tool-catalog.md) | 指定節の導入・版・取得元、TUI、静的検査、VS Code の起動・拡張導入。カタログは指定した導入経路だけ | Chrome 導入で scriptlet の RPM ロック・鍵再取り込みの警告。導入・版表示は成功 | VS Code のサインイン不要ボタンは表示と終了までで、選択後は未確認。拡張の実動作、カタログの全ツールは未実施 |
+| R3 / hv/R3 | [Samba](almalinux-setup.md#samba-サーバー-実施手順)、[クライアント](almalinux-setup.md#samba-クライアント-実施手順)、[Syncthing](almalinux-setup.md#syncthing-実施手順) | 報告は 40 成功・失敗 0・条件未該当 5・未実施 0。2 台で共有、CIFS、GUI 登録と同期を確認 | Syncthing の日本語 UI とフォルダーパス入力が本文の案内と相違 | root・home 共有、Syncthing のバックアップ・復元、相手の再起動後の fstab、Windows クライアントは未実施。Files の GUI 認証等は未確認 |
+| R4 / hv/R4 | [GNOME のリモートログイン](almalinux-setup.md#gnome-のリモートログイン-実施手順) | 原文の成功は 10 手順、失敗は 1。`xfreerdp` への読み替え後は 11 手順の到達点を確認。GDM からログイン、再接続、ゲスト再起動後の接続を確認 | 原文の `xfreerdp3` は終了 127。同じ引数の `xfreerdp` への読み替えで成功 | 原文コマンドの成功ではない。クライアントは AlmaLinux の FreeRDP。Windows からの接続へ広げない |
+| R5 / hv/R5 | [Forgejo](almalinux-setup.md#forgejo-実施手順)の導入・基本操作・バックアップ・復元 | 報告は 50 手順中 47 成功・条件未該当 3・失敗 0・未実施 0 | ブラウザ操作は相手 VM のヘッドレス Firefox をスクリプトで操作。固定 IP の前提は未充足 | バックアップ先は同じホストの別 VM。別媒体への保管、別版への移行、実際の自動更新、長期運用は未確認 |
+| R6 / C14・C15・C19 | [SOCKS](almalinux-setup.md#ssh-の-socks-トンネル-実施手順)、[Homebrew](almalinux-setup.md#homebrew-のオフライン導入-実施手順)、[npm](almalinux-setup.md#npm-のオフライン導入-実施手順)のオフライン導入 | C14 で SOCKS・dnf・Homebrew。C15 で npm 本文 1〜5・更新 1〜3 を判定し、npm の 4 ツールとトンネル終了後の直接通信失敗を確認 | C14 の Neovim 前提導入で EPEL 不足、プロキシ設定前の npm 取得の完了未確認、SSH 応答喪失。取得順が通信失敗の原因という判断は担当の推定 | C15 は既存の途中ディスクから、メモリ増・GNOME 未ログインで続行。前回 journal が無く OOM の有無と原因は未確定。前提からの通し直し・新版への更新は未実施 |
+| R7 / C16・C19 | [Dropbox](almalinux-setup.md#dropbox-実施手順)、[rclone](almalinux-setup.md#dropbox-と-rclone-実施手順) | 署名・配置、未リンクのサービス、再起動後と短い SSH 切断中の保持、認証不要のフィルタ・timer 設置と指定した撤去 | 報告された実行範囲に方式由来の失敗は無い。版の固定例と配布版は相違 | リンク・OAuth・クラウド同期・bisync は未実施。rclone の timer は未実行で撤去。`Result=success` は初期値で、同期成功の証拠ではない |
 
 R6 の C15 では Mason が開始時 5 件、本文で 9 件、更新の画面で 11 件となった（担当報告由来）。途中の 2 件はロックによる失敗を経て開き直し時に導入された。これを C14 の前提導入が成功していた証拠にはしない。C18・C19 の修正は既存証跡の反映で、文書化の完了を VM の再検証と数えない。
 

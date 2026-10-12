@@ -12,7 +12,7 @@
 
 - **目的**: AlmaLinux 10 の Workstation を入れた直後の PC で、更新・sudo・ファームウェア・SSH・journal・kdump、導入元（EPEL・RPM Fusion・Flathub・Homebrew）、日本語入力と GNOME の表示・入力、共通の bash 設定とシェルのツールを、1 本の手順で整える。2026-10-10 からは、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build と Codex・Grok のプラグイン、Neovim・WezTerm・lazygit・yazi の自分用の設定も、同じ手順で入れる
 - **方式**: 上から順に貼る 153 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
-  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../coding-agents.md)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
+  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
   - 2026-10-11 に、「Homebrew」の手順 4（IBus の GNOME 向けユーザーサービスのドロップインで、PATH を Homebrew を含まない固定値にする）を足して、153 の手順・27 項になった。同じ日に 3 つの VM で通したのは、足す前の 152 の手順（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
 - **状態**: **2026-10-08 に、x86_64 の VirtualBox の VM（公式 ISO の Workstation のクリーンインストールから新しく作ったもの）で、その時点の 13 項を通した**（[付録](#付録-x86_64-の-virtualbox-の-vm-で通した記録2026-10-08)）
   - **2026-10-10 に足した 14 項・「再起動と確認」の手順 8・ロールバックの 4 項（「AI エージェントとプラグインを消す」から「Firefox を戻す」まで）・更新の手順 5〜9 は、この文書の順番では通していない**。コマンドは、もとの手順書で確かめたものを移した（どこまで確かめたかは、後ろの「統合前の記録」のそれぞれの節）。つなぎを直した手順と新しい順番は、静的な確認だけ（[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
@@ -193,7 +193,7 @@
 
 ### まとめたもの
 
-- git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build の AlmaLinux 10 の部分（実施手順・後ろの節・更新・ロールバック・注意点）と、[コーディングエージェントの共同作業](../coding-agents.md)の手順 9・10（Node.js・bubblewrap とプラグイン）を、手順書の 14 項・後ろの節・更新の手順 5〜9、ロールバックの 4 項と注意点に移し、もとの文書は消した
+- git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build の AlmaLinux 10 の部分（実施手順・後ろの節・更新・ロールバック・注意点）と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10（Node.js・bubblewrap とプラグイン）を、手順書の 14 項・後ろの節・更新の手順 5〜9、ロールバックの 4 項と注意点に移し、もとの文書は消した
 - それぞれの Windows 11 の部分は、[Windows 11 の初期設定](../windows-setup.md)に移した（[その検証記録の付録](windows-setup.md#付録-13-本の手順書をまとめた記録2026-10-10)）
 - 必須にしたもの: 自分用の設定 4 つ（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)・[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)・[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)・[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)。clone のコマンドは載せず、それぞれの導入手順を範囲で名指しする）、もとは任意節の「WezTerm と HackGen Console NF をデスクトップで使う」、Codex・Grok のプラグイン
 - 項の順番: 「tmux を試す」の後、「再起動と確認」の前（LazyVimStarter の入力ソースの変更を、「再起動と確認」の再起動でまとめて読み直すため）。git の設定は clone より前、ブラウザ（Firefox）はログインより前、自分用の設定は TUI の確かめより前
@@ -1249,7 +1249,7 @@
   - 貼った順は、手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5。戻す手順を確かめた後、同じ VM を使う後ろの検証の前提（手順 1〜5 を当てた状態）にするため
   - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）。変数は、手順書の既定のまま
   - sudo は、パスワードを 1 度も聞かなかった
-- 続けて、同じ VM で [linger](../linger.md) と [Podman](../podman.md) の手順書を通した（[linger の検証記録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)・[Podman の検証記録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。下の「再起動の後」は、Podman の Quadlet の節の手順 3 の再起動
+- 続けて、同じ VM で [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) と [Podman](../almalinux-setup.md#podman-実施手順) の手順書を通した（[linger の検証記録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)・[Podman の検証記録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。下の「再起動の後」は、Podman の Quadlet の節の手順 3 の再起動
 - **証跡**: 追跡していない `.verification/campaign/hv/CL1/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl` の番号で、`session/after-confirm/` のファイルは、名前の頭の 4 桁が seq
 - 環境は、上の付録の「環境（Hyper-V）」と同じ VM（2 vCPU、4096 MB、AlmaLinux 10.2、kernel `6.12.0-211.64.1.el10_2.x86_64`）。この節にかかわる版は、`gnome-shell-49.4-9.el10_2.alma.1`・`gdm-47.0-24.el10_2`・`gnome-settings-daemon-47.2-10.el10_2.alma.1`・`systemd-257-23.el10_2.2.alma.1`・`dconf-0.40.0-17.el10`
 - 実施は 2026-10-11 10:47〜10:49 UTC（ゲストの時計で 19:47〜19:49 JST）。無操作の時間の読みは、11:01 UTC まで
@@ -1306,7 +1306,7 @@
 | 電池 | 無い（`upower -e` は `DisplayDevice` だけ）。`sleep-inactive-battery-type` は、書けるが、効く場面が無い |
 | 機械の見え方 | `systemd-detect-virt` は `microsoft`、`hostnamectl` は `Chassis: vm` |
 
-- [GNOME のヘッドレスのセッション](../gnome-headless-session.md)の前提の「サスペンドできる PC では、同じ節の手順 3・4 も」に当たる側の VM。手順を当てないまま 15 分置いたときに、実際に眠るかは、確かめていない（眠ると SSH が切れ、起こす手段を用意していなかった）
+- [GNOME のヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の前提の「サスペンドできる PC では、同じ節の手順 3・4 も」に当たる側の VM。手順を当てないまま 15 分置いたときに、実際に眠るかは、確かめていない（眠ると SSH が切れ、起こす手段を用意していなかった）
 
 ### 指摘と状態（画面オフの任意節、Hyper-V）
 
@@ -1394,7 +1394,7 @@ RPM Fusion が残っている状態では、`Removing dependent packages:` に `
 
 - **目的**: AlmaLinux 10 で EPEL（Extra Packages for Enterprise Linux。Fedora のプロジェクトが EL 向けに作る追加のパッケージ）を有効にし、AppStream / BaseOS に無い RPM を dnf で入れられるようにする
 - **進め方**: AlmaLinux の `extras` にある `epel-release` を入れる。読者が編集する変数は無い
-  - もとは [btop.md](../btop.md) などの手順の中にあった 3 つの手順を、共有の前提として 1 本にした
+  - もとは [btop.md](../almalinux-setup.md#btop-実施手順) などの手順の中にあった 3 つの手順を、共有の前提として 1 本にした
 - **状態**: **手順 2 はコンテナと x86_64 の VM で検証済み（VM は 2026-10-06）。手順 1・3 は x86_64 の実機でも通した**
   - 手順 1〜3 のコマンドは、この文書に移す前に、EPEL を使う手順書の検証で通したもの
     - コンテナ: [btop.md](btop.md#付録-コンテナでの検証記録2026-09-22)（2026-09-22、aarch64）、[virtualbox.md](virtualbox.md#付録-コンテナでの検証記録2026-09-24)（2026-09-24）、[distrobox.md](distrobox.md#付録-コンテナでの検証記録2026-09-27)・[podman-compose.md](podman-compose.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman-tui.md](podman-tui.md#付録-コンテナでの検証記録2026-09-28)（2026-09-28）。aarch64 と明記したもの以外は x86_64
@@ -1407,7 +1407,7 @@ RPM Fusion が残っている状態では、`Removing dependent packages:` に `
 
 | 項目 | x86_64 の実機 | 検証コンテナ（2026-09-29） |
 |---|---|---|
-| 実施日 | 2026-09-28（[virtualbox.md](../virtualbox.md) の中で） | 2026-09-29 |
+| 実施日 | 2026-09-28（[virtualbox.md](../almalinux-setup.md#virtualbox-実施手順) の中で） | 2026-09-29 |
 | OS | AlmaLinux 10.2 (Lavender Lion) / x86_64（AMD のノート PC） | 同左（`quay.io/almalinuxorg/almalinux:10`、Docker 29.3.1） |
 | dnf | 4.20.0 | 4.20.0 |
 | EPEL | **有効**（`epel-release-10-8.el10_2`。手順 2 は不要） | 未設定 → 手順 2 で `epel-release-10-6.el10` を導入 → [更新](../almalinux-setup.md#更新)で `10-8.el10_2` |
@@ -2069,7 +2069,7 @@ $ sudo bash -c 'printenv PATH; command -v brew'
 | OS | AlmaLinux 10.2 (Lavender Lion) / aarch64（Raspberry Pi 5） | 同左（`docker.io/library/almalinux:10`、podman 5.8.2 / rootless） |
 | Homebrew | `7.0.6`（`/home/linuxbrew/.linuxbrew`、`Branch: stable`） | 同じ（`7.0.6`、同じ場所に新規導入） |
 | `~/.bashrc` の行 | `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"`（**引数なし**） | `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"`（本書どおり） |
-| 入れたもの | `brew leaves` が 15 件（`fd` / `ffmpeg-full` / `fzf` / `gdu` / `imagemagick-full` / `jq` / `lazygit` / `neovim` / `poppler` / `resvg` / `ripgrep` / `sevenzip` / `tree-sitter-cli` / `yazi` / `zoxide`）。その後 2026-09-23 に [ShellCheck / shfmt](../shellcheck.md) を足して 17 件 | `jq` 1 件のみ（動作確認用） |
+| 入れたもの | `brew leaves` が 15 件（`fd` / `ffmpeg-full` / `fzf` / `gdu` / `imagemagick-full` / `jq` / `lazygit` / `neovim` / `poppler` / `resvg` / `ripgrep` / `sevenzip` / `tree-sitter-cli` / `yazi` / `zoxide`）。その後 2026-09-23 に [ShellCheck / shfmt](../almalinux-setup.md#shellcheck-と-shfmt-実施手順) を足して 17 件 | `jq` 1 件のみ（動作確認用） |
 | 占有サイズ | 2.8 GB | 216 MB |
 | git | RPM の `git 2.52.0`（`/bin/git`） | 同じ |
 
@@ -2094,7 +2094,7 @@ AlmaLinux 10 aarch64 で「EPEL / AppStream に無い、または古い CLI ツ�
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
 | **Homebrew** | `arm64_linux` のボトルが揃っていて**ソースビルドが要らない**。root 権限なしで upstream の最新版を追え、1 つの `brew upgrade` でまとめて上がる。占有は大きい（実機で 2.8 GB） | **採用** |
-| EPEL / AppStream / CRB の RPM | root 権限で `dnf` に乗るのが利点。ただし目的のツールが**無い**（`eza` / `git-delta` / `starship` / `zoxide`）か、**古い**（`bat 0.24.0` / `neovim 0.10.1` / `fzf 0.58.0`）ことが多い。同版なら RPM を選ぶ（手順書では [btop.md](../btop.md) と、[image-tools.md](../image-tools.md) の Trivy が例。[ツール一覧](../tool-catalog.md)の fastfetch などもこの規則で RPM にした） | 併用（無い・古いときだけ Homebrew） |
+| EPEL / AppStream / CRB の RPM | root 権限で `dnf` に乗るのが利点。ただし目的のツールが**無い**（`eza` / `git-delta` / `starship` / `zoxide`）か、**古い**（`bat 0.24.0` / `neovim 0.10.1` / `fzf 0.58.0`）ことが多い。同版なら RPM を選ぶ（手順書では [btop.md](../almalinux-setup.md#btop-実施手順) と、[image-tools.md](../almalinux-setup.md#画像の道具-実施手順) の Trivy が例。[ツール一覧](../tool-catalog.md)の fastfetch などもこの規則で RPM にした） | 併用（無い・古いときだけ Homebrew） |
 | COPR | EL10 向けの chroot があるとは限らず、`epel-10-aarch64` の repomd が 403 になる例を実測している（[lazygit.md](../almalinux-setup.md#lazygit)）。zoxide の COPR（x86_64 だけ）も、Homebrew と同じ版なので 2026-10-03 に外した（[zoxide.md](#zoxide-選択した方針)）。WezTerm Nightly だけは、Homebrew の公式 tap の nightly が古く aarch64 に無いので、EL9 向けの COPR を流用している（[wezterm-nightly.md](../reference/almalinux-setup.md#wezterm-選択した方針)） | 不採用（ツールごとに当たり外れが大きい） |
 | 各ツールの公式インストーラ / GitHub Releases | バイナリ 1 つで軽いが、**ツールごとに更新方法が違う**。17 本ぶん覚えることになる | 不採用（Homebrew に揃える） |
 | `cargo install` / `go install` | toolchain が要り、Raspberry Pi ではビルドに時間がかかる | 不採用 |
@@ -2134,7 +2134,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
   - コンテナの中（`/.dockerenv` か `/run/.containerenv` がある、または `/proc/1/cgroup` に `docker` などがある）では断られない（`brew.sh` の `check-run-command-as-root`）。検証では、これらを外したコンテナで確かめた
 - **設定ファイルは root のものを読む**: root で動かした Neovim の `stdpath("config")` は `/root/.config/nvim` だった。自分の `~/.config` の設定は使われない
 - **シェルの初期化は `/root/.bashrc` に足さない**: [zoxide](../almalinux-setup.md) や [starship](../almalinux-setup.md) の `eval "$(… init bash)"` を書くと、root のシェルを開くたびに、Homebrew のユーザーが所有するコマンドが root で動く
-  - 自分用の bash の設定を root のシェルにも入れると（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#root-のシェルでも読む任意)）、これらの初期化も root で動く。自分専用のマシンで、一般ユーザーを信用できるときだけにする
+  - 自分用の bash の設定を root のシェルにも入れると（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) の [docs/install.md の「root のシェルでも読む」](../almalinux-setup.md#共通の-bash-設定を-root-に入れる任意)）、これらの初期化も root で動く。自分専用のマシンで、一般ユーザーを信用できるときだけにする
 - **この節では sudo の `secure_path` を変えない**: [root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節は、root のシェルが対象。`sudo <コマンド>` で使うときは、[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスで渡す（`sudo /home/linuxbrew/.linuxbrew/bin/jq --version` は `jq-1.8.2` を返した）
 
 #### Homebrew: sudo で使うときの補足
@@ -2143,7 +2143,7 @@ $ du -sh /home/linuxbrew/.linuxbrew
 
 #### Homebrew: 注意点 / 手順 0: 本文中の記録
 
-  - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞き、答えは Enter を待たずに 1 文字で読む（[homebrew-offline.md 手順 4](../homebrew-offline.md#実施手順) の補足の実測）
+  - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞き、答えは Enter を待たずに 1 文字で読む（[homebrew-offline.md 手順 4](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) の補足の実測）
 
 #### Homebrew: 注意点 / 手順 0: 本文中の記録
 
@@ -2343,7 +2343,7 @@ Homebrew 7.0.8 が標準 prefix に入り、手順 3 の `. ~/.bashrc` で `/hom
 - **採らなかった形**
   - `sudo -E`: PATH は `secure_path` に置き換わる（`sudo -E printenv PATH` は、この節の前は `/sbin:/bin:/usr/sbin:/usr/bin`）
   - `alias sudo='sudo env PATH="$PATH"'`: 自分の PATH を丸ごと渡すので、Homebrew が先頭になる。RPM の `jq` があっても、`sudo env PATH="$PATH" jq --version` は Homebrew の `jq-1.8.2` を返した
-  - `/usr/local/bin` や `~/.local/bin` にリンクを張る: どちらも AlmaLinux 10 の `secure_path` に無い。`~/.local/bin/gdu` のリンク（[gdu.md の「gdu の名前で呼ぶ」](../gdu.md#gdu-の名前で呼ぶ任意)）は、この節を通しても `sudo gdu` で `command not found` だった
+  - `/usr/local/bin` や `~/.local/bin` にリンクを張る: どちらも AlmaLinux 10 の `secure_path` に無い。`~/.local/bin/gdu` のリンク（[gdu.md の「gdu の名前で呼ぶ」](../almalinux-setup.md#gdu-gdu-の名前で呼ぶ任意)）は、この節を通しても `sudo gdu` で `command not found` だった
 - **Homebrew を消す前に、この節を戻す**: 公式のアンインストーラ（`uninstall.sh`）は `/etc/sudoers.d` に触れない（中に `sudoers` の文字が無い）。残すと、`secure_path` に `/home/linuxbrew/.linuxbrew/bin` が残る
 
 ### Homebrew: 本文から分離した確認範囲と実測
@@ -2484,7 +2484,7 @@ bash -lc 'echo "$XDG_DATA_DIRS"'
 | 確認用アプリ | — | — | Flatseal 2.4.1（GNOME 50 の runtime） |
 
 - 実機の 2 列は**この手順を適用した結果ではなく、ほかの手順書が記録した時点の状態**
-- Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](../syncthing.md)）ので、今の状態は確かめていない
+- Raspberry Pi 5 はその後 2026-09-24 にクリーンインストールしている（[syncthing.md](../almalinux-setup.md#syncthing-実施手順)）ので、今の状態は確かめていない
 
 > [!NOTE]
 > 出力例の値は `<USER>` のプレースホルダで書いてある。バージョン（`1.16.0` / `2.4.1`）と容量は実行日によって変わる。
@@ -3076,9 +3076,9 @@ error: failed to update at least one of the databases
 #### 画面オフ・ロック・サスペンド: 対象と検証環境
 
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
-  - [WireGuard](../wireguard.md)・[Samba](../samba.md)・[Syncthing](../syncthing.md)・[Dropbox](../dropbox.md)・[Dropbox（rclone）](../dropbox-rclone.md)・[GNOME Remote Desktop](../gnome-remote-desktop.md) のホストは、眠るとサービスが止まる
-  - [GNOME のヘッドレスのセッション](../gnome-headless-session.md)は、手順 1・2（サスペンドできる PC では手順 3・4 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
-  - [Claude Code で GUI を確かめる](../claude-code-gui.md)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
+  - [WireGuard](../almalinux-setup.md#wireguard-実施手順)・[Samba](../almalinux-setup.md#samba-サーバー-実施手順)・[Syncthing](../almalinux-setup.md#syncthing-実施手順)・[Dropbox](../almalinux-setup.md#dropbox-実施手順)・[Dropbox（rclone）](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[GNOME Remote Desktop](../almalinux-setup.md#gnome-のリモートログイン-実施手順) のホストは、眠るとサービスが止まる
+  - [GNOME のヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)は、手順 1・2（サスペンドできる PC では手順 3・4 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
+  - [Claude Code で GUI を確かめる](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナ（2026-09-27）とクリーンインストールの VM（2026-10-06）で、手順 1〜5・ロールバックを本実行済み。手順 1・2 は aarch64 の実機（Raspberry Pi 5）でも本実行した（2026-10-01）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#画面オフロックサスペンド-付録-現行版の新規-vm-での再検証2026-10-06)に記録した
@@ -3098,7 +3098,7 @@ error: failed to update at least one of the databases
   - 2026-10-01: 手順 2 と[ロールバック](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
     - ロールバックの手順 1 の、`/usr/bin/gsettings` にした形は流していない
   - 2026-10-01: 手順 1・2 を aarch64 の実機（Raspberry Pi 5）で本実行した（[付録](#画面オフロックサスペンド-付録-実機での検証記録2026-10-01)）
-    - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](../gnome-headless-session.md) と [claude-code-gui.md](../claude-code-gui.md) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
+    - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と [claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
     - 読み戻しは[完了時点の状態](#画面オフロックサスペンド-完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
     - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとせず、画面は消えず、ロックもされなかった（`LockedHint=no`。[claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。物理モニターでの観測ではない
     - 手順 3〜5 とロールバックは、実機では流していない
@@ -3242,7 +3242,7 @@ x86_64 のクラウドホスト上の Docker で、使い捨てのコンテナ�
 
 #### 画面オフ・ロック・サスペンド: 付録: 実機での検証記録（2026-10-01）
 
-**環境**: Raspberry Pi 5（aarch64）の AlmaLinux 10.2。モニターはつながっておらず、[gnome-headless-session.md](../gnome-headless-session.md) のヘッドレスのセッションを動かした（表の「実機」の列）。PATH の先頭は Homebrew で、`command -v gsettings` は `/home/linuxbrew/.linuxbrew/bin/gsettings`（glib 2.90.0）だった。
+**環境**: Raspberry Pi 5（aarch64）の AlmaLinux 10.2。モニターはつながっておらず、[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) のヘッドレスのセッションを動かした（表の「実機」の列）。PATH の先頭は Homebrew で、`command -v gsettings` は `/home/linuxbrew/.linuxbrew/bin/gsettings`（glib 2.90.0）だった。
 
 **流し方**: GNOME のヘッドレスのセッションの手順書（分ける前の版）の検証の中で、この文書の手順 1・2 のブロックを、SSH でログインしたユーザーの `bash -i`（擬似端末）にそのまま書き込んだ。1 回目はブラケットペースト無し、2 回目はブラケットペーストで貼った（その記録は、今の [claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。
 
@@ -3445,7 +3445,7 @@ $ wc -l ~/.config/starship.toml
 
 #### starship: 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2・4・7、[プリセットを当てる（任意）](../almalinux-setup.md#starship-のプリセットを当てる任意)・[設定ファイル](../almalinux-setup.md#starship-の設定ファイル)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](../almalinux-setup.md) / [git-delta](../almalinux-setup.md#git-delta) / [eza](../almalinux-setup.md) / [gdu](../gdu.md) を先に入れた同じコンテナで続けている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2・4・7、[プリセットを当てる（任意）](../almalinux-setup.md#starship-のプリセットを当てる任意)・[設定ファイル](../almalinux-setup.md#starship-の設定ファイル)を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。[bat](../almalinux-setup.md) / [git-delta](../almalinux-setup.md#git-delta) / [eza](../almalinux-setup.md) / [gdu](../almalinux-setup.md#gdu-実施手順) を先に入れた同じコンテナで続けている。
 
 | 手順 | 結果 |
 |---|---|
@@ -4286,7 +4286,7 @@ $ cat ~/.config/bat/config
 
 #### bat: 付録: コンテナでの検証記録（2026-09-22）
 
-`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[設定ファイル](../almalinux-setup.md#bat-の設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](../almalinux-setup.md) / [git-delta](../almalinux-setup.md#git-delta) / [gdu](../gdu.md) / [starship](../almalinux-setup.md) も続けて入れている。
+`podman run -d docker.io/library/almalinux:10 sleep infinity` で立てた使い捨てコンテナに非 root ユーザーを作り、`podman exec` で[Homebrew の導入](../almalinux-setup.md)と手順 2〜3、[設定ファイル](../almalinux-setup.md#bat-の設定ファイル)の節を通した。実機で加えた変更は無い（`podman` は以前から導入済み）。 実行したのは**この文書のコードブロックをそのまま抜き出したもの**で、`sudo` はそのまま（コンテナ内のユーザーに NOPASSWD の sudo を与えた）、Homebrew のインストーラだけ `NONINTERACTIVE=1` を付けている。同じコンテナで [eza](../almalinux-setup.md) / [git-delta](../almalinux-setup.md#git-delta) / [gdu](../almalinux-setup.md#gdu-実施手順) / [starship](../almalinux-setup.md) も続けて入れている。
 
 | 手順 | 結果 |
 |---|---|
@@ -4440,7 +4440,7 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
 - `tmux new-session -s claude claude remote-control …` のように、tmux に直接 `claude` を起動させると、`claude` が終わった時点でセッションも消える。コンテナ（未ログイン）では `[exited]` だけが出て、エラーの文が読めなかった
 - tmux の中のシェルから起動すれば、`claude` が終わってもシェルとその表示が残り、`tmux attach -t claude` で理由を読める
 - `--spawn same-dir` を付けないと、`Choose [1/2]`（`same-dir` か `worktree` か）を聞かれる（Windows の実機の実測）。本書は Windows の手順書と同じ `same-dir`（1 つのディレクトリを共有）にする
-- 信頼のダイアログ・`Enable Remote Control?`・URL の表示は、Windows の実機の記録（[Windows の手順書](../windows-claude-remote-control.md#実施手順)の手順 4）。この手順書では見ていない
+- 信頼のダイアログ・`Enable Remote Control?`・URL の表示は、Windows の実機の記録（[Windows の手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 4）。この手順書では見ていない
 - セッション名を `claude` にしたのは、ステータス行の左端が既定で 10 文字までのため（`claude-rc` は `[claude-rc` で切れた）
 - 対話の `claude` の中で `/remote-control` と打っても、そのセッションを Remote Control につなげる（公式ドキュメント。本書では試していない）
 
@@ -4626,7 +4626,7 @@ Example configuration has been installed to:
 
 - コンテナで、SSH でログインしたシェルから tmux のセッションを作り、中で `top` を動かしたまま SSH のクライアントを `kill -KILL` で落とした。tmux のサーバーと `top` は残り、ログインし直して `tmux attach -t work` で `top` の画面に戻れた
 - 残るのは、systemd-logind の `KillUserProcesses` が既定で `no` のため（`/usr/lib/systemd/logind.conf` に `#KillUserProcesses=no`、`busctl` で読んだ値も `false`）。SSH のセッション（`loginctl`）は `closing` のまま残る
-- [linger](../linger.md) は要らない（tmux は systemd のユーザーのサービスではない）
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) は要らない（tmux は systemd のユーザーのサービスではない）
 
 ### tmux: 参考資料から分離した記録
 
@@ -5446,7 +5446,7 @@ gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) <rpmfusion-g
 gpg-pubkey-e37ed158-65785fa9 Fedora (epel10) <epel@fedoraproject.org> public key
 ```
 
-- RPM Fusion の有効化で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[rpmfusion.md 手順 3 の補足](almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)）
+- RPM Fusion の有効化で、CRB の `selinux-policy-extra` と `selinux-policy-targeted-extra` も入っている（[rpmfusion.md 手順 3 の補足](#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)）
 
 x86_64 の実機（2026-09-28、rpmfusion.md の手順 1〜3 と手順 8 を実行した後の手順 10）:
 
@@ -6080,7 +6080,7 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
 | Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
 | PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
   - [Windows 11 の初期設定](../windows-setup.md)（当時は scoop・UniGet UI・Caps Lock・コンテキストメニュー）の依頼の 1 つとして書き、利用者に確かめてここへ置いた
 
 ### HackGen Console NF: 本文から分離した確認範囲と実測
@@ -6141,7 +6141,7 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
 - **進め方**: どちらも**読者が書き換える変数は無い**
   - **AlmaLinux 10**（[実施手順](../almalinux-setup.md#wezterm)）: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる（chroot は `uname -m` から自動で決まる）
   - **Windows 11**（[Windows 11 で使う](../windows-setup.md#wezterm)）: GitHub の `nightly` のリリースの `WezTerm-nightly-setup.exe`（Inno Setup）を、同じリリースの `.sha256` と比べてから黙って動かし、`C:\Program Files\WezTerm` に入れる。管理者の Windows PowerShell 5.1 に貼る。更新は同じブロックを貼り直す
-    - [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)が `C:\Program Files\WezTerm\wezterm.exe` を呼ぶので、その場所に入れる
+    - [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)が `C:\Program Files\WezTerm\wezterm.exe` を呼ぶので、その場所に入れる
     - [Windows 11 の初期設定](../windows-setup.md)の後に通す手順書の 1 つ
   - 設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（Windows 11 では `%USERPROFILE%` の下。[設定ファイル](../almalinux-setup.md#wezterm-の設定ファイル)）
 - **状態（AlmaLinux 10）**: **x86_64 の実機（2026-09-21）とクリーンインストールの VM（2026-10-06）で本実行済み**。VM は実施手順 1〜5・CLI と GUI の起動・ロールバックを確認した
@@ -6151,7 +6151,7 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
   - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](../extra/almalinux-setup.md#注意点)を見る
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
-  - 利用者の PC には、nightly の `20260905-153129-092dcf70` が `C:\Program Files\WezTerm` に入っている（[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)の実機の記録。入れ方の記録は無い）。その PC では、[Windows 11 で使う](../windows-setup.md#wezterm)の手順は上書きになる
+  - 利用者の PC には、nightly の `20260905-153129-092dcf70` が `C:\Program Files\WezTerm` に入っている（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の実機の記録。入れ方の記録は無い）。その PC では、[Windows 11 で使う](../windows-setup.md#wezterm)の手順は上書きになる
   - **確かめたこと**（[付録](windows-setup.md#wezterm-付録-windows-11-の配布物と資料の調査2026-10-03)）:
     - 配布物: 2026-10-03 の `WezTerm-nightly-setup.exe` の sha256 と `.sha256` の一致、Inno Setup 6.7.0 で作られていること、Authenticode の署名が無いこと。同じ日の zip の中の実行ファイルが x64 で、`VCRUNTIME140.dll` を読み込むこと
     - インストーラの定義（`ci/windows-installer.iss`）と作り方（`ci/deploy.sh`・`gen_windows_continuous.yml`）、Inno Setup の文書とソース（引数・終了コード・アンインストールの登録・アンインストーラの動き）、WezTerm のソース（Windows の設定ファイルの探索順、更新の確認）
@@ -6176,7 +6176,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)の PC は 26H2）。x64 |
+| OS | Windows 11（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の PC は 26H2）。x64 |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員 |
 | 今の WezTerm | nightly の `20260905-153129-092dcf70`（`C:\Program Files\WezTerm`） |
@@ -6323,7 +6323,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [Setup Command-Line Parameters — Inno Setup](https://jrsoftware.org/ishelp/topic_setupcmdline.htm) / [Setup Exit Codes](https://jrsoftware.org/ishelp/topic_setupexitcodes.htm) / [Uninstaller Command-Line Parameters](https://jrsoftware.org/ishelp/topic_uninstcmdline.htm) / [Uninstaller Exit Codes](https://jrsoftware.org/ishelp/topic_uninstexitcodes.htm) / [CloseApplications](https://jrsoftware.org/ishelp/topic_setup_closeapplications.htm) — インストーラとアンインストーラの引数と動き
 - [Latest supported Visual C++ Redistributable downloads — Microsoft Learn](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) — `VCRUNTIME140.dll` を入れる再頒布可能パッケージ
 - [microsoft/winget-pkgs の wez.wezterm.nightly](https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/wez/wezterm/nightly) — 採らなかった winget の定義
-- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
+- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
 - [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）と、この文書を通す順
 
 #### WezTerm: 付録: AppImage の実測
@@ -6722,7 +6722,7 @@ merge.conflictstyle zdiff3
   - 確認したこと: ボトルが降りる、`nvim --version` が出る、`EDITOR` / `VISUAL` が `nvim` になる、`init.lua` を置いた状態で `has("nvim")` が `1` を返す
   - **コンテナでは TUI の起動と `:checkhealth` は確認していない**（端末が無いため、検証時はこの 1 行だけ除いた）
   - **実機には `~/.config/nvim` も `EDITOR` の設定も置いていない**
-  - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](almalinux-setup.md#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
+  - `sudo nvim`・`sudoedit`・`visudo` で開くエディタは、2026-10-02 に x86_64 のコンテナで確かめた（[homebrew.md の付録](#homebrew-付録-sudo-でも使う節のコンテナでの検証記録2026-10-02)）
   - 2026-10-05: 既定のエディタの設定に元値の控えと追記の目印を付け、ロールバックの手順 1 を追加した。一時ファイルで、元値なし・既存値あり・`.bashrc` がリンクの 3 通りを確認し、元値・元の本文・リンクを復元できた（パッケージの導入・削除は未実行）
 - **状態（Windows 11）**: **Windows 実機では未検証（2026-10-08 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
@@ -6916,7 +6916,7 @@ aarch64 で降ってくるボトルは `lazygit--0.65.1.arm64_linux.bottle.tar.g
   - **コンテナでは TUI の起動と `e` キーの動作は確認していない**（端末が無いため）
   - **実機には設定ファイルを置いていない**
   - 2026-10-02: [設定ファイル](../almalinux-setup.md#lazygit-の設定ファイル)の手順 1 を、`LG_EDITOR` が空なら何もせずに止める `if … fi` にした
-    - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
+    - それまでは、ヒアドキュメントの中の `${LG_EDITOR:?…}` が `cat` しか止めず（[gnome-power.md 手順 3 の補足](#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、`>>` が空の `config.yml` を作り、後ろの `lazygit --print-config-dir` も動いた
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`HOME` は使い捨てのディレクトリ、`lazygit` はスタブ）
   - 2026-10-05: 既存設定への無条件追記をやめ、エディタの存在も確かめる形にした。一時ディレクトリとスタブで、新規作成・再実行・既存 `os:` ありの 3 通りを確認した（既存内容は変わらず、`os:` は重複しない）。TUI は起動していない
 - **状態（Windows 11）**: **Windows 実機では未検証（2026-10-08 に書いた）**
@@ -7703,7 +7703,7 @@ Complete!
     - ログインの要らないもの（`doctor`・`auth status`・`mcp`・`update`、ログインしていないときの `-p` と `remote-control`）は、x86_64 の AlmaLinux 10 のコンテナに手順 2〜4 で入れた `claude-code-2.1.287-1` で確かめた
     - **確認していないこと**: セッションの中の操作（キーとスラッシュコマンド）、`-r` の一覧から選ぶ画面、`claude auth login` / `logout`、`claude remote-control` の接続
   - 2026-10-02: 手順 2 の `{ … }` を、`CC_CHANNEL` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
-    - それまでは、ヒアドキュメントの中の `${CC_CHANNEL:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、repo ファイルは書かれずに、後ろの `cat` が `No such file or directory` を出した
+    - それまでは、ヒアドキュメントの中の `${CC_CHANNEL:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3 の補足](#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、repo ファイルは書かれずに、後ろの `cat` が `No such file or directory` を出した
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
@@ -7713,7 +7713,7 @@ Complete!
     - 配布物: 2.1.288 の `manifest.json` の GPG の署名、Windows の `claude.exe`（x64）の sha256 と Authenticode の署名者・タイムスタンプ（Linux で読んだだけ）、`claude.exe` の中の文字列（`PATH` の案内、置き場所、更新のときの名前の変え方）
     - Linux の native installer の同じ版（2.1.288）: `claude install latest` / `stable` で書かれる設定と置き場所、`claude doctor`・`claude update` の出力
     - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../windows-setup.md#claude-code)の手順 4 は、本物の `install.ps1` を Linux の pwsh で動かし、`claude.exe` を落として sha256 が合うところまで通した（Windows の実行ファイルを動かすところで止まる）。同じ節の手順 5 と[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)の手順 2〜4 は、自分のユーザーの PATH とフォルダーを偽物にして流した（[付録](windows-setup.md#claude-code-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
-  - 別の手順書の実機（[windows-claude-remote-control.md](../windows-claude-remote-control.md) の Windows 11 Pro 26H2）には、native installer の 2.1.286 が `C:\Users\<WIN_USER>\.local\bin\claude.exe` に入っていて、claude.ai にログインしてあった（2026-10-01。この節の手順で入れたものではない）
+  - 別の手順書の実機（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の Windows 11 Pro 26H2）には、native installer の 2.1.286 が `C:\Users\<WIN_USER>\.local\bin\claude.exe` に入っていて、claude.ai にログインしてあった（2026-10-01。この節の手順で入れたものではない）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、`claude install` が Windows で出す文言と `PATH` の案内、`PATH` を足して開き直した PowerShell で `claude` が動くこと、`Get-AuthenticodeSignature` の結果、ブラウザでのログイン、`claude update`、ロールバック、arm64 の Windows、Git for Windows が無いとき
 
 AlmaLinux 10:
@@ -7774,13 +7774,13 @@ Windows 11 で Claude Code を入れる経路を比べた（2026-10-03 時点。
 
 | 経路 | 状況 | 採否 |
 |---|---|---|
-| **公式の native installer（PowerShell の `install.ps1`）** | `%USERPROFILE%\.local\bin\claude.exe` に入り、管理者の権限は要らない。Claude Code 自身が裏で更新する（チャンネルは `latest` / `stable`）。sha256 は照らすが署名は確かめず、`PATH` も足さない | **採用**（公式が勧める形。[windows-claude-remote-control.md](../windows-claude-remote-control.md) の前提もこの形） |
+| **公式の native installer（PowerShell の `install.ps1`）** | `%USERPROFILE%\.local\bin\claude.exe` に入り、管理者の権限は要らない。Claude Code 自身が裏で更新する（チャンネルは `latest` / `stable`）。sha256 は照らすが署名は確かめず、`PATH` も足さない | **採用**（公式が勧める形。[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の前提もこの形） |
 | 公式の native installer（CMD の `install.cmd`） | 同じものを CMD から入れる | 不採用（本書のブロックは Windows PowerShell にそろえる） |
 | WinGet の `Anthropic.ClaudeCode` | `portable` で、公式の配布物の `claude.exe` をそのまま置く。自分では更新しない（`winget upgrade`。`CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` で Claude Code に走らせられるが、動いている間は置き換えられないことがある）。2026-10-03 の winget-pkgs は 2.1.286 で、`latest` の 2.1.288 より遅れていた | 不採用（版が遅れ、更新を別に回すことになる） |
 | scoop の `main/claude-code` | 2.1.288（公式の配布物と同じ sha256）。更新は `scoop update` | 不採用（公式の文書の経路ではなく、Claude Code 自身の更新との関係を確かめていない） |
 | Chocolatey の `claude-code` | 2.1.285（コミュニティの保守） | 不採用 |
 | npm（`@anthropic-ai/claude-code`） | Node.js が要る。PowerShell の実行ポリシーが、npm の作る `.ps1` の起動を止めることがある（公式の Troubleshoot installation） | 不採用 |
-| WSL の中に Linux の手順で入れる | Linux の道具を使うなら有力（サンドボックスは WSL 2 だけ）。Windows の `claude.exe` とは別のもの | 不採用（Windows のプロジェクトで使い、[windows-claude-remote-control.md](../windows-claude-remote-control.md) の前提にもなるため） |
+| WSL の中に Linux の手順で入れる | Linux の道具を使うなら有力（サンドボックスは WSL 2 だけ）。Windows の `claude.exe` とは別のもの | 不採用（Windows のプロジェクトで使い、[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の前提にもなるため） |
 
 | npm（`npm install -g @anthropic-ai/claude-code`） | Node.js 22 以上が要る。このホストに Node.js は無く、そのために入れることになる。中身は同じネイティブバイナリ | 不採用 |
 
@@ -7897,7 +7897,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 #### Claude Code: 付録: 使い方の基本の検証記録（2026-10-01）
 
-**ログインの要らないもの**: [tmux.md の付録](almalinux-setup.md#tmux-付録-コンテナでの検証記録2026-10-01)と同じ x86_64 の AlmaLinux 10 のコンテナ（`10-init`、systemd と sshd）に、手順 2〜4 の `latest` で `claude-code-2.1.287-1` を入れ、SSH でログインした一般ユーザー（ログインしていない）で実行した。
+**ログインの要らないもの**: [tmux.md の付録](#tmux-付録-コンテナでの検証記録2026-10-01)と同じ x86_64 の AlmaLinux 10 のコンテナ（`10-init`、systemd と sshd）に、手順 2〜4 の `latest` で `claude-code-2.1.287-1` を入れ、SSH でログインした一般ユーザー（ログインしていない）で実行した。
 
 | コマンド | 結果 |
 |---|---|
@@ -7961,7 +7961,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 #### Claude Code: 手順中の実測・検証状況の記録
 
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../windows-claude-remote-control.md)）。本書では、ログインしていないときのエラーだけを確かめた |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）。本書では、ログインしていないときのエラーだけを確かめた |
 
 #### Claude Code: ロールバック / 手順 1: 補足: 消えたかの確かめ方
 

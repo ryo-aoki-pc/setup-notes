@@ -1,6 +1,6 @@
 # Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）の検証記録
 
-[手順書](../samba.md)・[ロールバックと注意点](../extra/samba.md)
+[手順書](../almalinux-setup.md#samba-サーバー-実施手順)・[ロールバックと注意点](../extra/samba.md)
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
@@ -40,18 +40,18 @@
 
 - Windows のエクスプローラーからは、利用者の PC で実機の共有を開いて使えている。2026-10-01 に、サーバーで変えたものの見え方を確かめた（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）。資格情報を入れる最初の接続の画面は記録していない
 - macOS / iOS / Android からの接続は未検証。IP アドレスで指定する（NetBIOS 名では見つからない）
-- [samba-client.md](../samba-client.md) は、AlmaLinux 10 の VM 同士で LAN と WireGuard 越しの手動 CIFS マウントを確かめた。LAN の fstab 自動マウントも VM で確認済み。この実機のサーバーへの接続は確かめていない
+- [samba-client.md](../almalinux-setup.md#samba-クライアント-実施手順) は、AlmaLinux 10 の VM 同士で LAN と WireGuard 越しの手動 CIFS マウントを確かめた。LAN の fstab 自動マウントも VM で確認済み。この実機のサーバーへの接続は確かめていない
 
 ### root のホームも公開する（任意）: 検証状況の記録
 
 > [!WARNING]
-> - `<USER>` の Samba のパスワードが、root のパスワードと同じ重みになる。`/root/.bashrc` や `/root/.ssh/authorized_keys` も書き換えられるので、root で任意のコマンドを動かせる。パスワードは長いものにし、[接続元を絞る](../samba.md#接続元を絞る任意)も検討する
+> - `<USER>` の Samba のパスワードが、root のパスワードと同じ重みになる。`/root/.bashrc` や `/root/.ssh/authorized_keys` も書き換えられるので、root で任意のコマンドを動かせる。パスワードは長いものにし、[接続元を絞る](../almalinux-setup.md#samba-サーバー-接続元を絞る任意)も検討する
 > - この節は **x86_64 の VM でのみ検証した**。実機では本実行していない（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
 
 ### /home も公開する（任意）: 検証状況の記録
 
 > [!WARNING]
-> - `<USER>` の Samba のパスワードで、ほかのユーザーのホームのファイル（`~/.bashrc` や `~/.ssh/authorized_keys`）も読み書きできる。`sudo` を使えるユーザーのホームを書き換えれば、root で任意のコマンドを動かせる。パスワードは長いものにし、[接続元を絞る](../samba.md#接続元を絞る任意)も検討する
+> - `<USER>` の Samba のパスワードで、ほかのユーザーのホームのファイル（`~/.bashrc` や `~/.ssh/authorized_keys`）も読み書きできる。`sudo` を使えるユーザーのホームを書き換えれば、root で任意のコマンドを動かせる。パスワードは長いものにし、[接続元を絞る](../almalinux-setup.md#samba-サーバー-接続元を絞る任意)も検討する
 > - この節は **x86_64 の VM でのみ検証した**。実機では本実行していない（[付録](#付録-home-を公開する節の-vm-での検証2026-10-05)）
 
 ### /home も公開する（任意） / 手順 1: 補足: [home] の各行
@@ -87,46 +87,46 @@
 
 - **目的**: ローカルユーザーが**自分のホームディレクトリ**に、LAN と WireGuard 越し（`wg0`）の両方から SMB3 で読み書きできるようにする
   - 共有は Samba の `[homes]` 機構（ユーザー名と同じ名前の共有が自動で現れ、本人しか入れない）を使う
-  - 任意で、root のホーム（`/root`）も `[root]` 共有で公開できる。入るのは自分の Samba ユーザーのままで、smbd は root として読み書きする（[root のホームも公開する（任意）](../samba.md#root-のホームも公開する任意)）
-  - 任意で、`/home` 全体（ほかのユーザーのホームも）を `[home]` 共有で公開できる。入るのは自分の Samba ユーザーのままで、smbd は root として読み書きし、作ったものは親ディレクトリの所有者のものにする（[/home も公開する（任意）](../samba.md#home-も公開する任意)）
+  - 任意で、root のホーム（`/root`）も `[root]` 共有で公開できる。入るのは自分の Samba ユーザーのままで、smbd は root として読み書きする（[root のホームも公開する（任意）](../almalinux-setup.md#samba-サーバー-root-のホームも公開する任意)）
+  - 任意で、`/home` 全体（ほかのユーザーのホームも）を `[home]` 共有で公開できる。入るのは自分の Samba ユーザーのままで、smbd は root として読み書きし、作ったものは親ディレクトリの所有者のものにする（[/home も公開する（任意）](../almalinux-setup.md#samba-サーバー-home-も公開する任意)）
   - 印刷・NetBIOS・ゲストアクセスは持たない
 - **進め方**: **冒頭の変数ブロックに値を 1 度書き、以降のコマンドをそのまま貼る**
   - 読者が編集するのは `WORKGROUP` と、接続元を絞る場合の `ALLOW_FROM` だけ
   - `smb.conf` は既定ファイルを退避したうえで、最小構成に置き換える
 - **状態**: **2026-09-21 に下表の実機で本実行し、公開を継続中。2026-10-06 にクリーンインストールした x86_64 の VM でも現行ブロックを本実行した**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
-  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)・[linger](../linger.md)・[Podman](../podman.md) を通した後の状態）で、`114c2b2` の実施手順 1〜9 と[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜10 の 19 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)・[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)・[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した後の状態）で、`114c2b2` の実施手順 1〜9 と[サーバーの上で動作を確かめる](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba.md#サーバーの上で動作を確かめる)の手順 1〜10 の 19 手順を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
     - 結果: 通した 15、通らなかった 0、条件に当たらず飛ばした 4（動作を確かめる節の手順 7〜10。root のホームも `/home` も公開していない）、未実施 0
-    - 手順 9 は、同じ仮想スイッチの別の VM（AlmaLinux 10.2）から [samba-client.md](../samba-client.md) の手順 1〜7 でつないだ分だけ。Windows・macOS・Android / iOS・WireGuard 越しでは、つないでいない
+    - 手順 9 は、同じ仮想スイッチの別の VM（AlmaLinux 10.2）から [samba-client.md](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba-client.md) の手順 1〜7 でつないだ分だけ。Windows・macOS・Android / iOS・WireGuard 越しでは、つないでいない
     - 確認したこと: Workstation に `samba`・`samba-client` 4.23.5-111 が依存の 5 個と入る、`smb3 directory leases = No`、445/tcp だけの待ち受け、サーバーの上の `smbclient` と `mount.cifs`（SMB 3.1.1、`partial(AES-128-CMAC)`、`user_home_t`・`cifs_t`）、別の VM からの firewalld 越しの接続、サーバーの再起動の後も smbd・445/tcp・boolean が残り、別の VM の自動マウントがつながり直すこと
     - 直した所: 無い（「確認」の後ろの出力は、どの手順も手順書のとおりだった。手順書・ロールバックと注意点・参考資料は変えていない）
     - 未実施の範囲: 「root のホームも公開する（任意）」「/home も公開する（任意）」「接続元を絞る（任意）」「設定済みのサーバーでディレクトリのリースを切る」、[ロールバック](../extra/samba.md#ロールバック)、Windows・macOS・Android / iOS のクライアント、WireGuard 越し、各ブロックの `中断:` の側、実機、aarch64
   - 確認したこと: **サーバー自身からの `smbclient` と `mount.cifs` による読み書き**、および **network namespace から firewalld 越しに 445/tcp へ到達できること**（[付録](#付録-実機での検証記録2026-09-21)）
   - **確認していないこと**: macOS / iOS / Android の実クライアントからの接続（Windows のエクスプローラーは、2026-10-01 に確かめた）
-  - 2026-09-28: 手順 2〜5・8、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 4、[ロールバック](../extra/samba.md#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 2〜5・8、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4、[ロールバック](../extra/samba.md#ロールバック)の手順 1 のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）。中のコマンドは変えていない
     - 手順 3 の smb.conf の字下げを、TAB から空白に変えた。TAB は、ブラケットペースト無しで貼ると bash の補完で `.` に置き換わった（手順 3 の補足）
     - 直した後の手順 1〜8、動作を確かめる節の手順 1〜6、ロールバックを、x86_64 の VM にブラケットペースト無しで貼って通した。VM は [samba-client.md の付録](samba-client.md#付録-vm-での検証記録2026-09-27)と同じもので、まっさらな状態から始めた
     - その VM には `samba-common` が入っていなかったので、手順 2 で一緒に入り、ロールバックの手順 3 で一緒に消えた
-  - 2026-09-29: [root のホームも公開する（任意）](../samba.md#root-のホームも公開する任意)と、[ロールバック](../extra/samba.md#ロールバック)の手順 2 を足した
+  - 2026-09-29: [root のホームも公開する（任意）](../almalinux-setup.md#samba-サーバー-root-のホームも公開する任意)と、[ロールバック](../extra/samba.md#ロールバック)の手順 2 を足した
     - **この 2 つは x86_64 の VM でのみ検証した**。実機では本実行していない
-    - まっさらな VM で手順 1〜8 と[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜6 を通した後、root の節の手順 1〜3・5、動作を確かめる節の手順 7・8、ロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
+    - まっさらな VM で手順 1〜8 と[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 1〜6 を通した後、root の節の手順 1〜3・5、動作を確かめる節の手順 7・8、ロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-root-のホームを公開する節の-vm-での検証2026-09-29)）
     - 確認したこと: `/root` の一覧・読み書き・改名・削除で AVC が出ないこと、作ったファイルが `root root` の `admin_home_t` になること、2 人目の Samba ユーザーが入れないこと、samba-client.md の手でのマウント（`SHARE=root`）、モジュールが無いときの失敗の表示
     - 確認していないこと: 実機、Windows などのクライアントからの接続（エラー 1219 を避けられることも）、WireGuard 越しの接続
-  - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](../samba.md#設定済みのサーバーでディレクトリのリースを切る)を足した
+  - 2026-10-01: 手順 3 の smb.conf に `smb3 directory leases = no` を足し、[設定済みのサーバーでディレクトリのリースを切る](../almalinux-setup.md#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)を足した
     - 足す前は、サーバーで直接作ったファイルが、利用者の Windows のエクスプローラーに F5 でも出なかった（[付録](#付録-サーバーで変えたものがクライアントに見えるまで2026-10-01)）
     - 実機では、その節の手順 1・2 を本実行した。その後は、サーバーで作ったもの・消したもの・サブフォルダーの中に作ったものが、エクスプローラーに自動で出た（利用者が確かめた）
     - 手順 3 のブロック（2026-10-02 に `if` を足す前の形）と、その節の手順 1〜3 は、実機の上の rootless の podman のコンテナ（aarch64）で貼って通した。コンテナには systemd が無いので、`systemctl` はスタブにした
-    - 確認していないこと: 手順 1〜8 と[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜6 の通し、リースを切る節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
+    - 確認していないこと: 手順 1〜8 と[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 1〜6 の通し、リースを切る節の手順 3 を実機で貼ること、macOS・iOS・Android のクライアント、WireGuard 越しの接続
     - 実機の smb.conf は、2026-09-28 より前の手順 3（字下げが TAB）に `[root]` を足したもの。`[root]` は `browseable = Yes` で、この文書と違う（今回は変えていない）
-  - 2026-10-02: サーバーの上の動作確認を、`## 実施手順` から[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)へ移した（利用者の依頼）
+  - 2026-10-02: サーバーの上の動作確認を、`## 実施手順` から[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)へ移した（利用者の依頼）
     - その節の手順 1〜6 は、もとの手順 9〜14。もとの手順 15（クライアントからの接続）は手順 9 になった
     - その節の手順 7・8 は、もとの root の節の手順 3 の `smbclient` と手順 4。root の節の手順 3 は smb.service の再起動だけになり、もとの手順 5・6 は手順 4・5 になった
     - コマンドは変えていない（root の節の手順 3 の `{ … }` を外し、再起動と `smbclient` を別の手順に分けただけ）。移した後の文書は貼って通していない
   - 2026-10-02: 手順 3 の `{ … }` を、`WORKGROUP` が空なら何もせずに止める `if … fi` にした（中のコマンドは変えていない）
     - それまでは、ヒアドキュメントの中の `${WORKGROUP:?…}` が `sudo tee` しか止めず（[gnome-power.md 手順 3 の補足](almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-3-補足-ログイン画面の設定の置き場所とgdm-ユーザーで読む理由)）、`cp -an` は動き、smb.conf は書き換わらずに、`testparm -s` が元の smb.conf を検査した
     - 直した形は、擬似端末の対話の bash にブラケットペースト無しで、変数を空にしたときと値を入れたときの 1 回ずつ貼って確かめた（`sudo` はそのまま実行するスタブ、`testparm` はスタブ、`/etc` は使い捨てのディレクトリに読み替えた）
-  - 2026-10-05: [/home も公開する（任意）](../samba.md#home-も公開する任意)と、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 9・10 を足した（利用者の依頼）
+  - 2026-10-05: [/home も公開する（任意）](../almalinux-setup.md#samba-サーバー-home-も公開する任意)と、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 を足した（利用者の依頼）
     - **この 2 つは x86_64 の VM でのみ検証した**。実機では本実行していない
     - まっさらな VM で、手順 1〜8、動作を確かめる節の手順 1〜6、root の節の手順 1〜3、/home の節の手順 1・2、動作を確かめる節の手順 7〜10、/home の節の手順 4、ロールバックを、ブラケットペーストの有りと無しで 1 回ずつ貼って通した（[付録](#付録-home-を公開する節の-vm-での検証2026-10-05)）
     - 確認したこと: `/home` の一覧、自分とほかのユーザーのホームへの書き込みで所有者がそのユーザーになること（改名での上書きも）、`/home` の直下には作れないこと、2 人目の Samba ユーザーが入れないこと、`[root]` と並べて足して `[home]` だけを戻せること、samba-client.md の手でのマウント（`SHARE=home`）
@@ -145,12 +145,12 @@
 | クライアント | 検証は Linux の `smbclient` 4.23.5 と `mount.cifs`（SMB 3.1.1）。2026-10-01 に、利用者の Windows のエクスプローラー（SMB 3.1.1）。macOS / iOS / Android は未確認 |
 
 > [!NOTE]
-> 環境固有の値は**シェル変数**で書いてある。[手順 1](../samba.md#実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**シェル変数**で書いてある。[手順 1](../almalinux-setup.md#samba-サーバー-実施手順) で 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
 > | `${WORKGROUP}` | `smb.conf` の `workgroup`。Windows 側のワークグループ名に合わせる（NetBIOS を使わないので実質ラベル） | `WORKGROUP` |
-> | `${ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](../samba.md#接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
+> | `${ALLOW_FROM}` | 送信元サブネットのリスト（空白区切り）。[接続元を絞る](../almalinux-setup.md#samba-サーバー-接続元を絞る任意)場合だけ、その節の冒頭で設定する | `192.168.1.0/24 10.99.0.0/30` |
 > | `${SERVER_IP}` | クライアントが接続に使うサーバーの LAN 側 IP（デフォルト経路の送信元から自動で入る）。検証と案内にしか使わない | `192.168.1.10` |
 >
 > 出力例・ログ・表の中の値は `<HOSTNAME>` / `<SERVER_IP>` / `<WG_IP>`（`wg0` のアドレス）/ `<USER>`（OS アカウント名）/ `<CLIENT_IP>`（Windows の PC の IP）のプレースホルダで書いてある。
@@ -367,7 +367,7 @@ IPC$         77781   127.0.0.1     Mon Sep 21 18:52:19 2026 UTC     -           
 - **`/home` の直下には作れない**
   - `smbclient` では、ファイルは `NT_STATUS_ACCESS_DENIED opening remote file \<名前>`、ディレクトリは `NT_STATUS_ACCESS_DENIED making remote directory \<名前>`
   - AVC は、ファイルが `denied { create } … tcontext=system_u:object_r:home_root_t:s0 tclass=file`、ディレクトリが `denied { create } … tcontext=system_u:object_r:user_home_dir_t:s0 tclass=dir`（`/home` に作るディレクトリは `user_home_dir_t` になるが、その作成は許されていない）
-  - [samba-client.md](../samba-client.md) で `SHARE=home` にしてマウントしたときも、直下への書き込みは `Permission denied`
+  - [samba-client.md](../almalinux-setup.md#samba-クライアント-実施手順) で `SHARE=home` にしてマウントしたときも、直下への書き込みは `Permission denied`
 - **入るのは `<USER>`**: `pdbedit -L` に、ほかのユーザーは増えない。`smbstatus` では、Username が `<USER>`、Service が `home` になる
 
 ### 接続元を絞るときの補足
@@ -593,7 +593,7 @@ sudo ip netns del smbtest
 
 #### 接続元を絞る節の検証
 
-`ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"` で[接続元を絞る](../samba.md#接続元を絞る任意)のコマンドを実行し、上の network namespace（192.168.250.0/24、どちらにも属さない）から接続した:
+`ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"` で[接続元を絞る](../almalinux-setup.md#samba-サーバー-接続元を絞る任意)のコマンドを実行し、上の network namespace（192.168.250.0/24、どちらにも属さない）から接続した:
 
 ```
 $ sudo firewall-cmd --list-rich-rules
@@ -619,7 +619,7 @@ $ sudo ip netns exec smbtest smbclient "//192.168.250.1/${SMB_USER}" -A "${AUTHF
 
 ### 付録: root のホームを公開する節の VM での検証（2026-09-29）
 
-[root のホームも公開する（任意）](../samba.md#root-のホームも公開する任意)と、[ロールバック](../extra/samba.md#ロールバック)の手順 2 を足したときの記録。x86_64 のクラウドのホストの上の、使い捨ての VM で行った。実機で加えた変更は無い。
+[root のホームも公開する（任意）](../almalinux-setup.md#samba-サーバー-root-のホームも公開する任意)と、[ロールバック](../extra/samba.md#ロールバック)の手順 2 を足したときの記録。x86_64 のクラウドのホストの上の、使い捨ての VM で行った。実機で加えた変更は無い。
 
 **環境**:
 
@@ -720,7 +720,7 @@ IPC$         …       127.0.0.1     Tue Sep 29 11:30:28 AM 2026 UTC  -         
   - 貼り方は 2 通りで、それぞれまっさらな overlay から通した: ブラケットペースト無し（行をそのまま打ち込む）と、ブラケットペースト（`ESC [200~` と `ESC [201~` で包んで送ってから Enter）
   - `smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
 - 1 つのシェルで、次の順に貼った
-  - 手順 1〜8 と、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜6
+  - 手順 1〜8 と、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 1〜6
   - `sudo -i` した root のシェルで、root の節の手順 1
   - root の節の手順 1〜3 と、動作を確かめる節の手順 7・8
   - samba-client.md の手順 1〜5（`SERVER=127.0.0.1`、`SHARE=root` に書き換えた）と、同書のロールバックの手順 3（マウント先と資格情報ファイルを消す）
@@ -779,7 +779,7 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
 
 ### 付録: サーバーで変えたものがクライアントに見えるまで（2026-10-01）
 
-サーバーで（Samba を通さずに）変えたファイルやディレクトリが、クライアントの再読み込みですぐに出るかを確かめ、手順 3 に `smb3 directory leases = no` を足したときの記録。実機に加えた変更は、[設定済みのサーバーでディレクトリのリースを切る](../samba.md#設定済みのサーバーでディレクトリのリースを切る)の手順 1・2 だけ（ほかに、ホーム直下にテスト用のファイルを作って消した）。
+サーバーで（Samba を通さずに）変えたファイルやディレクトリが、クライアントの再読み込みですぐに出るかを確かめ、手順 3 に `smb3 directory leases = no` を足したときの記録。実機に加えた変更は、[設定済みのサーバーでディレクトリのリースを切る](../almalinux-setup.md#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)の手順 1・2 だけ（ほかに、ホーム直下にテスト用のファイルを作って消した）。
 
 **環境**:
 
@@ -790,7 +790,7 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
   - smb.conf は、手順 3 のブロック（直す前と後）をそのまま貼って置いた。試験用のユーザー `smbreload`（実機に無い名前）を `smbpasswd -s -a` で登録し、`smbd --foreground --no-process-group` で動かした
   - kernel の cifs: 実機のカーネル（`cifs.ko` の版 2.51、`dir_cache_timeout` は既定の 30）で、samba-client.md 手順 5 と同じオプションに `port=4450` を足してマウントした。EL10 の x86_64 のカーネル（6.12.0-211 系）では測っていない
   - GNOME Files: 実機のヘッドレスの GNOME のセッション（nautilus 47.6、`gvfs-smb-1.54.4-3.el10`）で、`/usr/bin/gio mount smb://smbreload@127.0.0.1:4450/smbreload` でつないだ。PATH で先に見つかる Homebrew の `gio` は、`Operation not supported` で使えなかった
-  - 画面は、[claude-code-gui.md](../claude-code-gui.md) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
+  - 画面は、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
   - サーバーでの変更は、`podman exec` でコンテナの中のファイルを直接変えた（Samba を通さない）
 
 **直す前の Windows**（利用者がエクスプローラーで `\\<SERVER_IP>\<USER>` を開き、実機のホーム直下に `touch` でファイルを作った）:
@@ -809,7 +809,7 @@ Pid          User(ID)   DenyMode   Access      R/W        Oplock           Share
 24240        1000       DENY_NONE  0x100081    RDONLY     LEASE(RH)        /home/<USER>   .   Thu Oct  1 19:35:31 2026
 ```
 
-**実機に足したとき**（[設定済みのサーバーでディレクトリのリースを切る](../samba.md#設定済みのサーバーでディレクトリのリースを切る)の手順 1・2。つないでいたのは `<CLIENT_IP>` の 1 つだけ）:
+**実機に足したとき**（[設定済みのサーバーでディレクトリのリースを切る](../almalinux-setup.md#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)の手順 1・2。つないでいたのは `<CLIENT_IP>` の 1 つだけ）:
 
 ```
 $ （リースを切る節の手順 1）
@@ -882,13 +882,13 @@ Pid          User(ID)   DenyMode   Access      R/W        Oplock           Share
 - macOS・iOS・Android のクライアント（利用者は Android のファイルアプリも使う）
 - WireGuard 越しの接続
 - EL10 の x86_64 のカーネルの cifs
-- [設定済みのサーバーでディレクトリのリースを切る](../samba.md#設定済みのサーバーでディレクトリのリースを切る)の手順 3 を、実機で貼ること
-- 手順 1〜8 と、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜6 を通しで貼ること（手順 3 のブロックは、コンテナで貼っただけ）
+- [設定済みのサーバーでディレクトリのリースを切る](../almalinux-setup.md#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)の手順 3 を、実機で貼ること
+- 手順 1〜8 と、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 1〜6 を通しで貼ること（手順 3 のブロックは、コンテナで貼っただけ）
 - 開いたままのファイルを、サーバーで直接書き換えたときの見え方（ファイルのリース。`smb2 leases` は有効のまま）
 
 ### 付録: /home を公開する節の VM での検証（2026-10-05）
 
-[/home も公開する（任意）](../samba.md#home-も公開する任意)と、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 9・10 を足したときの記録。x86_64 のクラウドのホストの上の、使い捨ての VM で行った。実機で加えた変更は無い。
+[/home も公開する（任意）](../almalinux-setup.md#samba-サーバー-home-も公開する任意)と、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 を足したときの記録。x86_64 のクラウドのホストの上の、使い捨ての VM で行った。実機で加えた変更は無い。
 
 **環境**:
 
@@ -933,7 +933,7 @@ $ seinfo -t user_home_dir_t -x
   - 貼り方は 2 通りで、それぞれまっさらな overlay から通した: ブラケットペースト無し（行をそのまま打ち込む）と、ブラケットペースト（`ESC [200~` と `ESC [201~` で包んで送ってから Enter）
   - `smbpasswd`・`read`・`smbclient` のパスワードは、問い合わせが出てから送った
 - 1 つのシェルで、次の順に貼った
-  - 手順 1〜8 と、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の手順 1〜6
+  - 手順 1〜8 と、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 1〜6
   - root の節の手順 1〜3
   - `sudo -i` した root のシェルで、/home の節の手順 1
   - /home の節の手順 1・2 と、動作を確かめる節の手順 7〜10
@@ -1037,12 +1037,12 @@ home の解除 4、root の解除 5、既存サーバーのディレクトリリ
 
 この付録は、検証の担当の報告と、証跡のファイルから書いた（VM を操作したのは担当）。
 
-- **何を**: [手順書](../samba.md)の実施手順（9 手順）と「サーバーの上で動作を確かめる」（10 手順）を、コミット `114c2b2` の本文で、上から通した
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba.md)の実施手順（9 手順）と「サーバーの上で動作を確かめる」（10 手順）を、コミット `114c2b2` の本文で、上から通した
   - 「root のホームも公開する（任意）」「/home も公開する（任意）」「接続元を絞る（任意）」「設定済みのサーバーでディレクトリのリースを切る」と[ロールバック](../extra/samba.md#ロールバック)は、この通しの範囲の外（流していない）
 - **結果**: 19 手順のうち、通した 15、通らなかった 0、条件に当たらず飛ばした 4（動作を確かめる節の手順 7〜10。root のホームも `/home` も公開していない）、未実施 0
   - 手順 9（クライアントからの接続）は、箇条書きのうち「AlmaLinux 10 の PC なら samba-client.md」の側だけを通した（[samba-client.md の検証記録の付録](samba-client.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。Windows・macOS・Android / iOS・WireGuard 越しでは、つないでいない
   - 「確認」の後ろの出力は、どの手順も、手順書の箇条書きとブロックのコメントのとおりだった
-- **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` からのクローン（`server/meta.json`）。Kickstart で入れた AlmaLinux 10.2 の Workstation に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順と任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」、[linger](../linger.md)、[Podman](../podman.md) を通した状態（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)の続き）
+- **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` からのクローン（`server/meta.json`）。Kickstart で入れた AlmaLinux 10.2 の Workstation に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順と任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」、[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)、[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した状態（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)の続き）
   - `samba` と `samba-client` は入っていなかった。`samba-common`・`libsmbclient`・`cifs-utils` は入っていた。firewalld は `public` で、サービスは `cockpit dhcpv6-client ssh`、ポートは空（`server/guest-facts-start.txt`）
 - **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、公開するユーザーの SSH の対話の bash に、ブラケットペーストで 1 つずつ貼った
   - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ）
@@ -1140,7 +1140,7 @@ home の解除 4、root の解除 5、既存サーバーのディレクトリリ
 
 #### 指摘と状態（Hyper-V、2026-10-11）
 
-- 手順書（[手順書](../samba.md)・[ロールバックと注意点](../extra/samba.md)・[参考資料](../reference/samba.md)）への指摘は無い。担当の報告も、この手順書には挙げていない
+- 手順書（[手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba.md)・[ロールバックと注意点](../extra/samba.md)・[参考資料](../reference/samba.md)）への指摘は無い。担当の報告も、この手順書には挙げていない
 - 環境と道具（手順書の指摘ではない）
   - 別の SSH から打つ `ausearch` は、`--input-logs` を付けないと監査ログを読まない（上の「SELinux の拒否」）。手順書のブロックの `ausearch` は、対話の端末に貼るので当たらない
   - `mcelog.service` が、起動のたびに failed になる
@@ -1213,14 +1213,14 @@ home の解除 4、root の解除 5、既存サーバーのディレクトリリ
 ### 参考資料: 実施手順 / 手順 2: 補足: パッケージ
 
 - `samba`（baseos）が smbd 本体。依存で `samba-common-tools`（`smbpasswd` / `pdbedit` / `testparm` / `smbstatus`）、`samba-libs`、`samba-dcerpc` などが入る
-- `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は、[サーバーの上で動作を確かめる](../samba.md#サーバーの上で動作を確かめる)の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
+- `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
 - インストール直後は `smb.service` / `nmb.service` とも `disabled` / `inactive`
 
 ### 参考資料: 実施手順 / 手順 5: 補足: firewalld
 
 - 445/tcp は public ゾーンの全 NIC で開く。この環境では `end0`（LAN）と `wg0`（VPN）
 - 自ホストからの `smbclient //localhost/...` や `//${SERVER_IP}/...` は `lo` を通るため、**firewalld の設定を通らない**（`filter_INPUT` の `iifname "lo" accept` で先に受理される）
-- 開け忘れはサーバー上の検証では見つからない。[付録](../verification/samba.md#network-namespace-から-firewalld-越しに到達する)
+- 開け忘れはサーバー上の検証では見つからない。[付録](#network-namespace-から-firewalld-越しに到達する)
 
 ### 参考資料: root のホームも公開する（任意） / 手順 1: 補足: [root] の各行
 
@@ -1268,9 +1268,9 @@ home の解除 4、root の解除 5、既存サーバーのディレクトリリ
 ### 参考資料: root のホームを公開するときの補足
 
 - **公開されるのは `/root` の全体**
-  - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](../samba.md#root-のホームも公開する任意)の手順 2 のモジュールで許す
+  - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](../almalinux-setup.md#samba-サーバー-root-のホームも公開する任意)の手順 2 のモジュールで許す
   - `.ssh`（`ssh_home_t`）・`.gnupg`（`gpg_secret_t`）・`.config`（`config_home_t`）などは、一般ユーザーのホームと同じ `user_home_type` のラベルなので、手順 4 の boolean で既に許されている
   - VM では、SMB から `/root/.ssh/authorized_keys` を取得でき、`/root/.ssh` へのファイルの書き込みと `/root/.bashrc` の書き換えも通った（AVC は出ない）
 - **入るのは `<USER>`**: `pdbedit -L` は `<USER>` の 1 行のまま（root は出ない）。`smbstatus` では、Username が `<USER>`、Service が `root` になる
-- **クライアントでの見え方**: [samba-client.md](../samba-client.md) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
+- **クライアントでの見え方**: [samba-client.md](../almalinux-setup.md#samba-クライアント-実施手順) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
 - **以前に `smbpasswd -a root` で root を登録していたら**: VM では、`sudo smbpasswd -x root` は `Failed to delete entry for user root.` で消せず、`sudo pdbedit -x -u root` で消えた

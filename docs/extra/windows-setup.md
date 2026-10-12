@@ -219,7 +219,7 @@
 
 1. 自分用の lazygit の設定を外し、退避した設定に戻す。
 
-   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の README の「導入方法」](https://github.com/ryo-aoki-pc/lazygit#導入方法)の、元に戻す 2 つのブロックを貼る（1 つ目が何も出さないことを確かめてから、2 つ目）
+   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の README の「導入方法」](../windows-setup.md#lazygit-の設定を導入する)の、元に戻す 2 つのブロックを貼る（1 つ目が何も出さないことを確かめてから、2 つ目）
    - `%LOCALAPPDATA%\lazygit` を消し、退避した `lazygit.bak` があれば戻す
 
 1. scoop で lazygit を消す。
@@ -460,7 +460,7 @@
    - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 3・4 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
    - 共通の設定は[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2、`core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4 で控えた元の値・スコープと変更の記録を使う。変更しなかったキーは残す
    - 控えた記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
-   - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、同書の「Git」の手順 7 を飛ばした場合の `pull.ff` は触らない
+   - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、[AlmaLinux 10 の「Git」](../almalinux-setup.md#git)の手順 7 を飛ばした場合の `pull.ff` は触らない
    - 対象は `pull.rebase`・`rebase.autoStash`・`core.autocrlf`・`init.defaultBranch`・`core.quotepath`・`fetch.prune`・`push.autoSetupRemote`・`rerere.enabled`・`diff.algorithm`・`branch.sort`・`tag.sort`・`pull.ff`
    - `core.longpaths` も今回変更したときだけ対象にする。元の `global` が未設定なら `git config --global --unset core.longpaths`、値があったなら、この項の手順 5 で戻す
    - 例: 今回初めて追加した `core.autocrlf` なら `git config --global --unset core.autocrlf`
@@ -503,8 +503,8 @@
 
 1. 共通の bash 設定も外すときだけ、外す。
 
-   - [ryo-aoki-pc/bash の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/install.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5 で入れたもの）
-   - その手順 5 は `~/.config/bash` を消す（commit・push していないものは取り戻せない）。その手順 4 で確かめてから行う
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5 で入れたもの）
+   - 設定リポジトリも消すなら、[手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)の手順 4 で確かめ、手順 5 を行う。`~/.config/bash` の未 commit・未 push の変更は取り戻せない
    - 終わったら、Git Bash の窓は閉じてよい
 
 ### OpenSSH・Git for Windows・Firefox・WezTerm を外す
@@ -542,7 +542,7 @@
    ```
 
    - `False` が 2 行出ればよい
-   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で使う)、リモート デスクトップなど）があれば、戻さない）
+   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../windows-setup.md#syncthing-windows-11-で使う)、リモート デスクトップなど）があれば、戻さない）
 
 1. Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
 
@@ -1071,7 +1071,7 @@
 
    - 規則が `False  Any` で並べばよい
    - **注意**: リモート デスクトップでつないでいるときに貼ると、その場で切れる
-   - [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)を使っているなら、この手順は飛ばす
+   - [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断-実施手順)を使っているなら、この手順は飛ばす
 
 1. LAN の接続をパブリックに戻すときだけ、パブリックにする。
 
@@ -1087,7 +1087,7 @@
 
    - `<LAN_IF>  Public` が出ればよい
    - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `LanCategory` が `Private` だったなら（もとからプライベート）、この手順は飛ばす
-   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
+   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
 
 1. アダプターを、電力の節約のために止められるように戻す。
 

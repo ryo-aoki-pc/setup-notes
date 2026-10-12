@@ -1,8 +1,8 @@
 # gdu インストール手順（AlmaLinux 10 / Homebrew）のロールバックと注意点
 
-[手順書](../gdu.md)・[検証記録](../verification/gdu.md)・[参考資料](../reference/gdu.md)
+[手順書](../almalinux-setup.md#gdu-実施手順)・[検証記録](../verification/gdu.md)・[参考資料](../reference/gdu.md)
 
-- 「手順 N」は[手順書](../gdu.md#実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#gdu-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 
 ## ロールバック
 

@@ -233,7 +233,7 @@
 - `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（「WSL と再起動」の手順 1）・メモリ整合性・Credential Guard などで動く
 - `Get-DODownloadMode` は、配信の最適化のモード（`CdnOnly`・`Lan`・`Internet` など）
 - `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、「PC 全体の設定」の手順 6 の sudo の行は何もしない
-- `Hypervisor : True` なら、Hyper-V がもう動いている（[VirtualBox の Windows 11 の節](../virtualbox.md#windows-11-で使う)の VM は、その上で動く）
+- `Hypervisor : True` なら、Hyper-V がもう動いている（[VirtualBox の Windows 11 の節](../windows-setup.md#virtualbox-windows-11-で使う)の VM は、その上で動く）
 
 ### 実施手順 / PC 全体の設定 / 手順 5: 補足: 名前の決まりと、確認の問いを出さないこと
 
@@ -278,12 +278,12 @@
 ### 実施手順 / ネットワークとリモート / 手順 1: 補足: もとからプライベートのときと、前提にする手順
 
 - 既にプライベートなら、何も変わらない
-- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で使う)・「ネットワークとリモート」の手順 2〜4 は、この LAN がプライベートであることを前提にする
+- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../windows-setup.md#syncthing-windows-11-で使う)・「ネットワークとリモート」の手順 2〜4 は、この LAN がプライベートであることを前提にする
 
 ### 実施手順 / ネットワークとリモート / 手順 2: 補足: つなぐときのユーザーと、前提にする手順書
 
 - つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。「サインイン・検索・キーボード」の手順 1 も）
-- [RDP をロックせずに切断（Windows）](../windows-rdp-disconnect.md)は、この手順を前提にする
+- [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断-実施手順)は、この手順を前提にする
 
 ### 実施手順 / ネットワークとリモート / 手順 3: 補足: リモート アシスタンス
 
@@ -295,7 +295,7 @@
 ### 実施手順 / ネットワークとリモート / 手順 4: 補足: 自分で規則を作る理由
 
 - Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
-- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で使う)の規則と同じ形）
+- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../windows-setup.md#syncthing-windows-11-で使う)の規則と同じ形）
 - 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
 - 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 2
 - 何度貼ってもよいのは、規則を消してから作り直すため
@@ -467,7 +467,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### リモートから再起動する手段を増やす（任意） / 手順 7: 補足: Remote Control を再起動後も使う
 
-- [Claude Code の Remote Control（Windows）](../windows-claude-remote-control.md)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
+- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
 - ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
 - タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
 
@@ -897,7 +897,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
 - **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、「ネットワークとリモート」の手順 2・4 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
 - **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
-- [VirtualBox のゲスト（bootc）](../virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
+- [VirtualBox のゲスト（bootc）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする任意)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -1487,7 +1487,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
 - **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
 - **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 
 ---
 
@@ -1576,7 +1576,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
 - **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[wezterm-nightly.md の Windows 11 で使う](../windows-setup.md#wezterm)の手順 3 を前提にしない
 - **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外したときも）、その項目が残る
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
 
 ---
 
@@ -1788,9 +1788,9 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
 
 - 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
 
-- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../windows-claude-remote-control.md)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
+- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
 - ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
-- Remote Control（[windows-claude-remote-control.md](../windows-claude-remote-control.md)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
+- Remote Control（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
 
 #### Claude Code: Windows 11 で使う / 手順 9: 補足: 後ろに続けて貼らない理由
 
