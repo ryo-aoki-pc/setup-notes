@@ -360,3 +360,13 @@ curl: (6) Could not resolve host: github.com
 - 再起動後のGUIではTextEditorのフォーカス/上部バーをPNGで確認してから、Super+Space、nihongo、Space、Enter。「にほんご」→「日本語」→下線なしの確定まで目視確認した
 - 初期設定「再起動と確認」3は部分確認。SSHのibus接続や、今回用意していないjournal/フォルダー/拡張等の条件は未達で、項全体の成功に広げない
 - 全セッションを閉じ、担当2VMは通常停止でOff、継続名の新snapshotを保存。Homebrew本体の新規導入、jqの新規bottle、不足依存、更新対象があるupgrade、ロールバック、実機/aarch64は今回未実施
+
+## 付録: 初回オフライン試行の中断記録（2026-10-12 11:17 UTC）
+
+OFFLINE-FIRSTINSTALL は凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` を使い、`clean-install` 由来の offline と `after-AS4` 由来の online を専用 D 差分で新規作成・起動した。固定した停止親 5 件の全体 SHA と親鎖は保持 baseline に一致した。
+
+offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが、手順 3 の NOPASSWD ALL 永続設定は自動承認審査が拒否し、コード未送信・設定不変更。対象 61 番号のうち 2 確認・59 未実施で、Homebrew 本体・jq bottle・LazyVim・npm・Mason の初回取得は未開始。これら 2 件は GUI 前提の確認であり、Homebrew の成功件数や既存継続の成功へ加算しない。Homebrew のオフライン導入の実施手順 1〜6・更新も今回未実施。
+
+2 VM を通常停止で Off と確認し、自己 lock を解放、6 GiB の枠を返却した。通常の sudo 対話認証による続行案は準備であり、実認証・後続導入の結果ではない。この時点の中断を、後日の成功で書き換えない。
+
+根拠は今回専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012` の公開判定表・画面、`sudo3-auto-approval-rejection.json`、`post-stop-check.json`、`frame-return-receipt.json`。モデルは秘密内容・個別 hash・旧 raw/認証ログを読んでいない。

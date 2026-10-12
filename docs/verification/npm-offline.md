@@ -402,3 +402,11 @@ npm error   code: 'ECONNREFUSED',
 - E1568の端末応答警告と通知の重複は道具/表示上の問題として残す。成功通知は推測せず実公開bufferで確認し、旧privateログやMasonLogを読んでいない
 - 旧C14/C15と旧workerの応答喪失原因は未確定。今回のメモリ/依存順序/GNOME条件から、昔の原因や修正効果を断定しない
 - 全セッションを閉じ担当2VMは通常停止でOff、継続名の新snapshotを保存。更新対象ありのNode/npm/Mason更新、キャッシュなし初回取得、PyPI、JSON編集LSP、Neovim内IME、フォント、ロールバック、実機/aarch64/他列は今回未実施
+
+## 付録: 初回オフライン試行の中断記録（2026-10-12 11:17 UTC）
+
+OFFLINE-FIRSTINSTALL は凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` で、新しい online/offline の 2 VM を専用 D 差分に作成した。固定した停止親 5 件の全体 SHA と親鎖は保持 baseline に一致。offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが、手順 3 の NOPASSWD ALL 永続設定は自動承認審査が拒否し、未送信・設定不変更だった。
+
+対象 61 番号のうち 2 確認・59 未実施。npm のオフライン導入の実施手順 1〜5・更新、初回 LazyVim clone、Mason の新規取得・Installing から Installed への遷移・通知・実コマンドは未実施。GUI 前提の 2 件を npm や LazyVim の導入成功へ数えず、既存 Installed 11・レジストリ更新の継続記録と区別する。
+
+2 VM は通常 Off、自己 lock 解放、6 GiB 返却。通常の sudo 認証で続ける案は準備だけで、認証・取得成功ではない。根拠は今回専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012` の公開判定表・画面、拒否と終了の公開記録。この中断を後日の成功で置き換えず、同じ 2/61 を他の検証記録と重複加算しない。
