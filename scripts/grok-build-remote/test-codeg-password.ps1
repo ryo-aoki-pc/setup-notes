@@ -313,6 +313,16 @@ try {
     Assert-FixtureFiles -ServerDir $dir -Result $null -ExpectedValue $oldValue -HasBackup $false
     Write-Host 'PASS: JSON save failure preserves backup, stage, cleanup and current timestamp without values'
 
+    $result=New-CodegPasswordResult -FailureStage '変更処理' -UnknownFileState
+    $report=@(Write-CodegPasswordResult -Result $result -ResultFile $dir 6>&1)
+    $output=($report | ForEach-Object {[string]$_}) -join [Environment]::NewLine
+    Assert-Condition ($report[-1] -eq $false -and $output.Contains('CredentialReplaced=null; FileUnchanged=null;') -and
+        -not $output.Contains($oldValue) -and -not $output.Contains($newValue)) 'Unknown file state was ambiguous in the console after JSON save failure.'
+    [void](Write-CodegPasswordResult -Result $result -ResultFile $resultFile)
+    $record=[IO.File]::ReadAllText($resultFile) | ConvertFrom-Json
+    Assert-Condition ($null -eq $record.CredentialReplaced -and $null -eq $record.FileUnchanged) 'Unknown file state was lost in JSON.'
+    Write-Host 'PASS: unknown file state is explicit null in console fallback and JSON'
+
     foreach ($mode in @('rollback-task-still-running','rollback-port-occupied')) {
         $dir=New-FixtureCase $mode
         $script:fixture.FailNewHealth=$true

@@ -206,8 +206,10 @@ function Format-CodegPasswordResult {
     $backup='<なし>'; $cleanup='<なし>'
     if ($Result.BackupFile) { $backup=$Result.BackupFile }
     if ($Result.CleanupFile) { $cleanup=$Result.CleanupFile }
+    $credentialReplaced=$(if ($null -eq $Result.CredentialReplaced) { 'null' } else { $Result.CredentialReplaced })
+    $fileUnchanged=$(if ($null -eq $Result.FileUnchanged) { 'null' } else { $Result.FileUnchanged })
     return ('今回の結果: StartedAtUtc={0}; Outcome={1}; FailureStage={2}; CredentialReplaced={3}; FileUnchanged={4}; FileRestored={5}; ServiceRestored={6}; OldPasswordVerified={7}; BackupFile={8}; CleanupFailed={9}; CleanupFile={10}' -f
-        $Result.StartedAtUtc,$Result.Outcome,$Result.FailureStage,$Result.CredentialReplaced,$Result.FileUnchanged,
+        $Result.StartedAtUtc,$Result.Outcome,$Result.FailureStage,$credentialReplaced,$fileUnchanged,
         $Result.FileRestored,$Result.ServiceRestored,$Result.OldPasswordVerified,$backup,$Result.CleanupFailed,$cleanup)
 }
 
