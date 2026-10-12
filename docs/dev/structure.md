@@ -13,6 +13,9 @@
 - Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
 - 同任意節の履歴取り込みは、接続先ホストの本人の終了済みセッションを、全プロジェクトの作業ディレクトリごとに選別する。取り込みだけで終える場合と、同じエージェントで再開する場合を分け、進行中の会話との同時再開を避ける
 - 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](../verification/grok-build-remote.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
+- Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
+- 2026-10-13 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
+- [共通パスワードの検証記録](../verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
 - Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ## 統合前の文書構成と検証範囲（履歴）

@@ -130,6 +130,20 @@
 - 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
 - Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントの Grok を巻き込まない
 
+### Codeg の共通パスワードを設定・変更する / 手順 1〜3: 補足: 標準認証
+
+- 本人が決めた共通パスワードを、Codeg の標準認証の `CODEG_TOKEN` の値として使う。[公式の Web Service 設定](https://docs.codeg.app/reference/settings/web-service)と[サーバーの読取箇所](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/bin/codeg_server.rs#L205)を参照
+- 画面のトークン名と、内部の bearer による認証は維持する。[認証の実装](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/web/auth.rs#L21)は、受け取った値を設定値と照合する
+- 標準認証は 1 個の共有値を使う。同じ Codeg を使う利用者は同じ値で入り、利用者ごとの区別や有効期限は無い。Claude・Codex の本人の契約の認証とは別に、サーバーへのアクセスに使う
+- [ログイン画面](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src/app/login/page.tsx#L31)は入力した値を localStorage に保存する。値を変更した後は、以前の値を覚えたブラウザ・端末でログインし直す
+- スクリプトは `Read-Host -AsSecureString` で 2 回入力を受け、32〜512 文字の表示可能な ASCII・空白無し・一致を確かめる。既存の起動用スクリプトの最低 32 文字は維持する
+- 控えは同じディレクトリの `token.before-password-<unique>.txt` へ、本人だけの ACL で保存する。保存は原子的な置換で行い、認証を確かめる。結果の JSON はパスワードの値を含めない
+- `password-change-result.json` の `CredentialReplaced` は今回の置換が完了した履歴で、復元後も `true`。`FileUnchanged` は置換前のまま元ファイルを保っている状態
+- `FileRestored` は置換後に控えから戻した場合だけ `true`。未置換の場合は `false` のまま。`ServiceRestored` は専用サービスの復帰の結果で、ファイルの状態とは別
+- `Restored` は、ファイル未変更または復元済みに加え、サービスの復帰も確認できたときだけ `true`。前提確認・入力の未変更終了と、変更処理を始めた後の失敗も分けて扱う
+- 変更処理で結果自体を得られない失敗では、`CredentialReplaced`・`FileUnchanged` は `null`。未変更と断定せず、認証ファイルと専用サービスの状態を確認してから復旧する
+- 旧認証での 200 は確認しないため、`OldPasswordVerified` は `false` のまま。本人がブラウザで確かめる
+
 ### Claude Code と Codex CLI も操作する / 補足
 
 「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
