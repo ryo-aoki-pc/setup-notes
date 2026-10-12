@@ -1445,6 +1445,7 @@
 1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
 
    - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の全項を、この項で指定した端末で通す
+   - オフラインのホストでは、先に [npm のオフライン導入: 実施手順](#npm-のオフライン導入-実施手順)の手順 1・2 を同じトンネルのシェルで通す。参照先の手順 10 の初回起動から npm の取得が始まるため、起動後にプロキシを設定しない
    - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 5 で lazygit・ripgrep・fd を入れる
    - 参照先の手順 7〜9 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
    - 参照先の手順 9 の後はログインし直さず、[再起動と確認](#再起動と確認)の手順 1 の再起動で読み直す
@@ -9077,7 +9078,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 で、オフラインのホストへ接続する
 > - 手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)も通す
-> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入-実施手順)・[Neovim](#neovim) と Mason を使う設定（LazyVim など）を導入する。Mason の npm パッケージは未導入でよい
+> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入-実施手順)と [Neovim](#neovim)を導入する。Mason を使う設定（LazyVim など）は、この項の手順 1・2 で npm の経路を設定してから、初回起動を含む導入手順を通す。Mason の npm パッケージは未導入でよい
 > - **手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
 > - 手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
 > - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
