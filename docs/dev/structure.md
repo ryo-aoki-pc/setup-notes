@@ -4,15 +4,20 @@
 
 - `docs/windows-setup.md` — Windows 11 の基本設定と用途別の任意手順。導入前のデュアルブートを分け、実行する窓・権限を各節で指定する
 - `docs/almalinux-setup.md` — AlmaLinux 10 の基本設定と用途別の任意手順。通常の Workstation と bootc ゲスト、実行するホストを区別する
+- `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
+  - ロールバックと注意点は `docs/extra/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
+  - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
+  - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
+  - 2冊に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、almalinux-setup.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
 - 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する
 - `docs/verification/`・`docs/reference/`・`docs/extra/` は既存の場所を保つ。集約は新たな実機検証を意味しない
-- `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから2冊の新見出しへの対応表
+- `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから正本の新見出しへの対応表。AI エージェントの手順を分けたときの追補を含む
 - `docs/verification/consolidation.md` — 集約の静的検査・回帰検査・Grok のレビューと、実機では未実施の範囲
-- [README](../../README.md) — 2冊の索引と、環境構築・共同 VM 検証の横断報告への案内。個別の実測は既存の検証記録へ残す
+- [README](../../README.md) — 正本の索引と、環境構築・共同 VM 検証の横断報告への案内。個別の実測は既存の検証記録へ残す
 - [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と、初回試行の旧2/61・5/61、2026-10-13の42通過/4条件外/3部分確認/1失敗/11未実施を分ける。W0派生媒体はセットアップ分岐まで、V2はSDKとGUID/LUN/祖先mappingの追加確認のみ。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
-- 新しい手順は2冊の該当用途へ追加し、対応する記録とこの構成一覧を更新する
-- Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
+- 新しい手順は正本の該当用途へ追加し、対応する記録とこの構成一覧を更新する
+- Codeg で Claude Code・Codex CLI を操作する任意節は、ai-agents.md の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
 - 同任意節の履歴取り込みは、接続先ホストの本人の終了済みセッションを、全プロジェクトの作業ディレクトリごとに選別する。取り込みだけで終える場合と、同じエージェントで再開する場合を分け、進行中の会話との同時再開を避ける
 - 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](../verification/grok-build-remote.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
 - Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
