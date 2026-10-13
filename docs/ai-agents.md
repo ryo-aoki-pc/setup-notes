@@ -3084,9 +3084,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - [端末にルート証明書を入れる](#grok-build-のブラウザ操作-端末にルート証明書を入れる)の手順 2〜6 を通す。この PC 自身のブラウザで開くなら、この PC にも入れる
 
-1. トークンをスマートフォンに渡す。
+1. 共通パスワードを設定していないときは、トークンをスマートフォンに渡す。
 
-   - 共通パスワードを設定してあるなら、この手順は飛ばす。この項の手順 8 では、本人が共通パスワードを入れる
+   - 共通パスワードを設定してあるなら、この手順は飛ばし、この項の手順 8 で本人が共通パスワードを入れる
    - `qrencode` のある AlmaLinux に SSH で入れるなら、この PC で `Get-Content "$env:LOCALAPPDATA\codeg-server\token.txt" | ssh <ホスト> 'qrencode -t ansiutf8'` を打つ
    - QR コードをスマートフォンのカメラで読み、出てきた 64 文字をコピーする
    - トークンは SSH の中を通って相手の `qrencode` に渡り、相手には保存されない
@@ -3366,7 +3366,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Claude Code`・`Codex` の認証方法で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方法を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
-   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す
+   - Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
 
@@ -3470,7 +3471,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Claude Code`・`Codex` の認証方法で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方法を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
-   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す
+   - Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
    - ![Claude Code の設定管理。認証方式が「公式サブスクリプション」](images/ai-agents/codeg-agents-auth-v0.35.1.png)
