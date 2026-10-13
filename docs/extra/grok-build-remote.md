@@ -31,23 +31,49 @@
    ```bash
    {
      printf '\n\033[7m 確認 \033[0m\n'
-     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
+     if [ -z "${SERVER_IP}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
      else
-       read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
-       for src in "${CODEG_SRCS[@]}"; do
-         CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
-         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
-         sudo firewall-cmd --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+       CODEG_DST_RULE="rule priority=\"100\" family=\"ipv4\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+       CODEG_DST_OK=1
+       for CODEG_SCOPE in permanent runtime; do
+         CODEG_FW_ARGS=(--zone="${FW_ZONE}")
+         if [ "${CODEG_SCOPE}" = permanent ]; then
+           CODEG_FW_ARGS+=(--permanent)
+         fi
+         if sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --query-rich-rule="${CODEG_DST_RULE}" >/dev/null; then
+           if ! sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --remove-rich-rule="${CODEG_DST_RULE}"; then
+             CODEG_DST_OK=0
+           fi
+         else
+           CODEG_QUERY_STATUS=$?
+           if [ "${CODEG_QUERY_STATUS}" -ne 1 ]; then
+             CODEG_DST_OK=0
+           fi
+         fi
        done
-       sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
-       sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
+       if [ "${CODEG_DST_OK}" -ne 1 ]; then
+         echo '中断: 送信元指定の無い規則の確認または削除に失敗した' >&2
+       else
+         if [ -n "${ALLOW_FROM:-}" ]; then
+           read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+           for src in "${CODEG_SRCS[@]}"; do
+             CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+             sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+             sudo firewall-cmd --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"
+           done
+         fi
+         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
+         sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
+       fi
      fi
    }
    ```
 
    - 「HTTPS で LAN・VPN に公開する」の手順 4 を通していなければ、この手順は飛ばす
-   - 送信元ごとに `success` が 2 回ずつ出た後、3443/tcp の規則が runtime と permanent のどちらにも無ければよい
+   - 送信元指定の無い任意構成の規則は、存在する場合だけ runtime と permanent から削除する。`ALLOW_FROM` が空でも、この規則の削除は行う
+   - 削除した規則に `success` が出た後、3443/tcp の規則が runtime と permanent のどちらにも無ければよい
+   - 規則の確認・削除で中断した場合や、`ALLOW_FROM` が不明で送信元付きの規則が残る場合は、この節の手順 3 へ進まない
    - 変数の値を控えていなければ、`sudo firewall-cmd --zone="$(sudo firewall-cmd --get-default-zone)" --list-rich-rules` で規則を見て、「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数に同じ値を入れる
 
 1. ユニット・本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
@@ -161,6 +187,121 @@
 
 ---
 
+## 接続元の制限を戻す
+
+- AlmaLinux 10 で送信元制限を外した任意構成を戻す。元の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を設定した同じ端末で、旧規則の追加を確認してから送信元指定の無い規則を削除する
+- この 2 ブロックは構文・公開スタブの検査だけで、実機での復帰は未実施。規則の確認や追加で失敗したら、送信元指定の無い規則の削除へ進まない
+
+1. 元の送信元の規則を runtime と permanent に戻す。
+
+   ```bash
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     CODEG_SOURCES_READY=0
+     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
+       echo '中断: 元の SERVER_IP・ALLOW_FROM・FW_ZONE を設定する' >&2
+     else
+       CODEG_SOURCES_READY=1
+       read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+       if [ "${#CODEG_SRCS[@]}" -eq 0 ]; then
+         CODEG_SOURCES_READY=0
+       fi
+       for src in "${CODEG_SRCS[@]}"; do
+         CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+         for CODEG_SCOPE in permanent runtime; do
+           CODEG_FW_ARGS=(--zone="${FW_ZONE}")
+           if [ "${CODEG_SCOPE}" = permanent ]; then
+             CODEG_FW_ARGS+=(--permanent)
+           fi
+           if ! sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --add-rich-rule="${CODEG_RULE}" ||
+             ! sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --query-rich-rule="${CODEG_RULE}"; then
+             CODEG_SOURCES_READY=0
+           fi
+         done
+       done
+       if [ "${CODEG_SOURCES_READY}" -ne 1 ]; then
+         echo '中断: 元の送信元の規則を確認できない。送信元指定の無い規則は残す' >&2
+       fi
+       sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
+       sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
+     fi
+   }
+   ```
+
+   - 元の送信元ごとの規則が runtime と permanent の両方にあり、各照会が `yes` ならよい
+   - `中断` が出たら、この節の手順 2 へ進まない
+
+1. 元の規則を再確認してから、送信元指定の無い規則を削除する。
+
+   ```bash
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ] || [ "${CODEG_SOURCES_READY:-0}" -ne 1 ]; then
+       echo '中断: 同じ端末でこの節の手順 1 の成功を確認する' >&2
+     else
+       read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+       if [ "${#CODEG_SRCS[@]}" -eq 0 ]; then
+         CODEG_SOURCES_READY=0
+       fi
+       for src in "${CODEG_SRCS[@]}"; do
+         CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+         if ! sudo firewall-cmd --permanent --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}" ||
+           ! sudo firewall-cmd --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}"; then
+           CODEG_SOURCES_READY=0
+         fi
+       done
+       if [ "${CODEG_SOURCES_READY}" -ne 1 ]; then
+         echo '中断: 元の送信元の規則を確認できない。送信元指定の無い規則は残す' >&2
+       else
+         CODEG_DST_RULE="rule priority=\"100\" family=\"ipv4\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+         for CODEG_SCOPE in permanent runtime; do
+           CODEG_FW_ARGS=(--zone="${FW_ZONE}")
+           if [ "${CODEG_SCOPE}" = permanent ]; then
+             CODEG_FW_ARGS+=(--permanent)
+           fi
+           if sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --query-rich-rule="${CODEG_DST_RULE}" >/dev/null; then
+             if ! sudo firewall-cmd "${CODEG_FW_ARGS[@]}" --remove-rich-rule="${CODEG_DST_RULE}"; then
+               echo '中断: 送信元指定の無い規則の削除に失敗した' >&2
+             fi
+           else
+             CODEG_QUERY_STATUS=$?
+             if [ "${CODEG_QUERY_STATUS}" -ne 1 ]; then
+               echo '中断: 送信元指定の無い規則を確認できない' >&2
+             fi
+           fi
+         done
+         sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
+         sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
+       fi
+     fi
+   }
+   ```
+
+   - 元の送信元付きの規則だけが runtime と permanent にあり、送信元指定の無い 3443/tcp の規則が残っていなければよい
+   - `中断` が出たら、規則の読み戻しを確認するまで復帰完了と扱わない
+
+---
+
+## AlmaLinux 10 の共通パスワード変更で失敗したとき
+
+- [共通パスワードの設定・変更](../almalinux-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
+- 旧設定の退避はファイル名だけを表示する。認証ファイルや退避の本文を開かず、パスワードをエージェントや復旧担当へ渡さない
+- 失敗時の復帰は公開 fixture で検証した。実ホストでの失敗からの復帰と、旧認証によるログインは未確認（[検証記録](../verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)）
+
+1. 本人の端末で、今回の終了コードと表示された結果を確認する。
+
+   - 終了コード 0 は設定成功。新認証 200・未認証 401・誤入力 401 を同じ Codeg の worker で確認した場合だけ成功になる。旧設定の退避は保持される
+   - 終了コード 1 と「旧設定へ戻しました」は、旧ファイル・サービス・未認証 401 の復帰を確認した失敗。変更は完了していない。前提確認・入力の失敗で 1 になった場合は、変更へ進んでいない
+   - 終了コード 2 の「結果: 不明」は、ファイルまたはサービスの復帰を確認できていない。再実行を止め、表示された退避を保全する。この節の手順 2 へ進まない
+
+1. 復帰を確認できた場合だけ、本人が変更前の値で HTTPS にログインする。
+
+   - 終了コード 1 の「旧設定へ戻しました」を確認した場合に行う。未認証 401 の成功だけでは、旧認証によるログイン成功とは扱わない
+   - ログイン後の画面が表示されれば、旧認証も確認できた。入力値は本人だけが扱う
+   - 入れなければ中断し、退避を保持したまま、ファイルとサービスの復帰結果を確認する
+
+---
+
 ## 注意点
 
 #### アクセストークンの重み
@@ -216,9 +357,9 @@
 - Windows 11 の PC の証明書は、接続された IP アドレスごとに、その場で作られる
 - **認証局の鍵（`root.key`）を、読まない・写さない・人に渡さない**。ルート証明書を入れた端末は、その認証局が署名した証明書を、どのサイトのものでも信じる
 - 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
-- ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、AlmaLinux 10 では許可した送信元 CIDR 内、Windows 11 では Private の受信インターフェースへ届く全送信元から、トークンなしで取得できる
+- ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、AlmaLinux 10 の標準構成では許可した送信元 CIDR 内、送信元制限を外した任意構成では宛先の LAN IPv4 に届く全送信元から、トークンなしで取得できる。Windows 11 は Private の受信インターフェースへ届く全送信元が対象
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
-- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 は待ち受ける IP と送信元を絞る。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う
+- Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 の標準構成は待ち受ける IP と送信元を絞り、任意構成では宛先を残して送信元制限を外す。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う
 - インターネットへ公開しない
 
 #### AlmaLinux 10 の送信元に LAN の帯を入れるとき

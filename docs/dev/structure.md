@@ -14,8 +14,12 @@
 - 同任意節の履歴取り込みは、接続先ホストの本人の終了済みセッションを、全プロジェクトの作業ディレクトリごとに選別する。取り込みだけで終える場合と、同じエージェントで再開する場合を分け、進行中の会話との同時再開を避ける
 - 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](../verification/grok-build-remote.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
 - Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
-- 2026-10-13 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
+- 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
 - [共通パスワードの検証記録](../verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- AlmaLinux 10 の共通パスワードも本人の伏せ字入力で設定する。`set-codeg-password.py` と公開 fixture を分け、失敗時の状態と本人の旧認証による確認は extra に置く
+- 2026-10-13 の AlmaLinux 10.2 / aarch64 の実機では、3 エージェントの ACP 接続と Codex・Grok の応答、共同作業プラグインの ready と直接呼出しを確認。Claude の応答は週の利用上限で未確認
+- 同日の AlmaLinux の公開は、LAN IPv4 と 3443/tcp を宛先に残して送信元制限を外した。委譲の公開設定は反映済みで、画面からの実際の委譲と親エージェントの承認設定は未確認
+- Linux のパスワード変更は公開 fixture 11 件・構文検査・実機の `--check` が成功。HTTPS ログインは本人報告で、変更時の 200/401/401 の結果は未受領。[実機の記録](../verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)で範囲を区別する
 - Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ## 統合前の文書構成と検証範囲（履歴）
@@ -121,6 +125,9 @@
     - Codeg の GUI、Auto / Auto review の判断、承認・拒否・中断、履歴の取り込みと再開、スマートフォンからの操作、Windows の実機は未確認。追加した本体操作の実機での通しも未確認
     - 公式資料と配布版ソース、文書の静的検査と、上の ACP の実測を区別する。以前の Grok の成功は流用せず、今回の範囲は検証記録で管理する
   - 採らなかった案（参考資料の「方法のまとめ」）: 端末の形（tmux と SSH・ttyd・zellij の Web クライアント）、Paseo・Grok UI・Happier・Zed、公式のインストーラーと Docker イメージ、Codeg のデスクトップアプリと Android のアプリ（確かめていない）、HTTP のままの公開、公的な証明書
+  - AlmaLinux の追加検証（2026-10-13）: v0.35.1 の配布物・本体一致、3 エージェントの ACP 接続、Codex・Grok の応答を確認。Claude の応答・画面からの実委譲は未確認
+    - Grok の補助経路は外側の bubblewrap で読み取り専用。共同作業プラグインは ready と直接呼出しまで確認し、native ACP の経路とは分ける
+    - Linux の共通パスワードは公開 fixture 11 件・構文・実機の前提確認が成功。本人が HTTPS ログイン成功を報告したが、変更時の認証 3 条件の出力は未受領
 - `docs/almalinux-setup.md` — **AlmaLinux 10 のインストール直後に通す初期設定の手順書**（Windows 11 の windows-setup.md に当たる）。2026-10-08 に利用者の依頼で作り、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をまとめて消した。もとの検証記録・参考資料は、対応する検証記録と参考資料の「統合前の記録」「統合前の参考資料」に、中身を変えずに移した（見出しを 1 段下げて名前を頭に付け、各節の冒頭に当時の手順と今の手順の対応表を置いた）。実施手順は 73 手順・13 項だった（2026-10-10 に 12 本の手順書の AlmaLinux 10 の部分をまとめて、152 手順・27 項）
   - 「ログインと sudo」の最初の画面（1・2）→ NOPASSWD の sudo（3。`/etc/sudoers.d/nopasswd` に `Defaults:<USER> verifypw=any` と `<USER> ALL=(ALL) NOPASSWD: ALL`。`%wheel` の行が残るので、`verifypw=any` が無いと Homebrew のインストーラの `sudo -v` がパスワードを聞く。`visudo -cf -` で確かめてから `install -m 0440`。パスワードを聞くのはこの 1 回だけ）→ 「OS とファームウェアの更新」の更新（1。最初の dnf で AlmaLinux の鍵 `0xC2A1E572`）→ ファームウェア（2 の `fwupdmgr refresh --force` は LVFS を有効にするかを聞き、`--assume-yes` でも聞く。3 で `update`）→ `dnf needs-restarting -r` と条件付きの再起動（4・5）
   - 「システムの設定」の変数（1。`HOST_NAME` は変えるときだけ、`XKB_LAYOUT` は `localectl` から自動、`DASH_FAVORITES`）→ ホスト名（2）→ SSH の確認と条件付きの修正（3・4）→ journal を永続に（5。ドロップインの `Storage=persistent` → restart → `journalctl --flush` → `systemd-tmpfiles --create --prefix /var/log/journal`。tmpfiles の `z`・`a+` はすでにあるものだけを直すので、flush の後に置く）→ kdump を止める（6・7。`auto_reset_crashkernel no` にしないと、`92-crashkernel.install` がカーネルの更新で `crashkernel=` を付け直す）→ PackageKit-command-not-found を外す（8）
@@ -242,3 +249,7 @@
 - `scripts/render-diagrams.py` — 先頭のキーワードで方言（nwdiag / seqdiag）を選び、blockdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/gnome-gui.py` — claude-code-gui.md で使う、ヘッドレスのセッションを撮って操作する Python（`#!/usr/bin/python3`。Homebrew の `python3` には `gi` が無い）。`shot` は ScreenCast の `RecordMonitor` → PipeWire（`pipewiresrc path=`。`target-object=` はノードの ID を受け付けなかった）→ GStreamer で PNG。`key` / `type` / `move` / `click` / `scroll` は RemoteDesktop の Notify* で、コマンドごとにセッションを作る（作った直後と止める直前の入力が捨てられたので、`Control_L` と動かない相対移動を先に送り、前後に 0.3 秒置く）。`windows` は AT-SPI、`launch` は `.desktop` の `Exec` を `systemd-run --user` の主のプロセスにする（`gio launch` を挟むと、`gio` が終わったときにアプリも止められた）
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
+- `scripts/grok-build-remote/set-codeg-password.py` — AlmaLinux の本人の端末で、Codeg の共通パスワードを伏せ字で 2 回入力する。既存秘密の本文を読まず metadata・専用サービス・待ち受けを確認し、置換と旧控えの保持、失敗時の復帰を行う。`--check` は変更せず確認だけを行う
+- `scripts/grok-build-remote/test-codeg-password.py` — 固定した公開値と一時ディレクトリだけを使い、パスワード変更の置換・旧控え・失敗時の復帰・不明状態・安全条件を検証する。実ホストのサービス・HTTP・本人入力は実行しない
+- `scripts/grok-build-remote/codeg-grok-readonly.py` — Grok の内側の sandbox が使えないホストで、共同作業プラグインの補助経路を外側の bubblewrap で読み取り専用にする。`--write` は拒否し、Codeg の native ACP の経路とは分ける
+- `scripts/grok-build-remote/claude-agents.sh` — `/usr/bin/claude` の起動時だけ、本人の `~/.local/bin/codeg-grok-readonly` を `GROK_BINARY` として継承させる端末用の補助スクリプト。通常の `claude` コマンドは置き換えない

@@ -2,9 +2,15 @@
 
 [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/497bb823606053e5c08d4f7d59bde4e3274707e8/docs/grok-build-remote.md)・[ロールバックと注意点](../extra/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
-現行手順: AlmaLinux 10 の [Codeg 導入](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Claude Code・Codex CLI 操作](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)、Windows 11 の [Codeg 導入](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[Claude Code・Codex CLI 操作](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[共通パスワードの変更](../windows-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)。
+現行手順: AlmaLinux 10 の [Codeg 導入](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Claude Code・Codex CLI 操作](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[共通パスワードの変更](../almalinux-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)、Windows 11 の [Codeg 導入](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[Claude Code・Codex CLI 操作](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[共通パスワードの変更](../windows-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)。
 
 ## 対象と検証環境
+
+- **AlmaLinux 10 の接続・共通パスワードの状態（2026-10-13 JST）**: [実機の追加検証](#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)に、今回の範囲を記録する
+  - aarch64 の既存ホストで、Codeg v0.35.1 の配布物と配置済み本体の一致、3 エージェントの ACP 接続、Codex・Grok の短文の応答を確認した。Claude は `Auto` の設定まで成功し、週の利用上限で応答未確認
+  - 公式の共同作業プラグインの setup/check と、補助スクリプトからの Codex・Grok の応答を確認した。Codeg の委譲設定を反映したが、画面からの実際の委譲と承認の設定は未確認
+  - 宛先の LAN IPv4 と 3443/tcp を残し、送信元の制限を外した。両サービスの enabled・active、待ち受け、TLS を検証した HTTPS の未認証 401 を確認した
+  - Linux のパスワード変更スクリプトは公開 fixture 11 件・構文検査・実ホストの `--check` が成功した。本人は HTTPS のパスワードログイン成功を報告した。本人の変更時の 200/401/401 の出力は受領していない
 
 - **Windows 11 の共通パスワードの状態（2026-10-13 JST）**: [変更用スクリプトの付録](#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)に、確認済みの範囲を記録する
   - 実ホストの Windows PowerShell 5.1 で `-CheckOnly` を通し、本人が入力する補助スクリプトの変更成功を、秘密を含まない今回の結果で確認した。新認証 200・未認証 401・誤入力 401
@@ -804,3 +810,78 @@
 
 - エージェントによる変更後の HTTPS ログインの直接操作。本人の完了報告を、エージェントが画面で直接確認した結果として扱わない
 - 実ホストでの変更失敗からの復元と、変更前の認証による本人の HTTPS ログイン。公開 fixture の模擬した結果とは分ける
+
+## 付録: AlmaLinux 10.2 の3エージェント接続と共通パスワードの検証（2026-10-13 JST）
+
+### 対象と実施前の状態
+
+| 項目 | 値 |
+|---|---|
+| 実機 | AlmaLinux 10.2、aarch64。既存の Codeg・Caddy と本人の CLI のログインを使用 |
+| Codeg | `codeg-server`・`codeg-mcp` v0.35.1 |
+| Caddy | v2.11.7 |
+| 本人の CLI | Claude Code 2.1.296、Codex 0.160.0、Grok Build 1.0.50 |
+| 固定した ACP アダプター | Claude `0.89.1`、Codex `2.2.2` |
+| 公式の Claude Code 用プラグイン | `codex@openai-codex` 1.0.6、`grok-build@xai-grok-build` 0.2.1 |
+| 待ち受け | Codeg は `127.0.0.1:3080`、Caddy は `<SERVER_IP>:3443` |
+| 常駐 | `codeg-server.service`・`codeg-caddy.service`、systemd のユーザーサービス |
+
+- Codeg と Caddy は既に導入され、3 CLI も存在した。新規導入からの通しではなく、既存ホストへのアダプター・共同作業・パスワード変更の追加を検証した
+- 公式の v0.35.1 の archive を公表された digest と照合し、展開した `codeg-server`・`codeg-mcp` と配置済みバイナリの SHA-256 が一致することを確認した
+- 既存の認証ファイル・鍵・トークン・パスワードの本文、プロセスの引数と環境、サービスのログは読んでいない。CLI の本人のログインを再利用した
+- 今回の実行は、手順書のブロック全体をそのまま上から通した結果ではない。公開スクリプトの試験、実ホストの直接確認、本人の報告を分ける
+
+### ACP の接続と会話
+
+| 確認 | Claude Code | Codex | Grok Build |
+|---|---|---|---|
+| ACP の初期化と新しいセッション | 成功 | 成功 | native ACP で成功 |
+| セッションのモード設定 | `Auto` の設定成功 | `agent` の設定成功 | 接続成立 |
+| ツールを使わない短文の応答 | 週の利用上限で未確認 | 成功 | 成功 |
+
+- Claude と Codex は固定版のアダプターを使用した。Codeg の Grok は native ACP を使い、共同作業プラグイン向けの補助スクリプトとは接続経路を分けた
+- Claude の初期化・会話作成・`Auto` の設定は成功したが、応答は本人の週の利用上限で失敗した。接続と設定の成功を、応答・編集・自動承認の成功へ広げない
+- Codex・Grok の短文の応答は直接確認した。ファイル変更、危険な操作の承認・拒否、履歴の取り込みと再開を追加で検証したものではない
+
+### 共同作業プラグインと Grok の読み取り専用実行
+
+- 公式プラグインの setup/check は `ready` になった。補助スクリプトから Codex・Grok を直接呼び、短文の応答に検証用の印が含まれることも確認した
+- Grok の内側の sandbox は Podman ソケットの `EACCES` で起動できなかった。Landlock の syscall が `ENOSYS` を返すことも別に確認した。ホストのソケット権限やカーネルは変えず、外側の bubblewrap で読み取り専用にした専用の起動経路を追加した
+- 専用の起動元プロセスを使い、Grok の読み取り専用経路で `--write` を拒否した。Codeg が使う native ACP はこの補助スクリプトへ切り替えていない
+- Codeg の DB の公開設定で、委譲の有効化（`delegation.enabled=true`）、深さ 1、worker の既定モード（Claude は `auto`、Codex は `agent`）を反映した
+- 設定値の反映と直接呼出しの成功は、Codeg の画面からの実際の委譲の成功とは分ける。親エージェントの承認設定を画面で確かめた結果も無い
+
+### 公開範囲とサービスの確認
+
+- 利用者の指定で、firewalld の `public` ゾーンから以前の送信元付き rich rule 3 本を削除し、ホストの LAN IPv4 を宛先とする 3443/tcp の accept 1 本へ変更した
+- runtime と permanent の両方で、宛先・ポートの一致と送信元指定が無いことを確認した。以前の 3 本は残っていない
+- 両サービスが enabled・active で、Codeg は `127.0.0.1:3080`、Caddy は `<SERVER_IP>:3443` に限って待ち受けることを確認した
+- Caddy の公開ルート証明書で TLS を検証し、認証を付けない HTTPS の `POST /api/health` が 401 を返すことを確認した。秘密を含むリクエストは送っていない
+- `systemctl --user` の通常の接続は sandbox 内で失敗した。読み取りを許可した実行で `--machine=<USER>@.host` を使い、サービスの状態と非秘密の属性だけを確認した
+
+### 共通パスワードの補助スクリプト
+
+- Linux 用の公開スクリプトは `scripts/grok-build-remote/set-codeg-password.py`、公開 fixture は `scripts/grok-build-remote/test-codeg-password.py`。本人の端末で伏せ字の 2 回入力を行う方式を追加した
+- 固定した公開値と一時ディレクトリを使う fixture 11 件が成功した。引用符・バックスラッシュ、不正な文字と権限、symlink 拒否、同時実行の拒否、置換と旧控えの保持を確認した
+- fixture では、起動・認証確認・置換の失敗、rename 完了直後の割込みからの復帰、状態不明時の控え保持、秘密出力が journal に向く構成の起動拒否も確認した。実ホストのサービスと認証は模擬している
+- `py_compile` は成功した。実ホストでは `--check` が成功し、設定の metadata、専用サービス、単一の loopback の worker、未認証 401 を確認した。既存の認証本文は読んでいない
+- 公開版は、実ホストに置いた版の固定ユーザー・ホームを実行者の値へ一般化し、fixture は同じディレクトリのスクリプトを参照する形にした。公開版でも 11 件の fixture・Python の構文解析・実ホストの `--check` が成功した
+- Codeg は監督プロセスと worker に分かれるため、MainPID だけを待ち受けの所有者とは扱わない。専用サービスの cgroup から worker を特定し、PID・開始時刻・実行ファイル・socket の同一性を確認する
+- Codeg の起動時の秘密出力を保存しないため、`StandardError=null` と対象の `EnvironmentFiles` を、前提確認・本人の入力後・起動直前に検査する
+- **本人報告**: 共通パスワードで HTTPS の Codeg にログインできた。本人のパスワードと、変更時のスクリプトが表示した新認証 200・未認証 401・誤入力 401 の結果はエージェントに渡されていない
+- エージェントは通常の認証変更を実行していない。実変更のコードは公開 fixture の検証だけで、実機で認証変更の 3 条件すべてを直接確認した結果とは扱わない
+
+### 共同レビューと記録の範囲
+
+- Grok Build から、接続と秘密の取扱いに関する一般的な設計のレビューを得た。その一般レビューの入力には、ローカルの具体的なファイル・秘密・ホスト識別子を含めていない
+- それ以前に、秘密を含まない補助スクリプトと設定の具体的なレビューも依頼したが、応答待ちを打ち切った。具体的な差分レビューの完了結果としては扱わない
+- この一般レビューは、今回追加した公開ファイルの具体的な差分を検査した結果ではない。プラグインの `ready`、直接呼出し、ACP の接続、本人の画面操作を別々の結果として記録した
+- `claude-agents.sh` の Bash の構文と、Grok の公開補助スクリプトの実ホストでの self-test も成功した。これらは native ACP の実際の委譲を確かめた結果ではない
+- extra の Bash 5 ブロックは構文検査が成功した。firewalld・sudo を公開スタブに置き換えた 8 条件で、旧規則の追加・再照合より先に全送信元の規則を削除しないこと、照会失敗・送信元未設定時の停止、`ALLOW_FROM` 無しでの任意規則の撤去を確認した
+- 接続元制限を戻す 2 手順と、変更した撤去ブロックは実ホストで実行していない。extra の変更した手順を説明から最後の箇条書きまで点検し、操作・コード・確認と分岐の順序を確認した。担当 3 文書の `git diff --check` は出力無し
+
+### 残る未確認
+
+- 本人のパスワード変更時の新認証 200・未認証 401・誤入力 401 の出力、実ホストでの変更失敗からの復帰、復帰後の旧認証によるログイン
+- Claude の応答・編集と自動承認、Codeg の画面からの実際の委譲、親エージェントの承認設定、承認カードへの許可・拒否
+- 3 エージェントの画面での通し操作、今回の変更後の OS 再起動・ログアウト、別端末・別拠点からの接続、証明書の期限をまたいだ稼働、アダプター・Caddy の更新とロールバック
