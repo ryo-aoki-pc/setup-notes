@@ -5,7 +5,7 @@
 - `docs/windows-setup.md` — Windows 11 の基本設定と用途別の任意手順。導入前のデュアルブートを分け、実行する窓・権限を各節で指定する
 - `docs/almalinux-setup.md` — AlmaLinux 10 の基本設定と用途別の任意手順。通常の Workstation と bootc ゲスト、実行するホストを区別する
 - `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
-  - ロールバックと注意点は `docs/extra/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
+  - ロールバックと注意点は `docs/extra/ai-agents.md`、分けた理由と方針は `docs/reference/ai-agents.md`、分離の静的な確認（リンク・移動の同一性・折りたたみの描画・構文解析と、Codex の独立検査・レビューの対応）は `docs/verification/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
   - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
   - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
   - 2冊に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、almalinux-setup.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順

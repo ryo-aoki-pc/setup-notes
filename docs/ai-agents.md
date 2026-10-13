@@ -3,7 +3,7 @@
 ## 実施手順
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で使う](#windows-11-で使う)から始める
-- [ロールバックと注意点](extra/ai-agents.md)
+- [検証記録](verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
 > - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md#実施手順)の実施手順を、少なくとも[yazi](almalinux-setup.md#yazi)まで通してあること
@@ -297,7 +297,7 @@
 ## Windows 11 で使う
 
 - 対象: Windows 11。AlmaLinux 10 は[実施手順](#実施手順)
-- [ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
+- [検証記録](verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
 
 > [!IMPORTANT]
 > - 前提: [Windows 11 のセットアップ](windows-setup.md#実施手順)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
