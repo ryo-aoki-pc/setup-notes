@@ -129,7 +129,7 @@ $ sudo firewall-cmd --list-ports
 
 **クライアントの作り方**（検証の都合。手順書では要らない）:
 
-- 同じ Pi に試験用のユーザーを作り、そのユーザーにもヘッドレスのセッションを起動した。そのセッションには、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) と同じドロップインで 1600x900 の仮想モニターを付けた
+- 同じ Pi に試験用のユーザーを作り、そのユーザーにもヘッドレスのセッションを起動した。そのセッションには、[claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) と同じドロップインで 1600x900 の仮想モニターを付けた
 - root の podman で、AlmaLinux 10 に `freerdp` を入れたコンテナを作り、そのセッションの Xwayland（`DISPLAY`・`XAUTHORITY`）に `xfreerdp /v:192.168.1.10:3390 /u:<RDP のユーザー名> /f` を描かせた（ネットワークは `--network host`）
 - クライアントの画面は、試験用のユーザーのセッションで `scripts/gnome-gui.py shot` で撮り、入力も同じスクリプトで送った（クライアントの FreeRDP の窓へ）
 - ファイアウォールの確かめには、veth でつないだ network namespace（`192.168.252.0/24` と `192.168.253.0/24`。[samba.md の付録](samba.md#network-namespace-から-firewalld-越しに到達する)と同じ手法）から、手順 9 のプローブを 192.168.1.10:3390 へ当てた
@@ -222,7 +222,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 **実施前の状態**:
 
 - リモートログイン（[gnome-remote-desktop.md](../almalinux-setup.md#gnome-のリモートログイン-実施手順)。3389/tcp、手順 5 の `After=gdm.service` のドロップインあり）が有効
-- 2026-10-02 の起動から、このユーザーのヘッドレスのセッション（実施手順 1・2 だけ。ヘッドレスのセッションの RDP は設定していない）と、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor 1920x1080` のドロップインが動いていた
+- 2026-10-02 の起動から、このユーザーのヘッドレスのセッション（実施手順 1・2 だけ。ヘッドレスのセッションの RDP は設定していない）と、[claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor 1920x1080` のドロップインが動いていた
 - このユーザーの linger は `yes`
 
 **節を書く前に起きていたこと**:
@@ -277,7 +277,7 @@ LAN 限定の rich rule に替えてから VM を再起動した。ヘッドレ�
 
 - **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-headless-session.md)の実施手順 1〜10（コミット `114c2b2`）を、上から最後まで通した
   - 任意節「接続元を LAN に絞る」、節「リモートログインだけにする（併用をやめる）」、ロールバックは、この通しでは流していない
-  - 続けて、同じ VM で [claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の実施手順 1〜6 を通した（[同書の検証記録の付録](claude-code-gui.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 続けて、同じ VM で [claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の実施手順 1〜6 を通した（[同書の検証記録の付録](claude-code-gui.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - **結果**: 10 手順のうち、通した 10、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
   - 手順 1〜9 の出力は、どれも手順書の箇条書きのとおりだった
   - 手順 10 に、箇条書きに無い出力が 3 つあった（FreeRDP が初めての接続でも出す警告、パスワードの後に出す Kerberos の `[ERROR]` の行、手順 10 で見るログに残る手順 9 のプローブの行。[指摘と状態](#指摘と状態2026-10-11)）

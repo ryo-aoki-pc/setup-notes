@@ -234,7 +234,7 @@
 - コマンド ラインでパスワードを渡す形（`autologon <ユーザー> <ドメイン> <パスワード>`）は、パスワードがプロセスのコマンド ラインに見え、履歴にも残りうるので使わず、窓で入れる
 - `-accepteula` は、使用許諾の窓を出さないため
 - Microsoft アカウントでは、`Username` をメールアドレスにし、`Domain` を `MicrosoftAccount` か PC の名前にする、という報告があるが、確かめていない。パスワード（PIN ではない）が要り、「サインイン・検索・キーボード」の手順 1 でパスワードのサインインを使えるようにしておく
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)は、デスクトップにサインインしていることを前提にする。再起動の後もサインインした状態にするため
 - 止めるのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 3
 
 ### リモートから再起動する手段を増やす（任意）: 検証状況の記録
@@ -531,7 +531,7 @@
 - [Enable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enable-psremoting?view=powershell-5.1)・[Disable-PSRemoting](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/disable-psremoting?view=powershell-5.1) — Microsoft Learn。WinRM の有効化・無効化と、後始末（サービス・リスナー・規則・`LocalAccountTokenFilterPolicy`）
 - [net(8) — Samba](https://www.samba.org/samba/docs/current/man-html/net.8.html) — `net rpc shutdown [-t timeout] [-r] [-f] [-C message]`、`-I`、`-U`
 - [shutdown — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/shutdown) — `/r`・`/f`・`/t`・`/m \\<host>`
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — 手順 7 で再起動後も使えるようにするタスク
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順) — 手順 7 で再起動後も使えるようにするタスク
 
 ### 付録: 配布物と資料の調査（2026-10-03）
 
@@ -1448,7 +1448,7 @@ Windows Update と Microsoft Store の画面の手順を、コマンドライン
 - 当時の LastBoot は 12:04:48.5 UTC だった。11:48 の復旧起動の後、利用者が完了を知らせる前の追加の起動で、理由はまだ特定していない。手動サインイン後の「WSL の AlmaLinux 10 と自動サインイン」の手順 2 と以下の読み取りは、この時点の起動後の状態として扱う
 - 12:09:46.1127459 UTC の管理者の読み取りはエラー 0 件で、IME の 1・2、OneDriveSetup と Edge の StartupApproved の先頭 3、NIC の Disabled、AC の 3 値 0、RDP の有効・NLA と Private の規則などが保持されていた
 - 12:17:44.0437403 UTC の WSL の読み取りはエラー 0 件・タイムアウト 0 件だった。WSL 3.0.1.0 は Ok、VirtualMachinePlatform は Enabled、WSL 1 の機能は Disabled、CPU の VMMonitorModeExtensions・SLAT は False、VirtualizationFirmwareEnabled・HypervisorPresent は True。`wsl --status` は既定 2 で、この時点では WSL 2 の警告はなかったが、`--list` はディストリビューションなし・終了コード -1 だった。「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4 の実行結果を優先し、パッケージと機能の導入確認から実起動の成功とは判断しない
-- 初回導入と設定確認の時点では、後続の [Git for Windows](../windows-setup.md#git-for-windows)・[Firefox](../windows-setup.md#firefox)・[WezTerm](../windows-setup.md#wezterm)・[Claude Code](../windows-setup.md#claude-code)・[VirtualBox](../windows-setup.md#virtualbox-windows-11-で使う)・[WireGuard](../windows-setup.md#wireguard-windows-11-で使う)・[HackGen Console NF](../windows-setup.md#hackgen-console-nf)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
+- 初回導入と設定確認の時点では、後続の [Git for Windows](../windows-setup.md#git-for-windows)・[Firefox](../windows-setup.md#firefox)・[WezTerm](../windows-setup.md#wezterm)・[Claude Code](../ai-agents.md#windows-11-で-claude-code-を入れる)・[VirtualBox](../windows-setup.md#virtualbox-windows-11-で使う)・[WireGuard](../windows-setup.md#wireguard-windows-11-で使う)・[HackGen Console NF](../windows-setup.md#hackgen-console-nf)は、同じ VM で導入部分を確認した。VirtualBox は 7.2.20、WireGuard は 1.1.1 だった。追加検証では InstalledFontCollection の HackGen の 2 ファミリーと、WezTerm の右クリック用レジストリ項目を確認した。Git の共通手順 3・5・6・7 は非対話の Git Bash と隔離した global 設定で検証し、12 キーの値・global スコープ・試験用ファイルの出どころを確認した。この時点では本人の user.name/user.email と実 global 設定への反映、対話的な Git Bash の GUI、pull 動作は未検証。GUI の一覧・実クリックと認証、VPN の接続は未確認。Firefox・既定ブラウザー・HackGen の GUI・ゲスト内の VirtualBox Manager の確認は回答待ち
 - VirtualBox の入れ子の VM の起動試験は、バッチ `20261006-123615Z-9406750f` で `VERR_NEM_NOT_AVAILABLE`（ゲストの CPUID が VirtualBox の署名）・`VERR_SVM_NO_SVM` となり失敗した。試験用 VM は `unregister --delete` で削除し、フォルダーも不在だった。後始末の終了コード 0 を起動成功とは扱わず、WSL とともにこの検証環境の制約として記録する
 - 「ネットワークとリモート」の手順 1・2・4 は当初、具体的な許可が不足しているとして自動承認レビューに拒否された。利用者が「この VM に限って許可する」と明示した後に実行した。読み戻した RDP の規則は TCP/UDP 3389 と Shadow、ICMP は IPv4 の Type 8 と IPv6 の Type 128 だった
 - 「Microsoft Store の更新」の手順 5 の待機中に診断した HTTPS の接続先からは HTTP 404・204・200 の応答があった。この応答だけでは Store の検索が完了できるとは判断しない。CLI の故障とも断定していない
@@ -4287,7 +4287,7 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 
 #### Claude Code: Windows 11 で使う / 手順 0: 本文中の記録
 
-- 手順の後: `claude` のコマンドラインは[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)。以後は[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)・[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)
+- 手順の後: `claude` のコマンドラインは[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)（確かめたのは Linux だけ）。SSH でログインして Remote Control を使い続けるなら [windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)。以後は[Windows 11 の更新](../ai-agents.md#ai-エージェントとプラグインを上げる)・[Windows 11 のロールバック](../extra/ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)
 
 #### Claude Code: Windows 11 で使う: 検証状況の記録
 
@@ -4299,7 +4299,7 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 - この節の手順 4 のインストーラは、Claude Code の `claude install <チャンネル>` を動かす。`claude install` は、選んだチャンネルを自分のユーザーの設定（`%USERPROFILE%\.claude\settings.json`）の `autoUpdatesChannel` に書き、以後の自動の更新と `claude update` はそのチャンネルを追う（公式の文書の Install a specific version と Configure release channel。書かれることは Linux の native installer の 2.1.288 で確かめた）
 - 入れた後でチャンネルを変えるときは、`claude install stable`（戻すときは `claude install latest`）を打つ。Linux の 2.1.288 では、`latest` の 2.1.288 から `stable` の 2.1.285 に下がり、`autoUpdatesChannel` も `stable` になった（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）
 - セッションの中の `/config` の Auto-update channel でも変えられる（公式の文書。`stable` へ移るときは、今の版に留まるか、下げるかを聞かれる）
-- [実施手順](../almalinux-setup.md#claude-code)（AlmaLinux 10）の dnf の版では、チャンネルは repo ファイルの `baseurl` で決まり、`autoUpdatesChannel` は効かない
+- [実施手順](../ai-agents.md#claude-code)（AlmaLinux 10）の dnf の版では、チャンネルは repo ファイルの `baseurl` で決まり、`autoUpdatesChannel` は効かない
 
 #### Claude Code: Windows 11 で使う / 手順 4: 補足: インストーラがすることと、irm | iex にしない理由
 
@@ -4327,7 +4327,7 @@ Windows を動かせない環境（クラウドの Linux のコンテナ）で�
 - 出力の文言は公式の文書（Update manually）から。Linux の native installer の 2.1.288 では、`Current version: 2.1.288`・`Checking for updates to latest version...`・`Claude Code is up to date (2.1.288)` と出た（[付録](#claude-code-付録-windows-11-の配布物と資料の調査2026-10-03)）
 - Windows では、動いている `claude.exe` を同じフォルダーの `claude.exe.old.<数字>` に名前を変えてから、新しい版を置く（公式の Troubleshoot installation）
 - 新しい版は `%USERPROFILE%\.local\share\claude\versions` に置かれる。古い版は、使っているものと新しい 2 つを残して消される（公式の文書の Install on network storage）
-- [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の実機では、検証の間に、自動の更新で 2.1.283 から 2.1.286 に上がった
+- [windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) の実機では、検証の間に、自動の更新で 2.1.283 から 2.1.286 に上がった
 
 #### Claude Code: 付録: Windows 11 の配布物と資料の調査（2026-10-03）
 
@@ -4362,7 +4362,7 @@ latest: 2.1.288
 stable: 2.1.285
 ```
 
-2.1.288 の `manifest.json`（`buildDate` は 2026-10-02T17:00:28Z）の署名を、`https://downloads.claude.ai/keys/claude-code.asc` の鍵（fingerprint `31DD DE24 DDFA B679 F42D  7BD2 BAA9 29FF 1A7E CACE`。[実施手順](../almalinux-setup.md#claude-code)の手順 3 の dnf の鍵と同じ）で確かめた（gpg 2.4.4）:
+2.1.288 の `manifest.json`（`buildDate` は 2026-10-02T17:00:28Z）の署名を、`https://downloads.claude.ai/keys/claude-code.asc` の鍵（fingerprint `31DD DE24 DDFA B679 F42D  7BD2 BAA9 29FF 1A7E CACE`。[実施手順](../ai-agents.md#claude-code)の手順 3 の dnf の鍵と同じ）で確かめた（gpg 2.4.4）:
 
 ```
 gpg:                using RSA key 31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE
@@ -4398,7 +4398,7 @@ Number of verified signatures: 1
 Succeeded
 ```
 
-- 署名の中の証明書を Linux の PowerShell 7.6.6 の `X509Certificate2` に読ませると、`Subject` は `CN="Anthropic, PBC", O="Anthropic, PBC", L=San Francisco, S=California, C=US, SERIALNUMBER=4860621, ...` だった（名前に `,` があるので引用符で囲まれる）。[Windows 11 で使う](../windows-setup.md#claude-code)の手順 7 の箇条書きは、この形から引いた
+- 署名の中の証明書を Linux の PowerShell 7.6.6 の `X509Certificate2` に読ませると、`Subject` は `CN="Anthropic, PBC", O="Anthropic, PBC", L=San Francisco, S=California, C=US, SERIALNUMBER=4860621, ...` だった（名前に `,` があるので引用符で囲まれる）。[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 7 の箇条書きは、この形から引いた
 - 公式の文書（Binary integrity and code signing）の「signed by "Anthropic, PBC"」と合う
 
 ##### Claude Code: `claude.exe` の中の文字列
@@ -4461,7 +4461,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 - Windows 11 の 3 節の `powershell` のブロック 12 個を、PowerShell 7.6.6 の構文解析器に通した（構文の誤りは 0）
 - PSScriptAnalyzer の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（同梱の Windows 10 1809 の Windows PowerShell 5.1 のプロファイル）を当てた。指摘は 0
 
-**[Windows 11 で使う](../windows-setup.md#claude-code)の手順 2・4**: 文書から抜き出したブロックを、`$env:USERPROFILE` を一時的なディレクトリにして、そのまま流した（本物の `install.ps1` を取って動かす）:
+**[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 2・4**: 文書から抜き出したブロックを、`$env:USERPROFILE` を一時的なディレクトリにして、そのまま流した（本物の `install.ps1` を取って動かす）:
 
 - 手順 2 は `CC_CHANNEL = latest` を出した
 - `$CC_CHANNEL` を空にした手順 4 は、`手順 2 の $CC_CHANNEL が空` のエラーだけを出し、何も取らなかった
@@ -4470,7 +4470,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 **`irm … | iex` との違い**: `install.ps1` と同じ先頭（`param` と `Set-StrictMode -Version Latest`・`$ErrorActionPreference = "Stop"`・`$ProgressPreference = "SilentlyContinue"`）の文字列を `iex` に渡すと、流した後も `$ErrorActionPreference` が `Stop`、`$ProgressPreference` が `SilentlyContinue` のままで、未定義の変数を読むと `VariableIsUndefined` のエラーになった。`& ([scriptblock]::Create(...)) stable` では何も残らず、位置引数の `stable` が `$Target` に入った。Windows PowerShell 5.1 では確かめていない
 
-**[Windows 11 で使う](../windows-setup.md#claude-code)の手順 5 と[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)の手順 2〜4**: 文書から抜き出したブロックの `[Environment]::GetEnvironmentVariable('Path', 'User')` と `SetEnvironmentVariable('Path', …, 'User')` を、値を覚えておく偽物に置き換え（Linux の .NET は `User` の環境変数を持たない）、`$env:USERPROFILE` を一時的なディレクトリにして流した（パスの `\` は Linux の pwsh がそのまま区切りとして扱った）:
+**[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 5 と[Windows 11 のロールバック](../extra/ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 2〜4**: 文書から抜き出したブロックの `[Environment]::GetEnvironmentVariable('Path', 'User')` と `SetEnvironmentVariable('Path', …, 'User')` を、値を覚えておく偽物に置き換え（Linux の .NET は `User` の環境変数を持たない）、`$env:USERPROFILE` を一時的なディレクトリにして流した（パスの `\` は Linux の pwsh がそのまま区切りとして扱った）:
 
 - 手順 5、PATH に無いとき: `PATH に <USERPROFILE>\.local\bin を足した` で、書いたのは 1 回、値は前の値の後ろに `;<USERPROFILE>\.local\bin`
 - もう 1 度: `はもうある` で、書かなかった。末尾に `\` の付いた `<USERPROFILE>\.local\bin\` があるときも `はもうある`
@@ -4504,7 +4504,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 #### Claude Code: Windows 11 のロールバック / 手順 2: 補足: 消すもの
 
-- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。この 2 つは、Linux の native installer の 2.1.288 が作ったフォルダーと、`claude.exe` の中の置き場所の決め方（`XDG_*` が無ければホームの下）から足したもので、Windows では確かめていない
+- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../ai-agents.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。この 2 つは、Linux の native installer の 2.1.288 が作ったフォルダーと、`claude.exe` の中の置き場所の決め方（`XDG_*` が無ければホームの下）から足したもので、Windows では確かめていない
 
 ---
 
@@ -4624,7 +4624,7 @@ Rufus で作ったインストールメディアからクリーンインスト�
 - Windows 11 で使う・Windows 11 の更新・Windows 11 のロールバックの PowerShell の 12 ブロックを、PowerShell 7.6.6 の `[System.Management.Automation.Language.Parser]::ParseInput` で解析した（エラー 0）
 - PSScriptAnalyzer 1.25.0 の `PSUseCompatibleSyntax`（5.1）・`PSUseCompatibleCommands`・`PSUseCompatibleTypes`（プロファイル `win-48_x64_10.0.17763.0_5.1.17763.316_x64_4.0.30319.42000_framework`）で指摘 0
 - `install.ps1` は読んで確かめただけで、実行していない（置く場所・MinGit の SHA-256 の確認・ユーザーの PATH の先頭に足すこと・`$ErrorActionPreference = 'Stop'`・失敗のときの `exit 1`）
-- Windows のロールバックの手順 3 は、[claude-code.md](../almalinux-setup.md#claude-code) の Windows 11 のロールバックの手順 3 と同じ書き方（その手順は Windows 11 の VM で通っている）だが、この手順書のブロックとしては Windows で流していない
+- Windows のロールバックの手順 3 は、[claude-code.md](../ai-agents.md#claude-code) の Windows 11 のロールバックの手順 3 と同じ書き方（その手順は Windows 11 の VM で通っている）だが、この手順書のブロックとしては Windows で流していない
 
 ---
 

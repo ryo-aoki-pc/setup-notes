@@ -1,15 +1,15 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)・[検証記録](../verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[検証記録](../verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)へ進む
 - この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、この節の手順 5）
-- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AlmaLinux 10 の初期設定のロールバックの「AI エージェントとプラグインを消す」](almalinux-setup.md#ai-エージェントとプラグインを消す)の手順 1 と、「端末とエディタを消す」の手順 5
+- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AI エージェントのロールバックの「AI エージェントとプラグインを消す」](ai-agents.md#ai-エージェントとプラグインを消す)の手順 1 と、AlmaLinux 10 の初期設定のロールバックの「端末とエディタを消す」の手順 5
 - 実施手順の手順 1 の変数を設定したシェルで行う
 
 > [!CAUTION]
@@ -22,7 +22,7 @@
    ```
 
    - 先に、各ウィンドウのエージェントを終える（Claude Code は `/exit`、Codex と Grok は `/quit`）
-   - Remote Control を動かしているなら、[その任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の手順 8 で止める
+   - Remote Control を動かしているなら、[その任意節](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)の手順 8 で止める
    - tmux を使っていなければ `can't find session: agents` と出る（そのままでよい）
 
 1. 消す前に、コミットしていない変更と、取り込んでいないコミットを確かめる。
@@ -39,7 +39,7 @@
    ```
 
    - `== claude` などの見出しの下に何も出なければ、消して失うものは無い
-   - 出たら、要るものを[main に取り込む](../almalinux-setup.md#コーディングエージェントの共同作業-main-に取り込む)で取り込んでから進む
+   - 出たら、要るものを[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)で取り込んでから進む
 
 1. 3 つの worktree とブランチを消す。
 
@@ -87,8 +87,8 @@
 ## Windows 11 のロールバック
 
 - この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、[ロールバック](#ロールバック)の手順 5 と同じ）
-- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[Windows 11 の初期設定のロールバックの「AI エージェントとプラグインを消す」](windows-setup.md#ai-エージェントとプラグインを消す)の手順 1 と、「エディタとシェルのツールを消す」の手順 6
-- [Windows 11 で使う](../windows-setup.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 の変数を設定した PowerShell で行う
+- 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1 と、Windows 11 の初期設定のロールバックの「エディタとシェルのツールを消す」の手順 6
+- [Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 の変数を設定した PowerShell で行う
 
 > [!CAUTION]
 > **この節の手順 4 は、取り込んでいない作業ごと、3 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
@@ -150,13 +150,13 @@
 - **`/codex:rescue` と `/grok-build:delegate` は、Claude の worktree で動く**: Codex と Grok が Claude の worktree のファイルを変える。Claude 自身の作業と同じファイルを頼まない
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](../verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
 - **`/codex:cancel` の後も、Codex が始めたコマンドは動き続けることがある**: cancel はターンを中断するが、その中で始めたコマンドは裏に残ることがある。残ったコマンドは、Claude Code のセッションを終えてプラグインが Codex の共有のプロセスを止めると消える（プラグイン 1.0.6 と Codex 0.160.0。スクリプトを直接呼んだ確認。[検証記録](../verification/coding-agents.md#codex-の実行中のターンの中断を伴う-cancel)）
-- **Grok Build は既定で sandbox が無い**: [分担して作業する](../almalinux-setup.md#コーディングエージェントの共同作業-分担して作業する)のリードの `[!WARNING]`。Windows には sandbox が無い
-- **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
+- **Grok Build は既定で sandbox が無い**: [分担して作業する](../ai-agents.md#コーディングエージェントの共同作業-分担して作業する)のリードの `[!WARNING]`。Windows には sandbox が無い
+- **Grok の読むだけの sandbox には Landlock と bubblewrap が要る**: Landlock が有効なカーネルで起動し、bubblewrap を[AI エージェントの手順書の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1 で入れる。ソケットの親を検索できない場合も起動しない。ソケット自体のアクセス権は緩めない（[検証記録](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
 - **Grok は Claude の指示書も読む**: CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（信頼したフォルダーだけ）。3 つに共通の規則は AGENTS.md に書く
 - **`/grok-build:check` は、ログインしていなくても ready と出る**（grok-build のプラグイン 0.2.1 と Grok Build 1.0.50。`grok models` の終了コードで判定するため）。ログインは `grok models` の表示で確かめる
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない
-- **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AlmaLinux 10 の初期設定のロールバック](almalinux-setup.md#ai-エージェントとプラグインを消す)）
+- **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントのロールバック](ai-agents.md#ai-エージェントとプラグインを消す)）
 - **エージェントの push と Pull Request には、そのホストの認証が要る**: エージェントは、動いているユーザーの git の認証で push し、Pull Request は gh で作る。GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](../almalinux-setup.md#github-cli)・[Windows 11 の初期設定の「GitHub CLI」](../windows-setup.md#github-cli)でログインしておく（git の HTTPS の認証は、AlmaLinux 10 は gh の `Authenticate Git with your GitHub credentials?`、Windows 11 は Git Credential Manager）。Codex は、push と Pull Request の作成にも sandbox の外での実行の承認が要る
 - **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[forgejo.md の使い方の基本](../almalinux-setup.md#forgejo-使い方の基本)）
 - **画面で取り込むときは merge commit で**: squash と rebase で取り込むと、各 worktree の `git merge --ff-only main` が通らなくなる（[参考資料](../reference/coding-agents.md#main-に取り込む-画面で取り込むとき)）
-- **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../almalinux-setup.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）
+- **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）

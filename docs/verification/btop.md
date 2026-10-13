@@ -42,7 +42,7 @@ color_theme = "Default"
 ### 対象と検証環境
 
 - **目的**: AlmaLinux 10 に [btop](https://github.com/aristocratos/btop)（CPU・メモリ・ディスク・ネットワーク・プロセスをまとめて見る TUI。`htop` の後継的な位置づけ）を入れる
-- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](../verification/btop.md#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
+- **進め方**: **Homebrew ではなく EPEL の dnf で入れる**。同じ版が両方にあるため（[選択した方針](#選択した方針)）。EPEL の有効化は前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1 に任せる。読者が編集する変数は無い
 - **状態**: **x86_64 のクリーン VM で実施手順 1〜3 を本実行済み（2026-10-06）。コンテナでも検証済み（2026-09-22）。実機には入れていない**
   - これは 2026-10-06 の時点の状態
   - 下表の検証コンテナで、**この文書のコードブロックをそのまま貼って**、EPEL の有効化（今の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](https://github.com/ryo-aoki-pc/setup-notes/blob/421be2df74f6120da0168d8e9b5cbeac9af8dda1/docs/almalinux-setup.md#epel-と-rpm-fusion)の手順 1。当時はこの文書の手順だった）と手順 1〜3 を通した

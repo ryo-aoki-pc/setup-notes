@@ -6,7 +6,7 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
@@ -34,7 +34,7 @@ sudo dnf install -y google-noto-sans-cjk-vf-fonts
 python3 -m pip install --user nwdiag seqdiag
 python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
 
-# GUI の動作を確かめる（docs/almalinux-setup.md の「Claude Code の GNOME 操作: 実施手順」を通したホストで。撮った PNG を開いて見る）
+# GUI の動作を確かめる（docs/ai-agents.md の「Claude Code の GNOME 操作: 実施手順」を通したホストで。撮った PNG を開いて見る）
 scripts/gnome-gui.py shot /tmp/gnome-gui.png
 scripts/gnome-gui.py key Escape                 # セッションを始めた直後に開いているアクティビティ画面を閉じる
 scripts/gnome-gui.py launch org.gnome.TextEditor
@@ -43,18 +43,20 @@ scripts/gnome-gui.py click 70 15                # 座標は shot の PNG の画�
 scripts/gnome-gui.py windows
 ```
 
-GUI の動作を確かめるときは、[AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](docs/almalinux-setup.md#claude-code-の-gnome-操作-実施手順)（前提は同書の[「GNOME のヘッドレスセッション: 実施手順」](docs/almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから同書の「GNOME のヘッドレスセッション: 実施手順」の手順 1・2 と「Claude Code の GNOME 操作: 実施手順」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
+GUI の動作を確かめるときは、[AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」](docs/ai-agents.md#claude-code-の-gnome-操作-実施手順)（前提は [AlmaLinux 10 の「GNOME のヘッドレスセッション: 実施手順」](docs/almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから AlmaLinux 10 の「GNOME のヘッドレスセッション: 実施手順」の手順 1・2 と、AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
 
 `wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、`docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
 
 ## 手順を集約する正本
 
 - 既存・新規の Windows 11・AlmaLinux 10 の操作は、2冊の該当項または用途別の任意節へ集約する
-- 個別ツール・VPN・VM・リモート操作・共同作業も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
-- 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は2冊と元リポジトリの案内を合わせる
+- AI コーディングエージェント（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` へ集約する（2026-10-14 に利用者の決定で2冊から分けた）。2冊には AI エージェントの項・節を置かず、リードから案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として2冊に残す
+- 正本を増やすのは、利用者の決定があるときだけにする。以下の「正本」は、この 3 冊を指す
+- 個別ツール・VPN・VM・リモート操作も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
+- 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は正本と元リポジトリの案内を合わせる
 - 冒頭で対話・GUI・条件付き操作の全番号を列挙しない。各手順には成功条件・中断・分岐・停止・危険を短く残す
 - 旧見出しと移動先は [集約対応表](docs/dev/consolidation-map.md) で管理する。過去の検証本文と実施範囲を保持する
-- 集約後に案内だけとなった文書は削除する。参照元を2冊へ更新し、旧原文は対応表に記録した移動元コミットで確認する
+- 集約後に案内だけとなった文書は削除する。参照元を正本へ更新し、旧原文は対応表に記録した移動元コミットで確認する
 
 ## 文書を書く・直すとき
 

@@ -97,7 +97,7 @@
   - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
   - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、そのユーザーでログインしたときに、ログイン画面が名前とアイコンのまま進まない
     - RHEL の `gnome-remote-desktop` 49.3-3 からの機能（パッケージの changelog の「Support remote login to sessions from gnome-headless-session@.service」）
-    - クライアントには、ヘッドレスのセッションに足された仮想モニターが写る。[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) のドロップインがある PC では、`Meta-0` の右に足された `Meta-1` になり、壁紙だけが写る（上部バーもウィンドウも無い）
+    - クライアントには、ヘッドレスのセッションに足された仮想モニターが写る。[claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) のドロップインがある PC では、`Meta-0` の右に足された `Meta-1` になり、壁紙だけが写る（上部バーもウィンドウも無い）
     - 切断すると足されたモニターは消え、ヘッドレスのセッションは残った
   - ヘッドレスのセッションの RDP（gnome-headless-session.md、3390）と同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
   - 起動のときと同じすれ違い（[手順 5](../almalinux-setup.md#gnome-のリモートログイン-実施手順) の補足）は、タイミングによっては起きるはず（コードからの推定）。真っ暗なまま切れるようになったら、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 2〜4 で直す

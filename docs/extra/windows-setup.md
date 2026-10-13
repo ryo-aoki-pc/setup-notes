@@ -1,4 +1,4 @@
-# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim・AI エージェント）のロールバックと注意点
+# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim）のロールバックと注意点
 
 [手順書](../windows-setup.md)・[検証記録](../verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)
 
@@ -8,14 +8,13 @@
 ## ロールバック
 
 - 貼る窓
-  - [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)・[Git の道具を消す](#git-の道具を消す)・[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)・[HackGen Console NF を消す](#hackgen-console-nf-を消す)・[表示と入力を戻す](#表示と入力を戻す)・[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)のすべての手順と、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 4 は、[Microsoft Store の更新](../windows-setup.md#microsoft-store-の更新)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
+  - [Git の道具を消す](#git-の道具を消す)・[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)・[HackGen Console NF を消す](#hackgen-console-nf-を消す)・[表示と入力を戻す](#表示と入力を戻す)・[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)のすべての手順と、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 4 は、[Microsoft Store の更新](../windows-setup.md#microsoft-store-の更新)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
   - [Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 2〜8 は、同じ項の手順 1 で開く Git Bash に貼る
   - [OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 2〜8 は、同じ項の手順 1 で開く管理者の Windows PowerShell に、同じ項の手順 9 はクライアントのシェルに貼る
   - [サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 2・3・5〜11、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)のすべての手順、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 1 は、[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 1 で開く管理者の Windows PowerShell に貼る（同じ項の手順 4 の分だけ、管理者ではない窓も開いたままにしておく）
 - PSWindowsUpdate だけを外すなら、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 3・4 を行う（管理者ではない窓）。この文書で初めて入れた場合だけが対象
 - Windows Update や Store の更新を一括で取り消す手順ではない。Store 本体と、ほかのモジュールも使う NuGet のプロバイダーは外さない
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - AI エージェント: [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜5、Codex CLI は 6〜9、Grok Build は 10〜14
   - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1・2（自分用の設定は 1）、git-delta は 3・4、GitHub CLI は 5〜10。`~/.gitconfig` は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 2〜6、Git for Windows は[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 4
   - エディタとシェルのツール: [エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順で、yazi は 1〜3（自分用の設定は 1）、自分用の Neovim の設定は 4、Neovim は 5、Node.js は 6、starship・zoxide・fzf・eza・bat は 7〜9
   - 端末とブラウザ: 自分用の WezTerm の設定は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 7、共通の bash 設定は同じ項の手順 8。OpenSSH サーバーは[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 2・3・9、Firefox は同じ項の手順 5〜7、WezTerm は同じ項の手順 8。HackGen Console NF は[HackGen Console NF を消す](#hackgen-console-nf-を消す)の手順 1〜3
@@ -32,13 +31,12 @@
 - 多くは、元に戻すかを[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で控えた値で決める
 - ほかの手順書で入れたもの（VirtualBox・WireGuard・Syncthing など）は、それぞれの手順書の「Windows 11 のロールバック」で先に戻す
   - [SSH クライアント（Windows）](windows-ssh-client.md#ロールバック)は「ロールバック」、[Samba の共有のネットワーク ドライブ](samba-client.md#windows-11-のロールバック)は「Windows 11 のロールバック」
-  - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md#ロールバック)は、Claude Code と WezTerm を使う。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)より前に戻す
-  - [コーディングエージェントの共同作業](coding-agents.md#windows-11-のロールバック)も、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)より前に戻す
+  - [AI コーディングエージェントのセットアップ](ai-agents.md#windows-11-のロールバック)で入れたものは、この節の項より前に戻す
 - この文書で入れたものは、この節の項を上から順に戻す。自分用の設定（Neovim・WezTerm・lazygit・yazi）は、その項の中で、それぞれのリポジトリのロールバックへ案内する
 - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと消すときも、scoop の外に残るものは、先に次の手順で外す
   - `~/.gitconfig` の `core.pager` は[Git の道具を消す](#git-の道具を消す)の手順 3、資格情報マネージャーの gh のトークンは同じ項の手順 5〜8
   - ユーザーの環境変数 `YAZI_FILE_ONE` は[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 3、`EDITOR`・`VISUAL` は[Neovim を既定のエディタにする（任意）](../windows-setup.md#neovim-を既定のエディタにする任意)の手順 2
-  - Claude Code のプラグインは[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1（プラグインは、Claude Code の起動と終了のたびに、scoop の `node` を動かす）
+  - Claude Code のプラグインは[AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1（プラグインは、Claude Code の起動と終了のたびに、scoop の `node` を動かす）
   - そのときは、scoop で消す手順（[Git の道具を消す](#git-の道具を消す)の手順 2・4・9、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 2・5〜8）は要らない（止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える）。lazygit の設定（`%LOCALAPPDATA%\lazygit`）は scoop の外に残る（外すなら[Git の道具を消す](#git-の道具を消す)の手順 1）
   - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9（scoop を消した後でもよい）
 - 任意節で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](#windows-sandbox-を無効にする)で、ほかはそれぞれの節の最後の「元に戻すときは、」の手順で戻す
@@ -48,172 +46,7 @@
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする（任意）](../windows-setup.md#wsl-のネットワークをミラーにする任意)の手順 6・7
 
 > [!CAUTION]
-> [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 は、**scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 5 は**それらの設定（`~\scoop\persist`）を**、同じ項の手順 8 は **WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 5 は **Claude Code の設定・許可済みのツール・MCP サーバーの定義・セッションの履歴・ログインの情報・ディレクトリの信頼を**、同じ項の手順 14 は **Grok のログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree を**、[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 3 は **OpenSSH サーバーのホスト鍵と、登録した公開鍵（`C:\ProgramData\ssh`）を消す**（取り戻せない。入れ直すとホスト鍵が変わり、クライアントの `known_hosts` と合わなくなる。同じ項の手順 9 で消す）。入れ直すかもしれないなら、その手順は行わない。[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9 は、**zoxide が覚えたディレクトリの履歴（`%LOCALAPPDATA%\zoxide`）を消す**（取り戻せない）。
-
-### AI エージェントとプラグインを消す
-
-1. 2 つのプラグインとマーケットプレイスを外す。
-
-   ```powershell
-   claude plugin uninstall codex@openai-codex
-   claude plugin uninstall grok-build@xai-grok-build
-   claude plugin marketplace remove openai-codex
-   claude plugin marketplace remove xai-grok-build
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   claude plugin list
-   ```
-
-   - 最後の一覧に、2 つのプラグインが出なければよい
-   - Node.js は、ここでは外さない（[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 6）
-
-1. 動いている Claude Code と、Remote Control のタスクが無いことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name claude -ErrorAction SilentlyContinue | Where-Object Path -like "$env:USERPROFILE\.local\*" | Format-Table Id, Path
-   Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue | Format-Table TaskName, State
-   ```
-
-   - どちらも何も出なければよい
-   - プロセスが出たら、その Claude Code を `/exit` で終える（動いている `claude.exe` は消せない）
-   - タスクが出たら、[windows-claude-remote-control.md のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
-
-1. Claude Code の実行ファイルと、版・キャッシュ・ロックのフォルダーを消す。
-
-   ```powershell
-   Remove-Item -Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\bin\claude.exe.old.*" -Force -ErrorAction SilentlyContinue
-   Remove-Item -LiteralPath "$env:USERPROFILE\.local\share\claude", "$env:USERPROFILE\.local\state\claude", "$env:USERPROFILE\.cache\claude" -Recurse -Force -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:USERPROFILE\.local\bin\claude.exe", "$env:USERPROFILE\.local\share\claude"
-   Get-ChildItem -LiteralPath "$env:USERPROFILE\.local\bin" -Force -ErrorAction SilentlyContinue | Format-Table Name
-   ```
-
-   - `False` が 2 行出ればよい
-   - `True` が出たら、`claude.exe` がまだ動いている。この項の手順 2 からやり直す
-   - 最後の一覧が空なら、`.local\bin` にはほかのものが無い（この項の手順 4 で PATH から外せる）
-   - 公式の文書（Uninstall Claude Code の Native installation と Remove configuration files）の手順に、本書で見つけた置き場所（更新の名残・キャッシュ・ロック）と `PATH` を足したもの
-
-1. [Claude Code](../windows-setup.md#claude-code)の手順 4 で足したときだけ、PATH から `.local\bin` を外す。
-
-   ```powershell
-   & {
-     $bin = "$env:USERPROFILE\.local\bin"
-     if (Get-ChildItem -LiteralPath $bin -Force -ErrorAction SilentlyContinue) { Write-Error "中断: $bin にほかのファイルがある（ほかのツールが使っている）"; return }
-     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
-     $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
-     if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
-     Remove-Item -LiteralPath $bin -ErrorAction SilentlyContinue
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-   }
-   ```
-
-   - 自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.local\bin` が無ければよい
-   - `中断:` が出たら、`.local\bin` をほかのツール（uv など）も使っている。PATH は外さない
-   - この項の手順 2〜4 では、設定・履歴・ログインの情報（`%USERPROFILE%\.claude`、`%USERPROFILE%\.claude.json`）と、プロジェクトの `.claude` と `.mcp.json` は残る
-
-1. 完全に消すときだけ、設定・履歴・ログインの情報を消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.claude" -Recurse -Force
-   Remove-Item -LiteralPath "$env:USERPROFILE\.claude.json" -Force
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:USERPROFILE\.claude", "$env:USERPROFILE\.claude.json"
-   ```
-
-   - `False` が 2 行出ればよい
-   - Claude Desktop・VS Code の拡張機能・JetBrains のプラグインが入っていると、次に動いたときに `%USERPROFILE%\.claude` がまた作られる（公式の文書。全部消すなら、先にそれらを外す）
-   - プロジェクトの `.claude` と `.mcp.json` は、それぞれのプロジェクトのディレクトリで手で消す
-
-1. 起動中の Codex を終了し、ログイン情報も外す場合はログアウトする。
-
-   ```powershell
-   codex logout
-   ```
-
-   - ログイン情報を共有するエディタの拡張機能なども、次回ログインが必要になる
-   - 本書の既定の場所に入れた standalone 版が対象。設定・会話履歴と、Windows sandbox が作ったユーザー・ポリシーなどは残る。OS の sandbox 設定を元に戻す操作は、この項には含めない
-
-1. Codex の入口と配布物をエクスプローラーで削除する。
-
-   - `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` のジャンクションを削除する（リンク先の中へ入って削除しない）
-   - `%USERPROFILE%\.codex\packages\standalone` を削除する
-   - `%USERPROFILE%\.codex` 全体は削除しない（設定・会話履歴などが入っている）
-   - 確認用のディレクトリ `%USERPROFILE%\codex-sandbox`（[Codex CLI](../windows-setup.md#codex-cli)の手順 8）も、要らなければ削除する
-
-1. ユーザー用 PATH から Codex の入口を外す。
-
-   - スタートメニューで「環境変数」を検索し、自分のアカウントの環境変数を開く
-   - ユーザー環境変数の `Path` から `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` に相当する行だけを削除する
-   - PowerShell と、その親の Windows Terminal などを閉じて開き直す
-
-1. PATH 上に Codex が残っていないか確かめる。
-
-   ```powershell
-   Get-Command codex -All -ErrorAction SilentlyContinue
-   ```
-
-   - 何も出なければ、この CLI の入口は外れている
-   - パスが出る場合は、別の導入方法の Codex が残っている
-
-1. 動いている Grok が無いことを確かめ、ログイン情報も外すならログアウトする。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name grok, agent -ErrorAction SilentlyContinue | Format-Table Id, Path
-   grok logout
-   ```
-
-   - 1 行目で何も出なければよい。プロセスが出たら、その Grok を `/quit` で終えてから、このブロックを貼り直す
-   - ログインしていなければ `No cached session to log out of.` と出る
-   - 本書の既定の場所に入れた Grok が対象（WinGet で入れたものは WinGet で外す）
-
-1. 実行ファイル・配布物・Grok が使う Git を消す。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.grok\bin", "$env:USERPROFILE\.grok\downloads", "$env:USERPROFILE\.grok\completions", "$env:LOCALAPPDATA\grok\git" -Recurse -Force -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:USERPROFILE\.grok\bin", "$env:LOCALAPPDATA\grok\git"
-   ```
-
-   - `False` が 2 行出ればよい
-   - `True` が出たら、`grok.exe` がまだ動いている。この項の手順 10 からやり直す
-   - 確認用のディレクトリ `%USERPROFILE%\grok-sandbox`（[Grok Build](../windows-setup.md#grok-build)の手順 8）も、要らなければ削除する
-
-1. 自分のユーザーの PATH から `%USERPROFILE%\.grok\bin` を外す。
-
-   ```powershell
-   & {
-     $bin = "$env:USERPROFILE\.grok\bin"
-     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
-     $rest = @($entries | Where-Object { $_.TrimEnd('\') -ne $bin })
-     if ($rest.Count -lt $entries.Count) { [Environment]::SetEnvironmentVariable('Path', ($rest -join ';'), 'User') }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-   }
-   ```
-
-   - 自分のユーザーの PATH が 1 行ずつ出て、その中に `C:\Users\<WIN_USER>\.grok\bin` が無ければよい
-
-1. PowerShell を閉じ、スタートメニューから開き直してから、PATH 上に Grok が残っていないか確かめる。
-
-   ```powershell
-   Get-Command grok, agent -All -ErrorAction SilentlyContinue
-   ```
-
-   - 何も出なければ、この CLI の入口は外れている
-   - パスが出る場合は、別の導入方法の Grok か、別のツールの `agent` が残っている
-   - この項の手順 10〜13 では、設定・会話の記録・ログイン情報（`%USERPROFILE%\.grok` の残り）は残る
-
-1. 完全に消すときだけ、`%USERPROFILE%\.grok` を消す（取り戻せない）。
-
-   ```powershell
-   Remove-Item -LiteralPath "$env:USERPROFILE\.grok" -Recurse -Force
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:USERPROFILE\.grok"
-   ```
-
-   - `False` が出ればよい
+> [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 は、**scoop で入れたすべてのアプリを消す**（本書の外で入れたものも）。[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 5 は**それらの設定（`~\scoop\persist`）を**、同じ項の手順 8 は **WSL の AlmaLinux 10 のファイルをすべて消す**（取り戻せない）。残すなら、その手順は行わない。[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 3 は **OpenSSH サーバーのホスト鍵と、登録した公開鍵（`C:\ProgramData\ssh`）を消す**（取り戻せない。入れ直すとホスト鍵が変わり、クライアントの `known_hosts` と合わなくなる。同じ項の手順 9 で消す）。入れ直すかもしれないなら、その手順は行わない。[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9 は、**zoxide が覚えたディレクトリの履歴（`%LOCALAPPDATA%\zoxide`）を消す**（取り戻せない）。
 
 ### Git の道具を消す
 
@@ -397,8 +230,8 @@
    scoop uninstall nodejs-lts
    ```
 
-   - [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1 でプラグインを外してから行う（プラグインは Claude Code の起動と終了のたびに `node` を動かす）
-   - `nodejs-lts` は、[Codex・Grok のプラグイン](../windows-setup.md#codexgrok-のプラグイン)の手順 1 で入れたときだけある。自分用の Neovim の設定（その導入の手順 6）が入れた `nodejs` も外すなら、この項の手順 4 の後に `scoop uninstall nodejs`
+   - [AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1 でプラグインを外してから行う（プラグインは Claude Code の起動と終了のたびに `node` を動かす）
+   - `nodejs-lts` は、[AI エージェントの手順書の「Windows 11 で Codex・Grok のプラグインを入れる」](../ai-agents.md#windows-11-で-codexgrok-のプラグインを入れる)の手順 1 で入れたときだけある。自分用の Neovim の設定（その導入の手順 6）が入れた `nodejs` も外すなら、この項の手順 4 の後に `scoop uninstall nodejs`
 
 1. [シェルのツールを入れる](../windows-setup.md#シェルのツールを入れる)で入れた 5 つを scoop で消す。
 
@@ -1338,7 +1171,7 @@
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える（任意）](../windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える任意)の手順 4
 - **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする（任意）](../windows-setup.md#wsl-のネットワークをミラーにする任意)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
   - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない
-- **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Grok Build と、Codex・Grok のプラグインのもの。ここには Windows 11 だけの注意を書く
+- **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi のもの。ここには Windows 11 だけの注意を書く
 - **OpenSSH サーバー: SSH のセッションは管理者の権限を持つ**
   - Administrators の一員でログインすると、`whoami /groups` で `Mandatory Label\High Mandatory Level` と、有効な `BUILTIN\Administrators` を確認する
   - このユーザーのパスワードを知る人と、登録した鍵を持つ人は、この PC の管理者として操作できる。パスワードと秘密鍵の扱いは、管理者のパスワードと同じにする
@@ -1393,15 +1226,6 @@
   - PowerShell の `PATH` には `file` が無い（Git Bash には `/usr/bin/file` がある）
 - **yazi: Windows 11 の画像プレビューは、端末と ConPTY に依存する**: WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）で出る。ConPTY の制約で、Linux と同じには出ないことがある
 - **yazi: Windows 11 の SSH のセッションでは、そのままでは scoop の yazi が起動しないことがある**: [scoop のツールを SSH のセッションで使う（任意）](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う任意)を通す（`scoop install`・`scoop update` の後は貼り直す）
-- **Claude Code: `PATH` は自分で足す**: インストーラも `claude install` も足さない（[「Claude Code」の手順 4](../windows-setup.md#claude-code)）。足さないと、開き直した PowerShell でも `claude` が見つからない
-- **Claude Code: Windows PowerShell (x86) では入らない**: `Claude Code does not support 32-bit Windows` で止まる。x86 の付かない「Windows PowerShell」で入れ直す
-- **Claude Code: `claude` が 2 つ入ると混乱する**: WinGet・npm・scoop で入れたものが `PATH` の先にあると、そちらが動く。`Get-Command claude -All` で確かめ、`winget uninstall Anthropic.ClaudeCode` や `npm uninstall -g @anthropic-ai/claude-code` で外す。古い Claude Desktop は `WindowsApps` に `Claude.exe` を置き、`claude` で Desktop が開くので、最新にする（公式の Troubleshoot installation）
-- **Claude Code: 更新の後に `claude` が見つからないとき**: Windows の更新は、`claude.exe` を `claude.exe.old.<数字>` に名前を変えてから新しい版を置く。置けず、名前も戻せなかったときは `claude.exe` が無くなる。公式の文書は、一番新しい `claude.exe.old.*` の名前を戻す（`Get-ChildItem "$env:USERPROFILE\.local\bin\claude.exe.old.*" | Sort-Object Name | Select-Object -Last 1 | Rename-Item -NewName claude.exe`）か、入れ直すとしている
-- **Claude Code: `The process cannot access the file` で止まるとき**: 前のインストーラが動いているか、ウイルス対策が `%USERPROFILE%\.claude\downloads` のファイルを調べている。ほかの PowerShell を閉じ、そのフォルダーを消してから入れ直す（公式の Troubleshoot installation）
-- **Claude Code: `irm … | iex` で入れた PowerShell には、インストーラの設定が残る**: `Set-StrictMode -Version Latest` などが残るので、その窓は閉じて開き直す（[「Claude Code」の手順 3](../windows-setup.md#claude-code)の補足）
-- **Claude Code: ログインの情報は `%USERPROFILE%\.claude\.credentials.json`**: パスワードと同じ重みで扱い、ログや issue に貼らない
-- **Claude Code: Windows PowerShell 5.1 のパイプ**: `<コマンド> | claude -p` で日本語を渡すと化けるはず（[Claude Code の使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)の非対話の注意）
-- **Grok Build: Windows には sandbox（`--sandbox`）が無い**: 公式の文書の sandbox は Linux と macOS だけ（[AlmaLinux 10 の注意点の「Grok Build: sandbox は既定で無効」](almalinux-setup.md#注意点)）
 - **Firefox: AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（[「Firefox」の手順 3](../windows-setup.md#firefox)の補足）。N エディションの Windows では、Media Feature Pack が要るはず
 - **Firefox: 管理者の PowerShell から Firefox を起動しない**: Firefox が管理者の権限で動き、プロファイルに管理者の持ち物のファイルができうる。起動はスタートメニューから
 - **Firefox: 言語パックを足さない**: 閉じている間の更新（Background Update）が止まる。別の言語にしたいなら、その言語の `Mozilla.Firefox.<言語>` を入れ直す

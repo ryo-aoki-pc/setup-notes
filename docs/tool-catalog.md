@@ -74,10 +74,10 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone-実施手順) |
 | btop | EPEL | [btop.md](almalinux-setup.md#btop-実施手順) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
-| Claude Code / GitHub CLI | 公式 dnf リポジトリ | [初期設定の「Claude Code」](almalinux-setup.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
-| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [初期設定の「Codex CLI」](almalinux-setup.md#codex-cli) |
-| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [初期設定の「Grok Build」](almalinux-setup.md#grok-build) |
-| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [coding-agents.md](almalinux-setup.md#コーディングエージェントの共同作業-実施手順) |
+| Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
+| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [AI エージェントの「Codex CLI」](ai-agents.md#codex-cli) |
+| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [AI エージェントの「Grok Build」](ai-agents.md#grok-build) |
+| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [coding-agents.md](ai-agents.md#コーディングエージェントの共同作業-実施手順) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](almalinux-setup.md#vs-code-実施手順) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](almalinux-setup.md#virtualbox-実施手順) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [初期設定の「WezTerm」](almalinux-setup.md#wezterm) |

@@ -349,7 +349,7 @@
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
 
-- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 2）
+- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 2）
 - 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
@@ -886,8 +886,8 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 - [Homebrew の tmux の formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/t/tmux.rb)
 - [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`、`--spawn`、Limitations（SSH の切断後も残すには tmux か screen、10 分の終了）、4 時間以内の再開
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) — `Ctrl+B`（tmux では 2 回）
-- [Claude Code](../almalinux-setup.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — 同じことを Windows で行う手順書
+- [Claude Code](../ai-agents.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順) — 同じことを Windows で行う手順書
 - [Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
 
 ---
@@ -1269,7 +1269,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ##### WezTerm: Windows 11 で入れる経路
 
 - **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
-  - [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
+  - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
@@ -1613,7 +1613,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 #### Claude Code: 実施手順 / 手順 1: 補足: 変数について
 
-- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
+- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
 - ネイティブインストーラ版にある `autoUpdatesChannel` / `minimumVersion` の設定は dnf 版では効かない（更新を行うのが dnf のため）
 
 #### Claude Code: 更新 / 手順 1: 補足: dnf 版が自分で更新できない理由
@@ -1622,7 +1622,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 #### Claude Code: stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
 
-- 以後の `sudo dnf upgrade claude-code`（[更新](../almalinux-setup.md#更新)）は `stable` の版を追う
+- 以後の `sudo dnf upgrade claude-code`（[更新](../ai-agents.md#更新)）は `stable` の版を追う
 
 #### Claude Code: 選択した方針
 
@@ -1641,7 +1641,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 - `stable` は 1 週間ほど遅れて、大きな不具合のある版を飛ばす
 - `latest` は出た版をすぐ配る
-- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)）
+- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)）
 
 **既定を `latest` にした理由**:
 
@@ -1650,7 +1650,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
 
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
-- **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../windows-setup.md#claude-code)の手順 4 の補足）
+- **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 の補足）
 - **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ節の手順 5）
 - **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ節の手順 7）。インストーラの中で動く前の確かめにはならない
 - **Git for Windows を前提にした**: 公式の文書では任意だが、Claude Code の Bash のツール（と Monitor のツール）が Git Bash を使う。[Windows 11 の初期設定](../windows-setup.md)のリードの順で、先に入れる
@@ -1659,7 +1659,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 - [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、アンインストール、署名の検証。Windows 11 の節は、Set up on Windows・Install a specific version（チャンネルを選ぶ形）・Update manually・Binary integrity and code signing・Uninstall の Windows PowerShell
 - [Troubleshoot installation and login — Claude Code Docs](https://code.claude.com/docs/en/troubleshoot-install) — インストールが失敗したときの切り分け。Windows 11 の節は、Verify your PATH・Check for conflicting installations・`claude.exe` missing after an update on Windows・Claude Code does not support 32-bit Windows・Git Bash を探す順
-- [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)）
+- [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) / [Commands](https://code.claude.com/docs/en/commands) — セッションの中のキーとスラッシュコマンド
 - [Run Claude Code programmatically](https://code.claude.com/docs/en/headless) — `-p` と `--output-format`
 - [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp) — `claude mcp` とスコープ
@@ -1669,7 +1669,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - [winget-pkgs の Anthropic.ClaudeCode](https://github.com/microsoft/winget-pkgs/tree/master/manifests/a/Anthropic/ClaudeCode) / [scoop の main/claude-code](https://github.com/ScoopInstaller/Main/blob/master/bucket/claude-code.json) — Windows 11 で採らなかった経路の定義
 - [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
 - [Windows 11 の初期設定](../windows-setup.md) — 同じ PC で先に行う設定（貼り付けの設定と、この文書を通す順）
-- [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
+- [windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
 
 ---
 
@@ -1778,7 +1778,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
   - API キー（`XAI_API_KEY`）は、ログインが無いときだけ使われ、API の従量課金になる
   - 利用者の契約がサブスクリプション（SuperGrok / X Premium）なので、API キーの手順は置かない
 - 非公式の grok-cli（superagent-ai の `grok-dev`）は採らない。同じ `grok` の名前と `~/.grok` を使い、2026-05 から更新が止まっている（調査時）
-- 確認用のディレクトリでの起動は [codex.md](../almalinux-setup.md#codex-cli) と同じ形にした（`~/grok-sandbox`）
+- 確認用のディレクトリでの起動は [codex.md](../ai-agents.md#codex-cli) と同じ形にした（`~/grok-sandbox`）
 
 #### Grok Build: 実施手順 / 手順 1: 名前がぶつかるもの
 
@@ -1806,7 +1806,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
   - 初回は元の `~/.bashrc` を `~/.bashrc.bak.<UNIX 時刻>` に控える。2 回目からは、前のブロックを消して末尾に足し直す（ブロックの前の空行が 1 つずつ増える）
   - 書かせない設定（環境変数など）はインストーラーに無い。`SHELL` が bash・zsh・fish 以外のときだけ書かない
   - `~/.bashrc` がリンクなら、リンク先のファイルを書き換える
-- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../extra/almalinux-setup.md#ai-エージェントとプラグインを消す)の手順 3 で消す（codex.md のインストーラーが足すブロックと同じ扱い）
+- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../extra/ai-agents.md#ai-エージェントとプラグインを消す)の手順 3 で消す（codex.md のインストーラーが足すブロックと同じ扱い）
   - 共通の bash 設定より後ろで読まれるので、`~/.grok/bin` が PATH の先頭に来る
 - インストーラー（`install.sh`）は、配布物のハッシュや署名を確かめない（Windows の `install.ps1` が同梱の Git の zip の SHA-256 を確かめるだけ）
 

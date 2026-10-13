@@ -1,4 +1,4 @@
-# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim・AI エージェント）のロールバックと注意点
+# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim）のロールバックと注意点
 
 [手順書](../almalinux-setup.md)・[検証記録](../verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
 
@@ -8,7 +8,6 @@
 ## ロールバック
 
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - AI エージェント: [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
   - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1、git-delta は 2・3、GitHub CLI は 4〜8、Git の設定は 9〜13
   - 端末とエディタ: [端末とエディタを消す](#端末とエディタを消す)の手順で、yazi は 1、自分用の Neovim の設定は 2、Neovim は 3・4、Node.js は 5、デスクトップの等幅のフォントと Ctrl+Alt+T は 6、WezTerm は 7〜9（自分用の設定は 7）、HackGen Console NF は 10
   - ブラウザ: [Firefox を戻す](#firefox-を戻す)の手順 1〜5（AAC・H.264 のための FFmpeg だけなら 1）
@@ -19,10 +18,9 @@
   - PC 全体: [システムの設定を戻す](#システムの設定を戻す)の手順で、パッケージの案内は 1、kdump は 2、journal は 3、PC の名前は 4、再起動と確かめは 5・6、sudo は 7
 - 拡大率を 100% 以外にしていたら、[表示と入力を戻す](#表示と入力を戻す)の手順 8 の前に、設定の「ディスプレイ」の「スケーリング」で 100% に戻す
 - gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 2 と「GNOME の表示と入力」の手順 13 で控えた値に戻すなら、`reset` の代わりに `set` を使う
-- OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、「Codex CLI」の手順 2 のパッケージ、「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
+- OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
 - 任意節で変えたものは、その節の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)を通したなら、先にその節の手順 2 を行う
-  - [Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
-- 別の手順書で入れたもの（VS Code・Podman・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
+- 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#ロールバック)・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
 - この文書で入れたものは、この節の項を上から順に戻す（Homebrew を消す前に Homebrew のもの、RPM Fusion を消す前に[Firefox を戻す](#firefox-を戻す)の手順 1 の FFmpeg）
   - 自分用の設定は、[Git の道具を消す](#git-の道具を消す)と[端末とエディタを消す](#端末とエディタを消す)の中で戻す（Neovim と WezTerm は、それぞれのリポジトリのロールバックへ案内する。lazygit と yazi は、clone を残すか消すかを箇条書きに書いた）
 
@@ -34,131 +32,7 @@
 - [端末とエディタを消す](#端末とエディタを消す)から後の項は、WezTerm ではなく、Ptyxis（アクティビティの画面で `terminal`）に貼る（WezTerm を消すため）
 
 > [!CAUTION]
-> [Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順 2 は、**Homebrew で入れたものを全部消す**（この文書の yazi・Neovim などと、この文書の外で入れたものも。`~/.local/share/fonts` のフォントは残るので、先に[端末とエディタを消す](#端末とエディタを消す)の手順 10 で消す）。[システムの設定を戻す](#システムの設定を戻す)の手順 3 は、**ディスクに残した journal（前の起動のログ）を消す**。[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順 7 の後に閉じたシェルは、**`~/.bash_history` を既定の 1,000 行に切り詰める**（残す履歴は、同じ項の手順 2 で控える）。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 11 は、**`~/.grok`（ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree）を消す**（入れ直すかもしれないなら、行わない）。どれも取り戻せない。Claude Code の設定・履歴（`~/.claude/`・`~/.claude.json`）は、この節では消さない。手で消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える（消す前に中身を確認する）。
-
-### AI エージェントとプラグインを消す
-
-1. 2 つのプラグインとマーケットプレイスを外す。
-
-   ```bash
-   claude plugin uninstall codex@openai-codex
-   claude plugin uninstall grok-build@xai-grok-build
-   claude plugin marketplace remove openai-codex
-   claude plugin marketplace remove xai-grok-build
-   printf '\n\033[7m 確認 \033[0m\n'
-   claude plugin list
-   ```
-
-   - 最後の一覧に、2 つのプラグインが出なければよい
-   - プラグインのデータ（`~/.claude/plugins/data/` の下）も消える
-   - Node.js は、ここでは外さない（[端末とエディタを消す](#端末とエディタを消す)の手順 5）
-
-1. Claude Code を消す。
-
-   ```bash
-   sudo dnf remove claude-code
-   ```
-
-   - 設定・履歴（`~/.claude/`、`~/.claude.json`、プロジェクト側の `.claude/`、`.mcp.json`）は残る
-   - 確認用のディレクトリ `~/claude-sandbox`（[Claude Code](../almalinux-setup.md#claude-code)の手順 5）も残る。要らなければ手で消す
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. repo ファイルを消す。
-
-   ```bash
-   sudo rm -f /etc/yum.repos.d/claude-code.repo
-   ```
-
-1. 鍵も消すときだけ、署名鍵を消す。
-
-   ```bash
-   sudo rpm -e gpg-pubkey-1a7ecace-69caef70          # 鍵も消す場合
-   ```
-
-1. 起動中の Codex を終了し、ログイン情報も外す場合はログアウトする。
-
-   ```bash
-   codex logout
-   ```
-
-   - ログイン情報を共有するエディタの拡張機能なども、次回ログインが必要になる
-
-1. この手順で入れたリンクと配布物を消す。
-
-   ```bash
-   rm -f ~/.local/bin/codex ~/.local/bin/codex-code-mode-host
-   rm -rf ~/.codex/packages/standalone
-   hash -r
-   printf '\n\033[7m 確認 \033[0m\n'
-   command -v codex
-   ```
-
-   - 最後に何も出なければ、PATH 上に Codex は無い
-   - パスが出る場合は、別の導入方法の Codex が残っている
-   - `~/.codex` 全体は消さない（設定・会話履歴などが入っている）
-   - 確認用のディレクトリ `~/codex-sandbox`（[Codex CLI](../almalinux-setup.md#codex-cli)の手順 8）も残る。要らなければ手で消す
-
-1. インストーラーが PATH のブロックを足した場合だけ、シェルの設定を戻す。
-
-   - `~/.bashrc` の `# >>> Codex installer >>>` から `# <<< Codex installer <<<` までをエディタで削除する
-   - `~/.local/bin` 自体や、ほかのツールが書いた PATH の行は消さない
-   - 新しい端末を開いて確認する
-
-1. 起動中の Grok を終了し、ログイン情報も外すならログアウトする。
-
-   ```bash
-   grok logout
-   ```
-
-   - ログインしていなければ `No cached session to log out of.` と出る
-
-1. この手順で入れたリンクと配布物を消す。
-
-   ```bash
-   for f in ~/.local/bin/grok ~/.local/bin/agent; do
-     case "$(readlink "$f")" in
-       "$HOME/.grok/"*) rm -f "$f" ;;
-     esac
-   done
-   rm -f ~/.grok/bin/grok ~/.grok/bin/agent
-   rm -rf ~/.grok/downloads ~/.grok/completions
-   hash -r
-   printf '\n\033[7m 確認 \033[0m\n'
-   command -v grok agent
-   ```
-
-   - 最後に何も出なければ、PATH 上に Grok は無い
-   - `~/.local/bin` の `grok`・`agent` は、`~/.grok` を指すリンクだけを消す（ほかのツールの `agent` は残る）
-   - パスが出る場合は、別の導入方法の Grok か、別のツールの `agent` が残っている
-   - 確認用のディレクトリ `~/grok-sandbox`（[Grok Build](../almalinux-setup.md#grok-build)の手順 7）も残る。要らなければ手で消す
-
-1. インストーラーが `~/.bashrc` に足したブロックを消す。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if grep -qx '# >>> grok installer >>>' ~/.bashrc && grep -qx '# <<< grok installer <<<' ~/.bashrc; then
-     sed -i --follow-symlinks '/^# >>> grok installer >>>$/,/^# <<< grok installer <<<$/d' ~/.bashrc
-     grep -c 'grok' ~/.bashrc
-   else
-     echo '中断: ~/.bashrc に grok installer の印が 2 つそろっていない。エディタで確かめる' >&2
-   fi
-   ```
-
-   - 最後に `0` が出れば、`~/.bashrc` に Grok の行は無い（ほかに grok を含む行を自分で書いていれば、その数が出る）
-   - ブロックの前の空行は残る。`~/.bashrc.bak.<数字>` も残るので、要らなければ手で消す
-   - 新しい端末を開いて確かめる
-   - この項の手順 8〜10 で、ログイン・CLI・PATH の設定を外す。ログイン情報・会話の記録・設定（`~/.grok` の残り）は残る
-
-1. 完全に消すときだけ、`~/.grok` を消す（取り戻せない）。
-
-   ```bash
-   rm -rf ~/.grok
-   printf '\n\033[7m 確認 \033[0m\n'
-   ls -ld ~/.grok
-   ```
-
-   - `No such file or directory` になればよい
-   - Grok が作った worktree（`~/.grok/worktrees` の下）も消える。中の作業が要るなら、先に取り込む
+> [Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順 2 は、**Homebrew で入れたものを全部消す**（この文書の yazi・Neovim などと、この文書の外で入れたものも。`~/.local/share/fonts` のフォントは残るので、先に[端末とエディタを消す](#端末とエディタを消す)の手順 10 で消す）。[システムの設定を戻す](#システムの設定を戻す)の手順 3 は、**ディスクに残した journal（前の起動のログ）を消す**。[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順 7 の後に閉じたシェルは、**`~/.bash_history` を既定の 1,000 行に切り詰める**（残す履歴は、同じ項の手順 2 で控える）。どれも取り戻せない。
 
 ### Git の道具を消す
 
@@ -316,7 +190,7 @@
    sudo dnf remove nodejs nodejs-npm
    ```
 
-   - [Codex・Grok のプラグイン](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1 と、自分用の Neovim の設定（その導入の手順 3）が入れたもの。プラグイン（[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1）と自分用の設定（この項の手順 2）を外してから行う
+   - [AI エージェントの手順書の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1 と、自分用の Neovim の設定（その導入の手順 3）が入れたもの。プラグイン（[AI エージェントのロールバックの「AI エージェントとプラグインを消す」](ai-agents.md#ai-エージェントとプラグインを消す)の手順 1）と自分用の設定（この項の手順 2）を外してから行う
    - [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入-実施手順) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
    - bubblewrap は外さない（Flatpak と GNOME のデスクトップも使う）
    - トランザクション表の `Removing:` に `nodejs` と `nodejs-npm`、`Removing unused dependencies:` に一緒に入った `nodejs-libs`・`libuv` などが出る。ほかに使っているパッケージが出たら `N` で止める。よければ `y` と答える
@@ -1012,17 +886,9 @@
 - **eza の `--git` は大きなリポジトリで遅くなる**: 毎回 git の状態を引くため。気になるなら `--no-git`、リポジトリの一覧だけなら `--git-repos-no-status`
 - **bat を EPEL 版と二重に入れない**: どちらも `bat` という名前で、PATH の先頭にある Homebrew 版が勝つ
 - **bat のテーマの見え方は端末に依存する**: `ansi` 以外を選ぶと端末の配色とぶつかることがある。true color が出るかは端末側の設定次第
-- **Claude Code の `Ctrl+B` は、tmux の中では 2 回押す**: `Ctrl+b` → `Ctrl+b` で中のアプリに `Ctrl+b` を送る
 - **BaseOS の tmux と混ぜない**: 同じソケットを使うので、版の違うクライアントからはセッションにつなげない（[検証記録](../verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
 - **tmux のセッションがログアウトしても残るのは、`KillUserProcesses=no` のとき**: AlmaLinux 10 の既定。`yes` にしたホストでは、ログアウトでセッションも止まるはず
 - **PC を再起動すると、tmux のセッションも中のコマンドも消える**: 起動時に始め直す仕組みは、本書では作らない
-- **Remote Control の性質**（公式ドキュメント。[Windows の手順書の注意点](windows-claude-remote-control.md#注意点)にも同じ内容）
-  - このホストからは外向きの HTTPS だけで、受信のポートは開けない
-  - つないでいる間、会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される
-  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる。tmux の中のシェルは残るので、[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の手順 8 で入り、その節の手順 4 のコマンドを打ち直す
-  - 止めてから約 4 時間以内なら、`claude remote-control` で同じセッションが戻る
-  - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`・`DISABLE_GROWTHBOOK`・`ANTHROPIC_BASE_URL`（`api.anthropic.com` 以外）があると使えない
-- **tmux でマウスを on にすると、Claude Code の画面でもホイールは tmux が受け取る**: コンテナの Claude Code（ログインしていない最初の画面）は、マウスの報告も代替画面も使っていなかった（`#{mouse_any_flag}` と `#{alternate_on}` が 0）。ホイールは tmux のコピーモードに入る
 - **Git: リポジトリの `local` の設定は `global` に勝つ**
   - リポジトリの中で `git config --show-scope --get pull.rebase` と打つと、効いている値と場所が出る
   - `.gitattributes` の `text`・`eol` も、`core.autocrlf` より優先される
@@ -1111,21 +977,3 @@
 - **yazi: 画像プレビューは端末に依存する**: Kitty / WezTerm / foot などのグラフィックプロトコル、または Überzug++ が要る。GNOME 端末では文字ベースの表示になる
 - **yazi: `q` と `Q`**: `y` 関数経由なら `q` で終了時にそのディレクトリへ移動し、`Q` なら移動しない
 - **yazi: Homebrew の更新は自分の責任で**: `brew upgrade` は指定しなければ全 formula を上げる。yazi だけ上げるなら `brew upgrade yazi`
-- **Claude Code: `latest` は不具合のある版もそのまま届く**: `stable` なら飛ばされる版も入る。困ったら [Claude Code を stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)
-- **Claude Code: 自動更新しない**: ネイティブインストーラ版と違い、dnf 版は自分では更新しない
-  - `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` は Homebrew / WinGet 向けで、apt / dnf / apk は root 権限が要るため対象外
-- **Claude Code: 更新の通知が先に来ることがある**: リポジトリに新しい版が届く前に「更新がある」と言われることがある。その場合は時間をおいて `sudo dnf upgrade claude-code`
-- **Claude Code: `claude` が 2 つ入ると混乱する**: ネイティブインストーラや npm で入れたものが `~/.local/bin/claude` にあると、PATH の順序でそちらが勝つ。`command -v claude` と `claude doctor` で確認する
-- **Claude Code: アカウントが要る**: 無料の claude.ai プランでは使えない
-- **Claude Code: 設定ファイルは残る**: `dnf remove` しても `~/.claude` は消えない
-- **Claude Code: `-p` は許可を聞けない**: 許可の要るツールは断られ、JSON の `permission_denials` に残る。要るものは `--allowedTools` で渡す（[Claude Code の使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)）
-- **Claude Code: SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)）
-- **Grok Build: 非公式の grok-cli と名前がぶつかる**: npm の `grok-dev`（もとは `@vibe-kit/grok-cli`）も `grok` のコマンドと `~/.grok` を使う。両方は入れない
-- **Grok Build: `agent` のコマンドも入る**: 中身は `grok` と同じ。インストーラーは、`~/.local/bin` に `agent` があっても `ln -sf` で置き換える（Cursor の CLI など、ほかの `agent` を使っているなら、入れた後に確かめる）
-- **Grok Build: `XAI_API_KEY` を設定すると、ログインが無いときに API キーで動く**（API の従量課金になる）。サブスクリプションで使うなら設定しない
-- **Grok Build: sandbox は既定で無効**: `--sandbox workspace`・`--sandbox read-only` などで、書ける場所を絞れる。Linux では Landlock が有効なカーネルと bubblewrap が要る（`sudo dnf install -y bubblewrap`。GNOME のデスクトップの PC には Flatpak と一緒に入っている）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）
-  - `runtime-socket deny path` と `Permission denied (os error 13)` が出たら、ソケットの親ディレクトリの検索権限を確かめる。ソケット本体の権限を緩める必要は無い。このときの Grok のレビューは動いていないので、[コーディングエージェントの共同作業の「相互にレビューする」](../almalinux-setup.md#コーディングエージェントの共同作業-相互にレビューする)の代替へ進む
-  - カーネルの保護を適用できないエラー（`could not apply the '<プロファイル>' sandbox profile`）が出たら、Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。bubblewrap を入れただけで解決したとは扱わない（[起動できないときの補足](../reference/almalinux-setup.md#grok-build-注意点-linux-の-sandbox-を起動できないとき)）
-- **Grok Build: Claude Code の指示書も読む**: AGENTS.md のほかに、CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（読み込まれたものは `grok --trust inspect` の `Project Instructions`）。読むのは信頼したフォルダーだけ
-- **Grok Build: 会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](../reference/almalinux-setup.md#grok-build-注意点-会話のデータの扱い)）
-- **Codex・Grok のプラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1 の後に、[端末とエディタを消す](#端末とエディタを消す)の手順 5）

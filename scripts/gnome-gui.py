@@ -2,7 +2,7 @@
 """GNOME のセッションの画面を撮り、キーボードとポインタの入力を送る。
 
 docs/almalinux-setup.md の「GNOME のヘッドレスセッション: 実施手順」で常駐させ、
-同書の「Claude Code の GNOME 操作: 実施手順」で仮想モニターを付けたセッションを、
+docs/ai-agents.md の「Claude Code の GNOME 操作: 実施手順」で仮想モニターを付けたセッションを、
 同じユーザーのシェル（SSH など）から扱う。Claude Code が GUI の動作を確かめるときに使う。
 使うのは Mutter の公式の D-Bus API で、GNOME Shell の unsafe mode は要らない。
 
@@ -78,7 +78,7 @@ def primary_connector():
     if logical and logical[0][5]:
         return logical[0][5][0][0]
     sys.exit('中断: モニターが 1 枚も無い。gnome-shell に --virtual-monitor が付いていない'
-             '（docs/almalinux-setup.md の「Claude Code の GNOME 操作: 実施手順」）')
+             '（docs/ai-agents.md の「Claude Code の GNOME 操作: 実施手順」）')
 
 
 def start_and_wait(session_path, session_iface, stream_path):

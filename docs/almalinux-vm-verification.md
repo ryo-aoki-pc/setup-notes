@@ -42,7 +42,7 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 |---|---|
 | [Git](almalinux-setup.md#git) | 導入・設定・一時リポジトリの操作。認証を伴う GitHub への送信は除外 |
 | [Homebrew](almalinux-setup.md) / [EPEL](almalinux-setup.md) | 新規導入、PATH と導入元の確認。インストーラの Return / sudo / パッケージ導入の問い合わせにも答えた |
-| [gh](almalinux-setup.md#github-cli) / [Claude Code](almalinux-setup.md#claude-code) / [Codex CLI](almalinux-setup.md#codex-cli) | 導入・版・未ログインの確認まで。Codex はインストーラの再実行で 0.160.0 → 0.160.1 の更新も確認。実アカウントへのログインと認証後の操作は除外 |
+| [gh](almalinux-setup.md#github-cli) / [Claude Code](ai-agents.md#claude-code) / [Codex CLI](ai-agents.md#codex-cli) | 導入・版・未ログインの確認まで。Codex はインストーラの再実行で 0.160.0 → 0.160.1 の更新も確認。実アカウントへのログインと認証後の操作は除外 |
 | [btop](almalinux-setup.md#btop-実施手順) / [tmux](almalinux-setup.md) / [bat](almalinux-setup.md) / [eza](almalinux-setup.md) / [gdu](almalinux-setup.md#gdu-実施手順) | 導入と実行。TUI は文字を読み取り、キーの応答と終了を確認 |
 | [zoxide](almalinux-setup.md) / [fzf](almalinux-setup.md) | bash の設定を読み直し、移動・履歴・ファイル・ディレクトリ選択を実際に操作 |
 | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](almalinux-setup.md#neovim) / [delta](almalinux-setup.md#git-delta) | 導入と対話操作。yazi の追加ツールは本文の既定を全て導入し、ディレクトリ移動・ZIP プレビューも確認。Neovim の checkhealth はエラー無し、任意 provider などの警告 8 件。delta のページャと複数の変更間の n / N の移動も成功 |
@@ -53,7 +53,7 @@ VM の準備では、VirtualBox の無人インストールの生成物に Kicks
 | 手順書 | 今回の範囲と結果 |
 |---|---|
 | [電源とロック](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) | ユーザー・GDM・OS の設定を実行して読み戻し。Workstation の自動サスペンドを止めた |
-| [ヘッドレスのセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) / [GUI の操作](almalinux-setup.md#claude-code-の-gnome-操作-実施手順) | セッションと仮想モニターを作り、画面を撮影。電卓への入力とクリックを確認。GUI 構成を戻した後の再起動でも 1920×1080 の撮影・入力・クリックが成功 |
+| [ヘッドレスのセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) / [GUI の操作](ai-agents.md#claude-code-の-gnome-操作-実施手順) | セッションと仮想モニターを作り、画面を撮影。電卓への入力とクリックを確認。GUI 構成を戻した後の再起動でも 1920×1080 の撮影・入力・クリックが成功 |
 | [日本語入力](almalinux-setup.md) | Anthy を有効にして実際に日本語を確定。Mutter のキーコード入力で `日本語` を確認。既存スクリプトの keysym によるローマ字入力は別の制限として記録 |
 | [RPM Fusion](almalinux-setup.md) / [Firefox](almalinux-setup.md#firefox) | リポジトリ・Firefox・FFmpeg の導入。H.264 / AAC の動画を表示し、復号フレームの増加を確認。音声の実出力と GPU デコードは未確認 |
 | [Flatpak](almalinux-setup.md) / [VS Code](almalinux-setup.md#vs-code-実施手順) | 導入と実ウィンドウの起動。VS Code の desktop ファイルの確認方法を修正。Flatseal は Activities と CLI 検索で見えるが、GNOME Software の検索では表示されなかった |

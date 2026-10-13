@@ -1,6 +1,6 @@
 # setup-notes
 
-構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。
+構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。
 
 実施範囲・成功と失敗は [検証記録](docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。
 
@@ -38,14 +38,14 @@
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
-- AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、共通の bash 設定・Homebrew と starship・zoxide・fzf・eza・bat・tmux、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build）
+- AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、共通の bash 設定・Homebrew と starship・zoxide・fzf・eza・bat・tmux、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi）
   - 下の表の EPEL・RPM Fusion・Flatpak / Flathub・Homebrew は、同書の「EPEL と RPM Fusion」の手順 1・2〜5、「Flatpak と Flathub」の手順 1〜3、「Homebrew」の手順 1〜3
-  - Git から Codex・Grok のプラグインまでは、同書の「tmux を試す」と「再起動と確認」の間の項で入れる（Neovim・WezTerm・lazygit・yazi の自分用の設定も）
+  - Git から yazi までは、同書の「tmux を試す」と「再起動と確認」の間の項で入れる（Neovim・WezTerm・lazygit・yazi の自分用の設定も）
   - 常時動かしておく PC の画面オフ・画面ロック・自動サスペンド、SSH を公開鍵だけにする、dnf-automatic、Wake on LAN は、同書の任意節
-- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・HackGen Console NF・Git for Windows・Firefox・WezTerm と、Git Bash のシェルのツール・git-delta・GitHub CLI・Neovim・lazygit・yazi・Claude Code・Codex CLI・Grok Build）
+- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・HackGen Console NF・Git for Windows・Firefox・WezTerm と、Git Bash のシェルのツール・git-delta・GitHub CLI・Neovim・lazygit・yazi）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi・Claude Code・Codex CLI・Grok Build）は、同書の項で入れる。VirtualBox・WireGuard は、同書の [VirtualBox](docs/windows-setup.md#virtualbox-windows-11-で使う)・[WireGuard](docs/windows-setup.md#wireguard-windows-11-で使う) の任意節で入れる
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi）は、同書の項で入れる。VirtualBox・WireGuard は、同書の [VirtualBox](docs/windows-setup.md#virtualbox-windows-11-で使う)・[WireGuard](docs/windows-setup.md#wireguard-windows-11-で使う) の任意節で入れる
   - 任意節で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 同じく任意節で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
   - AlmaLinux 10 の初期設定の「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同書の「[シェルのツールを入れる](docs/windows-setup.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
@@ -69,7 +69,7 @@
 
 ### ほかの手順書が使う仕組み
 
-- 複数の用途が使う設定は2冊の項・節にまとめ、使う側のリードから該当項へ案内する
+- 複数の用途が使う設定は正本の項・節にまとめ、使う側のリードから該当項へ案内する
 - Windows 11 の貼り付けの設定と LAN をプライベートにする手順は、インストール直後に通す [Windows 11 の初期設定](docs/windows-setup.md)の手順（「貼り付けの設定」の手順 1〜4・「ネットワークとリモート」の手順 1）で、使う側の手順書はその手順を名指しする
 - AlmaLinux 10 の EPEL・RPM Fusion・Flathub・Homebrew は、インストール直後に通す [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の手順（「EPEL と RPM Fusion」の手順 1・2〜5、「Flatpak と Flathub」の手順 1〜3、「Homebrew」の手順 1〜3）で、画面オフ・画面ロック・自動サスペンドを止めるのは同書の任意節。使う側の手順書はその手順と節を名指しする
 - 設定はユーザーやホストに 1 つなので、別の用途で設定済みなら確認だけでよい。元に戻すのは、その設定を必要とする用途が無くなったとき
@@ -111,9 +111,9 @@
   - 同じ PC の WSL をミラー（[Windows 11 の初期設定の任意節](docs/windows-setup.md#wsl-のネットワークをミラーにする任意)）にしたら、WSL からは `127.0.0.1` でつなぐ
 - SSH クライアント（Windows）は、その逆向き。Windows 11 の PC から AlmaLinux 10 のホストに、ed25519 の鍵で入る。鍵と `%USERPROFILE%\.ssh\config` の接続先は、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）で共有する。ssh-agent は使わない（パスフレーズは毎回聞かれる）。**Windows の実機では流していない**（未検証）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
-- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AlmaLinux 10 の初期設定の tmux の任意節](docs/almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
+- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AI エージェントの手順書の tmux の任意節](docs/ai-agents.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
 - Grok Build には公式の遠隔操作の画面が無い。Grok Build をブラウザから操作する手順書は、OSS の Codeg のサーバーを Grok Build と同じホスト（AlmaLinux 10 のサーバー・Windows 11 の PC）に常駐させ、スマートフォンや PC のブラウザのチャット形式の画面から Grok Build を動かす。外部のサーバーは通らず、AlmaLinux 10 は待ち受ける IP と送信元 CIDR を絞る。Windows 11 は受信インターフェースが Private なら全送信元の IPv4・IPv6 と全接続種別を許可し、Public・Domain は遮断する。通信は HTTPS（同じホストの Caddy が、自分の認証局の証明書で受ける。端末にルート証明書を入れる）
-- 同じ Codeg で Claude Code と Codex CLI も操作する手順は、「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](docs/almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）。追加した手順の検証範囲は[検証記録](docs/verification/grok-build-remote.md)を参照する
+- 同じ Codeg で Claude Code と Codex CLI も操作する手順は、「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。追加した手順の検証範囲は[検証記録](docs/verification/grok-build-remote.md)を参照する
 - Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定の「ネットワークとリモート」](docs/windows-setup.md#ネットワークとリモート)の手順 2（Pro 以上。受信の規則をプライベートの LAN に絞る）
 - Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 - リモートの操作ができなくなったときに備えて再起動の経路を増やすのは、[Windows 11 の初期設定](docs/windows-setup.md#リモートから再起動する手段を増やす任意)の任意節（既にある SSH・RDP・Remote Control からの再起動に加え、別の PC からの SMB〔`net rpc shutdown`・`shutdown /m`〕・WinRM、クラッシュ時の自動再起動、ネットワーク断で自分で再起動する見張りタスク）。SMB・WinRM は管理の口を LAN に開け UAC のリモート制限を緩めるので任意。**Windows の実機では未検証**
@@ -127,8 +127,8 @@
 | [GNOME のデスクトップ共有](docs/almalinux-setup.md#gnome-のデスクトップ共有-実施手順) | RDP クライアントと、遠隔の PC の画面に自動ログインした GNOME のデスクトップ | 接続される PC（共有するユーザーの SSH のシェル。PC の画面は使わない） | `grdctl`（オプション無し）とユーザーの `gnome-remote-desktop.service`、GDM の自動ログイン。資格情報はパスワードの無いキーリング `rdp` | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー（Windows 11 の初期設定の「OpenSSH サーバー」）](docs/windows-setup.md#openssh-サーバー) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順) | Windows 11 の PC と AlmaLinux 10 のホスト（SSH の鍵と接続先） | 接続する PC（Windows。指紋を見るところだけホスト。公開鍵はホストの `authorized_keys` に Windows から足す） | Windows の OpenSSH クライアント（`System32\OpenSSH`）と Git for Windows の ssh。`%USERPROFILE%\.ssh` の ed25519 の鍵と config | 無し |
-| [Claude Code の Remote Control（Windows）](docs/windows-setup.md#claude-code-の-remote-control-実施手順) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
-| Grok Build をブラウザから操作（[AlmaLinux 10](docs/almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](docs/windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)）。Claude Code・Codex CLI も操作（[AlmaLinux 10](docs/almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)） | スマートフォン・PC のブラウザと、AlmaLinux 10 のサーバーや Windows 11 の PC で動く Grok Build・Claude Code・Codex CLI | 接続されるホスト（エージェントを使う一般ユーザーのシェル。Windows 11 は管理者ではない PowerShell。確認は別の PC のブラウザとスマートフォン） | Codeg の `codeg-server` と、HTTPS を受ける Caddy（どちらも GitHub の配布物をチェックサムで照合して置く）。アクセストークンで認証。AlmaLinux 10 は systemd のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順)、Windows 11 はタスク スケジューラ | 3443/tcp（AlmaLinux 10 は送信元 CIDR と宛先 IP を絞る。Windows 11 は Private の全送信元・全接続種別を許可し、Public・Domain と Edge Traversal は遮断） |
+| [Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
+| Grok Build をブラウザから操作（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）。Claude Code・Codex CLI も操作（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)） | スマートフォン・PC のブラウザと、AlmaLinux 10 のサーバーや Windows 11 の PC で動く Grok Build・Claude Code・Codex CLI | 接続されるホスト（エージェントを使う一般ユーザーのシェル。Windows 11 は管理者ではない PowerShell。確認は別の PC のブラウザとスマートフォン） | Codeg の `codeg-server` と、HTTPS を受ける Caddy（どちらも GitHub の配布物をチェックサムで照合して置く）。アクセストークンで認証。AlmaLinux 10 は systemd のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐-実施手順)、Windows 11 はタスク スケジューラ | 3443/tcp（AlmaLinux 10 は送信元 CIDR と宛先 IP を絞る。Windows 11 は Private の全送信元・全接続種別を許可し、Public・Domain と Edge Traversal は遮断） |
 | [RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順) | RDP のクライアントと Windows 11 の PC のデスクトップ（切るときに、セッションを PC の画面へ戻す） | 接続される PC（Windows。RDP でつないだセッションの中の管理者の PowerShell に貼る。確認は SSH か PC の前） | `tscon.exe <セッションの ID> /dest:console`（任意で、管理者として実行するデスクトップのショートカット） | 無し（RDP の 3389/tcp は、[Windows 11 の初期設定の「ネットワークとリモート」の手順 2](docs/windows-setup.md#ネットワークとリモート)か、Windows の設定のリモート デスクトップが開ける） |
 
 | 手順書の無いツール | 用途 | 導入元 |
@@ -261,16 +261,16 @@
 ### 開発の補助
 
 - 言語処理系は AppStream / BaseOS にある（Node.js・Python・Go・Rust）。別の版が要るときに mise を使う
-- Claude Code・Codex CLI・Grok Build と、Claude Code から Codex と Grok に頼む公式のプラグインは、初期設定（[AlmaLinux 10](docs/almalinux-setup.md#claude-code)・[Windows 11](docs/windows-setup.md#claude-code)）で入れてログインする。そのうえで、[コーディングエージェントの共同作業](docs/almalinux-setup.md#コーディングエージェントの共同作業-実施手順)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree。スマートフォンからは Remote Control で Claude に頼むか、Codeg の手順〔[AlmaLinux 10](docs/almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)〕で各エージェントに直接頼む）
+- Claude Code・Codex CLI・Grok Build と、Claude Code から Codex と Grok に頼む公式のプラグインは、[AI コーディングエージェントのセットアップ](docs/ai-agents.md)（[AlmaLinux 10](docs/ai-agents.md#claude-code)・[Windows 11](docs/ai-agents.md#windows-11-で-claude-code-を入れる)）で入れてログインする。そのうえで、[コーディングエージェントの共同作業](docs/ai-agents.md#コーディングエージェントの共同作業-実施手順)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree。スマートフォンからは Remote Control で Claude に頼むか、Codeg の手順〔[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)〕で各エージェントに直接頼む）
 
 | 手順・用途 | 用途 | 導入元 | 更新 |
 |---|---|---|---|
 | [ShellCheck / shfmt](docs/almalinux-setup.md#shellcheck-と-shfmt-実施手順) | シェルスクリプトの静的検査と整形（`wg-vpn.sh` の検査にも使う） | Homebrew（shfmt に RPM が無いので、2 つとも揃えた） | `brew upgrade` |
-| [Claude Code（AlmaLinux 10 の初期設定の「Claude Code」）](docs/almalinux-setup.md#claude-code) | Claude Code の CLI（Node.js 不要）と、`claude` のコマンドラインの使い方（起動と再開・`-p`・MCP） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる）。Windows 11 は公式の native installer（`%USERPROFILE%\.local\bin\claude.exe`。PATH は手順書で足す） | `sudo dnf upgrade claude-code`（自動更新しない）。Windows 11 は自動の更新（`claude update` で今すぐ） |
-| [Codex CLI（AlmaLinux 10 の初期設定の「Codex CLI」）](docs/almalinux-setup.md#codex-cli) | OpenAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・認証・起動 | OpenAI 公式の standalone インストーラー（Linux は `~/.local/bin/codex`、Windows は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`） | 起動したときの `Update available!` で上げる（公式インストーラーの再実行でも上がる） |
-| [Grok Build（AlmaLinux 10 の初期設定の「Grok Build」）](docs/almalinux-setup.md#grok-build) | xAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・ログイン・起動 | xAI 公式のインストーラー（Linux は `~/.grok/bin/grok` で、`~/.bashrc` に PATH のブロックを足す。Windows は `%USERPROFILE%\.grok\bin\grok.exe`） | 自動の更新（対話の画面の起動時。`grok update` で今すぐ） |
-| [コーディングエージェントの共同作業](docs/almalinux-setup.md#コーディングエージェントの共同作業-実施手順) | Claude Code・Codex・Grok Build を 1 つのプロジェクトで使う（AGENTS.md の規則、エージェントごとの git worktree、相互のレビュー、main への取り込み、スマートフォンからの指示） | OpenAI と xAI の Claude Code 用の公式プラグイン（初期設定の「Codex・Grok のプラグイン」で入れる）。プラグインが使う Node.js は AppStream（Windows 11 は scoop の `nodejs`。無ければ `nodejs-lts`）、Grok の sandbox が使う bubblewrap は BaseOS | 初期設定の更新（`claude plugin update`。Node.js は OS の更新と `scoop update`） |
-| [Claude Code で GUI を確かめる](docs/almalinux-setup.md#claude-code-の-gnome-操作-実施手順) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
+| [Claude Code（AI エージェントの手順書の「Claude Code」）](docs/ai-agents.md#claude-code) | Claude Code の CLI（Node.js 不要）と、`claude` のコマンドラインの使い方（起動と再開・`-p`・MCP） | Anthropic 公式 dnf リポジトリの `latest` チャンネル（`stable` も選べる）。Windows 11 は公式の native installer（`%USERPROFILE%\.local\bin\claude.exe`。PATH は手順書で足す） | `sudo dnf upgrade claude-code`（自動更新しない）。Windows 11 は自動の更新（`claude update` で今すぐ） |
+| [Codex CLI（AI エージェントの手順書の「Codex CLI」）](docs/ai-agents.md#codex-cli) | OpenAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・認証・起動 | OpenAI 公式の standalone インストーラー（Linux は `~/.local/bin/codex`、Windows は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`） | 起動したときの `Update available!` で上げる（公式インストーラーの再実行でも上がる） |
+| [Grok Build（AI エージェントの手順書の「Grok Build」）](docs/ai-agents.md#grok-build) | xAI のコーディング用 CLI（Node.js 不要）。AlmaLinux 10 と Windows 11 の導入・ログイン・起動 | xAI 公式のインストーラー（Linux は `~/.grok/bin/grok` で、`~/.bashrc` に PATH のブロックを足す。Windows は `%USERPROFILE%\.grok\bin\grok.exe`） | 自動の更新（対話の画面の起動時。`grok update` で今すぐ） |
+| [コーディングエージェントの共同作業](docs/ai-agents.md#コーディングエージェントの共同作業-実施手順) | Claude Code・Codex・Grok Build を 1 つのプロジェクトで使う（AGENTS.md の規則、エージェントごとの git worktree、相互のレビュー、main への取り込み、スマートフォンからの指示） | OpenAI と xAI の Claude Code 用の公式プラグイン（AI エージェントの手順書の「Codex・Grok のプラグイン」で入れる）。プラグインが使う Node.js は AppStream（Windows 11 は scoop の `nodejs`。無ければ `nodejs-lts`）、Grok の sandbox が使う bubblewrap は BaseOS | AI エージェントの手順書の更新（`claude plugin update`。Node.js は OS の更新と `scoop update`） |
+| [Claude Code で GUI を確かめる](docs/ai-agents.md#claude-code-の-gnome-操作-実施手順) | Claude Code が、ヘッドレスのセッションの画面を撮り、キーボードとポインタで操作して GUI の動作を確かめる（前提は GNOME のヘッドレスのセッション） | このリポジトリの [`scripts/gnome-gui.py`](scripts/gnome-gui.py)（Mutter の ScreenCast / RemoteDesktop）と、gnome-shell の `--virtual-monitor` | このリポジトリの `git pull` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -376,7 +376,7 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/windows-setup.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合-実施手順)・[Hyper-V](docs/windows-setup.md#hyper-v-実施手順)・[VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合-実施手順)・[Hyper-V](docs/windows-setup.md#hyper-v-実施手順)・[VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、「Windows Update」の手順 2〜8 と、「PC 全体の設定」の手順 2 から「WSL と再起動」までの手順（OpenSSH サーバー・Git for Windows・Firefox・WezTerm を含む）が管理者。Store・scoop と、再起動の後の項は通常の窓（Git Bash と WezTerm のタブに貼る `bash` のブロックもある）。貼り付け設定前の「Windows Update」の手順 2〜8 と「Microsoft Store の更新」の手順 1〜7 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐・OpenSSH サーバーの節は管理者。ほかは通常の窓）
   - コーディングエージェントの共同作業は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）
@@ -395,7 +395,7 @@
 - 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。検証範囲は対応する検証記録に記載する
 - アラートは本文の最上位にだけ置く（GitHub は番号付きリストの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
 - コマンドは実行済みのものを載せ、未検証事項は明記する
-- 共有する前提（Podman・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は2冊の項・節へまとめ、使う側のリードから参照する。インストール直後に通す前提も、2冊の該当項を名指しする
+- 共有する前提（Podman・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は正本の項・節へまとめ、使う側のリードから参照する。インストール直後に通す前提も、正本の該当項を名指しする
 - [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。表の各行に確認の深さ（起動 / 導入 / メタデータ）を書き、調査日と検証の範囲は[検証記録](docs/verification/tool-catalog.md)に置く
 - 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/reference/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない

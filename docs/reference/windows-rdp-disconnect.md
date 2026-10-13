@@ -31,7 +31,7 @@
 
 ### 実施手順 / 手順 5: 補足: Remote Control の確認
 
-- 同じ節の手順 5 で `console` の行が `Active` になれば、[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 3 の確認（`console` の行が `Active`）も通る
+- 同じ節の手順 5 で `console` の行が `Active` になれば、[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 3 の確認（`console` の行が `Active`）も通る
 
 ### ショートカットで切断する（任意） / 手順 1: 補足: ショートカットの作り
 
@@ -76,6 +76,6 @@
 - MS-SHLLINK の [ShellLinkHeader](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/c3376b21-0931-45e4-b2fc-a48ac0e60d15)・[LinkFlags](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/ae350202-3ba9-4790-9e9e-98935f4ee5af)（`.lnk` のヘッダーと `RunAsUser`）、[SHELL_LINK_DATA_FLAGS](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ne-shlobj_core-shell_link_data_flags)（`SLDF_RUNAS_USER` = `0x00002000`）
 - [Disconnecting From Remote Desktop While Running Automated Tests — SmartBear TestComplete](https://support.smartbear.com/testcomplete/docs/testing-with/running/via-rdp/keeping-computer-unlocked.html)（`tscon … /dest:console` を管理者として実行する、ロックされないことの注意、`rdpclip.exe`）
 - [Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)（手順 4・5 の SSH）
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)（デスクトップにサインインしていることを前提にする手順書）
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)（デスクトップにサインインしていることを前提にする手順書）
 
 ---
