@@ -16,6 +16,10 @@
 - Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
 - 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
 - [共通パスワードの検証記録](../verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- 2026-10-13 の Windows 11 / x64 の実機に Codeg v0.35.1・Caddy 2.11.7 を新規導入し、タスク・待ち受け・受信規則を読み戻した
+  - 本人の共通認証入力と証明書登録後、TLS を検証した HTTPS の認証 200・未認証 401・誤値 401 を直接確認した
+  - Codeg 経由で Codex の Auto review と Grok 4.7 の短文の応答を確認。Grok の `auto` を保存し、Claude は接続後に週の利用上限で応答未確認
+  - 画面の通し操作・別端末からの許可と遮断・再起動後の起動・複数ホストの認証値一致は未確認。[今回の記録](../verification/grok-build-remote.md#付録-windows-11-の新規構築と3エージェント接続の検証2026-10-13-jst)で範囲を区別する
 - AlmaLinux 10 の共通パスワードも本人の伏せ字入力で設定する。`set-codeg-password.py` と公開 fixture を分け、失敗時の状態と本人の旧認証による確認は extra に置く
 - 2026-10-13 の AlmaLinux 10.2 / aarch64 の実機では、3 エージェントの ACP 接続と Codex・Grok の応答、共同作業プラグインの ready と直接呼出しを確認。Claude の応答は週の利用上限で未確認
 - 同日の AlmaLinux の公開は、LAN IPv4 と 3443/tcp を宛先に残して送信元制限を外した。委譲の公開設定は反映済みで、画面からの実際の委譲と親エージェントの承認設定は未確認
