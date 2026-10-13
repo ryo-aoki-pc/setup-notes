@@ -10,10 +10,25 @@
 - `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから2冊の新見出しへの対応表
 - `docs/verification/consolidation.md` — 集約の静的検査・回帰検査・Grok のレビューと、実機では未実施の範囲
 - [README](../../README.md) — 2冊の索引と、環境構築・共同 VM 検証の横断報告への案内。個別の実測は既存の検証記録へ残す
-- [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と初回試行の旧2確認/59未実施と、通常認証後の現在5通過/1条件skip/1未達partial/54未実施を分ける。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
+- [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と、初回試行の旧2/61・5/61、2026-10-13の42通過/4条件外/3部分確認/1失敗/11未実施を分ける。W0派生媒体はセットアップ分岐まで、V2はSDKとGUID/LUN/祖先mappingの追加確認のみ。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
 - 新しい手順は2冊の該当用途へ追加し、対応する記録とこの構成一覧を更新する
 - Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
 - Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
+
+### 2026-10-13 UTC の追加検証記録
+
+- `docs/verification/windows-setup.md` — [W0追加付録](../verification/windows-setup.md#付録-w0-の-basicdata-派生媒体とセットアップ画面2026-10-13-utc)
+  - BasicData FAT32＋SWM派生媒体で言語・キーボード・インストール分岐まで。後続phase03のWinPE CLIで80 GiB導入先・16 GiB媒体の2台を識別。削除同意未選択、source/targetのGUI認識・OS導入未実施。元Rufus UEFI:NTFS拒否と原文手順3未達を保持
+- `docs/verification/homebrew-offline.md` — [SSH承認後の初回取得](../verification/homebrew-offline.md#付録-ssh-承認後の初回オフライン取得2026-10-13-utc)
+  - Homebrew7.0.9・jq1.8.2/oniguruma初回bottleを確認。原文exitの閉鎖はpartial、切断後対照・jqオフライン実行・再起動Anthy未実施。旧既存継続と分ける
+- `docs/verification/npm-offline.md` — [初回取得とMason部分確認](../verification/npm-offline.md#付録-ssh-承認後の初回取得と-mason-の部分確認2026-10-13-utc)
+  - Node22.23.2/npm10.9.8・PONG、初回Mason Installed11・通知・実コマンドを確認。Installing中のnpm実コマンド未観測で手順3はpartial。切断後対照未実施
+- `docs/verification/neovim-offline.md` — [初回取得の記録](../verification/neovim-offline.md#対象と判定)を新設
+  - Neovim0.12.6・初回LazyVim clone・38 plugin directory・lock復元後dirty0・checkhealthを確認。RPM Fusion前提と後続全条件未達でNeovim3はpartial。実IMEは未確認
+- OFFLINE-FIRSTINSTALLの共通台帳は61件中42通過/4条件外/3部分確認/1失敗/11未実施。旧5通過を含み、上記3冊を合算しない。旧2/61・5/61と原文NOPASSWD ALL拒否を保持。2VM通常Off・自己lock解放、6GiB返却
+- `docs/verification/virtualbox-guest-bootc.md` — [V2 metadata04 final-02](../verification/virtualbox-guest-bootc.md#付録-v2-の-sdk-と-controller-対応の追加確認2026-10-13-utc)
+  - 旧inner Off/SDK/VDI48GiB parent nullと全GUID・LUN・実祖先一意mappingを確認。新inner/GUI/原文成功数追加0、旧lint11通過/1条件外/警告2件とp2 collector未実装を保持。outer通常Off・8GiB返却
+- `docs/hypervisor-verification.md` — [時点別集計と残件](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)を追記。公開result/completion由来で、文書編集中の追加実検証はない
 
 ## 統合前の文書構成と検証範囲（履歴）
 

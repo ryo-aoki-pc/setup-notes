@@ -2,6 +2,12 @@
 
 [手順書](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: V2 の metadata04 final-02 で SDK の旧 inner 停止・旧 VDI と、controller の全 GUID・LUN・実 sysfs 祖先の一意対応を確認した（[追加付録](#付録-v2-の-sdk-と-controller-対応の追加確認2026-10-13-utc)）
+  - 新しい inner・ストレージ・GUI の追加検証はない。2026-10-11 の lint は11通過・1条件外・警告2件で原文正常条件未達のまま
+  - GNOME 端末での原文通しと新 p2 の導入・GUI・lint 条件は未確認。今回の metadata 成立を原文手順や GUI の成功数へ足さない
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -1345,3 +1351,20 @@ Identification: VirtualBox 7.2.20 Guest Additions for Linux
 - 実行と停止・保存は 18:07〜19:22 UTC（約 76 分）。CLI 原文・seq・ブロック SHA-256・afterConfirm、媒体の checksum 原文・二重 hash、PNG・支援コードと個別時刻は共同検証の `queued-units/V2/` に保存。媒体・鍵・raw ログは Git に追加していない
 - GNOME 端末での原文の通し、内側 Secure Boot 有効時、ホストオンリー経路、新版への更新、kernel-rt・KDE・COSMIC・認証レジストリ、autostart と運用全体は未確認。Windows・オフライン経路・内側 KVM の未確認を埋める結果ではない
 - 公開文書ではユーザー名・IP を記載せず、ローカル試験用の VM 名だけを残した。過去の 2026-09 の成功範囲を今回の現行版の成功へ読み替えない
+
+## 付録: V2 の SDK と controller 対応の追加確認（2026-10-13 UTC）
+
+公開 `metadata04-followup-20261013/publication-proposal.md` と `handoff-metadata04/final-02` の実 result・completion に基づく追記。04:52:58〜04:53:28 UTC の約31秒、既存の専用 outer を通常起動して公開metadataを読み取り照会した。以前の SDK 返答後の祖先条件未達を保持し、新helperの fresh final-02 の成立を別経過として記録する。
+
+| 範囲 | final-02 の実確認 |
+|---|---|
+| SDK の旧 inner | 停止を確認。既知 VDI の論理容量48 GiB・parent nullを確認し、祖先／read-only no-follow handleで新たにplain pathを検査。VDI内容は未読 |
+| host／guest disk mapping | hostの既知leaf→drive→controllerとguest VMBusの全128-bit GUID、drive position／LUN、実sysfs祖先が一意に対応。serialのprefix切取りから推測していない |
+| 資源と停止 | 許可済みoffline peer 6 GiBとouter 8 GiB、計14 GiBで実VM／worker対応を照合。outer通常Off・自己lock解放、8192 MiB返却。停止込みleaf増分2 MiB、既存after-V2保持 |
+
+- **追加していない検証**: 新ストレージ・新innerの作成／起動、認証・provision、GUI原文通し、Guest Additions build・lint の再検証は未実施。他担当VM／lockは操作していない
+  - 2026-10-11のpartial、lint11通過・1条件外・警告2件とGNOME端末での原文通し未完は保持。旧GUI・共有の再起動後成功は過去の範囲で、今回の成功数へ再加算しない
+  - 新p2の導入・GUI・共有分岐・lint正常条件は未成立。`p2/runtime_gate.py` のactual collectorは未実装／falseのままで、旧innerのSDK確認を新p2 UUID／VDI／provision入力の成立へ読み替えない
+  - metadata01〜03のpartial、final-01のprepared・未実行、旧grantを保存した。peer ack待機解除は親handoffによる内部連携で、別の人間承認や独立担当ackがあったとは扱わない
+
+原文手順数・GUI成功数への追加は0。正式な性能比較も未完。[横断報告](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)へ同じ限定範囲を対応させる。今回の文書編集でVMを再起動・再検証していない。

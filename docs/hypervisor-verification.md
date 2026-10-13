@@ -8,7 +8,10 @@
   - 正式 B/C の測定と集計は終了。観測値を記録したが、ホスト作業の重複により方式間の性能比較は未完
   - C20-FOLLOWUP（2026-10-12）で、元 CL5 の一時 LAN を戻した WireGuard の原文確認と双方向疎通、本人の GNOME 端末での IBus 原文ファイル実行と日本語変換を追加確認した。下の付録に実行方法と範囲を分けて記録する
   - OFFLINE-FULL（2026-10-12）は既存2VMからの継続範囲の判定と記録を完了した。SOCKS経路・切断対照、Masonの既存導入状態とレジストリ更新、再起動後の日本語変換を確認。初回導入・新規Mason取得・初期設定全体の成功には含めない
-  - AS-FULL のクリーン起点再試行は153手順を134確認・5条件外・4成功条件未達・10未実施で判定完了。再起動後のGNOMEの日本語変換とNeovimのIME連携を確認した。認証省略・説明不一致・AS3の一部順序逸脱を保持し、全成功や厳密な全順序達成とは扱わない。初回オフライン試行は同じ専用2VMで通常sudo認証後の前提3件を追加確認し、現在5/61通過・1条件skip・1未達partial・54未実施（元sudo3を含む）。追加3件はSSH TTY搬送。SOCKS2のSSH認証送信は自動審査に拒否され、秘密未送信・初回取得未開始。旧partial・参照操作・既存継続を加算しない
+  - AS-FULL のクリーン起点再試行は153手順を134確認・5条件外・4成功条件未達・10未実施で判定完了。再起動後のGNOMEの日本語変換とNeovimのIME連携を確認した。認証省略・説明不一致・AS3の一部順序逸脱を保持し、全成功や厳密な全順序達成とは扱わない。初回オフライン試行は同じ専用2VMで通常sudo認証後の前提3件を追加確認し、2026-10-12 12:27 UTC時点で5/61通過・1条件skip・1未達partial・54未実施（元sudo3を含む）。追加3件はSSH TTY搬送。SOCKS2のSSH認証送信は自動審査に拒否され、秘密未送信・初回取得未開始。旧partial・参照操作・既存継続を加算しない
+  - 2026-10-13のW0派生媒体は言語・キーボード・インストール分岐まで確認。削除同意は未選択、ディスクGUI認識・OS導入は未実施。元Rufusの署名拒否と原文手順3未達を保持
+  - 同日のOFFLINE-FIRSTINSTALLは61件中42通過・4条件外・3部分確認・1失敗・11未実施。初回取得は成立し、Installing中のnpm表示・切断後対照・再起動IMEは未確認
+  - 同日のV2 final-02は旧inner停止とSDK・全GUID／LUN／sysfs祖先mappingを確認。新inner・GUIの追加成功は0。[追加付録](#付録-公開結果の追加確認2026-10-13-utc)に各時点と限界を分ける
 
 この文書は、既存証跡に基づく結果の一覧。現在の操作は [AlmaLinux 10](almalinux-setup.md)・[Windows 11](windows-setup.md) の2冊を使い、個別の範囲は対応する `verification/` の記録を参照する。[2026-10-06 の VM 検証](almalinux-vm-verification.md)とは別の試験で、過去の成功・失敗を今回の結果に置き換えない。
 
@@ -328,3 +331,58 @@ C20 の部分成功を保持し、既存 Hyper-V VM の現在状態で以下を�
 - オフラインの初回導入は既存継続と別のfresh起点・記録で準備する。未再現だったHomebrew本体・jq bottle・LazyVim clone・Mason新規取得を対象とし、通常onlineのAS-FULLをその成功根拠にしない。起動は専用枠付与後に行う
 - 全方式の稼働上限16GiB、C:空き40GiB以上、Windows1台、自己VMだけの操作を守る。各担当が空き容量だけで未付与の枠を起動しない
 - 性能測定は並行担当のVMと編集・検査・取得が終了した後の独立フェーズ。B/Cの除外訪問をこの並行検証中に再測定しない
+
+## 付録: 公開結果の追加確認（2026-10-13 UTC）
+
+W0 の boot03 公開提案と UI phase02 の result・completion、OFFLINE-FIRSTINSTALL の SSH承認後 result・completion、V2 metadata04 の公開提案と final-02 の実 completion を照合した追記。今回の編集ではVM・検証CLIを起動していない。画面到達・取得は担当の実観測をまとめた公開結果由来で、rawや画像の再読による新判定ではない。
+
+### W0 の派生媒体とセットアップ画面
+
+- Ready03の実helper03を使い、BasicData FAT32＋SWM派生コピーで02:04:28 UTCに言語画面へ到達した。immutable planの旧helper02指示はunusedの表示不一致として残す
+  - 公開proofは承認49 byte以外の一致、16 GiB論理byte比較、ファイル対応、公開媒体のwhole／identity照合を区別する。EFIのPE digestは同一公開byteの既往計算再利用で、新規計算ではない
+  - UI phase02では06:02〜06:04 UTCに言語・Microsoft IME／PC AT拡張101/102・インストール分岐を実確認。削除同意は未チェックで次へ無効のためpartial
+  - driver dialogは観測した画面で見えなかっただけ。source／targetのGUI認識、ライセンス同意・format・OS導入は未実施。元Rufus UEFI:NTFS拒否・旧FAT32未到達を残し、原文手順3成功へ代替しない
+  - 06:06:03 UTCに通常Off・割当0、8192 MiB返却。停止後の固定親・旧媒体・既存子の一致、holder・旧partial保持を確認。whole一致から実行時I/O0とは主張しない
+
+詳細と公開proofの範囲は [Windows の追加付録](verification/windows-setup.md#付録-w0-の-basicdata-派生媒体とセットアップ画面2026-10-13-utc)。W1〜W5や過去のWindows導入成功へ加算しない。
+
+後続のphase03では07:07:40〜07:15:10 UTCにWinPEの読み取り診断を実行した。物理ディスクは2台、disk 0は80 GB・全域空き・パーティション無し、disk 1は16 GB・GPT・FAT32媒体と確認し、freshなホストのSCSI0:0／0:1と一意に対応させた。司令塔もlist diskと導入先detailの実画像を確認した。通常Off・8192 MiB返却、停止後の固定入力一致を保持した。
+
+これはCLIでの識別で、セットアップGUIの対象選択・削除同意・ライセンス同意・format／installは未実施。W0全体や元媒体の成功へ代替しない。詳細は同じWindows追加付録のphase03に残す。
+
+### OFFLINE-FIRSTINSTALL の同一61番号と時点別判定
+
+凍結原文は `27857989d9f0b492b6bd6396fed3a8c2155ea7cf`。同じ専用2VMの継続で、原文・番号・分母を変更していない。
+
+| 記録の時点（UTC） | 分母 | 通過 | 条件外 | 部分確認 | 失敗 | 未実施 |
+|---|---:|---:|---:|---:|---:|---:|
+| 2026-10-12 11:17／初回中断 | 61 | 2 | 0 | 0 | 0 | 59 |
+| 2026-10-12 12:27／通常sudo認証後 | 61 | 5 | 1 | 1 | 0 | 54 |
+| 2026-10-13 04:58／SSH承認後 | 61 | 42 | 4 | 3 | 1 | 11 |
+
+- 最新42通過は旧5件と新規37件。同一ID61件の最新判定であり、2＋5＋42や用途別付録を合算しない。条件外4件は旧2種類のskip表記を集計上統合した値
+  - 初期不在10項目からHomebrew 7.0.9、jq 1.8.2／oniguruma bottle、Neovim 0.12.6、AppStream Node.js 22.23.2／npm 10.9.8とPONG、LazyVim初回clone・38 plugin directory・lock復元後dirty0を確認
+  - npm1・2を初回LazyVim手順10より先に実施。Mason実TUIのInstalled11件、現在のLSP開始・成功通知、11実コマンド・checkhealth ERRORなしを確認。registry更新と導入は別に判定
+
+| 最新の未達ID／原文の項・手順 | 理由 |
+|---|---|
+| epel3／EPEL と RPM Fusion・3（失敗1件） | `sudo rpm --import URL` が curl(6) DNS失敗。通常userのALL_PROXYによる取得とprivileged importは別。指紋一致だけでrpm登録成功とせず、epel4・5未実施 |
+| nvim3／Neovim・3（部分確認） | RPM Fusion前提と後続の全条件が未成立。参照先の初回取得だけで全手順成功にしない |
+| npm3／npm のオフライン導入: 実施手順・3（部分確認） | 初回Installing中のnpm実コマンド未観測。Installed11件・通知・実コマンドから遡って補完しない |
+| close1／SSH の SOCKS トンネル: トンネルを閉じる・1（部分確認） | `exit` 後もforward channel／1080 listenerが残った。自己transportの通常切断で消失したが外側driverも切れ、原文だけでオンラインprompt復帰とは判定しない |
+
+- **未実施11件**: login3、epel4・5、npm4、brewOffline5、close2・3、brewOffline6、npm5、reboot1・3。原文NOPASSWD ALL未承認は保持し、通常sudo・承認後SSH認証とTTY搬送の条件差を分ける
+  - 切断後のcurl／jq／npm対照、再boot後の実Anthy変換は未実施。設定読戻しや以前のOFFLINE-FULL／ASのGUI成功を代替しない。Installing表示は別の真正な初回機会が必要
+  - 04:53:29 UTCに公開process metadataの`ProcessId`取得例外で自己2VMを通常Off。失敗snapshot欠落により特定peerの状態遷移を原因と断定しない。固定入力不一致ではなく、全campaign停止要求はfalse
+  - 04:58:44までに凍結132MD・工具20・停止immutable親5件のwhole SHA／ID／親鎖一致を確認。05:14:21に2VM Off・割当0・自己lock不存在を再確認、6144 MiB返却。旧partial・expectedは不変更
+
+用途別記録は [Homebrew](verification/homebrew-offline.md#付録-ssh-承認後の初回オフライン取得2026-10-13-utc)・[npm](verification/npm-offline.md#付録-ssh-承認後の初回取得と-mason-の部分確認2026-10-13-utc)・[Neovim](verification/neovim-offline.md#対象と判定)。監視の限定修正、新runtime枠、切断・再起動対照、epel3前提の修正と再検証が残る。
+
+### V2 の metadata04 final-02
+
+- 04:52:58〜04:53:28 UTCに既存outerで読み取り照会を実施。旧inner Off、旧VDI48 GiB・parent null・fresh plain path、hostとguestの全128-bit controller GUID・drive position／LUN・実sysfs祖先の一意対応を確認
+  - 旧祖先条件未達を保持し、新helperのfresh final-02として記録。新ストレージ・inner作成／起動、GUI・provision・Guest Additions build／lintの追加実行は0
+  - outer通常Off・自己lock解放、8192 MiB返却。旧after-V2保持。旧2026-10-11のpartial・lint11通過／1条件外／警告2件、GNOME原文通し未完を成功へ更新しない
+  - metadata01〜03、final-01のprepared・未実行は別履歴。新p2のactual collectorは未実装／falseのまま。親handoffのpeer ack解除を別の人間承認や独立担当ackとは扱わない
+
+詳細は [V2 の追加付録](verification/virtualbox-guest-bootc.md#付録-v2-の-sdk-と-controller-対応の追加確認2026-10-13-utc)。原文手順・GUI成功数への追加は0で、正式性能比較は未完。

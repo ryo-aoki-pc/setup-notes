@@ -2,6 +2,12 @@
 
 [手順書](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/homebrew-offline.md)
 
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: OFFLINE-FIRSTINSTALL の同じ専用2VMを通常sudo認証と承認後のSSH認証で続行し、Homebrew 7.0.9 と jq 1.8.2／oniguruma の初回 bottle 取得・導入を確認した（[追加付録](#付録-ssh-承認後の初回オフライン取得2026-10-13-utc)）
+  - 共通台帳61件は42通過・4条件外・3部分確認・1失敗・11未実施。同じ試行の旧5通過を含み、他の検証記録と合算しない
+  - 原文の閉鎖条件は部分確認。切断後の対照・jq のオフライン実行・再起動後の実Anthy変換は今回未実施。旧 OFFLINE-FULL の既存導入・GUI 成功は別履歴
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -380,3 +386,18 @@ offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが�
 Homebrew本体・jq bottle・LazyVim・npm・Masonの初回取得は未開始。Homebrewオフライン実施1〜6・更新の成功は追加せず、旧既存継続の成功とも合算しない。2VMを通常Off、自己lock解放、6GiB返却。旧11:17の付録は当時の記録として保持する。
 
 根拠は専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012/normal-auth-20261012T115622Z/` の公開番号台帳・completion、通常sudoのauth-facts、`nested-ssh-auto-approval-rejection.json`、終了時照合・解放receipt。原文132MD／工具20／停止親5件の全体SHA・親鎖は開始・終了とも保持baselineに一致し、expectedは変更していない。
+
+## 付録: SSH 承認後の初回オフライン取得（2026-10-13 UTC）
+
+凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` を、前の初回試行と同じ専用 online／offline 2VMで続行した。公開 `ssh-approved-20261013T0325Z` の result・completion に基づく記録。現在の対応先は [Homebrew のオフライン導入: 実施手順](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)で、出版版へ途中切替していない。
+
+- **確認**: 初期不在10項目の実観測後、承認済みSSH認証・自己 peer の SOCKS listener・同じオフラインシェルの経路を確認した
+  - Homebrew インストーラの成功表示と7.0.9、jq 1.8.2／oniguruma の初回 bottle 展開を確認。既存 cache の削除・退避で初回状態を作った試験ではない
+  - npm の実施手順 1・2を初回 LazyVim 手順10より先に通した。共通61番号は旧5通過を含む42通過・4条件外・3部分確認・1失敗・11未実施。[時点別集計](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)へ対応し、本書だけの成功数とは扱わない
+- **条件差・未達**: 原文の「ログインと sudo」手順3の永続 NOPASSWD ALL は未承認・未実施。通常sudo認証とSSH TTY搬送を用い、GNOME端末への貼付成功へ読み替えない
+  - 「SSH の SOCKS トンネル: トンネルを閉じる」手順1の `exit` 後も forward channel と1080 listenerが残り、原文だけで閉鎖条件を満たさず partial。通常SSH切断で listener0・自己PID不存在を確認したが、外側 driver も切れ、オンライン prompt 復帰の成功にはしていない
+  - 「Homebrew のオフライン導入: 実施手順」の手順5・6、切断後 curl／jq／npm 対照、再起動後の実Anthy変換は今回未実施。Anthy設定の読戻しと再起動後の実入力は別の判定で、旧 OFFLINE-FULL の GUI 成功を転用しない
+- **停止**: 04:53:29 UTC に監視の公開 process metadata の `ProcessId` 取得例外で自己2VMを通常停止した。失敗 snapshot が欠けており、特定 peer の状態遷移や空配列を原因と断定しない
+  - 04:58:44までに凍結132MD・公開工具20件・停止 immutable 親5件の whole SHA／ID／親鎖一致を確認。expected は変更していない。05:14:21に2VM Off・割当0・自己lock不存在を再確認し、6144 MiB返却・runtime0
+
+前日の2/61、5/61と既存導入の継続結果は当時の履歴として保持する。後続には監視の限定修正と新runtime枠、切断対照・オフライン実行・再起動IMEが残る。[npm の部分確認](npm-offline.md#付録-ssh-承認後の初回取得と-mason-の部分確認2026-10-13-utc)と [Neovim の結果](neovim-offline.md#対象と判定)は同じ61件を参照する。
