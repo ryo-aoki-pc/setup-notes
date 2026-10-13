@@ -2135,6 +2135,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS。AlmaLinux 10 は[実施手順](#grok-build-のブラウザ操作-実施手順)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
+- 画面の画像は、Windows 11 の実機の Codeg v0.35.1 で 2026-10-14 に撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
 - Claude Code・Codex を使うときは、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）も通す
@@ -2894,6 +2895,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - ブラウザで `http://127.0.0.1:3080/` を開き、「アクセストークン」に共通パスワード（トークンのまま使うなら、コピーした値）を入れて「接続」を押す
    - [ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 4〜6 と同じ操作で、権限モードを確かめ、フォルダを開いて、指示を送る
    - Windows では、ファイルの変更の確認の見出しが「Write `<パス>`」になる
+   - ![Codeg のログイン画面。Codeg、アクセストークン、接続](images/ai-agents/codeg-login-v0.35.1.png)
    - **次の手順は、ブラウザで Grok が応答してから貼る**
 
 #### Grok Build のブラウザ操作: Windows 11 で HTTPS で LAN・VPN に公開する
@@ -3462,6 +3464,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 最新版への「アップグレード」は押さない。既に違う版が入っている場合も、上書きせず、使う版と検証範囲を先に確かめる
    - 入らない・検出されない場合は「診断」を開く。Codeg が使う Node.js と npm の場所・版を確かめ、問題を解消するまで先へ進まない
    - 対応版が検出され、エラーが無ければ、この項の手順 3 以降へ進む
+   - ![Codeg の設定の「エージェント」。エージェント一覧の Claude Code と、バージョン状態の FAIL・「インストール」](images/ai-agents/codeg-agents-install-v0.35.1.png)
 
 1. ブラウザで、各エージェントの認証方法を確かめる。
 
@@ -3470,14 +3473,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
+   - ![Claude Code の設定管理。認証方式が「公式サブスクリプション」](images/ai-agents/codeg-agents-auth-v0.35.1.png)
 
 1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
 
-   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選ぶ。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-windows-11-で使う)で作った、その担当の worktree を選ぶ
+   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選び、「次へ」「完了」と進む。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-windows-11-で使う)で作った、その担当の worktree を選ぶ
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
    - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
+   - ![codeg-demo の新しい会話。Claude Code、Auto、Opus 5.5 を選んで指示を入力した画面](images/ai-agents/codeg-send-check-v0.35.1.png)
 
 1. ブラウザで、接続を確かめる指示を送る。
 
@@ -3485,6 +3490,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 選んだエージェントから応答があり、選んだモデルとモードで会話が続けばよい
    - Claude の「Auto mode unavailable」が出る、またはモードが `Accept edits` に変わる場合は、自動審査の設定は未完了。対応するモデルでやり直す。手動運用を選ぶ場合は、`Manual` に変えて個別に承認する
    - 最初の送信後にエージェントを間違えていたと分かったら、新しい会話を作り直す
+   - ![応答「接続確認ができました。」と、入力欄の下の Auto・Opus 5.5](images/ai-agents/codeg-reply-v0.35.1.png)
 
 1. ブラウザで、作業の指示を送り、必要になった承認に答える。
 
