@@ -3,7 +3,7 @@
 [AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 - 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
-- この文書のロールバックは、実機では流していない（[検証記録](../verification/grok-build-remote.md)）
+- 「Windows 11 のロールバック」の手順 1〜3 は、2026-10-14 に Windows 11 の実機で通した（[検証記録](../verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。パスを残す分岐と、ほかの節は、実機では流していない
 
 ## ロールバック
 

@@ -23,6 +23,11 @@
 - Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
 - 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
 - [共通パスワードの検証記録](../verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- 2026-10-14 の Windows 11 / x64 の実機で、稼働中の Codeg をロールバックの手順 1〜3 で消し、ai-agents.md の手順で入れ直した
+  - 受信規則は Private の全送信元・全接続種別。別拠点から、有線 LAN の IP への 200 と、Public の VPN の IP への接続のタイムアウトを確かめた
+  - 本人が共通パスワードを入力し、ブラウザの Codeg で Claude Code（Auto）・Codex（Auto review）・Grok Build の短文の応答を確かめた。Claude Code の応答は今回がはじめて
+  - 共通パスワードは HTTPS の公開の後に設定した（手順書の案内の順は未確認）。同じ LAN の別端末・Wi-Fi・IPv6、再起動後の自動起動は未確認。[今回の記録](../verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)で範囲を区別する
+  - 手順書の画像 5 枚（`docs/images/ai-agents/`）は、この実機の Codeg v0.35.1 で撮った
 - 2026-10-13 の Windows 11 / x64 の実機に Codeg v0.35.1・Caddy 2.11.7 を新規導入し、タスク・待ち受け・受信規則を読み戻した
   - 本人の共通認証入力と証明書登録後、TLS を検証した HTTPS の認証 200・未認証 401・誤値 401 を直接確認した
   - Codeg 経由で Codex の Auto review と Grok 4.7 の短文の応答を確認。Grok の `auto` を保存し、Claude は接続後に週の利用上限で応答未確認

@@ -3481,6 +3481,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
    - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
+   - Claude Code の入力欄の下は、左から Mode・Model・Effort・Fast mode（`On`・`Off`）・Agent。モードは左端で選ぶ
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
    - ![codeg-demo の新しい会話。Claude Code、Auto、Opus 5.5 を選んで指示を入力した画面](images/ai-agents/codeg-send-check-v0.35.1.png)
 
