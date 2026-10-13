@@ -8066,6 +8066,100 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
+### Grok Build のブラウザ操作: 接続元の制限を外す
+
+- 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
+- `ALLOW_FROM` は現在許可している送信元の帯に合わせる。ここで指定した既存の規則だけを外し、ほかの用途の規則は変更しない
+- この節の手順 2 から、`SERVER_IP` の 3443/tcp に届くすべての送信元を許可する。LAN・VPN の端末だけに限定されたとは扱わない
+- 元に戻せる既存の規則が分からない場合は始めない。途中で失敗した場合も、追加した規則を保持して止め、[接続元の制限を戻す](extra/grok-build-remote.md#接続元の制限を戻す)の条件を確かめる
+
+1. 制限を外す対象の、現在の規則を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
+     echo '中断: サーバー起動の手順 1 の変数を設定する' >&2
+   else
+     read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     for src in "${CODEG_SRCS[@]}"; do
+       CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+       sudo firewall-cmd --permanent --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}"
+       sudo firewall-cmd --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}"
+     done
+   fi
+   ```
+
+   - 送信元ごとに `yes` が 2 回出ればよい
+   - `no`・エラーが出たら止める。既存の送信元・宛先・ポートと zone を確かめ、削除対象が一致するまで先へ進まない
+
+1. 宛先とポートを限定して、送信元を指定しない規則を追加する。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FW_ZONE}" ]; then
+     echo '中断: サーバー起動の手順 1 の変数を設定する' >&2
+   else
+     CODEG_OPEN_RULE="rule family=\"ipv4\" priority=\"100\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+     sudo firewall-cmd --permanent --zone="${FW_ZONE}" --add-rich-rule="${CODEG_OPEN_RULE}" &&
+     sudo firewall-cmd --zone="${FW_ZONE}" --add-rich-rule="${CODEG_OPEN_RULE}" &&
+     printf '\n\033[7m 確認 \033[0m\n' &&
+     sudo firewall-cmd --permanent --zone="${FW_ZONE}" --query-rich-rule="${CODEG_OPEN_RULE}" &&
+     sudo firewall-cmd --zone="${FW_ZONE}" --query-rich-rule="${CODEG_OPEN_RULE}"
+   fi
+   ```
+
+   - runtime と permanent の確認で `yes` が 2 回出ればよい
+   - 片方だけの追加やエラーなら止める。元の送信元付き規則はまだ消さない
+   - **この節の手順 3・4 は、同じシェルに続けて貼る**
+
+1. サーバー自身で、証明書の検証と未認証の拒否を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ]; then
+     echo '中断: サーバー起動の手順 1 の変数を設定する' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     curl -sS --cacert ~/.local/share/caddy/pki/authorities/local/root.crt \
+       -o /dev/null -w '%{http_code}\n' -X POST "https://${SERVER_IP}:3443/api/health"
+   fi
+   ```
+
+   - `401` が出ればよい。証明書のエラーや別の結果なら止める
+   - `-k` は付けない。トークンやパスワードも送らない
+
+1. 確認した元の送信元付き規則だけを外す。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ] || [ -z "${CODEG_OPEN_RULE}" ]; then
+     echo '中断: 同じシェルでこの節の手順 1〜3 を通す' >&2
+   elif sudo firewall-cmd --permanent --zone="${FW_ZONE}" --query-rich-rule="${CODEG_OPEN_RULE}" &&
+        sudo firewall-cmd --zone="${FW_ZONE}" --query-rich-rule="${CODEG_OPEN_RULE}"; then
+     read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
+     for src in "${CODEG_SRCS[@]}"; do
+       CODEG_RULE="rule family=\"ipv4\" priority=\"100\" source address=\"${src}\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
+       if sudo firewall-cmd --permanent --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}" &&
+          sudo firewall-cmd --zone="${FW_ZONE}" --query-rich-rule="${CODEG_RULE}" &&
+          sudo firewall-cmd --permanent --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}" &&
+          sudo firewall-cmd --zone="${FW_ZONE}" --remove-rich-rule="${CODEG_RULE}"; then
+         :
+       else
+         echo '中断: 送信元付き規則の確認または削除に失敗した。残りは変更しない' >&2
+         break
+       fi
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo firewall-cmd --permanent --zone="${FW_ZONE}" --list-rich-rules
+     sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
+   else
+     echo '中断: 送信元を指定しない規則の追加を確認できない' >&2
+   fi
+   ```
+
+   - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
+   - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
+   - 公開を止めるときは、送信元を指定しない規則も [ロールバック](extra/grok-build-remote.md#ロールバック)で外す
+
+---
+
 ### Grok Build のブラウザ操作: 端末にルート証明書を入れる
 
 - 両 OS に共通の節。Codeg を置いたホストごとに、そのホストの Caddy が作った認証局のルート証明書を、つなぐ端末に 1 つずつ入れる
@@ -8285,6 +8379,154 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
+### Grok Build のブラウザ操作: Codeg の共通パスワードを設定・変更する
+
+- 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/grok-build-remote.md#codeg-の共通パスワードを設定変更する--手順-13-補足-標準認証)）
+- `scripts/grok-build-remote/set-codeg-password.py` を含むこのリポジトリのルートで、Codeg を入れた本人の bash に貼る。`sudo` は使わない
+- この節の手順 3 で Codeg だけを短時間止めて起動し直す。進行中の会話を終えてから行う。Caddy は止めない
+- パスワードはエージェントに渡さず、本人が端末の非表示入力で指定する
+
+1. 本人のホストで、パスワード変更のスクリプトを置く。
+
+   ```bash
+   install -d -m 755 ~/.local/bin &&
+   install -m 755 scripts/grok-build-remote/set-codeg-password.py ~/.local/bin/codeg-set-password
+   ```
+
+   - エラーが無ければ次へ進む
+   - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
+
+1. 秘密の本文を読まず、変更に要る前提を確かめる。
+
+   ```bash
+   ~/.local/bin/codeg-set-password --check
+   ```
+
+   - 所有者・権限・サービスと待ち受け・未認証 401 の確認が成功すれば次へ進む
+   - 確認に失敗したら、認証ファイルを表示せずに止める。原因を直して、この節の手順 2 からやり直す
+
+1. 本人が共通パスワードを入力し、保存と Codeg の起動し直しを行う。
+
+   ```bash
+   ~/.local/bin/codeg-set-password
+   ```
+
+   - 空白を含まない表示可能な ASCII 文字で、32〜512 文字のパスワードを 2 回入力する。入力は画面に出ない。値をコマンドの引数やチャットに書かない
+   - 新しい値の認証 200・未認証 401・誤った値 401 が、同じ Codeg プロセスで確認され、変更完了の表示が出ればよい
+   - 旧設定の控えのファイル名を記録する。控えの本文を表示・共有しない
+   - 未変更で終了した場合は、原因を直してこの節の手順 2 からやり直す
+   - 変更処理後の失敗や「結果: 不明」では、再実行せずに止める。控えを保持し、[失敗時の対処](extra/grok-build-remote.md#almalinux-10-の共通パスワード変更で失敗したとき)で設定とサービスの状態を分けて確かめる
+   - **次の手順は、2 回の入力が終わり、変更の成功を確かめてから行う**（続けて貼るとパスワードとして食われる）
+
+1. 本人のブラウザで、共通パスワードを使って HTTPS の Codeg にログインし直す。
+
+   - いま使っている HTTPS の Codeg を開き、「アクセストークン」に、この節の手順 3 で決めた共通パスワードを本人が入れる
+   - ログイン後の画面が表示されればよい。以前の値を覚えたほかのブラウザ・端末も、新しい値でログインし直す
+   - 入れなければ、この節の手順 3 の結果と入力を確かめ、解消するまで先へ進まない
+
+---
+
+### Grok Build のブラウザ操作: Claude Code のプラグインから Grok に読み取り専用で頼む
+
+- 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
+- このリポジトリのルートで、Codeg を入れた本人の bash に貼る。Grok にログイン済みで、`~/.grok/sessions/`・`~/.grok/logs/` が存在することを前提にする
+- この節の手順 3 で Codeg を起動し直す。進行中の会話を終えてから行う。Grok にはレビューや調査だけを頼み、`--write` は使わない
+- Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/grok-build-remote.md#claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
+
+1. 本人のホストで、2 つの起動用スクリプトを置く。
+
+   ```bash
+   install -d -m 755 ~/.local/bin &&
+   install -m 755 scripts/grok-build-remote/codeg-grok-readonly.py ~/.local/bin/codeg-grok-readonly &&
+   install -m 755 scripts/grok-build-remote/claude-agents.sh ~/.local/bin/claude-agents
+   ```
+
+   - エラーが無ければ次へ進む
+   - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
+
+1. 外側の sandbox が起動し、書き込みの制限が効くことを確かめる。
+
+   ```bash
+   ~/.local/bin/codeg-grok-readonly --self-test
+   ```
+
+   - `filesystem_read_only` と `session_storage_writable` がともに `true` なら次へ進む
+   - user namespace・bubblewrap・保存先のエラーなら止める。sandbox を外して続けない
+
+1. Codeg のユーザーサービスに、プラグインが使う Grok の起動先を設定する。
+
+   ```bash
+   if [ -e ~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf ]; then
+     echo '中断: 20-agent-connections.conf が既にある。既存の設定を上書きせず確認する' >&2
+   elif mkdir -p ~/.config/systemd/user/codeg-server.service.d &&
+        cat > ~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf <<EOF
+   [Service]
+   Environment="GROK_BINARY=${HOME}/.local/bin/codeg-grok-readonly"
+   Environment=CODEG_BRIDGE_PORTS=off
+   Environment=CODEG_BROWSER_TUNNEL=off
+   StandardError=null
+   EOF
+   then
+     systemctl --user --machine="$(id -un)@.host" daemon-reload &&
+     systemctl --user --machine="$(id -un)@.host" restart codeg-server.service &&
+     printf '\n\033[7m 確認 \033[0m\n' &&
+     systemctl --user --machine="$(id -un)@.host" is-active codeg-server.service
+   fi
+   ```
+
+   - `active` が出ればよい
+   - `中断:` が出たら、既存のドロップインと導入済みスクリプトを確認する。認証ファイルやサービスの環境全体は表示しない
+   - 起動できなければ先へ進まない。`StandardError=null` は外さない
+   - ブラウザだけで使う場合は、この節の手順 4 を飛ばす
+
+1. 端末の Claude Code でも使うときは、担当の worktree で専用の起動先から始める。
+
+   ```bash
+   ~/.local/bin/claude-agents
+   ```
+
+   - [共同作業の手順](#コーディングエージェントの共同作業-実施手順)で作った Claude の worktree で起動する
+   - `/grok-build:check` でプラグインの準備を確かめ、`/grok-build:review --base main --wait` など、読み取り専用の依頼で応答を確かめる
+   - 書き込みの依頼や `--write` は拒否されたら続けない
+   - `/exit` で終える
+   - **次の手順は、Claude Code を終えてシェルのプロンプトに戻ってから行う**
+
+1. ブラウザで新しい Claude Code の会話を開き、Grok への読み取り専用の依頼を確かめる。
+
+   - 担当の worktree で新しい `Claude Code` の会話を開く。サービスの再起動前の接続は使わない
+   - 「Grok のプラグインを使って、この worktree の変更をレビューして。ファイルは変更しない」と頼む
+   - Grok のレビュー結果が返ればよい。接続や sandbox のエラーなら、未完了として止める
+   - Codeg で直接 `Grok` を選んだ会話へ、この起動用スクリプトの制限が適用されたとは扱わない
+
+---
+
+### Grok Build のブラウザ操作: Codeg のエージェント同士で共同作業する
+
+- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)の手順 2〜5 で有効にし、接続と応答を確かめておく
+- 委譲先に編集を頼む場合も、[共同作業の手順](#コーディングエージェントの共同作業-実施手順)で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
+
+1. ブラウザの設定で、エージェントへの委譲を有効にする。
+
+   - 設定の `Collaboration`（共同作業）を開き、`Multi-Agent Collaboration` の委譲を有効にする
+   - 最大の委譲深度を `1` にし、そのパネルの保存ボタンを押す
+   - 保存後も有効と深度 `1` が表示されればよい。保存できなければ先へ進まない
+   - 設定は GUI から保存する。認証値を含む DB を直接編集しない
+
+1. ブラウザで新しい会話を開き、別のエージェントへの短い委譲を確かめる。
+
+   - `/workspace` で担当の worktree を開き、新しい会話を作る
+   - 「Codex に、ツールやファイルを使わずに接続確認の一文を答える作業を委譲して」のように、使う相手を明示して頼む
+   - 委譲先から結果が返ればよい。有効化しただけでは、すべての組合せの接続が確認できたとは扱わない
+   - 委譲のツールが見つからなければ、設定の保存・使うエージェントの有効化を確かめ、新しい会話でやり直す
+
+1. 共同作業の指示に、担当の worktree・ブランチ・変更する範囲を明示する。
+
+   - 初めは読み取り専用のレビューを頼む。編集を頼むときは、担当の worktree を開いた会話から始める
+   - 同じ作業ディレクトリを複数のエージェントが同時に編集しない
+   - 結果の差分とテストを確かめ、各担当のブランチから Pull Request を作る。`main` への取り込みは人が行う
+
+---
+
 ### Grok Build のブラウザ操作: 設定ファイル
 
 | 場所（AlmaLinux 10） | 場所（Windows 11） | 中身 |
@@ -8292,6 +8534,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.local/opt/codeg-server/` | `%LOCALAPPDATA%\codeg-server\` | `codeg-server`・`codeg-mcp` と、画面のファイル（`web`） |
 | `~/.config/codeg-server/token.env` | `%LOCALAPPDATA%\codeg-server\token.txt` | アクセストークン。持ち主だけが読める |
 | `~/.config/systemd/user/codeg-server.service` | `%LOCALAPPDATA%\codeg-server\start-codeg-server.ps1` と、タスク `codeg-server` | 待ち受ける IP（`CODEG_HOST`）などの設定と、起動のしかた |
+| `~/.local/bin/codeg-set-password` | リポジトリの `scripts/grok-build-remote/set-codeg-password.ps1` | 本人の端末で共通パスワードを設定・変更するスクリプト |
+| `~/.local/bin/codeg-grok-readonly` と `claude-agents` | — | Landlock 非対応ホストで、Claude の Grok プラグインから読み取り専用で頼む任意の起動先 |
+| `~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf` | — | 上の起動先を Codeg の Claude へ渡す環境設定。認証値は含めない |
 | `~/.local/share/codeg/` | `%APPDATA%\codeg\` | 会話と設定の DB（`codeg.db`）と、ログ（`logs`） |
 | `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル |
 | `~/.config/caddy/Caddyfile` | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先、認証局の名前 |

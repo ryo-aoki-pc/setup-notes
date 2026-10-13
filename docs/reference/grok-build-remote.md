@@ -86,6 +86,13 @@
 - 共同レビューでは、PC で照合したファイルを USB で Android に渡す形（取り込む前に照合できる）も挙がった。利用者の指定で、ブラウザで取得する形にしている
 - Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーが使う Edge・Chrome が信じる。Firefox は、設定によっては自分の置き場だけを使う（確かめていない）
 
+### 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
+
+- [AlmaLinux 10 の任意節](../almalinux-setup.md#grok-build-のブラウザ操作-接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま
+- runtime と permanent の両方へ新規則を追加してから、証明書を検証した未認証の要求が 401 になることを確かめ、元の送信元付き規則だけを外す。認証の共有値や Codeg・Caddy の待ち受けは変更しない
+- 送信元を指定しない規則は、LAN・VPN に属することを判定しない。宛先へ届く経路があれば、ほかのネットワークからも接続の対象になる
+- 自ホストの HTTPS 検査は、証明書と認証の検査で、別の端末からの到達確認ではない。別端末からのログインや、不要な経路を公開していないことの確認とは分ける
+
 ### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 6〜8: 補足: スクリプトとタスク
 
 - 環境変数を利用者の環境（レジストリ）に入れると、すべてのプロセスにトークンが渡る。起動用のスクリプトの中だけで設定する
@@ -136,13 +143,40 @@
 - 画面のトークン名と、内部の bearer による認証は維持する。[認証の実装](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/web/auth.rs#L21)は、受け取った値を設定値と照合する
 - 標準認証は 1 個の共有値を使う。同じ Codeg を使う利用者は同じ値で入り、利用者ごとの区別や有効期限は無い。Claude・Codex の本人の契約の認証とは別に、サーバーへのアクセスに使う
 - [ログイン画面](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src/app/login/page.tsx#L31)は入力した値を localStorage に保存する。値を変更した後は、以前の値を覚えたブラウザ・端末でログインし直す
-- スクリプトは `Read-Host -AsSecureString` で 2 回入力を受け、32〜512 文字の表示可能な ASCII・空白無し・一致を確かめる。既存の起動用スクリプトの最低 32 文字は維持する
-- 控えは同じディレクトリの `token.before-password-<unique>.txt` へ、本人だけの ACL で保存する。保存は原子的な置換で行い、認証を確かめる。結果の JSON はパスワードの値を含めない
+- Windows のスクリプトは `Read-Host -AsSecureString` で 2 回入力を受け、32〜512 文字の表示可能な ASCII・空白無し・一致を確かめる。既存の起動用スクリプトの最低 32 文字は維持する
+- Windows の控えは同じディレクトリの `token.before-password-<unique>.txt` へ、本人だけの ACL で保存する。保存は原子的な置換で行い、認証を確かめる。結果の JSON はパスワードの値を含めない
 - `password-change-result.json` の `CredentialReplaced` は今回の置換が完了した履歴で、復元後も `true`。`FileUnchanged` は置換前のまま元ファイルを保っている状態
 - `FileRestored` は置換後に控えから戻した場合だけ `true`。未置換の場合は `false` のまま。`ServiceRestored` は専用サービスの復帰の結果で、ファイルの状態とは別
 - `Restored` は、ファイル未変更または復元済みに加え、サービスの復帰も確認できたときだけ `true`。前提確認・入力の未変更終了と、変更処理を始めた後の失敗も分けて扱う
 - 変更処理で結果自体を得られない失敗では、`CredentialReplaced`・`FileUnchanged` は `null`。未変更と断定せず、認証ファイルと専用サービスの状態を確認してから復旧する
 - 旧認証での 200 は確認しないため、`OldPasswordVerified` は `false` のまま。本人がブラウザで確かめる
+
+### Codeg の共通パスワードを設定・変更する / 手順 1〜4: 補足: AlmaLinux の対話スクリプト
+
+- [AlmaLinux 10 の共通パスワード手順](../almalinux-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)は、`scripts/grok-build-remote/set-codeg-password.py` を本人の端末で使う。Python の `getpass` で 2 回入力し、Windows と同じ文字条件と一致を確かめる
+- `--check` は認証ファイルの本文を読まない。所有者と権限、`EnvironmentFile` の参照先、`StandardError=null`、専用サービスの実行ファイルと待ち受け、未認証 401 を確認する
+- 入力値は本人のローカルプロセスのメモリ内で扱う。コマンド引数・ログ・結果の表示には出さない。保存時は systemd の `EnvironmentFile` に合わせて引用し、`\` と `"` をエスケープする
+- `~/.config/codeg-server/` は 0700、`token.env` と新規の一時ファイル・控えは 0600。既存ファイルをハードリンクで控え、本文を読み出さずに新ファイルへ原子的に置き換える
+- 控えは成功時にも保持する。複数の変更を同時に実行しないためのロックを使い、変更後の失敗では旧設定の復元と Codeg の再起動を別に確かめる。不明な結果では、控えを消したり未変更と断定したりしない
+- Codeg の `--supervise` の MainPID と、3080 番を待ち受ける worker は別になる。サービスの cgroup 内の worker を特定し、PID・開始時刻・実行ファイルと socket inode を各要求の前後で照合する
+- 新しい値での 200 と `status=ok`、未認証 401、誤った値 401 を同じ worker で確認する。失敗後の旧認証による 200 と、本人の HTTPS ログインは自動では確認しない
+
+### Claude Code のプラグインから Grok に読み取り専用で頼む / 手順 1〜5: 補足: 外側の sandbox
+
+- [AlmaLinux 10 の任意節](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-のプラグインから-grok-に読み取り専用で頼む)は、Grok の内側の sandbox が Landlock 非対応で起動しないホストを対象にする。通常の Grok の起動先や、Codeg の native Grok ACP の起動方法は置き換えない
+- xAI の [Grok Build プラグイン](https://github.com/xai-org/grok-build-plugin-cc)が参照する `GROK_BINARY` に、`codeg-grok-readonly` を指定する。Codeg の Claude の接続はサービスの環境から、端末の Claude は `claude-agents` から、この値を継承する
+- 起動用スクリプトは読み取り専用の非対話依頼だけを受け付ける。`--sandbox read-only` を必須にし、書き込み用の指定・worktree の作成・コードの復元・外部 leader socket の指定を拒否する
+- 外側では bubblewrap の読み取り専用マウント、user/PID namespace、能力の削除を使う。この境界の内側でだけ Grok の sandbox を `off` にし、Landlock と Podman のソケットのエラーを回避する。bubblewrap が起動できなければ Grok も起動しない
+- `/tmp` と `/run` は私有化し、既存の Grok leader socket を隠す。新しい leader は私有の `/tmp` に置き、ホスト側の既存 leader にツールの実行を渡さない
+- `~/.grok/sessions/` と `~/.grok/logs/` は保存用に書き込みを許す。読み取りを特定の worktree やホーム内の一部へ限定する仕組みではなく、ネットワークも遮断しない。秘密情報を読まない規則は引き続き守る
+- バージョンとモデル一覧の照会は、外側の sandbox を経由せず Grok を直接呼ぶ。`--self-test` は、本来読み取り専用の場所への書き込み拒否と、セッションの保存先への書き込みを確認する
+
+### Codeg のエージェント同士で共同作業する / 手順 1〜3: 補足: 委譲と作業ディレクトリ
+
+- Codeg の [Collaboration 設定](https://docs.codeg.app/reference/settings/collaboration)は、Claude Code の Codex・Grok プラグインとは別の委譲機能。Codeg の `codeg-mcp` が委譲のツールを接続中のエージェントへ渡す
+- 設定の保存後に始めるエージェントへ適用される。最大の委譲深度 `1` では、委譲先からの追加の委譲を許さない。有効なエージェントが委譲先として表示される
+- 委譲先は親の作業ディレクトリを共有するのが既定で、別の worktree は自動では作られない。読み取り専用のレビューと、編集を行う担当の会話を分け、編集の担当ごとに worktree とブランチを明示する
+- エージェントごとの既定値は委譲先に使うモード・設定で、親の会話の権限モードを変更するものではない。設定を保存したことと、各エージェントの組合せで応答を得たことは別に確認する
 
 ### Claude Code と Codex CLI も操作する / 補足
 
