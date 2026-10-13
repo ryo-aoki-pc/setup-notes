@@ -1238,6 +1238,7 @@
 ## Claude Code の GNOME 操作（任意）
 
 - 対象: AlmaLinux 10
+- 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
 
@@ -1334,6 +1335,9 @@
 
 1. 電卓を起動して、キーボードの入力が届くかを確かめる。
 
+   <details>
+   <summary>貼るコマンド（bash・21 行）</summary>
+
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    "${REPO}/scripts/gnome-gui.py" key Escape
@@ -1357,6 +1361,8 @@
    fi
    fi
    ```
+
+   </details>
 
    - `gnome-gui-org.gnome.Calculator-<PID>`、`gnome-calculator` と `Calculator`（日本語 UI は「電卓」）の行（間はタブ）、PNG のパスが出ればよい
    - `~/gnome-gui-calc.png` に、電卓の窓と `12×34 = 408` が写っていればよい
@@ -1444,6 +1450,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ## コーディングエージェントの共同作業（任意）
 
 - 対象: 両 OS。AlmaLinux 10 は[実施手順](#コーディングエージェントの共同作業-実施手順)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
+- 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
 
@@ -1522,6 +1529,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
+   <details>
+   <summary>貼るコマンド（bash・24 行）</summary>
+
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
    elif grep -qx '## 共同作業の規則' "${PROJECT_DIR}/AGENTS.md" 2>/dev/null; then echo '中断: AGENTS.md に「## 共同作業の規則」がもうある。中身を確かめる' >&2
@@ -1548,6 +1558,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      cat "${PROJECT_DIR}/AGENTS.md"
    fi
    ```
+
+   </details>
 
    - AGENTS.md の中身が出て、最後に「## 共同作業の規則」の節がある
    - `中断:` が出たら、何も書いていない
@@ -1692,6 +1704,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
+   <details>
+   <summary>貼るコマンド（PowerShell・24 行）</summary>
+
    ```powershell
    & {
      if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す'; return }
@@ -1718,6 +1733,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-Content -LiteralPath $path -Encoding UTF8
    }
    ```
+
+   </details>
 
    - AGENTS.md の中身が出て、最後に「## 共同作業の規則」の節がある
    - `中断:` が出たら、何も書いていない
@@ -2117,6 +2134,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ## Grok Build のブラウザ操作（任意）
 
 - 対象: 両 OS。AlmaLinux 10 は[実施手順](#grok-build-のブラウザ操作-実施手順)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
+- 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
 - Claude Code・Codex を使うときは[追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)も通す
@@ -2204,6 +2222,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. 配布物を取得して、SHA-256 を照合する。
 
+   <details>
+   <summary>貼るコマンド（bash・25 行）</summary>
+
    ```bash
    if [ -z "${CODEG_VERSION}" ]; then
      echo '中断: この項の手順 1 の変数を設定する' >&2
@@ -2231,6 +2252,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      )
    fi
    ```
+
+   </details>
 
    - `codeg-server-linux-….tar.gz: OK` と、その次の行に `0` が出ればよい
    - `OK` が出ない、または `0` 以外が出たら中断する（壊れた配布物か、展開先を外れるパスを含む配布物）
@@ -2277,6 +2300,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. ユーザーサービスを置いて、localhost で起動する。
 
+   <details>
+   <summary>貼るコマンド（bash・35 行）</summary>
+
    ```bash
    if [ -e ~/.config/systemd/user/codeg-server.service ]; then
      echo '中断: codeg-server.service が既にある。上書きしない' >&2
@@ -2314,6 +2340,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      ss -ltn '( sport >= :3080 and sport <= :3090 )'
    fi
    ```
+
+   </details>
 
    - `active` と、`127.0.0.1:3080` の 1 行だけが出ればよい
    - **`StandardError=null` を外さない**。Codeg は、トークンを指定していても、起動のたびに標準エラーへトークンを出す
@@ -2411,6 +2439,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. Caddy の配布物を取得してチェックサムを照合し、自分のホームに置く。
 
+   <details>
+   <summary>貼るコマンド（bash・24 行）</summary>
+
    ```bash
    if [ -z "${CADDY_VERSION}" ]; then
      echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
@@ -2438,10 +2469,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
+   </details>
+
    - `caddy_…_linux_….tar.gz: OK` と、`v` で始まる `CADDY_VERSION` と同じ番号が出ればよい
    - `OK` が出なければ中断する
 
 1. Caddy の設定とユーザーサービスを書いて、設定を検査する。
+
+   <details>
+   <summary>貼るコマンド（bash・49 行）</summary>
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
@@ -2494,6 +2530,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile 2>&1 | tail -n 1
    fi
    ```
+
+   </details>
 
    - `Valid configuration` が出ればよい
    - Caddy は `https://<SERVER_IP>:3443` で受け、同じホストの Codeg（`127.0.0.1:3080`）へ渡す。Codeg の待ち受けは `127.0.0.1` のまま変えない
@@ -2649,6 +2687,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. 配布物を取得して SHA-256 を照合し、自分のユーザーの場所に置く。
 
+   <details>
+   <summary>貼るコマンド（PowerShell・25 行）</summary>
+
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2677,6 +2718,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
+   </details>
+
    - `sha256 一致`、`CODEG_VERSION` と同じ番号（先頭の `v` は付かない）、`web`・`codeg-mcp.exe`・`codeg-server.exe` が出ればよい
    - 実行ファイルに Authenticode の署名は無い。SHA-256 の照合だけで確かめる
    - 配布物の `codeg-computer-helper.exe` は置かない。PATH は変えない
@@ -2701,6 +2744,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - **トークンの値は表示しない**
 
 1. 起動用のスクリプトを書く。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・27 行）</summary>
 
    ```powershell
    if (-not $CODEG_DIR) { Write-Error '中断: この項の手順 2 の変数を設定する' } elseif (Test-Path -LiteralPath "$CODEG_DIR\start-codeg-server.ps1") { Write-Error '中断: start-codeg-server.ps1 が既にある。上書きしない' } else {
@@ -2732,10 +2778,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
+   </details>
+
    - `$env:CODEG_HOST = '127.0.0.1'` の行が出ればよい
    - スクリプトは、トークンのファイルが無いと起動しない。Codeg にトークンを作らせない
 
 1. ウィンドウを作らないランチャーのソースを書き、コンパイルする。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・50 行）</summary>
 
    ```powershell
    & {
@@ -2789,6 +2840,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-Item -LiteralPath $cs, $exe | Select-Object Name, Length
    }
    ```
+
+   </details>
 
    - `HiddenLauncher.cs` と `codeg-hidden-launcher.exe` の 2 行が出ればよい
    - 失敗した場合は、この手順が作ったソースだけを消し、原因を直してから貼り直す
@@ -2844,6 +2897,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. Caddy の配布物を取得してチェックサムを照合し、自分のユーザーの場所に置く。
 
+   <details>
+   <summary>貼るコマンド（PowerShell・25 行）</summary>
+
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2872,10 +2928,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
+   </details>
+
    - `sha512 一致` と、`v` で始まる `CADDY_VERSION` と同じ番号が出ればよい
    - 実行ファイルに Authenticode の署名は無い。SHA-512 の照合だけで確かめる
 
 1. Caddy の設定を書いて、検査する。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・32 行）</summary>
 
    ```powershell
    $cf = "$env:LOCALAPPDATA\codeg-caddy\Caddyfile"
@@ -2911,6 +2972,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      & "$env:LOCALAPPDATA\codeg-caddy\caddy.exe" validate --config $cf --adapter caddyfile 2>&1 | ForEach-Object { [string]$_ } | Select-Object -Last 1
    }
    ```
+
+   </details>
 
    - `Valid configuration` が出ればよい
    - Caddy は、この PC のすべてのアドレスの 3443 番で受け、同じ PC の Codeg（`127.0.0.1:3080`）へ渡す。Codeg の待ち受けは `127.0.0.1` のまま変えない
@@ -2950,6 +3013,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. Caddy のタスクを登録して開始し、この PC 自身から HTTPS を確かめる。
 
+   <details>
+   <summary>貼るコマンド（PowerShell・36 行）</summary>
+
    ```powershell
    $cdir = "$env:LOCALAPPDATA\codeg-caddy"
    $root = "$env:APPDATA\Caddy\pki\authorities\local\root.crt"
@@ -2988,6 +3054,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      }
    }
    ```
+
+   </details>
 
    - `Running`、待ち受けが `127.0.0.1` の 3080 と `::` の 3443 の 2 行、`401`、規則が 2 本、最後に `<接続名>: https://<Private の IPv4>:3443` が出ればよい
    - `::` は、この PC のすべてのアドレス（IPv4 を含む）で待ち受けていることを示す
@@ -3656,6 +3724,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. 確認した元の送信元付き規則だけを外す。
 
+   <details>
+   <summary>貼るコマンド（bash・23 行）</summary>
+
    ```bash
    if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ] || [ -z "${CODEG_OPEN_RULE}" ]; then
      echo '中断: 同じシェルでこの節の手順 1〜3 を通す' >&2
@@ -3682,6 +3753,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
+   </details>
+
    - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
    - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
    - 公開を止めるときは、送信元を指定しない規則も [ロールバック](extra/grok-build-remote.md#ロールバック)で外す
@@ -3695,6 +3768,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - XML の控えは `%LOCALAPPDATA%\codeg-caddy` に残す
 
 1. 既存の規則を XML に控え、Private の全送信元へ切り替える。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・42 行）</summary>
 
    ```powershell
    & {
@@ -3740,6 +3816,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
    }
    ```
+
+   </details>
 
    - XML の控えのパス、`Allow`・`Private` が 1 行と `Block`・`Domain, Public` が 1 行、両方の `Enabled : True` が出ればよい
    - 両方の `Program` が、この手順書で置いた `caddy.exe` のパスであることを確かめる
@@ -3813,6 +3891,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. タスクの控えを取り、起動するプログラムだけを切り替えて再開する。
 
+   <details>
+   <summary>貼るコマンド（PowerShell・46 行）</summary>
+
    ```powershell
    & {
      $ErrorActionPreference = 'Stop'
@@ -3861,6 +3942,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
    }
    ```
+
+   </details>
 
    - 控えのフォルダー、`Running` とランチャーのパス、`127.0.0.1:3080` が出ればよい
    - Caddy のタスクもある場合は、`Running` が 2 行と `::` の 3443 の待ち受けも出ればよい
@@ -3938,6 +4021,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. サービスを止めて置き換え、起動し直す。
 
+   <details>
+   <summary>貼るコマンド（bash・24 行）</summary>
+
    ```bash
    if [ -z "${CODEG_ASSET}" ] || [ ! -s ~/.cache/codeg-server-dl/"${CODEG_ASSET}.tar.gz" ]; then
      echo '中断: 同じシェルでこの節の手順 2 を通す' >&2
@@ -3964,6 +4050,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      fi
    fi
    ```
+
+   </details>
 
    - 上げた版の番号、`active`、今までと同じ待ち受けの 1 行が出ればよい
    - 動いていた Grok Build のプロセスは、サービスと一緒に止まる。会話の履歴は残り、ブラウザは入り直さずに使える
@@ -3999,6 +4087,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - [リリースの一覧](https://github.com/spacering-net/codeg/releases)で確かめる
 
 1. 配布物を取得して SHA-256 を照合し、Codeg を止めて置き換え、タスクを開始する。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・42 行）</summary>
 
    ```powershell
    & {
@@ -4044,6 +4135,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort -AutoSize
    }
    ```
+
+   </details>
 
    - `sha256 一致`、上げた版の番号、`Running`、今までと同じ待ち受けの 1 行が出ればよい
    - 起動用のスクリプトとトークンは、そのまま残る
