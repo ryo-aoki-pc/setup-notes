@@ -242,6 +242,12 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
     - すべて管理者の Windows PowerShell 5.1 に貼る
 - **状態（AlmaLinux 10）**: **実機で本実行済み（2026-09-24）。クリーンインストールした x86_64 の VM でも現行ブロックと、設定バックアップ・同じホストへの復元を本実行した（2026-10-06）**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
+  - 2026-10-11: Hyper-V の VM 2 台（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)と [linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md) などを通した後の状態）で、`114c2b2` の実施手順 1〜9 と[同期フォルダとデバイスを追加する（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/syncthing.md#同期フォルダとデバイスを追加する任意)の手順 1〜5 の 14 手順を通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+    - 結果: 通した 14、通らなかった 0、条件に当たらず飛ばした 0、未実施 0。実施手順の手順 1〜8 は、2 台とも SSH の対話の bash に貼った
+    - GUI の手順（実施手順の手順 9 と、任意節の手順 2〜5）は、一方の VM の画面に出した Firefox を、DOM の要素を指す自動操作（Marionette）で動かして通した。人がマウスとキーボードで操作した確認ではない
+    - 確認したこと: Homebrew の Syncthing 2.1.6 が入る、GUI の認証と HTTPS、firewalld 越しの GUI への到達、2 台の GUI でのデバイスの追加と承認・フォルダーの共有と受け入れ、双方向の同期（作成・追記・削除）、一方の VM を再起動した後に、ログインより前に起動してつながり直すこと
+    - 直した所: 実施手順の手順 2・4・5・9 と、任意節のリード・手順 2〜5 の文言を、今の版の出力と日本語の表示に合わせた（任意節の手順 5 には、相手側でフォルダーパスを入れる操作を足した。ブロックは変えていない）
+    - 未実施の範囲: `ST_GUI_ADDR=127.0.0.1:8384` の側、「接続元を絞る（任意）」「設定を自動でバックアップする（任意）」「バックアップから戻す」、[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/syncthing.md#更新)、[ロールバック](../extra/syncthing.md#ロールバック)、Windows 11 の節（通していない）、実機、aarch64
   - 下表のホストで、AlmaLinux 10 の各手順のコマンドを上から順に実行した。AlmaLinux 10 の手順はその実測をもとに書き起こしたもので、コードブロックを機械的に貼り直してはいない
     - linger の有効化（今の [linger.md](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) の手順 2 の最初の 2 行。当時はこの文書の手順 5 と、次の手順の 1 行目だった）も、このとき通した
   - 結果として、次の状態になっている
@@ -265,6 +271,7 @@ Mon 2026-09-28 00:47:31 UTC   8h -         - syncthing-backup.timer syncthing-ba
     - localhost（LAN の IP が空の場合も）・全 NIC・特定 IP の URL をスタブで確認した。変更した bash ブロックは構文検査済みで、実機には適用していない
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
+  - 2026-10-11 の Hyper-V の VM の通し（AlmaLinux 10 の節。[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）でも、Windows 11 の節は通していない。未検証のまま
   - **確かめたこと**（[付録](#付録-windows-11-の配布物と資料の調査2026-10-03)）:
     - 配布物: 2.1.5 の Windows の zip の中身、`sha256sum.txt.asc` の行との一致（その GPG の署名も）、`syncthing.exe` の Authenticode の署名者・証明書の連なり・タイムスタンプ・埋め込みの設定（`consoleAllocationPolicy`）。Linux で PE を読んだだけで、Windows の `Get-AuthenticodeSignature` は通していない
     - Syncthing 2.1.5 のソース: 設定とログの場所、`--no-console`、`generate` のパスワードの読み方、モニターの起動し直しと自動の更新の動き
@@ -920,6 +927,226 @@ Homebrew と linger は前提の手順書から導入した。両 VM の手順 1
 更新 1・2 は `2.1.5 already installed` と restart・版表示を確認した。新しい版への更新ではない。バックアップ解除 7 とロールバック 1〜3 を通し、両 VM のサービス・受信規則・Homebrew の Syncthing・現行の設定と鍵・DB が消えた。9 個の archive と相手のコピーは残し、linger は両 VM で無効に戻した。
 
 この再検証では OS を入れ直したホストへの復元、0 時台の timer と Persistent の追いかけ、競合、relay、UDP/QUIC、Windows の節は確かめていない。証明書 `cert.pem` と `https-cert.pem` は 0644、秘密鍵と `config.xml` は 0600 だった。
+
+### 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+この付録は、検証の担当の報告と、証跡のファイルから書いた（VM を操作したのは担当）。VM は 2 台で、下では「主の VM」「相手の VM」と書く。
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/syncthing.md)の実施手順（9 手順）と「同期フォルダとデバイスを追加する（任意）」（5 手順）を、コミット `114c2b2` の本文で、上から通した。実施手順は、2 台の両方で通した
+  - 「接続元を絞る（任意）」「設定を自動でバックアップする（任意）」「バックアップから戻す」・[更新](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/syncthing.md#更新)・[ロールバック](../extra/syncthing.md#ロールバック)は、この通しの範囲の外（流していない）。Windows 11 の節（「Windows 11 で使う」から後ろ）は、通していない
+- **結果**: 14 手順のうち、通した 14、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
+  - 実施手順の手順 1〜8 は、2 台とも、箇条書きの成功条件が出た。出力が箇条書きと違ったのは、手順 2・4・5 の 3 か所（[指摘と状態](#指摘と状態hyper-v2026-10-11)の 7〜9）
+  - GUI の手順（実施手順の手順 9 と、任意節の手順 2〜5）は、画面の名前が手順書と違う所があり、任意節の手順 5 には、手順書に無い操作（相手側でフォルダーパスを入れる）が要った（同じ表の 1〜6）
+- **どの状態から**: 2 台とも、Hyper-V の列の VM のスナップショット `after-CL1` からのクローン（`server/meta.json`・`peer2/meta.json`）。Kickstart で入れた AlmaLinux 10.2 の Workstation に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順（Homebrew を含む）と [linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md) などを通した状態
+  - 前提は、2 台とも満たしていた（`command -v brew` は `/home/linuxbrew/.linuxbrew/bin/brew`、`Linger=yes`）。Syncthing は入っておらず、`~/.local/state/syncthing` と `~/.config/syncthing` は無かった（`facts-syncthing-prereq.txt`）
+  - 同じ起動の中で、先に、主の VM では [samba.md](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba.md) を、相手の VM では [samba-client.md](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/samba-client.md) を通した（[samba.md の検証記録の付録](samba.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- **誰が・どう通したか**: Claude Code のサブエージェント
+  - 実施手順の手順 1〜8 は、手順書から抜き出したブロックを、それぞれの VM の自分のユーザーの SSH の対話の bash に、ブラケットペーストで 1 つずつ貼った。貼ったブロックは、手順書のものと 1 文字も違わない（`steps.jsonl` の `sha256` と `pastedSha256` が同じ）
+  - sudo は NOPASSWD（初期設定の「ログインと sudo」の手順 3）で、パスワードは 1 度も聞かれなかった。Homebrew の確認も出なかった
+  - GUI のパスワードは、その場で作った検証用の値（2 台で別のファイルから送っている。`session/masked-files.json`・`peer2/session/masked-files.json`。値が別であることは、担当の報告による）。手順 3 の `read` には、問いが出て待っているのを見てから、ドライバ（`rb.mjs send --text-file … --mask`）がファイルから SSH の対話の端末に送った（記録の上では伏せてある）
+  - GUI の手順は、相手の VM のコンソールで GNOME にログインし（OS のパスワードは、検証の道具の `Login-Console.ps1` が、コンソールへのキー送信で入れた）、その画面に出した Firefox を、Marionette（Firefox の自動操作の口。ゲストの中の `127.0.0.1:2828`）で動かした
+    - 担当が書いた小さなクライアント（`tools/mn.py`。標準ライブラリだけの Python）で、DOM の要素を指して、クリックと入力を行った。画面は、Marionette の PNG（`screens/st-NN-*.png`。窓の中身）と、コンソールの画面の PNG（`screens/peer2-05-…`・`peer2-06-…`）に残した
+    - GUI のログインのパスワードは、ゲストの tmpfs（`/run/user/<UID>/` の下）に置いたファイルから、`mn.py typefile` で入れた（`type=password` の欄でなければ打たない作り）。コンソールへのキー送信では打っていない。入れた後の PNG（`screens/st-04-login-filled.png`）の欄は、● だけ（`typefile` で入れたこと、ファイルを置いた場所、終わりに消したことは、担当の報告による。操作の記録は、証跡に無い）
+    - 証明書の警告は、Marionette の「安全でない証明書を受け入れる」設定を使わずに（`mn.py` は `acceptInsecureCerts` を `False` にしている）、画面のボタンを押して進んだ
+    - **人がマウスとキーボードで操作した確認ではない**。確かめられたのは、ボタン・欄・通知の名前と、押した結果の画面まで
+  - 相手の VM のホスト名を、最初に変えた（手順書の外の準備。`peer2/prep-hostname.txt`）。クローンは 2 台とも同じ名前で、GUI のデバイスの名前がホスト名から付くため
+  - 実アカウントでのログインは無い
+- **証跡**: 追跡していない `.verification/campaign/hv/R3/`（このリポジトリには入っていない。画面の PNG も、ここにだけある）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl`（主の VM）、`peer seq` は `peer2/session/steps.jsonl`（相手の VM）の番号。`after-confirm/` は、それぞれの `session/after-confirm/`
+- VM の値は、`<USER>`・`<UID>`・`<HOSTNAME>`（主の VM）・`<PEER_HOSTNAME>`（相手の VM）・`<SERVER_IP>`（主の VM）・`<PEER_IP>`（相手の VM）・`<DEVICE_ID>` で書いた。GUI のパスワードと API キーは載せていない
+
+#### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（第 2 世代の VM、VM の構成の版 12.0。`server/meta.json`・`peer2/meta.json`）。`vmms.exe` は 10.0.26100.8875（`host-vm-facts.txt`） |
+| 主の VM | UEFI、Secure Boot オフ、vTPM 無し、2 vCPU、3072 MB（動的メモリは無効。ゲストの `free -m` の合計は 2900 MB）、ディスク 64 GB、NIC 1 枚（Default Switch、`eth0`） |
+| 相手の VM | 同じ構成で 2048 MB（ゲストの合計は 1895 MB）。同じ Default Switch |
+| ゲスト | 2 台とも AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux Enforcing（`selinux-policy-42.1.18-4.el10_2.4`）、`firewalld-2.4.3-4.el10_2`（`public`、`eth0`）、`systemd-257-23.el10_2.2.alma.1`。表示は日本語。プロンプトは starship |
+| 前提 | Homebrew 7.0.9（`/home/linuxbrew/.linuxbrew`）、`Linger=yes` |
+| 入ったもの | `syncthing 2.1.6`（ボトルは `syncthing--2.1.6.x86_64_linux.bottle.tar.gz`、`25 files, 29.7MB`）。`syncthing --version` は `syncthing v2.1.6 "Hafnium Hornet" (go1.27.1 linux-amd64) … 2026-10-05 04:03:55 UTC [noupgrade]`。一緒に入ったものは無い |
+| ブラウザ | 相手の VM の `firefox-157.0.1-1`（画面の表示は日本語）。Syncthing の GUI の右上の言語は `Japanese` |
+| 手順書 | `docs/syncthing.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`。`steps.jsonl` の `docCommit`） |
+| 実施の日時 | 2026-10-11 12:07:22〜12:09:17 UTC（実施手順の手順 1〜8。2 台を交互に。ゲストの時計で 21:07〜21:09 JST）。GUI の手順は 21:11〜21:17 JST（PNG の時刻）。主の VM の再起動は 12:18:23 UTC |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ。検証用に変えた値は無い（`ST_GUI_ADDR` は既定の `0.0.0.0:8384`、`ST_GUI_USER` と `ST_LAN_IP` は自動で入った値のまま） |
+| 検証用の値 | フォルダー名は `Sync`、フォルダー ID は検証用に付けた名前、フォルダーパスは 2 台とも `~/Sync` |
+
+#### 手順ごとの結果（Hyper-V、2026-10-11）
+
+結果は、断りの無いかぎり 2 台とも同じ。根拠は「主の VM / 相手の VM」の順。
+
+| 節 | 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|---|
+| 実施手順 | 1 | 通した | `USER`・`ST_GUI_USER` は `<USER>`、`ST_GUI_ADDR = 0.0.0.0:8384`、`ST_LAN_IP` は、それぞれの VM の IP | seq 23 / peer seq 17、`after-confirm/0023-実施手順-1.txt`・`0017-実施手順-1.txt` |
+| 実施手順 | 2 | 通した | `==> Pouring syncthing--2.1.6.x86_64_linux.bottle.tar.gz`、`🍺  /home/linuxbrew/.linuxbrew/Cellar/syncthing/2.1.6: 25 files, 29.7MB`、`==> Caveats`。Homebrew の確認は出なかった。取得の途中に `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6. Applying the network restrictions supported by this kernel.` が 1 行。プロンプトの表示で 6 秒 / 8 秒 | seq 24 / peer seq 18、それぞれの `session/session-001.raw` |
+| 実施手順 | 3 | 通した | `Syncthing GUI のパスワード:` で止まり、入力の後にプロンプトへ戻った | seq 25・26 / peer seq 19・20 |
+| 実施手順 | 4 | 通した | `INF Generating key and certificate (cn=syncthing …)`・`INF Calculated device ID (device=<DEVICE_ID> …)`・`INF Updated GUI authentication user (name=<USER> …)`・`INF Updated GUI authentication password …` の 4 行、`syncthing 2.1.6`、`syncthing v2.1.6 "Hafnium Hornet" …`、デバイス ID。2 台のデバイス ID は別 | seq 27 / peer seq 21、`after-confirm/0027-実施手順-4.txt`・`0021-実施手順-4.txt` |
+| 実施手順 | 5 | 通した | `Created symlink '/home/<USER>/.config/systemd/user/default.target.wants/sh.brew.syncthing.service' → …`、``==> Successfully started `syncthing` (label: sh.brew.syncthing)``、`brew services list` に `syncthing  started <USER> ~/.config/systemd/user/sh.brew.syncthing.service`、`enabled`、`active` | seq 28 / peer seq 22、`after-confirm/0028-実施手順-5.txt`・`0022-実施手順-5.txt` |
+| 実施手順 | 6 | 通した | `0.0.0.0:8384`・`true`、``Stopping `syncthing`... (might take a while)``・``==> Successfully stopped `syncthing` …``・`Created symlink …`・``==> Successfully started `syncthing` …``、`LISTEN 0 4096 *:8384 *:*`。`EOF` も `中断:` も出ていない（再試行の 2 周目は使われていない） | seq 29 / peer seq 23、`after-confirm/0029-実施手順-6.txt`・`0023-実施手順-6.txt` |
+| 実施手順 | 7 | 通した | `cockpit dhcpv6-client ssh syncthing syncthing-gui` | seq 30 / peer seq 24、`after-confirm/0030-実施手順-7.txt`・`0024-実施手順-7.txt` |
+| 実施手順 | 8 | 通した | `syncthing  started`、`active`、8384/tcp と 22000/tcp が `LISTEN`（`*:8384`・`*:22000`）、22000/udp（`*:22000`）と 21027/udp（`0.0.0.0` と `[::]`）が `UNCONN`、デバイス ID、ログの終わりの 5 行、`GUI: https://<SERVER_IP>:8384/  （ログイン名 <USER>）`（相手の VM は `<PEER_IP>`） | seq 31 / peer seq 25、`after-confirm/0031-実施手順-8.txt`・`0025-実施手順-8.txt` |
+| 実施手順 | 9 | 通した（画面の操作は Marionette） | 下の「GUI の手順で見た画面」の 1〜6 | seq 32 / peer seq 26（メモの行）、`facts-syncthing-after-step8.txt`、`screens/st-01`〜`st-08`・`st-12`・`st-16`、`peer2-05-…` |
+| 同期フォルダとデバイスを追加する（任意） | 1 | 通した | 相手の VM で実施手順の手順 1〜8 を通し、デバイス ID を控えた | seq 33（メモの行）、peer seq 17〜25 |
+| 同期フォルダとデバイスを追加する（任意） | 2 | 通した（ボタンの名前を読み替えた） | 主の VM の GUI の「接続先デバイスを追加」→「デバイスID」に相手の ID を入れて「保存」→「接続先デバイス」に「切断中 (未使用)」の行 | seq 34（メモの行）、`screens/st-09`〜`st-11` |
+| 同期フォルダとデバイスを追加する（任意） | 3 | 通した | 相手の VM の GUI の「新規デバイス」の通知 →「デバイスを追加」→ 開いた画面の「保存」→ `<HOSTNAME>` の行が「接続中 (未使用)」 | seq 35（メモの行）、`screens/st-13`〜`st-15` |
+| 同期フォルダとデバイスを追加する（任意） | 4 | 通した | 主の VM の GUI の「フォルダーを追加」→ フォルダー名・フォルダーID・フォルダーパス（`~/Sync`）を入れ、「共有」タブで相手にチェックを入れて「保存」。`~/Sync` と `.stfolder` ができた | seq 36（メモの行）、`screens/st-18`〜`st-22`、`facts-syncthing-sync-check.txt` |
+| 同期フォルダとデバイスを追加する（任意） | 5 | 通した（「追加」の後に、フォルダーパスを入れた） | 相手の VM の GUI の「新規フォルダー」の通知 →「追加」→ 開いた画面の「フォルダーパス」が空 → `~/Sync` を入れて「保存」→ 2 台とも、フォルダーと相手のデバイスが「最新」 | seq 37（メモの行）、`screens/st-23`〜`st-31` |
+
+- 手順 8 のログの終わりの 5 行は、主の VM が `Loaded configuration (name=<HOSTNAME> …)`・`TCP listener starting (address="[::]:22000" …)`・`Measured hashing performance (perf="2156.82 MB/s" …)`・`Detected NAT services (count=0 …)`・`Joined relay (uri=relay://… …)`、相手の VM が `GUI and API listening (address="[::]:8384" …)`・`Access the GUI via the following URL: https://127.0.0.1:8384/ …`・`Loaded configuration (name=<PEER_HOSTNAME> …)`・`Measured hashing performance (perf="2161.29 MB/s" …)`・`Detected NAT services (count=0 …)`
+- 手順 5・8 の `brew services list` には、`pulseaudio none` の行もある（Syncthing とは関わらない）
+
+#### GUI の手順で見た画面（Hyper-V、2026-10-11）
+
+Syncthing 2.1.6 の GUI を、Firefox 157.0.1（日本語の表示）で開いたときの名前。PNG は `screens/` の下。
+
+1. **証明書の警告**（実施手順の手順 9）: `https://<SERVER_IP>:8384/` を開くと、Firefox の警告の画面（タブの題名は「警告: セキュリティの危険…」、見出しは「ご注意ください。異常な動作をしている可能性があります。」、ボタンは「上級者向けの情報」「戻る (推奨)」。`st-01`・`peer2-05-…`）。「上級者向けの情報」を開くと、「このサイトの証明書は自己署名されています。」を含む説明が出る（`st-02`）
+   - その先のボタンの名前（`<SERVER_IP>:8384 へ進む (危険)`）とエラーコード（`MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT`）は、担当の報告による（PNG に写っている範囲の外）
+1. **ログイン**: 「認証が必要です」の画面。欄は `User`・`Password`、チェックは `Stay logged in`、ボタンは `Log In`（この 4 つは英語のまま。`st-03`）。手順 1 のログイン名と、手順 3 のパスワードで入れた
+1. **使用状況のレポート**: 入った直後に、「匿名で使用状況をレポートすることを許可しますか？」（「はい」「いいえ」）が、画面の前面に出た。2 台とも出た（`st-05`・`st-12`）。担当は「いいえ」を押した
+1. **デバイス ID**: 右上の「メニュー」の中は「設定・高度な設定・IDを表示・ログ・Support Bundle・Log Out・再起動・シャットダウン」（`st-07`）。「IDを表示」で開く `デバイスID - <HOSTNAME>` の画面の ID は、手順 4・8 の `syncthing device-id` と同じだった（`st-08`。相手の VM は `st-16`）
+1. **フォルダー**: 「フォルダー」の下は「フォルダーを追加」のボタンだけ（フォルダーは 0。`st-07`・`st-11`）
+1. **firewalld 越しの到達**: 主の VM の GUI は、相手の VM のブラウザから開いた。相手の VM からの `curl` は、`/` が 200、`/rest/system/status` が 403、`/rest/noauth/health` が 200。証明書は `O=Syncthing, OU=Automatically Generated, CN=<HOSTNAME>`（`facts-syncthing-after-step8.txt`）
+   - 相手の VM の GUI（`https://<PEER_IP>:8384/`）は、同じ VM のブラウザから開いた。主の VM からの `curl` は、`/` が 200、`/rest/system/status` が 403
+1. **デバイスの追加**（任意節の手順 2）: 「接続先デバイス」の下のボタンは「すべて一時停止」「最近の変更点」「接続先デバイスを追加」。「リモートデバイスを追加」という名前のボタンは無い（`st-07`）。押すと開く「デバイスを追加」の画面は、タブが「一般・共有・高度な設定」、欄が「デバイスID」「デバイス名」`Device Group`（`st-09`）
+   - 「デバイスID」の欄の下に「近くに検出された以下のデバイスの一つを選択できます。」と出て、ID が 2 つ並んだ。1 つは相手の VM、もう 1 つは、ホストの PC で動いている Syncthing のもの（`st-09`、`server/facts-syncthing-discovery.txt`）。相手の VM の `syncthing device-id` と照らして、相手だけを追加した
+   - 保存の後は、「接続先デバイス」に、ID の先頭の 7 文字の名前で「切断中 (未使用)」と出た（`st-11`）
+1. **デバイスの承認**（任意節の手順 3）: 相手の VM の GUI の上に、「新規デバイス」の通知（`デバイス「<HOSTNAME>」 ([fe80::…%eth0]:22000 の <DEVICE_ID>) が接続を求めています。新しいデバイスとして追加しますか？`。ボタンは「デバイスを追加」「無視」`Dismiss`。`st-13`）。「デバイスを追加」で開く `デバイスを追加 (<HOSTNAME>)` の画面は、ID と名前が入っている（`st-14`）。「保存」で、「接続先デバイス」の `<HOSTNAME>` の行が「接続中 (未使用)」になった（`st-15`）
+1. **フォルダーの追加**（任意節の手順 4）: 「フォルダーを追加」で開く画面は、タブが「一般・共有・ファイルのバージョン管理・無視するファイル名・高度な設定」、欄が「フォルダー名」`Folder Group`「フォルダーID」「フォルダーパス」。開いたとき、フォルダーID には自動の値が入っていて、フォルダー名とフォルダーパスは空（`st-18`）。「共有」タブの「非共有のデバイス」に、相手の名前のチェックがある（`st-20`）
+1. **フォルダーの受け入れ**（任意節の手順 5）: 相手の VM の GUI の上に、「新規フォルダー」の通知（`<HOSTNAME> がフォルダー「Sync」 (<フォルダー ID>) を共有するよう求めています。 新しいフォルダーとして追加しますか？`。ボタンは「追加」「無視」`Dismiss`。`st-23`）。「追加」で開く `フォルダーを追加 (<フォルダー ID>)` の画面は、フォルダー名とフォルダーID が入っていて、**「フォルダーパス」は空**（`st-24`・`st-26`）
+   - 「共有」タブでは、送ってきたデバイスにチェックが入っている（担当の報告に、ここでチェックを入れた操作は無い。初めから入っていたとみる）。この画面の「保存」は、薄い色（押せない表示）だった（`st-25`）。担当の報告では、1 回目の「保存」は効かず、画面が残った（欄は必須で、ボタンは `disabled`）
+   - 「フォルダーパス」に `~/Sync` を入れると（`st-27`）、保存できた。その後は、2 台とも、フォルダー「Sync」と相手のデバイスが「最新」（`st-28`〜`st-31`、`peer2-06-…`）
+
+- 手順書には無い確かめ（別の SSH で読み書きした。`facts-syncthing-sync-check.txt`・`server/facts-reboot.txt`・`server/guest-facts-end.txt`・`peer2/guest-facts-end.txt`）
+  - 双方向の同期: 主の VM の `~/Sync` に作った日本語の名前のファイルが、13 秒で相手の VM に届き、相手の VM で作ったものが、11 秒で主の VM に届いた（どちらも sha256 が一致）。主の VM での追記と削除は、12 秒で相手の VM に届いた
+  - 接続は、直接の TCP（`tcp-client` と `tcp-server`、`isLocal: true`、`TLS1.3-TLS_AES_128_GCM_SHA256`）
+  - 主の VM の再起動（手順書に再起動の手順は無い。`sudo systemctl reboot`、seq 38・39）: 起動が 21:18:28 JST、`ActiveEnterTimestamp` の 2 行が 21:18:32、最初の SSH のログインが 21:18:37（2 行に、ユニットの名前は付いていない。担当の報告では、`user@<UID>.service` と `sh.brew.syncthing.service`）。logind のセッションは、Id 1 が linger の `manager`、Id 2 がこの SSH
+  - 再起動の後、8384/tcp と 22000/tcp が `LISTEN`、firewalld のサービスは `cockpit dhcpv6-client ssh syncthing syncthing-gui`、`Linger=yes`、デバイス ID は同じ。相手の VM とつながり直し、相手の VM で作ったファイルが 12 秒で主の VM に届いた（sha256 が一致）
+  - 終わりの設定の読み取り（`guest-facts-end.txt`）: GUI のアドレスは `0.0.0.0:8384`、TLS は `true`、フォルダーは検証用の 1 つ、デバイスは 2 つ
+  - 手順 8 の後の、設定のディレクトリの一覧（`facts-syncthing-after-step8.txt`。どちらの VM のものかは、ファイルに書かれていない）: `cert.pem`・`https-cert.pem` が `-rw-r--r--`、`key.pem`・`https-key.pem`・`config.xml` が `-rw-------`。長さ 0 の `.syncthing.tmp.<数字>` も 1 つある（2026-09-24 の付録の「`syncthing generate` が残す一時ファイル」と同じ形の名前）
+- SELinux の拒否
+  - 終わりに、担当が別の SSH から、`ausearch` に `--input-logs` を付けて読んだ（21:22:47 JST。担当の報告では `ausearch --input-logs -m AVC -ts today`）。2 台とも `<no matches>`（`rc=1`）だった（`facts-avc.txt`。このファイルに、コマンドの行そのものは無い）
+  - `--input-logs` を付けない `ausearch` を、端末の無い SSH から打つと、監査ログではなく標準入力を読み、ログを見ないまま `<no matches>` を返す。その形で読んだ `<no matches>`（`facts-syncthing-sync-check.txt`・`server/facts-reboot.txt` の中の行）は、根拠にしていない
+  - 監査ログのファイルを直接数える確かめ（同じ日に、ほかの手順書の VM で行ったもの）は、この 2 台では行っていない。この手順書のブロックに、`ausearch` は無い
+
+#### 通らなかった手順と、手順書の前提と違えた所（Hyper-V、2026-10-11）
+
+- 通らなかった手順は無い
+- 手順書の前提と違えた所
+  - GUI の手順は、人の手ではなく、DOM の自動操作で行った（上の「誰が・どう通したか」）。手順書は、ブラウザを人が操作する前提
+  - 手順 9 の「LAN の別の端末から開いて firewalld 越しの到達も確かめる」: 主の VM の GUI は、相手の VM のブラウザから開いた。相手の VM の GUI は、同じ VM のブラウザから LAN の IP で開いたので、ブラウザでは firewalld を通っていない（firewalld 越しは、主の VM からの `curl` で見た）
+  - 実施手順の手順 1〜8 は、手順書どおり、自分のシェル（SSH）に貼った
+- 手順書の外で行ったこと
+  - 相手の VM のホスト名を変えた（`sudo hostnamectl set-hostname`）。主の VM は変えていない
+  - 相手の VM のコンソールで GNOME にログインし、Firefox を起動した（別の SSH から、`--marionette` を付けて）。Firefox のプロファイルに、証明書の例外が 2 つ残ったはず（担当の報告による。プロファイルの中は見ていない）
+  - `~/Sync` に、検証用のファイルを作った（終わりに、2 台に 2 つずつ残っている）
+  - 主の VM の再起動と、その後の読み取り。再起動の後は、ブロックを貼っていない
+- 外との通信: Syncthing の既定のとおり、グローバル探索と中継が有効で、2 台とも、公開の探索サーバーと中継サーバーにつないだ（GUI の「探索サーバー 4/5」、主の VM のログの `Joined relay`）。検証用のデバイス ID が、そこに知らされている。同期そのものは、上のとおり直接の TCP だった
+
+#### Hyper-V に左右されたと思われる値（2026-10-11）
+
+担当の報告が挙げた値を、値のまま並べた。ほかのハイパーバイザと比べて確かめたものではない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`。`hostnamectl` は `Chassis: vm`・`Hardware Vendor: Microsoft Corporation`・`Hardware Model: Virtual Machine`・`Firmware Version: Hyper-V UEFI Release v4.1` |
+| NIC と IP | 2 台とも `eth0` で、Default Switch が配った `/20` の IP。手順 1 の `ST_LAN_IP` には、この IP が自動で入った。2 台のあいだは、この IP で直接届いた（8384/tcp・22000/tcp） |
+| ローカル探索 | Default Switch を通って、2 台のあいだで届いた（「近くに検出された以下のデバイス」に、相手の ID）。**同じ一覧に、ホストの PC の Windows で動いている Syncthing の ID も出た**（Default Switch は、ホストと VM が同じ網にいる。追加していない） |
+| ホスト名 | クローンは、2 台ともクローン元と同じ名前（`hostname -f` は `<HOSTNAME>.mshome.net`）。相手の VM の名前を変えた後も、古い名前は、Default Switch の DNS で、相手の VM の IP を返した（`peer2/prep-hostname.txt`）。Syncthing は IP と探索でつなぐので、響いていない |
+| machine-id とデバイス ID | machine-id は、クローンなので 2 台で同じ。デバイス ID は、手順 4 で作る鍵から決まるので、別になった |
+| ログと GUI の値 | `Measured hashing performance` は `2156.82 MB/s`（主の VM）・`2161.29 MB/s`（相手の VM）、`Detected NAT services (count=0)`。GUI は「待ち受けポート 3/3」「探索サーバー 4/5」 |
+| 同期が届くまで | 作成は 13 秒と 11 秒、追記と削除は 12 秒、再起動の後の作成は 12 秒（Syncthing が変更をまとめて待つ時間を含む） |
+| 時間 | `brew install syncthing` は、プロンプトの表示で 6 秒（主の VM）・8 秒（相手の VM）。主の VM の再起動は、送ってから 17 秒でドライバの SSH がつながり、`systemd-analyze` は `649ms (kernel) + 1.714s (initrd) + 14.406s (userspace) = 16.770s` |
+| メモリとディスク | 終わりの `free -m` は、主の VM が合計 2900・使用 932・available 1967、相手の VM が合計 1895・使用 1008・available 886（コンソールで GNOME にログインした後）。2 台とも、`/` は 39G のうち 8.1G、`/home` は 19G のうち 6.2G |
+| 失敗しているユニット | `mcelog.service`（起動のたびに failed。初期設定の通しのときから同じ。手順には影響しない。Hyper-V によるかは確かめていない） |
+
+- 時間は、静かなホストで測ったものではない（担当の報告では、同じ時刻に、ほかの検証の VM が同じホストで動いていた）
+- 担当の報告は、ハイパーバイザのせいで「確認」の出力が変わった所は無い、とみている。Hyper-V に固有だったのは、ホストの PC の Syncthing が一覧に出たことで、ホストと VM が同じ網にいない組み方（内部だけのスイッチなど）では出ないはず、とみている（確かめていない見立て）
+
+#### 過去の記録と違った所（Hyper-V、2026-10-11）
+
+どれも、手順の判定は変えない。
+
+| 所 | 今回（Hyper-V の VM） | 過去の記録 |
+|---|---|---|
+| 版 | Syncthing 2.1.6、Homebrew 7.0.9、kernel `6.12.0-211.64.1.el10_2` | 2026-10-06 の 2 回の VM は Syncthing 2.1.5・Homebrew 7.0.8・kernel `6.12.0-211.61.1.el10_2`。2026-09-24 の実機は 2.1.5・Homebrew 7.0.6 |
+| 手順 2 の `Warning:` | Landlock の警告が 1 行 | この文書の過去の記録には無い。[初期設定の検証記録](almalinux-setup.md)には、ほかの `brew install` で同じ行が出た記録がある |
+| 手順 4 の行 | `Generating key and certificate` から始まる 4 行 | 2026-10-03 の Linux での確認の記録にも、同じ 4 行がある。手順書の箇条書きは、後ろの 3 行だけを書いていた |
+| 手順 6 | 2 台とも 1 周目で通り、`EOF` は出なかった | 2026-10-06 の先の検証は、localhost の GUI にした VM の初回が `EOF` で終了 1 になり、再試行を入れる形に直した。同じ日の再検証では、出ていない |
+| GUI の操作のしかた | 両方の GUI を、DOM の自動操作で操作した | 2026-10-06 の先の検証は、相手の登録と受け入れを REST API で入れた。同じ日の再検証は、両方の GUI で操作した（「相手側のパス指定」を含む、と書いている） |
+| GUI の名前 | 日本語の表示の名前を記録した（「メニュー」→「IDを表示」、「接続先デバイスを追加」） | 2026-10-06 の再検証は「Show ID を確認した」と書いている（表示の言語は、書いていない） |
+| 再起動の後の起動 | 起動の 4 秒後で、最初の SSH のログインの 5 秒前 | 2026-10-06 の先の検証のサーバー側は、起動の 39 秒後（SSH は、その 29 秒後）。再検証のサーバー側は、SSH の 12 秒前。どれも、ログインより前 |
+| 貼り方 | ブラケットペースト | 2026-10-06 の 2 回は、ブラケットペースト無し |
+
+#### 指摘と状態（Hyper-V、2026-10-11）
+
+行番号は、`114c2b2` の `docs/syncthing.md` のもの。
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 中 | 任意節の手順 5（`:201`） | 「相手側に『このデバイスがフォルダーを共有しようとしています』と出るので受け入れる」だけでは終わらなかった。通知（「新規フォルダー」）の「追加」で開く画面は、フォルダーパスが空で、入れるまで保存できない。通知の文も違う | 手順書の書き方。送る側（手順 4）は、パスを自分で入れるので当たらない。2026-10-06 の再検証も「相手側のパス指定」を操作している。SSH にも Hyper-V にもよらないとみる（見立て） | 直した（1 行の説明と、箇条書き 3 つ。リードの WARNING の「手順 4」を「手順 4・5」に。コマンドの無い手順で、ブロックは無い） |
+| 2 | 低 | 任意節の手順 2（`:192`） | 「リモートデバイスを追加」という名前のボタンは無く、「接続先デバイスを追加」だった | 手順書の書き方。Syncthing の版と、GUI の表示の言語で決まる（見立て） | 直した（1 行の説明を、ボタンと欄の名前に合わせた） |
+| 3 | 低 | 実施手順の手順 9（`:170`） | 「Actions → Show ID」は英語の表示の名前で、日本語の表示では「メニュー」→「IDを表示」だった。任意節は日本語の名前（「フォルダーを追加」「共有」）で書いていて、節で言語が違っていた | 手順書の書き方 | 直した（日本語の名前を先に書き、英語の名前を括弧に入れた） |
+| 4 | 低 | 実施手順の手順 9（`:166`〜`:172`） | 初めて入ると、使用状況のレポートを許可するかの問いが、画面の前面に出る。2 台とも出た。書かれていなかった（Windows 11 の節の手順 12 には、同じ問いの箇条書きがある） | 手順書の書き落とし | 直した（箇条書きを 1 つ足した） |
+| 5 | 低 | 任意節の手順 2 の箇条書き（`:194`） | 「近くに検出された以下のデバイス」に、相手のほかに、同じ網のほかの Syncthing（今回は、ホストの PC のもの）の ID も並んだ | 環境（Default Switch は、ホストと同じ網）と、手順書の書き方（選び方が書かれていない）。ほかの Syncthing がいる LAN なら、実機でも並ぶはず（見立て。実機では見ていない） | 直した（一覧のある場所と、欄に入れた ID が相手の `syncthing device-id` と同じであることを確かめてから保存することを足した） |
+| 6 | 低 | 任意節の手順 3（`:197`） | 通知の名前（「新規デバイス」）と、押すボタン（「デバイスを追加」→ 開いた画面の「保存」）が書かれていなかった | 手順書の書き方 | 直した（箇条書きを 1 つ足した） |
+| 7 | 低 | 実施手順の手順 4（`:73`） | 「3 行が出る」と書かれた 3 行の前に、`Generating key and certificate` の 1 行が出た（計 4 行） | 手順書の書き方。鍵を新しく作るときに出る行 | 直した（その行に続いて 3 行が出る、と書いた） |
+| 8 | 低 | 実施手順の手順 2（`:39`〜`:43`） | `brew install` の途中に、`Warning: Landlock ABI 10 or later is required …` が 1 行出た。導入は成功した | 環境（Homebrew 7.0.9 と、カーネル 6.12 の Landlock ABI 6）。初期設定の通しでは、3 つのハイパーバイザで同じ行が出ている。SSH にも Hyper-V にもよらない | 直した（初期設定の「シェルのツール」の手順 1 と同じ箇条書きを足した） |
+| 9 | 低 | 実施手順の手順 5（`:91`） | 出力は ``Successfully started `syncthing` (label: sh.brew.syncthing)`` で、名前を囲むのはバッククォート。箇条書きは `'syncthing'` と書いていた | 手順書の書き方。担当の報告は挙げていない（証跡と照らして気付いた） | 直した（出力のとおりに書いた） |
+| 10 | 低 | 実施手順の手順 5・6 の箇条書き | 手順 5 は、`Successfully started` の前に `Created symlink …` が 1 行出る。手順 6 は、読み戻しの 2 行と `LISTEN` の行のあいだに、止めて始め直す 4 行が出る。箇条書きは触れていない | 成功条件は出ていて、読み違えは起きないとみる（見立て）。担当の報告は挙げていない | 未対応（手順書は変えていない） |
+| 11 | 低 | Windows 11 で使うの手順 12（`:751`）、「設定を自動でバックアップする（任意）」の手順 6（`:383`） | 指摘 3 と同じ「Actions → Show ID」と、指摘 1 と同じ「共有を受け入れる」が、通していない節にもある | 同じ GUI なので、同じ直しが要るはず（見立て。この 2 つの節は、今回通していない） | 未対応（通していない節なので、変えていない） |
+
+- 環境と道具（手順書の指摘ではない）
+  - Hyper-V の Default Switch では、ホストの PC の Syncthing のローカル探索が VM に届く。逆向きに、VM の検証用の ID も、ホストの Syncthing の同じ一覧に出るはず（見ていない。追加しないかぎり、つながらない）
+  - 検証用の VM が、公開の探索サーバーと中継サーバーにつないだ（手順書の既定のとおり）
+  - 別の SSH から打つ `ausearch` は、`--input-logs` を付けないと監査ログを読まない（上の「SELinux の拒否」）
+  - `mcelog.service` が、起動のたびに failed になる
+
+#### 手順書を直した所（Hyper-V、2026-10-11）
+
+どれも文言だけの直し。コードブロックは 1 つも変えていないので、貼り直す所は無い。直した後の文で、VM を操作し直してはいない（直した文は、今回の出力と PNG の名前のとおり）。
+
+- 実施手順の手順 2: 箇条書きに「`Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい」を足した（指摘 8）
+- 実施手順の手順 4: 「`Generating key and certificate` の行に続いて、…の 3 行が出る」に（指摘 7）
+- 実施手順の手順 5: ``Successfully started `syncthing` (label: sh.brew.syncthing)`` に（指摘 9）
+- 実施手順の手順 9: 「初めて入ると、『匿名で使用状況をレポートすることを許可しますか？』と聞かれる。『はい』『いいえ』のどちらでもよい」を足した（指摘 4）。デバイス ID の出し方を「『メニュー』→『IDを表示』（英語の表示では Actions → Show ID）」に（指摘 3）
+  - 「どちらでもよい」は、Windows 11 の節の手順 12 の書き方に合わせた。今回押したのは「いいえ」だけで、「はい」は押していない
+- 任意節のリード: 「ボタン・欄・通知の名前は、GUI の表示が日本語のときのもの」を足した。WARNING の「この節の手順 4 で」を「この節の手順 4・5 で」に（手順 5 でも、相手側のパスを入れるため）
+- 任意節の手順 2: 1 行の説明を「GUI の『接続先デバイスを追加』を押し、『デバイスID』の欄に相手のデバイス ID を貼って保存する。」に（指摘 2）。箇条書きに、一覧の場所（「近くに検出された以下のデバイス」）と、同じ LAN のほかの Syncthing の ID も並ぶので、欄に入れた ID が相手の `syncthing device-id` と同じであることを確かめてから保存することを足した（指摘 5）
+  - 英語の表示でのボタンの名前は、今回見ていないので、書いていない
+  - 「一覧から選ぶ」とは書いていない。担当の報告は「欄に相手の ID を入れた」で、一覧の ID を押して欄に入れる操作をしたかは、証跡から分からない
+- 任意節の手順 3: 箇条書きに、通知の名前と文、「デバイスを追加」→「保存」を足した（指摘 6）
+- 任意節の手順 4: 1 行の説明の終わりを「チェックを入れて保存する。」に（今回の操作のとおり。「保存」が書かれていなかった）
+- 任意節の手順 5: 1 行の説明を「相手側の GUI に出る『新規フォルダー』の通知で『追加』を押し、フォルダーパスを入れて保存する。」に。箇条書きに、通知の文、開いた画面はフォルダーパスが空で、入れるまで「保存」を押せないこと、保存の後に両方の GUI で「最新」になることを足した（指摘 1）
+- [ロールバックと注意点](../extra/syncthing.md)と[参考資料](../reference/syncthing.md)は、変えていない
+
+#### 報告と証跡の照合（Hyper-V、2026-10-11）
+
+- 14 手順の判定と、「確認」の後ろの出力、PNG に写っている名前は、担当の報告（`result.md`）と証跡で食い違わない
+- 手順 2 の時間: 報告は 8.1 秒と 10.8 秒（ドライバの記録で、落ち着くのを待つ時間を含む）。プロンプトの表示は `took 6s` と `took 8s`。この記録には、プロンプトの表示を書いた
+- 報告だけにあって、証跡のファイルでは確かめられないもの
+  - GUI の操作の 1 つずつ（`mn.py` を、どの要素に、どの順で呼んだか）。操作の記録は、証跡に無い。残っているのは、道具（`tools/mn.py`）と、操作の前後の PNG（`screens/st-NN-*.png`・`peer2-05-…`・`peer2-06-…`）。GUI のログインのパスワードを `mn.py typefile` で入れたことも、報告による（PNG で分かるのは、欄が ● だけなこと）
+  - Firefox の警告の画面の、先へ進むボタンの名前とエラーコード（PNG に写っている範囲の外）
+  - 任意節の手順 5 で、1 回目の「保存」が効かなかったことと、そのときの DOM の状態（PNG の `st-25` では、「保存」が薄い色で、画面が残っている）
+  - 使用状況のレポートで「いいえ」を押したこと（`guest-facts-end.txt` に `-1` の行があるが、行に名前は付いていない。報告では、設定の `urAccepted`）
+  - GUI のパスワードのファイルを、ゲストの tmpfs に置いて、終わりに消したこと。パスワードを送る前に、入力待ちの端末のエコーが切れていること（`stty -a` の `-echo`）を、別の SSH で見たこと
+  - ホストの PC の Syncthing の ID であること（`server/facts-syncthing-discovery.txt` は、担当が要点だけを書き直したもの。`syncthing cli show discovery` の出力そのものは、ホストの PC のアドレスを含むので、残していない）
+  - `globalAnnounceEnabled`・`relaysEnabled`・`natEnabled` が `true` であること（`guest-facts-end.txt` に `true` が 4 行あるが、行に名前は付いていない）
+- 報告は、主の VM を止めてスナップショット `after-R3` を取り、相手の VM はスナップショットを取らずに止めた、と書いている（証跡のファイルでは確かめられない）
+
+#### 確かめていないこと（Hyper-V、2026-10-11）
+
+- 人がマウスとキーボードで GUI を操作したときの動き（フォーカス、日本語入力）、Firefox のほかのブラウザ、スマートフォン
+- GUI の表示が英語のときの、ボタンと通知の名前
+- 使用状況のレポートに「はい」と答えた側
+- 手順 1 の `ST_GUI_ADDR=127.0.0.1:8384` の側、手順 2 で Homebrew が確認を出した場合、手順 6 の `EOF` と再試行の 2 周目、各ブロックの `中断:` の側
+- バックアップから戻したホストの表示（手順 4 の `Key exists; will not overwrite`、手順 9 の「戻したフォルダが並ぶ」）
+- 任意節の手順 2 の、アドレスを直接書く側（VPN 越し）、「近くに検出された以下のデバイス」の一覧の ID を押して欄に入れる操作。相手が Windows 11 のとき
+- 「接続元を絞る（任意）」「設定を自動でバックアップする（任意）」「バックアップから戻す」、更新（新しい版への入れ替え）、ロールバック、Windows 11 の節
+- 同期の競合、中継や QUIC での同期、相手の VM の再起動
+- ホストと VM が同じ網にいない組み方での、ローカル探索の一覧
+- デスクトップの端末（Ptyxis・WezTerm）に貼る形、ブラケットペーストが効かない端末
+- 監査ログのファイルを直接数える確かめ
+- 実機、aarch64。VMware と VirtualBox の VM では、この日は通していない
 
 ### 手順中の実測・検証状況の記録
 

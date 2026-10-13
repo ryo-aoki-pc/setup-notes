@@ -1,6 +1,8 @@
 # AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim・AI エージェント）の参考資料
 
-[手順書](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
+[AlmaLinux 10 の初期設定（実施手順）](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
+
+集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
@@ -19,7 +21,7 @@
 ### 実施手順 / システムの設定 / 手順 1: 補足: 変数の意味
 
 - `HOST_NAME` は、SSH・RDP・Samba・Syncthing などで、この PC を見分ける名前
-- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で左の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
+- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で、アクティビティの画面の下の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
 - 変数はその端末の中だけで有効なので、新しい端末を開いたら貼り直す
 
 ### 実施手順 / システムの設定 / 手順 3: 補足: SSH の既定とログイン
@@ -147,6 +149,24 @@
 
 - 日々の操作は[Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)
 
+### 実施手順 / Homebrew / 手順 4: 補足: IBus の PATH を固定する理由
+
+- Anthy のエンジン（`/usr/libexec/ibus-engine-anthy`）は、`exec python3 /usr/share/ibus-anthy/engine/main.py` と書かれた sh の包みで、PATH で最初に見つかった `python3` で動く
+- 共通の bash 設定は、Homebrew のディレクトリを PATH の先頭に置く。2026-10-11 の Hyper-V の VM では、`gnome-shell` と `ibus-daemon` の環境にも Homebrew を含む PATH があった。セッションへ取り込まれる具体的な経路は、確かめていない
+- Homebrew の `python3` は、formula の依存として入る（2026-10-11 は、「yazi」の手順 2 の既定のツールで `python@3.15` が入った）。この `python3` には `gi`（PyGObject）が無いので、エンジンが `ModuleNotFoundError: No module named 'gi'` で起動しない
+  - 上部バーの表示は `あ` に変わるが、打った字は英字のまま入り、Space でも変換されない
+  - `ibus list-engine` は、エンジンが起動できない状態でも `anthy - Anthy` を出す。FXB では、入力不能の状態でも journal の `ModuleNotFoundError` は 0 行だった。この行が無いことだけでは、復旧したと判断できない
+  - 入力不能の状態で出たのは、gnome-shell の `Gio.IOErrorEnum: タイムアウトしました`（`_setEngine`）。切り替えた後も `ibus engine` は `xkb:us::eng` のままで、Anthy のエンジンのプロセスは無かった。包みをその PATH で `--xml` 付きで呼ぶと、`ModuleNotFoundError` が出た
+- GNOME のユーザーサービス `org.freedesktop.IBus.session.GNOME.service` が `ibus-daemon` を起動する（FXA・FXB の `systemctl --user show` の起動コマンド・PID と、プロセスの環境を照合）。ドロップインは、このユニットの PATH だけを `/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` に置き換える
+  - Homebrew を含まない、決め打ちの PATH であり、systemd のユーザーマネージャーの既定値を写したものではない。`~/.local/bin`・`~/bin` なども、このユニットの PATH から外れる
+  - FXA のドロップインを置く前の `ibus-daemon` の PATH は、`/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/<USER>/.local/bin:/home/<USER>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin` だった（Homebrew 本体は導入済み。`FXA/out/02-baseline-before-step4.txt`）。Homebrew 導入前のユーザーマネージャーの PATH は、今回の証跡では確かめていない
+  - 検証した VM では、この設定の後に起動した `ibus-daemon` から、Anthy のエンジンは `/usr/bin/python3` で起動された。端末と `gnome-shell` の PATH は変わらない
+  - GNOME 以外のセッションや、別の経路で `ibus-daemon` を起動する構成は対象の外で、確かめていない。セッションの PATH で起動される `/usr/libexec/ibus-setup-anthy`（Anthy の設定）が開くかも、確かめていない
+- 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（[検証記録](../verification/almalinux-setup.md#手順書を直した所とその確かめ)）
+  - FXA では、Homebrew の `python3` が無い状態で手順 4 を置き、「yazi」の手順 2 で `python@3.15` を入れ、再起動した後に、テキストエディターで「日本語」への変換と確定を確かめた
+  - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
+  - FXB では、Homebrew とドロップインを消すロールバックの後も、再起動してログインしたテキストエディターで変換と確定を確かめた。ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
+
 ### 実施手順 / シェルのツール / 手順 1: 補足: 確認とボトル
 
 - 依存も入れる計画なので、`[y/n]` と聞かれる
@@ -207,6 +227,12 @@
 ### 実施手順 / tmux を試す / 手順 3: 補足: tmux のサーバー
 
 - セッションが 1 つも無くなると、tmux のサーバーも終わる
+
+### 実施手順 / yazi / 手順 2: 補足: 一緒に入る python3 と curl
+
+- 既定の `YAZI_EXTRAS` では、依存として Homebrew の `python3`（2026-10-11 は `python@3.15`）と `curl` も入る
+- 共通の bash 設定が Homebrew のディレクトリを PATH の先頭に置くので、端末では、どちらも `/usr/bin` のものより先に見つかるようになる（2026-10-11 の 3 つの VM で、この後の `command -v curl` は `/home/linuxbrew/.linuxbrew/bin/curl` を返した）
+- 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 4
 
 ### 実施手順 / 再起動と確認 / 手順 1: 補足: 再起動で効くもの
 

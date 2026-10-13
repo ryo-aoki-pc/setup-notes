@@ -4,6 +4,10 @@
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
+- **現在の追加確認（2026-10-12、C20-FOLLOWUP）**: 既存 Hyper-V の両拠点で元 CL5 の一時 LAN を再構成した
+  - A の dry-run 原文と B の案内どおりの読み替え、両拠点の status 原文と 2 分以内の handshake、LAN 端末役どうしの双方向 ping・tracepath を確認した（[今回の付録](#付録-一時-lan-を戻して修正ブロックを確認した記録2026-10-12c20-followup)）
+  - LAN の再構成は手順書外の fixture。C20 の失敗を保持し、実ルーター・インターネット越し・外出先クライアントの成功範囲は追加しない
+
 ## 補足
 
 ### 実施手順 / 状態と疎通を確かめる / 手順 2: 本文中の記録
@@ -91,7 +95,17 @@ $ tracepath -n 192.168.120.100
       - もとの検証記録は、[統合前の記録: Road Warrior](#統合前の記録-road-warriorもとは-wireguard-road-warriormd)に中身を変えずに移した
     - ホスト側の登録は、実施手順の[クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の 9 手順に作り直した
       - **作り直した形で通したのは、スタブ環境だけ**（鍵をホストで作る経路と、クライアントの公開鍵で登録する経路）
+        - これは、統合した時点（2026-10-11）の状態。同じ日に、Hyper-V の VM の WG ホストで、作り直した形の手順 1・3〜7・9 を流した（手順 7 は、`qrencode` を入れるまで通らなかった。手順 2 は条件に当たらず、手順 8 は AlmaLinux 10 の PC の分岐だけ。下の Hyper-V の行）
       - 実機・VM で通してあるのは、統合前の形（この手順書の手順 1〜7 と、Road Warrior の「WG ホストに登録する」の手順 1〜3）。作り直した手順は、その同じコマンドの組み替え
+  - **2026-10-11 に、Hyper-V の VM 3 台（x86_64 の AlmaLinux 10.2。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の「Flatpak と Flathub」までを通したもの）で、`114c2b2` の実施手順（4 項）と「AlmaLinux 10 の PC からつなぐ」（4 項）の 34 手順を上から通した**（[付録](#付録-hyper-v-の-vm-3-台で通した記録2026-10-11)）
+    - 通し方: 拠点 A・B の WG ホストと外出先の PC を、VM 1 台ずつにした。ブロックは、一般ユーザーの SSH の対話の bash に貼った。Endpoint は VM のあいだだけの閉じたネットワークの IP、拠点の LAN は各 WG ホストの中の network namespace と veth（実ルーター・NAT・インターネット越しではない）。`vi` は、ex のコマンドと貼り付けで操作した
+    - 結果: 通した 30、通らなかった 1、条件に当たらず飛ばした 1、未実施 2
+    - 通らなかった手順: 「クライアントを登録する」の手順 7（`qrencode` が入っておらず、`ERROR: qrencode がありません` で終了コード 1。手順書の外で `sudo dnf install -y qrencode` を行った後は、QR コードが出た。スマートフォンでは読み取っていない）
+    - 未実施の範囲: 「鍵を作って適用する」の手順 6（実ルーターのポート転送と静的経路）、「conf を取り込む」の手順 3（回線のつなぎ替え）。「クライアントを登録する」の手順 2 は、条件に当たらず飛ばした。同じ項の手順 6〜8 は、公開鍵で登録したクライアントでだけ行った（鍵をホストで作った conf は、表示も取り込みもしていない）
+    - 確認したこと: 作り直した「クライアントを登録する」が、スタブではない WG ホストで通る（鍵をホストで作る経路の手順 1・3・5・9 と、公開鍵で登録する経路の手順 1・4〜6。手順 7 は、手順書の外で `qrencode` を入れた後）。`vi` での `site.env` の編集と、`vi` への `client show` の出力の貼り付け。拠点の LAN の端末役どうし・外出先の PC から両拠点・拠点から PC の ping。両拠点と PC の OS の再起動の後、`wg-quick@wg0` が戻り、PC の `wg0` は張られない（`connection.autoconnect no`）
+    - SELinux の拒否: 拠点 A の WG ホストは、通しの後（2026-10-11 12:45 UTC）に、止めてあった VM を起動し直して監査ログのファイルを数え直し、`type=AVC`・`type=USER_AVC`・`type=SELINUX_ERR` の行が、どれも 0 行。拠点 B の WG ホストと外出先の PC は、数え直していない（確かめていない）
+    - 直した所: 新しいシェルで `REPO` だけを設定し直して貼ると `sudo: ./wg-vpn.sh: コマンドが見つかりません` になった 2 つのブロック（「鍵を作って適用する」の手順 4、「状態と疎通を確かめる」の手順 1）に、`cd` の行と「確認」の見出しを足した。**直した後のブロックは、VM で貼り直していない**。ほかは、箇条書きを足す文言だけの直し（`qrencode` の入れ方、`nmcli` の日本語の表示、`tracepath` の `!H`）
+    - 確認していないこと: 初期設定をしていないクリーンインストールからの通し、EPEL が無効な状態での `qrencode`、拠点 B のホストでブロックを読み替えずに貼ったときの動き、実ルーター・NAT・DDNS・テザリング、Windows 11 の節、任意節・クライアントの削除・バックアップと復旧・ロールバック、VMware と VirtualBox でのこの日の通し、実機
   - 2026-10-05: クライアント削除と鍵交換の反映、無関係の未知 peer による停止、LAN 側 IP の変更前後の検査を、一時ファイルとホスト操作のスタブで確認した。稼働中の WireGuard・firewalld・systemd には適用していない
 
 | 項目 | 値 |
@@ -934,6 +948,258 @@ IP アドレス・ホスト名・鍵は載せていない。`<WG_A_TUN_IP>` / `<
 - 移した節（AlmaLinux 10 の PC・Windows 11・ロールバック）の流し直し。コマンドを変えていないので、検証範囲は統合前のまま
 - `shellcheck`（このホストに入っていない。スクリプトは `--help` に出るコメントの手順番号だけを変えた）
 
+### 付録: Hyper-V の VM 3 台で通した記録（2026-10-11）
+
+この付録は、手順書の実施手順（4 項）と「AlmaLinux 10 の PC からつなぐ」（4 項）を、Hyper-V の VM 3 台で上から通した記録。手順番号は今の版の番号（項の名前と、項ごとの番号で書く）。VM を操作したのは検証の担当で、この付録は、その報告と証跡のファイルから書いた。
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/wireguard.md)（コミット `114c2b2`）の[実施手順](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/wireguard.md#実施手順)の 4 項（20 手順）と、[AlmaLinux 10 の PC からつなぐ](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/wireguard.md#almalinux-10-の-pc-からつなぐ)の 4 項（14 手順）の、合わせて 34 手順
+  - 2026-10-11 に作り直した「クライアントを登録する」の 9 手順（[上の付録](#付録-road-warrior-の手順書を統合した記録2026-10-11)）を、スタブではない WG ホストで流したのは、これが初めて
+  - 「Windows 11 で使う」「Windows 11 の更新」「回線に合わせて MTU を下げる（任意）」「クライアントを削除する」「バックアップと復旧」「落とし穴」と、[ロールバック](../extra/wireguard.md#全部消すロールバック)は、この通しの範囲の外（流していない）
+- **結果**: 通した 30、通らなかった 1、条件に当たらず飛ばした 1、未実施 2（合わせて 34）
+  - 通らなかった 1: 「クライアントを登録する」の手順 7（`client show … --qr`）。`qrencode` が入っておらず、`ERROR:` で終了コード 1。手順書の外で `qrencode` を入れた後に貼り直すと、QR コードが出た
+  - 条件に当たらず飛ばした 1: 「クライアントを登録する」の手順 2（同じ名前の登録が、2 回とも無かった）
+  - 未実施 2: 「鍵を作って適用する」の手順 6（ルーターが無い）、「conf を取り込む」の手順 3（回線のつなぎ替えが無い構成）
+  - 「通した」に数えたうち、一部だけを行った手順がある（[未実施の手順と、一部だけ行った手順](#未実施の手順と一部だけ行った手順hyper-v2026-10-11)）
+- **どの状態から**: Kickstart で入れた AlmaLinux 10.2 の Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の「ログインと sudo」から「Flatpak と Flathub」までを通した VM のスナップショット（`after-AS1`。[その記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列）から、クローンを 3 台作った
+  - 始めの状態: sudo はパスワードを聞かない（NOPASSWD）、EPEL は有効、`wireguard-tools`・`systemd-resolved`・`qrencode` は入っていない。ホスト名は、3 台ともクローン元と同じ `<HOSTNAME>`（`*/guest-facts-start.txt`）
+  - **初期設定をしていないクリーンインストールからの通しではない**。始めは、クリーンインストールのスナップショットから 3 台を作った。そのクローンは sudo がパスワードを聞き、担当のセッションでは、OS のパスワードを送る操作が、実行の前に権限の判定で断られた（担当の報告）。パスワードは送っていない。sudo の問いは Ctrl+C で取り消し（`sudo: パスワードが必要です`）、3 台を消して、`after-AS1` から作り直した（`aborted-clean-install/`）
+- **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、一般ユーザーの SSH の対話の bash に、ブラケットペーストで 1 つずつ貼った
+  - 3 台の役割は、拠点 A の WG ホスト・拠点 B の WG ホスト・外出先の PC。Endpoint は VM のあいだだけの閉じたネットワークの IP、拠点の LAN は各 WG ホストの中の network namespace と veth（[環境](#環境hyper-v2026-10-11)）。実ルーター・NAT・インターネット越しではない
+  - 貼ったブロックは、変数の値を変えた 2 つ（2 台目のクライアントの `CLIENT_NAME`・`CLIENT_PUBKEY`）と、拠点 B の読み替えのほかは、手順書のものと 1 文字も違わない（`steps.jsonl` の `sha256` と `pastedSha256` が同じ）
+  - 拠点 B のホストでは、リードの「引数の `A` を `B` に読み替える」のとおり、「鍵を作って適用する」の手順 1・4・5 の `A` を `B` にしたブロックを貼った（手順書の 3 行だけを変えた写し `wgb/wireguard-siteB.md` から）
+  - `vi` は、ex のコマンド（`:%s…`・`:wq`）と、挿入モードへの貼り付けで操作した。画面を見ながらカーソルを動かす編集は、行っていない
+  - VM のコンソールには、キーを送っていない（終わりの画面は、GDM のログイン画面。`screens/`）。OS のパスワードは、どの道具でも入れていない。新しく決めたパスワードは無い。実アカウントでのログインも無い
+  - WireGuard の秘密鍵は、表示していない。証跡のファイルにある 44 文字の鍵の形の文字列は、公開鍵の 4 つだけで、`PrivateKey = <鍵>` の形の行は無い（証跡のファイルを検索して確かめた）
+- Hyper-V だけで通したのは、同じ日の利用者の指示による（[初期設定の検証記録の付録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）。VMware と VirtualBox では、この日は通していない
+- **証跡**: 追跡していない `.verification/campaign/hv/CL5/`（このリポジトリには入っていない）。下のファイルの名前は、ここからの相対パス。`A seq` は `session/steps.jsonl`（拠点 A の WG ホスト）、`B seq` は `wgb/session/steps.jsonl`（拠点 B の WG ホスト）、`PC seq` は `rw/session/steps.jsonl`（外出先の PC）の番号。`after-confirm/` は、それぞれの `session/` の下にあり、名前の頭の 4 桁が seq
+- 実施は 2026-10-11 11:29〜11:53 UTC（ゲストの時計で 20:29〜20:53 JST）。手順を貼ったのは 11:40〜11:49 UTC で、その後に再起動の確かめを行った
+- この VM の値は `<USER>`・`<HOSTNAME>`・`<SITE_A_PUBLIC>`・`<SITE_B_PUBLIC>`・`<UUID>` で書いた。`192.168.110.*`・`192.168.120.*`・`10.99.*` は、`site.env.example` と手順書の例の値。クライアントの名前は、1 台目が手順書の既定の `laptop`、2 台目は検証用の名前（`<CLIENT_NAME>` と書く）。公開鍵は、検証用に作った値なので載せていない。パスワードと秘密鍵は載せていない
+
+#### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（第 2 世代の VM、VM の構成の版 12.0。`*/meta.json`）。`vmms.exe` は 10.0.26100.8875（担当の報告） |
+| VM（3 台とも） | UEFI、Secure Boot オフ、2 vCPU、1536 MB（ゲストの `free -m` の合計は 1391 MB）、ディスク 64 GB、NIC 2 枚（`eth0` は Default Switch、`eth1` は VM のあいだだけの閉じたネットワーク） |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux Enforcing、firewalld active（既定のゾーンは `public`、`forward: yes`）。表示は日本語。`NetworkManager-1.56.0-2.el10_2`・`firewalld-2.4.3-4.el10_2`・`iproute-6.17.0-2.el10`・`iputils-20240905-5.el10`・`python3-3.12.15-1.el10_2`・`vim-minimal-9.1.083-9.el10_2.22` と `vim-enhanced-9.1.083-9.el10_2.22`（`type vi` は `/usr/bin/vi`、alias は無い。どちらのパッケージの実体が動いたかは、見ていない）・`git-2.52.0-1.el10`・`epel-release-10-6.el10` |
+| 手順で入ったもの | `wireguard-tools-1.0.20250521-1.el10`（appstream）と、依存の `systemd-resolved-257-23.el10_2.2.alma.1`（baseos。`disabled` のまま）。拠点 A の WG ホストだけ、手順書の外で `qrencode-4.1.1-9.el10_0` と `qrencode-libs-4.1.1-9.el10_0`（epel） |
+| 手順書とスクリプト | `docs/wireguard.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`）。WG ホストの `~/setup-notes` は、公開のリポジトリを clone した `d69f113`（1 つ前のコミット）。`scripts/wireguard/wg-vpn.sh`（sha256 `1ca849db…`）と `site.env.example`（`1ac4faac…`）は、`114c2b2` のものと同じ（A seq 6、B seq 4。この 2 つのコミットのあいだで、`docs/wireguard.md` と `scripts/wireguard/` に差は無い） |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、`<USER>` の SSH の対話の bash にブラケットペーストで 1 ブロックずつ。`TERM` は `xterm-256color` |
+| `site.env` | 例の値のまま、`SITE_A_PUBLIC`・`SITE_B_PUBLIC`（閉じたネットワークの IP。実ルーターのグローバル側の代わり）と、公開鍵の 2 行だけを書いた。「鍵を作る」の手順 1 の 4 つの IP は、手順書の既定値と同じ（`10.99.0.1`・`192.168.110.2`・`192.168.110.1`・`192.168.120.2`） |
+| クライアント | 2 台分を登録した。1 台目は、鍵をホストで作る経路（名前は既定の `laptop`。トンネル IP は `10.99.1.1`）。2 台目は、外出先の PC で作った公開鍵で登録する経路（`<CLIENT_NAME>`。`10.99.1.2`） |
+
+役割ごとの構成:
+
+| 役割 | 構成 |
+|---|---|
+| 拠点 A の WG ホスト | `eth0`（Default Switch。管理用の SSH と既定の経路）、`eth1`（閉じたネットワーク。`<SITE_A_PUBLIC>/24`）、`veth-lan`（`192.168.110.2/24`。WG ホストの LAN 側の NIC の代わり）。namespace `lan-a` に、端末役の `192.168.110.100` とルーター役の `192.168.110.1` を付け、既定の経路を `192.168.110.2` に向けた |
+| 拠点 B の WG ホスト | 同じ形で、`eth1` は `<SITE_B_PUBLIC>/24`、`veth-lan` は `192.168.120.2/24`、namespace `lan-b` に `192.168.120.100` と `192.168.120.1` |
+| 外出先の PC | `eth0`（Default Switch）と、`eth1`（同じ閉じたネットワークの IP）。拠点の LAN には居ない（トンネルを張る前、`192.168.110.2` への ping は 100% 損失。PC seq 4） |
+
+- 実機との違い: ルーターが無い。ポート転送の代わりに Endpoint を閉じたネットワークの IP にし、ルーターの静的経路の代わりに namespace の既定の経路を WG ホストに向けた。ルーター役の IP は、端末役と同じ namespace に付けただけ（ルーターの NAT や状態の追跡に当たるものは無い）
+- `veth-lan` は、firewalld の `public` に、今の設定と永続の両方で入れた（`apply` の reload の後も残すため。2026-10-06 の記録と同じ）。`apply` は、`veth-lan` から LAN 側のゾーンを検出した（`LAN 側ゾーン: public（veth-lan から検出）`）
+- 準備（閉じたネットワークの IP・namespace・veth）は、手順書の外のスクリプトで行った（`tools/cl5-prep.sh`。各セッションの seq 2）。namespace と veth は、再起動で消える
+
+#### 手順ごとの結果（Hyper-V、2026-10-11）
+
+| 節・項 | 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|---|
+| 実施手順 / site.env を作る | 1 | 通した | `REPO` は既定のまま（clone 先が `~/setup-notes`）。出力は無い。両拠点で貼った | A seq 7・8、B seq 5 |
+| 同 | 2 | 通した | 貼ると `vi` が開いた（`"~/wg/site.env" 63L, 4592B`）。`SITE_A_PUBLIC` と `SITE_B_PUBLIC` の 2 行を書き換えて `:wq`（`63L, 4588B written`）。`~/wg` は `drwx------`、`site.env` は `-rw-------`。例との差は、その 2 行だけ | A seq 9〜13、B seq 6〜10 |
+| 同 | 3 | 通した | コマンドの無い手順。ファイルは写さず、両拠点で同じ編集をして、`sha256sum` が同じことを見た | A seq 13・14、B seq 10・11 |
+| 実施手順 / 鍵を作って適用する | 1 | 通した | 「確認」の見出しの後ろに、`==> wireguard-tools をインストールします`、dnf の出力（`wireguard-tools` と依存の `systemd-resolved` の 2 パッケージ。`完了しました!`）、`==> /etc/wireguard/wg0.key と /etc/wireguard/wg0.pub を生成しました`、`公開鍵:` の行（44 文字）、`site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置いてください。`（拠点 B は `SITE_B_PUBKEY`） | A seq 15、`session/after-confirm/0015-…`、B seq 13、`wgb/session/after-confirm/0013-…` |
+| 同 | 2 | 通した | `vi` が開き、`SITE_A_PUBKEY=`・`SITE_B_PUBKEY=` の 2 行に公開鍵を書いて `:wq`（`63L, 4676B written`）。例との差は、Endpoint の 2 行と公開鍵の 2 行 | A seq 16〜20、B seq 14〜18 |
+| 同 | 3 | 通した | コマンドの無い手順。両拠点の `sha256sum` が同じ | A seq 20・21、B seq 18・19 |
+| 同 | 4 | 通した | `==> dry-run: 以下は実行予定の内容です`、`wg0.conf` に書き込む内容（`PrivateKey = (hidden)`、相手拠点の `[Peer]`、`Endpoint = <SITE_B_PUBLIC>:51820`〔拠点 B では `<SITE_A_PUBLIC>:51820`〕）、`[dry-run]` の付いた sysctl・`firewall-cmd --permanent --zone=public --add-port=51820/udp`・`--add-interface=wg0`・`--reload`・`systemctl enable`・`restart` の行、`==> LAN 側ゾーン: public（veth-lan から検出）`、ルーターに設定する値 | A seq 22、B seq 20 |
+| 同 | 5 | 通した | `==> /etc/wireguard/wg0.conf を書き込みました`・`==> /etc/sysctl.d/90-wireguard.conf を書き込みました`・`==> LAN 側ゾーン: public（veth-lan から検出）`・`success` が 3 行・`Created symlink '/etc/systemd/system/multi-user.target.wants/wg-quick@wg0.service' → '/usr/lib/systemd/system/wg-quick@.service'.`・`==> wg-quick@wg0 を起動しました`。末尾に、ポート転送 1 行・静的経路 2 行・DHCP 予約 1 行。貼った後に別の SSH で読むと、両拠点で `latest handshake: 14 seconds ago`・`15 seconds ago`、`enabled`・`active`、`net.ipv4.ip_forward = 1`、`public` に `wg0` と `51820/udp`、`wg0` の MTU は 1420、鍵と conf は root の `-rw-------` | A seq 23、B seq 21、`wga/facts-after-apply.txt`・`wgb/facts-after-apply.txt` |
+| 同 | 6 | 未実施 | ルーターが無い | A seq 24、B seq 22 |
+| 実施手順 / クライアントを登録する | 1 | 通した（2 回） | 1 台目は、4 ブロックとも既定のまま。「確認」の後ろは `登録済みクライアントはありません`。2 台目は、`CLIENT_NAME` と `CLIENT_PUBKEY` の値だけを変えた。「確認」の後ろは、見出しの行と 1 台目の 1 行（`LAST_HANDSHAKE` は `-`） | A seq 25〜28・43〜46、`session/after-confirm/0028-…`・`0046-…` |
+| 同 | 2 | 条件に当たらず飛ばした | 2 回とも、同じ名前が一覧に無かった | A seq 29・47 |
+| 同 | 3 | 通した（1 台目） | `==> クライアント laptop を登録しました（拠点 A、10.99.1.1）: /home/<USER>/wg/clients.list`・`==> クライアント用 conf を書き込みました: /etc/wireguard/clients/laptop.conf`・`conf にはクライアントの秘密鍵が入っています。端末に取り込んだら削除してください。` と、表示と反映の案内の 2 行 | A seq 30 |
+| 同 | 4 | 通した（2 台目） | `==> クライアント <CLIENT_NAME> を登録しました（拠点 A、10.99.1.2）: …`・`conf の PrivateKey は <CLIENT_PRIVATE_KEY> のままです。クライアント側で秘密鍵に置き換えてください。`。1 台目のとき（`CLIENT_PUBKEY` が空）に 1 回貼ると、`中断: CLIENT_PUBKEY が空のまま。クライアントで作った公開鍵を、この項の手順 1 に入れて貼り直す` と出て、登録されなかった | A seq 48、A seq 32 |
+| 同 | 5 | 通した（2 回） | `==> 既存の /etc/wireguard/wg0.conf を /etc/wireguard/wg0.conf.bak-<日時> に退避しました`・`==> /etc/wireguard/wg0.conf を書き込みました`・`==> /etc/sysctl.d/90-wireguard.conf は変更なし`・`==> LAN 側ゾーン: public（veth-lan から検出）`・`success`・`==> wg-quick@wg0 を起動しました` と、ルーターに設定する値。`wg show` に、登録した peer（`allowed ips: 10.99.1.1/32`・`10.99.1.2/32`）が出た | A seq 33・49、A seq 39・63 |
+| 同 | 6 | 通した（2 台目だけ） | `[Interface]`（`# Client <CLIENT_NAME> (site A)`・`Address = 10.99.1.2/32`・`PrivateKey = <CLIENT_PRIVATE_KEY>`）と `[Peer]`（`# Site A`・拠点 A の公開鍵・`Endpoint = <SITE_A_PUBLIC>:51820`・`AllowedIPs = 192.168.110.0/24, 192.168.120.0/24, 10.99.0.0/30`・`PersistentKeepalive = 25`）の 11 行（空行を含む） | A seq 50、`rw/client-show-rwpc.txt` |
+| 同 | 7 | 通らなかった（2 台目だけ。入れた後は通った） | 1 回目は `ERROR: qrencode がありません（dnf install qrencode。EPEL が必要な場合があります）`、終了コード 1。手順書の外で `sudo dnf install -y qrencode` を行った後に貼り直すと、文字の四角でできた QR コードが出た | A seq 51・52、A seq 53〜55 |
+| 同 | 8 | 通した（2 台目の、AlmaLinux 10 の PC の分岐だけ） | コマンドの無い手順。下の「conf を取り込む」の手順 1・2・4 | A seq 36、PC seq 14〜22 |
+| 同 | 9 | 通した（1 台目） | 出力は無い。`/etc/wireguard/clients/` が空になり（`合計 0`）、`client list` には 1 台目が残った | A seq 37・38 |
+| 実施手順 / 状態と疎通を確かめる | 1 | 通した | `-------- wg show wg0`（拠点 B の peer に `latest handshake: 32 seconds ago`）・`-------- ip route show dev wg0`・`-------- service`（`enabled`・`active`）・`-------- sysctl`（`net.ipv4.ip_forward = 1`）・`-------- firewalld`・`-------- zone public (wg0)`（`interfaces: eth0 eth1 veth-lan wg0`・`ports: 51820/udp`・`forward: yes`）・`-------- clients (/home/<USER>/wg/clients.list)`（1 台目の `LAST_HANDSHAKE` は `なし`）。箇条書きの 4 つとも出た | A seq 39（再起動の後に A seq 71） |
+| 同 | 2 | 通した（LAN の端末は、namespace の端末役で代えた） | 拠点の LAN どうし: 拠点 A の端末役から拠点 B の端末役へ、`ping` は 3 回とも応答、`tracepath -n` は `192.168.110.2` → `10.99.0.2` → `192.168.120.100 … 到達しました`、`要約: pmtu 1420 ホップ数 3 戻りホップ数 3`。逆方向も 3 回とも応答で、`192.168.120.2` → `10.99.0.1` → `192.168.110.100 … 到達しました`。外出先の PC から: 両拠点の端末役と拠点 B のルーター役へ 3 回とも応答、`tracepath -n 192.168.120.100` は `10.99.0.1` → `10.99.0.2` → `192.168.120.100 … 到達しました`。拠点の LAN から PC のトンネル IP へ: 両拠点の端末役と、拠点 B の WG ホストから、どれも `0% packet loss` | A seq 40・41、B seq 23・24、PC seq 26・27、A seq 59、B seq 25 |
+| AlmaLinux 10 の PC からつなぐ / 鍵を作る | 1 | 通した | 5 ブロック。4 つの IP は既定値のまま。「確認」の後ろは `WG_HOST_TUN_IP  = 10.99.0.1`・`WG_HOST_LAN_IP  = 192.168.110.2`・`ROUTER_LAN_IP   = 192.168.110.1`・`PEER_WG_LAN_IP  = 192.168.120.2`・`WG_DIR          = /home/<USER>/wg-client` | PC seq 6〜10、`rw/session/after-confirm/0010-…` |
+| 同 | 2 | 通した | dnf の出力（2 パッケージ。`完了しました!`）の後、「確認」の後ろに `wireguard-tools-1.0.20250521-1.el10.x86_64`・`NetworkManager-1.56.0-2.el10_2.x86_64`・`systemd-resolved-257-23.el10_2.2.alma.1.x86_64`・`disabled`・`/lib/modules/6.12.0-211.64.1.el10_2.x86_64/kernel/drivers/net/wireguard/wireguard.ko.xz` | PC seq 11、`rw/session/after-confirm/0011-…` |
+| 同 | 3 | 通した | `wg0.key`・`wg0.pub` とも `-rw-------`・45 バイト。続いて、公開鍵（44 文字）が 1 行 | PC seq 12、`rw/session/after-confirm/0012-…` |
+| AlmaLinux 10 の PC からつなぐ / WG ホストに登録する | 1 | 通した | 拠点 A の WG ホストで、「クライアントを登録する」の手順 1・4・5 を行った（手順 2 は条件に当たらず） | PC seq 13、A seq 42〜49 |
+| 同 | 2 | 通した | `client show` の出力（11 行）を、ホストのファイルに写して運んだ（端末からのコピーの代わり。秘密は入っていない） | A seq 50・56、`rw/client-show-rwpc.txt` |
+| AlmaLinux 10 の PC からつなぐ / conf を取り込む | 1 | 通した | 貼ると `vi` が開いた（`"~/wg-client/wg0.conf" [New]`）。`i` → 11 行を貼る → Esc → `:wq`（`[New] 11L, 281B written`）。`wg0.conf` は `-rw-------` で、sha256 は運んだファイルと同じ | PC seq 14〜19 |
+| 同 | 2 | 通した | `1` の後に、`PrivateKey` 以外の 10 行（空行を含む）。鍵は表示されない | PC seq 20、`rw/session/after-confirm/0020-…` |
+| 同 | 3 | 未実施 | 回線のつなぎ替えが無い構成（PC は、始めから拠点の LAN の外に居る） | PC seq 21・4 |
+| 同 | 4 | 通した | `接続 'wg0' (<UUID>) が正常に追加されました。`、`wg0   wireguard  wg0     アクティベート済み  いいえ`、`接続 'wg0' が正常に非アクティブ化されました (…)`。「確認」の後ろは、`connection.autoconnect: いいえ`・`connection.zone: --`・`ipv4.method: manual`・`ipv4.addresses: 10.99.1.2/32`・`ipv4.dns: --`・`ipv6.method: disabled`・`wireguard.private-key: <hidden>`・`wireguard.peer-routes: はい`・`wireguard.mtu: 0`、`wireguard.peers:` に拠点 A の公開鍵と `allowed-ips=192.168.110.0/24;192.168.120.0/24;10.99.0.0/30 endpoint=<SITE_A_PUBLIC>:51820 persistent-keepalive=25`、`-rw-------. 1 root root 477 … /etc/NetworkManager/system-connections/wg0.nmconnection` | PC seq 22、`rw/session/after-confirm/0022-…` |
+| AlmaLinux 10 の PC からつなぐ / トンネルを確かめる | 1 | 通した | `接続が正常にアクティベートされました (…)`、`wg0     wireguard  接続済み         wg0`、`GENERAL.STATE: アクティベート済み`、`IP4.ROUTE[1]`〜`[3]`（`mt = 50`）、`ip -4 route` の 3 行（`proto static scope link metric 50`）、`mtu 1420`、`latest handshake: Now`・`transfer: 92 B received, 180 B sent`、`public (default)` の `interfaces: eth0 eth1 wg0`、`/etc/resolv.conf` は始めと同じ 3 行、`<no matches>`。`IP4.ADDRESS` の行は出ない。ブロックの終了コードは 1（最後の `ausearch` が 0 件のとき） | PC seq 23・24、`rw/session/after-confirm/0023-…`（再起動の後に PC seq 41） |
+| 同 | 2 | 通した | 4 つとも `0% packet loss`。`tracepath` は `1:  10.99.0.1` → `2:  192.168.120.2` の順で、`2:` の行が `!H` で終わり、次の行は `要約: pmtu 1420`（「到達しました」は出ない） | PC seq 25、`rw/session/after-confirm/0025-…`（再起動の後に PC seq 42） |
+| 同 | 3 | 通した | 拠点 A の WG ホストで貼った。2 台目の `LAST_HANDSHAKE` が `36 秒前`（1 台目は `なし`）、`ping` は 3 回とも応答（`0% packet loss`）。箇条書きの「LAN 上の別のホストから」も、拠点 A の端末役から 3 回とも応答 | A seq 57・59、`session/after-confirm/0057-…` |
+| 同 | 4 | 通した | `接続 'wg0' が正常に非アクティブ化されました (…)` と、`DEVICE  TYPE      STATE            CONNECTION` の見出しの行だけ（`wg0` の行が消えた）。続けて読むと、`Device "wg0" does not exist.`、プロファイルは `wg0   wireguard  --      --                  いいえ` で残り、`192.168.110.2` への ping は 100% 損失に戻った | PC seq 29・30（再起動の後に PC seq 43） |
+| 同 | 5 | 通した | `合計 4` と、`wg0.pub`（45 バイト）の行だけ | PC seq 31、`rw/session/after-confirm/0031-…` |
+
+- 確認の出力は、下の指摘に挙げた所（「クライアントを登録する」の手順 7、`nmcli` の日本語の表示、`tracepath` の `!H`）のほかは、手順書の箇条書きとコメントのとおり
+- 「トンネルを確かめる」の手順 1 の `sudo ausearch -m AVC -ts recent` は、PC の対話の端末に貼ったブロックの中で動き、2 回とも `<no matches>`（監査ログの数え直しは、[報告と証跡の照合](#報告と証跡の照合hyper-v2026-10-11)）
+
+#### 通らなかった手順と見立て（Hyper-V、2026-10-11）
+
+| 項 | 手順 | 何が起きたか | 見立て | 根拠 |
+|---|---|---|---|---|
+| クライアントを登録する | 7 | `ERROR: qrencode がありません（dnf install qrencode。EPEL が必要な場合があります）` で、終了コード 1。`rpm -q qrencode` は `パッケージ qrencode はインストールされていません`、`dnf repoquery` は `qrencode-4.1.1-9.el10_0 epel`。手順書の外で `sudo dnf install -y qrencode`（2 パッケージ）を行った後に貼り直すと、QR コードが出た | 手順書のせい。通した時点の手順書には、ブロックのコメント（「qrencode が必要。EL10 では epel-release が要る場合がある」）しか無く、入れる手順が無かった。SSH から貼ったせいでも、Hyper-V のせいでもない（パッケージの有無の話。見立て）。入ったのは、EPEL が有効な状態（初期設定の「EPEL と RPM Fusion」の後）から始めたため。EPEL が無効な状態では、確かめていない | A seq 51〜55 |
+
+- 2026-10-10 のスタブ環境の記録（[クライアント用 conf に MTU を書く変更の検証](#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）では、`client show alice --qr` で QR コードが出ている。そのホスト（拠点 B の実機）には `qrencode` が入っていた
+- 数えた 34 手順の外で、通らなかった貼り方が 1 つある。再起動の後の新しいシェルで、「site.env を作る」の手順 1（`REPO`）だけを貼り直してから、「状態と疎通を確かめる」の手順 1 と「鍵を作って適用する」の手順 4 のブロックを貼ると、どちらも `sudo: ./wg-vpn.sh: コマンドが見つかりません` になった（[指摘と状態](#指摘と状態hyper-v2026-10-11)の 1）
+
+#### 未実施の手順と、一部だけ行った手順（Hyper-V、2026-10-11）
+
+| 項 | 手順 | 判定 | 行った所まで・理由 | 根拠 |
+|---|---|---|---|---|
+| 鍵を作って適用する | 6 | 未実施 | ルーターが無い。同じ項の手順 5 が表示した値（ポート転送 `WAN（<SITE_A_PUBLIC>）の 51820/udp → 192.168.110.2:51820`、静的経路 `192.168.120.0/24 → 192.168.110.2`・`10.99.1.0/24 → 192.168.110.2`、DHCP 予約）は、どの機器にも入れていない | A seq 23・24、B seq 21・22 |
+| conf を取り込む | 3 | 未実施 | テザリングなどへのつなぎ替えは無い。PC は、始めから拠点の LAN の外に居る構成 | PC seq 4・21 |
+| クライアントを登録する | 2 | 条件に当たらず飛ばした | 旧登録を消す分岐（[クライアントを削除する](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/wireguard.md#クライアントを削除する)の手順 1〜6）は、通していない | A seq 29・47 |
+| クライアントを登録する | 6 | 通した（2 台目だけ） | 1 台目（鍵をホストで作った）では貼っていない。秘密鍵入りの conf が表示され、ドライバの記録に残るため。代わりに、別の SSH で `PrivateKey` 以外の行を読んだ（`Address = 10.99.1.1/32`。ほかの行は 2 台目と同じ形で、`PrivateKey` の形の行は 1 行） | A seq 34、`wga/facts-laptop-conf.txt` |
+| クライアントを登録する | 7 | 通らなかった（2 台目だけ） | 1 台目では貼っていない（QR コードに秘密鍵が入るため）。2 台目の QR コードは、`PrivateKey` がプレースホルダの conf のもの。スマートフォンでは読み取っていない | A seq 35・51〜55 |
+| クライアントを登録する | 8 | 通した（一部） | 2 台目を、AlmaLinux 10 の PC に取り込んだ。1 台目の conf は、どの端末にも取り込んでいない。Windows 11 とスマートフォンの分岐も、行っていない | A seq 36 |
+| クライアントを登録する | 9 | 通した（1 台目） | 1 台目の conf は、取り込まないまま消した（手順書は、取り込んでから消す順）。2 台目の conf（プレースホルダ入り）は、`/etc/wireguard/clients/` に残っている | A seq 37・38、`wga/guest-facts-end.txt` |
+| 状態と疎通を確かめる | 2 | 通した（代えた） | LAN のクライアントは、namespace の端末役で代えた。別の機械ではない | A seq 40・41 ほか |
+| トンネルを確かめる | 2 | 通した | 箇条書きの「トンネル越しの `ssh`」は、ログインしていない。両拠点の WG ホストの LAN 側 IP の 22 番が開いていることだけを見た（`192.168.110.2:22 open`・`192.168.120.2:22 open`） | PC seq 28 |
+
+#### 手順書の外で行ったこと（Hyper-V、2026-10-11）
+
+- **準備**: 閉じたネットワークの NIC に固定の IP を付け（NetworkManager が自動で作った「有線接続 1」は消した）、WG ホストの 2 台には、拠点の LAN を namespace と veth で作った（`tools/cl5-prep.sh`。各セッションの seq 2。「有線接続 1」の削除は、拠点 A の WG ホストと PC では seq 3）
+- **clone**: WG ホストの 2 台で、`git clone https://github.com/ryo-aoki-pc/setup-notes.git ~/setup-notes`（認証は聞かれなかった。A seq 6、B seq 4）
+- **拠点 B の読み替え**: 上の「誰が・どう通したか」のとおり。ドライバは、ブロックの中の文字を書き換えて貼れないので、3 行を直した写しを作って、そこから貼った（B seq 12・13・20・21）
+- **`vi` の操作**: `site.env` は `:%s…` と `:wq`、`wg0.conf` は `i` → ブラケットペーストの枠（`ESC[200~` … `ESC[201~`）で 11 行を 1 回に送る → Esc → `:wq`
+- **`qrencode`**: `sudo dnf install -y qrencode`（拠点 A の WG ホスト。A seq 54）
+- **読み取り**: ドライバとは別の SSH（鍵で、パスワードなし）で、状態を読んだ（`*/facts-*.txt`・`*/guest-facts-*.txt`）。対話のシェルでは、LAN の端末役からの `ping`・`tracepath`、`ping -M do`、22 番の確かめを打った
+- **再起動**: 3 台とも `sudo systemctl reboot` で再起動し、その後を確かめた（下）
+
+再起動の後（値のまま）:
+
+- **両拠点の WG ホスト**（11:49:33 UTC に再起動。A seq 61〜63・69〜72、B seq 27〜31）
+  - 起動の時刻は 20:49:37 JST。`wg-quick@wg0` は `enabled`・`active`（`ActiveEnterTimestamp` は 20:49:42、`Result=success`）、`net.ipv4.ip_forward = 1`、`latest handshake: 16 seconds ago`（拠点 B は `18 seconds ago`）、`public` に `wg0`、MTU は 1420
+  - namespace と veth は消えていた（firewalld の一覧には `veth-lan` の名前が残る）。準備のスクリプトを動かし直すと（`Warning: ALREADY_ENABLED: veth-lan`）、拠点の端末役どうしの ping は双方向とも 3 回応答、`tracepath` は 3 ホップ・`pmtu 1420`、相手のトンネル IP と LAN 側 IP への ping も `0% packet loss`
+  - 拠点 A の新しいシェルで、「site.env を作る」の手順 1 だけを貼り直して status と dry-run のブロックを貼ると、`sudo: ./wg-vpn.sh: コマンドが見つかりません`（[指摘と状態](#指摘と状態hyper-v2026-10-11)の 1）。「クライアントを登録する」の手順 1 の 4 つ目のブロックを貼った後は、status が通った（peer 3 つ、クライアント 2 台の `LAST_HANDSHAKE` は `なし`）
+- **外出先の PC**（11:51:22 UTC に再起動。PC seq 33〜43）
+  - `wg0` は張られていなかった（`Device "wg0" does not exist.`、プロファイルは `wg0   wireguard  --      --                  いいえ`）。`~/wg-client` は `wg0.pub` だけ、`systemd-resolved` は `disabled`
+  - 新しいシェルで、「鍵を作る」の手順 1 の 5 ブロックを貼り直し、「トンネルを確かめる」の手順 1・2・4 を貼ると、1 回目と同じ結果になった（`latest handshake: Now`、4 つの ping が `0% packet loss`、`tracepath` の `!H`、down の後は見出しの行だけ）
+  - 参考資料の「トンネルを確かめる / 手順 4: 補足: 再起動したとき」の「再起動しても勝手には張られない」を、実際の再起動で見た（2026-10-06 の 2 回の VM の検証は、クライアントを再起動していない）
+
+完了時点の状態（`*/guest-facts-end.txt`）:
+
+- 拠点 A の WG ホスト: `wg-quick@wg0` は `enabled`・`active`、クライアント 2 台を登録済み、`qrencode` 入り。`/etc/wireguard/` に `wg0.conf.bak-<日時>` が 2 つ（秘密鍵を含む控え）、`clients/` に 2 台目の conf。`~/wg/clients.list` は root の `-rw-r--r--`
+- 拠点 B の WG ホスト: `wg-quick@wg0` は `enabled`・`active`。`/etc/wireguard/` は `wg0.conf`・`wg0.key`・`wg0.pub`
+- 外出先の PC: `wg0` のプロファイルが残る（`/etc/NetworkManager/system-connections/wg0.nmconnection`。自動接続は `no`）。`~/wg-client` は `wg0.pub` だけ
+- ロールバックは流していない。3 台は止めてあり、拠点 A の WG ホストは、止めた状態でスナップショット `after-CL5` を取った（担当の報告）
+
+#### Hyper-V に左右されたと思われる値（2026-10-11）
+
+担当の報告が挙げた値を、値のまま並べた。ほかのハイパーバイザと比べて確かめたものではない。どれも、手順の判定は変えない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`。`hostnamectl` は `Chassis: vm`・`Hardware Vendor: Microsoft Corporation`・`Hardware Model: Virtual Machine`・`Firmware Version: Hyper-V UEFI Release v4.1` |
+| NIC の名前とドライバ | `eth0`（Default Switch）と `eth1`（閉じたネットワーク）。どちらも `hv_netvsc`、MTU は 1500。3 台とも、足した NIC が `eth1` になった |
+| IP と DNS | `eth0` は DHCP の `/20`。`/etc/resolv.conf` は `search mshome.net` と、Default Switch のゲートウェイの `nameserver`。`hostname -f` は `<HOSTNAME>.mshome.net`。ゲストを再起動しても、3 台とも同じ IP だった。「トンネルを確かめる」の手順 1 の `cat /etc/resolv.conf` に出るのは、この値 |
+| ホスト名 | 3 台とも `<HOSTNAME>`（クローン元と同じ）。プロンプトでは 3 台を区別できない |
+| IP の無い NIC を足した最初の起動 | NetworkManager が「有線接続 1」を自動で作った（3 台とも）。始めに読んだ時点で、WG ホストの 2 台の `eth1` は DHCP を待っていて（`connecting (getting IP configuration)`）、PC の `eth1` は `disconnected`（「有線接続 1」は、どの NIC にも付いていなかった）。`NetworkManager-wait-online.service` が failed（3 台とも）。固定の IP を付けた後の再起動では、failed にならなかった |
+| SSH が通るまで | クローンの最初の起動は、PC が 11.7 秒、WG ホストの 2 台が 70.2 秒・70.0 秒（同じ作り方。70 秒の理由は確かめていない）。ゲストの再起動の後のつなぎ直しは、拠点 A が 13.5 秒、拠点 B が 3.9 秒（拠点 A の後につないだ）、PC が 17.0 秒 |
+| 起動の時間 | 再起動の後の `systemd-analyze` は、`684ms (kernel) + 1.710s (initrd) + 14.663s (userspace) = 17.058s`（拠点 A）、`17.241s`（拠点 B）、`17.095s`（PC）。`wg-quick@wg0` は、起動の時刻の 5 秒後に active |
+| 貼ってから出力が落ち着くまで | ドライバの記録（`steps.jsonl` の `durationMs`。ドライバが待つ時間を含む）で長かったのは、「鍵を作って適用する」の手順 1 が 9.95 秒（拠点 A）・9.40 秒（拠点 B）、「トンネルを確かめる」の手順 2 が 9.86 秒と、再起動の後の 9.91 秒、「鍵を作る」の手順 2 が 7.66 秒、`apply` の 4 回が 3.5〜4.1 秒。ほかの貼り付けは、どれも 4 秒未満 |
+| `wg0` の MTU | WG ホスト（wg-quick）も PC（NetworkManager）も `1420`。`tracepath` は `pmtu 1420`。拠点の端末役からの `ping -M do -s 1392` は通り、`-s 1393` は `ping: sendmsg: メッセージが長すぎます` |
+| 往復の時間 | 閉じたネットワークの上の ping は 0.33〜0.56 ms。トンネル越しの ping は、外出先の PC から接続先の拠点が 0.3〜0.8 ms、PC から相手拠点が 0.8〜1.5 ms、拠点の端末役どうしが 0.5〜1.2 ms |
+| メモリ | 1536 MB を割り当てて、`free -m` の合計は 1391 MB、使用は 762〜846 MB、available は 545〜629 MB（GDM のログイン画面が出ている状態） |
+| 失敗しているユニット | `mcelog.service`（起動のたびに failed。初期設定の通しのときから同じ。Hyper-V によるかは確かめていない） |
+| カーネルのモジュール | `wireguard`・`hv_netvsc` |
+
+- 時間は、静かなホストで測ったものではない（担当の報告では、同じ時刻に、ほかの検証の VM が同じホストで動いていた）
+- 通らなかった手順と手順書の指摘に、Hyper-V のせいとみたものは無い（見立て。[指摘と状態](#指摘と状態hyper-v2026-10-11)）。Hyper-V にかかわるのは、上の表の値だけ
+
+#### 過去の記録と違った所（Hyper-V、2026-10-11）
+
+| 所 | 今回（Hyper-V の VM） | 過去の記録 |
+|---|---|---|
+| `nmcli` の表示 | 日本語（`接続 'wg0' (<UUID>) が正常に追加されました。`・`アクティベート済み`・`接続済み`・`いいえ`・`はい`） | 2026-09-22 の実機は英語（`Connection 'wg0' (<UUID>) successfully added.`・`activated  no`・`connected`・`yes`）。2026-10-06 の VM は日本語（「アクティベート済み」「いいえ」） |
+| 「トンネルを確かめる」の手順 1 の `wg show` | `latest handshake: Now`・`transfer: 92 B received, 180 B sent`（2 回とも。ブロックのコメントのとおり） | 2026-09-22 の実機は、この時点では `latest handshake` の行が無く、`transfer: 0 B received, 148 B sent`（最初のハンドシェイクは、同じ項の手順 2 の通信で起きた） |
+| 同じ項の手順 2 の `tracepath` の終わり方 | `2:` の行が `!H` で終わる | 2026-09-22 の実機の記録は、`1: <WG_HOST_TUN_IP>` → `2: <PEER_WG_LAN_IP>` の順だけを書いていて、終わり方は残っていない |
+| PC の OS の再起動 | 行った。`wg0` は張られず、`sudo nmcli connection up wg0` を含むブロックで張り直せた | 2026-10-06 の 2 回の VM の検証は、クライアントを再起動していない（「自動接続 no の読み戻しを、再起動で張られないことの実測とはしていない」） |
+| エディターの操作 | `vi` を、ex のコマンドと貼り付けで操作した | 2026-10-06 の 2 回は、エディターの操作を含めていない（`site.env` は値を入れたファイルを置き、conf はファイルで写した）。2026-09-22 の実機は、`client show` の出力をリダイレクトで書いた |
+| 「クライアントを登録する」の形 | 2026-10-11 に作り直した 9 手順 | 実機・VM で通してあったのは、統合前の形。作り直した形は、スタブ環境だけだった |
+
+#### 指摘と状態（Hyper-V、2026-10-11）
+
+行番号は、通した時点（`114c2b2`）の `docs/wireguard.md` のもの。
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 中 | 実施手順のリード（`:16`）、「鍵を作って適用する」の手順 4・5（`:82`・`:90`）、「状態と疎通を確かめる」の手順 1（`:204`） | 再起動の後の新しいシェルで、リードの「新しいシェルを開いたら設定し直す」のとおり `REPO` だけを貼り直してから、status と dry-run のブロックを貼ると、どちらも `sudo: ./wg-vpn.sh: コマンドが見つかりません`（2 つ目の dry-run のブロックの後に読んだ終了コードは 1、作業ディレクトリは `/home/<USER>`。status のブロックの終了コードは、読んでいない）。「クライアントを登録する」の手順 1 の 4 つ目のブロック（`cd` がある）を貼った後は、同じ status のブロックが通った（A seq 65〜68・70・71） | 手順書のせい。ブロックは `./wg-vpn.sh` を相対パスで呼び、実施手順の中で `cd` をするのは、「鍵を作って適用する」の手順 1 と「クライアントを登録する」の手順 1 だけだった。端末にもハイパーバイザにもよらない。相手拠点の公開鍵を待つあいだにシェルを閉じたとき（同じ項の手順 3 → 4）や、後日に状態だけを見るときに当たる（見立て） | 直した（ブロック。「鍵を作って適用する」の手順 4 と「状態と疎通を確かめる」の手順 1 に、`cd` の行と「確認」の見出しを足した。リードと、同じ項の手順 5 は変えていない）。**直した後のブロックは、VM で貼り直していない** |
+| 2 | 低 | 「クライアントを登録する」の手順 7（`:178`） | `ERROR: qrencode がありません（dnf install qrencode。EPEL が必要な場合があります）` で終了コード 1。入れる手順が無い（A seq 51） | 上の「通らなかった手順と見立て」 | 直した（文言。箇条書きを足した。ブロックは変えていない） |
+| 3 | 低 | 「conf を取り込む」の手順 4（`:352`・`:362`〜`:367`）、「トンネルを確かめる」の手順 1（`:377`・`:378`） | コメントと箇条書きの `activated`・`no`・`yes`・`connected` が、`アクティベート済み`・`いいえ`・`はい`・`接続済み` と出た（PC seq 22・23・41）。動きを決める行（`nmcli -t -f NAME,STATE … \| grep -qx 'wg0:activated'`）は正しく動き、自動で張られたトンネルは切られた | システムの表示の言語による。SSH にも Hyper-V にもよらない（見立て。上の「過去の記録と違った所」） | 直した（文言。箇条書きを 2 つ足し、1 つに書き足した。ブロックのコメントは変えていない） |
+| 4 | 低 | 「トンネルを確かめる」の手順 2（`:395`） | `tracepath -n` の `<PEER_WG_LAN_IP>` の行が `!H` で終わり、「到達しました」と出ない。2 回とも同じ（PC seq 25・42）。4 つの ping は `0% packet loss`。LAN の端末役（`192.168.120.100`）宛ての `tracepath` は、`到達しました` で終わった（PC seq 27） | 宛先が WG ホスト自身で、その firewalld が、開けていないポート宛ての `tracepath` の UDP を、拒否の ICMP で返すため、とみる（見立て。3 台とも、終わりに読んだ記録に `reject with icmpx admin-prohibited` の行がある〔`*/guest-facts-end.txt`。firewalld の入力のチェーンの行だというのは、担当の報告による。読んだコマンドは、証跡に残っていない〕。パケットは採っていない）。Hyper-V によるとは、みていない | 直した（文言。箇条書きを足した。ブロックは変えていない） |
+| 5 | 低 | 「鍵を作って適用する」の手順 1・4・5（`:59`・`:82`・`:90`） | 拠点 B では、貼るブロックの `A` を手で `B` に直す必要がある（リードの「拠点 B のホストでは、引数の `A` を `B` に読み替える」）。今回は、3 行を直した写しから貼った。**`A` のまま拠点 B で貼ったときの動きは、確かめていない** | 手順書の書き方。「クライアントを登録する」は、拠点を変数 `SITE` にしてある | 未対応（手順書は変えていない） |
+| 6 | 低 | 「クライアントを登録する」の手順 8（`:185`）と、「conf を取り込む」の手順 2（`:330`〜`:339`） | 担当が読んで気づいた所で、実行していない。鍵をホストで作った conf（秘密鍵入り）を AlmaLinux 10 の PC に取り込むとき、手順 8 は「conf を取り込む」の手順 1〜4 を案内するが、その手順 2 のブロックは、PC に `wg0.key` が無いと `中断:` と出す形になっている | 参考資料の「代替: WG ホスト側で鍵を作る場合」は、「conf を取り込む」の手順 2 の `sed` は不要、と書いている。鍵をホストで作った conf を端末に取り込む経路は、今回通していない | 未対応（確かめていないので、手順書は変えていない） |
+| 7 | 低 | `scripts/wireguard/site.env.example` の 44 行目、`clients.list.example` の 1 行目 | コメントの「docs/wireguard.md の手順 2」「手順 10〜11」が、項に分ける前の手順番号のまま。`site.env.example` の行は、「site.env を作る」の手順 2 の `vi` の画面に出る（A seq 9） | 手順番号の付け替えの漏れ、とみる（見立て。担当の報告には無く、証跡と照らして気付いた） | 未対応（`scripts/wireguard/` は、この記録の作業では変えていない） |
+| 8 | 低 | `scripts/wireguard/wg-vpn.sh` の `client add` の案内の行 | `表示するには        : sudo ./wg-vpn.sh client show <名前> [--qr]`・`ホストに反映するには: sudo ./wg-vpn.sh apply A` と、`-e` の無い形で出る（A seq 30・48）。手順書のブロックは、どれも `-e ~/wg/site.env` を付ける | 案内のとおりに打つと、スクリプトの隣の `site.env` を探す、とみる（見立て。打っていない。担当の報告には無い） | 未対応（同上） |
+
+- 環境と道具（手順書の指摘ではない）
+  - 担当のセッションの権限の判定が、sudo のパスワードを送る操作を、実行の前に断った。クリーンインストールのクローンから始められず、`after-AS1` から作り直した（冒頭の「どの状態から」）
+  - ドライバ（`rb.mjs`）には、ブロックの中の一部（`A` → `B`）を置き換えて貼る方法が無い（`--set` は、1 変数だけのブロックの右辺だけ）
+  - IP の無い NIC を足した最初の起動で、`NetworkManager-wait-online.service` が failed になる（上の表）
+
+#### 手順書を直した所（Hyper-V、2026-10-11）
+
+| 場所 | 種類 | 直した内容 | 確かめ |
+|---|---|---|---|
+| `docs/wireguard.md` の「鍵を作って適用する」の手順 4 | ブロック | 先頭に、「確認」の見出しの行と `cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&` の行を足した（[回線に合わせて MTU を下げる](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/wireguard.md#回線に合わせて-mtu-を下げる任意)の手順 5 と同じ 3 行になった）。指摘 1 | **直した後のブロックは、VM で貼り直していない**。`cd` の行と、その後ろの `sudo ./wg-vpn.sh … --dry-run apply A` の行は、別々のブロックとしては通っている（A seq 15・22） |
+| `docs/wireguard.md` の「状態と疎通を確かめる」の手順 1 | ブロック | 同じ 2 行を足した。指摘 1 | **直した後のブロックは、VM で貼り直していない**。新しいシェルで、`cd "${REPO:?…}/scripts/wireguard" && …` を含むブロックを貼った後に、もとの status のブロックが通ることは見た（A seq 70・71） |
+| 同「クライアントを登録する」の手順 7 | 文言 | 箇条書きに、「`ERROR: qrencode がありません` と出て止まったら、`sudo dnf install -y qrencode` で入れてから貼り直す」と、EPEL にあること（初期設定の「EPEL と RPM Fusion」の手順 1 への案内）を足した。指摘 2 | エラーの文と、入れた後に通ることは、今回の出力のとおり（A seq 51〜55。EPEL が有効な状態）。足した後に、VM では流していない |
+| 同「conf を取り込む」の手順 4 | 文言 | 箇条書きに「日本語の表示では、コメントの `activated` は `アクティベート済み`、`no` は `いいえ` と出る」を足し、`wireguard.peer-routes` の箇条書きに「（日本語の表示では `はい`）」を書き足した。指摘 3 | 今回の出力のとおり（PC seq 22） |
+| 同「トンネルを確かめる」の手順 1 | 文言 | 箇条書きに「日本語の表示では、コメントの `connected` は `接続済み`、`activated` は `アクティベート済み` と出る」を足した（この手順に、初めての箇条書き）。指摘 3 | 今回の出力のとおり（PC seq 23・41） |
+| 同「トンネルを確かめる」の手順 2 | 文言 | 箇条書きに「`tracepath` の `<PEER_WG_LAN_IP>` の行が `!H` で終わっても、4 つの `ping` が `0% packet loss` なら届いている」を足した。指摘 4 | 今回の出力のとおり（PC seq 25・42）。実機で `!H` になるかは、確かめていない（箇条書きは「終わっても」と書いた） |
+
+- 文言だけの直しは、コードブロックを変えていない（貼り直す所は無い）
+- ブロックの直しの 2 つを貼り直すときは、拠点 A の WG ホストのスナップショット `after-CL5` から起動し、準備のスクリプトで namespace と veth を作り直してから（`veth-lan` が、このホストの `WG_A_LAN_IP` を持つ NIC の代わり。再起動で消える）、新しいシェルに「site.env を作る」の手順 1 と、直した 2 つのブロックを貼る
+- [ロールバックと注意点](../extra/wireguard.md)・[参考資料](../reference/wireguard.md)・`scripts/wireguard/`・図は、変えていない
+- 指摘 1 の直しの後も、「鍵を作って適用する」の手順 5 と、「クライアントを登録する」の手順 3〜7・9 のブロックは、相対パスのまま（それぞれ、同じシェルで直前に貼る手順 4 と手順 1 に `cd` がある）
+  - そのため、実施手順のリードの「新しいシェルを開いたら設定し直す」の下に、入れ子の 1 行を足した（文言だけ。`./wg-vpn.sh` で始まるブロックは、その項の最初のブロックの `cd` で移った先で貼ること、項の途中でシェルを開き直したら `cd "$REPO/scripts/wireguard"` を打ってから続けること、`sudo: ./wg-vpn.sh: コマンドが見つかりません` はこれが抜けたときの表示であること）。エラーの文は、今回の出力のとおり（A seq 66・67）。`cd` を打った後に、もとのブロックが通ることも、今回の出力のとおり（A seq 70・71）
+
+#### 報告と証跡の照合（Hyper-V、2026-10-11）
+
+- 34 手順の判定と、確認の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+- **SELinux の拒否**: 報告は「AVC の拒否は無い（`ausearch -m AVC -ts boot` は `<no matches>`。3 台）」と書く。この記録では、次のように扱った
+  - 拠点 A の WG ホスト: 検証の司令塔（単位を担当に割り振る役。通した担当とは別）が、2026-10-11 12:45 UTC に、止めてあった VM を起動し直して、監査ログのファイルを直接数えた。`/var/log/audit/audit.log` の記録は 07:23:58 UTC から 12:45:50 UTC まで（クローン元の VM の分を含み、この通しの時間をまたぐ）で、`sudo grep -c` で数えた `type=AVC`・`type=USER_AVC`・`type=SELINUX_ERR` で始まる行は、どれも 0 行。`sudo ausearch --input-logs -m AVC,USER_AVC,SELINUX_ERR` は `<no matches>`（`.verification/campaign/hv/AVC-recheck/vmv-hv-wga/avc.txt`）
+  - 拠点 B の WG ホストと外出先の PC: 監査ログのファイルは、数え直していない（**確かめていない**）
+  - `*/guest-facts-end.txt` と `*/facts-after-apply.txt` の `<no matches>` は、ドライバとは別の SSH（`tools/side-ssh.sh`。端末を割り当てない）から読んだもので、根拠にしていない。打ったコマンドは、証跡に残っていない（`--input-logs` を付けない `ausearch` は、標準入力が端末でないと、監査ログではなく標準入力を読む。同じ日の別の検証の担当が見つけた）
+  - 対話の端末で打った分は、出力だけを書く: 外出先の PC の「トンネルを確かめる」の手順 1 の `-ts recent` は、2 回とも `<no matches>`。両拠点の再起動の後の `-ts boot` も `<no matches>`（再起動の後の約 20 秒の分だけ）
+- 「有線接続 1」を消した所: 報告は「各セッションの seq 2・3」と書く。拠点 B は、準備のスクリプトが seq 2 の中で消していて、seq 3 に削除のコマンドは無い（結果は同じ）
+- 往復の時間: 報告は、トンネル越しを「同じ拠点 0.3〜0.8 ms、相手拠点 0.8〜1.5 ms」と書く。拠点の端末役どうし（拠点をまたぐ）の ping は 0.5〜1.2 ms で、この分け方に収まらない。この記録には、3 つに分けて書いた
+- 新しいシェルで通らなかった 2 つのブロックの終了コード: 報告は、まとめて「終了 1」と書く。証跡で終了コードを読んでいるのは、2 つ目の dry-run のブロックの後の 1 回だけ（A seq 68）
+- IP の無い NIC: 報告は、NetworkManager が DHCP を待ち続ける（`connecting (getting IP configuration)`）と書く。始めの記録（`*/guest-facts-start.txt`）でそうなっているのは WG ホストの 2 台で、PC の `eth1` は `disconnected`
+- `vi` のパッケージ: 報告は `vim-minimal` だけを挙げる。始めの記録には、`vim-enhanced` も入っている
+- 終わりの画面: `screens/` の 3 枚の PNG は、この付録の点検のときに開いて見た。3 枚とも、時計が 20:52 の GDM のログイン画面
+- 報告だけにあって、証跡のファイルでは確かめられないもの
+  - `vmms.exe` の版、動的メモリが無効であること、ディスクが差分であること
+  - 権限の判定が断ったときの表示と、断られた操作をやり直していないこと（証跡にあるのは、sudo の問いと、取り消した後の `sudo: パスワードが必要です`）
+  - 最初に作った 3 台を消したこと、終わりに VM を止めるのにかかった時間（8.1〜8.3 秒）、スナップショット `after-CL5` を取った時刻（11:52:58 UTC）
+  - 同じ時刻に、ほかの検証の VM が動いていたこと
+
+#### 確かめていないこと（Hyper-V、2026-10-11）
+
+- 初期設定をしていないクリーンインストールからの通し（今回は、「Flatpak と Flathub」まで済み、sudo が NOPASSWD、EPEL が有効な状態から）
+- EPEL が無効な状態での `sudo dnf install -y qrencode`、QR コードのスマートフォンでの読み取り
+- 「鍵を作って適用する」の手順 6（実ルーターのポート転送と静的経路）、NAT・CGNAT・DDNS・インターネット越しの Endpoint
+- 「conf を取り込む」の手順 3（テザリングなどへのつなぎ替え）、サスペンドからの復帰、Wi-Fi の切り替え
+- 「クライアントを登録する」の手順 2（旧登録を消す分岐）、鍵をホストで作った conf の表示（同じ項の手順 6・7）と端末への取り込み（手順 8）、Windows 11 とスマートフォンの分岐
+- 拠点 B のホストで、ブロックの `A` を読み替えずに貼ったときの動き
+- 直した後の 2 つのブロック（「鍵を作って適用する」の手順 4、「状態と疎通を確かめる」の手順 1）を貼ること
+- `vi` を、画面を見ながらカーソルで編集すること。GNOME の端末に貼る形（今回は、3 台とも GDM のログイン画面のまま、SSH から貼った）
+- トンネル越しの `ssh` のログイン（22 番が開いていることだけを見た）、拠点の LAN の別の機械（端末役は namespace）
+- 拠点 B の WG ホストと外出先の PC の、監査ログの数え直し
+- 「Windows 11 で使う」「Windows 11 の更新」「回線に合わせて MTU を下げる（任意）」「クライアントを削除する」「バックアップと復旧」「落とし穴」、ロールバック
+- 実機、aarch64。VMware と VirtualBox の VM では、この日は通していない
+
 ## 統合前の記録: Road Warrior（もとは wireguard-road-warrior.md）
 
 もとの `wireguard-road-warrior.md` の検証記録を、内容を変えずに移したもの。見出しはこの文書の中で重ならないように、頭に `Road Warrior:` を付けて 1 段下げた。リンクは今の場所に直したが、本文の「手順 N」と、リンクの文字の文書名は、当時の手順書のまま。当時の手順と今の [WireGuard VPN 構築手順](../almalinux-setup.md#wireguard-実施手順)の手順の対応は次のとおり。
@@ -1759,3 +2025,39 @@ conf を import せず、値を手で写す方式（未検証）。最初から 
 
 - インターネット越し（物理のルーターのポート転送・NAT・DDNS）と、テザリングなどへのつなぎ替え
 - トンネル越しの SSH、相手拠点の LAN 上の別のホスト、張ったままの再起動、サスペンド復帰、Wi-Fi の切り替え、arm64 の Windows、Windows の実機
+
+## 付録: Hyper-V で修正ブロックを貼り直した記録（2026-10-11、C20 / FXC）
+
+- **状態**: e5e1afb の「鍵を作って適用する」の手順 4 と「状態と疎通を確かめる」の手順 1 を、after-CL5 の WG ホスト A の新しい SSH の対話 bash に、rb.mjs paste で変更せずに貼った
+  - 「site.env を作る」の手順 1 で REPO を設定し、ホームから貼った。両ブロックとも cd が成功し、スクリプトを呼び出した
+  - dry-run はホストの検証用 LAN アドレスが無いため停止した。status は実行できたが、相手を起動していないため latest handshake の成功条件は満たさない。両手順の全成功とは数えない
+
+環境は Hyper-V / Generation 2 / 2 vCPU / 1536 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。VM の WAN 側 NIC と wg0 は残っていたが、以前の検証で作った veth-lan は存在しなかった。site.env は読んでいない。namespace や veth の再作成、鍵の作成と本適用、相手との疎通は今回行っていない。
+
+根拠は queued-units/C20/FXC-wga の steps.jsonl の seq 2（REPO）、4（dry-run）、5（status）、6（LAN インターフェースの確認）と after-confirm/。秘密鍵は (hidden) で、公開鍵も保存する証跡では伏せた。公開鍵を伏せる処理で raw の長さが変わったため、伏字化した raw のオフセットは再利用せず、手順ごとの確認ファイルを根拠にする。セッションを閉じて VM を停止した。新しい cd の動作を確認した結果であり、VPN 全体の成功範囲は広げない。
+
+## 付録: 一時 LAN を戻して修正ブロックを確認した記録（2026-10-12、C20-FOLLOWUP）
+
+- **状態**: `9ad1b0a` の対象ブロックは変更せず、既存の拠点 A・B の現在状態を使って再確認した
+  - A は after-CL5 の snapshot を保持し、B は元 CL5 から停止していた状態を起動した。復元・snapshot の上書き・鍵の再作成・本適用は行っていない
+  - 両 VM の元 CL5 の公開準備スクリプトは同じ SHA256。WAN の専用 NIC と試験用アドレスを公開記録と照合して、同じ引数で namespace・veth を戻した。SELinux は Enforcing、firewalld は active のまま
+
+| 環境 | 内容 |
+|---|---|
+| ホストと VM | Hyper-V / Generation 2 / 構成版 12.0、各 2 vCPU・1536 MB・64 GiB、Default Switch と閉じた検証 WAN の NIC |
+| ゲスト | AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64 |
+| 原文 | commit `9ad1b0aec24a4cf0e3da239f7730806886654c46`、wireguard.md の SHA256 `fb4f9270b8fdad8b2f04b777ef59fdcf2240e8c4deed242c3a337771c992cc5b` |
+| fixture | 元 campaign の `hv/CL5/tools/cl5-prep.sh`、SHA256 `a24cb4a365fe00c0b69e99775d0fccf822554d607ffbd14dce6499a3e03f6453`。ゲストの既存ファイルも同値 |
+
+| 対象 | 判定 | 根拠と確認 |
+|---|---|---|
+| 実施手順 / site.env を作る / 1 | 通した（両拠点） | A seq 1、B seq 1。新しい SSH 対話 bash で REPO を設定。site.env の存在だけを確認し、内容は開いていない |
+| 実施手順 / 鍵を作って適用する / 4 | 通した（両拠点。B は案内どおりの読み替え） | A seq 3、B の追加確認 seq 3。ホームから A は原文、B は引数だけ読み替えた全ブロックを貼付。LAN ゾーン public を veth-lan から検出し、conf・sysctl・firewalld・enable/restart・ルーター値の実行予定まで表示。秘密鍵は hidden |
+| 実施手順 / 状態と疎通を確かめる / 1 | 通した（両拠点） | A seq 4、B seq 2。handshake は 75 秒・112 秒前。enabled/active、ip_forward=1、経路、public の interfaces・51820/udp・forward=yes を確認。A の登録済み外出先クライアントは「なし」で、接続成功には数えない |
+| 同じ項 / 2 の LAN 端末役間 | 通した（双方向） | `ping-a.sh.output.txt`・`ping-b.sh.output.txt`。双方 3/3、0% 損失。tracepath は相手のトンネル IP を通り、相手端末役に到達、pmtu 1420・3 ホップ |
+
+証跡は `verification-work/queued-units/C20-FOLLOWUP/` の `versions.json`・`blocks.json`、`wga/session/steps.jsonl`・`wgb/session/steps.jsonl` と確認ファイル、fixture の前後の出力。A dry-run の抽出・貼付 SHA256 は `370ccc6ea6f0b92a49452934856c4e0b3c2b716f5153184813da58fc9de59dc1`、status は両拠点とも `eb259a5d47ed0e0af5579ee7bf7b5a490a1c6e37811e3e982a2898f60ebd7858` で一致した。公開鍵も自動伏字化し、raw のサイズは保持した。元 campaign の session・認証ログは読んでいない。
+
+手順書外の準備は、元 CL5 と同じ一時 namespace・veth の再構成と LAN 端末役からの疎通確認。ホストのスイッチ・route・NIC、実ルーター、実ユーザーの機器には触れていない。本適用、外出先クライアント、実回線・実機の通しは今回未実施。証跡保存後に両 VM を通常停止し、Off と元 snapshot の保持を確認した。
+
+拠点 B の dry-run は、本体の「拠点 B のホストでは B」の案内どおり、引数 A だけを B に読み替えた写しをドライバで貼った。原文は保持し、`source/wireguard-siteB.md` と `site-b-history.json` に別履歴を保存した。抽出・貼付 SHA256 は `8636bb151c5cd624039987a2a4239b4fac46d9f5e8383215eff0404a7d46b52c` で一致。`wgb-dryrun/session/steps.jsonl` seq 1（新しいシェルの REPO）・2（ホームと存在確認）・3（全ブロック）の出力で、B の public ゾーンと実行予定の末尾まで確認した。B の追加起動でも同じ fixture を戻し、A は停止を維持した。これは先の両拠点稼働時の status・双方向疎通とは別の確認で、最後に B を通常停止した。

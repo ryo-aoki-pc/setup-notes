@@ -2,6 +2,12 @@
 
 [手順書](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: V2 の metadata04 final-02 で SDK の旧 inner 停止・旧 VDI と、controller の全 GUID・LUN・実 sysfs 祖先の一意対応を確認した（[追加付録](#付録-v2-の-sdk-と-controller-対応の追加確認2026-10-13-utc)）
+  - 新しい inner・ストレージ・GUI の追加検証はない。2026-10-11 の lint は11通過・1条件外・警告2件で原文正常条件未達のまま
+  - GNOME 端末での原文通しと新 p2 の導入・GUI・lint 条件は未確認。今回の metadata 成立を原文手順や GUI の成功数へ足さない
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -1274,3 +1280,91 @@ Identification: VirtualBox 7.2.20 Guest Additions for Linux
   - 更新を重ねた後は、1 つ前の派生イメージに戻るだけだった（VM で確認）
 
   - 切り替えた直後なら、元のイメージに戻った（kernel-rt のイメージの VM で確認。もう一度 `sudo bootc rollback` すると、派生イメージに戻った）
+
+## 付録: Hyper-V の内側の VirtualBox ゲストで確かめた記録（V2、2026-10-11 UTC）
+
+### 判定と対象
+
+- **partial**。内側 OS の導入、Guest Additions の派生イメージの起動、GUI のコピー・貼り付けとリサイズ、共有の追加再起動後の読み書き、更新なし、指定ロールバックは確認した。手順 6 の lint は本文の正常条件を満たさなかった
+- 原文は `2c54c02acfc0fdb55959afbc195f5aac627e45f7`。Bash はハーネスの `rb.mjs paste` で、ブロックごとの SHA-256 を保存し、同じ SSH の対話シェルへ原文を貼った。再起動後は手順 1 の変数を設定し直した。**GNOME 端末へ原文を貼る形での通しは未確認**
+- 2026-09 の実機・Windows ホスト・コンテナの記録とは別の検証。N1 の内側 KVM の OS 導入完了を確認したものではない
+- 実行前に正式測定 B・C の正常な `end`、C20・W0〜W5・AS-FULL・OFFLINE-FULL の結果と停止状態、QUIESCE が無いことを確認した。先行の partial を V2 の成功に転用していない
+
+| 対象 | 条件 |
+|---|---|
+| Windows ホスト | Hyper-V。実行中は専用の外側 VM 1 台だけ。開始時 C: 約 84 GiB、取得・作成前も 40 GiB 以上 |
+| 外側 | `vmv-hv-cx-v2-outer`。停止中の `vmv-hv-sb/after-N1` から provider で作成。固定 8192 MB・4 vCPU、AlmaLinux 10.2、カーネル `6.12.0-211.64.1.el10_2.x86_64`、VirtualBox `7.2.20r175154` |
+| 外側の前提 | 専用 clone だけに仮想化拡張を公開。Secure Boot は MicrosoftUEFICertificateAuthority で有効。clone の MOK は未登録だったため、既存の公開証明書を再登録し、`is already enrolled` と `vboxdrv` を確認 |
+| 内側 | `vmv-hv-cx-v2-atomic`。VirtualBox の EFI・VMSVGA・4096 MB・2 vCPU、可変ディスクの仮想容量 48 GiB。`systemd-detect-virt` は `oracle`（外側は `microsoft`） |
+| 保存先 | 外側の `/var/lib/vmv-v2`。約 19 GiB の `/home` は内側ディスクに使わなかった。内側 `/var` は導入時約 35.8 GiB 空き。外側の実使用と可変ディスクの仮想容量を分けて監視 |
+| 内側の前提 | 公式 GNOME、ローカル検証ユーザーの GNOME セッション、bootc `1.16.4`、カーネル `6.12.0-211.61.1.el10_2.x86_64`。Secure Boot は既定で無効・Setup Mode。無効に変更して回避したものではない |
+
+### 媒体・署名・版
+
+- 取得先は公式の [GNOME amd64 ISO](https://almalinux-atomic.s3-accelerate.dualstack.amazonaws.com/atomic-desktop/latest/atomic-desktop-gnome-amd64.iso) と [公開 CHECKSUM](https://almalinux-atomic.s3-accelerate.dualstack.amazonaws.com/atomic-desktop/latest/atomic-desktop-gnome-amd64.iso-CHECKSUM)。2026-10-11 18:07 UTC に CHECKSUM を取得し、18:13:55 UTC に ISO の二重ハッシュ照合を完了した。ISO は 2,712,983,552 bytes
+- 公開 SHA-256 は `d69283e66b1fcf88928b04c79d80c31f1970b969834ae26b9b9bca21b3a772f3`。Windows で独立した 2 回の読み直しと、SCP 後の外側の計算がすべて一致した。公開 CHECKSUM 本文は未署名で、コンテナの cosign 公開鍵を ISO の署名証拠には使っていない
+- 公式 [ISO CI v13](https://github.com/AlmaLinux/atomic-ci/blob/v13/.github/workflows/build-iso.yml) と live build の処理を確認した。GNOME の Live ISO と Anaconda の対話導入を使い、Workstation の OEMDRV・Kickstart は流用しなかった
+- 大容量媒体は V2 専用の `D:/vmverify/media/v2/20261012-v2` に保存。C: に ISO の複製は残さず、既存媒体を上書きしていない。Guest Additions は外側の `/usr/share/virtualbox/VBoxGuestAdditions.iso` を使用した
+- 内側の `/etc/containers/policy.json` は変更せず、公式リポジトリの `sigstoreSigned` と公開鍵による検査を保持した。pull の `Getting image source signatures` と取得完了を保存した。手順 5 の MD5 検査は、この配布媒体の SHA-256・署名の確認とは別
+
+| 時点 | 起点と Version | digest |
+|---|---|---|
+| ISO 導入後 | `quay.io/almalinuxorg/atomic-desktop-gnome:latest`、`10.2.20261008.0` | `sha256:ac62836a7dfa39462bd2ca3e3634a3c0ebceb0f4d38da819ff1f2a9401be5ad5` |
+| ビルド時に取得した公式 latest | `10.2.20261009.1`（ISO 導入版とは別） | `sha256:6f2e34749065fe29d2f9783e24516a5e5eed42565ec582091f1e73279d8cb9f3` |
+| 派生イメージの実起動 | `containers-storage:localhost/vbox-ga:latest`、`10.2.20261009.1` | `sha256:69d59c938337c9be09ad481d00dcdc0b8ad51490f25b405eb5c3fb5d116d050f` |
+| 指定ロールバック後 | 公式 latest、`10.2.20261009.1` | `sha256:6f2e34749065fe29d2f9783e24516a5e5eed42565ec582091f1e73279d8cb9f3` |
+
+ロールバックは現在の公式 latest への切り替えであり、ISO 導入時の版への復元ではない。latest の版の変化は、固定した ISO や転送物のハッシュ不一致とは分けて記録した。
+
+### 手順ごとの結果
+
+| 範囲 | 判定 | 根拠・制限 |
+|---|---|---|
+| 実施手順 1〜3 | 通した（SSH） | BASE_IMAGE、公式起点と `/var`、原文の Containerfile 作成を確認 |
+| 手順 4 | 通した（GUI） | 外側 GNOME の実際の VM ウィンドウで「デバイス」→「Guest Additions CD イメージを挿入」。インストール ISO は正常停止中に取り外していた |
+| 手順 5 | 通した（SSH） | `MD5 checksums are OK. All good.` と `Identification: VirtualBox 7.2.20 Guest Additions for Linux`。外側と同じ版 |
+| 手順 6 | **通らなかった** | 3 モジュール・enabled 2 行・タグ付けは完了したが、`Checks passed: 11`・`Checks skipped: 1`・`Warnings: 2`。本文の 13・警告なしを満たさない |
+| 手順 7 | 再試行で通した（SSH） | 最初は担当が切断前に reconnect して対話シェルを中断。元の起動状態・未配置を確認して原文を再実行し、配置・再起動・切断と起動後の digest を確認 |
+| 手順 8 | 通した（SSH と GUI ログイン） | `vboxguest`、active 2 行、GNOME の `VBoxClient --clipboard`・`--vmsvga-session`、派生起点を確認 |
+| 手順 9 | 通した（通常 GUI 起動に変更後） | 外側・内側それぞれの GNOME Text Editor のコピー・貼り付けで両方向の試験文字が一致。VM ウィンドウを戻して 1024×645 → 915×566 の追従、VMSVGA と自動リサイズの有効を確認。日本語の貼付は未確認 |
+| 手順 10 | 条件外 | 内側 Secure Boot は無効。有効時の前提 MOK と署名は未実施。外側の登録成功を内側へ転用しない |
+| ホストオンリー任意節 | 条件外 | 内側は NAT で公式レジストリへ到達し、pull が完了。この節の rootless ビルド・輸送・署名設定は実施していない |
+| 共有 1・2 | 通した（CLI・SSH） | 外側 clone 内の無害な試験フォルダーを、本文の `--automount --transient` で追加。原文の usermod を実行 |
+| 共有 3・4 | 追加再起動後に通した | GNOME logout/login だけでは端末に vboxsf が出ず、読み取りが拒否された。SSH の新しいログインは成功。内側を再起動後、GNOME 端末のグループ・読み取り・書き込みと外側の読み戻しを確認 |
+| 更新 1 | 条件外 | 外側・Guest Additions は 7.2.20 のまま。新版の CD は使っていない |
+| 更新 2・3 | 通した（更新なし、SSH） | Using cache 4 行・同じ `f054a76907ed…`、`No changes in …`・`No update available.`。新版のカーネルや Guest Additions への更新成功とは数えない |
+| extra のロールバック 1〜3 | 通した（SSH と GUI ログイン） | 公式起点で実再起動。Untagged 2 行と Deleted、ユーザー・グループ・リンク・ログの撤去を確認。起動中の vbox モジュールと VBoxClient が無く、2 サービスは inactive |
+
+### 警告・追加準備・再試行
+
+- lint の 2 件は `nonempty-run-tmp` と `var-tmpfiles`。派生前の公式ベース単独でも同じ内容、11 passed・1 skipped・警告 2 件だった。Guest Additions の生成や `installer exit=1` だけから成功・失敗を決めず、**本文の最終正常条件が成立しなかった**と判定した。警告を無視する修正はしていない
+- GUI の最初の clipboard 試験は、headless 起動へ `--separate` のウィンドウを付けた構成だった。双方向の設定でも外側→内側へ貼れず、VBox.log は `VBoxHeadless`・`headless mode`。内側を正常停止し、外側 GNOME から通常の `VirtualBoxVM` を起動すると `normal mode` になり、両方向の貼り付けが通った。この再起動は手順書外の準備
+- 共有の最初の GNOME 再ログインでは、SSH を継続していた。Linger は no だったが、新しい SSH と GNOME の端末のグループは異なった。原因は確定していない。追加再起動の後は、GNOME の `id -nG` に vboxsf が出て読み書きできたため、共有の手順 3 に再起動の分岐だけを足した
+- 内側の対話 installer・GDM・外側の MokManager は、専用 VM だけを対象にする V2/tools の画面・キー入力支援と PNG で操作した。隠れる欄とフォーカスを実画面で確認し、非秘密の文字で試してから、既存 PasswordFile を helper 内部だけで読み、値を表示せずに入力した。最初の大量キー送信は `VERR_PDM_NO_QUEUE_ITEMS` で途中までになり、キーを解放して 1 キーずつ送る修正後にやり直した
+- 内側 SSH は、V2 専用の公開鍵 bootstrap と、外側 localhost の NAT 転送・Windows localhost の SSH トンネルを使用。既存鍵はパスで渡した。外側 IP を内側として登録せず、共有ハーネス・ホスト firewall・portproxy・スイッチは変更していない
+- 外側 GNOME の idle-delay を試験中だけ 0 にし、終了前に 300 に戻した。試験用の公開鍵輸送 HTTP サーバーも停止した。内側・外側の停止時は GNOME/SSH の抑止があり、追加の通常 OS シャットダウンを用いた。外側の `systemctl poweroff -i` は認証要求で失敗し、sudo の uid 0 を確認した `systemctl start poweroff.target` で停止した。強制電源断は使っていない
+
+### 停止・残る範囲と証跡
+
+- 内側は 19:18:51 UTC に poweroff。19:19:18 UTC の `showvminfo` と空の `runningvms` で確認した。driver と localhost トンネルを閉じた
+- 外側も provider の停止要求と追加の OS シャットダウンの後、`Get-VmvVm` の off と `Wait-VmvVmOff` で確認した。19:22:49 UTC に停止中の専用外側へ `after-V2` を保存した。元の VM・`after-N1` は変更していない
+- 実行と停止・保存は 18:07〜19:22 UTC（約 76 分）。CLI 原文・seq・ブロック SHA-256・afterConfirm、媒体の checksum 原文・二重 hash、PNG・支援コードと個別時刻は共同検証の `queued-units/V2/` に保存。媒体・鍵・raw ログは Git に追加していない
+- GNOME 端末での原文の通し、内側 Secure Boot 有効時、ホストオンリー経路、新版への更新、kernel-rt・KDE・COSMIC・認証レジストリ、autostart と運用全体は未確認。Windows・オフライン経路・内側 KVM の未確認を埋める結果ではない
+- 公開文書ではユーザー名・IP を記載せず、ローカル試験用の VM 名だけを残した。過去の 2026-09 の成功範囲を今回の現行版の成功へ読み替えない
+
+## 付録: V2 の SDK と controller 対応の追加確認（2026-10-13 UTC）
+
+公開 `metadata04-followup-20261013/publication-proposal.md` と `handoff-metadata04/final-02` の実 result・completion に基づく追記。04:52:58〜04:53:28 UTC の約31秒、既存の専用 outer を通常起動して公開metadataを読み取り照会した。以前の SDK 返答後の祖先条件未達を保持し、新helperの fresh final-02 の成立を別経過として記録する。
+
+| 範囲 | final-02 の実確認 |
+|---|---|
+| SDK の旧 inner | 停止を確認。既知 VDI の論理容量48 GiB・parent nullを確認し、祖先／read-only no-follow handleで新たにplain pathを検査。VDI内容は未読 |
+| host／guest disk mapping | hostの既知leaf→drive→controllerとguest VMBusの全128-bit GUID、drive position／LUN、実sysfs祖先が一意に対応。serialのprefix切取りから推測していない |
+| 資源と停止 | 許可済みoffline peer 6 GiBとouter 8 GiB、計14 GiBで実VM／worker対応を照合。outer通常Off・自己lock解放、8192 MiB返却。停止込みleaf増分2 MiB、既存after-V2保持 |
+
+- **追加していない検証**: 新ストレージ・新innerの作成／起動、認証・provision、GUI原文通し、Guest Additions build・lint の再検証は未実施。他担当VM／lockは操作していない
+  - 2026-10-11のpartial、lint11通過・1条件外・警告2件とGNOME端末での原文通し未完は保持。旧GUI・共有の再起動後成功は過去の範囲で、今回の成功数へ再加算しない
+  - 新p2の導入・GUI・共有分岐・lint正常条件は未成立。`p2/runtime_gate.py` のactual collectorは未実装／falseのままで、旧innerのSDK確認を新p2 UUID／VDI／provision入力の成立へ読み替えない
+  - metadata01〜03のpartial、final-01のprepared・未実行、旧grantを保存した。peer ack待機解除は親handoffによる内部連携で、別の人間承認や独立担当ackがあったとは扱わない
+
+原文手順数・GUI成功数への追加は0。正式な性能比較も未完。[横断報告](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)へ同じ限定範囲を対応させる。今回の文書編集でVMを再起動・再検証していない。

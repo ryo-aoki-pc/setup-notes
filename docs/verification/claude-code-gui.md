@@ -48,6 +48,12 @@
   - 2026-10-02: もとの手順 3・4 と、[ロールバック](../extra/claude-code-gui.md#ロールバック)のもとの手順 2・3 をつなぎ、確かめの行を `if … fi` の `else` に入れた（つないだ形は貼っていない。`bash -n` だけ）
   - 2026-10-08: 実機（同じ Raspberry Pi 5）では、ヘッドレスのセッションをやめてリモートログインだけにしたので、[gnome-headless-session.md の「リモートログインだけにする（併用をやめる）」](../almalinux-setup.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)の手順 3 でドロップインを外した（ロールバックの手順 1 と同じ操作。手順 2 は行っていない）。2026-10-01 から残していた状態は、この実機にはもう無い
     - ヘッドレスのセッションを先に止めてからリモートログインで入ると、そのセッションの gnome-shell にもドロップインが効き、RDP のモニターは `Meta-1` として足された（[gnome-headless-session.md の検証記録の付録](gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
+  - **2026-10-11 に、Hyper-V の VM（x86_64）で、実施手順 1〜6 を上から通した**（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+    - 通し方: [gnome-headless-session.md](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-headless-session.md) の実施手順 1〜10 を通した直後の同じ VM で、ブロックを SSH の対話の bash に 1 つずつ貼った（変数は既定のまま）。`REPO` の `~/setup-notes` は、GitHub から clone した（`scripts/gnome-gui.py` は、検証する版と同じ中身）
+    - 結果: 通した 6、通らなかった 0、条件に当たらず飛ばした 0、未実施 0。確認の出力は 6 手順とも箇条書きのとおりで、手順書は直していない
+    - 確認したこと: 1920x1080 の仮想モニターの画面を 1 回で撮れる。電卓に `12×34 = 408` が出る。クリックでアクティビティ画面が開き、`ctrl+q` で電卓が閉じる。手順 3 の後も、ヘッドレスのセッションの RDP のデーモンは 3389/tcp を待ち受けていた（つないではいない）
+    - 通らなかったもの: 無い
+    - 未実施の範囲と、確認していないこと: 「使い方の基本」の表、任意節「仮想モニターの大きさを変える」、ロールバック、再起動の後、手順 4 の撮り直しの側と「ようこそ」の案内を閉じる側（どちらも出なかった）、ドロップインを置いた後の RDP の接続、Claude Code からの操作、実機
 
 | 項目 | 値 |
 |---|---|
@@ -224,6 +230,96 @@ RDP の標準構成の試験とロールバックを終えた後、ヘッドレ�
 実施手順 4 と解像度変更の確認を、撮影の成功・MIME `image/png` を確認してから情報を表示し、失敗時は中断を明示するブロックへ修正した。読者にも PNG を開いて画面を確認してから次へ進むようにした。改訂後の両ブロックを再実行し、`1920x1080` と `1280x720` の正常な PNG と画面を確認した。VM 再起動後の GNOME 自動起動も確認した。
 
 ロールバック 1・2 で drop-in を削除し、`ExecStart=/usr/bin/gnome-shell` に戻してセッションを起動し直した。GUI 補助スクリプトそのものは変更していない。物理モニター、長時間の放置試験、全アプリの操作は今回実施していない。
+
+---
+
+### 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/claude-code-gui.md)の実施手順 1〜6（コミット `114c2b2`）を、上から最後まで通した
+  - 「使い方の基本」の表、任意節「仮想モニターの大きさを変える」、ロールバックは、この通しでは流していない
+- **結果**: 6 手順のうち、通した 6、通らなかった 0、条件に当たらず飛ばした 0、未実施 0
+  - 「確認」から後ろの出力は、6 手順とも手順書の箇条書きのとおりだった。手順書への指摘は無く、手順書は直していない
+- **どの状態から**: [gnome-headless-session.md の実施手順 1〜10 を通した](gnome-headless-session.md#付録-hyper-v-の-vm-で通した記録2026-10-11)直後の、同じ VM（止めずに続けた）
+  - ヘッドレスのセッションと、そのセッションの RDP（3389/tcp）が有効な状態。この手順書の前提は、gnome-headless-session.md の手順 1・2 までなので、前提より先まで進んでいる
+  - 前提の「画面オフ・画面ロック・自動サスペンドを止める（任意）」は、手順 1〜5 まで当たっている（`/usr/bin/gsettings` で `idle-delay` は `uint32 0`、`lock-enabled` は `false`）
+- **どう通したか**: 手順書から抜き出したブロックを、SSH の対話の bash に 1 つずつ貼った（手順書の「本人のシェル（SSH でよい）」のとおり）。変数は、手順書の既定のまま
+  - VM のコンソールでは、GNOME にログインしていない（GDM のログイン画面のまま）
+  - 撮った PNG は、担当が `scp` で持ち帰って見た。実アカウントでのログインは無く、Claude Code からは動かしていない
+- **手順書の外の準備**: `git clone https://github.com/ryo-aoki-pc/setup-notes.git ~/setup-notes`（認証は聞かれなかった）
+  - clone されたのは `main` の `d69f113` で、検証する版（`114c2b2`）の 1 つ前。`scripts/gnome-gui.py` の sha256 は、検証する版のものと同じ（`23d0bb62…71ad7`）
+- **誰が**: 通したのは、検証の担当のエージェント。この付録は、その報告と証跡のファイルを、VM に触れない別の担当が照らし合わせて書いた。その後、もう 1 人の担当（これも VM に触れていない）が、付録を、証跡のファイルと PNG（6 枚とも）に当てて点検した
+- **証跡**: 追跡していない `.verification/campaign/hv/CL2/`（このリポジトリには入っていない）。下のファイルの名前は、ここからの相対パス。`seq` は `session/steps.jsonl` の番号、`after-confirm/` は `session/after-confirm/`
+- 出力の中の VM の値は、`<USER>`・`<UID>`・`<SESSION_ID>`・`<PID>` で書いた。パスワードと鍵は載せていない
+
+#### 環境（2026-10-11）
+
+ホスト・ハイパーバイザ・VM の構成・ゲストの版・貼り方は、[gnome-headless-session.md の検証記録の「環境（2026-10-11）」](gnome-headless-session.md#環境2026-10-11)と同じ（Windows 11 Pro の Hyper-V、第 2 世代の VM、2 vCPU、3072 MB、AlmaLinux 10.2 / x86_64 / SELinux Enforcing、ロケール `ja_JP.UTF-8`、sudo は NOPASSWD）。この手順書にかかわる所だけを書く。
+
+| 項目 | 内容 |
+|---|---|
+| 入っていた版 | `gnome-shell-49.4-9.el10_2.alma.1`、`mutter-49.4-4.el10_2`、`gdm-47.0-24.el10_2`、`pipewire-1.4.11-1.el10_2.1`、`wireplumber-0.5.10-1.el10`、`python3-gobject-3.46.0-7.el10`、`python3-3.12.15-1.el10_2`、`gnome-calculator-46.3-1.el10`（`guest-facts-end.txt`。`python3` だけは `guest-facts-start.txt`） |
+| PATH | Homebrew が `/usr/bin` より前にある。`python3` と `gsettings` は Homebrew のものが先に見つかる（seq 21）。`scripts/gnome-gui.py` は `#!/usr/bin/python3` で動いた |
+| 手順書 | `docs/claude-code-gui.md`、コミット `114c2b2`（`steps.jsonl` の `docCommit`）。貼った中身は手順書のまま（`sha256` と `pastedSha256` が同じ） |
+| 実施の日時 | 2026-10-11 11:19:07〜11:20:10 UTC（ゲストの時計で 20:19〜20:20 JST）。その前の clone は 11:18:57 UTC |
+| 検証用の値 | 無い（`REPO=~/setup-notes`・`VIRTUAL_MONITOR=1920x1080` のまま） |
+| 始めの状態 | このユーザーのヘッドレスのセッションが動いていて、gnome-shell は `--virtual-monitor` 無し（gnome-headless-session.md の手順 2 の `<PID> /usr/bin/gnome-shell`）。手順 2 の確認は 3 行だけで、ほかのドロップインの行は無い。RDP のクライアントは、つないでいない |
+
+#### 手順ごとの結果（2026-10-11）
+
+| 手順 | 判定 | 出力と、確かめたこと | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `USER = <USER>`・`REPO = /home/<USER>/setup-notes`・`VIRTUAL_MONITOR = 1920x1080` | seq 15、`after-confirm/0015-実施手順-1.txt` |
+| 2 | 通した | `ExecStart=/usr/bin/gnome-shell`・`ExecStart=`・`ExecStart=/usr/bin/gnome-shell --virtual-monitor 1920x1080` の 3 行 | seq 16、`0016-実施手順-2.txt` |
+| 3 | 通した | `stop` と `start` は何も出さず、「確認」の後に `<SESSION_ID> <UID> <USER> - <PID> user headless no -` と `<PID> /usr/bin/gnome-shell --virtual-monitor 1920x1080`。sudo はパスワードを聞かなかった。gnome-shell のログに `Added virtual monitor Meta-0`。Mutter のモニターの先頭は `Meta-0`（`MetaVirtualMonitor`、`1920x1080@60.000`。記録は行の途中で切ってあり、ほかのモニターが無いことまでは読めない） | seq 17、`0017-実施手順-3.txt`、`headless-session-journal.txt`、`guest-facts-end.txt` |
+| 4 | 通した | `/home/<USER>/gnome-gui-test.png` と `/home/<USER>/gnome-gui-test.png: PNG image data, 1920 x 1080, 8-bit/color RGBA, non-interlaced` の 2 行。1 回で撮れた（`15 秒以内に…` は出なかった）。PNG は、上に検索欄のあるアクティビティ画面。「AlmaLinux へようこそ」の案内は出なかった | seq 18、`0018-実施手順-4.txt`、`screens/gui-step4-gnome-gui-test.png` |
+| 5 | 通した | 出た順に、`gnome-gui-desktop.png` のパス、`gnome-gui-org.gnome.Calculator-<PID>`、`gnome-gui-calc-ready.png` のパス、`gnome-calculator` と `電卓`（間はタブ）、`gnome-gui-calc-input.png` のパス、`gnome-gui-calc.png` のパス。`gnome-gui-calc-input.png` に `12×34`、`gnome-gui-calc.png` に電卓の窓と `12×34 = 408` が写っている | seq 19、`0019-実施手順-5.txt`、`session/session-001.raw`、`screens/gui-step5-gnome-gui-*.png`（4 枚） |
+| 6 | 通した | `/home/<USER>/gnome-gui-overview.png` の 1 行だけが出て、最後の `windows` は何も出さなかった。PNG は、上に検索欄、真ん中に電卓の窓のアクティビティ画面（ポインタが、左上のアクティビティのボタンの上に写っている） | seq 20、`0020-実施手順-6.txt`、`screens/gui-step6-gnome-gui-overview.png` |
+
+- 条件に当たらなかった分岐: 手順 4 の「`15 秒以内に…` と出て貼り直す」側と、「ようこそ」の案内を閉じる側
+  - 手順 4 は、gnome-shell が起動してから 6 秒ほど後に撮っている（PNG の上部バーの時計が 20:19:26、gnome-shell のログの起動が 20:19:20）
+  - このユーザーは、初期設定の通しで、コンソールから GNOME にログインしたことがある（担当の報告による）
+- 手順ごとの時間（`steps.jsonl` の `durationMs`。出力が止まってからドライバが待つ 1.7〜1.9 秒を含む）: 手順 3 が 7.2 秒（中の `sleep 3` を含む）、手順 5 が 7.0 秒、手順 6 が 6.1 秒、手順 1・2・4 は 1.8〜2.0 秒
+- 手順 5 の `gnome-calculator` と `電卓` の間がタブ（0x09）であることは、生の記録（`session-001.raw`）で確かめた。`after-confirm/` のファイルでは、空白に展開されている
+- 撮った PNG は 6 枚で、どれも 1920×1080、0.6〜1.0 MB。どの PNG にも、上部バーの右に画面共有の印（オレンジ）が写っている
+- 手順 3 でセッションを起動し直すと、ヘッドレスのセッションの RDP のデーモンも一緒に止まって起動し直された（`RDP server stopped` → 新しいプロセスで `RDP server started`。`grd-journal-full.txt`）。終わりの時点で、デーモンは `active` で、`LISTEN 0 5 *:3389 *:*` だった（`guest-facts-end.txt`）。RDP では、つないでいない
+- SELinux の拒否: 通しの中の読み（別の SSH から打った `ausearch -m avc -ts boot` の `<no matches>`）は、読み方のせいで当てにならない。後から（2026-10-11 12:44 UTC）、同じ VM の監査ログのファイルを数え直して、`type=AVC`・`type=USER_AVC`・`type=SELINUX_ERR` の行は 0 行だった。読み方・数え方・証跡は、[gnome-headless-session.md の検証記録の「SELinux の拒否の数え直し」](gnome-headless-session.md#selinux-の拒否の数え直し2026-10-11)（同じ VM の、同じ読みと数え直し）
+
+#### 通らなかった手順と、手順書の前提と違えた所（2026-10-11）
+
+通らなかった手順は無い。
+
+- **SSH から貼ったせい**: 無い。SSH の対話の bash に貼るのは、手順書のとおり
+- **Hyper-V のせい**: 確認の出力が変わった所は無い
+- **手順書のせい**: 無い。箇条書きと違う出力も、箇条書きに無い出力も、見つからなかった
+- 前提と違えた所は 1 つ: ヘッドレスのセッションの RDP を設定した後に通した（前提は、gnome-headless-session.md の手順 1・2 まで）。確認の出力には、影響しなかった
+
+#### Hyper-V に左右されたと思われる値（2026-10-11）
+
+ほかのハイパーバイザや実機と比べて確かめたものではない。時間は、静かなホストで測ったものではない（同じ時刻に、ほかの単位の VM が動いていた）。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`（`guest-facts-end.txt`） |
+| 仮想モニター | `Meta-0`（`MetaVirtualMonitor`、`1920x1080@60.000`）が、RDP をつないでいなくても在る。選べる拡大率は 1.0・1.25・1.333・1.5・1.667・2.0（`guest-facts-end.txt`） |
+| 撮影の時間 | 手順 4 のブロックの出力は、貼ってから 0.2 秒ほどで出そろった（`steps.jsonl` の `outputEndMs` が 237）。`shot` は 1 回 1 秒かかっていない |
+| 起動し直しの時間 | 手順 3 は 7.2 秒。`start` から、gnome-shell のログの `Added virtual monitor Meta-0` まで 0.4 秒（`headless-session-journal.txt`） |
+| メモリ | 終わりの `free -m` は、合計 2900・使用 1692・available 1207（仮想モニターの付いたヘッドレスのセッションと、GDM のログイン画面が動いている状態） |
+| グラフィック | 一緒に起動し直された RDP のデーモンのログに、`libEGL warning: failed to get driver name for fd -1`・`MESA: error: ZINK: failed to choose pdev` などが出た（[gnome-headless-session.md の検証記録](gnome-headless-session.md#hyper-v-に左右されたと思われる値2026-10-11)）。gnome-shell の側のログは、この通しでは見ていない。撮影と入力は通った |
+
+#### 指摘と状態（2026-10-11）
+
+- 手順書への指摘は無い（直した所も、未対応も無い）
+- 環境の指摘（手順書の外）: PATH で先に見つかる Homebrew の `gsettings` は、非対話の SSH では dconf の値ではなく既定値を返した。[注意点](../extra/claude-code-gui.md#注意点)に書いてあるとおり（この手順書のブロックは `gsettings` を使わない。前提の初期設定の任意節は `/usr/bin/gsettings` で書いてある）
+
+#### 確かめていないこと（2026-10-11）
+
+- 手順 4 の撮り直しの側と、「ようこそ」の案内を閉じる側（どちらも出なかった）
+- 「使い方の基本」の表のコマンドのうち、実施手順に出てこないもの（`move`・`scroll`・右クリック・ダブルクリック・`--no-cursor`）
+- 任意節「仮想モニターの大きさを変える」と、ロールバック
+- 再起動の後に、仮想モニターの付いたセッションが戻ること（この通しに、再起動は無い）
+- ドロップインを置いた後のセッションへの RDP の接続（[注意点](../extra/claude-code-gui.md#注意点)の「RDP でつないだ人には、Claude Code の画面は写らない」）
+- Claude Code からの操作（Read で PNG を開く・リモートコントロールで送る）。VM では、Claude Code を動かしていない
+- 放置したときの動き（ロック・サスペンド）、キーリングを開く窓、IBus での日本語の入力、物理のモニターのある PC、実機
 
 ### 手順中の実測・検証状況の記録
 

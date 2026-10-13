@@ -13,6 +13,13 @@
   - 通したもの: 画面で一度もログインしていないユーザーの Workstation の VM で、前提の gnome-power.md 手順 1〜5 → 実施手順の全部（4 項。「前提を確かめる」の手順 4 は飛ばす場合も含む）→ 任意節 2 つ → つながらなくなったとき 1〜3 → ロールバック。最終版のブロックで、同じ VM でもう一度通した
   - 確認したこと: PC 役の VM には、VirtualBox のキーボード・マウスの入力を 1 度も送らずに、再起動の後の自動ログイン・RDP の画面と入力・SSH からのロック解除と切り替え・ログアウトからの復旧・資格情報の変更・残っている資格情報の削除（閉じたキーリングと開いたキーリング）・ロールバックの後のログイン画面
   - 確認していないこと: 実機・aarch64 でのこの版、Windows の mstsc でのこの版、モニターの無い PC・暗号化したディスク・SSH が無効などの「前提を確かめる」の手順 2 の分岐、長い放置、ほかのユーザーが PC の画面でログインしているとき
+  - **2026-10-11 に、Hyper-V の VM（x86_64。Kickstart で入れた Workstation のクローンに、初期設定と前提の任意節を通したもの）で、今の版の実施手順（4 項）と「見るだけにする（任意）」の 18 手順を上から通した**（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+    - 通し方: PC 役の VM のコンソールにはキーもマウスも送らず、ブロックは共有するユーザーの SSH の対話の bash に貼った。クライアントは、同じ仮想スイッチにつないだ別の VM の FreeRDP 3.10.3。実アカウントでのログインは無い
+    - 結果: 通した 17、通らなかった 0、条件に当たらず飛ばした 1（「前提を確かめる」の手順 4。RDP の資格情報が残っていなかった）、未実施 0。確認の出力は、どの手順も手順書の箇条書きのとおりだった
+    - 2026-10-07 の VM と違う所: このユーザーは、コンソールの GNOME にログイン済みで、通す前からあるログインのキーリングが閉じたまま残っている（2026-10-07 の 2 回目の通しのログインのキーリングは、手順書の外で作ったもの）。その状態でも、再起動の後の自動ログインと RDP の接続で、キーリングの窓は出なかった。「ようこそ」の窓には当たっていない
+    - 直した所: 手順書の箇条書きに 3 行（読み戻しに出るほかの行、FreeRDP の Kerberos の行、プローブが journal に残す行）、参考資料に 4 か所を足した。どれも文言だけで、コードブロックは変えていない（直した後に、VM では流していない）
+    - 未実施の範囲: 「接続元を LAN に絞る（任意）」「つながらなくなったとき」、ロールバック（この通しの範囲の外）
+    - 確認していないこと: クライアントからのマウスの操作、Windows の「リモート デスクトップ接続」、「前提を確かめる」の手順 4 と各手順の分岐、再起動の後に資格情報を読まずに直接つなぐ流れ、長い放置、VM の電源を入れ直した後、VMware と VirtualBox でのこの日の通し、実機
 - **以前の版（PC の前でパスワードでログインし、自動ログインは任意節だった）の記録**: 2026-10-07 に x86_64 の VirtualBox VM、aarch64 の実機、公式 ISO から新規インストールした aarch64 VM で、それぞれ検証した
   - [VirtualBox の記録](#付録-virtualbox-の-vm-での本実行2026-10-07): AlmaLinux 10.2 Workstation と、別の VM の FreeRDP 3.10.3・Windows 11 の mstsc。PR #100 の初版・レビュー修正版・この検証で直したブロックを実行した
   - [実機の記録](#付録-このホストでの検証2026-10-07): Raspberry Pi 5 aarch64 で設定・RDP の画面と入力・任意節・ロールバック。HDMI 未接続のため、seat0 に仮想モニターを付けた
@@ -61,11 +68,13 @@ PC の画面を触らない今の版の付録より前の付録は、以前の�
 ### 実施前の状態
 
 - PC の画面を触らない今の版は、[付録の実施前の状態](#実施前の状態pc-の画面を触らない版)を参照
+- 2026-10-11 の Hyper-V の VM（初期設定と前提の任意節を通した後で、このユーザーはコンソールにログイン済み）は、[付録の実施前の状態](#実施前の状態hyper-v)を参照
 - 2026-10-06 の作成時には実機・VM の記録は無かった。以前の版の 2026-10-07 の状態は [VirtualBox](#実施前の状態virtualbox)、[実機](#実施前の状態2026-10-07実施手順-12)、[aarch64 クリーン VM](#実施前の状態と設定tls)、[統合後の x86_64 VM](#環境と準備統合後の-x86_64-vm)を参照
 
 ### 完了時点の状態
 
 - PC の画面を触らない今の版は、[付録の完了時点の状態](#ロールバックと完了時点の状態pc-の画面を触らない版)を参照
+- 2026-10-11 の Hyper-V の VM は、ロールバックを流していない（デスクトップ共有が有効なまま終えた）。[付録の完了時点の状態](#完了時点の状態hyper-v)を参照
 - 以前の版は、[VirtualBox の復元結果](#完了時点の状態virtualbox)、[実機の復元結果](#ロールバック完了時点の状態2026-10-07)、[aarch64 クリーン VM の復元と後片付け](#ロールバックと後片付け)、[統合後の x86_64 VM の復元結果](#ロールバックと完了時点の状態統合後の-x86_64-vm)を参照
 - 2026-10-06 に書いた確認の出力は上流のソースに基づくものだった。各 2026-10-07 の付録には実測した出力を残す
 
@@ -1000,3 +1009,251 @@ RDP の入力はクライアント VM の Xvfb 上の FreeRDP の窓へ送った
 
 - 最終版の `bash` のブロック 29 個は、どれも `bash -n` を通り、埋め込みの Python 4 本は `ast.parse` を通った。1 回目に流したブロックとの違いは、ロールバックの手順 4 の表示の 1 行だけで、2 回目でそのブロックも流した
 - ShellCheck は、この検証のホストに無いので、かけていない
+
+---
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+この付録は、今の版の手順書の実施手順（4 項）と「見るだけにする（任意）」を、Hyper-V の VM で上から通した記録。手順番号は今の版の番号（実施手順は、項の名前と項ごとの番号で書く）。VM を操作したのは検証の担当で、この付録は、その報告と証跡のファイルから書いた。
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md)（コミット `114c2b2`）の実施手順の 4 項（16 手順）と、[見るだけにする（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#見るだけにする任意)（2 手順）の、合わせて 18 手順
+  - [接続元を LAN に絞る（任意）](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#接続元を-lan-に絞る任意)・[つながらなくなったとき](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md#つながらなくなったとき)・[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)は、この通しの範囲の外（流していない）
+- **結果**: 通した 17、通らなかった 0、条件に当たらず飛ばした 1（「前提を確かめる」の手順 4）、未実施 0
+  - 確認の出力は、どの手順も手順書の箇条書きのとおりだった（証跡の `session/after-confirm/`・`peer/session/session-001.raw`・`screens/` で確かめた）
+- **どの状態から**: Kickstart で入れた AlmaLinux 10.2 の Workstation のクローンに、[初期設定](../almalinux-setup.md)の実施手順と、前提の[画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1〜5、linger、podman を通した VM のスナップショットから作ったクローン
+  - **このユーザーは、コンソールの GNOME にログイン済み**（`~/.config/gnome-initial-setup-done` と `login.keyring` がある）。2026-10-07 の VirtualBox の VM は、画面で一度もログインしていないユーザーだった
+- **誰が**: Claude Code のサブエージェント
+- **どう通したか**: PC 役の VM のコンソールには、キーもマウスも送っていない（画面は PNG で見ただけ）。手順書から抜き出したブロックを、共有するユーザーの SSH の対話の bash に 1 つずつ貼った（手順書の前提と同じ貼り方）
+  - 「再起動の後に確かめてつなぐ」の手順 3 は、同じ仮想スイッチにつないだ別の VM（クライアント役）の FreeRDP 3.10.3 で行った
+  - 実アカウントでのログインは無い
+- Hyper-V だけで通したのは、同じ日の利用者の指示による（[初期設定の検証記録の付録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）。VMware と VirtualBox では、この日は通していない
+- **証跡**: 追跡していない `.verification/campaign/hv/CL3/`（このリポジトリには入っていない。画面の PNG も、ここにだけある）。下のファイルの名前は、ここからの相対パス。`seq` は `session/steps.jsonl`（PC 役の VM）、`peer seq` は `peer/session/steps.jsonl`（クライアント役の VM）の番号
+- 出力の中の VM の値は、`<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<CLIENT_IP>` で書いた。RDP のユーザー名は検証用の値。RDP のパスワード（その場で作った乱数）・OS のパスワード・証明書のフィンガープリントの値は載せていない
+
+### 環境（Hyper-V）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V。層の `Get-VmvBackend` は `Generation=2`・`Version=12.0`・`HypervisorPresent=True`（`meta.json`）。`vmms.exe` は 10.0.26100.8875（担当の報告による） |
+| PC 役の VM | 第 2 世代（UEFI）、Secure Boot オフ、2 vCPU、3072 MB（ゲストの `free -m` の合計は 2900 MB）、ディスク 64 GB、NIC 1 枚（`eth0`）。動的メモリは無効、ディスクは SCSI の差分、NIC は Default Switch（この 3 つは、担当の報告による） |
+| クライアント役の VM | 同じ構成で 2048 MB（ゲストの合計は 1639 MB）。Kickstart のベースのスナップショット `clean-install` からのクローンで、初期設定は通していない（`peer/meta.json`） |
+| PC 役の VM の始まり | Hyper-V の列の VM `desktop` のスナップショット `after-CL1` からのクローン（SSH が通るまで 11.3 秒。`meta.json`）。ホスト名は、クローン元と同じ |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux は Enforcing、firewalld は `public` ゾーン |
+| GNOME | `gnome-remote-desktop-49.3-4.el10_2`、`gnome-shell-49.4-9.el10_2.alma.1`、`mutter-49.4-4.el10_2`、`gdm-47.0-24.el10_2`、`gnome-session-46.0-11.el10`、`gnome-initial-setup-46.7-3.el10.alma.3`、`gnome-tour-46.0-4.el10.alma.1` |
+| キーリング | `gnome-keyring-42.1-20.el10`、`libsecret-0.21.2-8.el10`、`python3-gobject-base-3.46.0-7.el10`、`dconf-0.40.0-17.el10` |
+| そのほか | `firewalld-2.4.3-4.el10_2`、`openssl-3.5.8-2.el10_2.alma.1`、`systemd-257-23.el10_2.2.alma.1`、`plymouth-24.004.60-17.el10.alma.2`、`polkit-125-4.el10_2.1`、`grubby-8.40-83.el10.alma.1` |
+| クライアント | クライアント役の VM の AppStream の `freerdp-3.10.3-12.el10_2.14`（`xfreerdp`。`wlfreerdp` も入る）、`xorg-x11-server-Xwayland-24.1.9-4.el10_2.3`、`gnome-shell-49.4-9.el10_2.alma.1` |
+| 手順書 | `docs/gnome-desktop-sharing.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`。`steps.jsonl` の `docCommit`） |
+| 実施の日時 | 2026-10-11 11:11:38〜11:18:01 UTC（最初のブロックから、最後の手順まで。ゲストの時計で 20:11〜20:18 JST）。再起動のパスワードは 11:13:33、クライアントの接続は 11:16:08〜11:19:30 |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ。変えたのは `SERVER_IP` の 1 行だけ（`steps.jsonl` の `sha256` と `pastedSha256` は、その 1 ブロックのほかは同じ）。問い（RDP のユーザー名とパスワード、再起動の OS のパスワード）には、問いが出て待っているのを見てから 1 つずつ答えた |
+| 検証用の値 | `SERVER_IP` は、PC 役の VM に仮想スイッチが配った IP。RDP のユーザー名とパスワードは検証用の値（パスワードは、OS のパスワードとは別の乱数） |
+
+- 2026-10-07 の VirtualBox の VM と版が違うのは、kernel（`211.61.1` → `211.64.1`）・`openssl`（`3.5.8-1` → `3.5.8-2`）・`freerdp`（`el10_2.13` → `el10_2.14`）。上の表の GNOME とキーリングのパッケージは、同じ版（`gnome-control-center` と `glib2` の版は、今回は記録していない）
+- この VM のユーザーは、初期設定で共通の bash 設定と Homebrew を入れてある（SSH のプロンプトは starship）。手順書のブロックは `/usr/bin/gsettings` と `/usr/bin/python3` を名指しで呼ぶ。この通しの記録に、PATH の値は無い
+- 同じ時刻に、同じホストでほかの検証の VM が動いていた（担当の報告による）。時間は、静かなホストで測ったものではない
+
+### 実施前の状態（Hyper-V）
+
+`guest-facts-start.txt`（20:11:18 JST。最初のブロックを貼る前）による。
+
+- PC の画面は GDM のログイン画面で、seat0 はログイン画面の `gdm` の行（`greeter`、tty1）だけ。このユーザーの seat0 のセッションは無い（再起動の直前の画面は `screens/main-01-before-reboot-greeter.png`）
+- このユーザーは、前にコンソールの GNOME にログインしている。`~/.config/gnome-initial-setup-done` と、`~/.local/share/keyrings` の `login.keyring`・`user.keystore` がある
+- `~/.local/share/gnome-remote-desktop` は無い。dconf の `/org/gnome/desktop/remote-desktop/` の読み出しは空。`~/.local/state` に `gnome-desktop-sharing-setup` は無い
+- `/etc/gdm/custom.conf` は RPM の既定（`AutomaticLogin` の行は無い）。起動の引数は `… rhgb quiet` で終わる
+- 既定の target は `graphical.target`。firewalld は `public`（`cockpit`・`dhcpv6-client`・`ssh`。ポートと rich rule は無い）
+- 前提の任意節を通してある（`idle-delay` は `uint32 0`、`suspend.target` は `masked`）。`Linger=yes`。sudo はパスワードを聞かない設定（`/etc/sudoers.d/nopasswd`）
+- モニターは `card1-Virtual-1` が `connected`（1024x768・1920x1080・1600x1200）
+- 失敗しているユニットは `mcelog.service` だけ。PC 役の VM に `freerdp` は入っていない
+- クライアント役の VM は、`freerdp` を手順書の外の準備で入れた。つなぐ前に、FreeRDP の保存済みの証明書（`~/.config/freerdp`）は無かった（`peer/peer-facts.txt`）
+
+### 手順ごとの結果（Hyper-V）
+
+`after-confirm/` は `session/after-confirm/`、PNG は `screens/` の下。seq 1〜18 は再起動の前（`session/session-001.raw`）、seq 19〜26 は再起動の後（`session-002.raw`）。
+
+| 項 | 手順 | 判定 | 出力と、見たこと | 根拠 |
+|---|---|---|---|---|
+| 前提を確かめる | 1 | 通した | `USER = <USER>`・`SERVER_IP = <SERVER_IP>`・`SERVER_NAME = <HOSTNAME>`・`SERVER_FQDN = <HOSTNAME>.mshome.net`・`RDP_PORT = 3389`。再起動の後に貼り直したときも同じ | seq 1・2 と 20・21、`after-confirm/0002-…-1.txt`・`0021-…-1.txt` |
+| 前提を確かめる | 2 | 通した | `enabled`・`yes`・`graphical.target`・`enabled`・`1`・`0` の 6 行 | seq 3、`0003-…-2.txt` |
+| 前提を確かめる | 3 | 通した | `uint32 0`・`false`・`masked`・`false`・`disabled`・`inactive`・`0`・`0`・`aoao 0 0` の 9 行と、ログイン画面の `gdm` の行（`greeter`）だけ。`中断:` は出ていない | seq 4、`0004-…-3.txt` |
+| 前提を確かめる | 4 | 条件に当たらず飛ばした | 手順 3 が `aoao 0 0`（RDP の資格情報が無い）。箇条書きのとおり、貼っていない | seq 5（`note`） |
+| RDP を設定する | 1 | 通した | `証明書と秘密鍵の公開鍵: 一致`、`rdp-tls.crt`（`-rw-r--r--.`、1216 バイト）と `rdp-tls.key`（`-rw-------.`、1704 バイト）、`設定の退避と証明書の準備が完了`。「確認」より前に出たのは、鍵を作る `openssl` の進み具合の行だけ | seq 6、`0006-…-1.txt`、`session/session-001.raw` |
+| RDP を設定する | 2 | 通した | `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ。読み戻しは 7 行（`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert '/home/<USER>/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt'`・`tls-key '…/rdp-tls.key'`・`view-only false`） | seq 7、`0007-…-2.txt` |
+| RDP を設定する | 3 | 通した | `RDP のユーザー名:`（前面は `python3`）に検証用の名前 → `RDP のパスワード:` → `RDP のパスワード（もう一度）:`（打った文字は出ない）→ `入れた先: /org/freedesktop/secrets/collection/rdp/1` と `キーリングの記録: /home/<USER>/.local/state/gnome-desktop-sharing-setup/autologin-keyring`。答え終わるまで 21 秒 | seq 8〜11、`0008-…-3.txt` |
+| RDP を設定する | 4 | 通した | `aoao 1 "/org/freedesktop/secrets/collection/rdp/1" 0`・`記録したキーリング: /org/freedesktop/secrets/collection/rdp`・`b false` | seq 12、`0012-…-4.txt` |
+| RDP を設定する | 5 | 通した | `enabled`。このとき、seat0 はログイン画面だけで、ユーザーの unit は `enabled`・`active`（`SubState=running`）、3389 の待ち受けは `0`、デーモンの journal は `-- No entries --`（箇条書きの「セッションがまだ無ければ、デーモンは待ち受けない」のとおり） | seq 13、`0013-…-5.txt`、`facts-before-autologin.txt` |
+| RDP を設定する | 6 | 通した | `success`・`success`・`3389/tcp` | seq 14、`0014-…-6.txt` |
+| 自動ログインにして再起動する | 1 | 通した | `[daemon]`・`AutomaticLoginEnable=True`・`AutomaticLogin=<USER>` | seq 15、`0015-…-1.txt` |
+| 自動ログインにして再起動する | 2 | 通した | `args="ro resume=UUID=… rd.lvm.lv=… rd.lvm.lv=… rhgb quiet rd.plymouth=0 plymouth.enable=0"` | seq 16、`0016-…-2.txt` |
+| 自動ログインにして再起動する | 3 | 通した | `==== AUTHENTICATING FOR org.freedesktop.login1.reboot ====`・`Authentication is required to reboot the system.`・`Authenticating as: <USER>`・`Password:`（前面は `systemctl`）。OS のパスワードを送ると `==== AUTHENTICATION COMPLETE ====` の後に SSH が切れ、boot ID が変わった | seq 17・18、`session/session-001.raw`、`facts-reboot.txt` |
+| 再起動の後に確かめてつなぐ | 1 | 通した | `Service=gdm-autologin`・`Active=yes`・`ScreenCast: ok`・`active`・`LISTEN 0 5 *:3389 *:* users:(("gnome-remote-de",pid=<N>,fd=10))` | seq 19（つなぎ直し）・22、`0022-…-1.txt` |
+| 再起動の後に確かめてつなぐ | 2 | 通した | `negotiation: type=0x02 (RESPONSE) selectedProtocol=0x2`、`tls: TLSv1.3 TLS_AES_256_GCM_SHA384`、`subject=CN=<HOSTNAME>`、SAN は `DNS:<HOSTNAME>, DNS:<HOSTNAME>.mshome.net, DNS:<SERVER_IP>, IP Address:<SERVER_IP>`。`fingerprint:` と `TLS fingerprint:` は同じ値。`Unit status: active`・`Status: enabled`・`Port: 3389`・`View-only: no`・`Negotiate port: no`・`Username: (hidden)`・`Password: (hidden)`。最後に `sha1 Fingerprint=` の行。貼った後の PC の画面に、キーリングの窓は出ていない | seq 23、`0023-…-2.txt`、`main-03-after-step2-no-keyring-prompt.png` |
+| 再起動の後に確かめてつなぐ | 3 | 通した（FreeRDP で、キーボードの操作まで。マウスの操作と Windows のクライアントは見ていない） | 下の「クライアントからの接続」 | seq 24（`note`）、peer seq 4〜7、`peer/session/session-001.raw`、`peer-03-freerdp-connected.png`・`main-04-rdp-connected.png`・`main-05-typed-calc-from-client.png`・`main-06-calculator-12x34-from-client.png`・`peer-05-calculator-12x34.png`、`client-input-check.txt`、`facts-connected.txt` |
+| 見るだけにする（任意） | 1 | 通した | `View-only: yes`。つないだままのクライアントから打った `99` は電卓に入らなかった（表示は `408` のまま）。PC の無操作の時間（Mutter の `IdleMonitor`）は、打った 8 秒後に 34.8 秒で、リセットされていない。接続は切れていない | seq 25、`0025-…-1.txt`、`main-07-viewonly-yes-typed-99.png`・`peer-06-viewonly-yes-typed-99.png`、`client-input-check.txt` |
+| 見るだけにする（任意） | 2 | 通した | `View-only: no`。クライアントから打った数字が電卓に入った（表示は `9`、続けて打って `95799`）。PC の無操作の時間は 8.3 秒になった | seq 26、`0026-…-2.txt`、`main-08-viewonly-no-typed-99.png`・`main-10-viewonly-no-typed-9-9-separately.png`・`peer-08-viewonly-no-typed-957-9-9.png`、`client-input-check.txt` |
+
+- 再起動（「自動ログインにして再起動する」の手順 3）
+  - sudo がパスワードを聞かない設定のユーザーでも、ここは OS のパスワードを聞いた（手順書のとおり）。聞かれた操作は `org.freedesktop.login1.reboot`（PC の画面は、ログイン画面だけだった）
+  - パスワードを送ったのは 20:13:33 JST。ゲストの journal では、カーネルの起動が 20:13:35、GDM の起動が 20:13:42、自動ログインのセッション（`gdm-autologin`）が 20:13:52、デーモンの `RDP server started` が 20:13:56（パスワードから 23 秒。`guest-facts-end.txt`・`facts-reboot.txt`・`facts-connected.txt`）
+  - `systemd-analyze` は `653ms (kernel) + 1.737s (initrd) + 2.675s (userspace) = 5.066s`
+  - ドライバを SSH でつなぎ直したのは、パスワードから 48 秒後（`session/daemon.log`）。それより前に SSH で入れたかは、記録に無い
+  - 起動の後の PC の画面は、このユーザーのデスクトップ（アクティビティの画面）。ログイン画面も、キーリングの窓も、「ようこそ」の窓も出ていない（`main-02-after-reboot-autologin.png`。画面の時計は 20:14:11）
+  - seat0 のセッションは `Service=gdm-autologin`・`Type=wayland`・`Active=yes`・`TTY=tty2`（`guest-facts-end.txt`）
+- クライアントからの接続（「再起動の後に確かめてつなぐ」の手順 3）
+  - クライアント役の VM で、`xfreerdp /v:<SERVER_IP>:3389 /u:<RDP のユーザー名>` の形で打った（peer seq 4）
+  - 保存した証明書の無い初めての接続で、`@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @` と `Host key verification failed.` の後に、`Certificate details for <SERVER_IP>:3389 (RDP-Server):`・`Thumbprint:`・`Do you trust the above certificate? (Y/T/N)` が出た。`Thumbprint:` は、同じ項の手順 2 の `TLS fingerprint` と同じ値
+  - 問いの順は、証明書（`Y`）→ `Domain:`（空のまま Enter）→ `Password:`（打った文字は出ない）。手順書の箇条書きのとおり（peer seq 5〜7）
+  - `Password:` の後に、`[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` が 2 行、`[WARN] … expected messageChannelId=1008, got 1003` が 2 行、`[WARN] … license binary blob::type BB_ERROR_BLOB, length=0, skipping.` が 1 行出て、つながった
+  - PC の journal には、同じ秒（20:16:08）に `[RDP.RDPGFX] CapsAdvertise: Accepting capability set with version RDPGFX_CAPVERSION_107, Client cap flags: H264 (AVC444): false, H264 (AVC420): false`
+  - クライアントの画面に、題が `FreeRDP: <SERVER_IP>` の窓が出て、PC の画面のデスクトップが 1024x768 のまま写った（クライアントの画面も 1024x768 で、窓の下がはみ出す）
+  - PC の上部バーに、共有中の印（橙色）が出た
+  - キーリングのパスワードを聞く窓は、PC の画面にも RDP の窓にも出ていない。`gcr-prompter` のプロセスは無く、ログインのキーリングは閉じたまま（`login Locked: b true`）、「RDP を設定する」の手順 3 のキーリングは `b false`（`guest-facts-end.txt`・`facts-connected.txt`）
+  - クライアントのキーボードから `calc` → Enter → `12*34` → Enter と打つと、PC の画面で、アクティビティの検索に `calc` が入り、電卓が開いて `12×34 = 408` が出た。PC の無操作の時間は、打つ前の 42.8 秒から、打った後の 9.0 秒になった
+  - 接続していたのは 20:16:08〜20:19:30 の 3 分 22 秒（クライアントの Ctrl+C まで）。その間の RDP の接続は `<SERVER_IP>:3389 <- <CLIENT_IP>` の 1 本
+  - 違うパスワード（検証用の資格情報ではないダミー）の `/auth-only` は、同じ Kerberos の 2 行の後に `ERRCONNECT_AUTHENTICATION_FAILED [0x00020009]` で断られ、終了コードは 132（peer seq 9）。2 回目なので、証明書の問いは出ていない
+- デーモンの journal（`facts-connected.txt`）
+  - 起動のとき（20:13:55）に `libEGL warning` と `MESA: error: ZINK: failed to choose pdev` の 5 行、続けて `RDP server started`
+  - 「再起動の後に確かめてつなぐ」の手順 2 のプローブを貼った時刻（20:14:36）に、`BIO_read returned a system error 104: Connection reset by peer`・`ERRCONNECT_CONNECT_TRANSPORT_FAILED [0x0002000D]`・`nla_recv() error: -1`・`[transport_accept_nla]: client authentication failure`・`CONNECTION_STATE_NEGO - rdp_server_accept_nego() fail`・`STATE_RUN_FAILED [-1]` の `[ERROR]` が 6 行と、`[RDP] Network or intentional disconnect, stopping session` の 1 行
+  - 正しい資格情報の接続（20:16:08）では、`client authentication failure` は出ていない
+- SELinux は、始めの読みが Enforcing（`guest-facts-start.txt`。再起動の後のモードは、通しの中では読んでいない）。AVC の拒否を探した読みは、接続中も終わりも `<no matches>` だった（`facts-connected.txt`・`guest-facts-end.txt`）が、読み方のせいで当てにならない（[SELinux の拒否の数え直し](#selinux-の拒否の数え直しhyper-v)。後からの数え直しでは 0 行）
+
+### 通らなかった手順と、手順書の前提と違えた所（Hyper-V）
+
+- 通らなかった手順は無い
+- **SSH から貼ったせいで変わった所は無い**。この手順書は、共有するユーザーの SSH のシェルに貼る前提で、今回の貼り方と同じ
+- **Hyper-V のせいで変わった判定は無い**。Hyper-V の VM は、モニターが 1 つつながった PC に見え（「前提を確かめる」の手順 2 の 5 行目が `1`）、FQDN に `mshome.net` が付き、解像度は 1024x768。どれも、手順書の成功条件の範囲（値は[次の節](#ハイパーバイザに左右されたと思われる値hyper-v)）
+- **手順書のせいで止まった所は無い**。手順書に書かれていない出力が 3 つあった（[指摘と状態](#指摘と状態hyper-v)）
+- 手順書の前提と違えた所
+  - クライアントの始め方: 手順書は、`xfreerdp` を「別のマシンで」打つとだけ書く（デスクトップの端末で打つ想定）。今回は、クライアント役の VM のコンソールで GNOME にログインし、SSH のシェルに `DISPLAY` と `XAUTHORITY` を入れてから同じコマンドを打った。問いの順と文言は、手順書のとおりだった
+  - VM の始めの状態: このユーザーはデスクトップにログイン済みなので、「再起動の後に確かめてつなぐ」の手順 3 の「ようこそ」の窓の箇条書きには当たらなかった。画面で一度もログインしていないユーザーの流れは、2026-10-07 の VirtualBox の VM の[記録](#実施手順pc-の画面を触らない版)にある
+  - その代わり、**閉じたログインのキーリングが残っている状態で、自動ログインと RDP の接続がキーリングの窓を出さない**ことを見た（2026-10-07 の 2 回目の通しは、手順書の外で作ったログインのキーリングで同じことを見ている。今回のキーリングは、通す前からあった `login.keyring`）
+
+### ハイパーバイザに左右されたと思われる値（Hyper-V）
+
+報告が「ハイパーバイザに左右されたと思われる」として挙げた値を、証跡で確かめて並べた。ほかのハイパーバイザと同じ日に比べたものではない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`。`hostnamectl` は `Chassis: vm`・`Hardware Vendor: Microsoft Corporation`・`Hardware Model: Virtual Machine`・`Firmware Version: Hyper-V UEFI Release v4.1` |
+| NIC と IP | PC 役は `eth0`、`<SERVER_IP>/20`。クライアント役は `eth0`、`<CLIENT_IP>/20`（同じサブネット）。ゲストを再起動しても、PC 役の IP は同じだった。VM の電源を入れ直した後は見ていない |
+| FQDN | `hostname -f` は `<HOSTNAME>.mshome.net`。SSH のログインの案内も `https://<HOSTNAME>.mshome.net:9090/`。証明書の SAN は `DNS:<HOSTNAME>, DNS:<HOSTNAME>.mshome.net, DNS:<SERVER_IP>, IP Address:<SERVER_IP>`（2026-10-07 の VirtualBox の VM は、`SERVER_NAME` と `SERVER_FQDN` が同じで、同じ `DNS:` が 2 つ並んだ） |
+| モニター | 「前提を確かめる」の手順 2 の 5 行目は `1`。`/sys/class/drm/card1-Virtual-1/status` が `connected`（ドライバは `hyperv_drm`）。解像度は 1024x768（ほかに 1920x1080・1600x1200）。クライアントの窓にも 1024x768 のまま写った（2026-10-07 の VirtualBox の VM は 1280x800） |
+| ディスク | `sda` 64G。「前提を確かめる」の手順 2 の 6 行目（`crypt` の数）は `0` |
+| 起動の時間 | 再起動のパスワードから `RDP server started` まで 23 秒。`systemd-analyze` は 5.066 秒 |
+| デーモンの起動のログ | `libEGL warning: failed to get driver name for fd -1`（2 行）・`libEGL warning: MESA-LOADER: failed to retrieve device information`・`MESA: error: ZINK: failed to choose pdev`・`libEGL warning: egl: failed to create dri2 screen` の後に `RDP server started`。待ち受けと接続には響かなかった。報告は、GPU の無い VM のためとみている（確かめていない）。2026-10-07 の aarch64 の VM の記録にも、libEGL と ZINK の警告がある |
+| 映像の方式 | クライアントとは `RDPGFX_CAPVERSION_107`、`H264 (AVC444): false, H264 (AVC420): false` |
+| サスペンド | 「前提を確かめる」の手順 3 の 3 行目は `masked`（前提の任意節で mask してある）。`/sys/power/state` は `freeze mem disk` |
+| メモリ | PC 役は、`free -m` の合計が 2900 MB、終わりの使用が 1358 MB。クライアント役は、合計が 1639 MB |
+| 失敗しているユニット | `mcelog.service`（始めから failed。手順には響いていない） |
+
+- TLS は `TLSv1.3 TLS_AES_256_GCM_SHA384`、`selectedProtocol=0x2`。2026-10-07 の VirtualBox の VM と同じ
+- 仮想スイッチが配る IP は、「前提を確かめる」の手順 1 の `SERVER_IP` として、証明書の SAN と、FreeRDP が保存する証明書の名前（`<SERVER_IP>_3389.pem`）に入る。VM の電源を入れ直した後やホストを再起動した後に IP が変わったときのことは、見ていない
+
+### 手順書の外で行ったこと（Hyper-V）
+
+- **クライアント役の VM の準備**
+  - `sudo dnf install -y freerdp`（peer seq 1・2。sudo のパスワードを聞かれた。入るまで 10 秒）
+  - コンソールに、キー送信で GNOME にログインした（FreeRDP の窓を出すセッションが要るため。`screens/peer-login/`）。最初のログインで「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出て、閉じた後はデスクトップだけになった（`peer-login/login-…-3-after.png`・`peer-02-after-skip-tour.png`）。担当の報告では、フォーカスのある「スキップ」に Enter を送って閉じ、アクティビティの画面は Esc で閉じた
+  - SSH のシェルで、`DISPLAY=:0` と、`XAUTHORITY`（`/run/user/<UID>/` の下の、`.mutter-Xwaylandauth.` で始まるファイル）を `export` した（peer seq 3。SSH のシェルから、コンソールのセッションに窓を出すため）
+- **クライアントの操作**: `xfreerdp` は、クライアント役の SSH のシェルに打った（手順書にブロックが無い手順）。FreeRDP の窓へのキーは、クライアント役の VM のコンソールへのキー送信で送った（`calc`・Enter・`12*34`・Enter・`99`・`99`・`57`・`9`・`9`。送ったキーの記録は無く、担当の報告による。結果は PNG にある）。マウスは送っていない（検証の層に、マウスを送る関数が無い）
+  - `View-only: no` に戻した後、同じ文字を続けて 1 回で送った `99` は、PC に 1 文字しか入らなかった（`main-08-…` は `9`）。違う文字の `57` と、間を空けて 1 文字ずつ送った `9`・`9` は全部入った（`main-09-viewonly-no-typed-57.png` は `957`、`main-10-…` は `95799`）
+  - 報告は、キー送信と `xfreerdp` の組み合わせの癖とみている（確かめていない）。「見るだけにする（任意）」の手順 2 の判定は、数字が入ったことで行った
+  - `xfreerdp` は Ctrl+C で終えた（peer seq 8）
+- **手順書に無い確かめ**
+  - 違うパスワードの `/auth-only` で、断られることを見た（peer seq 9）
+  - クライアント役から PC 役への到達を見た（`ping` 2 回と、3389 を開いてすぐ閉じる）。PC 役のデーモンの journal に、20:15:36 の `BIO_read retries exceeded`・`[RDP] Network or intentional disconnect, stopping session` の 1 組が残った
+  - ドライバとは別の SSH で、状態を読んだ（`facts-*.txt`・`guest-facts-*.txt`・`client-input-check.txt`。セッション・パッケージ・dconf・journal・キーリングの `Locked`・Mutter の無操作の時間・`grdctl status`・待ち受け・起動の引数など）。報告では、書き込みはしていない
+  - 接続中の `client-input-check.txt` は、`grdctl status` も読んでいる（資格情報を読み出すコマンド。最初に読んだのは、手順書の「再起動の後に確かめてつなぐ」の手順 2）
+- **パスワードを使った所**: OS のパスワードは、クライアント役のコンソールのログイン・クライアント役の sudo・PC 役の再起動の 3 回。RDP のパスワードは、「RDP を設定する」の手順 3 の 2 回と、FreeRDP の `Password:` の 1 回。SSH のシェルへの入力は、どれも伏せて送っている（`steps.jsonl` の `masked: true`）
+- **残したもの**: PC 役の `~/rdp_tls_probe.py`（手順書は「消してよい」）、開いたままの電卓、クライアント役の FreeRDP の保存済みの証明書
+
+### 指摘と状態（Hyper-V）
+
+行番号は、コミット `114c2b2` の `docs/gnome-desktop-sharing.md` のもの（直した後は、行がずれている）。重大度は、報告が付けたもの。通らなかった手順は無い。連番 1〜3 は「手順書に書かれていない出力」の指摘で、連番 4 は、手順書の但し書き（「既定の構成では」）に当たらない PC だった、という指摘。
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 切り分け | 状態 |
+|---|---|---|---|---|---|
+| 1 | 低 | 「RDP を設定する」の手順 2 の箇条書き（`:261`） | 読み戻しは 7 行で、箇条書きに無い `enable false` と `screen-share-mode 'mirror-primary'` も出る | `gsettings list-recursively` が、スキーマのキーを全部出す。箇条書きの 5 つは全部出ている。この時点の `enable false` は正しい（有効にするのは同じ項の手順 5。手順 5 の後の dconf は `enable=true`）。2026-10-07 の記録は 5 つだけを挙げていて、そのとき 7 行だったかは、記録から分からない | 直した（箇条書きの下に 1 行。参考資料の「RDP を設定する」の手順 2 の補足にも足した） |
+| 2 | 低 | 「再起動の後に確かめてつなぐ」の手順 2 の箇条書き（`:495`〜`:500`）と、同じ項の手順 3 の最後の箇条書き（`:516`） | 手順 2 のプローブを貼った時刻に、手順 3 が「問題があれば見る」と案内している journal に、`client authentication failure` などの `[ERROR]` の 6 行と `[RDP] Network or intentional disconnect, stopping session` が残る | プローブの時刻と一致する。正しい資格情報の接続では、`client authentication failure` は出ていない。2026-10-07 の VirtualBox の VM の記録にも同じ行があるので、ハイパーバイザによらないとみる | 直した（手順 3 の journal の箇条書きの下に 1 行。参考資料の同じ項の手順 2 の補足にも足した） |
+| 3 | 低 | 「再起動の後に確かめてつなぐ」の手順 3 の FreeRDP の箇条書き（`:507`〜`:512`） | `Password:` の後、つながる前に `[ERROR][com.winpr.sspi.Kerberos] … krb5_parse_name (Configuration file does not specify default realm …)` が 2 行と、`[WARN]` が 3 行出る。接続はできる | 正しいパスワードでも、違うパスワードでも出た。2026-10-07 の VirtualBox の VM の記録にも `krb5_parse_name` の行がある。報告は、FreeRDP が Kerberos を先に試すためとみている（確かめていない） | 直した（パスワードの箇条書きの下に 1 行。見たのは、realm を設定していないクライアントの FreeRDP 3.10.3 だけなので、「出すことがある」と書いた。`[WARN]` の行は足していない。参考資料の同じ項の手順 3 の補足にも足した） |
+| 4 | 低 | 「再起動の後に確かめてつなぐ」の手順 3 の最後の箇条書き（`:516`） | 「`journalctl --user` は、既定の構成では `No journal files were found.` になる」は、初期設定を通していないクライアント役の VM では、そのとおりだった。PC 役の VM は、初期設定の「システムの設定」の手順 5（journal をディスクに書く）を通してあり、`journalctl --user` でもデーモンの行が読めた | 手順書の「既定の構成では」は正しい。案内している `journalctl -b _SYSTEMD_USER_UNIT=…` の形は、2026-10-07 の VM（揮発の journal）で読めている | 手順書は直していない（食い違いではない）。参考資料の同じ項の手順 3 の補足に、journal をディスクに書く PC では読めたことを足した |
+
+環境と道具について、報告が挙げたこと（手順書の指摘ではない）:
+
+- Hyper-V の既定のスイッチの IP は DHCP で、FQDN は `<HOSTNAME>.mshome.net` になる。IP が変わると、証明書の SAN と、FreeRDP が保存した証明書の名前とずれる。報告は、手順書の確認は拇印で行うので、つながりはするとみている（確かめていない）
+- GPU の無い VM なので、デーモンが起動のときに libEGL と ZINK の警告を出す（上の表）
+- キー送信で、同じ文字を続けて RDP の窓に送ると 1 文字しか入らない。マウスは送れない（上の「手順書の外で行ったこと」）
+- `mcelog.service` が起動のたびに failed（初期設定の通しのときから同じ）
+
+### 手順書を直した所（Hyper-V）
+
+通した後（`114c2b2` より後）に直した。どれも文言だけで、コードブロックは変えていない。直した後に、VM では流していない（足した文は、この通しの証跡にある出力を書いたもの）。
+
+- [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/gnome-desktop-sharing.md)
+  - 「RDP を設定する」の手順 2: 読み戻しの箇条書きの下に、`enable` と `screen-share-mode` の行も出ること（`enable` は、同じ項の手順 5 で有効にするまで `false`）を足した（指摘 1。`after-confirm/0007-…-2.txt`・`facts-before-autologin.txt`）
+  - 「再起動の後に確かめてつなぐ」の手順 3: パスワードの箇条書きの下に、FreeRDP が `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがあり、デスクトップが出れば害は無いことを足した（指摘 3。`peer/session/session-001.raw`）
+  - 同じ手順: journal を見る箇条書きの下に、同じ項の手順 2 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、プローブが残したもので害は無いことを足した（指摘 2。`facts-connected.txt`）
+- [参考資料](../reference/gnome-desktop-sharing.md)
+  - 「RDP を設定する」の手順 2 の補足: `gsettings list-recursively` がスキーマのキーを全部出すことと、この VM の 7 行（指摘 1）
+  - 「再起動の後に確かめてつなぐ」の手順 2 の補足: プローブが NLA の認証をせずに接続を閉じることと、デーモンのログに残る行（指摘 2）
+  - 同じ項の手順 3 の補足: FreeRDP 3.10.3 の Kerberos の行（指摘 3。理由は、見立てとして書いた）と、journal をディスクに書く PC では `journalctl --user` でも読めたこと（指摘 4）
+- 直していない所
+  - [ロールバックと注意点](../extra/gnome-desktop-sharing.md)は変えていない（この通しでは、流していない）
+  - 手順書のリードの「2026-10-07 に…通した」の行は変えていない（状態は、この検証記録の冒頭に足した）
+- 貼り直しが要る直し（コードブロックを変えた所、新しい手順）は無い
+
+### 報告と証跡の照合（Hyper-V）
+
+担当の報告（`result.md`）を、証跡のファイルと照らした。
+
+- 18 手順の判定と確認の出力は、報告と証跡が合っていた（`session/steps.jsonl` の 26 行、`session/after-confirm/` の 16 ファイル、`peer/session/steps.jsonl` の 9 行と `session-001.raw`、PNG の 18 枚と `peer-login/` の 3 枚を見た）
+- 報告にあって、証跡のファイルでは確かめられなかったこと（この付録では「担当の報告による」と書いたか、載せていない）
+  - 「再起動のパスワードから 29 秒後の最初の確かめで、SSH のポートは開いていた」: 証跡にあるのは、48 秒後のつなぎ直しだけ
+  - VM を止めた時刻・スナップショットを取った時刻・止めるのにかかった秒数
+  - `vmms.exe` の版、動的メモリが無効であること、ディスクが SCSI の差分であること、NIC が Default Switch であること
+  - ドライバとは別の SSH で打ったコマンドの行: `facts-*.txt` と `guest-facts-*.txt` は、見出しと出力だけを残している（`journalctl --user` を読んだコマンドの形、始めの状態の unit の 5 行〔`disabled` が 3 行と `inactive` が 2 行〕がどの unit のものか、など）
+  - 「ホストで VM の画面を開いていなくても、モニターは `connected`」: 画面を開いていたかどうかの記録は無い
+  - ログインのキーリングが「パスワード付き」であること: 証跡で分かるのは、`login.keyring` があることと、「RDP を設定する」の後（20:13:03）と接続中（20:19:04）の読みが、どちらも閉じたまま（`b true`）だったこと
+  - 記録にパスワードと鍵が無いことの走査の結果（出力のファイルは無い）。RDP のパスワードを置いたファイルは、この照合でも開いていない
+- 起動の時刻: 報告の「カーネルの起動 20:13:35」は、journal の最初のカーネルの行（`guest-facts-end.txt`）。`facts-reboot.txt` の起動の時刻は `20:13:37`。この付録は、journal の行のほうを書いた
+
+### SELinux の拒否の数え直し（Hyper-V）
+
+- **通しの中の読みは、根拠にしない**: 担当は、ドライバとは別の SSH（`tools/side-ssh.sh`。`BatchMode` で、端末は無い）から `sudo -n ausearch -m avc -ts boot` を打ち、接続中も終わりも `<no matches>` を得た（`facts-connected.txt`・`guest-facts-end.txt` の `-- avc` の下。コマンドは、担当の報告による）。報告は、これを「AVC は 0 件」と書いている
+  - `--input-logs` を付けない `ausearch` は、標準入力が端末でないと、監査ログではなく標準入力を読む。標準入力がすぐ閉じれば、ログを見ないまま `<no matches>` を返す
+  - 同じ日に、Samba と Syncthing の手順書を通した担当が見つけた（別の SSH から打った `ausearch` が 2 分止まった。追跡していない `.verification/campaign/hv/R3/result.md` の「4. 見つけた不具合」と `R3/facts-avc.txt`）。この VM で、`--input-logs` の有り無しを比べてはいない
+- **後から、監査ログのファイルを数え直した**: 2026-10-11 12:45 UTC に、検証の司令塔（単位を担当に割り振る役。通した担当とは別）が、止めてあった PC 役の VM（`vmv-hv-sharing`）を起動し直して数えた。`type=AVC`・`type=USER_AVC`・`type=SELINUX_ERR` の行は、どれも 0 行
+  - このときの `getenforce` は `Enforcing`（通しの中の再起動の直後ではなく、その後に VM を起動し直したときの読み）
+  - 数え方: `sudo -n sh -c 'grep -h -c "^type=AVC" /var/log/audit/audit.log* | paste -sd+ | bc'` と、同じ形の `^type=USER_AVC`・`^type=SELINUX_ERR`（ファイルは `audit.log` と `audit.log.1` の 2 つ）。`sudo -n ausearch --input-logs -m AVC,USER_AVC,SELINUX_ERR` は `<no matches>` で、`denied` を含む行も無い
+  - ログの範囲: 最初の記録が 2026-10-11 07:23:58 UTC（epoch 秒 `1791703438`。クローン元の VM を、初期設定の通しの始めに作って起動したころ。`.verification/campaign/hv/AS1/meta.json` の時刻は 07:24:02 UTC）、最後の記録が 12:45:13 UTC（`1791722713`。数え直した時刻）。この通し（11:11〜11:19 UTC。再起動の前も後も）は、この範囲に入る
+  - 証跡: 追跡していない `.verification/campaign/hv/AVC-recheck/vmv-hv-sharing/avc.txt`（ゲストで打った行は、同じ `AVC-recheck/` の `remote.sh`）
+- **確かめていない**: クライアント役の VM（`vmv-hv-peer3`）の監査ログは、数え直していない。通しの中でも、読んでいない
+
+### 完了時点の状態（Hyper-V）
+
+- ロールバックは流していない。デスクトップ共有が有効なまま終えた（`guest-facts-end.txt`、20:20:17 JST。クライアントを閉じた後）
+  - seat0 に `gdm-autologin` のセッション（`Active=yes`・`LockedHint=no`）。ユーザーの unit は `active`・`enabled`
+  - firewalld のポートの読み出しは `3389/tcp` が 2 行（報告は、動いている設定と永続の設定と書く）
+  - `/etc/gdm/custom.conf` の `[daemon]` に `AutomaticLoginEnable=True`・`AutomaticLogin=<USER>`
+  - 証明書と鍵（`rdp-tls.crt`・`rdp-tls.key`）と `~/rdp_tls_probe.py` がある
+  - AVC の拒否を探した読みは `<no matches>`（当てにならない読み。[SELinux の拒否の数え直し](#selinux-の拒否の数え直しhyper-v)では、監査ログの AVC の行は 0 行）
+  - 次の 3 つは、クライアントをつないでいた 20:19:04 の読み（`facts-connected.txt`。終わりには読み直していない）: `/proc/cmdline` に `rd.plymouth=0 plymouth.enable=0`、ログインのキーリングは閉じたまま（`b true`）、失敗しているユニットは `mcelog.service` だけ
+- クライアント役の VM には、`freerdp` と、FreeRDP の保存済みの証明書（`~/.config/freerdp/server/<SERVER_IP>_3389.pem`）が残っている
+- 担当の報告では、終わりに 2 台とも止め、PC 役の VM は、この状態のスナップショット（`after-CL3`）を取ってある
+
+### 確かめていないこと（Hyper-V）
+
+- この通しの範囲の外: 「接続元を LAN に絞る（任意）」、「つながらなくなったとき」の手順 1〜3、ロールバック、注意点（後からリモートログインを有効にしたとき、など）
+- 「前提を確かめる」の手順 4（閉じたキーリングを開いて、残っている資格情報を消す）。今回は、条件に当たらなかった
+- クライアントからのマウスの操作、クリップボード、音
+- クライアント役の VM の SELinux の拒否（[数え直し](#selinux-の拒否の数え直しhyper-v)は、PC 役の VM だけ）
+- Windows の「リモート デスクトップ接続」（`sha1 Fingerprint=` の行が出る所までは見た。拇印の照合はしていない）
+- 「ようこそ」の窓を RDP の画面の「スキップ」で閉じること、画面で一度もログインしていないユーザーでの通し（どちらも、2026-10-07 の VirtualBox の VM で見ている）
+  - クライアント役の VM の最初のログイン（パスワードでのログイン）では、同じ題の窓と「スキップ」のボタンが出た。RDP 越しではなく、コンソールで閉じた
+- 「前提を確かめる」の手順 2・3 の分岐（モニターの無い PC、暗号化したディスク、`sshd` が無効、ヘッドレスの unit が有効、ポートが使用中、自動ログインが設定済み、設定アプリで有効にしてある）と、各手順の `中断:`
+- 貼り直し（「RDP を設定する」の手順 2・3 の貼り直し、「自動ログインにして再起動する」の手順 1 の `このユーザーの自動ログインは設定済み`）
+- 再起動の後に、資格情報を先に読まずにクライアントから直接つなぐ流れ（今回は、「再起動の後に確かめてつなぐ」の手順 2 の `grdctl status` が先に読んでいる）
+- 長い放置（接続していたのは 3 分 22 秒）、2 つのクライアントの同時の接続、VM の電源を入れ直した後の待ち受け、仮想スイッチの配る IP が変わったとき
+- 文言を直した後の手順書を、VM で流すこと
+- PATH の先頭が Homebrew のときに `/usr/bin/` の名指しが効いていること（この通しの記録に、PATH の値が無い）
+- VMware・VirtualBox でのこの日の通し、aarch64、物理のモニター、実機

@@ -13,6 +13,10 @@
   - もとは [syncthing.md](../almalinux-setup.md#syncthing-実施手順)・[dropbox.md](../almalinux-setup.md#dropbox-実施手順)・[dropbox-rclone.md](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の中にあった手順を、共有の前提として 1 本にした
 - **状態**: **手順 2 の最初の 2 行は実機で本実行済み（2026-09-24）。現行の手順 1・2 とロールバックは、クリーンインストールした x86_64 の VM で本実行済み（2026-10-06）**
   - 2026-10-06: 先行検証とは別の新規 VM で現行本文を再検証した（[今回の記録](#付録-新規-vm-での現行手順の再検証2026-10-06)）。検証専用のアカウント・鍵・隔離 LAN を使った
+  - 2026-10-11: Hyper-V の VM（AlmaLinux 10.2 / x86_64。Kickstart で入れた Workstation のクローンに、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順を通した後の状態）で、`114c2b2` の手順 1・2 を、SSH の対話の bash に貼って通した（[付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+    - 通らなかった手順は無い。手順 1 は `Linger=no`、手順 2 の後は `Linger=yes` と `<USER>`
+    - 続けて通した [Podman の Quadlet の節](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md#quadlet-で自動起動する任意)の再起動で、ユーザーの systemd と Quadlet のサービスが、最初のログイン（わざと遅らせた SSH）の 59 秒前に起動した
+    - 未実施: [ロールバック](../extra/linger.md#ロールバック)（この通しの範囲の外）、手順 1 が `Linger=yes` を返して手順 2 を飛ばす側、実機、aarch64
   - 手順 2 のコマンドは、この文書に移す前に、次の検証でも通したもの
     - コンテナ: [dropbox.md](dropbox.md#付録-コンテナでの検証記録2026-09-27)・[dropbox-rclone.md](dropbox-rclone.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27）、[podman.md](podman.md#付録-コンテナでの検証記録2026-09-27)（2026-09-27、Quadlet の節）
   - [ロールバック](../extra/linger.md#ロールバック)の手順 1 の 1 つ目の `ls` と手順 2 は、dropbox.md・dropbox-rclone.md のコンテナでの検証で通したもの（実機では未実行）
@@ -79,6 +83,68 @@ ISO から入れた AlmaLinux 10.2 Workstation の x86_64 VM で、一般ユー�
 Syncthing と設定バックアップを導入して OS を再起動した。サーバーでは user manager と Syncthing が 14:00:45 JST、SSH セッションは 14:00:57。相手では user manager と Syncthing が 14:03:19、SSH は 14:03:28。いずれも SSH ログイン前に起動した。サーバーの backup path/timer も 14:00:44 に active だった。
 
 ユーザーサービスとバックアップを外した後は、両 VM でロールバック 1・2 を通し、`Linger=no` に戻した。実機での再起動確認はこの VM 検証に含めていない。
+
+### 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)の実施手順の手順 1・2（コミット `114c2b2`）を、上から通した
+  - [ロールバック](../extra/linger.md#ロールバック)は、この通しの範囲の外（流していない）
+- **結果**: 2 手順とも通した。通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い
+- **どの状態から**: Hyper-V の VM（Kickstart で入れた AlmaLinux 10.2 の Workstation のクローン）に、[AlmaLinux 10 の初期設定](../almalinux-setup.md)の実施手順を通した後の状態（[その記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列の、スナップショット `after-AS4` の続き）
+  - 直前に、同じ VM で、初期設定の任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」を通した（[その記録](almalinux-setup.md#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
+  - linger は無効だった（`Linger=no`。`/var/lib/systemd/linger` は空）
+- **誰が・どう通したか**: Claude Code のサブエージェントが、手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った（手順書の「デスクトップの端末か SSH」のうち、SSH の側）
+  - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）
+  - VM のコンソールは、同じユーザーで GNOME にログインした状態だった
+  - sudo は NOPASSWD（初期設定の「ログインと sudo」の手順 3）で、パスワードは聞かれなかった
+- 続けて、同じ VM で [Podman の手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md)を Quadlet の節まで通した（[Podman の検証記録の付録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。linger の効き目は、その節の再起動で見た
+- **証跡**: 追跡していない `.verification/campaign/hv/CL1/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl` の番号
+- この VM の値は `<USER>` で書いた。パスワードと鍵は載せていない
+
+#### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（第 2 世代の VM、VM の構成の版 12.0。`meta.json`） |
+| VM | UEFI、Secure Boot オフ、2 vCPU、4096 MB、ディスク 64 GB、NIC 1 枚（`eth0`） |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、`systemd-257-23.el10_2.2.alma.1`、SELinux Enforcing、ロケール `ja_JP.UTF-8`。`systemd-detect-virt` は `microsoft` |
+| 手順書 | `docs/linger.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`） |
+| 実施の日時 | 2026-10-11 10:49 UTC（ゲストの時計で 19:49 JST）。再起動は 10:52 UTC |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ。検証用に変えた値は無い |
+
+#### 手順ごとの結果（Hyper-V、2026-10-11）
+
+| 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `Linger=no`（手順 2 へ進む側） | seq 15、`session/session-001.raw` |
+| 2 | 通した | `enable-linger` は何も出さず、「確認」の後ろは `Linger=yes` と `<USER>` | seq 16、`session/after-confirm/0016-実施手順-2.txt` |
+
+- 出力は、2 手順とも手順書の箇条書きのとおり。手順書どおりにいかなかった所は無い
+- SSH から貼ったことで変わった出力は無い（手順書も SSH を認めている）
+- Hyper-V に左右されたと思われる値は、この 2 手順の出力には無い
+
+#### 再起動の後の起動（Hyper-V、2026-10-11）
+
+手順書には、効き目を確かめる手順が無い。[Podman の Quadlet の節](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md#quadlet-で自動起動する任意)の手順 3（再起動）・手順 4 を通したときに、別の SSH で読んだ（`quadlet-after-reboot.txt`・`facts-after-reboot.txt`）。
+
+- 再起動のブロックを貼ったのは 19:52:17 JST（`session/session-001.raw` の、再起動の知らせの行の時刻）。起動し直した後の起動の時刻は 19:52:24（`quadlet-after-reboot.txt` の boot ID の次の行。`idle-check.txt` の journal の抜粋には 19:52:22 のカーネルの行があり、`last` の `reboot` の行は 19:52:26 で、数秒の幅がある）
+- `<USER>` のユーザーの systemd と、logind の `manager` のセッション（Id 1）は 19:52:29 にできた。だれもログインしていない時点（コンソールは GDM のログイン画面で、それができたのは 19:52:40）
+- 同じ 19:52:29 に、Quadlet のサービス `hello-web.service` が起動した（journal の `Starting hello-web.service` と `Started hello-web.service`）
+- 再起動の後の最初のログインは、19:53:28 の SSH（手順 4 を貼った接続。前の接続が切れてから 70 秒後につなぎ直した。担当の報告では、「ログインより前」を意味のある差で見るために、わざと遅らせた）。logind のセッションは、Id 1 が `manager`、Id 2 が GDM、Id 3 がこの SSH。`last` も、`reboot` の行の次がこの SSH
+- 再起動の後も `Linger=yes` で、`/var/lib/systemd/linger` に `<USER>` がある
+- linger を有効にしないまま再起動したときとの比べは、この VM では行っていない
+
+#### 指摘と状態（Hyper-V、2026-10-11）
+
+- 手順書・[ロールバックと注意点](../extra/linger.md)・[参考資料](../reference/linger.md)への指摘は無い
+- 手順書を直した所も無い
+
+#### 確かめていないこと（Hyper-V、2026-10-11）
+
+- ロールバック（`disable-linger` と、その前の `ls`）
+- 手順 1 が `Linger=yes` を返して、手順 2 を飛ばす側
+- デスクトップの端末（Ptyxis・WezTerm）に貼る形
+- 実機、aarch64。今回は、VMware と VirtualBox の VM では通していない
 
 
 ### 実施手順 / 手順 2: 補足: linger が要る理由と、出力例

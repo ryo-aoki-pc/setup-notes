@@ -2,6 +2,12 @@
 
 [手順書](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/homebrew-offline.md)
 
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: OFFLINE-FIRSTINSTALL の同じ専用2VMを通常sudo認証と承認後のSSH認証で続行し、Homebrew 7.0.9 と jq 1.8.2／oniguruma の初回 bottle 取得・導入を確認した（[追加付録](#付録-ssh-承認後の初回オフライン取得2026-10-13-utc)）
+  - 共通台帳61件は42通過・4条件外・3部分確認・1失敗・11未実施。同じ試行の旧5通過を含み、他の検証記録と合算しない
+  - 原文の閉鎖条件は部分確認。切断後の対照・jq のオフライン実行・再起動後の実Anthy変換は今回未実施。旧 OFFLINE-FULL の既存導入・GUI 成功は別履歴
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -328,3 +334,70 @@ curl: (6) Could not resolve host: github.com
 
 - 不足依存の導入・更新対象を用意した upgrade・Homebrew 本体と jq の撤去、実機・aarch64 は今回未実施
 - 従来のコンテナ・2026-10-06 の VM での撤去と、今回の更新確認は別の履歴。ほかの Homebrew 文書全部のオフライン通し・GUI・IME は確認していない
+
+
+## 付録: 既存2VMでオフライン経路を継続した記録（2026-10-12、OFFLINE-FULL）
+
+- **状態**: 旧workerの停止と所有旧ロックの解放後、既存の専用2VMから継続した。新規clean-installからの通し実行ではない
+  - 原文は setup-notes `6a4520d` と開始前からの案内2箇所。main集約後の [AlmaLinux本文](../almalinux-setup.md)を原文ドライバで実行した
+  - 公開本文・工具35件、固定snapshot ID・親鎖・全Hyper-V参照、停止親5ファイルを開始時と終了時に照合。元の安定性baselineと一致し、expectedは変更していない
+  - 過去との歴史的内容一致はこのbaselineだけでは証明しない。旧C14/C15の失敗・未確認範囲、旧workerの記録と前回承認拒否の履歴を保持した
+
+| 環境 | 内容 |
+|---|---|
+| ホスト・VM | Windows 11 Pro / Hyper-V / Generation 2 / 構成版12.0。online 2 vCPU・2048MB、offline 4 vCPU・4096MB、各64GiB、Default SwitchのNIC、Secure Boot disabled |
+| ゲスト | AlmaLinux10.2 / x86_64 / kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 起点 | onlineの元固定snapshotはafter-AS4、offlineはclean-install。今回はその子の既存状態を続け、復元・再作成していない |
+| 貼付 | onlineの対話bashからofflineの `<USER>` へ入れ子SSH。同じシェルでALL_PROXY/https_proxyを設定。54貼付中、51は原文一致、3は許可されたOFFLINE_HOSTの単一変数置換 |
+| 証跡 | `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。表のseqはonline-session/steps.jsonl、補助観測はoffline-observe/steps.jsonl。rawは公開・commitしない |
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| Homebrew のオフライン導入: 実施手順 / 1 | 通した | seq14。公開取得先200/301/200/401、procps-ng/curl/file/git既存 |
+| 同じ項 / 2 | 条件に当たらず飛ばした | 同seq14の4依存が揃う。dnf proxyは既存、補助makecacheはseq20 |
+| 同じ項 / 3 | 既存導入の分岐とHomebrew4を確認 | 共通bash1/2 seq15–17、clone既存時の原文案内はAlready up to date/変更なし、loaded1・履歴値・5shopt on。brew既存なので初期Homebrew1–3は飛ばし、4をseq18で実行、固定Environment一致 |
+| 同じ項 / 4 | 既存最新を確認 | seq19。API取得後jq1.8.2 already installed/up-to-date。今回の新規bottle導入は未再現、再導入なし |
+| 同じ項 / 5 | 通した | seq44–47の閉鎖をnpm実施4と共用。1回の実行を二重計数しない |
+| 同じ項 / 6 | 通した | seq48。転送なしshellでjq1.8.2、Homebrewの実行パス、JSON結果offline |
+| Homebrew のオフライン導入: 更新 / 1 | 索引確認、upgradeは条件スキップ | seq63の参照先Alma更新2がAlready up-to-date、outdated無出力。参照先更新3は飛ばした |
+| 同じ項 / 2 | 通した | seq64の原文閉鎖1。補助offline seq4で1080消失/proxyなし/実IPv4直接失敗 |
+
+- GNOMEログイン後に初期Homebrew4を通し、再起動後seq55の実IBusプロセスPATHが `/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`、XMLは `<name>anthy</name>`。設定読み戻しと次回ログインの確認を分けた
+- 再起動後のGUIではTextEditorのフォーカス/上部バーをPNGで確認してから、Super+Space、nihongo、Space、Enter。「にほんご」→「日本語」→下線なしの確定まで目視確認した
+- 初期設定「再起動と確認」3は部分確認。SSHのibus接続や、今回用意していないjournal/フォルダー/拡張等の条件は未達で、項全体の成功に広げない
+- 全セッションを閉じ、担当2VMは通常停止でOff、継続名の新snapshotを保存。Homebrew本体の新規導入、jqの新規bottle、不足依存、更新対象があるupgrade、ロールバック、実機/aarch64は今回未実施
+
+## 付録: 初回オフライン試行の中断記録（2026-10-12 11:17 UTC）
+
+OFFLINE-FIRSTINSTALL は凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` を使い、`clean-install` 由来の offline と `after-AS4` 由来の online を専用 D 差分で新規作成・起動した。固定した停止親 5 件の全体 SHA と親鎖は保持 baseline に一致した。
+
+offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが、手順 3 の NOPASSWD ALL 永続設定は自動承認審査が拒否し、コード未送信・設定不変更。対象 61 番号のうち 2 確認・59 未実施で、Homebrew 本体・jq bottle・LazyVim・npm・Mason の初回取得は未開始。これら 2 件は GUI 前提の確認であり、Homebrew の成功件数や既存継続の成功へ加算しない。Homebrew のオフライン導入の実施手順 1〜6・更新も今回未実施。
+
+2 VM を通常停止で Off と確認し、自己 lock を解放、6 GiB の枠を返却した。通常の sudo 対話認証による続行案は準備であり、実認証・後続導入の結果ではない。この時点の中断を、後日の成功で書き換えない。
+
+根拠は今回専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012` の公開判定表・画面、`sudo3-auto-approval-rejection.json`、`post-stop-check.json`、`frame-return-receipt.json`。モデルは秘密内容・個別 hash・旧 raw/認証ログを読んでいない。
+
+## 付録: 通常sudo認証で前提を追加確認した記録（2026-10-12 12:27 UTC）
+
+凍結原文 `2785798` で、11:17に停止した同じ専用2VMを続行した。旧GUI2件に、システムの設定1の変数読み戻し・同3のSSH待受とfirewall確認・SOCKSトンネル実施手順1の変数読み戻しを追加した。計61番号は5通過／1条件skip／1未達partial／54未実施（元sudo3を含む）。追加3件はSSH TTY搬送で、GNOME/Ptyxisへの原文貼付成功ではない。
+
+設定3の通常sudo対話認証は、実TTY・前面sudo・echo無効を確認して既存masked helperで通した。元sudo3のNOPASSWD ALL設定は未実施。SOCKS2のSSHパスワード送信は「前面sudo限定の許可がSSH認証を含まない」と自動審査が拒否し、秘密未送信で中断した。
+
+Homebrew本体・jq bottle・LazyVim・npm・Masonの初回取得は未開始。Homebrewオフライン実施1〜6・更新の成功は追加せず、旧既存継続の成功とも合算しない。2VMを通常Off、自己lock解放、6GiB返却。旧11:17の付録は当時の記録として保持する。
+
+根拠は専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012/normal-auth-20261012T115622Z/` の公開番号台帳・completion、通常sudoのauth-facts、`nested-ssh-auto-approval-rejection.json`、終了時照合・解放receipt。原文132MD／工具20／停止親5件の全体SHA・親鎖は開始・終了とも保持baselineに一致し、expectedは変更していない。
+
+## 付録: SSH 承認後の初回オフライン取得（2026-10-13 UTC）
+
+凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` を、前の初回試行と同じ専用 online／offline 2VMで続行した。公開 `ssh-approved-20261013T0325Z` の result・completion に基づく記録。現在の対応先は [Homebrew のオフライン導入: 実施手順](../almalinux-setup.md#homebrew-のオフライン導入-実施手順)で、出版版へ途中切替していない。
+
+- **確認**: 初期不在10項目の実観測後、承認済みSSH認証・自己 peer の SOCKS listener・同じオフラインシェルの経路を確認した
+  - Homebrew インストーラの成功表示と7.0.9、jq 1.8.2／oniguruma の初回 bottle 展開を確認。既存 cache の削除・退避で初回状態を作った試験ではない
+  - npm の実施手順 1・2を初回 LazyVim 手順10より先に通した。共通61番号は旧5通過を含む42通過・4条件外・3部分確認・1失敗・11未実施。[時点別集計](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)へ対応し、本書だけの成功数とは扱わない
+- **条件差・未達**: 原文の「ログインと sudo」手順3の永続 NOPASSWD ALL は未承認・未実施。通常sudo認証とSSH TTY搬送を用い、GNOME端末への貼付成功へ読み替えない
+  - 「SSH の SOCKS トンネル: トンネルを閉じる」手順1の `exit` 後も forward channel と1080 listenerが残り、原文だけで閉鎖条件を満たさず partial。通常SSH切断で listener0・自己PID不存在を確認したが、外側 driver も切れ、オンライン prompt 復帰の成功にはしていない
+  - 「Homebrew のオフライン導入: 実施手順」の手順5・6、切断後 curl／jq／npm 対照、再起動後の実Anthy変換は今回未実施。Anthy設定の読戻しと再起動後の実入力は別の判定で、旧 OFFLINE-FULL の GUI 成功を転用しない
+- **停止**: 04:53:29 UTC に監視の公開 process metadata の `ProcessId` 取得例外で自己2VMを通常停止した。失敗 snapshot が欠けており、特定 peer の状態遷移や空配列を原因と断定しない
+  - 04:58:44までに凍結132MD・公開工具20件・停止 immutable 親5件の whole SHA／ID／親鎖一致を確認。expected は変更していない。05:14:21に2VM Off・割当0・自己lock不存在を再確認し、6144 MiB返却・runtime0
+
+前日の2/61、5/61と既存導入の継続結果は当時の履歴として保持する。後続には監視の限定修正と新runtime枠、切断対照・オフライン実行・再起動IMEが残る。[npm の部分確認](npm-offline.md#付録-ssh-承認後の初回取得と-mason-の部分確認2026-10-13-utc)と [Neovim の結果](neovim-offline.md#対象と判定)は同じ61件を参照する。

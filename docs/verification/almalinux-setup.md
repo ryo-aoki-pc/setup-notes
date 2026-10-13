@@ -6,14 +6,39 @@
 
 ### 対象と検証環境
 
+- **最新のクリーン起点再試行（2026-10-12、AS-FULL）**: Hyper-V の同じ新規 VM で153手順を判定し、134確認・5条件外・4成功条件未達・10未実施。再起動後の実 GNOME の日本語変換と Neovim の IME 連携を確認した（[今回の付録](#付録-クリーン起点の初期設定を-as4-まで判定した記録2026-10-12)）。認証の省略・説明不一致・AS3の一部順序逸脱を保持し、全手順の成功や厳密な全順序達成とは扱わない
+
+- **追加確認（2026-10-12、C20-FOLLOWUP）**: after-FXA の現在状態の Hyper-V VM で「再起動と確認」の手順 3 の原文ファイルを実 GNOME 端末で実行し、全成功条件を確認した
+  - 同じ GNOME の手順 6 で、Super+Space → Anthy → `nihongo` → Space → 「日本語」 → Enter の実入力も確認した（[今回の付録](#付録-実-gnome-端末で-ibus-確認と日本語入力を再確認した記録2026-10-12c20-followup)）
+  - ASCII の source 呼出しで SHA が一致する原文ファイル全体を実行した。GNOME 端末への Unicode 原文の直接貼付は未確認。C20 の SSH での失敗、他列・実機・初期設定全体の未確認は保持する
+
 - **目的**: AlmaLinux 10 の Workstation を入れた直後の PC で、更新・sudo・ファームウェア・SSH・journal・kdump、導入元（EPEL・RPM Fusion・Flathub・Homebrew）、日本語入力と GNOME の表示・入力、共通の bash 設定とシェルのツールを、1 本の手順で整える。2026-10-10 からは、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build と Codex・Grok のプラグイン、Neovim・WezTerm・lazygit・yazi の自分用の設定も、同じ手順で入れる
-- **方式**: 上から順に貼る 152 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
-  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
+- **方式**: 上から順に貼る 153 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
+  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
+  - 2026-10-11 に、「Homebrew」の手順 4（IBus の GNOME 向けユーザーサービスのドロップインで、PATH を Homebrew を含まない固定値にする）を足して、153 の手順・27 項になった。同じ日に 3 つの VM で通したのは、足す前の 152 の手順（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
 - **状態**: **2026-10-08 に、x86_64 の VirtualBox の VM（公式 ISO の Workstation のクリーンインストールから新しく作ったもの）で、その時点の 13 項を通した**（[付録](#付録-x86_64-の-virtualbox-の-vm-で通した記録2026-10-08)）
   - **2026-10-10 に足した 14 項・「再起動と確認」の手順 8・ロールバックの 4 項（「AI エージェントとプラグインを消す」から「Firefox を戻す」まで）・更新の手順 5〜9 は、この文書の順番では通していない**。コマンドは、もとの手順書で確かめたものを移した（どこまで確かめたかは、後ろの「統合前の記録」のそれぞれの節）。つなぎを直した手順と新しい順番は、静的な確認だけ（[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
+    - これは 2026-10-10 の時点の状態。このうち、14 項と「再起動と確認」の手順 8 は、2026-10-11 に 3 つの VM で、今の順番で流した。合格したという意味ではない（手順 8 は、3 つとも通らなかった。14 項の中にも、通らなかった手順と未実施がある。下の 2026-10-11 の行）。ロールバックの 4 項と更新の手順 5〜9 は、2026-10-11 の通しでも流していない
   - 通したもの: 実施手順の全部（13 項。「OS とファームウェアの更新」の手順 5 と「システムの設定」の手順 4 は条件に当たらず飛ばした）、任意節 11（12 のうち、Claude Code を tmux の中で動かす節を除く）と、starship・bat の設定ファイルの節、更新、ロールバックの全部（5 項。「表示と入力を戻す」の手順 14 と「Homebrew と bash-completion を消す」の手順 4 は条件に当たらず飛ばした）。見つけて直したブロックは、同じ VM か、スナップショットに戻した VM で流し直した
   - 確認したこと: パスワードを聞くのが「ログインと sudo」の手順 3 の 1 回だけ、再起動の後も設定が残る（2 回）、GNOME の画面とキー（時計・ダークモード・ボタン・Ctrl+Alt+T・Alt+Tab・Caps Lock・拡大率・日本語入力・Files）、ロールバックの後に実施前の値へ戻る（最後に sudo がパスワードを聞く）
   - 確認していないこと: 実機・aarch64・Raspberry Pi・Server with GUI、JIS の物理キーボード、Wake on LAN の実際の起動と UEFI の設定、ファームウェアの実際の更新、Claude Code のログインが要る節、インターネットに出られないホスト
+  - **2026-10-11 に、Hyper-V・VMware Workstation Pro・VirtualBox の VM（どれも x86_64。Kickstart で入れた Workstation のクローン）で、実施手順の 27 項（その時点の 152 の手順）を、今の順番で上から通した**（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
+    - 通し方: ブロックは、GNOME の端末ではなく、SSH の対話の bash に貼った（コンソールは GNOME にログインした状態）。実アカウントでのログインは、1 つもしていない。任意節・更新・ロールバックは、この通しでは流していない（任意節のうち「画面オフ・画面ロック・自動サスペンドを止める（任意）」だけは、同じ日に、Hyper-V の VM で別に通した。下の 2026-10-11 の 2 つ目の行）
+    - 結果（通した・通らなかった・条件に当たらず飛ばした・未実施）: Hyper-V は 131・4・5・12、VMware は 131・4・5・12、VirtualBox は 131・6・6・9。数え方が列で違う（付録の冒頭）
+    - 通らなかった手順: 3 つとも、「キー操作を試す」の手順 1、「git-delta」の手順 4、「再起動と確認」の手順 6・8（「yazi」の手順 2 で Homebrew の `python3` が入った後、Anthy のエンジンが起動しない）。VirtualBox は、ほかに「再起動と確認」の手順 3・7
+    - 未実施の範囲: 実アカウントが要る手順（「GitHub CLI」の手順 3・4、「Claude Code」の手順 5、「Codex CLI」の手順 5〜8、「Grok Build」の手順 4・5・7）と、「Firefox」の手順 7・11（最初の起動の同意の窓を進めていない）。VirtualBox は、このうち 4 手順を「通した」（起動して取り消した・未ログインの側の確認）に数え、「再起動と確認」の手順 5（Caps Lock を送れない）を未実施にした
+    - 2026-10-08 に当たらなかった分岐: 「OS とファームウェアの更新」の手順 3 のファームウェアの更新（`UEFI dbx`）と、同じ項の手順 5 の再起動は、Hyper-V と VMware で通した。OS の更新は 3 つとも無く、同じ項の手順 1 の `[y/N]` と AlmaLinux の鍵の確認は出ていない
+    - 直した所（`7c3f88a` の時点）: 見つかった 30 の指摘のうち、25 を直した（未対応は 5）。文言だけの直しが 23、新しい手順（「Homebrew」の手順 4）が 1、ブロックの直し（「git-delta」の手順 4 の `--format=`）が 1。30 の指摘の外に、文言の直しが 1 つ（「Grok Build」の手順 1 の `ls` の表示）
+    - 直しの確かめ: 前の `FIX-ibus-delta` の記録を保持し、Hyper-V の新しいクローン 2 台で `7c3f88a` を確かめた FXA・FXB の結果を足した（[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)）。FXA は範囲の 6 手順とも通した。FXB は通した 9・条件に当たらず飛ばした 1（通らなかった・未実施はどちらも 0）
+    - 確認したこと: Homebrew の `python3` が無い状態で「Homebrew」の手順 4 を置き、その後の「yazi」の導入と再起動を経てもテキストエディターで日本語入力できる（FXA）。入力不能の再現から手順 4 と再起動を通し、テキストエディターと Neovim の IME 連携、「git-delta」の手順 4、Homebrew とドロップインを消すロールバックの手順 1〜3、その後の再起動と日本語入力を確かめた（FXB）
+    - 追加の文書変更: Grok Build のレビュー V3（9 指摘）を採否どおり反映した。ブロックを変えたのは「再起動と確認」の手順 3（IBus の PATH で Anthy を `--xml` 付きで呼ぶ確認）。FXA・FXB 時点では貼り直していなかった。その後の C20 / FXC では after-FXA の SSH で原文を貼り、固定 PATH と `--xml` の Anthy 表示を確認した。ただし `ibus list-engine` は SSH から接続できず、手順全体は成功条件未達。GNOME 端末での貼付と、この貼り直し後の実入力は未実施。ほかは文言と記録の直しで、VM では流していない
+    - 確認していないこと: 上のブロックの GNOME 端末での通し、VMware と VirtualBox の VM での直し、ログインし直しだけ（再起動なし）で効くこと、Neovim の整形の変化（FXB は開始前から整形済み）、ロールバックのほかの項と bash-completion を消す分岐、GNOME の端末へ直接ブロックを貼る形での通し、実アカウントでのログインとその後ろ、オフライン経路での手順 4、実機
+  - **2026-10-11 に、Hyper-V の VM（上の通しを終えた VM の続き）で、任意節「画面オフ・画面ロック・自動サスペンドを止める（任意）」の手順 1〜9 を通した**（[付録](#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
+    - 通し方: コンソールは GNOME にログインした状態で、ブロックは SSH の対話の bash に貼った（手順書は、GNOME にログインするユーザー本人の端末に貼る前提）。手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5 の順に貼った
+    - 結果: 9 手順とも通した（通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い）。確認の出力は、どれも箇条書きのとおり
+    - 確認したこと: SSH から変えた値が、ログインし直さずにコンソールのセッションに効く（無操作 314 秒で、画面オフもロックも起きない。再起動してログインし直したセッションでも、無操作 421 秒まで同じ）。再起動の後も、手順 2〜5 の読み戻しが同じ
+    - 直した所: 無い（指摘は低が 1 つで、未対応）
+    - 確認していないこと: 無操作 15 分を越える放置、ログイン画面を放置したときの動き、電源ボタン、蓋と電池のある機械、手順を当てないまま 15 分置いたときにこの VM が眠るか、GNOME の端末に貼る形。ほかの任意節・更新・ロールバックは、このときも流していない
 - **統合前の記録**: もとの 13 本の検証記録は、この文書の後ろの「統合前の記録」に、中身を変えずに移した（[EPEL](#統合前の記録-epelもとは-epelmd) から [tmux](#統合前の記録-tmuxもとは-tmuxmd) まで）。各節の冒頭に、当時の手順と今の手順の対応表を置いた
   - 2026-10-10 にまとめた 12 本の記録も、同じ形で移した（[Git](#統合前の記録-gitもとは-gitmd) から [Grok Build](#統合前の記録-grok-buildもとは-grok-buildmd) まで）。見出しに Windows 11 を含む節は、[Windows 11 の初期設定の検証記録](windows-setup.md)に移した
 
@@ -224,6 +249,1088 @@
 - AlmaLinux 10 の GNOME の PC での、この文書の順番の通し（新しい 14 項・「再起動と確認」の手順 8・ロールバックの 4 項・更新の手順 5〜9）。この確認を行った環境は Linux のコンテナで、AlmaLinux 10 の GNOME も、仮想化（KVM）も無い
 - 自分用の設定 4 つを、この文書の順番で入れること（LazyVimStarter の入力ソースの変更を「再起動と確認」の再起動で読み直すことを含む）
 - 移したコマンドの、統合前の記録の範囲を超える確かめ（統合前の記録の「確認していないこと」は、そのまま残る）
+
+---
+
+## 付録: Hyper-V・VMware・VirtualBox の VM で、今の順番で通した記録（2026-10-11）
+
+- **何を**: [手順書](../almalinux-setup.md)の実施手順の全部（27 項・152 手順。コミット `114c2b2`）を、今の順番で、上から最後まで通した
+  - 2026-10-10 に足した 14 項（「Git」から「Codex・Grok のプラグイン」まで）と「再起動と確認」の手順 8 を、この文書の順番で通したのは、これが初めて
+  - 通したのは、「Homebrew」の手順 4 を足す前の 152 手順（手順 4 は、この通しの後に足した。[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)）
+  - 任意節・更新・ロールバックは、この通しでは流していない
+    - 任意節のうち「画面オフ・画面ロック・自動サスペンドを止める（任意）」は、同じ日に、この通しを終えた Hyper-V の VM で別に通した（[後ろの付録](#付録-hyper-v-の-vm-で画面オフの任意節を通した記録2026-10-11)）
+- **どの状態から**: Kickstart で入れた AlmaLinux 10.2 の Workstation（キー配列は `us`）のスナップショット `clean-install` からのリンククローン
+  - ネットワークから入れたベースなので、入れた時点でパッケージが最新だった（OS の更新は、3 つとも無かった）
+  - VirtualBox の列は、ベースの作り方を証跡では確かめていない（依頼で示された前提として書いている）
+- **誰が**: Hyper-V と VMware Workstation Pro の列は Claude Code のサブエージェント、VirtualBox の列は Codex
+- **どう通したか**: コンソールは GNOME にログインした状態にし、手順書から抜き出したブロックを、SSH の対話の bash に 1 つずつ貼った（手順書は、GNOME の端末に貼る前提）
+  - 画面で行う手順は、コンソールへのキー送信で行い、画面の PNG で確かめた
+  - 4 つの単位（AS1〜AS4）に分け、単位の間で VM を止めてスナップショットを取った
+  - 実アカウントでのログイン（GitHub・Claude・ChatGPT・grok.com）は、3 つの列とも 1 つもしていない
+  - VM は、Hyper-V と VMware が 2 vCPU、VirtualBox が 4 vCPU。メモリは 3 つとも 4096 MB（環境は、列ごとの節）
+  - VirtualBox の列は、報告が自分で、画面の確かめの順と逐次の照らし合わせの逸脱を挙げていて、厳密に順番どおり通した記録とは扱っていない（[実施の順が手順書と違った所](#実施の順が手順書と違った所virtualbox)）
+- 2026-10-11 に、利用者の指示で、これより後の手順書は、性能のいちばん良かった 1 つ（Hyper-V）だけで通すことになった。初期設定は、その前に 3 つとも通し終えていた
+  - 「いちばん良かった」の根拠は、同じ日の性能測定の 1 巡目（3 巡の本番は、取っていない）。測定の記録は `C:\vmverify\bench\run-A-round1\` にあり、このリポジトリにも、この文書にも入っていない。この付録の通しの時間は、根拠にしていない
+- 列ごとの 3 節は、通した時点（手順書を直す前）の記録。行番号と、「試していない」「直した状態での通し」などの書き方は、その時点のもの
+- **証跡**: Hyper-V と VMware の列は、追跡していない `.verification/campaign/hv/`・`.verification/campaign/vw/`、VirtualBox の列は `D:\vmverify\codex\units\` にある（このリポジトリには入っていない）
+- 出力の中の VM の値は、`<USER>`・`<HOSTNAME>`・`<OLD_HOSTNAME>`・`<SERVER_IP>` で書いた。パスワード・鍵・認証の URL とコードは載せていない
+
+3 つの列の合計（152 手順）:
+
+| 列 | 実施 | 通した | 通らなかった | 条件に当たらず飛ばした | 未実施 |
+|---|---|---|---|---|---|
+| [Hyper-V](#hyper-v-の-vm) | Claude Code のサブエージェント | 131 | 4 | 5 | 12 |
+| [VMware Workstation Pro](#vmware-workstation-pro-の-vm) | Claude Code のサブエージェント | 131 | 4 | 5 | 12 |
+| [VirtualBox](#virtualbox-の-vmcodex-が実施) | Codex | 131 | 6 | 6 | 9 |
+
+- 3 つとも通らなかった手順: 「キー操作を試す」の手順 1、「git-delta」の手順 4、「再起動と確認」の手順 6・8
+- 3 つとも未実施の手順: 「Firefox」の手順 7・11（最初の起動の同意の窓）、「GitHub CLI」の手順 3・4、「Codex CLI」の手順 5・6、「Grok Build」の手順 4・5（実アカウントが要る）
+- 数え方が列で違う所（起きたことは同じ）
+  - 「Claude Code」の手順 5、「Codex CLI」の手順 7・8、「Grok Build」の手順 7: 3 つとも、ログインの入り口の画面か、ログインしていない側の出力まで。Hyper-V と VMware は「未実施」、VirtualBox は「通した」（起動して取り消した・未ログインの側の確認）に数えた
+  - 「再起動と確認」の手順 3: 3 つとも、SSH のシェルでは `IBus に接続できません。`、画面の端末では `anthy - Anthy`。Hyper-V と VMware は「通した」、VirtualBox は「通らなかった」に数えた
+- 結果か道具が違って、判定が違う所
+  - 「OS とファームウェアの更新」の手順 5: Hyper-V と VMware は、ファームウェア（`UEFI dbx`）を更新したので再起動した（通した）。VirtualBox は更新が無く、条件に当たらず飛ばした
+  - 「再起動と確認」の手順 5: VirtualBox は Caps Lock を送れず、未実施（Ctrl+Alt+T と Alt+Tab は見た）
+  - 「再起動と確認」の手順 7: VirtualBox は「通らなかった」と報告した（隠しファイルが出ない）。証跡の PNG からは、出ないことを読み取れない（[報告のあいだで食い違っていた所](#報告のあいだで食い違っていた所)）
+- 通した数は 3 つとも 131 だが、中身は同じではない。VirtualBox は、Hyper-V・VMware と比べて、上の 4 手順（「OS とファームウェアの更新」の手順 5、「再起動と確認」の手順 3・5・7）が「通した」から外れ、別の 4 手順（「Claude Code」の手順 5、「Codex CLI」の手順 7・8、「Grok Build」の手順 7）が「通した」に入っている
+
+### 手順書を直した所と、その確かめ
+
+3 つの列を通した後（`114c2b2` より後）に、手順書・[ロールバックと注意点](../extra/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)を直した。直しは、次の 3 種類。指摘ごとの状態は、[見つかった指摘](#見つかった指摘)の表の「状態」の列に書いた。
+
+- **文言だけの直し**（箇条書きと 1 行の説明だけ。コードブロックは変えていない。VM では流していない）
+  - 「ログインと sudo」の手順 2、「WezTerm と HackGen Console NF をデスクトップで使う」の手順 3、ロールバックのリード: 「端末」を、`terminal` と打つ形と、画面の表示の「ターミナル」に（指摘 2）
+  - 「ログインと sudo」の手順 2、「GNOME の表示と入力」の手順 13、参考資料の「システムの設定 / 手順 1」の補足: Dash の場所と並びを、「アクティビティの画面の下」に（指摘 9）
+  - 「OS とファームウェアの更新」の手順 1: 更新が無いときの dnf の文を `行うべきことはありません。` に（指摘 10）
+  - 「OS とファームウェアの更新」の手順 1、「EPEL と RPM Fusion」の手順 1: 更新が無いと、AlmaLinux の鍵が「EPEL と RPM Fusion」の手順 1 で確認なしに入ること。鍵の表示は「確認」の見出しより前の dnf の出力に出ることと、fingerprint が違っていたら進まないことも書いた（指摘 11）
+  - 「OS とファームウェアの更新」の手順 2: ファームウェアの更新の有無（VirtualBox の VM は無し。Hyper-V と VMware の VM は、`N 個のデバイスが更新可能です` と出て、同じ項の手順 3 で `UEFI dbx` の更新を聞かれることがある。指摘 12）
+  - 「Flatpak と Flathub」の手順 4: `/var/lib/flatpak` の大きさ（指摘 13）
+  - 「GNOME の表示と入力」の手順 10: appindicator の依存の 3 つ（指摘 14）
+  - 「Homebrew」の手順 1: `は既にインストールされています。`（指摘 15）
+  - 「シェルのツール」の手順 1: Landlock の警告（指摘 16）
+  - 「キー操作を試す」の手順 1: `printf` と ↑ の 1 回目と 2 回目（指摘 3）、`globstar` で出る 2 つの名前（指摘 17）
+  - 「Firefox」の手順 4: 一覧に並ぶ行（指摘 18）。手順 5: アップグレードの表示（指摘 19）。手順 7: 「Firefox へようこそ」の窓と、「続行」を押すまで `about:support` を開けないこと（指摘 4）
+  - 「Neovim」の手順 2: 版の書き方（指摘 21）と、`nvim --version` が作る `nvim.log`（指摘 5）
+  - 「lazygit」の手順 4: 初回の案内が出ないとき（指摘 22）
+  - 「GitHub CLI」の手順 1: `repo の追加:` の表示（指摘 23）。手順 2: `[y/N]`、鍵の出る順、期限切れの警告（指摘 7。リードの「対話入力のある手順」も、「`[y/N]` と鍵の確認 2 回」に）
+  - 「yazi」の手順 2: `already installed` と出るもの、入る数とかかる時間（指摘 24）。Homebrew の `python3` と `curl` が入って、端末で先に見つかるようになることは、参考資料の[「yazi」の手順 2 の補足](../reference/almalinux-setup.md#実施手順--yazi--手順-2-補足-一緒に入る-python3-と-curl)に書いた
+  - 「Claude Code」の手順 5: 最初の画面（テーマと、ログインの方法の選択。指摘 28）
+  - 「Codex CLI」の手順 2: `curl` が入っているときの表示（指摘 25）
+  - 「Grok Build」の手順 7: ログインしていないときの承認の画面と、抜けるキー（画面の案内の Ctrl+Q。指摘 27）
+  - 「Grok Build」の手順 1: `ls` の表示を、日本語の `ls: '/home/<USER>/.grok' にアクセスできません: そのようなファイルやディレクトリはありません` に（30 の指摘には入っていない。3 つの列の `after-confirm` に、この文がある）
+- **新しい手順**: 「Homebrew」の手順 4（指摘 1）
+  - IBus の GNOME 向けユーザーサービス `org.freedesktop.IBus.session.GNOME.service` のドロップイン `10-system-path.conf` で、PATH を Homebrew を含まない固定値（`/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`）にする
+  - 手順 4 の箇条書きには、日本語入力を使う PC では飛ばさないことと、効くのは「再起動と確認」の手順 1 の再起動の後であることを書いた（ログインし直しだけで効くかは、確かめていない）
+  - リードの「項目ごとの手順」: 飛ばさない手順を「Homebrew」の手順 1〜4 にし、「日本語入力」と「シェル」の行に、手順 4 を足した
+  - あわせて、「再起動と確認」の手順 3 のブロックに、`ibus-daemon` の PATH を出す 1 行を足した（`/home/linuxbrew/` が入っていたら、手順 4 を貼って再起動からやり直す、と書いた）
+  - ロールバックの「Homebrew と bash-completion を消す」の手順 3 に、ドロップインを消す 3 行と、確認の 1 行を足した（1 行の説明にも、IBus の PATH の設定を消すことを足した）
+  - 参考資料に、[理由の補足](../reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を固定する理由)を足した（`python@3.15` を入れる元の formula は決めていない。`ibus-setup-anthy` など、セッションの PATH のまま起動されるものは対象の外で、確かめていない）
+  - 実施手順は、152 手順から 153 手順になった（27 項のまま）
+  - `7c3f88a` の時点で直していなかった所: `docs/homebrew-offline.md` の手順 3 は、「Homebrew」の手順 1〜3 だけを貼らせる。日本語入力を使う PC がこの道を通ると、手順 4 を通らない（当時は変更の範囲の外。下の Grok レビューの反映で、案内を直した）
+- **ブロックの直し**: 「git-delta」の手順 4 の `git show` に `--format=` を足した（指摘 8）
+
+新しい手順とブロックの直しは、2026-10-11 に Hyper-V の VM で確かめた。証跡は、追跡していない `.verification/campaign/hv/FIX-ibus-delta/`（下のファイルの名前は、ここからの相対パス）。
+
+- **証跡にあるファイル**: `candidate-b.sh`、`hv/`（VM A。`meta.json` と PNG だけ）、`hv2/`（VM B。`session/`・`delta4.json`・`step3.sh`・`step3-output.txt` と PNG）
+  - 下で「担当の報告による」と書いた行は、試した担当の報告だけにあり、記録のファイルを残していない。試し用の VM は 2 つとも消してあり、取り直せない
+  - 2 つの VM が `after-AS4` のクローンであることも、担当の報告による（`hv2/` に `meta.json` は無い。`hv/meta.json` は、元が `vmv-hv-desktop`、`snapshot` が `clean-install`、メモリが 2048 MB と書く）
+- **直す前の再現**（試し用の VM A。Hyper-V の列の VM `desktop` の `after-AS4` のクローンで、コンソールにログインした状態）。次の 3 つは、担当の報告による（同じ現れ方は、通しの Hyper-V の列の `.verification/campaign/hv/AS4/ibus-anthy-python-path.txt` にある）
+  - `ibus-daemon` の PATH は `~/.grok/bin:/home/linuxbrew/.linuxbrew/bin:…` だった
+  - その PATH で `/usr/libexec/ibus-engine-anthy --xml` を動かすと、`ModuleNotFoundError: No module named 'gi'`
+  - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` で動かすと、`<engines>` が出た
+- **VM A でドロップインを置いた後**（`candidate-b.sh`）
+  - IBus のサービスを起こし直すと、`ibus-daemon` の PATH が上の固定値になった（担当の報告による）
+  - コンソールで Super+Space → `nihongo` → Space が「日本語」になった（`hv/screens/t2-converted.png`。打った先は、アクティビティの画面の検索の欄）
+  - エンジンのプロセスの実行ファイルは `/usr/bin/python3.12`（担当の報告による）
+  - 再起動してログインし直した後の 1 回目は、上部バーが `en` のまま `kensaku` と打っていて、英字のまま「一致するものがありません」になった（`hv/screens/t3-after-reboot-converted.png`）
+  - 上部バーが `あ` に切り替わった後（`hv/screens/t4-state.png`）は、`kensaku` →「検索」（`hv/screens/t5-after-reboot-converted.png`）
+- **手を入れていない VM B に、直した手順書から貼った**（動いている `desktop` のチェックポイント `after-AS4` から作ったクローン。ドライバで貼った。`hv2/session/steps.jsonl`）
+  - 「Homebrew」の手順 4（seq 1）: 確認の出力は `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`
+    - 貼る前は、ドロップインのディレクトリが無く、`Environment=` だけだった（担当の報告による）
+  - 「git-delta」の手順 4（seq 2。直したブロック）: `delta 0.20.1`・`git-delta 0.20.1`・パスの後に、`Δ AGENTS.md` のヘッダと差分の行が、20 行の中に出た
+    - 生の記録（`hv2/session/session-001.raw`）で、背景色（`48;5;22`）の付いた行は 2 行
+    - 直す前の形（`--format=` 無し）は、同じ VM で 0 行だった（担当の報告による。直す前の形で 1 行も出ないことは、3 つの列の通しの記録にある〔指摘 8〕）
+  - 「再起動と確認」の手順 1（seq 3）で再起動し、コンソールにログインして、`nihongo` → Space が「日本語」になった（`hv2/screens/final-converted.png`。打った先は、アクティビティの画面の検索の欄）
+    - エンジンの実行ファイルは `/usr/bin/python3.12`、journal の `No module named 'gi'` は 0 行（担当の報告による）
+  - 「再起動と確認」の手順 3（直したブロック）を、コンソールの WezTerm のタブに貼って Enter（`wezterm cli send-text`。`hv2/step3.sh` と `hv2/step3-output.txt`）
+    - 出たのは、起動の 2 行、`0`、ホスト名、`/home/<USER>/Downloads`、`anthy - Anthy`、`PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`、`状態: ACTIVE`、`['scale-monitor-framebuffer', 'xwayland-native-scaling']`
+- **ロールバックに足した行（`FIX-ibus-delta` の時点）**: この証跡だけでは、確かめたとは扱わない（後の FXB で、ブロックの全体を確かめた）
+  - 担当の報告では、足した 3 行と確認の 1 行を、VM A でその 4 行だけ実行し、`10-system-path.conf` とディレクトリが消えて、`Environment=` だけが出た。出力のファイルは残していない
+  - ロールバックのブロックの全体（Homebrew を消す所を含む）は、貼っていない
+- **`FIX-ibus-delta` の時点で確かめていなかったこと**（この時点の記録は保持する。後の FXA・FXB の確認と、現在の未確認範囲は次に分けて書く）
+  - VMware と VirtualBox の VM での、直しの確かめ（直す前の症状は、3 つとも見た）
+  - 実機
+  - 手順書の順番（Homebrew を入れた直後で、「yazi」の手順 2 より前）に、この手順を通した場合（VM B は、Homebrew も yazi も入った後に貼った）
+  - ログインし直しだけ（再起動なし）で、「Homebrew」の手順 4 が効くこと（証跡で見たのは、再起動の後だけ）
+  - ロールバックに足した 4 行と、ロールバックのブロックの全体（次に Hyper-V の VM でロールバックを流すときに、出力を残す）
+  - 直した後の「再起動と確認」の手順 8（Neovim の IME 連携）。`FIX-ibus-delta` の証跡に、Neovim で確かめた記録は無い
+  - 文言だけの直し（VM では流していない）
+
+**FXA・FXB の追加確認（2026-10-11 UTC）**。
+
+- 環境: どちらも Hyper-V の第 2 世代の新しいクローン（vCPU 2、メモリ 4096 MB、UEFI、Secure Boot オフ）
+- ゲスト: AlmaLinux 10.2、カーネル `6.12.0-211.64.1.el10_2.x86_64`、IBus 1.5.32、ibus-anthy 1.5.17、GNOME Shell 49.4
+- 貼った文書: `7c3f88a` の本体と extra
+- 証跡: `.verification/campaign/hv/FXA/` と `FXB/` の `result.md`・`out/`・`session/after-confirm/`・`screens/`（追跡していない）。次のファイル名は、それぞれの単位のディレクトリからの相対パス
+
+| 単位 | 開始時点と通した順 | 結果 |
+| --- | --- | --- |
+| FXA | `after-AS2`（「tmux を試す」まで済み。Homebrew 7.0.9 はあるが、Homebrew の `python3`・ドロップイン・Neovim は無い）→「Homebrew」の手順 4 →「yazi」の手順 1・2 →「再起動と確認」の手順 1・3・6 | 範囲の 6 手順を通した（通らなかった 0・未実施 0） |
+| FXB | `after-AS4`（27 項を通したが、ドロップインは無く、日本語入力が効かない）→ 入力不能の再現 →「Homebrew」の手順 4 →「再起動と確認」の手順 1・3・6・8 →「git-delta」の手順 4 → ロールバックの「Homebrew と bash-completion を消す」の手順 1〜3 → 再起動後の日本語入力 | 範囲の 10 手順のうち通した 9・条件に当たらず飛ばした 1（ロールバックの同じ項の手順 4）。通らなかった 0・未実施 0 |
+
+- 貼り方: GNOME にログインしたコンソールを用意し、ブロックは SSH の対話の bash に貼った。画面の手順はコンソールにキーを送って PNG で確認した。「再起動と確認」の手順 3 は、同じブロックをファイルに取り出し、FXA はコンソールの Ptyxis、FXB は WezTerm で読み込ませて確かめ直した（直接貼り付けたのではない）
+- **FXA: 手順書の順番での確認**
+  - 開始前の `type -a python3` は `/usr/bin/python3` だけ。「Homebrew」の手順 4 の出力は `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin`。貼った直後の `ibus-daemon` は、まだ Homebrew を含む PATH だった（`out/00b-pre-type-a-python3.txt`・`out/11-after-step4-state.txt`、`session/after-confirm/0005-実施手順-Homebrew-4.txt`）
+  - 「yazi」の手順 2 で `python@3.15 3.15.0`・`yazi 26.9.1`・`glib 2.90.1` が入った。Homebrew の `python3` が先に見つかり、`import gi` は `ModuleNotFoundError`。`/usr/bin/python3`（3.12.15）では `gi` を読み込めた（`out/22a-brew-versions-python-yazi.txt`）
+  - 再起動の後、手順 3 の PATH は固定値になった。手順 6 は、テキストエディターで Super+Space → `nihongo` →「にほんご」→ Space →「日本語」→ Enter で確定し、もう 1 度 Super+Space で英字に戻った（`out/53-step3-console-terminal-output.txt`、`screens/43-after-super-space.png`〜`48-back-to-en-typed-ascii.png`）
+  - 変換中の Anthy のエンジンは、`ibus-daemon` の子で、実行ファイルは `/usr/bin/python3.12`、PATH は固定値、読み込んだ `gi` は RPM の `/usr/lib64/python3.12/site-packages/gi/` にあった（`out/46-engine-process-while-converting.txt`）
+- **FXB: 入力不能の再現と修正後の確認**
+  - 初めは上部バーが `あ` でも `nihongo` が英字のまま入り、Space で変換されなかった。`ibus engine` は `xkb:us::eng` のまま、Anthy のエンジンは居ないが、`ibus list-engine` は `anthy - Anthy` を出した（`out/02b-start-state-after-typing.txt`、`screens/14-start-after-space.png`）
+  - その `ibus-daemon` の PATH で包みを `--xml` 付きで呼ぶと `ModuleNotFoundError: No module named 'gi'`（終了コード 1）。固定値の PATH では `<engines>` と `<name>anthy</name>` が出た（`out/02c-start-wrapper-with-session-path.txt`。AS4 の `ibus-anthy-python-path.txt` にも同じタグがある）
+  - journal の `ModuleNotFoundError` は、入力不能でも 0 行（ユーザーとシステム、当該起動と全部の起動）。gnome-shell の `Gio.IOErrorEnum: タイムアウトしました`（`_setEngine`）は 1 件だった。前の `FIX-ibus-delta` の「0 行」という報告は保持するが、復旧の根拠には使わない（`out/02b-start-state-after-typing.txt`・`out/02d-start-system-journal-count.txt`）
+  - 手順 4 と再起動の後は、手順 3 の PATH が固定値、手順 6 のテキストエディターで「日本語」への変換と確定が通った。変換中の `ibus engine` は `anthy`、エンジンの実行ファイルは `/usr/bin/python3.12`、`_setEngine` のタイムアウトは 0 件（`out/44-step3-wezterm-output.txt`・`out/54-step6-engine-while-converting.txt`、`screens/55-step6-after-enter-committed.png`）
+  - 手順 8（LazyVimStarter `8e4a074` の手順 19）は、WezTerm の Neovim で `/kensaku` の検索と Tab、挿入時の `<C-j>` で `A` → `あ`、Esc で `A`、検索欄の `<C-j>` と次の `/` の IME 保持、ファイルピッカーのアイコン、`:qa!` まで確認した。手順の外で `nihongo` → Space → Enter を打ち、行に「日本語」が入ることも見た（`out/70-step8-engine-in-nvim.txt`、`screens/61-step8-kensaku-enter.png`〜`81-step8-after-qa.png`）
+    - 整形で 1 行目が直る所だけは、見分けられなかった。始めから `# 動作確認` で、前後のファイルの sha256 は同じ（`out/59-before-step8.txt`・`out/82-after-step8.txt`）。手順 8 の全部を再検証済みとは扱わない
+  - 「git-delta」の手順 4 は、`delta 0.20.1`・`git-delta 0.20.1`、`Δ AGENTS.md` のヘッダと、20 行の中に背景色（`48;5;22`）の付いた差分が 2 行出た。最後のコミットは 2 行を足した `67abb84` で、delta の出力は全部で 15 行（`session/after-confirm/0008-実施手順-git-delta-4.txt`、`out/92-git-delta-4-escapes-visible.txt`・`out/93-git-delta-4-commit-shape.txt`、`screens/95-git-delta-4-in-wezterm.png`）
+- **FXB: ロールバックの確認**（「Homebrew と bash-completion を消す」の項だけ。その前後の項は通していない）
+  - 手順 1 は `brew leaves` が 18 個、`brew list --versions` が 204 行、アンインストーラの `--dry-run` の一覧。手順 2 は `y` だけでは進まず、Enter で進み、`Homebrew uninstalled!` と残った `etc/`・`lib/`・`share/`・`var/` が出た（`session/after-confirm/0009-ロールバック-Homebrew_と_bash-completion_を消す-1.txt`、`out/120b-rollback-hb-2-y-no-newline.txt`・`out/120c-rollback-hb-2-enter.txt`）
+  - 手順 3 のブロックの全体を貼り、`/home/linuxbrew` とドロップインのファイル・ディレクトリが消え、`Environment=` だけ、`DropInPaths=` は空になった（`session/after-confirm/0013-ロールバック-Homebrew_と_bash-completion_を消す-3.txt`、`out/131-after-step3-dropin-gone.txt`）
+  - 手順 4 は条件に当たらず飛ばした（bash-completion は OS のインストール時に入っていた）。`--assumeno` の予告では bash-completion だけが消える計画で、`pkgconf` 系 4 つを消す分岐は確かめていない（`out/140-rollback-hb-4-condition.txt`）
+  - 追加で再起動してログインし、テキストエディターで「日本語」への変換と確定を確認した。`ibus-daemon` の PATH は `/home/<USER>/.grok/bin:/home/<USER>/.local/bin:/home/<USER>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin`、エンジンは `/usr/bin/python3.12`（`out/165-final-engine-while-converting.txt`、`screens/164-final-after-space.png`・`166-final-after-enter.png`）
+  - 前の項を飛ばしたため、Git の `core.pager delta`・フォント・WezTerm・設定の clone・`~/.inputrc` などは残った。端末での `git log` は `fatal: unable to execute pager 'delta'`。ロールバック全部を通した結果ではない（`out/170-after-rollback-git-pager.txt`・`out/171-after-rollback-leftovers.txt`）
+- **追加で見つかったことと採否**
+  - FXA の「yazi」の手順 2 は、`/usr/bin/cc` が無く、gcc の post-install が警告になった。「Neovim」の項を飛ばしたためで、順番どおりの AS4 では警告が無い。fd・ripgrep も FXA では初めて入った。yazi・ffmpeg・ImageMagick の起動は通ったが、`brew postinstall gcc` による復旧は試していない。手順書は順番を前提にしているので、記録にだけ残した（`out/21e-yazi-2-gcc-postinstall-warning.txt`・`out/54-yazi-extras-smoke.txt`、FXA の `result.md` の F1）
+  - FXA・FXB とも、SSH では `ibus list-engine` が `IBus に接続できません。`。同じブロックをコンソールの端末で読み込むと `anthy - Anthy` が出た。手順書は GNOME の端末に貼る前提なので、手順は変えていない
+  - FXA・FXB とも、クローンの最初の起動の journal の開始時刻が実際より 9 時間先で、終了時刻より後に見えた。再起動の後は正しい時刻。2 行出るという成功条件には影響せず、原因は確かめていない
+  - FXB のアンインストーラで Enter が必要なことと、starship を消した後のプロンプトのエラーを、extra の手順 2 に文言だけ足した。エラーが出ても手順 3 は通り、端末を開き直すと出なくなった
+
+**Grok レビュー V3 の反映（2026-10-11、Grok Build）**。対象は `7c3f88a`、指摘は 9（中 6・低 3）。指摘 1・3〜7 を採り、2 は `python3` の注意だけ採った。8・9 は手順書を変えず、再起動とロールバックを確かめた範囲を上に記録した。
+
+- **ブロックを変えた所**: 「再起動と確認」の手順 3 の PATH を出す 1 行を、PID が空のときの案内と、その PATH で `/usr/libexec/ibus-engine-anthy --xml` を呼んで `<name>anthy</name>` を抜く形に替えた（指摘 4）。タグの出力は上の FXB と AS4 の証跡で裏付けたが、**直した後のブロックは、VM で貼り直していない**。静的な構文検査だけ
+- **文言を変えた所**: 起動元を GNOME のユーザーサービスに揃え、PATH は Homebrew を含まない固定値であり、ユーザーマネージャーの既定値ではないと書いた。参考資料の検証範囲も FXA・FXB に揃えた（指摘 1・3・6）。extra に Homebrew の `python3` と `gi` の注意を足した（指摘 2 の一部）
+- **オフラインの案内を直した所**: `docs/homebrew-offline.md` の手順 3 は「Homebrew」の手順 1〜4 を案内し、GNOME で日本語入力を使う PC は、Homebrew が既に入っていても手順 4 を通すようにした（指摘 5）。同書のほかの手順と、対応する extra・参考資料・検証記録は変えていない。この経路で手順 4 を貼ることは、まだ確かめていない
+- **git-delta の案内**: 差分の行が出ないときは最後のコミットを見て、差分を持たない場合の確認を飛ばす旨を足した（指摘 7）。マージコミット・空コミットの出力は、確かめていない。ブロックは変えていない
+- **現在、確かめていないこと**
+  - `--xml` を足した「再起動と確認」の手順 3 のブロック全体を VM で貼ること。IBus が居ないとき・PID が複数のとき・`gi` を読めないときの、新しいブロックの実出力も未確認
+  - VMware・VirtualBox・実機での直しの確認、GNOME 以外のセッションや別の経路で起動する IBus、aarch64
+  - ログインし直しだけ、またはサービスの再起動だけ（OS の再起動なし）で、手順 4 とロールバックが効くこと。ロールバックの直後（再起動前）の日本語入力
+  - Neovim の整形の変化、ロールバックのほかの項を順番に全部通した結果と bash-completion を消す分岐
+  - `ibus-setup-anthy`・`firewall-config`・`dnf` などへの Homebrew の Python の影響。`python3` の例から、これらの成否は推定しない
+  - オフライン経路での手順 4、マージコミット・空コミットでの git-delta の出力、ほかの文言だけの直しを貼り直すこと
+  - GNOME の端末へ直接ブロックを貼る形での通し、実アカウントでのログインとその後ろ
+
+### 見つかった指摘
+
+2026-10-11 に、`docs/almalinux-setup.md` の実施手順（27 項・152 手順）を、Hyper-V・VMware Workstation・VirtualBox の VM で通したときの指摘を、重複をまとめて並べた。
+
+- Hyper-V と VMware Workstation の列は Claude Code、VirtualBox の列は Codex が実施した
+- もとの報告: Hyper-V は `.verification/campaign/hv/AS1`〜`AS4/result.md`、VMware は `.verification/campaign/vw/AS1`〜`AS4/result.md`、VirtualBox は `D:\vmverify\codex\units\C05`〜`C09\result.md`（AS1 が C05、AS2 が C06、AS3 が C07 と C08、AS4 が C08 と C09）
+- 行番号は、コミット `114c2b2` の `docs/almalinux-setup.md` のもの（ファイルの名前を書いていない `:N` は、このファイルの行）。3 つの列の報告の行番号は、引用の文と照らして、どれもこのコミットの行と合っていた。直した後の手順書では、行がずれている
+  - VirtualBox の報告は手順書を `d69f113` と書く。`docs/almalinux-setup.md`・`docs/extra/almalinux-setup.md`・`docs/reference/almalinux-setup.md` は、2 つのコミットで同じ中身（`git diff --quiet` で確かめた）
+- 重大度は、報告が付けたもの。列によって違うときは高いほうを書き、違いは「報告のあいだで食い違っていた所」に挙げた
+- 「見た列」は、指摘に挙げた列と、同じ出力が報告か証跡にある列を分けて書いた。「確かめていない」は、その列の報告に記述が無いもの
+- 「直し方の案」は、3 つの列の報告が挙げたもの（報告の時点では、どれも試していない）。採った形は「状態」に書いた
+- 「状態」は、2026-10-11 に手順書を直した後のもの（[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)）
+  - 「直した」: 箇条書きと 1 行の説明の文言だけを直した。コードブロックは変えておらず、VM では流していない
+  - 「直して、Hyper-V の VM で確かめた」: 手順かコードブロックを変え、Hyper-V の VM で確かめた
+  - 「未対応」: 指摘の場所を直していない。括弧の中は、残っている事情
+  - 「一部対応」: 採否に合わせて一部だけ直した。残した所と未確認の範囲は、括弧の中に書いた
+- 手順書の指摘は 30（高 1・中 7・低 22）。`7c3f88a` の時点では、直した 25（うち、Hyper-V の VM で確かめたのは 2）、未対応 5。参照先の別のリポジトリの文書への指摘は 4（別の表）
+  - 今回の Grok レビューの反映で、指摘 26 を一部対応にした。現在は、直した 25・一部対応 1・未対応 4。指摘 1 に足した `--xml` のブロックは、VM で貼り直していない
+- VM の値は `<USER>`・`<HOSTNAME>`・`<OLD_HOSTNAME>`・`<SERVER_IP>` で書いた。パスワード・鍵・認証の URL とコードは載せていない
+- 実アカウントでのログインは、3 つの列とも 1 つもしていない。「再起動と確認」の手順 6・8（指摘 1）は、3 つの列とも同じ形で通らなかった
+
+#### 手順書の指摘
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見た列 | 切り分け | 直し方の案 | 状態 |
+|---|---|---|---|---|---|---|---|
+| 1 | 高 | 「yazi」の手順 1・2（`:1560`・`:1573`）。現れるのは「再起動と確認」の手順 6（`:1934`〜`:1936`）と手順 8（`:1947`） | 既定の `YAZI_EXTRAS` で `brew install` すると、依存の `python@3.15` が入り、`/home/linuxbrew/.linuxbrew/bin/python3`（3.15.0）ができる。再起動の後、Super+Space で上部バーは `en` から `あ` に変わるが、`nihongo` は英字のまま入り、Space でも変換されない。Neovim の `<C-j>` でも `あ` にならない。「再起動と確認」の手順 3（`:1908`・`:1916`）の `ibus list-engine \| grep -w anthy` は `anthy - Anthy` を出すので、そこでは気付かない | 3 つとも（手順 6・8 が通らなかった）。原因まで切り分けたのは Hyper-V と VMware。VirtualBox は原因を切り分けていない | 手順書のせい（「yazi」の手順 2 と、PATH の順）。コンソールの画面で起きたので、SSH から貼ったせいではない。3 つの列で同じ現れ方なので、ハイパーバイザのせいでもない。根拠は「いちばん大きい指摘」の節 | どれも試していない。(a) 共通の bash 設定で、Homebrew を PATH の先頭に置くのを対話のシェルだけにする (b) IBus のユーザーサービスに、PATH を決めるドロップインを置く手順を「yazi」の手順 2 の後に足す (c) 「yazi」の手順 2 の後に `brew unlink python@3.15` を足す（更新のたびに戻る恐れ） (d) 「再起動と確認」の手順 3 の確かめを、エンジンが起動できるかを見る形（例: `/usr/libexec/ibus-engine-anthy --xml \| head -n 1`）に変える | 直して、Hyper-V の VM で確かめた（(b) の形を「Homebrew」の手順 4 として足し、FXA で Python 導入前に置く順番、FXB でテキストエディターと Neovim の IME 連携を確かめた。(a)・(c) は採っていない。「再起動と確認」の手順 3 は、初めは PATH を出す 1 行だけだったが、Grok レビュー後に (d) の `--xml` 確認も足した。この最新のブロックは VM で貼り直していない） |
+| 2 | 中 | 「ログインと sudo」の手順 2（`:51`・`:52`）、「WezTerm と HackGen Console NF をデスクトップで使う」の手順 3（`:1355`）、`docs/extra/almalinux-setup.md:34` | 「「端末」と打って Enter」「Ptyxis（「端末」）」とあるが、Ptyxis 47.13 の日本語の名前は「ターミナル」（`Name[ja]=ターミナル`。`Keywords` に日本語は無い）。`Gio.DesktopAppInfo.search` は、`端末` で `[]`、`ターミナル`・`terminal`・`ptyxis` で `org.gnome.Ptyxis.desktop`。この時点の入力ソースは `[('xkb', 'us')]` だけ | Hyper-V（`ptyxis` で開いた）と VMware（`terminal`）が、検索の API と `.desktop` で確かめた。VirtualBox は `terminal`・`Ptyxis` で開き、表示名が「ターミナル」であることだけを見た。画面で「端末」と打つことは、3 つとも試していない（キー送信で日本語を打てない） | 手順書のせい（アプリの名前と、まだ日本語を打てない順番）。パッケージの翻訳なので、ハイパーバイザにも SSH にもよらない。入力ソースの値は Kickstart のベースのもので、画面のインストーラで入れた PC では違うかもしれない | `terminal` と打つ形にし、アプリの名前は「ターミナル」と書く | 直した（4 か所とも。「端末」では出ない、とは書いていない。画面では打っていないため） |
+| 3 | 中 | 「キー操作を試す」の手順 1（`:856`） | 「`printf` と打って ↑」の 1 回目に出たのは `printf '\n\033[7m 確認 \033[0m\n'`。手順書の `printf '%s\n' "$MANPAGER"` は、2 回目の ↑ で出た。カーソルが `printf` の後ろに残るのは、手順書のとおり | 3 つとも（SSH のシェルで）。VMware は、コンソールの Ptyxis でも 1 回目が同じ行だった。Hyper-V と VirtualBox は、Ptyxis では試していない | 手順書のせい。「シェルのツール」の手順 8〜10 のブロックも「確認」の `printf` で始まるので、手順 7 より新しい `printf` の行が履歴にある。履歴は 1 行ずつ入っていた（Ctrl+R の一覧）。SSH にもハイパーバイザにもよらない | 1 回目と 2 回目に出る行を書く。または、ほかの行と始まりが重ならない語（`bat --c` と打って ↑）に変える | 直した（1 回目と 2 回目を書く形） |
+| 4 | 中 | 「Firefox」の手順 7（`:1166`）・手順 11（`:1208`） | 入れた Firefox 157.0.1 の最初の起動で、窓いっぱいに「Firefox へようこそ」（続行すると、利用規約とプライバシー通知に同意したものとみなされる）が出る。Esc では閉じず、閉じて起動し直しても、また出る。「続行」を押すまで `about:support` を開けない。手順書に書かれていない | Hyper-V と VMware（同意は行わず、手順 7・11 は未実施）。VirtualBox は、日本語の最初の画面を見て手順 7・11 を未実施としたが、指摘には挙げていない | Firefox（Mozilla のビルド）の最初の起動の動き。SSH にもハイパーバイザにもよらない | 手順 7 に、この窓が出ることと、同意するなら「続行」を押すことを足す（同じ窓の「診断情報と対話データを管理する」の中身は、どの列も見ていない） | 直した（手順 7 に 1 行。手順 11 とリードは変えていない）。「続行」を押した後に `about:support` を開けることは、確かめていない（3 つの列とも、同意していない） |
+| 5 | 中 | 「Neovim」の手順 2（`:1430`・`:1436`） | 箇条書きは「ここでは `nvim` を起動しない」と言うが、同じ手順の `nvim --version \| head -3` が `~/.local/state/nvim/nvim.log`（0 バイト）を作る。手順 3（LazyVimStarter の手順 5）で `renamed '/home/<USER>/.local/state/nvim' -> '/home/<USER>/.local/state/nvim.bak'` と出て、要らない `nvim.bak` が残る | 3 つとも、`nvim.bak` への退避が出た。原因は Hyper-V と VMware が切り分けた。VirtualBox は「どの操作で作られたかは未特定」と書く | 手順書のせい。Hyper-V は、一時の `HOME` で、`nvim --version > /dev/null` は何も作らず、`\| head -3`・`\| cat`・`\| head -1` は作り、`NVIM_LOG_FILE=/dev/null` を付けると作らないことを見た（Neovim 0.12.6）。VMware は、`XDG_STATE_HOME` を一時のディレクトリに向けて再現した。もう一度通したときに `mv` が `cannot overwrite` で止まるかは、確かめていない | ブロックを `NVIM_LOG_FILE=/dev/null nvim --version \| head -3` にする（Hyper-V の案）。`nvim --version` を外し、版は `brew list --versions neovim` で見る（VMware の案）。または、箇条書きに、空の `nvim.log` ができて退避されることを書く | 直した（箇条書きに 1 行。ブロックは変えていない） |
+| 6 | 中 | 「GitHub CLI」の手順 4（`:1541`）、「Claude Code」の手順 5（`:1681`）、「Codex CLI」の手順 5（`:1738`）、「Grok Build」の手順 4（`:1815`） | ブラウザでのログインは Firefox を開き、Firefox は指摘 4 の「Firefox へようこそ」の窓を上に出す。コンソールの WezTerm のタブに `codex login` と打って見た（同意は押さず、閉じて取り消した） | Hyper-V（`codex login` の 1 つだけ）。VMware と VirtualBox は確かめていない（SSH のシェルでは、ブラウザは開かない） | 指摘 4 と同じ Firefox の動き。ほかの 3 つの手順は、同じになるとみただけで、見ていない | この 4 つの手順から、「Firefox」の手順 7 を名指しする | 未対応（4 つの手順は変えていない。画面で見たのは、Hyper-V の `codex login` の 1 つだけ。窓のことは、「Firefox」の手順 7 に足した〔指摘 4〕） |
+| 7 | 中 | 「GitHub CLI」の手順 2（`:1521`〜`:1525`。リードの `:13`） | (1) 鍵の確認の前に、パッケージの `これでよろしいですか? [y/N]` が出る（箇条書きとリードは「鍵の確認 2 回」だけ） (2) 鍵が出る順は `2C61 … 6059` が先、`7F38 … 3325` が後で、手順書と逆 (3) 1 つ目の鍵を取り込むと `警告: Certificate 23F3D4EA75716059: The certificate is expired … Expired on 2026-09-05T12:43:48Z … Certificate does not have any usable signing keys` が出る。導入は成功した | (1)(3) は Hyper-V と VMware。VirtualBox は (3) を見た。(2) を指摘したのは Hyper-V（VMware の表も同じ順） | 手順書に書かれていない。期限切れは配布元（GitHub）の鍵で、2026-10-11 の時点のこと。SSH にもハイパーバイザにもよらない。鍵を目で確かめる手順なので、読む人が止まる | 「表示された導入予定を確かめて `y`。続けて鍵を 2 回聞かれる」「`2C61 … 6059` は 2026-09-05 に期限が切れていて警告が出るが、導入は続く」と足し、鍵の順を入れ替える | 直した（手順 2 の箇条書きに、`[y/N]`・鍵の順・期限切れの警告。リードの `:13` も、「`[y/N]` と鍵の確認 2 回」に直した） |
+| 8 | 中 | 「git-delta」の手順 4（`:1409`・`:1413`） | `git -C ~/.config/bash show \| delta --paging=never \| head -20` の 20 行が、コミットのメッセージ（13 行）・ファイル名のヘッダ・ハンクの見出しで終わり、「行ごとに背景色の付いた差分」が 1 行も出ない。版・パス・ファイル名のヘッダは出た。3 つの列とも、この手順を「通らなかった」とした | 3 つとも | 手順書のせい（共通の bash 設定の最後のコミット `67abb84` のメッセージが長い。コミットが変われば結果も変わる）。delta の出力は 28 行で、行番号の付いた差分の行は 21 行目から、背景色（`48;5;22`）の行は 24 行目から。delta は効いている | `git -C ~/.config/bash show --format= \| delta --paging=never \| head -20`（Hyper-V・VirtualBox の案）、`--format='%h %s'`（VMware の案）、`head -40` のどれか | 直して、Hyper-V の VM で確かめた（`--format=` を足した。20 行の中に、背景色の付いた行が 2 行出た） |
+| 9 | 低 | 「ログインと sudo」の手順 2（`:51`）、「GNOME の表示と入力」の手順 13（`:606`） | 「左の Dash」「Dash のお気に入り（左の並び）」とあるが、Dash はアクティビティの画面の下にある（GNOME Shell 49.4。有効な拡張は `background-logo@fedorahosted.org` だけ） | VMware（PNG で見た）。Hyper-V と VirtualBox は、指摘に挙げていない（通しでは確かめていない）。Hyper-V は、直しの確かめの PNG（`FIX-ibus-delta/hv/screens/t2-converted.png`）でも、Dash が下にある | 手順書のせい。ハイパーバイザによらない | 「アクティビティの画面の下」に直す | 直した（手順書の 2 か所と、参考資料の「システムの設定 / 手順 1」の補足の 1 か所） |
+| 10 | 低 | 「OS とファームウェアの更新」の手順 1（`:87`） | 更新が無いときの文は、`何もしません。` ではなく `行うべきことはありません。`（続けて `完了しました!`） | 3 つとも同じ文が出た（指摘に挙げたのは Hyper-V と VMware） | 手順書のせい。dnf 4.20.0-22 の日本語の訳（Hyper-V が `msgunfmt` で確かめた）。この分岐に当たったのは、ベースをネットワークから入れた直後で、更新が無かったため | 文を直す | 直した |
+| 11 | 低 | 「OS とファームウェアの更新」の手順 1（`:85`・`:86`）、「EPEL と RPM Fusion」の手順 1（`:260`） | 「最初の更新では、AlmaLinux の署名鍵の取り込みを聞かれる」とあるが、更新が 1 つも無いと聞かれない。鍵（`0xC2A1E572`）は、「EPEL と RPM Fusion」の手順 1 の `sudo dnf install -y epel-release` のときに、確認なしに取り込まれた（fingerprint は手順書の値と同じ） | 3 つとも | ベースの作り方（ネットワークから入れたので、入れた時点で最新）と、手順書の書き方の組み合わせ。SSH にもハイパーバイザにもよらない | 更新が無いときは鍵の確認が出ないことと、「EPEL と RPM Fusion」の手順 1 の出力の `Fingerprint:` を比べることを足す。確認を残すなら、`-y` を外す | 直した（2 つの手順の箇条書き。鍵の表示が「確認」の見出しより前に出ることと、fingerprint が違っていたら進まないことも書いた。`-y` は外していない） |
+| 12 | 低 | 「OS とファームウェアの更新」の手順 2（`:97`。関連は手順 3 の `:107`） | 「仮想マシンでは `更新可能なデバイスはありません`」とあるが、Hyper-V は `3 個のデバイスが更新可能です`、VMware は `9 個のデバイスが更新可能です` と出て、手順 3 で `UEFI dbx` の更新と再起動の問いが出た。流れは、手順書の「更新があれば」の分岐のとおりに通った | Hyper-V と VMware で出た。VirtualBox では出なかった（手順書のとおり `更新可能なデバイスはありません`・`No updatable devices`） | ハイパーバイザのせい（Hyper-V の第 2 世代と VMware の UEFI が、Secure Boot が無効でも dbx・KEK・db を fwupd に見せる）。手順書の括弧の中が、VirtualBox の結果だけを書いている | 括弧をハイパーバイザごとに書く。手順 3 の問いの形（`操作を実行しますか? [Y\|n]:`・`今すぐ再起動しますか? [y\|N]:`）を足す | 直した（`:97` の括弧。手順 2 で出るのは機器の数で、`UEFI dbx` の更新を聞かれるのは手順 3、と書いた。手順 3 の問いの形は足していない） |
+| 13 | 低 | 「Flatpak と Flathub」の手順 4（`:364`） | 「`/var/lib/flatpak` が 2.5 GB ほどになる」とあるが、1.7 GB だった（`sudo du -sh`。runtime は `org.gnome.Platform` 50） | Hyper-V と VMware。VirtualBox は測っていない | 手順書の値が古い（runtime の版で変わる）。環境によらない | 値を直す | 直した |
+| 14 | 低 | 「GNOME の表示と入力」の手順 10（`:567`。関連は `:268`） | 「入るのは `gnome-shell-extension-appindicator`」とあるが、入ったのは 4 つ（依存の `libappindicator-gtk3`〔EPEL〕・`libdbusmenu`・`libdbusmenu-gtk3`〔CRB〕が付く） | 3 つとも | 手順書の書き方。CRB が無効なホストで依存が解けるかは、確かめていない（VMware の報告） | 依存の 3 つを書く。`:268` の「CRB … 気にしなくてよい」は、この手順で CRB のパッケージが要ることと合わせて見直す | 直した（`:567`。`:268` は変えていない） |
+| 15 | 低 | 「Homebrew」の手順 1（`:694`） | 「`すでにインストールされています` と出る」とあるが、出たのは `パッケージ procps-ng-4.0.4-11.el10.x86_64 は既にインストールされています。`（「既に」が漢字） | Hyper-V（指摘）。VMware の表にも同じ文がある。VirtualBox は「導入済み」とだけ書く | 手順書のせい（dnf 4.20.0 の訳） | 文を直す | 直した |
+| 16 | 低 | 「シェルのツール」の手順 1（`:727`）と、後ろの `brew install`（`:1246`・`:1377`・`:1421`・`:1573`） | `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6. Applying the network restrictions supported by this kernel.` が、`brew install` のたびに 1 行出る。どれも最後まで進んだ | 3 つとも | 環境（Homebrew 7.0.9 と、カーネル 6.12 の Landlock ABI 6）。ハイパーバイザにも SSH にもよらない。手順書に書かれていない警告なので、止めるべきか迷う | 最初の `brew install` の手順に「気にしなくてよい。後の `brew install` でも毎回出る」と足す | 直した（「シェルのツール」の手順 1 に 1 行。「毎回出る」は足していない） |
+| 17 | 低 | 「キー操作を試す」の手順 1（`:858`） | 「`ls /usr/share/doc/bash-completion/**/*.md` … サブディレクトリの `.md` も出る」とあるが、出たのは直下の `CONTRIBUTING.md` と `README.md` だけ（bash-completion 2.11-16.el10 のこのディレクトリに、サブディレクトリが無い） | 3 つとも | 手順書のせい。`globstar` は効いている（Hyper-V と VMware が、切ると `そのようなファイルやディレクトリはありません` になることを見た。VirtualBox は「再帰の展開は未確認」とした） | 出る 2 つの名前を書く。または、サブディレクトリのある場所に変える | 直した（出る 2 つの名前を書く形） |
+| 18 | 低 | 「Firefox」の手順 4（`:1143`） | 「`x86_64` の行も一緒に並ぶ」は、aarch64 の PC から見た書き方。x86_64 の PC では、`firefox.aarch64` の行も一緒に並ぶ | Hyper-V と VMware（指摘）。VirtualBox も両方の行を見た | 手順書の書き方 | 「`aarch64` と `x86_64` の両方の行が並ぶ」 | 直した |
+| 19 | 低 | 「Firefox」の手順 5（`:1151`。関連は手順 9 の `:1193`） | 「`Upgrading: firefox` として解決される」とあるが、日本語のロケールでは、`アップグレード:` の下に `firefox`、`インストール:` の下に `firefox-l10n-ja` と出る | Hyper-V（指摘）。VMware の表にも同じ表示がある。VirtualBox は「本体は upgrade」とだけ書く | 手順書の書き方。手順 9 の `Removing dependent packages:` も同じとみるが、3 つとも手順 9 に当たっておらず、日本語の文は見ていない | 日本語の表示で書く | 直した（`:1151`。`:1193` は変えていない） |
+| 20 | 低 | 「Firefox」の手順 6（`:1159`）・手順 10（`:1201`）、「WezTerm」の手順 4（`:1302`） | `dnf -q repoquery --installed --qf '… %{from_repo}\n'` の出力が、1 行ごとに空行をはさむ | Hyper-V（指摘）。VMware と VirtualBox は指摘していないが、「Firefox」の手順 6 の `after-confirm` のファイルに、同じ空行がある | dnf 4.20 が、`--qf` の後に自分で改行を足すとみる（確かめていない）。見た目だけで、判定には効かない | `--qf` の末尾の `\n` を取る（dnf 5 での出方は確かめていない） | 未対応（コードブロックを変える直しで、VM で確かめていない。見た目だけで、判定には効かない） |
+| 21 | 低 | 「Neovim」の手順 2（`:1435`） | 「`NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている」とあるが、出たのは `NVIM v0.12.6` | 3 つとも | 版が進んだ。「git-delta」（`:1412`）と「lazygit」（`:1486`）は「のように出る」なので合っている | 「`NVIM v0.12.…`」 | 直した |
+| 22 | 低 | 「lazygit」の手順 4（`:1494`） | 「初回に `Thanks for using lazygit...` の案内が出たら」とあるが、手順 2 の設定が `disableStartupPopups: true` なので、出ない。条件付きの文なので、誤りではない | 3 つとも出なかった（指摘に挙げたのは VMware） | 手順書の書き方 | 「手順 2 の設定を入れていれば出ない」と足す | 直した（「この項の手順 2 の設定を入れていれば、出ない」と足した） |
+| 23 | 低 | 「GitHub CLI」の手順 1（`:1512`） | 「`Adding repo from: ...` と出て」とあるが、日本語のロケールでは `repo の追加: https://cli.github.com/packages/rpm/gh-cli.repo` | Hyper-V と VMware（指摘）。VirtualBox も、日本語の文が出たと書く | 手順書の書き方 | 「`repo の追加: …`（英語の表示では `Adding repo from: …`）」 | 直した（日本語の表示に。英語の表示は併記していない） |
+| 24 | 低 | 「yazi」の手順 2（`:1577`） | (1) fzf にも `already installed` が出る（箇条書きは fd と ripgrep） (2) 入る量が書かれていない。7 formulae と依存（`ffmpeg-full` が 129、`poppler` が 65、`imagemagick-full` が 67）で、Hyper-V では合わせて 172 個、`/home/linuxbrew/.linuxbrew` が 415M から 2.7G になった (3) cask の `font-symbols-only-nerd-font` は、`Would install 7 formulae` の一覧に出ず、最後に入る | Hyper-V と VMware。VirtualBox の報告には無い（確かめていない） | 手順書の書き方。かかった時間は列で違う（「ハイパーバイザで結果が違った所」の表） | 「fd・ripgrep・fzf は」にし、入る量と、`python3`・`curl` などの Homebrew 版が入って `/usr/bin` のものより先に見つかることを足す（指摘 1 の直し方と合わせて決める） | 直した（(1) と (2)。入る数は「170 個ほど」、時間は「数分から 10 分ほど」と書いた。Homebrew の `python3` と `curl` が先に見つかるようになることは、参考資料の「yazi」の手順 2 の補足に書いた。大きさと、(3) の cask の出方は足していない） |
+| 25 | 低 | 「Codex CLI」の手順 2（`:1707`） | 「`curl` が既に入っていて `curl-minimal` と競合するときは」とあるが、`パッケージ curl-8.12.1-4.el10_2.6.x86_64 は既にインストールされています。` で終わり、競合は出ない | Hyper-V と VMware。VirtualBox は「依存は導入済み」とだけ書く | 手順書の書き方（AlmaLinux 10.2 の Workstation では、入っている `curl` で満たされる） | 「`curl` が入っていれば、既にインストールされていると出る」と足す | 直した（`curl` が入っているときの表示を 1 行） |
+| 26 | 低 | 「Grok Build」の手順 1（`:1780`。関連は `:1704`・`:1712`・`:1788`） | `command -v curl` が出すのは `/home/linuxbrew/.linuxbrew/bin/curl`（8.22.0。「yazi」の手順 2 で入る）。Codex と Grok のインストーラは、dnf の curl ではなく、この curl で動いた（どちらも成功） | Hyper-V と VMware（指摘）。VirtualBox は、報告には「curl のみ」と書くが、`after-confirm` に同じパスがある | 指摘 1 と同じ仕組み（PATH の先頭の Homebrew）。害は見ていない | 「「yazi」を通した PC では Homebrew の `curl`」と書く。注意点の「PATH の先頭が Homebrew になる」（`docs/extra/almalinux-setup.md:971`）に、`python3` と `curl` を例として足す | 一部対応（`7c3f88a` では未対応だった。Grok レビューの採否に合わせ、extra の注意点に、証跡で確かめた Homebrew の `python3` と `gi` の例だけ足した。「Grok Build」の手順 1 の `curl` の書き方は変えていない。Homebrew の `curl` が先に見つかることは、参考資料の「yazi」の手順 2 の補足に残す〔指摘 24〕。害は見ていない） |
+| 27 | 低 | 「Grok Build」の手順 7（`:1843`〜`:1845`）・手順 3（`:1806`） | (1) ログインしていない状態で `grok` を起動すると、フォルダーの信頼より先に、ブラウザでの承認の画面（確認用のコード、`Waiting for approval...`、`ctrl+q quit`）になる (2) 1 度起動した後の `grok --version` は、末尾に ` [stable]` が付く | (1) は 3 つとも。(2) は Hyper-V と VMware | Grok Build 1.0.50 の動き。手順 4・5 を済ませていれば出ないはずだが、見ていない（実アカウントが要る） | 手順 7 に「ログインしていないと承認の画面になる。`ctrl+q` で抜けて手順 4 から」と足す | 直した（(1) を手順 7 に 1 行。抜けるキーは、画面の案内（`ctrl+q quit`）の Ctrl+Q と書いた。Hyper-V と VMware は ctrl+q で、VirtualBox は Ctrl+C で抜けた。(2) の `[stable]` は足していない） |
+| 28 | 低 | 「Claude Code」の手順 5（`:1680`〜`:1681`） | 最初に出るのはテーマの選択、次に `Select login method:` の 3 つの選択。箇条書きはフォルダーの信頼から始まり、この 2 つが無い | 3 つとも同じ画面を見た（指摘に挙げたのは VMware） | Claude Code 2.1.296 の動き。信頼の問いの順番は、ログインしていないので見ていない | テーマの選択と、ログインの方法の選択を足す | 直した（1 行） |
+| 29 | 低 | 「Codex CLI」の手順 8（`:1762`） | ログインしていない `codex` を起動して抜けた後、`codex app-server --listen unix:// … --managed-daemon` と `codex app-server daemon pid-update-loop` の 2 つのプロセスが、再起動するまで残った | VMware。Hyper-V と VirtualBox は確かめていない | ログイン済みでも残るかは、見ていない | 検証記録か注意点に書く | 未対応（手順書は変えていない。見たのは VMware だけで、ログイン済みでも残るかは見ていない） |
+| 30 | 低 | `docs/reference/almalinux-setup.md:1667`、`docs/extra/almalinux-setup.md:89` | 「`~/.local/bin/codex` と `~/.local/bin/codex-code-mode-host` にリンクを置き」とあるが、0.162.1 のインストーラが置いたリンクは `codex` だけ | Hyper-V。VMware と VirtualBox は確かめていない | インストーラの版による。ロールバックの `rm -f` は、無くても通る | 参考資料を「0.162.1 では `codex` だけ」に直す | 未対応（参考資料と extra は変えていない。見たのは Hyper-V だけ） |
+
+#### 参照先の別のリポジトリの文書への指摘
+
+手順書が名指しする、別のリポジトリの文書への指摘。このリポジトリでは直せない（どれも未対応）。
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見た列 | 切り分け | 直し方の案 |
+|---|---|---|---|---|---|---|
+| R1 | 低 | wezterm の `docs/install.md:28`・`:44`（`9cb9f77`） | 「2 行とも `No such file or directory` なら」とあるが、日本語のロケールでは `ls: '/home/<USER>/.wezterm.lua' にアクセスできません: そのようなファイルやディレクトリはありません` | Hyper-V（指摘）。VMware と VirtualBox は、同じブロックを通したが、指摘に挙げていない | 文書の書き方 | 日本語の表示も書く |
+| R2 | 低 | lazygit の `README.md:28`（`02c6326`、ブランチ `custom`）。名指しする側は `docs/almalinux-setup.md:1473` | 「導入方法」の Linux の例は、`sh` のブロックで、番号の付いた手順ではなく、確かめの行も無い（リンクが張れたかは、別に `ls -l` を打たないと分からない） | 3 つとも。Hyper-V は文書の形として、VMware と VirtualBox は道具が貼れない件として挙げた（VirtualBox の列は、ここで 1 度止まった） | 人が貼るぶんには通る。ほかの項と形がそろっていない | 手順書の側（`:1473`）に、3 行と `ls -l ~/.config/lazygit/config.yml` を bash のブロックで持つ（コードブロックを足すので、VM での確かめが要る）。または、README に手順の形の節を足す |
+| R3 | 低 | LazyVimStarter の `docs/setup.md:151`（`8e4a074`）。名指しする側は `docs/almalinux-setup.md:1442` | 「入るものの一覧の後に `Do you want to proceed with the installation? [y/n]` と聞かれる」とあるが、聞かれずに lazygit・ripgrep・fd が入った | Hyper-V と VMware。VirtualBox の報告には、聞かれたかどうかが書かれていない | 「Neovim」の手順 1 で neovim と依存が入っていて、残りの 3 つに足す依存が無い。初期設定の手順書の順に通すと、必ずこうなる | setup.md に「足す依存が無いときは、聞かれずに進む」と足す。手順書の `:1442` に「この流れでは Homebrew の確認は出ない」と足してもよい |
+| R4 | 低 | LazyVimStarter の `docs/setup.md:95`（`8e4a074`） | 「何も出なければ、退避するものは無かった」とあるが、初期設定の手順書の順に通すと、`renamed '…/.local/state/nvim' -> '…/nvim.bak'` が 1 行出る | 3 つとも出た（文書と合わないと書いたのは VMware） | 原因は手順書の側（指摘 5） | 指摘 5 のブロックを変えれば、この文書は変えなくてよい |
+
+#### ハイパーバイザで結果が違った所
+
+- 値と時間は、報告のまま。時間は、静かなホストで測ったものではない（同じホストで、ほかの列の VM と測定用の VM が動いていた）。性能の比べには使わない
+- VM は、Hyper-V と VMware が 2 vCPU、VirtualBox が 4 vCPU。メモリは 3 つとも 4096 MB
+- 判定の数え方が列で違う所は、結果の違いと分けて書いた
+
+| 項と手順 | Hyper-V | VMware | VirtualBox |
+|---|---|---|---|
+| 「OS とファームウェアの更新」の手順 2 | `3 個のデバイスが更新可能です`・`1 個のデバイスが、有効なリモートでサポートされています（更新が公開されています）` | `9 個のデバイスが更新可能です`・`2 個のデバイスが、有効なリモートでサポートされています（更新が公開されています）` | `更新可能なデバイスはありません` |
+| 「OS とファームウェアの更新」の手順 3 | `UEFI dbx を 20241101 から 20260707 にアップグレードしますか?` → `y`、再起動の問いに `n` | `UEFI dbx を 20230501 から 20260707 にアップグレードしますか?` → `y`、再起動の問いに `n` | `No updatable devices` |
+| 「OS とファームウェアの更新」の手順 5 | 通した（ファームウェアを更新したので再起動した） | 通した（同じ） | 条件に当たらず飛ばした。このため、AS1 の 26 手順は、通した 24・飛ばした 2（ほかの 2 つは、通した 25・飛ばした 1） |
+| 再起動の後の `fwupdmgr get-history`（手順書の外） | `アップデートステータス: 失敗`・`failed to run update on reboot: expected 20260707 and got (null)`。`get-devices` の今の版は `20260707`、`get-upgrades` は `アップデートはありません`（原因は確かめていない） | `アップデートステータス: 成功`、`get-upgrades` は `アップデートはありません` | 更新が無い |
+| 「システムの設定」の手順 3 の NIC の行 | `eth0 UP <SERVER_IP>/20`（`hv_netvsc`、Default Switch） | `ens160 UP <SERVER_IP>/24`（`vmxnet3`、NAT） | `enp0s3 UP <SERVER_IP>/24`（NAT） |
+| ゲストから見える値（手順の成否には効かない） | `systemd-detect-virt` は `microsoft`、ディスクは `sda`、画面は 1024×768、`/sys/class/power_supply/` は空 | `vmware`、`nvme0n1`、1280×800、`ACAD` だけ | `oracle`、`sda`（SATA）、1280×800、画面に電池の % は無い |
+| WezTerm の起動（「WezTerm」の手順 5 から後） | 起動のたびに、journal に `libEGL warning: failed to get driver name for fd -1`・`MESA: error: ZINK: failed to choose pdev`・`libEGL warning: egl: failed to create dri2 screen`（`/dev/dri/` は `card1` だけ、`hyperv_drm`）。窓は開いて描かれた | 同じ警告（3D を切った SVGA）。`gnome-control-center` の起動でも、端末に出た。窓は開いて描かれた | 報告に無い（確かめていない） |
+| 「再起動と確認」の手順 2 | 再起動の後のログインの直後は、Super・Super+2・Ctrl+Alt+T に反応しなかった。D-Bus でアクティビティの画面を開いてから効いた（1 回だけ。キーはゲストに届いていた。原因は確かめていない） | 出なかった | 報告に無い（ログインし直した後の PNG で、手順を確かめている） |
+| 「再起動と確認」の手順 4 | 飛ばした。設定の画面は開いていない（Mutter の DisplayConfig で選べるのは 1.0 と 1.333） | 飛ばした。設定の「スケーリング」に 100 %・125 %・133 %（見ただけ） | 飛ばした。選択肢は見ていない |
+| 「再起動と確認」の手順 5 | 通した（Caps Lock+A、Caps Lock だけ、Alt+Tab、Super+Tab、Ctrl+Alt+T） | 通した（Caps Lock は層に無く、写しの道具で送った。Alt+Tab の一覧の絵は見ていない） | 未実施（一部だけ）。Ctrl+Alt+T と Alt+Tab は見た。Caps Lock は、層が送れない |
+| 「再起動と確認」の手順 7 | 通した（サイドバーを押す所を除く）。一覧の表示（Ctrl+1）で、フォルダーが先、末尾に隠しファイル | 通した（同じ。隠しファイルが出て、フォルダーが先） | 「通らなかった」と報告（最初の画面に隠しファイルが出ない）。証跡の PNG（`files7-list-ready.png`）は、アイコンの表示で、4 段目から下が窓の外に切れていて、スクロールしていない。隠しファイルが出ないことは、この PNG からは読み取れない。値（`show-hidden true`）は、AS2 で読み戻している |
+| 失敗しているユニット（手順書の外） | `mcelog.service`（`systemctl is-system-running` は `degraded`） | `run-vmblock\x2dfuse.mount` と `mcelog.service`（`degraded`） | 報告に無い（確かめていない） |
+| 画面がロックされているあいだの、層の道具 | 撮った PNG は、消える直前の画面のまま（PNG ではロックに気付けない） | PNG が 1×1 画素の黒（AS1）。キー送信が 135 秒以上戻らなかった（AS3。AS4 では止まらなかった） | 報告に無い（ロックは、SSH で見て解いた） |
+| 起動・再起動・長い手順の時間 | クローンから SSH まで 9.9 秒。再起動から SSH まで 17 秒（AS1）・11 秒（AS4）。「yazi」の手順 2 は 7 分 44 秒 | 21.1 秒。約 20 秒（AS1）・22 秒（AS4）。10 分 4 秒 | 27.4 秒。再接続の待ちは 23.5 秒（AS4）。9 分 44 秒 |
+| VM の停止 | 電源を切るのに 4〜5 秒 | 6〜7 秒 | AS4 の終わりに、ACPI の電源ボタンで 2 分待っても止まらなかった。未保存の文書を捨てた後に止まった（原因は未特定） |
+
+- 数え方の違い（結果は同じ）
+  - 「再起動と確認」の手順 3: 3 つとも、SSH のシェルでは `IBus に接続できません。`、画面の端末では `anthy - Anthy`。Hyper-V と VMware は「通した」、VirtualBox は「通らなかった（SSH）」と数えた
+  - 「Claude Code」の手順 5、「Codex CLI」の手順 7・8、「Grok Build」の手順 7: 3 つとも、ログインの入り口の画面か、ログインしていない側の出力まで。Hyper-V と VMware は「未実施」、VirtualBox は「通した（起動・取消のみ）」「通した（未ログイン確認）」と数えた
+  - このため、AS4 の 40 手順は、Hyper-V と VMware が「通した 27・通らなかった 2・未実施 10・飛ばした 1」、VirtualBox が「通した 28・通らなかった 4・未実施 7・飛ばした 1」
+
+#### 環境と道具の指摘
+
+- SSH から貼った `gsettings set` は、3 つの列とも、画面のセッションにすぐ効いた（`dconf` の警告は出なかった）
+- 道具の場所は、ドライバが `C:\vmverify\harness\driver\`、層が `C:\vmverify\harness\providers\{hv,vw,vb}\`、補助が `C:\vmverify\harness\tools\`
+
+| 種別 | 何が起きたか | 見た列 | 直し方の案 |
+|---|---|---|---|
+| 道具（ドライバ） | Homebrew の問い（インストーラの `Press RETURN/ENTER`、`brew install` の `[y/n]`）と lazygit を、`waiting` ではなく `timeout` で返す。`--timeout` の秒数（120〜240 秒）を、そのまま待った | 3 つとも | 入力待ちになる手順は、短い `--timeout` で貼る。行末（`: `・`[y/n]`）で見分ける |
+| 道具（ドライバ） | `rb.mjs paste` は、番号の付いた手順の中の `bash` のブロックしか貼れない（lazygit と yazi の README の `sh` のブロックを貼れない） | 3 つとも。lazygit は、Hyper-V と VMware が `send` で 1 行ずつ送り、VirtualBox は 1 度止まってから、番号付きの文書に包んで貼った。yazi は、3 つとも包んで貼った | `paste` でも `--loose <K>` を受ける |
+| 道具（ドライバ） | 端末が `ESC[6n`（カーソル位置の問い合わせ）に答えず、`gh auth login` の `(Y/n)` で止まる。`gh` は、1 回ごとに背景色の問い合わせの応答を 5 秒待つ | Hyper-V と VMware。VirtualBox は、その前の選択の画面で取り消した | ドライバが応答を返す |
+| 道具（ドライバ） | ログインを始める手順の URL とコードが、`session-NNN.raw` にそのまま残る | Hyper-V と VMware は、後から同じ長さの文字で伏せた。VirtualBox は、`codex login`・`grok login` を貼らなかったが、ログインしていない `grok` の起動（指摘 27）でコードが出て、`C09\session\session-001.raw` に伏せられずに残っている（報告のとおり。値は読んでいない） | 保存する前に、形で伏せる指定を足す。VirtualBox の raw は、司令塔が伏せる |
+| 道具（ドライバ） | Claude Code の最初の画面を、Ctrl+C で抜けにくい（キーを 1.5 秒より短い間で続けて送れない） | Hyper-V は `pkill -INT -x claude`、VirtualBox は `pkill -x claude` で終えた（VirtualBox は、1 度ここで止まった）。VMware は、Ctrl+C を重ねて戻った | 間を決めて続けて送る形を足す。取り消し方を、単位の定義に書く |
+| 道具（ドライバ） | TUI の画面と、カーソルの移動で描く出力（`:Mason`・lazygit・`claude plugin …`）が、`output`・`after-confirm` では読めない | 3 つとも（プラグインの一覧は、別の SSH で読み戻した） | 画面を、行と桁の文字にして返す |
+| 道具（層） | キー送信で送れないものがある。日本語の文字とマウス（3 つとも）、Caps Lock（3 つとも、層の表に無い） | Hyper-V と VMware は、補助で Caps Lock を送った。VirtualBox は送れず、「再起動と確認」の手順 5 が未実施になった | キーを表に足す。マウスのクリックを足す |
+| 道具（補助） | `Login-Console.ps1` の 1 回目が `Sent:false`（GDM の画面がまだ出ていない）。15 秒後の 2 回目で通った | Hyper-V の AS1。VMware と VirtualBox は、1 回で通った | greeter が出るまで待つ |
+| 道具（補助） | `New-CloneReady.ps1 -Existing` でも、`meta.json` の `snapshot` が `clean-install` になる | VMware と VirtualBox | 書かないか、最後のスナップショットの名前を書く |
+| 道具（進め方） | 作業用のディレクトリが、同時に動く単位で同じ。補助のファイルと表示がぶつかった（送った先は、ぶつかっていない）。PNG 1 枚を、前の単位の記録に書いた（すぐ移した） | Hyper-V（AS3）と VMware（AS1・AS4） | 単位ごとに場所を分ける |
+| 道具（進め方） | `vmware.exe -v` が戻らない（約 5 分。自分が起動したプロセスだけを止めた） | VMware | 取り決めに「引数つきで呼ばない」と書く |
+| 道具（進め方） | 報告が自分で挙げた順序の逸脱。AS1 で、端末の窓を見る前に sudo の手順を貼った。AS2 の「GNOME の表示と入力」の手順 2〜9 の照らし合わせを、8 つの出力が揃ってから行った。AS4 の「yazi」の手順 5 で、`q` の応答が `waiting` のまま、次のブロック（「Claude Code」の手順 1）を貼った（TUI に食われたかもしれない。副作用は未特定。貼り直して確かめた） | VirtualBox | 報告は、この 3 つの単位を「厳密な順番どおりの通し」とは扱っていない |
+| 環境（SSH から貼ったせい） | SSH のシェルには `WAYLAND_DISPLAY` が無い。`ibus list-engine` は `IBus に接続できません。`、`gh auth login` は `Failed to copy one-time code to clipboard`、`codex login`・`grok` はブラウザを開けず `firefox-bin <defunct>` を残す、wezterm の `install.md` の手順 9 は `TERM_PROGRAM` が空 | `ibus` は 3 つとも。ほかは Hyper-V と VMware | これらは、コンソールの端末で確かめる、と単位の定義に書く |
+| 環境（SSH から貼ったせい） | 成否に効かない違い。starship のプロンプトと `starship explain` に、ユーザー名と `🌐 <HOSTNAME>` が出る。Alt+C は、ドライバでは `ESC` → `c`。コンソールの Ptyxis とは、履歴が別になる | Hyper-V と VMware。VirtualBox は、履歴の違いだけを書く | 単位の定義に書く |
+| 環境（ゲストの既定） | 無操作 5 分で画面がロックされる（`idle-delay 300`・`lock-delay 0`）。SSH に貼っているあいだ、コンソールは無操作になる | 3 つとも（SSH から `loginctl unlock-session` で解いた。パスワードは打っていない）。Hyper-V の AS2 では、気付く前に、ロックの画面にキー（`exit` + Enter が 2 回、Ctrl+Alt+T）が届いた。調べるために送った Esc → Enter で、空のパスワードの認証の失敗が 1 回記録された | キーを送る前に `LockedHint` を見て解く |
+| 環境（ベースの作り方） | Kickstart で、ネットワークから入れた Workstation（`keyboard us`）。入れた時点で最新なので、OS の更新の `[y/N]` と AlmaLinux の鍵の確認の分岐を通っていない。入力ソースが `[('xkb', 'us')]` で、LazyVimStarter の手順 13 は、変える前から `[('xkb', 'us'), ('ibus', 'anthy')]`。Dash のアイコンは 6 つ（Hyper-V の報告は、`gnome-calendar` が入っていないと書く。VMware は、パッケージの有無を確かめていない） | 3 つとも、同じ作り方のベース | 検証記録に、ベースの違いを書く。更新がある分岐を通すなら、古い ISO から入れたベースが要る |
+| 環境（ゲスト） | ロックの画面が開いたとき、パスワードの欄が出なかった（GNOME Shell 49.4。journal に `JS ERROR: TypeError: can't convert undefined to object`。Esc で出た） | Hyper-V で 1 回だけ（もう 1 度ロックして試したときは、欄が出た）。ほかの列は確かめていない | 検証記録に書く |
+| 環境（ゲスト） | Mozilla のビルドに入れ替えた後も、`/usr/lib64/firefox` のディレクトリが残る（中身は見ていない） | Hyper-V | 次に見る人が、中身を確かめる |
+| 環境（ゲスト） | `shared-mime-info` が、Homebrew の `share` が `XDG_DATA_DIRS` に無い、という注意を出した（プレビューへの影響は未確認） | VirtualBox | 検証記録に書く |
+| 環境（画面） | PNG に、一時的な表示の欠け（AS2 の `key4-inserted.png`）と、途中の文字の残り（AS3 の `wezterm-integration.png`）が 1 回ずつあった。必要な出力は読めた（原因は未特定） | VirtualBox | — |
+
+#### いちばん大きい指摘（「yazi」の手順 2 の後、日本語入力が動かなくなる）
+
+3 つの列を通した時点の、原因の見立てと切り分け。この後の直しと確かめは、[手順書を直した所と、その確かめ](#手順書を直した所とその確かめ)。
+
+- **入るもの**: 「yazi」の手順 2 を既定の `YAZI_EXTRAS` で通すと、依存として Homebrew の `python@3.15` が入り、`/home/linuxbrew/.linuxbrew/bin/python3`（3.15.0）ができる
+  - Hyper-V では Cellar のディレクトリが 17:53 に、VMware では `python3` のリンクが 18:00 にできていて、どちらも「yazi」の手順 2 の最中
+  - VMware の `brew uses --installed python@3.15` には、cairo・glib・ffmpeg-full・poppler・imagemagick-full などが並ぶ
+- **PATH の順**: GNOME のセッションの PATH は `/home/<USER>/.grok/bin:/home/linuxbrew/.linuxbrew/bin:…:/usr/bin` で、Homebrew が `/usr/bin` より先にある
+  - VMware は `ibus-daemon` の環境で確かめた。共通の bash 設定が、対話のシェルかどうかに関わらず `brew shellenv` を読むため、と VMware の報告は書く
+- **原因の見立て**: `/usr/libexec/ibus-engine-anthy` は `exec python3 /usr/share/ibus-anthy/engine/main.py "$@"` という sh の包みなので、`gi` の無い Homebrew の `python3` で起動して `ModuleNotFoundError: No module named 'gi'` で終わる。これが、Hyper-V と VMware の一致した原因の見立て
+- **現れ方**: 3 つの列で同じ
+  - 再起動の後、Super+Space で上部バーは `en` から `あ` に変わるのに、`nihongo` は英字のまま入って Space でも変換されない（「再起動と確認」の手順 6）
+  - Neovim の `<C-j>` でも、下の表示の `A` が消えるだけで `あ` にならない（手順 8）
+  - Hyper-V と VMware は、gnome-shell の journal の `Gio.IOErrorEnum: タイムアウトしました`（`_setEngine`、`ibusManager.js:284`）も見ていて、VMware では `ibus engine` が `xkb:us::eng` のままだった
+- **見逃す箇所**: 「再起動と確認」の手順 3。`ibus list-engine | grep -w anthy` は、エンジンが起動しない状態でも `anthy - Anthy` を出す（3 つの列とも、画面の端末で出た）
+  - 手順 6 より前には Anthy で打つ確かめが無いので、再起動の前から動かなくなっていたのかは、どの列も見ていない
+- **切り分け**（Hyper-V と VMware。設定もパッケージも変えていない。確かめた後に、手で起動したエンジンは止めた）
+  - セッションと同じ PATH で `/usr/libexec/ibus-engine-anthy --xml` を呼ぶと `ModuleNotFoundError` になり、`/usr/bin` を先にすると `<engines>` が出る
+  - `/usr/bin/python3`（3.12.15）では `import gi` が通る
+  - `PATH=/usr/bin:/usr/sbin` でエンジンを手で起動すると、`nihongo` →「にほんご」→「日本語」の変換と、Neovim の IME 連携が通る
+- **VirtualBox**: 切り分けておらず（証跡に `ModuleNotFoundError` の記録は無い）、報告は「IBus のエンジンや PATH、層のキー送信を、次の切り分けの対象にする」としている。同じ手順書で同じ現れ方なので、同じ原因とみるが、VirtualBox では確かめていない
+- **どこのせいか**: コンソールの画面の操作で起きていて SSH は関わらず、ハイパーバイザに触れる所も無いので、手順書（「yazi」の手順 2 と、PATH の順）のせいと切り分けた
+- **直し方の案**（3 つの列を通した時点では、どれも試していない）
+  - 共通の bash 設定で、Homebrew を PATH の先頭に置くのを対話のシェルだけにする（Hyper-V と VMware の案）
+  - IBus のユーザーサービス（`org.freedesktop.IBus.session.GNOME.service`）にドロップインで PATH を決める（同じ 2 つの案）
+  - 「yazi」の手順 2 の後に `brew unlink python@3.15` を足す（VMware の案。更新のたびに戻る恐れ）
+  - 「再起動と確認」の手順 3 の確かめを `/usr/libexec/ibus-engine-anthy --xml | head -n 1` のように、エンジンが起動できるかを見る形に変える（Hyper-V の案）
+- **3 つの列では確かめていないこと**（直した後の確かめでも、見ていない）: `YAZI_EXTRAS` を空にしたときに `python@3.15` が入らないか、同じく PATH の `python3` を使う `/usr/libexec/ibus-setup-anthy` が開くか、直した状態で最初から通るか
+
+#### 報告のあいだで食い違っていた所
+
+- **手順書のコミット**: Hyper-V と VMware は `114c2b2`、VirtualBox は `d69f113` と書く。対象の 3 つのファイルは、2 つのコミットで同じ中身（冒頭の箇条書き）
+- **AS4 の判定の数**: Hyper-V と VMware は 27・2・10・1、VirtualBox は 28・4・7・1（通した・通らなかった・未実施・飛ばした）。数え方の違いは「ハイパーバイザで結果が違った所」の下の箇条書きのとおり
+- **「再起動と確認」の手順 7 の隠しファイル**: Hyper-V と VMware は「出た」、VirtualBox は「出なかった」。VirtualBox の PNG は、スクロールしていないアイコンの表示で、出ないことは読み取れない
+  - VirtualBox は Ctrl+2 を「リスト表示」として送った（`steps.jsonl` の seq 38）。Hyper-V の報告では、一覧の表示は Ctrl+1 で、Ctrl+2 は元に戻すキー
+  - どちらが正しいかは、確かめられていない（VirtualBox の列で、一覧の表示かスクロールで見直す）
+- **Neovim の `<C-j>` の後の表示**: Hyper-V と VMware は「`A` が消えるだけで `あ` にならない」、VirtualBox は「`A` のまま」。VirtualBox の PNG は、Ctrl+J の直後（`nvim-ime-insert.png`）が `INSERT A`、9 秒後（`nvim-ime-text.png`）は `A` が消えている。Hyper-V と VMware の書き方が、証跡に合う
+- **指摘 1 の扱い**: Hyper-V と VMware は「手順書・高」で、原因を切り分けた。VirtualBox は「実行環境・中」で、原因は未特定
+- **指摘 8 の、背景色の行の位置**: Hyper-V の報告は「21 行目から」、VMware は「24 行目から」。2 つの列の証跡（`delta-step4-beyond-head20.txt`・`observations-delta-step4.txt`）では、行番号の付いた差分の行が 21 行目から、背景色（`48;5;22`）の行が 24 行目から。全体が 28 行なのは同じ
+- **指摘 5 の、ディレクトリができる条件**: Hyper-V は「標準出力がパイプのとき」（`> /dev/null` では作らない）、VMware は条件を分けずに「`nvim --version` が作る」、VirtualBox は「どの操作で作られたかは未特定」。Hyper-V の証跡（`neovim-state-bak.txt`）が、いちばん細かい。VMware の切り分けのコマンドの全体は記録に無く、パイプを通したかは分からない
+- **Claude Code の最初の画面の抜け方**: VMware の報告は「Ctrl+C 2 回で抜けた」。`steps.jsonl` では、Ctrl+C のキーが 2 回（seq 36・37）と、2 文字をまとめた送信（seq 38）では `waiting` のままで、その次の Ctrl+C（seq 39）で `prompt` に戻った。Hyper-V と VirtualBox は、Ctrl+C では戻らず、`pkill` で終えた
+- **重大度**
+  - 指摘 3（`printf` + ↑）: Hyper-V と VMware は中、VirtualBox は低
+  - 指摘 7（GitHub CLI の鍵）: Hyper-V は 3 つをまとめて低、VMware は期限切れの警告を中・`[y/N]` を低、VirtualBox は環境の観測（重大度なし）
+  - 指摘 8（`head -20`）: Hyper-V と VirtualBox は低、VMware は中
+  - 指摘 2（「端末」）: Hyper-V と VMware は中、VirtualBox は「低の候補」（表示名の違いだけを報告）
+  - 指摘 27（ログインしていない `grok` の起動）: Hyper-V は手順書の指摘として低、VirtualBox は「取り決めと CLI の挙動」として中（認証用のコードが記録に残る件。「環境と道具の指摘」の表）
+- **直し方の案**: 指摘 5 は、Hyper-V が `NVIM_LOG_FILE=/dev/null` を付ける案、VMware が `nvim --version` を外す案。指摘 8 は、Hyper-V と VirtualBox が `--format=`、VMware が `--format='%h %s'`。指摘 1 の `brew unlink python@3.15` は VMware だけ、手順 3 の確かめを変える案は Hyper-V だけ
+- **端末を開いた語**（指摘 2）: Hyper-V は `ptyxis`、VMware は `terminal`、VirtualBox は `terminal`（AS1）と `Ptyxis`（AS3）
+- **VirtualBox の単位の中での更新**: 「Claude Code」の手順 5 は、C08 が「通らなかった（取消）」、C09 が「通した（起動・取消のみ）」に改めた。AS3 は、C07 が lazygit の手順 2 で止まり（通した 37・未実施 5）、C08 で残りを通して、ほかの 2 つと同じ数（通した 40・通らなかった 1・飛ばした 3・未実施 2）になった
+
+### Hyper-V の VM
+
+2026-10-11 に、Kickstart で入れた直後の AlmaLinux 10.2 のクローン（Hyper-V の第 2 世代の VM）で、実施手順の 27 項・152 手順を上から通した。ブロックは SSH の対話の bash に貼り、コンソールは GNOME にログインした状態にした。
+
+- 結果: 通した 131、通らなかった 4、条件に当たらず飛ばした 5、未実施 12（合わせて 152）
+- 進め方: 4 つの単位（AS1〜AS4）に分け、単位の終わりに VM を止めてスナップショット（`after-AS1`〜`after-AS4`）を取り、次の単位で起動し直した
+- 実アカウントでのログインは 1 つもしていない（未実施 12 のうち 10 は、これによる）
+- 出力の中の、この VM の値は `<USER>`・`<HOSTNAME>`（「システムの設定」の手順 2 で変えた名前）・`<OLD_HOSTNAME>`（変える前の名前）・`<SERVER_IP>` で書いた。パスワードと、認証の URL・コードは載せていない
+- 根拠の場所は、作業記録（追跡していない `.verification/campaign/hv/`）からの相対パスで書いた。`seq` は、各単位の `session/steps.jsonl` の番号
+
+#### 環境（Hyper-V）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300（AS3 の報告では 10.0.26300.9457） |
+| ハイパーバイザ | Hyper-V（`vmms.exe` 10.0.26100.8875、VM の構成の版 12.0）。層の `Get-VmvBackend` は `Generation=2`・`Version=12.0`・`HypervisorPresent=True` |
+| VM | 第 2 世代（UEFI）、Secure Boot オフ、2 vCPU、4096 MB（固定。動的メモリは切）、SCSI の差分ディスク 64 GB、NIC 1 枚（Default Switch） |
+| ベース | Kickstart で入れた AlmaLinux 10.2 の Workstation のスナップショット `clean-install` からのリンククローン（SSH が通るまで 9.9 秒）。キー配列は `us`（入力ソースは `[('xkb', 'us')]`）。ネットワークから入れたので、入れた時点でパッケージが最新だった（「OS とファームウェアの更新」の手順 1 は更新なし）。`gnome-calendar` は入っていない |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、GNOME Shell 49.4、Ptyxis 47.13、fwupd 2.0.19、dnf 4.20.0-22、sudo 1.9.17、Flatpak 1.16.0-9、ibus 1.5.32・ibus-anthy 1.5.17、bash-completion 2.11-16、git 2.52.0、ロケール `ja_JP.UTF-8` |
+| ゲストの道具 | `hyperv-daemons`（`hypervkvpd`・`hypervvssd` が active）。`open-vm-tools` 13.0.10 と `qemu-guest-agent` 10.1.0-16 も入っている（`AS1/meta.json`） |
+| 手順書 | `docs/almalinux-setup.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`） |
+| 名指しされた文書 | wezterm の `docs/install.md`（`9cb9f77`）、LazyVimStarter の `docs/setup.md`（`8e4a074`、ブランチ `custom`）、lazygit の `README.md`（`02c6326`、`custom`）、yazi の `README.md`（`1cfe349`、`custom`）。共通の bash 設定は `67abb84` |
+| 実施の日時 | 2026-10-11 07:23〜09:26 UTC（ゲストの時計で 16:24〜18:26 JST）。AS1 は 07:23〜07:35、AS2 は 07:40〜08:04、AS3 は 08:10〜08:35、AS4 は 08:43〜09:26 |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ貼った。コンソールは、`Login-Console.ps1`（キー送信）で GNOME にログインした状態にした。WezTerm のタブで確かめる手順は、SSH から `wezterm cli send-text` で、コンソールの WezTerm のタブにも貼った |
+| 検証用の値 | `HOST_NAME`（「システムの設定」の手順 1）と、`GIT_USER_NAME`・`GIT_USER_EMAIL`（「Git」の手順 1。実在しない値）。ほかの変数は手順書の値のまま |
+| 入った版 | `epel-release` 10-6、`rpmfusion-free-release` 10-1、Flatseal 2.4.1、`gnome-shell-extension-appindicator` 61-1.el10_2、Homebrew 7.0.9、starship 1.26.0・zoxide 0.10.0・fzf 0.74.5・eza 0.23.5・bat 0.26.1・tmux 3.8、Firefox 157.0.1-1（Mozilla）、`ffmpeg-libs` 7.1.5-1.el10、`font-hackgen-nerd` 2.10.0、WezTerm `20261010_083911_e2a98e1b`、git-delta 0.20.1、Neovim 0.12.6、lazygit 0.66.0・ripgrep 15.2.0・fd 10.5.0、Node.js 22.23.2、`gh` 2.102.0-1、yazi 26.9.1、`claude-code` 2.1.296-1、Codex CLI 0.162.1、Grok Build 1.0.50、プラグイン `codex@openai-codex` 1.0.6・`grok-build@xai-grok-build` 0.2.1 |
+
+#### 項ごとの結果（Hyper-V）
+
+| 項 | 手順の数 | 通した | 通らなかった | 条件に当たらず飛ばした | 未実施 | メモ |
+|---|---|---|---|---|---|---|
+| ログインと sudo | 3 | 3 | 0 | 0 | 0 | 最初のログインで「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓。端末は、検索に `ptyxis` と打って開いた（手順書の「端末」は打っていない）。パスワードを聞いたのは手順 3 の 1 回だけで、`正しく構文解析されました` が 3 行と `sudo はパスワードを聞かない` |
+| OS とファームウェアの更新 | 5 | 5 | 0 | 0 | 0 | 手順 1 は更新なし（`行うべきことはありません。`・`完了しました!`）。手順 2 は `3 個のデバイスが更新可能です`。手順 3 で `UEFI dbx` を `20241101` から `20260707` に更新し、手順 5 の再起動の条件に当たった |
+| システムの設定 | 8 | 7 | 0 | 1 | 0 | 手順 4 は飛ばした（手順 3 が `enabled`・`active`・`yes`・`yes`・`eth0 UP <SERVER_IP>/20`）。`変える前: <OLD_HOSTNAME>`・`変えた後: <HOSTNAME>`。kdump は `enabled`・`268435456` から、`auto_reset_crashkernel no` と `crashkernel=` の無い `args=` へ |
+| EPEL と RPM Fusion | 5 | 5 | 0 | 0 | 0 | `epel-release-10-6.el10.noarch`。AlmaLinux の鍵 `0xC2A1E572` は、手順 1 の `-y` で確認なしに取り込まれた（fingerprint は手順書の値と同じ）。RPM Fusion の鍵の fingerprint と uid は手順書と一致 |
+| Flatpak と Flathub | 5 | 5 | 0 | 0 | 0 | Flatpak 1.16.0 は入っていた。Flathub の鍵は手順書と一致。Flatseal 2.4.1 は確認が 2 回で 33 秒、`sandbox OK`。`/var/lib/flatpak` は 1.7 GB |
+| 日本語入力 | 2 | 2 | 0 | 0 | 0 | 3 つのパッケージは入っていた。`[('xkb', 'us')]` から `[('xkb', 'us'), ('ibus', 'anthy')]` へ。貼った直後に、上部バーに `en` が出た |
+| GNOME の表示と入力 | 13 | 13 | 0 | 0 | 0 | 手順 2・4・5・12・13 は、貼った直後に画面に効いた（暗い配色・ボタン・時計の曜日と秒・Ctrl+Alt+T・Dash の 4 つ）。手順 3・6・7・8 は値の読み戻しだけ。手順 10 は 4 パッケージで、EPEL の鍵 `0xE37ED158`（手順書の値と同じ）に `y` |
+| 共通の bash 設定 | 4 | 4 | 0 | 0 | 0 | `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）`、`1`・`100000`・`100000`・`ignoreboth`・`on` が 5 つ。`bash-completion-2.11-16.el10.noarch` は入っていた |
+| Homebrew | 3 | 3 | 0 | 0 | 0 | 依存の 4 つは `は既にインストールされています。`。インストーラは sudo のパスワードを聞かず、Enter の後 18 秒で `==> Installation successful!`。`Homebrew 7.0.9` |
+| シェルのツール | 10 | 10 | 0 | 0 | 0 | `[y/n]` に `y`（Enter なし）で 45 秒。`Warning: Landlock ABI 10 or later is required …` が 1 行。開き直した端末は starship のプロンプト。版は「入った版」のとおり |
+| キー操作を試す | 5 | 4 | 1 | 0 | 0 | 手順 1 は、7 つの箇条書きのうち 2 つ（`printf` + ↑、`**/*.md`）が手順書の結果と違った。手順 2〜5 は手順書のとおり。Ptyxis で Alt+C が届いた |
+| tmux を試す | 3 | 3 | 0 | 0 | 0 | 最下行に緑の `[work] 0:bash*`、`[detached (from session work)]`、`[exited]`、`no server running on /tmp/tmux-1000/default` |
+| Git | 10 | 9 | 0 | 1 | 0 | 手順 7 は飛ばした（手順 6 の `pull.ff` が空）。`git version 2.52.0`、14 行が `global`。`?? 日本語.txt`、`Created autostash: …`・`Applied autostash.`、履歴は 1 本 |
+| Firefox | 11 | 8 | 0 | 1 | 2 | 手順 7・11 は未実施（最初の起動の窓が利用規約への同意を求める）。手順 9 は飛ばした（衝突は出なかった）。`firefox-140.17.0-1.el10_2` が 157.0.1-1（`mozilla`）に上がり、`ffmpeg-libs` 7.1.5-1.el10 は 64 パッケージ |
+| HackGen Console NF | 5 | 4 | 0 | 1 | 0 | 手順 3 は飛ばした（`/usr/bin/unzip`）。`font-hackgen-nerd 2.10.0`、`U+3042`・`U+6f22`・`U+e0b0`・`U+f09b` が 4 行とも `1` |
+| WezTerm | 5 | 5 | 0 | 0 | 0 | `wezterm 20261010_083911_e2a98e1b`（4 パッケージ）。COPR の鍵の fingerprint は手順書と一致。手順 5 は、wezterm の `docs/install.md` の手順 1・3・4・8・9（手順 2 は条件に当たらず、5〜7 は手順書のとおり飛ばした） |
+| WezTerm と HackGen Console NF をデスクトップで使う | 3 | 3 | 0 | 0 | 0 | `'Red Hat Mono Regular 10'` から `'HackGen Console NF 11'` へ。貼った直後に、Ctrl+Alt+T で WezTerm が開き、Dash の 3 つ目が WezTerm になった（Dash はマウスではなく Super+3 で開いた） |
+| git-delta | 4 | 3 | 1 | 0 | 0 | 手順 4 は、3 つの確かめのうち 1 つ（行ごとに背景色の付いた差分）が `head -20` に入らなかった。`delta 0.20.1`、6 項目の設定は読み戻せた |
+| Neovim | 4 | 4 | 0 | 0 | 0 | `NVIM v0.12.6`。手順 2 の `nvim --version \| head -3` が `~/.local/state/nvim/nvim.log`（0 バイト）を作り、手順 3 で `nvim.bak` に退避された。手順 3 は、LazyVimStarter の `docs/setup.md` の手順 3〜6・10・11・13〜18（プラグイン 38 個、`:Mason` は `Installed (11)`） |
+| lazygit | 4 | 4 | 0 | 0 | 0 | `version=0.66.0`。`~/.config/lazygit/config.yml` は `~/lazygit-config/config.yml` へのリンク。画面が出て `q` で終わった。初回の案内は出なかった |
+| GitHub CLI | 5 | 3 | 0 | 0 | 2 | 手順 3・4 は未実施（実アカウント）。`gh-2.102.0-1`。鍵は 2 回聞かれ、1 つ目に期限切れ（2026-09-05）の警告。手順 5 は、認証していない側の出力だけ |
+| yazi | 5 | 5 | 0 | 0 | 0 | 手順 2 は、依存を合わせて 172 個で 7 分 44 秒。このとき Homebrew の `python3`（3.15.0）・`curl`・`gsettings`・`gdbus`・`gio` が入る。`yazi 26.9.1`。手順 4・5 は WezTerm のタブで通した |
+| Claude Code | 5 | 4 | 0 | 0 | 1 | 手順 5 は未実施（実アカウント）。`claude-code 2.1.296-1`、鍵の fingerprint は手順書と一致 |
+| Codex CLI | 8 | 4 | 0 | 0 | 4 | 手順 5〜8 は未実施（実アカウント）。`codex-cli 0.162.1`。`~/.local/bin` にできたリンクは `codex` だけ |
+| Grok Build | 7 | 4 | 0 | 0 | 3 | 手順 4・5・7 は未実施（実アカウント）。`grok 1.0.50 (c58f321264ba)`。手順 6 は、ログインしていない側の出力だけ（`You are not authenticated.`、終了コード 0） |
+| Codex・Grok のプラグイン | 2 | 2 | 0 | 0 | 0 | Claude Code にログインしていなくても通った。一覧に 2 つとも `Status: ✔ enabled`。`nodejs`・`bubblewrap` は入っていた |
+| 再起動と確認 | 8 | 5 | 2 | 1 | 0 | 手順 6・8 は通らなかった（Anthy のエンジンが起動しない）。手順 4 は飛ばした（拡大率は変えない）。手順 3 は、WezTerm のタブで 6 つとも箇条書きのとおり。SSH は 11 秒で戻った |
+| 合計 | 152 | 131 | 4 | 5 | 12 | |
+
+- 単位ごとの数（報告のまま）: AS1（26 手順）は通した 25・飛ばした 1、AS2（40）は通した 39・通らなかった 1、AS3（46）は通した 40・通らなかった 1・飛ばした 3・未実施 2、AS4（40）は通した 27・通らなかった 2・飛ばした 1・未実施 10
+- 条件に当たらず飛ばした 5 つ: 「システムの設定」の手順 4、「Git」の手順 7、「Firefox」の手順 9、「HackGen Console NF」の手順 3、「再起動と確認」の手順 4
+- 「通した」のうち、報告が注記を付けたもの（判定は報告のまま数えた）
+  - 「ログインと sudo」の手順 2: 手順書の「端末」ではなく、`ptyxis` と打って開いた
+  - 「OS とファームウェアの更新」の手順 1 は更新なしの分岐、手順 3 は更新ありの分岐、手順 5 は条件に当たって再起動した
+  - 「GNOME の表示と入力」の手順 3・6・7・8: 値の読み戻しだけ。手順 3・6・7 の動きは、「再起動と確認」の手順 5・7 で画面で見た。手順 8（ホットコーナー）は見ていない
+  - 「GitHub CLI」の手順 5 と「Grok Build」の手順 6: 認証していない側の出力だけ
+  - 「再起動と確認」の手順 2: ログインの直後は Super・Super+2・Ctrl+Alt+T に反応せず、D-Bus でアクティビティの画面を開いてから見た。手順 3: SSH のシェルでは `ibus list-engine` が「IBus に接続できません。」になり、WezTerm のタブで通した。手順 7: サイドバーを押す所は見ていない
+- sudo は、「ログインと sudo」の手順 3 の後、再起動の後も含めて、1 度もパスワードを聞かなかった（Homebrew のインストーラの `sudo` を含む）
+- SSH から貼った `gsettings set` は、画面のセッションにすぐ効いた（入力ソースの表示・暗い配色・タイトルバーのボタン・時計・Ctrl+Alt+T・Dash・Ptyxis のフォントを、貼った直後の PNG で見た）
+
+#### 通らなかった手順（Hyper-V）
+
+| 項 | 手順 | 何が起きたか | 報告の見立て | 根拠の場所 |
+|---|---|---|---|---|
+| キー操作を試す | 1 | 7 つの箇条書きのうち 2 つが違った。`printf` + ↑ の 1 回目は `printf '\n\033[7m 確認 \033[0m\n'` で、`printf '%s\n' "$MANPAGER"` は 2 回目の ↑ で出た。`ls /usr/share/doc/bash-completion/**/*.md` は、直下の `CONTRIBUTING.md` と `README.md` だけが出た（サブディレクトリが無い）。機能（`history-search-backward`・`globstar`）は効いている。ほかの 5 つは手順書のとおり | 手順書（「シェルのツール」の手順 8〜10 のブロックも同じ `printf` の行で始まる）。SSH のシェルで見た。Ptyxis では試していない | `AS2/session/steps.jsonl` の seq 39〜62、`AS2/session/session-002.raw`、`AS2/screens/keys-g1-systemctl-tab.png`・`keys-g2-ls-tab.png` |
+| git-delta | 4 | `delta 0.20.1`・`git-delta 0.20.1`・`/home/linuxbrew/.linuxbrew/bin/delta` と、ファイル名のヘッダ（`Δ AGENTS.md`）は出た。行ごとに背景色の付いた差分は出なかった。delta の出力は 28 行で、行番号の付いた差分の行は 21 行目から、背景色（`48;5;22`）の付いた行は 24 行目から（報告は「背景色の付いた行は 21 行目から」と書く。[報告のあいだで食い違っていた所](#報告のあいだで食い違っていた所)）。`head -20` が、その手前で切る | 手順書（共通の bash 設定の最後のコミット `67abb84` のメッセージが 13 行ある）。機能は効いている | `AS3/session/steps.jsonl` の seq 50、`AS3/session/after-confirm/0050-…`、`AS3/delta-step4-beyond-head20.txt` |
+| 再起動と確認 | 6 | Super+Space で上部バーは `en` から `あ` に変わるが、`nihongo` は英字のまま入り、Space でも変換されない。gnome-shell の journal に `Gio.IOErrorEnum: タイムアウトしました`（`_setEngine`）。`/usr/libexec/ibus-engine-anthy` は `exec python3 /usr/share/ibus-anthy/engine/main.py "$@"` で、`ibus-daemon` の PATH は Homebrew が `/usr/bin` より先。Homebrew の `python3`（3.15.0）は `ModuleNotFoundError: No module named 'gi'` | 手順書（「yazi」の手順 2 と、PATH の順）。コンソールの画面で起きたので、SSH によらない。ハイパーバイザにもよらない | `AS4/session/steps.jsonl` の seq 77、`AS4/screens/29-input-source-anthy.png`〜`33-back-to-us.png`、`AS4/ibus-anthy-journal.txt`、`AS4/ibus-anthy-python-path.txt` |
+| 再起動と確認 | 8 | LazyVimStarter の `docs/setup.md` の手順 19 のうち、IME 連携が通らなかった。`o` の後の `<C-j>` で、下の表示の `A` が消えるだけで `あ` にならない。通った所は、`/kensaku` + Enter（`3:5`・`[1/1]`）、`/kensaku` + Tab、`:GlfmFormatInstall`、`:w`、Space 2 回、`:qa!` | 上の手順 6 と同じ原因 | `AS4/session/steps.jsonl` の seq 79、`AS4/wezterm-pane/lv19-*.txt`、`AS4/screens/39-nvim-asis-cj.png`〜`42-nvim-file-picker.png` |
+
+- 「再起動と確認」の手順 6・8 の切り分け（手順書の外）: エンジンを `env PATH=/usr/bin:/usr/sbin /usr/libexec/ibus-engine-anthy --ibus &` で手で起動すると、「にほんご」→ Space で「日本語」→ Enter で確定まで通り、Neovim の `<C-j>` で `あ`、Esc で `A`、検索の sticky まで通った（`AS4/screens/34-wa-anthy-indicator.png`〜`37-wa-anthy-committed.png`・`40-nvim-wa-cj.png`・`41-nvim-wa-search-cj.png`、`AS4/wezterm-pane/lv19-13`〜`lv19-20`）
+- `/home/linuxbrew/.linuxbrew/bin/python3` は `../Cellar/python@3.15/3.15.0/bin/python3` へのリンクで、できたのは 17:53 JST（「yazi」の手順 2 の最中）。`/usr/bin/python3`（3.12.15）は `import gi` が通る
+- 「再起動と確認」の手順 3 の `ibus list-engine | grep -w anthy` は、エンジンが起動しない状態でも `anthy - Anthy` を出した（切り分けの起動より前の 09:14 UTC に、WezTerm のタブで）
+
+#### 未実施の手順（Hyper-V）
+
+| 項 | 手順 | 理由 | 行った所まで | 根拠の場所 |
+|---|---|---|---|---|
+| Firefox | 7 | 最初の起動で、窓いっぱいに「Firefox へようこそ」（続行すると、利用規約とプライバシー通知に同意したものとみなされる）が出る。Esc では閉じない。同意は行っていない | 検索に `firefox` と打って、Firefox 157 の窓が日本語の表示で開く所まで。`about:support` は開いていない。代わりに、動いている実行ファイル（`/usr/lib/firefox/firefox-bin`）と `pref("app.update.channel", "release")` をファイルから読んだ | `AS3/session/steps.jsonl` の seq 20、`AS3/screens/ff7-1-search.png`〜`ff7-4-closed.png`、`AS3/firefox-step7-substitute.txt` |
+| Firefox | 11 | 同じ窓が、起動し直してもまた出る | 窓が開く所まで。「コーデックサポート情報」と動画の再生は見ていない（`ffmpeg-libs` と `/usr/lib64/libavcodec.so.61` が入ったことは、手順 10 で見た） | `AS3/session/steps.jsonl` の seq 25、`AS3/screens/ff11-1-launched.png`・`ff11-2-closed.png` |
+| GitHub CLI | 3 | 実アカウントが要る | GitHub.com → HTTPS → Git の認証は Enter → ブラウザでのログイン、まで選び、ワンタイムコードと、ブラウザを開く案内が出た所で Ctrl+C。取り消した後、`~/.config/gh` は無く、`~/.gitconfig` は変わらない | `AS4/session/steps.jsonl` の seq 7〜17、`AS4/tui/gh-login-1.txt`〜`gh-login-3.txt`、`AS4/gh-after-cancel.txt` |
+| GitHub CLI | 4 | 実アカウントが要る | ブラウザでの認証は行っていない | AS4 の seq 18 |
+| Claude Code | 5 | 実アカウントが要る | テーマの選択（Enter）の次の `Select login method` の画面まで。フォルダーの信頼・ログイン・`/exit` には届いていない | AS4 の seq 34〜42、`AS4/tui/claude-1.txt`〜`claude-4-login-method.txt`、`AS4/claude-after-first-launch.txt` |
+| Codex CLI | 5 | 実アカウントが要る | ログインのサーバーを始める行と認証の URL、`--device-auth` の案内が出て待つ所で Ctrl+C。SSH のシェルではブラウザは開かない | AS4 の seq 49・50 |
+| Codex CLI | 6 | 実アカウントが要る | 行っていない | AS4 の seq 51 |
+| Codex CLI | 7 | 実アカウントが要る | ブロックは貼った。`Not logged in`、終了コード 1（成功条件は確かめられない） | AS4 の seq 52・53 |
+| Codex CLI | 8 | 実アカウントが要る | `git init` は通った。`codex` は `Welcome to Codex` の画面（ログインの方法の 3 つの選択）まで。作業場所の確認・応答・`/quit` には届いていない | AS4 の seq 54〜56、`AS4/tui/codex-1.txt` |
+| Grok Build | 4 | 実アカウントが要る | 認証の URL とコード、`Waiting for authorization...` が出て待つ所で Ctrl+C。`~/.grok/auth.json` は無い | AS4 の seq 60・61 |
+| Grok Build | 5 | 実アカウントが要る | 行っていない | AS4 の seq 62 |
+| Grok Build | 7 | 実アカウントが要る | `git init` は通った。`grok` は、フォルダーの信頼の前に、ブラウザでの承認を待つ画面（`Waiting for approval...`・`ctrl+q quit`）を出した。ctrl+q で終えた | AS4 の seq 65〜67、`AS4/tui/grok-1.txt` |
+
+- 終わりの状態: `gh auth status` は `You are not logged into any GitHub hosts.`、`codex login status` は `Not logged in`、`claude auth status` は `"loggedIn": false`。`~/.grok/auth.json`・`~/.codex/auth.json`・`~/.config/gh/hosts.yml` は無い（`AS4/guest-facts-end.txt`）
+- 記録に出たワンタイムコード・デバイス コード・認証の URL の値は、記録の中で伏せてある
+
+#### ハイパーバイザに左右された出力（Hyper-V）
+
+報告が「ハイパーバイザに左右されたと思われる」として挙げた値を、値のまま並べた。この節の値は、ほかのハイパーバイザと比べて確かめたものではない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`（4 つの単位とも） |
+| DMI | `Microsoft Corporation` / `Virtual Machine` / BIOS `Hyper-V UEFI Release v4.1`。`hostnamectl chassis` は `vm` |
+| Secure Boot | `SecureBoot disabled` |
+| ファームウェアの更新 | **あった**。「OS とファームウェアの更新」の手順 2 は `3 個のデバイスが更新可能です`・`1 個のデバイスが、有効なリモートでサポートされています（更新が公開されています）`。手順 3 は `UEFI dbx を 20241101 から 20260707 にアップグレードしますか?`・`操作を実行しますか? [Y\|n]:` に `y`、`今すぐ再起動しますか? [y\|N]:` に `n`。`KEK CA`・`Windows UEFI CA` は更新なし、`Hyper-V Firmware PK`（2013）は更新の対象外。最初のログインの案内に `1 個のデバイスでファームウェアアップグレードが利用可能です。` |
+| ファームウェアの更新の後 | 再起動の後、`UEFI dbx` の今の版は `20260707`、`fwupdmgr get-upgrades` は `アップデートはありません`。`fwupdmgr get-history` は `アップデートステータス: 失敗`・`failed to run update on reboot: expected 20260707 and got (null)` と出した。GNOME Software は「ソフトウェアアップデートをインストールしました」と通知した |
+| NIC | `eth0`（ドライバ `hv_netvsc`、MAC `00:15:5d:…`）、`<SERVER_IP>/20`（Default Switch。4 回の起動と 2 回の再起動で同じだった） |
+| ログインの案内 | `Web console: https://<OLD_HOSTNAME>.mshome.net:9090/ or https://<SERVER_IP>:9090/`（名前を変えた後は `<HOSTNAME>.mshome.net`） |
+| ディスク | `sda` 64G、`Virtual Disk`（Msft）。`sda1` 600M・`sda2` 2G・`sda3` 61.4G（LVM: root 38.6G・swap 3.9G・home 18.9G） |
+| 画面 | 1024×768（コネクタは `Virtual-1`、`hyperv_drm`、`1024x768@60.004`）。選べる解像度は 1920×1080・1680×1050・1600×1200 ほか。拡大率は 1.0（`scaling-factor uint32 0`・`text-scaling-factor 1.0`）。AS4 の時点で、Mutter の DisplayConfig で選べる拡大率は 1.0 と 1.333 |
+| グラフィック | `/dev/dri/` は `card1` だけ（`DRIVER=hyperv_drm`。レンダー ノードが無い）。WezTerm を起動すると、journal に `libEGL warning: failed to get driver name for fd -1`・`libEGL warning: MESA-LOADER: failed to retrieve device information`・`MESA: error: ZINK: failed to choose pdev`・`libEGL warning: egl: failed to create dri2 screen` が出る。窓は開いて描かれた。gnome-shell は `Couldn't find suitable cursor plane format for /dev/dri/card1, disabling HW cursor` |
+| 電池 | 無い（`upower -e` は `DisplayDevice` だけ、`/sys/class/power_supply/` は空）。「GNOME の表示と入力」の手順 5 の `show-battery-percentage true` は値だけで、上部バーに % は出ない |
+| kdump とメモリ | 始めは `enabled`、`crashkernel=2G-64G:256M,64G-:512M`、予約 `268435456`、`free -m` の合計は 3652 MB。「システムの設定」の手順 7 の後、VM を起動し直すと、`/sys/kernel/kexec_crash_size` は `0`、`/proc/cmdline` に `crashkernel=` は無く、kdump は `disabled`、`free -m` の合計は 3908 MB |
+| キーボード | ゲストには `AT Translated Set 2 keyboard`（`/dev/input/event0`）として見える |
+| カーネルのモジュール | `hv_balloon hv_utils hv_sock hv_storvsc hv_netvsc hyperv_keyboard hyperv_drm hid_hyperv hv_vmbus` |
+| CPU の見え方 | `brew config` の `CPU: dual-core 64-bit zen3` |
+| 失敗しているユニット | `mcelog.service`（起動のたびに failed。`systemctl is-system-running` は `degraded`）。手順には影響しない。ハイパーバイザによるかは確かめていない |
+| 画面の PNG | ロックされて画面が消えているあいだに撮った PNG は、消える直前の画面のままだった（時計が止まっている）。報告は、Hyper-V のサムネイルが最後の絵を返すとみている |
+| 起動と再起動の時間 | クローンを作ってから SSH が通るまで 9.9 秒。止めた VM の起動から SSH まで 11.4 秒・11.8 秒・12.1 秒。再起動は、貼ってから SSH が戻るまで 17 秒（AS1。ファームウェアの更新の後。それより前に戻っていたかは見ていない）と 11 秒（AS4）。電源を切るのに 4〜5 秒 |
+| 長かった手順 | 「yazi」の手順 2 が 7 分 44 秒、「シェルのツール」の手順 1 が `y` の後 45 秒、「Neovim」の手順 1 が 43 秒（確認の待ちを含む）、「Flatpak と Flathub」の手順 4 が 33 秒、「GitHub CLI」の手順 2 が 28 秒（答える時間を含む）、`dnf install claude-code` が 25 秒、`dnf install firefox` と `ffmpeg-libs` が 23 秒ずつ、Homebrew のインストーラが 18 秒、`dnf install wezterm` が 17 秒。LazyVim のプラグイン 38 個は 11 秒、Mason の 11 個は 55 秒以内 |
+| 単位の全体の時間 | AS1 は 11 分 16 秒、AS2 は 24 分 37 秒（画面のロックの調べものの 4 分ほどを含む）、AS3 は 24 分 5 秒、AS4 は 43 分（再起動の後の画面の確かめと切り分けの 15 分を含む） |
+| ディスクの使用 | 終わりに、`/` は 39G のうち 8.0G、`/home` は 19G のうち 5.8G。`/home/linuxbrew/.linuxbrew` は 315M（AS2 の終わり）→ 415M（AS3 の終わり）→ 2.7G（AS4 の終わり） |
+
+- 時間は、静かなホストで測ったものではない。AS1 の 07:31 UTC から測定用の VM が、AS3 の始めにほかの担当の VM が、同じホストで動いていた
+- 報告が「ハイパーバイザによらない」とみたもの: Landlock の `Warning:`（Homebrew 7.0.9 とカーネル 6.12 の Landlock ABI 6）、Anthy が起動しないこと、「端末」で Ptyxis が見つからないこと、Firefox の同意の窓
+- `fwupdmgr get-history` の「失敗」と、WezTerm の libEGL・ZINK の警告は、報告が「ハイパーバイザによるとみる」と書いたもので、原因は確かめていない
+
+#### 手順書の外で行ったこと（Hyper-V）
+
+- **貼る先**: 手順書は、GNOME で開いた端末（「WezTerm」の手順 5 の後は WezTerm のタブ）に貼る。今回は、コンソールで GNOME にログインして端末を開いたうえで、ブロックは SSH の対話の bash（ドライバ）に貼った。Ptyxis の窓に打ったのは、「キー操作を試す」のキーと、`exit`・`cd -`・`tmux attach -t work`、字形を見る 1 行だけ
+- **コンソールのログイン**: `Login-Console.ps1`（キー送信）で GDM にログインした。4 回の起動と 2 回の再起動の後の、合わせて 6 回。AS1 の最初だけ、1 回目は GDM の画面がまだ出ておらず `Sent:false` で、15 秒後の 2 回目で通った
+- **キー送信**: 画面の操作は、Hyper-V の層の `Send-VmvKeys`（US 配列のスキャンコード）で送り、画面を PNG に撮って確かめた。日本語の文字とマウスのクリックは送れない
+  - 「ようこそ」の窓は、フォーカスのある「スキップ」に Enter を送って閉じた
+  - 端末とアプリは、アクティビティの画面の検索に `ptyxis`・`firefox`・`wezterm` と打って開いた。Dash の WezTerm は Super+3 で開いた
+  - Alt+Tab・Super+Tab の帯を撮るために、`Msvm_Keyboard` の `PressKey`・`TypeKey`・`ReleaseKey` を直接呼んだ
+  - 再起動の後、Super が効かなかったので、D-Bus で `org.gnome.Shell` の `OverviewActive` を `true` にした
+- **WezTerm のタブへの貼り付け**: SSH から `wezterm cli send-text`（ブラケットペースト）で貼り、`get-text` と PNG で読んだ。wezterm の `docs/install.md` の手順 9、「Neovim」の手順 4、「lazygit」の手順 4、「yazi」の手順 4・5、「再起動と確認」の手順 3・8（Neovim の中のキーを含む）
+- **端末を開き直す手順**: 「シェルのツール」の手順 2 と「Neovim」の手順 4 は、画面の端末を開き直したうえで、ドライバの SSH のシェルも開き直した
+- **名指しされた文書**: ホストの git のオブジェクトから `git show` で取り出して貼った（ゲストが clone したものと sha256 が同じ）
+  - lazygit の README の Linux の例（`sh` のブロックで、番号の付いた手順の外）は、ドライバが貼れないので、3 行を 1 行ずつ送った（ブラケットペーストではない）
+  - yazi の README の「インストール」の 1 つ目のブロック（`sh`、手順の外）は、検証用の包みに入れて貼った（包んだブロックの sha256 は元と同じ）
+  - `:GlfmFormatInstall`（LazyVimStarter の別の節の手順 1）を行った。手順 19 の「初めてなら済ませる」に当たる
+- **単位の区切り**: 手順書に無い停止と起動を 3 回はさんだ。「システムの設定」の手順 7（kdump）と「GNOME の表示と入力」の手順 9・11（拡大率の設定・AppIndicator）は、「再起動と確認」の手順 1 より前の、この起動し直しで効いた（AS2 の初めに `kexec_crash_size` が `0`、AS3 の初めに `状態: ACTIVE`）
+- **画面のロックの解除**: 無操作 5 分で画面がロックされた（`idle-delay 300`・`lock-enabled true`・`lock-delay 0`。設定は変えていない）。証跡にあるのは 4 回（AS2 で 1 回、AS3 で 1 回、AS4 で 2 回）。どれも、パスワードは打たず、SSH から `sudo loginctl unlock-session` で解いた
+  - AS2 の 1 回は、気付く前に `exit` + Enter を 2 回と Ctrl+Alt+T がロックの画面に届いた。このとき、ロックの画面にパスワードの欄が出ておらず（journal に `JS ERROR: TypeError: can't convert undefined to object`）、認証の試行は記録されていない
+  - 調べるために Esc → Enter を送り、空のパスワードで認証の失敗が 1 回記録された（`pam_unix(gdm-password:auth): authentication failure`、16:53:45 JST）
+  - 再現を見るために、`sudo loginctl lock-session` で 1 回ロックし、Space を 1 つ送って PNG を撮り、解いた（このときは欄が出た）
+  - AS3 と AS4 では、キーを送る前に `LockedHint=yes` を見て解いたので、ロックの画面にキーは届いていない
+- **対話の取り消しと後始末**
+  - `gh auth login` は、Git の認証の問いで止まった（ドライバが端末のカーソル位置の問い合わせに答えない）ので、応答（`ESC[5;56R`）を 2 回、手で送って進め、コードが出た所で Ctrl+C
+  - Claude Code は、Ctrl+C を 2 回続けて送れないので、SSH から `pkill -INT -x claude` で終えた
+  - `codex login`・`grok login`・`codex` は Ctrl+C、`grok` は ctrl+q で終えた
+  - 間違えて、WezTerm が動いていないときに `wezterm cli list` を打ち、`wezterm-mux-server --daemonize` が起動した。`pkill -x wezterm-mux-ser` で止め、`/run/user/1000/wezterm/` の `sock`・`pid`・`log` を消した
+  - コンソールの WezTerm のタブに `codex login` と打ち、ブラウザが開くかを見た。Firefox が開き、その上に「Firefox へようこそ」の窓が出た。同意は押さず、Alt+F4 で閉じ、Ctrl+C で取り消した
+  - Files を一覧の表示（Ctrl+1）にして見て、Ctrl+2 で戻した。テキストエディターに打った確かめの文は「破棄」で捨てた
+- **切り分けのための実行**
+  - `env PATH=/usr/bin:/usr/sbin /usr/libexec/ibus-engine-anthy --ibus &` を、WezTerm のタブで 2 回起動した。終わりに止めた（設定のファイルは変えていない）
+  - 一時の `HOME` で、`nvim --version` を呼び方を変えて何通りかと、`nvim --headless +qa` を呼んだ（どれが `~/.local/state/nvim` を作るかを見るため。終わりに消した。結果は `AS3/neovim-state-bak.txt`）
+  - キーが届いているかを見る道具（`kbd-events.py`・`keystate.py`）を、ゲストの `/tmp` に置いて root で動かした（終わりに消した）
+  - `shopt -u globstar` と `-s` での `ls` の比べ（別の `bash -c`）
+- **SSH のシェルに貼ったことで違った所**（どれも手順の判定は変えていない）
+  - starship のプロンプトが、SSH のシェルでは `<USER> in 🌐 <HOSTNAME> in ~` の形になる（Ptyxis では `~` だけ）。`starship explain` の出力も 2 行多い
+  - `ibus list-engine` は「IBus に接続できません。」になる（コンソールの WezTerm のタブでは `anthy - Anthy`）
+  - `gh auth login` は `Failed to copy one-time code to clipboard` と出し、`codex login`・`grok` はブラウザを開かない（SSH のシェルに `WAYLAND_DISPLAY` が無い。`grok` は `firefox-bin` の `<defunct>` を 1 つ残した）
+  - wezterm の `docs/install.md` の手順 9 は、SSH のシェルでは `TERM_PROGRAM` が空になるので、WezTerm のタブだけで貼った
+  - Neovim と lazygit の画面は、SSH の端末で開いた（lazygit は WezTerm のタブでも開いて、アイコンの字形を PNG で見た）
+- **道具**: AS3 では、作業用のディレクトリがほかの単位（VMware の列）と同じで、ドライバの応答の表示がぶつかった。送った先はぶつかっておらず（`steps.jsonl` の 82 行は全部この単位のもの）、応答は記録から読み直した
+- **読み取りだけの調べもの**: ドライバとは別の SSH で、`fwupdmgr get-devices`・`get-upgrades`・`get-history`、`Gio.DesktopAppInfo.search`、`gsettings get`・`rpm -q`・`du`・`journalctl` などを読んだ（設定は変えていない）
+
+#### 確かめていないこと（Hyper-V）
+
+- 実アカウントでのログインと、その後ろ: 「GitHub CLI」の手順 3・4、「Claude Code」の手順 5、「Codex CLI」の手順 5〜8、「Grok Build」の手順 4・5・7。認証した後の `gh auth status`・`grok models`、`~/.gitconfig` に入る行、動いている Claude Code にプラグインが効くこと
+- Firefox の `about:support`（更新チャンネル・実行ファイル・コーデックサポート情報）、`about:preferences` の言語、動画の再生。「Firefox へようこそ」の窓の「管理する」の中身
+- 「yazi」の手順 2 より前に、Anthy で変換できていたか（Anthy で打つ確かめは「再起動と確認」の手順 6 が初めて）。報告が挙げた直し方の案（Homebrew を PATH の先頭に置くのを対話のシェルだけにする、IBus のユーザーサービスにドロップインで PATH を足す、手順 3 の確かめを変える）は、どれも試していない
+- 画面で確かめていないこと
+  - 検索に「端末」と打ったときの結果（キー送信で日本語を打てない。検索の API と `.desktop` の中身で判断した）
+  - マウスで行う所: Dash のアイコンを押す、ホットコーナー、Files のサイドバーを押す
+  - Ptyxis の窓へのブロックの貼り付け。Ptyxis での `printf` + ↑、Ctrl+R で `fzf --version` を選ぶこと、`cd /usr/SH` + Tab・autocd・cdspell・globstar・`eza --gi` + Tab、`ls /usr/share/**` + Tab、tmux の作成
+  - 設定の「ディスプレイ」の画面と、拡大率を変えること（「再起動と確認」の手順 4）
+  - yazi のプレビュー（PDF・動画・画像・書庫）、lazygit の `e` キー、端末から `wezterm` と打って起動すること、「git-delta」の手順 4 の `git diff` を単体で打ったときの動き
+  - LazyVimStarter の手順 17 の、画面の下に流れる通知（開いて 55 秒後の画面と `:Mason` だけを見た）
+- 当たらなかった分岐
+  - 「OS とファームウェアの更新」の手順 1 のトランザクション表・`[y/N]`・AlmaLinux の鍵の確認（更新が無かった）、手順 2 の `デーモンへの接続に失敗しました`、手順 5 の `Operation inhibited by …`
+  - 「システムの設定」の手順 4、「Git」の手順 7、「Firefox」の手順 9（`conflicts with libswresample-free`）、「HackGen Console NF」の手順 3
+  - 各手順の `中断:` の分岐、鍵の fingerprint が違うときの `N`、パッケージが入っていないときに入れる側（`ibus-anthy`・`bash-completion`・`flatpak`・`unzip`・`nodejs`・`bubblewrap` は、どれも入っていた）
+  - 「キー操作を試す」の手順 5 の「Alt が届かないとき」（Ptyxis では届いた）、「シェルのツール」の手順 8 の「BaseOS の tmux が出る」
+- 原因を確かめていないこと
+  - `fwupdmgr get-history` の `アップデートステータス: 失敗`（版は上がっている）
+  - ロックの画面にパスワードの欄が出なかったこと（1 回だけ。自分でロックした 2 回目は出た）
+  - 再起動の後のログインの直後に、Super・Super+2・Ctrl+Alt+T に反応しなかったこと（1 回だけ。キーはゲストに届いていた。AS1 の再起動の後には起きていない）
+  - `mcelog.service` の失敗、Mozilla のビルドに入れ替えた後も `/usr/lib64/firefox` が残っていること
+  - ホームに `nvim` というディレクトリ（17:26 JST、中は 0 バイトの `nvim.log`）が残っていること。`AS4/guest-facts-start.txt` と `guest-facts-end.txt` のホームの一覧にある。何が作ったかは、報告にも証跡にも無い（AS3 の報告が挙げる残りものは `~/.local/state/nvim.bak` だけ）
+- この記録の範囲の外
+  - 任意節・更新・ロールバック（通したのは実施手順だけ）
+  - Secure Boot を有効にした VM、実機、aarch64、JIS の物理キーボード
+  - 画面のインストーラで入れた PC（Kickstart のベースは、入れた時点で更新が無く、`gnome-calendar` が入っていない。変える前の Dash のアイコンは 6 つだった）
+  - ほかのハイパーバイザとの比べ（この節は Hyper-V の値だけ）
+
+#### 手順書の指摘の一覧（Hyper-V）
+
+場所と 1 行だけを置く。行の番号は、コミット `114c2b2` のもの。詳しい切り分けと直し方の案は、各単位の報告（`AS1/result.md`〜`AS4/result.md` の 4 節）にある。
+
+| 場所 | 指摘 | 出どころ |
+|---|---|---|
+| `docs/almalinux-setup.md:51`・`:52`・`:1355`、`docs/extra/almalinux-setup.md:34` | アプリの名前は「ターミナル」で、検索の API は「端末」では Ptyxis を返さない。この時点では日本語も打てない | AS1 の 1（中） |
+| `docs/almalinux-setup.md:85`・`:86`（関連 `:260`） | 更新が無いと AlmaLinux の鍵の確認が出ず、鍵は「EPEL と RPM Fusion」の手順 1 の `dnf install -y` で確認なしに取り込まれる | AS1 の 5 |
+| `:87` | 更新が無いときの文は `何もしません。` ではなく `行うべきことはありません。` | AS1 の 2 |
+| `:97`（関連 `:107`） | 「仮想マシンでは `更新可能なデバイスはありません`」は、Hyper-V の第 2 世代の VM に当たらない（`UEFI dbx` の更新が出る） | AS1 の 3 |
+| `:364` | `/var/lib/flatpak` は「2.5 GB ほど」ではなく 1.7 GB だった | AS1 の 6 |
+| `:567` | 入るのは `gnome-shell-extension-appindicator` と依存の 3 つで、4 パッケージ | AS2 の 2 |
+| `:694` | `すでにインストールされています` ではなく `は既にインストールされています。` | AS2 の 3 |
+| `:727`・`:1246`・`:1377`・`:1421`・`:1577` | `brew install` のたびに `Warning: Landlock ABI 10 or later is required …` が 1 行出る（書かれていない） | AS2 の 5、AS3 の 8、AS4 の D5 |
+| `:856` | `printf` + ↑ の 1 回目は確認の見出しの行で、`printf '%s\n' "$MANPAGER"` は 2 回目の ↑ で出る | AS2 の 1（中） |
+| `:858` | `ls /usr/share/doc/bash-completion/**/*.md` は直下の 2 つだけが出る（サブディレクトリが無い） | AS2 の 4 |
+| `:1143` | 「`x86_64` の行も一緒に並ぶ」は aarch64 から見た書き方（x86_64 では `firefox.aarch64` の行も並ぶ） | AS3 の 7 |
+| `:1151` | `Upgrading: firefox` は、日本語のロケールでは `アップグレード:` の下に出る | AS3 の 5 |
+| `:1159`・`:1201`・`:1302` | `dnf -q repoquery --installed --qf '…\n'` の出力が、1 行ごとに空行をはさむ | AS3 の 6 |
+| `:1166`・`:1208` | Firefox 157 の最初の起動の「Firefox へようこそ」（利用規約とプライバシー通知への同意）の窓が書かれていない | AS3 の 1（中） |
+| `:1409`・`:1413` | `git … show \| delta … \| head -20` が、差分の行に届かない（最後のコミットのメッセージが長い） | AS3 の 3 |
+| `:1430`・`:1436` | 手順 2 の `nvim --version \| head -3` が `~/.local/state/nvim/nvim.log` を作り、手順 3 で要らない `nvim.bak` が残る | AS3 の 2（中） |
+| `:1435` | `NVIM v0.12.5` とあるが、出たのは `NVIM v0.12.6` | AS3 の 4 |
+| `:1473` と、lazygit の `README.md:28`（`02c6326`） | Linux の例が `sh` のブロックで、番号の付いた手順ではなく、確かめの行も無い | AS3 の 10 |
+| `:1512` | `Adding repo from: ...` は、日本語のロケールでは `repo の追加: …` | AS4 の D4 |
+| `:1521`〜`:1525` | 鍵の前にパッケージの `[y/N]` が出る。鍵の出る順が手順書と逆。1 つ目の鍵に期限切れ（2026-09-05）の警告が出る | AS4 の D3 |
+| `:1541`・`:1681`・`:1738`・`:1815` | ブラウザでのログインは Firefox を開き、「Firefox へようこそ」の窓が上に出る | AS4 の D2（中） |
+| `:1560`・`:1573`（現れるのは `:1934`〜`:1936`・`:1947`。`:1908`・`:1916` の確かめは通ってしまう） | 既定の `YAZI_EXTRAS` で Homebrew の `python3` が入り、Anthy のエンジンが起動しなくなる（「再起動と確認」の手順 6 で打つまで気付かない） | AS4 の D1（高） |
+| `:1577` | `fzf` も `already installed` と出る。入る量（依存を合わせて 172 個、7 分 44 秒、2.7G）が書かれていない | AS4 の D5 |
+| `:1707`・`:1780` | `command -v curl` が出すのは Homebrew の `curl`（「yazi」の手順 2 で入る） | AS4 の D6 |
+| `:1806`・`:1843`〜`:1845` | ログインしていない `grok` は、フォルダーの信頼より先に承認の画面になる。1 度起動した後の `grok --version` には `[stable]` が付く | AS4 の D7 |
+| `docs/reference/almalinux-setup.md:1667`、`docs/extra/almalinux-setup.md:89` | Codex CLI 0.162.1 のインストーラが `~/.local/bin` に置くリンクは `codex` だけ | AS4 の D8 |
+| wezterm の `docs/install.md:28`・`:44`（`9cb9f77`） | `No such file or directory` は、日本語のロケールでは `そのようなファイルやディレクトリはありません` | AS3 の 9 |
+| LazyVimStarter の `docs/setup.md:151`（`8e4a074`） | `brew install neovim lazygit ripgrep fd` は、`[y/n]` を聞かずに入った（neovim が先に入っている） | AS3 の 11 |
+
+### VMware Workstation Pro の VM
+
+`docs/almalinux-setup.md` の実施手順（27 項・152 手順）を、Kickstart で入れて 1 度も起動していないベースのリンククローンから、今の順番で上から最後まで通した。コンソールは GNOME にログインした状態にし、コードブロックは SSH の対話シェルに 1 つずつ貼った。
+
+- 結果: 通した 131、通らなかった 4、条件に当たらず飛ばした 5、未実施 12（合わせて 152）
+- 手順書は、デスクトップの端末に貼る前提。SSH のシェルに貼ったために違った所は、後ろの「手順書の外で行ったこと」に挙げた
+- 4 つの単位に分けて通し、単位の間で VM を止めてスナップショット（`after-AS1`〜`after-AS4`）を取った
+  - AS1: 「ログインと sudo」から「Flatpak と Flathub」まで（26 手順）
+  - AS2: 「日本語入力」から「tmux を試す」まで（40 手順）
+  - AS3: 「Git」から「lazygit」まで（46 手順）
+  - AS4: 「GitHub CLI」から「再起動と確認」まで（40 手順）
+- 画面で行う手順は、コンソールへのキー送信（VNC）で行い、画面の PNG で確かめた。マウスは使っていない
+- 実アカウントでのログイン（GitHub・Claude・ChatGPT・grok.com）と、Firefox の最初の起動の同意は行っていない
+- 任意節・更新・ロールバックは、この通しでは流していない
+- 出力の中の、この VM の値は `<USER>`・`<HOSTNAME>`（「システムの設定」の手順 2 で変えた名前）・`<OLD_HOSTNAME>`（変える前の名前）・`<SERVER_IP>` で書いた。パスワード・認証の URL・確認用のコードは載せていない
+- 根拠の記録は `.verification\campaign\vw\AS1`〜`AS4`（追跡していない作業用の記録）。`seq` は `session\steps.jsonl` の連番、`ac` は `session\after-confirm\` のファイルの先頭の番号、PNG は `screens\` の名前
+
+#### VMware の VM の環境
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300（Hyper-V が有効） |
+| ハイパーバイザ | VMware Workstation 26.0.1 build-25688693（26H1u1）。`vmware.log` は `IOPL_Init: Hyper-V detected by CPUID`・`Monitor Mode: ULM`（Hyper-V が有効なホストの上で、ULM で動く） |
+| VM | ベースの VM のスナップショット `clean-install` からのリンククローン。2 vCPU（1 ソケット 2 コア）・4096 MB・UEFI（Secure Boot は無効）・仮想ハードウェア 22・NVMe 64 GB・NIC は vmxnet3 の NAT（VMnet8）が 1 枚・3D のアクセラレーションは無効。コンソールは VNC（ホストの `127.0.0.1` だけ） |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、カーネル `6.12.0-211.64.1.el10_2.x86_64`、gnome-shell 49.4-9、ptyxis 47.13-1、fwupd 2.0.19、flatpak 1.16.0、ibus 1.5.32-1、ibus-anthy 1.5.17-1、open-vm-tools 13.0.10。ロケール `ja_JP.UTF-8`、キー配列 `us`、`SecureBoot disabled` |
+| ベースの作り方 | Kickstart（文字のインストール、`@^workstation-product-environment`、`lang ja_JP.UTF-8`、`keyboard --vckeymap=us --xlayouts='us'`）。boot ISO からネットワーク経由で入れたので、入れた時点でパッケージは最新。1 度も起動していない状態から始めた。ユーザーは `<USER>`（`wheel`）、ホスト名は `<OLD_HOSTNAME>` |
+| 手順書 | setup-notes `114c2b2`（`docs/almalinux-setup.md`。追跡されているファイルは変えていない） |
+| 参照先の文書 | 共通の bash 設定 `67abb84`、wezterm `9cb9f77`（`docs/install.md`）、LazyVimStarter `8e4a074`（`docs/setup.md`）、lazygit `02c6326`（`README.md`）、yazi `1cfe349`（`README.md`）。wezterm・LazyVimStarter・lazygit・yazi は、読んだ文書のコミットと VM に clone されたコミットが同じことを確かめた |
+| 実施の日時 | 2026-10-11 16:24〜18:29 JST（07:24〜09:29 UTC）。AS1 は 16:24〜16:35、AS2 は 16:39〜17:08、AS3 は 17:12〜17:38、AS4 は 17:48〜18:29 |
+| 入った版 | `epel-release` 10-6.el10、`rpmfusion-free-release` 10-1、Flatseal 2.4.1（`org.gnome.Platform` 50）、`gnome-shell-extension-appindicator` 61-1.el10_2、Homebrew 7.0.9、starship 1.26.0・zoxide 0.10.0・fzf 0.74.5・eza 0.23.5・bat 0.26.1・tmux 3.8、git 2.52.0、Firefox 157.0.1-1（140.17.0 から）、`ffmpeg-libs` 7.1.5-1.el10、font-hackgen-nerd 2.10.0、wezterm `20261010_083911_e2a98e1b`、git-delta 0.20.1、Neovim 0.12.6、Node.js 22.23.2、lazygit 0.66.0・ripgrep 15.2.0・fd 10.5.0、gh 2.102.0、yazi 26.9.1（ffmpeg-full 9.0.2・sevenzip 26.04・jq 1.8.2・poppler 26.10.0・resvg 0.48.1・imagemagick-full 7.1.2-33・font-symbols-only-nerd-font 3.5.1。依存で python@3.15 3.15.0・curl 8.22.0_1）、claude-code 2.1.296-1、codex-cli 0.162.1、grok 1.0.50 (c58f321264ba)、codex@openai-codex 1.0.6・grok-build@xai-grok-build 0.2.1、bubblewrap 0.10.0 |
+| 終わりの大きさ | Homebrew の formula は 202 個、`/home/linuxbrew` は `2.7G`、`/var/lib/flatpak` は `1.7G`（AS1 の終わり）、`/` の使用は `8.0G` |
+| 貼り方 | 文書から抜き出したブロックを、SSH の対話シェル（ドライバ）に 1 つずつ貼った。画面の操作は、コンソールへのキー送信（VNC）で行い、画面の PNG で確かめた |
+
+#### VMware の VM での項ごとの結果
+
+| 項 | 手順の数 | 通した | 通らなかった | 条件に当たらず飛ばした | 未実施 | メモ |
+|---|---|---|---|---|---|---|
+| ログインと sudo | 3 | 3 | 0 | 0 | 0 | 「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓を Enter（「スキップ」）で閉じた。端末は `terminal` と打って開いた（表示名は「ターミナル」）。手順 3 は講習の注意とパスワードの問いの後、`stdin: 正しく構文解析されました` と `sudo はパスワードを聞かない` |
+| OS とファームウェアの更新 | 5 | 5 | 0 | 0 | 0 | OS の更新は無かった（`行うべきことはありません。`。`[y/N]` も鍵の確認も出ない）。手順 2 は `[Y\|n]` に `Y` で `9 個のデバイスが更新可能です`。手順 3 は UEFI dbx を 20230501 から 20260707 に上げた（`y`、再起動は `n`）。そのため手順 5 の再起動を行った |
+| システムの設定 | 8 | 7 | 0 | 1 | 0 | 手順 4 は条件外（手順 3 が `enabled`・`active`・`yes`・`yes`）。手順 2 は `変える前: <OLD_HOSTNAME>`・`変えた後: <HOSTNAME>`。手順 5 は `drwxr-sr-x+ 3 root systemd-journal`。手順 6 が `enabled`・`268435456` だったので、手順 7 を通した。手順 8 で消えたのは `PackageKit-command-not-found` の 1 つだけ |
+| EPEL と RPM Fusion | 5 | 5 | 0 | 0 | 0 | `epel-release-10-6.el10.noarch`。手順 1 の `dnf install -y` の中で、AlmaLinux の鍵（`0xC2A1E572`）が確認無しに取り込まれた（OS の更新が無かったため）。RPM Fusion の鍵の fingerprint と uid は手順書と同じ。`rpmfusion-free-release-10-1.noarch` |
+| Flatpak と Flathub | 5 | 5 | 0 | 0 | 0 | `Flatpak 1.16.0`（入れた時から入っている）。Flathub の鍵は手順書と同じ。手順 4 の確認は 2 回で、入ったのは 6 つ。`com.github.tchx84.Flatseal 2.4.1`、`sandbox OK` |
+| 日本語入力 | 2 | 2 | 0 | 0 | 0 | `ibus`・`ibus-anthy`・`default-fonts-cjk-sans` は入っていた。入力ソースは `[('xkb', 'us')]` から `[('xkb', 'us'), ('ibus', 'anthy')]` へ。上部バーに `en` が出た |
+| GNOME の表示と入力 | 13 | 13 | 0 | 0 | 0 | SSH のシェルからの `gsettings set` が、コンソールのセッションにすぐ効いた（ダークモード・ボタン 3 つ・時計の曜日と秒・Ctrl+Alt+T・Dash の 4 つは画面で見た）。手順 10 は `[y/N]` と EPEL の鍵の確認の 2 回で、4 つ入った（うち 2 つは CRB）。手順 3・6〜9・11 は値の読み戻しだけ |
+| 共通の bash 設定 | 4 | 4 | 0 | 0 | 0 | `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）`。`__bash_config_loaded` は `1`。`bash-completion-2.11-16.el10.noarch` は入っていた |
+| Homebrew | 3 | 3 | 0 | 0 | 0 | 依存の 4 つは入っていた。`Press RETURN/ENTER to continue or any other key to abort:` に Enter。`sudo` はパスワードを聞かなかった。`Homebrew 7.0.9` |
+| シェルのツール | 10 | 10 | 0 | 0 | 0 | 手順 1 は `[y/n]` に `y`（Enter 無し）で、6 つと依存 14 個が bottle で入った。手順 2 の後、プロンプトが starship になった。手順 3 の補完は `_python_argcomplete_global` の側。`パッケージ tmux はインストールされていません` |
+| キー操作を試す | 5 | 4 | 1 | 0 | 0 | 手順 1 の 7 つの確かめのうち 2 つ（`printf` と ↑、`globstar`）が、書かれたとおりの表示にならない。機能は効いている。手順 1〜5 は、SSH のシェルとコンソールの Ptyxis の両方で行った |
+| tmux を試す | 3 | 3 | 0 | 0 | 0 | `[work] 0:bash*`、`[detached (from session work)]`、`[exited]`、`no server running on /tmp/tmux-<UID>/default` |
+| Git | 10 | 9 | 0 | 1 | 0 | 手順 7 は条件外（手順 6 で `pull.ff` が空）。`git version 2.52.0`。手順 6 は 14 行が `global`。手順 9 は `Created autostash`・`Applied autostash.`・`Successfully rebased and updated refs/heads/main.` |
+| Firefox | 11 | 8 | 0 | 1 | 2 | 手順 9 は条件外（手順 8 が衝突なし）。手順 7（一部だけ）と手順 11 は未実施（最初の起動の「Firefox へようこそ」の同意を行っていない）。`Mozilla Firefox 157.0.1`、`ffmpeg-libs` など 64 パッケージ |
+| HackGen Console NF | 5 | 4 | 0 | 1 | 0 | 手順 3 は条件外（`/usr/bin/unzip` がある）。`font-hackgen-nerd 2.10.0`、`.ttf` が 4 つ、`fc-list` が 4 行 |
+| WezTerm | 5 | 5 | 0 | 0 | 0 | 手順 1 は `[y/N]`、手順 3 は `[y/N]` と COPR の鍵の確認（fingerprint は手順書と同じ）。`wezterm 20261010_083911_e2a98e1b`、`not found` は 0。手順 5 は wezterm の `docs/install.md` の手順 1・3・4 を SSH のシェルに貼り、8・9 をコンソールで行った |
+| WezTerm と HackGen Console NF をデスクトップで使う | 3 | 3 | 0 | 0 | 0 | 等幅のフォントは `'Red Hat Mono Regular 10'` から `'HackGen Console NF 11'` へ。Ctrl+Alt+T で WezTerm の窓。手順 3 の Dash は、クリックの代わりに Super+3 で開いた |
+| git-delta | 4 | 3 | 1 | 0 | 0 | 手順 4 は、版・パス・ファイル名のヘッダは出たが、`head -20` がハンクの見出しで切れ、背景色の付いた差分の行が出ない。`git-delta 0.20.1` |
+| Neovim | 4 | 4 | 0 | 0 | 0 | 手順 1 は Homebrew の `[y/n]` に `y`。`NVIM v0.12.6`。手順 3 は LazyVimStarter の `docs/setup.md` の手順 3〜6・10・11・13〜18（プラグイン 38 個、`:Mason` は `Installed (11)`）。手順 2 の `nvim --version` が空の `nvim.log` を作り、退避で `~/.local/state/nvim.bak` が残った |
+| lazygit | 4 | 4 | 0 | 0 | 0 | `Warning: lazygit 0.66.0 is already installed and up-to-date.`。手順 2 は lazygit の README の Linux の例（3 行）。手順 4 は SSH のシェルとコンソールの WezTerm の両方で、枠とアイコンが出た |
+| GitHub CLI | 5 | 3 | 0 | 0 | 2 | 手順 3・4 は未実施（実アカウントが要る）。手順 2 は 3 回聞かれ（`[y/N]` と鍵 2 回）、1 つ目の鍵で期限切れの警告が出た。`gh-2.102.0-1.x86_64`。手順 5 は未ログインの側の表示だけ |
+| yazi | 5 | 5 | 0 | 0 | 0 | 手順 2 は 10 分 4 秒（`Would install 7 formulae` と依存、cask 1 つ）。この手順で `python@3.15` と `curl` が Homebrew に入った。手順 3 は yazi の README の Linux のブロック。`yazi 26.9.1`。3 ペインの画面は出た。プレビューは見ていない |
+| Claude Code | 5 | 4 | 0 | 0 | 1 | 手順 5 は未実施（テーマの選択と `Select login method:` まで）。`claude-code 2.1.296-1`、`2.1.296 (Claude Code)` |
+| Codex CLI | 8 | 4 | 0 | 0 | 4 | 手順 5〜8 は未実施（実アカウントが要る。手順 7 は未ログインの `Not logged in` だけ）。`codex-cli 0.162.1` |
+| Grok Build | 7 | 4 | 0 | 0 | 3 | 手順 4・5・7 は未実施（実アカウントが要る）。`grok 1.0.50 (c58f321264ba)`。手順 6 は未ログインの側の表示だけ（`You are not authenticated.`） |
+| Codex・Grok のプラグイン | 2 | 2 | 0 | 0 | 0 | Claude Code にログインしていなくても、marketplace の追加と 2 つのプラグインの導入が通った（一覧に `Status: ✔ enabled`） |
+| 再起動と確認 | 8 | 5 | 2 | 1 | 0 | 手順 4 は条件外（拡大率を変えない）。手順 6（Anthy が変換しない）と手順 8（IME 連携の箇条書き）が通らなかった。手順 3 の `ibus` の行は、コンソールの WezTerm で `anthy - Anthy` |
+| 合計 | 152 | 131 | 4 | 5 | 12 | AS1 は 25・0・1・0、AS2 は 39・1・0・0、AS3 は 40・1・3・2、AS4 は 27・2・1・10 |
+
+- 条件に当たって通した手順: 「OS とファームウェアの更新」の手順 5（ファームウェアを更新した）、「システムの設定」の手順 2（名前を変える）と手順 7（kdump が有効だった）
+- `sudo` がパスワードを聞いたのは、「ログインと sudo」の手順 3 の 1 回（AS1〜AS3 の報告。AS4 の報告は回数を書いておらず、終わりに `sudo -n` が通ることを見ている）
+
+#### VMware の VM で通らなかった手順と未実施の手順
+
+通らなかった手順（4）:
+
+| 項 | 手順 | 何が起きたか | 根拠の場所 |
+|---|---|---|---|
+| キー操作を試す | 1 | `printf` と打って ↑ の 1 回目は `printf '\n\033[7m 確認 \033[0m\n'` で、2 回目で `printf '%s\n' "$MANPAGER"` が出た。`ls /usr/share/doc/bash-completion/**/*.md` は直下の `CONTRIBUTING.md` と `README.md` だけ（bash-completion-2.11-16.el10 の doc にサブディレクトリが無い）。ほかの 5 つは書かれたとおり。SSH のシェルとコンソールの Ptyxis で同じ | AS2 の seq 39〜61・84、`keys-ssh-step1.txt`、`observations-globstar.txt`、PNG `k1a`〜`k1efg` |
+| git-delta | 4 | `delta 0.20.1`・`git-delta 0.20.1`・`/home/linuxbrew/.linuxbrew/bin/delta` と、ファイル名のヘッダ（`Δ AGENTS.md`）は出た。`head -20` が 20 行目のハンクの見出しの枠で切れ、背景色の付いた差分の行が 1 行も出ない。共通の bash 設定の最新コミット `67abb84` はコミットメッセージが長く、背景色（`48;5;22`）の行は 24 行目から（全体は 28 行）。delta は効いている | AS3 の seq 50、ac 0050、`observations-delta-step4.txt` |
+| 再起動と確認 | 6 | Super+Space で上部バーは `en` → `あ` → `en` と切り替わるが、`あ` のときに `nihongo` と打っても `nihongo` のままで、Space は空白になる。`ibus engine` は `xkb:us::eng` のまま、gnome-shell の journal に `_setEngine` の `Gio.IOErrorEnum: タイムアウトしました` | AS4 の seq 78、PNG `r06-01`〜`r06-14`、`observations-anthy.txt` |
+| 再起動と確認 | 8 | LazyVimStarter の `docs/setup.md` の手順 19 のうち、IME 連携の箇条書きが通らない（`o` → `<C-j>` で、下の表示から `A` が消えるだけで `あ` にならない）。`/kensaku`（Enter・Tab）・`:GlfmFormatInstall`・`:w`・ファイルピッカーのアイコン・`:qa!` は通った | AS4 の seq 80、PNG `r08-01`〜`r08-32` |
+
+- 「再起動と確認」の手順 6・8 の原因（AS4 の切り分け。`observations-anthy.txt`）
+  - `/usr/libexec/ibus-engine-anthy` は `exec  python3 /usr/share/ibus-anthy/engine/main.py "$@"`（パス無しの `python3`）
+  - `ibus-daemon` の PATH は `/home/<USER>/.grok/bin:/home/linuxbrew/.linuxbrew/bin:…:/usr/bin:/usr/sbin`（Homebrew が `/usr/bin` より先）
+  - 「yazi」の手順 2 の依存で `python@3.15` が入り、`/home/linuxbrew/.linuxbrew/bin/python3` ができた（リンクの時刻は 18:00）。この `python3`（3.15.0）は `ModuleNotFoundError: No module named 'gi'`。`/usr/bin/python3` は 3.12.15 で `gi` がある
+  - `PATH=/usr/bin:/usr/sbin` でエンジンを手で起動すると、`nihongo` → `にほんご` → 「日本語」になり、Neovim の IME 連携の箇条書きも全部通った（PNG `r06-23`・`r06-25`・`r08-21`〜`r08-29`）
+  - 報告の見立てでは、SSH にもハイパーバイザにも関係しない（エンジンの起動は GNOME のセッションの中で起きる）。ほかのハイパーバイザと比べたものではない
+  - 「yazi」の手順 2 より前に Anthy が変換できていたかは、見ていない
+
+未実施の手順（12）:
+
+| 項 | 手順 | 理由と、どこまで見たか | 根拠の場所 |
+|---|---|---|---|
+| Firefox | 7 | 一部だけ。アクティビティで `firefox` → Enter で、日本語 UI の窓が開いた。最初の起動の「Firefox へようこそ」（続行すると利用規約とプライバシー通知に同意）が前面に出て、Esc では閉じない。同意は行っていないので、`about:support` は開いていない。代わりに SSH で、実行ファイル `/usr/lib/firefox/firefox-bin` と `app.update.channel` の `release` を読んだ | AS3 の seq 20、PNG `f07-01`〜`f07-04`、`observations-firefox-step7.txt` |
+| Firefox | 11 | 同じ理由（`about:support` のコーデックサポート情報と動画の再生は、同意の窓を越えないと見られない）。ライブラリが入ったことは手順 10 で確かめた | AS3 の seq 25 |
+| GitHub CLI | 3 | 実アカウントが要る。`gh auth login` を GitHub.com → HTTPS → `Authenticate Git with your GitHub credentials?` は Yes → 認証の方法の選択まで進め、Ctrl+C で取り消した。ワンタイムコードは出していない | AS4 の seq 6〜14 |
+| GitHub CLI | 4 | 実アカウントが要る（ブラウザでの認証） | — |
+| Claude Code | 5 | 実アカウントが要る。`Welcome to Claude Code v2.1.296` → テーマの選択（Enter）→ `Select login method:` の 3 択まで。選ばずに Ctrl+C 2 回で抜けた。フォルダーの信頼の問いと `/exit` には届いていない | AS4 の seq 34〜41、`tui\claude-05-01-first.txt`・`claude-05-02-login-method.txt` |
+| Codex CLI | 5 | 実アカウントが要る。`codex login` がログインの案内と URL を出して待つ所まで。Ctrl+C で取り消した | AS4 の seq 49〜51 |
+| Codex CLI | 6 | 実アカウントが要る（ブラウザでのログイン） | — |
+| Codex CLI | 7 | ログイン済みの確認はできない。未ログインでは `Not logged in`、終了コード 1 | AS4 の seq 52・53 |
+| Codex CLI | 8 | 実アカウントが要る。`Welcome to Codex, OpenAI's command-line coding agent` とサインインの 3 択まで。Ctrl+C で抜けた。作業場所の確認・応答・`/quit` には届いていない | AS4 の seq 54〜56、`tui\codex-08-01-first.txt` |
+| Grok Build | 4 | 実アカウントが要る。`grok login` が URL と確認用のコードを出し、`Waiting for authorization...` で待つ所まで。Ctrl+C で取り消した | AS4 の seq 60〜62、`tui\grok-04-login.txt` |
+| Grok Build | 5 | 実アカウントが要る（ブラウザでのログイン） | — |
+| Grok Build | 7 | 実アカウントが要る。起動してすぐ `Approve in your browser to finish signing in.` とコード、`Waiting for approval...`。Ctrl+Q で抜けた。フォルダーの信頼・応答・`/quit` には届いていない | AS4 の seq 65〜67、`tui\grok-07-01-first.txt` |
+
+判定は「通した」で、書かれた形を代えて確かめた手順:
+
+- 「ログインと sudo」の手順 2: 「端末」の代わりに `terminal` と打った（キー送信では日本語を打てない）
+- 「OS とファームウェアの更新」の手順 1: 更新が無い枝だけ。手順 3 は更新がある枝だけ
+- 「キー操作を試す」の手順 5: SSH のシェルでは Alt+C を `ESC` → `c` で送った（コンソールの Ptyxis では Alt+C がそのまま届いた）
+- 「WezTerm と HackGen Console NF をデスクトップで使う」の手順 3: Dash のアイコンのクリックの代わりに、Super+3 で窓が開くことを見た
+- 「Neovim」の手順 4・「yazi」の手順 4: WezTerm の新しいタブ（Ctrl+Shift+T）と、開き直した SSH のシェルの両方で確かめた。WezTerm のタブには、`確認` の行は打っていない
+- 「GitHub CLI」の手順 5・「Grok Build」の手順 6: 未ログインの側の出力だけ（`You are not logged into any GitHub hosts.`、`You are not authenticated.`）。ログイン済みの表示は見ていない
+- 「再起動と確認」の手順 3: SSH のシェルでは `ibus list-engine` が `IBus に接続できません。` になった。この行だけ、コンソールの WezTerm で確かめた
+- 「再起動と確認」の手順 5: Caps Lock は層の道具に無く、写しの道具で送った。Alt+Tab は同じ WezTerm のもう 1 つの窓、Super+Tab は Files に切り替わった。Alt+Tab の一覧の絵は見ていない
+- 「再起動と確認」の手順 7: サイドバーに `Documents`・`Music`・`Pictures`・`Videos`・`Downloads` が並ぶことを見た。押してはいない
+
+#### VMware の VM でハイパーバイザに左右された出力
+
+報告が「ハイパーバイザに左右されたと思われる」として挙げた出力を、値のまま並べる。ほかのハイパーバイザと比べたものではない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `vmware` |
+| `hostnamectl` | `Chassis: vm`、`Virtualization: vmware`、`Hardware Vendor: VMware, Inc.`、`Hardware Model: VMware20,1`、`Firmware Version: VMW201.00V.25600138.B64.2607151225`、`Firmware Date: Wed 2026-07-15` |
+| ファームウェアの情報（「OS とファームウェアの更新」の手順 2） | `9 個のデバイスが更新可能です`・`2 個のデバイスが、有効なリモートでサポートされています（更新が公開されています）`。手順書の「仮想マシンでは `更新可能なデバイスはありません`」には当たらない。最初の SSH のログインの案内にも `1 個のデバイスでファームウェアアップグレードが利用可能です。` が出ていた |
+| ファームウェアの更新（同じ項の手順 3） | `UEFI dbx を 20230501 から 20260707 にアップグレードしますか?` → `ファームウェアのインストールが完了しました`。再起動の後の履歴は `アップデートステータス: 成功`、`get-upgrades` は `アップデートはありません`。更新が無い機器は `KEK CA`・`System Firmware`・`UEFI Device Firmware`・`Unknown`・`VMware Secure Boot Signing`・`Virtual NVMe Disk`・`Windows UEFI CA`、最新は `UEFI CA`・`UEFI dbx` |
+| 再起動（同じ項の手順 4・5） | 手順 4 は `再起動な必要ありません。`。ファームウェアを更新したので、手順 5 で再起動した。`Operation inhibited` は出なかった。再起動の後のログインで、GNOME ソフトウェアの通知「ソフトウェアアップデートをインストールしました」が出た |
+| Secure Boot | `SecureBoot disabled`（無効でも、fwupd に dbx・KEK・db が見える） |
+| NIC | `ens160`（ドライバは `vmxnet3`）、`<SERVER_IP>/24` |
+| ディスク | `nvme0n1 64G disk nvme VMware Virtual NVMe Disk`（`nvme0n1p1` 600M `/boot/efi`、`p2` 2G `/boot`、`p3` 61.4G の LVM: root 38.6G・swap 3.9G・home 18.9G。VG の名前は、変える前のホスト名を含んだまま） |
+| VGA | `VMware SVGA II Adapter` |
+| メモリ | `Mem: 3652`・`Swap: 4039`（MB。4096 MB の VM で、kdump の予約がある起動）。kdump を外した後の起動は `3908`（`meta.json` の `memMB`） |
+| kdump | 「システムの設定」の手順 6 は `enabled`・`268435456`・`crashkernel=2G-64G:256M,64G-:512M`（手順 7 に当たった）。次の起動では `/proc/cmdline` に `crashkernel=` が無く、`kexec_crash_size` は `0`、`kdump` は `disabled`・`inactive` |
+| 画面 | 1280×800（`card0-Virtual-1` が `connected`、`Virtual-2`〜`8` は `disconnected`）、60.00 Hz。`scaling-factor` は `uint32 0`、`text-scaling-factor` は `1.0`、`~/.config/monitors.xml` は無い。設定の「スケーリング」の選択肢は 100 %・125 %・133 % |
+| 電池 | `/sys/class/power_supply` は `ACAD` だけ。上部バーに電池の % は出ない |
+| 描画（3D を切った SVGA） | WezTerm の起動で、ユーザーの journal に `libEGL warning: failed to get driver name for fd -1`（10 回）・`libEGL warning: egl: failed to create dri2 screen`（8 回）・`MESA: error: ZINK: failed to choose pdev`（5 回）・`libEGL warning: DRI3 error: Could not get DRI3 device`（1 回）。`gnome-control-center` の起動でも、同じ種類の警告が端末に出た。窓は開き、文字もアイコンも描けた |
+| 失敗しているユニット | `systemctl is-system-running` は `degraded`。`run-vmblock\x2dfuse.mount`（VMware vmblock Fuse Mount）と `mcelog.service`。手順には影響しなかった |
+| ゲストの道具 | `open-vm-tools-13.0.10-1.el10`・`open-vm-tools-desktop-13.0.10-1.el10` |
+| `brew config` | `CPU: dual-core 64-bit zen3`（bottle がそのまま入り、ビルドは無かった） |
+| キー送信 | VNC で `ctrl+alt+t`・`ctrl+r`・`ctrl+t`・`alt+c`・`ctrl+b`・`win`・`win+up` が届いた。Caps Lock は keysym `0xffe5` で届き、`ctrl:nocaps` で Ctrl になった。ゲストの画面がロックされて消えているあいだは、キー送信が 135 秒以上戻らなかった（AS3。SSH からロックを解くと終わった） |
+| 画面の PNG | コンソールに最後のキーを送ってから 5 分ほど後に取った PNG が、1×1 画素（69 バイト）だった（AS1 の `end-console.png`。時刻は GNOME の既定の画面オフの 5 分と合うが、原因は確かめていない）。それまでの 10 枚は 1280×800 |
+| 起動と停止 | 起動から SSH まで 21.1 秒（クローンの最初の起動）・17.5 秒・17.5 秒・21.3 秒。`sudo systemctl reboot` を貼ってから SSH の再接続まで、AS1 は 0.6 秒で切断して 19.2 秒、AS4 は 21.6 秒。VM の停止は 6 秒（AS1）・7 秒（AS4） |
+| 所要時間（単位の全体） | AS1 は約 11 分 30 秒、AS2 は約 29 分、AS3 は約 26 分、AS4 は約 41 分 |
+| 所要時間（長かった手順） | 「yazi」の手順 2 は 591 秒（シェルの表示は `took 10m4s`）、「シェルのツール」の手順 1 は `y` の後 61 秒、「Flatpak と Flathub」の手順 4 は 41.4 秒、「Homebrew」の手順 2 は Enter の後 34 秒、「EPEL と RPM Fusion」の手順 4 と「Firefox」の手順 4 は 23.5 秒、LazyVimStarter の手順 16 は 12.5 秒 |
+
+- 「Homebrew」の手順 2 と「シェルのツール」の手順 1 は、道具が入力待ちに気付かず、上の時間のほかに 240 秒ずつ待った（道具のせいで、ゲストの速さではない）
+- AS2 の途中（17:01:14）から、同じホストで別の VM（`vmv-vw-bench`）が動いていた。AS3 の終わりにも動いていた。所要時間に効いたかは確かめていない
+- 報告の見立てでは、ハイパーバイザのせいで通らなかった手順は無い
+  - AS1: ハイパーバイザのせいとしたのは、ファームウェアの更新がある枝に当たったことだけ（手順は、更新がある枝のとおりに通った）
+  - AS2・AS4: ハイパーバイザのせいで手順が通らなかった所は無い、としている
+  - AS3: VMware に左右されたと挙げたのは、上の表の値（NIC・ディスク・画面・電池・描画の警告・キー送信）で、通らなかった「git-delta」の手順 4 は手順書の側としている
+
+#### VMware の VM で手順書の外で行ったこと
+
+- **貼る先**: 手順書は、GNOME の端末（「WezTerm」の手順 5 の後は WezTerm のタブ）に貼る前提。この通しでは、コンソールで GNOME にログインして端末を開いたうえで、ブロックは SSH の対話シェル（ドライバ）に貼った
+  - コンソールの端末に打ったもの: 「キー操作を試す」の手順 1〜5 と「tmux を試す」の手順 1〜3（Ptyxis。SSH のシェルでも行った）、wezterm の `docs/install.md` の手順 9、「Neovim」の手順 4 の 2 行、「lazygit」の手順 4、「yazi」の手順 4・5、「再起動と確認」の手順 3 の `ibus` の行と手順 8（WezTerm）
+  - 日本語は打てないので、`確認` の `printf` の行は、コンソールの端末には打っていない
+  - コンソールの Ptyxis は、ブロックを貼ったシェルと履歴が別になる。Ctrl+R の前に `fzf --version` を 1 回打って履歴に入れ、tmux の 3 手順は同じコマンドを打ち直した
+- **SSH のシェルに貼ったために違った所**（報告の見立て）
+  - starship のプロンプトと `starship explain` に、ユーザー名とホスト名が出る（コンソールの Ptyxis のプロンプトは `~` と `❯` だけ）
+  - Alt+C は、ドライバでは `ESC` → `c` で送る（手順書の「届かなければ、`ESC` を押してから `c`」のとおり）
+  - 「再起動と確認」の手順 3 の `ibus list-engine` が `IBus に接続できません。` になる（SSH のシェルには `WAYLAND_DISPLAY` が無い。`WAYLAND_DISPLAY=wayland-0` を付けると `anthy - Anthy`）
+  - 「Codex CLI」の手順 5 の `codex login` がブラウザを開こうとして、`[firefox-bin] <defunct>` が 1 つ残った
+- **コンソールのログイン**: 道具（`Login-Console.ps1`）が、GDM のログイン画面にパスワードを打った。6 回（PNG の `login-…` の組の数。AS1 と AS4 が 2 回ずつ、AS2 と AS3 が 1 回ずつ）
+- **キー送信**: 層の `Send-VmvKeys`（VNC）。「ようこそ」の窓は Enter、端末は `terminal` と打って Enter、新しい窓は Ctrl+Alt+T、Firefox と WezTerm はアクティビティで `firefox`・`wezterm` と打って Enter。マウスは使っていない
+- **単位の区切り**: 4 つの単位の間で VM を止め、スナップショットを取って起動し直した。手順書の再起動（2 回）のほかに、3 回起動し直している
+- **変数**: 「システムの設定」の手順 1 の `HOST_NAME` に検証用の値を入れた（同じ項の手順 2 の条件を通すため）。AS2 の始めに、リードの案内どおりに同じ手順 1 を貼り直した（`HOST_NAME` は空）。「Git」の手順 1 の名前とメールアドレスも検証用の値
+- **新しいシェル**: 「シェルのツール」の手順 2 は、コンソールでは Ptyxis を `exit` で閉じて Ctrl+Alt+T で開き直し、ドライバでは SSH のシェルを開き直した。「Neovim」の手順 4 と「yazi」の手順 4 も、SSH のシェルを開き直した（「yazi」は手順 1 を貼り直した）。「Codex・Grok のプラグイン」の前にも 1 度開き直した
+- **ロックの解除**: コンソールにキーを送らないまま 5 分が過ぎると、画面がロックされた（`idle-delay 300`・`lock-enabled true` は変えていない）。3 回とも、SSH から同じユーザーで `loginctl unlock-session <ID>` で解いた。パスワードは打っていない
+  - AS2: 17:01:50（Homebrew の 2 つの手順で合わせて 8 分待つあいだ）
+  - AS3: 17:33（17:28:45 から無操作）
+  - AS4: 18:05（「yazi」の手順 2 の 10 分のあいだ）
+  - AS2 では、眠らせないために `shift` だけを数回送った。AS3 では、ロックされた後の `shift` は戻らなかった
+- **参照先の文書のブロック**
+  - 参照先の文書は、メインのチェックアウトの同じコミットを読むだけで使った（AS3 の報告では、この worktree のサブモジュールの wezterm・LazyVimStarter・lazygit が取り出されていなかった）
+  - wezterm の `docs/install.md` は手順 1・3・4 を貼った（手順 2 は条件外、手順 5〜7 は手順書のとおり飛ばした）
+  - lazygit の README の「導入方法」の Linux の例（`sh` のブロック 3 行）は、手順の番号が無くドライバの `paste` で貼れなかったので、`send` で 1 行ずつ送った
+  - yazi の README の「インストール」の Linux のブロックは、検証用の包み（`wrapped\yazi-readme-wrapped.md`）から 1 文字も変えずに貼った
+- **ログインの取り消し**: `gh auth login`・`claude`・`codex login`・`codex`・`grok login`・`grok` は、ログインの入り口の画面まで進めて取り消した（Ctrl+C。`grok` の画面は Ctrl+Q）。実アカウントでは 1 度もログインしていない
+- **伏せたもの**: `codex login` と `grok login` の URL の `?` より後ろと、確認用のコードを、セッションを閉じた後に記録（`session-002.raw`）の中で同じ長さの `*` に置き換えた（4 か所）
+- **端末の代わりの応答**: `gh auth login` の Confirm のプロンプトが `ESC[6n`（カーソル位置の問い合わせ）の返事を待って止まったので、返事を手で送った（ドライバの端末が答えないため）
+- **Caps Lock**: 層の道具に Caps Lock が無いので、`vnc-keys.mjs` をスクラッチパッドに写し、keysym `0xffe5` を 1 つ足したもので送った。ハーネスのファイルは変えていない
+- **Anthy の切り分け**: `PATH=/usr/bin:/usr/sbin /usr/libexec/ibus-engine-anthy --ibus` を手で 2 回起動し、確かめた後に止めた。設定もパッケージも変えていない
+  - 1 回目は `pkill -f` で止め、自分の観測用の ssh のシェルも止まった（エンジンは止まった。ほかへの影響は無い）。2 回目は PID で止めた
+- **窓の操作**: 見やすくするための最大化（Super+↑）と戻し（Super+↓）、`clear`、字形を見るための `echo`。開いた窓は `exit`・Alt+F4 で閉じた。テキストエディターの「変更を保存しますか?」は「破棄(D)」を選んだ（検証で打った文字だけ）
+- **見ただけのもの**: `gnome-control-center display`（拡大率の選択肢。変えていない）、`claude plugin list`・`claude plugin marketplace list`
+- **読むだけの観測**: ドライバとは別の ssh で、`hostnamectl`・`systemd-detect-virt`・`lsblk`・`ip`・`fwupdmgr get-devices`・`gsettings get`・`loginctl`・`rpm -q`・`brew list --versions`・journal などを読んだ（`observations*.txt`・`guest-facts-*.txt`）。切り分けで、`XDG_STATE_HOME` を一時ディレクトリに向けた `nvim --version` を 1 回流した（一時ディレクトリは消した）
+- **記録の点検**: 記録のディレクトリに、検証用のパスワードと同じ文字列が無いことを数えた（AS1。0）
+- **担当の誤り**
+  - AS3: 版を見ようとしてホストで `vmware.exe -v` を呼び、約 5 分戻らなかった。自分が起動したそのプロセスだけを止めた。版はファイルの版情報から読んだ
+  - AS4: PNG 1 枚を AS3 の記録のディレクトリに書き、すぐに AS4 へ移した
+  - AS1: スクラッチパッドの補助スクリプトが、並行する別の単位に同じ名前で上書きされた（記録には影響していない）
+- **取りやめた 1 回目**: この通しの前に、AS1 を最初で取りやめている（ベースが `multi-user.target` で、`gdm.service` が `inactive (dead)` だった。記録は `AS1-aborted-textconsole`）。進行表（`progress.md`）によると、ベースを `graphical.target` で作り直してからやり直した。この節の数字には入っていない
+
+#### VMware の VM で確かめていないこと
+
+- GNOME の端末（Ptyxis・WezTerm）にブロックを貼る形での通し（手順書の前提。この通しは SSH のシェルに貼った）
+- 実アカウントでのログインと、その後ろ
+  - 「GitHub CLI」の手順 3・4、「Claude Code」の手順 5、「Codex CLI」の手順 5〜8、「Grok Build」の手順 4・5・7
+  - 「GitHub CLI」の手順 5 と「Grok Build」の手順 6 のログイン済みの表示
+  - プラグインが、動いている Claude Code で効くこと
+  - 未ログインで `codex` を起動して抜けた後に残った `codex app-server` の 2 つのプロセスが、ログイン済みでも残るか
+- Firefox の `about:support`（更新チャンネル・実行ファイル・コーデックサポート情報）、`about:preferences` の言語、動画の再生
+- 当たらなかった枝
+  - 「OS とファームウェアの更新」の手順 1 の `[y/N]` と AlmaLinux の鍵の確認（入れた時点で最新だった）、手順 3 の更新が無い枝
+  - 「システムの設定」の手順 4、「Git」の手順 7、「Firefox」の手順 9、「HackGen Console NF」の手順 3、wezterm の `docs/install.md` の手順 2
+  - 「日本語入力」の手順 1 と「共通の bash 設定」の手順 3 の「無ければ入れる」の側（どちらも入っていた）
+  - 「共通の bash 設定」の手順 1 の `fatal: destination path … already exists` の枝、`中断:` の枝、`gpg` が無いとき、`conflicts with libswresample-free` のとき、tmux の BaseOS の版があるとき
+- 画面で見ていないもの
+  - 「端末」と打って探すこと（キー送信では日本語を打てない。アプリの検索の API では 0 件）
+  - マウスの操作（Dash のアイコンのクリック、Files のサイドバーを押すこと）
+  - Alt+Tab の一覧の絵、ホットコーナー、トレイアイコン、電池の %、Flatseal がメニューに載ること
+  - 拡大率を変えること（「再起動と確認」の手順 4 は、選択肢を見ただけ）
+  - yazi のプレビュー（PDF・動画・画像・書庫）、LazyVimStarter の手順 17 の通知（`Downloading tree-sitter-…`。見たときには導入が終わっていた）
+- Anthy
+  - 直した状態での通し（手で起動したエンジンでの確かめだけ）
+  - 「yazi」の手順 2 より前に変換できていたか
+  - `YAZI_EXTRAS` を空にしたときに `python@3.15` が入らないか
+  - `/usr/libexec/ibus-setup-anthy` も PATH の `python3` を使うが、開いては確かめていない
+- CRB が無効なホストで、「GNOME の表示と入力」の手順 10 の依存が解けるか
+- `ANTHROPIC_API_KEY` を設定しているときの問い、`CC_CHANNEL=stable`
+- ほかのハイパーバイザとの比べ（この節は VMware の列だけ）。描画の警告が 3D を切った SVGA のためかどうか、画面の PNG が 1×1 になった原因
+- 画面から入れた環境（日本語配列のキーボード）、実機、Secure Boot が有効な VM、3D を有効にした VM
+- 任意節・更新・ロールバック（この通しでは流していない）
+
+#### VMware の VM で見つけた手順書の指摘（一覧）
+
+場所と 1 行だけを置く。切り分けと直し方の案は、4 つの報告（`result.md`）の「見つけた不具合」にある。行番号は `114c2b2` の `docs/almalinux-setup.md`。
+
+| 場所 | 指摘 | 出どころ |
+|---|---|---|
+| `:51`・`:52`（ログインと sudo の手順 2）、`:1355` | 「端末」と打っても Ptyxis は出ない見込み（表示名は「ターミナル」。検索の API で 0 件。画面では打てていない） | AS1 D1、AS3 F7 |
+| `:51`、`:606`（GNOME の表示と入力の手順 13） | Dash は「左」ではなく、アクティビティの画面の下にある | AS1 D1b、AS2 4 |
+| `:87`（OS とファームウェアの更新の手順 1） | 更新が無いときの文は `行うべきことはありません。`（手順書は `何もしません。`） | AS1 D2 |
+| `:85`〜`:86`、`:260`（EPEL と RPM Fusion の手順 1） | OS の更新が無いと、AlmaLinux の鍵は `dnf install -y epel-release` の中で確認無しに取り込まれる | AS1 D3 |
+| `:97`（関連 `:107`。OS とファームウェアの更新の手順 2） | 「仮想マシンでは `更新可能なデバイスはありません`」は、VMware では当たらない（9 個。UEFI dbx の更新が入る） | AS1 D4 |
+| `:364`（Flatpak と Flathub の手順 4） | `/var/lib/flatpak` は「2.5 GB ほど」ではなく `1.7G` だった | AS1 D5 |
+| `:567`（関連 `:268`。GNOME の表示と入力の手順 10） | 入るのは 1 つではなく 4 つ（`libdbusmenu`・`libdbusmenu-gtk3` は CRB から） | AS2 3 |
+| `:856`（キー操作を試すの手順 1） | `printf` と ↑ の 1 回目は、確認の見出しの `printf` の行になる | AS2 1 |
+| `:858`（同じ手順） | bash-completion の doc にサブディレクトリが無く、直下の 2 つだけが出る | AS2 2 |
+| `:1143`（Firefox の手順 4） | x86_64 のホストでは、`aarch64` の行のほうが「一緒に並ぶ」側になる | AS3 F5 |
+| `:1166`（Firefox の手順 7。関連 `:1208`・`:14`） | 最初の起動の「Firefox へようこそ」（利用規約とプライバシー通知への同意）の記載が無い | AS3 F1 |
+| `:1249`（HackGen Console NF の手順 4 と、ほかの `brew install`） | `Warning: Landlock ABI 10 or later is required …` が 1 行出ることの記載が無い | AS3 F6、AS4 5 |
+| `:1409`・`:1413`（git-delta の手順 4） | `head -20` では、最新コミットのメッセージが長いと背景色の差分の行が出ない | AS3 F2 |
+| `:1430`・`:1436`（Neovim の手順 2） | `nvim --version` が `~/.local/state/nvim/nvim.log` を作り、手順 3 の退避で `.bak` が残る（同じ手順の箇条書きと合わない） | AS3 F3 |
+| `:1435`（同じ手順） | `NVIM v0.12.5` は、今の Homebrew では `NVIM v0.12.6` | AS3 F4 |
+| `:1442` と LazyVimStarter の `docs/setup.md:151` | この流れでは、`brew install` の `[y/n]` は出ない（残りの 3 つに依存が無い） | AS3 F8 |
+| `:1494`（lazygit の手順 4） | 手順 2 の設定（`disableStartupPopups: true`）では、`Thanks for using lazygit...` は出ない | AS3 F9 |
+| `:1512`（GitHub CLI の手順 1） | 日本語のロケールでは `repo の追加: …` と出る（手順書は `Adding repo from: ...`） | AS4 4 |
+| `:1521`〜`:1525`（GitHub CLI の手順 2） | 1 つ目の鍵の取り込みで `警告: Certificate … is expired`（2026-09-05 に期限切れ）が出ることの記載が無い | AS4 2 |
+| `:1521`（関連 `:13`） | 聞かれるのは 3 回（トランザクションの `[y/N]` と鍵 2 回）。最初の `[y/N]` の記載が無い | AS4 3 |
+| `:1560`・`:1573`（yazi の手順 1・2。現れるのは `:1935`・`:1947`） | 既定の `YAZI_EXTRAS` で Homebrew の `python@3.15` が入り、次のログインから Anthy のエンジンが起動しない（報告の重大度は高） | AS4 1 |
+| `:1577`（yazi の手順 2） | fzf にも `already installed` の Warning が出る。cask は `Would install 7 formulae` の一覧に出ない | AS4 5 |
+| `:1680`〜`:1681`（Claude Code の手順 5） | 最初に出るテーマの選択と `Select login method:` の記載が無い | AS4 8 |
+| `:1707`（Codex CLI の手順 2） | `curl` が入っていても `curl-minimal` とは競合せず、`既にインストールされています` で終わる | AS4 6 |
+| `:1762`（Codex CLI の手順 8） | 未ログインで起動して抜けた後、`codex app-server` のプロセスが 2 つ残る（再起動するまで） | AS4 9 |
+| `:1780`（Grok Build の手順 1。関連 `:1704`・`:1712`・`:1788`） | `command -v curl` は Homebrew の curl になる（yazi の手順 2 の依存） | AS4 7 |
+
+### VirtualBox の VM（Codex が実施）
+
+`docs/almalinux-setup.md` の実施手順（27 項・152 手順）を、`clean-install` のリンククローンから AS1〜AS4 の順に判定した。コンソールは `<USER>` で GNOME にログインした状態にし、コードブロックの貼り先は SSH の対話シェルとした。実施は C05〜C09 に分かれ、C07 は番号なしの参照ブロックの貼り方、C08 は Claude の取消方法と認証出力の保存方法について質問して停止し、続きから再開した。GUI の確認順と逐次照合に逸脱があり、デスクトップ端末だけで厳密に順番どおり通した記録とは扱わない。C10 の途中結果は含めない。
+
+#### 環境（VirtualBox）
+
+| 項目 | 値 |
+|---|---|
+| ホスト | Windows 上の VirtualBox。NEM の記録に WinHvPlatform API と Hyper-V が出る。ホスト OS の版・ビルド・実機の構成は C05〜C09 の報告・meta.json に記載なし |
+| VirtualBox | `7.2.20r175154`、NEM / `Snail execution mode`。C05/meta.json に `AMD-V is not available`、`PGM: Enabling NEM mode`、`NEMR3Init: Snail execution mode is active!` |
+| VM の構成 | UEFI、Secure Boot 無効、4 vCPU、4096 MB、64 GiB SATA、VMSVGA、NAT、SSH のホスト側ポート `24202` |
+| ゲスト | AlmaLinux 10.2 (Lavender Lion)、x86_64、`6.12.0-211.64.1.el10_2.x86_64` |
+| ベースと開始状態 | C05 はベースの `clean-install` からリンククローンを新規作成。Kickstart、キー配列 `us`、導入時点でパッケージが最新、1 vCPU で導入して 4 vCPU で実施、という作成条件は今回の依頼で示された前提。C05〜C09 だけでは作成時の証跡まで確認していない。C05 の OS 更新は対象なし、XKB_LAYOUT は `us`、nproc は `4` |
+| 実行ユーザー・ホスト名・IP | `<USER>`、`<OLD_HOSTNAME>` → `<HOSTNAME>`、`<SERVER_IP>` |
+| 画面 | GNOME Wayland、1280×800 |
+| 手順書のコミット | `d69f1130f94d831b60bc9bd38a568d2cfb71659e` |
+| 共通 bash のコミット | `67abb84ed5601b242870841ff1da381388f5427a`（C06 の公開 clone） |
+| 実施日時 | 2026-10-11 UTC。C05: 07:15〜07:23 ごろ、C06: 07:27〜07:42 ごろ、C07: 08:02:07〜08:24:14（報告確認まで）、C08: 08:27:31〜08:44 台、C09: 08:54 前〜09:07:48（画面検証まで）、停止・保存は 09:10 台 |
+| 保存した状態 | `after-AS1` → `after-AS2` → `partial-AS3` → `after-AS3` → `partial-AS4` → `after-AS4`。C06 以降は保存後の既存 VM の続きで、復元し直していない。各 meta.json の `snapshot=clean-install` は補助の既定値 |
+
+#### 項ごとの結果（VirtualBox）
+
+「通した」には、未ログイン状態の確認、最初の画面を起動して取り消すまでの限定確認、実施方法に差異のある手順を含む。実アカウントの認証・AI 応答まで成功したという意味ではない。参照先の個別手順は本体の該当手順に含め、別に加算しない。AS3 は C08、AS4 は C09 の最終判定を使う。
+
+| 項 | 手順の数 | 通した | 通らなかった | 条件に当たらず飛ばした | 未実施 | メモ |
+|---|---:|---:|---:|---:|---:|---|
+| ログインと sudo | 3 | 3 | 0 | 0 | 0 | GNOME ログイン、Ptyxis、NOPASSWD。画面確認の順序逸脱あり |
+| OS とファームウェアの更新 | 5 | 4 | 0 | 1 | 0 | 更新対象なし、再起動不要で手順 5 を飛ばした |
+| システムの設定 | 8 | 7 | 0 | 1 | 0 | SSH 修正不要で手順 4 を飛ばした。journal・kdump・削除を確認 |
+| EPEL と RPM Fusion | 5 | 5 | 0 | 0 | 0 | 有効化・鍵確認。AlmaLinux 鍵は取り込み前の手動照合なし |
+| Flatpak と Flathub | 5 | 5 | 0 | 0 | 0 | Flatseal 2.4.1、GNOME runtime 50、sandbox OK |
+| 日本語入力 | 2 | 2 | 0 | 0 | 0 | パッケージ導入済み、US + Anthy を設定 |
+| GNOME の表示と入力 | 13 | 13 | 0 | 0 | 0 | 設定・読み戻し。手順 2〜9 の逐次照合に逸脱あり |
+| 共通の bash 設定 | 4 | 4 | 0 | 0 | 0 | 公開 clone、install.sh、読み込み、inputrc |
+| Homebrew | 3 | 3 | 0 | 0 | 0 | 7.0.9、導入と PATH 確認 |
+| シェルのツール | 10 | 10 | 0 | 0 | 0 | 6 ツール導入、端末を開き直し、設定・版確認 |
+| キー操作を試す | 5 | 4 | 1 | 0 | 0 | 手順 1 の printf 履歴の期待値不一致。再帰展開は対象なしで未確認 |
+| tmux を試す | 3 | 3 | 0 | 0 | 0 | 作成・デタッチ・再接続・終了 |
+| Git | 10 | 9 | 0 | 1 | 0 | 2.52.0、CRLF・日本語名・rebase/autostash。pull.ff が空で手順 7 を飛ばした |
+| Firefox | 11 | 8 | 0 | 1 | 2 | 157.0.1、FFmpeg 導入。衝突なしで手順 9 を飛ばした。画面手順は起動窓のみ |
+| HackGen Console NF | 5 | 4 | 0 | 1 | 0 | 2.10.0、収録文字・fc-match。unzip 導入済みで手順 3 を飛ばした |
+| WezTerm | 5 | 5 | 0 | 0 | 0 | 20261010_083911_e2a98e1b、設定 9cb9f77。GUI の統合確認はキー送信 |
+| WezTerm と HackGen Console NF をデスクトップで使う | 3 | 3 | 0 | 0 | 0 | フォント・ショートカット・Dash。Ptyxis を英語検索 |
+| git-delta | 4 | 3 | 1 | 0 | 0 | 0.20.1 と設定は確認。head -20 が差分行まで届かない |
+| Neovim | 4 | 4 | 0 | 0 | 0 | 0.12.6（本文は 0.12.5）、Mason Installed 11、health に ERROR/WARNING なし |
+| lazygit | 4 | 4 | 0 | 0 | 0 | 0.66.0、設定 custom 02c6326、TUI・q 終了。C08 で残りを実施 |
+| GitHub CLI | 5 | 3 | 0 | 0 | 2 | 2.102.0。手順 5 は未ログイン確認だけ |
+| yazi | 5 | 5 | 0 | 0 | 0 | yazi/ya 26.9.1、設定 custom 1cfe349。新 SSH で確認、終了待ちの逸脱あり |
+| Claude Code | 5 | 5 | 0 | 0 | 0 | 2.1.296 latest。手順 5 はテーマ画面の起動・pkill による取消まで |
+| Codex CLI | 8 | 6 | 0 | 0 | 2 | 0.162.1。未ログイン確認・認証方法選択画面の起動と Ctrl+C まで |
+| Grok Build | 7 | 5 | 0 | 0 | 2 | 1.0.50。未ログイン確認・通常起動と Ctrl+C まで。選択なしでも認証コードが出た |
+| Codex・Grok のプラグイン | 2 | 2 | 0 | 0 | 0 | 未ログインで導入。Codex 1.0.6、Grok 0.2.1、user/enabled |
+| 再起動と確認 | 8 | 2 | 4 | 1 | 1 | 再起動・画面確認は通過。SSH の IBus、日本語変換、Files、Neovim IME が不通過 |
+| 合計 | 152 | 131 | 6 | 6 | 9 | AS1: 24/0/2/0、AS2: 39/1/0/0、AS3: 40/1/3/2、AS4: 28/4/1/7 |
+
+以下の根拠は `D:/vmverify/codex/units/` の下。`seq` は各単位の `session/steps.jsonl` の連番で、確認出力は `session/after-confirm/` の同じ番号、PNG は `screens/` にある。認証用の URL・コード・鍵・パスワードは転記していない。
+
+#### 通らなかった手順（VirtualBox）
+
+| 項 | 手順 | 何が起きたか | 根拠の場所 |
+|---|---:|---|---|
+| キー操作を試す | 1 | printf + ↑ 1 回は「確認」見出しの printf。2 回目で MANPAGER の行に到達。globstar は直下の .md 2 本のみで再帰対象なし | C06/result.md、seq 40〜54・67、key1-*.png |
+| git-delta | 4 | 版・パス・ヘッダは確認できたが、長いコミット説明で head -20 が差分行まで届かず、行ごとの背景色を確認できない | C07/result.md、seq 50、after-confirm/0050-* |
+| 再起動と確認 | 3 | SSH の ibus list-engine は「IBus に接続できません。」。他の値は一致。GUI 端末の追加確認では anthy が出た | C09/result.md、seq 33〜36、after-confirm/0033-*、gui-readback.png |
+| 再起動と確認 | 6 | Super+Space で en → あになったが、nihongo は英字のまま。Space/Enter でも変換されない | C09/result.md、seq 37、anthy-hiragana.png・anthy-confirm.png |
+| 再起動と確認 | 7 | 英語名・サイドバーは確認。隠しファイルが出ず、並びは未確認。サイドバー押下の代わりに Ctrl+L で Downloads へ移動 | C09/result.md、seq 38、files7-list-ready.png・files7-downloads.png |
+| 再起動と確認 | 8 | 日本語の検索は 1/1、Tab 置換・整形・ピッカーのアイコンは確認。Ctrl+J は入力・検索とも A のまま、ローマ字が変換されず、IME の成功条件に届かない。追加行は保存せず qa! で終了 | C09/result.md、seq 39、nvim-search.png・nvim-tab.png・nvim-save-ready.png・nvim-ime-insert.png・nvim-ime-search.png・nvim-picker-fast.png・nvim-quit.png |
+
+#### 未実施の手順（VirtualBox）
+
+| 項 | 手順 | 未実施の範囲と理由 | 根拠の場所 |
+|---|---|---|---|
+| Firefox | 7 | 日本語の初回起動窓だけ確認。依頼の GUI 範囲は起動窓までで、about:support/preferences のチャンネル・実行ファイル・言語選択は未実施 | C07/result.md、seq 20、firefox-address.png |
+| Firefox | 11 | 閉じて再起動した窓だけ確認。コーデック情報・H264/AAC 対応表示・動画再生は未実施 | C07/result.md、seq 26、firefox-closed.png・firefox-reopening.png・firefox-reopened.png |
+| GitHub CLI | 3・4 | 手順 3 は GitHub.com / Other の最初の選択画面で Ctrl+C による取消まで。実アカウントを使わないため認証完了と手順 4 は未実施 | C08/result.md、seq 12〜14、C09 の最終判定 |
+| Codex CLI | 5・6 | 実アカウント認証が要るため、手順 5 のブロックを貼らず、承認も行っていない | C09/result.md、seq 14 |
+| Grok Build | 4・5 | 実アカウント認証が要るため、手順 4 のブロックを貼らず、承認も行っていない | C09/result.md、seq 22 |
+| 再起動と確認 | 5 | Ctrl+Alt+T と同じ Text Editor の 2 窓の Alt+Tab は確認。Caps Lock は補助のキー表に無く送れず、その部分が未実施 | C09/result.md、seq 36・37、wezterm-ready.png・alt-tab.png・alt-tab-back.png |
+
+#### VirtualBox に左右された出力
+
+ここには VM の出力と実施時の観測を置く。失敗すべての原因を VirtualBox と判定したものではない。
+
+| 対象 | 出力・観測 | 根拠 |
+|---|---|---|
+| ファームウェア・更新 | LVFS 有効化に Y、メタデータ取得成功。「更新可能なデバイスはありません」・`No updatable devices`。OS は「行うべきことはありません。完了しました!」・「再起動な必要ありません。」 | C05/result.md、seq 4〜10 |
+| NIC・ディスク・仮想化 | `enp0s3`、UP、`<SERVER_IP>/24`、`sda 64G sata`、`systemd-detect-virt` は `oracle`、`nproc` は `4` | C05/meta.json、C05 seq 14、C06/meta.json |
+| メモリ・kdump | C05 はメモリ `3633 MB`、kdump `enabled`、予約 `268435456`、`crashkernel=2G-64G:256M,64G-:512M`。削除後は `auto_reset_crashkernel no`、2 本の args に crashkernel なし。C06 起動後はメモリ `3889 MB`。C09 の再起動後の予約は `0` | C05/meta.json・seq 17・18、C06/meta.json、C09 after-confirm/0033-* |
+| 画面 | 1280×800、GNOME Wayland。電池の % は画面に無い。C09 の拡大率変更は希望なしで条件外。時計の曜日・秒、en、dark、Dash、Files の 3 ボタンは確認 | C06/result.md、C09 seq 32〜35、files-window-ready.png |
+| NEM | `Snail execution mode`。C05 は起動停滞・ネットワーク失敗・ドライバ異常終了を観測していない。C06・C07 のログ確認と C08/backend-final.json では `Giving up catch-up attempt` なし。C06〜C09 で 30 分進まない手順は無かった | C05/meta.json・result.md、C06〜C09/result.md、C08/backend-final.json |
+| 待機・警告 | Homebrew の RETURN / y 待ちが timeout として返る場面があり、状態・入力待ちを確認して応答し、導入完了。Landlock は要求 ABI 10 に対し ABI 6 の警告が出たが、対応する制限で導入は続行した | C06〜C08/result.md |
+| 所要時間 | C05 約 7 分、C06 約 15 分、C07 約 22 分（報告確認まで）、C08 約 17 分、C09 約 14 分（画面検証まで）。区切りと含む作業が異なり、性能測定値としては扱わない。SSH 準備は C05 27.4 秒、C06 27.3 秒、C07〜C09 約 28 秒 | 各 result.md・meta.json、C08/as4-start/meta.json |
+| 主な導入の待機 | Flatseal `35.278 秒`、Homebrew `69.147 秒`、シェルの 6 ツール `118.640 秒`、Neovim 導入・確認入力 `70.324 秒`、初回 Neovim/Mason 確認・終了 `45.819 秒`。yazi と extras は durationMs 合計 `484,087 ms`、シェル表示の全体所要時間 `9m44s` | C05 seq 30〜32、C06 seq 24〜25・27・29〜30、C07 seq 51〜52・65〜68、C08 seq 17〜28。durationMs は確認・呼び出し間隔を含まない |
+
+#### 手順書の外で行ったこと（VirtualBox）
+
+- C05 では旧 desktop を削除して clean-install から作り直した。各単位で起動・コンソールログインの補助を使い、コードは SSH の対話シェルへ貼った。停止後に状態を確認し、区切りのスナップショットを保存した
+- C06 では新しいシェルへ「システムの設定」の手順 1 の任意変数ブロックだけを再貼付した。GUI 操作を記録する補助を C06 内に作り、SSH の tmux を撮るため GUI 端末から追加 attach を 2 回行った。再帰対象の .md は読み取り確認だけを行い、試験用ファイルは作らなかった。誤った項名による呼び出しは貼る前に拒否され、正しい項名で実施した
+- C07 では参照文書を保存し、lazygit は upstream 用 main README から custom README を取り直した。WezTerm の統合確認は GUI へのキー送信で追加実行し、Ptyxis のフォントと新タブの EDITOR/VISUAL・alias も追加で読み戻した
+- C08 では参照先を読み取り用 clone し、lazygit の 3 行と yazi の 1 行を変更せず番号付き bash 文書に包み、抽出したブロックの SHA-256 の一致を確認して貼った。ゲストの clone の HEAD とリンク先を追加で読み戻した。画面の LockedHint=yes に対し loginctl unlock-session を行った。Claude の初回テーマで Dark mode を選んだ後、ログイン方法は選ばず、取消できないため session stop で SSH を閉じた
+- C09 では Claude のテーマ画面で Ctrl+C 2 回・Esc が効かず、別 SSH の pkill -x claude で終了し、prompt を確認した。プラグイン出力が重なったため、別 SSH の list コマンドで user/enabled と版を読み戻した
+- C09 の停止では ACPI 電源ボタンで 2 分待っても停止せず、別 SSH の sudo systemctl poweroff も Access denied。未保存の nihongo だけの Text Editor 文書を破棄してから再実行し、off と after-AS4 を保存した。未保存文書の inhibitor は原因の候補で、正確な原因は未特定。強制停止は行っていない
+
+#### 実施の順が手順書と違った所（VirtualBox）
+
+- C05 は Ptyxis の窓を確認する前に sudo の設定を貼り、後から英語の terminal 検索で起動をやり直して窓を確認した（seq 2・7）。bash ブロックの順は変えていない
+- C06 は「GNOME の表示と入力」の手順 2〜9 を個別に順次貼ったが、各 prompt 後に進み、成功条件の照合は 8 手順分の出力が揃った後だった（seq 5〜12・28）。値の一致と逐次照合の逸脱を区別する
+- C07 は Firefox 手順 11 の窓を確認してから HackGen へ進んだが、note は HackGen 手順 1 の後に記録した（seq 25・26）。確認順と記録順が異なる
+- C08 は yazi 手順 4 を WezTerm の新タブの代わりに新しい SSH シェルで確認した。手順 5 の q が waiting のまま、終了したと note に早く記し、Claude 手順 1 を貼った（seq 33〜35）。そのブロックが TUI の操作として食われた可能性があり、副作用は未特定。status で altScreen=false / prompt を確認し、Claude 手順 1 を再貼付して latest を確認した（seq 36）。早い終了注記は seq 47 で訂正したが、逸脱は解消扱いにしない
+- C09 は IBus 切り分け用の Ctrl+Alt+T を拡大率の条件外記録より先に送った。Files の 3 ボタンを起動待ちの PNG で確認済みとした早い注記を seq 34 で訂正し、ready の PNG で確認した。同アプリの Alt+Tab は seq 37 で未確認の注記を訂正した
+
+#### 手順書の指摘の一覧（VirtualBox）
+
+場所は対象コミットの行番号。道具・実行環境の問題は、手順書の誤りと断定しない。
+
+| 場所 | 指摘 |
+|---|---|
+| docs/almalinux-setup.md:85・260 | 更新なしの場合、後の EPEL 導入で AlmaLinux 鍵が -y により初めて自動取り込みされ、取り込み前の手動照合に進まない |
+| docs/almalinux-setup.md:856（キー操作を試す / 手順 1） | 直前の確認見出しの printf が新しい履歴候補となり、↑ 1 回で MANPAGER の行という期待値に合わない |
+| docs/almalinux-setup.md:858（キー操作を試す / 手順 1） | 例の .md は直下にしかなく、サブディレクトリへの globstar の再帰展開を確認できない |
+| docs/almalinux-setup.md:1355（WezTerm と HackGen Console NF をデスクトップで使う / 手順 3） | Ptyxis の表示名は「ターミナル」。「端末」の検索語自体は今回試していない |
+| docs/almalinux-setup.md:1409（git-delta / 手順 4） | 長いコミット説明で head -20 が差分行まで届かず、背景色の成功条件を確認できない |
+| docs/almalinux-setup.md:1435（Neovim / 手順 2） | 本文の固定版 0.12.5 に対し、導入された版は 0.12.6 |
+
+#### 報告と証跡の照合（VirtualBox）
+
+- C07 の lazygit 手順 2〜4 の未実施は、C08 seq 1〜6 の実施で更新した。C08 の Claude 手順 5 の取消失敗は、C09 seq 2〜7 の起動・pkill による取消までの限定通過で更新した。前の失敗の経緯は残し、同じ手順を二重に数えない
+- C09 seq 32 の Files 3 ボタン確認は seq 34・35、seq 36 の同アプリ 2 窓の Alt+Tab 未確認は seq 37 で訂正されている。最終判定は訂正後に合わせた
+- C05 のメモリ 3633 MB と C06 の 3889 MB は、それぞれの meta.json の値と一致し、測った時点が違う。C09 の再起動後の予約 0 も確認したが、この数値差だけで因果関係を断定しない
+- C06 以降の meta.json の clean-install と各報告の開始状態は、補助の既定値と実際の続行状態の違いとして各報告で説明されている。clean-install へ戻した検証とは扱わない
+- 最終判定について、未解決の「報告どうしで食い違う」箇所は見つからなかった。ホストの詳細とベース導入時の条件は、上の環境表に記録の不足を明記した
+
+#### 確かめていないこと（VirtualBox）
+
+- 実際の OS パッケージ・ファームウェアの更新適用と、その更新に伴う再起動。更新対象が無かった
+- Firefox の詳細画面、コーデック対応表示と動画再生。Flatseal の GUI 起動・メニュー表示。yazi の PDF・動画・画像・書庫のプレビューと WezTerm 内での yazi 確認
+- Caps Lock の Ctrl 動作、globstar のサブディレクトリ展開、ホットコーナーのマウス操作、拡大率の変更。電池の % は画面に無い
+- Files の隠しファイル・フォルダー優先の並びとサイドバー押下による移動の成功。テキストエディターの日本語変換、Neovim の IME 切替・変換・一時ポップアップ・カーソル橙・sticky の成功
+- GitHub・Claude・Codex・Grok の実アカウント認証、AI 応答、ログイン後のプラグイン動作。未ログイン確認や起動・取消だけを認証完了とは扱わない
+- Grok の通常起動では何も選ばず認証コードが出た。手順 4 のログイン開始ブロックは貼っていない。値は転記せず、C09/session/session-001.raw の所在だけ司令塔へ報告済み。認証出力が保存されない仕組みの解決は、この検証記録では確認していない
+- 実機、他のハイパーバイザ、任意節、更新節、ロールバック。2026-10-08 の別の付録の成功を今回の範囲へ加算しない。C10 の途中結果と性能測定の結果は対象外
+
+---
+
+## 付録: Hyper-V の VM で、画面オフの任意節を通した記録（2026-10-11）
+
+- **何を**: [手順書](../almalinux-setup.md)の任意節「[画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)」の手順 1〜9（コミット `114c2b2` の本文。この節は、その後の直しでも変わっていない）
+  - ほかの任意節・更新・ロールバックは、このときも流していない
+- **結果**: 9 手順とも通した。通らなかった手順・条件に当たらず飛ばした手順・未実施の手順は無い
+- **どの状態から**: [上の付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)の Hyper-V の列を通し終えた VM（スナップショット `after-AS4` の続き）。値は、どれも既定のままだった（下の表）
+  - `after-AS4` を取った後、この通しの前に、範囲の変更で止めた試行が 1 度ある（09:36〜09:37 UTC。証跡は、追跡していない `.verification/campaign/hv/CL1-stopped-scope-change/`）。同じ VM を起動し、コンソールで GNOME にログインして、この節の手順 1（変数を入れるだけ）を貼った所で止めている。設定を変える手順は貼っていない
+- **誰が・どう通したか**: Claude Code のサブエージェントが、コンソールで GNOME にログインした状態で、手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った
+  - 手順書は「GNOME にログインするユーザー本人の端末で」貼る前提。SSH のシェルに貼ったのは、手順書の前提と違う所
+  - 貼った順は、手順 1〜5 → 手順 6〜9（戻す）→ 手順 1〜5。戻す手順を確かめた後、同じ VM を使う後ろの検証の前提（手順 1〜5 を当てた状態）にするため
+  - 貼ったブロックは、手順書のものと 1 文字も違わない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ。今の手順書のブロックとも、sha256 が同じ）。変数は、手順書の既定のまま
+  - sudo は、パスワードを 1 度も聞かなかった
+- 続けて、同じ VM で [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) と [Podman](../almalinux-setup.md#podman-実施手順) の手順書を通した（[linger の検証記録](linger.md#付録-hyper-v-の-vm-で通した記録2026-10-11)・[Podman の検証記録](podman.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。下の「再起動の後」は、Podman の Quadlet の節の手順 3 の再起動
+- **証跡**: 追跡していない `.verification/campaign/hv/CL1/`（このリポジトリには入っていない）。下のファイルの名前は、そこからの相対パス。`seq` は `session/steps.jsonl` の番号で、`session/after-confirm/` のファイルは、名前の頭の 4 桁が seq
+- 環境は、上の付録の「環境（Hyper-V）」と同じ VM（2 vCPU、4096 MB、AlmaLinux 10.2、kernel `6.12.0-211.64.1.el10_2.x86_64`）。この節にかかわる版は、`gnome-shell-49.4-9.el10_2.alma.1`・`gdm-47.0-24.el10_2`・`gnome-settings-daemon-47.2-10.el10_2.alma.1`・`systemd-257-23.el10_2.2.alma.1`・`dconf-0.40.0-17.el10`
+- 実施は 2026-10-11 10:47〜10:49 UTC（ゲストの時計で 19:47〜19:49 JST）。無操作の時間の読みは、11:01 UTC まで
+- この VM の値は `<USER>` で書いた。パスワードと鍵は載せていない
+
+始めの値（`guest-facts-start.txt`）:
+
+| 項目 | 値 |
+|---|---|
+| `idle-delay`・`lock-enabled`・`idle-dim` | `uint32 300`・`true`・`true` |
+| `sleep-inactive-ac-type`・`sleep-inactive-battery-type`・`power-button-action` | 3 つとも `'suspend'` |
+| 5 つの sleep のターゲット | `static` が 5 つ |
+| `HandleLidSwitch` | `s "suspend"`。`/etc/systemd/logind.conf.d` は無い |
+| `/etc/dconf/db/gdm.d/` | `locks` だけ |
+
+### 手順ごとの結果（画面オフの任意節、Hyper-V）
+
+| 手順 | 判定 | 結果 | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `USER = <USER>`・`IDLE_DELAY = 0`・`LOCK_ENABLED = false`・`POWER_BUTTON = interactive` | seq 1・10 |
+| 2 | 通した | `uint32 0`、`false`、続いて `org.gnome.settings-daemon.plugins.power idle-dim false`・`… power-button-action 'interactive'`・`… sleep-inactive-ac-type 'nothing'`・`… sleep-inactive-battery-type 'nothing'` の 4 行 | seq 2・11、`idle-check.txt`、`screens/idle-over-300s-before-reboot.png`・`screens/idle-over-300s-after-reboot.png` |
+| 3 | 通した | `dconf update` は何も出さず、`org.gnome.settings-daemon.plugins.power power-button-action 'interactive'`・`… sleep-inactive-ac-type 'nothing'`・`… sleep-inactive-battery-type 'nothing'` の 3 行。`/etc/dconf/db/gdm.d/90-power`（147 バイト）ができ、`/etc/dconf/db/gdm` が作り直された | seq 3・12、`facts-after-screen-steps-1-5.txt` |
+| 4 | 通した | `Created symlink '/etc/systemd/system/sleep.target' → '/dev/null'.` の形が 5 行と、`masked` が 5 行。logind の `CanSuspend`・`CanHibernate` は、`s "challenge"` から `s "no"` になった | seq 4・13、`guest-facts-start.txt`・`facts-after-screen-steps-1-5.txt` |
+| 5 | 通した | `s "ignore"`。`/etc/systemd/logind.conf.d/90-lid.conf`（31 バイト）ができた | seq 5・14、`facts-after-screen-steps-1-5.txt` |
+| 6 | 通した | `uint32 300`、`true`、続いて `… idle-dim true`・`… power-button-action 'suspend'`・`… sleep-inactive-ac-type 'suspend'`・`… sleep-inactive-battery-type 'suspend'` の 4 行 | seq 6 |
+| 7 | 通した | 3 行とも `'suspend'` | seq 7 |
+| 8 | 通した | `Removed '/etc/systemd/system/sleep.target'.` の形が 5 行と、`static` が 5 行 | seq 8 |
+| 9 | 通した | `s "suspend"` | seq 9 |
+
+- 確認の出力は、どれも手順書の箇条書きのとおり。手順 2 の「値が変わっていなければ、デスクトップの端末でこの節の手順 1 から貼り直す」には当たらなかった
+- **SSH から貼った値が、ログインし直さずに、コンソールの GNOME のセッションに効いた**（`idle-check.txt` と PNG）
+  - コンソールには、ログインの操作の後、キーを送っていない（担当の報告。Mutter の無操作の時間の読みは、113 秒・244 秒・298 秒・314 秒と途切れずに伸びていて、報告と合う）。無操作 314 秒の時点で、セッションは `IdleHint=no`・`LockedHint=no`、スクリーンセーバーは動いていなかった（`(false,)`）。7 秒後の PNG は、上部バーの時計が撮った時刻（19:52:01）で、画面は消えていない
+  - 既定のままだった実施手順の通しでは、同じ VM のコンソールが、無操作 5 分でロックされていた（上の付録の「手順書の外で行ったこと（Hyper-V）」）。画面が消えているあいだの PNG は、時計が止まったままになる（同じ付録の「ハイパーバイザに左右された出力（Hyper-V）」）
+  - 手順 6〜9 で戻していたのは 17 秒（10:48:41〜10:48:58 UTC）で、無操作が 300 秒に届く前
+  - 再起動してコンソールにログインし直したセッションでも、無操作 342 秒と 421 秒で `IdleHint=no`・`LockedHint=no`・`(false,)`。342 秒の読みの 5 秒後の PNG の時計は、撮った時刻（20:00:21）だった
+- 再起動の後も、手順 2〜5 の読み戻しは同じだった（`uint32 0`・`false`・手順 2 の 4 行・手順 3 の 3 行・`masked` が 5 つ・`s "no"` が 2 つ・`s "ignore"`。`facts-after-reboot.txt`）
+- 終わりの状態は、手順 1〜5 を当てたまま（後ろの検証の前提）
+
+### 通らなかった手順と見立て（画面オフの任意節、Hyper-V）
+
+- 通らなかった手順は無い
+- SSH のシェルに貼ったこと（手順書の前提と違う所）は、結果に響かなかった。`gsettings` の書き込みは、同じユーザーの dconf に入り（`dconf dump` に 6 つの値。`facts-after-screen-steps-1-5.txt`）、コンソールのセッションの動きも変わった
+  - 2026-10-01 の実機（Raspberry Pi 5）の記録でも、SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いている（[統合前の記録](#画面オフロックサスペンド-対象と検証環境)）
+- Hyper-V のせいで変わった確認の出力は無い（担当の報告の見立て。ほかのハイパーバイザと比べてはいない）
+
+### Hyper-V に左右されたと思われる値（画面オフの任意節）
+
+担当の報告が挙げた値を、値のまま並べた。どれも、確認の出力には出ない。
+
+| 項目 | 値 |
+|---|---|
+| サスペンド | 手順の前は、`/sys/power/state` が `freeze mem disk`、`/sys/power/mem_sleep` が `[s2idle]`、logind の `CanSuspend`・`CanHibernate` が `s "challenge"`。OS からは、サスペンドできる PC に見える。手順 4 の後は、どちらも `s "no"` |
+| 蓋 | 無い（`/proc/acpi/button/` が無い）。手順 5 の `HandleLidSwitch` は、蓋が無くても `s "ignore"` に変わる |
+| 電池 | 無い（`upower -e` は `DisplayDevice` だけ）。`sleep-inactive-battery-type` は、書けるが、効く場面が無い |
+| 機械の見え方 | `systemd-detect-virt` は `microsoft`、`hostnamectl` は `Chassis: vm` |
+
+- [GNOME のヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の前提の「サスペンドできる PC では、同じ節の手順 3・4 も」に当たる側の VM。手順を当てないまま 15 分置いたときに、実際に眠るかは、確かめていない（眠ると SSH が切れ、起こす手段を用意していなかった）
+
+### 指摘と状態（画面オフの任意節、Hyper-V）
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 低 | この節の手順 2・3・6 の箇条書き（`114c2b2` の `docs/almalinux-setup.md:2142`・`:2163`・`:2211`） | 箇条書きは `idle-dim false` のように鍵と値だけを書くが、出力の行は `org.gnome.settings-daemon.plugins.power idle-dim false` のように、頭にスキーマの名前が付く | `gsettings list-recursively` の出力の形で、SSH にも Hyper-V にもよらない（統合前の記録の「[完了時点の状態](#画面オフロックサスペンド-完了時点の状態)」の出力も、同じ形）。箇条書きの文字は出力の行に含まれていて、読み違えは起きないとみる（担当の報告も「そのままでもよい」としている。2026-10-08 の VirtualBox の VM の記録は、同じ読み戻しを「手順書のとおり」と書いている） | 未対応（手順書は変えていない） |
+
+- 手順書・[ロールバックと注意点](../extra/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)を直した所は無い
+- 報告と証跡の照合
+  - 9 手順の判定と、確認の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+  - 報告は「既定のままのときは、同じ VM が 5 分で `IdleHint=yes`・`LockedHint=yes` になっていた」と書き、根拠に実施手順の通しの `AS4/unlock-log.txt` を挙げる。このファイルにあるのは、ロックされていた 2 回の時刻と、そのときの `IdleHint=yes`・`LockedHint=yes` だけで、置いた時間は無い。「5 分」は、上の付録の記録のほうにある
+  - 報告だけにあって、証跡のファイルでは確かめられないもの: 手順 6 の後に `dconf dump /org/gnome/settings-daemon/plugins/power/` が空になったこと、手順 7 の後に `/etc/dconf/db/gdm.d/` が `locks` だけに戻ったこと、手順 8 の後に `CanSuspend` が `s "challenge"` に戻ったこと、手順 9 の後に空の `/etc/systemd/logind.conf.d` が残ること（戻していた 17 秒のあいだの読みは、ファイルに残っていない）
+- 道具: 無操作 900 秒を越えるまで待つつもりの読みは、数字の取り出しを誤って、すぐに抜けた（`idle-check.txt` に、誤った `idle_ms=64377941` と、その訂正がある）。待ち直していない
+
+### 確かめていないこと（画面オフの任意節、Hyper-V）
+
+- 無操作 15 分（`sleep-inactive-ac-timeout` の既定の 900 秒）を越える放置。手順を当てた後も、既定のままでも
+- ログイン画面（GDM）を放置したときの動き（手順 3 は、値の読み戻しだけ）
+- 電源ボタンを押したときの動き（`power-button-action`）、蓋と電池のある機械、物理のモニター
+- GNOME の端末（Ptyxis・WezTerm）に貼る形。GNOME にログインしていない状態で、SSH から貼る形
+- 変数を既定から変えた場合（`IDLE_DELAY`・`LOCK_ENABLED`・`POWER_BUTTON`）と、各手順の `中断:` の分岐
+- 実機、aarch64。今回は、VMware と VirtualBox の VM では通していない
 
 ---
 
@@ -7370,3 +8477,102 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 - 片付け: `--trust` が `~/.grok/trusted_folders.toml` に足した試験用フォルダー 1 件と、今回の実行が残した `sandbox-blocked.<PID>` 9 個を消した（先の検証の 1 個は残した）。`config.toml` と `trusted_folders.toml` のハッシュ、版（1.0.50）、ログインの状態は実施前と同じ。
 - 未確認のまま: Landlock が有効なカーネルでの起動、sandbox が起動した状態でのレビュー・プロジェクトへの書き込みの拒否・`workspace` でのコミット、検索の ACL の永続化。Grok の sandbox レビューの失敗は未解消のまま。
+
+
+## 付録: IBus の追加確認ブロックを貼り直した記録（2026-10-11、C20 / FXC）
+
+- **状態**: e5e1afb の「再起動と確認」の手順 3 を、after-FXA の Hyper-V VM で、rb.mjs paste により SSH の対話 bash に原文のまま貼り直した
+  - Login-Console.ps1 で GNOME にログインした後、IBus の PATH が /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin で、追加した --xml の確認が `<name>anthy</name>` を返した
+  - 同じブロックの ibus list-engine は SSH シェルから IBus に接続できず、anthy - Anthy は出なかった。手順全体の成功とは数えず、追加した PATH と XML の確認だけを成功範囲にする
+
+環境は Hyper-V / Generation 2 / 2 vCPU / 4096 MB、AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64。最初の貼り付けでは GNOME にログインしておらず、ibus-daemon が動いていない旨を確認した。指定の Login-Console.ps1 が LoggedIn=true を返してから再実行した。パスワードの内容は表示していない。
+
+根拠は queued-units/C20/FXC-fxa の steps.jsonl の seq 1（ログイン前）・2（ログイン後）と after-confirm/、login/ の VM の画面。ログイン後は、前後 2 回の起動ログ、kdump の 0、Downloads、拡張の ACTIVE、mutter の 2 値も出た。GNOME の端末に直接貼った形、日本語の実入力、Neovim、実機・他列は今回未実施。セッションを閉じて VM を停止した。
+
+## 付録: 実 GNOME 端末で IBus 確認と日本語入力を再確認した記録（2026-10-12、C20-FOLLOWUP）
+
+- **状態**: `9ad1b0a` の「再起動と確認」の手順 3 のブロックは変更せず、全体を実 GNOME 端末で実行した
+  - 搬送 SHA を SSH と GNOME 端末の両方で照合し、ASCII の `source ~/c20-ibus.sh` で原文ファイル全体を実行。GNOME 端末で原文ファイル実行、貼付そのものは未確認
+  - SSH の DBus 環境を整えた実行ではない。本人の seat0 / Wayland / Active=yes / LockedHint=no を確認し、コンソールの端末を開いて、フォーカス・入力・出力を PNG で確認した
+
+| 環境 | 内容 |
+|---|---|
+| VM | 既存 after-FXA の現在状態。Hyper-V / Generation 2 / 構成版 12.0 / 2 vCPU / 4096 MB / 64 GiB、Default Switch の NIC。復元・snapshot 上書きは無し |
+| ゲスト | AlmaLinux 10.2 / x86_64 / 6.12.0-211.64.1.el10_2.x86_64 |
+| 原文 | commit `9ad1b0aec24a4cf0e3da239f7730806886654c46`、almalinux-setup.md の SHA256 `d45d66f865e353dfd03a634fd533fb3d01d1a33cafd9b4f149b62195389c16ba` |
+| 原文ブロック | 抽出・転送 SHA256 `c13c45a012e51bfa294e4c87da71524d5ec6dec08905122c080ba23145d945a8`。ASCII の source 呼出しを TypeScancodes で送り、日本語原文を変形して送っていない |
+
+| 対象 | 判定 | 根拠と確認 |
+|---|---|---|
+| GNOME ログイン（手順書外の補助） | 確認した | 専用 Login-Console.ps1 の GDM 判定後、LoggedIn=true。正しい password の opaque path だけを渡し、内容・hash は読んでいない。login/ と gnome-initial.png |
+| 実施手順 / 再起動と確認 / 3 | 通した（原文ファイル実行） | gnome-source-sha.png・gnome-source-result.png・gnome-pty.txt。前後 2 起動、kdump=0、設定済みホスト名、Downloads、anthy - Anthy、実 ibus-daemon の固定 PATH、XML の anthy、拡張 ACTIVE、mutter の 2 値を確認 |
+| 同じ項 / 6 | 通した | anthy-selected.png の「あ」、nihongo-preedit.png の「にほんご」、nihongo-converted.png の「日本語」、nihongo-committed.png の下線無しの確定文字と文書タイトルを目視確認 |
+
+証跡は `verification-work/queued-units/C20-FOLLOWUP/` の versions.json・blocks.json・source/ibus.sh と fxa/ の PNG・安全な PTY ログ。PTY ログは実 GNOME 端末で script を起動して原文を実行した範囲だけを保存し、終了値 0 と全出力を確認した。環境全体の dump・秘密・元 session/認証ログは読んでいない。原文ブロックの変更、DBus 補助設定、IBus の再起動や起動失敗の回避は不要だった。
+
+最初の Stop-VmvVm は Off になるまで待機が続いた。試験用「日本語」の未保存文書を破棄して閉じ、ゲストの通常の systemctl poweroff で停止し、Off を確認した。待機の原因は確定していない。Hard は使わず after-FXA を保持した。Unicode 原文の直接貼付、SSH の IBus 接続の改善、Neovim、他列・実機、初期設定全体の修正後の通しは今回未実施。
+
+
+## 付録: OFFLINE-FULL既存2VM継続の前提とIBus確認（2026-10-12）
+
+- **状態**: `6a4520d` と開始前の案内2箇所から、専用offline VMの既存状態を継続した。初期設定全体の新規通しではない
+  - [Homebrewの継続記録](homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)と[npmの継続記録](npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)が対象と全前提を示す
+  - 証跡は `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。以下のseqはonline-session/steps.jsonl
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| システムの設定 / 1 | 通した | seq10–11、HOST_NAME空/USER一般ユーザー/XKB_LAYOUT us。改名なし |
+| 日本語入力 / 1・2 | 通した（既存RPM） | seq12–13。3RPM既存、入力ソース前後us/AnthyとSuper+Space |
+| 共通の bash 設定 / 1・2 | 既存cloneの案内を通した | seq15–17。公開commit1b4067cb07709667e92827f5e54f64e3ac4c82a1、install変更なし、loaded/履歴/shopt一致 |
+| Homebrew / 1–3・4 | 1–3は条件スキップ、4を通した | brew既存。seq18で固定IBus Environment、再起動後seq55で実PATH/XMLを別確認 |
+| EPEL と RPM Fusion / 1 | 通した（既存有効） | seq21の版/epel行。RPM Fusionの残りは対象外 |
+| Neovim / 1・2・3 | 既存状態から部分確認 | seq22–40。0.12.6、依存/設定/restore/Installed11/health。既存データ退避と初回cloneは今回再現せず、3全体の新規導入成功にしない |
+| 再起動と確認 / 1 | 通した | seq51のoffline reboot、nested SSHのみ切断しonlineへ復帰。seq52–54で転送なし再ログイン/実offline identity |
+| 同じ項 / 3 | 部分確認 | seq55。実ibus-daemon PATH固定、XML anthy。SSHのibus接続不能、1bootのみ、kdump/日本語Download/拡張/mutterの条件未達を保持 |
+| 同じ項 / 6 | GUI変換を通した | 再起動後PNGでTextEditor編集カーソルと入力ソースを各操作前に確認。Super+Space後あ、nihongo→にほんご→Spaceで日本語→Enter確定/下線なし |
+
+- オフラインでもMason取得前にnpmの経路を設定する案内2箇所を採用。npm1/2はseq24–25、今回の最初のNeovim取得はseq36。同じnested shellで先に設定した
+- 初期設定の残り、GNOME端末へのUnicode原文直接貼付、Neovim内IME、実機/他列は今回未実施。既存2VMの継続結果やGUI変換を、初期設定全体・過去の応答喪失原因へ広げない
+- 公開原文/工具と停止親の開始/終了照合は一致。2VMを通常停止でOff確認後、after-OFFLINE-FULL-continuation-20261012を新規保存。旧baseline/snapshot/過去本文を上書きしていない
+
+## 付録: クリーン起点の初期設定を AS3 まで再試行した記録（2026-10-12）
+
+今回の対象は Hyper-V の新規専用 VM `vmv-hv-cx-asfull-p2`（4 vCPU・4096 MiB）。固定した `clean-install` から同じ VM を順に使い、凍結原文 `ed830a02b4f50d1b6f8ee0a72a90ca990fd56fa6` の先頭 27 項・153 手順のうち、最初の 113 手順を判定した。原文 `docs/almalinux-setup.md` の SHA-256 は `7E34C5EE42A68393F14046F20B6531D6097DB012B1B351BEF90A1748F109EF1C`。旧 partial と既存 VM からのオフライン継続は、今回の集計へ加算しない。
+
+| 単位 | 手順数 | 通した | 条件に当たらず飛ばした | 通らなかった | 未実施 |
+|---|---:|---:|---:|---:|---:|
+| AS1 | 26 | 25 | 1 | 0 | 0 |
+| AS2 | 41 | 40 | 0 | 0 | 1 |
+| AS3 | 46 | 42 | 3 | 1 | 0 |
+| AS3 まで | 113 | 107 | 4 | 1 | 1 |
+
+- AS1 は端末が使える画面を確認してから sudo の手順へ進み、ファームウェア更新後の再起動も行った。旧試行で順を崩した結果を、今回へ読み替えていない
+- AS2 の「キー操作を試す」手順 3 は一覧だけを部分確認。`.bashrc` のプレビュー・読込みは、自動承認レビューが秘密情報の混入を否定できないとして拒否したため未実施。別経路で内容を読んでいない
+- AS3 の Neovim 手順 3 は、参照先「LazyVim の設定を導入する」の手順 5 の説明と実際の表示が違い、通らなかった。Homebrew 7.0.9 で lazygit 0.66.1・ripgrep 15.2.0・fd 10.5.0 の新規導入は成功したが、本文が必ず出ると案内した `[y/n]` の質問が出なかった。後から確認を条件付きに直し、成功とプロンプト復帰を次へ進む条件にした。修正前の判定を成功へ書き換えていない
+- AS3 の参照導線では、LazyVim の依存・38 プラグイン・Mason の Installed 11 と health、WezTerm の設定・シェル統合を確認した。参照・補助操作は 153 手順と別表で判定し、二重に数えない。導入後の再起動と実 GUI 日本語入力は AS4 の判定まで残す
+- 各単位の判定後に通常停止と保存を行い、固定した停止親の SHA の一致を確認。`after-AS3` は `0b114306-1d15-4d13-aacf-27456bbbb3f7`、親の 11:02 UTC の読み取りでも VM は Off。メモリ枠を Windows へ渡し、残る AS4 の 40 手順は再付与後に同じ VM から続ける
+
+根拠は今回専用記録 `verification-work/queued-units/AS-FULL/parallel-20261012/AS1`〜`AS3` の公開判定表・画面・搬送記録と `proposals.md`。旧 raw・認証ログから判定を補わず、113 手順の判定を全 153 手順の完了や、修正後の全条件の成功として扱わない。
+
+## 付録: クリーン起点の初期設定を AS4 まで判定した記録（2026-10-12）
+
+先の AS3 までの付録から、同じ専用 VM `vmv-hv-cx-asfull-p2`（4 vCPU・4096 MiB）を続行した。固定したクリーンインストール起点と凍結原文 `ed830a02b4f50d1b6f8ee0a72a90ca990fd56fa6` を使い、27項・153番号の判定を完了した。旧 partial・3方式の旧試行・既存オフライン継続は今回へ合算しない。全成功を意味しない。
+
+| 単位 | 手順数 | 確認 | 条件に当たらず飛ばした | 成功条件未達 | 未実施 |
+|---|---:|---:|---:|---:|---:|
+| AS1 | 26 | 25 | 1 | 0 | 0 |
+| AS2 | 41 | 40 | 0 | 0 | 1 |
+| AS3 | 46 | 42 | 3 | 1 | 0 |
+| AS4 | 40 | 27 | 1 | 3 | 9 |
+| 合計 | 153 | 134 | 5 | 4 | 10 |
+
+- AS3 の Neovim 手順3は、参照先の無条件 `[y/n]` 案内と実表示の不一致を保持する。確認質問の案内は後から条件付きに直したが、凍結原文の旧失敗を成功へ置換しない
+- AS4 の GitHub CLI 手順5・Codex CLI 手順7・Grok Build 手順6は原文の status を実行し、未ログインを確認した。先行する認証を事前除外したため、原文のログイン済み成功条件に達していない。CLI故障や手順書の欠陥とは判定しない
+- 未実施10件は認証情報の生成・実アカウント・AI応答を伴う9件と、AS2「キー操作を試す」手順3。後者の `.bashrc` プレビュー・読込みは秘密混入を否定できないとの自動承認拒否を保持し、別経路で読んでいない
+- 再起動後、実 GNOME の WezTermへ新しい Anthy確認ブロックを貼り、実IBusプロセスの固定PATHと `anthy` XMLを確認した。TextEditorでは `nihongo` →「にほんご」→「日本語」→ Enter確定を別々の画面で確認した
+- 「再起動と確認」手順7のFiles、手順8のNeovim検索・整形・IME表示・sticky・pickerも実画面で確認した。手順8に必要な参照3手順は別表で判定し、153へ追加加算しない。IME確認で追加した行は保存せず閉じた
+- AS3ではFirefox手順11のGUI確認前にHackGen手順1・2の変数と既存unzip確認を先行した。順序逸脱と途中のGUI焦点誤り・未貼付時点を保持し、厳密な全順序達成や旧時点の成功へ読み替えない
+- オンライン検証であり、初回オフライン取得の成功を代替しない。yaziのPDF・動画・画像・書庫プレビュー、実機・他方式の修正後IME再確認、更新・ロールバックの全分岐は今回の対象外
+- 公開原文132MD・工具・固定停止親の終了照合は一致。自己セッションとlockを終了し、通常停止でOff、`after-AS4`（`ade44e06-9e09-4bbf-b88c-1c2b9edd6671`）を新規保存、4GiBを返却した。親の12:53 UTCの読み取りもOffだった。旧snapshotとexpectedは保持した
+
+根拠は専用 `verification-work/queued-units/AS-FULL/parallel-20261012/` の `all-153-steps.md`、AS4の公開判定表・完成PNG・原文搬送記録・終了照合と `result.md`。完成画像は生成途中の1byte観測と区別した。AS3までの113手順の付録と、過去のPython PATH・日本語入力失敗は当時の履歴として保持する。

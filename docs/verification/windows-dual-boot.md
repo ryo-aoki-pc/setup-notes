@@ -4,6 +4,12 @@
 
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
+## 共同検証の終了時点（2026-10-14 JST）
+
+- **状態: Hyper-V の W0 は部分確認のまま検証中止**。元 Rufus 媒体の署名拒否を保持し、別の BasicData 派生媒体による OS 導入で初回 OOBE のネットワーク画面まで到達した
+  - OOBE 完了・原文のパーティション構成・デュアルブート完成・後続 W1〜W5 は未確認。停止後の媒体子の予定外の変化は原因未確定
+  - 対象版・実施時刻・停止後調査は [Windows の追加記録](windows-setup.md#付録-w0-の-os-導入と検証中止時点の記録2026-10-14-jst)。以下の過去の VirtualBox の成功と Hyper-V の初回失敗を置き換えない
+
 ## 補足
 
 ### 実施手順: 検証状況の記録
@@ -419,3 +425,37 @@ VirtualBox の VM で、このブロックを打った画面（[付録](#付録-
   - [GUI の操作](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefientryview.cpp)と [EFI 変数の書き込み](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefientrystaticlist.cpp)（`Set reboot` と `Save` の違い、書き込みの結果を確認していないこと）
   - [CLI のマニュアル](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/qefibootmgr.8)と [CLI の実装](https://github.com/Inokinoki/QEFIEntryManager/blob/v0.5.0/cli.cpp)、[同梱の qefivar](https://github.com/Inokinoki/qefivar/blob/6e0a29d9267a83cb79c0b4f324e382ba9ffbe1c8/qefi.cpp)（`-v`・`-N`、未設定の `BootNext` を `0000` と表示する不具合）
 - [BCDEdit /enum](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--enum) / [BcdBootMgrElementTypes](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bcd/bcdbootmgrelementtypes)（ファームウェアの一覧、`DisplayOrder` と `BootSequence`）
+
+## 付録: Hyper-V の Rufus 媒体起動の検証（2026-10-12、W0）
+
+- **状態: partial**。実施手順 1・2 の VM 側の構成を確認し、手順 3 を実行したが、Secure Boot の署名検証で起動が止まった。Windows セットアップの最初の画面に到達していない
+- 手順 4〜13、Windows の導入、ゲスト対話補助の配備・権限・clipboard・前面窓の実動作は未実施。以前の VirtualBox の成功範囲を Hyper-V に広げない
+
+| 項目 | 今回の環境・範囲 |
+|---|---|
+| 実施者 | Codex（Claude の上限到達後の司令塔引継ぎ、W0） |
+| 原文 | `e51a565` の `docs/windows-dual-boot.md`、SHA256 `6775133A10013FDDC045EDAC20380804F75D4BE7D4A4FF1A8A57642B85A729A1` |
+| ホスト | Windows 11 Pro、ビルド 26300。vmms.exe 10.0.26100.8875 |
+| VM | 第 2 世代、構成版 12.0、4 vCPU、固定 8192 MB、80 GiB の可変 VHDX、Secure Boot・vTPM・入れ子有効 |
+| NIC | 1 枚。Default Switch から切断して起動 |
+| 媒体 | Rufus 媒体のコピー VHD を読み取り、別の VHDX 写しに変換して SCSI (0,1) に接続。元媒体は操作していない |
+| ゲストの版 | 未確認。Windows のインストーラーに到達していない |
+
+### 実施手順 / 手順 1〜3: 媒体の再読と Secure Boot の失敗
+
+- 開始前に性能測定 run-B の 3 巡と追加 run-C の正常な `end`、QUIESCE の不存在、全検証 VM の停止を確認した。性能測定はやり直していない
+- コピー VHD を独立に 3 回読み、各回の SHA256 `2582BE5CD9F9B7D1BE533A2188C6E9BFF0D828F5888CB703FF2869F42FDAAE20` と 17,025,431,040 バイトが保持された W0 初回観測と一致した
+  - 同一コピーの継続した安定性の確認であり、元媒体との全文 hash 照合・公開 checksum 照合・独立した利用者指定 expected との比較ではない
+  - 過去要約にある「コピー時 3 回一致」と省略 hash の全文原記録は未特定。今回の初回観測・再読とは別の出典として保持した
+- `MicrosoftUEFICertificateAuthority` では UEFI:NTFS v2.70、`Secure Boot status: Enabled`、NTFS ドライバー起動が表示された後、`Launching '\efi\boot\bootx64.efi'...` に続いて `[FAIL] Load failure: [26] Security Violation` となった
+- 停止後に `MicrosoftWindows` へ変更しようとしたが、vTPM 初期化後は Secure Boot テンプレート ID を変更できないと拒否された。未導入の担当 VM の証跡を保存し、その VM だけを削除して同じ構成で作り直した
+- `MicrosoftWindows` では Hyper-V UEFI の Boot Summary が SCSI Disk (0,1) に `The signed image's hash is not allowed (DB)` と表示した。SCSI Disk (0,0) は OS 未導入で、`No operating system was loaded` となった
+- 両テンプレートで導入画面に進めず中断した。Secure Boot を切る、ホストの証明書・設定を変える、別媒体に差し替える操作はしていない。拒否対象の署名・証明書の詳細な原因は未確認
+- この画面の `hash is not allowed` は Secure Boot の許可判定であり、今回計算した媒体・原文・転送物の hash mismatch を意味しない。計算値の不一致は観測せず、全体停止の hash mismatch marker は作成していない
+
+### 証跡と終了状態
+
+- 非公開の単位記録 `queued-units/W0` に `media-read-1.json`〜`media-read-3.json`、`media-provenance.json`、`preflight-retry.json`、`vm-config-readback.json`、`first-vm-attempt.json`、`final-vm-state.json` と画面 `001-boot.png`・`002-microsoftwindows.png` を保存した。PNG は開いて表示を確認した。新規画像はリポジトリに追加していない
+- 起動順の設定時にパスの区切り表記の違いで媒体デバイスを二重指定し、`0x80070490` となった。ディスク一覧を取得し直し、SCSI (0,1)・(0,0) の各デバイスを 1 回ずつ指定して解消した。手順書の不具合とは判定していない
+- 手順 9〜13 の原文を UTF-8/LF に抽出し、抽出器が付けた末尾 LF 1 文字だけを除いた搬送内容を別に保存した。空白・タブは保持。原文・抽出ブロック・搬送形式の SHA256 を分けて記録した。構文確認はホストの PowerShell 5.1 と 7 でエラー 0。ゲストへの貼り付け・実行の成功ではない
+- VM の電源断と停止を実際に確認し、`partial-W0-secureboot` を保存した。OS 未導入で `after-W0` は無く、W1 へ進める状態ではない。実機、手順 4〜13、後ろの任意節、認証、パスワード入力は未実施

@@ -1,6 +1,8 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）の参考資料
 
-[手順書](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+[AlmaLinux 10 の「GNOME のリモートログイン: 実施手順」](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+
+集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
@@ -20,6 +22,10 @@
 
 - `disable` 後は `inactive`、`enable` 後は `active` になる
 - このため、この時点でデーモンが起動し、**後から設定する資格情報は再起動するまで反映されない**（手順 6・7）
+  - 2026-10-11 の Hyper-V の VM では、手順 4 の直後の `sudo grdctl --system status` が `Unit status: active`・`Status: enabled`・`Username: (empty)` で、手順 5 の `sudo systemctl enable --now` は何も出さなかった（`Created symlink` の行が出ず、出力は `firewall-cmd` の `success` の 2 行だけ。手順 5 の後は `enabled`）
+  - ユニットの有効化も `grdctl --system rdp enable` が済ませていた、とみる（手順 4 の直後の `systemctl is-enabled` は読んでいないので、確かめてはいない。[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- `grdctl --system` は、TPM を使えないと、コマンドごとに `Init TPM credentials failed … using GKeyFile as fallback.` を 1 行出して、資格情報を GKeyFile（[注意点](../extra/gnome-remote-desktop.md#注意点)の `credentials.ini`）に置く
+  - vTPM の無い Hyper-V の VM（2026-10-11）では、`because No TPM device found` の形で、手順 4 に 3 行、手順 6・8 に 1 行ずつ出た。デーモンも、起動のたびに同じ行をログに出した
 
 ### 実施手順 / 手順 6: 補足: 資格情報
 
@@ -36,6 +42,9 @@
 [この節の検証記録](../verification/gnome-remote-desktop.md#実施手順--手順-9-補足-鍵と証明書)
 
 - `openssl pkey` には `-modulus` が無い。鍵側は `openssl rsa` を使う
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)を通した PC では、対話のシェルの PATH の先頭が Homebrew なので、パイプの右側の `openssl sha256` と、手順 10 の `python3`・スクリプトの中の `openssl` は、Homebrew のものに解決される
+  - `sudo` を付けた `openssl`（この手順のパイプの左側と、手順 2 の `sudo -u gnome-remote-desktop openssl`）は、sudo の `secure_path` で OS の `/bin/openssl` になる
+  - 2026-10-11 の Hyper-V の VM では、対話のシェルの `openssl` が Homebrew の 4.0.3、`python3` が 3.15.0、`sudo` の `openssl` が OS の 3.5.8 という状態で、手順 2・9・10 が通った（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`/usr/bin/` を付けた形は、流していない
 
 ### 実施手順 / 手順 10: 補足: TLS プローブと、FreeRDP クライアントでの確かめ方
 
@@ -63,6 +72,8 @@ RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に�
 [ERROR][com.freerdp.core.transport] - [transport_accept_nla]: client authentication failure
 [RDP] Network or intentional disconnect, stopping session
 ```
+
+- 2026-10-11 の Hyper-V の VM では、プローブを貼った秒に、この 3 行を含む 9 行が出た。ほかの 6 行は、`[kerberos_AcquireCredentialsHandleA]: krb5_init_context (Included profile directory could not be read …)` が 2 行と、`BIO_read returned a system error 104: Connection reset by peer`・`ERRCONNECT_CONNECT_TRANSPORT_FAILED`・`rdp_server_accept_nego() fail`・`STATE_RUN_FAILED` の行。待ち受けと、その後の接続には響かなかった（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 
 逆に、次が出る場合はプローブの前段で失敗している:
 
@@ -103,6 +114,15 @@ journalctl -u gdm -f
 ```
 
 - 別マシンには手順 1 の変数が無いので、`<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
+- AlmaLinux 10 の `freerdp` パッケージが入れる X11 のクライアントは `xfreerdp`。`xfreerdp3` という名前のコマンドは入らない
+  - 2026-10-11 の Hyper-V の VM のクライアント（`freerdp-3.10.3-12.el10_2.14`）では、`xfreerdp3` は `コマンドが見つかりませんでした` で終わり、`dnf -q provides "*/xfreerdp3"` も一致が無かった（クライアントにあったのは、`/usr/bin/xfreerdp` と `/usr/bin/wlfreerdp`）。手順書は、2026-10-11 まで `xfreerdp3` と書いていた（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_3389.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
+  - `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない。`T` と `N` で答えたときの動きは、確かめていない
+- FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、認証を通った（2026-10-11 の Hyper-V の VM。3 回とも。この行が出る理由は、確かめていない）
+- FreeRDP 3.10.3 のクライアントは、ログインまでに 2 回つなぎ直された（2026-10-11 の Hyper-V の VM。3 回のログインとも。どちらも、クライアントが自動で行う）
+  - RDP の認証を通ると、システムのデーモンが `[RDP] Sending server redirection` を出し、クライアント（ログは `rdp_recv_server_redirection_pdu`）は、GDM のログイン画面のセッションへつなぎ直した
+  - OS のパスワードの後、クライアントのログに `rdp_recv_server_redirection_pdu` がもう 1 度出て、ユーザーのセッションのデスクトップに切り替わった（新しいセッションのときは、そのユーザーの `gnome-remote-desktop-handover.service` が起動した）
+  - RDP の認証から 1 回目のつなぎ直しまで 1〜3 秒（3 回）、OS のパスワードで新しいセッションができてから 2 回目のつなぎ直しまで 6〜7 秒（2 回）だった
 
 ### 接続元を LAN に絞る（任意） / 手順 1: 補足: 先頭の if と引用符
 

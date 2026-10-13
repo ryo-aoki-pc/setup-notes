@@ -4,6 +4,8 @@
 
 実施範囲・成功と失敗は [検証記録](docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。
 
+横断的な結果は、[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)と[3 方式の共同 VM 検証（正式測定の観測値と未完の範囲）](docs/hypervisor-verification.md)を参照する。
+
 ## 手順書とツール
 
 - 基本設定は「実施手順」を順に通す。追加ツール・VPN・VM・リモート操作は任意節から選ぶ

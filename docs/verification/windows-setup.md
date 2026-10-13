@@ -2,6 +2,18 @@
 
 [手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
+## 終了時点の状態（2026-10-14 JST）
+
+- **状態: W0 は部分確認のまま検証中止**。別の BasicData 派生媒体を使い、Windows 11 Pro の初回 OOBE のネットワーク画面まで到達した（[終了時点の付録](#付録-w0-の-os-導入と検証中止時点の記録2026-10-14-jst)）
+  - OOBE 完了・デスクトップログイン・原文 W0 の通し・後続 W1〜W5 は未実施。元 Rufus 媒体の署名拒否と過去の Windows 検証は別の結果として保持する
+  - 停止後に媒体子の予定外の大きさ・SHA の変化を確認して全検証を止めた。原因は未確定。利用者の中止指示後は再開していない
+
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: W0 の BasicData FAT32＋SWM 派生媒体で、言語・キーボード・インストール分岐の画面まで確認した（[追加付録](#付録-w0-の-basicdata-派生媒体とセットアップ画面2026-10-13-utc)）
+  - WinPE の読み取り診断では80 GiBの導入先と16 GiBの媒体を識別した。削除同意は未選択、対象ディスクの GUI 認識・OS 導入は未実施。元 Rufus UEFI:NTFS 媒体の署名拒否を保持し、原文の「Windows と AlmaLinux のデュアルブート: 実施手順」の手順 3 の成功へ代替しない
+  - 以下の Windows 初期設定・過去の媒体検証は、それぞれ当時の版と環境の記録。今回の W0 や後続 W1〜W5 の成功へ加算しない
+
 ## 2026-10-12 JST に追加した Windows Sandbox の任意節
 
 - **状態**: [Windows Sandbox で配布物を試す（任意）](../windows-setup.md#windows-sandbox-で配布物を試す任意)の 8 手順と、extra の[Windows Sandbox を無効にする](../extra/windows-setup.md#windows-sandbox-を無効にする)の 5 手順を追加した
@@ -4680,3 +4692,108 @@ Rufus で作ったインストールメディアからクリーンインスト�
 
 - 13 ケースがすべて成功した。変更の対象は `Containers-DisposableClientVM` だけで、すべての変更呼び出しが `-Online`・`-ErrorAction Stop`・`-NoRestart` を使い、有効化では `-All` も指定することを確認した
 - **確認していないこと**: Windows PowerShell 5.1 の窓への貼り付け、実際の DISM の状態取得・機能変更と再起動、Sandbox の GUI 起動・配布物の試験・終了後の消去・無効化、VM の入れ子の仮想化、VirtualBox との併用。Linux の構文・互換性検査と模擬の成功を、Windows の動作確認として扱わない
+
+## 付録: W0 の BasicData 派生媒体とセットアップ画面（2026-10-13 UTC）
+
+[Windows と AlmaLinux のデュアルブート: 実施手順](../windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)の手順 3 の切り分け。凍結原文 `ed830a0` の W0 に対する公開提案と boot03／UI phase02 の公開 result・completion に基づく追記で、今回の文書編集で VM を再操作していない。
+
+- **対象**: Hyper-V の専用派生 VM、4 vCPU・8192 MiB、Secure Boot 有効／MicrosoftWindows、vTPM、NIC 切断。16 GiB の媒体子を SCSI 0:1、80 GiB の導入先子を SCSI 0:0 に接続
+  - 元 Rufus UEFI:NTFS 媒体の署名拒否と旧 FAT32 試行の言語画面未到達は過去の失敗として保持。BasicData FAT32＋SWM は別の派生コピーで、元媒体・旧 expected・partial を置き換えていない
+  - 実行した helper は Ready03 の helper03。immutable plan の `helper` 欄には旧 helper02 の unused 指示が残る表示不一致があり、helper02 を使ったとは記録しない
+
+### 公開 proof と署名確認の範囲
+
+公開 proof JSON の結果を以下に転記する。今回の編集でディスク内容を再読・再ハッシュしていない。
+
+| 公開 proof | 確認した範囲 |
+|---|---|
+| fixed-byte-proof／derived-vhd-vhdx-comparison | 旧 FAT32 VHD から承認済み49 byte以外と footer が一致。GPT CRC・BasicData・savedState 0 を確認し、fixed VHD と VHDX の16 GiB論理全 byte が一致 |
+| derived-static-check | GPT・FAT32 の backup boot／FAT mirror／LFN・cluster、公開元1070主要ファイルの実 byte、派生1072ファイル、install.wim 抽出物と3 SWMの対応を確認 |
+| construction／proof-resume | 既存 curated 記録の公開媒体3件で whole SHA・File ID・size・mtime が一致。新 VHDX は独立全体読取3回、resume は各媒体を新たに2回全体読取。新 File ID の永続記録は resume が初回 |
+| EFI signature | 公開 bootx64.efi の既往抽出 byte と一致、CMS の暗号検査と Authenticode Valid を確認。PE digest は同一公開 byte に対する既往計算を再利用し、新規計算とは扱わない |
+
+- 不透明ファイルの内容・個別 hash は公開していない。UEFI db／dbx による受入範囲や ISO 全体の配布元認証を証明する結果ではない
+
+### boot03 と後続 UI の到達点
+
+| UTC／試行 | 実観測と判定 |
+|---|---|
+| 02:03:08／boot03 | 通常起動して Running。初回画像は Hyper-V の spinner で、言語画面ではない |
+| 02:04:28／boot03 | 新しい実画像で Windows 11 セットアップの「言語設定を選択」、日本語／日本を確認。言語画面到達は成立 |
+| 02:05:27／boot03 | 通常 Off・割当メモリ0、8192 MiB返却。02:08:05の停止後照合で固定親・旧媒体・導入先子の whole／identity 一致と旧 partial 保持を確認 |
+| 06:02:27／UI phase02 | 同じ派生 VM を通常起動し、言語画面を確認。boot03 の再実行や新しい媒体子・snapshot 作成はない |
+| 06:04:01／UI phase02 | 画面の「次へ」を1回送り、Microsoft IME／PC AT 拡張101/102のキーボード画面を確認 |
+| 06:04:59／UI phase02 | 「次へ」をもう1回送り、Windows 11 のインストール／PCを修復する分岐を確認 |
+| 06:06:03／UI phase02 | 通常 Off・割当メモリ0、8192 MiB返却。06:08:02の照合で固定親・旧媒体・既存2子の whole／identity 一致、自己 holder・旧 partial 保持を確認 |
+
+- **停止境界**: 「ファイル、アプリ、設定など、すべてが削除されることに同意します(A)」は未チェックで、「次へ」は無効。削除同意が今回の許可範囲外のため、他経路へ進まず partial とした
+  - ライセンス同意、ディスク選択 GUI、clean／format／install、アカウント入力は未実施。ホスト側のディスク容量・親鎖照合は、guest の媒体／導入先認識の成功ではない
+  - driver 不足 dialog は観測した言語・キーボード・分岐画面では見えなかっただけで、後続の source／target 認識や driver 解決は未確認。OS 導入成功や原文 Rufus 手順 3 の成功へ代替しない
+  - boot03 helper 前の sandbox 読取拒否と配列 wrapper の失敗も支援履歴として残る。媒体起動失敗・helper 再実行とは混同しない。停止後 whole 一致を実行中 I/O が0だった証明には使わない
+
+公開参照の識別子は `w0-basicdata-boot-v3-03-result.md`／`completion.json` と `w0-basicdata-ui-phase02-result.md`／`completion.json`。画面到達は担当の実画像観察と公開結果由来で、ここで画像を再確認した結果ではない。[横断報告](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)も同じ試行を参照し、成功件数を重複加算しない。
+
+### WinPE の読み取り診断（phase03）
+
+07:07:40 UTCに同じ専用VMを起動し、Shift+F10で開いたWinPEのコマンドプロンプトでdiskpartのlist／select／detailとlist partitionを実行した。各1行の入力と結果を新しい画像で確認した。保存済みのphase03 result・completionに加え、司令塔もlist diskと導入先detailの実画像を確認した。
+
+| WinPEの実表示 | 読み取り確認とホスト側の対応 |
+|---|---|
+| disk 0、80 GB、空き80 GB | SAS bus0／target0／LUN0。ボリューム・パーティション無し。ホストのSCSI0:0、80 GiBの導入先子と一意に対応 |
+| disk 1、16 GB、GPT | SAS bus0／target0／LUN1。C: W0FATSWM、FAT32、Primary15 GB、offset1024 KB。ホストのSCSI0:1、16 GiBの媒体子と一意に対応 |
+
+- 物理ディスクは2台だけ。guestの容量・位置をfreshなホストの接続先・File ID・親鎖に対応させた。guest表示がホストのFile IDや親のSHAを暗号学的に証明したとは扱わない
+- コマンド10行、Enter10回、Shift+F10は1回。削除確認・ライセンス同意・clean／format／install・アカウント入力は0。新媒体・子・snapshotは作成していない
+- 07:15:10.775 UTCに通常Off、割当0、8192 MiB返却。07:18:15の停止後照合で固定親・旧媒体・公開source／tool／proofと子の一致を確認し、自己holderを保持。記録処理のプロパティ設定エラーはVM操作前の支援履歴として残した
+- **成立範囲はWinPE CLIでのディスク識別だけ**。セットアップGUIでの対象選択・導入先への書込み・OS導入は未実施。原文W0や元Rufus手順3の成功へ加算せず、whole一致から実行時I/O0も推測しない
+
+識別子は `w0-winpe-readonly-phase03-result.md`／`completion.json`。実診断後のVM停止は司令塔も07:17:37 UTCに別途確認した。次段階は、この導入先を対象にしたセットアップGUIの確認とWindows導入である。
+
+## 付録: W0 の OS 導入と検証中止時点の記録（2026-10-14 JST）
+
+- **状態: partial のまま終了**。2026-10-13 の retry01 で Windows 11 Pro の導入と初回 OOBE のネットワーク画面到達を確認した
+  - OOBE の完了、アカウント・パスワード入力、デスクトップログイン、after-W0 の保存はしていない。後続 W1〜W5 とデュアルブートの完成は未実施
+  - 元 Rufus UEFI:NTFS 媒体を通した成功ではなく、BasicData FAT32＋SWM 派生コピーの別試行。原文のパーティション構成や手順全体の成功へ読み替えない
+  - 今回は担当が画像で判定した保存済みの completion・OOBE・停止後記録の照合と文書への追記。VM とセットアップを再操作していない
+
+### 対象と実施手順の対応
+
+| 項目 | 今回の対象 |
+|---|---|
+| 凍結原文 | `ed830a02b4f50d1b6f8ee0a72a90ca990fd56fa6` の `docs/windows-setup.md` |
+| 対象箇所 | 「Windows と AlmaLinux のデュアルブート: 実施手順」の W0 切り分け。原文通しとは別の、専用 OS 子への限定導入 |
+| 専用 VM | Hyper-V、第 2 世代・4 vCPU・固定 8192 MiB・Secure Boot 有効／MicrosoftWindows・vTPM、NIC 切断 |
+| 導入先 | SCSI 0:0 の 80 GiB の子。事前の WinPE 診断で全域空き・パーティション無しと確認 |
+| 媒体 | SCSI 0:1 の 16 GiB の BasicData FAT32＋SWM 媒体子。元媒体と固定親を保持 |
+
+### retry01 の到達点と停止（2026-10-13 UTC）
+
+| 時刻 | 保存済みの観測・操作 |
+|---|---|
+| 10:58:28 | 同じ専用 VM を起動。媒体と導入先を分けた限定範囲でセットアップを継続 |
+| 11:15:09 | 80 GiB の導入先を選び、Windows 11 Pro のインストールを開始。後続の進行表示を確認 |
+| 11:33:38 | 初回 OS 起動後の OOBE ネットワーク画面へ到達。Ethernet は未接続、「次へ」は無効。オフラインリンクとドライバーのボタンは操作していない |
+| 11:35:12〜11:35:26 | 監視の `resource floor/growth guard` が通常停止を要求し、Off・割当メモリ 0・8192 MiB 返却を確認 |
+| 11:41:40 | 停止後照合で、媒体子の whole SHA とファイルの大きさが以前の基準と不一致になり、全検証を STOP にした |
+
+- 監視の停止理由は容量・増分をまとめた記録。発火時の個別指標を保存していないため、どの下限・増分が原因だったかは断定しない
+  - 停止後に再起動して OOBE を進めたり、以前の基準を新しい実測値で置き換えたりしていない。旧 `partial-W0-secureboot` を保持した
+  - 原文の ESP・MSR・Windows・回復・AlmaLinux 用空きの構成と、手順全体の達成は未確認。過去の VirtualBox の成功へ加算しない
+
+### 媒体子の不一致と読み取り調査
+
+- 媒体子は、基準の 7,340,032 バイトから 15,728,640 バイトへ 8 MiB 増加し、whole SHA256 も変わった
+  - mtime は 11:35:24.716 UTC で、通常停止要求と Off の間。導入先 OS 子への計画的な書込みと、媒体子の予定外の変化を区別する
+  - 固定した媒体親・OS 親・旧媒体親と旧子の 4 件は照合に成功。子の不一致を親の不一致や Secure Boot の署名拒否と同一視しない
+- Claude が停止状態で 7 ファイルを 2 回読み、各回の SHA・大きさ・mtime・File ID が一致した
+  - 媒体子は STOP 時の実測値で安定しており、以前の基準との不一致は残る。固定 4 件と元 Rufus 媒体は保存済みの値に一致した
+  - マウント・内部構造の解析・親子の論理内容の比較は行っていない。内部比較の実行は自動承認審査が拒否し、回避していない
+  - 何が書かれたか、どの主体が書いたか、論理内容が同じかは未確定。停止後の再読一致だけで、無害なメタデータ変更やホスト故障とは断定しない
+
+### 出典と終了状態
+
+- 非公開の単位記録の識別子は `w0-windows-install-phase04-retry01-completion.json`、同じ試行の `oobe-boundary.json`・`first-write-boundary.json`・`post-off-partial.json`
+  - Claude の `investigation-result.md` と `r1-descriptors-pass0.json`〜`pass2.json` は停止後の読み取り調査。OOBE 到達の再試行ではない
+  - 元の画像・端末ログ・媒体内容・認証入力はリポジトリに追加していない。実画像を再読して付けた新判定ではなく、保存済みの担当判定を掲載した
+- 利用者の中止指示後、担当の実行を終了した。2026-10-13 15:36 UTC の確認でも検証 VM は全て Off
+  - W0 の完成、W1〜W5、媒体子の原因調査を未完のまま保持し、追加検証は行わない。[横断報告の最終状態](../hypervisor-verification.md#付録-検証中止時点の結果2026-10-14-jst)にも同じ試行を記録する

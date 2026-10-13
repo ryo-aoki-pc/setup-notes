@@ -2,6 +2,12 @@
 
 [手順書](../almalinux-setup.md#npm-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/npm-offline.md)
 
+## 最新の追加確認（2026-10-13 UTC）
+
+- **状態**: OFFLINE-FIRSTINSTALL で AppStream の Node.js 22.23.2／npm 10.9.8 を初回導入し、同じオフラインシェルのプロキシ経路と npm PONG を確認した（[追加付録](#付録-ssh-承認後の初回取得と-mason-の部分確認2026-10-13-utc)）
+  - 初回 Mason の実 TUI で Installed 11件、現在の通知、11実コマンド・checkhealth を確認。Installing 中の npm 実コマンドは未観測で、原文の手順 3 は部分確認
+  - 切断後の対照と再起動後の実Anthy変換は未実施。共通台帳61件の42通過・4条件外・3部分確認・1失敗・11未実施を用途別に再加算しない
+
 以下は文書分離前から保存されている記録です。実施日・対象版・実行範囲は各記録に従います。
 
 ## 補足
@@ -368,3 +374,73 @@ npm error   code: 'ECONNREFUSED',
 - LazyVimStarter の手順 18、初期設定の Neovim 手順 4、JSON 編集の LSP 動作、GUI のフォント・IME、実機・aarch64・PyPI・Homebrew の node が先にある環境は今回未実施
 - 更新対象を用意した Node/npm・Mason の更新、ロールバック、設定ファイル競合、キャッシュ無しの取得、長い取得中の意図的切断は未実施
 - 従来の VM の 11 件導入・撤去と、今回の 5→9→11 件および残存ロックの結果は別の履歴
+
+
+## 付録: 既存2VMでオフライン経路を継続した記録（2026-10-12、OFFLINE-FULL）
+
+- **状態**: 旧workerの停止と所有旧ロックの解放後、既存の専用2VMから継続した。新規clean-installからの通し実行ではない
+  - 原文は setup-notes `6a4520d` と開始前からの案内2箇所。main集約後の [AlmaLinux本文](../almalinux-setup.md)を原文ドライバで実行した
+  - 公開本文・工具35件、固定snapshot ID・親鎖・全Hyper-V参照、停止親5ファイルを開始時と終了時に照合。元の安定性baselineと一致し、expectedは変更していない
+  - 過去との歴史的内容一致はこのbaselineだけでは証明しない。旧C14/C15の失敗・未確認範囲、旧workerの記録と前回承認拒否の履歴を保持した
+
+| 環境 | 内容 |
+|---|---|
+| ホスト・VM | Windows 11 Pro / Hyper-V / Generation 2 / 構成版12.0。online 2 vCPU・2048MB、offline 4 vCPU・4096MB、各64GiB、Default SwitchのNIC、Secure Boot disabled |
+| ゲスト | AlmaLinux10.2 / x86_64 / kernel 6.12.0-211.64.1.el10_2.x86_64 |
+| 起点 | onlineの元固定snapshotはafter-AS4、offlineはclean-install。今回はその子の既存状態を続け、復元・再作成していない |
+| 貼付 | onlineの対話bashからofflineの `<USER>` へ入れ子SSH。同じシェルでALL_PROXY/https_proxyを設定。54貼付中、51は原文一致、3は許可されたOFFLINE_HOSTの単一変数置換 |
+| 証跡 | `verification-work/queued-units/OFFLINE-FULL/recovery-after-lock-20261012/`。表のseqはonline-session/steps.jsonl、補助観測はoffline-observe/steps.jsonl。rawは公開・commitしない |
+
+| 現行の項 / 手順 | 判定 | 根拠と確認 |
+|---|---|---|
+| npm のオフライン導入: 実施手順 / 1 | 既存導入を確認 | seq24。AppStream nodejs/nodejs-npmが既存、Nothing to do/完了 |
+| 同じ項 / 2 | 通した | seq25。Node22.23.2/npm10.9.8、/usr/bin、設定null/null、PONG232ms。今回最初のNeovim取得より前に同じshellでhttps_proxy設定 |
+| 同じ項 / 3 | 実TUIの導入完了状態を確認 | seq41–43。原文nvim -R init.lua、:MasonのInstalled11にmarkdownlint/json等、:qaでoffline shell。Installing→Installed遷移と新規取得通知は未捕捉、初回取得の成功にしない |
+| 同じ項 / 4 | 通した | seq44–46の原文閉鎖1/2。続くseq47で1080なし/curl失敗。Homebrew実施5と共用 |
+| 同じ項 / 5 | 通した | seq49。proxy環境出力なし、Mason11コマンド、markdownlint-cli2 v0.23.3、npm ENOTFOUND後に期待どおり失敗 |
+| npm のオフライン導入: 更新 / 1 | 更新対象なしで完了 | seq71。dnf upgradeはNothing to do/完了。新版導入はしていない |
+| 同じ項 / 2 | レジストリ更新を確認、package更新は条件スキップ | seq72–79。:MasonでInstalled11/U案内なし。driver表示が重なったため表示中の公開Noice通知bufferだけを実抽出し、補助offline seq5でSuccessfully updated 1 registry.を確認 |
+| 同じ項 / 3 | 通した | seq80のexitでonline復帰。補助offline seq6で1080/proxyなし、実IPv4直接curl000/終了7、ローカル版と設定git status空を確認 |
+
+- 前提: EPEL1はseq21でenabled。Neovim1/2はseq22–23で既存0.12.6。既存LazyVim設定はf1d5363c624280bf863893324a1b7954f8a884de/custom、公開docs/setup.mdの集約先を確認した
+- 現Alma「LazyVim の設定を導入する」1/2・4–12を継続し、依存12RPMと4Homebrew実行パス、us/Anthy、on_off、lock restore、実Mason Installed11、healthの許容fzf警告だけを確認。3の既存データ退避と初回cloneは再実行せず、初期Neovim3全体の新規導入成功にしない
+- 開始前からの案内2箇所を採用: 初期Neovim3からnpm1/2を先行させ、npm用途節も初回headless起動より先に経路を設定する案内へ揃える。今回seq25→36の順で検証した。過去実行やキャッシュなし初回取得を証明するものではない
+- E1568の端末応答警告と通知の重複は道具/表示上の問題として残す。成功通知は推測せず実公開bufferで確認し、旧privateログやMasonLogを読んでいない
+- 旧C14/C15と旧workerの応答喪失原因は未確定。今回のメモリ/依存順序/GNOME条件から、昔の原因や修正効果を断定しない
+- 全セッションを閉じ担当2VMは通常停止でOff、継続名の新snapshotを保存。更新対象ありのNode/npm/Mason更新、キャッシュなし初回取得、PyPI、JSON編集LSP、Neovim内IME、フォント、ロールバック、実機/aarch64/他列は今回未実施
+
+## 付録: 初回オフライン試行の中断記録（2026-10-12 11:17 UTC）
+
+OFFLINE-FIRSTINSTALL は凍結原文 `27857989d9f0b492b6bd6396fed3a8c2155ea7cf` で、新しい online/offline の 2 VM を専用 D 差分に作成した。固定した停止親 5 件の全体 SHA と親鎖は保持 baseline に一致。offline の実 GUI で「ログインと sudo」手順 1・2 を確認したが、手順 3 の NOPASSWD ALL 永続設定は自動承認審査が拒否し、未送信・設定不変更だった。
+
+対象 61 番号のうち 2 確認・59 未実施。npm のオフライン導入の実施手順 1〜5・更新、初回 LazyVim clone、Mason の新規取得・Installing から Installed への遷移・通知・実コマンドは未実施。GUI 前提の 2 件を npm や LazyVim の導入成功へ数えず、既存 Installed 11・レジストリ更新の継続記録と区別する。
+
+2 VM は通常 Off、自己 lock 解放、6 GiB 返却。通常の sudo 認証で続ける案は準備だけで、認証・取得成功ではない。根拠は今回専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012` の公開判定表・画面、拒否と終了の公開記録。この中断を後日の成功で置き換えず、同じ 2/61 を他の検証記録と重複加算しない。
+
+## 付録: 通常sudo認証で前提を追加確認した記録（2026-10-12 12:27 UTC）
+
+凍結原文 `2785798` で、11:17に停止した同じ専用2VMを続行した。旧GUI2件に、システムの設定1の変数読み戻し・同3のSSH待受とfirewall確認・SOCKSトンネル実施手順1の変数読み戻しを追加した。計61番号は5通過／1条件skip／1未達partial／54未実施（元sudo3を含む）。追加3件はSSH TTY搬送で、GNOME/Ptyxisへの原文貼付成功ではない。
+
+設定3の通常sudo対話認証は、実TTY・前面sudo・echo無効を確認して既存masked helperで通した。元sudo3のNOPASSWD ALL設定は未実施。SOCKS2のSSHパスワード送信は「前面sudo限定の許可がSSH認証を含まない」と自動審査が拒否し、秘密未送信で中断した。
+
+Homebrew・jq・npm・初回LazyVim clone・Mason取得は未開始。npmオフライン実施1〜5・更新、Installing→Installed・通知・実コマンドは未実施で、旧Installed11／レジストリ更新の継続結果へ加算しない。2VMを通常Off、自己lock解放、6GiB返却。旧11:17の付録は当時の記録として保持する。
+
+根拠は専用 `verification-work/queued-units/OFFLINE-FIRSTINSTALL/parallel-20261012/normal-auth-20261012T115622Z/` の公開番号台帳・completion、通常sudoのauth-facts、`nested-ssh-auto-approval-rejection.json`、終了時照合・解放receipt。原文132MD／工具20／停止親5件の全体SHA・親鎖は開始・終了とも保持baselineに一致し、expectedは変更していない。
+
+## 付録: SSH 承認後の初回取得と Mason の部分確認（2026-10-13 UTC）
+
+OFFLINE-FIRSTINSTALL の公開 `ssh-approved-20261013T0325Z` result・completion に基づく追記。凍結原文は `27857989d9f0b492b6bd6396fed3a8c2155ea7cf`。現在の対応先は [npm のオフライン導入: 実施手順](../almalinux-setup.md#npm-のオフライン導入-実施手順)で、以前の既存 Installed 11件や registry 更新とは別の初回取得である。
+
+| 原文の項／手順 | 今回の確認と残件 |
+|---|---|
+| npm のオフライン導入: 実施手順／1・2 | 初回 AppStream Node.js 22.23.2／npm 10.9.8 の取得・導入、npm設定 null／null と PONG を確認。初回 LazyVim 手順10より先に実施 |
+| 同じ項／3（npm3） | 初回 Mason の実 TUI で Installed 11件の実名、現在の UI 通知で LSP 導入開始・成功、11実コマンドを確認。**Installing 中の npm 実コマンドは未観測のため partial** |
+| 同じ項／4・5（npm4・npm5） | 切断後の再ログイン・プロキシなし対照は未実施。初回 PONG を切断後の通信失敗やオフライン実行の成功へ代用しない |
+
+- **Mason と Neovim**: 初期不在を実観測し、LazyVimStarter の初回 clone、38 plugin directory、lock復元後の tracked dirty0、checkhealth の ERRORなしを確認した
+  - WARNING は原文が許容する fzf 未導入だけ。registry更新と package導入は分けて判定した。Installing時の実コマンドは Installed／通知／実行コマンドから遡って補完せず、別の真正な初回機会での観測が残る
+  - 原文 Neovim 手順3（nvim3）も RPM Fusion 前提と後続全条件が揃わず partial。[Neovim の記録](neovim-offline.md#判定表と残件)に条件差・IME未確認を分ける
+- **閉鎖と停止**: 原文 `exit` だけでは forward channel／listener が残った（close1 partial）。自己transportの通常切断では外側driverも切れ、原文のオンラインprompt復帰・切断後対照には数えない
+  - 04:53:29 UTC の監視metadata例外で自己2VMを通常Off。原文132MD・工具20・停止親5件は一致、expected不変更。05:14:21にOff・割当0・自己lock不存在を再確認し、6144 MiB返却
+
+共通台帳は61件中42通過・4条件外・3部分確認・1失敗・11未実施で、旧5通過を含む。[時点別集計と失敗理由](../hypervisor-verification.md#付録-公開結果の追加確認2026-10-13-utc)を参照し、Homebrew／Neovim／本書の同一導入を重複加算しない。旧2/61・5/61、中断・承認拒否、過去の切断後成功はそれぞれ当時の記録として残す。

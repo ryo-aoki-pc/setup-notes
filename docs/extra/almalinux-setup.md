@@ -31,7 +31,7 @@
 
 - **EPEL・RPM Fusion を消しても、そこから入れたパッケージ（btop・distrobox・podman-compose・podman-tui・VirtualBox の `liblzf`・Firefox の FFmpeg など）は残り、更新されなくなる**。要らないものは、先に各手順書のロールバックで消す
 - [表示と入力を戻す](#表示と入力を戻す)と[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順は、「シェルのツール」の手順 2 と同じ、開き直した端末に貼る
-- [端末とエディタを消す](#端末とエディタを消す)から後の項は、WezTerm ではなく、Ptyxis（アクティビティの画面で「端末」）に貼る（WezTerm を消すため）
+- [端末とエディタを消す](#端末とエディタを消す)から後の項は、WezTerm ではなく、Ptyxis（アクティビティの画面で `terminal`）に貼る（WezTerm を消すため）
 
 > [!CAUTION]
 > [Homebrew と bash-completion を消す](#homebrew-と-bash-completion-を消す)の手順 2 は、**Homebrew で入れたものを全部消す**（この文書の yazi・Neovim などと、この文書の外で入れたものも。`~/.local/share/fonts` のフォントは残るので、先に[端末とエディタを消す](#端末とエディタを消す)の手順 10 で消す）。[システムの設定を戻す](#システムの設定を戻す)の手順 3 は、**ディスクに残した journal（前の起動のログ）を消す**。[シェルのツールと bash の設定を戻す](#シェルのツールと-bash-の設定を戻す)の手順 7 の後に閉じたシェルは、**`~/.bash_history` を既定の 1,000 行に切り詰める**（残す履歴は、同じ項の手順 2 で控える）。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 11 は、**`~/.grok`（ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree）を消す**（入れ直すかもしれないなら、行わない）。どれも取り戻せない。Claude Code の設定・履歴（`~/.claude/`・`~/.claude.json`）は、この節では消さない。手で消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える（消す前に中身を確認する）。
@@ -723,24 +723,30 @@
    bash /tmp/uninstall.sh
    ```
 
-   - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y`
+   - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y` と打って Enter
    - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この項の手順 3 で消す
-   - インターネットに出られないホストでは、[ssh-socks-tunnel.md の手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
+   - インターネットに出られないホストでは、[AlmaLinux 10 の「SSH の SOCKS トンネル: 実施手順」の手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
+   - starship を読み込んだ端末では、消した後に `-bash: /home/linuxbrew/.linuxbrew/bin/starship: そのようなファイルやディレクトリはありません` と出ることがある。そのままこの項の手順 3 を貼り、端末を開き直す
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
-1. アンインストーラと、残った `/home/linuxbrew` を消して、端末を開き直す。
+1. アンインストーラ・残った `/home/linuxbrew`・IBus の PATH の設定を消して、端末を開き直す。
 
    ```bash
    {
      rm -f /tmp/uninstall.sh
      sudo rm -rf /home/linuxbrew
+     rm -f ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+     rmdir --ignore-fail-on-non-empty ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d 2>/dev/null
+     systemctl --user daemon-reload
      printf '\n\033[7m 確認 \033[0m\n'
      ls -ld /home/linuxbrew
+     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
    }
    ```
 
    - アンインストーラは、formula が置いた設定のファイル（`etc/` の証明書・openssl・dbus の設定など）を残す。`/home/linuxbrew` ごと消す
-   - 最後に `ls: '/home/linuxbrew' にアクセスできません: そのようなファイルやディレクトリはありません` と出ればよい
+   - 「Homebrew」の手順 4 で置いた、IBus の PATH の設定も消す
+   - `ls: '/home/linuxbrew' にアクセスできません: そのようなファイルやディレクトリはありません` と、`Environment=` だけの行が出ればよい
    - 共通設定は Homebrew が無ければ何もしない。`~/.bashrc` の編集は不要
 
 1. 「共通の bash 設定」の手順 3 で bash-completion を入れたホストだけ、RPM を消す。
@@ -969,6 +975,7 @@
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](../verification/almalinux-setup.md#統合前の記録-homebrewもとは-homebrewmd)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu-実施手順) で実際に問題になる）
+  - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 4 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
   - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す

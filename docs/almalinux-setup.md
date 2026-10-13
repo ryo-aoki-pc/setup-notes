@@ -10,6 +10,8 @@
 > - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - [WezTerm](#wezterm)を起動し直した後は、そのタブに貼る
+> - **GNOME で日本語入力を使う PC は、[Homebrew](#homebrew)の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
+> - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
 
 - 必要な項を上から順に通す。省略する場合は[省略できない初期設定](reference/almalinux-setup.md#省略できない初期設定)を先に確認する
 - 対話・GUI・再起動は各手順の案内に従い、プロンプトに戻ってから次へ進む
@@ -31,8 +33,8 @@
 
 1. 端末を開く。
 
-   - Super キー（Windows キー）でアクティビティの画面を開き、「端末」と打って Enter。左の Dash の端末のアイコンでもよい
-   - 端末のアプリは Ptyxis（「端末」）。この項の手順 3 から、この端末に貼る
+   - Super キー（Windows キー）でアクティビティの画面を開き、`terminal` と打って Enter（「ターミナル」が出る）。アクティビティの画面の下の Dash の、ターミナルのアイコンでもよい
+   - 端末のアプリは Ptyxis（画面の表示は「ターミナル」）。この項の手順 3 から、この端末に貼る
 
 1. sudo をパスワード無しで使えるようにする（パスワードを 1 回聞かれる）。
 
@@ -66,8 +68,9 @@
 
    - 更新するものの一覧（トランザクション表）の後に `これでよろしいですか? [y/N]:` と聞かれる。`y`
    - インストールの後の最初の更新では、続けて AlmaLinux の署名鍵の取り込みを聞かれる（`GPG 鍵 0xC2A1E572 をインポート中:`）
-     - `Userid : "AlmaLinux OS 10 <packager@almalinux.org>"` と fingerprint `EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` なら `y`、違えば `N` で中断する
-   - `何もしません。` と出たら、更新は無い
+     - `Userid : "AlmaLinux OS 10 <packager@almalinux.org>"` と `Fingerprint: EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` を確かめてから `y`（[AlmaLinux の Security のページ](https://almalinux.org/security/)の値と同じ）。違っていれば `N` で中断する
+   - `行うべきことはありません。` と出たら、更新は無い（`[y/N]` も、署名鍵の確認も出ない）
+     - このときは、AlmaLinux の署名鍵は、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で取り込まれる
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
 1. ファームウェアの情報（LVFS のメタデータ）を取り直す。
@@ -77,7 +80,7 @@
    ```
 
    - 初めてのときは `現在リモートが有効になっていないため、メタデータが利用できません。` に続けて `このリモートを有効にしますか? [Y|n]:` と聞かれる。`Y`
-   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（仮想マシンでは `更新可能なデバイスはありません`）
+   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（VirtualBox の VM では `更新可能なデバイスはありません`。Hyper-V と VMware の VM では `N 個のデバイスが更新可能です` と出て、この項の手順 3 で `UEFI dbx` の更新を聞かれることがある）
    - `デーモンへの接続に失敗しました: … タイムアウトしました` と出たら、少し待ってから貼り直す
    - **次の手順は、問いに答えてプロンプトに戻ってから貼る**（続けて貼ると、答えとして食われる）
 
@@ -249,8 +252,10 @@
 
    - `epel-release` の版と、`epel` の行が出れば有効になっている
    - 最後に出る「CRB を有効にすることを推奨」は、気にしなくてよい
-   - EPEL のパッケージを初めて入れるときに鍵の確認が出る。この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 10
-     - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
+   - [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1 で更新が無かったときは、ここで AlmaLinux の署名鍵が、確認を求めずに取り込まれる（「確認」の見出しより前の dnf の出力に、`GPG 鍵 0xC2A1E572 をインポート中:` と出る）
+     - その出力の `Fingerprint:` が `EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` であることを確かめる。違っていれば、ここで中断する（鍵は取り込まれた後なので、次の手順へ進まない）
+   - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 10）に、dnf が 1 回だけ確認を求める
+     - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y`。違っていれば `N` で中断する
 
 1. RPM Fusion（free）の署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
 
@@ -344,7 +349,7 @@
    - **確認を 2 回聞かれる**。どちらも `y` で進める
      - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
      - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
-   - Flatseal が不要なら、この項の手順 4・5 は飛ばしてよい。初回は runtime を含め約 2.5 GB 要る
+   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 1.7 GB ほどになる（runtime が GNOME 50 のとき）。要らなければ、この手順とこの項の手順 5 は飛ばしてよい
    - **次の手順は、2 回の確認に答え、完了してから貼る**（続けて貼ると答えとして食われる）
 
 1. 確認用のアプリが入り、サンドボックスが起動できるか確かめる。
@@ -546,8 +551,8 @@
    ```
 
    - `これでよろしいですか? [y/N]:` に `y`
-   - EPEL の鍵の確認が出たら、fingerprint が[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 の値なら `y`、違えば `N` で中断する
-   - 入るのは `gnome-shell-extension-appindicator`
+   - EPEL からパッケージを入れるのが初めてなら、続けて EPEL の鍵の取り込みを聞かれる。fingerprint が[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 の値なら `y`、違っていれば `N`
+   - 入るのは `gnome-shell-extension-appindicator` と、依存の 3 つ（`libappindicator-gtk3`・`libdbusmenu`・`libdbusmenu-gtk3`）
    - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
 
 1. 入れた拡張を有効にする（効くのは再起動の後）。
@@ -586,7 +591,7 @@
 
    - 一覧に `'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/'` と、`binding '<Control><Alt>t'`・`command 'ptyxis --new-window'`・`name '端末'` が出ればよい
 
-1. Dash のお気に入り（左の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
+1. Dash のお気に入り（アクティビティの画面の下の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
 
    ```bash
    if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 「システムの設定」の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
@@ -674,7 +679,7 @@
    sudo dnf install -y procps-ng curl file git
    ```
 
-   - Workstation では、どれも入っている（`すでにインストールされています` と出る）
+   - Workstation では、どれも入っている（`は既にインストールされています。` と出る）
 
 1. Homebrew の公式のインストーラを実行する。
 
@@ -699,6 +704,22 @@
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
    - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
+1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
+
+   ```bash
+   {
+     mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
+     printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+     systemctl --user daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
+   }
+   ```
+
+   - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
+   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
+   - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
+
 ### シェルのツール
 
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
@@ -708,6 +729,7 @@
    ```
 
    - 入れるものの一覧の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y`（Enter は要らない）
+   - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
    - 要らないツールは、名前を外してから貼る
    - **次の手順は、`y` と答えて、プロンプトに戻ってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
@@ -836,10 +858,10 @@
    - `systemctl star` と打って Tab: `systemctl start ` になる（bash-completion）
    - `ls /usr/s` → Tab: 色付きの `sbin/ share/ src/` が 1 回で出る
    - `cd /usr/SH` と打って Tab: `cd /usr/share/` になる（`completion-ignore-case`）
-   - `printf` → ↑: [シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"` が出て、カーソルが `printf` の後ろに残る。Ctrl+C で捨てる
-   - `/usr/share` → Enter: `cd -- /usr/share` で移る。`cd /usr/shaer` → Enter: `/usr/share` に直って移る。`cd` で戻る
-   - `ls /usr/share/doc/bash-completion/**/*.md` → Enter: サブディレクトリの `.md` も出る
-   - `eza --gi` → Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` が出て、`eza --git` まで入る
+   - `printf` と打って ↑: `printf` で始まる履歴の行が、新しい順に出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。1 回目は「確認」の見出しの `printf '\n\033[7m 確認 \033[0m\n'`、もう 1 回 ↑ で[シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"`。Ctrl+C で捨てる
+   - `/usr/share` と打って Enter: `cd -- /usr/share` と出て移る（`autocd`）。`cd /usr/shaer` と打って Enter: `/usr/share` と出て移る（`cdspell`）。`cd` で戻る
+   - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: `CONTRIBUTING.md` と `README.md` が出る（`globstar`。効いていないと、`そのようなファイルやディレクトリはありません` になる）
+   - `eza --gi` と打って Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` の一覧が出て、`eza --git` まで入る（Homebrew のコマンドの補完）
 
 1. Ctrl+R を押し、履歴から[シェルのツール](#シェルのツール)の手順 5 の `fzf --version` を選んで実行する。
 
@@ -1123,7 +1145,7 @@
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
-   - `x86_64` の行も一緒に並ぶ
+   - `aarch64` と `x86_64` の両方の行が並ぶ
 
 1. Firefox を入れる。
 
@@ -1131,7 +1153,7 @@
    sudo dnf install "${FF_PKG:?「Firefox」の手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
    ```
 
-   - AppStream の Firefox（ESR）が導入済みなら、`Upgrading: firefox` は正常
+   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る。参考資料を参照）
    - この文書を Firefox で見ているときは、入れ替わった後に Firefox を開き直す（この項の手順 7 で、新しい版で起動する）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -1148,6 +1170,7 @@
 
 1. デスクトップのセッションで Firefox を起動し、`about:support` で公式のビルドかを確かめる。
 
+   - 最初の起動では、窓いっぱいに「Firefox へようこそ」が出る（続行すると、Firefox の利用規約とプライバシー通知に同意したことになる、と書かれている）。「続行」を押すまで、`about:support` は開けない
    - 次のように出ればよい（日本語 UI の表記）
      - 「更新チャンネル」が `release`
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
@@ -1334,7 +1357,7 @@
 1. Ctrl+Alt+T と Dash から WezTerm が開き、等幅のフォントが変わったことを確かめる。
 
    - Ctrl+Alt+T と、Dash の WezTerm のアイコンで、WezTerm の窓が開く
-   - Ptyxis（アクティビティの画面で「端末」）の文字が HackGen Console NF になっている
+   - Ptyxis（アクティビティの画面で `terminal`）の文字が HackGen Console NF になっている
 
 ### git-delta
 
@@ -1388,12 +1411,13 @@
    delta --version
    brew list --versions git-delta
    command -v delta
-   git -C ~/.config/bash show | delta --paging=never | head -20
+   git -C ~/.config/bash show --format= | delta --paging=never | head -20
    ```
 
    - 版は `delta 0.19.2` / `git-delta 0.19.2` のように出る
    - ファイル名のヘッダと、行ごとに背景色の付いた差分が出る
-   - `git diff` は端末へ直接出すときだけ delta を使う。`git diff | head` では素の差分になる
+   - 差分の行が出ないときは、`git -C ~/.config/bash log -1 --oneline` で最後のコミットを確かめる。差分を持たないコミット（マージコミットなど）なら、この差分表示の確認は飛ばす（その場合の出力は VM では確かめていない）
+   - **`git diff` を単体で打ったときは、端末に直接出る場合だけ delta を通る**。`git diff | head` のようにパイプに繋ぐと git はページャを呼ばないので、素の差分が出る
 
 ### Neovim
 
@@ -1414,11 +1438,13 @@
    command -v nvim
    ```
 
-   - `NVIM v0.12.5` と `LuaJIT 2.1...` が出れば入っている
+   - `NVIM v0.12.…` と `LuaJIT 2.1...` が出れば入っている
    - ここでは `nvim` を起動しない（この項の手順 3 の退避より前に起動すると、`~/.local/state/nvim` などができて、それも退避される）
+     - この手順の `nvim --version` だけでも、空の `~/.local/state/nvim/nvim.log` ができる。この項の手順 3 で、`~/.local/state/nvim.bak` に退避される
 
-1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
+1. オフラインでは npm の経路を先に設定し、[自分用の設定](https://github.com/ryo-aoki-pc/LazyVimStarter)を入れる。
 
+   - オフラインのホストでは、先に [npm のオフライン導入: 実施手順](#npm-のオフライン導入-実施手順)の手順 1・2 を同じトンネルのシェルで通す。参照先の「LazyVim の設定を導入する」の手順 10 の初回起動より前に行う
    - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の全項を、この項で指定した端末で通す
    - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 5 で lazygit・ripgrep・fd を入れる
    - 参照先の手順 7〜9 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
@@ -1472,7 +1498,7 @@
    (cd ~/.config/bash && lazygit)
    ```
 
-   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
+   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる（この項の手順 2 の設定を入れていれば、出ない）。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
    - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
    - `q` で終了する
    - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazygit への操作として食われる）
@@ -1490,7 +1516,7 @@
    }
    ```
 
-   - `Adding repo from: ...` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
+   - `repo の追加: https://cli.github.com/packages/rpm/gh-cli.repo` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
    - `gpgcheck=1` になっていることを確認する
 
 1. gh をインストールする。
@@ -1499,11 +1525,13 @@
    sudo dnf install gh
    ```
 
-   - 初回は署名鍵の取り込みを **2 回**聞かれる
-   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える
-     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
+   - 入るパッケージの一覧の後に `これでよろしいですか? [y/N]` と聞かれる。`y`
+   - 初回は、続けて署名鍵の取り込みを **2 回**聞かれる
+   - fingerprint が次の 2 つであることを目で確かめてから `y` と答える（この順に出る）
      - `2C61 0620 1985 B60E 6C7A C873 23F3 D4EA 7571 6059`
+     - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
    - どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する
+   - 1 つ目の鍵を取り込むと、`警告: Certificate 23F3D4EA75716059:` と、次の行に `The certificate is expired: …` が出る（2026-09-05 に期限が切れている）。導入は続く
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. GitHub へのログインを始める。
@@ -1554,8 +1582,9 @@
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   - 導入予定を確かめて `y` と答え、プロンプトに戻ってから次の手順を貼る
-   - fd と ripgrep は[Neovim](#neovim)の手順 3 で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
+   - fd・ripgrep・fzf は、先の項で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+   - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
 
 1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
 
@@ -1658,6 +1687,7 @@
    claude
    ```
 
+   - 初めての起動では、テーマの選択と、ログインの方法の選択（`Select login method:`）が先に出る
    - フォルダーを信頼するか聞かれたら、`claude-sandbox` であることを確かめて信頼する
    - 画面の案内に従ってブラウザでログインする
    - Pro / Max / Team / Enterprise か Console のアカウントが要る（無料の claude.ai プランでは使えない）
@@ -1686,6 +1716,7 @@
    sudo dnf install -y curl-minimal ca-certificates tar gzip
    ```
 
+   - `curl` が既に入っているときは、`パッケージ curl-… は既にインストールされています。` と出て終わる
    - `curl` が既に入っていて `curl-minimal` と競合するときは、`curl-minimal` を外して実行する
 
 1. 公式の standalone インストーラーで Codex CLI を入れる。
@@ -1759,9 +1790,7 @@
    ls -ld ~/.grok
    ```
 
-   - 前提: grok.com の利用対象アカウント。現在の対象プランは xAI の案内で確かめる
-   - インストーラーは共通設定とは別に `~/.bashrc` へ PATH と補完を足す（[配置の説明](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
-   - 新規の PC なら `curl` のパスだけが出て、`ls` は `No such file or directory` になる
+   - 新規の PC なら `curl` のパスだけが出て、`ls` は `ls: '/home/<USER>/.grok' にアクセスできません: そのようなファイルやディレクトリはありません` になる
    - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
    - `grok` や `~/.grok` があれば、元の導入方法を確かめる。同名の非公式 grok-cli は先に外す
    - `agent` が見つかれば用途を確かめる。`~/.local/bin/agent` はインストーラーで置き換わることがある（[注意点](extra/almalinux-setup.md#注意点)）
@@ -1824,6 +1853,7 @@
    grok
    ```
 
+   - `Approve in your browser to finish signing in.` と確認用のコードが出たら、ログインできていない。Ctrl+Q で抜けて（画面に `ctrl+q quit` と出る）、この項の手順 4 からやり直す
    - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
    - 終了するときは `/quit` を入力する
@@ -1890,6 +1920,14 @@
    hostnamectl --static
    xdg-user-dir DOWNLOAD
    ibus list-engine | grep -w anthy
+   IBUS_PID="$(pgrep -u "$(id -u)" -x ibus-daemon | head -n 1)"
+   if [ -n "$IBUS_PID" ]; then
+     IBUS_PATH="$(tr '\0' '\n' < "/proc/$IBUS_PID/environ" | grep '^PATH=')"
+     printf '%s\n' "$IBUS_PATH"
+     env "$IBUS_PATH" /usr/libexec/ibus-engine-anthy --xml | grep -m 1 -o '<name>[^<]*</name>'
+   else
+     echo 'ibus-daemon が動いていない（GNOME にログインしてから貼り直す）'
+   fi
    gnome-extensions info appindicatorsupport@rgcjonas.gmail.com | grep -E '^ *(状態|State)'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
@@ -1898,6 +1936,9 @@
    - `0` が出る（[システムの設定](#システムの設定)の手順 7 で kdump を止めたとき）
    - [システムの設定](#システムの設定)の手順 2 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
    - `anthy - Anthy` が出る
+   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[Homebrew](#homebrew)の手順 4）
+   - PATH に `/home/linuxbrew/` が入っていたり、`ModuleNotFoundError: No module named 'gi'` が出たりしたら、[Homebrew](#homebrew)の手順 4 を貼って、この項の手順 1 の再起動からやり直す
+   - `ibus-daemon が動いていない` と出たら、GNOME にログインしてから、この手順を貼り直す
    - トレイアイコンの拡張が `ACTIVE` になっている
    - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る
 
@@ -4968,7 +5009,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - DB は SQLite3、DB のパスは `/var/lib/gitea/data/forgejo.db`、ドメインは `localhost`、ベース URL は `http://localhost:3000/`（ホストの Web ポートに合わせる）を確かめる
    - HTTP ポートはコンテナ内部の `3000`、SSH ポートは[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 のホスト側の番号にする。リポジトリとアプリケーションのデータの場所は自動で入った値を使う
    - 自己登録を無効にする項目を有効にし、「Administrator account settings」を開いてユーザー名・メールアドレス・パスワードを入力する
-   - 「Install Forgejo」を押し、作った管理者でログインできることを確かめる
+   - 「Install Forgejo」を押す。作った管理者でログインした状態のダッシュボードが開けばよい
+   - パスワードでログインできることは、右上のアカウントメニューの「Sign out」の後、「Sign in」にユーザー名とパスワードを入れて確かめる
    - **次の手順は、管理者でログインできてから貼る**
 
 1. 初期設定の完了と登録の拒否をサーバーで確かめる。
@@ -5187,6 +5229,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 別の PC でトンネルを閉じ、LAN の URL で管理者のログインを確かめる。
 
    - [初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 1 の端末で `Ctrl+C` を押してトンネルを閉じる
+     - この項の手順 2 の後、その端末に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがある。正常なので、そのまま閉じる
    - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
    - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、サーバーへ届く許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
@@ -5795,6 +5838,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - リポジトリの「Pull requests」で「New pull request」を開く
    - 「merge into」を `main`、「pull from」を `docs/readme-guide` にする。向きを逆にしない
+   - コミットの一覧と差分の上に出る「New pull request」をもう 1 度押し、タイトルと本文の欄を開く
    - タイトルを「README に使い方を追加」にし、本文に変更の目的・内容・確認結果を書く
    - 本文に `Closes #1` を書くと、main へのマージ時に Issue を閉じる。`#1` は、この節の手順 6 で控えた実際の番号に置き換える
    - 「Create pull request」を押し、作成後の画面に main と作業ブランチの名前が表示されればよい
@@ -6121,6 +6165,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - Web にログインし、バックアップ時点のリポジトリとコミットが見えることを確かめる
    - `git fetch` を実行し、確認用の新しいコミットを push する。SSH のホスト鍵の指紋もバックアップ当時と一致することを確かめる
+     - `git fetch` が `(forced update)` を出したら、その clone には、復元で無くなったコミットが残っている。そのまま push すると、そのコミットがサーバーに戻る。戻したくなければ、空の場所へ clone し直し、そこから確認用のコミットを push する
    - 初期設定画面が開かず、通常の自己登録と OpenID の登録ができないことを確かめる
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
    - 退避した現在のデータと展開用の作業場所は、復元を確認するまで消さない
@@ -6571,6 +6616,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
+     - ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、この項の手順 5 で有効にするまで `false`）
    - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
    - `中断:` が出たら、この項の手順 3 以降へ進まない
    - 既にデーモンが起動していれば、再起動する。接続中の RDP クライアントは切れる
@@ -6824,10 +6870,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 2 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
    - パスワードは [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
+     - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
    - このユーザーが初めてデスクトップにログインしたなら、「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出ている。RDP の画面で「スキップ」を押す
    - RDP の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
    - クライアントでの操作は、PC の画面にもそのまま出る。PC の上部バーには、共有中の印が出る
    - 問題があれば、PC で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る（`journalctl --user` は、既定の構成では `No journal files were found.` になる）
+     - この項の手順 2 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
 ---
 
@@ -7162,10 +7210,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Windows は「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
    - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 5 の値に読み替える
    - 証明書の確認を聞かれたら、表示された Thumbprint が手順 8 の `TLS fingerprint` と同じかを見てから受け入れる
+     - FreeRDP は、`Thumbprint:` の後に `Do you trust the above certificate? (Y/T/N)` と聞く。同じなら `Y` で答える
+     - FreeRDP は、初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告を出す。続く `Thumbprint:` で判断する
+     - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
    - パスワードは手順 5 のもの。通ると、このセッションの GNOME のデスクトップが、クライアントの窓の大きさで出る
+     - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
    - 切ってつなぎ直すと、同じデスクトップ（開いていたアプリもそのまま）に戻る
    - 問題があれば、PC の端末で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop-headless.service` を見る
+     - 手順 9 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
 ---
 
@@ -7383,6 +7436,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
+   - `rdp-tls.key` が `-rw-------`、`rdp-tls.crt` が `-rw-r--r--` で、どちらも所有者が `gnome-remote-desktop`、コンテキストに `gnome_remote_desktop_var_lib_t` が出ればよい
+
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
@@ -7393,7 +7448,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
-   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10 で使う）
+   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10・11 で使う）
+   - TPM の無い PC では、`grdctl --system` のコマンドごとに `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` が出る（手順 6・8 でも出る）。害は無い（[注意点](extra/gnome-remote-desktop.md#注意点)）
 
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
@@ -7495,8 +7551,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. LAN 内の別マシンから、RDP クライアントでログインする。
 
-   - `xfreerdp3 /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
+   - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
    - `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。手順 4 で控えた `TLS fingerprint` と同じなら `Y` で受け入れる
+     - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
+     - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
+   - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
+   - FreeRDP の `Password:` には、手順 6 のシステム共通パスワードを入れる
+     - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。GDM のログイン画面が出れば、害は無い
    - システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする
    - 問題があれば、サーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る
 
@@ -8636,7 +8698,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 を通す。接続元をオンラインのホスト、接続先をオフラインのホストとする
 > - **同じ手順 3 のシェルに貼る**。Homebrew の通信にもトンネルを使う
 > - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（同書の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
-> - **手順 3 で [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew)（Homebrew）を、同じシェルのまま貼る**
+> - **手順 3 で [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜4](#homebrew)（手順 4 は GNOME で日本語入力を使う PC だけ）を、同じシェルのまま貼る**
 > - **手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
 > - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
 
@@ -8667,12 +8729,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
 
-1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew) を貼る。
+1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜4](#homebrew) を貼る。
 
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、Homebrew は入っているので、この手順は飛ばす
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、同書の「Homebrew」の手順 1〜3 は飛ばす
    - 同書の「Homebrew」の手順 1 の dnf は、手順 2 の設定で通る（手順 1 で 4 つとも入っていたなら飛ばす）
    - 同書の「Homebrew」の手順 3 は、共通の bash 設定（同書の「共通の bash 設定」の手順 1・2）を入れてあるシェルで貼る
-   - **次の手順は、同書の「Homebrew」の手順 3 まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
+   - 同書の「Homebrew」の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
+   - **次の手順は、同書の「Homebrew」の手順 3（GNOME で日本語入力を使う PC は手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。
 
@@ -9274,16 +9337,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
 
-### npm のオフライン導入: 実施手順
-
-
 > [!IMPORTANT]
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 で、オフラインのホストへ接続する
-> - 手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)も通す
-> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入-実施手順)・[Neovim](#neovim) と Mason を使う設定（LazyVim など）を導入する。Mason の npm パッケージは未導入でよい
-> - **手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
-> - 手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
-> - **手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
+> - 「npm のオフライン導入: 実施手順」の手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)も通す
+> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入-実施手順)と [Neovim](#neovim)の手順 1・2 までを導入する
+> - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 10 の初回起動を含む導入は、「npm のオフライン導入: 実施手順」の手順 1・2 で経路を設定してから行う。Mason の npm パッケージは未導入でよい
+> - **「npm のオフライン導入: 実施手順」の手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
+> - 「npm のオフライン導入: 実施手順」の手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
+> - **「npm のオフライン導入: 実施手順」の手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -9291,6 +9352,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!WARNING]
 >
 > - トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通って外に出られる（[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）
+
+### npm のオフライン導入: 実施手順
 
 1. [SSH の SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 3 のシェルで、AppStream の Node.js と npm を入れる。
 
@@ -9765,6 +9828,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
+   - 初めて有効にしたときは、その前に `Created symlink '/home/<USER>/.config/systemd/user/sockets.target.wants/podman.socket' → '/usr/lib/systemd/user/podman.socket'.` の行が 1 つ出る
    - `Failed to connect to user scope bus` と出たら、`sudo -iu` などで切り替えたシェルで実行している。自分のユーザーでログインし直す
 
 ---
@@ -9961,7 +10025,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
-   - 入っていれば、`Package cifs-utils-… is already installed.` と出る
+   - 入っていれば、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
    - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー-実施手順)）を確かめる
@@ -10065,7 +10129,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    rpm -q gvfs-smb gvfs-fuse
    ```
 
-   - `package … is not installed` が出たら、この節の手順 2 で入れる
+   - `パッケージ … はインストールされていません`（英語の環境では `package … is not installed`）が出たら、この節の手順 2 で入れる
    - 2 つとも版が出たら、この節の手順 2 は飛ばす
 
 1. どちらかが未導入のときだけ、gvfs-smb と gvfs-fuse を入れる。
@@ -10082,7 +10146,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    /usr/bin/gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
    ```
 
-   - ドメインとパスワードを聞かれる（英語では `Domain [SAMBA]:` と `Password:`）
+   - ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）
    - ドメインは、Enter で既定のままでよい
    - パスワードは、手順 3 と同じもの
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
@@ -10098,8 +10162,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
    ```
 
-   - `Mount(0): <SHARE> on <SERVER> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい
-   - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>` と、共有の中の一覧（隠しファイルは出ない）が出る
+   - `Mount(0): <SERVER> 上の <SHARE> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい（英語の環境では `<SHARE> on <SERVER>`）
+   - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>`（端末では、`'` で囲まれて出る）と、共有の中の一覧（隠しファイルは出ない）が出る
    - 画面では、サイドバーに共有が出る
 
 1. 共有を外す。
@@ -10645,6 +10709,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **Secure Boot が有効な PC（または VM）で、カーネルモジュールをビルドする手順書より先に通す**。手順 3 で Secure Boot が無効と分かったら、この文書はそこで終わり
 > - **自分のシェルで実行する**（`sudo` できるユーザー）。bootc のシステム（AlmaLinux Atomic Desktop など）でも同じ手順になる
 > - **手順 4 で一時パスワードを 2 回聞かれ、手順 5 で再起動する**。答えてから次の手順を貼る
+> - **手順 5 を SSH で貼る前に、VM のウィンドウを開いておく**（再起動直後の MokManager を操作するため）
 > - **手順 6 は、起動の途中の MokManager の画面で行う**（最初の画面は 10 秒で消える。VM なら VM のウィンドウで操作する）
 
 - 上から順にコードブロックを貼る
@@ -10714,7 +10779,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す（VM なら、VM のウィンドウで押す）
    - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは `sudo mokutil --import /var/lib/shim-signed/mok/MOK.der`（手順 4 の最後の行）を貼り直してから、手順 5 からやり直す
-   - **注意**: MokManager でキーボードが効かない PC がある（参考資料を参照）
+   - **注意**: MokManager でキーボードが効かない PC がある（[検証記録](verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足を参照）
    - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
 
 1. 鍵が登録されたか確かめる。
@@ -11076,6 +11141,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    brew install syncthing
    ```
 
+   - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
 
 1. GUI のパスワードを読み取る。
@@ -11106,7 +11172,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `中断:` が出たら手順 5〜7 へ進まない。認証設定に成功した同じシェルだけで、手順 5〜7 を実行できる
-   - `Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
+   - `Generating key and certificate` の行に続いて、`Calculated device ID (device=...)` と `Updated GUI authentication user` / `Updated GUI authentication password` の 3 行が出る
    - 復元済みのホストの `Key exists; will not overwrite` は正常。鍵とデバイス ID は変わらない
    - ログイン名が同じなら `Updated GUI authentication user` は出ない
    - 最後の `syncthing device-id` が出す 7 桁 x 8 の文字列が、**このホストのデバイス ID**。相手デバイスに教える値で、秘密ではない
@@ -11125,7 +11191,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - `Successfully started 'syncthing' (label: sh.brew.syncthing)` が出る
+   - ``Successfully started `syncthing` (label: sh.brew.syncthing)`` が出る
 
 1. GUI の待ち受けと HTTPS を設定し、再起動して確かめる。
 
@@ -11203,8 +11269,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ブラウザで GUI に入り、デバイス ID を確かめる。
 
    - 手順 8 の URL を開き、自己署名証明書の警告を受け入れ、手順 3〜4 で決めたログイン名とパスワードで入る
+   - 初めて入ると、「匿名で使用状況をレポートすることを許可しますか？」と聞かれる。「はい」「いいえ」のどちらでもよい
    - `ST_GUI_ADDR=127.0.0.1:8384` の場合は、このホストのブラウザで開く。LAN に公開した場合は、LAN の別の端末から開いて firewalld 越しの到達も確かめる
-   - Actions → Show ID で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
+   - 「メニュー」→「IDを表示」（英語の表示では Actions → Show ID）で出るデバイス ID が、`syncthing device-id` と同じであることを確認する
    - **この時点では同期するフォルダは 1 つも無い**
    - バックアップから戻したホストでは、戻したフォルダが並ぶ
 
@@ -11214,9 +11281,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - **Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない**。入れただけでは何も同期しないので、GUI から足す
 - 操作は AlmaLinux 10 でも Windows 11 でも同じ。相手もどちらでもよい
+- ボタン・欄・通知の名前は、GUI の表示が日本語のときのもの
 
 > [!WARNING]
-> **この節の手順 4 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
+> **この節の手順 4・5 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
 >
 > - 同期したいものを入れる専用のディレクトリを作る（例: `~/Sync`、`C:\Users\<WIN_USER>\Sync`）
 > - このホストは [Samba](#samba-サーバー-実施手順) でホームを公開しているので、同じ領域を二重に扱うことになる点にも注意する
@@ -11226,16 +11294,23 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 相手が AlmaLinux 10 なら[実施手順](#syncthing-実施手順)、Windows 11 の PC なら [Windows 11 で使う](windows-setup.md#syncthing-windows-11-で使う)で入れる
 
-1. GUI の「リモートデバイスを追加」に相手のデバイス ID を貼る。
+1. GUI の「接続先デバイスを追加」を押し、「デバイスID」の欄に相手のデバイス ID を貼って保存する。
 
-   - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる
+   - 同じ LAN にいるなら、21027/udp のローカル探索で相手が自動的に見つかる（欄の下の「近くに検出された以下のデバイス」に ID が並ぶ）
+   - その一覧には、同じ LAN のほかの Syncthing の ID も並ぶ。欄に入れた ID が、相手の `syncthing device-id` と同じであることを確かめてから保存する
    - VPN 越しの拠点同士は探索が届かないことがある。その場合は、デバイスのアドレスに `tcp://10.99.0.1:22000`（`tcp://<相手の IP>:22000`）のように直接書く
 
 1. 相手側の GUI に出る承認の通知で、このデバイスを承認する。
 
-1. 「フォルダーを追加」でパス（例: `~/Sync`、Windows 11 では `C:\Users\<WIN_USER>\Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れる。
+   - 通知は「新規デバイス」（「デバイス「<このホストの名前>」 (…) が接続を求めています。新しいデバイスとして追加しますか？」）。「デバイスを追加」を押し、開いた画面で「保存」を押す
 
-1. 相手側に「このデバイスがフォルダーを共有しようとしています」と出るので受け入れる。
+1. 「フォルダーを追加」でパス（例: `~/Sync`、Windows 11 では `C:\Users\<WIN_USER>\Sync`）とフォルダー ID を決め、「共有」タブで相手デバイスにチェックを入れて保存する。
+
+1. 相手側の GUI に出る「新規フォルダー」の通知で「追加」を押し、フォルダーパスを入れて保存する。
+
+   - 通知の文は「<このホストの名前> がフォルダー「<フォルダー名>」 (<フォルダー ID>) を共有するよう求めています。新しいフォルダーとして追加しますか？」
+   - 「追加」で開く画面は、フォルダー名とフォルダー ID が入っていて、「フォルダーパス」が空。相手側で同期するディレクトリ（例: `~/Sync`）を入れるまで、「保存」を押せない
+   - 保存した後、両方の GUI でフォルダーが「最新」になればよい
 
 ---
 
@@ -12063,6 +12138,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `vboxsf` の行と、共有フォルダーのマウントの行（`/run/media/sf_<名前>` の `vboxsf`）が出ればよい
+   - `vboxsf` が出ないときは、VM を再起動してログインし直し、この手順を貼り直す
 
 ---
 
@@ -12614,6 +12690,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#wireguard-バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
 - [site.env を作る](#wireguard-siteenv-を作る)の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
+  - `./wg-vpn.sh` で始まるブロックは、その項の最初のブロックの `cd` で移った先（`<REPO>/scripts/wireguard`）で貼る
+  - 項の途中でシェルを開き直したら、`REPO` を設定し直した後に `cd "$REPO/scripts/wireguard"` を打ってから続ける。`sudo: ./wg-vpn.sh: コマンドが見つかりません` と出たら、これが抜けている
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 > [!WARNING]
@@ -12679,6 +12757,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 両拠点の WG ホストで、`apply` の実行予定の内容を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
    ```
 
@@ -12779,6 +12859,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 表示した QR コードを、この項の手順 8 でスマートフォンに読み取らせる
+   - `ERROR: qrencode がありません` と出て止まったら、`sudo dnf install -y qrencode` で入れてから、この手順を貼り直す
+     - AlmaLinux 10 では、`qrencode` は EPEL にある（EPEL は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](#epel-と-rpm-fusion)で有効にする）
 
 1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
@@ -12801,6 +12883,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. WG ホストで状態を見る。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env status
    ```
 
@@ -12957,12 +13041,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - **注意**: LAN 内でこの手順を貼ってしまうと、そこで通信が切れて、その後の手順を貼れなくなる。その場合は PC のコンソールで `sudo nmcli connection down wg0`
+   - 日本語の表示では、コメントの `activated` は `アクティベート済み`、`no` は `いいえ` と出る
    - 最後に、プロファイルの内容と秘密鍵の保存先を確認する。見るところは次のとおり
      - `ipv4.method` が `manual`
      - `ipv4.addresses` が `<CLIENT_TUN_IP>/32`
      - `ipv4.dns` が `--`
      - `wireguard.private-key` が `<hidden>`
-     - `wireguard.peer-routes` が `yes`
+     - `wireguard.peer-routes` が `yes`（日本語の表示では `はい`）
      - `wireguard.peers` に接続先拠点の公開鍵
 
 #### WireGuard: トンネルを確かめる
@@ -12984,6 +13069,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
+   - 日本語の表示では、コメントの `connected` は `接続済み`、`activated` は `アクティベート済み` と出る
+
 1. PC で、トンネル IP → WG ホストの LAN 側 → ルーター → 相手拠点の順に疎通を試す。
 
    ```bash
@@ -12994,6 +13081,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_LAN_IP> の順に出る
    ```
 
+   - `tracepath` の `<PEER_WG_LAN_IP>` の行が `!H` で終わっても、4 つの `ping` が `0% packet loss` なら届いている
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
    - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
 
@@ -13862,10 +13950,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    brew install lazygit ripgrep fd
    ```
 
-   - 入るものの一覧 (依存を含む) の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y` と答える
+   - `Do you want to proceed with the installation? [y/n]` と聞かれたら、入るものの一覧 (依存を含む) を見て `y` と答える
    - lazygit は任意 (無ければ `<leader>gg` が定義されないだけ)
    - ripgrep (`rg`) と fd は、ピッカーと Migemo の候補が使う。EPEL の `ripgrep` / `fd-find` と二重に入れない (実行ファイルの名前が同じで、PATH の先頭の Homebrew 版が使われる)
-   - **次の手順は、`[y/n]` に答えてインストールが終わってから貼る** (続けて貼ると答えとして食われる)
+   - **次の手順は、確認が出たら答え、インストールが成功してプロンプトに戻ってから貼る** (確認に答える前に続けて貼ると、答えとして食われる)
 
 1. Neovim・lazygit・ripgrep・fd が入ったか確かめる。
 

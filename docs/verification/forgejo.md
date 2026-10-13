@@ -4,6 +4,16 @@
 
 ## 対象と検証環境
 
+- **Hyper-V の VM での検証状態（2026-10-11 UTC）**: Hyper-V の VM（AlmaLinux 10.2 / x86_64 / SELinux Enforcing。Kickstart で入れた Workstation のクローンに、[初期設定](../almalinux-setup.md)・[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)・[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した後の状態）で、`114c2b2` の実施手順（6 項・26 手順）→ 使い方の基本（13 手順）→ バックアップ（4 手順）→ バックアップから復元する（7 手順）を、公式 16.0.5-rootless で上から通した。別の PC の役は、同じ仮想スイッチの別の VM。詳細は末尾の [Hyper-V の VM の付録](#付録-hyper-v-の-vm-で通した記録2026-10-11)
+  - 結果: 50 手順のうち、通した 47、通らなかった 0、条件に当たらず飛ばした 3（「使い方の基本」の手順 2・3、「バックアップから復元する」の手順 7）、未実施 0
+  - 通し方: サーバーのブロックは、SSH の対話の bash に貼った。ブラウザで行う操作は、人の手ではなく、クライアントの VM のヘッドレスの Firefox をスクリプトで操作した
+  - 手順書の書く形と違えた所: サーバーの IPv4 は固定していない（仮想スイッチの DHCP）。「バックアップ」の手順 4 は、クライアントの VM への `scp` で代えた（同じ PC の上なので、サーバーのディスクを失っても残る保管先ではない）。許可外の送信元には、VM を動かしている Windows の PC を使った
+  - 確認したこと: 最新の安定版の判定と取得（16.0.5）、SELinux Enforcing のままの `:Z`（サーバーの VM の監査ログに、拒否は 0 件。通しの後に、ログのファイルを数え直した。クライアントの VM は確かめていない）、実際の firewalld の runtime と permanent の 2 規則、SSH トンネルからの初期設定と管理者の作成、指定 IPv4 への切り替え、許可した CIDR の中の VM からの Web と Git（公開鍵の登録・指紋の照合・clone・push）、許可外の送信元から 3000 と 2222 へつながらないこと
+  - 確認したこと: サービスの再起動、サーバーのユーザーの全ログアウト（23 秒）、**ゲストの OS の再起動**の後の自動起動（サービスの起動は、最初のログインの 1 秒前）と、データ・Git 用 SSH のホスト鍵・2 規則の保持。自動更新のタイマーの有効化と、最新版での `Result=success`・`ExecMainStatus=0`
+  - 確認したこと: 「使い方の基本」の Issue → 作業ブランチ → Pull Request → マージ → main の更新。停止バックアップと、同じ版（16.0.5）の復元（バックアップの後に足したコミットが無くなり、復元の後もログインと push が使え、指紋は同じ）
+  - 直した所: 7 つの指摘のうち、4 つを直した（どれも箇条書きの文言だけで、コードブロックは変えていない）。「初期設定と管理者の作成」の手順 2、「LAN に公開する」の手順 3、「使い方の基本」の手順 10、「バックアップから復元する」の手順 6
+  - **確認していないこと**: 人の手でのブラウザの操作と窓のあるブラウザ、Windows のクライアント、固定の IPv4 と IP が変わったときの動き、VPN、別のディスクや別の PC への保管、「更新」の節、自動更新が版を上げる側と戻す側、異なる版の復元と「バックアップから復元する」の手順 7、ロールバック、`中断:` の分岐、`LAN_SUBNET='0.0.0.0/0'`、実機
+
 - **実機での検証状態（2026-10-11 JST）**: Raspberry Pi 5 の AlmaLinux 10.2 / aarch64 に公式 16.0.5-rootless を構築し、ホスト側の導入・公開・サービス再起動・停止バックアップ・隔離コピーの復元・最新版での自動更新の確認を通した。詳細は末尾の実機検証の付録
   - 確認したこと: rootless Podman と Quadlet、コンテナ UID / GID 1000、SELinux Enforcing の専用データ保存、実 firewalld の runtime / permanent 規則、指定 IPv4 の Web と Git 用 SSH 待ち受け
   - 確認したこと: 利用者が管理者作成とログインを完了。ホスト側では初期画面の閉鎖・通常登録と OpenID 入口の拒否・匿名閲覧の制限・有効な管理者・ヘルスチェックを確認した。秘密入り INI は直接読んでいない
@@ -21,7 +31,9 @@
   - 確認したこと: 「自動更新を有効にする」の手順 1 の大きなブロックを、ブラケットペーストの有りと無しで実際の端末に貼り、同じバイト列のプログラムが置かれること
   - **確認していないこと**: 新しい版（17.x など）が実際に出たときの更新、本物の壊れたリリースでの失敗（doctor だけを失敗させる包みで代えた）、4 時台の発火そのもの（試験用のドロップインで時刻を変えた）
   - **確認していないこと**: 「LAN に公開する」の手順 3 から「再起動しても残ることを確かめる」の手順 7 までの再実行（「Git の接続を確かめる」の手順 1・4 の代わりに、公開鍵・リポジトリ・Issue・PR を API で作り、clone・push は SSH で行った）、OS の再起動後の Forgejo の自動起動（コンテナの再起動では、検証環境の TUN の権限を直してから起動した）
+    - これは 2026-10-10 の時点の状態。「LAN に公開する」の手順 3 から「再起動しても残ることを確かめる」の手順 7 までと、OS の再起動の後の自動起動は、2026-10-11 に Hyper-V の VM で通した（上の Hyper-V の VM の行）
   - **確認していないこと**: SELinux Enforcing の `:Z`、firewalld（スタブ）と許可外の接続拒否、実際の LAN・VPN、実機・VM、aarch64
+    - これは 2026-10-10 の時点の状態。SELinux Enforcing の `:Z`、実際の firewalld と許可外の送信元からつながらないこと、VM は、2026-10-11 に Hyper-V の VM で通した（上の Hyper-V の VM の行。実機の分は、上の実機の行）。実際の LAN（別々の機器のあいだ）と VPN は、Hyper-V の VM では通していない（クライアントは、同じ仮想スイッチの VM）
 
 - **16.0.5 の検証状態（2026-10-09 UTC）**: 通常系列の最新安定版として公式の `16.0.5-rootless` を新規導入した。以下の 2 つの専用環境で確認し、詳細は末尾の 16.0.5 の付録へ記録した
   - AlmaLinux 10.2 の systemd コンテナ: 一般ユーザーの rootless Podman による公式イメージ取得・Quadlet の生成と起動、実ブラウザでの初期管理者作成・ログイン、SQLite と設定の保存先、自己登録・OpenID・匿名閲覧の制限を確認した
@@ -29,7 +41,9 @@
   - 別の Docker コンテナ: 英語 UI のログイン・SSH 公開鍵・プライベートなリポジトリ・Issue・Pull Request・差分・マージ、SSH の clone・作業ブランチ・commit / push・main の pull・Issue の自動クローズを確認し、英語画面 8 枚を保存した
   - 現行の Bash 35 ブロックと埋め込み Python 5 本は構文検査済み
   - **確認していないこと**: 16.0.5 の構築手順全体の通し実行、バックアップ・復元・更新・doctor、ログアウト後や OS 再起動後の稼働、旧版からの DB の移行・旧版への復旧。15.0.9 の成功結果を今回の結果へ広げない
+    - これは 2026-10-09 の時点の状態。16.0.5 の実施手順の通し、バックアップと同じ版の復元、ログアウトの後と OS の再起動の後の稼働は、2026-10-11 に Hyper-V の VM で通した（上の Hyper-V の VM の行）。更新・doctor・旧版からの DB の移行・旧版への復旧は、Hyper-V の VM でも通していない
   - **確認していないこと**: SELinux Enforcing の `:Z`、firewalld の runtime 規則と許可外の接続拒否、実際の LAN・VPN、実機・VM、aarch64、ホスト UID が 1000 以外の構成、別サーバーへの移設。複数ユーザーのレビュー・必須承認・CI・競合解消・Windows の Git Bash での利用操作も未確認
+    - これは 2026-10-09 の時点の状態。SELinux Enforcing の `:Z`、firewalld の runtime の規則と許可外の送信元からつながらないこと、VM は、2026-10-11 に Hyper-V の VM で通した（上の Hyper-V の VM の行。実機の分は、上の実機の行）。実際の LAN（別々の機器のあいだ。クライアントは、同じ仮想スイッチの VM）、VPN、ホスト UID が 1000 以外の構成、別サーバーへの移設、複数ユーザーのレビュー・必須承認・CI・競合解消、Windows の Git Bash は、Hyper-V の VM でも通していない
 
 - **15.0.9 の検証状態（2026-10-09 UTC）**: AlmaLinux 10.2 の systemd コンテナで検証した。実機・VM での本実行ではない
   - 通したもの: 一般ユーザーの rootless Podman、公式イメージの取得と Quadlet の起動、SSH トンネルからのブラウザ初期設定、指定 IPv4 への切り替え、Git の SSH 認証・clone・push、サービス再起動、停止バックアップ・復元、同じ版の再適用、撤去、専用データの削除
@@ -525,3 +539,307 @@ firewalld は、IPv4・送信元 CIDR・宛先 IPv4・priority 100・TCP ポー�
 - 実機の Forgejo・自動更新タイマーは稼働中。LAN IPv4 の 3000 / 2222 と送信元制限なしの 2 規則を runtime / permanent に保持している
 - 管理者の作成と最初のログイン、LAN と VPN のそれぞれでの Web・Git 操作は利用者が確認済み
 - ホスト OS の再起動と全ログアウト後の検証は別途調整する。実機での新しい版への更新と自動ロールバック、復元側へのログイン・SSH 認証・Git の通信は未検証
+
+---
+
+## 付録: Hyper-V の VM で通した記録（2026-10-11）
+
+- **何を**: [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/forgejo.md)の実施手順（6 項・26 手順）→「使い方の基本」（13 手順）→「バックアップ」（4 手順）→「バックアップから復元する」（7 手順）を、コミット `114c2b2` の本文で、上から通した
+  - 「更新」の節・「設定ファイル」の表・[ロールバック](../extra/forgejo.md)は、この通しの範囲の外（流していない）
+  - 入った版は、「イメージを取得して localhost で起動する」の手順 2 がその場で調べた 16.0.5
+- **結果**: 50 手順のうち、通した 47、通らなかった 0、条件に当たらず飛ばした 3、未実施 0
+  - 飛ばした 3 つ: 「使い方の基本」の手順 2・3（同じ PC の鍵を登録済み・同じサーバーへ照合済み）、「バックアップから復元する」の手順 7（新しい版の不具合で戻したのではない）
+  - 「通した」に数えた中に、手順書の書く形と違えたものがある: ブラウザで行う操作の全部（人の手ではなく、スクリプトで操作した）、「バックアップ」の手順 4（別の VM への `scp` で代えた）、許可外の送信元（VM を動かしている Windows の PC を使った）。サーバーの IPv4 も固定していない（[通らなかった手順と、手順書の前提と違えた所](#通らなかった手順と手順書の前提と違えた所hyper-v2026-10-11)）
+- **どの状態から**: Hyper-V の列の VM のスナップショット `after-CL1` のクローン
+  - Kickstart で入れた AlmaLinux 10.2 の Workstation に、[初期設定](../almalinux-setup.md)の実施手順（[記録](almalinux-setup.md#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）、同書の任意節「画面オフ・画面ロック・自動サスペンドを止める」、[linger](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/linger.md)、[Podman](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/podman.md) を通した後の状態
+  - 始めの状態: `Linger=yes`、rootless の Podman 5.8.2、podman.md の Quadlet の `hello-web`（`127.0.0.1:8080`）が動いている、`~/.local/share/forgejo` は無い、firewalld は `public`（`eth0`）、sudo は NOPASSWD（`guest-facts-start.txt`）。`public` のサービスは `cockpit dhcpv6-client ssh` で、rich rule は無い（「イメージを取得して localhost で起動する」の手順 2 の出力。`session/after-confirm/0004-…-2.txt`）
+- **どう通したか**
+  - サーバー（主の VM）: 手順書から抜き出したブロックを、SSH の対話の bash にブラケットペーストで 1 つずつ貼った（手順書のリードの「デスクトップの端末か SSH」のうち、SSH の側）
+    - 変数の 1 行（`SERVER_IP`・`LAN_SUBNET`・`FORGEJO_RESTORE`）に値を入れたほかは、1 文字も変えていない（`session/steps.jsonl` の `sha256` と `pastedSha256` が同じ）
+    - コンソールでは、GNOME にログインしていない（始めも終わりも、`loginctl` の seat0 は GDM のログイン画面だけ。`guest-facts-start.txt`・`guest-facts-end.txt`）
+    - sudo は、1 度もパスワードを聞かなかった
+  - 「別の PC で」の端末の操作: 同じ仮想スイッチにつないだ別の VM（以下「クライアント」）で行った。手順書の箇条書きのコマンド（`<SERVER_IP>` などを置き換える形）に値を入れて 1 つの文書（`peer/peer-steps.md`）に包み、クライアントの SSH の対話の bash に貼った。「使い方の基本」の手順 7・8・9・13 は、手順書のブロックをそのまま貼った
+  - 「別の PC のブラウザで」の操作: **人が画面を操作したのではない**。クライアントのヘッドレスの Firefox 140.17.0esr を、Marionette（Firefox に入っている遠隔操作の口。クライアントの `127.0.0.1:2828`）へ、標準ライブラリだけの Python のクライアント（`tools/guest/mar.py`）でつないで操作した。入れたパッケージは無い
+    - 操作ごとの短いスクリプト（`peer/browser/*.py`）が、リンクやボタンを文字で探して押し、欄に文字を入れる
+    - ページの移動には、リンクを押した所と、URL を直接開いた所がある。URL で開いたのは、最初のページ、`/user/login`、リポジトリ・Issue・Pull Request のページ、確かめのためのページ（`/user/sign_up`・`/install`・`/admin`・コミットの一覧など）
+    - 判定は、スクリプトがページの DOM から読んだ文字（`peer/browser/*.txt`）と、ページを撮った PNG（`screens/`。44 枚）で行った
+    - 担当が目で見た PNG は 6 枚（ページ 5 枚とコンソール 1 枚）と、報告にある。この付録を書いた担当が開いた PNG は 7 枚（`b03-after-install.png`・`b05-lan-home-signed-out.png`・`u10-pr-form.png`・`u12-pr-merge-confirm.png`・`x-pr-form-before-click.png`・`x-pr-form-after-click.png`・`main-console-end.png`）。この付録を点検した別の担当は、その 7 枚と、`b04-signed-out.png`・`b05-sign-up.png`・`u09-branches.png`・`u10-pr-created.png` の 4 枚を開いた。ほかは、保存されているだけ
+  - パスワードを入れた所と道具（値は、どこにも載せていない）
+    - OS のユーザーのパスワード（検証用の VM のもの）: クライアントの `ssh -N …` と `scp` の `password:` に、ドライバの `rb.mjs send --text-file … --mask` で、SSH の端末への文字として 2 回送った（クライアントの seq 11・51）
+    - Forgejo の管理者のパスワード（この通しのために作った検証用の 20 文字）: クライアントの 0600 のファイルに写し、ブラウザのスクリプトがそこから読んで、パスワードの欄に入れた（初期設定の 2 欄と、サインインのたび）。欄の値を出す所は、長さ（`<20 chars>`）だけにしてある
+    - VM のコンソールへのキー送信は、1 度も使っていない（担当の報告による）
+    - 実アカウントでのログインは無い
+- **誰が**: 通したのは、検証の担当のエージェント（Claude Code のサブエージェント）。この付録は、その報告（`result.md`）と証跡のファイルを、VM に触れない別の担当が照らし合わせて書いた。書いた後に、もう 1 人の別の担当が、付録と手順書の直しを証跡に当てて点検し、違う所を直した（どちらも、VM では何も実行していない）
+- **証跡**: 追跡していない `.verification/campaign/hv/R5/`（このリポジトリには入っていない）。下のファイルの名前は、ここからの相対パス
+  - `seq` は、主の VM が `session/steps.jsonl`、クライアントが `peer/session/steps.jsonl` の番号。`after-confirm/` は、それぞれの `session/after-confirm/`。ブラウザの操作は `peer/browser/<名前>.py`（操作）と `<名前>.txt`（出力）で、下では `b01` のように名前だけを書く
+- 出力の中の VM の値は、`<USER>`・`<HOSTNAME>`・`<SERVER_IP>`・`<LAN_SUBNET>`・`<FORGEJO_USER>`・`<FINGERPRINT>`・`<PID>` で書いた。コミットの ID は試験の値で、利用者の実行結果と一致する必要はない。パスワードと鍵は載せていない
+
+### 環境（Hyper-V、2026-10-11）
+
+| 項目 | 内容 |
+|---|---|
+| ホスト | Windows 11 Pro 10.0.26300 |
+| ハイパーバイザ | Hyper-V（担当の報告では `vmms.exe` 10.0.26100.8875）。層の `Get-VmvBackend` は `Generation=2`・`Version=12.0`・`HypervisorPresent=True`（`meta.json`） |
+| 主の VM（サーバー） | 第 2 世代（UEFI）、Secure Boot オフ、2 vCPU、3072 MB（ゲストから見えるのは 2900 MB）、ディスク 64 GB、NIC 1 枚（`eth0`）。ディスクが SCSI の差分であること、NIC が Default Switch であることは、担当の報告による |
+| クライアント（別の PC の役） | 同じ構成で 2048 MB（ゲストから見えるのは 1639 MB）。Kickstart で入れたベースのスナップショット `clean-install` のクローンで、初期設定は通していない（プロンプトは素の bash）。担当の報告では、同じ日の gnome-headless-session.md と gnome-remote-desktop.md の通しで相手の役に使った VM を、そのまま起動した。始めの状態は、`freerdp` が入っていて、`~/.ssh` に鍵は無く、`~/.gitconfig` も無い（`peer/guest-facts-start.txt`） |
+| ゲスト | 2 台とも AlmaLinux 10.2 (Lavender Lion)、kernel `6.12.0-211.64.1.el10_2.x86_64`、x86_64、SELinux Enforcing（`meta.json`・`peer/meta.json`・`guest-facts-start.txt`・`peer/guest-facts-start.txt`）。主の VM は firewalld 有効（`public`、`eth0`）。出力は 2 台とも日本語 |
+| 主の VM に入っていた版 | `podman-5.8.2-9.el10_2.alma.1`・`passt-0^20251210.gd04c480-7.el10_2`・`crun-1.27-2.el10_2`・`aardvark-dns-1.17.1-1.el10_2`・`netavark-1.17.2-1.el10`・`container-selinux-2.248.0-1.el10_2`・`firewalld-2.4.3-4.el10_2`・`systemd-257-23.el10_2.2.alma.1`・`python3-3.12.15-1.el10_2`・`openssh-server-9.9p1-28.el10_2.alma.1`（`guest-facts-start.txt`・`guest-facts-end.txt`） |
+| 主の VM の PATH | 対話のシェルでは、`python3` と `curl` は Homebrew のものが先に見つかる（初期設定を通した後なので。`guest-facts-start.txt` の `type -a`）。手順書のブロックは `/usr/bin/python3` と書いているので、Python は OS の 3.12.15 が動く。`curl` は「イメージを取得して localhost で起動する」の手順 5 だけで、Homebrew のものに解決される |
+| Forgejo | `codeberg.org/forgejo/forgejo:16.0.5-rootless`（イメージ ID `87fb96a25b00…`、188 MB）。`forgejo version 16.0.5+gitea-1.22.0 (release name 16.0.5) built with GNU Make 4.4.1, go1.26.8 : bindata, timetzdata, sqlite, sqlite_unlock_notify` |
+| クライアントの版 | `firefox-140.17.0-1.el10_2`（`Mozilla Firefox 140.17.0esr`。ヘッドレス、専用のプロファイル）、`git-2.52.0-1.el10`、`openssh-clients-9.9p1-28.el10_2.alma.1`、`python3-3.12.15-1.el10_2`（`peer/guest-facts-start.txt`） |
+| クライアントの Git | リードの前提「Git の確認に使う PC は、先に Git を通す」として、[初期設定の「Git」](../almalinux-setup.md#git)の手順 1〜6 を、この通しの初めに貼った（`pull.rebase=true` など 14 個が `global`、`pull.ff` は空。クライアントの seq 1〜8、`peer/session/after-confirm/0008-実施手順-Git-6.txt`）。手順 7 は条件に当たらず、手順 8〜10 は貼っていない |
+| 手順書 | `docs/forgejo.md`、コミット `114c2b2`（`114c2b2bfd14b51f9e1925b150cbf72e1954f311`。`steps.jsonl` の `docCommit`） |
+| 実施の日時 | 2026-10-11 12:03:38〜12:21:57 UTC（ゲストの時計で 21:03〜21:21 JST。`steps.jsonl`）。担当の報告では、VM の用意からスナップショットまでが 12:00〜12:23 UTC |
+| 貼り方 | ドライバ（`rb.mjs paste`）で、SSH の対話の bash にブラケットペーストで 1 ブロックずつ（主の VM に 34 回、クライアントに 39 回） |
+| 検証用の値 | `SERVER_IP` は主の VM の IP（Default Switch の DHCP が配ったもの。**固定ではない**）。`LAN_SUBNET` は、クライアントの IP を含み、Windows のホストの IP と主の VM 自身を含まない `/24`（許可外の送信元を作るため）。ポートは既定（3000・2222）、`FW_ZONE` は自動で入った `public`。Forgejo の管理者と、Git の名前・メールアドレスは、検証用の値（メールアドレスは `example.invalid`） |
+
+### 手順ごとの結果（Hyper-V、2026-10-11）
+
+- 判定の「ブラウザはスクリプトで操作」は、手順書の「ブラウザで」の操作を、上の Marionette のスクリプトで行ったもの。押したボタンとリンクの名前は、下の表に書いた
+- 時間は、`steps.jsonl` の `durationMs`（出力が止まってからドライバが待つ 1.7〜1.8 秒を含む）
+
+**実施手順（26 手順。通した 26）**:
+
+| 項 | 手順 | 判定 | 出力と、確かめたこと | 根拠 |
+|---|---|---|---|---|
+| イメージを取得して localhost で起動する | 1 | 通した | `待ち受け: <SERVER_IP>`・`許可する送信元: <LAN_SUBNET>`・`Web: 3000 / SSH: 2222`・`firewalld: public` | 主の seq 1〜3、`after-confirm/0003-実施手順-イメージを取得して_localhost_で起動する-1.txt` |
+| 〃 | 2 | 通した | `IPv4・CIDR・ポートの確認: OK`、`running`、`public (default)` に `eth0`（`FW_ZONE` と同じ）、`target: default`、`導入する版: 16.0.5`、取得の行、`forgejo version 16.0.5+gitea-1.22.0 …`。15.7 秒（プロンプトの表示は `took 13s`） | 主の seq 4、`after-confirm/0004-…-2.txt` |
+| 〃 | 3 | 通した | 何も出ない。別の SSH で見ると、`forgejo.container` は 600（1198 バイト）、`~/.local/share/forgejo` は 700。定義は本文のとおり（`Image=codeberg.org/forgejo/forgejo:16.0.5-rootless`、`PublishPort=127.0.0.1:3000:3000`・`127.0.0.1:2222:2222`） | 主の seq 5、`facts-after-step3.txt` |
+| 〃 | 4 | 通した | `active`・`generated`・`uid=1000(git) gid=1000(git) groups=1000(git)`。`Failed to connect to user scope bus` は出ていない | 主の seq 6、`after-confirm/0006-…-4.txt` |
+| 〃 | 5 | 通した | `200`、`2222/tcp -> 127.0.0.1:2222`・`3000/tcp -> 127.0.0.1:3000`、`ss` も `127.0.0.1` の 2 行だけ | 主の seq 7、`after-confirm/0007-…-5.txt` |
+| 初期設定と管理者の作成 | 1 | 通した | クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3000:127.0.0.1:3000 <USER>@<SERVER_IP>`。初めての接続なので、ホストの SSH の ED25519 の指紋を聞かれ（`yes`）、続けて OS のパスワードを聞かれた。その後は、何も出さずに開いたままになった | クライアントの seq 9〜11、`peer/session/session-001.raw`、主の seq 8（メモ） |
+| 〃 | 2 | 通した（ブラウザはスクリプトで操作） | 下の「初期設定の画面」 | `b01`〜`b04`、`screens/b01-…`〜`b04-…`、主の seq 9（メモ） |
+| 〃 | 3 | 通した | `初期設定画面の閉鎖・自己登録拒否・OpenID 入口なし・healthz・有効な管理者: OK`、見出しの行（`ID`・`Username`・`Email`・`IsActive`）と、作った管理者の 1 行（`IsActive` は `true`） | 主の seq 10、`after-confirm/0010-実施手順-初期設定と管理者の作成-3.txt` |
+| LAN に公開する | 1 | 通した | `success` が 4 行。permanent と runtime のどちらにも、`rule priority="100" family="ipv4" source address="<LAN_SUBNET>" destination address="<SERVER_IP>" port port="2222" protocol="tcp" accept` と、`port="3000"` の行の 2 規則。3.5 秒 | 主の seq 11、`after-confirm/0011-実施手順-LAN_に公開する-1.txt` |
+| 〃 | 2 | 通した | `初期設定画面の閉鎖・…: OK`、`LAN 用の待ち受けと URL: 設定済み`、`active`、`2222/tcp -> <SERVER_IP>:2222`・`3000/tcp -> <SERVER_IP>:3000`。別の SSH で見ると、`ss` は `<SERVER_IP>` の 2 行だけ（`0.0.0.0`・`[::]` は無い）、定義は 600 のまま、`127.0.0.1:3000` はつながらない | 主の seq 12、`after-confirm/0012-…-2.txt`、`facts-after-lan-step2.txt` |
+| 〃 | 3 | 通した（ブラウザはスクリプトで操作。許可外の送信元は Windows のホスト） | 下の「LAN の URL での確かめ」 | クライアントの seq 12、`b05`・`b05b`、`screens/b05-…`、`outside-source-check-lan-step3.txt`、主の seq 13（メモ） |
+| Git の接続を確かめる | 1 | 通した（ブラウザはスクリプトで操作） | クライアントで `ssh-keygen -t ed25519`（保存先は既定、パスフレーズは空で、Enter を 3 回）。アカウントメニューの「Settings」→「SSH / GPG keys」→「Manage SSH keys」の「Add key」→ 名前と `.pub` の中身 →「Add key」。`The SSH key "<鍵の名前>" has been added.` と出て、一覧に名前と指紋（クライアントの `ssh-keygen` が出した指紋と同じ） | クライアントの seq 13〜16、`b06`、`screens/b06-…`、主の seq 14（メモ） |
+| 〃 | 2 | 通した | `4096 SHA256:<FINGERPRINT> no comment (RSA)` の 1 行 | 主の seq 15、`after-confirm/0015-実施手順-Git_の接続を確かめる-2.txt` |
+| 〃 | 3 | 通した | `RSA key fingerprint is SHA256:<FINGERPRINT>.`（同じ項の手順 2 と同じ値）→ `yes` → `Hi there, <FORGEJO_USER>! You've successfully authenticated with the key named <鍵の名前>, but Forgejo does not provide shell access.`。パスワードは聞かれない | クライアントの seq 17・18、`peer/session/session-001.raw`、主の seq 16（メモ） |
+| 〃 | 4 | 通した（ブラウザはスクリプトで操作） | 右上の `+` →「New repository」→ `forgejo-test`、「Make repository private」と「Initialize repository」をオン →「Create repository」。`Private`・`main`・`README.md`。「SSH」の clone URL は `ssh://git@<SERVER_IP>:2222/<FORGEJO_USER>/forgejo-test.git` | `b07`、`screens/b07-…`、主の seq 17（メモ） |
+| 〃 | 5 | 通した | 空の作業場所で clone → `connection-check.txt` → add → commit（`ad313f5`）→ push（`54e55ea..ad313f5  main -> main`）。ブラウザのファイルの一覧に `README.md`・`connection-check.txt`、コミットの一覧に `ad313f5930 Forgejo の接続確認` と `54e55eaf29 Initial commit` | クライアントの seq 19〜25、`b08`、`screens/b08-…`、主の seq 18（メモ） |
+| 再起動しても残ることを確かめる | 1 | 通した | `active`、`2222/tcp -> <SERVER_IP>:2222`・`3000/tcp -> <SERVER_IP>:3000` | 主の seq 19、`after-confirm/0019-実施手順-再起動しても残ることを確かめる-1.txt` |
+| 〃 | 2 | 通した（ブラウザはスクリプトで操作） | サービスの再起動（`ActiveEnterTimestamp` は 21:11:59 JST）の 2 秒後（21:12:01）から、サインアウト → サインイン。`forgejo-test` と `ad313f5` が残っていた。`git fetch` は、ホスト鍵の確認を求めずに戻った | `b09`、クライアントの seq 26、`facts-logout-step3.txt`（`ActiveEnterTimestamp`）、主の seq 23（メモ） |
+| 〃 | 3 | 通した（ブラウザはスクリプトで操作） | 主の VM の `<USER>` の SSH を全部閉じた（コンソールは GDM のログイン画面のまま）。logind の記録では、`Removed session 6.` が 21:12:21.674、次の `New session 28 of user <USER>.` が 21:12:44.990 JST で、その 23 秒のあいだ、このユーザーに残るのは linger の `manager` のセッションだけ。そのあいだの 21:12:22〜21:12:30 に、クライアントから Web のサインインと `git fetch` が通った。`sleep.target` と `suspend.target` が `masked` であることは、担当の報告による | `facts-logout-step3.txt`、`b10`、クライアントの seq 27・28、主の seq 24（メモ） |
+| 〃 | 4 | 通した | ポート 22 の SSH で `<USER>` にログインし直し、「イメージを取得して localhost で起動する」の手順 1 の 3 つのブロックを貼り直した | 主の seq 20〜22、`after-confirm/0022-…-1.txt`、主の seq 25（メモ） |
+| 〃 | 5 | 通した | `sudo systemctl reboot`。パスワードは聞かれず、`The system will reboot now!` の後に SSH が切れた。再起動したことは、`systemd-analyze` の行と、起動から 5.47 秒の `ActiveEnterTimestampMonotonic` で読める | 主の seq 26・27、`session/session-002.raw`、`facts-after-reboot.txt` |
+| 〃 | 6 | 通した | 変数を貼り直してから貼った。`active`・`generated`・`ActiveEnterTimestamp=Sun 2026-10-11 21:13:19 JST`・`Timestamp=Sun 2026-10-11 21:13:20 JST`・`Linger=yes`、LAN 向けの 2 つのポート、2 規則。サービスの起動が、ログインの 1 秒前 | 主の seq 28〜31、`after-confirm/0031-実施手順-再起動しても残ることを確かめる-6.txt`、`facts-after-reboot.txt` |
+| 〃 | 7 | 通した（ブラウザはスクリプトで操作。許可外の送信元は Windows のホスト） | サインアウト → サインイン。`forgejo-test` と `ad313f5` が残っていた。`git fetch` は、何も聞かずに戻った。許可外の送信元からは、3000・2222 とも 5 秒でつながらず、22 はつながった。IP は `<SERVER_IP>` のまま | `b11`、クライアントの seq 29、`outside-source-check-after-reboot.txt`、主の seq 32（メモ） |
+| 自動更新を有効にする | 1 | 通した | `-rwx------. 1 <USER> <USER> 13149 … /home/<USER>/.local/bin/forgejo-auto-update`。置かれたファイルの sha256 と行数（318 行）は、本文のヒアドキュメントの中身と同じ（この付録を書くときに、`114c2b2` の本文から計算して比べた） | 主の seq 33、`after-confirm/0033-実施手順-自動更新を有効にする-1.txt`、`facts-after-autoupdate.txt` |
+| 〃 | 2 | 通した | 何も表示されない | 主の seq 34、`after-confirm/0034-…-2.txt` |
+| 〃 | 3 | 通した | `Result=success`・`ExecMainStatus=0`、`forgejo-auto-update[<PID>]: 最新版 16.0.5 を使用中`、`NEXT` は `Mon 2026-10-12 04:16:23 JST`、最後の行は `forgejo version 16.0.5+…`。4.2 秒。タイマーは `enabled`・`active` | 主の seq 35、`after-confirm/0035-…-3.txt`、`facts-after-autoupdate.txt` |
+
+- **初期設定の画面**（「初期設定と管理者の作成」の手順 2）
+  - `http://localhost:3000/` は、ブラウザの言語（日本語。`<html lang="ja-JP">`、題は「インストール - Forgejo: Beyond coding. We forge.」）で開いた
+  - 画面下部の言語メニューを開いて「English」を押すと、英語になった（`Installation - …`、`en-US`）
+  - 欄の値は、箇条書きのとおり: Database type は SQLite3、Path は `/var/lib/gitea/data/forgejo.db`、Server domain は `localhost`、SSH server port は `2222`、HTTP listen port は `3000`、Base URL は `http://localhost:3000/`
+  - 自己登録を無効にする項目は、最初からオンだった。OpenID のサインインと登録の項目は最初からオフ、閲覧にサインインを求める項目は最初からオン（`b02-install-english.txt` の `disable_registration`・`enable_open_id_sign_in`・`enable_open_id_sign_up`・`require_sign_in_view`）
+  - 「Administrator account settings」を開いて、ユーザー名・メールアドレス・パスワード（2 欄）を入れ、「Install Forgejo」を押すと、5 秒後に `http://localhost:3000/` が `<FORGEJO_USER> - Dashboard` になった。**パスワードを聞かれずに、作った管理者でログインした状態になる**（`b03-install-submit.txt`、`screens/b03-after-install.png`）
+  - 「ログインできること」は、アカウントメニューの「Sign out」→ `/user/login` でユーザー名とパスワード →「Sign in」で確かめた（ダッシュボードと `/admin` が開いた。`b04-relogin-tunnel.txt`）
+- **LAN の URL での確かめ**（「LAN に公開する」の手順 3）
+  - 同じ項の手順 2 を貼った（12:07:50 UTC）2 秒後から、開いたままのトンネルの端末に `channel 1: open failed: connect failed: Connection refused` が出始め、`Ctrl+C`（12:08:09）までの 16 秒に 71 行出た（`peer/session/session-001.raw`）。`Ctrl+C` でプロンプトに戻った
+    - 71 行のうち 70 行は、2〜3 秒おきに 10 行ずつの 7 回。残りの 1 行は、12:08:08.9 に単独で出た（何の接続かは、証跡からは分からない）
+    - このあいだ、クライアントのブラウザは `http://localhost:3000/admin` を開いたままだった（ブラウザの直前の操作は、`b04` の最後の `/admin`。次の `b05` は、トンネルを閉じた後。証跡の `b05-lan-login.txt` が書かれた時刻は 12:08:12 UTC）
+  - LAN の URL は、サインインの前は日本語で出た（`ja-JP`）。上部は「エクスプローラー・ヘルプ・サインイン」だけで、登録のボタンは無い（`screens/b05-lan-home-signed-out.png`）
+  - `/user/sign_up` は「登録は無効になっています。 サイト管理者にお問い合わせください。」で、入力欄が無く、OpenID へのリンクも無い。`/user/login/openid` は `Forbidden`。`/install` と、匿名でのプロフィールの閲覧は、`/user/login` へ移った
+  - 管理者でサインインでき（サインインの後は `en-US`）、`/admin` が開いた
+  - 許可外の送信元（Windows のホスト。`LAN_SUBNET` の外の IP）からは、3000・2222 とも 5 秒でつながらなかった（時間切れ）。同じ時に、22 は 10 ミリ秒でつながった。クライアント（`LAN_SUBNET` の中）からは、3000・2222 ともつながった
+- 通していない分岐: 各手順の `中断:` の側（変数が空・既存の構築がある・同じ規則がある・Quadlet が違う、など）、`Failed to connect to user scope bus` のときの `--machine=`、`LAN_SUBNET='0.0.0.0/0'`、ポートを変えた場合、`FW_ZONE` が既定と違う場合、自動更新が版を上げる側（`更新:`）
+- 「自動更新を有効にする」の手順 3 の `NEXT` は、終わりに読むと `Mon 2026-10-12 04:18:56 JST` に変わっていた（`guest-facts-end.txt`。あいだに「バックアップから復元する」の手順 5 の `daemon-reload` がある。ランダムな遅れが引き直されたとみるが、確かめていない）
+
+**使い方の基本（13 手順。通した 11、条件に当たらず飛ばした 2）**: 全部、クライアント（利用する PC の役）で行った。端末のブロックは `~/forgejo-work/forgejo-demo` の中で貼った。
+
+| 手順 | 判定 | 出力と、確かめたこと | 根拠 |
+|---|---|---|---|
+| 1 | 通した（ブラウザはスクリプトで操作） | Cookie を消した状態（初めて開くブラウザと同じ）で `http://<SERVER_IP>:3000/` を開くと、日本語（`ja-JP`）で出た。画面下部の言語メニューで「English」→ 上部の「Sign in」→「Username or email address」と「Password」→「Sign in」→ ダッシュボード | `u01`、`screens/u01-…`、クライアントの seq 38（メモ） |
+| 2 | 条件に当たらず飛ばした | 「Git の接続を確かめる」の手順 1 で、同じ Forgejo アカウントに同じ PC の鍵を登録済み | `b06`、クライアントの seq 39（メモ） |
+| 3 | 条件に当たらず飛ばした | 同じサーバーへ照合済み（「Git の接続を確かめる」の手順 3） | クライアントの seq 17・18・40（メモ） |
+| 4 | 通した（ブラウザはスクリプトで操作） | `+` →「New repository」→ Owner は管理者、`forgejo-demo`、「Make repository private」と「Initialize repository」をオン。「Advanced settings」は畳まれたまま（「Click to expand」）で、「Default branch」の値は最初から `main`。「Create repository」→ `Private`・`main`・`README.md` | `u04`、`screens/u04-…`、クライアントの seq 41（メモ） |
+| 5 | 通した | 画面の「SSH」の URL は `ssh://git@<SERVER_IP>:2222/<FORGEJO_USER>/forgejo-demo.git`。clone → `cd forgejo-demo` → `git status` は `On branch main`・`nothing to commit, working tree clean`。指紋は聞かれない（照合済み） | クライアントの seq 30〜33、`peer/session/session-001.raw` |
+| 6 | 通した（ブラウザはスクリプトで操作） | 「Issues」→「New issue」→ タイトル「README に使い方を追加する」と本文 →「Create issue」。`#1`・`Open` | `u06`、`screens/u06-…`、クライアントの seq 43（メモ） |
+| 7 | 通した | `Already on 'main'`・`Already up to date.`・`Switched to a new branch 'docs/readme-guide'`。クライアントの Git は `pull.rebase=true`（初期設定の「Git」）で、`git pull --ff-only` は通った | クライアントの seq 34、`peer/session/session-001.raw` |
+| 8 | 通した | 差分は `README.md` の 4 行の追加だけ（空行・`## 使い方`・空行・`Git で clone して作業用ブランチを作成します。`） | クライアントの seq 35、`peer/session/after-confirm/0035-使い方の基本-8.txt` |
+| 9 | 通した | `[docs/readme-guide b6145e0] README に使い方を追加`、`* [new branch]      docs/readme-guide -> docs/readme-guide`。push の出力に、`remote: Create a new pull request for 'docs/readme-guide':` と、比較の画面の URL が出た。ブラウザのブランチの一覧に `docs/readme-guide` | クライアントの seq 36、`peer/session/session-001.raw`、`u10-pr-open.txt`、`screens/u09-branches.png` |
+| 10 | 通した（ブラウザはスクリプトで操作。箇条書きに無い操作が 1 つ要った） | 下の「Pull Request を作る画面」 | `u10-pr-open`・`u10-pr-create`・`x-pr-form-visible`、`screens/u10-…`・`x-pr-form-…`、クライアントの seq 44（メモ） |
+| 11 | 通した（ブラウザはスクリプトで操作） | 「Files changed」: `README.md` だけ、`1 changed files with 4 additions and 0 deletions`、追加は手順 8 の 4 行。直して push し直す・レビュー・CI は行っていない | `u11-pr-files-merge.txt`、`screens/u11-pr-files-changed.png` |
+| 12 | 通した（ブラウザはスクリプトで操作） | 「Conversation」の「Create merge commit」→ 確認フォーム（ボタンは「Create merge commit」と「Cancel」）→「Create merge commit」。`Merged`、`Pull request successfully merged and closed`、`merged commit 41d1e72074 into main`。Issue #1 は `Closed`。main の README に「使い方」 | `u11-pr-files-merge.txt`、`screens/u12-…` |
+| 13 | 通した | `Updating 248c775..41d1e72`・`Fast-forward`、`41d1e72 (HEAD -> main, origin/main, origin/HEAD) Merge pull request 'README に使い方を追加' (#2) from docs/readme-guide into main` | クライアントの seq 37、`peer/session/after-confirm/0037-使い方の基本-13.txt` |
+
+- **Pull Request を作る画面**（手順 10）
+  - 「Pull requests」→「New pull request」で、比較の画面（`compare/main...main`。`merge into` も `pull from` も `main`）が開いた
+  - 「pull from」のメニューで `docs/readme-guide` を選ぶと、URL が `compare/main...docs/readme-guide` になり、下にコミットの一覧と差分が出た。**この時点では、タイトルと本文の欄は出ていない**（その上に「New pull request」のボタンがある）
+  - その「New pull request」を押すと、タイトルと本文の欄と「Create pull request」が出た。タイトルには、コミットの件名「README に使い方を追加」が最初から入っていた
+  - 本文に目的・内容・確認結果と `Closes #1` を入れて「Create pull request」→ `#2`・`Open`・`wants to merge 1 commit from docs/readme-guide into main`（`screens/u10-pr-form.png`・`u10-pr-created.png`）
+  - 欄が出る前と後は、マージの後に、別のブランチ（`docs/form-check`。手順書の外）で確かめ直してある。ブランチを選んだ直後は、タイトルの欄が見えず、ボタンは「New pull request」だけ。押した後は見えて、ボタンは「Create pull request」（`x-pr-form-visible.txt`、`screens/x-pr-form-before-click.png`・`x-pr-form-after-click.png`）
+
+**バックアップ（4 手順。通した 4。手順 4 は代わりの形）**:
+
+| 手順 | 判定 | 出力と、確かめたこと | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `ActiveState=inactive`・`SubState=dead`、`podman ps` は見出しだけ | 主の seq 36、`after-confirm/0036-バックアップ-1.txt` |
+| 2 | 通した | `700 /home/<USER>/.local/state/forgejo-backups`・`600 …/forgejo-20261011T121808Z.tar.gz`・`バックアップ: /home/<USER>/.local/state/forgejo-backups/forgejo-20261011T121808Z.tar.gz`。98148 バイト、157 項目（名前の一覧だけを読んだ）。止めているあいだ、Web は応答しない | 主の seq 37、`after-confirm/0037-バックアップ-2.txt`、`facts-backup1.txt` |
+| 3 | 通した | `active`。クライアントから、サインインと 2 つのリポジトリ（`forgejo-test` の `ad313f5`、`forgejo-demo` の `41d1e72`）、`git fetch` | 主の seq 38、`after-confirm/0038-バックアップ-3.txt`、`k03-after-backup-start.txt`、クライアントの seq 47・48 |
+| 4 | 通した（代わりの形） | コードブロックの無い手順。クライアントに 700 のディレクトリを作り、`scp -p` でアーカイブをコピーした（OS のパスワードを聞かれた）。コピー先は `700`・`600`。**同じ PC の上の VM なので、「サーバーのディスクを失っても残る保管先」ではない**。アーカイブを暗号化しての保管は行っていない | クライアントの seq 49〜52、`peer/session/session-001.raw`、主の seq 39（メモ） |
+
+- 止めていたのは 6 秒ほど（手順 1 を貼った 12:18:05 UTC から、手順 3 の `active` が出た 12:18:11 まで。`session/session-003.raw`）
+- 手順 4 のコピーの sha256 が元のファイルと同じであることと、写しを終わりに消したことは、担当の報告による（証跡にあるのは、コピー先の sha256 だけ）
+
+**バックアップから復元する（7 手順。通した 6、条件に当たらず飛ばした 1）**: 復元で戻ることが分かるように、バックアップの後に `forgejo-test` へコミットを 1 つ足して push した（`4da4bea`。手順書の外。クライアントの seq 53）。リードの「先に現在の状態をバックアップする」は、「バックアップ」の手順 1〜3 をもう 1 回貼って行った（主の seq 40〜42。`forgejo-20261011T121929Z.tar.gz`、100467 バイト）。
+
+| 手順 | 判定 | 出力と、確かめたこと | 根拠 |
+|---|---|---|---|
+| 1 | 通した | `FORGEJO_RESTORE` に、1 つ目のバックアップの絶対パスを入れた | 主の seq 43 |
+| 2 | 通した | `復元するイメージ: codeberg.org/forgejo/forgejo:16.0.5-rootless`、取得の行（どの層も `skipped: already exists`）、`forgejo version 16.0.5+…`、`初期設定画面の閉鎖・…: OK`、`復元前のファイル・版・隔離環境での実効確認: OK`。8.2 秒。別の SSH で見ると、検証用のコンテナとネットワークは残っていない（`podman network ls` は `podman` だけ）。動いている Forgejo は `active` のまま | 主の seq 44、`after-confirm/0044-バックアップから復元する-2.txt`、`facts-restore-after-step2.txt` |
+| 3 | 通した | `ActiveState=inactive`・`SubState=dead`、`podman ps` は見出しだけ | 主の seq 45、`after-confirm/0045-…-3.txt` |
+| 4 | 通した | `復元前の退避: /home/<USER>/.local/state/forgejo-backups/before-restore-<8 文字>`（中に `data` と `forgejo.container`）。`~/.local/share/forgejo` は 700、`forgejo.container` は 600 | 主の seq 46、`after-confirm/0046-…-4.txt`、`facts-restore-after-step5.txt` |
+| 5 | 通した | `active`、`forgejo version 16.0.5+…`。別の SSH で見ると、データのラベルは `container_file_t:s0:c206,c273`、`healthz` は 200、Git 用 SSH のホスト鍵の指紋は「Git の接続を確かめる」の手順 2 と同じ | 主の seq 47、`after-confirm/0047-…-5.txt`、`facts-restore-after-step5.txt` |
+| 6 | 通した（ブラウザはスクリプトで操作。許可外の送信元は Windows のホスト） | 下の「復元の後の確かめ」 | `r06-after-restore.txt`、`screens/r06-…`、クライアントの seq 54〜57、`outside-source-check-after-restore.txt`、主の seq 48（メモ） |
+| 7 | 条件に当たらず飛ばした | 新しい版の不具合で戻したのではない。退避した定義と、復元した定義の `Image=` は、どちらも `16.0.5-rootless`（貼っていない） | `facts-restore-after-step5.txt`、主の seq 49（メモ） |
+
+- **復元の後の確かめ**（手順 6）
+  - Web: サインインできた。`forgejo-test` は `ad313f5`（バックアップの後に足した `4da4bea` は無い）、`forgejo-demo` は `41d1e72` で PR #2 は `Merged` のまま、登録した SSH の鍵も残っていた
+  - `/install` は、サインインの前は `/user/login` へ移り、サインインの後は `Page not found`。`/user/sign_up`（`?openid` を付けても）は `Registration is disabled. Please contact your site administrator.` で、入力欄が無い。`/user/login/openid` は `Forbidden`
+  - 端末（バックアップの後のコミットを持つ、もとの clone）: `git fetch` は `+ 4da4bea...ad313f5 main       -> origin/main  (forced update)`、`git status -sb` は `## main...origin/main [ahead 1]`。この clone からは push していない
+  - 端末（新しい場所へ clone し直した）: `ad313f5`、`README.md  connection-check.txt`。`restore-check.txt` を commit して push した（`ad313f5..5c2f1db  main -> main`）
+  - Git 用 SSH の指紋は、取り寄せ直したもの（`ssh-keyscan`）も、クライアントの `known_hosts` のものも、バックアップの前と同じ値。ホスト鍵の確認は求められなかった
+  - 許可外の送信元からは、3000・2222 とも 5 秒でつながらなかった（22 はつながった）
+  - 退避と、展開用の作業場所は、消していない
+- 止めていたのは 6 秒ほど（手順 3 を貼った 12:20:02 UTC から、手順 5 の `active` が出た 12:20:08 まで。`session/session-003.raw`）
+- 通していない分岐: 異なる版のバックアップを戻す側（DB の移行の後の復元）、手順 7 の `保留:` と `中断:` の側、自動更新のアーカイブ（`forgejo-auto-*`）を戻す側、`中断: 自動更新の実行中`
+
+### 通らなかった手順と、手順書の前提と違えた所（Hyper-V、2026-10-11）
+
+通らなかった手順は無い。手順書の前提や書く形と違えた所と、見立ては、次のとおり。
+
+- **手順書の前提と違えた所**
+  - リードの「サーバーの IPv4 が固定されていること」: 満たしていない。主の VM の IP は、Default Switch の DHCP が配ったものを、そのまま `SERVER_IP` に使った。通しのあいだは、ゲストを再起動しても変わらなかった
+  - 「別の PC のブラウザで」: 人の手ではなく、クライアントのヘッドレスの Firefox をスクリプトで操作した。窓のあるブラウザ、マウスとキーボード、クリップボードへのコピーは、通していない
+  - 「バックアップ」の手順 4: 同じ PC の上の別の VM へ `scp` でコピーした。別のディスク・別の PC・暗号化しての保管は、通していない
+  - 許可外の送信元: VM を動かしている Windows の PC（同じ仮想スイッチの、`LAN_SUBNET` の外の IP）から、TCP の接続だけを試した（何も送っていない。PowerShell の `System.Net.Sockets.TcpClient` を使った、と担当の報告にある）
+- **SSH から貼ったせい**: 無い。手順書は「デスクトップの端末か SSH」と書いている。「再起動しても残ることを確かめる」の手順 6 の `XDG_SESSION_ID` は、SSH のセッションでも入っていた（`Timestamp=` が出た）
+- **Hyper-V のせい**: 確認の出力が変わった所は無い。値として変わるのは、`/20` の IP と、許可外の送信元からの接続が「拒否」ではなく「時間切れ」に見えたこと（[下の表](#hyper-v-に左右されたと思われる値2026-10-11)）
+- **手順書のせい**: 通らなかった所は無い。箇条書きに無い操作が 1 つ（「使い方の基本」の手順 10）、箇条書きから読み取れない動きが 3 つ（「初期設定と管理者の作成」の手順 2、「LAN に公開する」の手順 3、「バックアップから復元する」の手順 6）。どれも[指摘と状態](#指摘と状態hyper-v2026-10-11)
+- **道具のせい**（手順書ではない）
+  - ブラウザのスクリプトが、途中で止まったことがある。`b05` は、サインインのボタンを英語の文字で探して、日本語の画面で見つけられずに止まった（パスワードの欄に入れた後、送信する前）。`u10-pr-open` は、比較の画面を開いた後に、スクリプトの誤り（JavaScript の `TypeError`）で止まった。どちらも、直したスクリプトで続けた（`b05b`・`u10-pr-create`）。担当の報告では、`b07` も、最初の回は、欄の名前の誤りで何も入れる前に止まった（その回の出力は、証跡に無い）
+  - 「再起動しても残ることを確かめる」の手順 6 の 2 つの時刻が 1 秒しか違わないのは、ドライバが再起動の直後につなぎ直したため
+
+### 手順書の外で行ったこと（Hyper-V、2026-10-11）
+
+- クライアントの準備: 初期設定の「Git」の手順 1〜6（上の表）と、空の作業場所 `~/forgejo-work`
+- ブラウザの道具: クライアントに、Marionette のクライアント（`tools/guest/mar.py`）と操作ごとのスクリプトを `scp` で送り、別の SSH から動かした。「使い方の基本」の手順 1 の前に、ブラウザの Cookie を全部消した（初めて開く状態にして、言語メニューの案内を確かめるため）
+- `ssh-keygen`: 保存先は既定、パスフレーズは空
+- 復元を見分けるための操作: バックアップの後のコミット（`4da4bea`）、復元の前の 2 つ目のバックアップ、新しい場所への clone、`ssh-keyscan` での指紋の取り寄せ。箇条書きのコマンドに `mkdir`・`cd`・`git status -sb`・`git log`・`ls`・`sha256sum`・`stat` を足した所は、`peer/peer-steps.md` に「手順書の外」と書いてある
+- 範囲の外の確かめ: 比較の画面で入力欄が出るかを見るために、`forgejo-demo` にブランチ `docs/form-check`（コミット 1 つ）を push した。Pull Request は作っていない。担当の報告では、このブランチは、通しの終わりのスナップショットに残っている
+- 別の SSH（鍵で、パスワードなし）で、状態を読んだ（`facts-*.txt`・`guest-facts-*.txt`）。`app.ini` とアーカイブの中身は読んでいない（`forgejo.container` と、アーカイブの名前の一覧だけ）
+- 終わりの片付け（担当の報告による。証跡の `peer/guest-facts-end.txt` は、片付けの前の状態）: クライアントの Firefox を止め、ブラウザの道具・プロファイル・検証用のパスワードの写しと、バックアップの写しを消した。クライアントに残したのは、`~/.gitconfig`、パスフレーズ無しの鍵の組（この通しの Forgejo にだけ登録した）、`known_hosts` の行、`~/forgejo-work`
+- 画面の PNG を撮った（主の VM とクライアントのコンソールを 1 枚ずつ、終わりに）
+
+### Hyper-V に左右されたと思われる値（2026-10-11）
+
+担当の報告が挙げた値を、証跡と照らして、値のまま並べた。ほかのハイパーバイザや実機と比べて確かめたものではない。時間は、静かなホストで測ったものではない（担当の報告では、同じ時刻に、ほかの単位の VM が同じホストで動いていた）。性能の比べには使わない。
+
+| 項目 | 値 |
+|---|---|
+| `systemd-detect-virt` | `microsoft`。`hostnamectl` は `Chassis: vm`・`Hardware Vendor: Microsoft Corporation`・`Hardware Model: Virtual Machine`・`Firmware Version: Hyper-V UEFI Release v4.1`（`guest-facts-end.txt`） |
+| NIC と IP | 2 台とも `eth0` で、アドレスは `/20`。主の VM は `<SERVER_IP>/20`（DHCP。ゲストを再起動した後も同じ。`facts-after-reboot.txt`）。この通しの後、止めてあった VM を 12:45 UTC に起動し直したときも、同じ IP だった（`.verification/campaign/hv/AVC-recheck/` の、この VM の `meta.json`）。既定の経路は Windows のホスト。2 台のあいだは、この IP で直接届いた（ping は 0.3〜0.7 ミリ秒。`peer/guest-facts-start.txt`） |
+| ホスト名と FQDN | `hostname -f` は `<HOSTNAME>.mshome.net`（ホスト名は、クローンの元と同じ）。手順書は IP だけを使うので、確認の出力には出ない |
+| firewalld | 既定のゾーンは `public`、`--get-active-zones` は `public (default)` に `eth0`、`target: default` |
+| 許可外の送信元からの見え方 | Windows のホストから主の VM の 3000・2222 への TCP は、3 回とも、拒否の応答ではなく 5 秒の時間切れになった。同じ時に、22 は 9〜10 ミリ秒でつながった（`outside-source-check-*.txt`）。Linux の許可外の送信元からどう見えるかは、確かめていない |
+| 再起動 | 「再起動しても残ることを確かめる」の手順 5 を貼って（12:13:09.8 UTC）から、SSH のログインの表示が出るまで 10.5 秒、ドライバの bash が開くまで 14.1 秒（`session/session-003.raw`、主の seq 27）。`systemd-analyze` は `648ms (kernel) + 1.815s (initrd) + 14.429s (userspace) = 16.894s`。`forgejo.service` が active になったのは、起動から 5.47 秒（`ActiveEnterTimestampMonotonic=5468694`。`facts-after-reboot.txt`） |
+| イメージの取得 | 「イメージを取得して localhost で起動する」の手順 2 のブロックは 15.7 秒（プロンプトの表示は `took 13s`。イメージは 188 MB） |
+| メモリとディスク | 主の VM の終わりの `free -m` は、合計 2900・使用 1056・available 1843（Forgejo と `hello-web` が動いている状態）。`/` は 39G のうち 8.1G（始めも終わりも）。データは 6.1M、バックアップの置き場所は 5.2M。クライアントの終わりは、合計 1639・使用 1162・available 476（ヘッドレスの Firefox と GDM のログイン画面が動いている状態） |
+| コンソールの PNG | 終わり（21:22 JST）に撮った主の VM のコンソールの PNG には、ログイン画面と 21:18 の時計が写っていた（`screens/main-console-end.png`）。同じころ（21:22:26）の `loginctl` では、ログイン画面は約 4 分前から無操作（`guest-facts-end.txt`）。無操作で画面が消えていて、消える直前の絵が撮れたとみる（画面が消えたこと自体は、見ていない）。Hyper-V の VM は、画面が消えているあいだに撮った PNG が、消える直前の絵のままになる（[初期設定の通しの記録](almalinux-setup.md#ハイパーバイザに左右された出力hyper-v)）。この付録の「GNOME にログインしていない」は、PNG ではなく `loginctl` で書いた |
+| 失敗しているユニット | `mcelog.service`（主の VM。起動のたびに failed。初期設定の通しのときから同じ。手順には影響しない。Hyper-V によるかは確かめていない） |
+
+- **SELinux の拒否**: 主の VM は 0 件。根拠は、この通しの後の数え直し
+  - 2026-10-11 12:45 UTC に、止めてあった主の VM を司令塔が起動し直して、監査ログのファイル（`/var/log/audit/audit.log` と `audit.log.1`）を直接数えた。`type=AVC`・`type=USER_AVC`・`type=SELINUX_ERR` で始まる行は、どれも 0 行（`grep -c`）。`ausearch --input-logs -m AVC,USER_AVC,SELINUX_ERR` も `<no matches>`。ログの記録は 07:23:58〜12:45:32 UTC で、この通しの時間（12:03〜12:22 UTC）を含む（`.verification/campaign/hv/AVC-recheck/` の、この VM の `avc.txt`）
+  - 担当の報告の `<no matches>`（`facts-after-reboot.txt`・`facts-restore-after-step5.txt`・`guest-facts-end.txt`）は、根拠にしていない。端末の無い別の SSH から、`--input-logs` を付けない `ausearch` で読んだもので、その形の `ausearch` は、監査ログではなく標準入力を読み、ログを見ないまま `<no matches>` を返す
+  - クライアントの VM は、数え直していない（確かめていない）
+
+### 過去の記録と違った所（Hyper-V、2026-10-11）
+
+どれも、手順の判定は変えない。
+
+| 所 | 今回（Hyper-V の VM） | 過去の記録 |
+|---|---|---|
+| `systemctl --user` | どのブロックでも、`Failed to connect to user scope bus` は出なかった（SSH の対話の bash） | 2026-10-11 の実機は、Codex の実行経路で途中から `Connection refused` になり、`--machine=<USER>@.host` で読んだ |
+| 「バックアップ」の手順 1 と「バックアップから復元する」の手順 3 の停止 | 3 回とも `ActiveState=inactive`・`SubState=dead` | 2026-10-09 のコンテナは、サービスの再起動の直後に止めた最初の 1 回だけ、unit の表示が `failed` になった |
+| OS の再起動の後の、サービスの起動とログインの差 | 1 秒（ドライバが、すぐにつなぎ直した） | 2026-10-09 のコンテナ（検証コンテナの再起動）は 30 秒 |
+| 「バックアップから復元する」の手順 2 の隔離確認 | 今の形（`--internal --disable-dns` の専用ネットワーク）が、1 回で通った（8.2 秒） | 2026-10-11 の実機の隔離コピーの確認は、最初の起動で、専用ネットワークの aardvark-dns がユーザー D-Bus へ接続できずに失敗し、`--internal --disable-dns` で作り直した |
+| 復元の確かめ | 復元した本番に、別の VM からログインし、clone と push を通した | 2026-10-11 の実機は、隔離コピーの確認までで、復元側へのログインと Git の通信は未検証 |
+
+### 指摘と状態（Hyper-V、2026-10-11）
+
+- 行番号は、コミット `114c2b2` の `docs/forgejo.md` のもの。直した後の手順書では、行がずれている
+- 7 つとも、担当の報告が挙げたもの（重大度も、報告のまま）。報告の直し方の案のうち、採った形は「状態」に書いた
+- 「状態」は、2026-10-11 に手順書を直した後のもの。「直した」は、箇条書きの文言だけを直したもので、コードブロックは変えておらず、VM では流し直していない
+- 手順書の指摘は 7（どれも低）。直した 4、未対応 3
+
+| 連番 | 重大度 | 場所 | 何が起きたか | 見立て | 状態 |
+|---|---|---|---|---|---|
+| 1 | 低 | 「使い方の基本」の手順 10（`:1054`〜`:1056`） | 「New pull request」で開く比較の画面で、`merge into` と `pull from` を選んでも、タイトルと本文の欄は出ない。コミットの一覧と差分の上に出る「New pull request」をもう 1 度押すと出る。箇条書きに、この操作が無かった | 手順書の書き落とし。Forgejo 16.0.5 の英語の画面の動きで、SSH にも Hyper-V にもよらないとみる（見立て）。2026-10-09 の 16.0.5 の付録は、同じ画面を Playwright で通しているが、この操作を記録していない。手順書の画像（`usage-pr-create-en-v16.png`）は、押した後の画面 | 直した（箇条書きを 1 つ足した） |
+| 2 | 低 | 「初期設定と管理者の作成」の手順 2（`:231`） | 「「Install Forgejo」を押し、作った管理者でログインできることを確かめる」とあるが、押すと 5 秒でダッシュボードになり、パスワードを聞かれずに、作った管理者でログインした状態になる。「ログインできること」は、サインアウトしないと確かめられない | 手順書の書き方。Forgejo の動きで、SSH にも Hyper-V にもよらないとみる（見立て）。過去の付録（2026-10-09・2026-10-10）は、別のブラウザのセッションでログインを確かめたと書いていて、押した直後の状態は記録していない | 直した（押した後に開く画面と、サインアウトしてからの確かめの 2 つに分けた。参考資料にも補足） |
+| 3 | 低 | 「LAN に公開する」の手順 3（`:449`） | 同じ項の手順 2 で LAN 用に切り替えると、開いたままのトンネルの端末に `channel 1: open failed: connect failed: Connection refused` が出続けた（16 秒に 71 行）。エラーに見えるが、箇条書きに無い | 手順書の書き落とし。切り替えで、サーバーの `127.0.0.1:3000` の待ち受けが無くなった所へ、トンネルの入口に接続が来たため。接続しに行ったのは、`http://localhost:3000/admin` を開いたままのブラウザのページとみる（見立て。切り分けていない。2026-10-09 のコンテナの付録に、ホームのポーリングが続くとある）。リードの「初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない」と合う。窓のあるブラウザで同じだけ出るかは、確かめていない | 直した（入れ子の箇条書きを 1 つ足した。「出続けることがある」と書いた。参考資料にも補足） |
+| 4 | 低 | 「バックアップから復元する」の手順 6（`:1381`） | バックアップより後に push したコミットを持つ clone で `git fetch` すると、`(forced update)` と出て、ローカルが `[ahead 1]` になった。箇条書きは「`git fetch` を実行し、確認用の新しいコミットを push する」で、その clone からそのまま push する形に読める | 手順書の書き落とし。その clone から push すると、復元で無くなったコミットがサーバーへ戻るとみる（見立て。今回は push していない）。今回は、clone し直した場所から push した。2026-10-09 のコンテナの付録も、新しく clone した場所で確かめている | 直した（入れ子の箇条書きを 1 つ足した。参考資料にも補足） |
+| 5 | 低 | 「LAN に公開する」の手順 3（`:450`） | LAN の URL を初めて開くと、言語は、またブラウザの言語（日本語）になった（`localhost:3000` で English を選んだ後でも）。サインインすると英語になった。言語メニューの案内は、「初期設定と管理者の作成」の手順 2 と「使い方の基本」の手順 1 にだけある | 操作には困らなかった（登録のボタンが無いことは、日本語の画面でも確かめられた）。サインインの後に英語になった理由は、確かめていない | 未対応（手順書は変えていない） |
+| 6 | 低 | 「再起動しても残ることを確かめる」の手順 6（`:561`） | 「サービスが起動した時刻がログインした時刻より前ならよい」。2 つの時刻は秒までで、今回は 1 秒の差だった。再起動の直後にログインすると、同じ秒になりうる | 今回は、条件を満たした（サービスは起動から 5.47 秒、SSH のログインはその後。再起動の後の `loginctl` でも、ユーザーの `manager` のセッションの LEADER の PID は、ドライバの SSH のセッションの LEADER の PID より小さい。`facts-after-reboot.txt`）。ドライバがすぐにつなぎ直したための差。同じ秒になったことは、見ていない | 未対応（手順書は変えていない） |
+| 7 | 低 | 「使い方の基本」の手順 4（`:996`） | 「「Advanced settings」の「Default branch」は `main` にする」とあるが、「Advanced settings」は畳まれていて、「Default branch」は最初から `main` だった。開かなくても `main` で作られた | 箇条書きのとおりにしても困らない。Forgejo 16.0.5 の画面の、最初の値 | 未対応（手順書は変えていない） |
+
+環境と道具の指摘（手順書の外。このリポジトリでは直さない）:
+
+- **主の VM の IP**: Default Switch の DHCP で、手順書の前提（固定の IPv4）と違う。Quadlet の `PublishPort`・`DOMAIN`・`ROOT_URL`・`SSH_DOMAIN` と、firewalld の 2 規則に、この IP が入っている。次に起動したときに IP が変わっていれば、`forgejo.service` は待ち受けられないはず、というのが担当の見立て（確かめていない。12:45 UTC に起動し直したときは、同じ IP だった）
+- **ドライバ**: 再起動のブロックを貼ったとき、`accepted: false`・`state: disconnected` を返した（`session/requests.jsonl`）。コマンドは動いている（出力に `The system will reboot now!`）。失敗と読まない
+- **クライアントのメモリ**: 2048 MB の VM でヘッドレスの Firefox を動かすと、available が 500 MB を切った（終わりは 476 MB。担当の報告では、途中で 384 MB）。落ちてはいない
+- **Windows のホストから見た拒否**: 許可外の送信元からの 3000・2222 は、拒否の応答ではなく、時間切れになった。firewalld の `public` が返す拒否を、Windows の TCP が接続の失敗として返さないため、というのが担当の見立て（確かめていない）。「つながらない」ことは確かめられた
+- **ゲスト**: `mcelog.service` が、起動のたびに failed になる
+- 報告の重大度は、主の VM の IP が中、ほかの 4 つは低。報告は、このほかに 2 つ挙げている（どちらも低）: 検証の道具の文書（単位の定義）に、ブラウザの手順をどう操作するかが書かれていないことと、画面が消えているあいだに撮った PNG（上の表の「コンソールの PNG」）
+
+### 手順書を直した所（Hyper-V、2026-10-11）
+
+通した後（`114c2b2` より後）に直した。どれも箇条書きの文言だけで、コードブロックは変えていない（4 つとも、コマンドの無い手順）。VM で貼り直すものは無い。
+
+- [手順書](https://github.com/ryo-aoki-pc/setup-notes/blob/114c2b2bfd14b51f9e1925b150cbf72e1954f311/docs/forgejo.md)の「初期設定と管理者の作成」の手順 2: 「「Install Forgejo」を押し、作った管理者でログインできることを確かめる」を、2 つの箇条書きに分けた（指摘 2）
+  - 「Install Forgejo」を押すと、作った管理者でログインした状態のダッシュボードが開く
+  - パスワードでログインできることは、右上のアカウントメニューの「Sign out」の後、「Sign in」で確かめる
+- 「LAN に公開する」の手順 3: トンネルを閉じる箇条書きの下に、同じ項の手順 2 の後に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがあり、正常なのでそのまま閉じる、という 1 行を足した（指摘 3）
+- 「使い方の基本」の手順 10: `merge into` と `pull from` を選ぶ箇条書きの次に、コミットの一覧と差分の上に出る「New pull request」をもう 1 度押して、タイトルと本文の欄を開く、という 1 行を足した（指摘 1）
+- 「バックアップから復元する」の手順 6: `git fetch` と push の箇条書きの下に、`git fetch` が `(forced update)` を出したら、その clone には復元で無くなったコミットが残っていて、そのまま push するとサーバーに戻ること、戻したくなければ空の場所へ clone し直してから push すること、の 1 行を足した（指摘 4。その clone からの push は、この通しでは試していない。git の動きからの説明）
+- 足した文の元になった出力と画面は、どれも、この通しの記録にある（`b03-install-submit.txt`・`b04-relogin-tunnel.txt`、`peer/session/session-001.raw`、`x-pr-form-visible.txt` と 2 枚の PNG、クライアントの seq 54〜56）
+- [参考資料](../reference/forgejo.md)に、補足を 3 つ足した
+  - 「実施手順 / 初期設定と管理者の作成 / 手順 2: 補足: 「Install Forgejo」の後のログイン」
+  - 「実施手順 / LAN に公開する / 手順 3: 補足: トンネルの端末に出る Connection refused」（何が接続しに行ったかは、切り分けていないと書いた）
+  - 「バックアップから復元する / 手順 6: 補足: `(forced update)` が出た clone から push しない理由」（その clone からの push は試していないと書いた）
+- [ロールバック](../extra/forgejo.md)は、変えていない（この通しの範囲の外）
+
+### 報告と証跡の照合（Hyper-V、2026-10-11）
+
+- 50 手順の判定と、「確認」の後ろの出力は、担当の報告（`result.md`）と証跡で食い違わない
+- **SELinux の拒否**: 報告は「拒否は無い（`ausearch -m avc -ts boot`・`-ts today` とも `<no matches>`）」と書く。この読み方は当てにならないので、この付録は、司令塔の数え直しで書いた（[上の表の下](#hyper-v-に左右されたと思われる値2026-10-11)）。結果は、どちらも 0 件
+- **スクリプトが止まった回数**: 報告は 2 回（`b05`・`b07`）と書く。証跡では、`u10-pr-open.txt` も、比較の画面を開いた後に、スクリプトの誤りで止まっている。`b07` の止まった回の出力は、証跡に無い（同じ名前のファイルに、通った回の出力だけがある）
+- **URL を直接開いた所**: 報告は、URL を直接開いたのは、最初のページ・確かめのためのページ・`/user/login` だけと書く。スクリプトでは、リポジトリのページ（`u06-issue.py`・`u10-pr-open.py`）と、Pull Request と Issue のページ（`u11-pr-files-merge.py`）も、URL で開いている（手順書が、その画面にいる前提で書いている所）
+- **トンネルの端末の行**: 報告は「17 秒ほどで 71 行」と書く。証跡では、最初の行が 12:07:52.57、最後の行が 12:08:08.91 UTC で、16 秒に 71 行
+- **クライアントの `known_hosts`**: 報告は、残したのは 2 行（主の VM の 22 と 2222）と書く。証跡では、2222 の行は 4 行目にあった（`ssh-keygen -F` の `found: line 4`。クライアントの seq 57）。ほかの行が何かは、証跡からは読めない
+- **再起動の後のつなぎ直し**: 報告の「14.1 秒後につながった」は、ドライバの bash が開くまでの時間。SSH のログインの表示は、貼ってから 10.5 秒後に出ている
+- **止めていた時間**: 報告は、バックアップが 7 秒、復元が 8 秒と書く。証跡の時刻（止めるブロックを貼ってから、起動のブロックの `active` が出るまで）では、どちらも 6 秒ほど
+- 報告だけにあって、証跡のファイルでは確かめられないもの
+  - `vmms.exe` の版、ディスクが SCSI の差分であること、NIC が Default Switch であること
+  - トンネルの初めての接続で出た ED25519 の指紋を、サーバーの `/etc/ssh/ssh_host_ed25519_key.pub` と比べたこと（比べた記録は無い。点検のときに、証跡の `known_hosts` と `session/known_hosts`〔Windows のホストの SSH が控えた、主の VM のホスト鍵〕から指紋を計算すると、トンネルの端末に出た指紋と同じだった）。パスワードを送る前に、端末のエコーが切れていることを確かめたこと
+  - 「バックアップ」の手順 4 の、元のアーカイブの sha256
+  - 再起動の前後の boot ID、`sleep.target`・`suspend.target` が `masked` であること
+  - 終わりに 2 台を止めて、主の VM のスナップショットを取ったこと、クライアントの片付け、記録に OS のパスワードと鍵が無いことの点検（`tools/scan-secrets.mjs`）
+
+### 確かめていないこと（Hyper-V、2026-10-11）
+
+- 人の手でのブラウザの操作（マウス・キーボード・クリップボードへのコピー）、窓のあるブラウザでの表示、手順書の画像（`docs/images/forgejo/usage-*-en-v16.png`）との見比べ（開いて見たのは、指摘 1 の `usage-pr-create-en-v16.png` の 1 枚だけ）
+- Windows のクライアント（Git Bash）、実物の別のマシンからの接続（クライアントは、同じ仮想スイッチの AlmaLinux の VM だけ）
+- 固定の IPv4、IP が変わったときの動き、VPN 経由、LAN と VPN の両方、Linux の許可外の送信元からの見え方
+- 「バックアップ」の手順 4 の、別のディスク・別の PC・暗号化しての保管
+- 「更新」の節（手順 1〜4）、自動更新が版を上げる側・失敗して戻す側・保留、タイマーが 4 時台に動くこと
+- 異なる版のあいだの復元と DB の移行、「バックアップから復元する」の手順 7、別のサーバーへの移設
+- [ロールバック](../extra/forgejo.md)と「保持したデータも削除する（任意）」、「設定ファイル」の表の読み合わせ
+- 各手順の `中断:` の側、`Failed to connect to user scope bus` のときの `--machine=`、`LAN_SUBNET='0.0.0.0/0'`、ポートを変えた場合、`FW_ZONE` が既定と違う場合
+- 複数のユーザー（管理者ではないアカウント）、レビュー・必須の承認・CI・競合の解消、Pull Request を直して push し直す流れ
+- バックアップより後のコミットを持つ clone から、そのまま push したときの動き（指摘 4）
+- 直した後の箇条書きを見ながらの通し（文言だけの直し。足した文の元になった出力は、この通しの記録にある）
+- クライアントの VM の SELinux の拒否
+- デスクトップの端末にブロックを貼る形、ホスト UID が 1000 以外の構成、実機、aarch64（実機の aarch64 の構築は、[上の付録](#付録-raspberry-pi-5-の実機構築2026-10-11-jst)）
