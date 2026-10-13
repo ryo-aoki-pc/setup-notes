@@ -790,7 +790,7 @@ $ sudo ausearch --input-logs -m AVC -ts today         # 端末の無い ssh か�
   - smb.conf は、手順 3 のブロック（直す前と後）をそのまま貼って置いた。試験用のユーザー `smbreload`（実機に無い名前）を `smbpasswd -s -a` で登録し、`smbd --foreground --no-process-group` で動かした
   - kernel の cifs: 実機のカーネル（`cifs.ko` の版 2.51、`dir_cache_timeout` は既定の 30）で、samba-client.md 手順 5 と同じオプションに `port=4450` を足してマウントした。EL10 の x86_64 のカーネル（6.12.0-211 系）では測っていない
   - GNOME Files: 実機のヘッドレスの GNOME のセッション（nautilus 47.6、`gvfs-smb-1.54.4-3.el10`）で、`/usr/bin/gio mount smb://smbreload@127.0.0.1:4450/smbreload` でつないだ。PATH で先に見つかる Homebrew の `gio` は、`Operation not supported` で使えなかった
-  - 画面は、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
+  - 画面は、[claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で Nautilus を開き、F5 を送って撮った
   - サーバーでの変更は、`podman exec` でコンテナの中のファイルを直接変えた（Samba を通さない）
 
 **直す前の Windows**（利用者がエクスプローラーで `\\<SERVER_IP>\<USER>` を開き、実機のホーム直下に `touch` でファイルを作った）:

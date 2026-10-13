@@ -546,7 +546,7 @@ gnome-remote-desktop 49.3（と CentOS Stream 10 の独自パッチ）・gdm 47.
 
 同じ日の 07:13〜07:31 に、まだ確かめていなかった組み合わせを、試験用のユーザー（`grdtest`。終わってから消した）とコンテナの FreeRDP 3.10.3 で確かめた。
 
-- クライアントの窓は常駐しているヘッドレスのセッションの画面に出し、[claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で撮って操作した
+- クライアントの窓は常駐しているヘッドレスのセッションの画面に出し、[claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `scripts/gnome-gui.py` で撮って操作した
 - システム共通の RDP の資格情報は、`credentials.ini` を中身を読まずに控え、テスト用の値に差し替えた。終わってから控えを戻し、ハッシュが同じことを確かめた
 - 試験用のユーザーのヘッドレスのセッションの RDP は、[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と同じ設定で 3390 にした（ドロップインは最後の確認でだけ置いた）
 - 差し替えた後、[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3・4 で起動し直してから始めた

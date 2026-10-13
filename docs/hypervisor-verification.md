@@ -104,7 +104,7 @@ Syncthing のブラウザは相手 VM のコンソール上の Firefox、Forgejo
 | 単位 | 対象 | 分母 | 成功 | 失敗 | 条件未該当 | 未実施 | 成功した範囲と制限 |
 |---|---|---:|---:|---:|---:|---:|---|
 | CL1 | [画面オフの任意節](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)、[linger](almalinux-setup.md#ユーザーサービスの常駐-実施手順)、[Podman](almalinux-setup.md#podman-実施手順) | 23 | 22 | 0 | 1 | 0 | 設定・解除・再適用、rootless socket、Docker API、Quadlet。物理の蓋・電源・実サスペンドの検証ではない |
-| CL2 | [ヘッドレスのセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)、[GUI の操作](almalinux-setup.md#claude-code-の-gnome-操作-実施手順) | 16 | 16 | 0 | 0 | 0 | FreeRDP 接続、仮想モニター、撮影・キー・クリック。モニター設定後の RDP 再接続、OS 再起動後の復帰、長時間放置は未確認 |
+| CL2 | [ヘッドレスのセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)、[GUI の操作](ai-agents.md#claude-code-の-gnome-操作-実施手順) | 16 | 16 | 0 | 0 | 0 | FreeRDP 接続、仮想モニター、撮影・キー・クリック。モニター設定後の RDP 再接続、OS 再起動後の復帰、長時間放置は未確認 |
 | CL3 | [デスクトップ共有](almalinux-setup.md#gnome-のデスクトップ共有-実施手順)と見るだけの任意節 | 18 | 17 | 0 | 1 | 0 | 自動ログイン、RDP、再起動、共有画面と入力制限。クライアントのマウス・音・クリップボード、Windows クライアントは未確認 |
 | CL4 | [Secure Boot の MOK 登録](almalinux-setup.md#secure-boot-の署名鍵-実施手順) | 7 | 6 | 0 | 1 | 0 | Secure Boot 有効 VM で MokManager をキー操作し、登録と電源を入れ直した後の保持を確認 |
 | CL5 | [WireGuard](almalinux-setup.md#wireguard-実施手順)の拠点間と AlmaLinux クライアント | 34 | 30 | 1 | 1 | 2 | 拠点と LAN の namespace、Road Warrior の接続・経路・ICMP。`qrencode` 不足で QR 表示が失敗し、追加導入後は表示。ルーター操作と回線のつなぎ替えは未実施 |

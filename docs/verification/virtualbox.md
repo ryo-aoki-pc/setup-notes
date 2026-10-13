@@ -364,7 +364,7 @@ VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component Machin
 
 ### 更新 / 手順 0: 本文中の記録
 
-  - **7.3 系はまだ出ていないので、本書では 7.1 と 7.2 で試した**（コンテナ。[更新の補足](../verification/virtualbox.md#更新の補足)）
+  - **7.3 系はまだ出ていないので、本書では 7.1 と 7.2 で試した**（コンテナ。[更新の補足](#更新の補足)）
 
 ### ロールバック / 手順 0: 本文中の記録
 
@@ -712,7 +712,7 @@ vboxusers:x:<GID>:
 | GUI のライブラリ | `/usr/lib/virtualbox` の ELF 48 個すべてで `ldd` の `not found` が 0。Qt 6 は `/lib64/libQt6*.so.6`（AppStream） |
 | `kernel-devel` の installonly | 古い `kernel-devel-6.12.0-211.55.1.el10_2` を入れた状態で `dnf upgrade --assumeno kernel-devel` → `Installing: kernel-devel 6.12.0-211.56.1.el10_2` |
 | 更新 | 7.2.18 → 7.2.20 の `dnf upgrade` でモジュールが `7.2.20 r175154` になり、`/sbin/vboxconfig` と udev のルールが残った |
-| 系列の切り替え | 7.2 を入れたまま 7.1 → ファイルの衝突 501 件。`dnf swap` → 新しい系列のモジュールと設定が消えた。remove → install → 揃った（[更新の補足](../verification/virtualbox.md#更新の補足)） |
+| 系列の切り替え | 7.2 を入れたまま 7.1 → ファイルの衝突 501 件。`dnf swap` → 新しい系列のモジュールと設定が消えた。remove → install → 揃った（[更新の補足](#更新の補足)） |
 | ロールバックの残り物 | 本体と依存を消した後に、`vboxusers` グループ・`/var/log/vbox-setup.log`・`~/.config/VirtualBox`・dnf のキャッシュ（鍵を含む）・rpm の鍵・MOK の鍵のファイルが残った。本文のロールバックはこれを消す形にしてある |
 | systemd を PID 1 にしたコンテナ | 立ち上がらなかった（ログを出さずに終了コード 255。ホストは cgroup v1 で、EL10 の systemd 257 は cgroup v1 では起動しない見込み）。そのため `vboxdrv.service` の生成と有効化は確かめていない |
 
@@ -1052,7 +1052,7 @@ Linux（クラウドのコンテナ）の PowerShell 7.6.6 と PSScriptAnalyzer 
 
 ### 操作上の注意と併記されていた記録
 
-> 系列の切り替え（この節の手順 3・4）に **`dnf swap` は使わない**。`Complete!` で終わるが、コンテナで試したときは新しい系列のモジュールと設定が消え、動かない状態になった（[更新の補足](../verification/virtualbox.md#更新の補足)）。
+> 系列の切り替え（この節の手順 3・4）に **`dnf swap` は使わない**。`Complete!` で終わるが、コンテナで試したときは新しい系列のモジュールと設定が消え、動かない状態になった（[更新の補足](#更新の補足)）。
 
 
 ### 操作上の注意と併記されていた記録

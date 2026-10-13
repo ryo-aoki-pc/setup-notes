@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
 
-[AlmaLinux 10 の手順](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](../verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 - 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
 - この文書のロールバックは、実機では流していない（[検証記録](../verification/grok-build-remote.md)）
@@ -157,13 +157,13 @@
 
 ## Windows 11 の共通パスワードの復元
 
-- [共通パスワードの変更](../windows-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)で失敗したときに使う。Codeg の削除や Caddy の停止は行わない
+- [共通パスワードの変更](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)で失敗したときに使う。Codeg の削除や Caddy の停止は行わない
 - 控えと認証ファイルの本文は、表示・共有しない。`password-change-result.json` は変更スクリプトと同じディレクトリにあり、秘密の値を含まない
 
 1. 変更スクリプトの今回の結果を見て、復元の状態を確かめる。
 
    - `StartedAtUtc` が今回の開始時刻であることを確かめる。JSON を保存できなかった場合は、今回のコンソール出力を使う。`-CheckOnly` は結果ファイルを更新しない
-   - 前提確認・入力で未変更のまま終わった場合は、[共通パスワードの変更](../windows-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)の手順 1 へ戻る。復元へ進まない。古い実行の結果を今回の結果として使わない
+   - 前提確認・入力で未変更のまま終わった場合は、[共通パスワードの変更](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1 へ戻る。復元へ進まない。古い実行の結果を今回の結果として使わない
    - 変更処理後の `Outcome=failed` では、`FailureStage`・`CredentialReplaced`・`FileUnchanged`・`FileRestored`・`ServiceRestored`・`BackupFile` を確かめる
    - `CredentialReplaced`・`FileUnchanged` が `null` なら、変更の有無が未確認。未変更として再実行せず、控えを保持して認証ファイルと専用サービスの状態の確認を依頼する
    - ファイルが未変更か復元済みで、`ServiceRestored=true` なら手順 3 へ進む。`OldPasswordVerified` は `false` のままで、旧認証でのログイン成功は未確認
@@ -284,7 +284,7 @@
 
 ## AlmaLinux 10 の共通パスワード変更で失敗したとき
 
-- [共通パスワードの設定・変更](../almalinux-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
+- [共通パスワードの設定・変更](../ai-agents.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
 - 旧設定の退避はファイル名だけを表示する。認証ファイルや退避の本文を開かず、パスワードをエージェントや復旧担当へ渡さない
 - 失敗時の復帰は公開 fixture で検証した。実ホストでの失敗からの復帰と、旧認証によるログインは未確認（[検証記録](../verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)）
 
@@ -329,7 +329,7 @@
 
 #### Claude Code・Codex の共有設定と履歴
 
-- 任意節（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
+- 任意節（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
 - 認証方法を変える前に、本人が既存の方式と必要な設定を確かめる。既に「公式サブスクリプション」なら保存し直さない。別のアカウントへのログインも、端末の CLI に影響する
 - 既存の API 用の項目がある場合は、認証方法の保存で削除・変更されることがある。エージェントへ設定ファイルの全文やログイン情報を渡さない
 - 接続アダプターには別のランタイムが入る。CLI と同じホームの設定・MCP・フックなどを使い得るので、Codeg に追加しただけで既存設定から隔離されたとは扱わない
@@ -396,4 +396,4 @@
 - 「ファイルとコマンドをエージェント自身に処理させる」は、既定の無効のまま使う。有効にしても、`mkdir` が確認なしで実行される結果は変わらなかった
 - 取り込みの画面は、そのホストのほかのエージェントとプロジェクトのセッションの題名も一覧に出す
 - Codeg の子プロセス（`codeg-mcp`）の引数に、内部用の値（`--token <UUID>`）が出る。アクセストークンとは別のもの
-- Claude Code・Codex も使う場合は、任意節（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する
+- Claude Code・Codex も使う場合は、任意節（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する

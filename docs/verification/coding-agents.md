@@ -1,6 +1,6 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の検証記録
 
-[手順書](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[参考資料](../reference/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
 ## 対象と検証環境
 
@@ -8,7 +8,7 @@
   - 指示書の作成とコミット、3 つの worktree、tmux の 4 ウィンドウ、手で作ったコミットの取り込み・fast-forward・競合の abort を確認した
   - 3 CLI は未認証。規則を読んだエージェントの応答、プラグインからの作業・レビュー、push・Pull Request は未実施。過去の実機検証とは別の範囲（[今回の付録](#付録-hyper-v-の-vm-でログイン無しの範囲を通した記録2026-10-11)）
 
-- **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../almalinux-setup.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../windows-setup.md#codexgrok-のプラグイン)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
+- **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../ai-agents.md#windows-11-で-codexgrok-のプラグインを入れる)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
 
 - **状態（2026-10-10 UTC、規則の push と Pull Request の変更）**: 規則の文を「エージェントが自分のブランチを push し、Pull Request を作る」に変えた後、変えたブロックと git の流れだけを、クラウドの Ubuntu 24.04 のコンテナで確かめた（[付録](#付録-規則の-push-と-pull-request-の変更2026-10-10)）
   - 確かめたこと: 実施手順の手順 4 の bash のブロック（ファイルが無いとき・末尾に改行が無いとき・貼り直したとき・変数が空のとき）、Windows 11 で使うの手順 4 の PowerShell のブロック（同じ 4 通りを PowerShell 7.6.0 で。BOM 無し・CR 無しで、bash と同じバイト列）、手順書の bash の 23 ブロックの `bash -n` と ShellCheck 0.9.0、PowerShell の 11 ブロックの構文
@@ -34,7 +34,7 @@
   - 確かめたこと: Grok の `--sandbox read-only` は、bubblewrap が無いと起動しない。入れると、別の特権のコンテナでログインの確認まで進んだ（手順 9 に bubblewrap を足した）
   - 確かめたこと: bash の 33 ブロックの `bash -n` と ShellCheck 0.9.0（ブロックをまたぐ変数の SC2154・SC2034 を除き指摘 0）。PowerShell の 20 ブロックの構文（PowerShell 7.6.6、エラー 0）と PSScriptAnalyzer 1.25.0 の 5.1 互換の検査、AGENTS.md と CLAUDE.md を書く 2 ブロックの模擬（BOM と CR が無いこと）
   - **確認していないこと**: Codex と Grok のログイン後のすべて（手順 8 の Codex の答え、`codex review`・`grok -p` のレビュー、プラグインの review・rescue・delegate・status、手順 11 の画面）。3 つのエージェントが実際に分担して作業し、コミットすること
-  - **確認していないこと**: スマートフォンから指示するの全部（Remote Control は、既存の [almalinux-setup.md の tmux の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)と [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の範囲）。プラグインのコマンドがスマートフォンから動くか
+  - **確認していないこと**: スマートフォンから指示するの全部（Remote Control は、既存の [almalinux-setup.md の tmux の任意節](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)と [windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) の範囲）。プラグインのコマンドがスマートフォンから動くか
   - **確認していないこと**: Windows 11 での実行すべて。aarch64。実機・VM。Homebrew の tmux（今回は BaseOS の 3.3a）
 
 | 項目 | 値 |

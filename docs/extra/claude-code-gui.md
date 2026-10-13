@@ -1,8 +1,8 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)・[検証記録](../verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
+[手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)・[検証記録](../verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -42,7 +42,7 @@
 
    - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）が出ればよい
-   - `systemctl restart` は使わない（[手順 3](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の補足）
+   - `systemctl restart` は使わない（[手順 3](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の補足）
    - 確かめ用の PNG が残っていれば `rm ~/gnome-gui-*.png` で消す
 
 ---

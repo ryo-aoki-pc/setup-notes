@@ -14,7 +14,7 @@
 
 - **目的**: AlmaLinux 10 の Workstation を入れた直後の PC で、更新・sudo・ファームウェア・SSH・journal・kdump、導入元（EPEL・RPM Fusion・Flathub・Homebrew）、日本語入力と GNOME の表示・入力、共通の bash 設定とシェルのツールを、1 本の手順で整える。2026-10-10 からは、Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi・Claude Code・Codex CLI・Grok Build と Codex・Grok のプラグイン、Neovim・WezTerm・lazygit・yazi の自分用の設定も、同じ手順で入れる
 - **方式**: 上から順に貼る 153 の手順（27 項）と、任意節・更新・ロールバック。2026-10-08 に、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をこの文書にまとめた（その時点で 73 の手順・13 項）
-  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
+  - 2026-10-10 に、さらに 12 本の手順書（git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build）の AlmaLinux 10 の部分と、[コーディングエージェントの共同作業](../ai-agents.md#コーディングエージェントの共同作業-実施手順)の手順 9・10 を、「Git」から「Codex・Grok のプラグイン」までの 14 項にまとめた（その時点で 152 の手順・27 項。[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
   - 2026-10-11 に、「Homebrew」の手順 4（IBus の GNOME 向けユーザーサービスのドロップインで、PATH を Homebrew を含まない固定値にする）を足して、153 の手順・27 項になった。同じ日に 3 つの VM で通したのは、足す前の 152 の手順（[付録](#付録-hyper-vvmwarevirtualbox-の-vm-で今の順番で通した記録2026-10-11)）
 - **状態**: **2026-10-08 に、x86_64 の VirtualBox の VM（公式 ISO の Workstation のクリーンインストールから新しく作ったもの）で、その時点の 13 項を通した**（[付録](#付録-x86_64-の-virtualbox-の-vm-で通した記録2026-10-08)）
   - **2026-10-10 に足した 14 項・「再起動と確認」の手順 8・ロールバックの 4 項（「AI エージェントとプラグインを消す」から「Firefox を戻す」まで）・更新の手順 5〜9 は、この文書の順番では通していない**。コマンドは、もとの手順書で確かめたものを移した（どこまで確かめたかは、後ろの「統合前の記録」のそれぞれの節）。つなぎを直した手順と新しい順番は、静的な確認だけ（[付録](#付録-12-本の手順書をまとめた記録2026-10-10)）
@@ -195,7 +195,7 @@
 
 ### まとめたもの
 
-- git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build の AlmaLinux 10 の部分（実施手順・後ろの節・更新・ロールバック・注意点）と、[コーディングエージェントの共同作業](../almalinux-setup.md#コーディングエージェントの共同作業-実施手順)の手順 9・10（Node.js・bubblewrap とプラグイン）を、手順書の 14 項・後ろの節・更新の手順 5〜9、ロールバックの 4 項と注意点に移し、もとの文書は消した
+- git・firefox・hackgen・wezterm-nightly・git-delta・neovim・lazygit・gh・yazi・claude-code・codex・grok-build の AlmaLinux 10 の部分（実施手順・後ろの節・更新・ロールバック・注意点）と、[コーディングエージェントの共同作業](../ai-agents.md#コーディングエージェントの共同作業-実施手順)の手順 9・10（Node.js・bubblewrap とプラグイン）を、手順書の 14 項・後ろの節・更新の手順 5〜9、ロールバックの 4 項と注意点に移し、もとの文書は消した
 - それぞれの Windows 11 の部分は、[Windows 11 の初期設定](../windows-setup.md)に移した（[その検証記録の付録](windows-setup.md#付録-13-本の手順書をまとめた記録2026-10-10)）
 - 必須にしたもの: 自分用の設定 4 つ（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)・[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)・[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)・[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)。clone のコマンドは載せず、それぞれの導入手順を範囲で名指しする）、もとは任意節の「WezTerm と HackGen Console NF をデスクトップで使う」、Codex・Grok のプラグイン
 - 項の順番: 「tmux を試す」の後、「再起動と確認」の前（LazyVimStarter の入力ソースの変更を、「再起動と確認」の再起動でまとめて読み直すため）。git の設定は clone より前、ブラウザ（Firefox）はログインより前、自分用の設定は TUI の確かめより前
@@ -3080,7 +3080,7 @@ error: failed to update at least one of the databases
 - **目的**: 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - [WireGuard](../almalinux-setup.md#wireguard-実施手順)・[Samba](../almalinux-setup.md#samba-サーバー-実施手順)・[Syncthing](../almalinux-setup.md#syncthing-実施手順)・[Dropbox](../almalinux-setup.md#dropbox-実施手順)・[Dropbox（rclone）](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[GNOME Remote Desktop](../almalinux-setup.md#gnome-のリモートログイン-実施手順) のホストは、眠るとサービスが止まる
   - [GNOME のヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)は、手順 1・2（サスペンドできる PC では手順 3・4 も）を前提にしている。ヘッドレスのセッションでも gsd-power は、既定では 15 分の無操作でサスペンドしようとする
-  - [Claude Code で GUI を確かめる](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
+  - [Claude Code で GUI を確かめる](../ai-agents.md#claude-code-の-gnome-操作-実施手順)は、手順 1・2 を前提にしている。ロックされると、画面の前にいない Claude Code には解けない
 - **進め方**: 自分のセッションは `gsettings`、ログイン画面は dconf の `gdm.d`、OS 全体は `systemctl mask`、蓋は logind のドロップインで変える。**読者が書き換える必要のある変数は無い**
 - **状態**: **x86_64 のコンテナ（2026-09-27）とクリーンインストールの VM（2026-10-06）で、手順 1〜5・ロールバックを本実行済み。手順 1・2 は aarch64 の実機（Raspberry Pi 5）でも本実行した（2026-10-01）**
   - 2026-10-06: 別の新規 VM で現行手順を再検証した。今回の実施・解除・未実施範囲は[新しい付録](#画面オフロックサスペンド-付録-現行版の新規-vm-での再検証2026-10-06)に記録した
@@ -3100,7 +3100,7 @@ error: failed to update at least one of the databases
   - 2026-10-01: 手順 2 と[ロールバック](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1 の `gsettings` を `/usr/bin/gsettings` にした（Homebrew の `gsettings` は GNOME に効かないため。手順 2 の補足）
     - ロールバックの手順 1 の、`/usr/bin/gsettings` にした形は流していない
   - 2026-10-01: 手順 1・2 を aarch64 の実機（Raspberry Pi 5）で本実行した（[付録](#画面オフロックサスペンド-付録-実機での検証記録2026-10-01)）
-    - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と [claude-code-gui.md](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
+    - GNOME のヘッドレスのセッションの手順書（今の [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と [claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) に分ける前の版）の前提として、SSH でログインしたシェルに貼った（ブラケットペーストの無しと有り）
     - 読み戻しは[完了時点の状態](#画面オフロックサスペンド-完了時点の状態)と同じ。SSH のシェルから変えた値は、動いているヘッドレスのセッションにすぐ効いた
     - 手順 2 の後は、ヘッドレスのセッションを 16 分余り放置しても、サスペンドしようとせず、画面は消えず、ロックもされなかった（`LockedHint=no`。[claude-code-gui.md の付録](claude-code-gui.md#付録-実機での検証記録2026-10-01)）。物理モニターでの観測ではない
     - 手順 3〜5 とロールバックは、実機では流していない
@@ -4410,7 +4410,7 @@ $ dnf -q repoquery -l bat | grep bin/
 #### tmux: 実施手順: 検証状況の記録
 
 > [!WARNING]
-> **x86_64 のクリーン VM で実施手順を本実行済み**（2026-10-06）。コンテナでも検証したが、実機では本書の手順を通していない（[対象と検証環境](#tmux-対象と検証環境)）。[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の Remote Control の接続は、確かめていない。
+> **x86_64 のクリーン VM で実施手順を本実行済み**（2026-10-06）。コンテナでも検証したが、実機では本書の手順を通していない（[対象と検証環境](#tmux-対象と検証環境)）。[Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)の Remote Control の接続は、確かめていない。
 
 #### tmux: 実施手順 / 手順 2: 補足: BaseOS の tmux と並べたとき
 
@@ -4442,7 +4442,7 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
 - `tmux new-session -s claude claude remote-control …` のように、tmux に直接 `claude` を起動させると、`claude` が終わった時点でセッションも消える。コンテナ（未ログイン）では `[exited]` だけが出て、エラーの文が読めなかった
 - tmux の中のシェルから起動すれば、`claude` が終わってもシェルとその表示が残り、`tmux attach -t claude` で理由を読める
 - `--spawn same-dir` を付けないと、`Choose [1/2]`（`same-dir` か `worktree` か）を聞かれる（Windows の実機の実測）。本書は Windows の手順書と同じ `same-dir`（1 つのディレクトリを共有）にする
-- 信頼のダイアログ・`Enable Remote Control?`・URL の表示は、Windows の実機の記録（[Windows の手順書](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 4）。この手順書では見ていない
+- 信頼のダイアログ・`Enable Remote Control?`・URL の表示は、Windows の実機の記録（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 4）。この手順書では見ていない
 - セッション名を `claude` にしたのは、ステータス行の左端が既定で 10 文字までのため（`claude-rc` は `[claude-rc` で切れた）
 - 対話の `claude` の中で `/remote-control` と打っても、そのセッションを Remote Control につなげる（公式ドキュメント。本書では試していない）
 
@@ -4456,7 +4456,7 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
     - 実施手順 1〜5、[使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)の表のキーとコマンド、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)（ホイール・クリック・境界のドラッグは、マウスの信号を端末に送って確かめた）、[ロールバック](../extra/almalinux-setup.md#ロールバック)
     - SSH のクライアントを落としても tmux のセッションとその中のコマンドが残り、ログインし直して戻れること
     - BaseOS の tmux と並べたときの挙動（[手順 2](../almalinux-setup.md#シェルのツール) の補足）
-    - [Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)のうち、ログインしていない `claude` で通るところ（その節の手順 1〜3・5、手順 4 のエラー。手順 4 の代わりに対話の `claude` を動かして、手順 6 で SSH を切った後も残り、手順 8 で戻れること）
+    - [Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)のうち、ログインしていない `claude` で通るところ（その節の手順 1〜3・5、手順 4 のエラー。手順 4 の代わりに対話の `claude` を動かして、手順 6 で SSH を切った後も残り、手順 8 で戻れること）
   - **確認していないこと**
     - 実機（aarch64 の Raspberry Pi 5 を含む）
     - Remote Control の接続と、スマートフォン・ブラウザからの操作（claude.ai のアカウントでのログインが要る）
@@ -4472,7 +4472,7 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
 | コンテナ | クラウドのホストの Docker 29.6.2、`--privileged`。systemd を PID 1 にし、sshd と systemd-logind を動かした |
 | Homebrew | 7.0.7（`/home/linuxbrew/.linuxbrew`） |
 | tmux | 3.7c（Homebrew）。比べるために BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` も入れて消した |
-| Claude Code | `claude-code-2.1.287-1`（[claude-code.md](../almalinux-setup.md#claude-code) の `latest`）。ログインしていない |
+| Claude Code | `claude-code-2.1.287-1`（[claude-code.md](../ai-agents.md#claude-code) の `latest`）。ログインしていない |
 | 端末 | ホストの tmux 3.4 のペイン（160x45）から `docker exec -it` で `ssh -t` し、`TERM=xterm-256color` |
 
 > [!NOTE]
@@ -4495,7 +4495,7 @@ BaseOS の `tmux-3.3a-13.20230918gitb202a2f.el10` を一緒に入れて試した
   - Homebrew で入れると、そのままでは `sudo tmux` では見えないが、tmux は自分のユーザーで使うものなので困らない
 - **screen は使わない**: AlmaLinux 10 の BaseOS・AppStream に無い（コンテナの `dnf list --available screen` は `No matching Packages`）。EPEL は調べていない
 - **zellij は手順書にしない**: [導入元一覧](../tool-catalog.md#cli-定番の置き換え)の 1 行のまま。Windows では zellij のペインで Claude Code が動かなかった（[Windows の手順書の選択した方針](windows-claude-remote-control.md#選択した方針)）。Linux では試していない
-- **Claude Code の Remote Control は、tmux の中のシェルから始める**: tmux に直接起動させると、終わったときに表示が残らない（[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の手順 4 の補足）
+- **Claude Code の Remote Control は、tmux の中のシェルから始める**: tmux に直接起動させると、終わったときに表示が残らない（[Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)の手順 4 の補足）
 - **Claude Code 自身の裏で動かす機能は試していない**: `claude --help` には、セッションを裏で始める `--bg` と、それに入る `claude attach` がある。SSH の切断後も残るかは確かめていない
 
 #### tmux: 完了時点の状態
@@ -4537,7 +4537,7 @@ no server running on /tmp/tmux-<UID>/default
 - 1 回目はブラケットペースト無しで、2 回目は `paste-buffer -p`（ブラケットペースト有り。貼った後に Enter を送った）で、実施手順から[ロールバック](../extra/almalinux-setup.md#ロールバック)まで通した。2 回の間に、1 回目で見つけたことを直した（下の表）
 - 画面は `tmux capture-pane` で読み、`y`・`Ctrl+b d`・`exit` はキーとして送った
 - 中の tmux の状態は、`tmux list-windows` / `list-panes` / `show -g` を同じユーザーで別に呼んで読んだ
-- 表の「設定ファイル」と「Claude Code」は、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)と[Claude Code を tmux の中で動かす（任意）](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)の手順
+- 表の「設定ファイル」と「Claude Code」は、[設定ファイル（任意）](../almalinux-setup.md#tmux-の設定ファイル任意)と[Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)の手順
 
 | 手順 | 結果（2 回とも同じ。違ったものは書き分けた） |
 |---|---|
@@ -6143,7 +6143,7 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
 - **進め方**: どちらも**読者が書き換える変数は無い**
   - **AlmaLinux 10**（[実施手順](../almalinux-setup.md#wezterm)）: 作者が管理する公式 COPR `wezfurlong/wezterm-nightly` には **EL10 向けのビルドが無い**ので、chroot を `rhel-9-<arch>` と明示して有効化し、EL9 向けビルドをそのまま入れる（chroot は `uname -m` から自動で決まる）
   - **Windows 11**（[Windows 11 で使う](../windows-setup.md#wezterm)）: GitHub の `nightly` のリリースの `WezTerm-nightly-setup.exe`（Inno Setup）を、同じリリースの `.sha256` と比べてから黙って動かし、`C:\Program Files\WezTerm` に入れる。管理者の Windows PowerShell 5.1 に貼る。更新は同じブロックを貼り直す
-    - [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)が `C:\Program Files\WezTerm\wezterm.exe` を呼ぶので、その場所に入れる
+    - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が `C:\Program Files\WezTerm\wezterm.exe` を呼ぶので、その場所に入れる
     - [Windows 11 の初期設定](../windows-setup.md)の後に通す手順書の 1 つ
   - 設定ファイルは `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（Windows 11 では `%USERPROFILE%` の下。[設定ファイル](../almalinux-setup.md#wezterm-の設定ファイル)）
 - **状態（AlmaLinux 10）**: **x86_64 の実機（2026-09-21）とクリーンインストールの VM（2026-10-06）で本実行済み**。VM は実施手順 1〜5・CLI と GUI の起動・ロールバックを確認した
@@ -6153,7 +6153,7 @@ Nerd Fonts を含まない版は別の cask `font-hackgen`（HackGen / HackGen C
   - EL9 向けビルドを EL10 で使う非公式な流用なので、更新で壊れたら[補足: 注意点](../extra/almalinux-setup.md#注意点)を見る
 - **状態（Windows 11）**: **Windows の実機では流していない（未検証。2026-10-03 に書いた）**
   - 書いた環境（クラウドの Linux のコンテナ）では Windows を動かせなかった。どのブロックも Windows では貼っていない
-  - 利用者の PC には、nightly の `20260905-153129-092dcf70` が `C:\Program Files\WezTerm` に入っている（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の実機の記録。入れ方の記録は無い）。その PC では、[Windows 11 で使う](../windows-setup.md#wezterm)の手順は上書きになる
+  - 利用者の PC には、nightly の `20260905-153129-092dcf70` が `C:\Program Files\WezTerm` に入っている（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の実機の記録。入れ方の記録は無い）。その PC では、[Windows 11 で使う](../windows-setup.md#wezterm)の手順は上書きになる
   - **確かめたこと**（[付録](windows-setup.md#wezterm-付録-windows-11-の配布物と資料の調査2026-10-03)）:
     - 配布物: 2026-10-03 の `WezTerm-nightly-setup.exe` の sha256 と `.sha256` の一致、Inno Setup 6.7.0 で作られていること、Authenticode の署名が無いこと。同じ日の zip の中の実行ファイルが x64 で、`VCRUNTIME140.dll` を読み込むこと
     - インストーラの定義（`ci/windows-installer.iss`）と作り方（`ci/deploy.sh`・`gen_windows_continuous.yml`）、Inno Setup の文書とソース（引数・終了コード・アンインストールの登録・アンインストーラの動き）、WezTerm のソース（Windows の設定ファイルの探索順、更新の確認）
@@ -6178,7 +6178,7 @@ Windows 11 の手順が前提にしている環境（ほかの Windows の手順
 
 | 項目 | 値 |
 |---|---|
-| OS | Windows 11（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の PC は 26H2）。x64 |
+| OS | Windows 11（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の PC は 26H2）。x64 |
 | PowerShell | Windows PowerShell 5.1（管理者として実行） |
 | ユーザー | Administrators の一員 |
 | 今の WezTerm | nightly の `20260905-153129-092dcf70`（`C:\Program Files\WezTerm`） |
@@ -6325,7 +6325,7 @@ copr.fedorainfracloud.org/wezfurlong/wezterm-nightly
 - [Setup Command-Line Parameters — Inno Setup](https://jrsoftware.org/ishelp/topic_setupcmdline.htm) / [Setup Exit Codes](https://jrsoftware.org/ishelp/topic_setupexitcodes.htm) / [Uninstaller Command-Line Parameters](https://jrsoftware.org/ishelp/topic_uninstcmdline.htm) / [Uninstaller Exit Codes](https://jrsoftware.org/ishelp/topic_uninstexitcodes.htm) / [CloseApplications](https://jrsoftware.org/ishelp/topic_setup_closeapplications.htm) — インストーラとアンインストーラの引数と動き
 - [Latest supported Visual C++ Redistributable downloads — Microsoft Learn](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) — `VCRUNTIME140.dll` を入れる再頒布可能パッケージ
 - [microsoft/winget-pkgs の wez.wezterm.nightly](https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/wez/wezterm/nightly) — 採らなかった winget の定義
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順) — `C:\Program Files\WezTerm\wezterm.exe` を使う手順書
 - [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）と、この文書を通す順
 
 #### WezTerm: 付録: AppImage の実測
@@ -7606,7 +7606,7 @@ Complete!
 
 - `--available` はリポジトリにある版だけを見る（入っている版は含めない）。リポジトリには古い版も残っているので、`--latest-limit 1` で一番新しいものだけに絞る
 - 2026-09-26 の時点で、`latest` には 137 版、`stable` には 56 版が残っていた（x86_64 / aarch64 それぞれ）
-- ネイティブインストーラが最新版として取りに行くのは `https://downloads.claude.ai/claude-code-releases/latest` が指す版で、2026-09-26 は RPM の `latest` と同じ `2.1.283` だった。RPM に届くのが遅れることはある（[注意点](../extra/almalinux-setup.md#注意点)）
+- ネイティブインストーラが最新版として取りに行くのは `https://downloads.claude.ai/claude-code-releases/latest` が指す版で、2026-09-26 は RPM の `latest` と同じ `2.1.283` だった。RPM に届くのが遅れることはある（[注意点](../extra/ai-agents.md#注意点)）
 - コンテナの dnf 4.20.0 では、`--qf` の末尾に `\n` を付けると結果の後に空行が 1 行増えた。本書の 2026-09-22 版はそう書いていたので外した
 
 #### Claude Code: 実施手順 / 手順 5: 補足: 認証
@@ -7639,7 +7639,7 @@ No installation issues found.
 
 #### Claude Code: 使い方の基本 / 手順 0: 本文中の記録
 
-- 確かめたのは Linux だけ。[Windows 11 で使う](../windows-setup.md#claude-code)で入れた `claude` にも、同じコマンドを Windows PowerShell で打つ（公式の CLI reference は OS で分けていない）が、Windows では確かめていない
+- 確かめたのは Linux だけ。[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)で入れた `claude` にも、同じコマンドを Windows PowerShell で打つ（公式の CLI reference は OS で分けていない）が、Windows では確かめていない
 
 #### Claude Code: 使い方の基本 / 手順 0: 本文中の記録
 
@@ -7690,17 +7690,17 @@ Complete!
   - AlmaLinux 10 では **dnf 管理で**入れ、`dnf upgrade` で追従できるようにする
   - Windows 11 では公式の native installer で入れ、Claude Code 自身の自動の更新に任せる
 - **進め方**: どちらも Anthropic の公式の配布物を使い、npm も Node.js も使わない。**読者が書き換えるのは変数（チャンネル）だけ**で、既定のままで通る
-  - **AlmaLinux 10**（[実施手順](../almalinux-setup.md#claude-code)）: 公式の RPM リポジトリの `latest` チャンネルを 1 つ足して `dnf install` する
-  - **Windows 11**（[Windows 11 で使う](../windows-setup.md#claude-code)）: 管理者ではない Windows PowerShell 5.1 で公式の `install.ps1` を動かし、`%USERPROFILE%\.local\bin\claude.exe` に入れる。`PATH` は本書で足し、署名を確かめてから、ブラウザでログインする
+  - **AlmaLinux 10**（[実施手順](../ai-agents.md#claude-code)）: 公式の RPM リポジトリの `latest` チャンネルを 1 つ足して `dnf install` する
+  - **Windows 11**（[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)）: 管理者ではない Windows PowerShell 5.1 で公式の `install.ps1` を動かし、`%USERPROFILE%\.local\bin\claude.exe` に入れる。`PATH` は本書で足し、署名を確かめてから、ブラウザでログインする
 - **状態（AlmaLinux 10）**: **実機で本実行済み（`stable`、2026-09-20）**。既定の `latest` は x86_64 のクリーン VM（2026-10-06、認証前まで）とコンテナ（2026-09-26）で検証
   - 実機（aarch64）: `stable` チャンネルの repo ファイルを置いて `dnf install claude-code` し、`claude-code-2.1.267-1.aarch64` が入っている。認証も済んでいて常用中（本書の初版は、そのホストの Claude Code で書いた）
   - 2026-09-22: 同じ OS の aarch64 のコンテナで、`stable` の手順 2〜4 を通し直した
-  - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](../almalinux-setup.md#更新)・[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)・[ロールバック](../extra/almalinux-setup.md#ai-エージェントとプラグインを消す)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
+  - 2026-09-26: 既定を `latest` に変え、x86_64 のコンテナで手順 1〜4・[更新](../ai-agents.md#更新)・[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)・[ロールバック](../extra/ai-agents.md#ai-エージェントとプラグインを消す)を、この文書のコードブロックのまま通した（`claude-code-2.1.283-1.x86_64`）
   - **確認していないこと**: 実機（aarch64）での `latest`（aarch64 にも同じ版があることはメタデータで確認）、コンテナでの認証（手順 5）、認証後の `claude doctor`
-  - 2026-09-28: 手順 2 と、[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)の手順 1・4のブロックを `{ … }` で囲んだ
+  - 2026-09-28: 手順 2 と、[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)の手順 1・4のブロックを `{ … }` で囲んだ
     - ブラケットペーストが効かない端末で貼っても、`sudo` の後ろの行が失われないようにするため（[README の記法](../../README.md#記法)）
     - 中のコマンドは変えていない。囲んだ形は構文の検査だけで、流していない
-  - 2026-10-01: [使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)を足した（[付録](#claude-code-付録-使い方の基本の検証記録2026-10-01)）
+  - 2026-10-01: [使い方の基本](../ai-agents.md#claude-code-の使い方の基本)を足した（[付録](#claude-code-付録-使い方の基本の検証記録2026-10-01)）
     - ログインの要るもの（`-p`・`-c`・`-r`・`-n`・`--model`・`--permission-mode`・`--add-dir`・`--allowedTools`・`--max-turns`・`--output-format json`）は、クラウドのホスト（Ubuntu 24.04）にあったログイン済みの Claude Code 2.1.287 で確かめた
     - ログインの要らないもの（`doctor`・`auth status`・`mcp`・`update`、ログインしていないときの `-p` と `remote-control`）は、x86_64 の AlmaLinux 10 のコンテナに手順 2〜4 で入れた `claude-code-2.1.287-1` で確かめた
     - **確認していないこと**: セッションの中の操作（キーとスラッシュコマンド）、`-r` の一覧から選ぶ画面、`claude auth login` / `logout`、`claude remote-control` の接続
@@ -7714,8 +7714,8 @@ Complete!
     - インストーラ: `install.ps1`（`bootstrap.ps1`）の中身。sha256 は照らすが、署名は確かめず、`PATH` も変えない
     - 配布物: 2.1.288 の `manifest.json` の GPG の署名、Windows の `claude.exe`（x64）の sha256 と Authenticode の署名者・タイムスタンプ（Linux で読んだだけ）、`claude.exe` の中の文字列（`PATH` の案内、置き場所、更新のときの名前の変え方）
     - Linux の native installer の同じ版（2.1.288）: `claude install latest` / `stable` で書かれる設定と置き場所、`claude doctor`・`claude update` の出力
-    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../windows-setup.md#claude-code)の手順 4 は、本物の `install.ps1` を Linux の pwsh で動かし、`claude.exe` を落として sha256 が合うところまで通した（Windows の実行ファイルを動かすところで止まる）。同じ節の手順 5 と[Windows 11 のロールバック](../extra/windows-setup.md#ai-エージェントとプラグインを消す)の手順 2〜4 は、自分のユーザーの PATH とフォルダーを偽物にして流した（[付録](windows-setup.md#claude-code-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
-  - 別の手順書の実機（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の Windows 11 Pro 26H2）には、native installer の 2.1.286 が `C:\Users\<WIN_USER>\.local\bin\claude.exe` に入っていて、claude.ai にログインしてあった（2026-10-01。この節の手順で入れたものではない）
+    - PowerShell のブロック: Linux の PowerShell 7.6.6 の構文解析器と、PSScriptAnalyzer 1.25.0 の Windows PowerShell 5.1 との互換の検査。[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 は、本物の `install.ps1` を Linux の pwsh で動かし、`claude.exe` を落として sha256 が合うところまで通した（Windows の実行ファイルを動かすところで止まる）。同じ節の手順 5 と[Windows 11 のロールバック](../extra/ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 2〜4 は、自分のユーザーの PATH とフォルダーを偽物にして流した（[付録](windows-setup.md#claude-code-付録-windows-11-の-powershell-のブロックの-linux-での確認2026-10-03)）
+  - 別の手順書の実機（[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) の Windows 11 Pro 26H2）には、native installer の 2.1.286 が `C:\Users\<WIN_USER>\.local\bin\claude.exe` に入っていて、claude.ai にログインしてあった（2026-10-01。この節の手順で入れたものではない）
   - **確かめていないこと**: Windows で貼ること（すべての手順）、`claude install` が Windows で出す文言と `PATH` の案内、`PATH` を足して開き直した PowerShell で `claude` が動くこと、`Get-AuthenticodeSignature` の結果、ブラウザでのログイン、`claude update`、ロールバック、arm64 の Windows、Git for Windows が無いとき
 
 AlmaLinux 10:
@@ -7742,7 +7742,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 | Claude Code | 2.1.288（2026-10-02、`latest`。`stable` は 2.1.285） |
 
 > [!NOTE]
-> 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](../almalinux-setup.md#claude-code)のシェル変数、Windows 11 は[Windows 11 で使う](../windows-setup.md#claude-code)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
+> 環境固有の値は**変数**で書いてある。AlmaLinux 10 は[手順 1](../ai-agents.md#claude-code)のシェル変数、Windows 11 は[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 2 の PowerShell の変数に 1 度だけ設定すれば、以降のコマンドはそのまま貼って実行できる。
 >
 > | 変数 | 意味 | 例 |
 > |---|---|---|
@@ -7757,7 +7757,7 @@ Windows 11（前提にしている環境。ほかの Windows の手順書の実�
 
 #### Claude Code: 実施前の状態
 
-AlmaLinux 10 の実機（2026-09-20）の状態。検証コンテナは公式イメージのまま（Claude Code も追加のリポジトリも無し）。Windows 11 の PC は、[Windows 11 で使う](../windows-setup.md#claude-code)の手順 3 で確かめる。
+AlmaLinux 10 の実機（2026-09-20）の状態。検証コンテナは公式イメージのまま（Claude Code も追加のリポジトリも無し）。Windows 11 の PC は、[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 3 で確かめる。
 
 | 項目 | 状態 |
 |---|---|
@@ -7776,13 +7776,13 @@ Windows 11 で Claude Code を入れる経路を比べた（2026-10-03 時点。
 
 | 経路 | 状況 | 採否 |
 |---|---|---|
-| **公式の native installer（PowerShell の `install.ps1`）** | `%USERPROFILE%\.local\bin\claude.exe` に入り、管理者の権限は要らない。Claude Code 自身が裏で更新する（チャンネルは `latest` / `stable`）。sha256 は照らすが署名は確かめず、`PATH` も足さない | **採用**（公式が勧める形。[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の前提もこの形） |
+| **公式の native installer（PowerShell の `install.ps1`）** | `%USERPROFILE%\.local\bin\claude.exe` に入り、管理者の権限は要らない。Claude Code 自身が裏で更新する（チャンネルは `latest` / `stable`）。sha256 は照らすが署名は確かめず、`PATH` も足さない | **採用**（公式が勧める形。[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) の前提もこの形） |
 | 公式の native installer（CMD の `install.cmd`） | 同じものを CMD から入れる | 不採用（本書のブロックは Windows PowerShell にそろえる） |
 | WinGet の `Anthropic.ClaudeCode` | `portable` で、公式の配布物の `claude.exe` をそのまま置く。自分では更新しない（`winget upgrade`。`CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` で Claude Code に走らせられるが、動いている間は置き換えられないことがある）。2026-10-03 の winget-pkgs は 2.1.286 で、`latest` の 2.1.288 より遅れていた | 不採用（版が遅れ、更新を別に回すことになる） |
 | scoop の `main/claude-code` | 2.1.288（公式の配布物と同じ sha256）。更新は `scoop update` | 不採用（公式の文書の経路ではなく、Claude Code 自身の更新との関係を確かめていない） |
 | Chocolatey の `claude-code` | 2.1.285（コミュニティの保守） | 不採用 |
 | npm（`@anthropic-ai/claude-code`） | Node.js が要る。PowerShell の実行ポリシーが、npm の作る `.ps1` の起動を止めることがある（公式の Troubleshoot installation） | 不採用 |
-| WSL の中に Linux の手順で入れる | Linux の道具を使うなら有力（サンドボックスは WSL 2 だけ）。Windows の `claude.exe` とは別のもの | 不採用（Windows のプロジェクトで使い、[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順) の前提にもなるため） |
+| WSL の中に Linux の手順で入れる | Linux の道具を使うなら有力（サンドボックスは WSL 2 だけ）。Windows の `claude.exe` とは別のもの | 不採用（Windows のプロジェクトで使い、[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順) の前提にもなるため） |
 
 | npm（`npm install -g @anthropic-ai/claude-code`） | Node.js 22 以上が要る。このホストに Node.js は無く、そのために入れることになる。中身は同じネイティブバイナリ | 不採用 |
 
@@ -7867,7 +7867,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 **やり方**:
 
 - 1 つ目のコンテナで、`-y` 付きの dnf で同じ操作を試して挙動を確かめた
-- 新しいコンテナで、この文書の折り畳みの外にある bash のコードブロック 12 個（手順 1〜4、[更新](../almalinux-setup.md#更新)の手順 1、[stable チャンネルに切り替える（任意）](../almalinux-setup.md#claude-code-を-stable-チャンネルに切り替える任意)の手順 1〜4、[ロールバック](../extra/almalinux-setup.md#ai-エージェントとプラグインを消す)の手順 1〜3）を、上から順にそのまま抜き出したスクリプトを流した
+- 新しいコンテナで、この文書の折り畳みの外にある bash のコードブロック 12 個（手順 1〜4、[更新](../ai-agents.md#更新)の手順 1、[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)の手順 1〜4、[ロールバック](../extra/ai-agents.md#ai-エージェントとプラグインを消す)の手順 1〜3）を、上から順にそのまま抜き出したスクリプトを流した
 - `sudo` も `-y` 無しの dnf もそのまま。全体を `script` で作った pty の中で流し、6 秒おきに `y` を送った。全体で 42 秒
 - ブロックの間に確認のコマンドを挟んだ（下表の「追加」）
 
@@ -7963,7 +7963,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 
 #### Claude Code: 手順中の実測・検証状況の記録
 
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../almalinux-setup.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）。本書では、ログインしていないときのエラーだけを確かめた |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[tmux.md の任意節](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)。Windows は [windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)）。本書では、ログインしていないときのエラーだけを確かめた |
 
 #### Claude Code: ロールバック / 手順 1: 補足: 消えたかの確かめ方
 
@@ -8202,7 +8202,7 @@ gpg-pubkey-1a7ecace-69caef70 Anthropic Claude Code Release Signing <security@ant
 | 環境 | クラウドの Linux の Docker 29.8.2 の上の `almalinux:10`（AlmaLinux 10.2 (Lavender Lion)、x86_64、digest `sha256:838c2fafefb1a8a0d7f8cdbc3b0551c2a2b1eb0cd87aad6d62aecadb18311f1b`） |
 | Grok Build | 1.0.50（`c58f321264ba`）、stable のチャンネル |
 | インストーラー | `install.sh` の SHA-256 `7fd6fdc75d9418b2e58356726fcbf1ae849416f773925da07d0ccc7a60d3e791`、`install.ps1` の SHA-256 `c83dac29885215c79137e48cbc034d3d7c8c11afba3082ff1df0e0769aa902a4`（どちらも 2026-10-09 に取得） |
-| ほかに入れたもの | git 2.52.0-1.el10、curl 8.12.1（イメージにあったもの）、Codex CLI 0.162.0（[codex.md](../almalinux-setup.md#codex-cli) の手順 3 と同じインストーラー。`~/.local/bin` があるときの確認用） |
+| ほかに入れたもの | git 2.52.0-1.el10、curl 8.12.1（イメージにあったもの）、Codex CLI 0.162.0（[codex.md](../ai-agents.md#codex-cli) の手順 3 と同じインストーラー。`~/.local/bin` があるときの確認用） |
 | 実行ユーザー | 新規の一般ユーザー（`/etc/skel` の `.bashrc`）。`SHELL=/bin/bash`、umask 0022 |
 | PowerShell の検査 | Ubuntu 22.04 のコンテナの PowerShell 7.6.6、PSScriptAnalyzer 1.25.0 |
 

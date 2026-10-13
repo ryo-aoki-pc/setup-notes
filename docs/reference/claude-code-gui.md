@@ -1,6 +1,6 @@
 # Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の参考資料
 
-[手順書](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順)・[ロールバックと注意点](../extra/claude-code-gui.md)
+[手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
 ## 補足
 
@@ -9,8 +9,8 @@
 [この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-1-補足-変数について)
 
 - `VIRTUAL_MONITOR` は、手順 2 で gnome-shell に付ける `--virtual-monitor` の値。Claude Code が撮る画面の大きさになる
-- 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)
-- `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](../almalinux-setup.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
+- 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../ai-agents.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)
+- `REPO` は、手順 4〜6 と[仮想モニターの大きさを変える（任意）](../ai-agents.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)で `${REPO}/scripts/gnome-gui.py` を呼ぶためだけに使う
 - 変数はそのシェルの中だけで有効
 
 ### 実施手順 / 手順 2: 補足: 仮想モニターが要る理由

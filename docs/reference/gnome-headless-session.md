@@ -93,7 +93,7 @@
 ### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
 
 - **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](../verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
-- **ドロップインを外す**: [AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](../almalinux-setup.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
+- **ドロップインを外す**: [AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
 - **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
 - **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 5 の補足](#実施手順--手順-5-補足-資格情報の置き場所)）
 - 同じ節の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す

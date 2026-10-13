@@ -16,7 +16,7 @@
 
 - **目的**: Windows 11 の PC に RDP でつないで使った後、PC の画面をロックさせずに切断する。セッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする
   - ふつうに切断すると、セッションは `Disc`（切断）で残り、PC の画面はロック画面になる
-  - デスクトップにサインインしていて、`quser` で `console` が `Active` であることを前提にするもの（[Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)の手順 3）や、画面を使う自動の操作を、RDP で使った後も続けるため
+  - デスクトップにサインインしていて、`quser` で `console` が `Active` であることを前提にするもの（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 3）や、画面を使う自動の操作を、RDP で使った後も続けるため
 - **進め方**: RDP でつないだセッションの中の管理者の Windows PowerShell 5.1 で、`tscon.exe <このセッションの ID> /dest:console` を実行する
   - 変数は無い。読者が書き換える値も無い
   - 毎回の切断を、デスクトップのショートカットにもできる（任意）

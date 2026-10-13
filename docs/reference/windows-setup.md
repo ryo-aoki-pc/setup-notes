@@ -467,7 +467,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### リモートから再起動する手段を増やす（任意） / 手順 7: 補足: Remote Control を再起動後も使う
 
-- [Claude Code の Remote Control（Windows）](../windows-setup.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
 - ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
 - タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
 
@@ -1788,20 +1788,20 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](../verifi
 
 - 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
 
-- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
+- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
 - ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
-- Remote Control（[windows-claude-remote-control.md](../windows-setup.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
+- Remote Control（[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
 
 #### Claude Code: Windows 11 で使う / 手順 9: 補足: 後ろに続けて貼らない理由
 
-- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../almalinux-setup.md#claude-code-の使い方の基本)）
+- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
 
 #### Claude Code: Windows 11 のロールバック / 手順 2: 補足: 消すもの
 
 [この節の検証記録](../verification/windows-setup.md#claude-code-windows-11-のロールバック--手順-2-補足-消すもの)
 
 - 公式の文書の Windows PowerShell の手順が消すのは、`%USERPROFILE%\.local\bin\claude.exe` と `%USERPROFILE%\.local\share\claude`（版のファイル）の 2 つ
-- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../windows-setup.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。消去対象の根拠と検証範囲は検証記録に置く
+- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../ai-agents.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。消去対象の根拠と検証範囲は検証記録に置く
 - 空になった `%USERPROFILE%\.local\share` などは残る
 
 ---

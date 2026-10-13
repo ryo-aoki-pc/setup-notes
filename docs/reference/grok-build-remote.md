@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
 
-[AlmaLinux 10 の手順](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
 
 ## 補足
 
@@ -88,7 +88,7 @@
 
 ### 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
-- [AlmaLinux 10 の任意節](../almalinux-setup.md#grok-build-のブラウザ操作-接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま
+- [AlmaLinux 10 の任意節](../ai-agents.md#grok-build-のブラウザ操作-接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま
 - runtime と permanent の両方へ新規則を追加してから、証明書を検証した未認証の要求が 401 になることを確かめ、元の送信元付き規則だけを外す。認証の共有値や Codeg・Caddy の待ち受けは変更しない
 - 送信元を指定しない規則は、LAN・VPN に属することを判定しない。宛先へ届く経路があれば、ほかのネットワークからも接続の対象になる
 - 自ホストの HTTPS 検査は、証明書と認証の検査で、別の端末からの到達確認ではない。別端末からのログインや、不要な経路を公開していないことの確認とは分ける
@@ -153,7 +153,7 @@
 
 ### Codeg の共通パスワードを設定・変更する / 手順 1〜4: 補足: AlmaLinux の対話スクリプト
 
-- [AlmaLinux 10 の共通パスワード手順](../almalinux-setup.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)は、`scripts/grok-build-remote/set-codeg-password.py` を本人の端末で使う。Python の `getpass` で 2 回入力し、Windows と同じ文字条件と一致を確かめる
+- [AlmaLinux 10 の共通パスワード手順](../ai-agents.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)は、`scripts/grok-build-remote/set-codeg-password.py` を本人の端末で使う。Python の `getpass` で 2 回入力し、Windows と同じ文字条件と一致を確かめる
 - `--check` は認証ファイルの本文を読まない。所有者と権限、`EnvironmentFile` の参照先、`StandardError=null`、専用サービスの実行ファイルと待ち受け、未認証 401 を確認する
 - 入力値は本人のローカルプロセスのメモリ内で扱う。コマンド引数・ログ・結果の表示には出さない。保存時は systemd の `EnvironmentFile` に合わせて引用し、`\` と `"` をエスケープする
 - `~/.config/codeg-server/` は 0700、`token.env` と新規の一時ファイル・控えは 0600。既存ファイルをハードリンクで控え、本文を読み出さずに新ファイルへ原子的に置き換える
@@ -163,7 +163,7 @@
 
 ### Claude Code のプラグインから Grok に読み取り専用で頼む / 手順 1〜5: 補足: 外側の sandbox
 
-- [AlmaLinux 10 の任意節](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-のプラグインから-grok-に読み取り専用で頼む)は、Grok の内側の sandbox が Landlock 非対応で起動しないホストを対象にする。通常の Grok の起動先や、Codeg の native Grok ACP の起動方法は置き換えない
+- [AlmaLinux 10 の任意節](../ai-agents.md#grok-build-のブラウザ操作-claude-code-のプラグインから-grok-に読み取り専用で頼む)は、Grok の内側の sandbox が Landlock 非対応で起動しないホストを対象にする。通常の Grok の起動先や、Codeg の native Grok ACP の起動方法は置き換えない
 - xAI の [Grok Build プラグイン](https://github.com/xai-org/grok-build-plugin-cc)が参照する `GROK_BINARY` に、`codeg-grok-readonly` を指定する。Codeg の Claude の接続はサービスの環境から、端末の Claude は `claude-agents` から、この値を継承する
 - 起動用スクリプトは読み取り専用の非対話依頼だけを受け付ける。`--sandbox read-only` を必須にし、書き込み用の指定・worktree の作成・コードの復元・外部 leader socket の指定を拒否する
 - 外側では bubblewrap の読み取り専用マウント、user/PID namespace、能力の削除を使う。この境界の内側でだけ Grok の sandbox を `off` にし、Landlock と Podman のソケットのエラーを回避する。bubblewrap が起動できなければ Grok も起動しない
@@ -180,7 +180,7 @@
 
 ### Claude Code と Codex CLI も操作する / 補足
 
-「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)）は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
+「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）は、構築済みの Codeg にエージェントを足す任意の節。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
 
 ### Claude Code と Codex CLI も操作する / 手順 2: 補足: 接続アダプターとランタイム
 
@@ -254,7 +254,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | 画面から Grok Build を動かす | Happier | 採らない | MIT。Web の画面に HTTPS が必須。プッシュ通知が第三者（Expo）を通る。Grok ではセッションの一覧が使えない |
 | 画面から Grok Build を動かす | Zed の外部エージェント（SSH のリモート） | 採らない | PC のデスクトップアプリだけ。スマートフォンから使えない |
 | 画面から Grok Build を動かす | Grok Build の `grok agent serve` に直接つなぐ | 採らない | つなぎ方の仕様が公式の文書に無い。公式の例は always-approve 付き |
-| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../almalinux-setup.md#コーディングエージェントの共同作業-スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
+| 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../ai-agents.md#コーディングエージェントの共同作業-スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
 | 端末をそのまま使う | ttyd などの Web の端末 | 採らない | 端末がそのままブラウザに出る。スマートフォンで Ctrl・Esc・矢印が打ちにくい |
 | 端末をそのまま使う | zellij の Web クライアント | 採らない | Windows 版に未解決の不具合がある（[Claude Code の Remote Control（Windows）の検証記録](../verification/windows-claude-remote-control.md)） |
 | Codeg の置き方 | 配布物を取得して SHA-256 を照合し、ホームに置く | 採った | 版を決めて入れる。`sudo` を使わない |
@@ -288,7 +288,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../almalinux-setup.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../windows-setup.md#grok-build-のブラウザ操作-windows-11-で使う)）
+- 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
 
 ## 参照
 
