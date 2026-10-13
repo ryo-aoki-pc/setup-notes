@@ -15,7 +15,7 @@
 - 必要な項を上から順に通す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
-- 任意の構成（Remote Control・GNOME 操作・共同作業・ブラウザ操作）は後ろの節。以後は[更新](#更新)を通す
+- 任意の構成（tmux の中で動かす・GNOME 操作・共同作業・ブラウザ操作）は後ろの節。Remote Control の節は Windows 11 のもの。以後は[更新](#更新)を通す
 
 ### Claude Code
 
@@ -1416,7 +1416,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Claude Code の GNOME 操作: 仮想モニターの大きさを変える（任意）
 
-- 大きさの値は、手順 1 の `VIRTUAL_MONITOR` だけに置く（この節で別に設定しない）
+- 大きさの値は、[実施手順](#claude-code-の-gnome-操作-実施手順)の手順 1 の `VIRTUAL_MONITOR` だけに置く（この項で別に設定しない）
 
 > [!WARNING]
 > **この節の手順 1 は、セッションを起動し直す**。動いているアプリは閉じ、保存していない内容は失われる。
@@ -1636,7 +1636,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `/codex:setup --enable-review-gate`（終わるたびに Codex のレビューを待つ設定）は使わない（[注意点](extra/coding-agents.md#注意点)）
    - `/grok-build:check` と入力する。Node と `grok` の版が出る。**ログインしていなくても ready と出る**ので、Grok のログインは手順 2 の `grok models` で確かめる
    - `/exit` で終える
-   - **後ろの節のコマンドは、Claude Code を終えてシェルのプロンプトに戻ってから貼る**
+   - **[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)より後のコマンドは、Claude Code を終えてシェルのプロンプトに戻ってから貼る**（次の「Windows 11 で使う」は、AlmaLinux 10 では飛ばす）
 
 ---
 
@@ -1803,7 +1803,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 9 と同じ
    - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1・2 を確かめる
-   - **後ろの節のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
+   - **[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)より後のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
 
 ---
 
@@ -1872,7 +1872,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AlmaLinux 10 のときだけ、tmux に 4 つのウィンドウを作って入る。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
+   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 「コーディングエージェントの共同作業: 実施手順」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
    elif tmux has-session -t agents 2>/dev/null; then tmux attach -t agents
    else
      tmux new-session -d -s agents -n main -c "${PROJECT_DIR}"
@@ -1889,7 +1889,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Windows 11 のときだけ、4 つの PowerShell の窓を開く。
 
    ```powershell
-   if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+   if (-not $PROJECT_DIR) { Write-Error '中断: 「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      foreach ($d in $PROJECT_DIR, "$WT_ROOT\claude", "$WT_ROOT\codex", "$WT_ROOT\grok") { Start-Process powershell.exe -WorkingDirectory $d }
    }
    ```
@@ -1909,7 +1909,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    claude
    ```
 
-   - 初めての worktree では信頼のダイアログが出る（実施手順の手順 9 で信頼してあれば出ない）
+   - 初めての worktree では信頼のダイアログが出る（[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 9、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 9 で信頼してあれば出ない）
    - 頼んだら、その窓は Claude Code に任せる。Claude Code の確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える
 
 1. `codex` の worktree の窓で Codex を起動し、担当の作業を頼む。
@@ -1928,7 +1928,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    grok
    ```
 
-   - 実施手順の手順 8 の `--trust` で信頼してあるので、信頼は聞かれない
+   - [実施手順](#コーディングエージェントの共同作業-実施手順)の手順 8（Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 8）の `--trust` で信頼してあるので、信頼は聞かれない
    - 確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える（この節のリードの `[!WARNING]`）
 
 1. 3 つが終わったら、それぞれの worktree の窓で、コミットと残りの変更を確かめる。
@@ -2071,8 +2071,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - claude.ai のアカウント（Pro / Max / Team / Enterprise）のログインが要る。API キーでは使えない
 - PC は動かしたままにする（スリープ・ネットワークの切断で止まる）
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ
-- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、[Grok Build をブラウザから操作する手順書](#grok-build-のブラウザ操作-実施手順)（OSS の Codeg の画面。両 OS）
-- Claude Code と Codex CLI にも Codeg から直接頼むなら、[追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)（両 OS）
+- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、Grok Build のブラウザ操作（[AlmaLinux 10](#grok-build-のブラウザ操作-実施手順)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で使う)。OSS の Codeg の画面）
+- Claude Code と Codex CLI にも Codeg から直接頼むなら、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）
 
 > [!WARNING]
 > **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザから、この PC の Claude の worktree で Claude Code を動かせる**（ファイルの読み書きとコマンドの実行）。プラグインを通して Codex と Grok も動く。会話は Anthropic のサーバーに保存される。
@@ -2137,7 +2137,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
-- Claude Code・Codex を使うときは[追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)も通す
+- Claude Code・Codex を使うときは、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）も通す
 
 ### Grok Build のブラウザ操作: 実施手順
 
@@ -3200,6 +3200,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: Codeg の共通パスワードを設定・変更する
 
+- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)
 - 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/grok-build-remote.md#codeg-の共通パスワードを設定変更する--手順-13-補足-標準認証)）
 - `scripts/grok-build-remote/set-codeg-password.py` を含むこのリポジトリのルートで、Codeg を入れた本人の bash に貼る。`sudo` は使わない
 - この節の手順 3 で Codeg だけを短時間止めて起動し直す。進行中の会話を終えてから行う。Caddy は止めない
@@ -3539,8 +3540,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ### Grok Build のブラウザ操作: Codeg のエージェント同士で共同作業する
 
 - 対象: 両 OS
-- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)の手順 2〜5 で有効にし、接続と応答を確かめておく
-- 委譲先に編集を頼む場合も、[共同作業の手順](#コーディングエージェントの共同作業-実施手順)で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
+- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)（Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 2〜5 で有効にし、接続と応答を確かめておく
+- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-実施手順)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
 
 1. ブラウザの設定で、エージェントへの委譲を有効にする。
 
@@ -3566,6 +3567,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: Claude Code のプラグインから Grok に読み取り専用で頼む
 
+- 対象: AlmaLinux 10
 - 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
 - このリポジトリのルートで、Codeg を入れた本人の bash に貼る。Grok にログイン済みで、`~/.grok/sessions/`・`~/.grok/logs/` が存在することを前提にする
 - この節の手順 3 で Codeg を起動し直す。進行中の会話を終えてから行う。Grok にはレビューや調査だけを頼み、`--write` は使わない
