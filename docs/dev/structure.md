@@ -13,6 +13,15 @@
 - [共同 VM 検証の横断報告](../hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と、初回試行の旧2/61・5/61、2026-10-13の42通過/4条件外/3部分確認/1失敗/11未実施を分ける。W0派生媒体はセットアップ分岐まで、V2はSDKとGUID/LUN/祖先mappingの追加確認のみ。ホスト作業の重複により性能比較は未完。現在の操作リンクは2冊へ、検証時の版と手順番号は当時の記録と集約対応表へ対応させる
 - 新しい手順は2冊の該当用途へ追加し、対応する記録とこの構成一覧を更新する
 - Codeg で Claude Code・Codex CLI を操作する任意節は、2冊の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
+- 同任意節の履歴取り込みは、接続先ホストの本人の終了済みセッションを、全プロジェクトの作業ディレクトリごとに選別する。取り込みだけで終える場合と、同じエージェントで再開する場合を分け、進行中の会話との同時再開を避ける
+- 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](../verification/grok-build-remote.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
+- Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
+- 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
+- [共通パスワードの検証記録](../verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- AlmaLinux 10 の共通パスワードも本人の伏せ字入力で設定する。`set-codeg-password.py` と公開 fixture を分け、失敗時の状態と本人の旧認証による確認は extra に置く
+- 2026-10-13 の AlmaLinux 10.2 / aarch64 の実機では、3 エージェントの ACP 接続と Codex・Grok の応答、共同作業プラグインの ready と直接呼出しを確認。Claude の応答は週の利用上限で未確認
+- 同日の AlmaLinux の公開は、LAN IPv4 と 3443/tcp を宛先に残して送信元制限を外した。委譲の公開設定は反映済みで、画面からの実際の委譲と親エージェントの承認設定は未確認
+- Linux のパスワード変更は公開 fixture 11 件・構文検査・実機の `--check` が成功。HTTPS ログインは本人報告で、変更時の 200/401/401 の結果は未受領。[実機の記録](../verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)で範囲を区別する
 - Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（3）→長いパス（4）→bash（5）→WezTerm（6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ### 2026-10-13 UTC の追加検証記録
@@ -147,6 +156,9 @@
     - Codeg の GUI、Auto / Auto review の判断、承認・拒否・中断、履歴の取り込みと再開、スマートフォンからの操作、Windows の実機は未確認。追加した本体操作の実機での通しも未確認
     - 公式資料と配布版ソース、文書の静的検査と、上の ACP の実測を区別する。以前の Grok の成功は流用せず、今回の範囲は検証記録で管理する
   - 採らなかった案（参考資料の「方法のまとめ」）: 端末の形（tmux と SSH・ttyd・zellij の Web クライアント）、Paseo・Grok UI・Happier・Zed、公式のインストーラーと Docker イメージ、Codeg のデスクトップアプリと Android のアプリ（確かめていない）、HTTP のままの公開、公的な証明書
+  - AlmaLinux の追加検証（2026-10-13）: v0.35.1 の配布物・本体一致、3 エージェントの ACP 接続、Codex・Grok の応答を確認。Claude の応答・画面からの実委譲は未確認
+    - Grok の補助経路は外側の bubblewrap で読み取り専用。共同作業プラグインは ready と直接呼出しまで確認し、native ACP の経路とは分ける
+    - Linux の共通パスワードは公開 fixture 11 件・構文・実機の前提確認が成功。本人が HTTPS ログイン成功を報告したが、変更時の認証 3 条件の出力は未受領
 - `docs/almalinux-setup.md` — **AlmaLinux 10 のインストール直後に通す初期設定の手順書**（Windows 11 の windows-setup.md に当たる）。2026-10-08 に利用者の依頼で作り、13 本の手順書（epel・rpmfusion・bash-settings・homebrew・flatpak・japanese-input・gnome-power・starship・zoxide・fzf・eza・bat・tmux）をまとめて消した。もとの検証記録・参考資料は、対応する検証記録と参考資料の「統合前の記録」「統合前の参考資料」に、中身を変えずに移した（見出しを 1 段下げて名前を頭に付け、各節の冒頭に当時の手順と今の手順の対応表を置いた）。実施手順は 73 手順・13 項だった（2026-10-10 に 12 本の手順書の AlmaLinux 10 の部分をまとめて、152 手順・27 項。2026-10-11 に「Homebrew」の手順 4 を足して、153 手順・27 項）
   - 2026-10-12、OFFLINE-FULL既存継続: 初期Neovim3とnpm用途節の案内2箇所を採用し、今回の取得前にnpm1/2を先行。Homebrew4と再起動後の実IBus PATH/XML、GUI手順6の日本語変換を確認。再起動と確認3はSSH接続等が未達で部分確認。初期設定全体・新規導入・Neovim内IMEへ成功範囲を広げない
   - 2026-10-12、C20-FOLLOWUP: after-FXA の本人の実 GNOME 端末で「再起動と確認」の手順 3 を、SHA 一致原文ファイルの ASCII source 呼出しにより実行し、全成功条件を確認。同じ GNOME の手順 6 で Anthy の切替・「にほんご」→「日本語」→確定を PNG で確認。本体ブロックは変更無し。Unicode 原文の直接貼付・他列・実機は未確認。C20 の SSH での失敗は保持
@@ -305,3 +317,7 @@
   - C20-FOLLOWUP（2026-10-12）で一時 LAN 復旧後の WireGuard 原文確認と双方向疎通、実 GNOME 端末の IBus 原文ファイル実行と日本語変換を追記。C20 の部分成功と未確認、搬送方法の違いを保持し、旧集計へ重複加算しない
   - 2026-10-12のオフライン継続結果と最新の並行割当を追記。旧FINALの未実施は当時の履歴として保持。実行原文を凍結し、AS4GiB/Windows8GiBとV2の後続8GiB枠を分け、性能測定は全担当の作業終了後に行う
   - 修正後の初回オフライン導入は別fresh起点の再試行を残す。既存継続のcompleted・onlineのAS-FULLとは分け、初回Homebrew/jq/LazyVim/Mason取得を成功に読み替えない
+- `scripts/grok-build-remote/set-codeg-password.py` — AlmaLinux の本人の端末で、Codeg の共通パスワードを伏せ字で 2 回入力する。既存秘密の本文を読まず metadata・専用サービス・待ち受けを確認し、置換と旧控えの保持、失敗時の復帰を行う。`--check` は変更せず確認だけを行う
+- `scripts/grok-build-remote/test-codeg-password.py` — 固定した公開値と一時ディレクトリだけを使い、パスワード変更の置換・旧控え・失敗時の復帰・不明状態・安全条件を検証する。実ホストのサービス・HTTP・本人入力は実行しない
+- `scripts/grok-build-remote/codeg-grok-readonly.py` — Grok の内側の sandbox が使えないホストで、共同作業プラグインの補助経路を外側の bubblewrap で読み取り専用にする。`--write` は拒否し、Codeg の native ACP の経路とは分ける
+- `scripts/grok-build-remote/claude-agents.sh` — `/usr/bin/claude` の起動時だけ、本人の `~/.local/bin/codeg-grok-readonly` を `GROK_BINARY` として継承させる端末用の補助スクリプト。通常の `claude` コマンドは置き換えない
