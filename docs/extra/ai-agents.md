@@ -191,7 +191,7 @@
    - 最後の一覧が空なら、`.local\bin` にはほかのものが無い（この項の手順 4 で PATH から外せる）
    - 公式の文書（Uninstall Claude Code の Native installation と Remove configuration files）の手順に、本書で見つけた置き場所（更新の名残・キャッシュ・ロック）と `PATH` を足したもの
 
-1. [Claude Code](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 で足したときだけ、PATH から `.local\bin` を外す。
+1. [Windows 11 で Claude Code を入れる](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 で足したときだけ、PATH から `.local\bin` を外す。
 
    ```powershell
    & {
@@ -237,7 +237,7 @@
    - `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` のジャンクションを削除する（リンク先の中へ入って削除しない）
    - `%USERPROFILE%\.codex\packages\standalone` を削除する
    - `%USERPROFILE%\.codex` 全体は削除しない（設定・会話履歴などが入っている）
-   - 確認用のディレクトリ `%USERPROFILE%\codex-sandbox`（[Codex CLI](../ai-agents.md#windows-11-で-codex-cli-を入れる)の手順 8）も、要らなければ削除する
+   - 確認用のディレクトリ `%USERPROFILE%\codex-sandbox`（[Windows 11 で Codex CLI を入れる](../ai-agents.md#windows-11-で-codex-cli-を入れる)の手順 8）も、要らなければ削除する
 
 1. ユーザー用 PATH から Codex の入口を外す。
 
@@ -276,7 +276,7 @@
 
    - `False` が 2 行出ればよい
    - `True` が出たら、`grok.exe` がまだ動いている。この項の手順 10 からやり直す
-   - 確認用のディレクトリ `%USERPROFILE%\grok-sandbox`（[Grok Build](../ai-agents.md#windows-11-で-grok-build-を入れる)の手順 8）も、要らなければ削除する
+   - 確認用のディレクトリ `%USERPROFILE%\grok-sandbox`（[Windows 11 で Grok Build を入れる](../ai-agents.md#windows-11-で-grok-build-を入れる)の手順 8）も、要らなければ削除する
 
 1. 自分のユーザーの PATH から `%USERPROFILE%\.grok\bin` を外す。
 
@@ -343,12 +343,12 @@
 - **Grok Build: Claude Code の指示書も読む**: AGENTS.md のほかに、CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（読み込まれたものは `grok --trust inspect` の `Project Instructions`）。読むのは信頼したフォルダーだけ
 - **Grok Build: 会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](../reference/almalinux-setup.md#grok-build-注意点-会話のデータの扱い)）
 - **Codex・Grok のプラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1 の後に、[端末とエディタを消す](almalinux-setup.md#端末とエディタを消す)の手順 5）
-- **Claude Code: `PATH` は自分で足す**: インストーラも `claude install` も足さない（[「Claude Code」の手順 4](../ai-agents.md#windows-11-で-claude-code-を入れる)）。足さないと、開き直した PowerShell でも `claude` が見つからない
+- **Claude Code: `PATH` は自分で足す**: インストーラも `claude install` も足さない（[「Windows 11 で Claude Code を入れる」の手順 4](../ai-agents.md#windows-11-で-claude-code-を入れる)）。足さないと、開き直した PowerShell でも `claude` が見つからない
 - **Claude Code: Windows PowerShell (x86) では入らない**: `Claude Code does not support 32-bit Windows` で止まる。x86 の付かない「Windows PowerShell」で入れ直す
 - **Claude Code: `claude` が 2 つ入ると混乱する**: WinGet・npm・scoop で入れたものが `PATH` の先にあると、そちらが動く。`Get-Command claude -All` で確かめ、`winget uninstall Anthropic.ClaudeCode` や `npm uninstall -g @anthropic-ai/claude-code` で外す。古い Claude Desktop は `WindowsApps` に `Claude.exe` を置き、`claude` で Desktop が開くので、最新にする（公式の Troubleshoot installation）
 - **Claude Code: 更新の後に `claude` が見つからないとき**: Windows の更新は、`claude.exe` を `claude.exe.old.<数字>` に名前を変えてから新しい版を置く。置けず、名前も戻せなかったときは `claude.exe` が無くなる。公式の文書は、一番新しい `claude.exe.old.*` の名前を戻す（`Get-ChildItem "$env:USERPROFILE\.local\bin\claude.exe.old.*" | Sort-Object Name | Select-Object -Last 1 | Rename-Item -NewName claude.exe`）か、入れ直すとしている
 - **Claude Code: `The process cannot access the file` で止まるとき**: 前のインストーラが動いているか、ウイルス対策が `%USERPROFILE%\.claude\downloads` のファイルを調べている。ほかの PowerShell を閉じ、そのフォルダーを消してから入れ直す（公式の Troubleshoot installation）
-- **Claude Code: `irm … | iex` で入れた PowerShell には、インストーラの設定が残る**: `Set-StrictMode -Version Latest` などが残るので、その窓は閉じて開き直す（[「Claude Code」の手順 3](../ai-agents.md#windows-11-で-claude-code-を入れる)の補足）
+- **Claude Code: `irm … | iex` で入れた PowerShell には、インストーラの設定が残る**: `Set-StrictMode -Version Latest` などが残るので、その窓は閉じて開き直す（[「Windows 11 で Claude Code を入れる」の手順 3](../ai-agents.md#windows-11-で-claude-code-を入れる)の補足）
 - **Claude Code: ログインの情報は `%USERPROFILE%\.claude\.credentials.json`**: パスワードと同じ重みで扱い、ログや issue に貼らない
 - **Claude Code: Windows PowerShell 5.1 のパイプ**: `<コマンド> | claude -p` で日本語を渡すと化けるはず（[Claude Code の使い方の基本](../ai-agents.md#claude-code-の使い方の基本)の非対話の注意）
-- **Grok Build: Windows には sandbox（`--sandbox`）が無い**: 公式の文書の sandbox は Linux と macOS だけ（[AlmaLinux 10 の注意点の「Grok Build: sandbox は既定で無効」](#注意点)）
+- **Grok Build: Windows には sandbox（`--sandbox`）が無い**: 公式の文書の sandbox は Linux と macOS だけ（[この節の「Grok Build: sandbox は既定で無効」](#注意点)）

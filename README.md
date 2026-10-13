@@ -111,7 +111,7 @@
   - 同じ PC の WSL をミラー（[Windows 11 の初期設定の任意節](docs/windows-setup.md#wsl-のネットワークをミラーにする任意)）にしたら、WSL からは `127.0.0.1` でつなぐ
 - SSH クライアント（Windows）は、その逆向き。Windows 11 の PC から AlmaLinux 10 のホストに、ed25519 の鍵で入る。鍵と `%USERPROFILE%\.ssh\config` の接続先は、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）で共有する。ssh-agent は使わない（パスフレーズは毎回聞かれる）。**Windows の実機では流していない**（未検証）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
-- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AlmaLinux 10 の初期設定の tmux の任意節](docs/ai-agents.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
+- AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AI エージェントの手順書の tmux の任意節](docs/ai-agents.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
 - Grok Build には公式の遠隔操作の画面が無い。Grok Build をブラウザから操作する手順書は、OSS の Codeg のサーバーを Grok Build と同じホスト（AlmaLinux 10 のサーバー・Windows 11 の PC）に常駐させ、スマートフォンや PC のブラウザのチャット形式の画面から Grok Build を動かす。外部のサーバーは通らず、AlmaLinux 10 は待ち受ける IP と送信元 CIDR を絞る。Windows 11 は受信インターフェースが Private なら全送信元の IPv4・IPv6 と全接続種別を許可し、Public・Domain は遮断する。通信は HTTPS（同じホストの Caddy が、自分の認証局の証明書で受ける。端末にルート証明書を入れる）
 - 同じ Codeg で Claude Code と Codex CLI も操作する手順は、「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。追加した手順の検証範囲は[検証記録](docs/verification/grok-build-remote.md)を参照する
 - Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定の「ネットワークとリモート」](docs/windows-setup.md#ネットワークとリモート)の手順 2（Pro 以上。受信の規則をプライベートの LAN に絞る）

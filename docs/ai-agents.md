@@ -320,7 +320,7 @@
    ```
 
    - **編集が必須の変数は無い**。既定の `latest`（最新版）でよければ、そのまま貼る
-   - 大きな不具合のある版を避けたいなら `stable` にする（[AlmaLinux 10 の初期設定の「Claude Code」](#claude-code)の手順 1 の `CC_CHANNEL` と同じ意味）
+   - 大きな不具合のある版を避けたいなら `stable` にする（[AlmaLinux 10 の「Claude Code」](#claude-code)の手順 1 の `CC_CHANNEL` と同じ意味）
    - 最後に値を読み戻して確かめる
    - 変数はその PowerShell の中だけで有効。使うのはこの項の手順 3 だけ
 
@@ -346,7 +346,7 @@
 
    ```powershell
    if (-not $CC_CHANNEL) {
-     Write-Error '「Claude Code」の手順 1 の $CC_CHANNEL が空'
+     Write-Error 'この項の手順 1 の $CC_CHANNEL が空'
    } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      & ([scriptblock]::Create((Invoke-RestMethod -Uri https://claude.ai/install.ps1))) $CC_CHANNEL
@@ -363,7 +363,7 @@
    & {
      $bin = "$env:USERPROFILE\.local\bin"
      $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ })
-     if (-not (Test-Path -LiteralPath "$bin\claude.exe")) { Write-Error "中断: $bin\claude.exe が無い（「Claude Code」の手順 3 で入っていない）"; return }
+     if (-not (Test-Path -LiteralPath "$bin\claude.exe")) { Write-Error "中断: $bin\claude.exe が無い（この項の手順 3 で入っていない）"; return }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($entries | Where-Object { $_.TrimEnd('\') -eq $bin }) {
        "PATH に $bin はもうある"
@@ -471,7 +471,7 @@
    ```
 
    - ブラウザが開く。自動で開かなければ、端末に出た URL を同じ PC のブラウザで開く
-   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[AlmaLinux 10 の初期設定の「Codex CLI をブラウザの無いホストでログインする」](#codex-cli-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
+   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
 
 1. ブラウザで ChatGPT にログインし、Codex との接続を承認する。
 
@@ -547,7 +547,7 @@
    ```
 
    - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
-   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[AlmaLinux 10 の初期設定の「Grok Build をブラウザの無いホストでログインする」](#grok-build-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
+   - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Grok Build をブラウザの無いホストでログインする](#grok-build-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
 
 1. ブラウザで grok.com のアカウントにログインし、Grok Build との接続を承認する。
 
@@ -611,12 +611,13 @@
    claude plugin list
    ```
 
-   - 見方は、[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](#codexgrok-のプラグイン)の手順 2 と同じ
+   - 見方は、[AlmaLinux 10 の「Codex・Grok のプラグイン」](#codexgrok-のプラグイン)の手順 2 と同じ
 
 ---
 
 ## Claude Code の使い方の基本
 
+- 対象: 両 OS
 - 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
 - SSH を切っても動かす場合は[tmux の任意節](#claude-code-を-tmux-の中で動かす任意)を通す。Windows 11 は[Remote Control](#claude-code-の-remote-control-実施手順)（タスク スケジューラと WezTerm）
 
@@ -632,7 +633,7 @@
 | `claude --permission-mode plan` | 計画だけを立てるモード（ファイルを変えない）で始める。ほかに `acceptEdits`・`auto` など |
 | `claude --add-dir <ディレクトリ>` | 今のディレクトリのほかに、読み書きしてよいディレクトリを足す |
 
-- [Windows 11 の初期設定の「Claude Code」](#windows-11-で-claude-code-を入れる)で入れた `claude` にも、同じコマンドを Windows PowerShell で打つ
+- [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)で入れた `claude` にも、同じコマンドを Windows PowerShell で打つ
 
 **セッションの中の操作**（公式ドキュメントの [Interactive mode](https://code.claude.com/docs/en/interactive-mode) と [Commands](https://code.claude.com/docs/en/commands) から）
 
@@ -689,7 +690,7 @@
 | `claude mcp list` | MCP サーバーの一覧（つながるかも確かめる） |
 | `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
 | `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
-| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の初期設定の更新](#windows-11-の更新)） |
+| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の更新](#windows-11-の更新)） |
 | `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](#claude-code-の-remote-control-実施手順)） |
 
 - `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
@@ -699,6 +700,7 @@
 
 ## Codex CLI をブラウザの無いホストでログインする
 
+- 対象: 両 OS
 - [Codex CLI](#codex-cli)の手順 5・6（`codex login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
 
 1. 手元のブラウザで、デバイスコードによるログインを有効にする。
@@ -724,11 +726,13 @@
    codex login status
    ```
 
-   - 成功したら、[Codex CLI](#codex-cli)の手順 8 へ進む（Windows 11 は、[Windows 11 の初期設定の「Codex CLI」](#windows-11-で-codex-cli-を入れる)の手順 8）
+   - 成功したら、[Codex CLI](#codex-cli)の手順 8 へ進む（Windows 11 は、[Windows 11 で Codex CLI を入れる](#windows-11-で-codex-cli-を入れる)の手順 8）
 
 ---
 
 ## Codex CLI の設定ファイル
+
+- 対象: 両 OS
 
 | 用途 | AlmaLinux 10 | Windows 11 |
 |---|---|---|
@@ -744,6 +748,7 @@
 
 ## Grok Build をブラウザの無いホストでログインする
 
+- 対象: 両 OS
 - [Grok Build](#grok-build)の手順 4・5（`grok login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
 
 1. Grok を入れたホストで、デバイスコードでのログインを始める。
@@ -765,11 +770,13 @@
    grok models
    ```
 
-   - `You are not authenticated.` が出なければ、[Grok Build](#grok-build)の手順 7 へ進む（Windows 11 は、[Windows 11 の初期設定の「Grok Build」](#windows-11-で-grok-build-を入れる)の手順 8）
+   - `You are not authenticated.` が出なければ、[Grok Build](#grok-build)の手順 7 へ進む（Windows 11 は、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の手順 8）
 
 ---
 
 ## Grok Build の設定ファイル
+
+- 対象: 両 OS
 
 | 用途 | AlmaLinux 10 | Windows 11 |
 |---|---|---|
@@ -789,11 +796,12 @@
 
 ## Claude Code を stable チャンネルに切り替える（任意）
 
+- 対象: AlmaLinux 10
 - `latest` で不具合に当たったときに、1 週間ほど遅れて大きな不具合のある版を飛ばす `stable` へ移る
 - `stable` の版は `latest` より古いので、`dnf upgrade` では下がらない（`Nothing to do.`）。この節の手順 2 の `distro-sync` で下げる
 - repo ファイルの `baseurl` の末尾を書き換えるだけで、`dnf clean` は要らない
 - [Claude Code](#claude-code)の手順 1 で `stable` を選んで入れた後に `latest` へ移るときは、この節の手順 4 だけを行う
-- この節は AlmaLinux 10 の dnf のもの。Windows 11 でチャンネルを変えるときは、[Windows 11 の初期設定の「Claude Code」](#windows-11-で-claude-code-を入れる)の手順 1 の補足
+- この節は AlmaLinux 10 の dnf のもの。Windows 11 でチャンネルを変えるときは、[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 の補足
 
 1. repo ファイルの `baseurl` を `stable` に書き換える。
 
@@ -846,6 +854,7 @@
 
 ## Claude Code を tmux の中で動かす（任意）
 
+- 対象: AlmaLinux 10
 - SSH でログインしたシェルから、tmux の中で Claude Code を動かすと、SSH を切っても Claude Code が動き続ける
 - Remote Control（`claude remote-control`）で始めると、SSH を切った後も、スマートフォンの Claude のアプリや claude.ai/code のブラウザから続けて使える
 - 前提: [Claude Code](#claude-code)で入れ、`claude` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない（公式ドキュメント）
@@ -935,6 +944,7 @@
 
 ## Claude Code の Remote Control（任意）
 
+- 対象: Windows 11
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
 - [ロールバックと注意点](extra/windows-claude-remote-control.md)
@@ -1168,7 +1178,7 @@
 
 - 対象: Windows 11。通常（管理者ではない）の Windows PowerShell 5.1 に貼る
 - Claude Code・Codex・Grok Build は、自分で新しい版に上がる。待たずに上げるときだけ、[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)の手順を行う
-  - Claude Code は起動時・起動中に更新を取得し、次の起動から新しい版になる。追うチャンネルは[Claude Code](#windows-11-で-claude-code-を入れる)の手順 1 で選ぶ
+  - Claude Code は起動時・起動中に更新を取得し、次の起動から新しい版になる。追うチャンネルは[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 で選ぶ
   - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
   - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
 
@@ -1221,12 +1231,13 @@
    claude plugin list
    ```
 
-   - 見方は、[AlmaLinux 10 の初期設定の更新](#更新)の手順 5 と同じ
+   - 見方は、[AlmaLinux 10 の更新](#更新)の手順 5 と同じ
 
 ---
 
 ## Claude Code の GNOME 操作（任意）
 
+- 対象: AlmaLinux 10
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
 
@@ -1432,11 +1443,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ## コーディングエージェントの共同作業（任意）
 
+- 対象: 両 OS。AlmaLinux 10 は[実施手順](#コーディングエージェントの共同作業-実施手順)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
 
 ### コーディングエージェントの共同作業: 実施手順
 
+- 対象: AlmaLinux 10
 - [検証記録](verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
 
 > [!IMPORTANT]
@@ -1484,9 +1497,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 3 つの版が出る
-   - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [AlmaLinux 10 の初期設定の「Codex CLI」の手順 5](#codex-cli) から）
-   - `grok models` に `You are not authenticated.` が出ない（出たら [AlmaLinux 10 の初期設定の「Grok Build」の手順 4](#grok-build) から）
-   - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [AlmaLinux 10 の初期設定の「Claude Code」の手順 5](#claude-code)）
+   - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [「Codex CLI」の手順 5](#codex-cli) から）
+   - `grok models` に `You are not authenticated.` が出ない（出たら [「Grok Build」の手順 4](#grok-build) から）
+   - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [「Claude Code」の手順 5](#claude-code)）
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
 
@@ -1620,7 +1633,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
 > - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)を通してある
-> - [Claude Code](#windows-11-で-claude-code-を入れる)から[Codex・Grok のプラグイン](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある
+> - [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)から[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある
 > - 3 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 1・2（scoop）も必要
 > - リモートがあるなら、push の認証と PR を作る道具も必要。GitHub は[GitHub CLI](windows-setup.md#github-cli)でログインしておく
 > - **この項の手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
@@ -1772,13 +1785,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 9 と同じ
-   - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、[Windows 11 の初期設定の「Codex・Grok のプラグイン」](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1・2 を確かめる
+   - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1・2 を確かめる
    - **後ろの節のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
 
 ---
 
 ### コーディングエージェントの共同作業: 使い方の基本
 
+- 対象: 両 OS
 - 役割は、この手順書の既定。入れ替えてよい（AGENTS.md の規則は、どの役割でも同じ）
 
 | だれ | 主な役割 | 作業する場所 | ブランチ |
@@ -1918,6 +1932,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### コーディングエージェントの共同作業: 相互にレビューする
 
+- 対象: 両 OS
 - 書いたものとは別のモデルに、新しい会話でレビューさせる（どれもファイルを変えない）
 - 各ブランチを、ほかの 2 つがレビューする。指摘は人が選んで、担当に直させる
 - 頼む前に、レビューされる側の変更が自分のブランチにコミットしてあること（[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)の手順 7）
@@ -2047,7 +2062,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. AlmaLinux 10 のときだけ、Claude の worktree で Remote Control を tmux の中で始める。
 
-   - [AlmaLinux 10 の初期設定の任意節「Claude Code を tmux の中で動かす（任意）」](#claude-code-を-tmux-の中で動かす任意)の手順 1〜6 を通す
+   - [Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)の手順 1〜6 を通す
    - その節の手順 2 では、`cd <WT_ROOT>/claude` で Claude の worktree に移る
    - セッションの名前は worktree のディレクトリの名前（`claude`）になる。分かりにくければ、スマートフォンから `/rename <名前>` で変えられる
 
@@ -2086,7 +2101,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ### コーディングエージェントの共同作業: 更新
 
 - Windows 11 は [Windows 11 の更新](#コーディングエージェントの共同作業-windows-11-の更新)へ進む
-- Claude Code・Codex・Grok Build と 2 つのプラグインは、[AlmaLinux 10 の初期設定の更新](#更新)で上げる（プラグインは、その手順 5）。Node.js は OS の更新で上がる
+- Claude Code・Codex・Grok Build と 2 つのプラグインは、[更新](#更新)で上げる（プラグインは、その手順 5）。Node.js は OS の更新で上がる
 - この手順書で足した AGENTS.md・CLAUDE.md・worktree は、上げるものが無い。規則を変えたときは[main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で各 worktree をそろえる
 
 ---
@@ -2101,6 +2116,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ## Grok Build のブラウザ操作（任意）
 
+- 対象: 両 OS。AlmaLinux 10 は[実施手順](#grok-build-のブラウザ操作-実施手順)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
 - Claude Code・Codex を使うときは[追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)も通す
@@ -2567,7 +2583,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **Windows のデスクトップで行う**。[Codeg を入れる](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 1 で開く **管理者ではない Windows PowerShell 5.1** に貼る
 > - [HTTPS で公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 3 だけは、管理者の窓に貼る
 > - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と Grok Build が管理者の権限で動く
-> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4、[Grok Build](#windows-11-で-grok-build-を入れる)の導入・ログイン、[Codex・Grok のプラグイン](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
+> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の導入・ログイン、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
 > - 拠点ごとに[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 1 で、信頼する有線 LAN・Wi-Fi をプライベートにする
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）
 > - PC の IP は固定でなくてよい。受信するホスト側のインターフェースが Private なら、有線 LAN・Wi-Fi・VPN の全接続種別・全送信元の IPv4・IPv6 を許可する
@@ -3196,6 +3212,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: 使い方の基本
 
+- 対象: 両 OS
+
 | したいこと | 操作 |
 |---|---|
 | 開く | ルート証明書を入れた端末のブラウザで `https://<ホストの IP>:3443` |
@@ -3237,6 +3255,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: Claude Code と Codex CLI も操作する
 
+- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)
+
 任意。Codeg を構築したホストに [Claude Code](#claude-code)・[Codex CLI](#codex-cli) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1）。
 
 ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
@@ -3252,7 +3272,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - Node.js が `v22` 以上で、npm の版も出ればよい
-   - 見つからない、または Node.js が古ければ、[初期設定の「Codex・Grok のプラグイン」の手順 1](#codexgrok-のプラグイン)を通してからやり直す
+   - 見つからない、または Node.js が古ければ、[「Codex・Grok のプラグイン」の手順 1](#codexgrok-のプラグイン)を通してからやり直す
 
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
 
@@ -3268,7 +3288,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Claude Code`・`Codex` の認証方法で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方法を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
-   - Claude のログイン切れは、使う OS の初期設定の「Claude Code」のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
 
@@ -3340,7 +3360,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: Windows 11 で Claude Code と Codex CLI も操作する
 
-任意。Codeg を構築したホストに [Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Codex・Grok のプラグイン](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1）。
+任意。Codeg を構築したホストに [Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1）。
 
 ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
 
@@ -3355,7 +3375,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - Node.js が `v22` 以上で、npm の版も出ればよい
-   - 見つからない、または Node.js が古ければ、[初期設定の「Codex・Grok のプラグイン」の手順 1](#windows-11-で-codexgrok-のプラグインを入れる)を通し、新しい PowerShell でやり直す
+   - 見つからない、または Node.js が古ければ、[「Windows 11 で Codex・Grok のプラグインを入れる」の手順 1](#windows-11-で-codexgrok-のプラグインを入れる)を通し、新しい PowerShell でやり直す
 
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
 
@@ -3371,7 +3391,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Claude Code`・`Codex` の認証方法で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方法を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
-   - Claude のログイン切れは、使う OS の初期設定の「Claude Code」のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す。Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
 
@@ -3443,6 +3463,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: Codeg のエージェント同士で共同作業する
 
+- 対象: 両 OS
 - 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)の手順 2〜5 で有効にし、接続と応答を確かめておく
 - 委譲先に編集を頼む場合も、[共同作業の手順](#コーディングエージェントの共同作業-実施手順)で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
 
@@ -3544,6 +3565,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: 設定ファイル
 
+- 対象: 両 OS
+
 | 場所（AlmaLinux 10） | 場所（Windows 11） | 中身 |
 |---|---|---|
 | `~/.local/opt/codeg-server/` | `%LOCALAPPDATA%\codeg-server\` | `codeg-server`・`codeg-mcp` と、画面のファイル（`web`） |
@@ -3572,6 +3595,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: 接続元の制限を外す
 
+- 対象: AlmaLinux 10
 - 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
 - `ALLOW_FROM` は現在許可している送信元の帯に合わせる。ここで指定した既存の規則だけを外し、ほかの用途の規則は変更しない
 - この節の手順 2 から、`SERVER_IP` の 3443/tcp に届くすべての送信元を許可する。LAN・VPN の端末だけに限定されたとは扱わない
