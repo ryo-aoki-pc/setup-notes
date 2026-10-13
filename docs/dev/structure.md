@@ -26,6 +26,11 @@
 
 ### 2026-10-13 UTC の追加検証記録
 
+- 2026-10-14 JST の終了状態: 利用者の指示で検証を中止。保存結果の公開だけを行い、未実施を成功へ更新しない
+  - `docs/hypervisor-verification.md` — 中止時点の集計・部分確認・未実施を追記。B/C の元の性能観測値と除外判定を保持し、静穏な再測定と正式比較は未完。VM と担当・定期報告を停止。古い VM の削除・D: 移動は実行拒否で 0 台、容量回収も 0
+  - `docs/verification/windows-setup.md` — W0 retry01 の Windows 11 Pro 導入から初回 OOBE ネットワーク画面までを追記。OOBE 完了・W1〜W5・after-W0 は未実施。媒体子が 8 MiB 増え SHA が不一致となり STOP。停止後の再読は安定したが内部比較と原因の確定は未実施
+  - `docs/verification/windows-dual-boot.md` — 上の W0 記録へ案内。元媒体の署名拒否・過去の VirtualBox の成功を保持し、別媒体の部分導入を原文通しやデュアルブート完成としない
+
 - `docs/verification/windows-setup.md` — [W0追加付録](../verification/windows-setup.md#付録-w0-の-basicdata-派生媒体とセットアップ画面2026-10-13-utc)
   - BasicData FAT32＋SWM派生媒体で言語・キーボード・インストール分岐まで。後続phase03のWinPE CLIで80 GiB導入先・16 GiB媒体の2台を識別。削除同意未選択、source/targetのGUI認識・OS導入未実施。元Rufus UEFI:NTFS拒否と原文手順3未達を保持
 - `docs/verification/homebrew-offline.md` — [SSH承認後の初回取得](../verification/homebrew-offline.md#付録-ssh-承認後の初回オフライン取得2026-10-13-utc)
