@@ -213,6 +213,9 @@
 - `Accept edits` は `Auto` の確認完了と扱わない。手動運用を選ぶときは `Manual` に変える。`Auto` の可否は、最初の応答とモデルの変更後にも確かめる
 - Codex のモードは `Read-only`・`Workspace access`・`Auto review`・`Full access`。手順では `Auto review` を選ぶ。開始時のモードは、既存の Codex 設定や Windows の sandbox の状態にも左右される
 - 自動審査は、すべての操作への確認を省く指定ではない。審査結果に応じて確認・拒否が残る。停止ボタンを押しても、既に行ったファイル変更やコマンドの効果は巻き戻らない
+- Claude Code を選んだとき、入力欄の下の並びは、左から Mode・Model・Effort・Fast mode（`On`・`Off`）・Agent（`Default` は標準の Claude Code）
+  - 画面に項目の名前は出ない。2026-10-14 の Windows 11 の実機では `Manual`・`Opus 5.5`・`Xhigh`・`Off`・`Default` と並んでいた
+  - 項目の名前は、画面ではなく、Codeg が入れた `claude-agent-acp` 0.89.1 のソースで確かめた
 
 表示名と切り替えの条件は、[Claude のモードの実装](https://github.com/agentclientprotocol/claude-agent-acp/blob/4e1fc1e8df2b9af3b1b2d6880ba90c5862283ba8/src/session-mode.ts)と [Codex のモードの実装](https://github.com/agentclientprotocol/codex-acp/blob/202e66e63343ec4f5a5e35ab590251d813d129ca/src/AgentMode.ts)で確認した。Codeg の画面での自動審査・拒否・中断の実測とは区別する。
 
