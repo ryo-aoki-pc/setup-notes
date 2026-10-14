@@ -183,7 +183,7 @@ Android からリモート デスクトップでつないで、PC の上の VM �
 | VirtualBox のソフトキーボード | VM のウィンドウに出るキーをタップして打つ。画面のキーボードで出ない Shift の記号に使う | 併用 |
 | Extension Pack の VRDE（VM の画面に直接 RDP でつなぐ） | Extension Pack が要る（ライセンスが PUEL。本書では扱わない） | 不採用 |
 | PC の上で、Unicode の入力をスキャンコードに直す常駐 | VirtualBox のフックは、VM の画面にフォーカスが来るたびに入れ直されて先に呼ばれ、捕捉中は入力をそこで使ってしまう | 不採用 |
-| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../almalinux-setup.md#gnome-のリモートログイン)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
+| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../gnome-remote.md#gnome-のリモートログイン)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
 
 - PC（RDP サーバー）の側で、クライアントに Unicode を使わせない設定は見つからなかった
 - 設定は Windows App のすべての接続にかかる。PC の上のアプリでも、画面のキーボードの Shift の記号が出なくなる。Android の IME で日本語を打ちたいときは、オフに戻す

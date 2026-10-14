@@ -1,6 +1,6 @@
 # Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）の参考資料
 
-[手順書](../almalinux-setup.md#samba-サーバー)・[ロールバックと注意点](../extra/samba.md)
+[手順書](../samba.md#samba-サーバー)・[ロールバックと注意点](../extra/samba.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#参考資料から分離した記録)
 
@@ -9,16 +9,16 @@
 ### Samba サーバー / 手順 1: 補足: 変数について
 
 - `SERVER_IP` を自動取得にしているのは、設定には使わず検証と案内にしか使わないため（GNOME Remote Desktop の手順書で手入力なのは、値が証明書の SAN に入るから）
-- `SERVER_IP` が間違っていても、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
+- `SERVER_IP` が間違っていても、[サーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の `smbclient "//${SERVER_IP}/..."` が失敗するだけで、設定は壊れない
 - 公開するのは `${USER}`（このシェルのユーザー）のホーム。`sudo -i` した root のシェルでは `root` になり、手順 6 で root のホームを公開してしまうので、読み戻しで必ず確認する
-- root のシェルで進めると、root の Samba ユーザーができるうえ、`/root` のラベル（`admin_home_t`）は手順 4 の boolean の対象外なので、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の `ls` も通らない。root のホームは、自分のユーザーのまま入れる `[root]` 共有で足す（[root のホームも公開する](../almalinux-setup.md#samba-サーバー-root-のホームも公開する)）
-- `ALLOW_FROM` は[接続元を絞る](../almalinux-setup.md#samba-サーバー-接続元を絞る)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
+- root のシェルで進めると、root の Samba ユーザーができるうえ、`/root` のラベル（`admin_home_t`）は手順 4 の boolean の対象外なので、[サーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の `ls` も通らない。root のホームは、自分のユーザーのまま入れる `[root]` 共有で足す（[root のホームも公開する](../samba.md#samba-サーバー-root-のホームも公開する)）
+- `ALLOW_FROM` は[接続元を絞る](../samba.md#samba-サーバー-接続元を絞る)でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 - 変数はそのシェルの中だけで有効
 
 ### Samba サーバー / 手順 2: 補足: パッケージ
 
 - `samba`（baseos）が smbd 本体。依存で `samba-common-tools`（`smbpasswd` / `pdbedit` / `testparm` / `smbstatus`）、`samba-libs`、`samba-dcerpc` などが入る
-- `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は、[サーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
+- `samba-client`（`smbclient`）と `cifs-utils`（`mount.cifs`）は、[サーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の検証にしか使わない。サーバー上で検証しないなら入れなくてよい
 
 ### Samba サーバー / 手順 5: 補足: firewalld
 
@@ -110,10 +110,10 @@
 ### root のホームを公開するときの補足
 
 - **公開されるのは `/root` の全体**
-  - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](../almalinux-setup.md#samba-サーバー-root-のホームも公開する)の手順 2 のモジュールで許す
+  - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](../samba.md#samba-サーバー-root-のホームも公開する)の手順 2 のモジュールで許す
   - `.ssh`（`ssh_home_t`）・`.gnupg`（`gpg_secret_t`）・`.config`（`config_home_t`）などは、一般ユーザーのホームと同じ `user_home_type` のラベルなので、手順 4 の boolean で既に許されている
 - **入るのは `<USER>`**: root の Samba ユーザーは登録しない
-- **クライアントでの見え方**: [samba-client.md](../almalinux-setup.md#samba-クライアント) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
+- **クライアントでの見え方**: [samba-client.md](../samba.md#samba-クライアント) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
 - **以前に `smbpasswd -a root` で root を登録していたら**: `sudo pdbedit -x -u root` で登録を削除する
 
 ### 参照

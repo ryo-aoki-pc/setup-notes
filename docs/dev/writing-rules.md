@@ -4,21 +4,22 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。同じ日に、利用者の決定で大きな項も2冊から分け、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは元のファイルに保持し、用途の項のリードから案内する
 - 集約後に案内だけとなった文書は削除する。旧パス・見出し・移動先を [集約対応表](consolidation-map.md) に記録し、旧原文は移動元コミットで確認する
-- 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順（Remote Control のタスク、仮想モニターのドロップイン）だけは、その節の手順として2冊に残す
+- 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md。後者は 2026-10-15 に almalinux-setup.md から移した）
 - ai-agents.md は、OS で節を分けた手順書にする。`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
 - virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
+- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
 - Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは virtual-machines.md の `## AlmaLinux 10 で使う` の用途に置く
 
 ### 2 冊の骨格（カテゴリ別）
 
 2026-10-14 に、利用者の依頼で、2 冊の「実施手順」と任意節（必須・任意）の区別をやめ、カテゴリ別に組み直した。どの見出しも単独で通せるようにするため。旧→新の見出しと手順番号は[集約対応表の追補](consolidation-map.md#2-冊をカテゴリ別に組み直したときの追補)にある。ai-agents.md・extra・tool-catalog.md は、下の「各用途の手順は次の骨格に揃える。」のまま。
 
-1. 見出しは `#` 題 → `##` カテゴリ → `###` 用途（ツール・主題）→ `####` 用途の中の手順。2 段の項があったもの（almalinux-setup.md の「WireGuard: AlmaLinux 10 の PC からつなぐ」、windows-setup.md の「VirtualBox: Windows 11 で VM を作って使う」）だけ `#####`
+1. 見出しは `#` 題 → `##` カテゴリ → `###` 用途（ツール・主題）→ `####` 用途の中の手順。2 段の項があったもの（wireguard.md の「WireGuard: AlmaLinux 10 の PC からつなぐ」、virtual-machines.md の「VirtualBox: Windows 11 で VM を作って使う」。どちらも、2 冊にあったときからのもの）だけ `#####`
    - 手順（番号付きリスト）を持つ見出しを、階層によらず「項」と呼ぶ。本文では「この項の手順 N」と書く
    - 見出しに「（任意）」を付けない。用途の主の導入の手順は `### <用途>` の直下に置き、「<用途>: 実施手順」「<用途>: Windows 11 で使う」の見出しは作らない
    - `##` カテゴリは 1 行の箇条書きのリードだけで、手順を持たない。例外は `## 更新`（どの更新をどの項で行うかの案内を残す）
@@ -110,7 +111,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ
     - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は [samba-client.md の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-    - bash は `}` まで読んでから実行するので、捨てられる行が残らない。変数の空を弾くブロックは `if … fi` でもよい（almalinux-setup.md の「Samba クライアント」）
+    - bash は `}` まで読んでから実行するので、捨てられる行が残らない。変数の空を弾くブロックは `if … fi` でもよい（samba.md の「Samba クライアント」）
     - 目視で確かめてから次を実行するもの（dry-run の後の本番など）は、囲まずに手順（手順の外ならブロック）を分ける
     - 点検は、ブロックを bash が 1 回に読む単位（`bash -n` が通る最小の行のまとまり）に区切り、`sudo` を含む単位の後ろにコメント以外の行が残らないかで見る
   - 変数が空なら止めるのは、ブロックの先頭の `if [ -z "${VAR}" ]; then echo '中断: …' >&2; else … fi` で行う。ヒアドキュメント・パイプ・`$(…)` の中の `${VAR:?}` は、そのコマンドしか止めず、後ろの行は動く（almalinux-setup.md の検証記録にある、もとの gnome-power.md 手順 3 の補足、「Samba クライアント」）。`{ … }` で囲んでも同じ
@@ -174,7 +175,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - 実行前に読む必要がある警告は、1 手順だけにかかわる場合も対象の節のリードに置き、節・項の名前と手順番号を示す。箇条書きの順序を直すために、警告を危険なコマンドの後ろへ移すだけの修正はしない
 - 使い分け:
   - `[!IMPORTANT]`: リードの前提（上の骨格の最後の項目。OS で節を分けた手順書は、`## Windows 11 で使う` のリードにも置く）。2 冊では、前提は `- 前提:` の箇条書きにし、`[!IMPORTANT]` には項全体にかかわる権限・実行場所の注意だけを置く
-  - `[!WARNING]`: 複数の手順にかかわる危険（almalinux-setup.md の「WireGuard」の `apply` の restart で ssh が切れる、など）、手順の外の節（任意設定・更新・ロールバック）や、2 冊の項で事故につながる注意（同期対象にホームを丸ごと入れない、など）
+  - `[!WARNING]`: 複数の手順にかかわる危険（wireguard.md の「WireGuard」の `apply` の restart で ssh が切れる、など）、手順の外の節（任意設定・更新・ロールバック）や、2 冊の項で事故につながる注意（同期対象にホームを丸ごと入れない、など）
   - `[!CAUTION]`: 取り戻せない削除（鍵・デバイス ID・プロファイル・パスワード DB・Homebrew 全体など）をする手順のある節の、リスト直前のリード。どの手順かを名指しし、その手順の 1 行の説明にも「（取り戻せない）」と書く。軽い設定ファイルの削除には付けない
   - `[!NOTE]`: 検証記録の「対象と検証環境」の注記（変数表・プレースホルダ・秘密情報）
   - `[!TIP]` は使わない。1 用途の節（2 冊は `###` 用途のまとまり）に 5 つまでにし（extra は手順書と別に数える。OS で節を分けた手順書は OS ごとに数え、両 OS に共通の節のものは両方に数える）、アラート同士を空行だけで続けて置かない

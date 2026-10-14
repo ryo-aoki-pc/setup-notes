@@ -1096,7 +1096,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
 - **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/almalinux-setup.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
 - **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 の補足）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 
 #### Firefox: 参照
 
@@ -1155,7 +1155,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 | Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
 | PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 
 #### HackGen Console NF: 参照
 
@@ -1276,7 +1276,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 
 #### WezTerm: 参照
 
@@ -1353,67 +1353,6 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
 - [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」
 - [WezTerm の Windows 11 で使う](../windows-setup.md#wezterm) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
-
----
-
-## 統合前の参考資料: Neovim（もとは neovim.md）
-
-もとの `neovim.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-neovim-の-windows-11もとは-neovimmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| 実施手順 1 | 「Neovim」の手順 1 |
-| 実施手順 2 | 「Neovim」の手順 2（`checkhealth` の起動は外した） |
-| 既定のエディタにする（任意）の 1 | 「Neovim」の手順 4 |
-| 設定ファイルの 1（最小の例） | （外した。「Neovim」の手順 3 で自分用の設定を入れる。箇条書きは「Neovim の設定ファイル」） |
-| 更新 1 | 更新の手順 2・3 |
-| ロールバック 1・2 | ロールバックの「端末とエディタを消す」の手順 3・4 |
-
-### Neovim: 補足
-
-#### Neovim: 実施手順 / 手順 1: 補足: ボトルと依存
-
-- ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
-- 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
-
-#### Neovim: 実施手順 / 手順 2: 補足: :checkhealth の読み方
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
-
-`:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
-
-- `vim.provider`: node / perl / python3 / ruby のプロバイダが無い。それぞれの言語で書かれたプラグインを使わないなら無視してよい（`vim.g.loaded_node_provider = 0` などで黙らせられる）
-- `vim.deprecated`: プラグインが古い API を使っている
-- ツールの不足: `rg`（ripgrep）、`fd`、`git`、`tree-sitter` など。必要なものを各手順書で導入する（[yazi.md](../almalinux-setup.md#yazi) の依存ツール、および RPM の git）
-
-`ERROR` が出ていなければ、日常の編集には支障がない。
-
-- 手順 2 のブロックは、最後の行で起動して、`:checkhealth` で健全性を確認する
-
-#### Neovim: 既定のエディタにする（任意） / 手順 2: 補足: git commit のエディタ
-
-- git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
-
-#### Neovim: 既定のエディタにする（任意） / 手順 3: 補足: Git Bash の共通設定
-
-- Git Bash の共通設定の `EDITOR`・`VISUAL` は、この手順では変わらない
-
-#### Neovim: 設定ファイル / 手順 1: 補足: 探索先とディストリビューション
-
-- 設定の探索先は `nvim -c ':echo stdpath("config")' -c 'q'` で確認できる
-- LazyVim / NvChad などのディストリビューションを入れる場合も、同じ場所に置く
-
-#### Neovim: 参照
-
-- [Install Neovim](https://neovim.io/doc/install/) — 公式が案内する各経路（tarball / AppImage / パッケージマネージャ）
-- [neovim/neovim — INSTALL.md](https://github.com/neovim/neovim/blob/master/INSTALL.md) — tarball の展開先と PATH の通し方、glibc の要件
-- `:help nvim-defaults` / `:help checkhealth` — 既定値と健全性チェックの読み方
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
-- [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は [docs/setup.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md)
-- [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
-- [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）
-- [lazygit — Config.md の Configuring File Editing](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md#configuring-file-editing) — `e` キーのエディタの決まり方（`EDITOR` とプリセット）
-- [ryo-aoki-pc/LazyVimStarter — docs/setup.md の Windows 11 に導入する](../windows-setup.md#lazyvim-の設定を導入する) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
 
 ---
 
@@ -1653,7 +1592,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - ネイティブインストーラ（`install.sh` が取ってくる `bootstrap.sh`）も、まず `claude-code-releases/latest` が指す版を取ってくる
 - 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 - **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 の補足）
 - **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ節の手順 5）
 - **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ節の手順 7）。インストーラの中で動く前の確かめにはならない

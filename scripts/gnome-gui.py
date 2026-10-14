@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """GNOME のセッションの画面を撮り、キーボードとポインタの入力を送る。
 
-docs/almalinux-setup.md の「GNOME のヘッドレスセッション」で常駐させ、
+docs/gnome-remote.md の「GNOME のヘッドレスセッション」で常駐させ、
 docs/ai-agents.md の「Claude Code の GNOME 操作: 実施手順」で仮想モニターを付けたセッションを、
 同じユーザーのシェル（SSH など）から扱う。Claude Code が GUI の動作を確かめるときに使う。
 使うのは Mutter の公式の D-Bus API で、GNOME Shell の unsafe mode は要らない。
@@ -62,7 +62,7 @@ def call(dest, path, iface, method, args=None, rtype=None):
     except GLib.Error as e:
         if 'ServiceUnknown' in e.message or 'NameHasNoOwner' in e.message:
             sys.exit(f'中断: {dest} がセッションバスに無い。GNOME のセッションが動いていない'
-                     '（docs/almalinux-setup.md の「GNOME のヘッドレスセッション」）')
+                     '（docs/gnome-remote.md の「GNOME のヘッドレスセッション」）')
         raise
     return ret.unpack() if ret is not None else None
 

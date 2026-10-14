@@ -35,7 +35,7 @@
 - この文書で入れたものは、この節の項を上から順に戻す。自分用の設定（Neovim・WezTerm・lazygit・yazi）は、その項の中で、それぞれのリポジトリのロールバックへ案内する
 - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと消すときも、scoop の外に残るものは、先に次の手順で外す
   - `~/.gitconfig` の `core.pager` は[Git の道具を消す](#git-の道具を消す)の手順 3、資格情報マネージャーの gh のトークンは同じ項の手順 5〜8
-  - ユーザーの環境変数 `YAZI_FILE_ONE` は[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 3、`EDITOR`・`VISUAL` は[Neovim を既定のエディタにする](../windows-setup.md#neovim-を既定のエディタにする)の手順 3
+  - ユーザーの環境変数 `YAZI_FILE_ONE` は[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 3、`EDITOR`・`VISUAL` は[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 3
   - Claude Code のプラグインは[AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1（プラグインは、Claude Code の起動と終了のたびに、scoop の `node` を動かす）
   - そのときは、scoop で消す手順（[Git の道具を消す](#git-の道具を消す)の手順 2・4・9、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 2・5〜8）は要らない（止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える）。lazygit の設定（`%LOCALAPPDATA%\lazygit`）は scoop の外に残る（外すなら[Git の道具を消す](#git-の道具を消す)の手順 1）
   - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9（scoop を消した後でもよい）
@@ -222,7 +222,7 @@
    - 動いている Neovim があると、消さずに止まる（閉じてから貼り直す）
    - `%LOCALAPPDATA%\nvim`（設定）・`%LOCALAPPDATA%\nvim-data`（プラグイン・undo・ログ）・`%TEMP%\nvim-data`（キャッシュ）は残るので、要らなければ手で消す
    - VC++ のランタイムは、ほかのアプリも使うので消さない
-   - ユーザーの環境変数 `EDITOR`・`VISUAL` は、[Neovim を既定のエディタにする](../windows-setup.md#neovim-を既定のエディタにする)の手順 3 で消す
+   - ユーザーの環境変数 `EDITOR`・`VISUAL` は、[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 3 で消す
 
 1. ほかに使うものが無いときだけ、scoop で入れた Node.js を外す。
 
@@ -375,7 +375,7 @@
    ```
 
    - `False` が 2 行出ればよい
-   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../windows-setup.md#syncthing)、リモート デスクトップなど）があれば、戻さない）
+   - LAN の接続をパブリックに戻すのは、[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 5（この LAN でほかにプライベートの規則を使うもの（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で-syncthing-を使う)、リモート デスクトップなど）があれば、戻さない）
 
 1. Git for Windows も外すときだけ、Git Bash を閉じてから winget で外す。
 
@@ -920,7 +920,7 @@
 
    - `<LAN_IF>  Public` が出ればよい
    - [PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 3 で `LanCategory` が `Private` だったなら（もとからプライベート）、この手順は飛ばす
-   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../windows-setup.md#syncthing)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
+   - [OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で-syncthing-を使う)・リモート デスクトップをこの LAN で使っているなら、この手順は飛ばす（パブリックにすると届かなくなる）
 
 1. アダプターを、電力の節約のために止められるように戻す。
 
@@ -1100,7 +1100,7 @@
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
 - **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
   - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない
-- **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・HackGen Console NF・WezTerm・git-delta・Neovim・lazygit・GitHub CLI・yazi のもの。ここには Windows 11 だけの注意を書く
+- **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・HackGen Console NF・WezTerm・git-delta・lazygit・GitHub CLI・yazi のもの。Neovim の注意は、両 OS とも [Neovim のセットアップの注意点](neovim.md#注意点) にある。ここには Windows 11 だけの注意を書く
 - **OpenSSH サーバー: SSH のセッションは管理者の権限を持つ**
   - Administrators の一員でログインすると、`whoami /groups` で `Mandatory Label\High Mandatory Level` と、有効な `BUILTIN\Administrators` を確認する
   - このユーザーのパスワードを知る人と、登録した鍵を持つ人は、この PC の管理者として操作できる。パスワードと秘密鍵の扱いは、管理者のパスワードと同じにする
@@ -1147,10 +1147,6 @@
   - `gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことは、git の HTTPS の認証に影響しない
 - **lazygit: Windows 11 では、winget の lazygit（`JesseDuffield.lazygit`）と両方入れない**: どちらが使われるかが `PATH` の順で決まり、分かりにくくなる。どちらか一方にする
 - **lazygit: Windows 11 の SSH のセッションでは、そのままでは scoop の lazygit が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
-- **Neovim: Windows 11 では、winget などで入れた Neovim と両方入れない**: winget の `Neovim.Neovim` は PC 全体（`C:\Program Files\Neovim`）に入り、PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、そちらが使われる。どちらか一方にする
-- **Neovim: Windows 11 の SSH のセッションでは、そのままでは scoop の nvim が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
-- **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
-  - [「アプリを入れる」の手順 6](../windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、pwsh の中から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-の外部コマンド)）
 - **yazi: Windows 11 では、`file` を `YAZI_FILE_ONE` で渡す**: 無いと PowerShell から起動した yazi はファイルの種類が分からず、開く・プレビューの規則が効かない（[「yazi」の手順 5](../windows-setup.md#yazi)）。Git for Windows を外すと、同じことになる
   - PowerShell の `PATH` には `file` が無い（Git Bash には `/usr/bin/file` がある）
 - **yazi: Windows 11 の画像プレビューは、端末と ConPTY に依存する**: WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）で出る。ConPTY の制約で、Linux と同じには出ないことがある

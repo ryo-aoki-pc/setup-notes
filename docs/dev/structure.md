@@ -4,7 +4,7 @@
 
 この文書の `docs/verification/…`・`docs/almalinux-vm-verification.md`・`docs/hypervisor-verification.md` と検証で撮った画像のパスは、非公開側の同じパスを指す。
 
-- `docs/windows-setup.md` — Windows 11 の手順書。10 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・シェルと端末・SSH・Git と開発の道具・アプリ・ファイルの共有と同期・更新）に分け、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせた
+- `docs/windows-setup.md` — Windows 11 の手順書。9 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・シェルと端末・SSH・Git と開発の道具・アプリ・更新）に分け、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせた
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。10 のカテゴリ（基本の設定・GNOME のデスクトップ・シェルと端末・Git と開発の道具・アプリ・ネットワークとリモート操作・コンテナ・ファイルの共有と同期・再起動の後の確認・更新）に分け、項ごとに前提・実行場所を書いて、変数を項の中に持たせた。実行するホストを区別する
   - 2 冊は 2026-10-14 に、利用者の依頼で「実施手順」と任意節の区別をやめ、カテゴリ別に組み直した（[対応表の追補](consolidation-map.md#2-冊をカテゴリ別に組み直したときの追補)）。Windows は Codex、AlmaLinux はカテゴリごとの Claude Code のサブエージェントが書き直し、設計と差分は Grok Build が読み取り専用でレビューした
   - 組み直しは、見出しの並べ替えと、項を単独で通すための書き直しで、新たな実機検証を意味しない。コードブロックは、足した変数・窓を開く手順と、変数を使う項へ移したもの・中断のメッセージを直したもののほかは変えていない（静的な確認は `docs/verification/consolidation.md`）
@@ -12,12 +12,18 @@
   - ロールバックと注意点は `docs/extra/ai-agents.md`、分けた理由と方針は `docs/reference/ai-agents.md`、分離の静的な確認（リンク・移動の同一性・折りたたみの描画・構文解析と、Codex の独立検査・レビューの対応）は `docs/verification/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
   - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
   - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
-  - 2冊に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、almalinux-setup.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
+  - 2冊（と、そこから分けた gnome-remote.md）に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、gnome-remote.md（2026-10-15 までは almalinux-setup.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox。2026-10-15 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#仮想マシンと-forgejo-を別の文書へ分けたときの追補)）
   - 検証記録・参考資料・extra は、項ごとの文書名（`virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`）のまま使う。Windows Sandbox のものは、2冊の検証記録・参考資料・extra から `windows-sandbox` へ移した。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「VirtualBox」は、AlmaLinux 10 の同名の項と分けるため「Windows 11 で VirtualBox を入れる」にした
   - 分離は文書の移動で、新たな実機検証を意味しない。本文とコードブロックは移動の前後で一致する（静的な確認は `docs/verification/consolidation.md`）
 - `docs/forgejo.md` — Forgejo のサーバー（AlmaLinux 10）の手順書。2026-10-15 に利用者の決定で、almalinux-setup.md の「サーバー」のカテゴリごと分けた。検証記録・参考資料・extra は `forgejo` のまま使う
+- `docs/gnome-remote.md`・`docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` — 2 冊の大きな項（両 OS の合計がおよそ 50 KB 以上の話題）を、2026-10-15 に利用者の決定で分けた手順書（[対応表の追補](consolidation-map.md#大きな項を-5-冊へ分けたときの追補)）。virtual-machines.md と同じく、`## AlmaLinux 10 で使う`・`## Windows 11 で使う` の下に元の項を置いた（gnome-remote.md は AlmaLinux 10 だけ）
+  - gnome-remote.md は almalinux-setup.md の「GNOME のデスクトップ共有」「GNOME のヘッドレスセッション」「GNOME のリモートログイン」、samba.md は「Samba クライアント」「Samba サーバー」と Windows の「Samba クライアント」、wireguard.md・neovim.md・syncthing.md は両 OS の同名の項
+  - Windows 11 側の同名の項は「Windows 11 で WireGuard を使う」「Windows 11 で Neovim を入れる」「Windows 11 で Samba クライアントを使う」「Windows 11 で Syncthing を使う」にし、Neovim の子の LazyVim の 5 項にも「Windows 11 で」を付けた。Windows の「ファイルの共有と同期」は空になったので消した
+  - 検証記録・参考資料・extra は、項ごとの文書名（`gnome-desktop-sharing`・`gnome-headless-session`・`gnome-remote-desktop`・`wireguard`・`samba`・`samba-client`・`syncthing`）のまま使う。Neovim のものは、2冊の参考資料・extra の注意点・検証記録の「統合前の…」の節から `neovim` へ移した（ロールバックは、ほかの道具と同じ項にあるので2冊の extra に残した）
+  - `wireguard.md`・`samba.md`・`syncthing.md`・`neovim.md` は、2026-10-12 に2冊へ集約するまでの単独の文書と同じ名前。[統合前の文書構成と検証範囲（履歴）](#統合前の文書構成と検証範囲履歴)の同じ名前の項は、当時の文書の説明
+  - 分離は文書の移動で、新たな実機検証を意味しない。本文とコードブロックは移動の前後で一致する（静的な確認は `docs/verification/consolidation.md`）
 - 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する
 - `docs/reference/`・`docs/extra/` はこのリポジトリの既存の場所を保つ。`docs/verification/` は同じパスのまま非公開の `ryo-aoki-pc/setup-notes-verification` へ移した。集約は新たな実機検証を意味しない

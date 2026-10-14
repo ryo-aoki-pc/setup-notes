@@ -1247,7 +1247,7 @@
 
 > [!IMPORTANT]
 > - **Claude Code が動くユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない
-> - 前提: [ヘッドレスセッション](almalinux-setup.md#gnome-のヘッドレスセッション)の手順 1・2。RDP の設定は不要
+> - 前提: [ヘッドレスセッション](gnome-remote.md#gnome-のヘッドレスセッション)の手順 1・2。RDP の設定は不要
 > - [画面ロックを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順 1・2 も通す。Claude Code は画面ロックを解除できない
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
@@ -2149,7 +2149,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
 > - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
-> - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](almalinux-setup.md#wireguard-クライアントを登録する)でクライアントにしておく
+> - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
 > - [ブラウザ操作](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 1・3〜6 は別の PC とそのブラウザで行う
 > - [HTTPS 公開](#grok-build-のブラウザ操作-https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末、手順 6・8 はスマートフォンと PC で行う
 
@@ -2627,7 +2627,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）
 > - PC の IP は固定でなくてよい。受信するホスト側のインターフェースが Private なら、有線 LAN・Wi-Fi・VPN の全接続種別・全送信元の IPv4・IPv6 を許可する
 > - VPN からでも、実際に受信するホスト側のインターフェースが Private であることが必要。信頼する接続だけを Private にし、公衆 Wi-Fi などは Public のままにする
-> - スマートフォンから LAN の外で使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](almalinux-setup.md#wireguard-クライアントを登録する)でクライアントにしておく
+> - スマートフォンから LAN の外で使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
 > - [Windows 11 で HTTPS で LAN・VPN に公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 5 は確認するネットワークの別の端末で、手順 6・8 はスマートフォンと PC で行う
 
 - 上から順にコードブロックを貼る。[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 で変数を設定した PowerShell に貼る
