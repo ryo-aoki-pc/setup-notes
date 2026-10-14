@@ -3,34 +3,16 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[ロールバックと注意点](extra/windows-setup.md)
 
 > [!IMPORTANT]
-> - **この PC のデスクトップで、Administrators のユーザーが行う**。SSH のセッションには貼らない
-> - PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常（管理者ではない）の窓は、窓を開く手順に従って切り替える
->   - 管理者: [Windows Update](#windows-update)、[PC 全体の設定](#pc-全体の設定)から[WSL と再起動](#wsl-と再起動)まで
->   - 通常: [Microsoft Store の更新](#microsoft-store-の更新)から[HackGen Console NF](#hackgen-console-nf)まで、再起動後の PowerShell の手順
-> - bash の貼り先は次の 3 段階
->   - [SSH でログインを確かめる](#ssh-でログインを確かめる): クライアントの bash（この PC の WSL の AlmaLinux 10 など）
->   - [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定): 同じ項の手順 2 で開く Git Bash の窓
->   - それより後: 設定を入れた WezTerm の新しい Git Bash のタブ
-> - 前提: GitHub のアカウント
+> - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
+> - PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常（管理者ではない）の窓は、各項の窓を開く手順に従う
 > - [貼り付けの設定](#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
-> - [WSL と再起動](#wsl-と再起動)の手順 2 で **再起動する**。Windows Update の再起動は[Windows Update](#windows-update)に従う
 
-- 上から順にコードブロックを貼る。[PC 全体の設定](#pc-全体の設定)の手順 2 の変数は、管理者の PowerShell を開き直したら貼り直す（[OpenSSH サーバー](#openssh-サーバー)の手順 3・5 も使う）
-  - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3・[yazi](#yazi)の手順 1 の変数も、その項の中で新しいシェルや窓を開いたら貼り直す
+- 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
+- どの項も単独で通せる。リードの前提を先に満たす
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 使わない項目は飛ばしてよい。ただし、次の準備は省かない
-  - [Microsoft Store の更新](#microsoft-store-の更新)の手順 1、[貼り付けの設定](#貼り付けの設定)の手順 1〜4、[PC 全体の設定](#pc-全体の設定)の手順 1〜3
-  - [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、[WSL と再起動](#wsl-と再起動)の手順 2、[シェルのツールを入れる](#シェルのツールを入れる)の手順 1・3・4
-- デュアルブート向けに入れるなら、先に[Windows 11 の導入](#windows-と-almalinux-のデュアルブート)を通す
-- 初期設定後は、必要な任意節を選び、以後は[更新](#更新)・[ロールバック](extra/windows-setup.md#ロールバック)を使う
-- 後続の手順: [VirtualBox](#virtualbox) → [WireGuard](#wireguard)。その他のツールは [README](../README.md) から選ぶ
+- 設定を更新するときは[更新](#更新)、戻すときは[ロールバック](extra/windows-setup.md#ロールバック)を使う
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップの「Windows 11 で使う」](ai-agents.md#windows-11-で使う)で入れる
-- 両 OS 共通の使い方・設定は[AlmaLinux 10 の初期設定](almalinux-setup.md)の後ろの節を参照し、Git Bash に貼る
-  - [fzf の任意節](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う)の `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
-  - bat の設定は[シェルのツールを入れる](#シェルのツールを入れる)の手順 5 を使う
-- CRLF に変換して clone 済みのリポジトリは、Git Bash で[改行を変換して clone したリポジトリを直す](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を通す
-- SSH で scoop のツールを使うなら、導入・更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 1 を管理者の窓に貼る
 
 > [!WARNING]
 > - ロックを止め、自動サインイン・インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
@@ -43,26 +25,28 @@
 
 ### Windows と AlmaLinux のデュアルブート
 
+- Windows 11 を新しく入れ、AlmaLinux 10 用の未割り当て領域を残す
+- 前提: Rufus で Windows 11 のインストールメディアを作成済み。カスタムの指定は次の箇条書きで確かめる
+- 実行場所: この PC の画面・機器、セットアップのコマンド プロンプト、導入後の管理者の Windows PowerShell（5.1）。窓はこの項の中で開く
+
+- **インストールメディアは、Rufus で作成済みとする**。「インストーラーをカスタムしますか?」でオンにした項目は次の 7 つ（[選択した方針](reference/windows-dual-boot.md#選択した方針)）
+  - 「4GB以上のRAM、セキュアブート及びTPM 2.0の要件を削除」「オンラインアカウントの要件を削除」「ローカルアカウントを次の名前で作成:」
+  - 「地域設定をこのユーザーと同じものに設定」「データ収集を無効化」「BitLocker 自動デバイス暗号化を無効化します。」「利便性向上パッチ(Microsoftの各種ソフトウェアの無効化)」
+  - **「⚠サイレント⚠ ディスクの削除とインストール:」はオフにしてある**こと（オンだと、最初に見つかったディスクを確かめずに消して入れる）
+  - ビルド 26200 以降の ISO で出る「Windows CA 2023署名のブートローダーを使用する」「インストール時にSkuSiPolicy.p7bを適応する」もオフのまま（既定でオフ）
+
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[ロールバックと注意点](extra/windows-dual-boot.md)
 
-> [!IMPORTANT]
-> - **入れる先のディスクの中身は、手順 5 ですべて消える**。そのディスクに Windows 11 を新しく入れ、後ろに AlmaLinux 10 用の未割り当て領域を残す
-> - **インストールメディアは、Rufus で作成済みとする**。「インストーラーをカスタムしますか?」でオンにした項目は次の 7 つ（[選択した方針](reference/windows-dual-boot.md#選択した方針)）
->   - 「4GB以上のRAM、セキュアブート及びTPM 2.0の要件を削除」「オンラインアカウントの要件を削除」「ローカルアカウントを次の名前で作成:」
->   - 「地域設定をこのユーザーと同じものに設定」「データ収集を無効化」「BitLocker 自動デバイス暗号化を無効化します。」「利便性向上パッチ(Microsoftの各種ソフトウェアの無効化)」
->   - **「⚠サイレント⚠ ディスクの削除とインストール:」はオフにしてある**こと（オンだと、最初に見つかったディスクを確かめずに消して入れる）
->   - ビルド 26200 以降の ISO で出る「Windows CA 2023署名のブートローダーを使用する」「インストール時にSkuSiPolicy.p7bを適応する」もオフのまま（既定でオフ）
-> - 手順 1〜3・6〜8 は、PC の画面と機器で行う。**手順 4・5 は、セットアップのコマンド プロンプトに手で 1 行ずつ打つ**（貼り付けられない）
-> - 手順 9〜13 は、入れた Windows の管理者の Windows PowerShell 5.1 に **Ctrl+V で貼る**。[貼り付けの設定](#貼り付けの設定)より前に右クリックで貼ると、行が逆順になる
+- この項の手順 1〜3・6〜8 は、PC の画面と機器で行う。**この項の手順 4・5 は、セットアップのコマンド プロンプトに手で 1 行ずつ打つ**（貼り付けられない）
+- この項の手順 9〜13 は、入れた Windows の管理者の Windows PowerShell 5.1 に **Ctrl+V で貼る**。[貼り付けの設定](#貼り付けの設定)より前に右クリックで貼ると、行が逆順になる
 
-- 上から順に進める。手順 10・12・13 は、条件に当たるときだけ行う
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- やり直すときは、手順 3 から始める（ロールバックの節は無い）。手順 5 のパーティションが残っていれば、手順 4・5 は飛ばしてよい
+- この項の手順 10・12・13 は、条件に当たるときだけ行う
+- やり直すときは、この項の手順 3 から始める（ロールバックの節は無い）。この項の手順 5 のパーティションが残っていれば、この項の手順 4・5 は飛ばしてよい
 
 - 両方の OS を入れた後、Windows から次回だけ AlmaLinux を起動したいときは、[QEFI Entry Manager を使う節](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)へ進む
 
 > [!CAUTION]
-> **手順 5 の `clean` で、選んだディスクのパーティションとデータをすべて消す（取り戻せない）。** ディスクの番号は、手順 4 で大きさを見て確かめる。
+> **この項の手順 5 の `clean` で、選んだディスクのパーティションとデータをすべて消す（取り戻せない）。** ディスクの番号は、この項の手順 4 で大きさを見て確かめる。
 
 1. PC の UEFI（BIOS）の設定画面で、起動の設定を確かめる。
 
@@ -74,14 +58,14 @@
 
 1. LAN ケーブルを抜き、Wi-Fi にもつながない状態にする。
 
-   - つなぐのは、手順 7 でデスクトップが出てから
+   - つなぐのは、この項の手順 7 でデスクトップが出てから
 
 1. Rufus の USB を挿し、PC の起動メニューから UEFI で起動して、セットアップの最初の画面まで進める。
 
    - 起動メニューを出すキー（F12・F11・Esc など）は PC ごとに違う。USB が 2 つ出るなら、名前が「UEFI:」で始まる方を選ぶ
    - 黒い画面に `UEFI:NTFS` の文字と `Secure Boot status: Enabled` が出てから、Windows のセットアップが始まる
-   - 「言語設定を選択」の画面が出たら、まだ「次へ」を押さずに手順 4 へ進む
-   - Secure Boot の違反で止まるなら、手順 1 の 3rd Party UEFI CA を見直す
+   - 「言語設定を選択」の画面が出たら、まだ「次へ」を押さずにこの項の手順 4 へ進む
+   - Secure Boot の違反で止まるなら、この項の手順 1 の 3rd Party UEFI CA を見直す
    - やり直しのときに「アップグレードを開始し、インストール メディアから起動したようです。」の窓が出たら、「いいえ」（クリーン インストール）を押す
 
 1. Shift+F10 でコマンド プロンプトを開き、UEFI で起動したことと、入れる先のディスクの番号を確かめる。
@@ -97,7 +81,7 @@
    - コマンド プロンプトのキー配列は日本語（106/109）。`\` は画面では `¥` と表示される（同じ文字）
    - Enter の前に、打った文字が画面に正しく出ているかを見る
    - ノート PC で Shift+F10 が効かなければ、Shift+Fn+F10 を押す
-   - 2 行目の結果が `PEFirmwareType    REG_DWORD    0x2` なら UEFI で起動している。`0x1` なら BIOS（Legacy）の起動なので、手順 1・3 からやり直す
+   - 2 行目の結果が `PEFirmwareType    REG_DWORD    0x2` なら UEFI で起動している。`0x1` なら BIOS（Legacy）の起動なので、この項の手順 1・3 からやり直す
    - `list disk` に、ディスクの番号・大きさ・空き・GPT の印が並ぶ。**Windows を入れるディスクの番号を、大きさで見分けて控える**
    - Rufus の USB も 1 台のディスクとして並ぶ（USB メモリの大きさのもの）。選ばない
 
@@ -121,22 +105,22 @@
    exit
    ```
 
-   - `DISKPART>` のプロンプトに 1 行ずつ打つ。**1 行目の `0` は、手順 4 で控えたディスクの番号に直す**
+   - `DISKPART>` のプロンプトに 1 行ずつ打つ。**1 行目の `0` は、この項の手順 4 で控えたディスクの番号に直す**
    - **7 行目の `204800` は Windows のパーティションの大きさ**（単位は MB。204800 = 200 GiB）。Windows に割り当てたい大きさに直す。ディスクの残りは、AlmaLinux 用の未割り当て領域になる
    - `list partition` に 4 つのパーティション（`システム` 2048 MB・`予約済み` 16 MB・`プライマリ` Windows の大きさ・`回復` 1024 MB）が並べばよい
    - 途中で打ち間違えたら、`select disk 0`（控えた番号）から打ち直す
 
-1. セットアップに戻り、手順 5 の「Windows」のパーティションを選んでインストールする。
+1. セットアップに戻り、この項の手順 5 の「Windows」のパーティションを選んでインストールする。
 
    - 「言語設定を選択」→「キーボード設定を選択」→「セットアップ オプションの選択」→「プロダクト キーを入力してください」→「イメージの選択」→「適用される通知とライセンス条項」の順に進む
    - 「キーボード設定を選択」の「キーボードの種類」は、日本語のキーボードなら「日本語キーボード (106/109 キー)」にする
    - 「セットアップ オプションの選択」では「Windows 11 のインストール」を選び、「ファイル、アプリ、設定など、すべてが削除されることに同意します」に印を付ける
    - プロダクト キーが無ければ「プロダクト キーがありません」を押し、「イメージの選択」でエディション（Windows 11 Pro など）を選ぶ
-   - **「Windows 11 をインストールする場所の選択」では、手順 5 で作った Windows の大きさのパーティション（`ディスク 0 パーティション 3: Windows` のように、手順 4 で控えたディスクのパーティション 3）を選び、「次へ」を押す**
+   - **「Windows 11 をインストールする場所の選択」では、この項の手順 5 で作った Windows の大きさのパーティション（`ディスク 0 パーティション 3: Windows` のように、この項の手順 4 で控えたディスクのパーティション 3）を選び、「次へ」を押す**
    - この画面では「パーティションの削除」を押さず、「未割り当て領域」も選ばない
    - 「インストール準備完了」の画面で「インストール」を押す。途中で何度か再起動する
    - 最初の再起動のときに USB を抜く
-   - **注意**: 「適用される通知とライセンス条項」の画面には「戻る」が無い。Esc を押すと「本当に終了しますか?」が出て、「はい」で PC が再起動する（手順 3 からやり直す）
+   - **注意**: 「適用される通知とライセンス条項」の画面には「戻る」が無い。Esc を押すと「本当に終了しますか?」が出て、「はい」で PC が再起動する（この項の手順 3 からやり直す）
 
 1. 初回の起動を待ち、Rufus で作ったローカル アカウントでデスクトップまで進む。
 
@@ -162,8 +146,8 @@
 
    - パーティションが `System`（`2147483648`）・`Reserved`（`16777216`）・`Basic`（C:）・`Recovery`（`1073741824`）の順に 4 つ並べばよい
    - `PartitionStyle` が `GPT` で、`LargestFreeExtent` が AlmaLinux 用に残した大きさ（バイト）になっていればよい
-   - `reagentc /info` の Windows RE の状態が `Enabled` で、場所が `…\partition4\Recovery\WindowsRE`（回復パーティション）なら、手順 10 は飛ばす
-   - 場所が `partition3`（C:）か空なら、手順 10 で回復パーティションへ移す
+   - `reagentc /info` の Windows RE の状態が `Enabled` で、場所が `…\partition4\Recovery\WindowsRE`（回復パーティション）なら、この項の手順 10 は飛ばす
+   - 場所が `partition3`（C:）か空なら、この項の手順 10 で回復パーティションへ移す
 
 1. WinRE が回復パーティションに無いときだけ、回復パーティションへ移す。
 
@@ -185,9 +169,9 @@
    Get-TimeZone | Format-List Id
    ```
 
-   - `HiberbootEnabled : 0` なら高速スタートアップは切れている。`1` なら、手順 12 で切る。`0` なら手順 12 は飛ばす
+   - `HiberbootEnabled : 0` なら高速スタートアップは切れている。`1` なら、この項の手順 12 で切る。`0` ならこの項の手順 12 は飛ばす
    - `VolumeStatus : FullyDecrypted` と `ProtectionStatus : Off` なら、BitLocker は使われていない。暗号化されていたら[注意点](extra/windows-dual-boot.md#注意点)
-   - `Id : Tokyo Standard Time` なら、手順 13 は飛ばす。違えば、手順 13 で直す
+   - `Id : Tokyo Standard Time` なら、この項の手順 13 は飛ばす。違えば、この項の手順 13 で直す
    - Home エディションで `Get-BitLockerVolume` が無いと出たら、代わりに `manage-bde -status C:` で見る
 
 1. 高速スタートアップが有効なときだけ、切る。
@@ -213,12 +197,14 @@
 
 #### Windows と AlmaLinux のデュアルブート: 次回だけ AlmaLinux で起動する
 
-> [!IMPORTANT]
-> - Windows 11 から操作する。AlmaLinux を導入済みで、PC の起動メニューから AlmaLinux のエントリを選んで起動できることが前提
-> - QEFI Entry Manager と PowerShell は管理者として起動する。PowerShell のブロックは Ctrl+V で貼る
-> - この項では、次回だけの起動先（`BootNext`）を指定する。通常の起動順（`BootOrder`）や GRUB の既定の選択は変更しない
+- Windows から、次回だけ AlmaLinux で起動するように指定する
+- 前提: [Windows と AlmaLinux のデュアルブート](#windows-と-almalinux-のデュアルブート)を通し、AlmaLinux 10 を導入済み。PC の起動メニューから AlmaLinux を起動できる
+- 実行場所: Windows のブラウザ・エクスプローラー、管理者の Windows PowerShell（5.1）。PowerShell はこの項の手順 2 で開く
 
-- 初回はこの項の手順 1 から行う。展開済みなら、この項の手順 5 から行う（管理者の Windows PowerShell を開いておく）
+- QEFI Entry Manager と PowerShell は管理者として起動する。PowerShell のブロックは Ctrl+V で貼る
+
+- 通常の起動順（`BootOrder`）や GRUB の既定の選択は変更しない
+- 初回はこの項の手順 1 から行う。展開済みなら、この項の手順 2 で管理者の Windows PowerShell を開き、同じ項の手順 5 へ進む
 - 同梱 CLI に表示の不具合があるため、Windows 標準の BCDEdit も使って確認する（この項の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)）
 - 再起動前に取り消すときは、[次回起動の指定を取り消す](#windows-と-almalinux-のデュアルブート-次回起動の指定を取り消す)へ進む。QEFI Entry Manager を閉じるだけでは取り消せない
 
@@ -229,7 +215,7 @@
 
 1. 管理者の Windows PowerShell（5.1）を開く。
 
-   - [手順 8](#windows-と-almalinux-のデュアルブート)と同じように、スタートメニューから「管理者として実行する」で開く
+   - [Windows と AlmaLinux のデュアルブート](#windows-と-almalinux-のデュアルブート)の手順 8と同じように、スタートメニューから「管理者として実行する」で開く
    - この窓は、GUI で指定した後の確認にも使うので残しておく
    - **次の手順は、管理者の窓が開いてから貼る**
 
@@ -312,8 +298,16 @@
 
 #### Windows と AlmaLinux のデュアルブート: 次回起動の指定を取り消す
 
-- QEFI Entry Manager で指定した後、まだ再起動していないときに行う。展開先は[次回だけ起動する節](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)と同じで、管理者の Windows PowerShell（5.1）に貼る
+- 再起動前に、自分が指定した次回だけの起動先を取り消す
+- 前提: [次回だけ AlmaLinux で起動する](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)で予約し、まだ再起動していない。QEFI Entry Manager は同じ場所へ展開済み
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - 解除するのは次回だけの予約。AlmaLinux のエントリ自体は消さず、通常の起動順も変えない
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
 
 1. BCDEdit で、取り消す予約を確かめる。
 
@@ -324,7 +318,7 @@
    ```
 
    - `{fwbootmgr}` の `bootsequence` が自分の指定したエントリの識別子であることを確かめる。別の対象や不明な対象なら中断する
-   - `{fwbootmgr}` に `bootsequence` が無ければ、この項の手順 2 は飛ばす
+   - `{fwbootmgr}` に `bootsequence` が無ければ、この項の手順 3 は飛ばす
 
 1. 自分が指定した予約が残っているときだけ、解除する。
 
@@ -334,7 +328,7 @@
    ```
 
    - オプションは大文字の `-N`。`-B`（エントリ削除）や `-O`（起動順削除）は使わない
-   - `BootNext deleted` が出ても成功と決めず、この項の手順 3 で確認する
+   - `BootNext deleted` が出ても成功と決めず、この項の手順 4 で確認する
 
 1. 予約が消え、通常の起動順が変わっていないことを確かめる。
 
@@ -358,6 +352,10 @@
 
 ### Windows Update
 
+- Windows Update の更新を検索・適用し、必要なら再起動する
+- 前提: 無し
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」。UAC の確認で「はい」
@@ -373,7 +371,7 @@
        throw '中断: Windows PowerShell 5.1 で実行する'
      }
      if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       throw '中断: 「Windows Update」の手順 1 で管理者の Windows PowerShell を開く'
+       throw '中断: この項の手順 1 で管理者の Windows PowerShell を開く'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Module -ListAvailable -Name PSWindowsUpdate | Select-Object Name, Version, ModuleBase
@@ -427,7 +425,7 @@
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
-       throw '中断: 再起動が必要。「Windows Update」の手順 8 を行ってから検索し直す'
+       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
      }
      $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
      '対象の更新: {0} 件' -f $updates.Count
@@ -449,7 +447,7 @@
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
-       throw '中断: 再起動が必要。「Windows Update」の手順 8 を行ってから検索し直す'
+       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
      }
      Install-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' -AcceptAll -IgnoreReboot |
        ForEach-Object {
@@ -488,13 +486,13 @@
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
-       throw '中断: 再起動が必要。「Windows Update」の手順 8 を行ってから検索し直す'
+       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      '残っている対象の更新: {0} 件' -f $updates.Count
      $updates | Format-Table KB, Size, Title -AutoSize
      if ($updates.Count -gt 0) {
-       Write-Warning '更新が残っている。「Windows Update」の手順 5 から繰り返す'
+       Write-Warning '更新が残っている。この項の手順 5 から繰り返す'
      } else {
        'Windows Update の確認完了（対象の更新なし・再起動待ちなし）'
      }
@@ -518,9 +516,12 @@
 
 ### Microsoft Store の更新
 
+- Store CLI を用意し、Microsoft Store のアプリを更新する
+- 前提: 無し
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
 
-   - [Windows Update](#windows-update)の手順 1 の管理者の窓を閉じる
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
    - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
    - Windows Terminal の中に開いた窓に複数行のブロックを貼ると、「複数の行を含むテキストを貼り付けようとしています」の警告が出る。「強制的に貼り付け」を押す
@@ -534,7 +535,7 @@
        throw '中断: Windows PowerShell 5.1 で実行する'
      }
      if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       throw '中断: 「Microsoft Store の更新」の手順 1 で管理者ではない窓を開く'
+       throw '中断: この項の手順 1 で管理者ではない窓を開く'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-AppxPackage -Name Microsoft.WindowsStore | Select-Object Name, Version
@@ -590,11 +591,11 @@
    & {
      $ErrorActionPreference = 'Stop'
      if (-not (Get-Command -Name store.exe -ErrorAction SilentlyContinue)) {
-       throw '中断: Store CLI が無い。「Microsoft Store の更新」の手順 4 で準備してから再確認する'
+       throw '中断: Store CLI が無い。この項の手順 4 で準備してから再確認する'
      }
      $help = store.exe updates --help
      if ($LASTEXITCODE -ne 0 -or ($help -join "`n") -notmatch '--apply\b') {
-       throw '中断: Store CLI の一括更新を確認できない。「Microsoft Store の更新」の手順 4 の後も同じなら進まない'
+       throw '中断: Store CLI の一括更新を確認できない。この項の手順 4 の後も同じなら進まない'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      store.exe updates
@@ -648,6 +649,15 @@
 
 ### 貼り付けの設定
 
+- 複数行を元の順に貼れるように、Ctrl+Enter とプロファイルを設定する
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)でアプリ インストーラーと winget を用意してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+
 1. 今の窓だけ、Ctrl+Enter を「行を足す」にする。
 
    ```powershell
@@ -677,11 +687,11 @@
    '実行ポリシー: {0}' -f (Get-ExecutionPolicy)
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じて[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 から
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じてこの項の手順 1 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 でアプリ インストーラーの登録と更新を確かめてから
    - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 は、別の割り当てがあれば止まる
    - `CurrentUser` の値（未設定なら `Undefined`）を控え、[ロールバック](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 7 で使う
-   - `Scoop` に場所が出たら、scoop はもう入っている。[アプリを入れる](#アプリを入れる)の手順 1・2 は飛ばす
+   - `Scoop` に場所が出たら、scoop はもう入っている
 
 1. スクリプトの実行ポリシーを RemoteSigned にする。
 
@@ -692,9 +702,9 @@
    ```
 
    - `RemoteSigned`（もとから `Unrestricted` か `Bypass` だった PC では、その値）が出ればよい
-   - 上書きのエラーが出て別の値になる PC では、scoop とこの項の手順 4 のプロファイルは使えない。ほかの手順書は Ctrl+V で貼る
+   - 上書きのエラーが出て別の値になる PC では、scoop とこの項の手順 5 のプロファイルは使えない。ほかの手順書は Ctrl+V で貼る
 
-1. プロファイルに、この項の手順 1 と同じ 1 行を足す。
+1. プロファイルに、この項の手順 2 と同じ 1 行を足す。
 
    ```powershell
    & {
@@ -720,6 +730,15 @@
 
 ### アプリを入れる
 
+- scoop・UniGet UI・PowerToys・PowerShell 7 を入れる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)と[貼り付けの設定](#貼り付けの設定)を通してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+
 1. scoop を入れる。
 
    ```powershell
@@ -727,8 +746,8 @@
    ```
 
    - 最後に `Scoop was installed successfully!` が出ればよい
-   - `Running the installer as administrator is disabled by default` が出たら、管理者の PowerShell に貼っている。閉じて[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 から
-   - `Scoop is already installed` が出たら、もう入っている（何も変えずに終わる）。この項の手順 2 へ進む
+   - `Running the installer as administrator is disabled by default` が出たら、管理者の PowerShell に貼っている。閉じてこの項の手順 1 から
+   - `Scoop is already installed` が出たら、もう入っている（何も変えずに終わる）。この項の手順 3 へ進む
    - `'C:\Users\<WIN_USER>\scoop' exists and is not empty` が出たら、前に入れた scoop の残り（`persist` など）がある。要らなければ[ロールバックの「アプリと貼り付けの設定を外す」](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 5 で消してから貼り直す
 
 1. scoop が入ったことを確かめる。
@@ -784,10 +803,13 @@
 
 ### PC 全体の設定
 
+- PC の名前・長いパス・電源・ロック・LAN の省電力を設定する
+- 前提: [貼り付けの設定](#貼り付けの設定)を通してある。設定する LAN が接続されている
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 1. 管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - [Microsoft Store の更新](#microsoft-store-の更新)の手順 1 の PowerShell は閉じてよい（再起動の後は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開き直す）
    - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。[貼り付けの設定](#貼り付けの設定)の手順 3 を、この窓で貼り直す
 
 1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
@@ -860,7 +882,7 @@
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $PC_NAME) {
-     Write-Error '中断: 「PC 全体の設定」の手順 2 の $PC_NAME が空'
+     Write-Error '中断: この項の手順 2 の $PC_NAME が空'
    } elseif ($PC_NAME -notmatch '^[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$' -or $PC_NAME -match '^[0-9]+$') {
      Write-Error "中断: 使えない名前（15 文字まで。英字・数字・ハイフンで、先頭と末尾は英数字。数字だけは不可）: $PC_NAME"
    } elseif ($PC_NAME -eq $env:COMPUTERNAME) {
@@ -914,7 +936,7 @@
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error '「PC 全体の設定」の手順 2 の $LAN_IF が空'
+     Write-Error 'この項の手順 2 の $LAN_IF が空'
    } else {
      $pm = Get-NetAdapterPowerManagement -Name $LAN_IF
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -933,6 +955,15 @@
 ---
 
 ### サインイン・検索・キーボード
+
+- サインイン・検索・ショートカット・キー配列を設定する
+- 前提: 無し。デュアルブートの時計を変えるときは、AlmaLinux の時計が UTC になっている
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
 
 1. 「Windows Hello サインインのみを許可する」を切る。
 
@@ -1031,6 +1062,15 @@
 
 ### WSL と再起動
 
+- WSL の機能を有効にして、この PC を再起動する
+- 前提: 無し
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+
 1. WSL を使えるように、Windows の機能を入れる（ディストリビューションは再起動の後に入れる）。
 
    ```powershell
@@ -1054,6 +1094,10 @@
 ---
 
 ### WSL の AlmaLinux 10 と自動サインイン
+
+- WSL に AlmaLinux 10 を入れ、必要なら Windows の自動サインインを有効にする
+- 前提: [WSL と再起動](#wsl-と再起動)で機能を入れて再起動し、[Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある。状態確認は、通した項の値だけを確かめる
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -1081,11 +1125,12 @@
    ```
 
    - 次の値が出ればよい（行わなかった手順の値は、元のまま）
-     - `ComputerName` が[PC 全体の設定](#pc-全体の設定)の手順 2 の `PC_NAME`（大文字）、`CtrlEnter : AddLine`、`ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`
+     - `ComputerName` が設定した名前（大文字）、`LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`（[PC 全体の設定](#pc-全体の設定)を通したとき）
+     - `CtrlEnter : AddLine`（[貼り付けの設定](#貼り付けの設定)を通したとき）
+     - `ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
      - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら `kbd101.dll`
-     - `LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`
-     - `RemoteDesktop : 0`（[ネットワークとリモート](#ネットワークとリモート)の手順 2 を行ったとき）・`LanCategory : Private`
-     - `Hypervisor : True`
+     - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
+     - `Hypervisor : True`（[WSL と再起動](#wsl-と再起動)を通したとき）
 
 1. WSL に AlmaLinux 10 を入れ、ユーザーを作る。
 
@@ -1129,7 +1174,9 @@
 ### プライバシーと広告の表示を切る
 
 - 自分のユーザーの広告・プライバシー・検索の設定を変える
-- 前提: [Windows 11 のセットアップ](windows-setup.md)を通した後に行う。この項のブロックは、この項の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- 前提: 無し
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - **この項の手順 3 でサインアウトしてサインインし直し、この項の手順 4・6 は設定の画面で行う**
 - **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
 - 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
@@ -1232,8 +1279,10 @@
 
 ### Edge の常駐をポリシーで止める
 
-- Edge のスタートアップ ブースト（サインインのときに Edge を裏で起動しておく）と、閉じた後も拡張機能とアプリを動かし続けるバックグラウンドの実行を、PC 全体のポリシーで切る
-- 前提: [Windows 11 のセットアップ](windows-setup.md)を通した後に行う。この項のブロックは、この項の手順 1 で開く**管理者の** Windows PowerShell（5.1）に貼る（PC 全体のポリシーなので、すべてのユーザーにかかる）
+- Edge のスタートアップ ブーストとバックグラウンドの実行を切る
+- 前提: 無し
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - **この項の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この項の手順 2 の代わりにこの項の手順 3（画面だけで切る）を行う
 - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
 - **この項の手順 3・4 は Edge の画面で行う**
@@ -1294,6 +1343,15 @@
 - エクスプローラー・表示・入力・音・ストレージ、自動起動と標準アプリ、フォント、クリップボード、PowerToys、ホットキー、Windows Terminal と、再起動の後の確認
 
 ### 表示と入力
+
+- エクスプローラー・タスクバー・テーマ・既定の端末・IME を設定する
+- 前提: Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. エクスプローラーで、拡張子と隠しファイルを表示し、「PC」で開き、最近使ったものを出さないようにする。
 
@@ -1404,11 +1462,10 @@
 
 ### 表示・入力・音・ストレージを変える
 
-- 自分のユーザーの設定で、次のものを変える（[表示と入力](#表示と入力)の手順 1・4・7 の続き）
+- 自分のユーザーの設定で、次のものを変える
   - 誤って押しやすいキー: 固定キー・フィルター キー・切り替えキーのショートカット、入力言語とキー配列の切り替え（Alt+Shift・Ctrl+Shift）
   - 窓とエクスプローラー: Alt+Tab の Edge のタブ、タイトル バーのシェイク、左の一覧のギャラリーとホーム、タスクバーの「タスクの終了」
   - アニメーション効果、効果音と起動音、ストレージ センサー
-- [Windows 11 のセットアップ](windows-setup.md)の後、[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 1 で開く通常の Windows PowerShell 5.1 に貼る
 - 項目は独立しているので、要らない手順は飛ばしてよい（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 1・2・13・14 は飛ばさない）
 - [表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 10・12・14 は**画面で行い**、同じ項の手順 13 で**サインアウトしてサインインし直す**
 - **ストレージ センサーは、一時ファイルとごみ箱に 30 日を超えて置いたファイルを毎月消す（取り戻せない）**
@@ -1417,6 +1474,10 @@
 - 戻すときは、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 1〜9（行った手順のものだけ）。[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 2 で控えた値を使う
 
 #### 表示・入力・音・ストレージを控えて変える
+
+- キーの切り替え・表示・効果音・ストレージ センサーの値を控えて変える
+- 前提: 無し
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -1660,6 +1721,15 @@
 
 #### 表示・入力・音・ストレージを元に戻す
 
+- 変更した表示・入力・音・ストレージの設定を元に戻す
+- 前提: [表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)で戻す設定を変更済み。控えのファイルを同じユーザーのまま残してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+
 1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 3 を行ったとき）、固定キーなどのショートカットを有効に戻す。
 
    ```powershell
@@ -1822,6 +1892,15 @@
 
 ### 自動起動と標準アプリ
 
+- 不要な自動起動・標準アプリ・ウィジェットを外す
+- 前提: [表示と入力](#表示と入力)を通してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+
 1. 自動で起動するアプリのうち、OneDrive・Edge・Teams を止める。
 
    ```powershell
@@ -1874,6 +1953,15 @@
 ---
 
 ### HackGen Console NF
+
+- HackGen Console NF を自分のユーザーのフォントに入れる
+- 前提: 無し
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. HackGen がまだ入っていないことを確かめる。
 
@@ -1929,8 +2017,10 @@
 
 ### CopyQ を使う
 
-- クリップボードの履歴は、Windows の履歴（Win+V）ではなく、CopyQ に持たせる
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)の手順 1〜7。この項の手順 1 で開く通常の Windows PowerShell 5.1 に貼る
+- Windows のクリップボードの履歴を CopyQ に持たせる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - **この項の手順 3 で CopyQ を起動し、この項の手順 5・6 は画面で行う**
 - CopyQ は窓を持つアプリなので、`copyq.exe` のコマンドの結果は、`| Write-Output` を付けないと出ない
 - **CopyQ の履歴は、暗号化されずにディスクに残る**。パスワードなどをコピーするときは、[注意点](extra/windows-setup.md#注意点)を読む
@@ -2031,8 +2121,10 @@
 
 ### PowerToys のユーティリティを絞る
 
-- [アプリを入れる](#アプリを入れる)の手順 4 で入れた PowerToys の、既定で有効なユーティリティのうち、使わないものを設定ファイルで切る（同じ項の手順 4 の続き）
-- 前提: [アプリを入れる](#アプリを入れる)の手順 4。この項のブロックは、この項の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
+- PowerToys の使わないユーティリティを、設定ファイルで切る
+- 前提: [アプリを入れる](#アプリを入れる)で PowerToys を入れてある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - **この項の手順 4・7 は通知領域で PowerToys を終了し、この項の手順 6 は PowerToys の設定の画面で行う**
 - PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
 - 切るユーティリティは好みで選ぶ。この項の手順 2 の `$PT_OFF` は案で、Always On Top・コマンド パレット・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer は残す（[参考資料](reference/windows-setup.md)）
@@ -2153,9 +2245,10 @@
 
 ### Windows Terminal のフォントと貼り付けの警告を変える
 
-- Windows Terminal（[表示と入力](#表示と入力)の手順 6 で既定の端末にした）の全プロファイルのフォントを HackGen Console NF にし、複数行を貼るときの警告を、要らなければ切る
-- 前提: [HackGen Console NF](#hackgen-console-nf)を入れ、サインインし直すか、[WSL と再起動](#wsl-と再起動)の手順 2 を通した後
-- この項の手順 1 で開く通常の Windows PowerShell 5.1 に貼る
+- Windows Terminal のフォントを HackGen にし、必要なら複数行の貼り付けの警告を切る
+- 前提: [HackGen Console NF](#hackgen-console-nf)を通し、サインインし直してある。Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
+- 実行場所: 管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブ。この項の手順 1 で開く
+
 - **この項の手順 5 は Windows Terminal の設定の画面で行う**
 - 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
@@ -2164,7 +2257,7 @@
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（[表示と入力](#表示と入力)の手順 6 の設定で、Windows Terminal の窓で開く）
+   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ（Windows PowerShell 5.1 のタブ）
 
 1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
 
@@ -2272,17 +2365,15 @@
 
 ### Windows のホットキー競合
 
+- 問題が起きるキーを使っているアプリを調べる
+- 前提: [初回準備](#windows-のホットキー競合-初回準備)で Hotkey Screener を展開してある
+- 実行場所: 問題が起きるユーザー・ログインセッションのデスクトップ（Hotkey Screener）
+
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)・[ロールバックと注意点](extra/windows-hotkey-conflict.md)
 
-> [!IMPORTANT]
-> - 問題が起きる Windows 11 のユーザー・ログインセッションで実施する
-> - 検出時には対象キーが実際に入力され、対応する操作が実行されることもある。先に作業を保存する
-> - Hotkey Screener を未導入なら、[初回準備](#windows-のホットキー競合-初回準備)を先に行う
-> - PowerShell を使う任意手順は、通常権限の Windows PowerShell 5.1 で実施する
-> - 複数行のコードは Ctrl+V で貼る。[Windows の初期設定の「貼り付けの設定」](#貼り付けの設定)の手順 1〜4で設定済みなら、その貼り付け方法も使える
+- 問題が起きる Windows 11 のユーザー・ログインセッションで実施する
+- 検出時には対象キーが実際に入力され、対応する操作が実行されることもある。先に作業を保存する
 
-- 普段の調査は次の 6 手順で行う
-- PowerShell に貼った後は、反転表示の「確認」から後ろの出力を、各手順の箇条書きで確かめる
 - 調べるキーだけ検出する。複数の操作を実行する `Detect All` は使わない
 
 1. Hotkey Screener を起動する。
@@ -2328,7 +2419,12 @@
 
 #### Windows のホットキー競合: 初回準備
 
+- Hotkey Screener の ZIP を取得・展開し、署名を確かめる
+- 前提: 無し
+- 実行場所: Windows のブラウザ・エクスプローラー
+
 - ZIP の取得と展開は初回だけ行う。更新する場合はツールを終了してから行う
+
 - 検証した版とファイル構成は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)を参照する
 - 権限要求が頻発する場合は、[Program Files への配置](#windows-のホットキー競合-権限要求を減らすために-program-files-へ配置する)も行う
 
@@ -2347,9 +2443,13 @@
 
    - EXE の「プロパティ → デジタル署名」で NTWIND LLC の署名を確認する
    - Windows 11 では 64 ビット版の `hkscr64.exe` を使う
-   - [実施手順](#windows-のホットキー競合)の手順 1へ進む
+   - [Windows のホットキー競合](#windows-のホットキー競合)の手順 1へ進む
 
 #### Windows のホットキー競合: 権限要求を減らすために Program Files へ配置する
+
+- 展開した Hotkey Screener を Program Files に配置する
+- 前提: [初回準備](#windows-のホットキー競合-初回準備)で展開し、署名を確かめてある
+- 実行場所: Windows のエクスプローラー。コピー時に権限確認が出たら承認する
 
 - 検出時の権限要求が頻発する場合だけ行う
 - フォルダー作成・コピーで Windows の権限確認が出たら、自分で内容を確認して承認する
@@ -2372,12 +2472,21 @@
 1. 配置先の実行ファイルから起動し直す。
 
    - `C:\Program Files\Hotkey Screener\hkscr64.exe` を開く
-   - [実施手順](#windows-のホットキー競合)の手順 2へ戻り、対象キーだけ検出する
+   - [Windows のホットキー競合](#windows-のホットキー競合)の手順 2へ戻り、対象キーだけ検出する
 
 #### Windows のホットキー競合: 使用アプリが分からない場合の切り分け
 
+- 入力条件と候補アプリを一つずつ変えて、ホットキーの問題を切り分ける
+- 前提: [Windows のホットキー競合](#windows-のホットキー競合)で検出を試してある
+- 実行場所: 問題が起きるユーザー・ログインセッションのデスクトップと、通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - 対象キーが一覧にない場合、検出でアプリが表示されない場合、設定変更で解消しない場合に行う
 - 表示がない理由と、入力フック・アプリ内ショートカットの検出範囲は[参考資料](reference/windows-hotkey-conflict.md)を参照する
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 対象キーと、メニューからの操作結果を記録する。
 
@@ -2422,15 +2531,24 @@
 
 1. 同じ条件で問題の操作を確認する。
 
-   - 解消しなければ候補の設定を元に戻し、終了した候補を通常起動してから、この項の手順 5で次の候補を調べる
-   - 解消した場合は[実施手順](#windows-のホットキー競合)の手順 5で必要な設定と保存状態を確認し、手順 6で結果を残して終了する
-   - 特定できない場合は、次の任意手順も使い、試した入力条件・候補・ログを追加調査用に残す
+   - 解消しなければ候補の設定を元に戻し、終了した候補を通常起動してから、この項の手順 6で次の候補を調べる
+   - 解消した場合は[Windows のホットキー競合](#windows-のホットキー競合)の手順 5 で必要な設定と保存状態を確認し、同じ項の手順 6 で結果を残して終了する
+   - 特定できない場合は、[ホットキーの登録可否を確認する](#windows-のホットキー競合-ホットキーの登録可否を確認する)も使い、試した入力条件・候補・ログを追加調査用に残す
 
 #### Windows のホットキー競合: ホットキーの登録可否を確認する
 
+- 対象キーを一時登録して、登録できるかを確かめる
+- 前提: [使用アプリが分からない場合の切り分け](#windows-のホットキー競合-使用アプリが分からない場合の切り分け)で対象キーを絞ってある
+- 実行場所: 問題が起きるユーザー・ログインセッションの、新しい通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - アプリ名を返す試験ではない。登録成功でも、IME や入力フックによる処理は除外できない
+
 - 試験中だけ対象キーを一時登録し、直ちに解除する。コードの実行中は対象キーを押さない
-- 問題が起きるユーザー・セッションの、新しい通常権限の Windows PowerShell 5.1 で行う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 試験する修飾キーと仮想キーコードを設定する。
 
@@ -2524,21 +2642,26 @@
 
 ### 再起動の後に確かめる
 
+- 通した項の設定が再起動後にも効いていることを画面で確かめる
+- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[アプリを入れる](#アプリを入れる)・[HackGen Console NF](#hackgen-console-nf)のうち、確かめたい項を通し、再起動してサインインしてある
+- 実行場所: この PC のデスクトップ（メモ帳・エクスプローラー・設定・UniGet UI）
+
 1. キーボードで、Caps Lock・Ctrl+Space・配列を確かめる。
 
-   - メモ帳を開いて何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）
-   - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない
-   - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる
-   - Ctrl+Space を押すたびに、IME のオンとオフが入れ替わる（タスクバーの「あ」と「A」）
+   - メモ帳を開いて何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
+   - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
+   - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
+   - Ctrl+Space を押すたびに、IME のオンとオフが入れ替わる（タスクバーの「あ」と「A」）（[表示と入力](#表示と入力)を通したとき）
    - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
 
 1. エクスプローラー・タスクバー・スタートが変わったことを確かめる。
 
-   - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る
-   - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える
-   - タスクバーのアイコンが左に寄り、タスク ビュー・検索・ウィジェットのボタンが無く、時計に秒が出る。全体が濃い色になっている
-   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2）
-   - デスクトップに Edge と UniGet UI のショートカットが無い
+   - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る（[表示と入力](#表示と入力)を通したとき）
+   - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える（[表示と入力](#表示と入力)を通したとき）
+   - タスクバーのアイコンが左に寄り、タスク ビュー・検索のボタンが無く、時計に秒が出る。全体が濃い色になっている（[表示と入力](#表示と入力)を通したとき）
+   - タスクバーにウィジェットのボタンが無い（[自動起動と標準アプリ](#自動起動と標準アプリ)を通したとき）
+   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
+   - デスクトップに Edge と UniGet UI のショートカットが無い（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
 
 1. タスクバーとスタートの、要らないピン留めを外す。
 
@@ -2546,16 +2669,16 @@
    - スタートを開き、ピン留めされたアプリを右クリックし、「スタートからピン留めを外す」
    - Copilot は外さない。使うアプリは残す
 
-1. スタートメニューから UniGet UI を起動し、WinGet と Scoop が使えることを確かめる。
+1. [アプリを入れる](#アプリを入れる)を通したときだけ、UniGet UI を起動し、WinGet と Scoop が使えることを確かめる。
 
    - スタートメニューで「UniGetUI」を探して開く
    - 初回は、使い方の案内や設定の問いが出ることがある。読んで進める
-   - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）
-   - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 3 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る
+   - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）（[アプリを入れる](#アプリを入れる)を通したとき）
+   - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 3 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る（[アプリを入れる](#アプリを入れる)を通したとき）
 
-1. 設定のフォントの一覧で、HackGen Console NF が出ることを確かめる。
+1. [HackGen Console NF](#hackgen-console-nf)を通したときだけ、フォントの一覧で、HackGen Console NF が出ることを確かめる。
 
-   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）
+   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）（[HackGen Console NF](#hackgen-console-nf)を通したとき）
    - ライセンス認証していない Windows では、フォントの画面の検索欄が使えないことがある。そのときは一覧をスクロールして探す
    - メモ帳のフォントの一覧に出ても同じ
    - 端末のフォントにするなら、アプリの設定にファミリー名 `HackGen Console NF` を書く（WezTerm は `config.font = wezterm.font 'HackGen Console NF'`。自分用の設定（`ryo-aoki-pc/wezterm`）は、もうこのフォントを使う）
@@ -2568,11 +2691,31 @@
 
 ### ネットワークとリモート
 
+- LAN をプライベートにし、RDP・ping・配信の最適化を設定する
+- 前提: 設定する LAN が接続されている
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+
+1. 変数を設定する。
+
+   ```powershell
+   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'LAN_IF = {0}' -f $LAN_IF
+   ```
+
+   - `LAN_IF` が空か対象の LAN と違えば、`$LAN_IF = 'イーサネット'` のように接続名を入れる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. LAN の接続をプライベートにする。
 
    ```powershell
    if (-not $LAN_IF) {
-     Write-Error '「PC 全体の設定」の手順 2 の $LAN_IF が空'
+     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
    } else {
      Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2597,7 +2740,7 @@
    ```
 
    - `RemoteDesktop-UserMode-In-TCP` などの行が `True  Private  Inbound  Allow` で出ればよい
-   - [PC 全体の設定](#pc-全体の設定)の手順 3 の `Edition` が `Core` で始まる（Home）なら、この手順は飛ばす（貼っても `中断:` で止まる）
+   - Home なら、この手順は飛ばす（ブロック自身もエディションを調べ、`中断:` で止まる）
 
 1. リモート アシスタンスを切る。
 
@@ -2641,9 +2784,10 @@
 
 ### WSL のネットワークをミラーにする
 
-- WSL 2 のネットワークを、NAT から Windows と同じ IP を使うミラーに変える
-- 前提: [WSL と再起動](#wsl-と再起動)の手順 1 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3・4
-- この項の手順 1 で開く通常の Windows PowerShell 5.1 に貼る。対象は自分の `%USERPROFILE%\.wslconfig`
+- WSL 2 のネットワークを、Windows と同じ IP を使うミラーに変える
+- 前提: [WSL と再起動](#wsl-と再起動)と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)で WSL 2 の AlmaLinux 10 を導入済み。Windows の SSH を確かめるときは[OpenSSH サーバー](#openssh-サーバー)を通してある
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - **この項の手順 4・7 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
 - ミラーにして変わること
   - WSL からこの PC の Windows のサーバー（[OpenSSH サーバー](#openssh-サーバー)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
@@ -2773,9 +2917,10 @@
 
 ### Wake on LAN を使う
 
-- 電源を切った（シャットダウンした）この PC を、LAN の別の PC から起こせるようにする。有線 LAN だけ（Wi-Fi では使えない）
-- 前提: [PC 全体の設定](#pc-全体の設定)の手順 7・8（休止状態・高速スタートアップ・アダプターの省電力を切る）
-- この項の手順 2〜4・8 は、同じ節の手順 1 で開く管理者の Windows PowerShell 5.1 に貼る
+- 有線 LAN の別の PC から、この PC の電源を入れられるようにする
+- 前提: [PC 全体の設定](#pc-全体の設定)で休止状態とアダプターの省電力を切ってある。有線 LAN が接続されている
+- 実行場所: 管理者の Windows PowerShell（5.1）、この PC の UEFI の画面、LAN の別の PC。PowerShell はこの項の手順 1 で開く
+
 - **この項の手順 4 で再起動して UEFI の画面に入り、この項の手順 5 は UEFI の画面、この項の手順 6 はこの PC、この項の手順 7 は LAN の別の PC で行う**
 - Windows の側の値は Microsoft の文書の標準の名前（`*WakeOnMagicPacket`）だけを変える。アダプターに独自の項目があれば、この項の手順 3 の表で確かめる
 
@@ -2854,11 +2999,12 @@
 
 ### リモートから再起動する手段を増やす
 
-> [!IMPORTANT]
-> - [Windows 11 のセットアップ](windows-setup.md)の後に行う。[ネットワークとリモート](#ネットワークとリモート)の手順 1 で LAN をプライベートにしておく
-> - 再起動後に使えるよう、[PC 全体の設定](#pc-全体の設定)の手順 7・8 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 を通す
-> - 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7・撤去の手順は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
-> - **別の PC で動かすトリガーのコマンドは、その PC で実行する**（AlmaLinux のシェルか、別の Windows の PowerShell）
+- リモートから使える再起動の経路を増やす
+- 前提: [ネットワークとリモート](#ネットワークとリモート)で LAN をプライベートにし、[PC 全体の設定](#pc-全体の設定)で電源・LAN の省電力を設定済み。自動サインインを使うなら[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)、Remote Control の自動起動を使うなら[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-実施手順)を通してある
+- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。トリガーのコマンドは別の PC で実行する
+
+- 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7・撤去の手順は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
+- **別の PC で動かすトリガーのコマンドは、その PC で実行する**（AlmaLinux のシェルか、別の Windows の PowerShell）
 
 - リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
 - 既にある接続からの再起動（この項の手順にはしない）
@@ -3004,7 +3150,6 @@
    }
    ```
 
-   - 前提: [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順) を設定済みで、この PC のデスクトップに同じユーザーでサインインする（[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 の自動サインイン）
    - ログオンのトリガーが 1 つ表示されればよい。次にそのユーザーでサインインしたときから、タスクが自動で始まる
 
 1. 元に戻すときは（この項の手順 4 を行ったとき）、SMB のリモートシャットダウンを閉じる。
@@ -3066,24 +3211,22 @@
 
 1. 元に戻すときは（この項の手順 7 を行ったとき）、Remote Control のタスクのトリガーを外す。
 
-   - [Claude Code の Remote Control（Windows）](extra/windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、AI エージェントの手順書の[Claude Code の Remote Control: 実施手順](ai-agents.md#claude-code-の-remote-control-実施手順)の手順 5 で入れ直す
+   - [Claude Code の Remote Control（Windows）](extra/windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、AI エージェントの手順書の[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-実施手順)の手順 5 で入れ直す
 
 ---
 
 ### RDP をロックせずに切断
 
+- RDP のセッションをこの PC の画面へ移し、ロックせずに切断する
+- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断後に SSH で確かめるなら[OpenSSH サーバー](#openssh-サーバー)と[SSH でログインを確かめる](#ssh-でログインを確かめる)を通してある
+- 実行場所: RDP 接続先の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。切断後はクライアントの PC の SSH または接続先の画面で確かめる
+
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[ロールバックと注意点](extra/windows-rdp-disconnect.md)
 
-> [!IMPORTANT]
-> - **手順 1〜3 は、RDP（リモートデスクトップ）でつないだ Windows のセッションの中で行う**。手順 1 で管理者の Windows PowerShell（5.1）を開き、手順 2・3 をそこに貼る
-> - 前提: Windows 11 Pro 以上で RDP 接続できること（Home は受け付けられない）。[ネットワークとリモート](#ネットワークとリモート)の手順 2、または設定の「システム → リモート デスクトップ」で有効にする
-> - PC にサインイン中のユーザーでつなぐ。`tscon` に管理者の権限が要るので、そのユーザーは Administrators の一員にする
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - **手順 3 を貼ると、その場で RDP が切れる**
-> - **手順 4・5 は、クライアントの PC から SSH で行う**（[Windows 11 の初期設定の「OpenSSH サーバー」](#openssh-サーバー)）。SSH が無ければ、PC の前で画面を見る
+- この項の手順 1〜3 は RDP のセッションの中で行う。この項の手順 3 を貼ると、その場で RDP が切れる
+- この項の手順 4・5 は、クライアントの PC から SSH で行う。SSH が無ければ、PC の前で画面を見る
 
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- SSH でログインできなければ、PC の前で画面を見て確かめる
 
 > [!WARNING]
 > - **切断した後の PC の画面はロックされない**。PC の前にいる人が、このユーザー（Administrators の一員）としてそのまま操作できる。人が触れる場所にある PC では使わない
@@ -3105,7 +3248,7 @@
 
    - `quser` の自分の行（先頭に `>` が付く）のセッション名が `rdp-tcp#<N>` で、状態が `Active`
    - その行の ID と、最後の行の ID が同じ
-   - 自分の行のセッション名が `console` なら、PC の前のセッション（RDP ではない）。手順 3 は貼らない
+   - 自分の行のセッション名が `console` なら、PC の前のセッション（RDP ではない）。この項の手順 3 は貼らない
 
 1. セッションを PC の画面（コンソール）へ移し、RDP を切る。
 
@@ -3114,13 +3257,13 @@
    ```
 
    - RDP のクライアントの窓が閉じる（クライアントが切断を知らせる）
-   - 切れずに PowerShell にエラーが出たときは、管理者の PowerShell かを確かめて、手順 1 からやり直す
+   - 切れずに PowerShell にエラーが出たときは、管理者の PowerShell かを確かめて、この項の手順 1 からやり直す
    - **次の手順は、RDP が切れてから、クライアントの PC で行う**（この手順の後ろに行を続けて貼らない）
 
 1. クライアントの PC から、Windows に SSH でログインする。
 
    - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 4](#ssh-でログインを確かめる)と同じ）
-   - PC の前にいるなら、SSH の代わりに PC の画面を見る。ロック画面ではなく、RDP で開いていたままのデスクトップが出ていればよい。そのときは手順 5 は飛ばす
+   - PC の前にいるなら、SSH の代わりに PC の画面を見る。ロック画面ではなく、RDP で開いていたままのデスクトップが出ていればよい。そのときはこの項の手順 5 は飛ばす
    - **次の手順は、ログインした先のプロンプトが出てから貼る**（続けて貼ると、ログインの途中の入力として食われる）
 
 1. SSH でログインしたシェルで、セッションが PC の画面に戻ったことを確かめる。
@@ -3129,14 +3272,22 @@
    quser
    ```
 
-   - 自分の行のセッション名が `console` で、状態が `Active`。ID は手順 2 と同じ
+   - 自分の行のセッション名が `console` で、状態が `Active`。ID はこの項の手順 2 と同じ
    - ログインした先のシェルが Git Bash でも cmd でも、そのまま `quser` と打てばよい
 
 #### RDP をロックせずに切断: ショートカットで切断する
 
-- [実施手順](#rdp-をロックせずに切断)の手順 1〜3 を、デスクトップのアイコンのダブルクリックにする。UAC の確認は毎回出る
-- この項の手順 1 は、RDP でつないだセッションの中の Windows PowerShell に貼る（管理者でなくてよい。実施手順の手順 1 で開いたものに貼るなら、手順 3 より前に）
-- ショートカットは、管理者として実行する Windows PowerShell で、手順 3 と同じ `tscon` を動かす
+- RDP をロックせずに切断するショートカットを作る
+- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断の注意は[RDP をロックせずに切断](#rdp-をロックせずに切断)を先に読む
+- 実行場所: RDP 接続先の通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+- UAC の確認は毎回出る。ショートカットは、管理者として実行する Windows PowerShell で `tscon` を動かす
+- **切断した後の画面はロックされない**。人が触れる場所にある PC では使わない
+
+1. RDP でつないだセッションの中で、管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. デスクトップに、管理者として実行するショートカットを作る。
 
@@ -3164,66 +3315,33 @@
 
 1. 切断するときは、RDP でつないだセッションの中で、デスクトップのショートカットをダブルクリックする。
 
-   - UAC の確認（Windows PowerShell）で「はい」を押すと、RDP が切れる（実施手順の手順 3 と同じ）
-   - 切れないときは、[実施手順](#rdp-をロックせずに切断)の手順 1〜3 で切って、エラーを見る
+   - UAC の確認（Windows PowerShell）で「はい」を押すと、RDP が切れる（[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 3 と同じ）
+   - 切れないときは、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 1〜3 で切って、エラーを見る
    - PC の前（コンソール）では使わない
-   - 切った後の確かめ方は、実施手順の手順 4・5 と同じ
+   - 切った後の確かめ方は、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 4・5 と同じ
 
 ---
 
 ### WireGuard
 
+- Windows のクライアントから、拠点の WireGuard に接続する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
 
-> [!IMPORTANT]
-> - **Administrators のユーザーが Windows で行う**。[導入と鍵の用意](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 1 で開く **管理者の Windows PowerShell 5.1** に貼る
-> - 更新・ロールバックも同じ窓を使う。WireGuard は PC 全体に入り、トンネルは Windows のサービスとして動く
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - **WG ホストで行う**のは、[登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 2 と[トンネルの確認](#wireguard-windows-11-でトンネルを確かめる)の手順 4
-> - ホスト側は[クライアントの登録](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1・2・4〜6 と[トンネルの確認](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 を参照する
-> - [Windows 11 で WireGuard と鍵を用意する](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 5 で **WireGuard の窓が開く**。開いてから次の手順を貼る
-> - [Windows 11 でトンネルを確かめる](#wireguard-windows-11-でトンネルを確かめる)の手順 1 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
+- Windows の操作は管理者の Windows PowerShell（5.1）で行う。各項で窓を開く
+- WG ホストで行う操作は、各項の説明に従って拠点の bash に貼る
 
-- 上から順に進める。[導入と鍵の用意](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 2 の変数は、PowerShell を開き直したら貼り直す
+- WireGuard は PC 全体に入り、トンネルは Windows のサービスとして動く
 - [登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3 だけは、関数名を手入力する
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- WG ホストの側は、AlmaLinux 10 の PC と同じ（`client add --pubkey` で公開鍵を登録して `apply` するだけで、ほかに変えるものは無い）
 
 #### WireGuard: Windows 11 で WireGuard と鍵を用意する
+
+- 外出先からつなぐ Windows の PC に WireGuard を入れ、この PC の鍵を作る
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)で winget を用意し、拠点の WG ホストで[状態と疎通を確かめる](almalinux-setup.md#wireguard-状態と疎通を確かめる)まで通してある
+- 実行場所: この PC の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. Windows で、管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
-
-1. 変数を設定する（4 つの IP は必ず値を入れる）。
-
-   ```powershell
-   $WG_HOST_TUN_IP = '10.99.0.1'         # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
-   ```
-
-   ```powershell
-   $WG_HOST_LAN_IP = '192.168.110.2'     # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
-   ```
-
-   ```powershell
-   $ROUTER_LAN_IP = '192.168.110.1'      # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
-   ```
-
-   ```powershell
-   $PEER_WG_LAN_IP = '192.168.120.2'     # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
-   ```
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   foreach ($v in 'WG_HOST_TUN_IP', 'WG_HOST_LAN_IP', 'ROUTER_LAN_IP', 'PEER_WG_LAN_IP') {
-     '{0,-15} = {1}' -f $v, (Get-Variable -Name $v -ValueOnly -ErrorAction SilentlyContinue)
-   }
-   ```
-
-   - 編集が必須なのは、1 行ずつの 4 ブロック（入れる値は、[鍵を作る](almalinux-setup.md#wireguard-鍵を作る)の手順 1 と同じ）
-   - 最後に値を読み戻して確かめる
-   - **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
-   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この項の手順 2 の 5 つのブロックを貼り直してから先へ進む
 
 1. この PC の WireGuard の状態を確かめる。
 
@@ -3237,7 +3355,7 @@
 
    - `入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）と、`False` だけが出れば、まだ入っていない
    - `WireGuardTunnel$wg0` か `wg0.conf.dpapi` が出たら、同名のトンネルがある。[ロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消してから始める（鍵は取り戻せない）
-   - 最後が `True` なら、前に作った鍵が残っている（この項の手順 6 で止まる）。使わないなら、[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消す
+   - 最後が `True` なら、前に作った鍵が残っている（この項の手順 5 で止まる）。使わないなら、[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消す
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
 
 1. WireGuard を winget で入れる。
@@ -3253,7 +3371,7 @@
    - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `WireGuard.WireGuard` の行が出ればよい
    - 2 つのファイルの署名が `Valid` で、署名者が `CN=WireGuard LLC`
    - 最後に `wireguard-tools v1.0.20260223 - https://git.zx2c4.com/wireguard-tools/` の形の 1 行が出る
-   - インストーラーの画面は出ず、入れた後に WireGuard の窓も開かない（窓は、この項の手順 5 で開く）
+   - インストーラーの画面は出ず、入れた後に WireGuard の窓も開かない（窓は、この項の手順 4 で開く）
 
 1. WireGuard の窓を開く（マネージャーを起動する）。
 
@@ -3295,13 +3413,22 @@
 
 #### WireGuard: Windows 11 で WG ホストに登録して取り込む
 
+- この PC の公開鍵を拠点の WG ホストに登録し、Windows に conf を取り込む
+- 前提: [WireGuard と鍵を用意する](#wireguard-windows-11-で-wireguard-と鍵を用意する)を通し、鍵と公開鍵が残っている。WireGuard のマネージャーが動いている
+- 実行場所: この PC の管理者の Windows PowerShell（5.1）と、拠点の WG ホストの bash。PowerShell はこの項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+
 1. Windows の PowerShell で、conf を取り込む関数を定義する。
 
    ```powershell
    function Import-WgClientConf {
      $dir = "$env:USERPROFILE\wg-client"
      $text = Get-Clipboard -Raw
-     if (-not $text) { Write-Error '中断: クリップボードが空（この項の手順 2 の client show の出力をコピーし直す）'; return }
+     if (-not $text) { Write-Error '中断: クリップボードが空（この項の手順 3 の client show の出力をコピーし直す）'; return }
      $lines = @($text.Trim() -split '\r?\n' | ForEach-Object { $_.TrimEnd() })
      if ($lines[0] -cne '[Interface]') { Write-Error '中断: クリップボードの先頭が [Interface] ではない（client show の出力だけをコピーし直す）'; return }
      if (@($lines -cnotmatch '^[\t\x20-\x7e]*$').Count -ne 0) { Write-Error '中断: クリップボードに ASCII でない文字がある'; return }
@@ -3315,7 +3442,7 @@
    ```
 
    - この手順は関数を定義するだけで、何も表示せず、conf もまだ書かない
-   - PowerShell を開き直した場合は、[Windows 11 で WireGuard と鍵を用意する](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 2 と、この関数の定義を貼り直す
+   - PowerShell を開き直した場合は、この項の手順 1 で管理者の窓を開き、この項の手順 2 の関数の定義を貼り直す
 
 1. WG ホストで、[クライアントを登録する](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1・2・4〜6 を行い、この PC の公開鍵を登録して conf を表示する。
 
@@ -3327,7 +3454,7 @@
 
 1. Windows の PowerShell で、`Import-WgClientConf` と手入力して Enter を押す。
 
-   - 関数名はコピーせず手で打つ。クリップボードには、この項の手順 2 の conf を残しておく
+   - 関数名はコピーせず手で打つ。クリップボードには、この項の手順 3 の conf を残しておく
    - `1`（置き換わった）と、`PrivateKey` 以外の行（`Address`・`PublicKey`・`Endpoint`・`AllowedIPs` など）が出ればよい
    - 残りの行が `client show` の出力のとおりで、途中で折り返されていないことを目で確かめる
    - `中断:` で始まるエラーが出たら、何も書いていない
@@ -3340,7 +3467,7 @@
      $dir = "$env:USERPROFILE\wg-client"
      $store = "$env:ProgramFiles\WireGuard\Data\Configurations"
      if ((Get-Service -Name WireGuardManager -ErrorAction SilentlyContinue).Status -ne 'Running' -or -not (Test-Path -LiteralPath $store)) { Write-Error '中断: WireGuard のマネージャーが動いていない（「Windows 11 で WireGuard と鍵を用意する」の手順 5 からやり直す）'; return }
-     if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（この項の手順 3）'; return }
+     if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（この項の手順 4）'; return }
      if (Test-Path -LiteralPath "$store\wg0.conf.dpapi") { Write-Error '中断: wg0 というトンネルが既にある'; return }
      Copy-Item -LiteralPath "$dir\wg0.conf" -Destination "$store\wg0.conf"
      for ($i = 0; $i -lt 30 -and (Test-Path -LiteralPath "$store\wg0.conf"); $i++) { Start-Sleep -Seconds 1 }
@@ -3353,14 +3480,53 @@
    - WireGuard の窓のトンネルの一覧に `wg0` が出る（無効のまま）
    - この手順は LAN の中で貼ってよい
    - `wg0.conf` が残ったら取り込み失敗。理由を確かめ、`Remove-Item -LiteralPath "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf"` で消す
-   - この項の手順 2・3 からやり直す
+   - この項の手順 3・4 からやり直す
    - （この手順の代わりに）窓の「トンネルをファイルからインポート…」で `%USERPROFILE%\wg-client\wg0.conf` を選んでも、同じ `wg0.conf.dpapi` ができるはず
 
 #### WireGuard: Windows 11 でトンネルを確かめる
 
+- 外出先からつなぐ Windows の PC でトンネルを張り、拠点への疎通を確かめる
+- 前提: [WG ホストに登録して取り込む](#wireguard-windows-11-で-wg-ホストに登録して取り込む)を通し、wg0 を取り込んである
+- 実行場所: この PC の管理者の Windows PowerShell（5.1）と、拠点の WG ホストの bash。PowerShell はこの項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+
+1. 変数を設定する（4 つの IP は必ず値を入れる）。
+
+   ```powershell
+   $WG_HOST_TUN_IP = '10.99.0.1'         # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
+   ```
+
+   ```powershell
+   $WG_HOST_LAN_IP = '192.168.110.2'     # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
+   ```
+
+   ```powershell
+   $ROUTER_LAN_IP = '192.168.110.1'      # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
+   ```
+
+   ```powershell
+   $PEER_WG_LAN_IP = '192.168.120.2'     # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
+   ```
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   foreach ($v in 'WG_HOST_TUN_IP', 'WG_HOST_LAN_IP', 'ROUTER_LAN_IP', 'PEER_WG_LAN_IP') {
+     '{0,-15} = {1}' -f $v, (Get-Variable -Name $v -ValueOnly -ErrorAction SilentlyContinue)
+   }
+   ```
+
+   - 編集が必須なのは、1 行ずつの 4 ブロック。接続先拠点と相手拠点の IP を入れる
+   - 最後に値を読み戻して確かめる
+   - **例の値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
+   - 変数はその PowerShell の中だけで有効。**新しい PowerShell を開いたら**、この項の手順 2 の 5 つのブロックを貼り直してから先へ進む
+
 1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
 
-   - LAN 内でこの項の手順 2 を貼ると、そこで LAN の通信が切れる
+   - LAN 内でこの項の手順 4 を貼ると、そこで LAN の通信が切れる
    - **次の手順は、LAN の外につないでから貼る**
 
 1. 拠点の LAN の外で、トンネルを張る。
@@ -3387,7 +3553,7 @@
    - `NlMtu` は、conf に `MTU =` があればその値、無ければ `1420`（今の回線の MTU が 1500 のとき）
    - `NetworkCategory` は `Public` のはず（変えない。行が出なければ、Windows がまだネットワークを識別している）
    - `ServerAddresses` が空（`{}`）
-   - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この項の手順 3 の通信で出る
+   - `wg show` の `latest handshake` が数秒前で、`transfer` の received が 0 でない。まだ出ていなければ、この項の手順 5 の通信で出る
    - 窓で `wg0` を選び「有効化」を押しても同じ
    - **注意**: LAN 内で貼ってしまったら、そこで LAN の通信が切れる。PC の画面の WireGuard の窓で「無効化」を押す
 
@@ -3396,7 +3562,7 @@
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not ($WG_HOST_TUN_IP -and $WG_HOST_LAN_IP -and $ROUTER_LAN_IP -and $PEER_WG_LAN_IP)) {
-     Write-Error '「Windows 11 で WireGuard と鍵を用意する」の手順 2 の変数が空のまま'
+     Write-Error '中断: この項の手順 2 の変数が空のまま'
    } else {
      foreach ($h in $WG_HOST_TUN_IP, $WG_HOST_LAN_IP, $ROUTER_LAN_IP, $PEER_WG_LAN_IP) {
        "== $h"
@@ -3411,7 +3577,10 @@
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>`（Windows 11 の OpenSSH クライアント）も試しておくとよい
    - どこで止まるかで、疑う場所が変わる（[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 2 と同じ）
 
-1. WG ホストで、[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 を（[クライアントを登録する](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1 のシェルで）貼り、ハンドシェイクを確かめる。
+1. WG ホストで変数を設定し、ハンドシェイクを確かめる。
+
+   - [クライアントを登録する](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1 で、`SITE`・`CLIENT_NAME`・`REPO` をこの PC を登録したときと同じ値に設定する
+   - その WG ホストの bash に、[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 を貼る
 
    - `client list` の、この PC の名前の `LAST_HANDSHAKE` が「N 秒前」なら届いている
    - 最後の `ping`（拠点 → PC）は、応答が無くてよい
@@ -3430,7 +3599,7 @@
 
    - 最後の 2 つが何も出さなければよい
    - 窓で `wg0` を選び「無効化」を押しても同じ
-   - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この項の手順 2・5 のコマンドでも同じ）
+   - 日常は、外出先で窓（か、通知領域の WireGuard のアイコン）から `wg0` を有効化し、拠点に戻る前に無効化する（この項の手順 4・7 のコマンドでも同じ）
    - **張ったまま再起動すると、起動したときにまた張られる**。拠点の LAN に戻る前に切る
 
 1. 平文の鍵と conf を消す。
@@ -3446,10 +3615,18 @@
 
 #### WireGuard: Windows 11 の更新
 
+- この PC の WireGuard を winget で更新する
+- 前提: [WireGuard と鍵を用意する](#wireguard-windows-11-で-wireguard-と鍵を用意する)で本体を入れ、[Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある
+- 実行場所: この PC の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
 - WireGuard のマネージャーは、1 時間ごとに新しい版を確かめる（起動した直後は数分待ってから）。新しい版があると、窓に「更新が利用できます！」のタブが出て、そこの「今すぐ更新」で上がる（Administrators の一員だけ）
 - 窓からの更新は、公式の署名付きの一覧（`latest.sig`）で MSI を確かめてから入れる。winget で上げても、入るのは同じ公式の MSI
 - 更新の間、マネージャーと、張っているトンネルのサービスは止まり、入れ終えると起動し直す（張っていれば数秒切れる）
-- この項の手順 1 は、管理者の Windows PowerShell（5.1）に貼る
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
+   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
 
 1. WireGuard を winget で上げる。
 
@@ -3473,6 +3650,15 @@
 
 ### Git for Windows
 
+- Git for Windows を PC 全体に入れる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - ユーザーアカウント制御（UAC）の確認は「はい」
+
 1. Git for Windows がまだ入っていないことを確かめる。
 
    ```powershell
@@ -3486,7 +3672,7 @@
    - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
    - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 2 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
 
 1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
 
@@ -3504,6 +3690,15 @@
 
 ### WezTerm
 
+- WezTerm nightly と、必要な Visual C++ ランタイムを PC 全体に入れる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - ユーザーアカウント制御（UAC）の確認は「はい」
+
 1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
 
    ```powershell
@@ -3519,13 +3714,13 @@
    } | Format-List
    ```
 
-   - `Admin : True` であること（`False` なら、[PC 全体の設定](#pc-全体の設定)の手順 1 で管理者の窓を開き直し、同じ項の手順 2 を貼り直してから、このブロックを貼る）
+   - `Admin : True` であること（`False` なら、この項の手順 1 で管理者の窓を開き直してから、このブロックを貼る）
    - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
-   - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 3 で今の nightly に上書きする
+   - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
      - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
    - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
    - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
-   - `VCRuntime : True` なら、この項の手順 2 は飛ばす。`False` なら、この項の手順 2 で入れる
+   - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
 
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
 
@@ -3536,8 +3731,8 @@
    ```
 
    - `インストールが完了しました`（英語の Windows では `Successfully installed`）と、`True` が出ればよい
-   - ここでは再起動しない。最後が `True` ならこの項の手順 3 へ進み、[WSL と再起動](#wsl-と再起動)の手順 2 で再起動する
-   - 最後の行が `False` なら、この項の残りは、再起動の後（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)より前）に管理者の窓（[PC 全体の設定](#pc-全体の設定)の手順 1 と同じ）を開いて、この項の手順 1 から行う
+   - 最後が `True` ならこの項の手順 4へ進む
+   - 最後の行が `False` なら、Windows を再起動してデスクトップにサインインし、この項の手順 1 から行う
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
 
 1. nightly のインストーラを取り、sha256 を確かめて、黙って入れる。
@@ -3551,7 +3746,7 @@
      $setup = "$tmp\WezTerm-nightly-setup.exe"
      $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
      if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない'; return }
-     if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（「WezTerm」の手順 2）'; return }
+     if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（この項の手順 3）'; return }
      if (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue) { Write-Error '中断: WezTerm が動いている（窓をすべて閉じる）'; return }
      Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
      New-Item -ItemType Directory -Path $tmp | Out-Null
@@ -3598,7 +3793,7 @@
 
    - スタートメニューで「WezTerm」を探し、クリックして開く
    - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 で入れる）
-   - 窓の中で `wezterm --version` を打つと、この項の手順 4 と同じ版が出る
+   - 窓の中で `wezterm --version` を打つと、この項の手順 5 と同じ版が出る
    - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](#windows-のホットキー競合)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
      - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
@@ -3610,6 +3805,14 @@
 ---
 
 ### Git Bash と WezTerm の設定
+
+- Git の共通設定・共通の bash 設定と、自分用の WezTerm の設定を入れる
+- 前提: [Git for Windows](#git-for-windows)・[WezTerm](#wezterm)を通してある。導入後に Windows を再起動するか、サインアウトしてサインインし直し、PATH を読み直してある。GitHub のアカウントがある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3 からは Git Bash の窓、最後は WezTerm の Git Bash のタブ
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. Git for Windows の git の場所と版と、Git Bash があることを確かめる。
 
@@ -3634,9 +3837,9 @@
 
    - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
-   - **この手順は、この項の手順 5・6 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
+   - **この手順は、この項の手順 6・7 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
-   - 戻すときは、[Git Bash の設定を戻す](extra/windows-setup.md#git-bash-の設定を戻す)で行う。共通設定に加え、次の手順 4 で変更した Windows 専用 `core.longpaths` も記録に合わせて戻す
+   - 戻すときは、[Git Bash の設定を戻す](extra/windows-setup.md#git-bash-の設定を戻す)で行う。共通設定に加え、この項の手順 5 で変更した Windows 専用 `core.longpaths` も記録に合わせて戻す
 
 1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
 
@@ -3672,20 +3875,30 @@
 
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 5 で導入済み
-   - その項の手順 5 で WezTerm を起動し、手順 6 を新しい Git Bash のタブに貼って確かめる
-   - Git Bash の窓は閉じてよい。この後の bash のブロックは、WezTerm のタブに貼る
-   - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 6 で導入済み
+   - その項の手順 5 で WezTerm を起動し、同じ項の手順 6 を新しい Git Bash のタブに貼って確かめる
+   - Git Bash の窓は閉じてよい
+   - CRLF に変換して clone 済みのリポジトリは、WezTerm の Git Bash のタブで[改行を変換して clone したリポジトリを直す](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を通す
 
 #### 共通の bash 設定を更新する
 
-自分のユーザーの bash（Windows 11 は Git Bash）で行う。更新後は端末を開き直す。
+- 共通の bash 設定のリポジトリを更新し、端末を開き直して反映する
+- 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
+- 手元の変更は `git -C ~/.config/bash status` で確認してから進む
+
+1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
+
+   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
+   - `MINGW64` と `$` のプロンプトが出ればよい
+   - **次の手順は、この Git Bash のタブに貼る**
 
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
 
    ```bash
    git -C ~/.config/bash remote set-url origin https://github.com/ryo-aoki-pc/bash.git
    git -C ~/.config/bash pull --ff-only
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/bash log -1 --oneline
    ```
 
@@ -3697,15 +3910,24 @@
 
 #### 共通の bash 設定を手動で移行する
 
-通常の導入が中断した場合は、[AlmaLinux 側の共通 bash 手動移行](almalinux-setup.md#共通の-bash-設定を手動で移行する)の全節を自分のユーザーの Git Bash で行う。WSL は WSL 側で別に行う。
+- 通常の共通 bash 設定の導入が中断したときに、設定を手動で移行する
+- 前提: [Git for Windows](#git-for-windows)を通してある
+- 実行場所: この PC のデスクトップの、自分のユーザーの Git Bash の窓
+- [AlmaLinux 10 の共通の bash 設定を手動で移行する](almalinux-setup.md#共通の-bash-設定を手動で移行する)の全手順を Git Bash で行う。WSL は WSL 側で別に行う
 
 #### WezTerm の設定を導入する
 
-WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)を先に入れ、自分のユーザーの bash（Windows 11 は Git Bash）で行う。シェル統合は共通 bash 設定が読む。HackGen Console NF は任意。
+- 自分用の WezTerm の設定を入れ、シェル統合を確かめる
+- 前提: [WezTerm](#wezterm)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜5 を通し、Git と共通の bash 設定を入れてある。HackGen Console NF は任意
+- 実行場所: この項の手順 1〜5 は、WezTerm の外の、自分のユーザーの Git Bash の窓。この項の手順 6・7 は、起動し直した WezTerm の Git Bash のタブ
+- この項の手順 1 で WezTerm の窓をすべて閉じる。既存設定の確認と、この項の手順 3 の退避を省かない
+- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
-この項の手順 1〜4 は WezTerm の外の Git Bash の窓で行い、手順 2 の退避前に WezTerm のウィンドウをすべて閉じる。
+1. WezTerm の窓をすべて閉じ、スタートメニューから Git Bash を開く。
 
-[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
+   - スタートメニューで「Git Bash」を探して開く（管理者として実行しない）
+   - `MINGW64` と `$` のプロンプトが出ればよい
+   - **次の手順は、この Git Bash の窓に貼る**
 
 1. 既存の WezTerm の設定があるか確かめる。
 
@@ -3713,8 +3935,8 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
    ls -ld ~/.wezterm.lua ~/.config/wezterm
    ```
 
-   - どちらかが出たら、手順 2 で退避する
-   - 2 行とも `No such file or directory` なら、設定は無い。手順 2 は飛ばす
+   - どちらかが出たら、この項の手順 3 で退避する
+   - 2 行とも `No such file or directory` なら、設定は無い。この項の手順 3 は飛ばす
    - `~/.wezterm.lua` が残っていると、この設定は読まれない
 
 1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
@@ -3736,18 +3958,19 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
 
    - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。この項の手順 3 へ進まず、中身を確かめて片付けてから手順 2 を貼り直す
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。この項の手順 4 へ進まず、中身を確かめて片付けてからこの項の手順 3 を貼り直す
    - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
 
    ```bash
    git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/wezterm log -1 --oneline
    ```
 
    - `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
-   - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、手順 1 から見直す
+   - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、この項の手順 2 から見直す
 
 1. WezTerm がこの設定を読めるか確かめる。
 
@@ -3765,11 +3988,12 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
    - WezTerm を開いていなければ、起動するだけでよい
    - AlmaLinux 10 はアプリ一覧の「WezTerm」から、Windows 11 はスタートメニューの「WezTerm」から起動する
    - シェル統合とウィンドウ装飾は起動し直して反映する
-   - **次の手順は、起動し直した WezTerm のタブで貼る**（開いていたタブで貼ると、手順 6 の確かめが外れる）
+   - **次の手順は、起動し直した WezTerm のタブで貼る**（開いていたタブで貼ると、この項の手順 7 の確かめが外れる）
 
 1. 起動し直した WezTerm のタブで、シェル統合が読まれたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "$TERM_PROGRAM"
    echo "$WEZTERM_SHELL_INTEGRATION"
    declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
@@ -3779,28 +4003,41 @@ WezTerm nightly・Git・[共通の bash 設定](#git-bash-と-wezterm-の設定)
    - 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
      - AlmaLinux 10（COPR の公式統合）: `__wezterm_set_user_var`・`__wezterm_notify_done`・`__wz_mouse_off` の 3 行
      - 公式の統合が無いとき（Windows の Git Bash など）: `__wezterm_notify_done` と `__wz_mouse_off` の 2 行
-   - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、手順 5 の前から開いていたタブで貼っている
+   - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、この項の手順 6 の前から開いていたタブで貼っている
    - `__wz_mouse_off` が出なければ、`~/.bashrc` の行が読まれていない。共通の bash 設定を見直す
 
 #### WezTerm のシェル統合を WSL で使う
 
-Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側の共通 bash 設定を先に入れる。以下は WSL の bash で行い、Windows 側の統合を共通 bash の読み込み行より後ろで読む。
+- WSL の bash で Windows 側の WezTerm のシェル統合を読む
+- 前提: [WezTerm の設定を導入する](#wezterm-の設定を導入する)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)と、WSL 側の[共通の bash 設定](almalinux-setup.md#共通の-bash-設定)を通してある
+- 実行場所: この PC のデスクトップの WezTerm の WSL の bash のタブ。この項の手順 1 で開く
+- WSL の `~/.bashrc` の既存の変更を確かめ、Windows 側の統合を共通の bash 設定の読み込み行より後ろで読む
+
+1. スタートメニューから WezTerm を開き、WSL のタブを用意する。
+
+   - WezTerm の Ctrl+Shift+M の起動メニューで「AlmaLinux-10」を選ぶ
+   - WSL の自分のユーザーの bash のプロンプトが出ればよい
+   - **次の手順は、この WSL のタブに貼る**
 
 1. WSL のシェルで、Windows のホームを調べ、シェル統合のスクリプトが見えるか確かめる。
 
    ```bash
    WIN_HOME=$(wslpath "$(cd /mnt/c && cmd.exe /c 'echo %USERPROFILE%' | tr -d '\r')")
+   printf '\n\033[7m 確認 \033[0m\n'
    ls -l "$WIN_HOME/.config/wezterm/shell/wezterm.sh"
    ```
 
    - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` の 1 行が出ればよい
    - `No such file or directory` なら、Windows 側の[WezTerm 設定の導入](#wezterm-の設定を導入する)を先に済ませる
 
-1. この項の手順 1 と同じシェルで、WSL の `~/.bashrc` に読み込む行を足す。
+1. この項の手順 2 と同じシェルで、WSL の `~/.bashrc` に読み込む行を足す。
 
    ```bash
-   echo "[ -r '$WIN_HOME/.config/wezterm/shell/wezterm.sh' ] && . '$WIN_HOME/.config/wezterm/shell/wezterm.sh'" >> ~/.bashrc
-   tail -1 ~/.bashrc
+   if [ -z "${WIN_HOME}" ]; then echo '中断: この項の手順 2 の WIN_HOME が空のまま' >&2; else
+     echo "[ -r '$WIN_HOME/.config/wezterm/shell/wezterm.sh' ] && . '$WIN_HOME/.config/wezterm/shell/wezterm.sh'" >> ~/.bashrc
+     printf '\n\033[7m 確認 \033[0m\n'
+     tail -1 ~/.bashrc
+   fi
    ```
 
    - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` を 2 回含む 1 行が出る
@@ -3814,6 +4051,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 1. 開き直した WSL のタブで、シェル統合が読まれたか確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "$TERM_PROGRAM"
    declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
    ```
@@ -3822,12 +4060,23 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 #### WezTerm の設定を更新する
 
-自分のユーザーの bash（Windows 11 は Git Bash）で行う。WezTerm 本体の更新は同じ冊の更新節で行う。
+- WezTerm の設定のリポジトリを更新する
+- 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
+- 手元の変更は `git -C ~/.config/wezterm status` で確認してから進む
+- WezTerm 本体は[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)で更新する
+
+1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
+
+   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
+   - `MINGW64` と `$` のプロンプトが出ればよい
+   - **次の手順は、この Git Bash のタブに貼る**
 
 1. 設定のリポジトリを pull する。
 
    ```bash
    git -C ~/.config/wezterm pull
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/wezterm log -1 --oneline
    ```
 
@@ -3839,6 +4088,14 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 ---
 
 ### シェルのツールを入れる
+
+- scoop で fzf・zoxide・starship・eza・bat を入れ、Git Bash で確かめる
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
 
@@ -3856,14 +4113,14 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
    - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 を通す
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
-   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 3 は、入っているものを飛ばす）
+   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
-   - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 2 は飛ばす
+   - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 3 は飛ばす
 
 1. scoop の zoxide が 0.9.9 でないときだけ、外す。
 
@@ -3908,7 +4165,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
-   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この項の手順 1 の `VCRuntime`）
+   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この項の手順 2 の `VCRuntime`）
    - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
    - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
 
@@ -3923,7 +4180,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
      $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
-     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。「シェルのツールを入れる」の手順 3 で bat を入れたかを確かめる'; return }
+     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この項の手順 4 で bat を入れたかを確かめる'; return }
      if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
        Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
        "書いた: $f"
@@ -3942,7 +4199,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の「シェルのツール」の手順 2](almalinux-setup.md#シェルのツール)の補足と同じ）
    - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
    - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
-     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 4 と同じ
+     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 5 と同じ
      - 同書の「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
      - 同書の「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
      - 同書の「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
@@ -3952,24 +4209,24 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 1. 同じタブで、[同書の「キー操作を試す」の手順 2〜5](almalinux-setup.md#キー操作を試す)のキーを押して、fzf を確かめる。
 
-   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 6 で Git Bash の履歴に入っている
+   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 7 で Git Bash の履歴に入っている
    - 同書の「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
    - 同書の「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
    - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
-   - **次の手順は、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+   - [fzf で fd と bat を候補とプレビューに使う](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
+   - bat の設定にはこの項の手順 6を使う
 
 ---
 
 ### PowerShell 7 のプロファイルを設定する
 
 - PowerShell 7 に貼り付け・↑/↓ の履歴検索と、導入済みの zoxide・starship を読む設定を足す
-- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[アプリを入れる](#アプリを入れる)の手順 5
-- この項の手順 1 で開く通常の Windows PowerShell 5.1 に貼る。PowerShell 7 には貼らない
+- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[アプリを入れる](#アプリを入れる)の手順 5 を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
 - 対象は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`。Windows PowerShell 5.1 のプロファイルとは別
 - 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
-- **この項の手順 6 は PowerShell 7 の窓で確かめる**
-- zoxide と starship は、入れていなければ読まない。この項は、それらを入れる前に通してよい（入れた後に PowerShell 7 を開き直せば読む）
-- Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない。この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+- zoxide と starship は、入れていなければ読まない。入れた後に PowerShell 7 を開き直せば読む
+- Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない
 - 戻すときは、この項の手順 7・8（行った手順のものだけ）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -4094,6 +4351,27 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### OpenSSH サーバー
 
+- LAN からこの PC に SSH でログインできるように、OpenSSH サーバーを入れる
+- 前提: [ネットワークとリモート](#ネットワークとリモート)の手順 1 を通し、LAN の接続をプライベートにしてある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - ユーザーアカウント制御（UAC）の確認は「はい」
+
+1. LAN の接続の変数を設定する。
+
+   ```powershell
+   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'LAN_IF = {0}' -f $LAN_IF
+   ```
+
+   - インターネットにつながっている接続の名前が入る。ほかの PC とつながる接続と違うか空なら、`$LAN_IF = 'Wi-Fi'` のように直す
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. OpenSSH サーバーの機能を入れる。
 
    ```powershell
@@ -4126,19 +4404,19 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 1. LAN の接続がプライベートなことと、sshd の受信の規則を確かめる。
 
    ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $LAN_IF) {
-     Write-Error '「PC 全体の設定」の手順 2 の $LAN_IF が空'
+     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
      Write-Error '中断: LAN の接続がプライベートではない（「ネットワークとリモート」の手順 1 でプライベートにする）'
    } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
      Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
    }
    ```
 
    - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
-   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 1 でプライベートにして貼り直す。変数はそのまま使える
+   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 1 でプライベートにして貼り直す。この項の手順 2 の変数を貼り直す
    - **注意**: プライベートの LAN では、ネットワーク探索など、ほかのプライベート向けの許可も効く
 
 1. パスワード認証を有効にし、設定を検査してから sshd を再起動する。
@@ -4157,26 +4435,39 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 1. 接続先と、ホスト鍵の指紋を表示する。
 
    ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   '{0}@{1}' -f $env:USERNAME, (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress
-   & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
+   if (-not $LAN_IF) {
+     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
+   } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     '{0}@{1}' -f $env:USERNAME, (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress
+     & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
+   }
    ```
 
-   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（再起動の後の[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 で使う）
+   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 で使う）
    - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` も控え、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 の初回の接続で照合する
 
 ---
 
 ### SSH でログインを確かめる
 
-1. クライアントのシェルを開く（この PC の WSL の AlmaLinux 10 を使うなら、そのシェルに入る）。
+- Linux または WSL のクライアントから、この Windows の PC にパスワードでログインして確かめる
+- 前提: [OpenSSH サーバー](#openssh-サーバー)を通し、接続先とホスト鍵の指紋を控えてある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 実行場所: Linux のクライアントの、自分のユーザーの端末（bash）。この PC の WSL を使う場合は、この項の手順 1 の通常の Windows PowerShell（5.1）から開く
+
+1. クライアントの端末を用意する。
+
+   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
+   - この PC の WSL を使うなら、スタートメニューで「Windows PowerShell」を探してクリックし、管理者ではない Windows PowerShell（5.1）を開く
+
+1. この PC の WSL をクライアントに使うときだけ、AlmaLinux 10 のシェルに入る。
 
    ```powershell
    wsl.exe --distribution AlmaLinux-10 --cd ~
    ```
 
-   - [WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 の PowerShell に貼る。`[<ユーザー>@<HOSTNAME> ~]$` のプロンプトになればよい
-   - ほかの PC（AlmaLinux 10 など）をクライアントにするなら、その PC の自分のユーザーの端末を開き、このブロックは貼らない
+   - この項の手順 1 で開いた PowerShell に貼る。`[<ユーザー>@<HOSTNAME> ~]$` のプロンプトになればよい
+   - ほかの PC（AlmaLinux 10 など）をクライアントにするなら、この項の手順 1 で開いた端末を使い、このブロックは貼らない
    - WSL のネットワークが既定（NAT）なら、この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ（[注意点](extra/windows-setup.md#注意点)の WSL からつなぐとき）
    - **次の手順は、クライアントのシェルに貼る**
 
@@ -4205,12 +4496,12 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - 最後に値を読み戻して確かめる
-   - **新しいシェルを開いたら**、この項の手順 3 の 2 つのブロックを貼り直してから先へ進む（任意節の[OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)などでも使う）
+   - **新しいシェルを開いたら**、この項の手順 4 の 2 つのブロックを貼り直してから先へ進む
 
 1. クライアントのシェルで、ホスト鍵を照合し、パスワードでログインする。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 4 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}"
    fi
    ```
@@ -4223,16 +4514,43 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - Git Bash を既定にした後、PowerShell の操作をするなら、[SSH で管理者・非管理者の PowerShell を使う](#ssh-で管理者非管理者の-powershell-を使う)を行う
    - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（[注意点](extra/windows-setup.md#注意点)）
    - WSL の AlmaLinux 10 をクライアントにしたときは、続けてもう一度 `exit` を打ち、PowerShell に戻る
-   - **次の手順は、`exit` で PowerShell に戻ってから貼る**（続けて貼ると Windows の cmd への入力として食われる）
+   - **ほかのブロックは、SSH を `exit` で閉じてから貼る**（続けて貼ると Windows 側への入力として食われる）
 
 ---
 
 ### OpenSSH サーバーに公開鍵でもログインする
 
-- クライアントで作った鍵で、パスワードを入れずに入れるようにする。パスワード認証は有効のまま
-- この項の手順 1・2・5 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに、手順 3・4 は Windows の管理者の Windows PowerShell に貼る
-- 登録できるのは、Administrators の一員のユーザーの鍵だけ（この項の手順 4 で確かめる。標準ユーザーは[注意点](extra/windows-setup.md#注意点)）
+- クライアントで作った鍵で、パスワードを入れずにこの Windows の PC に入れるようにする
+- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)を通し、クライアントからログインできる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2〜4・7 はクライアント、手順 5・6 は Windows
+- パスワード認証は有効のまま
+- 登録できるのは、Administrators の一員のユーザーの鍵だけ（この項の手順 6 で確かめる。標準ユーザーは[注意点](extra/windows-setup.md#注意点)）
 - 登録した鍵を持つ人も、パスワードを知る人と同じく、この PC の管理者として操作できる（[注意点](extra/windows-setup.md#注意点)）
+
+1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
+
+   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
+   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
+   - **次の手順は、クライアントの bash に貼る**
+
+1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. クライアントの PC で、鍵ペアが無ければ作る。
 
@@ -4250,13 +4568,13 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    cat ~/.ssh/id_ed25519.pub
    ```
 
-   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、この項の手順 3 で Windows に貼る
+   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、この項の手順 5 で Windows に貼る
    - 公開鍵は秘密ではない。チャットやメールで Windows 側へ渡してもよい
 
 1. Windows の管理者の PowerShell で、変数を設定する（`$PUBKEY` は必ず値を入れる）。
 
    ```powershell
-   $PUBKEY = ''                          # ← この項の手順 2 の 1 行を '' の中に貼る。<PUBKEY>
+   $PUBKEY = ''                          # ← この項の手順 4 の 1 行を '' の中に貼る。<PUBKEY>
    ```
 
    ```powershell
@@ -4271,7 +4589,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    ```powershell
    if ($PUBKEY -notmatch '^(ssh-|ecdsa-|sk-)') {
-     Write-Error 'この項の手順 3 の $PUBKEY が空か、公開鍵の形でない'
+     Write-Error 'この項の手順 5 の $PUBKEY が空か、公開鍵の形でない'
    } elseif (-not (Get-LocalGroupMember -SID S-1-5-32-544 | Where-Object Name -like "*\$env:USERNAME")) {
      Write-Error "$env:USERNAME は Administrators の一員ではない（注意点を見る）"
    } else {
@@ -4284,13 +4602,13 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - 最後の `icacls` に、`NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行だけが出ればよい
-   - クライアントを足すときは、そのクライアントでこの項の手順 1・2 を行い、この項の手順 3 の `$PUBKEY` を貼り直してから、この項の手順 4 を貼る
+   - クライアントを足すときは、そのクライアントでこの項の手順 3・4 を行い、この項の手順 5 の `$PUBKEY` を貼り直してから、この項の手順 6 を貼る
 
 1. クライアントの PC で、鍵で入れることを確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PasswordAuthentication=no "${WIN_USER}@${WIN_HOST}" whoami
    fi
    ```
@@ -4302,10 +4620,36 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### OpenSSH サーバーのパスワード認証を切る
 
-- 鍵を持たない相手からのパスワードを受け付けないようにする（パスワードの総当たりを受け付けない）
-- 前提: [OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)を行い、使うクライアントが鍵で入れること。切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
-- この項の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
+- 鍵を持たない相手からのパスワード認証を受け付けないようにする
+- 前提: [OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)を通し、使うクライアントが鍵で入れる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
+- 切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
 - パスワード認証に戻すときは、[OpenSSH サーバー](#openssh-サーバー)の手順 4 を貼り直す
+
+1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
+
+   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
+   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
+   - **次の手順は、クライアントの bash に貼る**
+
+1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. Windows で、パスワード認証を切り、設定を検査してから sshd を再起動する。
 
@@ -4324,7 +4668,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}" true
      ssh "${WIN_USER}@${WIN_HOST}" whoami
    fi
@@ -4338,9 +4682,34 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### SSH の既定のシェルを Git Bash にする
 
-- SSH でログインしたとき・コマンドを実行するときのシェルを、cmd.exe から Git for Windows の bash に変える
-- 前提: Git for Windows が `C:\Program Files\Git` に入っていること（[Git for Windows](#git-for-windows)）
-- この項の手順 1・3 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
+- SSH でログインしたときとコマンドを実行するときのシェルを、cmd.exe から Git Bash に変える
+- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3・5 は Windows
+
+1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
+
+   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
+   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
+   - **次の手順は、クライアントの bash に貼る**
+
+1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. Windows で、既定のシェルを Git Bash にする。
 
@@ -4359,7 +4728,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'echo "$BASH_VERSION $MSYSTEM"; git --version'
      ssh "${WIN_USER}@${WIN_HOST}"
    fi
@@ -4370,6 +4739,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - 2 つ目は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` のプロンプトになる。`exit` で戻る
    - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる
    - `Shim: Could not create process …` が出るなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)を行う
+   - **次の手順は、`exit` でクライアントの bash に戻ってから Windows の管理者の PowerShell に貼る**（続けて貼ると SSH 先への入力として食われる）
 
 1. 元に戻すときは、`DefaultShell` を消す。
 
@@ -4383,14 +4753,36 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### scoop のツールを SSH のセッションで使う
 
-- scoop で入れたツール（`zoxide`・`rg`・`nvim` など）が、SSH のセッションでだけ起動しないときに行う
-  - 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448（信頼されていないマウントポイント）
-- 原因は、sshd の緩和策 RedirectionGuard。管理者以外が作ったジャンクションを、SSH のセッションのプロセスはたどれない
-  - scoop の `current` と persist のジャンクションは、一般ユーザーの scoop が作るので、この制限に当たる
-- この項は、それらのジャンクションを、管理者の PowerShell で同じ向き先のまま作り直す（中身は変えない）
-- 前提: scoop が `C:\Users\<WIN_USER>\scoop` に入っていること（[アプリを入れる](#アプリを入れる)の手順 1・2 で入れた形）
-- この項の手順 1 は Windows の管理者の Windows PowerShell に、手順 2 はクライアントの[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 のシェルに貼る
-- `scoop install`・`scoop update` の後は、新しいジャンクションが一般ユーザーの作ったものになるので、この項の手順 1 を貼り直す
+- SSH で起動できない scoop のツールのジャンクションを、管理者で同じ向き先に作り直す
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
+- 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448
+- `scoop install`・`scoop update` の後は、この項の手順 3 を貼り直す
+
+1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
+
+   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
+   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
+   - **次の手順は、クライアントの bash に貼る**
+
+1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. Windows で、scoop のジャンクションを管理者で作り直す。
 
@@ -4417,7 +4809,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
    fi
    ```
@@ -4429,36 +4821,54 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### SSH で管理者・非管理者の PowerShell を使う
 
-- 前提: [OpenSSH サーバー](#openssh-サーバー)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)。Windows のユーザーは Administrators の一員
-- 接続元は Linux または Windows の WezTerm。各手順の貼り先と権限を確認する
-- 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 5 も先に通す
-- **この項の手順 6 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
+- WezTerm からこの Windows の PC に SSH で入り、管理者と同じユーザーの非管理者の PowerShell を切り替える
+- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)を通してある。接続元も WezTerm の設定を入れてある（Windows は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、Linux は[WezTerm の設定の導入](almalinux-setup.md#wezterm-の設定を導入する)）
+- 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
+- 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 5 も通してあること
+- **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
 
 > [!WARNING]
-> **この項の手順 10 で子を閉じると、管理者の親 PowerShell へ戻る**。手順 11 で権限を確認してから操作する。
+> **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。
 
-1. 接続元と Windows の両方で、WezTerm の設定を更新する。
+1. 接続元と Windows の WezTerm の設定を更新し、接続元の bash のタブを開く。
 
    - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
-   - [WezTerm の設定の更新](almalinux-setup.md#wezterm-の設定を更新する)をそれぞれの PC で行い、接続元の WezTerm を開き直す
+   - Windows では[WezTerm の設定を更新する](#wezterm-の設定を更新する)、Linux では[同書の WezTerm の設定の更新](almalinux-setup.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
    - 貼り付けの前提と停止条件は[WezTerm の SSH 貼り付け](almalinux-setup.md#wezterm-windows-の-ssh-先で-powershell-に貼り付ける)を先に確認する
    - Linux の Wayland は `wl-paste`、X11 は `xclip` が必要。導入は同じ項の手順 2 に従う
    - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
-   - **次の手順は、接続元の WezTerm の Bash に貼る**
+   - Windows の接続元はスタートメニューから「WezTerm」、Linux の接続元は GUI セッションのアプリ一覧から「WezTerm」を開く。新しい bash のタブのプロンプトが出ればよい
+   - **次の手順は、接続元の WezTerm の bash に貼る**
+
+1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
+
+   ```bash
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   ```
+
+   ```bash
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WIN_HOST WIN_USER; do
+     printf '%-8s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. 接続元の Bash で、Windows にログインする。
 
    ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: 「SSH でログインを確かめる」の手順 3 の WIN_HOST か WIN_USER が空のまま' >&2; else
+   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
      ssh "${WIN_USER}@${WIN_HOST}"
    fi
    ```
 
-   - `WIN_HOST`・`WIN_USER` は[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値。新しいシェルなら、同じ項の手順 3 のブロックを先に貼る
-   - この検証環境では SSH の接続名 `surface` を設定済みなので、上のブロックの代わりに `ssh surface` でも入れる
    - Windows の Git Bash の `$` のプロンプトが出ればよい。cmd のプロンプトなら、前提の既定シェルの設定を確かめる
-   - 5.1 ならこの項の手順 3、7 なら手順 3 を飛ばして手順 4 へ進む
+   - 5.1 ならこの項の手順 4、7 ならこの項の手順 4 を飛ばしてこの項の手順 5 へ進む
    - **次の手順は、ログインした Windows の Git Bash に貼る**（続けて貼ると、パスワードなどの入力として食われる）
 
 1. 5.1 を使うときは、SSH 先の Git Bash で統合を読み、PowerShell を開く。
@@ -4474,10 +4884,10 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - `PS C:\Users\…>` のプロンプトが出ればよい。読み込みエラーが出たら、そこで止めて設定の更新と実行ポリシーを確かめる
-   - この項の手順 4 は飛ばす
-   - **次の手順 5 は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
+   - この項の手順 5 は飛ばす
+   - **この項の手順 6 は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
 
-1. 7 を使うときは、この項の手順 3 の代わりに Git Bash から PowerShell を開く。
+1. 7 を使うときは、この項の手順 4 の代わりに Git Bash から PowerShell を開く。
 
    ```bash
    if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
@@ -4499,10 +4909,10 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - `Version` が 5.1 または 7 の版、`User` がこの Windows のユーザー、`Admin : True` が出ればよい。`User` の値を控える
-   - Ctrl+Shift+F12 の `Function` が `WezTermSshPaste` ならよい。配送用なので手動では押さない。出ないなら設定を更新し、この項の手順 2 からやり直す
+   - Ctrl+Shift+F12 の `Function` が `WezTermSshPaste` ならよい。配送用なので手動では押さない。出ないなら設定を更新し、この項の手順 3 からやり直す
    - `whoami.exe /groups` の `S-1-16-12288` は High、`S-1-5-32-544` は Administrators で、有効なグループとして出る
-   - `Admin : False` なら管理者の操作とこの項の手順 7・8 は行わず、ログインユーザーを確かめる
-   - **この項の手順 6 は、右クリックか Ctrl+Shift+V で貼り、入力内容を確かめてから Enter を押す**
+   - `Admin : False` なら管理者の操作とこの項の手順 8・9 は行わず、ログインユーザーを確かめる
+   - **この項の手順 7 は、右クリックか Ctrl+Shift+V で貼り、入力内容を確かめてから Enter を押す**
    - 貼れる本文は UTF-8 で 64 KiB（65,536 バイト）まで。超えると貼り付けず通知が出るので、ブロックを分ける
    - 大きなブロックの受信は数十秒〜1分以上かかることがある。受信中は次を貼らず、入力欄に入った内容を確かめてから Enter を押す
    - 受信中の Ctrl+C は、終端まで受信して本文を捨てる
@@ -4519,7 +4929,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - Enter を押す前は、2 行の式と間の空行 1 行が入力欄にあり、結果はまだ出ない
    - Enter を 1 回押すと、`ssh-paste: first` と `ssh-paste: 日本語` が順に 1 回ずつ出る
    - 空行が増える、途中で実行される、通知が出て貼れない場合は進まない。失敗時は通常貼り付けへ自動で切り替わらない。両側の設定と Linux のクリップボード取得コマンドを確かめる
-   - この項の手順 7 は x64 用。ARM64 の Windows では行わない
+   - この項の手順 8 は x64 用。ARM64 の Windows では行わない
 
 1. x64 の Windows の管理者 PowerShell で、降格用の固定版を照合して配置する。
 
@@ -4571,10 +4981,10 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; & "$env:WINDIR\System32\whoami.exe" /groups
    ```
 
-   - `User` がこの項の手順 5 と同じで、`Admin : False` ならよい
+   - `User` がこの項の手順 6 と同じで、`Admin : False` ならよい
    - `S-1-16-8192` は Medium、`S-1-5-32-544` は Administrators で「拒否のみに使用するグループ」（英語では `Group used for deny only`）として出る
    - どれかが違う場合は非管理者の操作を始めず、`exit` で親へ戻る
-   - この項の手順 6 のブロックも貼り、Enter の前には実行されず、Enter の後に 1 回だけ出ることを確かめてから、通常の権限で行う操作を貼る
+   - この項の手順 7 のブロックも貼り、Enter の前には実行されず、Enter の後に 1 回だけ出ることを確かめてから、通常の権限で行う操作を貼る
 
 1. 非管理者の操作を終えたら、子 PowerShell を閉じる。
 
@@ -4591,7 +5001,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List
    ```
 
-   - `User` がこの項の手順 5 と同じで、`Admin : True` なら管理者の操作を再開できる
+   - `User` がこの項の手順 6 と同じで、`Admin : True` なら管理者の操作を再開できる
    - 今回の操作を終えるなら `exit` を打ち、SSH 先の Git Bash へ戻る
    - **次の手順は、SSH 先の Git Bash に戻ってから貼る**（続けて貼ると、PowerShell の入力として食われる）
 
@@ -4607,24 +5017,14 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### Windows の OpenSSH クライアント
 
+- Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
+- 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)も通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
-
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
-
-> [!IMPORTANT]
-> - **この項の手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**
-> - この項の手順 1 で開く **管理者ではない Windows PowerShell 5.1** に貼る。更新・ロールバックも同じ窓を使う
-> - 管理者の権限は要らない。Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ（ホストでは、手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す）
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - 前提: [Git for Windows](#git-for-windows) が `C:\Program Files\Git` に入っていること（Git の ssh でも同じ config を読めるかを、手順 7・10 で確かめる）
-> - 前提: つなぐ先の AlmaLinux 10 のホストで sshd が動き、そのユーザーのパスワードで SSH に入れること（AlmaLinux 10 の既定。[注意点](extra/windows-ssh-client.md#注意点)）
-> - **手順 4 と手順 9 には対話入力がある**（手順 4 は鍵を作るか公開鍵を作り直すときのパスフレーズ、手順 9 はホスト鍵の確認とホストのユーザーのパスワード）。鍵にパスフレーズを付けたなら、手順 10（2 回）・11 でも聞かれる
-
-- 上から順にコードブロックを貼る。Windows の手順は手順 2 で変数を設定した PowerShell に、手順 8 はホストの端末に貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）の両方で使う
-- ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに（ssh・scp・ssh を使う git・WezTerm の起動メニュー）パスフレーズを聞かれる
-- 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[Windows 11 の初期設定の「OpenSSH サーバー」](#openssh-サーバー)
+- Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
+- 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows と Git の両方の ssh で使う
+- ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
+- 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[OpenSSH サーバー](#openssh-サーバー)で設定する
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -4651,7 +5051,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - 最後に値を読み戻して確かめる
    - `SSH_USER` は、AlmaLinux 10 のホストのユーザー名にする。Windows のユーザー名（`C:\Users\` の下のフォルダーの名前）と、大文字・小文字やつづりが違えば直す
    - `SSH_USER` に `root` は使わない
-   - **新しい PowerShell を開いたら**、手順 2 の 3 つのブロックを貼り直してから先へ進む
+   - **新しい PowerShell を開いたら**、この項の手順 2 の 3 つのブロックを貼り直してから先へ進む
 
 1. 2 つの ssh の版と `PATH` の順、鍵・config・Git の ssh の設定を確かめる。
 
@@ -4668,7 +5068,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - 1 行目に Windows の ssh の版（`OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2` か、それより新しい版）、2 行目に Git の ssh の版（`OpenSSH_10.5p1` など）が出ればよい
    - 1 行目が「認識されません」のエラーなら、Windows の OpenSSH クライアントが無い。設定の「オプション機能」（`ms-settings:optionalfeatures`）で「OpenSSH クライアント」を追加してから始める（追加には管理者の承認が要る）
    - `core.sshCommand` の行は出ず、最後の行は `GIT_SSH= GIT_SSH_COMMAND= HOME=` であればよい
-   - どれかに値があれば、git が別の ssh か別の `.ssh` を使う。その設定を外すまで、手順 7・10 の Git の ssh の確かめは、git の動きと一致しない
+   - どれかに値があれば、git が別の ssh か別の `.ssh` を使う。その設定を外すまで、この項の手順 7・10 の Git の ssh の確かめは、git の動きと一致しない
 
 1. 鍵ペアが無いときだけ、ed25519 で作る（公開鍵だけが無ければ作り直す）。
 
@@ -4693,7 +5093,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    - 鍵の対があれば、`既にある: …` と出て何もしない
    - 秘密鍵だけがあれば、秘密鍵から公開鍵（`id_ed25519.pub`）を作り直し、`公開鍵を作り直した: …` と出る。秘密鍵にパスフレーズがあれば聞かれる
-   - `中断: … 公開鍵を作れなかった` の前に `UNPROTECTED PRIVATE KEY FILE!` が出ていれば、手順 5・6 で秘密鍵のアクセス権を直してから、この手順を貼り直す
+   - `中断: … 公開鍵を作れなかった` の前に `UNPROTECTED PRIVATE KEY FILE!` が出ていれば、この項の手順 5・6 で秘密鍵のアクセス権を直してから、この手順を貼り直す
    - その表示が無ければ、パスフレーズが違う。この手順を貼り直す
    - 鍵が無ければ、`Enter passphrase (empty for no passphrase):` と `Enter same passphrase again:` でパスフレーズを 2 回聞かれ、鍵の指紋が出る
    - パスフレーズを付けると、鍵を使うたびに聞かれる。空にすると聞かれないが、秘密鍵のファイルを持つ人は誰でも入れる
@@ -4706,7 +5106,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - 出てくる主体が `NT AUTHORITY\SYSTEM`・`BUILTIN\Administrators`・自分のユーザー（`<HOSTNAME>\<WIN_USER>`）の 3 つだけならよい（`(I)` の付いた、受け継いだものでもよい）
-   - ほかの主体（`Everyone`・`BUILTIN\Users`・`NT AUTHORITY\Authenticated Users` など）があれば、手順 6 で直す。無ければ手順 6 は飛ばす
+   - ほかの主体（`Everyone`・`BUILTIN\Users`・`NT AUTHORITY\Authenticated Users` など）があれば、この項の手順 6 で直す。無ければこの項の手順 6 は飛ばす
 
 1. ほかの主体に許可があるときだけ、秘密鍵のアクセス権を直す。
 
@@ -4726,9 +5126,9 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```powershell
    $f = "$env:USERPROFILE\.ssh\config"
    if (-not $SSH_HOST -or -not $SSH_ALIAS -or -not $SSH_USER) {
-     Write-Error '中断: 手順 2 の SSH_HOST・SSH_ALIAS・SSH_USER のどれかが空のまま。値を入れて貼り直す'
+     Write-Error '中断: この項の手順 2 の SSH_HOST・SSH_ALIAS・SSH_USER のどれかが空のまま。値を入れて貼り直す'
    } elseif ($SSH_ALIAS -notmatch '^[A-Za-z0-9_-]+$' -or $SSH_HOST -notmatch '^[A-Za-z0-9.:_-]+$' -or $SSH_USER -notmatch '^[A-Za-z0-9._-]+$') {
-     Write-Error '中断: 手順 2 の値は、ASCII の英数字と . : _ - だけにする（空白・ワイルドカードは使わない）'
+     Write-Error '中断: この項の手順 2 の値は、ASCII の英数字と . : _ - だけにする（空白・ワイルドカードは使わない）'
    } elseif ((Test-Path -LiteralPath $f) -and ((([IO.File]::ReadAllBytes($f) | Select-Object -First 2) -join ',') -match '^(239,187|255,254|254,255)$')) {
      Write-Error "中断: $f の先頭に BOM がある（Git の ssh と、ssh を使う git が読めない）。BOM の無い UTF-8 で保存し直してから貼り直す"
    } elseif ((Test-Path -LiteralPath $f) -and (Select-String -LiteralPath $f -Pattern "^\s*Host(\s*=\s*|\s+)(.*\s)?$([regex]::Escape($SSH_ALIAS))(\s|$)" -Quiet)) {
@@ -4746,7 +5146,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    - `user <SSH_USER>`・`hostname <SSH_HOST>`・`identitiesonly yes`・`identityfile ~/.ssh/id_ed25519` の 4 行が出ればよい
    - Windows の ssh と Git の ssh で 1 回ずつ出る。順は ssh による
-   - `user` などが手順 2 の値と違えば、config の前の方の `Host *` などが先に効いている。その行を直す
+   - `user` などがこの項の手順 2 の値と違えば、config の前の方の `Host *` などが先に効いている。その行を直す
    - `Bad configuration option` が出たら、前からある config に、片方の ssh が知らない設定がある（[注意点](extra/windows-ssh-client.md#注意点)）
    - `Bad owner or permissions on …config` が出たら、config にほかの主体の書き込みの許可がある（[注意点](extra/windows-ssh-client.md#注意点)）
    - `中断: … BOM がある` ときは、メモ帳で config を開き、「名前を付けて保存」の文字コードを「UTF-8」（BOM なし）にして保存し直す
@@ -4758,16 +5158,16 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - ホストの画面の端末か、すでにホストに入れている別の端末に貼る（`sudo` は要らない）
-   - `256 SHA256:<指紋> no comment (ED25519)` の 1 行が出る。この指紋を、手順 9 の初回の接続で照合する
+   - `256 SHA256:<指紋> no comment (ED25519)` の 1 行が出る。この指紋を、この項の手順 9 の初回の接続で照合する
    - 同じ LAN から `ssh-keyscan` で取った指紋は、照合に使えない
-   - **次の手順は、指紋を控えてから、手順 2 の変数を設定した PowerShell に貼る**
+   - **次の手順は、指紋を控えてから、この項の手順 2 の変数を設定した PowerShell に貼る**
 
 1. 公開鍵をホストの authorized_keys に足す（パスワードで 1 回ログインする）。
 
    ```powershell
    $pub = "$env:USERPROFILE\.ssh\id_ed25519.pub"
    if (-not $SSH_ALIAS) {
-     Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
+     Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } elseif (-not (Test-Path -LiteralPath $pub) -or [string](Get-Content -LiteralPath $pub -TotalCount 1) -notmatch '^ssh-ed25519 AAAA[0-9A-Za-z+/=]+( |$)') {
      Write-Error "中断: $pub が無いか、ed25519 の公開鍵の形でない"
    } else {
@@ -4777,7 +5177,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - 初回は `ED25519 key fingerprint is` の後ろに `SHA256:…` が出て、`Are you sure you want to continue connecting (yes/no/[fingerprint])?` と聞かれる
-   - その指紋が手順 8 の指紋と同じなら `yes`、違えば `no` で止める
+   - その指紋がこの項の手順 8 の指紋と同じなら `yes`、違えば `no` で止める
    - `<SSH_USER>@<SSH_HOST>'s password:` で、ホストのユーザーのパスワードを入れる
    - `added` と出ればよい
    - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](extra/windows-ssh-client.md#注意点)）
@@ -4788,7 +5188,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SSH_ALIAS) {
-     Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
+     Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" -o PreferredAuthentications=publickey $SSH_ALIAS 'whoami; ls -lZ ~/.ssh/authorized_keys'
      & 'C:\Program Files\Git\usr\bin\ssh.exe' -o PreferredAuthentications=publickey $SSH_ALIAS whoami
@@ -4798,27 +5198,46 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - パスワードを聞かれずに、`<SSH_USER>` と、`authorized_keys` の行、もう一度 `<SSH_USER>` が出ればよい
    - `authorized_keys` の行は、group と other に書き込みが無く（`-rw-------` など）、`ssh_home_t` が付いていればよい
    - 鍵にパスフレーズを付けたなら、2 回聞かれる
-   - Git の ssh でホスト鍵を聞かれたら、Git の ssh が別の known_hosts を見ている（手順 3 の `HOME`）
-   - `Permission denied (publickey…)` なら、鍵が登録されていないか、Windows の ssh が秘密鍵を使っていない。`UNPROTECTED PRIVATE KEY FILE!` が出ていれば、手順 6 で直す
+   - Git の ssh でホスト鍵を聞かれたら、Git の ssh が別の known_hosts を見ている（この項の手順 3 の `HOME`）
+   - `Permission denied (publickey…)` なら、鍵が登録されていないか、Windows の ssh が秘密鍵を使っていない。`UNPROTECTED PRIVATE KEY FILE!` が出ていれば、この項の手順 6 で直す
 
 1. WezTerm を自分用の設定で使うときだけ、起動メニューから接続先を開けることを確かめる。
 
-   - 前提は、[Windows 11 の初期設定の「WezTerm」](#wezterm)と、自分用の設定（同書の[「Git Bash と WezTerm の設定」](#git-bash-と-wezterm-の設定)の手順 6）。入れていなければ、この手順は飛ばす
+   - 前提の WezTerm の設定を入れていなければ、この手順は飛ばす
    - WezTerm で Ctrl+Shift+R（設定の読み直し）を押してから、Ctrl+Shift+M で起動メニューを開く
    - `ssh <SSH_ALIAS>` が並び、選ぶと新しいタブでホストのシェルに入ればよい（パスフレーズを付けたなら聞かれる）
 
 #### Windows の OpenSSH クライアント: 更新
 
-- Windows の ssh は Windows Update、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
-- 上がった後と、`~/.ssh/config` を書き換えた後は、この項の手順 1 で、両方の ssh が config を読めることを確かめる
-- [手順 2](#windows-の-openssh-クライアント) の変数を設定した、管理者ではない Windows PowerShell（5.1）に貼る。新しい窓なら、手順 2 のブロックを貼り直してから貼る
+- 更新後や config の変更後に、Windows と Git の ssh の版と設定を確かめる
+- 前提: [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 変数を設定する（`SSH_ALIAS` は必ず値を入れる）。
+
+   ```powershell
+   $SSH_ALIAS = ''                       # ← ssh で打つ短い名前（英数字と - _ だけ）。<SSH_ALIAS>
+   ```
+
+   ```powershell
+   'SSH_ALIAS = {0}' -f $SSH_ALIAS
+   ```
+
+   - [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)の手順 2 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
 1. 2 つの ssh の版と、両方が config を読めることを確かめる。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SSH_ALIAS) {
-     Write-Error '中断: 手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
+     Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" -V
      & 'C:\Program Files\Git\usr\bin\ssh.exe' -V
@@ -4838,6 +5257,14 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 ### git-delta
 
+- scoop で delta を入れ、Git の差分表示を設定する
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
 1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
 
    ```powershell
@@ -4852,7 +5279,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
@@ -4869,7 +5296,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    - `'delta' (0.20.1) was installed successfully!` の形の行が出ればよい
    - 導入済みなら `is already installed.` と更新の案内が出て、何も変えない
-   - `delta 0.20.1` の形で、入れた版が出ればよい。版が出なければ、この項の手順 1 の `VCRuntime` を確かめる
+   - `delta 0.20.1` の形で、入れた版が出ればよい。版が出なければ、この項の手順 2 の `VCRuntime` を確かめる
    - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\delta.exe` の 1 行だけを出せばよい
 
 1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「git-delta」](almalinux-setup.md#git-delta)の手順 1・3 を貼る。
@@ -4884,13 +5311,21 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ
    - ファイル名のヘッダと、行番号・行ごとに背景色の付いた差分が出ればよい（同書の「git-delta」の手順 4 と同じ見え方）
    - 1 画面に収まらないときは、less で止まる。`q` で閉じる
-   - 素の差分（背景色の無い `+` / `-` の行）が出たら、この項の手順 3 で貼った同書の「git-delta」の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
+   - 素の差分（背景色の無い `+` / `-` の行）が出たら、この項の手順 4 で貼った同書の「git-delta」の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
    - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
-   - **次の手順は、less を `q` で閉じ、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1で開いた PowerShell に貼る**
+   - **ほかのブロックは、less を `q` で閉じてから貼る**（続けて貼ると less への入力として食われる）
 
 ---
 
 ### GitHub CLI
+
+- scoop で GitHub CLI を入れ、GitHub にログインする
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
 
@@ -4906,11 +5341,11 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `GitCred` が `credential.helper manager` ならよい
-   - `GitCred` が空なら、この項の手順 3 の Git の認証には `Y` と答えてよい
+   - `GitCred` が空なら、この項の手順 4 の Git の認証には `Y` と答えてよい
    - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。外してから始める
 
 1. scoop で gh を入れ、版と場所を確かめる。
@@ -4938,15 +5373,15 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
      - `What is your preferred protocol for Git operations on this host?` は `HTTPS`
      - `Authenticate Git with your GitHub credentials?` は、**`n` と打って Enter**（既定は `Y`）
      - `How would you like to authenticate GitHub CLI?` は `Login with a web browser`
-   - Git の認証の問いが出なければ、gh がもう Git の資格情報のヘルパーになっている（この項の手順 1 の `GitCred`）
-   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この項の手順 4 のブラウザで使う
+   - Git の認証の問いが出なければ、gh がもう Git の資格情報のヘルパーになっている（この項の手順 2 の `GitCred`）
+   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この項の手順 5 のブラウザで使う
    - クリップボードに入れられなかったときは、`First copy your one-time code:` の後にコードが出る
    - `Press Enter to open https://github.com/login/device in your browser...` で Enter を押すと、既定のブラウザが開く
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
 
 1. ブラウザで、GitHub の認証を済ませる。
 
-   - `https://github.com/login/device` にこの項の手順 3 のワンタイムコードを入れ、画面の案内に従う
+   - `https://github.com/login/device` にこの項の手順 4 のワンタイムコードを入れ、画面の案内に従う
    - ブラウザが開かなければ（`Failed opening a web browser at …`）、`https://github.com/login/device` を自分でブラウザで開く
    - PowerShell に `Logged in as <GITHUB_USER>` が出れば、`gh auth login` は終わっている
    - `Authentication credentials saved in plain text` なら、トークンは `%APPDATA%\GitHub CLI\hosts.yml` に平文で入った（[注意点](extra/windows-setup.md#注意点)）
@@ -4962,13 +5397,21 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    - `Logged in to github.com account <GITHUB_USER> (keyring)` の行と、`Git operations protocol: https` の行が出ればよい
    - `(keyring)` の代わりに `(C:\Users\<WIN_USER>\AppData\Roaming\GitHub CLI\hosts.yml)` が出たら、トークンは平文のファイルにある
-   - `You are not logged into any GitHub hosts.` なら、ログインしていない。この項の手順 3 からやり直す
-   - 最後のコマンドが、この項の手順 1 の `GitCred` と同じ行（ふつうは `credential.helper manager`）を出せばよい
+   - `You are not logged into any GitHub hosts.` なら、ログインしていない。この項の手順 4 からやり直す
+   - 最後のコマンドが、この項の手順 2 の `GitCred` と同じ行（ふつうは `credential.helper manager`）を出せばよい
    - `GitCred` が空で、Git の認証に `Y` と答えたときは、代わりに `auth git-credential` で終わる行が出る
 
 ---
 
 ### Neovim
+
+- scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[HackGen Console NF](#hackgen-console-nf)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
 
@@ -4984,7 +5427,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
@@ -4997,16 +5440,15 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - `'neovim' (0.12.5) was installed successfully!` の形の行が出ればよい
-   - `'neovim' suggests installing 'extras/vcredist2022'.` も出るが、この項の手順 1 が `VCRuntime : True` なら入れなくてよい
+   - `'neovim' suggests installing 'extras/vcredist2022'.` も出るが、この項の手順 2 が `VCRuntime : True` なら入れなくてよい
    - `'neovim' (0.12.5) is already installed.` の形なら、もう入っている（何も変えない）
-   - まだ `nvim` は起動しない（この項の手順 3 の退避より前に起動すると、`nvim-data` などができて、それも退避される）
+   - まだ `nvim` は起動しない（この項の手順 4 の退避より前に起動すると、`nvim-data` などができて、それも退避される）
 
-1. 自分用の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を入れる。
+1. 自分用の LazyVim の設定を導入する。
 
-   - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の全項を、この項で指定した端末で通す
-   - 飛ばす手順: 2（scoop。[アプリを入れる](#アプリを入れる)の手順 1・2 で入れた）と、手順 7 のフォント（[HackGen Console NF](#hackgen-console-nf)で入れた。手順 7 の確かめは行う）
-   - その手順 3 で `extras` のバケットを足し、手順 6 で ripgrep・fd・gcc・nodejs・zenhan・lazygit も scoop で入れる（Neovim は、この項の手順 2 で入っている）
-   - その手順 9・11 で Neovim の画面が開く（その手順 10 は画面を開かない）。手順 9 は `:qa`、手順 11 は `:qa!` で閉じてから次を貼る
+   - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通す。scoop・Git for Windows・Neovim 本体とフォントは、この項の前提と本体導入で用意済み
+   - 参照先の既存設定の確認と退避を省かない
+   - Neovim の画面を開く手順では、指定された `:qa` または `:qa!` で閉じてから先へ進む
 
 1. 版と場所と、設定・データの置き場所を確かめる。
 
@@ -5018,17 +5460,22 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    ```
 
    - `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい
-   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 1 で確かめる
+   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 2 で確かめる
      - 窓が出たら、OK で閉じる
    - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい
    - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[AlmaLinux 10 の初期設定の「Neovim の設定ファイル」](almalinux-setup.md#neovim-の設定ファイル)）
 
 #### Neovim を既定のエディタにする
 
-- Windows PowerShell や Windows Terminal から起動するツール（lazygit の `e` キーなど）にも Neovim を使わせるなら、この項の手順 1 でユーザーの環境変数にする
-- Git Bash（WezTerm の新しいタブ）では、共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にする（この項は要らない）
-  - 確かめるときは、WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「Neovim」](almalinux-setup.md#neovim)の手順 4 のブロックを貼る（`. ~/.bashrc` は読み直さない）
-- この項のブロックは、[Neovim](#neovim)と同じ管理者ではない Windows PowerShell（5.1）に貼る
+- Windows PowerShell や Windows Terminal から起動するツールにも Neovim を使わせる
+- 前提: [Neovim](#neovim)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Git Bash では、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)で入れた共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
+- Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](almalinux-setup.md#neovim)の手順 4 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. Windows の PowerShell でも使うように、`EDITOR`・`VISUAL` を `nvim` にする。
 
@@ -5060,11 +5507,16 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 #### LazyVim の設定を導入する
 
-[Git for Windows](#git-for-windows)・[アプリを入れる](#アプリを入れる)の scoop・[HackGen Console NF](#hackgen-console-nf)・[Neovim](#neovim)を先に済ませる。管理者ではない PowerShell で行い、VC++ ランタイムの導入時だけ UAC を許可する。
+- Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
+- 前提: [Git for Windows](#git-for-windows)・[アプリを入れる](#アプリを入れる)の手順 1・2・[HackGen Console NF](#hackgen-console-nf)と、[Neovim](#neovim)で本体を先に入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
+- Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
+- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
 
-この項の手順 2 の退避前に、Neovim を閉じる。
+1. 管理者ではない Windows PowerShell（5.1）を開く。
 
-[背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
 
@@ -5090,18 +5542,20 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
          "moved: $d"
        }
      }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      $nvimPaths | ForEach-Object { '{0}: {1}' -f $_, (Test-Path -LiteralPath $_) }
    }
    ```
 
    - 退避したものは `moved: …` と出る。最後の 2 行がどちらも `False` なら、元の設定とデータは残っていない
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
+   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 3 を貼り直す
    - `nvim` は設定、`nvim-data` はプラグイン・Mason のツール・undo など
 
 1. この設定を `%LOCALAPPDATA%\nvim` に clone する。
 
    ```powershell
    if (-not (Test-Path "$env:LOCALAPPDATA\nvim\init.lua")) { git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git "$env:LOCALAPPDATA\nvim" }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" branch --show-current
    ```
 
@@ -5124,6 +5578,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 1. 入ったか確かめ、フォントを入れる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    nvim --version | Select-Object -First 1
    Get-Command rg, fd, gcc, node, npm, zenhan, lazygit | Format-Table Name, Source
    ```
@@ -5138,6 +5593,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    nvim --headless +qa
    git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json
    nvim --headless "+Lazy! restore" +qa
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" status --short
    ```
 
@@ -5161,6 +5617,7 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
    ```powershell
    nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! $env:TEMP\lazyvim-health.txt" +qa
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    Select-String -Path "$env:TEMP\lazyvim-health.txt" -Pattern 'ERROR|WARNING'
    ```
 
@@ -5181,12 +5638,22 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 #### LazyVim の設定とプラグインの版を揃える
 
-設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える。初回と整形用 lock の変更後は[安全な整形](#lazyvim-の安全な-markdown-整形を導入する)を入れ直す。外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す。
+- 設定と lazy-lock.json を取り込み、プラグインをその版に揃える
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
+- 初回と整形用 lock の変更後は[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通す
+- 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
    ```powershell
    git -C "$env:LOCALAPPDATA\nvim" pull --ff-only; if ($?) { nvim --headless "+Lazy! restore" +qa }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" status --short
    ```
 
@@ -5199,9 +5666,24 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
 
 #### LazyVim の安全な Markdown 整形を導入する
 
-- AlmaLinux 10 / Windows 11 共通。Node.js 22 以上と npm が必要
+- Neovim に安全な Markdown 整形の依存を入れ、保存と手動整形を確かめる
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、Node.js 22 以上と npm が使える
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
 - 初回と `tools/glfm-format/package-lock.json` の変更後に行う
-- 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る。Mason のツールとは別に管理する
+- 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 試験用の Markdown を Neovim で開く。
+
+   ```powershell
+   nvim "$env:TEMP\lazyvim-format-check.md"
+   ```
+
+   - Neovim の編集画面が開けばよい
+   - **次の手順は、Esc を押し、Neovim の `:` のコマンドラインに入力する**（PowerShell には貼らない）
 
 1. Neovim で整形用の依存を導入する。
 
@@ -5213,8 +5695,9 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
    - 取得するのは lock ファイルで固定した markdownlint-cli2 と Comrak (WASM 版)。整形時は通信しない
    - 失敗したら Node.js と npm が PATH にあるか確かめ、同じコマンドを入力し直す
    - lint の診断用は `:MasonInstall markdownlint-cli2` で導入する
+   - **次の手順は、完了の通知が出てから `i` を押し、挿入モードの本文に貼る**
 
-1. Markdown ファイルで保存と手動整形を確かめる。
+1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
 
    ```markdown
    #動作確認
@@ -5225,15 +5708,27 @@ Windows 側の[WezTerm 設定](#wezterm-の設定を導入する)と、WSL 側�
      - 内部の項目
    ```
 
+   - 貼り終えたら Esc を押し、ノーマルモードに戻る
    - `:w` または `<leader>cf` で `#動作確認` が `# 動作確認` に直る
    - `内部の項目` の行頭の 2 スペースが保たれる
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
    - `:ConformInfo` に `glfm_markdownlint` が出る。依存不足・設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
+   - **ほかのブロックは、Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
 #### LazyVim の GitLab プレビューを設定する
 
-GitLab でスコープ `read_api` の個人アクセストークンを用意する。編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る。設定しなくても近似プレビューは使える。削除は [LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う。
+- GitLab プレビュー用のトークンと、送り先の GitLab を自分のユーザーの環境変数に設定する
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある。GitLab でスコープ `read_api` の個人アクセストークンを用意してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4 で通常の窓を開き直し、手順 5 で Neovim を起動する
+- 編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る
+- 設定しなくても近似プレビューは使える
+- 削除は[LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. Windows 11 では、トークンを入力して、ユーザーの環境変数にする。
 
@@ -5257,6 +5752,11 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - Enter の後、プロンプトが戻るまで 2 秒ほどかかる
    - **次の手順は、URL を入力し、プロンプトが戻ってから貼る**
 
+1. 管理者ではない Windows PowerShell（5.1）を開き直す。
+
+   - この項の手順 1 の窓を閉じ、スタートメニューで「Windows PowerShell」をクリックして開く（管理者として実行しない）
+   - **次の手順は、開き直した PowerShell に貼る**
+
 1. Windows 11 では、新しい端末でこの設定の README を開き、プレビューで確かめる。
 
    ```powershell
@@ -5268,11 +5768,21 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### LazyVim の本体・外部コマンド・プラグインを更新する
 
-設定の取り込みは[設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)で行う。プラグイン更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する。
+- scoop で入れた本体と外部コマンド・LazyVim のプラグインを更新する
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
+- 設定の取り込みは[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)で行う
+- 更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. Windows 11 では、scoop で入れたものを上げる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    scoop update
    scoop update neovim ripgrep fd gcc nodejs zenhan lazygit
    nvim --version | Select-Object -First 1
@@ -5284,6 +5794,7 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
    ```powershell
    nvim --headless "+Lazy! update" +qa
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" diff --stat
    ```
 
@@ -5292,6 +5803,14 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 ---
 
 ### lazygit
+
+- scoop で lazygit を入れ、自分用の設定と起動を確かめる
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
 
@@ -5307,11 +5826,11 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す
+   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
    - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、外してから始める
-   - `Extras : True` なら、extras のバケットはもうある（[Neovim](#neovim)の手順 3 で足した）。この項の手順 2 は飛ばす
+   - `Extras : True` なら、extras のバケットはもうある（[Neovim](#neovim)の手順 3 で足した）。この項の手順 3 は飛ばす
 
 1. extras のバケットが無いときだけ、scoop に足す。
 
@@ -5336,7 +5855,7 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
    - [lazygit の設定を導入する](#lazygit-の設定を導入する)の全項を通す
    - `custom` と `C:\Users\<WIN_USER>\AppData\Local\lazygit` が出れば、入っている
-   - lazygit を起動する（この項の手順 6）前に入れる。先に起動すると、できた状態ファイルごと `lazygit.bak` に退避される
+   - lazygit を起動する（この項の手順 7）前に入れる。先に起動すると、できた状態ファイルごと `lazygit.bak` に退避される
 
 1. 版と、設定の置き場所を確かめる。
 
@@ -5361,7 +5880,7 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    }
    ```
 
-   - `中断:` と出たら、lazygit は起動していない（git が呼べるかを、この項の手順 1 で確かめ直す）
+   - `中断:` と出たら、lazygit は起動していない（git が呼べるかを、この項の手順 2 で確かめ直す）
    - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる
    - Status・Files・Branches・Commits などの欄が出ればよい（空のリポジトリなので、一覧は空）
    - ほかのリポジトリで確かめるなら、そのフォルダーに `Set-Location` してから `lazygit` を打つ（git 管理外のフォルダーで起動すると、リポジトリを作るか聞かれる）
@@ -5375,7 +5894,14 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### lazygit の設定を導入する
 
-lazygit を終了してから、管理者ではない PowerShell で行う。lazygit・delta・VC++ ランタイム・HackGen Console NF は同冊の導入節で入れておく。
+- Windows の lazygit の既存設定を退避し、自分用の設定を入れる
+- 前提: [lazygit](#lazygit)の手順 1〜3 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)も通し、Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 既存設定を退避して、設定ディレクトリへ clone する。
 
@@ -5386,6 +5912,7 @@ lazygit を終了してから、管理者ではない PowerShell で行う。laz
    } else {
      if (Test-Path -LiteralPath $d) { Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop; "moved: $d -> $d.bak" }
      git clone https://github.com/ryo-aoki-pc/lazygit.git $d
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $d branch --show-current
      lazygit --print-config-dir
    }
@@ -5398,7 +5925,26 @@ lazygit を終了してから、管理者ではない PowerShell で行う。laz
 
 #### lazygit の Excel 差分表示を導入する
 
-Python 3.9 以上・Git が必要。部分ステージには lazygit 0.66.0 以上・delta 0.20.1 以上が必要。Python が無ければ、先に `scoop install python` を行う。
+- lazygit の設定リポジトリから、Excel 差分表示と部分ステージ用のコマンドを入れる
+- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある。部分ステージには lazygit 0.66.0 以上・delta 0.20.1 以上が要る
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
+- 既存の変更は `git -C "$env:LOCALAPPDATA\lazygit" status` で確認してから進む
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Python が無ければ scoop で入れ、版を確かめる。
+
+   ```powershell
+   if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   python --version
+   ```
+
+   - `Python 3.9` 以上の版が出ればよい
+   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
 
 1. 設定リポジトリへ移り、Excel の差分表示を導入して確かめる。
 
@@ -5408,6 +5954,7 @@ Python 3.9 以上・Git が必要。部分ステージには lazygit 0.66.0 以�
      try {
        python --version
        python scripts/setup-excel-diff.py
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
        python scripts/setup-excel-diff.py --check
      } finally {
        Pop-Location
@@ -5422,16 +5969,51 @@ Python 3.9 以上・Git が必要。部分ステージには lazygit 0.66.0 以�
 
 #### lazygit で Excel の差分を確かめる
 
-対象の Excel がある Git リポジトリへ移ってから行う。例のファイル名は実際の名前に置き換える。属性の仕様は [Excel 差分の説明](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#excel-の差分表示)を参照する。
+- 対象の Git リポジトリの Excel の属性と差分を確かめる
+- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象の Excel が Git のリポジトリにある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+- 属性の仕様は[Excel 差分の説明](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#excel-の差分表示)を参照する
 
 > [!CAUTION]
 > - **通常の Excel 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Excel にテキストのパッチは適用できず、新規ファイルでは Excel の代わりに変換後のテキストをステージする場合がある
 > - `diff.excel.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
-> - 全体をステージするならファイル一覧で `Space`、部分ステージは[専用画面](#lazygit-で-excel-のセル変更を部分ステージする)の `E` を使う
+> - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)の `E` を使う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git rev-parse --show-toplevel
+   }
+   ```
+
+   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
 
 1. Excel の属性と、作業中・ステージ済みの差分を確かめる。
 
    ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
    git check-attr diff -- "売上表.xlsx"
    git diff -- "売上表.xlsx"
    git diff --cached -- "売上表.xlsx"
@@ -5444,7 +6026,40 @@ Python 3.9 以上・Git が必要。部分ステージには lazygit 0.66.0 以�
 
 #### lazygit で Excel のセル変更を部分ステージする
 
-lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git リポジトリへ移ってから行う。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてから使う。
+- 対象の Git リポジトリで、Excel の値・通常の数式の変更を専用画面から部分ステージする
+- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移り、lazygit を起動する。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     lazygit
+   }
+   ```
+
+   - lazygit のファイル一覧が開けばよい
+   - **次の手順は、lazygit の画面で行う**
 
 1. lazygit のファイル一覧で対象を選び、`E` を押す。
 
@@ -5465,10 +6080,46 @@ lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git
    - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
    - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
    - 次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
+   - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
+   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
 
 #### lazygit で大きな Excel の変換を待つ
 
-対象の Excel がある Git リポジトリへ移ってから行う。変換中のブックは、完了後にファイルを選び直すか `R` で表示する。例のファイル名は実際の名前に置き換える。
+- 大きい Excel の全セルの変換を待ち、差分を表示する
+- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象の Excel が Git のリポジトリにある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+- lazygit で変換中のブックは、完了後にファイルを選び直すか `R` で表示する
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git rev-parse --show-toplevel
+   }
+   ```
+
+   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
 
 1. 全セルの変換を待って差分を表示する。
 
@@ -5481,6 +6132,14 @@ lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git
 ---
 
 ### yazi
+
+- scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. 変数を設定する。
 
@@ -5513,22 +6172,22 @@ lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 1 のとおりに開き直す（この項の手順 1 も貼り直す）
+   - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
    - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、外してから始める
-   - `YaziFileOne` の元の値を控える。この項の手順 4 で Git for Windows の `file.exe` に上書きし、ロールバックで戻す
+   - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きし、ロールバックで戻す
 
 1. scoop で yazi と、プレビュー・検索に使うツールを入れる。
 
    ```powershell
-   if ($null -eq $YAZI_EXTRAS) { Write-Error '中断: 「yazi」の手順 1 の $YAZI_EXTRAS が無い。手順 1 を貼り直す' } else { scoop install yazi @YAZI_EXTRAS }
+   if ($null -eq $YAZI_EXTRAS) { Write-Error '中断: この項の手順 2 の $YAZI_EXTRAS が無い。この項の手順 2 を貼り直す' } else { scoop install yazi @YAZI_EXTRAS }
    ```
 
    - アプリごとに `'yazi' (26.9.1) was installed successfully!` の形の行が出ればよい。入っていたものは `is already installed.` の形の行を出して飛ばす
    - `'ripgrep' suggests installing 'extras/vcredist2022'.` などの `suggests installing` の行は、入れなくてよい
-   - `中断:` と出たら、何も入れていない（新しい窓では、この項の手順 1 を貼り直す。yazi 本体だけにするなら `$YAZI_EXTRAS = @()`）
+   - `中断:` と出たら、何も入れていない（新しい窓では、この項の手順 2 を貼り直す。yazi 本体だけにするなら `$YAZI_EXTRAS = @()`）
    - scoop の `file` は入れない
 
 1. ユーザーの環境変数 `YAZI_FILE_ONE` を Git for Windows の `file.exe` にする。
@@ -5562,7 +6221,7 @@ lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git
    ```
 
    - `yazi --version` は `Version: 26.9.1 (…)` と、括弧の中が `windows-x86_64` の `Triple` の行、`ya --version` は `Version: 26.9.1 (…)` の行が出ればよい
-   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 2 で確かめる
+   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 3 で確かめる
      - 窓が出たら、OK で閉じる
    - `ya env` の `Config` の各行に `C:\Users\<WIN_USER>\AppData\Roaming\yazi\config\…` が出る
      - 設定のフォルダーが無ければ、パスが見つからない旨と `os error 3` が出る
@@ -5602,7 +6261,14 @@ lazygit・delta・Excel 差分表示を導入し、対象の Excel がある Git
 
 #### yazi の設定を導入する
 
-yazi と依存ツールを先に入れる。Windows の `YAZI_FILE_ONE` と VC++ ランタイムは[yazi](#yazi)で設定する。
+- Windows の yazi の既存設定を退避し、自分用の設定を入れる
+- 前提: [yazi](#yazi)の手順 1〜4 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](#git-for-windows)で入れてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- yazi をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
 
 1. yazi を終了し、自分用の設定を clone する。
 
@@ -5613,6 +6279,7 @@ yazi と依存ツールを先に入れる。Windows の `YAZI_FILE_ONE` と VC++
    } else {
      if (Test-Path -LiteralPath $dst) { Move-Item -LiteralPath $dst -Destination "$dst.bak" -ErrorAction Stop }
      git clone -b custom https://github.com/ryo-aoki-pc/yazi.git $dst
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $dst branch --show-current
    }
    ```
@@ -5623,15 +6290,43 @@ yazi と依存ツールを先に入れる。Windows の `YAZI_FILE_ONE` と VC++
 
 #### yazi で複数ファイルをまとめて開く
 
-`l` / `<Enter>` は既定でホバー中の 1 ファイルだけを開く。選択した複数ファイルをまとめて開くときだけ行う。
+- yazi で選択した複数ファイルを、`l` / `<Enter>` でまとめて開く設定を足す
+- 前提: [yazi](#yazi)と[Neovim](#neovim)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2・3 は Neovim、手順 4 は yazi の画面
+- 既存の `init.lua` の変更を確かめ、yazi をすべて閉じてから始める
+- `l` / `<Enter>` は既定でホバー中の 1 ファイルだけを開く。選択した複数ファイルをまとめて開くときだけ行う
 
-1. `%APPDATA%\yazi\config\init.lua` に、次の行を足す。
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. yazi の `init.lua` を Neovim で開く。
+
+   ```powershell
+   nvim "$env:APPDATA\yazi\config\init.lua"
+   ```
+
+   - 既存の `init.lua` の本文が開けばよい
+   - **次の手順は、Esc → `G` → `o` で末尾に行を足し、挿入モードの本文に貼る**（PowerShell には貼らない）
+
+1. Neovim で開いた `init.lua` に、複数ファイルを開く行を足す。
 
    ```lua
    require("smart-enter"):setup { open_multi = true }
    ```
 
-   - yazi を開き直し、選択したファイルが `l` / `<Enter>` でまとめて開くことを確かめる
+   - 貼り終えたら Esc を押し、`:wq` を打って Enter で保存して閉じる
+   - **次の手順は、Neovim を閉じてから、この項の手順 1 の PowerShell に貼る**（続けて貼ると Neovim への入力として食われる）
+
+1. yazi を起動し、選択した複数ファイルをまとめて開けるか確かめる。
+
+   ```powershell
+   yazi
+   ```
+
+   - 選択した複数ファイルが `l` / `<Enter>` でまとめて開けばよい
+   - `q` で yazi を閉じる
+   - **ほかのブロックは、yazi を閉じてから貼る**（続けて貼ると yazi への操作として食われる）
 
 ---
 
@@ -5641,7 +6336,26 @@ yazi と依存ツールを先に入れる。Windows の `YAZI_FILE_ONE` と VC++
 
 #### mdtable を導入・更新する
 
-Python 3.9 以上が必要。Python が無ければ、先に `scoop install python` を行う。
+- Markdown と Excel を往復する mdtable を入れ、導入状態を確かめる
+- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
+- 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Python が無ければ scoop で入れ、版を確かめる。
+
+   ```powershell
+   if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   python --version
+   ```
+
+   - `Python 3.9` 以上の版が出ればよい
+   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
 
 1. リポジトリを clone し、導入して確かめる。
 
@@ -5651,6 +6365,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
      Push-Location -LiteralPath "$env:USERPROFILE\md-table-excel" -ErrorAction Stop
      try {
        python scripts/setup-mdtable.py
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
        python scripts/setup-mdtable.py --check
      } finally {
        Pop-Location
@@ -5661,7 +6376,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - 依存はリポジトリ外の専用仮想環境へ入る
    - 起動コマンドは `%USERPROFILE%\.local\bin`。PATH に無いときは案内に従って加える
    - `--check` は何も変更せず状態を確かめる
-   - 更新時は `git -C "$env:USERPROFILE\md-table-excel" pull --ff-only` を実行し、この項の手順 1 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
+   - 更新時は `git -C "$env:USERPROFILE\md-table-excel" pull --ff-only` を実行し、この項の手順 3 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
    - 終わると元の作業ディレクトリへ戻る
 
 #### mdtable のブックを Excel で編集するときの注意
@@ -5679,10 +6394,43 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### mdtable で Markdown の表を Excel と往復する
 
-編集する自分の Markdown があるディレクトリへ移ってから行う。例の `README.md` と `README.tables.xlsx` は、対象の文書名と対応するブック名に置き換える。Excel が必要。
+- 自分の Markdown の表を Excel で編集し、Markdown に書き戻す
+- 前提: [mdtable を導入・更新する](#mdtable-を導入更新する)を通してある。Excel が入っている。対象の Markdown を編集できる
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。Excel の編集は、この PC のデスクトップで行う
+- 例の `README.md` と `README.tables.xlsx` は、対象の文書名と対応するブック名に置き換える
 
 > [!CAUTION]
-> この項の手順 1・2 で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
+> この項の手順 4・6 で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`MDTABLE_DIR` は必ず値を入れる）。
+
+   ```powershell
+   $MDTABLE_DIR = ''                     # ← 編集する自分の Markdown があるディレクトリの絶対パス。<MDTABLE_DIR>
+   ```
+
+   ```powershell
+   'MDTABLE_DIR = {0}' -f $MDTABLE_DIR
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象の Markdown があるディレクトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $MDTABLE_DIR) { Write-Error '中断: この項の手順 2 の MDTABLE_DIR が空のまま'; return }
+     Set-Location -LiteralPath $MDTABLE_DIR -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Location
+   }
+   ```
+
+   - 対象の Markdown がある場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
 
 1. 表を一覧にし、Excel で開いて編集する。
 
@@ -5697,16 +6445,37 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - 書き戻せないときや Ctrl+C で止めたときはブックを残し、取り込み直すコマンドを表示する
    - **次の手順は、Excel を閉じて Enter を押し、プロンプトに戻ってから貼る**
 
-1. ブックをファイルとして残すときは、書き出して取り込む。
+1. ブックをファイルとして残すときだけ、Markdown から書き出す。
 
    ```powershell
    mdtable export README.md
+   ```
+
+   - Markdown と同じフォルダーに `README.tables.xlsx` ができる（`-o` で変更）。既存のブックは `--force` 無しでは上書きしない
+
+1. ブックをファイルとして残すときだけ、Excel で開いて編集する。
+
+   - エクスプローラーで `README.tables.xlsx` を開き、表を編集する
+   - この項のリードから案内した、Excel で編集するときの注意に従う
+   - **次の手順は、保存して Excel を閉じてから、この項の手順 1 の PowerShell に貼る**
+
+1. ブックをファイルとして残すときだけ、取り込む前に差分を確かめる。
+
+   ```powershell
    mdtable import README.tables.xlsx --dry-run
+   ```
+
+   - Markdown に書き戻す差分だけが出る
+   - 差分が意図した内容と違えば、この項の手順 8 は貼らず、Markdown とブックを見直す
+   - **次の手順は、差分を確かめてから貼る**
+
+1. ブックをファイルとして残すときだけ、確かめた差分を Markdown に取り込む。
+
+   ```powershell
    mdtable import README.tables.xlsx
    ```
 
-   - `export` は Markdown と同じフォルダーに `README.tables.xlsx` を書く（`-o` で変更）。既存のブックは `--force` 無しでは上書きしない
-   - `import` はブックに記録した Markdown に書き戻す（`--md` で変更）。`--dry-run` は差分だけを出す
+   - ブックに記録した Markdown に書き戻す（`--md` で変更）
    - 書き出した後に Markdown の表を変えていたら、衝突として書き戻さない。`--force` を付けるとブックの内容で上書きする
    - 同じブックを再度取り込むと「適用済み」になる。取り込み後はブックを消してよい
 
@@ -5718,6 +6487,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Firefox
 
+- 日本語版の Firefox を PC 全体に入れ、既定のブラウザーにする
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - ユーザーアカウント制御（UAC）の確認は「はい」
+
 1. Firefox がまだ入っていないことを確かめる。
 
    ```powershell
@@ -5728,7 +6506,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    ```
 
    - どちらも何も出なければ、入っていない
-   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` にあれば、この項の手順 2 をそのまま貼ってよい
+   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` にあれば、この項の手順 3 をそのまま貼ってよい
    - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、設定 →「アプリ」→「インストールされているアプリ」で外してから始める（プロファイルは残る）
 
 1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
@@ -5751,7 +6529,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. スタートメニューから Firefox を起動し、`about:support` で日本語版の公式のビルドかを確かめる。
 
    - スタートメニューの「Firefox」から起動する（管理者の PowerShell からは起動しない。Firefox が管理者の権限で動いてしまう）
-   - 最初の起動で、Firefox を既定のブラウザーにするかを聞かれることがある。選ぶと Windows の設定が開くので、この項の手順 4 の操作をそこで行ってよい
+   - 最初の起動で、Firefox を既定のブラウザーにするかを聞かれることがある。選ぶと Windows の設定が開くので、この項の手順 5 の操作をそこで行ってよい
    - アドレスバーに `about:support` を入れ、「アプリケーション基本情報」を見る
      - 「更新チャンネル」が `release`
      - 「プログラムの実行ファイル」が `C:\Program Files\Mozilla Firefox\firefox.exe`
@@ -5776,21 +6554,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Hyper-V
 
+- Hyper-V で VM を作って使う
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[ロールバックと注意点](extra/hyper-v.md)
 
-> [!IMPORTANT]
-> - **Windows 11 Pro（x64）の PC のデスクトップで行う**。Home には Hyper-V が無い。SSH やリモート デスクトップのセッションからは行わない（途中で再起動する）
-> - [対応の確認](#hyper-v-この-pc-で使えるかを確かめる)の手順 1 で開く **管理者の Windows PowerShell 5.1** に、有効化・再起動まで貼る
-> - [再起動後の確認](#hyper-v-再起動の後に確かめる)から後ろは、**管理者ではない Windows PowerShell 5.1** に貼る
-> - ログインするユーザーは Administrators の一員
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)。通していなければ、ブロックは Ctrl+V で貼る
-> - **途中で再起動が 1 回入る**（[Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 4）。開いている作業を先に保存し、動いている VM を止める
-> - **同じ PC の VirtualBox と VMware Workstation の VM は、再起動の後は Windows のハイパーバイザーの上で動く**。遅くなり、起動しない VM が出ることがある
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
 #### Hyper-V: この PC で使えるかを確かめる
+
+- Windows 11 のこの PC で、Hyper-V が使えるかを確かめる
+- 前提: 無し
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- Windows 11 Pro・Enterprise・Education の x64 が対象。Home には Hyper-V が無い
 
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
 
@@ -5822,7 +6594,19 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: Hyper-V を有効にして再起動する
 
-1. Hyper-V を有効にする。
+- この PC の Hyper-V を有効にし、自分のユーザーで管理できるようにする
+- 前提: [Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)を通してある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+> [!IMPORTANT]
+> - **この項の手順 5 で再起動する**。開いている作業を先に保存し、動いている VM を止める。SSH やリモート デスクトップのセッションからは行わない
+> - **同じ PC の VirtualBox と VMware Workstation の VM は、再起動の後は Windows のハイパーバイザーの上で動く**。遅くなり、起動しない VM が出ることがある
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+
+1. Hyper-V が有効でないときだけ、Hyper-V を有効にする。
 
    ```powershell
    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -All -NoRestart
@@ -5832,7 +6616,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    - `Microsoft-Hyper-V-All`・`Microsoft-Hyper-V-Hypervisor` が `Enabled` か `EnablePending` ならよい
    - `Microsoft-Hyper-V-Services`・`Microsoft-Hyper-V-Management-PowerShell` も `Enabled` か `EnablePending` ならよい
-   - **まだ再起動しない**（この項の手順 4 でまとめて行う）
+   - **まだ再起動しない**（この項の手順 5 でまとめて行う）
 
 1. VirtualBox か VMware Workstation も同じ PC で使うときだけ、Windows ハイパーバイザー プラットフォームも有効にする。
 
@@ -5869,6 +6653,10 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: 再起動の後に確かめる
 
+- 再起動後に、昇格せずに Hyper-V を管理できることを確かめる
+- 前提: [Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)を通し、再起動してサインインしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
@@ -5889,6 +6677,14 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: VM を作る
 
+- この PC に、第 2 世代の VM を作る
+- 前提: [Hyper-V: 再起動の後に確かめる](#hyper-v-再起動の後に確かめる)を通し、入れる OS のインストール用の ISO を用意してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
 1. 変数を設定する（`HV_ISO` は必ず値を入れる）。
 
    ```powershell
@@ -5907,12 +6703,12 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    - `$HV_ISO` は、入れる OS のインストール用の ISO のパス
    - `$HV_VM` は VM の名前、`$HV_DIR` は VM を置くフォルダー（その下に VM の名前のフォルダーができる）
-   - 新しい窓を開いたら、この手順を貼り直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. 第 2 世代の VM を作り、ISO を付ける。
 
    ```powershell
-   if (-not $HV_ISO) { Write-Error '中断: この項の手順 1 の $HV_ISO が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $HV_ISO)) { Write-Error "中断: ISO が無い: $HV_ISO" } elseif (Get-VM -Name $HV_VM -ErrorAction SilentlyContinue) { Write-Error "中断: 同じ名前の VM がすでにある: $HV_VM" } else {
+   if (-not $HV_ISO -or -not $HV_VM -or -not $HV_DIR -or -not $HV_CPU -or -not $HV_MEM -or -not $HV_DISK) { Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $HV_ISO)) { Write-Error "中断: ISO が無い: $HV_ISO" } elseif (Get-VM -Name $HV_VM -ErrorAction SilentlyContinue) { Write-Error "中断: 同じ名前の VM がすでにある: $HV_VM" } else {
      New-VM -Name $HV_VM -Generation 2 -MemoryStartupBytes $HV_MEM -Path $HV_DIR -NewVHDPath "$HV_DIR\$HV_VM\$HV_VM.vhdx" -NewVHDSizeBytes $HV_DISK -SwitchName 'Default Switch' | Out-Null
      Set-VM -Name $HV_VM -ProcessorCount $HV_CPU -StaticMemory -AutomaticCheckpointsEnabled $false -CheckpointType Standard
      Set-VMFirmware -VMName $HV_VM -FirstBootDevice (Add-VMDvdDrive -VMName $HV_VM -Path $HV_ISO -Passthru)
@@ -5928,6 +6724,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. Linux を入れるときだけ、Secure Boot のテンプレートを Linux 用に変える。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の $HV_VM が空のまま。値を入れて貼り直す' }
    Set-VMFirmware -VMName $HV_VM -SecureBootTemplate MicrosoftUEFICertificateAuthority
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-VMFirmware -VMName $HV_VM | Format-List SecureBoot, SecureBootTemplate
@@ -5940,6 +6737,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. Windows 11 を入れるときだけ、仮想 TPM を付ける。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の $HV_VM が空のまま。値を入れて貼り直す' }
    Set-VMKeyProtector -VMName $HV_VM -NewLocalKeyProtector
    Enable-VMTPM -VMName $HV_VM
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -5950,9 +6748,33 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: VM を起動して OS を入れる
 
+- VM を起動し、OS をインストールする
+- 前提: [Hyper-V: VM を作る](#hyper-v-vm-を作る)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`HV_VM` は必ず値を入れる）。
+
+   ```powershell
+   $HV_VM = ''
+   ```
+
+   ```powershell
+
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
+   ```
+
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM を起動し、VM の画面を開く。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    Start-VM -Name $HV_VM
    vmconnect.exe localhost $HV_VM
    ```
@@ -5968,6 +6790,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. ISO を付けた DVD ドライブを、VM から外す。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    Get-VMDvdDrive -VMName $HV_VM | Remove-VMDvdDrive
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    "DVD ドライブの数: $(@(Get-VMDvdDrive -VMName $HV_VM).Count)"
@@ -5977,9 +6800,33 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: 動作を確かめる
 
+- 動いている VM の状態と、ゲストへの SSH を確かめる
+- 前提: [Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)を通してある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`HV_VM` は必ず値を入れる）。
+
+   ```powershell
+   $HV_VM = ''
+   ```
+
+   ```powershell
+
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
+   ```
+
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM の状態と、ゲストの IP を確かめる。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-VM -Name $HV_VM | Format-List Name, State, Uptime, Status
    Get-VMNetworkAdapter -VMName $HV_VM | Format-Table Name, SwitchName, MacAddress, IPAddresses
@@ -5991,9 +6838,9 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 1. Linux のゲストなら、この PC から SSH で入れるかを確かめる。
 
-   - この窓で `ssh <ゲストのユーザー>@<ゲストの IP>` を打つ（IP はこの項の手順 1 の `IPAddresses`）
+   - この項の手順 1 で開いた PowerShell で `ssh <ゲストのユーザー>@<ゲストの IP>` を打つ（IP はこの項の手順 3 の `IPAddresses`）
    - ゲストのプロンプトが出ればよい。`exit` で戻る
-   - ゲストの IP は固定ではない。つなぐ前に、この項の手順 1 で引き直す
+   - ゲストの IP は固定ではない。つなぐ前に、この項の手順 3 で引き直す
 
 #### Hyper-V: 使い方の基本
 
@@ -6012,16 +6859,37 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: チェックポイントとクローン
 
-- チェックポイントは、VM のその時点の状態。戻したり、そこから別の VM を作ったりできる
-- 管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#hyper-v-vm-を作る)の手順 1 の変数を使う
+- チェックポイントを取って戻し、その時点から別の VM を作る
+- 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 > [!WARNING]
-> **この項の手順 3 で作った VM があるあいだは、元の VM のチェックポイントを消さない**。消すと元のディスクが書き換わり、そこから作った VM がすべて起動しなくなる。
+> **この項の手順 5 で作った VM があるあいだは、元の VM のチェックポイントを消さない**。消すと元のディスクが書き換わり、そこから作った VM がすべて起動しなくなる。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`HV_VM` は必ず値を入れる）。
+
+   ```powershell
+   $HV_VM = ''
+   ```
+
+   ```powershell
+   $HV_DIR = "$env:USERPROFILE\Hyper-V"
+   $HV_CHECKPOINT = 'clean-install'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ HV_VM = $HV_VM; HV_DIR = $HV_DIR; HV_CHECKPOINT = $HV_CHECKPOINT } | Format-List
+   ```
+
+   - `HV_VM` と `HV_DIR` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ値にする
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を止めて、チェックポイントを取る。
 
    ```powershell
-   $HV_CHECKPOINT = 'clean-install'
+   if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    Stop-VM -Name $HV_VM
    Checkpoint-VM -Name $HV_VM -SnapshotName $HV_CHECKPOINT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6034,6 +6902,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. VM をチェックポイントの時点に戻すときは、VM を止めてから戻す。
 
    ```powershell
+   if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    Stop-VM -Name $HV_VM -TurnOff
    Restore-VMSnapshot -VMName $HV_VM -Name $HV_CHECKPOINT -Confirm:$false
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6047,6 +6916,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. チェックポイントの時点から、差分ディスクで別の VM を作る。
 
    ```powershell
+   if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $HV_CLONE = "$HV_VM-clone"
    if (Get-VM -Name $HV_CLONE -ErrorAction SilentlyContinue) { Write-Error "中断: 同じ名前の VM がすでにある: $HV_CLONE" } else {
      $parent = (Get-VMHardDiskDrive -VMSnapshot (Get-VMSnapshot -VMName $HV_VM -Name $HV_CHECKPOINT) | Select-Object -First 1).Path
@@ -6068,12 +6938,34 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: VM どうしだけがつながるスイッチを作る
 
-- Private のスイッチは、つないだ VM どうしだけが通信できる（この PC とも、インターネットともつながらない）
-- 管理者ではない Windows PowerShell（5.1）に貼る。IP は配られないので、ゲストの中で固定の IP を付ける
+- Private のスイッチを作り、止めてある VM に 2 枚目の NIC として付ける
+- 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通し、対象の VM を止めてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- このスイッチは VM どうしだけが通信でき、この PC ともインターネットともつながらない。ゲストの中で固定の IP を付ける
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`HV_VM` は必ず値を入れる）。
+
+   ```powershell
+   $HV_VM = ''
+   ```
+
+   ```powershell
+
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
+   ```
+
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. スイッチを作り、止めてある VM に 2 枚目の NIC として付ける。
 
    ```powershell
+   if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $HV_SWITCH = 'lab-lan'
    $switch = Get-VMSwitch -Name $HV_SWITCH -ErrorAction SilentlyContinue
    if ($switch -and $switch.SwitchType -ne 'Private') { Write-Error "中断: 同じ名前で、Private ではないスイッチがある: $HV_SWITCH" } else {
@@ -6091,8 +6983,16 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Hyper-V: VM を消す
 
+- VM の登録とディスクを消す
+- 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
 > [!CAUTION]
-> **この項の手順 1 は、VM のディスクごと消す（取り戻せない）**。[チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+> **この項の手順 2 は、VM のディスクごと消す（取り戻せない）**。[チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
 
 1. VM を止めて、登録とファイルを消す（取り戻せない）。
 
@@ -6124,20 +7024,16 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### VirtualBox
 
+- VirtualBox を入れ、使い捨ての VM と管理画面の起動を確かめる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある
+- 実行場所: この PC のデスクトップ。管理者の Windows PowerShell（5.1）をこの項の手順 1、管理者ではない窓を手順 5 で開く
+- Windows 11 の x64 が対象
+- Android の Windows App から VM に打つなら、[Android の RDP 設定](#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)を通す
+- Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](almalinux-setup.md#virtualbox-の-bootc-ゲスト)を通す
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
-> - **すべて Windows 11 の PC のデスクトップで行う**。SSH やリモート デスクトップのセッションからは行わない（この項の手順 3 の途中でネットワークがいったん切れ、この項の手順 7 は画面で行う）
-> - この項の手順 1 で開く **管理者の Windows PowerShell 5.1** に、手順 2〜4 と更新・ロールバックのブロックを貼る
-> - この項の手順 5 で開く **管理者ではない Windows PowerShell 5.1** に、手順 6・8 を貼る
-> - ログインするユーザーは Administrators の一員（VirtualBox は PC 全体に入り、ドライバーを入れる）
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - **AlmaLinux 10 の前提（EPEL・Secure Boot の MOK の鍵）と KVM の設定は要らない**。Windows のドライバーは、Microsoft の署名付きでインストーラに入っている
-
-- 上から順にコードブロックを貼る。変数は無い
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Android の Windows App から VM に打つなら、[Android の RDP 設定](#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)を通す
-- Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](almalinux-setup.md#virtualbox-の-bootc-ゲスト)を通す
+> - **SSH やリモート デスクトップのセッションからは行わない**。この項の手順 3 の途中でネットワークがいったん切れ、手順 7 は画面で行う
 
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
 
@@ -6192,7 +7088,6 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
-   - この項の手順 1 の管理者の窓は、[Windows 11 の更新](#virtualbox-windows-11-の更新)・[Windows 11 のロールバック](extra/virtualbox.md#windows-11-のロールバック)で使う。閉じてもよい
 
 1. 使い捨ての VM を画面無しで起動し、Hyper-V の上で動くかを見てから止めて消す。
 
@@ -6249,14 +7144,11 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VirtualBox: Windows 11 の VirtualBox を Android からリモート デスクトップで使う
 
-> [!IMPORTANT]
-> - **この項は Android の Windows App の画面で行う**。PC と VirtualBox の設定は変えない
-> - 前提: この PC がリモート デスクトップを受け付けていること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 2](#ネットワークとリモート)）と、[Windows 11 で使う](#virtualbox)で入れた VirtualBox
-
-- Windows App の既定の Unicode 送信では、VM に別のキーが入る（`1.,2` が `nczm`。[参考資料](reference/virtualbox.md)）
-- この項で、Windows App がキーの位置（スキャンコード）を送るようにする。Windows App のすべての接続にかかる
+- Android の Windows App から、VM にキーの位置（スキャンコード）を送るようにする
+- 前提: この PC で[ネットワークとリモート](#ネットワークとリモート)を通してリモート デスクトップを受け付け、[VirtualBox](#virtualbox)を入れてある。[VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、操作する VM を起動してある
+- 実行場所: Android の Windows App の画面。必要なときだけ、この PC のデスクトップで VirtualBox の画面を操作する
 - 日本語は Android の IME では打てなくなる。PC の IME は、物理キーボードの `` Alt+` `` で切り替える（Ctrl+Space は Android が受け取る）
-- 実測は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
+- [参考資料](reference/virtualbox.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
 
 1. Android の Windows App の設定で、「使用可能な場合にスキャンコード入力を使用する」をオンにする。
 
@@ -6286,16 +7178,19 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VirtualBox: Windows 11 で VM を作って使う
 
-> [!IMPORTANT]
-> - **管理者ではない Windows PowerShell（5.1）に貼る**。[Windows 11 で使う](#virtualbox)で VirtualBox を入れてから行う
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)。通していなければ Ctrl+V で貼る
-> - AlmaLinux 10 の x86_64 の ISO を使う。インストーラーの画面は人が操作する
-
-- 上から順に貼り、反転表示の「確認」から後ろを箇条書きで確かめる
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)。AlmaLinux 10 のホストでこの項は確かめていない
+- AlmaLinux 10 の x86_64 の ISO から VM を作って使う。インストーラーの画面は人が操作する
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
 - ふだんの操作は[使い方の基本](#virtualbox-使い方の基本)、状態を残す・複製するなら[スナップショットとクローン](#virtualbox-スナップショットとクローン)、要らなくなったら[VM を消す](#virtualbox-vm-を消す)
 
 ##### VirtualBox: VM を作る
+
+- この PC に、AlmaLinux 10 の VM を作る
+- 前提: [VirtualBox](#virtualbox)を通し、AlmaLinux 10 の x86_64 の ISO を用意してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
 
 1. 変数を設定する（`VB_ISO` は必ず値を入れる）。
 
@@ -6310,20 +7205,20 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    $VB_MEM_MB = 4096
    $VB_DISK_MB = 65536
    $VB_SSH_PORT = 2222
-   $VB_CLONE_PORT = 2223
    $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{ ISO = $VB_ISO; VM = $VB_VM; Base = $VB_BASE; CPU = $VB_CPU; MemoryMB = $VB_MEM_MB; DiskMB = $VB_DISK_MB; SshPort = $VB_SSH_PORT; ClonePort = $VB_CLONE_PORT } | Format-List
+   [pscustomobject]@{ ISO = $VB_ISO; VM = $VB_VM; Base = $VB_BASE; CPU = $VB_CPU; MemoryMB = $VB_MEM_MB; DiskMB = $VB_DISK_MB; SshPort = $VB_SSH_PORT } | Format-List
    ```
 
    - `VB_ISO` はインストール用の ISO のパス
    - `VB_BASE` の下に VM の名前のフォルダーを作る。VirtualBox 全体の既定の置き場所は変えない
-   - SSH のポートはこの PC で使っていない番号にする。クローン用は別の番号にする
-   - 新しい窓を開いたら、この手順を貼り直す
+   - SSH のポートはこの PC で使っていない番号にする
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を登録し、EFI・CPU・メモリ・画面・NAT を設定する。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CPU -or -not $VB_MEM_MB -or -not $VB_SSH_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    if (-not $VB_ISO -or -not (Test-Path -LiteralPath $VB_ISO -PathType Leaf)) { throw '中断: ISO のパスを入れて貼り直す' }
    if (Test-Path -LiteralPath "$VB_BASE\$VB_VM") { throw '中断: 同じ名前のフォルダーがある' }
    $registered = & $vbm list vms
@@ -6343,6 +7238,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. 可変のディスクと光学ドライブを作り、ISO を付ける。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_DISK_MB -or -not $VB_ISO -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm createmedium disk --filename "$VB_BASE\$VB_VM\$VB_VM.vdi" --size $VB_DISK_MB --format VDI --variant Standard
    if ($LASTEXITCODE -ne 0) { throw '中断: ディスクを作れなかった' }
    & $vbm storagectl $VB_VM --name SATA --add sata --controller IntelAhci --portcount 2
@@ -6361,9 +7257,33 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ##### VirtualBox: VM を起動して OS を入れる
 
+- 作った VM を起動し、AlmaLinux をインストールする
+- 前提: [VirtualBox: VM を作る](#virtualbox-vm-を作る)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VB_VM` は必ず値を入れる）。
+
+   ```powershell
+   $VB_VM = ''
+   ```
+
+   ```powershell
+   $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VB_VM = $VB_VM; VBoxManage = $vbm } | Format-List
+   ```
+
+   - `VB_VM` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM のウィンドウを開いて起動する。
 
    ```powershell
+   if (-not $VB_VM -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm startvm $VB_VM --type gui
    ```
 
@@ -6379,6 +7299,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. 停止した VM の光学ドライブから ISO を外す。
 
    ```powershell
+   if (-not $VB_VM -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm storageattach $VB_VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive
    if ($LASTEXITCODE -ne 0) { throw '中断: ISO を外せなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6389,9 +7310,37 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ##### VirtualBox: Windows のホストで VM の動作を確かめる
 
+- この PC で VM の起動と、ゲストへの SSH を確かめる
+- 前提: [VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VB_VM`・`VB_SSH_PORT` は必ず値を入れる）。
+
+   ```powershell
+   $VB_VM = ''
+   ```
+
+   ```powershell
+   $VB_SSH_PORT = ''
+   ```
+
+   ```powershell
+   $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VB_VM = $VB_VM; VB_SSH_PORT = $VB_SSH_PORT; VBoxManage = $vbm } | Format-List
+   ```
+
+   - `VB_VM` と `VB_SSH_PORT` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ値を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM を画面無しで起動し、状態と仮想化の載り方を確かめる。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_SSH_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm startvm $VB_VM --type headless
    if ($LASTEXITCODE -ne 0) { throw '中断: VM が起動しなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6404,7 +7353,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 1. この PC から SSH でゲストに入れるか確かめる。
 
-   - この窓で `ssh -p $VB_SSH_PORT <ゲストのユーザー>@127.0.0.1` を打つ
+   - この項の手順 1 で開いた PowerShell で `ssh -p $VB_SSH_PORT <ゲストのユーザー>@127.0.0.1` を打つ
    - 初回はホスト鍵の指紋をゲスト側と照合して承認する。ゲストのプロンプトが出ればよい。`exit` で戻る
    - つながらなければ起動を待ち、ゲストの SSH サーバーとファイアウォールを確かめる
 
@@ -6424,15 +7373,39 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VirtualBox: スナップショットとクローン
 
-> [!WARNING]
-> **この項の手順 3 の復元では、スナップショットより後の変更は消える**。
+- 停止した VM のスナップショットを取り、独立したディスクを持つ完全クローンを作る
+- 前提: [VirtualBox: Windows のホストで VM の動作を確かめる](#virtualbox-windows-のホストで-vm-の動作を確かめる)まで通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- Windows 11 の管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
-- スナップショットは停止した VM で取る。クローンはスナップショットの時点から独立したディスクを持つ完全クローンを作る
+> [!WARNING]
+> **この項の手順 5 の復元では、スナップショットより後の変更は消える**。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VB_VM` は必ず値を入れる）。
+
+   ```powershell
+   $VB_VM = ''
+   ```
+
+   ```powershell
+   $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
+   $VB_CLONE_PORT = 2223
+   $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VB_VM = $VB_VM; VB_BASE = $VB_BASE; VB_CLONE_PORT = $VB_CLONE_PORT; VBoxManage = $vbm } | Format-List
+   ```
+
+   - `VB_VM` と `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ値にする
+   - `VB_CLONE_PORT` は、この PC で使っていない番号にする。元の VM の SSH の転送ポートと違う番号にする
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. ゲストに電源ボタンを送り、停止を確かめる。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm controlvm $VB_VM acpipowerbutton
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^VMState='
@@ -6445,6 +7418,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. 停止した VM のスナップショットを取る。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm snapshot $VB_VM take clean-install
    if ($LASTEXITCODE -ne 0) { throw '中断: スナップショットを取れなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6456,6 +7430,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. 元に戻すときは、VM を停止してからスナップショットを復元する。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm snapshot $VB_VM restore clean-install
    if ($LASTEXITCODE -ne 0) { throw '中断: 復元できなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6467,6 +7442,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. スナップショットから完全クローンを作り、SSH の転送ポートを変える。
 
    ```powershell
+   if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $VB_CLONE = "$VB_VM-clone"
    if (Test-Path -LiteralPath "$VB_BASE\$VB_CLONE") { throw '中断: クローン先のフォルダーがある' }
    $registered = & $vbm list vms
@@ -6487,10 +7463,28 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VirtualBox: VM を消す
 
-> [!CAUTION]
-> **この項の手順 1 は、指定した VM のディスクとスナップショットも消す（取り戻せない）**。必要なデータを先に退避する。
+- 停止した VM の登録とディスクを消す
+- 前提: [VirtualBox](#virtualbox)を通し、消す VM を止めてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- Windows 11 の管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
+> [!CAUTION]
+> **この項の手順 3 は、指定した VM のディスクとスナップショットも消す（取り戻せない）**。必要なデータを先に退避する。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する。
+
+   ```powershell
+   $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
+   $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VB_BASE = $VB_BASE; VBoxManage = $vbm } | Format-List
+   ```
+
+   - `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ VM の置き場所にする
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. 停止した VM の登録とディスクを消す（取り戻せない。`VB_REMOVE` は必ず値を入れる）。
 
@@ -6499,7 +7493,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    ```
 
    ```powershell
-   if (-not $VB_REMOVE) { throw '中断: 消す VM の名前を VB_REMOVE に入れる' }
+   if (-not $VB_REMOVE -or -not $VB_BASE -or -not $vbm) { throw '中断: この項の手順 2 の変数と、消す VM の名前の VB_REMOVE を入れて貼り直す' }
    $info = & $vbm showvminfo $VB_REMOVE --machinereadable
    if ($LASTEXITCODE -ne 0) { throw '中断: VM が見つからない' }
    if ($info -notcontains 'VMState="poweroff"') { throw '中断: ゲストの操作で電源を切ってから貼り直す' }
@@ -6515,11 +7509,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VirtualBox: Windows 11 の更新
 
-- この項は、[Windows 11 で使う](#virtualbox)の手順 1 と同じ管理者の Windows PowerShell（5.1）に貼る
-- 7.2 の中の更新も、系列が変わる更新（7.3 など。まだ出ていない）も、winget の同じ ID（`Oracle.VirtualBox`）で上がる。AlmaLinux 10 と違い、名前に系列が入らない
-- VirtualBox マネージャーも、決まった間隔で新しい版を確かめる（環境設定の Update のタブ。マニュアル）。入れ替えは、この項の手順で行う
-- **更新の途中でも、ネットワークがいったん切れるはず**（ドライバーを入れ直すため）
+- VirtualBox を winget で上げる
+- 前提: [VirtualBox](#virtualbox)を通してある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- **更新の途中でも、ネットワークがいったん切れるはず**。SSH やリモート デスクトップのセッションからは行わない
 - VM の中の Guest Additions は、この項では上がらない（Atomic Desktop の VM は [VirtualBox の bootc ゲストの更新](almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)）
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
 
 1. VirtualBox の VM と VirtualBox マネージャーをすべて閉じる。
 
@@ -6537,7 +7535,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - プロセスは何も出なければよい
    - `VBoxSVC` だけが出たら、数秒待って貼り直す
    - `winget list` の版の列の右に、新しい版の列（英語の表示では `Available`）が出たら、新しい版がある
-   - 新しい版の列が無ければ、この項の手順 3・4 は飛ばす
+   - 新しい版の列が無ければ、この項の手順 4・5 は飛ばす
 
 1. 新しい版があるときだけ、winget で上げる。
 
@@ -6562,24 +7560,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### VMware Workstation Pro
 
+- VMware Workstation Pro を入れて VM を作る
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
-
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
-
-> [!IMPORTANT]
-> - **Windows 11（x64）の PC のデスクトップで行う**（インストーラーはネットワークのドライバーを入れる。SSH やリモート デスクトップのセッションからは確かめていない）
-> - [取得と確認](#vmware-workstation-pro-インストーラーを取得して確かめる)の手順 2 で開く **管理者の Windows PowerShell 5.1** に、インストールまで貼る
-> - [導入後の確認](#vmware-workstation-pro-入ったかを確かめる)から後ろは、**管理者ではない Windows PowerShell 5.1** に貼る
-> - ログインするユーザーは Administrators の一員（VMware Workstation は PC 全体に入り、ドライバーを入れる）
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)。通していなければ、ブロックは Ctrl+V で貼る
-> - **インストーラーの取得には Broadcom のアカウントが要る**（個人利用は無償。winget には無い）
-> - **Hyper-V や WSL 2 と併用するなら、先に Windows ハイパーバイザー プラットフォームを有効にする**（[Hyper-V](#hyper-v-hyper-v-を有効にして再起動する)の手順 2）
-> - 有効化後に再起動待ちなら、[インストール](#vmware-workstation-pro-インストールする)の手順 2 で再起動する
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 #### VMware Workstation Pro: インストーラーを取得して確かめる
+
+- Windows 用のインストーラーを取得し、署名と版を確かめる
+- 前提: Broadcom のアカウントを用意してある
+- 実行場所: この PC のデスクトップのブラウザと管理者の Windows PowerShell（5.1）。この項の手順 2 で開く
+- Windows 11 の x64 が対象
 
 1. ブラウザで Broadcom のサポート ポータルにログインし、VMware Workstation Pro の Windows 用のインストーラーを「ダウンロード」フォルダーに保存する。
 
@@ -6618,10 +7607,34 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VMware Workstation Pro: インストールする
 
+- 取得したインストーラーで VMware Workstation Pro を入れる
+- 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2 で Windows ハイパーバイザー プラットフォームを有効にしてある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+> [!IMPORTANT]
+> - **インストーラーはネットワークのドライバーを入れる**。SSH やリモート デスクトップのセッションからは確かめていない
+> - **この項の手順 4 は、再起動が必要なときだけ行う**。開いている作業を保存し、動いている VM を止めてから進む
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+
+1. 変数を設定する。
+
+   ```powershell
+   $VMW_SETUP = (Get-ChildItem -LiteralPath "$env:USERPROFILE\Downloads" -Filter 'VMware-Workstation-Full-*.exe' | Sort-Object LastWriteTime | Select-Object -Last 1).FullName
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   $VMW_SETUP
+   ```
+
+   - [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)の手順 3 と同じ、署名と版を確かめたインストーラーのパスにする
+   - 違うファイルが出たときと、何も出ないときは、`$VMW_SETUP = '<インストーラーのパス>'` を打って入れ直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. 使用許諾契約に同意して、画面無しでインストールする。
 
    ```powershell
-   if (-not $VMW_SETUP) { Write-Error '中断: インストーラーを取得して確かめるの手順 3 の $VMW_SETUP が空のまま。その手順から貼り直す' } else {
+   if (-not $VMW_SETUP) { Write-Error '中断: この項の手順 2 の $VMW_SETUP が空のまま。値を入れて貼り直す' } else {
      $p = Start-Process -FilePath $VMW_SETUP -ArgumentList '/s /v"/qn EULAS_AGREED=1 AUTOSOFTWAREUPDATE=0 DATACOLLECTION=0 REBOOT=ReallySuppress"' -Wait -PassThru
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      "ExitCode = $($p.ExitCode)"
@@ -6631,7 +7644,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - **注意**: `EULAS_AGREED=1` を付けて実行すると、VMware Workstation Pro の使用許諾契約に同意したことになる。契約を画面で読んでから進めるなら、このブロックは貼らずに、インストーラーをダブルクリックして画面で進める
    - `ExitCode = 0` なら入った。`ExitCode = 3010` は、入ったが再起動が要る
    - それ以外の値なら中断する（`%TEMP%` の `vminst.log` を見る）
-   - `ExitCode = 0` で、Windows の機能の再起動待ちも無いなら、この項の手順 2 は飛ばす
+   - `ExitCode = 0` で、Windows の機能の再起動待ちも無いなら、この項の手順 4 は飛ばす
 
 1. `ExitCode = 3010` のときと、Windows の機能（Hyper-V など）が再起動待ちのときだけ、再起動する。
 
@@ -6644,6 +7657,10 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - **次の手順は、起動してサインインしてから行う**
 
 #### VMware Workstation Pro: 入ったかを確かめる
+
+- 入った版と、コマンドの場所、仮想ネットワークを確かめる
+- 前提: [VMware Workstation Pro: インストールする](#vmware-workstation-pro-インストールする)を通し、必要な再起動を済ませてサインインしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -6666,6 +7683,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - `VMware Network Adapter VMnet1`（この PC と VM だけ）と `VMnet8`（NAT）の行が出る
 
 #### VMware Workstation Pro: VM を作る
+
+- この PC に、AlmaLinux などの VM を作る
+- 前提: [VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)を通し、入れる OS のインストール用の ISO を用意してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Windows 11 を入れる VM（仮想 TPM が要る）は、この項では扱わない
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
 
 1. 変数を設定する（`VMW_ISO` は必ず値を入れる）。
 
@@ -6690,12 +7716,12 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - `$VMW_VM` は VM の名前、`$VMW_BASE` は VM を置くフォルダー（その下に VM の名前のフォルダーができる）
    - `$VMW_GUEST` は入れる OS の種類（既定は AlmaLinux）。本書は、Windows 11 を入れる VM（仮想 TPM が要る）を扱わない
    - `VMW_DIR` が空なら、VMware Workstation が入っていない。[インストールする](#vmware-workstation-pro-インストールする)から
-   - 新しい窓を開いたら、この手順を貼り直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM の設定ファイルとディスクを作る。
 
    ```powershell
-   if (-not $VMW_ISO) { Write-Error '中断: この項の手順 1 の $VMW_ISO が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_ISO)) { Write-Error "中断: ISO が無い: $VMW_ISO" } elseif (Test-Path -LiteralPath "$VMW_BASE\$VMW_VM") { Write-Error "中断: 同じ名前のフォルダーがすでにある: $VMW_BASE\$VMW_VM" } else {
+   if (-not $VMW_ISO -or -not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_GUEST -or -not $VMW_DISK) { Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_ISO)) { Write-Error "中断: ISO が無い: $VMW_ISO" } elseif (Test-Path -LiteralPath "$VMW_BASE\$VMW_VM") { Write-Error "中断: 同じ名前のフォルダーがすでにある: $VMW_BASE\$VMW_VM" } else {
      & "$VMW_DIR\vmcli.exe" VM Create -n $VMW_VM -d "$VMW_BASE\$VMW_VM" -c $VMW_GUEST
      Remove-Item -LiteralPath "$VMW_BASE\$VMW_VM\$VMW_VM.vmdk"
      & "$VMW_DIR\vmcli.exe" $VMW_VMX Disk Create -f "$VMW_BASE\$VMW_VM\$VMW_VM.vmdk" -a lsilogic -s $VMW_DISK -t 0
@@ -6709,6 +7735,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. ファームウェア・CPU・メモリ・ディスク・ISO・NIC を設定する。
 
    ```powershell
+   if (-not $VMW_ISO -or -not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_CPU -or -not $VMW_MEM_MB) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $vmcli = "$VMW_DIR\vmcli.exe"
    & $vmcli $VMW_VMX ConfigParams SetEntry displayName $VMW_VM
    & $vmcli $VMW_VMX ConfigParams SetEntry firmware efi
@@ -6734,9 +7761,36 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VMware Workstation Pro: VM を起動して OS を入れる
 
+- 作った VM を起動し、OS をインストールする
+- 前提: [VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
+
+   ```powershell
+   $VMW_VM = ''
+   ```
+
+   ```powershell
+   $VMW_BASE = "$env:USERPROFILE\VMware"
+   $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
+   $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR } | Format-List
+   ```
+
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM を起動する。
 
    ```powershell
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws start $VMW_VMX
    ```
 
@@ -6751,6 +7805,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. ISO を外す。
 
    ```powershell
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmcli.exe" $VMW_VMX Disk SetPresent sata0:0 0
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    "sata0:0.present の行の数: $(@(Select-String -LiteralPath $VMW_VMX -Pattern '^sata0:0\.present').Count)"
@@ -6760,9 +7815,36 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VMware Workstation Pro: 動作を確かめる
 
+- この PC で VM の起動と、ゲストの IP・SSH を確かめる
+- 前提: [VMware Workstation Pro: VM を起動して OS を入れる](#vmware-workstation-pro-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
+
+   ```powershell
+   $VMW_VM = ''
+   ```
+
+   ```powershell
+   $VMW_BASE = "$env:USERPROFILE\VMware"
+   $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
+   $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR } | Format-List
+   ```
+
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
 1. VM を画面無しで起動し、Hyper-V の上で動いているかと、ゲストの IP を確かめる。
 
    ```powershell
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws start $VMW_VMX nogui
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    & "$VMW_DIR\vmrun.exe" -T ws list
@@ -6777,7 +7859,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 1. Linux のゲストなら、この PC から SSH で入れるかを確かめる。
 
-   - この窓で `ssh <ゲストのユーザー>@<ゲストの IP>` を打つ（IP はこの項の手順 1 の最後の行）
+   - この項の手順 1 で開いた PowerShell で `ssh <ゲストのユーザー>@<ゲストの IP>` を打つ（IP はこの項の手順 3 の最後の行）
    - ゲストのプロンプトが出ればよい。`exit` で戻る
 
 #### VMware Workstation Pro: 使い方の基本
@@ -6799,16 +7881,40 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VMware Workstation Pro: スナップショットとクローン
 
-- スナップショットは、VM のその時点の状態。戻したり、そこから別の VM（リンククローン）を作ったりできる
-- 管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 の変数を使う
+- スナップショットを取って戻し、その時点から別の VM（リンククローン）を作る
+- 前提: [VMware Workstation Pro: 動作を確かめる](#vmware-workstation-pro-動作を確かめる)まで通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 > [!WARNING]
-> **この項の手順 3 で作った VM があるあいだは、元の VM とそのスナップショットを消さない**。リンククローンは元の VM のディスクを読むので、消すと起動しなくなる。
+> **この項の手順 5 で作った VM があるあいだは、元の VM とそのスナップショットを消さない**。リンククローンは元の VM のディスクを読むので、消すと起動しなくなる。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
+
+   ```powershell
+   $VMW_VM = ''
+   ```
+
+   ```powershell
+   $VMW_BASE = "$env:USERPROFILE\VMware"
+   $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
+   $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
+   $VMW_SNAPSHOT = 'clean-install'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR; VMW_SNAPSHOT = $VMW_SNAPSHOT } | Format-List
+   ```
+
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を止めて、スナップショットを取る。
 
    ```powershell
-   $VMW_SNAPSHOT = 'clean-install'
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_VMX soft
    & "$VMW_DIR\vmrun.exe" -T ws snapshot $VMW_VMX $VMW_SNAPSHOT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6821,6 +7927,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. VM をスナップショットの時点に戻すときは、VM を止めてから戻す。
 
    ```powershell
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_VMX hard
    & "$VMW_DIR\vmrun.exe" -T ws revertToSnapshot $VMW_VMX $VMW_SNAPSHOT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6833,6 +7940,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 1. スナップショットの時点から、リンククローンで別の VM を作る。
 
    ```powershell
+   if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $VMW_CLONE = "$VMW_VM-clone"
    if (Test-Path -LiteralPath "$VMW_BASE\$VMW_CLONE") { Write-Error "中断: 同じ名前のフォルダーがすでにある: $VMW_BASE\$VMW_CLONE" } else {
      & "$VMW_DIR\vmrun.exe" -T ws clone $VMW_VMX "$VMW_BASE\$VMW_CLONE\$VMW_CLONE.vmx" linked "-snapshot=$VMW_SNAPSHOT" "-cloneName=$VMW_CLONE"
@@ -6849,10 +7957,27 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### VMware Workstation Pro: VM を消す
 
-> [!CAUTION]
-> **この項の手順 1 は、VM のディスクごと消す（取り戻せない）**。[スナップショットとクローン](#vmware-workstation-pro-スナップショットとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+- VM の登録とディスクを消す
+- 前提: [VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- 管理者ではない Windows PowerShell（5.1）に貼る。[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 の変数（`$VMW_DIR`）を使う
+> [!CAUTION]
+> **この項の手順 3 は、VM のディスクごと消す（取り戻せない）**。[スナップショットとクローン](#vmware-workstation-pro-スナップショットとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する。
+
+   ```powershell
+   $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ VMW_DIR = $VMW_DIR } | Format-List
+   ```
+
+   - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を止めて、登録とファイルを消す（取り戻せない）。
 
@@ -6861,7 +7986,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    ```
 
    ```powershell
-   if (-not $VMW_REMOVE) { Write-Error '中断: $VMW_REMOVE が空のまま。消す VM の .vmx のパスを入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_REMOVE)) { Write-Error "中断: .vmx が無い: $VMW_REMOVE" } else {
+   if (-not $VMW_DIR) { Write-Error '中断: この項の手順 2 の $VMW_DIR が空のまま。インストールを確かめ直す' } elseif (-not $VMW_REMOVE) { Write-Error '中断: $VMW_REMOVE が空のまま。消す VM の .vmx のパスを入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_REMOVE)) { Write-Error "中断: .vmx が無い: $VMW_REMOVE" } else {
      & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_REMOVE hard
      & "$VMW_DIR\vmrun.exe" -T ws deleteVM $VMW_REMOVE
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -6877,12 +8002,10 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Windows Sandbox で配布物を試す
 
-- 実施手順を通した後に、必要なときだけ行う
-- **前提**: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）
-- UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意する
-- Windows の VM の中で使う場合は、入れ子の仮想化も有効にしておく
-- この項の手順 2〜5 は管理者の Windows PowerShell（5.1）に貼る。手順 6〜8 は、通常のデスクトップから行う
-- **再起動**: この項の手順 4 は、状態の確認または有効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
+- Windows Sandbox の一時的な Windows で、配布物の起動と必要な操作を試す
+- 前提: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）。UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意してある。Windows の VM の中では、入れ子の仮想化も有効にしてある
+- 実行場所: この PC のデスクトップ。状態確認・有効化・再起動は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）。起動・試験・窓を閉じた後の確認は、通常のデスクトップと Sandbox の画面
+- **この項の手順 4 は、再起動が必要な場合だけ行う**。先に開いているファイルを保存し、実行中の作業を終える
 - [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
 > [!CAUTION]
@@ -6979,20 +8102,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Samba クライアント
 
+- Samba の共有をドライブ文字に割り当て、サインインのたびにつなぎ直す
+- 前提: サーバーで [Samba サーバー](almalinux-setup.md#samba-サーバー)を通してある。外出先では、[WireGuard: Windows 11 でトンネルを確かめる](#wireguard-windows-11-でトンネルを確かめる)に従ってトンネルを張り、サーバーにつながる状態にしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
+- パスワードは Windows の資格情報マネージャーに置く
+- Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
 
 > [!IMPORTANT]
-> - **Windows の手順は、この項の手順 1 で開く管理者ではない Windows PowerShell 5.1 に貼る**。更新・ロールバックも同じ窓を使う
-> - 管理者の窓で割り当てたドライブは、エクスプローラーに出ない
-> - 前提: サーバーで [Samba サーバー](almalinux-setup.md#samba-サーバー) の手順を終えていること
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - **この項の手順 4 には対話入力がある**（共有のパスワード）。入力し終えてから手順 5 を貼る
-> - **この項の手順 7 はサーバーのシェルで、手順 8 はこの PC で行う**（サインアウトしてサインインし直す）
-
-- 上から順にコードブロックを貼る。Windows の手順は、この項の手順 2 で変数を設定した PowerShell に、この項の手順 7 はサーバーのシェルに貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 共有をドライブ文字（既定は `Z:`）に割り当て、サインインのたびにつなぎ直す。パスワードは、Windows の資格情報マネージャーに置く
-- Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
+> **管理者の窓で割り当てたドライブは、エクスプローラーに出ない**。管理者ではない窓で行う。
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -7122,22 +8240,46 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Samba クライアント: Windows 11 の更新
 
-- SMB のクライアントは Windows に入っているもので、Windows Update で上がる。この項で上げるものは無い
-- Samba のパスワードを変えたとき（Samba サーバー では `sudo smbpasswd <SMB_USER>`）だけ、この項の手順を行う
-- この項の手順 1 は、[Windows 11 で使う](#samba-クライアント)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
+- Samba サーバーで変えたパスワードを、Windows の資格情報マネージャーにも入れ直す
+- 前提: [Samba クライアント](#samba-クライアント)を通し、サーバーで Samba のパスワードを変えてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 4 はこの PC のデスクトップ
+- SMB のクライアントは Windows Update で上がる。この項で上げるものは無い
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
+1. 変数を設定する（`SERVER`・`SMB_USER` は必ず値を入れる）。
+
+   ```powershell
+   $SERVER = ''
+   ```
+
+   ```powershell
+   $SMB_USER = ''
+   ```
+
+   ```powershell
+
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [pscustomobject]@{ SERVER = $SERVER; SMB_USER = $SMB_USER } | Format-List
+   ```
+
+   - `SERVER` と `SMB_USER` は、[Samba クライアント](#samba-クライアント)の手順 2 と同じ値を入れる
+   - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. Samba のパスワードを変えたときだけ、資格情報を登録し直す。
 
    ```powershell
    if (-not $SERVER -or -not $SMB_USER) {
-     Write-Error '中断: Windows 11 で使うの手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
+     Write-Error '中断: この項の手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
    } else {
      cmdkey "/add:$SERVER" "/user:$SMB_USER" /pass
    }
    ```
 
    - サーバーで変えた後の新しいパスワードを入れる
-   - パスワードを入力し終えてから、この項の手順 2 を行う
+   - パスワードを入力し終えてから、この項の手順 4 を行う
 
 1. サインアウトしてサインインし直し、ドライブがパスワード無しで開くことを確かめる。
 
@@ -7147,20 +8289,16 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Syncthing
 
+- この PC に Syncthing を入れ、サインイン中の自動起動と GUI を設定する
+- 前提: [ネットワークとリモート](#ネットワークとリモート)を通し、相手とつながる LAN の接続をプライベートにしてある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。手順 12 は LAN の別の端末のブラウザ、手順 13 はこの PC のデスクトップ
+- フォルダー追加は[同期フォルダとデバイスを追加する](almalinux-setup.md#syncthing-同期フォルダとデバイスを追加する)を通す
+- この PC は、[AlmaLinux 10 の Syncthing](almalinux-setup.md#syncthing)の相手にもなる
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
 
 > [!IMPORTANT]
-> - **Administrators のユーザーが Windows で行う**。この項の手順 1 で開く **管理者の Windows PowerShell 5.1** に、以後と停止・更新・ロールバックのブロックを貼る
-> - フォルダー追加は[同期フォルダとデバイスを追加する](almalinux-setup.md#syncthing-同期フォルダとデバイスを追加する)に従い、**ホーム全体は同期しない**
-> - 前提: [Windows 11 の初期設定の「貼り付けの設定」の手順 1〜4](#貼り付けの設定)（GitHub のコピーボタンでコピーしたブロックを、conhost の窓に右クリックで貼ると、行が逆順になるのを防ぐ貼り付けの設定）。通していなければ、ブロックは Ctrl+V で貼る
-> - 前提: 相手とつながる LAN の接続がプライベートであること（[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](#ネットワークとリモート)）。この項の手順 7 で確かめる
-> - Syncthing そのものは、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この項の手順 8 のタスク）
-> - **この項の手順 5 には対話入力がある**（GUI のパスワード）。入力し終えてから手順 6 を貼る
-> - **この項の手順 12 は LAN の別の端末のブラウザで、手順 13 はこの PC で行う**（サインアウトしてサインインし直す）
-
-- 上から順にコードブロックを貼る。この項の手順 2 で変数を設定した PowerShell に貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- この項の PC は、[実施手順](almalinux-setup.md#syncthing)の AlmaLinux 10 の Syncthing の相手にもなる
+> - **ホーム全体は同期しない**。同期するフォルダーだけを追加する
+> - Syncthing は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この項の手順 8 のタスク）
 
 1. Windows で、管理者の Windows PowerShell（5.1）を開く。
 
@@ -7253,13 +8391,13 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $ST_GUI_USER) {
-     Write-Error '手順 2 の $ST_GUI_USER が空'
+     Write-Error 'この項の手順 2 の $ST_GUI_USER が空'
    } elseif (-not $ST_GUI_PASS -or $ST_GUI_PASS.Length -eq 0) {
      Write-Error '手順 5 のパスワードが空'
    } else {
      $p = ([Net.NetworkCredential]::new('', $ST_GUI_PASS)).Password
      if ($p -cnotmatch '^[\x20-\x7e]+$') {
-       Write-Error 'パスワードに ASCII でない文字がある（手順 5 からやり直す）'
+       Write-Error 'パスワードに ASCII でない文字がある（この項の手順 5 からやり直す）'
      } else {
        $p | & $exe generate "--gui-user=$ST_GUI_USER" --gui-password=-
        if ($LASTEXITCODE -eq 0) { & $exe device-id }
@@ -7281,7 +8419,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    $g = 'Syncthing (setup-notes)'
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $LAN_IF) {
-     Write-Error '手順 2 の $LAN_IF が空'
+     Write-Error 'この項の手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
      Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の「ネットワークとリモート」の手順 1 でプライベートにする）'
    } else {
@@ -7356,7 +8494,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    $exe = "$env:LOCALAPPDATA\Programs\Syncthing\syncthing.exe"
    $proc = @{ Label = 'Process'; Expression = { (Get-Process -Id $_.OwningProcess).ProcessName } }
    if (-not $LAN_IF) {
-     Write-Error '手順 2 の $LAN_IF が空'
+     Write-Error 'この項の手順 2 の $LAN_IF が空'
    } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetTCPConnection -State Listen -LocalPort 8384, 22000 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, $proc
@@ -7376,7 +8514,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 1. LAN の別の端末のブラウザで GUI に入り、デバイス ID を確かめる。
 
-   - この項の手順 11 の URL を開き、自己署名の証明書の警告を受け入れ、手順 2 のログイン名と手順 5 のパスワードで入る
+   - この項の手順 11 の URL を開き、自己署名の証明書の警告を受け入れ、この項の手順 2 のログイン名とこの項の手順 5 のパスワードで入る
    - 最初に、利用状況の報告（Usage Reporting）を許可するかを聞かれる。どちらでもよい
    - Actions → Show ID のデバイス ID が、この項の手順 11 の `device-id` と同じであることを確かめる
    - 新規導入では同期するフォルダは 1 つも無い。設定を残した再導入では、前のフォルダが並んでよい
@@ -7401,8 +8539,14 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Syncthing: Windows 11 で止める・もう一度始める
 
-- タスク スケジューラでタスクを終了しても（`Stop-ScheduledTask` も）、親のプロセス（モニター）しか止まらず、本体は動き続ける（公式の説明）。止めるのはこの項の手順 1
-- 自動の更新の後の Syncthing は、タスクの外で動く（[Windows 11 の更新](#syncthing-windows-11-の更新)）。動いているかは、タスクの状態ではなくプロセスで見る
+- Syncthing を止め、必要なときにもう一度始める
+- 前提: [Syncthing](#syncthing)を通してある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 動いているかは、タスクの状態ではなくプロセスで見る。止めるのはこの項の手順 2
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
 
 1. Syncthing を止める。
 
@@ -7439,10 +8583,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 #### Syncthing: Windows 11 の更新
 
-- Syncthing は稼働中、既定で 12 時間ごとに新しい版を確かめ、あれば自分で入れ替えて起動し直す（入れ替える前に、リリースの署名を確かめる）。サインアウト中・スリープ中・通信できない間は更新されない
-- 入れ替えは同じ場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）で行うので、タスクと受信の規則はそのまま使える。古い実行ファイルは、同じフォルダーに `syncthing.exe.old` として残る
+- 自動更新を待たずに、Syncthing を上げる
+- 前提: [Syncthing](#syncthing)を通し、Syncthing が動いている
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- Syncthing は稼働中、既定で 12 時間ごとに新しい版を確かめ、あれば自分で入れ替えて起動し直す。サインアウト中・スリープ中・通信できない間は更新されない
 - **自動で入れ替えた後の Syncthing は、タスクの外で動く**（タスクは `Ready` になる）。次のサインインからは、またタスクで起動する
-- 待たずに上げるときは、この項の手順を貼る
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
 
 1. 今の版と、新しい版があるかを確かめる。
 
@@ -7454,7 +8603,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    ```
 
    - 新しい版があれば、`Upgrade available` の行に今の版（`current`）と新しい版（`latest`）が出る
-   - 新しい版が無ければ、`no upgrade available (current "v2.1.5" >= latest "v2.1.5")` のエラーが出る。そのときは、この項の手順 2 は飛ばす
+   - 新しい版が無ければ、`no upgrade available (current "v2.1.5" >= latest "v2.1.5")` のエラーが出る。そのときは、この項の手順 3 は飛ばす
 
 1. 新しい版があるときだけ、今すぐ上げる。
 
@@ -7476,7 +8625,6 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 ## 更新
 
 - OS・Store の更新は[Windows Update](#windows-update)（管理者）・[Microsoft Store の更新](#microsoft-store-の更新)（通常）を通す。再起動は手動で行う
-- この項は通常の Windows PowerShell 5.1 に貼る。[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)だけは管理者の窓に貼る
 - scoop・winget で入れたアプリは、入れた方法で上げる
   - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6 で修正版を確かめ、手順 7 で上げる
   - 上げても、git の設定（`~/.gitconfig`）と gh のログイン（資格情報マネージャーと `%APPDATA%\GitHub CLI`）は変わらない
@@ -7488,7 +8636,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
   - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 1・5〜7 で、設定を残して `C:\Program Files\WezTerm` に上書きする
   - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
 - フォントは[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)に従い、この文書の版と sha256 を確かめて直してから入れ直す
-- 共通の bash 設定は、WezTerm のタブ（Git Bash）で[AlmaLinux 10 の初期設定の更新](almalinux-setup.md#更新)の手順 1 を貼って上げる
+- 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)を通して上げる
 - 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる
   - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
 - SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 1 を管理者の窓に貼り直す
@@ -7501,6 +8649,15 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### scoop・winget・WSL を上げる
 
+- scoop・winget のアプリと WSL・AlmaLinux 10 を上げる
+- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)を通してある。zoxide を上げるときは、[シェルのツールを入れる](#シェルのツールを入れる)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。zoxide のリリースはブラウザ、上げた後の確認は WezTerm の Git Bash のタブ
+- PSWindowsUpdate は、[Windows Update](#windows-update)を通してこの文書で入れたときだけ上げる
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
 1. scoop とバケットを上げ、古くなったものを確かめる。
 
    ```powershell
@@ -7511,7 +8668,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    - `scoop update` は `Scoop was updated successfully!` を出す
    - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [Git for Windows](#git-for-windows)で Git for Windows を入れる
-   - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この項の手順 2 は飛ばす
+   - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この項の手順 3 は飛ばす
 
 1. 古いものがあるときだけ、scoop で入れたものを上げる。
 
@@ -7568,7 +8725,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    - `https://github.com/ajeetdsouza/zoxide/releases` を開く
    - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
-   - 無ければ、この項の手順 7 は飛ばす（0.9.9 のまま使う）
+   - 無ければ、この項の手順 8 は飛ばす（0.9.9 のまま使う）
    - **次の手順は、管理者ではない Windows PowerShell（5.1）に貼る**
 
 1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
@@ -7578,7 +8735,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
      scoop update
      $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、「scoop・winget・WSL を上げる」の手順 6 から"; return }
+     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この項の手順 7 から"; return }
      scoop unhold zoxide
      scoop update zoxide --force
      zoxide --version
@@ -7594,13 +8751,21 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### HackGen Console NF を上げる
 
+- HackGen Console NF の新しい版を確かめ、必要なときに入れ直す
+- 前提: [HackGen Console NF](#hackgen-console-nf)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。削除・再導入・確認は、リンク先の項に指定した窓で行う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+
 1. HackGen の新しい版が出ているかを確かめる。
 
    ```powershell
    (Invoke-RestMethod -Uri https://api.github.com/repos/yuru7/HackGen/releases/latest).tag_name
    ```
 
-   - `v2.10.0` なら、新しい版は無い。この項の手順 2 は行わない
+   - `v2.10.0` なら、新しい版は無い。この項の手順 3 は行わない
    - 違う版なら、[HackGen Console NF](#hackgen-console-nf)の手順 2 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
 
 1. 新しい版にするときだけ、今の版を外してから入れ直す。
@@ -7612,10 +8777,19 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 ### Git for Windows・Firefox・WezTerm を上げる
 
+- Git for Windows・Firefox・WezTerm を、設定を残して上げる
+- 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
+- Claude Code の Remote Control のタスクを動かしているときは、この項で止めてから、更新後に始め直す
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+
 1. Remote Control のタスクを動かしているときだけ、先にタスクを止める。
 
    - [Claude Code の Remote Control の止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 を行う
-   - タスクの Claude Code と WezTerm（中のシェルは Git Bash）は、Git for Windows と WezTerm を上げる間は止めておく。上げた後に、この項の手順 7 で始め直す
+   - タスクの Claude Code と WezTerm（中のシェルは Git Bash）は、Git for Windows と WezTerm を上げる間は止めておく。上げた後に、この項の手順 8 で始め直す
 
 1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。
 
@@ -7628,7 +8802,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
    - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
    - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
    - **注意**: Git Bash・WezTerm のタブ（自分用の設定では Git Bash）や、Git の bash を使う SSH のセッション・Claude Code が動いていると、インストーラは入れ替えずに終わるはず
-   - 上げた後は、Git Bash を開き直し、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 6 を貼り直す（`pull.ff` が `only` なら同じ項の手順 7 も）
+   - 上げた後は、WezTerm の新しい Git Bash のタブを開き、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 6 を貼り直す（`pull.ff` が `only` なら同じ項の手順 7 も）
 
 1. Firefox の今の版と、winget に新しい版があるかを確かめる。
 
@@ -7640,7 +8814,7 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
    - 1 行目が今の版
    - winget に新しい版があれば、`Mozilla.Firefox.ja` の行に今の版と新しい版が並ぶ
-   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この項の手順 4 は飛ばす
+   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この項の手順 5 は飛ばす
 
 1. Firefox の新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
 
@@ -7666,10 +8840,10 @@ Python 3.9 以上が必要。Python が無ければ、先に `scoop install pyth
 
 1. [WezTerm](#wezterm)の手順 3 のブロックを貼る。
 
-   - 最後に出る `wezterm <版>` が、この項の手順 5 の版より新しければ上がった
+   - 最後に出る `wezterm <版>` が、この項の手順 6 の版より新しければ上がった
    - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）
 
-1. この項の手順 1 でタスクを止めたときだけ、タスクを始め直す。
+1. この項の手順 2 でタスクを止めたときだけ、タスクを始め直す。
 
    - [Claude Code の Remote Control の止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 2 を行う
 
