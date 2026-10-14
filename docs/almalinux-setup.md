@@ -3,19 +3,17 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
-> - 前提: AlmaLinux 10 Workstation のインストール直後とインターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入)を使う
-> - GitHub のアカウントを用意する
+> - 前提: AlmaLinux 10 Workstation を入れた PC と、インターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入)を使う
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - [WezTerm](#wezterm)を起動し直した後は、そのタブに貼る
-> - **GNOME で日本語入力を使う PC は、[Homebrew](#homebrew)の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
 
-- 必要な項を上から順に通す。省略する場合は[省略できない初期設定](reference/almalinux-setup.md#省略できない初期設定)を先に確認する
+- どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
 - 対話・GUI・再起動は各手順の案内に従い、プロンプトに戻ってから次へ進む
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 新しい端末では、使う項の変数の手順を貼り直す。[システムの設定](#システムの設定)の変数は[シェルのツール](#シェルのツール)の手順 2 より後では使わない
+- 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 は[Windows の初期設定](windows-setup.md)から指定された項だけを使う
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップ](ai-agents.md)で入れる
-- SSH・自動更新・電源・各ツールの任意設定は後ろの節。以後は[更新](#更新)を通す
+- 入れたものを上げるときは、[更新](#更新)の案内に従う
 
 > [!WARNING]
 > - [ログインと sudo](#ログインと-sudo)の手順 3 の後は、**このユーザーのプログラムがパスワード無しで root 権限を使える**。人が触れる場所の PC や信用できないプログラムを使うユーザーでは行わない
@@ -26,6 +24,10 @@
 - インストール直後の sudo・更新・SSH・ログの設定、パッケージの入手元（EPEL・RPM Fusion・Flathub）、OS の自動更新・Secure Boot の署名鍵・ユーザーサービスの常駐
 
 ### ログインと sudo
+
+- インストールのときに作った管理者のユーザーで GNOME にログインし、sudo をパスワード無しで使えるようにする
+- 前提: 無し
+- 実行場所: この PC の画面（GNOME のログイン画面）。この項の手順 3 は、この項の手順 2 で開く端末（bash）
 
 1. インストールのときに作ったユーザーで GNOME にログインし、「ようこそ」の窓を閉じる。
 
@@ -62,6 +64,10 @@
 ---
 
 ### OS とファームウェアの更新
+
+- OS のパッケージを最新にし、ファームウェアの更新があれば入れて、要るときだけ再起動する
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 
 1. OS を最新にする。
 
@@ -120,6 +126,10 @@
 
 ### システムの設定
 
+- PC の名前・SSH の待ち受け・ログ（journal）の保存・kdump・コマンドが無いときの案内を設定する
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+
 1. 変数を設定する（PC の名前を変えるなら、`HOST_NAME` に値を入れる）。
 
    ```bash
@@ -127,17 +137,14 @@
    ```
 
    ```bash
-   XKB_LAYOUT=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: \([a-z][a-z0-9_]*\).*/\1/p')   # キーボードの配列（自動）。JIS は jp、US は us。<XKB_LAYOUT>
-   DASH_FAVORITES="['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop']"   # Dash に並べるアプリ（左から）
    printf '\n\033[7m 確認 \033[0m\n'
-   for v in USER HOST_NAME XKB_LAYOUT DASH_FAVORITES; do
-     printf '%-14s = %s\n' "$v" "${!v}"
+   for v in USER HOST_NAME; do
+     printf '%-9s = %s\n' "$v" "${!v}"
    done
    ```
 
    - 最後に値を読み戻して確かめる
    - `HOST_NAME` を変えないなら空のままにして、この項の手順 2 を飛ばす
-   - `XKB_LAYOUT` が空か配列と違えば、`XKB_LAYOUT=jp`（JIS）か `XKB_LAYOUT=us`（US）を貼ってから進む
    - `USER` が `root` になっているなら、ここで止めて、自分のユーザーの端末で貼り直す
    - **新しい端末を開いたら**、この項の手順 1 を貼り直してから先へ進む
 
@@ -246,6 +253,10 @@
 
 ### EPEL と RPM Fusion
 
+- EPEL と RPM Fusion（free）のリポジトリを、署名鍵を確かめてから入れる
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+
 1. EPEL が無ければ入れ、有効になったか確かめる。
 
    ```bash
@@ -312,6 +323,10 @@
 ---
 
 ### Flatpak と Flathub
+
+- flatpak を確かめ、署名鍵を確かめてから Flathub を system に登録し、確認用のアプリ（Flatseal）で動きを確かめる
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 
 1. flatpak を確かめ（無ければ入れ）、登録されているリモートを見る。
 
@@ -401,6 +416,8 @@
 ### dnf-automatic で自動で更新する
 
 - BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で再起動する）
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 - GNOME Software の自動の更新（裏でダウンロードし、再起動のときに入れる）は、この項の手順 3 で止める（二重にしない）
 - 戻すときは、この項の手順 5・6
 
@@ -475,20 +492,20 @@
 
 ### Secure Boot の署名鍵
 
+- Secure Boot が有効な PC（または VM）で、自分でビルドしたカーネルモジュールを読み込めるように、署名用の鍵を作って MOK に登録する
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある（bootc のシステムでは、`sudo` できるユーザーでログインしてある）
+- 実行場所: Secure Boot を使う PC（または VM）の、自分のユーザーの端末（bash）か SSH
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[ロールバックと注意点](extra/secure-boot-mok.md)
-
-> [!IMPORTANT]
-> - **Secure Boot が有効な PC（または VM）で、カーネルモジュールをビルドする手順書より先に通す**。手順 3 で Secure Boot が無効と分かったら、この文書はそこで終わり
-> - **自分のシェルで実行する**（`sudo` できるユーザー）。bootc のシステム（AlmaLinux Atomic Desktop など）でも同じ手順になる
-> - **手順 4 で一時パスワードを 2 回聞かれ、手順 5 で再起動する**。答えてから次の手順を貼る
-> - **手順 5 を SSH で貼る前に、VM のウィンドウを開いておく**（再起動直後の MokManager を操作するため）
-> - **手順 6 は、起動の途中の MokManager の画面で行う**（最初の画面は 10 秒で消える。VM なら VM のウィンドウで操作する）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- **カーネルモジュールをビルドする項より先に通す**。この項の手順 3 で Secure Boot が無効と分かったら、この項はそこで終わり
+- bootc のシステム（AlmaLinux Atomic Desktop など）でも同じ手順になる
+- **この項の手順 4 で一時パスワードを 2 回聞かれ、この項の手順 5 で再起動する**。答えてから次の手順を貼る
 - 通すと使えるようになるもの（この鍵で署名したモジュールが、Secure Boot のまま読み込まれる）:
   - [VirtualBox](#virtualbox) のホストのモジュール（`vboxdrv` など）
   - [VirtualBox Guest Additions（bootc のゲスト）](#virtualbox-の-bootc-ゲスト) のモジュール（`vboxguest` など）
+
+> [!IMPORTANT]
+> - **この項の手順 5 を SSH で貼る前に、VM のウィンドウを開いておく**（再起動直後の MokManager を操作するため）
+> - **この項の手順 6 は、起動の途中の MokManager の画面で行う**（最初の画面は 10 秒で消える。VM なら VM のウィンドウで操作する）
 
 1. `mokutil` と `openssl` が入っているか確かめる。
 
@@ -514,7 +531,7 @@
    ```
 
    - `SecureBoot enabled` なら、手順 4 から続ける
-   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、この文書の手順はここで終わり**
+   - **`SecureBoot disabled`（または `EFI variables are not supported on this system`）なら、この項の手順はここで終わり**
 
 1. 鍵がまだ無いときだけ、署名用の鍵を作り、MOK への登録を予約する。
 
@@ -568,17 +585,17 @@
 
 ### ユーザーサービスの常駐
 
+- 自分のユーザーの linger を有効にして、ログアウトしている間も、そのユーザーのサービスが動くようにする
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: 常駐させるユーザー自身のシェル（デスクトップの端末か SSH の bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
-
-> [!IMPORTANT]
-> - **常駐させるユーザー自身のシェル（デスクトップの端末か SSH）で実行する**。`sudo -i` した root のシェルでは行わない（`${USER}` が `root` になる）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](#syncthing)・[Dropbox 公式](#dropbox)・[rclone](#dropbox-と-rclone)
   - [Forgejo](#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)
   - [Podman の Quadlet](#podman-quadlet-で自動起動する)で動かすコンテナ
+
+> [!IMPORTANT]
+> - **`sudo -i` した root のシェルでは行わない**（`${USER}` が `root` になる）
 
 1. linger が有効になっているか確かめる。
 
@@ -611,6 +628,23 @@
 
 ### 日本語入力
 
+- GNOME で日本語を打てるように、Anthy と日本語のフォントを入れ、入力ソースを「キーボードの配列 + Anthy」にする
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+- **Homebrew を入れた（これから入れる）PC では、[Homebrew](#homebrew)の手順 4 も通す**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
+
+1. 変数を設定する。
+
+   ```bash
+   XKB_LAYOUT=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: \([a-z][a-z0-9_]*\).*/\1/p')   # キーボードの配列（自動）。JIS は jp、US は us。<XKB_LAYOUT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'XKB_LAYOUT = %s\n' "${XKB_LAYOUT}"
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `XKB_LAYOUT` が空か配列と違えば、`XKB_LAYOUT=jp`（JIS）か `XKB_LAYOUT=us`（US）を貼ってから進む
+   - **新しい端末を開いたら**、この項の手順 1 を貼り直してから先へ進む
+
 1. ibus-anthy と日本語のフォントが無ければ入れる。
 
    ```bash
@@ -623,7 +657,7 @@
 1. 入力ソースを「キーボードの配列 + Anthy」にする。
 
    ```bash
-   if [ -z "${XKB_LAYOUT}" ]; then echo '中断: 「システムの設定」の手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${XKB_LAYOUT}" ]; then echo '中断: この項の手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
      /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT}'), ('ibus', 'anthy')]"
@@ -641,6 +675,22 @@
 ---
 
 ### GNOME の表示と入力
+
+- ホームのフォルダーの名前・ダークモード・キーの割り当て・上部バー・Files・拡大率・トレイアイコン・Dash のお気に入りを、自分用に変える
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある。この項の手順 11（EPEL から入れる）には、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 も要る
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+
+1. 変数を設定する。
+
+   ```bash
+   DASH_FAVORITES="['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop']"   # Dash に並べるアプリ（左から）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'DASH_FAVORITES = %s\n' "${DASH_FAVORITES}"
+   ```
+
+   - **編集が必須の変数は無い**。既定のままなら、Dash に Firefox・ファイル・端末（Ptyxis）・テキストエディターが並ぶ
+   - 最後に値を読み戻して確かめる
+   - **新しい端末を開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. ホームのフォルダーの名前を、日本語から英語にする（中身ごと移す）。
 
@@ -835,10 +885,10 @@
 
    - 一覧に `'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/'` と、`binding '<Control><Alt>t'`・`command 'ptyxis --new-window'`・`name '端末'` が出ればよい
 
-1. Dash のお気に入り（アクティビティの画面の下の並び）を、[システムの設定](#システムの設定)の手順 1 のアプリにする。
+1. Dash のお気に入り（アクティビティの画面の下の並び）を、この項の手順 1 のアプリにする。
 
    ```bash
-   if [ -z "${DASH_FAVORITES}" ]; then echo '中断: 「システムの設定」の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${DASH_FAVORITES}" ]; then echo '中断: この項の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.shell favorite-apps
      /usr/bin/gsettings set org.gnome.shell favorite-apps "${DASH_FAVORITES}"
@@ -847,7 +897,7 @@
    ```
 
    - 最初の `get` の並びを、元に戻すときのために控える
-   - 2 つ目の `get` が[システムの設定](#システムの設定)の手順 1 の値になればよい。すぐに効く
+   - 2 つ目の `get` がこの項の手順 1 の値になればよい。すぐに効く
 
 ---
 
@@ -855,11 +905,12 @@
 
 - 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - WireGuard・Samba・Syncthing・Dropbox のホストや、RDP で待ち受ける PC は、眠るとサービスが止まる
-   - [GNOME のヘッドレスのセッション](#gnome-のヘッドレスセッション)はこの項の手順 1・2 が前提。サスペンドできる PC では手順 3・4 も通す
-   - [Claude Code で GUI を確かめる](ai-agents.md#claude-code-の-gnome-操作-実施手順)はこの項の手順 1・2、[GNOME のデスクトップ共有](#gnome-のデスクトップ共有)は手順 1〜4 が前提
+  - [GNOME のヘッドレスのセッション](#gnome-のヘッドレスセッション)はこの項の手順 1・2 が前提。サスペンドできる PC では手順 3・4 も通す
+  - [Claude Code で GUI を確かめる](ai-agents.md#claude-code-の-gnome-操作-実施手順)はこの項の手順 1・2、[GNOME のデスクトップ共有](#gnome-のデスクトップ共有)は手順 1〜4 が前提
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインするユーザー本人の端末（bash）。この項の手順 1 で変数を設定したシェルに貼る
 - **人が触れる場所にある PC では行わない**（画面をロックしないので、前にいる人がそのまま使える）
 - GNOME を入れていない（デスクトップの無い）機械では、この項の手順 4・5 だけを行う
-- GNOME にログインするユーザー本人の端末で、この項の手順 1 で変数を設定してから、上から順に貼る
 - 戻すときは、この項の手順 6〜9。変える前の値ではなく**既定値**に戻る（Server with GUI で入れた PC は、既定でも電源につないでいる間は眠らない）
 
 1. 変数を設定する。
@@ -1011,6 +1062,10 @@
 
 ### 共通の bash 設定
 
+- 自分のユーザーに共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れ、bash-completion と `~/.inputrc` で補完と履歴の検索を整える
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+
 1. 共通の bash 設定を入れる。
 
    ```bash
@@ -1077,7 +1132,11 @@
 
 #### 共通の bash 設定を手動で移行する
 
-通常は[共通の bash 設定](#共通の-bash-設定)の `install.sh` を使う。以下は手で確認しながら移行するときだけ行う。Git が入った自分のユーザーの bash で、上から順に貼る。Windows 11 も Git Bash で同じ全節を行える。WSL は Linux 側で別に行う。
+通常は[共通の bash 設定](#共通の-bash-設定)の `install.sh` を使う。この項は、`install.sh` を使わずに、手で確認しながら移行するときだけ行う。
+
+- 前提: 無し（Git は AlmaLinux 10 Workstation に初めから入っている）
+- 実行場所: 自分のユーザーの端末（bash）。Windows 11 も、Git Bash でこの項の手順をすべて行える。WSL は Linux 側で別に行う
+- この項の手順 3 の控えと、手順 4 の既存の行の確認を省かない
 
 [背景説明](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md)
 
@@ -1217,7 +1276,11 @@
 
 #### 共通の bash 設定を root に入れる
 
-一般ユーザーを信用できる自分専用のホストだけで行う。root が一般ユーザーの書き換えられる Homebrew のコマンド・補完を実行し、Homebrew が PATH の先頭になる。一般ユーザーの共通 bash 設定を先に入れておく。`sudo -i` は `ALL_PROXY` を渡さない。
+root のシェルにも、共通の bash 設定を入れる。一般ユーザーを信用できる自分専用のホストだけで行う。root が一般ユーザーの書き換えられる Homebrew のコマンド・補完を実行し、Homebrew が PATH の先頭になる。
+
+- 前提: [共通の bash 設定](#共通の-bash-設定)を通してある（一般ユーザーの共通 bash 設定を先に入れる）
+- 実行場所: この項の手順 1 は自分のユーザーの端末（bash）。手順 2 からは、その端末から `sudo -i` で入った root のシェル（手順 3 で入り直す）
+- `sudo -i` は `ALL_PROXY` を渡さない
 
 1. 自分のユーザーのシェルから root に入る。
 
@@ -1236,7 +1299,7 @@
 
    - `~` は `/root`。clone 済みなら更新し、`bash ~/.config/bash/install.sh` を実行する
    - 控えは `/root/.bashrc.before-bash`。既知の Homebrew・DOCKER_HOST の追記も移行する
-   - 控えが既にある状態で変更が必要なら中断する。手動で確認する場合は[共通 bash の手動移行](#共通の-bash-設定を手動で移行する)の全節を root のシェルで行う
+   - 控えが既にある状態で変更が必要なら中断する。手動で確認する場合は[共通 bash の手動移行](#共通の-bash-設定を手動で移行する)の手順をすべて root のシェルで行う
    - 独自設定は共通設定の読み込み行より後ろに置く。構文エラーなら変更せず中断する
 
 1. `exit` で抜け、自分のユーザーから `sudo -i` で入り直す。
@@ -1257,7 +1320,10 @@
 
 #### 共通の bash 設定を更新する
 
-自分のユーザーの bash（Windows 11 は Git Bash）で行う。更新後は端末を開き直す。
+共通の bash 設定のリポジトリを pull で上げる。更新後は端末を開き直す。
+
+- 前提: [共通の bash 設定](#共通の-bash-設定)か[共通の bash 設定を手動で移行する](#共通の-bash-設定を手動で移行する)を通してある
+- 実行場所: 自分のユーザーの端末（bash。Windows 11 は Git Bash）。この項の手順 2 は、`sudo -i` で入った root のシェル
 
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
 
@@ -1281,6 +1347,12 @@
 ---
 
 ### Homebrew
+
+- Homebrew を公式のインストーラで `/home/linuxbrew/.linuxbrew` に入れ、共通の bash 設定で PATH を通す
+- 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](#共通の-bash-設定)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+- インターネットに出られない PC は、この項を飛ばし、[Homebrew のオフライン導入](#homebrew-のオフライン導入)を通す
+- **GNOME で日本語入力を使う PC は、この項の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
 
 1. Homebrew の依存パッケージを入れる。
 
@@ -1331,7 +1403,7 @@
 
 #### Homebrew の使い方の基本
 
-各手順書が使うコマンドはこれだけ。
+この文書の各項が使うコマンドはこれだけ。
 
 | コマンド | 用途 |
 |---|---|
@@ -1346,16 +1418,18 @@
 
 - `brew install`・`brew upgrade` などの管理操作は、導入した一般ユーザーで行う
 - [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通しても、管理操作は一般ユーザーで行う
-- 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)の節を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の節を通す
+- 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通す
 - `brew install` の確認が出たら答えてから進む（[確認が出る条件](extra/almalinux-setup.md#注意点)）
 - Homebrew からツールを入れる手順は、[Homebrew](#homebrew)の手順 1〜3 を前提にする。Trivy は dnf で入れる
 
 #### Homebrew を root のシェルでも使う
 
-- root でも使う場合は、[bash の root 用導入手順](#共通の-bash-設定を-root-に入れる)で root 自身の clone と読み込み口を用意する
+- root のログインシェルでも、Homebrew で入れたコマンドを使う。PATH は、root に入れた共通の bash 設定が足す
+- 前提: [Homebrew](#homebrew)と[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)（root 自身の clone と読み込み口）を通してある
+- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
 - 自分専用のマシンで、一般ユーザーを信用できる場合だけ行う。root のシェルから Homebrew のユーザー所有のコマンドを実行するため
 - 共通設定の `brew shellenv` は Homebrew を PATH の先頭に入れる。同名の RPM コマンドより Homebrew が優先される
-- `sudo <コマンド>` は別で、次の「Homebrew を sudo でも使う」の `secure_path` を使う
+- `sudo <コマンド>` は別で、[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の `secure_path` を使う
 
 1. root のログインシェルから Homebrew が見えることを確かめる。
 
@@ -1372,14 +1446,15 @@
 
 #### Homebrew を sudo でも使う
 
-- **`sudo <コマンド>` で Homebrew のコマンドを使わないなら、この項は不要**
 - sudo の設定に 1 行のファイル（`/etc/sudoers.d/homebrew`）を置き、sudo がコマンドを探す PATH（`secure_path`）の末尾に、Homebrew の `bin` と `sbin` を足す
+- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
+- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
+- **`sudo <コマンド>` で Homebrew のコマンドを使わないなら、この項は不要**
 - `sudo nvim /etc/hosts` や `sudo gdu-go /` のように、`sudo <コマンド>` で使えるようになる。`sudo -s`・`sudo -i` で開いた root のシェルでも使える
 - `EDITOR=nvim` の `sudoedit` も、自分の設定の Homebrew の `nvim` で開くようになる（この項の前は、黙って `vi` で開く）
-- sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)の節を通す
+- sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を通す
 - RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
 - `brew install` などの管理操作は、この項を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
-- [Homebrew](#homebrew)の手順 1〜3 を終えた、Homebrew を入れたユーザーのシェルで貼る
 - 補足: [参考資料](reference/almalinux-setup.md#homebrew-sudo-で使うときの補足)
 
 > [!WARNING]
@@ -1428,23 +1503,18 @@
 
 ### Homebrew のオフライン導入
 
+- インターネットに出られないホスト（以下、オフラインのホスト）に、SSH の SOCKS トンネル越しに Homebrew を入れる。トンネルの出口は、インターネットに出られるホスト（以下、オンラインのホスト）
+- 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
+- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
-
-> [!IMPORTANT]
-> - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を通す。接続元をオンラインのホスト、接続先をオフラインのホストとする
-> - **同じ手順 3 のシェルに貼る**。Homebrew の通信にもトンネルを使う
-> - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（同書の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
-> - **手順 3 で [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜4](#homebrew)（手順 4 は GNOME で日本語入力を使う PC だけ）を、同じシェルのまま貼る**
-> - **手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
-> - **手順 5 はトンネルを閉じてログインし直す**（オンラインのホストで行う操作がある）
-
-- 上から順に、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 のシェルで貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Neovim の Mason に npm のパッケージを入れるなら、手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入) を貼る（npm は `ALL_PROXY` を読まない）
+- この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜4（同じ項の手順 4 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
+- **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
+- **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
+- Neovim の Mason に npm のパッケージを入れるなら、この項の手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入) を貼る（npm は `ALL_PROXY` を読まない）
 
 > [!WARNING]
 >
-> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら手順 5 で閉じる
+> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら、この項の手順 5 で閉じる
 
 1. トンネルのシェルで、Homebrew の取得先に届くかと、Homebrew が使うパッケージを確かめる。
 
@@ -1458,20 +1528,20 @@
 
    - 4 つの URL の数字が、どれも `000` 以外なら届いている（ghcr.io は `401`）
    - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、トンネルか `ALL_PROXY` が無い。[SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 からやり直す
-   - `rpm -q` の 4 つがどれも入っていれば、**手順 2 は飛ばし、手順 3 でも AlmaLinux 10 の初期設定の「Homebrew」の手順 1 を飛ばす**
-   - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、手順 2 は飛ばす
+   - `rpm -q` の 4 つがどれも入っていれば、**この項の手順 2 は飛ばし、この項の手順 3 でも[Homebrew](#homebrew)の手順 1 を飛ばす**
+   - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、この項の手順 2 は飛ばす
 
-1. 手順 1 で入っていないパッケージがあったときだけ、[SSH の SOCKS トンネルの「dnf にもトンネルを使わせる」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)を行う。
+1. この項の手順 1 で入っていないパッケージがあったときだけ、[SSH の SOCKS トンネルの「dnf にもトンネルを使わせる」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)を行う。
 
-   - **次の手順は、同書の節の `Metadata cache created.` が出てから貼る**
+   - **次の手順は、その項の `Metadata cache created.` が出てから貼る**
 
-1. 手順 1 のシェルのまま、[AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜4](#homebrew) を貼る。
+1. この項の手順 1 のシェルのまま、[Homebrew](#homebrew)の手順 1〜4 を貼る。
 
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、同書の「Homebrew」の手順 1〜3 は飛ばす
-   - 同書の「Homebrew」の手順 1 の dnf は、手順 2 の設定で通る（手順 1 で 4 つとも入っていたなら飛ばす）
-   - 同書の「Homebrew」の手順 3 は、共通の bash 設定（同書の「共通の bash 設定」の手順 1・2）を入れてあるシェルで貼る
-   - 同書の「Homebrew」の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
-   - **次の手順は、同書の「Homebrew」の手順 3（GNOME で日本語入力を使う PC は手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、[Homebrew](#homebrew)の手順 1〜3 は飛ばす
+   - [Homebrew](#homebrew)の手順 1 の dnf は、この項の手順 2 の設定で通る（この項の手順 1 で 4 つとも入っていたなら飛ばす）
+   - [Homebrew](#homebrew)の手順 3 は、[共通の bash 設定](#共通の-bash-設定)の手順 1・2 を入れてあるシェルで貼る
+   - [Homebrew](#homebrew)の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
+   - **次の手順は、[Homebrew](#homebrew)の手順 3（GNOME で日本語入力を使う PC は同じ項の手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。
 
@@ -1481,13 +1551,13 @@
 
    - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれたら、`y` を押す（Enter は要らない）
    - `==> Pouring jq--…bottle…tar.gz` と出て、ソースからのビルドにならない
-   - ほかの Homebrew 系の手順書も、手順 5 の前に、このシェルで貼る
+   - ほかの Homebrew で入れる項も、この項の手順 5 の前に、このシェルで貼る
    - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
 1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜3 で、トンネルを閉じて、転送を付けずにログインし直す。
 
-   - 同書のその節の手順 1 の `exit` の後、手順 2 のログインはオンラインのホストで行う
-   - 同書のその節の手順 3 で、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
+   - その項で `exit` した後の、転送を付けないログインは、オンラインのホストで行う
+   - その項の最後の確かめで、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
    - **次の手順は、ログインし直したオフラインのホストのシェルで貼る**
 
 1. オフラインのホストで、トンネルが無くても jq が動くことを確かめる。
@@ -1503,12 +1573,14 @@
 
 #### Homebrew のオフライン導入: 更新
 
-- [SSH の SOCKS トンネルの手順 1〜3](#ssh-の-socks-トンネル) でトンネルを張り、同書の手順 3 のシェルで貼る
+- オフラインのホストで、SSH の SOCKS トンネル越しに Homebrew と、Homebrew で入れたものを上げる
+- 前提: [Homebrew のオフライン導入](#homebrew-のオフライン導入)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、トンネルを張り直してある
+- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル）
 
-1. [AlmaLinux 10 の初期設定の更新](#更新)の手順 2・3 を貼る。
+1. [共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 を貼る。
 
-   - `brew outdated` が何も出さなければ、上げるものは無いので、同書の更新の手順 3 は飛ばす
-   - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[手順 4](#homebrew-のオフライン導入) と同じ確認）
+   - `brew outdated` が何も出さなければ、上げるものは無いので、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 は飛ばす
+   - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[Homebrew のオフライン導入](#homebrew-のオフライン導入)の手順 4 と同じ確認）
    - **次の手順は、上げ終わってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
 1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
@@ -1516,6 +1588,10 @@
 ---
 
 ### シェルのツール
+
+- starship・zoxide・fzf・eza・bat・tmux を Homebrew で入れ、共通の bash 設定が読み込んだことを確かめる
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
 
@@ -1533,7 +1609,6 @@
    - Ctrl+Alt+T（[GNOME の表示と入力](#gnome-の表示と入力)の手順 12）でも開ける
    - 開き直した端末から、プロンプトが starship に変わり、zoxide・fzf・eza のエイリアス・bat の `MANPAGER` も効く
    - 今の端末で `. ~/.bashrc` を読み直さず、端末を開き直す
-   - [システムの設定](#システムの設定)の手順 1 の変数は、この後は使わない
    - **次の手順は、開き直した端末で貼る**
 
 1. bash の履歴・補完・キー操作の設定が効いていることを確かめる。
@@ -1648,12 +1723,17 @@
 
 #### キー操作を試す
 
+- 共通の bash 設定とシェルのツールのキー操作（補完・履歴の検索・fzf のキー）を、端末で押して試す
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた端末）
+
 1. キーを押して、補完と履歴の検索を確かめる。
 
    - `systemctl star` と打って Tab: `systemctl start ` になる（bash-completion）
    - `ls /usr/s` → Tab: 色付きの `sbin/ share/ src/` が 1 回で出る
    - `cd /usr/SH` と打って Tab: `cd /usr/share/` になる（`completion-ignore-case`）
-   - `printf` と打って ↑: `printf` で始まる履歴の行が、新しい順に出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。1 回目は「確認」の見出しの `printf '\n\033[7m 確認 \033[0m\n'`、もう 1 回 ↑ で[シェルのツール](#シェルのツール)の手順 7 の `printf '%s\n' "$MANPAGER"`。Ctrl+C で捨てる
+   - `printf` と打って ↑: `printf` で始まる履歴の行が、新しい順に出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。Ctrl+C で捨てる
+     - [シェルのツール](#シェルのツール)の手順 7 を貼った端末なら、1 回目は「確認」の見出しの `printf '\n\033[7m 確認 \033[0m\n'`、もう 1 回 ↑ で、その手順の `printf '%s\n' "$MANPAGER"`
    - `/usr/share` と打って Enter: `cd -- /usr/share` と出て移る（`autocd`）。`cd /usr/shaer` と打って Enter: `/usr/share` と出て移る（`cdspell`）。`cd` で戻る
    - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: `CONTRIBUTING.md` と `README.md` が出る（`globstar`。効いていないと、`そのようなファイルやディレクトリはありません` になる）
    - `eza --gi` と打って Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` の一覧が出て、`eza --git` まで入る（Homebrew のコマンドの補完）
@@ -1663,6 +1743,7 @@
    - 画面の下から fzf の一覧が開き、最下行の `>` の右に打った文字で絞り込める。`fzf --v` と打ち、上下キーで `fzf --version` の行を選ぶ
    - Enter でその行がプロンプトに入る（**実行はされない**）。もう一度 Enter で実行する
    - Esc か Ctrl+C で、何も選ばずに閉じる
+   - 履歴に `fzf --version` が無ければ、Esc で閉じ、`fzf --version` を打って Enter で実行してから、この手順をやり直す
 
 1. `cat ` と打ってから Ctrl+T を押し、ファイルを選ぶ。
 
@@ -1683,8 +1764,9 @@
 #### starship のプリセットを当てる
 
 - 公式が配っている設定一式を `~/.config/starship.toml` に書き出す
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）
 - **この項の手順 2 で、既存の設定は上書きされる**。自分で書いたものがあれば、先に退避する
-- [シェルのツール](#シェルのツール)の手順 2 で開き直した端末（starship を読み込んだ端末）で貼る
 
 1. 当てられるプリセットの一覧を見る。
 
@@ -1715,6 +1797,9 @@
 
 #### starship の設定ファイル
 
+- starship の設定ファイル `~/.config/starship.toml` を、手で書く
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）
 - `~/.config/starship.toml` は**既定では存在しない**（無ければ組み込みの既定値で動く）
 
 1. `~/.config/starship.toml` に、設定を手で書く。
@@ -1736,8 +1821,8 @@
 #### starship でユーザー名とホスト名を常に表示する
 
 - ユーザーを切り替えても名前を出す（starship の既定は、SSH のときと、ログインしたユーザーと違うときだけ出す）
-- 自分のユーザーのシェルで実行する。root の設定は別のファイルになる
-- プリセットや[starship の設定ファイル](#starship-の設定ファイル)の例を使う場合は、先に適用する
+- 前提: [シェルのツール](#シェルのツール)を通してある。[starship のプリセットを当てる](#starship-のプリセットを当てる)や[starship の設定ファイル](#starship-の設定ファイル)の例を使う場合は、それを先に通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）。root の設定は別のファイルになる
 
 1. ユーザー名とホスト名を常に表示する設定を入れる。
 
@@ -1789,9 +1874,11 @@
 #### fzf で fd と bat を候補とプレビューに使う
 
 - Ctrl+T と Alt+C の候補を、fd の一覧に変える（`.git` の中を除き、隠しファイルは含める。`.gitignore` の対象は fd が既定で除く）
+- 前提: [シェルのツール](#シェルのツール)を通してある（bat は、その項の手順 1 で入る）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
-- bat は[シェルのツール](#シェルのツール)の手順 1、fd は[Neovim](#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](#yazi)の手順 2 で入れてある。fd が入っていれば、この項の手順 1・2 は飛ばす
+- fd は[Neovim](#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
 - 戻すときは、この項の手順 5
 
 1. brew で fd を入れる。
@@ -1851,6 +1938,9 @@
 
 #### bat の設定ファイル
 
+- bat の設定ファイルを置き、テーマ・表示の飾り・ページャを決める
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は `~/.config/bat/config`（`bat --config-file` で確認できる）
   - 既定の場所に置く限り bat は自分で見つける。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する
@@ -1879,6 +1969,10 @@
    - `中断:` と出たら、何も書いていない
 
 #### tmux を試す
+
+- tmux のセッションを作り、抜けて（デタッチ）、入り直して（アタッチ）、終わらせる
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
 1. tmux のセッションを作って入る。
 
@@ -1948,6 +2042,8 @@
 #### tmux の設定ファイル
 
 - マウスのホイールでさかのぼれるようにし、さかのぼれる行数を 2000 から 50000 に増やす。Claude Code のように出力が長く続くものを、tmux の中で読み返すときに効く
+- 前提: [シェルのツール](#シェルのツール)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 - tmux は、サーバーが起動するときに `~/.tmux.conf` と `~/.config/tmux/tmux.conf` の**両方**を読む（あるものだけ）。新規作成は後者、既存設定がある場合はそのファイルに書く
 - マウスを on にすると、マウスでの文字の選択は tmux が受け取る。端末の選択を使うときは、端末の決まりに従う（WezTerm などは Shift を押しながら）
 
@@ -1993,6 +2089,10 @@
 ---
 
 ### HackGen Console NF
+
+- 日本語と Nerd Fonts のアイコンを含む等幅のフォント HackGen Console NF を、Homebrew の cask で入れる
+- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
 1. 変数を設定する。
 
@@ -2050,6 +2150,10 @@
 
 ### WezTerm
 
+- 端末のアプリ WezTerm（nightly）を COPR から入れ、自分用の設定を入れて起動し直す
+- 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意（通してあれば、自分用の設定がそのフォントで描く）
+- 実行場所: GNOME にログインした自分のユーザーの、WezTerm の外の端末（bash。Ptyxis など）。この項の手順 5 の中で、起動し直した WezTerm のタブへ移る
+
 1. chroot を明示して、COPR を有効化する。
 
    ```bash
@@ -2093,11 +2197,14 @@
 
 1. 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、起動し直した WezTerm に移る。
 
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)の全項を、この項で指定した端末で通す
+   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)の手順をすべて、その項の実行場所のとおりに通す
    - 参照先の手順 5 で WezTerm を起動し、手順 6 を WezTerm のタブに貼って確かめる
-   - **この後の手順は、WezTerm のタブで貼る**（Nerd Font のアイコンを使う TUI の確かめも、WezTerm で見る）
 
 #### WezTerm と HackGen Console NF をデスクトップで使う
+
+- GNOME の等幅のフォントを HackGen Console NF にし、Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする
+- 前提: [GNOME の表示と入力](#gnome-の表示と入力)（Ctrl+Alt+T のショートカットと Dash のお気に入り）、[HackGen Console NF](#hackgen-console-nf)、[WezTerm](#wezterm)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの WezTerm のタブ（bash）
 
 1. GNOME の等幅のフォントを HackGen Console NF にする。
 
@@ -2163,9 +2270,12 @@
 
 #### WezTerm の設定を導入する
 
-WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に入れ、自分のユーザーの bash で行う。シェル統合は共通 bash 設定が読む。HackGen Console NF は任意。
+自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を `~/.config/wezterm` に clone し、WezTerm を起動し直して読ませる。シェル統合は共通 bash 設定が読む。
 
-この項の手順 1〜4 は WezTerm の外の端末で行い、手順 2 の退避前に WezTerm のウィンドウをすべて閉じる。
+- 前提: [WezTerm](#wezterm)の手順 1〜4（WezTerm nightly）と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意
+- 実行場所: GNOME にログインした自分のユーザーの bash（Windows 11 は Git Bash）。この項の手順 1〜4 は WezTerm の外の端末、手順 6 は手順 5 で起動し直した WezTerm のタブ
+- この項の手順 2 の退避の前に、WezTerm のウィンドウをすべて閉じる
+- 既存の設定の確認（この項の手順 1）と退避（手順 2）を省かない
 
 [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
@@ -2248,7 +2358,10 @@ WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に
 
 #### WezTerm のシェル統合を SSH 先で使う
 
-自分で管理する AlmaLinux 10 の SSH 先で行う。手元の WezTerm から `TERM_PROGRAM` を送り、SSH 先の sshd で受け取る。公式 Bash 統合が既に有効なら、変数が未設定でも補完処理が動く。
+手元の WezTerm から ssh でつないだ先でも、WezTerm のシェル統合を使う。手元の WezTerm から `TERM_PROGRAM` を送り、SSH 先の sshd で受け取る。公式 Bash 統合が既に有効なら、変数が未設定でも補完処理が動く。
+
+- 前提: 手元で[WezTerm](#wezterm)を通してある。SSH 先は自分で管理する AlmaLinux 10 で、手元から `ssh <HOST>` でログインできる
+- 実行場所: この項の手順 1・4 は手元（WezTerm を使う PC）、手順 2・3・5 は SSH 先の自分のユーザーのシェル（bash）
 
 1. 手元の `~/.ssh/config` で、使う `Host` に `SendEnv TERM_PROGRAM` を足す。
 
@@ -2301,11 +2414,13 @@ WezTerm nightly・Git・[共通の bash 設定](#共通の-bash-設定)を先に
 
 #### WezTerm: Windows の SSH 先で PowerShell に貼り付ける
 
-接続元は Linux または Windows の WezTerm、接続先は Windows OpenSSH と Git Bash。両側にこの版の設定を置く。Linux では GUI セッションから WezTerm を起動する。
+手元の WezTerm から Windows の SSH 先に入り、その PowerShell の PSReadLine の入力欄へ複数行を貼る。接続元は Linux または Windows の WezTerm、接続先は Windows OpenSSH と Git Bash。両側にこの版の設定を置く（この項の手順 1）。
 
-Windows 接続先は [OpenSSH サーバー](windows-setup.md#openssh-サーバー)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)・[SSH の既定シェル](windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を先に通す。通常の PowerShell プロファイルには追記しない。
-
-PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)を使う。**この項の手順 3 の `surface` は検証環境の SSH 接続名。貼る前に、自分の設定済み接続名へ置き換える**。
+- 前提: 接続元で[WezTerm](#wezterm)（Windows の接続元は[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)）を通してある。Windows 接続先で [OpenSSH サーバー](windows-setup.md#openssh-サーバー)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)・[SSH の既定シェル](windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通してある
+- 実行場所: 接続元の WezTerm のタブ（Linux では GUI セッションから起動した WezTerm）。この項の手順 4・9 は接続先の Git Bash、手順 5〜8 は接続先の PowerShell
+- 通常の PowerShell プロファイルには追記しない
+- 管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)を使う
+- **この項の手順 3 の `surface` は検証環境の SSH 接続名。貼る前に、自分の設定済み接続名へ置き換える**
 
 [参照情報](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
@@ -2399,7 +2514,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### WezTerm の設定を更新する
 
-自分のユーザーの bash（Windows 11 は Git Bash）で行う。WezTerm 本体の更新は同じ冊の更新節で行う。
+自分用の WezTerm の設定のリポジトリを pull で上げる。WezTerm 本体の更新は[更新](#更新)で行う。
+
+- 前提: [WezTerm](#wezterm)を通してある
+- 実行場所: 自分のユーザーの bash（Windows 11 は Git Bash）
 
 1. 設定のリポジトリを pull する。
 
@@ -2417,16 +2535,12 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 ### btop
 
+- CPU・メモリ・ディスク・ネットワーク・プロセスを端末の画面で見る btop を、EPEL から入れる
+- 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
+- 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
-
-> [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](#epel-と-rpm-fusion) で EPEL を有効にしてあること。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
-> - **すべて対象ホスト上で実行する**
-> - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
-> - **手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
+- **この項の手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
 
 1. 入手できる版を見てから、btop を入れる。
 
@@ -2465,6 +2579,9 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### btop: 設定ファイル
 
+- btop の設定ファイルとテーマの置き場所を確かめ、起動せずに既定の設定を見る
+- 前提: [btop](#btop)を通してある
+- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
 - `~/.config/btop/btop.conf` は**初回起動時に既定値で作られる**（約 9.8 KB、項目ごとにコメント付き）
 - アプリ内では `Esc` または `m` でメニューが開き、`Options` からほとんどの項目を GUI で変えられる（保存も btop がやる）
 - テーマは 2 か所から読む。`btop.conf` の `color_theme` にファイル名を書くと切り替わる（`"Default"` と `"TTY"` は組み込み）
@@ -2479,7 +2596,9 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### btop: 更新
 
-- btop は通常の更新に含まれる
+- btop を dnf で上げる。btop は通常の更新に含まれる
+- 前提: [btop](#btop)を通してある
+- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
 
 1. btop を更新する。
 
@@ -2494,16 +2613,14 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 ### gdu
 
+- ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある（`command -v brew` で何も出なければ、先に通す）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
-
-- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+- ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定も自分のユーザーに導入するため）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 1. brew で gdu を入れる。
 
@@ -2531,6 +2648,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### gdu: gdu の名前で呼ぶ
 
+- 共通の bash 設定のエイリアスで、`gdu-go` を `gdu` の名前で呼ぶ
+- 前提: [gdu](#gdu)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
+
 1. 共通設定を読み直し、gdu のエイリアスを確かめる。
 
    ```bash
@@ -2547,9 +2668,13 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
    ```
 
-   - `sudo gdu` には効かない。`sudo` では `gdu-go` と打つ（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の節が要る）
+   - `sudo gdu` には効かない。`sudo` では `gdu-go` と打つ（[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)が要る）
 
 #### gdu: 更新
+
+- brew で gdu を上げる
+- 前提: [gdu](#gdu)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
 1. brew で gdu を更新する。
 
@@ -2563,9 +2688,13 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 ## Git と開発の道具
 
-- Git・GitHub CLI・Neovim（LazyVim）・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm
+- Git・git-delta・GitHub CLI・Neovim（LazyVim）・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm
 
 ### Git
+
+- コミットに載せる名前とメールアドレスと、pull・改行・ブランチなどの git の設定を `--global` に書き、使い捨てのリポジトリで確かめる
+- 前提: [Homebrew](#homebrew)の手順 1 で git を入れてある（Workstation では最初から入っている）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 
 1. 変数を設定する（`GIT_USER_NAME` と `GIT_USER_EMAIL` は必ず値を入れる）。
 
@@ -2669,7 +2798,6 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    ```
 
    - `global	true` と出る
-
    - `pull.ff` を今回変更したことを、この項の手順 2 の元値の記録に書き足す
 
 1. 使い捨てのリポジトリで、改行・ブランチ名・日本語のファイル名・最初の push を確かめる。
@@ -2736,7 +2864,8 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 - 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリは、作業ツリーのファイルが CRLF のまま残る
 - [Git](#git)の手順 4 の後は、それらが変更ありと出る。編集してコミットすると、CRLF で入る
 - Windows で、Git for Windows の既定の設定のまま clone したリポジトリが当たる
-- リポジトリごとに、そのリポジトリのトップのディレクトリで、この項の手順 1 から貼る
+- 前提: [Git](#git)を通してある
+- 実行場所: 自分のユーザーの端末（bash。Windows 11 では Git Bash）の、直すリポジトリのトップのディレクトリ。リポジトリごとに、この項の手順 1 から貼る
 - **この項の手順 3 は、作業ツリーの追跡しているファイルをすべて書き直し、未コミットの変更を消す**。この項の手順 1 で変更が出たら、手順 2 で退避してから貼る
 
 1. 直すリポジトリのトップで、未コミットの変更と、CRLF で書かれたファイルの数を見る。
@@ -2789,6 +2918,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 ### git-delta
 
+- 差分を色付きで見やすくする git-delta を Homebrew で入れ、git のページャにする
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+
 1. 変数を設定する。
 
    ```bash
@@ -2802,7 +2935,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    - **編集が必須の変数は無い**。既定のままで進められる
    - 広い画面で左右に並べたいなら、`DELTA_SIDE_BY_SIDE=true` にする
    - 最後の行で値を読み戻して確かめる
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの項の手順 1 を貼り直す
 
 1. brew で git-delta を入れる。
 
@@ -2866,6 +2999,11 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 ### GitHub CLI
 
+- GitHub の dnf のリポジトリから GitHub CLI（`gh`）を入れ、GitHub にログインする
+- 前提: GitHub のアカウントを用意し、[ログインと sudo](#ログインと-sudo)を通してある
+  - この項の手順 4 のブラウザ認証には、このホストのブラウザ（[Firefox](#firefox)）か、手元のブラウザを使う
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+
 1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
 
    ```bash
@@ -2901,7 +3039,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    gh auth login
    ```
 
-   - GitHub アカウントを用意し、対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
+   - 対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
    - `Authenticate Git with your GitHub credentials?` は `Y`。外すときは[ロールバックの「Git の道具を消す」](extra/almalinux-setup.md#git-の道具を消す)の手順 6
    - ワンタイムコードが表示されたら、この項の手順 4 のブラウザで使う
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
@@ -2925,6 +3063,12 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 ---
 
 ### Neovim
+
+- Neovim を Homebrew で入れ、自分用の設定（LazyVim をもとにした設定）を入れて、既定のエディタになったことを確かめる
+- 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[WezTerm](#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+  - この項の手順 3 は、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の前提も要る
+  - インターネットに出られないホストは、[Homebrew](#homebrew)の代わりに[Homebrew のオフライン導入](#homebrew-のオフライン導入)を通し、そのトンネルのシェルで行う
+- 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 4 で新しいタブを開く
 
 1. brew で Neovim を入れる。
 
@@ -2954,7 +3098,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 5 で lazygit・ripgrep・fd を入れる
    - 参照先の手順 7〜9 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
    - 参照先の手順 9 の後はログインし直さず、[再起動と確認](#再起動と確認)の手順 1 の再起動で読み直す
-   - 参照先の手順 11 で Neovim が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（手順 12 は画面を開かない）
+   - 参照先の手順 11 で Neovim が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（参照先の手順 12 は画面を開かない）
    - [日本語検索・整形・IME 連携の確認](#lazyvim-の日本語検索整形ime-連携を確かめる)は、[再起動と確認](#再起動と確認)の手順 8 で行う
 
 1. WezTerm で新しいタブを開き、既定のエディタを確かめる。
@@ -2986,9 +3130,10 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### LazyVim の設定を導入する
 
-[EPEL と RPM Fusion](#epel-と-rpm-fusion)・[Homebrew](#homebrew)・[HackGen Console NF](#hackgen-console-nf)・[Neovim](#neovim)・[共通の bash 設定](#共通の-bash-設定)を先に済ませる。GNOME にログインした一般ユーザーの端末で行う。依存を全部入れてから Neovim を初回起動する。
-
-[背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
+- 自分用の Neovim の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を `~/.config/nvim` に入れる。外部コマンドと日本語入力の設定を全部入れてから、Neovim を初回起動する
+- 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)・[共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[HackGen Console NF](#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1・2 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 3 の既存の設定の退避を省かない
+- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
 
 1. 外部コマンドと日本語入力 (ibus-anthy) を dnf で入れる。
 
@@ -3092,7 +3237,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
    - `'on_off': <['Zenkaku_Hankaku']>` と出ればよい
    - 以後、日本語と英数の切り替えは Super+Space と、Neovim の中の `<C-j>` になる
-   - 導入後の[再起動と確認](#再起動と確認)で Anthy と入力ソースを読み直す。日本語検索・IME 連携は[LazyVim の動作確認](#lazyvim-の日本語検索整形ime-連携を確かめる)で行う
+   - 導入後の[再起動と確認](#再起動と確認)で Anthy と入力ソースを読み直す。日本語検索・IME 連携は[LazyVim の日本語検索・整形・IME 連携を確かめる](#lazyvim-の日本語検索整形ime-連携を確かめる)で行う
 
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
@@ -3105,7 +3250,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
    - 1 行目で lazy.nvim が自分を clone し、プラグイン 38 個を入れる。数分かかる
    - `Neovim is exiting while packages are still installing.`・`Unmet requirements for **nvim-treesitter**`・`Error in command line` は出ても進んでよい
-   - 未完了の導入は手順 11 で補完する
+   - 未完了の導入は、この項の手順 11 で補完する
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - **次の手順は、プロンプトが戻ってから貼る** (最後のメッセージの行末に続けて出ることがある)
 
@@ -3136,17 +3281,19 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### LazyVim の日本語検索・整形・IME 連携を確かめる
 
-再起動後、WezTerm の新しいタブで行う。先に[LazyVim の安全な Markdown 整形](#lazyvim-の安全な-markdown-整形を導入する)を済ませる。
+- 試験用の Markdown で、LazyVim の日本語検索・保存のときの整形・IME 連携・アイコンの表示を確かめる
+- 前提: [WezTerm](#wezterm)・[LazyVim の設定を導入する](#lazyvim-の設定を導入する)・[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し、その後に再起動してある（[再起動と確認](#再起動と確認)の手順 1）
+- 実行場所: 再起動の後に開いた WezTerm の新しいタブ（GNOME にログインした自分のユーザーの bash。`sudo` は使わない）
 
-1. 試験用の Markdown を開き、日本語検索・整形・IME 連携を確かめる。
+1. 試験用の Markdown を作って開き、日本語検索・整形・IME 連携を確かめる。
 
    ```bash
+   printf '%s\n' '#動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
 
    - `/kensaku` と打って Enter を押す。3 行目の「検索」にカーソルが移り、`[1/1]` と出る
    - `/kensaku` と打って `<Tab>` を押す。入力が「検索」に置き換わる (候補が 1 つなので、すぐ確定する)。`<Esc>` で抜ける
-   - 初めてなら [安全な整形の導入](#lazyvim-の安全な-markdown-整形を導入する) を済ませる
    - `:w` で保存する。1 行目が `# 動作確認` に直る (glfm_markdownlint の整形)
    - 遅い VM では整形に数秒掛かる。Markdown / MDX の待ち時間の上限は 10 秒で、処理が終わればすぐ戻る
    - `o` で行を開き、`<C-j>` を押す。下の表示が `A` から `あ` に変わる。`<Esc>` で `A` に戻る
@@ -3159,7 +3306,11 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### LazyVim の設定とプラグインの版を揃える
 
-設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える。初回と整形用 lock の変更後は[安全な整形](#lazyvim-の安全な-markdown-整形を導入する)を入れ直す。外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す。
+- 設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
+- 初回と整形用 lock の変更後は、[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し直す
+- 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
@@ -3177,7 +3328,9 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### LazyVim の安全な Markdown 整形を導入する
 
-- AlmaLinux 10 / Windows 11 共通。Node.js 22 以上と npm が必要
+- Markdown を保存のときに整形する依存（lock ファイルで固定した markdownlint-cli2 と Comrak）を Neovim から入れ、整形を確かめる。AlmaLinux 10 / Windows 11 共通
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある（Node.js 22 以上と npm が要る）
+- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](#wezterm)を通したなら、WezTerm のタブで開く
 - 初回と `tools/glfm-format/package-lock.json` の変更後に行う
 - 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る。Mason のツールとは別に管理する
 
@@ -3212,6 +3365,8 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 #### LazyVim のカーソル色を tmux で使う
 
 - 挿入モードのカーソル色も IME の状態で変わる。ただし tmux 越しでは既定では効かないので、tmux の設定に 1 行足す
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[シェルのツール](#シェルのツール)の手順 1 で tmux を入れてある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 2 は tmux の中のシェル。既存の `~/.tmux.conf` の確認（この項の手順 1）を省かない
 - AlmaLinux 10 で tmux を使うときだけ行う。無くても害は無い
 - `tmux-256color` には `Cs` / `Cr` が無く、Neovim がカーソル色の OSC 12 を出さないため
 
@@ -3243,6 +3398,8 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 - Neovim がモードに合わせて IME を切り替えても、GNOME の上部バーの表示と Super+Space の順番がずれないようにする
 - GNOME Shell は ibus の engine が外から変わっても、上部バーと Super+Space が基準にする「今の入力ソース」を更新しない。そのため、この項を行わないと Neovim を開いた時点で上部バーがずれ、最初の Super+Space が空振りする
 - この設定のリポジトリにある GNOME Shell の拡張 (`gnome-shell/ibus-engine-follow@ryo-aoki-pc.github.com`) を有効にする。engine が変わったときに「今の入力ソース」を合わせるだけで、engine やキー配列は変えない
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある（拡張は `~/.config/nvim` の中にある）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 3 からは、ログインし直した後に開いた端末
 - AlmaLinux 10 + GNOME 49 のときだけ行う。拡張は GNOME Shell の内部の関数を使うので、GNOME を上げたらこの項の手順 4 で確かめる
 - **この項の手順 2 で、ログアウトしてログインし直す**
 
@@ -3290,9 +3447,9 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 - 手元の端末から AlmaLinux 10 に ssh して Neovim を使うとき、`y` `d` `x` などでレジスタに入れたものを、手元のクリップボードにも入れる
 - 仕組みは端末の OSC 52 で、この設定が SSH のシェル (`SSH_CONNECTION` がある) で起動したときだけ使う。手元にも AlmaLinux 10 にも、足すソフトは無い
 - 向きは Neovim → 手元だけ。手元でコピーしたものは、端末の貼り付け (WezTerm は Ctrl+Shift+V) で Neovim に入れる
-- 手元は WezTerm nightly を使う。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
-- 先に[取り込みの手順 1](#lazyvim-の設定とプラグインの版を揃える)で、AlmaLinux 10 の設定を最新にしておく
-- **この項は、GNOME の端末ではなく、手元の WezTerm から ssh したシェルで貼る**。tmux の中の Neovim は扱わない
+- 前提: AlmaLinux 10 で、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)の手順 1 で設定を最新にしてある。[システムの設定](#システムの設定)の手順 3・4 で、SSH を待ち受けている
+  - 手元は WezTerm nightly を使う（AlmaLinux 10 は[WezTerm](#wezterm)、Windows 11 は[Windows 11 のセットアップの「WezTerm」](windows-setup.md#wezterm)）。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
+- 実行場所: **GNOME の端末ではなく、手元の WezTerm から AlmaLinux 10 に ssh したシェル**（ssh でログインした自分のユーザーの bash。`sudo` は使わない）。tmux の中の Neovim は扱わない
 
 1. SSH のシェルで、この設定が OSC 52 を使うことを確かめる。
 
@@ -3304,7 +3461,7 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
    - 1 行目が `SSH_CONNECTION=` に続けて、接続元と接続先のアドレスとポートを 4 つ出せばよい
    - 2 行目が `OSC 52 (copy only)` と出ればよい
    - `SSH_CONNECTION=(無い)` と出たら、SSH のシェルではない (`sudo -i` や `su -` のシェルでは消える)。ssh でログインしたユーザーのシェルで貼り直す
-   - 2 行目が `(無い)` と出たら、設定が古い。取り込みの手順 1 を貼ってから、この手順を貼り直す
+   - 2 行目が `(無い)` と出たら、設定が古い。[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)の手順 1 を貼ってから、この手順を貼り直す
 
 1. 試験用のテキストを開き、ヤンクした行が手元のクリップボードに入ることを確かめる。
 
@@ -3320,7 +3477,11 @@ PSReadLine の入力欄へ複数行を貼る。管理者・同じユーザーの
 
 #### LazyVim の GitLab プレビューを設定する
 
-GitLab でスコープ `read_api` の個人アクセストークンを用意する。編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る。設定しなくても近似プレビューは使える。削除は [LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う。
+- LazyVim の Markdown のプレビュー（`<leader>cp`）を GitLab で描けるように、GitLab のトークンと URL を `~/.bashrc` に書く。設定しなくても近似プレビューは使える
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、GitLab でスコープ `read_api` の個人アクセストークンを用意してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 3 は、この項の手順 1・2 の後に開いた新しい端末
+- 編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る
+- 削除は [LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う
 
 1. AlmaLinux 10 では、トークンを入力して `~/.bashrc` に書く。
 
@@ -3354,7 +3515,12 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### LazyVim の本体・外部コマンド・プラグインを更新する
 
-設定の取り込みは[設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)で行う。プラグイン更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する。
+- Homebrew で入れた Neovim・lazygit・ripgrep・fd・HackGen と、LazyVim のプラグインを上げる
+- 前提: [Homebrew](#homebrew)と[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+  - `lazy-lock.json` を push するには、[GitHub CLI](#github-cli)でログインしてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。この項の手順 2 の `lazy-lock.json` の差分の確認を省かない
+- 設定の取り込みは[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)で行う
+- プラグイン更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する
 
 1. AlmaLinux 10 では、Homebrew で入れたものを上げる。
 
@@ -3380,6 +3546,11 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 ---
 
 ### lazygit
+
+- Git を端末の画面で操作する lazygit を Homebrew で入れ、自分用の設定を入れて起動を確かめる
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+  - この項の手順 2 は、[lazygit の設定を導入する](#lazygit-の設定を導入する)の前提も要る
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 
 1. brew で lazygit を入れる。
 
@@ -3430,18 +3601,20 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)）にする
     - Windows 11 への導入は[HackGen Console NF](windows-setup.md#hackgen-console-nf)。WezTerm は自分用の設定で変わる
-    - Windows Terminal のフォントは[任意節](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
+    - Windows Terminal のフォントは[Windows 11 のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[AlmaLinux](#git-delta)・[Windows 11](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](#neovim)の手順 4）
     - Windows 11 で Windows PowerShell から起動するなら、[Windows 11 の初期設定の「Neovim を既定のエディタにする」](windows-setup.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
 
 #### lazygit の設定を導入する
 
-- 前提: lazygit・git-delta・HackGen Console NF を入れる
+- 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を `~/lazygit-config` に clone し、`~/.config/lazygit/config.yml` にリンクする
+- 前提: [lazygit](#lazygit)の手順 1 で lazygit を入れ、[git-delta](#git-delta)と[HackGen Console NF](#hackgen-console-nf)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 の前の、既存の `config.yml` の確認と退避を省かない
 
 > [!CAUTION]
 > - この項の手順 1 は既存の `~/.config/lazygit/config.yml` を置き換える
-> - 残す通常ファイルがある場合は止め、別名へ退避してから手順 1 を貼る
+> - 残す通常ファイルがある場合は止め、別名へ退避してから、この項の手順 1 を貼る
 
 1. 設定を clone してリンクする。
 
@@ -3457,7 +3630,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### lazygit の Excel 差分表示を導入する
 
-- 前提: Python 3.9 以上・Git。部分ステージには lazygit 0.66.0 以上・delta 0.20.1 以上も必要
+- 設定のリポジトリ（`~/lazygit-config`）のスクリプトで、Git と lazygit が Excel のブックの差分をテキストで出せるようにする
+- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある（`~/lazygit-config` を使う）。Python 3.9 以上と git が要る
+  - 部分ステージ（[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)）には、lazygit 0.66.0 以上・delta 0.20.1 以上も要る
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う
 
 1. 設定リポジトリで Excel の差分表示を導入して確かめる。
 
@@ -3476,6 +3652,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - `--check` は読み取りだけの確認
 
 #### lazygit で Excel の差分を確かめる
+
+- Excel のブックのある Git リポジトリで、ブックの差分がシートとセル番地の付いたテキストで出ることを確かめる
+- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 
 1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
 
@@ -3496,7 +3676,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### lazygit で Excel のセル変更を部分ステージする
 
-- 前提: lazygit・delta・Excel 差分表示を導入済み。対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
+- lazygit の専用画面で、Excel のブックのセルの変更を選んで index に入れる
+- 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
 - 新規ファイルは全体をコミットしてから使う
 
 1. lazygit のファイル一覧で対象を選び、`E` を押す。
@@ -3521,6 +3704,10 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### lazygit で大きな Excel の変換を待つ
 
+- 大きなブックの差分を、全セルの変換が終わるまで待ってから出す
+- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+
 1. 全セルの変換を待って差分を表示する（`売上表.xlsx` は実際のファイル名）。
 
    ```bash
@@ -3534,6 +3721,11 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 ### yazi
 
+- 端末のファイルマネージャーの yazi と、プレビュー・検索に使うツールを Homebrew で入れ、自分用の設定を入れて `y` で起動する
+- 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[WezTerm](#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+  - この項の手順 3 は、[yazi の設定を導入する](#yazi-の設定を導入する)の前提も要る
+- 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 4 で新しいタブを開く
+
 1. 変数を設定する。
 
    ```bash
@@ -3545,7 +3737,7 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    - **編集が必須の変数は無い**
    - 最小構成にするなら、`YAZI_EXTRAS` を空にする
    - 最後の行で値を読み戻して確かめる
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの項の手順 1 を貼り直す
 
 1. brew で yazi と、プレビュー・検索に使うツールを入れる。
 
@@ -3553,9 +3745,9 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   - 確認が出たら表示された導入予定を確かめて `y` と答え、処理が終わってプロンプトに戻ってから次の手順を貼る（[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
-   - fd・ripgrep・fzf は、先の項で入っているので、`Warning: fd … is already installed and up-to-date.` のように出る
+   - fd・ripgrep（[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 5）と fzf（[シェルのツール](#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
    - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
+   - **次の手順は、確認が出たら表示された導入予定を確かめて `y` と答え、プロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる。[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
 
 1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
 
@@ -3607,7 +3799,9 @@ GitLab でスコープ `read_api` の個人アクセストークンを用意す�
 
 #### yazi の設定を導入する
 
-yazi と依存ツールを先に入れる。
+- 自分用の yazi の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) の `custom` ブランチ）を `~/.config/yazi` に clone する
+- 前提: [yazi](#yazi)の手順 1・2 で yazi と依存ツールを入れてある。ファイルを開くエディタに nvim（[Neovim](#neovim)）、`z` と `Z` のキーに fzf と zoxide（[シェルのツール](#シェルのツール)の手順 1）を使う
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。既存の `~/.config/yazi` の確認と退避を省かない
 
 1. yazi を終了し、自分用の設定を clone する。
 
@@ -3620,6 +3814,10 @@ yazi と依存ツールを先に入れる。
    - `ya env` の Config で読み込む場所を確かめる
 
 #### yazi で複数ファイルをまとめて開く
+
+- yazi で選んだ複数のファイルを、`l` / `<Enter>` でまとめて開けるようにする
+- 前提: [yazi の設定を導入する](#yazi-の設定を導入する)を通してある
+- 実行場所: 自分のユーザーがエディタで開いた `~/.config/yazi/init.lua`（`sudo` は使わない）。追記の前に、今の中身の確認を省かない
 
 1. 選択した複数ファイルをまとめて開くため、`init.lua` に追記する。
 
@@ -3637,7 +3835,9 @@ yazi と依存ツールを先に入れる。
 
 #### mdtable を導入・更新する
 
-- 前提: Python 3.9 以上
+- `mdtable` を `~/md-table-excel` に clone し、専用の仮想環境に入れて確かめる。更新も、この項の手順 1 で行う
+- 前提: Python 3.9 以上と git が入っている（git は[Homebrew](#homebrew)の手順 1 で入る）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う。更新では、`~/md-table-excel` の手元の変更の確認を省かない
 
 1. リポジトリを clone し、導入して確かめる。
 
@@ -3671,7 +3871,10 @@ yazi と依存ツールを先に入れる。
 
 #### mdtable で Markdown の表を Excel と往復する
 
-- 編集する文書のあるディレクトリへ移ってから行う。`README.md` と `README.tables.xlsx` は、対象の文書名とブック名に置き換える
+- Markdown の表を Excel のブックに書き出し、Excel で編集したブックの変更を Markdown に書き戻す
+- 前提: [mdtable を導入・更新する](#mdtable-を導入更新する)を通し、`mdtable` が PATH にある。ブックの編集には、Excel のある端末を使う
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、編集する文書のあるディレクトリ。ブックの編集は、Excel のある端末
+- `README.md` と `README.tables.xlsx` は、対象の文書名とブック名に置き換える
 
 > [!CAUTION]
 > この項の手順 1 の後で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
@@ -3684,7 +3887,7 @@ yazi と依存ツールを先に入れる。
 
    - 同じフォルダーに `README.tables.xlsx` ができる。保存先は `-o` で変えられる
    - 既存のブックは `--force` が無ければ上書きしない
-   - Excel のある端末でブックを編集し、元のフォルダーへ戻してから手順 2 へ進む
+   - **次の手順は、Excel のある端末でブックを編集し、元のフォルダーへ戻してから貼る**
 
 1. 取り込む差分を確かめる。
 
@@ -3692,7 +3895,8 @@ yazi と依存ツールを先に入れる。
    mdtable import README.tables.xlsx --dry-run
    ```
 
-   - 差分だけが表示され、Markdown は変わらない。内容を確認してから手順 3 へ進む
+   - 差分だけが表示され、Markdown は変わらない
+   - **次の手順は、差分の内容を確かめてから貼る**
 
 1. ブックの変更を Markdown に書き戻す。
 
@@ -3708,16 +3912,14 @@ yazi と依存ツールを先に入れる。
 
 ### ShellCheck と shfmt
 
+- シェルスクリプトの静的検査の ShellCheck と、整形の shfmt を Homebrew で入れ、自分のスクリプトを検査する
+- 前提: [Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある。`command -v brew` で何も出なければ、先に通す
+  - この項の手順 5 の JSON の集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
 
 > [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
-> - **前提**: 手順 5 の JSON 集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
-> - **手順 2 で Homebrew の確認が出る場合がある**。答えて導入が完了してから手順 3 を貼る
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
 
@@ -3735,7 +3937,7 @@ yazi と依存ツールを先に入れる。
    - **編集が必須なのは、検査対象のパス `SC_TARGET` だけ**。自分のリポジトリのスクリプトに変える
    - 残りは既定のままでよい
    - 最後に値を読み戻して確かめる
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先に手順 1 の 2 つのブロックを貼り直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの項の手順 1 の 2 つのブロックを貼り直す
 
 1. ShellCheck と shfmt を入れる。
 
@@ -3793,17 +3995,37 @@ yazi と依存ツールを先に入れる。
 
 #### ShellCheck と shfmt: shfmt で整形を確かめる
 
+- shfmt で、スクリプトの今の書き方と整形した結果との違いを見て、`-w` の上書きを一時ディレクトリの複製で試す
+- 前提: [ShellCheck と shfmt](#shellcheck-と-shfmt)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 - **`-d` は差分を出すだけでファイルを変えない**
 
 > [!WARNING]
-> **`-w` は元のファイルを上書きする。** いきなり本番のスクリプトに掛けない。**この項の**手順 2 は、一時ディレクトリの複製に掛けて挙動を見る。
+> **`-w` は元のファイルを上書きする。** いきなり本番のスクリプトに掛けない。**この項の**手順 3 は、一時ディレクトリの複製に掛けて挙動を見る。
+
+1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
+
+   ```bash
+   SC_TARGET=scripts/wireguard/wg-vpn.sh   # 検査するスクリプト。自分のパスに変える。<SC_TARGET>
+   ```
+
+   ```bash
+   SHFMT_INDENT=2           # shfmt -i のインデント幅。0 ならタブ。<SHFMT_INDENT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in SC_TARGET SHFMT_INDENT; do printf '%-13s = %s\n' "$v" "${!v}"; done
+   ```
+
+   - [ShellCheck と shfmt](#shellcheck-と-shfmt)の手順 1 と同じ値を入れる
+   - **編集が必須なのは、検査対象のパス `SC_TARGET` だけ**
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの項の手順 1 の 2 つのブロックを貼り直す
 
 1. 今の書き方とどれだけ違うかを見て、整形対象になるファイルを一覧する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SC_TARGET}" ] || [ -z "${SHFMT_INDENT}" ]; then
-     echo '中断: 手順 1 の SC_TARGET と SHFMT_INDENT を設定してから貼り直す' >&2
+     echo '中断: この項の手順 1 の SC_TARGET と SHFMT_INDENT を設定してから貼り直す' >&2
    else
      shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | wc -l
      shfmt -i "${SHFMT_INDENT}" -d "${SC_TARGET}" | head -30
@@ -3827,6 +4049,25 @@ yazi と依存ツールを先に入れる。
    - **差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)の shfmt の項を見る）
 
 #### ShellCheck と shfmt: 検査を調整する
+
+- ShellCheck の指摘を、1 行だけ（ディレクティブ）か、リポジトリ全体（`.shellcheckrc`）で黙らせる書き方を確かめる
+- 前提: [ShellCheck と shfmt](#shellcheck-と-shfmt)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+
+1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
+
+   ```bash
+   SC_TARGET=scripts/wireguard/wg-vpn.sh   # 検査するスクリプト。自分のパスに変える。<SC_TARGET>
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'SC_TARGET = %s\n' "${SC_TARGET}"
+   ```
+
+   - [ShellCheck と shfmt](#shellcheck-と-shfmt)の手順 1 と同じ値を入れる
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの項の手順 1 の 2 つのブロックを貼り直す
 
 1. 1 行だけ黙らせるディレクティブの例を、検査対象の中から探す。
 
@@ -3854,6 +4095,10 @@ yazi と依存ツールを先に入れる。
 
 #### ShellCheck と shfmt: 更新
 
+- Homebrew で入れた ShellCheck と shfmt を上げる
+- 前提: [Homebrew](#homebrew)と[ShellCheck と shfmt](#shellcheck-と-shfmt)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+
 1. ShellCheck と shfmt を上げる。
 
    ```bash
@@ -3867,15 +4112,14 @@ yazi と依存ツールを先に入れる。
 
 ### VS Code
 
+- Microsoft の dnf のリポジトリから VS Code（rpm 版）を入れ、起動を確かめる
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。デスクトップが要るのは手順 6（GUI の起動）だけ
-> - **手順 6 は、デスクトップにログインした端末から実行する**。TTY やディスプレイが無いシェル（ssh や自動化）からは実行しない
-> - **手順 4 と手順 6 には対話入力がある**（`[y/N]` と、開いたウィンドウ）。答えるかウィンドウを閉じてから、次の手順を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+> - **すべて対象ホスト上で実行する**。デスクトップが要るのは、この項の手順 6（GUI の起動）だけ
+> - **この項の手順 6 は、デスクトップにログインした端末から実行する**。TTY やディスプレイが無いシェル（ssh や自動化）からは実行しない
 
 1. 署名鍵を落として、取り込む前に fingerprint を見る。
 
@@ -3954,7 +4198,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - アプリ一覧の「Visual Studio Code」からでも同じ
-   - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（冒頭の前提と、この手順の補足）
+   - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（この項のリードのアラートと、この手順の補足）
    - ウィンドウが開き、初回は Welcome 画面と `Continue without Signing In` のボタンが表示される
    - ウィンドウが出たことを確かめる
    - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VS Code への操作として食われる）
@@ -3973,7 +4217,9 @@ yazi と依存ツールを先に入れる。
 
 #### VS Code: 拡張機能を入れる
 
-- CLI から入れられる
+- VS Code の拡張機能を、CLI（`code`）で一覧し、入れ、消す
+- 前提: [VS Code](#vs-code)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 - Settings Sync・Remote-SSH・Marketplace の利用条件は扱わない
 
 1. 入っている拡張機能を一覧する。
@@ -3987,7 +4233,9 @@ yazi と依存ツールを先に入れる。
 
 #### VS Code: 更新
 
-- VS Code は通常の更新に含まれる
+- VS Code を dnf で上げる。VS Code は、OS の通常の更新にも含まれる
+- 前提: [VS Code](#vs-code)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
 
 1. VS Code を更新する。
 
@@ -4002,19 +4250,13 @@ yazi と依存ツールを先に入れる。
 
 ### npm のオフライン導入
 
+- インターネットに出られないホストで、SSH の SOCKS トンネルを通して AppStream の Node.js と npm を入れ、Neovim の Mason に npm のパッケージ（LSP サーバー・リンター）を入れる
+- 前提: オンラインのホストから[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 でトンネルを張り、オフラインのホストへ接続してある
+  - この項の手順 1 の前に、[SSH の SOCKS トンネル: dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)も通してある
+  - 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入)と[Neovim](#neovim)の手順 1・2 を通してある
+  - この項の手順 1・2 で経路を設定してから、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 10 の初回起動を含む導入を行い、この項の手順 3 へ進む。Mason の npm パッケージは未導入でよい
+- 実行場所: オフラインのホストの、`sudo` できる自分のユーザーのシェル（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 のシェル）。この項の手順 4 でトンネルを閉じてログインし直し（オンラインのホストでも操作する）、この項の手順 5 はログインし直したシェルに貼る
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
-
-> [!IMPORTANT]
-> - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、オフラインのホストへ接続する
-> - 「npm のオフライン導入」の手順 1 の前に[dnf のプロキシ設定](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)も通す
-> - 前提: 同じトンネルで [Homebrew](#homebrew-のオフライン導入)と [Neovim](#neovim)の手順 1・2 までを導入する
-> - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 10 の初回起動を含む導入は、「npm のオフライン導入」の手順 1・2 で経路を設定してから行う。Mason の npm パッケージは未導入でよい
-> - **「npm のオフライン導入」の手順 1〜3 は、SOCKS トンネルの手順 3 のシェルに貼る**（オフラインのホストの、`sudo` できる一般ユーザー）
-> - 「npm のオフライン導入」の手順 4 で[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を通し、手順 5 はログインし直したシェルに貼る
-> - **「npm のオフライン導入」の手順 3 は Neovim の画面、手順 4 は ssh のログインがある**。終わってから次の手順を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 > [!WARNING]
 >
@@ -4028,8 +4270,8 @@ yazi と依存ツールを先に入れる。
 
    - `nodejs`・`nodejs-npm` と不足する依存が入り、`Complete!`（日本語では `完了しました!`）で終わる。導入済みなら `Nothing to do.`（`行うべきことはありません。`）も出る
    - `Failed to download metadata for repo` で止まったら、dnf がトンネルを通っていない
-     - `Curl error (6)`（名前を引けない）なら、SSH の SOCKS トンネルの[dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)の設定が無い
-     - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（同書の手順 2 から張り直す）
+     - `Curl error (6)`（名前を引けない）なら、[SSH の SOCKS トンネル: dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)の設定が無い
+     - `Curl error (7)`（`127.0.0.1 port 1080` につながらない）なら、トンネルが無い（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 から張り直す）
 
 1. Node.js と npm を確かめ、npm にトンネルを使わせて、レジストリに届くか確かめる。
 
@@ -4051,7 +4293,7 @@ yazi と依存ツールを先に入れる。
    - `npm notice PONG 148ms` のように `PONG` が出れば、npm はトンネルを通ってレジストリに届いている
    - **トンネルを張り直したら、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 に続けて、この手順を貼り直す**
 
-1. 手順 2 のシェルで Neovim でファイルを開き、Mason に足りないパッケージを入れさせる。
+1. この項の手順 2 のシェルで Neovim でファイルを開き、Mason に足りないパッケージを入れさせる。
 
    ```bash
    nvim -R ~/.config/nvim/init.lua
@@ -4060,17 +4302,17 @@ yazi と依存ツールを先に入れる。
    - 入れ終わるたびに、`markdownlint-cli2 was successfully installed.` のような通知が出る
    - `:Mason` で画面を開くと、入れている間は `Installing` に `$ npm install markdown-toc@1.2.0` のような行が出る
    - npm のパッケージ（`markdownlint-cli2`・`json-lsp` など）が `Installed` に並べばよい
-   - 手順 5 で使う `markdownlint-cli2` が設定に無ければ、`:MasonInstall markdownlint-cli2` で入れる。ほかの npm のパッケージも、同じように名前で入れられる
+   - この項の手順 5 で使う `markdownlint-cli2` が設定に無ければ、`:MasonInstall markdownlint-cli2` で入れる。ほかの npm のパッケージも、同じように名前で入れられる
    - 失敗は通知が出ないことがある。`Installed` に並ばないものは、`:MasonLog` の `Installation failed for Package(name=…)` の行で理由を見る
    - npm 以外の理由（`unzip` が無い、など）で失敗したものは[注意点](extra/npm-offline.md#注意点)
    - 通知が出そろってから、`:qa` で閉じる
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
-1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
+1. [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
 
-   - その節の手順 1（`exit`）はオフラインのホストで、手順 2 はオンラインのホストで貼る
-   - オンラインのホストのシェルで同書の手順 1 の変数が消えていたら（新しいシェルなど）、先に同書の手順 1 を貼る
+   - [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1（`exit`）はオフラインのホストで、同じ項の手順 2 はオンラインのホストで貼る
+   - オンラインのホストのシェルで[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の変数が消えていたら（新しいシェルなど）、先に[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 を貼る
    - **次の手順は、ログインし直してから貼る**（続けて貼るとパスワードへの答えとして食われる）
 
 1. オフラインのホストで、トンネルが無くても Mason の npm のパッケージが動き、npm が外に出られないことを確かめる。
@@ -4090,7 +4332,9 @@ yazi と依存ツールを先に入れる。
 
 #### npm のオフライン導入: 更新
 
-- [SSH の SOCKS トンネル 手順 1〜3](#ssh-の-socks-トンネル) でトンネルを張り、そのシェルで[手順 2](#npm-のオフライン導入) を貼ってから、この項を貼る
+- オフラインのホストの Node.js と npm、Mason の npm のパッケージを、SSH の SOCKS トンネルを通して上げる
+- 前提: [npm のオフライン導入](#npm-のオフライン導入)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 でトンネルを張り、そのシェルで[npm のオフライン導入](#npm-のオフライン導入)の手順 2 を貼ってある
+- 実行場所: オフラインのホストの、トンネルを張った ssh のシェル（`sudo` できる自分のユーザー）
 - Node.js と npm は `sudo dnf upgrade` でも上がる（トンネルか、dnf が届くリポジトリが要る）
 
 1. Node.js と npm を上げる。
@@ -4127,6 +4371,10 @@ yazi と依存ツールを先に入れる。
 - Firefox と画像の道具
 
 ### Firefox
+
+- Mozilla の dnf のリポジトリから最新版（Rapid Release）の Firefox を入れ、RPM Fusion の FFmpeg で AAC・H.264 を再生できるようにする
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある。この項の手順 8〜10 には、[EPEL と RPM Fusion](#epel-と-rpm-fusion)も要る
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。この項の手順 7・11 は、デスクトップのセッションの Firefox
 
 1. 変数を設定する。
 
@@ -4264,17 +4512,15 @@ yazi と依存ツールを先に入れる。
 ### 画像の道具
 
 - Dockerfile とコンテナイメージの検査（hadolint・dive・Trivy）に使う
+- 前提: [Homebrew](#homebrew)の手順 1〜3 と[Podman](#podman)の手順 7（API ソケット）までを通してある
+  - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
+- 実行場所: 自分のユーザーでログインしたシェル（端末の bash か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[ロールバックと注意点](extra/image-tools.md)
+- **この項の手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
+- **この項の手順 10 で dive の画面（TUI）が開く**。`q` で終了する
 
 > [!IMPORTANT]
-> - 前提: [Homebrew](#homebrew)の手順 1〜3 と[Podman](#podman)の手順 7（API ソケット）までを通す
-> - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
-> - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
-> - **手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
-> - **手順 10 で dive の画面（TUI）が開く**。`q` で終了する
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+> - **`sudo -i` した root のシェルでは行わない**（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
 
 1. brew で hadolint と dive を入れる。
 
@@ -4396,7 +4642,7 @@ yazi と依存ツールを先に入れる。
    - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 8 と同じ値
    - いちばん下の行に、キーの案内（`Quit`・`Tab Switch view`・`^F Filter` など）が出る
    - `q` で終了する
-   - **後ろの節の手順は、`q` で終了してから貼る**（続けて貼ると dive への操作として食われる）
+   - **次のコマンドは、`q` で終了してから貼る**（続けて貼ると dive への操作として食われる）
 
 #### 画像の道具: 使い方の基本
 
@@ -4416,6 +4662,10 @@ yazi と依存ツールを先に入れる。
   - `DS-0026 (LOW)`: `HEALTHCHECK` が無い
 
 #### 画像の道具: 更新
+
+- Homebrew で入れた hadolint・dive と、dnf で入れた Trivy を上げる
+- 前提: [画像の道具](#画像の道具)を通してある
+- 実行場所: 自分のユーザーでログインしたシェル（端末の bash か SSH）
 
 1. hadolint と dive を更新する。
 
@@ -4443,8 +4693,9 @@ yazi と依存ツールを先に入れる。
 ### SSH を公開鍵だけにする
 
 - 常時動かしておく PC で、パスワードでの SSH のログインを断り、公開鍵だけにする
+- 前提: [ログインと sudo](#ログインと-sudo)と、[システムの設定](#システムの設定)の手順 3・4（SSH の待ち受けとファイアウォール）を通してある
+- 実行場所: 常時動かしておく PC の、SSH でログインを受けるユーザーの端末（bash）。この項の手順 2・4 は、つなぐ側の PC で行う
 - 鍵は、つなぐ側の PC で作る（`ssh-keygen -t ed25519`）。公開鍵の 1 行は、つなぐ側の `~/.ssh/id_ed25519.pub`（Windows は `%USERPROFILE%\.ssh\id_ed25519.pub`）
-- この項の手順 2・4 は、つなぐ側の PC で行う
 
 > [!WARNING]
 > **この項の手順 3 の後は、パスワードでは SSH でログインできない**。この項の手順 2 で、鍵でログインできることを確かめてから貼る。SSH でつないで作業しているときは、そのセッションを閉じずに、別のセッションでこの項の手順 4 を確かめる。
@@ -4515,7 +4766,9 @@ yazi と依存ツールを先に入れる。
 ### Wake on LAN を使う
 
 - 電源を切った（シャットダウンした）この PC を、LAN の別の PC から起こせるようにする。有線 LAN だけ（Wi-Fi では使えない）
-- **この項の手順 3 で再起動して UEFI の画面に入り、この項の手順 4 は UEFI の画面、この項の手順 7 は LAN の別の PC で行う**
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。この項の手順 4 は UEFI の設定の画面、この項の手順 7 は LAN の別の PC で行う
+- **この項の手順 3 で再起動して UEFI の画面に入る**
 - 仮想マシンでは、電源を切った VM は起こせない（VirtualBox など）
 
 1. 変数を設定する（どちらも自動）。
@@ -4605,17 +4858,17 @@ yazi と依存ツールを先に入れる。
 
 ### SSH の SOCKS トンネル
 
+- インターネットに出られないホストから、ssh の SOCKS の転送で、インターネットに出られるホストを通して外へ出る
+- 前提: オンラインのホストからオフラインのホストへ ssh でログインできる（LAN・VPN・VirtualBox のホストオンリーのネットワークなど）。オンラインのホストの OpenSSH は 7.6 以上
+- 実行場所: この項の手順 1・2 は、インターネットに出られるホスト（以下、オンラインのホスト）のシェル（bash）。手順 3 は、手順 2 でログインしたインターネットに出られないホスト（以下、オフラインのホスト）のシェル
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[ロールバックと注意点](extra/ssh-socks-tunnel.md)
 
 > [!IMPORTANT]
-> - **2 台のホストで行う**。手順 1・2 はインターネットに出られるホスト（以下、オンラインのホスト）で、手順 3 は、手順 2 でログインしたインターネットに出られないホスト（以下、オフラインのホスト）のシェルで貼る
-> - 前提: オンラインのホストからオフラインのホストへ ssh でログインできること（LAN・VPN・VirtualBox のホストオンリーのネットワークなど）。オンラインのホストの OpenSSH は 7.6 以上
-> - **手順 2 は ssh のログイン**。ログインしてから手順 3 を貼る
-> - オンラインのホストが Windows なら、手順 1 は飛ばし、手順 2 の箇条書きのとおり 1 行を打つ
+> - **2 台のホストで行う**。この項の手順 1・2 はオンラインのホストで、手順 3 は、手順 2 でログインしたオフラインのホストのシェルで貼る
+> - **この項の手順 2 は ssh のログイン**。ログインしてから手順 3 を貼る
+> - オンラインのホストが Windows なら、この項の手順 1 は飛ばし、手順 2 の箇条書きのとおり 1 行を打つ
 
-- 手順 1 はオンラインのホストのシェルで貼る。手順 2 の後は、ログインしたオフラインのホストのシェルで貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- これを前提にする手順書:
+- これを前提にする項:
   - [Homebrew（インターネットに出られないホスト）](#homebrew-のオフライン導入)
   - [npm（インターネットに出られないホスト）](#npm-のオフライン導入)（Neovim の Mason が npm で入れるパッケージ。npm には `https_proxy` を足す）
 
@@ -4641,7 +4894,7 @@ yazi と依存ツールを先に入れる。
    - オフラインのホストのユーザー名がオンラインのホストと違うときは、`OFFLINE_USER` も書き換える
    - 最後に値を読み戻して確かめる
    - `OFFLINE_HOST` を書き換えたかをここで確かめる
-   - **新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直す
+   - **新しいシェルを開いたら**、この項の手順 1 の 2 つのブロックを貼り直す
 
 1. オンラインのホストから、SOCKS の転送を付けて ssh でログインする。
 
@@ -4668,15 +4921,17 @@ yazi と依存ツールを先に入れる。
    - `ss` の行は `127.0.0.1:1080`（IPv6 があれば `[::1]:1080` も）だけ
    - `0.0.0.0:1080` や `*:1080` が出たら、LAN 全体にプロキシが開いている。`exit` で抜けて、ここで止める（参考資料を参照）
    - 最後の行が `200` なら届いている
-   - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、手順 2 の転送が無い
-   - `export` はこのシェルの中だけで有効。**ssh を張り直したら、手順 2 からやり直す**
+   - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、この項の手順 2 の転送が無い
+   - `export` はこのシェルの中だけで有効。**ssh を張り直したら、この項の手順 2 からやり直す**
    - `sudo` を付けたコマンド・podman・npm は `ALL_PROXY` を読まない（参考資料を参照）。dnf には[dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)で設定する
 
 #### SSH の SOCKS トンネル: dnf にもトンネルを使わせる
 
 - オフラインのホストで、dnf で外のリポジトリから入れるときだけ行う（[Homebrew のオフライン導入](#homebrew-のオフライン導入) では、Homebrew の依存が足りないとき）
+- 前提: オフラインのホストで[ログインと sudo](#ログインと-sudo)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、トンネルを張ってある
+- 実行場所: オフラインのホストの、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 を貼ったシェル（bash）
 - 社内のミラーなど、dnf がトンネル無しで届くリポジトリを使うホストでは行わない（その通信もトンネルに向かってしまう）
-- 手順 3 のシェルで貼る。足した行は、[ロールバック](extra/ssh-socks-tunnel.md#ロールバック)で消すまで残る
+- 足した行は、[ロールバック](extra/ssh-socks-tunnel.md#ロールバック)で消すまで残る
 
 1. dnf にプロキシを設定する。
 
@@ -4693,9 +4948,12 @@ yazi と依存ツールを先に入れる。
 
 #### SSH の SOCKS トンネル: トンネルを閉じる
 
-- トンネルを使う手順書の作業が終わってから行う
-- 張り直すときは、[手順 1〜3](#ssh-の-socks-トンネル) から（手順 1 の変数が残っているオンラインのホストのシェルなら、手順 2 から）
-- この項の手順 2・3 は、閉じたことを確かめるためのもの。確かめないなら、この項の手順 1 だけでよい
+- SOCKS のトンネルを閉じ、オフラインのホストが外に出られなくなったことを確かめる
+- 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)でトンネルを張り、トンネルを使う手順書の作業を終えてある
+- 実行場所: この項の手順 1 は、トンネルを張ったオフラインのホストのシェル（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 でログインしたシェル）。手順 2・3 は、手順 1 で戻ったオンラインのホストのシェル（bash）、手順 4 は、手順 3 でログインしたオフラインのホストのシェル
+- オンラインのホストが Windows なら、この項の手順 2 は飛ばし、手順 3 の箇条書きのとおり 1 行を打つ
+- 張り直すときは、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 から（同じ項の手順 1 の変数が残っているオンラインのホストのシェルなら、同じ項の手順 2 から）
+- この項の手順 2〜4 は、閉じたことを確かめるためのもの。確かめないなら、この項の手順 1 だけでよい
 
 1. オフラインのホストからログアウトして、トンネルを閉じる。
 
@@ -4705,13 +4963,32 @@ yazi と依存ツールを先に入れる。
 
    - **次の手順は、オンラインのホストのプロンプトに戻ってから貼る**
 
+1. オンラインのホストで、変数を設定する（`OFFLINE_HOST` は必ず値を入れる）。
+
+   ```bash
+   OFFLINE_HOST=192.168.1.20            # ← 自分の値に書き換える。オフラインのホストの IP アドレスかホスト名。<OFFLINE_HOST>
+   ```
+
+   ```bash
+   OFFLINE_USER=${USER}                 # オフラインのホストでログインするユーザー。<OFFLINE_USER>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in OFFLINE_HOST OFFLINE_USER; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは `OFFLINE_HOST` だけ。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 と同じ値を入れる
+   - `OFFLINE_USER` も、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 で書き換えたなら、同じ値に書き換える
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 2 の 2 つのブロックを貼り直す
+
 1. オンラインのホストから、転送を付けずにログインし直す。
 
    ```bash
-   ssh "${OFFLINE_USER:?手順 1 の OFFLINE_USER が空のまま}@${OFFLINE_HOST:?手順 1 の OFFLINE_HOST が空のまま}"
+   ssh "${OFFLINE_USER:?この項の手順 2 の OFFLINE_USER が空のまま}@${OFFLINE_HOST:?この項の手順 2 の OFFLINE_HOST が空のまま}"
    ```
 
-   - オンラインのホストが Windows なら、この Bash のブロックの代わりに、PowerShell か cmd に `ssh <OFFLINE_USER>@<OFFLINE_HOST>` を打つ（手順 2 と同じユーザー・ホストを指定する）
+   - オンラインのホストが Windows なら、この Bash のブロックの代わりに、PowerShell か cmd に `ssh <OFFLINE_USER>@<OFFLINE_HOST>` を打つ（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 と同じユーザー・ホストを指定する）
    - **次の手順は、ログインしてから貼る**（続けて貼るとパスワードへの答えとして食われる）
 
 1. オフラインのホストで、トンネルが無く、外に出られないことを確かめる。
@@ -4735,16 +5012,15 @@ yazi と依存ツールを先に入れる。
 > - **拠点の WG ホスト用の手順**。外出先の PC は[AlmaLinux](#wireguard-almalinux-10-の-pc-からつなぐ)・[Windows](windows-setup.md#wireguard)の手順から通す
 > - [site.env を作る](#wireguard-siteenv-を作る)の手順 1〜3 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 1〜5 は**両拠点の WG ホストで**、同じ項の手順 6 は**両拠点のルーターで行う**
 > - [クライアント登録](#wireguard-クライアントを登録する)の手順 1〜7・9 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 1 は**受ける拠点のホストで行う**
-> - クライアント登録の手順 8 と疎通確認の手順 2 はクライアントで行う
-> - コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は[site.env を作る](#wireguard-siteenv-を作る)の手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す
+> - [クライアント登録](#wireguard-クライアントを登録する)の手順 8 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 2 はクライアントで行う
+> - コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は、各項の手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す
 > - **拠点 B のホストでは、引数の `A` を `B` に読み替える**
 > - [site.env を作る](#wireguard-siteenv-を作る)の手順 2 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 2 で、**`vi` が開く**。保存して閉じてから次の手順を行う
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#wireguard-バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
-- [site.env を作る](#wireguard-siteenv-を作る)の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら設定し直す
-  - `./wg-vpn.sh` で始まるブロックは、その項の最初のブロックの `cd` で移った先（`<REPO>/scripts/wireguard`）で貼る
-  - 項の途中でシェルを開き直したら、`REPO` を設定し直した後に `cd "$REPO/scripts/wireguard"` を打ってから続ける。`sudo: ./wg-vpn.sh: コマンドが見つかりません` と出たら、これが抜けている
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- `REPO` を使う項は、その項の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら、その項の手順 1 を貼り直す
+  - `./wg-vpn.sh` で始まるブロックは、その項の中で先に貼った `cd` で移った先（`<REPO>/scripts/wireguard`）で貼る
+  - 項の途中でシェルを開き直したら、その項の手順 1 を貼り直した後に `cd "$REPO/scripts/wireguard"` を打ってから続ける。`sudo: ./wg-vpn.sh: コマンドが見つかりません` と出たら、これが抜けている
 
 > [!WARNING]
 > **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる。**
@@ -4754,6 +5030,10 @@ yazi と依存ツールを先に入れる。
 > - 切り離して実行する方法は、[落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)にある
 
 #### WireGuard: site.env を作る
+
+- 両拠点の WG ホストで、`wg-vpn.sh` に渡す値を書いた `~/wg/site.env` を作り、両拠点に同じ内容で置く
+- 前提: 両拠点の WG ホストに、このリポジトリ（setup-notes）を clone してある
+- 実行場所: 両拠点の WG ホストの、自分のユーザーのシェル（bash）
 
 1. 変数を設定する。
 
@@ -4781,11 +5061,27 @@ yazi と依存ツールを先に入れる。
 
 #### WireGuard: 鍵を作って適用する
 
+- 両拠点の WG ホストで、WG ホストの鍵ペアを作り、`site.env` の設定を適用する（つなぐ側の AlmaLinux 10 の PC の鍵は、[鍵を作る](#wireguard-鍵を作る)で作る）
+- 前提: 両拠点の WG ホストで、[ログインと sudo](#ログインと-sudo)と[site.env を作る](#wireguard-siteenv-を作る)を通してある
+- 実行場所: 両拠点の WG ホストの、自分のユーザーのシェル（bash）。この項の手順 7 は、両拠点のルーターで行う
+
+1. 変数を設定する。
+
+   ```bash
+   REPO=~/setup-notes                    # このリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   ```
+
+   - clone 先が `~/setup-notes` なら、既定のままでよい。[site.env を作る](#wireguard-siteenv-を作る)の手順 1 と同じ値にする
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
+
 1. 両拠点の WG ホストで、`wireguard-tools` を入れて鍵ペアを作る。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env keygen A        # 拠点 B のホストでは B
    ```
 
@@ -4810,7 +5106,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
    ```
 
@@ -4822,16 +5118,20 @@ yazi と依存ツールを先に入れる。
    sudo ./wg-vpn.sh -e ~/wg/site.env apply A             # 拠点 B のホストでは B
    ```
 
-   - 末尾に、ルーターに入れる値（ポート転送と静的経路）が表示される（この項の手順 6）
+   - 末尾に、ルーターに入れる値（ポート転送と静的経路）が表示される（この項の手順 7）
    - 拠点の指定（`A` / `B`）はこのホストの LAN 側 IP（`WG_x_LAN_IP`）と照合され、違えば何も変更せずに止まる
    - **注意**: トンネル越しの ssh で作業していると、`apply` の restart で切れる（冒頭の警告）
 
-1. 両拠点のルーターに、この項の手順 5 の `apply` の末尾に表示された値を入れる。
+1. 両拠点のルーターに、この項の手順 6 の `apply` の末尾に表示された値を入れる。
 
    - 入れるのは、ポート転送と静的経路
    - **次の手順は、両拠点のルーターに入れてから貼る**
 
 #### WireGuard: クライアントを登録する
+
+- クライアントを受ける拠点の WG ホストで、クライアント（PC・スマートフォン）を登録して反映し、クライアント用 conf を渡す
+- 前提: 両拠点の WG ホストで、[鍵を作って適用する](#wireguard-鍵を作って適用する)を通してある
+- 実行場所: クライアントを受ける拠点の WG ホストの、自分のユーザーのシェル（bash）。この項の手順 8 は、クライアント（PC・スマートフォン）で行う
 
 1. クライアントを受ける拠点の WG ホストで変数を設定し、登録済みのクライアントを確かめる（`SITE` と `CLIENT_NAME` は必ず値を入れる）。
 
@@ -4912,7 +5212,7 @@ yazi と依存ツールを先に入れる。
 
    - 表示した QR コードを、この項の手順 8 でスマートフォンに読み取らせる
    - `ERROR: qrencode がありません` と出て止まったら、`sudo dnf install -y qrencode` で入れてから、この手順を貼り直す
-     - AlmaLinux 10 では、`qrencode` は EPEL にある（EPEL は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](#epel-と-rpm-fusion)で有効にする）
+     - AlmaLinux 10 では、`qrencode` は EPEL にある（EPEL は、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で有効にする）
 
 1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
@@ -4932,11 +5232,27 @@ yazi と依存ツールを先に入れる。
 
 #### WireGuard: 状態と疎通を確かめる
 
+- 受ける拠点の WG ホストで WireGuard の状態を見て、クライアントから疎通を確かめる
+- 前提: 両拠点の WG ホストで、[鍵を作って適用する](#wireguard-鍵を作って適用する)を通してある。外出先のクライアントからも確かめるときは、[クライアントを登録する](#wireguard-クライアントを登録する)を通してある
+- 実行場所: 受ける拠点の WG ホストの、自分のユーザーのシェル（bash）。この項の手順 3 は、クライアントで行う
+
+1. 変数を設定する。
+
+   ```bash
+   REPO=~/setup-notes                    # WG ホスト上でこのリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   ```
+
+   - clone 先が `~/setup-notes` なら、既定のままでよい。[site.env を作る](#wireguard-siteenv-を作る)の手順 1 と同じ値にする
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
+
 1. WG ホストで状態を見る。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env status
    ```
 
@@ -4962,49 +5278,30 @@ yazi と依存ツールを先に入れる。
 
 > [!IMPORTANT]
 > - **この項は AlmaLinux 10 の PC のもの**。Windows 11 の PC は、[Windows 11 で使う](windows-setup.md#wireguard)から通す（管理者の Windows PowerShell 5.1 に貼る）
-> - **拠点の WG ホストができてから始める**（[実施手順](#wireguard)の[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 6 まで）
-> - **PC で実行する**。[WG ホストに登録する](#wireguard-wg-ホストに登録する)の手順 1・2 と[トンネルを確かめる](#wireguard-トンネルを確かめる)の手順 3 だけ WG ホストで実行する
+> - **PC で実行する**。[WG ホストに登録する](#wireguard-wg-ホストに登録する)の手順と、[トンネルを確かめる](#wireguard-トンネルを確かめる)の WG ホストで確かめる手順だけ、WG ホストで実行する
 > - **`sudo -i` した root のシェルではなく、自分のシェルで貼る**。`~` が自分のホームになるため
 > - [conf を取り込む](#wireguard-conf-を取り込む)の手順 1 で **`vi` が開く**。`client show` の出力を貼って保存し、閉じてから次の手順を貼る
 > - [conf を取り込む](#wireguard-conf-を取り込む)の手順 3 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
 
-- [鍵を作る](#wireguard-鍵を作る)の手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 変数のある項は、その項の手順 1 で変数を設定したシェルに貼る
 
 ##### WireGuard: 鍵を作る
 
-1. 変数を設定する（4 つの IP は必ず値を入れる）。
+- つなぐ側の AlmaLinux 10 の PC で、`wireguard-tools` を入れ、この PC の鍵ペアを作る（拠点の WG ホストの鍵は、[鍵を作って適用する](#wireguard-鍵を作って適用する)で作る）
+- 前提: この PC で[ログインと sudo](#ログインと-sudo)を通してある。拠点の WG ホストで、[状態と疎通を確かめる](#wireguard-状態と疎通を確かめる)まで通してある
+- 実行場所: つなぐ側の AlmaLinux 10 の PC の、自分のユーザーの端末（bash）
 
-   ```bash
-   WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
-   ```
-
-   ```bash
-   WG_HOST_LAN_IP=192.168.110.2         # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
-   ```
-
-   ```bash
-   ROUTER_LAN_IP=192.168.110.1          # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
-   ```
-
-   ```bash
-   PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
-   ```
+1. 変数を設定する。
 
    ```bash
    WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「トンネルを確かめる」の手順 5 で秘密鍵と conf を消す）
    printf '\n\033[7m 確認 \033[0m\n'
-   for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
-     printf '%-15s = %s\n' "$v" "${!v}"
-   done
+   printf 'WG_DIR = %s\n' "${WG_DIR}"
    ```
 
-   - 編集が必須なのは、1 行ずつの 4 ブロック
    - 鍵と conf の一時置き場（`WG_DIR`）は既定のままでよい
    - 最後に値を読み戻して確かめる
-   - 例の値は拠点 A がクライアントを受ける構成のもの。拠点 B が受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること
-   - **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
-   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 の 5 つのブロックを貼り直してから先へ進む
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
 
 1. `wireguard-tools` を入れる。
 
@@ -5034,6 +5331,10 @@ yazi と依存ツールを先に入れる。
 
 ##### WireGuard: WG ホストに登録する
 
+- クライアントを受ける拠点の WG ホストで、この PC の公開鍵を登録して反映し、クライアント用 conf を PC へ持っていく
+- 前提: [鍵を作る](#wireguard-鍵を作る)を通し、この PC の公開鍵を表示してある
+- 実行場所: クライアントを受ける拠点の WG ホストの、自分のユーザーのシェル（bash）
+
 1. WG ホストで、[クライアントを登録する](#wireguard-クライアントを登録する)の手順 1・2・4・5 を行い、この PC の公開鍵を登録して反映する。
 
    - 同じ項の手順 1 の `CLIENT_PUBKEY` には、[鍵を作る](#wireguard-鍵を作る)の手順 3 で PC に表示された公開鍵（44 文字）を貼る
@@ -5047,10 +5348,26 @@ yazi と依存ツールを先に入れる。
 
 ##### WireGuard: conf を取り込む
 
+- つなぐ側の AlmaLinux 10 の PC で、クライアント用 conf に秘密鍵を入れ、拠点の LAN の外で NetworkManager に取り込む
+- 前提: [WG ホストに登録する](#wireguard-wg-ホストに登録する)を通し、`client show` の出力を PC に持ってきてある
+- 実行場所: つなぐ側の AlmaLinux 10 の PC の、自分のユーザーの端末（bash）
+
+1. 変数を設定する。
+
+   ```bash
+   WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「鍵を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'WG_DIR = %s\n' "${WG_DIR}"
+   ```
+
+   - [鍵を作る](#wireguard-鍵を作る)の手順 1 と同じ値にする（既定のままなら、変えなくてよい）
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
+
 1. PC で、[WG ホストに登録する](#wireguard-wg-ホストに登録する)の手順 2 の `client show` の出力を `vi` に貼り、`wg0.conf` に保存する。
 
    ```bash
-   ( umask 077; vi "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" )    # 「WG ホストに登録する」の手順 2 の client show の出力をそのまま貼って保存する
+   ( umask 077; vi "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.conf" )    # 「WG ホストに登録する」の手順 2 の client show の出力をそのまま貼って保存する
    ```
 
    - `client show` の出力は、WG ホストの端末からコピーする
@@ -5062,7 +5379,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   if [ "$(grep -c '^PrivateKey *=' "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" 2>/dev/null)" != 1 ] || [ ! -s "${WG_DIR}/wg0.key" ]; then
+   if [ "$(grep -c '^PrivateKey *=' "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.conf" 2>/dev/null)" != 1 ] || [ ! -s "${WG_DIR}/wg0.key" ]; then
      echo '中断: wg0.conf の PrivateKey 行が 1 行ちょうどでないか、wg0.key が無い' >&2
    else
      sed -i "s|^PrivateKey *=.*|PrivateKey = $(cat "${WG_DIR}/wg0.key")|" "${WG_DIR}/wg0.conf" &&
@@ -5073,14 +5390,14 @@ yazi と依存ツールを先に入れる。
 
 1. PC を、拠点の LAN の外のネットワークにつなぐ（スマートフォンのテザリングなど）。
 
-   - LAN 内でこの項の手順 4 を貼ると、そこで通信が切れる
+   - LAN 内でこの項の手順 5 を貼ると、そこで通信が切れる
    - **次の手順は、LAN の外につないでから貼る**
 
 1. 拠点の LAN の外で、conf を NetworkManager に取り込み、自動で張られたトンネルをすぐ切る。
 
    ```bash
    {
-     sudo nmcli connection import type wireguard file "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.conf" &&
+     sudo nmcli connection import type wireguard file "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.conf" &&
      sudo nmcli connection modify wg0 connection.autoconnect no &&
      nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
      nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（「トンネルを確かめる」の手順 1 で改めて張る）
@@ -5101,6 +5418,43 @@ yazi と依存ツールを先に入れる。
      - `wireguard.peers` に接続先拠点の公開鍵
 
 ##### WireGuard: トンネルを確かめる
+
+- つなぐ側の AlmaLinux 10 の PC でトンネルを張り、拠点への疎通と、拠点から PC への逆方向を確かめる
+- 前提: [conf を取り込む](#wireguard-conf-を取り込む)を通してある
+- 実行場所: 拠点の LAN の外につないだ、つなぐ側の AlmaLinux 10 の PC の、自分のユーザーの端末（bash）。この項の手順 4・5 は、クライアントを受ける拠点の WG ホストの、自分のユーザーのシェルで行う
+
+1. PC で、変数を設定する（4 つの IP は必ず値を入れる）。
+
+   ```bash
+   WG_HOST_TUN_IP=10.99.0.1             # 接続先拠点の WG ホストの wg0 アドレス（site.env の WG_A_TUN_IP）。<WG_HOST_TUN_IP>
+   ```
+
+   ```bash
+   WG_HOST_LAN_IP=192.168.110.2         # 同じホストの LAN 側 IP（WG_A_LAN_IP）。<WG_HOST_LAN_IP>
+   ```
+
+   ```bash
+   ROUTER_LAN_IP=192.168.110.1          # 接続先拠点のルーターの LAN 側 IP（ROUTER_A_LAN_IP）。<ROUTER_LAN_IP>
+   ```
+
+   ```bash
+   PEER_WG_LAN_IP=192.168.120.2         # 相手拠点の WG ホストの LAN 側 IP（WG_B_LAN_IP）。<PEER_WG_LAN_IP>
+   ```
+
+   ```bash
+   WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「鍵を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in WG_HOST_TUN_IP WG_HOST_LAN_IP ROUTER_LAN_IP PEER_WG_LAN_IP WG_DIR; do
+     printf '%-15s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは、1 行ずつの 4 ブロック
+   - `WG_DIR` は、[鍵を作る](#wireguard-鍵を作る)の手順 1 と同じ値にする（既定のままなら、変えなくてよい）
+   - 最後に値を読み戻して確かめる
+   - 例の値は拠点 A がクライアントを受ける構成のもの。拠点 B が受ける構成なら、`site.env` の `*_B_*` 側の値が入っていること
+   - **既定値のままでもエラーにならない**ので、4 つの IP を書き換えたか必ずここで確かめる
+   - 変数はそのシェルの中だけで有効。**新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 の 5 つのブロックを貼り直してから先へ進む
 
 1. 拠点の LAN の外で、トンネルを張る。
 
@@ -5125,7 +5479,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   for h in "${WG_HOST_TUN_IP:?「鍵を作る」の手順 1 の変数が空のまま}" "${WG_HOST_LAN_IP:?}" "${ROUTER_LAN_IP:?}" "${PEER_WG_LAN_IP:?}"; do
+   for h in "${WG_HOST_TUN_IP:?この項の手順 1 の変数が空のまま}" "${WG_HOST_LAN_IP:?}" "${ROUTER_LAN_IP:?}" "${PEER_WG_LAN_IP:?}"; do
      echo "== $h"; ping -c 3 -W 2 "$h" | tail -2
    done
    tracepath -n "${PEER_WG_LAN_IP:?}"             # <WG_HOST_TUN_IP> → <PEER_WG_LAN_IP> の順に出る
@@ -5135,7 +5489,26 @@ yazi と依存ツールを先に入れる。
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
    - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
 
-1. WG ホストで（[クライアントを登録する](#wireguard-クライアントを登録する)の手順 1 のシェルで）、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
+1. WG ホストで、変数を設定する（`CLIENT_NAME` は必ず値を入れる）。
+
+   ```bash
+   CLIENT_NAME=laptop                   # この PC を登録簿（clients.list）に載せた名前（「クライアントを登録する」の手順 1 と同じ）
+   ```
+
+   ```bash
+   REPO=~/setup-notes                   # WG ホスト上でこのリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in CLIENT_NAME REPO; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは `CLIENT_NAME` の 1 ブロック。[クライアントを登録する](#wireguard-クライアントを登録する)の手順 1 で、この PC に付けた名前を入れる
+   - `REPO` は、clone 先が `~/setup-notes` なら既定のままでよい
+   - 最後に値を読み戻して確かめる
+   - WG ホストのシェルを開き直したら、この項の手順 4 を貼り直す
+
+1. WG ホストで、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -5158,21 +5531,36 @@ yazi と依存ツールを先に入れる。
 
    - 日常は、外出先で `sudo nmcli connection up wg0`、拠点に戻る前に `sudo nmcli connection down wg0`
 
-1. 平文の鍵と conf を消す。
+1. PC で、平文の鍵と conf を消す。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   rm -f "${WG_DIR:?「鍵を作る」の手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" &&
+   rm -f "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.key" "${WG_DIR}/wg0.conf" &&
    ls -l "${WG_DIR}"                                       # wg0.pub だけ残る
    ```
 
 #### WireGuard: 回線に合わせて MTU を下げる
 
+- 両拠点の WG ホストで、`wg0` の MTU を回線に合わせて下げ、配布済みのクライアントにも同じ値を入れる
 - 小さい通信は通るのに、大きい通信だけ遅い・止まるときに行う（ssh の画面の描き直し、ファイル転送、一部の HTTPS）
-- この項の手順 1〜7 は両拠点の WG ホストで、手順 8 はクライアントで行う。`WG_MTU` は両拠点で同じ値にする
-- **トンネル越しに ssh して作業している場合、この項の手順 6 の restart で自分のセッションが切れる**（→ [落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
-- 配布済みのクライアントの MTU は、`apply` では変わらない（この項の手順 8 で入れる。→ [注意点の MTU](extra/wireguard.md#mtu)）
+- 前提: 両拠点の WG ホストで、[鍵を作って適用する](#wireguard-鍵を作って適用する)を通してある
+- 実行場所: 両拠点の WG ホストの、自分のユーザーのシェル（bash）。この項の手順 9 は、クライアントで行う
+- `WG_MTU` は両拠点で同じ値にする
+- **トンネル越しに ssh して作業している場合、この項の手順 7 の restart で自分のセッションが切れる**（→ [落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
+- 配布済みのクライアントの MTU は、`apply` では変わらない（この項の手順 9 で入れる。→ [注意点の MTU](extra/wireguard.md#mtu)）
 - → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-1-補足-wg_mtu-に書く値)
+
+1. 変数を設定する。
+
+   ```bash
+   REPO=~/setup-notes                    # WG ホスト上でこのリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   ```
+
+   - clone 先が `~/setup-notes` なら、既定のままでよい。[site.env を作る](#wireguard-siteenv-を作る)の手順 1 と同じ値にする
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. 両拠点の WG ホストで、回線の MTU と今の `wg0` の MTU を調べる。
 
@@ -5187,7 +5575,7 @@ yazi と依存ツールを先に入れる。
    - `Endpoint` が IPv6 のアドレスのときは、60 ではなく 80 を引く
    - その値が今の `wg0` の `mtu` 以上なら、下げなくてよい（この項はここで終える）
 
-1. `site.env` の `WG_MTU` に、この項の手順 1 で決めた値を書く。
+1. `site.env` の `WG_MTU` に、この項の手順 2 で決めた値を書く。
 
    ```bash
    vi ~/wg/site.env                      # WG_MTU= の右に値を書く（例: WG_MTU=1380）
@@ -5211,17 +5599,17 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `mtu` が `WG_MTU` の値になっていればよい
-   - この項の手順 5・6 も、切れてよいときに必ず行う（行わないと、`wg-quick@wg0` の restart や OS の再起動で元の MTU に戻る）
+   - この項の手順 6・7 も、切れてよいときに必ず行う（行わないと、`wg-quick@wg0` の restart や OS の再起動で元の MTU に戻る）
 
 1. 両拠点の WG ホストで、`apply` の実行予定の内容を見る。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply A   # 拠点 B のホストでは B。秘密鍵は (hidden) と表示
    ```
 
-   - `[Interface]` に `MTU =` の行があり、値がこの項の手順 2 で書いたものになっている
+   - `[Interface]` に `MTU =` の行があり、値がこの項の手順 3 で書いたものになっている
    - **次の手順は、表示された内容でよいか確かめてから貼る**
 
 1. 両拠点の WG ホストで、設定を適用する。
@@ -5245,13 +5633,13 @@ yazi と依存ツールを先に入れる。
 
    - `mtu` が `WG_MTU` の値になっている
    - 2 つの ping が、どちらも `0% packet loss`
-   - 後ろの ping（`wg0` の MTU いっぱいの大きさ）だけ落ちるなら、`WG_MTU` をさらに下げて、この項の手順 2 からやり直す
+   - 後ろの ping（`wg0` の MTU いっぱいの大きさ）だけ落ちるなら、`WG_MTU` をさらに下げて、この項の手順 3 からやり直す
    - `WG_IFACE` を変えている場合は、この項の `wg0` を読み替える
 
-1. 配布済みのクライアントに、この項の手順 2 と同じ値の MTU を入れる。
+1. 配布済みのクライアントに、この項の手順 3 と同じ値の MTU を入れる。
 
-   - この項の手順 2 より後に `client add` で登録したクライアントは、conf に同じ `MTU =` が入っているので、何もしなくてよい
-   - AlmaLinux 10 は `sudo nmcli connection modify wg0 wireguard.mtu 1380` を貼る（`1380` は手順 2 の値）
+   - この項の手順 3 より後に `client add` で登録したクライアントは、conf に同じ `MTU =` が入っているので、何もしなくてよい
+   - AlmaLinux 10 は `sudo nmcli connection modify wg0 wireguard.mtu 1380` を貼る（`1380` はこの項の手順 3 の値）
    - 続けて `sudo nmcli connection down wg0` と `sudo nmcli connection up wg0` を貼る
    - Windows 11 の PC は、トンネルを切ってから、WireGuard の窓の「編集」で `[Interface]` に `MTU = 1380` を足す（同じく読み替える）
    - スマートフォンは、公式アプリのトンネルの編集で、インターフェースの MTU に同じ値を入れる
@@ -5260,6 +5648,8 @@ yazi と依存ツールを先に入れる。
 #### WireGuard: クライアントを削除する
 
 - クライアントを受ける拠点のホストで行う。登録簿から消しただけでは、動いているトンネルの接続許可は残る
+- 前提: [クライアントを登録する](#wireguard-クライアントを登録する)で、消すクライアントを登録してある
+- 実行場所: クライアントを受ける拠点の WG ホストの、自分のユーザーのシェル（bash）
 - 鍵の交換や PC のロールバックでも、この項を使う
 - `WG_USE_EXISTING_CONF=0`（既定）の、登録簿から conf を生成する構成が対象。`1` のままでは `apply` が peer を書き換えないので、この項では削除できない
 - **トンネル越しに ssh して作業している場合、この項の手順 5 の restart で自分のセッションが切れる**（→ [落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
@@ -5339,14 +5729,29 @@ yazi と依存ツールを先に入れる。
 
 #### WireGuard: バックアップと復旧（OS の再インストール）
 
+- WG ホストの鍵と設定をバックアップし、OS を入れ直したホストに同じ鍵で戻す
+- 前提: 両拠点の WG ホストで、[鍵を作って適用する](#wireguard-鍵を作って適用する)を通してある。復旧先のホストでは、OS を入れ直した後に[ログインと sudo](#ログインと-sudo)を通し、このリポジトリを clone してある
+- 実行場所: WG ホストの、自分のユーザーのシェル（bash）。この項の手順 1〜3 は OS を入れ直す前の両拠点のホストで、手順 4〜9 は OS を入れ直した復旧先のホストで（この項の手順 1 を貼り直してから）行う。手順 10 は、その拠点のルーターで行う
 - OS を入れ直しても、**ホストの秘密鍵とネットワークの値が同じなら**、相手拠点の `site.env` も、配布済みのクライアントの conf も、ルーターの設定も**そのまま使える**
 - 逆に鍵を作り直すと、相手拠点の公開鍵の差し替えと、クライアント全台の conf 再発行が連鎖する
 - → [バックアップと復旧の補足](reference/wireguard.md#バックアップと復旧の補足)
 
+1. 変数を設定する。
+
+   ```bash
+   REPO=~/setup-notes                    # WG ホスト上でこのリポジトリを clone した場所（「site.env を作る」の手順 1 と同じ）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   ```
+
+   - clone 先が `~/setup-notes` なら、既定のままでよい。[site.env を作る](#wireguard-siteenv-を作る)の手順 1 と同じ値にする
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**（OS を入れ直した復旧先のホストでも）、この項の手順 1 を貼り直してから先へ進む
+
 1. 両拠点でそれぞれ、バックアップを取る。
 
    ```bash
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run backup &&       # まとめる内容を表示するだけ
    sudo ./wg-vpn.sh -e ~/wg/site.env backup                    # ~/wg-backup-<ホスト名>-<日時>.tar.gz（0600）
    ```
@@ -5354,7 +5759,7 @@ yazi と依存ツールを先に入れる。
    - 読むだけなので、トンネルを止めずに稼働中のホストで実行できる
    - 出力先を変えるときは、`backup` の前に `-o /mnt/usb/wgb.tar.gz` のように付ける
 
-1. この項の手順 1 のアーカイブを、このマシンの外（別のディスク、オフラインのメディア）に保管する。
+1. この項の手順 2 のアーカイブを、このマシンの外（別のディスク、オフラインのメディア）に保管する。
 
    - **このアーカイブには秘密鍵が入っている。** `0600` のまま、リポジトリの中には置かない
 
@@ -5366,7 +5771,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?「site.env を作る」の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
+   cd "${REPO:?この項の手順 1 の REPO を設定してから貼る}/scripts/wireguard" &&
    sudo ./wg-vpn.sh --dry-run restore "${BACKUP:?復旧するアーカイブを BACKUP に入れてから貼る}"
    ```
 
@@ -5377,10 +5782,10 @@ yazi と依存ツールを先に入れる。
 1. 鍵・conf・`site.env`・`clients.list` を戻す。
 
    ```bash
-   sudo ./wg-vpn.sh restore "${BACKUP:?この項の手順 3 の BACKUP が空のまま}"
+   sudo ./wg-vpn.sh restore "${BACKUP:?この項の手順 4 の BACKUP が空のまま}"
    ```
 
-   - WG ホストの LAN 側 IP が変わっていなければ、この項の手順 5・6・9 は飛ばす
+   - WG ホストの LAN 側 IP が変わっていなければ、この項の手順 6・7・10 は飛ばす
 
 1. WG ホストの LAN 側 IP が変わったときだけ、`site.env` を直す。
 
@@ -5394,7 +5799,7 @@ yazi と依存ツールを先に入れる。
 
 1. WG ホストの LAN 側 IP が変わったときだけ、更新した `site.env` を相手拠点にも置く。
 
-   - この項の手順 5 で更新したファイルと同じ内容にそろえる。相手拠点の公開鍵は変えない
+   - この項の手順 6 で更新したファイルと同じ内容にそろえる。相手拠点の公開鍵は変えない
    - **次の手順は、両拠点に同じ設定を置いてから貼る**
 
 1. 復旧先のホストで、適用する内容を確認する。
@@ -5417,11 +5822,14 @@ yazi と依存ツールを先に入れる。
 1. WG ホストの LAN 側 IP が変わったときだけ、その拠点のルーターの転送先を直す。
 
    - ポート転送の宛先と、相手 LAN・クライアント帯の静的経路のゲートウェイを新しい LAN 側 IP にする
-   - 入れる値は、この項の手順 8 の `apply` の末尾に表示される（[補足: ルーターの設定](reference/wireguard.md#ルーターの設定)）
+   - 入れる値は、この項の手順 9 の `apply` の末尾に表示される（[補足: ルーターの設定](reference/wireguard.md#ルーターの設定)）
    - 相手拠点の WG ホストの LAN 側 IP が同じなら、相手拠点のルーターのゲートウェイは変更しない
 
 #### WireGuard: 落とし穴: `apply` は作業中の ssh 経路そのものを切る
 
+- WG ホストで、`apply` を、作業中の ssh のセッションから切り離して実行する
+- 前提: `apply` を使う項（[鍵を作って適用する](#wireguard-鍵を作って適用する)・[クライアントを登録する](#wireguard-クライアントを登録する)・[回線に合わせて MTU を下げる](#wireguard-回線に合わせて-mtu-を下げる)・[クライアントを削除する](#wireguard-クライアントを削除する)）を、`apply` の手前まで通してある
+- 実行場所: トンネル越しに ssh でログインした、WG ホストの自分のユーザーのシェル（bash）
 - `apply` は最後に `wg-quick@wg0` を再起動する。トンネル越しに WG ホストへ ssh して作業すると、その接続が切れる
 - 切れたまま戻らない場合に備えて、LAN 側の ssh やコンソールなど別の経路を用意しておく
 
@@ -5464,7 +5872,6 @@ yazi と依存ツールを先に入れる。
 > - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3 で RDP のクライアントから確かめる
 > - PC の画面のセッションは、GDM の自動ログインで作る（[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1〜3）。PC の前でログインしておく必要は無い
 > - **そのユーザー本人のシェルで貼る**。`sudo -i` / `su -` したシェルでは貼らない（設定と資格情報は、貼ったユーザーのものになるため）
-> - 前提は [AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める」](#画面オフ画面ロック自動サスペンドを止める)の手順 1〜4（遠隔の PC は、眠ると起こせない）。画面が暗くなるかロックされると、RDP の接続が切れる
 > - [前提確認](#gnome-のデスクトップ共有-前提を確かめる)の手順 4 と[RDP 設定](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 は**対話入力を終えてから次を貼る**
 > - [自動ログインと再起動](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 で**再起動する**。OS のパスワードを入力する
 > - [再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3（クライアントからの接続）だけ別のマシンで行う
@@ -5472,36 +5879,33 @@ yazi と依存ツールを先に入れる。
 > - [リモートログイン](#gnome-のリモートログイン)を併用済みなら、[前提確認](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 でポートが 3390 になる
 > - 後からリモートログインを有効にする場合は[注意点](extra/gnome-desktop-sharing.md#注意点)を参照する
 
-- [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 変数のある項は、その項の手順 1 で変数を設定したシェルに貼る
 - 現行版と以前の版の環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
 
 > [!WARNING]
-> - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める節で、ロックもしない）
+> - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める項で、ロックもしない）
 > - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 で入れる RDP のユーザー名とパスワードは、暗号化されずに `~/.local/share/keyrings/` に置かれる
 > - PC を置く場所を信用できるときだけ行う
 
 #### GNOME のデスクトップ共有: 前提を確かめる
 
-1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
+- デスクトップ共有を設定する前に、SSH・GDM・モニター・画面の設定・ポート・自動ログイン・RDP の資格情報の状態を確かめる
+- 前提: [ログインと sudo](#ログインと-sudo)と、[システムの設定](#システムの設定)の手順 3・4（SSH の待ち受け）を通してある。[画面オフ・画面ロック・自動サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)の手順 1〜4 も通してある（遠隔の PC は、眠ると起こせない。画面が暗くなるかロックされると、RDP の接続が切れる）
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
+
+1. 変数を設定する。
 
    ```bash
-   SERVER_IP=192.168.10.100            # ← 自分の値に書き換える。クライアントが接続に使う IP。<SERVER_IP>
-   ```
-
-   ```bash
-   SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
-   SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
    RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
    printf '\n\033[7m 確認 \033[0m\n'
-   for v in USER SERVER_IP SERVER_NAME SERVER_FQDN RDP_PORT; do
+   for v in USER RDP_PORT; do
      printf '%-12s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
+   - **編集が必須の変数は無い**。既定のままでよい
    - `USER` が `root` なら、ここで止めて、共有するユーザーのシェルで貼り直す
-   - **新しいシェルを開いたら**（[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 の再起動の後も）、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. 再起動の後も SSH で入り直せて、GNOME が自動で起動するかを確かめる。
 
@@ -5524,7 +5928,7 @@ yazi と依存ツールを先に入れる。
    - 4 行目が `enabled` でなければ、GDM が起動しない。先に GDM を使える状態にする
    - 5 行目は、PC につながっているモニターの数。`0` なら、写す画面が無い。モニターの無い PC は[ヘッドレスのセッション](#gnome-のヘッドレスセッション)を使う
    - 6 行目は、暗号化したディスクの数。`0` でなければ、起動のときにパスフレーズを PC の画面で入れるかを確かめる
-     - 入れるなら、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 の再起動から戻らないので、この手順書は使えない（TPM などで自動で開くなら続けてよい）
+     - 入れるなら、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 の再起動から戻らないので、この用途（デスクトップ共有）の手順は使えない（TPM などで自動で開くなら続けてよい）
 
 1. 共有するユーザーの画面の設定・共有とヘッドレスの状態・ポート・自動ログインの設定・資格情報を確かめる。
 
@@ -5563,7 +5967,7 @@ yazi と依存ツールを先に入れる。
      - 先に `grdctl rdp disable` で止めてから貼り直す
    - ヘッドレスの unit が有効か起動中なら、ここで止める。利用状況を確認してから、どちらを使うか決める
    - `RDP_PORT` の行が `0` でなければ、ほかのもの（ほかのユーザーの[ヘッドレスのセッション](#gnome-のヘッドレスセッション)など）がそのポートを使っている
-     - この項の手順 1 の 2 つ目のブロックの `RDP_PORT` の行を、空いているポート（`3391` など）に書き換えて貼り直し、この手順を貼り直す
+     - この項の手順 1 の `RDP_PORT` の行を、空いているポート（`3391` など）に書き換えて貼り直し、この手順を貼り直す
    - `AutomaticLogin` の行が `0` でなければ、自動ログインがすでに設定してある。[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1 で、このユーザーかを確かめる
    - `aoao 0 0` なら、この項の手順 4 は飛ばす。それ以外なら、RDP の資格情報がすでにあるので、この項の手順 4 を行う
 
@@ -5626,15 +6030,41 @@ yazi と依存ツールを先に入れる。
 
 #### GNOME のデスクトップ共有: RDP を設定する
 
+- 共有するユーザーで、RDP の証明書と鍵・ポート・資格情報を設定し、デスクトップ共有を有効にして、ファイアウォールを開ける
+- 前提: [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)を通してある
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
+
+1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=192.168.10.100            # ← 自分の値に書き換える。クライアントが接続に使う IP。<SERVER_IP>
+   ```
+
+   ```bash
+   SERVER_NAME=$(hostname)             # 証明書の CN と SAN に入る（自動）。<HOSTNAME>
+   SERVER_FQDN=$(hostname -f)          # 同上。<HOSTNAME>.<DOMAIN>
+   RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in USER SERVER_IP SERVER_NAME SERVER_FQDN RDP_PORT; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
+   - [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の `RDP_PORT` を書き換えたとき（同じ項の手順 3 の分岐）は、2 つ目のブロックの `RDP_PORT` の行も同じ値に書き換える
+   - 最後に値を読み戻して確かめる
+   - `USER` が `root` なら、ここで止めて、共有するユーザーのシェルで貼り直す
+   - **新しいシェルを開いたら**、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
+
 1. 変える設定の元値と共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
 
    ```bash
    if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
-     echo '中断: 「前提を確かめる」の手順 1 の変数が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
+     echo '中断: この項の手順 1 の変数が空のまま。この項の手順 1 を貼り直す' >&2
    else
      (
        set -e
-       trap 'echo "中断: 「RDP を設定する」の手順 1 が失敗した。「RDP を設定する」の手順 2 へ進まない" >&2' ERR
+       trap 'echo "中断: この項の手順 2 が失敗した。この項の手順 3 へ進まない" >&2' ERR
        umask 077
        if [ -e ~/.local/state/gnome-desktop-sharing-setup ] || [ -L ~/.local/state/gnome-desktop-sharing-setup ]; then
          if [ -L ~/.local/state/gnome-desktop-sharing-setup ] ||
@@ -5688,18 +6118,18 @@ yazi と依存ツールを先に入れる。
    fi
    ```
 
-   - 最後に `設定の退避と証明書の準備が完了` と出れば、この項の手順 2 へ進む
+   - 最後に `設定の退避と証明書の準備が完了` と出れば、この項の手順 3 へ進む
    - その前に `証明書と秘密鍵の公開鍵: 一致` と出る
    - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る
-   - `中断:` が出たら、この項の手順 2 以降へ進まない。原因を直してから、この手順を貼り直す
+   - `中断:` が出たら、この項の手順 3 以降へ進まない。原因を直してから、この手順を貼り直す
    - `設定の退避が不完全` と出たら、`~/.local/state/gnome-desktop-sharing-setup` の中身を手で確かめる。何も変えていなければ、このディレクトリを消してから貼り直す
 
 1. `grdctl` で、証明書と鍵・ポートと、リモートからの操作を設定する。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
+   if [ -z "${RDP_PORT}" ]; then echo '中断: この項の手順 1 の RDP_PORT が空のまま。この項の手順 1 を貼り直す' >&2
    elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then
-     echo '中断: 「RDP を設定する」の手順 1 が完了していない。設定は変更しない' >&2
+     echo '中断: この項の手順 2 が完了していない。設定は変更しない' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
      rm -f ~/.local/state/gnome-desktop-sharing-setup/restored &&
@@ -5718,9 +6148,9 @@ yazi と依存ツールを先に入れる。
    ```
 
    - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
-     - ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、この項の手順 5 で有効にするまで `false`）
+     - ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、この項の手順 6 で有効にするまで `false`）
    - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
-   - `中断:` が出たら、この項の手順 3 以降へ進まない
+   - `中断:` が出たら、この項の手順 4 以降へ進まない
    - 既にデーモンが起動していれば、再起動する。接続中の RDP クライアントは切れる
    - デーモンが起動した後に貼り直すと、再起動のときに `Warning: The unit file, … of gnome-remote-desktop.service changed on disk.` が出ることがある。再起動はされ、害は無い
 
@@ -5737,7 +6167,7 @@ yazi と依存ツールを先に入れる。
    marker = state / 'autologin-keyring'
    if (state.is_symlink() or not (state / 'ready').is_file() or marker.is_symlink()
            or (marker.exists() and not marker.is_file())):
-       raise SystemExit('中断: 「RDP を設定する」の手順 1 が完了していないか、キーリングの記録が不正。資格情報は入れない')
+       raise SystemExit('中断: この項の手順 2 が完了していないか、キーリングの記録が不正。資格情報は入れない')
    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
    svc = '/org/freedesktop/secrets'
    def call(path, iface, method, args, rtype):
@@ -5793,7 +6223,7 @@ yazi と依存ツールを先に入れる。
    - `中断:` やエラーが出たら、次へ進まない
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
-1. RDP の資格情報が、この項の手順 3 のキーリングにだけあることを確かめる。
+1. RDP の資格情報が、この項の手順 4 のキーリングにだけあることを確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -5810,8 +6240,8 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。共有するユーザーのシェルで貼り直す' >&2
-   elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then echo '中断: 「RDP を設定する」の手順 1 が完了していない。有効にしない' >&2
-   elif [ ! -s ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring ]; then echo '中断: 「RDP を設定する」の手順 3 が完了していない。有効にしない' >&2
+   elif [ ! -f ~/.local/state/gnome-desktop-sharing-setup/ready ]; then echo '中断: この項の手順 2 が完了していない。有効にしない' >&2
+   elif [ ! -s ~/.local/state/gnome-desktop-sharing-setup/autologin-keyring ]; then echo '中断: この項の手順 4 が完了していない。有効にしない' >&2
    elif systemctl --user is-enabled --quiet gnome-remote-desktop-headless.service ||
         systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
      echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効か起動中。有効にしない' >&2
@@ -5828,7 +6258,7 @@ yazi と依存ツールを先に入れる。
 1. ファイアウォールで、`RDP_PORT` の TCP を開ける。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2; else
+   if [ -z "${RDP_PORT}" ]; then echo '中断: この項の手順 1 の RDP_PORT が空のまま。この項の手順 1 を貼り直す' >&2; else
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --add-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --reload
@@ -5839,6 +6269,10 @@ yazi と依存ツールを先に入れる。
    - `success` が 2 行出て、最後に `<RDP_PORT>/tcp` を含む行が出ればよい
 
 #### GNOME のデスクトップ共有: 自動ログインにして再起動する
+
+- PC の画面のセッションを GDM の自動ログインで作るようにし、起動画面を止めて、PC を再起動する
+- 前提: [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)を通してある
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 
 1. GDM の自動ログインを、このユーザーで有効にする。
 
@@ -5881,14 +6315,38 @@ yazi と依存ツールを先に入れる。
    - `sudo` は付けない。`==== AUTHENTICATING FOR org.freedesktop.login1.…` と出てパスワードを聞かれるので、このユーザーの OS のパスワードを入れる
    - SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
    - 数分待っても SSH で入れないときは、PC の前での対処が要る（[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 2 の確認を見直す）
-   - **次の手順は、PC が起動してから SSH で入り直し、変数の 2 つのブロックを貼り直してから貼る**（[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1）
+   - **PC が起動したら SSH で入り直し、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)へ進む**
 
 #### GNOME のデスクトップ共有: 再起動の後に確かめてつなぐ
+
+- 再起動の後に、自動でログインしたセッションと、RDP の待ち受け・証明書を確かめ、別のマシンからつなぐ
+- 前提: [自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)で再起動し、PC が起動している
+- 実行場所: 共有するユーザーで SSH でログインし直したシェル（bash）。この項の手順 4 は、RDP のクライアントのある別のマシンで行う
+
+1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=192.168.10.100            # ← 自分の値に書き換える。クライアントが接続に使う IP。<SERVER_IP>
+   ```
+
+   ```bash
+   RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in USER SERVER_IP RDP_PORT; do
+     printf '%-12s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - **編集が必須なのは `SERVER_IP` の 1 行だけ**。[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)で証明書を作ったときと同じ値を入れる
+   - [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の `RDP_PORT` を書き換えたとき（同じ項の手順 3 の分岐）は、2 つ目のブロックの `RDP_PORT` の行も同じ値に書き換える
+   - 最後に値を読み戻して確かめる
+   - `USER` が `root` なら、ここで止めて、共有するユーザーのシェルで貼り直す
+   - **新しいシェルを開いたら**、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. 自動でログインしたセッションと、デーモンの待ち受けを確かめる。
 
    ```bash
-   if [ -z "${RDP_PORT}" ]; then echo '中断: 「前提を確かめる」の手順 1 の RDP_PORT が空のまま。「前提を確かめる」の手順 1 を貼り直す' >&2
+   if [ -z "${RDP_PORT}" ]; then echo '中断: この項の手順 1 の RDP_PORT が空のまま。この項の手順 1 を貼り直す' >&2
    elif [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
@@ -5905,7 +6363,7 @@ yazi と依存ツールを先に入れる。
          fi
          sleep 1
        done
-       echo "中断: ${RDP_PORT}/tcp の待ち受けを 30 秒以内に確認できない。「再起動の後に確かめてつなぐ」の手順 2 へ進まず、デーモンのログを確認する" >&2
+       echo "中断: ${RDP_PORT}/tcp の待ち受けを 30 秒以内に確認できない。この項の手順 3 へ進まず、デーモンのログを確認する" >&2
        exit 1
      )
    fi
@@ -5916,7 +6374,7 @@ yazi と依存ツールを先に入れる。
    - `Active=no` なら GDM のログイン画面が出ており、RDP は真っ黒になる
    - [自動ログイン](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 2 を `sudo grubby --info=DEFAULT` で確かめ、[復旧手順](#gnome-のデスクトップ共有-つながらなくなったとき)の手順 2 で戻す
    - セッションが無いと出たら、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1 の `/etc/gdm/custom.conf` を確かめる
-   - `中断:` が出たら、この項の手順 2 へ進まない。`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` で理由を見る
+   - `中断:` が出たら、この項の手順 3 へ進まない。`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` で理由を見る
      - ほかのプロセスがポートを使っていると、`Error binding to address [::]:<RDP_PORT>: Address already in use` が出ている
      - 原因を直したら、[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 2 を貼り直し（起動中のデーモンを再起動する）、この手順を貼り直す
 
@@ -5956,20 +6414,20 @@ yazi と依存ツールを先に入れる。
    - プローブで、`selectedProtocol=0x2` でネゴシエーションが成立し、SAN に接続に使う名前が `DNS:` エントリとして含まれていればよい
    - `grdctl status` で `Unit status: active`・`Status: enabled`・`Port: <RDP_PORT>` を確認する
    - `View-only: no`・`Negotiate port: no`・`Username: (hidden)`・`Password: (hidden)` も確認する
-   - プローブの `fingerprint:` の行が、`grdctl status` の `TLS fingerprint:` の行と**完全一致**すればよい。この値をこの項の手順 3 で使う
-   - 最後の `sha1 Fingerprint=` の行は、Windows のクライアントで証明書を確かめるときに使う（この項の手順 3）
-   - **注意**: `grdctl status` の `Port:` は設定した値で、実際に待ち受けたポートではない。ポートはこの項の手順 1 の `ss` で見る
+   - プローブの `fingerprint:` の行が、`grdctl status` の `TLS fingerprint:` の行と**完全一致**すればよい。この値をこの項の手順 4 で使う
+   - 最後の `sha1 Fingerprint=` の行は、Windows のクライアントで証明書を確かめるときに使う（この項の手順 4）
+   - **注意**: `grdctl status` の `Port:` は設定した値で、実際に待ち受けたポートではない。ポートはこの項の手順 2 の `ss` で見る
    - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい
 
 1. 別のマシンから、RDP クライアントでつなぐ。
 
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` の形でつなぐ
    - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
-   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 と [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 の値に読み替える
-   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。この項の手順 2 の `TLS fingerprint` と同じなら `Y` で受け入れる
+   - `<SERVER_IP>`・`<RDP_PORT>` はこの項の手順 1 の値に、`<RDP のユーザー名>` は [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 の値に読み替える
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。この項の手順 3 の `TLS fingerprint` と同じなら `Y` で受け入れる
      - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
    - Windows は、拇印を出さずに「このリモート コンピューターの ID を識別できません」と聞く
-     - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 2 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
+     - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 3 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
    - パスワードは [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
      - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
@@ -5977,10 +6435,13 @@ yazi と依存ツールを先に入れる。
    - RDP の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
    - クライアントでの操作は、PC の画面にもそのまま出る。PC の上部バーには、共有中の印が出る
    - 問題があれば、PC で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る（`journalctl --user` は、既定の構成では `No journal files were found.` になる）
-     - この項の手順 2 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
+     - この項の手順 3 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
 #### GNOME のデスクトップ共有: 見るだけにする
 
+- デスクトップ共有を見るだけにし、クライアントからのキーボードとマウスを受け付けないようにする
+- 前提: [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)を通してある
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 - **クライアントから操作させるなら、この項は不要**
 
 1. クライアントからのキーボードとマウスを受け付けないようにする。
@@ -6005,10 +6466,24 @@ yazi と依存ツールを先に入れる。
 
 #### GNOME のデスクトップ共有: 接続元を LAN に絞る
 
+- デスクトップ共有の RDP のポートを、LAN の送信元サブネットからだけ受け付けるようにする
+- 前提: [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)を通してある
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 - **接続元を制限しないなら、この項は不要**
 - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 6 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
-- [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の変数を設定したシェルで貼る
 - WireGuard などで別の拠点からつなぐなら、`LAN_SUBNET` には、PC に届くときの接続元のサブネットを入れる（この項は 1 つのサブネットだけを通す）
+
+1. 変数を設定する。
+
+   ```bash
+   RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'RDP_PORT = %s\n' "${RDP_PORT}"
+   ```
+
+   - [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の `RDP_PORT` を書き換えたとき（同じ項の手順 3 の分岐）は、`RDP_PORT` の行も同じ値に書き換える
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. LAN に絞るなら、送信元サブネットを入れ、ポートの開放を rich rule に置き換える。
 
@@ -6017,7 +6492,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    ```bash
-   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、「前提を確かめる」の手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、この項の手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
@@ -6031,7 +6506,9 @@ yazi と依存ツールを先に入れる。
 
 #### GNOME のデスクトップ共有: つながらなくなったとき
 
-- **PC の画面を触らずに、SSH から直す**。共有するユーザーで SSH でログインしたシェルで貼る
+- デスクトップ共有でつながらなくなったときに、**PC の画面を触らずに、SSH から直す**
+- 前提: [再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)まで通してある
+- 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 - 当てはまる手順だけを貼る。どれも[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の変数は要らない
 - 理由が分からないときは、`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` を見る
 
@@ -6073,23 +6550,23 @@ yazi と依存ツールを先に入れる。
    ```
 
    - パスワードの聞かれ方は、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 と同じ
-   - 起動したら SSH で入り直し、[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 の 2 つのブロックを貼り直してから、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1 で確かめる
+   - 起動したら SSH で入り直し、[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 を貼り直してから、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1 で確かめる
 
 ---
 
 ### GNOME のヘッドレスセッション
 
+- モニターの無い PC でも、自分の GNOME のデスクトップをヘッドレスのセッションで常駐させ、RDP でつなぐ
+- 前提: [ログインと sudo](#ログインと-sudo)と、[画面オフ・画面ロック・自動サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)の手順 1・2 を通してある。サスペンドできる PC は、同じ項の手順 3・4 も通してある
+- 実行場所: セッションを使うユーザー本人のシェル（bash。SSH でよい）。この項の手順 10 は、LAN 内の別のマシンで行う
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[ロールバックと注意点](extra/gnome-headless-session.md)
+- **この項の手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
+- [リモートログイン](#gnome-のリモートログイン)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、この項の手順 1 で自動で 3390 になる
+- この項の手順 1 で変数を設定したシェルに貼る
 
 > [!IMPORTANT]
 > - **セッションを使うユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない（セッションと RDP の設定は、貼ったユーザーのものになるため）
-> - 前提: [画面オフ・ロック・サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)の手順 1・2。サスペンドできる PC は手順 3・4 も通す
-> - **手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
-> - 手順 10（クライアントからの接続）だけ別のマシンで行う
-> - [リモートログイン](#gnome-のリモートログイン)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、手順 1 で自動で 3390 になる
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+> - この項の手順 10（クライアントからの接続）だけ別のマシンで行う
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -6109,7 +6586,7 @@ yazi と依存ツールを先に入れる。
 
    - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
    - `USER` が `root` なら、ここで止めて、セッションを使うユーザーのシェルで貼り直す
-   - **新しいシェルを開いたら**、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. ヘッドレスのセッションを有効にして起動し、セッションができたかを確かめる。
 
@@ -6188,10 +6665,10 @@ yazi と依存ツールを先に入れる。
    fi
    ```
 
-   - 最後に `TLS の退避と証明書の準備が完了` と出れば、手順 4 へ進む
+   - 最後に `TLS の退避と証明書の準備が完了` と出れば、この項の手順 4 へ進む
    - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る
    - 既存の鍵も、この手順で生成するものと同じく、パスフレーズなしで読める必要がある
-   - `中断:` が出たら、手順 4 以降へ進まない。[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 3・4 で戻す
+   - `中断:` が出たら、この項の手順 4 以降へ進まない。[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 3・4 で戻す
 
 1. `grdctl --headless` で、証明書と鍵・ポートを設定する。
 
@@ -6230,7 +6707,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `enabled` と出ればよい
-   - デーモンが待ち受けたかは、手順 8 で確かめる
+   - デーモンが待ち受けたかは、この項の手順 8 で確かめる
 
 1. ファイアウォールで、`RDP_PORT` の TCP を開ける。
 
@@ -6254,7 +6731,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `grdctl --headless status` で、`Unit status: active`・`Status: enabled`・`Port: <RDP_PORT>`・`Negotiate port: no`・`Username: (hidden)` を確かめる
-   - `TLS fingerprint` の値を控えておく（手順 9 と手順 10 で使う）
+   - `TLS fingerprint` の値を控えておく（この項の手順 9 と手順 10 で使う）
    - `ss` が `LISTEN … *:<RDP_PORT> …` の 1 行を出せばよい
 
 1. TLS のハンドシェイクと、提示される証明書を確かめる。
@@ -6299,23 +6776,37 @@ yazi と依存ツールを先に入れる。
 
    - AlmaLinux 10 は `freerdp` の `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` でつなぐ
    - Windows は「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
-   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、手順 1 と手順 5 の値に読み替える
-   - 証明書の確認を聞かれたら、表示された Thumbprint が手順 8 の `TLS fingerprint` と同じかを見てから受け入れる
+   - `<SERVER_IP>`・`<RDP_PORT>`・`<RDP のユーザー名>` は、この項の手順 1 と手順 5 の値に読み替える
+   - 証明書の確認を聞かれたら、表示された Thumbprint がこの項の手順 8 の `TLS fingerprint` と同じかを見てから受け入れる
      - FreeRDP は、`Thumbprint:` の後に `Do you trust the above certificate? (Y/T/N)` と聞く。同じなら `Y` で答える
      - FreeRDP は、初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告を出す。続く `Thumbprint:` で判断する
      - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
-   - パスワードは手順 5 のもの。通ると、このセッションの GNOME のデスクトップが、クライアントの窓の大きさで出る
+   - パスワードはこの項の手順 5 のもの。通ると、このセッションの GNOME のデスクトップが、クライアントの窓の大きさで出る
      - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
    - 切ってつなぎ直すと、同じデスクトップ（開いていたアプリもそのまま）に戻る
    - 問題があれば、PC の端末で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop-headless.service` を見る
-     - 手順 9 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
+     - この項の手順 9 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
 #### GNOME のヘッドレスセッション: 接続元を LAN に絞る
 
+- ヘッドレスのセッションの RDP のポートを、LAN の送信元サブネットからだけ受け付けるようにする
+- 前提: [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)を通してある
+- 実行場所: セッションを使うユーザー本人のシェル（bash。SSH でよい）
 - **接続元を制限しないなら、この項は不要**
-- [手順 7](#gnome-のヘッドレスセッション) は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
-- 手順 1 の変数を設定したシェルで貼る
+- [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 7 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
+
+1. 変数を設定する。
+
+   ```bash
+   RDP_PORT=$(if [ "$(systemctl is-enabled gnome-remote-desktop.service 2>/dev/null)" = enabled ]; then echo 3390; else echo 3389; fi)   # 待ち受けるポート（自動）。<RDP_PORT>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'RDP_PORT = %s\n' "${RDP_PORT}"
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `RDP_PORT` が、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 で設定した値と違えば、`RDP_PORT` の行をその値に書き換えて貼り直す
+   - **新しいシェルを開いたら**、この項の手順 1 を貼り直してから先へ進む
 
 1. LAN に絞るなら、送信元サブネットを入れ、ポートの開放を rich rule に置き換える。
 
@@ -6324,7 +6815,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    ```bash
-   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、この項の手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
@@ -6338,18 +6829,19 @@ yazi と依存ツールを先に入れる。
 
 #### GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）
 
-> [!IMPORTANT]
-> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この項の手順 5 で、そのセッションを終わらせるため）
-> - この項の手順 6（クライアントからの接続）だけ、クライアントの PC で行う
-
-- [リモートログイン](#gnome-のリモートログイン)とこの手順書のヘッドレスのセッションを併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
+- [リモートログイン](#gnome-のリモートログイン)と[ヘッドレスのセッション](#gnome-のヘッドレスセッション)を併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)と[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)を通して、併用している。ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [ユーザーサービスの常駐](#ユーザーサービスの常駐) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
+- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）。この項の手順 6 は、クライアントの PC で行う
 - リモートログインの設定（システムのデーモン・証明書・資格情報・3389/tcp）は変えない
 - ヘッドレスのセッションで動いていたアプリは閉じる
 - [Claude Code の GNOME 操作](ai-agents.md#claude-code-の-gnome-操作-実施手順) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
 - やめた後は、リモートログインで入ると新しいセッションができる。切断してもセッションは残り、次のログインでそこへ戻る
-- ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [ユーザーサービスの常駐](#ユーザーサービスの常駐) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
-- 実施手順 1 の変数は、この項の手順 2 を行うときだけ要る
-- 元に戻すときは、[手順 2](#gnome-のヘッドレスセッション)（ヘッドレスのセッションの RDP も使うなら手順 3〜10）と、[Claude Code の GNOME 操作 手順 1〜3](ai-agents.md#claude-code-の-gnome-操作-実施手順)
+- [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の変数は、この項の手順 2 を行うときだけ要る
+- 元に戻すときは、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 2（ヘッドレスのセッションの RDP も使うなら、同じ項の手順 3〜10）と、[Claude Code の GNOME 操作 手順 1〜3](ai-agents.md#claude-code-の-gnome-操作-実施手順)
+
+> [!IMPORTANT]
+> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この項の手順 5 で、そのセッションを終わらせるため）
+> - この項の手順 6（クライアントからの接続）だけ、クライアントの PC で行う
 
 1. 今の状態を確かめる。
 
@@ -6375,7 +6867,7 @@ yazi と依存ツールを先に入れる。
 
 1. ヘッドレスのセッションの RDP を設定してあるときだけ、その設定を外す。
 
-   - [手順 1](#gnome-のヘッドレスセッション) の 2 つのブロックを貼ってから、[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 1（LAN に絞ったときは手順 2）・手順 3・手順 4 を順に貼る
+   - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の 2 つのブロックを貼ってから、[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 1（LAN に絞ったときは手順 2）・手順 3・手順 4 を順に貼る
    - ロールバックの手順 5 は貼らない（この項の手順 4 で行う）
 
 1. Claude Code の GNOME 操作のドロップインがあるときだけ、外す。
@@ -6432,7 +6924,7 @@ yazi と依存ツールを先に入れる。
 
 1. クライアントの PC から、リモートログインでつなぎ直してログインする。
 
-   - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[GNOME のリモートログイン 手順 11](#gnome-のリモートログイン) と同じ）
+   - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 11 と同じ）
    - 上部バーのあるデスクトップが、クライアントの窓の大きさで出ればよい
    - 切断してつなぎ直すと、同じデスクトップに戻る
    - **次の手順は、ログインし終えてから貼る**
@@ -6457,17 +6949,18 @@ yazi と依存ツールを先に入れる。
 
 ### GNOME のリモートログイン
 
+- RDP のクライアントに GDM のログイン画面を出し、OS のアカウントでログインできるようにする（システムのデーモンで待ち受ける）
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 11 は、LAN 内の別のマシンで行う
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[ロールバックと注意点](extra/gnome-remote-desktop.md)
+- **この項の手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
+- この項の手順 1 で変数を設定したシェルに貼る
+- モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)。この項と同じ PC で併用できる（ポートは 3390）
+- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。現行版・以前の版の実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
+  - デスクトップ共有を 3389 で使っている PC では、この項の後に、デスクトップ共有の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 > [!IMPORTANT]
-> - **すべてサーバー上で実行する**。手順 11（クライアントからのログイン）だけ別マシン
-> - **手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)。この手順書と同じ PC で併用できる（ポートは 3390）
-- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。現行版・以前の版の実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
-  - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
+> - **すべてサーバー上で実行する**。この項の手順 11（クライアントからのログイン）だけ別マシン
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
 
@@ -6486,7 +6979,7 @@ yazi と依存ツールを先に入れる。
 
    - **編集が必須なのは `SERVER_IP` の 1 行だけ**。残りは既定のままでよい
    - `SERVER_IP` が空、または `SERVER_NAME` / `SERVER_FQDN` が意図した名前と違うなら、ここで止めて直す
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 の 2 つのブロックを貼り直してから先へ進む
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. `gnome-remote-desktop` ユーザーとして、TLS 証明書と鍵を openssl で生成する。
 
@@ -6504,7 +6997,7 @@ yazi と依存ツールを先に入れる。
    fi
    ```
 
-   - `中断:` と出たら、何も変更していない。手順 1 を貼り直してから、この手順をやり直す
+   - `中断:` と出たら、何も変更していない。この項の手順 1 を貼り直してから、この手順をやり直す
 
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
 
@@ -6530,8 +7023,8 @@ yazi と依存ツールを先に入れる。
    }
    ```
 
-   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（手順 10・11 で使う）
-   - TPM の無い PC では、`grdctl --system` のコマンドごとに `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` が出る（手順 6・8 でも出る）。害は無い（[注意点](extra/gnome-remote-desktop.md#注意点)）
+   - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（この項の手順 10・11 で使う）
+   - TPM の無い PC では、`grdctl --system` のコマンドごとに `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` が出る（この項の手順 6・8 でも出る）。害は無い（[注意点](extra/gnome-remote-desktop.md#注意点)）
 
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
@@ -6565,8 +7058,8 @@ yazi と依存ツールを先に入れる。
 1. 資格情報を反映させるため、デーモンを起動し直す。
 
    - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
-   - [設定済みのサーバーで GDM の後に起動させる](#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3 を行う。ヘッドレスのセッションがある PC では、続けて同節の手順 4 も行う
-   - その節の手順 1・2・5 は行わない
+   - [設定済みのサーバーで GDM の後に起動させる](#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3 を行う。ヘッドレスのセッションがある PC では、続けて同じ項の手順 4 も行う
+   - その項の手順 1・2・5 は行わない
    - **次の手順は、デーモンと必要な受け渡し役の起動し直しが終わってから貼る**
 
 1. サーバー側の状態を確かめる。
@@ -6635,19 +7128,22 @@ yazi と依存ツールを先に入れる。
 
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:3389 /u:<システムRDPユーザー名>` の形で接続する
    - `<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
-   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。手順 4 で控えた `TLS fingerprint` と同じなら `Y` で受け入れる
+   - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。この項の手順 4 で控えた `TLS fingerprint` と同じなら `Y` で受け入れる
      - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
      - `Y` で答えた後は、同じクライアントからつなぎ直しても証明書の確認は出ず、`Domain:` から聞かれる
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
-   - FreeRDP の `Password:` には、手順 6 のシステム共通パスワードを入れる
+   - FreeRDP の `Password:` には、この項の手順 6 のシステム共通パスワードを入れる
      - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。GDM のログイン画面が出れば、害は無い
    - システム共通パスワードで RDP 認証を通過すると GDM のログイン画面が出るので、OS アカウントでログインする
    - 問題があれば、サーバー側で `journalctl -u gnome-remote-desktop -f` と `journalctl -u gdm -f` を並行して見る
 
 #### GNOME のリモートログイン: 接続元を LAN に絞る
 
+- リモートログインの RDP（3389/tcp）を、LAN の送信元サブネットからだけ受け付けるようにする
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)を通してある
+- 実行場所: サーバーの、自分のユーザーのシェル（bash）
 - **接続元を制限しないなら、この項は不要**
-- 手順 5 は、public ゾーンに属するすべての NIC で 3389/tcp を開く
+- [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 5 は、public ゾーンに属するすべての NIC で 3389/tcp を開く
 
 1. LAN に絞るなら、送信元サブネットを入れ、`rdp` サービスの開放を rich rule に置き換える。
 
@@ -6667,7 +7163,10 @@ yazi と依存ツールを先に入れる。
 
 #### GNOME のリモートログイン: 設定済みのサーバーで GDM の後に起動させる
 
-- ドロップインが効くのは次の起動から。今のデーモンが起動のときに GDM とすれ違っていたら、この項の手順 3 でデーモンを起動し直すと直る（理由は[手順 5](#gnome-のリモートログイン) の補足）
+- 設定済みのサーバーで、リモートログインのデーモンを GDM の後に起動させ、起動のときに GDM とすれ違ったデーモンを起動し直す
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)で設定してある
+- 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 4 は、ヘッドレスのセッションを使うユーザーのシェルで行う
+- ドロップインが効くのは次の起動から。今のデーモンが起動のときに GDM とすれ違っていたら、この項の手順 3 でデーモンを起動し直すと直る（理由は[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 5 の補足）
 - 資格情報や証明書を変更した後も、この項の手順 3 と、ヘッドレスのセッションがある場合は手順 4 を使う。その場合、この項の手順 1・2・5 は行わない
 - **この項の手順 3・4 は、リモートログインでつないでいる利用者がいないときに行う**（ヘッドレスのセッションに入った RDP の接続は、手順 4 で再起動する受け渡し役のデーモンが持っている）
 
@@ -6695,7 +7194,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `1` なら、すれ違っている。この項の手順 3 へ進む
-   - `0` なら、起動時のすれ違いを直すための手順 3・4 は飛ばす（資格情報や証明書を変更した後は、`0` でも行う）
+   - `0` なら、起動時のすれ違いを直すためのこの項の手順 3・4 は飛ばす（資格情報や証明書を変更した後は、`0` でも行う）
 
 1. デーモンを起動し直す必要があるときは、止めて待ってから起動する。
 
@@ -6749,17 +7248,15 @@ yazi と依存ツールを先に入れる。
 
 ### Podman
 
+- AppStream の podman を入れ、自分のユーザー（rootless）でコンテナを動かせるようにする
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](reference/podman.md)・[ロールバックと注意点](extra/podman.md)
-
-- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+- 導入後は、必要な[コンテナ用ツール](tool-catalog.md#cli-コンテナ)を追加する
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインした bash（デスクトップの端末か SSH）で行う**
 > - `sudo -i` の root のシェルや、`sudo -iu <ユーザー>` で切り替えたシェルでは行わない
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 導入後は、必要な[コンテナ用ツール](tool-catalog.md#cli-コンテナ)を追加する
 
 1. podman が入っているか確かめる。
 
@@ -6856,6 +7353,9 @@ yazi と依存ツールを先に入れる。
 #### Podman: Docker 向けのツールから使う
 
 - Docker の API に `DOCKER_HOST` でつなぐツール（[lazydocker](#lazydocker) など）のための設定
+- 前提: [Podman](#podman)と[共通の bash 設定](#共通の-bash-設定)を通してある
+  - `DOCKER_HOST` は共通の bash 設定が入れる。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [画像の道具](#画像の道具) の dive と Trivy、[podman-tui](#podman-tui) は podman を直接読むので、この項は要らない
 
 1. 共通設定を読み直し、ソケットが Docker の API に答えるか確かめる。
@@ -6876,7 +7376,9 @@ yazi と依存ツールを先に入れる。
 - `podman run -d` で動かしたコンテナは、PC を再起動すると戻らない。linger が無いと、ログアウトしただけで止まる（[注意点](extra/podman.md#注意点)）
 - Quadlet は、`~/.config/containers/systemd` に置いた定義から、ユーザーの systemd のサービスを作る仕組み。podman に含まれている
 - 確認用に、`registry.access.redhat.com/ubi10/httpd-24`（Apache）を `127.0.0.1:8080` で動かす
-- 前提: [linger](#ユーザーサービスの常駐)を有効にする。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` でなければ、先に通す
+- 前提: [Podman](#podman)と[ユーザーサービスの常駐](#ユーザーサービスの常駐)（linger）を通してある
+  - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` でなければ、先に通す
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - この項の手順 3 で再起動する
 
 1. 確認用の Web サーバーの定義とページを置く。
@@ -6961,6 +7463,10 @@ yazi と依存ツールを先に入れる。
 
 #### Podman: 更新
 
+- podman と、Quadlet で動かすコンテナのイメージを上げる
+- 前提: [Podman](#podman)を通してある
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
+
 1. podman を更新する。
 
    ```bash
@@ -6971,7 +7477,7 @@ yazi と依存ツールを先に入れる。
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
    - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
 
-1. Quadlet の節を通したときだけ、新しいイメージがあるか見てから当てる。
+1. [Quadlet で自動起動する](#podman-quadlet-で自動起動する)を通したときだけ、新しいイメージがあるか見てから当てる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -6986,18 +7492,17 @@ yazi と依存ツールを先に入れる。
 
 ### podman-compose
 
+- EPEL の podman-compose を入れ、compose ファイルで 2 つのコンテナを動かして確かめる
+- 前提: [Podman](#podman)と[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 を通してある
+  - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
+- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
+- **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
+- PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 > [!IMPORTANT]
-> - 前提: [Podman](#podman)と[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（コンテナを自分のユーザーの rootless の podman で動かすため）
-> - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
-> - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 1. 入手できる版を見てから、podman-compose を入れる。
 
@@ -7080,7 +7585,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `hello from compose` が出ればよい
-   - **次の節は、プロンプトが戻ってから貼る**（続けて貼るとコンテナの中のコマンドへの入力として食われる）
+   - **ほかの項の手順は、プロンプトが戻ってから貼る**（続けて貼るとコンテナの中のコマンドへの入力として食われる）
 
 #### podman-compose: 使い方の基本
 
@@ -7099,6 +7604,10 @@ yazi と依存ツールを先に入れる。
 - 端末の画面（TUI）でサービスのログを見たり再起動したりするなら、[lazydocker の compose の節](#lazydocker-compose-のプロジェクトを見る)
 
 #### podman-compose: 更新
+
+- podman-compose を上げ、確認用の compose のイメージを取り直す
+- 前提: [podman-compose](#podman-compose)を通してある（この項の手順 2 は `~/compose-sample` を使う）
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
 1. podman-compose を更新する。
 
@@ -7125,18 +7634,17 @@ yazi と依存ツールを先に入れる。
 
 ### podman-tui
 
+- EPEL の podman-tui を入れ、確認用のコンテナを画面（TUI）から止めて確かめる
+- 前提: [Podman](#podman)の手順 7（API ソケット）までと、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 を通してある
+  - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
+- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
+- **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
+- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
 
 > [!IMPORTANT]
-> - 前提: [Podman](#podman)の手順 7（API ソケット）までと、[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
-> - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
-> - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
 
 1. 入手できる版を見てから、podman-tui を入れる。
 
@@ -7215,6 +7723,10 @@ yazi と依存ツールを先に入れる。
 
 #### podman-tui: 更新
 
+- podman-tui を上げる
+- 前提: [podman-tui](#podman-tui)を通してある
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
+
 1. podman-tui を更新する。
 
    ```bash
@@ -7229,20 +7741,17 @@ yazi と依存ツールを先に入れる。
 
 ### lazydocker
 
+- Homebrew の lazydocker を入れ、podman の API ソケットにつないで、確認用のコンテナを画面（TUI）から止める
+- 前提: [共通の bash 設定](#共通の-bash-設定)、[Homebrew](#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
+  - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+  - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
-
-- **前提**: [共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)を導入する。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+- **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
+- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
 
 > [!IMPORTANT]
-> - 前提: [Homebrew](#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）までを通す
-> - [Docker 向けツールの設定](#podman-docker-向けのツールから使う)も通す
-> - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
-> - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
 
 1. brew で lazydocker を入れる。
 
@@ -7265,7 +7774,7 @@ yazi と依存ツールを先に入れる。
    - 1 行目で `Version: 0.25.2` と `BuildSource: Homebrew` が出る
    - `/home/linuxbrew/.linuxbrew/bin/lazydocker` が出る
    - `unix:///run/user/<UID>/podman/podman.sock` と `OK` が出れば、lazydocker は podman の API ソケットにつなぐ
-   - 3 行目が空なら、`DOCKER_HOST` が無い。[Podman の Docker 向けの節](#podman-docker-向けのツールから使う)を通す（参考資料を参照）
+   - 3 行目が空なら、`DOCKER_HOST` が無い。[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通す（参考資料を参照）
 
 1. 画面で操作する、確認用のコンテナを動かす。
 
@@ -7305,6 +7814,8 @@ yazi と依存ツールを先に入れる。
 
 - lazydocker の `E`（シェルを開く）と `a`（アタッチ）は、`docker` コマンドを直接呼ぶ。podman だけの PC では、`+ docker exec -it ...` と出るだけで何も起きない（[注意点](extra/lazydocker.md#注意点)）
 - この項で、`c`（自分で足したコマンドのメニュー）に、`podman exec` でシェルを開くコマンドを足す
+- 前提: [lazydocker](#lazydocker)を通してある（確認用のコンテナ `lazydocker-web` と、設定ファイル `~/.config/lazydocker/config.yml` を使う）
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
 1. [手順 4](#lazydocker) で止めた確認用のコンテナを、起動し直す。
 
@@ -7342,13 +7853,14 @@ yazi と依存ツールを先に入れる。
    - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る
    - `exit` で抜け、`Press enter to return to lazydocker ...` で Enter を押すと画面に戻る
    - `q` で終了する
-   - **後ろの節の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
+   - **ほかの項の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
 
 #### lazydocker: compose のプロジェクトを見る
 
-- 前提: [podman-compose](#podman-compose) の実施手順を手順 4 まで通し、`~/compose-sample` のコンテナが動いていること
 - lazydocker は、起動したディレクトリで `docker compose config --quiet` が通ったときだけ、`[1]─Project` と `[2]─Services` の枠を出す
 - podman だけの PC では通らないので、この項で compose のコマンドを `podman-compose` に替える
+- 前提: [lazydocker](#lazydocker)を通し、[podman-compose](#podman-compose)を手順 4 まで通して、`~/compose-sample` のコンテナが動いている
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
 1. compose のコマンドを `podman-compose` にする設定を、設定ファイルに足す。
 
@@ -7390,18 +7902,18 @@ yazi と依存ツールを先に入れる。
 
 #### lazydocker: root でも使う
 
+- この項で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にし、root のコンテナを lazydocker で見る
 - **root のコンテナを lazydocker で見ないなら、この項は不要**
 - root のコンテナは `/var/lib/containers` にあり、[手順 4](#lazydocker)の一般ユーザーの画面には出ない
+- 前提: [lazydocker](#lazydocker)と[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)を通してある
+  - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの項の前提を満たさない
+  - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）。root の権限は、コマンドに付けた `sudo` で使う
 - [注意点](extra/podman.md#注意点)と[root を使う条件](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md#選択した方針)を先に確認する
-- この項で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
 - root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
 - `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（[root で使うときの補足](reference/lazydocker.md#root-で使うときの補足)）
-- 前提: root 自身にも [bash の共通設定](#共通の-bash-設定を-root-に入れる)を導入すること
-  - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの項の前提を満たさない
-  - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
 - この項の手順 4 で lazydocker の画面（TUI）が開く
-- [手順 1〜5](#lazydocker) を終えた、自分のユーザーのシェルで貼る
 - 補足: [root で使うときの補足](reference/lazydocker.md#root-で使うときの補足)
 
 > [!WARNING]
@@ -7523,6 +8035,10 @@ yazi と依存ツールを先に入れる。
 
 #### lazydocker: 更新
 
+- Homebrew の lazydocker を上げる
+- 前提: [lazydocker](#lazydocker)を通してある
+- 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）。Homebrew の更新は root のシェルでは行わない
+
 1. lazydocker を更新する。
 
    ```bash
@@ -7536,17 +8052,17 @@ yazi と依存ツールを先に入れる。
 
 ### Distrobox
 
+- EPEL の distrobox を入れ、podman のコンテナでほかのディストリ（既定は Ubuntu 24.04）のボックスを作って入る
+- 前提: [Podman](#podman)と[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 を通してある
+  - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
+- 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[ロールバックと注意点](extra/distrobox.md)
+- この項の手順 1 で変数を設定したシェルに貼る
+- **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
+- **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
 
 > [!IMPORTANT]
-> - 前提: [Podman](#podman)と[EPEL](#epel-と-rpm-fusion)の手順 1 を通す
-> - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（ボックスは自分のユーザーの rootless の podman で動かすため）
-> - **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
-> - **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 1. 変数を設定する。
 
@@ -7620,18 +8136,32 @@ yazi と依存ツールを先に入れる。
    - プロンプトが `📦[<USER>@ubuntu ~]$` に変わる。ここから先はボックスの中のシェル
    - SSH など画面の無いログインから入ると、`host-spawn: command not found` が出ることがある。出なくても、ボックスのプロンプトに入れればよい
    - `exit` でホストに戻る
-   - **後ろの節の手順は、`exit` でホストに戻ってから貼る**
+   - **ほかの項の手順は、`exit` でホストに戻ってから貼る**
 
 #### Distrobox: ボックスのコマンドをホストから呼ぶ
 
 - 例として、AppStream と EPEL に無い `ffmpeg` を Ubuntu のボックスに入れ、ホストのシェルから `ffmpeg` で呼べるようにする
 - ボックスに入れたものはボックスの中にだけある。ホストには、ボックスを呼び出す小さなスクリプトが `~/.local/bin` に置かれる
-- **この項の手順はどれも `distrobox enter` で終わる**。プロンプトが戻ってから次を貼る
+- 前提: [Distrobox](#distrobox)を通して、ボックスを作ってある
+- 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）。ボックスの中のシェルには貼らない
+- **この項の手順 2〜4 は `distrobox enter` で終わる**。プロンプトが戻ってから次を貼る
+
+1. 変数を設定する（既定のままでよい）。
+
+   ```bash
+   DBX_NAME=ubuntu                                  # ボックスの名前。<DBX_NAME>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf '%-9s = %s\n' DBX_NAME "${DBX_NAME}"
+   ```
+
+   - [Distrobox](#distrobox)の手順 1 で `DBX_NAME` を変えたときは、同じ値を入れる
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
 1. ボックスのパッケージの一覧を新しくする。
 
    ```bash
-   distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get update
+   distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get update
    ```
 
    - `Reading package lists...` または `パッケージリストを読み込んでいます... 完了` で終わる
@@ -7640,7 +8170,7 @@ yazi と依存ツールを先に入れる。
 1. ボックスに ffmpeg を入れる。
 
    ```bash
-   distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get install -y ffmpeg
+   distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get install -y ffmpeg
    ```
 
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
@@ -7648,7 +8178,7 @@ yazi と依存ツールを先に入れる。
 1. ffmpeg をホストから呼べるように書き出す。
 
    ```bash
-   distrobox enter "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- distrobox-export --bin /usr/bin/ffmpeg --export-path ~/.local/bin
+   distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- distrobox-export --bin /usr/bin/ffmpeg --export-path ~/.local/bin
    ```
 
    - `/usr/bin/ffmpeg from ubuntu exported successfully in /home/<USER>/.local/bin.` と `OK!` が出る
@@ -7667,6 +8197,22 @@ yazi と依存ツールを先に入れる。
 
 #### Distrobox: 更新
 
+- distrobox と、ボックスの中のパッケージを上げる
+- 前提: [Distrobox](#distrobox)を通して、ボックスを作ってある
+- 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）。ボックスの中のシェルには貼らない
+
+1. 変数を設定する（既定のままでよい）。
+
+   ```bash
+   DBX_NAME=ubuntu                                  # ボックスの名前。<DBX_NAME>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf '%-9s = %s\n' DBX_NAME "${DBX_NAME}"
+   ```
+
+   - [Distrobox](#distrobox)の手順 1 で `DBX_NAME` を変えたときは、同じ値を入れる
+   - 最後の行で値を読み戻して確かめる
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
+
 1. distrobox を更新する。
 
    ```bash
@@ -7680,11 +8226,11 @@ yazi と依存ツールを先に入れる。
 1. ボックスの中のパッケージを更新する。
 
    ```bash
-   distrobox upgrade "${DBX_NAME:?手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}"
+   distrobox upgrade "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}"
    ```
 
    - **ボックスの中身は `dnf upgrade` では上がらない**。ボックスごとにこの手順を行う
-   - **次の節は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
+   - **ほかの項の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
 
 ---
 
@@ -7695,19 +8241,15 @@ yazi と依存ツールを先に入れる。
 > [!IMPORTANT]
 > - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](windows-setup.md#virtualbox)を管理者の Windows PowerShell 5.1 で通す
 > - Windows では EPEL・Secure Boot の前提と KVM の設定は不要
-> - 前提: [EPEL](#epel-と-rpm-fusion)の手順 1 で有効にする。`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す
-> - **Secure Boot が有効な PC は、VirtualBox より先に[署名鍵](#secure-boot-の署名鍵)を MOK に登録する**。有効かは署名鍵の手順 3 で分かる
-> - 署名鍵の手順で再起動し、起動途中の MokManager を操作する
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **途中で再起動が 1 回入る**（[KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)の手順 3）。再起動した後は新しい端末を開いて続ける
-> - [リポジトリを置く](#virtualbox-リポジトリを置く)の手順 4・5 と[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 4 には、**対話入力がある**（鍵の確認・`[y/N]`）。答えてから次の手順を貼る
-> - [動作を確かめる](#virtualbox-動作を確かめる)の手順 4 で **GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてから[動作を確かめる](#virtualbox-動作を確かめる)の手順 5 を貼る
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 #### VirtualBox: リポジトリを置く
+
+- Oracle の VirtualBox の dnf リポジトリを置き、その署名鍵を rpm と dnf に取り込む
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash）
+- この項の手順 4・5 には、**対話入力がある**（鍵の確認）。答えてから次の手順を貼る
 
 1. この PC に入るかを確かめる。
 
@@ -7786,6 +8328,14 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox: VirtualBox を入れる
 
+- VirtualBox と、カーネルモジュールのビルドに要るものを入れ、モジュールが動いているか確かめる
+- 前提: [VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)と[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 を通してある
+  - `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に EPEL を通す
+  - **Secure Boot が有効な PC は、VirtualBox より先に[Secure Boot の署名鍵](#secure-boot-の署名鍵)で鍵を MOK に登録してある**。有効かは[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 で分かる
+  - 署名鍵の手順で再起動し、起動途中の MokManager を操作する
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash）
+- この項の手順 4 には、**対話入力がある**（`[y/N]`・鍵の確認）。答えてから次の手順を貼る
+
 1. 何が入るかを見る（`--assumeno` は必ず中断する）。
 
    ```bash
@@ -7850,6 +8400,11 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox: KVM と USB の設定
 
+- KVM が仮想化支援を先に取らないようにし、USB 機器を渡すなら自分を `vboxusers` に入れて、再起動で反映させる
+- 前提: [VirtualBox: VirtualBox を入れる](#virtualbox-virtualbox-を入れる)を通してある
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash）
+- **この項の手順 3 で再起動する**。再起動した後は新しい端末を開いて続ける
+
 1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置いて確かめる。
 
    ```bash
@@ -7886,6 +8441,11 @@ yazi と依存ツールを先に入れる。
    - **次の手順は、起動したら新しい端末を開いてから貼る**
 
 #### VirtualBox: 動作を確かめる
+
+- VirtualBox の版とモジュール・KVM の状態を見て、使い捨ての VM と GUI で動くか確かめる
+- 前提: [VirtualBox: KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)を通し、再起動してある
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、GNOME にログインした自分のユーザーの端末（bash。再起動した後に開いたもの）
+- この項の手順 4 で **GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてからこの項の手順 5 を貼る
 
 1. VirtualBox の版と、モジュールと KVM の状態を確かめる。
 
@@ -7955,6 +8515,9 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox: カーネルを更新したとき
 
+- 新しいカーネルで起動した後に、VirtualBox のモジュールが作り直されたか確かめる
+- 前提: [VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)から[VirtualBox: 動作を確かめる](#virtualbox-動作を確かめる)までを通し、新しいカーネルで起動してある
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash。新しいカーネルで起動した後に開いたもの）
 - この項は AlmaLinux 10 だけのもの（Windows 11 のドライバーは、ビルド済みのものをインストーラが入れる）
 - `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
 - **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [Secure Boot の署名鍵](#secure-boot-の署名鍵) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
@@ -7975,6 +8538,9 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox: 更新
 
+- VirtualBox を同じ系列の新しい版に上げる。系列を変えるときは、消してから入れ直す
+- 前提: [VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)から[VirtualBox: 動作を確かめる](#virtualbox-動作を確かめる)までを通してある
+- 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、GNOME にログインした自分のユーザーの端末（bash）
 - この項は AlmaLinux 10 のもの。Windows 11 は[Windows 11 の更新](windows-setup.md#virtualbox-windows-11-の更新)
 - **系列を変えるとき（7.2 → 7.3 など）は、先に消してから入れる**（この項の手順 3・4）
   - 系列ごとにパッケージ名が違うので `dnf upgrade` では移らず、2 つを同時に入れることもできない
@@ -8011,26 +8577,24 @@ yazi と依存ツールを先に入れる。
 
 ### VirtualBox の bootc ゲスト
 
+- VirtualBox の VM の中の AlmaLinux Atomic Desktop（bootc）に Guest Additions を入れる。**dnf では入れない**。Guest Additions を焼き込んだ派生イメージをこの VM でビルドし、`bootc switch` で切り替える（手順 3〜7）
+- 前提:
+  - ホストに VirtualBox を入れ、その VM に AlmaLinux Atomic Desktop（GNOME）を入れてある。ホストは AlmaLinux 10（[VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)から[VirtualBox: 動作を確かめる](#virtualbox-動作を確かめる)まで）でも Windows 11（[Windows の VirtualBox](windows-setup.md#virtualbox)）でもよい
+  - **Secure Boot が有効な VM は、先に[Secure Boot の署名鍵](#secure-boot-の署名鍵)を VM の中で通し、鍵を MOK に登録してある**
+    - 再起動時の MokManager を VM のウィンドウで操作する。最初の画面は 10 秒で消える
+    - `mokutil --sb-state` が `SecureBoot enabled` であることを確認する
+    - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
+    - ホストオンリーだけなら、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 まで通す
+      - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 3・4 でホストに鍵を作り、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 で登録する
+- 実行場所:
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
-
-> [!IMPORTANT]
-> - **VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いて自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
-> - **Secure Boot が有効な VM は先に[署名鍵](#secure-boot-の署名鍵)を MOK に登録する**
->   - 再起動時の MokManager を VM のウィンドウで操作する。最初の画面は 10 秒で消える
->   - `mokutil --sb-state` が `SecureBoot enabled` であることを確認する
->   - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
->   - ホストオンリーだけなら、署名鍵の手順 3 まで通す
->     - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 3・4 でホストに鍵を作り、署名鍵の手順 5〜7 で登録する
-> - **dnf では入れない**。Guest Additions を焼き込んだ派生イメージをこの VM でビルドし、`bootc switch` で切り替える（手順 3〜7）
-> - **手順 4 と手順 9 は、VM のウィンドウで行う**（手順 4 の CD の挿入は、ホスト側の操作）
-> - **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
-> - **インターネットに出られないホストオンリーだけの VM は、手順 6 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)を通す**
-> - イメージと署名鍵はホストで作り、イメージを ssh で VM へ運ぶ
-
-- 手順 1 の変数を設定したシェルで、上から順にコードブロックを貼る。新しい端末を開いたら手順 1 を貼り直す
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。手順 1〜3・5〜8・10。`sudo -i` した root のシェルでは行わない
+  - ホスト: ホストのデスクトップの、VM のウィンドウ（メニューの操作）。手順 4・9（手順 4 の CD の挿入は、ホスト側の操作）
+- この項の手順 1 で変数を設定したシェルに貼る。新しい端末を開いたら、この項の手順 1 を貼り直す
+- **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
+- **インターネットに出られないホストオンリーだけの VM は、手順 6 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)を通す**
+  - イメージと署名鍵はホストで作り、イメージを ssh で VM へ運ぶ
 - **切り替えた後は、`sudo bootc upgrade` だけでは OS が上がらない**（[更新](#virtualbox-の-bootc-ゲスト-更新)の手順でビルドし直す）
-- ホストは AlmaLinux 10 でも Windows 11 でもよい
 - 自作の kernel-rt のイメージでも、手順 1 の `BASE_IMAGE` を変えるだけで同じ手順になる（イメージで `rt` のリポジトリを有効にしておく）
 - `vboxguest` を読み込んだ直後にカーネルの `WARNING` が出ることがある。手順 7・8 の起動状態とログを確認する
   - 起動が止まった場合は、手順 7 の注意と[参考資料](reference/virtualbox-guest-bootc.md)を確認する
@@ -8243,20 +8807,37 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする
 
-- ホストオンリーだけでインターネットに出られない VM は、[通常の導入](#virtualbox-の-bootc-ゲスト)の手順 6 の代わりに通す。手順 1〜5 と 7 以降は同じ
-- Secure Boot なら[署名鍵](#secure-boot-の署名鍵)の手順 4 も、この項の手順 3・4 で代える
-  - そのままの手順 6 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
+- ホストオンリーだけでインターネットに出られない VM は、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 の代わりに通す。その項の手順 1〜5 と 7 以降は同じ
+  - そのままの[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 は、ベースのイメージを取り込めずに `pinging container registry quay.io: Get "https://quay.io/v2/": dial tcp: lookup quay.io …` で止まる
 - ホスト（VirtualBox を動かしている PC）で派生イメージをビルドし、1 つのファイルにして ssh で VM に運ぶ。VM はインターネットに出ない
-  - ビルドの材料（手順 3 の Containerfile と、手順 5 でコピーしたインストーラ）は、VM から写して使う
-- ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[Podman](#podman) の手順 1〜6）
-  - Windows ホストでは WSL の AlmaLinux 10 の端末で行う。既定の NAT でホストオンリーの VM に届くことを確認済み
-  - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
-- 手順 6 と違うところ:
-  - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この項の手順 6）
-  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この項の手順 3・4。登録は [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7）
+  - ビルドの材料（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3 の Containerfile と、同じ項の手順 5 でコピーしたインストーラ）は、VM から写して使う
+- 前提:
+  - VM の中で[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1〜5 を通してある
+  - Secure Boot が有効な VM は、VM の中で[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 まで通してある
+  - ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[Podman](#podman)の手順 1〜6）
+    - Windows ホストでは WSL の AlmaLinux 10 の端末で行う。既定の NAT でホストオンリーの VM に届くことを確認済み
+    - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
+- 実行場所:
+  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。この項の手順 1・2・5・10・11
+  - ホスト: VirtualBox を動かしている PC の、自分のユーザーの端末（bash）。Windows のホストでは WSL の AlmaLinux 10 の端末。この項の手順 3・4・6〜9・12
+- Secure Boot なら[署名鍵](#secure-boot-の署名鍵)の手順 4 も、この項の手順 4・5 で代える
+- [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 と違うところ:
+  - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この項の手順 7）
+  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この項の手順 4・5。登録は [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7）
   - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
-- この項の手順 1・4・9・10 は VM の端末（先に[手順 1](#virtualbox-の-bootc-ゲスト) を貼っておく）、手順 2・3・5〜8・11 はホストの端末に貼る
-- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 2 の代わりに、この項の手順 5・7〜9。元のイメージに戻すときは、この項の手順 10・11
+- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 2 の代わりに、この項の手順 6・8〜10。元のイメージに戻すときは、この項の手順 11・12
+
+1. VM の端末で、変数を設定する（既定のままでよい）。
+
+   ```bash
+   BASE_IMAGE=quay.io/almalinuxorg/atomic-desktop-gnome:latest   # 元のイメージ（「VirtualBox の bootc ゲスト」の手順 2 の Booted image）
+   printf '\n\033[7m 確認 \033[0m\n'
+   echo "BASE_IMAGE = ${BASE_IMAGE}"
+   ```
+
+   - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 と同じ値を入れる
+   - この項の手順 11 で使う
+   - 新しい端末を開いたら、この手順を貼り直す
 
 1. VM の端末で、ホストオンリーアダプターの IP を見る。
 
@@ -8264,26 +8845,33 @@ yazi と依存ツールを先に入れる。
    ip -4 -br addr show scope global
    ```
 
-   - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この項の手順 2 で使う `<VM_IP>`
+   - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この項の手順 3 で使う `<VM_IP>`
    - 何も出ないときは、有線の接続が上がっていない。`nmcli -t -f NAME,DEVICE connection show` で接続の名前を見て、`sudo nmcli connection up <名前>` で上げる
      - 自動接続しない VM は `sudo nmcli connection modify <名前> connection.autoconnect yes` で有効にする（[インストール時の状態](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施前の状態)）
 
 1. ホストの端末で、変数を設定する（`VM_SSH` は必ず値を入れる）。
 
    ```bash
-   VM_SSH=   # ← VM のユーザー名と、この項の手順 1 の IP（<USER>@<VM_IP>）
-   echo "VM_SSH = ${VM_SSH}"
+   VM_SSH=   # ← VM のユーザー名と、この項の手順 2 の IP（<USER>@<VM_IP>）
    ```
 
-   - 同じ端末に、[手順 1](#virtualbox-の-bootc-ゲスト) も貼る（この項の手順 7・8・11 で `BASE_IMAGE` を使う）
-   - 新しい端末を開いたら、[手順 1](#virtualbox-の-bootc-ゲスト) とこの手順を貼り直す
+   ```bash
+   BASE_IMAGE=quay.io/almalinuxorg/atomic-desktop-gnome:latest   # 元のイメージ（「VirtualBox の bootc ゲスト」の手順 2 の Booted image）
+   printf '\n\033[7m 確認 \033[0m\n'
+   echo "VM_SSH = ${VM_SSH}"
+   echo "BASE_IMAGE = ${BASE_IMAGE}"
+   ```
+
+   - `BASE_IMAGE` は、この項の手順 1 と同じ値を入れる（この項の手順 8・9・12 で使う）
+   - 最後の 2 行で値を読み戻して確かめる
+   - 新しい端末を開いたら、この手順の 2 つのブロックを貼り直す
    - Windows のホストでは、WSL の AlmaLinux 10 の端末を開いて貼る
 
 1. Secure Boot が有効なときだけ、ホストの端末で署名用の鍵を作り、証明書を VM に送る。
 
    ```bash
    if [ -z "${VM_SSH}" ]; then
-     echo 'VM_SSH が空のまま。この項の手順 2 を貼り直す' >&2
+     echo 'VM_SSH が空のまま。この項の手順 3 を貼り直す' >&2
    else
      rpm -q openssl >/dev/null || sudo dnf install -y openssl
      if [ ! -e ~/vbox-ga-mok/MOK.priv ]; then
@@ -8296,7 +8884,7 @@ yazi と依存ツールを先に入れる。
    fi
    ```
 
-   - Secure Boot が有効かは、VM で [Secure Boot の署名鍵 手順 3](#secure-boot-の署名鍵) の `mokutil --sb-state` で見たもの
+   - Secure Boot が有効かは、VM で [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 の `mokutil --sb-state` で見たもの
    - `MOK.priv`（秘密鍵。`-rw-------`）と `MOK.der`（公開鍵の証明書）が並び、`scp` が `MOK.der` を VM のホームに送る
    - **秘密鍵 `MOK.priv` はホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない**。VM へ送るのは証明書 `MOK.der` だけ
    - 初めてつなぐときはホスト鍵を聞かれるので `yes`、続けて VM のユーザーのパスワードを入れる
@@ -8316,18 +8904,18 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `MOK.der` だけが並ぶ（秘密鍵は VM に置かない）
-   - 置き場所は [Secure Boot の署名鍵 手順 4](#secure-boot-の署名鍵) と同じなので、同書の手順 7 と[ロールバック](extra/secure-boot-mok.md#ロールバック)はそのまま使える
-   - `MOK.priv` も並ぶなら、[Secure Boot の署名鍵 手順 4](#secure-boot-の署名鍵) で VM に作った鍵が残っている。この項ではホストの鍵で署名するので、使われない
+   - 置き場所は [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 4 と同じなので、同じ項の手順 7 と[ロールバック](extra/secure-boot-mok.md#ロールバック)はそのまま使える
+   - `MOK.priv` も並ぶなら、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 4 で VM に作った鍵が残っている。この項ではホストの鍵で署名するので、使われない
    - **一時パスワードを 2 回聞かれる**（[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 6 の MokManager で 1 回だけ使う。本書には残さない）
-   - 続けて、VM で [Secure Boot の署名鍵 手順 5〜7](#secure-boot-の署名鍵) を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
-   - 同書の手順 7 の後、この項の手順 5 はホストの端末で貼る（VM の端末を開き直したら、[手順 1](#virtualbox-の-bootc-ゲスト) を貼り直す）
-   - **次の手順（Secure Boot の署名鍵 手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
+   - 続けて、VM で [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
+   - [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 7 の後、この項の手順 6 はホストの端末で貼る（VM の端末を開き直したら、この項の手順 1 を貼り直す）
+   - **次の手順（[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. ホストの端末で、ビルドの材料と、署名を確かめる設定を VM から写す。
 
    ```bash
    if [ -z "${VM_SSH}" ]; then
-     echo 'VM_SSH が空のまま。この項の手順 2 を貼り直す' >&2
+     echo 'VM_SSH が空のまま。この項の手順 3 を貼り直す' >&2
    else
      mkdir -p ~/vbox-ga-host
      printf '\n\033[7m 確認 \033[0m\n'
@@ -8348,7 +8936,7 @@ yazi と依存ツールを先に入れる。
       [ -e ~/.config/containers/pki ] || [ -L ~/.config/containers/pki ]; then
      echo '~/.config/containers に policy.json・registries.d・pki のいずれかがすでにある。上書きせず、この手順の補足を見て手で足す' >&2
    elif [ -e ~/vbox-ga-host/containers-config-created ] || [ -L ~/vbox-ga-host/containers-config-created ]; then
-     echo '前回の設定の控えがある。上書きせず、この項の手順 11 で確認してからやり直す' >&2
+     echo '前回の設定の控えがある。上書きせず、この項の手順 12 で確認してからやり直す' >&2
    elif mkdir ~/vbox-ga-host/containers-config-created &&
         mkdir ~/vbox-ga-host/containers-config-created/pki &&
         cp ~/vbox-ga-host/etc/pki/containers/*.pub ~/vbox-ga-host/containers-config-created/pki/ &&
@@ -8362,17 +8950,17 @@ yazi と依存ツールを先に入れる。
      printf '\n\033[7m 確認 \033[0m\n'
      podman image trust show
    else
-     echo '設定のコピーに失敗した。次へ進まず、この項の手順 11 で残ったファイルを確認する' >&2
+     echo '設定のコピーに失敗した。次へ進まず、この項の手順 12 で残ったファイルを確認する' >&2
    fi
    ```
 
    - `quay.io/almalinuxorg/atomic-desktop-gnome` の行が `sigstoreSigned` ならよい
-   - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）。消すのは、この項の手順 11
-   - 「すでにある」と出たときは何も変えずに止まる。[既存の署名設定への追加](#virtualbox-の-bootc-ゲスト-既存のコンテナ署名設定に追加する)を行ってから、この項の手順 7 へ進む
-   - 新規に置く設定の控えは `~/vbox-ga-host/containers-config-created` に残す。この項の手順 11 で、内容が変わっていないことを確かめてから消すため
+   - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）。消すのは、この項の手順 12
+   - 「すでにある」と出たときは何も変えずに止まる。[既存の署名設定への追加](#virtualbox-の-bootc-ゲスト-既存のコンテナ署名設定に追加する)を行ってから、この項の手順 8 へ進む
+   - 新規に置く設定の控えは `~/vbox-ga-host/containers-config-created` に残す。この項の手順 12 で、内容が変わっていないことを確かめてから消すため
    - コピーや `podman image trust show` が失敗したときは、次の手順に進まない
 
-1. ホストの端末で、派生イメージをビルドする（[手順 6](#virtualbox-の-bootc-ゲスト) の代わりに）。
+1. ホストの端末で、派生イメージをビルドする（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 の代わりに）。
 
    ```bash
    build_args=(--pull=newer)
@@ -8380,7 +8968,7 @@ yazi と依存ツールを先に入れる。
      build_args+=(--build-arg MOK_SIGN=1 --secret "id=mok_priv,src=${HOME}/vbox-ga-mok/MOK.priv" --secret "id=mok_der,src=${HOME}/vbox-ga-mok/MOK.der")
    fi
    printf '\n\033[7m 確認 \033[0m\n'
-   podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-host/vbox-ga-image
+   podman build "${build_args[@]}" --build-arg "BASE_IMAGE=${BASE_IMAGE:?この項の手順 3 の BASE_IMAGE が空のまま。値を入れて貼り直す}" -t localhost/vbox-ga:latest ~/vbox-ga-host/vbox-ga-image
    ```
 
    - [通常の導入](#virtualbox-の-bootc-ゲスト)の手順 6 と同じ `Storing signatures` と 3 モジュールの行が出る
@@ -8393,7 +8981,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    if [ -z "${VM_SSH}" ] || [ -z "${BASE_IMAGE}" ]; then
-     echo 'VM_SSH か BASE_IMAGE が空のまま。手順 1 とこの項の手順 2 を貼り直す' >&2
+     echo 'VM_SSH か BASE_IMAGE が空のまま。この項の手順 3 を貼り直す' >&2
    else
      rm -f ~/vbox-ga-host/vbox-ga.tar
      printf '\n\033[7m 確認 \033[0m\n'
@@ -8419,29 +9007,29 @@ yazi と依存ツールを先に入れる。
 
    - `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出る
    - `sudo podman images` に、この 2 つが並べばよい
-   - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[手順 2](#virtualbox-の-bootc-ゲスト) の空きの目安より多く）
-   - 続けて[手順 7](#virtualbox-の-bootc-ゲスト) から先を行う
-   - **[手順 7](#virtualbox-の-bootc-ゲスト) は、`Loaded image:` が出てから貼る**
+   - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の空きの目安より多く）
+   - 続けて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 から先を行う
+   - **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 は、`Loaded image:` が出てから貼る**
 
 1. 元に戻すときは、VM の端末で、[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 1 の代わりにこれを貼る。
 
    ```bash
-   sudo bootc switch --apply --transport containers-storage "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
+   sudo bootc switch --apply --transport containers-storage "${BASE_IMAGE:?この項の手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
    ```
 
-   - 手順 9 で運んだベースイメージへ切り替えて再起動する
+   - この項の手順 10 で運んだベースイメージへ切り替えて再起動する
    - `Fetching layers` が `0/0`、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出る
    - 起動した後の `sudo bootc status` の `● Booted image:` は `containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` になる
      - `Digest:` も、レジストリのものとは違う値になる
      - 中身は元のイメージと同じ版（`Version:`）で、Guest Additions のモジュールと `/opt/VBoxGuestAdditions-*` は無くなる
    - 続けて[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 から先を行う
-   - **[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 は、起動したらログインし、新しい端末で[手順 1](#virtualbox-の-bootc-ゲスト) を貼ってから貼る**
+   - **[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 は、起動したらログインし、新しい端末で[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 を貼ってから貼る**
 
 1. 元に戻すときは、ホストの端末で、ビルドに使ったものと、署名を確かめる設定を消す。
 
    ```bash
    if [ -z "${BASE_IMAGE}" ]; then
-     echo 'BASE_IMAGE が空のまま。手順 1 を貼り直す' >&2
+     echo 'BASE_IMAGE が空のまま。この項の手順 3 を貼り直す' >&2
    elif [ ! -f ~/vbox-ga-host/containers-config-created/.ready ]; then
      echo '新規作成した設定の控えが無いか、不完全。自動では消さず、この手順の注意に従って戻す' >&2
    else
@@ -8468,7 +9056,7 @@ yazi と依存ツールを先に入れる。
    - 自動で消せたときは、`Untagged:` が 2 行と、`Deleted:` の行が並ぶ
    - ビルドの最初の段（`<none>`、6.43 MB）が残る。`podman image prune` で消せる（`[y/N]` を聞く）
    - **注意**: 控えが無い・不完全なときや、設定の内容が変わったときは、`policy.json`・`registries.d`・`pki` をまとめて消さない。退避と控えを見て、今回追加・変更したファイルや項目だけを手で戻す
-     - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 を貼り直す}"` で消す
+     - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?この項の手順 3 を貼り直す}"` で消す
      - コピーの途中で失敗した場合も、残ったファイルを確かめてから戻す。比較自体が失敗した場合は原因を直すか、同じく手で確認する
    - Secure Boot の鍵（`~/vbox-ga-mok`）は残る。消すときは、[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)のリード
 
@@ -8477,6 +9065,10 @@ yazi と依存ツールを先に入れる。
 - 共有フォルダーを足すと、VM の中で `vboxsf` のモジュールが読み込まれ、フォルダーが `/media/sf_<名前>` に自動でマウントされる
   - `findmnt` の表示は `/run/media/sf_<名前>`（Atomic Desktop では `/media` が `run/media` へのリンク）
 - 読み書きできるのは `vboxsf` グループのユーザーだけ
+- 前提: [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通し、Guest Additions が動いている
+- 実行場所:
+  - ホスト: VirtualBox マネージャーか `VBoxManage`（この項の手順 1）
+  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash（この項の手順 2〜4）
 
 1. ホストの VirtualBox で、VM の設定の「共有フォルダー」にフォルダーを足す。
 
@@ -8509,26 +9101,44 @@ yazi と依存ツールを先に入れる。
 
 #### VirtualBox の bootc ゲスト: 更新
 
-> [!WARNING]
-> **切り替えた後は、`sudo bootc upgrade` だけでは OS（ベースのイメージ）が上がらない**。bootc が見に行くのは、この VM の中の `localhost/vbox-ga:latest` だけになる。OS を上げるときも、この項の手順 2・3 でビルドし直す。
-
-- OS（ベースのイメージ）を上げる: この項の手順 2・3。カーネルが変わっても、同じ手順でモジュールが作り直される
-  - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この項の手順 2 は、レジストリにあるものを取り込む）
+- 切り替えた VM の OS（ベースのイメージ）や Guest Additions を上げるときに、派生イメージをビルドし直して取り込む
+- 前提: [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通し、`localhost/vbox-ga:latest` に切り替えてある
+- 実行場所:
+  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash（この項の手順 1〜4）
+  - ホスト: ホストのデスクトップの、VM のウィンドウ（この項の手順 2 の CD の挿入）
+  - ホストオンリーだけの VM でホストでビルドし直すときは、ホストの端末（下の箇条書き）
+- OS（ベースのイメージ）を上げる: この項の手順 1・3・4。カーネルが変わっても、同じ手順でモジュールが作り直される
+  - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この項の手順 3 は、レジストリにあるものを取り込む）
 - ホストの VirtualBox を上げた（Guest Additions の版が変わった）: この項の手順 1 から
-- ホストオンリーだけの VM は、手順 2 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 5・7〜9 でビルドし直し、VM へ運ぶ
-- ホストの端末で、先に[通常の導入](#virtualbox-の-bootc-ゲスト)の手順 1 とオフラインビルドの手順 2 を貼る
-- Secure Boot の鍵を作り直したときは、この項の手順 2 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない。ホストでビルドするときも同じ）
+- ホストオンリーだけの VM は、この項の手順 3 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 5・7〜9 でビルドし直し、VM へ運ぶ
+- ホストの端末で、先に[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2 を貼る
+- Secure Boot の鍵を作り直したときは、この項の手順 3 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない。ホストでビルドするときも同じ）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
 
-1. ホストの VirtualBox を上げたときだけ、CD を入れ直して [手順 5](#virtualbox-の-bootc-ゲスト) を貼る。
+> [!WARNING]
+> **切り替えた後は、`sudo bootc upgrade` だけでは OS（ベースのイメージ）が上がらない**。bootc が見に行くのは、この VM の中の `localhost/vbox-ga:latest` だけになる。OS を上げるときも、この項の手順 3・4 でビルドし直す。
+
+1. 変数を設定する（既定のままでよい）。
+
+   ```bash
+   BASE_IMAGE=quay.io/almalinuxorg/atomic-desktop-gnome:latest   # 元のイメージ（「VirtualBox の bootc ゲスト」の手順 2 の Booted image）
+   printf '\n\033[7m 確認 \033[0m\n'
+   echo "BASE_IMAGE = ${BASE_IMAGE}"
+   ```
+
+   - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 と同じ値を入れる
+   - この項の手順 3 で使う
+   - 新しい端末を開いたら、この手順を貼り直す
+
+1. ホストの VirtualBox を上げたときだけ、CD を入れ直して[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 を貼る。
 
    - VM のウィンドウのメニューの「デバイス」→「Guest Additions CD イメージを挿入」（英語の表示では Devices → Insert Guest Additions CD image...）で、新しい版の CD を入れる
-   - [手順 5](#virtualbox-の-bootc-ゲスト) の `Identification:` が、ホストの新しい版になっていればよい
+   - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 の `Identification:` が、ホストの新しい版になっていればよい
 
-1. 手順 1 の変数を設定したシェルで、[手順 6](#virtualbox-の-bootc-ゲスト) を貼り直す。
+1. この項の手順 1 を貼ったシェルで、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 を貼り直す。
 
    - 何も変わっていなければ、ビルドのキャッシュが使われて同じイメージになる（`Using cache` が 4 行並び、最後のイメージ ID が同じ）
-   - Containerfile を置き直したとき（[手順 3](#virtualbox-の-bootc-ゲスト)）は、Guest Additions の段をやり直す
+   - Containerfile を置き直したとき（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3）は、Guest Additions の段をやり直す
    - **次の手順は、`Successfully tagged` が出てから貼る**
 
 1. 新しいイメージを取り込んで、再起動する。
@@ -8539,21 +9149,23 @@ yazi と依存ツールを先に入れる。
 
    - イメージが変わっていれば、`Queued for next boot:` と入れ替わった層の数を出してから再起動する
    - 変わっていなければ、`No changes in ...` と `No update available.` を出して、再起動しない
-   - 起動したら、[手順 8・9](#virtualbox-の-bootc-ゲスト) で確かめる
+   - 起動したら、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8・9 で確かめる
 
 #### VirtualBox の bootc ゲスト: 既存のコンテナ署名設定に追加する
 
-- ホストオンリーアダプターだけの VM の節の手順 6 で「すでにある」と出た場合だけ行う
+- ホストの `~/.config/containers` に既にある署名の設定へ、VM の Atomic Desktop の署名を確かめる設定を手で足す
+- 前提: [ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 6 で「すでにある」と出た場合だけ行う（VM から写した `~/vbox-ga-host` を使う）
+- 実行場所: ホスト（VirtualBox を動かしている PC）の、自分のユーザーの端末とエディタ。Windows のホストでは WSL の AlmaLinux 10
 
-1. 変更前の設定と公開鍵を別の場所に退避し、今回追加・変更するファイルを控える。既存の同名の鍵や設定は上書きしない
+1. 変更前の設定と公開鍵を別の場所に退避し、今回追加・変更するファイルを控える。既存の同名の鍵や設定は上書きしない。
 
-1. 公開鍵は `~/vbox-ga-host/etc/pki/containers/*.pub` から `~/.config/containers/pki` に写す。同名があるときは内容を照合し、別の鍵なら名前と `policy.json` の参照先を合わせて分ける
+1. 公開鍵は `~/vbox-ga-host/etc/pki/containers/*.pub` から `~/.config/containers/pki` に写す。同名があるときは内容を照合し、別の鍵なら名前と `policy.json` の参照先を合わせて分ける。
 
-1. `policy.json` があるなら、その `transports` の `docker` に、VM の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を足す。無いなら VM のファイルを写す。どちらも鍵のパスを `~/.config/containers/pki/` に合わせる
+1. `policy.json` があるなら、その `transports` の `docker` に、VM の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を足す。無いなら VM のファイルを写す。どちらも鍵のパスを `~/.config/containers/pki/` に合わせる。
 
-1. `registries.d` があるなら、VM の `almalinuxorg-atomic-desktop-gnome.yaml` を、同名が無いことを確かめて足す。無いなら VM の `registries.d` をまるごと写す（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるため）
+1. `registries.d` があるなら、VM の `almalinuxorg-atomic-desktop-gnome.yaml` を、同名が無いことを確かめて足す。無いなら VM の `registries.d` をまるごと写す（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるため）。
 
-1. この項の手順 11 の自動削除は使わず、控えたファイル・項目だけを元に戻す
+1. 元に戻すときは、[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 11 の自動削除は使わず、控えたファイル・項目だけを戻す。
 
 ---
 
@@ -8563,39 +9175,29 @@ yazi と依存ツールを先に入れる。
 
 #### kvm-container を導入する
 
-対象ホストの一般ユーザーで行う。画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェルで行う。ホストの sudo がパスワードなしで使え、CPU の SVM / VT-x が有効であること。VM 内なら外側からネストした仮想化が提供されていること。VM 作成は x86_64 用。
+- podman と git だけのホストに kvm-container のリポジトリを clone し、イメージをビルドしてコンテナを起動する
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある（ホストの sudo がパスワードなしで使える）。podman と git は、この項の手順 2 で入れる
+  - CPU の SVM（AMD）/ VT-x（Intel）が有効であること。VM 内なら外側からネストした仮想化が提供されていること
+  - VM 作成は x86_64 用
+- 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
+- [仕様](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/SPEC.md)・[参照情報](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/verification/setup.md)
+- 既に clone したリポジトリやホスト自身の libvirt がある PC では、この項の手順 4・5 の確認を省かない
+- ホストごとに 1 度だけ行う。2 回目からは[VM を使う](#kvm-container-の-vm-を使う)から始める
 
-[仕様](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/SPEC.md)・[参照情報](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/verification/setup.md)
-
-- podman と git だけのホストにこのリポジトリを clone し、イメージをビルドしてコンテナを起動する
-- ホストごとに 1 度だけ行う。2 回目からは[VM を使う](#kvm-container-の-vm-を使う)から始める (新しいシェルでは、この項の手順 1 だけを貼り直す)
-
-1. 変数を設定する (`ISO` は必ず値を入れる)。
-
-   ```bash
-   ISO=   # ← ダウンロードした ISO のホスト側パス (例: ~/Downloads/AlmaLinux-10-latest-x86_64-dvd.iso)。<ISO>
-   ```
+1. 変数を設定する（既定のままでよい）。
 
    ```bash
    REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
-   VM_NAME=alma10         # VM 名。ディスクは /var/lib/libvirt/images/${VM_NAME}.qcow2 になる。<VM_NAME>
-   VM_MEMORY=4096         # メモリ (MiB)。<VM_MEMORY>
-   VM_VCPUS=2             # vCPU 数。<VM_VCPUS>
-   VM_DISK=20             # ディスクの大きさ (GiB)。<VM_DISK>
-   VM_NETWORK=default     # VM をつなぐ libvirt ネットワーク。ブリッジの節を通したホストで LAN に直接つなぐなら bridged。<VM_NETWORK>
-   for v in ISO REPO VM_NAME VM_MEMORY VM_VCPUS VM_DISK VM_NETWORK; do
-     printf '%-10s = %s\n' "$v" "${!v}"
-   done
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
    [ ! -d "${REPO}" ] || cd "${REPO}"
    ```
 
-   - `ISO` には、ホストにダウンロードしておいた ISO の絶対パスを入れる (`~` 始まりも可。代入値を引用符で囲むと `~` は展開されない)
-   - `ISO` を使うのは [VM 作成の手順 1](#kvm-container-で-vm-を作る) から。空のままだと、そこで止まる
-   - `REPO` から `VM_NETWORK` までは、既定のままでよければそのまま貼る
+   - `REPO` は、既定のままでよければそのまま貼る
    - clone 先を `~/kvm-container` 以外にするときだけ `REPO` を変える。ユーザーのホームディレクトリ配下にする
    - 値を読み戻して確かめる
    - clone 済みなら、最後の行でリポジトリ直下に移る
-   - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから、続きのシナリオへ進む
+   - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順を貼り直してから先へ進む
 
 
 1. podman と git を入れる。
@@ -8620,7 +9222,7 @@ yazi と依存ツールを先に入れる。
 1. リポジトリを clone する。
 
    ```bash
-   [ -e "${REPO:?導入の手順 1 の REPO が空のまま。導入の手順 1 を貼り直す}/kvm.sh" ] || git clone https://github.com/ryo-aoki-pc/kvm-container.git "${REPO}"
+   [ -e "${REPO:?この項の手順 1 の REPO が空のまま。この項の手順 1 を貼り直す}/kvm.sh" ] || git clone https://github.com/ryo-aoki-pc/kvm-container.git "${REPO}"
    cd "${REPO}" && ls -l kvm.sh
    ```
 
@@ -8650,7 +9252,7 @@ yazi と依存ツールを先に入れる。
 1. `kvm` のイメージをビルドする。
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh build kvm
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh build kvm
    ```
 
    - 時間がかかる (AlmaLinux 10 minimal のイメージ取得と `microdnf` でのパッケージ導入)
@@ -8711,23 +9313,54 @@ yazi と依存ツールを先に入れる。
 #### kvm-container で VM を作る
 
 - ISO を `data/` に置き、`virt-install` で VM (ディスクは SATA の SSD、NIC は e1000e) を作って、virt-viewer の画面でインストールする
-- x86_64 のホストで行う。この項の手順 3 で使う SATA と e1000e は、aarch64 の qemu-kvm には無い
-- [導入の手順 1](#kvm-container-を導入する) の変数を設定したシェル (リポジトリ直下) で貼る。コンテナが止まっていれば、先に [VM 利用の手順 1](#kvm-container-の-vm-を使う) で起動する
-- 2 台目からは、導入の手順 1 の `VM_NAME` (ISO を変えるなら `ISO` も) を変えて貼り直してから、この項の手順 1 から貼る
-- VM をホストのブリッジにつなぐなら、先に[ブリッジの節](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1〜8 を行う
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1 で起動する
+  - VM をホストのブリッジにつなぐなら、先に[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1〜8 を行う
+- 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
+- x86_64 のホストで行う。この項の手順 4 で使う SATA と e1000e は、aarch64 の qemu-kvm には無い
+- 2 台目からは、この項の手順 1 の `VM_NAME` (ISO を変えるなら `ISO` も) を変えて、この項の手順 1 から貼る
 
 > [!CAUTION]
-> - ブリッジを使うホストは手順 4 の最初のブロックだけを貼り、次のブロックは貼らない
-> - 先に `BRIDGE` に利用中の名前を入れる。空で止まったら値を入れ、最初のブロックを貼り直す
+> - ブリッジを使うホストは、この項の手順 5 の最初のブロックだけを貼り、次のブロックは貼らない
+> - 先に、この項の手順 1 の `BRIDGE` に利用中の名前を入れる。空で止まったら、この項の手順 1 で値を入れてから、最初のブロックを貼り直す
+
+1. 変数を設定する（`ISO` は必ず値を入れる）。
+
+   ```bash
+   ISO=   # ← ダウンロードした ISO のホスト側パス (例: ~/Downloads/AlmaLinux-10-latest-x86_64-dvd.iso)。<ISO>
+   ```
+
+   ```bash
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   VM_NAME=alma10         # VM 名。ディスクは /var/lib/libvirt/images/${VM_NAME}.qcow2 になる。<VM_NAME>
+   VM_MEMORY=4096         # メモリ (MiB)。<VM_MEMORY>
+   VM_VCPUS=2             # vCPU 数。<VM_VCPUS>
+   VM_DISK=20             # ディスクの大きさ (GiB)。<VM_DISK>
+   VM_NETWORK=default     # VM をつなぐ libvirt ネットワーク。ブリッジの項を通したホストで LAN に直接つなぐなら bridged。<VM_NETWORK>
+   BRIDGE=br0             # ブリッジの名前 (ブリッジを使うホストだけが使う)。<BRIDGE>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in ISO REPO VM_NAME VM_MEMORY VM_VCPUS VM_DISK VM_NETWORK BRIDGE; do
+     printf '%-10s = %s\n' "$v" "${!v}"
+   done
+   [ ! -d "${REPO}" ] || cd "${REPO}"
+   ```
+
+   - `ISO` には、ホストにダウンロードしておいた ISO の絶対パスを入れる (`~` 始まりも可。代入値を引用符で囲むと `~` は展開されない)
+   - `REPO` から `BRIDGE` までは、既定のままでよければそのまま貼る
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - `VM_NETWORK` は、[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)を通したホストで LAN に直接つなぐなら `bridged` にする
+   - `BRIDGE` は、ブリッジを使うホストだけが使う。[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1 と同じ値を入れる
+   - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
+   - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから先へ進む
 
 1. ISO があるか確かめ、`data/` にコピーする。
 
    ```bash
-   ls -l "${ISO:?導入の手順 1 の ISO が空のまま。値を入れて貼り直す}"
-   sudo cp "${ISO:?導入の手順 1 の ISO が空のまま。値を入れて貼り直す}" data/var-libvirt/images/
+   ls -l "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}"
+   sudo cp "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}" data/var-libvirt/images/
    ```
 
-   - `ls -l` が `No such file or directory` なら、導入の手順 1 の `ISO` を直して貼り直してから、この手順を貼り直す
+   - `ls -l` が `No such file or directory` なら、この項の手順 1 の `ISO` を直して貼り直してから、この手順を貼り直す
    - ISO の大きさによっては時間がかかる
    - **次の手順は、`cp` が終わってから貼る**
 
@@ -8743,23 +9376,23 @@ yazi と依存ツールを先に入れる。
 1. ディスクを SATA の SSD、NIC を e1000e にして VM を作る。
 
    ```bash
-   ./kvm.sh virt-install --name "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}" --memory "${VM_MEMORY}" --vcpus "${VM_VCPUS}" \
+   ./kvm.sh virt-install --name "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}" --memory "${VM_MEMORY}" --vcpus "${VM_VCPUS}" \
      --machine q35 --disk "size=${VM_DISK},bus=sata,target.rotation_rate=1" \
-     --cdrom "/var/lib/libvirt/images/$(basename "${ISO:?導入の手順 1 の ISO が空のまま。値を入れて貼り直す}")" --osinfo detect=on,require=off \
-     --network "network=${VM_NETWORK:?導入の手順 1 の VM_NETWORK が空のまま。導入の手順 1 を貼り直す},model=e1000e" --graphics vnc --noautoconsole
+     --cdrom "/var/lib/libvirt/images/$(basename "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}")" --osinfo detect=on,require=off \
+     --network "network=${VM_NETWORK:?この項の手順 1 の VM_NETWORK が空のまま。この項の手順 1 を貼り直す},model=e1000e" --graphics vnc --noautoconsole
    ```
 
    - `virt-install` はすぐ戻り、VM はインストーラが起動した状態 (`running`) になる
    - ディスクは `/var/lib/libvirt/images/${VM_NAME}.qcow2` (ホストの `data/var-libvirt/images/`) に作られる
-   - ディスクは SATA の SSD (`sda`)、NIC は `e1000e` になる (確かめるのはこの項の手順 5)
-   - `VM_NETWORK=bridged` でネットワークが見つからないと言われたら、[ブリッジの節](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 6・7 (`KVM_BRIDGE` を付けた `up`) を先に行う
+   - ディスクは SATA の SSD (`sda`)、NIC は `e1000e` になる (確かめるのはこの項の手順 6)
+   - `VM_NETWORK=bridged` でネットワークが見つからないと言われたら、[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 6・7 (`KVM_BRIDGE` を付けた `up`) を先に行う
    - **注意**: aarch64 のホストでは通らない想定。qemu-kvm に SATA と e1000e が無い
 
 
 1. virt-viewer で画面を開き、インストールする（ブリッジを使うホストは最初のブロック、使わないホストは次のブロック。どちらか一方だけを貼る）。
 
    ```bash
-   KVM_BRIDGE="${BRIDGE:?ブリッジの手順 1 の BRIDGE を設定する}" ./kvm.sh viewer "${VM_NAME}"
+   KVM_BRIDGE="${BRIDGE:?この項の手順 1 の BRIDGE を設定する}" ./kvm.sh viewer "${VM_NAME}"
    ```
 
    ```bash
@@ -8804,33 +9437,54 @@ yazi と依存ツールを先に入れる。
 #### kvm-container の VM を使う
 
 - コンテナと VM を起動し、画面を見て、止めるまでの流れ。ホストの起動後やログインのたびに、要る手順だけを貼る
-- [導入の手順 1](#kvm-container-を導入する) の変数を設定したシェルで貼る。新しいシェルでは、導入の手順 1 の 2 つのブロックを貼り直してから始める
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)と[VM を作る](#kvm-container-で-vm-を作る)を通してある
+- 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 
 > [!CAUTION]
-> - ブリッジを使うホストは手順 1・3 の最初のブロックだけを貼り、次のブロックは貼らない
-> - 先に `BRIDGE` に利用中の名前を入れる。空で止まったら値を入れ、最初のブロックを貼り直す
+> - ブリッジを使うホストは、この項の手順 2・4 の最初のブロックだけを貼り、次のブロックは貼らない
+> - 先に、この項の手順 1 の `BRIDGE` に利用中の名前を入れる。空で止まったら、この項の手順 1 で値を入れてから、最初のブロックを貼り直す
 > - `KVM_BRIDGE` を付けずに `kvm` を起動すると `bridged` は削除される
+
+1. 変数を設定する（既定のままでよい）。
+
+   ```bash
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   VM_NAME=alma10         # VM 名。<VM_NAME>
+   BRIDGE=br0             # ブリッジの名前 (ブリッジを使うホストだけが使う)。<BRIDGE>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in REPO VM_NAME BRIDGE; do
+     printf '%-10s = %s\n' "$v" "${!v}"
+   done
+   [ ! -d "${REPO}" ] || cd "${REPO}"
+   ```
+
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - `VM_NAME` は、[VM を作る](#kvm-container-で-vm-を作る)で作った VM の名前を入れる
+   - `BRIDGE` は、ブリッジを使うホストだけが使う。[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1 と同じ値を入れる
+   - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
+   - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順を貼り直してから先へ進む
 
 1. コンテナを起動する（動いていれば何もしない。ブリッジを使うホストは最初のブロック、使わないホストは次のブロック。どちらか一方だけを貼る）。
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}" && KVM_BRIDGE="${BRIDGE:?ブリッジの手順 1 の BRIDGE を設定する}" ./kvm.sh up
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}" && KVM_BRIDGE="${BRIDGE:?この項の手順 1 の BRIDGE を設定する}" ./kvm.sh up
    ```
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh up
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh up
    ```
 
    - `>> ready. VMs: …` が出れば `kvm` は起動している。動いていれば `>> kvm is already running`
    - 画面のあるホストでは、続けて `>> kvm-gui started. …` か `>> kvm-gui is already running` が出る
    - 再ログインの後なら `>> the host session has changed: recreating kvm-gui …` が出て、`kvm-gui` だけが作り直される
-   - [VM 作成の手順 6](#kvm-container-で-vm-を作る) で自動起動を設定した VM は、`kvm` の起動と一緒に起動する
+   - [VM を作る](#kvm-container-で-vm-を作る)の手順 6 で自動起動を設定した VM は、`kvm` の起動と一緒に起動する
    - **次の手順は、`>> ready.` か `>> kvm is already running` が出てから貼る**
 
 1. VM を起動する。
 
    ```bash
-   ./kvm.sh virsh start "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
+   ./kvm.sh virsh start "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
    ./kvm.sh virsh domstate "${VM_NAME}"            # running
    ```
 
@@ -8840,11 +9494,11 @@ yazi と依存ツールを先に入れる。
 1. VM の画面を開く（ブリッジを使うホストは最初のブロック、使わないホストは次のブロック。どちらか一方だけを貼る）。
 
    ```bash
-   KVM_BRIDGE="${BRIDGE:?ブリッジの手順 1 の BRIDGE を設定する}" ./kvm.sh viewer "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
+   KVM_BRIDGE="${BRIDGE:?この項の手順 1 の BRIDGE を設定する}" ./kvm.sh viewer "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
    ```
 
    ```bash
-   ./kvm.sh viewer "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
+   ./kvm.sh viewer "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
    ```
 
    - ホストのデスクトップに virt-viewer のウィンドウが開き、VM の画面が出る
@@ -8886,13 +9540,27 @@ yazi と依存ツールを先に入れる。
 
 - GNOME からログアウト / 再ログインしたり、ホスト側の `DISPLAY` 等を変えたりしたときに行う
 - `kvm-gui` だけが作り直され、`kvm` と VM は動いたまま
-- [VM 利用の手順 1](#kvm-container-の-vm-を使う) の `up` と `viewer` も同じことをしてから動くので、それらを使うならこの項は飛ばしてよい
+- 前提: 画面のあるホストで[kvm-container を導入する](#kvm-container-を導入する)を通してあり、`kvm` のコンテナが動いている
+- 実行場所: GNOME にログインし直した後に開いた、一般ユーザーの GNOME の端末（bash）。root の権限は、コマンドに付けた `sudo` だけで使う
+- [VM を使う](#kvm-container-の-vm-を使う)の `up` と `viewer` も同じことをしてから動くので、それらを使うならこの項は飛ばしてよい
 
-
-1. GNOME の端末を開き、[導入の手順 1](#kvm-container-を導入する) を貼ってから `kvm-gui` を作り直す。
+1. 変数を設定する（既定のままでよい）。
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh up gui
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   [ ! -d "${REPO}" ] || cd "${REPO}"
+   ```
+
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
+
+1. `kvm-gui` を作り直す。
+
+   ```bash
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}" && ./kvm.sh up gui
    ```
 
    - `>> the host session has changed: recreating kvm-gui (the kvm container and its VMs keep running)` が出る
@@ -8911,11 +9579,13 @@ yazi と依存ツールを先に入れる。
 #### kvm-container の VM をホストのブリッジにつなぐ
 
 - VM にホストと同じセグメントの IP (LAN の DHCP) を割り当てる。ホストにブリッジを作り、`KVM_BRIDGE` でそれを libvirt ネットワーク `bridged` として登録する
-- [導入](#kvm-container-を導入する)の後、[VM を作る](#kvm-container-で-vm-を作る)の前に行う。[導入の手順 1](#kvm-container-を導入する) の `VM_NETWORK` は `bridged` にしておく
-- この項の手順 9 だけは、[VM 作成の手順 3](#kvm-container-で-vm-を作る) で VM を作った後に貼る
-- すでに VM を作ったなら、導入の手順 1 の `VM_NAME` も別の名前にして貼り直す (作った VM の `default` からの付け替えは扱わない)
-- **物理マシン / VM の AlmaLinux 10 + GNOME (NetworkManager) で、GNOME にログインした端末 (コンソール) から行う**。この項の手順 4 は NIC の接続をブリッジに切り替えるので、その NIC 越しの ssh は切れる
-- ブリッジ自体はホスト側で作る (`kvm.sh` はホストのネットワーク設定を変更しない)。無線 NIC しか無いホストでは使えない
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。[VM を作る](#kvm-container-で-vm-を作る)より前に行い、VM を作るときは `VM_NETWORK` を `bridged` にする
+  - すでに VM を作ったなら、[VM を作る](#kvm-container-で-vm-を作る)では `VM_NAME` も別の名前にする (作った VM の `default` からの付け替えは扱わない)
+  - ブリッジ自体はホスト側で作る (`kvm.sh` はホストのネットワーク設定を変更しない)。無線 NIC しか無いホストでは使えない
+- 実行場所: **物理マシン / VM の AlmaLinux 10 + GNOME (NetworkManager) で、GNOME にログインした一般ユーザーの端末 (コンソール) から行う**。root の権限は、コマンドに付けた `sudo` だけで使う
+- この項の手順 4 は NIC の接続をブリッジに切り替えるので、その NIC 越しの ssh は切れる
+- NIC の元の接続名 (この項の手順 1 の `NIC_CON`) を控えてから、接続を変える (この項の手順 3・4)
+- この項の手順 9 だけは、[VM を作る](#kvm-container-で-vm-を作る)の手順 3 で VM を作った後に貼る
 - 元に戻すのは[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1〜4
 
 1. 変数を設定する (`NIC` は必ず値を入れる)。
@@ -8927,18 +9597,25 @@ yazi と依存ツールを先に入れる。
    ```bash
    BRIDGE=br0             # 作るブリッジの名前。libvirt ネットワーク bridged の実体になる。<BRIDGE>
    NIC_CON=$(nmcli -g NAME,DEVICE connection show --active | awk -F: -v d="${NIC}" '$2==d{print $1}')   # NIC の現在の接続名 (自動)。<NIC_CON>
-   for v in NIC BRIDGE NIC_CON; do
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   VM_NAME=alma10         # VM 名 (この項の手順 9 で使う)。<VM_NAME>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in NIC BRIDGE NIC_CON REPO VM_NAME; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
+   [ ! -d "${REPO}" ] || cd "${REPO}"
    ```
 
    - `NIC` には、ブリッジに収容する物理 NIC の名前を入れる (`ip -br link` で確認する)
    - `BRIDGE` は、既定のままでよければそのまま貼る
    - `NIC_CON` は `NIC` から自動で入る
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - `VM_NAME` は、[VM を作る](#kvm-container-で-vm-を作る)で作る (作った) VM の名前を入れる。この項の手順 9 で使う
    - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
    - `NIC_CON` が空なら、ここで止める。`NIC` の名前が違うか、その NIC に active な接続が無い (`nmcli connection show --active` で確かめる)
    - **`NIC_CON` の値を控えておく**。[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 4 で NIC の元の接続を上げるのに使う
-   - 新しいシェルを開いたら (SSH を張り直したあとも)、[導入の手順 1](#kvm-container-を導入する) と、この手順の 2 つのブロックを貼り直してから先へ進む。**この項の手順 4 の後に貼り直すと `NIC_CON` の値が変わる**
+   - 新しいシェルを開いたら (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから先へ進む。**この項の手順 4 の後に貼り直すと `NIC_CON` の値が変わる**
 
 
 1. NIC が UP で、IP を持っているか確かめる。
@@ -8985,7 +9662,7 @@ yazi と依存ツールを先に入れる。
 1. ブリッジを登録するため、先に `kvm` を止める。
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。導入の手順 1 を貼り直す}" && ./kvm.sh down kvm   # 動いている VM は ACPI で停止
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。この項の手順 1 を貼り直す}" && ./kvm.sh down kvm   # 動いている VM は ACPI で停止
    ```
 
    - 動いている VM は ACPI でシャットダウンされる (最大 120 秒待つ)
@@ -9003,8 +9680,8 @@ yazi と依存ツールを先に入れる。
    - 最後に `>> ready. VMs: ...` で戻る
    - **注意**: 以後、`kvm` を起動するすべての経路に毎回 `KVM_BRIDGE=` を付ける
    - 付けずに `kvm` を起動すると `bridged` は削除される (`>> KVM_BRIDGE is not set: removing the libvirt network "bridged"`)
-   - `viewer` も内部で `up` を呼ぶ。ブリッジ利用時は、VM 作成の手順 4・VM 利用の手順 3 の最初のブロックだけを貼る
-   - [VM 利用の手順 1](#kvm-container-の-vm-を使う) も最初のブロックだけを貼る
+   - `viewer` も内部で `up` を呼ぶ。ブリッジ利用時は、[VM を作る](#kvm-container-で-vm-を作る)の手順 4・[VM を使う](#kvm-container-の-vm-を使う)の手順 3 の最初のブロックだけを貼る
+   - [VM を使う](#kvm-container-の-vm-を使う)の手順 1 も最初のブロックだけを貼る
    - `./kvm.sh up gui` (再ログイン後の `kvm-gui` の作り直し) は `bridged` に影響しない。`kvm` が動いている限り `bridged` はそのまま
    - **次の手順は、`>> ready.` が出てから貼る**
 
@@ -9019,39 +9696,64 @@ yazi と依存ツールを先に入れる。
    - `net-list` で `bridged` が active (`default` と並ぶ)
    - `net-list` に `bridged` が無ければ、`kvm` を止めずに `up` したか、`KVM_BRIDGE=` を付け忘れている。この項の手順 6・7 をやり直す
    - この後は[VM を作る](#kvm-container-で-vm-を作る)に進む
-   - [導入](#kvm-container-を導入する)の手順 1 で `VM_NETWORK=bridged` にすると、[VM 作成](#kvm-container-で-vm-を作る)の手順 3 は `--network network=bridged` を使う
+   - `VM_NETWORK=bridged` にすると、[VM を作る](#kvm-container-で-vm-を作る)の手順 3 は `--network network=bridged` を使う
    - VM は LAN の DHCP から IP を取る (ホストと同じセグメント)
 
 
-1. [VM 作成の手順 3](#kvm-container-で-vm-を作る) の後に、VM が `bridged` につながっていることを確かめる。
+1. [VM を作る](#kvm-container-で-vm-を作る)の手順 3 の後に、VM が `bridged` につながっていることを確かめる。
 
    ```bash
-   ./kvm.sh virsh domiflist "${VM_NAME:?導入の手順 1 の VM_NAME を設定してから貼る}"   # Type が network、Source が bridged
+   ./kvm.sh virsh domiflist "${VM_NAME:?この項の手順 1 の VM_NAME を設定してから貼る}"   # Type が network、Source が bridged
    ```
 
-   - [導入の手順 1](#kvm-container-を導入する) の変数を設定したシェル (リポジトリ直下) で貼る
+   - この項の手順 1 の変数を設定したシェル (リポジトリ直下) で貼る
    - `Type` が `network`、`Source` が `bridged` ならよい
    - 既存の VM の付け替え (定義の `<source network='default'/>` を `bridged` にする) は本書では扱わない
 
 #### kvm-container の VM を削除する
 
-- [導入の手順 1](#kvm-container-を導入する) の変数を設定したシェル (リポジトリ直下) で貼る。コンテナが止まっていれば、先に [VM 利用の手順 1](#kvm-container-の-vm-を使う) で起動する
+- VM の定義・UEFI 変数・ディスクを消す。ISO は、消すときだけこの項の手順 7 で消す
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1 で起動する
+- 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5〜7
 - `down` は `data/` を残す。**`clean` は削除する**
 - 共有 ISO を消さないため、`--remove-all-storage` は使わず、消すディスクを `--storage` で指定する
 - UEFI の VM は `--nvram` を付ける。BIOS の VM に付けてもよい
 
 > [!CAUTION]
-> **この項の手順 5 で、VM の定義・UEFI 変数・ディスク (`sda`) が消え、取り戻せない。** ISO は残る。
+> **この項の手順 6 で、VM の定義・UEFI 変数・ディスク (`sda`) が消え、取り戻せない。** ISO は残る。
+
+1. 変数を設定する（ISO も消すときは、`ISO` に必ず値を入れる）。
+
+   ```bash
+   ISO=   # ← VM を作ったときの ISO のホスト側パス (例: ~/Downloads/AlmaLinux-10-latest-x86_64-dvd.iso)。<ISO>
+   ```
+
+   ```bash
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   VM_NAME=alma10         # 消す VM の名前。<VM_NAME>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in ISO REPO VM_NAME; do
+     printf '%-10s = %s\n' "$v" "${!v}"
+   done
+   [ ! -d "${REPO}" ] || cd "${REPO}"
+   ```
+
+   - `ISO` は、[VM を作る](#kvm-container-で-vm-を作る)の `ISO` と同じ値を入れる。使うのは、ISO も消すとき (この項の手順 7) だけ
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - `VM_NAME` には、消す VM の名前 ([VM を作る](#kvm-container-で-vm-を作る)の `VM_NAME`) を入れる
+   - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
+   - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから先へ進む
 
 1. 削除するディスクと、CD-ROM の中身を確かめる。
 
    ```bash
-   ./kvm.sh virsh domblklist "${VM_NAME:?導入の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"   # sda = 消すディスク。sdb に ISO が入ったままなら次の手順で取り出す
+   ./kvm.sh virsh domblklist "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"   # sda = 消すディスク。sdb に ISO が入ったままなら次の手順で取り出す
    ```
 
    - `sda` が消すディスク
-   - `sdb` が `-` なら、この項の手順 2 は飛ばす (`--cdrom` でインストールした VM は、Windows 以外はインストール後に取り出されている)
+   - `sdb` が `-` なら、この項の手順 3 は飛ばす (`--cdrom` でインストールした VM は、Windows 以外はインストール後に取り出されている)
    - `vda` が出たら virtio で作った VM。この項の `sda` を `vda` に、`sdb` を `sda` に読み替えて貼る
 
 1. `sdb` に他の VM と共有している ISO が入ったままのときだけ、取り出す。
@@ -9084,7 +9786,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    ./kvm.sh virsh undefine "${VM_NAME}" --nvram --storage sda   # 定義・UEFI 変数・ディスクを削除 (ISO は残る)
-   sudo ls "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}/data/var-libvirt/images" "${REPO}/data/etc-libvirt/qemu"   # qcow2 と xml が消え、ISO は残っている
+   sudo ls "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}/data/var-libvirt/images" "${REPO}/data/etc-libvirt/qemu"   # qcow2 と xml が消え、ISO は残っている
    ```
 
    - `sudo ls` で、qcow2 と xml が消え、ISO が残っていることを確かめる
@@ -9092,18 +9794,34 @@ yazi と依存ツールを先に入れる。
 1. ISO も消すときだけ、他の VM が使っていないことを `domblklist` で確かめてから消す。
 
    ```bash
-   sudo rm "${REPO:?導入の手順 1 の REPO が空のまま。値を入れて貼り直す}/data/var-libvirt/images/$(basename "${ISO:?導入の手順 1 の ISO が空のまま。値を入れて貼り直す}")"
+   sudo rm "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}/data/var-libvirt/images/$(basename "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}")"
    ```
 
 #### kvm-container を更新する
 
 - リポジトリを最新にし、イメージを作り直してコンテナを起動し直す。`data/` (VM のディスク・定義) はそのまま使える
-- ブリッジの節を通したホストでは、この項の手順 2 の最後の `./kvm.sh up` を `KVM_BRIDGE=br0 ./kvm.sh up` に変えて貼る (`br0` はブリッジの節の手順 1 の `BRIDGE`)。付けないと `bridged` が消える
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある
+- 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
+- リポジトリに自分で加えた変更があれば、この項の手順 2 の `git pull --ff-only` の前に確かめて退避する
+- [VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)を通したホストでは、この項の手順 3 の最後の `./kvm.sh up` を `KVM_BRIDGE=br0 ./kvm.sh up` に変えて貼る (`br0` は[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1 の `BRIDGE`)。付けないと `bridged` が消える
+
+1. 変数を設定する（既定のままでよい）。
+
+   ```bash
+   REPO=~/kvm-container   # clone 先。ユーザーのホームディレクトリ配下にする。<REPO>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'REPO = %s\n' "${REPO}"
+   [ ! -d "${REPO}" ] || cd "${REPO}"
+   ```
+
+   - `REPO` は、[kvm-container を導入する](#kvm-container-を導入する)の手順 1 と同じ値を入れる
+   - 値を読み戻して確かめる
+   - 最後の行でリポジトリ直下に移る
 
 1. リポジトリを最新にし、コンテナを止める。
 
    ```bash
-   cd "${REPO:?導入の手順 1 の REPO が空のまま。導入の手順 1 を貼り直す}" && git pull --ff-only
+   cd "${REPO:?この項の手順 1 の REPO が空のまま。この項の手順 1 を貼り直す}" && git pull --ff-only
    ./kvm.sh down
    ```
 
@@ -9117,7 +9835,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - 画面の無いホストでは `gui` を作らない
-   - `>> ready.` が出れば終わり。確認は[導入の手順 9](#kvm-container-を導入する)
+   - `>> ready.` が出れば終わり。確認は[kvm-container を導入する](#kvm-container-を導入する)の手順 9
    - **次の手順は、`>> ready.` が出てから貼る**
 
 1. 旧版で `install-desktop` を実行したときだけ、残ったランチャーを消す。
@@ -9138,16 +9856,16 @@ yazi と依存ツールを先に入れる。
 
 ### Samba クライアント
 
+- クライアントの PC で、Samba の共有を cifs でマウントし、アクセスしたときに自動でマウントされるようにする（fstab と systemd の automount）
+- 前提: サーバーで[Samba サーバー](#samba-サーバー)を通してある（Windows や NAS の共有でもよい）
+- 実行場所: クライアントの PC の、自分のユーザーの bash（デスクトップの端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
+- AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](windows-setup.md#samba-クライアント)を、管理者ではない Windows PowerShell 5.1 で通す
+- **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
+- この項の手順 1 で変数を設定したシェルに貼る
 
 > [!IMPORTANT]
-> - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](windows-setup.md#samba-クライアント)を、管理者ではない Windows PowerShell 5.1 で通す
-> - **クライアントの PC で、自分のユーザーのシェルで貼る**。`sudo -i` した root のシェルでは貼らない（`$(id -u)` が 0 になり、マウントしたファイルが root の所有に見えるため）
-> - 前提: サーバーで [Samba サーバー](#samba-サーバー) の手順を終えていること（Windows や NAS の共有でもよい）
-> - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+> - **`sudo -i` した root のシェルでは貼らない**（`$(id -u)` が 0 になり、マウントしたファイルが root の所有に見えるため）
 
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
@@ -9189,7 +9907,7 @@ yazi と依存ツールを先に入れる。
    - 入っていれば、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
-   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー)）を確かめる
+   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー](#samba-サーバー)の手順 5・8）を確かめる
    - 外出先から使うなら、先に WireGuard のトンネルを張る（[注意点](extra/samba-client.md#注意点)）
 
 1. 資格情報ファイルを作るため、共有のパスワードを入力する。
@@ -9198,7 +9916,7 @@ yazi と依存ツールを先に入れる。
    IFS= read -rsp "Samba password for ${SMB_USER}@${SERVER}: " PW; echo
    ```
 
-   - AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー 手順 6](#samba-サーバー) で `smbpasswd -a` に入れたパスワード
+   - AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたパスワード
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
 1. 資格情報ファイルを、root だけが読めるように置く。
@@ -9277,10 +9995,36 @@ yazi と依存ツールを先に入れる。
 
 #### Samba クライアント: GNOME Files で開く
 
+- クライアントの PC で、Samba の共有を GNOME Files（gvfs）でつなぎ、端末の `gio` で確かめて外す
+- 前提: サーバーで[Samba サーバー](#samba-サーバー)を通してある（Windows や NAS の共有でもよい）。[Samba クライアント](#samba-クライアント)の cifs のマウントは要らない
+- 実行場所: クライアントの PC の、GNOME にログインした自分のユーザーの端末（bash）
 - fstab のマウントとは別の仕組み（gvfs）。ログインしたユーザーがつなぐので、root も資格情報ファイルも要らない
 - 画面では「ファイル」（Nautilus）から開く。この項のコマンドは、同じ仕組みを端末から使う `gio`
-- 手順 1 の変数を設定したシェルで貼る
-- **この項の手順 3 には対話入力がある**（ドメインとパスワード）
+- この項の手順 1 で変数を設定したシェルで貼る
+- **この項の手順 4 には対話入力がある**（ドメインとパスワード）
+
+1. 変数を設定する（`SERVER` は必ず値を入れる）。
+
+   ```bash
+   SERVER=192.168.1.10                  # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
+   ```
+
+   ```bash
+   SMB_USER=${USER}                     # サーバーの Samba ユーザー。AlmaLinux の「Samba サーバー」の設定なら、サーバーの OS のユーザー名。<SMB_USER>
+   SHARE=${SMB_USER}                    # 共有名。Samba サーバーの [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in SERVER USER SMB_USER SHARE; do
+     printf '%-11s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 編集が必須なのは `SERVER` だけ。[Samba クライアント](#samba-クライアント)を通した PC では、その手順 1 と同じ値を入れる
+   - サーバーのユーザー名がこの PC と違うとき、NAS や Windows の共有のときは、`SMB_USER` と `SHARE` も書き換える
+   - Samba サーバーの[root のホーム](#samba-サーバー-root-のホームも公開する)につなぐときは `SHARE` を `root`、[/home](#samba-サーバー-home-も公開する)につなぐときは `SHARE` を `home` に書き換える（`SMB_USER` は自分のまま）
+   - 最後に値を読み戻して確かめる
+   - `SERVER` を書き換えたかをここで確かめる
+   - `USER` が `root` なら、ここで止めて、自分のユーザーの端末で貼り直す
+   - **新しいシェルを開いたら**、この項の手順 1 の 2 つのブロックを貼り直してから先へ進む
 
 1. gvfs-smb と gvfs-fuse が入っているか確かめる。
 
@@ -9288,8 +10032,8 @@ yazi と依存ツールを先に入れる。
    rpm -q gvfs-smb gvfs-fuse
    ```
 
-   - `パッケージ … はインストールされていません`（英語の環境では `package … is not installed`）が出たら、この項の手順 2 で入れる
-   - 2 つとも版が出たら、この項の手順 2 は飛ばす
+   - `パッケージ … はインストールされていません`（英語の環境では `package … is not installed`）が出たら、この項の手順 3 で入れる
+   - 2 つとも版が出たら、この項の手順 3 は飛ばす
 
 1. どちらかが未導入のときだけ、gvfs-smb と gvfs-fuse を入れる。
 
@@ -9302,12 +10046,12 @@ yazi と依存ツールを先に入れる。
 1. 端末から共有をマウントする。
 
    ```bash
-   /usr/bin/gio mount "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
+   /usr/bin/gio mount "smb://${SMB_USER:?この項の手順 1 の SMB_USER が空のまま}@${SERVER:?この項の手順 1 の SERVER が空のまま}/${SHARE:?この項の手順 1 の SHARE が空のまま}"
    ```
 
    - ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）
    - ドメインは、Enter で既定のままでよい
-   - パスワードは、手順 3 と同じもの
+   - パスワードは、共有のパスワード（AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたもの）
    - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
    - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
@@ -9316,7 +10060,7 @@ yazi と依存ツールを先に入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gio mount -l | grep -F "${SERVER:?手順 1 の SERVER が空のまま}"
+   /usr/bin/gio mount -l | grep -F "${SERVER:?この項の手順 1 の SERVER が空のまま}"
    ls "/run/user/$(id -u)/gvfs/"
    /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
    ```
@@ -9328,7 +10072,7 @@ yazi と依存ツールを先に入れる。
 1. 共有を外す。
 
    ```bash
-   /usr/bin/gio mount -u "smb://${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}"
+   /usr/bin/gio mount -u "smb://${SMB_USER:?この項の手順 1 の SMB_USER が空のまま}@${SERVER:?この項の手順 1 の SERVER が空のまま}/${SHARE:?この項の手順 1 の SHARE が空のまま}"
    ```
 
    - 何も出ずに終わればよい
@@ -9338,22 +10082,22 @@ yazi と依存ツールを先に入れる。
 
 ### Samba サーバー
 
+- サーバーで、自分のユーザーのホームを Samba（SMB3）で公開する
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある
+- 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 9 だけは、つなぐ側の別のマシン
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
-
-> [!IMPORTANT]
-> - **すべてサーバー上で実行する**。手順 9（クライアントからの接続）だけ別マシン
-> - **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
-> - **設定済みのサーバーで手順 3 を貼り直さない**。smb.conf 全体が置き換わり、`[root]`・`[home]` も消える
-> - `smb3 directory leases` が無ければ、[リースを切る手順](#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 手順の後の節:
+- **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
+- `smb3 directory leases` が無い設定済みのサーバーは、[リースを切る手順](#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
+- この項の手順 1 で変数を設定したシェルに貼る
+- この項の後に行う項:
   - root のホーム（`/root`）も公開するなら、[root のホームも公開する](#samba-サーバー-root-のホームも公開する)を行う
   - `/home` の下のすべてのホーム（ほかのユーザーのホームも）を 1 つの共有で開くなら、[/home も公開する](#samba-サーバー-home-も公開する)を行う
   - サーバーの上で読み書きを確かめるとき（クライアントでつなげないときの切り分けにも）は、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)を行う
   - 接続元を絞る場合は、最後に[接続元を絞る](#samba-サーバー-接続元を絞る)を行う
   - 戻すときは[ロールバック](extra/samba.md#ロールバック)
+
+> [!IMPORTANT]
+> - **設定済みのサーバーで手順 3 を貼り直さない**。smb.conf 全体が置き換わり、`[root]`・`[home]` も消える
 
 1. 公開するユーザー自身のシェルで、変数を設定する（`sudo -i` した root のシェルでは貼らない）。
 
@@ -9368,7 +10112,7 @@ yazi と依存ツールを先に入れる。
 
    - 最後に値を読み戻して確かめる
    - `USER` が `root` になっている、`SERVER_IP` が空、または意図した NIC の IP でないなら、ここで止めて直す
-   - root のホームも公開したいときも、ここでは自分のユーザーで進める。root のホームは、手順の後の[root のホームも公開する](#samba-サーバー-root-のホームも公開する)で足す
+   - root のホームも公開したいときも、ここでは自分のユーザーで進める。root のホームは、この項の後に[root のホームも公開する](#samba-サーバー-root-のホームも公開する)で足す
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、手順 1 のブロックを貼り直してから先へ進む
 
 1. samba・samba-client・cifs-utils を入れる。
@@ -9478,10 +10222,11 @@ yazi と依存ツールを先に入れる。
 
 #### Samba サーバー: root のホームも公開する
 
+- サーバーで、`\\<SERVER_IP>\root` で `/root` を読み書きできるようにする。つなぐのは[Samba サーバー](#samba-サーバー)の手順 6 で登録した自分の Samba ユーザーのままで、root の Samba ユーザーは作らない
+- 前提: [Samba サーバー](#samba-サーバー)を通してある
+- 実行場所: サーバーの、公開したユーザー自身の bash（デスクトップの端末か SSH）。`${USER}` を `valid users` に書く。この項の手順 4 だけは、つなぐ側の別のマシン
 - **root のホーム（`/root`）を公開しないなら、この項は不要**
-- `\\<SERVER_IP>\root` で `/root` を読み書きできるようにする。つなぐのは手順 6 で登録した自分の Samba ユーザーのままで、root の Samba ユーザーは作らない
 - smbd は、この共有の中を root として読み書きする（`force user = root`）。作ったファイルは root の所有になる
-- 手順 1 の変数を設定した、公開したユーザー自身のシェルで貼る（`${USER}` を `valid users` に書く）
 - `/root` の読み書きは、この項の手順 3 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 7・8 で確かめる
 - 補足: [root のホームを公開するときの補足](reference/samba.md#root-のホームを公開するときの補足)
 
@@ -9544,9 +10289,9 @@ yazi と依存ツールを先に入れる。
 
 1. 別のマシンから、共有名 `root` でつなぐ。
 
-   - [手順 9](#samba-サーバー) の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
+   - [Samba サーバー](#samba-サーバー)の手順 9 の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`
-   - AlmaLinux 10 の PC なら、[Samba クライアント](#samba-クライアント) の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
+   - AlmaLinux 10 の PC なら、[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
 1. 元に戻すときは、`[root]` の節とモジュールを消し、smb.service を再起動する。
 
@@ -9565,12 +10310,13 @@ yazi と依存ツールを先に入れる。
 
 #### Samba サーバー: /home も公開する
 
+- サーバーで、`\\<SERVER_IP>\home` で `/home` を開き、その下のすべてのユーザーのホームを読み書きできるようにする。つなぐのは[Samba サーバー](#samba-サーバー)の手順 6 で登録した自分の Samba ユーザーのままで、ほかのユーザーは Samba に登録しなくてよい
+- 前提: [Samba サーバー](#samba-サーバー)を通してある
+- 実行場所: サーバーの、公開したユーザー自身の bash（デスクトップの端末か SSH）。`${USER}` を `valid users` に書く。この項の手順 3 だけは、つなぐ側の別のマシン
 - **`/home` を公開しないなら、この項は不要**
-- `\\<SERVER_IP>\home` で `/home` を開き、その下のすべてのユーザーのホームを読み書きできるようにする。つなぐのは手順 6 で登録した自分の Samba ユーザーのままで、ほかのユーザーは Samba に登録しなくてよい
 - smbd は、この共有の中を root として読み書きする（`force user = root`）
 - 新しく作ったファイルとディレクトリの所有者は、親ディレクトリの所有者（`/home/<ユーザー>` の中なら、そのユーザー）になる（`inherit owner = yes`）。グループは `root` になる
 - `/home` の直下には、ファイルもディレクトリも作れない（SELinux が断る）
-- 手順 1 の変数を設定した、公開したユーザー自身のシェルで貼る（`${USER}` を `valid users` に書く）
 - 読み書きは、この項の手順 2 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 で確かめる
 - 補足: [/home を公開するときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#home-を公開するときの補足)
 
@@ -9615,10 +10361,10 @@ yazi と依存ツールを先に入れる。
 
 1. 別のマシンから、共有名 `home` でつなぐ。
 
-   - [手順 9](#samba-サーバー) の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と手順 6 のパスワードのまま
+   - [Samba サーバー](#samba-サーバー)の手順 9 の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\home`。ユーザーごとのフォルダーが並ぶ。フォルダーの外（`/home` の直下）には作れない
    - AlmaLinux 10 は[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=home` にし、`SMB_USER` は自分のままにする
-   - 同じ手順 5・7 の共有直下への書き込みは `Permission denied` になる
+   - [Samba クライアント](#samba-クライアント)の手順 5・7 の共有直下への書き込みは `Permission denied` になる
 
 1. 元に戻すときは、`[home]` の節を消し、smb.service を再起動する。
 
@@ -9635,14 +10381,30 @@ yazi と依存ツールを先に入れる。
 
 #### Samba サーバー: サーバーの上で動作を確かめる
 
-- [実施手順](#samba-サーバー)で設定は終わっている。この項は、サーバーの上の `smbclient` と `mount.cifs` で読み書きを確かめる（クライアントでつなげないときの切り分けにも使う）
-- [手順 1](#samba-サーバー) の変数を設定した、公開したユーザー自身のシェルで貼る。新しいシェルなら、手順 1 を貼り直してから貼る
-- **この項の手順 1・7・9 には対話入力がある**（パスワード）
-- この項の手順 7・8 は、[root のホームも公開した](#samba-サーバー-root-のホームも公開する)ときだけ行う
-- この項の手順 9・10 は、[/home も公開した](#samba-サーバー-home-も公開する)ときだけ行う
+- サーバーの上の `smbclient` と `mount.cifs` で、共有の読み書きを確かめる（クライアントでつなげないときの切り分けにも使う）
+- 前提: [Samba サーバー](#samba-サーバー)を通してある
+- 実行場所: サーバーの、公開したユーザー自身の bash（デスクトップの端末か SSH）
+- **この項の手順 2・8・10 には対話入力がある**（パスワード）
+- この項の手順 8・9 は、[root のホームも公開した](#samba-サーバー-root-のホームも公開する)ときだけ行う
+- この項の手順 10・11 は、[/home も公開した](#samba-サーバー-home-も公開する)ときだけ行う
 - サーバー自身からの接続は firewalld を通らない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
 
-1. 資格情報ファイルを作るため、[手順 6](#samba-サーバー) で登録したパスワードを入力する。
+1. 変数を設定する。
+
+   ```bash
+   SERVER_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')   # 検証に使う（自動）。<SERVER_IP>
+   printf '\n\033[7m 確認 \033[0m\n'
+   for v in USER SERVER_IP; do
+     printf '%-10s = %s\n' "$v" "${!v}"
+   done
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `USER` が `root` なら、ここで止めて、公開したユーザー自身のシェルで貼り直す
+   - `SERVER_IP` が空か、意図した NIC の IP でないなら、[Samba サーバー](#samba-サーバー)の手順 1 と同じ値に直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
+
+1. 資格情報ファイルを作るため、[Samba サーバー](#samba-サーバー)の手順 6 で登録したパスワードを入力する。
 
    ```bash
    AUTHFILE=/run/user/$(id -u)/smb-auth
@@ -9685,7 +10447,7 @@ yazi と依存ツールを先に入れる。
    }
    ```
 
-   - **次の手順は、`smbstatus` の出力を確かめてから貼る**（この項の手順 5 でアンマウントすると見えなくなる）
+   - **次の手順は、`smbstatus` の出力を確かめてから貼る**（この項の手順 6 でアンマウントすると見えなくなる）
 
 1. アンマウントして、マウントポイントを消す。
 
@@ -9701,8 +10463,8 @@ yazi と依存ツールを先に入れる。
    sudo ausearch -m AVC -ts today               # <no matches>
    ```
 
-   - root のホームを公開していないなら、この項の手順 7・8 は飛ばす
-   - `/home` を公開していないなら、この項の手順 9・10 は飛ばす
+   - root のホームを公開していないなら、この項の手順 8・9 は飛ばす
+   - `/home` を公開していないなら、この項の手順 10・11 は飛ばす
 
 1. root のホームも公開したときだけ、自分の Samba ユーザーで `/root` の一覧と書き込みを確かめる。
 
@@ -9710,7 +10472,7 @@ yazi と依存ツールを先に入れる。
    smbclient //localhost/root -U "${USER}" -c 'ls; put /etc/hostname smb-root-test.txt; ls smb-root-test.txt'
    ```
 
-   - パスワードは、[手順 6](#samba-サーバー) で登録した `<USER>` の Samba のパスワード
+   - パスワードは、[Samba サーバー](#samba-サーバー)の手順 6 で登録した `<USER>` の Samba のパスワード
    - `/root` の中身（`.bashrc` や `.ssh` など）の一覧に続いて、`putting file /etc/hostname as \smb-root-test.txt` と `smb-root-test.txt` の 1 行が出ればよい
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
@@ -9727,7 +10489,7 @@ yazi と依存ツールを先に入れる。
 
    - ファイルは `root root` の所有で、ラベルは `admin_home_t`
    - `ausearch` が `<no matches>` ならよい
-   - `/home` を公開していないなら、この項の手順 9・10 は飛ばす
+   - `/home` を公開していないなら、この項の手順 10・11 は飛ばす
 
 1. `/home` も公開したときだけ、`/home` の一覧と、自分のホームへの書き込みを確かめる。
 
@@ -9735,7 +10497,7 @@ yazi と依存ツールを先に入れる。
    smbclient //localhost/home -U "${USER}" -c "ls; put /etc/hostname ${USER}/smb-home-test.txt; ls ${USER}/smb-home-test.txt"
    ```
 
-   - パスワードは、[手順 6](#samba-サーバー) で登録した `<USER>` の Samba のパスワード
+   - パスワードは、[Samba サーバー](#samba-サーバー)の手順 6 で登録した `<USER>` の Samba のパスワード
    - `/home` の中のユーザーのディレクトリ（`<USER>` など）の一覧に続いて、`putting file /etc/hostname as \<USER>\smb-home-test.txt` と `smb-home-test.txt` の 1 行が出ればよい
    - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
 
@@ -9753,8 +10515,11 @@ yazi と依存ツールを先に入れる。
 
 #### Samba サーバー: 接続元を絞る
 
+- サーバーで、445/tcp に届く送信元を、指定したサブネットだけに絞る
+- 前提: [Samba サーバー](#samba-サーバー)を通してある
+- 実行場所: サーバーの、自分のユーザーの bash（デスクトップの端末か SSH）
 - **接続元を制限しないなら、この項は不要**
-- 手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く
+- [Samba サーバー](#samba-サーバー)の手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く
 - 補足: [接続元を絞るときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#接続元を絞るときの補足)
 
 1. 送信元サブネットを空白区切りで入れ、445/tcp の開放を rich rule に置き換える。
@@ -9788,9 +10553,11 @@ yazi と依存ツールを先に入れる。
 
 #### Samba サーバー: 設定済みのサーバーでディレクトリのリースを切る
 
-- **smb.conf に `smb3 directory leases` の行が無いサーバーだけ**。今の手順 3 には、この 1 行が入っている
-- 手順 3 は貼り直さず、`[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
-- 変数を使わないので、どのユーザーのシェルで貼ってもよい
+- サーバーで、設定済みの smb.conf の `[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
+- 前提: [Samba サーバー](#samba-サーバー)を、この 1 行が入る前の手順で通してある
+- 実行場所: サーバーの bash（デスクトップの端末か SSH）。変数を使わないので、どのユーザーのシェルで貼ってもよい
+- **smb.conf に `smb3 directory leases` の行が無いサーバーだけ**。今の[Samba サーバー](#samba-サーバー)の手順 3 には、この 1 行が入っている
+- [Samba サーバー](#samba-サーバー)の手順 3 は貼り直さない
 - **この項の手順 2 で smb.service を再起動すると、つないでいるクライアントの接続が一度切れる**
 
 1. smb.conf の `[global]` に 1 行を足し、構文を検査する。
@@ -9833,25 +10600,26 @@ yazi と依存ツールを先に入れる。
    ```
 
    - 最後に `0` と出ればよい
-   - 今の手順 3 で置いた smb.conf の行も消える
+   - 今の[Samba サーバー](#samba-サーバー)の手順 3 で置いた smb.conf の行も消える
    - 再起動すると、つないでいるクライアントの接続が一度切れる
 
 ---
 
 ### Syncthing
 
+- Homebrew で Syncthing を入れ、ユーザーサービスとして常駐させ、Web GUI を HTTPS とパスワードで開けるようにする
+- 前提: [Homebrew](#homebrew)の手順 1〜3 と、[ユーザーサービスの常駐](#ユーザーサービスの常駐)（linger。ログアウト中も Syncthing を動かすため）を通してある
+  - `command -v brew` で何も出なければ、先に[Homebrew](#homebrew)を通す
+  - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に[ユーザーサービスの常駐](#ユーザーサービスの常駐)を通す
+- 実行場所: 同期するファイルの持ち主の、自分のユーザーの bash（デスクトップの端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
+- AlmaLinux 10 の手順。Windows 11 の PC は、[Windows 11 で使う](windows-setup.md#syncthing)から通す（管理者の Windows PowerShell 5.1 に貼る）
+- **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
+- この項の手順 1 で変数を設定したシェルに貼る
+- OS を入れ直したホストを同じデバイス ID で戻すなら、先に[バックアップから戻す](#syncthing-バックアップから戻す)の手順 1・2・4・5 を行ってから、手順 1 から通す
 
 > [!IMPORTANT]
-> - **この実施手順は AlmaLinux 10 のもの**。Windows 11 の PC は、[Windows 11 で使う](windows-setup.md#syncthing)から通す（管理者の Windows PowerShell 5.1 に貼る）
-> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
-> - **前提**: [linger](#ユーザーサービスの常駐) を有効にしてあること（ログアウト中も Syncthing を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
-> - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行い、Syncthing も同期するファイルの持ち主として動かす
-> - **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
-
-- 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- OS を入れ直したホストを同じデバイス ID で戻すなら、先に[バックアップから戻す](#syncthing-バックアップから戻す)の手順 1・2・4・5 を行ってから、手順 1 から通す
+> - **自分のシェルで実行する**（`sudo -i` した root のシェルでは行わない）。Homebrew の導入・管理は一般ユーザーで行い、Syncthing も同期するファイルの持ち主として動かす
 
 1. 変数を設定する。
 
@@ -10013,6 +10781,9 @@ yazi と依存ツールを先に入れる。
 
 #### Syncthing: 同期フォルダとデバイスを追加する
 
+- Syncthing の GUI で相手のデバイスを登録し合い、同期するフォルダを共有する
+- 前提: このホストで[Syncthing](#syncthing)（Windows 11 の PC は[Windows 11 で使う](windows-setup.md#syncthing)）を通してある。相手のデバイスには、この項の手順 1 で入れる
+- 実行場所: このホストと相手のデバイスの、Syncthing の Web GUI（ブラウザ）
 - **Syncthing 2.x は初回起動時に既定フォルダ（`~/Sync`）を作らない**。入れただけでは何も同期しないので、GUI から足す
 - 操作は AlmaLinux 10 でも Windows 11 でも同じ。相手もどちらでもよい
 - ボタン・欄・通知の名前は、GUI の表示が日本語のときのもの
@@ -10021,12 +10792,12 @@ yazi と依存ツールを先に入れる。
 > **この項の手順 4・5 で、ホームディレクトリ（Windows 11 では `C:\Users\<WIN_USER>`）を丸ごと同期対象にしない。** `~/.local/state/syncthing`（Windows 11 では `AppData\Local\Syncthing`）自身や `~/.cache`、ほかのアプリのデータまで同期してしまう。
 >
 > - 同期したいものを入れる専用のディレクトリを作る（例: `~/Sync`、`C:\Users\<WIN_USER>\Sync`）
-> - このホストは [Samba](#samba-サーバー) でホームを公開しているので、同じ領域を二重に扱うことになる点にも注意する
+> - [Samba サーバー](#samba-サーバー)でホームを公開しているホストでは、同じ領域を二重に扱うことになる点にも注意する
 > - Windows 11 では、OneDrive に移したデスクトップ・ドキュメントや、Dropbox のフォルダーも入れない（2 つの同期が同じファイルを書き合う）
 
 1. 相手側のデバイスでも同じように Syncthing を入れ、そのデバイス ID を控える。
 
-   - 相手が AlmaLinux 10 なら[実施手順](#syncthing)、Windows 11 の PC なら [Windows 11 で使う](windows-setup.md#syncthing)で入れる
+   - 相手が AlmaLinux 10 なら[Syncthing](#syncthing)、Windows 11 の PC なら [Windows 11 で使う](windows-setup.md#syncthing)で入れる
 
 1. GUI の「接続先デバイスを追加」を押し、「デバイスID」の欄に相手のデバイス ID を貼って保存する。
 
@@ -10048,8 +10819,11 @@ yazi と依存ツールを先に入れる。
 
 #### Syncthing: 接続元を絞る
 
+- Syncthing の Web GUI（8384/tcp）に届く送信元を、指定したサブネットだけに絞る
+- 前提: [Syncthing](#syncthing)を、GUI を LAN にも公開する設定（`ST_GUI_ADDR` が `127.0.0.1:8384` 以外）で通してある
+- 実行場所: Syncthing を動かすホストの、自分のユーザーの bash（デスクトップの端末か SSH）
 - **接続元を制限しないなら、この項は不要**
-- [手順 7](#syncthing) は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く
+- [Syncthing](#syncthing)の手順 7 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 8384/tcp を開く
 - 同期そのもの（22000）まで絞ると、相手デバイスの側の経路が変わったときに黙って同期が止まる。**絞るのは GUI だけにしておく方が事故が少ない**
 
 1. GUI だけを特定のサブネットに絞るため、`syncthing-gui` の開放を rich rule に置き換える。
@@ -10087,7 +10861,9 @@ yazi と依存ツールを先に入れる。
 
 #### Syncthing: 設定を自動でバックアップする
 
-- 鍵（`cert.pem`・`key.pem`）、`config.xml`、GUI の証明書（`https-cert.pem`・`https-key.pem`）を控える。DB（`index-v2`）は除く
+- Syncthing の鍵（`cert.pem`・`key.pem`）、`config.xml`、GUI の証明書（`https-cert.pem`・`https-key.pem`）を、自動で控える。DB（`index-v2`）は除く
+- 前提: [Syncthing](#syncthing)を通してある。この項の手順 5 の前に、複製先の端末を[同期フォルダとデバイスを追加する](#syncthing-同期フォルダとデバイスを追加する)の手順 2・3 で追加しておく
+- 実行場所: Syncthing を動かすホストの、自分のユーザーの bash（デスクトップの端末か SSH）。この項の手順 5 は GUI、手順 6 は相手の端末の GUI
 - 保存先は `~/syncthing-backup/syncthing-config-<日時>.tar.gz`
 - `config.xml` が書き換わると数秒後に取る（systemd の path ユニット）。取りこぼしの保険として 1 日 1 回も取る（タイマー）
 - 最新のアーカイブと中身が同じなら作らない。新しい順に 100 個残す
@@ -10249,10 +11025,13 @@ yazi と依存ツールを先に入れる。
 
 #### Syncthing: バックアップから戻す
 
+- [設定を自動でバックアップする](#syncthing-設定を自動でバックアップする)で取ったアーカイブから、Syncthing の鍵と設定を戻す
+- 前提: [設定を自動でバックアップする](#syncthing-設定を自動でバックアップする)でアーカイブを取ってある。OS を入れ直したホストでは、そのアーカイブを相手の端末に複製してある
+- 実行場所: 戻すホストの、自分のユーザーの bash（デスクトップの端末か SSH）
 - **同じホストで設定を壊したとき**は、この項の手順 3〜6 を貼る
   - path ユニットは壊れた設定も取っている。壊す前の時刻のアーカイブを選ぶ
-- **OS を入れ直したホストを、同じデバイス ID で戻すとき**は、この項の手順 1・2・4・5 を[実施手順](#syncthing)より先に行い、そのあと実施手順を手順 1 から通す
-  - [手順 4](#syncthing) の `syncthing generate` は戻した鍵をそのまま使う。デバイス ID・フォルダ・API キーは戻したものになり、GUI のパスワードだけ入れ直す
+- **OS を入れ直したホストを、同じデバイス ID で戻すとき**は、この項の手順 1・2・4・5 を[Syncthing](#syncthing)より先に行い、そのあと[Syncthing](#syncthing)を手順 1 から通す
+  - [Syncthing](#syncthing)の手順 4 の `syncthing generate` は戻した鍵をそのまま使う。デバイス ID・フォルダ・API キーは戻したものになり、GUI のパスワードだけ入れ直す
   - 自動バックアップも、[設定を自動でバックアップする](#syncthing-設定を自動でバックアップする)の手順 1〜3 で入れ直す
 - DB は入っていないので、OS を入れ直したホストは初回の起動で全フォルダを読み直し、中身を相手の端末から受け取る。フォルダのディレクトリと `.stfolder` は Syncthing が作る
 - 外付けディスクにあるフォルダは、Syncthing を起動する前にマウントしておく
@@ -10313,7 +11092,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - `cert.pem`・`key.pem`・`config.xml` が並ぶ。同じホストでは DB（`index-v2`）もそのまま残る
-   - OS を入れ直したホストでは、この後[手順 1](#syncthing)から通す（この項の手順 6 は飛ばす）
+   - OS を入れ直したホストでは、この後[Syncthing](#syncthing)を手順 1 から通す（この項の手順 6 は飛ばす）
 
 1. 同じホストで戻すときだけ、Syncthing を開始して確かめる。
 
@@ -10333,6 +11112,9 @@ yazi と依存ツールを先に入れる。
 
 #### Syncthing: 更新
 
+- Homebrew で入れた Syncthing を上げ、サービスを再起動する
+- 前提: [Syncthing](#syncthing)を通してある
+- 実行場所: Syncthing を動かすホストの、自分のユーザーの bash（デスクトップの端末か SSH）
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](windows-setup.md#syncthing-windows-11-の更新)
 
 1. Syncthing を更新する。
@@ -10359,18 +11141,17 @@ yazi と依存ツールを先に入れる。
 
 ### Dropbox
 
+- Dropbox の公式クライアント（ヘッドレスのデーモン）をホームに入れ、ユーザーサービスとして常駐させ、この PC を Dropbox のアカウントにリンクする
+- 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)（linger。ログアウト中も Dropbox を動かすため）を通してある
+  - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に[ユーザーサービスの常駐](#ユーザーサービスの常駐)を通す
+  - **ログアウト中も同期するなら、PC を眠らせない**（[画面オフ・画面ロック・自動サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)を通す。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
+- 実行場所: x86_64 の PC の、自分のユーザーの bash（デスクトップの端末か SSH）。**手順 8 はブラウザでリンクする**。この PC でなくても、ブラウザがあればどこでもよい
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](reference/dropbox.md)・[ロールバックと注意点](extra/dropbox.md)
+- **手順 2 で止まる**（fingerprint の目視）
 
 > [!IMPORTANT]
 > - **x86_64 の PC で実行する**。Dropbox は Linux の ARM 版を出していないので、Raspberry Pi 5（aarch64）では [Dropbox と rclone](#dropbox-と-rclone) を使う
-> - **前提**: [linger](#ユーザーサービスの常駐) を有効にしてあること（ログアウト中も Dropbox を動かすため）。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（デーモンは自分のホームに入り、同期するファイルの持ち主として動く）
-> - **手順 2 で止まる**（fingerprint の目視）
-> - **手順 8 はブラウザでリンクする**。この PC でなくても、ブラウザがあればどこでもよい
-> - **ログアウト中も同期するなら、PC を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める」](#画面オフ画面ロック自動サスペンドを止める)。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 1. この PC で公式クライアントが動くかを確かめる。
 
@@ -10521,6 +11302,9 @@ yazi と依存ツールを先に入れる。
 
 #### Dropbox: 更新
 
+- Dropbox のデーモンと CLI の版を確かめ、CLI（dropbox.py）を取り直す
+- 前提: [Dropbox](#dropbox)を通してある
+- 実行場所: Dropbox を入れた PC の、自分のユーザーの bash（デスクトップの端末か SSH）
 - デーモンは、`~/.dropbox-dist` の中身を自分で入れ替えて更新する作り（tarball の README と `dropbox.py` の説明）
 - `dropbox.py` は自分では更新しない
 
@@ -10530,7 +11314,7 @@ yazi と依存ツールを先に入れる。
    dropbox version
    ```
 
-   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから [手順 2〜4](#dropbox) をやり直し、`systemctl --user start dropbox.service` で動かす
+   - 手で入れ直すときは、`systemctl --user stop dropbox.service` で止めてから[Dropbox](#dropbox)の手順 2〜4 をやり直し、`systemctl --user start dropbox.service` で動かす
    - 入れ直すと、古い版のディレクトリ（`~/.dropbox-dist/dropbox-lnx.x86_64-<古い版>`）が残る。新しい版で動いているのを `dropbox version` で確かめてから、`rm -rf` で消してよい
 
 1. CLI（dropbox.py）を取り直す。
@@ -10544,20 +11328,20 @@ yazi と依存ツールを先に入れる。
 
 ### Dropbox と rclone
 
+- Homebrew で rclone を入れ、Dropbox と `~/Dropbox` を `rclone bisync` で 15 分ごとに同期する（公式クライアントの無い aarch64 向け）
+- 前提: [Homebrew](#homebrew)の手順 1〜3 と、[ユーザーサービスの常駐](#ユーザーサービスの常駐)（linger）を通してある
+  - `command -v brew` で何も出なければ、先に[Homebrew](#homebrew)を通す
+  - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` でなければ、先に[ユーザーサービスの常駐](#ユーザーサービスの常駐)を通す
+  - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[画面オフ・画面ロック・自動サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)を通す）
+- 実行場所: Raspberry Pi 5（aarch64）などの、自分のユーザーの bash（デスクトップの端末か SSH）。**手順 3 はブラウザで認証する**
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)・[ロールバックと注意点](extra/dropbox-rclone.md)
+- **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
+- 手順 1 の導入で `[y/n]` が出たら、答えてプロンプトが戻ってから手順 2 を貼る
+- x86_64 の PC では、公式クライアントの [Dropbox](#dropbox) を勧める（この手順も同じように動く）
 
 > [!IMPORTANT]
-> - **前提**: [AlmaLinux 10 の初期設定の「Homebrew」の手順 1〜3](#homebrew) で Homebrew を入れてあること。`command -v brew` で何も出なければ、先に通す
-> - 前提: [linger](#ユーザーサービスの常駐)を有効にする。`loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` でなければ、先に通す
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、同期するファイルの持ち主として動かすため）
-> - **手順 3 はブラウザで認証する**。手順 2 は、Raspberry Pi 5 のデスクトップの端末で貼るか、手元の PC から `ssh -L localhost:53682:localhost:53682 <USER>@<HOSTNAME>` で入り直してから貼る
-> - **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
-> - 手順 1 の導入で `[y/n]` が出たら、答えてプロンプトが戻ってから手順 2 を貼る
-> - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[AlmaLinux 10 の初期設定の「画面オフ・画面ロック・自動サスペンドを止める」](#画面オフ画面ロック自動サスペンドを止める)）
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- x86_64 の PC では、公式クライアントの [Dropbox](#dropbox) を勧める（この手順も同じように動く）
+> - 手順 2 は、Raspberry Pi 5 のデスクトップの端末で貼るか、手元の PC から `ssh -L localhost:53682:localhost:53682 <USER>@<HOSTNAME>` で入り直してから貼る
 
 1. brew で rclone を入れる。
 
@@ -10609,7 +11393,7 @@ yazi と依存ツールを先に入れる。
    mkdir -p ~/.config/rclone ~/Dropbox
    cat > ~/.config/rclone/dropbox-filters.txt <<'EOF'
    # rclone bisync のフィルタ（書き方は https://rclone.org/filtering/ ）
-   # このファイルを変えたら、次の同期は --resync で行う（Dropbox と rclone の「同期するフォルダを変える（任意）」）
+   # このファイルを変えたら、次の同期は --resync で行う（Dropbox と rclone の「同期するフォルダを変える」）
 
    # Dropbox が同期しないファイル（rclone の bisync の文書の例から）
    - .dropbox.attr
@@ -10732,6 +11516,9 @@ yazi と依存ツールを先に入れる。
 
 #### Dropbox と rclone: 同期するフォルダを変える
 
+- rclone の同期で使うフィルタのファイルを変え、`--resync` で同期し直す
+- 前提: [Dropbox と rclone](#dropbox-と-rclone)を通してある
+- 実行場所: rclone で同期しているホストの、自分のユーザーの bash（デスクトップの端末か SSH）
 - フィルタを変えたら、次の同期は `--resync` で行う。しないと `Bisync critical error: filters file has changed (must run --resync)` で止まる
 - 外したフォルダの手元の複製は、消えずに残る（同期されなくなるだけ）。要らなければ手で消す
 
@@ -10743,7 +11530,7 @@ yazi と依存ツールを先に入れる。
    ```
 
    - 同期の途中なら、`systemctl --user stop` は後始末が終わるまで待つ
-   - 書き方は[手順 6](#dropbox-と-rclone)と同じ
+   - 書き方は[Dropbox と rclone](#dropbox-と-rclone)の手順 6 と同じ
    - **次の手順は、保存して `vi` を閉じてから貼る**
 
 1. 変えた後の同期で何が起きるかを見る（`--dry-run`）。
@@ -10752,7 +11539,7 @@ yazi と依存ツールを先に入れる。
    rclone bisync dropbox: ~/Dropbox --filters-file ~/.config/rclone/dropbox-filters.txt --resync --max-lock 2m --dry-run --verbose
    ```
 
-   - 見方は[手順 7](#dropbox-と-rclone)と同じ
+   - 見方は[Dropbox と rclone](#dropbox-と-rclone)の手順 7 と同じ
    - **次の手順は、コピーされるファイルを確かめてから貼る**
 
 1. `--resync` で同期し直し、タイマーを戻す。
@@ -10767,6 +11554,10 @@ yazi と依存ツールを先に入れる。
    - `Bisync successful` の後に、`list-timers` が次の時刻を出せばよい
 
 #### Dropbox と rclone: 更新
+
+- Homebrew で入れた rclone を上げる
+- 前提: [Dropbox と rclone](#dropbox-と-rclone)を通してある
+- 実行場所: rclone で同期しているホストの、自分のユーザーの bash（デスクトップの端末か SSH）
 
 1. rclone を上げる。
 
@@ -10795,27 +11586,24 @@ yazi と依存ツールを先に入れる。
 ### Forgejo
 
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
-
-> [!IMPORTANT]
-> - **サーバーを動かす一般ユーザー自身の bash（デスクトップの端末か SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
-> - 前提: [ログインと sudo](#ログインと-sudo)の手順 3（NOPASSWD）、[Podman](#podman)・[linger](#ユーザーサービスの常駐)
-> - 常時動かす PC は[画面オフ・ロック・サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)も通す
-> - 別の PC からホストの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
-> - 別の PC・ブラウザで行う手順: [初期設定](#forgejo-初期設定と管理者の作成)の手順 1・2、[LAN 公開](#forgejo-lan-に公開する)の手順 3
-> - [Git の確認](#forgejo-git-の接続を確かめる)の手順 1・3〜5、[再起動後の確認](#forgejo-再起動しても残ることを確かめる)の手順 2〜4 も別の PC で行う
-> - Git の確認に使う PC は、先に[Git](#git)を通す
-> - [再起動後の確認](#forgejo-再起動しても残ることを確かめる)の手順 5 でサーバーを再起動する
-> - ログインし直したら、[起動手順](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 の変数だけを貼り直す
-
-- 上から順にコードブロックを貼る
-- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバック](extra/forgejo.md)
+- Forgejo を rootless の Podman（Quadlet）で動かし、LAN か VPN の PC から Web と Git で使う
+- 導入は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[自動更新を有効にする](#forgejo-自動更新を有効にする)までの項を順に通す
 - [起動手順](#forgejo-イメージを取得して-localhost-で起動する)の手順 2 で公式の最新安定版を入れる
 - [自動更新](#forgejo-自動更新を有効にする)の手順 1〜3 で毎日最新安定版へ上げるタイマーを有効にする（[更新](#forgejo-更新)）
 - Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
 - 初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない。インターネット向けのポート転送は設定しない
 
+> [!IMPORTANT]
+> - **サーバーの手順は、サーバーを動かす一般ユーザー自身の bash（デスクトップの端末か SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
+> - firewalld と SELinux は有効なまま使う
+
 #### Forgejo: イメージを取得して localhost で起動する
+
+- サーバーで、公式の最新安定版の rootless イメージを取得し、localhost だけで待ち受ける Forgejo を Quadlet で起動する
+- 前提: [ログインと sudo](#ログインと-sudo)・[Podman](#podman)・[ユーザーサービスの常駐](#ユーザーサービスの常駐)（linger）を通してある
+  - 常時動かす PC は、[画面オフ・画面ロック・自動サスペンドを止める](#画面オフ画面ロック自動サスペンドを止める)も通してある
+  - 別の PC からホストの SSH にログインでき、サーバーの IPv4 が固定されている
+- 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）
 
 1. 変数を設定する（`SERVER_IP` と `LAN_SUBNET` は必ず値を入れる）。
 
@@ -10844,6 +11632,7 @@ yazi と依存ツールを先に入れる。
    - 待ち受ける NIC が別の zone に属しているなら、任意変数のブロックの `FW_ZONE=` をその名前に変える
    - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 1 と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3・5 の番号も同じにする
    - 空のままなら先へ進まない
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
 
 1. 値と前提を確かめ、公式の最新安定版の rootless イメージを取得する。
 
@@ -11013,6 +11802,22 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: 初期設定と管理者の作成
 
+- 別の PC から SSH のトンネル越しに初期設定の画面を開いて管理者を作り、サーバーで初期設定が終わったことを確かめる
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)を通してある
+- 実行場所: この項の手順 1・4 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 2・3 は別の PC の端末とブラウザ
+
+1. サーバーで、変数を設定する。
+
+   ```bash
+   FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'Web: %s\n' "${FORGEJO_HTTP_PORT}"
+   ```
+
+   - `FORGEJO_HTTP_PORT` は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 と同じ値にする
+   - 最後に値を読み戻して確かめる
+   - この項の手順 4 は、この変数を設定したシェルに貼る。**新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから貼る
+
 1. 別の PC で、初期設定用の SSH トンネルを開く。
 
    - クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3000:127.0.0.1:3000 <OSユーザー>@<SERVER_IP>` を実行する
@@ -11037,7 +11842,7 @@ yazi と依存ツールを先に入れる。
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${FORGEJO_HTTP_PORT}" ]; then
-     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${FORGEJO_HTTP_PORT}" <<'PY'
    import json
    from pathlib import Path
@@ -11092,7 +11897,7 @@ yazi と依存ツールを先に入れる。
    then
      podman exec forgejo /usr/local/bin/gitea --config /var/lib/gitea/custom/conf/app.ini admin user list --admin
    else
-     echo '中断: この項の手順 2 の初期設定とログインを確認する' >&2
+     echo '中断: この項の手順 3 の初期設定とログインを確認する' >&2
    fi
    ```
 
@@ -11101,12 +11906,42 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: LAN に公開する
 
+- サーバーで firewalld の規則を足し、Forgejo の待ち受けを localhost から `SERVER_IP` に切り替え、別の PC から LAN の URL で確かめる
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)と[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)を通してある
+- 実行場所: この項の手順 1〜3 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 4 は、初期設定のトンネルを開いた別の PC と、許可した LAN か VPN の PC
+
+1. 変数を設定する（`SERVER_IP` と `LAN_SUBNET` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=''                       # サーバーの待ち受け IPv4（例: 192.168.1.10）
+   ```
+
+   ```bash
+   LAN_SUBNET=''                      # 許可する送信元 IPv4 の CIDR（例: 192.168.1.0/24、制限なしは 0.0.0.0/0）
+   ```
+
+   ```bash
+   {
+     FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
+     FORGEJO_SSH_PORT=2222             # ホスト側の Git 用 SSH ポート（1024〜65535）
+     FW_ZONE=$(sudo firewall-cmd --get-default-zone)
+     printf '\n\033[7m 確認 \033[0m\n'
+     printf '待ち受け: %s\n許可する送信元: %s\nWeb: %s / SSH: %s\nfirewalld: %s\n' \
+       "${SERVER_IP}" "${LAN_SUBNET}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" "${FW_ZONE}"
+   }
+   ```
+
+   - どの変数も、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 と同じ値にする（ポートと `FW_ZONE` は、そこで変えたときだけ同じ値に書き換える）
+   - 最後に値を読み戻して確かめる
+   - 空のままなら先へ進まない
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
+
 1. 指定した送信元 CIDR・宛先・ポートで、この手順専用の firewalld の規則を追加する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${LAN_SUBNET}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
-     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    else
      FORGEJO_RULES=(
        "rule family=\"ipv4\" priority=\"100\" source address=\"${LAN_SUBNET}\" destination address=\"${SERVER_IP}\" port port=\"${FORGEJO_HTTP_PORT}\" protocol=\"tcp\" accept"
@@ -11137,14 +11972,14 @@ yazi と依存ツールを先に入れる。
    - runtime と permanent に、指定した送信元・宛先・Web と Git 用 SSH の 2 規則があればよい
    - `LAN_SUBNET='0.0.0.0/0'` のときは、指定した宛先とポートへの全 IPv4 送信元を許可する
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない。公開前に管理者へ既存の許可を確認する
-   - **中断や失敗が出たらこの項の手順 2 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
+   - **中断や失敗が出たらこの項の手順 3 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
 
 1. 初期設定済みの Quadlet を LAN 用に変え、サービスを再起動する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
-     echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を設定する' >&2
+     echo '中断: この項の手順 1 の変数を設定する' >&2
    elif /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" <<'PY'
    import ipaddress
    import json
@@ -11248,7 +12083,7 @@ yazi と依存ツールを先に入れる。
 1. 別の PC でトンネルを閉じ、LAN の URL で管理者のログインを確かめる。
 
    - [初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 1 の端末で `Ctrl+C` を押してトンネルを閉じる
-     - この項の手順 2 の後、その端末に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがある。正常なので、そのまま閉じる
+     - この項の手順 3 の後、その端末に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがある。正常なので、そのまま閉じる
    - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
    - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、サーバーへ届く許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
@@ -11256,6 +12091,10 @@ yazi と依存ツールを先に入れる。
    - 接続できないときは、サーバーの IP・FW_ZONE・クライアントの送信元と VPN の経路を確かめる
 
 #### Forgejo: Git の接続を確かめる
+
+- 別の PC から、Git 用 SSH のホスト鍵を照合し、確認用のリポジトリの clone と push を確かめる
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。Git の確認に使う PC は、先に[Git](#git)を通してある
+- 実行場所: この項の手順 1・3〜5 は、許可した LAN か VPN の別の PC の端末とブラウザ。手順 2 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）
 
 1. 別の PC のブラウザで、Git に使う公開鍵を Forgejo に登録する。
 
@@ -11304,6 +12143,25 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: 再起動しても残ることを確かめる
 
+- サービスの再起動・ログアウト・OS の再起動の後も、Forgejo が動き、設定とデータが残ることを確かめる
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[Git の接続を確かめる](#forgejo-git-の接続を確かめる)までを通してある
+- 実行場所: この項の手順 1・2・6・7 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 3〜5・8 は別の PC（手順 5 は、別の PC からサーバーへ SSH でログインし直す）
+- この項の手順 6 でサーバーを再起動する
+
+1. サーバーで、変数を設定する。
+
+   ```bash
+   {
+     FW_ZONE=$(sudo firewall-cmd --get-default-zone)
+     printf '\n\033[7m 確認 \033[0m\n'
+     printf 'firewalld: %s\n' "${FW_ZONE}"
+   }
+   ```
+
+   - `FW_ZONE` は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 と同じ値にする（そこで別の zone の名前に変えたなら、同じ名前に書き換える）
+   - 最後に値を読み戻して確かめる
+   - **新しいシェルを開いたら**（ログインし直した後・再起動した後も）、この項の手順 1 を貼り直してから先へ進む
+
 1. サーバーでサービスを再起動し、設定とデータが残ることを確かめる。
 
    ```bash
@@ -11331,7 +12189,7 @@ yazi と依存ツールを先に入れる。
 1. サーバーを動かすユーザーで、ホストの SSH にログインし直す。
 
    - ポート 22 の通常の SSH で、サーバーを動かす OS のユーザーにログインする。`git` や Forgejo の管理者名ではログインしない
-   - [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 の変数を貼り直す
+   - この項の手順 1 の変数を貼り直す
    - **次の手順は、再起動してよい時間に貼る**
 
 1. サーバーを再起動する。
@@ -11341,14 +12199,14 @@ yazi と依存ツールを先に入れる。
    ```
 
    - Web と Git の接続がいったん切れる
-   - **次の手順は、再起動後に同じ OS のユーザーでログインし直し、変数を貼り直してから貼る**（変数は[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1）
+   - **次の手順は、再起動後に同じ OS のユーザーでログインし直し、変数を貼り直してから貼る**（変数はこの項の手順 1）
 
 1. 再起動後の自動起動と待ち受けを確かめる。
 
    ```bash
    {
      if [ -z "${FW_ZONE}" ]; then
-       echo '中断: 「イメージを取得して localhost で起動する」の手順 1 の変数を貼り直す' >&2
+       echo '中断: この項の手順 1 の変数を貼り直す' >&2
      else
        printf '\n\033[7m 確認 \033[0m\n'
        systemctl --user is-active forgejo.service
@@ -11373,6 +12231,10 @@ yazi と依存ツールを先に入れる。
    - **次の手順は、Web と Git を確かめてから貼る**
 
 #### Forgejo: 自動更新を有効にする
+
+- サーバーに、毎日 Forgejo を公式の最新安定版へ上げるプログラムとタイマーを置く（動きと終了コードは[更新](#forgejo-更新)のリード）
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある
+- 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）
 
 1. 自動更新のプログラムを置く。
 
@@ -11762,7 +12624,9 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: 使い方の基本
 
-- 構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う。端末の操作はその PC の bash（Windows は Git Bash）で行う。先に [Git](#git) で名前・メールアドレスを設定する
+- 構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う
+- 前提: サーバーで[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。利用する PC では、先に [Git](#git) で名前・メールアドレスを設定してある
+- 実行場所: 利用する PC のブラウザと端末。端末の操作はその PC の bash（Windows は Git Bash）で行う
 - 初回はログイン・SSH 公開鍵の登録・リポジトリの作成・clone を行う。普段は Issue → 作業ブランチ → commit / push → Pull Request → マージ → main の更新を繰り返す
 - Issue は作業内容と完了条件を共有する場所、Pull Request はブランチの変更を確認して main に取り込むための画面
 - この項では、新しいプライベートな `forgejo-demo` で操作を練習する。同名のリポジトリや作業ディレクトリが既にあるときは、上書きせず別の名前で作る
@@ -11779,7 +12643,7 @@ yazi と依存ツールを先に入れる。
 1. ブラウザで、自分のアカウントに SSH 公開鍵を登録する。
 
    - 右上のアカウントメニューから「Settings」を開き、「SSH / GPG keys」の「Add key」で公開鍵を登録する。名前は利用する PC を識別できるものにする
-   - 実施手順の[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 1 で、同じ Forgejo アカウントに同じ PC の鍵を登録済みなら、この項の手順 2 は飛ばす
+   - [Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 1 で、同じ Forgejo アカウントに同じ PC の鍵を登録済みなら、この項の手順 2 は飛ばす
    - 公開鍵が無ければ、その PC で `ssh-keygen -t ed25519` を実行し、保存先とパスフレーズに答える。既存の鍵へ上書きしない
    - `.pub` の内容を末尾まで貼る。秘密鍵は登録しない
    - 登録した鍵の名前と指紋が一覧に出ればよい
@@ -11787,8 +12651,8 @@ yazi と依存ツールを先に入れる。
 
 1. 利用する PC の端末で、Git 用 SSH の接続先を確かめる。
 
-   - 管理者から、実施手順の[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 2 で表示したサーバーのホスト鍵の指紋を受け取る
-   - 実施手順の[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3 の初回接続時に表示される指紋と照合し、一致したときだけ接続を許可する。同じサーバーへ照合済みなら、この項の手順 3 は飛ばす
+   - 管理者から、[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 2 で表示したサーバーのホスト鍵の指紋を受け取る
+   - [Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3 の初回接続時に表示される指紋と照合し、一致したときだけ接続を許可する。同じサーバーへ照合済みなら、この項の手順 3 は飛ばす
    - 接続先は `git@<SERVER_IP>` と Git 用 SSH ポート（既定は 2222）
    - 自分の Forgejo のユーザー名を含む認証成功の案内が出ればよい。シェルは開かない
 
@@ -11908,7 +12772,9 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: バックアップ
 
-- サーバーを動かすユーザーのシェルで行う。データと Quadlet を一緒に取る
+- サーバーで Forgejo を止め、データと Quadlet を一緒にアーカイブに取る
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある
+- 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この項の手順 3 の後の確かめは別の PC
 - この項の手順 1 から 3 まで、Web と Git の操作が止まる。止めている間は、自動更新は版を上げない
 - バックアップにはリポジトリ・アカウント・SSH のホスト秘密鍵などが入る。保管先のディレクトリは 0700、アーカイブは 0600 にする
 
@@ -11977,13 +12843,17 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: バックアップから復元する
 
-> [!IMPORTANT]
-> - 自分がこの文書の[バックアップ](#forgejo-バックアップ)か自動更新（[更新](#forgejo-更新)）で作ったアーカイブを使う。バックアップと同じイメージの版・Quadlet・データを組にして戻す
-> - 同じサーバー・同じユーザー・同じ IP とポートの復元を扱う。IP や許可 CIDR を変える移設では、Quadlet の URL・待ち受けと firewalld も合わせ直す
-
-- 先に現在の状態を[バックアップ](#forgejo-バックアップ)する。復元前のデータは消さず、別のディレクトリへ退避する
+- サーバーで、[バックアップ](#forgejo-バックアップ)か自動更新で取ったアーカイブから、Forgejo のデータと Quadlet を戻す
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通したサーバーで、次を済ませてある
+  - 自分がこの文書の[バックアップ](#forgejo-バックアップ)か自動更新（[更新](#forgejo-更新)）で作ったアーカイブがある。バックアップと同じイメージの版・Quadlet・データを組にして戻す
+  - 現在の状態を[バックアップ](#forgejo-バックアップ)で取ってある
+- 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この項の手順 6 は別の PC
+- 復元前のデータは消さず、別のディレクトリへ退避する
 - この項の手順 3 から 5 まで Web と Git の操作が止まる
 - 戻した後は、次の自動更新で最新版へ上がる。新しい版の不具合で戻すときは、この項の手順 7 でその版を保留する
+
+> [!IMPORTANT]
+> - 同じサーバー・同じユーザー・同じ IP とポートの復元を扱う。IP や許可 CIDR を変える移設では、Quadlet の URL・待ち受けと firewalld も合わせ直す
 
 1. 復元するバックアップを指定する（`FORGEJO_RESTORE` は必ず値を入れる）。
 
@@ -12213,6 +13083,9 @@ yazi と依存ツールを先に入れる。
 
 #### Forgejo: 更新
 
+- 自動更新の結果を確かめ、必要なときは今すぐ更新する。保留した版を試し直す
+- 前提: [自動更新を有効にする](#forgejo-自動更新を有効にする)を通してある
+- 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この項の手順 3 は別の PC
 - [自動更新を有効にする](#forgejo-自動更新を有効にする)の手順 1〜3 のタイマーが、毎日 4:00〜4:30（サーバーの時刻）に公式の最新安定版を調べる。今の版が最新なら何もしない
 - 新しい版があれば、Forgejo を止めてバックアップを取り、イメージの行を新しい版に変えて起動する。続けて、Web の `/api/healthz`・Git 用 SSH・動いている版・`doctor check --all` を確かめる。止まるのは数分で、DB の移行があると長くなる
 - 確かめられなければ、直前のバックアップへ自動で戻し、その版を保留する（`~/.local/state/forgejo-auto-update/skip-version`）。さらに新しい版が出たら、また自動で更新する
@@ -12226,7 +13099,7 @@ yazi と依存ツールを先に入れる。
 - この文書の前の版で構築したサーバー（自動更新の無いもの）は、[自動更新を有効にする](#forgejo-自動更新を有効にする)の手順 1〜3 を通すと自動更新になる
 
 > [!WARNING]
-> メジャー版の更新と DB の移行も、確認無しで自動で入る。自動の確認で見つからない不具合に気付いたら、[バックアップから復元する](#forgejo-バックアップから復元する)で更新直前のアーカイブを戻し、その節の手順 7 で新しい版を保留する。戻すと、更新後に受け付けた変更は失われる。
+> メジャー版の更新と DB の移行も、確認無しで自動で入る。自動の確認で見つからない不具合に気付いたら、[バックアップから復元する](#forgejo-バックアップから復元する)で更新直前のアーカイブを戻し、同じ項の手順 7 で新しい版を保留する。戻すと、更新後に受け付けた変更は失われる。
 
 1. 自動更新の結果と、次に動く時刻を確かめる。
 
@@ -12280,9 +13153,16 @@ yazi と依存ツールを先に入れる。
 
 ## 再起動の後の確認
 
-- 再起動して、ここまでに通した見出しの設定が効いているかを確かめる
+- 再起動して、通した項の設定が効いているかを確かめる
 
 ### 再起動と確認
+
+- 再起動して、GNOME の表示と入力・日本語入力・システムの設定などが効いているかを確かめる
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある。確かめるのは、次の項のうち通したもの
+  - [システムの設定](#システムの設定)・[日本語入力](#日本語入力)・[GNOME の表示と入力](#gnome-の表示と入力)
+  - [WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)・[Neovim](#neovim)
+  - [Homebrew](#homebrew)の手順 4
+- 実行場所: この PC の画面（GNOME）。コマンドは、GNOME にログインした自分のユーザーの端末（bash）に貼る。この項の手順 8 は、WezTerm のタブで行う
 
 1. 再起動する。
 
@@ -12295,11 +13175,12 @@ yazi と依存ツールを先に入れる。
 
 1. ログインした画面で、上部バー・ウィンドウ・Dash が変わったことを確かめる。
 
-   - 上部バーの時計に曜日と秒が出る（電池のある PC では、電池の % も）
-   - 上部バーの右に、入力ソースの表示が出る
-   - 画面がダークになり、Super キーで開く Dash が[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並びで、端末が WezTerm になっていればよい
-   - Files などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る（自分用の設定の WezTerm は、タブバーの右端に自分でボタンを描く）
-   - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
+   - 上部バーの時計に曜日と秒が出る。電池のある PC では、電池の % も出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
+   - 上部バーの右に、入力ソースの表示が出る（[日本語入力](#日本語入力)を通したとき）
+   - 画面がダークになり、Super キーで開く Dash が[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並びになっていればよい（その項を通したとき）
+   - Dash の端末が WezTerm になっていればよい（[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
+   - Files などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき。自分用の設定の WezTerm は、タブバーの右端に自分でボタンを描く）
+   - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
 
 1. 端末を開き、再起動の後の状態を確かめる。
 
@@ -12322,45 +13203,46 @@ yazi と依存ツールを先に入れる。
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```
 
-   - `journalctl --list-boots` に 2 行出る（前の起動のログが残っている。[システムの設定](#システムの設定)の手順 5）
+   - `journalctl --list-boots` に 2 行出る（前の起動のログが残っている。[システムの設定](#システムの設定)の手順 5 を通したとき）
    - `0` が出る（[システムの設定](#システムの設定)の手順 7 で kdump を止めたとき）
-   - [システムの設定](#システムの設定)の手順 2 の名前（変えたとき）と、`/home/<USER>/Downloads` が出る
-   - `anthy - Anthy` が出る
-   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[Homebrew](#homebrew)の手順 4）
+   - [システムの設定](#システムの設定)の手順 2 の名前が出る（名前を変えたとき）
+   - `/home/<USER>/Downloads` が出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
+   - `anthy - Anthy` が出る（[日本語入力](#日本語入力)を通したとき）
+   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[日本語入力](#日本語入力)と、[Homebrew](#homebrew)の手順 4 を通したとき）
    - PATH に `/home/linuxbrew/` が入っていたり、`ModuleNotFoundError: No module named 'gi'` が出たりしたら、[Homebrew](#homebrew)の手順 4 を貼って、この項の手順 1 の再起動からやり直す
    - `ibus-daemon が動いていない` と出たら、GNOME にログインしてから、この手順を貼り直す
-   - トレイアイコンの拡張が `ACTIVE` になっている
-   - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る
+   - トレイアイコンの拡張が `ACTIVE` になっている（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
+   - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
 
 1. 拡大率を変えるときだけ、設定の「ディスプレイ」の「スケーリング」で選ぶ。
 
-   - アクティビティの画面で「設定」を開き、「ディスプレイ」→「スケーリング」で 125% などを選ぶ
+   - アクティビティの画面で「設定」を開き、「ディスプレイ」→「スケーリング」で 125% などを選ぶ（125%・150% などが出るのは、[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - 上に出る「適用」を押し、「この表示設定を保存しますか?」の窓で「変更を保存」を押す（押さないと、しばらくして元に戻る）
    - 選べる拡大率は、画面の解像度で決まる（解像度の低い画面では 100% しか出ないことがある）
 
 1. キーボードで、Caps Lock・Alt+Tab・Ctrl+Alt+T を確かめる。
 
-   - テキストエディターに何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）。Caps Lock だけを押しても大文字にならない
-   - ウィンドウを 2 つ以上開いて Alt+Tab を押すと、ウィンドウごとに切り替わる（同じアプリの窓も別に並ぶ）。Super+Tab はアプリごと
-   - Ctrl+Alt+T で WezTerm の新しい窓が開く
+   - テキストエディターに何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）。Caps Lock だけを押しても大文字にならない（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
+   - ウィンドウを 2 つ以上開いて Alt+Tab を押すと、ウィンドウごとに切り替わる（同じアプリの窓も別に並ぶ）。Super+Tab はアプリごと（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
+   - Ctrl+Alt+T で WezTerm の新しい窓が開く（[GNOME の表示と入力](#gnome-の表示と入力)と[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
 
-1. 入力ソースを切り替えて、日本語を打ってみる。
+1. [日本語入力](#日本語入力)を通したときだけ、入力ソースを切り替えて、日本語を打ってみる。
 
    - Super+Space で「英語 (US)」と Anthy に切り替わる。[Neovim](#neovim)の手順 3 を飛ばしたなら、[日本語入力](#日本語入力)の手順 2 の配列と Anthy
    - Anthy に切り替えてからテキストエディターなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
    - Anthy は、ひらがなで始まる
-   - 英字と日本語は Super+Space、Neovim 内では `<C-j>` で切り替える。JIS キーボードでも US 配列で打つため、一部の記号は刻印と異なる
+   - 英字と日本語は Super+Space で切り替える。[Neovim](#neovim)の手順 3 を通したときは、Neovim 内では `<C-j>` で切り替え、JIS キーボードでも US 配列で打つため、一部の記号は刻印と異なる
 
-1. Files で、フォルダーの名前と、隠しファイルとフォルダーの並びを確かめる。
+1. [GNOME の表示と入力](#gnome-の表示と入力)を通したときだけ、Files で、フォルダーの名前と、隠しファイルとフォルダーの並びを確かめる。
 
    - Files（アクティビティの画面で「ファイル」）でホームを開くと、`Desktop`・`Documents`・`Downloads` などの英語の名前のフォルダーが並び、日本語の名前のフォルダーは無い
    - `.bashrc`・`.config` などの隠しファイルも出て、フォルダーがファイルより先に並ぶ
    - 左のサイドバーにも `Documents`・`Downloads` などが並び、押すとそのフォルダーが開く
 
-1. Neovim で、日本語の検索・整形と IME 連携を確かめる。
+1. [Neovim](#neovim)を通したときだけ、Neovim で、日本語の検索・整形と IME 連携を確かめる。
 
    - [LazyVim の日本語検索・整形・IME 連携を確かめる](#lazyvim-の日本語検索整形ime-連携を確かめる)の全項を WezTerm のタブで行う
-   - `/tmp/lazyvim-check.md` が無ければ、参照先の手順 17 の `printf …` の行を貼ってから開く
+   - `/tmp/lazyvim-check.md` が無ければ、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 11 の `printf …` の行を貼ってから開く
    - `o` で足した行は保存せず、`:qa!` で閉じる
 
 ---
@@ -12370,18 +13252,21 @@ yazi と依存ツールを先に入れる。
 - OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5 を、ファームウェアは同じ項の手順 2・3 を貼り直す
 - [dnf-automatic で自動で更新する](#dnf-automatic-で自動で更新する)を通したなら、OS の更新は毎日自動で入る（再起動は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で行う）
 - EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1）
-- Flatpak のアプリは `dnf upgrade` では上がらない（この項の手順 4）
+- Flatpak のアプリは `dnf upgrade` では上がらない（[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 4）
 - Firefox・WezTerm・GitHub CLI（それぞれのベンダーの dnf のリポジトリから入れたもの）と git・Node.js も、OS の更新で上がる
   - 1 つだけ上げるなら、名前を指定する（Firefox は言語パックと一緒に `sudo dnf upgrade firefox firefox-l10n-ja`）
   - Firefox の FFmpeg（RPM Fusion の `ffmpeg-libs`）も一緒に上がる。WezTerm の COPR は、`main` ブランチに追従して毎日〜数日おきにビルドされる
 - Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「更新」](ai-agents.md#更新)で上げる（dnf で入れた Claude Code は、OS の更新でも上がる）
-- HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、この項の手順 3 で上がる
+- HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 自分用の設定は各リポジトリで上げる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](#lazyvim-の本体外部コマンドプラグインを更新する)
   - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
-- この項の手順は、[シェルのツール](#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 ### 共通の bash 設定・Homebrew・Flatpak を上げる
+
+- 共通の bash 設定と、Homebrew・Flatpak で入れたものを上げる
+- 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[Flatpak と Flathub](#flatpak-と-flathub)のうち、上げるものを通してある
+- 実行場所: 開き直した、自分のユーザーの端末（bash）。開き直し方は[シェルのツール](#シェルのツール)の手順 2 と同じ
 
 1. 共通の bash 設定を上げる。
 
