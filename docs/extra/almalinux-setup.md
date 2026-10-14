@@ -18,7 +18,7 @@
   - PC 全体: [システムの設定を戻す](#システムの設定を戻す)の手順で、パッケージの案内は 1、kdump は 2、journal は 3、PC の名前は 4、再起動と確かめは 5・6、sudo は 7
 - 拡大率を 100% 以外にしていたら、[表示と入力を戻す](#表示と入力を戻す)の手順 8 の前に、設定の「ディスプレイ」の「スケーリング」で 100% に戻す
 - gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 3 と「GNOME の表示と入力」の手順 14 で控えた値に戻すなら、`reset` の代わりに `set` を使う
-- OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
+- OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、[Neovim のセットアップ](../neovim.md#neovim)の「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
 - ロールバックの節の対象でない項で変えたものは、その項の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)を通したなら、先にその項の手順 2 を行う
 - 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#ロールバック)・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
 - この文書で入れたものは、この節の項を上から順に戻す（Homebrew を消す前に Homebrew のもの、RPM Fusion を消す前に[Firefox を戻す](#firefox-を戻す)の手順 1 の FFmpeg）
@@ -828,7 +828,7 @@
   - [Firefox](../almalinux-setup.md#firefox) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 読み戻しで確かめる。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（Homebrew の `gsettings` は、dconf ではなくファイルに書き、読み戻しでは変わったように見える）
 - **ほかの入力ソースは消える**: 「日本語入力」の手順 3 の `set` は一覧をまるごと置き換える
-- **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列（「Neovim」の手順 3 の後は「英語 (US)」）に戻す。Anthy の中の切り替えのキー（Ctrl+Space・Ctrl+J）は、「Neovim」の手順 3 で外れる
+- **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列（Neovim のセットアップの「Neovim」の手順 3 の後は「英語 (US)」）に戻す。Anthy の中の切り替えのキー（Ctrl+Space・Ctrl+J）は、Neovim のセットアップの「Neovim」の手順 3 で外れる
   - 変換は Mozc に比べて弱いと言われる（本書では比べていない）。よく使う語は、一緒に入る辞書のツール `kasumi-unicode` で登録する
   - 入力モードやキーの割り当ての設定画面は `/usr/libexec/ibus-setup-anthy`（アプリの一覧には出ない）
 - **Caps Lock の働きは無くなる**: 「GNOME の表示と入力」の手順 4 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる

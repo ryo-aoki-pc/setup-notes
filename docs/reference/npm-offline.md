@@ -6,7 +6,7 @@
 
 ### npm のオフライン導入 / 手順 1・2: 補足: LazyVim の初回取得より前に経路を設定する理由
 
-初期設定の「Neovim」の手順 3 は、設定の導入先の「LazyVim の設定を導入する」を参照する。その手順 10 の初回起動から依存の取得が始まるため、オフラインでは先に同じSOCKSシェルでNode.js/npmを用意し、`https_proxy`とレジストリの疎通を確認する。Neovimの本体導入（手順 1・2）と、LazyVimの初回起動を分けて案内する。
+[Neovim のセットアップ](../neovim.md)の「Neovim」の手順 3 は、設定の導入先の「LazyVim の設定を導入する」を参照する。その手順 10 の初回起動から依存の取得が始まるため、オフラインでは先に同じSOCKSシェルでNode.js/npmを用意し、`https_proxy`とレジストリの疎通を確認する。Neovimの本体導入（手順 1・2）と、LazyVimの初回起動を分けて案内する。
 
 2026-10-12の[既存VM継続の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)では、この順番と通信を確認した。キャッシュなしの初回Mason取得や、過去の応答停止原因の証明には含めない。
 

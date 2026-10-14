@@ -12,7 +12,7 @@
   - ロールバックと注意点は `docs/extra/ai-agents.md`、分けた理由と方針は `docs/reference/ai-agents.md`、分離の静的な確認（リンク・移動の同一性・折りたたみの描画・構文解析と、Codex の独立検査・レビューの対応）は `docs/verification/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
   - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
   - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
-  - 2冊に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、gnome-remote.md（2026-10-15 までは almalinux-setup.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
+  - 2冊（と、そこから分けた gnome-remote.md）に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、gnome-remote.md（2026-10-15 までは almalinux-setup.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox。2026-10-15 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#仮想マシンと-forgejo-を別の文書へ分けたときの追補)）
   - 検証記録・参考資料・extra は、項ごとの文書名（`virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`）のまま使う。Windows Sandbox のものは、2冊の検証記録・参考資料・extra から `windows-sandbox` へ移した。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「VirtualBox」は、AlmaLinux 10 の同名の項と分けるため「Windows 11 で VirtualBox を入れる」にした

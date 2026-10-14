@@ -46,7 +46,7 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 ## 手順を集約する正本
 
 - 既存・新規の Windows 11・AlmaLinux 10 の操作は、2冊のカテゴリの該当する用途の項へ集約する（2026-10-14 にカテゴリ別に組み直した。骨格は writing-rules.md の「2 冊の骨格（カテゴリ別）」）
-- AI コーディングエージェント（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` へ集約する（2026-10-14 に利用者の決定で2冊から分けた）。2冊には AI エージェントの項・節を置かず、リードから案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として2冊に残す
+- AI コーディングエージェント（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` へ集約する（2026-10-14 に利用者の決定で2冊から分けた）。2冊には AI エージェントの項・節を置かず、リードから案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md）
 - 仮想マシン（AlmaLinux 10 の VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 の Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` へ集約する（2026-10-15 に利用者の決定で2冊から分けた）。2冊には項を置かず、冒頭と `## 更新` のリードから案内する
 - 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` へ集約する（2026-10-15 に利用者の決定で2冊から分けた）。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
 - 正本を増やすのは、利用者の決定があるときだけにする。以下の「正本」は、この 10 冊を指す
