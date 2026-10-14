@@ -50,7 +50,7 @@
 
 - `epel-release` は AlmaLinux の `extras` リポジトリにあるので、追加のリポジトリの設定は要らない
 - 最後に出る「CRB を有効にすることを推奨」を気にしなくてよいのは、AlmaLinux 10 では CRB が既定で有効なため（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
-- EPEL を使う手順書（[btop](../almalinux-setup.md#btop)・[distrobox](../almalinux-setup.md#distrobox)・[podman-compose](../almalinux-setup.md#podman-compose)・[podman-tui](../almalinux-setup.md#podman-tui)・[VirtualBox](../almalinux-setup.md#virtualbox)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
+- EPEL を使う手順書（[btop](../almalinux-setup.md#btop)・[distrobox](../almalinux-setup.md#distrobox)・[podman-compose](../almalinux-setup.md#podman-compose)・[podman-tui](../almalinux-setup.md#podman-tui)・[VirtualBox](../virtual-machines.md#virtualbox)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
 
 ### EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 

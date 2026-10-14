@@ -87,7 +87,7 @@
 - エージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
   - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
   - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順で手元で取り込んでもよい
-- GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../almalinux-setup.md#forgejo) など）でも同じに使えることを優先した
+- GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
 
 ### 実施手順 / 手順 4〜6: 各 CLI が読む指示書
 

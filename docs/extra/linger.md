@@ -23,7 +23,7 @@
 
    - どちらも何も出さなければ、この節の手順 2 で linger を切る
    - 1 つ目の `ls` が何か出す（Syncthing の `sh.brew.syncthing.service`、Dropbox（rclone）の `dropbox-rclone.timer` など）なら、linger はそれが使っているので、この節の手順 2 は飛ばす
-   - 2 つ目の `ls` が何か出す（`hello-web.container`・[Forgejo](../almalinux-setup.md#forgejo) の `forgejo.container` など）なら、[Podman の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
+   - 2 つ目の `ls` が何か出す（`hello-web.container`・[Forgejo](../forgejo.md#forgejo) の `forgejo.container` など）なら、[Podman の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する) のコンテナが linger を使っているので、この節の手順 2 は飛ばす
    - 1 つ目の `ls` が `podman.socket` だけを出すときは、linger を切ってよい（[podman.md 手順 7](../almalinux-setup.md#podman) の API ソケット。ログインしている間に使うもの）
 
 1. ほかにユーザーのサービスを常駐させていないときだけ、linger を切る。

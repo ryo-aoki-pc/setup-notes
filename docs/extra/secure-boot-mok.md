@@ -55,4 +55,4 @@
 ## 注意点
 
 - **MokManager の最初の画面は 10 秒で消える**: 逃すと登録されず、予約も消える（手順 6）
-- **鍵を作り直したら、署名したモジュールも作り直す**: bootc のゲストでは、ビルドに `--no-cache` を足す（[virtualbox-guest-bootc.md の更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)）
+- **鍵を作り直したら、署名したモジュールも作り直す**: bootc のゲストでは、ビルドに `--no-cache` を足す（[virtualbox-guest-bootc.md の更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
