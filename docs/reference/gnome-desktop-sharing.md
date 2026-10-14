@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）の参考資料
 
-[AlmaLinux 10 の「GNOME のデスクトップ共有」](../almalinux-setup.md#gnome-のデスクトップ共有)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
+[AlmaLinux 10 の「GNOME のデスクトップ共有」](../gnome-remote.md#gnome-のデスクトップ共有)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)
 
@@ -10,7 +10,7 @@
 
 ### 前提を確かめる / 手順 1: 補足: 変数について
 
-- `RDP_PORT` の式は、[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../almalinux-setup.md#gnome-のヘッドレスセッション) の手順 1 と同じ。`systemctl is-enabled gnome-remote-desktop.service` は `--user` を付けないので、システムの unit（リモートログイン）を見る
+- `RDP_PORT` の式は、[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション) の手順 1 と同じ。`systemctl is-enabled gnome-remote-desktop.service` は `--user` を付けないので、システムの unit（リモートログイン）を見る
   - ユーザーの unit も同じ名前（`gnome-remote-desktop.service`）なので、ユーザーの unit を見るときは必ず `--user` を付ける
 - RHEL 10 の文書の 1.1 も、リモートログインと併用するときはデスクトップ共有のポートが 3390 になると書いている
 - `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
@@ -22,7 +22,7 @@
 - この手順書は、「自動ログインにして再起動する」の手順 3 で PC を再起動して、自動ログインでデスクトップを作る。PC の画面を触れないので、再起動から戻ってこられないと、遠隔では直せない
 - 確かめるのは、再起動の後に SSH で入り直せること（`sshd.service` が enabled、firewalld の永続の設定に `ssh` がある）と、GNOME が自動で起動すること（既定の target が `graphical.target`、`gdm.service` が enabled）
 - `/sys/class/drm/card*-*/status` の `connected` の数は、PC につながっているモニターの数。デスクトップ共有は PC の主モニターを写す（`screen-share-mode='mirror-primary'`）ので、モニターの無い PC には写すものが無い
-  - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション)を使う（「選択した方針」）
+  - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../gnome-remote.md#gnome-のヘッドレスセッション)を使う（「選択した方針」）
 - 既定の target が `graphical.target` でないと、再起動の後に GNOME が起動しない。`gdm.service` が要るのは、この手順書が GDM の自動ログインを使うため
 - `lsblk` の `crypt` は、LUKS などで暗号化したブロックデバイス。起動のときにパスフレーズを PC の画面で入れる構成なら、「自動ログインにして再起動する」の手順 3 の再起動の後に入力を待って止まる。TPM などで自動で開く構成かどうかは、この確認では分からないので、手順書は利用者に確かめさせる
 
@@ -57,12 +57,12 @@
 
 ### RDP を設定する / 手順 1: 補足: 変数について
 
-- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン) の手順 1 と同じ。証明書の SAN に入れる（この項の手順 2）
+- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン) の手順 1 と同じ。証明書の SAN に入れる（この項の手順 2）
 - 2026-10-14 に「前提を確かめる」の手順 1 から移した（項を単独で通すため）
 
 ### RDP を設定する / 手順 2: 補足: 退避と証明書
 
-- 中身は [AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 3](../almalinux-setup.md#gnome-のヘッドレスセッション) と同じ形。違うのは、退避先（`~/.local/state/gnome-desktop-sharing-setup`）と、退避するキーの数（5 つ）
+- 中身は [AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 3](../gnome-remote.md#gnome-のヘッドレスセッション) と同じ形。違うのは、退避先（`~/.local/state/gnome-desktop-sharing-setup`）と、退避するキーの数（5 つ）
 - `証明書と秘密鍵の公開鍵: 一致` は、既存の証明書と鍵も、組み合わせが正しいことを確かめたもの。既存の証明書と鍵は上書きしない
 - 退避するのは、「RDP を設定する」の手順 3 で変える dconf のキー（`/org/gnome/desktop/remote-desktop/rdp/` の `port`・`negotiate-port`・`view-only`・`tls-cert`・`tls-key`）。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - `tls-cert` と `tls-key` は、デスクトップ共有とヘッドレスのモードで共用する（ヘッドレスの専用のキーは `rdp/headless/` の下の `port`・`negotiate-port`・`enable` だけ）。`rdp/` を `dconf reset -f` すると `rdp/headless/` も消えるので、キーごとに戻す
@@ -78,7 +78,7 @@
 - `disable-port-negotiation` は、指定したポートが使われていたときに次のポートを順に試すのを止める。ポートが勝手に変わって、「RDP を設定する」の手順 7 で開けたポートと食い違うのを防ぐ。代わりに、ポートが使われていると待ち受けに失敗し、再試行しない
 - `set-tls-cert` と `set-tls-key` は絶対パスだけを受け付ける（`~` はシェルが展開する）
 - 初めて設定するときの `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、`grdctl` が設定を読み込むとき（49.3 の `src/grd-settings.c` の `update_rdp_server_fingerprint`）に、まだ空の `tls-cert` で証明書を読もうとして出すもの
-  - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 4](../almalinux-setup.md#gnome-のヘッドレスセッション) と同じ）
+  - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 4](../gnome-remote.md#gnome-のヘッドレスセッション) と同じ）
 - `port` と `negotiate-port` は、次に待ち受けるときに効く。「RDP を設定する」の手順 3 は、既に起動しているデーモンを再起動してポートと TLS の設定を反映する。`view-only` 自体は、つないでいるクライアントにもすぐ効く
 - 読み戻しの `gsettings list-recursively` は、このスキーマのキーを全部出す。手順書の箇条書きの 5 つのほかに、`enable` と `screen-share-mode` の行も並ぶ
   - 2026-10-11 の Hyper-V の VM では、`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert`・`tls-key`・`view-only false` の 7 行だった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
@@ -119,7 +119,7 @@
 - その結果、PC の画面にはログイン画面が出て、自動ログインのセッションは裏（`Active=no`）に回る。裏のセッションは画面を描かないので、RDP でつなぐと、認証は通るのに画面が真っ黒になる
 - VirtualBox の VM で、起動の引数に `rd.plymouth=0 plymouth.enable=0` を足すと、plymouth が動かず、VT の切り替えが起きないので、ログイン画面は出なかった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)）
 - 起動の引数で止めると、次の起動から、起動画面の代わりに文字のメッセージが出る
-- 裏に回ったセッションは、`sudo loginctl activate <SESSION_ID>` で前に戻せる（[つながらなくなったとき](../almalinux-setup.md#gnome-のデスクトップ共有-つながらなくなったとき)の手順 2）。`sudo` が無いと `Interactive authentication required.` で断られる
+- 裏に回ったセッションは、`sudo loginctl activate <SESSION_ID>` で前に戻せる（[つながらなくなったとき](../gnome-remote.md#gnome-のデスクトップ共有-つながらなくなったとき)の手順 2）。`sudo` が無いと `Interactive authentication required.` で断られる
 
 ### 自動ログインにして再起動する / 手順 3: 補足: 再起動のコマンド
 
@@ -149,7 +149,7 @@
 
 ### 再起動の後に確かめてつなぐ / 手順 3: 補足: TLS プローブ
 
-- スクリプトは [AlmaLinux 10 の「GNOME のリモートログイン」の手順 10](../almalinux-setup.md#gnome-のリモートログイン) と同じもの。第 2 引数でポートを渡す
+- スクリプトは [AlmaLinux 10 の「GNOME のリモートログイン」の手順 10](../gnome-remote.md#gnome-のリモートログイン) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため
 - `grdctl status` は資格情報を読み出す（`Username: (hidden)` と出るのは、読めたとき）。「RDP を設定する」の手順 4 のキーリングはパスワードが無いので、PC の画面に窓は出ない
 - プローブは、TLS のハンドシェイクで証明書を受け取ると、NLA の認証をせずに接続を閉じる。デーモンは、この接続をエラーの行としてログに残す
@@ -177,7 +177,7 @@
 
 ### 接続元を LAN に絞る / 手順 2: 補足: 引用符
 
-- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
+- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
 
 ### つながらなくなったとき: 補足
 
@@ -186,7 +186,7 @@
 - 手順 2: VM で `sudo chvt 1` で VT1 に切り替えると、GDM が VT1 にログイン画面を作り、自動ログインのセッションが `Active=no` になった。`sudo loginctl activate` で `Active=yes` に戻り、つないだままの FreeRDP にも画面が戻って、入力も届いた
 - 手順 3: VM で、RDP の画面からログアウトすると、PC の画面はログイン画面のままになり（自動ログインし直さない）、`RDP_PORT` は閉じた（ユーザーの unit も止まる）。再起動すると、自動ログインで戻った
   - ログアウトの確認の窓は、「キャンセル」を押さないと 60 秒で自動でログアウトする
-  - aarch64 の実機の検証では、OS の再起動の代わりに GDM とユーザーマネージャーを起動し直して、自動ログインさせた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。リモートログインのデーモンとの順序の問題（[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン)）があるので、手順には再起動を採った
+  - aarch64 の実機の検証では、OS の再起動の代わりに GDM とユーザーマネージャーを起動し直して、自動ログインさせた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。リモートログインのデーモンとの順序の問題（[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)）があるので、手順には再起動を採った
 
 ### 注意点の補足: 後からリモートログインを有効にしたとき
 
@@ -204,7 +204,7 @@
 
 - **デスクトップ共有にする**（RHEL 10 の文書の 1.1 の方式）
   - PC の画面に出ているデスクトップを、そのまま共有する。PC の前にいる人と、同じ画面を見て操作できる
-  - モニターの無い PC なら[ヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション)、ログイン画面から入るなら[リモートログイン](../almalinux-setup.md#gnome-のリモートログイン)
+  - モニターの無い PC なら[ヘッドレスのセッション](../gnome-remote.md#gnome-のヘッドレスセッション)、ログイン画面から入るなら[リモートログイン](../gnome-remote.md#gnome-のリモートログイン)
 - **PC の画面を触らない前提にする**（2026-10-07、利用者の依頼）— 遠隔の PC で、PC の画面・キーボード・マウスを使えなくても、SSH のシェルと RDP のクライアントだけで、設定・確認・復旧・ロールバックができるようにした
   - 以前の版は、PC の前でパスワードでログインしておくことを前提にし、自動ログインを任意節にしていた。その記録は検証記録に残す
 - **自動ログインでデスクトップを作る** — SSH から GDM のログイン画面でログインする手段は無いので、PC の画面のセッションは自動ログインで作る。PC の前にいる人がこのデスクトップを使える危険は、手順書のリードの `[!WARNING]` に書いた

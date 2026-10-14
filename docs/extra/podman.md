@@ -9,7 +9,7 @@
 
 - 上から順に、通した節の分だけ実行する
 - この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose・[Forgejo](forgejo.md#ロールバック)）で作ったものが要らないか確かめる。Forgejo が動いているときは先に止め、Quadlet の定義も外す
-- Quadlet の節を通し、linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（[Syncthing](../almalinux-setup.md#syncthing)・[Dropbox](../almalinux-setup.md#dropbox)・[Forgejo](../forgejo.md#forgejo) など、ほかに linger を使うものが無いかは、そこで確かめる）
+- Quadlet の節を通し、linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（[Syncthing](../syncthing.md#syncthing)・[Dropbox](../almalinux-setup.md#dropbox)・[Forgejo](../forgejo.md#forgejo) など、ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
 > **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](../almalinux-setup.md#distrobox) のボックスや [podman-compose](../almalinux-setup.md#podman-compose)・[Forgejo](../forgejo.md#forgejo) のコンテナも含む。Forgejo の bind mount 先の `~/.local/share/forgejo` と Quadlet の定義は残るので、[Forgejo のロールバック](forgejo.md#ロールバック)で扱う。

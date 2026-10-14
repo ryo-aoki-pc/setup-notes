@@ -1,6 +1,6 @@
 # Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の参考資料
 
-[手順書](../almalinux-setup.md#syncthing)・[ロールバックと注意点](../extra/syncthing.md)
+[手順書](../syncthing.md#syncthing)・[ロールバックと注意点](../extra/syncthing.md)
 
 ## 補足
 
@@ -9,7 +9,7 @@
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#実施手順--手順-1-補足-変数について)
 
 - `ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、OS のアカウントとも Samba のユーザーとも無関係。自動で OS と同じ名前が入るだけなので、別の名前にしてもよい
-- `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](../almalinux-setup.md#samba-サーバー) の `SERVER_IP` と同じ扱い）
+- `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](../samba.md#samba-サーバー) の `SERVER_IP` と同じ扱い）
 - `ST_GUI_ADDR` を `0.0.0.0:8384` にすると**すべての NIC で待ち受ける**
 - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 7 のままでよい）
 - パスワードは変数に置かない。手順 3 でその場で読み取り、設定したら `unset` する
@@ -23,7 +23,7 @@ aarch64 で降ってくるボトルは `syncthing--2.1.5.arm64_linux.bottle.tar.
 
 - `noupgrade` は、**Syncthing 自身の自動アップグレード機能を無効にしてビルドされている**という印
   - 公式の tarball 版は自分で新しい版を取ってきて入れ替えるが、Homebrew の formula は `go run build.go --version ... --no-upgrade tar` でビルドするので、その機能が入らない
-  - 更新は `brew upgrade` で行う（[更新](../almalinux-setup.md#syncthing-更新)）。パッケージマネージャ管理下のファイルを Syncthing が勝手に書き換えないので、こちらの方が都合がよい
+  - 更新は `brew upgrade` で行う（[更新](../syncthing.md#syncthing-更新)）。パッケージマネージャ管理下のファイルを Syncthing が勝手に書き換えないので、こちらの方が都合がよい
 - `modernc-sqlite` は 2.x で採用された SQLite 実装（cgo 無しの純 Go 版）。1.x の LevelDB から変わった部分（[注意点](../extra/syncthing.md#注意点)）
 
 実行ファイルと man ページに加え、Homebrew が生成したサービス用ファイルが入る。**上流が配る systemd の unit とは別物**:
@@ -146,7 +146,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 ### Windows 11 の Syncthing / 手順 2: 補足: 変数について
 
-- `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](../almalinux-setup.md#syncthing)の `ST_GUI_USER` と同じ扱い）
+- `$ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、Windows のアカウントとは関係が無い。自動で同じ名前が入るだけなので、別の名前にしてもよい（AlmaLinux 10 の[手順 1](../syncthing.md#syncthing)の `ST_GUI_USER` と同じ扱い）
 - `$LAN_IF` は、この節の手順 7（ネットワークがプライベートか確かめる）・手順 11（GUI の URL を出す）で使う。式は [Windows 11 の初期設定の「PC 全体の設定」の手順 2](../windows-setup.md#pc-全体の設定) と同じ（同書の「OpenSSH サーバー」も、この変数を使う）
 - GUI の待ち受け（`0.0.0.0:8384`）と実行ファイルの場所（`%LOCALAPPDATA%\Programs\Syncthing\syncthing.exe`）は変える必要が無いので、変数にせずブロックに直接書いてある
 - パスワードは変数に置いたままにしない。この節の手順 5 で読み取り、手順 6 で使ったら消す
@@ -176,7 +176,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#windows-11-で使う--手順-7-補足-規則の中身と最初の起動より前に作る理由)
 
-- 3 つの規則は、AlmaLinux 10 の[手順 7](../almalinux-setup.md#syncthing)の firewalld の `syncthing`（22000/tcp・22000/udp・21027/udp）と `syncthing-gui`（8384/tcp）に当たる。22000/tcp は同期、22000/udp は QUIC、21027/udp は同じ LAN の相手を見つけるため、8384/tcp は Web GUI
+- 3 つの規則は、AlmaLinux 10 の[手順 7](../syncthing.md#syncthing)の firewalld の `syncthing`（22000/tcp・22000/udp・21027/udp）と `syncthing-gui`（8384/tcp）に当たる。22000/tcp は同期、22000/udp は QUIC、21027/udp は同じ LAN の相手を見つけるため、8384/tcp は Web GUI
 - どれも `syncthing.exe`（展開したフルパス）に限り、プライベートのネットワークだけで有効にする。持ち出した先のパブリックの Wi-Fi では開かない
 - Windows のファイアウォールは、規則の無いプログラムが待ち受けると「Windows セキュリティの重要な警告」の窓を出す。そこで「キャンセル」を押すと、そのプログラムの**拒否**の規則ができ、拒否は許可より優先され、窓は二度と出ない。許可の規則は起動する前に作る
 - Syncthing の公式の自動起動の説明は、「一度対話で起動して、ファイアウォールの窓で許可する」としている。本書はその代わりに、規則を先に作る
@@ -239,7 +239,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
   - 公開しない構成（`127.0.0.1:8384`）でも手順 6 で HTTPS を設定する。手順 7 は `syncthing-gui` を開けず、手順 9 はこのホストのブラウザで確かめる
 
 - **firewalld は定義済みサービス（`syncthing` / `syncthing-gui`）で開けた。** ポート番号を直接書くより意図が読め、上流がポートを足したときにも追従する
-- **設定のバックアップは、systemd のユーザーユニット（path + タイマー）で自動にした**（[設定を自動でバックアップする](../almalinux-setup.md#syncthing-設定を自動でバックアップする)）
+- **設定のバックアップは、systemd のユーザーユニット（path + タイマー）で自動にした**（[設定を自動でバックアップする](../syncthing.md#syncthing-設定を自動でバックアップする)）
   - Syncthing と同じユーザーの systemd に載せるので、root も cron も要らない。linger で、ログアウト中も動く
   - path ユニットなら、設定を変えた数秒後に取れる。1 日 1 回のタイマーは取りこぼしの保険
   - 取るのは鍵と `config.xml` だけで、DB は入れない（作り直せるうえ、動いている間のコピーは整合しない）

@@ -1,6 +1,6 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）の参考資料
 
-[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
 
 集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
@@ -8,7 +8,7 @@
 
 ### GNOME のリモートログイン / 手順 1: 補足: 変数について
 
-- `LAN_SUBNET` は[接続元を LAN に絞る](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する
+- `LAN_SUBNET` は[接続元を LAN に絞る](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 - 接続元を制限しない場合は、手順 5 で public ゾーンに `rdp` サービスを開放した状態が完成形
 - `SERVER_IP` が空のまま進むと、手順 2 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
 - 任意の変数のブロックは、最後に値を読み戻す
@@ -188,7 +188,7 @@ RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` �
 sudo dnf install -y freerdp
 ```
 
-[手順 1](../almalinux-setup.md#gnome-のリモートログイン) の変数を設定したうえで:
+[手順 1](../gnome-remote.md#gnome-のリモートログイン) の変数を設定したうえで:
 
 ```bash
 sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
@@ -201,7 +201,7 @@ sudo restorecon -Rv /var/lib/gnome-remote-desktop
 
 #### 方式 2: podman コンテナで winpr-makecert を使う
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[手順 1](../almalinux-setup.md#gnome-のリモートログイン) の変数を設定したうえで:
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[手順 1](../gnome-remote.md#gnome-のリモートログイン) の変数を設定したうえで:
 
 ```bash
 OUT=$(mktemp -d)

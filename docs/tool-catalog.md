@@ -68,8 +68,8 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Homebrew 本体 | 公式インストーラ | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Homebrew」の手順 1〜3） |
 | Flatpak / Flathub | AppStream + Flathub | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Flatpak と Flathub」の手順 1〜3） |
 | starship / zoxide / fzf / eza / bat / tmux | Homebrew（初期化は共通の bash 設定） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「シェルのツール」の手順 1） |
-| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](almalinux-setup.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
-| Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](almalinux-setup.md#syncthing) |
+| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](neovim.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
+| Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](syncthing.md#syncthing) |
 | Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](almalinux-setup.md#dropbox) |
 | rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone) |
 | btop | EPEL | [btop.md](almalinux-setup.md#btop) |

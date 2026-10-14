@@ -45,7 +45,7 @@
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・HackGen Console NF・Git for Windows・Firefox・WezTerm と、Git Bash のシェルのツール・git-delta・GitHub CLI・Neovim・lazygit・yazi）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi）は、同書の項で入れる。WireGuard は同書の [WireGuard](docs/windows-setup.md#wireguard) の項、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi）は、同書の項で入れる。WireGuard は同書の [WireGuard](docs/wireguard.md#windows-11-で-wireguard-を使う) の項、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
   - 同書の項で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 同じく同書の項で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
   - AlmaLinux 10 の初期設定の「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同書の「[シェルのツールを入れる](docs/windows-setup.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
@@ -61,7 +61,7 @@
 | [Flatpak / Flathub（AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3）](docs/almalinux-setup.md#flatpak-と-flathub) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
 | [EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（「GNOME の表示と入力」の手順 11）、btop・distrobox・podman-compose・podman-tui、仮想マシンのセットアップの [VirtualBox](docs/virtual-machines.md#virtualbox)（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free。AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5）](docs/almalinux-setup.md#epel-と-rpm-fusion) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | 同書の[「Firefox」](docs/almalinux-setup.md#firefox)の AAC・H.264（手順 8〜11） |
-| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ と、表示・電源・リモートなどの設定も（PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォント・WSL のミラーも項にある）。Git Bash の starship・zoxide・fzf・eza・bat（「シェルのツールを入れる」）と、git-delta・GitHub CLI・Neovim・lazygit・yazi も scoop から | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | 管理者の窓か通常の窓かは、各項のリードの実行場所に従う（Windows Update・PC 全体の設定・WSL と再起動などは管理者。scoop のインストーラは管理者では止まる） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows。zoxide は 0.9.9 に止めてあり、上がらない）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | 同書の[scoop のツールを SSH のセッションで使う](docs/windows-setup.md#scoop-のツールを-ssh-のセッションで使う)と、同書の[git-delta](docs/windows-setup.md#git-delta)・[GitHub CLI](docs/windows-setup.md#github-cli)・[Neovim](docs/windows-setup.md#neovim)・[lazygit](docs/windows-setup.md#lazygit)・[yazi](docs/windows-setup.md#yazi)（scoop で入れる） |
+| [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ と、表示・電源・リモートなどの設定も（PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォント・WSL のミラーも項にある）。Git Bash の starship・zoxide・fzf・eza・bat（「シェルのツールを入れる」）と、git-delta・GitHub CLI・Neovim・lazygit・yazi も scoop から | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | 管理者の窓か通常の窓かは、各項のリードの実行場所に従う（Windows Update・PC 全体の設定・WSL と再起動などは管理者。scoop のインストーラは管理者では止まる） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows。zoxide は 0.9.9 に止めてあり、上がらない）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | 同書の[scoop のツールを SSH のセッションで使う](docs/windows-setup.md#scoop-のツールを-ssh-のセッションで使う)と、同書の[git-delta](docs/windows-setup.md#git-delta)・[GitHub CLI](docs/windows-setup.md#github-cli)・[Neovim](docs/neovim.md#windows-11-で-neovim-を入れる)・[lazygit](docs/windows-setup.md#lazygit)・[yazi](docs/windows-setup.md#yazi)（scoop で入れる） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -120,11 +120,11 @@
 
 | 手順・用途 | つなぐもの | 実行する場所 | 仕組み | 開けるポート |
 |---|---|---|---|---|
-| [WireGuard VPN](docs/almalinux-setup.md#wireguard) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
-| [WireGuard VPN の外出先の PC（WireGuard VPN の「AlmaLinux 10 の PC からつなぐ」と「Windows 11 で使う」）](docs/almalinux-setup.md#wireguard-almalinux-10-の-pc-からつなぐ) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down`。Windows 11 は winget の `WireGuard.WireGuard`（公式の MSI）で、`/installtunnelservice` / `/uninstalltunnelservice` | 無し（PC の firewalld は変えない） |
-| [GNOME Remote Desktop](docs/almalinux-setup.md#gnome-のリモートログイン) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（GDM で認証し、既存セッションへ戻るか、無ければ作る） | 3389/tcp |
-| [GNOME のヘッドレスのセッション](docs/almalinux-setup.md#gnome-のヘッドレスセッション) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
-| [GNOME のデスクトップ共有](docs/almalinux-setup.md#gnome-のデスクトップ共有) | RDP クライアントと、遠隔の PC の画面に自動ログインした GNOME のデスクトップ | 接続される PC（共有するユーザーの SSH のシェル。PC の画面は使わない） | `grdctl`（オプション無し）とユーザーの `gnome-remote-desktop.service`、GDM の自動ログイン。資格情報はパスワードの無いキーリング `rdp` | 3389/tcp（リモートログインと併用なら 3390/tcp） |
+| [WireGuard VPN](docs/wireguard.md#wireguard) | 2 拠点の LAN 同士と、外出先のクライアント | 各拠点の WG ホスト（ルーターの配下） | `wg-vpn.sh`（値は `site.env` 1 ファイル）と `wg-quick@wg0` | `${WG_PORT}/udp`（例 51820） |
+| [WireGuard VPN の外出先の PC（WireGuard VPN の「AlmaLinux 10 の PC からつなぐ」と「Windows 11 で使う」）](docs/wireguard.md#wireguard-almalinux-10-の-pc-からつなぐ) | 外出先の PC と両拠点の LAN | 外出先の PC（一部の手順は WG ホスト） | NetworkManager（`nmcli connection import`）。張る・切るは `nmcli connection up` / `down`。Windows 11 は winget の `WireGuard.WireGuard`（公式の MSI）で、`/installtunnelservice` / `/uninstalltunnelservice` | 無し（PC の firewalld は変えない） |
+| [GNOME Remote Desktop](docs/gnome-remote.md#gnome-のリモートログイン) | RDP クライアントと PC のログイン画面 | 接続される PC | `grdctl --system`（GDM で認証し、既存セッションへ戻るか、無ければ作る） | 3389/tcp |
+| [GNOME のヘッドレスのセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション) | RDP クライアントと、モニターの無い PC に常駐させた GNOME のデスクトップ | 接続される PC（セッションを使うユーザーのシェル） | GDM の `gnome-headless-session@<USER>.service` と `grdctl --headless`（ユーザーのデーモン） | 3389/tcp（リモートログインと併用なら 3390/tcp） |
+| [GNOME のデスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有) | RDP クライアントと、遠隔の PC の画面に自動ログインした GNOME のデスクトップ | 接続される PC（共有するユーザーの SSH のシェル。PC の画面は使わない） | `grdctl`（オプション無し）とユーザーの `gnome-remote-desktop.service`、GDM の自動ログイン。資格情報はパスワードの無いキーリング `rdp` | 3389/tcp（リモートログインと併用なら 3390/tcp） |
 | [Windows の OpenSSH サーバー（Windows 11 の初期設定の「OpenSSH サーバー」）](docs/windows-setup.md#openssh-サーバー) | SSH クライアントと Windows 11 の PC | 接続される PC（Windows。接続はクライアント） | Windows のオプション機能 `OpenSSH.Server`（サービス `sshd`）とパスワード認証（公開鍵は任意） | 22/tcp（プライベートのネットワークだけ） |
 | [SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント) | Windows 11 の PC と AlmaLinux 10 のホスト（SSH の鍵と接続先） | 接続する PC（Windows。指紋を見るところだけホスト。公開鍵はホストの `authorized_keys` に Windows から足す） | Windows の OpenSSH クライアント（`System32\OpenSSH`）と Git for Windows の ssh。`%USERPROFILE%\.ssh` の ed25519 の鍵と config | 無し |
 | [Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順) | スマートフォン・ブラウザの Claude アプリと、Windows 11 の PC で動く Claude Code | 接続される PC（Windows。SSH でログインした PowerShell に貼る。確認はスマートフォンかブラウザ） | タスク スケジューラのタスクで WezTerm を起動し、その中で `claude remote-control` を動かす（SSH の子プロセスにしない） | 無し（外向きの HTTPS だけ） |
@@ -140,18 +140,18 @@
 
 - Samba は、サーバーにある自分のホームを LAN・WireGuard 越しに SMB3 で読み書きする（任意で root のホームも、自分のユーザーのまま）。Syncthing は、指定したフォルダを端末同士で同期する
 - Samba クライアントは、その共有を AlmaLinux 10 の PC の `/mnt/<共有名>` に、アクセスしたときにマウントする。GNOME Files（`smb://`）で開く方法も同書にある
-  - Windows 11 の PC では、同書の [Windows 11 の節](docs/windows-setup.md#samba-クライアント)で、共有をドライブ文字に割り当て、サインインのたびにつなぎ直す（資格情報マネージャーと `New-SmbMapping`。管理者ではない窓で行う）。**Windows の実機では流していない**（未検証）
+  - Windows 11 の PC では、同書の [Windows 11 の節](docs/samba.md#windows-11-で-samba-クライアントを使う)で、共有をドライブ文字に割り当て、サインインのたびにつなぎ直す（資格情報マネージャーと `New-SmbMapping`。管理者ではない窓で行う）。**Windows の実機では流していない**（未検証）
 - 同じホストで両方使うときは、Syncthing の同期対象にホームを丸ごと入れない（Samba と同じ領域を二重に扱うことになる）
-- Syncthing の鍵と設定は、[AlmaLinux 10 の Syncthing 自動バックアップ](docs/almalinux-setup.md#syncthing-設定を自動でバックアップする)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
-- Syncthing は、Windows 11 の PC にも [Windows 11 の「Syncthing」](docs/windows-setup.md#syncthing)で入れられる。公式の zip の `syncthing.exe` を置き、サインインしている間だけタスク スケジューラで動かす（AlmaLinux 10 の Syncthing の相手にもなる）。更新は Syncthing 自身の自動の更新。**Windows の実機では流していない**（未検証）
+- Syncthing の鍵と設定は、[AlmaLinux 10 の Syncthing 自動バックアップ](docs/syncthing.md#syncthing-設定を自動でバックアップする)で自動でバックアップし、送信専用フォルダで別の端末へ複製できる。戻し方も同書にある（この 2 節はコンテナのみで検証）
+- Syncthing は、Windows 11 の PC にも [Windows 11 の「Syncthing」](docs/syncthing.md#windows-11-で-syncthing-を使う)で入れられる。公式の zip の `syncthing.exe` を置き、サインインしている間だけタスク スケジューラで動かす（AlmaLinux 10 の Syncthing の相手にもなる）。更新は Syncthing 自身の自動の更新。**Windows の実機では流していない**（未検証）
 - Dropbox は、公式クライアントと rclone のいずれも `~/Dropbox` をクラウドと同期する。公式クライアントは x86_64 にしか無いので、Raspberry Pi 5（aarch64）では rclone を使う
 - `~/Dropbox` を Syncthing の同期フォルダに入れない（2 つの同期が同じファイルを書き合う）
 
 | 手順・用途 | 方式 | 導入元 | 常駐 | 開けるポート |
 |---|---|---|---|---|
-| [Samba](docs/almalinux-setup.md#samba-サーバー) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]`、`/home` 全体を `[home]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
-| [Samba クライアント](docs/almalinux-setup.md#samba-クライアント) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける。Windows 11 はネットワーク ドライブに割り当てる | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`）。Windows 11 は Windows に入っている SMB のクライアント | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す）。Windows 11 はサインインのたびにつなぎ直す | 無し（サーバーの 445/tcp へ出るだけ） |
-| [Syncthing](docs/almalinux-setup.md#syncthing) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
+| [Samba](docs/samba.md#samba-サーバー) | ホームディレクトリを SMB3 で公開（`[homes]`。任意で root のホームを `[root]`、`/home` 全体を `[home]` 共有で） | BaseOS / AppStream | `smb.service`（システムのサービス） | 445/tcp だけ（NetBIOS は使わない） |
+| [Samba クライアント](docs/samba.md#samba-クライアント) | Samba の共有を PC から SMB3 でマウント（`/etc/fstab` の `x-systemd.automount`）。GNOME Files でも開ける。Windows 11 はネットワーク ドライブに割り当てる | BaseOS（`cifs-utils`）。GNOME Files は AppStream（`gvfs-smb`）。Windows 11 は Windows に入っている SMB のクライアント | 無し（アクセスしたときに systemd がマウントし、1 分使わなければ外す）。Windows 11 はサインインのたびにつなぎ直す | 無し（サーバーの 445/tcp へ出るだけ） |
+| [Syncthing](docs/syncthing.md#syncthing) | フォルダを端末同士で同期。操作は Web GUI | Homebrew（EPEL 版は最新でなく、公式の RPM リポジトリは無い）。Windows 11 は GitHub の公式の zip（sha256 と Authenticode の署名を確かめて `%LOCALAPPDATA%\Programs\Syncthing` に置く。更新は Syncthing 自身の自動の更新） | `brew services` のユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐)。Windows 11 はタスク スケジューラのサインインのタスク（サインインしている間だけ） | firewalld の `syncthing`（22000/tcp・udp、21027/udp）と `syncthing-gui`（8384/tcp）。Windows 11 は Windows ファイアウォールのプライベートだけに、`syncthing.exe` の同じポート |
 | [Dropbox（公式クライアント）](docs/almalinux-setup.md#dropbox) | `~/Dropbox` を Dropbox と常時同期する（x86_64 だけ）。操作は `dropbox` コマンド | Dropbox 公式の tarball（署名を確かめて `~/.dropbox-dist` に展開。公式 RPM は EL10 に入らない） | 自分で書く systemd ユーザーサービスと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐) | 無し（LAN 同期の `dropbox-lansync` は開けない） |
 | [Dropbox（rclone）](docs/almalinux-setup.md#dropbox-と-rclone) | `rclone bisync` で `~/Dropbox` と Dropbox を 15 分ごとに双方向同期する（Raspberry Pi 5 向け） | Homebrew（EPEL 版は古い） | systemd ユーザータイマーと [linger](docs/almalinux-setup.md#ユーザーサービスの常駐) | 無し |
 
@@ -228,13 +228,13 @@
 
 - 端末の中で使うなら Neovim、GUI なら VS Code
 - lazygit の `e` キーで開くエディタは、`EDITOR` で決まる（共通の bash 設定では `nvim`）
-  - Windows 11 の PowerShell から起動するときは、[Windows 11 の初期設定の「Neovim を既定のエディタにする」](docs/windows-setup.md#neovim-を既定のエディタにする)の手順 2 で、ユーザーの環境変数 `EDITOR` を `nvim` にする（Git Bash では、共通の bash 設定が `nvim` にする）
+  - Windows 11 の PowerShell から起動するときは、[Windows 11 の初期設定の「Neovim を既定のエディタにする」](docs/neovim.md#neovim-を既定のエディタにする)の手順 2 で、ユーザーの環境変数 `EDITOR` を `nvim` にする（Git Bash では、共通の bash 設定が `nvim` にする）
 - Homebrew の nvim は、そのままでは `sudo` の PATH に無く、`EDITOR=nvim` でも `sudoedit` は黙って `vi` で開く。[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](docs/almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通すと、`sudoedit` が自分の設定の nvim で開く（通さないなら `SUDO_EDITOR` にフルパスを渡す）
 - インターネットに出られないホストでは、Neovim は [Homebrew のオフライン導入](docs/almalinux-setup.md#homebrew-のオフライン導入) のトンネルで入れ、Mason の npm のパッケージは [npm のオフライン導入](docs/almalinux-setup.md#npm-のオフライン導入) で入れる
 
 | 手順・用途 | 形 | 導入元 | 設定の置き場所 | 更新 |
 |---|---|---|---|---|
-| [Neovim（AlmaLinux 10 の初期設定の「Neovim」）](docs/almalinux-setup.md#neovim) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系）。Windows 11 は scoop の main | `~/.config/nvim`（`init.lua` か `init.vim`）。Windows 11 は `%LOCALAPPDATA%\nvim` | `brew upgrade neovim`（Windows 11 は `scoop update neovim`） |
+| [Neovim（AlmaLinux 10 の初期設定の「Neovim」）](docs/neovim.md#neovim) | 端末の中（TUI）。`vi` は RPM の `vim-minimal` のまま | Homebrew（EPEL は 0.10 系）。Windows 11 は scoop の main | `~/.config/nvim`（`init.lua` か `init.vim`）。Windows 11 は `%LOCALAPPDATA%\nvim` | `brew upgrade neovim`（Windows 11 は `scoop update neovim`） |
 | [VS Code](docs/almalinux-setup.md#vs-code) | GUI（Electron） | Microsoft 公式 dnf リポジトリ（EL 共通の rpm） | `~/.config/Code`、`~/.vscode`（`~/.config/code-flags.conf` は読まれない） | `sudo dnf upgrade code`（内蔵のアップデータは使わない） |
 
 ### git と GitHub

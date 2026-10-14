@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の参考資料
 
-[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../almalinux-setup.md#gnome-のヘッドレスセッション)・[ロールバックと注意点](../extra/gnome-headless-session.md)
+[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#参考資料から分離した記録)
 
@@ -10,7 +10,7 @@
 
 ### GNOME のヘッドレスセッション / 手順 1: 補足: 変数について
 
-- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
+- `SERVER_IP`・`SERVER_NAME`・`SERVER_FQDN` は、[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン) の手順 1 と同じ。証明書の SAN に入れる（手順 3）
 - `RDP_PORT` の判定に使う `systemctl is-enabled gnome-remote-desktop.service` は、`--user` を付けないのでシステムの unit を見る
 - リモートログインのデーモンは 3389/tcp で待ち受けるので、同じ PC ではヘッドレスのセッションの RDP を 3390/tcp にする
 - `RDP_PORT` は、リモートログインのシステムのデーモン（`gnome-remote-desktop.service`）が有効なら `3390`、そうでなければ `3389` になる
@@ -35,7 +35,7 @@
 
 ### GNOME のヘッドレスセッション / 手順 3: 補足: 証明書
 
-- 中身は [AlmaLinux 10 の「GNOME のリモートログイン」の手順 2](../almalinux-setup.md#gnome-のリモートログイン) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
+- 中身は [AlmaLinux 10 の「GNOME のリモートログイン」の手順 2](../gnome-remote.md#gnome-のリモートログイン) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る
 - TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - 貼り直しても退避は上書きしない。`backup-complete` は退避完了、`ready` は証明書の準備完了、`created-certificate` はこの手順が新規生成したことの目印
@@ -73,7 +73,7 @@
 
 ### GNOME のヘッドレスセッション / 手順 9: 補足: TLS プローブ
 
-- スクリプトは [AlmaLinux 10 の「GNOME のリモートログイン」の手順 10](../almalinux-setup.md#gnome-のリモートログイン) と同じもの。第 2 引数でポートを渡す
+- スクリプトは [AlmaLinux 10 の「GNOME のリモートログイン」の手順 10](../gnome-remote.md#gnome-のリモートログイン) と同じもの。第 2 引数でポートを渡す
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため（どちらでも動く）
 - `~/rdp_tls_probe.py` は、この手順書が作る唯一の作業ファイル
 - プローブは、TLS のハンドシェイクで証明書を受け取ると、認証をせずに接続を閉じる。デーモンは、この接続を `client authentication failure` などのエラーの行としてログに残す（2026-10-11 の Hyper-V の VM では 7 行。待ち受けと、その後の接続には響かなかった）
@@ -88,7 +88,7 @@
 
 ### 接続元を LAN に絞る / 手順 2: 補足: 引用符
 
-- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
+- rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
 
 ### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
 
@@ -105,8 +105,8 @@
 ### 選択した方針
 
 - **ヘッドレスのセッションにする**（RHEL 10 の文書の 1.4）
-  - デスクトップ共有（設定アプリの「デスクトップ共有」。CLI で設定する手順は [AlmaLinux 10 の「GNOME のデスクトップ共有」](../almalinux-setup.md#gnome-のデスクトップ共有)）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
-  - リモートログイン（[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
+  - デスクトップ共有（設定アプリの「デスクトップ共有」。CLI で設定する手順は [AlmaLinux 10 の「GNOME のデスクトップ共有」](../gnome-remote.md#gnome-のデスクトップ共有)）は、PC の物理の画面を写す。モニターの無い PC には写す画面が無い
+  - リモートログイン（[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)）は、GDM で認証し、そのユーザーのセッションが無ければ作成する。切断後のセッションや、ここで常駐させたヘッドレスのセッションがあれば、そこへ引き渡す
   - ヘッドレスのセッションは RDP 接続より前から常駐し、手順 10 の接続では GDM のログイン画面を通らず、そのデスクトップへ入る
 - **証明書は openssl で作る** — SAN に IP を入れる理由は gnome-remote-desktop.md と同じ
 - **ポートを固定し、ポートのネゴシエーションを切る** — ファイアウォールで開けたポートと食い違わないように
