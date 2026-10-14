@@ -807,6 +807,7 @@
 
 ## 注意点
 
+- **シェルと端末の注意は、[シェルと端末のセットアップの注意点](shell-terminal.md#注意点)にある**: `~/.inputrc` と shopt・シェルのツール（starship・zoxide・fzf・eza・bat・tmux）・HackGen Console NF・WezTerm のもの
 - **パスワードを聞かない sudo**: [手順書の「ログインと sudo」の手順 3](../almalinux-setup.md#ログインと-sudo) の後は、このユーザーで動くものがパスワード無しで root の権限を使える（リードの `[!WARNING]`）。外すのは[システムの設定を戻す](#システムの設定を戻す)の手順 7
 - **アプリが再起動を止めることがある**: `sudo systemctl reboot` が `Operation inhibited by …` で断られたら、保存していない文書のあるアプリを閉じてから貼り直す
 - **PC の名前を変えた後**: 開いている端末のプロンプトは前の名前のまま。ほかの PC の `~/.ssh/known_hosts` は名前でつないでいれば、新しい名前で鍵を聞かれる

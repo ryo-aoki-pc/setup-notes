@@ -2,6 +2,12 @@
 
 [手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[注意点](../extra/shell-terminal.md)
 
+- 2026-10-15 に、AlmaLinux 10・Windows 11 の初期設定の参考資料（`almalinux-setup.md`・`windows-setup.md`）から、移した項の補足・選択した方針・参照と、統合前の参考資料を移した。本文は変えていない
+- 見出しの項（「共通の bash 設定」「シェルのツール」「WezTerm」「PowerShell 7 のプロファイルを設定する」など）は、同じ日から[手順書](../shell-terminal.md)にある。Windows 11 の「HackGen Console NF」は「Windows 11 で HackGen Console NF を入れる」、「WezTerm」は「Windows 11 で WezTerm を入れる」、「Git Bash と WezTerm の設定」の中の「共通の bash 設定を更新する」「共通の bash 設定を手動で移行する」「WezTerm の設定を導入する」「WezTerm の設定を更新する」は「Windows 11 で …」と読み替える
+- 統合前の参考資料の Windows 11 の「HackGen Console NF: 補足」「WezTerm: 補足」は、AlmaLinux 10 の同じ名前の見出しと分けるため、「…: Windows 11 の補足」にした
+- PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と、Windows Terminal の控え `settings.json.windows-setup.bak` は、移る前の書名のまま
+- PowerShell 7 のプロファイルと Windows Terminal の資料（文書・コード）は、ほかの項の資料と同じ段落にあるので、[Windows 11 の初期設定の参考資料の「参照」](windows-setup.md#参照)に残した
+
 ## 補足
 
 ### 共通の bash 設定 / 手順 1: 補足: 共通の bash 設定

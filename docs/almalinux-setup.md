@@ -15,6 +15,7 @@
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップ](ai-agents.md)で入れる
 - 仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container）は、[仮想マシンのセットアップ](virtual-machines.md)で入れる
 - Forgejo のサーバーは、[Forgejo のセットアップ](forgejo.md)で動かす
+- 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm は、[シェルと端末のセットアップ](shell-terminal.md#almalinux-10-で使う)で入れる
 - GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）・WireGuard・Neovim・Samba・Syncthing は、[GNOME のリモート操作のセットアップ](gnome-remote.md)・[WireGuard のセットアップ](wireguard.md)・[Neovim のセットアップ](neovim.md)・[Samba のセットアップ](samba.md)・[Syncthing のセットアップ](syncthing.md)で入れる
 - 入れたものを上げるときは、[更新](#更新)の案内に従う
 
@@ -24,7 +25,7 @@
 
 ## 基本の設定
 
-- インストール直後の sudo・更新・SSH・ログの設定、パッケージの入手元（EPEL・RPM Fusion・Flathub）、OS の自動更新・Secure Boot の署名鍵・ユーザーサービスの常駐
+- インストール直後の sudo・更新・SSH・ログの設定、パッケージの入手元（EPEL・RPM Fusion・Flathub・Homebrew）、OS の自動更新・Secure Boot の署名鍵・ユーザーサービスの常駐。共通の bash 設定は、[シェルと端末のセットアップ](shell-terminal.md#共通の-bash-設定)で入れる
 
 ### ログインと sudo
 
@@ -2503,7 +2504,7 @@
 
 ## アプリ
 
-- Firefox と画像の道具
+- Firefox と画像の道具、端末で使う道具（btop・gdu）
 
 ### Firefox
 
@@ -4840,6 +4841,7 @@
 - Syncthing は、[Syncthing のセットアップの「Syncthing: 更新」](syncthing.md#syncthing-更新)で上げる。WireGuard（`wireguard-tools`）・Samba（`samba`・`cifs-utils` など）のパッケージと、GNOME のリモート操作で使う部品は、OS の更新で上がる
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
+- 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と自分用の WezTerm の設定の上げ方は、[シェルと端末のセットアップ](shell-terminal.md)の冒頭にまとめてある
 - 自分用の設定は各リポジトリで上げる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
   - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
 

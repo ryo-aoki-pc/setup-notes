@@ -2,6 +2,13 @@
 
 [手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](../reference/shell-terminal.md)
 
+- 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順を指す
+- 2026-10-15 に、2 冊の注意点（`extra/almalinux-setup.md`・`extra/windows-setup.md`）から、移した項の箇条を移した。本文は変えていない
+- ロールバックは、ほかの道具と一緒に「上から順に戻す」並びに入っているので、2 冊のロールバックに残した
+  - AlmaLinux 10: シェルのツール・`~/.inputrc`・共通の bash 設定は[AlmaLinux 10 のセットアップのロールバックの「シェルのツールと bash の設定を戻す」](almalinux-setup.md#シェルのツールと-bash-の設定を戻す)、デスクトップの等幅のフォントと Ctrl+Alt+T・WezTerm・HackGen Console NF は[「端末とエディタを消す」](almalinux-setup.md#端末とエディタを消す)の手順 6〜10、bash-completion は[「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 4
+  - Windows 11: 自分用の WezTerm の設定と共通の bash 設定は[Windows 11 のセットアップのロールバックの「Git Bash の設定を戻す」](windows-setup.md#git-bash-の設定を戻す)の手順 7・8、starship・zoxide・fzf・eza・bat は[「エディタとシェルのツールを消す」](windows-setup.md#エディタとシェルのツールを消す)の手順 7〜9、WezTerm は[「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8、HackGen Console NF は[「HackGen Console NF を消す」](windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3
+  - PowerShell 7 のプロファイルと Windows Terminal の設定は、手順書のそれぞれの項の戻す手順で戻す
+
 ## 注意点
 
 - **`~/.inputrc` を作ったら `$include /etc/inputrc` を忘れない**: 無いと Home / End / Delete / Ctrl+矢印が効かなくなる

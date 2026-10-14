@@ -1,6 +1,24 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
-- 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と、Windows 11 の Windows Terminal・Git Bash・PowerShell 7 のプロファイル
+- 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal と PowerShell 7 のプロファイルも整える
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う
+
+> [!IMPORTANT]
+> - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
+> - AlmaLinux 10 の項は、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常の窓と Git Bash は、各項のリードに従う
+> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+
+- どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- ほかの手順書の項を前提にする項がある（各項のリードの前提からリンクで開く）。AlmaLinux 10 は[Homebrew](almalinux-setup.md#homebrew)（オフラインのホストは[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)）、Windows 11 は[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)・[アプリを入れる](windows-setup.md#アプリを入れる)（scoop・PowerShell 7）・[Git for Windows](windows-setup.md#git-for-windows)
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 新しい端末では、使う項の変数の手順を貼り直す
+- Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
+- 入れたものを上げるとき
+  - 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)・[Windows 11 で共通の bash 設定を更新する](#windows-11-で共通の-bash-設定を更新する)で上げる。AlmaLinux 10 で Homebrew・Flatpak とまとめて上げるなら、[AlmaLinux 10 のセットアップの「共通の bash 設定・Homebrew・Flatpak を上げる」](almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)
+  - AlmaLinux 10 のシェルのツールと HackGen Console NF は、同じ「共通の bash 設定・Homebrew・Flatpak を上げる」の手順 3（Homebrew）で上がる。Windows 11 のシェルのツールは[Windows 11 のセットアップの「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)、HackGen Console NF は[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)で上げる
+  - WezTerm は、AlmaLinux 10 は OS の更新（[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)）で上がる。Windows 11 は[Windows 11 のセットアップの「Git for Windows・Firefox・WezTerm を上げる」](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で上げる。自分用の WezTerm の設定は、[WezTerm の設定を更新する](#wezterm-の設定を更新する)・[Windows 11 で WezTerm の設定を更新する](#windows-11-で-wezterm-の設定を更新する)で上げる
+- Windows 11 の PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と、Windows Terminal の設定の控え `settings.json.windows-setup.bak` は、項がこの文書へ移る前の名前のまま（すでに通した PC の戻す手順と合わせるため）
 
 ## AlmaLinux 10 で使う
 
