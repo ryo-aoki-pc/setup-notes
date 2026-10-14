@@ -1125,7 +1125,7 @@
   - **dnf 版の Claude Code は `claude update` では上がらない**。[Claude Code](#claude-code)の手順 4 で版を確かめる
 - Codex に `Update available!` が出たら `1. Update now` を選ぶ。`Update ran successfully! Please restart Codex.` の後に `codex` を起動し直す
 - Grok は起動時に自動更新し、次の起動から新しい版を使う。手動更新は `grok update`。更新では `~/.bashrc` は変わらない
-- この節の手順は、[AlmaLinux 10 のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
+- この節の手順は、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 1. 起動中の Codex と Grok を終了する。
 
@@ -1881,7 +1881,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - 下の行に `0:main`・`1:claude`・`2:codex`・`3:grok` のウィンドウが出る。`Ctrl+b` → 数字で切り替える（tmux のキーは [AlmaLinux 10 の初期設定の tmux の使い方の基本](shell-terminal.md#tmux-の使い方の基本)）
+   - 下の行に `0:main`・`1:claude`・`2:codex`・`3:grok` のウィンドウが出る。`Ctrl+b` → 数字で切り替える（tmux のキーは [シェルと端末のセットアップの「tmux の使い方の基本」](shell-terminal.md#tmux-の使い方の基本)）
    - 各ウィンドウのシェルは、それぞれの worktree（`main` はプロジェクト）から始まる
    - SSH を切っても残る。スマートフォンの SSH のアプリからも `tmux attach -t agents` で戻れる
    - **次の手順からは、tmux の中の、手順に書いたウィンドウに貼る**

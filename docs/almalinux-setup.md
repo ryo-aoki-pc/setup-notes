@@ -1732,7 +1732,7 @@
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）にする
     - Windows 11 への導入は[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)。WezTerm は自分用の設定で変わる
-    - Windows Terminal のフォントは[Windows 11 のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
+    - Windows Terminal のフォントは[シェルと端末のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[AlmaLinux](#git-delta)・[Windows 11](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 4）
     - Windows 11 で Windows PowerShell から起動するなら、[Neovim のセットアップの「Neovim を既定のエディタにする」](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
@@ -1925,7 +1925,7 @@
   - Windows 11 は[初期設定の「yazi」](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
   - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](shell-terminal.md#シェルのツール)で入れる
-    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定の「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
+    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[シェルと端末のセットアップの「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
 
 #### yazi の設定を導入する

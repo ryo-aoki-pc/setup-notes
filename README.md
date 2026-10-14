@@ -48,7 +48,7 @@
   - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・lazygit・yazi）は、同書の項で入れる。Neovim は [Neovim のセットアップ](docs/neovim.md#windows-11-で-neovim-を入れる)、WireGuard は [WireGuard のセットアップ](docs/wireguard.md#windows-11-で-wireguard-を使う)、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
   - 同書の項で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 同じく同書の項で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
-  - AlmaLinux 10 の初期設定の「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同書の「[シェルのツールを入れる](docs/shell-terminal.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
+  - シェルと端末のセットアップの「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同じ文書の「[シェルのツールを入れる](docs/shell-terminal.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
   - 各手順の実施範囲は、対応する検証記録を参照する
   - [Windows 11 のクリーンインストール後の VM 検証](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06): 導入・設定の読み戻しと一部の手動確認、Git の隔離したローカル機能、HackGen の CLI 描画、WireGuard の鍵と管理サービス、RDP の TLS、スタートアップの確認用項目を検証した。WSL 2 と入れ子の VM は仮想化エラーで未達、残る GUI・認証・外部接続と実機での通し実行は未確認。
   - [同じ VM での追加検証（2026-10-08）](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08): GitHub のコピーボタンから管理者・通常の窓への貼り付け、残る画面と分岐、RDP のログインと ping、WireGuard の VPN の通し、任意節の一部（Wake on LAN の設定・リモートからの再起動）、更新、ロールバックを確かめた。[別の Windows からの再起動](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-別の-windows-からの再起動とwinrm-の手順-5-の貼り直しを確かめた記録2026-10-08)は、ホストの実機を送る側にして確かめた。WSL 2・Claude Code のログイン・インターネット越しの VPN・Wake on LAN での起動・Store の更新の適用と、実機での通し実行は未確認
@@ -166,21 +166,21 @@
 - starship・zoxide・fzf・eza・bat・tmux と bash の設定は、[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の「共通の bash 設定」から「tmux を試す」までの手順でまとめて入れて確かめる（使い方と設定は同書の後ろの節）
 - 初期化の順番は bash の共通設定が管理する。Homebrew → starship → WezTerm → zoxide、Homebrew の補完 → fzf の順で読む。手順書ごとの追記や並べ替えは不要
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
-- HackGen Console NF は、Windows 11 の PC には[Windows 11 の初期設定の「HackGen Console NF」](docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)で入れる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる
-  - Windows Terminal のフォントにするのは、[Windows 11 の初期設定の「Windows Terminal のフォントと貼り付けの警告を変える」](docs/shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)
+- HackGen Console NF は、Windows 11 の PC には[シェルと端末のセットアップの「Windows 11 で HackGen Console NF を入れる」](docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)で入れる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる
+  - Windows Terminal のフォントにするのは、[シェルと端末のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](docs/shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)
 - Windows 11 では、共通の bash 設定を Git Bash で使う（WezTerm の自分用の設定の既定のシェル）
-  - Git Bash の starship・zoxide・fzf・eza・bat は、[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)で scoop から入れる。共通の bash 設定が入っているものを読むので、`~/.bashrc` には足さない。確かめるのは、Git Bash で AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5
-  - PowerShell 7 は、[Windows 11 の初期設定の「PowerShell 7 のプロファイルを設定する」](docs/shell-terminal.md#powershell-7-のプロファイルを設定する)で starship と zoxide だけを読む。手順書を貼る Windows PowerShell 5.1 には、貼り付けの設定（同書の「貼り付けの設定」の手順 1〜5）のほかは足さない
+  - Git Bash の starship・zoxide・fzf・eza・bat は、[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)で scoop から入れる。共通の bash 設定が入っているものを読むので、`~/.bashrc` には足さない。確かめるのは、Git Bash で同じ文書の AlmaLinux 10 の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5
+  - PowerShell 7 は、[シェルと端末のセットアップの「PowerShell 7 のプロファイルを設定する」](docs/shell-terminal.md#powershell-7-のプロファイルを設定する)で starship と zoxide だけを読む。手順書を貼る Windows PowerShell 5.1 には、貼り付けの設定（同書の「貼り付けの設定」の手順 1〜5）のほかは足さない
 
 | 手順・用途 | 変えるもの | 導入元 | 設定の置き場所 |
 |---|---|---|---|
-| [WezTerm Nightly（AlmaLinux 10 の初期設定の「WezTerm」）](docs/shell-terminal.md#wezterm) | 端末アプリ（GUI） | 公式 COPR の EL9 ビルド（chroot を明示）。Windows 11 は GitHub の nightly の `WezTerm-nightly-setup.exe`（`C:\Program Files\WezTerm`） | `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（両方あると前者だけ読む。Windows は `%USERPROFILE%` の下） |
-| [HackGen Console NF（AlmaLinux 10 の初期設定の「HackGen Console NF」）](docs/shell-terminal.md#hackgen-console-nf) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask。Windows 11 は上流の zip（版と sha256 を固定） | `~/.local/share/fonts` に入る（自分のユーザーだけ）。Windows 11 は `%LOCALAPPDATA%\Microsoft\Windows\Fonts` と `HKCU` の登録 |
-| [starship（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定。`~/.config/starship.toml` は任意 |
-| [zoxide（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ディレクトリの移動（`z`・`zi`） | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop で、0.9.9 に止める（0.10.0 は Git Bash で記録しない。[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定 |
-| [tmux（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
-| [bash の履歴・補完・キー操作（AlmaLinux 10 の初期設定の「共通の bash 設定」の手順 3・4）](docs/shell-terminal.md#共通の-bash-設定) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | bash の共通設定と `~/.inputrc` |
-| [fzf（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定（fd・bat があれば候補・プレビューも有効） |
+| [WezTerm Nightly（シェルと端末のセットアップの「WezTerm」）](docs/shell-terminal.md#wezterm) | 端末アプリ（GUI） | 公式 COPR の EL9 ビルド（chroot を明示）。Windows 11 は GitHub の nightly の `WezTerm-nightly-setup.exe`（`C:\Program Files\WezTerm`） | `~/.wezterm.lua` か `~/.config/wezterm/wezterm.lua`（両方あると前者だけ読む。Windows は `%USERPROFILE%` の下） |
+| [HackGen Console NF（シェルと端末のセットアップの「HackGen Console NF」）](docs/shell-terminal.md#hackgen-console-nf) | 端末のフォント（日本語と Nerd Fonts のアイコン） | Homebrew の cask。Windows 11 は上流の zip（版と sha256 を固定） | `~/.local/share/fonts` に入る（自分のユーザーだけ）。Windows 11 は `%LOCALAPPDATA%\Microsoft\Windows\Fonts` と `HKCU` の登録 |
+| [starship（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | シェルのプロンプト（`PS1`） | Homebrew（RPM 無し）。Windows 11 は scoop（[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定。`~/.config/starship.toml` は任意 |
+| [zoxide（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ディレクトリの移動（`z`・`zi`） | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop で、0.9.9 に止める（0.10.0 は Git Bash で記録しない。[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定 |
+| [tmux（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | 端末の多重化（SSH を切ってもシェルとコマンドが残る。Claude Code を動かし続けるのにも使う） | Homebrew（BaseOS は 3.3a） | `~/.config/tmux/tmux.conf`（任意） |
+| [bash の履歴・補完・キー操作（シェルと端末のセットアップの「共通の bash 設定」の手順 3・4）](docs/shell-terminal.md#共通の-bash-設定) | bash 自身（履歴の量、`autocd`・`globstar` などの `shopt`、bash-completion と Homebrew のコマンドの補完、readline の補完の大文字小文字と色、↑/↓ の履歴の検索） | BaseOS の `bash-completion`（bash は入っている） | bash の共通設定と `~/.inputrc` |
+| [fzf（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | 履歴・パス・ディレクトリを曖昧検索で選ぶ（Ctrl+R / Ctrl+T / Alt+C、`**<Tab>`） | Homebrew（EPEL は 0.58 系。yazi・zoxide の依存で入っていることが多い）。Windows 11 は scoop（[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） | bash の共通設定（fd・bat があれば候補・プレビューも有効） |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -196,8 +196,8 @@
 
 | 手順・用途 | 見るもの | 近い標準のコマンド | 打つコマンド | 形 | 導入元 |
 |---|---|---|---|---|---|
-| [bat（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） |
-| [eza（AlmaLinux 10 の初期設定の「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、共通の bash 設定のエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し）。Windows 11 は scoop（[Windows 11 の初期設定の「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） |
+| [bat（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ファイルの中身（シンタックスハイライト、git 連携） | `cat` | `bat` | CLI | Homebrew（EPEL は 0.24 系）。Windows 11 は scoop（[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） |
+| [eza（シェルと端末のセットアップの「シェルのツール」の手順 1）](docs/shell-terminal.md#シェルのツール) | ディレクトリの一覧（git の状態、ツリー表示） | `ls` | `eza`、共通の bash 設定のエイリアスの `ll` / `la` / `lt` | CLI | Homebrew（RPM 無し）。Windows 11 は scoop（[シェルと端末のセットアップの「シェルのツールを入れる」](docs/shell-terminal.md#シェルのツールを入れる)） |
 | [yazi（AlmaLinux 10 の初期設定の「yazi」）](docs/almalinux-setup.md#yazi) | ファイルの閲覧と操作（プレビュー、検索） | — | `y`（終了した場所へ移るシェル関数）、`yazi` | TUI | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の main |
 | [gdu](docs/almalinux-setup.md#gdu) | ディスク使用量 | `du` | `gdu-go`（`gdu` ではない） | TUI | Homebrew（EPEL は 5.32 系で、コマンド名は `gdu`） |
 | [btop](docs/almalinux-setup.md#btop) | CPU・メモリ・ディスク・ネットワーク・プロセス | `top` | `btop` | TUI | EPEL（Homebrew と同じ 1.4.7） |
@@ -386,8 +386,8 @@
   - ホットキーの調査の任意コードは、通常権限の Windows PowerShell 5.1 に貼る。Hotkey Screener の検出で権限要求が出た場合は、本人が画面で確認して承認する
   - デュアルブート向けの導入の diskpart は、セットアップのコマンド プロンプトに手で打つので、値を直接書いた `text` のブロックにしてある
   - `sudo` と `{ }` の規則はかからず、変数の空は `if … else` で弾く
-  - Git の設定は、Windows でも Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る（[Windows 11 の初期設定の「Git Bash と WezTerm の設定」](docs/shell-terminal.md#git-bash-と-wezterm-の設定)の手順 4。Git for Windows を入れる項だけ PowerShell）
-  - git-delta の git の設定と、Windows 11 の初期設定の「シェルのツールを入れる」の確かめも、Git Bash で AlmaLinux 10 の手順を名指しする（PowerShell 向けに書き分けない）
+  - Git の設定は、Windows でも Git Bash に AlmaLinux 10 と同じ bash のブロックを貼る（[シェルと端末のセットアップの「Git Bash と WezTerm の設定」](docs/shell-terminal.md#git-bash-と-wezterm-の設定)の手順 4。Git for Windows を入れる項だけ PowerShell）
+  - git-delta の git の設定と、シェルと端末のセットアップの「シェルのツールを入れる」の確かめも、Git Bash で AlmaLinux 10 の手順を名指しする（PowerShell 向けに書き分けない）
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く

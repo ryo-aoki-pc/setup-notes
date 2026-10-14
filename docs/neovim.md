@@ -405,7 +405,7 @@
 - 仕組みは端末の OSC 52 で、この設定が SSH のシェル (`SSH_CONNECTION` がある) で起動したときだけ使う。手元にも AlmaLinux 10 にも、足すソフトは無い
 - 向きは Neovim → 手元だけ。手元でコピーしたものは、端末の貼り付け (WezTerm は Ctrl+Shift+V) で Neovim に入れる
 - 前提: AlmaLinux 10 で、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)の手順 1 で設定を最新にしてある。[システムの設定](almalinux-setup.md#システムの設定)の手順 3・4 で、SSH を待ち受けている
-  - 手元は WezTerm nightly を使う（AlmaLinux 10 は[WezTerm](shell-terminal.md#wezterm)、Windows 11 は[Windows 11 のセットアップの「WezTerm」](shell-terminal.md#windows-11-で-wezterm-を入れる)）。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
+  - 手元は WezTerm nightly を使う（AlmaLinux 10 は[WezTerm](shell-terminal.md#wezterm)、Windows 11 は[シェルと端末のセットアップの「Windows 11 で WezTerm を入れる」](shell-terminal.md#windows-11-で-wezterm-を入れる)）。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
 - 実行場所: **GNOME の端末ではなく、手元の WezTerm から AlmaLinux 10 に ssh したシェル**（ssh でログインした自分のユーザーの bash。`sudo` は使わない）。tmux の中の Neovim は扱わない
 
 1. SSH のシェルで、この設定が OSC 52 を使うことを確かめる。

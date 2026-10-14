@@ -3670,7 +3670,7 @@
 1. 接続元と Windows の WezTerm の設定を更新し、接続元の bash のタブを開く。
 
    - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
-   - Windows では[WezTerm の設定を更新する](shell-terminal.md#windows-11-で-wezterm-の設定を更新する)、Linux では[同書の WezTerm の設定の更新](shell-terminal.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
+   - Windows では[シェルと端末のセットアップの「Windows 11 で WezTerm の設定を更新する」](shell-terminal.md#windows-11-で-wezterm-の設定を更新する)、Linux では[同じ文書の「WezTerm の設定を更新する」](shell-terminal.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
    - 貼り付けの前提と停止条件は[WezTerm の SSH 貼り付け](shell-terminal.md#wezterm-windows-の-ssh-先で-powershell-に貼り付ける)を先に確認する
    - Linux の Wayland は `wl-paste`、X11 は `xclip` が必要。導入は同じ項の手順 2 に従う
    - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
@@ -5108,7 +5108,7 @@
    - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
    - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
    - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「シェルのツール」](shell-terminal.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)の手順 7 の箇条書き）
+   - WezTerm の新しいタブで、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、同じ文書の[「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)の手順 7 の箇条書き）
 
 ---
 

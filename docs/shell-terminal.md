@@ -965,10 +965,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
   - 導入は[WezTerm](#wezterm)の手順 5。[設定を導入する](#wezterm-の設定を導入する)の手順 5 で端末を開き直す
-  - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Windows 11 の初期設定の「Git Bash と WezTerm の設定」](#git-bash-と-wezterm-の設定)）
+  - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)）
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
-  - フォントは HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)。Windows 11 は[Windows 11 の初期設定の「HackGen Console NF」](#windows-11-で-hackgen-console-nf-を入れる)）
+  - フォントは HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)。Windows 11 は[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)）
   - AlmaLinux 10 の公式 Bash 統合との併用は[導入手順の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)を参照する
   - Windows 11 は Git Bash を既定にし、Git Bash・PowerShell の統合を設定から読む（[シェル統合](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
   - `~/.wezterm.lua` があると、clone した設定は読まれない
@@ -1560,7 +1560,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
      - その場で開くなら、Win+R の「ファイル名を指定して実行」に `"C:\Program Files\WezTerm\wezterm-gui.exe" --config prefer_egl=true` を入れて開く（管理者の窓からは起動しない）
      - いつも開くようにするなら、設定の `config` に `config.prefer_egl = true` を足す。設定ファイルが無ければ、`%USERPROFILE%\.wezterm.lua` に `local wezterm = require 'wezterm'`・`local config = wezterm.config_builder()`・`config.prefer_egl = true`・`return config` の 4 行を書く
-     - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[AlmaLinux 10 の初期設定の「WezTerm の設定ファイル」](#wezterm-の設定ファイル)のとおり、clone した設定が読まれなくなる）
+     - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[WezTerm の設定ファイル](#wezterm-の設定ファイル)のとおり、clone した設定が読まれなくなる）
    - **注意**: 管理者の PowerShell から `wezterm-gui.exe` を起動しない（WezTerm と中のシェルが管理者で動く）
 
 ---
@@ -1630,7 +1630,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      bash ~/.config/bash/install.sh
    ```
 
-   - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[AlmaLinux 10 の初期設定の「共通の bash 設定」](#共通の-bash-設定)の手順 1 と同じブロック
+   - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[共通の bash 設定](#共通の-bash-設定)の手順 1 と同じブロック
    - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
    - すでに clone してあるなら `fatal: destination path … already exists` で止まる。そのときは `git -C ~/.config/bash pull --ff-only` で更新し、`bash ~/.config/bash/install.sh` を貼る
 
@@ -1955,24 +1955,24 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
    - `中断:` が出たら、何も書いていない
 
-1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10](#シェルのツール)のブロックを貼る。
+1. WezTerm の新しいタブ（Git Bash）で、[シェルのツール](#シェルのツール)の手順 4〜7・9・10 のブロックを貼る。
 
-   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の「シェルのツール」の手順 2](#シェルのツール)の補足と同じ）
+   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[シェルのツール](#シェルのツール)の手順 2 の補足と同じ）
    - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
-   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
+   - 成功の条件は、「シェルのツール」のそれぞれの手順と同じ。違うのは次のところ
      - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 5 と同じ
-     - 同書の「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
-     - 同書の「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
-     - 同書の「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
-     - 同書の「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
-   - 同書の「シェルのツール」の手順 8（tmux）は行わない
+     - 「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
+     - 「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
+     - 「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
+     - 「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
+   - 「シェルのツール」の手順 8（tmux）は行わない
    - `~/.bashrc` には追記しない。Windows PowerShell 5.1 には読み込まない
 
-1. 同じタブで、[同書の「キー操作を試す」の手順 2〜5](#キー操作を試す)のキーを押して、fzf を確かめる。
+1. 同じタブで、[キー操作を試す](#キー操作を試す)の手順 2〜5 のキーを押して、fzf を確かめる。
 
-   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 7 で Git Bash の履歴に入っている
-   - 同書の「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
-   - 同書の「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
+   - 「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 7 で Git Bash の履歴に入っている
+   - 「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
+   - 「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
    - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
    - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
    - bat の設定にはこの項の手順 6を使う
