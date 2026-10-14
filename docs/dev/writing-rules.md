@@ -4,7 +4,7 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。同じ日に、利用者の決定で大きな項も2冊から分け、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは元のファイルに保持し、用途の項のリードから案内する
@@ -12,13 +12,14 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
 - 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順（Remote Control のタスク、仮想モニターのドロップイン）だけは、その節の手順として2冊に残す
 - ai-agents.md は、OS で節を分けた手順書にする。`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
 - virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
+- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
 - Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは virtual-machines.md の `## AlmaLinux 10 で使う` の用途に置く
 
 ### 2 冊の骨格（カテゴリ別）
 
 2026-10-14 に、利用者の依頼で、2 冊の「実施手順」と任意節（必須・任意）の区別をやめ、カテゴリ別に組み直した。どの見出しも単独で通せるようにするため。旧→新の見出しと手順番号は[集約対応表の追補](consolidation-map.md#2-冊をカテゴリ別に組み直したときの追補)にある。ai-agents.md・extra・tool-catalog.md は、下の「各用途の手順は次の骨格に揃える。」のまま。
 
-1. 見出しは `#` 題 → `##` カテゴリ → `###` 用途（ツール・主題）→ `####` 用途の中の手順。2 段の項があったもの（almalinux-setup.md の「WireGuard: AlmaLinux 10 の PC からつなぐ」、windows-setup.md の「VirtualBox: Windows 11 で VM を作って使う」）だけ `#####`
+1. 見出しは `#` 題 → `##` カテゴリ → `###` 用途（ツール・主題）→ `####` 用途の中の手順。2 段の項があったもの（wireguard.md の「WireGuard: AlmaLinux 10 の PC からつなぐ」、virtual-machines.md の「VirtualBox: Windows 11 で VM を作って使う」。どちらも、2 冊にあったときからのもの）だけ `#####`
    - 手順（番号付きリスト）を持つ見出しを、階層によらず「項」と呼ぶ。本文では「この項の手順 N」と書く
    - 見出しに「（任意）」を付けない。用途の主の導入の手順は `### <用途>` の直下に置き、「<用途>: 実施手順」「<用途>: Windows 11 で使う」の見出しは作らない
    - `##` カテゴリは 1 行の箇条書きのリードだけで、手順を持たない。例外は `## 更新`（どの更新をどの項で行うかの案内を残す）
