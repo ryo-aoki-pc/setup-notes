@@ -1,6 +1,6 @@
 # setup-notes
 
-構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。
+構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも [仮想マシンのセットアップ](docs/virtual-machines.md)、Forgejo のサーバーは [Forgejo のセットアップ](docs/forgejo.md) にまとめてある。
 
 実施範囲・成功と失敗は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。
 
@@ -45,7 +45,7 @@
 - Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・HackGen Console NF・Git for Windows・Firefox・WezTerm と、Git Bash のシェルのツール・git-delta・GitHub CLI・Neovim・lazygit・yazi）
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi）は、同書の項で入れる。VirtualBox・WireGuard は、同書の [VirtualBox](docs/windows-setup.md#virtualbox)・[WireGuard](docs/windows-setup.md#wireguard) の項で入れる
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・Neovim・lazygit・yazi）は、同書の項で入れる。WireGuard は同書の [WireGuard](docs/windows-setup.md#wireguard) の項、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
   - 同書の項で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
   - 同じく同書の項で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
   - AlmaLinux 10 の初期設定の「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同書の「[シェルのツールを入れる](docs/windows-setup.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
@@ -59,7 +59,7 @@
 | [Homebrew（インターネットに出られないホスト）](docs/almalinux-setup.md#homebrew-のオフライン導入) | Homebrew と、Homebrew で入れるもの（出られるホストから [ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)を張り、そのプロキシを通して入れる） | `/home/linuxbrew/.linuxbrew`（Homebrew と同じ） | 一般ユーザーで使う（出られるホストから ssh でログインする） | トンネルを張ってから `brew upgrade` | インターネットに出られないホストで通す、導入元が Homebrew の用途別手順とツール、[npm（インターネットに出られないホスト）](docs/almalinux-setup.md#npm-のオフライン導入) |
 | [npm（インターネットに出られないホスト）](docs/almalinux-setup.md#npm-のオフライン導入) | Node.js と npm（AppStream の 22 系）と、Neovim の Mason が npm で入れる LSP サーバー・リンター（[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)を、`https_proxy` で npm に使わせる） | Node.js と npm は `/usr/bin`（システム全体）。Mason が入れるものは `~/.local/share/nvim/mason` | Node.js と npm は `sudo dnf` で入れる。Mason は一般ユーザーの Neovim から動く | トンネルを張り `https_proxy` を入れてから、`sudo dnf upgrade` と Mason の画面の `U` | インターネットに出られないホストで使う、Mason を使う Neovim の設定（LazyVimStarter など） |
 | [Flatpak / Flathub（AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3）](docs/almalinux-setup.md#flatpak-と-flathub) | GUI アプリ | `/var/lib/flatpak`（システム全体） | `sudo flatpak` で入れる | `sudo flatpak update`（`dnf upgrade` では上がらない） | 手順書の無いツールの Flathub の行 |
-| [EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（「GNOME の表示と入力」の手順 11）、btop・distrobox・podman-compose・podman-tui・VirtualBox（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
+| [EPEL（AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1）](docs/almalinux-setup.md#epel-と-rpm-fusion) | AppStream / BaseOS に無い RPM（Fedora のプロジェクトが EL 向けに作る） | システム全体。repo ファイルは `/etc/yum.repos.d/epel.repo`（extras の `epel-release` が置く） | `sudo dnf` で入れる | `sudo dnf upgrade`（`epel-release` 自身も上がる） | 同書の RPM Fusion とトレイアイコンの拡張（「GNOME の表示と入力」の手順 11）、btop・distrobox・podman-compose・podman-tui、仮想マシンのセットアップの [VirtualBox](docs/virtual-machines.md#virtualbox)（依存の `liblzf`）、手順書の無いツールの EPEL の行 |
 | [RPM Fusion（free。AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5）](docs/almalinux-setup.md#epel-と-rpm-fusion) | Fedora・EL の標準のリポジトリに無い RPM（FFmpeg など） | システム全体。repo ファイルは `/etc/yum.repos.d/rpmfusion-free-updates.repo` | `sudo dnf` で入れる | `sudo dnf upgrade` | 同書の[「Firefox」](docs/almalinux-setup.md#firefox)の AAC・H.264（手順 8〜11） |
 | [Windows 11 の初期設定](docs/windows-setup.md) | Windows 11 の scoop（CLI ツール）と UniGet UI（winget の自分のユーザーへの導入）。PSWindowsUpdate は PowerShell Gallery から。同じ文書で PowerToys・PowerShell 7・WSL の AlmaLinux 10・Autologon・CopyQ と、表示・電源・リモートなどの設定も（PowerToys のユーティリティ・PowerShell 7 のプロファイル・Windows Terminal のフォント・WSL のミラーも項にある）。Git Bash の starship・zoxide・fzf・eza・bat（「シェルのツールを入れる」）と、git-delta・GitHub CLI・Neovim・lazygit・yazi も scoop から | scoop は `~\scoop`、UniGet UI は `%LOCALAPPDATA%\Programs\UniGetUI`、PSWindowsUpdate はドキュメントの `WindowsPowerShell\Modules`（自分のユーザー） | 管理者の窓か通常の窓かは、各項のリードの実行場所に従う（Windows Update・PC 全体の設定・WSL と再起動などは管理者。scoop のインストーラは管理者では止まる） | Windows は PSWindowsUpdate、Store は `store updates --apply`。scoop は `scoop update`（git は Git for Windows。zoxide は 0.9.9 に止めてあり、上がらない）、ほかは `winget upgrade`。UniGet UI は自分でも上がる | 同書の[scoop のツールを SSH のセッションで使う](docs/windows-setup.md#scoop-のツールを-ssh-のセッションで使う)と、同書の[git-delta](docs/windows-setup.md#git-delta)・[GitHub CLI](docs/windows-setup.md#github-cli)・[Neovim](docs/windows-setup.md#neovim)・[lazygit](docs/windows-setup.md#lazygit)・[yazi](docs/windows-setup.md#yazi)（scoop で入れる） |
 
@@ -241,7 +241,7 @@
 
 - 役割が違うので、併用できる
 - Git（[AlmaLinux 10 の初期設定の「Git」](docs/almalinux-setup.md#git)）は git 本体と `~/.gitconfig` の基本の設定（pull は rebase と autostash、改行を変換しない、推奨の設定）。AlmaLinux 10 と Windows 11 の Git for Windows で同じ設定にする
-- [Forgejo](docs/almalinux-setup.md#forgejo) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。公式の最新安定版を入れ、毎日自動で最新版へ更新する（失敗したら自動で戻す）。[使い方の基本](docs/almalinux-setup.md#forgejo-使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
+- [Forgejo](docs/forgejo.md#forgejo) は、自分の AlmaLinux 10 のサーバーに Git リポジトリ・Issue・Pull Request を置く。rootless Podman と Quadlet、SQLite を使い、LAN・VPN 内の HTTP 3000/tcp と SSH 2222/tcp で利用する。公式の最新安定版を入れ、毎日自動で最新版へ更新する（失敗したら自動で戻す）。[使い方の基本](docs/forgejo.md#forgejo-使い方の基本)には、ログインから Issue・Pull Request・マージまでの画面付きの案内がある
 - `merge.conflictStyle zdiff3` は、初期設定の「Git」と「git-delta」の両方で入れる（同じ値）
 - lazygit は git の `core.pager` を読まない。自分用の lazygit の設定（[AlmaLinux 10 の初期設定の「lazygit」](docs/almalinux-setup.md#lazygit)の手順 2）が、`git.diffRenderers` で delta を使う
 
@@ -251,7 +251,7 @@
 | [lazygit（AlmaLinux 10 の初期設定の「lazygit」）](docs/almalinux-setup.md#lazygit) | git の TUI クライアント | `lazygit` | Homebrew（EPEL・AppStream に無い）。Windows 11 は scoop の extras | `~/.config/lazygit/config.yml`。Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml` |
 | [git-delta（AlmaLinux 10 の初期設定の「git-delta」）](docs/almalinux-setup.md#git-delta) | `git diff` / `show` / `log -p` の表示（ページャ） | `delta`（formula 名は `git-delta`。ふだんは git が呼ぶ） | Homebrew（RPM 無し）。Windows 11 は scoop の main（`delta`） | `~/.gitconfig`（`git config --global` で書く。Windows 11 は `C:\Users\<WIN_USER>\.gitconfig` で、Git Bash・PowerShell・cmd の git が同じものを読む） |
 | [GitHub CLI（AlmaLinux 10 の初期設定の「GitHub CLI」）](docs/almalinux-setup.md#github-cli) | GitHub の操作（`gh auth login` で認証） | `gh` | GitHub 公式 dnf リポジトリ（EPEL 版は古い）。Windows 11 は scoop の main（`gh`） | `~/.config/gh/hosts.yml`（トークンは OS の資格情報ストアを優先し、使えない場合はファイルに平文保存）。Windows 11 は `%APPDATA%\GitHub CLI`（トークンは資格情報マネージャーを優先） |
-| [Forgejo](docs/almalinux-setup.md#forgejo) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo`。自動更新は `~/.config/systemd/user/forgejo-auto-update.timer` と `~/.local/bin/forgejo-auto-update` |
+| [Forgejo](docs/forgejo.md#forgejo) | 自分のサーバーで Git リポジトリ・Issue・Pull Request を管理する | Web UI・`git`・`systemctl --user` | Forgejo 公式の rootless OCI イメージ（Podman・Quadlet） | `~/.config/containers/systemd/forgejo.container`。設定・SQLite・リポジトリなどの永続データは `~/.local/share/forgejo`。自動更新は `~/.config/systemd/user/forgejo-auto-update.timer` と `~/.local/bin/forgejo-auto-update` |
 
 | 手順書の無いツール | 用途 | 導入元 |
 |---|---|---|
@@ -283,7 +283,7 @@
 
 ### コンテナ
 
-- 土台は [Podman](docs/almalinux-setup.md#podman)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。下表の追加ツールと [Forgejo](docs/almalinux-setup.md#forgejo)と手順書の無いツールは、これを前提にしている
+- 土台は [Podman](docs/almalinux-setup.md#podman)（AppStream）で、コンテナを自分のユーザー（rootless）で動かす。下表の追加ツールと [Forgejo](docs/forgejo.md#forgejo)と手順書の無いツールは、これを前提にしている
 - podman 本体と、システムの podman と組んで使うもの（podman-compose・podman-tui・distrobox・toolbox・buildah・skopeo）は RPM にしている
   - Homebrew 版の podman-compose は別の podman を連れてきて、システムの podman を隠した
   - Homebrew の podman・skopeo は、`/etc/containers` の設定を読まない
@@ -291,7 +291,7 @@
 - podman の API ソケット（[「Podman」の手順 7](docs/almalinux-setup.md#podman)）を、Trivy・podman-tui・Pods・Podman Desktop が使う
   - lazydocker など Docker の API を使うツールは、`DOCKER_HOST` で同じソケットに向ける
   - dive は podman のコマンドでイメージを読むので、ソケットは要らない
-- PC の起動時に動かしておくコンテナは、[Podman の「Quadlet で自動起動する」](docs/almalinux-setup.md#podman-quadlet-で自動起動する)で動かす（[linger](docs/almalinux-setup.md#ユーザーサービスの常駐) が前提）。[Forgejo](docs/almalinux-setup.md#forgejo) も同じ仕組みで常駐させる
+- PC の起動時に動かしておくコンテナは、[Podman の「Quadlet で自動起動する」](docs/almalinux-setup.md#podman-quadlet-で自動起動する)で動かす（[linger](docs/almalinux-setup.md#ユーザーサービスの常駐) が前提）。[Forgejo](docs/forgejo.md#forgejo) も同じ仕組みで常駐させる
 
 | 手順・用途 | 用途 | 打つコマンド | 導入元 | 前提 |
 |---|---|---|---|---|
@@ -323,16 +323,16 @@
   - Secure Boot が有効な VM では、ゲストでも同じ [MOK の登録](docs/almalinux-setup.md#secure-boot-の署名鍵)を先に行う（鍵はホストとは別）
   - ホストが Windows 11 の VirtualBox でも、同じ手順で入る。Hyper-V（WSL 2 など）が動いている Windows では、重い処理の途中で VM が数分ずつ止まることがある（VM のウィンドウでキーを押すと動き出す）
   - VM がホストオンリーアダプターだけでインターネットに出られないときは、ホスト（Windows では WSL の AlmaLinux 10）の rootless の podman で同じ Containerfile をビルドし、`podman save` のファイルを ssh で VM に運んで `podman load` する。ベースの署名は VM の `policy.json` と公開鍵をホストに写して確かめ、Secure Boot の鍵はホストで作る
-- Windows 11 の PC に Android の Windows App からリモート デスクトップでつないで VM に打つときは、Windows App の「使用可能な場合にスキャンコード入力を使用する」をオンにする（[VirtualBox の「Windows 11 の VirtualBox を Android からリモート デスクトップで使う」](docs/windows-setup.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)）
+- Windows 11 の PC に Android の Windows App からリモート デスクトップでつないで VM に打つときは、Windows App の「使用可能な場合にスキャンコード入力を使用する」をオンにする（[VirtualBox の「Windows 11 の VirtualBox を Android からリモート デスクトップで使う」](docs/virtual-machines.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)）
   - 既定の Unicode の入力では、打った文字が VM で別のキーになる（`1.,2` が `nczm`）
   - 画面のキーボード（Gboard）では Shift で打つ記号が出ないので、VirtualBox のソフトキーボードで打つ。物理キーボードは記号まで出る
 
 | 手順・用途 | 用途 | 導入元 | ほかの経路 | アーキ |
 |---|---|---|---|---|
-| VirtualBox（[AlmaLinux 10](docs/almalinux-setup.md#virtualbox)・[Windows 11](docs/windows-setup.md#virtualbox)） | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
-| [Hyper-V](docs/windows-setup.md#hyper-v) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
-| [VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
-| [VirtualBox Guest Additions（bootc のゲスト）](docs/almalinux-setup.md#virtualbox-の-bootc-ゲスト) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
+| VirtualBox（[AlmaLinux 10](docs/virtual-machines.md#virtualbox)・[Windows 11](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる)） | 仮想マシン | Oracle 公式 dnf リポジトリ（7.2 系）。Windows 11 は winget の `Oracle.VirtualBox`（PC 全体） | RPM Fusion（EL10）・Flathub には無い | x86_64 だけ |
+| [Hyper-V](docs/virtual-machines.md#hyper-v) | 仮想マシン（Windows 11 Pro のホスト） | Windows の機能（`Microsoft-Hyper-V-All`） | Home には無い | x86_64 で確認 |
+| [VMware Workstation Pro](docs/virtual-machines.md#vmware-workstation-pro) | 仮想マシン（Windows 11 のホスト） | Broadcom のサポート ポータルのインストーラー（アカウントが要る） | winget には無い | x86_64 で確認 |
+| [VirtualBox Guest Additions（bootc のゲスト）](docs/virtual-machines.md#virtualbox-の-bootc-ゲスト) | VM の中のクリップボードの共有・画面サイズの自動変更・共有フォルダー | ホストの Guest Additions の CD を、VM でビルドする派生イメージに焼き込む | AppStream・EPEL 10・ELRepo に無く、EL10 のカーネルにもドライバが無い | x86_64 だけ |
 
 ### ブラウザ
 
@@ -376,7 +376,7 @@
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo) で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
-- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合)・[Hyper-V](docs/windows-setup.md#hyper-v)・[VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
+- Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合)・[Hyper-V](docs/virtual-machines.md#hyper-v)・[VMware Workstation Pro](docs/virtual-machines.md#vmware-workstation-pro)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、管理者の窓か通常の窓か（Git Bash と WezTerm のタブに貼る `bash` のブロックもある）を、項ごとにリードの実行場所で指定する。貼り付けの設定より前は Ctrl+V で貼る
   - コーディングエージェントの共同作業は管理者でなくてよい（Codex の Windows sandbox の初回設定は管理者の承認が必要）

@@ -75,7 +75,7 @@
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
 - Codeg は `127.0.0.1` のままにする。暗号化されない HTTP は、ホストの外に出ない
-- 規則は、[Forgejo](../almalinux-setup.md#forgejo) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
+- 規則は、[Forgejo](../forgejo.md#forgejo) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
 - `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
 
@@ -285,7 +285,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 画面は、端末をそのまま映すものではなく、会話・承認・変更されたファイルを扱うチャット形式のものにする（利用者の指定）
 - Codeg は、Grok Build 自身のセッションの置き場（`~/.grok/sessions`）を使う。端末の `grok` で始めた会話を取り込めて、Codeg で作った会話は `grok sessions list` に出る
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
-- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../almalinux-setup.md#forgejo) と同じ順）
+- まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../forgejo.md#forgejo) と同じ順）
 - Windows 11 の PC は待ち受ける IP を決めない。利用者の指定で、受信インターフェースが Private なら全送信元・全接続種別を許可し、Public・Domain は遮断する。送信元 CIDR と有線限定は使わない
 - 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
 - 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない

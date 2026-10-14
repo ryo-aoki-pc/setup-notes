@@ -36,7 +36,7 @@
 
 - **`ALL_PROXY` を `~/.bashrc` に書かない**: トンネルがあるのは手順 2 の ssh のセッションの間だけなので、手順 3 でそのシェルにだけ入れる
 - **dnf には、`sudo` に環境変数を渡す（`sudo --preserve-env=ALL_PROXY`）のではなく、設定ファイルで渡す**: ほかの手順書の `sudo dnf install` を、書き換えずに貼れるようにするため
-- **独立した手順書にした**: [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入) と [virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
+- **独立した手順書にした**: [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入) と [virtualbox-guest-bootc.md](../virtual-machines.md#virtualbox-の-bootc-ゲスト) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
 
 ### 参照
 

@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox)・[Windows 11](../windows-setup.md#virtualbox)。[ロールバックと注意点](../extra/virtualbox.md)
+手順: [AlmaLinux 10](../virtual-machines.md#virtualbox)・[Windows 11](../virtual-machines.md#windows-11-で-virtualbox-を入れる)。[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#参考資料から分離した記録)
 
@@ -46,7 +46,7 @@
 
 ### VirtualBox を入れる / 手順 2: 補足: 動いているカーネルを最新にしておく理由
 
-`kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../almalinux-setup.md#virtualbox-カーネルを更新したとき)）。
+`kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../virtual-machines.md#virtualbox-カーネルを更新したとき)）。
 
 ### VirtualBox を入れる / 手順 3: 補足: 先に入れる理由
 
@@ -81,7 +81,7 @@
 
 ### 更新 / 手順 2: 補足: 同じ系列の中で上げたとき
 
-- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../almalinux-setup.md#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
+- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../virtual-machines.md#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
 - コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
 - モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
 - `/sbin/vboxconfig` と udev のルールも残った

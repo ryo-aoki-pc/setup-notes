@@ -41,13 +41,13 @@
 - **鍵の場所は `/var/lib/shim-signed/mok/MOK.{der,priv}` に固定する**: VirtualBox の `vboxdrv.sh` と Guest Additions の `vboxadd` が、この場所を決め打ちで使う
 - **鍵は 1 つにし、作り直さない**: 登録済みの鍵を作り直すと、その鍵で署名したモジュールと合わなくなる。手順 4 は、鍵があれば `中断:` で止まる
 - **CN は用途を問わない名前にする**: 1 つの鍵で、この PC（VM）のモジュールのどれにも署名するため
-- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[AlmaLinux 10 の「VirtualBox」](../almalinux-setup.md#virtualbox) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[同書の「VirtualBox: VirtualBox を入れる」の手順 4](../almalinux-setup.md#virtualbox-virtualbox-を入れる) の補足）
+- **登録は、モジュールをビルドする前に済ませる**: 鍵が登録済みなら、[AlmaLinux 10 の「VirtualBox」](../virtual-machines.md#virtualbox) の `dnf install` の `%post` が、ビルド → 署名 → 読み込みまで一度に済ませる（[仮想マシンのセットアップの「VirtualBox: VirtualBox を入れる」の手順 4](../virtual-machines.md#virtualbox-virtualbox-を入れる) の補足）
 - **集約前は独立した手順書にした**: VirtualBox のホストと、bootc のゲストの Guest Additions の 2 本で、同じ鍵の作り方・MokManager・確認の手順が重なっていたため
 
 ### 参照
 
 - [RHEL 10 — Managing, monitoring, and updating the kernel](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/managing_monitoring_and_updating_the_kernel/index) — Secure Boot でのモジュールの署名、MOK への鍵の登録、`.platform` キーリング
 - `man mokutil`（`--sb-state` / `--import` / `--test-key` / `--list-new` / `--delete` / `--list-delete`）
-- [VirtualBox](../almalinux-setup.md#virtualbox) / [VirtualBox Guest Additions（bootc のゲスト）](../almalinux-setup.md#virtualbox-の-bootc-ゲスト) — この鍵で署名したモジュールを使う手順書
+- [VirtualBox](../virtual-machines.md#virtualbox) / [VirtualBox Guest Additions（bootc のゲスト）](../virtual-machines.md#virtualbox-の-bootc-ゲスト) — この鍵で署名したモジュールを使う手順書
 
 ---

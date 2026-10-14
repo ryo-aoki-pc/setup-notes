@@ -4,14 +4,15 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・VM・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは元のファイルに保持し、用途の項のリードから案内する
 - 集約後に案内だけとなった文書は削除する。旧パス・見出し・移動先を [集約対応表](consolidation-map.md) に記録し、旧原文は移動元コミットで確認する
 - 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順（Remote Control のタスク、仮想モニターのドロップイン）だけは、その節の手順として2冊に残す
 - ai-agents.md は、OS で節を分けた手順書にする。`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
-- Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは `## コンテナと仮想マシン` の用途に置く
+- virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
+- Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは virtual-machines.md の `## AlmaLinux 10 で使う` の用途に置く
 
 ### 2 冊の骨格（カテゴリ別）
 
