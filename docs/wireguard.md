@@ -1,5 +1,19 @@
 # WireGuard のセットアップ（AlmaLinux 10・Windows 11）
 
+- 2 つの拠点の AlmaLinux 10 の PC（WG ホスト）を WireGuard の VPN でつなぎ、外出先の AlmaLinux 10・Windows 11 の PC から、どちらかの拠点へつなぐ
+- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+
+> [!IMPORTANT]
+> - **前提と実行場所（どのホスト・どの窓か）は、各項のリードに従う**。AlmaLinux 10 の項は自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る
+> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+
+- どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 新しい端末では、使う項の変数の手順を貼り直す
+- Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
+- AlmaLinux 10 の `wireguard-tools` は、[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)の OS の更新で上がる。Windows 11 の WireGuard は、[WireGuard: Windows 11 の更新](#wireguard-windows-11-の更新)で上げる
+
 ## AlmaLinux 10 で使う
 
 - WG ホスト（拠点）の設定とクライアントの登録、AlmaLinux 10 の PC からの接続

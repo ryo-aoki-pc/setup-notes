@@ -1,6 +1,9 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../neovim.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[ロールバックと注意点](../extra/neovim.md)
+[手順書](../neovim.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[注意点](../extra/neovim.md)
+
+- 2026-10-15 に、AlmaLinux 10・Windows 11 の初期設定の参考資料（`almalinux-setup.md`・`windows-setup.md`）から移した。本文は変えていない
+- 2 つの節の表の「今の手順」の項は、同じ日から[手順書](../neovim.md)にある。Windows 11 の「Neovim」は「Windows 11 で Neovim を入れる」、「LazyVim の …」は「Windows 11 で LazyVim の …」と読み替える
 
 ## 統合前の参考資料: Neovim（もとは neovim.md）
 

@@ -14,6 +14,7 @@
 - 設定を更新するときは[更新](#更新)、戻すときは[ロールバック](extra/windows-setup.md#ロールバック)を使う
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップの「Windows 11 で使う」](ai-agents.md#windows-11-で使う)で入れる
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で入れる
+- WireGuard・Neovim・Samba のクライアント・Syncthing は、[WireGuard のセットアップ](wireguard.md#windows-11-で使う)・[Neovim のセットアップ](neovim.md#windows-11-で使う)・[Samba のセットアップ](samba.md#windows-11-で使う)・[Syncthing のセットアップ](syncthing.md#windows-11-で使う)の「Windows 11 で使う」で入れる
 
 > [!WARNING]
 > - ロックを止め、自動サインイン・インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
@@ -2688,7 +2689,7 @@
 
 ## ネットワークとリモート操作
 
-- LAN とリモート デスクトップ、WSL のネットワーク、Wake on LAN、リモートからの再起動、RDP の切断、WireGuard
+- LAN とリモート デスクトップ、WSL のネットワーク、Wake on LAN、リモートからの再起動、RDP の切断。WireGuard は、[WireGuard のセットアップの「Windows 11 で使う」](wireguard.md#windows-11-で使う)で入れる
 
 ### ネットワークとリモート
 
@@ -4932,7 +4933,7 @@
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・Neovim（LazyVim）・lazygit・yazi・mdtable
+- git-delta・GitHub CLI・lazygit・yazi・mdtable。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
 
 ### git-delta
 
@@ -5850,8 +5851,8 @@
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。戻っていれば、その節の「元に戻すときは、」より前を貼り直す（控えは書き換えない）
-- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は[WireGuard: Windows 11 の更新](wireguard.md#wireguard-windows-11-の更新)
-  - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba.md#samba-クライアント-windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
+- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は[WireGuard のセットアップの「WireGuard: Windows 11 の更新」](wireguard.md#wireguard-windows-11-の更新)、Syncthing は[Syncthing のセットアップの「Syncthing: Windows 11 の更新」](syncthing.md#syncthing-windows-11-の更新)
+  - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba.md#samba-クライアント-windows-11-の更新)は Samba のセットアップの「Samba クライアント: Windows 11 の更新」（どちらも、上げるものは無い）
 
 ### scoop・winget・WSL を上げる
 

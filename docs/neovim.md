@@ -1,5 +1,20 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）
 
+- Neovim を入れ、自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。AlmaLinux 10 は Homebrew、Windows 11 は scoop で入れる
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#端末とエディタを消す)・[Windows 11](extra/windows-setup.md#エディタとシェルのツールを消す)）で行う
+
+> [!IMPORTANT]
+> - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常の窓は、各項のリードに従う
+> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+
+- どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 新しい端末では、使う項の変数の手順を貼り直す
+- Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
+- Neovim は、AlmaLinux 10 は[AlmaLinux 10 のセットアップの「共通の bash 設定・Homebrew・Flatpak を上げる」](almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 3、Windows 11 は[Windows 11 のセットアップの「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)で上がる。**設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
+- 自分用の設定のプラグインと外部コマンドは、[LazyVim の本体・外部コマンド・プラグインを更新する](#lazyvim-の本体外部コマンドプラグインを更新する)・[Windows 11 で LazyVim の本体・外部コマンド・プラグインを更新する](#windows-11-で-lazyvim-の本体外部コマンドプラグインを更新する)で上げる
+
 ## AlmaLinux 10 で使う
 
 - Neovim と、自分用の LazyVim の設定
@@ -61,12 +76,12 @@
 - 置き場所は `~/.config/nvim` で、読み込まれるのは `init.lua` か `init.vim` のどちらか一方
   - `XDG_CONFIG_HOME` を設定していれば `$XDG_CONFIG_HOME/nvim` になる。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する
 - Windows 11 の設定は `%LOCALAPPDATA%\nvim`（`init.lua`）、プラグイン・undo・ログは `%LOCALAPPDATA%\nvim-data`、キャッシュは `%TEMP%\nvim-data`
-- Windows 11 の場所は[初期設定の「Neovim」](#windows-11-で-neovim-を入れる)の手順 5 で確かめる
+- Windows 11 の場所は[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5 で確かめる
   - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[理由](reference/neovim.md#neovim-windows-11-では-選択した方針)）
 - **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
   - 導入は[Neovim](#neovim)の手順 3
   - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる
-  - Windows 11 は、[Windows 11 の初期設定の「Neovim」](#windows-11-で-neovim-を入れる)の手順 4 で通す
+  - Windows 11 は、[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 4 で通す
   - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
 - インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm のオフライン導入](almalinux-setup.md#npm-のオフライン導入) を通す
 
@@ -551,7 +566,7 @@
    - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 2 で確かめる
      - 窓が出たら、OK で閉じる
    - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい
-   - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[AlmaLinux 10 の初期設定の「Neovim の設定ファイル」](#neovim-の設定ファイル)）
+   - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[AlmaLinux 10 の「Neovim の設定ファイル」](#neovim-の設定ファイル)）
 
 #### Neovim を既定のエディタにする
 

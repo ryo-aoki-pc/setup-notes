@@ -15,6 +15,7 @@
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップ](ai-agents.md)で入れる
 - 仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container）は、[仮想マシンのセットアップ](virtual-machines.md)で入れる
 - Forgejo のサーバーは、[Forgejo のセットアップ](forgejo.md)で動かす
+- GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）・WireGuard・Neovim・Samba・Syncthing は、[GNOME のリモート操作のセットアップ](gnome-remote.md)・[WireGuard のセットアップ](wireguard.md)・[Neovim のセットアップ](neovim.md)・[Samba のセットアップ](samba.md)・[Syncthing のセットアップ](syncthing.md)で入れる
 - 入れたものを上げるときは、[更新](#更新)の案内に従う
 
 > [!WARNING]
@@ -2690,7 +2691,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 ## Git と開発の道具
 
-- Git・git-delta・GitHub CLI・Neovim（LazyVim）・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm
+- Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
 
 ### Git
 
@@ -3123,7 +3124,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
     - Windows Terminal のフォントは[Windows 11 のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[AlmaLinux](#git-delta)・[Windows 11](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 4）
-    - Windows 11 で Windows PowerShell から起動するなら、[Windows 11 の初期設定の「Neovim を既定のエディタにする」](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
+    - Windows 11 で Windows PowerShell から起動するなら、[Neovim のセットアップの「Neovim を既定のエディタにする」](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
 
 #### lazygit の設定を導入する
 
@@ -4211,7 +4212,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 ## ネットワークとリモート操作
 
-- SSH・Wake on LAN・SOCKS トンネル・WireGuard と、GNOME のリモートの画面（デスクトップ共有・ヘッドレスセッション・リモートログイン）
+- SSH・Wake on LAN・SOCKS トンネル。WireGuard は[WireGuard のセットアップ](wireguard.md)、GNOME のリモートの画面（デスクトップ共有・ヘッドレスセッション・リモートログイン）は[GNOME のリモート操作のセットアップ](gnome-remote.md)で入れる
 
 ### SSH を公開鍵だけにする
 
@@ -5523,7 +5524,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 ## ファイルの共有と同期
 
-- Samba のクライアントとサーバー、Syncthing、Dropbox
+- Dropbox（公式のクライアントと rclone）。Samba のクライアントとサーバーは[Samba のセットアップ](samba.md)、Syncthing は[Syncthing のセットアップ](syncthing.md)で入れる
 
 ### Dropbox
 
@@ -6072,6 +6073,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - Firefox の FFmpeg（RPM Fusion の `ffmpeg-libs`）も一緒に上がる。WezTerm の COPR は、`main` ブランチに追従して毎日〜数日おきにビルドされる
 - Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「更新」](ai-agents.md#更新)で上げる（dnf で入れた Claude Code は、OS の更新でも上がる）
 - VirtualBox・VirtualBox の bootc ゲスト・kvm-container は、仮想マシンのセットアップの[VirtualBox: 更新](virtual-machines.md#virtualbox-更新)・[VirtualBox の bootc ゲスト: 更新](virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)・[kvm-container を更新する](virtual-machines.md#kvm-container-を更新する)、Forgejo は[Forgejo のセットアップの「Forgejo: 更新」](forgejo.md#forgejo-更新)で上げる
+- Syncthing は、[Syncthing のセットアップの「Syncthing: 更新」](syncthing.md#syncthing-更新)で上げる。WireGuard（`wireguard-tools`）・Samba（`samba`・`cifs-utils` など）のパッケージと、GNOME のリモート操作で使う部品は、OS の更新で上がる
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 自分用の設定は各リポジトリで上げる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
