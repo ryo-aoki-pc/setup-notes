@@ -22,7 +22,7 @@
 ### Neovim
 
 - Neovim を Homebrew で入れ、自分用の設定（LazyVim をもとにした設定）を入れて、既定のエディタになったことを確かめる
-- 前提: [共通の bash 設定](almalinux-setup.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[WezTerm](almalinux-setup.md#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](almalinux-setup.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[WezTerm](shell-terminal.md#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
   - この項の手順 3 は、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の前提も要る
   - インターネットに出られないホストは、[Homebrew](almalinux-setup.md#homebrew)の代わりに[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)を通し、そのトンネルのシェルで行う
 - 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 4 で新しいタブを開く
@@ -68,7 +68,7 @@
 
    - `nvim / nvim` と `alias vi='nvim'` が出ればよい
    - この 3 項目は共通の bash 設定が持つ（`nvim` があれば、開いたシェルで設定する）。元値の控えや `~/.bashrc` への追記は行わない
-   - 開いていたタブは、`nvim` を入れる前の値のまま。`. ~/.bashrc` で読み直さない（[シェルのツール](almalinux-setup.md#シェルのツール)の手順 2）
+   - 開いていたタブは、`nvim` を入れる前の値のまま。`. ~/.bashrc` で読み直さない（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2）
 
 #### Neovim の設定ファイル
 
@@ -88,8 +88,8 @@
 #### LazyVim の設定を導入する
 
 - 自分用の Neovim の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を `~/.config/nvim` に入れる。外部コマンドと日本語入力の設定を全部入れてから、Neovim を初回起動する
-- 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](almalinux-setup.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](almalinux-setup.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1・2 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](almalinux-setup.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](almalinux-setup.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 3 の既存の設定の退避を省かない
+- 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1・2 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 3 の既存の設定の退避を省かない
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md)
 
 1. 外部コマンドと日本語入力 (ibus-anthy) を dnf で入れる。
@@ -239,7 +239,7 @@
 #### LazyVim の日本語検索・整形・IME 連携を確かめる
 
 - 試験用の Markdown で、LazyVim の日本語検索・保存のときの整形・IME 連携・アイコンの表示を確かめる
-- 前提: [WezTerm](almalinux-setup.md#wezterm)・[LazyVim の設定を導入する](#lazyvim-の設定を導入する)・[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し、その後に再起動してある（[再起動と確認](almalinux-setup.md#再起動と確認)の手順 1）
+- 前提: [WezTerm](shell-terminal.md#wezterm)・[LazyVim の設定を導入する](#lazyvim-の設定を導入する)・[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し、その後に再起動してある（[再起動と確認](almalinux-setup.md#再起動と確認)の手順 1）
 - 実行場所: 再起動の後に開いた WezTerm の新しいタブ（GNOME にログインした自分のユーザーの bash。`sudo` は使わない）
 
 1. 試験用の Markdown を作って開き、日本語検索・整形・IME 連携を確かめる。
@@ -265,7 +265,7 @@
 
 - 設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](almalinux-setup.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
 - 初回と整形用 lock の変更後は、[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し直す
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
 
@@ -287,7 +287,7 @@
 
 - Markdown を保存のときに整形する依存（lock ファイルで固定した markdownlint-cli2 と Comrak）を Neovim から入れ、整形を確かめる。AlmaLinux 10 / Windows 11 共通
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある（Node.js 22 以上と npm が要る）
-- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](almalinux-setup.md#wezterm)を通したなら、WezTerm のタブで開く
+- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
 - 初回と `tools/glfm-format/package-lock.json` の変更後に行う
 - 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る。Mason のツールとは別に管理する
 
@@ -322,7 +322,7 @@
 #### LazyVim のカーソル色を tmux で使う
 
 - 挿入モードのカーソル色も IME の状態で変わる。ただし tmux 越しでは既定では効かないので、tmux の設定に 1 行足す
-- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[シェルのツール](almalinux-setup.md#シェルのツール)の手順 1 で tmux を入れてある
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[シェルのツール](shell-terminal.md#シェルのツール)の手順 1 で tmux を入れてある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 2 は tmux の中のシェル。既存の `~/.tmux.conf` の確認（この項の手順 1）を省かない
 - AlmaLinux 10 で tmux を使うときだけ行う。無くても害は無い
 - `tmux-256color` には `Cs` / `Cr` が無く、Neovim がカーソル色の OSC 12 を出さないため
@@ -405,7 +405,7 @@
 - 仕組みは端末の OSC 52 で、この設定が SSH のシェル (`SSH_CONNECTION` がある) で起動したときだけ使う。手元にも AlmaLinux 10 にも、足すソフトは無い
 - 向きは Neovim → 手元だけ。手元でコピーしたものは、端末の貼り付け (WezTerm は Ctrl+Shift+V) で Neovim に入れる
 - 前提: AlmaLinux 10 で、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)の手順 1 で設定を最新にしてある。[システムの設定](almalinux-setup.md#システムの設定)の手順 3・4 で、SSH を待ち受けている
-  - 手元は WezTerm nightly を使う（AlmaLinux 10 は[WezTerm](almalinux-setup.md#wezterm)、Windows 11 は[Windows 11 のセットアップの「WezTerm」](windows-setup.md#wezterm)）。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
+  - 手元は WezTerm nightly を使う（AlmaLinux 10 は[WezTerm](shell-terminal.md#wezterm)、Windows 11 は[Windows 11 のセットアップの「WezTerm」](shell-terminal.md#windows-11-で-wezterm-を入れる)）。安定版 20240203 は設定があると OSC 52 を捨てる（[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)）
 - 実行場所: **GNOME の端末ではなく、手元の WezTerm から AlmaLinux 10 に ssh したシェル**（ssh でログインした自分のユーザーの bash。`sudo` は使わない）。tmux の中の Neovim は扱わない
 
 1. SSH のシェルで、この設定が OSC 52 を使うことを確かめる。
@@ -473,9 +473,9 @@
 #### LazyVim の本体・外部コマンド・プラグインを更新する
 
 - Homebrew で入れた Neovim・lazygit・ripgrep・fd・HackGen と、LazyVim のプラグインを上げる
-- 前提: [Homebrew](almalinux-setup.md#homebrew)と[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、PATH に Homebrew が入った端末（[シェルのツール](almalinux-setup.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 前提: [Homebrew](almalinux-setup.md#homebrew)と[LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
   - `lazy-lock.json` を push するには、[GitHub CLI](almalinux-setup.md#github-cli)でログインしてある
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash。`sudo` は使わない）。[WezTerm](almalinux-setup.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 2 の `lazy-lock.json` の差分の確認を省かない
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 2 の `lazy-lock.json` の差分の確認を省かない
 - 設定の取り込みは[LazyVim の設定とプラグインの版を揃える](#lazyvim-の設定とプラグインの版を揃える)で行う
 - プラグイン更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する
 
@@ -509,7 +509,7 @@
 ### Windows 11 で Neovim を入れる
 
 - scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
-- 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)・[HackGen Console NF](windows-setup.md#hackgen-console-nf)を通してある。Visual C++ ランタイムも[WezTerm](windows-setup.md#wezterm)で入れてある
+- 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -533,7 +533,7 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](windows-setup.md#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](windows-setup.md#wezterm)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める
 
 1. scoop で Neovim を入れる。
@@ -573,7 +573,7 @@
 - Windows PowerShell や Windows Terminal から起動するツールにも Neovim を使わせる
 - 前提: [Neovim](#windows-11-で-neovim-を入れる)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- Git Bash では、[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)で入れた共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
+- Git Bash では、[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)で入れた共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
 - Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](#neovim)の手順 4 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -611,7 +611,7 @@
 #### Windows 11 で LazyVim の設定を導入する
 
 - Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
-- 前提: [Git for Windows](windows-setup.md#git-for-windows)・[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[HackGen Console NF](windows-setup.md#hackgen-console-nf)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
+- 前提: [Git for Windows](windows-setup.md#git-for-windows)・[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
@@ -688,7 +688,7 @@
 
    - `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
    - 7 つのコマンドの場所が並ぶ
-   - 端末のフォントは[HackGen Console NF](windows-setup.md#hackgen-console-nf)にする
+   - 端末のフォントは[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)にする
 
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 

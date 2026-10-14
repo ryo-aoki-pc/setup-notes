@@ -416,6 +416,247 @@
 
 ---
 
+### Homebrew
+
+- Homebrew を公式のインストーラで `/home/linuxbrew/.linuxbrew` に入れ、共通の bash 設定で PATH を通す
+- 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](shell-terminal.md#共通の-bash-設定)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
+- インターネットに出られない PC は、この項を飛ばし、[Homebrew のオフライン導入](#homebrew-のオフライン導入)を通す
+- **GNOME で日本語入力を使う PC は、この項の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
+
+1. Homebrew の依存パッケージを入れる。
+
+   ```bash
+   sudo dnf install -y procps-ng curl file git
+   ```
+
+   - Workstation では、どれも入っている（`は既にインストールされています。` と出る）
+
+1. Homebrew の公式のインストーラを実行する。
+
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+   - インストーラは続行の確認で `RETURN` を求める
+   - `==> Installation successful!` と `==> Next steps:` が出ればよい。`Next steps` の `~/.bashrc` への追記は行わない
+   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認として食われる）
+
+1. 共通の bash 設定を読み直して Homebrew の PATH を有効にし、入ったか確かめる。
+
+   ```bash
+   . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
+   brew --version
+   command -v brew
+   brew config | head -12
+   ```
+
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
+   - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
+
+1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
+
+   ```bash
+   {
+     mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
+     printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+     systemctl --user daemon-reload
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
+   }
+   ```
+
+   - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
+   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
+   - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
+
+#### Homebrew の使い方の基本
+
+この文書の各項が使うコマンドはこれだけ。
+
+| コマンド | 用途 |
+|---|---|
+| `brew install <formula>` | 入れる。ビルド済みのボトルがあれば `Pouring ...` と出て、ソースビルドは走らない |
+| `brew uninstall <formula>` | 消す。Homebrew 7.0.7 では、不要になった依存も既定で自動削除する（[注意点](extra/almalinux-setup.md#注意点)） |
+| `brew list --versions` | 入っているものと版の一覧 |
+| `brew leaves` | ほかの導入済み formula や cask から依存されていない formula の一覧。明示的に入れたものの履歴ではない |
+| `brew info <formula>` | 版・依存・caveat（[gdu](#gdu) のような名前の注意書き） |
+| `brew deps --tree <formula>` | 依存の木。単独で入れたときに何が付いてくるか |
+| `brew outdated` | 更新できるものの一覧。何も無ければ無出力 |
+| `brew autoremove` | 依存として入って、もう誰も使っていないものを消す（`--dry-run` で確認できる） |
+
+- `brew install`・`brew upgrade` などの管理操作は、導入した一般ユーザーで行う
+- [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通しても、管理操作は一般ユーザーで行う
+- 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通す
+- `brew install` の確認が出たら答えてから進む（[確認が出る条件](extra/almalinux-setup.md#注意点)）
+- Homebrew からツールを入れる手順は、[Homebrew](#homebrew)の手順 1〜3 を前提にする。Trivy は dnf で入れる
+
+#### Homebrew を root のシェルでも使う
+
+- root のログインシェルでも、Homebrew で入れたコマンドを使う。PATH は、root に入れた共通の bash 設定が足す
+- 前提: [Homebrew](#homebrew)と[共通の bash 設定を root に入れる](shell-terminal.md#共通の-bash-設定を-root-に入れる)（root 自身の clone と読み込み口）を通してある
+- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
+- 自分専用のマシンで、一般ユーザーを信用できる場合だけ行う。root のシェルから Homebrew のユーザー所有のコマンドを実行するため
+- 共通設定の `brew shellenv` は Homebrew を PATH の先頭に入れる。同名の RPM コマンドより Homebrew が優先される
+- `sudo <コマンド>` は別で、[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の `secure_path` を使う
+
+1. root のログインシェルから Homebrew が見えることを確かめる。
+
+   ```bash
+   sudo -i bash -c 'printenv PATH; command -v brew'
+   ```
+
+   - `/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい。`/root/.bashrc` に PATH の行は追記しない
+   - `brew install` などは一般ユーザーで行う
+
+1. root の共通設定も外す場合だけ、bash のロールバックを行う。
+
+   - [root の導入手順](shell-terminal.md#共通の-bash-設定を-root-に入れる)のロールバックを参照する
+
+#### Homebrew を sudo でも使う
+
+- sudo の設定に 1 行のファイル（`/etc/sudoers.d/homebrew`）を置き、sudo がコマンドを探す PATH（`secure_path`）の末尾に、Homebrew の `bin` と `sbin` を足す
+- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
+- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
+- **`sudo <コマンド>` で Homebrew のコマンドを使わないなら、この項は不要**
+- `sudo nvim /etc/hosts` や `sudo gdu-go /` のように、`sudo <コマンド>` で使えるようになる。`sudo -s`・`sudo -i` で開いた root のシェルでも使える
+- `EDITOR=nvim` の `sudoedit` も、自分の設定の Homebrew の `nvim` で開くようになる（この項の前は、黙って `vi` で開く）
+- sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を通す
+- RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
+- `brew install` などの管理操作は、この項を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
+- 補足: [参考資料](reference/almalinux-setup.md#homebrew-sudo-で使うときの補足)
+
+> [!WARNING]
+> - `/home/linuxbrew/.linuxbrew` は Homebrew を入れたユーザーの所有。`sudo` で打ったコマンドが `/usr/bin` などに無いと、そのユーザーが書き換えられるプログラムを root の権限で動かすことになる（そのユーザーを乗っ取られると、root まで取られる）
+> - sudo の設定はホスト全体にかかる。このホストで `sudo` を使う、ほかのユーザーにも効く
+
+1. sudo の `secure_path` の末尾に Homebrew を足すファイルを置き、`sudo` の PATH を確かめる。
+
+   ```bash
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
+     elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
+     else
+       line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
+       echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
+       sudo visudo -c
+     fi
+     sudo bash -c 'printenv PATH; command -v brew'
+   }
+   ```
+
+   - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出る
+     - `/etc/sudoers.d` にほかのファイル（[ログインと sudo](#ログインと-sudo)の手順 3 の `nopasswd` など）があれば、その行も出る
+     - 日本語のロケール（`ja_JP.UTF-8`）では、`parsed OK` は `正しく構文解析されました` と出る
+   - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
+   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
+     - `既にある` なら、この項は通してある。最後の 2 行で確かめる
+     - `既定と違う` なら、`secure_path` がほかで変えてある（`sudo grep -rn secure_path /etc/sudoers /etc/sudoers.d` で探す）。そのホストでは、この項は使わない
+   - 開いたままの root のシェル（`sudo -s` など）には効かない。開き直す
+
+1. 元に戻すときは、この項の手順 1 で置いたファイルを消す。
+
+   ```bash
+   {
+     sudo rm -f /etc/sudoers.d/homebrew
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo printenv PATH   # /sbin:/bin:/usr/sbin:/usr/bin
+   }
+   ```
+
+   - 最後に `/sbin:/bin:/usr/sbin:/usr/bin` と出ればよい
+   - 開いたままの root のシェル（`sudo -s` など）の PATH には残る。開き直すと消える
+
+---
+
+### Homebrew のオフライン導入
+
+- インターネットに出られないホスト（以下、オフラインのホスト）に、SSH の SOCKS トンネル越しに Homebrew を入れる。トンネルの出口は、インターネットに出られるホスト（以下、オンラインのホスト）
+- 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
+- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
+- この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜4（同じ項の手順 4 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
+- **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
+- **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
+- Neovim の Mason に npm のパッケージを入れるなら、この項の手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入) を貼る（npm は `ALL_PROXY` を読まない）
+
+> [!WARNING]
+>
+> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら、この項の手順 5 で閉じる
+
+1. トンネルのシェルで、Homebrew の取得先に届くかと、Homebrew が使うパッケージを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   for u in https://github.com https://raw.githubusercontent.com https://formulae.brew.sh https://ghcr.io/v2/; do
+     printf '%-34s %s\n' "$u" "$(curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}' "$u")"
+   done
+   rpm -q procps-ng curl file git
+   ```
+
+   - 4 つの URL の数字が、どれも `000` 以外なら届いている（ghcr.io は `401`）
+   - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、トンネルか `ALL_PROXY` が無い。[SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 からやり直す
+   - `rpm -q` の 4 つがどれも入っていれば、**この項の手順 2 は飛ばし、この項の手順 3 でも[Homebrew](#homebrew)の手順 1 を飛ばす**
+   - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、この項の手順 2 は飛ばす
+
+1. この項の手順 1 で入っていないパッケージがあったときだけ、[SSH の SOCKS トンネルの「dnf にもトンネルを使わせる」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)を行う。
+
+   - **次の手順は、その項の `Metadata cache created.` が出てから貼る**
+
+1. この項の手順 1 のシェルのまま、[Homebrew](#homebrew)の手順 1〜4 を貼る。
+
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、[Homebrew](#homebrew)の手順 1〜3 は飛ばす
+   - [Homebrew](#homebrew)の手順 1 の dnf は、この項の手順 2 の設定で通る（この項の手順 1 で 4 つとも入っていたなら飛ばす）
+   - [Homebrew](#homebrew)の手順 3 は、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を入れてあるシェルで貼る
+   - [Homebrew](#homebrew)の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
+   - **次の手順は、[Homebrew](#homebrew)の手順 3（GNOME で日本語入力を使う PC は同じ項の手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
+
+1. 確かめるために、brew で jq をトンネル越しに入れる。
+
+   ```bash
+   brew install jq
+   ```
+
+   - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれたら、`y` を押す（Enter は要らない）
+   - `==> Pouring jq--…bottle…tar.gz` と出て、ソースからのビルドにならない
+   - ほかの Homebrew で入れる項も、この項の手順 5 の前に、このシェルで貼る
+   - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
+
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜4 で、トンネルを閉じて、転送を付けずにログインし直す。
+
+   - その項で `exit` した後の、転送を付けないログインは、オンラインのホストで行う
+   - その項の最後の確かめで、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
+   - **次の手順は、ログインし直したオフラインのホストのシェルで貼る**
+
+1. オフラインのホストで、トンネルが無くても jq が動くことを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   brew list --versions jq
+   command -v jq
+   echo '{"host": "offline"}' | jq -r .host
+   ```
+
+   - `jq 1.8.2` のような版、`/home/linuxbrew/.linuxbrew/bin/jq`、`offline` が出る
+
+#### Homebrew のオフライン導入: 更新
+
+- オフラインのホストで、SSH の SOCKS トンネル越しに Homebrew と、Homebrew で入れたものを上げる
+- 前提: [Homebrew のオフライン導入](#homebrew-のオフライン導入)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、トンネルを張り直してある
+- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル）
+
+1. [共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 を貼る。
+
+   - `brew outdated` が何も出さなければ、上げるものは無いので、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 は飛ばす
+   - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[Homebrew のオフライン導入](#homebrew-のオフライン導入)の手順 4 と同じ確認）
+   - **次の手順は、上げ終わってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
+
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
+
+---
+
 ### dnf-automatic で自動で更新する
 
 - BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で再起動する）
@@ -1059,1636 +1300,6 @@
 
 ---
 
-## シェルと端末
-
-- 共通の bash 設定・Homebrew・シェルのツール・フォント・WezTerm と、端末で使う道具（btop・gdu）
-
-### 共通の bash 設定
-
-- 自分のユーザーに共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）を入れ、bash-completion と `~/.inputrc` で補完と履歴の検索を整える
-- 前提: [ログインと sudo](#ログインと-sudo)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
-
-1. 共通の bash 設定を入れる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
-     bash ~/.config/bash/install.sh
-   ```
-
-   - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
-   - clone 済みで `fatal: destination path … already exists` と出たら、`git -C ~/.config/bash pull --ff-only` と `bash ~/.config/bash/install.sh` を貼る
-
-1. 共通の bash 設定を今の端末に読み込み、履歴と shopt の値を確かめる。
-
-   ```bash
-   . ~/.bashrc
-   printf '\n\033[7m 確認 \033[0m\n'
-   echo "${__bash_config_loaded-読まれていない}"
-   printf '%s\n' "$HISTSIZE" "$HISTFILESIZE" "$HISTCONTROL"
-   shopt histappend autocd cdspell dirspell globstar
-   ```
-
-   - `1`、`100000`・`100000`・`ignoreboth`、5 つの `on` が出ればよい
-
-1. bash-completion が入っているか確かめ、無ければ入れる。
-
-   ```bash
-   if ! rpm -q bash-completion; then sudo dnf install -y bash-completion; fi
-   ```
-
-   - `bash-completion-2.11-…` と出れば入っている
-   - `package bash-completion is not installed` のときは、続けて BaseOS から入る
-
-1. `~/.inputrc` を書き、今のシェルにも読ませる。
-
-   ```bash
-   if [ -e ~/.inputrc ]; then
-     echo '中断: ~/.inputrc がすでにある。中身を見て、この手順の set と矢印の行を手で足す' >&2
-   else
-     cat > ~/.inputrc <<'EOF'
-   # OS の設定（Home / End / Delete、Ctrl+矢印の単語の移動など）を先に読む。この行が無いと読まれなくなる
-   $include /etc/inputrc
-   # 補完: 大文字小文字を区別しない、候補が複数なら 1 回の Tab で一覧を出す、種類と打った部分を色で示す
-   set completion-ignore-case on
-   set show-all-if-ambiguous on
-   set colored-stats on
-   set colored-completion-prefix on
-   # ↑/↓: 打った文字で始まる履歴だけをさかのぼる（何も打っていなければ 1 つずつ）
-   "\e[A": history-search-backward
-   "\e[B": history-search-forward
-   "\eOA": history-search-backward
-   "\eOB": history-search-forward
-   EOF
-     bind -f ~/.inputrc
-     printf '\n\033[7m 確認 \033[0m\n'
-     bind -v | grep -E 'completion-ignore-case|show-all-if-ambiguous|colored-stats|colored-completion-prefix'
-     bind -q history-search-backward
-     bind -q beginning-of-line
-   fi
-   ```
-
-   - `set … on` が 4 行出る。`history-search-backward` は `\eOA`・`\e[5~`・`\e[A`、`beginning-of-line` は `\C-a`・`\eOH`・`\e[1~`・`\e[H` の割り当てが出る
-   - `beginning-of-line` に `"\e[1~"` が無ければ、`$include /etc/inputrc` の行が読まれていない
-   - `中断:` が出たら、既存の `~/.inputrc` の先頭に `$include /etc/inputrc` が無ければ足し、`set` と矢印の各 4 行を足して `bind -f ~/.inputrc` を貼る
-
-#### 共通の bash 設定を手動で移行する
-
-通常は[共通の bash 設定](#共通の-bash-設定)の `install.sh` を使う。この項は、`install.sh` を使わずに、手で確認しながら移行するときだけ行う。
-
-- 前提: 無し（Git は AlmaLinux 10 Workstation に初めから入っている）
-- 実行場所: 自分のユーザーの端末（bash）。Windows 11 も、Git Bash でこの項の手順をすべて行える。WSL は Linux 側で別に行う
-- この項の手順 3 の控えと、手順 4 の既存の行の確認を省かない
-
-[背景説明](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md)
-
-1. この設定が既に入っているか確かめる。
-
-   ```bash
-   ls -ld ~/.config/bash
-   grep -n 'config/bash/bashrc' ~/.bashrc
-   ```
-
-   - `ls` が `No such file or directory` で、`grep` が何も出さなければ、まだ入っていない。手順 2 へ進む
-   - `ls` がディレクトリ、`grep` が `if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi` を出せば導入済み
-   - 導入済みなら手順 2〜10 を飛ばし、[更新](#共通の-bash-設定を更新する)を行う
-   - Git Bash で `~/.bashrc` がまだ無ければ、`grep` は `No such file or directory` と出す（手順 3 で作られる）
-
-1. この設定を `~/.config/bash` に clone する。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash
-   ```
-
-   - `Cloning into '/home/<USER>/.config/bash'...` と出る（Git Bash では `Cloning into 'C:/Users/<WIN_USER>/.config/bash'...`）
-   - 問いは出ない（公開のリポジトリなので、認証は要らない）
-   - インターネットに出られないホストでは、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)を張ったシェルで貼る
-   - 止まったときは `~/.config/bash` は残らないので、そのまま貼り直せる
-
-1. `~/.bashrc` を控えてから、元の手順書が書いた行を消す。
-
-   ```bash
-   if [ ! -r ~/.config/bash/migrate/remove-old-lines.awk ]; then echo '中断: 手順 2 の clone ができていない' >&2
-   elif [ -e ~/.bashrc.before-bash ]; then echo '中断: ~/.bashrc.before-bash が既にある' >&2
-   else
-     touch ~/.bashrc &&
-       cp -p ~/.bashrc ~/.bashrc.before-bash &&
-       awk -f ~/.config/bash/migrate/remove-old-lines.awk ~/.config/bash/migrate/old-lines.txt ~/.config/bash/migrate/old-y.txt ~/.bashrc.before-bash > ~/.bashrc &&
-       bash -n ~/.bashrc && echo 'bash -n: OK'
-   fi
-   ```
-
-   - `bash -n: OK` と出ればよい
-   - `中断:` と出たら、何も書き換えていない。`~/.bashrc.before-bash` が前の実行の控えなら、手順 4 から続ける
-   - `bash -n` が `syntax error` を出したら、`cp -p ~/.bashrc.before-bash ~/.bashrc` で戻し、手順 4 の `grep` の行をエディタで消す形に切り替える
-   - **行全体が[移行で消す行](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#移行で消す行)と同じ行だけを消す**
-
-1. 手順 3 で消した行と、残った関係の行を見る。
-
-   ```bash
-   git --no-pager diff --no-index ~/.bashrc.before-bash ~/.bashrc
-   grep -n -i -E 'brew|zoxide|starship|yazi|eza|gdu-go|MANPAGER|nvim|DOCKER_HOST|wezterm|HIST|shopt|bash_completion|fzf|FZF_' ~/.bashrc
-   ```
-
-   - `git diff` の `-` で始まる行が、手順 3 で消した行
-   - `grep` が何も出さなければ、手順 6・7 は飛ばす
-   - `grep` が行を出したら、手順 6 でエディタで見る（行の番号が左に出る）
-
-1. `~/.bashrc` の末尾に、この設定を読む 1 行を足す。
-
-   ```bash
-   if ! grep -qxF 'if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi' ~/.bashrc; then
-     [ -z "$(tail -c 1 ~/.bashrc)" ] || echo >> ~/.bashrc
-     echo 'if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi' >> ~/.bashrc
-   fi
-   tail -n 1 ~/.bashrc
-   bash -n ~/.bashrc && echo 'bash -n: OK'
-   ```
-
-   - `if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi` と `bash -n: OK` が出ればよい
-   - 既にその 1 行があれば、足さない（2 度貼っても 1 行のまま）
-   - このホストだけの設定を足すときは、この 1 行より後ろに書く
-
-1. 手順 4 で行が出たときだけ、`~/.bashrc` をエディタで開き、この設定と重なる行を消して、残す行を末尾の 1 行より後ろへ移す。
-
-   - [共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)と同じ処理の行を消す
-   - `if … fi` は `fi` まで、`y()` は `function y() {` から `}` まで消す
-   - この設定と違う形で使いたい行（`--cmd cd` の zoxide、手で直した `alias ll` など）は、消さずに、手順 5 で足した末尾の 1 行より後ろへ移す
-   - zoxide の行を残すときは、`--hook none` を足す（例: `eval "$(zoxide init bash --cmd cd --hook none)"`）
-   - Homebrew のコマンドを使う行も、手順 5 の 1 行より後ろへ移す（Homebrew の PATH は、その 1 行で足される）
-   - WSL の WezTerm の行は残す。starship を使うなら手順 5 の 1 行より後ろへ移す（[読む順番](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読む順番)）
-   - トークンなど、ホストだけの行は残す（前でも後ろでもよい）
-   - **次の手順は、エディタを閉じてから貼る**
-
-1. 手順 6 でエディタで直したときだけ、構文と並びを確かめる。
-
-   ```bash
-   bash -n ~/.bashrc && echo 'bash -n: OK'
-   grep -n -i -E 'config/bash/bashrc|brew|zoxide|starship|yazi|eza|gdu-go|MANPAGER|nvim|DOCKER_HOST|wezterm' ~/.bashrc
-   ```
-
-   - `bash -n: OK` と出ればよい。`syntax error` と出たら、手順 6 に戻って直す
-   - 手順 6 で残した行の番号が、`config/bash/bashrc` の行（手順 5 の 1 行）の番号より大きければよい
-
-1. ログインシェルの設定ファイルが無いときだけ（新しい Git Bash など）、`~/.bashrc` を読む `~/.bash_profile` を作る。
-
-   ```bash
-   if [ -e ~/.bash_profile ] || [ -e ~/.bash_login ] || [ -e ~/.profile ]; then
-     grep -n 'bashrc' ~/.bash_profile ~/.bash_login ~/.profile 2>/dev/null
-   else
-     printf '%s\n' '# ログインシェルでも ~/.bashrc を読む' 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > ~/.bash_profile
-     cat ~/.bash_profile
-   fi
-   ```
-
-   - AlmaLinux 10 では既存の `~/.bash_profile` の `if [ -f ~/.bashrc ]; then` と `. ~/.bashrc` の 2 行が出る。ファイルは作らない
-   - Git for Windows が作った `~/.bash_profile` のある Git Bash では、`/c/Users/<WIN_USER>/.bash_profile:3:test -f ~/.bashrc && . ~/.bashrc` の 1 行が出る（何も作らない）
-   - ログインシェルの設定ファイルが 1 つも無いホスト（新しい Git Bash）では、作った 2 行が出る
-   - 既にあるファイルが何も出さなければ、そのファイルは `~/.bashrc` を読んでいない。エディタで `if [ -f ~/.bashrc ]; then . ~/.bashrc; fi` を足す
-
-1. 開いている端末をすべて閉じて、開き直す。
-
-   - WezTerm などの端末アプリは、ウィンドウをすべて閉じて起動し直す。ssh で入っているなら、ログアウトして入り直す
-   - 開いたままのシェルには効かない（手順 3 で消した行の関数やフックも、そのシェルには残っている）
-   - **次の手順は、開き直した端末で貼る**
-
-1. 開き直した端末で、この設定が読まれたか確かめる。
-
-   ```bash
-   echo "${__bash_config_loaded-読まれていない}"
-   alias | grep -E "^alias (ll|la|lt|vi|gdu)="
-   type -t y z
-   echo "EDITOR=${EDITOR-} DOCKER_HOST=${DOCKER_HOST-}"
-   echo "HISTSIZE=${HISTSIZE} $(shopt -p autocd globstar | tr '\n' ' ')"
-   bind -X
-   complete -p brew bat 2>/dev/null
-   bash -c '. ~/.bashrc' 2>&1 | wc -c
-   ```
-
-   - 1 行目が `1` なら、対話のシェルでこの設定が最後まで読まれている
-   - `HISTSIZE=100000 shopt -s autocd shopt -s globstar` は、どのホストでも出る（履歴と `shopt`）
-   - fzf があれば `bind -X` に Ctrl+R の `__fzf_history__` と Ctrl+T の `fzf-file-widget` が出る。Git Bash 5.3 ではコロン無しでよい
-   - WezTerm の統合を読む場合はマウス報告よけの行も出る
-   - Homebrew の bat があれば `complete -p` に `complete -F _fzf_path_completion bat`（fzf 無しなら `_bat`）と `brew` の行が出る
-   - 2〜4 行目は導入済みのツールだけ出る。eza は `ll`・`la`・`lt`、yazi は `function`（`y`）、zoxide は `function`（`z`）
-   - Git Bash では eza 無しでも `alias ll='ls -l'` が出てよい。`alias gdu` は出ない
-   - AlmaLinux 10 でも、eza が無いと `alias ll='ls -l --color=auto'` が出る（coreutils-common の `/etc/profile.d/colorls.sh` のもので、この設定のものではない）
-   - 最後が `0` なら、非対話のシェル（`ssh <HOST> <コマンド>`・scp・rsync）で何も出力しない
-   - 1 行目が `読まれていない` なら、手順 5・8 を見直す
-
-#### 共通の bash 設定を root に入れる
-
-root のシェルにも、共通の bash 設定を入れる。一般ユーザーを信用できる自分専用のホストだけで行う。root が一般ユーザーの書き換えられる Homebrew のコマンド・補完を実行し、Homebrew が PATH の先頭になる。
-
-- 前提: [共通の bash 設定](#共通の-bash-設定)を通してある（一般ユーザーの共通 bash 設定を先に入れる）
-- 実行場所: この項の手順 1 は自分のユーザーの端末（bash）。手順 2 からは、その端末から `sudo -i` で入った root のシェル（手順 3 で入り直す）
-- `sudo -i` は `ALL_PROXY` を渡さない
-
-1. 自分のユーザーのシェルから root に入る。
-
-   ```bash
-   sudo -i
-   ```
-
-   - **次の手順は、root のシェルで貼る**
-
-1. root 自身の clone を作り、読み込み口を設定する。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
-     bash ~/.config/bash/install.sh
-   ```
-
-   - `~` は `/root`。clone 済みなら更新し、`bash ~/.config/bash/install.sh` を実行する
-   - 控えは `/root/.bashrc.before-bash`。既知の Homebrew・DOCKER_HOST の追記も移行する
-   - 控えが既にある状態で変更が必要なら中断する。手動で確認する場合は[共通 bash の手動移行](#共通の-bash-設定を手動で移行する)の手順をすべて root のシェルで行う
-   - 独自設定は共通設定の読み込み行より後ろに置く。構文エラーなら変更せず中断する
-
-1. `exit` で抜け、自分のユーザーから `sudo -i` で入り直す。
-
-   - **次の手順は、入り直した root のシェルで貼る**
-
-1. 読み込みと非対話時の無出力を確かめる。
-
-   ```bash
-   echo "${__bash_config_loaded-読まれていない}"
-   echo "DOCKER_HOST=${DOCKER_HOST-}"
-   bash -c '. ~/.bashrc' 2>&1 | wc -c
-   ```
-
-   - 最初が `1`、最後が `0` ならよい
-   - システムの `podman.socket` があれば `DOCKER_HOST=unix:///run/podman/podman.sock`、無ければ空
-   - 確認後は `exit` で抜ける。戻すときは[共通 bash のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md)を root のシェルで行う
-
-#### 共通の bash 設定を更新する
-
-共通の bash 設定のリポジトリを pull で上げる。更新後は端末を開き直す。
-
-- 前提: [共通の bash 設定](#共通の-bash-設定)か[共通の bash 設定を手動で移行する](#共通の-bash-設定を手動で移行する)を通してある
-- 実行場所: 自分のユーザーの端末（bash。Windows 11 は Git Bash）。この項の手順 2 は、`sudo -i` で入った root のシェル
-
-1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
-
-   ```bash
-   git -C ~/.config/bash remote set-url origin https://github.com/ryo-aoki-pc/bash.git
-   git -C ~/.config/bash pull --ff-only
-   git -C ~/.config/bash log -1 --oneline
-   ```
-
-   - 新しいコミットが無ければ `Already up to date.` と出て、最後にいちばん新しいコミットが 1 行出る
-   - `set-url` は、HTTPS で clone したホストでは何も変えない。SSH で clone したホストを HTTPS にそろえる
-   - インターネットに出られないホストは、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)を張ったシェルで貼る
-   - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/bash status` で見る
-   - 開いている端末には効かない。端末を開き直す
-
-1. root のシェルにも入れたときだけ、`sudo -i` の root のシェルで、この項の手順 1 を貼る。
-
-   - `/root/.config/bash` が新しくなる。出力は、この項の手順 1 と同じ
-   - 開いている root のシェルには効かない。`exit` で抜けて入り直す
-
----
-
-### Homebrew
-
-- Homebrew を公式のインストーラで `/home/linuxbrew/.linuxbrew` に入れ、共通の bash 設定で PATH を通す
-- 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](#共通の-bash-設定)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）
-- インターネットに出られない PC は、この項を飛ばし、[Homebrew のオフライン導入](#homebrew-のオフライン導入)を通す
-- **GNOME で日本語入力を使う PC は、この項の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
-
-1. Homebrew の依存パッケージを入れる。
-
-   ```bash
-   sudo dnf install -y procps-ng curl file git
-   ```
-
-   - Workstation では、どれも入っている（`は既にインストールされています。` と出る）
-
-1. Homebrew の公式のインストーラを実行する。
-
-   ```bash
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   ```
-
-   - インストーラは続行の確認で `RETURN` を求める
-   - `==> Installation successful!` と `==> Next steps:` が出ればよい。`Next steps` の `~/.bashrc` への追記は行わない
-   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認として食われる）
-
-1. 共通の bash 設定を読み直して Homebrew の PATH を有効にし、入ったか確かめる。
-
-   ```bash
-   . ~/.bashrc
-   printf '\n\033[7m 確認 \033[0m\n'
-   brew --version
-   command -v brew
-   brew config | head -12
-   ```
-
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
-   - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
-
-1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
-
-   ```bash
-   {
-     mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
-     printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
-     systemctl --user daemon-reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
-   }
-   ```
-
-   - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
-   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
-   - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
-
-#### Homebrew の使い方の基本
-
-この文書の各項が使うコマンドはこれだけ。
-
-| コマンド | 用途 |
-|---|---|
-| `brew install <formula>` | 入れる。ビルド済みのボトルがあれば `Pouring ...` と出て、ソースビルドは走らない |
-| `brew uninstall <formula>` | 消す。Homebrew 7.0.7 では、不要になった依存も既定で自動削除する（[注意点](extra/almalinux-setup.md#注意点)） |
-| `brew list --versions` | 入っているものと版の一覧 |
-| `brew leaves` | ほかの導入済み formula や cask から依存されていない formula の一覧。明示的に入れたものの履歴ではない |
-| `brew info <formula>` | 版・依存・caveat（[gdu](#gdu) のような名前の注意書き） |
-| `brew deps --tree <formula>` | 依存の木。単独で入れたときに何が付いてくるか |
-| `brew outdated` | 更新できるものの一覧。何も無ければ無出力 |
-| `brew autoremove` | 依存として入って、もう誰も使っていないものを消す（`--dry-run` で確認できる） |
-
-- `brew install`・`brew upgrade` などの管理操作は、導入した一般ユーザーで行う
-- [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通しても、管理操作は一般ユーザーで行う
-- 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通す
-- `brew install` の確認が出たら答えてから進む（[確認が出る条件](extra/almalinux-setup.md#注意点)）
-- Homebrew からツールを入れる手順は、[Homebrew](#homebrew)の手順 1〜3 を前提にする。Trivy は dnf で入れる
-
-#### Homebrew を root のシェルでも使う
-
-- root のログインシェルでも、Homebrew で入れたコマンドを使う。PATH は、root に入れた共通の bash 設定が足す
-- 前提: [Homebrew](#homebrew)と[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)（root 自身の clone と読み込み口）を通してある
-- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
-- 自分専用のマシンで、一般ユーザーを信用できる場合だけ行う。root のシェルから Homebrew のユーザー所有のコマンドを実行するため
-- 共通設定の `brew shellenv` は Homebrew を PATH の先頭に入れる。同名の RPM コマンドより Homebrew が優先される
-- `sudo <コマンド>` は別で、[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の `secure_path` を使う
-
-1. root のログインシェルから Homebrew が見えることを確かめる。
-
-   ```bash
-   sudo -i bash -c 'printenv PATH; command -v brew'
-   ```
-
-   - `/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい。`/root/.bashrc` に PATH の行は追記しない
-   - `brew install` などは一般ユーザーで行う
-
-1. root の共通設定も外す場合だけ、bash のロールバックを行う。
-
-   - [root の導入手順](#共通の-bash-設定を-root-に入れる)のロールバックを参照する
-
-#### Homebrew を sudo でも使う
-
-- sudo の設定に 1 行のファイル（`/etc/sudoers.d/homebrew`）を置き、sudo がコマンドを探す PATH（`secure_path`）の末尾に、Homebrew の `bin` と `sbin` を足す
-- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
-- 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
-- **`sudo <コマンド>` で Homebrew のコマンドを使わないなら、この項は不要**
-- `sudo nvim /etc/hosts` や `sudo gdu-go /` のように、`sudo <コマンド>` で使えるようになる。`sudo -s`・`sudo -i` で開いた root のシェルでも使える
-- `EDITOR=nvim` の `sudoedit` も、自分の設定の Homebrew の `nvim` で開くようになる（この項の前は、黙って `vi` で開く）
-- sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を通す
-- RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
-- `brew install` などの管理操作は、この項を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
-- 補足: [参考資料](reference/almalinux-setup.md#homebrew-sudo-で使うときの補足)
-
-> [!WARNING]
-> - `/home/linuxbrew/.linuxbrew` は Homebrew を入れたユーザーの所有。`sudo` で打ったコマンドが `/usr/bin` などに無いと、そのユーザーが書き換えられるプログラムを root の権限で動かすことになる（そのユーザーを乗っ取られると、root まで取られる）
-> - sudo の設定はホスト全体にかかる。このホストで `sudo` を使う、ほかのユーザーにも効く
-
-1. sudo の `secure_path` の末尾に Homebrew を足すファイルを置き、`sudo` の PATH を確かめる。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
-     elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
-     else
-       line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
-       echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
-       sudo visudo -c
-     fi
-     sudo bash -c 'printenv PATH; command -v brew'
-   }
-   ```
-
-   - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出る
-     - `/etc/sudoers.d` にほかのファイル（[ログインと sudo](#ログインと-sudo)の手順 3 の `nopasswd` など）があれば、その行も出る
-     - 日本語のロケール（`ja_JP.UTF-8`）では、`parsed OK` は `正しく構文解析されました` と出る
-   - 最後の 2 行で、PATH の末尾が `:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin` で、`/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい
-   - `中断:` と出たら、何も書き換えていない（最後の 2 行は出る）
-     - `既にある` なら、この項は通してある。最後の 2 行で確かめる
-     - `既定と違う` なら、`secure_path` がほかで変えてある（`sudo grep -rn secure_path /etc/sudoers /etc/sudoers.d` で探す）。そのホストでは、この項は使わない
-   - 開いたままの root のシェル（`sudo -s` など）には効かない。開き直す
-
-1. 元に戻すときは、この項の手順 1 で置いたファイルを消す。
-
-   ```bash
-   {
-     sudo rm -f /etc/sudoers.d/homebrew
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo printenv PATH   # /sbin:/bin:/usr/sbin:/usr/bin
-   }
-   ```
-
-   - 最後に `/sbin:/bin:/usr/sbin:/usr/bin` と出ればよい
-   - 開いたままの root のシェル（`sudo -s` など）の PATH には残る。開き直すと消える
-
----
-
-### Homebrew のオフライン導入
-
-- インターネットに出られないホスト（以下、オフラインのホスト）に、SSH の SOCKS トンネル越しに Homebrew を入れる。トンネルの出口は、インターネットに出られるホスト（以下、オンラインのホスト）
-- 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
-- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
-- この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜4（同じ項の手順 4 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
-- **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
-- **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
-- Neovim の Mason に npm のパッケージを入れるなら、この項の手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入) を貼る（npm は `ALL_PROXY` を読まない）
-
-> [!WARNING]
->
-> - トンネルを張っている間は、オフラインのホストのどのユーザーもインターネットに出られる（出口はオンラインのホスト。[SSH の SOCKS トンネルの注意点](extra/ssh-socks-tunnel.md#注意点)）。使い終わったら、この項の手順 5 で閉じる
-
-1. トンネルのシェルで、Homebrew の取得先に届くかと、Homebrew が使うパッケージを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   for u in https://github.com https://raw.githubusercontent.com https://formulae.brew.sh https://ghcr.io/v2/; do
-     printf '%-34s %s\n' "$u" "$(curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}' "$u")"
-   done
-   rpm -q procps-ng curl file git
-   ```
-
-   - 4 つの URL の数字が、どれも `000` 以外なら届いている（ghcr.io は `401`）
-   - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、トンネルか `ALL_PROXY` が無い。[SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 からやり直す
-   - `rpm -q` の 4 つがどれも入っていれば、**この項の手順 2 は飛ばし、この項の手順 3 でも[Homebrew](#homebrew)の手順 1 を飛ばす**
-   - dnf がトンネル無しで届くリポジトリ（社内のミラーなど）を使うホストなら、この項の手順 2 は飛ばす
-
-1. この項の手順 1 で入っていないパッケージがあったときだけ、[SSH の SOCKS トンネルの「dnf にもトンネルを使わせる」](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)を行う。
-
-   - **次の手順は、その項の `Metadata cache created.` が出てから貼る**
-
-1. この項の手順 1 のシェルのまま、[Homebrew](#homebrew)の手順 1〜4 を貼る。
-
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、[Homebrew](#homebrew)の手順 1〜3 は飛ばす
-   - [Homebrew](#homebrew)の手順 1 の dnf は、この項の手順 2 の設定で通る（この項の手順 1 で 4 つとも入っていたなら飛ばす）
-   - [Homebrew](#homebrew)の手順 3 は、[共通の bash 設定](#共通の-bash-設定)の手順 1・2 を入れてあるシェルで貼る
-   - [Homebrew](#homebrew)の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
-   - **次の手順は、[Homebrew](#homebrew)の手順 3（GNOME で日本語入力を使う PC は同じ項の手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
-
-1. 確かめるために、brew で jq をトンネル越しに入れる。
-
-   ```bash
-   brew install jq
-   ```
-
-   - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれたら、`y` を押す（Enter は要らない）
-   - `==> Pouring jq--…bottle…tar.gz` と出て、ソースからのビルドにならない
-   - ほかの Homebrew で入れる項も、この項の手順 5 の前に、このシェルで貼る
-   - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
-
-1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜4 で、トンネルを閉じて、転送を付けずにログインし直す。
-
-   - その項で `exit` した後の、転送を付けないログインは、オンラインのホストで行う
-   - その項の最後の確かめで、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
-   - **次の手順は、ログインし直したオフラインのホストのシェルで貼る**
-
-1. オフラインのホストで、トンネルが無くても jq が動くことを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   brew list --versions jq
-   command -v jq
-   echo '{"host": "offline"}' | jq -r .host
-   ```
-
-   - `jq 1.8.2` のような版、`/home/linuxbrew/.linuxbrew/bin/jq`、`offline` が出る
-
-#### Homebrew のオフライン導入: 更新
-
-- オフラインのホストで、SSH の SOCKS トンネル越しに Homebrew と、Homebrew で入れたものを上げる
-- 前提: [Homebrew のオフライン導入](#homebrew-のオフライン導入)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、トンネルを張り直してある
-- 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル）
-
-1. [共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 を貼る。
-
-   - `brew outdated` が何も出さなければ、上げるものは無いので、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 は飛ばす
-   - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[Homebrew のオフライン導入](#homebrew-のオフライン導入)の手順 4 と同じ確認）
-   - **次の手順は、上げ終わってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
-
-1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
-
----
-
-### シェルのツール
-
-- starship・zoxide・fzf・eza・bat・tmux を Homebrew で入れ、共通の bash 設定が読み込んだことを確かめる
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
-
-1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
-
-   ```bash
-   brew install starship zoxide fzf eza bat tmux
-   ```
-
-   - 入れるものの一覧の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y`（Enter は要らない）
-   - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
-   - 要らないツールは、名前を外してから貼る
-   - **次の手順は、`y` と答えて、プロンプトに戻ってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
-
-1. 開いている端末を閉じて、開き直す。
-
-   - Ctrl+Alt+T（[GNOME の表示と入力](#gnome-の表示と入力)の手順 13）でも開ける
-   - 開き直した端末から、プロンプトが starship に変わり、zoxide・fzf・eza のエイリアス・bat の `MANPAGER` も効く
-   - 今の端末で `. ~/.bashrc` を読み直さず、端末を開き直す
-   - **次の手順は、開き直した端末で貼る**
-
-1. bash の履歴・補完・キー操作の設定が効いていることを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   printf '%s\n' "${HISTSIZE}" "${HISTFILESIZE}" "${HISTCONTROL}"
-   shopt histappend autocd cdspell dirspell globstar
-   complete -p -D
-   complete -p brew
-   bind -v | grep -E 'completion-ignore-case|show-all-if-ambiguous|colored-stats|colored-completion-prefix'
-   bind -q history-search-backward
-   ```
-
-   - `100000`・`100000`・`ignoreboth`、5 つの `on` が出る
-   - `complete -F _completion_loader -D`（Workstation では `complete -F _python_argcomplete_global -D` のこともある）と、`-F _brew brew` を含む行が出る
-   - `set … on` が 4 行と、`history-search-backward` の `\eOA`・`\e[5~`・`\e[A` の割り当てが出る
-
-1. starship が入り、プロンプトの文字列が作られるか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   grep -n -e 'starship init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'zoxide init' ~/.config/bash/bashrc
-   starship --version
-   command -v starship
-   starship module directory
-   starship explain
-   ```
-
-   - 最初の行で、starship → WezTerm → zoxide の順に出る
-   - `starship 1.26.0` のような版と、`/home/linuxbrew/.linuxbrew/bin/starship` が出る
-
-1. fzf が入り、キー操作と補完が組み込まれたか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   fzf --version
-   command -v fzf
-   bind -X
-   bind -s | grep -F '"\ec"'
-   complete -p cd vi ssh
-   ```
-
-   - `0.74.4 (Homebrew)` のような版と `/home/linuxbrew/.linuxbrew/bin/fzf` が出る
-   - Ctrl+R・Ctrl+T の割り当て（`"\C-r": "__fzf_history__"`・`"\C-t": "fzf-file-widget"`）と、Alt+C のマクロ（`` "\ec": " \C-b\C-k \C-u`__fzf_cd__`… ``）が出る
-   - `cd`・`vi`・`ssh` の補完の定義（`_fzf_dir_completion`・`_fzf_path_completion`・`_fzf_complete_ssh`）が出る
-
-1. eza の版と Git の列、`ll`・`la`・`lt` を確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   eza --version
-   command -v eza
-   eza -l --git --header ~/.config/bash
-   alias ll la lt
-   ```
-
-   - `eza --version` は `v0.23.5 [+git]` のような行を含む
-   - `Permissions Size User Date Modified Git Name` の見出しの一覧が出る
-   - `ll` は `eza -l --git --group-directories-first`、`la` は `-la`、`lt` は `eza --tree --level=2`
-
-1. bat の版と、色と行番号、man のページャを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   bat --version
-   command -v bat
-   bat --color=always --style=numbers /etc/os-release | head -5
-   printf '%s\n' "$MANPAGER"
-   ```
-
-   - `bat 0.26.1` のような版と、`/home/linuxbrew/.linuxbrew/bin/bat` が出る
-   - 行番号付きで `NAME="AlmaLinux"` から 5 行が色付きで出る
-   - 最後に `bat -plman` が出ればよい
-
-1. tmux が入ったことを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   tmux -V
-   command -v tmux
-   rpm -q tmux
-   ```
-
-   - `tmux 3.7c` のような版と `/home/linuxbrew/.linuxbrew/bin/tmux` が出る
-   - 最後の行は `パッケージ tmux はインストールされていません`（英語の環境では `package tmux is not installed`）でよい
-   - **BaseOS の tmux（`tmux-3.3a-…`）が出て、そちらで始めたセッションが動いているなら**、そのセッションには `/usr/bin/tmux attach` で入る
-
-1. zoxide の `z` と `zi` を確かめ、記録を試すディレクトリへ移る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   type -t z zi
-   zoxide --version
-   command -v zoxide
-   cd /usr/share
-   ```
-
-   - `function` が 2 行と、`zoxide 0.10.0` のような版、`/home/linuxbrew/.linuxbrew/bin/zoxide` が出る
-   - **注意**: 対話のシェル（端末に貼る）で行う。スクリプトの中では記録されない
-   - **次の手順は、プロンプトが戻ってから貼る**。戻る前は `/usr/share` が zoxide に記録されない
-
-1. zoxide のデータベースに記録されたか確かめ、ホームに戻る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   zoxide query --list
-   cd ~
-   ```
-
-   - `/usr/share` が出れば動いている
-
-#### キー操作を試す
-
-- 共通の bash 設定とシェルのツールのキー操作（補完・履歴の検索・fzf のキー）を、端末で押して試す
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた端末）
-
-1. キーを押して、補完と履歴の検索を確かめる。
-
-   - `systemctl star` と打って Tab: `systemctl start ` になる（bash-completion）
-   - `ls /usr/s` → Tab: 色付きの `sbin/ share/ src/` が 1 回で出る
-   - `cd /usr/SH` と打って Tab: `cd /usr/share/` になる（`completion-ignore-case`）
-   - `printf` と打って ↑: `printf` で始まる履歴の行が、新しい順に出る（`history-search-backward`。カーソルは `printf` の後ろに残る）。Ctrl+C で捨てる
-     - [シェルのツール](#シェルのツール)の手順 7 を貼った端末なら、1 回目は「確認」の見出しの `printf '\n\033[7m 確認 \033[0m\n'`、もう 1 回 ↑ で、その手順の `printf '%s\n' "$MANPAGER"`
-   - `/usr/share` と打って Enter: `cd -- /usr/share` と出て移る（`autocd`）。`cd /usr/shaer` と打って Enter: `/usr/share` と出て移る（`cdspell`）。`cd` で戻る
-   - `ls /usr/share/doc/bash-completion/**/*.md` と打って Enter: `CONTRIBUTING.md` と `README.md` が出る（`globstar`。効いていないと、`そのようなファイルやディレクトリはありません` になる）
-   - `eza --gi` と打って Tab: `--git  --git-ignore  --git-repos  --git-repos-no-status` の一覧が出て、`eza --git` まで入る（Homebrew のコマンドの補完）
-
-1. Ctrl+R を押し、履歴から[シェルのツール](#シェルのツール)の手順 5 の `fzf --version` を選んで実行する。
-
-   - 画面の下から fzf の一覧が開き、最下行の `>` の右に打った文字で絞り込める。`fzf --v` と打ち、上下キーで `fzf --version` の行を選ぶ
-   - Enter でその行がプロンプトに入る（**実行はされない**）。もう一度 Enter で実行する
-   - Esc か Ctrl+C で、何も選ばずに閉じる
-   - 履歴に `fzf --version` が無ければ、Esc で閉じ、`fzf --version` を打って Enter で実行してから、この手順をやり直す
-
-1. `cat ` と打ってから Ctrl+T を押し、ファイルを選ぶ。
-
-   - ホームのファイル一覧で `.bashrc` と打つと先頭になり、Enter でカーソル位置に入る。`bashrc` だけでは `.config/bash/bashrc` が先頭になる
-   - 右側に、選んでいるファイルの中身が bat の行番号と色付きで出る
-   - そのまま Enter で `cat .bashrc` が動く
-
-1. `ls /usr/share/**` と打って Tab を押し、候補から選ぶ。
-
-   - `**` → Tab: `/usr/share/` のパス一覧が開く。`doc/bash` → Enter: `ls /usr/share/doc/bash/` が入る。再度 Enter で実行する
-
-1. Alt+C を押してディレクトリを選んで移り、`cd -` で戻る。
-
-   - 今のディレクトリの下のディレクトリの一覧が開く。選んで Enter で、`builtin cd -- <ディレクトリ>` と表示して移る
-   - 端末が Alt を ESC の前置きとして送る設定のときに届く（届かなければ、`ESC` を押してから `c`）
-   - `cd -` で元のディレクトリに戻る
-
-#### starship のプリセットを当てる
-
-- 公式が配っている設定一式を `~/.config/starship.toml` に書き出す
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）
-- **この項の手順 2 で、既存の設定は上書きされる**。自分で書いたものがあれば、先に退避する
-
-1. 当てられるプリセットの一覧を見る。
-
-   ```bash
-   starship preset --list
-   ```
-
-   - `plain-text-symbols` と `no-nerd-font` は**Nerd Font が無い端末向け**で、記号を ASCII に置き換える
-   - `nerd-font-symbols` / `pastel-powerline` / `gruvbox-rainbow` などは Nerd Font が要る（[HackGen Console NF](#hackgen-console-nf) など）
-   - **次の手順は、使うプリセットを決めてから貼る**
-
-1. 選んだプリセットを `~/.config/starship.toml` に書き出す（`STARSHIP_PRESET` は、この項の手順 1 で選んだ名前にする）。
-
-   ```bash
-   STARSHIP_PRESET=plain-text-symbols   # 当てるプリセット（この項の手順 1 の一覧から）。<STARSHIP_PRESET>
-   ```
-
-   ```bash
-   if [ -z "${STARSHIP_PRESET}" ]; then echo '中断: STARSHIP_PRESET が空のまま。値を入れて貼り直す' >&2; else
-     mkdir -p ~/.config
-     starship preset "${STARSHIP_PRESET}" -o ~/.config/starship.toml --force &&
-       wc -l ~/.config/starship.toml &&
-       starship prompt
-   fi
-   ```
-
-   - 設定ファイルの変更だけなら `~/.bashrc` を読み直す必要はない。次のプロンプトから変わる
-
-#### starship の設定ファイル
-
-- starship の設定ファイル `~/.config/starship.toml` を、手で書く
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）
-- `~/.config/starship.toml` は**既定では存在しない**（無ければ組み込みの既定値で動く）
-
-1. `~/.config/starship.toml` に、設定を手で書く。
-
-   ```bash
-   mkdir -p ~/.config
-   cat > ~/.config/starship.toml <<'EOF'
-   add_newline = false
-
-   [directory]
-   truncation_length = 3
-   truncate_to_repo = false
-   EOF
-   starship prompt
-   ```
-
-   - `~/.config/starship.toml` が既にあれば、まるごと置き換える（[starship のプリセットを当てる](#starship-のプリセットを当てる)の設定も消える）
-
-#### starship でユーザー名とホスト名を常に表示する
-
-- ユーザーを切り替えても名前を出す（starship の既定は、SSH のときと、ログインしたユーザーと違うときだけ出す）
-- 前提: [シェルのツール](#シェルのツール)を通してある。[starship のプリセットを当てる](#starship-のプリセットを当てる)や[starship の設定ファイル](#starship-の設定ファイル)の例を使う場合は、それを先に通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）。root の設定は別のファイルになる
-
-1. ユーザー名とホスト名を常に表示する設定を入れる。
-
-   ```bash
-   mkdir -p ~/.config
-   starship config username.show_always true
-   starship config hostname.ssh_only false
-   printf '\n\033[7m 確認 \033[0m\n'
-   starship module username
-   starship module hostname
-   ```
-
-   - ユーザー名とホスト名が出ることを確かめる
-   - 次のプロンプトから反映される。端末の開き直しや `~/.bashrc` の読み直しは不要
-   - 設定後にプリセットや設定ファイルを上書きした場合は、この項の手順をもう一度実行する
-
-#### fzf の使い方の基本
-
-- 全部のキーと変数は `man fzf`（Homebrew のものが読める）と [README](https://github.com/junegunn/fzf#readme)
-
-| シェルのキー | すること | 動きを変える変数 |
-|---|---|---|
-| Ctrl+R | 履歴を曖昧検索で選び、プロンプトに入れる（実行はしない） | `FZF_CTRL_R_OPTS` |
-| Ctrl+T | 今のディレクトリの下のファイル・ディレクトリを選び、カーソルの位置に入れる（Tab で複数） | `FZF_CTRL_T_COMMAND`・`FZF_CTRL_T_OPTS` |
-| Alt+C | 今のディレクトリの下のディレクトリを選んで `cd` する | `FZF_ALT_C_COMMAND`・`FZF_ALT_C_OPTS` |
-| `<コマンド> **` + Tab | パス（`cd` などはディレクトリ、`ssh` はホスト、`export` は変数）を選んで入れる | `FZF_COMPLETION_TRIGGER`（既定 `**`）・`FZF_COMPLETION_OPTS` |
-
-| fzf の画面のキー | すること |
-|---|---|
-| 文字 | 打つたびに絞り込む |
-| ↑ / ↓、Ctrl+K / Ctrl+J、Ctrl+P / Ctrl+N | 候補を上下に動く |
-| Enter | 選んで閉じる |
-| Esc、Ctrl+C、Ctrl+G | 選ばずに閉じる |
-| Tab / Shift+Tab | 複数を選ぶ・外す（Ctrl+T と `**<Tab>` のパスのとき） |
-| Ctrl+R（履歴の中で） | 並びを「新しい順」と「一致の良い順」で切り替える（右上の `+S`） |
-
-| 検索の書き方 | 意味 | 例（`apple banana cherry grape pineapple apple-pie` から） |
-|---|---|---|
-| `ap` | 文字が順に含まれる（曖昧一致） | `apple` `apple-pie` `grape` `pineapple` |
-| `'ap` | その文字列をそのまま含む（完全一致） | 同上（`'apple` なら `apple` `apple-pie` `pineapple`） |
-| `^ap` | その文字列で始まる | `apple` `apple-pie` |
-| `le$` | その文字列で終わる | `apple` `pineapple` |
-| `!ap` | 含まない | `banana` `cherry` |
-| `ap le`（空白） | 両方に一致（AND） | `apple` `apple-pie` `pineapple` |
-| `ap \| ch` | どちらかに一致（OR） | `apple` `cherry` `apple-pie` `grape` `pineapple` |
-
-- 共通の見た目や動き（`--height`・`--layout`・`--border` など）は `FZF_DEFAULT_OPTS` に書く。本書では変えていない
-
-#### fzf で fd と bat を候補とプレビューに使う
-
-- Ctrl+T と Alt+C の候補を、fd の一覧に変える（`.git` の中を除き、隠しファイルは含める。`.gitignore` の対象は fd が既定で除く）
-- 前提: [シェルのツール](#シェルのツール)を通してある（bat は、その項の手順 1 で入る）
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
-- 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
-- `**<Tab>` の候補は変わらない（`find` のまま）
-- fd は[Neovim](neovim.md#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
-- 戻すときは、この項の手順 5
-
-1. brew で fd を入れる。
-
-   ```bash
-   brew install fd
-   ```
-
-   - 確認が出たら `y`（Enter は要らない）
-   - EPEL の `fd-find` と二重に入れない
-   - **次の手順は、プロンプトに戻ってから行う**
-
-1. 開いている端末を閉じて、開き直す。
-
-   - **次の手順は、開き直した端末で貼る**
-
-1. fd と bat があり、変数が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   command -v fd bat
-   printf '%s\n' "${FZF_DEFAULT_COMMAND-}" "${FZF_CTRL_T_COMMAND-}" "${FZF_ALT_C_COMMAND-}" "${FZF_CTRL_T_OPTS-}"
-   ```
-
-   - 2 つのパスと、`fd` を使う候補の 3 変数・`bat` を使うプレビューの変数が出ればよい
-
-1. `cat ` と打ってから Ctrl+T を押し、候補が fd の一覧になったことを確かめる。
-
-   - `.git` の中のファイルと、`.gitignore` に書かれたファイルは一覧に出ない
-   - 一覧の右側に、選んでいるファイルの中身が行番号と色付きで出る。Esc で閉じる
-
-1. 元に戻すときは、fd を消す。
-
-   ```bash
-   brew uninstall fd
-   ```
-
-   - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/fd/…` と出ればよい
-   - [Neovim](neovim.md#neovim)の手順 3 か[yazi](#yazi)の手順 2 で fd を入れてあれば、消さない（自分用の Neovim の設定のファイルピッカーと yazi も使う）
-
-#### eza の表示を調整する
-
-設定ファイルは無く、すべてコマンドラインオプションと環境変数で決める。よく使うもの:
-
-| やりたいこと | オプション |
-|---|---|
-| 列の見出しを出す | `--header`（`-h`） |
-| 時刻の書式を変える | `--time-style=long-iso` / `iso` / `relative` / `+%Y-%m-%d` |
-| 8 進数のパーミッション | `--octal-permissions`（`-o`） |
-| アイコンを出す | `--icons=always`（**Nerd Font が要る**） |
-| ディレクトリを先に並べる | `--group-directories-first` |
-| `.gitignore` のファイルを隠す | `--git-ignore` |
-| git 連携を切る | `--no-git` |
-
-- 色は `LS_COLORS` と `EZA_COLORS` を見る
-- 全オプションは `eza --help`（86 行）と `man eza`
-
-#### bat の設定ファイル
-
-- bat の設定ファイルを置き、テーマ・表示の飾り・ページャを決める
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-- パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
-- 置き場所は `~/.config/bat/config`（`bat --config-file` で確認できる）
-  - 既定の場所に置く限り bat は自分で見つける。別の場所に置きたいときだけ `BAT_CONFIG_PATH` を `~/.bashrc` に `export` する
-
-1. よく変える 3 つだけを書いた、最小の設定ファイルを置く。
-
-   ```bash
-   BAT_THEME_NAME=ansi   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
-   ```
-
-   ```bash
-   if [ -z "${BAT_THEME_NAME}" ]; then echo '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す' >&2; else
-     mkdir -p ~/.config/bat
-     cat > ~/.config/bat/config <<EOF
-   --theme="${BAT_THEME_NAME}"
-   --style="numbers,changes,header"
-   --paging=never
-   EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     cat ~/.config/bat/config
-     bat --config-file
-   fi
-   ```
-
-   - 書いた 3 行と、`/home/<USER>/.config/bat/config` が出ればよい
-   - `中断:` と出たら、何も書いていない
-
-#### tmux を試す
-
-- tmux のセッションを作り、抜けて（デタッチ）、入り直して（アタッチ）、終わらせる
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-
-1. tmux のセッションを作って入る。
-
-   ```bash
-   tmux new-session -s work
-   ```
-
-   - 画面の下に緑の帯（ステータス行）が出て、左端に `[work]` が出る
-   - **`Ctrl+b` を押して離してから `d`** で抜ける（デタッチ）。シェルに戻って `[detached (from session work)]` と出る
-   - **次の手順は、デタッチしてシェルに戻ってから貼る**（続けて貼ると、tmux の中のシェルへの入力になる）
-
-1. セッションの一覧を見て、もう一度入る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   tmux ls
-   tmux attach -t work
-   ```
-
-   - `tmux ls` の `work: 1 windows (created …)` は、tmux の画面を出た後のシェルに見える
-   - `tmux attach -t work` で、この項の手順 1 の画面に戻る
-   - 中で `exit` と打つと、シェルが終わってセッションも終わる。`[exited]` と出てシェルに戻る
-   - **次の手順は、`exit` でシェルに戻ってから貼る**（続けて貼ると、tmux の中のシェルへの入力になる）
-
-1. tmux のセッションが残っていないことを確かめる。
-
-   ```bash
-   tmux ls
-   ```
-
-   - `no server running on /tmp/tmux-<UID>/default` と出る
-
-#### tmux の使い方の基本
-
-- tmux のキーは、**`Ctrl+b`（プレフィックス）を押して離してから**次のキーを押す
-- 全部のキーは `Ctrl+b` → `?` で出る（`q` で閉じる）。`man tmux` も Homebrew の tmux のものが読める
-
-| キー（`Ctrl+b` の後） | すること |
-|---|---|
-| `d` | デタッチ（セッションを残して抜ける） |
-| `c` | 新しいウィンドウを作る |
-| `n` / `p` | 次 / 前のウィンドウへ |
-| `0`〜`9` | その番号のウィンドウへ |
-| `w` | セッションとウィンドウの一覧から選ぶ（`q` で閉じる） |
-| `s` | セッションの一覧から選ぶ |
-| `%` | ペインを左右に分ける |
-| `"` | ペインを上下に分ける |
-| `o` / 矢印 | 次のペイン / その向きのペインへ |
-| `z` | 今のペインを全画面にする（もう一度で戻る） |
-| `x` | 今のペインを閉じる（`kill-pane …? (y/n)` に `y`） |
-| `[` | さかのぼって読む（コピーモード。矢印・PageUp・PageDown で動き、`q` で戻る） |
-| `$` / `,` | セッション / ウィンドウの名前を変える |
-| `:` | tmux のコマンドを打つ |
-| `Ctrl+b` | `Ctrl+b` を中のアプリに送る |
-
-| コマンド | すること |
-|---|---|
-| `tmux new-session -s <名前>` | 名前を付けてセッションを作り、入る |
-| `tmux new-session -A -s <名前>` | 同じ名前のセッションがあれば入り、無ければ作って入る |
-| `tmux new-session -d -s <名前> <コマンド>` | 入らずに、コマンドを動かすセッションを作る（コマンドが終わるとセッションも終わる） |
-| `tmux ls` | セッションの一覧（どこかで入っているものには `(attached)`） |
-| `tmux attach -t <名前>` | セッションに入る |
-| `tmux attach -d -t <名前>` | ほかの端末から入っていれば、そちらを外してから入る |
-| `tmux kill-session -t <名前>` | セッションを終わらせる（中のコマンドも止まる） |
-| `tmux kill-server` | すべてのセッションを終わらせる |
-
-#### tmux の設定ファイル
-
-- マウスのホイールでさかのぼれるようにし、さかのぼれる行数を 2000 から 50000 に増やす。Claude Code のように出力が長く続くものを、tmux の中で読み返すときに効く
-- 前提: [シェルのツール](#シェルのツール)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-- tmux は、サーバーが起動するときに `~/.tmux.conf` と `~/.config/tmux/tmux.conf` の**両方**を読む（あるものだけ）。新規作成は後者、既存設定がある場合はそのファイルに書く
-- マウスを on にすると、マウスでの文字の選択は tmux が受け取る。端末の選択を使うときは、端末の決まりに従う（WezTerm などは Shift を押しながら）
-
-1. 設定ファイルを書く。
-
-   ```bash
-   if [ -e ~/.tmux.conf ] || [ -e ~/.config/tmux/tmux.conf ]; then
-     echo '中断: tmux の設定ファイルがすでにある。中身を見て、この項の set の 2 行を手で足す' >&2
-   else
-     mkdir -p ~/.config/tmux
-     cat > ~/.config/tmux/tmux.conf <<'EOF'
-   # マウス: ホイールでさかのぼる・クリックでペインを選ぶ・境界のドラッグで大きさを変える
-   set -g mouse on
-   # さかのぼれる行数（既定は 2000）
-   set -g history-limit 50000
-   EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     cat ~/.config/tmux/tmux.conf
-   fi
-   ```
-
-   - 書いた 4 行が出る
-   - `中断:` が出たら、既存ファイルの `mouse`・`history-limit` を編集する。両方あるなら `~/.config/tmux/tmux.conf` に異なる値が無いことも確かめる
-
-1. 動いている tmux にも読ませて、効いたか確かめる。
-
-   ```bash
-   if TMUX_CHECK_ID=$(tmux new-session -d -P -F '#{session_id}' -s "conf-check-$$"); then
-     for conf in ~/.tmux.conf ~/.config/tmux/tmux.conf; do
-       if [ -f "${conf}" ]; then tmux source-file "${conf}"; fi
-     done
-     printf '\n\033[7m 確認 \033[0m\n'
-     tmux show -g mouse
-     tmux show -g history-limit
-     tmux kill-session -t "${TMUX_CHECK_ID}"
-   else
-     echo '中断: 確認用のセッションを作れなかった。既存セッションは終了しない' >&2
-   fi
-   ```
-
-   - `mouse on` と `history-limit 50000` が出る
-
----
-
-### HackGen Console NF
-
-- 日本語と Nerd Fonts のアイコンを含む等幅のフォント HackGen Console NF を、Homebrew の cask で入れる
-- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-
-1. 変数を設定する。
-
-   ```bash
-   HACKGEN_FAMILY='HackGen Console NF'   # 確認と設定に使うファミリー名。<HACKGEN_FAMILY>
-   printf '\n\033[7m 確認 \033[0m\n'
-   printf '%-15s = %s\n' HACKGEN_FAMILY "${HACKGEN_FAMILY}"
-   ```
-
-   - **編集が必須の変数は無い**。この項の手順 5 の確認に使うファミリー名で、既定のまま進められる
-   - 文字幅が半角 3:全角 5 の版を使いたいときだけ、`HackGen35 Console NF` に変える
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
-
-1. `unzip` が入っているか確かめる。
-
-   ```bash
-   command -v unzip || echo 'unzip は未導入'
-   ```
-
-   - パスが出れば、この項の手順 3 は飛ばす
-   - `unzip は未導入` と出たら、この項の手順 3 で入れる
-
-1. `unzip` が未導入のときだけ、`unzip` を入れる。
-
-   ```bash
-   sudo dnf install -y unzip
-   ```
-
-1. HackGen を Homebrew の cask で入れる。
-
-   ```bash
-   brew install --cask font-hackgen-nerd
-   ```
-
-   - `==> Moving Font ...` が 4 行出る
-   - `font-hackgen-nerd was successfully installed!` で終わる
-
-1. HackGen が入ったか確かめ、かな・漢字・記号・アイコンが入っているかも見る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   brew list --cask --versions font-hackgen-nerd
-   ls ~/.local/share/fonts/
-   fc-list : family style file | grep HackGen
-   fc-match "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"
-   for cp in 3042 6f22 e0b0 f09b; do printf 'U+%s: ' "${cp}"; fc-list ":charset=${cp}" family | grep -c -x -F "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"; done
-   ```
-
-   - `font-hackgen-nerd 2.10.0`、4 つの `.ttf`、`HackGen Console NF` と `HackGen35 Console NF` の Regular / Bold の 4 行が出る
-   - `fc-match` が `HackGenConsoleNF-Regular.ttf: "HackGen Console NF" "Regular"` を返せばよい
-   - **ファイル名が HackGen であることを確かめる**
-   - 4 行とも `1` なら入っている（`あ` / `漢` / Powerline の三角 / GitHub のアイコン）
-
----
-
-### WezTerm
-
-- 端末のアプリ WezTerm（nightly）を COPR から入れ、自分用の設定を入れて起動し直す
-- 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意（通してあれば、自分用の設定がそのフォントで描く）
-- 実行場所: GNOME にログインした自分のユーザーの、WezTerm の外の端末（bash。Ptyxis など）。この項の手順 5 の中で、起動し直した WezTerm のタブへ移る
-
-1. chroot を明示して、COPR を有効化する。
-
-   ```bash
-   sudo dnf copr enable wezfurlong/wezterm-nightly "rhel-9-$(uname -m)"
-   ```
-
-   - 有効化してよいか `[y/N]` で聞かれる
-   - **次の手順は、`[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. できた repo ファイルを確かめる。
-
-   ```bash
-   cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
-   ```
-
-   - `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい
-
-1. WezTerm を入れる。
-
-   ```bash
-   sudo dnf install wezterm
-   ```
-
-   - 途中で COPR の GPG 鍵の取り込みを聞かれる
-   - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. WezTerm が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
-   dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
-   wezterm --version
-   ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
-   wezterm ls-fonts | sed -n '1,5p'
-   ```
-
-   - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
-   - アプリ一覧には「WezTerm」が出る
-
-1. 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、起動し直した WezTerm に移る。
-
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)の手順をすべて、その項の実行場所のとおりに通す
-   - 参照先の手順 5 で WezTerm を起動し、手順 6 を WezTerm のタブに貼って確かめる
-
-#### WezTerm と HackGen Console NF をデスクトップで使う
-
-- GNOME の等幅のフォントを HackGen Console NF にし、Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする
-- 前提: [GNOME の表示と入力](#gnome-の表示と入力)（Ctrl+Alt+T のショートカットと Dash のお気に入り）、[HackGen Console NF](#hackgen-console-nf)、[WezTerm](#wezterm)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの WezTerm のタブ（bash）
-
-1. GNOME の等幅のフォントを HackGen Console NF にする。
-
-   ```bash
-   MONO_FONT='HackGen Console NF 11'   # 等幅のフォントの名前と大きさ。<MONO_FONT>
-   ```
-
-   ```bash
-   if [ -z "${MONO_FONT}" ]; then echo '中断: MONO_FONT が空のまま。値を入れて貼り直す' >&2; else
-     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
-     /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name "${MONO_FONT}"
-     printf '\n\033[7m 確認 \033[0m\n'
-     /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
-   fi
-   ```
-
-   - 2 つ目の `get` が `'HackGen Console NF 11'` になればよい
-
-1. Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする。
-
-   ```bash
-   kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
-   /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'wezterm start'
-   printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
-   fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
-   /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.gnome.Ptyxis.desktop/org.wezfurlong.wezterm.desktop}"
-   /usr/bin/gsettings get org.gnome.shell favorite-apps
-   ```
-
-   - `'wezterm start'` と、端末のところが `'org.wezfurlong.wezterm.desktop'` になったお気に入りが出ればよい
-   - お気に入りに Ptyxis が無かったときは、お気に入りは変わらない
-
-1. Ctrl+Alt+T と Dash から WezTerm が開き、等幅のフォントが変わったことを確かめる。
-
-   - Ctrl+Alt+T と、Dash の WezTerm のアイコンで、WezTerm の窓が開く
-   - Ptyxis（アクティビティの画面で `terminal`）の文字が HackGen Console NF になっている
-
-#### WezTerm の設定ファイル
-
-- パッケージ（Windows 11 ではインストーラ）は設定ファイルを置かない。無ければ組み込みの既定値で動く
-- [WezTerm](#wezterm)の手順 5 で入れた自分用の設定は、`~/.config/wezterm/wezterm.lua`（下の表の 5）
-
-| 優先 | 場所 | 用途 |
-|---|---|---|
-| 1 | `wezterm --config-file <path>` | 一時的に別の設定で起動する |
-| 2 | 環境変数 `WEZTERM_CONFIG_FILE` | 同上（環境ごとに切り替える） |
-| 3 | `~/.wezterm.lua` | **1 ファイルで済む設定はここ**（公式の推奨） |
-| 4 | `${XDG_CONFIG_HOME}/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` を設定している場合のみ） | 複数ファイルに分ける設定 |
-| 5 | `~/.config/wezterm/wezterm.lua`（`XDG_CONFIG_HOME` 未設定のとき） | 同上 |
-
-- **Windows 11 では**、`~` は `%USERPROFILE%`（`C:\Users\<WIN_USER>`）。置くのは `%USERPROFILE%\.wezterm.lua` か `%USERPROFILE%\.config\wezterm\wezterm.lua`
-  - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
-- **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
-  - 導入は[WezTerm](#wezterm)の手順 5。[設定を導入する](#wezterm-の設定を導入する)の手順 5 で端末を開き直す
-  - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Windows 11 の初期設定の「Git Bash と WezTerm の設定」](windows-setup.md#git-bash-と-wezterm-の設定)）
-  - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
-  - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
-  - フォントは HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)。Windows 11 は[Windows 11 の初期設定の「HackGen Console NF」](windows-setup.md#hackgen-console-nf)）
-  - AlmaLinux 10 の公式 Bash 統合との併用は[導入手順の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)を参照する
-  - Windows 11 は Git Bash を既定にし、Git Bash・PowerShell の統合を設定から読む（[シェル統合](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
-  - `~/.wezterm.lua` があると、clone した設定は読まれない
-
-#### WezTerm の設定を導入する
-
-自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を `~/.config/wezterm` に clone し、WezTerm を起動し直して読ませる。シェル統合は共通 bash 設定が読む。
-
-- 前提: [WezTerm](#wezterm)の手順 1〜4（WezTerm nightly）と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意
-- 実行場所: GNOME にログインした自分のユーザーの bash（Windows 11 は Git Bash）。この項の手順 1〜4 は WezTerm の外の端末、手順 6 は手順 5 で起動し直した WezTerm のタブ
-- この項の手順 2 の退避の前に、WezTerm のウィンドウをすべて閉じる
-- 既存の設定の確認（この項の手順 1）と退避（手順 2）を省かない
-
-[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
-
-1. 既存の WezTerm の設定があるか確かめる。
-
-   ```bash
-   ls -ld ~/.wezterm.lua ~/.config/wezterm
-   ```
-
-   - どちらかが出たら、手順 2 で退避する
-   - 2 行とも `No such file or directory` なら、設定は無い。手順 2 は飛ばす
-   - `~/.wezterm.lua` が残っていると、この設定は読まれない
-
-1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
-
-   ```bash
-   (
-     for f in ~/.wezterm.lua ~/.config/wezterm; do
-       if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
-         echo "中断: $f.bak が既にある。何も退避していない" >&2
-         exit 1
-       fi
-     done
-     for f in ~/.wezterm.lua ~/.config/wezterm; do
-       if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
-     done
-     ls -ld ~/.wezterm.lua ~/.config/wezterm
-   )
-   ```
-
-   - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
-   - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
-   - `中断:` や `mv` のエラーが出たら、手順 3 へ進まない。原因を直して手順 2 を貼り直す
-   - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
-
-1. この設定を `~/.config/wezterm` に clone する。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
-   git -C ~/.config/wezterm log -1 --oneline
-   ```
-
-   - `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
-   - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、手順 1 から見直す
-
-1. WezTerm がこの設定を読めるか確かめる。
-
-   ```bash
-   wezterm ls-fonts --text 'aあ'
-   ```
-
-   - `ERROR  wezterm_gui >` が無ければ設定を読めている。終了コードは誤りがあっても `0` なので使わない
-   - `show-keys` は読み込み確認に使わず、`| head` も付けない
-   - HackGen Console NF があればそのフォントで描く。無ければフォント警告が出て代替フォントを使う。画面なしでは通知の dbus エラーが出る場合もある
-   - Windows でコマンドが無ければ `"/c/Program Files/WezTerm/wezterm.exe" ls-fonts --text 'aあ'` を使う
-
-1. WezTerm のウィンドウをすべて閉じてから、起動し直す。
-
-   - WezTerm を開いていなければ、起動するだけでよい
-   - AlmaLinux 10 はアプリ一覧の「WezTerm」から、Windows 11 はスタートメニューの「WezTerm」から起動する
-   - シェル統合とウィンドウ装飾は起動し直して反映する
-   - **次の手順は、起動し直した WezTerm のタブで貼る**（開いていたタブで貼ると、手順 6 の確かめが外れる）
-
-1. 起動し直した WezTerm のタブで、シェル統合が読まれたか確かめる。
-
-   ```bash
-   echo "$TERM_PROGRAM"
-   echo "$WEZTERM_SHELL_INTEGRATION"
-   declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
-   ```
-
-   - 1 行目は `WezTerm`、2 行目は `.config/wezterm/shell/wezterm.sh` で終わるパス
-   - 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
-     - AlmaLinux 10 の公式 Bash 統合: `__wezterm_set_user_var`・`__wezterm_notify_done`・`__wz_mouse_off` の 3 行
-     - 公式統合との併用は[注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#注意点)を参照する
-     - 公式の統合が無いとき（Windows の Git Bash など）: `__wezterm_notify_done` と `__wz_mouse_off` の 2 行
-   - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、手順 5 の前から開いていたタブで貼っている
-   - `__wz_mouse_off` が出なければ、`~/.bashrc` の行が読まれていない。共通の bash 設定を見直す
-
-#### WezTerm のシェル統合を SSH 先で使う
-
-手元の WezTerm から ssh でつないだ先でも、WezTerm のシェル統合を使う。手元の WezTerm から `TERM_PROGRAM` を送り、SSH 先の sshd で受け取る。公式 Bash 統合が既に有効なら、変数が未設定でも補完処理が動く。
-
-- 前提: 手元で[WezTerm](#wezterm)を通してある。SSH 先は自分で管理する AlmaLinux 10 で、手元から `ssh <HOST>` でログインできる
-- 実行場所: この項の手順 1・4 は手元（WezTerm を使う PC）、手順 2・3・5 は SSH 先の自分のユーザーのシェル（bash）
-
-1. 手元の `~/.ssh/config` で、使う `Host` に `SendEnv TERM_PROGRAM` を足す。
-
-   - エディタで `~/.ssh/config` を開く（Windows は `%USERPROFILE%\.ssh\config`。Git Bash では `~/.ssh/config`）
-   - 使う `Host <HOST>` の行の下に、字下げして `SendEnv TERM_PROGRAM` の行を足す
-   - WezTerm から ssh したときだけ、`WezTerm` が送られる。公式統合が無い場合、この値が `WezTerm` のときだけ独自統合が動く
-
-1. ssh 先で、sshd が `TERM_PROGRAM` を受け取るようにする。
-
-   ```bash
-   {
-     echo 'AcceptEnv TERM_PROGRAM' | sudo tee /etc/ssh/sshd_config.d/50-wezterm.conf
-     sudo sshd -t && sudo systemctl reload sshd
-     sudo sshd -T | grep -i '^acceptenv'
-   }
-   ```
-
-   - 最後に `acceptenv TERM_PROGRAM` と出ればよい
-   - `sshd -t` が設定の誤りを出したら、`reload` はされない
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. SSH 先に共通 bash 設定と WezTerm のシェル統合を置く。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
-     bash ~/.config/bash/install.sh
-   git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
-   ```
-
-   - clone 済みなら、そのリポジトリの更新を行う
-   - WezTerm 本体は SSH 先のシェル統合には要らない
-   - 同期済みの設定は再 clone しない
-   - **次の手順は、clone が成功してから行う**
-
-1. 手元の WezTerm の新しいタブから、ssh し直す。
-
-   - `ssh <HOST>` を打つか、起動メニュー（`Ctrl+Shift+M`）の「ssh <HOST>」を選ぶ
-   - **次の手順は、ssh 先のシェルで貼る**
-
-1. ssh 先のシェルで、`TERM_PROGRAM` が届き、シェル統合が読まれたか確かめる。
-
-   ```bash
-   echo "$TERM_PROGRAM"
-   declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
-   ```
-
-   - 1 行目が `WezTerm` ならよい。公式 Bash 統合が有効なら、空でも補完処理は動く。公式統合が無ければ、この項の手順 1・2 を見直す
-   - 2 つ目の見方は`__wezterm_notify_done` と `__wz_mouse_off` が出ればよい。COPR の公式統合が有効なら `__wezterm_set_user_var` も出る
-   - tmux の中では `TERM_PROGRAM` が `tmux` になり、マウス報告よけのほかは動かない
-
-#### WezTerm: Windows の SSH 先で PowerShell に貼り付ける
-
-手元の WezTerm から Windows の SSH 先に入り、その PowerShell の PSReadLine の入力欄へ複数行を貼る。接続元は Linux または Windows の WezTerm、接続先は Windows OpenSSH と Git Bash。両側にこの版の設定を置く（この項の手順 1）。
-
-- 前提: 接続元で[WezTerm](#wezterm)（Windows の接続元は[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)）を通してある。Windows 接続先で [OpenSSH サーバー](windows-setup.md#openssh-サーバー)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)・[SSH の既定シェル](windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通してある
-- 実行場所: 接続元の WezTerm のタブ（Linux では GUI セッションから起動した WezTerm）。この項の手順 4・9 は接続先の Git Bash、手順 5〜8 は接続先の PowerShell
-- 通常の PowerShell プロファイルには追記しない
-- 管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)を使う
-- **この項の手順 3 の `surface` は検証環境の SSH 接続名。貼る前に、自分の設定済み接続名へ置き換える**
-
-[参照情報](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
-
-1. 接続元と Windows 接続先の設定を、[WezTerm の設定を更新する](#wezterm-の設定を更新する)の手順 1 で更新する。
-
-   - Windows 接続先では Git Bash で、[Windows の設定更新](windows-setup.md#wezterm-の設定を更新する)の手順 2 を通す
-   - 接続元は `Ctrl+Shift+R` で設定を読み直す
-   - 通常の PowerShell プロファイルには追記しない
-
-1. Linux の接続元では、セッションに対応するクリップボード取得コマンドがあるか確かめる。
-
-   ```bash
-   if [ -n "${WAYLAND_DISPLAY-}" ]; then
-     command -v wl-paste
-   elif [ -n "${DISPLAY-}" ]; then
-     command -v xclip
-   else
-     echo 'GUI セッションから WezTerm を起動してください'
-   fi
-   ```
-
-   - Wayland は `wl-paste`、X11 は `xclip` のパスが出ればよい
-   - 無ければ接続元の dnf で `wl-clipboard`（Wayland）か `xclip`（X11）を導入し、この項の手順 2 をやり直す。GUI セッションが無い場合も先へ進まない
-   - Windows 接続元ではこの手順を飛ばす。標準の Windows PowerShell を `-NoProfile` で使う
-
-1. 接続元の WezTerm の新しいペインで Windows に接続する。
-
-   ```bash
-   ssh surface
-   ```
-
-   - `surface` はこの環境の SSH エイリアス。別の接続先では自分のホスト名を使う
-   - Windows OpenSSH の既定シェルは Git Bash とする
-   - **次の手順は、接続先の Git Bash のプロンプトが出てから貼る**
-
-1. 接続先の Git Bash で統合を読み、Windows PowerShell 5.1 を起動する。
-
-   ```bash
-   export TERM_PROGRAM=WezTerm
-   . ~/.config/wezterm/shell/wezterm.sh
-   powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
-   ```
-
-   - PowerShell 7 を使う場合は、最後の行の `powershell.exe` を `pwsh.exe` に替える
-   - **次の手順は、PowerShell のプロンプトが出てから貼る**
-
-1. 接続先 PowerShell で、専用受信キーが登録されたか確かめる。
-
-   ```powershell
-   Get-Module PSReadLine | Select-Object Name, Version; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq WezTermSshPaste
-   ```
-
-   - `Ctrl+Shift+F12` の `WezTermSshPaste` が出ればよい。このキーは配送用で、手動では押さない
-   - キーが無ければ PSReadLine を読み込み、統合を読み直してから確認する
-
-1. 接続元で無害な複数行をコピーし、右クリックまたは `Ctrl+Shift+V` で貼る。
-
-   ```powershell
-   & {
-     '一行目'
-
-     '二行目'
-   }
-   ```
-
-   - このブロックは入力欄に残り、Enter を押すまで実行しない
-   - 空行・日本語・末尾改行を保持する。PSReadLine の Paste と同じく CR を除き、タブを空白 4 個にする
-   - 準備応答・取得・検証が失敗すると通知し、本文を挿入しない。自動で通常貼り付けに切り替えない
-   - 本文は UTF-8 で 64 KiB まで。途中で `Ctrl+C` を押すと終端まで受信して捨てる。配送が止まった場合は受信待機が続くため、本文を追加で貼らず、接続元でその SSH ペインを閉じて接続し直す
-
-1. 入力欄を確認し、Enter を押して実行する。
-
-   - `一行目`・`二行目` が一度ずつ出ればよい
-   - **次の手順は、PowerShell のプロンプトが戻ってから行う**
-
-1. PowerShell を終了して Git Bash に戻る。
-
-   ```powershell
-   exit
-   ```
-
-   - **次の手順は、Git Bash のプロンプトに戻ってから貼る**
-
-1. 接続先の Git Bash で接続を閉じる。
-
-   ```bash
-   exit
-   ```
-
-   - 接続元のプロンプトに戻ればよい
-
-#### WezTerm の設定を更新する
-
-自分用の WezTerm の設定のリポジトリを pull で上げる。WezTerm 本体の更新は[更新](#更新)で行う。
-
-- 前提: [WezTerm](#wezterm)を通してある
-- 実行場所: 自分のユーザーの bash（Windows 11 は Git Bash）
-
-1. 設定のリポジトリを pull する。
-
-   ```bash
-   git -C ~/.config/wezterm pull
-   git -C ~/.config/wezterm log -1 --oneline
-   ```
-
-   - 新しいコミットが無ければ、`Already up to date.` と出る
-   - 起動中の WezTerm は、ファイルが変わると設定を読み直す（効かなければ `Ctrl+Shift+R`）
-   - シェル統合（`shell/`）とウィンドウの装飾の変更は、WezTerm を起動し直すまで効かない
-   - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/wezterm status` で見る
-
----
-
-### btop
-
-- CPU・メモリ・ディスク・ネットワーク・プロセスを端末の画面で見る btop を、EPEL から入れる
-- 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
-- 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
-- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
-- **この項の手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
-
-1. 入手できる版を見てから、btop を入れる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   dnf -q list --showduplicates btop
-   sudo dnf install btop
-   ```
-
-   - 版は `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る
-   - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
-   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. btop が入ったか確かめ、起動する。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   btop --version
-   command -v btop
-   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
-   btop
-   ```
-
-   - `btop version: 1.4.7` と `/usr/bin/btop` が出てから、btop の画面が開く
-   - 画面が出たら `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると btop への操作として食われる）
-
-1. 初回の起動で `~/.config/btop/btop.conf` が作られたか確かめる。
-
-   ```bash
-   ls -l ~/.config/btop
-   ```
-
-   - `btop.conf` と `themes/` があればよい
-
-#### btop: 設定ファイル
-
-- btop の設定ファイルとテーマの置き場所を確かめ、起動せずに既定の設定を見る
-- 前提: [btop](#btop)を通してある
-- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
-- `~/.config/btop/btop.conf` は**初回起動時に既定値で作られる**（約 9.8 KB、項目ごとにコメント付き）
-- アプリ内では `Esc` または `m` でメニューが開き、`Options` からほとんどの項目を GUI で変えられる（保存も btop がやる）
-- テーマは 2 か所から読む。`btop.conf` の `color_theme` にファイル名を書くと切り替わる（`"Default"` と `"TTY"` は組み込み）
-  - `/usr/share/btop/themes/`: RPM が入れる既定のテーマ（`dracula` / `nord` / `gruvbox-*` / `adwaita-dark` など）
-  - `~/.config/btop/themes/`: 自分で足すテーマ
-
-1. 起動せずに、既定の設定だけを見る。
-
-   ```bash
-   btop --default-config | head -20
-   ```
-
-#### btop: 更新
-
-- btop を dnf で上げる。btop は通常の更新に含まれる
-- 前提: [btop](#btop)を通してある
-- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
-
-1. btop を更新する。
-
-   ```bash
-   sudo dnf upgrade btop
-   ```
-
-   - システム全体なら `sudo dnf upgrade`
-   - EPEL が新しい版を出すまでは上がらない（[注意点](extra/btop.md#注意点)）
-
----
-
-### gdu
-
-- ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある（`command -v brew` で何も出なければ、先に通す）
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
-- ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
-
-> [!IMPORTANT]
-> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定も自分のユーザーに導入するため）
-
-1. brew で gdu を入れる。
-
-   ```bash
-   brew install gdu
-   ```
-
-   - **入るコマンドは `gdu` ではなく `gdu-go`**
-   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る
-
-1. `gdu-go` が入ったことと、TUI を起動せずに走査できることを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   gdu-go --version
-   brew list --versions gdu
-   command -v gdu-go
-   command -v gdu || echo 'gdu という名前のコマンドは無い'
-   gdu-go -n /usr/share | tail -5
-   ```
-
-   - `Version: v5.38.0` のように版が出る
-   - `command -v gdu` の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ](#gdu-gdu-の名前で呼ぶ)をやるまでは、これが正しい状態
-   - 最後の `gdu-go -n` では、サイズの大きい順に並んだ一覧が出る
-
-#### gdu: gdu の名前で呼ぶ
-
-- 共通の bash 設定のエイリアスで、`gdu-go` を `gdu` の名前で呼ぶ
-- 前提: [gdu](#gdu)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-
-1. 共通設定を読み直し、gdu のエイリアスを確かめる。
-
-   ```bash
-   . ~/.bashrc
-   printf '\n\033[7m 確認 \033[0m\n'
-   alias gdu
-   ```
-
-   - `alias gdu='gdu-go'` が出ればよい
-
-1. スクリプトや他のツールからも `gdu` で呼びたいときだけ、シンボリックリンクにする。
-
-   ```bash
-   mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
-   ```
-
-   - `sudo gdu` には効かない。`sudo` では `gdu-go` と打つ（[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)が要る）
-
-#### gdu: 更新
-
-- brew で gdu を上げる
-- 前提: [gdu](#gdu)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-
-1. brew で gdu を更新する。
-
-   ```bash
-   brew upgrade gdu
-   ```
-
-   - すべてまとめて上げるなら `brew upgrade`
-
----
-
 ## Git と開発の道具
 
 - Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
@@ -2697,7 +1308,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - コミットに載せる名前とメールアドレスと、pull・改行・ブランチなどの git の設定を `--global` に書き、使い捨てのリポジトリで確かめる
 - 前提: [Homebrew](#homebrew)の手順 1 で git を入れてある（Workstation では最初から入っている）
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. 変数を設定する（`GIT_USER_NAME` と `GIT_USER_EMAIL` は必ず値を入れる）。
 
@@ -2922,8 +1533,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### git-delta
 
 - 差分を色付きで見やすくする git-delta を Homebrew で入れ、git のページャにする
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. 変数を設定する。
 
@@ -3005,7 +1616,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - GitHub の dnf のリポジトリから GitHub CLI（`gh`）を入れ、GitHub にログインする
 - 前提: GitHub のアカウントを用意し、[ログインと sudo](#ログインと-sudo)を通してある
   - この項の手順 4 のブラウザ認証には、このホストのブラウザ（[Firefox](#firefox)）か、手元のブラウザを使う
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
 
@@ -3068,9 +1679,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### lazygit
 
 - Git を端末の画面で操作する lazygit を Homebrew で入れ、自分用の設定を入れて起動を確かめる
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
   - この項の手順 2 は、[lazygit の設定を導入する](#lazygit-の設定を導入する)の前提も要る
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. brew で lazygit を入れる。
 
@@ -3084,7 +1695,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
 
    - [lazygit の設定を導入する](#lazygit-の設定を導入する)の全項を通す
-   - 差分の表示に delta（[git-delta](#git-delta)）、アイコンに Nerd Fonts（[HackGen Console NF](#hackgen-console-nf)）を使う設定
+   - 差分の表示に delta（[git-delta](#git-delta)）、アイコンに Nerd Fonts（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）を使う設定
    - `e` キーで開くエディタは、`EDITOR`（[Neovim](neovim.md#neovim)の手順 4）から決まる
 
 1. lazygit が入ったか確かめる。
@@ -3119,9 +1730,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - 導入は[lazygit](#lazygit)の手順 2。`config.yml` を `~/.config/lazygit/config.yml` にリンクする
   - Windows 11 は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 5。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
-  - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)）にする
-    - Windows 11 への導入は[HackGen Console NF](windows-setup.md#hackgen-console-nf)。WezTerm は自分用の設定で変わる
-    - Windows Terminal のフォントは[Windows 11 のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
+  - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）にする
+    - Windows 11 への導入は[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)。WezTerm は自分用の設定で変わる
+    - Windows Terminal のフォントは[Windows 11 のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[AlmaLinux](#git-delta)・[Windows 11](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 4）
     - Windows 11 で Windows PowerShell から起動するなら、[Neovim のセットアップの「Neovim を既定のエディタにする」](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
@@ -3129,8 +1740,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### lazygit の設定を導入する
 
 - 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を `~/lazygit-config` に clone し、`~/.config/lazygit/config.yml` にリンクする
-- 前提: [lazygit](#lazygit)の手順 1 で lazygit を入れ、[git-delta](#git-delta)と[HackGen Console NF](#hackgen-console-nf)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 の前の、既存の `config.yml` の確認と退避を省かない
+- 前提: [lazygit](#lazygit)の手順 1 で lazygit を入れ、[git-delta](#git-delta)と[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 の前の、既存の `config.yml` の確認と退避を省かない
 
 > [!CAUTION]
 > - この項の手順 1 は既存の `~/.config/lazygit/config.yml` を置き換える
@@ -3175,7 +1786,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - Excel のブックのある Git リポジトリで、ブックの差分がシートとセル番地の付いたテキストで出ることを確かめる
 - 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
 
@@ -3198,7 +1809,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - lazygit の専用画面で、Excel のブックのセルの変更を選んで index に入れる
 - 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 - 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
 - 新規ファイルは全体をコミットしてから使う
 
@@ -3226,7 +1837,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 大きなブックの差分を、全セルの変換が終わるまで待ってから出す
 - 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. 全セルの変換を待って差分を表示する（`売上表.xlsx` は実際のファイル名）。
 
@@ -3242,7 +1853,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### yazi
 
 - 端末のファイルマネージャーの yazi と、プレビュー・検索に使うツールを Homebrew で入れ、自分用の設定を入れて `y` で起動する
-- 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[WezTerm](#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](#homebrew)・[WezTerm](shell-terminal.md#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
   - この項の手順 3 は、[yazi の設定を導入する](#yazi-の設定を導入する)の前提も要る
 - 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 4 で新しいタブを開く
 
@@ -3265,14 +1876,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   - fd・ripgrep（[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 5）と fzf（[シェルのツール](#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
+   - fd・ripgrep（[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 5）と fzf（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
    - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
    - **次の手順は、確認が出たら表示された導入予定を確かめて `y` と答え、プロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる。[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
 
 1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
 
    - [yazi の設定を導入する](#yazi-の設定を導入する)の全項を通す
-   - ファイルを開くエディタは nvim（[Neovim](neovim.md#neovim)）、`z` と `Z` のキーは fzf と zoxide（[シェルのツール](#シェルのツール)の手順 1）を使う
+   - ファイルを開くエディタは nvim（[Neovim](neovim.md#neovim)）、`z` と `Z` のキーは fzf と zoxide（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を使う
 
 1. WezTerm で新しいタブを開き、y 関数を確かめる。
 
@@ -3282,7 +1893,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `function` が出ればよい。`~/.bashrc` への関数の追記は不要
-   - **`. ~/.bashrc` で読み直さず、新しいタブで `y` を確かめる**（[シェルのツール](#シェルのツール)の手順 2）
+   - **`. ~/.bashrc` で読み直さず、新しいタブで `y` を確かめる**（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2）
 
 1. 同じタブで、yazi が入ったか確かめ、`y` で起動する。
 
@@ -3313,15 +1924,15 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - 導入は[yazi](#yazi)の手順 3。`custom` を `~/.config/yazi` に clone する
   - Windows 11 は[初期設定の「yazi」](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
-  - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](#シェルのツール)で入れる
-    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定の「シェルのツールを入れる」](windows-setup.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
+  - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](shell-terminal.md#シェルのツール)で入れる
+    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定の「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
 
 #### yazi の設定を導入する
 
 - 自分用の yazi の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) の `custom` ブランチ）を `~/.config/yazi` に clone する
-- 前提: [yazi](#yazi)の手順 1・2 で yazi と依存ツールを入れてある。ファイルを開くエディタに nvim（[Neovim](neovim.md#neovim)）、`z` と `Z` のキーに fzf と zoxide（[シェルのツール](#シェルのツール)の手順 1）を使う
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ。既存の `~/.config/yazi` の確認と退避を省かない
+- 前提: [yazi](#yazi)の手順 1・2 で yazi と依存ツールを入れてある。ファイルを開くエディタに nvim（[Neovim](neovim.md#neovim)）、`z` と `Z` のキーに fzf と zoxide（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を使う
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。既存の `~/.config/yazi` の確認と退避を省かない
 
 1. yazi を終了し、自分用の設定を clone する。
 
@@ -3433,9 +2044,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### ShellCheck と shfmt
 
 - シェルスクリプトの静的検査の ShellCheck と、整形の shfmt を Homebrew で入れ、自分のスクリプトを検査する
-- 前提: [Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある。`command -v brew` で何も出なければ、先に通す
+- 前提: [Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある。`command -v brew` で何も出なければ、先に通す
   - この項の手順 5 の JSON の集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
 
 > [!IMPORTANT]
@@ -3517,7 +2128,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - shfmt で、スクリプトの今の書き方と整形した結果との違いを見て、`-w` の上書きを一時ディレクトリの複製で試す
 - 前提: [ShellCheck と shfmt](#shellcheck-と-shfmt)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 - **`-d` は差分を出すだけでファイルを変えない**
 
 > [!WARNING]
@@ -3576,7 +2187,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - ShellCheck の指摘を、1 行だけ（ディレクティブ）か、リポジトリ全体（`.shellcheckrc`）で黙らせる書き方を確かめる
 - 前提: [ShellCheck と shfmt](#shellcheck-と-shfmt)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. 変数を設定する（`SC_TARGET` は必ず値を入れる）。
 
@@ -3620,8 +2231,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### ShellCheck と shfmt: 更新
 
 - Homebrew で入れた ShellCheck と shfmt を上げる
-- 前提: [Homebrew](#homebrew)と[ShellCheck と shfmt](#shellcheck-と-shfmt)を通し、PATH に Homebrew が入った端末（[シェルのツール](#シェルのツール)の手順 2 で開き直した端末）を開いてある
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 前提: [Homebrew](#homebrew)と[ShellCheck と shfmt](#shellcheck-と-shfmt)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. ShellCheck と shfmt を上げる。
 
@@ -3638,7 +2249,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - Microsoft の dnf のリポジトリから VS Code（rpm 版）を入れ、起動を確かめる
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
 
 > [!IMPORTANT]
@@ -3743,7 +2354,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - VS Code の拡張機能を、CLI（`code`）で一覧し、入れ、消す
 - 前提: [VS Code](#vs-code)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 - Settings Sync・Remote-SSH・Marketplace の利用条件は扱わない
 
 1. 入っている拡張機能を一覧する。
@@ -3759,7 +2370,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - VS Code を dnf で上げる。VS Code は、OS の通常の更新にも含まれる
 - 前提: [VS Code](#vs-code)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](#wezterm)を通したなら、WezTerm のタブ
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
 
 1. VS Code を更新する。
 
@@ -4210,6 +2821,159 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 ---
 
+### btop
+
+- CPU・メモリ・ディスク・ネットワーク・プロセスを端末の画面で見る btop を、EPEL から入れる
+- 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
+- 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
+- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
+- **この項の手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
+
+1. 入手できる版を見てから、btop を入れる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q list --showduplicates btop
+   sudo dnf install btop
+   ```
+
+   - 版は `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る
+   - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
+   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
+   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
+
+1. btop が入ったか確かめ、起動する。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   btop --version
+   command -v btop
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
+   btop
+   ```
+
+   - `btop version: 1.4.7` と `/usr/bin/btop` が出てから、btop の画面が開く
+   - 画面が出たら `q` で終了する
+   - **次の手順は、`q` で終了してから貼る**（続けて貼ると btop への操作として食われる）
+
+1. 初回の起動で `~/.config/btop/btop.conf` が作られたか確かめる。
+
+   ```bash
+   ls -l ~/.config/btop
+   ```
+
+   - `btop.conf` と `themes/` があればよい
+
+#### btop: 設定ファイル
+
+- btop の設定ファイルとテーマの置き場所を確かめ、起動せずに既定の設定を見る
+- 前提: [btop](#btop)を通してある
+- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
+- `~/.config/btop/btop.conf` は**初回起動時に既定値で作られる**（約 9.8 KB、項目ごとにコメント付き）
+- アプリ内では `Esc` または `m` でメニューが開き、`Options` からほとんどの項目を GUI で変えられる（保存も btop がやる）
+- テーマは 2 か所から読む。`btop.conf` の `color_theme` にファイル名を書くと切り替わる（`"Default"` と `"TTY"` は組み込み）
+  - `/usr/share/btop/themes/`: RPM が入れる既定のテーマ（`dracula` / `nord` / `gruvbox-*` / `adwaita-dark` など）
+  - `~/.config/btop/themes/`: 自分で足すテーマ
+
+1. 起動せずに、既定の設定だけを見る。
+
+   ```bash
+   btop --default-config | head -20
+   ```
+
+#### btop: 更新
+
+- btop を dnf で上げる。btop は通常の更新に含まれる
+- 前提: [btop](#btop)を通してある
+- 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
+
+1. btop を更新する。
+
+   ```bash
+   sudo dnf upgrade btop
+   ```
+
+   - システム全体なら `sudo dnf upgrade`
+   - EPEL が新しい版を出すまでは上がらない（[注意点](extra/btop.md#注意点)）
+
+---
+
+### gdu
+
+- ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある（`command -v brew` で何も出なければ、先に通す）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
+- ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
+
+> [!IMPORTANT]
+> - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、共通設定も自分のユーザーに導入するため）
+
+1. brew で gdu を入れる。
+
+   ```bash
+   brew install gdu
+   ```
+
+   - **入るコマンドは `gdu` ではなく `gdu-go`**
+   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る
+
+1. `gdu-go` が入ったことと、TUI を起動せずに走査できることを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   gdu-go --version
+   brew list --versions gdu
+   command -v gdu-go
+   command -v gdu || echo 'gdu という名前のコマンドは無い'
+   gdu-go -n /usr/share | tail -5
+   ```
+
+   - `Version: v5.38.0` のように版が出る
+   - `command -v gdu` の行は `gdu という名前のコマンドは無い` になる。[gdu の名前で呼ぶ](#gdu-gdu-の名前で呼ぶ)をやるまでは、これが正しい状態
+   - 最後の `gdu-go -n` では、サイズの大きい順に並んだ一覧が出る
+
+#### gdu: gdu の名前で呼ぶ
+
+- 共通の bash 設定のエイリアスで、`gdu-go` を `gdu` の名前で呼ぶ
+- 前提: [gdu](#gdu)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
+
+1. 共通設定を読み直し、gdu のエイリアスを確かめる。
+
+   ```bash
+   . ~/.bashrc
+   printf '\n\033[7m 確認 \033[0m\n'
+   alias gdu
+   ```
+
+   - `alias gdu='gdu-go'` が出ればよい
+
+1. スクリプトや他のツールからも `gdu` で呼びたいときだけ、シンボリックリンクにする。
+
+   ```bash
+   mkdir -p ~/.local/bin && ln -sfn /home/linuxbrew/.linuxbrew/bin/gdu-go ~/.local/bin/gdu
+   ```
+
+   - `sudo gdu` には効かない。`sudo` では `gdu-go` と打つ（[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)が要る）
+
+#### gdu: 更新
+
+- brew で gdu を上げる
+- 前提: [gdu](#gdu)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
+
+1. brew で gdu を更新する。
+
+   ```bash
+   brew upgrade gdu
+   ```
+
+   - すべてまとめて上げるなら `brew upgrade`
+
+---
+
 ## ネットワークとリモート操作
 
 - SSH・Wake on LAN・SOCKS トンネル。WireGuard は[WireGuard のセットアップ](wireguard.md)、GNOME のリモートの画面（デスクトップ共有・ヘッドレスセッション・リモートログイン）は[GNOME のリモート操作のセットアップ](gnome-remote.md)で入れる
@@ -4639,7 +3403,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### Podman: Docker 向けのツールから使う
 
 - Docker の API に `DOCKER_HOST` でつなぐツール（[lazydocker](#lazydocker) など）のための設定
-- 前提: [Podman](#podman)と[共通の bash 設定](#共通の-bash-設定)を通してある
+- 前提: [Podman](#podman)と[共通の bash 設定](shell-terminal.md#共通の-bash-設定)を通してある
   - `DOCKER_HOST` は共通の bash 設定が入れる。ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [画像の道具](#画像の道具) の dive と Trivy、[podman-tui](#podman-tui) は podman を直接読むので、この項は要らない
@@ -5028,7 +3792,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### lazydocker
 
 - Homebrew の lazydocker を入れ、podman の API ソケットにつないで、確認用のコンテナを画面（TUI）から止める
-- 前提: [共通の bash 設定](#共通の-bash-設定)、[Homebrew](#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)、[Homebrew](#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
   - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
   - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
@@ -5191,7 +3955,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - この項で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にし、root のコンテナを lazydocker で見る
 - **root のコンテナを lazydocker で見ないなら、この項は不要**
 - root のコンテナは `/var/lib/containers` にあり、[手順 4](#lazydocker)の一般ユーザーの画面には出ない
-- 前提: [lazydocker](#lazydocker)と[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)を通してある
+- 前提: [lazydocker](#lazydocker)と[共通の bash 設定を root に入れる](shell-terminal.md#共通の-bash-設定を-root-に入れる)を通してある
   - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの項の前提を満たさない
   - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）。root の権限は、コマンドに付けた `sudo` で使う
@@ -5228,7 +3992,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `unix:///run/podman/podman.sock` と `/home/linuxbrew/.linuxbrew/bin/lazydocker` が出ればよい
-   - root 自身の [共通設定](#共通の-bash-設定を-root-に入れる)を先に導入する。`/root/.bashrc` への `DOCKER_HOST` の追記は不要
+   - root 自身の [共通設定](shell-terminal.md#共通の-bash-設定を-root-に入れる)を先に導入する。`/root/.bashrc` への `DOCKER_HOST` の追記は不要
    - 接続先が違う場合はここで止め、既存の用途を確認する
 
 1. 確認用のコンテナを root で動かす。
@@ -5975,7 +4739,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 再起動して、GNOME の表示と入力・日本語入力・システムの設定などが効いているかを確かめる
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある。確かめるのは、次の項のうち通したもの
   - [システムの設定](#システムの設定)・[日本語入力](#日本語入力)・[GNOME の表示と入力](#gnome-の表示と入力)
-  - [WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)・[Neovim](neovim.md#neovim)
+  - [WezTerm と HackGen Console NF をデスクトップで使う](shell-terminal.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)・[Neovim](neovim.md#neovim)
   - [Homebrew](#homebrew)の手順 4
 - 実行場所: この PC の画面（GNOME）。コマンドは、GNOME にログインした自分のユーザーの端末（bash）に貼る。この項の手順 8 は、WezTerm のタブで行う
 
@@ -5993,7 +4757,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 上部バーの時計に曜日と秒が出る。電池のある PC では、電池の % も出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - 上部バーの右に、入力ソースの表示が出る（[日本語入力](#日本語入力)を通したとき）
    - 画面がダークになり、Super キーで開く Dash が[GNOME の表示と入力](#gnome-の表示と入力)の手順 14 の並びになっていればよい（その項を通したとき）
-   - Dash の端末が WezTerm になっていればよい（[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
+   - Dash の端末が WezTerm になっていればよい（[WezTerm と HackGen Console NF をデスクトップで使う](shell-terminal.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
    - Files などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき。自分用の設定の WezTerm は、タブバーの右端に自分でボタンを描く）
    - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
 
@@ -6039,7 +4803,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - テキストエディターに何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）。Caps Lock だけを押しても大文字にならない（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - ウィンドウを 2 つ以上開いて Alt+Tab を押すと、ウィンドウごとに切り替わる（同じアプリの窓も別に並ぶ）。Super+Tab はアプリごと（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
-   - Ctrl+Alt+T で WezTerm の新しい窓が開く（[GNOME の表示と入力](#gnome-の表示と入力)と[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
+   - Ctrl+Alt+T で WezTerm の新しい窓が開く（[GNOME の表示と入力](#gnome-の表示と入力)と[WezTerm と HackGen Console NF をデスクトップで使う](shell-terminal.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
 
 1. [日本語入力](#日本語入力)を通したときだけ、入力ソースを切り替えて、日本語を打ってみる。
 
@@ -6082,8 +4846,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### 共通の bash 設定・Homebrew・Flatpak を上げる
 
 - 共通の bash 設定と、Homebrew・Flatpak で入れたものを上げる
-- 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[Flatpak と Flathub](#flatpak-と-flathub)のうち、上げるものを通してある
-- 実行場所: 開き直した、自分のユーザーの端末（bash）。開き直し方は[シェルのツール](#シェルのツール)の手順 2 と同じ
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](#homebrew)・[Flatpak と Flathub](#flatpak-と-flathub)のうち、上げるものを通してある
+- 実行場所: 開き直した、自分のユーザーの端末（bash）。開き直し方は[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 と同じ
 - 入れたものの手順だけを行う。共通の bash 設定はこの項の手順 1、Homebrew は手順 2・3、Flatpak は手順 4
 
 1. 共通の bash 設定を入れたときだけ、上げる。

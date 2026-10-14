@@ -914,13 +914,13 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - `scoop uninstall` は、止めてあっても消す（`hold` を見ない）。そのため、[ロールバックの「エディタとシェルのツールを消す」](../extra/windows-setup.md#エディタとシェルのツールを消す)の手順 7 に `scoop unhold` は要らない
 - **VC++ ランタイム**: 5 つの Windows の実行ファイル（x64）の DLL の読み込みの表（PE のインポート表）で、`VCRUNTIME140.dll` を使うのは bat だけだった
   - fzf（Go）は `kernel32.dll` だけ。zoxide と starship は MSVC のビルドだが、C のランタイムを静的にリンクする（zoxide の `.cargo/config.toml`、starship の `release.yml` の `+crt-static`）。eza は MinGW のビルドで、Windows に付いている `msvcrt.dll` を使う
-  - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [WezTerm](../windows-setup.md#wezterm)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
-- starship の定義の `notes` は、PowerShell の `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足すよう案内するが、従わない。Windows PowerShell 5.1 の `$PROFILE` は、手順書を貼る窓（管理者の窓も）が読むプロファイル。PowerShell 7 には、[PowerShell 7 のプロファイルを設定する](../windows-setup.md#powershell-7-のプロファイルを設定する)が、zoxide と starship の行を 1 回だけ置く
+  - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [WezTerm](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
+- starship の定義の `notes` は、PowerShell の `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足すよう案内するが、従わない。Windows PowerShell 5.1 の `$PROFILE` は、手順書を貼る窓（管理者の窓も）が読むプロファイル。PowerShell 7 には、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が、zoxide と starship の行を 1 回だけ置く
 
 ### シェルのツールを入れる / 手順 6: 補足: bat の設定ファイル
 
 - Windows の bat は、`BAT_CONFIG_PATH` が無ければ `BAT_CONFIG_DIR` の下の `config` を、それも無ければ `%APPDATA%\bat\config` を読む（bat 0.26.1 の `src/bin/bat/directories.rs`・`config.rs`。`XDG_CONFIG_HOME` も `~/.config` も見ない）。scoop で入れると `BAT_CONFIG_DIR` の下になる
-  - そのため、AlmaLinux 10 の [bat の設定ファイル](../almalinux-setup.md#bat-の設定ファイル)の bash のブロックを Git Bash に貼っても効かない
+  - そのため、AlmaLinux 10 の [bat の設定ファイル](../shell-terminal.md#bat-の設定ファイル)の bash のブロックを Git Bash に貼っても効かない
   - `C:\ProgramData\bat\config`（PC 全体）があれば、bat はその後ろに自分の設定をつないで読む。本書では作らない
 - 書く場所は、bat が探すのと同じ順（`BAT_CONFIG_PATH`、無ければ `BAT_CONFIG_DIR` の下の `config`）で決める。`BAT_CONFIG_PATH` を自分で決めていても、bat が読む場所に書ける。どちらも無ければ（scoop の bat が入っていない）、`%APPDATA%` には書かずに止める
 - `bat --config-file` の出力は使わない。bat はパイプに UTF-8 で書く（bat 0.26.1 の `src/bin/bat/main.rs` の `println!`）が、Windows PowerShell 5.1 は外部コマンドの出力を `[Console]::OutputEncoding`（日本語の Windows では OEM のコードページ 932）で読む。ユーザーのフォルダー名に ASCII 以外の文字があると、場所の文字が化けて書けない（Windows では確かめていない）
@@ -956,7 +956,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### シェルのツールを入れる: 選択した方針
 
-- **1 つの項にまとめた**（2026-10-08 に任意節として足し、2026-10-10 に必須の項にした）: AlmaLinux 10 の starship・zoxide・fzf・eza・bat は、2026-10-08 に [AlmaLinux 10 の初期設定の「シェルのツール」](../almalinux-setup.md#シェルのツール)の手順 1 などにまとめられ、ツールごとの手順書は無くなった。Windows 11 も同じく、初期設定の手順書にまとめ、5 つを 1 つの手順（`scoop install` は、版を指定しない 4 つと zoxide の 2 回）で入れる
+- **1 つの項にまとめた**（2026-10-08 に任意節として足し、2026-10-10 に必須の項にした）: AlmaLinux 10 の starship・zoxide・fzf・eza・bat は、2026-10-08 に [AlmaLinux 10 の初期設定の「シェルのツール」](../shell-terminal.md#シェルのツール)の手順 1 などにまとめられ、ツールごとの手順書は無くなった。Windows 11 も同じく、初期設定の手順書にまとめ、5 つを 1 つの手順（`scoop install` は、版を指定しない 4 つと zoxide の 2 回）で入れる
   - git-delta と GitHub CLI も、2026-10-10 から同じ手順書の項（[git-delta](../windows-setup.md#git-delta)・[GitHub CLI](../windows-setup.md#github-cli)）にある
 - **導入元は scoop の main のバケット**（README の「導入の基盤」の、CLI ツールは scoop）
   - 管理者が要らず、[更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
@@ -1366,7 +1366,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 #### WezTerm: Windows 11 の更新 / 手順 2: 補足: 窓を閉じる理由
 
-- WezTerm が動いていると、同じ節の手順 3（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 4 のブロック）が止まる
+- WezTerm が動いていると、同じ節の手順 3（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロック）が止まる
 
 #### WezTerm: Windows 11 のロールバック / 手順 1: 補足: アンインストーラの動き
 
@@ -1396,7 +1396,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-付録-windows-11-の配布物と資料の調査2026-10-08)）。無い PC では起動しない
 - scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
-- 入れ方は新しく書かず、[wezterm-nightly.md の Windows 11 で使う](../windows-setup.md#wezterm)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
+- 入れ方は新しく書かず、[wezterm-nightly.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
   - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
   - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
 - 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
@@ -1445,12 +1445,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
   - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
   - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる)）
+  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)）
 - **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（[Windows 11 で使う / 手順 4 の補足](#git-delta-windows-11-で使う--手順-4-補足-実施手順の手順-13-を-git-bash-で貼る)）
 - **シェルとの組み込み方**
   - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
-  - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 の初期設定の PowerShell 7 のプロファイルを設定する](../windows-setup.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ
+  - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 の初期設定の PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ
   - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 の初期設定の「貼り付けの設定」の手順 4 の 1 行のまま
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[実施手順](../almalinux-setup.md#git-delta)を WSL の中で通す
 - **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#git-delta-windows-11-で使う--手順-2-補足-vc-ランタイム)
@@ -1534,7 +1534,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
   - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
   - 上流の MSI や zip を手で入れる形は、更新が手作業になる
   - scoop は、定義の sha256（上流の `gh_<版>_checksums.txt` と同じ値）で zip を確かめる。`gh.exe` には `GitHub, Inc.` の Authenticode の署名があるが、手順では確かめない
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる)）
+  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)）
 - **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
   - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
   - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
@@ -1542,10 +1542,10 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **シェルとの組み込み方**
   - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
-  - **PowerShell 7 のプロファイルには何も足さない**: [Windows 11 の初期設定の任意節](../windows-setup.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ。gh の PowerShell の補完（`gh completion -s powershell`）は、pwsh を開くたびに gh を 1 回動かすので入れない
+  - **PowerShell 7 のプロファイルには何も足さない**: [Windows 11 の初期設定の任意節](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ。gh の PowerShell の補完（`gh completion -s powershell`）は、pwsh を開くたびに gh を 1 回動かすので入れない
   - **Windows PowerShell 5.1 のプロファイルにも足さない**: 手順書を貼る窓のプロファイルは、Windows 11 の初期設定の「貼り付けの設定」の手順 4 の 1 行のまま
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
-- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[wezterm-nightly.md の Windows 11 で使う](../windows-setup.md#wezterm)の手順 3 を前提にしない
+- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[wezterm-nightly.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を前提にしない
 - **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外したときも）、その項目が残る
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 
@@ -1633,8 +1633,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 - **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
 - **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
-  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../almalinux-setup.md#シェルのツール)、Windows 11 は [Windows 11 の初期設定のシェルのツールを入れる（任意）](../windows-setup.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
-  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[hackgen.md の Windows 11 で使う](../windows-setup.md#hackgen-console-nf)の HackGen Console NF
+  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../shell-terminal.md#シェルのツール)、Windows 11 は [Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
+  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[hackgen.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の HackGen Console NF
   - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
     - そのため、Windows 11 で使うの手順 4 は、同じ節の手順 2 を貼っていない窓では止める
 - **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
@@ -1648,7 +1648,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **VC++ のランタイムは、neovim.md と同じく wezterm-nightly.md の手順 3 を指す**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
 - **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定の Windows の clone は、設定のリポジトリの README の例へリンクする
 - **`y` は Git Bash の共通の設定だけで使う**: Windows PowerShell 5.1 は手順書を貼る窓なので、ツールの初期化（PowerShell 版の `y`）は足さない。WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
-  - PowerShell 7 のプロファイル（[Windows 11 の初期設定の任意節](../windows-setup.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
+  - PowerShell 7 のプロファイル（[Windows 11 の初期設定の任意節](../shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
 - **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に neovim.md を通すよう案内する）
   - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）
   - `${EDITOR:-vi}` は `for = "unix"` の行だけで、Windows の yazi は `EDITOR` を見ない

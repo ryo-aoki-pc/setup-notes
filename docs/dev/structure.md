@@ -51,7 +51,7 @@
 - 2026-10-13 の AlmaLinux 10.2 / aarch64 の実機では、3 エージェントの ACP 接続と Codex・Grok の応答、共同作業プラグインの ready と直接呼出しを確認。Claude の応答は週の利用上限で未確認
 - 同日の AlmaLinux の公開は、LAN IPv4 と 3443/tcp を宛先に残して送信元制限を外した。委譲の公開設定は反映済みで、画面からの実際の委譲と親エージェントの承認設定は未確認
 - Linux のパスワード変更は公開 fixture 11 件・構文検査・実機の `--check` が成功。HTTPS ログインは本人報告で、変更時の 200/401/401 の結果は未受領。[実機の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)で範囲を区別する
-- Windows の[Git Bash 設定](../windows-setup.md#git-bash-と-wezterm-の設定)は、共通 Git（4）→長いパス（5）→bash（6）→WezTerm（7）（2026-10-14 に手順 1 に窓を開く手順を足す前は 3〜6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
+- Windows の[Git Bash 設定](../shell-terminal.md#git-bash-と-wezterm-の設定)は、共通 Git（4）→長いパス（5）→bash（6）→WezTerm（7）（2026-10-14 に手順 1 に窓を開く手順を足す前は 3〜6）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ### 2026-10-13 UTC の追加検証記録
 

@@ -42,7 +42,7 @@
 - この節の対象でない項で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](windows-sandbox.md#windows-sandbox-を無効にする)で、ほかはそれぞれの項の最後の「元に戻すときは、」の手順で戻す
   - 対象の項: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
   - [SSH の既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通し、OpenSSH サーバーを残して Git for Windows を外すなら、先にその項の手順 5 で `DefaultShell` を消す
-  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する](../windows-setup.md#powershell-7-のプロファイルを設定する)の手順 7・8
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7・8
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の手順 6・7
 
 > [!CAUTION]
@@ -233,7 +233,7 @@
    - [AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1 でプラグインを外してから行う（プラグインは Claude Code の起動と終了のたびに `node` を動かす）
    - `nodejs-lts` は、[AI エージェントの手順書の「Windows 11 で Codex・Grok のプラグインを入れる」](../ai-agents.md#windows-11-で-codexgrok-のプラグインを入れる)の手順 1 で入れたときだけある。自分用の Neovim の設定（その導入の手順 6）が入れた `nodejs` も外すなら、この項の手順 4 の後に `scoop uninstall nodejs`
 
-1. [シェルのツールを入れる](../windows-setup.md#シェルのツールを入れる)で入れた 5 つを scoop で消す。
+1. [シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)で入れた 5 つを scoop で消す。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -249,7 +249,7 @@
    - 開いている Git Bash のタブと PowerShell 7 の窓は、閉じて開き直す
    - starship のログ（`~\.cache\starship`）は、要らなければ手で消す
 
-1. [シェルのツールを入れる](../windows-setup.md#シェルのツールを入れる)の手順 6 で書いたときだけ、bat の設定ファイルの 3 行を消す。
+1. [シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)の手順 6 で書いたときだけ、bat の設定ファイルの 3 行を消す。
 
    ```powershell
    & {
@@ -290,8 +290,8 @@
 
 1. 共通の Git 設定と Windows の長いパス対応で、今回追加・変更したキーだけ元に戻す（`merge.conflictStyle` を除く）。
 
-   - [Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 4・5 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
-   - 共通の設定は[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2、`core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5 で控えた元の値・スコープと変更の記録を使う。変更しなかったキーは残す
+   - [Git Bash と WezTerm の設定](../shell-terminal.md#git-bash-と-wezterm-の設定)の手順 4・5 で `global`（`C:\Users\<WIN_USER>\.gitconfig`）に書いた設定を外す。`system` と `local` の設定は変えない
+   - 共通の設定は[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2、`core.longpaths` は[Git Bash と WezTerm の設定](../shell-terminal.md#git-bash-と-wezterm-の設定)の手順 5 で控えた元の値・スコープと変更の記録を使う。変更しなかったキーは残す
    - 控えた記録で、元の `global` が未設定だったキーだけ、`git config --global --unset <キー>` の形で 1 行ずつ外す
    - 元の `global` に値があったキーは、この項の手順 5 で書き戻す。変更なしのキーと、[AlmaLinux 10 の「Git」](../almalinux-setup.md#git)の手順 7 を飛ばした場合の `pull.ff` は触らない
    - 対象は `pull.rebase`・`rebase.autoStash`・`core.autocrlf`・`init.defaultBranch`・`core.quotepath`・`fetch.prune`・`push.autoSetupRemote`・`rerere.enabled`・`diff.algorithm`・`branch.sort`・`tag.sort`・`pull.ff`
@@ -315,7 +315,7 @@
 
    - `git config --global <キー> <元の値>` の形で、キーごとに 1 行ずつ貼る
    - 例: 元の `core.autocrlf` を戻すなら `git config --global core.autocrlf <元の値>`
-   - `core.longpaths` は[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 5、ほかのキーは[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2 の記録を使う
+   - `core.longpaths` は[Git Bash と WezTerm の設定](../shell-terminal.md#git-bash-と-wezterm-の設定)の手順 5、ほかのキーは[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の手順 2 の記録を使う
    - 空白を含む値は引用符で囲む。元の値が `system` や `local` だけにあった場合は、それを `global` に写さない（今回追加した `global` を外せば、元のスコープの値がまた効く）
    - 残すと決めた `merge.conflictStyle`・名前・メールアドレスと、今回変更しなかったキーは書き戻さない
 
@@ -336,7 +336,7 @@
 
 1. 共通の bash 設定も外すときだけ、外す。
 
-   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../windows-setup.md#git-bash-と-wezterm-の設定)の手順 6 で入れたもの）
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../shell-terminal.md#git-bash-と-wezterm-の設定)の手順 6 で入れたもの）
    - 設定リポジトリも消すなら、[手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)の手順 4 で確かめ、手順 5 を行う。`~/.config/bash` の未 commit・未 push の変更は取り戻せない
    - 終わったら、Git Bash の窓は閉じてよい
 
@@ -449,7 +449,7 @@
    - 2 行目が `True` のまま（60 秒待ってから出る）なら、インストーラが置いていないファイル（`wezterm.lua` など）が `C:\Program Files\WezTerm` に残っている。中を見て、要らなければ消す
    - 設定のアプリ → インストールされているアプリ の「WezTerm」の「アンインストール」でも同じ
    - 設定ファイル（`%USERPROFILE%\.wezterm.lua`・`%USERPROFILE%\.config\wezterm`）は消えない。要らなければ手で消す（自分用の設定は、[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 7 で外す）
-   - [WezTerm](../windows-setup.md#wezterm)の手順 3 で入れた Visual C++ の再頒布可能パッケージは、ほかのアプリも使うので消さない
+   - [WezTerm](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 で入れた Visual C++ の再頒布可能パッケージは、ほかのアプリも使うので消さない
 
 1. クライアントの PC で、Windows のホスト鍵を `known_hosts` から消す。
 
@@ -489,7 +489,7 @@
    ```
 
    - 最後のコマンドが何も出さなければよい
-   - [HackGen Console NF](../windows-setup.md#hackgen-console-nf)の手順 3 の `icacls` で足した読み取りの許可は残す（ほかのフォントにも要る）
+   - [HackGen Console NF](../shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の手順 3 の `icacls` で足した読み取りの許可は残す（ほかのフォントにも要る）
 
 ### 表示と入力を戻す
 
@@ -1077,7 +1077,7 @@
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)）
-  - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する](../windows-setup.md#powershell-7-のプロファイルを設定する)の手順 3）
+  - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 3）
 - **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](../windows-setup.md#表示と入力)の手順 7）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 3・4）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。[表示と入力](../windows-setup.md#表示と入力)の手順 4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 3 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 2・4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
@@ -1087,7 +1087,7 @@
   - 本文の上限は UTF-8 で 64 KiB（65,536 バイト）。大きなブロックは分け、受信中は次のコマンドを貼り足さない
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 6）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
-  - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する](../windows-setup.md#powershell-7-のプロファイルを設定する)
+  - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
 - **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
@@ -1097,7 +1097,7 @@
 - **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 12 で外さないと、オンラインだけにされうる
 - **CopyQ の履歴は暗号化されない**: [CopyQ を使う](../windows-setup.md#copyq-を使う)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
 - **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
-  - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../windows-setup.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
+  - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
 - **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
   - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない
 - **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・HackGen Console NF・WezTerm・git-delta・lazygit・GitHub CLI・yazi のもの。Neovim の注意は、両 OS とも [Neovim のセットアップの注意点](neovim.md#注意点) にある。ここには Windows 11 だけの注意を書く
@@ -1161,7 +1161,7 @@
 - **HackGen Console NF: Windows 11 では、読み込まれているフォントのファイルを置き換えられない**: 入れ替え（更新）と削除は、登録を消してサインインし直してから行う（[HackGen Console NF を消す](#hackgen-console-nf-を消す)）
 - **WezTerm: Windows 11 のインストーラと実行ファイルには署名が無い**: 本物かどうかは確かめられず、`.sha256` で分かるのは壊れていないことまで（[選択した方針](../reference/almalinux-setup.md#wezterm-選択した方針)）
   - ブラウザで取得したファイルでは SmartScreen が警告することがある。本書では `curl.exe` で取得する
-- **WezTerm: Windows 11 の WezTerm には `VCRUNTIME140.dll` が要る**: インストーラは入れない（[「WezTerm」の手順 3](../windows-setup.md#wezterm)）
+- **WezTerm: Windows 11 の WezTerm には `VCRUNTIME140.dll` が要る**: インストーラは入れない（[「WezTerm」の手順 3](../shell-terminal.md#windows-11-で-wezterm-を入れる)）
 - **WezTerm: Windows 11 の nightly は自分では上がらず、winget・scoop の管理にも乗らない**: 上げるのは[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)
 - **WezTerm: Windows 11 では、stable と nightly が同じ登録を使う**: インストーラの `AppId` が同じなので、PC に入るのはどちらか 1 つ。後から入れた方が上書きするはず
 - **WezTerm: Windows 11 で管理者の窓から起動すると、WezTerm も管理者で動く**: 起動はスタートメニューから行う

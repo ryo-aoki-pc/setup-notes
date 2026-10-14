@@ -211,7 +211,7 @@
    ```
 
    - `'Red Hat Mono Regular 10'`・`'ptyxis --new-window'` と、端末のところが `'org.gnome.Ptyxis.desktop'` のお気に入りが出ればよい
-   - [WezTerm と HackGen Console NF をデスクトップで使う](../almalinux-setup.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)で変えたものを戻す
+   - [WezTerm と HackGen Console NF をデスクトップで使う](../shell-terminal.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)で変えたものを戻す
    - この手順の後、Ctrl+Alt+T は Ptyxis を開く（割り当てごと外すのは[表示と入力を戻す](#表示と入力を戻す)の手順 9）
 
 1. 自分用の WezTerm の設定を外し、退避した設定に戻す。
@@ -882,7 +882,7 @@
   - bat は既定でページャ（`less`）を開くので、`cat` のつもりで打つと画面が切り替わる。`-A` / `-v` / `-e` などフラグの意味も GNU `cat` と違う
   - エイリアスは対話シェルにしか効かないのでスクリプトは壊れないが、**壊れないぶん挙動の違いに気づきにくい**
 - **エイリアスの確認に `type -t` は使えない**: bash は非対話シェルでエイリアスを展開しないため、`type -t ll` はエイリアスを見つけられない（`alias ll` なら確認できる）
-- **eza のアイコンには Nerd Font が要る**: `--icons=always` はグリフを出すだけなので、フォントが無い端末では豆腐になる（[HackGen Console NF](../almalinux-setup.md#hackgen-console-nf)）
+- **eza のアイコンには Nerd Font が要る**: `--icons=always` はグリフを出すだけなので、フォントが無い端末では豆腐になる（[HackGen Console NF](../shell-terminal.md#hackgen-console-nf)）
 - **eza の `--git` は大きなリポジトリで遅くなる**: 毎回 git の状態を引くため。気になるなら `--no-git`、リポジトリの一覧だけなら `--git-repos-no-status`
 - **bat を EPEL 版と二重に入れない**: どちらも `bat` という名前で、PATH の先頭にある Homebrew 版が勝つ
 - **bat のテーマの見え方は端末に依存する**: `ansi` 以外を選ぶと端末の配色とぶつかることがある。true color が出るかは端末側の設定次第

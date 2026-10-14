@@ -189,7 +189,7 @@
 
 - starship → WezTerm → zoxide の順は、共通の bash 設定が初期化の順番を持つ。`~/.bashrc` の編集は不要
 - `starship explain` は、今のプロンプトに出ている各部分の意味を 1 行ずつ説明する
-- 見た目を変えるなら[starship のプリセットを当てる](../almalinux-setup.md#starship-のプリセットを当てる)、細かい調整は[starship の設定ファイル](../almalinux-setup.md#starship-の設定ファイル)
+- 見た目を変えるなら[starship のプリセットを当てる](../shell-terminal.md#starship-のプリセットを当てる)、細かい調整は[starship の設定ファイル](../shell-terminal.md#starship-の設定ファイル)
 
 ### シェルのツール / 手順 6: 補足: 出力の意味
 
@@ -226,7 +226,7 @@
 
 ### tmux を試す / 手順 2: 補足: tmux の使い方
 
-- キーとコマンドは[tmux の使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)
+- キーとコマンドは[tmux の使い方の基本](../shell-terminal.md#tmux-の使い方の基本)
 
 ### tmux を試す / 手順 3: 補足: tmux のサーバー
 
@@ -506,7 +506,7 @@
 - **採らなかった設定**
   - `HISTTIMEFORMAT`（`history` に時刻を出す）: 履歴ファイルに `#<epoch>` の行が増える。本書は履歴の見え方を変えない範囲にとどめる。欲しければ `HISTTIMEFORMAT='%F %T '` を手順 3 の行に足せばよい
   - `HISTCONTROL=…:erasedups`（同じ行を全部消して 1 つにする）: 覚えている一覧の中だけを直し、ファイルの古い重複は残る。効き目が分かりにくいので入れない
-  - `PROMPT_COMMAND` に `history -a`（コマンドごとにファイルへ書き、別の端末ですぐ使う）: AlmaLinux 10 の `PROMPT_COMMAND` は配列で、starship・WezTerm のシェル統合・zoxide が順番に意味を持って触っている（[starship.md 手順 3](../almalinux-setup.md#シェルのツール) の補足）。そこへ足す形は本書では扱わない
+  - `PROMPT_COMMAND` に `history -a`（コマンドごとにファイルへ書き、別の端末ですぐ使う）: AlmaLinux 10 の `PROMPT_COMMAND` は配列で、starship・WezTerm のシェル統合・zoxide が順番に意味を持って触っている（[starship.md 手順 3](../shell-terminal.md#シェルのツール) の補足）。そこへ足す形は本書では扱わない
   - `set bell-style none`（ベルを消す）、`menu-complete`（Tab で候補を順に入れる）: 好みの幅が大きいので入れない
   - `shopt -s histappend`: `/etc/bashrc` が対話のシェルで入れている（手順 3 の補足）
 - **atuin（履歴を SQLite に持ち、同期もする）は使わない**: 履歴の検索は [fzf](../almalinux-setup.md) の Ctrl+R で足りる。[導入元一覧](../tool-catalog.md#cli-定番の置き換え)の行のまま
@@ -682,7 +682,7 @@
 
 #### starship: 実施手順 / 手順 1: 補足: 変数について
 
-- `${STARSHIP_PRESET}` は[プリセットを当てる](../almalinux-setup.md#starship-のプリセットを当てる)でしか使わない
+- `${STARSHIP_PRESET}` は[プリセットを当てる](../shell-terminal.md#starship-のプリセットを当てる)でしか使わない
 - 既定を `plain-text-symbols` にしてあるのは、Nerd Font が無い環境でも文字化けしないため
 
 #### starship: 実施手順 / 手順 2: 補足: 降ってくるボトル
@@ -1133,7 +1133,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 #### HackGen Console NF: WezTerm で使う（任意） / 手順 2: 補足: 反映
 
-- 起動中の WezTerm には、保存した時点で反映される（[wezterm-nightly.md の設定ファイル](../almalinux-setup.md#wezterm-の設定ファイル)の節）
+- 起動中の WezTerm には、保存した時点で反映される（[wezterm-nightly.md の設定ファイル](../shell-terminal.md#wezterm-の設定ファイル)の節）
 
 #### HackGen Console NF: 選択した方針
 
@@ -1163,7 +1163,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [Homebrew Formulae — font-hackgen-nerd](https://formulae.brew.sh/cask/font-hackgen-nerd) — cask の版と中身
 - [Nerd Fonts](https://www.nerdfonts.com/) — 追加されているアイコンの一覧（コードポイントの確認に使える）
 - `man fc-list` / `man fc-match` / `man fc-cache` — fontconfig の照会と、キャッシュの作り直し
-- [wezterm-nightly.md](../almalinux-setup.md#wezterm) — WezTerm の導入と設定ファイルの置き場所
+- [wezterm-nightly.md](../shell-terminal.md#wezterm) — WezTerm の導入と設定ファイルの置き場所
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [HackGen v2.10.0](https://github.com/yuru7/HackGen/releases/tag/v2.10.0) — Windows 11 の節で取る `HackGen_NF_v2.10.0.zip`
 - [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
@@ -1275,7 +1275,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
   - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
-  - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
+  - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3）
 - **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
 
 #### WezTerm: 参照
@@ -1352,7 +1352,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
 - [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」
-- [WezTerm の Windows 11 で使う](../windows-setup.md#wezterm) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
+- [WezTerm の Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
 
 ---
 
@@ -1805,8 +1805,8 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 必要な項だけを通す場合も、次の手順は省略しない。
 
 - [ログインと sudo](../almalinux-setup.md#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](../almalinux-setup.md#os-とファームウェアの更新)の手順 1・4・5
-- [システムの設定](../almalinux-setup.md#システムの設定)の手順 1、[共通の bash 設定](../almalinux-setup.md#共通の-bash-設定)の手順 1・2
-- [Homebrew](../almalinux-setup.md#homebrew)の手順 1〜3、[シェルのツール](../almalinux-setup.md#シェルのツール)の手順 1・2
+- [システムの設定](../almalinux-setup.md#システムの設定)の手順 1、[共通の bash 設定](../shell-terminal.md#共通の-bash-設定)の手順 1・2
+- [Homebrew](../almalinux-setup.md#homebrew)の手順 1〜3、[シェルのツール](../shell-terminal.md#シェルのツール)の手順 1・2
 - [Git](../almalinux-setup.md#git)の手順 1〜6、[Firefox](../almalinux-setup.md#firefox)の手順 1〜7（ブラウザ認証に使う）
-- [HackGen Console NF](../almalinux-setup.md#hackgen-console-nf)の手順 1〜5（WezTerm と等幅のフォントに使う）、[WezTerm](../almalinux-setup.md#wezterm)の手順 1〜5
+- [HackGen Console NF](../shell-terminal.md#hackgen-console-nf)の手順 1〜5（WezTerm と等幅のフォントに使う）、[WezTerm](../shell-terminal.md#wezterm)の手順 1〜5
 - [再起動と確認](../almalinux-setup.md#再起動と確認)の手順 1
