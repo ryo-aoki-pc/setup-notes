@@ -1,15 +1,15 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](../reference/samba-client.md)
+[手順書](../almalinux-setup.md#samba-クライアント)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](../reference/samba-client.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#samba-クライアント-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#samba-クライアント)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 手順 1 の変数を設定したシェルで、上から順に貼る（新しいシェルなら、手順 1 の 2 つのブロックを貼り直してから）
-- GNOME Files でつないだままなら、先に [GNOME Files で開く（任意）](../almalinux-setup.md#samba-クライアント-gnome-files-で開く任意)の手順 5 を貼る
+- GNOME Files でつないだままなら、先に [GNOME Files で開く](../almalinux-setup.md#samba-クライアント-gnome-files-で開く)の手順 6 を貼る
 - この節は、`MOUNT_POINT` の行だけを fstab から消す。ほかの共有の行は残る
 
 1. 自動マウントを止め、マウントを外す。
@@ -75,7 +75,7 @@
    - 手順 2 で依存として入ったもの（`samba-client-libs` など）も、ほかに使うものが無ければ一緒に消える
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
-1. [GNOME Files で開く（任意）](../almalinux-setup.md#samba-クライアント-gnome-files-で開く任意)の手順 2 で入れたときだけ、gvfs-smb と gvfs-fuse を消す。
+1. [GNOME Files で開く](../almalinux-setup.md#samba-クライアント-gnome-files-で開く)の手順 3 で入れたときだけ、gvfs-smb と gvfs-fuse を消す。
 
    ```bash
    sudo dnf remove gvfs-smb gvfs-fuse
@@ -88,7 +88,7 @@
 
 ## Windows 11 のロールバック
 
-- [Windows 11 で使う](../windows-setup.md#samba-クライアント-windows-11-で使う)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
+- [Windows 11 で使う](../windows-setup.md#samba-クライアント)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
 - `[root]`・`[home]` も割り当てたなら、その手順 2 の 3 つ目のブロックの `DRIVE` をその文字に書き換えて貼り、この節の手順 1 を文字ごとに貼る
 - 共有の中のファイルと、サーバーの Samba ユーザーは変わらない（サーバーを戻すのは [samba.md のロールバック](samba.md#ロールバック)）
 
@@ -123,7 +123,7 @@
 
    - 消した旨の 1 行の後の一覧に、`<SERVER>` の資格情報が出なければよい
    - 同じサーバーのほかの割り当て（`[root]` など）を残すなら、この手順は行わない（残す割り当てが、この資格情報でつなぐ）
-   - **注意**: [Windows 11 で使う](../windows-setup.md#samba-クライアント-windows-11-で使う)の手順 4 より前からあった `<SERVER>` の資格情報（同じ節の手順 3 で見たもの）も、その手順 4 で置き換わっているので、ここで消える。エクスプローラーで開くときに入れ直す
+   - **注意**: [Windows 11 で使う](../windows-setup.md#samba-クライアント)の手順 4 より前からあった `<SERVER>` の資格情報（同じ節の手順 3 で見たもの）も、その手順 4 で置き換わっているので、ここで消える。エクスプローラーで開くときに入れ直す
 
 ---
 
@@ -158,7 +158,7 @@
     - samba.md のサーバーはユーザーとパスワードで認証し（ゲストにしない）、SMB3 の署名にも応じるため
     - `Set-SmbClientConfiguration` の `RequireSecuritySignature` と `EnableInsecureGuestLogons` は変えない
   - **エラー 1219**: 同じサーバーに別のユーザー名でつないでいると、割り当てが断られる（エクスプローラーで別の資格情報で開いた接続など）
-    - その接続を閉じるか、サインアウトしてサインインし直してから、[Windows 11 で使う](../windows-setup.md#samba-クライアント-windows-11-で使う)の手順 5 を貼り直す
+    - その接続を閉じるか、サインアウトしてサインインし直してから、[Windows 11 で使う](../windows-setup.md#samba-クライアント)の手順 5 を貼り直す
     - samba.md の `[root]`・`[home]` は同じユーザーでつなぐので、`[homes]` と並べて割り当てられる
   - **サインインのときにサーバーに届かないと、ドライブに赤い × が付く**: すべてのネットワーク ドライブを再接続できなかった旨の通知も出る。サーバーに届くようになってから、エクスプローラーでドライブを開き直す
     - 外出先では、先に WireGuard のトンネルを張る。`SERVER` を LAN 側の IP にしておけば、LAN の中でも外でも同じ割り当てを使える

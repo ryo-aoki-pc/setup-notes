@@ -1,6 +1,6 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#wireguard-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](../reference/wireguard.md)
+[手順書](../almalinux-setup.md#wireguard)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](../reference/wireguard.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -45,7 +45,7 @@
 
 1. 両拠点のルーターから、ポート転送と静的経路を消す。
 
-   - 消す値は、[鍵を作って適用する](../almalinux-setup.md#wireguard-鍵を作って適用する)の手順 5 の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
+   - 消す値は、[鍵を作って適用する](../almalinux-setup.md#wireguard-鍵を作って適用する)の手順 6 の `apply` の末尾に表示されたもの（[補足: ルーターの設定](../reference/wireguard.md#ルーターの設定)）
 
 ---
 
@@ -133,7 +133,7 @@
 
 1. WG ホストで、[AlmaLinux 10 の PC のロールバック](#almalinux-10-の-pc-のロールバック)の手順 3 の案内に従い、登録を消して反映する。
 
-   - 「クライアントを登録する」の手順 1 の `CLIENT_NAME` は、[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 2 で登録した、この PC の名前にする
+   - 「クライアントを登録する」の手順 1 の `CLIENT_NAME` は、[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3 で登録した、この PC の名前にする
    - ルーターの静的経路（クライアント帯）は、他のクライアントも使うので触らない
 
 ---
@@ -386,10 +386,10 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 
 - PPPoE（MTU 1454 / 1492 など）のように MTU が 1500 より小さい回線では、トンネル内の最大サイズのパケットが回線の MTU を超え、分割されて送られる
 - 分割されたパケットが途中で落ちると、**小さい通信は通るのに、大きい通信だけ遅い・止まる**（ping と ssh のキー入力は通るが、ssh の画面の描き直し・大きなファイル転送・一部の HTTPS が再送待ちになる）
-- 調べ方と直し方は、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)（`site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す。`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）
+- 調べ方と直し方は、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる)（`site.env` の `WG_MTU` に `1380` などと書いて `apply` し直す。`MTU =` の行は `WG_MTU` が空なら書かれず、書いてあれば入る）
 - 外出先のクライアントも、接続先の拠点の回線を通るので同じことが起きる。モバイル回線の側で起きることもある（クライアント conf の `[Interface]` に `MTU =` を書く）
   - `WG_MTU` に値を書いた後に `client add` で作る conf には、同じ `MTU =` が入る
-  - 配布済みのクライアントは作り直されないので、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)の手順 8 で入れる
+  - 配布済みのクライアントは作り直されないので、[回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる)の手順 9 で入れる
 
 #### LAN サブネットの重複
 
@@ -401,14 +401,14 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 
 #### AlmaLinux 10 の PC からつなぐときの注意点
 
-- **拠点の LAN 内では切る**: 「conf を取り込む」の手順 4 と「トンネルを確かめる」の全部は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので、すぐ切る
+- **拠点の LAN 内では切る**: 「conf を取り込む」の手順 5 と「トンネルを確かめる」の全部は**どちらの拠点の LAN の外でも**行い、import 直後に自動で張られるので、すぐ切る
   - `Endpoint` 宛ての通信が、ルーターで折り返す[ヘアピン](#クライアントが拠点の-lan-内にいるとき)になる
   - NetworkManager が入れる拠点 LAN の経路が Wi-Fi の直結経路より優先されると、LAN 宛ての通信がすべてトンネルに入る
   - `AllowedIPs` には**両拠点の LAN**が入るので、接続先ではない方の拠点の LAN にいるときも同じことが起きる（その LAN のデフォルトゲートウェイに届かなくなり、`Endpoint` 自体も見えなくなってトンネルごと死ぬ）
 - **`DNS =` の扱いが wg-quick と違う**: 本書は `DNS =` 無し
   - NetworkManager では `ipv4.dns` になり、接続中は resolv.conf を NetworkManager が書き換えるので、`systemd-resolved` は不要と考えられる
   - wg-quick は `resolvconf` 経由で resolved が要る（→ [wireguard.md](#dns--を書く場合)）
-- **MTU**: 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする
+- **MTU**: 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる)）は、PC も同じ値にする
   - 拠点が `WG_MTU` を書いた後に `client add` で登録した conf には `MTU =` が入っていて、取り込むと `wireguard.mtu` になる
   - それより前に取り込んだプロファイルは、`sudo nmcli connection modify wg0 wireguard.mtu 1380` して down / up（`1380` は拠点の値に読み替える）
   - 拠点が下げていなくても、PPPoE やモバイル回線で大きい通信だけ遅い・止まるなら、同じ操作で下げる（→ [wireguard.md: MTU](#mtu)）
@@ -432,7 +432,7 @@ wg-quick は `MTU` を指定しない場合、出口の NIC の MTU から 80 �
 - **秘密鍵は、管理者なら読める**: 張っている間の `wg.exe show wg0 private-key`、窓の「編集」（設定の全文を出す）と「すべてのトンネルをzipにエクスポート」。WireGuard の窓は Administrators の一員にしか出ない。Windows のサインインのパスワードが鍵の守りになる
 - **WireGuard を外すと、ほかのトンネルの設定も消える**: MSI のアンインストールは `C:\Program Files\WireGuard\Data` を丸ごと消す（ソースの `installer/customactions.c` の `RemoveConfigFolder`）
 - **MTU**: conf に `MTU =` が無いと、既定の経路のインターフェースの MTU から 80 を引いた値になる（1500 なら 1420。WireGuard の文書の「Network Configuration Quirks」）
-  - 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)）は、PC も同じ値にする。拠点が `WG_MTU` を書いた後に `client add` で登録した conf には、はじめから `MTU =` が入っている
+  - 拠点が `WG_MTU` を下げているとき（[wireguard.md の「回線に合わせて MTU を下げる」](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる)）は、PC も同じ値にする。拠点が `WG_MTU` を書いた後に `client add` で登録した conf には、はじめから `MTU =` が入っている
   - それより前に取り込んだトンネルと、大きい通信だけ遅い・止まるときは、トンネルを切ってから窓の「編集」で `[Interface]` に `MTU = 1380` を足す（`1380` は拠点の値に読み替える）
 - **`DNS =` を書いた場合**: `wg0` の DNS サーバーになり、Windows の通常の名前解決の扱い（複数の DNS サーバーを使う）に任される。DNS を絞る規則は、キルスイッチが掛かる構成（`/0` の peer が 1 つ）でだけ入る（同じ文書）。本書は `DNS =` 無し
 - **`Endpoint` が DDNS 名のとき**: トンネルを張るたびに名前を引く（ソースの `tunnel/service.go`）

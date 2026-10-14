@@ -1,8 +1,8 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#distrobox-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](../reference/distrobox.md)
+[手順書](../almalinux-setup.md#distrobox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](../reference/distrobox.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#distrobox-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#distrobox)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック

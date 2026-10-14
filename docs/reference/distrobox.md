@@ -1,15 +1,15 @@
 # distrobox インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../almalinux-setup.md#distrobox-実施手順)・[ロールバックと注意点](../extra/distrobox.md)
+[手順書](../almalinux-setup.md#distrobox)・[ロールバックと注意点](../extra/distrobox.md)
 
 ## 補足
 
-### 実施手順 / 手順 2: 補足: 一緒に入るものと鍵
+### Distrobox / 手順 2: 補足: 一緒に入るものと鍵
 
 - 未導入なら一緒に入る依存が `hicolor-icon-theme` だけなのは、podman は前提の手順で入っているため
 - 確認を求められる EPEL の署名鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
-### 実施手順 / 手順 3: 補足: distrobox の依存
+### Distrobox / 手順 3: 補足: distrobox の依存
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md#実施手順--手順-3-補足-distrobox-の依存)
 
@@ -18,7 +18,7 @@
 - podman を消すと distrobox も消える（[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
 - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり
 
-### 実施手順 / 手順 4: 補足: ボックスは隔離されていない
+### Distrobox / 手順 4: 補足: ボックスは隔離されていない
 
 | オプション | 意味 |
 |---|---|
@@ -32,22 +32,22 @@
 
 **ボックスは「別のディストリのユーザーランドを使うための道具」で、安全のための隔離ではない**（[注意点](../extra/distrobox.md#注意点)）。
 
-### 実施手順 / 手順 5: 補足: 初期化で行われること
+### Distrobox / 手順 5: 補足: 初期化で行われること
 
 - ボックスの中に自分と同じ名前のユーザーを作り、`sudo` をパスワード無しで使えるようにする（ボックスの中の `sudo -l` は `(root) NOPASSWD: ALL`）
 - 本書の `--userns keep-id` では、ボックスの root はホストの subordinate UID に対応する。自分の UID に対応するのはボックス内の同じ UID で、ボックスの root にホストの root の権限は無い
 - コンテナが止まっていれば、次の `distrobox enter` でも起動と初期化の確認が走る（2 回目からは速い）
-- 同じ節の手順 5 で出るユーザー名とホームは、ホストと同じ
+- 同じ項の手順 5 で出るユーザー名とホームは、ホストと同じ
 
-### 実施手順 / 手順 6: 補足: host-spawn: command not found
+### Distrobox / 手順 6: 補足: host-spawn: command not found
 
 ボックスの中の `/etc/profile.d/distrobox_profile.sh` は、`DISPLAY`・`WAYLAND_DISPLAY`・`XAUTHORITY` などが空のとき、`host-spawn` でホストの値を読みに行く。
 
-### ボックスのコマンドをホストから呼ぶ（任意） / 手順 2: 補足: ボックスの中の sudo
+### ボックスのコマンドをホストから呼ぶ / 手順 3: 補足: ボックスの中の sudo
 
-- ボックスの中の `sudo` はパスワードを聞かない（[実施手順 / 手順 5 の補足](#実施手順--手順-5-補足-初期化で行われること)の初期化で、パスワード無しにしてある）
+- ボックスの中の `sudo` はパスワードを聞かない（[実施手順 / 手順 5 の補足](#distrobox--手順-5-補足-初期化で行われること)の初期化で、パスワード無しにしてある）
 
-### ボックスのコマンドをホストから呼ぶ（任意） / 手順 4: 補足: 書き出されたもの
+### ボックスのコマンドをホストから呼ぶ / 手順 5: 補足: 書き出されたもの
 
 `~/.local/bin/ffmpeg` は、ボックスの中の ffmpeg を呼び出すシェルスクリプト:
 
@@ -68,7 +68,7 @@ fi
 - ホームはボックスと共有しているので、ホームの中のファイルはそのままのパスで渡せる
 - `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` で PATH に入っている
 
-### 更新 / 手順 2: 補足: ボックスの中の更新
+### 更新 / 手順 3: 補足: ボックスの中の更新
 
 - Ubuntu のボックスでは `apt-get update` と `apt-get upgrade` が確認なしで走る
 
@@ -87,7 +87,7 @@ fi
 - [distrobox — README](https://github.com/89luca89/distrobox) — 概要、コマンドの一覧、互換のあるイメージ（`docs/compatibility.md`）
 - [distrobox — Useful tips](https://github.com/89luca89/distrobox/blob/main/docs/useful_tips.md) — 書き出し、ホストのコマンドの呼び出し
 - `man distrobox-create` / `man distrobox-enter` / `man distrobox-export` / `man distrobox-rm` — オプション
-- [Podman](../almalinux-setup.md#podman-実施手順) — 前提の rootless の podman
+- [Podman](../almalinux-setup.md#podman) — 前提の rootless の podman
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

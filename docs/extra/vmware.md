@@ -1,6 +1,6 @@
 # VMware Workstation Pro のインストールと VM の作成（Windows 11）のロールバックと注意点
 
-[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](../reference/vmware.md)
+[手順書](../windows-setup.md#vmware-workstation-pro)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](../reference/vmware.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 
@@ -21,7 +21,7 @@
   - 同じ VM で、`vmrun readVariable <vmx> guestVar ip` は IP を返した。本書はこちらを使う
   - クローンの元の VM では、`getGuestIPAddress` も IP を返した
   - リンククローンでも、`vmrun stop <vmx> soft`（ゲストに電源を切らせる）は効いた
-- **3D のアクセラレーションは切ってある**（[VM を作る](../windows-setup.md#vmware-workstation-pro-vm-を作る)の手順 3 の `MKS SetAccel3d false`）。25H2 のリリースノートに、有効だと RHEL 10 のインストールが灰色の画面で止まる、という既知の問題がある（本書では、有効にした場合を確かめていない）
-- **`vmcli VM Create` の作る `.vmx` は、3D が有効で、ディスクも NIC もつながっていない**。[VM を作る](../windows-setup.md#vmware-workstation-pro-vm-を作る)の手順 3 を通すまで、起動しても OS は入らない
+- **3D のアクセラレーションは切ってある**（[VM を作る](../windows-setup.md#vmware-workstation-pro-vm-を作る)の手順 4 の `MKS SetAccel3d false`）。25H2 のリリースノートに、有効だと RHEL 10 のインストールが灰色の画面で止まる、という既知の問題がある（本書では、有効にした場合を確かめていない）
+- **`vmcli VM Create` の作る `.vmx` は、3D が有効で、ディスクも NIC もつながっていない**。[VM を作る](../windows-setup.md#vmware-workstation-pro-vm-を作る)の手順 4 を通すまで、起動しても OS は入らない
 - **画面への入力で確かめたのは、文字と Enter だけ**。`vmcli MKS sendKeySequence` は文字列をそのまま打ち、文字列の中の改行が Enter になる。矢印・Esc・Tab・ファンクション キーを送る方法は確かめられていない
 - **リンククローンのディスクは、元の VM のディスクを親として指す**（`.vmdk` の中の `parentFileNameHint` が、元の VM のフォルダーの `.vmdk` のパス）。元の VM を消したり動かしたりする前に、リンククローンを消す

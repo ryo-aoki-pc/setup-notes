@@ -1,10 +1,10 @@
 # Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の参考資料
 
-[手順書](../almalinux-setup.md#podman-実施手順)・[ロールバックと注意点](../extra/podman.md)
+[手順書](../almalinux-setup.md#podman)・[ロールバックと注意点](../extra/podman.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: Server の環境では最初から入っている
+### Podman / 手順 1: 補足: Server の環境では最初から入っている
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md#実施手順--手順-1-補足-server-の環境では最初から入っている)
 
@@ -13,7 +13,7 @@ AlmaLinux 10 のインストーラのグループ定義（AppStream の comps）
 - このグループの必須パッケージは `podman` と `buildah`。この 2 つの環境で入れた PC には、podman が最初から入っている
 - Workstation と Minimal Install の環境には、このグループが無い
 
-### 実施手順 / 手順 2: 補足: 一緒に入るものと、container-tools を使わない理由
+### Podman / 手順 2: 補足: 一緒に入るものと、container-tools を使わない理由
 
 | パッケージ | 役割 |
 |---|---|
@@ -29,13 +29,13 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 
 - 本書は podman だけを入れ、ほかは[ツール一覧](../tool-catalog.md#cli-コンテナ)から要るものを足す形にした
 
-### 実施手順 / 手順 4: 補足: 割り当てる範囲
+### Podman / 手順 4: 補足: 割り当てる範囲
 
 - `SUBID_START=` の行で、登録済みの範囲のいちばん後ろ（1 つも無ければ 524288）を始まりにする
 - `usermod` の行で、そこから 65536 個を不足する側だけに割り当てる。既存の UID・GID の範囲は変更しない
 - `podman system migrate` は、それまでに podman を使っていたときに、新しい範囲を反映させる
 
-### 実施手順 / 手順 5: 補足: podman info の読み方
+### Podman / 手順 5: 補足: podman info の読み方
 
 3 行目の 6 つの値の意味:
 
@@ -48,16 +48,16 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 | `pasta` | rootless のネットワークと、ポートの公開 |
 | `v2` | cgroup v2 |
 
-### 実施手順 / 手順 7: 補足: このソケットを使うもの
+### Podman / 手順 7: 補足: このソケットを使うもの
 
-- [Trivy](../almalinux-setup.md#画像の道具-実施手順)、[podman-tui](../almalinux-setup.md#podman-tui-実施手順)、[lazydocker](../almalinux-setup.md#lazydocker-実施手順)、GUI の Pods・Podman Desktop
+- [Trivy](../almalinux-setup.md#画像の道具)、[podman-tui](../almalinux-setup.md#podman-tui)、[lazydocker](../almalinux-setup.md#lazydocker)、GUI の Pods・Podman Desktop
 
-### Docker 向けのツールから使う（任意） / 手順 1: 補足: 共通設定とソケット
+### Docker 向けのツールから使う / 手順 1: 補足: 共通設定とソケット
 
 - 共通設定はソケットがあるときだけ `DOCKER_HOST` を入れる
-- ソケットの有効化は[実施手順](../almalinux-setup.md#podman-実施手順)の手順 7 で行う
+- ソケットの有効化は[Podman](../almalinux-setup.md#podman)の手順 7 で行う
 
-### Quadlet で自動起動する（任意） / 手順 1: 補足: 定義の中身
+### Quadlet で自動起動する / 手順 1: 補足: 定義の中身
 
 | 行 | 意味 |
 |---|---|
@@ -69,7 +69,7 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 | `TimeoutStartSec=300` | 初回はイメージの取得を待つので、起動の待ち時間を延ばす |
 | `WantedBy=default.target` | ユーザーの systemd が起動したときに、このサービスも起動する |
 
-### Quadlet で自動起動する（任意） / 手順 2: 補足: 起動の待ち時間と、enable を使わない理由
+### Quadlet で自動起動する / 手順 2: 補足: 起動の待ち時間と、enable を使わない理由
 
 - 初回の `start` に数十秒かかるのは、イメージの取得を待つため
 - `start` から戻った直後は、Apache がまだ待ち受けていないことがある。curl は、応答が来るまで 1 秒おきに 10 回まで試し直す
@@ -83,6 +83,6 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
 - [podman-run(1)](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--volume` の `:Z`、`--publish`
 - [RHEL 10 — Building, running, and managing containers](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/building_running_and_managing_containers/index) — RHEL の podman の文書
 - `man containers-registries.conf` — 短い名前の扱い（`unqualified-search-registries`・`short-name-mode`）
-- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) — [Quadlet の節](../almalinux-setup.md#podman-quadlet-で自動起動する任意)の前提の手順書
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐) — [Quadlet の節](../almalinux-setup.md#podman-quadlet-で自動起動する)の前提の手順書
 
 ---

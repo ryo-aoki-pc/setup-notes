@@ -6,7 +6,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
-> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md#実施手順)の実施手順を、少なくとも[yazi](almalinux-setup.md#yazi)まで通してあること
+> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること（2026-10-14 からは、これらの項はカテゴリに分かれている）
 > - AI エージェントのアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
 > - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -300,7 +300,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
 
 > [!IMPORTANT]
-> - 前提: [Windows 11 のセットアップ](windows-setup.md#実施手順)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
+> - 前提: [Windows 11 のセットアップ](windows-setup.md)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
 > - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ
 > - **この PC のデスクトップで行う**。SSH のセッションには貼らない
 > - PowerShell のブロックは、管理者ではない **Windows PowerShell 5.1** に貼る（窓の開き方は、[Windows 11 のセットアップの「WSL の AlmaLinux 10 と自動サインイン」](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1）
@@ -956,7 +956,7 @@
 > - **Administrators のユーザーでログインする**。タスク登録に管理者の権限が要る。SSH のセッションは UAC 無しで管理者の権限を持つ
 > - 前提: [OpenSSH サーバー](windows-setup.md#openssh-サーバー)で SSH ログインでき、[Claude Code](#windows-11-で-claude-code-を入れる)を公式の native installer で入れてある
 > - `claude` の `/login` で claude.ai（Pro / Max / Team / Enterprise）にログイン済み。API キーでは Remote Control を使えない
-> - [WezTerm](windows-setup.md#wezterm)は `C:\Program Files\WezTerm` に入れ、[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4 を通す。SSH の PowerShell も同じプロファイルを読む
+> - [WezTerm](windows-setup.md#wezterm)は `C:\Program Files\WezTerm` に入れ、[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通す。SSH の PowerShell も同じプロファイルを読む
 > - **デスクトップにログインしたままにする**。タスクはそのセッションで WezTerm を開くので、ログオフすると動かない（[注意点](extra/windows-claude-remote-control.md#注意点)）
 > - 再起動後の自動サインインは[WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 で設定する
 > - **手順 4 には対話入力がある**（ディレクトリの信頼のダイアログと、初回の Remote Control の確認。URL が出たら Ctrl+C）
@@ -969,7 +969,7 @@
 
 1. クライアントの PC から Windows に SSH でログインし、Windows PowerShell を起動する。
 
-   - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 4](windows-setup.md#ssh-でログインを確かめる)と同じ。スマートフォンの SSH のアプリでもよい）
+   - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](windows-setup.md#ssh-でログインを確かめる)と同じ。スマートフォンの SSH のアプリでもよい）
    - ログインした先のシェルが Git Bash でも cmd でも、`powershell` と打つ
    - プロンプトが `PS C:\Users\<WIN_USER>>` になる
    - **次の手順は、このプロンプトが出てから貼る**（続けて貼ると、ログインした先のシェルへの入力として食われる）
@@ -1003,7 +1003,7 @@
 
    - `claude` の版と、ログイン済みを示す行、`wezterm 2026…` が出ればよい
    - `quser` に、自分のユーザーの `console` の行が `Active` で出ること。出なければ、この PC にログインしてから続ける
-   - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-setup.md#rdp-をロックせずに切断-実施手順)で切ると `console` に戻る
+   - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-setup.md#rdp-をロックせずに切断)で切ると `console` に戻る
    - `claude remote-control --help` は貼らない
 
 1. 初回だけ、対話で起動して信頼と Remote Control の確認に答え、URL が出たら止める。
@@ -1247,8 +1247,8 @@
 
 > [!IMPORTANT]
 > - **Claude Code が動くユーザー本人のシェル（SSH でよい）で貼る**。`sudo -i` / `su -` したシェルでは貼らない
-> - 前提: [ヘッドレスセッション](almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 1・2。RDP の設定は不要
-> - [画面ロックを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意)の手順 1・2 も通す。Claude Code は画面ロックを解除できない
+> - 前提: [ヘッドレスセッション](almalinux-setup.md#gnome-のヘッドレスセッション)の手順 1・2。RDP の設定は不要
+> - [画面ロックを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順 1・2 も通す。Claude Code は画面ロックを解除できない
 > - このリポジトリの [`scripts/gnome-gui.py`](../scripts/gnome-gui.py) を使う。clone した場所を手順 1 の `REPO` に入れる
 
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
@@ -1646,7 +1646,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
 > - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)を通してある
 > - [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)から[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある
-> - 3 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 1・2（scoop）も必要
+> - 3 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3（scoop）も必要
 > - リモートがあるなら、push の認証と PR を作る道具も必要。GitHub は[GitHub CLI](windows-setup.md#github-cli)でログインしておく
 > - **この項の手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
@@ -2125,7 +2125,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### コーディングエージェントの共同作業: Windows 11 の更新
 
-- CLI と 2 つのプラグインは[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)、Node.js は[scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)の手順 1・2 で上げる
+- CLI と 2 つのプラグインは[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)、Node.js は[scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 - 規則を変えたときは、AlmaLinux 10 と同じく[main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で各 worktree をそろえる
 
 
@@ -2147,7 +2147,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **この実施手順は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
 > - **Grok Build を使う一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
 > - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
-> - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐-実施手順)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
+> - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](almalinux-setup.md#wireguard-クライアントを登録する)でクライアントにしておく
 > - [ブラウザ操作](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 1・3〜6 は別の PC とそのブラウザで行う
@@ -2217,7 +2217,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `aarch64` か `x86_64`、`grok` と `node` の版、`Linger=yes`、`running` が出ればよい
    - `ss` は見出しの 1 行だけ、`ls` は 6 つとも `No such file or directory` になればよい
-   - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐-実施手順) を通す
+   - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐) を通す
    - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[ロールバック](extra/grok-build-remote.md#ロールバック)で消してからやり直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
 
@@ -2622,8 +2622,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **Windows のデスクトップで行う**。[Codeg を入れる](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 1 で開く **管理者ではない Windows PowerShell 5.1** に貼る
 > - [HTTPS で公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 3 だけは、管理者の窓に貼る
 > - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と Grok Build が管理者の権限で動く
-> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜4、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の導入・ログイン、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
-> - 拠点ごとに[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 1 で、信頼する有線 LAN・Wi-Fi をプライベートにする
+> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の導入・ログイン、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
+> - 拠点ごとに[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 3 で、信頼する有線 LAN・Wi-Fi をプライベートにする
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）
 > - PC の IP は固定でなくてよい。受信するホスト側のインターフェースが Private なら、有線 LAN・Wi-Fi・VPN の全接続種別・全送信元の IPv4・IPv6 を許可する
 > - VPN からでも、実際に受信するホスト側のインターフェースが Private であることが必要。信頼する接続だけを Private にし、公衆 Wi-Fi などは Public のままにする
@@ -2685,7 +2685,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `grok` と `node` の版、`False`（管理者ではない）、LAN の接続の `Private` が出ればよい
    - その後は、待ち受けの表が出ず、`False` が 3 行出て、タスクの表も出なければよい
    - 最初の `False` が `True` なら、管理者の窓で開いている。この項の手順 1 からやり直す
-   - `Public` なら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](windows-setup.md#ネットワークとリモート)を通す
+   - `Public` なら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 3](windows-setup.md#ネットワークとリモート)を通す
    - 待ち受け・`True`・タスクのどれかが出たら、既存の構築がある。[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)で消してからやり直す
 
 1. 配布物を取得して SHA-256 を照合し、自分のユーザーの場所に置く。
@@ -3120,7 +3120,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 接続中の Private の IPv4 ごとに接続名と URL が 1 行、接続ごとの InterfaceIndex・ネットワークの種類と IPv4 の表が出る。URL が出なければ、Private の有効な IPv4 が無い
    - `Public`・`DomainAuthenticated` の受信インターフェースには別の端末から届かない
-   - 信頼する LAN・VPN を Private にする場合だけ、[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 1 を通す。公衆 Wi-Fi などは Public のままにする
+   - 信頼する LAN・VPN を Private にする場合だけ、[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 3 を通す。公衆 Wi-Fi などは Public のままにする
    - この項の手順 5 を行うときは、今回表示した URL と表を使う
    - Caddy の設定・タスク・受信の規則・端末のルート証明書は、変えなくてよい。新しい IP 宛ての証明書は、Caddy がその場で作る
    - ブラウザは、IP が違う URL を別のサイトとして扱う。はじめて開く IP では、トークンを入れ直す

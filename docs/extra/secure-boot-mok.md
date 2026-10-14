@@ -1,8 +1,8 @@
 # Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](../reference/secure-boot-mok.md)
+[手順書](../almalinux-setup.md#secure-boot-の署名鍵)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](../reference/secure-boot-mok.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#secure-boot-の署名鍵-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#secure-boot-の署名鍵)の手順 N、「本書」「この文書」は手順書を指す
 
 ## ロールバック
 

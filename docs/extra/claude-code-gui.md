@@ -53,7 +53,7 @@
   - `python3` には `gi` が無い。`scripts/gnome-gui.py` は `#!/usr/bin/python3` で動く
   - `gsettings` は dconf ではなく `~/.config/glib-2.0/settings/keyfile` に書き、GNOME には効かないのに、読み戻すと変わったように見える。[AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順は `/usr/bin/gsettings` で書く
   - `gdbus` と `gio` も Homebrew のものになる。手で使うときは `/usr/bin/` を付ける
-- **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
+- **RDP でつないだ人には、Claude Code の画面は写らない**: [gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション) の RDP でつなぐと、この手順書の仮想モニター（`Meta-0`）の右に、クライアントの大きさの別のモニター（`Virtual remote monitor`）が足され、クライアントにはそちらが写る
   - 上部バーは主のモニター（`Meta-0`）にしか出ないので、クライアントの画面には上部バーが無かった
     - 同じドロップインを置いた試験用のユーザーで、FreeRDP で同じように入ると、クライアントには壁紙だけが写った（上部バーもウィンドウも無い）
   - RDP だけで使うなら、[ロールバック](#ロールバック)でドロップインを外すと、クライアントの画面がデスクトップ全体になる

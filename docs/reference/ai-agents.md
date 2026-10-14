@@ -26,7 +26,7 @@
   - 両 OS 共通の項（ルート証明書、使い方の基本、設定ファイル、分担・レビュー・取り込み）を 1 か所に置けるため
 - AlmaLinux 10 の「更新」は手順 5〜9 だけを移し、新しい本の[更新](../ai-agents.md#更新)の手順 1〜5 にした
 - AI エージェントの状態で分岐する手順は、節の手順番号と検証記録を保つため、2 冊に残した
-  - windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の、Remote Control のタスクの手順
+  - windows-setup.md の「リモートから再起動する手段を増やす」と「Git for Windows・Firefox・WezTerm を上げる」の、Remote Control のタスクの手順
   - almalinux-setup.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の、仮想モニターのドロップインを外す手順
 - 旧見出しと現在の節の対応は、[集約対応表の追補](../dev/consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)で管理する
 

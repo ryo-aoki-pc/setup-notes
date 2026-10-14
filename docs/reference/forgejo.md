@@ -1,50 +1,50 @@
 # Forgejo 構築手順（AlmaLinux 10 / rootless Podman + Quadlet / LAN・VPN 内で使う）の参考資料
 
-[AlmaLinux 10 の「Forgejo: 実施手順」](../almalinux-setup.md#forgejo-実施手順)・[ロールバック](../extra/forgejo.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)
+[AlmaLinux 10 の「Forgejo」](../almalinux-setup.md#forgejo)・[ロールバック](../extra/forgejo.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)
 
 集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 1: 補足: 変数
+### イメージを取得して localhost で起動する / 手順 1: 補足: 変数
 
 - `SERVER_IP` は、Forgejo の Web・Git の接続先にも使う
 - `LAN_SUBNET` は送信元 IPv4 の CIDR。`0.0.0.0/0` を明示すると送信元を制限しない。待ち受け IP・宛先・ポートの制限とは別の指定になる
 - `FW_ZONE` は自動で入る
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 2: 補足: 同じシェルで続ける理由
+### イメージを取得して localhost で起動する / 手順 2: 補足: 同じシェルで続ける理由
 
 - 「イメージを取得して localhost で起動する」の手順 3 を同じシェルに続けて貼るのは、同じ項の手順 2 で調べた `FORGEJO_VERSION` を使うため
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 3: 補足: イメージの行
+### イメージを取得して localhost で起動する / 手順 3: 補足: イメージの行
 
 - イメージの行には、「イメージを取得して localhost で起動する」の手順 2 で調べた版の番号が入る
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 5: 補足: まだ公開しない
+### イメージを取得して localhost で起動する / 手順 5: 補足: まだ公開しない
 
 - この時点では LAN に公開しない
 
-### 実施手順 / 初期設定と管理者の作成 / 手順 2: 補足: 「Install Forgejo」の後のログイン
+### 初期設定と管理者の作成 / 手順 3: 補足: 「Install Forgejo」の後のログイン
 
 - 「Install Forgejo」を押すと、パスワードを聞かれずに、作った管理者でログインした状態のダッシュボードが開く（2026-10-11 に Hyper-V の VM の 16.0.5 で、押してから 5 秒。ブラウザは、スクリプトで操作したヘッドレスの Firefox。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - 入力したパスワードが通ることは、いったん「Sign out」してから確かめる
 
-### 実施手順 / LAN に公開する / 手順 3: 補足: トンネルの端末に出る Connection refused
+### LAN に公開する / 手順 4: 補足: トンネルの端末に出る Connection refused
 
-- 「LAN に公開する」の手順 2 の後は、サーバーの `127.0.0.1:3000` に待ち受けが無い。トンネルの入口（クライアントの `localhost:3000`）へ接続が来るたびに、トンネルの `ssh` が `channel 1: open failed: connect failed: Connection refused` を出す
+- 「LAN に公開する」の手順 3 の後は、サーバーの `127.0.0.1:3000` に待ち受けが無い。トンネルの入口（クライアントの `localhost:3000`）へ接続が来るたびに、トンネルの `ssh` が `channel 1: open failed: connect failed: Connection refused` を出す
 - 2026-10-11 の Hyper-V の VM の検証では、ブラウザ（ヘッドレスの Firefox）が `http://localhost:3000/admin` を開いたままで、切り替えの 2 秒後から `Ctrl+C` で閉じるまでの 16 秒に 71 行出た（うち 70 行は、2〜3 秒おきに 10 行ずつ。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。接続しに行ったのは、開いたままのページの定期的な取り寄せとみた（切り分けていない）。窓のあるブラウザで同じだけ出るかは、確かめていない
 
-### 実施手順 / 自動更新を有効にする / 手順 1: 補足: 貼り直したとき
+### 自動更新を有効にする / 手順 1: 補足: 貼り直したとき
 
 - 「自動更新を有効にする」の手順 1 を貼り直すと、プログラムだけを置き直す。Quadlet とデータは変えない
 
-### 実施手順 / 自動更新を有効にする / 手順 2: 補足: ユニットの役割
+### 自動更新を有効にする / 手順 2: 補足: ユニットの役割
 
 - `.service` がプログラムを 1 回動かす。`.timer` は、毎日 4:00〜4:30（サーバーの時刻）のどこかで `.service` を起動する
 
-### 実施手順 / 自動更新を有効にする / 手順 3: 補足: linger
+### 自動更新を有効にする / 手順 3: 補足: linger
 
-- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) が有効なので、ログアウトしていてもタイマーは動く
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐) が有効なので、ログアウトしていてもタイマーは動く
 
 ### 使い方の基本 / 手順 1: 補足: アカウント
 
@@ -65,13 +65,13 @@
 
 ## 選択した方針
 
-- 既存の [Podman の手順](../almalinux-setup.md#podman-実施手順)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)を使う
+- 既存の [Podman の手順](../almalinux-setup.md#podman)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐)を使う
 - Forgejo は公式の `-rootless` イメージを使い、コンテナ内も UID・GID 1000 で動かす。ホストの一般ユーザーとコンテナのユーザーを `keep-id` で対応させる
 - DB は SQLite にする。小規模で同時操作が多くない構成では外部 DB の導入・保守が不要になる。Forgejo の公式バイナリとイメージは SQLite に対応している。高い同時負荷では PostgreSQL または MySQL / MariaDB を検討するが、既存 DB の変更は単純な設定変更だけではできない
 - HTTP 3000 と Git 用 SSH 2222 を、初期設定中は localhost、管理者作成後は指定した LAN / VPN の IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
 - 公式の最新安定版を導入時に自動で調べて入れ、以後は毎日のユーザータイマーで最新の安定版へ自動で更新する（利用者の指定）。Quadlet には調べた版の番号を書き、停止バックアップ・更新・確認・失敗時の自動の戻しを組にする
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 2・3: 最新安定版とイメージの選択
+### イメージを取得して localhost で起動する / 手順 2・3: 最新安定版とイメージの選択
 
 - 手順書に版の番号を書かない。「イメージを取得して localhost で起動する」の手順 2 で、Codeberg の API（`/api/v1/repos/forgejo/forgejo/releases?draft=false&pre-release=false&limit=50`）から、`v<数>.<数>.<数>` の形で下書きとプレリリースでないものの最も大きい番号を選ぶ
 - `/releases/latest` は、最後に公開したリリースを返す。LTS（15.x・11.x）のパッチは通常版と前後して公開される（2026-09-17 は v15.0.9 の 3 分後に v16.0.5）ので、公開順では LTS の版を選ぶことがある。番号の大きさで選ぶ
@@ -81,7 +81,7 @@
 - 「イメージを取得して localhost で起動する」の手順 2 と自動更新のプログラムの版を選ぶ関数は、同じ文字列にしてある。片方を直すときは、もう片方も直す
 - 公式の Podman 例は root 管理の `/etc/containers/systemd` とホストポート 222 を使う。本書は rootless Podman のユーザー unit に変え、1024 以上のホストポートを使う
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 3: rootless の 2 つの意味とデータ
+### イメージを取得して localhost で起動する / 手順 3: rootless の 2 つの意味とデータ
 
 | 項目 | 本書の指定 | 役割 |
 |---|---|---|
@@ -98,7 +98,7 @@
 - `/var/lib/gitea/custom/conf/app.ini` は永続データの中にある。v15 で以前の `/etc/gitea/app.ini` 向けの互換処理が取り除かれ、v16 もこの配置を使う。Gitea の rootless 構築例のパスは写さない
 - `Restart=on-failure` は異常終了時の再起動、`TimeoutStartSec=300` は初回のイメージ取得などを待つ時間。起動時の生成は `WantedBy=default.target` が受け持つ。生成 unit に `systemctl --user enable` は使わない
 
-### 実施手順 / イメージを取得して localhost で起動する / 手順 3、初期設定と管理者の作成 / 手順 2・3、LAN に公開する / 手順 2: 初期設定と設定の反映
+### イメージを取得して localhost で起動する / 手順 3、初期設定と管理者の作成 / 手順 3・4、LAN に公開する / 手順 3: 初期設定と設定の反映
 
 - コンテナ起動時の `FORGEJO__[SECTION]__[KEY]` は `app.ini` へ反映される。画面で変更した同じ項目が再起動後に元へ戻る場合は、Quadlet 側の値を確認する
 - `ROOT_URL` はブラウザに見える URL、`HTTP_ADDR` / `HTTP_PORT` はコンテナ内の待ち受け。host の `PublishPort` は外部へ公開するアドレスと番号。これらは別々に指定する
@@ -111,7 +111,7 @@
 - `app.ini` にはトークンの署名鍵などが入るため、エージェントの確認では内容を読み取らない。ファイルと DB の存在、CLI の有効な管理者、初期設定画面の閉鎖、登録画面の拒否、OpenID の入口が無いこと、`/api/healthz` の応答で動作を確かめる
 - この確認は実効状態を判定するもので、INI の `INSTALL_LOCK` などの値を読み戻した結果ではない。LAN への切り替え直前にも同じ確認を行い、Quadlet の登録・閲覧制限の行を確かめてから書き換える
 
-### 実施手順 / LAN に公開する / 手順 1・3: 通信の範囲
+### LAN に公開する / 手順 2・4: 通信の範囲
 
 - 本書の rich rule は `family=ipv4`・送信元 CIDR・宛先 IPv4・対象ポート・`priority=100` を組にする。最初から存在する同じ規則には重ねず、撤去ではその組に一致する規則だけを外す
 - runtime と permanent の両方へ追加・削除する。既存のほかの runtime の設定も保存してしまう `--runtime-to-permanent` は使わない
@@ -121,13 +121,13 @@
 - LAN の IPv4 を待ち受けたまま VPN のクライアントから使うときは、VPN にその LAN への経路が必要になる。送信元を制限した場合は、サーバーから見える送信元が許可 CIDR に入る必要もある。VPN 経由の SNAT があると送信元は変わる
 - HTTP の内容は暗号化されない。VPN や SSH トンネルの外で Web を使う運用へ広げるときは、HTTPS の構築と公開範囲を別に設計する
 
-### 実施手順 / Git の接続を確かめる / 手順 1〜5: Git とアカウント
+### Git の接続を確かめる / 手順 1〜5: Git とアカウント
 
 - OS のユーザーは rootless Podman とユーザーサービスを動かす。Forgejo のユーザーは Web 上のアカウント。clone URL の `git` はコンテナ内の SSH 接続用ユーザーで、これらは同じ名前である必要がない
 - `SSH_PORT` は clone URL に表示するホストの番号、`SSH_LISTEN_PORT` は内蔵 SSH の内部番号。本書では後者を 2222 に固定する
 - SSH のホスト鍵は永続データに保存される。サービス再起動やコンテナ再作成で変わらないことを確認する。初回の確認でホストの OpenSSH 22 の鍵と取り違えない
 
-### 実施手順 / 自動更新を有効にする / 手順 1〜3・更新: 自動更新
+### 自動更新を有効にする / 手順 1〜3・更新: 自動更新
 
 - Podman の自動更新（`AutoUpdate=registry` と `podman auto-update`）は採らない
   - 動くタグは系列の中だけなので、メジャー版をまたいで最新版へ進めない
@@ -188,6 +188,6 @@
 - [podman run](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--userns=keep-id`、`--user`、bind mount の所有者と SELinux の `:Z`
 - [firewalld rich language](https://firewalld.org/documentation/man-pages/firewalld.richlanguage.html) — 送信元・宛先・ポート・priority と許可の規則
 - [Netavark / firewalld の相互作用](https://github.com/containers/netavark/blob/main/docs/netavark-firewalld.7.md) — rootful の転送経路と rootless との違い
-- [Podman](../almalinux-setup.md#podman-実施手順)・[linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順)・[Git](../almalinux-setup.md#git) — 本書の前提
+- [Podman](../almalinux-setup.md#podman)・[linger](../almalinux-setup.md#ユーザーサービスの常駐)・[Git](../almalinux-setup.md#git) — 本書の前提
 
 ---

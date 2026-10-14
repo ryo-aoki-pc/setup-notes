@@ -1,10 +1,10 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）の参考資料
 
-[手順書](../almalinux-setup.md#wireguard-実施手順)・[ロールバックと注意点](../extra/wireguard.md)
+[手順書](../almalinux-setup.md#wireguard)・[ロールバックと注意点](../extra/wireguard.md)
 
 ## 補足
 
-### 実施手順 / 鍵を作って適用する / 手順 1: 補足: keygen の出力
+### 鍵を作って適用する / 手順 2: 補足: keygen の出力
 
 **出力例**
 
@@ -13,7 +13,7 @@
 site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置いてください。
 ```
 
-### 実施手順 / 鍵を作って適用する / 手順 5: 補足: apply が行うこと
+### 鍵を作って適用する / 手順 6: 補足: apply が行うこと
 
 `apply` が行うのは次のとおり。詳しくは[スクリプトの動作](#スクリプトの動作)。
 
@@ -24,26 +24,26 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - 旧レイアウトの専用ゾーンと policy が残っていれば、先に消す
 - 再実行しても設定は重複しない。`site.env` を変えたときやクライアントを足したときも、`apply` で反映する（最後に必ず restart する）
 
-### 実施手順 / 鍵を作って適用する / 手順 5: 補足: 疎通を確かめる時期
+### 鍵を作って適用する / 手順 6: 補足: 疎通を確かめる時期
 
-- 拠点間の疎通は、「鍵を作って適用する」の手順 6（ルーター）の後で確認できる（「状態と疎通を確かめる」の手順 1・2 の疎通確認）
+- 拠点間の疎通は、「鍵を作って適用する」の手順 7（ルーター）の後で確認できる（「状態と疎通を確かめる」の手順 2・3 の疎通確認）
 
-### 実施手順 / クライアントを登録する / 手順 1: 補足: 登録簿の名前
+### クライアントを登録する / 手順 1: 補足: 登録簿の名前
 
 - 登録簿は名前で一意。そのため、`CLIENT_NAME` と同じ名前が一覧にあるときだけ、「クライアントを登録する」の手順 2 で旧登録を消す
 
-### 実施手順 / クライアントを登録する / 手順 3: 補足: 登録簿とトンネル IP
+### クライアントを登録する / 手順 3: 補足: 登録簿とトンネル IP
 
 - 登録は `~/wg/clients.list` に残り、`apply` のたびに同じ conf が組み立て直される
 - トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）
 
 詳しくは[スクリプトの動作](#スクリプトの動作)。
 
-### 実施手順 / クライアントを登録する / 手順 4: 補足: --pubkey で登録した conf
+### クライアントを登録する / 手順 4: 補足: --pubkey で登録した conf
 
 - `--pubkey` で登録した conf の `PrivateKey` は `<CLIENT_PRIVATE_KEY>` のまま（「クライアントを登録する」の手順 8 で置き換える）
 
-### 実施手順 / クライアントを登録する / 手順 4: 補足: WG ホストでの登録
+### クライアントを登録する / 手順 4: 補足: WG ホストでの登録
 
 - `client add` は同じ名前・同じ公開鍵・同じトンネル IP を拒否する（`wg-vpn.sh` の `cmd_client_add`）
 - `--pubkey` で登録した conf の `PrivateKey` は、文字列 `<CLIENT_PRIVATE_KEY>` のまま書かれる（`client add` の末尾にもその旨が出る）
@@ -51,90 +51,88 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - `apply` の末尾に出るルーターの設定（クライアント帯の静的経路）は、既に入っていれば変更不要
 - トンネル IP は帯の中で最小の空きが割り当たる（`--ip` で指定できる）
 
-### 実施手順 / クライアントを登録する / 手順 5: 補足: 反映と届く範囲
+### クライアントを登録する / 手順 5: 補足: 反映と届く範囲
 
 - 反映は `apply`（restart）で行う。`reload` では新しい peer の経路が入らない（[落とし穴 2](../extra/wireguard.md#落とし穴-2-reload-では経路が追加されない)）
 - どちらか片方の拠点で登録すれば、そのクライアントは両拠点の LAN に届く（[パケットの流れ](#パケットの流れremote-client--各拠点)）
   - 前提: 両拠点で `apply` 済みで、両拠点のルーターにクライアント帯の静的経路がある
 
-### AlmaLinux 10 の PC からつなぐ / 鍵を作る / 手順 1: 補足: 変数について
+### 鍵を作る / 手順 1: 補足: 変数について
 
-- 変数名は PC 視点（`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）
-- 拠点 B がクライアントを受ける構成なら、`site.env` の `WG_B_TUN_IP` / `WG_B_LAN_IP` / `ROUTER_B_LAN_IP` と `WG_A_LAN_IP` を入れる
+- 4 つの IP の変数は、使う[トンネルを確かめる](../almalinux-setup.md#wireguard-トンネルを確かめる)の手順 1 へ移した（2026-10-14。項を単独で通すため）
 - `WG_DIR` を WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）と別の名前にしてあるのは、同じ人が両方のマシンを触るときに、ロールバックの `rm` を取り違えても登録簿が消えないようにするため
 
-### AlmaLinux 10 の PC からつなぐ / 鍵を作る / 手順 2: 補足: パッケージ
+### 鍵を作る / 手順 2: 補足: パッケージ
 
 - `wireguard-tools` は `wg` / `wg-quick` と、依存の `systemd-resolved` を入れる
 - `systemd-resolved` は有効にしない。有効にすると NetworkManager の DNS 処理が resolved 経由に切り替わる（`DNS =` を使わない本手順では不要）
 - `modinfo -n` はモジュールの存在確認だけで、ロードは `nmcli connection up` の時点で NetworkManager が行う
 
-### AlmaLinux 10 の PC からつなぐ / 鍵を作る / 手順 3: 補足: 鍵ペア
+### 鍵を作る / 手順 3: 補足: 鍵ペア
 
 - `umask 077` で `wg0.key` / `wg0.pub` を 0600 にする
 - `tee` で秘密鍵をファイルに落としつつ `wg pubkey` に流すので、秘密鍵は端末に出ない
 - `wg genkey` / `wg pubkey` はカーネルモジュール無しで動く
 - 既に `wg0.key` があるときに中断するのは、上書きするとホストに登録済みの公開鍵と対応しなくなるため
 
-### AlmaLinux 10 の PC からつなぐ / conf を取り込む / 手順 1: 補足: ファイル名と運び方
+### conf を取り込む / 手順 2: 補足: ファイル名と運び方
 
 - ファイル名を `wg0.conf` にするのは、NetworkManager がファイル名から接続名とインターフェース名を決めるため
 - `client show` の出力には秘密鍵が入っていないので、ファイルで渡すときも平文でよい
 
-### AlmaLinux 10 の PC からつなぐ / conf を取り込む / 手順 3: 補足: LAN の外につなぐ理由
+### conf を取り込む / 手順 4: 補足: LAN の外につなぐ理由
 
-- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で「conf を取り込む」の手順 4 を貼ると、そこで通信が切れる
+- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で「conf を取り込む」の手順 5 を貼ると、そこで通信が切れる
 
-### AlmaLinux 10 の PC からつなぐ / conf を取り込む / 手順 4: 補足: 取り込んだ直後に切る理由
+### conf を取り込む / 手順 5: 補足: 取り込んだ直後に切る理由
 
 - `import` した直後に、NetworkManager が `wg0` を自動で張る（`connection.autoconnect` の既定が `yes` のため）。張られた時点で拠点 LAN 宛ての経路が入れ替わる
-- そのため、張られたトンネルは取り込んだ直後に切る（「トンネルを確かめる」の手順 1 で改めて張る）
+- そのため、張られたトンネルは取り込んだ直後に切る（「トンネルを確かめる」の手順 2 で改めて張る）
 
-### AlmaLinux 10 の PC からつなぐ / トンネルを確かめる / 手順 4: 補足: 再起動したとき
+### トンネルを確かめる / 手順 1: 補足: 変数について
+
+- 変数名は PC 視点（`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）
+- 拠点 B がクライアントを受ける構成なら、`site.env` の `WG_B_TUN_IP` / `WG_B_LAN_IP` / `ROUTER_B_LAN_IP` と `WG_A_LAN_IP` を入れる
+
+### トンネルを確かめる / 手順 6: 補足: 再起動したとき
 
 - autoconnect を無効にしてあるので、再起動しても勝手には張られない
 
-### AlmaLinux 10 の PC からつなぐ / トンネルを確かめる / 手順 5: 補足: 平文の鍵と conf を消す理由
+### トンネルを確かめる / 手順 7: 補足: 平文の鍵と conf を消す理由
 
-- 秘密鍵は「conf を取り込む」の手順 4 で NetworkManager のプロファイルに入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
+- 秘密鍵は「conf を取り込む」の手順 5 で NetworkManager のプロファイルに入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
 
-### Windows 11 で使う / Windows 11 で WireGuard と鍵を用意する / 手順 2: 補足: 変数について
-
-- 変数の名前と意味は、AlmaLinux 10 の[「鍵を作る」の手順 1](../almalinux-setup.md#wireguard-鍵を作る)と同じ（PC 視点。`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）。拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値を入れる
-- 使うのは、「Windows 11 でトンネルを確かめる」の手順 3 の疎通の確認だけ
-- 鍵と conf の一時置き場は `%USERPROFILE%\wg-client`（`C:\Users\<WIN_USER>\wg-client`）に決めてあり、変数にしていない。WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）とは別の名前
-
-### Windows 11 で使う / Windows 11 で WireGuard と鍵を用意する / 手順 3: 補足: 見ているもの
+### Windows 11 で WireGuard と鍵を用意する / 手順 2: 補足: 見ているもの
 
 - `WireGuardManager` は WireGuard の窓（マネージャー）のサービス、`WireGuardTunnel$<名前>` は張っているトンネルごとのサービス（[WireGuard for Windows の文書](https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md)）
 - `C:\Program Files\WireGuard\Data\Configurations` は、WireGuard が取り込んだトンネルの設定（`<名前>.conf.dpapi`）の置き場所。アクセス権が SYSTEM と Administrators だけなので、管理者の PowerShell でないと何も出ない
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
-- `WireGuard.WireGuard` の行が出たら、WireGuard はもう入っている（公式のインストーラーで入れたものも出るはず）。そのまま進めてよい（「Windows 11 で WireGuard と鍵を用意する」の手順 4 は、新しい版があれば上げる）
+- `WireGuard.WireGuard` の行が出たら、WireGuard はもう入っている（公式のインストーラーで入れたものも出るはず）。そのまま進めてよい（「Windows 11 で WireGuard と鍵を用意する」の手順 3 は、新しい版があれば上げる）
 
-### Windows 11 で使う / Windows 11 で WireGuard と鍵を用意する / 手順 4: 補足: 版
+### Windows 11 で WireGuard と鍵を用意する / 手順 3: 補足: 版
 
 - `winget list` に出る版は、実行した日の最新
 
-### Windows 11 で使う / Windows 11 で WireGuard と鍵を用意する / 手順 5: 補足: マネージャーのサービス
+### Windows 11 で WireGuard と鍵を用意する / 手順 4: 補足: マネージャーのサービス
 
 - 引数無しの `wireguard.exe` は、マネージャーが動いていれば窓を出し、動いていなければマネージャーのサービス `WireGuardManager` を作って起動してから窓を出す（ソースの `main.go`、WireGuard の文書の「Enterprise Usage」）。スタートメニューの「WireGuard」も同じ
 - `WireGuardManager` は自動で起動するサービスになる。以後は、Administrators の一員がサインインするたびに、通知領域に WireGuard のアイコンが出る
-- マネージャーは、「Windows 11 で WG ホストに登録して取り込む」の手順 4 の取り込み（設定の置き場所を見張って暗号化する）と、更新の知らせ（[Windows 11 の更新](../windows-setup.md#wireguard-windows-11-の更新)）に要る
+- マネージャーは、「Windows 11 で WG ホストに登録して取り込む」の手順 5 の取り込み（設定の置き場所を見張って暗号化する）と、更新の知らせ（[Windows 11 の更新](../windows-setup.md#wireguard-windows-11-の更新)）に要る
 - 窓は Administrators の一員にしか出ない（ソースの `main.go` の `checkForAdminGroup`）
 - 管理者の PowerShell から開くので、UAC の確認は出ないはず
 - `wireguard.exe` は GUI のプログラムなので、PowerShell は窓が開くのを待たずにプロンプトに戻る
 - 窓を閉じても、マネージャーは動き続ける
 
-### Windows 11 で使う / Windows 11 で WG ホストに登録して取り込む / 手順 1: 補足: 関数が読むもの
+### Windows 11 で WG ホストに登録して取り込む / 手順 2: 補足: 関数が読むもの
 
-- 「Windows 11 で WG ホストに登録して取り込む」の手順 3 で `Import-WgClientConf` と手入力すると、クリップボードを読み込む
+- 「Windows 11 で WG ホストに登録して取り込む」の手順 4 で `Import-WgClientConf` と手入力すると、クリップボードを読み込む
 
-### Windows 11 で使う / Windows 11 で WG ホストに登録して取り込む / 手順 3: 補足: 表示するもの
+### Windows 11 で WG ホストに登録して取り込む / 手順 4: 補足: 表示するもの
 
 - 関数は、置き換えた鍵そのものは表示しない
 
-### Windows 11 で使う / Windows 11 で WG ホストに登録して取り込む / 手順 4: 補足: 取り込みと、理由の見方
+### Windows 11 で WG ホストに登録して取り込む / 手順 5: 補足: 取り込みと、理由の見方
 
 - マネージャーは `C:\Program Files\WireGuard\Data\Configurations` を見張っていて、`.conf` のファイルが来ると、読んで `<名前>.conf.dpapi` に暗号化して書き、元のファイルを消す（WireGuard の文書の「Enterprise Usage」、ソースの `conf/migration_windows.go`）。トンネルの名前はファイル名から決まる（`wg0`）
 - `.conf.dpapi` は LocalSystem の DPAPI で暗号化され、アクセス権は SYSTEM だけが読み書きでき、Administrators は消せるだけ（ソースの `conf/filewriter_windows.go`）。秘密鍵の置き場所は、以後これだけになる（AlmaLinux 10 の `/etc/NetworkManager/system-connections/wg0.nmconnection` に当たる）
@@ -142,26 +140,32 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - 読めなかったときは、マネージャーのログに `Unable to ingest and encrypt` の行が出て、`wg0.conf` が残る。ログは `& "$env:ProgramFiles\WireGuard\wireguard.exe" /dumplog | Select-String -SimpleMatch 'wg0.conf'` で見られる（窓の「ログ」のタブでも見られる）
 - 同じ名前の `wg0.conf.dpapi` があると上書きしない（取り込めずに残る）ので、ブロックの先頭で止めている
 
-### Windows 11 で使う / Windows 11 でトンネルを確かめる / 手順 1: 補足: LAN の外につなぐ理由
+### Windows 11 でトンネルを確かめる / 手順 2: 補足: 変数について
 
-- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で「Windows 11 でトンネルを確かめる」の手順 2 を貼ると、そこで LAN の通信が切れる
+- 変数の名前と意味は、AlmaLinux 10 の[「トンネルを確かめる」の手順 1](../almalinux-setup.md#wireguard-トンネルを確かめる)と同じ（PC 視点。`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）。拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値を入れる
+- 使うのは、この項の手順 5 の疎通の確認だけ（2026-10-14 に「Windows 11 で WireGuard と鍵を用意する」から移した）
+- 鍵と conf の一時置き場は `%USERPROFILE%\wg-client`（`C:\Users\<WIN_USER>\wg-client`）に決めてあり、変数にしていない。WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）とは別の名前
 
-### Windows 11 で使う / Windows 11 でトンネルを確かめる / 手順 2: 補足: DNS
+### Windows 11 でトンネルを確かめる / 手順 3: 補足: LAN の外につなぐ理由
+
+- クライアント conf の `AllowedIPs` には両拠点の LAN が入るので、LAN 内で「Windows 11 でトンネルを確かめる」の手順 4 を貼ると、そこで LAN の通信が切れる
+
+### Windows 11 でトンネルを確かめる / 手順 4: 補足: DNS
 
 - `ServerAddresses` が空なのは、conf に `DNS =` が無いため。DNS は変わらない
 
-### Windows 11 で使う / Windows 11 でトンネルを確かめる / 手順 5: 補足: 切ったときと、日常の使い方
+### Windows 11 でトンネルを確かめる / 手順 7: 補足: 切ったときと、日常の使い方
 
 - `/uninstalltunnelservice wg0` は、トンネルのサービスを止めて消す。窓の「無効化」も同じ（ソースの `manager/ipc_server.go` の `Stop`）。アダプターは、トンネルが止まると消える
 - トンネルの設定（`wg0.conf.dpapi`）は残るので、次は有効化だけでよい
 - サービスは消されてもすぐには無くならないことがあるので、消えるまで 30 秒まで待つ
 - NetworkManager の `autoconnect no` に当たる設定は無い。張ったまま（サービスが残ったまま）再起動すると、起動のときに張られ、拠点の LAN の中なら LAN の通信を奪う
 
-### Windows 11 で使う / Windows 11 でトンネルを確かめる / 手順 6: 補足: 平文の鍵と conf を消す理由
+### Windows 11 でトンネルを確かめる / 手順 8: 補足: 平文の鍵と conf を消す理由
 
-- 秘密鍵は、「Windows 11 で WG ホストに登録して取り込む」の手順 4 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
+- 秘密鍵は、「Windows 11 で WG ホストに登録して取り込む」の手順 5 で WireGuard の設定（`wg0.conf.dpapi`）に入っているので、平文のファイルを残さない（`wg0.pub` は公開鍵なので残してよい）
 
-### Windows 11 の更新 / 手順 1: 補足: winget の定義の遅れ
+### Windows 11 の更新 / 手順 2: 補足: winget の定義の遅れ
 
 - winget の定義は、公式の版より遅れて出ることがある
 
@@ -173,7 +177,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 
 - ルーターのクライアント帯の静的経路は、ほかのクライアントも使うので残す
 
-### 回線に合わせて MTU を下げる（任意） / 手順 1: 補足: WG_MTU に書く値
+### 回線に合わせて MTU を下げる / 手順 2: 補足: WG_MTU に書く値
 
 - wg-quick は `MTU` の指定が無いと、`Endpoint` への経路（無ければ既定の経路）に `mtu` の指定があればその値、無ければ出口の NIC の MTU から、80 を引いて `wg0` の MTU にする（wireguard-tools 1.0.20250521-1.el10 の `/usr/bin/wg-quick` の `set_mtu_up`）
   - NIC の MTU が 1500 なら 1420 になる。ルーターの先の回線の MTU は見ない
@@ -187,24 +191,24 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - `tracepath` の宛先の `1.1.1.1` は、回線の先にあって応答する宛先として選んだだけで、インターネット上のほかの宛先でもよい
 - `Endpoint` が IPv6 のときに 80 を引くのは上の内訳からの計算で、実機では確かめていない
 
-### 回線に合わせて MTU を下げる（任意） / 手順 3: 補足: 両拠点で同じ値にする理由
+### 回線に合わせて MTU を下げる / 手順 4: 補足: 両拠点で同じ値にする理由
 
 - `site.env` は両拠点に同じ内容で置くファイルで、`WG_MTU` を拠点ごとに変える書き方は無い
 - 拠点間のパケットは両拠点の回線を通るので、小さいほうの回線に合わせる
 
-### 回線に合わせて MTU を下げる（任意） / 手順 4: 補足: ip link で先に下げる
+### 回線に合わせて MTU を下げる / 手順 5: 補足: ip link で先に下げる
 
 - `ip link set` は、動いている `wg0` の MTU だけを変える。トンネルは張ったままで、作業中の ssh も切れない（実機で確かめた）
 - `wg0.conf` には書かれない。`wg-quick@wg0` の restart と OS の再起動では、conf の `MTU =`（無ければ wg-quick が決める値）になる（restart は、実機の `apply` で確かめた。OS の再起動は確かめていない）
 - 張ってある TCP の接続も、その後に送る分は小さいセグメントになる（実機の拠点間の接続で確かめた）
 
-### 回線に合わせて MTU を下げる（任意） / 手順 7: 補足: ping の大きさ
+### 回線に合わせて MTU を下げる / 手順 8: 補足: ping の大きさ
 
 - `-M do` は分割を禁じる指定、`-s` は ICMP の中身の大きさ。IP ヘッダー 20 と ICMP ヘッダー 8 を足して `wg0` の MTU ちょうどになるよう、MTU から 28 を引く
 - 小さい ping と並べるのは、回線そのものの損失（混雑など）と見分けるため
 - 下げる前に同じ 2 つを打つと、分割されたパケットが落ちている向きでは、MTU いっぱいの ping だけが落ちる（実測は検証記録の同じ付録）
 
-### 回線に合わせて MTU を下げる（任意） / 手順 8: 補足: クライアントにも入れる理由
+### 回線に合わせて MTU を下げる / 手順 9: 補足: クライアントにも入れる理由
 
 - クライアントから拠点へ向かうパケットも拠点の回線を通る。クライアントの MTU が 1420 のままだと、外側が回線の MTU を超える
 - WG ホスト自身との TCP（ssh・Samba・Syncthing）は、両端の小さいほうに合わせてセグメントを決めるので、ホスト側を下げただけで両方向とも収まる（拠点間の ssh で、張ってあった接続の `mss` が変わるのを実機で確かめた）
@@ -222,7 +226,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - **設定方式**: `wg-quick` + systemd（`/etc/wireguard/wg0.conf` / `wg-quick@wg0.service`）
   - firewalld は `wg0` を LAN 側ゾーンに入れてゾーン内転送（forward）で通す（policy は作らない。転送は WG ホストでは絞らず、宛先ホストのファイアウォールに任せる）
   - クライアントを足すときも既存の `wg0` に `[Peer]` を加えるだけで、インターフェースも待ち受けポートも増やさない
-- **スクリプト**: 本書のメインの手順は、同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard/wg-vpn.sh`](../../scripts/wireguard/wg-vpn.sh) を使う（拠点間の構築、クライアントの追加、鍵と設定のバックアップ・復旧に対応。[実施手順](../almalinux-setup.md#wireguard-実施手順)）
+- **スクリプト**: 本書のメインの手順は、同じ `site.env` を読んで手順をまとめて実行する [`scripts/wireguard/wg-vpn.sh`](../../scripts/wireguard/wg-vpn.sh) を使う（拠点間の構築、クライアントの追加、鍵と設定のバックアップ・復旧に対応。[WireGuard](../almalinux-setup.md#wireguard)）
 
 拠点ルーターの配下に WG ホストを 1 台ずつ置き、`wg0` 同士をトンネルで結ぶ。外出先のクライアントは、どちらかの拠点の WG ホストに接続する（図は拠点 A で受ける場合）。
 
@@ -466,7 +470,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
 | 方法 | 状況 | 採否 |
 |---|---|---|
 | **設定の置き場所（`C:\Program Files\WireGuard\Data\Configurations`）に `wg0.conf` を写し、マネージャーに暗号化させる。張る・切るは `wireguard.exe /installtunnelservice` / `/uninstalltunnelservice`** | マネージャーが `wg0.conf.dpapi` に暗号化して、写した平文を消す（WireGuard の文書の「Enterprise Usage」）。窓の一覧にも出て、窓と通知領域のアイコンからも張る・切るができる。2 つのコマンドは、窓の「有効化」「無効化」がすることと同じ | **採用**（ブロックで写して、できたことを確かめられる） |
-| 窓の「トンネルをファイルからインポート…」 | 結果は同じ（`wg0.conf.dpapi` になる）。ファイルを選ぶ画面の操作になり、確かめをブロックにまとめられない | 不採用（[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 4 の代わりにしてよい） |
+| 窓の「トンネルをファイルからインポート…」 | 結果は同じ（`wg0.conf.dpapi` になる）。ファイルを選ぶ画面の操作になり、確かめをブロックにまとめられない | 不採用（[Windows 11 で WG ホストに登録して取り込む](../windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 5 の代わりにしてよい） |
 | `/installtunnelservice` に作業用の `wg0.conf` を直接渡す | すぐ張られるが、トンネルのサービスは起動のたびにそのファイルを読むので、秘密鍵入りの平文のファイルを消せない | 不採用 |
 
 - **Windows 11 でも、鍵は PC で作り、公開鍵だけを WG ホストに渡す**（AlmaLinux 10 と同じ）
@@ -474,7 +478,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - `client show` の conf は、ファイルにせずクリップボードから読む（`vi` を開く手順の代わり）。秘密は入っていないので、運ぶ経路を選ばない
 - **Windows 11 の秘密鍵の置き場所は、WireGuard の設定（`wg0.conf.dpapi`）だけ**
   - LocalSystem（マネージャー）の DPAPI で暗号化され、アクセス権は SYSTEM だけが読み書きでき、Administrators は消せるだけ（ソースの `conf/filewriter_windows.go`）
-  - 作業用の置き場所（`%USERPROFILE%\wg-client`）は、アクセス権を Administrators と SYSTEM だけにし（管理者の PowerShell からだけ読める）、[Windows 11 でトンネルを確かめる](../windows-setup.md#wireguard-windows-11-でトンネルを確かめる)の手順 6 で平文の鍵と conf を消す
+  - 作業用の置き場所（`%USERPROFILE%\wg-client`）は、アクセス権を Administrators と SYSTEM だけにし（管理者の PowerShell からだけ読める）、[Windows 11 でトンネルを確かめる](../windows-setup.md#wireguard-windows-11-でトンネルを確かめる)の手順 8 で平文の鍵と conf を消す
   - バックアップは取らず、失ったら作り直す（AlmaLinux 10 と同じ。ホスト側は[クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の手順 2 の共通の削除手順で反映した後、同じ項の手順 4 で `client add --pubkey`）
 - **Windows 11 では、拠点の LAN に戻る前に手で切る**
   - トンネルのサービスは自動で起動するので、張ったまま再起動すると、起動のときに張られる。NetworkManager の `autoconnect no` に当たる設定は無い
@@ -482,15 +486,15 @@ Windows 11 で conf を取り込んで張る方法を比べた:
 - **Windows 11 のファイアウォールとネットワークの種類は変えない**
   - PC 側で開けるものは無い（外向きの UDP は既定で通る）。WireGuard は自分のパケットを通す規則を自分で足す
   - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)など）が、拠点からトンネル越しに届くようになる
-  - 拠点から PC への ping（[トンネルを確かめる](../almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
+  - 拠点から PC への ping（[トンネルを確かめる](../almalinux-setup.md#wireguard-トンネルを確かめる)の手順 5 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
 - **Windows 11 ではキルスイッチは出ない**: `AllowedIPs` に `/0` が無いので、窓の編集の「トンネルを通らないトラフィックのブロック（キルスイッチ）」は出ず、ファイアウォールの制限も掛からない（WireGuard の文書の「Network Configuration Quirks」）。全トラフィックを通す構成は、AlmaLinux 10 と同じく対象外
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../almalinux-setup.md#wireguard-トンネルを確かめる)の手順 5 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
 
 ### 代替: wg-quick で張る場合
 
 NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
 
-- 「鍵を作る」から「conf を取り込む」の手順 2 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
+- 「鍵を作る」から「conf を取り込む」の手順 3 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
 - NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）
 
 ```bash
@@ -504,8 +508,8 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 「クライアントを登録する」で、手順 4 ではなく手順 3 を選ぶ流れ（→ [クライアントを登録する](../almalinux-setup.md#wireguard-クライアントを登録する)の手順 1〜3・5〜9、[秘密鍵の扱い](../extra/wireguard.md#クライアントの秘密鍵の扱い)）。
 
 1. ホストで `client add A NAME`（`--pubkey` 無し）→ `apply A` → `client show NAME`（拠点 B なら `A` を `B` に読み替える）。`apply` でホストに反映してから表示する。この出力に秘密鍵が入っている
-1. LAN 内の `scp` など安全な経路で、PC の `${WG_DIR}/wg0.conf` に置く（「conf を取り込む」の手順 2 の `sed` は不要）
-1. 「conf を取り込む」の手順 3 以降（「トンネルを確かめる」まで）は同じ
+1. LAN 内の `scp` など安全な経路で、PC の `${WG_DIR}/wg0.conf` に置く（「conf を取り込む」の手順 3 の `sed` は不要）
+1. 「conf を取り込む」の手順 4 以降（「トンネルを確かめる」まで）は同じ
 1. 取り込んだら、ホストで `sudo rm /etc/wireguard/clients/NAME.conf`
 
 - 端末のスクロールバックとクリップボードに鍵が残る点に注意
@@ -527,7 +531,7 @@ conf を import せず、値を手で写す方式。最初から `autoconnect no
 - [WireGuard: Quick Start](https://www.wireguard.com/quickstart/)
 - [WireGuard: Conceptual Overview](https://www.wireguard.com/#cryptokey-routing)
 - [WireGuard メーリングリスト: Header / MTU sizes for Wireguard](https://lists.zx2c4.com/pipermail/wireguard/2017-December/002201.html) — 外側に足される大きさの内訳（IPv4 は 60、IPv6 は 80 で、MTU 1500 から 80 を引いた 1420 が既定）
-- Linux 6.12 のソース [`drivers/net/wireguard/send.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/send.c)（`calculate_skb_padding`。16 バイトの倍数に詰め、MTU を超えては詰めない）・[`socket.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/socket.c)（`send4`。外側の IPv4 に DF を立てない） — [回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる任意)の補足に使っている（実機のカーネルは 6.12.96）
+- Linux 6.12 のソース [`drivers/net/wireguard/send.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/send.c)（`calculate_skb_padding`。16 バイトの倍数に詰め、MTU を超えては詰めない）・[`socket.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/socket.c)（`send4`。外側の IPv4 に DF を立てない） — [回線に合わせて MTU を下げる](../almalinux-setup.md#wireguard-回線に合わせて-mtu-を下げる)の補足に使っている（実機のカーネルは 6.12.96）
 - クライアントが conf の `MTU` を読むところ: NetworkManager 1.56.0 の [`src/libnm-client-impl/nm-conn-utils.c`](https://github.com/NetworkManager/NetworkManager/blob/1.56.0/src/libnm-client-impl/nm-conn-utils.c)（`nm_conn_wireguard_import`）、WireGuard for Windows の [`conf/parser.go`](https://github.com/WireGuard/wireguard-windows/blob/master/conf/parser.go)、Android の公式アプリの [`config/Interface.java`](https://github.com/WireGuard/wireguard-android/blob/master/tunnel/src/main/java/com/wireguard/config/Interface.java)
 - [firewalld: Policy Objects](https://firewalld.org/2020/09/policy-objects-introduction)
 - [firewalld ソース `src/firewall/core/io/policy.py`](https://github.com/firewalld/firewalld/blob/v2.4.3/src/firewall/core/io/policy.py) — ingress/egress ゾーンの検証（同一ゾーンを拒否する規則は無い。policy 名の上限は 128 文字）

@@ -1,12 +1,12 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の参考資料
 
-[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[ロールバックと注意点](../extra/samba-client.md)
+[手順書](../almalinux-setup.md#samba-クライアント)・[ロールバックと注意点](../extra/samba-client.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#参考資料から分離した記録)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 変数について
+### Samba クライアント / 手順 1: 補足: 変数について
 
 - `SMB_USER` を `USER`（この PC のユーザー名）と分けてあるのは、NAS や Windows ではサーバー側のアカウント名が違うことがあるため
 - samba.md のサーバーは OS のアカウント名で Samba ユーザーを登録するので、この PC と同じ名前なら既定のままでよい
@@ -18,46 +18,46 @@
 - `SERVER` は既定値のままでもエラーにならないので、書き換えたかを手順 1 で確かめる
 - 変数はそのシェルの中だけで有効
 
-### 実施手順 / 手順 2: 補足: cifs-utils
+### Samba クライアント / 手順 2: 補足: cifs-utils
 
 - Workstation で入れた PC には、cifs-utils が最初から入っている
 
-### 実施手順 / 手順 4: 補足: パスワードの扱い
+### Samba クライアント / 手順 4: 補足: パスワードの扱い
 
 - パスワードは、コマンドラインにもシェルの履歴にも残らない
 - 最後の `unset PW` で、シェルの変数からもパスワードを消す
 
-### 実施手順 / 手順 5: 補足: 出力の意味
+### Samba クライアント / 手順 5: 補足: 出力の意味
 
 - `ls -ldZ` の `drwx------ … <USER> <USER>` は、自分の所有で、ほかのユーザーは入れないこと
 - `SHARE=home` で `cifs-test.txt` の書き込みが `Permission denied` になるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため
 
-### 実施手順 / 手順 7: 補足: 自動マウントの動き
+### Samba クライアント / 手順 7: 補足: 自動マウントの動き
 
 - `SHARE=home` の `Permission denied` は、サーバーの SELinux による拒否
 - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
 - 使わないまま 1 分ほどたつと外れ、次にアクセスしたときにまたマウントされる
 - 再起動した後も、アクセスしたときにマウントされる
 
-### GNOME Files で開く（任意） / 手順 1: 補足: パッケージ
+### GNOME Files で開く / 手順 2: 補足: パッケージ
 
 - `gvfs-smb` が gvfs の SMB のバックエンド（libsmbclient を使う）、`gvfs-fuse` が GIO を使わないアプリ向けの `/run/user/<UID>/gvfs/`
 - どちらも GNOME のグループ（`gnome-desktop`）の必須パッケージなので、Workstation にも Server with GUI にも入っている
 
-### GNOME Files で開く（任意） / 手順 2: 補足: ログインし直さなくてよい理由
+### GNOME Files で開く / 手順 3: 補足: ログインし直さなくてよい理由
 
 - VM で、動いている gvfsd がそのまま SMB につないだ
 
-### GNOME Files で開く（任意） / 手順 3: 補足: パスワードの保存
+### GNOME Files で開く / 手順 4: 補足: パスワードの保存
 
 - `/usr/bin/gio mount` は、パスワードを保存しない
 
-### GNOME Files で開く（任意） / 手順 4: 補足: 使い方
+### GNOME Files で開く / 手順 5: 補足: 使い方
 
 - GIO を使わないアプリからは、`/run/user/<UID>/gvfs/smb-share:…/` の下で読み書きできる
 - サーバーで変えたものは、「ファイル」には自動では出ない。F5 で出る（[注意点](../extra/samba-client.md#注意点)）
 
-### GNOME Files で開く（任意） / 手順 5: 補足: 外した後
+### GNOME Files で開く / 手順 6: 補足: 外した後
 
 - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
@@ -72,38 +72,38 @@
 - 行は awk で、2 列目（マウント先）と 3 列目（`cifs`）を文字列として比べて消す。sed の正規表現だと、IP アドレスのドットなどが特別な意味を持つ
 - `tee` で書き戻すので、`/etc/fstab` のモード（0644）とラベル（`etc_t`）は変わらない
 
-### Windows 11 で使う / 手順 1: 補足: 管理者ではない窓で割り当てる理由
+### Windows 11 の Samba クライアント / 手順 1: 補足: 管理者ではない窓で割り当てる理由
 
 - UAC が有効な Windows では、Administrators の一員がサインインすると、昇格したものとしないものの 2 つのログオン セッションができる。ドライブの割り当ては、作った側のセッションにだけある（Microsoft の文書）
 - エクスプローラーは昇格しない側で動くので、管理者の窓（`sudo` を含む）で割り当てたドライブは、エクスプローラーにも、管理者ではない窓にも出ない
 - 管理者の窓からも見えるようにするレジストリの値（`EnableLinkedConnections`）は、PC 全体の設定を足すことになるので採らない。管理者の窓では UNC パスを使う（[注意点](../extra/samba-client.md#注意点)）
 
-### Windows 11 で使う / 手順 2: 補足: 変数について
+### Windows 11 の Samba クライアント / 手順 2: 補足: 変数について
 
 - `SMB_USER` は、AlmaLinux 10 の節と違って必須にした。Windows のユーザー名（Microsoft アカウントなら `C:\Users\` の下のフォルダーの名前）は、サーバーの OS のユーザー名と違うことが多いため
-- `SHARE` の既定が `SMB_USER` なのは、samba.md の `[homes]` が Samba ユーザーと同じ名前の共有を見せるため（[実施手順の手順 1 の補足](#実施手順--手順-1-補足-変数について)と同じ）
+- `SHARE` の既定が `SMB_USER` なのは、samba.md の `[homes]` が Samba ユーザーと同じ名前の共有を見せるため（[実施手順の手順 1 の補足](#samba-クライアント--手順-1-補足-変数について)と同じ）
 - `SERVER` に NetBIOS 名は使えない（samba.md のサーバーは nmbd を動かさない）。IP アドレスか、DNS で引ける名前にする
 - `SERVER` をエクスプローラーで `\\<SERVER>\…` を開くときと同じ書き方にするのは、資格情報をこの名前に結び付けて置くため
 - 変数はその PowerShell の中だけで有効
 
-### Windows 11 で使う / 手順 4: 補足: 資格情報マネージャーに置く
+### Windows 11 の Samba クライアント / 手順 4: 補足: 資格情報マネージャーに置く
 
 - `cmdkey /add:<SERVER> /user:<SMB_USER> /pass` は、`<SERVER>` を宛先にした Windows の資格情報（資格情報マネージャーの「Windows 資格情報」）を作る。`/pass` に値を書かなければ、`cmdkey` がパスワードを聞く（Microsoft の文書）
-- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 2 と同じ考え）
+- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 3 と同じ考え）
 - この節の手順 5 の `New-SmbMapping` に資格情報を渡さないと、Windows はこの資格情報でつなぐ（Microsoft の Azure Files の文書も、`cmdkey /add` の後に資格情報を渡さずに割り当てている）
 - 資格情報はこのユーザーのものなので、ほかのユーザーには使われない。サインインし直しても残る
 
-### Windows 11 で使う / 手順 5: 補足: New-SmbMapping と、エクスプローラーの表示
+### Windows 11 の Samba クライアント / 手順 5: 補足: New-SmbMapping と、エクスプローラーの表示
 
 - `-Persistent $true` で、割り当てをこのユーザーのプロファイルに覚えさせ、サインインのたびにつなぎ直させる
 - 成功は、`Get-SmbMapping` の `Status` が `OK` で判断する。Microsoft のコミュニティには、Windows 11 で `New-SmbMapping` のドライブがエクスプローラーを起動し直す（かサインインし直す）まで出ないという報告があるので、エクスプローラーでの確かめはこの節の手順 8 のサインインし直した後にした
 - 前に割り当てて、切れたまま覚えているドライブ文字（`Status` が `Unavailable` など）には割り当てられない（`ERROR_DEVICE_ALREADY_REMEMBERED`）。この節の手順 3 は、そのドライブ文字も `Get-SmbMapping` で見つけて止める
 
-### Windows 11 で使う / 手順 6: 補足: [home] の書き込み
+### Windows 11 の Samba クライアント / 手順 6: 補足: [home] の書き込み
 
-- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[実施手順](../almalinux-setup.md#samba-クライアント-実施手順)の手順 5 と同じ）
+- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[Samba クライアント](../almalinux-setup.md#samba-クライアント)の手順 5 と同じ）
 
-### Windows 11 で使う / 手順 7: 補足: 署名と、サーバーの設定を変えない理由
+### Windows 11 の Samba クライアント / 手順 7: 補足: 署名と、サーバーの設定を変えない理由
 
 - Windows 11 24H2 の Pro・Enterprise・Education は、SMB の署名を、送る側（クライアント）と受ける側（サーバー）の両方で必ず求める。Home は、どちらも求めない（Microsoft の文書）
 - samba.md のサーバーは `server signing` を書いておらず、既定の `default` のまま。SMB2 以降では署名を止められず、クライアントが求めれば署名する（smb.conf(5)）。そのため Pro の PC からの接続は署名され、サーバーもクライアントも設定を変えずにつながる
@@ -111,7 +111,7 @@
 - Pro は、ゲスト（認証しない接続）も既定で断る。samba.md のサーバーはユーザーとパスワードで認証し、`map to guest` は既定の `Never`（ゲストにしない）なので、当たらない
 - `smbstatus` にこの PC の行が無いことがあるのは、使っていない接続が閉じられることがあるため
 
-### Windows 11 の更新 / 手順 1: 補足: 置き換わる資格情報
+### Windows 11 の更新 / 手順 3: 補足: 置き換わる資格情報
 
 - 登録し直すと、同じ `<SERVER>` の資格情報が置き換わる
 
@@ -132,7 +132,7 @@
   - fstab に `password=` を書かない。fstab は誰でも読める（0644）
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 4 の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../almalinux-setup.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 5 の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる
   - `vers=` は書かない。既定でサーバーの最も新しい版を使う
@@ -144,12 +144,12 @@
   - 出ていく 445/tcp だけなので、開けるものは無い
   - firewalld の `samba-client` サービス（137/138/udp。NetBIOS の名前引きと一覧）は要らない。samba.md のサーバーは NetBIOS を使わない
 - **暗号化（`seal`）は使わない**: LAN 上の通信は署名だけ。samba.md の方針と同じ
-- **GNOME Files（gvfs）は任意節にした**
+- **GNOME Files（gvfs）は別の項にした**
   - fstab のマウントとは別の仕組みで、ログインしたユーザーの gvfsd が libsmbclient でつなぐ。root も資格情報ファイルも要らない
   - つながるのはログインしている間だけ。GIO を使わないアプリからは `/run/user/<UID>/gvfs/` の下に見える
 - **Windows 11 では、資格情報マネージャー（`cmdkey`）と `New-SmbMapping -Persistent $true` で、ドライブ文字に割り当てる**
   - パスワードは、`cmdkey` が聞いて資格情報マネージャーに置く。コマンドラインにも、PowerShell の履歴にも残らない
-  - 窓は管理者ではない Windows PowerShell 5.1（[Windows 11 で使うの手順 1 の補足](#windows-11-で使う--手順-1-補足-管理者ではない窓で割り当てる理由)）。PowerShell 7 でも `SmbShare` のモジュールは使えるはずだが、ほかの Windows の手順書に合わせて 5.1 にした
+  - 窓は管理者ではない Windows PowerShell 5.1（[Windows 11 で使うの手順 1 の補足](#windows-11-の-samba-クライアント--手順-1-補足-管理者ではない窓で割り当てる理由)）。PowerShell 7 でも `SmbShare` のモジュールは使えるはずだが、ほかの Windows の手順書に合わせて 5.1 にした
   - 採らなかった割り当て方
     - `net use <ドライブ>: \\<SERVER>\<SHARE> /savecred /persistent:yes`: `/savecred` は `/user` と一緒に使えない（Microsoft の Windows Server 2003 の文書）。今の Microsoft Learn の `net use` のページは 404 で、Windows Server 2012 R2 の版しか読めなかった
     - `New-SmbMapping -UserName <SMB_USER> -Password <パスワード>`: パスワードをコマンドラインに書くことになる。`-Credential` は windowsserver2025-ps の版の文書にだけあり、Windows 11 の SmbShare にあるかを確かめていない
@@ -176,7 +176,7 @@
 - `man systemd.mount`（`x-systemd.automount`、`x-systemd.idle-timeout`、`nofail`、`_netdev`）/ `man systemd-fstab-generator`
 - `man findmnt`（`--verify`）/ `man gio`
 - cifs-utils 7.7 のソース（`mount.cifs.c` の `open_cred_file`・`parse_cred_line`・`set_password`・`parse_opt_token`）
-- [Samba でホームディレクトリを公開する手順](../almalinux-setup.md#samba-サーバー-実施手順)（サーバー側）
+- [Samba でホームディレクトリを公開する手順](../almalinux-setup.md#samba-サーバー)（サーバー側）
 - [Control SMB signing behavior — Windows Server (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-signing)（24H2 の版ごとの署名の要求、ゲストの禁止）
 - [Block NTLM connections on SMB — Windows Server (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ntlm-blocking)
 - [cmdkey (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey) / [New-SmbMapping](https://learn.microsoft.com/en-us/powershell/module/smbshare/new-smbmapping?view=windowsserver2025-ps) / [Remove-SmbMapping](https://learn.microsoft.com/en-us/powershell/module/smbshare/remove-smbmapping?view=windowsserver2025-ps)

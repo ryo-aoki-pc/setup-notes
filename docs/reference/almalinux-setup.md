@@ -1,155 +1,159 @@
 # AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim・AI エージェント）の参考資料
 
-[AlmaLinux 10 の初期設定（実施手順）](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
+[AlmaLinux 10 のセットアップ](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
 
 集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
-### 実施手順 / ログインと sudo / 手順 1: 補足: 日本語の名前のフォルダー
+### ログインと sudo / 手順 1: 補足: 日本語の名前のフォルダー
 
-- このログインで、ホームに日本語の名前のフォルダー（`ダウンロード`・`ドキュメント` など）ができる。「GNOME の表示と入力」の手順 1 で英語の名前にする
+- このログインで、ホームに日本語の名前のフォルダー（`ダウンロード`・`ドキュメント` など）ができる。「GNOME の表示と入力」の手順 2 で英語の名前にする
 
-### 実施手順 / ログインと sudo / 手順 3: 補足: 貼り直し
+### ログインと sudo / 手順 3: 補足: 貼り直し
 
 - 貼り直しても同じ内容で置き直すだけ（何度貼ってもよい）
 
-### 実施手順 / OS とファームウェアの更新 / 手順 2: 補足: fwupd の起動待ち
+### OS とファームウェアの更新 / 手順 2: 補足: fwupd の起動待ち
 
 - `デーモンへの接続に失敗しました: … タイムアウトしました` が出るのは、起動の直後に fwupd の起動が間に合わないことがあるため
 
-### 実施手順 / システムの設定 / 手順 1: 補足: 変数の意味
+### システムの設定 / 手順 1: 補足: 変数の意味
 
 - `HOST_NAME` は、SSH・RDP・Samba・Syncthing などで、この PC を見分ける名前
-- `DASH_FAVORITES` は、「GNOME の表示と入力」の手順 13 で、アクティビティの画面の下の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
 - 変数はその端末の中だけで有効なので、新しい端末を開いたら貼り直す
 
-### 実施手順 / システムの設定 / 手順 3: 補足: SSH の既定とログイン
+### システムの設定 / 手順 3: 補足: SSH の既定とログイン
 
 - `enabled`・`active`・`yes`・`yes` は、Workstation の既定
 - 別の PC からは `ssh <USER>@<IP>` でログインできる（初めてつなぐときは、ホストの鍵の fingerprint を聞かれる）
 
-### 実施手順 / システムの設定 / 手順 5: 補足: journal の置き場所
+### システムの設定 / 手順 5: 補足: journal の置き場所
 
 - AlmaLinux 10 の既定では `/var/log/journal` が無く、journal は `/run/log/journal`（メモリー）にだけ書かれて、再起動で消える
 - journald が作った `/var/log/journal` に付かない ACL は、`wheel`・`adm` のグループが読めるもの（付け直す仕組みは[選択した方針](#選択した方針)）
 - 前の起動のログが読めることは、「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 3 で確かめる
 
-### 実施手順 / システムの設定 / 手順 6: 補足: 予約しているメモリー
+### システムの設定 / 手順 6: 補足: 予約しているメモリー
 
 - `/sys/kernel/kexec_crash_size` の数は、予約しているメモリーのバイト数（`268435456` で 256 MiB）
 
-### 実施手順 / システムの設定 / 手順 7: 補足: 効く時期
+### システムの設定 / 手順 7: 補足: 効く時期
 
 - メモリーが空くのは、「再起動と確認」の手順 1 の再起動の後
 
-### 実施手順 / システムの設定 / 手順 8: 補足: 外した後
+### システムの設定 / 手順 8: 補足: 外した後
 
 - 外すと、無いコマンドを打ったときは `bash: <コマンド>: コマンドが見つかりません...` とだけ出て、パッケージを探して待たされない
 
-### 実施手順 / EPEL と RPM Fusion / 手順 1: 補足: EPEL の入手元と使う手順書
+### EPEL と RPM Fusion / 手順 1: 補足: EPEL の入手元と使う手順書
 
 - `epel-release` は AlmaLinux の `extras` リポジトリにあるので、追加のリポジトリの設定は要らない
 - 最後に出る「CRB を有効にすることを推奨」を気にしなくてよいのは、AlmaLinux 10 では CRB が既定で有効なため（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
-- EPEL を使う手順書（[btop](../almalinux-setup.md#btop-実施手順)・[distrobox](../almalinux-setup.md#distrobox-実施手順)・[podman-compose](../almalinux-setup.md#podman-compose-実施手順)・[podman-tui](../almalinux-setup.md#podman-tui-実施手順)・[VirtualBox](../almalinux-setup.md#virtualbox-実施手順)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
+- EPEL を使う手順書（[btop](../almalinux-setup.md#btop)・[distrobox](../almalinux-setup.md#distrobox)・[podman-compose](../almalinux-setup.md#podman-compose)・[podman-tui](../almalinux-setup.md#podman-tui)・[VirtualBox](../almalinux-setup.md#virtualbox)）と、[導入元一覧](../tool-catalog.md)の EPEL の行が使えるようになる
 
-### 実施手順 / EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
+### EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 
 - `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#rpm-fusion-選択した方針)
 - 有効にするのは free だけ。nonfree は扱わない
 
-### 実施手順 / EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
+### EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
 
 - [Firefox の AAC・H.264](../almalinux-setup.md#firefox)（firefox.md の手順 8 から。RPM Fusion の `ffmpeg-libs` を入れる）が使えるようになる
 
-### 実施手順 / Flatpak と Flathub / 手順 1: 補足: flatpak と Flathub の登録
+### Flatpak と Flathub / 手順 1: 補足: flatpak と Flathub の登録
 
 - Workstation には flatpak が最初から入っている
 - `flathub` の行が既にあれば、「Flatpak と Flathub」の手順 3 は何もしない（`--if-not-exists` のため）
 
-### 実施手順 / Flatpak と Flathub / 手順 3: 補足: 使えるようになるもの
+### Flatpak と Flathub / 手順 3: 補足: 使えるようになるもの
 
-- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../almalinux-setup.md#firefox) と [VS Code](../almalinux-setup.md#vs-code-実施手順) は Flathub を使わず RPM で入れる
+- [導入元一覧](../tool-catalog.md#gui)の「Flathub」の行にある GUI アプリが入れられるようになる。[Firefox](../almalinux-setup.md#firefox) と [VS Code](../almalinux-setup.md#vs-code) は Flathub を使わず RPM で入れる
 
-### 実施手順 / Flatpak と Flathub / 手順 4: 補足: 確認用のアプリ
+### Flatpak と Flathub / 手順 4: 補足: 確認用のアプリ
 
 - 確認用のアプリは、小さい [Flatseal](https://flathub.org/apps/com.github.tchx84.Flatseal)（Flatpak アプリの権限を GUI で変えるツール）にしてある
 
-### 実施手順 / 日本語入力 / 手順 1: 補足: 入っているときと入れたとき
+### 日本語入力 / 手順 2: 補足: 入っているときと入れたとき
 
 - Workstation で入れた PC には、3 つとも最初から入っている
 - 入れたときに「再起動と確認」の手順 1 の再起動を待つのは、動いている IBus が、ログインし直すまで Anthy を使えないため
 
-### 実施手順 / 日本語入力 / 手順 2: 補足: 入力ソースを切り替えるキー
+### 日本語入力 / 手順 3: 補足: 入力ソースを切り替えるキー
 
 - 最後の `get` の `['<Super>space', 'XF86Keyboard']` が、入力ソースを切り替えるキー（Super+Space）
 
-### 実施手順 / GNOME の表示と入力 / 手順 1: 補足: 中身とログインの窓
+### GNOME の表示と入力 / 手順 1: 補足: 変数の意味
+
+- `DASH_FAVORITES` は、この項の手順 14 で、アクティビティの画面の下の Dash に並べるアプリ（`/usr/share/applications` の `.desktop` のファイル名）
+- 2026-10-14 に「システムの設定」の手順 1 から移した（項を単独で通すため）
+
+### GNOME の表示と入力 / 手順 2: 補足: 中身とログインの窓
 
 - 中身は、フォルダーごと移る
 - 次のログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない（`~/.config/user-dirs.locale` は今の言語のまま）
 
-### 実施手順 / GNOME の表示と入力 / 手順 2: 補足: 設定アプリとの対応
+### GNOME の表示と入力 / 手順 3: 補足: 設定アプリとの対応
 
 - 設定の「外観」の「スタイル」の「ダーク」と同じで、すぐに効く
 
-### 実施手順 / GNOME の表示と入力 / 手順 3: 補足: 効く範囲
+### GNOME の表示と入力 / 手順 4: 補足: 効く範囲
 
 - 自分のセッションだけの設定。ログイン画面と、ほかのユーザーには効かない
 
-### 実施手順 / GNOME の表示と入力 / 手順 4: 補足: 既定値
+### GNOME の表示と入力 / 手順 5: 補足: 既定値
 
 - `button-layout` の既定は `'appmenu:close'`
 
-### 実施手順 / GNOME の表示と入力 / 手順 6: 補足: 2 つのスキーマ
+### GNOME の表示と入力 / 手順 7: 補足: 2 つのスキーマ
 
 - Files と GTK4 のアプリは `org.gtk.gtk4`、GTK3 のアプリは `org.gtk` を読む
 - Files では Ctrl+H で、隠しファイルを出す・隠すを切り替えられる
 
-### 実施手順 / GNOME の表示と入力 / 手順 7: 補足: アプリごとの切り替え
+### GNOME の表示と入力 / 手順 8: 補足: アプリごとの切り替え
 
 - アプリごとの切り替えは Super+Tab に残る
 
-### 実施手順 / GNOME の表示と入力 / 手順 8: 補足: アクティビティの画面
+### GNOME の表示と入力 / 手順 9: 補足: アクティビティの画面
 
 - ホットコーナーを切った後も、アクティビティの画面は Super キーで開く
 
-### 実施手順 / GNOME の表示と入力 / 手順 9: 補足: 拡大率を選ぶ時期
+### GNOME の表示と入力 / 手順 10: 補足: 拡大率を選ぶ時期
 
 - 拡大率を選ぶのは、「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 4 で行う
 
-### 実施手順 / GNOME の表示と入力 / 手順 10: 補足: 版
+### GNOME の表示と入力 / 手順 11: 補足: 版
 
 - 入る `gnome-shell-extension-appindicator` は、AlmaLinux 10.2 では 61
 
-### 実施手順 / GNOME の表示と入力 / 手順 11: 補足: 効く時期
+### GNOME の表示と入力 / 手順 12: 補足: 効く時期
 
 - 動いている GNOME Shell は、ログインし直すまで、入れたばかりの拡張を読まない。「再起動と確認」の手順 1 の再起動の後に、同じ項の手順 3 で確かめる
 
-### 実施手順 / GNOME の表示と入力 / 手順 12: 補足: 設定アプリでの表示
+### GNOME の表示と入力 / 手順 13: 補足: 設定アプリでの表示
 
 - 足したショートカットは、設定の「キーボード」→「キーボードショートカット」→「カスタムショートカット」にも出る
 
-### 実施手順 / 共通の bash 設定 / 手順 1: 補足: 共通の bash 設定
+### 共通の bash 設定 / 手順 1: 補足: 共通の bash 設定
 
 - [README の共通の bash 設定を先に入れる](../../README.md#共通の-bash-設定を先に入れる)と同じ（Workstation には git が最初から入っている）
 - 元の `~/.bashrc` は `~/.bashrc.before-bash` に残る
 - `~/.bashrc` の末尾に、`~/.config/bash/bashrc` を読む 1 行が足される。ツールごとの設定（Homebrew・starship・zoxide・fzf・eza・bat の `MANPAGER`・履歴と `shopt` など）は、この設定がまとめて読む。この文書では `~/.bashrc` に追記しない
 
-### 実施手順 / 共通の bash 設定 / 手順 3: 補足: 入っているときと入れたとき
+### 共通の bash 設定 / 手順 3: 補足: 入っているときと入れたとき
 
 - Workstation で入れた PC は、bash-completion が最初から入っている
 - BaseOS から入れるときは、依存の `pkgconf` 系 4 つも入る
 
-### 実施手順 / Homebrew / 手順 2: 補足: Next steps を行わない理由
+### Homebrew / 手順 2: 補足: Next steps を行わない理由
 
 - `Next steps` の `~/.bashrc` への追記を行わないのは、共通の bash 設定が `brew shellenv` を読むため
 
-### 実施手順 / Homebrew / 手順 3: 補足: 日々の操作
+### Homebrew / 手順 3: 補足: 日々の操作
 
 - 日々の操作は[Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)
 
-### 実施手順 / Homebrew / 手順 4: 補足: IBus の PATH を固定する理由
+### Homebrew / 手順 4: 補足: IBus の PATH を固定する理由
 
 - Anthy のエンジン（`/usr/libexec/ibus-engine-anthy`）は、`exec python3 /usr/share/ibus-anthy/engine/main.py` と書かれた sh の包みで、PATH で最初に見つかった `python3` で動く
 - 共通の bash 設定は、Homebrew のディレクトリを PATH の先頭に置く。2026-10-11 の Hyper-V の VM では、`gnome-shell` と `ibus-daemon` の環境にも Homebrew を含む PATH があった。セッションへ取り込まれる具体的な経路は、確かめていない
@@ -167,145 +171,145 @@
   - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
   - FXB では、Homebrew とドロップインを消すロールバックの後も、再起動してログインしたテキストエディターで変換と確定を確かめた。ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
 
-### 実施手順 / シェルのツール / 手順 1: 補足: 確認とボトル
+### シェルのツール / 手順 1: 補足: 確認とボトル
 
 - 依存も入れる計画なので、`[y/n]` と聞かれる
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 要らないツールの名前を外してよいのは、共通の bash 設定が、入っているものだけを読むため
 
-### 実施手順 / シェルのツール / 手順 2: 補足: 開き直した端末で効く理由
+### シェルのツール / 手順 2: 補足: 開き直した端末で効く理由
 
 - 開き直した端末で starship・zoxide・fzf・eza・bat が効くのは、共通の bash 設定が、入っているツールを読むため
 
-### 実施手順 / シェルのツール / 手順 3: 補足: 補完の順
+### シェルのツール / 手順 3: 補足: 補完の順
 
 - `-F _brew brew` が出るのは、共通の bash 設定が Homebrew の補完を fzf より前に読むため
 
-### 実施手順 / シェルのツール / 手順 4: 補足: 初期化の順と starship explain
+### シェルのツール / 手順 4: 補足: 初期化の順と starship explain
 
 - starship → WezTerm → zoxide の順は、共通の bash 設定が初期化の順番を持つ。`~/.bashrc` の編集は不要
 - `starship explain` は、今のプロンプトに出ている各部分の意味を 1 行ずつ説明する
-- 見た目を変えるなら[starship のプリセットを当てる（任意）](../almalinux-setup.md#starship-のプリセットを当てる任意)、細かい調整は[starship の設定ファイル](../almalinux-setup.md#starship-の設定ファイル)
+- 見た目を変えるなら[starship のプリセットを当てる](../almalinux-setup.md#starship-のプリセットを当てる)、細かい調整は[starship の設定ファイル](../almalinux-setup.md#starship-の設定ファイル)
 
-### 実施手順 / シェルのツール / 手順 6: 補足: 出力の意味
+### シェルのツール / 手順 6: 補足: 出力の意味
 
 - `[+git]` は git の連携込みのビルド
 - `Git` の列が出るのは、`~/.config/bash` が git のリポジトリだから
 - `ll`・`la`・`lt` は共通の bash 設定が足す。`ls` は置き換えない
 
-### 実施手順 / シェルのツール / 手順 7: 補足: bat の出力と MANPAGER
+### シェルのツール / 手順 7: 補足: bat の出力と MANPAGER
 
 - `--color=always` を外してパイプに繋ぐと、装飾の無い `cat` と同じ出力になる
 - `MANPAGER` の `bat -plman` は共通の bash 設定が持つ。`man bash` が bat の色で開く（`q` で閉じる）
 
-### 実施手順 / シェルのツール / 手順 8: 補足: BaseOS の tmux
+### シェルのツール / 手順 8: 補足: BaseOS の tmux
 
 - BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
 
-### 実施手順 / シェルのツール / 手順 10: 補足: z と zi の使い方
+### シェルのツール / 手順 10: 補足: z と zi の使い方
 
 - 以後は `z share` のように末尾の一部を書けば `/usr/share` に飛ぶ。`zi` で候補を fzf で選べる
 
-### 実施手順 / キー操作を試す / 手順 3: 補足: プレビューと複数の選択
+### キー操作を試す / 手順 3: 補足: プレビューと複数の選択
 
 - 右側のプレビューは、共通の bash 設定が、bat があるときに入れる
 - Tab で複数を選べる（選んだ行に印が付き、Enter で全部入る）
 
-### 実施手順 / キー操作を試す / 手順 4: 補足: ** の補完
+### キー操作を試す / 手順 4: 補足: ** の補完
 
 - `**` を付けなければ、今までどおりの補完
 - `ssh **<Tab>` は `~/.ssh/config` と `known_hosts` のホスト名、`export **<Tab>` は変数名の一覧になる
 
-### 実施手順 / tmux を試す / 手順 1: 補足: デタッチ
+### tmux を試す / 手順 1: 補足: デタッチ
 
 - デタッチしても、セッションの中のシェルと、そこで動かしているコマンドは動き続ける
 
-### 実施手順 / tmux を試す / 手順 2: 補足: tmux の使い方
+### tmux を試す / 手順 2: 補足: tmux の使い方
 
 - キーとコマンドは[tmux の使い方の基本](../almalinux-setup.md#tmux-の使い方の基本)
 
-### 実施手順 / tmux を試す / 手順 3: 補足: tmux のサーバー
+### tmux を試す / 手順 3: 補足: tmux のサーバー
 
 - セッションが 1 つも無くなると、tmux のサーバーも終わる
 
-### 実施手順 / yazi / 手順 2: 補足: 一緒に入る python3 と curl
+### yazi / 手順 2: 補足: 一緒に入る python3 と curl
 
 - 既定の `YAZI_EXTRAS` では、依存として Homebrew の `python3`（2026-10-11 は `python@3.15`）と `curl` も入る
 - 共通の bash 設定が Homebrew のディレクトリを PATH の先頭に置くので、端末では、どちらも `/usr/bin` のものより先に見つかるようになる（2026-10-11 の 3 つの VM で、この後の `command -v curl` は `/home/linuxbrew/.linuxbrew/bin/curl` を返した）
 - 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 4
 
-### 実施手順 / 再起動と確認 / 手順 1: 補足: 再起動で効くもの
+### 再起動と確認 / 手順 1: 補足: 再起動で効くもの
 
-- 「システムの設定」の手順 7 の kdump のメモリー（外したとき）、「日本語入力」の手順 1 で入れた ibus-anthy（入れたとき）、「GNOME の表示と入力」の手順 9 の拡大率、同じ項の手順 11 のトレイアイコン、「Flatpak と Flathub」の手順 4 の Flatseal のメニュー
+- 「システムの設定」の手順 7 の kdump のメモリー（外したとき）、「日本語入力」の手順 2 で入れた ibus-anthy（入れたとき）、「GNOME の表示と入力」の手順 10 の拡大率、同じ項の手順 12 のトレイアイコン、「Flatpak と Flathub」の手順 4 の Flatseal のメニュー
 
-### SSH を公開鍵だけにする（任意） / 手順 1: 補足: restorecon
+### SSH を公開鍵だけにする / 手順 1: 補足: restorecon
 
 - `restorecon` は、`~/.ssh` の SELinux のラベルを、sshd が読めるものに合わせる
 
-### SSH を公開鍵だけにする（任意） / 手順 5: 補足: 既定値
+### SSH を公開鍵だけにする / 手順 5: 補足: 既定値
 
 - `passwordauthentication yes` と `kbdinteractiveauthentication no` は、AlmaLinux 10 の既定
 
-### dnf-automatic で自動で更新する（任意） / 手順 2: 補足: 入れる更新の設定
+### dnf-automatic で自動で更新する / 手順 2: 補足: 入れる更新の設定
 
 - 何を入れるか（`upgrade_type`）などは `/etc/dnf/automatic.conf` にある。このタイマーは、その設定の `apply_updates` に関わらず、更新を入れる
 
-### dnf-automatic で自動で更新する（任意） / 手順 3: 補足: GNOME Software の設定
+### dnf-automatic で自動で更新する / 手順 3: 補足: GNOME Software の設定
 
 - `download-updates` を `false` にすると、GNOME Software の「設定」の「自動更新」がオフになる
 - 更新があることの通知と、手で入れる更新は、そのまま使える
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 1: 補足: 変数の有効な範囲
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 1: 補足: 変数の有効な範囲
 
 - 変数はそのシェルの中だけで有効なので、新しいシェルを開いたら貼り直す
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 2: 補足: 読み戻し
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 2: 補足: 読み戻し
 
 - 最後の 3 つのコマンドで読み戻す
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 3: 補足: ログイン画面の設定ファイル
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 3: 補足: ログイン画面の設定ファイル
 
 - ファイルには、自動サスペンドと電源ボタンの設定を書く
 - 文字列の値は引用符（`'`）で囲む。囲まないと、`dconf update` が失敗する
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 4: 補足: mask の効き目
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 4: 補足: mask の効き目
 
 - GNOME のメニュー・蓋・電源ボタンなど、どこから頼まれてもサスペンドが始まらなくなる
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 5: 補足: 蓋の既定値
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 5: 補足: 蓋の既定値
 
 - `HandleLidSwitch` の既定は `s "suspend"`
 - 蓋の無い PC では何も変わらない（置いても害は無い）
 
-### 画面オフ・画面ロック・自動サスペンドを止める（任意） / 手順 9: 補足: 残るディレクトリ
+### 画面オフ・画面ロック・自動サスペンドを止める / 手順 9: 補足: 残るディレクトリ
 
 - 空の `/etc/systemd/logind.conf.d` は残る
 
-### Wake on LAN を使う（任意） / 手順 2: 補足: Wake-on の値
+### Wake on LAN を使う / 手順 2: 補足: Wake-on の値
 
 - `Wake-on:` の `g` がマジック パケット
 - VirtualBox の VM の e1000 は、`Supports Wake-on: umbg` でも `d` のままだった
 
-### 実施手順 / WezTerm と HackGen Console NF をデスクトップで使う / 手順 1: 補足: 等幅のフォント
+### WezTerm と HackGen Console NF をデスクトップで使う / 手順 1: 補足: 等幅のフォント
 
 - 等幅のフォントは、端末の Ptyxis などが使う
 - 最初の `get` は変える前の値（AlmaLinux 10 の既定は `'Red Hat Mono Regular 10'`）
 - Ptyxis は既定でこのフォントを使うので、開いている端末もすぐに変わる
 
-### Homebrew を root のシェルでも使う（任意） / 手順 2: 補足: Homebrew を消したとき
+### Homebrew を root のシェルでも使う / 手順 2: 補足: Homebrew を消したとき
 
 - Homebrew 自体を削除した場合は、共通設定が自動で読み込みを省略する
 
-### Homebrew を sudo でも使う（任意） / 手順 1: 補足: 使い方
+### Homebrew を sudo でも使う / 手順 1: 補足: 使い方
 
 - Homebrew で入れたコマンドを、`sudo jq --version` のように打てる
 - `sudo` でどれが使われるかは、`sudo bash -c 'type -a <コマンド>'` で見る（先頭の行が使われる）
 
-### Homebrew を sudo でも使う（任意） / 手順 2: 補足: root のシェルの PATH
+### Homebrew を sudo でも使う / 手順 2: 補足: root のシェルの PATH
 
-- [Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節も通していれば、root のシェル（`sudo -i` も）では、root の共通の bash 設定が Homebrew を PATH に入れたまま
+- [Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節も通していれば、root のシェル（`sudo -i` も）では、root の共通の bash 設定が Homebrew を PATH に入れたまま
 
-### starship のプリセットを当てる（任意） / 手順 2: 補足: --force と再初期化
+### starship のプリセットを当てる / 手順 2: 補足: --force と再初期化
 
 - starship は設定ファイルをプロンプトのたびに読む
 - `--force` は既存のファイルを置き換える。付けないと既存設定がある場合に拒否されるので、節の先頭のとおり先に退避する
@@ -316,23 +320,23 @@
 - `starship config` で `$EDITOR` が開く
 - 設定の場所を変えたいときは、starship 自身が読む環境変数 `STARSHIP_CONFIG` を `~/.bashrc` で `export` する
 
-### starship でユーザー名とホスト名を常に表示する（任意） / 手順 1: 補足: starship config
+### starship でユーザー名とホスト名を常に表示する / 手順 1: 補足: starship config
 
 - 既存の設定を保ち、常時表示に必要な 2 項目だけを更新する。設定ファイルが無ければ作られる
 
-### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 1: 補足: fd-find と二重に入れない理由
+### fzf で fd と bat を候補とプレビューに使う / 手順 1: 補足: fd-find と二重に入れない理由
 
 - EPEL の `fd-find` も Homebrew の fd も `fd` で、PATH の先頭の Homebrew 版が使われる
 
-### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 2: 補足: 変数を入れる時期
+### fzf で fd と bat を候補とプレビューに使う / 手順 2: 補足: 変数を入れる時期
 
 - 共通の bash 設定は、端末を開くときに fd と bat を見つけて変数を入れる
 
-### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 4: 補足: コマンドの中のプレビュー
+### fzf で fd と bat を候補とプレビューに使う / 手順 4: 補足: コマンドの中のプレビュー
 
 - コマンドの中で同じプレビューを使うなら、`fzf --preview 'bat --color=always --style=numbers {}'`
 
-### fzf で fd と bat を候補とプレビューに使う（任意） / 手順 5: 補足: 消した後
+### fzf で fd と bat を候補とプレビューに使う / 手順 5: 補足: 消した後
 
 - 開き直した端末から、共通の bash 設定は候補の 3 つの変数を入れず、候補は fzf の既定の一覧に戻る
 - yazi.md の `YAZI_EXTRAS` で入れた fd を消さないのは、yazi の検索が使うため
@@ -342,7 +346,7 @@
 - テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
 - 自前のシンタックス定義やテーマを足したときだけ `bat cache --build` が要る（キャッシュの場所は `bat --cache-dir`）
 
-### tmux の設定ファイル（任意） / 手順 2: 補足: 読み込みとホイール
+### tmux の設定ファイル / 手順 2: 補足: 読み込みとホイール
 
 - 既存・新規のどちらの設定ファイルも、起動時と同じ順で読み込む。既存セッションのマウス設定にも反映する
 - tmux の中でホイールを上へ回すと、さかのぼって読める（右上に `[5/258]` のような位置が出る）。下まで回すか `q` で戻る
@@ -356,11 +360,11 @@
 
 - tmux のセッションと、その中の Claude Code は、このホストで動き続ける
 
-### 更新 / 手順 2: 補足: 自動更新
+### 共通の bash 設定・Homebrew・Flatpak を上げる / 手順 2: 補足: 自動更新
 
 - `brew install` / `brew upgrade` は既定で自動更新が走るので、普段は `brew update` を明示しなくてよい（抑えるには `HOMEBREW_NO_AUTO_UPDATE=1`）
 
-### 更新 / 手順 3: 補足: 確認と、上げた後の tmux・fzf・zoxide
+### 共通の bash 設定・Homebrew・Flatpak を上げる / 手順 3: 補足: 確認と、上げた後の tmux・fzf・zoxide
 
 - `[y/n]` を聞く条件は[注意点](../extra/almalinux-setup.md#注意点)
 - 動いている tmux のサーバーは、前の版のまま動き続ける。新しい版を使うのは、セッションを全部閉じて `tmux ls` が `no server running on …` になってから
@@ -387,20 +391,20 @@
   - `/etc/kdump.conf` の `auto_reset_crashkernel` を `no` にする。`yes` のままだと、カーネルを入れたときに kernel-install の `92-crashkernel.install` が `crashkernel=` を付け直す
   - `crashkernel=` は `grubby --update-kernel=ALL --remove-args=crashkernel` で、入っているすべてのカーネルの起動の項目から外す
 - **PackageKit-command-not-found を外す（「システムの設定」の手順 8）**: 無いコマンドを打つたびにリポジトリを探して待たされるため。パッケージは `dnf provides` で探す
-- **ホームのフォルダーの名前を英語にする（「GNOME の表示と入力」の手順 1）**: 端末で打ちやすく、Homebrew・WezTerm などの既定の場所と合わせるため
+- **ホームのフォルダーの名前を英語にする（「GNOME の表示と入力」の手順 2）**: 端末で打ちやすく、Homebrew・WezTerm などの既定の場所と合わせるため
   - `xdg-user-dirs-update --force` は空のフォルダーを作り直すだけで、中身を移さない。中身を残すために、フォルダーを `mv` してから `xdg-user-dirs-update --set` で場所を書き換える
   - Files のサイドバーのブックマーク（`~/.config/gtk-3.0/bookmarks`）も、日本語の名前の URI のままになるので書き換える
   - `~/.config/user-dirs.locale` を今のロケールに合わせる。xdg-user-dirs-gtk は、このファイルのロケールが今のロケールと違うときに、ログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓を出す（xdg-user-dirs-gtk のソース）
 - **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。統合前の[画面オフ・ロック・サスペンドの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
   - 一覧の値（`xkb-options`・`experimental-features`・`custom-keybindings`）は、まるごと置き換えず、無ければ足す。ほかの設定で入っている値を消さないため
-- **Caps Lock を Ctrl に（「GNOME の表示と入力」の手順 3）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
-- **拡大率（「GNOME の表示と入力」の手順 9）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
-- **トレイアイコン（「GNOME の表示と入力」の手順 10・11）**: EPEL の `gnome-shell-extension-appindicator`（AppIndicator と KStatusNotifierItem を扱う）。AppStream の `gnome-shell-extension-status-icons` は、旧来の XEmbed のトレイアイコンだけを扱い、今のアプリが使う AppIndicator / KStatusNotifierItem を出さない
-- **Ctrl+Alt+T（「GNOME の表示と入力」の手順 12）**: GNOME 49 の media-keys には端末を開くキーが無いので、カスタムのショートカットにする。コマンドは、新しい窓を開く `ptyxis --new-window`
+- **Caps Lock を Ctrl に（「GNOME の表示と入力」の手順 4）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
+- **拡大率（「GNOME の表示と入力」の手順 10）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
+- **トレイアイコン（「GNOME の表示と入力」の手順 11・12）**: EPEL の `gnome-shell-extension-appindicator`（AppIndicator と KStatusNotifierItem を扱う）。AppStream の `gnome-shell-extension-status-icons` は、旧来の XEmbed のトレイアイコンだけを扱い、今のアプリが使う AppIndicator / KStatusNotifierItem を出さない
+- **Ctrl+Alt+T（「GNOME の表示と入力」の手順 13）**: GNOME 49 の media-keys には端末を開くキーが無いので、カスタムのショートカットにする。コマンドは、新しい窓を開く `ptyxis --new-window`
 - **シェルのツールは 1 回の `brew install` にまとめた（「シェルのツール」の手順 1）**: 依存の確認（`[y/n]`）が 1 回で済む。初期化は共通の bash 設定が持つので、入れた後は端末を開き直すだけ
-- **SSH を公開鍵だけにする（任意節）**: ドロップインのファイル名を `40-pubkey-only.conf` にする。sshd は最初に読んだ値を使い、Workstation の `50-redhat.conf` より前に読ませるため
-- **dnf-automatic（任意節）**: `dnf-automatic-install.timer` で、毎日更新を入れる（再起動はしない）。GNOME Software の自動の更新（`download-updates`）は切る。2 つの仕組みが同じ更新を落とし合わないようにするため
-- **Wake on LAN（任意節）**: NetworkManager の接続の `802-3-ethernet.wake-on-lan` に `magic` を入れる。`ethtool -s` で変えた値は再起動で消えるが、接続の設定は接続を上げるたびに入る
+- **SSH を公開鍵だけにする**: ドロップインのファイル名を `40-pubkey-only.conf` にする。sshd は最初に読んだ値を使い、Workstation の `50-redhat.conf` より前に読ませるため
+- **dnf-automatic**: `dnf-automatic-install.timer` で、毎日更新を入れる（再起動はしない）。GNOME Software の自動の更新（`download-updates`）は切る。2 つの仕組みが同じ更新を落とし合わないようにするため
+- **Wake on LAN**: NetworkManager の接続の `802-3-ethernet.wake-on-lan` に `magic` を入れる。`ethtool -s` で変えた値は再起動で消えるが、接続の設定は接続を上げるたびに入る
 
 ### 参照
 
@@ -529,8 +533,8 @@
 | 実施手順 2 | 「Homebrew」の手順 2 |
 | 実施手順 3・4 | 「Homebrew」の手順 3 |
 | 使い方の基本 | Homebrew の使い方の基本 |
-| root のシェルでも使う（任意）の 1・2 | Homebrew を root のシェルでも使う（任意）の 1・2 |
-| sudo でも使う（任意）の 1・2 | Homebrew を sudo でも使う（任意）の 1・2 |
+| root のシェルでも使う（任意）の 1・2 | 「Homebrew を root のシェルでも使う」の手順 1・2 |
+| sudo でも使う（任意）の 1・2 | 「Homebrew を sudo でも使う」の手順 1・2 |
 | 更新 1・2 | 更新 2・3 |
 | ロールバック 1〜3 | ロールバックの「Homebrew と bash-completion を消す」の手順 1〜3 |
 
@@ -547,7 +551,7 @@
 | `su -`、ssh での root のログイン | `/etc/profile` → `/root/.bash_profile` → `/root/.bashrc` | 使える（PATH の末尾） |
 | `sudo -i` | 同上。PATH の始まりは sudo の `secure_path` | 使える（PATH の末尾） |
 | `sudo -s`、`su`（`-` 無し） | `/root/.bashrc`（`sudo -s` でも `HOME` は `/root`） | 使える（PATH の末尾） |
-| `sudo <コマンド>` | 読まない。PATH は `secure_path` の `/sbin:/bin:/usr/sbin:/usr/bin` | 使えない（`sudo: jq: command not found`）。[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節で使える |
+| `sudo <コマンド>` | 読まない。PATH は `secure_path` の `/sbin:/bin:/usr/sbin:/usr/bin` | 使えない（`sudo: jq: command not found`）。[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節で使える |
 
 - **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わり、その末尾に足される
 - **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../extra/almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
@@ -574,7 +578,7 @@
 | `sudo -i` | `/root/.local/bin:/root/bin:/usr/local/sbin` の後ろに `secure_path` | 使える（PATH の末尾） |
 | `sudoedit`（`EDITOR=nvim`） | エディタを `secure_path` で探し、自分のユーザーと自分の環境で動かす | Homebrew の `nvim`。設定は自分の `~/.config/nvim` |
 | `sudo EDITOR=nvim visudo` | エディタを `secure_path` で探し、root で動かす | Homebrew の `nvim`。設定は `/root/.config/nvim` |
-| `su -`、`sudo su -`、ssh での root のログイン | sudo の `secure_path` を通らない | 使えない（[root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節で使える） |
+| `su -`、`sudo su -`、ssh での root のログイン | sudo の `secure_path` を通らない | 使えない（[root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節で使える） |
 
 #### Homebrew: 参照
 
@@ -596,7 +600,7 @@
 
 #### Flatpak: 実施手順 / 手順 4: 補足: 鍵は登録ファイルの中にある
 
-`flathub.flatpakrepo` は鍵を**本文に base64 で埋め込んで**いて、`flatpak remote-add` はこの鍵をリモートの設定に取り込む。以後の取得はすべてこの鍵で署名を検証する。したがって、確かめるべきは「登録ファイルの中の鍵が Flathub のものか」の 1 点になる（[VS Code](../almalinux-setup.md#vs-code-実施手順) の手順で rpm の鍵を確かめているのと同じ考え方）。
+`flathub.flatpakrepo` は鍵を**本文に base64 で埋め込んで**いて、`flatpak remote-add` はこの鍵をリモートの設定に取り込む。以後の取得はすべてこの鍵で署名を検証する。したがって、確かめるべきは「登録ファイルの中の鍵が Flathub のものか」の 1 点になる（[VS Code](../almalinux-setup.md#vs-code) の手順で rpm の鍵を確かめているのと同じ考え方）。
 
 `gpg --show-keys` は鍵を**鍵束に取り込まずに表示するだけ**。ただし `~/.gnupg` が無ければ最初の実行で作られる（`gpg: directory '/home/<USER>/.gnupg' created`）。
 
@@ -610,9 +614,9 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1（変数） | 「システムの設定」の手順 1 |
-| 実施手順 2・3 | 「日本語入力」の手順 1 |
-| 実施手順 4 | 「日本語入力」の手順 2 |
+| 実施手順 1（変数） | 「日本語入力」の手順 1 |
+| 実施手順 2・3 | 「日本語入力」の手順 2 |
+| 実施手順 4 | 「日本語入力」の手順 3 |
 | 実施手順 5（ログインし直す） | 「再起動と確認」の手順 1（再起動） |
 | 実施手順 6 | 「再起動と確認」の手順 3 |
 | 実施手順 7 | 「再起動と確認」の手順 6 |
@@ -634,7 +638,7 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1〜5 | 画面オフ・画面ロック・自動サスペンドを止める（任意）の 1〜5 |
+| 実施手順 1〜5 | 「画面オフ・画面ロック・自動サスペンドを止める」の手順 1〜5 |
 | ロールバック 1〜4 | 同じ節の 6〜9 |
 
 ### 画面オフ・ロック・サスペンド: 補足
@@ -663,13 +667,13 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1（変数） | starship のプリセットを当てる（任意）の 2 |
+| 実施手順 1（変数） | 「starship のプリセットを当てる」の手順 2 |
 | 実施手順 2 | 「シェルのツール」の手順 1 |
 | 実施手順 3・5 | 「シェルのツール」の手順 4 |
 | 実施手順 4 | 「シェルのツール」の手順 2 |
-| プリセットを当てる（任意）の 1・2 | starship のプリセットを当てる（任意）の 1・2 |
+| プリセットを当てる（任意）の 1・2 | 「starship のプリセットを当てる」の手順 1・2 |
 | 設定ファイルの 1 | starship の設定ファイルの 1 |
-| ユーザー名とホスト名を常に表示するの 1 | starship でユーザー名とホスト名を常に表示する（任意）の 1 |
+| ユーザー名とホスト名を常に表示するの 1 | 「starship でユーザー名とホスト名を常に表示する」の手順 1 |
 | 更新 1 | 更新 3 |
 | ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
 | ロールバック 2・3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
@@ -678,7 +682,7 @@
 
 #### starship: 実施手順 / 手順 1: 補足: 変数について
 
-- `${STARSHIP_PRESET}` は[プリセットを当てる（任意）](../almalinux-setup.md#starship-のプリセットを当てる任意)でしか使わない
+- `${STARSHIP_PRESET}` は[プリセットを当てる](../almalinux-setup.md#starship-のプリセットを当てる)でしか使わない
 - 既定を `plain-text-symbols` にしてあるのは、Nerd Font が無い環境でも文字化けしないため
 
 #### starship: 実施手順 / 手順 2: 補足: 降ってくるボトル
@@ -861,7 +865,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | 実施手順 2 | 「シェルのツール」の手順 8 |
 | 実施手順 3〜5 | 「tmux を試す」の手順 1〜3 |
 | 使い方の基本 | tmux の使い方の基本 |
-| 設定ファイル（任意）の 1・2 | tmux の設定ファイル（任意）の 1・2 |
+| 設定ファイル（任意）の 1・2 | 「tmux の設定ファイル」の手順 1・2 |
 | Claude Code を tmux の中で動かす（任意）の 1〜8 | 同じ節の 1〜8 |
 | 更新 1 | 更新 3 |
 | ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 1 |
@@ -986,7 +990,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | **winget の `Git.Git` を `--scope machine` で** | 上流のインストーラを、winget が sha256 を確かめてから黙って動かす。`C:\Program Files\Git` に入り、`winget upgrade` で上がる。管理者の権限が要る | **採用** |
 | winget の `--scope user` | 同じインストーラで、winget はスコープのスイッチを渡さない。入る先はインストーラが権限で決める | 不採用（PC 全体に入れるので、winget にも `machine` を指定する） |
 | 上流のインストーラを落として、画面で入れる | 選択を画面で選べる。版の確認と更新は手作業 | 不採用 |
-| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows の OpenSSH サーバー](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする任意)が `C:\Program Files\Git` を前提にしている。[Windows 11 の初期設定](../windows-setup.md)も、scoop の git を入れなくなった） |
+| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows の OpenSSH サーバー](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)が `C:\Program Files\Git` を前提にしている。[Windows 11 の初期設定](../windows-setup.md)も、scoop の git を入れなくなった） |
 
 - **インストーラの選択は既定のまま**（winget の `--custom` や `--override` で `/o:` を渡さない）
   - 本書は `system` を変えず `global` で上書きするので、`system` の `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` は既定のままでよい（[実施手順](../almalinux-setup.md#git)の手順 7 で確かめる）
@@ -1092,7 +1096,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
 - **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/almalinux-setup.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
 - **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 の補足）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
 
 #### Firefox: 参照
 
@@ -1151,7 +1155,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 | Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
 | PC 全体（`C:\Windows\Fonts`）に入れる | 管理者が要る | 不採用（AlmaLinux 10 と同じく自分のユーザーだけ） |
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
 
 #### HackGen Console NF: 参照
 
@@ -1272,7 +1276,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../windows-setup.md#wezterm)の手順 3）
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
 
 #### WezTerm: 参照
 
@@ -1347,7 +1351,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」
 - [WezTerm の Windows 11 で使う](../windows-setup.md#wezterm) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
 
 ---
@@ -1530,7 +1534,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - [cli/go-gh v2.16.1 — pkg/config/config.go](https://github.com/cli/go-gh/blob/v2.16.1/pkg/config/config.go) — 設定・状態・データ・キャッシュの場所
 - [zalando/go-keyring v0.2.8 — keyring_windows.go](https://github.com/zalando/go-keyring/blob/v0.2.8/keyring_windows.go) — 資格情報マネージャーの項目の名前
 - [GitHub CLI manual — gh help environment](https://cli.github.com/manual/gh_help_environment) — `GH_CONFIG_DIR`・`GH_PATH` など
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節。[Git](../almalinux-setup.md#git) — Git for Windows と、その Git Credential Manager
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」。[Git](../almalinux-setup.md#git) — Git for Windows と、その Git Credential Manager
 
 ---
 
@@ -1649,7 +1653,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - ネイティブインストーラ（`install.sh` が取ってくる `bootstrap.sh`）も、まず `claude-code-releases/latest` が指す版を取ってくる
 - 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
 
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing-実施手順) と同じく後ろの節に分けた
+- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../almalinux-setup.md#syncthing) と同じく後ろの節に分けた
 - **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 4 の補足）
 - **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ節の手順 5）
 - **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ節の手順 7）。インストーラの中で動く前の確かめにはならない

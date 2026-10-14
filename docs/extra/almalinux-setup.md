@@ -2,7 +2,7 @@
 
 [手順書](../almalinux-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
 
-- 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
+- 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -17,9 +17,9 @@
   - 導入元: [Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順で、Flathub は 1〜4、RPM Fusion は 5・6、EPEL は 7・8
   - PC 全体: [システムの設定を戻す](#システムの設定を戻す)の手順で、パッケージの案内は 1、kdump は 2、journal は 3、PC の名前は 4、再起動と確かめは 5・6、sudo は 7
 - 拡大率を 100% 以外にしていたら、[表示と入力を戻す](#表示と入力を戻す)の手順 8 の前に、設定の「ディスプレイ」の「スケーリング」で 100% に戻す
-- gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 2 と「GNOME の表示と入力」の手順 13 で控えた値に戻すなら、`reset` の代わりに `set` を使う
+- gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 3 と「GNOME の表示と入力」の手順 14 で控えた値に戻すなら、`reset` の代わりに `set` を使う
 - OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
-- 任意節で変えたものは、その節の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)を通したなら、先にその節の手順 2 を行う
+- ロールバックの節の対象でない項で変えたものは、その項の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)を通したなら、先にその項の手順 2 を行う
 - 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#ロールバック)・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
 - この文書で入れたものは、この節の項を上から順に戻す（Homebrew を消す前に Homebrew のもの、RPM Fusion を消す前に[Firefox を戻す](#firefox-を戻す)の手順 1 の FFmpeg）
   - 自分用の設定は、[Git の道具を消す](#git-の道具を消す)と[端末とエディタを消す](#端末とエディタを消す)の中で戻す（Neovim と WezTerm は、それぞれのリポジトリのロールバックへ案内する。lazygit と yazi は、clone を残すか消すかを箇条書きに書いた）
@@ -165,7 +165,7 @@
 
    - [LazyVimStarter の docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)の手順 1〜3 を、上から順に貼る
    - その手順 2 は、設定のディレクトリごと消す（push していない変更は取り戻せない）。その手順 1 で、何も出ないことを確かめてから行う
-   - その手順 3 で、入力ソースが既定（空）に戻り、Anthy の切り替えのキーに Ctrl+Space と Ctrl+J が戻る。日本語入力を残すなら、その手順 3 の箇条書きのとおり、入力ソースを導入の前の値（[日本語入力](../almalinux-setup.md#日本語入力)の手順 2 で設定した `[('xkb', 'jp'), ('ibus', 'anthy')]` など）に書き戻す
+   - その手順 3 で、入力ソースが既定（空）に戻り、Anthy の切り替えのキーに Ctrl+Space と Ctrl+J が戻る。日本語入力を残すなら、その手順 3 の箇条書きのとおり、入力ソースを導入の前の値（[日本語入力](../almalinux-setup.md#日本語入力)の手順 3 で設定した `[('xkb', 'jp'), ('ibus', 'anthy')]` など）に書き戻す
    - その手順 4（Homebrew の Neovim・lazygit・HackGen Console NF をまとめて消す）は行わない。Neovim はこの項の手順 4、lazygit は[Git の道具を消す](#git-の道具を消す)の手順 1、HackGen Console NF はこの項の手順 10 で消す
 
 1. 既定のエディタの扱いを確認する。
@@ -191,7 +191,7 @@
    ```
 
    - [AI エージェントの手順書の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1 と、自分用の Neovim の設定（その導入の手順 3）が入れたもの。プラグイン（[AI エージェントのロールバックの「AI エージェントとプラグインを消す」](ai-agents.md#ai-エージェントとプラグインを消す)の手順 1）と自分用の設定（この項の手順 2）を外してから行う
-   - [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入-実施手順) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
+   - [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
    - bubblewrap は外さない（Flatpak と GNOME のデスクトップも使う）
    - トランザクション表の `Removing:` に `nodejs` と `nodejs-npm`、`Removing unused dependencies:` に一緒に入った `nodejs-libs`・`libuv` などが出る。ほかに使っているパッケージが出たら `N` で止める。よければ `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
@@ -263,7 +263,7 @@
 
    - 「Firefox」の手順 8 で一緒に入った依存も、ほかに使うものが無ければ一緒に消える
    - AAC・H.264 のための FFmpeg だけ外すなら、この手順だけ行う。RPM Fusion 自体も外すなら、続けて[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 5・6 を行う
-   - EPEL は外さない（[btop.md](../almalinux-setup.md#btop-実施手順) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
+   - EPEL は外さない（[btop.md](../almalinux-setup.md#btop) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Mozilla の repo ファイルを消す。
@@ -422,7 +422,7 @@
    ```
 
    - `['firefox.desktop', 'org.gnome.Calendar.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Software.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop', 'org.gnome.Calculator.desktop']`（Workstation の既定）が出ればよい
-   - 「GNOME の表示と入力」の手順 13 で控えた並びに戻すなら、`reset` の代わりに `/usr/bin/gsettings set org.gnome.shell favorite-apps "<控えた値>"` を貼る（`<控えた値>` を置き換える）
+   - 「GNOME の表示と入力」の手順 14 で控えた並びに戻すなら、`reset` の代わりに `/usr/bin/gsettings set org.gnome.shell favorite-apps "<控えた値>"` を貼る（`<控えた値>` を置き換える）
 
 1. トレイアイコンの拡張を無効にする。
 
@@ -453,15 +453,15 @@
    ```
 
    - `@a(ss) []`（既定値）になればよい
-   - 「日本語入力」の手順 2 で控えた値に戻すなら、`/usr/bin/gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
+   - 「日本語入力」の手順 3 で控えた値に戻すなら、`/usr/bin/gsettings set org.gnome.desktop.input-sources sources "<控えた値>"` を貼る（`<控えた値>` を置き換える）
 
-1. 「日本語入力」の手順 1 で ibus-anthy を入れたときだけ、ibus-anthy を消す。
+1. 「日本語入力」の手順 2 で ibus-anthy を入れたときだけ、ibus-anthy を消す。
 
    ```bash
    sudo dnf remove ibus-anthy
    ```
 
-   - `anthy-unicode`・`ibus-anthy-python`・`kasumi-common`・`kasumi-unicode` も一緒に消える。`ibus` 本体と、「日本語入力」の手順 1 で入ったフォントは残る
+   - `anthy-unicode`・`ibus-anthy-python`・`kasumi-common`・`kasumi-unicode` も一緒に消える。`ibus` 本体と、「日本語入力」の手順 2 で入ったフォントは残る
    - 最初から入っていた PC（Workstation）では貼らない
    - **次の手順は、`[y/N]` に `y` と答えて、プロンプトに戻ってから貼る**
 
@@ -502,7 +502,7 @@
    grep '^XDG_' ~/.config/user-dirs.dirs
    ```
 
-   - 「GNOME の表示と入力」の手順 1 と同じ形で、`/home/<USER>/Downloads → /home/<USER>/ダウンロード` のような行が 8 つ出る
+   - 「GNOME の表示と入力」の手順 2 と同じ形で、`/home/<USER>/Downloads → /home/<USER>/ダウンロード` のような行が 8 つ出る
    - `user-dirs.dirs` の 8 行が日本語の名前に戻ればよい
 
 ### シェルのツールと bash の設定を戻す
@@ -599,7 +599,7 @@
 
    - `Are you sure you want to uninstall Homebrew? … [y/N]` と聞かれる。`y` と打って Enter
    - 終わりに `==> Homebrew uninstalled!` と、消さなかったファイルの一覧（`The following possible Homebrew files were not deleted:` の後の `/home/linuxbrew/.linuxbrew/etc/` など）が出る。残りは、この項の手順 3 で消す
-   - インターネットに出られないホストでは、[AlmaLinux 10 の「SSH の SOCKS トンネル: 実施手順」の手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) でトンネルを張ったシェルで、この項の手順 1 から貼る
+   - インターネットに出られないホストでは、[AlmaLinux 10 の「SSH の SOCKS トンネル」の手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル) でトンネルを張ったシェルで、この項の手順 1 から貼る
    - starship を読み込んだ端末では、消した後に `-bash: /home/linuxbrew/.linuxbrew/bin/starship: そのようなファイルやディレクトリはありません` と出ることがある。そのままこの項の手順 3 を貼り、端末を開き直す
    - **次の手順は、アンインストーラが終わってから貼る**（続けて貼ると確認として食われる）
 
@@ -706,7 +706,7 @@
    sudo rpm -e gpg-pubkey-e37ed158-65785fa9
    ```
 
-   - 鍵は、EPEL からパッケージを入れたことがあるとき（「GNOME の表示と入力」の手順 10）だけ登録されている
+   - 鍵は、EPEL からパッケージを入れたことがあるとき（「GNOME の表示と入力」の手順 11）だけ登録されている
 
 ### システムの設定を戻す
 
@@ -810,7 +810,7 @@
 - **パスワードを聞かない sudo**: [手順書の「ログインと sudo」の手順 3](../almalinux-setup.md#ログインと-sudo) の後は、このユーザーで動くものがパスワード無しで root の権限を使える（リードの `[!WARNING]`）。外すのは[システムの設定を戻す](#システムの設定を戻す)の手順 7
 - **アプリが再起動を止めることがある**: `sudo systemctl reboot` が `Operation inhibited by …` で断られたら、保存していない文書のあるアプリを閉じてから貼り直す
 - **PC の名前を変えた後**: 開いている端末のプロンプトは前の名前のまま。ほかの PC の `~/.ssh/known_hosts` は名前でつないでいれば、新しい名前で鍵を聞かれる
-- **SSH はパスワードでもログインできる**: Workstation の既定。公開鍵だけにするなら[SSH を公開鍵だけにする（任意）](../almalinux-setup.md#ssh-を公開鍵だけにする任意)
+- **SSH はパスワードでもログインできる**: Workstation の既定。公開鍵だけにするなら[SSH を公開鍵だけにする](../almalinux-setup.md#ssh-を公開鍵だけにする)
 - **journal は rsyslog と二重に残る**: `/var/log/messages`（rsyslog）にも同じ内容が残る。journal の大きさは、既定でファイルシステムの 10%（4 GiB まで）
 - **kdump を止めると、カーネルが落ちたときの記録（vmcore）は残らない**: 原因を調べるときは、[システムの設定を戻す](#システムの設定を戻す)の手順 2 で戻す
 - **コマンドが見つからないときに、パッケージを案内しない**: 「システムの設定」の手順 8 の後は、`dnf provides '*/bin/<コマンド>'` で探す
@@ -827,11 +827,11 @@
   - Microsoft Edge などは Flathub でも x86_64 だけ（[導入元一覧](../tool-catalog.md#aarch64-で使えないもの)）
   - [Firefox](../almalinux-setup.md#firefox) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 読み戻しで確かめる。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（Homebrew の `gsettings` は、dconf ではなくファイルに書き、読み戻しでは変わったように見える）
-- **ほかの入力ソースは消える**: 「日本語入力」の手順 2 の `set` は一覧をまるごと置き換える
+- **ほかの入力ソースは消える**: 「日本語入力」の手順 3 の `set` は一覧をまるごと置き換える
 - **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列（「Neovim」の手順 3 の後は「英語 (US)」）に戻す。Anthy の中の切り替えのキー（Ctrl+Space・Ctrl+J）は、「Neovim」の手順 3 で外れる
   - 変換は Mozc に比べて弱いと言われる（本書では比べていない）。よく使う語は、一緒に入る辞書のツール `kasumi-unicode` で登録する
   - 入力モードやキーの割り当ての設定画面は `/usr/libexec/ibus-setup-anthy`（アプリの一覧には出ない）
-- **Caps Lock の働きは無くなる**: 「GNOME の表示と入力」の手順 3 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる
+- **Caps Lock の働きは無くなる**: 「GNOME の表示と入力」の手順 4 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる
 - **Alt+Tab はウィンドウを切り替える**: アプリごとに切り替えるのは Super+Tab
 - **拡大率の設定は mutter の実験的な機能**: GNOME の更新で、名前や働きが変わることがある。うまく動かなければ、[表示と入力を戻す](#表示と入力を戻す)の手順 8 で外す
 - **トレイアイコンの拡張は EPEL のもの**: GNOME Shell の更新に遅れることがある。拡張が動かなくなったら、[表示と入力を戻す](#表示と入力を戻す)の手順 11 で無効にする
@@ -848,11 +848,11 @@
 - **`show-all-if-ambiguous` は候補が多いと長い一覧になる**: `ls /usr/share/<Tab>` のような場所では、既定と同じく `Display all 123 possibilities? (y or n)` と聞かれる
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#統合前の記録-homebrewもとは-homebrewmd)
-- **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu-実施手順) で実際に問題になる）
+- **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu) で実際に問題になる）
   - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 4 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
-  - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
-  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す
+  - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
+  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節を通す
   - どちらも通さないなら、RPM で入れるか、フルパス（`/home/linuxbrew/.linuxbrew/bin/<tool>`）を渡す。bat で root のファイルを読むなら、`sudo cat` か、フルパスの `sudo /home/linuxbrew/.linuxbrew/bin/bat`
 - **`brew install` は、依存や依存先も含む計画なら端末で `[y/n]` を聞く**（Homebrew 7.0.7 の既定の ask mode）
   - 同じブロックに後ろの行があると、その文字が答えとして読まれ、`n` で中止になる。`brew install` は、`[y/n]` に答えてから次の手順を貼る
@@ -867,7 +867,7 @@
 - **Homebrew は匿名の利用統計が既定で有効**: 止めるなら `brew analytics off`
 - **starship・zoxide・fzf の初期化は、共通の bash 設定が読む**: `brew install` だけではプロンプトも `z` も変わらない。共通設定が starship → WezTerm → zoxide、Homebrew の補完 → fzf の順に読む。端末を開き直すと効く
   - WezTerm のシェル統合の `A` / `B` は失われる: `PS1` が毎回作り直されるため。並びによらない（[bash の参考資料の読む順番](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読む順番)）
-  - root は別に導入する: root 自身にも bash の共通設定を導入した場合にだけ、root のシェルで初期化される（[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)）
+  - root は別に導入する: root 自身にも bash の共通設定を導入した場合にだけ、root のシェルで初期化される（[Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)）
 - **starship はプロンプトごとに外部プロセスが起動する**: git の状態を調べるので、大きなリポジトリや遅いストレージ（Raspberry Pi の microSD）では体感できるほど遅くなることがある。`starship timings` で犯人を探し、要らないモジュールは `disabled = true` で切る
 - **starship の記号には Nerd Font が要るものがある**: 既定のプロンプト記号 `❯` は普通のフォントでも出るが、プリセットによっては Nerd Font 前提。無い端末では `plain-text-symbols` / `no-nerd-font` を当てる
 - **zoxide の `--cmd cd` は影響範囲が広い**: `cd` を置き換えると、シェル関数やエイリアス経由の `cd` の挙動も変わる。既定の `z` から始めるのが無難
@@ -954,9 +954,9 @@
 - **git-delta も、Homebrew の注意のとおり**: PATH の先頭が Homebrew になる、`~/.bashrc` を読まない文脈では見えない、など
 - **Neovim: EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ。どちらか一方にする
 - **Neovim: `sudo nvim` は、そのままでは動かない**: sudo の PATH に Homebrew が無い
-  - [Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む
+  - [Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む
   - root のファイルを自分の設定で編集するなら、`sudo nvim` ではなく `sudoedit` を使う（その節を通すか、`SUDO_EDITOR` にフルパスを渡す。[「Neovim」の手順 4](../almalinux-setup.md#neovim)）
-  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う（任意）](../almalinux-setup.md#homebrew-を-root-のシェルでも使う任意)の節を通す（`sudo nvim` は、その節だけでは動かない）
+  - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節を通す（`sudo nvim` は、その節だけでは動かない）
 - **Neovim: プロバイダは別途**: Python / Node.js のプラグインを使うなら、それぞれ `pynvim` / `neovim` パッケージを入れる。Node.js 本体は、[「Neovim」の手順 3](../almalinux-setup.md#neovim) の自分用の設定の導入で入る
 - **Neovim: 設定とプラグインは更新に追従しない**: `brew upgrade neovim` でメジャー版が上がると、古い API を使うプラグインが壊れることがある
 - **Neovim: `vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
@@ -972,7 +972,7 @@
   - `gh auth logout` はローカルの認証情報を外す。GitHub 側のトークンの失効は別の操作（[Git の道具を消す](#git-の道具を消す)の手順 5）
 - **GitHub CLI: `gh` は git を呼ぶ**: `gh repo clone` などは git に依存する。最小構成のホストでは git 一式が付いてくる
 - **GitHub CLI: 全アーキ共通リポジトリ**: `dnf list gh` に `i386` / `armv6hl` の行が出るのは正常
-- **yazi も、Homebrew の注意のとおり**: PATH の先頭が Homebrew になる（同名のコマンドは RPM 版より Homebrew 版が勝つ）、`sudo yazi` はそのままでは使えない（root で使うなら、[Homebrew を sudo でも使う（任意）](../almalinux-setup.md#homebrew-を-sudo-でも使う任意)の節を通すか、フルパスで呼ぶ）、など
+- **yazi も、Homebrew の注意のとおり**: PATH の先頭が Homebrew になる（同名のコマンドは RPM 版より Homebrew 版が勝つ）、`sudo yazi` はそのままでは使えない（root で使うなら、[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通すか、フルパスで呼ぶ）、など
   - RPM 版と両方入れると分かりにくくなるので、どちらか一方にする
 - **yazi: 画像プレビューは端末に依存する**: Kitty / WezTerm / foot などのグラフィックプロトコル、または Überzug++ が要る。GNOME 端末では文字ベースの表示になる
 - **yazi: `q` と `Q`**: `y` 関数経由なら `q` で終了時にそのディレクトリへ移動し、`Q` なら移動しない

@@ -1,18 +1,18 @@
 # Windows 11 で OpenSSH クライアントを使う手順（ed25519 の鍵と ssh の config で AlmaLinux 10 のホストに入る）のロールバックと注意点
 
-[手順書](../windows-setup.md#windows-の-openssh-クライアント-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](../reference/windows-ssh-client.md)
+[手順書](../windows-setup.md#windows-の-openssh-クライアント)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](../reference/windows-ssh-client.md)
 
-- 「手順 N」は[手順書](../windows-setup.md#windows-の-openssh-クライアント-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../windows-setup.md#windows-の-openssh-クライアント)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
-- [手順 2](../windows-setup.md#windows-の-openssh-クライアント-実施手順) の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、手順 2 のブロックを貼り直してから貼る
+- [手順 2](../windows-setup.md#windows-の-openssh-クライアント) の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、手順 2 のブロックを貼り直してから貼る
 - ホストの `authorized_keys` の行を消すには鍵で入るので、鍵のファイルを消す手順は最後にしてある
 - Windows の OpenSSH クライアントと Git の ssh は外さない（ほかの手順書も使う）
 
 > [!CAUTION]
-> **この節の手順 4 で、秘密鍵と公開鍵（`%USERPROFILE%\.ssh\id_ed25519`・`id_ed25519.pub`）を消すと、取り戻せない**。GitHub やほかのホストにも登録してある鍵（[手順 4](../windows-setup.md#windows-の-openssh-クライアント-実施手順) で作らなかった鍵）なら、この節の手順 4 は行わない。
+> **この節の手順 4 で、秘密鍵と公開鍵（`%USERPROFILE%\.ssh\id_ed25519`・`id_ed25519.pub`）を消すと、取り戻せない**。GitHub やほかのホストにも登録してある鍵（[手順 4](../windows-setup.md#windows-の-openssh-クライアント) で作らなかった鍵）なら、この節の手順 4 は行わない。
 
 1. ホストの authorized_keys から、この鍵の行を消す。
 
@@ -36,7 +36,7 @@
    - ホストを既に消したなど、つなげないときは、この手順は飛ばす
    - **次の手順は、`0` が出てから貼る**（続けて貼るとパスフレーズかパスワードとして食われる）
 
-1. `~/.ssh/config` から、[手順 7](../windows-setup.md#windows-の-openssh-クライアント-実施手順) で足した接続先を消す。
+1. `~/.ssh/config` から、[手順 7](../windows-setup.md#windows-の-openssh-クライアント) で足した接続先を消す。
 
    ```powershell
    $f = "$env:USERPROFILE\.ssh\config"
@@ -77,7 +77,7 @@
    - Git の ssh も同じ known_hosts を使うので、Git の ssh の側で消す手順は無い
    - **注意**: 元の known_hosts は `known_hosts.old` に写される。前からあった `known_hosts.old` は上書きされる
 
-1. [手順 4](../windows-setup.md#windows-の-openssh-クライアント-実施手順) で作った鍵を、ほかで使っていないときだけ消す（取り戻せない）。
+1. [手順 4](../windows-setup.md#windows-の-openssh-クライアント) で作った鍵を、ほかで使っていないときだけ消す（取り戻せない）。
 
    ```powershell
    Remove-Item -LiteralPath "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub"
@@ -86,7 +86,7 @@
    ```
 
    - `False` が 2 行出ればよい
-   - [手順 4](../windows-setup.md#windows-の-openssh-クライアント-実施手順) で `既にある:` か `公開鍵を作り直した:` と出た鍵（前からあった鍵）は消さない
+   - [手順 4](../windows-setup.md#windows-の-openssh-クライアント) で `既にある:` か `公開鍵を作り直した:` と出た鍵（前からあった鍵）は消さない
 
 ---
 
@@ -100,14 +100,14 @@
 - **config を BOM 付きや UTF-16 で保存しない**: Windows PowerShell 5.1 の `-Encoding UTF8`・`>`・`>>`・`Out-File` は、BOM 付きの UTF-8 か UTF-16 で書く
   - Windows の ssh は UTF-8 の BOM を読み飛ばすが、Git の ssh は `Bad configuration option` で止まり、ssh を使う git（GitHub への push など）も失敗する。UTF-16 は両方が読めない
   - メモ帳で書くなら、文字コードを「UTF-8」（BOM なし）にする
-- **config には、両方の ssh が知っている設定だけを書く**: Windows の ssh（9.5p2）が知らない新しい設定を書くと、Windows の ssh が止まる。書いた後は、[更新](../windows-setup.md#windows-の-openssh-クライアント-更新)の手順 1 で両方を確かめる
+- **config には、両方の ssh が知っている設定だけを書く**: Windows の ssh（9.5p2）が知らない新しい設定を書くと、Windows の ssh が止まる。書いた後は、[更新](../windows-setup.md#windows-の-openssh-クライアント-更新)の手順 3 で両方を確かめる
 - **ssh の設定は、最初に見つけた値が効く**: config の前の方の `Host *` などにある `User`・`IdentityFile` は、手順 7 で足した値より先に効く
 - **Git の `usr\bin` が `PATH` の先にある PC**: PowerShell と WezTerm の起動メニューの `ssh` が、Git のものになる（[Windows 11 の初期設定の注意点](windows-setup.md#注意点)の OpenSSH サーバーと同じ）。この手順書のブロックは、どちらもフルパスで呼ぶ
 - **秘密鍵のアクセス権**: Windows の ssh は、ほかの主体（Everyone・Users など）に許可のある秘密鍵を、`UNPROTECTED PRIVATE KEY FILE!` と出して使わない（手順 5・6）
 - **config のアクセス権**: Windows の ssh は、ほかの主体に書き込みの許可のある config を読まず、`Bad owner or permissions on …config` で止まる
   - ほかの PC から写した config や、同期した config で起こりうる
-  - 手順 6 のブロックの 1 行目の `id_ed25519` を `config` に書き換えて貼り、[更新](../windows-setup.md#windows-の-openssh-クライアント-更新)の手順 1 で確かめ直す
+  - 手順 6 のブロックの 1 行目の `id_ed25519` を `config` に書き換えて貼り、[更新](../windows-setup.md#windows-の-openssh-クライアント-更新)の手順 3 で確かめ直す
 - **ホストがパスワードでのログインを受け付けないとき**（`PasswordAuthentication no` にしたホストなど）: 手順 9 は使えない。手順 9 の公開鍵の 1 行（`id_ed25519.pub` の中身）を、ホストの画面などで `~/.ssh/authorized_keys` に足す
-  - [AlmaLinux 10 の初期設定の任意節「SSH を公開鍵だけにする」](../almalinux-setup.md#ssh-を公開鍵だけにする任意)を通したホストが、これに当たる。足すのは、その節の手順 1（`SSH_PUBKEY` に公開鍵の 1 行を入れる）でよい
+  - [AlmaLinux 10 のセットアップの「SSH を公開鍵だけにする」](../almalinux-setup.md#ssh-を公開鍵だけにする)を通したホストが、これに当たる。足すのは、その項の手順 1（`SSH_PUBKEY` に公開鍵の 1 行を入れる）でよい
   - その節をまだ通していないホストでは、この手順書を先に通す（手順 9 でパスワードを使う）
 - **FIPS モードのホスト**: ed25519 の鍵は使えない（RHEL 10 の文書）。この手順書では扱わない

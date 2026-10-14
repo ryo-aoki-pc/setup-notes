@@ -1,10 +1,10 @@
 # Windows 11 のリモートデスクトップを、画面をロックせずに切断する手順（tscon）の参考資料
 
-[手順書](../windows-setup.md#rdp-をロックせずに切断-実施手順)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
+[手順書](../windows-setup.md#rdp-をロックせずに切断)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 管理者の PowerShell を使う理由
+### RDP をロックせずに切断 / 手順 1: 補足: 管理者の PowerShell を使う理由
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#実施手順--手順-1-補足-管理者の-powershell-を使う理由)
 
@@ -13,7 +13,7 @@
 - 管理者として開いた PowerShell も、RDP でつないだのと同じセッションで動く。手順 2・3 は、このプロセスのセッションの ID を使う
 - 32 ビットの PowerShell では `System32` が `SysWOW64` に読み替えられ、`tscon.exe` が見つからないことがある
 
-### 実施手順 / 手順 2: 補足: RDP でつないだときのセッション
+### RDP をロックせずに切断 / 手順 2: 補足: RDP でつないだときのセッション
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#実施手順--手順-2-補足-rdp-でつないだときのセッション)
 
@@ -21,7 +21,7 @@
 - ふつうに切断する（RDP の窓を閉じる）と、セッションは `Disc`（切断）の状態で残り、PC の画面はロック画面のまま。アプリは動き続ける
 - セッションの ID はつなぎ直しても変わらず、セッション名だけが `console` と `rdp-tcp#<N>` で入れ替わる（`<N>` はつなぐたびに変わる）
 
-### 実施手順 / 手順 3: 補足: tscon がすること
+### RDP をロックせずに切断 / 手順 3: 補足: tscon がすること
 
 - `tscon <セッションの ID> /dest:console` は、そのセッションを `console`（PC の画面とキーボード）につなぎ、今つないでいる RDP を切る（Microsoft の `tscon` の資料の `/dest`）
 - 同じユーザーのセッションなので、`/password` は要らない（資料は、別のユーザーのセッションにつなぐときに要ると書いている）
@@ -29,11 +29,11 @@
 - セッションの ID は、`quser` の出力を切り出さずに、この PowerShell のプロセスのセッションの ID（`Process.SessionId`。ターミナル サービスのセッションの ID）から取る。出力の列の位置に頼らないため
 - PC の画面は、ロック画面を通らずにデスクトップになる。開いていたアプリはそのまま
 
-### 実施手順 / 手順 5: 補足: Remote Control の確認
+### RDP をロックせずに切断 / 手順 5: 補足: Remote Control の確認
 
-- 同じ節の手順 5 で `console` の行が `Active` になれば、[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 3 の確認（`console` の行が `Active`）も通る
+- 同じ項の手順 5 で `console` の行が `Active` になれば、[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 3 の確認（`console` の行が `Active`）も通る
 
-### ショートカットで切断する（任意） / 手順 1: 補足: ショートカットの作り
+### ショートカットで切断する / 手順 2: 補足: ショートカットの作り
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#ショートカットで切断する任意--手順-1-補足-ショートカットの作り)
 
@@ -47,9 +47,9 @@
 - デスクトップの場所は `[Environment]::GetFolderPath('Desktop')` で取る（OneDrive に移したデスクトップも、この値になる）
 - 何度貼っても、同じショートカットを作り直すだけ
 
-### ショートカットで切断する（任意） / 手順 2: 補足: 切れないとき
+### ショートカットで切断する / 手順 3: 補足: 切れないとき
 
-- ショートカットは窓を隠して動かすので、切れないときのエラーが見えない。そのため、[実施手順](../windows-setup.md#rdp-をロックせずに切断-実施手順)の手順 1〜3 で切ってエラーを見る
+- ショートカットは窓を隠して動かすので、切れないときのエラーが見えない。そのため、[RDP をロックせずに切断](../windows-setup.md#rdp-をロックせずに切断)の手順 1〜3 で切ってエラーを見る
 
 ### 選択した方針
 

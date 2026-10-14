@@ -1,10 +1,10 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../almalinux-setup.md#btop-実施手順)・[ロールバックと注意点](../extra/btop.md)
+[手順書](../almalinux-setup.md#btop)・[ロールバックと注意点](../extra/btop.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 依存
+### btop / 手順 1: 補足: 依存
 
 - 依存として `hicolor-icon-theme`（デスクトップエントリのアイコン用）が、まだ無ければ一緒に入る
 

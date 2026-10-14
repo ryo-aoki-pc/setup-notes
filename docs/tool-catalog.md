@@ -21,7 +21,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)（EPEL）を通してあること
 - Flathub（`sudo flatpak install`）: [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub)（Flatpak / Flathub）を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
-- コンテナの節の行は、どの導入元でも [Podman](almalinux-setup.md#podman-実施手順) の実施手順を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
+- コンテナの節の行は、どの導入元でも [Podman](almalinux-setup.md#podman) を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
 
 ---
 
@@ -33,7 +33,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | CRB | **既定で有効**。素のコンテナイメージで確認した（`almalinux-repos-10.2` の `almalinux-crb.repo` が `enabled=1`） | — | — | EPEL を入れたときに出る「CRB を有効に」の案内は、AlmaLinux 10 では済んでいる | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
 | EPEL 10 | [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)。`sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
 | RPM Fusion（EL10） | 本書では有効にしていない。free は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜5](almalinux-setup.md#epel-と-rpm-fusion) で、鍵を照合してから `rpmfusion-free-release` を入れる（EPEL が前提） | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[初期設定の「Firefox」](almalinux-setup.md#firefox)（`ffmpeg-libs`） |
-| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[初期設定の「Firefox」](almalinux-setup.md#firefox)、[初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)、[vscode.md](almalinux-setup.md#vs-code-実施手順)、[virtualbox.md](almalinux-setup.md#virtualbox-実施手順)、[image-tools.md](almalinux-setup.md#画像の道具-実施手順)（Trivy） |
+| ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[初期設定の「Firefox」](almalinux-setup.md#firefox)、[初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)、[vscode.md](almalinux-setup.md#vs-code)、[virtualbox.md](almalinux-setup.md#virtualbox)、[image-tools.md](almalinux-setup.md#画像の道具)（Trivy） |
 | COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit の注意点](extra/almalinux-setup.md#注意点)（COPR の経路）、[初期設定の「WezTerm」](almalinux-setup.md#wezterm)、[AlmaLinux 10 の初期設定の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#zoxide-付録-dnf-の経路のコンテナでの検証記録2026-09-29)（zoxide の外した dnf の経路の記録） |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | 導入・更新などの管理操作は一般ユーザーで行う。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[注意点](#注意点) |
 | Flathub | [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
@@ -48,9 +48,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 1. **例外として、podman 本体と、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox / toolbox / buildah / skopeo）は RPM にする**
    - Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
    - Homebrew の podman と skopeo は、設定を `/etc/containers` ではなく `/home/linuxbrew/.linuxbrew/etc/containers` から読む（formula の定義）
-   - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui.md](almalinux-setup.md#podman-tui-実施手順) の選択した方針）
+   - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui.md](almalinux-setup.md#podman-tui) の選択した方針）
 
-**GUI** は、次の順で選んだ。[Firefox](almalinux-setup.md#firefox) と [VS Code](almalinux-setup.md#vs-code-実施手順) を RPM にした判断と同じ。
+**GUI** は、次の順で選んだ。[Firefox](almalinux-setup.md#firefox) と [VS Code](almalinux-setup.md#vs-code) を RPM にした判断と同じ。
 
 1. ベンダーの公式 dnf リポジトリ（x86_64 と aarch64 の両方にあるもの）
 1. AppStream / EPEL（Flathub との版の差がパッチ版までのもの）
@@ -68,25 +68,25 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Homebrew 本体 | 公式インストーラ | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Homebrew」の手順 1〜3） |
 | Flatpak / Flathub | AppStream + Flathub | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Flatpak と Flathub」の手順 1〜3） |
 | starship / zoxide / fzf / eza / bat / tmux | Homebrew（初期化は共通の bash 設定） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「シェルのツール」の手順 1） |
-| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](almalinux-setup.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu-実施手順) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt-実施手順) |
-| Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](almalinux-setup.md#syncthing-実施手順) |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](almalinux-setup.md#dropbox-実施手順) |
-| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone-実施手順) |
-| btop | EPEL | [btop.md](almalinux-setup.md#btop-実施手順) |
+| yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](almalinux-setup.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
+| Syncthing | Homebrew + systemd ユーザーサービス | [syncthing.md](almalinux-setup.md#syncthing) |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [dropbox.md](almalinux-setup.md#dropbox) |
+| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone) |
+| btop | EPEL | [btop.md](almalinux-setup.md#btop) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
 | Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [AI エージェントの「Codex CLI」](ai-agents.md#codex-cli) |
 | Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [AI エージェントの「Grok Build」](ai-agents.md#grok-build) |
 | Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [coding-agents.md](ai-agents.md#コーディングエージェントの共同作業-実施手順) |
-| VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](almalinux-setup.md#vs-code-実施手順) |
-| VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](almalinux-setup.md#virtualbox-実施手順) |
+| VS Code | Microsoft 公式 dnf リポジトリ | [vscode.md](almalinux-setup.md#vs-code) |
+| VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [virtualbox.md](almalinux-setup.md#virtualbox) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [初期設定の「WezTerm」](almalinux-setup.md#wezterm) |
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [初期設定の「HackGen Console NF」](almalinux-setup.md#hackgen-console-nf) |
-| IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「日本語入力」の手順 1・2） |
-| Podman | AppStream（自分のユーザーで動かす rootless） | [podman.md](almalinux-setup.md#podman-実施手順) |
-| distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](almalinux-setup.md#distrobox-実施手順) / [podman-compose](almalinux-setup.md#podman-compose-実施手順) / [podman-tui](almalinux-setup.md#podman-tui-実施手順) |
-| hadolint / dive / Trivy | Homebrew と Trivy の公式 dnf リポジトリ（Podman が前提） | [image-tools.md](almalinux-setup.md#画像の道具-実施手順) |
-| lazydocker | Homebrew（Podman と、その Docker 向けの節の `DOCKER_HOST` が前提） | [lazydocker.md](almalinux-setup.md#lazydocker-実施手順) |
+| IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「日本語入力」の手順 2・3） |
+| Podman | AppStream（自分のユーザーで動かす rootless） | [podman.md](almalinux-setup.md#podman) |
+| distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](almalinux-setup.md#distrobox) / [podman-compose](almalinux-setup.md#podman-compose) / [podman-tui](almalinux-setup.md#podman-tui) |
+| hadolint / dive / Trivy | Homebrew と Trivy の公式 dnf リポジトリ（Podman が前提） | [image-tools.md](almalinux-setup.md#画像の道具) |
+| lazydocker | Homebrew（Podman と、その Docker 向けの節の `DOCKER_HOST` が前提） | [lazydocker.md](almalinux-setup.md#lazydocker) |
 
 ---
 
@@ -104,7 +104,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | tealdeer | コマンドの使用例を引く（`tldr`） | Homebrew 1.9.0 | `brew install tealdeer` | EPEL の `tldr` 3.3.0 は Python 製の別クライアント | 有 | 起動 |
 | dust | `du` の見やすい版 | Homebrew 1.2.6 | `brew install dust` | RPM 無し | 有 | 起動 |
 | duf | `df` の見やすい版 | EPEL 0.9.1 | `sudo dnf install -y duf` | Homebrew 0.9.1（同版） | 有 | 起動 |
-| ncdu | ディスク使用量の TUI（[gdu](almalinux-setup.md#gdu-実施手順) と同類） | Homebrew 2.9.2 | `brew install ncdu` | EPEL 1.22（C で書かれた 1.x 系。2.x は Zig で書き直された別系統） | 有 | 起動 |
+| ncdu | ディスク使用量の TUI（[gdu](almalinux-setup.md#gdu) と同類） | Homebrew 2.9.2 | `brew install ncdu` | EPEL 1.22（C で書かれた 1.x 系。2.x は Zig で書き直された別系統） | 有 | 起動 |
 | atuin | シェル履歴の検索 | Homebrew 18.23.0 | `brew install atuin` | RPM 無し | 有 | 起動 |
 | difftastic | 構文を理解する diff（`difft`） | Homebrew 0.71.0 | `brew install difftastic` | EPEL 0.67.0 | 有 | 起動 |
 | glow | Markdown を端末で読む | Homebrew 3.0.0 | `brew install glow` | EPEL 2.1.1 | 有 | 起動 |
@@ -130,7 +130,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 ## CLI: コンテナ
 
-- どの行も [Podman](almalinux-setup.md#podman-実施手順) の実施手順を通してあることが前提
+- どの行も [Podman](almalinux-setup.md#podman) を通してあることが前提
 - 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy・podman-tui・lazydocker）は[文書化済みのツール](#文書化済みのツール)にある
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
@@ -144,7 +144,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 - 「起動」は `--version`（cosign は `cosign version`）が版を出したことを示す
 - podman-docker の `docker --version` は、`Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.` と `podman version 5.8.2` を出した
-  - 入れると、lazydocker の `E`（シェル）・`a`（アタッチ）と compose の判定が、既定の設定のまま動いた（[lazydocker.md](almalinux-setup.md#lazydocker-実施手順) の選択した方針）
+  - 入れると、lazydocker の `E`（シェル）・`a`（アタッチ）と compose の判定が、既定の設定のまま動いた（[lazydocker.md](almalinux-setup.md#lazydocker) の選択した方針）
 - buildah の RPM の版は `1.43.1-6.el10_2` だが、`buildah --version` は `buildah version 1.43.2` を出した
 - podlet は、`podlet podman run --name demo -p 127.0.0.1:8090:8080 <イメージ>` で Quadlet の `[Container]` 節を出した
   - `-d` だけでは指定せず、`--detach=true` と書く
@@ -195,8 +195,8 @@ Meld は GUI の規則の 4 番目にあたる。
 | BoxBuddy | distrobox の GUI | Flathub `io.github.dvlv.boxbuddyrs` 2.6.1（検証済み、GNOME 50） | `sudo flatpak install -y flathub io.github.dvlv.boxbuddyrs` | RPM 無し | 有 | 導入 |
 | Cockpit の podman の画面 | ブラウザからコンテナを操作する | AppStream `cockpit-podman` 121（BaseOS の `cockpit` 356.2 と組む） | `sudo dnf install -y cockpit cockpit-podman` | — | 有 | 導入 |
 
-- Pods と Podman Desktop は podman の API ソケット（[podman.md 手順 7](almalinux-setup.md#podman-実施手順)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
-- BoxBuddy はホストの distrobox（[distrobox.md](almalinux-setup.md#distrobox-実施手順)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
+- Pods と Podman Desktop は podman の API ソケット（[podman.md 手順 7](almalinux-setup.md#podman)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
+- BoxBuddy はホストの distrobox（[distrobox.md](almalinux-setup.md#distrobox)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
   - `cockpit-podman` だけを入れると、依存は `cockpit-bridge` だけで、Web の画面（`cockpit-ws`）は入らなかった。素のコンテナでは、`cockpit` も入れて 102 パッケージになった
 
 ### GNOME・システム
@@ -266,8 +266,8 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 | ツール | x86_64 の提供元 | aarch64 |
 |---|---|---|
 | Microsoft Edge | 公式 dnf リポジトリ 154.0.4258.37 / Flathub `com.microsoft.Edge` 153.0.4234.48（未検証） | どちらにも無い |
-| VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[virtualbox.md](almalinux-setup.md#virtualbox-実施手順)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball（[dropbox.md](almalinux-setup.md#dropbox-実施手順)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone-実施手順)） |
+| VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[virtualbox.md](almalinux-setup.md#virtualbox)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball（[dropbox.md](almalinux-setup.md#dropbox)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[dropbox-rclone.md](almalinux-setup.md#dropbox-と-rclone)） |
 
 ---
 

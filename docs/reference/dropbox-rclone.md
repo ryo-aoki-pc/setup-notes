@@ -1,43 +1,43 @@
 # Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）の参考資料
 
-[手順書](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[ロールバックと注意点](../extra/dropbox-rclone.md)
+[手順書](../almalinux-setup.md#dropbox-と-rclone)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#参考資料から分離した記録)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: ask mode
+### Dropbox と rclone / 手順 1: 補足: ask mode
 
 - 依存の一覧と `[y/n]` が出るのは、Homebrew 7.0.7 の ask mode（[AlmaLinux 10 の初期設定の注意点](../extra/almalinux-setup.md#注意点)）
 
-### 実施手順 / 手順 2: 補足: 設定を画面に出さない
+### Dropbox と rclone / 手順 2: 補足: 設定を画面に出さない
 
 - `>/dev/null` は、登録が終わったときに出る設定（トークン入り）を画面に出さないため
 
-### 実施手順 / 手順 4: 補足: 出力の項目
+### Dropbox と rclone / 手順 4: 補足: 出力の項目
 
 - `listremotes` の `dropbox: dropbox` は、名前と種類
 - `rclone about` の `Used:` が Dropbox で使っている容量、`df` の `Avail` が手元の空き
 
-### 実施手順 / 手順 5: 補足: フィルタの中身
+### Dropbox と rclone / 手順 5: 補足: フィルタの中身
 
 - 前の 6 行は、rclone の bisync の文書にある「Example filters file for Dropbox」の、Dropbox が同期しないファイルの行をそのまま使った（Office の一時ファイル、Windows の `desktop.ini` など）
 - **`- *.partial` は本書で足した**。rclone は転送中のファイルを `<名前>.<16 進>.partial` として書き、終わってから名前を変える
   - `kill -9` や電源断で止まると書きかけが残るため、`*.partial` を除外する
-- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える（任意）](../almalinux-setup.md#dropbox-と-rclone-同期するフォルダを変える任意)）
+- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える](../almalinux-setup.md#dropbox-と-rclone-同期するフォルダを変える)）
 
-### 実施手順 / 手順 6: 補足: 最後の行
+### Dropbox と rclone / 手順 6: 補足: 最後の行
 
 - `- **` は、並べたフォルダ以外を外す行
 
-### 実施手順 / 手順 7: 補足: Path1 と Path2、--resync の意味
+### Dropbox と rclone / 手順 7: 補足: Path1 と Path2、--resync の意味
 
 - `dropbox:` が Path1、`~/Dropbox` が Path2。`--resync` は、両方にあって中身が違うファイルでは Path1（Dropbox）を正とし（`--resync-mode path1`）、片方にしか無いファイルはもう片方へコピーする
 - `--resync` は最初の 1 回と、フィルタを変えたときだけ使う。ふだんの同期（手順 9 の timer）には付けない
 - `--max-lock 2m` は、途中で止まったときに残るロックを 2 分で切らせる（手順 8 の補足）
 - アカウントが大きいと、ファイルの数だけ行が出る
 
-### 実施手順 / 手順 9: 補足: unit の中身の理由
+### Dropbox と rclone / 手順 9: 補足: unit の中身の理由
 
 - **rclone は絶対パスで書く**。systemd は `~/.bashrc` を読まないので、Homebrew の PATH が無い。`/home/linuxbrew/.linuxbrew/bin/rclone` は `brew upgrade` で付け替わるリンクなので、更新しても書き換えなくてよい
 - `%h` は systemd がホームディレクトリに置き換える
@@ -52,9 +52,9 @@
   - 動く時刻は最大 1 分ずれる（systemd の既定の `AccuracySec=1min`）
 - ユーザーの systemd からは `network-online.target` を使えないので、起動直後はつながっていないことがある。`OnBootSec` で 5 分待ち、失敗しても `--resilient` で次の回に続ける
 
-### 実施手順 / 手順 9: 補足: linger
+### Dropbox と rclone / 手順 9: 補足: linger
 
-- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) が有効なので、ログアウトしても timer は動く
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐) が有効なので、ログアウトしても timer は動く
 
 ### 更新 / 手順 2: 補足: 新しい版で動くとき
 
@@ -72,6 +72,6 @@
 - [Filtering — rclone](https://rclone.org/filtering/) — フィルタのファイルの書き方
 - [Homebrew Formulae — rclone](https://formulae.brew.sh/formula/rclone) — 版とボトル（`arm64_linux`）
 - `man systemd.timer`（`OnBootSec=` / `OnUnitInactiveSec=` / `AccuracySec=`）/ `man systemd.service`（`Type=oneshot`）/ `man loginctl`（`enable-linger`）
-- [linger](../almalinux-setup.md#ユーザーサービスの常駐-実施手順) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
+- [linger](../almalinux-setup.md#ユーザーサービスの常駐) — 前提の手順書（ログアウト中もユーザーの systemd を動かす）
 
 ---
