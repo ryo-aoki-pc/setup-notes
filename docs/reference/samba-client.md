@@ -144,7 +144,7 @@
   - 出ていく 445/tcp だけなので、開けるものは無い
   - firewalld の `samba-client` サービス（137/138/udp。NetBIOS の名前引きと一覧）は要らない。samba.md のサーバーは NetBIOS を使わない
 - **暗号化（`seal`）は使わない**: LAN 上の通信は署名だけ。samba.md の方針と同じ
-- **GNOME Files（gvfs）は任意節にした**
+- **GNOME Files（gvfs）は別の項にした**
   - fstab のマウントとは別の仕組みで、ログインしたユーザーの gvfsd が libsmbclient でつなぐ。root も資格情報ファイルも要らない
   - つながるのはログインしている間だけ。GIO を使わないアプリからは `/run/user/<UID>/gvfs/` の下に見える
 - **Windows 11 では、資格情報マネージャー（`cmdkey`）と `New-SmbMapping -Persistent $true` で、ドライブ文字に割り当てる**

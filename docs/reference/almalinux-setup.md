@@ -533,8 +533,8 @@
 | 実施手順 2 | 「Homebrew」の手順 2 |
 | 実施手順 3・4 | 「Homebrew」の手順 3 |
 | 使い方の基本 | Homebrew の使い方の基本 |
-| root のシェルでも使う（任意）の 1・2 | Homebrew を root のシェルでも使う（任意）の 1・2 |
-| sudo でも使う（任意）の 1・2 | Homebrew を sudo でも使う（任意）の 1・2 |
+| root のシェルでも使う（任意）の 1・2 | 「Homebrew を root のシェルでも使う」の手順 1・2 |
+| sudo でも使う（任意）の 1・2 | 「Homebrew を sudo でも使う」の手順 1・2 |
 | 更新 1・2 | 更新 2・3 |
 | ロールバック 1〜3 | ロールバックの「Homebrew と bash-completion を消す」の手順 1〜3 |
 
@@ -614,9 +614,9 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1（変数） | 「システムの設定」の手順 1 |
-| 実施手順 2・3 | 「日本語入力」の手順 1 |
-| 実施手順 4 | 「日本語入力」の手順 2 |
+| 実施手順 1（変数） | 「日本語入力」の手順 1 |
+| 実施手順 2・3 | 「日本語入力」の手順 2 |
+| 実施手順 4 | 「日本語入力」の手順 3 |
 | 実施手順 5（ログインし直す） | 「再起動と確認」の手順 1（再起動） |
 | 実施手順 6 | 「再起動と確認」の手順 3 |
 | 実施手順 7 | 「再起動と確認」の手順 6 |
@@ -638,7 +638,7 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1〜5 | 画面オフ・画面ロック・自動サスペンドを止める（任意）の 1〜5 |
+| 実施手順 1〜5 | 「画面オフ・画面ロック・自動サスペンドを止める」の手順 1〜5 |
 | ロールバック 1〜4 | 同じ節の 6〜9 |
 
 ### 画面オフ・ロック・サスペンド: 補足
@@ -667,13 +667,13 @@
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1（変数） | starship のプリセットを当てる（任意）の 2 |
+| 実施手順 1（変数） | 「starship のプリセットを当てる」の手順 2 |
 | 実施手順 2 | 「シェルのツール」の手順 1 |
 | 実施手順 3・5 | 「シェルのツール」の手順 4 |
 | 実施手順 4 | 「シェルのツール」の手順 2 |
-| プリセットを当てる（任意）の 1・2 | starship のプリセットを当てる（任意）の 1・2 |
+| プリセットを当てる（任意）の 1・2 | 「starship のプリセットを当てる」の手順 1・2 |
 | 設定ファイルの 1 | starship の設定ファイルの 1 |
-| ユーザー名とホスト名を常に表示するの 1 | starship でユーザー名とホスト名を常に表示する（任意）の 1 |
+| ユーザー名とホスト名を常に表示するの 1 | 「starship でユーザー名とホスト名を常に表示する」の手順 1 |
 | 更新 1 | 更新 3 |
 | ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 3 |
 | ロールバック 2・3 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 5 |
@@ -865,7 +865,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | 実施手順 2 | 「シェルのツール」の手順 8 |
 | 実施手順 3〜5 | 「tmux を試す」の手順 1〜3 |
 | 使い方の基本 | tmux の使い方の基本 |
-| 設定ファイル（任意）の 1・2 | tmux の設定ファイル（任意）の 1・2 |
+| 設定ファイル（任意）の 1・2 | 「tmux の設定ファイル」の手順 1・2 |
 | Claude Code を tmux の中で動かす（任意）の 1〜8 | 同じ節の 1〜8 |
 | 更新 1 | 更新 3 |
 | ロールバック 1 | ロールバックの「シェルのツールと bash の設定を戻す」の手順 1 |
@@ -1351,7 +1351,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」
 - [WezTerm の Windows 11 で使う](../windows-setup.md#wezterm) — VC++ ランタイム（手順 3）と、Git Bash で開く自分用の設定
 
 ---
@@ -1534,7 +1534,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - [cli/go-gh v2.16.1 — pkg/config/config.go](https://github.com/cli/go-gh/blob/v2.16.1/pkg/config/config.go) — 設定・状態・データ・キャッシュの場所
 - [zalando/go-keyring v0.2.8 — keyring_windows.go](https://github.com/zalando/go-keyring/blob/v0.2.8/keyring_windows.go) — 資格情報マネージャーの項目の名前
 - [GitHub CLI manual — gh help environment](https://cli.github.com/manual/gh_help_environment) — `GH_CONFIG_DIR`・`GH_PATH` など
-- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜4）、scoop（「アプリを入れる」の手順 1・2）、PowerShell 7 のプロファイルの任意節。[Git](../almalinux-setup.md#git) — Git for Windows と、その Git Credential Manager
+- [Windows 11 の初期設定](../windows-setup.md) — 貼り付けの設定（「貼り付けの設定」の手順 1〜5）、scoop（「アプリを入れる」の手順 2・3）、「PowerShell 7 のプロファイルを設定する」。[Git](../almalinux-setup.md#git) — Git for Windows と、その Git Credential Manager
 
 ---
 

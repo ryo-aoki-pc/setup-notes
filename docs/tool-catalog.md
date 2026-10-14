@@ -21,7 +21,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)（EPEL）を通してあること
 - Flathub（`sudo flatpak install`）: [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub)（Flatpak / Flathub）を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
-- コンテナの節の行は、どの導入元でも [Podman](almalinux-setup.md#podman) の実施手順を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
+- コンテナの節の行は、どの導入元でも [Podman](almalinux-setup.md#podman) を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
 
 ---
 
@@ -130,7 +130,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 ## CLI: コンテナ
 
-- どの行も [Podman](almalinux-setup.md#podman) の実施手順を通してあることが前提
+- どの行も [Podman](almalinux-setup.md#podman) を通してあることが前提
 - 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy・podman-tui・lazydocker）は[文書化済みのツール](#文書化済みのツール)にある
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |

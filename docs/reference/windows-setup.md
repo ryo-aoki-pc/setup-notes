@@ -18,10 +18,10 @@
 
 ### Windows Sandbox で配布物を試す / 手順 2: 補足: 対応環境
 
-- クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後の任意節にした
+- クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後に、要るときだけ通す項にした（2026-10-14 からは「仮想マシン」のカテゴリ）
 - Microsoft の導入手順は、Windows 11 Pro・Enterprise・Education などの対応エディションを対象とし、Home は対象外としている。AMD64 と、Windows 11 22H2 以降の ARM64 に対応する
 - 最低要件は、UEFI / BIOS で有効にした仮想化、RAM 4 GB、ディスクの空き 1 GB、CPU 2 コア。Microsoft は RAM 8 GB、SSD、ハイパースレッディングを含む 4 コアを推奨している
-- Windows の VM の中で使う場合は入れ子の仮想化が要る。この任意節は、前提を満たす PC を対象にしており、VM 側の仮想化設定を変える手順は含めない
+- Windows の VM の中で使う場合は入れ子の仮想化が要る。この項は、前提を満たす PC を対象にしており、VM 側の仮想化設定を変える手順は含めない
 - [Microsoft Learn: Install Windows Sandbox](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-install)
 
 ### Windows Sandbox で配布物を試す / 手順 3・4: 補足: 変更前の状態と再起動
@@ -222,7 +222,7 @@
 ### PC 全体の設定 / 手順 2: 補足: 変数について
 
 - `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）と「ネットワークとリモート」の手順 3（プライベートにする）で使う。式は [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)の手順 4 と同じ
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」と [OpenSSH サーバー](../windows-setup.md#openssh-サーバー) は、同じ式をそれぞれの項の手順 2 で取り直す（2026-10-14 に、項を単独で通すために分けた）
 - 接続の一覧は `Get-NetConnectionProfile` で見られる
 
 ### PC 全体の設定 / 手順 3: 補足: 見ているもの
@@ -1006,7 +1006,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 | VC++ ランタイム | 無ければ WezTerm の手順 3（管理者の窓） | extras の `vcredist2022` を scoop で入れる: extras のバケットを足す手順が増える |
 | fzf の ASCII 以外の文字 | 変えない（手順 8 の補足だけ） | `FZF_DEFAULT_OPTS` に `--no-height`: 全画面で開き、AlmaLinux 10 と見た目が変わる。実機で確かめてから決める |
 
-### scoop・winget・WSL を上げる / 手順 3: 補足: SSH のセッションの任意節を貼り直す理由
+### scoop・winget・WSL を上げる / 手順 3: 補足: SSH のセッションの項を貼り直す理由
 
 - scoop で上げると、新しいジャンクションができるため
 
@@ -1023,7 +1023,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#参考資料から分離した記録)
 
-任意節（プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ。2026-10-08）の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
+2026-10-08 に任意節として足した項（プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ）の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
 
 - 文書: [Manage connections from Windows operating system components to Microsoft services — Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services) — 18.1（広告 ID・言語リスト・`Start_TrackProgs`）、18.6（オンライン音声認識）、18.16（フィードバックの頻度）、18.21（手書き入力）、18.22（アクティビティの履歴）
 - 文書: Policy CSP — [Privacy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)・[Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[System](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system)・[Search](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage)・[ApplicationManagement](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement) — 採らなかったポリシーと、値が無いときの動き
@@ -1046,7 +1046,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - コード: [ReactOS の input.cpl](https://github.com/reactos/reactos/blob/master/dll/cpl/input/key_settings_dialog.c)・[Wine の sysparams.c](https://github.com/wine-mirror/wine/blob/master/dlls/win32u/sysparams.c)・[Chromium の animation_win.cc](https://chromium.googlesource.com/chromium/src/+/HEAD/ui/gfx/animation/animation_win.cc)・[Chromium の auto_launch_util.cc](https://chromium.googlesource.com/chromium/src/+/main/chrome/installer/util/auto_launch_util.cc)、[MDN の prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
 
-任意節（PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク。2026-10-08 の 2 つ目）の資料。「文書」「コード」「広く」の区別は上と同じ。
+2026-10-08 に任意節として足した項の 2 つ目（PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク）の資料。「文書」「コード」「広く」の区別は上と同じ。
 
 - 文書: [Install PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/install)・[PowerToys の DSC（Microsoft.PowerToys DSC v3）](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/microsoft-dsc)・[PSDSC](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/psdsc)・[Running as administrator](https://learn.microsoft.com/en-us/windows/powertoys/administrator)・[Peek](https://learn.microsoft.com/en-us/windows/powertoys/peek)・[Mouse utilities](https://learn.microsoft.com/en-us/windows/powertoys/mouse-utilities)・[Command Not Found](https://learn.microsoft.com/en-us/windows/powertoys/cmd-not-found) — Microsoft Learn。入る場所の食い違い、DSC、管理者で動かすこと、Peek の Space、Find My Mouse、プロファイルへの追記
 - コード: [microsoft/PowerToys](https://github.com/microsoft/PowerToys)（`src/runner/main.cpp`・`general_settings.cpp`・`auto_start_helper.cpp`、`src/common/SettingsAPI/settings_helpers.cpp`、`src/settings-ui/Settings.UI.Library/EnabledModules.cs`・`PeekProperties.cs`・`FindMyMouseProperties.cs`、`src/modules/peek/peek/dllmain.cpp`、`installer/PowerToysSetupVNext/Common.wxi`・`Product.wxs`、`doc/dsc/modules/App.md`）
@@ -1059,7 +1059,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
 - コード: [microsoft/WSL](https://github.com/microsoft/WSL)（`src/windows/common/WslCoreConfig.cpp`・`WslCoreConfig.h`、日本語の訳の `localization/strings/ja-JP/Resources.resw`）
 
-任意節（シェルのツール。2026-10-08 の 3 つ目）の資料。「コード」の区別は上と同じ。
+2026-10-08 に任意節として足した項の 3 つ目（シェルのツール）の資料。「コード」の区別は上と同じ。
 
 - コード: [ScoopInstaller/Main](https://github.com/ScoopInstaller/Main)（`bucket/fzf.json`・`zoxide.json`・`starship.json`・`eza.json`・`bat.json`。zoxide の 0.9.9 の定義は `f8683b6ce` の親）
 - コード: [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop)（v0.6.0。`lib/manifest.ps1` の `Find-HistoricalManifestInGit`・`generate_user_manifest`、`lib/install.ps1` の `env_add_path`・`env_set`・`persist_data`・`show_suggestions`・`test_running_process`・`prune_installed`、`lib/core.ps1` の `installed`、`lib/depends.ps1` の `Get-Dependency`、`lib/system.ps1` の `Add-Path`、`bin/scoop.ps1`、`libexec/scoop-install.ps1`・`scoop-update.ps1`（`Sync-Bucket`・`update`）・`scoop-hold.ps1`・`scoop-unhold.ps1`・`scoop-list.ps1`・`scoop-uninstall.ps1`、`CHANGELOG.md` の #6370・#6730）と [ScoopInstaller/Install](https://github.com/ScoopInstaller/Install)（`install.ps1`。git が無いときは、本体と main のバケットを zip で置く）
@@ -1108,11 +1108,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2・3 | 「HackGen Console NF」の手順 1・2 |
-| Windows 11 で使う 4（サインインし直す） | （なし。「WSL と再起動」の手順 2 の再起動で読み直す） |
+| Windows 11 で使う 1 | 「HackGen Console NF」の手順 1 |
+| Windows 11 で使う 2・3 | 「HackGen Console NF」の手順 2・3 |
+| Windows 11 で使う 4（サインインし直す） | （なし。「WSL と再起動」の手順 3 の再起動で読み直す） |
 | Windows 11 で使う 5 | 「再起動の後に確かめる」の手順 5 |
-| Windows 11 の更新 1・2 | 「HackGen Console NF を上げる」の手順 1・2 |
+| Windows 11 の更新 1・2 | 「HackGen Console NF を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1〜3 | ロールバックの「HackGen Console NF を消す」の手順 1〜3 |
 
 ### HackGen Console NF: 補足
@@ -1143,14 +1143,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| 実施手順 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
-| 実施手順 2（`$LAN_IF`） | （なし。「PC 全体の設定」の手順 2 の変数を使う） |
-| 実施手順 3〜7 | 「OpenSSH サーバー」の手順 1〜5 |
-| 実施手順 8・9 | 「SSH でログインを確かめる」の手順 3・4 |
-| 公開鍵でもログインする（任意）の 1〜5 | OpenSSH サーバーに公開鍵でもログインする（任意）の 1〜5 |
-| パスワード認証を切る（任意）の 1・2 | OpenSSH サーバーのパスワード認証を切る（任意）の 1・2 |
-| 既定のシェルを Git Bash にする（任意）の 1〜3 | SSH の既定のシェルを Git Bash にする（任意）の 1〜3 |
-| scoop のツールを SSH のセッションで使う（任意）の 1・2 | scoop のツールを SSH のセッションで使う（任意）の 1・2 |
+| 実施手順 1 | 「OpenSSH サーバー」の手順 1 |
+| 実施手順 2（`$LAN_IF`） | 「OpenSSH サーバー」の手順 2 |
+| 実施手順 3〜7 | 「OpenSSH サーバー」の手順 3〜7 |
+| 実施手順 8・9 | 「SSH でログインを確かめる」の手順 4・5 |
+| 公開鍵でもログインする（任意）の 1〜5 | 「OpenSSH サーバーに公開鍵でもログインする」の手順 3〜7 |
+| パスワード認証を切る（任意）の 1・2 | 「OpenSSH サーバーのパスワード認証を切る」の手順 3・4 |
+| 既定のシェルを Git Bash にする（任意）の 1〜3 | 「SSH の既定のシェルを Git Bash にする」の手順 3〜5 |
+| scoop のツールを SSH のセッションで使う（任意）の 1・2 | 「scoop のツールを SSH のセッションで使う」の手順 3・4 |
 | ロールバック 1・2 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 2・3 |
 | ロールバック 3 | ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 5 |
 | ロールバック 4 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 9 |
@@ -1251,12 +1251,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で Git for Windows を入れるの 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
-| Windows 11 で Git for Windows を入れるの 2・3 | 「Git for Windows」の手順 1・2 |
+| Windows 11 で Git for Windows を入れるの 1 | 「Git for Windows」の手順 1 |
+| Windows 11 で Git for Windows を入れるの 2・3 | 「Git for Windows」の手順 2・3 |
 | Windows 11 で Git for Windows を入れるの 4 | （なし。再起動の後に開く窓を使う） |
-| Windows 11 で Git for Windows を入れるの 5 | 「Git Bash と WezTerm の設定」の手順 1 |
-| Windows 11 で Git for Windows を入れるの 6（Git Bash で実施手順） | 「Git Bash と WezTerm の設定」の手順 2・3 |
-| 更新 2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 2 |
+| Windows 11 で Git for Windows を入れるの 5 | 「Git Bash と WezTerm の設定」の手順 2 |
+| Windows 11 で Git for Windows を入れるの 6（Git Bash で実施手順） | 「Git Bash と WezTerm の設定」の手順 3・4 |
+| 更新 2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 3 |
 | ロールバック 1〜5（Git Bash） | ロールバックの「Git Bash の設定を戻す」の手順 2〜6 |
 | ロールバック 6 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 4 |
 
@@ -1302,9 +1302,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
-| Windows 11 で使う 2〜5 | 「Firefox」の手順 1〜4 |
-| Windows 11 の更新 1・2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 3・4 |
+| Windows 11 で使う 1 | 「Firefox」の手順 1 |
+| Windows 11 で使う 2〜5 | 「Firefox」の手順 2〜5 |
+| Windows 11 の更新 1・2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 4・5 |
 | Windows 11 のロールバック 1〜3 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 5〜7 |
 
 ### Firefox: 補足
@@ -1367,9 +1367,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。「PC 全体の設定」の手順 1 の管理者の窓を使う） |
-| Windows 11 で使う 2〜6 | 「WezTerm」の手順 1〜5 |
-| Windows 11 の更新 1〜4 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 1・5〜7 |
+| Windows 11 で使う 1 | 「WezTerm」の手順 1 |
+| Windows 11 で使う 2〜6 | 「WezTerm」の手順 2〜6 |
+| Windows 11 の更新 1〜4 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 2・6〜8 |
 | Windows 11 のロールバック 1 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 8 |
 
 ### WezTerm: 補足
@@ -1413,9 +1413,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2〜5 | 「git-delta」の手順 1〜4 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 で使う 1 | 「git-delta」の手順 1 |
+| Windows 11 で使う 2〜5 | 「git-delta」の手順 2〜5 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1・3 | ロールバックの「Git の道具を消す」の手順 3・4 |
 | Windows 11 のロールバック 2 | ロールバックの「Git Bash の設定を戻す」の手順 3 |
 
@@ -1497,9 +1497,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2〜6 | 「GitHub CLI」の手順 1〜5 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 で使う 1 | 「GitHub CLI」の手順 1 |
+| Windows 11 で使う 2〜6 | 「GitHub CLI」の手順 2〜6 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1〜6 | ロールバックの「Git の道具を消す」の手順 5〜10 |
 
 ### GitHub CLI: 補足
@@ -1586,14 +1586,14 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2・3 | 「Neovim」の手順 1・2 |
-| Windows 11 で使う 4 | 「Neovim」の手順 4 |
-| Windows 11 で使う 5（`checkhealth`） | （外した。自分用の設定の導入（「Neovim」の手順 3）で確かめる） |
-| 既定のエディタにする（任意）の 2・3 | Neovim を既定のエディタにする（任意）の 1・2 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 で使う 1 | 「Neovim」の手順 1 |
+| Windows 11 で使う 2・3 | 「Neovim」の手順 2・3 |
+| Windows 11 で使う 4 | 「Neovim」の手順 5 |
+| Windows 11 で使う 5（`checkhealth`） | （外した。自分用の設定の導入（「Neovim」の手順 4）で確かめる） |
+| 既定のエディタにする（任意）の 2・3 | 「Neovim を既定のエディタにする」の手順 2・3 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1 | ロールバックの「エディタとシェルのツールを消す」の手順 5 |
-| Windows 11 のロールバック 2 | Neovim を既定のエディタにする（任意）の 2 |
+| Windows 11 のロールバック 2 | 「Neovim を既定のエディタにする」の手順 3 |
 
 ### Neovim: 補足
 
@@ -1639,10 +1639,10 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2〜4 | 「lazygit」の手順 1〜3 |
-| Windows 11 で使う 5・6 | 「lazygit」の手順 5・6 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 で使う 1 | 「lazygit」の手順 1 |
+| Windows 11 で使う 2〜4 | 「lazygit」の手順 2〜4 |
+| Windows 11 で使う 5・6 | 「lazygit」の手順 6・7 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1 | ロールバックの「Git の道具を消す」の手順 2 |
 
 ### lazygit: 補足
@@ -1685,10 +1685,10 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 | 当時の手順 | 今の手順 |
 |---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2〜5 | 「yazi」の手順 1〜4 |
-| Windows 11 で使う 6〜9 | 「yazi」の手順 6〜9 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 1・2 |
+| Windows 11 で使う 1 | 「yazi」の手順 1 |
+| Windows 11 で使う 2〜5 | 「yazi」の手順 2〜5 |
+| Windows 11 で使う 6〜9 | 「yazi」の手順 7〜10 |
+| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
 | Windows 11 のロールバック 1・2 | ロールバックの「エディタとシェルのツールを消す」の手順 2・3 |
 
 ### yazi: 補足

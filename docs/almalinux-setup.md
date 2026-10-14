@@ -4037,12 +4037,16 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 一時ディレクトリに複製して、`-w` の挙動を見る。
 
    ```bash
-   SHFMT_TMP=$(mktemp -d)
-   cp "${SC_TARGET}" "${SHFMT_TMP}/copy.sh"
-   shfmt -i "${SHFMT_INDENT}" -w "${SHFMT_TMP}/copy.sh"
-   printf '\n\033[7m 確認 \033[0m\n'
-   diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
-   rm -rf "${SHFMT_TMP}"
+   if [ -z "${SC_TARGET}" ] || [ -z "${SHFMT_INDENT}" ]; then
+     echo '中断: この項の手順 1 の SC_TARGET と SHFMT_INDENT を設定してから貼り直す' >&2
+   else
+     SHFMT_TMP=$(mktemp -d)
+     cp "${SC_TARGET}" "${SHFMT_TMP}/copy.sh"
+     shfmt -i "${SHFMT_INDENT}" -w "${SHFMT_TMP}/copy.sh"
+     printf '\n\033[7m 確認 \033[0m\n'
+     diff <(wc -l < "${SC_TARGET}") <(wc -l < "${SHFMT_TMP}/copy.sh")
+     rm -rf "${SHFMT_TMP}"
+   fi
    ```
 
    - 行数がどれだけ増減するかが出る
@@ -5511,11 +5515,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. WG ホストで、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
 
    ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   cd "${REPO:?REPO が空のまま}/scripts/wireguard" &&
-   sudo ./wg-vpn.sh -e ~/wg/site.env client list &&                                        # LAST_HANDSHAKE が「N 秒前」
-   CLIENT_TUN_IP=$(awk -v n="${CLIENT_NAME:?CLIENT_NAME が空のまま}" '$1 == n { print $3 }' ~/wg/clients.list) &&
-   ping -c 3 "${CLIENT_TUN_IP:?clients.list にその名前が無い}"                              # 拠点 → PC（PC の public ゾーンは ping に応答する）
+   if [ -z "${REPO}" ] || [ -z "${CLIENT_NAME}" ]; then echo '中断: この項の手順 4 の REPO と CLIENT_NAME を設定してから貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
+     cd "${REPO}/scripts/wireguard" &&
+     sudo ./wg-vpn.sh -e ~/wg/site.env client list &&                                        # LAST_HANDSHAKE が「N 秒前」
+     CLIENT_TUN_IP=$(awk -v n="${CLIENT_NAME}" '$1 == n { print $3 }' ~/wg/clients.list) &&
+     ping -c 3 "${CLIENT_TUN_IP:?clients.list にその名前が無い}"                              # 拠点 → PC（PC の public ゾーンは ping に応答する）
+   fi
    ```
 
    - 接続先拠点の LAN 上の別のホストから `ping <CLIENT_TUN_IP>` も通る（ルーターにクライアント帯の静的経路がある前提）
@@ -10059,10 +10065,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. マウントされたことを確かめる。
 
    ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gio mount -l | grep -F "${SERVER:?この項の手順 1 の SERVER が空のまま}"
-   ls "/run/user/$(id -u)/gvfs/"
-   /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
+   if [ -z "${SERVER}" ] || [ -z "${SMB_USER}" ] || [ -z "${SHARE}" ]; then echo '中断: この項の手順 1 の SERVER・SMB_USER・SHARE を設定してから貼り直す' >&2; else
+     printf '\n\033[7m 確認 \033[0m\n'
+     /usr/bin/gio mount -l | grep -F "${SERVER}"
+     ls "/run/user/$(id -u)/gvfs/"
+     /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
+   fi
    ```
 
    - `Mount(0): <SERVER> 上の <SHARE> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい（英語の環境では `<SHARE> on <SERVER>`）

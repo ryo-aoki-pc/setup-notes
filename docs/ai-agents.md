@@ -6,7 +6,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
-> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の実施手順を、少なくとも[yazi](almalinux-setup.md#yazi)まで通してあること
+> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること（2026-10-14 からは、これらの項はカテゴリに分かれている）
 > - AI エージェントのアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
 > - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
