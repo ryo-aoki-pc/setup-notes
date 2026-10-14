@@ -551,7 +551,7 @@
    - **場所とファイル名は変えない**
    - **一時パスワードを 2 回聞かれる**（手順 6 の MokManager で 1 回だけ使う。本書には残さない）
    - `中断: 鍵が既にある` と出たら、前に作った鍵がある。手順 7 へ進む
-   - ホストオンリーだけの VM は、この手順の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 を通す
+   - ホストオンリーだけの VM は、この手順の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2〜5 を通す
    - 鍵はホストで作り、証明書だけを VM に置いて予約する。手順 5 からは同じ
    - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -5221,7 +5221,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
    - AlmaLinux 10 の PC は、[conf を取り込む](#wireguard-conf-を取り込む)の手順 1〜5
-   - Windows 11 の PC は、[Windows 11 で WG ホストに登録して取り込む](windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 4・5
+   - Windows 11 の PC は、[Windows 11 で WG ホストに登録して取り込む](windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 1・2・4・5（手順 2 で関数を定義した後に、この項の `client show` の出力をコピーし直してから、手順 4 を行う）
    - スマートフォンは、この項の手順 7 の QR コードを読み取る
    - この項の手順 4 の `--pubkey` で登録したときは、conf の `PrivateKey`（`<CLIENT_PRIVATE_KEY>`）を、端末側で自分の秘密鍵に置き換える
    - **次の手順は、クライアントに取り込んでから貼る**
@@ -7991,8 +7991,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 元に戻すときは、root の確認用コンテナと lazydocker の設定を消す。
 
    ```bash
-   sudo podman rm -f lazydocker-root-web
-   sudo rm -rf /root/.config/lazydocker
+   {
+     sudo podman rm -f lazydocker-root-web
+     sudo rm -rf /root/.config/lazydocker
+   }
    ```
 
    - root の設定ファイルに手で足したものも消える
@@ -8591,11 +8593,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
     - `mokutil --sb-state` が `SecureBoot enabled` であることを確認する
     - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
     - ホストオンリーだけなら、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 まで通す
-      - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 でホストに鍵を作り、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 で登録する
+      - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2〜5 でホストに鍵を作り、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 で登録する
 - 実行場所:
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
   - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。手順 1〜3・5〜8・10。`sudo -i` した root のシェルでは行わない
   - ホスト: ホストのデスクトップの、VM のウィンドウ（メニューの操作）。手順 4・9（手順 4 の CD の挿入は、ホスト側の操作）
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
 - この項の手順 1 で変数を設定したシェルに貼る。新しい端末を開いたら、この項の手順 1 を貼り直す
 - **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
 - **インターネットに出られないホストオンリーだけの VM は、手順 6 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)を通す**
@@ -9297,15 +9299,18 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 両コンテナと、コンテナをまたぐ libvirt の接続を確かめる。
 
    ```bash
-   sudo podman exec kvm systemctl is-system-running         # running (degraded ではない)
-   sudo podman exec kvm ls -l /run/libvirt/virtqemud-sock   # srw-rw---- root libvirt
-   ./kvm.sh virsh list --all                                # 空の一覧 (ヘッダだけ) で可
-   if sudo podman container exists kvm-gui; then
-     sudo podman exec kvm-gui systemctl is-system-running                          # running
-     sudo podman exec kvm-gui runuser -u "$USER" -- virsh -c qemu:///system list   # 一般ユーザーが kvm-gui から kvm の libvirt に接続できること
-   else
-     echo 'kvm-gui が無い (画面なし): skip'
-   fi
+   {
+     printf '\n\033[7m 確認 \033[0m\n'
+     sudo podman exec kvm systemctl is-system-running         # running (degraded ではない)
+     sudo podman exec kvm ls -l /run/libvirt/virtqemud-sock   # srw-rw---- root libvirt
+     ./kvm.sh virsh list --all                                # 空の一覧 (ヘッダだけ) で可
+     if sudo podman container exists kvm-gui; then
+       sudo podman exec kvm-gui systemctl is-system-running                          # running
+       sudo podman exec kvm-gui runuser -u "$USER" -- virsh -c qemu:///system list   # 一般ユーザーが kvm-gui から kvm の libvirt に接続できること
+     else
+       echo 'kvm-gui が無い (画面なし): skip'
+     fi
+   }
    ```
 
    - `kvm` の `systemctl is-system-running` が `running` (`degraded` ではない)
@@ -9319,7 +9324,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### kvm-container で VM を作る
 
 - ISO を `data/` に置き、`virt-install` で VM (ディスクは SATA の SSD、NIC は e1000e) を作って、virt-viewer の画面でインストールする
-- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 2 で起動する
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1・2 で起動する
   - VM をホストのブリッジにつなぐなら、先に[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1〜8 を行う
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - x86_64 のホストで行う。この項の手順 4 で使う SATA と e1000e は、aarch64 の qemu-kvm には無い
@@ -9635,8 +9640,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. ブリッジの接続と、NIC を収容する接続を作る。
 
    ```bash
-   sudo nmcli connection add type bridge ifname "${BRIDGE:?この項の手順 1 の BRIDGE が空のまま。この項の手順 1 を貼り直す}" con-name "${BRIDGE}" ipv4.method auto
-   sudo nmcli connection add type bridge-slave ifname "${NIC:?この項の手順 1 の NIC が空のまま。値を入れて貼り直す}" master "${BRIDGE}"
+   if [ -z "${BRIDGE}" ] || [ -z "${NIC}" ]; then echo '中断: この項の手順 1 の BRIDGE と NIC を設定してから貼り直す' >&2; else
+     sudo nmcli connection add type bridge ifname "${BRIDGE}" con-name "${BRIDGE}" ipv4.method auto
+     sudo nmcli connection add type bridge-slave ifname "${NIC}" master "${BRIDGE}"
+   fi
    ```
 
    - 物理 NIC をブリッジに収容し、IP はブリッジ側に持たせる
@@ -9719,7 +9726,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### kvm-container の VM を削除する
 
 - VM の定義・UEFI 変数・ディスクを消す。ISO は、消すときだけこの項の手順 7 で消す
-- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 2 で起動する
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1・2 で起動する
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5〜7
 - `down` は `data/` を残す。**`clean` は削除する**
@@ -13275,8 +13282,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 共通の bash 設定と、Homebrew・Flatpak で入れたものを上げる
 - 前提: [共通の bash 設定](#共通の-bash-設定)・[Homebrew](#homebrew)・[Flatpak と Flathub](#flatpak-と-flathub)のうち、上げるものを通してある
 - 実行場所: 開き直した、自分のユーザーの端末（bash）。開き直し方は[シェルのツール](#シェルのツール)の手順 2 と同じ
+- 入れたものの手順だけを行う。共通の bash 設定はこの項の手順 1、Homebrew は手順 2・3、Flatpak は手順 4
 
-1. 共通の bash 設定を上げる。
+1. 共通の bash 設定を入れたときだけ、上げる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -13287,7 +13295,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Already up to date.`（上がったときは、変わったファイルの一覧）が出る
    - 上がったときは、端末を開き直すと効く
 
-1. Homebrew 自身と formula の索引を更新し、上げられるものを見る。
+1. Homebrew を入れたときだけ、Homebrew 自身と formula の索引を更新し、上げられるものを見る。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -13298,7 +13306,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `brew update` が `Already up-to-date.` を返し、`brew outdated` が無出力なら、上げるものは無いので、この項の手順 3 は飛ばす
    - インターネットに出られないホストでは、[Homebrew のオフライン導入の更新](#homebrew-のオフライン導入-更新)で行う
 
-1. 上げるものがあるときだけ、入れたものを上げる。
+1. Homebrew で上げるものがあるときだけ、入れたものを上げる。
 
    ```bash
    brew upgrade
@@ -13307,7 +13315,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 特定のものだけなら `brew upgrade <formula>`
    - `[y/n]` と聞かれたら、`y` を押す（Enter は要らない）
 
-1. Flatpak で入れたアプリを上げる。
+1. Flatpak と Flathub を通したときだけ、Flatpak で入れたアプリを上げる。
 
    ```bash
    sudo flatpak update
