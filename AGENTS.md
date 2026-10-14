@@ -12,10 +12,12 @@
 
 共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
 
+これまでの検証の経緯と、実施済みと扱わない範囲は、非公開側の `AGENTS.md` の「これまでの検証の経緯」にある。`README.md`・`docs/dev/structure.md` の状態や検証範囲の記述を変える前に読む。
+
 ## よく使うコマンド
 
 ```bash
-# シェルスクリプトの静的検査（導入は docs/almalinux-setup.md の「ShellCheck と shfmt: 実施手順」。最新の実測は docs/verification/shellcheck.md）
+# シェルスクリプトの静的検査（導入は docs/almalinux-setup.md の「ShellCheck と shfmt: 実施手順」。最新の実測は非公開側の docs/verification/shellcheck.md）
 bash -n scripts/wireguard/wg-vpn.sh
 shellcheck -x scripts/wireguard/wg-vpn.sh
 
@@ -39,7 +41,7 @@ scripts/gnome-gui.py windows
 
 GUI の動作を確かめるときは、[AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」](docs/ai-agents.md#claude-code-の-gnome-操作-実施手順)（前提は [AlmaLinux 10 の「GNOME のヘッドレスセッション: 実施手順」](docs/almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 では 2026-10-08 にヘッドレスのセッションと仮想モニターのドロップインを外した（リモートログインだけにした）ので、この仕組みは無い。使うなら、利用者に確かめてから AlmaLinux 10 の「GNOME のヘッドレスセッション: 実施手順」の手順 1・2 と、AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
 
-`wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、`docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
+`wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、非公開側の `docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
 
 ## 手順を集約する正本
 
@@ -60,7 +62,7 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - ある文書やスクリプトを直す前に、[docs/dev/structure.md](docs/dev/structure.md) で、そのファイルの項（`` - `docs/<名前>.md` — `` などで始まる行と、その下の入れ子の行）を読む
 - 文書を足したときや、状態（検証範囲）を変えたときは、`docs/dev/structure.md` の項も直す
 
-検証記録を書く・直すときは、非公開の `ryo-aoki-pc/setup-notes-verification` を clone し、そちらへ Pull Request を作る。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。`docs` リポジトリでは、隣の `setup-notes-verification/` にサブモジュールとして取り出せる。
+検証記録を書く・直すときは、非公開の `ryo-aoki-pc/setup-notes-verification` を `gh repo clone ryo-aoki-pc/setup-notes-verification` で clone し、そちらへ Pull Request を作る。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。`docs` リポジトリでは、隣の `setup-notes-verification/` にサブモジュールとして取り出せる。
 
 ### 手順の並び順と完了前の点検
 

@@ -2,6 +2,8 @@
 
 ## 現在の文書構成
 
+この文書の `docs/verification/…`・`docs/almalinux-vm-verification.md`・`docs/hypervisor-verification.md` と検証で撮った画像のパスは、非公開側の同じパスを指す。
+
 - `docs/windows-setup.md` — Windows 11 の基本設定と用途別の任意手順。導入前のデュアルブートを分け、実行する窓・権限を各節で指定する
 - `docs/almalinux-setup.md` — AlmaLinux 10 の基本設定と用途別の任意手順。通常の Workstation と bootc ゲスト、実行するホストを区別する
 - `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
@@ -11,7 +13,7 @@
   - 2冊に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、almalinux-setup.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
 - 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する
-- `docs/verification/`・`docs/reference/`・`docs/extra/` は既存の場所を保つ。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。集約は新たな実機検証を意味しない
+- `docs/reference/`・`docs/extra/` はこのリポジトリの既存の場所を保つ。`docs/verification/` は同じパスのまま非公開の `ryo-aoki-pc/setup-notes-verification` へ移した。集約は新たな実機検証を意味しない
 - `docs/dev/consolidation-map.md` — 移動元のコミットと旧見出しから正本の新見出しへの対応表。AI エージェントの手順を分けたときの追補を含む
 - `docs/verification/consolidation.md` — 集約の静的検査・回帰検査・Grok のレビューと、実機では未実施の範囲
 - [README](../../README.md) — 正本の索引と、環境構築・共同 VM 検証の横断報告への案内。個別の実測は既存の検証記録へ残す
