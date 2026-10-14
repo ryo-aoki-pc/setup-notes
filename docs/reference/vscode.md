@@ -1,18 +1,18 @@
 # Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の参考資料
 
-[手順書](../almalinux-setup.md#vs-code-実施手順)・[ロールバックと注意点](../extra/vscode.md)
+[手順書](../almalinux-setup.md#vs-code)・[ロールバックと注意点](../extra/vscode.md)
 
 ## 補足
 
-### 実施手順 / 手順 3: 補足: ヒアドキュメント
+### VS Code / 手順 3: 補足: ヒアドキュメント
 
 - ヒアドキュメントは `<<'EOF'`（クォート付き）。この中に展開したい変数は無い
 
-### 実施手順 / 手順 4: 補足: 弱い依存
+### VS Code / 手順 4: 補足: 弱い依存
 
 - 弱い依存として `socat` が一緒に入る
 
-### 実施手順 / 手順 5: 補足: .el8 タグの rpm が EL10 で解決できる理由
+### VS Code / 手順 5: 補足: .el8 タグの rpm が EL10 で解決できる理由
 
 入る rpm は `code-1.138.0-1789458729.el8.aarch64` で、release の末尾が **`.el8` に固定されている**。
 
@@ -25,7 +25,7 @@
 - [WezTerm](../almalinux-setup.md#wezterm) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
 - dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く
 
-### 実施手順 / 手順 7: 補足: 設定のディレクトリ
+### VS Code / 手順 7: 補足: 設定のディレクトリ
 
 - `~/.config/Code` は設定と履歴
 
@@ -44,7 +44,7 @@
 | Flathub `com.visualstudio.code` | リモートと runtime の導入が必要で、サンドボックスで PATH やツールチェインの見え方が変わる | 不採用（RPM で足りる） |
 | Snap | EL10 に snapd を入れることになる | 不採用 |
 | VSCodium / `code-oss` | Marketplace と一部の拡張（Remote-SSH など）が使えない | 対象外（本書は Microsoft のビルドを入れる） |
-| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../almalinux-setup.md#vs-code-実施手順) 以降の `code` を `code-insiders` に読み替える |
+| `code-insiders` | 同じリポジトリの別パッケージ。コマンド名も設定ディレクトリ（`~/.config/Code - Insiders`）も別なので安定版と併存できる | 使うなら [手順 4](../almalinux-setup.md#vs-code) 以降の `code` を `code-insiders` に読み替える |
 
 ### 参照
 

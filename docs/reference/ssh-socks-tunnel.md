@@ -1,17 +1,17 @@
 # ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）の参考資料
 
-[手順書](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
+[手順書](../almalinux-setup.md#ssh-の-socks-トンネル)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 変数について
+### SSH の SOCKS トンネル / 手順 1: 補足: 変数について
 
 - オフラインのホストには変数が無い。ポート（1080）は変える必要が無いので、変数にせずコマンドに直接書いた（変えるときは手順 2 の補足）
-- `OFFLINE_USER` は、トンネルを使う手順書が決める。[homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) なら、Homebrew を使うユーザー（root ではログインしない）
+- `OFFLINE_USER` は、トンネルを使う手順書が決める。[homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入) なら、Homebrew を使うユーザー（root ではログインしない）
 - `OFFLINE_HOST` を書き換えたかを手順 1 で確かめるのは、既定値のままでもエラーにならないため
 - 変数はオンラインのホストのシェルの中だけで使う
 
-### dnf にもトンネルを使わせる（任意） / 手順 1: 補足: 設定ファイルで渡す理由
+### dnf にもトンネルを使わせる / 手順 1: 補足: 設定ファイルで渡す理由
 
 - `sudo` は `ALL_PROXY` を引き継がないので、dnf には `/etc/dnf/dnf.conf` で渡す
 - この行がある間は、トンネルが無いと dnf がどのリポジトリにも届かなくなる
@@ -20,7 +20,7 @@
 
 - ssh のセッションが終わると、`127.0.0.1:1080` の待ち受けも消える
 
-### トンネルを閉じる / 手順 3: 補足: 出力の意味
+### トンネルを閉じる / 手順 4: 補足: 出力の意味
 
 - `ss` が何も出さないのは、トンネルが無いこと
 
@@ -36,7 +36,7 @@
 
 - **`ALL_PROXY` を `~/.bashrc` に書かない**: トンネルがあるのは手順 2 の ssh のセッションの間だけなので、手順 3 でそのシェルにだけ入れる
 - **dnf には、`sudo` に環境変数を渡す（`sudo --preserve-env=ALL_PROXY`）のではなく、設定ファイルで渡す**: ほかの手順書の `sudo dnf install` を、書き換えずに貼れるようにするため
-- **独立した手順書にした**: [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) と [virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
+- **独立した手順書にした**: [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入) と [virtualbox-guest-bootc.md](../almalinux-setup.md#virtualbox-の-bootc-ゲスト) のホストオンリーアダプターの節で、同じトンネルの張り方・確かめ方・閉じ方が重なっていたため（今は homebrew-offline.md と npm-offline.md が使う）
 
 ### 参照
 

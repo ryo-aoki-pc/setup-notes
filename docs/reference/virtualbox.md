@@ -1,12 +1,12 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
 
-手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[ロールバックと注意点](../extra/virtualbox.md)
+手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox)・[Windows 11](../windows-setup.md#virtualbox)。[ロールバックと注意点](../extra/virtualbox.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#参考資料から分離した記録)
 
 ## 補足
 
-### Windows 11 で VM を作って使う / VM を作る / 手順 2・3: 補足: 選んだ構成
+### VM を作る / 手順 3・4: 補足: 選んだ構成
 
 - `createvm --basefolder` で VM ごとの置き場所を指定する。`setproperty machinefolder` は全体の既定を変えるため使わない
 - AlmaLinux 用の OS 種類は `RedHat_64`。EFI、PIIX3、I/O APIC、2 vCPU、4096 MB、64 GiB の可変 VDI、SATA（Intel AHCI）で構成する。容量は Workstation を入れるための例で、必要な量に変更できる
@@ -14,18 +14,18 @@
 - NIC は Intel PRO/1000 MT Desktop（`82540EM`）の NAT。ホストのネットワーク用ドライバーやアダプターを追加せず、VM から外へ接続できる構成にする
 - SSH は NAT の転送を `127.0.0.1` に限定する。ゲストの DHCP が割り当てる IP は指定せず、Guest Additions による IP の読み取りも前提にしない（[Virtual Networking](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html)）
 
-### スナップショットとクローン / 手順 4: 補足: 完全クローン
+### スナップショットとクローン / 手順 6: 補足: 完全クローン
 
 - `clonevm --snapshot clean-install --mode machine` は、そのスナップショットの状態を、履歴を含めずコピーする。`--options link` を付けないので、元の VM のディスクに依存しない完全クローンになる
 - MAC アドレスは既定で再生成される。NAT の転送設定はコピーされるため、クローン用のポートに変える
 - コマンドの一次情報は [Oracle VirtualBox User Guide 7.2 — VBoxManage Command Reference](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html) の各節と、Windows 11 に入った `VBoxManage.exe help createvm`・`help modifyvm`・`help createmedium`・`help storagectl`・`help storageattach`・`help startvm`・`help controlvm`・`help snapshot`・`help clonevm`・`help unregistervm`。一部のサブコマンドは `--help` を受け付けないため、`help <コマンド>` で読む
 
-### 実施手順 / リポジトリを置く / 手順 2: 補足: gpg と sub の fingerprint
+### リポジトリを置く / 手順 2: 補足: gpg と sub の fingerprint
 
 - `gpg`（`gnupg2`）は、GNOME のデスクトップには入っている
 - `sub` の下にも fingerprint が出るのは、Homebrew の gnupg が先に見つかる PC（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)）
 
-### 実施手順 / リポジトリを置く / 手順 4: 補足: repo ファイルは Oracle 公式のものとほぼ同じ
+### リポジトリを置く / 手順 4: 補足: repo ファイルは Oracle 公式のものとほぼ同じ
 
 **repo ファイルは Oracle 公式のもの（`https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo`）とほぼ同じ**。
 
@@ -34,29 +34,29 @@
 - `$releasever` は AlmaLinux 10 では `10` に展開されるので、`.../rpm/el/10/x86_64` を見に行く
 - ヒアドキュメントは `<<'EOF'`（クォート付き）。`$releasever` / `$basearch` は dnf が展開するので、シェルに展開させない
 
-### 実施手順 / リポジトリを置く / 手順 4: 補足: メタデータの署名と鍵の確認
+### リポジトリを置く / 手順 4: 補足: メタデータの署名と鍵の確認
 
 - このリポジトリは、メタデータにも署名がある（`repo_gpgcheck=1`）
 - dnf はそれを確かめるための鍵を rpm とは別に持つので、最初の 1 回だけ鍵の取り込みを聞かれる
 
-### 実施手順 / リポジトリを置く / 手順 5: 補足: sudo を付けない dnf にも通す理由
+### リポジトリを置く / 手順 5: 補足: sudo を付けない dnf にも通す理由
 
 - `sudo` を付けない dnf は、ユーザーごとの別のキャッシュを使う
 - 通しておかないと、`sudo` を付けない `dnf list` などが関係の無いパッケージでも失敗する
 
-### 実施手順 / VirtualBox を入れる / 手順 2: 補足: 動いているカーネルを最新にしておく理由
+### VirtualBox を入れる / 手順 2: 補足: 動いているカーネルを最新にしておく理由
 
 `kernel-devel` は動いているカーネル（`uname -r`）と同じ版を入れ、モジュールもその版向けにビルドされる。更新済みのカーネルでまだ起動していないと、次の起動で新しいカーネル用のモジュールを作り直すことになる（[カーネルを更新したとき](../almalinux-setup.md#virtualbox-カーネルを更新したとき)）。
 
-### 実施手順 / VirtualBox を入れる / 手順 3: 補足: 先に入れる理由
+### VirtualBox を入れる / 手順 3: 補足: 先に入れる理由
 
 - VirtualBox は、自分のカーネルモジュール（`vboxdrv` / `vboxnetflt` / `vboxnetadp`）をインストールの途中で、この PC の上でビルドする
 
-### 実施手順 / VirtualBox を入れる / 手順 5: 補足: Complete! だけでは成功とは限らない理由
+### VirtualBox を入れる / 手順 5: 補足: Complete! だけでは成功とは限らない理由
 
 - モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる
 
-### 実施手順 / KVM と USB の設定 / 手順 1: 補足: KVM の設定
+### KVM と USB の設定 / 手順 1: 補足: KVM の設定
 
 - EL10 のカーネル（6.12 系）では、KVM のモジュールが読み込まれた時点で VT-x / AMD-V を確保し、VirtualBox の VM が起動できなくなる
 - KVM を使っていなくても、VT-x / AMD-V のある PC では起動時に自動で読み込まれる
@@ -65,17 +65,17 @@
 - 効くのは次に kvm が読み込まれたとき。「KVM と USB の設定」の手順 3 の再起動で反映させる
 - KVM（libvirt / GNOME Boxes など）はこの後も使えるが、KVM の VM と VirtualBox の VM は同時には動かせない
 
-### 実施手順 / KVM と USB の設定 / 手順 2: 補足: 効く時期
+### KVM と USB の設定 / 手順 2: 補足: 効く時期
 
 - `vboxusers` に入ったことが効くのはログインし直してから（「KVM と USB の設定」の手順 3 の再起動で済む）
 
-### 実施手順 / 動作を確かめる / 手順 3: 補足: 使い捨ての VM
+### 動作を確かめる / 手順 3: 補足: 使い捨ての VM
 
 - VirtualBox が VT-x / AMD-V を取れるか（KVM とぶつからないか）は、ここで初めて分かる
 - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
 - 起動するディスクが無いので、VM の中では何も動かない
 
-### 実施手順 / 動作を確かめる / 手順 4: 補足: 一覧が空の理由
+### 動作を確かめる / 手順 4: 補足: 一覧が空の理由
 
 - VirtualBox マネージャーの一覧が空なのは、「動作を確かめる」の手順 3 の VM を消してあるため
 
@@ -90,47 +90,47 @@
 
 - 系列を変えても、repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
 
-### Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
+### Windows 11 の VirtualBox / 手順 2: 補足: 確かめる値の意味
 
 - `Hypervisor` が `True` なら、Hyper-V のハイパーバイザーが動いている（WSL 2 を使う PC など）。VirtualBox の VM は Hyper-V の上で動き、遅くなる（[注意点](../extra/virtualbox.md#注意点)）
 - 最後の表は、Hyper-V を使う Windows の機能の状態（`Enabled` / `Disabled`）。一覧を作るのに数秒かかる
 
-### Windows 11 で使う / 手順 3: 補足: winget で入れるときに起きること
+### Windows 11 の VirtualBox / 手順 3: 補足: winget で入れるときに起きること
 
 - 依存の Microsoft Visual C++ の再頒布可能パッケージ（`Microsoft.VCRedist.2015+.x64`）が無ければ、先にそれが入る
 - 途中でネットワークがいったん切れるのは、VirtualBox のネットワークのドライバーを入れるため
 - デスクトップとスタートメニューに「Oracle VirtualBox」のショートカットができる
 
-### Windows 11 で使う / 手順 4: 補足: winget のソースを限定する理由
+### Windows 11 の VirtualBox / 手順 4: 補足: winget のソースを限定する理由
 
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 
-### Windows 11 で使う / 手順 4: 補足: 版と VBoxManage の場所
+### Windows 11 の VirtualBox / 手順 4: 補足: 版と VBoxManage の場所
 
 - 版は、実行した日の最新
 - `VBoxManage` は `PATH` に入らないので、場所を付けて呼ぶ
 
-### Windows 11 で使う / 手順 5: 補足: 管理者ではない窓で動かす理由
+### Windows 11 の VirtualBox / 手順 5: 補足: 管理者ではない窓で動かす理由
 
 - 管理者の窓から起動したもの（`VBoxManage`・`VirtualBox.exe`）は、管理者の権限で動く。AlmaLinux 10 で VM を root ではなく自分のユーザーで動かすのと同じく、VM は自分のユーザーで動かす
 - VirtualBox のマニュアルは、管理者の権限で動かした VirtualBox と、普通の権限で動くエクスプローラーの間では、ドラッグ＆ドロップができないと書いている
 - VM と設定の場所（`%USERPROFILE%\VirtualBox VMs` と `%USERPROFILE%\.VirtualBox`）はユーザーごと。管理者の窓でも同じユーザーなので、場所は変わらない
 
-### Windows 11 で使う / 手順 6: 補足: 使い捨ての VM
+### Windows 11 の VirtualBox / 手順 6: 補足: 使い捨ての VM
 
 - VirtualBox が VT-x / AMD-V（か Hyper-V）を使えるかは、ここで初めて分かる
 - 起動するディスクが無いので、VM の中では何も動かない
 - 作成に失敗したときも、変更・起動・削除には進まない。削除するのは、このブロックで作成できた VM だけ
 
-### Windows 11 で使う / 手順 7: 補足: 一覧が空の理由
+### Windows 11 の VirtualBox / 手順 7: 補足: 一覧が空の理由
 
-- VirtualBox マネージャーの一覧が空なのは、同じ節の手順 6 の VM を消してあるため
+- VirtualBox マネージャーの一覧が空なのは、同じ項の手順 6 の VM を消してあるため
 
-### Windows 11 で使う / 手順 8: 補足: 設定の場所
+### Windows 11 の VirtualBox / 手順 8: 補足: 設定の場所
 
 - Windows の VirtualBox は、全体の設定を `%USERPROFILE%\.VirtualBox` に置く（AlmaLinux 10 の `~/.config/VirtualBox` に当たる。マニュアルの 13.1.2「Global Settings」）
 
-### Windows 11 の VirtualBox を Android からリモート デスクトップで使う（任意） / 手順 1: 補足: 文字が別のキーになる理由
+### Windows 11 の VirtualBox を Android からリモート デスクトップで使う / 手順 1: 補足: 文字が別のキーになる理由
 
 - RDP のクライアントは、キーを 2 通りで送れる
   - キーの位置（スキャンコード）を送る Keyboard Event と、文字を送る Unicode Keyboard Event（MS-RDPBCGR）
@@ -149,11 +149,11 @@
 - スキャンコードのモードでは、クライアントがキーの位置を送り、VirtualBox はそれをそのままゲストに渡す。どの文字になるかは、ゲストのキー配列で決まる
 - Android の IME は、Unicode のモードでしか使えない（Microsoft の文書）
 
-### Windows 11 の更新 / 手順 2: 補足: VBoxSVC が残る理由
+### Windows 11 の更新 / 手順 3: 補足: VBoxSVC が残る理由
 
 - `VBoxSVC` は、VirtualBox マネージャーや VM を閉じた後、しばらく残る。ソースでは、使われなくなってから 5 秒で終わる
 
-### Windows 11 の更新 / 手順 3: 補足: 今の版の上から入れる
+### Windows 11 の更新 / 手順 4: 補足: 今の版の上から入れる
 
 - 新しい版のインストーラを、今の版の上から動かす（winget の定義の `UpgradeBehavior: install`）。VM と設定は残る
 
@@ -183,7 +183,7 @@ Android からリモート デスクトップでつないで、PC の上の VM �
 | VirtualBox のソフトキーボード | VM のウィンドウに出るキーをタップして打つ。画面のキーボードで出ない Shift の記号に使う | 併用 |
 | Extension Pack の VRDE（VM の画面に直接 RDP でつなぐ） | Extension Pack が要る（ライセンスが PUEL。本書では扱わない） | 不採用 |
 | PC の上で、Unicode の入力をスキャンコードに直す常駐 | VirtualBox のフックは、VM の画面にフォーカスが来るたびに入れ直されて先に呼ばれ、捕捉中は入力をそこで使ってしまう | 不採用 |
-| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../almalinux-setup.md#gnome-のリモートログイン-実施手順)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
+| VM の中の RDP サーバーに直接つなぐ（Windows のリモート デスクトップ、[gnome-remote-desktop](../almalinux-setup.md#gnome-のリモートログイン)） | VM ごとに設定とネットワークの口が要る | 対象外（本書は PC の上の VirtualBox の窓を使う） |
 
 - PC（RDP サーバー）の側で、クライアントに Unicode を使わせない設定は見つからなかった
 - 設定は Windows App のすべての接続にかかる。PC の上のアプリでも、画面のキーボードの Shift の記号が出なくなる。Android の IME で日本語を打ちたいときは、オフに戻す

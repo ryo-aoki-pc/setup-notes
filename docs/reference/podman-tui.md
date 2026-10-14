@@ -1,23 +1,23 @@
 # podman-tui インストール手順（AlmaLinux 10 / EPEL）の参考資料
 
-[手順書](../almalinux-setup.md#podman-tui-実施手順)・[ロールバックと注意点](../extra/podman-tui.md)
+[手順書](../almalinux-setup.md#podman-tui)・[ロールバックと注意点](../extra/podman-tui.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 依存と、podman との関係
+### podman-tui / 手順 1: 補足: 依存と、podman との関係
 
 podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requires podman-tui` に出る依存は glibc（`libc.so.6`・`libresolv.so.2`）だけ。
 
-### 実施手順 / 手順 1: 補足: 署名鍵
+### podman-tui / 手順 1: 補足: 署名鍵
 
 - fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
-### 実施手順 / 手順 3: 補足: 確認用のコンテナ
+### podman-tui / 手順 3: 補足: 確認用のコンテナ
 
-- 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する任意) などで取得済みなら、取り直さない
+- 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 - ポートは公開しない（画面から止めるためだけのコンテナ）
 
-### 実施手順 / 手順 4: 補足: 画面の中身と、つながらないとき
+### podman-tui / 手順 4: 補足: 画面の中身と、つながらないとき
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#実施手順--手順-4-補足-画面の中身とつながらないとき)
 
@@ -36,7 +36,7 @@ podman.sock: connect: connection refused
 - `Ctrl+C` で終了し、`systemctl --user start podman.socket` で起動し直す
 - `v5.7.1` は、podman-tui が使っている podman の API の版（1.10.0 は podman 5.7.1 の部品で作られている）
 
-### 実施手順 / 手順 5: 補足: podman でも確かめる理由
+### podman-tui / 手順 5: 補足: podman でも確かめる理由
 
 - `podman-tui-web Exited (0) ...` と出れば、画面の操作が API を通して podman に届いている
 
@@ -45,7 +45,7 @@ podman.sock: connect: connection refused
 - [containers/podman-tui — README（v1.10.0）](https://github.com/containers/podman-tui/blob/v1.10.0/docs/README.md) — 互換表、API ソケットの前提、キーの一覧
 - [podman-tui v2.0.0 のリリースノート](https://github.com/containers/podman-tui/releases/tag/v2.0.0) — podman v6 への対応、接続を podman の設定からだけ読むこと
 - `podman-tui --help`、画面の `F1`
-- [Podman](../almalinux-setup.md#podman-実施手順) — 前提の rootless の podman と API ソケット
+- [Podman](../almalinux-setup.md#podman) — 前提の rootless の podman と API ソケット
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

@@ -1,24 +1,24 @@
 # gdu インストール手順（AlmaLinux 10 / Homebrew）の参考資料
 
-[手順書](../almalinux-setup.md#gdu-実施手順)・[ロールバックと注意点](../extra/gdu.md)
+[手順書](../almalinux-setup.md#gdu)・[ロールバックと注意点](../extra/gdu.md)
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: ボトルと依存
+### gdu / 手順 1: 補足: ボトルと依存
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 依存は無い（Go の静的バイナリ 1 つ、約 20 MB）
 - `brew install` の最後に出る caveat の出力例は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)
 
-### 実施手順 / 手順 2: 補足: TUI で使う
+### gdu / 手順 2: 補足: TUI で使う
 
 - TUI で使うときは引数にディレクトリを渡すだけ（`gdu-go ~` など。`q` で終了）
 
-### gdu の名前で呼ぶ（任意） / 手順 1: 補足: 共通設定
+### gdu の名前で呼ぶ / 手順 1: 補足: 共通設定
 
 - gdu のエイリアスは共通設定にあるので、`~/.bashrc` への追記は不要
 
-### gdu の名前で呼ぶ（任意） / 手順 2: 補足: シンボリックリンク
+### gdu の名前で呼ぶ / 手順 2: 補足: シンボリックリンク
 
 - `~/.local/bin` は AlmaLinux の既定の `~/.bashrc` で PATH に入っている
 - リンク先を Cellar ではなく `/home/linuxbrew/.linuxbrew/bin` にしてあるので、`brew upgrade` で版が上がってもリンクは張り直さなくてよい

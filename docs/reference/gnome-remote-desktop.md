@@ -1,24 +1,24 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）の参考資料
 
-[AlmaLinux 10 の「GNOME のリモートログイン: 実施手順」](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+[AlmaLinux 10 の「GNOME のリモートログイン」](../almalinux-setup.md#gnome-のリモートログイン)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
 
 集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
-### 実施手順 / 手順 1: 補足: 変数について
+### GNOME のリモートログイン / 手順 1: 補足: 変数について
 
-- `LAN_SUBNET` は[接続元を LAN に絞る](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る任意)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する
+- `LAN_SUBNET` は[接続元を LAN に絞る](../almalinux-setup.md#gnome-のリモートログイン-接続元を-lan-に絞る)の rich rule でしか使わないので、手順 1 ではなくその節の冒頭で設定する
 - 接続元を制限しない場合は、手順 5 で public ゾーンに `rdp` サービスを開放した状態が完成形
 - `SERVER_IP` が空のまま進むと、手順 2 の `openssl` が SAN の空エントリで `invalid null value` のエラーになる
 - 任意の変数のブロックは、最後に値を読み戻す
 - 変数はそのシェルの中だけで有効なので、新しいシェルでは手順 1 の 2 つのブロックを貼り直す
 
-### 実施手順 / 手順 2: 補足: 生成するユーザー
+### GNOME のリモートログイン / 手順 2: 補足: 生成するユーザー
 
 - 所有権を最初から正しくするため、`gnome-remote-desktop` ユーザー自身として生成する
 
-### 実施手順 / 手順 4: 補足: grdctl
+### GNOME のリモートログイン / 手順 4: 補足: grdctl
 
 - `disable` 後は `inactive`、`enable` 後は `active` になる
 - このため、この時点でデーモンが起動し、**後から設定する資格情報は再起動するまで反映されない**（手順 6・7）
@@ -27,17 +27,17 @@
 - `grdctl --system` は、TPM を使えないと、コマンドごとに `Init TPM credentials failed … using GKeyFile as fallback.` を 1 行出して、資格情報を GKeyFile（[注意点](../extra/gnome-remote-desktop.md#注意点)の `credentials.ini`）に置く
   - vTPM の無い Hyper-V の VM（2026-10-11）では、`because No TPM device found` の形で、手順 4 に 3 行、手順 6・8 に 1 行ずつ出た。デーモンも、起動のたびに同じ行をログに出した
 
-### 実施手順 / 手順 6: 補足: 資格情報
+### GNOME のリモートログイン / 手順 6: 補足: 資格情報
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-6-補足-資格情報)
 
 - 引数なしで打つのは、パスワードをシェル履歴・ログに残さないため
 
-### 実施手順 / 手順 8: 補足: サーバー側の状態
+### GNOME のリモートログイン / 手順 8: 補足: サーバー側の状態
 
 - `Unit status: active` なのに `Status: disabled` で 3389 が LISTEN していない場合は、後半の補足「注意点」の**設定レイヤーの食い違い**を疑う
 
-### 実施手順 / 手順 9: 補足: 鍵と証明書
+### GNOME のリモートログイン / 手順 9: 補足: 鍵と証明書
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-9-補足-鍵と証明書)
 
@@ -46,7 +46,7 @@
   - `sudo` を付けた `openssl`（この手順のパイプの左側と、手順 2 の `sudo -u gnome-remote-desktop openssl`）は、sudo の `secure_path` で OS の `/bin/openssl` になる
   - 2026-10-11 の Hyper-V の VM では、対話のシェルの `openssl` が Homebrew の 4.0.3、`python3` が 3.15.0、`sudo` の `openssl` が OS の 3.5.8 という状態で、手順 2・9・10 が通った（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`/usr/bin/` を付けた形は、流していない
 
-### 実施手順 / 手順 10: 補足: TLS プローブと、FreeRDP クライアントでの確かめ方
+### GNOME のリモートログイン / 手順 10: 補足: TLS プローブと、FreeRDP クライアントでの確かめ方
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)
 
@@ -100,7 +100,7 @@ echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /a
   | grep -iE "Common Name|Subject:|Issuer:|Thumbprint|MISMATCH"
 ```
 
-### 実施手順 / 手順 11: 補足: クライアントからのログイン
+### GNOME のリモートログイン / 手順 11: 補足: クライアントからのログイン
 
 1. システム共通パスワードで RDP 認証を通過
 1. GDM ログイン画面が表示される
@@ -124,7 +124,7 @@ journalctl -u gdm -f
   - OS のパスワードの後、クライアントのログに `rdp_recv_server_redirection_pdu` がもう 1 度出て、ユーザーのセッションのデスクトップに切り替わった（新しいセッションのときは、そのユーザーの `gnome-remote-desktop-handover.service` が起動した）
   - RDP の認証から 1 回目のつなぎ直しまで 1〜3 秒（3 回）、OS のパスワードで新しいセッションができてから 2 回目のつなぎ直しまで 6〜7 秒（2 回）だった
 
-### 接続元を LAN に絞る（任意） / 手順 1: 補足: 先頭の if と引用符
+### 接続元を LAN に絞る / 手順 1: 補足: 先頭の if と引用符
 
 - 先頭の `if` は、`LAN_SUBNET` が空のままブロックを貼ったときに、`rdp` サービスだけ消えて rich rule が空アドレスで入るのを防ぐ
 - rich rule は**二重引用符**で囲む。単一引用符だと `${LAN_SUBNET}` が展開されず、firewalld は `$LAN_SUBNET` という文字列のままの rule を `success` で受理してしまう
@@ -141,7 +141,7 @@ journalctl -u gdm -f
 
 ### 設定済みのサーバーで GDM の後に起動させる / 手順 4: 補足: 受け渡し役のデーモン
 
-- 同じ節の手順 3 の後、受け渡し役のデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある
+- 同じ項の手順 3 の後、受け渡し役のデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある
 
 ### 設定済みのサーバーで GDM の後に起動させる / 手順 5: 補足: 今のデーモン
 
@@ -188,7 +188,7 @@ RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` �
 sudo dnf install -y freerdp
 ```
 
-[手順 1](../almalinux-setup.md#gnome-のリモートログイン-実施手順) の変数を設定したうえで:
+[手順 1](../almalinux-setup.md#gnome-のリモートログイン) の変数を設定したうえで:
 
 ```bash
 sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
@@ -201,7 +201,7 @@ sudo restorecon -Rv /var/lib/gnome-remote-desktop
 
 #### 方式 2: podman コンテナで winpr-makecert を使う
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[手順 1](../almalinux-setup.md#gnome-のリモートログイン-実施手順) の変数を設定したうえで:
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[手順 1](../almalinux-setup.md#gnome-のリモートログイン) の変数を設定したうえで:
 
 ```bash
 OUT=$(mktemp -d)

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # WireGuard 拠点間 VPN と、そこへのリモートクライアント追加
-# docs/almalinux-setup.md の「WireGuard: 実施手順」を site.env の値で実行する。
+# docs/almalinux-setup.md の「WireGuard」を site.env の値で実行する。
 #
-#   sudo ./wg-vpn.sh [options] keygen [A|B]          「鍵を作って適用する」の手順 1: wireguard-tools 導入と鍵生成
-#   sudo ./wg-vpn.sh [options] apply  A|B            「鍵を作って適用する」の手順 4〜5: wg0.conf・sysctl・firewalld・サービス（旧レイアウトの専用ゾーンと policy が残っていれば消す）
+#   sudo ./wg-vpn.sh [options] keygen [A|B]          「鍵を作って適用する」の手順 2: wireguard-tools 導入と鍵生成
+#   sudo ./wg-vpn.sh [options] apply  A|B            「鍵を作って適用する」の手順 5〜6: wg0.conf・sysctl・firewalld・サービス（旧レイアウトの専用ゾーンと policy が残っていれば消す）
 #        ./wg-vpn.sh [options] router A|B            ルーターに入れる値を表示（apply の末尾と同じ。補足「ルーターの設定」）
-#   sudo ./wg-vpn.sh [options] status                「状態と疎通を確かめる」の手順 1: 状態確認
+#   sudo ./wg-vpn.sh [options] status                「状態と疎通を確かめる」の手順 2: 状態確認
 #   sudo ./wg-vpn.sh [options] remove A|B            ロールバック
 #   sudo ./wg-vpn.sh [options] client add A|B NAME   「クライアントを登録する」の手順 3〜4: クライアントを登録し、鍵とクライアント用 conf を生成する
 #   sudo ./wg-vpn.sh [options] client remove NAME    クライアントの登録とクライアント用 conf を削除する

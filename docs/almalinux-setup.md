@@ -272,7 +272,7 @@
    - 最後に出る「CRB を有効にすることを推奨」は、気にしなくてよい
    - [OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1 で更新が無かったときは、ここで AlmaLinux の署名鍵が、確認を求めずに取り込まれる（「確認」の見出しより前の dnf の出力に、`GPG 鍵 0xC2A1E572 をインポート中:` と出る）
      - その出力の `Fingerprint:` が `EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` であることを確かめる。違っていれば、ここで中断する（鍵は取り込まれた後なので、次の手順へ進まない）
-   - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 10）に、dnf が 1 回だけ確認を求める
+   - EPEL の署名鍵は、EPEL からパッケージを初めて入れるとき（この文書では[GNOME の表示と入力](#gnome-の表示と入力)の手順 11）に、dnf が 1 回だけ確認を求める
      - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y`。違っていれば `N` で中断する
 
 1. RPM Fusion（free）の署名鍵を落として、取り込む前に fingerprint と uid を確かめる。
@@ -551,7 +551,7 @@
    - **場所とファイル名は変えない**
    - **一時パスワードを 2 回聞かれる**（手順 6 の MokManager で 1 回だけ使う。本書には残さない）
    - `中断: 鍵が既にある` と出たら、前に作った鍵がある。手順 7 へ進む
-   - ホストオンリーだけの VM は、この手順の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 3・4 を通す
+   - ホストオンリーだけの VM は、この手順の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 を通す
    - 鍵はホストで作り、証明書だけを VM に置いて予約する。手順 5 からは同じ
    - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
 
@@ -669,7 +669,7 @@
    - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。戻すときのために控えておく
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
    - **ほかの入力ソースは消える**。残すものは `set` の値に足す
-   - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜13 も同じ）
+   - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜14 も同じ）
    - [Neovim](#neovim)の手順 3 では、JIS 配列でも入力ソースが「英語 (US)」と Anthy に変わる
 
 ---
@@ -1398,7 +1398,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
-   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#実施手順--homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
+   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
    - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
 
 #### Homebrew の使い方の基本
@@ -1554,7 +1554,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - ほかの Homebrew で入れる項も、この項の手順 5 の前に、このシェルで貼る
    - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
-1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜3 で、トンネルを閉じて、転送を付けずにログインし直す。
+1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜4 で、トンネルを閉じて、転送を付けずにログインし直す。
 
    - その項で `exit` した後の、転送を付けないログインは、オンラインのホストで行う
    - その項の最後の確かめで、`ss` が何も出さず、`届かない（期待どおり）` になることを確かめる
@@ -1606,7 +1606,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. 開いている端末を閉じて、開き直す。
 
-   - Ctrl+Alt+T（[GNOME の表示と入力](#gnome-の表示と入力)の手順 12）でも開ける
+   - Ctrl+Alt+T（[GNOME の表示と入力](#gnome-の表示と入力)の手順 13）でも開ける
    - 開き直した端末から、プロンプトが starship に変わり、zoxide・fzf・eza のエイリアス・bat の `MANPAGER` も効く
    - 今の端末で `. ~/.bashrc` を読み直さず、端末を開き直す
    - **次の手順は、開き直した端末で貼る**
@@ -2426,7 +2426,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. 接続元と Windows 接続先の設定を、[WezTerm の設定を更新する](#wezterm-の設定を更新する)の手順 1 で更新する。
 
-   - Windows 接続先では Git Bash で、[Windows の設定更新](windows-setup.md#wezterm-の設定を更新する)の手順 1 を通す
+   - Windows 接続先では Git Bash で、[Windows の設定更新](windows-setup.md#wezterm-の設定を更新する)の手順 2 を通す
    - 接続元は `Ctrl+Shift+R` で設定を読み直す
    - 通常の PowerShell プロファイルには追記しない
 
@@ -3119,12 +3119,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 置き場所は `~/.config/nvim` で、読み込まれるのは `init.lua` か `init.vim` のどちらか一方
   - `XDG_CONFIG_HOME` を設定していれば `$XDG_CONFIG_HOME/nvim` になる。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する
 - Windows 11 の設定は `%LOCALAPPDATA%\nvim`（`init.lua`）、プラグイン・undo・ログは `%LOCALAPPDATA%\nvim-data`、キャッシュは `%TEMP%\nvim-data`
-- Windows 11 の場所は[初期設定の「Neovim」](windows-setup.md#neovim)の手順 4 で確かめる
+- Windows 11 の場所は[初期設定の「Neovim」](windows-setup.md#neovim)の手順 5 で確かめる
   - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[理由](reference/windows-setup.md#neovim-windows-11-では-選択した方針)）
 - **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
   - 導入は[Neovim](#neovim)の手順 3
   - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる
-  - Windows 11 は、[Windows 11 の初期設定の「Neovim」](windows-setup.md#neovim)の手順 3 で通す
+  - Windows 11 は、[Windows 11 の初期設定の「Neovim」](windows-setup.md#neovim)の手順 4 で通す
   - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
 - インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm のオフライン導入](#npm-のオフライン導入) を通す
 
@@ -3594,10 +3594,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 - 置き場所は `~/.config/lazygit/config.yml`（`lazygit --print-config-dir` で確認できる）
 - Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml`（`%APPDATA%\lazygit\config.yml` があれば、そちらも読む）。`state.yml` も同じフォルダー
-- Windows 11 の場所は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 5 で確かめる
+- Windows 11 の場所は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 6 で確かめる
 - **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
   - 導入は[lazygit](#lazygit)の手順 2。`config.yml` を `~/.config/lazygit/config.yml` にリンクする
-  - Windows 11 は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 4。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
+  - Windows 11 は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 5。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)）にする
     - Windows 11 への導入は[HackGen Console NF](windows-setup.md#hackgen-console-nf)。WezTerm は自分用の設定で変わる
@@ -3786,12 +3786,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 置き場所は `~/.config/yazi/` で、ファイル名は `yazi.toml`（全般）/ `keymap.toml`（キー割り当て）/ `theme.toml`（配色）
 - Windows 11 の置き場所は `%APPDATA%\yazi\config\`（Windows の yazi は `XDG_CONFIG_HOME` を見ない。別の場所にするなら `YAZI_CONFIG_HOME` に絶対パスを入れる）
   - 状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`
-  - yazi が読む場所は `ya env` の `Config` の行で確かめられる（[Windows 11 の初期設定の「yazi」](windows-setup.md#yazi)の手順 6）
+  - yazi が読む場所は `ya env` の `Config` の行で確かめられる（[Windows 11 の初期設定の「yazi」](windows-setup.md#yazi)の手順 7）
 - **既定値のファイルは配布物に入っていない**。変更する項目だけを設定ファイルに書く
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
   - 導入は[yazi](#yazi)の手順 3。`custom` を `~/.config/yazi` に clone する
-  - Windows 11 は[初期設定の「yazi」](windows-setup.md#yazi)の手順 5。`custom` を `%APPDATA%\yazi\config` に clone する
+  - Windows 11 は[初期設定の「yazi」](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
   - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](#neovim)、zoxide と fzf のキー操作は[シェルのツール](#シェルのツール)で入れる
     - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[Windows 11 の初期設定の「シェルのツールを入れる」](windows-setup.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
@@ -4309,9 +4309,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
-1. [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・2 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
+1. [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・3 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
 
-   - [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1（`exit`）はオフラインのホストで、同じ項の手順 2 はオンラインのホストで貼る
+   - [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1（`exit`）はオフラインのホストで、同じ項の手順 3 はオンラインのホストで貼る
    - オンラインのホストのシェルで[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の変数が消えていたら（新しいシェルなど）、先に[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 を貼る
    - **次の手順は、ログインし直してから貼る**（続けて貼るとパスワードへの答えとして食われる）
 
@@ -5010,12 +5010,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 > [!IMPORTANT]
 > - **拠点の WG ホスト用の手順**。外出先の PC は[AlmaLinux](#wireguard-almalinux-10-の-pc-からつなぐ)・[Windows](windows-setup.md#wireguard)の手順から通す
-> - [site.env を作る](#wireguard-siteenv-を作る)の手順 1〜3 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 1〜5 は**両拠点の WG ホストで**、同じ項の手順 6 は**両拠点のルーターで行う**
-> - [クライアント登録](#wireguard-クライアントを登録する)の手順 1〜7・9 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 1 は**受ける拠点のホストで行う**
-> - [クライアント登録](#wireguard-クライアントを登録する)の手順 8 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 2 はクライアントで行う
+> - [site.env を作る](#wireguard-siteenv-を作る)の手順 1〜3 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 1〜6 は**両拠点の WG ホストで**、同じ項の手順 7 は**両拠点のルーターで行う**
+> - [クライアント登録](#wireguard-クライアントを登録する)の手順 1〜7・9 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 1・2 は**受ける拠点のホストで行う**
+> - [クライアント登録](#wireguard-クライアントを登録する)の手順 8 と[疎通確認](#wireguard-状態と疎通を確かめる)の手順 3 はクライアントで行う
 > - コマンドはすべて `${REPO}/scripts/wireguard`（`REPO` は、各項の手順 1 で設定する clone 先）で実行し、`-e ~/wg/site.env` で値を渡す
 > - **拠点 B のホストでは、引数の `A` を `B` に読み替える**
-> - [site.env を作る](#wireguard-siteenv-を作る)の手順 2 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 2 で、**`vi` が開く**。保存して閉じてから次の手順を行う
+> - [site.env を作る](#wireguard-siteenv-を作る)の手順 2 と[鍵を作って適用する](#wireguard-鍵を作って適用する)の手順 3 で、**`vi` が開く**。保存して閉じてから次の手順を行う
 > - **OS を入れ直して同じ鍵で戻したい場合は、先に[バックアップと復旧](#wireguard-バックアップと復旧os-の再インストール)を読む**。鍵さえ残っていれば、相手拠点の設定も配布済みのクライアント conf も変えずに復旧できる
 
 - `REPO` を使う項は、その項の手順 1 で `REPO` を設定したシェルで実行する。新しいシェルを開いたら、その項の手順 1 を貼り直す
@@ -5025,7 +5025,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 > [!WARNING]
 > **トンネル越しに ssh して作業している場合、`apply` の restart で自分のセッションが切れる。**
 >
-> - 対象は[鍵の適用](#wireguard-鍵を作って適用する)の手順 5 と[クライアント登録](#wireguard-クライアントを登録する)の手順 5
+> - 対象は[鍵の適用](#wireguard-鍵を作って適用する)の手順 6 と[クライアント登録](#wireguard-クライアントを登録する)の手順 5
 > - [MTU の変更](#wireguard-回線に合わせて-mtu-を下げる)と[クライアント削除](#wireguard-クライアントを削除する)の `apply` も対象
 > - 切り離して実行する方法は、[落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)にある
 
@@ -5049,7 +5049,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    mkdir -p ~/wg && chmod 700 ~/wg
    cp "${REPO:?このリポジトリの場所を REPO に入れてから貼る}/scripts/wireguard/site.env.example" ~/wg/site.env
    chmod 600 ~/wg/site.env
-   vi ~/wg/site.env                      # 公開鍵は「鍵を作って適用する」の手順 2 で書き足す
+   vi ~/wg/site.env                      # 公開鍵は「鍵を作って適用する」の手順 3 で書き足す
    ```
 
    - **編集するのは `~/wg/site.env` だけ。** 埋める値は[設定値の表](#wireguard-siteenv-に書く値)にある（クライアント帯は、クライアントを受ける拠点にだけ書く）
@@ -5183,7 +5183,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    fi
    ```
 
-   - 公開鍵は[AlmaLinux の鍵作成](#wireguard-鍵を作る)の手順 3、[Windows の鍵作成](windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 6 で用意する
+   - 公開鍵は[AlmaLinux の鍵作成](#wireguard-鍵を作る)の手順 3、[Windows の鍵作成](windows-setup.md#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 5 で用意する
 
 1. クライアントの台数分、この項の手順 1〜4 を繰り返したら、まとめて反映する。
 
@@ -5216,8 +5216,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. クライアントで、この項の手順 6・7 の conf を取り込む。
 
-   - AlmaLinux 10 の PC は、[conf を取り込む](#wireguard-conf-を取り込む)の手順 1〜4
-   - Windows 11 の PC は、[Windows 11 で WG ホストに登録して取り込む](windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3・4
+   - AlmaLinux 10 の PC は、[conf を取り込む](#wireguard-conf-を取り込む)の手順 1〜5
+   - Windows 11 の PC は、[Windows 11 で WG ホストに登録して取り込む](windows-setup.md#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 4・5
    - スマートフォンは、この項の手順 7 の QR コードを読み取る
    - この項の手順 4 の `--pubkey` で登録したときは、conf の `PrivateKey`（`<CLIENT_PRIVATE_KEY>`）を、端末側で自分の秘密鍵に置き換える
    - **次の手順は、クライアントに取り込んでから貼る**
@@ -5280,8 +5280,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 > - **この項は AlmaLinux 10 の PC のもの**。Windows 11 の PC は、[Windows 11 で使う](windows-setup.md#wireguard)から通す（管理者の Windows PowerShell 5.1 に貼る）
 > - **PC で実行する**。[WG ホストに登録する](#wireguard-wg-ホストに登録する)の手順と、[トンネルを確かめる](#wireguard-トンネルを確かめる)の WG ホストで確かめる手順だけ、WG ホストで実行する
 > - **`sudo -i` した root のシェルではなく、自分のシェルで貼る**。`~` が自分のホームになるため
-> - [conf を取り込む](#wireguard-conf-を取り込む)の手順 1 で **`vi` が開く**。`client show` の出力を貼って保存し、閉じてから次の手順を貼る
-> - [conf を取り込む](#wireguard-conf-を取り込む)の手順 3 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
+> - [conf を取り込む](#wireguard-conf-を取り込む)の手順 2 で **`vi` が開く**。`client show` の出力を貼って保存し、閉じてから次の手順を貼る
+> - [conf を取り込む](#wireguard-conf-を取り込む)の手順 4 で、**PC を拠点の LAN の外のネットワークにつなぐ**（スマートフォンのテザリングなど）。その後の手順は LAN の外で行う
 
 - 変数のある項は、その項の手順 1 で変数を設定したシェルに貼る
 
@@ -5294,7 +5294,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 変数を設定する。
 
    ```bash
-   WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「トンネルを確かめる」の手順 5 で秘密鍵と conf を消す）
+   WG_DIR=~/wg-client                   # 鍵と conf の一時置き場（「トンネルを確かめる」の手順 7 で秘密鍵と conf を消す）
    printf '\n\033[7m 確認 \033[0m\n'
    printf 'WG_DIR = %s\n' "${WG_DIR}"
    ```
@@ -5400,7 +5400,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      sudo nmcli connection import type wireguard file "${WG_DIR:?この項の手順 1 の WG_DIR が空のまま}/wg0.conf" &&
      sudo nmcli connection modify wg0 connection.autoconnect no &&
      nmcli -f NAME,TYPE,DEVICE,STATE,AUTOCONNECT connection show | grep -E '^(NAME|wg0 )'    # STATE は activated（import 直後に張られる）。AUTOCONNECT は no
-     nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（「トンネルを確かめる」の手順 1 で改めて張る）
+     nmcli -t -f NAME,STATE connection show | grep -qx 'wg0:activated' && sudo nmcli connection down wg0    # 張られていたら切る（「トンネルを確かめる」の手順 2 で改めて張る）
      printf '\n\033[7m 確認 \033[0m\n'
      nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.zone,ipv4.method,ipv4.addresses,ipv4.dns,ipv6.method,wireguard connection show wg0
      sudo ls -l /etc/NetworkManager/system-connections/wg0.nmconnection     # -rw------- root root。秘密鍵はこの中（表示はしない）
@@ -5548,7 +5548,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - `WG_MTU` は両拠点で同じ値にする
 - **トンネル越しに ssh して作業している場合、この項の手順 7 の restart で自分のセッションが切れる**（→ [落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
 - 配布済みのクライアントの MTU は、`apply` では変わらない（この項の手順 9 で入れる。→ [注意点の MTU](extra/wireguard.md#mtu)）
-- → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる任意--手順-1-補足-wg_mtu-に書く値)
+- → [補足](reference/wireguard.md#回線に合わせて-mtu-を下げる--手順-2-補足-wg_mtu-に書く値)
 
 1. 変数を設定する。
 
@@ -5860,7 +5860,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 | `${WG_IFACE}` / `${WG_FW_ZONE}` | インターフェース名 / 旧レイアウトで `wg0` を入れていた専用ゾーン名（残っていれば `apply` / `remove` が消す。[移行](reference/wireguard.md#旧レイアウト専用ゾーン--policyからの移行)） |
 | `${WG_A_CLIENT_NET}` / `${WG_B_CLIENT_NET}` | 各拠点に接続するクライアントに割り当てるトンネル内のアドレス帯（**LAN・`${WG_TUNNEL_NET}`・互いに重複不可**、`/30` またはそれより広く。クライアントを受けない拠点は空） |
 | `${WG_CLIENT_DNS}` | クライアント用 conf に書く DNS サーバー（任意） |
-| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#wireguard-回線に合わせて-mtu-を下げる)の手順 1）。値があれば、`client add` が作るクライアント用 conf にも同じ `MTU =` を書く |
+| `${WG_MTU}` | `wg0` の MTU（任意。空なら wg-quick が決める。書く値は[回線に合わせて MTU を下げる](#wireguard-回線に合わせて-mtu-を下げる)の手順 2）。値があれば、`client add` が作るクライアント用 conf にも同じ `MTU =` を書く |
 
 ---
 
@@ -5869,12 +5869,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[ロールバックと注意点](extra/gnome-desktop-sharing.md)
 
 > [!IMPORTANT]
-> - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3 で RDP のクライアントから確かめる
+> - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 4 で RDP のクライアントから確かめる
 > - PC の画面のセッションは、GDM の自動ログインで作る（[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1〜3）。PC の前でログインしておく必要は無い
 > - **そのユーザー本人のシェルで貼る**。`sudo -i` / `su -` したシェルでは貼らない（設定と資格情報は、貼ったユーザーのものになるため）
-> - [前提確認](#gnome-のデスクトップ共有-前提を確かめる)の手順 4 と[RDP 設定](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 は**対話入力を終えてから次を貼る**
+> - [前提確認](#gnome-のデスクトップ共有-前提を確かめる)の手順 4 と[RDP 設定](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 は**対話入力を終えてから次を貼る**
 > - [自動ログインと再起動](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 で**再起動する**。OS のパスワードを入力する
-> - [再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3（クライアントからの接続）だけ別のマシンで行う
+> - [再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 4（クライアントからの接続）だけ別のマシンで行う
 > - 同じユーザーの[ヘッドレスセッション](#gnome-のヘッドレスセッション)とは併用できない
 > - [リモートログイン](#gnome-のリモートログイン)を併用済みなら、[前提確認](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 でポートが 3390 になる
 > - 後からリモートログインを有効にする場合は[注意点](extra/gnome-desktop-sharing.md#注意点)を参照する
@@ -5884,7 +5884,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 > [!WARNING]
 > - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める項で、ロックもしない）
-> - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 で入れる RDP のユーザー名とパスワードは、暗号化されずに `~/.local/share/keyrings/` に置かれる
+> - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 で入れる RDP のユーザー名とパスワードは、暗号化されずに `~/.local/share/keyrings/` に置かれる
 > - PC を置く場所を信用できるときだけ行う
 
 #### GNOME のデスクトップ共有: 前提を確かめる
@@ -5971,7 +5971,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `AutomaticLogin` の行が `0` でなければ、自動ログインがすでに設定してある。[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1 で、このユーザーかを確かめる
    - `aoao 0 0` なら、この項の手順 4 は飛ばす。それ以外なら、RDP の資格情報がすでにあるので、この項の手順 4 を行う
 
-1. 前に入れた RDP の資格情報が残っているときだけ、[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 のキーリングの外にあるものを消す。
+1. 前に入れた RDP の資格情報が残っているときだけ、[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 のキーリングの外にあるものを消す。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -6023,7 +6023,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 資格情報が閉じたキーリング（自動ログインのときのログインのキーリングなど）にあれば、そのパスワードを聞かれる。ログインのキーリングなら、ふつうは OS のパスワード
    - `消した: <コレクションのパス>/<N>` の形の行が出ればよい。開いたキーリングは、消した後に閉じ直す（`閉じ直した:` の行）
-   - [RDP 設定](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 で作るキーリングの項目は消さない
+   - [RDP 設定](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 で作るキーリングの項目は消さない
    - 対象は `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録されている。ほかに無ければ `ほかのキーリングに RDP の資格情報は無い` と出る
    - キーリングを開けないときの `中断:`（`を開けない`）では、何も消していない。パスワードが違うときは、貼り直す
    - **次の手順は、パスワードを聞かれたなら、入力し終えてから貼る**（続けて貼ると入力として食われる）
@@ -6253,7 +6253,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `enabled` と出ればよい
-   - PC の画面にこのユーザーのセッションがまだ無ければ、デーモンは待ち受けない。待ち受けは、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1 で確かめる
+   - PC の画面にこのユーザーのセッションがまだ無ければ、デーモンは待ち受けない。待ち受けは、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 2 で確かめる
 
 1. ファイアウォールで、`RDP_PORT` の TCP を開ける。
 
@@ -6376,7 +6376,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - セッションが無いと出たら、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 1 の `/etc/gdm/custom.conf` を確かめる
    - `中断:` が出たら、この項の手順 3 へ進まない。`journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop.service` で理由を見る
      - ほかのプロセスがポートを使っていると、`Error binding to address [::]:<RDP_PORT>: Address already in use` が出ている
-     - 原因を直したら、[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 2 を貼り直し（起動中のデーモンを再起動する）、この手順を貼り直す
+     - 原因を直したら、[RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 を貼り直し（起動中のデーモンを再起動する）、この手順を貼り直す
 
 1. 設定を読み戻し、TLS のハンドシェイクと、提示される証明書を確かめる。
 
@@ -6423,13 +6423,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - AlmaLinux 10 の FreeRDP（`freerdp` パッケージ）なら `xfreerdp /v:<SERVER_IP>:<RDP_PORT> /u:<RDP のユーザー名>` の形でつなぐ
    - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>:<RDP_PORT>` につなぐ
-   - `<SERVER_IP>`・`<RDP_PORT>` はこの項の手順 1 の値に、`<RDP のユーザー名>` は [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 の値に読み替える
+   - `<SERVER_IP>`・`<RDP_PORT>` はこの項の手順 1 の値に、`<RDP のユーザー名>` は [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 の値に読み替える
    - FreeRDP は、証明書の `Thumbprint:` を出して `Do you trust the above certificate? (Y/T/N)` と聞く。この項の手順 3 の `TLS fingerprint` と同じなら `Y` で受け入れる
      - 初めてつなぐときも、その前に `REMOTE HOST IDENTIFICATION HAS CHANGED!` などの警告が出る。続く `Thumbprint:` で判断する
    - Windows は、拇印を出さずに「このリモート コンピューターの ID を識別できません」と聞く
      - 「証明書の表示」→「詳細」の「拇印」（SHA-1）が、この項の手順 3 の `sha1 Fingerprint=` の値と同じかを見てから「はい」を押す（拇印はコロンが無く小文字なので、そこは違ってよい）
    - FreeRDP は `Domain:` も聞く。空のまま Enter を押す
-   - パスワードは [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
+   - パスワードは [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 のもの。通ると、PC の画面に出ているデスクトップが、PC の画面の解像度のまま出る
      - FreeRDP は、パスワードの後に `[ERROR][com.winpr.sspi.Kerberos]` の `krb5_parse_name (Configuration file does not specify default realm …)` の行を出すことがある。デスクトップが出れば、害は無い
    - このユーザーが初めてデスクトップにログインしたなら、「AlmaLinux 10.2 (Lavender Lion) へようこそ」の窓が出ている。RDP の画面で「スキップ」を押す
    - RDP の画面に、キーリングのパスワードを聞く窓が出ていないことを確かめる
@@ -6470,7 +6470,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 前提: [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)を通してある
 - 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 - **接続元を制限しないなら、この項は不要**
-- [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 6 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
+- [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 7 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
 - WireGuard などで別の拠点からつなぐなら、`LAN_SUBNET` には、PC に届くときの接続元のサブネットを入れる（この項は 1 つのサブネットだけを通す）
 
 1. 変数を設定する。
@@ -6550,7 +6550,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - パスワードの聞かれ方は、[自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3 と同じ
-   - 起動したら SSH で入り直し、[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 を貼り直してから、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1 で確かめる
+   - 起動したら SSH で入り直し、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1・2 で確かめる
 
 ---
 
@@ -8585,7 +8585,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
     - `mokutil --sb-state` が `SecureBoot enabled` であることを確認する
     - `sudo mokutil --test-key /var/lib/shim-signed/mok/MOK.der` が `is already enrolled` を返さなければ、先に署名鍵の手順を通す
     - ホストオンリーだけなら、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 3 まで通す
-      - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 3・4 でホストに鍵を作り、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 で登録する
+      - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 でホストに鍵を作り、[Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7 で登録する
 - 実行場所:
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
   - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。手順 1〜3・5〜8・10。`sudo -i` した root のシェルでは行わない
@@ -8825,7 +8825,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この項の手順 7）
   - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この項の手順 4・5。登録は [Secure Boot の署名鍵](#secure-boot-の署名鍵)の手順 5〜7）
   - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
-- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 2 の代わりに、この項の手順 6・8〜10。元のイメージに戻すときは、この項の手順 11・12
+- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 3 の代わりに、この項の手順 6・8〜10。元のイメージに戻すときは、この項の手順 11・12
 
 1. VM の端末で、変数を設定する（既定のままでよい）。
 
@@ -9110,8 +9110,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - OS（ベースのイメージ）を上げる: この項の手順 1・3・4。カーネルが変わっても、同じ手順でモジュールが作り直される
   - 自作の kernel-rt のイメージは、先にレジストリのイメージを新しくしておく（この項の手順 3 は、レジストリにあるものを取り込む）
 - ホストの VirtualBox を上げた（Guest Additions の版が変わった）: この項の手順 1 から
-- ホストオンリーだけの VM は、この項の手順 3 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 5・7〜9 でビルドし直し、VM へ運ぶ
-- ホストの端末で、先に[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2 を貼る
+- ホストオンリーだけの VM は、この項の手順 3 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 6・8〜10 でビルドし直し、VM へ運ぶ
+- ホストの端末で、先に[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 3 を貼る
 - Secure Boot の鍵を作り直したときは、この項の手順 3 で `sudo podman build` に `--no-cache` を足す（ビルドのキャッシュは、渡した鍵の中身の違いを見分けない。ホストでビルドするときも同じ）
 - 古いイメージは `sudo podman image prune` で消せる（`[y/N]` を聞く）
 
@@ -9154,7 +9154,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### VirtualBox の bootc ゲスト: 既存のコンテナ署名設定に追加する
 
 - ホストの `~/.config/containers` に既にある署名の設定へ、VM の Atomic Desktop の署名を確かめる設定を手で足す
-- 前提: [ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 6 で「すでにある」と出た場合だけ行う（VM から写した `~/vbox-ga-host` を使う）
+- 前提: [ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 7 で「すでにある」と出た場合だけ行う（VM から写した `~/vbox-ga-host` を使う）
 - 実行場所: ホスト（VirtualBox を動かしている PC）の、自分のユーザーの端末とエディタ。Windows のホストでは WSL の AlmaLinux 10
 
 1. 変更前の設定と公開鍵を別の場所に退避し、今回追加・変更するファイルを控える。既存の同名の鍵や設定は上書きしない。
@@ -9165,7 +9165,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. `registries.d` があるなら、VM の `almalinuxorg-atomic-desktop-gnome.yaml` を、同名が無いことを確かめて足す。無いなら VM の `registries.d` をまるごと写す（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるため）。
 
-1. 元に戻すときは、[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 11 の自動削除は使わず、控えたファイル・項目だけを戻す。
+1. 元に戻すときは、[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 12 の自動削除は使わず、控えたファイル・項目だけを戻す。
 
 ---
 
@@ -9313,7 +9313,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### kvm-container で VM を作る
 
 - ISO を `data/` に置き、`virt-install` で VM (ディスクは SATA の SSD、NIC は e1000e) を作って、virt-viewer の画面でインストールする
-- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1 で起動する
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 2 で起動する
   - VM をホストのブリッジにつなぐなら、先に[VM をホストのブリッジにつなぐ](#kvm-container-の-vm-をホストのブリッジにつなぐ)の手順 1〜8 を行う
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - x86_64 のホストで行う。この項の手順 4 で使う SATA と e1000e は、aarch64 の qemu-kvm には無い
@@ -9478,7 +9478,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `>> ready. VMs: …` が出れば `kvm` は起動している。動いていれば `>> kvm is already running`
    - 画面のあるホストでは、続けて `>> kvm-gui started. …` か `>> kvm-gui is already running` が出る
    - 再ログインの後なら `>> the host session has changed: recreating kvm-gui …` が出て、`kvm-gui` だけが作り直される
-   - [VM を作る](#kvm-container-で-vm-を作る)の手順 6 で自動起動を設定した VM は、`kvm` の起動と一緒に起動する
+   - [VM を作る](#kvm-container-で-vm-を作る)の手順 7 で自動起動を設定した VM は、`kvm` の起動と一緒に起動する
    - **次の手順は、`>> ready.` か `>> kvm is already running` が出てから貼る**
 
 1. VM を起動する。
@@ -9585,7 +9585,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: **物理マシン / VM の AlmaLinux 10 + GNOME (NetworkManager) で、GNOME にログインした一般ユーザーの端末 (コンソール) から行う**。root の権限は、コマンドに付けた `sudo` だけで使う
 - この項の手順 4 は NIC の接続をブリッジに切り替えるので、その NIC 越しの ssh は切れる
 - NIC の元の接続名 (この項の手順 1 の `NIC_CON`) を控えてから、接続を変える (この項の手順 3・4)
-- この項の手順 9 だけは、[VM を作る](#kvm-container-で-vm-を作る)の手順 3 で VM を作った後に貼る
+- この項の手順 9 だけは、[VM を作る](#kvm-container-で-vm-を作る)の手順 4 で VM を作った後に貼る
 - 元に戻すのは[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1〜4
 
 1. 変数を設定する (`NIC` は必ず値を入れる)。
@@ -9680,8 +9680,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 最後に `>> ready. VMs: ...` で戻る
    - **注意**: 以後、`kvm` を起動するすべての経路に毎回 `KVM_BRIDGE=` を付ける
    - 付けずに `kvm` を起動すると `bridged` は削除される (`>> KVM_BRIDGE is not set: removing the libvirt network "bridged"`)
-   - `viewer` も内部で `up` を呼ぶ。ブリッジ利用時は、[VM を作る](#kvm-container-で-vm-を作る)の手順 4・[VM を使う](#kvm-container-の-vm-を使う)の手順 3 の最初のブロックだけを貼る
-   - [VM を使う](#kvm-container-の-vm-を使う)の手順 1 も最初のブロックだけを貼る
+   - `viewer` も内部で `up` を呼ぶ。ブリッジ利用時は、[VM を作る](#kvm-container-で-vm-を作る)の手順 5・[VM を使う](#kvm-container-の-vm-を使う)の手順 4 の最初のブロックだけを貼る
+   - [VM を使う](#kvm-container-の-vm-を使う)の手順 2 も最初のブロックだけを貼る
    - `./kvm.sh up gui` (再ログイン後の `kvm-gui` の作り直し) は `bridged` に影響しない。`kvm` が動いている限り `bridged` はそのまま
    - **次の手順は、`>> ready.` が出てから貼る**
 
@@ -9696,11 +9696,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `net-list` で `bridged` が active (`default` と並ぶ)
    - `net-list` に `bridged` が無ければ、`kvm` を止めずに `up` したか、`KVM_BRIDGE=` を付け忘れている。この項の手順 6・7 をやり直す
    - この後は[VM を作る](#kvm-container-で-vm-を作る)に進む
-   - `VM_NETWORK=bridged` にすると、[VM を作る](#kvm-container-で-vm-を作る)の手順 3 は `--network network=bridged` を使う
+   - `VM_NETWORK=bridged` にすると、[VM を作る](#kvm-container-で-vm-を作る)の手順 4 は `--network network=bridged` を使う
    - VM は LAN の DHCP から IP を取る (ホストと同じセグメント)
 
 
-1. [VM を作る](#kvm-container-で-vm-を作る)の手順 3 の後に、VM が `bridged` につながっていることを確かめる。
+1. [VM を作る](#kvm-container-で-vm-を作る)の手順 4 の後に、VM が `bridged` につながっていることを確かめる。
 
    ```bash
    ./kvm.sh virsh domiflist "${VM_NAME:?この項の手順 1 の VM_NAME を設定してから貼る}"   # Type が network、Source が bridged
@@ -9713,7 +9713,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### kvm-container の VM を削除する
 
 - VM の定義・UEFI 変数・ディスクを消す。ISO は、消すときだけこの項の手順 7 で消す
-- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1 で起動する
+- 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 2 で起動する
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5〜7
 - `down` は `data/` を残す。**`clean` は削除する**
@@ -10227,7 +10227,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: サーバーの、公開したユーザー自身の bash（デスクトップの端末か SSH）。`${USER}` を `valid users` に書く。この項の手順 4 だけは、つなぐ側の別のマシン
 - **root のホーム（`/root`）を公開しないなら、この項は不要**
 - smbd は、この共有の中を root として読み書きする（`force user = root`）。作ったファイルは root の所有になる
-- `/root` の読み書きは、この項の手順 3 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 7・8 で確かめる
+- `/root` の読み書きは、この項の手順 3 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 8・9 で確かめる
 - 補足: [root のホームを公開するときの補足](reference/samba.md#root-のホームを公開するときの補足)
 
 > [!WARNING]
@@ -10285,7 +10285,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 再起動すると、ほかのクライアントのつないでいる接続が切れる
-   - `/root` の一覧と書き込みは、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 7・8 で確かめる
+   - `/root` の一覧と書き込みは、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 8・9 で確かめる
 
 1. 別のマシンから、共有名 `root` でつなぐ。
 
@@ -10317,7 +10317,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - smbd は、この共有の中を root として読み書きする（`force user = root`）
 - 新しく作ったファイルとディレクトリの所有者は、親ディレクトリの所有者（`/home/<ユーザー>` の中なら、そのユーザー）になる（`inherit owner = yes`）。グループは `root` になる
 - `/home` の直下には、ファイルもディレクトリも作れない（SELinux が断る）
-- 読み書きは、この項の手順 2 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 で確かめる
+- 読み書きは、この項の手順 2 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 10・11 で確かめる
 - 補足: [/home を公開するときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#home-を公開するときの補足)
 
 > [!WARNING]
@@ -10357,7 +10357,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 再起動すると、ほかのクライアントのつないでいる接続が切れる
-   - `/home` の一覧と書き込みは、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 で確かめる
+   - `/home` の一覧と書き込みは、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 10・11 で確かめる
 
 1. 別のマシンから、共有名 `home` でつなぐ。
 
@@ -11630,7 +11630,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `LAN_SUBNET` は、サーバーから見えるクライアントの送信元に合わせる。VPN の相手だけに許可するときは、その VPN の CIDR にする
    - 送信元 IPv4 を制限しないときは、`LAN_SUBNET='0.0.0.0/0'` と明示する。待ち受ける IP とポートは引き続き限定する
    - 待ち受ける NIC が別の zone に属しているなら、任意変数のブロックの `FW_ZONE=` をその名前に変える
-   - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 1 と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3・5 の番号も同じにする
+   - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 2 と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3・5 の番号も同じにする
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
 
@@ -12082,7 +12082,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. 別の PC でトンネルを閉じ、LAN の URL で管理者のログインを確かめる。
 
-   - [初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 1 の端末で `Ctrl+C` を押してトンネルを閉じる
+   - [初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 2 の端末で `Ctrl+C` を押してトンネルを閉じる
      - この項の手順 3 の後、その端末に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがある。正常なので、そのまま閉じる
    - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
    - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
@@ -12221,7 +12221,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `active`・`generated`・`Linger=yes` が出て、サービスが起動した時刻がログインした時刻より前ならよい
-   - LAN 向けの 2 つのポートと、[LAN に公開する](#forgejo-lan-に公開する)の手順 1 の 2 規則が残っていればよい
+   - LAN 向けの 2 つのポートと、[LAN に公開する](#forgejo-lan-に公開する)の手順 2 の 2 規則が残っていればよい
 
 1. 別の PC で、OS の再起動後の Web と Git を確かめる。
 
@@ -13177,7 +13177,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 上部バーの時計に曜日と秒が出る。電池のある PC では、電池の % も出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - 上部バーの右に、入力ソースの表示が出る（[日本語入力](#日本語入力)を通したとき）
-   - 画面がダークになり、Super キーで開く Dash が[GNOME の表示と入力](#gnome-の表示と入力)の手順 13 の並びになっていればよい（その項を通したとき）
+   - 画面がダークになり、Super キーで開く Dash が[GNOME の表示と入力](#gnome-の表示と入力)の手順 14 の並びになっていればよい（その項を通したとき）
    - Dash の端末が WezTerm になっていればよい（[WezTerm と HackGen Console NF をデスクトップで使う](#wezterm-と-hackgen-console-nf-をデスクトップで使う)を通したとき）
    - Files などのウィンドウのタイトルバーの右に、最小化・最大化・閉じるの 3 つのボタンが出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき。自分用の設定の WezTerm は、タブバーの右端に自分でボタンを描く）
    - 「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓は出ない（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）。出たら、「次回から表示しない」をオンにして「古い名前のままにする」を押す
@@ -13228,7 +13228,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. [日本語入力](#日本語入力)を通したときだけ、入力ソースを切り替えて、日本語を打ってみる。
 
-   - Super+Space で「英語 (US)」と Anthy に切り替わる。[Neovim](#neovim)の手順 3 を飛ばしたなら、[日本語入力](#日本語入力)の手順 2 の配列と Anthy
+   - Super+Space で「英語 (US)」と Anthy に切り替わる。[Neovim](#neovim)の手順 3 を飛ばしたなら、[日本語入力](#日本語入力)の手順 3 の配列と Anthy
    - Anthy に切り替えてからテキストエディターなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
    - Anthy は、ひらがなで始まる
    - 英字と日本語は Super+Space で切り替える。[Neovim](#neovim)の手順 3 を通したときは、Neovim 内では `<C-j>` で切り替え、JIS キーボードでも US 配列で打つため、一部の記号は刻印と異なる

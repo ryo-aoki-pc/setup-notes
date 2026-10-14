@@ -1,8 +1,8 @@
 # Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#dropbox-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](../reference/dropbox.md)
+[手順書](../almalinux-setup.md#dropbox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](../reference/dropbox.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#dropbox-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../almalinux-setup.md#dropbox)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
@@ -58,5 +58,5 @@
   - 使うなら `sudo firewall-cmd --permanent --add-service=dropbox-lansync` と `sudo firewall-cmd --reload`
 - **`dropbox stop` は戻される**: `Restart=always` なので 10 秒後に起こし直される。止めるなら `systemctl --user stop dropbox.service`
 - **リンク用の URL は他人に見せない**: 開いた人のアカウントにこの PC がつながる。リンクするまでは journal にも 5 秒ごとに残る
-- **眠ると止まる**: サスペンド中は同期しない。常時動かす PC は [画面オフ・画面ロック・自動サスペンドを止める（任意）](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める任意) の節で眠らないようにする
+- **眠ると止まる**: サスペンド中は同期しない。常時動かす PC は [画面オフ・画面ロック・自動サスペンドを止める](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める) の節で眠らないようにする
 - **フォルダの場所は `~/Dropbox` のまま**: headless の `dropbox` コマンドには、場所を移す機能が無い

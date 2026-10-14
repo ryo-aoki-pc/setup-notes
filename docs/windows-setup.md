@@ -689,7 +689,7 @@
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じてこの項の手順 1 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 でアプリ インストーラーの登録と更新を確かめてから
-   - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 は、別の割り当てがあれば止まる
+   - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 は、別の割り当てがあれば止まる
    - `CurrentUser` の値（未設定なら `Undefined`）を控え、[ロールバック](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 7 で使う
    - `Scoop` に場所が出たら、scoop はもう入っている
 
@@ -810,7 +810,7 @@
 1. 管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。[貼り付けの設定](#貼り付けの設定)の手順 3 を、この窓で貼り直す
+   - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。[貼り付けの設定](#貼り付けの設定)の手順 4 を、この窓で貼り直す
 
 1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
 
@@ -854,13 +854,13 @@
 
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。この項の手順 1 から
-   - `CtrlEnter : InsertLineAbove` なら、[貼り付けの設定](#貼り付けの設定)の手順 1・3・4 をこの順で貼り直し、窓を開き直してこの項の手順 2 から
+   - `CtrlEnter : InsertLineAbove` なら、[貼り付けの設定](#貼り付けの設定)の手順 2・4・5 をこの順で貼り直し、窓を開き直してこの項の手順 2 から
    - 次の値を控える（[ロールバック](extra/windows-setup.md#ロールバック)で、元に戻すかを決めるのに使う）
      - `ComputerName`（PC の名前。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 9）と `LanCategory`（LAN の種類。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 5）
      - `RemoteDesktop`（1 なら無効、0 ならもう有効。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 4）と `RemoteAssistance`（1 なら有効、0 なら無効。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 3）
      - `HelloOnly`（2 ならオン、0 ならオフ。ロールバックの「サインイン・検索・キーボードを戻す」の手順 5）と `Keyboard`（`kbd106.dll` なら JIS 配列。ロールバックの「サインイン・検索・キーボードを戻す」の手順 9）
      - 最後の行の配信の最適化のモード（`Lan` が Windows の既定。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 1）
-   - `Edition` が `Core` で始まる（Home）なら、[ネットワークとリモート](#ネットワークとリモート)の手順 2 は飛ばす
+   - `Edition` が `Core` で始まる（Home）なら、[ネットワークとリモート](#ネットワークとリモート)の手順 4 は飛ばす
 
 1. 複数行のブロックをコピーボタンでコピーして右クリックで貼り、元の順に動くことを確かめる。
 
@@ -895,7 +895,7 @@
 
    - 再起動を求める旨の警告と、`再起動の後に <HOSTNAME> になる` が出ればよい
    - 何度貼ってもよい（2 回目からは `すでにこの名前:`。再起動の前は、まだ古い名前と比べる）
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
    - 名前を変えないなら（この項の手順 2 の `PC_NAME` が空なら）、この手順は飛ばす
 
 1. 長いパス・開発者モード・sudo（今の窓で動く形）を有効にする。
@@ -950,7 +950,7 @@
 
    - `AllowComputerToTurnOffDevice : Disabled` が出ればよい
    - `このアダプターは対象外:` なら、このアダプターには設定が無い（何もしない）
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
 
 ---
 
@@ -989,7 +989,7 @@
    ```
 
    - `DisableSearchBoxSuggestions : 1` が出ればよい
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
 
 1. デスクトップの Edge と UniGet UI のショートカットを消し、Edge が作り直したら消すようにする。
 
@@ -1027,7 +1027,7 @@
    - `Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` が出ればよい
    - 同じ値がもうあれば、何も書かずに同じ行を出す（何度貼ってもよい）
    - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
 
 1. AlmaLinux とデュアル ブートし、AlmaLinux の時計を UTC にしているときだけ、Windows も UTC にする。
 
@@ -1038,7 +1038,7 @@
    ```
 
    - `RealTimeIsUniversal : 1` が出ればよい
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後。時刻がずれていたら、設定の「時刻と言語」→「日付と時刻」の「今すぐ同期」で合わせ直す
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。時刻がずれていたら、設定の「時刻と言語」→「日付と時刻」の「今すぐ同期」で合わせ直す
    - AlmaLinux の `timedatectl` の `RTC in local TZ:` が `yes`（`/etc/adjtime` の 3 行目が `LOCAL`）なら、この手順は飛ばす
    - デュアル ブートしない PC でも、この手順は飛ばす
 
@@ -1056,7 +1056,7 @@
 
    - `LayerDriver JPN : kbd101.dll`・`OverrideKeyboardIdentifier : PCAT_101KEY`・`OverrideKeyboardType : 7`・`OverrideKeyboardSubtype : 0` が出ればよい
    - JIS 配列（日本語の 106/109 キー）のキーボードなら、この手順は飛ばす
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後。日本語の入力の切り替えは、[表示と入力](#表示と入力)の手順 7 の Ctrl+Space（または Alt+`）で行う
+   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。日本語の入力の切り替えは、[表示と入力](#表示と入力)の手順 8 の Ctrl+Space（または Alt+`）で行う
 
 ---
 
@@ -1128,7 +1128,7 @@
      - `ComputerName` が設定した名前（大文字）、`LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`（[PC 全体の設定](#pc-全体の設定)を通したとき）
      - `CtrlEnter : AddLine`（[貼り付けの設定](#貼り付けの設定)を通したとき）
      - `ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-     - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら `kbd101.dll`
+     - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 7 を行ったなら `kbd101.dll`
      - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
      - `Hypervisor : True`（[WSL と再起動](#wsl-と再起動)を通したとき）
 
@@ -1241,7 +1241,7 @@
    - 「手書き入力と入力の個人用設定」で、「カスタム手書き入力と入力の辞書」をオフにする（覚えた単語の一覧が消える）
    - 「診断とフィードバック」で、「オプションの診断データを送信する」がオンなら、オフにする。「手書き入力と入力の改善」と「カスタマイズされたエクスペリエンス」がオフ、「フィードバックの頻度」が「しない」
    - 新しいビルドでは、「カスタマイズされたエクスペリエンス」は「パーソナライズされたオファー」の名前で別のページにある
-   - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2 の値で灰色になっている
+   - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の値で灰色になっている
    - この項の手順 2 で書いた項目がオンのまま出ていたら、その画面でオフにする
    - **次の手順は、設定を閉じてから貼る**
 
@@ -1284,7 +1284,7 @@
 - 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 
 - **この項の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この項の手順 2 の代わりにこの項の手順 3（画面だけで切る）を行う
-- [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
+- [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
 - **この項の手順 3・4 は Edge の画面で行う**
 - 戻すときは、この項の手順 5・6（行った手順のものだけ）
 
@@ -1305,7 +1305,7 @@
 
    - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
    - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
-   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（同じ項の手順 1 と[ロールバックの「表示と入力を戻す」](extra/windows-setup.md#表示と入力を戻す)の手順 8 は、無いものを飛ばす）
+   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（同じ項の手順 2 と[ロールバックの「表示と入力を戻す」](extra/windows-setup.md#表示と入力を戻す)の手順 8 は、無いものを飛ばす）
 
 1. （この項の手順 2 の代わりに）管理の表示を出したくないときは、Edge の設定の画面で 2 つを切る。
 
@@ -1370,7 +1370,7 @@
    ```
 
    - `HideFileExt : 0`・`Hidden : 1`・`LaunchTo : 1`・`Start_TrackDocs : 0`・`ShowRecent : 0`・`ShowFrequent : 0` が出ればよい
-   - 開いているエクスプローラーの窓には、開き直すか[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後に効く
+   - 開いているエクスプローラーの窓には、開き直すか[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
 
 1. 自分のユーザーで、旧形式のコンテキストメニューを出すようにする。
 
@@ -1381,7 +1381,7 @@
    ```
 
    - `reg.exe add` が成功の 1 行を出し、`reg.exe query` に `(既定)`（英語の表示では `(Default)`）と `REG_SZ` の行が出ればよい（値は空）
-   - エクスプローラーに効くのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後
+   - エクスプローラーに効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
 
 1. スタートと設定の、おすすめ・提案・ヒントを切る。
 
@@ -1401,7 +1401,7 @@
    ```
 
    - 並んだ値がすべて `0` ならよい
-   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 より前に貼る
+   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 3 より前に貼る
 
 1. タスクバーを左に寄せ、タスク ビューと検索のボタンを消し、時計に秒を出す。
 
@@ -1417,7 +1417,7 @@
    ```
 
    - `TaskbarAl : 0`・`ShowTaskViewButton : 0`・`ShowSecondsInSystemClock : 1`・`SearchboxTaskbarMode : 0` が出ればよい
-   - タスクバーには、すぐか、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後に効く
+   - タスクバーには、すぐか、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
 
 1. ダークモードにする。
 
@@ -1430,7 +1430,7 @@
    ```
 
    - `AppsUseLightTheme : 0` と `SystemUsesLightTheme : 0` が出ればよい
-   - 動いているアプリとタスクバーには、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後に効く
+   - 動いているアプリとタスクバーには、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
 
 1. 既定の端末を Windows Terminal にする。
 
@@ -1445,7 +1445,7 @@
 
    - `DelegationConsole : {2EACA947-…}` と `DelegationTerminal : {E12CFF52-…}` が出ればよい
    - 次に起動したコンソールのアプリから効く
-   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには[貼り付けの設定](#貼り付けの設定)の手順 1〜4 が必要
+   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには[貼り付けの設定](#貼り付けの設定)の手順 1〜5 が必要
 
 1. Microsoft IME の設定を開き、Ctrl+Space で IME をオン・オフするようにする。
 
@@ -1471,7 +1471,7 @@
 - **ストレージ センサーは、一時ファイルとごみ箱に 30 日を超えて置いたファイルを毎月消す（取り戻せない）**
   - ごみ箱を置き場に使うなら、[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11・12 を飛ばすか、同じ項の手順 12 でごみ箱を「許可しない」にする
 - 入力言語の切り替えのキーを切っても、Win+Space で切り替えられる
-- 戻すときは、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 1〜9（行った手順のものだけ）。[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 2 で控えた値を使う
+- 戻すときは、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 1〜10（行った手順のものだけ）。[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 2 で控えた値を使う
 
 #### 表示・入力・音・ストレージを控えて変える
 
@@ -1519,7 +1519,7 @@
    ```
 
    - `控えた:` か `控えはもうある` の行と、13 行の表（`Name` と `Value`）が出ればよい。値が無いものは空
-   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 2〜5 で使う）
+   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 3〜6 で使う）
 
 1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
 
@@ -1650,7 +1650,7 @@
    ```
 
    - 控えを作った成功の 1 行（2 回目からは `控えはもうある`）と、`Scheme : .None` と、空にしたイベントの数（1 以上）が出ればよい
-   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 7 で戻す）
+   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 8 で戻す）
    - 次に鳴る音から効く
    - 後から入れたアプリが足したイベントには、音が入る。気になれば、この手順を貼り直す
 
@@ -1682,7 +1682,7 @@
    ```
 
    - 7 行が出て、`->` の右が `01`・`04`・`08` は `1`、`256` と `2048` は `30`、`32` と `512` は `0` ならよい
-   - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 9 で戻した後に、画面で同じにし直す
+   - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 10 で戻した後に、画面で同じにし直す
    - 毎月、一時ファイルと、ごみ箱に 30 日を超えて置いたファイルを消す。ダウンロード フォルダーは消さない
    - **注意**: OneDrive にサインインしているなら、30 日開かないファイルがオンラインだけになりうる。この項の手順 12 で外す
 
@@ -1948,7 +1948,7 @@
    ```
 
    - `外した:` か `無い:` が出ればよい
-   - タスクバーのウィジェットのボタンと、設定のウィジェットの切り替えが消える（[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後に確かめる）
+   - タスクバーのウィジェットのボタンと、設定のウィジェットの切り替えが消える（[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に確かめる）
 
 ---
 
@@ -2011,7 +2011,7 @@
    - `HackGen35ConsoleNF-Bold (TrueType) : C:\Users\<WIN_USER>\AppData\Local\Microsoft\Windows\Fonts\HackGen35ConsoleNF-Bold.ttf` の形の行が 4 つ出ればよい
    - `中断:` で始まるエラーが出たら、そこで止まっている
    - 何度貼ってもよい
-   - アプリで使えるのは、[WSL と再起動](#wsl-と再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5）
+   - アプリで使えるのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5）
 
 ---
 
@@ -2082,9 +2082,9 @@
    - 通知領域の CopyQ のアイコンをクリックして窓を開き、「ファイル」→「設定...」（Ctrl+P）→「ショートカット」→「グローバル」で、「メインウィンドウの表示切り替え」にキーを足して「OK」を押す
    - 次のキーは避ける
      - Win+V（Windows の履歴のパネル）
-     - Win+Shift+V と Ctrl+Win+Alt+V（[アプリを入れる](#アプリを入れる)の手順 4 の PowerToys の高度な貼り付け）
+     - Win+Shift+V と Ctrl+Win+Alt+V（[アプリを入れる](#アプリを入れる)の手順 5 の PowerToys の高度な貼り付け）
      - Ctrl+Shift+V（多くのアプリの、書式なしの貼り付け）
-     - Ctrl+Space（[表示と入力](#表示と入力)の手順 7 の IME）
+     - Ctrl+Space（[表示と入力](#表示と入力)の手順 8 の IME）
    - Windows キーを含むキーは、OS が予約していて効かないことがある。効かなくても、画面には何も出ない
    - 管理者の窓には、CopyQ から自動では貼れない。クリップボードには入るので、右クリックで貼る
 
@@ -2129,7 +2129,7 @@
 - PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
 - 切るユーティリティは好みで選ぶ。この項の手順 2 の `$PT_OFF` は案で、Always On Top・コマンド パレット・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer は残す（[参考資料](reference/windows-setup.md)）
 - 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
-- Keyboard Manager は使わない（既定でオフ。Caps Lock は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 で変える）
+- Keyboard Manager は使わない（既定でオフ。Caps Lock は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で変える）
 - 戻すときは、この項の手順 7・8
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -2147,7 +2147,7 @@
    ```
 
    - `PT_OFF = FindMyMouse, …` と、`PT_EXE = C:\Users\<WIN_USER>\AppData\Local\PowerToys\PowerToys.exe` の形の 2 行が出ればよい
-   - `PT_EXE` が空なら、PowerToys が見つからない。[アプリを入れる](#アプリを入れる)の手順 4 を確かめる
+   - `PT_EXE` が空なら、PowerToys が見つからない。[アプリを入れる](#アプリを入れる)の手順 5 を確かめる
    - `$PT_OFF` の名前は、設定ファイルの名前（空白を含むものがある）。変えるなら、この項の手順 3 の表の `Name` から選ぶ
    - 新しい窓を開いたら、このブロックを貼り直す
 
@@ -2636,7 +2636,7 @@
 
    - 1409 なら、候補アプリ 1 つの無効化前後で同じ試験と実操作を比較する
    - `Hotkey cleanup failed` などの例外が出た場合は成功扱いにせず、この PowerShell を閉じる
-   - [使用アプリが分からない場合の切り分け](#windows-のホットキー競合-使用アプリが分からない場合の切り分け)の手順 5へ戻り、アプリ設定と実操作で候補を絞る
+   - [使用アプリが分からない場合の切り分け](#windows-のホットキー競合-使用アプリが分からない場合の切り分け)の手順 6へ戻り、アプリ設定と実操作で候補を絞る
 
 ---
 
@@ -2652,7 +2652,7 @@
    - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - Ctrl+Space を押すたびに、IME のオンとオフが入れ替わる（タスクバーの「あ」と「A」）（[表示と入力](#表示と入力)を通したとき）
-   - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
+   - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 7 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
 
 1. エクスプローラー・タスクバー・スタートが変わったことを確かめる。
 
@@ -2674,7 +2674,7 @@
    - スタートメニューで「UniGetUI」を探して開く
    - 初回は、使い方の案内や設定の問いが出ることがある。読んで進める
    - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）（[アプリを入れる](#アプリを入れる)を通したとき）
-   - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 3 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る（[アプリを入れる](#アプリを入れる)を通したとき）
+   - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 4 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る（[アプリを入れる](#アプリを入れる)を通したとき）
 
 1. [HackGen Console NF](#hackgen-console-nf)を通したときだけ、フォントの一覧で、HackGen Console NF が出ることを確かめる。
 
@@ -3009,7 +3009,7 @@
 - リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
 - 既にある接続からの再起動（この項の手順にはしない）
   - SSH でつながるなら `Restart-Computer`。Administrators のユーザーは UAC 不要で、sshd は再起動後も自動で起動する
-  - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 2 で有効。再起動の後はロック画面に戻るが、また入れる）
+  - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 4 で有効。再起動の後はロック画面に戻るが、また入れる）
   - [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの項の手順 7
 - この項で足す手段: クラッシュ時の自動再起動（この項の手順 3）・別の PC からのネットワーク再起動（この項の手順 4・5）・ネットワークが切れたときの自動再起動（この項の手順 6）
 - 戻すときは、この項の手順 8〜12（入れた手段のものだけ）
@@ -3262,7 +3262,7 @@
 
 1. クライアントの PC から、Windows に SSH でログインする。
 
-   - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 4](#ssh-でログインを確かめる)と同じ）
+   - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](#ssh-でログインを確かめる)と同じ）
    - PC の前にいるなら、SSH の代わりに PC の画面を見る。ロック画面ではなく、RDP で開いていたままのデスクトップが出ていればよい。そのときはこの項の手順 5 は飛ばす
    - **次の手順は、ログインした先のプロンプトが出てから貼る**（続けて貼ると、ログインの途中の入力として食われる）
 
@@ -3331,7 +3331,7 @@
 - WG ホストで行う操作は、各項の説明に従って拠点の bash に貼る
 
 - WireGuard は PC 全体に入り、トンネルは Windows のサービスとして動く
-- [登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3 だけは、関数名を手入力する
+- [登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 4 だけは、関数名を手入力する
 
 #### WireGuard: Windows 11 で WireGuard と鍵を用意する
 
@@ -3408,7 +3408,7 @@
 
    - `icacls` に `NT AUTHORITY\SYSTEM:(OI)(CI)(F)` と `BUILTIN\Administrators:(OI)(CI)(F)` の 2 行だけが出る
    - `wg0.key` と `wg0.pub` がどちらも 45 バイト
-   - 最後の 1 行（公開鍵、44 文字）だけを、[Windows 11 で WG ホストに登録して取り込む](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 2 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
+   - 最後の 1 行（公開鍵、44 文字）だけを、[Windows 11 で WG ホストに登録して取り込む](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 3 で WG ホストに渡す。秘密鍵（`wg0.key`）は渡さない
    - **注意**: `%USERPROFILE%\wg-client` は、管理者の PowerShell からしか読めない（管理者ではない PowerShell やエクスプローラーでは開けない）
 
 #### WireGuard: Windows 11 で WG ホストに登録して取り込む
@@ -3446,7 +3446,7 @@
 
 1. WG ホストで、[クライアントを登録する](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1・2・4〜6 を行い、この PC の公開鍵を登録して conf を表示する。
 
-   - ホスト側の手順 1 の `CLIENT_PUBKEY` に、[鍵の用意](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 6 の公開鍵を貼る
+   - ホスト側の手順 1 の `CLIENT_PUBKEY` に、[鍵の用意](#wireguard-windows-11-で-wireguard-と鍵を用意する)の手順 5 の公開鍵を貼る
    - `CLIENT_NAME` はこの PC だけの名前（例 `win-laptop`）にする。同名の端末は、ホスト側の手順 2 で登録を消してしまう
    - ホスト側の手順 6 の `client show` から、`[Interface]`〜`PersistentKeepalive` をこの PC のクリップボードにコピーする
    - `PrivateKey` はプレースホルダのままなので、**秘密情報を含まない**。どの経路で運んでもよい
@@ -3466,7 +3466,7 @@
    & {
      $dir = "$env:USERPROFILE\wg-client"
      $store = "$env:ProgramFiles\WireGuard\Data\Configurations"
-     if ((Get-Service -Name WireGuardManager -ErrorAction SilentlyContinue).Status -ne 'Running' -or -not (Test-Path -LiteralPath $store)) { Write-Error '中断: WireGuard のマネージャーが動いていない（「Windows 11 で WireGuard と鍵を用意する」の手順 5 からやり直す）'; return }
+     if ((Get-Service -Name WireGuardManager -ErrorAction SilentlyContinue).Status -ne 'Running' -or -not (Test-Path -LiteralPath $store)) { Write-Error '中断: WireGuard のマネージャーが動いていない（「Windows 11 で WireGuard と鍵を用意する」の手順 4 からやり直す）'; return }
      if (-not (Test-Path -LiteralPath "$dir\wg0.conf")) { Write-Error '中断: wg0.conf が無い（この項の手順 4）'; return }
      if (Test-Path -LiteralPath "$store\wg0.conf.dpapi") { Write-Error '中断: wg0 というトンネルが既にある'; return }
      Copy-Item -LiteralPath "$dir\wg0.conf" -Destination "$store\wg0.conf"
@@ -3534,7 +3534,7 @@
    ```powershell
    & {
      $conf = "$env:ProgramFiles\WireGuard\Data\Configurations\wg0.conf.dpapi"
-     if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（「Windows 11 で WG ホストに登録して取り込む」の手順 4）'; return }
+     if (-not (Test-Path -LiteralPath $conf)) { Write-Error '中断: wg0.conf.dpapi が無い（「Windows 11 で WG ホストに登録して取り込む」の手順 5）'; return }
      & "$env:ProgramFiles\WireGuard\wireguard.exe" /installtunnelservice $conf 2>&1 | ForEach-Object { "$_" }
      for ($i = 0; $i -lt 30 -and -not (Get-NetIPAddress -InterfaceAlias wg0 -AddressFamily IPv4 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -3575,12 +3575,12 @@
    - 4 つとも、損失が 0%（`0% の損失`）ならよい
    - `tracert` は `<WG_HOST_TUN_IP>` → `<PEER_WG_LAN_IP>` の順に出る
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>`（Windows 11 の OpenSSH クライアント）も試しておくとよい
-   - どこで止まるかで、疑う場所が変わる（[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 2 と同じ）
+   - どこで止まるかで、疑う場所が変わる（[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 と同じ）
 
 1. WG ホストで変数を設定し、ハンドシェイクを確かめる。
 
    - [クライアントを登録する](almalinux-setup.md#wireguard-クライアントを登録する)の手順 1 で、`SITE`・`CLIENT_NAME`・`REPO` をこの PC を登録したときと同じ値に設定する
-   - その WG ホストの bash に、[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 3 を貼る
+   - その WG ホストの bash に、[トンネルを確かめる](almalinux-setup.md#wireguard-トンネルを確かめる)の手順 5 を貼る
 
    - `client list` の、この PC の名前の `LAST_HANDSHAKE` が「N 秒前」なら届いている
    - 最後の `ping`（拠点 → PC）は、応答が無くてよい
@@ -3611,7 +3611,7 @@
    ```
 
    - `wg0.pub` だけが残る
-   - 取り込みをやり直すときは、後片付けの前に[登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 4 を行う（`wg0.conf` が必要）
+   - 取り込みをやり直すときは、後片付けの前に[登録と取り込み](#wireguard-windows-11-で-wg-ホストに登録して取り込む)の手順 5 を行う（`wg0.conf` が必要）
 
 #### WireGuard: Windows 11 の更新
 
@@ -3672,7 +3672,7 @@
    - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
    - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3）
 
 1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
 
@@ -3684,7 +3684,7 @@
 
    - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
    - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
-   - この窓では `git` は見つからない。再起動後、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1 で確かめる
+   - この窓では `git` は見つからない。再起動後、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2 で確かめる
 
 ---
 
@@ -3792,7 +3792,7 @@
 1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
 
    - スタートメニューで「WezTerm」を探し、クリックして開く
-   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 で入れる）
+   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 7 で入れる）
    - 窓の中で `wezterm --version` を打つと、この項の手順 5 と同じ版が出る
    - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](#windows-のホットキー競合)で対象キーを調べる
    - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
@@ -3918,7 +3918,7 @@
 #### WezTerm の設定を導入する
 
 - 自分用の WezTerm の設定を入れ、シェル統合を確かめる
-- 前提: [WezTerm](#wezterm)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜5 を通し、Git と共通の bash 設定を入れてある。HackGen Console NF は任意
+- 前提: [WezTerm](#wezterm)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜6 を通し、Git と共通の bash 設定を入れてある。HackGen Console NF は任意
 - 実行場所: この項の手順 1〜5 は、WezTerm の外の、自分のユーザーの Git Bash の窓。この項の手順 6・7 は、起動し直した WezTerm の Git Bash のタブ
 - この項の手順 1 で WezTerm の窓をすべて閉じる。既存設定の確認と、この項の手順 3 の退避を省かない
 - [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
@@ -4090,7 +4090,7 @@
 ### シェルのツールを入れる
 
 - scoop で fzf・zoxide・starship・eza・bat を入れ、Git Bash で確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -4114,10 +4114,10 @@
    ```
 
    - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 を通す
+   - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
-   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5 を通す
-   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の窓で行ってから、このブロックを貼り直す
+   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 を通す
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
    - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 3 は飛ばす
@@ -4149,7 +4149,7 @@
    - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
    - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
    - `Notes` の starship のプロファイル追記と、`suggests installing` の VC++ ランタイム・less の導入は行わない
-   - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](#scoopwingetwsl-を上げる)の手順 6・7、ほかのツールは同じ項の手順 1・2 で上げる
+   - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](#scoopwingetwsl-を上げる)の手順 7・8、ほかのツールは同じ項の手順 2・3 で上げる
 
 1. 版と場所と、zoxide を止めたことを確かめる。
 
@@ -4221,7 +4221,7 @@
 ### PowerShell 7 のプロファイルを設定する
 
 - PowerShell 7 に貼り付け・↑/↓ の履歴検索と、導入済みの zoxide・starship を読む設定を足す
-- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜4 と[アプリを入れる](#アプリを入れる)の手順 5 を通してある
+- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜5 と[アプリを入れる](#アプリを入れる)の手順 6 を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
 - 対象は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`。Windows PowerShell 5.1 のプロファイルとは別
 - 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
@@ -4296,7 +4296,7 @@
    - 次のとおりならよい
      - 実行ポリシーの表の `LocalMachine` か `CurrentUser` が `RemoteSigned`
      - キーの表の `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`（この項の手順 3 を行ったなら、`Tab` が `MenuComplete`）
-   - `pwsh.exe` が見つからない旨が出たら、[アプリを入れる](#アプリを入れる)の手順 5 を確かめる
+   - `pwsh.exe` が見つからない旨が出たら、[アプリを入れる](#アプリを入れる)の手順 6 を確かめる
    - 実行ポリシーがどれも `Undefined` なら、プロファイルは読まれず、キーは既定のまま（`Ctrl+Enter` が `InsertLineAbove`）。そうでなければ、この項の手順 5 は飛ばす
 
 1. 実行ポリシーがどれも `Undefined` のときだけ、PowerShell 7 の CurrentUser を RemoteSigned にする。
@@ -4352,7 +4352,7 @@
 ### OpenSSH サーバー
 
 - LAN からこの PC に SSH でログインできるように、OpenSSH サーバーを入れる
-- 前提: [ネットワークとリモート](#ネットワークとリモート)の手順 1 を通し、LAN の接続をプライベートにしてある
+- 前提: [ネットワークとリモート](#ネットワークとリモート)の手順 3 を通し、LAN の接続をプライベートにしてある
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者の Windows PowerShell（5.1）を開く。
@@ -4407,7 +4407,7 @@
    if (-not $LAN_IF) {
      Write-Error '中断: この項の手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
-     Write-Error '中断: LAN の接続がプライベートではない（「ネットワークとリモート」の手順 1 でプライベートにする）'
+     Write-Error '中断: LAN の接続がプライベートではない（「ネットワークとリモート」の手順 3 でプライベートにする）'
    } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
@@ -4416,7 +4416,7 @@
    ```
 
    - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
-   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 1 でプライベートにして貼り直す。この項の手順 2 の変数を貼り直す
+   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 3 でプライベートにして貼り直す。この項の手順 2 の変数を貼り直す
    - **注意**: プライベートの LAN では、ネットワーク探索など、ほかのプライベート向けの許可も効く
 
 1. パスワード認証を有効にし、設定を検査してから sshd を再起動する。
@@ -4444,8 +4444,8 @@
    }
    ```
 
-   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 で使う）
-   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` も控え、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 の初回の接続で照合する
+   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 で使う）
+   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` も控え、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 5 の初回の接続で照合する
 
 ---
 
@@ -4484,11 +4484,11 @@
 1. クライアントのシェルで、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
@@ -4506,7 +4506,7 @@
    fi
    ```
 
-   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。[OpenSSH サーバー](#openssh-サーバー)の手順 5 で控えた指紋と同じなら `yes`
+   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。[OpenSSH サーバー](#openssh-サーバー)の手順 7 で控えた指紋と同じなら `yes`
    - `<WIN_USER>@<WIN_HOST>'s password:` で、Windows のユーザーのパスワードを入れる（Microsoft アカウントなら、そのアカウントのパスワード。PIN ではない）
    - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
      - [SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<WIN_USER>` だけを出す
@@ -4537,18 +4537,18 @@
 1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
    - 最後に値を読み戻して確かめる
    - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -4624,7 +4624,7 @@
 - 前提: [OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)を通し、使うクライアントが鍵で入れる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
 - 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
 - 切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
-- パスワード認証に戻すときは、[OpenSSH サーバー](#openssh-サーバー)の手順 4 を貼り直す
+- パスワード認証に戻すときは、[OpenSSH サーバー](#openssh-サーバー)の手順 6 を貼り直す
 
 1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
 
@@ -4636,18 +4636,18 @@
 1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
    - 最後に値を読み戻して確かめる
    - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -4696,18 +4696,18 @@
 1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
    - 最後に値を読み戻して確かめる
    - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -4754,7 +4754,7 @@
 ### scoop のツールを SSH のセッションで使う
 
 - SSH で起動できない scoop のツールのジャンクションを、管理者で同じ向き先に作り直す
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
 - 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
 - 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448
 - `scoop install`・`scoop update` の後は、この項の手順 3 を貼り直す
@@ -4769,18 +4769,18 @@
 1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
    - 最後に値を読み戻して確かめる
    - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -4824,9 +4824,9 @@
 - WezTerm からこの Windows の PC に SSH で入り、管理者と同じユーザーの非管理者の PowerShell を切り替える
 - 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)を通してある。接続元も WezTerm の設定を入れてある（Windows は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、Linux は[WezTerm の設定の導入](almalinux-setup.md#wezterm-の設定を導入する)）
 - 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
-- 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 5 も通してあること
+- 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
 - **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
 
 > [!WARNING]
 > **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。
@@ -4844,18 +4844,18 @@
 1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
 
    ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 5 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
+   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
    ```
 
    ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 5 の @ の前と違えば直す。<WIN_USER>
+   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in WIN_HOST WIN_USER; do
      printf '%-8s = %s\n' "$v" "${!v}"
    done
    ```
 
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 3 と同じ値を入れる
+   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
    - 最後に値を読み戻して確かめる
    - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -5212,7 +5212,7 @@
 - 更新後や config の変更後に、Windows と Git の ssh の版と設定を確かめる
 - 前提: [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
+- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 3 で上がる。この項で別に上げるものは無い
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5258,7 +5258,7 @@
 ### git-delta
 
 - scoop で delta を入れ、Git の差分表示を設定する
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5280,9 +5280,9 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
+   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](#wezterm)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める
 
 1. scoop で delta を入れ、版と場所を確かめる。
@@ -5320,7 +5320,7 @@
 ### GitHub CLI
 
 - scoop で GitHub CLI を入れ、GitHub にログインする
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5342,7 +5342,7 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `GitCred` が `credential.helper manager` ならよい
    - `GitCred` が空なら、この項の手順 4 の Git の認証には `Y` と答えてよい
@@ -5406,7 +5406,7 @@
 ### Neovim
 
 - scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[HackGen Console NF](#hackgen-console-nf)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[HackGen Console NF](#hackgen-console-nf)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5428,9 +5428,9 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める
 
 1. scoop で Neovim を入れる。
@@ -5508,7 +5508,7 @@
 #### LazyVim の設定を導入する
 
 - Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
-- 前提: [Git for Windows](#git-for-windows)・[アプリを入れる](#アプリを入れる)の手順 1・2・[HackGen Console NF](#hackgen-console-nf)と、[Neovim](#neovim)で本体を先に入れてある
+- 前提: [Git for Windows](#git-for-windows)・[アプリを入れる](#アプリを入れる)の手順 2・3・[HackGen Console NF](#hackgen-console-nf)と、[Neovim](#neovim)で本体を先に入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
@@ -5805,7 +5805,7 @@
 ### lazygit
 
 - scoop で lazygit を入れ、自分用の設定と起動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5827,10 +5827,10 @@
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
    - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、外してから始める
-   - `Extras : True` なら、extras のバケットはもうある（[Neovim](#neovim)の手順 3 で足した）。この項の手順 3 は飛ばす
+   - `Extras : True` なら、extras のバケットはもうある（[Neovim](#neovim)の手順 4 で足した）。この項の手順 3 は飛ばす
 
 1. extras のバケットが無いときだけ、scoop に足す。
 
@@ -5895,7 +5895,7 @@
 #### lazygit の設定を導入する
 
 - Windows の lazygit の既存設定を退避し、自分用の設定を入れる
-- 前提: [lazygit](#lazygit)の手順 1〜3 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)も通し、Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)も通し、Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
@@ -6134,7 +6134,7 @@
 ### yazi
 
 - scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -6173,9 +6173,9 @@
    ```
 
    - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 1・2 で入れる
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 2 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、外してから始める
    - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きし、ロールバックで戻す
 
@@ -6255,14 +6255,14 @@
 
    - プレビューを確かめるには、PDF・動画・画像・書庫のあるフォルダーで右のペインを見る
    - 画像のプレビューは、WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）の中で出る。conhost の窓では出ない
-   - [表示と入力](#表示と入力)の手順 6 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
+   - [表示と入力](#表示と入力)の手順 7 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
    - `q` で閉じる
    - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると yazi への操作として食われる）
 
 #### yazi の設定を導入する
 
 - Windows の yazi の既存設定を退避し、自分用の設定を入れる
-- 前提: [yazi](#yazi)の手順 1〜4 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](#git-for-windows)で入れてある
+- 前提: [yazi](#yazi)の手順 1〜5 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](#git-for-windows)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - yazi をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
@@ -6337,7 +6337,7 @@
 #### mdtable を導入・更新する
 
 - Markdown と Excel を往復する mdtable を入れ、導入状態を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 1・2 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
@@ -6589,7 +6589,7 @@
    - `Admin` が `False` なら、管理者ではない窓に貼っている。閉じて、この項の手順 1 から
    - `Edition` が `Core`（Home）なら、Hyper-V は入らない。ここで止める
    - `Hypervisor` が `False` で `VirtFirmware` も `False` なら、PC の UEFI（BIOS）の設定で Intel VT-x / AMD-V（SVM）を有効にしてから始める
-   - `Microsoft-Hyper-V-All` が `Enabled` なら、もう有効。[Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 1 は飛ばす
+   - `Microsoft-Hyper-V-All` が `Enabled` なら、もう有効。[Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2 は飛ばす
    - 最後の表（Hyper-V Administrators の一員）は、空でよい
 
 #### Hyper-V: Hyper-V を有効にして再起動する
@@ -6648,7 +6648,7 @@
    ```
 
    - **開いている作業を保存し、動いている VM（VirtualBox など）を止めてから貼る**（確認を聞かずに再起動が始まる）
-   - VMware も入れるなら、先に[VMware の導入](#vmware-workstation-pro-インストールする)の手順 1 まで済ませると、再起動は 1 回で済む（同じ項の手順 2 を兼ねる）
+   - VMware も入れるなら、先に[VMware の導入](#vmware-workstation-pro-インストールする)の手順 3 まで済ませると、再起動は 1 回で済む（同じ項の手順 4 を兼ねる）
    - **次の手順は、起動してサインインしてから行う**
 
 #### Hyper-V: 再起動の後に確かめる
@@ -6768,7 +6768,7 @@
    [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
    ```
 
-   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 2 と同じ VM の名前を入れる
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を起動し、VM の画面を開く。
@@ -6820,7 +6820,7 @@
    [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
    ```
 
-   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 2 と同じ VM の名前を入れる
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM の状態と、ゲストの IP を確かめる。
@@ -6883,7 +6883,7 @@
    [pscustomobject]@{ HV_VM = $HV_VM; HV_DIR = $HV_DIR; HV_CHECKPOINT = $HV_CHECKPOINT } | Format-List
    ```
 
-   - `HV_VM` と `HV_DIR` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ値にする
+   - `HV_VM` と `HV_DIR` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 2 と同じ値にする
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を止めて、チェックポイントを取る。
@@ -6959,7 +6959,7 @@
    [pscustomobject]@{ HV_VM = $HV_VM } | Format-List
    ```
 
-   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - `HV_VM` は、[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 2 と同じ VM の名前を入れる
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. スイッチを作り、止めてある VM に 2 枚目の NIC として付ける。
@@ -6988,7 +6988,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 > [!CAUTION]
-> **この項の手順 2 は、VM のディスクごと消す（取り戻せない）**。[チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+> **この項の手順 2 は、VM のディスクごと消す（取り戻せない）**。[チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 5 で、この VM から作った VM が残っているなら、先にそちらを消す。
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -7277,7 +7277,7 @@
    [pscustomobject]@{ VB_VM = $VB_VM; VBoxManage = $vbm } | Format-List
    ```
 
-   - `VB_VM` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ VM の名前を入れる
+   - `VB_VM` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 2 と同じ VM の名前を入れる
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM のウィンドウを開いて起動する。
@@ -7334,7 +7334,7 @@
    [pscustomobject]@{ VB_VM = $VB_VM; VB_SSH_PORT = $VB_SSH_PORT; VBoxManage = $vbm } | Format-List
    ```
 
-   - `VB_VM` と `VB_SSH_PORT` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ値を入れる
+   - `VB_VM` と `VB_SSH_PORT` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 2 と同じ値を入れる
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. VM を画面無しで起動し、状態と仮想化の載り方を確かめる。
@@ -7359,7 +7359,7 @@
 
 #### VirtualBox: 使い方の基本
 
-- 以下は Windows 11 のホスト用。管理者ではない Windows PowerShell（5.1）で、[VM を作る](#virtualbox-vm-を作る)の手順 1 の変数を使う
+- 以下は Windows 11 のホスト用。管理者ではない Windows PowerShell（5.1）で、[VM を作る](#virtualbox-vm-を作る)の手順 2 の変数を使う
 
 | すること | コマンド |
 |---|---|
@@ -7398,7 +7398,7 @@
    [pscustomobject]@{ VB_VM = $VB_VM; VB_BASE = $VB_BASE; VB_CLONE_PORT = $VB_CLONE_PORT; VBoxManage = $vbm } | Format-List
    ```
 
-   - `VB_VM` と `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ値にする
+   - `VB_VM` と `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 2 と同じ値にする
    - `VB_CLONE_PORT` は、この PC で使っていない番号にする。元の VM の SSH の転送ポートと違う番号にする
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
@@ -7483,7 +7483,7 @@
    [pscustomobject]@{ VB_BASE = $VB_BASE; VBoxManage = $vbm } | Format-List
    ```
 
-   - `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 1 と同じ VM の置き場所にする
+   - `VB_BASE` は、[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 2 と同じ VM の置き場所にする
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
 1. 停止した VM の登録とディスクを消す（取り戻せない。`VB_REMOVE` は必ず値を入れる）。
@@ -7608,7 +7608,7 @@
 #### VMware Workstation Pro: インストールする
 
 - 取得したインストーラーで VMware Workstation Pro を入れる
-- 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2 で Windows ハイパーバイザー プラットフォームを有効にしてある
+- 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 3 で Windows ハイパーバイザー プラットフォームを有効にしてある
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 
 > [!IMPORTANT]
@@ -7653,7 +7653,7 @@
    ```
 
    - **開いている作業を保存し、動いている VM を止めてから貼る**（確認を聞かずに再起動が始まる）
-   - Hyper-V の手順書の途中から来たなら、[Hyper-V の「Hyper-V を有効にして再起動する」の手順 4](#hyper-v-hyper-v-を有効にして再起動する)の再起動がこれに当たる（再起動は 1 回でよい）
+   - Hyper-V の手順書の途中から来たなら、[Hyper-V の「Hyper-V を有効にして再起動する」の手順 5](#hyper-v-hyper-v-を有効にして再起動する)の再起動がこれに当たる（再起動は 1 回でよい）
    - **次の手順は、起動してサインインしてから行う**
 
 #### VMware Workstation Pro: 入ったかを確かめる
@@ -7783,7 +7783,7 @@
    [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR } | Format-List
    ```
 
-   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 と同じ値にする
    - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
@@ -7837,7 +7837,7 @@
    [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR } | Format-List
    ```
 
-   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 と同じ値にする
    - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
@@ -7864,7 +7864,7 @@
 
 #### VMware Workstation Pro: 使い方の基本
 
-- 管理者ではない Windows PowerShell 5.1 で打つ。`<vmx>` は VM の `.vmx` のパス。`$VMW_DIR` は[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 で設定する
+- 管理者ではない Windows PowerShell 5.1 で打つ。`<vmx>` は VM の `.vmx` のパス。`$VMW_DIR` は[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 で設定する
 
 | すること | コマンド |
 |---|---|
@@ -7907,7 +7907,7 @@
    [pscustomobject]@{ VMW_VM = $VMW_VM; VMW_BASE = $VMW_BASE; VMW_VMX = $VMW_VMX; VMW_DIR = $VMW_DIR; VMW_SNAPSHOT = $VMW_SNAPSHOT } | Format-List
    ```
 
-   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 1 と同じ値にする
+   - `VMW_VM` と `VMW_BASE` は、[VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 と同じ値にする
    - `VMW_DIR` が空なら、[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)から確かめ直す
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 
@@ -7962,7 +7962,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 > [!CAUTION]
-> **この項の手順 3 は、VM のディスクごと消す（取り戻せない）**。[スナップショットとクローン](#vmware-workstation-pro-スナップショットとクローン)の手順 3 で、この VM から作った VM が残っているなら、先にそちらを消す。
+> **この項の手順 3 は、VM のディスクごと消す（取り戻せない）**。[スナップショットとクローン](#vmware-workstation-pro-スナップショットとクローン)の手順 5 で、この VM から作った VM が残っているなら、先にそちらを消す。
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -8006,7 +8006,7 @@
 - 前提: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）。UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意してある。Windows の VM の中では、入れ子の仮想化も有効にしてある
 - 実行場所: この PC のデスクトップ。状態確認・有効化・再起動は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）。起動・試験・窓を閉じた後の確認は、通常のデスクトップと Sandbox の画面
 - **この項の手順 4 は、再起動が必要な場合だけ行う**。先に開いているファイルを保存し、実行中の作業を終える
-- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
 > [!CAUTION]
 > **この項の手順 8 で Sandbox 内のファイルとアプリの状態が消える**。残す結果をホストへコピーしてから閉じる。
@@ -8421,7 +8421,7 @@
    if (-not $LAN_IF) {
      Write-Error 'この項の手順 2 の $LAN_IF が空'
    } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
-     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の「ネットワークとリモート」の手順 1 でプライベートにする）'
+     Write-Error '中断: LAN の接続がプライベートではない（Windows 11 の初期設定の「ネットワークとリモート」の手順 3 でプライベートにする）'
    } else {
      Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
      New-NetFirewallRule -Name 'Syncthing-In-TCP' -DisplayName 'Syncthing (TCP 22000)' -Group $g -Direction Inbound -Action Allow -Profile Private -Program $exe -Protocol TCP -LocalPort 22000 | Out-Null
@@ -8433,9 +8433,9 @@
    ```
 
    - `<LAN_IF>  Private` と、3 つの規則が `True  Private  Inbound  Allow` で出ればよい
-   - `中断:` が出たら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](#ネットワークとリモート) でプライベートにしてから、この手順を貼り直す
+   - `中断:` が出たら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 3](#ネットワークとリモート) でプライベートにしてから、この手順を貼り直す
    - 何度貼ってもよい
-   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows 11 の初期設定の「OpenSSH サーバー」の手順 3](#openssh-サーバー)の補足）
+   - **注意**: プライベートの LAN では、プライベート向けのほかの許可の規則（ネットワーク探索など）も効く（[Windows 11 の初期設定の「OpenSSH サーバー」の手順 5](#openssh-サーバー)の補足）
 
 1. サインインしたときに Syncthing を起動するタスクを登録する。
 
@@ -8486,7 +8486,7 @@
    ```
 
    - `0.0.0.0:8384` と `true` が出て、8384 の `LocalAddress` が `127.0.0.1` でなくなればよい（`::` か `0.0.0.0`）
-   - `127.0.0.1` のままなら、[Windows 11 で止める・もう一度始める](#syncthing-windows-11-で止めるもう一度始める)の手順 1・2 で起動し直す
+   - `127.0.0.1` のままなら、[Windows 11 で止める・もう一度始める](#syncthing-windows-11-で止めるもう一度始める)の手順 2・3 で起動し直す
 
 1. 待ち受け・規則・デバイス ID を確かめ、GUI の URL を出す。
 
@@ -8626,23 +8626,23 @@
 
 - OS・Store の更新は[Windows Update](#windows-update)（管理者）・[Microsoft Store の更新](#microsoft-store-の更新)（通常）を通す。再起動は手動で行う
 - scoop・winget で入れたアプリは、入れた方法で上げる
-  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6 で修正版を確かめ、手順 7 で上げる
+  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7 で修正版を確かめ、手順 7 で上げる
   - 上げても、git の設定（`~/.gitconfig`）と gh のログイン（資格情報マネージャーと `%APPDATA%\GitHub CLI`）は変わらない
 - Firefox は、自分で新しい版に上がる。待たずに上げるときだけ、その手順を行う
   - Firefox は起動中に取得し、次の起動時に更新する。起動後に作られる `\Mozilla\Firefox Background Update <番号>` のタスクも、7 時間ごとに更新する
   - Firefox の更新は Mozilla Maintenance Service が書き込み、UAC は出ない。日本語版に言語パックを足すと、閉じている間の更新が止まるので使わない
 - Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「Windows 11 の更新」](ai-agents.md#windows-11-の更新)で上げる
 - WezTerm は自分では更新しない。nightly の新しい版が出ても知らせない（WezTerm の更新の確認が見るのは stable のリリースだけで、nightly の版の方が新しいので何も出ない）
-  - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 1・5〜7 で、設定を残して `C:\Program Files\WezTerm` に上書きする
+  - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2・6〜8 で、設定を残して `C:\Program Files\WezTerm` に上書きする
   - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
 - フォントは[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)に従い、この文書の版と sha256 を確かめて直してから入れ直す
 - 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)を通して上げる
 - 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる
   - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
-- SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 1 を管理者の窓に貼り直す
+- SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
-- Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 3 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜3 を貼り直す
+- Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。戻っていれば、その節の「元に戻すときは、」より前を貼り直す（控えは書き換えない）
 - VirtualBox・WireGuard は、それぞれの手順書の「Windows 11 の更新」
   - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](#samba-クライアント-windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
@@ -8678,7 +8678,7 @@
 
    - アプリごとに `'<名前>' (<版>) was installed successfully!` の形の行が出る
    - 動いているアプリは `Running process detected, skip updating.` で飛ばされる。閉じてから貼り直す
-   - SSH のセッションで scoop のツールを使っているなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 1 を、管理者の PowerShell で貼り直す
+   - SSH のセッションで scoop のツールを使っているなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を、管理者の PowerShell で貼り直す
    - **Neovim の設定やプラグインは更新に追従しない**ので、メジャー更新の後は `:checkhealth` で壊れていないか見る（自分用の設定のプラグインと外部コマンドは、[LazyVim の更新](#lazyvim-の本体外部コマンドプラグインを更新する)の全項）
 
 1. winget で入れたものを上げる。
@@ -8745,7 +8745,7 @@
    - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
    - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
    - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「シェルのツール」](almalinux-setup.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、[シェルのツールを入れる](#シェルのツールを入れる)の手順 6 の箇条書き）
+   - WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「シェルのツール」](almalinux-setup.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7 の箇条書き）
 
 ---
 
@@ -8766,12 +8766,12 @@
    ```
 
    - `v2.10.0` なら、新しい版は無い。この項の手順 3 は行わない
-   - 違う版なら、[HackGen Console NF](#hackgen-console-nf)の手順 2 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
+   - 違う版なら、[HackGen Console NF](#hackgen-console-nf)の手順 3 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
 
 1. 新しい版にするときだけ、今の版を外してから入れ直す。
 
    - [ロールバックの「HackGen Console NF を消す」](extra/windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3（登録を消し、サインインし直してから、ファイルを消す）を行う
-   - 続けて、直した[HackGen Console NF](#hackgen-console-nf)の手順 2 を貼り、サインアウトしてサインインし直してから、[再起動の後に確かめる](#再起動の後に確かめる)の手順 5 で確かめる
+   - 続けて、直した[HackGen Console NF](#hackgen-console-nf)の手順 3 を貼り、サインアウトしてサインインし直してから、[再起動の後に確かめる](#再起動の後に確かめる)の手順 5 で確かめる
 
 ---
 
@@ -8838,7 +8838,7 @@
    - 1 行目に今の版が出る
    - プロセスが出たら、その WezTerm の窓をすべて閉じる
 
-1. [WezTerm](#wezterm)の手順 3 のブロックを貼る。
+1. [WezTerm](#wezterm)の手順 4 のブロックを貼る。
 
    - 最後に出る `wezterm <版>` が、この項の手順 6 の版より新しければ上がった
    - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）

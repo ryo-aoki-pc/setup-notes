@@ -1,29 +1,29 @@
 # VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の参考資料
 
-[手順書](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-実施手順)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
+[手順書](../almalinux-setup.md#virtualbox-の-bootc-ゲスト)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
 ## 補足
 
-### 実施手順 / 手順 2: 補足: 空き容量
+### VirtualBox の bootc ゲスト / 手順 2: 補足: 空き容量
 
 - `/var` に 10 GB 以上の空きが要るのは、手順 6 でベースのイメージをもう 1 つ取り込むため
 
-### 実施手順 / 手順 4: 補足: CD の挿入
+### VirtualBox の bootc ゲスト / 手順 4: 補足: CD の挿入
 
 - CD を入れるのは VirtualBox のホスト側の操作。ホストの VirtualBox に同梱の ISO が、VM の光学ドライブに入る
 
-### 実施手順 / 手順 5: 補足: CD の中身と確かめ方
+### VirtualBox の bootc ゲスト / 手順 5: 補足: CD の中身と確かめ方
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施手順--手順-5-補足-cd-の中身と確かめ方)
 
 - 7.2.8 より古い版を使わないのは、EL10.1・10.2 のカーネルへの対応が 7.2.8 で入ったため
 
-### 実施手順 / 手順 6: 補足: ビルドの表示
+### VirtualBox の bootc ゲスト / 手順 6: 補足: ビルドの表示
 
 - 途中の `+` で始まる行は、Containerfile の中で実行したコマンド（Containerfile の `set -x`）
 - 途中の `unable to load vboxguest kernel module` と `installer exit=1` が出るのは、ビルドの中ではモジュールを読み込めないため
 
-### 実施手順 / 手順 7: 補足: 切り替えで起きること
+### VirtualBox の bootc ゲスト / 手順 7: 補足: 切り替えで起きること
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施手順--手順-7-補足-切り替えで起きること)
 
@@ -33,40 +33,40 @@
 - `/var` はそのまま残る。`/var/lib/VBoxGuestAdditions` のリンクは、起動のたびに `systemd-tmpfiles` が張る
 - 起動時の `vboxadd.service` は、イメージのカーネル向けのモジュールがそろっているので作り直さず、読み込むだけにする
 
-### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 3: 補足: 鍵をホストに置く理由と扱い
+### ホストオンリーアダプターだけの VM でビルドする / 手順 4: 補足: 鍵をホストに置く理由と扱い
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意--手順-3-補足-鍵をホストに置く理由と扱い)
 
 - モジュールに署名するのは、この節の手順 7 のビルド（ホスト）なので、秘密鍵もホストに置く。VM には公開鍵の証明書だけを送る
-- 鍵の作り方（CN も）は [secure-boot-mok.md 手順 4](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) と同じで、置き場所と持ち主（自分のユーザー）だけが違う
+- 鍵の作り方（CN も）は [secure-boot-mok.md 手順 4](../almalinux-setup.md#secure-boot-の署名鍵) と同じで、置き場所と持ち主（自分のユーザー）だけが違う
 - `~/vbox-ga-mok` は、ビルドの文脈（`~/vbox-ga-host/vbox-ga-image`）の外に置く。文脈のディレクトリは、まるごと podman に渡るため
 - `MOK.priv` は、この鍵を登録した VM が信頼するモジュールを作れる鍵になる。ホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない
-- AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) で作るもの）とは別のもの
+- AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵) で作るもの）とは別のもの
 - **鍵を作り直したら**、この節の手順 7 のビルドに `--no-cache` を足す（[更新](../almalinux-setup.md#virtualbox-の-bootc-ゲスト-更新)のリードと同じ）
 - この節の手順 3 のブロックは、`openssl` が入っていなければ `sudo dnf` で入れる
 - すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
 
 - 初めてつなぐときは、ホスト鍵の確認に答えると `known_hosts` に登録され、パスワードを聞かれる
 
-### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 5: 補足: tar の時刻の警告
+### ホストオンリーアダプターだけの VM でビルドする / 手順 6: 補足: tar の時刻の警告
 
 - `tar: … time stamp … is … s in the future` が混ざるのは、VM の時計が進んでいるため
 
-### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 10: 補足: 切り替えた後の表示
+### ホストオンリーアダプターだけの VM でビルドする / 手順 11: 補足: 切り替えた後の表示
 
 - 切り替えた後の `● Booted image:` が `containers-storage:…` になるのは、レジストリではなく、この VM の podman のイメージを追うため
 - `Digest:` がレジストリのものと違うのは、ファイルから取り込んだイメージの digest だから
 
-### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 11: 補足: 自動で消すもの
+### ホストオンリーアダプターだけの VM でビルドする / 手順 12: 補足: 自動で消すもの
 
-- 同じ節の手順 6 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
+- 同じ項の手順 7 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
 - `~/.config/containers` は、ほかのファイルが無ければ消える
 
-### 共有フォルダーを使う（任意） / 手順 2: 補足: vboxsf グループ
+### 共有フォルダーを使う / 手順 2: 補足: vboxsf グループ
 
 - `vboxsf` グループは、切り替えた後の最初の起動で `systemd-sysusers` が作っている
 
-### 更新 / 手順 2: 補足: ベースの取り込み
+### 更新 / 手順 3: 補足: ベースの取り込み
 
 - `--pull=newer` なので、ベースが新しくなっていれば取り込み直す
 
@@ -106,6 +106,6 @@ Guest Additions の入手元とビルドの場所:
 - [VirtualBox — Changelog 7.2](https://www.virtualbox.org/wiki/Changelog-7.2) — RHEL 10.1・10.2（7.2.8）と RHEL 10.3（7.2.18）のカーネルへの対応、Wayland のクリップボード
 - [VirtualBox のソース（GitHub の v7.2.20）](https://github.com/VirtualBox/virtualbox/tree/v7.2.20/src/VBox/Additions/linux/installer) — `vboxadd.sh`・`install.sh.in`・`vboxadd-x11.sh` と `src/VBox/Installer/linux/routines.sh`
 - `man tmpfiles.d`（`L+`）/ `man sysusers.d`（`uid:gid`）/ `man Containerfile`（`RUN --mount=type=secret`）
-- [Secure Boot の MOK 登録](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) — Secure Boot の VM の前提の手順書（署名鍵の作成と MokManager での登録）
+- [Secure Boot の MOK 登録](../almalinux-setup.md#secure-boot-の署名鍵) — Secure Boot の VM の前提の手順書（署名鍵の作成と MokManager での登録）
 
 ---

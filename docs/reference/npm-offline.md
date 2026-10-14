@@ -1,16 +1,16 @@
 # npm をインターネットに出られないホストで使う手順（AlmaLinux 10 / AppStream の Node.js / Neovim の Mason）の参考資料
 
-[手順書](../almalinux-setup.md#npm-のオフライン導入-実施手順)・[ロールバックと注意点](../extra/npm-offline.md)
+[手順書](../almalinux-setup.md#npm-のオフライン導入)・[ロールバックと注意点](../extra/npm-offline.md)
 
 ## 補足
 
-### npm のオフライン導入: 実施手順 / 手順 1・2: 補足: LazyVim の初回取得より前に経路を設定する理由
+### npm のオフライン導入 / 手順 1・2: 補足: LazyVim の初回取得より前に経路を設定する理由
 
 初期設定の「Neovim」の手順 3 は、設定の導入先の「LazyVim の設定を導入する」を参照する。その手順 10 の初回起動から依存の取得が始まるため、オフラインでは先に同じSOCKSシェルでNode.js/npmを用意し、`https_proxy`とレジストリの疎通を確認する。Neovimの本体導入（手順 1・2）と、LazyVimの初回起動を分けて案内する。
 
 2026-10-12の[既存VM継続の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)では、この順番と通信を確認した。キャッシュなしの初回Mason取得や、過去の応答停止原因の証明には含めない。
 
-### 実施手順 / 手順 2: 補足: npm は ALL_PROXY を読まない
+### npm のオフライン導入 / 手順 2: 補足: npm は ALL_PROXY を読まない
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#実施手順--手順-2-補足-npm-は-all_proxy-を読まない)
 
@@ -25,7 +25,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 ```
 
 - npm のレジストリは https なので、使うのは `https_proxy` だけ。ssh-socks-tunnel.md の手順 3 の `ALL_PROXY` は読まない
-- `socks5h://` は、同梱の `socks-proxy-agent` が受け付ける（`socks`・`socks4`・`socks4a`・`socks5`・`socks5h`）。`h` を落とすと、名前をオフラインのホストで引いて失敗する（[ssh-socks-tunnel.md 手順 3](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) の補足）
+- `socks5h://` は、同梱の `socks-proxy-agent` が受け付ける（`socks`・`socks4`・`socks4a`・`socks5`・`socks5h`）。`h` を落とすと、名前をオフラインのホストで引いて失敗する（[ssh-socks-tunnel.md 手順 3](../almalinux-setup.md#ssh-の-socks-トンネル) の補足）
 
 **設定の値は、環境変数より優先される。**
 
@@ -35,7 +35,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 - `export` はこのシェルの中だけで有効
 
-### 実施手順 / 手順 3: 補足: Mason が npm を動かす仕組みと、ファイルを開く理由
+### npm のオフライン導入 / 手順 3: 補足: Mason が npm を動かす仕組みと、ファイルを開く理由
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#実施手順--手順-3-補足-mason-が-npm-を動かす仕組みとファイルを開く理由)
 
@@ -54,9 +54,9 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 **入れている途中で `:qa` すると、確認は出ず、その導入は止まる。** 次に開いたときに、Mason がやり直す。
 
-### 実施手順 / 手順 5: 補足: プロキシの変数
+### npm のオフライン導入 / 手順 5: 補足: プロキシの変数
 
-- `env` が何も出さないのは、プロキシの変数が同じ節の手順 2 のシェルと一緒に消えたため
+- `env` が何も出さないのは、プロキシの変数が同じ項の手順 2 のシェルと一緒に消えたため
 
 ### 選択した方針
 
@@ -67,8 +67,8 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 | **AppStream の `nodejs`（22 系）と、シェルの `https_proxy`** | ssh-socks-tunnel.md のトンネルと dnf のプロキシ | **採用。** 言語処理系は AppStream から入れる方針（[導入元一覧](../tool-catalog.md)）で、`dnf upgrade` で上がる。npm にだけ変数を 1 つ足せば、Mason を書き換えずに npm がトンネルを通る |
 | AppStream の `nodejs24`（24.19.0） | 同上 | 不採用。コマンドが `node-24`・`npm-24` で、Mason が探す `npm` が無い |
 | Homebrew の `node` | homebrew-offline.md のトンネル | 不採用。Homebrew の `bin` が PATH で先に来るので、RPM の node と npm を隠す。版を選ぶなら mise（[導入元一覧](../tool-catalog.md)） |
-| `~/.npmrc` に `https-proxy=socks5h://127.0.0.1:1080` を書く | — | 不採用。トンネルが無いときも npm が 1080 番に向かい続ける。dnf のプロキシの行（ssh-socks-tunnel.md の[dnf にもトンネルを使わせる（任意）](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる任意)）と違い、書かなくても済む |
-| `ALL_PROXY` だけ | — | 動かない。npm は `ALL_PROXY` を読まない（[手順 2](../almalinux-setup.md#npm-のオフライン導入-実施手順) の補足） |
+| `~/.npmrc` に `https-proxy=socks5h://127.0.0.1:1080` を書く | — | 不採用。トンネルが無いときも npm が 1080 番に向かい続ける。dnf のプロキシの行（ssh-socks-tunnel.md の[dnf にもトンネルを使わせる](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)）と違い、書かなくても済む |
+| `ALL_PROXY` だけ | — | 動かない。npm は `ALL_PROXY` を読まない（[手順 2](../almalinux-setup.md#npm-のオフライン導入) の補足） |
 | npm のキャッシュ・Mason のディレクトリを運ぶ、社内に npm のミラー（Verdaccio など）を建てる | 同じアーキのホスト、運ぶ手段、ミラーのサーバー | 本書では扱わない（ネットワークで届かないときの方法） |
 
 - **Mason の導入を、`nvim --headless` のコマンドにしなかった**
@@ -83,8 +83,8 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 - [npm/agent の lib/proxy.js](https://github.com/npm/agent/blob/main/lib/proxy.js) — npm が読むプロキシの環境変数と、SOCKS の扱い
 - [mason.nvim](https://github.com/mason-org/mason.nvim) — `lua/mason-core/installer/managers/npm.lua`（npm のパッケージの入れ方）、`lua/mason-core/fetch.lua`（curl と wget）
 - [LazyVim の LSP の設定](https://www.lazyvim.org/plugins/lsp) — mason.nvim と mason-lspconfig.nvim の `ensure_installed`
-- [ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル-実施手順) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1・2 を使う
-- [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入-実施手順) — 前提の Homebrew（Neovim をトンネル越しに入れる）
+- [ssh-socks-tunnel.md](../almalinux-setup.md#ssh-の-socks-トンネル) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1〜3 を使う
+- [homebrew-offline.md](../almalinux-setup.md#homebrew-のオフライン導入) — 前提の Homebrew（Neovim をトンネル越しに入れる）
 - [AlmaLinux 10 の初期設定の「Neovim」](../almalinux-setup.md#neovim) — 前提の Neovim と、自分用の設定
 
 ---
