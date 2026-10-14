@@ -1,6 +1,6 @@
 # Windows 11 で Claude Code の Remote Control を SSH の切断後も動かす手順（タスク スケジューラ + WezTerm）のロールバックと注意点
 
-[手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)・[検証記録](../verification/windows-claude-remote-control.md)・[参考資料](../reference/windows-claude-remote-control.md)
+[手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-claude-remote-control.md)・[参考資料](../reference/windows-claude-remote-control.md)
 
 - 「手順 N」は[手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる

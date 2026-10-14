@@ -26,7 +26,7 @@
 
 ### 選択した方針
 
-[この節の検証記録](../verification/ssh-socks-tunnel.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md#選択した方針)
 
 | 経路 | 要るもの | 採否 |
 |---|---|---|

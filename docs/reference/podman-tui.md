@@ -19,7 +19,7 @@ podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requ
 
 ### 実施手順 / 手順 4: 補足: 画面の中身と、つながらないとき
 
-[この節の検証記録](../verification/podman-tui.md#実施手順--手順-4-補足-画面の中身とつながらないとき)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#実施手順--手順-4-補足-画面の中身とつながらないとき)
 
 - `localhost` は、podman-tui が `XDG_RUNTIME_DIR` から作る既定の接続。設定ファイルは要らない
 - `unix://run/...` とスラッシュが 2 つなのは podman-tui の書き方で、つながっている

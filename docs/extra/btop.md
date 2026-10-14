@@ -1,6 +1,6 @@
 # btop インストール手順（AlmaLinux 10 / EPEL）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#btop-実施手順)・[検証記録](../verification/btop.md)・[参考資料](../reference/btop.md)
+[手順書](../almalinux-setup.md#btop-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](../reference/btop.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#btop-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 
@@ -33,5 +33,5 @@
 - **表示は端末の UTF-8 とカラーに依存する**: 記号が崩れるときは `--force-utf`、色がおかしいときは `-l`（256 色）や `-t`（TTY モード）を試す
 - **root で起動しなくても動く**: ただし他ユーザーのプロセスの詳細（コマンドライン全体など）は見えないことがある
   - 全部見たいなら `sudo btop`（RPM なので、何も足さずに root の PATH にも入っている。ここが Homebrew 版との違い）
-- **設定は初回起動まで作られない**: [検証記録](../verification/btop.md)・[参考資料](../reference/btop.md)
+- **設定は初回起動まで作られない**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](../reference/btop.md)
 - **`htop` とは別物**: 同時に入れても衝突しない

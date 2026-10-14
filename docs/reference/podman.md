@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: Server の環境では最初から入っている
 
-[この節の検証記録](../verification/podman.md#実施手順--手順-1-補足-server-の環境では最初から入っている)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md#実施手順--手順-1-補足-server-の環境では最初から入っている)
 
 AlmaLinux 10 のインストーラのグループ定義（AppStream の comps）では、Server と Server with GUI の環境に「コンテナー管理」（`container-management`）のグループが入っている。
 

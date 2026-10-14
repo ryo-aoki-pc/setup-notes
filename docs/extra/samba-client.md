@@ -1,6 +1,6 @@
 # Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[検証記録](../verification/samba-client.md)・[参考資料](../reference/samba-client.md)
+[手順書](../almalinux-setup.md#samba-クライアント-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](../reference/samba-client.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#samba-クライアント-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -139,7 +139,7 @@
 - **サーバーで直接変えたもの**（サーバーのシェルや Syncthing などで、Samba を通さずに）
   - samba.md の今のサーバー（`smb3 directory leases = no`）なら、`ls` にすぐ出る。消したファイルを `stat` で引くと、約 1 秒はまだあるように見える（`actimeo=1`）
   - サーバーを変えられないときは、マウントのオプションに `nohandlecache` を足す
-- **GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない**: F5 ですぐ出る。gvfs はディレクトリのリースを使わないので、サーバーの設定によらない（[検証記録](../verification/samba-client.md)）
+- **GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない**: F5 ですぐ出る。gvfs はディレクトリのリースを使わないので、サーバーの設定によらない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)）
 - **`sudo mount -a` はエラーを出す**: 自動マウントの行について、1 回目は `mount error(16): Device or resource busy`
   - パスをたどった時点で systemd がマウントし、そのあと mount.cifs が同じ場所にもう一度マウントしようとするため
 - **資格情報ファイルは平文**: root なら読める。samba.md では Samba のパスワードは OS のパスワードと別なので、OS のパスワードと同じにしない

@@ -2,7 +2,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
 > - 前提: AlmaLinux 10 Workstation のインストール直後とインターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入-実施手順)を使う
@@ -2725,7 +2725,7 @@
 ## btop（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
 
 ### btop: 実施手順
 
@@ -2811,7 +2811,7 @@
 ## Distrobox（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/distrobox.md)・[参考資料](reference/distrobox.md)・[ロールバックと注意点](extra/distrobox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[ロールバックと注意点](extra/distrobox.md)
 
 ### Distrobox: 実施手順
 
@@ -2974,7 +2974,7 @@
 ## Dropbox と rclone（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)・[ロールバックと注意点](extra/dropbox-rclone.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)・[ロールバックと注意点](extra/dropbox-rclone.md)
 
 ### Dropbox と rclone: 実施手順
 
@@ -3231,7 +3231,7 @@
 ## Dropbox（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/dropbox.md)・[参考資料](reference/dropbox.md)・[ロールバックと注意点](extra/dropbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](reference/dropbox.md)・[ロールバックと注意点](extra/dropbox.md)
 
 ### Dropbox: 実施手順
 
@@ -3425,7 +3425,7 @@
 ## Forgejo（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
 
 ### Forgejo: 実施手順
 
@@ -3442,7 +3442,7 @@
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- [検証記録](verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバック](extra/forgejo.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバック](extra/forgejo.md)
 - [起動手順](#forgejo-イメージを取得して-localhost-で起動する)の手順 2 で公式の最新安定版を入れる
 - [自動更新](#forgejo-自動更新を有効にする)の手順 1〜3 で毎日最新安定版へ上げるタイマーを有効にする（[更新](#forgejo-更新)）
 - Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
@@ -4927,7 +4927,7 @@
 ## gdu（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
 
 ### gdu: 実施手順
 
@@ -5005,7 +5005,7 @@
 ## GNOME のデスクトップ共有（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[ロールバックと注意点](extra/gnome-desktop-sharing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[ロールバックと注意点](extra/gnome-desktop-sharing.md)
 
 ### GNOME のデスクトップ共有: 実施手順
 
@@ -5024,7 +5024,7 @@
 
 - [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 現行版と以前の版の環境・実施範囲は[検証記録](verification/gnome-desktop-sharing.md)を参照する
+- 現行版と以前の版の環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
 
 > [!WARNING]
 > - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める節で、ロックもしない）
@@ -5637,7 +5637,7 @@
 ## GNOME のヘッドレスセッション（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[ロールバックと注意点](extra/gnome-headless-session.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[ロールバックと注意点](extra/gnome-headless-session.md)
 
 ### GNOME のヘッドレスセッション: 実施手順
 
@@ -6024,7 +6024,7 @@
 ## GNOME のリモートログイン（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[ロールバックと注意点](extra/gnome-remote-desktop.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[ロールバックと注意点](extra/gnome-remote-desktop.md)
 
 ### GNOME のリモートログイン: 実施手順
 
@@ -6036,7 +6036,7 @@
 - 手順 1 で変数を設定したシェルで、上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション-実施手順)。この手順書と同じ PC で併用できる（ポートは 3390）
-- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有-実施手順)を通す。現行版・以前の版の実施範囲は[検証記録](verification/gnome-desktop-sharing.md)を参照する
+- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有-実施手順)を通す。現行版・以前の版の実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
   - デスクトップ共有を 3389 で使っている PC では、この手順書の後に、同書の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
@@ -6129,12 +6129,12 @@
    ```
 
    - ユーザー名とパスワードを聞かれる
-   - **対話入力は TTY 必須**。スクリプト・パイプ・Claude Code の `!` では、設定されずに exit 0 で終わる（[記録](verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
+   - **対話入力は TTY 必須**。スクリプト・パイプ・Claude Code の `!` では、設定されずに exit 0 で終わる（[記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
 1. 資格情報を反映させるため、デーモンを起動し直す。
 
-   - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](verification/gnome-remote-desktop.md#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
+   - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
    - [設定済みのサーバーで GDM の後に起動させる](#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3 を行う。ヘッドレスのセッションがある PC では、続けて同節の手順 4 も行う
    - その節の手順 1・2・5 は行わない
    - **次の手順は、デーモンと必要な受け渡し役の起動し直しが終わってから貼る**
@@ -6321,7 +6321,7 @@
 ## Homebrew のオフライン導入（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
 
 ### Homebrew のオフライン導入: 実施手順
 
@@ -6418,7 +6418,7 @@
 
 - Dockerfile とコンテナイメージの検査（hadolint・dive・Trivy）に使う
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/image-tools.md)・[参考資料](reference/image-tools.md)・[ロールバックと注意点](extra/image-tools.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[ロールバックと注意点](extra/image-tools.md)
 
 ### 画像の道具: 実施手順
 
@@ -6601,7 +6601,7 @@
 ## lazydocker（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
 
 ### lazydocker: 実施手順
 
@@ -6617,7 +6617,7 @@
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui-実施手順)（違いは[選択した方針](verification/lazydocker.md#選択した方針)）
+- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui-実施手順)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
 
 1. brew で lazydocker を入れる。
 
@@ -6773,7 +6773,7 @@
 
 - **root のコンテナを lazydocker で見ないなら、この節は不要**
 - root のコンテナは `/var/lib/containers` にあり、[手順 4](#lazydocker-実施手順)の一般ユーザーの画面には出ない
-- [注意点](extra/podman.md#注意点)と[root を使う条件](verification/podman.md#選択した方針)を先に確認する
+- [注意点](extra/podman.md#注意点)と[root を使う条件](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md#選択した方針)を先に確認する
 - この節で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にする
 - root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
@@ -6923,7 +6923,7 @@
 ## ユーザーサービスの常駐（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
 
 ### ユーザーサービスの常駐: 実施手順
 
@@ -6967,7 +6967,7 @@
 ## npm のオフライン導入（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
 
 > [!IMPORTANT]
 > - 前提: [SOCKS トンネル](#ssh-の-socks-トンネル-実施手順)の手順 1〜3 で、オフラインのホストへ接続する
@@ -7095,7 +7095,7 @@
 ## podman-compose（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
 
 ### podman-compose: 実施手順
 
@@ -7243,7 +7243,7 @@
 ## podman-tui（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
 
 ### podman-tui: 実施手順
 
@@ -7257,7 +7257,7 @@
 
 - 上から順にコードブロックを貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker-実施手順)（違いは[選択した方針](verification/podman-tui.md#選択した方針)）
+- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker-実施手順)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
 
 1. 入手できる版を見てから、podman-tui を入れる。
 
@@ -7356,7 +7356,7 @@
 ## Podman（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/podman.md)・[参考資料](reference/podman.md)・[ロールバックと注意点](extra/podman.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](reference/podman.md)・[ロールバックと注意点](extra/podman.md)
 
 ### Podman: 実施手順
 
@@ -7606,7 +7606,7 @@
 ## Samba クライアント（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
 
 ### Samba クライアント: 実施手順
 
@@ -7704,7 +7704,7 @@
 
    - `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1` を含む）、続いて `cifs write` が出ればよい
    - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`
-   - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は[検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)）
+   - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)）
    - `SHARE=home`（Samba サーバーの `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる。`findmnt` の行が出ていればよい
 
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
@@ -7815,7 +7815,7 @@
 ## Samba サーバー（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
 
 ### Samba サーバー: 実施手順
 
@@ -8056,7 +8056,7 @@
 - `/home` の直下には、ファイルもディレクトリも作れない（SELinux が断る）
 - 手順 1 の変数を設定した、公開したユーザー自身のシェルで貼る（`${USER}` を `valid users` に書く）
 - 読み書きは、この節の手順 2 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 9・10 で確かめる
-- 補足: [/home を公開するときの補足](verification/samba.md#home-を公開するときの補足)
+- 補足: [/home を公開するときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#home-を公開するときの補足)
 
 > [!WARNING]
 > - Samba のパスワードで、ほかのユーザーの `~/.bashrc`・`~/.ssh/authorized_keys` も読み書きできる
@@ -8126,7 +8126,7 @@
 - **この節の手順 1・7・9 には対話入力がある**（パスワード）
 - この節の手順 7・8 は、[root のホームも公開した](#samba-サーバー-root-のホームも公開する任意)ときだけ行う
 - この節の手順 9・10 は、[/home も公開した](#samba-サーバー-home-も公開する任意)ときだけ行う
-- サーバー自身からの接続は firewalld を通らない（[検証記録](verification/samba.md)・[参考資料](reference/samba.md)）
+- サーバー自身からの接続は firewalld を通らない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
 
 1. 資格情報ファイルを作るため、[手順 6](#samba-サーバー-実施手順) で登録したパスワードを入力する。
 
@@ -8243,7 +8243,7 @@
 
 - **接続元を制限しないなら、この節は不要**
 - 手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く
-- 補足: [接続元を絞るときの補足](verification/samba.md#接続元を絞るときの補足)
+- 補足: [接続元を絞るときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#接続元を絞るときの補足)
 
 1. 送信元サブネットを空白区切りで入れ、445/tcp の開放を rich rule に置き換える。
 
@@ -8279,7 +8279,7 @@
 ### Samba サーバー: 設定済みのサーバーでディレクトリのリースを切る
 
 - **smb.conf に `smb3 directory leases` の行が無いサーバーだけ**。今の手順 3 には、この 1 行が入っている
-- 手順 3 は貼り直さず、`[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は[検証記録](verification/samba.md)・[参考資料](reference/samba.md)）
+- 手順 3 は貼り直さず、`[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
 - 変数を使わないので、どのユーザーのシェルで貼ってもよい
 - **この節の手順 2 で smb.service を再起動すると、つないでいるクライアントの接続が一度切れる**
 
@@ -8332,7 +8332,7 @@
 ## Secure Boot の署名鍵（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[ロールバックと注意点](extra/secure-boot-mok.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[ロールバックと注意点](extra/secure-boot-mok.md)
 
 ### Secure Boot の署名鍵: 実施手順
 
@@ -8411,7 +8411,7 @@
    - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す（VM なら、VM のウィンドウで押す）
    - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは `sudo mokutil --import /var/lib/shim-signed/mok/MOK.der`（手順 4 の最後の行）を貼り直してから、手順 5 からやり直す
-   - **注意**: MokManager でキーボードが効かない PC がある（[検証記録](verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足を参照）
+   - **注意**: MokManager でキーボードが効かない PC がある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足を参照）
    - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
 
 1. 鍵が登録されたか確かめる。
@@ -8430,7 +8430,7 @@
 ## ShellCheck と shfmt（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
 
 ### ShellCheck と shfmt: 実施手順
 
@@ -8551,7 +8551,7 @@
    ```
 
    - 行数がどれだけ増減するかが出る
-   - **差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[検証記録](verification/shellcheck.md)・[参考資料](reference/shellcheck.md)の shfmt の項を見る）
+   - **差分が大きいときは、そのスクリプトの書き方と shfmt の既定が合っていない**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)の shfmt の項を見る）
 
 ---
 
@@ -8600,7 +8600,7 @@
 ## SSH の SOCKS トンネル（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[ロールバックと注意点](extra/ssh-socks-tunnel.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[ロールバックと注意点](extra/ssh-socks-tunnel.md)
 
 ### SSH の SOCKS トンネル: 実施手順
 
@@ -8733,7 +8733,7 @@
 ## Syncthing（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
 
 ### Syncthing: 実施手順
 
@@ -9269,7 +9269,7 @@
 ## VirtualBox の bootc ゲスト（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
 
 ### VirtualBox の bootc ゲスト: 実施手順
 
@@ -9529,7 +9529,7 @@
 
    - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この節の手順 2 で使う `<VM_IP>`
    - 何も出ないときは、有線の接続が上がっていない。`nmcli -t -f NAME,DEVICE connection show` で接続の名前を見て、`sudo nmcli connection up <名前>` で上げる
-     - 自動接続しない VM は `sudo nmcli connection modify <名前> connection.autoconnect yes` で有効にする（[インストール時の状態](verification/virtualbox-guest-bootc.md#実施前の状態)）
+     - 自動接続しない VM は `sudo nmcli connection modify <名前> connection.autoconnect yes` で有効にする（[インストール時の状態](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施前の状態)）
 
 1. ホストの端末で、変数を設定する（`VM_SSH` は必ず値を入れる）。
 
@@ -9830,7 +9830,7 @@
 ## VirtualBox（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
 
 ### VirtualBox: 実施手順
 
@@ -10101,7 +10101,7 @@
 ### VirtualBox: カーネルを更新したとき
 
 - この節は AlmaLinux 10 だけのもの（Windows 11 のドライバーは、ビルド済みのものをインストーラが入れる）
-- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
+- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
 - **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [Secure Boot の署名鍵](#secure-boot-の署名鍵-実施手順) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
   - スクリプトは、動いているカーネル用の vbox のモジュールが無ければ、その場でビルドする
   - 最後に「もう入っていないカーネル」用のモジュールを消す
@@ -10162,7 +10162,7 @@
 ## VS Code（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
 
 ### VS Code: 実施手順
 
@@ -10306,7 +10306,7 @@
 ## WireGuard（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
 
 ### WireGuard: 実施手順
 
@@ -10536,7 +10536,7 @@
      - `ping <相手拠点の LAN のホスト>`（例: `192.168.120.100`）
      - `tracepath -n <相手拠点の LAN のホスト>`
    - **逆方向（Client B → Client A、拠点の LAN → クライアント）も必ず確認する**
-   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [検証記録の症状と原因の対応](verification/wireguard.md#症状と原因の対応実測) を見る
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [検証記録の症状と原因の対応](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#症状と原因の対応実測) を見る
 
 ---
 
@@ -10715,7 +10715,7 @@
 
    - `tracepath` の `<PEER_WG_LAN_IP>` の行が `!H` で終わっても、4 つの `ping` が `0% packet loss` なら届いている
    - 相手拠点の LAN 上の別のホストへの `ping`、トンネル越しの `ssh <ユーザー>@<WG_HOST_LAN_IP>` も試しておくとよい
-   - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
+   - どこで止まるかで、疑う場所が変わる（→ [検証記録の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-実施手順--トンネルを確かめる--手順-2-補足-疎通確認)）
 
 1. WG ホストで（[クライアントを登録する](#wireguard-クライアントを登録する)の手順 1 のシェルで）、ハンドシェイクと逆方向（拠点 → PC）を確かめる。
 
@@ -10728,7 +10728,7 @@
    ```
 
    - 接続先拠点の LAN 上の別のホストから `ping <CLIENT_TUN_IP>` も通る（ルーターにクライアント帯の静的経路がある前提）
-   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](verification/wireguard.md#症状と原因の対応実測)
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#症状と原因の対応実測)
 
 1. PC で、トンネルを切る。
 

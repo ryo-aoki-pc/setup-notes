@@ -9,7 +9,7 @@
 ### 実施手順 / 手順 1: 補足: 2 つの役目と、入っていた環境
 
 - `mokutil` は、Secure Boot が有効かを見る（手順 3）のと、MOK への登録の予約と確認（手順 4・7）に使う。`openssl` は鍵を作る（手順 4）
-- [virtualbox.md](../verification/virtualbox.md#実施前の状態) の実機（GNOME の PC）と、[virtualbox-guest-bootc.md](../verification/virtualbox-guest-bootc.md#実施前の状態) の VM（Atomic Desktop のイメージ）には、どちらも入っていた
+- [virtualbox.md](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#実施前の状態) の実機（GNOME の PC）と、[virtualbox-guest-bootc.md](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施前の状態) の VM（Atomic Desktop のイメージ）には、どちらも入っていた
 - 素のコンテナ（`quay.io/almalinuxorg/almalinux:10`）には、どちらも無かった
 
 ### 実施手順 / 手順 2: 補足: bootc のシステム
@@ -27,14 +27,14 @@
 ### 実施手順 / 手順 5: 補足: VM のウィンドウを先に開いておく
 
 - MokManager の最初の画面は、再起動の途中で出て、出てから 10 秒で消える（手順 6）。VM に SSH でつないで貼ったときは、消える前に、VM のウィンドウでキーを押すことになる
-- Hyper-V の第 2 世代の VM では、手順 5 を貼ってから 3 秒足らずで最初の画面が出た（[検証記録の付録](../verification/secure-boot-mok.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。手順 5 の `sudo systemctl reboot` から最初の画面までを、ほかのハイパーバイザと実機で測った記録は無い
-  - VirtualBox の VM の記録にある時間は、別のコマンド（`bootc switch --apply`。イメージの切り替えの後に再起動する）を貼ってから 54 秒、の 1 つだけ（[virtualbox-guest-bootc.md の検証記録の付録](../verification/virtualbox-guest-bootc.md#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
+- Hyper-V の第 2 世代の VM では、手順 5 を貼ってから 3 秒足らずで最初の画面が出た（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。手順 5 の `sudo systemctl reboot` から最初の画面までを、ほかのハイパーバイザと実機で測った記録は無い
+  - VirtualBox の VM の記録にある時間は、別のコマンド（`bootc switch --apply`。イメージの切り替えの後に再起動する）を貼ってから 54 秒、の 1 つだけ（[virtualbox-guest-bootc.md の検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#付録-ホストでビルドして-vm-に運ぶ形の本実行2026-09-30)）
 - その VM では、画面を見張る道具がキーを送った。人が、貼った後にウィンドウを開いて間に合うかも、先に開いておけば間に合うかも、確かめていない
 
 ### 実施手順 / 手順 7: 補足: 読み込めないときの見方
 
 - `sudo keyctl list %:.platform` に、手順 4 の鍵の CN があるかを見る（`keyutils` パッケージ）
-- `sudo dmesg` に `Loading of module with unavailable key is rejected` が出ていれば、モジュールを署名した鍵が登録されていない（[検証記録](../verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足）
+- `sudo dmesg` に `Loading of module with unavailable key is rejected` が出ていれば、モジュールを署名した鍵が登録されていない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足）
 
 ### 選択した方針
 

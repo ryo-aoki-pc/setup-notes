@@ -1,6 +1,6 @@
 # Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
 
-[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](../verification/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)
 
 ## 補足
 
@@ -195,7 +195,7 @@
 - Codex の依存指定は `^0.160.1`。同じアダプター版でも、導入時に入る Codex の版が変わり得る。Codeg の対応版を、すべての依存が固定されたものとは扱わない
 - Codeg は npm のグローバル領域へ導入を試み、権限不足なら `~/.codeg/npm-global` を使う。アダプターの更新は、同じ実行ファイルを使うほかの ACP クライアントにも影響し得る
 
-対応版は [Codeg v0.35.1 のレジストリ](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/acp/registry.rs)で確認した。実際に導入した版と試験条件は[今回の検証記録](../verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に分ける。
+対応版は [Codeg v0.35.1 のレジストリ](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/acp/registry.rs)で確認した。実際に導入した版と試験条件は[今回の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に分ける。
 
 ### Claude Code と Codex CLI も操作する / 手順 3: 補足: 本人の契約と共有設定
 
@@ -259,7 +259,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | 画面から Grok Build を動かす | Grok Build の `grok agent serve` に直接つなぐ | 採らない | つなぎ方の仕様が公式の文書に無い。公式の例は always-approve 付き |
 | 端末をそのまま使う | SSH のアプリと tmux | 採らない（[共同作業の手順書](../ai-agents.md#コーディングエージェントの共同作業-スマートフォンから指示する)にある） | 画面で扱いたい、という目的に合わない。AlmaLinux 10 だけ |
 | 端末をそのまま使う | ttyd などの Web の端末 | 採らない | 端末がそのままブラウザに出る。スマートフォンで Ctrl・Esc・矢印が打ちにくい |
-| 端末をそのまま使う | zellij の Web クライアント | 採らない | Windows 版に未解決の不具合がある（[Claude Code の Remote Control（Windows）の検証記録](../verification/windows-claude-remote-control.md)） |
+| 端末をそのまま使う | zellij の Web クライアント | 採らない | Windows 版に未解決の不具合がある（[Claude Code の Remote Control（Windows）の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-claude-remote-control.md)） |
 | Codeg の置き方 | 配布物を取得して SHA-256 を照合し、ホームに置く | 採った | 版を決めて入れる。`sudo` を使わない |
 | Codeg の置き方 | 公式のインストーラー（`curl … \| bash`・`irm … \| iex`） | 採らない | SHA-256 を照合しない。`/usr/local` に置く（Linux） |
 | Codeg の置き方 | 公式の Docker イメージ | 採らない | コンテナの中で動くので、ホストの Grok Build のログイン・Git・道具をそのまま使えない |

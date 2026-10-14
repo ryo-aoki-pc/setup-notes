@@ -2,7 +2,7 @@
 
 [手順書](../windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[注意点](../extra/windows-dual-boot.md)
 
-[検証記録](../verification/windows-dual-boot.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md#参考資料から分離した記録)
 
 ## 補足
 

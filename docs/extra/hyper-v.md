@@ -1,6 +1,6 @@
 # Hyper-V の有効化と VM の作成（Windows 11 Pro）のロールバックと注意点
 
-[手順書](../windows-setup.md#hyper-v-実施手順)・[検証記録](../verification/hyper-v.md)・[参考資料](../reference/hyper-v.md)
+[手順書](../windows-setup.md#hyper-v-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](../reference/hyper-v.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -9,7 +9,7 @@
 
 - 管理者ではない Windows PowerShell（5.1）に貼る
 - VM は、先に本書の[VM を消す](../windows-setup.md#hyper-v-vm-を消す)で消す
-- **Hyper-V の機能を無効に戻す手順と、ユーザーを Hyper-V Administrators から外す手順は、まだ検証していないので載せていない**（[検証記録](../verification/hyper-v.md)）
+- **Hyper-V の機能を無効に戻す手順と、ユーザーを Hyper-V Administrators から外す手順は、まだ検証していないので載せていない**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)）
 
 1. [VM どうしだけがつながるスイッチを作る（任意）](../windows-setup.md#hyper-v-vm-どうしだけがつながるスイッチを作る任意)で作ったスイッチを消す。
 

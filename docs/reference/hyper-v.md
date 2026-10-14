@@ -1,6 +1,6 @@
 # Hyper-V の有効化と VM の作成（Windows 11 Pro）の参考資料
 
-[手順書](../windows-setup.md#hyper-v-実施手順)・[検証記録](../verification/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
+[手順書](../windows-setup.md#hyper-v-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
 
 ## 補足
 
@@ -28,7 +28,7 @@
 
 - 本書は、VM の操作を管理者ではない窓で行うために、ユーザーをこのグループに足す
 - グループに足した後、サインインし直すまで（本書では再起動まで）は効かない
-- 一員になると、管理者ではない窓から、VM の作成・起動・停止・チェックポイント・削除、Private のスイッチの作成、仮想 TPM の追加までできた（[検証記録](../verification/hyper-v.md)）
+- 一員になると、管理者ではない窓から、VM の作成・起動・停止・チェックポイント・削除、Private のスイッチの作成、仮想 TPM の追加までできた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)）
 
 ### 実施手順 / VM を作る / 手順 2: 補足: 既定を変えている設定
 
@@ -43,7 +43,7 @@
 
 - 第 2 世代の VM は、Secure Boot が既定で有効。テンプレートは、起動を許す署名の組
 - `MicrosoftWindows`（既定）は Windows 用、`MicrosoftUEFICertificateAuthority` は Linux のディストリビューション用
-- AlmaLinux 10.2 の ISO は、既定のテンプレートでは起動せず、Linux 用に変えると GRUB の画面まで進んだ（[検証記録](../verification/hyper-v.md)）
+- AlmaLinux 10.2 の ISO は、既定のテンプレートでは起動せず、Linux 用に変えると GRUB の画面まで進んだ（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)）
 
 ### 実施手順 / VM を作る / 手順 4: 補足: 仮想 TPM
 

@@ -1,6 +1,6 @@
 # Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](../verification/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)
 
 ## 補足
 
@@ -135,8 +135,8 @@
 - **xAI の grok-build-plugin-cc**（`grok-build@xai-grok-build`、検証時は 0.2.1）
   - 本物の `grok` を `grok -p` で動かす。レビューは、読むだけのエージェント（`explore`）を `--sandbox read-only --always-approve` で動かす（承認する人がいない非対話では、plan のモードが止まるため）。Linux ではこの sandbox に Landlock が有効なカーネルと bubblewrap が要る
   - `review` と `critique` は `runHeadlessAgent` に `sandbox: "read-only"` を渡す。`--always-approve` は確認を自動承認するだけで、sandbox の起動失敗は直さない
-  - `runtime-socket deny path` のエラーは、sandbox の拒否パスを解決する段階の失敗。bubblewrap 不足とは別に判定する（[対象版と実機の結果](../verification/coding-agents.md)）
-  - ソケットが無くても、親ディレクトリを検索できないと拒否パスを解決できない。親の検索権限とソケット自体のアクセス権は別で、後者を緩める必要はない。検索権限を直しても、Landlock が無効なカーネルでは read-only の保護が成立しない（[追加の原因調査](../verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
+  - `runtime-socket deny path` のエラーは、sandbox の拒否パスを解決する段階の失敗。bubblewrap 不足とは別に判定する（[対象版と実機の結果](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)）
+  - ソケットが無くても、親ディレクトリを検索できないと拒否パスを解決できない。親の検索権限とソケット自体のアクセス権は別で、後者を緩める必要はない。検索権限を直しても、Landlock が無効なカーネルでは read-only の保護が成立しない（[追加の原因調査](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#追加原因調査と対処の準備2026-10-10)）
   - `/grok-build:check` のログインの判定は `grok models` の終了コードだけを見る。Grok Build 1.0.50 の `grok models` はログインしていなくても終了コード 0 なので、ready と出る（検証記録）
   - hooks: `SessionStart`・`SessionEnd`
 - 2 つのプラグインは自分のユーザーに入り、どのプロジェクトの Claude Code でも使える（`~/.claude/settings.json` の `enabledPlugins`。Windows 11 では `%USERPROFILE%\.claude\settings.json`）
@@ -172,7 +172,7 @@
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
 - 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-実施手順)（2026-10-11）
-- 同じ Codeg で Claude Code と Codex CLI も選ぶ手順は、OS 別の「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)、2026-10-12）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](../verification/grok-build-remote.md)を参照する
+- 同じ Codeg で Claude Code と Codex CLI も選ぶ手順は、OS 別の「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)、2026-10-12）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)を参照する
 
 ### GitHub で分担する（この手順書では使わない）
 

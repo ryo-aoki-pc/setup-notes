@@ -183,7 +183,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
   - 既定の 1420 のままだと、回線の MTU が 1454 のとき、中身が 1393 バイト以上のパケットは 1408 以上に詰められ、外側が 1468 以上になって回線の MTU を超える
 - 外側の IPv4 パケットには DF（分割禁止）を立てない（同じく `socket.c` の `send4`）。回線の MTU を超えた分は途中のルーターが分割して送り、送り元には何も返らないので、`wg0` の MTU が自動で下がることは無い
 - 分割された片方でも落ちると、もとの 1 パケットが丸ごと失われる。小さいパケットは分割されないので、ping や ssh のキー入力は通り、TCP の大きいセグメントだけが再送になる
-- `1380` は、実機（回線の MTU が 1454 と 1460 の 2 拠点）で確かめた値（[検証記録の付録](../verification/wireguard.md#付録-実機の-2-拠点で-wg0-の-mtu-を下げた記録2026-10-10)）
+- `1380` は、実機（回線の MTU が 1454 と 1460 の 2 拠点）で確かめた値（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#付録-実機の-2-拠点で-wg0-の-mtu-を下げた記録2026-10-10)）
 - `tracepath` の宛先の `1.1.1.1` は、回線の先にあって応答する宛先として選んだだけで、インターネット上のほかの宛先でもよい
 - `Endpoint` が IPv6 のときに 80 を引くのは上の内訳からの計算で、実機では確かめていない
 
@@ -212,7 +212,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
   - 拠点からクライアントへ向かう向きは、WG ホストが大きすぎるパケットを送り元へ知らせ、送り元が小さくし直す（経路 MTU 探索）ことに頼る
   - この 2 つは仕組みからの見立てで、クライアントでは測っていない
 - `apply` は配布済みのクライアントに触れない。`client add` が作る conf に `MTU =` を書くのは、`WG_MTU` に値を書いた後の登録だけ（[スクリプトの動作](#スクリプトの動作)）
-- クライアントは conf の `MTU` を読む（ソースで確かめただけで、取り込みは流していない。[検証記録の付録](../verification/wireguard.md#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）
+- クライアントは conf の `MTU` を読む（ソースで確かめただけで、取り込みは流していない。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#付録-クライアント用-conf-に-mtu-を書く変更の検証2026-10-10)）
   - NetworkManager は、取り込みで `MTU =` を `wireguard.mtu` にする（1.56.0 の `nm_conn_wireguard_import`）
   - WireGuard for Windows と Android の公式アプリは、`[Interface]` の `MTU` を読む（`conf/parser.go`・`config/Interface.java`）
 
@@ -247,7 +247,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 ヘッダの書き換わり方（行き）:
 
 - WG ホストは NAT しないので、**内側の送信元・宛先は端から端まで変わらない**
-- 書き換わるのは外側の UDP だけで、それをするのはルーターである（[選択した方針](../verification/wireguard.md#選択した方針)）
+- 書き換わるのは外側の UDP だけで、それをするのはルーターである（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#選択した方針)）
 
 | ホップ | 外側（UDP。ルーターが書き換える） | 内側（元のパケット） |
 |---|---|---|
@@ -488,7 +488,7 @@ Windows 11 で conf を取り込んで張る方法を比べた:
 
 ### 代替: wg-quick で張る場合
 
-NetworkManager を使わない場合。実行の範囲は[検証記録](../verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
 
 - 「鍵を作る」から「conf を取り込む」の手順 2 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
 - NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）
@@ -513,7 +513,7 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 
 ### 代替: nmcli connection add で組む場合（RHEL のドキュメントの方式）
 
-conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](../verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
 
 1. `nmcli connection add type wireguard con-name wg0 ifname wg0 autoconnect no`
 1. `nmcli connection modify wg0 ipv4.method manual ipv4.addresses <CLIENT_TUN_IP>/32`

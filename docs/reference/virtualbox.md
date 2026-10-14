@@ -2,7 +2,7 @@
 
 手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[ロールバックと注意点](../extra/virtualbox.md)
 
-[検証記録](../verification/virtualbox.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#参考資料から分離した記録)
 
 ## 補足
 
@@ -23,7 +23,7 @@
 ### 実施手順 / リポジトリを置く / 手順 2: 補足: gpg と sub の fingerprint
 
 - `gpg`（`gnupg2`）は、GNOME のデスクトップには入っている
-- `sub` の下にも fingerprint が出るのは、Homebrew の gnupg が先に見つかる PC（[検証記録](../verification/virtualbox.md)）
+- `sub` の下にも fingerprint が出るのは、Homebrew の gnupg が先に見つかる PC（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)）
 
 ### 実施手順 / リポジトリを置く / 手順 4: 補足: repo ファイルは Oracle 公式のものとほぼ同じ
 

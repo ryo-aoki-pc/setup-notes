@@ -1,6 +1,6 @@
 # VMware Workstation Pro のインストールと VM の作成（Windows 11）の参考資料
 
-[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](../verification/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
+[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
 
 ## 補足
 
@@ -28,7 +28,7 @@
 
 - インストーラーは、インストールの間に Hyper-V と Windows ハイパーバイザー プラットフォームの状態を調べる、と Broadcom の文書にある
 - Windows のハイパーバイザーが動いている PC では、VM は Windows ハイパーバイザー プラットフォームを通して動く。このとき、ゲストに CPU の仮想化支援（入れ子の仮想化）は見えない
-- 本書の検証では、Hyper-V と Windows ハイパーバイザー プラットフォームを有効にした直後（再起動待ち）にインストールし、その後に 1 回再起動した。再起動の後、VM は `Monitor Mode: ULM` で動いた（[検証記録](../verification/vmware.md)）
+- 本書の検証では、Hyper-V と Windows ハイパーバイザー プラットフォームを有効にした直後（再起動待ち）にインストールし、その後に 1 回再起動した。再起動の後、VM は `Monitor Mode: ULM` で動いた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)）
 - 機能を有効にして再起動した後にインストールする順は、確かめていない
 
 ### 実施手順 / 入ったかを確かめる / 手順 2: 補足: コマンドの場所

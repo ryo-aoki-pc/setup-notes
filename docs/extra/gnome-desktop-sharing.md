@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)・[検証記録](../verification/gnome-desktop-sharing.md)・[参考資料](../reference/gnome-desktop-sharing.md)
+[手順書](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](../reference/gnome-desktop-sharing.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる

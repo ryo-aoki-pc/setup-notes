@@ -22,7 +22,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
      - 項の見出しには番号を入れず、同じファイルのほかの見出しとアンカーがぶつからない名前にする。既存の名前は維持する。集約する見出しにはツール名を付け、旧→新のアンカー対応を記録する
      - 2冊に同名の見出しがあったものを 1 冊へ移すときは、AlmaLinux 10 側の名前を保ち、Windows 11 側の名前に「Windows 11 で」を付ける（ai-agents.md の「Claude Code」と「Windows 11 で Claude Code を入れる」）
      - 変数ブロックは、それを置いた項の手順 1 になる（almalinux-setup.md は「システムの設定」の手順 1、windows-setup.md は「PC 全体の設定」の手順 2）。2026-10-10 に移したツールの変数も、それぞれの項の手順 1（almalinux-setup.md の「Git」「Firefox」「HackGen Console NF」「git-delta」「yazi」、windows-setup.md の「yazi」、ai-agents.md の「Claude Code」「Windows 11 で Claude Code を入れる」。windows-setup.md の「SSH でログインを確かめる」は、手順 1・2 でクライアントのシェルを用意してから手順 3）
-1. 手順ごとの実測・出力例・検証の経緯は `docs/verification/<手順書名>.md` に、理由・比較・背景は `docs/reference/<手順書名>.md` に置く。対応する節と手順番号を見出しに含める（項に分けた節は `### <節> / <項> / 手順 N: 補足: <題>`）。操作に必要な分岐・失敗時の対処・短い注意は手順書に残す
+1. 手順ごとの実測・出力例・検証の経緯は `docs/verification/<手順書名>.md` に、理由・比較・背景は `docs/reference/<手順書名>.md` に置く。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。対応する節と手順番号を見出しに含める（項に分けた節は `### <節> / <項> / 手順 N: 補足: <題>`）。操作に必要な分岐・失敗時の対処・短い注意は手順書に残す
 1. 環境固有の値は手順冒頭の変数ブロックまたは `site.env` だけで設定する（`${SERVER_IP}` 形式。値の置き場所は用途ごとに 1 か所）。**変更が必須の変数は 1 変数ずつのコードブロックに分け、変更が任意の変数（既定のままでよい・自動で入るが違えば直す）は 1 つのブロックにまとめて必須ブロックの後に置く。** 値の読み戻しは任意の変数のブロックの末尾に入れる。シェルに貼って編集する手間を減らすため
    - **変える必要の無い値は変数にせず、コマンドに直接書く。** 固定の URL・パス・パッケージ名、ツールが既定の場所からしか読まないパス（`~/.config/bat/config` など。変数を変えても読み込み先は変わらない）、動作確認にだけ使う名前、`${USER}` や `$(uname -m)` の言い換えがこれに当たる
    - 変数が 1 つも無い文書には変数の手順を置かず、手順 1 から主題を始める
@@ -88,7 +88,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。windows-setup.md の「Git Bash と WezTerm の設定」の手順 3 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 3 と「シェルのツールを入れる」の手順 6・7 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ
-    - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は [samba-client.md の付録](../verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
+    - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は [samba-client.md の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
     - bash は `}` まで読んでから実行するので、捨てられる行が残らない。変数の空を弾くブロックは `if … fi` でもよい（almalinux-setup.md の「Samba クライアント」）
     - 目視で確かめてから次を実行するもの（dry-run の後の本番など）は、囲まずに手順（手順の外ならブロック）を分ける
     - 点検は、ブロックを bash が 1 回に読む単位（`bash -n` が通る最小の行のまとまり）に区切り、`sudo` を含む単位の後ろにコメント以外の行が残らないかで見る

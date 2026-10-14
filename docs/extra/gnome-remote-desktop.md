@@ -1,6 +1,6 @@
 # GNOME Remote Desktop 有効化手順（リモートログイン方式）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[検証記録](../verification/gnome-remote-desktop.md)・[参考資料](../reference/gnome-remote-desktop.md)
+[手順書](../almalinux-setup.md#gnome-のリモートログイン-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](../reference/gnome-remote-desktop.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#gnome-のリモートログイン-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -92,7 +92,7 @@
 
 - **リモートログインのセッション**: そのユーザーのセッションが無ければ、ログインで新しいセッションができる
   - ローカルでログイン中のユーザーと同一ユーザーで接続すると、GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある
-  - PC の物理モニターに表示しているデスクトップを見る用途は「デスクトップ共有」方式（ユーザーのデーモン）。本書では扱わず、[gnome-desktop-sharing.md](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順) に分けた。aarch64 の[実機](../verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](../verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](../verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照（物理 HDMI への表示は未確認）
+  - PC の物理モニターに表示しているデスクトップを見る用途は「デスクトップ共有」方式（ユーザーのデーモン）。本書では扱わず、[gnome-desktop-sharing.md](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順) に分けた。aarch64 の[実機](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照（物理 HDMI への表示は未確認）
 - **ヘッドレスのセッションを常駐させている PC**（[gnome-headless-session.md](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)）
   - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
   - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[設定済みのサーバーで GDM の後に起動させる](../almalinux-setup.md#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 4）。しないと、そのユーザーでログインしたときに、ログイン画面が名前とアイコンのまま進まない

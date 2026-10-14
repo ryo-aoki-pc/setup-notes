@@ -1,6 +1,6 @@
 # hadolint / dive / Trivy インストール手順（AlmaLinux 10 / Homebrew + Trivy 公式 dnf リポジトリ）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#画像の道具-実施手順)・[検証記録](../verification/image-tools.md)・[参考資料](../reference/image-tools.md)
+[手順書](../almalinux-setup.md#画像の道具-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](../reference/image-tools.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#画像の道具-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる

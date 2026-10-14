@@ -6,17 +6,11 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る実施手順・任意節・使い方・更新・Windows 11 で使うを残す）。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
 共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
-
-2026-10-06 の現行版再検証では、公式 ISO の Workstation クリーンインストールのスナップショットから 6 台の VM を新規作成し、`5da3478` の手順と共通 bash `3d5323e`、設定サブモジュールを前提から通した。結果は `docs/almalinux-vm-verification.md` の後半と各文書の `docs/verification/` の今回の付録にある。前半の `0dbb522` の結果と、従来の実機・コンテナの付録は別の履歴。実アカウント、Windows / bootc 固有の手順、VM が条件を満たさない入れ子の仮想化や MOK 登録は実施済みと扱わない。
-
-2026-10-06〜07 UTC の Windows 検証は、Rufus のインストールメディアから入れた Windows 11 Pro の VM で行った。記録は `docs/verification/windows-setup.md` と各後続ツールの Windows VM の付録に集約する。CLI・値の読み戻し・利用者の手動確認を区別し、windows-setup.md の「WSL の AlmaLinux 10 と自動サインイン」の手順 5 の起動要求取消、WSL 2 と入れ子の VM の失敗、Git の初回通信 timeout、スタートアップの最初の確認不能も保持する。実機での通し実行・残る GUI・認証・VPN と RDP ログイン・ping は未確認。今回の VM の検証から任意のリモート再起動節などへ成功範囲を広げない。
-
-2026-10-08 UTC に、同じ VM で PR #104 の未検証の項目を追加で確かめた。GitHub のコピーボタンからの貼り付け（管理者の conhost・Windows Terminal・mintty）、残る画面と分岐、2 枚目の NIC での ping と RDP ログイン、AlmaLinux の VM 2 台を拠点にした WireGuard の VPN の通し、任意節（Wake on LAN の一部・リモートからの再起動）、更新とロールバックを通した。VirtualBox の手順 6 だけはホストの実機で流した。別の Windows からの再起動のトリガー（SMB の `net use` と `shutdown /m`、WinRM の `TrustedHosts` と `Invoke-Command`）は、利用者の許可を得てホストの実機を送る側にして確かめた（相手の VM のクローンは正しい資格情報でも NTLM が拒否され、送る側に使えなかった。マシンの SID の重複が原因とみたが、確かめていない）。記録は `docs/verification/windows-setup.md` と各後続ツールの 2026-10-08 の付録。WSL 2・Claude Code のログイン・インターネット越しの VPN・Wake on LAN の起動・Store の更新の適用と Windows Update の再起動の分岐（この VM では対象の更新が無かった）と、実機での通し実行は未確認。
 
 ## よく使うコマンド
 
@@ -65,6 +59,8 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - 手順書・検証記録・参考資料・extra を書いたり直したりする前に、[docs/dev/writing-rules.md](docs/dev/writing-rules.md)（手順書の構造・手順の形・表現の規則）を読む
 - ある文書やスクリプトを直す前に、[docs/dev/structure.md](docs/dev/structure.md) で、そのファイルの項（`` - `docs/<名前>.md` — `` などで始まる行と、その下の入れ子の行）を読む
 - 文書を足したときや、状態（検証範囲）を変えたときは、`docs/dev/structure.md` の項も直す
+
+検証記録を書く・直すときは、非公開の `ryo-aoki-pc/setup-notes-verification` を clone し、そちらへ Pull Request を作る。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。`docs` リポジトリでは、隣の `setup-notes-verification/` にサブモジュールとして取り出せる。
 
 ### 手順の並び順と完了前の点検
 

@@ -2,7 +2,7 @@
 
 [手順書](../almalinux-setup.md#dropbox-と-rclone-実施手順)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
-[検証記録](../verification/dropbox-rclone.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#参考資料から分離した記録)
 
 ## 補足
 

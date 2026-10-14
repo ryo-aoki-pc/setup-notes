@@ -3,7 +3,7 @@
 ## 実施手順
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で使う](#windows-11-で使う)から始める
-- [検証記録](verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
 > - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md#実施手順)の実施手順を、少なくとも[yazi](almalinux-setup.md#yazi)まで通してあること
@@ -77,7 +77,7 @@
 
    - 1 行目（入っている版）と 2 行目（チャンネルにある一番新しい版）が同じなら、そのチャンネルの最新版が入っている
    - `2.1.283 (Claude Code)` のようにバージョンが出れば動く
-   - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](verification/almalinux-setup.md#claude-code-完了時点の状態)）
+   - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#claude-code-完了時点の状態)）
 
 1. 確認用のディレクトリで `claude` を起動し、ブラウザでログインする。
 
@@ -297,7 +297,7 @@
 ## Windows 11 で使う
 
 - 対象: Windows 11。AlmaLinux 10 は[実施手順](#実施手順)
-- [検証記録](verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
 
 > [!IMPORTANT]
 > - 前提: [Windows 11 のセットアップ](windows-setup.md#実施手順)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
@@ -946,7 +946,7 @@
 
 - 対象: Windows 11
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
 - [ロールバックと注意点](extra/windows-claude-remote-control.md)
 
 ### Claude Code の Remote Control: 実施手順
@@ -1240,7 +1240,7 @@
 - 対象: AlmaLinux 10
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
 
 ### Claude Code の GNOME 操作: 実施手順
 
@@ -1452,12 +1452,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 対象: 両 OS。AlmaLinux 10 は[実施手順](#コーディングエージェントの共同作業-実施手順)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
 
 ### コーディングエージェントの共同作業: 実施手順
 
 - 対象: AlmaLinux 10
-- [検証記録](verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
 
 > [!IMPORTANT]
 > - **Windows 11 は、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める**
@@ -2137,7 +2137,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - 画面の画像は、Windows 11 の実機の Codeg v0.35.1 で 2026-10-14 に撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
 - Claude Code・Codex を使うときは、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）も通す
 
 ### Grok Build のブラウザ操作: 実施手順
@@ -3341,7 +3341,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 任意。Codeg を構築したホストに [Claude Code](#claude-code)・[Codex CLI](#codex-cli) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1）。
 
-ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
+ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/grok-build-remote.md#アクセストークンの重み)）。
 
@@ -3445,7 +3445,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 任意。Codeg を構築したホストに [Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1）。
 
-ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
+ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/grok-build-remote.md#アクセストークンの重み)）。
 

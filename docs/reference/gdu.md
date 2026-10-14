@@ -8,7 +8,7 @@
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 依存は無い（Go の静的バイナリ 1 つ、約 20 MB）
-- `brew install` の最後に出る caveat の出力例は[検証記録](../verification/gdu.md)
+- `brew install` の最後に出る caveat の出力例は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)
 
 ### 実施手順 / 手順 2: 補足: TUI で使う
 

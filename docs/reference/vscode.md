@@ -35,7 +35,7 @@
 
 ### 選択した方針
 
-[この節の検証記録](../verification/vscode.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md#選択した方針)
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
