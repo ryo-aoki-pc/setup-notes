@@ -1,6 +1,6 @@
 # VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）のロールバックと注意点
 
-手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
+手順: [AlmaLinux 10](../almalinux-setup.md#virtualbox-実施手順)・[Windows 11](../windows-setup.md#virtualbox-windows-11-で使う)。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -125,9 +125,9 @@
 - **スナップショットはバックアップの代わりにならない**。元の VM のディスクと一緒に失われる。必要なデータは別の場所に退避する
 - **ホストオンリー・ブリッジ・Extension Pack・USB の受け渡しは、VM を作って使う節の対象外**。この節の検証では確かめていない
 
-- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
+- **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
 - **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../almalinux-setup.md#virtualbox-virtualbox-を入れる)の手順 4・5）
-- **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
+- **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) で作って登録する
 - **MokManager でキーボードが効かなければ、[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) の手順 6 に従って対処する**。Secure Boot を無効にするとモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する
 - **EL10 のカーネルでは KVM と同居できない**: `enable_virt_at_load=0` が要り、それでも KVM の VM と VirtualBox の VM は同時に動かない（[KVM と USB の設定](../almalinux-setup.md#virtualbox-kvm-と-usb-の設定)の手順 1）
@@ -146,7 +146,7 @@
     - 止まっている間に VM の中の systemd の watchdog が `systemd-logind` などを止め、GNOME がログイン画面に戻った回もあった
     - VM が Hyper-V の上かは、VM のログ（[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の手順 6）か、VM のウィンドウの状態バー（プロセッサーのアイコンに緑の亀）で分かる
   - **入れる・上げる・消すときに、ネットワークがいったん切れる**: ブリッジ接続のドライバーを入れるため（MSI の画面の警告。上げる・消すときも切れるはず）。SSH やリモート デスクトップでつないでいる PC では行わない
-  - **VirtualBox は管理者ではない窓で動かす**: 管理者の窓から起動すると、VM も管理者の権限で動く（[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の[検証記録](../verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
+  - **VirtualBox は管理者ではない窓で動かす**: 管理者の窓から起動すると、VM も管理者の権限で動く（[Windows 11 で使う](../windows-setup.md#virtualbox-windows-11-で使う)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
   - **`VBoxManage` は `PATH` に入らない**: `C:\Program Files\Oracle\VirtualBox\VBoxManage.exe` を場所ごと呼ぶ（インストーラが足す環境変数は `VBOX_MSI_INSTALL_PATH` だけ）
   - **Secure Boot の MOK は要らない**: ドライバーは Microsoft の署名付きで配られる。[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) は Linux だけのもの
   - **ロールバックで残るもの**: 依存で入った Visual C++ の再頒布可能パッケージと、インストーラが「信頼された発行元」に入れた Oracle の証明書（[Windows 11 のロールバック](#windows-11-のロールバック)）

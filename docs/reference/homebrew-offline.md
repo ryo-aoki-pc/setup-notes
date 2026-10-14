@@ -24,7 +24,7 @@
 
 ### 選択した方針
 
-[この節の検証記録](../verification/homebrew-offline.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md#選択した方針)
 
 | 経路 | 要るもの | 採否 |
 |---|---|---|
@@ -47,4 +47,4 @@
 ## 追加確認（2026-10-12）
 
 - 2026-10-11に案内を加えた時点ではオフライン経路のHomebrew4は未確認だった。今回、既存2VMから同じトンネルのシェルで設定を実行し、再起動後の実IBus PATH/XMLとGUIの日本語変換を確認した
-- [今回の継続記録](../verification/homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)。新規Homebrew本体導入・jqの新規bottle・実機を確認した結果ではない
+- [今回の継続記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)。新規Homebrew本体導入・jqの新規bottle・実機を確認した結果ではない

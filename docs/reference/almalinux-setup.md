@@ -55,7 +55,7 @@
 
 ### 実施手順 / EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 
-- `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](../verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#rpm-fusion-選択した方針)
+- `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#rpm-fusion-選択した方針)
 - 有効にするのは free だけ。nonfree は扱わない
 
 ### 実施手順 / EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
@@ -162,7 +162,7 @@
   - FXA のドロップインを置く前の `ibus-daemon` の PATH は、`/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/<USER>/.local/bin:/home/<USER>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin` だった（Homebrew 本体は導入済み。`FXA/out/02-baseline-before-step4.txt`）。Homebrew 導入前のユーザーマネージャーの PATH は、今回の証跡では確かめていない
   - 検証した VM では、この設定の後に起動した `ibus-daemon` から、Anthy のエンジンは `/usr/bin/python3` で起動された。端末と `gnome-shell` の PATH は変わらない
   - GNOME 以外のセッションや、別の経路で `ibus-daemon` を起動する構成は対象の外で、確かめていない。セッションの PATH で起動される `/usr/libexec/ibus-setup-anthy`（Anthy の設定）が開くかも、確かめていない
-- 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（[検証記録](../verification/almalinux-setup.md#手順書を直した所とその確かめ)）
+- 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#手順書を直した所とその確かめ)）
   - FXA では、Homebrew の `python3` が無い状態で手順 4 を置き、「yazi」の手順 2 で `python@3.15` を入れ、再起動した後に、テキストエディターで「日本語」への変換と確定を確かめた
   - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
   - FXB では、Homebrew とドロップインを消すロールバックの後も、再起動してログインしたテキストエディターで変換と確定を確かめた。ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
@@ -200,7 +200,7 @@
 
 ### 実施手順 / シェルのツール / 手順 8: 補足: BaseOS の tmux
 
-- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](../verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
+- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
 
 ### 実施手順 / シェルのツール / 手順 10: 補足: z と zi の使い方
 
@@ -391,7 +391,7 @@
   - `xdg-user-dirs-update --force` は空のフォルダーを作り直すだけで、中身を移さない。中身を残すために、フォルダーを `mv` してから `xdg-user-dirs-update --set` で場所を書き換える
   - Files のサイドバーのブックマーク（`~/.config/gtk-3.0/bookmarks`）も、日本語の名前の URI のままになるので書き換える
   - `~/.config/user-dirs.locale` を今のロケールに合わせる。xdg-user-dirs-gtk は、このファイルのロケールが今のロケールと違うときに、ログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓を出す（xdg-user-dirs-gtk のソース）
-- **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。統合前の[画面オフ・ロック・サスペンドの記録](../verification/almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
+- **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。統合前の[画面オフ・ロック・サスペンドの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
   - 一覧の値（`xkb-options`・`experimental-features`・`custom-keybindings`）は、まるごと置き換えず、無ければ足す。ほかの設定で入っている値を消さないため
 - **Caps Lock を Ctrl に（「GNOME の表示と入力」の手順 3）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
 - **拡大率（「GNOME の表示と入力」の手順 9）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
@@ -421,7 +421,7 @@
 
 ## 統合前の参考資料: EPEL（もとは epel.md）
 
-もとの `epel.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `epel.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -447,7 +447,7 @@
 
 ## 統合前の参考資料: RPM Fusion（もとは rpmfusion.md）
 
-もとの `rpmfusion.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `rpmfusion.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -474,7 +474,7 @@
 
 ## 統合前の参考資料: bash の設定（もとは bash-settings.md）
 
-もとの `bash-settings.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `bash-settings.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -521,7 +521,7 @@
 
 ## 統合前の参考資料: Homebrew（もとは homebrew.md）
 
-もとの `homebrew.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `homebrew.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -582,7 +582,7 @@
 
 ## 統合前の参考資料: Flatpak（もとは flatpak.md）
 
-もとの `flatpak.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `flatpak.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -606,7 +606,7 @@
 
 ## 統合前の参考資料: 日本語入力（もとは japanese-input.md）
 
-もとの `japanese-input.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `japanese-input.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -630,7 +630,7 @@
 
 ## 統合前の参考資料: 画面オフ・ロック・サスペンド（もとは gnome-power.md）
 
-もとの `gnome-power.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `gnome-power.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -659,7 +659,7 @@
 
 ## 統合前の参考資料: starship（もとは starship.md）
 
-もとの `starship.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `starship.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -683,7 +683,7 @@
 
 #### starship: 実施手順 / 手順 2: 補足: 降ってくるボトル
 
-[検証記録](../verification/almalinux-setup.md#starship-参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#starship-参考資料から分離した記録)
 
 #### starship: 設定ファイル / 手順 1: 補足: 調べるときに使うサブコマンド
 
@@ -715,7 +715,7 @@
 
 ## 統合前の参考資料: zoxide（もとは zoxide.md）
 
-もとの `zoxide.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `zoxide.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -743,7 +743,7 @@
 
 ## 統合前の参考資料: fzf（もとは fzf.md）
 
-もとの `fzf.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `fzf.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -760,7 +760,7 @@
 
 #### fzf: 実施手順 / 手順 1: 補足: 依存と、入れてあるホストで貼る意味
 
-[この節の検証記録](../verification/almalinux-setup.md#fzf-実施手順--手順-1-補足-依存と入れてあるホストで貼る意味)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#fzf-実施手順--手順-1-補足-依存と入れてあるホストで貼る意味)
 
 - fzf の依存は `ncurses` だけ（`brew deps fzf`）
 - yazi.md や zoxide.md で入れた fzf は、`brew install zoxide fzf` のように名前を挙げて入れているので、Homebrew の「頼まれて入れた」印（`installed_on_request`）が付いている。`brew install fzf` を貼り直しても害は無く、印が無かったホストでは付く（印が無いと、zoxide や yazi を `brew uninstall` した際の自動削除や、明示的な `brew autoremove` で fzf も消えうる）
@@ -779,7 +779,7 @@
 
 ## 統合前の参考資料: eza（もとは eza.md）
 
-もとの `eza.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `eza.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -800,7 +800,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 #### eza: 選択した方針
 
-[この節の検証記録](../verification/almalinux-setup.md#eza-選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#eza-選択した方針)
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
@@ -821,7 +821,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ## 統合前の参考資料: bat（もとは bat.md）
 
-もとの `bat.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `bat.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -853,7 +853,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ## 統合前の参考資料: tmux（もとは tmux.md）
 
-もとの `tmux.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `tmux.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -894,7 +894,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ## 統合前の参考資料: Git（もとは git.md）
 
-もとの `git.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-の-windows-11もとは-gitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `git.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-の-windows-11もとは-gitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -905,7 +905,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | 更新 1 | 更新のリード（OS の更新で上がる） |
 | ロールバック 1〜5 | ロールバックの「Git の道具を消す」の手順 9〜13 |
 
-[検証記録](../verification/almalinux-setup.md#git-参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-参考資料から分離した記録)
 
 ### Git: 補足
 
@@ -1015,7 +1015,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ## 統合前の参考資料: Firefox（もとは firefox.md）
 
-もとの `firefox.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-firefox-の-windows-11もとは-firefoxmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `firefox.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-firefox-の-windows-11もとは-firefoxmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1036,7 +1036,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 #### Firefox: 実施手順 / 手順 4: 補足: priority は保険
 
-[この節の検証記録](../verification/almalinux-setup.md#firefox-実施手順--手順-4-補足-priority-は保険)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#firefox-実施手順--手順-4-補足-priority-は保険)
 
 Mozilla の案内する repo ファイルには `priority` が無い。`priority=10`（数字が小さいほど優先）は、将来のリポジトリ間の優先順位に備えて足している。
 
@@ -1057,7 +1057,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 #### Firefox: 選択した方針
 
-[この節の検証記録](../verification/almalinux-setup.md#firefox-選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#firefox-選択した方針)
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
@@ -1100,7 +1100,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ## 統合前の参考資料: HackGen Console NF（もとは hackgen.md）
 
-もとの `hackgen.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-hackgen-console-nf-の-windows-11もとは-hackgenmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `hackgen.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-hackgen-console-nf-の-windows-11もとは-hackgenmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1110,13 +1110,13 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 | ロールバック 1 | ロールバックの「端末とエディタを消す」の手順 10 |
 | ロールバック 2 | （外した。WezTerm で使う（任意）の戻し方） |
 
-[検証記録](../verification/almalinux-setup.md#hackgen-console-nf-参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#hackgen-console-nf-参考資料から分離した記録)
 
 ### HackGen Console NF: 補足
 
 #### HackGen Console NF: 実施手順 / 手順 1: 補足: HackGen35 Console NF
 
-- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](../verification/almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)）
+- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)）
 
 #### HackGen Console NF: 実施手順 / 手順 2: 補足: unzip が要る理由
 
@@ -1171,7 +1171,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ## 統合前の参考資料: WezTerm（もとは wezterm-nightly.md）
 
-もとの `wezterm-nightly.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-wezterm-の-windows-11もとは-wezterm-nightlymd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `wezterm-nightly.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-wezterm-の-windows-11もとは-wezterm-nightlymd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1208,7 +1208,7 @@ enabled_metadata=1
 
 #### WezTerm: 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵
 
-[この節の検証記録](../verification/almalinux-setup.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
 
 - `wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は、`wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ
 - `dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているため。x86_64 パッケージには入っていない
@@ -1280,7 +1280,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 ## 統合前の参考資料: git-delta（もとは git-delta.md）
 
-もとの `git-delta.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-delta-の-windows-11もとは-git-deltamd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `git-delta.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-git-delta-の-windows-11もとは-git-deltamd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1354,7 +1354,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 
 ## 統合前の参考資料: Neovim（もとは neovim.md）
 
-もとの `neovim.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-neovim-の-windows-11もとは-neovimmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `neovim.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-neovim-の-windows-11もとは-neovimmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1374,7 +1374,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 
 #### Neovim: 実施手順 / 手順 2: 補足: :checkhealth の読み方
 
-[この節の検証記録](../verification/almalinux-setup.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
 
 `:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
 
@@ -1415,7 +1415,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 
 ## 統合前の参考資料: lazygit（もとは lazygit.md）
 
-もとの `lazygit.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-lazygit-の-windows-11もとは-lazygitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `lazygit.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-lazygit-の-windows-11もとは-lazygitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1439,7 +1439,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 
 #### lazygit: 実施手順 / 手順 3: 補足: 起動時の注意
 
-[この節の検証記録](../verification/almalinux-setup.md#lazygit-実施手順--手順-3-補足-起動時の注意)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#lazygit-実施手順--手順-3-補足-起動時の注意)
 
 `lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。
 
@@ -1476,7 +1476,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 ## 統合前の参考資料: GitHub CLI（もとは gh.md）
 
-もとの `gh.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-github-cli-の-windows-11もとは-ghmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `gh.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-github-cli-の-windows-11もとは-ghmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1536,7 +1536,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 ## 統合前の参考資料: yazi（もとは yazi.md）
 
-もとの `yazi.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-yazi-の-windows-11もとは-yazimd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `yazi.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-yazi-の-windows-11もとは-yazimd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1557,7 +1557,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 #### yazi: 実施手順 / 手順 2: 補足: ボトルと、依存ツールの役割
 
-[この節の検証記録](../verification/almalinux-setup.md#yazi-実施手順--手順-2-補足-ボトルと依存ツールの役割)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#yazi-実施手順--手順-2-補足-ボトルと依存ツールの役割)
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
@@ -1599,7 +1599,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 ## 統合前の参考資料: Claude Code（もとは claude-code.md）
 
-もとの `claude-code.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-claude-code-の-windows-11もとは-claude-codemd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `claude-code.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-claude-code-の-windows-11もとは-claude-codemd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1626,7 +1626,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 #### Claude Code: 選択した方針
 
-[この節の検証記録](../verification/almalinux-setup.md#claude-code-選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#claude-code-選択した方針)
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
@@ -1675,7 +1675,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 ## 統合前の参考資料: Codex CLI（もとは codex.md）
 
-もとの `codex.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-codex-cli-の-windows-11もとは-codexmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `codex.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-codex-cli-の-windows-11もとは-codexmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1698,7 +1698,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 - 配布はある: Homebrew の cask `codex`（Linux でも入る）、scoop の main の `codex`、WinGet の `OpenAI.Codex`
 - どれも、そのパッケージマネージャーのコマンド（`brew upgrade --cask codex`・`scoop update codex`・`winget upgrade`）を打たないと上がらない
-- Homebrew の cask で入れた Codex（AlmaLinux 10）では、`codex update` が `Could not detect the Codex installation method.` で止まった（[検証記録](../verification/almalinux-setup.md#codex-cli-付録-起動したときの更新とパッケージマネージャー2026-10-09)）
+- Homebrew の cask で入れた Codex（AlmaLinux 10）では、`codex update` が `Could not detect the Codex installation method.` で止まった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#codex-cli-付録-起動したときの更新とパッケージマネージャー2026-10-09)）
 - standalone のインストーラーで入れたものは、起動したときの知らせから Enter 1 回で上がる（[更新: 補足](#codex-cli-更新-補足-起動したときの知らせ)）。利用者の希望（自動で最新になるなら公式の方法でよい）に近いので、こちらを採る
 
 #### Codex CLI: 実施手順 / 手順 3: 補足: Start Codex now? に n と答える理由
@@ -1735,7 +1735,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 ## 統合前の参考資料: Grok Build（もとは grok-build.md）
 
-もとの `grok-build.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-grok-build-の-windows-11もとは-grok-buildmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](../verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
+もとの `grok-build.md` の参考資料を、内容を変えずに移したもの（Windows 11 の節は、[Windows 11 の初期設定の参考資料](windows-setup.md#統合前の参考資料-grok-build-の-windows-11もとは-grok-buildmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)の統合前の記録と同じ。当時の手順と今の [AlmaLinux 10 の初期設定](../almalinux-setup.md)の手順の対応は次のとおり。
 
 | 当時の手順 | 今の手順 |
 |---|---|
@@ -1770,7 +1770,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
   - Homebrew と WinGet の版は、`brew upgrade --cask grok-build`・`winget upgrade` を打たないと上がらない
   - npm の版は Node.js が要る
   - Homebrew の cask で入れた Grok でも、`grok update` は Homebrew を使わずに Grok 自身で入れる
-  - `grok update --force-reinstall` を打つと、Homebrew の外（`~/.grok/bin`・`~/.grok/downloads`）に別の Grok が入り、Homebrew の版はそのままだった（[検証記録](../verification/almalinux-setup.md#grok-build-homebrew-の-cask)）
+  - `grok update --force-reinstall` を打つと、Homebrew の外（`~/.grok/bin`・`~/.grok/downloads`）に別の Grok が入り、Homebrew の版はそのままだった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-homebrew-の-cask)）
   - Homebrew で使うなら、自動の更新を止め（`[cli] auto_update = false`）、`brew upgrade --cask grok-build` で上げる形になる
   - WinGet で入れた Grok では、`grok update` は WinGet のコマンドを出すだけで何も変えない
   - Homebrew の formula の `grok`（`brew install grok`）は Grok Build ではない（正規表現でログを読む別のツール）
@@ -1828,15 +1828,15 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 - 確かめた時刻は `~/.grok/version.json` の `checked_at` に残り、間もないうちは確かめない
 - 新しい版は `~/.grok/downloads/grok-<版>-<OS>-<CPU>` に入り、`~/.grok/bin` の `grok`・`agent` のリンクが付け替わる。前の配布物は残る
 - 更新の入れ方は、設定の `[cli] installer`（公式のインストーラーは `internal` を書く）で選ばれる（同梱の文書 26-config-reference）
-- 確かめた範囲は[検証記録](../verification/almalinux-setup.md#grok-build-付録-自動の更新とパッケージマネージャー2026-10-09)
+- 確かめた範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-付録-自動の更新とパッケージマネージャー2026-10-09)
 
 #### Grok Build: 注意点: Linux の sandbox を起動できないとき
 
 - Linux のファイルアクセス制限には Landlock が要る。カーネルの版が 5.13 以降でも、`CONFIG_SECURITY_LANDLOCK=y` で組み込まれ、起動中のカーネルで有効になっている必要がある。`/sys/kernel/security/lsm` に `landlock` があることを確かめる
 - bubblewrap は、拒否するパスの遮蔽などに使う。bubblewrap があることだけでは `read-only` の書き込み制限が効くと判断しない
 - `runtime-socket deny path /run/podman/podman.sock` の `Permission denied (os error 13)` は、ソケット本体に限らず、親ディレクトリを検索できないときも出る。Podman が停止し、ソケットが存在しなくても、親の検索権限が無ければ失敗する。親ディレクトリの検索権限を確かめ、ソケット本体の権限は緩めない
-- `read-only` は起動時に `/run/docker.sock` と `/run/podman/podman.sock` を調べるが、`workspace` は調べない。`workspace` が `could not apply the 'workspace' sandbox profile` で止まるときは、ソケットの親ではなく Landlock の側を確かめる（Grok 1.0.50 の起動時のシステムコールを実機で追った。[検証記録](../verification/almalinux-setup.md#grok-build-sandbox-の再起動なしの追加検証)）
-- 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](../verification/almalinux-setup.md#grok-build-sandbox-の追加原因調査と対処の準備)に分けた。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
+- `read-only` は起動時に `/run/docker.sock` と `/run/podman/podman.sock` を調べるが、`workspace` は調べない。`workspace` が `could not apply the 'workspace' sandbox profile` で止まるときは、ソケットの親ではなく Landlock の側を確かめる（Grok 1.0.50 の起動時のシステムコールを実機で追った。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-sandbox-の再起動なしの追加検証)）
+- 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-sandbox-の追加原因調査と対処の準備)に分けた。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
 
 #### Grok Build: 注意点: 会話のデータの扱い
 

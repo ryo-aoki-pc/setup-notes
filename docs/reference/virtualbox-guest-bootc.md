@@ -14,7 +14,7 @@
 
 ### 実施手順 / 手順 5: 補足: CD の中身と確かめ方
 
-[この節の検証記録](../verification/virtualbox-guest-bootc.md#実施手順--手順-5-補足-cd-の中身と確かめ方)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施手順--手順-5-補足-cd-の中身と確かめ方)
 
 - 7.2.8 より古い版を使わないのは、EL10.1・10.2 のカーネルへの対応が 7.2.8 で入ったため
 
@@ -25,7 +25,7 @@
 
 ### 実施手順 / 手順 7: 補足: 切り替えで起きること
 
-[この節の検証記録](../verification/virtualbox-guest-bootc.md#実施手順--手順-7-補足-切り替えで起きること)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施手順--手順-7-補足-切り替えで起きること)
 
 - `/usr` と `/opt` は、新しいイメージのものになる
 - `/etc` は、手元の変更を残しつつ新しいイメージとマージされる（ostree の 3-way マージ）。イメージで足したファイル（udev のルール、`vboxclient.desktop`、unit を有効にするリンク）は、手元に無いので足される
@@ -35,7 +35,7 @@
 
 ### ホストオンリーアダプターだけの VM でビルドする（任意） / 手順 3: 補足: 鍵をホストに置く理由と扱い
 
-[この節の検証記録](../verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意--手順-3-補足-鍵をホストに置く理由と扱い)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意--手順-3-補足-鍵をホストに置く理由と扱い)
 
 - モジュールに署名するのは、この節の手順 7 のビルド（ホスト）なので、秘密鍵もホストに置く。VM には公開鍵の証明書だけを送る
 - 鍵の作り方（CN も）は [secure-boot-mok.md 手順 4](../almalinux-setup.md#secure-boot-の署名鍵-実施手順) と同じで、置き場所と持ち主（自分のユーザー）だけが違う
@@ -72,7 +72,7 @@
 
 ### ロールバック / 手順 3: 補足: これらが自然には消えない理由
 
-[この節の検証記録](../verification/virtualbox-guest-bootc.md#ロールバック--手順-3-補足-これらが自然には消えない理由)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ロールバック--手順-3-補足-これらが自然には消えない理由)
 
 - ユーザーとグループは、`systemd-sysusers` が手元の `/etc/passwd`・`/etc/group` に書いたもの。元のイメージに戻しても、手元で変更済みのファイルは 3-way マージで残る
 - `/var` は、イメージを切り替えても戻らない

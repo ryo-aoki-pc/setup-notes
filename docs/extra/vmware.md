@@ -1,13 +1,13 @@
 # VMware Workstation Pro のインストールと VM の作成（Windows 11）のロールバックと注意点
 
-[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](../verification/vmware.md)・[参考資料](../reference/vmware.md)
+[手順書](../windows-setup.md#vmware-workstation-pro-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](../reference/vmware.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 
 ## ロールバック
 
 - VM は、本書の[VM を消す](../windows-setup.md#vmware-workstation-pro-vm-を消す)で消す
-- **VMware Workstation Pro のアンインストールは、まだ検証していないので載せていない**（[検証記録](../verification/vmware.md)）
+- **VMware Workstation Pro のアンインストールは、まだ検証していないので載せていない**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)）
 
 ---
 

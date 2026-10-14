@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: 管理者の PowerShell を使う理由
 
-[この節の検証記録](../verification/windows-rdp-disconnect.md#実施手順--手順-1-補足-管理者の-powershell-を使う理由)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#実施手順--手順-1-補足-管理者の-powershell-を使う理由)
 
 - `tscon` で今のセッションを PC の画面（コンソール）へ移すときは、管理者として実行する（SmartBear の TestComplete の資料）
 - Microsoft の `tscon` の資料は、別のセッションにつなぐには、フル コントロールか「接続」の特殊なアクセス許可が要ると書いている
@@ -15,7 +15,7 @@
 
 ### 実施手順 / 手順 2: 補足: RDP でつないだときのセッション
 
-[この節の検証記録](../verification/windows-rdp-disconnect.md#実施手順--手順-2-補足-rdp-でつないだときのセッション)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#実施手順--手順-2-補足-rdp-でつないだときのセッション)
 
 - Windows 11 の Pro では、PC にサインインしているのと同じユーザーで RDP でつなぐと、新しいセッションは作られず、そのセッションが RDP へ移る。PC の画面はロック画面になる
 - ふつうに切断する（RDP の窓を閉じる）と、セッションは `Disc`（切断）の状態で残り、PC の画面はロック画面のまま。アプリは動き続ける
@@ -35,7 +35,7 @@
 
 ### ショートカットで切断する（任意） / 手順 1: 補足: ショートカットの作り
 
-[この節の検証記録](../verification/windows-rdp-disconnect.md#ショートカットで切断する任意--手順-1-補足-ショートカットの作り)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#ショートカットで切断する任意--手順-1-補足-ショートカットの作り)
 
 - 動かすのは `powershell.exe -NoProfile -WindowStyle Hidden -Command "tscon.exe (Get-Process -Id $PID).SessionId /dest:console"`。手順 3 と同じコマンドを、隠した窓で動かす
 - `Arguments` は単一引用符で囲み、`$PID` を、ショートカットを作る PowerShell ではなく、ショートカットが起動する PowerShell に読ませる
@@ -53,7 +53,7 @@
 
 ### 選択した方針
 
-[この節の検証記録](../verification/windows-rdp-disconnect.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#選択した方針)
 
 - **`tscon` で、今のセッションを PC の画面（コンソール）へ移して切る**
 

@@ -2,7 +2,7 @@
 
 [手順書](../almalinux-setup.md#shellcheck-と-shfmt-実施手順)・[ロールバックと注意点](../extra/shellcheck.md)
 
-[検証記録](../verification/shellcheck.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#参考資料から分離した記録)
 
 ## 補足
 
@@ -69,6 +69,6 @@
 
 ### 参照
 
-[検証記録](../verification/shellcheck.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#参考資料から分離した記録)
 
 ---

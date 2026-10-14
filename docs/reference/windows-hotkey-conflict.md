@@ -1,6 +1,6 @@
 # Windows 11 でホットキーを使用しているアプリを調べる手順の参考資料
 
-[手順書](../windows-setup.md#windows-のホットキー競合-実施手順)・[検証記録](../verification/windows-hotkey-conflict.md)・[ロールバック](../extra/windows-hotkey-conflict.md)
+[手順書](../windows-setup.md#windows-のホットキー競合-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[ロールバック](../extra/windows-hotkey-conflict.md)
 
 ## 補足
 
@@ -25,7 +25,7 @@
 - 公式説明では、グローバルなメッセージフックの DLL を使い、選んだホットキーの入力を模擬して、そのイベントを待つ（[Hotkey Screener](https://www.ntwind.com/freeware/hotkey-screener.html)）
 - 検出は登録情報だけを読む操作ではない。キーに割り当てられた処理が実行されることがあるため、対象キーを選んでから検出する
 - 検出前に作業を保存する。割り当てられた操作が不明なまま、複数のキーをまとめて検出しない
-- 公式は 32 bit・64 bit、通常権限・管理者権限のプロセスへの対応を説明している。個々の環境での検出成否は[検証記録](../verification/windows-hotkey-conflict.md)で管理する
+- 公式は 32 bit・64 bit、通常権限・管理者権限のプロセスへの対応を説明している。個々の環境での検出成否は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)で管理する
 
 ### 実施手順 / 手順 4: 補足: 使用アプリの情報と Windows の通知
 
@@ -33,7 +33,7 @@
 - `WM_HOTKEY` の `wParam` はホットキーの識別子、`lParam` は修飾キーと仮想キーコードを表す。メッセージのパラメーターに使用アプリ名や PID が入っているわけではない（[WM_HOTKEY](https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-hotkey)）
 - 登録先のウィンドウハンドルが分かる場合は、`GetWindowThreadProcessId` でそのウィンドウを作成したスレッドとプロセスの ID を取得できる。この関数はキーの組み合わせから所有アプリを検索するものではない（[Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowthreadprocessid)）
 - `RegisterHotKey` の `hWnd` が `NULL` なら、通知先は登録したスレッドのメッセージキューになる。特定のウィンドウを経由しない登録もある
-- Hotkey Screener が `hWnd = NULL` の登録をどこまで検出するかは、公式ページに明示されていない。今回確認した登録方式は[検証記録](../verification/windows-hotkey-conflict.md)に残し、全種類の登録への対応を保証しない
+- Hotkey Screener が `hWnd = NULL` の登録をどこまで検出するかは、公式ページに明示されていない。今回確認した登録方式は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)に残し、全種類の登録への対応を保証しない
 - 表示されたアプリ名と PID を実行中のプロセスと照合する。同名の実行ファイルが複数ある場合も、名前だけで同じプロセスと判断しない
 - 検出結果はアプリを調べる手がかりとして使い、そのアプリの対象キーの設定と変更後の動作を照合する
 
@@ -110,7 +110,7 @@
 - 検出したアプリのキー設定と、変更後の実操作を合わせて判断する
 - 一覧に無いキーや未検出の状態は、一般的な入力の切り分けへ進む分岐として残す
 - PowerShell の登録可否試験は任意の補助にする。使用アプリを取得する機能ではなく、入力フックなども検出できないため
-- ツールの実機での確認範囲は[検証記録](../verification/windows-hotkey-conflict.md)へ分け、公式説明だけで実機検証済みにしない
+- ツールの実機での確認範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)へ分け、公式説明だけで実機検証済みにしない
 
 ### 参照
 

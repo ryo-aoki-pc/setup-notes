@@ -1,6 +1,6 @@
 # GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)・[検証記録](../verification/gnome-headless-session.md)・[参考資料](../reference/gnome-headless-session.md)
+[手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](../reference/gnome-headless-session.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -141,7 +141,7 @@
 
    - `Removed '/etc/systemd/system/graphical.target.wants/gnome-headless-session@<USER>.service'.` と出る
    - セッションで動いていたアプリも閉じる
-   - 続いて `0` が出ればよい（このユーザーのヘッドレスのセッション〔`Service=gdm-autologin`〕だけを数え、リモートログインのセッションは数えない。[検証記録](../verification/gnome-headless-session.md)・[参考資料](../reference/gnome-headless-session.md)）
+   - 続いて `0` が出ればよい（このユーザーのヘッドレスのセッション〔`Service=gdm-autologin`〕だけを数え、リモートログインのセッションは数えない。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](../reference/gnome-headless-session.md)）
    - `for` の行で、セッションが終わるまで、30 秒まで待つ
 
 ---

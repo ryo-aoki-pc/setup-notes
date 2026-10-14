@@ -1,6 +1,6 @@
 # WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#wireguard-実施手順)・[検証記録](../verification/wireguard.md)・[参考資料](../reference/wireguard.md)
+[手順書](../almalinux-setup.md#wireguard-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](../reference/wireguard.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -213,7 +213,7 @@ sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
 - 誰がどこへ入れるかは、宛先ホストのファイアウォール（`firewalld` のゾーンや rich rule、アプリの認証）で決める
 - トンネル越しの通信は送信元 IP がそのまま届く（NAT しない）ので、宛先ホストで送信元の帯（相手拠点 LAN、クライアント帯）ごとに許可・拒否できる
 
-それでも WG ホストで絞りたい場合は、LAN 側ゾーンに rich rule を足す（例: 拠点 B のクライアント帯から拠点 A の LAN への転送を拒否する）。実行範囲は[検証記録](../verification/wireguard.md)を参照する
+それでも WG ホストで絞りたい場合は、LAN 側ゾーンに rich rule を足す（例: 拠点 B のクライアント帯から拠点 A の LAN への転送を拒否する）。実行範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)を参照する
 
 ```bash
 {
@@ -237,7 +237,7 @@ sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
 - クライアント帯を使う場合は、それも入る。スクリプトが相手 peer の `AllowedIPs` にこれを組み立てる
 - `journalctl -u wg-quick@wg0` で、起動時に経路が追加されるのを確認できる
 
-この対応表は **1 インターフェース内で peer ごとに排他**で、1 つのアドレスを 2 つの peer に対応づけることはできない。だからクライアントは拠点に所属させ、拠点ごとに帯を分ける（[選択した方針](../verification/wireguard.md#選択した方針)）。
+この対応表は **1 インターフェース内で peer ごとに排他**で、1 つのアドレスを 2 つの peer に対応づけることはできない。だからクライアントは拠点に所属させ、拠点ごとに帯を分ける（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#選択した方針)）。
 
 > `0.0.0.0/0` を書くと、WG ホスト自身の通信も含めてすべてがトンネルに向かう（wg-quick が policy routing で差し替える）。拠点間接続では相手 LAN だけを書く。
 

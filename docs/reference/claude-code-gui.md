@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: 変数について
 
-[この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-1-補足-変数について)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md#実施手順--手順-1-補足-変数について)
 
 - `VIRTUAL_MONITOR` は、手順 2 で gnome-shell に付ける `--virtual-monitor` の値。Claude Code が撮る画面の大きさになる
 - 小さくすると、画面の写しの PNG も小さくなる。後から変えるときは[仮想モニターの大きさを変える（任意）](../ai-agents.md#claude-code-の-gnome-操作-仮想モニターの大きさを変える任意)
@@ -29,7 +29,7 @@
 
 ### 実施手順 / 手順 3: 補足: restart を使わない理由
 
-[この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-3-補足-restart-を使わない理由)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md#実施手順--手順-3-補足-restart-を使わない理由)
 
 - `sudo systemctl restart` は、前のセッションの片付けと次の `start` が重なるため使わない
 - `stop` は `gdm-new-session` を止めるだけで、前のセッションの片付けは後から進む。`start` は、その片付けが終わってから行う
@@ -43,7 +43,7 @@
 
 ### 実施手順 / 手順 4: 補足: 画面の撮り方
 
-[この節の検証記録](../verification/claude-code-gui.md#実施手順--手順-4-補足-画面の撮り方)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md#実施手順--手順-4-補足-画面の撮り方)
 
 - `gnome-gui.py shot` は、Mutter の `org.gnome.Mutter.ScreenCast` で主のモニターを録画するセッションを作り、PipeWire のストリームから GStreamer で 1 コマを PNG にして、セッションを止める
 - 撮っている間は、上部バーの右に画面共有の表示（オレンジ）が出て、写しにも写る

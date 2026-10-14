@@ -1,6 +1,6 @@
 # Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）のロールバックと注意点
 
-[手順書](../almalinux-setup.md#samba-サーバー-実施手順)・[検証記録](../verification/samba.md)・[参考資料](../reference/samba.md)
+[手順書](../almalinux-setup.md#samba-サーバー-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](../reference/samba.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#samba-サーバー-実施手順)の手順 N、「本書」「この文書」は手順書を指す
 
@@ -10,7 +10,7 @@
 - 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[接続元を絞る（任意）](../almalinux-setup.md#samba-サーバー-接続元を絞る任意)の手順 2 を貼る
 
 > [!CAUTION]
-> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。[検証記録](../verification/samba.md)・[参考資料](../reference/samba.md)）。**この節の**手順 3 の「完全に消すなら」で消すと、中の登録は取り戻せない。
+> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](../reference/samba.md)）。**この節の**手順 3 の「完全に消すなら」で消すと、中の登録は取り戻せない。
 
 1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
 

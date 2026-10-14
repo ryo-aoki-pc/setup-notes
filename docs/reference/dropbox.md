@@ -28,7 +28,7 @@
 
 ### 実施手順 / 手順 7: 補足: URL が出るまでの時間と、journal
 
-[この節の検証記録](../verification/dropbox.md#実施手順--手順-7-補足-url-が出るまでの時間とjournal)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md#実施手順--手順-7-補足-url-が出るまでの時間とjournal)
 
 URL は、リンクするまで journal にも繰り返し出る。
 

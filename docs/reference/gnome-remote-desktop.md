@@ -23,13 +23,13 @@
 - `disable` 後は `inactive`、`enable` 後は `active` になる
 - このため、この時点でデーモンが起動し、**後から設定する資格情報は再起動するまで反映されない**（手順 6・7）
   - 2026-10-11 の Hyper-V の VM では、手順 4 の直後の `sudo grdctl --system status` が `Unit status: active`・`Status: enabled`・`Username: (empty)` で、手順 5 の `sudo systemctl enable --now` は何も出さなかった（`Created symlink` の行が出ず、出力は `firewall-cmd` の `success` の 2 行だけ。手順 5 の後は `enabled`）
-  - ユニットの有効化も `grdctl --system rdp enable` が済ませていた、とみる（手順 4 の直後の `systemctl is-enabled` は読んでいないので、確かめてはいない。[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - ユニットの有効化も `grdctl --system rdp enable` が済ませていた、とみる（手順 4 の直後の `systemctl is-enabled` は読んでいないので、確かめてはいない。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - `grdctl --system` は、TPM を使えないと、コマンドごとに `Init TPM credentials failed … using GKeyFile as fallback.` を 1 行出して、資格情報を GKeyFile（[注意点](../extra/gnome-remote-desktop.md#注意点)の `credentials.ini`）に置く
   - vTPM の無い Hyper-V の VM（2026-10-11）では、`because No TPM device found` の形で、手順 4 に 3 行、手順 6・8 に 1 行ずつ出た。デーモンも、起動のたびに同じ行をログに出した
 
 ### 実施手順 / 手順 6: 補足: 資格情報
 
-[この節の検証記録](../verification/gnome-remote-desktop.md#実施手順--手順-6-補足-資格情報)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-6-補足-資格情報)
 
 - 引数なしで打つのは、パスワードをシェル履歴・ログに残さないため
 
@@ -39,16 +39,16 @@
 
 ### 実施手順 / 手順 9: 補足: 鍵と証明書
 
-[この節の検証記録](../verification/gnome-remote-desktop.md#実施手順--手順-9-補足-鍵と証明書)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-9-補足-鍵と証明書)
 
 - `openssl pkey` には `-modulus` が無い。鍵側は `openssl rsa` を使う
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md)を通した PC では、対話のシェルの PATH の先頭が Homebrew なので、パイプの右側の `openssl sha256` と、手順 10 の `python3`・スクリプトの中の `openssl` は、Homebrew のものに解決される
   - `sudo` を付けた `openssl`（この手順のパイプの左側と、手順 2 の `sudo -u gnome-remote-desktop openssl`）は、sudo の `secure_path` で OS の `/bin/openssl` になる
-  - 2026-10-11 の Hyper-V の VM では、対話のシェルの `openssl` が Homebrew の 4.0.3、`python3` が 3.15.0、`sudo` の `openssl` が OS の 3.5.8 という状態で、手順 2・9・10 が通った（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`/usr/bin/` を付けた形は、流していない
+  - 2026-10-11 の Hyper-V の VM では、対話のシェルの `openssl` が Homebrew の 4.0.3、`python3` が 3.15.0、`sudo` の `openssl` が OS の 3.5.8 という状態で、手順 2・9・10 が通った（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`/usr/bin/` を付けた形は、流していない
 
 ### 実施手順 / 手順 10: 補足: TLS プローブと、FreeRDP クライアントでの確かめ方
 
-[この節の検証記録](../verification/gnome-remote-desktop.md#実施手順--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#実施手順--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)
 
 **TLS プローブ**
 
@@ -73,7 +73,7 @@ RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に�
 [RDP] Network or intentional disconnect, stopping session
 ```
 
-- 2026-10-11 の Hyper-V の VM では、プローブを貼った秒に、この 3 行を含む 9 行が出た。ほかの 6 行は、`[kerberos_AcquireCredentialsHandleA]: krb5_init_context (Included profile directory could not be read …)` が 2 行と、`BIO_read returned a system error 104: Connection reset by peer`・`ERRCONNECT_CONNECT_TRANSPORT_FAILED`・`rdp_server_accept_nego() fail`・`STATE_RUN_FAILED` の行。待ち受けと、その後の接続には響かなかった（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+- 2026-10-11 の Hyper-V の VM では、プローブを貼った秒に、この 3 行を含む 9 行が出た。ほかの 6 行は、`[kerberos_AcquireCredentialsHandleA]: krb5_init_context (Included profile directory could not be read …)` が 2 行と、`BIO_read returned a system error 104: Connection reset by peer`・`ERRCONNECT_CONNECT_TRANSPORT_FAILED`・`rdp_server_accept_nego() fail`・`STATE_RUN_FAILED` の行。待ち受けと、その後の接続には響かなかった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 
 逆に、次が出る場合はプローブの前段で失敗している:
 
@@ -115,7 +115,7 @@ journalctl -u gdm -f
 
 - 別マシンには手順 1 の変数が無いので、`<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
 - AlmaLinux 10 の `freerdp` パッケージが入れる X11 のクライアントは `xfreerdp`。`xfreerdp3` という名前のコマンドは入らない
-  - 2026-10-11 の Hyper-V の VM のクライアント（`freerdp-3.10.3-12.el10_2.14`）では、`xfreerdp3` は `コマンドが見つかりませんでした` で終わり、`dnf -q provides "*/xfreerdp3"` も一致が無かった（クライアントにあったのは、`/usr/bin/xfreerdp` と `/usr/bin/wlfreerdp`）。手順書は、2026-10-11 まで `xfreerdp3` と書いていた（[検証記録](../verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 2026-10-11 の Hyper-V の VM のクライアント（`freerdp-3.10.3-12.el10_2.14`）では、`xfreerdp3` は `コマンドが見つかりませんでした` で終わり、`dnf -q provides "*/xfreerdp3"` も一致が無かった（クライアントにあったのは、`/usr/bin/xfreerdp` と `/usr/bin/wlfreerdp`）。手順書は、2026-10-11 まで `xfreerdp3` と書いていた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_3389.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
   - `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない。`T` と `N` で答えたときの動きは、確かめていない
 - FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、認証を通った（2026-10-11 の Hyper-V の VM。3 回とも。この行が出る理由は、確かめていない）
@@ -131,7 +131,7 @@ journalctl -u gdm -f
 
 ### 設定済みのサーバーで GDM の後に起動させる / 手順 2: 補足: すれ違ったときのログ
 
-[この節の検証記録](../verification/gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる--手順-2-補足-すれ違ったときのログ)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる--手順-2-補足-すれ違ったときのログ)
 
 - 今のデーモンのプロセス（MainPID）のログだけを数える。起動の後にデーモンを再起動していれば `0` になる
 
@@ -172,9 +172,9 @@ journalctl -u gdm -f
 
 ### 付録: winpr-makecert で証明書を作る場合（RHEL 10 公式手順）
 
-[証明書生成時の表示の記録](../verification/gnome-remote-desktop.md#参考資料の証明書生成で確認した表示)
+[証明書生成時の表示の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#参考資料の証明書生成で確認した表示)
 
-[この節の検証記録](../verification/gnome-remote-desktop.md#付録-winpr-makecert-で証明書を作る場合rhel-10-公式手順)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-winpr-makecert-で証明書を作る場合rhel-10-公式手順)
 
 RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` で証明書を作る手順を載せている。これは Red Hat のドキュメントがそのツールを採用しているだけで、GRD の要件ではない。**GNOME 本家の README は openssl による生成を正規の手順として記載しており、機能的にも openssl の方が上位**（SAN・有効期間を指定できる）。本書のメイン手順が openssl を使うのはこのため。
 

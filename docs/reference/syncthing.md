@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: 変数について
 
-[この節の検証記録](../verification/syncthing.md#実施手順--手順-1-補足-変数について)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#実施手順--手順-1-補足-変数について)
 
 - `ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、OS のアカウントとも Samba のユーザーとも無関係。自動で OS と同じ名前が入るだけなので、別の名前にしてもよい
 - `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](../almalinux-setup.md#samba-サーバー-実施手順) の `SERVER_IP` と同じ扱い）
@@ -84,7 +84,7 @@ StandardError=append:/home/linuxbrew/.linuxbrew/var/log/syncthing.log
 
 ### 実施手順 / 手順 8: 補足: 認証が効いているかの確かめ方
 
-[この節の検証記録](../verification/syncthing.md#実施手順--手順-8-補足-認証が効いているかの確かめ方)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#実施手順--手順-8-補足-認証が効いているかの確かめ方)
 
 GUI のトップはログイン画面なので 200 が返る。**認証が効いていることは API で確かめる**。
 
@@ -103,7 +103,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 - 保存先の `~/syncthing-backup`（0700）と、スクリプト `~/.local/bin/syncthing-backup` ができる
 - スクリプトは保存先のディレクトリが無いと、作らずに失敗する
-- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](../verification/syncthing.md#設定を自動でバックアップする任意--手順-1-補足-スクリプトの作り)）
+- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#設定を自動でバックアップする任意--手順-1-補足-スクリプトの作り)）
 
 ### 設定を自動でバックアップする（任意） / 手順 2: 補足: ユニットの役割
 
@@ -174,7 +174,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 ### Windows 11 で使う / 手順 7: 補足: 規則の中身と、最初の起動より前に作る理由
 
-[この節の検証記録](../verification/syncthing.md#windows-11-で使う--手順-7-補足-規則の中身と最初の起動より前に作る理由)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#windows-11-で使う--手順-7-補足-規則の中身と最初の起動より前に作る理由)
 
 - 3 つの規則は、AlmaLinux 10 の[手順 7](../almalinux-setup.md#syncthing-実施手順)の firewalld の `syncthing`（22000/tcp・22000/udp・21027/udp）と `syncthing-gui`（8384/tcp）に当たる。22000/tcp は同期、22000/udp は QUIC、21027/udp は同じ LAN の相手を見つけるため、8384/tcp は Web GUI
 - どれも `syncthing.exe`（展開したフルパス）に限り、プライベートのネットワークだけで有効にする。持ち出した先のパブリックの Wi-Fi では開かない
@@ -230,7 +230,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 ### 選択した方針
 
-[この節の検証記録](../verification/syncthing.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#選択した方針)
 
 - **起動方式はユーザーサービス + linger にした**
   - 同期するのはホームディレクトリ配下なので、ファイルの持ち主として動かすのが素直

@@ -8,11 +8,11 @@
 
 初期設定の「Neovim」の手順 3 は、設定の導入先の「LazyVim の設定を導入する」を参照する。その手順 10 の初回起動から依存の取得が始まるため、オフラインでは先に同じSOCKSシェルでNode.js/npmを用意し、`https_proxy`とレジストリの疎通を確認する。Neovimの本体導入（手順 1・2）と、LazyVimの初回起動を分けて案内する。
 
-2026-10-12の[既存VM継続の記録](../verification/npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)では、この順番と通信を確認した。キャッシュなしの初回Mason取得や、過去の応答停止原因の証明には含めない。
+2026-10-12の[既存VM継続の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)では、この順番と通信を確認した。キャッシュなしの初回Mason取得や、過去の応答停止原因の証明には含めない。
 
 ### 実施手順 / 手順 2: 補足: npm は ALL_PROXY を読まない
 
-[この節の検証記録](../verification/npm-offline.md#実施手順--手順-2-補足-npm-は-all_proxy-を読まない)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#実施手順--手順-2-補足-npm-は-all_proxy-を読まない)
 
 **npm が読むプロキシの環境変数は、`https_proxy`・`http_proxy`・`proxy`・`no_proxy` だけ**（大文字でもよい）。npm 10.9 に同梱の `@npmcli/agent` の `lib/proxy.js`:
 
@@ -37,7 +37,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 ### 実施手順 / 手順 3: 補足: Mason が npm を動かす仕組みと、ファイルを開く理由
 
-[この節の検証記録](../verification/npm-offline.md#実施手順--手順-3-補足-mason-が-npm-を動かす仕組みとファイルを開く理由)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#実施手順--手順-3-補足-mason-が-npm-を動かす仕組みとファイルを開く理由)
 
 **Mason（2.3.1）は、npm のパッケージを `~/.local/share/nvim/mason/packages/<名前>` に入れる。** そのディレクトリで `npm init --yes --scope=mason` と `npm install <名前>@<版>` を実行し、`~/.local/share/nvim/mason/bin/` からリンクを張る。
 
@@ -60,7 +60,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 ### 選択した方針
 
-[この節の検証記録](../verification/npm-offline.md#選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md#選択した方針)
 
 | 経路 | 要るもの | 採否 |
 |---|---|---|

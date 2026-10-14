@@ -2,9 +2,9 @@
 
 構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。
 
-実施範囲・成功と失敗は [検証記録](docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。
+実施範囲・成功と失敗は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。
 
-横断的な結果は、[AlmaLinux 10 の環境構築の記録](docs/almalinux-vm-verification.md)と[3 方式の共同 VM 検証（正式測定の観測値と未完の範囲）](docs/hypervisor-verification.md)を参照する。
+横断的な結果は、[AlmaLinux 10 の環境構築の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/almalinux-vm-verification.md)と[3 方式の共同 VM 検証（正式測定の観測値と未完の範囲）](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/hypervisor-verification.md)を参照する。
 
 ## 手順書とツール
 
@@ -24,7 +24,7 @@
 - Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows を先に入れる。Windows のセットアップで ESP（EFI システム パーティション）を 2 GiB で作り、後ろに AlmaLinux 用の未割り当て領域を残す
 - AlmaLinux 10 のインストールの手順書は無い。入れるときの要点（ESP を `/boot/efi` に割り当て、フォーマットしない）は、下の手順書の注意点にある。入れた後は [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す
 - 両 OS の導入後、Windows から次回だけ AlmaLinux を起動する方法は、同書の [QEFI Entry Manager の任意節](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する任意)にある。通常の起動順は変えず、GUI で指定して CLI と BCDEdit で確かめる
-- インストールと QEFI Entry Manager の実施範囲は、[検証記録](docs/verification/windows-dual-boot.md)を参照する
+- インストールと QEFI Entry Manager の実施範囲は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)を参照する
 
 | 手順・用途 | 入れる OS | メディア | ディスクの使い方 | 次にすること |
 |---|---|---|---|---|
@@ -50,8 +50,8 @@
   - 同じく任意節で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
   - AlmaLinux 10 の初期設定の「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同書の「[シェルのツールを入れる](docs/windows-setup.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
   - 各手順の実施範囲は、対応する検証記録を参照する
-  - [Windows 11 のクリーンインストール後の VM 検証](docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06): 導入・設定の読み戻しと一部の手動確認、Git の隔離したローカル機能、HackGen の CLI 描画、WireGuard の鍵と管理サービス、RDP の TLS、スタートアップの確認用項目を検証した。WSL 2 と入れ子の VM は仮想化エラーで未達、残る GUI・認証・外部接続と実機での通し実行は未確認。
-  - [同じ VM での追加検証（2026-10-08）](docs/verification/windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08): GitHub のコピーボタンから管理者・通常の窓への貼り付け、残る画面と分岐、RDP のログインと ping、WireGuard の VPN の通し、任意節の一部（Wake on LAN の設定・リモートからの再起動）、更新、ロールバックを確かめた。[別の Windows からの再起動](docs/verification/windows-setup.md#付録-別の-windows-からの再起動とwinrm-の手順-5-の貼り直しを確かめた記録2026-10-08)は、ホストの実機を送る側にして確かめた。WSL 2・Claude Code のログイン・インターネット越しの VPN・Wake on LAN での起動・Store の更新の適用と、実機での通し実行は未確認
+  - [Windows 11 のクリーンインストール後の VM 検証](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06): 導入・設定の読み戻しと一部の手動確認、Git の隔離したローカル機能、HackGen の CLI 描画、WireGuard の鍵と管理サービス、RDP の TLS、スタートアップの確認用項目を検証した。WSL 2 と入れ子の VM は仮想化エラーで未達、残る GUI・認証・外部接続と実機での通し実行は未確認。
+  - [同じ VM での追加検証（2026-10-08）](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-pr-104-の未検証項目を同じ-vm-で確かめた記録2026-10-08): GitHub のコピーボタンから管理者・通常の窓への貼り付け、残る画面と分岐、RDP のログインと ping、WireGuard の VPN の通し、任意節の一部（Wake on LAN の設定・リモートからの再起動）、更新、ロールバックを確かめた。[別の Windows からの再起動](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-別の-windows-からの再起動とwinrm-の手順-5-の貼り直しを確かめた記録2026-10-08)は、ホストの実機を送る側にして確かめた。WSL 2・Claude Code のログイン・インターネット越しの VPN・Wake on LAN での起動・Store の更新の適用と、実機での通し実行は未確認
 
 | 手順・用途 | 入れるもの | 入る場所 | 権限 | 更新 | これを前提にするもの |
 |---|---|---|---|---|---|
@@ -105,15 +105,15 @@
 - WireGuard VPN の手順書は、拠点に建てる側（実施手順）と、外出先の PC からそこへつなぐ側（「AlmaLinux 10 の PC からつなぐ」と「Windows 11 で使う」）を 1 つにまとめてある。PC で作った鍵をホストの `client add --pubkey` で登録し、`client show` の conf を PC に取り込む
 - GNOME Remote Desktop は VPN ではなく、RDP で PC にログインして画面を使う
 - ヘッドレスのセッションは、モニターの無い PC に常駐させた自分の GNOME のデスクトップに、RDP でつなぐ。リモートログインも既存のセッションへ戻れるため、同じ PC で併用できる。前提は画面オフ・画面ロック・自動サスペンドの手順 1・2（サスペンドできる PC では手順 3・4 も）
-- デスクトップ共有は、遠隔の PC の画面のデスクトップを、PC の画面を触らずに RDP で共有する（設定アプリの「デスクトップ共有」と同じ仕組みを、SSH から CLI だけで設定する。PC の画面のセッションは GDM の自動ログインで作り、RDP の資格情報はパスワードの無い専用のキーリングに置く。ロックやログアウトでつながらなくなったときも SSH から直す）。画面が暗くなるか眠ると使えないので、前提は画面オフ・画面ロック・自動サスペンドの手順 1〜4。今の版は、x86_64 の VirtualBox の Workstation の VM で、PC の画面を一度も操作せずに通した（[記録](docs/verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）。PC の前でパスワードでログインしていた以前の版は、aarch64 の実機・Server with GUI の新規 VM と、x86_64 の VirtualBox / Workstation の VM で検証した（[実機の記録](docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)・[クリーン VM の記録](docs/verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)・[x86_64 VM の記録](docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)・[統合後の x86_64 VM の記録](docs/verification/gnome-desktop-sharing.md#付録-統合後の手順を-x86_64-の-vm-で通した記録2026-10-07)）
+- デスクトップ共有は、遠隔の PC の画面のデスクトップを、PC の画面を触らずに RDP で共有する（設定アプリの「デスクトップ共有」と同じ仕組みを、SSH から CLI だけで設定する。PC の画面のセッションは GDM の自動ログインで作り、RDP の資格情報はパスワードの無い専用のキーリングに置く。ロックやログアウトでつながらなくなったときも SSH から直す）。画面が暗くなるか眠ると使えないので、前提は画面オフ・画面ロック・自動サスペンドの手順 1〜4。今の版は、x86_64 の VirtualBox の Workstation の VM で、PC の画面を一度も操作せずに通した（[記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）。PC の前でパスワードでログインしていた以前の版は、aarch64 の実機・Server with GUI の新規 VM と、x86_64 の VirtualBox / Workstation の VM で検証した（[実機の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)・[クリーン VM の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)・[x86_64 VM の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)・[統合後の x86_64 VM の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-統合後の手順を-x86_64-の-vm-で通した記録2026-10-07)）
 - Windows の OpenSSH サーバー（[Windows 11 の初期設定の「OpenSSH サーバー」](docs/windows-setup.md#openssh-サーバー)）は、Windows 11 の PC に AlmaLinux などの `ssh` で入る側。Windows のユーザーのパスワードで入る（公開鍵での認証と、パスワード認証を切るのは任意節）。LAN の接続をプライベートにするのは、[Windows 11 の初期設定の「ネットワークとリモート」の手順 1](docs/windows-setup.md#ネットワークとリモート)
-  - [SSH で管理者・非管理者の PowerShell を使う（任意）](docs/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)では、WezTerm から Git Bash に入り、5.1 または 7 を開く。同じユーザーの非管理者の子 PowerShell は、SHA-256 を照合した固定版の busybox-w32 の `drop` で開き、`exit` で管理者の親へ戻る。貼り付けと権限の確認範囲は[検証記録](docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)に分ける
+  - [SSH で管理者・非管理者の PowerShell を使う（任意）](docs/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意)では、WezTerm から Git Bash に入り、5.1 または 7 を開く。同じユーザーの非管理者の子 PowerShell は、SHA-256 を照合した固定版の busybox-w32 の `drop` で開き、`exit` で管理者の親へ戻る。貼り付けと権限の確認範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)に分ける
   - 同じ PC の WSL をミラー（[Windows 11 の初期設定の任意節](docs/windows-setup.md#wsl-のネットワークをミラーにする任意)）にしたら、WSL からは `127.0.0.1` でつなぐ
 - SSH クライアント（Windows）は、その逆向き。Windows 11 の PC から AlmaLinux 10 のホストに、ed25519 の鍵で入る。鍵と `%USERPROFILE%\.ssh\config` の接続先は、Windows の ssh（PowerShell・WezTerm の起動メニュー）と Git の ssh（Git Bash・git）で共有する。ssh-agent は使わない（パスフレーズは毎回聞かれる）。**Windows の実機では流していない**（未検証）
 - Claude Code の Remote Control（Windows）は VPN でも SSH でもなく、Anthropic の API 経由でスマートフォンやブラウザから Windows 11 の PC の Claude Code を操作する。SSH で入ってタスク スケジューラのタスクを登録・開始し、タスクが WezTerm で起動した Claude Code は SSH を切った後も動く（Windows の OpenSSH サーバーが前提）
 - AlmaLinux 10 のホストでは、SSH で入って tmux の中で `claude remote-control` を動かす（[AI エージェントの手順書の tmux の任意節](docs/ai-agents.md#claude-code-を-tmux-の中で動かす任意)。接続は未検証）
 - Grok Build には公式の遠隔操作の画面が無い。Grok Build をブラウザから操作する手順書は、OSS の Codeg のサーバーを Grok Build と同じホスト（AlmaLinux 10 のサーバー・Windows 11 の PC）に常駐させ、スマートフォンや PC のブラウザのチャット形式の画面から Grok Build を動かす。外部のサーバーは通らず、AlmaLinux 10 は待ち受ける IP と送信元 CIDR を絞る。Windows 11 は受信インターフェースが Private なら全送信元の IPv4・IPv6 と全接続種別を許可し、Public・Domain は遮断する。通信は HTTPS（同じホストの Caddy が、自分の認証局の証明書で受ける。端末にルート証明書を入れる）
-- 同じ Codeg で Claude Code と Codex CLI も操作する手順は、「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。追加した手順の検証範囲は[検証記録](docs/verification/grok-build-remote.md)を参照する
+- 同じ Codeg で Claude Code と Codex CLI も操作する手順は、「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。追加した手順の検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)を参照する
 - Windows 11 の PC でリモート デスクトップを受け付けるのは、[Windows 11 の初期設定の「ネットワークとリモート」](docs/windows-setup.md#ネットワークとリモート)の手順 2（Pro 以上。受信の規則をプライベートの LAN に絞る）
 - Windows 11 の PC に RDP でつないで使った後、ふつうに切断すると PC の画面がロックされる。RDP をロックせずに切断する手順書は、切るときに `tscon` でセッションを PC の画面（コンソール）へ戻し、デスクトップにサインインしたままにする（Claude Code の Remote Control（Windows）は、`console` が `Active` であることを前提にする）。**Windows の実機では流していない**（未検証）
 - リモートの操作ができなくなったときに備えて再起動の経路を増やすのは、[Windows 11 の初期設定](docs/windows-setup.md#リモートから再起動する手段を増やす任意)の任意節（既にある SSH・RDP・Remote Control からの再起動に加え、別の PC からの SMB〔`net rpc shutdown`・`shutdown /m`〕・WinRM、クラッシュ時の自動再起動、ネットワーク断で自分で再起動する見張りタスク）。SMB・WinRM は管理の口を LAN に開け UAC のリモート制限を緩めるので任意。**Windows の実機では未検証**
@@ -375,7 +375,7 @@
 - 出力を確かめるブロックには、判定する出力の直前に反転表示の「確認」を出す 1 行（bash は `printf '\n\033[7m 確認 \033[0m\n'`、PowerShell は ``"`n$([char]27)[7m 確認 $([char]27)[0m"``）を置く。貼った後は、その「確認」から後ろの出力を箇条書きで確かめる
 - コマンドの無い操作（GUI・ブラウザ・起動途中の画面・別のマシンや機器・ログインし直す）も、コマンドのブロックを置かない 1 つの手順にする。手順のコマンドが開いたエディタや TUI への入力は、その手順の箇条書きに書く
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にしている（AlmaLinux 10 は [AlmaLinux 10 の初期設定の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo) で設定する）
-- `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
+- `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
 - Windows で実行する手順（[Claude Code の Remote Control（Windows）](docs/ai-agents.md#claude-code-の-remote-control-実施手順)・[RDP をロックせずに切断（Windows）](docs/windows-setup.md#rdp-をロックせずに切断-実施手順)・[Windows 11 の初期設定](docs/windows-setup.md)・[Windows 11 のデュアルブート向けの導入](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-実施手順)・[SSH クライアント（Windows）](docs/windows-setup.md#windows-の-openssh-クライアント-実施手順)・[ホットキーを使用しているアプリの調査](docs/windows-setup.md#windows-のホットキー競合-実施手順)・[Hyper-V](docs/windows-setup.md#hyper-v-実施手順)・[VMware Workstation Pro](docs/windows-setup.md#vmware-workstation-pro-実施手順)と、Samba クライアント・Syncthing・コーディングエージェントの共同作業・VirtualBox・WireGuard VPN の Windows 11 の節）のブロックは `powershell` で、管理者の Windows PowerShell 5.1 に貼る
   - Remote Control は SSH でログインした昇格済みの PowerShell、RDP の切断は RDP のセッションの中の PowerShell
   - Windows 11 の初期設定は、「Windows Update」の手順 2〜8 と、「PC 全体の設定」の手順 2 から「WSL と再起動」までの手順（OpenSSH サーバー・Git for Windows・Firefox・WezTerm を含む）が管理者。Store・scoop と、再起動の後の項は通常の窓（Git Bash と WezTerm のタブに貼る `bash` のブロックもある）。貼り付け設定前の「Windows Update」の手順 2〜8 と「Microsoft Store の更新」の手順 1〜7 は Ctrl+V で貼る。任意節は節のリードのとおり（Wake on LAN・リモートからの再起動・Edge の常駐・OpenSSH サーバーの節は管理者。ほかは通常の窓）
@@ -391,11 +391,11 @@
 - 環境固有値は冒頭の変数ブロック、または WireGuard の `site.env` で一度だけ設定する
 - 変更が必須の変数は 1 変数ずつのコードブロック、変更が任意の変数は 1 つのブロックにまとめる
 - 変える必要の無い値（固定の URL・パス・パッケージ名、ツールが既定の場所から読むパスなど）は変数にせず、コマンドに直接書く
-- 実測・出力・検証した環境・失敗の記録は `docs/verification/<文書名>.md` に置く。理由・比較・背景・資料の参照は `docs/reference/<文書名>.md` に置く。ロールバックと注意点は `docs/extra/<文書名>.md` に置く。手順書には操作に必要な前提・成功条件を残す
+- 実測・出力・検証した環境・失敗の記録は `docs/verification/<文書名>.md` に置く。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。理由・比較・背景・資料の参照は `docs/reference/<文書名>.md` に置く。ロールバックと注意点は `docs/extra/<文書名>.md` に置く。手順書には操作に必要な前提・成功条件を残す
 - 実行の前提（実行するユーザー、前提の手順書、対話入力のある手順）は `## 実施手順` の冒頭に `> [!IMPORTANT]` で示す。検証範囲は対応する検証記録に記載する
 - アラートは本文の最上位にだけ置く（GitHub は番号付きリストの中のアラートを描画しない）。手順の中の注意は太字の箇条書きにし、取り戻せない削除をする手順のある節では、そのリードに `> [!CAUTION]` を置いて手順を名指しする
 - コマンドは実行済みのものを載せ、未検証事項は明記する
 - 共有する前提（Podman・linger・Secure Boot の MOK・ssh の SOCKS トンネルなど）は正本の項・節へまとめ、使う側のリードから参照する。インストール直後に通す前提も、正本の該当項を名指しする
-- [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。表の各行に確認の深さ（起動 / 導入 / メタデータ）を書き、調査日と検証の範囲は[検証記録](docs/verification/tool-catalog.md)に置く
+- [導入元一覧](docs/tool-catalog.md)は手順書ではないので、この骨格に従わない。表の各行に確認の深さ（起動 / 導入 / メタデータ）を書き、調査日と検証の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/tool-catalog.md)に置く
 - 図は `docs/diagrams/*.diag`（構成図は nwdiag、パケットの流れは seqdiag）を原本にし、`python3 scripts/render-diagrams.py` で `*.svg` を生成する。SVG は直接編集しない（前提は [WireGuard の付録](docs/reference/wireguard.md#付録-構成図の再生成)）
 - パスワード、秘密鍵、トークンなどの秘密情報は残さない

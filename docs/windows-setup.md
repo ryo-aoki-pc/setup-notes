@@ -3,7 +3,7 @@
 ## Windows と AlmaLinux のデュアルブート（導入前・任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[ロールバックと注意点](extra/windows-dual-boot.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[ロールバックと注意点](extra/windows-dual-boot.md)
 
 ### Windows と AlmaLinux のデュアルブート: 実施手順
 
@@ -183,7 +183,7 @@
 > - この節では、次回だけの起動先（`BootNext`）を指定する。通常の起動順（`BootOrder`）や GRUB の既定の選択は変更しない
 
 - 初回はこの項の手順 1 から行う。展開済みなら、この項の手順 5 から行う（管理者の Windows PowerShell を開いておく）
-- 同梱 CLI に表示の不具合があるため、Windows 標準の BCDEdit も使って確認する（この節の[検証記録](verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)）
+- 同梱 CLI に表示の不具合があるため、Windows 標準の BCDEdit も使って確認する（この節の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)）
 - 再起動前に取り消すときは、[次回起動の指定を取り消す](#windows-と-almalinux-のデュアルブート-次回起動の指定を取り消す任意)へ進む。QEFI Entry Manager を閉じるだけでは取り消せない
 
 1. Windows のブラウザで、公式の Windows 向け ZIP をダウンロードする。
@@ -318,7 +318,7 @@
 
 ## 実施手順
 
-- [検証記録](verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[ロールバックと注意点](extra/windows-setup.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[ロールバックと注意点](extra/windows-setup.md)
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。SSH のセッションには貼らない
@@ -2625,7 +2625,7 @@
 - 前提: [実施手順](#実施手順)を通した後に行う。この節のブロックは、この節の手順 1 で開く**管理者ではない** Windows PowerShell（5.1）に貼る（管理者の権限は要らない）
 - **この節の手順 3 でサインアウトしてサインインし直し、この節の手順 4・6 は設定の画面で行う**
 - **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
-- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](verification/windows-setup.md)）
+- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
 - 戻すときは、この節の手順 5・6（行った手順のものだけ）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -4009,7 +4009,7 @@
 - 接続元は Linux または Windows の WezTerm。各手順の貼り先と権限を確認する
 - 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 5 も先に通す
 - **この節の手順 6 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う任意-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
 
 > [!WARNING]
 > **この節の手順 10 で子を閉じると、管理者の親 PowerShell へ戻る**。手順 11 で権限を確認してから操作する。
@@ -4226,7 +4226,7 @@
 - Windows の VM の中で使う場合は、入れ子の仮想化も有効にしておく
 - この節の手順 2〜5 は管理者の Windows PowerShell（5.1）に貼る。手順 6〜8 は、通常のデスクトップから行う
 - **再起動**: この節の手順 4 は、状態の確認または有効化が成功し、再起動が必要な場合だけ行う。先に開いているファイルを保存し、実行中の作業を終える
-- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](verification/windows-setup.md)
+- [参考資料](reference/windows-setup.md#windows-sandbox-で配布物を試す任意--手順-2-補足-対応環境)・[無効にする手順](extra/windows-setup.md#windows-sandbox-を無効にする)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
 > [!CAUTION]
 > **この節の手順 8 で Sandbox 内のファイルとアプリの状態が消える**。残す結果をホストへコピーしてから閉じる。
@@ -4517,7 +4517,7 @@
 ## Hyper-V（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[ロールバックと注意点](extra/hyper-v.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[ロールバックと注意点](extra/hyper-v.md)
 
 ### Hyper-V: 実施手順
 
@@ -4879,7 +4879,7 @@
 ## Samba クライアント（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
 
 ### Samba クライアント: Windows 11 で使う
 
@@ -5053,7 +5053,7 @@
 ## Syncthing（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
 
 ### Syncthing: Windows 11 で使う
 
@@ -5389,7 +5389,7 @@
 ## VirtualBox（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
 
 ### VirtualBox: Windows 11 で使う
 
@@ -5525,7 +5525,7 @@
 - Windows App の既定の Unicode 送信では、VM に別のキーが入る（`1.,2` が `nczm`。[参考資料](reference/virtualbox.md)）
 - この節で、Windows App がキーの位置（スキャンコード）を送るようにする。Windows App のすべての接続にかかる
 - 日本語は Android の IME では打てなくなる。PC の IME は、物理キーボードの `` Alt+` `` で切り替える（Ctrl+Space は Android が受け取る）
-- 実測は[検証記録](verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
+- 実測は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
 
 1. Android の Windows App の設定で、「使用可能な場合にスキャンコード入力を使用する」をオンにする。
 
@@ -5563,7 +5563,7 @@
 > - AlmaLinux 10 の x86_64 の ISO を使う。インストーラーの画面は人が操作する
 
 - 上から順に貼り、反転表示の「確認」から後ろを箇条書きで確かめる
-- [検証記録](verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)。AlmaLinux 10 のホストでこの節は確かめていない
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)。AlmaLinux 10 のホストでこの節は確かめていない
 - ふだんの操作は[使い方の基本](#virtualbox-使い方の基本)、状態を残す・複製するなら[スナップショットとクローン](#virtualbox-スナップショットとクローン)、要らなくなったら[VM を消す](#virtualbox-vm-を消す)
 
 #### VirtualBox: VM を作る
@@ -5843,11 +5843,11 @@
 ## VMware Workstation Pro（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
 
 ### VMware Workstation Pro: 実施手順
 
-- [検証記録](verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
 
 > [!IMPORTANT]
 > - **Windows 11（x64）の PC のデスクトップで行う**（インストーラーはネットワークのドライバーを入れる。SSH やリモート デスクトップのセッションからは確かめていない）
@@ -6170,7 +6170,7 @@
 ## Windows のホットキー競合（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)・[ロールバックと注意点](extra/windows-hotkey-conflict.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)・[ロールバックと注意点](extra/windows-hotkey-conflict.md)
 
 ### Windows のホットキー競合: 実施手順
 
@@ -6224,14 +6224,14 @@
    - 日時、キー、検出されたアプリ、変更前後の設定、実操作の結果を記録する
    - 検出できなかった条件と、元に戻した設定も残す
    - `Command → Exit` またはウィンドウ右上の閉じるボタンで終了する
-   - 書き方は[検証記録](verification/windows-hotkey-conflict.md)を参照する
+   - 書き方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)を参照する
 
 ---
 
 ### Windows のホットキー競合: 初回準備
 
 - ZIP の取得と展開は初回だけ行う。更新する場合はツールを終了してから行う
-- 検証した版とファイル構成は[検証記録](verification/windows-hotkey-conflict.md)を参照する
+- 検証した版とファイル構成は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)を参照する
 - 権限要求が頻発する場合は、[Program Files への配置](#windows-のホットキー競合-権限要求を減らすために-program-files-へ配置する任意)も行う
 
 1. 公式サイトから Hotkey Screener の ZIP をダウンロードする。
@@ -6436,7 +6436,7 @@
 ## RDP をロックせずに切断（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[ロールバックと注意点](extra/windows-rdp-disconnect.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[ロールバックと注意点](extra/windows-rdp-disconnect.md)
 
 ### RDP をロックせずに切断: 実施手順
 
@@ -6543,11 +6543,11 @@
 ## Windows の OpenSSH クライアント（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
 
 ### Windows の OpenSSH クライアント: 実施手順
 
-- [検証記録](verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
 
 > [!IMPORTANT]
 > - **この項の手順 8 だけ AlmaLinux 10 のホストで、ほかは Windows で行う**
@@ -6776,7 +6776,7 @@
 ## WireGuard（任意）
 
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
 
 ### WireGuard: Windows 11 で使う
 
@@ -7020,7 +7020,7 @@
 
    - `client list` の、この PC の名前の `LAST_HANDSHAKE` が「N 秒前」なら届いている
    - 最後の `ping`（拠点 → PC）は、応答が無くてよい
-   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](verification/wireguard.md#症状と原因の対応実測)
+   - 片方向だけ失敗する、`latest handshake` が出ない、といった場合は [症状と原因の対応](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#症状と原因の対応実測)
    - **次の手順は、WG ホストで確かめてから、この PC で貼る**
 
 1. PC で、トンネルを切る。

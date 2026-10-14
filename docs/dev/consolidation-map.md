@@ -1,11 +1,11 @@
 # 手順の集約対応
 
-Windows・AlmaLinux の実施手順の正本は2冊のセットアップ。AI コーディングエージェントの実施手順は、2026-10-14 に 3 冊目の [docs/ai-agents.md](../ai-agents.md) へ分けた（[追補](#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）。案内だけになった個別手順37文書と bash の導入案内は削除した。固有の仕様・他 OS の操作・開発用検査・検証・参考資料・ロールバックは元の場所に保持する。
+Windows・AlmaLinux の実施手順の正本は2冊のセットアップ。AI コーディングエージェントの実施手順は、2026-10-14 に 3 冊目の [docs/ai-agents.md](../ai-agents.md) へ分けた（[追補](#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）。案内だけになった個別手順37文書と bash の導入案内は削除した。固有の仕様・他 OS の操作・開発用検査・検証・参考資料・ロールバックは元の場所に保持する。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。
 
 - 移動元は集約前の基準コミットに固定し、元のパスと旧見出しを併記する
 - 過去の検証の手順番号は当時のもの。次の対応表で現在の節を確認する
 - 既存の設定内の識別印・バックアップ名・ツールの実装は変更しない
-- 集約時の静的検査・回帰検査と削除後の確認は [検証記録](../verification/consolidation.md) に記録する
+- 集約時の静的検査・回帰検査と削除後の確認は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/consolidation.md) に記録する
 
 集約後に main へ入った [Codeg の Windows 公開範囲の更新（0e8dc65）](https://github.com/ryo-aoki-pc/setup-notes/commit/0e8dc6589485cd4205ff5d0d0618511a156da0b4)も正本と関連資料へ反映した。下表の移動元は当初の基準を保つ。
 

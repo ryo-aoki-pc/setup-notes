@@ -2,7 +2,7 @@
 
 [AlmaLinux 10 の「GNOME のデスクトップ共有: 実施手順」](../almalinux-setup.md#gnome-のデスクトップ共有-実施手順)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
 
-[検証記録](../verification/gnome-desktop-sharing.md)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)
 
 集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
@@ -23,7 +23,7 @@
 - この手順書は、「自動ログインにして再起動する」の手順 3 で PC を再起動して、自動ログインでデスクトップを作る。PC の画面を触れないので、再起動から戻ってこられないと、遠隔では直せない
 - 確かめるのは、再起動の後に SSH で入り直せること（`sshd.service` が enabled、firewalld の永続の設定に `ssh` がある）と、GNOME が自動で起動すること（既定の target が `graphical.target`、`gdm.service` が enabled）
 - `/sys/class/drm/card*-*/status` の `connected` の数は、PC につながっているモニターの数。デスクトップ共有は PC の主モニターを写す（`screen-share-mode='mirror-primary'`）ので、モニターの無い PC には写すものが無い
-  - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](../verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)を使う（「選択した方針」）
+  - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順)を使う（「選択した方針」）
 - 既定の target が `graphical.target` でないと、再起動の後に GNOME が起動しない。`gdm.service` が要るのは、この手順書が GDM の自動ログインを使うため
 - `lsblk` の `crypt` は、LUKS などで暗号化したブロックデバイス。起動のときにパスフレーズを PC の画面で入れる構成なら、「自動ログインにして再起動する」の手順 3 の再起動の後に入力を待って止まる。TPM などで自動で開く構成かどうかは、この確認では分からないので、手順書は利用者に確かめさせる
 
@@ -77,7 +77,7 @@
   - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[AlmaLinux 10 の「GNOME のヘッドレスセッション: 実施手順」の手順 4](../almalinux-setup.md#gnome-のヘッドレスセッション-実施手順) と同じ）
 - `port` と `negotiate-port` は、次に待ち受けるときに効く。「RDP を設定する」の手順 2 は、既に起動しているデーモンを再起動してポートと TLS の設定を反映する。`view-only` 自体は、つないでいるクライアントにもすぐ効く
 - 読み戻しの `gsettings list-recursively` は、このスキーマのキーを全部出す。手順書の箇条書きの 5 つのほかに、`enable` と `screen-share-mode` の行も並ぶ
-  - 2026-10-11 の Hyper-V の VM では、`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert`・`tls-key`・`view-only false` の 7 行だった（[検証記録](../verification/gnome-desktop-sharing.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 2026-10-11 の Hyper-V の VM では、`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert`・`tls-key`・`view-only false` の 7 行だった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
   - `enable` が `true` になるのは、「RDP を設定する」の手順 5 の後（同じ VM で、手順 5 の後の dconf は `enable=true`）
 
 ### 実施手順 / RDP を設定する / 手順 3: 補足: パスワードの無いキーリングに直接入れる
@@ -87,7 +87,7 @@
   - ログインのキーリングのパスワードを空にする: ほかのパスワード（ブラウザーなど）もすべて暗号化されずに置かれる
   - パスワードの無い別のキーリングに RDP の資格情報だけを置く: この手順書はこちらを採る
 - `grdctl rdp set-credentials` は、libsecret の既定のコレクション（`default` の別名。通常は `login`）に書く。ログインのキーリングが閉じていると、PC の画面に「認証が必要です」の窓を出して待ち続ける（上流 #166・#338）
-  - VM では、Ctrl+C で `grdctl` を止めても PC の画面の窓は残り、RDP の画面で「キャンセル」を押して閉じた（[検証記録](../verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）
+  - VM では、Ctrl+C で `grdctl` を止めても PC の画面の窓は残り、RDP の画面で「キャンセル」を押して閉じた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-pc-の画面を触らない版を-x86_64-の-vm-で通した記録2026-10-07)）
   - 画面で一度もログインしていないユーザーには、ログインのキーリングがそもそも無く、書き込みはキーリングを作る窓を出すはず
 - そこで、`grdctl` を使わず、Python（Gio）で Secret Service に直接書く
   - パスワードの無いキーリングを、PC の画面に窓を出さずに作るには、gnome-keyring の `CreateWithMasterPassword` を空のパスワードで呼ぶ（Secret Service の `CreateCollection` は、PC の画面にパスワードを聞く窓を出す）
@@ -113,7 +113,7 @@
 - GDM は、VT1（`GDM_INITIAL_VT`）に切り替わったときに VT1 にログイン画面が無ければ、ログイン画面を作る（`daemon/gdm-local-display-factory.c` の `on_vt_changed`）
 - VirtualBox の VM では、自動ログインのセッションは VT2 で動き、約 22 秒後に plymouth が終わった直後に、GDM が VT1 にログイン画面を作って、VT1 が前に出た（起動の引数を `rhgb quiet` 付きの一般的な形にしても同じだった）
 - その結果、PC の画面にはログイン画面が出て、自動ログインのセッションは裏（`Active=no`）に回る。裏のセッションは画面を描かないので、RDP でつなぐと、認証は通るのに画面が真っ黒になる
-- VirtualBox の VM で、起動の引数に `rd.plymouth=0 plymouth.enable=0` を足すと、plymouth が動かず、VT の切り替えが起きないので、ログイン画面は出なかった（[検証記録](../verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)）
+- VirtualBox の VM で、起動の引数に `rd.plymouth=0 plymouth.enable=0` を足すと、plymouth が動かず、VT の切り替えが起きないので、ログイン画面は出なかった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)）
 - 起動の引数で止めると、次の起動から、起動画面の代わりに文字のメッセージが出る
 - 裏に回ったセッションは、`sudo loginctl activate <SESSION_ID>` で前に戻せる（[つながらなくなったとき](../almalinux-setup.md#gnome-のデスクトップ共有-つながらなくなったとき)の手順 2）。`sudo` が無いと `Interactive authentication required.` で断られる
 
@@ -150,7 +150,7 @@
 - `grdctl status` は資格情報を読み出す（`Username: (hidden)` と出るのは、読めたとき）。「RDP を設定する」の手順 3 のキーリングはパスワードが無いので、PC の画面に窓は出ない
 - プローブは、TLS のハンドシェイクで証明書を受け取ると、NLA の認証をせずに接続を閉じる。デーモンは、この接続をエラーの行としてログに残す
   - 2026-10-11 の Hyper-V の VM では、プローブを貼った時刻に `BIO_read returned a system error 104: Connection reset by peer`・`[transport_accept_nla]: client authentication failure`・`[RDP] Network or intentional disconnect, stopping session` などの 7 行が残った。待ち受けと、その後の接続には響かなかった
-  - 2026-10-07 の VirtualBox の VM でも、`client authentication failure` と `Network or intentional disconnect` が残った（[検証記録](../verification/gnome-desktop-sharing.md#実施手順81012d3-と-f3450e6-で-1-回ずつ)）
+  - 2026-10-07 の VirtualBox の VM でも、`client authentication failure` と `Network or intentional disconnect` が残った（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#実施手順81012d3-と-f3450e6-で-1-回ずつ)）
 - 最後の `openssl x509 … -fingerprint -sha1` は、Windows のクライアントで比べるための値
   - `grdctl status` の `TLS fingerprint` と、FreeRDP の `Thumbprint:` は SHA-256（コロン区切りの小文字）
   - Windows の「リモート デスクトップ接続」の警告の窓は、証明書の名前とエラーだけを出し、拇印を出さない。「証明書の表示」→「詳細」の「拇印」は SHA-1 で、コロンの無い小文字（例: `de7964917c…`）。openssl は同じ値をコロン区切りの大文字（`DE:79:64:91:7C:…`）で出す
@@ -182,7 +182,7 @@
 - 手順 2: VM で `sudo chvt 1` で VT1 に切り替えると、GDM が VT1 にログイン画面を作り、自動ログインのセッションが `Active=no` になった。`sudo loginctl activate` で `Active=yes` に戻り、つないだままの FreeRDP にも画面が戻って、入力も届いた
 - 手順 3: VM で、RDP の画面からログアウトすると、PC の画面はログイン画面のままになり（自動ログインし直さない）、`RDP_PORT` は閉じた（ユーザーの unit も止まる）。再起動すると、自動ログインで戻った
   - ログアウトの確認の窓は、「キャンセル」を押さないと 60 秒で自動でログアウトする
-  - aarch64 の実機の検証では、OS の再起動の代わりに GDM とユーザーマネージャーを起動し直して、自動ログインさせた（[検証記録](../verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。リモートログインのデーモンとの順序の問題（[AlmaLinux 10 の「GNOME のリモートログイン: 実施手順」](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）があるので、手順には再起動を採った
+  - aarch64 の実機の検証では、OS の再起動の代わりに GDM とユーザーマネージャーを起動し直して、自動ログインさせた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。リモートログインのデーモンとの順序の問題（[AlmaLinux 10 の「GNOME のリモートログイン: 実施手順」](../almalinux-setup.md#gnome-のリモートログイン-実施手順)）があるので、手順には再起動を採った
 
 ### 注意点の補足: 後からリモートログインを有効にしたとき
 

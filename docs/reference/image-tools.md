@@ -6,7 +6,7 @@
 
 ### 実施手順 / 手順 1: 補足: ボトルと依存
 
-[この節の検証記録](../verification/image-tools.md#実施手順--手順-1-補足-ボトルと依存)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md#実施手順--手順-1-補足-ボトルと依存)
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - hadolint は `gmp` など 4 つの依存を連れてくる（Haskell 製のため）。dive に依存は無い
@@ -34,7 +34,7 @@
 
 ### 実施手順 / 手順 8: 補足: FAIL の理由と、判定の基準
 
-[この節の検証記録](../verification/image-tools.md#実施手順--手順-8-補足-fail-の理由と判定の基準)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md#実施手順--手順-8-補足-fail-の理由と判定の基準)
 
 - 無駄の元はベースイメージの層で、同じ節の手順 6 の `COPY` の層ではない
 - `ubi10/httpd-24` は、複数の層でパッケージを入れるため、層ごとに rpm のデータベースが書き直される
