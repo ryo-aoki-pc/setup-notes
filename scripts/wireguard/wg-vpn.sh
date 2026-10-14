@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # WireGuard 拠点間 VPN と、そこへのリモートクライアント追加
-# docs/almalinux-setup.md の「WireGuard」を site.env の値で実行する。
+# docs/wireguard.md の「WireGuard」を site.env の値で実行する。
 #
 #   sudo ./wg-vpn.sh [options] keygen [A|B]          「鍵を作って適用する」の手順 2: wireguard-tools 導入と鍵生成
 #   sudo ./wg-vpn.sh [options] apply  A|B            「鍵を作って適用する」の手順 5〜6: wg0.conf・sysctl・firewalld・サービス（旧レイアウトの専用ゾーンと policy が残っていれば消す）
@@ -524,7 +524,7 @@ resolve_my_pubkey() {
 # 作り直す conf に載らない [Peer] が既存の conf にあれば列挙する。
 # apply は clients.list からクライアントの [Peer] を毎回組み立て直すので、登録簿に無い peer は
 # 黙って消える（手で足した peer を残したまま移行するとこれで失う）。消す前に止める
-# client remove 後も同じ保護が働く。対象鍵の確認と明示許可は docs/almalinux-setup.md の「WireGuard: クライアントを削除する」を参照
+# client remove 後も同じ保護が働く。対象鍵の確認と明示許可は docs/wireguard.md の「WireGuard: クライアントを削除する」を参照
 check_unknown_peers() {
   [[ -f $CONF ]] || return 0
   local known=("$PEER_PUBKEY" "${CL_PUBS[@]}")
@@ -953,7 +953,7 @@ cmd_backup() {
     cp -p "$path" "$stage/$name"
   done
   {
-    echo "# wg-vpn.sh backup（docs/almalinux-setup.md「WireGuard: バックアップと復旧（OS の再インストール）」）"
+    echo "# wg-vpn.sh backup（docs/wireguard.md「WireGuard: バックアップと復旧（OS の再インストール）」）"
     echo "FORMAT=$BACKUP_FORMAT"
     echo "CREATED=$(date -Is)"
     echo "HOST=$(short_host)"
