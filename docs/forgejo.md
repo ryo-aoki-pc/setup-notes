@@ -1,7 +1,9 @@
 # Forgejo のセットアップ（AlmaLinux 10）
 
 - AlmaLinux 10 の PC で Forgejo のサーバーを動かし、LAN か VPN の PC から Web と Git で使う
-- 前提・実行場所は[Forgejo](#forgejo)のリードに従う。Windows 11 の PC からは、Git とブラウザで使う
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
+- 前提・実行場所は[Forgejo](#forgejo)のリードに従う。サーバーの手順は、サーバーを動かす一般ユーザーの bash に貼る
+- 別の PC からは Git とブラウザで使う。Git は、AlmaLinux 10 の PC は[Git](almalinux-setup.md#git)、Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)で入れて設定する
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 
@@ -519,7 +521,7 @@
 #### Forgejo: Git の接続を確かめる
 
 - 別の PC から、Git 用 SSH のホスト鍵を照合し、確認用のリポジトリの clone と push を確かめる
-- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。Git の確認に使う PC は、先に[Git](almalinux-setup.md#git)を通してある
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。Git の確認に使う PC は、先に[Git](almalinux-setup.md#git)を通してある（Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)）
 - 実行場所: この項の手順 1・3〜5 は、許可した LAN か VPN の別の PC の端末とブラウザ。手順 2 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）
 
 1. 別の PC のブラウザで、Git に使う公開鍵を Forgejo に登録する。
@@ -1051,7 +1053,7 @@
 #### Forgejo: 使い方の基本
 
 - 構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う
-- 前提: サーバーで[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。利用する PC では、先に [Git](almalinux-setup.md#git) で名前・メールアドレスを設定してある
+- 前提: サーバーで[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。利用する PC では、先に [Git](almalinux-setup.md#git) で名前・メールアドレスを設定してある（Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)）
 - 実行場所: 利用する PC のブラウザと端末。端末の操作はその PC の bash（Windows は Git Bash）で行う
 - 初回はログイン・SSH 公開鍵の登録・リポジトリの作成・clone を行う。普段は Issue → 作業ブランチ → commit / push → Pull Request → マージ → main の更新を繰り返す
 - Issue は作業内容と完了条件を共有する場所、Pull Request はブランチの変更を確認して main に取り込むための画面

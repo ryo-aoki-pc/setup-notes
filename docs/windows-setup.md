@@ -7097,7 +7097,7 @@
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。戻っていれば、その節の「元に戻すときは、」より前を貼り直す（控えは書き換えない）
-- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は手順書の「Windows 11 の更新」
+- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は[WireGuard: Windows 11 の更新](#wireguard-windows-11-の更新)
   - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](#samba-クライアント-windows-11-の更新)は「Windows 11 の更新」（どちらも、上げるものは無い）
 
 ### scoop・winget・WSL を上げる

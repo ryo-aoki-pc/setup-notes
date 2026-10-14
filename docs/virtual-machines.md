@@ -6,12 +6,13 @@
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る
+> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 入れたものを上げるときは、各項の「更新」を通す
+- 入れたものを上げるときは、[VirtualBox: 更新](#virtualbox-更新)・[VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)・[kvm-container を更新する](#kvm-container-を更新する)・[VirtualBox: Windows 11 の更新](#virtualbox-windows-11-の更新)を通す。Hyper-V・VMware Workstation Pro・Windows Sandbox には、更新の項は無い
 
 ## AlmaLinux 10 で使う
 
@@ -2115,6 +2116,7 @@
 ### Windows 11 で VirtualBox を入れる
 
 - VirtualBox を入れ、使い捨ての VM と管理画面の起動を確かめる
+- VM を作って使う・消す・上げるときは、この項の後ろの「VirtualBox: 〜」の項を通す
 - 前提: [Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で winget を用意してある
 - 実行場所: この PC のデスクトップ。管理者の Windows PowerShell（5.1）をこの項の手順 1、管理者ではない窓を手順 5 で開く
 - Windows 11 の x64 が対象
@@ -2804,7 +2806,7 @@
 
    - `$VMW_ISO` は、入れる OS のインストール用の ISO のパス
    - `$VMW_VM` は VM の名前、`$VMW_BASE` は VM を置くフォルダー（その下に VM の名前のフォルダーができる）
-   - `$VMW_GUEST` は入れる OS の種類（既定は AlmaLinux）。本書は、Windows 11 を入れる VM（仮想 TPM が要る）を扱わない
+   - `$VMW_GUEST` は入れる OS の種類（既定は AlmaLinux）。この項は、Windows 11 を入れる VM（仮想 TPM が要る）を扱わない
    - `VMW_DIR` が空なら、VMware Workstation が入っていない。[インストールする](#vmware-workstation-pro-インストールする)から
    - **新しい窓を開いたら**、この項の手順 2 を貼り直してから先へ進む
 

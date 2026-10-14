@@ -10081,7 +10081,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - 1 つだけ上げるなら、名前を指定する（Firefox は言語パックと一緒に `sudo dnf upgrade firefox firefox-l10n-ja`）
   - Firefox の FFmpeg（RPM Fusion の `ffmpeg-libs`）も一緒に上がる。WezTerm の COPR は、`main` ブランチに追従して毎日〜数日おきにビルドされる
 - Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「更新」](ai-agents.md#更新)で上げる（dnf で入れた Claude Code は、OS の更新でも上がる）
-- VirtualBox・VirtualBox の bootc ゲスト・kvm-container は[仮想マシンのセットアップ](virtual-machines.md)の各項の更新、Forgejo は[Forgejo のセットアップの「Forgejo: 更新」](forgejo.md#forgejo-更新)で上げる
+- VirtualBox・VirtualBox の bootc ゲスト・kvm-container は、仮想マシンのセットアップの[VirtualBox: 更新](virtual-machines.md#virtualbox-更新)・[VirtualBox の bootc ゲスト: 更新](virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)・[kvm-container を更新する](virtual-machines.md#kvm-container-を更新する)、Forgejo は[Forgejo のセットアップの「Forgejo: 更新」](forgejo.md#forgejo-更新)で上げる
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 自分用の設定は各リポジトリで上げる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](#lazyvim-の本体外部コマンドプラグインを更新する)
