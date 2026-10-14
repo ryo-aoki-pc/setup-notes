@@ -742,3 +742,31 @@ AI コーディングエージェントの項・節を、2冊から [docs/ai-age
 | almalinux-setup.md | kvm-container の GUI を再ログイン後に使う | 1→2・2→3 |
 | almalinux-setup.md | kvm-container の VM を削除する | 1→2・2→3・3→4・4→5・5→6・6→7 |
 | almalinux-setup.md | kvm-container を更新する | 1→2・2→3・3→4 |
+
+## 仮想マシンと Forgejo を別の文書へ分けたときの追補
+
+2026-10-15 に、利用者の決定で、仮想マシンの項を [docs/virtual-machines.md](../virtual-machines.md) へ、Forgejo を [docs/forgejo.md](../forgejo.md) へ移した。移動元の基準は setup-notes の `3cb4ba2df2d6ee49545787b8adbd4048a158a1c8`。上の表の移動先・現在の節も、移した後の場所に直してある。
+
+- 見出しの名前は保った。`####` の見出しは親の `###` と一緒に移り、アンカーは変わらない
+- Windows 11 の「VirtualBox」だけは、AlmaLinux 10 の同名の項と分けるため「Windows 11 で VirtualBox を入れる」にした（writing-rules.md の、同名の見出しを 1 冊へ移すときの規則）
+- AlmaLinux 10 の「コンテナと仮想マシン」は、仮想マシンの項が無くなったので「コンテナ」にした。Windows 11 の「仮想マシン」のカテゴリは、新しい本の「Windows 11 で使う」にした。AlmaLinux 10 の「サーバー」のカテゴリは、そのまま forgejo.md へ移した
+- Windows Sandbox の参考資料・ロールバックは、2冊のものから `windows-sandbox.md` へ移した。検証記録の 2 節も、検証記録のリポジトリで `docs/verification/windows-sandbox.md` へ移した
+- 本文とコードブロックは変えていない。リンクは移した先へ付け替えた
+
+| 文書 | 移動前の見出し | 今の見出し |
+| --- | --- | --- |
+| almalinux-setup.md | [コンテナと仮想マシン](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#コンテナと仮想マシン) | [almalinux-setup.md: コンテナ](../almalinux-setup.md#コンテナ) |
+| almalinux-setup.md | [VirtualBox](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#virtualbox) | [virtual-machines.md: VirtualBox](../virtual-machines.md#virtualbox) |
+| almalinux-setup.md | [VirtualBox の bootc ゲスト](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#virtualbox-の-bootc-ゲスト) | [virtual-machines.md: VirtualBox の bootc ゲスト](../virtual-machines.md#virtualbox-の-bootc-ゲスト) |
+| almalinux-setup.md | [kvm-container](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#kvm-container) | [virtual-machines.md: kvm-container](../virtual-machines.md#kvm-container) |
+| almalinux-setup.md | [サーバー](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#サーバー) | [forgejo.md: サーバー](../forgejo.md#サーバー) |
+| almalinux-setup.md | [Forgejo](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/almalinux-setup.md#forgejo) | [forgejo.md: Forgejo](../forgejo.md#forgejo) |
+| windows-setup.md | [仮想マシン](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/windows-setup.md#仮想マシン) | [virtual-machines.md: Windows 11 で使う](../virtual-machines.md#windows-11-で使う) |
+| windows-setup.md | [Hyper-V](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/windows-setup.md#hyper-v) | [virtual-machines.md: Hyper-V](../virtual-machines.md#hyper-v) |
+| windows-setup.md | [VirtualBox](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/windows-setup.md#virtualbox) | [virtual-machines.md: Windows 11 で VirtualBox を入れる](../virtual-machines.md#windows-11-で-virtualbox-を入れる) |
+| windows-setup.md | [VMware Workstation Pro](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/windows-setup.md#vmware-workstation-pro) | [virtual-machines.md: VMware Workstation Pro](../virtual-machines.md#vmware-workstation-pro) |
+| windows-setup.md | [Windows Sandbox で配布物を試す](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/windows-setup.md#windows-sandbox-で配布物を試す) | [virtual-machines.md: Windows Sandbox で配布物を試す](../virtual-machines.md#windows-sandbox-で配布物を試す) |
+| extra/windows-setup.md | [Windows Sandbox を無効にする](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/extra/windows-setup.md#windows-sandbox-を無効にする) | [extra/windows-sandbox.md: Windows Sandbox を無効にする](../extra/windows-sandbox.md#windows-sandbox-を無効にする) |
+| reference/windows-setup.md | [Windows Sandbox で配布物を試す / 手順 2: 補足: 対応環境](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/reference/windows-setup.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境) | [reference/windows-sandbox.md: Windows Sandbox で配布物を試す / 手順 2: 補足: 対応環境](../reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境) |
+| reference/windows-setup.md | [Windows Sandbox で配布物を試す / 手順 3・4: 補足: 変更前の状態と再起動](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/reference/windows-setup.md#windows-sandbox-で配布物を試す--手順-34-補足-変更前の状態と再起動) | [reference/windows-sandbox.md: Windows Sandbox で配布物を試す / 手順 3・4: 補足: 変更前の状態と再起動](../reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-34-補足-変更前の状態と再起動) |
+| reference/windows-setup.md | [Windows Sandbox で配布物を試す / 手順 6〜8: 補足: 起動・試験・状態の消去](https://github.com/ryo-aoki-pc/setup-notes/blob/3cb4ba2df2d6ee49545787b8adbd4048a158a1c8/docs/reference/windows-setup.md#windows-sandbox-で配布物を試す--手順-68-補足-起動試験状態の消去) | [reference/windows-sandbox.md: Windows Sandbox で配布物を試す / 手順 6〜8: 補足: 起動・試験・状態の消去](../reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-68-補足-起動試験状態の消去) |

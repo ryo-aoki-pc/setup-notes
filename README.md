@@ -1,6 +1,6 @@
 # setup-notes
 
-構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。
+構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも [仮想マシンのセットアップ](docs/virtual-machines.md)、Forgejo のサーバーは [Forgejo のセットアップ](docs/forgejo.md) にまとめてある。
 
 実施範囲・成功と失敗は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。
 
