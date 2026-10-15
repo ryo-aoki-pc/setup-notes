@@ -298,9 +298,9 @@
 
    - 自分のホームの `.local/bin/agy` と、`1.3.5` のような版が出る
    - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#実施手順--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
-   - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる
+   - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる。この項の手順 6 からは、その端末に貼る
 
-1. `~/.local/bin` が PATH にあるときだけ、インストーラーが足した PATH の行をエディタで消す。
+1. この項の手順 3 で `agy` が見つかったときだけ、インストーラーが足した PATH の行をエディタで消す。
 
    - `~/.bashrc` と `~/.bash_profile` の末尾の、`# Added by Antigravity CLI installer` の行と、次の `export PATH="/home/<USER>/.local/bin:$PATH"` の行を消す
    - その 2 行の前に足された空行 2 つも消す
@@ -311,10 +311,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   grep -c 'Antigravity CLI installer' ~/.bashrc ~/.bash_profile
+   grep -cF -e 'Antigravity CLI installer' -e "export PATH=\"$HOME/.local/bin:\$PATH\"" ~/.bashrc ~/.bash_profile
    ```
 
-   - 2 行とも、末尾が `:0` ならよい。`:1` 以上なら、この項の手順 4 に戻る
+   - 2 行とも、末尾が `:0` ならよい。`:1` 以上なら、コメントか `export PATH=…` の行が残っている。この項の手順 4 に戻る
+   - 同じ `export PATH=…` の行を自分で書いていれば、その数も出る。その行は残す
    - 新しく開いた端末でも `agy --version` が通ることを確かめる
 
 1. 確認用のディレクトリで Antigravity CLI を起動し、ログインを始める。

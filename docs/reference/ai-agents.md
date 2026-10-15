@@ -65,7 +65,8 @@
 ### AlmaLinux 10 の Antigravity CLI
 
 - 2026-10-15、利用者の依頼で、AlmaLinux 10 の PC（Raspberry Pi 5 の実機）にも Antigravity CLI を入れ、[Antigravity CLI](../ai-agents.md#antigravity-cli)の項を足した。それまでは Windows 11 だけを対象にしていた
-- Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新も、バックグラウンドの自動更新と `agy update` を使う
+- Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新は `agy update` を使う
+  - インストーラーの案内では、バックグラウンドでも自分で上がる。AlmaLinux 10 で確かめたのは、新しい版が無いときの `agy update` だけ（自動の更新と、新しい版への `agy update` は確かめていない）
 - インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
 - AlmaLinux 10 の共同作業は、従来の 3 つの構成のまま（[共同作業の参考資料](coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）。Antigravity CLI を 4 つ目に足す手順は、AlmaLinux 10 では書いておらず、確かめてもいない
 - AlmaLinux 10 の headless（`agy -p`）は、信頼したフォルダーでも作業フォルダーの中に書かず、`/tmp` の中には書いた。Windows 11 とは許す範囲が違う（[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)）
@@ -107,6 +108,11 @@
 - 各ツールの手順には `~/.bashrc` を直接書き換えるブロックを置かない決まりなので、エディタで消し、消えたことだけを `grep` で確かめる形にした（Codex の PATH のブロックを外す、extra の手順と同じ）
 - 足された 4 行を消すと、2 つのファイルは入れる前と同じになった。新しいログインシェルでも `agy` が見つかった
 - 新しい版が無いときの `agy update` は、2 つのファイルを変えなかった。新しい版に上がるときに足すかは、確かめていない
+
+### 実施手順 / Antigravity CLI / 手順 6・8: 補足: 画面の文字と `/config` の既定
+
+- 手順 6 の `You are currently not signed in.`・`Select login method:` と、手順 8 の `/config` の既定（`Tool Permission` が `request-review`、`Non-Workspace Access` が `off`）は、Windows 11 の同じ版で見たもの
+- AlmaLinux 10 では、ログインと `/config` の確かめは利用者が端末で行い、Claude Code は画面を見ていない。`settings.json` には、信頼したフォルダーのほかに値が書かれなかった
 
 ### 実施手順 / Antigravity CLI / 手順 7: 補足: ログインの保存先
 
