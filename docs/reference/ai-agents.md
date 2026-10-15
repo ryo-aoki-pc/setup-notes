@@ -39,6 +39,8 @@
 - タグは手順の本文と同じ 3 スペース字下げにし、`</summary>` の後と `</details>` の前後に空行を置く
   - 空行を崩すと GitHub がコードを地の文として出し、字下げを崩すと番号付きリストが切れることを、GitHub の Markdown API で確かめて決めた
   - `<summary>` は「貼るコマンド（PowerShell・50 行）」の形にし、言語とフェンスを除いた行数を示す
+  - 2026-10-15 に、利用者の決定で `<summary>` の行だけを 2 スペース深く（5 スペース）した。Neovim の Markdown の整形（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) の `glfm_markdownlint`）が、埋め込んだ HTML をタグの入れ子に合わせて字下げするようになり、その結果に揃えて保存のたびに書き換わらないようにするため
+  - `<summary>` は `<details>` と同じ HTML のブロックの中の行なので、字下げを変えても GitHub の描画は変わらない（前後の描画を GitHub の Markdown API で比べた。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-summary-の字下げを変えたときの描画の比べ2026-10-15)）
 - GitHub の Web での開閉とコードブロックは[公式の説明](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)を参照した
   - 今回の描画の確認と、モバイルアプリなどの未確認範囲は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-ai-エージェントの手順を分けたときの静的な確認2026-10-14)に分ける
 
