@@ -8,7 +8,7 @@
 
 ### イメージを取得して localhost で起動する / 手順 1: 補足: 変数
 
-- `SERVER_IP` は、Forgejo の Web・Git の接続先にも使う
+- `SERVER_IP` は、Forgejo の Web・Git の接続先と Caddy のサイトの `bind`・アドレスにも使う
 - `LAN_SUBNET` は送信元 IPv4 の CIDR。`0.0.0.0/0` を明示すると送信元を制限しない。待ち受け IP・宛先・ポートの制限とは別の指定になる
 - `FW_ZONE` は自動で入る
 
@@ -29,10 +29,11 @@
 - 「Install Forgejo」を押すと、パスワードを聞かれずに、作った管理者でログインした状態のダッシュボードが開く（2026-10-11 に Hyper-V の VM の 16.0.5 で、押してから 5 秒。ブラウザは、スクリプトで操作したヘッドレスの Firefox。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - 入力したパスワードが通ることは、いったん「Sign out」してから確かめる
 
-### LAN に公開する / 手順 4: 補足: トンネルの端末に出る Connection refused
+### LAN に公開する / 手順 3〜8: 補足: Web と SSH の公開
 
-- 「LAN に公開する」の手順 3 の後は、サーバーの `127.0.0.1:3000` に待ち受けが無い。トンネルの入口（クライアントの `localhost:3000`）へ接続が来るたびに、トンネルの `ssh` が `channel 1: open failed: connect failed: Connection refused` を出す
-- 2026-10-11 の Hyper-V の VM の検証では、ブラウザ（ヘッドレスの Firefox）が `http://localhost:3000/admin` を開いたままで、切り替えの 2 秒後から `Ctrl+C` で閉じるまでの 16 秒に 71 行出た（うち 70 行は、2〜3 秒おきに 10 行ずつ。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。接続しに行ったのは、開いたままのページの定期的な取り寄せとみた（切り分けていない）。窓のあるブラウザで同じだけ出るかは、確かめていない
+- Web の `PublishPort` は `127.0.0.1:<Web ポート>:3000` のままにし、共通の Caddy が `<SERVER_IP>:<Web ポート>` の HTTPS で受ける。Git 用 SSH だけを LAN の IPv4 に切り替える
+- SSH トンネルの転送先は公開後も残る。`ROOT_URL` は HTTPS の公開 URL になるため、通常はそちらで開く。旧 HTTP 手順で出た `Connection refused` の記録は、その時点の検証記録に保持する
+- Caddy のサイトは `bind` を明記し、Podman の localhost と同じポートを全アドレスで取り合わない。`/caddy-root.crt` はホスト共通のルート証明書を配り、残りを `reverse_proxy 127.0.0.1:<Web ポート>` で渡す
 
 ### 自動更新を有効にする / 手順 1: 補足: 貼り直したとき
 
@@ -68,7 +69,7 @@
 - 既存の [Podman の手順](../almalinux-setup.md#podman)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐)を使う
 - Forgejo は公式の `-rootless` イメージを使い、コンテナ内も UID・GID 1000 で動かす。ホストの一般ユーザーとコンテナのユーザーを `keep-id` で対応させる
 - DB は SQLite にする。小規模で同時操作が多くない構成では外部 DB の導入・保守が不要になる。Forgejo の公式バイナリとイメージは SQLite に対応している。高い同時負荷では PostgreSQL または MySQL / MariaDB を検討するが、既存 DB の変更は単純な設定変更だけではできない
-- HTTP 3000 と Git 用 SSH 2222 を、初期設定中は localhost、管理者作成後は指定した LAN / VPN の IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
+- 初期設定中は Web と Git 用 SSH を localhost に限定する。管理者作成後も Web は localhost に残し、共通の Caddy が指定した LAN / VPN の IPv4 の HTTPS 3000 で受ける。Git 用 SSH 2222 だけを指定 IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
 - 公式の最新安定版を導入時に自動で調べて入れ、以後は毎日のユーザータイマーで最新の安定版へ自動で更新する（利用者の指定）。Quadlet には調べた版の番号を書き、停止バックアップ・更新・確認・失敗時の自動の戻しを組にする
 
 ### イメージを取得して localhost で起動する / 手順 2・3: 最新安定版とイメージの選択
@@ -101,17 +102,19 @@
 ### イメージを取得して localhost で起動する / 手順 3、初期設定と管理者の作成 / 手順 3・4、LAN に公開する / 手順 3: 初期設定と設定の反映
 
 - コンテナ起動時の `FORGEJO__[SECTION]__[KEY]` は `app.ini` へ反映される。画面で変更した同じ項目が再起動後に元へ戻る場合は、Quadlet 側の値を確認する
-- `ROOT_URL` はブラウザに見える URL、`HTTP_ADDR` / `HTTP_PORT` はコンテナ内の待ち受け。host の `PublishPort` は外部へ公開するアドレスと番号。これらは別々に指定する
-- 初期設定のトンネルではクライアントとサーバーの両方を `127.0.0.1` に限定し、クライアント側でも最終的な Web ポートと同じ番号を使う。初期の `ROOT_URL` とブラウザの接続先をそろえた後、公開時に LAN の URL へ切り替える
+- `ROOT_URL` はブラウザに見える URL、`HTTP_ADDR` / `HTTP_PORT` はコンテナ内の待ち受け。ホストの `PublishPort` は Podman が公開するアドレスと番号。公開後の `ROOT_URL` は `https://<SERVER_IP>:<Web ポート>/`、Web の `PublishPort` は `127.0.0.1:<Web ポート>:3000` になり、Caddy がその間を渡す
+- 初期設定のトンネルではクライアントとサーバーの両方を `127.0.0.1` に限定し、クライアント側でも最終的な Web ポートと同じ番号を使う。初期の `ROOT_URL` とブラウザの接続先をそろえた後、公開時に LAN の HTTPS URL へ切り替える
 - `DISABLE_REGISTRATION=true` は通常の自己登録を無効にする。初期設定画面の管理者作成まで省略する指定ではない。管理者作成と初期設定の保存を終えてから公開する
 - OpenID を使わない構成なので、`openid.ENABLE_OPENID_SIGNIN` と `openid.ENABLE_OPENID_SIGNUP` も明示して無効にする。通常の自己登録の設定だけで外部認証の入口まで同じ表示になるとは扱わない
 - `INSTALL_LOCK` は初期設定が終わったときに `app.ini` に保存される。環境変数で `false` を指定し続けると再起動で反映されるため、本書の Quadlet には置かない
 - `REQUIRE_SIGNIN_VIEW=true` はログイン前の閲覧を制限する。リポジトリの公開範囲は、それぞれのリポジトリの設定でも決まる
-- v16 では、コンテナの `security.REVERSE_PROXY_TRUSTED_PROXIES=*` の既定指定が廃止された。本書も信頼するプロキシを localhost に明示し、リバースプロキシ認証を有効にしない
+- `REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128,<SERVER_IP>/32` は、Caddy が付ける `X-Forwarded-For` のクライアント IP を Forgejo が扱うための指定。rootless Podman の pasta は、ホストの `127.0.0.1` へ来た接続を、コンテナの中ではホストの IP（`SERVER_IP`）からの接続に見せる。`127.0.0.1` だけを信頼すると、Forgejo のログの送信元がすべて Caddy（`SERVER_IP`）になる（2026-10-15 に実機で確認。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)）
+  - `SERVER_IP` を信頼しても、Forgejo の Web の口は `127.0.0.1` だけなので、`X-Forwarded-For` を偽れるのは、このホストの中のプロセスに限られる。リバースプロキシ認証は有効にしない
+- v16 では、コンテナの `security.REVERSE_PROXY_TRUSTED_PROXIES=*` の既定指定が廃止された。本書は信頼するプロキシを明示する（localhost で起動したときは `127.0.0.1/32,::1/128`、公開した後は `<SERVER_IP>/32` も足す）。リバースプロキシ認証は有効にしない
 - `app.ini` にはトークンの署名鍵などが入るため、エージェントの確認では内容を読み取らない。ファイルと DB の存在、CLI の有効な管理者、初期設定画面の閉鎖、登録画面の拒否、OpenID の入口が無いこと、`/api/healthz` の応答で動作を確かめる
 - この確認は実効状態を判定するもので、INI の `INSTALL_LOCK` などの値を読み戻した結果ではない。LAN への切り替え直前にも同じ確認を行い、Quadlet の登録・閲覧制限の行を確かめてから書き換える
 
-### LAN に公開する / 手順 2・4: 通信の範囲
+### LAN に公開する / 手順 2・8: 通信の範囲
 
 - 本書の rich rule は `family=ipv4`・送信元 CIDR・宛先 IPv4・対象ポート・`priority=100` を組にする。最初から存在する同じ規則には重ねず、撤去ではその組に一致する規則だけを外す
 - runtime と permanent の両方へ追加・削除する。既存のほかの runtime の設定も保存してしまう `--runtime-to-permanent` は使わない
@@ -119,7 +122,7 @@
 - `LAN_SUBNET=0.0.0.0/0` は全 IPv4 の送信元を許可する。その場合には許可外の送信元が無いため、拒否試験は行わない。runtime・permanent の規則確認と、指定 IP・ポートへの LAN・VPN クライアントの接続を確かめる
 - rootful Podman の Netavark はコンテナ向けに転送の許可を設定する。本書の rootless Podman は別の経路で、rootful 用の firewalld 転送ポリシーや `StrictForwardPorts` を採用しない
 - LAN の IPv4 を待ち受けたまま VPN のクライアントから使うときは、VPN にその LAN への経路が必要になる。送信元を制限した場合は、サーバーから見える送信元が許可 CIDR に入る必要もある。VPN 経由の SNAT があると送信元は変わる
-- HTTP の内容は暗号化されない。VPN や SSH トンネルの外で Web を使う運用へ広げるときは、HTTPS の構築と公開範囲を別に設計する
+- HTTPS は共通の Caddy の `tls internal` で構築し、端末にはホストのルート証明書を入れる。公開範囲は引き続き `bind` と firewalld の宛先・ポート・送信元で限定する
 
 ### Git の接続を確かめる / 手順 1〜5: Git とアカウント
 
@@ -144,6 +147,7 @@
 - 時刻は毎日 4:00 から 30 分の間。`Persistent=true` は付けない。止めていた PC を起動した直後（昼間）に更新が走るのと、ユーザーのユニットからシステムの `network-online.target` を待てないため
 - サービスの `PATH` は `/usr/bin` に固定する（GNOME のセッションから Homebrew の `PATH` を受け取らないため）。`TimeoutStartSec=2h` で、止まったままの実行が次の実行を塞ぎ続けないようにする
 - 実行経路によっては通常の `systemctl --user` がユーザーの bus へ接続できない。自動更新は失敗の stderr に `Failed to connect to user scope bus` があるときだけ、現在の UID に対応するユーザーの `--machine=<ユーザー>@.host` を付けて再試行する。最終結果には従来と同じ終了コード検査を行い、unit 自体の失敗では再試行しない
+- 自動更新の `endpoints()` の正規表現は `127.0.0.1` にも一致する。`check()` は `http://127.0.0.1:<Web ポート>/api/healthz` を直接見るので、Caddy と TLS の状態は確認しない。自動更新のスクリプトは HTTPS 化で変更しない
 - `/api/healthz` は、`REQUIRE_SIGNIN_VIEW=true` でもログイン無しで `pass` を返す（2026-10-10 に確認。検証記録）。プロキシの環境変数があっても、確認の通信はプロキシを通さない
 - 古いものの整理
   - 自動更新のアーカイブ（`forgejo-auto-*`）は新しい 3 つを残し、手動のバックアップには触れない
@@ -166,6 +170,8 @@
 - 検証用コンテナは localhost のランダムポートで待ち受け、専用の internal ネットワークで外向き通信を止める。コピー・コンテナ・ネットワークは確認後に外す。このコピー分の空き容量も必要になる
 - DB の移行を伴う更新後に、旧イメージだけを起動しても元へは戻らない。旧イメージの定義と更新前データをセットで復元する。更新後に受け付けた操作は、更新前バックアップには含まれない
 - 初回作成用の上書きガードと、更新用の置き換えは用途が異なる。既存の導入へ実施手順の「イメージを取得して localhost で起動する」の手順 3 を再実行するのではなく、後ろの更新・復元の節を使う
+- HTTPS 化前のアーカイブには Web を LAN に直接公開する Quadlet が入る。Caddy が同じ番号で待ち受けている状態でそのまま復元すると衝突するため、復元前の検査で中断する。HTTP 公開側で HTTPS へ移して新しいアーカイブを作る
+- Caddy のサイトと共通認証局はアーカイブに含めない。サイトは別に管理し、認証局の鍵は写さない
 - 自動更新のアーカイブも、手動のバックアップと同じ中身なので、復元の節でそのまま使える
 
 ## 参照
@@ -191,3 +197,10 @@
 - [Podman](../almalinux-setup.md#podman)・[linger](../almalinux-setup.md#ユーザーサービスの常駐)・[Git](../almalinux-setup.md#git) — 本書の前提
 
 ---
+
+- [Forgejo の reverse proxy](https://forgejo.org/docs/latest/admin/setup/reverse-proxy/)
+- [Caddy の reverse_proxy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy)
+- [Caddy の bind](https://caddyserver.com/docs/caddyfile/directives/bind)
+- [Caddy の tls](https://caddyserver.com/docs/caddyfile/directives/tls)
+- [Caddy の import](https://caddyserver.com/docs/caddyfile/directives/import)
+- [共通の Caddy の参考資料](caddy.md)
