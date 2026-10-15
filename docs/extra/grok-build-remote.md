@@ -10,21 +10,28 @@
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)
 - Grok Build と、そのセッション（`~/.grok`）は消さない。端末の `grok` は、そのまま使える
 - linger を、ほかに使うものが無くて戻すときは、[linger のロールバック](linger.md#ロールバック)
-- 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している Caddy の `~/.local/opt/caddy`（本体）・`~/.config/caddy`（設定）・`~/.local/share/caddy`（認証局データ）は `rm` と `ls` の両方から、Codeg のデスクトップアプリをこのホストで使っているときの `~/.codeg`（Codeg が置いたスキル）は `rm` から外す
+- 手順 3 を貼る前に、Codeg のデスクトップアプリを使っているホストでは `~/.codeg` を `rm` から外す
+- 共通の Caddy と認証局は残す。撤去は、すべてのサイトを外してから [Caddy のロールバック](caddy.md#共通の-caddy-を撤去する)で行う
 
 > [!CAUTION]
-> **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）、アクセストークン、Caddy の認証局の鍵（`~/.local/share/caddy`）を消す。取り戻せない。** 認証局を消すと、端末に入れたルート証明書は役に立たなくなる。
+> **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）、アクセストークンを消す。取り戻せない。**
 
-1. 2 つのサービスを止めて、自動起動を外す。
+1. Codeg を止めて自動起動を外し、Codeg のサイトだけを共通の Caddy から外す。
 
    ```bash
-   systemctl --user disable --now codeg-caddy.service codeg-server.service
-   printf '\n\033[7m 確認 \033[0m\n'
-   systemctl --user is-active codeg-caddy.service codeg-server.service
-   ss -ltn '( sport = :3080 or sport = :3443 )'
+   if [ -e ~/.config/caddy/sites/codeg.caddy ] && ! grep -qx '# setup-notes: grok-build-remote' ~/.config/caddy/sites/codeg.caddy; then
+     echo '中断: この手順の Codeg サイトではない' >&2
+   else
+     systemctl --user disable --now codeg-server.service &&
+     { [ ! -e ~/.config/caddy/sites/codeg.caddy ] || mv ~/.config/caddy/sites/codeg.caddy ~/.config/caddy/codeg.caddy.removed; }
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active codeg-server.service
+   fi
    ```
 
-   - `inactive` が 2 行と、`ss` の見出しの 1 行だけが出ればよい
+   - `inactive` が出ればよい。サイトを外した場合は [Caddy: 設定を検査して起動し直す](../almalinux-setup.md#caddy-設定を検査して起動し直す)を通す
+   - 検査や起動に失敗したら、`mv ~/.config/caddy/codeg.caddy.removed ~/.config/caddy/sites/codeg.caddy` で戻し、同じ項を通し直す
+   - Caddy を起動し直した後に、`ss -ltn '( sport = :3080 or sport = :3443 )'` で両ポートの待ち受けが無いことを確かめる。ほかのサイトの Caddy は動かしたままにする
 
 1. firewalld の規則を外す。
 
@@ -76,25 +83,19 @@
    - 規則の確認・削除で中断した場合や、`ALLOW_FROM` が不明で送信元付きの規則が残る場合は、この節の手順 3 へ進まない
    - 変数の値を控えていなければ、`sudo firewall-cmd --zone="$(sudo firewall-cmd --get-default-zone)" --list-rich-rules` で規則を見て、「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数に同じ値を入れる
 
-1. ユニット・本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
+1. ユニット・本体・トークン・会話の履歴を消す（取り戻せない）。
 
    ```bash
-   rm -f ~/.config/systemd/user/codeg-server.service ~/.config/systemd/user/codeg-caddy.service
+   rm -f ~/.config/systemd/user/codeg-server.service ~/.config/caddy/codeg.caddy.removed
    systemctl --user daemon-reload
    rm -rf ~/.local/opt/codeg-server ~/.local/opt/codeg-server.prev ~/.config/codeg-server ~/.local/share/codeg ~/.codeg ~/.cache/codeg-server-dl
-   rm -rf ~/.local/opt/caddy ~/.config/caddy ~/.local/share/caddy ~/.cache/caddy-dl
    printf '\n\033[7m 確認 \033[0m\n'
-   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/opt/caddy ~/.config/caddy ~/.local/share/caddy
+   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
    ```
 
-   - `ls` に残したパスが、すべて `No such file or directory` になればよい（外したパスが無ければ 7 つ）
-   - Caddy の認証局をほかの用途のために残したときは、手順 4 の端末からのルート証明書の削除も飛ばす
+   - `ls` に残したパスが、すべて `No such file or directory` になればよい（外したパスが無ければ 4 つ）
+   - 端末のルート証明書は残す。共通の Caddy を撤去するときだけ [端末からルート証明書を消す](caddy.md#端末からルート証明書を消す)を通す
    - ブラウザとスマートフォンに残るトークンは、もう使えない
-
-1. つないでいた端末から、このホストのルート証明書を消す。
-
-   - Android は、設定の「信頼できる認証情報」→「ユーザー」で、`Codeg <ホスト名>` の証明書を開いて削除する
-   - Windows の PC は、管理者ではない PowerShell で `Get-ChildItem Cert:\CurrentUser\Root | Where-Object Subject -like 'CN=Codeg *'` で一覧を見て、消すものの `Thumbprint` を確かめてから、「ユーザー証明書の管理」（`certmgr.msc`）の「信頼されたルート証明機関」で削除する
 
 ---
 
@@ -102,7 +103,7 @@
 
 - 手順 1・3 は管理者ではない PowerShell に、手順 2 は管理者の PowerShell に貼る
 - Grok Build と、そのセッション（`%USERPROFILE%\.grok`）は消さない
-- 端末に入れたルート証明書は、[ロールバック](#ロールバック)の手順 4 と同じ操作で消す
+- 端末に入れたルート証明書は、[Caddy の「端末からルート証明書を消す」](caddy.md#端末からルート証明書を消す)と同じ操作で消す
 - 手順 1 を貼る前に、ほかの用途の Caddy をこの PC で動かしているなら、2 行目（`Get-Process -Name caddy` の行）を外し、確認の `Get-Process` の名前からも `caddy` を外す
 - 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は `Remove-Item` と `Test-Path` の両方から、Codeg のデスクトップアプリをこの PC で使っているときの `%USERPROFILE%\.codeg`（Codeg が置いたスキル）は `Remove-Item` から外す
 
@@ -352,11 +353,11 @@
 #### 通信と証明書
 
 - 外から届くのは、Caddy が待ち受ける 3443/tcp の HTTPS だけ。Codeg の 3080 番は `127.0.0.1` だけで待ち受け、ファイアウォールでも開けない
-- ホストごとに、Caddy が自分の認証局を作る。ルート証明書の期限は 10 年、サーバーの証明書の期限は 12 時間だった。Caddy の文書では、動いている間に自動で作り直す（期限をまたいだ後の動きは、確かめていない）
+- AlmaLinux 10 の認証局は、同じホストの Forgejo などと共通で使う。作り直すと全サイトに影響する。Windows 11 は Codeg 専用の認証局を使う。ルート証明書の期限は 10 年、サーバーの証明書の期限は 12 時間だった。Caddy の文書では、動いている間に自動で作り直す（期限をまたいだ後の動きは、確かめていない）
 - AlmaLinux 10 のサーバーの証明書は、ホストの IP 宛てに作られる。別の名前や IP で開くと、警告が出る
 - Windows 11 の PC の証明書は、接続された IP アドレスごとに、その場で作られる
 - **認証局の鍵（`root.key`）を、読まない・写さない・人に渡さない**。ルート証明書を入れた端末は、その認証局が署名した証明書を、どのサイトのものでも信じる
-- 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、ホストの Caddy のデータ（`~/.local/share/caddy`・`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
+- 鍵が漏れた疑いがあるときは、端末からルート証明書を消し、AlmaLinux 10 は [Caddy の注意点](caddy.md#注意点)に従って全サイトへの影響を確認する。Windows 11 はホストの Caddy のデータ（`%APPDATA%\Caddy`）を消して起動し直し、新しいルート証明書を入れ直す
 - ルート証明書（`root.crt`）は公開してよい。`https://<ホストの IP>:3443/caddy-root.crt` は、AlmaLinux 10 の標準構成では許可した送信元 CIDR 内、送信元制限を外した任意構成では宛先の LAN IPv4 に届く全送信元から、トークンなしで取得できる。Windows 11 は Private の受信インターフェースへ届く全送信元が対象
 - ルート証明書を入れずに、ブラウザの警告を進んで使うこともできるが、相手が本物かを確かめられない
 - Codeg は、どのオリジンからのリクエストも受ける応答（`Access-Control-Allow-Origin: *`）を返す。AlmaLinux 10 の標準構成は待ち受ける IP と送信元を絞り、任意構成では宛先を残して送信元制限を外す。Windows 11 は受信側の Private という条件だけで、全送信元・全接続種別を許可する。接続後の認証はトークンで行う

@@ -33,7 +33,7 @@
 - `CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリをつないだときに、そのアプリの内蔵ブラウザがサーバー経由で届く範囲を無くす設定（既定は `all`）
 - `--supervise` は、画面から Codeg を入れ替えたときに、起動に失敗した版を前の版へ戻す仕組み（公式の文書）。本書の更新は画面を使わないが、公式の起動のしかたに合わせた
 - `StandardError=null` は、起動のたびに標準エラーへ出るトークンを journal に残さないため。Codeg のログは、別に `~/.local/share/codeg/logs/` に出る
-- `Restart=on-failure` と `RestartSec=5` は、異常終了したときに起動し直すため。Caddy のユニットにも同じ設定を置き、起動の時点で `SERVER_IP` がまだ付いていないときも、待ってやり直す
+- `Restart=on-failure` と `RestartSec=5` は、異常終了したときに起動し直すため。共通の Caddy の起動し直しは [Caddy の参考資料](caddy.md)を参照する
 
 ### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 7: 補足: トークンを引数に書かない
 
@@ -54,23 +54,12 @@
 - Codeg を起動して最初の会話は、モデルの欄が Grok 4.6 で、Grok Build のセッションの記録（`events.jsonl`）の `modelId` も `grok-4.6` だった。同じ時点の `grok models` の既定は `grok-4.7`
 - Codeg の Issue に、Grok の ACP の接続で、後から届くモデルの一覧が反映されない不具合の報告がある（#876。2026-10-02 に閉じられている）。同じ原因かは確かめていない
 
-### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 1: 補足: Caddy の入手
+### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 1: 補足: Codeg のサイト
 
-- Caddy は、Codeg と同じく、GitHub の配布物を版を決めて取得し、ホームに置く。チェックサムの一覧（`caddy_<版>_checksums.txt`）は SHA-512
-- GitHub のリリースが出す digest（`sha256:…`）とも一致することを、検証で確かめた
-- EPEL・Homebrew・scoop にも Caddy はある。置き場所を固定するために使っていない（scoop は版ごとにディレクトリが変わり、Windows の受信の規則をプログラムに限れなくなる）
-- 配布物の `caddy` は、ほかのライブラリを要らない 1 つの実行ファイル
-
-### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 2: 補足: Caddyfile の各行
-
-- `admin off` は、Caddy の管理用の API（既定は `localhost:2019`）を開けない設定。設定を変えたら、サービスを起動し直す
-- `auto_https disable_redirects` は、HTTP から HTTPS へ送るための 80 番の待ち受けを作らない設定
-- `skip_install_trust` は、ルート証明書を OS の信頼の置き場へ自動で入れさせない設定（入れるには `sudo` や管理者の権限が要る）。端末には、手で入れる
-- `pki` の `name` は、認証局の名前。ルート証明書の名前が `<名前> - <年> ECC Root` になる。既定の名前のままだと、2 台のホストのルート証明書が、端末の一覧で見分けられない
-- `bind` は、待ち受ける IP を 1 つに絞る。`tls internal` は、Caddy の認証局で証明書を作る指定。IP アドレス宛ての証明書になる
-- `handle /caddy-root.crt` は、ルート証明書（公開してよいもの）を配る口。`{$HOME}`・`{$APPDATA}` は、Caddyfile の解析より前に環境変数で置き換える。パス全体を二重引用符で囲み、空白を含むホームでも 1 つのパスとして扱う
-- `reverse_proxy 127.0.0.1:3080` で、そのほかの通信を Codeg へ渡す。WebSocket も通る
-- 字下げは、空白でもタブでもよい
+- AlmaLinux 10 は、[共通の Caddy](../almalinux-setup.md#caddy)に `sites/codeg.caddy` を足す。本体の入手・共通設定・サービス・指紋の照合は [Caddy の参考資料](caddy.md)にまとめる
+- `bind` は、待ち受ける IP を限定する。`tls internal` はホスト共通の認証局でその IP 用の証明書を作る。`import root-crt` は共通の `root.crt` を配る
+- `handle` の `reverse_proxy 127.0.0.1:3080` は残りの通信を Codeg に渡す。WebSocket も通る
+- Windows 11 は専用の本体・Caddyfile・タスクの構成を保つ。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
 
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
@@ -79,12 +68,10 @@
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
 - `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
 
-### 端末にルート証明書を入れる / 手順 3〜5: 補足: 指紋の照合
+### 端末にルート証明書を入れる / 指紋の照合
 
-- ルート証明書は、まだ信頼していない相手から取る（Android は警告を進み、Windows は `curl -k`）。途中で差し替えられていないことは、ホストに出した指紋と比べて確かめる
-- Android は、取り込む画面に指紋が出ないので、取り込んだ後に「信頼できる認証情報」で確かめる。違っていたら、すぐに削除する
-- 共同レビューでは、PC で照合したファイルを USB で Android に渡す形（取り込む前に照合できる）も挙がった。利用者の指定で、ブラウザで取得する形にしている
-- Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーが使う Edge・Chrome が信じる。Firefox は、設定によっては自分の置き場だけを使う（確かめていない）
+- [Caddy の参考資料](caddy.md#caddy-端末にルート証明書を入れる--指紋の照合)を参照する。AlmaLinux 10 は Forgejo などと同じ認証局を共有し、同じホストのために取り込み済みの端末には入れ直さない
+- Windows 11 の認証局は従来どおり Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
 
 ### 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
@@ -299,11 +286,11 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 | つなぐ側 | Codeg の Android のアプリ | 採らない（確かめていない） | Apache-2.0。APK を GitHub から入れる。testing の段階 |
 | 経路（AlmaLinux 10） | LAN と VPN の、指定した帯だけに開ける | 採った | 送信元を CIDR で絞る（複数を並べられる）。はじめは VPN の帯だけにしていたが、LAN からも使うために広げた |
 | 経路（Windows 11） | Private の全送信元・全接続種別に開ける | 採った | IPv4・IPv6 と、有線 LAN・Wi-Fi・VPN を区別しない。Public・Domain と Edge Traversal は遮断する（利用者の指定） |
-| 通信の暗号化 | 同じホストの Caddy が HTTPS で受けて、Codeg へ渡す。証明書は Caddy の認証局（`tls internal`） | 採った | Apache-2.0。ドメインも外部のサービスも要らない。端末にルート証明書を入れる |
+| 通信の暗号化 | AlmaLinux 10 はホスト共通の Caddy が HTTPS で受けて Codeg へ渡す（Windows 11 は専用）。証明書は Caddy の認証局（`tls internal`） | 採った | Apache-2.0。ドメインも外部のサービスも要らない。端末にルート証明書を入れる |
 | 通信の暗号化 | 公的な証明書（Let's Encrypt の DNS-01） | 採らない | 自分のドメインと、DNS 事業者の API トークンが要る |
 | 通信の暗号化 | HTTP のまま使う | 採らない（はじめの形） | VPN の区間しか暗号化されない。LAN の区間は、トークンも平文で流れる |
 | 通信の暗号化 | ルート証明書を入れず、ブラウザの警告を進んで使う | 採らない | 暗号化はされるが、相手が本物かを確かめられない |
-| Caddy の置き方 | GitHub の配布物を SHA-512 で照合して、ホームに置く | 採った | 置き場所が版で変わらない。`sudo` を使わない |
+| Caddy の置き方 | AlmaLinux 10 はホスト共通の本体・認証局・サービスを使う。Windows 11 は Codeg 専用の配置 | 採った | 置き場所が版で変わらない。`sudo` を使わない |
 | Caddy の置き方 | EPEL・Homebrew・scoop | 採らない | scoop は版ごとにディレクトリが変わり、Windows の受信の規則をプログラムに限れない |
 | 経路 | インターネットへ公開する | 採らない | トークン 1 つが、ホストでコマンドを実行できる鍵になる |
 
@@ -315,8 +302,8 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 既存の Grok Build（`~/.grok/bin/grok`）とログインをそのまま使う。Codeg からは Grok Build を入れ替えない
 - まず localhost で起動して確かめ、それから公開する。AlmaLinux 10 は待ち受ける IP と送信元を絞る（[Forgejo](../forgejo.md#forgejo) と同じ順）
 - Windows 11 の PC は待ち受ける IP を決めない。利用者の指定で、受信インターフェースが Private なら全送信元・全接続種別を許可し、Public・Domain は遮断する。送信元 CIDR と有線限定は使わない
-- 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、同じホストの Caddy が TLS を受け持つ。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
-- 認証局は、ホストごとに別にする。鍵は Caddy が作り、エージェントは読まない
+- 外に出す口は HTTPS だけにする（利用者の指定）。Codeg は `127.0.0.1` のままにし、AlmaLinux 10 はホスト共通の Caddy が TLS を受け持つ（Windows 11 は専用）。証明書は Caddy の認証局で作り、端末にルート証明書を入れて、警告なしで開く
+- 認証局はホストごとに別で、AlmaLinux 10 は Forgejo などと共有する。端末に入れるルート証明書は同じホストに 1 つ。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
 - 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
