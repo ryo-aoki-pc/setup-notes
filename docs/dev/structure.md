@@ -28,6 +28,7 @@
     - PC のブラウザで `Online` への接続、プロジェクトの作成と会話の応答、コマンドの承認と拒否を確認した。プロジェクト内のファイルは確認なしで作成された
     - 窓を閉じても接続と応答は続き、トレイから終了すると `Offline` になった。Remote Control のオフ・オンでも `Offline`・`Online` が切り替わり、一覧の項目は残った
     - スタートアップにショートカットを置き、そのショートカットからの手動起動で `Online` に戻ることを確認した。サインアウト・再起動後の自動起動は確かめていない
+    - 実施手順の手順 1・2・4・7〜9 のブロックは、導入の後に Windows PowerShell 5.1 で書いたとおりに流した。手順 3 は同じ動きを PowerShell 7.6.6 で通した。入れる前の PC での通しは確かめていない
     - スリープ・休止状態からの復帰、Prevent Sleep がスリープを防ぐこと、ノート PC の蓋を閉じたとき、スマートフォンでのアクセスとホーム画面からのプッシュ通知は確かめていない
     - アプリの自動更新と更新後の動き、アンインストールと残るもの、PC の Remote Control の正確な項目名と Nickname の変え方、CLI の常駐デーモン、管理者の権限の有無による違いは確かめていない
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox。2026-10-15 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#仮想マシンと-forgejo-を別の文書へ分けたときの追補)）
