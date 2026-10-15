@@ -1729,6 +1729,7 @@
 - Windows 11 の場所は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 6 で確かめる
 - **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
   - 導入は[lazygit](#lazygit)の手順 2。`config.yml` を `~/.config/lazygit/config.yml` にリンクする
+  - 更新は[lazygit の設定を更新する](#lazygit-の設定を更新する)（[Windows 11](windows-setup.md#lazygit-の設定を更新する)）で行う
   - Windows 11 は[初期設定の「lazygit」](windows-setup.md#lazygit)の手順 5。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）にする
@@ -1849,6 +1850,86 @@
    - 通常の変換中のブックは、完了後に選び直すか `R` で表示する
    - この環境変数は、このコマンドにだけ適用する
 
+#### lazygit の設定を更新する
+
+- 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
+- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 の手元の変更の確認を省かない
+- lazygit 本体は[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 で上げる
+- 更新方法と分岐の補足は[参考資料](reference/almalinux-setup.md#lazygit-の設定を更新する--手順-2-補足-force-push-と分岐点)
+
+> [!WARNING]
+> この項の手順 3 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C ~/lazygit-config reflog` で見られる）。
+
+1. 手元の変更を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/lazygit-config status --short --branch
+   ```
+
+   - 1 行目が `## custom...origin/custom` で始まればよい（`[ahead …, behind …]` が続いてもよい）
+   - 2 行目から出る行（` M config.yml` など）は手元の変更。この項の手順 2 で残したまま合わせる
+   - 1 行目が `## HEAD (no branch)` で、前にこの項の手順 2 を貼って止まったままなら、この項の手順 2 は飛ばし、手順 3 から貼る
+   - そのほかに、1 行目が `## custom` で始まらなければ、中断する
+
+1. GitHub の `custom` に合わせる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/lazygit-config pull --rebase --autostash
+   git -C ~/lazygit-config status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.`・`Fast-forward`・`Already up to date.` のどれかが出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
+   - 手元の変更を退避して戻したときは、`Created autostash:`・`Applied autostash.` が出て、`status` の 2 行目から同じ形で残る
+   - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
+   - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 3 を貼る。手順 4 へ進むかは、手順 3 の `status` で決める
+   - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 3 は飛ばす
+   - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+
+1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
+
+   ```bash
+   git -C ~/lazygit-config rebase --abort
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/lazygit-config rebase --autostash --onto origin/custom HEAD
+   git -C ~/lazygit-config status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.` と出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 手元の未コミットの変更は残る
+   - 2 行目から `UU` で始まる行があれば、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+
+1. この項の手順 2・3 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
+
+   ```bash
+   git -C ~/lazygit-config reset -q --hard
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/lazygit-config status --short --branch
+   git --no-pager -C ~/lazygit-config stash show -p
+   ```
+
+   - `status` が `## custom...origin/custom` の 1 行だけになり、その後ろに手元の変更の差分が出ればよい
+   - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている。要るものをエディタで書き直す
+   - 書き直したら、`git -C ~/lazygit-config stash drop` で stash を消す
+
+1. Excel の差分表示を導入したときだけ、導入し直す。
+
+   - [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)の手順 1 を貼る
+
+1. 設定の元にした上流の版と、入っている本体の版を比べる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git --no-pager -C ~/lazygit-config log -1 --format=%s origin/main
+   lazygit --version
+   ```
+
+   - `lazygit v0.66.0 のデフォルト設定に更新` の版と、その次の行の `version=0.66.0` が同じならよい
+   - 本体の方が古ければ、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 で上げる
+
 ---
 
 ### yazi
@@ -1923,6 +2004,7 @@
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
   - 導入は[yazi](#yazi)の手順 3。`custom` を `~/.config/yazi` に clone する
+  - 更新は[yazi の設定を更新する](#yazi-の設定を更新する)（[Windows 11](windows-setup.md#yazi-の設定を更新する)）で行う
   - Windows 11 は[初期設定の「yazi」](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
   - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](shell-terminal.md#シェルのツール)で入れる
@@ -1958,6 +2040,84 @@
    ```
 
    - `l` / `<Enter>` で選択した複数ファイルを開く。追記前はホバー中の 1 ファイルだけを開く
+
+#### yazi の設定を更新する
+
+- 自分用の yazi の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
+- 前提: [yazi の設定を導入する](#yazi-の設定を導入する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 の手元の変更の確認を省かない
+- yazi 本体は[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 で上げる
+- 更新方法と分岐の補足は[参考資料](reference/almalinux-setup.md#yazi-の設定を更新する--手順-2-補足-force-push-と分岐点)
+
+> [!WARNING]
+> この項の手順 3 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C ~/.config/yazi reflog` で見られる）。
+
+1. 手元の変更を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/.config/yazi status --short --branch
+   ```
+
+   - 1 行目が `## custom...origin/custom` で始まればよい（`[ahead …, behind …]` が続いてもよい）
+   - 2 行目から出る行（` M init.lua` など）は手元の変更。この項の手順 2 で残したまま合わせる
+   - 1 行目が `## HEAD (no branch)` で、前にこの項の手順 2 を貼って止まったままなら、この項の手順 2 は飛ばし、手順 3 から貼る
+   - そのほかに、1 行目が `## custom` で始まらなければ、中断する
+
+1. GitHub の `custom` に合わせる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/.config/yazi pull --rebase --autostash
+   git -C ~/.config/yazi status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.`・`Fast-forward`・`Already up to date.` のどれかが出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
+   - 手元の変更を退避して戻したときは、`Created autostash:`・`Applied autostash.` が出て、`status` の 2 行目から同じ形で残る
+   - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
+   - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 3 を貼る。手順 4 へ進むかは、手順 3 の `status` で決める
+   - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 3 は飛ばす
+   - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+
+1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
+
+   ```bash
+   git -C ~/.config/yazi rebase --abort
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/.config/yazi rebase --autostash --onto origin/custom HEAD
+   git -C ~/.config/yazi status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.` と出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 手元の未コミットの変更は残る
+   - 2 行目から `UU` で始まる行があれば、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+
+1. この項の手順 2・3 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
+
+   ```bash
+   git -C ~/.config/yazi reset -q --hard
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/.config/yazi status --short --branch
+   git --no-pager -C ~/.config/yazi stash show -p
+   ```
+
+   - `status` が `## custom...origin/custom` の 1 行だけになり、その後ろに手元の変更の差分が出ればよい
+   - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている
+   - `init.lua` の `open_multi` の行は、[yazi で複数ファイルをまとめて開く](#yazi-で複数ファイルをまとめて開く)を通し直して足す。新しい `init.lua` に同じ行が既にあれば、足さない
+   - ほかの変更は、要るものをエディタで書き直す
+   - 書き直したら、`git -C ~/.config/yazi stash drop` で stash を消す
+
+1. 設定の元にした上流の版と、入っている本体の版を比べる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git -C ~/.config/yazi describe --tags --abbrev=0
+   yazi --version
+   ```
+
+   - `upstream/v26.9.1` の版と、その後ろの `Version: 26.9.1` が同じならよい
+   - 本体の方が古ければ、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 で上げる
 
 ---
 
@@ -5365,8 +5525,8 @@
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と自分用の WezTerm の設定の上げ方は、[シェルと端末のセットアップ](shell-terminal.md)の冒頭にまとめてある
-- 自分用の設定は各リポジトリで上げる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
-  - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
+- 自分用の設定のうち、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
+  - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 
 ### 共通の bash 設定・Homebrew・Flatpak を上げる
 

@@ -758,6 +758,42 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 | `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
 | 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
 
+### lazygit の設定を更新する / 手順 3: 補足: force push と分岐点
+
+- `--ff-only` を使わない理由、fork point と reflog、`--rebase --autostash` を明示する理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 2 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-2-補足-force-push-と分岐点)を参照する
+
+### lazygit の設定を更新する / 手順 4: 補足: 分岐点が分からないときの載せ直し
+
+- rebase が止まる条件と、`--onto origin/custom HEAD` でこの clone だけのコミットを載せない理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 3 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-3-補足-分岐点が分からないときの載せ直し)を参照する
+
+### lazygit の設定を更新する / 手順 5: 補足: autostash の衝突と reset の範囲
+
+- 終了コードと `UU` の行による判定、reset の範囲は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 4 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-4-補足-autostash-の衝突と-reset-の範囲)を参照する
+- git 2.55.0.windows.5 は、autostash の衝突を `Your local changes are stashed, however applying them` に続く `resulted in conflicts` で知らせる
+- git 2.52.0 の文言とは違うので、手順書では `status` の `UU` の行で見分ける
+
+### lazygit の設定を更新する / 手順 6: 補足: Excel の差分表示を入れ直す理由
+
+- Excel の変換スクリプトを更新した後に導入し直す理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 5 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-5-補足-excel-の差分表示を入れ直す理由)を参照する
+
+### lazygit の設定を更新する / 手順 7: 補足: Windows PowerShell 5.1 のコンソールの表示
+
+- 版の読み方と `--no-pager` の理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 6 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-6-補足-版の表示と-pager)を参照する
+- Windows PowerShell 5.1 のコンソール（コードページ shift_jis）でも、日本語のコミットの題は正しく表示された。Git for Windows がコンソールへ直接書くため
+
+### yazi の設定を更新する / 手順 3: 補足: force push と分岐点
+
+- `--ff-only` を使わない理由、fork point と reflog、pull による上流のタグの取得は、[AlmaLinux 10 側の yazi の設定を更新する / 手順 2 の補足](almalinux-setup.md#yazi-の設定を更新する--手順-2-補足-force-push-と分岐点)を参照する
+
+### yazi の設定を更新する / 手順 4: 補足: 分岐点が分からないときの載せ直し
+
+- rebase が止まる条件と、`--onto origin/custom HEAD` でこの clone だけのコミットを載せない理由は、[AlmaLinux 10 側の yazi の設定を更新する / 手順 3 の補足](almalinux-setup.md#yazi-の設定を更新する--手順-3-補足-分岐点が分からないときの載せ直し)を参照する
+
+### yazi の設定を更新する / 手順 5: 補足: autostash の衝突と reset の範囲
+
+- reset の範囲は、[AlmaLinux 10 側の yazi の設定を更新する / 手順 4 の補足](almalinux-setup.md#yazi-の設定を更新する--手順-4-補足-autostash-の衝突と-reset-の範囲)を参照する
+- Windows の git 2.55.0.windows.5 の文言は、[lazygit の設定を更新する / 手順 5 の補足](#lazygit-の設定を更新する--手順-5-補足-autostash-の衝突と-reset-の範囲)と同じ
+
 ### scoop・winget・WSL を上げる / 手順 8: 補足: zoxide を上げた後の更新
 
 - これより後は、[scoop・winget・WSL を上げる](../windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 で、ほかのツールと一緒に上がる

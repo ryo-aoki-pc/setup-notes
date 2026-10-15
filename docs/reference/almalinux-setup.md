@@ -160,11 +160,58 @@
   - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
   - FXB では、Homebrew とドロップインを消すロールバックの後も、再起動してログインしたテキストエディターで変換と確定を確かめた。ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
 
+### lazygit の設定を更新する / 手順 2: 補足: force push と分岐点
+
+- 持ち主が `custom` を新しい `main` の上へ載せ直すと、古い `custom` からは fast-forward で移れない。`git pull --ff-only` は `fatal: Not possible to fast-forward, aborting.` で止まる
+- `git pull --rebase --autostash` は、fetch 前の `origin/custom` と、その reflog から分岐点（fork point）を求める
+- 古い `custom` のコミットを重ねず、この clone だけのコミットを新しい `custom` の上に載せる
+- clone 直後には `origin/custom` の reflog が無い。最初の fetch が作る reflog の行は、古い `custom` の位置も持つ。lazygit の自動の fetch などで先に取得していても、その reflog が残っていれば分岐点が分かる
+- `--rebase --autostash` を明示するので、global の `pull.rebase`・`rebase.autoStash` の設定には頼らない
+
+### lazygit の設定を更新する / 手順 3: 補足: 分岐点が分からないときの載せ直し
+
+- 先に fetch 済みで、`origin/custom` の reflog も期限切れなどで無いと、古い `custom` のコミットを全部載せ直そうとする
+- 最初のコミットで衝突すると `Could not apply` で止まり、`status` の 1 行目が `## HEAD (no branch)` になる。2 行目からは、止まったコミットの `UU` の行が出る（手順 4 の autostash の衝突とは別のもので、手順 4 には進まない）
+- `rebase --abort` は rebase を始める前に戻し、autostash があれば手元の変更も戻す。その後の `rebase --autostash --onto origin/custom HEAD` は、載せ直すコミットが無いので、新しい `custom` に移るだけになる
+- この方法では、この clone だけのコミットは新しい `custom` に載らない。前の位置は HEAD の reflog に残る
+- `git reset --keep origin/custom` は、手元の変更のあるファイルを新しい `custom` も変えていると、`Entry '<ファイル>' not uptodate. Cannot merge.` で止まり、何も変えない
+- `--onto` なら autostash の衝突も、[lazygit の設定を更新する](../almalinux-setup.md#lazygit-の設定を更新する)の手順 4 と同じ方法で扱える
+
+### lazygit の設定を更新する / 手順 4: 補足: autostash の衝突と reset の範囲
+
+- git 2.52.0 は、autostash を戻すときに衝突すると `Applying autostash resulted in conflicts.`・`Your changes are safe in the stash.` と出す。rebase 自体は終わり、終了コードは 0 になる
+- 文言は git の版で違う。成功のメッセージや終了コードだけでは判定せず、`status` の 1 行目が `## custom...origin/custom` で、2 行目から `UU` の行があるかで見分ける。手元の変更は `stash@{0}: autostash` に残る
+- この状態で使う `reset -q --hard` は、移動先を指定せず、作業ツリー全体を現在の HEAD（新しい `custom`）に戻す。ぶつからなかったファイルの手元の変更も作業ツリーから消えるが、autostash の stash にすべて残り、`stash show -p` で出る
+- 最初から `git reset --hard origin/custom` で合わせる方法は採らない。stash に入っていない未コミットの変更が消え、この clone だけのコミットも新しい `custom` に載らない
+
+### lazygit の設定を更新する / 手順 5: 補足: Excel の差分表示を入れ直す理由
+
+- Excel の変換スクリプトの写しは、中身などから決まる名前で Git の設定に書かれる。`scripts/excel-textconv.py` を変える更新を取り込むと、前の設定では確認が失敗する
+- [lazygit の Excel 差分表示を導入する](../almalinux-setup.md#lazygit-の-excel-差分表示を導入する)の手順 1 を通し直すと、新しい変換スクリプトの名前で設定される
+
+### lazygit の設定を更新する / 手順 6: 補足: 版の表示と pager
+
+- `origin/main` の最後のコミットの題は、上流の既定設定を取り込んだ版を示す。本体の `--version` の `version=` と比べる
+- `git log` は設定済みの pager（delta）を通るので、`--no-pager` を付ける。`status` は pager を使わない
+
 ### yazi / 手順 2: 補足: 一緒に入る python3 と curl
 
 - 既定の `YAZI_EXTRAS` では、依存として Homebrew の `python3`（2026-10-11 は `python@3.15`）と `curl` も入る
 - 共通の bash 設定が Homebrew のディレクトリを PATH の先頭に置くので、端末では、どちらも `/usr/bin` のものより先に見つかるようになる（2026-10-11 の 3 つの VM で、この後の `command -v curl` は `/home/linuxbrew/.linuxbrew/bin/curl` を返した）
 - 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 4
+
+### yazi の設定を更新する / 手順 2: 補足: force push と分岐点
+
+- `--ff-only` を使わない理由、fork point と reflog、`--rebase --autostash` を明示する理由は、[lazygit の設定を更新する / 手順 2 の補足](#lazygit-の設定を更新する--手順-2-補足-force-push-と分岐点)と同じ
+- pull は新しい上流のタグも取得する。設定の元にした上流の版は、[yazi の設定を更新する](../almalinux-setup.md#yazi-の設定を更新する)の手順 5 の `describe --tags --abbrev=0` で確かめる
+
+### yazi の設定を更新する / 手順 3: 補足: 分岐点が分からないときの載せ直し
+
+- rebase が止まる条件と、`--onto origin/custom HEAD` でこの clone だけのコミットを載せない理由は、[lazygit の設定を更新する / 手順 3 の補足](#lazygit-の設定を更新する--手順-3-補足-分岐点が分からないときの載せ直し)と同じ
+
+### yazi の設定を更新する / 手順 4: 補足: autostash の衝突と reset の範囲
+
+- git 2.52.0 の文言、衝突しても終了コードが 0 になること、`UU` の行で判定する理由と、一律に `reset --hard origin/custom` を使わない理由は、[lazygit の設定を更新する / 手順 4 の補足](#lazygit-の設定を更新する--手順-4-補足-autostash-の衝突と-reset-の範囲)と同じ
 
 ### 再起動と確認 / 手順 1: 補足: 再起動で効くもの
 
