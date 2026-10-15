@@ -220,6 +220,11 @@
     - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
 - `docs/ai-agents.md` — 「Grok Build のブラウザ操作」: **AlmaLinux 10 と Windows 11 が対象で、手順が OS で違う手順書**（syncthing.md の形。`## 実施手順` は AlmaLinux 10 で 3 項〔Codeg のサーバーを入れて localhost で起動する・ブラウザで開いて Grok を動かす・HTTPS で LAN・VPN に公開する〕、Windows 11 は後ろの `## Windows 11 で使う`〔2 項〕・`## Windows 11 で止める・もう一度始める`・`## Windows 11 の更新`・`## Windows 11 のロールバック`。`## 端末にルート証明書を入れる`・`## 使い方の基本`・`## 端末の grok のセッションを取り込む`・`## Claude Code と Codex CLI も操作する`・`## 設定ファイル` は両 OS で 1 つ）。公式の遠隔操作の画面が無い Grok Build を、OSS の Codeg（Apache-2.0）の `codeg-server` を同じホストに常駐させて、ブラウザのチャット形式の画面から動かす。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。前提は ai-agents.md の「Grok Build」と、AlmaLinux 10 は almalinux-setup.md の「ユーザーサービスの常駐」
   - AlmaLinux 10 の HTTPS は、共通の Caddy の `sites/codeg.caddy` を追加・撤去して扱う。本体・認証局・更新とルート証明書の導入は、almalinux-setup.md の「Caddy」の項に置く。Windows 11 は Codeg 専用の Caddy を使う
+  - Windows 11 の委譲の検証（2026-10-16 JST、Codeg 0.35.1 と、自動更新の後の 0.35.2）: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-grok-を親にした委譲と委譲先の既定のモード2026-10-16-jst)に範囲を記録する
+    - 使い捨てのリポジトリ 2 つで、Grok から Claude Code・Codex への並行の委譲、テスト、コミットを通した。1 回目は Antigravity の読み取り専用のレビューも通した
+    - サブエージェント設定の保存と読み込み直し、Claude Code `Manual` の承認カード 2 回、Claude Code `Auto`・Codex `Auto review` の書き込みとコマンドで承認カード 0 枚を確認した
+    - 親の Grok の cmd.exe と `"` の制約、`git commit -F` の成功を確認した。最大委任深度 `1` でも、Codex は自分の `spawn_agent` を起動した
+    - 未確認: Codex の自動レビューの許可・拒否、Claude Code `Auto` の拒否、Antigravity の `Auto Edit`・`YOLO`、AlmaLinux 10、Grok 以外を親にした 2 回目と同じ確認、Grok の「毎回確認」
   - **実機での検証状態（2026-10-15 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で、共通の Caddy の上に「Codeg のサーバーを入れて localhost で起動する」の手順 1〜7 と「HTTPS で LAN・VPN に公開する」の手順 1〜5 を通した
     - Codeg は、手順 1 の「最新リリースを確かめて変える」に従い v0.35.2 を指定した（手順書の初期値は v0.35.1）。localhost の認証あり・なし、HTTPS の待ち受けと別ホストからの `200`（`curl -sk`）を確認した
     - **確認していないこと**: 「HTTPS で LAN・VPN に公開する」の手順 6〜8（端末のルート証明書・トークン・ブラウザ）、AlmaLinux 10 のロールバック、共通の Caddy の上での Codeg の更新・Claude Code と Codex CLI の操作・共通パスワード、ホストの再起動
