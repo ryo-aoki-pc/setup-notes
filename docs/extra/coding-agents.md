@@ -144,6 +144,78 @@
 
 ---
 
+## Windows 11 で既定の分担をやめる
+
+- [既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)で足した AGENTS.md の `## 既定の分担` を外し、`main` にコミットして 4 つの worktree をそろえる。節の文を替えるときも、ここで外してから、その項の手順 1 からやり直す
+- 前提: [既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)を通してある
+- 実行場所: 自分のユーザーの、管理者ではない Windows PowerShell 5.1
+- 始める前に、4 つのエージェントの作業を終え、4 つの `agent/<名前>` のブランチのコミットを `main` に取り込み、変更とステージしたものが無い状態にする
+
+1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
+
+   ```powershell
+   $PROJECT_DIR = ''                     # ← 共同作業させるリポジトリ（git のルート）の絶対パスを書く。<PROJECT_DIR>
+   ```
+
+   ```powershell
+   $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'PROJECT_DIR = {0}' -f $PROJECT_DIR
+   'WT_ROOT     = {0}' -f $WT_ROOT
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - [既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 1 と同じ値にする
+   - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
+
+1. AGENTS.md から `## 既定の分担` の節を外す。
+
+   ```powershell
+   & {
+     if (-not $PROJECT_DIR) { Write-Error '中断: この節の手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す'; return }
+     if ((git -C $PROJECT_DIR branch --show-current) -ne 'main') { Write-Error '中断: PROJECT_DIR のブランチが main ではない。main に切り替えてから貼り直す'; return }
+     $path = Join-Path $PROJECT_DIR 'AGENTS.md'
+     $old = [IO.File]::ReadAllText($path)
+     $m = [regex]::Match($old, '(?ms)^## 既定の分担\r?\n.*?(?=^## |\z)')
+     if (-not $m.Success) { Write-Error '中断: AGENTS.md に「## 既定の分担」が無い'; return }
+     [IO.File]::WriteAllText($path, $old.Remove($m.Index, $m.Length).TrimEnd("`r", "`n") + "`n", (New-Object Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git -C $PROJECT_DIR diff --stat
+     Select-String -LiteralPath $path -Pattern '^## ' | ForEach-Object { $_.Line }
+   }
+   ```
+
+   - `AGENTS.md | … -` の 1 行（消した行の数）が出て、`##` の見出しの一覧に `## 既定の分担` が無い
+   - `中断:` が出たら、何も変えていない。変数・ブランチ・AGENTS.md の中身を確かめる
+
+1. AGENTS.md を `main` にコミットする。
+
+   ```powershell
+   if (-not $PROJECT_DIR) { Write-Error '中断: この節の手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } elseif ((git -C $PROJECT_DIR branch --show-current) -ne 'main') { Write-Error '中断: PROJECT_DIR のブランチが main ではない。main に切り替えてから貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git -C $PROJECT_DIR add AGENTS.md
+     git -C $PROJECT_DIR commit -m '既定の分担を外す'
+     git -C $PROJECT_DIR log --oneline -1
+   }
+   ```
+
+   - 最後に、コミットメッセージが「既定の分担を外す」のコミットが出る
+   - コミットに失敗したら、この節の手順 4 へ進まない
+
+1. 4 つの worktree を `main` にそろえる。
+
+   ```powershell
+   if (-not $PROJECT_DIR) { Write-Error '中断: この節の手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') { "[$a]"; git -C "$WT_ROOT\$a" merge --ff-only main }
+   }
+   ```
+
+   - 4 つの worktree で動いているエージェントを終えてから貼る
+   - 見方は、[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 4 と同じ
+
+---
+
 ## 注意点
 
 - **3 つの契約の使用量を使う**: レビュー・委任・確かめの問いのたびに、Claude（claude.ai）・Codex（ChatGPT）・Grok（grok.com）それぞれのプランの使用量が減る

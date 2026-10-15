@@ -13,6 +13,11 @@
   - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
   - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
   - 2冊（と、そこから分けた gnome-remote.md）に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、gnome-remote.md（2026-10-15 までは almalinux-setup.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
+  - 既定の分担の追加（2026-10-15）: 利用者の決定で、docs とその 9 つのサブモジュールの AGENTS.md の末尾に同じ `## 既定の分担` を足し、ほかのプロジェクトにも入れられるよう「既定で分担する」の項（Windows 11）を追加した
+    - 新しい項の手順 1〜5 のブロックを、使い捨てのリポジトリと 4 つの worktree で Windows PowerShell 5.1 に通した。足した文が AGENTS.md の節と一字一句同じこと、BOM と CR が無いこと、既に節があるときの中断も確かめた
+    - 手順 5 で、Claude Code と Codex が実装と下書きの担当を Codex と答え、Antigravity が自分の役割を答え、Grok の `--trust inspect` が AGENTS.md を読み込んだ。docs の worktree でも、分担を言わずに聞いた Claude Code が 4 つの役割を答えた。Grok は信頼していないフォルダーでは AGENTS.md を読まなかった
+    - extra の「Windows 11 で既定の分担をやめる」の手順 1〜4 を、同じ使い捨てのリポジトリで通し、AGENTS.md が足す前と同じに戻ることを確かめた
+    - 対話の Claude Code で、分担を言わずにファイルを変える依頼をしたとき、実際に分担する流れになること（手順 6）、9 つのサブモジュールのリポジトリを単独で開いたときの応答、AlmaLinux 10 は未確認
   - Antigravity CLI の追加（2026-10-15）: Windows 11 だけを対象に、公式インストーラーでの導入・設定ファイル・更新、Codeg の Antigravity、共同作業の 4 つ目の worktree と読み取り専用の依頼を追加した。AlmaLinux 10 は対象外
     - Windows 11 / x64 の実機で CLI 1.3.5 を管理者ではない Windows PowerShell 5.1 から導入し、SHA-512・署名・版・PATH、個人の Google アカウントのログイン、`agy models`・JSON の応答、AGENTS.md・GEMINI.md の読み込みを確認した
     - 新規の導入は、保存して中身を確かめたインストーラーを scriptblock にして行った。手順 2 の `Invoke-RestMethod` の形は、入った後に流し、「既に入っている」の分岐までを確かめた

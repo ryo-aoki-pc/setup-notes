@@ -269,6 +269,7 @@
 - [Antigravity アプリの Remote Control（Windows 11）](docs/ai-agents.md#antigravity-アプリの-remote-control任意) は、ブラウザからアプリに直接頼む入口。CLI の読み取り専用の共同作業とは別に、プロジェクトのファイル編集と、承認したコマンドの実行に使う
 - [コーディングエージェントの共同作業](docs/ai-agents.md#コーディングエージェントの共同作業-実施手順)で 1 つのプロジェクトに並べる（規則は AGENTS.md 1 つ、作業場所はエージェントごとの git worktree）
   - Windows 11 は `claude`・`codex`・`grok`・`antigravity` の 4 つ。Antigravity への依頼は「[Antigravity に読み取り専用で頼む](docs/ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)」を通す
+  - Windows 11 で、分担を言わずに Claude Code に 4 つで分担させる設定は[既定で分担する](docs/ai-agents.md#コーディングエージェントの共同作業-既定で分担する)
   - スマートフォンからは Remote Control で Claude に頼むか、Codeg の手順〔[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)〕で各エージェントに直接頼む
 
 | 手順・用途 | 用途 | 導入元 | 更新 |

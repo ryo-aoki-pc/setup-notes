@@ -2200,6 +2200,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS
 - 役割は、この手順書の既定。入れ替えてよい（AGENTS.md の規則は、どの役割でも同じ）
+- AGENTS.md に `## 既定の分担` があるプロジェクトでは、利用者が Claude Code に分担を言わずに頼むと、下の表ではなく[既定で分担する](#コーディングエージェントの共同作業-既定で分担する)の分担になる（Codex が下書きし、Claude Code が確かめて `agent/claude` にコミットする。Grok と Antigravity は読み取り専用のレビュー）
 
 | だれ | 主な役割 | 作業する場所 | ブランチ |
 |---|---|---|---|
@@ -2474,6 +2475,140 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `False` が出ればよい
+
+---
+
+### コーディングエージェントの共同作業: 既定で分担する
+
+- 対象: Windows 11
+- AGENTS.md の末尾に `## 既定の分担` を足し、利用者が Claude Code に分担を言わずにファイルを変える作業を頼んでも、Claude Code が取りまとめて 4 つで分担するようにする。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは、分担しない
+- 前提: [Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)を通してある
+- 実行場所: 自分のユーザーの、管理者ではない Windows PowerShell 5.1
+- `PROJECT_DIR` は `main` をチェックアウトしたリポジトリを指す。始める前に、4 つのエージェントの作業を終え、4 つの `agent/<名前>` のブランチのコミットを `main` に取り込み、変更とステージしたものが無い状態にする
+- 上から順に貼る。貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
+- 追記する文は BOM の無い UTF-8 と LF の改行にする。折りたたまれたブロックは、「貼るコマンド」を開いてからコピーボタンで写す
+- Claude Code が 3 つに頼む形（コマンド・変更の移し方・後片付け）と、方針と役割の理由は[参考資料の「既定の分担」](reference/coding-agents.md#既定の分担)
+- AlmaLinux 10 では、AGENTS.md の節は同じ文のままで、Antigravity CLI を飛ばす。AlmaLinux 10 での頼み方は未検証で、この項には書かない
+- 既定の分担をやめるとき・文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)
+- この項の手順 6（対話で実際に分担する流れ）は未確認
+
+> [!WARNING]
+> この項の手順 6 で Claude Code が依頼するときも、Grok に `--always-approve` を付けない。呼ぶ前に `~/.grok/config.toml` の `permission_mode` を確かめる。Antigravity に `--dangerously-skip-permissions`・`--mode` を付けない。
+
+1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
+
+   ```powershell
+   $PROJECT_DIR = ''                     # ← 共同作業させるリポジトリ（git のルート）の絶対パスを書く。<PROJECT_DIR>
+   ```
+
+   ```powershell
+   $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'PROJECT_DIR = {0}' -f $PROJECT_DIR
+   'WT_ROOT     = {0}' -f $WT_ROOT
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、git のリポジトリのルートの絶対パス
+   - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
+
+1. AGENTS.md の末尾に既定の分担を足す。
+
+   <details>
+   <summary>貼るコマンド（PowerShell・26 行）</summary>
+
+   ```powershell
+   & {
+     if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す'; return }
+     if ((git -C $PROJECT_DIR branch --show-current) -ne 'main') { Write-Error '中断: PROJECT_DIR のブランチが main ではない。main に切り替えてから貼り直す'; return }
+     $path = Join-Path $PROJECT_DIR 'AGENTS.md'
+     $old = if (Test-Path -LiteralPath $path) { [IO.File]::ReadAllText($path) } else { '' }
+     if ($old -match '(?m)^## 既定の分担\r?$') { Write-Error '中断: AGENTS.md に「## 既定の分担」がもうある。中身を確かめる'; return }
+     $text = @'
+   ## 既定の分担
+
+   利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する（2026-10-15、利用者の決定）。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
+
+   - Claude Code だけで行うもの: 利用者の質問への答え、ファイルを変えない調べもの、1 つのファイルの数行で振る舞いを変えない直し（誤字・リンク・値の直しなど）
+   - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request
+   - Codex: 実装と下書き。Claude Code が用意した別の clone か worktree の中だけで書く。この分担で頼まれたときは、「共同作業の規則」のコミット・push・Pull Request を行わず、変更を残して報告する（Claude Code が確かめ、自分の worktree に移してからコミットする）
+   - Grok Build: 差分の読み取り専用のレビュー。ファイルを変えない（Windows 11 では、Claude Code は `--always-approve` を付けずに頼む）
+   - Antigravity CLI（Windows 11 だけ）: 差分の読み取り専用のレビューと、その作業のための調べもの。ファイルを変えない（Claude Code は、入力を写した使い捨てのフォルダーで 1 回だけ実行し、`--dangerously-skip-permissions`・`--mode` を付けない）
+   - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
+   - レビューの指摘は、実物で確かめてから採る。採らなかった指摘は、理由を付けて報告する
+   - 使えないエージェント（入っていない・ログインが切れた・AlmaLinux 10 の Antigravity CLI）は飛ばし、そのことを報告する
+   - 頼み方は、setup-notes（https://github.com/ryo-aoki-pc/setup-notes）の `docs/ai-agents.md` の「コーディングエージェントの共同作業: 既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
+   '@
+     $prefix = if ($old.Length -eq 0) { '' } elseif ($old.EndsWith("`n")) { "`n" } else { "`n`n" }
+     [IO.File]::AppendAllText($path, $prefix + ($text -replace "`r`n", "`n") + "`n", (New-Object Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Content -LiteralPath $path -Encoding UTF8
+   }
+   ```
+
+   </details>
+
+   - AGENTS.md の中身が出て、最後に「## 既定の分担」の節がある
+   - `中断:` が出たら、何も書いていない。この項の手順 3 へ進まず、変数・ブランチ・既にある節を確かめる
+   - 既にある節の文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)で外してから、この項の手順 1 からやり直す
+
+1. AGENTS.md を `main` にコミットする。
+
+   ```powershell
+   if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } elseif ((git -C $PROJECT_DIR branch --show-current) -ne 'main') { Write-Error '中断: PROJECT_DIR のブランチが main ではない。main に切り替えてから貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git -C $PROJECT_DIR add AGENTS.md
+     git -C $PROJECT_DIR commit -m '既定の分担を足す'
+     git -C $PROJECT_DIR log --oneline -1
+   }
+   ```
+
+   - 最後に、コミットメッセージが「既定の分担を足す」のコミットが出る
+   - コミットに失敗したら、この項の手順 4 へ進まない
+   - `The following paths are ignored by one of your .gitignore files` と出たら、AGENTS.md を `.gitignore` から外して、この項の手順 3 を貼り直す
+
+1. 4 つの worktree を `main` にそろえる。
+
+   ```powershell
+   if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') { "[$a]"; git -C "$WT_ROOT\$a" merge --ff-only main }
+   }
+   ```
+
+   - 4 つの worktree で動いているエージェントを終えてから貼る
+   - `[claude]`・`[codex]`・`[grok]`・`[antigravity]` の後ろに、それぞれ `Fast-forward` か `Already up to date.` が出ればよい（[main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順 7 と同じ）
+   - `Not possible to fast-forward` が出た worktree には、`main` に取り込んでいないコミットがある。この項の手順 5 へ進まず、[main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順 3〜5 で取り込んでから、この項の手順 4 を貼り直す
+   - `[antigravity]` で出たときは、Antigravity にはコミットさせないので、`agent/antigravity` のコミットは人か別の作業が作ったもの。`git -C <PROJECT_DIR> log --oneline main..agent/antigravity` で中身を確かめ、取り込むか捨てるかを人が決める
+
+1. 4 つが既定の分担を読むことを確かめる。
+
+   ```powershell
+   if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'; Pop-Location
+     codex exec --sandbox read-only -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'
+     Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
+     Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、Antigravity CLI が担当する役割は何か。1 行で' --print-timeout 300s; Pop-Location
+     git -C "$WT_ROOT\antigravity" status --short
+   }
+   ```
+
+   - Claude Code と Codex が、実装と下書きの担当を `Codex` と答える
+   - Antigravity が、自分の役割を「読み取り専用のレビューと調べもの」と答える
+   - `分からない` や違う役割を答えたら、この項の手順 2 の追記・手順 3 のコミット・手順 4 の同期を確かめ、先へ進まない
+   - Grok は `Project trusted: yes` と、AGENTS.md・CLAUDE.md の `(project, …)` の行が出る（名前は `Agents.md`・`Claude.md` のように出ることがある）。AGENTS.md の行が出なければ、先へ進まない
+   - 最後の `git status --short` に何も出なければ、Antigravity は antigravity の worktree を変えていない。何か出たら、中身を確かめてから消す
+   - Antigravity の行は、規則を読むことの確かめだけ。レビューと調べものは、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使う
+   - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、この項の手順 5 を貼り直す
+
+1. Claude Code の worktree で、分担を言わずにファイルを変える依頼をする。
+
+   - `<WT_ROOT>\claude` で Claude Code を起動し、質問や数行の小さな直しに当たらない変更を頼む
+   - Claude Code が Codex に実装と下書きを頼み、Grok と Antigravity に読み取り専用のレビューを頼む流れになることを確かめる
+   - Claude Code が指摘を実物で確かめ、採らなかった指摘は理由とともに報告することを確かめる
+   - 使えないエージェントがあれば、飛ばした相手と理由の報告を確かめる
+   - この項の手順 6 の対話での流れは未確認
 
 ---
 
