@@ -85,7 +85,7 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - `PrivateKey` は conf に直接書く。`PostUp` で読み込む方式は reload で鍵が消える
 - `firewall-cmd --query-policy` は 2.4.3 に存在しない。存在確認は `--info-policy` の終了コードで行う
 
-スクリプトの挙動を変えたら、[WireGuard の参考資料の「スクリプトの動作」](docs/reference/wireguard.md#スクリプトの動作)と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）、必要なら README の知見リストも合わせて直す。
+スクリプトの挙動を変えたら、[WireGuard の参考資料の「スクリプトの動作」](docs/reference/wireguard.md#スクリプトの動作)と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）も合わせて直す。
 
 ## 共同作業の規則
 
