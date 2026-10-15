@@ -1804,7 +1804,7 @@
    - 全体をステージするには、lazygit の**ファイル一覧で `Space`** を押す
    - **通常差分の `Enter` から行・ハンクのステージや破棄を行わない**。既存 Excel にはパッチを適用できず、新規ファイルはテキストをステージしてしまう場合がある
    - `diff.excel.binary=true` でも、この操作は禁止されない。部分ステージは[専用画面](#lazygit-で-excel-のセル変更を部分ステージする)の `E` で行う
-   - 対応形式と制限は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/excel-diff.md)を参照する
+   - 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/excel-diff.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md#注意点)を参照する
 
 #### lazygit で Excel のセル変更を部分ステージする
 

@@ -173,7 +173,7 @@
 
 1. 手順 4 で行が出たときだけ、`~/.bashrc` をエディタで開き、この設定と重なる行を消して、残す行を末尾の 1 行より後ろへ移す。
 
-   - [共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)と同じ処理の行を消す
+   - Homebrew の `shellenv`、`EDITOR` / `VISUAL`、`alias vi=nvim`、`MANPAGER`、`DOCKER_HOST`、履歴と `shopt`、`ll` / `la` / `lt`、`alias gdu=gdu-go`、`y()`、Homebrew の補完、fzf と `FZF_` の環境変数、starship、WezTerm の統合、zoxide の行を消す（詳しい条件は[共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)）
    - `if … fi` は `fi` まで、`y()` は `function y() {` から `}` まで消す
    - この設定と違う形で使いたい行（`--cmd cd` の zoxide、手で直した `alias ll` など）は、消さずに、手順 5 で足した末尾の 1 行より後ろへ移す
    - zoxide の行を残すときは、`--hook none` を足す（例: `eval "$(zoxide init bash --cmd cd --hook none)"`）
