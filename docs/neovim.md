@@ -713,7 +713,7 @@
 
    - 数分かかる。Mason と treesitter の中断のメッセージは出てよい
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
-   - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazy-lockjson-を戻してから-restore-する理由)を参照する
+   - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-10-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
    - **次の手順は、プロンプトが戻ってから貼る**
 
 1. 試験用の Markdown を開いて、treesitter と Mason の導入を待つ。

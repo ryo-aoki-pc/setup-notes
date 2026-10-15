@@ -58,11 +58,11 @@
 - [neovim/neovim — INSTALL.md](https://github.com/neovim/neovim/blob/master/INSTALL.md) — tarball の展開先と PATH の通し方、glibc の要件
 - `:help nvim-defaults` / `:help checkhealth` — 既定値と健全性チェックの読み方
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
-- [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は [docs/setup.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md)
+- [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は[LazyVim の設定を導入する](../neovim.md#lazyvim-の設定を導入する)、何ができるかはその README
 - [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
 - [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）
 - [lazygit — Config.md の Configuring File Editing](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md#configuring-file-editing) — `e` キーのエディタの決まり方（`EDITOR` とプリセット）
-- [ryo-aoki-pc/LazyVimStarter — docs/setup.md の Windows 11 に導入する](../neovim.md#windows-11-で-lazyvim-の設定を導入する) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
+- [Windows 11 で LazyVim の設定を導入する](../neovim.md#windows-11-で-lazyvim-の設定を導入する) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
 
 ---
 

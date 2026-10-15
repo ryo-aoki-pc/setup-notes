@@ -1962,7 +1962,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 上から順に貼る。手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 人は `main`、各エージェントは自分の worktree とブランチで作業し、共通の AGENTS.md を読む
-- エージェントは自分のブランチを push して Pull Request を作る（リモートがある場合）。`main` への取り込みは人が行う
+- エージェントは自分のブランチを push して Pull Request を作り、取り込んでよい（リモートがある場合。merge commit にする）。手元での取り込みとブランチの削除は人が行う
 - Claude Code の公式プラグインから Codex と Grok にレビューや作業を頼める
 
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
@@ -2021,7 +2021,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
    <details>
-     <summary>貼るコマンド（bash・24 行）</summary>
+     <summary>貼るコマンド（bash・26 行）</summary>
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
@@ -2034,13 +2034,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      cat >> "${PROJECT_DIR}/AGENTS.md" <<'EOF'
    ## 共同作業の規則
 
-   このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担と `main` への取り込みは人が決める。
+   このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担は人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
    - 今のブランチにだけコミットする。`main` にはコミットも push もしない
    - 頼まれた範囲のファイルだけを変える。範囲の外を変えるときは、変える前に理由を書いて確かめる
    - 終わったら、テストとリンターを通してから、目的ごとにコミットする。通らなければコミットせずに、結果を報告する
-   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。`main` への取り込み（マージ）とブランチの削除は人が行う。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
+   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
+   - リモートがあれば、Pull Request をエージェントが取り込んでよい（`gh pr merge --merge` などの merge commit。squash と rebase にしない）。リモートが無いときの取り込み（「main に取り込む」の手順）と、ブランチの削除は人が行う
+   - Pull Request は、テストとリンターが通り、競合していないときに取り込む。利用者が取り込まないよう頼んだときは取り込まず、そのことを報告する
    - 秘密情報（`.env`・鍵・トークン・パスワード）を読まない・書かない・出力しない
    - レビューを頼まれたら、ファイルを変えずに、指摘を「重大度・場所（ファイル:行）・理由・直し方」で挙げる
    - ほかの担当の変更は、`git diff main...agent/codex` のように git で読む（ほかの worktree へ移らない）
@@ -2201,7 +2203,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
    <details>
-     <summary>貼るコマンド（PowerShell・24 行）</summary>
+     <summary>貼るコマンド（PowerShell・26 行）</summary>
 
    ```powershell
    & {
@@ -2212,13 +2214,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      $text = @'
    ## 共同作業の規則
 
-   このリポジトリでは、Claude Code・Codex・Grok Build・Antigravity CLI が同じ規則で作業する。分担と `main` への取り込みは人が決める。
+   このリポジトリでは、Claude Code・Codex・Grok Build・Antigravity CLI が同じ規則で作業する。分担は人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
    - 今のブランチにだけコミットする。`main` にはコミットも push もしない
    - 頼まれた範囲のファイルだけを変える。範囲の外を変えるときは、変える前に理由を書いて確かめる
    - 終わったら、テストとリンターを通してから、目的ごとにコミットする。通らなければコミットせずに、結果を報告する
-   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。`main` への取り込み（マージ）とブランチの削除は人が行う。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
+   - コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る（既にあれば足す）。今のブランチに `main` を取り込むのは、頼まれたときと、Pull Request が競合したときだけ
+   - リモートがあれば、Pull Request をエージェントが取り込んでよい（`gh pr merge --merge` などの merge commit。squash と rebase にしない）。リモートが無いときの取り込み（「main に取り込む」の手順）と、ブランチの削除は人が行う
+   - Pull Request は、テストとリンターが通り、競合していないときに取り込む。利用者が取り込まないよう頼んだときは取り込まず、そのことを報告する
    - 秘密情報（`.env`・鍵・トークン・パスワード）を読まない・書かない・出力しない
    - レビューを頼まれたら、ファイルを変えずに、指摘を「重大度・場所（ファイル:行）・理由・直し方」で挙げる
    - ほかの担当の変更は、`git diff main...agent/codex` のように git で読む（ほかの worktree へ移らない）
@@ -2316,13 +2320,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 | だれ | 主な役割 | 作業する場所 | ブランチ |
 |---|---|---|---|
-| 人 | 分担を決める・テスト・`main` への取り込み（Pull Request のマージ）・`main` の push | `<PROJECT_DIR>` | `main` |
+| 人 | 分担を決める・テスト・手元での `main` への取り込み・`main` の push・ブランチの削除（Pull Request のマージは、エージェントが行ってよい） | `<PROJECT_DIR>` | `main` |
 | Claude Code | 実装の主担当。Codex と Grok にレビューと作業を頼む窓口（スマートフォンからの入口も） | `<WT_ROOT>/claude` | `agent/claude` |
 | Codex | レビュー、別の実装 | `<WT_ROOT>/codex` | `agent/codex` |
 | Grok Build | 調べもの（Web の検索）、別の目のレビュー、別の実装 | `<WT_ROOT>/grok` | `agent/grok` |
 | Antigravity CLI（Windows 11 だけ） | 読み取り専用のレビューと調べもの（書かせない） | 使い捨てのフォルダー（`<WT_ROOT>/antigravity` は規則の確かめだけ） | `agent/antigravity`（コミットしない） |
 
 - 変更を担当する 3 つのエージェント（Claude Code・Codex・Grok Build）は、コミットしたら自分のブランチ（`agent/<名前>`）を push し、`main` への Pull Request を作る（AGENTS.md の規則。リモートがあるとき）
+- その Pull Request は、テストとリンターが通り、競合していなければ、エージェントが merge commit で取り込んでよい。利用者が止めたときは取り込まない
 
 **Claude Code の画面（スマートフォンからも）で打つプラグインのコマンド**
 
@@ -2403,7 +2408,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 人が分担を決める。
 
    - 3 つに同じファイルを触らせない（モジュールやディレクトリで分ける）
-   - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットし、push して Pull Request を作ることを書く
+   - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットし、push して Pull Request を作ることを書く。取り込みまで頼むなら、merge commit で取り込むことも書く
    - 振り方の目安は、[使い方の基本](#コーディングエージェントの共同作業-使い方の基本)の役割の表
 
 1. `claude` の worktree の窓で Claude Code を起動し、担当の作業を頼む。
@@ -2642,8 +2647,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する（2026-10-15、利用者の決定）。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
 
    - Claude Code だけで行うもの: 利用者の質問への答え、ファイルを変えない調べもの、1 つのファイルの数行で振る舞いを変えない直し（誤字・リンク・値の直しなど）
-   - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request
-   - Codex: 実装と下書き。Claude Code が用意した別の clone か worktree の中だけで書く。この分担で頼まれたときは、「共同作業の規則」のコミット・push・Pull Request を行わず、変更を残して報告する（Claude Code が確かめ、自分の worktree に移してからコミットする）
+   - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request・取り込み
+   - Codex: 実装と下書き。Claude Code が用意した別の clone か worktree の中だけで書く。この分担で頼まれたときは、「共同作業の規則」のコミット・push・Pull Request・取り込みを行わず、変更を残して報告する（Claude Code が確かめ、自分の worktree に移してからコミットする）
    - Grok Build: 差分の読み取り専用のレビュー。ファイルを変えない（Windows 11 では、Claude Code は `--always-approve` を付けずに頼む）
    - Antigravity CLI（Windows 11 だけ）: 差分の読み取り専用のレビューと、その作業のための調べもの。ファイルを変えない（Claude Code は、入力を写した使い捨てのフォルダーで 1 回だけ実行し、`--dangerously-skip-permissions`・`--mode` を付けない）
    - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
@@ -2726,11 +2731,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### コーディングエージェントの共同作業: main に取り込む
 
-- 人が行う。エージェントには `main` を変えさせない（AGENTS.md の規則）
+- 手元で取り込むこの節の手順は人が行う。エージェントは手元の `main` にコミットも push もしない（AGENTS.md の規則）
 - 両 OS で同じコマンド。この節の手順 2〜6 は `main` の窓（プロジェクト）、手順 7 は各 worktree の窓に貼る
-- Pull Request は、GitHub などの画面で取り込んでもよい
-- 画面で取り込むときは、merge commit にする（squash と rebase にしない。この節の手順 7 の `--ff-only` が通らなくなる）
-- 画面で取り込んだときは、この節の手順 2〜6 の代わりに、`main` の窓で `git pull --ff-only` する
+- Pull Request は、GitHub などの画面や `gh pr merge --merge` でエージェントが取り込んでよい
+- Pull Request を取り込むときは、merge commit にする（`gh pr merge --merge`。squash と rebase にしない。この節の手順 7 の `--ff-only` が通らなくなる）
+- Pull Request を取り込んだときは、この節の手順 2〜6 の代わりに、`main` の窓で `git pull --ff-only` する
 
 1. それぞれの worktree の窓で、プロジェクトのテストを通す。
 
@@ -2844,11 +2849,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `Ctrl+b` → `2`（codex）・`3`（grok）で切り替え、それぞれのエージェントに頼む
    - 終わるときは `Ctrl+b` → `d` で離れる（エージェントは動き続ける）
 
-1. 取り込みは、PC か SSH のアプリで行う。
+1. 手元での取り込みと、取り込んだ後の worktree の同期は、PC か SSH のアプリで行う。
 
    - [main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順を、`main` の窓で行う
    - 取り込んだら、Claude の worktree も同じ節の手順 7 で `main` にそろえる（Remote Control のセッションは動かしたままでよい）
-   - Pull Request を画面で取り込んだときは、`main` の窓で `git pull --ff-only` してから、同じ節の手順 7 でそろえる
+   - Pull Request を画面や `gh pr merge --merge` で取り込んだとき（エージェントが取り込んだときも）は、`main` の窓で `git pull --ff-only` してから、同じ節の手順 7 でそろえる
 
 ---
 
@@ -4312,7 +4317,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 初めは読み取り専用のレビューを頼む。編集を頼むときは、担当の worktree を開いた会話から始める
    - 同じ作業ディレクトリを複数のエージェントが同時に編集しない
-   - 結果の差分とテストを確かめ、各担当のブランチから Pull Request を作る。`main` への取り込みは人が行う
+   - 結果の差分とテストを確かめ、各担当のブランチから Pull Request を作る。Pull Request はエージェントが取り込んでよい（merge commit にする）。手元での取り込みとブランチの削除は人が行う
 
 ---
 

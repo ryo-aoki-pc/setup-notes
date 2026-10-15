@@ -173,7 +173,7 @@
 
 1. 手順 4 で行が出たときだけ、`~/.bashrc` をエディタで開き、この設定と重なる行を消して、残す行を末尾の 1 行より後ろへ移す。
 
-   - [共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)と同じ処理の行を消す
+   - Homebrew の `shellenv`、`EDITOR` / `VISUAL`、`alias vi=nvim`、`MANPAGER`、`DOCKER_HOST`、履歴と `shopt`、`ll` / `la` / `lt`、`alias gdu=gdu-go`、`y()`、Homebrew の補完、fzf と `FZF_` の環境変数、starship、WezTerm の統合、zoxide の行を消す（詳しい条件は[共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)）
    - `if … fi` は `fi` まで、`y()` は `function y() {` から `}` まで消す
    - この設定と違う形で使いたい行（`--cmd cd` の zoxide、手で直した `alias ll` など）は、消さずに、手順 5 で足した末尾の 1 行より後ろへ移す
    - zoxide の行を残すときは、`--hook none` を足す（例: `eval "$(zoxide init bash --cmd cd --hook none)"`）
@@ -990,7 +990,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
   - フォントは HackGen Console NF（[HackGen Console NF](#hackgen-console-nf)。Windows 11 は[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)）
-  - AlmaLinux 10 の公式 Bash 統合との併用は[導入手順の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#注意点)を参照する
+  - AlmaLinux 10 の公式 Bash 統合との併用は[設定の注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#注意点)を参照する
   - Windows 11 は Git Bash を既定にし、Git Bash・PowerShell の統合を設定から読む（[シェル統合](https://github.com/ryo-aoki-pc/wezterm#シェル統合)）
   - `~/.wezterm.lua` があると、clone した設定は読まれない
 
@@ -1723,7 +1723,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
    - [WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 6 で導入済み
-   - その項の手順 5 で WezTerm を起動し、同じ項の手順 6 を新しい Git Bash のタブに貼って確かめる
+   - その項の手順 6 で WezTerm を起動し直し、同じ項の手順 7 を新しい Git Bash のタブに貼って確かめる
    - Git Bash の窓は閉じてよい
    - CRLF に変換して clone 済みのリポジトリは、WezTerm の Git Bash のタブで[改行を変換して clone したリポジトリを直す](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を通す
 

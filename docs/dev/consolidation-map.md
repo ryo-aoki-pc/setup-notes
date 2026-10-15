@@ -852,9 +852,38 @@ AI コーディングエージェントの項・節を、2冊から [docs/ai-age
 | reference/almalinux-setup.md | 「補足」の中の、移した項の `### <項> / 手順 N: 補足: …` と「…: 選択した方針」（27 個） | [reference/shell-terminal.md: 補足](../reference/shell-terminal.md#補足)（見出しの名前は同じ） |
 | reference/windows-setup.md | 「補足」の中の、移した項の `### <項> / 手順 N: 補足: …` と「…: 選択した方針」（16 個） | [reference/shell-terminal.md: 補足](../reference/shell-terminal.md#補足)（見出しの名前は同じ） |
 
+## サブモジュールの案内だけの文書を消したときの追補
+
+2026-10-15 に、利用者の依頼で、setup-notes 以外のサブモジュール（bash・kvm-container・wezterm・md-table-excel・LazyVimStarter・lazygit・yazi）の文書を整理した。正本への案内だけになっていた文書・節を消し、各リポジトリの README の冒頭に「導入」の表を置いて、正本の項へ 1 回で着くようにした。移動元の基準は、下の表の消した側のリンクの固定コミット
+
+- 開発者検査・注意点などの固有の内容は、下の表の「今の場所」へ移した。本文は変えていない
+- 各リポジトリの検証記録から消した文書へのリンクは、削除前の固定コミットへ付け替えた
+- この setup-notes から消した文書へのリンクは、今の場所へ付け替えた
+- md-table-excel にロールバック（`docs/extra/readme.md`）を足し、「mdtable を導入・更新する」のリードから案内した
+
+| リポジトリ | 消した文書・節 | 今の場所 |
+| --- | --- | --- |
+| bash | [docs/quick-start.md](https://github.com/ryo-aoki-pc/bash/blob/4352d0a9808bf7819240e6e24afe5901b251175a/docs/quick-start.md) の「実施手順」「更新」「手動移行」「ロールバック」 | 正本への案内は [README の「導入」](https://github.com/ryo-aoki-pc/bash/blob/main/README.md#導入)の表。ロールバックは [docs/extra/quick-start.md](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック) |
+| bash | [docs/quick-start.md の「検証」](https://github.com/ryo-aoki-pc/bash/blob/4352d0a9808bf7819240e6e24afe5901b251175a/docs/quick-start.md#検証) | [AGENTS.md の「よく使うコマンド」](https://github.com/ryo-aoki-pc/bash/blob/main/AGENTS.md#よく使うコマンド) |
+| bash | [docs/reference/quick-start.md](https://github.com/ryo-aoki-pc/bash/blob/4352d0a9808bf7819240e6e24afe5901b251175a/docs/reference/quick-start.md) | [docs/reference/readme.md の「読むもの」](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)と [README の「ホストだけの設定」](https://github.com/ryo-aoki-pc/bash/blob/main/README.md#ホストだけの設定) |
+| kvm-container | [docs/setup.md](https://github.com/ryo-aoki-pc/kvm-container/blob/b0ecaa3a2fd43c1277bfcc44f08a631739ae9196/docs/setup.md) の「導入する (1 度だけ)」〜「更新」「ロールバック」 | 正本への案内は [README の「導入」](https://github.com/ryo-aoki-pc/kvm-container/blob/main/README.md#導入)の表 |
+| kvm-container | [docs/setup.md の「変更後に確認する」](https://github.com/ryo-aoki-pc/kvm-container/blob/b0ecaa3a2fd43c1277bfcc44f08a631739ae9196/docs/setup.md#変更後に確認する) | [docs/dev/check.md](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/dev/check.md) |
+| kvm-container | [docs/reference/setup.md の「注意点」「VM を削除するときの注意」](https://github.com/ryo-aoki-pc/kvm-container/blob/b0ecaa3a2fd43c1277bfcc44f08a631739ae9196/docs/reference/setup.md#注意点) | [docs/extra/setup.md の「注意点」](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#注意点) |
+| wezterm | [docs/install.md](https://github.com/ryo-aoki-pc/wezterm/blob/6e80f5c013b1e4b2423627705180c364ce70955c/docs/install.md) の「実施手順」〜「注意点」の案内 | 正本への案内は [README の「導入」](https://github.com/ryo-aoki-pc/wezterm/blob/main/README.md#導入)の表 |
+| wezterm | [docs/install.md の「AlmaLinux 10・Git Bash 以外のシェル」](https://github.com/ryo-aoki-pc/wezterm/blob/6e80f5c013b1e4b2423627705180c364ce70955c/docs/install.md#almalinux-10git-bash-以外のシェル) | [README の「bash（Git Bash / MSYS2 / QMK MSYS / Linux）と zsh」](https://github.com/ryo-aoki-pc/wezterm/blob/main/README.md#bashgit-bash--msys2--qmk-msys--linuxと-zsh) |
+| wezterm | [docs/reference/install.md の「注意点」](https://github.com/ryo-aoki-pc/wezterm/blob/6e80f5c013b1e4b2423627705180c364ce70955c/docs/reference/install.md#注意点) | [docs/extra/install.md の「注意点」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#注意点) |
+| wezterm | [tests/starship/ の報告書 5 つ](https://github.com/ryo-aoki-pc/wezterm/tree/6e80f5c013b1e4b2423627705180c364ce70955c/tests/starship) | [docs/verification/starship/](https://github.com/ryo-aoki-pc/wezterm/tree/main/docs/verification/starship) |
+| LazyVimStarter | [docs/setup.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/7826bd8c3a47b2e49809ba3aac448d8969edcb0f/docs/setup.md) の案内の節 | 正本への案内は [README の「導入」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#導入)の表 |
+| LazyVimStarter | [docs/setup.md の「GitLab Markdown 整形器の回帰テストを実行する (開発時)」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/7826bd8c3a47b2e49809ba3aac448d8969edcb0f/docs/setup.md#gitlab-markdown-整形器の回帰テストを実行する-開発時) | [docs/dev/check.md](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/dev/check.md) |
+| LazyVimStarter | [docs/extra/setup.md の「実施前の状態」「完了時点の状態」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/7826bd8c3a47b2e49809ba3aac448d8969edcb0f/docs/extra/setup.md#実施前の状態) | [docs/verification/setup.md の「実施前と完了時点の状態」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/verification/setup.md#実施前と完了時点の状態) |
+| lazygit | [docs/excel-diff.md](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md) の「導入」「大きいブックの表示」「確認と操作」「Excel の部分ステージ」 | [README の「導入」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#導入)の表と、正本の[lazygit の Excel 差分表示を導入する](../almalinux-setup.md#lazygit-の-excel-差分表示を導入する)などの項 |
+| lazygit | [README の「導入方法」「前提ツール」](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#導入方法) | [README の「導入」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#導入) |
+| yazi | [README の「インストール」「補足: 複数ファイルをまとめて開く」](https://github.com/ryo-aoki-pc/yazi/blob/280b1c7278fb57165f2893145a6d715d9ddd6cde/README.md#インストール) | [README の「導入」](https://github.com/ryo-aoki-pc/yazi/blob/custom/README.md#導入)の表 |
+| md-table-excel | [README の「導入」「使い方」「Excel で編集するときの注意」](https://github.com/ryo-aoki-pc/md-table-excel/blob/a6c7b04f469538d5d414474e569eb12e2d302437/README.md#導入) | [README の「導入」](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/README.md#導入)の表 |
+
 ## AlmaLinux 10 の Caddy をホストで共通にしたときの追補
 
-2026-10-15 に、利用者の決定で、AlmaLinux 10 の Caddy の本体・認証局・ユーザーサービスをホストで 1 つにする下書きを作った。新しい正本は増やさず、共通の操作を almalinux-setup.md の「Caddy」へ移す。移動元の基準は setup-notes の `6994d4d9ec971aff03d4d1c1321af550e7464b4e`。
+2026-10-15 に、利用者の決定で、AlmaLinux 10 の Caddy の本体・認証局・ユーザーサービスをホストで 1 つにした。新しい正本は増やさず、共通の操作を almalinux-setup.md の「Caddy」へ移す。移動元の基準は setup-notes の `6994d4d9ec971aff03d4d1c1321af550e7464b4e`。
 
 - Codeg の HTTPS サイトは ai-agents.md に残す。Windows 11 の Codeg 専用 Caddy の操作は移さない
 - ルート証明書の節は、AlmaLinux 10 のホストと接続する端末の分を共通化した。ai-agents.md には Windows 11 のホストの分を残し、番号を付け替えた
