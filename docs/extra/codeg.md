@@ -517,6 +517,13 @@
 - 承認の選択肢の「Yes, allow all edits during this session」「Yes, and don't ask again for bash commands」は、その会話の以後の確認を省く
 - Windows の Grok Build には sandbox が無い。AlmaLinux 10 でも、Codeg は sandbox を足さない
 
+#### 委譲先のモードと自動承認
+
+- 委譲先の Claude Code の `Auto`・Codex の `Auto review` では、作業フォルダーへの書き込みとコマンドが承認カード無しで進む。Codex は、サンドボックスの中の操作に自動レビューを使わない
+- `Auto`・`Auto review` が確認や拒否に回す場面は確かめていない。確認が出ることを、安全の境界にしない
+- `Bypass permissions`・`Full access`・`YOLO` は使わない
+- [共同作業の手順](../ai-agents.md#codeg-エージェント同士で共同作業する)の手順 2 を戻すときは、同じ画面で Claude Code を `既定（Manual）`、Codex を `既定（Workspace access）` に戻し、タブごとに保存する（実機では戻していない）
+
 #### Claude Code・Codex の共有設定と履歴
 
 - 任意節（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
@@ -565,6 +572,7 @@
 
 #### Windows 11
 
+- Codeg の Grok のコマンドは cmd.exe で動き、`"` が正しく渡らない。親にするときの依頼の書き方は、[共同作業の手順](../ai-agents.md#codeg-エージェント同士で共同作業する)のリード（同じ項の手順 4 の依頼）に従う
 - SSH でログインしたシェルから Codeg を始めない。Administrators の一員の SSH のセッションは管理者の権限を持つ
 - ランチャーのソース・実行ファイルは、`%LOCALAPPDATA%\codeg-server` の中にある。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 3 で、このフォルダーとともに消す
 - Caddy の起動用 `start-caddy-hidden.ps1` は、`%LOCALAPPDATA%\codeg-caddy` の中にある

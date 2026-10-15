@@ -226,6 +226,11 @@
     - フォルダーを切り替えた直後の最初の送信は「会話を作成できませんでした。もう一度お試しください。」で失敗し、再送で成功した。承認・変更・履歴の取り込み・再開・停止は今回確かめていない
     - 同じ実機の仮想アドレスが 39 ビットの arm64 のカーネル（`CONFIG_ARM64_VA_BITS_39=y`）では、Google Antigravity の ACP サーバーの 1.4.0 は使えない。TCMalloc で起動時に落ちた。推奨版がほかの版になったときの動作は確かめていない。サインイン開始の失敗を確認し、画面の「アンインストール」で消した。Antigravity CLI 1.3.5 とは別の製品。ほかの Linux（x86_64 など）は確かめていない
   - AlmaLinux 10 の HTTPS は、共通の Caddy の `sites/codeg.caddy` を追加・撤去して扱う。本体・認証局・更新とルート証明書の導入は、almalinux-setup.md の「Caddy」の項に置く。Windows 11 は Codeg 専用の Caddy を使う
+  - Windows 11 の委譲の検証（2026-10-16 JST、Codeg 0.35.1 と、自動更新の後の 0.35.2）: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-grok-を親にした委譲と委譲先の既定のモード2026-10-16-jst)に範囲を記録する
+    - 使い捨てのリポジトリ 2 つで、Grok から Claude Code・Codex への並行の委譲、テスト、コミットを通した。1 回目は Antigravity の読み取り専用のレビューも通した
+    - サブエージェント設定の保存と読み込み直し、Claude Code `Manual` の承認カード 2 回、Claude Code `Auto`・Codex `Auto review` の書き込みとコマンドで承認カード 0 枚を確認した
+    - 親の Grok の cmd.exe と `"` の制約、`git commit -F` の成功を確認した。最大委任深度 `1` でも、Codex は自分の `spawn_agent` を起動した
+    - 未確認: Codex の自動レビューの許可・拒否、Claude Code `Auto` の拒否、Antigravity の `Auto Edit`・`YOLO`、AlmaLinux 10、Grok 以外を親にした 2 回目と同じ確認、Grok の「毎回確認」
   - **実機での検証状態（2026-10-15 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で、共通の Caddy の上に「サーバーを入れて localhost で起動する」の手順 1〜7 と「HTTPS で LAN・VPN に公開する」の手順 1〜5 を通した
     - Codeg は、手順 1 の「最新リリースを確かめて変える」に従い v0.35.2 を指定した（手順書の初期値は v0.35.1）。localhost の認証あり・なし、HTTPS の待ち受けと別ホストからの `200`（`curl -sk`）を確認した
     - **確認していないこと**: 「HTTPS で LAN・VPN に公開する」の手順 6〜8（端末のルート証明書・トークン・ブラウザ）、AlmaLinux 10 のロールバック、共通の Caddy の上での Codeg の更新・Claude Code と Codex CLI の操作・共通パスワード、ホストの再起動

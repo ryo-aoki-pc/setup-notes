@@ -4562,23 +4562,34 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS
 - 任意。Codeg で使うエージェントを [Claude Code と Codex CLI を使う](#codeg-claude-code-と-codex-cli-を使う)（Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 2〜5 で有効にし、接続と応答を確かめておく
-- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/codeg.md#codeg--エージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
+- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/codeg.md#codeg--エージェント同士で共同作業する--手順-14-補足-委譲と作業ディレクトリ)）
 - Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
+- Windows 11 で Grok を親にするときは、Grok のコマンドが cmd.exe で動き、`"` が正しく渡らない。この項の手順 4 の親への依頼に、次の注意を含める
+  - 「PowerShell のコマンドと `"` を使わない。コミットメッセージはファイルに書いて `git commit -F` で渡す。この注意は委譲先への依頼文には書かない」
 
 1. ブラウザの設定で、エージェントへの委譲を有効にする。
 
-   - 設定の `Collaboration`（共同作業）を開き、`Multi-Agent Collaboration` の委譲を有効にする
+   - 設定の `Collaboration`（コラボレーション）を開き、`Multi-Agent Collaboration` の委譲を有効にする
    - 最大の委譲深度を `1` にし、そのパネルの保存ボタンを押す
    - 保存後も有効と深度 `1` が表示されればよい。保存できなければ先へ進まない
    - 設定は GUI から保存する。認証値を含む DB を直接編集しない
+
+1. ブラウザの設定で、委譲先のエージェントの既定のモードを決める。
+
+   - 設定の `Collaboration`（コラボレーション）の「サブエージェント設定」を開き、エージェントのタブを選ぶ
+   - Claude Code の `Mode` を `Auto`、Codex の `Mode` を `Auto review` にし、タブごとにそのパネルの保存ボタンを押す
+   - Google Antigravity の `Session Mode` は `Default` のままにする
+   - `Bypass permissions`・`Full access`・`YOLO` は選ばない
+   - 読み込み直しても選んだ値が表示されればよい。表示されなければ先へ進まない
 
 1. ブラウザで新しい会話を開き、別のエージェントへの短い委譲を確かめる。
 
    - `/workspace` で担当の worktree を開き、新しい会話を作る
    - 「Codex に、ツールやファイルを使わずに接続確認の一文を答える作業を委譲して」のように、使う相手を明示して頼む（Antigravity は「Google Antigravity に、…」）
    - 親のエージェントの承認カード（`delegate_to_agent`・`get_delegation_status`）が出たら、委譲先と頼む内容を読んでから許可する
+   - 委譲先が承認を求め、親の会話の委譲のカードが「承認待ち」になったら、カードの「会話を表示」で委譲先の画面を開く。承認カードの内容を読み、許可する操作なら `Yes` を押す（`Yes, allow all edits during this session` は、その会話の以後の編集の確認も省く）
    - 委譲先から結果が返ればよい。有効化しただけでは、すべての組合せの接続が確認できたとは扱わない
-   - 委譲先の Session Mode は、設定の `Collaboration` の「サブエージェント設定」で確かめる（Antigravity の既定は `Default`）。委譲先は親と同じ作業ディレクトリで動く
+   - 委譲先は親と同じ作業ディレクトリで動く。編集を頼む場合は、担当の worktree であることを確かめる
    - 委譲のツールが見つからなければ、設定の保存・使うエージェントの有効化を確かめ、新しい会話でやり直す
 
 1. 共同作業の指示に、担当の worktree・ブランチ・変更する範囲を明示する。
