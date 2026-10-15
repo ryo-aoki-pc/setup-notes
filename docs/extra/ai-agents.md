@@ -151,12 +151,16 @@
 - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md#ロールバック)は、Claude Code と WezTerm を使う。同じ項より前に戻す
 - [コーディングエージェントの共同作業](coding-agents.md#windows-11-のロールバック)も、同じ項より前に戻す
 - Antigravity CLI と Codeg の Antigravity の削除は未検証。資格情報を消す `cmdkey /delete:LegacyGeneric:target=gemini:antigravity` も実行していない
+- Antigravity アプリのアンインストールと、その後に残るものは未検証。以下のアプリの削除は、管理者ではない Windows PowerShell 5.1 と PC の画面で行う
 - Antigravity CLI の自動更新を止める方法は未確認
 
 > [!CAUTION]
 > [Windows 11 で AI エージェントとプラグインを消す](#windows-11-で-ai-エージェントとプラグインを消す)の手順 5 は **Claude Code の設定・許可済みのツール・MCP サーバーの定義・セッションの履歴・ログインの情報・ディレクトリの信頼を**、同じ項の手順 14 は **Grok のログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree を消す**（取り戻せない）。入れ直すかもしれないなら、その手順は行わない。
 >
 > [Windows 11 で Antigravity CLI を消す](#windows-11-で-antigravity-cli-を消す)の手順 5 は、`%USERPROFILE%\.gemini\antigravity-cli` と `%USERPROFILE%\.gemini\config` を消す（取り戻せない）。
+> アプリなども使っているなら、共有の `config` は消さず、その手順を飛ばすか、`antigravity-cli` だけを消す。
+>
+> [Windows 11 で Antigravity アプリを消す](#windows-11-で-antigravity-アプリを消す)の手順 5 は、アプリの会話の記録を含むデータを消す（取り戻せない）。残したいデータがあるなら、その手順は行わない。
 >
 > [Windows 11 で Codeg の Antigravity を消す](#windows-11-で-codeg-の-antigravity-を消す)の手順 2 は、`%USERPROFILE%\.gemini\antigravity-acp` を消す（取り戻せない）。残したい設定・ログイン情報があるなら、その手順は行わない。
 
@@ -377,6 +381,7 @@
 
    - `False` が 2 行出ればよい
    - Antigravity のほかの製品（アプリなど）も使っているなら、共有の設定の `%USERPROFILE%\.gemini\config` は消さない。この手順を飛ばすか、`antigravity-cli` だけを消す
+   - アプリも消すときは、[Windows 11 で Antigravity アプリを消す](#windows-11-で-antigravity-アプリを消す)を通す。アプリのデータは `%USERPROFILE%\.gemini\antigravity` にもある
 
 1. 資格情報マネージャーの Antigravity CLI の資格情報を消す。
 
@@ -398,6 +403,60 @@
    ```
 
    - 何も出なければ、この CLI の入口は外れている
+
+---
+
+### Windows 11 で Antigravity アプリを消す
+
+1. PC のアプリで Remote Control をオフにしてから、アプリを終了する。
+
+   - 設定（`Ctrl+,`）→ Application → Remote Control のトグルをオフにする
+   - タスクトレイのアイコンからアプリを終了する。ブラウザの一覧が `Offline` になることを確かめる
+   - **次の手順は、アプリを終了してから貼る**
+
+1. 通常の Windows PowerShell 5.1 で、スタートアップのショートカットを消す。
+
+   ```powershell
+   Remove-Item -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk') -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
+   ```
+
+   - `False` が出ればよい
+
+1. Antigravity アプリをアンインストールする。
+
+   ```powershell
+   $u = "$env:LOCALAPPDATA\Programs\antigravity\Uninstall Antigravity.exe"
+   if (-not (Test-Path -LiteralPath $u)) { Write-Error '中断: アンインストーラーが無い' } else {
+     Start-Process -FilePath $u -ArgumentList '/currentuser', '/S' -PassThru | Wait-Process
+   }
+   ```
+
+   - このアンインストールのコマンドは実行していない（未検証）
+   - **次の手順は、アンインストーラーが終了してから貼る**
+
+1. アプリの実行ファイルが消えたことを確かめる。
+
+   ```powershell
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\Programs\antigravity\Antigravity.exe"
+   ```
+
+   - `False` が出ればよい。`True` なら、実行ファイルが消えていないので、この項の手順 5 へ進まない
+   - アンインストールと、その後に残るものは確かめていない。デスクトップとスタートメニューの `Antigravity.lnk`、HKCU の Uninstall の登録、ブラウザの一覧の `Offline` の項目が残ることがある。要らなければ手で消す（一覧の項目は削除のアイコン）
+   - [Antigravity アプリの Remote Control: 実施手順](../ai-agents.md#antigravity-アプリの-remote-control-実施手順)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
+   - アプリのデータを残すなら、この項の手順 5 は飛ばす
+
+1. 完全に消すときだけ、アプリのデータのフォルダーを消す（取り戻せない）。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:APPDATA\Antigravity", "$env:LOCALAPPDATA\antigravity-updater", "$env:USERPROFILE\.gemini\antigravity", "$env:USERPROFILE\.gemini\antigravity-backup", "$env:USERPROFILE\.gemini\antigravity-ide" -Recurse -Force -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Test-Path -LiteralPath "$env:APPDATA\Antigravity", "$env:LOCALAPPDATA\antigravity-updater", "$env:USERPROFILE\.gemini\antigravity", "$env:USERPROFILE\.gemini\antigravity-backup", "$env:USERPROFILE\.gemini\antigravity-ide"
+   ```
+
+   - `False` が 5 行出ればよい
+   - CLI と共有する `%USERPROFILE%\.gemini\config` は消さない
 
 ---
 
@@ -461,3 +520,14 @@
 - **Antigravity CLI: `ERROR: logging before google.Init: I…` は情報の行**: `ERROR` で始まっても、後ろの `I` は情報の行を示す
 - **Antigravity CLI: headless は操作を拒んでも終了コード 0**: JSON の `status` も `SUCCESS` になる。拒否は `denied_actions` と標準エラーの `jetski: no output produced` で見分ける
 - **Codeg の Antigravity: サインイン中の「サインアウト」は資格情報も消す**: 待ち手を止め、保存済みの資格情報も消す
+- **Antigravity アプリの Remote Control**
+  - アプリが動いていないと使えない。Keep In Menu Bar がオンなら、窓を閉じても動く。タスクトレイから終了すると、ブラウザの一覧は `Offline` になる
+  - スリープ・休止状態からの復帰、ノート PC の蓋を閉じたときの動き、Prevent Sleep が実際にスリープを防ぐことは未検証
+  - スタートアップのショートカットは置いたが、サインアウト・再起動の後に自動で起動して `Online` になることは未検証
+  - ブラウザ側の Settings → Application → General の Prevent Sleep と Keep In Menu Bar は、PC の値を映していないとみられる。ブラウザ側では変えない
+  - Settings → Application の Remote Control は、ブラウザからは変えられない。PC のアプリで変更する
+  - 同じ Google アカウントで入れる人は、ブラウザから PC のフォルダーを辿ってプロジェクトにできる。プロジェクトの中のファイルは確認なしで書き換わる
+  - コマンドの承認で「常に許可」を選ぶと、その会話・プロジェクト・全体のうち選んだ範囲で許可が残り、以後は聞かれない
+  - スマートフォンでのアクセス、ホーム画面への追加とプッシュ通知は未検証
+  - アプリの更新と、更新の後の動きは未検証
+  - CLI には別の方法として常駐デーモンがある（公式文書）。この PC では登録しておらず、使っていない

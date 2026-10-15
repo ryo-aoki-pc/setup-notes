@@ -62,6 +62,18 @@
 - 更新はバックグラウンドの自動更新と `agy update` を使う。公式インストーラーは、既に入っていれば入れ直さず、自動更新を案内する
 - Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](grok-build-remote.md)で分けて扱う
 
+### Windows 11 の Antigravity アプリの Remote Control
+
+- 2026-10-15、利用者の決定で、Windows 11 ではデスクトップアプリの [Remote Control](../ai-agents.md#antigravity-アプリの-remote-control任意) を使うことにした。Antigravity CLI は前提にしない
+- 公式文書には、CLI の常駐デーモン（`agy remote-control start`）という別の方法もある。この PC では登録しておらず、使っていない
+  - アプリは動いている間だけ接続できる。CLI のデーモンは、公式文書で説明されている常駐する別の入口
+  - 共有の `%USERPROFILE%\.gemini\config\config.json` でも、アプリの名前は `userSettings.remoteControlHostname`、CLI のデーモンの名前は `cliRemoteControlHostname` と、別のキーを使う
+- この PC ではアプリの導入後に自動起動が登録されなかったため、利用者の決定で、ログオン時の起動用にスタートアップのフォルダーへショートカットを置いた
+  - ショートカットから手で起動できることは確かめた。サインアウト・再起動後の自動起動は確かめていない
+- 窓を閉じても動かすため Keep In Menu Bar をオンにし、公式の説明に沿って Prevent Sleep もオンにする
+  - Keep In Menu Bar がオンの状態では、窓を閉じた後も接続できた。Prevent Sleep が実際にスリープを防ぐことは確かめていない
+- インストーラーを実行する前に、有効な署名と、署名者が Google LLC であることを確かめる。版を含む URL は固定し、新しい版の URL は公式のダウンロードのページで取り直す
+
 ## 補足
 
 ### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 2: 補足: 公式インストーラーの照合
@@ -79,6 +91,37 @@
 
 - 個人の Google アカウントでブラウザからログインする。CLI の資格情報は Windows の資格情報マネージャーの `gemini:antigravity` に保存される
 - ログイン後の設定・ログ・会話・更新の情報などは `%USERPROFILE%\.gemini\antigravity-cli`、共通の設定は `%USERPROFILE%\.gemini\config` に作られる
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 2: 補足: 署名と版の確認
+
+- ダウンロードの URL には版が入っている。新しい版へ変えるときは、公式のダウンロードのページから、その版の URL を取り直す
+- 実行前に `Get-AuthenticodeSignature` の `Status` と `SignerCertificate.Subject` を見て、有効な Google LLC の署名を持つ配布物であることを確かめる。`VersionInfo` では製品名と版を確かめる
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 5: 補足: CLI とは別のログイン
+
+- アプリの Google アカウントへのログインは、Antigravity CLI とは別になる。CLI にログイン済みでも、アプリでログインする
+- アプリのログイン画面の細部と、ログイン情報の保存先は確かめていない
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 6: 補足: 設定画面と自動の名前
+
+- 公式文書は設定の節を App と書くが、画面の名前は Application。PC のアプリの Remote Control の正確な項目名と Nickname の変え方は、Claude は画面で確かめていない
+- 公式文書の Nickname を変えなかった場合、この PC では `<ホスト名>-<2 語>` の名前が自動で付いた。手順書では設定ファイルから名前を読み、ブラウザで接続先を選ぶときに使う
+- Keep In Menu Bar は、すべての窓を閉じてもアプリを動かす設定。Prevent Sleep は、アプリが動いている間のスリープを防ぐ設定として説明されているが、実際に防ぐかは確かめていない
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 7: 補足: 設定の表示を絞る理由
+
+- 設定ファイル全体には、ログインしたアカウントなども入る。手順書では Remote Control の有効・無効と名前、バックグラウンド動作とスリープ抑止の 4 つの値だけを表示する
+- `%USERPROFILE%\.gemini\config\config.json` は CLI と共有する場所だが、アプリの Remote Control は `userSettings.remoteControlEnabled` と `remoteControlHostname` を使う
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 8: 補足: スタートアップのショートカット
+
+- この PC では、アプリの導入後に HKCU の Run・スタートアップのフォルダー・タスク スケジューラのいずれにも自動起動が登録されなかった。利用者の決定でスタートアップのショートカットを使う
+- ショートカットからの手動起動では窓が開く。ログオン後に自動で起動し、一覧が Online に戻ることまでは確かめていない
+
+### Antigravity アプリの Remote Control / 実施手順 / 手順 10: 補足: ブラウザとモバイル
+
+- 公式文書では、ブラウザはアプリと同じ Google アカウントでサインインする。`Remote control is not enabled for your account.` は、アカウントや組織で機能が有効でないときの表示として説明されている
+- モバイルでは Web アプリをホーム画面へ追加すると、エージェントの完了時と入力待ちにプッシュ通知を受け取れると公式文書にある。スマートフォンでのアクセス、ホーム画面への追加、プッシュ通知は実機で確かめていない
 
 ## 以前の参考資料の場所
 
@@ -110,3 +153,12 @@
 | [Caddyfile: Global options](https://caddyserver.com/docs/caddyfile/options) | HTTPS・信頼ストア・ローカル CA の設定 |
 | [Caddyfile: tls](https://caddyserver.com/docs/caddyfile/directives/tls) | 内部 CA とオンデマンドの TLS |
 | [GitHub: Organizing information with collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) | `<details>`・`<summary>` と内部のコードブロック |
+
+Windows 11 の Antigravity アプリの Remote Control は、2026-10-15 に読んだ次の一次情報を参照した。実機で確かめた範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-windows-11-の-antigravity-アプリの-remote-control2026-10-15-jst)に記録する。
+
+| 資料 | 参照した内容 |
+| --- | --- |
+| [Antigravity: Remote Control](https://antigravity.google/docs/remote-control/) | アプリの設定・接続、CLI の別の入口、モバイルのホーム画面への追加とプッシュ通知 |
+| [Antigravity: Download](https://antigravity.google/download) | Windows のアプリの配布物・要件、別製品の Antigravity IDE |
+| [Remote Control for Antigravity（2026-08-21）](https://antigravity.google/blog/remote-control-for-antigravity/) | Remote Control の案内 |
+| [Antigravity: Permissions](https://antigravity.google/docs/permissions) | Windows のアプリの権限、ターミナルのコマンドの承認、プロジェクトの中の読み書き |
