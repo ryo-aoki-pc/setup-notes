@@ -1,4 +1,4 @@
-# distrobox インストール手順（AlmaLinux 10 / EPEL）の参考資料
+# Distrobox の参考資料
 
 [手順書](../almalinux-setup.md#distrobox)・[ロールバックと注意点](../extra/distrobox.md)
 
@@ -15,7 +15,7 @@
 
 `rpm -q --requires distrobox` の中身は `(podman or /usr/bin/docker)` と `hicolor-icon-theme` など。
 
-- podman を消すと distrobox も消える（[podman.md のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
+- podman を消すと distrobox も消える（[Podman のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
 - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり
 
 ### Distrobox / 手順 4: 補足: ボックスは隔離されていない

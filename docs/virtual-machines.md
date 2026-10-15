@@ -252,7 +252,7 @@
    modinfo -F signer vboxdrv
    ```
 
-   - 署名者が `Local kernel module signing key` ならよい（[署名鍵](almalinux-setup.md#secure-boot-の署名鍵)）。旧手順の鍵なら `VirtualBox module signing key`
+   - 署名者が `Local kernel module signing key` ならよい（[署名鍵](almalinux-setup.md#secure-boot-の署名鍵)）
 
 1. 使い捨ての VM を画面無しで起動し、状態を見てから止めて消す。
 
@@ -1625,17 +1625,6 @@
 
    - 画面の無いホストでは `gui` を作らない
    - `>> ready.` が出れば終わり。確認は[kvm-container を導入する](#kvm-container-を導入する)の手順 9
-   - **次の手順は、`>> ready.` が出てから貼る**
-
-1. 旧版で `install-desktop` を実行したときだけ、残ったランチャーを消す。
-
-   ```bash
-   rm -f "${XDG_DATA_HOME:-$HOME/.local/share}"/applications/kvm-{virt-viewer,virt-manager,firefox}.desktop \
-     "${XDG_DATA_HOME:-$HOME/.local/share}"/icons/hicolor/*/apps/{virt-viewer,virt-manager,firefox}.*
-   ```
-
-   - アクティビティからの起動 (`install-desktop` / `launch`) は廃止した。残ったランチャーは、押しても VM の画面が開かない
-   - sudo は要らない
 
 ---
 

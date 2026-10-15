@@ -77,7 +77,7 @@
   - `XDG_CONFIG_HOME` を設定していれば `$XDG_CONFIG_HOME/nvim` になる。別の場所を使うなら `XDG_CONFIG_HOME` か `NVIM_APPNAME` を設定する
 - Windows 11 の設定は `%LOCALAPPDATA%\nvim`（`init.lua`）、プラグイン・undo・ログは `%LOCALAPPDATA%\nvim-data`、キャッシュは `%TEMP%\nvim-data`
 - Windows 11 の場所は[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5 で確かめる
-  - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[理由](reference/neovim.md#neovim-windows-11-では-選択した方針)）
+  - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[理由](reference/neovim.md#windows-11-で-neovim-を入れる)）
 - **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
   - 導入は[Neovim](#neovim)の手順 3
   - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる

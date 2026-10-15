@@ -4,53 +4,29 @@
 
 ## 選択した方針
 
-### 手順書を分ける範囲
-
-- 2026-10-14、利用者の決定で、AI コーディングエージェントの手順を [AlmaLinux 10](../almalinux-setup.md)・[Windows 11](../windows-setup.md) の 2 冊から [ai-agents.md](../ai-agents.md) へ分けた
-  - それまでは、操作を 2 冊へ集約する方針だった（PR #138。[集約時の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/consolidation.md)）
-  - Claude Code・Codex CLI・Grok Build の導入・更新、Remote Control・tmux・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）を対象にした
-  - 両 OS を 1 冊にし、「実施手順」を AlmaLinux 10、「Windows 11 で使う」を Windows 11 の手順にした
-- ロールバックと注意点は [extra/ai-agents.md](../extra/ai-agents.md) へ移した
-- 任意の構成の付属文書は、`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control` の旧名を保ち、手順へのリンク先だけを直した
-- 導入 3 ツールの以前の参考資料と検証記録は移さず、両 OS の文書の「統合前の…」の節に残した
-  - 参考資料は[以前の参考資料の場所](#以前の参考資料の場所)、検証記録は[以前の記録の場所](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#以前の記録の場所)で案内する
-- 分離は文書の移動で、新たな実機検証を意味しない。移した手順の検証範囲は、移す前の各記録のまま
-
-### 見出しと共通の項
-
-- 見出しの名前は保った。2 冊で同名の見出しは、AlmaLinux 10 側を保ち、Windows 11 側に「Windows 11 で」を付けた
-  - 改名は 7 つ。たとえば「Claude Code」は、Windows 11 側を「Windows 11 で Claude Code を入れる」にした
-- 「Grok Build のブラウザ操作: …」は「Codeg: …」へ改めなかった
-  - アンカーの付け替えを最小にし、過去の検証記録の項名と一致させ続けるため。改名は別の変更に回した
-- 同名の「コーディングエージェントの共同作業（任意）」「Grok Build のブラウザ操作（任意）」は、それぞれ 1 つにした
-  - 両 OS 共通の項（ルート証明書、使い方の基本、設定ファイル、分担・レビュー・取り込み）を 1 か所に置けるため
-- AlmaLinux 10 の「更新」は手順 5〜9 だけを移し、新しい本の[更新](../ai-agents.md#更新)の手順 1〜5 にした
-- AI エージェントの状態で分岐する手順は、節の手順番号と検証記録を保つため、2 冊に残した
-  - windows-setup.md の「リモートから再起動する手段を増やす」と「Git for Windows・Firefox・WezTerm を上げる」の、Remote Control のタスクの手順
-  - almalinux-setup.md（2026-10-15 からは gnome-remote.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の、仮想モニターのドロップインを外す手順
-- 旧見出しと現在の節の対応は、[集約対応表の追補](../dev/consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)で管理する
+[AI コーディングエージェント](../ai-agents.md)は両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11 の手順を扱う。AI エージェントの状態で分岐する手順は、[Windows 11 のセットアップ](../windows-setup.md)と[GNOME のリモート操作](../gnome-remote.md)で扱う。
 
 ### 長いコードブロックの折りたたみ
 
-- 利用者の決定で、ai-agents.md の長いコードブロックを `<details>` で包んだ。説明と確認の箇条書きが離れるのを避けるため
+- ai-agents.md の長いコードブロックを `<details>` で包む。説明と確認の箇条書きが離れるのを避けるため
   - フェンスを除いて 20 行以上の 18 ブロック（bash 7、PowerShell 11）が対象
   - 20 行以上が全ブロックの上位 1 割ほどで、既存の唯一の前例（[WireGuard の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)の 21 行）とも合うため、しきい値を 20 行にした
   - 変数のブロック、手で打つ `text` のブロック、1 行の説明に「（取り戻せない）」とある手順のブロックは折りたたまない
 - タグは手順の本文と同じ 3 スペース字下げにし、`</summary>` の後と `</details>` の前後に空行を置く
   - 空行を崩すと GitHub がコードを地の文として出し、字下げを崩すと番号付きリストが切れることを、GitHub の Markdown API で確かめて決めた
   - `<summary>` は「貼るコマンド（PowerShell・50 行）」の形にし、言語とフェンスを除いた行数を示す
-  - 2026-10-15 に、利用者の決定で `<summary>` の行だけを 2 スペース深く（5 スペース）した。Neovim の Markdown の整形（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) の `glfm_markdownlint`）が、埋め込んだ HTML をタグの入れ子に合わせて字下げするようになり、その結果に揃えて保存のたびに書き換わらないようにするため
+  - `<summary>` の行は 2 スペース深く（5 スペース）する。Neovim の Markdown の整形（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) の `glfm_markdownlint`）が、埋め込んだ HTML をタグの入れ子に合わせて字下げするため、その結果に揃える
   - `<summary>` は `<details>` と同じ HTML のブロックの中の行なので、字下げを変えても GitHub の描画は変わらない（前後の描画を GitHub の Markdown API で比べた。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-summary-の字下げを変えたときの描画の比べ2026-10-15)）
 - GitHub の Web での開閉とコードブロックは[公式の説明](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)を参照した
-  - 今回の描画の確認と、モバイルアプリなどの未確認範囲は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-ai-エージェントの手順を分けたときの静的な確認2026-10-14)に分ける
+  - 描画の確認と、モバイルアプリなどの未確認範囲は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-構文描画と-web-の一次情報の確認2026-10-14)にある
 
 ### スクリーンショットと Windows 11 の Codeg
 
-- 利用者の決定で、手順書にスクリーンショットを貼ることにした
+- 手順書には、操作する場所と成功条件を示すスクリーンショットを貼る
   - コマンドの無い手順の最後の箇条書き（「次の手順は、〜してから貼る」があれば、その直前）に 1 枚までとし、押す場所や成功の表示を示す
   - 本当のユーザー名・ホスト名・IP、入力済みの認証欄、証明書の画面は載せない
   - 撮影した環境と対象の版を節のリードに書き、画面内の値が試験用であることを断る
-- Windows 11 の Codeg は、ランダムなトークンをブラウザへ入れずに、共通パスワードで使い始められるよう、分岐の箇条書きを 4 つ足した。コマンドは変えていない
+- Windows 11 の Codeg は、ランダムなトークンをブラウザへ入れずに、共通パスワードで使い始められるようにする
   - Codeg の標準の認証に、トークンと別のパスワード専用設定があるという意味ではない（[Grok Build の調査](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#grok-build-の調査)）
 
 ### Windows 11 の Antigravity CLI
@@ -58,13 +34,13 @@
 - Windows 11 では、Google 公式の [PowerShell のインストーラー](https://antigravity.google/cli/install.ps1)で Antigravity CLI（`agy`）を入れる
   - WinGet・npm には無いので、公式の配布物を公式のインストーラーで入れる形にした
 - Gemini CLI は、2026-06-18 に個人アカウントへの提供を終え、Antigravity CLI が後継になった
-- Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする。AlmaLinux 10 は、同じ日に後から足した（[AlmaLinux 10 の Antigravity CLI](#almalinux-10-の-antigravity-cli)）
+- Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする。AlmaLinux 10 でも使える（[AlmaLinux 10 の Antigravity CLI](#almalinux-10-の-antigravity-cli)）
 - 更新はバックグラウンドの自動更新と `agy update` を使う。公式インストーラーは、既に入っていれば入れ直さず、自動更新を案内する
 - Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](grok-build-remote.md)で分けて扱う
 
 ### AlmaLinux 10 の Antigravity CLI
 
-- 2026-10-15、利用者の依頼で、AlmaLinux 10 の PC（Raspberry Pi 5 の実機）にも Antigravity CLI を入れ、[Antigravity CLI](../ai-agents.md#antigravity-cli)の項を足した。それまでは Windows 11 だけを対象にしていた
+- AlmaLinux 10 でも [Antigravity CLI](../ai-agents.md#antigravity-cli)を使う
 - Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新は `agy update` を使う
   - インストーラーの案内では、バックグラウンドでも自分で上がる。AlmaLinux 10 で確かめたのは、新しい版が無いときの `agy update` だけ（自動の更新と、新しい版への `agy update` は確かめていない）
 - インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
@@ -74,7 +50,7 @@
 
 ### Windows 11 の Antigravity アプリの Remote Control
 
-- 2026-10-15、利用者の決定で、Windows 11 ではデスクトップアプリの [Remote Control](../ai-agents.md#antigravity-アプリの-remote-control任意) を使うことにした。Antigravity CLI は前提にしない
+- Windows 11 ではデスクトップアプリの [Remote Control](../ai-agents.md#antigravity-アプリの-remote-control任意) を使う。Antigravity CLI は前提にしない
 - 公式文書には、CLI の常駐デーモン（`agy remote-control start`）という別の方法もある。この PC では登録しておらず、使っていない
   - アプリは動いている間だけ接続できる。CLI のデーモンは、公式文書で説明されている常駐する別の入口
   - 共有の `%USERPROFILE%\.gemini\config\config.json` でも、アプリの名前は `userSettings.remoteControlHostname`、CLI のデーモンの名前は `cliRemoteControlHostname` と、別のキーを使う
@@ -166,19 +142,13 @@
 - 公式文書では、ブラウザはアプリと同じ Google アカウントでサインインする。`Remote control is not enabled for your account.` は、アカウントや組織で機能が有効でないときの表示として説明されている
 - モバイルでは Web アプリをホーム画面へ追加すると、エージェントの完了時と入力待ちにプッシュ通知を受け取れると公式文書にある。スマートフォンでのアクセス、ホーム画面への追加、プッシュ通知は実機で確かめていない
 
-## 以前の参考資料の場所
+## 導入の参考資料
 
-導入の参考資料は、両 OS の文書の「統合前の参考資料」の節に残してある。任意の構成の参考資料は、旧名のファイルを使う。
-
-| 対象 | 参考資料 |
-| --- | --- |
-| Claude Code の導入 | [AlmaLinux 10 の統合前の参考資料](almalinux-setup.md#統合前の参考資料-claude-codeもとは-claude-codemd)・[Windows 11 の統合前の参考資料](windows-setup.md#統合前の参考資料-claude-code-の-windows-11もとは-claude-codemd) |
-| Codex CLI の導入 | [AlmaLinux 10 の統合前の参考資料](almalinux-setup.md#統合前の参考資料-codex-cliもとは-codexmd)・[Windows 11 の統合前の参考資料](windows-setup.md#統合前の参考資料-codex-cli-の-windows-11もとは-codexmd) |
-| Grok Build の導入 | [AlmaLinux 10 の統合前の参考資料](almalinux-setup.md#統合前の参考資料-grok-buildもとは-grok-buildmd)・[Windows 11 の統合前の参考資料](windows-setup.md#統合前の参考資料-grok-build-の-windows-11もとは-grok-buildmd) |
-| コーディングエージェントの共同作業 | [coding-agents.md](coding-agents.md) |
-| Grok Build のブラウザ操作（Codeg） | [grok-build-remote.md](grok-build-remote.md) |
-| Claude Code の GNOME 操作 | [claude-code-gui.md](claude-code-gui.md) |
-| Windows 11 の Claude Code の Remote Control | [windows-claude-remote-control.md](windows-claude-remote-control.md) |
+| 対象 | AlmaLinux 10 | Windows 11 |
+| --- | --- | --- |
+| Claude Code | [Claude Code](almalinux-setup.md#claude-code) | [Windows 11 で Claude Code を入れる](windows-setup.md#windows-11-で-claude-code-を入れる--手順-2-補足-確かめていることとgit-for-windows-の役割) |
+| Codex CLI | [Codex CLI](almalinux-setup.md#codex-cli) | [Windows 11 で Codex CLI を入れる](windows-setup.md#windows-11-で-codex-cli-を入れる--手順-2-補足-置き場所と-powershell-の設定) |
+| Grok Build | [Grok Build](almalinux-setup.md#grok-build) | [Windows 11 で Grok Build を入れる](windows-setup.md#windows-11-で-grok-build-を入れる--手順-2-補足-インストーラーの動き) |
 
 ## 参照
 

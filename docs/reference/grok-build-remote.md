@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
+# Grok Build のブラウザ操作の参考資料
 
 [AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)
 
@@ -59,7 +59,7 @@
 - AlmaLinux 10 は、[共通の Caddy](../almalinux-setup.md#caddy)に `sites/codeg.caddy` を足す。本体の入手・共通設定・サービス・指紋の照合は [Caddy の参考資料](caddy.md)にまとめる
 - `bind` は、待ち受ける IP を限定する。`tls internal` はホスト共通の認証局でその IP 用の証明書を作る。`import root-crt` は共通の `root.crt` を配る
 - `handle` の `reverse_proxy 127.0.0.1:3080` は残りの通信を Codeg に渡す。WebSocket も通る
-- Windows 11 は専用の本体・Caddyfile・タスクの構成を保つ。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
+- Windows 11 は専用の本体・Caddyfile・タスクを使う。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
 
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
@@ -71,7 +71,7 @@
 ### 端末にルート証明書を入れる / 指紋の照合
 
 - [Caddy の参考資料](caddy.md#caddy-端末にルート証明書を入れる--指紋の照合)を参照する。AlmaLinux 10 は Forgejo などと同じ認証局を共有し、同じホストのために取り込み済みの端末には入れ直さない
-- Windows 11 の認証局は従来どおり Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
+- Windows 11 の認証局は Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
 
 ### 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
@@ -96,7 +96,7 @@
 - サイトのアドレスを `https://:3443` にして `bind` を書かないと、Caddy は、すべてのアドレスの 3443 番で待ち受ける
 - `tls internal` の `on_demand` は、TLS の接続が来たときに、その宛先の証明書を作る指定。IP アドレスで開いた接続は名前（SNI）を持たず、Caddy は、接続を受けたローカルの IP 宛ての証明書を作った
 - 認証局は変わらない。端末のルート証明書は、PC の IP が変わっても入れ直さない
-- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。Windows の新構成では送信元を制限せず、受信インターフェースの Private という条件だけで公開するので、その接続へ届く端末は任意の名前の証明書を要求できる
+- Caddy は、起動のときに `on-demand TLS is enabled, but no protections are in place` の警告を出す。証明書を作ってよい名前を尋ねる先（`ask`）を置いていないため。Windows では送信元を制限せず、受信インターフェースの Private という条件だけで公開するので、その接続へ届く端末は任意の名前の証明書を要求できる
 - AlmaLinux 10 のサーバーは IP が固定なので、IP 宛てのサイトと `bind` のままにしてある
 
 ### Windows 11 で使う / Windows 11 で Codeg のサーバーを入れて起動する / 手順 1: 補足: MSIX からの配置
@@ -111,8 +111,6 @@
 - `-Profile Private`・`-RemoteAddress Any`・`-InterfaceType Any` で、ホスト側の受信インターフェースが Private なら、IPv4・IPv6 の全送信元、有線 LAN・Wi-Fi・VPN を含む全接続種別を通す。PC の IP が変わるので、宛先 IP は絞らない。`-EdgeTraversalPolicy Block` で Edge Traversal は許可しない
 - `Block` の 1 本は、Public・Domain のネットワークを、`caddy.exe` 宛てに遮断する。Windows のファイアウォールでは、遮断の規則が許可の規則より優先する
 - どのネットワークにいても `caddy.exe` 宛ての規則がある状態にして、Caddy が待ち受けを始めたときに Windows が許可を尋ねる画面を出さないようにする狙いもある（パブリックのネットワークで Caddy を起動しての確認は、していない）
-- 既存構成の切り替えでは、規則とフィルターを XML に控える。Public・Domain の遮断を固定し、Allow を Private に限定してから、送信元と接続種別を Any にする。読み戻しがすべて一致したことを確かめ、別の手順で旧 `codeg-caddy-block-wifi` だけを消す。控えの XML は読み戻し用で、`Import-Clixml` は規則を復元しない
-- 既存の Public・Domain 遮断規則は、手順書由来の全プロトコル・全ポートの規則だけを扱う。`Protocol`・`LocalPort`・`RemotePort` がすべて `Any` であることを変更前に確認し、異なる条件なら中断する。設定時は `Protocol Any` を指定し、ポートの条件は変更しない
 - URL の表示は、接続中の Private のプロファイルに対応する InterfaceIndex から、有効な IPv4 を拾う。接続名を添え、loopback・link-local・SkipAsSource のアドレスは出さない。物理アダプターだけには絞らない
 - Private の URL に接続できた結果は、その受信インターフェースの許可を示す。Public・Domain の遮断は、それぞれの受信インターフェースと現在の IP、接続経路、サーバーの稼働を別に確認して試す。タイムアウトだけでは遮断の確認にならない
 - VPN のクライアントの通信は、WG ホストが LAN へ転送する。PC から見た送信元は、クライアントの VPN のアドレスだった
@@ -306,7 +304,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 認証局はホストごとに別で、AlmaLinux 10 は Forgejo などと共有する。端末に入れるルート証明書は同じホストに 1 つ。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
+- 両 OS の操作は AI エージェントの手順書の OS 別の項で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
 
 ## 参照
 

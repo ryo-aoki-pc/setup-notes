@@ -1,4 +1,4 @@
-# Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）の参考資料
+# Claude Code の GNOME 操作の参考資料
 
 [手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)・[ロールバックと注意点](../extra/claude-code-gui.md)
 
@@ -71,7 +71,6 @@
   - Mutter の ScreenCast と RemoteDesktop は、gnome-remote-desktop や xdg-desktop-portal-gnome が使う口。使っている間は、上部バーに画面共有の表示が出る
 - **仮想モニターを gnome-shell のオプションで付ける**: ヘッドレスのセッションには、RDP のクライアントがつないでいる間しかモニターが無い。常に 1 枚あれば、いつでも撮れ、窓の位置も変わらない
 - **人が同じ画面を見るときは、Claude Code が撮った画面を送る**: RDP（gnome-headless-session.md）でつなぐと、Claude Code が見ている仮想モニターとは別のモニターが足され、同じ画面は写らなかった（[注意点](../extra/claude-code-gui.md#注意点)）
-- **ヘッドレスのセッションの手順書から分けた**: もとはひとつの手順書だった。利用者の依頼で、セッションの動かし方と RDP でつなぐところを [GNOME のヘッドレスセッション](../gnome-remote.md#gnome-のヘッドレスセッション) に残し、Claude Code にかかわるところをこの手順書にした
 
 ### 参照
 

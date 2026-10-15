@@ -1,4 +1,4 @@
-# Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）のロールバックと注意点
+# Claude Code の GNOME 操作のロールバックと注意点
 
 [手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
 
@@ -8,7 +8,7 @@
 ## ロールバック
 
 - この手順書で足したもの（ドロップイン）だけを戻す。ヘッドレスのセッションは、仮想モニターの無い形で動き続ける
-- セッションも止めるなら、続けて [gnome-headless-session.md のロールバック](gnome-headless-session.md#ロールバック)
+- セッションも止めるなら、続けて [GNOME のヘッドレスセッション のロールバック](gnome-headless-session.md#ロールバック)
 - ヘッドレスのセッションをやめてリモートログインだけにするなら、この節ではなく [GNOME のヘッドレスセッションの「リモートログインだけにする（併用をやめる）」](../gnome-remote.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)（この節の手順 2 はヘッドレスのセッションを起動し直すため）
 - 手順 1 の変数は要らない。Claude Code が動くユーザーのシェルで、上から順に貼る
 

@@ -1,4 +1,4 @@
-# lazydocker インストール手順（AlmaLinux 10 / Homebrew）のロールバックと注意点
+# lazydocker のロールバックと注意点
 
 [手順書](../almalinux-setup.md#lazydocker)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](../reference/lazydocker.md)
 
@@ -8,7 +8,7 @@
 
 - 上から順に実行する
 - [root でも使う](../almalinux-setup.md#lazydocker-root-でも使う)の節を通したなら、先にその節の手順 6〜8 で戻す（この節の手順 3 で、root の lazydocker も消える）
-- `DOCKER_HOST` の行と API ソケットは、ほかのツールも使うので残す。消すなら [podman.md のロールバック](podman.md#ロールバック)の手順 2・3
+- `DOCKER_HOST` の行と API ソケットは、ほかのツールも使うので残す。消すなら [Podman のロールバック](podman.md#ロールバック)の手順 2・3
 - compose の任意節で使った `~/compose-sample` は、[podman-compose のロールバック](podman-compose.md#ロールバック)で消す
 
 1. 確認用のコンテナを消す。
@@ -25,7 +25,7 @@
    podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
    ```
 
-   - 同じイメージを使うもの: [podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する)、[podman-compose](../almalinux-setup.md#podman-compose)、[podman-tui](../almalinux-setup.md#podman-tui)
+   - 同じイメージを使うもの: [Podman: Quadlet で自動起動する](../almalinux-setup.md#podman-quadlet-で自動起動する)、[podman-compose](../almalinux-setup.md#podman-compose)、[podman-tui](../almalinux-setup.md#podman-tui)
    - 使っているコンテナが残っていると、消せずにエラーになる
 
 1. lazydocker を消す。

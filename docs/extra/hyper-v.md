@@ -1,4 +1,4 @@
-# Hyper-V の有効化と VM の作成（Windows 11 Pro）のロールバックと注意点
+# Hyper-V のロールバックと注意点
 
 [手順書](../virtual-machines.md#hyper-v)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](../reference/hyper-v.md)
 

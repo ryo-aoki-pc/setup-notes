@@ -254,7 +254,6 @@
 - 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 9 だけは、つなぐ側の別のマシン
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
 - **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
-- `smb3 directory leases` が無い設定済みのサーバーは、[リースを切る手順](#samba-サーバー-設定済みのサーバーでディレクトリのリースを切る)で 1 行だけ足す
 - この項の手順 1 で変数を設定したシェルに貼る
 - この項の後に行う項:
   - root のホーム（`/root`）も公開するなら、[root のホームも公開する](#samba-サーバー-root-のホームも公開する)を行う
@@ -717,58 +716,6 @@
    sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
    fi
    ```
-
-#### Samba サーバー: 設定済みのサーバーでディレクトリのリースを切る
-
-- サーバーで、設定済みの smb.conf の `[global]` に `smb3 directory leases = no` の 1 行だけを足す（理由は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
-- 前提: [Samba サーバー](#samba-サーバー)を、この 1 行が入る前の手順で通してある
-- 実行場所: サーバーの bash（デスクトップの端末か SSH）。変数を使わないので、どのユーザーのシェルで貼ってもよい
-- **smb.conf に `smb3 directory leases` の行が無いサーバーだけ**。今の[Samba サーバー](#samba-サーバー)の手順 3 には、この 1 行が入っている
-- [Samba サーバー](#samba-サーバー)の手順 3 は貼り直さない
-- **この項の手順 2 で smb.service を再起動すると、つないでいるクライアントの接続が一度切れる**
-
-1. smb.conf の `[global]` に 1 行を足し、構文を検査する。
-
-   ```bash
-   if grep -qiE '^[[:space:]]*smb3[[:space:]]+directory[[:space:]]+leases' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に smb3 directory leases の行が既にある' >&2
-   elif ! grep -q '^\[global\]$' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [global] の行が無い' >&2
-   else
-     sudo sed -i '/^\[global\]$/a\    smb3 directory leases = no' /etc/samba/smb.conf
-     printf '\n\033[7m 確認 \033[0m\n'
-     testparm -s 2>/dev/null | grep 'smb3 directory leases'
-   fi
-   ```
-
-   - `smb3 directory leases = No` の 1 行が出ればよい
-   - `中断:` と出たら、何も書き換えていない
-   - `… 既にある` で止まったら、その行が `smb3 directory leases = no` かを見る。`no` なら、この項の手順 2 へ進む
-
-1. smb.service を再起動する。
-
-   ```bash
-   {
-     sudo systemctl restart smb.service
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl is-active smb.service              # active
-   }
-   ```
-
-   - `active` と出ればよい
-
-1. 元に戻すときは、足した行を消して smb.service を再起動する。
-
-   ```bash
-   {
-     sudo sed -i '/^[[:space:]]*smb3 directory leases = no$/d' /etc/samba/smb.conf
-     sudo systemctl restart smb.service
-     printf '\n\033[7m 確認 \033[0m\n'
-     testparm -s 2>/dev/null | grep -c 'smb3 directory leases'   # 0
-   }
-   ```
-
-   - 最後に `0` と出ればよい
-   - 今の[Samba サーバー](#samba-サーバー)の手順 3 で置いた smb.conf の行も消える
-   - 再起動すると、つないでいるクライアントの接続が一度切れる
 
 ---
 

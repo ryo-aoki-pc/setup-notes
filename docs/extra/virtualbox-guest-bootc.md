@@ -1,4 +1,4 @@
-# VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）のロールバックと注意点
+# VirtualBox の bootc ゲストのロールバックと注意点
 
 [手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](../reference/virtualbox-guest-bootc.md)
 
@@ -12,7 +12,7 @@
   - 更新を重ねた後は、1 つ前の派生イメージに戻る
   - 切り替えた直後なら元のイメージに戻る。もう一度 `sudo bootc rollback` すると派生イメージに戻る
 - この節の手順では消えないもの:
-  - **Secure Boot の MOK**（前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵)、または[ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 で登録した場合）: 要らなければ、この節の後に [secure-boot-mok.md のロールバック](secure-boot-mok.md#ロールバック)で消す
+  - **Secure Boot の MOK**（前提の [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵)、または[ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 で登録した場合）: 要らなければ、この節の後に [Secure Boot の署名鍵 のロールバック](secure-boot-mok.md#ロールバック)で消す
     - ホストオンリーアダプターだけの VM でビルドする項で鍵をホストで作ったときは、VM の MOK を消した後に、ホストの端末で `rm -rf ~/vbox-ga-mok`（秘密鍵。取り戻せない。同じ鍵を使うほかの VM が無いときだけ）
 
 1. 元のイメージに切り替えて、再起動する。
@@ -79,8 +79,8 @@
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 3](../virtual-machines.md#virtualbox-の-bootc-ゲスト) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
-- **Secure Boot では鍵の登録が要る**: 前提の [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵) で登録する（MokManager の最初の画面は 10 秒で消え、逃すと登録されない）。鍵を作り直したら `--no-cache` でビルドし直す（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
+- **Secure Boot では鍵の登録が要る**: 前提の [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で登録する（MokManager の最初の画面は 10 秒で消え、逃すと登録されない）。鍵を作り直したら `--no-cache` でビルドし直す（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
 - **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから手順 5 を貼る（[手順 4](../virtual-machines.md#virtualbox-の-bootc-ゲスト)）
 - **元のイメージに戻すときは、`--enforce-container-sigpolicy` を付けない**: Atomic Desktop の `policy.json` の既定では断られる。付けなくても署名は確かめられる（[ロールバック](#ロールバック)の手順 1 の補足）
 - **アンインストーラは使えない**: 戻すときはイメージを切り替える（[ロールバック](#ロールバック)）
-- **ホスト側の手順書は別**: VirtualBox 本体は [virtualbox.md](../virtual-machines.md#virtualbox)。ホスト側でモジュールを署名する鍵（同じ `/var/lib/shim-signed/mok/` の置き場所。どちらも [secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵) で作る）は、ホストの PC のもので、VM の鍵とは別物
+- **ホスト側の手順書は別**: VirtualBox 本体は [VirtualBox](../virtual-machines.md#virtualbox)。ホスト側でモジュールを署名する鍵（同じ `/var/lib/shim-signed/mok/` の置き場所。どちらも [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で作る）は、ホストの PC のもので、VM の鍵とは別物

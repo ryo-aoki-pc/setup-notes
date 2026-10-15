@@ -32,7 +32,7 @@
 > - 後からリモートログインを有効にする場合は[注意点](extra/gnome-desktop-sharing.md#注意点)を参照する
 
 - 変数のある項は、その項の手順 1 で変数を設定したシェルに貼る
-- 現行版と以前の版の環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
+- 環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
 
 > [!WARNING]
 > - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める項で、ロックもしない）
@@ -1108,7 +1108,7 @@
 - **この項の手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)。この項と同じ PC で併用できる（ポートは 3390）
-- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。現行版・以前の版の実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
+- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
   - デスクトップ共有を 3389 で使っている PC では、この項の後に、デスクトップ共有の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 > [!IMPORTANT]
@@ -1210,8 +1210,7 @@
 1. 資格情報を反映させるため、デーモンを起動し直す。
 
    - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
-   - [設定済みのサーバーで GDM の後に起動させる](#gnome-のリモートログイン-設定済みのサーバーで-gdm-の後に起動させる)の手順 3 を行う。ヘッドレスのセッションがある PC では、続けて同じ項の手順 4 も行う
-   - その項の手順 1・2・5 は行わない
+   - [デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 を行う。ヘッドレスのセッションがある PC では、続けて同じ項の手順 2 も行う
    - **次の手順は、デーモンと必要な受け渡し役の起動し直しが終わってから貼る**
 
 1. サーバー側の状態を確かめる。
@@ -1313,40 +1312,12 @@
    fi
    ```
 
-#### GNOME のリモートログイン: 設定済みのサーバーで GDM の後に起動させる
+#### GNOME のリモートログイン: デーモンを起動し直す
 
-- 設定済みのサーバーで、リモートログインのデーモンを GDM の後に起動させ、起動のときに GDM とすれ違ったデーモンを起動し直す
-- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)で設定してある
-- 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 4 は、ヘッドレスのセッションを使うユーザーのシェルで行う
-- ドロップインが効くのは次の起動から。今のデーモンが起動のときに GDM とすれ違っていたら、この項の手順 3 でデーモンを起動し直すと直る（理由は[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 5 の補足）
-- 資格情報や証明書を変更した後も、この項の手順 3 と、ヘッドレスのセッションがある場合は手順 4 を使う。その場合、この項の手順 1・2・5 は行わない
-- **この項の手順 3・4 は、リモートログインでつないでいる利用者がいないときに行う**（ヘッドレスのセッションに入った RDP の接続は、手順 4 で再起動する受け渡し役のデーモンが持っている）
-
-1. 起動の順番を GDM の後にするドロップインを置く。
-
-   ```bash
-   {
-     sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
-     sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
-   [Unit]
-   After=gdm.service
-   CONF
-     sudo systemctl daemon-reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl show gnome-remote-desktop.service -p After | grep -ow 'gdm\.service'
-   }
-   ```
-
-   - `gdm.service` と出ればよい
-
-1. 今のデーモンが、起動のときに GDM とすれ違ったかを確かめる。
-
-   ```bash
-   sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -c 'Error calling GetManagedObjects'
-   ```
-
-   - `1` なら、すれ違っている。この項の手順 3 へ進む
-   - `0` なら、起動時のすれ違いを直すためのこの項の手順 3・4 は飛ばす（資格情報や証明書を変更した後は、`0` でも行う）
+- 資格情報や証明書を変更した後に、リモートログインのデーモンと、必要な受け渡し役のデーモンを起動し直す
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)でサービスを有効にしてある
+- 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 2 は、ヘッドレスのセッションを使うユーザーのシェルで行う
+- **この項の手順 1・2 は、リモートログインでつないでいる利用者がいないときに行う**（ヘッドレスのセッションに入った RDP の接続は、手順 2 で再起動する受け渡し役のデーモンが持っている）
 
 1. デーモンを起動し直す必要があるときは、止めて待ってから起動する。
 
@@ -1377,19 +1348,5 @@
 
    - `RDP server started` と出ればよい
    - ヘッドレスのセッションは [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション) のもの。無い PC では、この手順は飛ばす
-
-1. 元に戻すときは、ドロップインを消して読み込ませる。
-
-   ```bash
-   {
-     sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
-     sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
-     sudo systemctl daemon-reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl show gnome-remote-desktop.service -p After | grep -cw 'gdm\.service'   # 0
-   }
-   ```
-
-   - 最後に `0` と出ればよい
 
 ---

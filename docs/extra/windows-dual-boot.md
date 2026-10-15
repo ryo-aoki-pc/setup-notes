@@ -1,4 +1,4 @@
-# Windows 11 を AlmaLinux 10 とのデュアルブート向けに入れる手順（ESP を 2 GiB にし、AlmaLinux 用の空きを残す）の注意点
+# Windows と AlmaLinux のデュアルブートの注意点
 
 [手順書](../windows-setup.md#windows-と-almalinux-のデュアルブート)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](../reference/windows-dual-boot.md)
 

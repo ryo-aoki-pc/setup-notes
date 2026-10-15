@@ -1,4 +1,4 @@
-# Windows 11 のリモートデスクトップを、画面をロックせずに切断する手順（tscon）の参考資料
+# RDP をロックせずに切断の参考資料
 
 [手順書](../windows-setup.md#rdp-をロックせずに切断)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
 
@@ -35,7 +35,7 @@
 
 ### ショートカットで切断する / 手順 2: 補足: ショートカットの作り
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#ショートカットで切断する任意--手順-1-補足-ショートカットの作り)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md#ショートカットで切断する--手順-1-補足-ショートカットの作り)
 
 - 動かすのは `powershell.exe -NoProfile -WindowStyle Hidden -Command "tscon.exe (Get-Process -Id $PID).SessionId /dest:console"`。手順 3 と同じコマンドを、隠した窓で動かす
 - `Arguments` は単一引用符で囲み、`$PID` を、ショートカットを作る PowerShell ではなく、ショートカットが起動する PowerShell に読ませる

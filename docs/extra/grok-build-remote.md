@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）のロールバックと注意点
+# Grok Build のブラウザ操作のロールバックと注意点
 
 [AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
@@ -132,15 +132,15 @@
 
    ```powershell
    $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-   Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue |
+   Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' -ErrorAction SilentlyContinue |
      Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe } |
      Remove-NetFirewallRule
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Name 'codeg-caddy-*' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
+   Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' -ErrorAction SilentlyContinue | Format-Table Name, Enabled
    ```
 
    - 「Windows 11 で HTTPS で LAN・VPN に公開する」の手順 3 を通していなければ、この手順は飛ばす
-   - 新構成の 2 本と、旧構成の Wi-Fi 遮断規則が残っている場合はその 1 本だけを消す。ほかのプログラムの規則は変更しない
+   - この手順で作る 2 本だけを消す。ほかのプログラムの規則は変更しない
    - 何も出なければよい
 
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
@@ -377,16 +377,16 @@
 #### Windows 11
 
 - SSH でログインしたシェルから Codeg を始めない。Administrators の一員の SSH のセッションは管理者の権限を持つ
-- ランチャーのソース・実行ファイル・タスクの XML の控えは、`%LOCALAPPDATA%\codeg-server` の中にある。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 3 で、このフォルダーとともに消す
+- ランチャーのソース・実行ファイルは、`%LOCALAPPDATA%\codeg-server` の中にある。[Windows 11 のロールバック](#windows-11-のロールバック)の手順 3 で、このフォルダーとともに消す
 - Caddy の起動用 `start-caddy-hidden.ps1` は、`%LOCALAPPDATA%\codeg-caddy` の中にある
-- 非表示起動のランチャーに切り替えた後の、OS 再起動・サインアウト後の動作は未確認
+- 非表示起動のランチャーを使った OS 再起動・サインアウト後の動作は未確認
 - タスクは、サインインしている間だけ動く設定（`-LogonType Interactive`）。再起動した後も、本人のサインインが必要。再起動・サインアウト後の実測は、検証記録の対象・実施日ごとの範囲を参照する
 - Caddy は、待ち受ける IP を決めずに、この PC のすべてのアドレスで待ち受ける。受信インターフェースが Private なら、IPv4・IPv6 の全送信元・全接続種別で 3443/tcp に届く。有線 LAN・Wi-Fi・VPN を区別しない
 - LAN には有線 LAN と Wi-Fi が含まれる。VPN からの通信も、ホスト側で実際に受信するインターフェースが Private であることが必要
 - 信頼する接続だけを Private にする。公衆 Wi-Fi などほかの接続は Public のままにし、Codeg に届かせるために Private へ変えない
 - Public・Domain の受信インターフェースは遮断する。Private にした接続に到達できる端末はすべて、ログインの画面と公開のルート証明書まで届く。Edge Traversal は許可しない
 - PC の IP が変わると、つなぐ URL が変わる。ブラウザは別のサイトとして扱うので、トークンを入れ直す
-- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。Windows の新構成は送信元を制限しないので、Private にした接続へ届く端末はすべてこの機能を利用できる
+- 接続できる端末は、Caddy に、任意の名前の証明書を作らせられる（`on_demand`。Caddy は起動のときに警告を出す）。Windows は送信元を制限しないので、Private にした接続へ届く端末はすべてこの機能を利用できる
 - 受信の規則より先に Caddy を起動しない。Windows が許可を尋ねる画面を出す
 - タスク スケジューラの「失敗時の再起動」は使っていない。終了コードが 0 でないだけのタスクは、再起動されなかった
 

@@ -1,8 +1,6 @@
-# Forgejo 構築手順（AlmaLinux 10 / rootless Podman + Quadlet / LAN・VPN 内で使う）の参考資料
+# Forgejo の参考資料
 
 [AlmaLinux 10 の「Forgejo」](../forgejo.md#forgejo)・[ロールバック](../extra/forgejo.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)
-
-集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
@@ -32,7 +30,7 @@
 ### LAN に公開する / 手順 3〜8: 補足: Web と SSH の公開
 
 - Web の `PublishPort` は `127.0.0.1:<Web ポート>:3000` のままにし、共通の Caddy が `<SERVER_IP>:<Web ポート>` の HTTPS で受ける。Git 用 SSH だけを LAN の IPv4 に切り替える
-- SSH トンネルの転送先は公開後も残る。`ROOT_URL` は HTTPS の公開 URL になるため、通常はそちらで開く。旧 HTTP 手順で出た `Connection refused` の記録は、その時点の検証記録に保持する
+- SSH トンネルの転送先は公開後も残る。`ROOT_URL` は HTTPS の公開 URL になるため、通常はそちらで開く
 - Caddy のサイトは `bind` を明記し、Podman の localhost と同じポートを全アドレスで取り合わない。`/caddy-root.crt` はホスト共通のルート証明書を配り、残りを `reverse_proxy 127.0.0.1:<Web ポート>` で渡す
 
 ### 自動更新を有効にする / 手順 1: 補足: 貼り直したとき
@@ -147,7 +145,7 @@
 - 時刻は毎日 4:00 から 30 分の間。`Persistent=true` は付けない。止めていた PC を起動した直後（昼間）に更新が走るのと、ユーザーのユニットからシステムの `network-online.target` を待てないため
 - サービスの `PATH` は `/usr/bin` に固定する（GNOME のセッションから Homebrew の `PATH` を受け取らないため）。`TimeoutStartSec=2h` で、止まったままの実行が次の実行を塞ぎ続けないようにする
 - 実行経路によっては通常の `systemctl --user` がユーザーの bus へ接続できない。自動更新は失敗の stderr に `Failed to connect to user scope bus` があるときだけ、現在の UID に対応するユーザーの `--machine=<ユーザー>@.host` を付けて再試行する。最終結果には従来と同じ終了コード検査を行い、unit 自体の失敗では再試行しない
-- 自動更新の `endpoints()` の正規表現は `127.0.0.1` にも一致する。`check()` は `http://127.0.0.1:<Web ポート>/api/healthz` を直接見るので、Caddy と TLS の状態は確認しない。自動更新のスクリプトは HTTPS 化で変更しない
+- 自動更新の `endpoints()` の正規表現は `127.0.0.1` にも一致する。`check()` は `http://127.0.0.1:<Web ポート>/api/healthz` を直接見るので、Caddy と TLS の状態は確認しない
 - `/api/healthz` は、`REQUIRE_SIGNIN_VIEW=true` でもログイン無しで `pass` を返す（2026-10-10 に確認。検証記録）。プロキシの環境変数があっても、確認の通信はプロキシを通さない
 - 古いものの整理
   - 自動更新のアーカイブ（`forgejo-auto-*`）は新しい 3 つを残し、手動のバックアップには触れない
@@ -170,7 +168,6 @@
 - 検証用コンテナは localhost のランダムポートで待ち受け、専用の internal ネットワークで外向き通信を止める。コピー・コンテナ・ネットワークは確認後に外す。このコピー分の空き容量も必要になる
 - DB の移行を伴う更新後に、旧イメージだけを起動しても元へは戻らない。旧イメージの定義と更新前データをセットで復元する。更新後に受け付けた操作は、更新前バックアップには含まれない
 - 初回作成用の上書きガードと、更新用の置き換えは用途が異なる。既存の導入へ実施手順の「イメージを取得して localhost で起動する」の手順 3 を再実行するのではなく、後ろの更新・復元の節を使う
-- HTTPS 化前のアーカイブには Web を LAN に直接公開する Quadlet が入る。Caddy が同じ番号で待ち受けている状態でそのまま復元すると衝突するため、復元前の検査で中断する。HTTP 公開側で HTTPS へ移して新しいアーカイブを作る
 - Caddy のサイトと共通認証局はアーカイブに含めない。サイトは別に管理し、認証局の鍵は写さない
 - 自動更新のアーカイブも、手動のバックアップと同じ中身なので、復元の節でそのまま使える
 

@@ -1,8 +1,8 @@
-# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim・AI エージェント）の参考資料
+# Windows 11 のセットアップの参考資料
 
 [手順書](../windows-setup.md)・[ロールバックと注意点](../extra/windows-setup.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#補足の実測)
 
 ## 補足
 
@@ -67,7 +67,7 @@
 - `$PROFILE` は、このユーザーの、Windows PowerShell のコンソールのプロファイル（`Microsoft.PowerShell_profile.ps1`）。管理者で開いた窓も、同じユーザーなら同じファイルを読む。PowerShell 7・PowerShell ISE・VS Code は別のファイルを読む（about_Profiles）。OneDrive でドキュメントをバックアップしていると、`OneDrive` の下のパスになる
 - `Get-ExecutionPolicy -List` は、範囲（`MachinePolicy`・`UserPolicy`・`Process`・`CurrentUser`・`LocalMachine`）ごとの実行ポリシー。上の範囲ほど優先される。`MachinePolicy` か `UserPolicy` が `Undefined` でなければ、グループ ポリシーで決まっていて、「貼り付けの設定」の手順 4 では変えられない
 - プロファイルもスクリプト（`.ps1`）なので、実行ポリシーが `Restricted` だと読まれない（Microsoft の about_Execution_Policies。`Restricted` は Windows のクライアントの既定）
-- `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [git.md](../windows-setup.md#git-for-windows) で入れる）
+- `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [Git for Windows](../windows-setup.md#git-for-windows) で入れる）
 - `ProfileExists : False` なら、「貼り付けの設定」の手順 5 で作る
 - `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、「貼り付けの設定」の手順 4 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
 
@@ -90,7 +90,7 @@
   - ユーザーの環境変数 `PATH` の先頭に `~\scoop\shims` を足す。変えたことを Windows 全体に知らせる（`WM_SETTINGCHANGE`）ので、この後にスタートメニューから起動したアプリにも届く
   - 設定のファイル `~\.config\scoop\config.json`
 - git があれば、本体と main のバケットを `git clone` で取る。無ければ zip で取る
-- git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [git.md](../windows-setup.md#git-for-windows) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない。[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)）
+- git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [Git for Windows](../windows-setup.md#git-for-windows) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない。[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)）
 - 管理者で入れる方法（インストーラの `-RunAsAdmin`）は、公式の README が安全のために既定で止めているので、使わない
 
 ### アプリを入れる / 手順 3: 補足: 版
@@ -135,46 +135,18 @@
 - 最後の表の版は、実行した日の最新
 - スタートメニューに「PowerShell 7」ができる
 
-### 表示と入力 / 手順 4: 補足: 貼る順と、Web の結果
+### Git for Windows / 手順 2: 補足: 確かめていること
 
-- 「自動起動と標準アプリ」の手順 3 より前に貼るのは、外したアプリが戻らないようにするため（`SilentInstalledAppsEnabled`）
-- スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、「サインイン・検索・キーボード」の手順 3 で切る
+- Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
+- `bin\bash.exe` は、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)が決め打ちにしている。Claude Code（Windows）の公式の文書も、Git Bash の場所の例にこのパスを挙げる
+- 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
+- `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
+- `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+- `…\AppData\Local\Programs\Git\cmd\git.exe` の Git for Windows を外してから始めるのは、ほかの手順書が `C:\Program Files\Git` を前提にしているため
 
-### 表示と入力 / 手順 5: 補足: ウィジェットのボタン
+### Git for Windows / 手順 3: 補足: UAC
 
-- ウィジェットのボタンは、「自動起動と標準アプリ」の手順 4 でウィジェットを外すと消える（この手順では書けない）
-
-### 表示と入力 / 手順 6: 補足: 値の意味
-
-- `AppsUseLightTheme` はアプリ、`SystemUsesLightTheme` はタスクバー・スタート・通知の色。0 で濃色、1 で淡色（Windows 11 の既定）
-- Microsoft の DSC のリソース（`Microsoft.Windows.Settings`）も同じ 2 つを書き、すぐに効かせるために `WM_SETTINGCHANGE`（`ImmersiveColorSet`）を全部の窓に送る。本書は、「WSL と再起動」の手順 3 で再起動するので送らない
-- 設定の「個人用設定」→「色」から変えると、すぐに効く
-
-### 表示と入力 / 手順 7: 補足: 値と、管理者の窓が conhost になる理由
-
-- 値は、Windows Terminal の文書（グループ ポリシーの「既定のターミナル アプリケーション」）にある GUID。Windows Terminal は `DelegationConsole` が `{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}`、`DelegationTerminal` が `{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}`
-- Windows 11 22H2 以降の既定は「Windows に任せる」（2 つとも `{00000000-0000-0000-0000-000000000000}`）で、Windows Terminal が入っていればそれを使う（Microsoft のサポートの記事）。この手順は、それを Windows Terminal に決める
-- 管理者として起動したコンソールは、既定の端末に引き渡されず、conhost で開く。Windows Terminal の課題（microsoft/terminal の #13392。「管理者のコマンド ラインの受け手として登録できる端末は無く、COM の側の対応が要る」）が開いたまま。管理者の Windows Terminal は、Win+X の「ターミナル (管理者)」で開ける
-- 設定の「システム」→「開発者向け」→「ターミナル」と、Windows Terminal の設定の「スタートアップ」→「既定のターミナル アプリケーション」でも変えられる
-
-### 自動起動と標準アプリ / 手順 2: 補足: タスク マネージャーと同じ所に書く
-
-- タスク マネージャーの「スタートアップ アプリ」と設定の「アプリ」→「スタートアップ」は、`Run` の値を消さずに、`Explorer\StartupApproved\Run` に同じ名前の値（バイナリ）を書く。先頭の 1 バイトが 2 なら起動し、3（と、止めた日時の 8 バイト）なら止める。Microsoft の文書には無いが、広く知られた形（UniGet UI のインストーラも同じ所に書く）
-- OneDrive の値の名前は `OneDrive`、Edge は `MicrosoftEdgeAutoLaunch_<文字列>`。OneDrive は OneDrive の設定の「Windows にサインインしたときに OneDrive を自動的に開始する」でも止められる
-- Teams（新しい Teams。「自動起動と標準アプリ」の手順 3 で外す）はパッケージのアプリで、起動のタスク `TeamsTfwStartupTask` の `State` を 1（「ユーザーが無効にした」）にする。値の意味は Microsoft の文書（`StartupTaskState`）にある
-- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバックの「表示と入力を戻す」](../extra/windows-setup.md#表示と入力を戻す)の手順 8）
-- 初回導入用の `OneDriveSetup` の項目も、残っていれば止める。実行ファイルがある場合は初回インストールも延期される
-- UniGet UI（`WingetUI`）は、更新を知らせるために起動する
-
-### 自動起動と標準アプリ / 手順 3: 補足: 外さないもの
-
-- Copilot（`Microsoft.Copilot`）は外さない。`Microsoft.MicrosoftOfficeHub` はストアの名前が「Microsoft 365 Copilot」になった別のアプリ（Office の入口）
-
-### 自動起動と標準アプリ / 手順 4: 補足: ウィジェットを外すこと
-
-- ウィジェットの本体は、ストアのアプリ「Windows Web Experience Pack」（`MicrosoftWindows.Client.WebExperience`、ストアの ID は `9MSSGKG348SP`）。外すとボタンも消えると広く報告されている（Microsoft の文書には無い）
-- ボタンだけを消す値（`TaskbarDa`）は、PowerShell からは書けない（「表示と入力」の手順 5 の補足）
-- Microsoft が説明している止め方は、管理者のポリシー（「ウィジェットを許可する」）。本書では使わない
+- 管理者の窓から動かすので、UAC の確認も出ないはず
 
 ### PC 全体の設定 / 手順 1: 補足: プロファイルの行
 
@@ -183,7 +155,7 @@
 ### PC 全体の設定 / 手順 2: 補足: 変数について
 
 - `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」と [OpenSSH サーバー](../windows-setup.md#openssh-サーバー) は、同じ式をそれぞれの項の手順 2 で取り直す（2026-10-14 に、項を単独で通すために分けた）
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」と [OpenSSH サーバー](../windows-setup.md#openssh-サーバー) は、同じ式をそれぞれの項の手順 2 で取り直す
 - 接続の一覧は `Get-NetConnectionProfile` で見られる
 
 ### PC 全体の設定 / 手順 3: 補足: 見ているもの
@@ -236,39 +208,6 @@
 - この項目を外すと、Windows がアダプターに「この PC を起こす」を任せる設定（眠りからの Wake on LAN）も使えなくなる（Microsoft の古いサポートの記事）。シャットダウンからの Wake on LAN は UEFI とアダプターが行い、Windows は関わらないので、[Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)はこの手順と両立する
 - 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 6
 
-### ネットワークとリモート / 手順 3: 補足: もとからプライベートのときと、前提にする手順
-
-- 既にプライベートなら、何も変わらない
-- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で-syncthing-を使う)・「ネットワークとリモート」の手順 4〜6 は、この LAN がプライベートであることを前提にする
-
-### ネットワークとリモート / 手順 4: 補足: つなぐときのユーザーと、前提にする手順書
-
-- つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。「サインイン・検索・キーボード」の手順 2 も）
-- [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断)は、この手順を前提にする
-
-### ネットワークとリモート / 手順 5: 補足: リモート アシスタンス
-
-- リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
-- グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
-- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。「PC 全体の設定」の手順 3 の `RemoteAssistance` で、元の値を控える
-- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 3
-
-### ネットワークとリモート / 手順 6: 補足: 自分で規則を作る理由
-
-- Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
-- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で-syncthing-を使う)の規則と同じ形）
-- 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
-- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 2
-- 何度貼ってもよいのは、規則を消してから作り直すため
-
-### ネットワークとリモート / 手順 7: 補足: 配信の最適化
-
-- 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
-- `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
-- `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
-- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 1
-- Windows の既定も `Lan` なので、「PC 全体の設定」の手順 3 で `Lan` だったなら何も変わらない
-
 ### サインイン・検索・キーボード / 手順 2: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
@@ -304,7 +243,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### サインイン・検索・キーボード / 手順 6: 補足: AlmaLinux のインストーラの時計
 
-- AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[windows-dual-boot.md の注意点](../extra/windows-dual-boot.md#注意点)）
+- AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[Windows と AlmaLinux のデュアルブートの注意点](../extra/windows-dual-boot.md#注意点)）
 
 ### サインイン・検索・キーボード / 手順 7: 補足: キーボードの種類の値
 
@@ -322,16 +261,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - VirtualBox は、Hyper-V が動いていると、それを通して VM を動かす（NEM）。仮想マシン プラットフォームを外しても、メモリ整合性などで Hyper-V が動き続けることがある
 - 元に戻すのは[ロールバックの「サインイン・検索・キーボードを戻す」](../extra/windows-setup.md#サインイン検索キーボードを戻す)の手順 8
 
-### 再起動の後に確かめる / 手順 2: 補足: Web の結果が出たとき
-
-- スタートの検索に Web（Bing）の結果が出たら、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)と、「サインイン・検索・キーボード」の手順 3 の補足を見る
-
-### 再起動の後に確かめる / 手順 3: 補足: コマンドで外さない理由
-
-- 自分のユーザーのピン留めを外す、サポートされたコマンドは無い。Microsoft の文書にある方法は、どれもポリシー（`ConfigureStartPins` やタスクバーのレイアウトの XML）か、新しいユーザーにだけかかるファイル
-- タスクバーの設定（`Taskband`）やスタートのファイル（`start2.bin`）を消す方法は、Microsoft の説明が無く、形も決まっていないので採らない
-- Copilot を外さないのは、利用者の選択
-
 ### WSL の AlmaLinux 10 と自動サインイン / 手順 1: 補足: Windows Terminal の中に開く
 
 - 「表示と入力」の手順 7 の後なので、Windows Terminal の中に開く
@@ -344,102 +273,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - `VERSION="10.2 …"` の版は、入れた日のイメージ
 - 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（「WSL の AlmaLinux 10 と自動サインイン」の手順 3 も同じ）
-
-### Wake on LAN を使う / 手順 2: 補足: 式
-
-- [「PC 全体の設定」](../windows-setup.md#pc-全体の設定)の手順 2 の 2 つ目のブロックと同じ式
-
-### Wake on LAN を使う / 手順 3: 補足: シャットダウンからの Wake on LAN
-
-- Microsoft の文書では、Windows 10 以降の既定のシャットダウン（高速スタートアップ）では、Windows はアダプターに起動を任せない。シャットダウン（S5）からの起動は、UEFI とアダプターだけが行い、Windows は関わらない
-- そのため、高速スタートアップを切り（「PC 全体の設定」の手順 7）、UEFI の Wake on LAN（機種によって「Power On By PCI-E」など）を有効にし、アダプターの詳細設定でマジック パケットを受けるようにする
-- `*WakeOnMagicPacket` は、Microsoft の文書の標準の詳細設定の名前（1 で有効）。機種独自の項目（シャットダウンからの起動、リンクでの起動など）は、名前がアダプターごとに違う
-- `-NoRestart` で、アダプターを起動し直さない（効くのは次の再起動から）
-- 眠り（S3・Modern Standby）からの起動は、「PC 全体の設定」の手順 7 で眠らないようにしたので扱わない
-
-### Wake on LAN を使う / 手順 4: 補足: 203 のエラー
-
-- `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある
-
-### ロールバック / アプリと貼り付けの設定を外す / 手順 4: 補足: 先に current の読み取り専用を外す理由
-
-- scoop はアプリを入れるたびに、`~\scoop\apps\<アプリ>\current` を版のフォルダーへのジャンクションにし、読み取り専用の属性を付ける（`lib/install.ps1` の `link_current` の `attrib $currentdir +R /L`）
-- scoop 0.6.0 の `scoop uninstall scoop`（`bin/uninstall.ps1`）は、アプリごとに `unlink_current (appdir $app $global)` を呼ぶ。`unlink_current` は渡されたフォルダーの親の `current` を探すので、`~\scoop\apps\current` を探して何もしない（ふつうの `scoop uninstall <アプリ>` は版のフォルダーを渡すので、読み取り専用を外してから消す）
-- 残った読み取り専用のジャンクションは、続く `Remove-Item -Recurse -Force` で「アクセスが拒否されました」になる。`$errors = $true` は関数の中だけで立つので `Not all apps could be deleted.` は出ず、`~\scoop\apps` を消すところで `Couldn't remove` の `abort` で終わる。後ろの PATH の片付けまで進まないので、ユーザーの PATH の `scoop\shims` は残る
-- `~\scoop\apps` の中は名前の順に消すので、消せないアプリが `scoop` より後ろ（`scoop-search` など）なら、scoop 本体は先に消えている。前（`7zip`・`git` など）なら、scoop 本体は残る
-- 1 行目で `attrib.exe -R /L` を先に当てると、`Remove-Item` がジャンクションを消せて、最後まで進む（2026-10-08 に VM で確かめた。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
-
-### ロールバック / アプリと貼り付けの設定を外す / 手順 6: 補足: 文字コードを変えずに消す
-
-- ファイルをバイトのまま読み、消す行のほかのバイトは変えずに書き戻す
-- 先頭が `FF FE`（UTF-16 LE の BOM）なら UTF-16 LE として、それ以外は 1 バイトを 1 文字にする Latin-1（コードページ 28591）として読み書きする。消す行は ASCII の文字だけなので、UTF-8（BOM の有無によらない）・Shift_JIS のどちらでも同じバイトで見つかる
-- ファイルの 1 行目は BOM の直後にあるので、行の前の BOM を許して探し、BOM は残す
-- 残りが BOM と空白だけなら、ファイルを消す
-- `Get-Content` と `Set-Content` で書き直さないのは、Windows PowerShell 5.1 が BOM の無いファイルを ANSI（日本語の Windows では Shift_JIS）として読み、`Set-Content` が指定しないと ANSI で書くため。BOM の無い UTF-8 の日本語が化ける
-
-### リモートから再起動する手段を増やす / 手順 3: 補足: クラッシュ時の自動再起動
-
-- `HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl` の `AutoReboot` は、カーネルが止まった（ストップ エラー）ときに自動で再起動するかを決める。Windows の既定は 1（有効）で、この手順は確認が主
-- `Win32_OSRecoveryConfiguration` の `AutoReboot` と同じ値。設定の「システムの詳細設定 → 起動と回復」の「自動的に再起動する」に当たる
-- OS が応答するが操作できないとき（アプリのハング・ネットワーク断）には効かない。そちらはこの節の手順 6 の見張りタスクが担う
-
-### リモートから再起動する手段を増やす / 手順 4: 補足: SMB のリモートシャットダウンの仕組み
-
-- `shutdown /m \\<host>`（Windows）も `net rpc shutdown`（Samba）も、MS-RSP の InitShutdown インターフェイスを使う。これは名前付きパイプ `\PIPE\InitShutdown` を SMB（TCP 445）の上で呼ぶ（ncacn_np）。WindowsShutdown インターフェイスだけが TCP（ncacn_ip_tcp の動的ポート）で、`shutdown`・`net rpc` はそちらを使わないので、開けるのは 445 だけでよい
-- 組み込みの受信規則「ファイルとプリンターの共有 (SMB 受信)」（`FPS-SMB-In-TCP`、TCP 445）を有効にする。既定では無効。ping の規則（「ネットワークとリモート」の手順 6）と同じく `-Profile Private` に絞る
-- 再起動には 2 つの許可が要る
-  - 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）。Administrators が既定で持つ。スタンドアロンのクライアントでは Administrators だけ
-  - `LocalAccountTokenFilterPolicy = 1`。これが無いと、ローカル・Microsoft アカウントの管理者がネットワークログオンしたとき、UAC のリモート制限で絞られたトークンになり、再起動の権限を使えない（アクセス拒否になる）。1 にすると完全な管理者のトークンになる（UAC のリモート制限が緩む）
-- ドメインに参加していない PC が対象なので、`-U '<user>%<pass>'` の資格情報はローカル・Microsoft アカウントのもの。Samba の `net` は `samba-common-tools` にある
-- Windows の `shutdown /m` には資格情報を渡す引数が無く、送る側のユーザーの資格情報で相手につなぐ。検証では、相手に無いユーザーからと、Microsoft アカウントでサインインした PC から送ったときに、`アクセスが拒否されました。(5)` で止まった
-  - 先に `net use \\<host>\IPC$ /user:<host>\<user>` で、相手の資格情報で `IPC$` につないでおくと、`shutdown /m \\<host>` はその接続を使う。名前（`<host>`）は 2 つのコマンドでそろえる
-  - `net use` は、パスワードを聞く前に `…のパスワードまたはユーザー名が無効です。` を出す。聞かれたパスワードを入れるとつながる
-  - 相手が再起動すると、送る側の接続は `Disconnected` で残るので、`net use \\<host>\IPC$ /delete` で消す
-
-### リモートから再起動する手段を増やす / 手順 5: 補足: WinRM を選ぶ理由
-
-- `Restart-Computer -ComputerName` は、既定で WMI/DCOM（RPC のエンドポイント マッパー 135 と動的ポート）を使う。開けるポートが多く、絞りにくい
-- 代わりに WinRM（WS-Management、TCP 5985）を有効にして、`Invoke-Command -ComputerName … { Restart-Computer -Force }` で再起動する。開けるのは 5985 の 1 つだけ
-- `Enable-PSRemoting` は、WinRM のサービスの開始・リスナーの作成・受信規則の有効化に加えて、`LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）。`-SkipNetworkProfileCheck` は、ほかにパブリックの接続があっても止まらないようにする（LAN はプライベートにしてある）
-- Windows 11（クライアント版）の「Windows リモート管理」のグループ（`@FirewallAPI.dll,-30267`）の受信規則は 2 つ。`WINRM-HTTP-In-TCP` はパブリック向けで接続元をローカル サブネットに絞り、`WINRM-HTTP-In-TCP-NoScope` はドメイン・プライベート向けで接続元を絞らない。`Enable-PSRemoting` は両方を有効にする
-  - ほかに、別のグループの互換モードの規則（`WINRM-HTTP-Compat-In-TCP`・`WINRM-HTTP-Compat-In-TCP-NoScope`）があり、既定で無効。本書は触らない
-  - 本書は、ローカル サブネットに絞った `WINRM-HTTP-In-TCP` をプライベートにし、`WINRM-HTTP-In-TCP-NoScope` を切る（LAN の外からは届かないようにする）
-  - 2026-10-06 の版の手順は、`WINRM-HTTP-In-TCP` をドメイン・プライベート向け、`WINRM-HTTP-In-TCP-PUBLIC` をパブリック向けとして書いていたが、Windows 11 の VM には `-PUBLIC` の規則が無かった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
-- `WINRM-HTTP-In-TCP` が無効のままプライベートになっていると、`Enable-PSRemoting` は `エラー:1 つ以上の更新手順を終了できませんでした。`（`winrm quickconfig` では「WinRM ファイアウォールの例外を有効にします。」の後に「WinRM のファイアウォールを有効にできません。」）で止まった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。パブリック向けの例外としてこの規則を探し、パブリックに見つからないためとみている（中の動きは資料・ソースで確かめていない）
-  - 止まる前に、2 つの規則（`WINRM-HTTP-In-TCP` はプライベートのまま）を有効にしてしまう。このエラーは、複数行を貼ったときの後ろの行も止めるので、`-NoScope` を切る行が動かずに残る
-  - 規則が有効でプライベートのとき（手順 5 を貼り直したとき）と、無効でパブリック（既定）のときは止まらない
-  - そこで手順 5 の 1 行目で規則を既定のパブリックに戻し、この節の手順 9 でもパブリックに戻す（以前の版のこの節の手順 9 は、プライベートのまま残していた）
-- 規則のグループは、表示名（`DisplayGroup`）が Windows の言語で変わる（日本語の Windows では「Windows リモート管理」）ので、言語に依らない `Group`（`@FirewallAPI.dll,-30267`）で選ぶ
-- ドメインに参加していない PC から `Invoke-Command -ComputerName` で送ると、Kerberos を使えないので、送る側の WinRM のクライアントが、相手を `TrustedHosts` に入れるか HTTPS を使うことを求める（about_Remote_Troubleshooting）。本書は送る側で `TrustedHosts` に相手を足す
-  - 送る側の WinRM のサービスが止まっていても、`Invoke-Command` は `TrustedHosts` の検査のエラー（`ServerNotTrusted`）までは進んだ。相手に届いて再起動できたのは、サービスを動かした後（止めたまま送れるかは確かめていない）。サービスが要るのは、`TrustedHosts` を読み書きする `WSMan:\localhost` のドライブ
-  - `TrustedHosts` は `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` の `trusted_hosts` に入る。検証のホストでは初めは値が無く、`-Value ''` で戻すと空の値で残った
-  - 検証のホスト（送る側）では、WinRM のサービスを動かしている間、TCP 5985 を System が待ち受けた（受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効のままだった）。戻すときにサービスも止める
-
-### リモートから再起動する手段を増やす / 手順 6: 補足: 見張りタスクの作り
-
-- ネットワークが切れても（OS は動いているが外から届かない）自分で再起動する。起動時と 5 分ごとに走るタスクで、`WATCHDOG_HOST`（既定はゲートウェイ）へ ping する
-- SYSTEM・最上位の権限で動かす。SYSTEM は `SeShutdownPrivilege` を持つので、だれもサインインしていなくても再起動でき、ネットワークのサインインにも依らない
-- 歯止め
-  - 稼働 60 分未満なら何もしない。起動の直後に再起動を繰り返す（再起動ループ）のを避け、人が直す余地を残す
-  - 連続して届かない回数を `HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails` に記録し、6 回（約 30 分）でだけ再起動する。1 回でも届けば 0 に戻すので、一時的な切断では再起動しない
-- 相手（ルーターなど）がずっと落ちていると、稼働 60 分ごとに再起動を繰り返す。`$limit` を増やすと猶予が延びる。相手は、LAN の中でいつも応答するものにする
-- 起動時トリガーに 5 分ごとの繰り返しを足すため、`-Once` のトリガーの `Repetition` を起動時トリガーに移している（Windows PowerShell 5.1 の `New-ScheduledTaskTrigger` は、起動時トリガーに直接 `-RepetitionInterval` を取らない）
-- 起動時トリガーなので、登録した時点では動かず（`NextRunTime` も空）、次の起動から起動時と 5 分ごとに動く
-
-### リモートから再起動する手段を増やす / 手順 7: 補足: Remote Control を再起動後も使う
-
-- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
-- ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
-- タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
-
-### リモートから再起動する手段を増やす（任意）: 選択した方針
-
-- **既にある接続（SSH・RDP・Remote Control）からの再起動を第一にし、それが使えないときの経路を足した**
-  - SSH の sshd と RDP のサービスは再起動の後に自動で戻るので、再起動の引き金としても戻る口としても使える
-- **別の PC からの再起動は、Linux からも使える SMB を主に、Windows 同士の WinRM を従にした**
-  - SMB は AlmaLinux の `net rpc shutdown` でも Windows の `shutdown /m` でも使える。WinRM は Windows 同士で、開けるポートが 1 つで済む
-- **電源・帯域外の手段（スマートプラグ + BIOS の通電時起動・IP-KVM・Intel AMT/vPro）は、この文書では扱わない**（利用者の選択）
-  - 機器やマザーボードに依存し、設定が Windows の外になる。電源を切った後に起こすのは、既存の [Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)が担う
 
 ### プライバシーと広告の表示を切る / 手順 2: 補足: 値と画面の対応
 
@@ -472,20 +305,39 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 「検索のハイライトを表示する」: 「サインイン・検索・キーボード」の手順 3 の `DisableSearchBoxSuggestions` で灰色になる（Microsoft Q&A の回答）。ポリシー（`EnableDynamicContentInWSB`）は管理者の窓が要り、同じく灰色にする
 - この節の手順 2 の値が画面でオンのまま出たら、その画面でオフにすれば、画面が値を書き直す
 
-### プライバシーと広告の表示を切る（任意）: 選択した方針
+### Edge の常駐をポリシーで止める / 手順 2: 補足: 2 つのポリシー
 
-| 項目 | 採った方法 | 採らなかった方法と理由 |
-|---|---|---|
-| 広告 ID・カスタマイズされたエクスペリエンス | 自分のユーザーの値（`HKCU`） | ポリシー（`DisabledByGroupPolicy`・`DisableTailoredExperiencesWithDiagnosticData`）: 設定の画面が灰色になり、「組織によって管理」の表示が出る。広告 ID のポリシーは全ユーザーにかかる |
-| 診断データ | 画面で確かめ、オプションがオンのときだけ切る | `AllowTelemetry` のポリシー: 画面を灰色にする。0（オフ）は Enterprise・Education・Server だけ |
-| 辞書・設定アプリの通知 | 画面で切る | レジストリ: 辞書は既にある分が消えない。通知の値は資料が少ない |
-| アクティビティの履歴 | 入れない | 送信は KB5034204（2024-01）で廃止され、履歴はこの PC にだけ残る。24H2 以降は画面が無いと広く報告されていて、止めるのは `HKLM` のポリシー（`PublishUserActivities` など）だけ |
-| Recall | 入れない | Copilot+ PC だけの機能で、管理されていない PC では、利用者が同意するまでスナップショットを保存しない（文書） |
-| アプリの起動の追跡（`Start_TrackProgs`） | 入れない | 文書（18.1）にある値だが、スタートの「よく使う」と、Win+R・アドレス バーのアプリの履歴も消えると広く言われる（2025 年の新しいスタートでの働きは確かめていない） |
-| ロック画面のトリビアとヒント | 入れない | 背景が Windows スポットライトの間は切れない（チェックが出ない。広く）。スポットライトを止めるポリシーは Enterprise・Education だけ（文書） |
-| モバイル デバイスの提案・共有のおすすめのアプリ・スタートの閲覧履歴のサイト・Edge のおすすめ | 入れない | 資料が少ないか、管理者のポリシーで Pro では効かないものがある |
-| 位置情報 | 入れない | 文書にあるのは `HKLM` のポリシーだけで、「組織によって管理」の表示が出る |
-| 値を戻す方法 | 元の値をファイルに控えて、そのとおりに戻す | 既定の値に戻す: Rufus で入れた PC などでは、元が 0 のことがある |
+- `StartupBoostEnabled`（Edge 88 から）と `BackgroundModeEnabled`（Edge 77 から）。どちらも REG_DWORD のブールで、必須にも推奨にもでき、Dynamic Policy Refresh が Yes（開き直さずに読み直せる）、Per Profile が No（文書。Microsoft Edge のポリシーの文書）
+- スタートアップ ブーストは、サインインのときに Edge を裏で起動しておく。4 GB を超えるメモリ（または 1 GB を超え、新しいディスク）で、Edge を数日おきに使う PC では、Edge が自分でオンにする（サポートの記事）
+- バックグラウンドの実行が残ると、スタートアップ ブーストの扱いと関係なく、窓を閉じても Edge が終わらないことがある（文書）。そのため 2 つを組で切る
+- 「自動起動と標準アプリ」の手順 2 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
+- Edge Update の、サインインのときのコマンド（`on-logon-startup-boost`・`on-logon-autolaunch`）でも、Edge が起動することがある（広く）。文書に無いので変えない
+- 必須のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Edge`）を置くと、Edge は組織が管理している旨を出し、その切り替えを灰色にする（表示の日本語の文言は広く）
+- 「サインイン・検索・キーボード」の手順 4 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
+- `Edge` のキーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）。戻すときも、キーは消さずに 2 つの値だけを消す
+- ドメイン参加か MDM の登録が要るポリシーには、その旨の注記がある。2 つのポリシーの文書には無いので、家庭の PC でも効くはず（確かめていない）
+
+### 表示と入力 / 手順 4: 補足: 貼る順と、Web の結果
+
+- 「自動起動と標準アプリ」の手順 3 より前に貼るのは、外したアプリが戻らないようにするため（`SilentInstalledAppsEnabled`）
+- スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、「サインイン・検索・キーボード」の手順 3 で切る
+
+### 表示と入力 / 手順 5: 補足: ウィジェットのボタン
+
+- ウィジェットのボタンは、「自動起動と標準アプリ」の手順 4 でウィジェットを外すと消える（この手順では書けない）
+
+### 表示と入力 / 手順 6: 補足: 値の意味
+
+- `AppsUseLightTheme` はアプリ、`SystemUsesLightTheme` はタスクバー・スタート・通知の色。0 で濃色、1 で淡色（Windows 11 の既定）
+- Microsoft の DSC のリソース（`Microsoft.Windows.Settings`）も同じ 2 つを書き、すぐに効かせるために `WM_SETTINGCHANGE`（`ImmersiveColorSet`）を全部の窓に送る。本書は、「WSL と再起動」の手順 3 で再起動するので送らない
+- 設定の「個人用設定」→「色」から変えると、すぐに効く
+
+### 表示と入力 / 手順 7: 補足: 値と、管理者の窓が conhost になる理由
+
+- 値は、Windows Terminal の文書（グループ ポリシーの「既定のターミナル アプリケーション」）にある GUID。Windows Terminal は `DelegationConsole` が `{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}`、`DelegationTerminal` が `{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}`
+- Windows 11 22H2 以降の既定は「Windows に任せる」（2 つとも `{00000000-0000-0000-0000-000000000000}`）で、Windows Terminal が入っていればそれを使う（Microsoft のサポートの記事）。この手順は、それを Windows Terminal に決める
+- 管理者として起動したコンソールは、既定の端末に引き渡されず、conhost で開く。Windows Terminal の課題（microsoft/terminal の #13392。「管理者のコマンド ラインの受け手として登録できる端末は無く、COM の側の対応が要る」）が開いたまま。管理者の Windows Terminal は、Win+X の「ターミナル (管理者)」で開ける
+- 設定の「システム」→「開発者向け」→「ターミナル」と、Windows Terminal の設定の「スタートアップ」→「既定のターミナル アプリケーション」でも変えられる
 
 ### 表示・入力・音・ストレージを控えて変える / 手順 2: 補足: 控えのファイル
 
@@ -593,40 +445,24 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - 「表示・入力・音・ストレージを控えて変える」の手順 2 で無かったキー（ふつう）はキーごと消し（`False`）、あったキーは値だけを消す（`True`）
 
-### 表示・入力・音・ストレージを変える（任意）: 選択した方針
+### 自動起動と標準アプリ / 手順 2: 補足: タスク マネージャーと同じ所に書く
 
-| 項目 | 採った方法 | 採らなかった方法と理由 |
-|---|---|---|
-| 透明効果 | 変えない | `EnableTransparency` を 0 にすると、WezTerm の自分用の設定のアクリルの背景（`win32_system_backdrop = "Acrylic"`）も単色になるはず（WinUI の文書が、透明効果を切るとアクリルが単色になると書く）。利用者はアクリルを使い続ける |
-| Xbox Game Bar と録画 | 入れない | Win+G を止めるサポートされた値が無い。Game Bar のアプリを外すと、ゲームを開くたびに `ms-gamingoverlay` の窓が出たという報告がある（Microsoft Q&A の質問。広く）。バックグラウンドの録画は既定でオフ。録画を止めるポリシー（`AllowGameDVR`）の CSP の注は "The policy is only enforced in Windows 10 for desktop." で、Windows 11 で効くかは書いていない（確かめていない） |
-| アニメーション効果 | `SystemParametersInfo` | `UserPreferencesMask` を丸ごと書く: ほかのビットも変わる |
-| 起動音 | 画面のチェック | レジストリ: 資料どうしで値の意味が食い違う |
-| 効果音 | `.Current` を空にし、スキームを `.None` にする（先に `.reg` で控える） | 画面だけ: 戻すときに、元の音を全部は戻せない |
-| ギャラリーとホーム | 自分のユーザーの CLSID の上書き | PC 全体の `NameSpace` を消す: 管理者が要り、ほかのユーザーにもかかる |
-| ストレージ センサー | 自分のユーザーの値（ダウンロードは消さない） | ポリシー（`AllowStorageSenseGlobal`）: 設定の画面が灰色になる |
-| マウス キー・ハイ コントラスト・ナレーターのショートカット | 入れない | 3 つのキーを同時に押すので誤って押しにくく、値は広くだけ |
+- タスク マネージャーの「スタートアップ アプリ」と設定の「アプリ」→「スタートアップ」は、`Run` の値を消さずに、`Explorer\StartupApproved\Run` に同じ名前の値（バイナリ）を書く。先頭の 1 バイトが 2 なら起動し、3（と、止めた日時の 8 バイト）なら止める。Microsoft の文書には無いが、広く知られた形（UniGet UI のインストーラも同じ所に書く）
+- OneDrive の値の名前は `OneDrive`、Edge は `MicrosoftEdgeAutoLaunch_<文字列>`。OneDrive は OneDrive の設定の「Windows にサインインしたときに OneDrive を自動的に開始する」でも止められる
+- Teams（新しい Teams。「自動起動と標準アプリ」の手順 3 で外す）はパッケージのアプリで、起動のタスク `TeamsTfwStartupTask` の `State` を 1（「ユーザーが無効にした」）にする。値の意味は Microsoft の文書（`StartupTaskState`）にある
+- 消すのではなく止めるので、タスク マネージャーからいつでも戻せる（[ロールバックの「表示と入力を戻す」](../extra/windows-setup.md#表示と入力を戻す)の手順 8）
+- 初回導入用の `OneDriveSetup` の項目も、残っていれば止める。実行ファイルがある場合は初回インストールも延期される
+- UniGet UI（`WingetUI`）は、更新を知らせるために起動する
 
-### Edge の常駐をポリシーで止める / 手順 2: 補足: 2 つのポリシー
+### 自動起動と標準アプリ / 手順 3: 補足: 外さないもの
 
-- `StartupBoostEnabled`（Edge 88 から）と `BackgroundModeEnabled`（Edge 77 から）。どちらも REG_DWORD のブールで、必須にも推奨にもでき、Dynamic Policy Refresh が Yes（開き直さずに読み直せる）、Per Profile が No（文書。Microsoft Edge のポリシーの文書）
-- スタートアップ ブーストは、サインインのときに Edge を裏で起動しておく。4 GB を超えるメモリ（または 1 GB を超え、新しいディスク）で、Edge を数日おきに使う PC では、Edge が自分でオンにする（サポートの記事）
-- バックグラウンドの実行が残ると、スタートアップ ブーストの扱いと関係なく、窓を閉じても Edge が終わらないことがある（文書）。そのため 2 つを組で切る
-- 「自動起動と標準アプリ」の手順 2 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
-- Edge Update の、サインインのときのコマンド（`on-logon-startup-boost`・`on-logon-autolaunch`）でも、Edge が起動することがある（広く）。文書に無いので変えない
-- 必須のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Edge`）を置くと、Edge は組織が管理している旨を出し、その切り替えを灰色にする（表示の日本語の文言は広く）
-- 「サインイン・検索・キーボード」の手順 4 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
-- `Edge` のキーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）。戻すときも、キーは消さずに 2 つの値だけを消す
-- ドメイン参加か MDM の登録が要るポリシーには、その旨の注記がある。2 つのポリシーの文書には無いので、家庭の PC でも効くはず（確かめていない）
+- Copilot（`Microsoft.Copilot`）は外さない。`Microsoft.MicrosoftOfficeHub` はストアの名前が「Microsoft 365 Copilot」になった別のアプリ（Office の入口）
 
-### Edge の常駐をポリシーで止める（任意）: 選択した方針
+### 自動起動と標準アプリ / 手順 4: 補足: ウィジェットを外すこと
 
-| 経路 | 状況 | 採否 |
-|---|---|---|
-| **`HKLM` の必須のポリシー** | 「サインイン・検索・キーボード」の手順 4 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
-| 推奨のポリシー（`Edge\Recommended`） | 利用者が一度でも切り替えていると効かない（文書）。管理の表示が出るかは資料が無い | 不採用 |
-| `HKCU` のポリシー | 書くのに管理者が要るのは同じ。両方あると `HKLM` が勝つ（Chromium の文書） | 不採用 |
-| Edge の設定の画面 | 管理の表示は出ない。Edge が自分でオンに戻すことがあるかは、資料が無い | 代わりの手順（この節の手順 3） |
-| 旧 Edge の `AllowPrelaunch` など | EdgeHTML の Edge のポリシーで、今の Edge には効かない | 不採用 |
+- ウィジェットの本体は、ストアのアプリ「Windows Web Experience Pack」（`MicrosoftWindows.Client.WebExperience`、ストアの ID は `9MSSGKG348SP`）。外すとボタンも消えると広く報告されている（Microsoft の文書には無い）
+- ボタンだけを消す値（`TaskbarDa`）は、PowerShell からは書けない（「表示と入力」の手順 5 の補足）
+- Microsoft が説明している止め方は、管理者のポリシー（「ウィジェットを許可する」）。本書では使わない
 
 ### CopyQ を使う / 手順 2: 補足: 入れ方と入る場所
 
@@ -657,18 +493,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
 - 履歴は暗号化しないで保存する（`encrypt_tabs` の既定は false。項目は既定で 200 まで）。16.0.0 は `%APPDATA%\copyq`、17.0.0 からは `%LOCALAPPDATA%\copyq` の下
 - 画面の日本語は、同梱の訳（約 94%）が、Windows の地域の形式に合わせて出る（推測）
-
-### CopyQ を使う（任意）: 選択した方針
-
-| 経路 | 状況 | 採否 |
-|---|---|---|
-| **winget の `hluk.CopyQ` を `--scope user` で** | 管理者が要らず、UniGet UI・PowerToys と同じ形。`## 更新` の winget の一覧で上がる | **採用** |
-| winget の `--scope machine` | `%ProgramFiles%\CopyQ` に入り、管理者の確認が要る | 不採用 |
-| scoop の `extras/copyq` | extras のバケットは git が要り（この文書の時点では Git for Windows が無い）、動いている間は更新を飛ばし、シムが GUI の終了を待つ | 不採用 |
-| Windows のクリップボードの履歴（Win+V） | 標準で入っている | 不採用（利用者の選択） |
-| Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
-| インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
-| ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
 
 ### PowerToys のユーティリティを絞る / 手順 2: 補足: 入る場所と、切るユーティリティの案
 
@@ -704,16 +528,48 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 通知領域のアイコンを 1 回クリックすると、クイック アクセス（`enable_quick_access` が既定で true）が開く。設定の窓は、右クリックのメニューの「設定」か、ダブルクリックで開く（`src/runner/tray_icon.cpp`）
 - 画面の日本語の文言（「終了」「設定」「ダッシュボード」「Space で開く」「マウスを振る」など）は、英語の文言から書き、確かめていない
 
-### PowerToys のユーティリティを絞る（任意）: 選択した方針
+### 再起動の後に確かめる / 手順 2: 補足: Web の結果が出たとき
 
-| 経路 | 状況 | 採否 |
-|---|---|---|
-| **設定ファイル（`settings.json` の `enabled`）を、終了してから書く** | 管理者が要らず、控えから戻せる。書き方は Microsoft の文書に無い | **採用** |
-| 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | この節の手順 6 で確かめに使う |
-| `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
-| `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
-| Keyboard Manager で Caps Lock を変える | 「サインイン・検索・キーボード」の手順 5 の Scancode Map を採った（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)） | 不採用 |
-| 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
+- スタートの検索に Web（Bing）の結果が出たら、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)と、「サインイン・検索・キーボード」の手順 3 の補足を見る
+
+### 再起動の後に確かめる / 手順 3: 補足: コマンドで外さない理由
+
+- 自分のユーザーのピン留めを外す、サポートされたコマンドは無い。Microsoft の文書にある方法は、どれもポリシー（`ConfigureStartPins` やタスクバーのレイアウトの XML）か、新しいユーザーにだけかかるファイル
+- タスクバーの設定（`Taskband`）やスタートのファイル（`start2.bin`）を消す方法は、Microsoft の説明が無く、形も決まっていないので採らない
+- Copilot を外さないのは、利用者の選択
+
+### ネットワークとリモート / 手順 3: 補足: もとからプライベートのときと、前提にする手順
+
+- 既にプライベートなら、何も変わらない
+- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で-syncthing-を使う)・「ネットワークとリモート」の手順 4〜6 は、この LAN がプライベートであることを前提にする
+
+### ネットワークとリモート / 手順 4: 補足: つなぐときのユーザーと、前提にする手順書
+
+- つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。「サインイン・検索・キーボード」の手順 2 も）
+- [RDP をロックせずに切断（Windows）](../windows-setup.md#rdp-をロックせずに切断)は、この手順を前提にする
+
+### ネットワークとリモート / 手順 5: 補足: リモート アシスタンス
+
+- リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
+- グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
+- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。「PC 全体の設定」の手順 3 の `RemoteAssistance` で、元の値を控える
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 3
+
+### ネットワークとリモート / 手順 6: 補足: 自分で規則を作る理由
+
+- Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
+- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で-syncthing-を使う)の規則と同じ形）
+- 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 2
+- 何度貼ってもよいのは、規則を消してから作り直すため
+
+### ネットワークとリモート / 手順 7: 補足: 配信の最適化
+
+- 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
+- `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
+- `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
+- 元に戻すのは[ロールバックの「ネットワークと PC 全体の設定を戻す」](../extra/windows-setup.md#ネットワークと-pc-全体の設定を戻す)の手順 1
+- Windows の既定も `Lan` なので、「PC 全体の設定」の手順 3 で `Lan` だったなら何も変わらない
 
 ### WSL のネットワークをミラーにする / 手順 3: 補足: `.wslconfig`
 
@@ -738,25 +594,263 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - この節の手順 5: NAT では、WSL の中の `127.0.0.1:22` は WSL 自身を指すので、Windows の sshd には届かない。ミラーでは Windows のループバックに届く（`::1` は使えない）。`/dev/tcp` は bash の機能で、`head -n 1` で sshd の最初の 1 行（バナー。CR LF で終わる）を読む
 - ミラーでは、sshd のログの送信元が、LAN の IP から `127.0.0.1` に変わるはず（確かめていない。`sshd_config` にアドレスでの絞り込みは無いので、動きは変わらない）
 
-### WSL のネットワークをミラーにする（任意）: 選択した方針
+### Wake on LAN を使う / 手順 2: 補足: 式
 
-- **ミラーにする理由**: WSL と Windows が `127.0.0.1` で互いにつながり、IPv6・マルチキャスト（mDNS）・VPN との相性がよく、LAN から WSL に直接届く（Microsoft の文書）
-- **既知の問題**（Microsoft の文書。troubleshooting）
-  - Docker の `-p` のポートの公開（`ignoredPorts` で避ける）、OpenVPN 2.6.501 などの一部の VPN
-  - UDP 68・TCP 135/1900/2869/5004/3702/5357/5358 は、WSL に届かない
-  - WSL が `accept_local`・`route_localnet`・`rp_filter` などの sysctl を自分で設定する
-  - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
-- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、「ネットワークとリモート」の手順 4・6 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
-- **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
-- [VirtualBox のゲスト（bootc）](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
+- [「PC 全体の設定」](../windows-setup.md#pc-全体の設定)の手順 2 の 2 つ目のブロックと同じ式
 
-| 項目 | 採った方法 | 採らなかった方法と理由 |
+### Wake on LAN を使う / 手順 3: 補足: シャットダウンからの Wake on LAN
+
+- Microsoft の文書では、Windows 10 以降の既定のシャットダウン（高速スタートアップ）では、Windows はアダプターに起動を任せない。シャットダウン（S5）からの起動は、UEFI とアダプターだけが行い、Windows は関わらない
+- そのため、高速スタートアップを切り（「PC 全体の設定」の手順 7）、UEFI の Wake on LAN（機種によって「Power On By PCI-E」など）を有効にし、アダプターの詳細設定でマジック パケットを受けるようにする
+- `*WakeOnMagicPacket` は、Microsoft の文書の標準の詳細設定の名前（1 で有効）。機種独自の項目（シャットダウンからの起動、リンクでの起動など）は、名前がアダプターごとに違う
+- `-NoRestart` で、アダプターを起動し直さない（効くのは次の再起動から）
+- 眠り（S3・Modern Standby）からの起動は、「PC 全体の設定」の手順 7 で眠らないようにしたので扱わない
+
+### Wake on LAN を使う / 手順 4: 補足: 203 のエラー
+
+- `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある
+
+### リモートから再起動する手段を増やす / 手順 3: 補足: クラッシュ時の自動再起動
+
+- `HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl` の `AutoReboot` は、カーネルが止まった（ストップ エラー）ときに自動で再起動するかを決める。Windows の既定は 1（有効）で、この手順は確認が主
+- `Win32_OSRecoveryConfiguration` の `AutoReboot` と同じ値。設定の「システムの詳細設定 → 起動と回復」の「自動的に再起動する」に当たる
+- OS が応答するが操作できないとき（アプリのハング・ネットワーク断）には効かない。そちらはこの節の手順 6 の見張りタスクが担う
+
+### リモートから再起動する手段を増やす / 手順 4: 補足: SMB のリモートシャットダウンの仕組み
+
+- `shutdown /m \\<host>`（Windows）も `net rpc shutdown`（Samba）も、MS-RSP の InitShutdown インターフェイスを使う。これは名前付きパイプ `\PIPE\InitShutdown` を SMB（TCP 445）の上で呼ぶ（ncacn_np）。WindowsShutdown インターフェイスだけが TCP（ncacn_ip_tcp の動的ポート）で、`shutdown`・`net rpc` はそちらを使わないので、開けるのは 445 だけでよい
+- 組み込みの受信規則「ファイルとプリンターの共有 (SMB 受信)」（`FPS-SMB-In-TCP`、TCP 445）を有効にする。既定では無効。ping の規則（「ネットワークとリモート」の手順 6）と同じく `-Profile Private` に絞る
+- 再起動には 2 つの許可が要る
+  - 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）。Administrators が既定で持つ。スタンドアロンのクライアントでは Administrators だけ
+  - `LocalAccountTokenFilterPolicy = 1`。これが無いと、ローカル・Microsoft アカウントの管理者がネットワークログオンしたとき、UAC のリモート制限で絞られたトークンになり、再起動の権限を使えない（アクセス拒否になる）。1 にすると完全な管理者のトークンになる（UAC のリモート制限が緩む）
+- ドメインに参加していない PC が対象なので、`-U '<user>%<pass>'` の資格情報はローカル・Microsoft アカウントのもの。Samba の `net` は `samba-common-tools` にある
+- Windows の `shutdown /m` には資格情報を渡す引数が無く、送る側のユーザーの資格情報で相手につなぐ。検証では、相手に無いユーザーからと、Microsoft アカウントでサインインした PC から送ったときに、`アクセスが拒否されました。(5)` で止まった
+  - 先に `net use \\<host>\IPC$ /user:<host>\<user>` で、相手の資格情報で `IPC$` につないでおくと、`shutdown /m \\<host>` はその接続を使う。名前（`<host>`）は 2 つのコマンドでそろえる
+  - `net use` は、パスワードを聞く前に `…のパスワードまたはユーザー名が無効です。` を出す。聞かれたパスワードを入れるとつながる
+  - 相手が再起動すると、送る側の接続は `Disconnected` で残るので、`net use \\<host>\IPC$ /delete` で消す
+
+### リモートから再起動する手段を増やす / 手順 5: 補足: WinRM を選ぶ理由
+
+- `Restart-Computer -ComputerName` は、既定で WMI/DCOM（RPC のエンドポイント マッパー 135 と動的ポート）を使う。開けるポートが多く、絞りにくい
+- 代わりに WinRM（WS-Management、TCP 5985）を有効にして、`Invoke-Command -ComputerName … { Restart-Computer -Force }` で再起動する。開けるのは 5985 の 1 つだけ
+- `Enable-PSRemoting` は、WinRM のサービスの開始・リスナーの作成・受信規則の有効化に加えて、`LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）。`-SkipNetworkProfileCheck` は、ほかにパブリックの接続があっても止まらないようにする（LAN はプライベートにしてある）
+- Windows 11（クライアント版）の「Windows リモート管理」のグループ（`@FirewallAPI.dll,-30267`）の受信規則は 2 つ。`WINRM-HTTP-In-TCP` はパブリック向けで接続元をローカル サブネットに絞り、`WINRM-HTTP-In-TCP-NoScope` はドメイン・プライベート向けで接続元を絞らない。`Enable-PSRemoting` は両方を有効にする
+  - ほかに、別のグループの互換モードの規則（`WINRM-HTTP-Compat-In-TCP`・`WINRM-HTTP-Compat-In-TCP-NoScope`）があり、既定で無効。本書は触らない
+  - 本書は、ローカル サブネットに絞った `WINRM-HTTP-In-TCP` をプライベートにし、`WINRM-HTTP-In-TCP-NoScope` を切る（LAN の外からは届かないようにする）
+  - Windows 11 の VM には `WINRM-HTTP-In-TCP-PUBLIC` の規則が無かった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
+- `WINRM-HTTP-In-TCP` が無効のままプライベートになっていると、`Enable-PSRemoting` は `エラー:1 つ以上の更新手順を終了できませんでした。`（`winrm quickconfig` では「WinRM ファイアウォールの例外を有効にします。」の後に「WinRM のファイアウォールを有効にできません。」）で止まった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。パブリック向けの例外としてこの規則を探し、パブリックに見つからないためとみている（中の動きは資料・ソースで確かめていない）
+  - 止まる前に、2 つの規則（`WINRM-HTTP-In-TCP` はプライベートのまま）を有効にしてしまう。このエラーは、複数行を貼ったときの後ろの行も止めるので、`-NoScope` を切る行が動かずに残る
+  - 規則が有効でプライベートのとき（手順 5 を貼り直したとき）と、無効でパブリック（既定）のときは止まらない
+  - そこで手順 5 の 1 行目で規則を既定のパブリックに戻し、この節の手順 9 でもパブリックに戻す
+- 規則のグループは、表示名（`DisplayGroup`）が Windows の言語で変わる（日本語の Windows では「Windows リモート管理」）ので、言語に依らない `Group`（`@FirewallAPI.dll,-30267`）で選ぶ
+- ドメインに参加していない PC から `Invoke-Command -ComputerName` で送ると、Kerberos を使えないので、送る側の WinRM のクライアントが、相手を `TrustedHosts` に入れるか HTTPS を使うことを求める（about_Remote_Troubleshooting）。本書は送る側で `TrustedHosts` に相手を足す
+  - 送る側の WinRM のサービスが止まっていても、`Invoke-Command` は `TrustedHosts` の検査のエラー（`ServerNotTrusted`）までは進んだ。相手に届いて再起動できたのは、サービスを動かした後（止めたまま送れるかは確かめていない）。サービスが要るのは、`TrustedHosts` を読み書きする `WSMan:\localhost` のドライブ
+  - `TrustedHosts` は `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` の `trusted_hosts` に入る。検証のホストでは初めは値が無く、`-Value ''` で戻すと空の値で残った
+  - 検証のホスト（送る側）では、WinRM のサービスを動かしている間、TCP 5985 を System が待ち受けた（受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効のままだった）。戻すときにサービスも止める
+
+### リモートから再起動する手段を増やす / 手順 6: 補足: 見張りタスクの作り
+
+- ネットワークが切れても（OS は動いているが外から届かない）自分で再起動する。起動時と 5 分ごとに走るタスクで、`WATCHDOG_HOST`（既定はゲートウェイ）へ ping する
+- SYSTEM・最上位の権限で動かす。SYSTEM は `SeShutdownPrivilege` を持つので、だれもサインインしていなくても再起動でき、ネットワークのサインインにも依らない
+- 歯止め
+  - 稼働 60 分未満なら何もしない。起動の直後に再起動を繰り返す（再起動ループ）のを避け、人が直す余地を残す
+  - 連続して届かない回数を `HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails` に記録し、6 回（約 30 分）でだけ再起動する。1 回でも届けば 0 に戻すので、一時的な切断では再起動しない
+- 相手（ルーターなど）がずっと落ちていると、稼働 60 分ごとに再起動を繰り返す。`$limit` を増やすと猶予が延びる。相手は、LAN の中でいつも応答するものにする
+- 起動時トリガーに 5 分ごとの繰り返しを足すため、`-Once` のトリガーの `Repetition` を起動時トリガーに移している（Windows PowerShell 5.1 の `New-ScheduledTaskTrigger` は、起動時トリガーに直接 `-RepetitionInterval` を取らない）
+- 起動時トリガーなので、登録した時点では動かず（`NextRunTime` も空）、次の起動から起動時と 5 分ごとに動く
+
+### リモートから再起動する手段を増やす / 手順 7: 補足: Remote Control を再起動後も使う
+
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
+- ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
+- タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
+
+### OpenSSH サーバー / 手順 1: 補足: Windows PowerShell 5.1 で開く理由
+
+- PowerShell 7（`pwsh`）では、手順 3 が失敗する
+
+### OpenSSH サーバー / 手順 2: 補足: 変数について
+
+- `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）
+- 変数はその PowerShell の中だけで有効
+
+### OpenSSH サーバー / 手順 3: 補足: 入るものと、PowerShell 7 で失敗すること
+
+- 入るのは Windows のオプション機能「OpenSSH サーバー」（設定アプリの「システム」→「オプション機能」と同じもの）。`C:\Windows\System32\OpenSSH\sshd.exe`と、サービス `sshd`、受信の規則 `OpenSSH-Server-In-TCP` ができる
+- クライアント（`ssh.exe` など）は Windows 11 に最初から入っていて、この手順では変わらない
+- 先頭の `if` は、PowerShell 7（`PSEdition` が `Core`）で貼ったときに何もしないで止めるためのもの
+- 機能は Windows Update から取ってくるので、数分かかる
+
+### OpenSSH サーバー / 手順 4: 補足: 最初の起動で作られるもの
+
+- 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。
+- [既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)では、レジストリの `HKLM:\SOFTWARE\OpenSSH` に値を足す
+
+### OpenSSH サーバー / 手順 6: 補足: 既定でも有効なのに書く理由と、置き換える理由
+
+- パスワード認証は既定で有効。この手順はそれを明示的な行にするので、[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)で `no` にした PC も、この手順を貼れば戻る
+- `sshd_config` の末尾は `Match Group administrators` のブロックなので、末尾に足した行はそのブロックの中の設定になる。そこで、既定の行を置き換える
+- `sshd -t` は設定の検査だけをする（誤りが無ければ何も出さない）。誤りがあれば再起動しないので、動いている sshd は古い設定のまま残る
+- Windows PowerShell 5.1 の `Set-Content -Encoding ascii` は BOM 無しの ASCII、CRLF で書く
+- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけとしている
+- 行を置き換えるので、何度貼っても結果は同じ
+
+### OpenSSH サーバー / 手順 7: 補足: ユーザー名
+
+- Microsoft アカウントでも、ユーザー名はメールアドレスではなく、`C:\Users\` の下のフォルダーの名前
+
+### SSH でログインを確かめる / 手順 4: 補足: 変数について
+
+- 変数はそのシェルの中だけで有効
+
+### OpenSSH サーバーに公開鍵でもログインする / 手順 3: 補足: 鍵の種類とパスフレーズ
+
+- ED25519 は Windows と AlmaLinux 10 の OpenSSH のどちらも扱え、鍵が短く、この項の手順 5 で 1 行のまま貼れる
+- パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、この項の手順 7 と[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)の手順 4 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
+- 秘密鍵（`~/.ssh/id_ed25519`）はクライアントから出さない。Windows に渡すのは、この項の手順 4 の公開鍵だけ
+
+### OpenSSH サーバーに公開鍵でもログインする / 手順 5: 補足: 読み戻し
+
+- `$PUBKEY` が空、または `ssh-` などで始まらなければ、この項の手順 6 は何もしないで止まる
+
+### OpenSSH サーバーに公開鍵でもログインする / 手順 6: 補足: クライアントを足す
+
+- この項の手順 6 を貼り直すと、`administrators_authorized_keys` に行が足される
+
+### OpenSSH サーバーに公開鍵でもログインする / 手順 7: 補足: 鍵で入ったときのログ
+
+- `-o PasswordAuthentication=no` は、鍵が通らなかったときにパスワードへ移らず、そこで終わらせるため
+
+### OpenSSH サーバーのパスワード認証を切る / 手順 3: 補足: 切る前と後
+
+- 行を置き換える理由と `sshd -t` は、[手順 6](../windows-setup.md#openssh-サーバー) の補足と同じ
+- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
+- 行を置き換えるので、何度貼っても結果は同じ
+
+### SSH の既定のシェルを Git Bash にする / 手順 3: 補足: DefaultShell
+
+- `DefaultShell` は Windows の sshd だけの設定で、`sshd_config` ではなくレジストリに置く。この PC の全ユーザーの SSH のセッションに効く
+- `bin\bash.exe` は、Git の `usr\bin\bash.exe` を `MSYSTEM=MINGW64` と `PATH` を整えて起動する入口。
+- sshd の再起動は要らない。次のログインから変わる
+
+### SSH の既定のシェルを Git Bash にする / 手順 4: 補足: パスワードを 2 回聞かれる理由
+
+- 鍵を登録していなければ 2 回聞かれるのは、`ssh` が 2 つあるため
+
+### SSH の既定のシェルを Git Bash にする / 手順 5: 補足: 戻る時期
+
+- `DefaultShell` を消すと、次のログインから cmd.exe に戻る
+
+### scoop のツールを SSH のセッションで使う / 手順 3: 補足: 貼り直し
+
+- 作り直すものが無ければ何も出ないので、何度貼ってもよい
+
+### git-delta / 手順 2: 補足: VC++ ランタイム
+
+- scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-付録-windows-11-の配布物と資料の調査2026-10-08)）。無い PC では起動しない
+- scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
+- 入れ方は新しく書かず、[Windows 11 で WezTerm を入れる](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
+  - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
+  - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
+- 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
+
+### git-delta / 手順 2: 補足: 確かめる値の意味
+
+- `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
+- ほかの方法で入れた delta を外すのは、混ざらないようにするため
+
+### git-delta / 手順 3: 補足: scoop の名前と版
+
+- scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
+- `'delta' (<版>) was installed successfully!` の版は、実行した日の最新
+
+### git-delta / 手順 4: 補足: 実施手順の手順 1・3 を Git Bash で貼る
+
+- 手順 1・3 のブロックは bash と git だけを使うので、Git Bash にそのまま貼れる。PowerShell 向けに書き分けない（[Git](../almalinux-setup.md#git) と同じ考え方）
+- `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、[Git の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-付録-windows-11-の-git-bash-での検証記録2026-09-30)で確かめてある
+- 手順 2（`brew install`）と手順 4（`brew list` を含む）は指さない。入れることと版・場所は、Windows 11 の節の手順 3 で PowerShell から確かめる
+- 手順 3 は `merge.conflictstyle zdiff3` も書く。[Git](../almalinux-setup.md#git) の手順 5 と同じ値なので、どちらを先に通してもよい（AlmaLinux 10 と同じ）
+- 手順 1 の変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
+
+### git-delta / 手順 5: 補足: 変更のあるリポジトリが無いとき
+
+- `git -C ~/.config/bash show` が出すのは、[共通の bash 設定](../../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分
+
+### git-delta / 手順 5: 補足: ページャの less と PowerShell の git
+
+- git は `core.pager` の `delta` を PATH から探して起動する（scoop の shim の `~\scoop\shims\delta.exe`）
+- delta 0.20.1 のページャは、`delta.pager`（`--pager`）・`DELTA_PAGER`・`BAT_PAGER`・`PAGER` の順に決まり、どれも無ければ `less`。そのコマンドを PATH から探し、見つからなければ、ページャを使わずに標準出力へ書く（ソースの `src/utils/bat/output.rs` と `src/env.rs`）
+- **Git Bash** では、PATH の先頭が Git の `/usr/bin` なので、delta は Git for Windows の `usr\bin\less.exe` を使う
+- **PowerShell・cmd** の PATH には Git の `cmd` しか無い（Git for Windows の既定の `Path Option=Cmd`）。それでも、そこの `git.exe`（Git for Windows の git-wrapper）は、`mingw64\bin`・`usr\bin`・`%HOME%\bin` を PATH の先頭に足してから本体の `mingw64\bin\git.exe` を動かす（git-wrapper のソースの `setup_environment`。`cmd\git.exe` は `git.res` の版の情報だけを持ち、PATH を絞る `MINIMAL_PATH=1` の文字列のリソースが無い）。その PATH を受け継ぐ delta も、Git for Windows の less を使う
+- 上流の文書は、Windows では新しい less が要り、古い `less.exe` を使うと色が崩れたり変な文字が出たりすると書いている。Git for Windows の less は MSYS2 の今の版なので、これに当たらないはず（版は確かめていない）
+- **scoop の less は入れなかった**: 設計の段階では、PowerShell から git を使うときだけ scoop の less（main の `less.json`。上流の文書が勧める `jftuga/less-Windows` の配布物）を入れる任意の手順を考えた。上のとおり、git が起動する delta には、Git Bash でも PowerShell でも Git の `usr\bin` が scoop の shims より前に来るので、入れても使われない（`DELTA_PAGER` か `delta.pager` で場所を指したときと、PowerShell で delta を直に動かしたときだけ使われる）
+- PowerShell で delta を直に動かす（`git diff | delta` など）と、PATH に less が無いので、delta はページャを使わずに出す（上の `output.rs` の動き）
+- `delta.navigate`（手順 1 の `DELTA_NAVIGATE`）が `true` だと、delta は less の検索履歴の写しを `%LOCALAPPDATA%\delta\delta.lesshst` に作り、`LESSHISTFILE` で less に渡す（ソースの `src/features/navigate.rs`。Linux では `~/.local/share/delta/lesshst`）。Windows で `n` / `N` が効くかは確かめていない
+- PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](../extra/almalinux-setup.md#注意点)）
+- どれも、ソースを読んだだけで、Windows では確かめていない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）
+
+### GitHub CLI / 手順 2: 補足: 確かめる値の意味
+
+- `GitCred` の `credential.helper manager` は、Git for Windows のインストーラの既定の Git Credential Manager
+- `GitCred` に `auth git-credential` で終わる行があれば、前に gh を Git の資格情報のヘルパーにしてある（`gh auth setup-git` など）。同じ節の手順 4 で Git の認証は聞かれない
+- `GitCred` が空なのは、Git の資格情報のヘルパーが無いこと。同じ節の手順 4 で `Y` と答えると、gh が `~/.gitconfig` に自分をヘルパーとして書く
+- `Gh` が空なら、gh は入っていない。`C:\Users\<WIN_USER>\scoop\shims\gh.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
+- ほかの方法で入れた gh を外すのは、混ざらないようにするため。外してもログインと設定は残り、scoop の gh も同じ場所を読む
+
+### GitHub CLI / 手順 3: 補足: 版
+
+- `'gh' (<版>) was installed successfully!` の版は、実行した日の最新
+
+### GitHub CLI / 手順 4: 補足: Git の認証に n と答える理由
+
+gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）。**Windows では確かめていない**。
+
+- **問いが出る条件**: `gh auth login` で HTTPS を選ぶと、github.com の Git の資格情報のヘルパーが gh でなければ、`Authenticate Git with your GitHub credentials?`（既定は Yes）を聞く
+  - ヘルパーは `credential.https://github.com.helper`、無ければ `credential.helper` を、スコープを問わずに読む
+  - Git for Windows は、インストーラの既定の選択で `system`（`C:\Program Files\Git\etc\gitconfig`）に `credential.helper=manager`（Git Credential Manager）を書く（[Git の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-実施手順--手順-3-補足-設定の-3-つの場所)）。そのため、[Windows 11 のセットアップ](../windows-setup.md)の順に通した PC では、この問いが出る
+- **Yes と答えたとき**（ソースからの推論）
+  - ヘルパーがある（Git for Windows の既定）: `~/.gitconfig` は変えない。`git credential reject` で github.com の資格情報を消してから、`git credential approve` で gh のトークンを Git Credential Manager に入れる。以後、git の HTTPS も gh のトークン（GitHub CLI の OAuth アプリ。`workflow` の権限も付く）で GitHub につなぐ
+  - ヘルパーが無い: `~/.gitconfig` の `credential.https://github.com.helper` と `credential.https://gist.github.com.helper` に、空の値（ほかのヘルパーを切る）と `!<gh の場所> auth git-credential` を書く。`gh auth setup-git` と同じ
+- **No を選んだ理由**
+  - git の HTTPS の認証は、Git for Windows の Git Credential Manager が自分のサインイン（Git Credential Manager の OAuth アプリ）で行う。gh と git のトークンが別になるので、`gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことが、git の push に効かない
+  - Yes にすると、gh のトークンが Git Credential Manager にも残る。`gh auth logout` は gh 自身の置き場所しか消さないので、ロールバックに 1 手順増える（[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)の手順 8）
+  - `~/.gitconfig` に gh の場所を書かない。書くと、scoop を外した後も git がその場所の gh を呼ぶ
+- **Git の資格情報のヘルパーが無い PC**（[Windows 11 で使う](../windows-setup.md#github-cli)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる（外すのは[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)の手順 7）
+- **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
+  - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
+  - SSH のセッションの git からその場所を呼ぶと、scoop の `current` のジャンクションが [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)の制限に当たるはず（確かめていない）
+
+### GitHub CLI / 手順 4: 補足: ワンタイムコード
+
+- gh の既定では、ワンタイムコードはクリップボードにも入る
+
+### GitHub CLI / 手順 6: 補足: トークンと設定の置き場所
+
+ソースから（gh 2.102.0、go-gh 2.16.1、go-keyring 0.2.8）。**Windows では確かめていない**。
+
+| もの | Windows 11 の場所 | AlmaLinux 10 の場所 |
 |---|---|---|
-| ネットワーク | ミラー | NAT（既定）: WSL から Windows のサーバーに LAN の IP あてでつなぎ、IPv6・mDNS が使えない |
-| 書くキー | `networkingMode` だけ | `dnsTunneling`・`firewall`・`autoProxy`: 既定で有効。メモリなど: 既定で足りる |
-| LAN から WSL への受信 | 開けない | Hyper-V のファイアウォールの規則: 管理者が要り、WSL の中のサーバーを LAN に開ける |
-| `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
-| 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
+| トークン | 資格情報マネージャーの汎用資格情報 `gh:github.com:<GITHUB_USER>` と、今のアカウントの写しの `gh:github.com:`（名前はソースからの推論） | OS の資格情報ストア |
+| トークン（ストアを使えないとき） | `%APPDATA%\GitHub CLI\hosts.yml`（平文） | `~/.config/gh/hosts.yml`（平文） |
+| 設定（`config.yml`・`hosts.yml`） | `%APPDATA%\GitHub CLI` | `~/.config/gh` |
+| 状態・拡張機能・キャッシュ | `%LOCALAPPDATA%\GitHub CLI` | `~/.local/state/gh`・`~/.local/share/gh`・`~/.cache/gh` |
+
+- 設定の場所は、環境変数 `GH_CONFIG_DIR`、次に `XDG_CONFIG_HOME`（`%XDG_CONFIG_HOME%\gh`）があれば、そちらが先になる（go-gh の `ConfigDir`）
+- `gh auth status` の `(keyring)` は、トークンが資格情報マネージャーにあること。平文のときは `hosts.yml` の場所が出る
+- Git Credential Manager が git のために置く資格情報（`git:https://github.com` の名前になるはず）は、gh の項目とは別
+
+### lazygit / 手順 2: 補足: 確かめる値の意味
+
+- `Lazygit` が空なら、lazygit は入っていない。`C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` だけなら、もう scoop で入っている（自分用の Neovim の設定の導入でも入る）
+
+### lazygit / 手順 4・6: 補足: 版
+
+- 同じ節の手順 4 の `'lazygit' (<版>) was installed successfully!` と、手順 6 の `version=` の版は、実行した日の最新
+
+### lazygit / 手順 7: 補足: 新しい窓と確かめ用のリポジトリ
+
+- `EDITOR` を `nvim` にした後、新しい窓で lazygit を起動し直すのは、今の窓には入らないため
+- `%TEMP%\lazygit-check` を消す前に `Set-Location ~` で出るのは、この窓の今のフォルダーがそこにあり、今のフォルダーのままでは使用中で消せないため
 
 ### lazygit の設定を更新する / 手順 3: 補足: force push と分岐点
 
@@ -781,6 +875,22 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 版の読み方と `--no-pager` の理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 6 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-6-補足-版の表示と-pager)を参照する
 - Windows PowerShell 5.1 のコンソール（コードページ shift_jis）でも、日本語のコミットの題は正しく表示された。Git for Windows がコンソールへ直接書くため
 
+### yazi / 手順 2: 補足: 変数について
+
+- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている（どれも scoop の main のバケットにある）
+- 1 つだけにするときも `@('fd')` の形のままにするのは、`'fd'` だけにすると、1 文字ずつ別の名前として scoop に渡るため
+
+### yazi / 手順 3: 補足: 確かめる値の意味
+
+- ほかの場所の yazi を外すのは、混ざらないようにするため
+- `Config : True` なら、設定がもうある（[設定ファイル](../almalinux-setup.md#yazi-の設定ファイル)）
+
+### yazi / 手順 4: 補足: 版と、出る行・環境変数
+
+- 同じ節の手順 4 の `'yazi' (<版>) was installed successfully!` と、手順 7 の `Version:` の版は、実行した日の最新
+- `suggests installing` の行のものを入れなくてよいのは、VC++ のランタイムを同じ節の手順 3 で確かめてあるため
+- imagemagick が足すユーザーの環境変数（`MAGICK_HOME` など）と `PATH` は、今の窓にも入る。ほかの開いている窓は、開き直してから効く
+
 ### yazi の設定を更新する / 手順 3: 補足: force push と分岐点
 
 - `--ff-only` を使わない理由、fork point と reflog、pull による上流のタグの取得は、[AlmaLinux 10 側の yazi の設定を更新する / 手順 2 の補足](almalinux-setup.md#yazi-の設定を更新する--手順-2-補足-force-push-と分岐点)を参照する
@@ -794,13 +904,98 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - reset の範囲は、[AlmaLinux 10 側の yazi の設定を更新する / 手順 4 の補足](almalinux-setup.md#yazi-の設定を更新する--手順-4-補足-autostash-の衝突と-reset-の範囲)を参照する
 - Windows の git 2.55.0.windows.5 の文言は、[lazygit の設定を更新する / 手順 5 の補足](#lazygit-の設定を更新する--手順-5-補足-autostash-の衝突と-reset-の範囲)と同じ
 
-### scoop・winget・WSL を上げる / 手順 8: 補足: zoxide を上げた後の更新
+### Firefox / 手順 2: 補足: 入れたものがあるとき
 
-- これより後は、[scoop・winget・WSL を上げる](../windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 で、ほかのツールと一緒に上がる
+- `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たときも、同じ節の手順 3 を貼れば、新しい版があれば上がる
 
-### ロールバック / エディタとシェルのツールを消す / 手順 7: 補足: 開き直す理由
+### Firefox / 手順 3: 補足: 入れ方と版
 
-- 共通の bash 設定と PowerShell 7 のプロファイルは、無いツールを読まないので、開いている Git Bash のタブと PowerShell 7 の窓は閉じて開き直す
+- winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
+- `winget list` に出る版は、実行した日の最新
+
+### Firefox / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由
+
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-で使う--手順-4-補足-windows-では-aac-と-h264-のために何も足さない理由)
+
+- Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
+- 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのは Android の MediaCodec を使うものだけ）
+  - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](../almalinux-setup.md#firefox)の手順 8〜11 が要る（[選択した方針](almalinux-setup.md#firefox)）
+- MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
+
+- N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が必要になる可能性がある
+
+### Firefox / 手順 4: 補足: 言語パック
+
+- 日本語版なので、言語パックは要らない
+
+### Firefox / 手順 5: 補足: コマンドで変えない理由
+
+- Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
+- Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
+- 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
+- Claude Code の `/login` は、既定のブラウザーでログインのページを開く。[Windows 11 のセットアップ](../windows-setup.md)の後に通す順で、Claude Code より先にこの手順を行うのはそのため
+
+### Git Bash と WezTerm の設定 / 手順 2: 補足: PATH と、ほかの git
+
+- `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
+- Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
+- scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
+- Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
+
+### Git Bash と WezTerm の設定 / 手順 2: 補足: 版
+
+- `git version` の版は、実行した日の最新
+
+### Git Bash と WezTerm の設定 / 手順 4: 補足: Windows の system の行
+
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+
+- Windows で出る `system` の行（インストーラが書いたもの）より、[Git](../almalinux-setup.md#git)の手順 4・5 で書く `global` の値が優先される
+
+### Windows 11 で Claude Code を入れる / 手順 2: 補足: 確かめていることと、Git for Windows の役割
+
+- `[Environment]::Is64BitProcess` は、インストーラが最初に見る値と同じ。スタートメニューの「Windows PowerShell (x86)」は、64 ビットの Windows でも 32 ビットで動く（公式の Troubleshoot installation）
+- native installer の置き場所は `%USERPROFILE%\.local\bin\claude.exe` に決まっている（公式の文書）。同じ名前のコマンドがほかにもあると、`PATH` の順で先のものが動き、版が食い違う（公式の Check for conflicting installations）
+- Git for Windows は任意（公式の Set up on Windows）。入っていれば、Claude Code は Git Bash を Bash のツールと Monitor のツールに使う。無ければ PowerShell のツールでコマンドを動かす
+- Claude Code が Git Bash を探す順は、`C:\Program Files\Git`・`C:\Program Files (x86)\Git` → `PATH` の `git` の `bin\bash.exe`（公式の Troubleshoot installation）。ほかの場所に入れたときは、設定の `env` の `CLAUDE_CODE_GIT_BASH_PATH` に `bash.exe` のパスを書く
+
+### Windows 11 で Claude Code を入れる / 手順 4: 補足: PATH の足し方
+
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-5-補足-path-の足し方)
+
+- native installer は `PATH` を変えない（この項の手順 3 の補足）。公式の文書（Troubleshoot installation の Verify your PATH）は、Windows PowerShell に `[Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')` を貼る形で足す。この手順も同じ書き方で、あれば足さないようにしただけ
+- `SetEnvironmentVariable` の `User` は、レジストリの `HKCU\Environment` の `Path` に書き、開いているウィンドウに環境が変わったことを知らせる。そのため、この後に開いた PowerShell に効く（サインインし直さなくてよい）
+- 読むときに `%USERPROFILE%` のような書き方は展開され、書き戻すと展開した形（`C:\Users\<WIN_USER>\...`）で残る（.NET Framework の `Environment` の動き）。自分のユーザーの PATH なので、困ることは無いはず
+- 足すのは自分のユーザーの PATH だけで、システムの PATH（管理者の権限が要る）は変えない
+- 公式の文書は、画面からでも同じことができるとしている（システムのプロパティ → 環境変数 → ユーザー環境変数の `Path` → 新規）
+- 開いている PowerShell には効かない。同じ項の手順 5 で開き直す
+
+### Windows 11 で Claude Code を入れる / 手順 5: 補足: 開き直した PowerShell が読む PATH
+
+- 開き直した PowerShell は、同じ項の手順 4 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
+
+### Windows 11 で Claude Code を入れる / 手順 7: 補足: ログインの流れと、ログインの情報の置き場所
+
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-8-補足-ログインの流れとログインの情報の置き場所)
+
+- 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
+
+- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[Claude Code の Remote Control: 実施手順](../ai-agents.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
+- ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
+- Remote Control（[Claude Code の Remote Control: 実施手順](../ai-agents.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
+
+### Windows 11 で Claude Code を入れる / 手順 8: 補足: 後ろに続けて貼らない理由
+
+- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
+
+### Windows 11 で Codex CLI を入れる / 手順 2: 補足: 置き場所と PowerShell の設定
+
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+
+- 実行ファイルの入口は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`。`bin` は `%USERPROFILE%\.codex\packages\standalone\` 内の配布物を指すジャンクションになる
+- インストーラーがユーザー用 PATH と、今の PowerShell の PATH の両方を設定する
+- `&` でスクリプトブロックとして呼び、インストーラーの StrictMode・エラー処理の設定を呼び出し元に残さない
+- PowerShell 全体の ExecutionPolicy を変更する手順は不要
 
 ### scoop・winget・WSL を上げる / 手順 3: 補足: SSH のセッションの項を貼り直す理由
 
@@ -815,11 +1010,282 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - Windows の更新は、このコマンドでは行わない
 - 新しく開いた管理者の窓で Windows Update を行うのは、読み込み済みの窓では古いモジュールが残るため
 
+### scoop・winget・WSL を上げる / 手順 8: 補足: zoxide を上げた後の更新
+
+- これより後は、[scoop・winget・WSL を上げる](../windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 で、ほかのツールと一緒に上がる
+
+### Git for Windows・Firefox・WezTerm を上げる / 手順 4: 補足: 新しい版が無いとき
+
+- winget に新しい版が無いのは、Firefox が自分で先に上げているからのこともある
+
+### Git for Windows・Firefox・WezTerm を上げる / 手順 5: 補足: winget での更新
+
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-の更新--手順-2-補足-winget-での更新)
+
+- winget の定義の `UpgradeBehavior` は `install`。今の Firefox を消さずに、同じ場所へ新しい版のインストーラを重ねて入れる。プロファイルと既定のブラウザーの設定はそのまま
+- winget が渡す `/PreventRebootRequired=true` は、使用中のファイルがあっても再起動が要る処理をしないスイッチ。Mozilla の文書は、動いている Firefox に重ねて入れるときにこれを付けると、入れ替えが途中で終わることがあると書いている
+- winget の定義は、Mozilla が新しい版を出してから、winget-pkgs に定義が足されたときに上がる。Firefox 自身の更新の方が先に上がることもある
+
+### AI エージェントとプラグインを上げる / 手順 2: 補足: 終了する理由
+
+- 先に Grok を終了するのは、動いている `grok.exe` は置き換えられないため
+
+### ロールバック / エディタとシェルのツールを消す / 手順 7: 補足: 開き直す理由
+
+- 共通の bash 設定と PowerShell 7 のプロファイルは、無いツールを読まないので、開いている Git Bash のタブと PowerShell 7 の窓は閉じて開き直す
+
+### ロールバック / OpenSSH・Git for Windows・Firefox・WezTerm を外す / 手順 5: 補足: 窓が出る理由と、アンインストーラが消すもの
+
+- winget は、NSIS のインストーラで入れたものを、アンインストールの登録の `QuietUninstallString`（画面を出さずに消すコマンド）で消し、それが無ければ `UninstallString` で消す（winget のソースの `UninstallFlow.cpp`）
+- Firefox が書くのは `UninstallString`（`C:\Program Files\Mozilla Firefox\uninstall\helper.exe`）だけなので、ふだんのアンインストールと同じ窓が出る（Firefox のソースの `shared.nsh`）
+- アンインストーラは、Firefox のタスク（Default Browser Agent と Background Update）を消し、ほかに使う Mozilla のアプリ（Thunderbird など）が無ければ Mozilla Maintenance Service も外す（Firefox のソースの `uninstaller.nsi`）
+- 入れ直したときのリフレッシュの勧めは、アンインストーラが `HKCU\Software\Mozilla\Firefox` に残す `Uninstalled-release` の値による（同じソース）
+
+### ロールバック / アプリと貼り付けの設定を外す / 手順 4: 補足: 先に current の読み取り専用を外す理由
+
+- scoop はアプリを入れるたびに、`~\scoop\apps\<アプリ>\current` を版のフォルダーへのジャンクションにし、読み取り専用の属性を付ける（`lib/install.ps1` の `link_current` の `attrib $currentdir +R /L`）
+- scoop 0.6.0 の `scoop uninstall scoop`（`bin/uninstall.ps1`）は、アプリごとに `unlink_current (appdir $app $global)` を呼ぶ。`unlink_current` は渡されたフォルダーの親の `current` を探すので、`~\scoop\apps\current` を探して何もしない（ふつうの `scoop uninstall <アプリ>` は版のフォルダーを渡すので、読み取り専用を外してから消す）
+- 残った読み取り専用のジャンクションは、続く `Remove-Item -Recurse -Force` で「アクセスが拒否されました」になる。`$errors = $true` は関数の中だけで立つので `Not all apps could be deleted.` は出ず、`~\scoop\apps` を消すところで `Couldn't remove` の `abort` で終わる。後ろの PATH の片付けまで進まないので、ユーザーの PATH の `scoop\shims` は残る
+- `~\scoop\apps` の中は名前の順に消すので、消せないアプリが `scoop` より後ろ（`scoop-search` など）なら、scoop 本体は先に消えている。前（`7zip`・`git` など）なら、scoop 本体は残る
+- 1 行目で `attrib.exe -R /L` を先に当てると、`Remove-Item` がジャンクションを消せて、最後まで進む（2026-10-08 に VM で確かめた。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
+
+### ロールバック / アプリと貼り付けの設定を外す / 手順 6: 補足: 文字コードを変えずに消す
+
+- ファイルをバイトのまま読み、消す行のほかのバイトは変えずに書き戻す
+- 先頭が `FF FE`（UTF-16 LE の BOM）なら UTF-16 LE として、それ以外は 1 バイトを 1 文字にする Latin-1（コードページ 28591）として読み書きする。消す行は ASCII の文字だけなので、UTF-8（BOM の有無によらない）・Shift_JIS のどちらでも同じバイトで見つかる
+- ファイルの 1 行目は BOM の直後にあるので、行の前の BOM を許して探し、BOM は残す
+- 残りが BOM と空白だけなら、ファイルを消す
+- `Get-Content` と `Set-Content` で書き直さないのは、Windows PowerShell 5.1 が BOM の無いファイルを ANSI（日本語の Windows では Shift_JIS）として読み、`Set-Content` が指定しないと ANSI で書くため。BOM の無い UTF-8 の日本語が化ける
+
+### Windows 11 のロールバック / Windows 11 で AI エージェントとプラグインを消す / 手順 3: 補足: 消すもの
+
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-のロールバック--手順-2-補足-消すもの)
+
+- 公式の文書の Windows PowerShell の手順が消すのは、`%USERPROFILE%\.local\bin\claude.exe` と `%USERPROFILE%\.local\share\claude`（版のファイル）の 2 つ
+- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../ai-agents.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。消去対象の根拠と検証範囲は検証記録に置く
+- 空になった `%USERPROFILE%\.local\share` などは残る
+
+### Windows 11 で Grok Build を入れる / 手順 2: 補足: インストーラーの動き
+
+- `%USERPROFILE%\.grok\downloads\grok-windows-<アーキ>.exe` を取ってきて、`%USERPROFILE%\.grok\bin\grok.exe` と `agent.exe` に写す（リンクではなくコピー）
+- Grok が使う Git（MinGit）を `%LOCALAPPDATA%\grok\git\<版>` に置く。zip は SHA-256 を確かめてから展開する
+- PowerShell の補完を `%USERPROFILE%\.grok\completions\powershell\grok.ps1` に書く（プロファイルには足さない）
+- 自分のユーザーの PATH の先頭に `%USERPROFILE%\.grok\bin` を足し、今の窓の `$env:Path` にも足す（`[Environment]::SetEnvironmentVariable('Path', …, 'User')`。[Claude Code の参考資料](#windows-11-で-claude-code-を入れる--手順-4-補足-path-の足し方)と同じ書き方で、`%USERPROFILE%` のような書き方は展開した形で書き戻される）
+- スクリプトの先頭で `$ErrorActionPreference = 'Stop'` にするので、`irm … | iex` ではなく `&` でスクリプトブロックとして呼び、今の窓にその設定を残さない（Codex CLI と同じ）。失敗したときの `exit 1` は、どちらの呼び方でも窓を閉じることがある
+
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+
+### 選択した方針
+
+#### プライバシーと広告の表示を切る
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 広告 ID・カスタマイズされたエクスペリエンス | 自分のユーザーの値（`HKCU`） | ポリシー（`DisabledByGroupPolicy`・`DisableTailoredExperiencesWithDiagnosticData`）: 設定の画面が灰色になり、「組織によって管理」の表示が出る。広告 ID のポリシーは全ユーザーにかかる |
+| 診断データ | 画面で確かめ、オプションがオンのときだけ切る | `AllowTelemetry` のポリシー: 画面を灰色にする。0（オフ）は Enterprise・Education・Server だけ |
+| 辞書・設定アプリの通知 | 画面で切る | レジストリ: 辞書は既にある分が消えない。通知の値は資料が少ない |
+| アクティビティの履歴 | 入れない | 送信は KB5034204（2024-01）で廃止され、履歴はこの PC にだけ残る。24H2 以降は画面が無いと広く報告されていて、止めるのは `HKLM` のポリシー（`PublishUserActivities` など）だけ |
+| Recall | 入れない | Copilot+ PC だけの機能で、管理されていない PC では、利用者が同意するまでスナップショットを保存しない（文書） |
+| アプリの起動の追跡（`Start_TrackProgs`） | 入れない | 文書（18.1）にある値だが、スタートの「よく使う」と、Win+R・アドレス バーのアプリの履歴も消えると広く言われる（2025 年の新しいスタートでの働きは確かめていない） |
+| ロック画面のトリビアとヒント | 入れない | 背景が Windows スポットライトの間は切れない（チェックが出ない。広く）。スポットライトを止めるポリシーは Enterprise・Education だけ（文書） |
+| モバイル デバイスの提案・共有のおすすめのアプリ・スタートの閲覧履歴のサイト・Edge のおすすめ | 入れない | 資料が少ないか、管理者のポリシーで Pro では効かないものがある |
+| 位置情報 | 入れない | 文書にあるのは `HKLM` のポリシーだけで、「組織によって管理」の表示が出る |
+| 値を戻す方法 | 元の値をファイルに控えて、そのとおりに戻す | 既定の値に戻す: Rufus で入れた PC などでは、元が 0 のことがある |
+
+#### Edge の常駐をポリシーで止める
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **`HKLM` の必須のポリシー** | 「サインイン・検索・キーボード」の手順 4 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
+| 推奨のポリシー（`Edge\Recommended`） | 利用者が一度でも切り替えていると効かない（文書）。管理の表示が出るかは資料が無い | 不採用 |
+| `HKCU` のポリシー | 書くのに管理者が要るのは同じ。両方あると `HKLM` が勝つ（Chromium の文書） | 不採用 |
+| Edge の設定の画面 | 管理の表示は出ない。Edge が自分でオンに戻すことがあるかは、資料が無い | 代わりの手順（この節の手順 3） |
+| 旧 Edge の `AllowPrelaunch` など | EdgeHTML の Edge のポリシーで、今の Edge には効かない | 不採用 |
+
+#### 表示・入力・音・ストレージを変える
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 透明効果 | 変えない | `EnableTransparency` を 0 にすると、WezTerm の自分用の設定のアクリルの背景（`win32_system_backdrop = "Acrylic"`）も単色になるはず（WinUI の文書が、透明効果を切るとアクリルが単色になると書く）。利用者はアクリルを使い続ける |
+| Xbox Game Bar と録画 | 入れない | Win+G を止めるサポートされた値が無い。Game Bar のアプリを外すと、ゲームを開くたびに `ms-gamingoverlay` の窓が出たという報告がある（Microsoft Q&A の質問。広く）。バックグラウンドの録画は既定でオフ。録画を止めるポリシー（`AllowGameDVR`）の CSP の注は "The policy is only enforced in Windows 10 for desktop." で、Windows 11 で効くかは書いていない（確かめていない） |
+| アニメーション効果 | `SystemParametersInfo` | `UserPreferencesMask` を丸ごと書く: ほかのビットも変わる |
+| 起動音 | 画面のチェック | レジストリ: 資料どうしで値の意味が食い違う |
+| 効果音 | `.Current` を空にし、スキームを `.None` にする（先に `.reg` で控える） | 画面だけ: 戻すときに、元の音を全部は戻せない |
+| ギャラリーとホーム | 自分のユーザーの CLSID の上書き | PC 全体の `NameSpace` を消す: 管理者が要り、ほかのユーザーにもかかる |
+| ストレージ センサー | 自分のユーザーの値（ダウンロードは消さない） | ポリシー（`AllowStorageSenseGlobal`）: 設定の画面が灰色になる |
+| マウス キー・ハイ コントラスト・ナレーターのショートカット | 入れない | 3 つのキーを同時に押すので誤って押しにくく、値は広くだけ |
+
+#### CopyQ を使う
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **winget の `hluk.CopyQ` を `--scope user` で** | 管理者が要らず、UniGet UI・PowerToys と同じ形。`## 更新` の winget の一覧で上がる | **採用** |
+| winget の `--scope machine` | `%ProgramFiles%\CopyQ` に入り、管理者の確認が要る | 不採用 |
+| scoop の `extras/copyq` | extras のバケットは git が要り（この文書の時点では Git for Windows が無い）、動いている間は更新を飛ばし、シムが GUI の終了を待つ | 不採用 |
+| Windows のクリップボードの履歴（Win+V） | 標準で入っている | 不採用（利用者の選択） |
+| Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
+| インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
+| ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
+
+#### PowerToys のユーティリティを絞る
+
+| 経路 | 状況 | 採否 |
+|---|---|---|
+| **設定ファイル（`settings.json` の `enabled`）を、終了してから書く** | 管理者が要らず、控えから戻せる。書き方は Microsoft の文書に無い | **採用** |
+| 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | この節の手順 6 で確かめに使う |
+| `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
+| `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
+| Keyboard Manager で Caps Lock を変える | 「サインイン・検索・キーボード」の手順 5 の Scancode Map を採った（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)） | 不採用 |
+| 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
+
+#### WSL のネットワークをミラーにする
+
+- **ミラーにする理由**: WSL と Windows が `127.0.0.1` で互いにつながり、IPv6・マルチキャスト（mDNS）・VPN との相性がよく、LAN から WSL に直接届く（Microsoft の文書）
+- **既知の問題**（Microsoft の文書。troubleshooting）
+  - Docker の `-p` のポートの公開（`ignoredPorts` で避ける）、OpenVPN 2.6.501 などの一部の VPN
+  - UDP 68・TCP 135/1900/2869/5004/3702/5357/5358 は、WSL に届かない
+  - WSL が `accept_local`・`route_localnet`・`rp_filter` などの sysctl を自分で設定する
+  - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
+- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、「ネットワークとリモート」の手順 4・6 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
+- **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
+- [VirtualBox のゲスト（bootc）](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| ネットワーク | ミラー | NAT（既定）: WSL から Windows のサーバーに LAN の IP あてでつなぎ、IPv6・mDNS が使えない |
+| 書くキー | `networkingMode` だけ | `dnsTunneling`・`firewall`・`autoProxy`: 既定で有効。メモリなど: 既定で足りる |
+| LAN から WSL への受信 | 開けない | Hyper-V のファイアウォールの規則: 管理者が要り、WSL の中のサーバーを LAN に開ける |
+| `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
+| 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
+
+#### リモートから再起動する手段を増やす
+
+- **既にある接続（SSH・RDP・Remote Control）からの再起動を第一にし、それが使えないときの経路を足した**
+  - SSH の sshd と RDP のサービスは再起動の後に自動で戻るので、再起動の引き金としても戻る口としても使える
+- **別の PC からの再起動は、Linux からも使える SMB を主に、Windows 同士の WinRM を従にした**
+  - SMB は AlmaLinux の `net rpc shutdown` でも Windows の `shutdown /m` でも使える。WinRM は Windows 同士で、開けるポートが 1 つで済む
+- **電源・帯域外の手段（スマートプラグ + BIOS の通電時起動・IP-KVM・Intel AMT/vPro）は、この文書では扱わない**（利用者の選択）
+  - 機器やマザーボードに依存し、設定が Windows の外になる。電源を切った後に起こすのは、既存の [Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)が担う
+
+#### SSH で管理者・非管理者の PowerShell を使う
+
+- 対象は[手順書の「SSH で管理者・非管理者の PowerShell を使う」](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)。デスクトップで行う初期設定の項とは検証範囲を分け、SSH の操作と貼り付けの結果は[今回の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)へ置く
+- **管理者かどうかは実効トークンで確かめる**: Administrators のユーザーで SSH に入ると、通常のデスクトップの非管理者シェルと同じ権限にはならない。ユーザー名だけで判断せず、`WindowsPrincipal.IsInRole(Administrator)` と Windows 標準の `whoami.exe /groups` の整合性レベル・管理者 SID の属性を確認する。[Win32-OpenSSH の issue #1652](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **同じユーザーの子だけ降格する**: busybox-w32 の `drop` で起動し、Medium、管理者 SID が拒否専用、`Admin : False` を確認する。同じユーザーの設定・ファイルを引き続き使える。親は管理者のまま待つので、子を `exit` で閉じて親へ戻る。UAC の対話的な昇格を SSH 内に作らず、この往復を使う。[busybox-w32 の drop の実装](https://github.com/rmyorston/busybox-w32/blob/master/miscutils/drop.c)、[OpenSSH のネットワークログオンと UAC の説明](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
+- **専用の固定版を照合して置く**: [公式配布ファイル](https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe)の x64 用 `FRP-6075-g169694ebd` と SHA-256 を組にし、`%LOCALAPPDATA%\setup-notes\bin\busybox.exe` に置く。[Scoop の busybox の定義](https://github.com/ScoopInstaller/Main/blob/master/bucket/busybox.json)は多数の shim とシェルの初期化を伴うため、降格だけに使う今回は採らない。既存の別ファイルは上書きせず、取得した一時ファイルを照合してから移す。撤去も同じハッシュに一致した実行ファイルだけを削除する
+- **drop の後ろに `--` を置く**: 固定版は後続の `-NoLogo` なども自身のオプションとして読むため、`drop -- powershell.exe …`／`drop -- pwsh.exe …` にする。失敗した呼び出しと修正後の結果は検証記録に保持する
+- **先に対話 SSH、次に PowerShell**: SSH 先の Git Bash でシェル統合を読み、5.1 または 7 を起動する。[Windows OpenSSH の PTY のコマンド生成](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32-doexec.c)は、シェル・`-c`・コマンド本文を空白で連結する。`ssh -tt <host> '<複数のコマンド>'` では Bash の `-c` の引数の囲みが失われるため、本文では接続先の対話プロンプトから起動する
+- **接続元のクリップボードを渡す**: [WezTerm PR #39](https://github.com/ryo-aoki-pc/wezterm/pull/39) のローカル Windows 向けの Paste は、SSH 先の PowerShell にはそのまま適用できない。接続元では Linux の Wayland の `wl-paste`／X11 の `xclip`、Windows の標準 PowerShell を使い、同じ右クリック・Ctrl+Shift+V の操作から渡す
+- **本文を送る前に二段階で確認する（V2）**: 専用の Ctrl+Shift+F12 で受信ハンドラーを開き、識別子付きの `READY` を照合して、本文を含まない `WZP2:<nonce>:` のヘッダーだけを送る。正しいヘッダー全体を受信した `BODYREADY` を照合してから、改行を含まない `<Base64長>:<Base64>~WZE2:<nonce>~` の本文を送る。長さは UTF-8 のバイト数ではなく Base64 の文字数。受信処理が始まる前に本文を送らず、終端の nonce も同じ値にする
+- **PSReadLine の入力欄へ挿入する**: 検証・復号後の本文は PSReadLine の `Insert`／選択範囲の `Replace` で挿入し、Enter は送らない。CR とタブは既存の `Paste` と同じ扱いにし、空行・日本語・末尾改行を保持する
+- **本文の上限は UTF-8 で 64 KiB にする**: SSH 先の入力処理の負荷を限定し、65,536 バイトを超える本文は送らない。大きな本文はブロックを分ける。上限までの受信時間と、開発中に試した 1 MiB の結果は検証記録に分けて残す
+- **準備待ちに期限を設ける**: SSH 先は正しいヘッダーを受け取るまで開始から 5 秒を上限にし、ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさない。接続元の `READY`・`BODYREADY` 待ちはそれぞれ 3 秒にし、応答処理でも期限を確認する。同じ入力待機の識別子（epoch）で専用キーを再発火せず、版が違う応答も拒否する
+- **更新後は新しい SSH と PowerShell を起動する**: 受信処理の C# の型は読み込み済みのプロセス内では入れ替えられない。統合ファイルを更新した後は、手順どおり SSH へログインし直し、新しい PowerShell から読む。V1 の型が残る状態から V2 を初めて読むことと、同じ最終版を再びドットソースすることは、既存の V2 の型を更新する操作とは区別する
+- **終端も nonce で照合する**: 本文の受信開始後は、単独の `~` や別の nonce の終端では入力欄に戻らず、同じ `~WZE2:<nonce>~` まで読み捨てる。利用者が先に `~` を打っても、遅れて届く本文を親の入力欄へ流さない
+- **本文送信と受信の例外でも入力欄へ流さない**: 本文を送れた判定は送信処理が正常に終わった後で立て、途中で送信が失敗したときは取消用の `~WZE2:<nonce>~` を送る処理を行う。SSH 先の Console IO に例外が出たときも、正しいヘッダーを受信した後は同じ nonce の終端まで読み捨ててから入力欄へ戻る。ヘッダー受信前の例外では 5 秒の期限を延ばさない
+- **失敗時に本文を別のシェルへ送らない**: 取得失敗・無応答・取り消し・不正フレームでは通常貼り付けへ切り替えない。SSH 先の PSReadLine が無い、または専用キーの登録に失敗した場合は `unavailable` の目印を出し、貼り付けは通知して止める。ペインごとに配送状態と識別子を照合し、コマンド開始・例外・終了・親 Bash 復帰で SSH の PowerShell の目印を解除する。正しいヘッダーを受信した後の Ctrl+C は本文を末尾まで読み捨てるので、その後に配送が止まった場合は待機が続く可能性がある
+
+#### git-delta
+
+[Windows 11 で使う](../windows-setup.md#git-delta)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）。
+
+- **scoop の main のバケットで入れた**（winget は採らない）
+  - [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」と同じ。管理者が要らず、[Windows 11 のセットアップの更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
+  - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
+  - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
+  - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
+  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)）
+- **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（[Windows 11 で使う / 手順 4 の補足](#git-delta--手順-4-補足-実施手順の手順-13-を-git-bash-で貼る)）
+- **シェルとの組み込み方**
+  - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
+  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
+  - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 のセットアップの PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ
+  - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 のセットアップの「貼り付けの設定」の手順 4 の 1 行のまま
+  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[実施手順](../almalinux-setup.md#git-delta)を WSL の中で通す
+- **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#git-delta--手順-2-補足-vc-ランタイム)
+- **scoop の less は入れない**: [Windows 11 で使う / 手順 5 の補足](#git-delta--手順-5-補足-ページャの-less-と-powershell-の-git)
+- **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
+- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 のセットアップのロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
+- **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
+
+#### GitHub CLI
+
+[Windows 11 で使う](../windows-setup.md#github-cli)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-windows-11-で使う-検証状況の記録)）。
+
+- **scoop の main のバケットの `gh`**: [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」に合わせた
+  - 管理者の権限が要らない。[Windows 11 のセットアップの更新](../windows-setup.md#更新)の `scoop update *` でほかのツールとまとめて上がり、UniGet UI にも出る
+  - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
+  - 上流の MSI や zip を手で入れる形は、更新が手作業になる
+  - scoop は、定義の sha256（上流の `gh_<版>_checksums.txt` と同じ値）で zip を確かめる。`gh.exe` には `GitHub, Inc.` の Authenticode の署名があるが、手順では確かめない
+  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)）
+- **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
+  - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
+  - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
+- **git の HTTPS の認証は Git Credential Manager のまま**: [Windows 11 で使う / 手順 4 の補足](#github-cli--手順-4-補足-git-の認証に-n-と答える理由)
+- **シェルとの組み込み方**
+  - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
+  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
+  - **PowerShell 7 のプロファイルには何も足さない**: [PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ。gh の PowerShell の補完（`gh completion -s powershell`）は、pwsh を開くたびに gh を 1 回動かすので入れない
+  - **Windows PowerShell 5.1 のプロファイルにも足さない**: 手順書を貼る窓のプロファイルは、Windows 11 のセットアップの「貼り付けの設定」の手順 4 の 1 行のまま
+  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
+- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[Windows 11 で WezTerm を入れる](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を前提にしない
+- **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 のセットアップのロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外したときも）、その項目が残る
+
+#### lazygit
+
+[Windows 11 で使う](../windows-setup.md#lazygit)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#lazygit-windows-11-で使う-検証状況の記録)）。
+
+- **scoop の extras の `lazygit`**（main のバケットには無い）
+  - extras のバケットを足すのに git が要る（Git for Windows）。extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使うので、ロールバックでも外さない
+  - lazygit は Go の 1 つの実行ファイルなので、VC++ のランタイムは要らない（自分用の設定が使う delta は要る。[git-delta](../windows-setup.md#git-delta)の手順 2 で確かめる）
+  - winget の `JesseDuffield.lazygit` と両方あると、`PATH` の順でどちらかが使われ、分かりにくい。Windows 11 で使うの手順 2 で見つけたら、外してから始める
+- **設定の置き場所は `%LOCALAPPDATA%\lazygit`**
+  - lazygit 0.66.0 の Config.md の Windows の既定の場所。`%APPDATA%\lazygit\config.yml` も探す（adrg/xdg の Windows の `XDG_CONFIG_DIRS` は `%ProgramData%` と `%APPDATA%`）
+  - `XDG_CONFIG_HOME` は設定しない（[Neovim の参考資料](neovim.md#windows-11-で-neovim-を入れる)）
+- **自分用の設定は、設定のリポジトリの README の Windows の例へリンクする**（clone のコマンドはこの文書に載せない）。その例は `%LOCALAPPDATA%\lazygit` に直接 clone する（シンボリックリンクには、開発者モードか管理者の権限が要るため）。状態ファイル `state.yml` は、そのリポジトリの `.gitignore` で除いてある
+- **確かめの起動は `%TEMP%\lazygit-check` の空のリポジトリで行う**
+  - 読者のリポジトリの場所を決め打ちできないため。git 管理外で起動すると、リポジトリを作るか聞かれる
+  - `git init` が失敗したまま起動すると、元のフォルダーでリポジトリを作るか聞かれるので、`.git` ができたことを確かめてから起動する
+- **`e` キーのエディタ**: Windows PowerShell から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[Neovim の参考資料](neovim.md#windows-11-で-neovim-を入れる)）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
+
+#### yazi
+
+[Windows 11 で使う](../windows-setup.md#yazi)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-windows-11-で使う-検証状況の記録)）。
+
+- **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
+- **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
+  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../shell-terminal.md#シェルのツール)、Windows 11 は [シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
+  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[Windows 11 で HackGen Console NF を入れる](../shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の HackGen Console NF
+  - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
+    - そのため、Windows 11 で使うの手順 4 は、同じ節の手順 2 を貼っていない窓では止める
+- **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
+  - yazi の文書が勧める唯一の形。scoop・Chocolatey の `file` は Unicode のファイル名を扱えない
+  - yazi は `YAZI_FILE_ONE` をシェルを通さずに起動するので、`Program Files` の空白は問題にならない
+    - yazi 26.9.1 の `yazi-plugin/preset/plugins/mime-local.lua`・`file.lua` は、`Command(<YAZI_FILE_ONE の値>)` で起動する
+    - Lua の `Command` は、`yazi-binding/src/process/command.rs` の `tokio::process::Command::new`（シェルを挟まない）。`ya env` も `Command::new` で動かす（`yazi-cli/src/env/env.rs`）
+  - PowerShell の `PATH` には `file` が無い。Git Bash には `/usr/bin/file` があるが、PowerShell や Windows Terminal から起動したときにも同じに動くよう、ユーザーの環境変数にする
+  - Windows 11 で使うの手順 5 は、前の値を確かめずに上書きする。元の値は同じ節の手順 3 で控え、ロールバックの「エディタとシェルのツールを消す」の手順 3 の後に手で戻す
+  - そのロールバックの手順 3 は、値が Git for Windows の `file.exe` のときだけ消す（Neovim の `EDITOR`・`VISUAL` と同じく、後から変えた値は残す）
+- **VC++ のランタイムは、Neovim と同じく「Windows 11 で WezTerm を入れる」の手順 3 を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
+- **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定の Windows の clone は、設定のリポジトリの README の例へリンクする
+- **`y` は Git Bash の共通の設定だけで使う**: Windows PowerShell 5.1 は手順書を貼る窓なので、ツールの初期化（PowerShell 版の `y`）は足さない。WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
+  - PowerShell 7 のプロファイル（[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
+- **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に Neovim を通すよう案内する）
+  - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）
+  - `${EDITOR:-vi}` は `for = "unix"` の行だけで、Windows の yazi は `EDITOR` を見ない
+  - テキスト（`text/*`）は `edit` が最初の候補なので、自分用の設定が無いと、Git Bash の `y` から開いても Enter で `code` が動く
+  - 自分用の設定（`ryo-aoki-pc/yazi` の `yazi.toml`）は、Windows の `edit` を `nvim %s`（`block = true`）にしてある
+- **確かめは `ya env`**: 26.9.1 には `yazi --debug` が無く、`ya env` が設定の場所・変数・依存の版・`file -bL --mime-type` の結果を出す
+- **TUI の手順を節の最後にした**: Git Bash の `y` の確かめを先にし、PowerShell の `yazi` の起動を最後に置いた
+  - Git Bash のタブを開くところ（コマンドの無い手順 8）と、そこに貼る `type -t y` と `y`（`bash` のブロックの手順 9。Git と同じく、Git Bash には bash の構文で貼る）を分けた
+  - 手順 9 の `y` も TUI を開くので、手順 9 の最後で閉じてから PowerShell に戻る
+
+
 ### 参照
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#補足の実測)
 
-2026-10-08 に任意節として足した項（プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ）の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
+プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ の項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
 
 - 文書: [Manage connections from Windows operating system components to Microsoft services — Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services) — 18.1（広告 ID・言語リスト・`Start_TrackProgs`）、18.6（オンライン音声認識）、18.16（フィードバックの頻度）、18.21（手書き入力）、18.22（アクティビティの履歴）
 - 文書: Policy CSP — [Privacy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)・[Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[System](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system)・[Search](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage)・[ApplicationManagement](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement) — 採らなかったポリシーと、値が無いときの動き
@@ -842,7 +1308,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - コード: [ReactOS の input.cpl](https://github.com/reactos/reactos/blob/master/dll/cpl/input/key_settings_dialog.c)・[Wine の sysparams.c](https://github.com/wine-mirror/wine/blob/master/dlls/win32u/sysparams.c)・[Chromium の animation_win.cc](https://chromium.googlesource.com/chromium/src/+/HEAD/ui/gfx/animation/animation_win.cc)・[Chromium の auto_launch_util.cc](https://chromium.googlesource.com/chromium/src/+/main/chrome/installer/util/auto_launch_util.cc)、[MDN の prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
 
-2026-10-08 に任意節として足した項の 2 つ目（PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク）の資料。「文書」「コード」「広く」の区別は上と同じ。
+PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワークの項の資料。「文書」「コード」「広く」の区別は上と同じ。
 
 - 文書: [Install PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/install)・[PowerToys の DSC（Microsoft.PowerToys DSC v3）](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/microsoft-dsc)・[PSDSC](https://learn.microsoft.com/en-us/windows/powertoys/dsc-configure/psdsc)・[Running as administrator](https://learn.microsoft.com/en-us/windows/powertoys/administrator)・[Peek](https://learn.microsoft.com/en-us/windows/powertoys/peek)・[Mouse utilities](https://learn.microsoft.com/en-us/windows/powertoys/mouse-utilities)・[Command Not Found](https://learn.microsoft.com/en-us/windows/powertoys/cmd-not-found) — Microsoft Learn。入る場所の食い違い、DSC、管理者で動かすこと、Peek の Space、Find My Mouse、プロファイルへの追記
 - コード: [microsoft/PowerToys](https://github.com/microsoft/PowerToys)（`src/runner/main.cpp`・`general_settings.cpp`・`auto_start_helper.cpp`、`src/common/SettingsAPI/settings_helpers.cpp`、`src/settings-ui/Settings.UI.Library/EnabledModules.cs`・`PeekProperties.cs`・`FindMyMouseProperties.cs`、`src/modules/peek/peek/dllmain.cpp`、`installer/PowerToysSetupVNext/Common.wxi`・`Product.wxs`、`doc/dsc/modules/App.md`）
@@ -855,9 +1321,13 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
 - コード: [microsoft/WSL](https://github.com/microsoft/WSL)（`src/windows/common/WslCoreConfig.cpp`・`WslCoreConfig.h`、日本語の訳の `localization/strings/ja-JP/Resources.resw`）
 
+#### OpenSSH サーバー
+
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-補足の実測)
+
 ---
 
-## VM での確認に伴う手順修正の根拠
+## 設定と確認方法の根拠
 
 - 「Windows Update」の手順 4・7: PSWindowsUpdate 2.2.1.5 は複数件の結果を 1 つの `Collection` として返す場合がある。`ForEach-Object { $_ }` で各更新を展開してから件数を数える。更新対象の Criteria と実際の適用コマンドは変えない。
 - 「アプリを入れる」の手順 4〜6: 確認の [`winget list`](https://learn.microsoft.com/en-us/windows/package-manager/winget/list) も `--source winget` で導入元に絞る。source 未指定では `msstore` の初回の規約と地域情報の同意待ちになる場合がある。
@@ -869,641 +1339,3 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 実施環境と再実行の結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。
 
 ---
-
-## SSH で管理者・非管理者の PowerShell を使う: 選択した方針
-
-- 対象は[手順書の「SSH で管理者・非管理者の PowerShell を使う」](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)。デスクトップで行う初期設定の項とは検証範囲を分け、SSH の操作と貼り付けの結果は[今回の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)へ置く
-- **管理者かどうかは実効トークンで確かめる**: Administrators のユーザーで SSH に入ると、通常のデスクトップの非管理者シェルと同じ権限にはならない。ユーザー名だけで判断せず、`WindowsPrincipal.IsInRole(Administrator)` と Windows 標準の `whoami.exe /groups` の整合性レベル・管理者 SID の属性を確認する。[Win32-OpenSSH の issue #1652](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
-- **同じユーザーの子だけ降格する**: busybox-w32 の `drop` で起動し、Medium、管理者 SID が拒否専用、`Admin : False` を確認する。同じユーザーの設定・ファイルを引き続き使える。親は管理者のまま待つので、子を `exit` で閉じて親へ戻る。UAC の対話的な昇格を SSH 内に作らず、この往復を使う。[busybox-w32 の drop の実装](https://github.com/rmyorston/busybox-w32/blob/master/miscutils/drop.c)、[OpenSSH のネットワークログオンと UAC の説明](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
-- **専用の固定版を照合して置く**: [公式配布ファイル](https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe)の x64 用 `FRP-6075-g169694ebd` と SHA-256 を組にし、`%LOCALAPPDATA%\setup-notes\bin\busybox.exe` に置く。[Scoop の busybox の定義](https://github.com/ScoopInstaller/Main/blob/master/bucket/busybox.json)は多数の shim とシェルの初期化を伴うため、降格だけに使う今回は採らない。既存の別ファイルは上書きせず、取得した一時ファイルを照合してから移す。撤去も同じハッシュに一致した実行ファイルだけを削除する
-- **drop の後ろに `--` を置く**: 固定版は後続の `-NoLogo` なども自身のオプションとして読むため、`drop -- powershell.exe …`／`drop -- pwsh.exe …` にする。失敗した呼び出しと修正後の結果は検証記録に保持する
-- **先に対話 SSH、次に PowerShell**: SSH 先の Git Bash でシェル統合を読み、5.1 または 7 を起動する。[Windows OpenSSH の PTY のコマンド生成](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32-doexec.c)は、シェル・`-c`・コマンド本文を空白で連結する。`ssh -tt <host> '<複数のコマンド>'` では Bash の `-c` の引数の囲みが失われるため、本文では接続先の対話プロンプトから起動する
-- **接続元のクリップボードを渡す**: [WezTerm PR #39](https://github.com/ryo-aoki-pc/wezterm/pull/39) のローカル Windows 向けの Paste は、SSH 先の PowerShell にはそのまま適用できない。接続元では Linux の Wayland の `wl-paste`／X11 の `xclip`、Windows の標準 PowerShell を使い、同じ右クリック・Ctrl+Shift+V の操作から渡す
-- **本文を送る前に二段階で確認する（V2）**: 専用の Ctrl+Shift+F12 で受信ハンドラーを開き、識別子付きの `READY` を照合して、本文を含まない `WZP2:<nonce>:` のヘッダーだけを送る。正しいヘッダー全体を受信した `BODYREADY` を照合してから、改行を含まない `<Base64長>:<Base64>~WZE2:<nonce>~` の本文を送る。長さは UTF-8 のバイト数ではなく Base64 の文字数。受信処理が始まる前に本文を送らず、終端の nonce も同じ値にする
-- **PSReadLine の入力欄へ挿入する**: 検証・復号後の本文は PSReadLine の `Insert`／選択範囲の `Replace` で挿入し、Enter は送らない。CR とタブは既存の `Paste` と同じ扱いにし、空行・日本語・末尾改行を保持する
-- **本文の上限は UTF-8 で 64 KiB にする**: SSH 先の入力処理の負荷を限定し、65,536 バイトを超える本文は送らない。大きな本文はブロックを分ける。上限までの受信時間と、開発中に試した 1 MiB の結果は検証記録に分けて残す
-- **準備待ちに期限を設ける**: SSH 先は正しいヘッダーを受け取るまで開始から 5 秒を上限にし、ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさない。接続元の `READY`・`BODYREADY` 待ちはそれぞれ 3 秒にし、応答処理でも期限を確認する。同じ入力待機の識別子（epoch）で専用キーを再発火せず、版が違う応答も拒否する
-- **更新後は新しい SSH と PowerShell を起動する**: 受信処理の C# の型は読み込み済みのプロセス内では入れ替えられない。統合ファイルを更新した後は、手順どおり SSH へログインし直し、新しい PowerShell から読む。V1 の型が残る状態から V2 を初めて読むことと、同じ最終版を再びドットソースすることは、既存の V2 の型を更新する操作とは区別する
-- **終端も nonce で照合する**: 本文の受信開始後は、単独の `~` や別の nonce の終端では入力欄に戻らず、同じ `~WZE2:<nonce>~` まで読み捨てる。利用者が先に `~` を打っても、遅れて届く本文を親の入力欄へ流さない
-- **本文送信と受信の例外でも入力欄へ流さない**: 本文を送れた判定は送信処理が正常に終わった後で立て、途中で送信が失敗したときは取消用の `~WZE2:<nonce>~` を送る処理を行う。SSH 先の Console IO に例外が出たときも、正しいヘッダーを受信した後は同じ nonce の終端まで読み捨ててから入力欄へ戻る。ヘッダー受信前の例外では 5 秒の期限を延ばさない
-- **失敗時に本文を別のシェルへ送らない**: 取得失敗・無応答・取り消し・不正フレームでは通常貼り付けへ切り替えない。SSH 先の PSReadLine が無い、または専用キーの登録に失敗した場合は `unavailable` の目印を出し、貼り付けは通知して止める。ペインごとに配送状態と識別子を照合し、コマンド開始・例外・終了・親 Bash 復帰で SSH の PowerShell の目印を解除する。正しいヘッダーを受信した後の Ctrl+C は本文を末尾まで読み捨てるので、その後に配送が止まった場合は待機が続く可能性がある
-
----
-
-## 統合前の参考資料: OpenSSH サーバー（もとは windows-openssh-server.md）
-
-もとの `windows-openssh-server.md` の参考資料を、内容を変えずに移したもの。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| 実施手順 1 | 「OpenSSH サーバー」の手順 1 |
-| 実施手順 2（`$LAN_IF`） | 「OpenSSH サーバー」の手順 2 |
-| 実施手順 3〜7 | 「OpenSSH サーバー」の手順 3〜7 |
-| 実施手順 8・9 | 「SSH でログインを確かめる」の手順 4・5 |
-| 公開鍵でもログインする（任意）の 1〜5 | 「OpenSSH サーバーに公開鍵でもログインする」の手順 3〜7 |
-| パスワード認証を切る（任意）の 1・2 | 「OpenSSH サーバーのパスワード認証を切る」の手順 3・4 |
-| 既定のシェルを Git Bash にする（任意）の 1〜3 | 「SSH の既定のシェルを Git Bash にする」の手順 3〜5 |
-| scoop のツールを SSH のセッションで使う（任意）の 1・2 | 「scoop のツールを SSH のセッションで使う」の手順 3・4 |
-| ロールバック 1・2 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 2・3 |
-| ロールバック 3 | ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 5 |
-| ロールバック 4 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 9 |
-
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-参考資料から分離した記録)
-
-### OpenSSH サーバー: 補足
-
-#### OpenSSH サーバー: 実施手順 / 手順 1: 補足: Windows PowerShell 5.1 で開く理由
-
-- PowerShell 7（`pwsh`）では、手順 3 が失敗する
-
-#### OpenSSH サーバー: 実施手順 / 手順 2: 補足: 変数について
-
-- `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）
-- 変数はその PowerShell の中だけで有効
-
-#### OpenSSH サーバー: 実施手順 / 手順 3: 補足: 入るものと、PowerShell 7 で失敗すること
-
-- 入るのは Windows のオプション機能「OpenSSH サーバー」（設定アプリの「システム」→「オプション機能」と同じもの）。`C:\Windows\System32\OpenSSH\sshd.exe`と、サービス `sshd`、受信の規則 `OpenSSH-Server-In-TCP` ができる
-- クライアント（`ssh.exe` など）は Windows 11 に最初から入っていて、この手順では変わらない
-- 先頭の `if` は、PowerShell 7（`PSEdition` が `Core`）で貼ったときに何もしないで止めるためのもの
-- 機能は Windows Update から取ってくるので、数分かかる
-
-#### OpenSSH サーバー: 実施手順 / 手順 4: 補足: 最初の起動で作られるもの
-
-- 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。
-- [既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)では、レジストリの `HKLM:\SOFTWARE\OpenSSH` に値を足す
-
-#### OpenSSH サーバー: 実施手順 / 手順 6: 補足: 既定でも有効なのに書く理由と、置き換える理由
-
-- パスワード認証は既定で有効。この手順はそれを明示的な行にするので、[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)で `no` にした PC も、この手順を貼れば戻る
-- `sshd_config` の末尾は `Match Group administrators` のブロックなので、末尾に足した行はそのブロックの中の設定になる。そこで、既定の行を置き換える
-- `sshd -t` は設定の検査だけをする（誤りが無ければ何も出さない）。誤りがあれば再起動しないので、動いている sshd は古い設定のまま残る
-- Windows PowerShell 5.1 の `Set-Content -Encoding ascii` は BOM 無しの ASCII、CRLF で書く
-- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけとしている
-- 行を置き換えるので、何度貼っても結果は同じ
-
-#### OpenSSH サーバー: 実施手順 / 手順 7: 補足: ユーザー名
-
-- Microsoft アカウントでも、ユーザー名はメールアドレスではなく、`C:\Users\` の下のフォルダーの名前
-
-#### OpenSSH サーバー: 実施手順 / 手順 8: 補足: 変数について
-
-- 変数はそのシェルの中だけで有効
-
-#### OpenSSH サーバー: 公開鍵でもログインする（任意） / 手順 1: 補足: 鍵の種類とパスフレーズ
-
-- ED25519 は Windows と AlmaLinux 10 の OpenSSH のどちらも扱え、鍵が短く、この節の手順 3 で 1 行のまま貼れる
-- パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、この節の手順 5 と[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)の手順 2 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
-- 秘密鍵（`~/.ssh/id_ed25519`）はクライアントから出さない。Windows に渡すのは、この節の手順 2 の公開鍵だけ
-
-#### OpenSSH サーバー: 公開鍵でもログインする（任意） / 手順 3: 補足: 読み戻し
-
-- `$PUBKEY` が空、または `ssh-` などで始まらなければ、この節の手順 4 は何もしないで止まる
-
-#### OpenSSH サーバー: 公開鍵でもログインする（任意） / 手順 4: 補足: クライアントを足す
-
-- この節の手順 4 を貼り直すと、`administrators_authorized_keys` に行が足される
-
-#### OpenSSH サーバー: 公開鍵でもログインする（任意） / 手順 5: 補足: 鍵で入ったときのログ
-
-- `-o PasswordAuthentication=no` は、鍵が通らなかったときにパスワードへ移らず、そこで終わらせるため
-
-#### OpenSSH サーバー: パスワード認証を切る（任意） / 手順 1: 補足: 切る前と後
-
-- 行を置き換える理由と `sshd -t` は、[手順 6](../windows-setup.md#openssh-サーバー) の補足と同じ
-- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
-- 行を置き換えるので、何度貼っても結果は同じ
-
-#### OpenSSH サーバー: 既定のシェルを Git Bash にする（任意） / 手順 1: 補足: DefaultShell
-
-- `DefaultShell` は Windows の sshd だけの設定で、`sshd_config` ではなくレジストリに置く。この PC の全ユーザーの SSH のセッションに効く
-- `bin\bash.exe` は、Git の `usr\bin\bash.exe` を `MSYSTEM=MINGW64` と `PATH` を整えて起動する入口。
-- sshd の再起動は要らない。次のログインから変わる
-
-#### OpenSSH サーバー: 既定のシェルを Git Bash にする（任意） / 手順 2: 補足: パスワードを 2 回聞かれる理由
-
-- 鍵を登録していなければ 2 回聞かれるのは、`ssh` が 2 つあるため
-
-#### OpenSSH サーバー: 既定のシェルを Git Bash にする（任意） / 手順 3: 補足: 戻る時期
-
-- `DefaultShell` を消すと、次のログインから cmd.exe に戻る
-
-#### OpenSSH サーバー: scoop のツールを SSH のセッションで使う（任意） / 手順 1: 補足: 貼り直し
-
-- 作り直すものが無ければ何も出ないので、何度貼ってもよい
-
-#### OpenSSH サーバー: 参照
-
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-参考資料から分離した記録)
-
----
-
-## 統合前の参考資料: Git の Windows 11（もとは git.md）
-
-もとの `git.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-gitもとは-gitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で Git for Windows を入れるの 1 | 「Git for Windows」の手順 1 |
-| Windows 11 で Git for Windows を入れるの 2・3 | 「Git for Windows」の手順 2・3 |
-| Windows 11 で Git for Windows を入れるの 4 | （なし。再起動の後に開く窓を使う） |
-| Windows 11 で Git for Windows を入れるの 5 | 「Git Bash と WezTerm の設定」の手順 2 |
-| Windows 11 で Git for Windows を入れるの 6（Git Bash で実施手順） | 「Git Bash と WezTerm の設定」の手順 3・4 |
-| 更新 2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 3 |
-| ロールバック 1〜5（Git Bash） | ロールバックの「Git Bash の設定を戻す」の手順 2〜6 |
-| ロールバック 6 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 4 |
-
-### Git: 補足
-
-#### Git: 実施手順 / 手順 3: 補足: Windows の system の行
-
-- Windows で出る `system` の行（インストーラが書いたもの）より、手順 5・6 で書く `global` の値が優先される
-
-#### Git: Windows 11 で Git for Windows を入れる / 手順 2: 補足: 確かめていること
-
-- Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
-- `bin\bash.exe` は、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)が決め打ちにしている。Claude Code（Windows）の公式の文書も、Git Bash の場所の例にこのパスを挙げる
-- 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
-- `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
-- `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
-- `…\AppData\Local\Programs\Git\cmd\git.exe` の Git for Windows を外してから始めるのは、ほかの手順書が `C:\Program Files\Git` を前提にしているため
-
-#### Git: Windows 11 で Git for Windows を入れる / 手順 3: 補足: UAC
-
-- 管理者の窓から動かすので、UAC の確認も出ないはず
-
-#### Git: Windows 11 で Git for Windows を入れる / 手順 4: 補足: 開き直す理由
-
-- 同じ節の手順 3 で PC 全体の `PATH` に足された `C:\Program Files\Git\cmd` は、開いていた PowerShell には入らない
-
-#### Git: Windows 11 で Git for Windows を入れる / 手順 5: 補足: PATH と、ほかの git
-
-- `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
-- Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
-- scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
-- Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
-
-#### Git: Windows 11 で Git for Windows を入れる / 手順 5: 補足: 版
-
-- `git version` の版は、実行した日の最新
-
----
-
-## 統合前の参考資料: Firefox の Windows 11（もとは firefox.md）
-
-もとの `firefox.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-firefoxもとは-firefoxmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | 「Firefox」の手順 1 |
-| Windows 11 で使う 2〜5 | 「Firefox」の手順 2〜5 |
-| Windows 11 の更新 1・2 | 「Git for Windows・Firefox・WezTerm を上げる」の手順 4・5 |
-| Windows 11 のロールバック 1〜3 | ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」の手順 5〜7 |
-
-### Firefox: 補足
-
-#### Firefox: Windows 11 で使う / 手順 2: 補足: 入れたものがあるとき
-
-- `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たときも、同じ節の手順 3 を貼れば、新しい版があれば上がる
-
-#### Firefox: Windows 11 で使う / 手順 3: 補足: 入れ方と版
-
-- winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
-- `winget list` に出る版は、実行した日の最新
-
-#### Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-で使う--手順-4-補足-windows-では-aac-と-h264-のために何も足さない理由)
-
-- Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
-- 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのは Android の MediaCodec を使うものだけ）
-  - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](../almalinux-setup.md#firefox)の手順 8〜11 が要る（[選択した方針](almalinux-setup.md#firefox-選択した方針)）
-- MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
-
-- N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が必要になる可能性がある
-
-#### Firefox: Windows 11 で使う / 手順 4: 補足: 言語パック
-
-- 日本語版なので、言語パックは要らない
-
-#### Firefox: Windows 11 で使う / 手順 5: 補足: コマンドで変えない理由
-
-- Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
-- Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
-- 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
-- Claude Code の `/login` は、既定のブラウザーでログインのページを開く。[Windows 11 の初期設定](../windows-setup.md)の後に通す順で、Claude Code より先にこの手順を行うのはそのため
-
-#### Firefox: Windows 11 の更新 / 手順 1: 補足: 新しい版が無いとき
-
-- winget に新しい版が無いのは、Firefox が自分で先に上げているからのこともある
-
-#### Firefox: Windows 11 の更新 / 手順 2: 補足: winget での更新
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-の更新--手順-2-補足-winget-での更新)
-
-- winget の定義の `UpgradeBehavior` は `install`。今の Firefox を消さずに、同じ場所へ新しい版のインストーラを重ねて入れる。プロファイルと既定のブラウザーの設定はそのまま
-- winget が渡す `/PreventRebootRequired=true` は、使用中のファイルがあっても再起動が要る処理をしないスイッチ。Mozilla の文書は、動いている Firefox に重ねて入れるときにこれを付けると、入れ替えが途中で終わることがあると書いている
-- winget の定義は、Mozilla が新しい版を出してから、winget-pkgs に定義が足されたときに上がる。Firefox 自身の更新の方が先に上がることもある
-
-#### Firefox: Windows 11 のロールバック / 手順 1: 補足: 窓が出る理由と、アンインストーラが消すもの
-
-- winget は、NSIS のインストーラで入れたものを、アンインストールの登録の `QuietUninstallString`（画面を出さずに消すコマンド）で消し、それが無ければ `UninstallString` で消す（winget のソースの `UninstallFlow.cpp`）
-- Firefox が書くのは `UninstallString`（`C:\Program Files\Mozilla Firefox\uninstall\helper.exe`）だけなので、ふだんのアンインストールと同じ窓が出る（Firefox のソースの `shared.nsh`）
-- アンインストーラは、Firefox のタスク（Default Browser Agent と Background Update）を消し、ほかに使う Mozilla のアプリ（Thunderbird など）が無ければ Mozilla Maintenance Service も外す（Firefox のソースの `uninstaller.nsi`）
-- 入れ直したときのリフレッシュの勧めは、アンインストーラが `HKCU\Software\Mozilla\Firefox` に残す `Uninstalled-release` の値による（同じソース）
-
----
-
-## 統合前の参考資料: git-delta の Windows 11（もとは git-delta.md）
-
-もとの `git-delta.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-git-deltaもとは-git-deltamd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | 「git-delta」の手順 1 |
-| Windows 11 で使う 2〜5 | 「git-delta」の手順 2〜5 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
-| Windows 11 のロールバック 1・3 | ロールバックの「Git の道具を消す」の手順 3・4 |
-| Windows 11 のロールバック 2 | ロールバックの「Git Bash の設定を戻す」の手順 3 |
-
-### git-delta: 補足
-
-#### git-delta: Windows 11 で使う / 手順 2: 補足: VC++ ランタイム
-
-- scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-付録-windows-11-の配布物と資料の調査2026-10-08)）。無い PC では起動しない
-- scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
-- 入れ方は新しく書かず、[wezterm-nightly.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
-  - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
-  - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
-- 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
-
-#### git-delta: Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
-
-- `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
-- ほかの方法で入れた delta を外すのは、混ざらないようにするため
-
-#### git-delta: Windows 11 で使う / 手順 3: 補足: scoop の名前と版
-
-- scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
-- `'delta' (<版>) was installed successfully!` の版は、実行した日の最新
-
-#### git-delta: Windows 11 で使う / 手順 4: 補足: 実施手順の手順 1・3 を Git Bash で貼る
-
-- 手順 1・3 のブロックは bash と git だけを使うので、Git Bash にそのまま貼れる。PowerShell 向けに書き分けない（[git.md](../almalinux-setup.md#git) と同じ考え方）
-- `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、[git.md の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-付録-windows-11-の-git-bash-での検証記録2026-09-30)で確かめてある
-- 手順 2（`brew install`）と手順 4（`brew list` を含む）は指さない。入れることと版・場所は、Windows 11 の節の手順 3 で PowerShell から確かめる
-- 手順 3 は `merge.conflictstyle zdiff3` も書く。[git.md](../almalinux-setup.md#git) の手順 6 と同じ値なので、どちらを先に通してもよい（AlmaLinux 10 と同じ）
-- 手順 1 の変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
-
-#### git-delta: Windows 11 で使う / 手順 5: 補足: 変更のあるリポジトリが無いとき
-
-- `git -C ~/.config/bash show` が出すのは、[共通の bash 設定](../../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分
-
-#### git-delta: Windows 11 で使う / 手順 5: 補足: ページャの less と PowerShell の git
-
-- git は `core.pager` の `delta` を PATH から探して起動する（scoop の shim の `~\scoop\shims\delta.exe`）
-- delta 0.20.1 のページャは、`delta.pager`（`--pager`）・`DELTA_PAGER`・`BAT_PAGER`・`PAGER` の順に決まり、どれも無ければ `less`。そのコマンドを PATH から探し、見つからなければ、ページャを使わずに標準出力へ書く（ソースの `src/utils/bat/output.rs` と `src/env.rs`）
-- **Git Bash** では、PATH の先頭が Git の `/usr/bin` なので、delta は Git for Windows の `usr\bin\less.exe` を使う
-- **PowerShell・cmd** の PATH には Git の `cmd` しか無い（Git for Windows の既定の `Path Option=Cmd`）。それでも、そこの `git.exe`（Git for Windows の git-wrapper）は、`mingw64\bin`・`usr\bin`・`%HOME%\bin` を PATH の先頭に足してから本体の `mingw64\bin\git.exe` を動かす（git-wrapper のソースの `setup_environment`。`cmd\git.exe` は `git.res` の版の情報だけを持ち、PATH を絞る `MINIMAL_PATH=1` の文字列のリソースが無い）。その PATH を受け継ぐ delta も、Git for Windows の less を使う
-- 上流の文書は、Windows では新しい less が要り、古い `less.exe` を使うと色が崩れたり変な文字が出たりすると書いている。Git for Windows の less は MSYS2 の今の版なので、これに当たらないはず（版は確かめていない）
-- **scoop の less は入れなかった**: 設計の段階では、PowerShell から git を使うときだけ scoop の less（main の `less.json`。上流の文書が勧める `jftuga/less-Windows` の配布物）を入れる任意の手順を考えた。上のとおり、git が起動する delta には、Git Bash でも PowerShell でも Git の `usr\bin` が scoop の shims より前に来るので、入れても使われない（`DELTA_PAGER` か `delta.pager` で場所を指したときと、PowerShell で delta を直に動かしたときだけ使われる）
-- PowerShell で delta を直に動かす（`git diff | delta` など）と、PATH に less が無いので、delta はページャを使わずに出す（上の `output.rs` の動き）
-- `delta.navigate`（手順 1 の `DELTA_NAVIGATE`）が `true` だと、delta は less の検索履歴の写しを `%LOCALAPPDATA%\delta\delta.lesshst` に作り、`LESSHISTFILE` で less に渡す（ソースの `src/features/navigate.rs`。Linux では `~/.local/share/delta/lesshst`）。Windows で `n` / `N` が効くかは確かめていない
-- PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](../extra/almalinux-setup.md#注意点)）
-- どれも、ソースを読んだだけで、Windows では確かめていない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）
-
-#### git-delta: Windows 11 では: 選択した方針
-
-[Windows 11 で使う](../windows-setup.md#git-delta)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）。
-
-- **scoop の main のバケットで入れた**（winget は採らない）
-  - [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」と同じ。管理者が要らず、[Windows 11 の初期設定の更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
-  - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
-  - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
-  - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)）
-- **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（[Windows 11 で使う / 手順 4 の補足](#git-delta-windows-11-で使う--手順-4-補足-実施手順の手順-13-を-git-bash-で貼る)）
-- **シェルとの組み込み方**
-  - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
-  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
-  - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 の初期設定の PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ
-  - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 の初期設定の「貼り付けの設定」の手順 4 の 1 行のまま
-  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[実施手順](../almalinux-setup.md#git-delta)を WSL の中で通す
-- **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#git-delta-windows-11-で使う--手順-2-補足-vc-ランタイム)
-- **scoop の less は入れない**: [Windows 11 で使う / 手順 5 の補足](#git-delta-windows-11-で使う--手順-5-補足-ページャの-less-と-powershell-の-git)
-- **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
-- **ロールバックは、git の設定を先に外す**: scoop の delta を先に消すと、`core.pager` が残って、git が delta を起動できなくなる。[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4（scoop ごと外す）も `~/.gitconfig` は変えないので、その前に外す
-- **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
-
----
-
-## 統合前の参考資料: GitHub CLI の Windows 11（もとは gh.md）
-
-もとの `gh.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-github-cliもとは-ghmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | 「GitHub CLI」の手順 1 |
-| Windows 11 で使う 2〜6 | 「GitHub CLI」の手順 2〜6 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
-| Windows 11 のロールバック 1〜6 | ロールバックの「Git の道具を消す」の手順 5〜10 |
-
-### GitHub CLI: 補足
-
-#### GitHub CLI: Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
-
-- `GitCred` の `credential.helper manager` は、Git for Windows のインストーラの既定の Git Credential Manager
-- `GitCred` に `auth git-credential` で終わる行があれば、前に gh を Git の資格情報のヘルパーにしてある（`gh auth setup-git` など）。同じ節の手順 4 で Git の認証は聞かれない
-- `GitCred` が空なのは、Git の資格情報のヘルパーが無いこと。同じ節の手順 4 で `Y` と答えると、gh が `~/.gitconfig` に自分をヘルパーとして書く
-- `Gh` が空なら、gh は入っていない。`C:\Users\<WIN_USER>\scoop\shims\gh.exe` だけなら、もう scoop で入っている（同じ節の手順 3 の `scoop install` は何も変えない）
-- ほかの方法で入れた gh を外すのは、混ざらないようにするため。外してもログインと設定は残り、scoop の gh も同じ場所を読む
-
-#### GitHub CLI: Windows 11 で使う / 手順 3: 補足: 版
-
-- `'gh' (<版>) was installed successfully!` の版は、実行した日の最新
-
-#### GitHub CLI: Windows 11 で使う / 手順 4: 補足: Git の認証に n と答える理由
-
-gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）。**Windows では確かめていない**。
-
-- **問いが出る条件**: `gh auth login` で HTTPS を選ぶと、github.com の Git の資格情報のヘルパーが gh でなければ、`Authenticate Git with your GitHub credentials?`（既定は Yes）を聞く
-  - ヘルパーは `credential.https://github.com.helper`、無ければ `credential.helper` を、スコープを問わずに読む
-  - Git for Windows は、インストーラの既定の選択で `system`（`C:\Program Files\Git\etc\gitconfig`）に `credential.helper=manager`（Git Credential Manager）を書く（[git.md の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-実施手順--手順-3-補足-設定の-3-つの場所)）。そのため、[Windows 11 の初期設定](../windows-setup.md)の順に通した PC では、この問いが出る
-- **Yes と答えたとき**（ソースからの推論）
-  - ヘルパーがある（Git for Windows の既定）: `~/.gitconfig` は変えない。`git credential reject` で github.com の資格情報を消してから、`git credential approve` で gh のトークンを Git Credential Manager に入れる。以後、git の HTTPS も gh のトークン（GitHub CLI の OAuth アプリ。`workflow` の権限も付く）で GitHub につなぐ
-  - ヘルパーが無い: `~/.gitconfig` の `credential.https://github.com.helper` と `credential.https://gist.github.com.helper` に、空の値（ほかのヘルパーを切る）と `!<gh の場所> auth git-credential` を書く。`gh auth setup-git` と同じ
-- **No を選んだ理由**
-  - git の HTTPS の認証は、Git for Windows の Git Credential Manager が自分のサインイン（Git Credential Manager の OAuth アプリ）で行う。gh と git のトークンが別になるので、`gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことが、git の push に効かない
-  - Yes にすると、gh のトークンが Git Credential Manager にも残る。`gh auth logout` は gh 自身の置き場所しか消さないので、ロールバックに 1 手順増える（[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)の手順 4）
-  - `~/.gitconfig` に gh の場所を書かない。書くと、scoop を外した後も git がその場所の gh を呼ぶ
-- **Git の資格情報のヘルパーが無い PC**（[Windows 11 で使う](../windows-setup.md#github-cli)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる（外すのは[Windows 11 のロールバック](../extra/windows-setup.md#git-の道具を消す)の手順 3）
-- **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
-  - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
-  - SSH のセッションの git からその場所を呼ぶと、scoop の `current` のジャンクションが [windows-openssh-server.md の任意節](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)の制限に当たるはず（確かめていない）
-
-#### GitHub CLI: Windows 11 で使う / 手順 4: 補足: ワンタイムコード
-
-- gh の既定では、ワンタイムコードはクリップボードにも入る
-
-#### GitHub CLI: Windows 11 で使う / 手順 6: 補足: トークンと設定の置き場所
-
-ソースから（gh 2.102.0、go-gh 2.16.1、go-keyring 0.2.8）。**Windows では確かめていない**。
-
-| もの | Windows 11 の場所 | AlmaLinux 10 の場所 |
-|---|---|---|
-| トークン | 資格情報マネージャーの汎用資格情報 `gh:github.com:<GITHUB_USER>` と、今のアカウントの写しの `gh:github.com:`（名前はソースからの推論） | OS の資格情報ストア |
-| トークン（ストアを使えないとき） | `%APPDATA%\GitHub CLI\hosts.yml`（平文） | `~/.config/gh/hosts.yml`（平文） |
-| 設定（`config.yml`・`hosts.yml`） | `%APPDATA%\GitHub CLI` | `~/.config/gh` |
-| 状態・拡張機能・キャッシュ | `%LOCALAPPDATA%\GitHub CLI` | `~/.local/state/gh`・`~/.local/share/gh`・`~/.cache/gh` |
-
-- 設定の場所は、環境変数 `GH_CONFIG_DIR`、次に `XDG_CONFIG_HOME`（`%XDG_CONFIG_HOME%\gh`）があれば、そちらが先になる（go-gh の `ConfigDir`）
-- `gh auth status` の `(keyring)` は、トークンが資格情報マネージャーにあること。平文のときは `hosts.yml` の場所が出る
-- Git Credential Manager が git のために置く資格情報（`git:https://github.com` の名前になるはず）は、gh の項目とは別
-
-#### GitHub CLI: Windows 11 では: 選択した方針
-
-[Windows 11 で使う](../windows-setup.md#github-cli)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-windows-11-で使う-検証状況の記録)）。
-
-- **scoop の main のバケットの `gh`**: [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」に合わせた
-  - 管理者の権限が要らない。[Windows 11 の初期設定の更新](../windows-setup.md#更新)の `scoop update *` でほかのツールとまとめて上がり、UniGet UI にも出る
-  - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
-  - 上流の MSI や zip を手で入れる形は、更新が手作業になる
-  - scoop は、定義の sha256（上流の `gh_<版>_checksums.txt` と同じ値）で zip を確かめる。`gh.exe` には `GitHub, Inc.` の Authenticode の署名があるが、手順では確かめない
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)）
-- **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
-  - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
-  - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
-- **git の HTTPS の認証は Git Credential Manager のまま**: [Windows 11 で使う / 手順 4 の補足](#github-cli-windows-11-で使う--手順-4-補足-git-の認証に-n-と答える理由)
-- **シェルとの組み込み方**
-  - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
-  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
-  - **PowerShell 7 のプロファイルには何も足さない**: [Windows 11 の初期設定の任意節](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ。gh の PowerShell の補完（`gh completion -s powershell`）は、pwsh を開くたびに gh を 1 回動かすので入れない
-  - **Windows PowerShell 5.1 のプロファイルにも足さない**: 手順書を貼る窓のプロファイルは、Windows 11 の初期設定の「貼り付けの設定」の手順 4 の 1 行のまま
-  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
-- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[wezterm-nightly.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を前提にしない
-- **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 の初期設定のロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外したときも）、その項目が残る
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた
-
----
-
-## 統合前の参考資料: lazygit の Windows 11（もとは lazygit.md）
-
-もとの `lazygit.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-lazygitもとは-lazygitmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | 「lazygit」の手順 1 |
-| Windows 11 で使う 2〜4 | 「lazygit」の手順 2〜4 |
-| Windows 11 で使う 5・6 | 「lazygit」の手順 6・7 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
-| Windows 11 のロールバック 1 | ロールバックの「Git の道具を消す」の手順 2 |
-
-### lazygit: 補足
-
-#### lazygit: Windows 11 で使う / 手順 2: 補足: 確かめる値の意味
-
-- `Lazygit` が空なら、lazygit は入っていない。`C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` だけなら、もう scoop で入っている（自分用の Neovim の設定の導入でも入る）
-
-#### lazygit: Windows 11 で使う / 手順 4・5: 補足: 版
-
-- 同じ節の手順 4 の `'lazygit' (<版>) was installed successfully!` と、手順 5 の `version=` の版は、実行した日の最新
-
-#### lazygit: Windows 11 で使う / 手順 6: 補足: 新しい窓と確かめ用のリポジトリ
-
-- `EDITOR` を `nvim` にした後、新しい窓で lazygit を起動し直すのは、今の窓には入らないため
-- `%TEMP%\lazygit-check` を消す前に `Set-Location ~` で出るのは、この窓の今のフォルダーがそこにあり、今のフォルダーのままでは使用中で消せないため
-
-#### lazygit: Windows 11 では: 選択した方針
-
-[Windows 11 で使う](../windows-setup.md#lazygit)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#lazygit-windows-11-で使う-検証状況の記録)）。
-
-- **scoop の extras の `lazygit`**（main のバケットには無い）
-  - extras のバケットを足すのに git が要る（Git for Windows）。extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使うので、ロールバックでも外さない
-  - lazygit は Go の 1 つの実行ファイルなので、VC++ のランタイムは要らない（自分用の設定が使う delta は要る。[git-delta.md の Windows 11 で使う](../windows-setup.md#git-delta)の手順 2 で確かめる）
-  - winget の `JesseDuffield.lazygit` と両方あると、`PATH` の順でどちらかが使われ、分かりにくい。Windows 11 で使うの手順 2 で見つけたら、外してから始める
-- **設定の置き場所は `%LOCALAPPDATA%\lazygit`**
-  - lazygit 0.66.0 の Config.md の Windows の既定の場所。`%APPDATA%\lazygit\config.yml` も探す（adrg/xdg の Windows の `XDG_CONFIG_DIRS` は `%ProgramData%` と `%APPDATA%`）
-  - `XDG_CONFIG_HOME` は設定しない（[neovim.md の参考資料](neovim.md#neovim-windows-11-では-選択した方針)）
-- **自分用の設定は、設定のリポジトリの README の Windows の例へリンクする**（clone のコマンドはこの文書に載せない）。その例は `%LOCALAPPDATA%\lazygit` に直接 clone する（シンボリックリンクには、開発者モードか管理者の権限が要るため）。状態ファイル `state.yml` は、そのリポジトリの `.gitignore` で除いてある
-- **確かめの起動は `%TEMP%\lazygit-check` の空のリポジトリで行う**
-  - 読者のリポジトリの場所を決め打ちできないため。git 管理外で起動すると、リポジトリを作るか聞かれる
-  - `git init` が失敗したまま起動すると、元のフォルダーでリポジトリを作るか聞かれるので、`.git` ができたことを確かめてから起動する
-- **`e` キーのエディタ**: Windows PowerShell から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[neovim.md の参考資料](neovim.md#neovim-windows-11-では-選択した方針)）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
-
----
-
-## 統合前の参考資料: yazi の Windows 11（もとは yazi.md）
-
-もとの `yazi.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-yaziもとは-yazimd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | 「yazi」の手順 1 |
-| Windows 11 で使う 2〜5 | 「yazi」の手順 2〜5 |
-| Windows 11 で使う 6〜9 | 「yazi」の手順 7〜10 |
-| Windows 11 の更新 1 | 「scoop・winget・WSL を上げる」の手順 2・3 |
-| Windows 11 のロールバック 1・2 | ロールバックの「エディタとシェルのツールを消す」の手順 2・3 |
-
-### yazi: 補足
-
-#### yazi: Windows 11 で使う / 手順 2: 補足: 変数について
-
-- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている（どれも scoop の main のバケットにある）
-- 1 つだけにするときも `@('fd')` の形のままにするのは、`'fd'` だけにすると、1 文字ずつ別の名前として scoop に渡るため
-
-#### yazi: Windows 11 で使う / 手順 3: 補足: 確かめる値の意味
-
-- ほかの場所の yazi を外すのは、混ざらないようにするため
-- `Config : True` なら、設定がもうある（[設定ファイル](../almalinux-setup.md#yazi-の設定ファイル)）
-
-#### yazi: Windows 11 で使う / 手順 4: 補足: 版と、出る行・環境変数
-
-- 同じ節の手順 4 の `'yazi' (<版>) was installed successfully!` と、手順 6 の `Version:` の版は、実行した日の最新
-- `suggests installing` の行のものを入れなくてよいのは、VC++ のランタイムを同じ節の手順 3 で確かめてあるため
-- imagemagick が足すユーザーの環境変数（`MAGICK_HOME` など）と `PATH` は、今の窓にも入る。ほかの開いている窓は、開き直してから効く
-
-#### yazi: Windows 11 では: 選択した方針
-
-[Windows 11 で使う](../windows-setup.md#yazi)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-windows-11-で使う-検証状況の記録)）。
-
-- **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
-- **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
-  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../shell-terminal.md#シェルのツール)、Windows 11 は [Windows 11 の初期設定のシェルのツールを入れる（任意）](../shell-terminal.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
-  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[hackgen.md の Windows 11 で使う](../shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の HackGen Console NF
-  - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
-    - そのため、Windows 11 で使うの手順 4 は、同じ節の手順 2 を貼っていない窓では止める
-- **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
-  - yazi の文書が勧める唯一の形。scoop・Chocolatey の `file` は Unicode のファイル名を扱えない
-  - yazi は `YAZI_FILE_ONE` をシェルを通さずに起動するので、`Program Files` の空白は問題にならない
-    - yazi 26.9.1 の `yazi-plugin/preset/plugins/mime-local.lua`・`file.lua` は、`Command(<YAZI_FILE_ONE の値>)` で起動する
-    - Lua の `Command` は、`yazi-binding/src/process/command.rs` の `tokio::process::Command::new`（シェルを挟まない）。`ya env` も `Command::new` で動かす（`yazi-cli/src/env/env.rs`）
-  - PowerShell の `PATH` には `file` が無い。Git Bash には `/usr/bin/file` があるが、PowerShell や Windows Terminal から起動したときにも同じに動くよう、ユーザーの環境変数にする
-  - Windows 11 で使うの手順 5 は、前の値を確かめずに上書きする。元の値は同じ節の手順 3 で控え、Windows 11 のロールバックの手順 2 の後に手で戻す
-  - そのロールバックの手順 2 は、値が Git for Windows の `file.exe` のときだけ消す（neovim.md の `EDITOR`・`VISUAL` と同じく、後から変えた値は残す）
-- **VC++ のランタイムは、neovim.md と同じく wezterm-nightly.md の手順 3 を指す**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
-- **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定の Windows の clone は、設定のリポジトリの README の例へリンクする
-- **`y` は Git Bash の共通の設定だけで使う**: Windows PowerShell 5.1 は手順書を貼る窓なので、ツールの初期化（PowerShell 版の `y`）は足さない。WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
-  - PowerShell 7 のプロファイル（[Windows 11 の初期設定の任意節](../shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
-- **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に neovim.md を通すよう案内する）
-  - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）
-  - `${EDITOR:-vi}` は `for = "unix"` の行だけで、Windows の yazi は `EDITOR` を見ない
-  - テキスト（`text/*`）は `edit` が最初の候補なので、自分用の設定が無いと、Git Bash の `y` から開いても Enter で `code` が動く
-  - 自分用の設定（`ryo-aoki-pc/yazi` の `yazi.toml`）は、Windows の `edit` を `nvim %s`（`block = true`）にしてある
-- **確かめは `ya env`**: 26.9.1 には `yazi --debug` が無く、`ya env` が設定の場所・変数・依存の版・`file -bL --mime-type` の結果を出す
-- **TUI の手順を節の最後にした**: Git Bash の `y` の確かめを先にし、PowerShell の `yazi` の起動を最後に置いた
-  - Git Bash のタブを開くところ（コマンドの無い手順 7）と、そこに貼る `type -t y` と `y`（`bash` のブロックの手順 8。git.md と同じく、Git Bash には bash の構文で貼る）を分けた
-  - 手順 8 の `y` も TUI を開くので、手順 8 の最後で閉じてから PowerShell に戻る
-
----
-
-## 統合前の参考資料: Claude Code の Windows 11（もとは claude-code.md）
-
-もとの `claude-code.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-claude-codeもとは-claude-codemd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1 | （なし。前の項で開いた窓を使う） |
-| Windows 11 で使う 2〜9 | 「Claude Code」の手順 1〜8 |
-| Windows 11 の更新 1 | 「AI エージェントとプラグインを上げる」の手順 1 |
-| Windows 11 のロールバック 1〜4 | ロールバックの「AI エージェントとプラグインを消す」の手順 2〜5 |
-
-### Claude Code: 補足
-
-#### Claude Code: Windows 11 で使う / 手順 1: 補足: x86 の PowerShell
-
-- 「Windows PowerShell (x86)」は 32 ビットで動き、インストーラが `Claude Code does not support 32-bit Windows` で止まる
-
-#### Claude Code: Windows 11 で使う / 手順 3: 補足: 確かめていることと、Git for Windows の役割
-
-- `[Environment]::Is64BitProcess` は、インストーラが最初に見る値と同じ。スタートメニューの「Windows PowerShell (x86)」は、64 ビットの Windows でも 32 ビットで動く（公式の Troubleshoot installation）
-- native installer の置き場所は `%USERPROFILE%\.local\bin\claude.exe` に決まっている（公式の文書）。同じ名前のコマンドがほかにもあると、`PATH` の順で先のものが動き、版が食い違う（公式の Check for conflicting installations）
-- Git for Windows は任意（公式の Set up on Windows）。入っていれば、Claude Code は Git Bash を Bash のツールと Monitor のツールに使う。無ければ PowerShell のツールでコマンドを動かす
-- Claude Code が Git Bash を探す順は、`C:\Program Files\Git`・`C:\Program Files (x86)\Git` → `PATH` の `git` の `bin\bash.exe`（公式の Troubleshoot installation）。ほかの場所に入れたときは、設定の `env` の `CLAUDE_CODE_GIT_BASH_PATH` に `bash.exe` のパスを書く
-
-#### Claude Code: Windows 11 で使う / 手順 5: 補足: PATH の足し方
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-5-補足-path-の足し方)
-
-- native installer は `PATH` を変えない（この節の手順 4 の補足）。公式の文書（Troubleshoot installation の Verify your PATH）は、Windows PowerShell に `[Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')` を貼る形で足す。この手順も同じ書き方で、あれば足さないようにしただけ
-- `SetEnvironmentVariable` の `User` は、レジストリの `HKCU\Environment` の `Path` に書き、開いているウィンドウに環境が変わったことを知らせる。そのため、この後に開いた PowerShell に効く（サインインし直さなくてよい）
-- 読むときに `%USERPROFILE%` のような書き方は展開され、書き戻すと展開した形（`C:\Users\<WIN_USER>\...`）で残る（.NET Framework の `Environment` の動き）。自分のユーザーの PATH なので、困ることは無いはず
-- 足すのは自分のユーザーの PATH だけで、システムの PATH（管理者の権限が要る）は変えない
-- 公式の文書は、画面からでも同じことができるとしている（システムのプロパティ → 環境変数 → ユーザー環境変数の `Path` → 新規）
-- 開いている PowerShell には効かない。同じ節の手順 6 で開き直す
-
-#### Claude Code: Windows 11 で使う / 手順 6: 補足: 開き直した PowerShell が読む PATH
-
-- 開き直した PowerShell は、同じ節の手順 5 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
-
-#### Claude Code: Windows 11 で使う / 手順 8: 補足: ログインの流れと、ログインの情報の置き場所
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-8-補足-ログインの流れとログインの情報の置き場所)
-
-- 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
-
-- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
-- ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
-- Remote Control（[windows-claude-remote-control.md](../ai-agents.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
-
-#### Claude Code: Windows 11 で使う / 手順 9: 補足: 後ろに続けて貼らない理由
-
-- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
-
-#### Claude Code: Windows 11 のロールバック / 手順 2: 補足: 消すもの
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-のロールバック--手順-2-補足-消すもの)
-
-- 公式の文書の Windows PowerShell の手順が消すのは、`%USERPROFILE%\.local\bin\claude.exe` と `%USERPROFILE%\.local\share\claude`（版のファイル）の 2 つ
-- 本書は、更新の名残の `claude.exe.old.*`（[Windows 11 の更新](../ai-agents.md#ai-エージェントとプラグインを上げる)の補足）と、`%USERPROFILE%\.local\state\claude`（ロック）・`%USERPROFILE%\.cache\claude`（更新の途中のファイル）も消す。消去対象の根拠と検証範囲は検証記録に置く
-- 空になった `%USERPROFILE%\.local\share` などは残る
-
----
-
-## 統合前の参考資料: Codex CLI の Windows 11（もとは codex.md）
-
-もとの `codex.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-codex-cliもとは-codexmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1〜8 | 「Codex CLI」の手順 1〜8 |
-| Windows 11 の更新 1 | 「AI エージェントとプラグインを上げる」の手順 2 |
-| Windows 11 の更新 2・3 | 「AI エージェントとプラグインを上げる」の手順 3（版の確かめは、その箇条書き） |
-| Windows 11 のロールバック 1〜4 | ロールバックの「AI エージェントとプラグインを消す」の手順 6〜9 |
-
-### Codex CLI: 補足
-
-#### Codex CLI: Windows 11 で使う / 手順 2: 補足: 置き場所と PowerShell の設定
-
-- 実行ファイルの入口は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`。`bin` は `%USERPROFILE%\.codex\packages\standalone\` 内の配布物を指すジャンクションになる
-- インストーラーがユーザー用 PATH と、今の PowerShell の PATH の両方を設定する
-- `&` でスクリプトブロックとして呼び、インストーラーの StrictMode・エラー処理の設定を呼び出し元に残さない
-- PowerShell 全体の ExecutionPolicy を変更する手順は不要
-
----
-
-## 統合前の参考資料: Grok Build の Windows 11（もとは grok-build.md）
-
-もとの `grok-build.md` の参考資料のうち、Windows 11 の節を、内容を変えずに移したもの（ほかの節は、[AlmaLinux 10 の初期設定の参考資料](almalinux-setup.md#統合前の参考資料-grok-buildもとは-grok-buildmd)に移した）。見出しの付け方とリンクの直し方は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)の統合前の記録と同じ。当時の手順と今の [Windows 11 の初期設定](../windows-setup.md)の手順の対応は次のとおり。
-
-| 当時の手順 | 今の手順 |
-|---|---|
-| Windows 11 で使う 1〜8 | 「Grok Build」の手順 1〜8 |
-| Windows 11 の更新 1・2 | 「AI エージェントとプラグインを上げる」の手順 2・4 |
-| Windows 11 のロールバック 1〜5 | ロールバックの「AI エージェントとプラグインを消す」の手順 10〜14 |
-
-### Grok Build: 補足
-
-#### Grok Build: Windows 11 の更新 / 手順 1: 補足: 終了する理由
-
-- 先に Grok を終了するのは、動いている `grok.exe` は置き換えられないため
-
-### Grok Build: 選択した方針
-
-#### Grok Build: Windows 11 で使う / 手順 2: インストーラーの動き
-
-- `%USERPROFILE%\.grok\downloads\grok-windows-<アーキ>.exe` を取ってきて、`%USERPROFILE%\.grok\bin\grok.exe` と `agent.exe` に写す（リンクではなくコピー）
-- Grok が使う Git（MinGit）を `%LOCALAPPDATA%\grok\git\<版>` に置く。zip は SHA-256 を確かめてから展開する
-- PowerShell の補完を `%USERPROFILE%\.grok\completions\powershell\grok.ps1` に書く（プロファイルには足さない）
-- 自分のユーザーの PATH の先頭に `%USERPROFILE%\.grok\bin` を足し、今の窓の `$env:Path` にも足す（`[Environment]::SetEnvironmentVariable('Path', …, 'User')`。[claude-code.md の参考資料](#claude-code-windows-11-で使う--手順-5-補足-path-の足し方)と同じ書き方で、`%USERPROFILE%` のような書き方は展開した形で書き戻される）
-- スクリプトの先頭で `$ErrorActionPreference = 'Stop'` にするので、`irm … | iex` ではなく `&` でスクリプトブロックとして呼び、今の窓にその設定を残さない（codex.md と同じ）。失敗したときの `exit 1` は、どちらの呼び方でも窓を閉じることがある

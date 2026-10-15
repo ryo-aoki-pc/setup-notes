@@ -3,8 +3,7 @@
 [手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](../reference/shell-terminal.md)
 
 - 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順を指す
-- 2026-10-15 に、2 冊の注意点（`extra/almalinux-setup.md`・`extra/windows-setup.md`）から、移した項の箇条を移した。本文は変えていない
-- ロールバックは、ほかの道具と一緒に「上から順に戻す」並びに入っているので、2 冊のロールバックに残した
+- ロールバックは、ほかの道具と一緒に「上から順に戻す」並びに入っているので、2 冊のロールバックにある
   - AlmaLinux 10: シェルのツール・`~/.inputrc`・共通の bash 設定は[AlmaLinux 10 のセットアップのロールバックの「シェルのツールと bash の設定を戻す」](almalinux-setup.md#シェルのツールと-bash-の設定を戻す)、デスクトップの等幅のフォントと Ctrl+Alt+T・WezTerm・HackGen Console NF は[「端末とエディタを消す」](almalinux-setup.md#端末とエディタを消す)の手順 6〜10、bash-completion は[「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 4
   - Windows 11: 自分用の WezTerm の設定と共通の bash 設定は[Windows 11 のセットアップのロールバックの「Git Bash の設定を戻す」](windows-setup.md#git-bash-の設定を戻す)の手順 7・8、starship・zoxide・fzf・eza・bat は[「エディタとシェルのツールを消す」](windows-setup.md#エディタとシェルのツールを消す)の手順 7〜9、WezTerm は[「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8、HackGen Console NF は[「HackGen Console NF を消す」](windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3
   - PowerShell 7 のプロファイルと Windows Terminal の設定は、手順書のそれぞれの項の戻す手順で戻す
@@ -85,7 +84,7 @@
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
 - **HackGen Console NF: Windows 11 では、自分のユーザーのフォントが見えないアプリがある**: ユーザーごとのフォントは Windows 10 1809 からで、古いアプリには見えないことがある。そのアプリだけ、PC 全体に入れ直す（本書では扱わない）
 - **HackGen Console NF: Windows 11 では、読み込まれているフォントのファイルを置き換えられない**: 入れ替え（更新）と削除は、登録を消してサインインし直してから行う（[HackGen Console NF を消す](windows-setup.md#hackgen-console-nf-を消す)）
-- **WezTerm: Windows 11 のインストーラと実行ファイルには署名が無い**: 本物かどうかは確かめられず、`.sha256` で分かるのは壊れていないことまで（[選択した方針](../reference/shell-terminal.md#wezterm-選択した方針)）
+- **WezTerm: Windows 11 のインストーラと実行ファイルには署名が無い**: 本物かどうかは確かめられず、`.sha256` で分かるのは壊れていないことまで（[選択した方針](../reference/shell-terminal.md#windows-11-で-wezterm-を入れる)）
   - ブラウザで取得したファイルでは SmartScreen が警告することがある。本書では `curl.exe` で取得する
 - **WezTerm: Windows 11 の WezTerm には `VCRUNTIME140.dll` が要る**: インストーラは入れない（[「WezTerm」の手順 3](../shell-terminal.md#windows-11-で-wezterm-を入れる)）
 - **WezTerm: Windows 11 の nightly は自分では上がらず、winget・scoop の管理にも乗らない**: 上げるのは[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)

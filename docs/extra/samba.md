@@ -1,4 +1,4 @@
-# Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）のロールバックと注意点
+# Samba サーバーのロールバックと注意点
 
 [手順書](../samba.md#samba-サーバー)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](../reference/samba.md)
 
@@ -64,6 +64,6 @@
 - **`create mask` を変えても既存ファイルのモードは変わらない**: 手順 3 の前にホームに置いていたファイルのモードはそのまま
 - **`nmb` を起動しない構成なので、Windows のエクスプローラーで「ネットワーク」から見つけることはできない**: `\\<SERVER_IP>\<USER>` を直接入力する。一覧に出したいなら `wsdd`
 - **クライアントにも、サーバーとは別の一覧のキャッシュがある**
-  - GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない。F5 ですぐ出る（[samba-client.md の注意点](samba-client.md#注意点)）
+  - GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない。F5 ですぐ出る（[Samba クライアント の注意点](samba-client.md#注意点)）
   - Windows は、ディレクトリのリースが無いときも、一覧を最長 10 秒キャッシュする（Microsoft の文書の `DirectoryCacheLifetime`）
   - macOS は、SMB 2/3 の一覧を手元にキャッシュする（Apple の文書。止めるには `nsmb.conf` の `dir_cache_max_cnt=0`）

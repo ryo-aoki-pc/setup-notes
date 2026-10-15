@@ -1,4 +1,4 @@
-# Windows Sandbox で配布物を試す（Windows 11）のロールバックと注意点
+# Windows Sandbox で配布物を試すのロールバックと注意点
 
 [手順書](../virtual-machines.md#windows-sandbox-で配布物を試す)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)・[参考資料](../reference/windows-sandbox.md)
 

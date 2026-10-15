@@ -1,4 +1,4 @@
-# Visual Studio Code インストール手順（AlmaLinux 10 / Microsoft 公式 dnf リポジトリ）の参考資料
+# VS Code の参考資料
 
 [手順書](../almalinux-setup.md#vs-code)・[ロールバックと注意点](../extra/vscode.md)
 

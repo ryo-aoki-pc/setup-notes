@@ -1,10 +1,8 @@
-# GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）の参考資料
+# GNOME のヘッドレスセッションの参考資料
 
 [AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション)・[ロールバックと注意点](../extra/gnome-headless-session.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#参考資料から分離した記録)
-
-集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#補足の実測)
 
 ## 補足
 
@@ -40,7 +38,7 @@
 - TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
 - 貼り直しても退避は上書きしない。`backup-complete` は退避完了、`ready` は証明書の準備完了、`created-certificate` はこの手順が新規生成したことの目印
 - 新規生成したファイルの SHA-256 も `created.sha256` に保存する。ロールバックでは、中身が変わっていたりリンクへ置き換わっていたりすれば削除しない
-- 既存の証明書を更新する手順ではない。以前の手順で残した `.old` なども、この手順とロールバックでは消さない
+- 既存の証明書を更新する手順ではない
 - `set -e` は丸括弧の中だけに効かせ、退避・生成・読み取りのどれかが失敗したら、そのブロックを止める
 - 既存の証明書と鍵は上書きしない
 - `中断:` のとき、生成途中で照合用の記録も作れなかった場合は、ロールバックはファイルを自動削除せず残す
@@ -77,14 +75,14 @@
 - `/usr/bin/python3` で動かすのは、Homebrew が PATH の先頭にあるときも、同じ Python にするため（どちらでも動く）
 - `~/rdp_tls_probe.py` は、この手順書が作る唯一の作業ファイル
 - プローブは、TLS のハンドシェイクで証明書を受け取ると、認証をせずに接続を閉じる。デーモンは、この接続を `client authentication failure` などのエラーの行としてログに残す（2026-10-11 の Hyper-V の VM では 7 行。待ち受けと、その後の接続には響かなかった）
-  - 同じスクリプトを使う [gnome-remote-desktop.md の参考資料](gnome-remote-desktop.md#gnome-のリモートログイン--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)にも、この行が出て正常とある
+  - 同じスクリプトを使う [GNOME のリモートログイン の参考資料](gnome-remote-desktop.md#gnome-のリモートログイン--手順-10-補足-tls-プローブとfreerdp-クライアントでの確かめ方)にも、この行が出て正常とある
 
 ### GNOME のヘッドレスセッション / 手順 10: 補足: FreeRDP の証明書の確認と、つなぐときの表示
 
 - FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_<RDP_PORT>.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
 - `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`T` と `N` で答えたときの動きは、確かめていない
 - FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、つながった（2026-10-11 の Hyper-V の VM。この行が出る理由は、確かめていない）
-  - [gnome-remote-desktop.md の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#常に出るが無害なログ)には、近い行（`kerberos_AcquireCredentialsHandleA: krb5_init_context ...`）が、Kerberos を設定していない環境で NTLM に切り替わるときの出力として載っている
+  - [GNOME のリモートログイン の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#常に出るが無害なログ)には、近い行（`kerberos_AcquireCredentialsHandleA: krb5_init_context ...`）が、Kerberos を設定していない環境で NTLM に切り替わるときの出力として載っている
 
 ### 接続元を LAN に絞る / 手順 2: 補足: 引用符
 
@@ -93,7 +91,7 @@
 ### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
 
 - **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
-- **ドロップインを外す**: [AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[claude-code-gui.md の注意点](../extra/claude-code-gui.md#注意点)）
+- **ドロップインを外す**: [AlmaLinux 10 の「Claude Code の GNOME 操作: 実施手順」](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[Claude Code の GNOME 操作 の注意点](../extra/claude-code-gui.md#注意点)）
 - **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
 - **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 5 の補足](#gnome-のヘッドレスセッション--手順-5-補足-資格情報の置き場所)）
 - 同じ項の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
