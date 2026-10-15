@@ -4089,7 +4089,7 @@
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・lazygit・yazi・mdtable。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
+- git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
 
 ### git-delta
 
@@ -5082,6 +5082,102 @@
    - ブックに記録した Markdown に書き戻す（`--md` で変更）
    - 書き出した後に Markdown の表を変えていたら、衝突として書き戻さない。`--force` を付けるとブックの内容で上書きする
    - 同じブックを再度取り込むと「適用済み」になる。取り込み後はブックを消してよい
+
+---
+
+### md-format
+
+- GFM と GLFM の Markdown を、描画を変えずに整形する `mdfmt` コマンド（[md-format](https://github.com/ryo-aoki-pc/md-format)）。Neovim（LazyVim）の保存のときの整形も、これを使う
+
+#### md-format を導入・更新する
+
+- Markdown を整形する mdfmt を入れ、導入状態を確かめる
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と、[貼り付けの設定](#貼り付けの設定)（実行ポリシーを RemoteSigned にする）を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Node.js 22 以上が要る。この項の手順 2 で、無ければ scoop で入れる
+- 更新時は `git -C "$env:USERPROFILE\md-format" status` で既存の変更を確かめてから進む
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Node.js が無ければ scoop で入れ、版を確かめる。
+
+   ```powershell
+   if (-not (Get-Command node -ErrorAction SilentlyContinue)) { scoop install nodejs-lts }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   node --version
+   ```
+
+   - `v22.` 以上の版が出ればよい
+   - 22 より古い版やエラーが出たら、その Node.js を更新してから貼り直す
+
+1. リポジトリを clone し、導入して確かめる。
+
+   ```powershell
+   git clone https://github.com/ryo-aoki-pc/md-format.git "$env:USERPROFILE\md-format"
+   & {
+     Push-Location -LiteralPath "$env:USERPROFILE\md-format" -ErrorAction Stop
+     try {
+       node scripts/setup.mjs
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       node scripts/setup.mjs --check
+     } finally {
+       Pop-Location
+     }
+   }
+   ```
+
+   - 最後に `導入済み: mdfmt` と版、起動コマンドのパスが出ればよい
+   - 依存はリポジトリ外の `%LOCALAPPDATA%\md-format` へ入る
+   - 起動コマンドは `%USERPROFILE%\.local\bin` の `mdfmt.ps1`（PowerShell）・`mdfmt.cmd`（cmd）・`mdfmt`（Git Bash）
+   - `問題:` で始まる行が出たら、その案内に従って直してから `& { ... }` 部分を貼り直す（`%USERPROFILE%\.local\bin` が PATH に無いときは、PATH に加えてから Windows PowerShell を開き直す）
+   - `--check` は何も変更せず状態を確かめる
+   - 更新時は `git -C "$env:USERPROFILE\md-format" pull --ff-only` を実行し、この項の手順 3 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
+   - `導入先を入れ替えられません` で止まったら、Neovim をすべて閉じてから `& { ... }` 部分を貼り直す
+   - 古い整形器の依存が残っていると、`注意:` に `%LOCALAPPDATA%\nvim-data\glfm-format` が出る。LazyVim の設定を md-format を使う版に揃えた後なら、そのフォルダーを消してよい
+   - 終わると元の作業ディレクトリへ戻る
+
+#### mdfmt で Markdown を整形する
+
+- 文書を整形し、整形の要るファイルを確かめる
+- 前提: [md-format を導入・更新する](#md-format-を導入更新する)を通し、`mdfmt` が PATH にある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開き、整形する文書のあるフォルダーへ移る
+- 方言の既定は GLFM。GitHub 向けの文書のリポジトリでは、この項の手順 2 で GFM にする
+- PowerShell では、パイプやリダイレクトで文書を渡さない（文字コードや改行が変わる）。ファイルとフォルダーを渡す
+- `docs` と `README.md` は、整形するフォルダーとファイルに置き換える
+
+1. 管理者ではない Windows PowerShell（5.1）を開き、整形する文書のあるフォルダーへ移る。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - `Set-Location` で、文書のリポジトリの直下へ移る
+
+1. GitHub 向けの文書のリポジトリなら、そのリポジトリの直下で方言を GFM にする。
+
+   ```powershell
+   [IO.File]::WriteAllText("$PWD\.md-format.json", "{ `"flavor`": `"gfm`" }`n")
+   ```
+
+   - GitLab 向け（GLFM）の文書なら、この手順は行わない
+   - 長い行を折りたいときは `{ "flavor": "gfm", "fixes": { "line_length": true } }` と書く（幅は markdownlint の MD013 の設定）
+
+1. 整形の要るファイルを確かめる。
+
+   ```powershell
+   mdfmt --check docs README.md
+   ```
+
+   - 整形の要るファイルの名前が出る。何も出なければ、整形は要らない
+   - `mdfmt:` で始まる行は誤り。そのファイルは変えていない
+
+1. 整形して書き換える。
+
+   ```powershell
+   mdfmt --write docs README.md
+   ```
+
+   - 書き換えたファイルの名前が出る
+   - フォルダーは、その下の `*.md` を扱う（`.git`・`node_modules`・`.` で始まるフォルダーは除く）
 
 ---
 

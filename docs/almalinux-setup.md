@@ -1303,7 +1303,7 @@
 
 ## Git と開発の道具
 
-- Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
+- Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
 
 ### Git
 
@@ -2200,6 +2200,86 @@
    - ブックに記録した Markdown に書き戻す。書き戻す先は `--md` で変えられる
    - 書き出し後に Markdown の表を変えていたら、衝突として書き戻さない。**`--force` はブックの内容で上書きする**
    - 取り込み済みのブックは「適用済み」になる。取り込み後のブックは消してよい
+
+---
+
+### md-format
+
+- GFM と GLFM の Markdown を、描画を変えずに整形する `mdfmt` コマンド（[md-format](https://github.com/ryo-aoki-pc/md-format)）。Neovim（LazyVim）の保存のときの整形も、これを使う
+
+#### md-format を導入・更新する
+
+- md-format を `~/md-format` に clone し、リポジトリの外に依存を入れて、`mdfmt` コマンドを確かめる。更新も、この項の手順 2 で行う
+- 前提: git が入っている（[Homebrew](#homebrew)の手順 1 で入る）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、この項の手順 1 で Node.js が無いときだけ使う。更新では、`~/md-format` の手元の変更の確認を省かない
+
+1. Node.js が無ければ dnf で入れ、版を確かめる。
+
+   ```bash
+   {
+     command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
+     printf '\n\033[7m 確認 \033[0m\n'
+     node --version
+   }
+   ```
+
+   - `v22.` 以上の版が出ればよい
+   - 22 より古い版が出たら、その Node.js を更新してから貼り直す
+
+1. リポジトリを clone し、導入して確かめる。
+
+   ```bash
+   git clone https://github.com/ryo-aoki-pc/md-format.git ~/md-format
+   (
+     cd ~/md-format &&
+       node scripts/setup.mjs &&
+       node scripts/setup.mjs --check
+   )
+   ```
+
+   - 最後に `導入済み: mdfmt` と版、起動コマンドのパスが出ればよい
+   - 依存はリポジトリ外の `~/.local/share/md-format` へ入る
+   - 起動コマンド `mdfmt` は `~/.local/bin`
+   - `問題:` で始まる行が出たら、その案内に従って直してから `(`〜`)` を貼り直す（`~/.local/bin` が PATH に無いときは、PATH に加えてから端末を開き直す）
+   - `--check` は何も変更せず状態を確かめる
+   - 更新時は `git -C ~/md-format pull --ff-only` し、この手順の `(`〜`)` の導入・確認を再実行する
+   - `ほかの導入が動いています` で止まったら、表示のプロセスが終わるのを待って、`(`〜`)` を貼り直す
+   - 古い整形器の依存が残っていると、`注意:` に `~/.local/share/nvim/glfm-format` が出る。LazyVim の設定を md-format を使う版に揃えた後なら、`rm -rf ~/.local/share/nvim/glfm-format` で消してよい
+
+#### mdfmt で Markdown を整形する
+
+- 文書を整形し、整形の要るファイルを確かめる
+- 前提: [md-format を導入・更新する](#md-format-を導入更新する)を通し、`mdfmt` が PATH にある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、整形する文書のあるディレクトリ
+- 方言の既定は GLFM。GitHub 向けの文書のリポジトリでは、この項の手順 1 で GFM にする
+- `docs` と `README.md` は、整形するフォルダーとファイルに置き換える
+
+1. GitHub 向けの文書のリポジトリなら、そのリポジトリの直下で方言を GFM にする。
+
+   ```bash
+   printf '%s\n' '{ "flavor": "gfm" }' > .md-format.json
+   ```
+
+   - GitLab 向け（GLFM）の文書なら、この手順は行わない
+   - 長い行を折りたいときは `{ "flavor": "gfm", "fixes": { "line_length": true } }` と書く（幅は markdownlint の MD013 の設定）
+
+1. 整形の要るファイルを確かめる。
+
+   ```bash
+   mdfmt --check docs README.md
+   ```
+
+   - 整形の要るファイルの名前が出る。何も出なければ、整形は要らない
+   - `mdfmt:` で始まる行は誤り。そのファイルは変えていない
+
+1. 整形して書き換える。
+
+   ```bash
+   mdfmt --write docs README.md
+   ```
+
+   - 書き換えたファイルの名前が出る
+   - フォルダーは、その下の `*.md` を扱う（`.git`・`node_modules`・`.` で始まるフォルダーは除く）
 
 ---
 

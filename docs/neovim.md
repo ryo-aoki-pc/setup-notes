@@ -251,7 +251,7 @@
 
    - `/kensaku` と打って Enter を押す。3 行目の「検索」にカーソルが移り、`[1/1]` と出る
    - `/kensaku` と打って `<Tab>` を押す。入力が「検索」に置き換わる (候補が 1 つなので、すぐ確定する)。`<Esc>` で抜ける
-   - `:w` で保存する。1 行目の `#` の後の 2 つの空白が 1 つになり、`# 動作確認` になる (glfm_markdownlint の整形)
+   - `:w` で保存する。1 行目の `#` の後の 2 つの空白が 1 つになり、`# 動作確認` になる (md-format の `mdfmt` の整形)
    - 遅い VM では整形に数秒掛かる。Markdown / MDX の待ち時間の上限は 10 秒で、処理が終わればすぐ戻る
    - `o` で行を開き、`<C-j>` を押す。下の表示が `A` から `あ` に変わる。`<Esc>` で `A` に戻る
    - `<C-j>` を押したときは、カーソルのすぐ下にも `あ` / `A` が約 1 秒出る
@@ -266,7 +266,7 @@
 - 設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
-- 初回と整形用 lock の変更後は、[LazyVim の安全な Markdown 整形を導入する](#lazyvim-の安全な-markdown-整形を導入する)を通し直す
+- Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)の手順 2 で上げる
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
@@ -285,24 +285,21 @@
 
 #### LazyVim の安全な Markdown 整形を導入する
 
-- Markdown を保存のときに整形する依存（lock ファイルで固定した markdownlint-cli2・Comrak・js-beautify）を Neovim から入れ、整形を確かめる。AlmaLinux 10 / Windows 11 共通
-- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある（Node.js 22 以上と npm が要る）
-- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
-- 初回と `tools/glfm-format/package-lock.json` の変更後に行う
-- 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る。Mason のツールとは別に管理する
+- 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、Neovim で整形を確かめる
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してある
+- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 2 は、手順 1 で開く Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
+- 整形器と依存は md-format の導入先（`~/.local/share/md-format`）にある。Neovim からは入れない。lint の診断用の markdownlint-cli2 は Mason で入る
 
-1. Neovim で整形用の依存を導入する。
+1. 試験用の Markdown を Neovim で開く。
 
-   ```vim
-   :GlfmFormatInstall
+   ```bash
+   nvim /tmp/lazyvim-format-check.md
    ```
 
-   - 完了の通知が出るまで待つ
-   - 取得するのは lock ファイルで固定した markdownlint-cli2・Comrak (WASM 版)・js-beautify (HTML の整形用)。整形時は通信しない
-   - 失敗したら Node.js と npm が PATH にあるか確かめ、同じコマンドを入力し直す
-   - lint の診断用は `:MasonInstall markdownlint-cli2` で導入する
+   - Neovim の編集画面が開けばよい
+   - **次の手順は、`i` を押し、挿入モードの本文に貼る**（端末のシェルには貼らない）
 
-1. Markdown ファイルで保存と手動整形を確かめる。
+1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
 
    ```markdown
    #  動作確認
@@ -328,7 +325,10 @@
    - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
-   - `:ConformInfo` に `glfm_markdownlint` が出る。依存不足・設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - 貼り終えたら Esc を押し、ノーマルモードに戻る
+   - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
+   - 確かめ終えたら `:qa!` で閉じる。試験用の `/tmp/lazyvim-format-check.md` は、要らなければ `rm /tmp/lazyvim-format-check.md` で消す
 
 #### LazyVim のカーソル色を tmux で使う
 
@@ -745,7 +745,7 @@
    ```
 
    - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しの `#` の後の空白が 1 つになり (`# 動作確認`)、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
-   - 初めてなら [安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) を済ませる
+   - 初めてなら [md-format を導入・更新する](windows-setup.md#md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
    - `:qa!` で閉じる。これで導入は終わり
@@ -756,7 +756,7 @@
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
-- 初回と整形用 lock の変更後は[LazyVim の安全な Markdown 整形を導入する](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する)を通す
+- Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)の手順 3 で上げる
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -780,11 +780,10 @@
 
 #### Windows 11 で LazyVim の安全な Markdown 整形を導入する
 
-- Neovim に安全な Markdown 整形の依存を入れ、保存と手動整形を確かめる
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通し、Node.js 22 以上と npm が使える
+- 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、保存と手動整形を確かめる
+- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
-- 初回と `tools/glfm-format/package-lock.json` の変更後に行う
-- 整形用依存は Neovim のデータディレクトリの `glfm-format` に入る
+- 整形器と依存は md-format の導入先（`%LOCALAPPDATA%\md-format`）にある。Neovim からは入れない。lint の診断用の markdownlint-cli2 は Mason で入る
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -797,19 +796,7 @@
    ```
 
    - Neovim の編集画面が開けばよい
-   - **次の手順は、Esc を押し、Neovim の `:` のコマンドラインに入力する**（PowerShell には貼らない）
-
-1. Neovim で整形用の依存を導入する。
-
-   ```vim
-   :GlfmFormatInstall
-   ```
-
-   - 完了の通知が出るまで待つ
-   - 取得するのは lock ファイルで固定した markdownlint-cli2・Comrak (WASM 版)・js-beautify (HTML の整形用)。整形時は通信しない
-   - 失敗したら Node.js と npm が PATH にあるか確かめ、同じコマンドを入力し直す
-   - lint の診断用は `:MasonInstall markdownlint-cli2` で導入する
-   - **次の手順は、完了の通知が出てから `i` を押し、挿入モードの本文に貼る**
+   - **次の手順は、`i` を押し、挿入モードの本文に貼る**（PowerShell には貼らない）
 
 1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
 
@@ -838,7 +825,8 @@
    - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
-   - `:ConformInfo` に `glfm_markdownlint` が出る。依存不足・設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
    - **ほかのブロックは、Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
 
