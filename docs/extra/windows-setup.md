@@ -672,7 +672,7 @@
    - `False` が 2 行出ればよい
    - この手順を行わないと、scoop を入れ直すときに[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 2 が `exists and is not empty` で止まる
 
-1. プロファイルから、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 で足した行を消す。
+1. プロファイルから、貼り付けの設定と任意のキー操作の印の行を消す。
 
    ```powershell
    & {
@@ -680,9 +680,9 @@
      $old = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-powershell-paste.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { "プロファイルが無い: $PROFILE"; return }
      $bytes = [System.IO.File]::ReadAllBytes($PROFILE)
-     $enc = if ($bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + ')\r?\n?', '$1')
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + '|[^\r\n]*  # shell-terminal\.md)\r?(\n|$)', '$1')
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $PROFILE" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $PROFILE; "消した: $PROFILE" } else { [System.IO.File]::WriteAllBytes($PROFILE, $enc.GetBytes($rest)); "その行だけ消した: $PROFILE" }
    }
@@ -690,7 +690,10 @@
 
    - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
    - 前の版の手順書（`windows-powershell-paste.md`）の印の行も消す
-   - 開いている窓の設定（[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2・5）は、窓を閉じるまで残る。戻した後は、Windows の PowerShell のブロックを、conhost の窓では Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
+   - [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 と、[Windows PowerShell 5.1 のキー操作を変える](../shell-terminal.md#windows-powershell-51-のキー操作を変える)の印の行を消す。印の無い行は残る
+   - 開いている窓の設定（[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2・5）は、窓を閉じるまで残る
+   - 戻した後の PowerShell のブロックは、既定の Windows モードの conhost の窓では Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）
+   - 印の無い Emacs モードの行が残ると、次の窓では Ctrl+V の貼り付けが使えないことがある。その場合は、Win+R で `powershell.exe -NoProfile` を開き、既定のキーで Ctrl+V を使う
 
 1. 実行ポリシーを戻すときだけ、元の値にする（`OLD_EXECUTION_POLICY` は必ず値を入れる）。
 

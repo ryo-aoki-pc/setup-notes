@@ -29,6 +29,7 @@
   - 2 冊に残した項は置き直した: AlmaLinux 10 の Homebrew とオフライン導入は「基本の設定」、btop・gdu は「アプリ」、Windows 11 の Git for Windows は「基本の設定」へ。貼り付けの設定と SSH の項は、もとから「シェルと端末」の外にある。2 冊の「シェルと端末」のカテゴリは消した。Windows 11 の HackGen Console NF と Windows Terminal は「デスクトップ」から移した
   - 参考資料と注意点は、2 冊の参考資料・extra から `shell-terminal` へ移した。ロールバックは、2 冊の「上から順に戻す」並びに入っているので、2 冊の extra に残した。検証記録は、検証記録のリポジトリで `docs/verification/shell-terminal.md` へ分けた
   - PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と Windows Terminal の控え `settings.json.windows-setup.bak` は、移る前の書名のまま（すでに通した PC の戻す手順と合わせるため）
+  - 2026-10-15 に、任意の PSReadLine の Emacs モード（PowerShell 7・Windows PowerShell 5.1 のキー操作）・Windows Terminal の選択コピー・Windows の starship 表示設定・Git Bash のログイン時の読み込みの確認を追加した。実機では確かめていない
   - 分離は文書の移動で、新たな実機検証を意味しない。本文とコードブロックは移動の前後で一致する（静的な確認は `docs/verification/consolidation.md`）
 - 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する

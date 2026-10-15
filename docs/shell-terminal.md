@@ -1356,7 +1356,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - **この項の手順 5 は Windows Terminal の設定の画面で行う**
 - 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
-- コマンドで書くのは `settings.json` だけ。既定のプロファイル（Windows PowerShell）と、選んだらコピーする設定（`copyOnSelect`）は変えない
+- この項の手順 2〜5 は `settings.json` だけを読み書きし、既定のプロファイル（Windows PowerShell）と `copyOnSelect` は変えない
+- 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す。この項の手順 6 は、その設定も含めて控えを書き戻す
 - 戻すときは、この項の手順 6
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -1464,6 +1465,65 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻る。残すなら、このブロックは貼らず、この項の手順 5 の画面でフォント スタイルと警告を戻す
    - `中断: 控えが無い` が出たら、この項の手順 5 の画面で戻す
    - 控えのファイルは消える（もう一度この項を通すと、そのときの設定を控え直す）
+
+#### Windows Terminal で選択した文字をコピーする
+
+- 任意で、Windows Terminal の選択した文字を自動でコピーする `copyOnSelect` を `true` にする
+- 前提: [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 1・2 を通し、`settings.json.windows-setup.bak` がある
+- 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブ。この項の手順 1 で開く
+- コメントや末尾のカンマがあるファイルには書かない。控えは上書きしない（[補足](reference/shell-terminal.md#windows-terminal-で選択した文字をコピーする--手順-2-補足-copyonselect-と貼り付け)）
+
+> [!WARNING]
+> - この項の手順 2 の後は、文字を選ぶだけでクリップボードが置き換わり、手順書からコピーしたブロックも消える。右クリックは貼り付けになる。
+> - [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4 で複数行の警告を切っていると、管理者の窓でも複数行が確かめずに動く。
+
+1. 管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブを開く。
+
+   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ
+
+1. 設定ファイルの最上位の `copyOnSelect` を `true` にする。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。shell-terminal.md の「Windows Terminal のフォントと貼り付けの警告を変える」の手順 2 を先に通す'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     if (-not $text.TrimStart().StartsWith('{')) { Write-Error '中断: 最上位がオブジェクトではない'; return }
+     $s | Add-Member -NotePropertyName copyOnSelect -NotePropertyValue $true -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'copyOnSelect: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).copyOnSelect
+   }
+   ```
+
+   - `copyOnSelect: True` が出ればよい。開いている Windows Terminal にも効く
+   - `中断:` が出たら、何も書いていない。コメントや末尾のカンマを残すときは、Windows Terminal の設定の「操作」で「選択範囲をクリップボードに自動的にコピー」をオンにして保存する
+
+1. 元に戻すときは、`copyOnSelect` だけを `false` に戻す。
+
+   ```powershell
+   & {
+     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
+     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。shell-terminal.md の「Windows Terminal のフォントと貼り付けの警告を変える」の手順 2 を先に通す'; return }
+     $text = [IO.File]::ReadAllText($path)
+     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
+     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     if (-not $text.TrimStart().StartsWith('{')) { Write-Error '中断: 最上位がオブジェクトではない'; return }
+     $s | Add-Member -NotePropertyName copyOnSelect -NotePropertyValue $false -Force
+     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'copyOnSelect: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).copyOnSelect
+   }
+   ```
+
+   - `copyOnSelect: False` が出ればよい。ほかのキーの値は残る
+   - コメントや末尾のカンマで止まったら、この項の手順 2 の設定画面で「選択範囲をクリップボードに自動的にコピー」をオフにして保存する
+   - [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 で後から控えを書き戻すと、この設定も控えたときの値に戻る
+
 
 ---
 
@@ -1651,6 +1711,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[共通の bash 設定](#共通の-bash-設定)の手順 1 と同じブロック
    - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
    - すでに clone してあるなら `fatal: destination path … already exists` で止まる。そのときは `git -C ~/.config/bash pull --ff-only` で更新し、`bash ~/.config/bash/install.sh` を貼る
+   - 自分用の WezTerm は Git Bash を `-i -l` で開き、`~/.bash_profile` → `~/.bashrc` → 共通の bash 設定の順に読む。読み込みを確かめるときは、[Windows 11 で bash のログイン時の読み込みを確かめる](#windows-11-で-bash-のログイン時の読み込みを確かめる)を通す
+   - Git for Windows が作る `~/.bash_profile` と、共通設定の導入時に既存ファイルを残す扱いは、[この手順の補足](reference/shell-terminal.md#git-bash-と-wezterm-の設定--手順-6-補足-ログインシェルの読み込み)で確かめる
 
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
@@ -1864,6 +1926,67 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - シェル統合（`shell/`）とウィンドウの装飾の変更は、WezTerm を起動し直すまで効かない
    - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/wezterm status` で見る
 
+#### Windows 11 で bash のログイン時の読み込みを確かめる
+
+- 任意で、`~/.bash_profile` が `~/.bashrc` を読むことを確かめ、読む行が無いときだけ足す
+- 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
+- 自分用の WezTerm の設定は Git Bash を `-i -l`（ログインシェル）で開き、`~/.bash_profile` → `~/.bashrc` → 共通の bash 設定の順に読む（[補足](reference/shell-terminal.md#git-bash-と-wezterm-の設定--手順-6-補足-ログインシェルの読み込み)）
+
+1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
+
+   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
+   - タブの起動メニューで Git Bash を選ぶ（自分用の設定では既定で開く）
+   - **次の手順は、この Git Bash のタブに貼る**
+
+1. `~/.bash_profile` の構文と、`~/.bashrc` を読む行を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   if [ -f ~/.bash_profile ]; then
+     bash -n ~/.bash_profile && grep -n '\.bashrc' ~/.bash_profile
+   else
+     echo '中断: ~/.bash_profile が無い。参考資料の生成条件と、既存のログイン用ファイルを確かめる' >&2
+   fi
+   ```
+
+   - 構文エラーが無く、コメントでない `test -f ~/.bashrc && . ~/.bashrc` などの読む行が出ればよい。この項の手順 3 は飛ばす
+   - 読む行が無いときだけ、この項の手順 3 を行う
+   - `中断:` や構文エラーが出たら、この項の手順 3 へ進まない
+
+1. この項の手順 2 で読む行が無かったときだけ、`~/.bash_profile` の末尾に 1 行足す。
+
+   ```bash
+   (
+     if [ ! -f ~/.bash_profile ]; then echo '中断: ~/.bash_profile が無い。ファイルは作らない' >&2; exit 1; fi
+     bash -n ~/.bash_profile || exit 1
+     line='test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md'
+     if ! grep -Fqx "$line" ~/.bash_profile; then
+       if [ -s ~/.bash_profile ] && [ -n "$(tail -c 1 ~/.bash_profile)" ]; then printf '\n' >> ~/.bash_profile || exit 1; fi
+       printf '%s\n' "$line" >> ~/.bash_profile || exit 1
+     fi
+     printf '\n\033[7m 確認 \033[0m\n'
+     grep -Fnx "$line" ~/.bash_profile
+   )
+   ```
+
+   - `test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md` の行が 1 つ出ればよい。ファイルは置き換えず、同じ行は増やさない
+   - 新しい Git Bash のタブを開き、[WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)の手順 7 で読み込みを確かめる
+
+1. 元に戻すときは、この項の手順 3 で足した印の行だけを消す。
+
+   ```bash
+   if [ -f ~/.bash_profile ]; then
+     sed -i '/^test -f ~\/\.bashrc && \. ~\/\.bashrc  # shell-terminal\.md$/d' ~/.bash_profile
+     printf '\n\033[7m 確認 \033[0m\n'
+     grep -n '  # shell-terminal\.md$' ~/.bash_profile
+   fi
+   ```
+
+   - 「確認」の後に何も出なければよい。Git for Windows が作った、印の無い行は残る
+   - 次に開く Git Bash のタブから、残した行だけを読む
+
+
 ---
 
 ### シェルのツールを入れる
@@ -1995,6 +2118,107 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
    - bat の設定にはこの項の手順 6を使う
 
+#### Windows 11 で starship の表示を変える
+
+- 任意で、starship のプロンプト前の空行を省き、ディレクトリを 3 階層まで、ユーザー名とホスト名を常に表示する
+- 前提: [シェルのツールを入れる](#シェルのツールを入れる)を通してある
+- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
+- `%USERPROFILE%\.config\starship.toml`（Git Bash の `~/.config/starship.toml`）は、Git Bash と PowerShell 7 で共有する。PowerShell 7 は、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 の starship の行で読む
+- 控えは `~/.config/starship.toml.shell-terminal.bak`。ファイルが無ければ、`~/.config/starship.toml.shell-terminal.new` に新規作成の印を残す。既存の控えと印は上書きしない（[補足](reference/shell-terminal.md#windows-11-で-starship-の表示を変える--手順-2-補足-git-bash-と-powershell-7-が読む場所)）
+
+> [!WARNING]
+> この項の手順 2 は `starship.toml` の中身全体を、この項の 5 つの値に置き換える。既存のほかの設定は控えに残る。Git Bash と PowerShell 7 の両方のプロンプトに効き、ユーザー名・ホスト名が常に出るので画面の共有に注意する。
+
+1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
+
+   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
+   - タブの起動メニューで Git Bash を選ぶ（自分用の設定では既定で開く）
+   - **次の手順は、この Git Bash のタブに貼る**
+
+1. 既存ファイルがあれば控えを取り、Windows で共有する starship の設定を書く。
+
+   ```bash
+   (
+     if [ -n "${STARSHIP_CONFIG:-}" ]; then echo '中断: STARSHIP_CONFIG がある。標準の設定ファイルを使う状態にしてから始める' >&2; exit 1; fi
+     mkdir -p ~/.config || exit 1
+     for f in ~/.config/starship.toml ~/.config/starship.toml.shell-terminal.bak ~/.config/starship.toml.shell-terminal.new; do
+       if [ -L "$f" ] || { [ -e "$f" ] && [ ! -f "$f" ]; }; then echo "中断: 通常のファイルではない: $f" >&2; exit 1; fi
+     done
+     if [ -e ~/.config/starship.toml.shell-terminal.bak ] && [ -e ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: 控えと新規作成の印が両方ある' >&2; exit 1; fi
+     if [ ! -e ~/.config/starship.toml.shell-terminal.bak ] && [ ! -e ~/.config/starship.toml.shell-terminal.new ]; then
+       if [ -e ~/.config/starship.toml ]; then
+         cp -p ~/.config/starship.toml ~/.config/starship.toml.shell-terminal.bak || exit 1
+       else
+         touch ~/.config/starship.toml.shell-terminal.new || exit 1
+       fi
+     fi
+     cat > ~/.config/starship.toml <<'EOF'
+   add_newline = false
+
+   [directory]
+   truncation_length = 3
+   truncate_to_repo = false
+
+   [username]
+   show_always = true
+
+   [hostname]
+   ssh_only = false
+   EOF
+     if [ "$?" -ne 0 ]; then echo '中断: 書き込めない。控えは残してある' >&2; exit 1; fi
+     printf '\n\033[7m 確認 \033[0m\n'
+     cat ~/.config/starship.toml
+   )
+   ```
+
+   - `add_newline = false`・`truncation_length = 3`・`truncate_to_repo = false`・`show_always = true`・`ssh_only = false` が出ればよい
+   - `中断:` やエラーが出たら、この項の手順 3 へ進まない
+   - 再実行しても控えは最初のまま。設定ファイルは、この項の 5 つの値で書き直す
+
+1. WezTerm で、Git Bash の新しいタブを開く。
+
+   - Ctrl+Shift+T で開く。開いているタブで `. ~/.bashrc` を読み直さない
+   - **次の手順は、新しく開いた Git Bash のタブに貼る**
+
+1. 新しい Git Bash のタブで、設定とプロンプトを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   cat ~/.config/starship.toml
+   starship prompt
+   ```
+
+   - この項の手順 2 の 5 つの値と、ユーザー名・ホスト名を含むプロンプトが出ればよい
+   - PowerShell 7 のプロファイルを設定済みなら、新しい PowerShell 7 を開くと同じ表示設定になる
+   - PowerShell 7 だけ違う表示なら、`STARSHIP_CONFIG` の環境変数などで別の設定ファイルを指定していないか確かめる
+
+1. 元に戻すときは、控えを書き戻すか、この項で新しく作った設定ファイルを消す。
+
+   ```bash
+   (
+     if [ -L ~/.config/starship.toml ] || [ -L ~/.config/starship.toml.shell-terminal.bak ] || [ -L ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: シンボリックリンクがある' >&2; exit 1; fi
+     if [ -e ~/.config/starship.toml.shell-terminal.bak ] && [ -e ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: 控えと新規作成の印が両方ある' >&2; exit 1; fi
+     if [ -f ~/.config/starship.toml.shell-terminal.bak ]; then
+       cp -p ~/.config/starship.toml.shell-terminal.bak ~/.config/starship.toml &&
+         rm ~/.config/starship.toml.shell-terminal.bak || exit 1
+       printf '\n\033[7m 確認 \033[0m\n'
+       echo '控えを書き戻した'
+     elif [ -f ~/.config/starship.toml.shell-terminal.new ]; then
+       rm -f ~/.config/starship.toml && rm ~/.config/starship.toml.shell-terminal.new || exit 1
+       printf '\n\033[7m 確認 \033[0m\n'
+       echo '作った設定ファイルを消した'
+     else
+       echo '中断: 控えも新規作成の印も無い。推測で戻さない' >&2
+       exit 1
+     fi
+   )
+   ```
+
+   - `控えを書き戻した` か `作った設定ファイルを消した` が出ればよい
+   - この項の手順 2 の後で変えた設定も戻る。残す変更があれば、書き戻す前に別に控える
+   - Git Bash の新しいタブを開き直す。PowerShell 7 でも、次の窓から戻した設定を読む
+
+
 ---
 
 ### PowerShell 7 のプロファイルを設定する
@@ -2096,7 +2320,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - Ctrl+Alt+? で、キーの割り当ての一覧が出る
    - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
 
-1. 元に戻すときは、PowerShell 7 のプロファイルから、この項で足した行を消す。
+1. 元に戻すときは、PowerShell 7 のプロファイルから、この項と Emacs モードの項の印の行を消す。
 
    ```powershell
    & {
@@ -2105,7 +2329,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $bytes = [System.IO.File]::ReadAllBytes($p)
      $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # windows-setup\.md\r?(\n|$)', '$1')
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # (windows-setup|shell-terminal)\.md\r?(\n|$)', '$1')
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
    }
@@ -2121,5 +2345,248 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 表の `CurrentUser` が `Undefined` ならよい
+
+#### PowerShell 7 で Emacs モードを使う
+
+- 任意で、PowerShell 7 のキー操作を Emacs モードにし、Ctrl+V の貼り付けを割り当て直す
+- 前提: [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は、新しい PowerShell 7 の窓
+- 足す行は ASCII の文字だけで、行末の印は `# shell-terminal.md`。キーの割り当てより前、先頭の `using`・`param`・`#Requires` などの宣言より後に入れる
+- [設定する行と挿入位置の補足](reference/shell-terminal.md#powershell-7-で-emacs-モードを使う--手順-2-補足-設定する行と挿入位置)
+
+> [!WARNING]
+> この項の手順 2 はファイルだけを変える。今開いている窓で `Set-PSReadLineOption -EditMode` を実行すると、それまでのキーの割り当てが消えるので、貼り付けを続ける窓では実行しない。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. PowerShell 7 のプロファイルに、モードとキーの 2 行を入れる。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -EditMode Emacs }  # shell-terminal.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+v -Function Paste }  # shell-terminal.md'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。前提の手順を先に通す: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $wide = $bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE
+     $enc = if ($wide) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $original = $enc.GetString($bytes)
+     $text = [regex]::Replace($original, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
+     if ($wide) { $parseText = $text; $parseEnc = $enc } else {
+       $parseEnc = New-Object Text.UTF8Encoding($false, $true)
+       try { $parseText = $parseEnc.GetString($enc.GetBytes($text)) } catch { $parseEnc = [Text.Encoding]::Default; $parseText = $parseEnc.GetString($enc.GetBytes($text)) }
+     }
+     $bomLength = 0
+     if ($parseText.Length -gt 0 -and $parseText[0] -eq [char]0xFEFF) {
+       $parseText = $parseText.Substring(1)
+       $bomLength = if ($wide) { 1 } else { $parseEnc.GetByteCount([string][char]0xFEFF) }
+     }
+     $tokens = $null; $errors = $null
+     $ast = [Management.Automation.Language.Parser]::ParseInput($parseText, [ref]$tokens, [ref]$errors)
+     if ($errors.Count) { Write-Error '中断: プロファイルに構文エラーがある。何も書いていない'; return }
+     $commands = @($ast.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] }, $true))
+     $modes = @($commands | Where-Object {
+       $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and
+       @($_.CommandElements | Where-Object { $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -eq 'EditMode' }).Count
+     })
+     $keys = @($commands | Where-Object { $_.GetCommandName() -match '(^|\\)Set-PSReadLineKeyHandler$' } | Sort-Object { $_.Extent.StartOffset })
+     if ($keys.Count) {
+       $lateMode = @($commands | Where-Object {
+         $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and $_.Extent.StartOffset -gt $keys[0].Extent.StartOffset -and
+         @($_.CommandElements | Where-Object { $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -eq 'EditMode' }).Count
+       })
+       if ($lateMode.Count) { Write-Error '中断: 印の無い EditMode の行がキーの割り当てより後にある。先にその行をキーの割り当てより前へ移す。何も書いていない'; return }
+       $anchor = $ast.EndBlock.Statements | Where-Object {
+         $_.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] -and $a.GetCommandName() -match '(^|\\)Set-PSReadLineKeyHandler$' }, $true).Count
+       } | Select-Object -First 1
+       if (-not $anchor) { Write-Error '中断: キーの割り当ての位置を決められない。何も書いていない'; return }
+       $pos = $parseText.LastIndexOf("`n", $anchor.Extent.StartOffset) + 1
+       if ($parseText.Substring($pos, $anchor.Extent.StartOffset - $pos).Trim()) { Write-Error '中断: キーの割り当てと同じ行に別の文がある。何も書いていない'; return }
+     } else { $pos = $parseText.Length }
+     if (@($modes | Where-Object { $_.Extent.StartOffset -ge $pos }).Count) { Write-Error '中断: 挿入位置より後に印の無い EditMode がある。複合文からモードとキーの設定を別の行へ分け、モードを先に置く。何も書いていない'; return }
+     $declarations = @($ast.UsingStatements) + @($ast.ParamBlock)
+     if (@($declarations | Where-Object { $_ -and $_.Extent.EndOffset -gt $pos }).Count) { Write-Error '中断: 宣言より後の位置を決められない。何も書いていない'; return }
+     $offset = if ($wide) { $pos } else { $parseEnc.GetByteCount($parseText.Substring(0, $pos)) }
+     $offset += $bomLength
+     $nl = if ($text.Contains("`r`n") -or -not $text.Contains("`n")) { "`r`n" } else { "`n" }
+     $add = ($lines -join $nl) + $nl
+     if ($offset -gt 0 -and $text[$offset - 1] -ne "`n" -and $text.Substring(0, $offset) -notmatch '^(\uFEFF|\u00EF\u00BB\u00BF)?$') { $add = $nl + $add }
+     $result = $text.Insert($offset, $add)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($result -eq $original) { "設定済み: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($result)); "設定した: $p" }
+     $lines
+   }
+   ```
+
+   - `設定した:` か `設定済み:` と、印の付いた 2 行が出ればよい。再実行しても同じ行は増えない
+   - `中断:` が出たら、この項の手順 3 へ進まない。印の無い `EditMode` の行がキーの割り当てより後なら、先にその行をキーの割り当てより前へ移してから貼り直す
+   - 印の無い `EditMode` の行がキーの割り当てより前なら、そのまま残してよい
+
+1. スタートメニューから、新しい PowerShell 7 を開く。
+
+   - 「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
+
+1. 新しい PowerShell 7 で、モードとキーを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-PSReadLineOption).EditMode
+   Get-PSReadLineKeyHandler -Chord Ctrl+v,Ctrl+Enter,UpArrow | Format-Table Key, Function -AutoSize
+   ```
+
+   - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward` が出ればよい
+   - 出なければ、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 4・5 と、この項の手順 2 を確かめる
+   - 元に戻すときのこの項の手順 5 は、この項の手順 1 で開いた Windows PowerShell（5.1）に貼る
+
+1. 元に戻すときは、PowerShell 7 のプロファイルから、この項の印の行だけを消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
+   - 印の無い行と `# windows-setup.md` の行は残る。モードを変える印の無い行があれば、その設定も残る
+   - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
+   - [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 7 は、この項の行も含めて消す
+
+
+---
+
+### Windows PowerShell 5.1 のキー操作を変える
+
+- 任意で、Windows PowerShell 5.1 を Emacs モードにし、Ctrl+V と ↑/↓ の履歴検索を割り当てる
+- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい Windows PowerShell（5.1）の窓
+- 対象は `[Environment]::GetFolderPath('MyDocuments')` の下の `WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（Windows PowerShell 5.1 の `$PROFILE`）
+- 足す 4 行は ASCII の文字だけで、行末の印は `# shell-terminal.md`。Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
+- Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、貼り付けの設定の `AddLine` のまま
+- conhost の右クリック貼り付けは、端末が入力として送るので PSReadLine のキーに依らないとソースから推測している。実機では確かめていない（[補足](reference/shell-terminal.md#windows-powershell-51-のキー操作を変える--手順-2-補足-適用範囲と貼り付け)）
+
+> [!WARNING]
+> - この項の手順 2 で変えるプロファイルは、手順書を貼る管理者の conhost の窓や、プロファイルを読む SSH のセッションにも効く。
+> - 全ユーザーの `$PSHOME\profile.ps1` などは先に読まれる。そこで付けたキーも `EditMode` で消えるので、必要な割り当てはこの項の行より後で付け直す。
+> - この項の手順 2 はファイルだけを変える。今開いている窓で `Set-PSReadLineOption -EditMode` を実行しない。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Windows PowerShell（5.1） のプロファイルに、モードとキーの 4 行を入れる。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -EditMode Emacs }  # shell-terminal.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+v -Function Paste }  # shell-terminal.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward }  # shell-terminal.md'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward }  # shell-terminal.md'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。前提の手順を先に通す: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $wide = $bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE
+     $enc = if ($wide) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $original = $enc.GetString($bytes)
+     $text = [regex]::Replace($original, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
+     if ($wide) { $parseText = $text; $parseEnc = $enc } else {
+       $parseEnc = New-Object Text.UTF8Encoding($false, $true)
+       try { $parseText = $parseEnc.GetString($enc.GetBytes($text)) } catch { $parseEnc = [Text.Encoding]::Default; $parseText = $parseEnc.GetString($enc.GetBytes($text)) }
+     }
+     $bomLength = 0
+     if ($parseText.Length -gt 0 -and $parseText[0] -eq [char]0xFEFF) {
+       $parseText = $parseText.Substring(1)
+       $bomLength = if ($wide) { 1 } else { $parseEnc.GetByteCount([string][char]0xFEFF) }
+     }
+     $tokens = $null; $errors = $null
+     $ast = [Management.Automation.Language.Parser]::ParseInput($parseText, [ref]$tokens, [ref]$errors)
+     if ($errors.Count) { Write-Error '中断: プロファイルに構文エラーがある。何も書いていない'; return }
+     $commands = @($ast.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] }, $true))
+     $modes = @($commands | Where-Object {
+       $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and
+       @($_.CommandElements | Where-Object { $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -eq 'EditMode' }).Count
+     })
+     $keys = @($commands | Where-Object { $_.GetCommandName() -match '(^|\\)Set-PSReadLineKeyHandler$' } | Sort-Object { $_.Extent.StartOffset })
+     if ($keys.Count) {
+       $lateMode = @($commands | Where-Object {
+         $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and $_.Extent.StartOffset -gt $keys[0].Extent.StartOffset -and
+         @($_.CommandElements | Where-Object { $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -eq 'EditMode' }).Count
+       })
+       if ($lateMode.Count) { Write-Error '中断: 印の無い EditMode の行がキーの割り当てより後にある。先にその行をキーの割り当てより前へ移す。何も書いていない'; return }
+       $anchor = $ast.EndBlock.Statements | Where-Object {
+         $_.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] -and $a.GetCommandName() -match '(^|\\)Set-PSReadLineKeyHandler$' }, $true).Count
+       } | Select-Object -First 1
+       if (-not $anchor) { Write-Error '中断: キーの割り当ての位置を決められない。何も書いていない'; return }
+       $pos = $parseText.LastIndexOf("`n", $anchor.Extent.StartOffset) + 1
+       if ($parseText.Substring($pos, $anchor.Extent.StartOffset - $pos).Trim()) { Write-Error '中断: キーの割り当てと同じ行に別の文がある。何も書いていない'; return }
+     } else { $pos = $parseText.Length }
+     if (@($modes | Where-Object { $_.Extent.StartOffset -ge $pos }).Count) { Write-Error '中断: 挿入位置より後に印の無い EditMode がある。複合文からモードとキーの設定を別の行へ分け、モードを先に置く。何も書いていない'; return }
+     $declarations = @($ast.UsingStatements) + @($ast.ParamBlock)
+     if (@($declarations | Where-Object { $_ -and $_.Extent.EndOffset -gt $pos }).Count) { Write-Error '中断: 宣言より後の位置を決められない。何も書いていない'; return }
+     $offset = if ($wide) { $pos } else { $parseEnc.GetByteCount($parseText.Substring(0, $pos)) }
+     $offset += $bomLength
+     $nl = if ($text.Contains("`r`n") -or -not $text.Contains("`n")) { "`r`n" } else { "`n" }
+     $add = ($lines -join $nl) + $nl
+     if ($offset -gt 0 -and $text[$offset - 1] -ne "`n" -and $text.Substring(0, $offset) -notmatch '^(\uFEFF|\u00EF\u00BB\u00BF)?$') { $add = $nl + $add }
+     $result = $text.Insert($offset, $add)
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($result -eq $original) { "設定済み: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($result)); "設定した: $p" }
+     $lines
+   }
+   ```
+
+   - `設定した:` か `設定済み:` と、印の付いた 4 行が出ればよい。再実行しても同じ行は増えない
+   - `中断:` が出たら、この項の手順 3 へ進まない。印の無い `EditMode` の行がキーの割り当てより後なら、先にその行をキーの割り当てより前へ移してから貼り直す
+   - 印の無い `EditMode` の行がキーの割り当てより前なら、そのまま残してよい
+
+1. スタートメニューから、新しい Windows PowerShell（5.1） を開く。
+
+   - 「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - **次の手順は、新しく開いた Windows PowerShell（5.1） の窓に貼る**
+
+1. 新しい Windows PowerShell（5.1） で、モードとキーを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-PSReadLineOption).EditMode
+   Get-PSReadLineKeyHandler -Chord Ctrl+v,Ctrl+Enter,UpArrow,DownArrow | Format-Table Key, Function -AutoSize
+   ```
+
+   - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward`・`DownArrow` の `HistorySearchForward` が出ればよい
+   - 出なければ、この項の手順 2 と[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 3〜5 を確かめる
+   - 元に戻すときのこの項の手順 5 は、この項の手順 1 で開いた Windows PowerShell（5.1）に貼る
+
+1. 元に戻すときは、Windows PowerShell（5.1） のプロファイルから、この項の印の行だけを消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
+   - 印の無い行と `# windows-setup.md` の行は残る。モードを変える印の無い行があれば、その設定も残る
+   - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
+   - [アプリと貼り付けの設定を外す](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 は、この項の行も含めて消す
 
 ---
