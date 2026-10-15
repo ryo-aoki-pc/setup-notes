@@ -2921,7 +2921,30 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    ```bash
    {
-     CODEG_VERSION=v0.35.1             # 入れる Codeg の版（GitHub のリリースのタグ）
+     CODEG_VERSION=$(/usr/bin/python3 -I - <<'PY'
+   import json
+   import platform
+   import re
+   import urllib.request
+
+   assets = {"aarch64": "codeg-server-linux-arm64", "x86_64": "codeg-server-linux-x64"}
+   asset = assets[platform.machine()] + ".tar.gz"
+   request = urllib.request.Request("https://api.github.com/repos/spacering-net/codeg/releases?per_page=50",
+                                    headers={"User-Agent": "setup-notes-codeg"})
+   with urllib.request.urlopen(request, timeout=30) as response:
+       releases = json.load(response)
+   candidates = []
+   for release in releases:
+       tag = release.get("tag_name", "")
+       names = {item["name"] for item in release.get("assets", [])}
+       if re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag) and not release.get("draft", True) and not release.get("prerelease", True):
+           if {asset, asset + ".sha256"} <= names:
+               candidates.append((tuple(map(int, tag[1:].split("."))), tag))
+   if not candidates:
+       raise SystemExit("中断: 必要な配布物のある安定版が見つからない")
+   print(max(candidates)[1])
+   PY
+     )
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
      printf '待ち受け: https://%s:3443\n許可する送信元: %s\n版: Codeg %s\nfirewalld: %s\n' \
@@ -2931,7 +2954,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `SERVER_IP` は、スマートフォンや PC から届くサーバーの IPv4。`ip -4 -br addr` で確かめる
    - `ALLOW_FROM` は、サーバーから見えるクライアントの送信元に合わせる。VPN のクライアントの帯と LAN の帯を、空白で区切って並べられる
-   - `CODEG_VERSION` は[Codeg の最新リリース](https://github.com/spacering-net/codeg/releases)を確かめて変える
    - 待ち受ける NIC が別の zone に属しているなら、`FW_ZONE=` をその名前に変える
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直す
@@ -3288,6 +3310,86 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - [ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る
    - PC のブラウザからも、同じ URL とトークンで開ける。PC で開いた会話も、同じ一覧に出る
 
+#### Grok Build のブラウザ操作: 自動更新を有効にする
+
+- 対象: AlmaLinux 10
+- 前提: [Codeg のサーバーを入れて localhost で起動する](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)を通し、Codeg を入れてある
+- 実行場所: Codeg を動かす一般ユーザーの bash（デスクトップの端末か SSH）。このリポジトリのルートで行う
+- 毎日 4:30〜5:00（サーバーの時刻）に最新の安定版へ更新する。更新中は数十秒止まり、動いている会話は切れる
+
+1. このリポジトリのルートで、自動更新のプログラムを入れる。
+
+   ```bash
+   if [ ! -x ~/.local/opt/codeg-server/codeg-server ]; then
+     echo '中断: 先に Codeg を入れる' >&2
+   else
+     mkdir -p ~/.local/bin
+     install -m 700 scripts/grok-build-remote/codeg-auto-update.py ~/.local/bin/codeg-auto-update
+     printf '\n\033[7m 確認 \033[0m\n'
+     ls -l ~/.local/bin/codeg-auto-update
+   fi
+   ```
+
+   - `-rwx------` の `~/.local/bin/codeg-auto-update` が表示されればよい
+   - このリポジトリを更新して自動更新のスクリプトが変わったら、この項の手順 1 をもう一度実行する。次の実行から新しいスクリプトを使う
+
+1. 自動更新のサービスとタイマーを置き、読み込ませる。
+
+   <details>
+     <summary>貼るコマンド（bash・25 行）</summary>
+
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cat > ~/.config/systemd/user/codeg-auto-update.service <<'EOF'
+   [Unit]
+   Description=Update Codeg to the latest stable release
+
+   [Service]
+   Type=oneshot
+   Environment=PATH=/usr/bin
+   TimeoutStartSec=30min
+   SyslogIdentifier=codeg-auto-update
+   ExecStart=%h/.local/bin/codeg-auto-update
+   EOF
+   cat > ~/.config/systemd/user/codeg-auto-update.timer <<'EOF'
+   [Unit]
+   Description=Update Codeg to the latest stable release daily
+
+   [Timer]
+   OnCalendar=*-*-* 04:30
+   RandomizedDelaySec=30min
+
+   [Install]
+   WantedBy=timers.target
+   EOF
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user daemon-reload
+   ```
+
+   </details>
+
+   - 何も表示されなければよい
+   - `systemctl --user` が `Failed to connect to user scope bus` で失敗したときは、`--machine="$(id -un)@.host"` を付け、同じ一般ユーザーで実行し直す
+
+1. タイマーを有効にし、自動更新を 1 回動かして確かめる。
+
+   ```bash
+   systemctl --user enable --now codeg-auto-update.timer
+   systemctl --user start codeg-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
+   tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
+   systemctl --user list-timers codeg-auto-update.timer --no-pager
+   ~/.local/opt/codeg-server/codeg-server --version
+   ```
+
+   - `start` は、プログラムが終わるまで戻らない。新しい版があればその場で更新する
+   - `Result=success`・`ExecMainStatus=0` で、ログの最後に `最新版 <版> を使用中` か `更新: <旧版> → <新版>` が出ればよい
+   - `list-timers` の `NEXT` に、次の 4:30〜5:00 の時刻が出る。最後の版がログの版と同じならよい
+   - Codeg を止めてあるときは、ログに `止まっているので更新しない` と出ればよい
+   - 失敗したら、ログの最後の行と、[AlmaLinux 10 の更新](#grok-build-のブラウザ操作-almalinux-10-の更新)のリードの終了コードを見る
+   - `更新:` が出たら、[AlmaLinux 10 の更新](#grok-build-のブラウザ操作-almalinux-10-の更新)の手順 3 でブラウザから確かめる
+
 ---
 
 ### Grok Build のブラウザ操作: Windows 11 で使う
@@ -3329,7 +3431,24 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 変数を設定する。
 
    ```powershell
-   $CODEG_VERSION = 'v0.35.1'            # 入れる Codeg の版（GitHub のリリースのタグ）
+   $CODEG_VERSION = ''
+   $releaseFile = Join-Path $env:TEMP ('codeg-releases-' + [Guid]::NewGuid().ToString('N') + '.json')
+   try {
+     & "$env:WINDIR\System32\curl.exe" -fsSL --max-time 60 -H 'User-Agent: setup-notes-codeg' --output $releaseFile 'https://api.github.com/repos/spacering-net/codeg/releases?per_page=50'
+     if ($LASTEXITCODE -ne 0) { throw '中断: Codeg の最新の安定版を調べられない' }
+     $releaseJson = [IO.File]::ReadAllText($releaseFile, [Text.Encoding]::UTF8)
+     $releases = $releaseJson | ConvertFrom-Json
+     $CODEG_VERSION = $releases | Where-Object {
+       $_.tag_name -cmatch '^v[0-9]+\.[0-9]+\.[0-9]+$' -and
+       $null -ne $_.PSObject.Properties['draft'] -and $null -ne $_.PSObject.Properties['prerelease'] -and
+       -not $_.draft -and -not $_.prerelease -and
+       @($_.assets.name) -contains 'codeg-server-windows-x64.zip' -and
+       @($_.assets.name) -contains 'codeg-server-windows-x64.zip.sha256'
+     } | Sort-Object { [version]$_.tag_name.Substring(1) } -Descending | Select-Object -First 1 -ExpandProperty tag_name
+     if (-not $CODEG_VERSION) { throw '中断: 必要な配布物のある安定版が見つからない' }
+   } finally {
+     if (Test-Path -LiteralPath $releaseFile) { Remove-Item -LiteralPath $releaseFile -Force }
+   }
    $CADDY_VERSION = '2.11.7'             # 入れる Caddy の版（v を付けない）
    $CODEG_DIR = "$env:LOCALAPPDATA\codeg-server"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -3338,7 +3457,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    'CODEG_DIR     = {0}' -f $CODEG_DIR
    ```
 
-   - `CODEG_VERSION` は[Codeg のリリース](https://github.com/spacering-net/codeg/releases)で新しい版を確かめて変える
    - `CADDY_VERSION` は[Caddy のリリース](https://github.com/caddyserver/caddy/releases)で新しい版を確かめて変える
    - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
@@ -3798,6 +3916,86 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Caddy の設定・タスク・受信の規則・端末のルート証明書は、変えなくてよい。新しい IP 宛ての証明書は、Caddy がその場で作る
    - ブラウザは、IP が違う URL を別のサイトとして扱う。はじめて開く IP では、トークンを入れ直す
 
+#### Grok Build のブラウザ操作: Windows 11 で自動更新を有効にする
+
+- 対象: Windows 11
+- 前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、Codeg を入れてある
+- 実行場所: Codeg を使う本人のデスクトップで開いた、管理者ではない Windows PowerShell 5.1。このリポジトリのルートで行う
+- 毎日 4:30（PC の時刻）に最新の安定版へ更新する。スリープなどで逃したら起きた後に動く。更新中は数十秒止まり、動いている会話は切れる
+
+1. このリポジトリのルートで、自動更新のスクリプトを写す。
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     $state = Join-Path $env:LOCALAPPDATA 'codeg-auto-update'
+     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
+     if (-not (Test-Path -LiteralPath "$dir\codeg-server.exe") -or -not (Test-Path -LiteralPath "$dir\codeg-hidden-launcher.exe")) { throw '中断: Codeg と隠しランチャーを先に入れる' }
+     if (-not (Get-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue)) { throw '中断: codeg-server のタスクが無い' }
+     New-Item -ItemType Directory -Path $state -Force | Out-Null
+     Copy-Item -LiteralPath '.\scripts\grok-build-remote\codeg-auto-update.ps1' -Destination "$state\codeg-auto-update.ps1"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Item -LiteralPath "$state\codeg-auto-update.ps1" | Select-Object Name, Length
+   }
+   ```
+
+   - `codeg-auto-update.ps1` の 1 行が出ればよい
+   - このリポジトリを更新して自動更新のスクリプトが変わったら、この項の手順 1 をもう一度実行する。次の実行から新しいスクリプトを使う
+
+1. 毎日 4:30 に隠しランチャーから動かすタスクを登録する。
+
+   <details>
+     <summary>貼るコマンド（PowerShell・20 行）</summary>
+
+   ```powershell
+   & {
+     $ErrorActionPreference = 'Stop'
+     if (Get-ScheduledTask -TaskName 'codeg-auto-update' -ErrorAction SilentlyContinue) { throw '中断: codeg-auto-update のタスクが既にある' }
+     $me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
+     $script = Join-Path $env:LOCALAPPDATA 'codeg-auto-update\codeg-auto-update.ps1'
+     $server = Get-ScheduledTask -TaskName 'codeg-server'
+     $account = $server.Principal.UserId
+     $sid = if ($account -match '^S-1-') { $account } else { ([Security.Principal.NTAccount]$account).Translate([Security.Principal.SecurityIdentifier]).Value }
+     if ($sid -ne [Security.Principal.WindowsIdentity]::GetCurrent().User.Value -or $server.Principal.LogonType -ne 'Interactive' -or $server.Principal.RunLevel -ne 'Limited') { throw '中断: codeg-server の本人・Interactive・Limited を確かめる' }
+     if (-not (Test-Path -LiteralPath $script)) { throw '中断: この項の手順 1 を通す' }
+     $action = New-ScheduledTaskAction -Execute "$dir\codeg-hidden-launcher.exe" -Argument ('"{0}"' -f $script)
+     $principal = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited
+     $trigger = New-ScheduledTaskTrigger -Daily -At '04:30'
+     $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -RunOnlyIfNetworkAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Hours 1) -MultipleInstances IgnoreNew
+     Register-ScheduledTask -TaskName 'codeg-auto-update' -Action $action -Principal $principal -Trigger $trigger -Settings $settings | Out-Null
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-ScheduledTask -TaskName 'codeg-auto-update' | Select-Object TaskName, State | Format-Table -AutoSize
+     Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object NextRunTime | Format-Table -AutoSize
+   }
+   ```
+
+   </details>
+
+   - `codeg-auto-update` が `Ready` で、`NextRunTime` が次の 4:30 ならよい
+   - 登録で失敗したら、エラーを解消するまで先へ進まない
+
+1. 自動更新を 1 回動かし、結果と次の時刻を確かめる。
+
+   ```powershell
+   Start-ScheduledTask -TaskName 'codeg-auto-update'
+   Start-Sleep -Seconds 2
+   $deadline = (Get-Date).AddHours(1)
+   while ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -eq 'Running' -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
+   if ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -ne 'Ready') { throw '中断: 自動更新が Ready に戻っていない。ログとタスクを確かめる' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
+   Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
+   & "$env:LOCALAPPDATA\codeg-server\codeg-server.exe" --version
+   ```
+
+   - タスクが `Ready` に戻り、`LastTaskResult` が `0` ならよい
+   - ログの最後に `最新版 <版> を使用中` か `更新: <旧版> → <新版>` が出て、最後の版と同じならよい
+   - Codeg を止めてあるときは、ログに `止まっているので更新しない` と出ればよい
+   - `NextRunTime` は、次の 4:30 になる。タスクが新しいウィンドウを開かないことも確かめる
+   - `LastTaskResult` が `0` 以外なら、ログの最後の行と、[Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)のリードの終了コードを見る
+   - `更新:` が出たら、[Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)の手順 3 でブラウザから確かめる
+
 ---
 
 ### Grok Build のブラウザ操作: 端末にルート証明書を入れる
@@ -4021,7 +4219,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
 
    - `/settings/agents` を開き、エージェント一覧の `Claude Code`・`Codex CLI` で、使うものを有効にする
-   - 「バージョン状態」の「インストール」を押す。Codeg v0.35.1 の対応版は、Claude の `claude-agent-acp` が `0.89.1`、Codex の `codex-acp` が `2.2.2`
+   - 「バージョン状態」で対応版を確かめ、「インストール」を押す
    - インストール完了まで待ち、「再チェック」で対応版が検出され、エラーが無いことを確かめる。既に対応版が入っているものは、入れ直さない
    - npm の導入完了ログだけでは、対応版の検出や接続の成功として扱わない
    - 最新版への「アップグレード」は押さない。既に違う版が入っている場合も、上書きせず、使う版と検証範囲を先に確かめる
@@ -4127,7 +4325,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
 
    - `/settings/agents` を開き、エージェント一覧の `Claude Code`・`Codex CLI` で、使うものを有効にする
-   - 「バージョン状態」の「インストール」を押す。Codeg v0.35.1 の対応版は、Claude の `claude-agent-acp` が `0.89.1`、Codex の `codex-acp` が `2.2.2`
+   - 「バージョン状態」で対応版を確かめ、「インストール」を押す
    - インストール完了まで待ち、「再チェック」で対応版が検出され、エラーが無いことを確かめる（「バージョン状態」が `PASS` になる）。既に対応版が入っているものは、入れ直さない
    - npm の導入完了ログだけでは、対応版の検出や接続の成功として扱わない
    - 最新版への「アップグレード」は押さない。既に違う版が入っている場合も、上書きせず、使う版と検証範囲を先に確かめる
@@ -4217,7 +4415,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ### Grok Build のブラウザ操作: Windows 11 で Antigravity も操作する
 
 - 対象: Windows 11
-- 任意。前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、ブラウザで Codeg にログインしてある（Codeg v0.35.1）
+- 任意。前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、ブラウザで Codeg にログインしてある
 - 実行場所: ブラウザの Codeg と、Codeg を入れた PC の、管理者ではない Windows PowerShell 5.1。Google への承認は、その PC の普段のブラウザで行う
 - Codeg の「Google Antigravity」は、Google の ACP サーバー（`agy_acp_server`）で、[Antigravity CLI](#windows-11-で-antigravity-cli-を入れる)とは別の製品。ログインも別で、CLI を入れていなくても使える
 
@@ -4228,9 +4426,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ブラウザで、Antigravity の ACP サーバーを入れる。
 
    - `/settings/agents` を開き、エージェント一覧の `Google Antigravity` を選ぶ
-   - 「バージョン状態」の「インストール」を押す。Codeg v0.35.1 の推奨版は `1.3.0`
-   - 「再チェック」で `PASS`（`推奨: 1.3.0 · ローカル: 1.3.0`）になればよい
-   - 「未レビューの最新版 … にアップグレード」は押さない。押してしまったら、「カスタムインストール」で `1.3.0` を入れ直す
+   - 「バージョン状態」で推奨版を確かめ、「インストール」を押す
+   - 「再チェック」で `PASS` になり、推奨版とローカルの版が同じならよい
+   - 「未レビューの最新版 … にアップグレード」は押さない。押してしまったら、「カスタムインストール」で「バージョン状態」の推奨版を入れ直す
    - 「ファイルとコマンドをエージェント自身に処理させる」はオフのままにする
 
 1. ブラウザで、認証の方法を保存する。
@@ -4405,13 +4603,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.config/codeg-server/token.env` | `%LOCALAPPDATA%\codeg-server\token.txt` | アクセストークン。持ち主だけが読める |
 | `~/.config/systemd/user/codeg-server.service` | `%LOCALAPPDATA%\codeg-server\start-codeg-server.ps1` と、タスク `codeg-server` | 待ち受ける IP（`CODEG_HOST`）などの設定と、起動のしかた |
 | `~/.local/bin/codeg-set-password` | リポジトリの `scripts/grok-build-remote/set-codeg-password.ps1` | 本人の端末で共通パスワードを設定・変更するスクリプト |
+| `~/.local/bin/codeg-auto-update` | `%LOCALAPPDATA%\codeg-auto-update\codeg-auto-update.ps1` | 最新の安定版を調べ、照合・退避・入れ替え・確認と失敗時の戻し、指定した控えからの復元をするスクリプト |
+| `~/.local/state/codeg-auto-update/` | `%LOCALAPPDATA%\codeg-auto-update\` | ロック、保留する版（`skip-version`）、入れ替えの段階（`in-progress`）、控え（`backups`）、自動更新のログ（`codeg-auto-update.log`）と作業用の一時ファイル |
+| `~/.config/systemd/user/codeg-auto-update.service` と `codeg-auto-update.timer` | タスク `codeg-auto-update` | 毎日の自動更新の起動設定 |
 | `~/.local/bin/codeg-grok-readonly` と `claude-agents` | — | Landlock 非対応ホストで、Claude の Grok プラグインから読み取り専用で頼む任意の起動先 |
 | `~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf` | — | 上の起動先を Codeg の Claude へ渡す環境設定。認証値は含めない |
 | `~/.local/share/codeg/` | `%APPDATA%\codeg\` | 会話と設定の DB（`codeg.db`）と、ログ（`logs`） |
 | `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル（AlmaLinux 10 はホストで共通） |
 | `~/.config/caddy/sites/codeg.caddy`（共通設定は [Caddy: 設定ファイル](almalinux-setup.md#caddy-設定ファイル)） | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先（Windows は認証局の名前も） |
 | `~/.config/systemd/user/caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた（AlmaLinux 10 はホストで共通） |
-| — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | 両タスクで使う、コンソールを作らないランチャー |
+| — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | Codeg・Caddy・自動更新のタスクで使う、コンソールを作らないランチャー |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
@@ -4528,24 +4729,29 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 管理者ではない PowerShell に貼る。変数は要らない
 - タスクを終了しただけでは、Codeg と Caddy の本体が残る。止めるのはこの項の手順 1
-- ほかの用途の Caddy が動く PC では、この項の手順 1 の 2 行目（`Get-Process -Name caddy` から始まる行）は貼らない。名前が `caddy` のプロセスをすべて止める
+- ほかの用途の Caddy が動く PC では、この項の手順 1 の `Get-Process -Name caddy` から始まる行は貼らない。名前が `caddy` のプロセスをすべて止める
+- Codeg を止めてある間は、自動更新は何もしない。止める前に、自動更新が動いていないことを確かめる
 
 1. Caddy と Codeg を止める。
 
    ```powershell
-   Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
-   Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
-   Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
-     Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
-     ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
-   Stop-ScheduledTask -TaskName 'codeg-server'
-   Start-Sleep -Seconds 2
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
-   (Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue).State
-   Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
+   & {
+     if ((Get-ScheduledTask -TaskName 'codeg-auto-update' -ErrorAction SilentlyContinue).State -eq 'Running') { Write-Error '中断: 自動更新が動いている。終わるまで止めない'; return }
+     Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
+     Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
+     Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
+       Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
+       ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
+     Stop-ScheduledTask -TaskName 'codeg-server'
+     Start-Sleep -Seconds 2
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+     (Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue).State
+     Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
+   }
    ```
 
+   - 自動更新が `Running` なら、終わってからこの手順をやり直す
    - プロセスと待ち受けの表は出ず、`Ready` が 2 行出ればよい（公開の項を通していなければ 1 行）
    - 止めるのは、この手順で置いた Codeg と、その子プロセスだけ。端末や、ほかの ACP クライアントで動かしている `grok` は止めない
    - 実行中の会話は中断される。会話の履歴は残る
@@ -4573,158 +4779,163 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: AlmaLinux 10 の更新
 
-- AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)
-- 画面の右下に「新バージョン」と出たら、新しい版がある。画面からは入れ替えず、この節の手順で、SHA-256 を照合してから置き換える
+- 対象: AlmaLinux 10。Windows 11 は [Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)
+- 前提: [自動更新を有効にする](#grok-build-のブラウザ操作-自動更新を有効にする)を通してある
+- 実行場所: Codeg を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この節の手順 3 はブラウザ
+- 毎日 4:30〜5:00（サーバーの時刻）に最新の安定版を調べる。今の版が最新なら何もしない
+- 新しい版があれば、取得・SHA-256 と API の digest（あるとき）の照合・展開・版と空き容量の確認を終えてから止め、本体と DB を退避し、入れ替えて起動する。待ち受ける本体・HTTP の応答・再起動の回数・版を確かめる
+- 止まるのは数十秒で、動いている会話は切れる。確認に失敗したら、前の本体と DB に戻してその版を保留する。さらに新しい安定版が出たら、また自動で試す
+- 控えは `~/.local/state/codeg-auto-update/backups/<UTC日時>-<旧版>/` の `bin/` と `db/` に置き、新しい 2 世代を残す。失敗した本体と DB は同じ場所の `failed-<UTC日時>/` に残し、自動では消さない
+- Codeg のサービスが止まっている間は、更新せずに終わる
+- 画面の右下に「新バージョン」と出たら、毎日の自動更新を待つか、この節の手順 2 で動かす。画面からは入れ替えない
 - Grok Build は、Codeg からは上がらない（Codeg は `--no-auto-update` を付けて起動する）。端末で `grok update` を実行して上げる
 - この節は Codeg の更新。共通の Caddy は [Caddy: 更新](almalinux-setup.md#caddy-更新)で上げる
+- ログは `~/.local/state/codeg-auto-update/codeg-auto-update.log` に追記する
+- 終了コード
+  - `0`: 最新版を使用中、更新した、控えから復元した、または Codeg が止まっているので何もしなかった
+  - `1`: 入れ替えずに中断した、または保留中
+  - `2`: 更新に失敗し、前の本体と DB に戻して保留した
+  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で復旧する
 
-1. 上げる版を設定する。
+> [!WARNING]
+> 自動の確認で見つからない不具合に気付いたら、[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
-   ```bash
-   CODEG_VERSION=''                   # 上げる版（GitHub のリリースのタグ。例: v0.35.1）
-   ```
-
-   - [リリースの一覧](https://github.com/spacering-net/codeg/releases)で確かめる
-
-1. 配布物を取得して、SHA-256 を照合する。
-
-   - [Codeg のサーバーを入れて localhost で起動する](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 3 のブロックを貼る
-   - **この節の手順 3 は、同じシェルに続けて貼る**
-
-1. サービスを止めて置き換え、起動し直す。
-
-   <details>
-     <summary>貼るコマンド（bash・24 行）</summary>
+1. 自動更新の結果と、次に動く時刻を確かめる。
 
    ```bash
-   if [ -z "${CODEG_ASSET}" ] || [ ! -s ~/.cache/codeg-server-dl/"${CODEG_ASSET}.tar.gz" ]; then
-     echo '中断: 同じシェルでこの節の手順 2 を通す' >&2
-   elif [ -e ~/.local/opt/codeg-server.prev ]; then
-     echo '中断: ~/.local/opt/codeg-server.prev が既にある。前の更新の残りを確かめて消す' >&2
-   else
-     if CODEG_X=$(mktemp -d ~/.cache/codeg-server-x.XXXXXX) &&
-     tar -xzf ~/.cache/codeg-server-dl/"${CODEG_ASSET}.tar.gz" -C "${CODEG_X}" &&
-     systemctl --user stop codeg-server.service &&
-     mv ~/.local/opt/codeg-server ~/.local/opt/codeg-server.prev &&
-     install -d -m 755 ~/.local/opt/codeg-server &&
-     install -m 755 "${CODEG_X}/${CODEG_ASSET}/codeg-server" "${CODEG_X}/${CODEG_ASSET}/codeg-mcp" ~/.local/opt/codeg-server/ &&
-     cp -r "${CODEG_X}/${CODEG_ASSET}/web" ~/.local/opt/codeg-server/web &&
-     rm -r "${CODEG_X}" ~/.cache/codeg-server-dl &&
-     systemctl --user start codeg-server.service; then
-       for i in $(seq 1 30); do ss -ltn '( sport = :3080 )' | grep -q LISTEN && break; sleep 1; done
-       printf '\n\033[7m 確認 \033[0m\n'
-       ~/.local/opt/codeg-server/codeg-server --version
-       systemctl --user is-active codeg-server.service
-       ss -ltn '( sport >= :3080 and sport <= :3090 )'
-     else
-       echo '中断: 更新が途中で止まった。前の版の退避先の有無と、直前のエラーを確かめる' >&2
-       false
-     fi
-   fi
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user list-timers codeg-auto-update.timer --no-pager
+   systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
+   tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
+   cat ~/.local/state/codeg-auto-update/skip-version 2>/dev/null
+   if [ -e ~/.local/state/codeg-auto-update/in-progress ]; then echo '中断: in-progress が残っている。extra の復旧手順を使う'; fi
+   ~/.local/opt/codeg-server/codeg-server --version
    ```
 
-   </details>
+   - `list-timers` の `NEXT` に、次の 4:30〜5:00 の時刻が出る
+   - `Result=success` なら、最後の実行は終了コード `0` で終わった。`exit-code` なら、`ExecMainStatus` とログの最後の行を見る
+   - 保留の版が出たら、その版は自動では入らない。試し直すときは、この節の手順 4 を行う
+   - `in-progress` の中断が出たら、この節のリードの終了コード `3` の復旧手順を使う
+   - 最後の版が、ログの `最新版 <版> を使用中` か `更新: <旧版> → <新版>` の版と同じならよい
 
-   - 上げた版の番号、`active`、今までと同じ待ち受けの 1 行が出ればよい
-   - 動いていた Grok Build のプロセスは、サービスと一緒に止まる。会話の履歴は残り、ブラウザは入り直さずに使える
-   - 起動しなければ `~/.local/opt/codeg-server.prev/codeg-server` が残っていることを確かめる
-   - 残っていれば `systemctl --user stop codeg-server.service` の後、`~/.local/opt/codeg-server` を消す
-   - `~/.local/opt/codeg-server.prev` を元の名前に戻し、`start` する
-   - 退避先が無ければ、現行の `~/.local/opt/codeg-server` は消さない。直前のエラーの原因を直し、現行の本体が残っていることを確かめてから `systemctl --user start codeg-server.service` で再開する
-
-1. ブラウザで動くことを確かめてから、前の版を消す。
+1. 次の自動更新を待たないときだけ、今すぐ最新版へ更新する。
 
    ```bash
-   rm -r ~/.local/opt/codeg-server.prev
+   systemctl --user start codeg-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
+   tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
    ```
 
-   - 会話の一覧が残っていて、画面の右下の「新バージョン」が消えていればよい
+   - プログラムが終わるまで戻らない。新しい版があれば、動いている会話は切れる
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
+   - `ExecMainStatus` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
+
+1. 更新したときは、ブラウザで会話の一覧と応答を確かめる。
+
+   - 使っている Codeg の URL を開き直し、会話の一覧と既存の会話の履歴が残っていることを確かめる
+   - 新しい会話で Grok などの使うエージェントへ短い指示を送り、応答が返ることを確かめる
+   - 右下の「新バージョン」が残るときは、この節の手順 1 の版とログを確かめる
+   - 問題があれば、この節のリードの WARNING のとおりに戻して保留する
+
+1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。
+
+   ```bash
+   rm -f ~/.local/state/codeg-auto-update/skip-version
+   systemctl --user start codeg-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
+   tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
+   ```
+
+   - 失敗の原因を直してから行う。また失敗すると、前の版に戻して同じ版を保留する
+   - `in-progress` が残っているときは、保留を解く前に、この節のリードの終了コード `3` の復旧手順を使う
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
 
 ---
 
 ### Grok Build のブラウザ操作: Windows 11 の更新
 
-- Windows 版の Codeg は、画面から自分を入れ替えない。この項の手順で、SHA-256 を照合してから置き換える
-- 同じ場所（`%LOCALAPPDATA%\codeg-server`）に置き換えるので、タスクはそのまま使える。Caddy と受信の規則には触れない
+- 対象: Windows 11
+- 前提: [Windows 11 で自動更新を有効にする](#grok-build-のブラウザ操作-windows-11-で自動更新を有効にする)を通してある
+- 実行場所: Codeg を使う本人のデスクトップで開いた、管理者ではない Windows PowerShell 5.1。この節の手順 3 はブラウザ
+- 毎日 4:30（PC の時刻）に最新の安定版を調べる。スリープなどで逃したら起きた後に動く。サインインしている間だけ動き、今の版が最新なら何もしない
+- 新しい版があれば、取得・SHA-256 と API の digest（あるとき）の照合・展開・版と空き容量の確認を終えてから止め、本体と DB を退避し、入れ替えて起動する。待ち受ける本体と起動時刻・HTTP の応答・版を確かめる
+- 止まるのは数十秒で、動いている会話は切れる。確認に失敗したら、前の本体と DB に戻してその版を保留する。さらに新しい安定版が出たら、また自動で試す
+- 控えは `%LOCALAPPDATA%\codeg-auto-update\backups\<UTC日時>-<旧版>\` の `bin\` と `db\` に置き、新しい 2 世代を残す。失敗した本体と DB は同じ場所の `failed-<UTC日時>\` に残し、自動では消さない
+- Codeg のタスクが `Ready`（停止中）なら、更新せずに終わる。起動用のスクリプト・トークン・隠しランチャーは入れ替えない
+- 画面の右下に「新バージョン」と出たら、毎日の自動更新を待つか、この節の手順 2 で動かす。画面からは入れ替えない
 - この節は Codeg の更新。Caddy の更新は、この手順書では確かめていない
-- 管理者ではない PowerShell に貼る
-- Grok Build は、Codeg からは上がらない。[Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 1 で Codeg を止めてから、端末で `grok update` を実行して上げる
+- Grok Build は、Codeg からは上がらない。[Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 1 で止め、端末で `grok update` を実行して上げる
+- ログは `%LOCALAPPDATA%\codeg-auto-update\codeg-auto-update.log`。1 MB を超えたら `.1` へ回し、2 世代を残す
+- 終了コード（`LastTaskResult`）
+  - `0`: 最新版を使用中、更新した、控えから復元した、または Codeg が止まっているので何もしなかった
+  - `1`: 入れ替えずに中断した、または保留中
+  - `2`: 更新に失敗し、前の本体と DB に戻して保留した
+  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で復旧する
 
-1. 上げる版を設定する。
+> [!WARNING]
+> 自動の確認で見つからない不具合に気付いたら、[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
-   ```powershell
-   $CODEG_VERSION = ''                   # 上げる版（GitHub のリリースのタグ。例: v0.35.1）
-   ```
-
-   - [リリースの一覧](https://github.com/spacering-net/codeg/releases)で確かめる
-
-1. 配布物を取得して SHA-256 を照合し、Codeg を止めて置き換え、タスクを開始する。
-
-   <details>
-     <summary>貼るコマンド（PowerShell・42 行）</summary>
+1. 自動更新の結果と、次に動く時刻を確かめる。
 
    ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $dir = "$env:LOCALAPPDATA\codeg-server"
-     $prev = "$env:LOCALAPPDATA\codeg-server.prev"
-     $curl = "$env:WINDIR\System32\curl.exe"
-     $tmp = "$env:TEMP\codeg-server-setup"
-     if (-not $CODEG_VERSION) { Write-Error '中断: この節の手順 1 の変数を設定する'; return }
-     if (-not (Test-Path -LiteralPath "$dir\codeg-server.exe")) { Write-Error '中断: Codeg が入っていない'; return }
-     if (Test-Path -LiteralPath $prev) { Write-Error "中断: $prev が既にある。前の更新と復旧を終えるまで消さない"; return }
-     if (Test-Path -LiteralPath $tmp) { Write-Error "中断: $tmp が既にある。中を確かめて消してから貼り直す"; return }
-     New-Item -ItemType Directory -Path $tmp | Out-Null
-     $url = "https://github.com/spacering-net/codeg/releases/download/$CODEG_VERSION/codeg-server-windows-x64.zip"
-     & $curl -fsSL -o "$tmp\codeg-server-windows-x64.zip" $url
-     if ($LASTEXITCODE -ne 0) { Write-Error '中断: zip を取れない'; return }
-     & $curl -fsSL -o "$tmp\codeg-server-windows-x64.zip.sha256" "$url.sha256"
-     if ($LASTEXITCODE -ne 0) { Write-Error '中断: .sha256 を取れない'; return }
-     $want = ((Get-Content -LiteralPath "$tmp\codeg-server-windows-x64.zip.sha256" -Raw) -split '\s+')[0]
-     if ((Get-FileHash -LiteralPath "$tmp\codeg-server-windows-x64.zip" -Algorithm SHA256).Hash -ne $want) { Write-Error '中断: sha256 が一致しない'; return }
-     Expand-Archive -LiteralPath "$tmp\codeg-server-windows-x64.zip" -DestinationPath $tmp
-     $payload = Join-Path $tmp 'codeg-server-windows-x64'
-     if (-not (Test-Path -LiteralPath "$payload\codeg-server.exe" -PathType Leaf) -or -not (Test-Path -LiteralPath "$payload\codeg-mcp.exe" -PathType Leaf) -or -not (Test-Path -LiteralPath "$payload\web" -PathType Container)) { throw '中断: 配布物の本体と web が揃っていない' }
-     Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
-       Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
-       ForEach-Object {
-         & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null
-         if ($LASTEXITCODE -ne 0) { throw '中断: Codeg と子プロセスを止められない' }
-       }
-     Stop-ScheduledTask -TaskName 'codeg-server'
-     Start-Sleep -Seconds 2
-     New-Item -ItemType Directory -Path $prev | Out-Null
-     Move-Item -LiteralPath "$dir\codeg-server.exe", "$dir\codeg-mcp.exe", "$dir\web" -Destination $prev
-     Copy-Item -LiteralPath "$tmp\codeg-server-windows-x64\codeg-server.exe", "$tmp\codeg-server-windows-x64\codeg-mcp.exe" -Destination $dir
-     Copy-Item -LiteralPath "$tmp\codeg-server-windows-x64\web" -Destination $dir -Recurse
-     Remove-Item -LiteralPath $tmp -Recurse -Force
-     Start-ScheduledTask -TaskName 'codeg-server'
-     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
-     'sha256 一致'
-     & "$dir\codeg-server.exe" --version
-     (Get-ScheduledTask -TaskName 'codeg-server').State
-     Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort -AutoSize
-   }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTask -TaskName 'codeg-auto-update' | Select-Object TaskName, State | Format-Table -AutoSize
+   Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
+   Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 30
+   Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\skip-version" -ErrorAction SilentlyContinue
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\in-progress"
+   & "$env:LOCALAPPDATA\codeg-server\codeg-server.exe" --version
    ```
 
-   </details>
+   - `Ready` で、`NextRunTime` に次の 4:30 が出ればよい。`Running` なら、終わってから貼り直す
+   - `LastTaskResult` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
+   - 保留の版が出たら、その版は自動では入らない。試し直すときは、この節の手順 4 を行う
+   - `Test-Path` は `False` ならよい。`True` なら、この節のリードの終了コード `3` の復旧手順を使う
+   - 最後の版が、ログの `最新版 <版> を使用中` か `更新: <旧版> → <新版>` の版と同じならよい
 
-   - `sha256 一致`、上げた版の番号、`Running`、今までと同じ待ち受けの 1 行が出ればよい
-   - 起動用のスクリプトとトークンは、そのまま残る
-   - 失敗時は現行の本体と `codeg-server.prev` を残す。退避先の `codeg-server.exe`・`codeg-mcp.exe`・`web` が揃っているか確かめる
-   - 揃っていれば、[停止](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 1 で止める
-   - 3 つが揃っていれば、現行の `codeg-server` のその 3 つだけを消し、`codeg-server.prev` から同じ場所に戻す。起動用のスクリプトとトークンは消さない
-   - 復旧後は[Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 2 で始める
-   - 退避先が揃っていなければ、どちらのディレクトリも消さず、移動やコピーが止まった原因を確かめる。前の版は一部が現行の場所、一部が退避先に残っていることがある
-
-1. ブラウザで動くことを確かめてから、前の版を消す。
+1. 次の自動更新を待たないときだけ、今すぐ最新版へ更新する。
 
    ```powershell
-   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server.prev" -Recurse -Force
+   Start-ScheduledTask -TaskName 'codeg-auto-update'
+   Start-Sleep -Seconds 2
+   $deadline = (Get-Date).AddHours(1)
+   while ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -eq 'Running' -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
+   if ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -ne 'Ready') { throw '中断: 自動更新が Ready に戻っていない。ログとタスクを確かめる' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
+   Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
    ```
 
-   - 会話の一覧が残っていて、画面の右下の「新バージョン」が消えていればよい
+   - タスクが `Ready` に戻るまで待つ。新しい版があれば、動いている会話は切れる
+   - `LastTaskResult` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
+
+1. 更新したときは、ブラウザで会話の一覧と応答を確かめる。
+
+   - 使っている Codeg の URL を開き直し、会話の一覧と既存の会話の履歴が残っていることを確かめる
+   - 新しい会話で Grok などの使うエージェントへ短い指示を送り、応答が返ることを確かめる
+   - 右下の「新バージョン」が残るときは、この節の手順 1 の版とログを確かめる
+   - 問題があれば、この節のリードの WARNING のとおりに戻して保留する
+
+1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\skip-version" -Force -ErrorAction SilentlyContinue
+   Start-ScheduledTask -TaskName 'codeg-auto-update'
+   Start-Sleep -Seconds 2
+   $deadline = (Get-Date).AddHours(1)
+   while ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -eq 'Running' -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
+   if ((Get-ScheduledTask -TaskName 'codeg-auto-update').State -ne 'Ready') { throw '中断: 自動更新が Ready に戻っていない。ログとタスクを確かめる' }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
+   Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
+   ```
+
+   - 失敗の原因を直してから行う。また失敗すると、前の版に戻して同じ版を保留する
+   - `in-progress` が残っているときは、保留を解く前に、この節のリードの終了コード `3` の復旧手順を使う
+   - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
 
 
 ---
