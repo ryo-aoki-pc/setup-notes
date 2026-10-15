@@ -52,7 +52,7 @@
 
 1. 自分用の lazygit の設定を外し、退避した設定に戻す。
 
-   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の README の「導入方法」](../windows-setup.md#lazygit-の設定を導入する)の、元に戻す 2 つのブロックを貼る（1 つ目が何も出さないことを確かめてから、2 つ目）
+   - lazygit をすべて閉じてから、[ryo-aoki-pc/lazygit の「lazygit の設定のロールバック」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/readme.md#windows-11-のロールバック)の手順 1・2 を貼る（手順 1 が何も出さないことを確かめてから、手順 2）
    - `%LOCALAPPDATA%\lazygit` を消し、退避した `lazygit.bak` があれば戻す
 
 1. scoop で lazygit を消す。
@@ -172,7 +172,7 @@
    - 自分用の設定の clone（`%APPDATA%\yazi\config`）を消すときは、次の 2 つが、どちらも何も出さないことを先に確かめる（コミットしていない変更と、push していないコミットが無い）
      - `git -C "$env:APPDATA\yazi\config" status --short`
      - `git -C "$env:APPDATA\yazi\config" log --oneline '@{u}..'`
-   - 自分用の設定の clone を消した後、`%APPDATA%\yazi\config.bak` があれば、名前を `config` に戻す（README の Windows の例が、元の設定をそこへ退避している）
+   - 自分用の設定の clone を消した後、`%APPDATA%\yazi\config.bak` があれば、名前を `config` に戻す（[yazi の設定を導入する](../windows-setup.md#yazi-の設定を導入する)の手順 2 が、元の設定をそこへ退避している）
 
 1. scoop で yazi を消す。
 
@@ -205,7 +205,7 @@
 
 1. 自分用の Neovim の設定とプラグインを消し、退避した設定に戻す。
 
-   - Neovim をすべて閉じてから、[LazyVimStarter の docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)の手順 5・6 を貼る
+   - Neovim をすべて閉じてから、[LazyVimStarter の「LazyVim の設定のロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#ロールバック)の手順 5・6 を貼る
    - その手順 6 は、設定のフォルダーごと消す（push していない変更は取り戻せない）。その手順 5 で、何も出ないことを確かめてから行う
    - その手順 7（scoop の Neovim・zenhan・lazygit をまとめて消す）は行わない。Neovim はこの項の手順 5、lazygit は[Git の道具を消す](#git-の道具を消す)の手順 2 で消す（zenhan は残る。要らなければ `scoop uninstall zenhan`）
 
@@ -331,7 +331,7 @@
 
 1. 自分用の WezTerm の設定を外し、退避した設定に戻す。
 
-   - WezTerm の窓をすべて閉じてから、[ryo-aoki-pc/wezterm の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#ロールバック)の手順 1〜4 を、この Git Bash に貼る
+   - WezTerm の窓をすべて閉じてから、[ryo-aoki-pc/wezterm の「WezTerm の設定のロールバック」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 1〜4 を、この Git Bash に貼る
    - その手順 3 は `~/.config/wezterm` を消す（commit・push していないものは取り戻せない）。その手順 2 で確かめてから行う
 
 1. 共通の bash 設定も外すときだけ、外す。
