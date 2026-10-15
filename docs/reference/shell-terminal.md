@@ -54,7 +54,7 @@
 
 ### シェルのツール / 手順 8: 補足: BaseOS の tmux
 
-- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
+- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
 
 ### シェルのツール / 手順 10: 補足: z と zi の使い方
 
@@ -518,7 +518,7 @@
 
 #### starship: 実施手順 / 手順 2: 補足: 降ってくるボトル
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#starship-参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#starship-参考資料から分離した記録)
 
 #### starship: 設定ファイル / 手順 1: 補足: 調べるときに使うサブコマンド
 
@@ -595,7 +595,7 @@
 
 #### fzf: 実施手順 / 手順 1: 補足: 依存と、入れてあるホストで貼る意味
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#fzf-実施手順--手順-1-補足-依存と入れてあるホストで貼る意味)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#fzf-実施手順--手順-1-補足-依存と入れてあるホストで貼る意味)
 
 - fzf の依存は `ncurses` だけ（`brew deps fzf`）
 - yazi.md や zoxide.md で入れた fzf は、`brew install zoxide fzf` のように名前を挙げて入れているので、Homebrew の「頼まれて入れた」印（`installed_on_request`）が付いている。`brew install fzf` を貼り直しても害は無く、印が無かったホストでは付く（印が無いと、zoxide や yazi を `brew uninstall` した際の自動削除や、明示的な `brew autoremove` で fzf も消えうる）
@@ -635,7 +635,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 #### eza: 選択した方針
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#eza-選択した方針)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#eza-選択した方針)
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
@@ -739,13 +739,13 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 | ロールバック 1 | ロールバックの「端末とエディタを消す」の手順 10 |
 | ロールバック 2 | （外した。WezTerm で使う（任意）の戻し方） |
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#hackgen-console-nf-参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#hackgen-console-nf-参考資料から分離した記録)
 
 ### HackGen Console NF: 補足
 
 #### HackGen Console NF: 実施手順 / 手順 1: 補足: HackGen35 Console NF
 
-- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)）
+- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#統合前の記録-hackgen-console-nfもとは-hackgenmd)）
 
 #### HackGen Console NF: 実施手順 / 手順 2: 補足: unzip が要る理由
 
@@ -837,7 +837,7 @@ enabled_metadata=1
 
 #### WezTerm: 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
 
 - `wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は、`wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ
 - `dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているため。x86_64 パッケージには入っていない
