@@ -1454,7 +1454,7 @@
 1. 電卓を起動して、キーボードの入力が届くかを確かめる。
 
    <details>
-   <summary>貼るコマンド（bash・21 行）</summary>
+     <summary>貼るコマンド（bash・21 行）</summary>
 
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
@@ -1648,7 +1648,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
    <details>
-   <summary>貼るコマンド（bash・24 行）</summary>
+     <summary>貼るコマンド（bash・24 行）</summary>
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
@@ -1828,7 +1828,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
 
    <details>
-   <summary>貼るコマンド（PowerShell・24 行）</summary>
+     <summary>貼るコマンド（PowerShell・24 行）</summary>
 
    ```powershell
    & {
@@ -2452,7 +2452,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 配布物を取得して、SHA-256 を照合する。
 
    <details>
-   <summary>貼るコマンド（bash・25 行）</summary>
+     <summary>貼るコマンド（bash・25 行）</summary>
 
    ```bash
    if [ -z "${CODEG_VERSION}" ]; then
@@ -2530,7 +2530,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ユーザーサービスを置いて、localhost で起動する。
 
    <details>
-   <summary>貼るコマンド（bash・35 行）</summary>
+     <summary>貼るコマンド（bash・35 行）</summary>
 
    ```bash
    if [ -e ~/.config/systemd/user/codeg-server.service ]; then
@@ -2669,7 +2669,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Caddy の配布物を取得してチェックサムを照合し、自分のホームに置く。
 
    <details>
-   <summary>貼るコマンド（bash・24 行）</summary>
+     <summary>貼るコマンド（bash・24 行）</summary>
 
    ```bash
    if [ -z "${CADDY_VERSION}" ]; then
@@ -2706,7 +2706,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Caddy の設定とユーザーサービスを書いて、設定を検査する。
 
    <details>
-   <summary>貼るコマンド（bash・49 行）</summary>
+     <summary>貼るコマンド（bash・49 行）</summary>
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
@@ -2919,7 +2919,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 配布物を取得して SHA-256 を照合し、自分のユーザーの場所に置く。
 
    <details>
-   <summary>貼るコマンド（PowerShell・25 行）</summary>
+     <summary>貼るコマンド（PowerShell・25 行）</summary>
 
    ```powershell
    & {
@@ -2977,7 +2977,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 起動用のスクリプトを書く。
 
    <details>
-   <summary>貼るコマンド（PowerShell・27 行）</summary>
+     <summary>貼るコマンド（PowerShell・27 行）</summary>
 
    ```powershell
    if (-not $CODEG_DIR) { Write-Error '中断: この項の手順 2 の変数を設定する' } elseif (Test-Path -LiteralPath "$CODEG_DIR\start-codeg-server.ps1") { Write-Error '中断: start-codeg-server.ps1 が既にある。上書きしない' } else {
@@ -3017,7 +3017,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ウィンドウを作らないランチャーのソースを書き、コンパイルする。
 
    <details>
-   <summary>貼るコマンド（PowerShell・50 行）</summary>
+     <summary>貼るコマンド（PowerShell・50 行）</summary>
 
    ```powershell
    & {
@@ -3132,7 +3132,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Caddy の配布物を取得してチェックサムを照合し、自分のユーザーの場所に置く。
 
    <details>
-   <summary>貼るコマンド（PowerShell・25 行）</summary>
+     <summary>貼るコマンド（PowerShell・25 行）</summary>
 
    ```powershell
    & {
@@ -3170,7 +3170,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Caddy の設定を書いて、検査する。
 
    <details>
-   <summary>貼るコマンド（PowerShell・32 行）</summary>
+     <summary>貼るコマンド（PowerShell・32 行）</summary>
 
    ```powershell
    $cf = "$env:LOCALAPPDATA\codeg-caddy\Caddyfile"
@@ -3248,7 +3248,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. Caddy のタスクを登録して開始し、この PC 自身から HTTPS を確かめる。
 
    <details>
-   <summary>貼るコマンド（PowerShell・36 行）</summary>
+     <summary>貼るコマンド（PowerShell・36 行）</summary>
 
    ```powershell
    $cdir = "$env:LOCALAPPDATA\codeg-caddy"
@@ -4055,7 +4055,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 確認した元の送信元付き規則だけを外す。
 
    <details>
-   <summary>貼るコマンド（bash・23 行）</summary>
+     <summary>貼るコマンド（bash・23 行）</summary>
 
    ```bash
    if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ] || [ -z "${CODEG_OPEN_RULE}" ]; then
@@ -4100,7 +4100,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 既存の規則を XML に控え、Private の全送信元へ切り替える。
 
    <details>
-   <summary>貼るコマンド（PowerShell・42 行）</summary>
+     <summary>貼るコマンド（PowerShell・42 行）</summary>
 
    ```powershell
    & {
@@ -4222,7 +4222,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. タスクの控えを取り、起動するプログラムだけを切り替えて再開する。
 
    <details>
-   <summary>貼るコマンド（PowerShell・46 行）</summary>
+     <summary>貼るコマンド（PowerShell・46 行）</summary>
 
    ```powershell
    & {
@@ -4352,7 +4352,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. サービスを止めて置き換え、起動し直す。
 
    <details>
-   <summary>貼るコマンド（bash・24 行）</summary>
+     <summary>貼るコマンド（bash・24 行）</summary>
 
    ```bash
    if [ -z "${CODEG_ASSET}" ] || [ ! -s ~/.cache/codeg-server-dl/"${CODEG_ASSET}.tar.gz" ]; then
@@ -4419,7 +4419,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 配布物を取得して SHA-256 を照合し、Codeg を止めて置き換え、タスクを開始する。
 
    <details>
-   <summary>貼るコマンド（PowerShell・42 行）</summary>
+     <summary>貼るコマンド（PowerShell・42 行）</summary>
 
    ```powershell
    & {
