@@ -1,17 +1,17 @@
 # Grok Build のブラウザ操作の参考資料
 
-[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)
 
 ## 補足
 
-### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 1: 補足: 変数
+### AlmaLinux 10 で使う / Codeg のサーバーを入れて localhost で起動する / 手順 1: 補足: 変数
 
 - `SERVER_IP` は、Caddy が待ち受ける IP と、firewalld の規則の宛先の両方に使う。Codeg は `127.0.0.1` のまま
 - `ALLOW_FROM` は送信元 IPv4 の CIDR。空白で区切って複数を並べられ、1 つにつき規則を 1 本作る。WG ホスト自身で動かすときは、VPN のクライアントの通信が `wg0` から入り、送信元はクライアントの VPN のアドレスになる
 - ポートは、Codeg が既定の 3080（ホストの中だけ）、Caddy が 3443（外から届く口）。どちらも変数にしていない
 - `FW_ZONE` は自動で入る
 
-### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 3: 補足: SHA-256 の照合
+### AlmaLinux 10 で使う / Codeg のサーバーを入れて localhost で起動する / 手順 3: 補足: SHA-256 の照合
 
 - `.sha256` は、配布物と同じリリースに置かれたファイル。取得の途中で壊れたものは見つけられるが、リリースそのものが書き換えられた場合は見つけられない
 - GitHub のリリースの画面と API は、配布物ごとの digest（`sha256:…`）を出す。検証では、その値とも一致することを確かめた
@@ -19,13 +19,13 @@
 - 公式のインストーラー（`install.ps1`）は、SHA-256 を照合しない（スクリプトを読んで確かめた）。`install.sh` は読んでいない
 - `tar -tzf` が成功したときだけ一覧を変数に入れ、`awk` で展開先を外れるパス（`/` で始まるもの、`..` を含むもの）の数を出す。一覧を読めなかった場合は `0` を出さずに中断する。数が `0` なら成功、それ以外なら終了コードも非 0 にする
 
-### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 4: 補足: 置き場所
+### AlmaLinux 10 で使う / Codeg のサーバーを入れて localhost で起動する / 手順 4: 補足: 置き場所
 
 - 公式のインストーラーは、実行ファイルを `/usr/local/bin`、画面のファイルを `/usr/local/share/codeg/web` に置く。本書は `sudo` を使わず、ホームの `~/.local/opt/codeg-server` にまとめる
 - `codeg-mcp` は、`codeg-server` と同じディレクトリに置く（Codeg は既定で隣を探す。`CODEG_MCP_BIN` で変えられる）
 - `codeg-computer-helper` は、サーバーのデスクトップを操作させる機能（`CODEG_COMPUTER_USE`）の部品。その機能を使わないので置かない
 
-### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 6: 補足: ユニットの各行
+### AlmaLinux 10 で使う / Codeg のサーバーを入れて localhost で起動する / 手順 6: 補足: ユニットの各行
 
 - `EnvironmentFile` は必須にしてある（`-` を付けない）。トークンのファイルが無ければ起動に失敗し、Codeg がトークンを自分で作ることは無い
 - `Environment=PATH=` は、`~/.grok/bin` を足すため。systemd のユーザーの環境の PATH は `/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin` で、`grok` が見つからない
@@ -35,12 +35,12 @@
 - `StandardError=null` は、起動のたびに標準エラーへ出るトークンを journal に残さないため。Codeg のログは、別に `~/.local/share/codeg/logs/` に出る
 - `Restart=on-failure` と `RestartSec=5` は、異常終了したときに起動し直すため。共通の Caddy の起動し直しは [Caddy の参考資料](caddy.md)を参照する
 
-### 実施手順 / Codeg のサーバーを入れて localhost で起動する / 手順 7: 補足: トークンを引数に書かない
+### AlmaLinux 10 で使う / Codeg のサーバーを入れて localhost で起動する / 手順 7: 補足: トークンを引数に書かない
 
 - `curl -K -` は、設定を標準入力から読む。`printf` は bash の組み込みなので、トークンがどのプロセスの引数にもならない
 - `grep -cFf <(…)` は、探す文字列をファイル（プロセス置換）から読む
 
-### 実施手順 / ブラウザで開いて Grok を動かす / 手順 4: 補足: 権限モードと config.toml の値
+### AlmaLinux 10 で使う / ブラウザで開いて Grok を動かす / 手順 4: 補足: 権限モードと config.toml の値
 
 - Codeg の「権限モード」を保存すると、`~/.grok/config.toml` の `[ui]` の `permission_mode` が書き換わる。ほかの行は変わらなかった
 - 「毎回確認」は `"default"`、「常に許可」は `"bypassPermissions"` と書かれた。Grok Build の文書では、`"always-approve"` と `"bypassPermissions"` は同じモード
@@ -49,19 +49,19 @@
 - Codeg は、「常に許可」のとき `--permission-mode bypassPermissions` を付けて Grok Build を起動し、「毎回確認」のときは付けなかった
 - Grok Build の文書では、既定（ask）で確認なしに動くのは、読み取り専用のツールと、決まった読み取り専用のコマンドだけ。`mkdir` はその一覧に無いが、検証では確認なしで実行された
 
-### 実施手順 / ブラウザで開いて Grok を動かす / 手順 5: 補足: 最初の会話のモデル
+### AlmaLinux 10 で使う / ブラウザで開いて Grok を動かす / 手順 5: 補足: 最初の会話のモデル
 
 - Codeg を起動して最初の会話は、モデルの欄が Grok 4.6 で、Grok Build のセッションの記録（`events.jsonl`）の `modelId` も `grok-4.6` だった。同じ時点の `grok models` の既定は `grok-4.7`
 - Codeg の Issue に、Grok の ACP の接続で、後から届くモデルの一覧が反映されない不具合の報告がある（#876。2026-10-02 に閉じられている）。同じ原因かは確かめていない
 
-### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 1: 補足: Codeg のサイト
+### AlmaLinux 10 で使う / HTTPS で LAN・VPN に公開する / 手順 1: 補足: Codeg のサイト
 
 - AlmaLinux 10 は、[共通の Caddy](../almalinux-setup.md#caddy)に `sites/codeg.caddy` を足す。本体の入手・共通設定・サービス・指紋の照合は [Caddy の参考資料](caddy.md)にまとめる
 - `bind` は、待ち受ける IP を限定する。`tls internal` はホスト共通の認証局でその IP 用の証明書を作る。`import root-crt` は共通の `root.crt` を配る
 - `handle` の `reverse_proxy 127.0.0.1:3080` は残りの通信を Codeg に渡す。WebSocket も通る
 - Windows 11 は専用の本体・Caddyfile・タスクを使う。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
 
-### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
+### AlmaLinux 10 で使う / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
 - Codeg は `127.0.0.1` のままにする。暗号化されない HTTP は、ホストの外に出ない
 - 規則は、[Forgejo](../forgejo.md#forgejo) と同じ形（送信元・宛先・ポートを絞った rich rule）。zone の既定の拒否はそのままで、指定した送信元だけを通す
@@ -304,7 +304,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 認証局はホストごとに別で、AlmaLinux 10 は Forgejo などと共有する。端末に入れるルート証明書は同じホストに 1 つ。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS の操作は AI エージェントの手順書の OS 別の項で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
+- 両 OS の操作は AI エージェントの手順書の OS 別の項で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
 
 ## 参照
 

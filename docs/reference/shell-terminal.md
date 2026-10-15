@@ -166,7 +166,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
 
-- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 2）
+- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 2）
 - 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
 
 ### Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
@@ -623,7 +623,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 #### Windows 11 で WezTerm を入れる
 
 - **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
-  - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
+  - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3）
 
@@ -737,7 +737,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`、`--spawn`、Limitations（SSH の切断後も残すには tmux か screen、10 分の終了）、4 時間以内の再開
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) — `Ctrl+B`（tmux では 2 回）
 - [Claude Code](../ai-agents.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
-- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順) — 同じことを Windows で行う手順書
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う) — 同じことを Windows で行う手順書
 - [Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
 
 #### HackGen Console NF

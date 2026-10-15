@@ -661,7 +661,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### リモートから再起動する手段を増やす / 手順 7: 補足: Remote Control を再起動後も使う
 
-- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
+- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
 - ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
 - タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
 
@@ -980,9 +980,9 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 - 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
 
-- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[Claude Code の Remote Control: 実施手順](../ai-agents.md#claude-code-の-remote-control-実施手順)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
+- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[Claude Code の Remote Control: Windows 11 で使う](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
 - ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
-- Remote Control（[Claude Code の Remote Control: 実施手順](../ai-agents.md#claude-code-の-remote-control-実施手順)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
+- Remote Control（[Claude Code の Remote Control: Windows 11 で使う](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
 
 ### Windows 11 で Claude Code を入れる / 手順 8: 補足: 後ろに続けて貼らない理由
 

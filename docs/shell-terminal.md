@@ -1420,7 +1420,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
      - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
    - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
-   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
+   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
    - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
 
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。

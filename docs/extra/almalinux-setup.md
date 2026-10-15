@@ -20,7 +20,7 @@
 - gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 3 と「GNOME の表示と入力」の手順 14 で控えた値に戻すなら、`reset` の代わりに `set` を使う
 - OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、[Neovim のセットアップ](../neovim.md#neovim)の「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
 - ロールバックの節の対象でない項で変えたものは、その項の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)を通したなら、先にその項の手順 2 を行う
-- 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#ロールバック)・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
+- 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#almalinux-10-のロールバック)・[コーディングエージェントの共同作業](coding-agents.md#almalinux-10-のロールバック)など）は、それぞれの手順書のロールバックで先に戻す
 - この文書で入れたものは、この節の項を上から順に戻す（Homebrew を消す前に Homebrew のもの、RPM Fusion を消す前に[Firefox を戻す](#firefox-を戻す)の手順 1 の FFmpeg）
   - 自分用の設定は、[Git の道具を消す](#git-の道具を消す)と[端末とエディタを消す](#端末とエディタを消す)の中で戻す（Neovim と WezTerm は、それぞれのリポジトリのロールバックへ案内する。lazygit と yazi は、clone を残すか消すかを箇条書きに書いた）
 

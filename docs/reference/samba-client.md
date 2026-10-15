@@ -61,13 +61,13 @@
 
 - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
-### ロールバック / 手順 1: 補足: 2 つのユニットを止める理由
+### AlmaLinux 10 のロールバック / 手順 1: 補足: 2 つのユニットを止める理由
 
 - `.automount` と `.mount` を一緒に止めると、`cifs` と `autofs` の両方が外れる
 - `.mount` だけを止めると、`Stopping 'mnt-<SHARE>.mount', but its triggering units are still active: mnt-<SHARE>.automount` と出て、次のアクセスでまたマウントされる
 - `MOUNT_POINT` が空のまま `$(systemd-escape …)` を使うと、ユニットの名前が `-.mount`（ルートのファイルシステム）になる。先頭の `if` はこれを防ぐ
 
-### ロールバック / 手順 2: 補足: 行の消し方
+### AlmaLinux 10 のロールバック / 手順 2: 補足: 行の消し方
 
 - 行は awk で、2 列目（マウント先）と 3 列目（`cifs`）を文字列として比べて消す。sed の正規表現だと、IP アドレスのドットなどが特別な意味を持つ
 - `tee` で書き戻すので、`/etc/fstab` のモード（0644）とラベル（`etc_t`）は変わらない

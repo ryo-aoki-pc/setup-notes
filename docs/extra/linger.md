@@ -10,7 +10,7 @@
 > [!WARNING]
 > **linger を切ると、ログアウトしている間は、自分のユーザーのサービスがすべて止まる**（Syncthing・Dropbox・Forgejo・Quadlet のコンテナなど）。止まっていること自体は気付きにくい。
 
-- linger を使う手順書（[Syncthing](syncthing.md#ロールバック)・[Dropbox](dropbox.md#ロールバック)・[Dropbox（rclone）](dropbox-rclone.md#ロールバック)・[Forgejo](forgejo.md#ロールバック)・[Podman の Quadlet](podman.md#ロールバック)）のロールバックを先に行う
+- linger を使う手順書（[Syncthing](syncthing.md#almalinux-10-のロールバック)・[Dropbox](dropbox.md#ロールバック)・[Dropbox（rclone）](dropbox-rclone.md#ロールバック)・[Forgejo](forgejo.md#ロールバック)・[Podman の Quadlet](podman.md#ロールバック)）のロールバックを先に行う
 - この節の手順も、そのユーザー自身のシェルで貼る
 
 1. ほかに自分で有効にしたユーザーのサービスと、Quadlet の定義が残っていないか見る。

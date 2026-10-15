@@ -610,7 +610,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### Claude Code を stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
 
-- 以後の `sudo dnf upgrade claude-code`（[更新](../ai-agents.md#更新)）は `stable` の版を追う
+- 以後の `sudo dnf upgrade claude-code`（[AlmaLinux 10 の更新](../ai-agents.md#almalinux-10-の更新)）は `stable` の版を追う
 
 ### 更新: 補足: Git の dnf upgrade
 
@@ -623,13 +623,13 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### 更新: 補足: dnf 版の Claude Code が自分で更新できない理由
 
-[AI コーディングエージェントのセットアップの「更新」](../ai-agents.md#更新)の補足。
+[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
 
 - dnf 版の更新には root 権限が要るため、起動中の Claude Code は自分で更新できない
 
 ### 更新: 補足: Codex CLI の起動したときの知らせ
 
-[AI コーディングエージェントのセットアップの「更新」](../ai-agents.md#更新)の補足。
+[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
 
 - 端末の Codex は、起動したときに、最新の版を GitHub（`api.github.com/repos/openai/codex/releases/latest`）に問い合わせ、`~/.codex/version.json` に控える。控えが無いか古いときだけ問い合わせる
 - 控えた版が今の版より新しいと、起動の画面に `Update available!` を出す。`1. Update now` は、入れ方に合う更新のコマンドを動かす
@@ -639,7 +639,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### 更新: 補足: Grok Build の自動の更新の仕組み
 
-[AI コーディングエージェントのセットアップの「更新」](../ai-agents.md#更新)の補足。
+[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
 
 - 設定の `[cli] auto_update`（既定は有効）で、対話の画面の起動のときに新しい版を確かめる。環境変数 `GROK_DISABLE_AUTOUPDATER` でも止められる（同梱の文書 05-configuration・26-config-reference）
 - 確かめた時刻は `~/.grok/version.json` の `checked_at` に残り、間もないうちは確かめない
@@ -649,13 +649,13 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### 更新 / 手順 2: 補足: もう一度実行したとき
 
-[AI コーディングエージェントのセットアップの「更新」](../ai-agents.md#更新)の補足。
+[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
 
 - 公式インストーラーをもう一度実行すると、新しい配布物を導入する
 
 ### 更新 / 手順 4: 補足: 古い版の配布物
 
-[AI コーディングエージェントのセットアップの「更新」](../ai-agents.md#更新)の補足。
+[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
 
 - 古い版の配布物は `~/.grok/downloads` に残ることがある。使っている量は `grok du` で見る
 
@@ -968,7 +968,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [winget-pkgs の Anthropic.ClaudeCode](https://github.com/microsoft/winget-pkgs/tree/master/manifests/a/Anthropic/ClaudeCode) / [scoop の main/claude-code](https://github.com/ScoopInstaller/Main/blob/master/bucket/claude-code.json) — Windows 11 で採らなかった経路の定義
 - [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
 - [Windows 11 の初期設定](../windows-setup.md) — 同じ PC で先に行う設定（貼り付けの設定と、この文書を通す順）
-- [Claude Code の Remote Control](../ai-agents.md#claude-code-の-remote-control-実施手順) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
+- [Claude Code の Remote Control](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
 
 #### Codex CLI
 

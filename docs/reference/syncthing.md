@@ -199,7 +199,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - **`-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries`**: ノート PC で、電池のときも起動し、電池になっても止めない（公式の説明の任意の設定）
 - **`-MultipleInstances IgnoreNew`**: 既に動いていれば、二重に起動しない
 - **`-Force`**: 同じ名前のタスクがあれば、上書きする
-- **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 5 の補足）
+- **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 5 の補足）
 
 ### Windows 11 の Syncthing / 手順 9: 補足: 2 つのプロセス
 
