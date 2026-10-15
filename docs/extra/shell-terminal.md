@@ -75,7 +75,7 @@
   - [PowerShell 7 で Emacs モードを使う](../shell-terminal.md#powershell-7-で-emacs-モードを使う)を戻しても、印の無い EditMode の行は残る。その行が Emacs なら Windows モードへは戻らない
 - **Windows PowerShell 5.1 のキーは、手順書を貼る管理者の conhost の窓にも効く**: 任意の[キー操作の設定](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
   - Ctrl+V は `Paste`、Ctrl+Enter は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の `AddLine` を使う
-  - conhost の右クリックは入力として送られ、PSReadLine のキーには依らないというソースからの推測。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
+  - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。貼り付けの設定の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
 - **Windows Terminal の copyOnSelect は、選んだだけでクリップボードを置き換える**: 手順書からコピーしたブロックも消え、右クリックが貼り付けになる。任意の[選択のコピー](../shell-terminal.md#windows-terminal-で選択した文字をコピーする)で true にできる
   - 複数行の警告を切っていると、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
   - キー単位で false に戻しても、親の[設定の戻し](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 を後で行うと、控えの値が戻る

@@ -1,7 +1,7 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
 - 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal と PowerShell 7 のプロファイルも整える
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う。Windows Terminal・PowerShell 7 と 5.1 のプロファイル・任意の項の設定は、この文書のそれぞれの項の「元に戻すときは」で戻す
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -524,6 +524,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 前提: [シェルのツール](#シェルのツール)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。[シェルのツール](#シェルのツール)でツールを入れた後に開いた、starship を読み込んだ端末）
 - `~/.config/starship.toml` は**既定では存在しない**（無ければ組み込みの既定値で動く）
+
+> [!WARNING]
+> この項の手順 1 は、`~/.config/starship.toml` が既にあれば、まるごと置き換える（[starship のプリセットを当てる](#starship-のプリセットを当てる)の設定も消える）。残すなら、先に別の名前で控える
 
 1. `~/.config/starship.toml` に、設定を手で書く。
 
@@ -1360,6 +1363,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す。この項の手順 6 は、その設定も含めて控えを書き戻す
 - 戻すときは、この項の手順 6
 
+> [!WARNING]
+> - この項の手順 4 で警告を切ると、信用できない複数行の文字も、確かめずにそのまま貼られて動く
+> - この項の手順 6 は、控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻す。残すなら手順 6 は貼らず、この項の手順 5 の画面でフォント スタイルと警告を戻す
+
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
    - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ（Windows PowerShell 5.1 のタブ）
@@ -1499,7 +1506,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    }
    ```
 
-   - `copyOnSelect: True` が出ればよい。開いている Windows Terminal にも効く
+   - `copyOnSelect: True` が出ればよい。開いている Windows Terminal にも効くはず（文書とソースからの推測で、実機では確かめていない）
    - `中断:` が出たら、何も書いていない。コメントや末尾のカンマを残すときは、Windows Terminal の設定の「操作」で「選択範囲をクリップボードに自動的にコピー」をオンにして保存する
 
 1. 元に戻すときは、`copyOnSelect` だけを `false` に戻す。
@@ -1523,7 +1530,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `copyOnSelect: False` が出ればよい。ほかのキーの値は残る
    - コメントや末尾のカンマで止まったら、この項の手順 2 の設定画面で「選択範囲をクリップボードに自動的にコピー」をオフにして保存する
    - [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 で後から控えを書き戻すと、この設定も控えたときの値に戻る
-
 
 ---
 
@@ -1711,7 +1717,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[共通の bash 設定](#共通の-bash-設定)の手順 1 と同じブロック
    - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
    - すでに clone してあるなら `fatal: destination path … already exists` で止まる。そのときは `git -C ~/.config/bash pull --ff-only` で更新し、`bash ~/.config/bash/install.sh` を貼る
-   - 自分用の WezTerm は Git Bash を `-i -l` で開き、`~/.bash_profile` → `~/.bashrc` → 共通の bash 設定の順に読む。読み込みを確かめるときは、[Windows 11 で bash のログイン時の読み込みを確かめる](#windows-11-で-bash-のログイン時の読み込みを確かめる)を通す
+   - 自分用の WezTerm は Git Bash を `-i -l`（ログインシェル）で開き、ログイン用のファイル（ふつうは `~/.bash_profile`）→ `~/.bashrc` → 共通の bash 設定の順に読む。読み込みを確かめるときは、[Windows 11 で bash のログイン時の読み込みを確かめる](#windows-11-で-bash-のログイン時の読み込みを確かめる)を通す
    - Git for Windows が作る `~/.bash_profile` と、共通設定の導入時に既存ファイルを残す扱いは、[この手順の補足](reference/shell-terminal.md#git-bash-と-wezterm-の設定--手順-6-補足-ログインシェルの読み込み)で確かめる
 
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
@@ -1928,10 +1934,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 #### Windows 11 で bash のログイン時の読み込みを確かめる
 
-- 任意で、`~/.bash_profile` が `~/.bashrc` を読むことを確かめ、読む行が無いときだけ足す
+- 任意で、Git Bash のログインシェルが読むファイルが `~/.bashrc` を読むことを確かめ、読む行が無いときだけ足す
 - 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
-- 自分用の WezTerm の設定は Git Bash を `-i -l`（ログインシェル）で開き、`~/.bash_profile` → `~/.bashrc` → 共通の bash 設定の順に読む（[補足](reference/shell-terminal.md#git-bash-と-wezterm-の設定--手順-6-補足-ログインシェルの読み込み)）
+- 自分用の WezTerm の設定は Git Bash を `-i -l`（ログインシェル）で開く。bash は `~/.bash_profile`・`~/.bash_login`・`~/.profile` のうち最初にあるものだけを読み、そこから `~/.bashrc` → 共通の bash 設定を読む（[補足](reference/shell-terminal.md#git-bash-と-wezterm-の設定--手順-6-補足-ログインシェルの読み込み)）
+- この項では、ログイン用のファイルを新しく作らない
 
 1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
 
@@ -1939,53 +1946,62 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - タブの起動メニューで Git Bash を選ぶ（自分用の設定では既定で開く）
    - **次の手順は、この Git Bash のタブに貼る**
 
-1. `~/.bash_profile` の構文と、`~/.bashrc` を読む行を確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if [ -f ~/.bash_profile ]; then
-     bash -n ~/.bash_profile && grep -n '\.bashrc' ~/.bash_profile
-   else
-     echo '中断: ~/.bash_profile が無い。参考資料の生成条件と、既存のログイン用ファイルを確かめる' >&2
-   fi
-   ```
-
-   - 構文エラーが無く、コメントでない `test -f ~/.bashrc && . ~/.bashrc` などの読む行が出ればよい。この項の手順 3 は飛ばす
-   - 読む行が無いときだけ、この項の手順 3 を行う
-   - `中断:` や構文エラーが出たら、この項の手順 3 へ進まない
-
-1. この項の手順 2 で読む行が無かったときだけ、`~/.bash_profile` の末尾に 1 行足す。
+1. ログインシェルが読むファイルの名前と構文と、`~/.bashrc` を読む行を確かめる。
 
    ```bash
    (
-     if [ ! -f ~/.bash_profile ]; then echo '中断: ~/.bash_profile が無い。ファイルは作らない' >&2; exit 1; fi
-     bash -n ~/.bash_profile || exit 1
-     line='test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md'
-     if ! grep -Fqx "$line" ~/.bash_profile; then
-       if [ -s ~/.bash_profile ] && [ -n "$(tail -c 1 ~/.bash_profile)" ]; then printf '\n' >> ~/.bash_profile || exit 1; fi
-       printf '%s\n' "$line" >> ~/.bash_profile || exit 1
-     fi
+     f=
+     for x in ~/.bash_profile ~/.bash_login ~/.profile; do
+       if [ -f "$x" ]; then f=$x; break; fi
+     done
      printf '\n\033[7m 確認 \033[0m\n'
-     grep -Fnx "$line" ~/.bash_profile
+     if [ -z "$f" ]; then echo '中断: ~/.bash_profile・~/.bash_login・~/.profile のどれも無い' >&2; exit 1; fi
+     echo "$f"
+     bash -n "$f" && grep -n '\.bashrc' "$f"
    )
    ```
 
-   - `test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md` の行が 1 つ出ればよい。ファイルは置き換えず、同じ行は増やさない
+   - 1 行目にファイルの名前（ふつうは `/c/Users/<WIN_USER>/.bash_profile`）が出て、構文エラーが無く、コメントでない `test -f ~/.bashrc && . ~/.bashrc` などの読む行が出ればよい。この項の手順 3 は飛ばす
+   - 読む行が無いときだけ、この項の手順 3 を行う
+   - `中断:` が出たら、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 のブロックを貼り直す（共通の bash 設定の `install.sh` が、`~/.bashrc` を読む `~/.bash_profile` を作る）。構文エラーが出たら、この項の手順 3 へ進まない
+
+1. この項の手順 2 で読む行が無かったときだけ、そのファイルの末尾に 1 行足す。
+
+   ```bash
+   (
+     f=
+     for x in ~/.bash_profile ~/.bash_login ~/.profile; do
+       if [ -f "$x" ]; then f=$x; break; fi
+     done
+     if [ -z "$f" ]; then echo '中断: ~/.bash_profile・~/.bash_login・~/.profile のどれも無い。ファイルは作らない' >&2; exit 1; fi
+     bash -n "$f" || exit 1
+     line='test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md'
+     if ! grep -Fqx "$line" "$f"; then
+       if [ -s "$f" ] && [ -n "$(tail -c 1 "$f")" ]; then printf '\n' >> "$f" || exit 1; fi
+       printf '%s\n' "$line" >> "$f" || exit 1
+     fi
+     printf '\n\033[7m 確認 \033[0m\n'
+     echo "$f"
+     grep -Fnx "$line" "$f"
+   )
+   ```
+
+   - ファイルの名前と、`test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md` の行が 1 つ出ればよい。ファイルは置き換えず、同じ行は増やさない
+   - 足したのが `~/.profile` なら、その行は sh のログインシェルにも読まれる（共通の bash 設定は bash 向け）。Git Bash のほかに sh でログインしないなら問題にならない
    - 新しい Git Bash のタブを開き、[WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)の手順 7 で読み込みを確かめる
 
 1. 元に戻すときは、この項の手順 3 で足した印の行だけを消す。
 
    ```bash
-   if [ -f ~/.bash_profile ]; then
-     sed -i '/^test -f ~\/\.bashrc && \. ~\/\.bashrc  # shell-terminal\.md$/d' ~/.bash_profile
-     printf '\n\033[7m 確認 \033[0m\n'
-     grep -n '  # shell-terminal\.md$' ~/.bash_profile
-   fi
+   for f in ~/.bash_profile ~/.bash_login ~/.profile; do
+     if [ -f "$f" ]; then sed -i '/^test -f ~\/\.bashrc && \. ~\/\.bashrc  # shell-terminal\.md$/d' "$f"; fi
+   done
+   printf '\n\033[7m 確認 \033[0m\n'
+   grep -n '  # shell-terminal\.md$' ~/.bash_profile ~/.bash_login ~/.profile 2>/dev/null
    ```
 
-   - 「確認」の後に何も出なければよい。Git for Windows が作った、印の無い行は残る
+   - 「確認」の後に何も出なければよい。Git for Windows や共通の bash 設定が作った、印の無い行は残る
    - 次に開く Git Bash のタブから、残した行だけを読む
-
 
 ---
 
@@ -2217,7 +2233,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `控えを書き戻した` か `作った設定ファイルを消した` が出ればよい
    - この項の手順 2 の後で変えた設定も戻る。残す変更があれば、書き戻す前に別に控える
    - Git Bash の新しいタブを開き直す。PowerShell 7 でも、次の窓から戻した設定を読む
-
 
 ---
 
@@ -2463,7 +2478,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
    - [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 7 は、この項の行も含めて消す
 
-
 ---
 
 ### Windows PowerShell 5.1 のキー操作を変える
@@ -2474,7 +2488,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 対象は `[Environment]::GetFolderPath('MyDocuments')` の下の `WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（Windows PowerShell 5.1 の `$PROFILE`）
 - 足す 4 行は ASCII の文字だけで、行末の印は `# shell-terminal.md`。Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
 - Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、貼り付けの設定の `AddLine` のまま
-- conhost の右クリック貼り付けは、端末が入力として送るので PSReadLine のキーに依らないとソースから推測している。実機では確かめていない（[補足](reference/shell-terminal.md#windows-powershell-51-のキー操作を変える--手順-2-補足-適用範囲と貼り付け)）
+- conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、文字をキーとして送る。LF は Ctrl+Enter として届くので、[貼り付けの設定](windows-setup.md#貼り付けの設定)の Ctrl+Enter の `AddLine` の行が、この項の EditMode の行より後に残っている必要がある（この項の手順 2 は、その順に入れる）。Emacs モードの窓に右クリックで貼ることは、実機では確かめていない（[補足](reference/shell-terminal.md#windows-powershell-51-のキー操作を変える--手順-2-補足-適用範囲と貼り付け)）
 
 > [!WARNING]
 > - この項の手順 2 で変えるプロファイルは、手順書を貼る管理者の conhost の窓や、プロファイルを読む SSH のセッションにも効く。
