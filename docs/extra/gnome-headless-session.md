@@ -1,4 +1,4 @@
-# GNOME のヘッドレスのセッションの手順（モニターの無い PC のデスクトップに RDP でつなぐ）のロールバックと注意点
+# GNOME のヘッドレスセッションのロールバックと注意点
 
 [手順書](../gnome-remote.md#gnome-のヘッドレスセッション)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](../reference/gnome-headless-session.md)
 
@@ -9,7 +9,7 @@
 
 - 手順 1 の変数を設定したシェルで、上から順に貼る
 - [画面オフ・画面ロック・自動サスペンドを止める](../almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)で変えた値は残る。戻すなら同じ節の手順 6〜9
-- [claude-code-gui.md](../ai-agents.md#claude-code-の-gnome-操作-実施手順) を行ったなら、先に同書の[ロールバック](claude-code-gui.md#ロールバック)で戻す
+- [Claude Code の GNOME 操作: 実施手順](../ai-agents.md#claude-code-の-gnome-操作-実施手順) を行ったなら、先に同書の[ロールバック](claude-code-gui.md#ロールバック)で戻す
 - この節の手順 3 は共用 TLS 設定を退避時の値に戻し、手順 4 は今回生成した証明書だけを消す。退避後にデスクトップ共有（[GNOME のデスクトップ共有](../gnome-remote.md#gnome-のデスクトップ共有)、設定アプリの「デスクトップ共有」）の TLS 設定を別に変えた場合は、先にその設定を控える
 - 退避が無い場合は、共用 TLS 設定と証明書を保持する。導入前の値に戻すには、別に残した記録が要る
 

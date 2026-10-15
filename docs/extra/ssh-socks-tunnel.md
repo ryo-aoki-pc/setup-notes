@@ -1,4 +1,4 @@
-# ssh の SOCKS トンネル手順（AlmaLinux 10 / インターネットに出られないホストから ssh -R で外に出る）のロールバックと注意点
+# SSH の SOCKS トンネルのロールバックと注意点
 
 [手順書](../almalinux-setup.md#ssh-の-socks-トンネル)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](../reference/ssh-socks-tunnel.md)
 
@@ -32,6 +32,6 @@
 - **`socks5h` の `h` を落とさない**: 落とすと名前を引けない（参考資料を参照）
 - **`https_proxy` や git の `http.proxy` が入っていると、そちらが勝つ**: 手順 3 の補足
 - **`sudo` は `ALL_PROXY` を渡さない**: dnf は[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)の設定で、podman はコマンドの前の `https_proxy` で通す
-- **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm-offline.md 手順 2](../almalinux-setup.md#npm-のオフライン導入)）
+- **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm のオフライン導入の手順 2](../almalinux-setup.md#npm-のオフライン導入)）
 - **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する。dnf で外のリポジトリを使わなくなったら、[ロールバック](#ロールバック)で消す
 - **ssh が切れると、トンネルも消える**: 取得の途中なら失敗するはず。そのときは手順 2 から張り直して、同じコマンドを貼り直す

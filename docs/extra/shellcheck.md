@@ -1,4 +1,4 @@
-# ShellCheck / shfmt インストール手順（AlmaLinux 10 / Homebrew）のロールバックと注意点
+# ShellCheck と shfmt のロールバックと注意点
 
 [手順書](../almalinux-setup.md#shellcheck-と-shfmt)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](../reference/shellcheck.md)
 

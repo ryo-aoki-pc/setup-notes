@@ -1,4 +1,4 @@
-# Windows 11 でホットキーを使用しているアプリを調べる手順のロールバック
+# Windows のホットキー競合のロールバック
 
 [手順書](../windows-setup.md#windows-のホットキー競合)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](../reference/windows-hotkey-conflict.md)
 

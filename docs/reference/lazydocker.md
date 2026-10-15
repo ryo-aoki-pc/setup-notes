@@ -1,4 +1,4 @@
-# lazydocker インストール手順（AlmaLinux 10 / Homebrew）の参考資料
+# lazydocker の参考資料
 
 [手順書](../almalinux-setup.md#lazydocker)・[ロールバックと注意点](../extra/lazydocker.md)
 
@@ -19,7 +19,7 @@ lazydocker は、コンテナに `name` というラベルがあると、コン�
 
 ### lazydocker / 手順 3: 補足: イメージの取得
 
-- 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
+- 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 
 ### lazydocker / 手順 4: 補足: 画面の中身
 
@@ -71,7 +71,7 @@ SocketMode=0660
 - 要求が来たときだけ、root の `podman.service`（`podman system service`）が起動し、要求が途切れると自分から終わる
 - `sudo podman --remote` は、指定が無ければこのソケットにつなぐ
 - この節の手順 8 で止めた後も、ソケットのファイルは再起動まで残る。つなごうとすると失敗する（`curl` は終了コード 7）
-- 自分のユーザーのソケット（[podman.md 手順 7](../almalinux-setup.md#podman) の `systemctl --user`）とは別のソケット
+- 自分のユーザーのソケット（[Podmanの手順 7](../almalinux-setup.md#podman) の `systemctl --user`）とは別のソケット
 
 ### root でも使う / 手順 3: 補足: 確認用のコンテナ
 

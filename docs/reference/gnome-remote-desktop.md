@@ -1,8 +1,6 @@
-# GNOME Remote Desktop 有効化手順（リモートログイン方式）の参考資料
+# GNOME のリモートログインの参考資料
 
 [AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
-
-集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
@@ -115,7 +113,7 @@ journalctl -u gdm -f
 
 - 別マシンには手順 1 の変数が無いので、`<SERVER_IP>` と `<システムRDPユーザー名>` は値に読み替える
 - AlmaLinux 10 の `freerdp` パッケージが入れる X11 のクライアントは `xfreerdp`。`xfreerdp3` という名前のコマンドは入らない
-  - 2026-10-11 の Hyper-V の VM のクライアント（`freerdp-3.10.3-12.el10_2.14`）では、`xfreerdp3` は `コマンドが見つかりませんでした` で終わり、`dnf -q provides "*/xfreerdp3"` も一致が無かった（クライアントにあったのは、`/usr/bin/xfreerdp` と `/usr/bin/wlfreerdp`）。手順書は、2026-10-11 まで `xfreerdp3` と書いていた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
+  - 2026-10-11 の Hyper-V の VM のクライアント（`freerdp-3.10.3-12.el10_2.14`）では、`xfreerdp3` は `コマンドが見つかりませんでした` で終わり、`dnf -q provides "*/xfreerdp3"` も一致が無かった（クライアントにあったのは、`/usr/bin/xfreerdp` と `/usr/bin/wlfreerdp`）（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
 - FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_3389.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
   - `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない。`T` と `N` で答えたときの動きは、確かめていない
 - FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、認証を通った（2026-10-11 の Hyper-V の VM。3 回とも。この行が出る理由は、確かめていない）
@@ -180,7 +178,6 @@ RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` �
 
 `winpr-makecert --help` では `-eku` や `-b`/`-e` が "Unsupported" と明記されており、SAN を付けるオプションは存在しない。
 
-<a id="方式-1-ホストに-freerdp-をインストールする環境-1-で当初実施"></a>
 
 #### 方式 1: ホストに freerdp をインストールする
 

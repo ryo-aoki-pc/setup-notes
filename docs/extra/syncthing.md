@@ -1,4 +1,4 @@
-# Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）のロールバックと注意点
+# Syncthing のロールバックと注意点
 
 [手順書](../syncthing.md#syncthing)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](../reference/syncthing.md)
 
@@ -12,7 +12,7 @@
 - 接続元を絞る節を使った場合は `syncthing-gui` ではなく rich rule が入っているので、先に[接続元を絞る](../syncthing.md#syncthing-接続元を絞る)の手順 2 を貼る
 - 自動バックアップを設定した場合は、Syncthing が動いているうちに、先に[設定を自動でバックアップする](../syncthing.md#syncthing-設定を自動でバックアップする)の手順 7 を貼る
 - 同期していたファイル自体は、この節のどの手順でも消えない
-- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
+- linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
 > **この節の**手順 3 で設定・鍵・DB を**消すとデバイス ID が失われ、相手デバイスからは別のデバイスとして見える**。入れ直す可能性があるなら残すか、自動バックアップのアーカイブ（`~/syncthing-backup`）を取っておく（[バックアップから戻す](../syncthing.md#syncthing-バックアップから戻す)で同じデバイス ID に戻せる）。

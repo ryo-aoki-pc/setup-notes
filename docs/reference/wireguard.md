@@ -1,4 +1,4 @@
-# WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）の参考資料
+# WireGuard の参考資料
 
 [手順書](../wireguard.md#wireguard)・[ロールバックと注意点](../extra/wireguard.md)
 
@@ -59,7 +59,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 
 ### 鍵を作る / 手順 1: 補足: 変数について
 
-- 4 つの IP の変数は、使う[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 1 へ移した（2026-10-14。項を単独で通すため）
+- 4 つの IP の変数は、使う[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 1 で設定する
 - `WG_DIR` を WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）と別の名前にしてあるのは、同じ人が両方のマシンを触るときに、ロールバックの `rm` を取り違えても登録簿が消えないようにするため
 
 ### 鍵を作る / 手順 2: 補足: パッケージ
@@ -143,7 +143,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 ### Windows 11 でトンネルを確かめる / 手順 2: 補足: 変数について
 
 - 変数の名前と意味は、AlmaLinux 10 の[「トンネルを確かめる」の手順 1](../wireguard.md#wireguard-トンネルを確かめる)と同じ（PC 視点。`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）。拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値を入れる
-- 使うのは、この項の手順 5 の疎通の確認だけ（2026-10-14 に「Windows 11 で WireGuard と鍵を用意する」から移した）
+- 使うのは、この項の手順 5 の疎通の確認だけ
 - 鍵と conf の一時置き場は `%USERPROFILE%\wg-client`（`C:\Users\<WIN_USER>\wg-client`）に決めてあり、変数にしていない。WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）とは別の名前
 
 ### Windows 11 でトンネルを確かめる / 手順 3: 補足: LAN の外につなぐ理由
@@ -488,11 +488,11 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)など）が、拠点からトンネル越しに届くようになる
   - 拠点から PC への ping（[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
 - **Windows 11 ではキルスイッチは出ない**: `AllowedIPs` に `/0` が無いので、窓の編集の「トンネルを通らないトラフィックのブロック（キルスイッチ）」は出ず、ファイアウォールの制限も掛からない（WireGuard の文書の「Network Configuration Quirks」）。全トラフィックを通す構成は、AlmaLinux 10 と同じく対象外
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[クライアントを登録する](../wireguard.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
+- WG ホストの手順は共通なので、[クライアントを登録する](../wireguard.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
 
 ### 代替: wg-quick で張る場合
 
-NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-補足の実測)を参照。
 
 - 「鍵を作る」から「conf を取り込む」の手順 3 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
 - NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）
@@ -517,7 +517,7 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 
 ### 代替: nmcli connection add で組む場合（RHEL のドキュメントの方式）
 
-conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-補足の実測)を参照。
 
 1. `nmcli connection add type wireguard con-name wg0 ifname wg0 autoconnect no`
 1. `nmcli connection modify wg0 ipv4.method manual ipv4.addresses <CLIENT_TUN_IP>/32`

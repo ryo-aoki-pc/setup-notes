@@ -1,4 +1,4 @@
-# GNOME のデスクトップ共有の手順（PC の画面のデスクトップに、遠隔から RDP でつなぐ。PC の画面を触らずに CLI だけで設定する）のロールバックと注意点
+# GNOME のデスクトップ共有のロールバックと注意点
 
 [手順書](../gnome-remote.md#gnome-のデスクトップ共有)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](../reference/gnome-desktop-sharing.md)
 

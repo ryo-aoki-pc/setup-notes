@@ -1,4 +1,4 @@
-# Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）のロールバックと注意点
+# コーディングエージェントの共同作業のロールバックと注意点
 
 [手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
@@ -96,7 +96,7 @@
 1. 動いているエージェントと Remote Control を終える。
 
    - 開いている窓のエージェントを終え（Claude Code は `/exit`、Codex と Grok は `/quit`）、その窓を閉じる
-   - Remote Control のタスクを使っているなら、[windows-claude-remote-control.md のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
+   - Remote Control のタスクを使っているなら、[Windows 11 で Claude Code の Remote Control を使う のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
 
 1. 消す前に、コミットしていない変更と、取り込んでいないコミットを確かめる。
 
@@ -229,6 +229,6 @@
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない
 - **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントのロールバック](ai-agents.md#ai-エージェントとプラグインを消す)）
 - **エージェントの push と Pull Request には、そのホストの認証が要る**: エージェントは、動いているユーザーの git の認証で push し、Pull Request は gh で作る。GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](../almalinux-setup.md#github-cli)・[Windows 11 の初期設定の「GitHub CLI」](../windows-setup.md#github-cli)でログインしておく（git の HTTPS の認証は、AlmaLinux 10 は gh の `Authenticate Git with your GitHub credentials?`、Windows 11 は Git Credential Manager）。Codex は、push と Pull Request の作成にも sandbox の外での実行の承認が要る
-- **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[forgejo.md の使い方の基本](../forgejo.md#forgejo-使い方の基本)）
+- **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[Forgejo: 使い方の基本](../forgejo.md#forgejo-使い方の基本)）
 - **画面で取り込むときは merge commit で**: squash と rebase で取り込むと、各 worktree の `git merge --ff-only main` が通らなくなる（[参考資料](../reference/coding-agents.md#main-に取り込む-画面で取り込むとき)）
 - **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）

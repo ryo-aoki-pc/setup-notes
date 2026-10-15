@@ -1,8 +1,6 @@
-# Homebrew をインターネットに出られないホストで使う手順（AlmaLinux 10 / ssh -R の SOCKS プロキシ）の参考資料
+# Homebrew のオフライン導入の参考資料
 
 [AlmaLinux 10 の「Homebrew のオフライン導入」](../almalinux-setup.md#homebrew-のオフライン導入)・[ロールバックと注意点](../extra/homebrew-offline.md)
-
-集約前の節名・手順番号から現在の項への対応は [集約対応表](../dev/consolidation-map.md) を参照する。本文の実測・失敗・未確認範囲は当時の記録を保持する。
 
 ## 補足
 
@@ -43,8 +41,3 @@
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 手順 3 で貼る Homebrew 本体の導入手順（「Homebrew」の手順 1〜3）
 
 ---
-
-## 追加確認（2026-10-12）
-
-- 2026-10-11に案内を加えた時点ではオフライン経路のHomebrew4は未確認だった。今回、既存2VMから同じトンネルのシェルで設定を実行し、再起動後の実IBus PATH/XMLとGUIの日本語変換を確認した
-- [今回の継続記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md#付録-既存2vmでオフライン経路を継続した記録2026-10-12offline-full)。新規Homebrew本体導入・jqの新規bottle・実機を確認した結果ではない

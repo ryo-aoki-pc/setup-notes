@@ -1,4 +1,4 @@
-# Windows 11 の初期設定の手順（インストール直後の更新・貼り付けの設定・scoop・UniGet UI・表示・電源・リモート・WSL・OpenSSH・Git・Firefox・WezTerm・Neovim）のロールバックと注意点
+# Windows 11 のセットアップのロールバックと注意点
 
 [手順書](../windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)
 
@@ -136,7 +136,7 @@
    ```
 
    - エラーが出ずにプロンプトに戻ればよい
-   - `Y` と答えると、gh は自分のトークンを Git Credential Manager にも入れる（[参考資料](../reference/windows-setup.md#github-cli-windows-11-で使う--手順-4-補足-git-の認証に-n-と答える理由)）。この項の手順 5 では消えない
+   - `Y` と答えると、gh は自分のトークンを Git Credential Manager にも入れる（[参考資料](../reference/windows-setup.md#github-cli--手順-4-補足-git-の認証に-n-と答える理由)）。この項の手順 5 では消えない
    - 次に git が GitHub に HTTPS でつなぐときは、Git Credential Manager のサインインになる
 
 1. scoop で gh を消す。
@@ -1101,7 +1101,7 @@
 - **CopyQ の履歴は暗号化されない**: [CopyQ を使う](../windows-setup.md#copyq-を使う)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
 - **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
   - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない
-- **移したツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・git-delta・lazygit・GitHub CLI・yazi のもの。Neovim の注意は、両 OS とも [Neovim のセットアップの注意点](neovim.md#注意点) に、HackGen Console NF・WezTerm・Windows Terminal・シェルのツールの注意は、両 OS とも [シェルと端末のセットアップの注意点](shell-terminal.md#注意点) にある。ここには Windows 11 だけの注意を書く
+- **ツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・git-delta・lazygit・GitHub CLI・yazi のもの。Neovim の注意は、両 OS とも [Neovim のセットアップの注意点](neovim.md#注意点) に、HackGen Console NF・WezTerm・Windows Terminal・シェルのツールの注意は、両 OS とも [シェルと端末のセットアップの注意点](shell-terminal.md#注意点) にある。ここには Windows 11 だけの注意を書く
 - **OpenSSH サーバー: SSH のセッションは管理者の権限を持つ**
   - Administrators の一員でログインすると、`whoami /groups` で `Mandatory Label\High Mandatory Level` と、有効な `BUILTIN\Administrators` を確認する
   - このユーザーのパスワードを知る人と、登録した鍵を持つ人は、この PC の管理者として操作できる。パスワードと秘密鍵の扱いは、管理者のパスワードと同じにする
@@ -1134,11 +1134,11 @@
 - **Git: Windows の PowerShell や cmd から呼ぶ git** も、同じ `global`（`C:/Users/<WIN_USER>/.gitconfig`）を読む
   - Windows 11 の PC で、Git Bash・PowerShell・cmd の `git config --global --list --show-origin` が同じファイルを示した
 - **Git: Git for Windows を上げるときは、Git の bash を使うものを閉じる**
-  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）、既定のシェルを Git Bash にした SSH のセッション、Claude Code の Bash のツール（Remote Control のタスクも）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#統合前の記録-gitもとは-gitmd)・[参考資料](../reference/almalinux-setup.md#統合前の参考資料-gitもとは-gitmd)）
+  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）、既定のシェルを Git Bash にした SSH のセッション、Claude Code の Bash のツール（Remote Control のタスクも）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-の記録)・[参考資料](../reference/almalinux-setup.md#git--手順-1-補足-変数について)）
 - **Git: Git for Windows 2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった**（上流のリリースノート）
   - `C:\Program Files\Git\mingw64\bin\git.exe` を直接指す設定は、上げた後に見直す
 - **git-delta: Windows 11 の PowerShell と cmd で打つ git も、delta を通る**: `~/.gitconfig` は Git Bash と同じファイル
-  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。[参考資料](../reference/windows-setup.md#git-delta-windows-11-で使う--手順-5-補足-ページャの-less-と-powershell-の-git)）
+  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。[参考資料](../reference/windows-setup.md#git-delta--手順-5-補足-ページャの-less-と-powershell-の-git)）
   - そのため、scoop の less は入れていない。PowerShell で delta を直に動かす（`git diff | delta` など）ときは、PATH に less が無いので、ページャを使わずに出る
 - **git-delta: Windows 11 の SSH のセッションでは、そのままでは scoop の delta が起動しないことがある**: sshd は、一般ユーザーが作った scoop の `current` のジャンクションをたどらせない（scoop の shim が `Could not create process with command …` で失敗する）
   - SSH で git を使うなら、[scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）

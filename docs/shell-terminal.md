@@ -18,7 +18,7 @@
   - 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)・[Windows 11 で共通の bash 設定を更新する](#windows-11-で共通の-bash-設定を更新する)で上げる。AlmaLinux 10 で Homebrew・Flatpak とまとめて上げるなら、[AlmaLinux 10 のセットアップの「共通の bash 設定・Homebrew・Flatpak を上げる」](almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)
   - AlmaLinux 10 のシェルのツールと HackGen Console NF は、同じ「共通の bash 設定・Homebrew・Flatpak を上げる」の手順 3（Homebrew）で上がる。Windows 11 のシェルのツールは[Windows 11 のセットアップの「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)、HackGen Console NF は[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)で上げる
   - WezTerm は、AlmaLinux 10 は OS の更新（[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)）で上がる。Windows 11 は[Windows 11 のセットアップの「Git for Windows・Firefox・WezTerm を上げる」](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で上げる。自分用の WezTerm の設定は、[WezTerm の設定を更新する](#wezterm-の設定を更新する)・[Windows 11 で WezTerm の設定を更新する](#windows-11-で-wezterm-の設定を更新する)で上げる
-- Windows 11 の PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と、Windows Terminal の設定の控え `settings.json.windows-setup.bak` は、項がこの文書へ移る前の名前のまま（すでに通した PC の戻す手順と合わせるため）
+- Windows 11 の PowerShell 7 のプロファイルの行には印 `# windows-setup.md` を使い、Windows Terminal の設定の控えには `settings.json.windows-setup.bak` を使う
 
 ## AlmaLinux 10 で使う
 

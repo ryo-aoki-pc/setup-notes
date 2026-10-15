@@ -3663,7 +3663,7 @@
 - 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
 - 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
 - **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
 
 > [!WARNING]
 > **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。

@@ -526,7 +526,7 @@
 - sudo を通らない `su -`、コンソールや ssh での root のログインには効かない。そちらは [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を通す
 - RPM にも同じ名前のコマンドがあると、`sudo` では RPM のほうが使われる
 - `brew install` などの管理操作は、この項を通しても一般ユーザーで行う（通常のホストでは `sudo brew install` などを `Running Homebrew as root is extremely dangerous …` で断られる）
-- 補足: [参考資料](reference/almalinux-setup.md#homebrew-sudo-で使うときの補足)
+- 補足: [参考資料](reference/almalinux-setup.md#homebrew-を-sudo-でも使う--手順-1-補足-呼び出し方ごとの-path)
 
 > [!WARNING]
 > - `/home/linuxbrew/.linuxbrew` は Homebrew を入れたユーザーの所有。`sudo` で打ったコマンドが `/usr/bin` などに無いと、そのユーザーが書き換えられるプログラムを root の権限で動かすことになる（そのユーザーを乗っ取られると、root まで取られる）

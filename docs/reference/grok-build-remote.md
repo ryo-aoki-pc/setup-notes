@@ -1,4 +1,4 @@
-# Grok Build をブラウザから操作する手順（Codeg と Caddy / AlmaLinux 10 は systemd のユーザーサービス / Windows 11 はタスク スケジューラ / LAN・VPN 内で HTTPS で使う）の参考資料
+# Grok Build のブラウザ操作の参考資料
 
 [AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[ロールバックと注意点](../extra/grok-build-remote.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)
 
@@ -306,7 +306,7 @@ Grok Build を、離れた場所からデスクトップアプリかブラウザ
 - 認証局はホストごとに別で、AlmaLinux 10 は Forgejo などと共有する。端末に入れるルート証明書は同じホストに 1 つ。鍵は Caddy が作り、エージェントは読まない
 - トークンは、エージェントに作らせず・読ませず、利用者が作る。確認は、値を表示しないコマンドで行う
 - 利用者の指定で、承認を減らして使う用途にはスマート自動承認（`auto`）を選ぶ。Grok の審査で確認や拒否になる操作は残る。確認が出ることを安全の境界にはしない（`mkdir` は確認なしで実行された）
-- 両 OS の操作は OS 別の正本へ集約する（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
+- 両 OS の操作は AI エージェントの手順書の OS 別の項で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）
 
 ## 参照
 

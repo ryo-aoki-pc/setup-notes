@@ -1,4 +1,4 @@
-# Podman インストール手順（AlmaLinux 10 / AppStream・rootless）の参考資料
+# Podman の参考資料
 
 [手順書](../almalinux-setup.md#podman)・[ロールバックと注意点](../extra/podman.md)
 

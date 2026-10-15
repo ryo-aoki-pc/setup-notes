@@ -1,4 +1,4 @@
-# npm をインターネットに出られないホストで使う手順（AlmaLinux 10 / AppStream の Node.js / Neovim の Mason）のロールバックと注意点
+# npm のオフライン導入のロールバックと注意点
 
 [手順書](../almalinux-setup.md#npm-のオフライン導入)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](../reference/npm-offline.md)
 
@@ -9,7 +9,7 @@
 
 - オフラインのホストで貼る。トンネルは要らない
 - `https_proxy` はどこにも書いていないので、戻すものは無い
-- dnf のプロキシの行は、[ssh-socks-tunnel.md のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す
+- dnf のプロキシの行は、[SSH の SOCKS トンネル のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す
 - Mason で入れたものは、`:MasonUninstall <名前>` で消せる（設定にあるものは、次にトンネルのあるシェルで開いたときに入り直す）
 
 > [!WARNING]
@@ -51,4 +51,4 @@
   - 入れたパッケージはそのまま使える
   - 一覧を取り直すのは、次にトンネルのあるシェルで開いたとき（[更新](../almalinux-setup.md#npm-のオフライン導入-更新)）
 - **トンネルが無いときに開くと、設定にあって入っていないパッケージの導入が毎回失敗する**: 画面での編集には影響しない
-- **ssh が切れると、トンネルも消える**: 途中の導入は失敗する。[ssh-socks-tunnel.md 手順 2](../almalinux-setup.md#ssh-の-socks-トンネル) から張り直し、[手順 2・3](../almalinux-setup.md#npm-のオフライン導入) を貼り直す
+- **ssh が切れると、トンネルも消える**: 途中の導入は失敗する。[SSH の SOCKS トンネルの手順 2](../almalinux-setup.md#ssh-の-socks-トンネル) から張り直し、[手順 2・3](../almalinux-setup.md#npm-のオフライン導入) を貼り直す

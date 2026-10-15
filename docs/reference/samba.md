@@ -1,8 +1,8 @@
-# Samba でホームディレクトリを公開する手順（`[homes]` 共有 / smbd + firewalld）の参考資料
+# Samba サーバーの参考資料
 
 [手順書](../samba.md#samba-サーバー)・[ロールバックと注意点](../extra/samba.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
 
 ## 補足
 
@@ -78,7 +78,7 @@
 
 ### サーバーの上で動作を確かめる / 手順 4: 補足: 共有の一覧
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
 
 ### サーバーの上で動作を確かめる / 手順 5: 補足: マウントと smbstatus
 
@@ -105,7 +105,7 @@
 
 #### smb.conf の各行の根拠
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
 
 ### root のホームを公開するときの補足
 
@@ -113,7 +113,7 @@
   - `/root` と、その中の `admin_home_t` のファイル・ディレクトリは、[root のホームも公開する](../samba.md#samba-サーバー-root-のホームも公開する)の手順 2 のモジュールで許す
   - `.ssh`（`ssh_home_t`）・`.gnupg`（`gpg_secret_t`）・`.config`（`config_home_t`）などは、一般ユーザーのホームと同じ `user_home_type` のラベルなので、手順 4 の boolean で既に許されている
 - **入るのは `<USER>`**: root の Samba ユーザーは登録しない
-- **クライアントでの見え方**: [samba-client.md](../samba.md#samba-クライアント) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
+- **クライアントでの見え方**: [Samba クライアント](../samba.md#samba-クライアント) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
 - **以前に `smbpasswd -a root` で root を登録していたら**: `sudo pdbedit -x -u root` で登録を削除する
 
 ### 参照

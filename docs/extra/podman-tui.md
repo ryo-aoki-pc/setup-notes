@@ -1,4 +1,4 @@
-# podman-tui インストール手順（AlmaLinux 10 / EPEL）のロールバックと注意点
+# podman-tui のロールバックと注意点
 
 [手順書](../almalinux-setup.md#podman-tui)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](../reference/podman-tui.md)
 
@@ -7,7 +7,7 @@
 ## ロールバック
 
 - 上から順に実行する
-- API ソケットは止めない。ほかの手順書も使う（止めるなら [podman.md のロールバック](podman.md#ロールバック)の手順 3）
+- API ソケットは止めない。ほかの手順書も使う（止めるなら [Podman のロールバック](podman.md#ロールバック)の手順 3）
 
 1. 確認用のコンテナを消す。
 
@@ -23,7 +23,7 @@
    podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
    ```
 
-   - 同じイメージを使うもの: [podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する)、[podman-compose](../almalinux-setup.md#podman-compose)、[lazydocker](../almalinux-setup.md#lazydocker)
+   - 同じイメージを使うもの: [Podman: Quadlet で自動起動する](../almalinux-setup.md#podman-quadlet-で自動起動する)、[podman-compose](../almalinux-setup.md#podman-compose)、[lazydocker](../almalinux-setup.md#lazydocker)
    - 使っているコンテナが残っていると、消せずにエラーになる
 
 1. podman-tui を消す。

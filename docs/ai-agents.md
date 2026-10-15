@@ -6,11 +6,11 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
-> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること（2026-10-14 からは、これらの項はカテゴリに分かれている）
+> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること
 > - AI エージェントのアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
 > - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する。Antigravity CLI は個人の Google アカウント
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
+> - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build--手順-2-補足-インストーラーが置くものと-bashrc)）
 > - **[Antigravity CLI](#antigravity-cli)の手順 2 は、`~/.bashrc` と `~/.bash_profile` に PATH の行を足す**。同じ項の手順 4・5 で外す（[理由](reference/ai-agents.md#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
 
 - 必要な項を上から順に通す
@@ -2644,7 +2644,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      $text = @'
    ## 既定の分担
 
-   利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する（2026-10-15、利用者の決定）。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
+   利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
 
    - Claude Code だけで行うもの: 利用者の質問への答え、ファイルを変えない調べもの、1 つのファイルの数行で振る舞いを変えない直し（誤字・リンク・値の直しなど）
    - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request・取り込み

@@ -1,4 +1,4 @@
-# Dropbox 公式クライアント導入手順（AlmaLinux 10 / x86_64 / headless + systemd ユーザーサービス）のロールバックと注意点
+# Dropbox のロールバックと注意点
 
 [手順書](../almalinux-setup.md#dropbox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](../reference/dropbox.md)
 
@@ -10,7 +10,7 @@
 - 上から順に実行する
 - 同期していたファイルはクラウドに残る。この PC の `~/Dropbox` を消すのは、この節の手順 4 だけ
 - 手順 2 で作られた `~/.gnupg` は、ほかでも使うので消さない
-- linger も切るときは、この節の後に [linger.md のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
+- linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
 > **この節の**手順 4 で、`~/.dropbox`（リンクの情報）と `~/Dropbox`（この PC の複製）を消す。まだ同期していない変更があれば失われる。

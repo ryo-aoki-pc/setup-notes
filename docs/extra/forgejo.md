@@ -1,4 +1,4 @@
-# Forgejo 構築手順（AlmaLinux 10 / rootless Podman + Quadlet / LAN・VPN 内で使う）のロールバック
+# Forgejo のロールバック
 
 [手順書](../forgejo.md#forgejo)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](../reference/forgejo.md)
 

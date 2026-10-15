@@ -1,4 +1,4 @@
-# VirtualBox Guest Additions 導入手順（AlmaLinux 10 bootc / Atomic Desktop のゲスト）の参考資料
+# VirtualBox の bootc ゲストの参考資料
 
 [手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
 
@@ -38,10 +38,10 @@
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意--手順-3-補足-鍵をホストに置く理由と扱い)
 
 - モジュールに署名するのは、この節の手順 7 のビルド（ホスト）なので、秘密鍵もホストに置く。VM には公開鍵の証明書だけを送る
-- 鍵の作り方（CN も）は [secure-boot-mok.md 手順 4](../almalinux-setup.md#secure-boot-の署名鍵) と同じで、置き場所と持ち主（自分のユーザー）だけが違う
+- 鍵の作り方（CN も）は [Secure Boot の署名鍵の手順 4](../almalinux-setup.md#secure-boot-の署名鍵) と同じで、置き場所と持ち主（自分のユーザー）だけが違う
 - `~/vbox-ga-mok` は、ビルドの文脈（`~/vbox-ga-host/vbox-ga-image`）の外に置く。文脈のディレクトリは、まるごと podman に渡るため
 - `MOK.priv` は、この鍵を登録した VM が信頼するモジュールを作れる鍵になる。ホストのほかのユーザーに読ませず、ほかのマシンに持ち出さない
-- AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[secure-boot-mok.md](../almalinux-setup.md#secure-boot-の署名鍵) で作るもの）とは別のもの
+- AlmaLinux 10 のホストでは、ホストの VirtualBox のモジュールの鍵（`/var/lib/shim-signed/mok/`。[Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で作るもの）とは別のもの
 - **鍵を作り直したら**、この節の手順 7 のビルドに `--no-cache` を足す（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)のリードと同じ）
 - この節の手順 3 のブロックは、`openssl` が入っていなければ `sudo dnf` で入れる
 - すでに `~/vbox-ga-mok/MOK.priv` があれば、作り直さずにその鍵を使う
