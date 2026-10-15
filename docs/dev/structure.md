@@ -206,7 +206,11 @@
   - Grok の sandbox の前提: Landlock が有効なカーネルと bubblewrap が必要。ソケットが無くても親ディレクトリの検索権限不足で起動できない。ソケット自体のアクセス権は緩めず、対応するカーネルで起動してから再試行する。2026-10-10 は Image の静的検査 7 項目と ACL の模擬検査 6 項目まで成功し、ユーザーの指示でホスト修正は行わず調査・準備までで終了した。適用・再起動・再検証は未実施で、Grok の sandbox によるレビューは未解消
   - 再起動なしの追加検証（2026-10-10、#119 のマージ後）: プラグインのスクリプトを `node` で呼ぶ component の検査（Claude Code には入れていない）で、sandbox を使わない実行中の Grok の job の stop（worker・grok・bash・sleep の消滅）と、Codex の cancel の `turnInterruptAttempted`・`turnInterrupted` が `true` になること、スレッドの記録の `turn_aborted`（interrupted）を確認。cancel の後も Codex が始めたコマンドは残り、`SessionEnd` の hook による broker の終了で消えた（注意点に追加）。ACL の適用中のプラグインの review・critique は Landlock のエラーで失敗。先の付録の「SELinux は Disabled」は誤りで、Enforcing に訂正した（Codex の sandbox の中の `getenforce` は Disabled と出る）。Grok の sandbox によるレビューは未解消のまま
   - 規則の変更（2026-10-10、利用者の決定）: 規則の文を「コミットしたら、リモートがあれば今のブランチを push し、`main` への Pull Request を作る。`main` への取り込み（マージ）とブランチの削除は人が行う」に変えた（ryo-aoki-pc の 9 つのリポジトリの AGENTS.md と同じ。違いは「リモートがあれば」だけ）。前提に push の認証と Pull Request を作る道具（GitHub は gh）、使い方の基本・分担・取り込みに push と Pull Request、「main に取り込む」に画面での取り込み（merge commit だけ。squash・rebase では worktree の `--ff-only` が通らない）と `git pull --ff-only` を足した。クラウドの Ubuntu のコンテナで、手順 4 の bash と PowerShell 7.6.0 のブロック、bare のリモートでの push と 2 つの取り込みの流れ、Claude Code 2.1.296 の push と報告を確認。実際のホスティングでの Pull Request、Codex・Grok、Windows は未確認
-  - 規則の変更（2026-10-15、利用者の決定）: Pull Request はエージェントが取り込んでよいとした（merge commit）。手元での取り込みとブランチ削除は人が行う。手順のブロック内は規則の文だけを変更し、実機では流し直していない（検証範囲は変えない）
+  - 規則の変更（2026-10-15、利用者の決定）: 共同作業の手順で、Pull Request はエージェントが取り込んでよいとした（merge commit）。手元での取り込みとブランチ削除は人が行う。手順のブロック内は規則の文だけを変更し、実機では流し直していない（検証範囲は変えない）
+  - 11 個のリポジトリの規則の変更（2026-10-15、利用者の決定）: docs とその 10 個のサブモジュールの AGENTS.md の取り込みの文の末尾「ブランチの削除は人が行う」を置き換えた
+    - リモートのブランチは GitHub が自動で消す（設定は人が保つ）。取り込んだブランチには push しない。手元のブランチは人が消す
+    - GitHub API で、11 個とも自動削除が有効、10 個は squash だけを許す（md-table-excel は merge commit も許す）ことを確かめた
+    - 共同作業の手順の中の規則の文は変えていない（`agent/<名前>` を使い続け、ホスティングの設定にもよるため）
   - Windows 11 への Antigravity CLI の追加（2026-10-15、現行の ai-agents.md）: `antigravity` と `agent/antigravity` を 4 つ目の worktree・ブランチにし、読み取り専用のレビューと調べものを頼む。AlmaLinux 10 は従来の 3 つのまま
     - 使い捨てのリポジトリで「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（手順 2 は 4 つの CLI の版とログイン）
     - 同じ項の手順 8 は Claude・Codex・Antigravity CLI の規則の読み込みまで。Grok の `--trust inspect` の行と手順 9 は通していない。CLI の headless の権限の確認と Codeg の接続確認だけを、4 エージェントの実分担の成功として扱わない
