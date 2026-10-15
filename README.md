@@ -1,6 +1,6 @@
 # setup-notes
 
-構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも [仮想マシンのセットアップ](docs/virtual-machines.md)、Forgejo のサーバーは [Forgejo のセットアップ](docs/forgejo.md) にまとめてある。WireGuard・Neovim・Samba・Syncthing は両 OS とも [WireGuard のセットアップ](docs/wireguard.md)・[Neovim のセットアップ](docs/neovim.md)・[Samba のセットアップ](docs/samba.md)・[Syncthing のセットアップ](docs/syncthing.md)、AlmaLinux 10 の GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) にまとめてある。
+構築・設定の操作は、[Windows 11](docs/windows-setup.md) と [AlmaLinux 10](docs/almalinux-setup.md) の2冊に集約する。既存ツールと設定リポジトリの導入もここから通す。AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と、共同作業・ブラウザ操作・Remote Control は、両 OS とも [AI コーディングエージェントのセットアップ](docs/ai-agents.md) にまとめてある。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも [仮想マシンのセットアップ](docs/virtual-machines.md)、Forgejo のサーバーは [Forgejo のセットアップ](docs/forgejo.md) にまとめてある。WireGuard・Neovim・Samba・Syncthing は両 OS とも [WireGuard のセットアップ](docs/wireguard.md)・[Neovim のセットアップ](docs/neovim.md)・[Samba のセットアップ](docs/samba.md)・[Syncthing のセットアップ](docs/syncthing.md)、シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・PowerShell 7 のプロファイル）は両 OS とも [シェルと端末のセットアップ](docs/shell-terminal.md)、AlmaLinux 10 の GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) にまとめてある。
 
 実施範囲・成功と失敗は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/readme.md) と各用途の記録、理由は `docs/reference/`、ロールバックは `docs/extra/` に残す。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。
 
@@ -16,7 +16,7 @@
 
 ### 共通の bash 設定を先に入れる
 
-- 導入と確認は [AlmaLinux 10 の「共通の bash 設定」](docs/shell-terminal.md#共通の-bash-設定)、Windows は [Git Bash と WezTerm の設定](docs/shell-terminal.md#git-bash-と-wezterm-の設定) で行う
+- 導入と確認は [シェルと端末のセットアップ](docs/shell-terminal.md) の、AlmaLinux 10 は「[共通の bash 設定](docs/shell-terminal.md#共通の-bash-設定)」、Windows は「[Git Bash と WezTerm の設定](docs/shell-terminal.md#git-bash-と-wezterm-の設定)」で行う
 - 各ツールで `~/.bashrc` に設定を重ねて追記しない。ツール本体・ソケット・別形式の設定ファイルは該当項で導入する
 
 ### OS のインストール
@@ -38,16 +38,16 @@
 - Firefox と VS Code は Flathub を使わず、ベンダーの RPM で入れている
 - AppStream / BaseOS に無い RPM は EPEL から入れる。Firefox の AAC・H.264 に使う FFmpeg だけは RPM Fusion（free）から入れ、RPM Fusion は EPEL を前提にする
 - ほかの導入元（AppStream / EPEL / COPR / AppImage など）との比較は、導入元一覧の[導入経路と EL10 での注意](docs/tool-catalog.md#導入経路と-el10-での注意)にある
-- AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、共通の bash 設定・Homebrew と starship・zoxide・fzf・eza・bat・tmux、Git・Firefox・HackGen Console NF・WezTerm・git-delta・lazygit・GitHub CLI・yazi）
+- AlmaLinux 10 では、インストールした直後に [AlmaLinux 10 の初期設定](docs/almalinux-setup.md)を通す（更新・NOPASSWD の sudo・ファームウェア・journal・kdump、EPEL・RPM Fusion・Flathub、日本語入力と GNOME の表示・入力、Homebrew、Git・Firefox・git-delta・lazygit・GitHub CLI・yazi）。共通の bash 設定・starship・zoxide・fzf・eza・bat・tmux・HackGen Console NF・WezTerm は [シェルと端末のセットアップ](docs/shell-terminal.md#almalinux-10-で使う) で入れる
   - 下の表の EPEL・RPM Fusion・Flatpak / Flathub・Homebrew は、同書の「EPEL と RPM Fusion」の手順 1・2〜5、「Flatpak と Flathub」の手順 1〜3、「Homebrew」の手順 1〜3
-  - Git から yazi までは、同書の「tmux を試す」と「再起動と確認」の間の項で入れる（WezTerm・lazygit・yazi の自分用の設定も。Neovim とその自分用の設定は [Neovim のセットアップ](docs/neovim.md) で入れる）
+  - Git から yazi までは、同書の「Git と開発の道具」の項で入れる（lazygit・yazi の自分用の設定も。WezTerm の自分用の設定はシェルと端末のセットアップの「WezTerm」、Neovim とその自分用の設定は [Neovim のセットアップ](docs/neovim.md) で入れる）
   - 常時動かしておく PC の画面オフ・画面ロック・自動サスペンド、SSH を公開鍵だけにする、dnf-automatic、Wake on LAN も、同書の項にある
-- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・HackGen Console NF・Git for Windows・Firefox・WezTerm と、Git Bash のシェルのツール・git-delta・GitHub CLI・lazygit・yazi）
+- Windows 11 では、インストールした直後に [Windows 11 の初期設定](docs/windows-setup.md)を通す（更新、貼り付けの設定、scoop・UniGet UI・PowerToys・PowerShell 7・WSL、表示・電源・リモートの設定、OpenSSH サーバー・Git for Windows・Firefox・git-delta・GitHub CLI・lazygit・yazi）。HackGen Console NF・Windows Terminal・WezTerm・Git Bash の共通の bash 設定とシェルのツール・PowerShell 7 のプロファイルは [シェルと端末のセットアップの「Windows 11 で使う」](docs/shell-terminal.md#windows-11-で使う) で入れる
   - Windows Update は PSWindowsUpdate で通常の更新だけを入れ、再起動は手動。Store は同梱の CLI で全アプリを更新する（Preview 版の CLI）
   - CLI ツールは scoop で、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる
-  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・WezTerm・HackGen Console NF・git-delta・GitHub CLI・lazygit・yazi）は、同書の項で入れる。Neovim は [Neovim のセットアップ](docs/neovim.md#windows-11-で-neovim-を入れる)、WireGuard は [WireGuard のセットアップ](docs/wireguard.md#windows-11-で-wireguard-を使う)、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
+  - AlmaLinux 10 と同じツール（Git for Windows・Firefox・git-delta・GitHub CLI・lazygit・yazi）は、同書の項で入れる。WezTerm・HackGen Console NF は [シェルと端末のセットアップ](docs/shell-terminal.md#windows-11-で使う)、Neovim は [Neovim のセットアップ](docs/neovim.md#windows-11-で-neovim-を入れる)、WireGuard は [WireGuard のセットアップ](docs/wireguard.md#windows-11-で-wireguard-を使う)、VirtualBox は [仮想マシンのセットアップ](docs/virtual-machines.md#windows-11-で-virtualbox-を入れる) の項で入れる
   - 同書の項で、プライバシーと広告の表示・誤って押しやすいキーやアニメーション・効果音・ストレージ センサー、Edge の常駐、クリップボードの履歴（CopyQ）も変えられる
-  - 同じく同書の項で、PowerToys のユーティリティを絞り、PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）を書き、Windows Terminal のフォントを HackGen Console NF にし、WSL のネットワークをミラーにできる
+  - 同じく同書の項で、PowerToys のユーティリティを絞り、WSL のネットワークをミラーにできる。PowerShell 7 のプロファイル（貼り付け・履歴の検索・starship と zoxide）と Windows Terminal のフォント（HackGen Console NF）は、シェルと端末のセットアップの項で変えられる
   - シェルと端末のセットアップの「シェルのツール」の手順 1 で入れる starship・zoxide・fzf・eza・bat は、同じ文書の「[シェルのツールを入れる](docs/shell-terminal.md#シェルのツールを入れる)」で、Git Bash 用に scoop で入れる（zoxide は 0.9.9 に止める。tmux は入れない）
   - 各手順の実施範囲は、対応する検証記録を参照する
   - [Windows 11 のクリーンインストール後の VM 検証](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06): 導入・設定の読み戻しと一部の手動確認、Git の隔離したローカル機能、HackGen の CLI 描画、WireGuard の鍵と管理サービス、RDP の TLS、スタートアップの確認用項目を検証した。WSL 2 と入れ子の VM は仮想化エラーで未達、残る GUI・認証・外部接続と実機での通し実行は未確認。
@@ -163,7 +163,7 @@
 ### 端末とシェル
 
 - 変えるものがそれぞれ違うので、併用できる
-- starship・zoxide・fzf・eza・bat・tmux と bash の設定は、[AlmaLinux 10 の初期設定](docs/almalinux-setup.md)の「共通の bash 設定」から「tmux を試す」までの手順でまとめて入れて確かめる（使い方と設定は同書の後ろの節）
+- starship・zoxide・fzf・eza・bat・tmux と bash の設定は、[シェルと端末のセットアップ](docs/shell-terminal.md)の「共通の bash 設定」と「シェルのツール」（「tmux を試す」まで）の手順でまとめて入れて確かめる（使い方と設定は「シェルのツール」の中の項）
 - 初期化の順番は bash の共通設定が管理する。Homebrew → starship → WezTerm → zoxide、Homebrew の補完 → fzf の順で読む。手順書ごとの追記や並べ替えは不要
 - eza のアイコンや starship の Nerd Font 前提のプリセットは、端末のフォントに Nerd Fonts のグリフ（HackGen Console NF など）が要る
 - HackGen Console NF は、Windows 11 の PC には[シェルと端末のセットアップの「Windows 11 で HackGen Console NF を入れる」](docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)で入れる。上流の zip を、版と sha256 を確かめて自分のユーザーに入れる

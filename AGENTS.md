@@ -6,11 +6,11 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md`、仮想マシンは両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md`、GNOME のリモート操作（AlmaLinux 10）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。2 冊は 2026-10-14 に、必須・任意の区別をやめてカテゴリ別に組み直し、どの項も単独で通せる形にした）。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md`、仮想マシンは両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md`、GNOME のリモート操作（AlmaLinux 10）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md`、シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル）は両 OS とも `docs/shell-terminal.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける（extra は 2026-10-10 に本体から移した。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。2 冊は 2026-10-14 に、必須・任意の区別をやめてカテゴリ別に組み直し、どの項も単独で通せる形にした）。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
-共通の bash 設定は、`docs/almalinux-setup.md` の「共通の bash 設定」、Windows では `docs/windows-setup.md` の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
+共通の bash 設定は、`docs/shell-terminal.md` の「共通の bash 設定」、Windows では同じ文書の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリに集約済み。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。`docs/dev/structure.md` の各文書の説明に残る直接追記の内容は、2026-10-05 の統一前の履歴。現行の手順を優先する。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは従来どおり各手順書で扱う。
 
 これまでの検証の経緯と、実施済みと扱わない範囲は、非公開側の `AGENTS.md` の「これまでの検証の経緯」にある。`README.md`・`docs/dev/structure.md` の状態や検証範囲の記述を変える前に読む。
 
@@ -49,7 +49,8 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - AI コーディングエージェント（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` へ集約する（2026-10-14 に利用者の決定で2冊から分けた）。2冊には AI エージェントの項・節を置かず、リードから案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md）
 - 仮想マシン（AlmaLinux 10 の VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 の Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` へ集約する（2026-10-15 に利用者の決定で2冊から分けた）。2冊には項を置かず、冒頭と `## 更新` のリードから案内する
 - 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` へ集約する（2026-10-15 に利用者の決定で2冊から分けた）。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
-- 正本を増やすのは、利用者の決定があるときだけにする。以下の「正本」は、この 10 冊を指す
+- シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル）は、両 OS とも `docs/shell-terminal.md` へ集約する（2026-10-15 に利用者の決定で2冊から分けた）。Homebrew・btop・gdu・Git for Windows・貼り付けの設定・SSH の項は2冊に残す。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
+- 正本を増やすのは、利用者の決定があるときだけにする。以下の「正本」は、この 11 冊を指す
 - 個別ツール・VPN・VM・リモート操作も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
 - 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は正本と元リポジトリの案内を合わせる
 - 冒頭で対話・GUI・条件付き操作の全番号を列挙しない。各手順には成功条件・中断・分岐・停止・危険を短く残す

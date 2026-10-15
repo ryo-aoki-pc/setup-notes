@@ -4,8 +4,8 @@
 
 この文書の `docs/verification/…`・`docs/almalinux-vm-verification.md`・`docs/hypervisor-verification.md` と検証で撮った画像のパスは、非公開側の同じパスを指す。
 
-- `docs/windows-setup.md` — Windows 11 の手順書。9 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・シェルと端末・SSH・Git と開発の道具・アプリ・更新）に分け、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせた
-- `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。10 のカテゴリ（基本の設定・GNOME のデスクトップ・シェルと端末・Git と開発の道具・アプリ・ネットワークとリモート操作・コンテナ・ファイルの共有と同期・再起動の後の確認・更新）に分け、項ごとに前提・実行場所を書いて、変数を項の中に持たせた。実行するホストを区別する
+- `docs/windows-setup.md` — Windows 11 の手順書。8 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・アプリ・更新）に分け、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせた
+- `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。9 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・コンテナ・ファイルの共有と同期・再起動の後の確認・更新）に分け、項ごとに前提・実行場所を書いて、変数を項の中に持たせた。実行するホストを区別する
   - 2 冊は 2026-10-14 に、利用者の依頼で「実施手順」と任意節の区別をやめ、カテゴリ別に組み直した（[対応表の追補](consolidation-map.md#2-冊をカテゴリ別に組み直したときの追補)）。Windows は Codex、AlmaLinux はカテゴリごとの Claude Code のサブエージェントが書き直し、設計と差分は Grok Build が読み取り専用でレビューした
   - 組み直しは、見出しの並べ替えと、項を単独で通すための書き直しで、新たな実機検証を意味しない。コードブロックは、足した変数・窓を開く手順と、変数を使う項へ移したもの・中断のメッセージを直したもののほかは変えていない（静的な確認は `docs/verification/consolidation.md`）
 - `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
@@ -23,6 +23,12 @@
   - Windows 11 側の同名の項は「Windows 11 で WireGuard を使う」「Windows 11 で Neovim を入れる」「Windows 11 で Samba クライアントを使う」「Windows 11 で Syncthing を使う」にし、Neovim の子の LazyVim の 5 項にも「Windows 11 で」を付けた。Windows の「ファイルの共有と同期」は空になったので消した
   - 検証記録・参考資料・extra は、項ごとの文書名（`gnome-desktop-sharing`・`gnome-headless-session`・`gnome-remote-desktop`・`wireguard`・`samba`・`samba-client`・`syncthing`）のまま使う。Neovim のものは、2冊の参考資料・extra の注意点・検証記録の「統合前の…」の節から `neovim` へ移した（ロールバックは、ほかの道具と同じ項にあるので2冊の extra に残した）
   - `wireguard.md`・`samba.md`・`syncthing.md`・`neovim.md` は、2026-10-12 に2冊へ集約するまでの単独の文書と同じ名前。[統合前の文書構成と検証範囲（履歴）](#統合前の文書構成と検証範囲履歴)の同じ名前の項は、当時の文書の説明
+  - 分離は文書の移動で、新たな実機検証を意味しない。本文とコードブロックは移動の前後で一致する（静的な確認は `docs/verification/consolidation.md`）
+- `docs/shell-terminal.md` — シェルと端末の手順書。2026-10-15 に利用者の決定で、2 冊の「シェルと端末」のカテゴリの中核を分けた（[対応表の追補](consolidation-map.md#シェルと端末を分けたときの追補)）。`## AlmaLinux 10 で使う` が共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm、`## Windows 11 で使う` が HackGen Console NF・Windows Terminal・WezTerm・Git Bash と WezTerm の設定・シェルのツール・PowerShell 7 のプロファイル
+  - Windows 11 側の同名の項は「Windows 11 で HackGen Console NF を入れる」「Windows 11 で WezTerm を入れる」にし、「Git Bash と WezTerm の設定」の子の同名の 4 項にも「Windows 11 で」を付けた。「HackGen Console NF を上げる」は、HackGen の項の `####` にした
+  - 2 冊に残した項は置き直した: AlmaLinux 10 の Homebrew とオフライン導入は「基本の設定」、btop・gdu は「アプリ」、Windows 11 の Git for Windows は「基本の設定」へ。貼り付けの設定と SSH の項は、もとから「シェルと端末」の外にある。2 冊の「シェルと端末」のカテゴリは消した。Windows 11 の HackGen Console NF と Windows Terminal は「デスクトップ」から移した
+  - 参考資料と注意点は、2 冊の参考資料・extra から `shell-terminal` へ移した。ロールバックは、2 冊の「上から順に戻す」並びに入っているので、2 冊の extra に残した。検証記録は、検証記録のリポジトリで `docs/verification/shell-terminal.md` へ分けた
+  - PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と Windows Terminal の控え `settings.json.windows-setup.bak` は、移る前の書名のまま（すでに通した PC の戻す手順と合わせるため）
   - 分離は文書の移動で、新たな実機検証を意味しない。本文とコードブロックは移動の前後で一致する（静的な確認は `docs/verification/consolidation.md`）
 - 集約後に案内だけとなった個別文書は削除する。旧パス・見出し・移動先は [集約対応表](consolidation-map.md) で確認する
 - 設定リポジトリの導入操作も2冊へ集約。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は元リポジトリに保持する

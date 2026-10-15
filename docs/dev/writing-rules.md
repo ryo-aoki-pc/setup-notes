@@ -4,7 +4,7 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。同じ日に、利用者の決定で大きな項も2冊から分け、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする（2026-10-14 に、利用者の決定で2冊から分けた）。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする（2026-10-15 に、利用者の決定で2冊から分けた）。同じ日に、利用者の決定で大きな項も2冊から分け、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル）も、同じ日に利用者の決定で2冊から分け、両 OS とも `docs/shell-terminal.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは元のファイルに保持し、用途の項のリードから案内する
@@ -12,7 +12,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
 - 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md。後者は 2026-10-15 に almalinux-setup.md から移した）
 - ai-agents.md は、OS で節を分けた手順書にする。`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
 - virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
-- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
+- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md・shell-terminal.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
 - Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは virtual-machines.md の `## AlmaLinux 10 で使う` の用途に置く
 
 ### 2 冊の骨格（カテゴリ別）
@@ -107,7 +107,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - PowerShell の変数が空ならブロック先頭で中断する。`}` と `else` / `elseif` は同じ行に置く
   - windows-setup.md の「Windows と AlmaLinux のデュアルブート」の手順 4・5 は、Windows のセットアップのコマンド プロンプト（diskpart）に手で打つ（貼れない）ので、`text` のブロックに 1 行ずつ書く。値（ディスクの番号・大きさ）は変数にできないのでコマンドに直接書き、変える値を箇条書きで名指しする（変数ブロックと `<...>` の規則の例外）
   - Windows Sandbox の状態確認・有効化・無効化・再起動は管理者の Windows PowerShell 5.1、起動・試験・窓を閉じた後の確認は通常のデスクトップで行う
-  - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。windows-setup.md の「Git Bash と WezTerm の設定」の手順 4 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 4 と「シェルのツールを入れる」の手順 7・8 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
+  - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。shell-terminal.md の「Git Bash と WezTerm の設定」の手順 4 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 4 と shell-terminal.md の「シェルのツールを入れる」の手順 7・8 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、shell-terminal.md の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ
     - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は [samba-client.md の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
