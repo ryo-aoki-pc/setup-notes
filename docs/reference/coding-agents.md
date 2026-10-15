@@ -127,6 +127,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 ### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
 
 - Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
+  - 2026-10-15 に AlmaLinux 10 にも Antigravity CLI の[導入の項](../ai-agents.md#antigravity-cli)を足したが、共同作業の構成は変えていない。AlmaLinux 10 の headless は、作業フォルダーの中にも書かなかった（[参考資料](ai-agents.md#almalinux-10-の-antigravity-cli)）
 - CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](grok-build-remote.md)）
 - Windows のコマンドの sandbox は 1.2.17 からある（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。実測では、既定の `request-review` のまま `--sandbox` を付けても、headless ではコマンドが拒まれた
 - 実測で、headless は作業フォルダーの中の書き込みと、作業フォルダーの外でも `%TEMP%` の下への書き込みを、確認なしで許した。作業フォルダーと `%TEMP%` の外の読み書きと、シェルのコマンドは拒まれた。作業フォルダーの外の `%TEMP%` を読めるかは測っていない

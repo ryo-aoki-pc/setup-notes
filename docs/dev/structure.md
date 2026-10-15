@@ -8,7 +8,7 @@
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。9 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・コンテナ・ファイルの共有と同期・再起動の後の確認・更新）に分け、項ごとに前提・実行場所を書いて、変数を項の中に持たせた。実行するホストを区別する
   - 2 冊は 2026-10-14 に、利用者の依頼で「実施手順」と任意節の区別をやめ、カテゴリ別に組み直した（[対応表の追補](consolidation-map.md#2-冊をカテゴリ別に組み直したときの追補)）。Windows は Codex、AlmaLinux はカテゴリごとの Claude Code のサブエージェントが書き直し、設計と差分は Grok Build が読み取り専用でレビューした
   - 組み直しは、見出しの並べ替えと、項を単独で通すための書き直しで、新たな実機検証を意味しない。コードブロックは、足した変数・窓を開く手順と、変数を使う項へ移したもの・中断のメッセージを直したもののほかは変えていない（静的な確認は `docs/verification/consolidation.md`）
-- `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI〔Windows 11 だけ〕）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
+- `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。2026-10-14 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#ai-エージェントの手順を-ai-agentsmd-へ分けたときの追補)）
   - ロールバックと注意点は `docs/extra/ai-agents.md`、分けた理由と方針は `docs/reference/ai-agents.md`、分離の静的な確認（リンク・移動の同一性・折りたたみの描画・構文解析と、Codex の独立検査・レビューの対応）は `docs/verification/ai-agents.md`。任意の構成の検証記録・参考資料・extra は、旧文書名（`coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control`）のまま使う
   - 導入（Claude Code・Codex CLI・Grok Build）の以前の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料の「統合前の…」の節に残した。下の各項の `docs/claude-code.md` などの説明は、当時の文書名のもの
   - 分離は文書の移動で、新たな実機検証を意味しない。コードブロックと手順の数は移動の前後で一致する
@@ -36,6 +36,12 @@
     - 実施手順の手順 1・2・4・7〜9 のブロックは、導入の後に Windows PowerShell 5.1 で書いたとおりに流した。手順 3 は同じ動きを PowerShell 7.6.6 で通した。入れる前の PC での通しは確かめていない
     - スリープ・休止状態からの復帰、Prevent Sleep がスリープを防ぐこと、ノート PC の蓋を閉じたとき、スマートフォンでのアクセスとホーム画面からのプッシュ通知は確かめていない
     - アプリの自動更新と更新後の動き、アンインストールと残るもの、PC の Remote Control の正確な項目名と Nickname の変え方、CLI の常駐デーモン、管理者の権限の有無による違いは確かめていない
+  - AlmaLinux 10 への Antigravity CLI の追加（2026-10-15）: 利用者の依頼で、`## 実施手順` に「Antigravity CLI」の項、「更新」の手順 6、設定ファイルの AlmaLinux 10 の列、extra の撤去と注意点、参考資料を足した。共同作業は 3 つのまま
+    - Raspberry Pi 5（aarch64、仮想アドレスが 39 ビットのカーネル）の AlmaLinux 10.2 の実機で CLI 1.3.5 を入れ、SHA-512・版・PATH、個人の Google アカウントのログイン（利用者）、`agy models`・JSON の応答、`agy update`、AGENTS.md・GEMINI.md の読み込みを確認した
+    - 新規の導入は、保存して中身を確かめたインストーラーを `bash` で実行して行った。「Antigravity CLI」の手順 2 の `curl … | bash` の形は流していない
+    - インストーラーと `agy install` が `~/.bashrc`・`~/.bash_profile` に足す 4 行（空行 2 つと 2 行）を消すと、入れる前の写しと同じになることを確かめた（「Antigravity CLI」の手順 4・5）
+    - headless は、作業フォルダーの中を読み、`/tmp` の中に書いた。作業フォルダーの中への書き込み（信頼したフォルダーでも）、その外の読み書き、シェルのコマンドは拒まれた
+    - 撤去（extra の「Antigravity CLI を消す」）と `/logout`、自動更新は実行していない。x86_64 の PC、自動更新を止める方法は未確認
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox。2026-10-15 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#仮想マシンと-forgejo-を別の文書へ分けたときの追補)）
   - 検証記録・参考資料・extra は、項ごとの文書名（`virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`）のまま使う。Windows Sandbox のものは、2冊の検証記録・参考資料・extra から `windows-sandbox` へ移した。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「VirtualBox」は、AlmaLinux 10 の同名の項と分けるため「Windows 11 で VirtualBox を入れる」にした

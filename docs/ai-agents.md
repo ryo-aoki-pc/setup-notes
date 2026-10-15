@@ -8,9 +8,10 @@
 > [!IMPORTANT]
 > - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること（2026-10-14 からは、これらの項はカテゴリに分かれている）
 > - AI エージェントのアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
-> - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する
+> - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する。Antigravity CLI は個人の Google アカウント
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
+> - **[Antigravity CLI](#antigravity-cli)の手順 2 は、`~/.bashrc` と `~/.bash_profile` に PATH の行を足す**。同じ項の手順 4・5 で外す（[理由](reference/ai-agents.md#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
 
 - 必要な項を上から順に通す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -259,6 +260,100 @@
    - 終了するときは `/quit` を入力する
    - **次の手順は、Grok を終了してシェルのプロンプトに戻ってから貼る**
 
+### Antigravity CLI
+
+1. 既存の Antigravity と、インストーラーが使う `curl` を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v agy antigravity curl
+   ls -ld ~/.local/bin/agy ~/.gemini
+   ```
+
+   - 新規の PC なら `curl` のパスだけが出て、`ls` は 2 つとも、そのようなファイルやディレクトリは無いと出る
+   - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
+   - `agy` か `~/.local/bin/agy` があれば、元の導入方法を確かめてから進める（Antigravity の IDE が入れた `agy`・`antigravity` は、エディターを開くだけのコマンドで、この CLI ではない）
+   - `~/.gemini` だけがあれば、ほかのツール（Gemini CLI など）のデータ。消さずに進める
+
+1. 公式のインストーラーで Antigravity CLI を入れる。
+
+   ```bash
+   curl -fsSL https://antigravity.google/cli/install.sh | bash
+   ```
+
+   - `✓ Download complete and checksum verified.` と `✅ Antigravity CLI installed successfully at /home/<USER>/.local/bin/agy` を確かめる
+   - `Appending PATH export to profile` の行が、`~/.bashrc` と `~/.bash_profile` の 2 つ出る。足された行は、この項の手順 4・5 で外す
+   - `ERROR: logging before google.Init: I…` の行は、`I` で始まる情報の行で、エラーではない
+   - `Security Halt: …` が出たら、入っていない。進まない
+   - `Notice: 'agy' is already installed at …` が出たら、既に入っていて、何も変わっていない。この項の手順 1 の分岐を確かめる
+   - 質問は出ない
+
+1. 実行ファイルと版を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v agy
+   agy --version
+   ```
+
+   - 自分のホームの `.local/bin/agy` と、`1.3.5` のような版が出る
+   - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#実施手順--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
+   - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる
+
+1. `~/.local/bin` が PATH にあるときだけ、インストーラーが足した PATH の行をエディタで消す。
+
+   - `~/.bashrc` と `~/.bash_profile` の末尾の、`# Added by Antigravity CLI installer` の行と、次の `export PATH="/home/<USER>/.local/bin:$PATH"` の行を消す
+   - その 2 行の前に足された空行 2 つも消す
+   - ほかの PATH の行（既定の `~/.bashrc` が `~/.local/bin` を足す行など）は消さない
+   - **次の手順は、2 つのファイルを保存してエディタを閉じてから貼る**
+
+1. この項の手順 4 を行ったときだけ、PATH の行が外れたことを確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   grep -c 'Antigravity CLI installer' ~/.bashrc ~/.bash_profile
+   ```
+
+   - 2 行とも、末尾が `:0` ならよい。`:1` 以上なら、この項の手順 4 に戻る
+   - 新しく開いた端末でも `agy --version` が通ることを確かめる
+
+1. 確認用のディレクトリで Antigravity CLI を起動し、ログインを始める。
+
+   ```bash
+   mkdir -p ~/agy-sandbox
+   cd ~/agy-sandbox
+   git init
+   agy
+   ```
+
+   - `You are currently not signed in.` と `Select login method:` が出たら、`1. Google OAuth` を選んで Enter を押す
+   - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
+
+1. ブラウザで個人の Google アカウントにログインし、Antigravity CLI を承認する。
+
+   - 使うアカウントと、許可する内容を確かめてから承認する
+   - 端末の起動画面に `Antigravity CLI 1.3.5` のような版、ログインしたアカウントとプラン、モデル名が出ればよい
+   - フォルダーを信頼するか聞かれたら、`agy-sandbox` であることを確かめて信頼する
+
+1. Antigravity の入力欄で `/config` を開き、設定を確かめてから終了する。
+
+   - `Enable Telemetry`（利用データの送信）を確かめ、送らないなら `off` にする
+   - `Tool Permission` が `request-review`、`Non-Workspace Access` が `off` であることを確かめる（[Antigravity CLI の設定ファイル](#antigravity-cli-の設定ファイル)）
+   - `Esc` で設定を閉じ、`/quit` で終了する
+   - **次の手順は、Antigravity を終了してシェルのプロンプトに戻ってから貼る**
+
+1. ログインと、1 回だけの実行（`-p`）を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   agy models
+   agy -p 'ツールやファイルを使わずに、接続確認ができたと一文で答えてください。' --output-format json --print-timeout 300s
+   ```
+
+   - モデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
+   - JSON の `"status":"SUCCESS"` と、`"response"` に一文が出ればよい
+   - ログインの情報は `~/.gemini/antigravity-cli/antigravity-oauth-token` に入る。中身を表示・共有しない
+
 ### Codex・Grok のプラグイン
 
 1. Node.js と bubblewrap を入れる（プラグインと sandbox が使う）。
@@ -301,14 +396,15 @@
 
 > [!IMPORTANT]
 > - 前提: [Windows 11 のセットアップ](windows-setup.md)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
-> - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ。Antigravity CLI（Windows 11 だけ）は個人の Google アカウント
+> - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ（Antigravity CLI は個人の Google アカウント）
 > - **この PC のデスクトップで行う**。SSH のセッションには貼らない
 > - PowerShell のブロックは、管理者ではない **Windows PowerShell 5.1** に貼る（窓の開き方は、[Windows 11 のセットアップの「WSL の AlmaLinux 10 と自動サインイン」](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1）
 
 - 上から順にコードブロックを貼る。[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 の変数は、その項の中で新しい窓を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- Google の Antigravity CLI（`agy`）は、Windows 11 だけで扱う（[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)）。Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)で入れる
+- Google の Antigravity CLI（`agy`）は、[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)で入れる（AlmaLinux 10 は[Antigravity CLI](#antigravity-cli)）
+- Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)で入れる
 - デスクトップアプリをブラウザから使うときは、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)を通す
 
 ### Windows 11 で Claude Code を入れる
@@ -881,23 +977,26 @@
 
 ## Antigravity CLI の設定ファイル
 
-- 対象: Windows 11
+- 対象: 両 OS
 
-| 用途 | Windows 11 |
-|---|---|
-| 実行ファイル | `%LOCALAPPDATA%\agy\bin\agy.exe` |
-| ユーザー設定（`/config` の値・信頼したフォルダー `trustedWorkspaces`・許可の規則 `permissions`） | `%USERPROFILE%\.gemini\antigravity-cli\settings.json` |
-| 共有の設定（MCP サーバーなど） | `%USERPROFILE%\.gemini\config\`（`mcp_config.json`） |
-| ログイン情報 | Windows の資格情報マネージャーの `gemini:antigravity` |
-| 会話の記録とログ | `%USERPROFILE%\.gemini\antigravity-cli\conversations\`・`log\` |
-| 自動の更新の状態 | `%USERPROFILE%\.gemini\antigravity-cli\updater\` |
-| すべてのフォルダーに効く指示書 | `%USERPROFILE%\.gemini\AGENTS.md`・`GEMINI.md`（初めは無い） |
-| Codeg の Antigravity（別の製品） | `%USERPROFILE%\.gemini\antigravity-acp\`（[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)） |
+| 用途 | AlmaLinux 10 | Windows 11 |
+|---|---|---|
+| 実行ファイル | `~/.local/bin/agy` | `%LOCALAPPDATA%\agy\bin\agy.exe` |
+| ユーザー設定（`/config` の値・信頼したフォルダー `trustedWorkspaces`・許可の規則 `permissions`） | `~/.gemini/antigravity-cli/settings.json` | `%USERPROFILE%\.gemini\antigravity-cli\settings.json` |
+| 共有の設定（MCP サーバーなど） | `~/.gemini/config/`（`mcp_config.json`） | `%USERPROFILE%\.gemini\config\`（`mcp_config.json`） |
+| ログイン情報 | `~/.gemini/antigravity-cli/antigravity-oauth-token` | Windows の資格情報マネージャーの `gemini:antigravity` |
+| 会話の記録とログ | `~/.gemini/antigravity-cli/conversations/`・`log/` | `%USERPROFILE%\.gemini\antigravity-cli\conversations\`・`log\` |
+| 自動の更新の状態 | `~/.gemini/antigravity-cli/updater/` | `%USERPROFILE%\.gemini\antigravity-cli\updater\` |
+| インストーラーの一時ファイル | `~/.cache/antigravity/staging/`（空のフォルダーが残る） | `%LOCALAPPDATA%\antigravity\staging\` |
+| すべてのフォルダーに効く指示書 | `~/.gemini/AGENTS.md`・`GEMINI.md`（初めは無い） | `%USERPROFILE%\.gemini\AGENTS.md`・`GEMINI.md`（初めは無い） |
+| Codeg の Antigravity（別の製品） | 扱わない | `%USERPROFILE%\.gemini\antigravity-acp\`（[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)） |
 
-- 資格情報マネージャーの値はパスワードと同じ扱いにし、表示させない・載せない
+- `antigravity-oauth-token` と資格情報マネージャーの値はパスワードと同じ扱いにし、表示させない・載せない
 - 作業フォルダーの `AGENTS.md` と `GEMINI.md` を、どちらも指示として読む
 - 初回の導入のために `settings.json` を書く必要は無い（フォルダーを信頼すると `trustedWorkspaces` が書かれる）
-- 1 回だけの実行（`agy -p`）は、作業フォルダーの中の読み書きと `%TEMP%` の中への書き込みを確認なしで行い、シェルのコマンドと、それ以外の場所の読み書きは拒む。拒んでも終了コードは 0 で、JSON の `denied_actions` と stderr の `jetski: no output produced` に出る
+- Windows 11 の 1 回だけの実行（`agy -p`）は、作業フォルダーの中の読み書きと `%TEMP%` の中への書き込みを確認なしで行い、シェルのコマンドと、それ以外の場所の読み書きは拒む
+- AlmaLinux 10 の `agy -p` は、作業フォルダーの中を読むことと `/tmp` の中への書き込みを確認なしで行う。作業フォルダーの中への書き込み（信頼したフォルダーでも）、それ以外の場所の読み書き、シェルのコマンドは拒む
+- 拒んでも終了コードは 0 で、JSON の `denied_actions` と stderr の `jetski: no output produced` に出る
 - `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は使わない。`--mode plan` も、読み取り専用の境界には使わない（[参考資料](reference/coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）
 
 ---
@@ -1491,12 +1590,13 @@
   - **dnf 版の Claude Code は `claude update` では上がらない**。[Claude Code](#claude-code)の手順 4 で版を確かめる
 - Codex に `Update available!` が出たら `1. Update now` を選ぶ。`Update ran successfully! Please restart Codex.` の後に `codex` を起動し直す
 - Grok は起動時に自動更新し、次の起動から新しい版を使う。手動更新は `grok update`。更新では `~/.bashrc` は変わらない
+- Antigravity CLI は、インストーラーの案内では、ふだんの実行の間にバックグラウンドで自分で上がる（AlmaLinux 10 では、自動の更新も止める設定も確かめていない）。待たずに上げるときは、この節の手順 6
 - この節の手順は、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
-1. 起動中の Codex と Grok を終了する。
+1. 起動中の Codex・Grok・Antigravity CLI を終了する。
 
-   - 端末の Codex と Grok は `/quit` で閉じる
-   - 知らせを待たずに上げるときだけ、この節の手順 1〜4 を行う
+   - 端末の Codex・Grok・Antigravity CLI は `/quit` で閉じる
+   - 知らせを待たずに上げるときだけ、この節の手順 1〜4 と手順 6 を行う（Antigravity CLI を入れていなければ、手順 6 は飛ばす）
 
 1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
 
@@ -1537,6 +1637,17 @@
 
    - `✔ Successfully updated marketplace: …` が 2 つと、`✔ … updated …` か `✔ … is already at the latest version (…)` が 2 つ出る
    - 上がったプラグインは、Claude Code を起動し直すまで効かない（Remote Control も止めてから始め直す）
+
+1. Antigravity CLI を入れたときだけ、新しい版を入れて版を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   agy update
+   agy --version
+   ```
+
+   - 新しい版が無ければ `✓ You are already on the latest version.` と出る
+   - `~/.bashrc` か `~/.bash_profile` に `# Added by Antigravity CLI installer` の行が戻ったら、[Antigravity CLI](#antigravity-cli)の手順 4・5 で外す
 
 ---
 

@@ -58,9 +58,18 @@
 - Windows 11 では、Google 公式の [PowerShell のインストーラー](https://antigravity.google/cli/install.ps1)で Antigravity CLI（`agy`）を入れる
   - WinGet・npm には無いので、公式の配布物を公式のインストーラーで入れる形にした
 - Gemini CLI は、2026-06-18 に個人アカウントへの提供を終え、Antigravity CLI が後継になった
-- AlmaLinux 10 では扱わない。Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする
+- Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする。AlmaLinux 10 は、同じ日に後から足した（[AlmaLinux 10 の Antigravity CLI](#almalinux-10-の-antigravity-cli)）
 - 更新はバックグラウンドの自動更新と `agy update` を使う。公式インストーラーは、既に入っていれば入れ直さず、自動更新を案内する
 - Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](grok-build-remote.md)で分けて扱う
+
+### AlmaLinux 10 の Antigravity CLI
+
+- 2026-10-15、利用者の依頼で、AlmaLinux 10 の PC（Raspberry Pi 5 の実機）にも Antigravity CLI を入れ、[Antigravity CLI](../ai-agents.md#antigravity-cli)の項を足した。それまでは Windows 11 だけを対象にしていた
+- Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新も、バックグラウンドの自動更新と `agy update` を使う
+- インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
+- AlmaLinux 10 の共同作業は、従来の 3 つの構成のまま（[共同作業の参考資料](coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）。Antigravity CLI を 4 つ目に足す手順は、AlmaLinux 10 では書いておらず、確かめてもいない
+- AlmaLinux 10 の headless（`agy -p`）は、信頼したフォルダーでも作業フォルダーの中に書かず、`/tmp` の中には書いた。Windows 11 とは許す範囲が違う（[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)）
+  - Windows 11 の実測では、作業フォルダーが `%TEMP%` の下にあった。作業フォルダーの中に書けたのが、`%TEMP%` の下だったからかどうかは、分けて確かめていない
 
 ### Windows 11 の Antigravity アプリの Remote Control
 
@@ -75,6 +84,34 @@
 - インストーラーを実行する前に、有効な署名と、署名者が Google LLC であることを確かめる。版を含む URL は固定し、新しい版の URL は公式のダウンロードのページで取り直す
 
 ## 補足
+
+### 実施手順 / Antigravity CLI / 手順 2: 補足: 公式インストーラーの動き
+
+- インストーラーは、マニフェストにある URL から本体（アーキテクチャと libc で `linux_arm64` などを選ぶ）を取り、SHA-512 を照合して `~/.local/bin/agy` に置き、`agy install` を呼ぶ。sudo は使わない
+- `agy install` は、`~/.bashrc` と `~/.bash_profile` の末尾に 4 行を足す。`~/.local/bin` が既に PATH にあっても、実行するたびに足す
+  - 足すのは、空行 2 つ・`# Added by Antigravity CLI installer`・`export PATH="/home/<USER>/.local/bin:$PATH"`
+- 一時ファイルは `~/.cache/antigravity/staging` に置き、終わると消す。空のフォルダーは残る
+- インストーラーの中身では、`~/.local/bin/agy` があれば何もせずに `Notice: 'agy' is already installed at …` を出して終わる
+
+### 実施手順 / Antigravity CLI / 手順 3: 補足: 仮想アドレスが 39 ビットの arm64
+
+- arm64 のカーネルには、ユーザーの仮想アドレスを 39 ビットにしたもの（`CONFIG_ARM64_VA_BITS=39`）がある。検証した Raspberry Pi 5 の AlmaLinux 10 のカーネルも、そうだった
+- 1.0.4 より前の linux_arm64 版は、48 ビットを前提にした TCMalloc のため、そうしたカーネルで起動時に `MmapAligned() failed` で落ちたと報告されている（[issue #64](https://github.com/google-antigravity/antigravity-cli/issues/64)）
+  - 開発者は、1.0.4 から linux_arm64 版は標準の malloc で作ると書いている。issue は 2026-10-15 の時点でまだ閉じていない
+- 検証した PC では、1.3.5 が起動し、ログイン・応答・更新の確認まで動いた
+- 落ちる版に当たったら、非公式のバイナリの書き換えはしない。消して、直った版を待つ
+
+### 実施手順 / Antigravity CLI / 手順 4: 補足: PATH の行を外す理由
+
+- AlmaLinux 10 の既定の `~/.bashrc` は、`~/.local/bin` を PATH に足す。`~/.bash_profile` は `~/.bashrc` を読む。インストーラーが足した行は重なるだけなので外し、`~/.bashrc` を共通の設定の形のままにする
+- 各ツールの手順には `~/.bashrc` を直接書き換えるブロックを置かない決まりなので、エディタで消し、消えたことだけを `grep` で確かめる形にした（Codex の PATH のブロックを外す、extra の手順と同じ）
+- 足された 4 行を消すと、2 つのファイルは入れる前と同じになった。新しいログインシェルでも `agy` が見つかった
+- 新しい版が無いときの `agy update` は、2 つのファイルを変えなかった。新しい版に上がるときに足すかは、確かめていない
+
+### 実施手順 / Antigravity CLI / 手順 7: 補足: ログインの保存先
+
+- AlmaLinux 10 では、ログイン情報は `~/.gemini/antigravity-cli/antigravity-oauth-token`（権限 600）に保存された。GNOME のキーリングには入らなかった
+- ログイン後の設定・ログ・会話・更新の情報などは `~/.gemini/antigravity-cli`、共通の設定は `~/.gemini/config` に作られる
 
 ### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 2: 補足: 公式インストーラーの照合
 
@@ -153,6 +190,13 @@
 | [Caddyfile: Global options](https://caddyserver.com/docs/caddyfile/options) | HTTPS・信頼ストア・ローカル CA の設定 |
 | [Caddyfile: tls](https://caddyserver.com/docs/caddyfile/directives/tls) | 内部 CA とオンデマンドの TLS |
 | [GitHub: Organizing information with collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) | `<details>`・`<summary>` と内部のコードブロック |
+
+AlmaLinux 10 の Antigravity CLI は、2026-10-15 に読んだ次の一次情報を参照した。実機で確かめた範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-almalinux-10-の-antigravity-cli2026-10-15-jst)に記録する。
+
+| 資料 | 参照した内容 |
+| --- | --- |
+| [install.sh](https://antigravity.google/cli/install.sh) | プラットフォームの選び方・マニフェスト・SHA-512 の照合・置き場所・`agy install` の呼び出し |
+| [antigravity-cli#64](https://github.com/google-antigravity/antigravity-cli/issues/64) | 39 ビットの arm64 のカーネルで落ちる報告と、1.0.4 からの malloc の変更 |
 
 Windows 11 の Antigravity アプリの Remote Control は、2026-10-15 に読んだ次の一次情報を参照した。実機で確かめた範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-windows-11-の-antigravity-アプリの-remote-control2026-10-15-jst)に記録する。
 
