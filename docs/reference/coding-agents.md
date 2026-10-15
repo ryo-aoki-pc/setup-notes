@@ -110,6 +110,19 @@
   - 境界とハッシュで分かる範囲は[読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)のとおり
 - 過去のレビューでは、指摘の約 3 分の 1 が誤りか直し済みだった経験がある。指摘は実物で確かめてから採り、採らなかった指摘は理由とともに報告する
 - エージェントが入っていない・ログインが切れた場合や AlmaLinux 10 の Antigravity CLI は飛ばし、そのことを報告する
+  - AlmaLinux 10 は、Antigravity CLI を足さない従来の 3 つの構成のまま。AGENTS.md の節は両 OS で同じ文にし、AlmaLinux 10 での頼み方（Grok の sandbox を使うかなど）は実機で通すまで手順にしない
+- Claude Code だけで行う直しを「1 つのファイルの数行で振る舞いを変えない直し」にしたのは、レビューだけで 10〜25 分かかり、誤字やリンクの直しまで 4 つで回すと待ち時間が見合わないため
+- この分担で頼まれた Codex は、「共同作業の規則」のコミット・push・Pull Request を行わない。規則と既定の分担がぶつからないよう、節の中に書いた。利用者がほかのエージェントに直接頼んだときは、この節を使わない
+
+Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使ったもの。2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52、Antigravity CLI 1.3.5）。
+
+| 頼む相手 | 頼み方 |
+|---|---|
+| Codex | Codex の worktree（`<WT_ROOT>\codex`）か別の clone に、頼む文の Markdown（「コミットしない・ステージしない」と書く）を置き、PowerShell から `node "$env:USERPROFILE\.claude\plugins\cache\openai-codex\codex\<版>\scripts\codex-companion.mjs" task --fresh --write --cwd <その場所> --prompt-file <頼む文.md>` を前景で実行する（10〜20 分）。`<版>` は、そのフォルダーの下にあるフォルダーの名前（`1.0.6` など） |
+| Codex の変更を移す | `git -C <Codex の場所> diff --binary --output=<ファイル>` で書き出し、`git -C <WT_ROOT>\claude apply <ファイル>` で Claude の worktree に移し、確かめてから `agent/claude` にコミットする。移した後、Codex の場所の変更は消す |
+| Codex の後片付け | 終わった後も `app-server-broker.mjs serve` の node のプロセスが、その場所を使ったまま残る。その worktree か clone を消す前に、コマンドラインにその場所を含むプロセスだけを止める（ほかの場所のものは、ほかのセッションのもの） |
+| Grok Build | 差分・変えたファイル・規則・頼む文（BRIEF.md）を専用のフォルダーへ写し、`grok -p "このフォルダーの BRIEF.md を読み、その指示どおりにレビューしてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。" --cwd <フォルダー> --permission-mode default --output-format plain` を実行する（10〜25 分）。前後のフォルダーのハッシュを比べる。Grok は信頼していないフォルダーでは AGENTS.md を読まないので、役割は頼む文に書く |
+| Antigravity CLI | [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使い、使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
 
 ### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
 
