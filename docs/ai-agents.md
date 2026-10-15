@@ -2889,6 +2889,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **この実施手順は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
 > - **Grok Build を使う一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
 > - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
+> - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す。Codeg 専用の Caddy で動いているホストは、[Caddy: Codeg 専用の Caddy から切り替える](almalinux-setup.md#caddy-codeg-専用の-caddy-から切り替える)を使う
 > - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
@@ -2898,7 +2899,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 上から順にコードブロックを貼る。[Codeg のサーバーを入れて localhost で起動する](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - [Codeg](https://github.com/spacering-net/codeg)のサーバーを Grok Build と同じホストに常駐させ、ブラウザから操作する。外部のサーバーは通らない
-- 通信は HTTPS。OSS の [Caddy](https://caddyserver.com/)（Apache-2.0）を同じホストに置き、Caddy が自分で作る認証局の証明書で受けて、Codeg へ渡す。つなぐ端末には、その認証局のルート証明書を入れる
+- 通信は HTTPS。OSS の [Caddy](https://caddyserver.com/)（Apache-2.0）の共通のサービスにサイトを足し、ホストに 1 つの認証局の証明書で受けて、Codeg へ渡す。つなぐ端末には、その認証局のルート証明書を入れる
 - 開けるのは 3443/tcp だけで、送信元を指定した帯に絞る。インターネット向けのポート転送は設定しない
 
 > [!WARNING]
@@ -2921,18 +2922,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    {
      CODEG_VERSION=v0.35.1             # 入れる Codeg の版（GitHub のリリースのタグ）
-     CADDY_VERSION=2.11.7              # 入れる Caddy の版（v を付けない）
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
-     printf '待ち受け: https://%s:3443\n許可する送信元: %s\n版: Codeg %s / Caddy %s\nfirewalld: %s\n' \
-       "${SERVER_IP}" "${ALLOW_FROM}" "${CODEG_VERSION}" "${CADDY_VERSION}" "${FW_ZONE}"
+     printf '待ち受け: https://%s:3443\n許可する送信元: %s\n版: Codeg %s\nfirewalld: %s\n' \
+       "${SERVER_IP}" "${ALLOW_FROM}" "${CODEG_VERSION}" "${FW_ZONE}"
    }
    ```
 
    - `SERVER_IP` は、スマートフォンや PC から届くサーバーの IPv4。`ip -4 -br addr` で確かめる
    - `ALLOW_FROM` は、サーバーから見えるクライアントの送信元に合わせる。VPN のクライアントの帯と LAN の帯を、空白で区切って並べられる
    - `CODEG_VERSION` は[Codeg の最新リリース](https://github.com/spacering-net/codeg/releases)を確かめて変える
-   - `CADDY_VERSION` は[Caddy の最新リリース](https://github.com/caddyserver/caddy/releases)を確かめて変える
    - 待ち受ける NIC が別の zone に属しているなら、`FW_ZONE=` をその名前に変える
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直す
@@ -2942,23 +2941,25 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```bash
    {
      printf '\n\033[7m 確認 \033[0m\n'
-     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${CODEG_VERSION}" ] || [ -z "${CADDY_VERSION}" ] || [ -z "${FW_ZONE}" ]; then
+     if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${CODEG_VERSION}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: この項の手順 1 の変数を設定する' >&2
      else
        uname -m
        grok --version
        node --version
+       systemctl --user is-active caddy.service
        loginctl show-user "$(id -u)" -p Linger
        sudo firewall-cmd --state
        sudo firewall-cmd --get-active-zones
        ss -ltn '( sport >= :3080 and sport <= :3090 ) or ( sport = :3443 )'
-       ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/opt/caddy ~/.config/caddy
+       ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
      fi
    }
    ```
 
-   - `aarch64` か `x86_64`、`grok` と `node` の版、`Linger=yes`、`running` が出ればよい
-   - `ss` は見出しの 1 行だけ、`ls` は 6 つとも `No such file or directory` になればよい
+   - `aarch64` か `x86_64`、`grok` と `node` の版、`active`、`Linger=yes`、`running` が出ればよい
+   - `ss` は見出しの 1 行だけ、`ls` は 4 つとも `No such file or directory` になればよい
+   - `caddy.service` が `active` でなければ、先に [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通す
    - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐) を通す
    - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[ロールバック](extra/grok-build-remote.md#ロールバック)で消してからやり直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
@@ -3180,118 +3181,50 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 #### Grok Build のブラウザ操作: HTTPS で LAN・VPN に公開する
 
-1. Caddy の配布物を取得してチェックサムを照合し、自分のホームに置く。
-
-   <details>
-     <summary>貼るコマンド（bash・24 行）</summary>
-
-   ```bash
-   if [ -z "${CADDY_VERSION}" ]; then
-     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
-   elif [ -e ~/.cache/caddy-dl ] || [ -e ~/.local/opt/caddy ]; then
-     echo '中断: ~/.cache/caddy-dl か ~/.local/opt/caddy が既にある。上書きしない' >&2
-   else
-     case "$(uname -m)" in
-       aarch64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_arm64.tar.gz" ;;
-       x86_64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_amd64.tar.gz" ;;
-       *) CADDY_ASSET='' ;;
-     esac
-     mkdir -p ~/.cache/caddy-dl &&
-     (
-       cd ~/.cache/caddy-dl &&
-       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/${CADDY_ASSET}" &&
-       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_checksums.txt" &&
-       printf '\n\033[7m 確認 \033[0m\n' &&
-       grep -E "  ${CADDY_ASSET}\$" "caddy_${CADDY_VERSION}_checksums.txt" | sha512sum -c - &&
-       tar -xzf "${CADDY_ASSET}" &&
-       install -d -m 755 ~/.local/opt/caddy &&
-       install -m 755 caddy ~/.local/opt/caddy/caddy
-     ) &&
-     rm -r ~/.cache/caddy-dl &&
-     ~/.local/opt/caddy/caddy version
-   fi
-   ```
-
-   </details>
-
-   - `caddy_…_linux_….tar.gz: OK` と、`v` で始まる `CADDY_VERSION` と同じ番号が出ればよい
-   - `OK` が出なければ中断する
-
-1. Caddy の設定とユーザーサービスを書いて、設定を検査する。
-
-   <details>
-     <summary>貼るコマンド（bash・49 行）</summary>
+1. 共通の Caddy に Codeg のサイトを足す。
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
      echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
-   elif [ -e ~/.config/caddy/Caddyfile ] || [ -e ~/.config/systemd/user/codeg-caddy.service ]; then
-     echo '中断: Caddyfile か codeg-caddy.service が既にある。上書きしない' >&2
+   elif [ -e ~/.config/caddy/sites/codeg.caddy ] || [ -L ~/.config/caddy/sites/codeg.caddy ]; then
+     echo '中断: codeg.caddy が既にある。上書きしない' >&2
+   elif ! systemctl --user is-active --quiet caddy.service || [ ! -d ~/.config/caddy/sites ]; then
+     echo '中断: 先に共通の Caddy を入れて起動する' >&2
    else
-     mkdir -p ~/.config/caddy ~/.config/systemd/user &&
-     cat > ~/.config/caddy/Caddyfile <<EOF
+     cat > ~/.config/caddy/sites/codeg.caddy <<EOF
    # setup-notes: grok-build-remote
-   {
-       admin off
-       auto_https disable_redirects
-       skip_install_trust
-       pki {
-           ca local {
-               name "Codeg $(hostname -s)"
-           }
-       }
-   }
-
    https://${SERVER_IP}:3443 {
        bind ${SERVER_IP}
        tls internal
-       handle /caddy-root.crt {
-           root * "{\$HOME}/.local/share/caddy/pki/authorities/local"
-           rewrite * /root.crt
-           file_server
-       }
+       import root-crt
        handle {
            reverse_proxy 127.0.0.1:3080
        }
    }
    EOF
-     cat > ~/.config/systemd/user/codeg-caddy.service <<'EOF'
-   # setup-notes: grok-build-remote
-   [Unit]
-   Description=Caddy (HTTPS for Codeg)
-
-   [Service]
-   Type=simple
-   ExecStart=%h/.local/opt/caddy/caddy run --config %h/.config/caddy/Caddyfile --adapter caddyfile
-   Restart=on-failure
-   RestartSec=5
-
-   [Install]
-   WantedBy=default.target
-   EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile 2>&1 | tail -n 1
    fi
    ```
 
-   </details>
+   - エラー無く終わればよい。Codeg の待ち受けは `127.0.0.1:3080` のままにする
 
-   - `Valid configuration` が出ればよい
-   - Caddy は `https://<SERVER_IP>:3443` で受け、同じホストの Codeg（`127.0.0.1:3080`）へ渡す。Codeg の待ち受けは `127.0.0.1` のまま変えない
-   - 認証局の名前は `Codeg <ホスト名>` になる。端末に入れたルート証明書を、ホストごとに見分けるための名前
+1. Codeg の自動起動を有効にし、共通の Caddy の設定を反映する。
 
-1. Caddy を起動し、2 つのサービスの自動起動を有効にして、サーバー自身から HTTPS を確かめる。
+   ```bash
+   systemctl --user enable codeg-server.service
+   ```
+
+   - [Caddy: 設定を検査して起動し直す](almalinux-setup.md#caddy-設定を検査して起動し直す)を同じ一般ユーザーの bash で通す
+   - 初めて有効にすると `Created symlink …` が 1 回出る。エラーや設定の検査失敗が出たら先へ進まない
+
+1. サービスと待ち受け、サーバー自身からの HTTPS を確かめる。
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
      echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
    else
-     systemctl --user daemon-reload &&
-     systemctl --user enable codeg-server.service &&
-     systemctl --user enable --now codeg-caddy.service
-     for i in $(seq 1 30); do [ -s ~/.local/share/caddy/pki/authorities/local/root.crt ] && ss -ltn '( sport = :3443 )' | grep -q LISTEN && break; sleep 1; done
+     for i in $(seq 1 30); do ss -ltn '( sport = :3443 )' | grep -q LISTEN && break; sleep 1; done
      printf '\n\033[7m 確認 \033[0m\n'
-     systemctl --user is-active codeg-server.service codeg-caddy.service
+     systemctl --user is-active codeg-server.service caddy.service
      ss -ltn '( sport = :3080 or sport = :3443 )'
      curl -s --cacert ~/.local/share/caddy/pki/authorities/local/root.crt -o /dev/null -w '%{http_code}\n' -X POST "https://${SERVER_IP}:3443/api/health"
      curl -s -o /dev/null "https://${SERVER_IP}:3443/"
@@ -3299,9 +3232,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - `Created symlink …` が 2 回出た後、`active` が 2 行、待ち受けが `127.0.0.1:3080` と `<SERVER_IP>:3443` の 2 行、`401`、`curl の終了コード: 60` が出ればよい
-   - `60` は、ルート証明書を信頼していない相手として、証明書の検証で止まったことを示す（正常）
-   - 認証局の鍵と証明書は、Caddy が初回の起動で `~/.local/share/caddy/` に作る。**`root.key` を、読まない・写さない・人に渡さない**
+   - `active` が 2 行、待ち受けが `127.0.0.1:3080` と `<SERVER_IP>:3443` の 2 行、`401`、`curl の終了コード: 60` が出ればよい
+   - 既にホスト自身もこの認証局を信頼させている場合、最後は `0` になる
 
 1. 指定した送信元・宛先・ポートで、この手順専用の firewalld の規則を追加する。
 
@@ -3336,7 +3268,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. スマートフォンと PC に、このサーバーのルート証明書を入れる。
 
-   - [端末にルート証明書を入れる](#grok-build-のブラウザ操作-端末にルート証明書を入れる)の手順 1・3〜6 を通す
+   - [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す
    - スマートフォンは、先に WireGuard のアプリでトンネルを有効にする（LAN の Wi-Fi にいて、LAN の帯を `ALLOW_FROM` に入れてあれば要らない）
 
 1. サーバーで、トークンを QR コードで表示する。
@@ -3825,7 +3757,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. スマートフォンと PC に、この PC のルート証明書を入れる。
 
-   - [端末にルート証明書を入れる](#grok-build-のブラウザ操作-端末にルート証明書を入れる)を通す。スマートフォン（Android）は手順 2・3・6、Windows の PC は手順 2・4・5・6
+   - [端末にルート証明書を入れる](#grok-build-のブラウザ操作-端末にルート証明書を入れる)を通す。スマートフォン（Android）は同じ項の手順 1・2・5、Windows の PC は同じ項の手順 1・3・4・5
    - この PC 自身のブラウザで HTTPS を開くなら、この PC にも入れる
 
 1. 共通パスワードを設定していないときは、トークンをスマートフォンに渡す。
@@ -3871,19 +3803,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Grok Build のブラウザ操作: 端末にルート証明書を入れる
 
-- 両 OS に共通の節。Codeg を置いたホストごとに、そのホストの Caddy が作った認証局のルート証明書を、つなぐ端末に 1 つずつ入れる
-- 入れると、ブラウザが警告を出さなくなり、偽のサーバーを見分けられる
-- ルート証明書（`root.crt`）は公開してよい。各ホストが `https://<ホストの IP>:3443/caddy-root.crt` で配る
-- **入れる前か後に、必ず指紋を照合する**。この節の手順 1・2 でホストに出した指紋と、端末に出た指紋が同じであること
-
-1. AlmaLinux 10 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256
-   ```
-
-   - `subject=CN=Codeg <ホスト名> - <年> ECC Root`、期限（10 年後）、`sha256 Fingerprint=` の 3 行が出る。指紋を控える
+- 対象: Windows 11 のホストの Codeg 専用 Caddy。AlmaLinux 10 のホストは [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す
+- Codeg を置いた Windows のホストごとに、認証局のルート証明書を接続する端末に入れる
+- ルート証明書は `https://<ホストの IP>:3443/caddy-root.crt` で配る。入れる前か後に、この項の手順 1 の指紋と必ず照合する
 
 1. Windows 11 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
 
@@ -3901,7 +3823,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - ブラウザで `https://<ホストの IP>:3443/caddy-root.crt` を開く。警告が出たら「詳細設定」から進む（この 1 回だけ）。証明書のファイルがダウンロードされる
    - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、ダウンロードしたファイルを選ぶ（メニューの名前は機種で少し違う）
-   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの節の手順 1・2 のものと同じことを確かめる
+   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの項の手順 1 のものと同じことを確かめる
    - 違っていたら、その証明書を削除する
 
 1. Windows の PC で、ルート証明書を取得して、名前と指紋を表示する。
@@ -3922,9 +3844,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 管理者ではない Windows PowerShell に貼る。Codeg を置いた PC 自身にも、同じ手順で入れる
-   - 名前と指紋が、この節の手順 1・2 でホストに出したものと同じなら、手順 5 へ進む
+   - 名前と指紋が、この項の手順 1 でホストに出したものと同じなら、手順 4 へ進む
    - **違っていたら、取り込まない**（途中で差し替えられている）
-   - ホストが 2 台あるときは、この節の手順 4・5 を、`$CODEG_URL` を変えて 2 回通す
+   - ホストが 2 台あるときは、この項の手順 3・4 を、`$CODEG_URL` を変えて 2 回通す
 
 1. Windows の PC で、指紋が同じだったルート証明書を取り込む。
 
@@ -3940,7 +3862,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `https://<ホストの IP>:3443` を開き、警告が出ずにログインの画面が出ればよい
    - 警告が出るときは、入れたルート証明書が、そのホストのものかを確かめる
-   - AlmaLinux 10 のホストは、URL の IP が、ホストの待ち受けの IP と同じかも確かめる（証明書は、その IP 宛てに作られる）
 
 ---
 
@@ -4050,7 +3971,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#grok-build-のブラウザ操作-端末の-grok-のセッションを取り込む) |
 | ブラウザで始めた会話を、端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
 | Claude Code・Codex で会話し、端末の履歴を取り込む | [追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)。Claude は `Auto`、Codex は `Auto review` を選ぶ |
-| 止める・始める | `systemctl --user stop codeg-caddy.service codeg-server.service`・`systemctl --user start codeg-server.service codeg-caddy.service`（Windows 11 は [Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)） |
+| 止める・始める | `systemctl --user stop codeg-server.service`・`systemctl --user start codeg-server.service`（共有する `caddy.service` は動かしたままにする）（Windows 11 は [Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)） |
 
 ---
 
@@ -4488,9 +4409,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.local/bin/codeg-grok-readonly` と `claude-agents` | — | Landlock 非対応ホストで、Claude の Grok プラグインから読み取り専用で頼む任意の起動先 |
 | `~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf` | — | 上の起動先を Codeg の Claude へ渡す環境設定。認証値は含めない |
 | `~/.local/share/codeg/` | `%APPDATA%\codeg\` | 会話と設定の DB（`codeg.db`）と、ログ（`logs`） |
-| `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル |
-| `~/.config/caddy/Caddyfile` | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先、認証局の名前 |
-| `~/.config/systemd/user/codeg-caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた |
+| `~/.local/opt/caddy/caddy` | `%LOCALAPPDATA%\codeg-caddy\caddy.exe` | Caddy の実行ファイル（AlmaLinux 10 はホストで共通） |
+| `~/.config/caddy/sites/codeg.caddy`（共通設定は [Caddy: 設定ファイル](almalinux-setup.md#caddy-設定ファイル)） | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先（Windows は認証局の名前も） |
+| `~/.config/systemd/user/caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた（AlmaLinux 10 はホストで共通） |
 | — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | 両タスクで使う、コンソールを作らないランチャー |
 | — | `%LOCALAPPDATA%\codeg-server\startup-backup-*\` | 既存のタスクを切り替えるときの XML の控え |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
@@ -4501,7 +4422,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - `CODEG_BRIDGE_PORTS=off` は、開発サーバー用の追加のポート（3081〜3090）を開けない設定。`CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリからの中継を止める設定
 - トークンを替えるときは、トークンのファイルを作り直して、Codeg のサービス（Windows 11 はタスク）を起動し直す。ブラウザは入り直しになる
-- ホストの IP を変えたときは、`Caddyfile` の 2 か所の IP と、ファイアウォールの規則の宛先を直して、Caddy を起動し直す。サーバーの証明書は、その IP 宛てに作られる
+- AlmaLinux 10 のホストの IP を変えたときは、`sites/codeg.caddy` の 2 か所の IP と、ファイアウォールの規則の宛先を直し、[Caddy: 設定を検査して起動し直す](almalinux-setup.md#caddy-設定を検査して起動し直す)を通す。証明書は、その IP 宛てに作られる
 
 ---
 
@@ -4848,7 +4769,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)
 - 画面の右下に「新バージョン」と出たら、新しい版がある。画面からは入れ替えず、この節の手順で、SHA-256 を照合してから置き換える
 - Grok Build は、Codeg からは上がらない（Codeg は `--no-auto-update` を付けて起動する）。端末で `grok update` を実行して上げる
-- この節は Codeg の更新。Caddy の更新は、この手順書では確かめていない（配布物を取得して照合し、`codeg-caddy.service` を止めて `~/.local/opt/caddy/caddy` を置き換え、始める形になる）
+- この節は Codeg の更新。共通の Caddy は [Caddy: 更新](almalinux-setup.md#caddy-更新)で上げる
 
 1. 上げる版を設定する。
 

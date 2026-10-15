@@ -1,6 +1,6 @@
 # Forgejo のセットアップ（AlmaLinux 10）
 
-- AlmaLinux 10 の PC で Forgejo のサーバーを動かし、LAN か VPN の PC から Web と Git で使う
+- AlmaLinux 10 の PC で Forgejo のサーバーを動かし、LAN か VPN の PC から HTTPS の Web と SSH の Git で使う
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
 - 前提・実行場所は[Forgejo](#forgejo)のリードに従う。サーバーの手順は、サーバーを動かす一般ユーザーの bash に貼る
 - 別の PC からは Git とブラウザで使う。Git は、AlmaLinux 10 の PC は[Git](almalinux-setup.md#git)、Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)で入れて設定する
@@ -14,12 +14,13 @@
 ### Forgejo
 
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
-- Forgejo を rootless の Podman（Quadlet）で動かし、LAN か VPN の PC から Web と Git で使う
+- Forgejo を rootless の Podman（Quadlet）で動かし、LAN か VPN の PC から HTTPS の Web と SSH の Git で使う
+- 旧手順で HTTP 公開済みのサーバーは、[Web を HTTPS に切り替える](#forgejo-web-を-https-に切り替える)を通す
 - 導入は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[自動更新を有効にする](#forgejo-自動更新を有効にする)までの項を順に通す
 - [起動手順](#forgejo-イメージを取得して-localhost-で起動する)の手順 2 で公式の最新安定版を入れる
 - [自動更新](#forgejo-自動更新を有効にする)の手順 1〜3 で毎日最新安定版へ上げるタイマーを有効にする（[更新](#forgejo-更新)）
-- Web は HTTP、Git は SSH で使う。HTTP の内容は暗号化されない。VPN 経由で開く場合は VPN の区間が暗号化される
-- 初期設定用の SSH トンネルは、LAN の待ち受けへ切り替えた後には使えない。インターネット向けのポート転送は設定しない
+- Web は[共通の Caddy](almalinux-setup.md#caddy)の HTTPS、Git は SSH で使う。接続する端末には[Caddy のルート証明書](almalinux-setup.md#caddy-端末にルート証明書を入れる)を入れる
+- Forgejo の Web は公開後も `127.0.0.1` で待ち受ける。初期設定用の SSH トンネルの転送先は残るが、公開後は `ROOT_URL` に合わせた HTTPS の URL を使う。インターネット向けのポート転送は設定しない
 
 > [!IMPORTANT]
 > - **サーバーの手順は、サーバーを動かす一般ユーザー自身の bash（デスクトップの端末か SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
@@ -45,7 +46,7 @@
 
    ```bash
    {
-     FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
+     FORGEJO_HTTP_PORT=3000            # localhost と Caddy の HTTPS で使う同じ Web ポート（1024〜65535）
      FORGEJO_SSH_PORT=2222             # ホスト側の Git 用 SSH ポート（1024〜65535）
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
@@ -58,7 +59,7 @@
    - `LAN_SUBNET` は、サーバーから見えるクライアントの送信元に合わせる。VPN の相手だけに許可するときは、その VPN の CIDR にする
    - 送信元 IPv4 を制限しないときは、`LAN_SUBNET='0.0.0.0/0'` と明示する。待ち受ける IP とポートは引き続き限定する
    - 待ち受ける NIC が別の zone に属しているなら、任意変数のブロックの `FW_ZONE=` をその名前に変える
-   - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 2 と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3・5 の番号も同じにする
+   - ポートを変えたら、別の PC で打つ[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 2 と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 3・5 と、[LAN に公開する](#forgejo-lan-に公開する)の手順 4 の Caddy サイトの番号も同じにする
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
 
@@ -237,7 +238,7 @@
 1. サーバーで、変数を設定する。
 
    ```bash
-   FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
+   FORGEJO_HTTP_PORT=3000            # localhost と Caddy の HTTPS で使う同じ Web ポート（1024〜65535）
    printf '\n\033[7m 確認 \033[0m\n'
    printf 'Web: %s\n' "${FORGEJO_HTTP_PORT}"
    ```
@@ -334,9 +335,9 @@
 
 #### Forgejo: LAN に公開する
 
-- サーバーで firewalld の規則を足し、Forgejo の待ち受けを localhost から `SERVER_IP` に切り替え、別の PC から LAN の URL で確かめる
-- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)と[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)を通してある
-- 実行場所: この項の手順 1〜3 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 4 は、初期設定のトンネルを開いた別の PC と、許可した LAN か VPN の PC
+- サーバーで firewalld の規則を足し、Web は localhost に残して共通の Caddy で HTTPS にし、Git 用 SSH を `SERVER_IP` に公開する
+- 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)と[初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)と [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通してある
+- 実行場所: この項の手順 1〜6 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 7・8 は、初期設定のトンネルを開いた別の PC と、許可した LAN か VPN の PC
 
 1. 変数を設定する（`SERVER_IP` と `LAN_SUBNET` は必ず値を入れる）。
 
@@ -350,7 +351,7 @@
 
    ```bash
    {
-     FORGEJO_HTTP_PORT=3000            # ホスト側の Web ポート（1024〜65535）
+     FORGEJO_HTTP_PORT=3000            # localhost と Caddy の HTTPS で使う同じ Web ポート（1024〜65535）
      FORGEJO_SSH_PORT=2222             # ホスト側の Git 用 SSH ポート（1024〜65535）
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
@@ -476,12 +477,14 @@
            raise SystemExit('中断: 公開後の登録・閲覧制限の定義が一致しない')
    if re.search(r'^Environment=.*FORGEJO__security__INSTALL_LOCK=', text, re.M):
        raise SystemExit('中断: 初期設定ロックを環境変数で上書きしない')
+   if text.splitlines().count(f'PublishPort=127.0.0.1:{http_port}:3000') != 1:
+       raise SystemExit('中断: Web の待ち受けが localhost ではない')
    replacements = {
-       f'PublishPort=127.0.0.1:{http_port}:3000': f'PublishPort={address}:{http_port}:3000',
        f'PublishPort=127.0.0.1:{ssh_port}:2222': f'PublishPort={address}:{ssh_port}:2222',
        'Environment=FORGEJO__server__DOMAIN=localhost': f'Environment=FORGEJO__server__DOMAIN={address}',
-       f'Environment=FORGEJO__server__ROOT_URL=http://localhost:{http_port}/': f'Environment=FORGEJO__server__ROOT_URL=http://{address}:{http_port}/',
+       f'Environment=FORGEJO__server__ROOT_URL=http://localhost:{http_port}/': f'Environment=FORGEJO__server__ROOT_URL=https://{address}:{http_port}/',
        'Environment=FORGEJO__server__SSH_DOMAIN=localhost': f'Environment=FORGEJO__server__SSH_DOMAIN={address}',
+       'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128': f'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128,{address}/32',
    }
    lines = text.splitlines()
    for old, new in replacements.items():
@@ -505,15 +508,73 @@
    fi
    ```
 
-   - `active` が出て、Web と Git 用 SSH が `SERVER_IP` にだけ公開されていればよい
+   - `active` が出て、Web が `127.0.0.1`、Git 用 SSH だけが `SERVER_IP` に公開されていればよい
    - `0.0.0.0` や `[::]` には公開しない。ほかの NIC や IPv6 から使う設定は含めない
+
+1. 共通の Caddy に Forgejo のサイトを足す。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   elif [ -e ~/.config/caddy/sites/forgejo.caddy ] || [ -L ~/.config/caddy/sites/forgejo.caddy ]; then
+     echo '中断: forgejo.caddy が既にある。上書きしない' >&2
+   elif ! systemctl --user is-active --quiet caddy.service || [ ! -d ~/.config/caddy/sites ]; then
+     echo '中断: 先に共通の Caddy を入れて起動する' >&2
+   else
+     cat > ~/.config/caddy/sites/forgejo.caddy <<EOF
+   # setup-notes: forgejo
+   https://${SERVER_IP}:${FORGEJO_HTTP_PORT} {
+       bind ${SERVER_IP}
+       tls internal
+       import root-crt
+       handle {
+           reverse_proxy 127.0.0.1:${FORGEJO_HTTP_PORT}
+       }
+   }
+   EOF
+   fi
+   ```
+
+   - エラー無く終わればよい。既存のサイトには上書きしない
+
+1. サーバーで、共通の Caddy の設定を検査して起動し直す。
+
+   - [Caddy: 設定を検査して起動し直す](almalinux-setup.md#caddy-設定を検査して起動し直す)を同じ一般ユーザーの bash で通す
+   - 検査や起動に失敗したら先へ進まない
+
+1. サーバー自身から HTTPS と待ち受けを確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   else
+     for i in $(seq 1 30); do
+       curl -fsS --cacert ~/.local/share/caddy/pki/authorities/local/root.crt "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/api/healthz" 2>/dev/null | grep -q '"pass"' && break
+       sleep 1
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     curl -s --cacert ~/.local/share/caddy/pki/authorities/local/root.crt "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/api/healthz"
+     printf '\n'
+     curl -s -o /dev/null "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/"
+     echo "curl の終了コード: $?"
+     ss -ltn "( sport = :${FORGEJO_HTTP_PORT} )"
+   fi
+   ```
+
+   - healthz の `status` が `pass`、`curl の終了コード: 60`、`127.0.0.1:<Web ポート>` と `<SERVER_IP>:<Web ポート>` の 2 行が出ればよい
+   - 既にサーバー自身もこの認証局を信頼させている場合、最後の curl の終了コードは `0` になる
+   - 失敗したら `journalctl --user -u caddy.service -n 30 --no-pager` と、Forgejo の起動・ポートを確かめる
+
+1. 接続する PC・スマートフォンに、ホストのルート証明書を入れる。
+
+   - [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す。配布 URL は `https://<SERVER_IP>:3000/caddy-root.crt`（Web ポートを変えたらその番号）
+   - 同じホストの Codeg などのために入れた端末には、もう一度入れなくてよい
 
 1. 別の PC でトンネルを閉じ、LAN の URL で管理者のログインを確かめる。
 
    - [初期設定と管理者の作成](#forgejo-初期設定と管理者の作成)の手順 2 の端末で `Ctrl+C` を押してトンネルを閉じる
-     - この項の手順 3 の後、その端末に `channel 1: open failed: connect failed: Connection refused` のような行が出続けることがある。正常なので、そのまま閉じる
-   - 許可した LAN または VPN の PC で `http://<SERVER_IP>:3000/` を開き、管理者でログインする。Web ポートを変えたらその番号にする
-   - 登録のボタンが無いことと、`http://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
+   - 許可した LAN または VPN の PC で `https://<SERVER_IP>:3000/` を開き、証明書の警告が出ないことを確かめて管理者でログインする。Web ポートを変えたらその番号にする
+   - 登録のボタンが無いことと、`https://<SERVER_IP>:3000/user/sign_up` から通常の登録も OpenID の登録もできないことを確かめる
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、サーバーへ届く許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
    - LAN と VPN の両方で使う場合は、それぞれのクライアントでログインを確かめる。ルーターのポート転送は作らない
    - 接続できないときは、サーバーの IP・FW_ZONE・クライアントの送信元と VPN の経路を確かめる
@@ -576,17 +637,23 @@
 - 実行場所: この項の手順 1・2・6・7 はサーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。手順 3〜5・8 は別の PC（手順 5 は、別の PC からサーバーへ SSH でログインし直す）
 - この項の手順 6 でサーバーを再起動する
 
-1. サーバーで、変数を設定する。
+1. サーバーで、変数を設定する（`SERVER_IP` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=''                       # LAN に公開した IPv4
+   ```
 
    ```bash
    {
+     FORGEJO_HTTP_PORT=3000
+     FORGEJO_SSH_PORT=2222
      FW_ZONE=$(sudo firewall-cmd --get-default-zone)
      printf '\n\033[7m 確認 \033[0m\n'
-     printf 'firewalld: %s\n' "${FW_ZONE}"
+     printf 'IP: %s / Web: %s / SSH: %s / firewalld: %s\n' "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}" "${FW_ZONE}"
    }
    ```
 
-   - `FW_ZONE` は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 と同じ値にする（そこで別の zone の名前に変えたなら、同じ名前に書き換える）
+   - IP・ポート・`FW_ZONE` は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)の手順 1 と同じ値にする（そこで別の zone の名前に変えたなら、同じ名前に書き換える）
    - 最後に値を読み戻して確かめる
    - **新しいシェルを開いたら**（ログインし直した後・再起動した後も）、この項の手順 1 を貼り直してから先へ進む
 
@@ -599,12 +666,12 @@
    podman port forgejo
    ```
 
-   - `active` と LAN 向けのポートが出ればよい
+   - `active` と、Web は `127.0.0.1`、Git 用 SSH は `SERVER_IP` のポートが出ればよい
    - 起動し直した直後は、Web と Git 用 SSH の待ち受けが始まるまで数秒待つ
 
 1. 別の PC で、再起動後のログインと Git の接続を確かめる。
 
-   - ブラウザで LAN の URL を開き、作成した管理者でログインする
+   - ブラウザで `https://<SERVER_IP>:3000/`（変更した場合はその Web ポート）を警告なしで開き、作成した管理者でログインする
    - `forgejo-test` と[Git の接続を確かめる](#forgejo-git-の接続を確かめる)の手順 5 のコミットが残ることを確かめる
    - clone した作業場所で `git fetch` を実行する。再起動のたびに SSH のホスト鍵の確認を求められないことを確かめる
 
@@ -633,27 +700,29 @@
 
    ```bash
    {
-     if [ -z "${FW_ZONE}" ]; then
+     if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: この項の手順 1 の変数を貼り直す' >&2
      else
        printf '\n\033[7m 確認 \033[0m\n'
-       systemctl --user is-active forgejo.service
-       systemctl --user is-enabled forgejo.service
+       systemctl --user is-active forgejo.service caddy.service
+       systemctl --user is-enabled forgejo.service caddy.service
        systemctl --user show forgejo.service -p ActiveEnterTimestamp
        loginctl show-session "${XDG_SESSION_ID}" -p Timestamp
        loginctl show-user "$(id -u)" -p Linger
        podman port forgejo
+       ss -ltn "( sport = :${FORGEJO_HTTP_PORT} or sport = :${FORGEJO_SSH_PORT} )"
        sudo firewall-cmd --zone="${FW_ZONE}" --list-rich-rules
      fi
    }
    ```
 
-   - `active`・`generated`・`Linger=yes` が出て、サービスが起動した時刻がログインした時刻より前ならよい
-   - LAN 向けの 2 つのポートと、[LAN に公開する](#forgejo-lan-に公開する)の手順 2 の 2 規則が残っていればよい
+   - `active` が 2 行、`generated`・`enabled`・`Linger=yes` が出て、サービスが起動した時刻がログインした時刻より前ならよい
+   - Web の localhost と Caddy の LAN の待ち受け、Git 用 SSH の LAN の待ち受けと、[LAN に公開する](#forgejo-lan-に公開する)の手順 2 の 2 規則が残っていればよい
 
 1. 別の PC で、OS の再起動後の Web と Git を確かめる。
 
-   - LAN または VPN の URL で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
+   - LAN または VPN から `https://<SERVER_IP>:3000/` で管理者がログインでき、リポジトリとコミットが残っていることを確かめる
+   - Web ポートを変えたら URL もその番号にする
    - 作業場所で `git fetch` を実行する
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことも確かめる
    - **次の手順は、Web と Git を確かめてから貼る**
@@ -1052,8 +1121,10 @@
 
 #### Forgejo: 使い方の基本
 
-- 構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う
+- ルート証明書を入れた端末で、構築が済んだ Forgejo を、許可された LAN または VPN の PC から使う
 - 前提: サーバーで[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある。利用する PC では、先に [Git](almalinux-setup.md#git) で名前・メールアドレスを設定してある（Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)）
+- HTTPS で Git を使う場合、AlmaLinux の端末は各 Git コマンドへ `git -c http.sslCAInfo=<照合済み root.crt の絶対パス> …` を付ける。システムで信頼させるなら、照合済みの公開証明書を `/etc/pki/ca-trust/source/anchors/` に置いて `sudo update-ca-trust` を実行する
+- Windows の Git は `git -c http.sslBackend=schannel …` で、このユーザーの Windows の証明書ストアを使う。証明書の検証は無効にしない
 - 実行場所: 利用する PC のブラウザと端末。端末の操作はその PC の bash（Windows は Git Bash）で行う
 - 初回はログイン・SSH 公開鍵の登録・リポジトリの作成・clone を行う。普段は Issue → 作業ブランチ → commit / push → Pull Request → マージ → main の更新を繰り返す
 - Issue は作業内容と完了条件を共有する場所、Pull Request はブランチの変更を確認して main に取り込むための画面
@@ -1062,7 +1133,7 @@
 
 1. 利用する PC のブラウザで、Forgejo にログインする。
 
-   - `http://<SERVER_IP>:3000/` を開く。表示言語が違う場合は、画面下部の言語メニューで English を選ぶ。Web ポートを変更した場合はその番号を使う
+   - `https://<SERVER_IP>:3000/` を開く。表示言語が違う場合は、画面下部の言語メニューで English を選ぶ。Web ポートを変更した場合はその番号を使う
    - Forgejo のユーザー名とパスワードを入力して「Sign in」を押す
    - アカウントが無いときは管理者に作成を依頼する
    - ログイン後に自分のダッシュボードが開けばよい
@@ -1179,10 +1250,203 @@
    - main の `README.md` に、この項の手順 8 で追加した内容が残っていればよい
    - 次の作業も更新した main から別の作業ブランチを作る
 
+#### Forgejo: Web を HTTPS に切り替える
+
+- 旧手順で HTTP の `<SERVER_IP>:<Web ポート>` に公開済みのサーバーを、共通の Caddy に切り替える
+- 前提: [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通してある。Codeg 専用の Caddy があるホストは、先に [Caddy: Codeg 専用の Caddy から切り替える](almalinux-setup.md#caddy-codeg-専用の-caddy-から切り替える)を通す
+- 実行場所: この項の手順 1〜6 はサーバーの、Forgejo と Caddy を動かす一般ユーザーの bash。手順 7 は接続する別の PC・スマートフォン
+- この項の手順 4〜6 の間は Web が切れる。Git 用 SSH と firewalld の規則は変えない
+- 戻すときは [HTTPS 化を戻す](extra/forgejo.md#web-の-https-化を戻す)を通す
+
+1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=''                       # サーバーの待ち受け IPv4（例: 192.168.1.10）
+   ```
+
+   ```bash
+   {
+     FORGEJO_HTTP_PORT=3000            # localhost と Caddy の HTTPS で使う同じ Web ポート（1024〜65535）
+     FORGEJO_SSH_PORT=2222             # ホスト側の Git 用 SSH ポート（1024〜65535）
+     printf '\n\033[7m 確認 \033[0m\n'
+     printf '待ち受け: %s\nWeb: %s / SSH: %s\n' "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" "${FORGEJO_SSH_PORT}"
+   }
+   ```
+
+   - どの変数も、[LAN に公開する](#forgejo-lan-に公開する)の手順 1 と同じ値にする（ポートは、そこで変えたときだけ同じ値に書き換える）
+   - 最後に値を読み戻して確かめる
+   - 空のままなら先へ進まない
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直してから先へ進む
+
+1. 共通の Caddy と、旧 HTTP の公開定義を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ] || [ -z "${FORGEJO_SSH_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active caddy.service
+     /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" <<'PYCODE'
+   from pathlib import Path
+   import ipaddress
+   import sys
+
+   address = str(ipaddress.IPv4Address(sys.argv[1]))
+   port = sys.argv[2]
+   site = Path.home() / '.config/caddy/sites/forgejo.caddy'
+   path = Path.home() / '.config/containers/systemd/forgejo.container'
+   backup = path.with_name('forgejo.container.http-backup')
+   if site.exists() or site.is_symlink() or backup.exists() or backup.is_symlink():
+       raise SystemExit('中断: サイトまたは HTTP 定義の控えが既にある')
+   lines = path.read_text().splitlines()
+   if not lines or lines[0] != '# setup-notes: forgejo':
+       raise SystemExit('中断: この手順が作った Quadlet ではない')
+   for line in [f'PublishPort={address}:{port}:3000',
+                f'Environment=FORGEJO__server__ROOT_URL=http://{address}:{port}/',
+                'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128']:
+       if lines.count(line) != 1:
+           raise SystemExit('中断: 旧 HTTP の公開定義が一致しない')
+   print('旧 HTTP の公開定義と未作成のサイト・控え: OK')
+   PYCODE
+   fi
+   ```
+
+   - `active` と `OK` が出ればよい。中断や失敗が出たら進まない
+
+1. HTTP の定義を控え、Web の待ち受け・ROOT_URL・信頼するプロキシの 3 行を置き換える。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   elif ! systemctl --user is-active --quiet caddy.service; then
+     echo '中断: caddy.service が active ではない' >&2
+   elif [ "$(systemctl --user show -p ActiveState --value forgejo-auto-update.service)" = activating ]; then
+     echo '中断: 自動更新の実行中。終わってから貼り直す' >&2
+   else
+     /usr/bin/python3 - "${SERVER_IP}" "${FORGEJO_HTTP_PORT}" <<'PYCODE'
+   from pathlib import Path
+   import ipaddress
+   import os
+   import sys
+
+   address = str(ipaddress.IPv4Address(sys.argv[1]))
+   port = sys.argv[2]
+   site = Path.home() / '.config/caddy/sites/forgejo.caddy'
+   path = Path.home() / '.config/containers/systemd/forgejo.container'
+   backup = path.with_name('forgejo.container.http-backup')
+   if site.exists() or site.is_symlink() or backup.exists() or backup.is_symlink():
+       raise SystemExit('中断: サイトまたは控えが既にある。上書きしない')
+   text = path.read_text()
+   if not text.startswith('# setup-notes: forgejo\n'):
+       raise SystemExit('中断: この手順が作った Quadlet ではない')
+   replacements = {
+       f'PublishPort={address}:{port}:3000': f'PublishPort=127.0.0.1:{port}:3000',
+       f'Environment=FORGEJO__server__ROOT_URL=http://{address}:{port}/': f'Environment=FORGEJO__server__ROOT_URL=https://{address}:{port}/',
+       'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128': f'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128,{address}/32',
+   }
+   lines = text.splitlines()
+   for old, new in replacements.items():
+       if lines.count(old) != 1:
+           raise SystemExit(f'中断: 変更前の行が一致しない: {old}')
+       lines[lines.index(old)] = new
+   with backup.open('x') as stream:
+       stream.write(text)
+   backup.chmod(0o600)
+   temporary = path.with_suffix('.container.tmp')
+   with temporary.open('x') as stream:
+       stream.write('\n'.join(lines) + '\n')
+   temporary.chmod(0o600)
+   os.replace(temporary, path)
+   print('Web の localhost・HTTPS の ROOT_URL・信頼するプロキシ: 設定済み')
+   PYCODE
+   fi
+   ```
+
+   - 設定済みの行が出ればよい。前の内容は `forgejo.container.http-backup` に残る
+
+1. Forgejo を起動し直し、localhost の Web と Git 用 SSH を確かめる。
+
+   ```bash
+   if [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   else
+     systemctl --user daemon-reload &&
+     systemctl --user restart forgejo.service &&
+     for i in $(seq 1 60); do
+       curl -fsS "http://127.0.0.1:${FORGEJO_HTTP_PORT}/api/healthz" 2>/dev/null | grep -q '"pass"' && break
+       sleep 1
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     curl -s "http://127.0.0.1:${FORGEJO_HTTP_PORT}/api/healthz"
+     printf '\n'
+     podman port forgejo
+   fi
+   ```
+
+   - healthz の `status` が `pass`、Web が `127.0.0.1`、Git 用 SSH が `SERVER_IP` ならよい
+   - 失敗したらサイトを足さず、`podman logs forgejo` と Quadlet を確かめる
+
+1. Forgejo のサイトを足し、共通の Caddy の設定を反映する。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   elif [ -e ~/.config/caddy/sites/forgejo.caddy ] || [ -L ~/.config/caddy/sites/forgejo.caddy ]; then
+     echo '中断: forgejo.caddy が既にある。上書きしない' >&2
+   elif ! systemctl --user is-active --quiet caddy.service || [ ! -d ~/.config/caddy/sites ]; then
+     echo '中断: 先に共通の Caddy を入れて起動する' >&2
+   else
+     cat > ~/.config/caddy/sites/forgejo.caddy <<EOF
+   # setup-notes: forgejo
+   https://${SERVER_IP}:${FORGEJO_HTTP_PORT} {
+       bind ${SERVER_IP}
+       tls internal
+       import root-crt
+       handle {
+           reverse_proxy 127.0.0.1:${FORGEJO_HTTP_PORT}
+       }
+   }
+   EOF
+   fi
+   ```
+
+   - [Caddy: 設定を検査して起動し直す](almalinux-setup.md#caddy-設定を検査して起動し直す)を同じ一般ユーザーの bash で通す。検査や起動に失敗したら先へ進まない
+
+1. サーバー自身から HTTPS を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${FORGEJO_HTTP_PORT}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   else
+     for i in $(seq 1 30); do
+       curl -fsS --cacert ~/.local/share/caddy/pki/authorities/local/root.crt "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/api/healthz" 2>/dev/null | grep -q '"pass"' && break
+       sleep 1
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     curl -s --cacert ~/.local/share/caddy/pki/authorities/local/root.crt "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/api/healthz"
+     printf '\n'
+     curl -s -o /dev/null "https://${SERVER_IP}:${FORGEJO_HTTP_PORT}/"
+     echo "curl の終了コード: $?"
+     ss -ltn "( sport = :${FORGEJO_HTTP_PORT} )"
+   fi
+   ```
+
+   - healthz の `status` が `pass`、`curl の終了コード: 60`、`127.0.0.1:<Web ポート>` と `<SERVER_IP>:<Web ポート>` の 2 行が出ればよい
+   - 既にサーバー自身もこの認証局を信頼させている場合、最後の curl の終了コードは `0` になる
+   - 失敗したら `journalctl --user -u caddy.service -n 30 --no-pager` と、Forgejo の起動・ポートを確かめる
+
+1. 別の端末にルート証明書を入れ、HTTPS で開く。
+
+   - [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す。同じホストの Codeg などのために導入済みなら入れ直さない
+   - `https://<SERVER_IP>:3000/`（変更した場合はその Web ポート）を開き、証明書の警告なしでログインできればよい
+   - `http://<SERVER_IP>:<Web ポート>/…` を remote にしている clone は、各 clone で `git remote -v` を確かめ、`git remote set-url origin <画面に出る HTTPS か SSH の clone URL>` で付け替える
+   - HTTPS の Git は[使い方の基本](#forgejo-使い方の基本)の信頼設定を使う
+
 #### Forgejo: 設定ファイル
 
 | 場所 | 内容 |
 |---|---|
+| `~/.config/caddy/sites/forgejo.caddy` | Forgejo の HTTPS サイト。共通の本体・認証局・サービスは [Caddy: 設定ファイル](almalinux-setup.md#caddy-設定ファイル) |
 | `~/.config/containers/systemd/forgejo.container` | イメージ、ポート、URL、設定の環境変数、自動起動 |
 | `~/.local/share/forgejo/custom/conf/app.ini` | 初期設定の結果と秘密を含む Forgejo の設定 |
 | `~/.local/share/forgejo/data/forgejo.db` | SQLite の DB |
@@ -1203,6 +1467,7 @@
 - サーバーで Forgejo を止め、データと Quadlet を一緒にアーカイブに取る
 - 前提: [イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[LAN に公開する](#forgejo-lan-に公開する)までを通してある
 - 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この項の手順 3 の後の確かめは別の PC
+- アーカイブに Caddy のサイトは入らない。`~/.config/caddy/sites/forgejo.caddy` は別に保管する（認証局の鍵は写さない）
 - この項の手順 1 から 3 まで、Web と Git の操作が止まる。止めている間は、自動更新は版を上げない
 - バックアップにはリポジトリ・アカウント・SSH のホスト秘密鍵などが入る。保管先のディレクトリは 0700、アーカイブは 0600 にする
 
@@ -1281,7 +1546,7 @@
 - 戻した後は、次の自動更新で最新版へ上がる。新しい版の不具合で戻すときは、この項の手順 7 でその版を保留する
 
 > [!IMPORTANT]
-> - 同じサーバー・同じユーザー・同じ IP とポートの復元を扱う。IP や許可 CIDR を変える移設では、Quadlet の URL・待ち受けと firewalld も合わせ直す
+> - 同じサーバー・同じユーザー・同じ IP とポートの復元を扱う。IP や許可 CIDR を変える移設では、Quadlet の URL・待ち受け、Caddy のサイトと firewalld も合わせ直す
 
 1. 復元するバックアップを指定する（`FORGEJO_RESTORE` は必ず値を入れる）。
 
@@ -1291,6 +1556,7 @@
 
    - [バックアップ](#forgejo-バックアップ)の手順 2 で表示された場所を入れる。自動更新のアーカイブは、[更新](#forgejo-更新)の手順 1 の journal の `バックアップ:` の行に出る
    - 作成途中や失敗したアーカイブは使わない
+   - HTTPS 化前のアーカイブは、手順 2 で、展開した Quadlet の 3 行を[Web を HTTPS に切り替える](#forgejo-web-を-https-に切り替える)の手順 3 と同じ形に直して使う。共通の Caddy の Forgejo のサイトが無いホストでは、手順 2 で中断する
 
 1. バックアップの構成とイメージを確かめ、空の作業場所に展開する。
 
@@ -1321,6 +1587,28 @@
    text = quadlet.read_text()
    if not text.startswith('# setup-notes: forgejo\n'):
        raise SystemExit('中断: この手順の Quadlet が入っていない')
+   web_ports = re.findall(r'^PublishPort=([^\n]+):3000$', text, re.M)
+   if len(web_ports) != 1:
+       raise SystemExit('中断: Web の PublishPort の行が一意ではない')
+   old_web = re.fullmatch(r'(\d+\.\d+\.\d+\.\d+):(\d+)', web_ports[0])
+   if old_web and old_web.group(1) != '127.0.0.1':
+       if not (Path.home() / '.config/caddy/sites/forgejo.caddy').is_file():
+           raise SystemExit('中断: HTTPS 化前のアーカイブ。先に共通の Caddy と Forgejo のサイトを用意する')
+       address, http_port = old_web.groups()
+       lines = text.splitlines()
+       for old, new in {
+           f'PublishPort={address}:{http_port}:3000': f'PublishPort=127.0.0.1:{http_port}:3000',
+           f'Environment=FORGEJO__server__ROOT_URL=http://{address}:{http_port}/': f'Environment=FORGEJO__server__ROOT_URL=https://{address}:{http_port}/',
+           'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128': f'Environment=FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES=127.0.0.1/32,::1/128,{address}/32',
+       }.items():
+           if lines.count(old) != 1:
+               raise SystemExit(f'中断: HTTPS 化前の定義の行が一致しない: {old}')
+           lines[lines.index(old)] = new
+       text = '\n'.join(lines) + '\n'
+       quadlet.write_text(text)
+       print('HTTPS 化前の Web 定義: HTTPS の形に直した', flush=True)
+   elif not re.fullmatch(r'127\.0\.0\.1:\d+', web_ports[0]):
+       raise SystemExit('中断: Web の PublishPort の形が想定と違う')
    images = re.findall(r'^Image=(codeberg\.org/forgejo/forgejo:\d+\.\d+\.\d+-rootless)$', text, re.M)
    if len(images) != 1:
        raise SystemExit('中断: 固定した rootless イメージの行が一意ではない')
@@ -1472,7 +1760,7 @@
 
 1. 別の PC で、復元したアカウント・リポジトリ・SSH を確かめる。
 
-   - Web にログインし、バックアップ時点のリポジトリとコミットが見えることを確かめる
+   - ルート証明書を入れた PC から `https://<SERVER_IP>:3000/`（変更した場合はその Web ポート）を警告なしで開いてログインし、バックアップ時点のリポジトリとコミットが見えることを確かめる
    - `git fetch` を実行し、確認用の新しいコミットを push する。SSH のホスト鍵の指紋もバックアップ当時と一致することを確かめる
      - `git fetch` が `(forced update)` を出したら、その clone には、復元で無くなったコミットが残っている。そのまま push すると、そのコミットがサーバーに戻る。戻したくなければ、空の場所へ clone し直し、そこから確認用のコミットを push する
    - 初期設定画面が開かず、通常の自己登録と OpenID の登録ができないことを確かめる
@@ -1511,6 +1799,7 @@
 
 #### Forgejo: 更新
 
+- Caddy 自体は [Caddy: 更新](almalinux-setup.md#caddy-更新)で上げる
 - 自動更新の結果を確かめ、必要なときは今すぐ更新する。保留した版を試し直す
 - 前提: [自動更新を有効にする](#forgejo-自動更新を有効にする)を通してある
 - 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この項の手順 3 は別の PC
@@ -1559,7 +1848,7 @@
 
 1. 更新したときは、別の PC で更新後の Web と Git を確かめる。
 
-   - 管理者のログイン、リポジトリの一覧・既存のコミット、`git fetch`、新しいコミットの push を確かめる
+   - ルート証明書を入れた PC で `https://<SERVER_IP>:3000/`（変更した場合はその Web ポート）を警告なしで開き、管理者のログイン、リポジトリの一覧・既存のコミット、`git fetch`、新しいコミットの push を確かめる
    - 初期設定画面が開かず、通常の自己登録と OpenID の登録ができないことを確かめる
    - `LAN_SUBNET` が `0.0.0.0/0` 以外のときだけ、許可外の送信元から Web と Git 用 SSH の両方へ接続できないことを確かめる
    - 問題があれば、この項のリードの WARNING のとおり、更新直前のアーカイブを戻して新しい版を保留する

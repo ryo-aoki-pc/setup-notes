@@ -880,3 +880,18 @@ AI コーディングエージェントの項・節を、2冊から [docs/ai-age
 | lazygit | [README の「導入方法」「前提ツール」](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#導入方法) | [README の「導入」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#導入) |
 | yazi | [README の「インストール」「補足: 複数ファイルをまとめて開く」](https://github.com/ryo-aoki-pc/yazi/blob/280b1c7278fb57165f2893145a6d715d9ddd6cde/README.md#インストール) | [README の「導入」](https://github.com/ryo-aoki-pc/yazi/blob/custom/README.md#導入)の表 |
 | md-table-excel | [README の「導入」「使い方」「Excel で編集するときの注意」](https://github.com/ryo-aoki-pc/md-table-excel/blob/a6c7b04f469538d5d414474e569eb12e2d302437/README.md#導入) | [README の「導入」](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/README.md#導入)の表 |
+
+## AlmaLinux 10 の Caddy をホストで共通にしたときの追補
+
+2026-10-15 に、利用者の決定で、AlmaLinux 10 の Caddy の本体・認証局・ユーザーサービスをホストで 1 つにした。新しい正本は増やさず、共通の操作を almalinux-setup.md の「Caddy」へ移す。移動元の基準は setup-notes の `6994d4d9ec971aff03d4d1c1321af550e7464b4e`。
+
+- Codeg の HTTPS サイトは ai-agents.md に残す。Windows 11 の Codeg 専用 Caddy の操作は移さない
+- ルート証明書の節は、AlmaLinux 10 のホストと接続する端末の分を共通化した。ai-agents.md には Windows 11 のホストの分を残し、番号を付け替えた
+- Caddy の更新は旧本文の案内を独立した操作手順へ書き直した。移動と新構成の検証状態は検証記録で管理する
+
+| 文書 | 移動前の見出し・手順 | 今の見出し・手順 |
+| --- | --- | --- |
+| ai-agents.md | [Grok Build のブラウザ操作: HTTPS で LAN・VPN に公開する](https://github.com/ryo-aoki-pc/setup-notes/blob/6994d4d9ec971aff03d4d1c1321af550e7464b4e/docs/ai-agents.md#grok-build-のブラウザ操作-https-で-lanvpn-に公開する)の手順 1（Caddy の取得）と手順 2・3 の共通設定・サービス | [almalinux-setup.md: Caddy: 入れて起動する](../almalinux-setup.md#caddy-入れて起動する)の手順 3〜5。サイトは元の項に残す |
+| ai-agents.md | [Grok Build のブラウザ操作: 端末にルート証明書を入れる](https://github.com/ryo-aoki-pc/setup-notes/blob/6994d4d9ec971aff03d4d1c1321af550e7464b4e/docs/ai-agents.md#grok-build-のブラウザ操作-端末にルート証明書を入れる)の手順 1・3〜6（AlmaLinux ホストと端末） | [almalinux-setup.md: Caddy: 端末にルート証明書を入れる](../almalinux-setup.md#caddy-端末にルート証明書を入れる)の手順 1〜5 |
+| ai-agents.md | [Grok Build のブラウザ操作: 更新](https://github.com/ryo-aoki-pc/setup-notes/blob/6994d4d9ec971aff03d4d1c1321af550e7464b4e/docs/ai-agents.md#grok-build-のブラウザ操作-更新)のリード（Caddy の更新） | [almalinux-setup.md: Caddy: 更新](../almalinux-setup.md#caddy-更新) |
+| reference/grok-build-remote.md | 「Caddy の入手」「Caddyfile の各行」の共通設定と「指紋の照合」 | [reference/caddy.md: 補足](../reference/caddy.md#補足)。Codeg のサイトの説明は元の参考資料に残す |
