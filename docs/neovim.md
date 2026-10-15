@@ -285,7 +285,7 @@
 
 #### LazyVim の安全な Markdown 整形を導入する
 
-- Markdown を保存のときに整形する依存（lock ファイルで固定した markdownlint-cli2 と Comrak）を Neovim から入れ、整形を確かめる。AlmaLinux 10 / Windows 11 共通
+- Markdown を保存のときに整形する依存（lock ファイルで固定した markdownlint-cli2・Comrak・js-beautify）を Neovim から入れ、整形を確かめる。AlmaLinux 10 / Windows 11 共通
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある（Node.js 22 以上と npm が要る）
 - 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
 - 初回と `tools/glfm-format/package-lock.json` の変更後に行う
@@ -298,23 +298,34 @@
    ```
 
    - 完了の通知が出るまで待つ
-   - 取得するのは lock ファイルで固定した markdownlint-cli2 と Comrak (WASM 版)。整形時は通信しない
+   - 取得するのは lock ファイルで固定した markdownlint-cli2・Comrak (WASM 版)・js-beautify (HTML の整形用)。整形時は通信しない
    - 失敗したら Node.js と npm が PATH にあるか確かめ、同じコマンドを入力し直す
    - lint の診断用は `:MasonInstall markdownlint-cli2` で導入する
 
 1. Markdown ファイルで保存と手動整形を確かめる。
 
    ```markdown
-   #動作確認
+   #  動作確認
 
    用語
    : 説明
 
      - 内部の項目
+
+   <details>
+   <summary>概要</summary>
+
+   本文
+
+   </details>
+
+   <table><tr><td>a</td><td>b</td></tr></table>
    ```
 
-   - `:w` または `<leader>cf` で `#動作確認` が `# 動作確認` に直る
+   - `:w` または `<leader>cf` で `#  動作確認` の `#` の後の空白が 1 つになる (`# 動作確認`)
    - `内部の項目` の行頭の 2 スペースが保たれる
+   - `<summary>` の行が 2 スペース字下げになる。空行と `本文` はそのまま
+   - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
    - `:ConformInfo` に `glfm_markdownlint` が出る。依存不足・設定不正・時間切れのときは原文を保持し、エラーを知らせる
@@ -795,7 +806,7 @@
    ```
 
    - 完了の通知が出るまで待つ
-   - 取得するのは lock ファイルで固定した markdownlint-cli2 と Comrak (WASM 版)。整形時は通信しない
+   - 取得するのは lock ファイルで固定した markdownlint-cli2・Comrak (WASM 版)・js-beautify (HTML の整形用)。整形時は通信しない
    - 失敗したら Node.js と npm が PATH にあるか確かめ、同じコマンドを入力し直す
    - lint の診断用は `:MasonInstall markdownlint-cli2` で導入する
    - **次の手順は、完了の通知が出てから `i` を押し、挿入モードの本文に貼る**
@@ -803,17 +814,28 @@
 1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
 
    ```markdown
-   #動作確認
+   #  動作確認
 
    用語
    : 説明
 
      - 内部の項目
+
+   <details>
+   <summary>概要</summary>
+
+   本文
+
+   </details>
+
+   <table><tr><td>a</td><td>b</td></tr></table>
    ```
 
    - 貼り終えたら Esc を押し、ノーマルモードに戻る
-   - `:w` または `<leader>cf` で `#動作確認` が `# 動作確認` に直る
+   - `:w` または `<leader>cf` で `#  動作確認` の `#` の後の空白が 1 つになる (`# 動作確認`)
    - `内部の項目` の行頭の 2 スペースが保たれる
+   - `<summary>` の行が 2 スペース字下げになる。空行と `本文` はそのまま
+   - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
    - `:ConformInfo` に `glfm_markdownlint` が出る。依存不足・設定不正・時間切れのときは原文を保持し、エラーを知らせる
