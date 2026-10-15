@@ -2576,10 +2576,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-PSReadLineOption).EditMode
-   Get-PSReadLineKeyHandler -Chord Ctrl+v,Ctrl+Enter,UpArrow,DownArrow | Format-Table Key, Function -AutoSize
+   Get-PSReadLineKeyHandler -Bound | Where-Object { $_.Key -in 'Ctrl+v', 'Ctrl+Enter', 'UpArrow', 'DownArrow' } | Format-Table Key, Function -AutoSize
    ```
 
    - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward`・`DownArrow` の `HistorySearchForward` が出ればよい
+   - 5.1 の PSReadLine（2.0.0）の `Get-PSReadLineKeyHandler` には `-Chord` が無いので、割り当ての一覧から絞る
    - 出なければ、この項の手順 2 と[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 3〜5 を確かめる
    - 元に戻すときのこの項の手順 5 は、この項の手順 1 で開いた Windows PowerShell（5.1）に貼る
 
