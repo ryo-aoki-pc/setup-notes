@@ -22,6 +22,15 @@
     - ACP サーバー 1.4.0 でも同じ制約を確認し、1.3.0 に戻した。Codeg の Claude Code から Antigravity への委譲は接続確認の一文までで、子は親と同じ worktree を使う。読み取り専用の CLI の手順とは分ける
     - 使い捨てのリポジトリで、Windows 11 の共同作業の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（4 worktree。手順 2 の 4 つの CLI の版とログインを含む）
     - 共同作業の手順 8 は Claude・Codex・Antigravity CLI の規則の応答を確認した。Grok の `--trust inspect` の行は、試験用フォルダーを信頼の一覧に足すため通していない。手順 9（対話）も通していない。4 エージェントの実作業・取り込み全体の検証には広げない
+  - Antigravity アプリの Remote Control の追加（2026-10-15）: Windows 11 だけを対象に、アプリの導入・設定・ブラウザからの接続・スタートアップのショートカット・停止と再開、設定ファイルの一覧、extra の撤去と注意点、参考資料を追加した。AlmaLinux 10 は対象外
+    - Windows 11 / x64 の実機でアプリ 2.23.1 を管理者ではない PowerShell から導入し、署名・版・導入先・アンインストールの登録を確認した。CLI の `agy` のパスとハッシュ、ユーザーの PATH は変わらず、`antigravity` のコマンドも増えていない
+    - PC の画面での個人の Google アカウントのログインと設定は利用者が行った。ファイルで Remote Control と自動の名前、Keep In Menu Bar・Prevent Sleep の値を確認した
+    - PC のブラウザで `Online` への接続、プロジェクトの作成と会話の応答、コマンドの承認と拒否を確認した。プロジェクト内のファイルは確認なしで作成された
+    - 窓を閉じても接続と応答は続き、トレイから終了すると `Offline` になった。Remote Control のオフ・オンでも `Offline`・`Online` が切り替わり、一覧の項目は残った
+    - スタートアップにショートカットを置き、そのショートカットからの手動起動で `Online` に戻ることを確認した。サインアウト・再起動後の自動起動は確かめていない
+    - 実施手順の手順 1・2・4・7〜9 のブロックは、導入の後に Windows PowerShell 5.1 で書いたとおりに流した。手順 3 は同じ動きを PowerShell 7.6.6 で通した。入れる前の PC での通しは確かめていない
+    - スリープ・休止状態からの復帰、Prevent Sleep がスリープを防ぐこと、ノート PC の蓋を閉じたとき、スマートフォンでのアクセスとホーム画面からのプッシュ通知は確かめていない
+    - アプリの自動更新と更新後の動き、アンインストールと残るもの、PC の Remote Control の正確な項目名と Nickname の変え方、CLI の常駐デーモン、管理者の権限の有無による違いは確かめていない
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox。2026-10-15 に利用者の決定で2冊から分けた（[対応表の追補](consolidation-map.md#仮想マシンと-forgejo-を別の文書へ分けたときの追補)）
   - 検証記録・参考資料・extra は、項ごとの文書名（`virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`）のまま使う。Windows Sandbox のものは、2冊の検証記録・参考資料・extra から `windows-sandbox` へ移した。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「VirtualBox」は、AlmaLinux 10 の同名の項と分けるため「Windows 11 で VirtualBox を入れる」にした
