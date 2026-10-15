@@ -3,7 +3,7 @@
 # docs/wireguard.md の「WireGuard」を site.env の値で実行する。
 #
 #   sudo ./wg-vpn.sh [options] keygen [A|B]          「鍵を作って適用する」の手順 2: wireguard-tools 導入と鍵生成
-#   sudo ./wg-vpn.sh [options] apply  A|B            「鍵を作って適用する」の手順 5〜6: wg0.conf・sysctl・firewalld・サービス（旧レイアウトの専用ゾーンと policy が残っていれば消す）
+#   sudo ./wg-vpn.sh [options] apply  A|B            「鍵を作って適用する」の手順 5〜6: wg0.conf・sysctl・firewalld・サービス
 #        ./wg-vpn.sh [options] router A|B            ルーターに入れる値を表示（apply の末尾と同じ。補足「ルーターの設定」）
 #   sudo ./wg-vpn.sh [options] status                「状態と疎通を確かめる」の手順 2: 状態確認
 #   sudo ./wg-vpn.sh [options] remove A|B            ロールバック
@@ -50,8 +50,6 @@ TMP_WORK=""
 SYSCTL_FILE=/etc/sysctl.d/90-wireguard.conf
 # --pubkey で登録したクライアントの conf に書く PrivateKey の仮の値
 CLIENT_KEY_PLACEHOLDER="<CLIENT_PRIVATE_KEY>"
-# 旧レイアウト（専用ゾーン WG_FW_ZONE + 方向ごとの policy）が作っていた policy 名。apply / remove が残っていれば消す
-LEGACY_POLICY_RE='^(site[AB]-to-(site|clients)[AB]|clients[AB]-to-site[AB])$'
 
 die()  { echo "ERROR: $*" >&2; exit 1; }
 warn() { echo "WARN:  $*" >&2; }
@@ -80,7 +78,6 @@ load_env() {
     die "設定ファイルがありません: $ENV_FILE（site.env.example をコピーして作成）"
   fi
   WG_IFACE=${WG_IFACE:-wg0}
-  WG_FW_ZONE=${WG_FW_ZONE:-wireguard}   # 旧レイアウトで wg0 を入れていた専用ゾーン名（残っていれば消す対象）
   WG_KEEPALIVE=${WG_KEEPALIVE:-25}
   WG_MTU=${WG_MTU:-}
   LAN_ZONE=${LAN_ZONE:-}
@@ -266,8 +263,6 @@ resolve_lan_zone() {
   fi
   firewall-cmd --permanent --get-zones | has_word "$LAN_ZONE" \
     || die "firewalld にゾーン $LAN_ZONE がありません"
-  # 旧レイアウトの掃除で LAN 側ゾーンを消してしまわないように
-  [[ $WG_FW_ZONE != "$LAN_ZONE" ]] || die "WG_FW_ZONE（旧専用ゾーン名）が LAN_ZONE と同じです"
 }
 
 install_tools() {
@@ -610,36 +605,15 @@ fw() { firewall-cmd --permanent "$@" >/dev/null 2>&1; }
 # grep -q は途中で読むのをやめて pipefail で誤判定しうるので、全部読ませる
 has_word() { tr -s ' \n' '\n' | grep -Fx -- "$1" >/dev/null; }
 
-# 旧レイアウト（専用ゾーン WG_FW_ZONE + 方向ごとの policy）が残っていれば消す。
-# policy → ゾーンの順に消す（ゾーンを先に消すと、参照する policy が残って reload が INVALID_ZONE で失敗する）
-cleanup_legacy_firewalld() {
-  local p found=0
-  for p in $(firewall-cmd --permanent --get-policies | tr -s ' \n' '\n' | grep -E "$LEGACY_POLICY_RE" || true); do
-    found=1
-    run firewall-cmd --permanent --delete-policy="$p"
-    [[ ! -f /etc/firewalld/policies/$p.xml.old ]] || run rm -f "/etc/firewalld/policies/$p.xml.old"
-  done
-  if firewall-cmd --permanent --get-zones | has_word "$WG_FW_ZONE"; then
-    found=1
-    # ゾーンを消すと所属していた wg0 も外れる（--remove-interface は不要）
-    run firewall-cmd --permanent --delete-zone="$WG_FW_ZONE"
-    [[ ! -f /etc/firewalld/zones/$WG_FW_ZONE.xml.old ]] || run rm -f "/etc/firewalld/zones/$WG_FW_ZONE.xml.old"
-  fi
-  (( found )) && info "旧レイアウト（ゾーン $WG_FW_ZONE と policy）を削除しました"
-  return 0
-}
-
 setup_firewalld() {
   systemctl is-active --quiet firewalld || die "firewalld が起動していません"
   resolve_lan_zone
-  # 何かを変える前に、wg0 が LAN 側ゾーンでも旧専用ゾーンでもない別のゾーンにあれば止まる
+  # 何かを変える前に、wg0 が LAN 側ゾーンではない別のゾーンにあれば止まる
   local cur
   cur=$(firewall-cmd --permanent --get-zone-of-interface="$WG_IFACE" 2>/dev/null || true)
-  if [[ -n $cur && $cur != "no zone" && $cur != "$LAN_ZONE" && $cur != "$WG_FW_ZONE" ]]; then
+  if [[ -n $cur && $cur != "no zone" && $cur != "$LAN_ZONE" ]]; then
     die "$WG_IFACE は既にゾーン $cur に割り当てられています"
   fi
-  cleanup_legacy_firewalld            # 旧専用ゾーンにあった wg0 は、ここで未割り当てになる
-  [[ $cur != "$WG_FW_ZONE" ]] || cur=""
   fw --zone="$LAN_ZONE" --query-port="$PORT/udp" || run firewall-cmd --permanent --zone="$LAN_ZONE" --add-port="$PORT/udp"
   [[ $cur == "$LAN_ZONE" ]] || run firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface="$WG_IFACE"
   # ゾーン内転送（LAN NIC ⇔ wg0、wg0 → wg0 の折り返しを含む）。組み込みゾーンは既定で有効、--new-zone で作ったゾーンは無効
@@ -858,10 +832,9 @@ cmd_remove() {
   cur=$(firewall-cmd --permanent --get-zone-of-interface="$WG_IFACE" 2>/dev/null || true)
   if [[ $cur == "$LAN_ZONE" ]]; then
     run firewall-cmd --permanent --zone="$LAN_ZONE" --remove-interface="$WG_IFACE"
-  elif [[ -n $cur && $cur != "no zone" && $cur != "$WG_FW_ZONE" ]]; then
+  elif [[ -n $cur && $cur != "no zone" ]]; then
     warn "$WG_IFACE はゾーン $cur に割り当てられています（このスクリプトが入れたものではないので触りません）"
   fi
-  cleanup_legacy_firewalld            # 旧レイアウトの policy・専用ゾーン（wg0 ごと）も消す
   fw --zone="$LAN_ZONE" --query-port="$PORT/udp" && run firewall-cmd --permanent --zone="$LAN_ZONE" --remove-port="$PORT/udp"
   # ゾーンの forward は戻さない（apply 前の状態が分からず、組み込みゾーンでは既定で有効なため）
   run firewall-cmd --reload

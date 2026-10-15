@@ -337,7 +337,7 @@
 1. 共通の bash 設定も外すときだけ、外す。
 
    - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を、この Git Bash に貼る（[Git Bash と WezTerm の設定](../shell-terminal.md#git-bash-と-wezterm-の設定)の手順 6 で入れたもの）
-   - 設定リポジトリも消すなら、[手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)の手順 4 で確かめ、手順 5 を行う。`~/.config/bash` の未 commit・未 push の変更は取り戻せない
+   - 設定リポジトリも消すなら、`~/.config/bash` の未 commit・未 push の変更を確かめ、残すものを退避してから手で消す（取り戻せない）
    - 終わったら、Git Bash の窓は閉じてよい
 
 ### OpenSSH・Git for Windows・Firefox・WezTerm を外す
@@ -677,19 +677,17 @@
    ```powershell
    & {
      $line = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md'
-     $old = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-powershell-paste.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { "プロファイルが無い: $PROFILE"; return }
      $bytes = [System.IO.File]::ReadAllBytes($PROFILE)
      $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|' + [regex]::Escape($old) + '|[^\r\n]*  # shell-terminal\.md)\r?(\n|$)', '$1')
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?(' + [regex]::Escape($line) + '|[^\r\n]*  # shell-terminal\.md)\r?(\n|$)', '$1')
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $PROFILE" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $PROFILE; "消した: $PROFILE" } else { [System.IO.File]::WriteAllBytes($PROFILE, $enc.GetBytes($rest)); "その行だけ消した: $PROFILE" }
    }
    ```
 
    - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
-   - 前の版の手順書（`windows-powershell-paste.md`）の印の行も消す
    - [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 と、[Windows PowerShell 5.1 のキー操作を変える](../shell-terminal.md#windows-powershell-51-のキー操作を変える)の印の行を消す。印の無い行は残る
    - 開いている窓の設定（[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 2・5）は、窓を閉じるまで残る
    - 戻した後の PowerShell のブロックは、既定の Windows モードの conhost の窓では Ctrl+V で貼る（右クリックで貼ると、行が逆順になる）

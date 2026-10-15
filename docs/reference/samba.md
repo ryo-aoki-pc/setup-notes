@@ -114,7 +114,6 @@
   - `.ssh`（`ssh_home_t`）・`.gnupg`（`gpg_secret_t`）・`.config`（`config_home_t`）などは、一般ユーザーのホームと同じ `user_home_type` のラベルなので、手順 4 の boolean で既に許されている
 - **入るのは `<USER>`**: root の Samba ユーザーは登録しない
 - **クライアントでの見え方**: [Samba クライアント](../samba.md#samba-クライアント) の `mount.cifs` は `uid=` / `gid=` で自分の所有に見せるが、サーバーでは `root root` で書かれる
-- **以前に `smbpasswd -a root` で root を登録していたら**: `sudo pdbedit -x -u root` で登録を削除する
 
 ### 参照
 

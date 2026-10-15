@@ -3311,7 +3311,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 共通パスワードでログインするなら、[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 9 の後で[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1・2 を通し、同じ項の手順 10 へ戻る
   - 共通パスワードの項は、このリポジトリを clone したフォルダーで行う（スクリプトを相対パスで呼ぶ）
 - ルート証明書は、[Windows 11 で HTTPS で LAN・VPN に公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 6 で端末に入れる
-- 以前の手順で `codeg-caddy-in` を作ってあるときだけ、既存の受信規則を[Private の全送信元へ切り替える](#grok-build-のブラウザ操作-windows-11-の既存の受信規則を-private-の全送信元に切り替える)
 - 画面の操作とセッションの取り込みは、AlmaLinux と共通の[使い方の基本](#grok-build-のブラウザ操作-使い方の基本)から行う
 
 > [!WARNING]
@@ -3665,7 +3664,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    ```powershell
    $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-   if (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue) { Write-Error '中断: 既存の規則がある。既存規則の切り替え節を通す' } else {
+   if (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' -ErrorAction SilentlyContinue) { Write-Error '中断: 既存の規則がある。名前と目的を確かめる' } else {
      New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe -ErrorAction Stop | Out-Null
      try {
        New-NetFirewallRule -Name 'codeg-caddy-in' -DisplayName 'Codeg (HTTPS)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3443 -RemoteAddress Any -Profile Private -InterfaceType Any -Program $exe -EdgeTraversalPolicy Block -ErrorAction Stop | Out-Null
@@ -3747,7 +3746,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. 別の端末で、受信インターフェースごとに HTTPS の許可と遮断を確かめる。
 
-   - 新規導入はこの項の手順 4、IP 変更後・既存規則の移行後は手順 9 で表示した現在の URL を使う。以前の IP の URL は使わない
+   - 新規導入はこの項の手順 4、IP 変更後は手順 9 で表示した現在の URL を使う。以前の IP の URL は使わない
    - Private の URL ごとに、同じネットワークの別の端末で `curl -sk -o /dev/null -w '%{http_code}\n' <現在の URL>/` を実行し、`200` を確かめる（証明書を入れる前は `-k` を付ける）
    - 有線 LAN・Wi-Fi・VPN は、利用する受信インターフェースごとに確かめる。Private の URL への成功は、そのインターフェースでの許可の確認だけで、Public・Domain での遮断の確認にはならない
    - Public・Domain を試せるなら、手順 4 または手順 9 の表で、対象の受信インターフェースの InterfaceIndex・種類・現在の IPv4 を確かめる。Private の URL は使わない
@@ -4413,7 +4412,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.config/caddy/sites/codeg.caddy`（共通設定は [Caddy: 設定ファイル](almalinux-setup.md#caddy-設定ファイル)） | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先（Windows は認証局の名前も） |
 | `~/.config/systemd/user/caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた（AlmaLinux 10 はホストで共通） |
 | — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | 両タスクで使う、コンソールを作らないランチャー |
-| — | `%LOCALAPPDATA%\codeg-server\startup-backup-*\` | 既存のタスクを切り替えるときの XML の控え |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
@@ -4523,197 +4521,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
    - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
    - 公開を止めるときは、送信元を指定しない規則も [ロールバック](extra/grok-build-remote.md#ロールバック)で外す
-
----
-
-### Grok Build のブラウザ操作: Windows 11 の既存の受信規則を Private の全送信元に切り替える
-
-- 以前の手順で `codeg-caddy-in` を作ったときだけ通す。Codeg を入れたユーザーの、管理者の Windows PowerShell（5.1）で行う
-- この項の手順 1 は、Private の全送信元・全接続種別に公開する。名前とプログラムが一致する既知の規則だけを変え、ほかの規則は変更しない
-- XML の控えは `%LOCALAPPDATA%\codeg-caddy` に残す
-
-1. 既存の規則を XML に控え、Private の全送信元へ切り替える。
-
-   <details>
-     <summary>貼るコマンド（PowerShell・42 行）</summary>
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
-     $exe = Join-Path $dir 'caddy.exe'
-     $names = @('codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi')
-     if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw '中断: caddy.exe が無い' }
-     $oldRules = @(Get-NetFirewallRule -Name $names -ErrorAction SilentlyContinue)
-     if (-not ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-in' })) { throw '中断: codeg-caddy-in が無い。新規導入の手順を通す' }
-     $saved = foreach ($rule in $oldRules) {
-       $application = $rule | Get-NetFirewallApplicationFilter
-       if ($application.Program -ne $exe) { throw ('中断: プログラムが一致しない規則: ' + $rule.Name) }
-       $port = $rule | Get-NetFirewallPortFilter
-       if ($rule.Name -eq 'codeg-caddy-block-public' -and ($port.Protocol -ne 'Any' -or ($port.LocalPort -join ',') -ne 'Any' -or ($port.RemotePort -join ',') -ne 'Any')) { throw '中断: 既存の Public・Domain 遮断規則の Protocol・LocalPort・RemotePort がすべて Any ではない' }
-       [pscustomobject]@{
-         Rule = $rule
-         Application = $application
-         Address = $rule | Get-NetFirewallAddressFilter
-         Port = $port
-         InterfaceType = $rule | Get-NetFirewallInterfaceTypeFilter
-         Interface = $rule | Get-NetFirewallInterfaceFilter
-         Service = $rule | Get-NetFirewallServiceFilter
-       }
-     }
-     $backup = Join-Path $dir ('firewall-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '.xml')
-     if (Test-Path -LiteralPath $backup) { throw '中断: XML の控えが既にある' }
-     $saved | Export-Clixml -LiteralPath $backup -Depth 6
-     if ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-block-public' }) {
-       Set-NetFirewallRule -Name 'codeg-caddy-block-public' -Direction Inbound -Action Block -Enabled True -Profile Public, Domain -Program $exe -Protocol Any -LocalAddress Any -RemoteAddress Any -InterfaceType Any -InterfaceAlias Any
-     } else {
-       New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe | Out-Null
-     }
-     Set-NetFirewallRule -Name 'codeg-caddy-in' -Direction Inbound -Action Allow -Enabled True -Profile Private -Program $exe -Protocol TCP -LocalPort 3443 -EdgeTraversalPolicy Block
-     Set-NetFirewallRule -Name 'codeg-caddy-in' -LocalAddress Any -RemoteAddress Any -RemotePort Any -InterfaceType Any -InterfaceAlias Any
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $backup
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled, EdgeTraversalPolicy -AutoSize
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Get-NetFirewallApplicationFilter | Format-List Program
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallAddressFilter | Format-List LocalAddress, RemoteAddress
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceTypeFilter | Format-List InterfaceType
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceFilter | Format-List InterfaceAlias
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
-   }
-   ```
-
-   </details>
-
-   - XML の控えのパス、`Allow`・`Private` が 1 行と `Block`・`Domain, Public` が 1 行、両方の `Enabled : True` が出ればよい
-   - 両方の `Program` が、この手順書で置いた `caddy.exe` のパスであることを確かめる
-   - Allow の `LocalAddress`・`RemoteAddress`・`InterfaceType`・`InterfaceAlias` が `Any`、`Protocol : TCP`、`LocalPort : 3443`、`EdgeTraversalPolicy : Block` が出ればよい
-   - エラーが出たら中断する。XML の控えと既存の規則を残し、原因を確かめてからやり直す
-   - 既存の Public・Domain 遮断規則は、`Protocol`・`LocalPort`・`RemotePort` がすべて `Any` の場合だけ切り替える。異なる規則では変更前に中断する
-   - 控えは規則と関連フィルターの読み戻し用。`Import-Clixml` だけではファイアウォールへ復元されない
-   - **この項の手順 2 は、以上の読み戻しがすべて一致してから通す**。旧 Wi-Fi 遮断規則は、まだ残してある
-
-1. この項の手順 1 の読み戻しがすべて一致したら、旧 Wi-Fi 遮断規則だけを消す。
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-     $oldWifi = Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue
-     if ($oldWifi) {
-       $application = $oldWifi | Get-NetFirewallApplicationFilter
-       if ($application.Program -ne $exe) { throw '中断: 旧 Wi-Fi 遮断規則のプログラムが一致しない' }
-       $oldWifi | Remove-NetFirewallRule
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled -AutoSize
-     Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue | Format-Table Name
-   }
-   ```
-
-   - 有効な `Allow`・`Private` と `Block`・`Domain, Public` が残り、最後の Wi-Fi 遮断規則の表が出なければよい
-   - 旧規則が無ければ削除は行わない。名前が `codeg-caddy-block-wifi` で、プログラムが一致する規則だけを消す
-   - エラーが出たら中断し、XML の控えと残る規則を保持する
-
-1. 別の端末で、切り替え後の受信インターフェースの許可と遮断を確かめる。
-
-   - [HTTPS で公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 9 で現在の URL と受信インターフェースの表を表示し、同じ項の手順 5 で接続を確かめる
-   - 導入時の手順 4 の古い URL は使わない
-   - Caddy の設定・タスク・認証局・端末に入れたルート証明書は変えない
-   - 終わったら、管理者の窓を閉じる
-
----
-
-### Grok Build のブラウザ操作: Windows 11 の既存のタスクを非表示起動に切り替える
-
-- 以前の手順でタスクを作り、ログオン時に Terminal が開く場合に通す。管理者ではない Windows PowerShell（5.1）で行う
-- この項の手順 3 で、Codeg と Caddy を短時間止める。実行中の会話は中断されるので、作業が終わってから通す
-
-1. ランチャーを用意する。
-
-   - `%LOCALAPPDATA%\codeg-server\codeg-hidden-launcher.exe` が無いときだけ、[Codeg を入れる](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 7 を通す
-   - その項の手順 8 は通さない。既存のタスクは、この項の手順 3 で切り替える
-
-1. Caddy のタスクがあるときだけ、Caddy の起動用スクリプトを用意する。
-
-   ```powershell
-   $script = Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1'
-   if (Test-Path -LiteralPath $script) {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-Item -LiteralPath $script | Select-Object Name, Length
-   } else {
-     [IO.File]::WriteAllText($script, @'
-   $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
-   & (Join-Path $dir 'caddy.exe') run --config (Join-Path $dir 'Caddyfile') --adapter caddyfile
-   exit $LASTEXITCODE
-   '@, (New-Object Text.UTF8Encoding($true)))
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-Item -LiteralPath $script | Select-Object Name, Length
-   }
-   ```
-
-   - `start-caddy-hidden.ps1` の行が出ればよい
-   - 既にファイルがある場合は、Caddy の起動用であることを確かめてから進む。上書きはしない
-
-1. タスクの控えを取り、起動するプログラムだけを切り替えて再開する。
-
-   <details>
-     <summary>貼るコマンド（PowerShell・46 行）</summary>
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
-     $launcher = Join-Path $dir 'codeg-hidden-launcher.exe'
-     $names = @('codeg-server')
-     if (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { $names += 'codeg-caddy' }
-     $scripts = @{ 'codeg-server' = (Join-Path $dir 'start-codeg-server.ps1'); 'codeg-caddy' = (Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1') }
-     if (-not (Test-Path -LiteralPath $launcher)) { Write-Error '中断: ランチャーが無い'; return }
-     $oldActions = @{}
-     foreach ($name in $names) {
-       $oldActions[$name] = (Get-ScheduledTask -TaskName $name).Actions
-       if (-not (Test-Path -LiteralPath $scripts[$name])) { Write-Error "中断: 起動用のスクリプトが無い: $name"; return }
-     }
-     $backup = Join-Path $dir ('startup-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-     New-Item -ItemType Directory -Path $backup | Out-Null
-     foreach ($name in $names) { Export-ScheduledTask -TaskName $name | Set-Content -LiteralPath (Join-Path $backup ($name + '.xml')) -Encoding Unicode }
-     try {
-       $targets = @(Get-CimInstance Win32_Process | Where-Object {
-         ($_.Name -eq 'codeg-server.exe' -and $_.ExecutablePath -eq (Join-Path $dir 'codeg-server.exe')) -or
-         ($names -contains 'codeg-caddy' -and $_.Name -eq 'caddy.exe' -and $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'))
-       })
-       foreach ($target in $targets) {
-         & "$env:WINDIR\System32\taskkill.exe" /PID $target.ProcessId /T /F | Out-Null
-         if ($LASTEXITCODE -ne 0) { throw "停止に失敗: $($target.Name)" }
-       }
-       foreach ($name in $names) { Stop-ScheduledTask -TaskName $name }
-       foreach ($name in $names) {
-         $action = New-ScheduledTaskAction -Execute $launcher -Argument ('"{0}"' -f $scripts[$name])
-         Set-ScheduledTask -TaskName $name -Action $action | Out-Null
-       }
-       foreach ($name in $names) { Start-ScheduledTask -TaskName $name }
-     } catch {
-       foreach ($name in $names) {
-         Stop-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
-         Set-ScheduledTask -TaskName $name -Action $oldActions[$name] | Out-Null
-         Start-ScheduledTask -TaskName $name
-       }
-       Write-Error "中断: 以前の起動方法へ戻した。$($_.Exception.Message)"
-       return
-     }
-     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $backup
-     Get-ScheduledTask -TaskName $names | Select-Object TaskName, State, @{ Name = 'Execute'; Expression = { $_.Actions.Execute } }
-     Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
-   }
-   ```
-
-   </details>
-
-   - 控えのフォルダー、`Running` とランチャーのパス、`127.0.0.1:3080` が出ればよい
-   - Caddy のタスクもある場合は、`Running` が 2 行と `::` の 3443 の待ち受けも出ればよい
-   - 新しい Terminal のウィンドウが開かないことを確かめ、いつもの URL でブラウザから開く
-   - 控えの XML とランチャーは、ふだんの Codeg の更新では消さない
 
 ---
 

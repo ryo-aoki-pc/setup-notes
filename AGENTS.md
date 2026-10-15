@@ -81,9 +81,8 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - **入力は `site.env` 1 ファイル**。両拠点に同じファイルを置く。`select_site A|B` が `SITE_A_*` / `SITE_B_*` から `MY_*` / `PEER_*` を組み立てるので、以降の処理は拠点を意識しない。このホストの LAN 側 IP が `WG_x_LAN_IP` と一致しなければ何も変更せずに止まる
 - **変更を伴うコマンドはすべて `run()` を通す**。`--dry-run` はこれで実現しているので、新しい副作用も必ず `run` 経由にする
 - **各段階で検査してから変更する**。`validate_addresses` は Python の `ipaddress` で形式・重複・包含関係を検査する。入力や未知 peer の事前検査で止まれば設定は反映しないが、`apply` の後半で失敗すると、それ以前に行った設定変更は残りうる。すべての検査失敗で無変更になるとは案内しない
-- `apply` は冪等。`clients.list` の登録簿から毎回 conf を組み立て直し、firewalld は存在確認してから追加し、最後は常に `systemctl restart`（reload では経路が変わらないため）。旧レイアウト（専用ゾーン + policy）が残っていれば policy → ゾーンの順で消す（逆順だと firewalld の設定が壊れる）
+- `apply` は冪等。`clients.list` の登録簿から毎回 conf を組み立て直し、firewalld は存在確認してから追加し、最後は常に `systemctl restart`（reload では経路が変わらないため）
 - `PrivateKey` は conf に直接書く。`PostUp` で読み込む方式は reload で鍵が消える
-- `firewall-cmd --query-policy` は 2.4.3 に存在しない。存在確認は `--info-policy` の終了コードで行う
 
 スクリプトの挙動を変えたら、[WireGuard の参考資料の「スクリプトの動作」](docs/reference/wireguard.md#スクリプトの動作)と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）も合わせて直す。
 

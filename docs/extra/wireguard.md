@@ -9,7 +9,7 @@
 
 - 各拠点の WG ホストで、**必要なところまで**貼る（後の手順ほど戻しにくい）
 - ルーター側の設定は、この節の手順 5 で消す
-- → [全部消すときの補足](../reference/wireguard.md#全部消すときの補足)
+- → [スクリプトの動作](../reference/wireguard.md#スクリプトの動作)
 
 > [!CAUTION]
 > **鍵を消す前に。** 同じ鍵で戻す可能性が少しでもあるなら、先に[バックアップ](../wireguard.md#wireguard-バックアップと復旧os-の再インストール)を取る。**この節の手順 2 で鍵が消え、そこから先は戻せない。** 鍵を作り直すと、相手拠点の `site.env` と conf の公開鍵の差し替え、クライアント全台の conf 再発行が連鎖する。
@@ -223,8 +223,6 @@ sudo ./wg-vpn.sh -e ~/wg/site.env client add B <名前> \
 }
 ```
 
-方向ごと・組み合わせごとに細かく絞る構成が要るなら、専用ゾーン + policy の旧レイアウト（履歴 `d364840` 以前の `docs/wireguard.md` と `wg-vpn.sh`）が参考になる。
-
 #### `AllowedIPs` が cryptokey routing の要
 
 `AllowedIPs` は次の 2 つの役割を持つ。
@@ -305,8 +303,7 @@ sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-service=cockpit && sudo f
 ```
 
 - Cockpit は `9090/tcp`（firewalld の `cockpit` サービス）。ホスト側で動いているかは `systemctl is-active cockpit.socket` で確認する。ブラウザからは `https://${WG_x_LAN_IP}:9090`
-- 旧レイアウトでは、`wg0` を入れた専用ゾーンが**何も開いていなかった**
-  - 転送用の policy は**ホスト自身宛ての通信には効かない**ので、専用ゾーンに service を開ける必要があった
+- 転送用の policy は**ホスト自身宛ての通信には効かない**。ホスト自身宛ての service は LAN 側ゾーンで開ける
 - ssh はトンネルの向こう側全体から届く。公開鍵認証のみにする（`PasswordAuthentication no`）などの対策は別途行う
 
 #### 片側がグローバル IP を持たない場合（CGNAT など）
@@ -369,7 +366,6 @@ cryptokey routing の制約（[`AllowedIPs` が cryptokey routing の要](#allow
 - ホストのゾーンの forward はこれも許可するが、**生成したクライアント conf の `AllowedIPs` は両拠点 LAN とホスト間のトンネル帯だけ**で、クライアント帯は含まない
 - 通すには、通信する各クライアントの `AllowedIPs` に必要なクライアント帯を追加して、経路と受信元の許可をそろえる必要がある
 - 隔離したい場合は、LAN 側ゾーンに rich rule を足す（例: `rule family=ipv4 source address=$WG_A_CLIENT_NET destination address=$WG_A_CLIENT_NET reject`）
-- 旧レイアウトでは、policy を作らない限り通らなかった
 
 #### Endpoint に DDNS 名を書く場合
 

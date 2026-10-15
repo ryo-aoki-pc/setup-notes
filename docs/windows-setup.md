@@ -712,11 +712,10 @@
    ```powershell
    & {
      $line = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md'
-     $old = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-powershell-paste.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
      $text = Get-Content -LiteralPath $PROFILE -Raw
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($text -and ($text.Contains($line) -or $text.Contains($old))) { "すでにある: $PROFILE" } else {
+     if ($text -and $text.Contains($line)) { "すでにある: $PROFILE" } else {
        if ($text -and -not $text.EndsWith("`n")) { $line = "`r`n" + $line }
        Add-Content -LiteralPath $PROFILE -Value $line
        "足した: $PROFILE"
@@ -727,7 +726,7 @@
 
    - `足した:` とプロファイルのパス、足した行が出ればよい。OneDrive のバックアップ対象なら、パスは OneDrive の下
    - プロファイルにほかの行があれば、それも出る
-   - 追加済みなら `すでにある:` と出て、重複しない。旧 `windows-powershell-paste.md` で足した行も含む
+   - 追加済みなら `すでにある:` と出て、重複しない
 
 ---
 

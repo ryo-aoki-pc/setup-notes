@@ -21,7 +21,6 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - IP フォワーディング
 - firewalld（LAN 側ゾーンに `${WG_PORT}/udp` と `wg0` を追加し、ゾーン内転送を有効にする）
 - `wg-quick@wg0` の有効化と起動
-- 旧レイアウトの専用ゾーンと policy が残っていれば、先に消す
 - 再実行しても設定は重複しない。`site.env` を変えたときやクライアントを足したときも、`apply` で反映する（最後に必ず restart する）
 
 ### 鍵を作って適用する / 手順 6: 補足: 疎通を確かめる時期
@@ -340,7 +339,7 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 - `client add` は、帯の重複・名前や IP の重複・拠点の取り違えなどを**何かを書く前に**検査する
 - トンネル IP は、`--ip` が無ければ帯の中で最小の空きを割り当てる
 - クライアント用 conf には、`site.env` の `WG_MTU` に値があれば、同じ `MTU =` を書く（空なら書かない）。書くのは `client add` のときだけで、配布済みの conf は作り直さない
-- `remove A` は `wg0` と待ち受けポートを LAN 側ゾーンから外し（forward は戻さない。旧レイアウトの残骸があればそれも消す）、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）
+- `remove A` は `wg0` と待ち受けポートを LAN 側ゾーンから外し（forward は戻さない）、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）
 
 `keygen` の動作: `wireguard-tools` が無ければ dnf で入れ、鍵が無ければ生成する。**既存の鍵は上書きしない**（公開鍵だけ表示し直す）。
 
@@ -363,9 +362,9 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 `remove` の動作:
 
-- サービスを `disable --now` し、`wg0` を LAN 側ゾーンから外し、旧レイアウトの policy・専用ゾーンがあれば消し、待ち受けポートを外して reload する
+- サービスを `disable --now` し、`wg0` を LAN 側ゾーンから外し、待ち受けポートを外して reload する
 - ゾーンの forward は戻さない（`apply` 前の状態が分からず、組み込みゾーンでは既定で有効なため）
-- LAN 側ゾーンの `<ゾーン名>.xml.old` は、firewalld がゾーンを書き換えるたびに作る通常のバックアップなので消さない（旧レイアウト由来の `*.xml.old` だけ消す）
+- LAN 側ゾーンの `<ゾーン名>.xml.old` は、firewalld がゾーンを書き換えるたびに作る通常のバックアップなので消さない
 - `/etc/sysctl.d/90-wireguard.conf` を消して、`ip_forward` を 0 に戻す
 - `--purge` を付けたときだけ、`wg0.conf`・鍵・`clients.list` にあるクライアント用 conf を消す
 - `clients.list`・`~/wg`・パッケージは残し、ルーター側は手で戻す
@@ -416,41 +415,7 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 `clients.list` も失った場合は、各クライアントの公開鍵を端末側の conf から読み出すか、全台を登録し直す。
 
-### 全部消すときの補足
-
-#### 旧レイアウト（専用ゾーン + policy）からの移行
-
-**移行は現在の `apply` が自動で行う。** 両拠点の WG ホストで:
-
-```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply B   # 消す policy・ゾーンと、LAN 側ゾーンに足すものを確認する
-```
-
-dry-run の出力を確かめてから、本実行する。
-
-```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env apply B
-```
-
-`apply` は次の順に行う（変更は permanent にまとめて入れ、最後に 1 回だけ reload する）。
-
-1. 名前が `site[AB]-to-(site|clients)[AB]` / `clients[AB]-to-site[AB]` に一致する policy を消す（他の policy には触れない）
-1. `${WG_FW_ZONE}` ゾーンを消す（所属していた `wg0` はここで外れる）。旧レイアウト由来の `*.xml.old` も消す
-1. LAN 側ゾーンに `${WG_PORT}/udp`・`wg0`・forward を入れて reload する
-
-```bash
-{
-  for p in $(sudo firewall-cmd --permanent --get-policies | tr ' ' '\n' \
-             | grep -E '^(site[AB]-to-(site|clients)[AB]|clients[AB]-to-site[AB])$'); do
-    sudo firewall-cmd --permanent --delete-policy="$p"
-  done
-  sudo firewall-cmd --permanent --delete-zone=wireguard
-  sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface=wg0 --add-port="$WG_PORT/udp" --add-forward
-  sudo firewall-cmd --reload
-}
-```
-
-**移行は両拠点で行う。**
+### firewalld のポリシーが転送へ与える影響
 
 #### `gateway-lan-to-world` について（LAN 側ゾーンが `internal` / `home` / `trusted` の場合）
 

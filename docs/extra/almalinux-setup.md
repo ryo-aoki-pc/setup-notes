@@ -65,7 +65,7 @@
    ```
 
    - 何も出なければ消えている
-   - lazygit の `git.diffRenderers` に delta の項目を足していた場合は、その項目も消す（ほかの renderer は残す）。以前の `git.paging` を使っていた場合は、そちらの delta 設定を外す
+   - lazygit の `git.diffRenderers` に delta の項目を足していた場合は、その項目も消す（ほかの renderer は残す）
 
 1. このホストの認証情報も外すときだけ、ローカルからログアウトする。
 
@@ -566,7 +566,7 @@
 
 1. 共通の bash 設定も戻すときだけ、bash リポジトリの設定を戻す。
 
-   - `install.sh` で入れたなら [install.sh で入れた共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)、手で移行したなら [共通の bash 設定の手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
    - ツールを消しただけなら、共通設定は残してよい（入っていないツールの設定は読まない）
 
 1. 開いている端末を閉じて、開き直す。
