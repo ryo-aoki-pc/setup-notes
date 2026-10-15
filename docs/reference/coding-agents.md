@@ -74,7 +74,7 @@
 | Claude Code から Codex・Grok を呼ぶ | Claude Code にシェルで `codex review`・`grok -p` を動かさせる | 代わりの方法として載せた（使い方の基本の表） | 依存は増えない。裏で動かして状況を見る機能は無い |
 | Claude Code から Codex・Grok を呼ぶ | MCP で Codex を呼ぶ（`codex mcp-server`） | 使えない | Codex 0.154.0 で削除された |
 | Claude Code から Codex・Grok を呼ぶ | PAL MCP Server（旧 Zen MCP Server） | 採らない | 2025-12 から更新が無い。Grok は API キー（従量課金）が要る |
-| エージェントの変更を人に渡す | エージェントが自分のブランチを push し、`main` への Pull Request を作る。取り込みは人 | 採った（2026-10-10 から。AGENTS.md の規則） | リモートと、push の認証・Pull Request を作る道具（GitHub は gh）。リモートが無ければ、ブランチへのコミットまで |
+| エージェントの変更を人に渡す | エージェントが自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit） | 採った（2026-10-10 から push と作成。2026-10-15 から取り込みも可。いずれも利用者の決定） | リモートと、push の認証・Pull Request を作る道具（GitHub は gh）。リモートが無ければ、ブランチへのコミットまで |
 | エージェントの変更を人に渡す | push も Pull Request も人が行い、エージェントはブランチへのコミットまで | 採らない（2026-10-09 の初版の形） | 人の手間が増える。リモートの無いプロジェクトでは、今の形でも同じになる |
 | 役割を分けてレビューし合う | 書いたものとは別のモデルが、新しい会話でレビューし、人が指摘を選ぶ | 採った（分担して作業する・相互にレビューする・main に取り込む） | 3 つの契約の使用量を使う |
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
@@ -92,9 +92,13 @@
 - 規則は AGENTS.md 1 つにまとめ、同じものを読ませる（AlmaLinux 10 は 3 つ、Windows 11 は Antigravity CLI を含む 4 つ）。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
 - 作業場所は素の `git worktree` で分け、worktree の間の受け渡しはブランチへのコミットで行う。そのための push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
-- 変更を担当するエージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
+- 変更を担当するエージェントは、リモートがあるとき、自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
   - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
-  - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順で手元で取り込んでもよい
+  - 2026-10-15 に、利用者の決定で Pull Request の取り込みもエージェントが行ってよいことにした。それまでは、取り込みは人が行っていた
+  - テストとリンターが通り、Pull Request が競合していなければ取り込める。利用者が取り込まないよう頼んだときは取り込まず、そのことを報告する
+  - Pull Request は、ホスティングの画面や `gh pr merge --merge` で取り込める。squash と rebase にせず、各 worktree の `--ff-only` が通る形を保つ
+  - docs とそのサブモジュールの 11 個のリポジトリの AGENTS.md は、`gh pr merge --squash` にした。作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないため、この節の `--ff-only` でそろえる形と分けた
+  - 手元での取り込み（[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順）と `main` の push・ブランチの削除は人が行う
 - GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
 
 ### 既定の分担
@@ -102,7 +106,7 @@
 - 2026-10-15 の利用者の決定で、分担を指定しないファイル変更の依頼も Claude Code が取りまとめる
   - 適用範囲は docs リポジトリとその 10 個のサブモジュールに絞り、11 個のリポジトリの AGENTS.md の末尾に同じ `## 既定の分担` を置く。ほかのプロジェクトへは自動で適用しない
 - ほかのプロジェクトでも同じ既定を入れるための手順を、[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)に残す。手順の対象は Windows 11。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは Claude Code だけで行う
-- Claude Code は計画・実機での確認・依頼・指摘の確認・統合・コミットと Pull Request を担当し、Codex は別の clone か worktree で実装と下書きを担当する
+- Claude Code は計画・実機での確認・依頼・指摘の確認・統合・コミットと Pull Request・取り込みを担当し、Codex は別の clone か worktree で実装と下書きを担当する
   - Codex の Windows の sandbox では `git add`・`git commit` ができないので、Codex はコミットもステージもせず、Claude Code が確かめてからコミットする
 - Windows 11 の Grok には sandbox が無いので、差分の読み取り専用のレビューを担当させる。`--always-approve` は付けず、入力を専用のフォルダーへ写し、その外を読ませず、前後のハッシュを比べる
   - 読み取り専用の依頼文とハッシュ比較は、書き込みを禁じる sandbox の代わりにはならない
@@ -112,7 +116,7 @@
 - エージェントが入っていない・ログインが切れた場合や AlmaLinux 10 の Antigravity CLI は飛ばし、そのことを報告する
   - AlmaLinux 10 は、Antigravity CLI を足さない従来の 3 つの構成のまま。AGENTS.md の節は両 OS で同じ文にし、AlmaLinux 10 での頼み方（Grok の sandbox を使うかなど）は実機で通すまで手順にしない
 - Claude Code だけで行う直しを「1 つのファイルの数行で振る舞いを変えない直し」にしたのは、レビューだけで 10〜25 分かかり、誤字やリンクの直しまで 4 つで回すと待ち時間が見合わないため
-- この分担で頼まれた Codex は、「共同作業の規則」のコミット・push・Pull Request を行わない。規則と既定の分担がぶつからないよう、節の中に書いた。利用者がほかのエージェントに直接頼んだときは、この節を使わない
+- この分担で頼まれた Codex は、「共同作業の規則」のコミット・push・Pull Request・取り込みを行わない。規則と既定の分担がぶつからないよう、節の中に書いた。利用者がほかのエージェントに直接頼んだときは、この節を使わない
 
 Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使ったもの。2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52、Antigravity CLI 1.3.5）。
 
