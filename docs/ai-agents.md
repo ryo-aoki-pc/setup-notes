@@ -2889,7 +2889,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - **この実施手順は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
 > - **Grok Build を使う一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
 > - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
-> - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す。Codeg 専用の Caddy で動いているホストは、[Caddy: Codeg 専用の Caddy から切り替える](almalinux-setup.md#caddy-codeg-専用の-caddy-から切り替える)を使う
+> - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す
 > - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく

@@ -59,7 +59,7 @@
 - AlmaLinux 10 は、[共通の Caddy](../almalinux-setup.md#caddy)に `sites/codeg.caddy` を足す。本体の入手・共通設定・サービス・指紋の照合は [Caddy の参考資料](caddy.md)にまとめる
 - `bind` は、待ち受ける IP を限定する。`tls internal` はホスト共通の認証局でその IP 用の証明書を作る。`import root-crt` は共通の `root.crt` を配る
 - `handle` の `reverse_proxy 127.0.0.1:3080` は残りの通信を Codeg に渡す。WebSocket も通る
-- Windows 11 は専用の本体・Caddyfile・タスクの構成を保つ。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
+- Windows 11 は専用の本体・Caddyfile・タスクを使う。グローバル設定の各行の意味は [共通の説明](caddy.md#caddy-入れて起動する--手順-4-共通の-caddyfile)と同じ
 
 ### 実施手順 / HTTPS で LAN・VPN に公開する / 手順 3・4: 補足: 待ち受けと規則
 
@@ -71,7 +71,7 @@
 ### 端末にルート証明書を入れる / 指紋の照合
 
 - [Caddy の参考資料](caddy.md#caddy-端末にルート証明書を入れる--指紋の照合)を参照する。AlmaLinux 10 は Forgejo などと同じ認証局を共有し、同じホストのために取り込み済みの端末には入れ直さない
-- Windows 11 の認証局は従来どおり Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
+- Windows 11 の認証局は Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
 
 ### 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 

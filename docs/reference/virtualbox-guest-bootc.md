@@ -35,7 +35,7 @@
 
 ### ホストオンリーアダプターだけの VM でビルドする / 手順 4: 補足: 鍵をホストに置く理由と扱い
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする任意--手順-3-補足-鍵をホストに置く理由と扱い)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ホストオンリーアダプターだけの-vm-でビルドする--手順-3-補足-鍵をホストに置く理由と扱い)
 
 - モジュールに署名するのは、この節の手順 7 のビルド（ホスト）なので、秘密鍵もホストに置く。VM には公開鍵の証明書だけを送る
 - 鍵の作り方（CN も）は [Secure Boot の署名鍵の手順 4](../almalinux-setup.md#secure-boot-の署名鍵) と同じで、置き場所と持ち主（自分のユーザー）だけが違う

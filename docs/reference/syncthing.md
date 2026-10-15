@@ -103,7 +103,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 - 保存先の `~/syncthing-backup`（0700）と、スクリプト `~/.local/bin/syncthing-backup` ができる
 - スクリプトは保存先のディレクトリが無いと、作らずに失敗する
-- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#設定を自動でバックアップする任意--手順-1-補足-スクリプトの作り)）
+- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#設定を自動でバックアップする--手順-1-補足-スクリプトの作り)）
 
 ### 設定を自動でバックアップする / 手順 2: 補足: ユニットの役割
 

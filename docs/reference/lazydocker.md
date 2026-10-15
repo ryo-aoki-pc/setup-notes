@@ -80,7 +80,7 @@ SocketMode=0660
 
 ### root でも使う / 手順 4: 補足: 画面の中身
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#root-でも使う任意--手順-4-補足-画面の中身)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#root-でも使う--手順-4-補足-画面の中身)
 
 - 出るのは root のコンテナとイメージだけ。[手順 3](../almalinux-setup.md#lazydocker) の `lazydocker-web` と、自分のユーザーの `quay.io/podman/hello` は出ない
 - `-i` を付けずに `sudo lazydocker` と打つと（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通したホスト）、`Error` の枠に次が出て、枠は空のまま:

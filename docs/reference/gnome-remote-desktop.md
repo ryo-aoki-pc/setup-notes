@@ -127,23 +127,23 @@ journalctl -u gdm -f
 - 先頭の `if` は、`LAN_SUBNET` が空のままブロックを貼ったときに、`rdp` サービスだけ消えて rich rule が空アドレスで入るのを防ぐ
 - rich rule は**二重引用符**で囲む。単一引用符だと `${LAN_SUBNET}` が展開されず、firewalld は `$LAN_SUBNET` という文字列のままの rule を `success` で受理してしまう
 
-### 設定済みのサーバーで GDM の後に起動させる / 手順 2: 補足: すれ違ったときのログ
+### GNOME のリモートログイン / 手順 5: 補足: 起動時のログ
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#設定済みのサーバーで-gdm-の後に起動させる--手順-2-補足-すれ違ったときのログ)
+[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#起動時に-gdm-の表示を取得できなかったログ)
 
-- 今のデーモンのプロセス（MainPID）のログだけを数える。起動の後にデーモンを再起動していれば `0` になる
+- ログを読むときは、今のデーモンのプロセス（MainPID）を対象にする
 
-### 設定済みのサーバーで GDM の後に起動させる / 手順 3: 補足: 閉じるセッション
+### デーモンを起動し直す / 手順 1: 補足: 閉じるセッション
 
 - 真っ暗なまま残っていたリモートログインのログイン画面のセッションは、止めたときに閉じる（`loginctl list-sessions` の `gdm` の `greeter` で、SEAT が `-` のもの）
 
-### 設定済みのサーバーで GDM の後に起動させる / 手順 4: 補足: 受け渡し役のデーモン
+### デーモンを起動し直す / 手順 2: 補足: 受け渡し役のデーモン
 
-- 同じ項の手順 3 の後、受け渡し役のデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある
+- 同じ項の手順 1 の後、受け渡し役のデーモンは引き渡し口を取り直さないまま止まる。`[DaemonHandover] Could not get session id` が出ることも、何も出ないこともある
 
-### 設定済みのサーバーで GDM の後に起動させる / 手順 5: 補足: 今のデーモン
+### GNOME のリモートログイン / 手順 5: 補足: 設定を反映する時点
 
-- 次の起動からの順番が戻るだけで、今動いているデーモンはそのまま
+- ドロップインの設定は次の起動から効く。既に動いているデーモンはそのまま
 
 ### 選択した方針
 

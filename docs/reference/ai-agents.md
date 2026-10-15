@@ -18,7 +18,7 @@
   - `<summary>` の行は 2 スペース深く（5 スペース）する。Neovim の Markdown の整形（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) の `glfm_markdownlint`）が、埋め込んだ HTML をタグの入れ子に合わせて字下げするため、その結果に揃える
   - `<summary>` は `<details>` と同じ HTML のブロックの中の行なので、字下げを変えても GitHub の描画は変わらない（前後の描画を GitHub の Markdown API で比べた。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-summary-の字下げを変えたときの描画の比べ2026-10-15)）
 - GitHub の Web での開閉とコードブロックは[公式の説明](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)を参照した
-  - 描画の確認と、モバイルアプリなどの未確認範囲は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-ai-エージェントの手順を分けたときの静的な確認2026-10-14)にある
+  - 描画の確認と、モバイルアプリなどの未確認範囲は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-構文描画と-web-の一次情報の確認2026-10-14)にある
 
 ### スクリーンショットと Windows 11 の Codeg
 
