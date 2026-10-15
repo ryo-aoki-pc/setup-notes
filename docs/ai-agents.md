@@ -1302,7 +1302,7 @@
 1. 導入先・登録・CLI の状態を確かめ、ダウンロードしたファイルを消す。
 
    <details>
-   <summary>貼るコマンド（PowerShell・23 行）</summary>
+     <summary>貼るコマンド（PowerShell・23 行）</summary>
 
    ```powershell
    if (-not $AG_APP_INSTALLER -or -not $AG_APP_DOWNLOAD_DIR) {
