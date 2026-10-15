@@ -15,6 +15,7 @@
   - 2冊（と、そこから分けた gnome-remote.md）に残した AI 依存の手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスクの手順、gnome-remote.md（2026-10-15 までは almalinux-setup.md）の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップインの手順
   - Antigravity CLI の追加（2026-10-15）: Windows 11 だけを対象に、公式インストーラーでの導入・設定ファイル・更新、Codeg の Antigravity、共同作業の 4 つ目の worktree と読み取り専用の依頼を追加した。AlmaLinux 10 は対象外
     - Windows 11 / x64 の実機で CLI 1.3.5 を管理者ではない Windows PowerShell 5.1 から導入し、SHA-512・署名・版・PATH、個人の Google アカウントのログイン、`agy models`・JSON の応答、AGENTS.md・GEMINI.md の読み込みを確認した
+    - 新規の導入は、保存して中身を確かめたインストーラーを scriptblock にして行った。手順 2 の `Invoke-RestMethod` の形は、入った後に流し、「既に入っている」の分岐までを確かめた
     - headless の既定で作業フォルダーと `%TEMP%` には書ける一方、その外の読み書きとシェルのコマンドは拒まれた。`--sandbox` を付けてもコマンドは拒まれ、拒否時も終了コード 0 だった。使い捨ての入力のコピーと前後のハッシュ比較を境界にする
     - `agy update`（新しい版が無いときの表示）と、インストーラーが残した staging の一時ファイルの削除も確かめた。CLI・ACP サーバーの撤去は実行していない。自動更新を止める方法は未確認
     - Codeg v0.35.1 の Google Antigravity（純正 ACP サーバー 1.3.0）は CLI と別にログインし、接続確認の応答とファイル作成の拒否を確認した。Active Workspaces の先頭が skills になり、作業フォルダーの AGENTS.md は読まれない
@@ -187,6 +188,7 @@
   - Windows 11 への Antigravity CLI の追加（2026-10-15、現行の ai-agents.md）: `antigravity` と `agent/antigravity` を 4 つ目の worktree・ブランチにし、読み取り専用のレビューと調べものを頼む。AlmaLinux 10 は従来の 3 つのまま
     - 使い捨てのリポジトリで「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（手順 2 は 4 つの CLI の版とログイン）
     - 同じ項の手順 8 は Claude・Codex・Antigravity CLI の規則の読み込みまで。Grok の `--trust inspect` の行と手順 9 は通していない。CLI の headless の権限の確認と Codeg の接続確認だけを、4 エージェントの実分担の成功として扱わない
+    - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
 - `docs/grok-build-remote.md` — **AlmaLinux 10 と Windows 11 が対象で、手順が OS で違う手順書**（syncthing.md の形。`## 実施手順` は AlmaLinux 10 で 3 項〔Codeg のサーバーを入れて localhost で起動する・ブラウザで開いて Grok を動かす・HTTPS で LAN・VPN に公開する〕、Windows 11 は後ろの `## Windows 11 で使う`〔2 項〕・`## Windows 11 で止める・もう一度始める`・`## Windows 11 の更新`・`## Windows 11 のロールバック`。`## 端末にルート証明書を入れる`・`## 使い方の基本`・`## 端末の grok のセッションを取り込む`・`## Claude Code と Codex CLI も操作する`・`## 設定ファイル` は両 OS で 1 つ）。公式の遠隔操作の画面が無い Grok Build を、OSS の Codeg（Apache-2.0）の `codeg-server` を同じホストに常駐させて、ブラウザのチャット形式の画面から動かす。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。前提は 2 つの初期設定の「Grok Build」と、AlmaLinux 10 は linger.md
   - 形: まず localhost で起動して確かめ、その後で公開する。Codeg は `127.0.0.1:3080` のまま変えず、Caddy が HTTPS の 3443 番で受けて渡す。AlmaLinux 10 は待ち受ける IP と送信元 CIDR を絞る（複数を並べられる）。Windows 11 は受信インターフェースが Private なら全送信元の IPv4・IPv6 と全接続種別を許可し、Public・Domain と Edge Traversal は遮断する。証明書は Caddy の認証局（`tls internal`。ホストごとに別、名前は `Codeg <ホスト名>`）で、端末にルート証明書を入れる（指紋を照合する）。配布物は版を決めて取得し、チェックサムと照合してホームに置く（公式のインストーラーや、EPEL・Homebrew・scoop は使わない）。AlmaLinux 10 は systemd のユーザーサービス、Windows 11 はタスク スケジューラ（管理者ではない権限。SSH のセッションからは始めない）
   - トークンの扱い: アクセストークンは利用者が作り、エージェントは値を読まない。Codeg は起動のたびに標準エラーへトークンを出すので、ユニットは `StandardError=null`。確認のブロックは、トークンを引数に書かない形（`curl -K -`・`grep -cFf <(…)`）にしてある。直すときも、この形を崩さない

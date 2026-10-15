@@ -156,9 +156,9 @@
 > [!CAUTION]
 > [Windows 11 で AI エージェントとプラグインを消す](#windows-11-で-ai-エージェントとプラグインを消す)の手順 5 は **Claude Code の設定・許可済みのツール・MCP サーバーの定義・セッションの履歴・ログインの情報・ディレクトリの信頼を**、同じ項の手順 14 は **Grok のログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree を消す**（取り戻せない）。入れ直すかもしれないなら、その手順は行わない。
 >
-> 「Windows 11 で Antigravity CLI を消す」の手順 5 は、`%USERPROFILE%\.gemini\antigravity-cli` と `%USERPROFILE%\.gemini\config` を消す（取り戻せない）。
+> [Windows 11 で Antigravity CLI を消す](#windows-11-で-antigravity-cli-を消す)の手順 5 は、`%USERPROFILE%\.gemini\antigravity-cli` と `%USERPROFILE%\.gemini\config` を消す（取り戻せない）。
 >
-> 「Windows 11 で Codeg の Antigravity を消す」の手順 2 は、`%USERPROFILE%\.gemini\antigravity-acp` を消す（取り戻せない）。残したい設定・ログイン情報があるなら、その手順は行わない。
+> [Windows 11 で Codeg の Antigravity を消す](#windows-11-で-codeg-の-antigravity-を消す)の手順 2 は、`%USERPROFILE%\.gemini\antigravity-acp` を消す（取り戻せない）。残したい設定・ログイン情報があるなら、その手順は行わない。
 
 ### Windows 11 で AI エージェントとプラグインを消す
 
@@ -335,7 +335,7 @@
    agy
    ```
 
-   - `agy` の中で `/logout` を実行し、`/quit` で終了する
+   - `agy` の中で `/logout` を実行し、`/quit` で終了する（`/logout` は実行していない。未検証）
    - **次の手順は、Antigravity CLI を終えて PowerShell に戻ってから貼る**（続けて貼ると CLI への入力になる）
 
 1. Antigravity CLI の実行ファイルのフォルダーを消す。
@@ -347,21 +347,25 @@
    ```
 
    - `False` が出ればよい
+   - 確認用のディレクトリ `%USERPROFILE%\agy-sandbox`（[Windows 11 で Antigravity CLI を入れる](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)の手順 5）も残る。要らなければ手で消す
 
 1. ユーザー用 PATH から Antigravity CLI の入口を外す。
 
    - スタートメニューで「環境変数」を検索し、自分のアカウントの環境変数を開く
    - ユーザー環境変数の `Path` から `%LOCALAPPDATA%\agy\bin` に相当する行だけを削除する
+   - **次の手順は、環境変数の画面を「OK」で閉じてから貼る**
 
 1. 通常の Windows PowerShell 5.1 で、インストーラーの一時ファイルのフォルダーを消す。
 
    ```powershell
-   Remove-Item -LiteralPath "$env:LOCALAPPDATA\antigravity" -Recurse -Force -ErrorAction SilentlyContinue
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\antigravity\staging" -Recurse -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:LOCALAPPDATA\antigravity"
+   Test-Path "$env:LOCALAPPDATA\antigravity\staging"
+   Get-ChildItem -LiteralPath "$env:LOCALAPPDATA\antigravity" -Force -Name -ErrorAction SilentlyContinue
    ```
 
    - `False` が出ればよい
+   - その後ろに何も出なければ、空の `%LOCALAPPDATA%\antigravity` は手で消してよい。何か出たら、ほかの Antigravity の製品が使っているので残す
 
 1. 完全に消すときだけ、Antigravity CLI の設定と会話の記録のフォルダーを消す（取り戻せない）。
 
@@ -372,6 +376,7 @@
    ```
 
    - `False` が 2 行出ればよい
+   - Antigravity のほかの製品（アプリなど）も使っているなら、共有の設定の `%USERPROFILE%\.gemini\config` は消さない。この手順を飛ばすか、`antigravity-cli` だけを消す
 
 1. 資格情報マネージャーの Antigravity CLI の資格情報を消す。
 
@@ -380,6 +385,7 @@
    ```
 
    - 対象は `gemini:antigravity` の資格情報だけ
+   - このコマンドは実行していない（未検証）。消えなければ、資格情報マネージャーの画面の「Windows 資格情報」から `gemini:antigravity` を削除する
 
 1. PowerShell とその親の Windows Terminal などを閉じ、通常の Windows PowerShell 5.1 を開き直す。
 
@@ -401,6 +407,7 @@
 
    - Antigravity の会話のタブを閉じる
    - 設定の「エージェント」で「Google Antigravity」を開き、「アンインストール」を選ぶ
+   - **次の手順は、アンインストールが終わってから貼る**
 
 1. 通常の Windows PowerShell 5.1 で、ACP サーバーの設定とログイン情報を消す（取り戻せない）。
 

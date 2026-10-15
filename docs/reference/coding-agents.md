@@ -95,13 +95,14 @@
 
 - Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
 - CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](grok-build-remote.md)）
-- Windows のコマンドの sandbox は 1.2.17 からあるが、既定の `request-review` では sandbox の中のコマンドにも承認が要る。headless では承認を求められず、コマンドは拒まれる
-- headless は、作業フォルダーと `%TEMP%` の読み書きを確認なしで許す。作業フォルダーを信頼していなくても書けるので、読み取り専用という依頼文だけでは書き込みを防げない
+- Windows のコマンドの sandbox は 1.2.17 からある（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。実測では、既定の `request-review` のまま `--sandbox` を付けても、headless ではコマンドが拒まれた
+- 実測で、headless は作業フォルダーの中の書き込みと、作業フォルダーの外でも `%TEMP%` の下への書き込みを、確認なしで許した。作業フォルダーと `%TEMP%` の外の読み書きと、シェルのコマンドは拒まれた。作業フォルダーの外の `%TEMP%` を読めるかは測っていない
+- 作業フォルダーを信頼していなくても書けるので、読み取り専用という依頼文だけでは書き込みを防げない
 - [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)では、次の 3 つを境界にする
   - 入力だけをコピーした使い捨てのフォルダーを作業フォルダーにする
   - headless の既定で、シェルのコマンドと、作業フォルダー・`%TEMP%` の外の読み書きが拒まれることを使う
-  - 前後のハッシュを比べ、入力が変わっていないか確かめる
-- `--mode plan` は `/plan` の指示を前に付けるだけで、書き込みを禁じない。読み取り専用の境界には使わない
+  - 使い捨てのフォルダーの前後のハッシュを比べる。`%TEMP%` のほかの場所への書き込みは、この比較に出ない
+- `--mode plan` は、[公式の文書](https://antigravity.google/docs/cli/modes)で「`/plan` の指示を前に付ける」モードとされ、書き込みを禁じるとは書かれていない（実測はしていない）。読み取り専用の境界には使わない
 - `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は使わない
 - 拒まれても JSON の `status` は `SUCCESS`、終了コードは 0 になる。`denied_actions` と stderr の `jetski: no output produced` を見て、拒否と応答の有無を判断する
 
