@@ -18,7 +18,7 @@
     - 手順 5 で、Claude Code と Codex が実装と下書きの担当を Codex と答え、Antigravity が自分の役割を答え、Grok の `--trust inspect` が AGENTS.md を読み込んだ。docs の worktree でも、分担を言わずに聞いた Claude Code が 4 つの役割を答えた。Grok は信頼していないフォルダーでは AGENTS.md を読まなかった
     - extra の「Windows 11 で既定の分担をやめる」の手順 1〜4 を、同じ使い捨てのリポジトリで通し、AGENTS.md が足す前と同じに戻ることを確かめた
     - 対話の Claude Code で、分担を言わずにファイルを変える依頼をしたとき、実際に分担する流れになること（手順 6）、当時の 9 つのサブモジュールのリポジトリを単独で開いたときの応答、AlmaLinux 10 は未確認
-    - その後、docs のサブモジュールに加わった scene-browser には、AGENTS.md を新しく作って同じ `## 共同作業の規則` と `## 既定の分担` を置き、CLAUDE.md に `@AGENTS.md` を足した（対象は docs とその 10 個のサブモジュール、11 個のリポジトリ）。scene-browser の clone で、分担を言わずに聞いた Claude Code が 4 つの役割を、Codex と Antigravity が自分の役割を答えた
+    - その後、docs のサブモジュールに加わった scene-browser では、別の作業（scene-browser の #18）で日本語の AGENTS.md ができ、同じ `## 共同作業の規則` と `## 既定の分担` が入り、CLAUDE.md は `@AGENTS.md` だけになった（対象は docs とその 10 個のサブモジュール、11 個のリポジトリ）。その main で、分担を言わずに聞いた Claude Code が 4 つの役割を、Codex が自分の役割を答えた
   - Antigravity CLI の追加（2026-10-15）: Windows 11 だけを対象に、公式インストーラーでの導入・設定ファイル・更新、Codeg の Antigravity、共同作業の 4 つ目の worktree と読み取り専用の依頼を追加した。AlmaLinux 10 は対象外
     - Windows 11 / x64 の実機で CLI 1.3.5 を管理者ではない Windows PowerShell 5.1 から導入し、SHA-512・署名・版・PATH、個人の Google アカウントのログイン、`agy models`・JSON の応答、AGENTS.md・GEMINI.md の読み込みを確認した
     - 新規の導入は、保存して中身を確かめたインストーラーを scriptblock にして行った。手順 2 の `Invoke-RestMethod` の形は、入った後に流し、「既に入っている」の分岐までを確かめた
