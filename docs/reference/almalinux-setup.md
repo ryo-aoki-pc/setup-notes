@@ -116,25 +116,13 @@
 
 | 入口 | 読むファイル | Homebrew のコマンド |
 |---|---|---|
-| `su -`、ssh での root のログイン | `/etc/profile` → `/root/.bash_profile` → `/root/.bashrc` | 使える（PATH の末尾） |
-| `sudo -i` | 同上。PATH の始まりは sudo の `secure_path` | 使える（PATH の末尾） |
-| `sudo -s`、`su`（`-` 無し） | `/root/.bashrc`（`sudo -s` でも `HOME` は `/root`） | 使える（PATH の末尾） |
+| `su -`、ssh での root のログイン | `/etc/profile` → `/root/.bash_profile` → `/root/.bashrc` | 使える |
+| `sudo -i` | 同上。PATH の始まりは sudo の `secure_path` | 使える |
+| `sudo -s`、`su`（`-` 無し） | `/root/.bashrc`（`sudo -s` でも `HOME` は `/root`） | 使える |
 | `sudo <コマンド>` | 読まない。PATH は `secure_path` の `/sbin:/bin:/usr/sbin:/usr/bin` | 使えない（`sudo: jq: command not found`）。[sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節で使える |
 
-- **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わり、その末尾に足される
+- **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わる
 - **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../extra/almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
-- **RPM と同じ名前のコマンドは、root では RPM が先**: AppStream の `jq` も入れると、`type -a jq` の並びが root と Homebrew のユーザーで逆になる
-
-  ```
-  # root のシェル
-  jq is /bin/jq
-  jq is /usr/bin/jq
-  jq is /home/linuxbrew/.linuxbrew/bin/jq
-  # Homebrew のユーザーのシェル
-  jq is /home/linuxbrew/.linuxbrew/bin/jq
-  jq is /usr/bin/jq
-  jq is /bin/jq
-  ```
 
 ### Homebrew を root のシェルでも使う / 手順 2: 補足: Homebrew を消したとき
 
