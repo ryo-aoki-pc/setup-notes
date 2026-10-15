@@ -1228,9 +1228,9 @@
 
 ## Antigravity アプリの Remote Control（任意）
 
-- 対象: Windows 11（x64）
+- 対象: Windows 11
 - この節だけを実施するときは、次の前提と実行場所を先に確認する。Antigravity CLI の導入は要らない
-- 前提: 個人の Google アカウント。[Git for Windows](windows-setup.md#git-for-windows)（試験用のリポジトリを作るのに使う）
+- 前提: x64 の PC。個人の Google アカウント。[Git for Windows](windows-setup.md#git-for-windows)（試験用のリポジトリを作るのに使う）
 - 実行場所: PC のデスクトップの、自分のユーザーの管理者ではない Windows PowerShell 5.1。アプリとブラウザの画面の操作がある
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-windows-11-の-antigravity-アプリの-remote-control2026-10-15-jst)・[参考資料](reference/ai-agents.md#windows-11-の-antigravity-アプリの-remote-control)
 - [ロールバック](extra/ai-agents.md#windows-11-で-antigravity-アプリを消す)・[注意点](extra/ai-agents.md#注意点)
@@ -1250,13 +1250,13 @@
    $AG_APP_AGY_HASH_BEFORE = if (Test-Path -LiteralPath "$env:LOCALAPPDATA\agy\bin\agy.exe") { (Get-FileHash -LiteralPath "$env:LOCALAPPDATA\agy\bin\agy.exe" -Algorithm SHA256).Hash }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command agy, antigravity -All -ErrorAction SilentlyContinue
-   Test-Path "$env:LOCALAPPDATA\Programs\antigravity"
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\Programs\antigravity"
    $AG_APP_AGY_HASH_BEFORE
    ```
 
    - アプリが無ければ、`False` が出る。CLI が無くても進める
    - CLI があるなら、`agy` が `%LOCALAPPDATA%\agy\bin\agy.exe` だけを指すことを確かめる。別の場所のコマンドが出たら、元の導入方法を確かめるまで進まない
-   - アプリが既に入っていて `True` が出たら、この項の手順 2〜4 を飛ばし、手順 5 から設定する
+   - アプリが既に入っていて `True` が出たら、この項の手順 2〜4 を飛ばし、この項の手順 5 から設定する
    - この項の手順 1〜4 は、同じ PowerShell に貼る。窓を開き直したら、この項の手順 1 からやり直す
 
 1. 公式のインストーラーを一時フォルダーに取り、署名と版を確かめる。
@@ -1302,11 +1302,13 @@
 1. 導入先・登録・CLI の状態を確かめ、ダウンロードしたファイルを消す。
 
    <details>
-   <summary>貼るコマンド（PowerShell・21 行）</summary>
+   <summary>貼るコマンド（PowerShell・23 行）</summary>
 
    ```powershell
    if (-not $AG_APP_INSTALLER -or -not $AG_APP_DOWNLOAD_DIR) {
      Write-Error '中断: この項の手順 2 の一時ファイルの変数が空'
+   } elseif (-not (Test-Path -LiteralPath "$env:LOCALAPPDATA\Programs\antigravity\Antigravity.exe")) {
+     Write-Error '中断: アプリが入っていない。ダウンロードしたファイルは消さずに残した'
    } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Item -LiteralPath "$env:LOCALAPPDATA\Programs\antigravity\Antigravity.exe" | Select-Object FullName
@@ -1323,7 +1325,7 @@
        AgyHashUnchanged = $AG_APP_AGY_HASH_BEFORE -eq $AG_APP_AGY_HASH_AFTER
      } | Format-List
      Remove-Item -LiteralPath $AG_APP_INSTALLER -Force
-     Remove-Item -LiteralPath $AG_APP_DOWNLOAD_DIR
+     Remove-Item -LiteralPath $AG_APP_DOWNLOAD_DIR -Recurse -Force
      Test-Path -LiteralPath $AG_APP_INSTALLER
    }
    ```
@@ -1333,6 +1335,7 @@
    - `FullName` が `%LOCALAPPDATA%\Programs\antigravity\Antigravity.exe` に相当し、アンインストールの登録に `Antigravity 2.23.1`・`Google` が出ることを確かめる
    - `AgyCommandUnchanged` と `AgyHashUnchanged` が `True` で、`antigravity` のコマンドが増えていないことを確かめる。違うときは進まない
    - 最後の `Test-Path` が `False` なら、ダウンロードしたファイルは消えている
+   - `中断: アプリが入っていない` が出たら、この項の手順 3 のインストーラーの画面とエラーを確かめ、この項の手順 3 からやり直す
 
 1. 起動したアプリで、個人の Google アカウントにログインする。
 
@@ -1341,8 +1344,8 @@
 
 1. PC のアプリの設定で、バックグラウンド動作と Remote Control を有効にする。
 
-   - `Ctrl+,` → `Application` → `General` で、`Keep In Menu Bar` と `Prevent Sleep` をオンにする
-   - `Application` → `Remote Control` をオンにする
+   - `Ctrl+,` → `Application` → `Remote Control` をオンにする
+   - 同じ `Application` の `General` で、`Keep In Menu Bar`（窓を閉じても動かす）と `Prevent Sleep`（スリープを防ぐ）をオンにする。PC の画面の項目名は未確認で、オンになったかはこの項の手順 7 のファイルの値で確かめる
    - **次の手順は、PC のアプリで設定を終えてから PowerShell に貼る**
 
 1. 設定ファイルから、Remote Control と動作設定の 4 つの値だけを確かめる。
@@ -1371,7 +1374,7 @@
    $ws = New-Object -ComObject WScript.Shell
    $s = $ws.CreateShortcut($lnk)
    $s.TargetPath = $exe
-   $s.WorkingDirectory = Split-Path $exe
+   $s.WorkingDirectory = Split-Path -LiteralPath $exe
    $s.Save()
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    $ws.CreateShortcut($lnk).TargetPath
@@ -1392,7 +1395,7 @@
 
    - `## No commits yet on master`（既定のブランチの名前を変えていれば、その名前）と `?? README.md` が出ればよい
 
-1. PC かスマートフォンのブラウザで、Remote Control に接続する。
+1. PC のブラウザで、Remote Control に接続する。
 
    - [antigravity.google.com](https://antigravity.google.com) を開き、アプリと同じ Google アカウントでサインインする
    - `Remote Control Instances` に、この項の手順 7 の `<RC_NAME>` が `Online` で出ることを確かめ、`Connect` を押す
@@ -1440,11 +1443,16 @@
 
    - タスクトレイの Antigravity のアイコンからアプリを終了する
    - ブラウザの一覧が `Offline` になることを確かめる。窓を閉じるだけでは止まらない
+   - **次の手順は、アプリが終わってから貼る**
 
-1. アプリをもう一度始めるときは、スタートメニューから起動する。
+1. アプリをもう一度始めるときは、スタートアップのショートカットで起動する。
 
-   - スタートメニューの `Antigravity` を起動する
+   ```powershell
+   Start-Process -FilePath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
+   ```
+
    - 窓が開き、ブラウザの一覧が同じ名前で `Online` に戻ることを確かめる
+   - スタートメニューの `Antigravity` からの起動は確かめていない
 
 1. ログオン時の自動起動をやめるときは、ショートカットを消す。
 
@@ -1540,6 +1548,7 @@
   - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
   - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
   - Antigravity CLI は、バックグラウンドで自分で上がる（止める設定は確かめていない）
+  - Antigravity アプリ（[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)）の更新の動きは確かめていない。`%LOCALAPPDATA%\antigravity-updater` はあるが、上げる手順は置かない
   - Codeg の Antigravity（ACP サーバー）は自分では上がらない。[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の版のまま使う
 
 ### AI エージェントとプラグインを上げる

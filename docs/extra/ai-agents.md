@@ -419,7 +419,7 @@
    ```powershell
    Remove-Item -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk') -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
+   Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
    ```
 
    - `False` が出ればよい
@@ -427,7 +427,10 @@
 1. Antigravity アプリをアンインストールする。
 
    ```powershell
-   & "$env:LOCALAPPDATA\Programs\antigravity\Uninstall Antigravity.exe" /currentuser /S
+   $u = "$env:LOCALAPPDATA\Programs\antigravity\Uninstall Antigravity.exe"
+   if (-not (Test-Path -LiteralPath $u)) { Write-Error '中断: アンインストーラーが無い' } else {
+     Start-Process -FilePath $u -ArgumentList '/currentuser', '/S' -PassThru | Wait-Process
+   }
    ```
 
    - このアンインストールのコマンドは実行していない（未検証）
@@ -436,11 +439,11 @@
 1. アプリの実行ファイルが消えたことを確かめる。
 
    ```powershell
-   Test-Path "$env:LOCALAPPDATA\Programs\antigravity\Antigravity.exe"
+   Test-Path -LiteralPath "$env:LOCALAPPDATA\Programs\antigravity\Antigravity.exe"
    ```
 
    - `False` が出ればよい。`True` なら、実行ファイルが消えていないので、この項の手順 5 へ進まない
-   - アンインストールと、その後に残るものは確かめていない
+   - アンインストールと、その後に残るものは確かめていない。デスクトップとスタートメニューの `Antigravity.lnk`、HKCU の Uninstall の登録、ブラウザの一覧の `Offline` の項目が残ることがある。要らなければ手で消す（一覧の項目は削除のアイコン）
    - [Antigravity アプリの Remote Control: 実施手順](../ai-agents.md#antigravity-アプリの-remote-control-実施手順)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
    - アプリのデータを残すなら、この項の手順 5 は飛ばす
 
@@ -449,7 +452,7 @@
    ```powershell
    Remove-Item -LiteralPath "$env:APPDATA\Antigravity", "$env:LOCALAPPDATA\antigravity-updater", "$env:USERPROFILE\.gemini\antigravity", "$env:USERPROFILE\.gemini\antigravity-backup", "$env:USERPROFILE\.gemini\antigravity-ide" -Recurse -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:APPDATA\Antigravity", "$env:LOCALAPPDATA\antigravity-updater", "$env:USERPROFILE\.gemini\antigravity", "$env:USERPROFILE\.gemini\antigravity-backup", "$env:USERPROFILE\.gemini\antigravity-ide"
+   Test-Path -LiteralPath "$env:APPDATA\Antigravity", "$env:LOCALAPPDATA\antigravity-updater", "$env:USERPROFILE\.gemini\antigravity", "$env:USERPROFILE\.gemini\antigravity-backup", "$env:USERPROFILE\.gemini\antigravity-ide"
    ```
 
    - `False` が 5 行出ればよい
