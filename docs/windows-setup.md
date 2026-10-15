@@ -4567,6 +4567,90 @@
 
    - 環境変数は同じ窓に残る。戻すときは `Remove-Item Env:EXCEL_TEXTCONV_TIMEOUT` を実行する
 
+#### lazygit の設定を更新する
+
+- 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
+- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
+- lazygit 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
+- 更新方法と分岐の補足は[参考資料](reference/windows-setup.md#lazygit-の設定を更新する--手順-3-補足-force-push-と分岐点)
+
+> [!WARNING]
+> この項の手順 4 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C "$env:LOCALAPPDATA\lazygit" reflog` で見られる）。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 手元の変更を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:LOCALAPPDATA\lazygit" status --short --branch
+   ```
+
+   - 1 行目が `## custom...origin/custom` で始まればよい（`[ahead …, behind …]` が続いてもよい）
+   - 2 行目から出る行（` M config.yml` など）は手元の変更。この項の手順 3 で残したまま合わせる
+   - 1 行目が `## HEAD (no branch)` で、前にこの項の手順 3 を貼って止まったままなら、この項の手順 3 は飛ばし、手順 4 から貼る
+   - そのほかに、1 行目が `## custom` で始まらなければ、中断する
+
+1. GitHub の `custom` に合わせる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:LOCALAPPDATA\lazygit" pull --rebase --autostash
+   git -C "$env:LOCALAPPDATA\lazygit" status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.`・`Fast-forward`・`Already up to date.` のどれかが出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
+   - 手元の変更を退避して戻したときは、`Created autostash:`・`Applied autostash.` が出て、`status` の 2 行目から同じ形で残る
+   - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
+   - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 4 を貼る。手順 5 へ進むかは、手順 4 の `status` で決める
+   - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 4 は飛ばす
+   - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 5 を貼る。無ければ、この項の手順 5 は飛ばす
+
+1. この項の手順 3 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
+
+   ```powershell
+   git -C "$env:LOCALAPPDATA\lazygit" rebase --abort
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:LOCALAPPDATA\lazygit" rebase --autostash --onto origin/custom HEAD
+   git -C "$env:LOCALAPPDATA\lazygit" status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.` と出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 手元の未コミットの変更は残る
+   - 2 行目から `UU` で始まる行があれば、この項の手順 5 を貼る。無ければ、この項の手順 5 は飛ばす
+
+1. この項の手順 3・4 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
+
+   ```powershell
+   git -C "$env:LOCALAPPDATA\lazygit" reset -q --hard
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:LOCALAPPDATA\lazygit" status --short --branch
+   git --no-pager -C "$env:LOCALAPPDATA\lazygit" stash show -p
+   ```
+
+   - `status` が `## custom...origin/custom` の 1 行だけになり、その後ろに手元の変更の差分が出ればよい
+   - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている。要るものをエディタで書き直す
+   - 書き直したら、`git -C "$env:LOCALAPPDATA\lazygit" stash drop` で stash を消す
+
+1. Excel の差分表示を導入したときだけ、導入し直す。
+
+   - [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)の手順 3 を、この項の手順 1 で開いた窓に貼る
+
+1. 設定の元にした上流の版と、入っている本体の版を比べる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git --no-pager -C "$env:LOCALAPPDATA\lazygit" log -1 --format=%s origin/main
+   lazygit --version
+   ```
+
+   - `lazygit v0.66.0 のデフォルト設定に更新` の版と、その次の行の `version=0.66.0` が同じならよい
+   - 本体の方が古ければ、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
+
 ---
 
 ### yazi
@@ -4765,6 +4849,88 @@
    - 選択した複数ファイルが `l` / `<Enter>` でまとめて開けばよい
    - `q` で yazi を閉じる
    - **ほかのブロックは、yazi を閉じてから貼る**（続けて貼ると yazi への操作として食われる）
+
+#### yazi の設定を更新する
+
+- 自分用の yazi の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
+- 前提: [yazi の設定を導入する](#yazi-の設定を導入する)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
+- yazi 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
+- 更新方法と分岐の補足は[参考資料](reference/windows-setup.md#yazi-の設定を更新する--手順-3-補足-force-push-と分岐点)
+
+> [!WARNING]
+> この項の手順 4 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C "$env:APPDATA\yazi\config" reflog` で見られる）。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 手元の変更を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:APPDATA\yazi\config" status --short --branch
+   ```
+
+   - 1 行目が `## custom...origin/custom` で始まればよい（`[ahead …, behind …]` が続いてもよい）
+   - 2 行目から出る行（` M init.lua` など）は手元の変更。この項の手順 3 で残したまま合わせる
+   - 1 行目が `## HEAD (no branch)` で、前にこの項の手順 3 を貼って止まったままなら、この項の手順 3 は飛ばし、手順 4 から貼る
+   - そのほかに、1 行目が `## custom` で始まらなければ、中断する
+
+1. GitHub の `custom` に合わせる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:APPDATA\yazi\config" pull --rebase --autostash
+   git -C "$env:APPDATA\yazi\config" status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.`・`Fast-forward`・`Already up to date.` のどれかが出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
+   - 手元の変更を退避して戻したときは、`Created autostash:`・`Applied autostash.` が出て、`status` の 2 行目から同じ形で残る
+   - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
+   - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 4 を貼る。手順 5 へ進むかは、手順 4 の `status` で決める
+   - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 4 は飛ばす
+   - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 5 を貼る。無ければ、この項の手順 5 は飛ばす
+
+1. この項の手順 3 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
+
+   ```powershell
+   git -C "$env:APPDATA\yazi\config" rebase --abort
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:APPDATA\yazi\config" rebase --autostash --onto origin/custom HEAD
+   git -C "$env:APPDATA\yazi\config" status --short --branch
+   ```
+
+   - `Successfully rebased and updated refs/heads/custom.` と出て、`status` の 1 行目が `## custom...origin/custom`（`[ahead`・`[behind` が付かない）で、2 行目から `UU` の行が無ければよい
+   - 手元の未コミットの変更は残る
+   - 2 行目から `UU` で始まる行があれば、この項の手順 5 を貼る。無ければ、この項の手順 5 は飛ばす
+
+1. この項の手順 3・4 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
+
+   ```powershell
+   git -C "$env:APPDATA\yazi\config" reset -q --hard
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:APPDATA\yazi\config" status --short --branch
+   git --no-pager -C "$env:APPDATA\yazi\config" stash show -p
+   ```
+
+   - `status` が `## custom...origin/custom` の 1 行だけになり、その後ろに手元の変更の差分が出ればよい
+   - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている
+   - `init.lua` の `open_multi` の行は、[yazi で複数ファイルをまとめて開く](#yazi-で複数ファイルをまとめて開く)を通し直して足す。新しい `init.lua` に同じ行が既にあれば、足さない
+   - ほかの変更は、要るものをエディタで書き直す
+   - 書き直したら、`git -C "$env:APPDATA\yazi\config" stash drop` で stash を消す
+
+1. 設定の元にした上流の版と、入っている本体の版を比べる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git -C "$env:APPDATA\yazi\config" describe --tags --abbrev=0
+   yazi --version
+   ```
+
+   - `upstream/v26.9.1` の版と、その後ろの `Version: 26.9.1` が同じならよい
+   - 本体の方が古ければ、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 
 ---
 
@@ -5001,8 +5167,8 @@
   - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
 - フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、その文書の版と sha256 を確かめて直してから入れ直す
 - 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
-- 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる
-  - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
+- 自分用の設定のうち、WezTerm・Neovim はそれぞれのリポジトリの更新で上げ、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
+  - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 - SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
