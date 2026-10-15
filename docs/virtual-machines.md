@@ -1373,7 +1373,7 @@
 - この項の手順 4 は NIC の接続をブリッジに切り替えるので、その NIC 越しの ssh は切れる
 - NIC の元の接続名 (この項の手順 1 の `NIC_CON`) を控えてから、接続を変える (この項の手順 3・4)
 - この項の手順 9 だけは、[VM を作る](#kvm-container-で-vm-を作る)の手順 4 で VM を作った後に貼る
-- 元に戻すのは[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1〜4
+- 元に戻すのは[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1〜5
 
 1. 変数を設定する (`NIC` は必ず値を入れる)。
 
@@ -1401,7 +1401,7 @@
    - 値を読み戻して確かめる
    - 最後の行でリポジトリ直下に移る
    - `NIC_CON` が空なら、ここで止める。`NIC` の名前が違うか、その NIC に active な接続が無い (`nmcli connection show --active` で確かめる)
-   - **`NIC_CON` の値を控えておく**。[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 4 で NIC の元の接続を上げるのに使う
+   - **`NIC_CON` の値を控えておく**。[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5 で NIC の元の接続を上げるのに使う
    - 新しいシェルを開いたら (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから先へ進む。**この項の手順 4 の後に貼り直すと `NIC_CON` の値が変わる**
 
 
@@ -1504,7 +1504,7 @@
 - VM の定義・UEFI 変数・ディスクを消す。ISO は、消すときだけこの項の手順 7 で消す
 - 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1・2 で起動する
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
-- コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5〜7
+- コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1・6〜8
 - `down` は `data/` を残す。**`clean` は削除する**
 - 共有 ISO を消さないため、`--remove-all-storage` は使わず、消すディスクを `--storage` で指定する
 - UEFI の VM は `--nvram` を付ける。BIOS の VM に付けてもよい

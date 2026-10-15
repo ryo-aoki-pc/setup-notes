@@ -163,7 +163,7 @@
 
 1. 自分用の Neovim の設定とプラグインを消し、退避した設定に戻す。
 
-   - [LazyVimStarter の docs/setup.md の「ロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/setup.md#ロールバック)の手順 1〜3 を、上から順に貼る
+   - [LazyVimStarter の「LazyVim の設定のロールバック」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#ロールバック)の手順 1〜3 を、上から順に貼る
    - その手順 2 は、設定のディレクトリごと消す（push していない変更は取り戻せない）。その手順 1 で、何も出ないことを確かめてから行う
    - その手順 3 で、入力ソースが既定（空）に戻り、Anthy の切り替えのキーに Ctrl+Space と Ctrl+J が戻る。日本語入力を残すなら、その手順 3 の箇条書きのとおり、入力ソースを導入の前の値（[日本語入力](../almalinux-setup.md#日本語入力)の手順 3 で設定した `[('xkb', 'jp'), ('ibus', 'anthy')]` など）に書き戻す
    - その手順 4（Homebrew の Neovim・lazygit・HackGen Console NF をまとめて消す）は行わない。Neovim はこの項の手順 4、lazygit は[Git の道具を消す](#git-の道具を消す)の手順 1、HackGen Console NF はこの項の手順 10 で消す
@@ -216,7 +216,7 @@
 
 1. 自分用の WezTerm の設定を外し、退避した設定に戻す。
 
-   - [ryo-aoki-pc/wezterm の docs/install.md の「ロールバック」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/install.md#ロールバック)の手順 1〜4 を、上から順に貼る
+   - [ryo-aoki-pc/wezterm の「WezTerm の設定のロールバック」](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 1〜4 を、上から順に貼る
    - その手順 3 は `~/.config/wezterm` を消す（commit・push していないものは取り戻せない）。その手順 2 で確かめてから行う
    - その手順 5・6 は、その文書の任意節を通したときだけ
 
@@ -566,7 +566,7 @@
 
 1. 共通の bash 設定も戻すときだけ、bash リポジトリの設定を戻す。
 
-   - [bash のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/quick-start.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
+   - `install.sh` で入れたなら [install.sh で入れた共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)、手で移行したなら [共通の bash 設定の手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
    - ツールを消しただけなら、共通設定は残してよい（入っていないツールの設定は読まない）
 
 1. 開いている端末を閉じて、開き直す。

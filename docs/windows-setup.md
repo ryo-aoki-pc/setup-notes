@@ -4411,7 +4411,7 @@
 - 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象の Excel が Git のリポジトリにある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - 例の `売上表.xlsx` は実際のファイル名に置き換える
-- 属性の仕様は[Excel 差分の説明](https://github.com/ryo-aoki-pc/lazygit/blob/custom/README.md#excel-の差分表示)を参照する
+- 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/excel-diff.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md#注意点)を参照する
 
 > [!CAUTION]
 > - **通常の Excel 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Excel にテキストのパッチは適用できず、新規ファイルでは Excel の代わりに変換後のテキストをステージする場合がある
@@ -4779,6 +4779,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
+- 戻すときは、md-table-excel の[mdtable のロールバック](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
