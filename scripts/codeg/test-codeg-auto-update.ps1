@@ -235,6 +235,8 @@ try {
     Test-Case '中断マーカーがあれば何も変えず 3' {
         $p=New-TestFixture 'in-progress'; Write-CodegProgress (Join-Path $p.State 'in-progress') 'checking' 'fixture' '0.1.0' '0.2.0'
         Assert-Condition ((Invoke-CodegAutoUpdate $p) -eq 3 -and $script:fixture.Stops -eq 0 -and $script:fixture.Downloads -eq 0) '途中の状態に触れた'
+        $log=[IO.File]::ReadAllText((Join-Path $p.State 'codeg-auto-update.log'))
+        Assert-Condition ($log.Contains('docs/extra/codeg.md の「Windows 11 で自動更新の控えから前の版と DB に戻す」')) '復旧先のパスと見出しが異なる'
     }
     Test-Case 'ロックが取れなければ 1' {
         $p=New-TestFixture 'locked'; $lock=[IO.File]::Open((Join-Path $p.State 'lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)

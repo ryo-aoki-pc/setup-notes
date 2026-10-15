@@ -653,7 +653,7 @@ function Invoke-CodegAutoUpdate {
         Initialize-CodegUpdateLog $Paths; $logReady = $true
         try { $lock = [IO.File]::Open((Join-Path $Paths.State 'lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None) }
         catch { Write-CodegUpdateLog $Paths '別の自動更新が動いているため中断しました。'; return 1 }
-        if (Test-Path -LiteralPath $marker) { Write-CodegUpdateLog $Paths '前の入れ替えが途中です。終了 3: docs/extra/grok-build-remote.md の自動更新の復旧を行ってください。'; return 3 }
+        if (Test-Path -LiteralPath $marker) { Write-CodegUpdateLog $Paths '前の入れ替えが途中です。終了 3: docs/extra/codeg.md の「Windows 11 で自動更新の控えから前の版と DB に戻す」で復旧してください。'; return 3 }
         [IO.Directory]::CreateDirectory($Paths.Backups) | Out-Null
         Assert-CodegInstall $Paths
         $endpoint = Get-CodegEndpoint $Paths
@@ -727,7 +727,7 @@ function Invoke-CodegAutoUpdate {
                 if ($backup -and (Test-Path -LiteralPath $backup)) { try { Remove-Item -LiteralPath $backup -Recurse -Force } catch { Write-CodegUpdateLog $Paths '旧版は確認済みですが、不完全な控えを片付けられませんでした。' } }
                 Write-CodegUpdateLog $Paths '旧版で起動し直し、変更前の状態を確認しました。'
                 return 1
-            } catch { if (-not $backup -or -not (Test-Path -LiteralPath $marker)) { Write-CodegProgress $marker 'restart-failed' $backup $current $release.Version }; Write-CodegUpdateLog $Paths '終了 3: 旧版を確認できません。docs/extra/grok-build-remote.md の自動更新の復旧を行ってください。'; return 3 }
+            } catch { if (-not $backup -or -not (Test-Path -LiteralPath $marker)) { Write-CodegProgress $marker 'restart-failed' $backup $current $release.Version }; Write-CodegUpdateLog $Paths '終了 3: 旧版を確認できません。docs/extra/codeg.md の「Windows 11 で自動更新の控えから前の版と DB に戻す」で復旧してください。'; return 3 }
         }
         try {
             Write-CodegUpdateState $skip $release.Version
@@ -749,7 +749,7 @@ function Invoke-CodegAutoUpdate {
             Remove-Item -LiteralPath $marker -Force
             Write-CodegUpdateLog $Paths ('終了 2: ' + $current + ' に戻し、' + $release.Version + ' を保留しました。')
             return 2
-        } catch { Write-CodegUpdateLog $Paths '終了 3: 戻せませんでした。docs/extra/grok-build-remote.md の自動更新の復旧を行ってください。'; return 3 }
+        } catch { Write-CodegUpdateLog $Paths '終了 3: 戻せませんでした。docs/extra/codeg.md の「Windows 11 で自動更新の控えから前の版と DB に戻す」で復旧してください。'; return 3 }
     } finally {
         if ($work -and (Test-Path -LiteralPath $work)) { try { Remove-Item -LiteralPath $work -Recurse -Force } catch { Write-CodegUpdateLog $Paths '作業用の一時フォルダーを消せませんでした。' } }
         if ($lock) { $lock.Dispose() }

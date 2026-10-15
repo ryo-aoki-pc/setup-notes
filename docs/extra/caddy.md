@@ -9,7 +9,7 @@
 
 ### 共通の Caddy を撤去する
 
-- 前提: [Forgejo のロールバック](forgejo.md#ロールバック)・[Codeg のロールバック](grok-build-remote.md#almalinux-10-のロールバック)などで、すべてのサイトを外してある
+- 前提: [Forgejo のロールバック](forgejo.md#ロールバック)・[Codeg のロールバック](codeg.md#almalinux-10-のロールバック)などで、すべてのサイトを外してある
 - 実行場所: Caddy を動かす一般ユーザー自身の bash。`sudo` は使わない
 - linger は共有前提なので、ここでは切らない。ほかに使うものが無いときだけ[linger のロールバック](linger.md#ロールバック)を使う
 

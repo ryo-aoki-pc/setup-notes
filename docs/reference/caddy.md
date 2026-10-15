@@ -6,7 +6,7 @@
 
 - AlmaLinux 10 では、本体・認証局・ユーザーサービスをホストで 1 つにする。Forgejo と Codeg はサイトのファイルだけを足す。端末で信頼するルート証明書はホストごとに 1 つで済む（利用者の決定）
 - 同じ一般ユーザーで `caddy.service` を動かし、各アプリの HTTP を localhost に閉じる。LAN・VPN の口は Caddy の HTTPS と、アプリごとに明示した SSH などだけにする
-- Windows 11 の Codeg 専用の Caddy は、[AI エージェントの手順書](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)に残す
+- Windows 11 の Codeg 専用の Caddy は、[AI エージェントの手順書](../ai-agents.md#codeg-windows-11-で使う)に残す
 
 ## 補足
 
@@ -14,7 +14,7 @@
 
 - GitHub の配布物を版を決めて取得し、ホームの固定パスに置く。チェックサム一覧（`caddy_<版>_checksums.txt`）は SHA-512。`aarch64` は `linux_arm64`、`x86_64` は `linux_amd64` を使う
 - EPEL・Homebrew・scoop の Caddy は使わない。Windows の scoop は版ごとにパスが変わり、受信規則のプログラム指定と合わなくなる
-- Caddy の配布物は、追加の共有ライブラリを必要としない 1 つの実行ファイル。GitHub の配布物の SHA-256 digest とも照合した記録は、[Codeg の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)に保持する
+- Caddy の配布物は、追加の共有ライブラリを必要としない 1 つの実行ファイル。GitHub の配布物の SHA-256 digest とも照合した記録は、[Codeg の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)に保持する
 - 配布物と一覧を同じ配布元から取得する照合は、取得中の破損を見つける。配布元そのものの差し替えを検出する署名検証とは異なる
 
 ### Caddy: 入れて起動する / 手順 4: 共通の Caddyfile

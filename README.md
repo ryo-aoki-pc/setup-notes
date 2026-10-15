@@ -49,7 +49,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 ### リモート接続・VPN
 
 - VPN は WireGuard の [AlmaLinux 10](docs/wireguard.md#wireguard)・[Windows 11](docs/wireguard.md#windows-11-で-wireguard-を使う)、GNOME は[デスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有)・[ヘッドレスセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション)・[リモートログイン](docs/gnome-remote.md#gnome-のリモートログイン)から選ぶ
-- Windows 11 の [OpenSSH サーバー](docs/windows-setup.md#openssh-サーバー)・[SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)・[RDP](docs/windows-setup.md#ネットワークとリモート)、AI エージェントの [Claude Code の Remote Control](docs/ai-agents.md#claude-code-の-remote-control-windows-11-で使う)・[Antigravity アプリの Remote Control](docs/ai-agents.md#antigravity-アプリの-remote-control任意)・Codeg（[AlmaLinux 10](docs/ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う) / [Windows 11](docs/ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)）の手順を通す
+- Windows 11 の [OpenSSH サーバー](docs/windows-setup.md#openssh-サーバー)・[SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)・[RDP](docs/windows-setup.md#ネットワークとリモート)、AI エージェントの [Claude Code の Remote Control](docs/ai-agents.md#claude-code-の-remote-control-windows-11-で使う)・[Antigravity アプリの Remote Control](docs/ai-agents.md#antigravity-アプリの-remote-control任意)・複数のエージェントをブラウザから動かす Codeg（[AlmaLinux 10](docs/ai-agents.md#codeg-almalinux-10-で使う) / [Windows 11](docs/ai-agents.md#codeg-windows-11-で使う)）の手順を通す
 
 ### ファイル共有・同期
 

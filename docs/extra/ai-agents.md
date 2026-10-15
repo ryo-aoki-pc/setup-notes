@@ -4,7 +4,7 @@
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- 任意の構成のロールバックと注意点は、それぞれの文書にある: [コーディングエージェントの共同作業](coding-agents.md)・[Grok Build のブラウザ操作](grok-build-remote.md)・[Claude Code の GNOME 操作](claude-code-gui.md)・[Claude Code の Remote Control](windows-claude-remote-control.md)
+- 任意の構成のロールバックと注意点は、それぞれの文書にある: [コーディングエージェントの共同作業](coding-agents.md)・[Codeg](codeg.md)・[Claude Code の GNOME 操作](claude-code-gui.md)・[Claude Code の Remote Control](windows-claude-remote-control.md)
 
 ## AlmaLinux 10 のロールバック
 

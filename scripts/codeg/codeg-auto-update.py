@@ -33,7 +33,7 @@ from dataclasses import dataclass
 
 SERVICE = "codeg-server.service"
 API = "https://api.github.com/repos/spacering-net/codeg/releases?per_page=50"
-RECOVERY = "docs/extra/grok-build-remote.md の「AlmaLinux 10 で自動更新の控えから前の版と DB に戻す」"
+RECOVERY = "docs/extra/codeg.md の「AlmaLinux 10 で自動更新の控えから前の版と DB に戻す」"
 VERSION_TIMEOUT = 10
 HEALTH_TIMEOUT = 120
 STABLE_SECONDS = 30

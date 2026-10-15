@@ -8,9 +8,9 @@
 
 - `docs/windows-setup.md` — Windows 11 の手順書。8 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・アプリ・更新）に置き、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせる
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。9 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・コンテナ・ファイルの共有と同期・再起動の後の確認・更新）に置き、項ごとに前提・実行場所を書いて、変数を項の中に持たせる。実行するホストを区別する
-- `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI）の導入と更新、Remote Control・GNOME 操作・共同作業・Grok Build のブラウザ操作（Codeg）。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11
+- `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI）の導入と更新、Remote Control・GNOME 操作・共同作業・Codeg。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11
   - Codeg は常に自動で最新の安定版にする（2026-10-16、利用者の決定）。AlmaLinux 10 と Windows 11 で毎日更新し、失敗時は本体と DB を戻してその版を保留する。復旧は専用 CLI で行い、両 OS の専用ログで結果を確認する。両 OS の実機で更新と「使用中」を確かめた（2026-10-16）。自動の戻しと復元は実機で未確認
-  - ロールバックと注意点は `docs/extra/ai-agents.md`、採用理由と方針は `docs/reference/ai-agents.md` に置く。共同作業・Grok Build のブラウザ操作・Claude Code の GNOME 操作・Windows の Remote Control の検証記録・参考資料・extra は、用途ごとに `coding-agents`・`grok-build-remote`・`claude-code-gui`・`windows-claude-remote-control` を使う
+  - ロールバックと注意点は `docs/extra/ai-agents.md`、採用理由と方針は `docs/reference/ai-agents.md` に置く。共同作業・Codeg・Claude Code の GNOME 操作・Windows の Remote Control の検証記録・参考資料・extra は、用途ごとに `coding-agents`・`codeg`・`claude-code-gui`・`windows-claude-remote-control` を使う
   - Claude Code・Codex CLI・Grok Build の導入の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料にある
   - AI エージェントの状態で分岐する手順: windows-setup.md の「リモートから再起動する手段を増やす（任意）」と「Git for Windows・Firefox・WezTerm を上げる」の Remote Control のタスク、gnome-remote.md の「GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）」の仮想モニターのドロップイン
   - 既定の分担の検証（2026-10-15、Windows 11）: 「既定で分担する」の項を対象にした
@@ -46,7 +46,7 @@
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox
   - 検証記録・参考資料・extra は、用途ごとに `virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`・`windows-sandbox` を使う。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「Windows 11 で VirtualBox を入れる」は、AlmaLinux 10 の「VirtualBox」と区別する
-- 共通の Caddy（`docs/almalinux-setup.md` の「Caddy」）— 「ネットワークとリモート操作」で SSH の SOCKS トンネルの後に置く。ホストの一般ユーザーに本体・認証局・`caddy.service` を 1 つ置き、`sites/*.caddy` を読む。Forgejo と Grok Build のブラウザ操作（AlmaLinux 10）が使う
+- 共通の Caddy（`docs/almalinux-setup.md` の「Caddy」）— 「ネットワークとリモート操作」で SSH の SOCKS トンネルの後に置く。ホストの一般ユーザーに本体・認証局・`caddy.service` を 1 つ置き、`sites/*.caddy` を読む。Forgejo と Codeg（AlmaLinux 10）が使う
   - 入れて起動する・設定を検査して起動し直す・端末にルート証明書を入れる・設定ファイル・更新の 5 項。前提はユーザーサービスの常駐（linger）
   - 参考資料は `docs/reference/caddy.md`、ロールバックと注意点は `docs/extra/caddy.md`、検証記録は非公開側の `docs/verification/caddy.md`
   - **実機での検証状態（2026-10-15 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で「入れて起動する」の手順 1〜5（Caddy 2.11.7）と「設定を検査して起動し直す」の手順 1 を通した
@@ -74,25 +74,25 @@
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - [共同 VM 検証の横断報告](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と、初回試行の旧2/61・5/61、2026-10-13の42通過/4条件外/3部分確認/1失敗/11未実施を分ける。W0派生媒体はセットアップ分岐まで、V2はSDKとGUID/LUN/祖先mappingの追加確認のみ。ホスト作業の重複により性能比較は未完。現在の操作リンクは正本の該当用途へ向け、検証時の版と手順番号は記録で確認する
 - 新しい手順は正本の該当用途へ追加し、対応する記録とこの構成一覧を更新する
-- Codeg で Claude Code・Codex CLI を操作する任意節は、ai-agents.md の「Grok Build のブラウザ操作」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
+- Codeg で Claude Code・Codex CLI を操作する任意節は、ai-agents.md の「Codeg」に置く。Node.js の確認は OS ごとに書き、ブラウザの操作は両 OS で同じ手順番号にする
 - 同任意節の履歴取り込みは、接続先ホストの本人の終了済みセッションを、全プロジェクトの作業ディレクトリごとに選別する。取り込みだけで終える場合と、同じエージェントで再開する場合を分け、進行中の会話との同時再開を避ける
-- 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
-- Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/grok-build-remote/set-codeg-password.ps1` にまとめる
+- 2026-10-12 の Windows 11 の実機では、両アダプターの導入・接続と、Codex の応答・専用ファイル作成・停止・文脈の再開を確認。Claude の応答は週の利用上限で未確認。履歴の対象と残る未確認は [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の-claude-codecodex-の追加検証2026-10-12-jst) に置く
+- Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/codeg/set-codeg-password.ps1` にまとめる
 - 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
-- [共通パスワードの検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- [共通パスワードの検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
 - 2026-10-14 の Windows 11 / x64 の実機で、稼働中の Codeg をロールバックの手順 1〜3 で消し、ai-agents.md の手順で入れ直した
   - 受信規則は Private の全送信元・全接続種別。別拠点から、有線 LAN の IP への 200 と、Public の VPN の IP への接続のタイムアウトを確かめた
   - 本人が共通パスワードを入力し、ブラウザの Codeg で Claude Code（Auto）・Codex（Auto review）・Grok Build の短文の応答を確かめた。Claude Code の応答は今回がはじめて
-  - 共通パスワードは HTTPS の公開の後に設定した（手順書の案内の順は未確認）。同じ LAN の別端末・Wi-Fi・IPv6、再起動後の自動起動は未確認。[今回の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)で範囲を区別する
+  - 共通パスワードは HTTPS の公開の後に設定した（手順書の案内の順は未確認）。同じ LAN の別端末・Wi-Fi・IPv6、再起動後の自動起動は未確認。[今回の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)で範囲を区別する
   - 手順書の画像 5 枚（`docs/images/ai-agents/`）は、この実機の Codeg v0.35.1 で撮った
 - 2026-10-13 の Windows 11 / x64 の実機に Codeg v0.35.1・Caddy 2.11.7 を新規導入し、タスク・待ち受け・受信規則を読み戻した
   - 本人の共通認証入力と証明書登録後、TLS を検証した HTTPS の認証 200・未認証 401・誤値 401 を直接確認した
   - Codeg 経由で Codex の Auto review と Grok 4.7 の短文の応答を確認。Grok の `auto` を保存し、Claude は接続後に週の利用上限で応答未確認
-  - 画面の通し操作・別端末からの許可と遮断・再起動後の起動・複数ホストの認証値一致は未確認。[今回の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の新規構築と3エージェント接続の検証2026-10-13-jst)で範囲を区別する
+  - 画面の通し操作・別端末からの許可と遮断・再起動後の起動・複数ホストの認証値一致は未確認。[今回の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の新規構築と3エージェント接続の検証2026-10-13-jst)で範囲を区別する
 - AlmaLinux 10 の共通パスワードも本人の伏せ字入力で設定する。`set-codeg-password.py` と公開 fixture を分け、失敗時の状態と本人の旧認証による確認は extra に置く
 - 2026-10-13 の AlmaLinux 10.2 / aarch64 の実機では、3 エージェントの ACP 接続と Codex・Grok の応答、共同作業プラグインの ready と直接呼出しを確認。Claude の応答は週の利用上限で未確認
 - 同日の AlmaLinux の公開は、LAN IPv4 と 3443/tcp を宛先に残して送信元制限を外した。委譲の公開設定は反映済みで、画面からの実際の委譲と親エージェントの承認設定は未確認
-- Linux のパスワード変更は公開 fixture 11 件・構文検査・実機の `--check` が成功。HTTPS ログインは本人報告で、変更時の 200/401/401 の結果は未受領。[実機の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)で範囲を区別する
+- Linux のパスワード変更は公開 fixture 11 件・構文検査・実機の `--check` が成功。HTTPS ログインは本人報告で、変更時の 200/401/401 の結果は未受領。[実機の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)で範囲を区別する
 - Windows の[Git Bash 設定](../shell-terminal.md#git-bash-と-wezterm-の設定)は、共通 Git（4）→長いパス（5）→bash（6）→WezTerm（7）。[復元](../extra/windows-setup.md#git-bash-の設定を戻す)は、共通設定に加え、今回変更した `core.longpaths` を控えた元値へ戻す
 
 ### 検証範囲
@@ -218,9 +218,15 @@
     - 使い捨てのリポジトリで「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（手順 2 は 4 つの CLI の版とログイン）
     - 同じ項の手順 8 は Claude・Codex・Antigravity CLI の規則の読み込みまで。Grok の `--trust inspect` の行と手順 9 は通していない。CLI の headless の権限の確認と Codeg の接続確認だけを、4 エージェントの実分担の成功として扱わない
     - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
-- `docs/ai-agents.md` — 「Grok Build のブラウザ操作」: **AlmaLinux 10 と Windows 11 が対象で、手順が OS で違う手順書**（syncthing.md の形。`## 実施手順` は AlmaLinux 10 で 3 項〔Codeg のサーバーを入れて localhost で起動する・ブラウザで開いて Grok を動かす・HTTPS で LAN・VPN に公開する〕、Windows 11 は後ろの `## Windows 11 で使う`〔2 項〕・`## Windows 11 で止める・もう一度始める`・`## Windows 11 の更新`・`## Windows 11 のロールバック`。`## 端末にルート証明書を入れる`・`## 使い方の基本`・`## 端末の grok のセッションを取り込む`・`## Claude Code と Codex CLI も操作する`・`## 設定ファイル` は両 OS で 1 つ）。公式の遠隔操作の画面が無い Grok Build を、OSS の Codeg（Apache-2.0）の `codeg-server` を同じホストに常駐させて、ブラウザのチャット形式の画面から動かす。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。前提は ai-agents.md の「Grok Build」と、AlmaLinux 10 は almalinux-setup.md の「ユーザーサービスの常駐」
+- `docs/ai-agents.md` — 「Codeg」: AlmaLinux 10 と Windows 11 で、ACP のコーディングエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）をブラウザやスマートフォンのチャット画面から動かす任意の構成。使うエージェントと同じホストに OSS の Codeg（Apache-2.0）の `codeg-server` を常駐させる。まず localhost で起動し、ブラウザを開いてフォルダーを選び、使うエージェントの項へ進む。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。AlmaLinux 10 は「ユーザーサービスの常駐」と、使う CLI の導入・ログインを前提にする
+  - Codeg は複数のエージェントを使う Web UI として書く（2026-10-16、利用者の決定）。共通の「ブラウザで開いてエージェントを選ぶ」と、Grok 固有の「Grok Build を使う」を分ける。後者は手順 1 が権限モード、2 が Grok・モデルの選択、3 が指示・承認、4 がプロセスの確認
+  - エージェント別の項は「Codeg: Grok Build を使う」「Codeg: Claude Code と Codex CLI を使う」「Codeg: Windows 11 で Claude Code と Codex CLI を使う」「Codeg: AlmaLinux 10 で Antigravity を使う」「Codeg: Windows 11 で Antigravity を使う」。AlmaLinux 10 の Antigravity の項は Windows 11 の同項の前に置く
+  - **実機での検証状態（2026-10-16 JST）**: Raspberry Pi 5（AlmaLinux 10.2、aarch64）の Codeg v0.35.2 で、「Claude Code と Codex CLI を使う」の手順 2〜5 を通した。Claude の ACP 0.90.0、Codex の ACP 2.2.2 を入れ、公式サブスクリプションの認証、試験用の `codeg-demo` の選択、Claude の Auto・Opus 5.5 と Codex の Auto review・6.1 Sol での短文の応答を確認した
+    - 画像は `docs/images/ai-agents/codeg-almalinux-agents-install-v0.35.2.png`・`codeg-almalinux-agents-auth-v0.35.2.png`・`codeg-almalinux-send-check-v0.35.2.png`・`codeg-almalinux-reply-v0.35.2.png` の 4 枚。Windows 11 の v0.35.1 の画像 5 枚も使う
+    - フォルダーを切り替えた直後の最初の送信は「会話を作成できませんでした。もう一度お試しください。」で失敗し、再送で成功した。承認・変更・履歴の取り込み・再開・停止は今回確かめていない
+    - 同じ実機の仮想アドレスが 39 ビットの arm64 のカーネル（`CONFIG_ARM64_VA_BITS_39=y`）では、Google Antigravity の ACP サーバーの 1.4.0 は使えない。TCMalloc で起動時に落ちた。推奨版がほかの版になったときの動作は確かめていない。サインイン開始の失敗を確認し、画面の「アンインストール」で消した。Antigravity CLI 1.3.5 とは別の製品。ほかの Linux（x86_64 など）は確かめていない
   - AlmaLinux 10 の HTTPS は、共通の Caddy の `sites/codeg.caddy` を追加・撤去して扱う。本体・認証局・更新とルート証明書の導入は、almalinux-setup.md の「Caddy」の項に置く。Windows 11 は Codeg 専用の Caddy を使う
-  - **実機での検証状態（2026-10-15 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で、共通の Caddy の上に「Codeg のサーバーを入れて localhost で起動する」の手順 1〜7 と「HTTPS で LAN・VPN に公開する」の手順 1〜5 を通した
+  - **実機での検証状態（2026-10-15 JST）**: Raspberry Pi 5 / AlmaLinux 10.2 / aarch64 で、共通の Caddy の上に「サーバーを入れて localhost で起動する」の手順 1〜7 と「HTTPS で LAN・VPN に公開する」の手順 1〜5 を通した
     - Codeg は、手順 1 の「最新リリースを確かめて変える」に従い v0.35.2 を指定した（手順書の初期値は v0.35.1）。localhost の認証あり・なし、HTTPS の待ち受けと別ホストからの `200`（`curl -sk`）を確認した
     - **確認していないこと**: 「HTTPS で LAN・VPN に公開する」の手順 6〜8（端末のルート証明書・トークン・ブラウザ）、AlmaLinux 10 のロールバック、共通の Caddy の上での Codeg の更新・Claude Code と Codex CLI の操作・共通パスワード、ホストの再起動
   - Codeg は常に自動で最新の安定版にする（2026-10-16、利用者の決定）。タグは ASCII の数字だけの `vX.Y.Z`、`draft`・`prerelease` は両キーの存在と安定版の条件、必要な配布物の有無で最新を選び、毎日 04:30 に確認する。AlmaLinux 10 は最大 30 分ずらし、Windows 11 は取り逃した後に実行できる設定にする
@@ -231,7 +237,7 @@
     - Windows 11 のリリース JSON は curl の `--output` で一時ファイルに保存して UTF-8 指定で読み、成功・失敗とも片付ける。導入と自動更新で、コンソールの出力コードページに依存させない
     - 両 OS の状態ディレクトリに UTF-8 の `codeg-auto-update.log` を置き、UTC の ISO 8601 の日時を各行に付ける。1 MB 超で `.1` へ回し、現行と合わせて 2 世代を保持する。AlmaLinux 10 は標準出力への表示も続ける
       - Windows 11 はログ本体と `.1` の再解析ポイントを拒む。初回にログを開けなければ操作前に 1 で中断し、開始後の追記失敗は標準出力への警告だけにして更新・復元の終了コードを上書きしない
-    - **実機での検証状態（2026-10-16 JST）**: Windows 11 の PC（x64、Codeg 0.35.1）と、AlmaLinux 10.2 の Raspberry Pi 5 の 2 台（0.35.1 と 0.35.2）で、「自動更新を有効にする」の手順 1〜3 を書いたとおりに通した。0.35.1 の 2 台は 0.35.2 に上がり、2 回目は「使用中」になった。0.35.2 の 1 台は止まらずに「使用中」。Windows のタスクは 4:30 に予定どおり起動した。導入の節の版の選び方も、出力コードページ 932 の Windows PowerShell 5.1 と Pi の上で確かめた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-codeg-の毎日の自動更新2026-10-16-jst)）
+    - **実機での検証状態（2026-10-16 JST）**: Windows 11 の PC（x64、Codeg 0.35.1）と、AlmaLinux 10.2 の Raspberry Pi 5 の 2 台（0.35.1 と 0.35.2）で、「自動更新を有効にする」の手順 1〜3 を書いたとおりに通した。0.35.1 の 2 台は 0.35.2 に上がり、2 回目は「使用中」になった。0.35.2 の 1 台は止まらずに「使用中」。Windows のタスクは 4:30 に予定どおり起動した。導入の節の版の選び方も、出力コードページ 932 の Windows PowerShell 5.1 と Pi の上で確かめた（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-codeg-の毎日の自動更新2026-10-16-jst)）
       - テストは、Windows PowerShell 5.1 で 56 件、WSL の AlmaLinux 10 の `/tmp`（Python 3.12.13）で 60 件が成功
       - 実機で未確認: 起動確認の失敗からの自動の戻し（終了コード 2・3）、復元のサブコマンド、extra の撤去への追加、スリープ明けの `StartWhenAvailable`、x86_64 の Linux。Caddy の更新は対象外
   - 形: まず localhost で起動して確かめ、その後で公開する。Codeg は `127.0.0.1:3080` のまま変えず、Caddy が HTTPS の 3443 番で受けて渡す。AlmaLinux 10 は待ち受ける IP と送信元 CIDR を絞る（複数を並べられる）。Windows 11 は受信インターフェースが Private なら全送信元の IPv4・IPv6 と全接続種別を許可し、Public・Domain と Edge Traversal は遮断する。証明書は Caddy の認証局（`tls internal`。ホストごとに別、名前は AlmaLinux 10 が `Caddy <ホスト名>`、Windows 11 が `Codeg <ホスト名>`）で、端末にルート証明書を入れる（指紋を照合する）。配布物は最新の安定版を取得して SHA-256 と照合し、ホームに置いて毎日自動で更新する（公式のインストーラーや、EPEL・Homebrew・scoop は使わない）。AlmaLinux 10 は systemd のユーザーサービス、Windows 11 はタスク スケジューラ（管理者ではない権限。SSH のセッションからは始めない）
@@ -242,11 +248,11 @@
   - 共同レビューの追加修正: ルート証明書は Windows の PC で取り込み前に指紋を照合し、Android には同じファイルを USB で渡す形にした。共有する Caddy のパスは、撤去時の削除・確認の両方から外す。AlmaLinux 10 の更新失敗時は中断を表示し、退避した本体が無ければ現行の本体を消さない。変更した手順の実機での通しは未検証
   - 共同レビューでの失敗時の扱い: 配布物の一覧と journal を読めなかったときは、検査結果の `0` を出さずに中断する。Windows の更新も、展開・退避・配置のエラーや停止の失敗で中断する。復旧元が揃っていなければ、現行と退避先の両方を残す。localhost だけの構成で再開したときの成功条件も分けた。実機での通しは未検証
   - その後の修正（2026-10-11）: Windows 11 は、ノート PC を複数の拠点の有線 LAN につなぐ使い方に合わせ（利用者の指定）、Caddy が待ち受ける IP を決めない形（`https://:3443` と `on_demand`）にし、受信の規則を 3 本（プライベート・有線・送信元だけを許可し、パブリックと Wi-Fi は遮断）にした。`$PC_IP` の変数は無い。上の再試行（999 回）は、使い捨てのタスクで働かないことを確かめて外した。Android へのルート証明書は、利用者の指定で、ブラウザで取得する形に戻した（USB の形は無い）。この PC を入れ替えて有線 LAN から届くことは確かめた。別の拠点での接続と、パブリックのネットワークでの動きは未検証（検証記録の末尾）
-  - 非表示起動の検証（2026-10-11）: Windows の両タスクは、`/target:winexe` で作る `codeg-hidden-launcher.exe` から PowerShell を始める。`CreateNoWindow` と出力の読み捨てを使い、終了コードをタスクへ返す。新規導入は「Windows 11 で Codeg のサーバーを入れて起動する」の手順 7 でコンパイルし、手順 8 と Caddy の手順 4 で使う。タスクの再起動で新しい Terminal が開かず HTTPS 200/401 を確認。OS 再起動後と撤去の通しは未確認
+  - 非表示起動の検証（2026-10-11）: Windows の両タスクは、`/target:winexe` で作る `codeg-hidden-launcher.exe` から PowerShell を始める。`CreateNoWindow` と出力の読み捨てを使い、終了コードをタスクへ返す。新規導入は「Windows 11 でサーバーを入れて起動する」の手順 7 でコンパイルし、手順 8 と Caddy の手順 4 で使う。タスクの再起動で新しい Terminal が開かず HTTPS 200/401 を確認。OS 再起動後と撤去の通しは未確認
   - Windows の公開範囲（利用者の指定）: 受信の規則は 2 本（Private の TCP 3443 を全送信元・全接続種別で許可し、Public・Domain は遮断）にする。送信元と接続種別は Any、Edge Traversal は Block。URL は接続中の Private の InterfaceIndex から有効な IPv4 を接続名つきで表示し、現在の URL ごとに同じネットワークの別端末から確認する。Public・Domain の遮断は対象の受信インターフェースと IP・接続経路・サーバー稼働を別途確かめる。LAN は有線と Wi-Fi を含み、VPN も実際の受信インターフェースが Private であることが必要。信頼する接続だけを Private にし、公衆 Wi-Fi などは Public のままにする。承認を減らして使う用途では「スマート自動承認」（auto）を選び、設定保存と会話の利用が未確認なら未完了と記載する。実機での確認範囲は検証記録の今回の付録で管理し、以前の構成の成功を流用しない
   - Windows 11 Home の新規導入の確認（2026-10-12）: Codex の MSIX による AppData の転送で通常の PowerShell から本体が見えなかった失敗と、配置用マニフェストの PowerShell 5.1 の配列の失敗を残した。利用者が通常の PowerShell で公開ファイルを照合・配置し、トークンを作った。通常の AppData の実在、両タスクの Running、待ち受けと API 401、証明書で検証した HTTPS 200、スマート自動承認の保存後の新しい Grok 4.7 の会話を確認。本人の証明書取り込み、通常のブラウザの HTTPS ログイン、自宅 Wi-Fi の別端末でのログイン画面表示は利用者の報告。別端末での認証・指示送信、Public/Domain の接続拒否・有線 LAN/VPN/IPv6・再起動・更新/ロールバックと、自動承認のファイル変更・コマンド実行は未確認。手順書のブロック全体をそのまま実機で通した結果ではない
   - Claude Code・Codex CLI の検証（2026-10-12）:
-    - 「Claude Code と Codex CLI も操作する」は両 OS に共通。各 CLI の導入とログインを前提にし、Codeg での検出、対応する worktree を開いてエージェントを選ぶ操作、会話の開始・承認・再開を扱う
+    - 「Claude Code と Codex CLI を使う」は両 OS に共通。各 CLI の導入とログインを前提にし、Codeg での検出、対応する worktree を開いてエージェントを選ぶ操作、会話の開始・承認・再開を扱う
     - AlmaLinux 10.2 / aarch64、Node.js 26.11.0 / npm 11.20.0 で、固定版の ACP アダプターを `/tmp` の隔離ディレクトリに導入。既存の Codeg と npm の設定は変えていない
     - Claude の ACP 0.89.1 / SDK 0.3.293 / native CLI 2.1.293 は、本人のサブスクリプションの認証を再利用し、initialize・新規セッション・Manual の選択まで成功
     - Claude の 1 回の prompt は RPC -32603 で失敗し、応答は未確認。limit の語を検出したが、原因は確定していない
@@ -257,7 +263,7 @@
   - AlmaLinux の追加検証（2026-10-13）: v0.35.1 の配布物・本体一致、3 エージェントの ACP 接続、Codex・Grok の応答を確認。Claude の応答・画面からの実委譲は未確認
     - Grok の補助経路は外側の bubblewrap で読み取り専用。共同作業プラグインは ready と直接呼出しまで確認し、native ACP の経路とは分ける
     - Linux の共通パスワードは公開 fixture 11 件・構文・実機の前提確認が成功。本人が HTTPS ログイン成功を報告したが、変更時の認証 3 条件の出力は未受領
-  - Windows 11 の Antigravity の検証（2026-10-15）: Codeg v0.35.1 の組み込みの Google Antigravity（純正 ACP サーバー `agy_acp_server` 1.3.0）を使う。CLI 1.3.5 とは別の製品・別のログインで、AlmaLinux 10 は対象外
+  - Windows 11 の Antigravity の検証（2026-10-15）: Codeg v0.35.1 の組み込みの Google Antigravity（純正 ACP サーバー `agy_acp_server` 1.3.0）を使う。CLI 1.3.5 とは別の製品・別のログイン。AlmaLinux 10 の状態は 2026-10-16 の検証範囲に記す
     - 「ブラウザのないマシンでサインイン」でログインし、新しい会話の短文の応答とファイル作成の承認カードの拒否を確認した。自動のサインインは再接続ごとにタブを開き、古い接続の時間切れで保存済みのトークンが消えた
     - 制約: Active Workspaces は `~\.gemini\antigravity-cli\skills` が先頭になり、作業フォルダーの AGENTS.md は読まれない。1.4.0 でも同じで、試した後に 1.3.0 に戻した。同じ worktree の CLI では規則を読めた
     - Claude Code から Antigravity への委譲は接続確認の一文まで成功した。子は親の `claude` の worktree を使い、別の worktree は作られない。4 worktree と main の git status は空のままだった
@@ -422,16 +428,16 @@
   - C20-FOLLOWUP（2026-10-12）で一時 LAN 復旧後の WireGuard 原文確認と双方向疎通、実 GNOME 端末の IBus 原文ファイル実行と日本語変換を追記。C20 の部分成功と未確認、搬送方法の違いを保持し、旧集計へ重複加算しない
   - 2026-10-12のオフライン継続結果と最新の並行割当を追記。旧FINALの未実施は当時の履歴として保持。実行原文を凍結し、AS4GiB/Windows8GiBとV2の後続8GiB枠を分け、性能測定は全担当の作業終了後に行う
   - 修正後の初回オフライン導入は別fresh起点の再試行を残す。既存継続のcompleted・onlineのAS-FULLとは分け、初回Homebrew/jq/LazyVim/Mason取得を成功に読み替えない
-- `docs/extra/grok-build-remote.md` — Codeg の撤去、共通パスワードの復元、接続元の制限の復帰、自動更新の控えから本体と DB を戻す手順。復元 CLI に控え名と問題版を指定し、停止・復元・旧版の起動確認を行う。`backing-up`・`restart-failed` は元 DB を保持する。自動更新の復旧と撤去の追加箇所は実機で未確認
-- `docs/reference/grok-build-remote.md` — Codeg と Caddy の構成、ACP、認証、権限の補足。自動更新は SHA-256 と digest、使い捨ての版確認、トークンを使わない起動確認、本体と DB 一式を戻す復元 CLI、両 OS の専用ログ、毎日の時刻と会話の切断の理由をまとめる
-- `scripts/grok-build-remote/codeg-auto-update.py` — AlmaLinux 10 の Codeg を毎日最新の安定版にする。二重実行とパスワード変更をロックし、照合・準備後に本体と DB を退避し、起動確認に失敗した版を戻して保留する。`--restore`・`--hold` で控えを戻し、旧版の起動も確認する。UTF-8・UTC 日時の専用ログを 2 世代保持し、標準出力も続ける。Raspberry Pi 5 の 2 台で更新と「使用中」を確かめた（2026-10-16）。自動の戻しと復元は実機で未確認
-- `scripts/grok-build-remote/test-codeg-auto-update.py` — 一時 HOME と偽の API・配布物・systemctl・HTTP・待ち受け・版確認で自動更新を検査する。実サービス・本人のトークン・実際の Codeg 本体には触れない
-- `scripts/grok-build-remote/codeg-auto-update.ps1` — Windows PowerShell 5.1 で Codeg の本体 3 つだけを更新する。隠しランチャーのタスクで動き、結果を専用ログに残す。本体と DB の退避・復帰、保留と 2 世代の保持を行う。`-Restore`・`-Hold` は控えから戻して旧版の起動まで確認する。ログは UTF-8・UTC 日時、1 MB 超で `.1` へ回して 2 世代。隠しランチャーが出力を捨てるため、結果は専用ログで確認する。Windows 11 の PC で更新と「使用中」と 4:30 の起動を確かめた（2026-10-16）。自動の戻しと復元は実機で未確認
-- `scripts/grok-build-remote/test-codeg-auto-update.ps1` — Windows PowerShell 5.1 の関数を AST から読み込み、偽のタスク・curl・待ち受けと一時フォルダーで自動更新を検査する。中国語・絵文字を含む UTF-8 のリリース JSON を、出力コードページ 932 でも読めることを含む。実タスク・本人のトークン・実際の Codeg 本体には触れない
-- `scripts/grok-build-remote/set-codeg-password.py` — AlmaLinux の本人の端末で、Codeg の共通パスワードを伏せ字で 2 回入力する。既存秘密の本文を読まず metadata・専用サービス・待ち受けを確認し、置換と旧控えの保持、失敗時の復帰を行う。`--check` は変更せず確認だけを行う
-- `scripts/grok-build-remote/test-codeg-password.py` — 固定した公開値と一時ディレクトリだけを使い、パスワード変更の置換・旧控え・失敗時の復帰・不明状態・安全条件を検証する。実ホストのサービス・HTTP・本人入力は実行しない
-- `scripts/grok-build-remote/codeg-grok-readonly.py` — Grok の内側の sandbox が使えないホストで、共同作業プラグインの補助経路を外側の bubblewrap で読み取り専用にする。`--write` は拒否し、Codeg の native ACP の経路とは分ける
-- `scripts/grok-build-remote/claude-agents.sh` — `/usr/bin/claude` の起動時だけ、本人の `~/.local/bin/codeg-grok-readonly` を `GROK_BINARY` として継承させる端末用の補助スクリプト。通常の `claude` コマンドは置き換えない
+- `docs/extra/codeg.md` — Codeg の撤去、共通パスワードの復元、接続元の制限の復帰、自動更新の控えから本体と DB を戻す手順。復元 CLI に控え名と問題版を指定し、停止・復元・旧版の起動確認を行う。`backing-up`・`restart-failed` は元 DB を保持する。自動更新の復旧と撤去の追加箇所は実機で未確認
+- `docs/reference/codeg.md` — Codeg と Caddy の構成、ACP、認証、権限の補足。自動更新は SHA-256 と digest、使い捨ての版確認、トークンを使わない起動確認、本体と DB 一式を戻す復元 CLI、両 OS の専用ログ、毎日の時刻と会話の切断の理由をまとめる
+- `scripts/codeg/codeg-auto-update.py` — AlmaLinux 10 の Codeg を毎日最新の安定版にする。二重実行とパスワード変更をロックし、照合・準備後に本体と DB を退避し、起動確認に失敗した版を戻して保留する。`--restore`・`--hold` で控えを戻し、旧版の起動も確認する。UTF-8・UTC 日時の専用ログを 2 世代保持し、標準出力も続ける。Raspberry Pi 5 の 2 台で更新と「使用中」を確かめた（2026-10-16）。自動の戻しと復元は実機で未確認
+- `scripts/codeg/test-codeg-auto-update.py` — 一時 HOME と偽の API・配布物・systemctl・HTTP・待ち受け・版確認で自動更新を検査する。実サービス・本人のトークン・実際の Codeg 本体には触れない
+- `scripts/codeg/codeg-auto-update.ps1` — Windows PowerShell 5.1 で Codeg の本体 3 つだけを更新する。隠しランチャーのタスクで動き、結果を専用ログに残す。本体と DB の退避・復帰、保留と 2 世代の保持を行う。`-Restore`・`-Hold` は控えから戻して旧版の起動まで確認する。ログは UTF-8・UTC 日時、1 MB 超で `.1` へ回して 2 世代。隠しランチャーが出力を捨てるため、結果は専用ログで確認する。Windows 11 の PC で更新と「使用中」と 4:30 の起動を確かめた（2026-10-16）。自動の戻しと復元は実機で未確認
+- `scripts/codeg/test-codeg-auto-update.ps1` — Windows PowerShell 5.1 の関数を AST から読み込み、偽のタスク・curl・待ち受けと一時フォルダーで自動更新を検査する。中国語・絵文字を含む UTF-8 のリリース JSON を、出力コードページ 932 でも読めることを含む。実タスク・本人のトークン・実際の Codeg 本体には触れない
+- `scripts/codeg/set-codeg-password.py` — AlmaLinux の本人の端末で、Codeg の共通パスワードを伏せ字で 2 回入力する。既存秘密の本文を読まず metadata・専用サービス・待ち受けを確認し、置換と旧控えの保持、失敗時の復帰を行う。`--check` は変更せず確認だけを行う
+- `scripts/codeg/test-codeg-password.py` — 固定した公開値と一時ディレクトリだけを使い、パスワード変更の置換・旧控え・失敗時の復帰・不明状態・安全条件を検証する。実ホストのサービス・HTTP・本人入力は実行しない
+- `scripts/codeg/codeg-grok-readonly.py` — Grok の内側の sandbox が使えないホストで、共同作業プラグインの補助経路を外側の bubblewrap で読み取り専用にする。`--write` は拒否し、Codeg の native ACP の経路とは分ける
+- `scripts/codeg/claude-agents.sh` — `/usr/bin/claude` の起動時だけ、本人の `~/.local/bin/codeg-grok-readonly` を `GROK_BINARY` として継承させる端末用の補助スクリプト。通常の `claude` コマンドは置き換えない
 
 - `docs/reference/caddy.md` — ホストで Caddy を 1 つにする方針、配布物と SHA-512、共通の import・管理 API 無効化・bind・tls internal、認証局の名前、ルート証明書と指紋の説明。公式文書と実機で確認した範囲を分ける
 - `docs/extra/caddy.md` — 全サイトの撤去後の共通 Caddy の削除と、端末からのルート証明書の削除。認証局の鍵の削除は取り戻せない。アプリ 1 つの撤去では共通認証局を残す。どのロールバックも実機では確かめていない

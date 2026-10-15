@@ -1,9 +1,9 @@
-# Grok Build のブラウザ操作のロールバックと注意点
+# Codeg のロールバックと注意点
 
-[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#codeg-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#codeg-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](../reference/codeg.md)
 
-- 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
-- Codeg の撤去の既存部分は、2026-10-14 に Windows 11 の実機で通した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。自動更新に関する撤去・復旧と、パスを残す分岐は実機で未確認
+- 本書の「<項>の手順 N」は、各正本の「Codeg」の該当項を指す
+- Codeg の撤去の既存部分は、2026-10-14 に Windows 11 の実機で通した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。自動更新に関する撤去・復旧と、パスを残す分岐は実機で未確認
 
 ## AlmaLinux 10 で自動更新の控えから前の版と DB に戻す
 
@@ -86,14 +86,14 @@
    systemctl --user list-timers codeg-auto-update.timer
    ```
 
-   - 次回の時刻が出ればよい。保留は残す。試し直すときは[AlmaLinux 10 の更新](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-の更新)の保留を解く手順を通す
+   - 次回の時刻が出ればよい。保留は残す。試し直すときは[AlmaLinux 10 の更新](../ai-agents.md#codeg-almalinux-10-の更新)の保留を解く手順を通す
 
 ---
 
 ## AlmaLinux 10 のロールバック
 
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)
-- Grok Build と、そのセッション（`~/.grok`）は消さない。端末の `grok` は、そのまま使える
+- 各エージェントの CLI と、その認証・設定・履歴は消さない
 - linger を、ほかに使うものが無くて戻すときは、[linger のロールバック](linger.md#ロールバック)
 - 手順 3 を貼る前に、Codeg のデスクトップアプリを使っているホストでは `~/.codeg` を `rm` から外す
 - 共通の Caddy と認証局は残す。撤去は、すべてのサイトを外してから [Caddy のロールバック](caddy.md#共通の-caddy-を撤去する)で行う
@@ -128,7 +128,7 @@
    {
      printf '\n\033[7m 確認 \033[0m\n'
      if [ -z "${SERVER_IP}" ] || [ -z "${FW_ZONE}" ]; then
-       echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+       echo '中断: 「Codeg: サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
      else
        CODEG_DST_RULE="rule priority=\"100\" family=\"ipv4\" destination address=\"${SERVER_IP}\" port port=\"3443\" protocol=\"tcp\" accept"
        CODEG_DST_OK=1
@@ -166,11 +166,11 @@
    }
    ```
 
-   - 「HTTPS で LAN・VPN に公開する」の手順 4 を通していなければ、この手順は飛ばす
+   - 「Codeg: HTTPS で LAN・VPN に公開する」の手順 4 を通していなければ、この手順は飛ばす
    - 送信元指定の無い任意構成の規則は、存在する場合だけ runtime と permanent から削除する。`ALLOW_FROM` が空でも、この規則の削除は行う
    - 削除した規則に `success` が出た後、3443/tcp の規則が runtime と permanent のどちらにも無ければよい
    - 規則の確認・削除で中断した場合や、`ALLOW_FROM` が不明で送信元付きの規則が残る場合は、この節の手順 3 へ進まない
-   - 変数の値を控えていなければ、`sudo firewall-cmd --zone="$(sudo firewall-cmd --get-default-zone)" --list-rich-rules` で規則を見て、「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数に同じ値を入れる
+   - 変数の値を控えていなければ、`sudo firewall-cmd --zone="$(sudo firewall-cmd --get-default-zone)" --list-rich-rules` で規則を見て、「Codeg: サーバーを入れて localhost で起動する」の手順 1 の変数に同じ値を入れる
 
 1. ユニット・本体・トークン・会話の履歴を消す（取り戻せない）。
 
@@ -266,14 +266,14 @@
    Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Format-List NextRunTime
    ```
 
-   - 次回の時刻が出ればよい。保留は残す。試し直すときは[Windows 11 の更新](../ai-agents.md#grok-build-のブラウザ操作-windows-11-の更新)の保留を解く手順を通す
+   - 次回の時刻が出ればよい。保留は残す。試し直すときは[Windows 11 の更新](../ai-agents.md#codeg-windows-11-の更新)の保留を解く手順を通す
 
 ---
 
 ## Windows 11 のロールバック
 
 - 手順 1・3 は管理者ではない PowerShell に、手順 2 は管理者の PowerShell に貼る
-- Grok Build と、そのセッション（`%USERPROFILE%\.grok`）は消さない
+- 各エージェントの CLI と、その認証・設定・履歴は消さない
 - 端末に入れたルート証明書は、[Caddy の「端末からルート証明書を消す」](caddy.md#端末からルート証明書を消す)と同じ操作で消す
 - 手順 1 を貼る前に、ほかの用途の Caddy をこの PC で動かしているなら、`Get-Process -Name caddy` の行を外し、確認の `Get-Process` の名前からも `caddy` を外す
 - 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は `Remove-Item` と `Test-Path` の両方から、Codeg のデスクトップアプリをこの PC で使っているときの `%USERPROFILE%\.codeg`（Codeg が置いたスキル）は `Remove-Item` から外す
@@ -347,13 +347,13 @@
 
 ## Windows 11 の共通パスワードの復元
 
-- [共通パスワードの変更](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)で失敗したときに使う。Codeg の削除や Caddy の停止は行わない
+- [共通パスワードの変更](../ai-agents.md#codeg-windows-11-で共通パスワードを設定変更する)で失敗したときに使う。Codeg の削除や Caddy の停止は行わない
 - 控えと認証ファイルの本文は、表示・共有しない。`password-change-result.json` は変更スクリプトと同じディレクトリにあり、秘密の値を含まない
 
 1. 変更スクリプトの今回の結果を見て、復元の状態を確かめる。
 
    - `StartedAtUtc` が今回の開始時刻であることを確かめる。JSON を保存できなかった場合は、今回のコンソール出力を使う。`-CheckOnly` は結果ファイルを更新しない
-   - 前提確認・入力で未変更のまま終わった場合は、[共通パスワードの変更](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1 へ戻る。復元へ進まない。古い実行の結果を今回の結果として使わない
+   - 前提確認・入力で未変更のまま終わった場合は、[共通パスワードの変更](../ai-agents.md#codeg-windows-11-で共通パスワードを設定変更する)の手順 1 へ戻る。復元へ進まない。古い実行の結果を今回の結果として使わない
    - 変更処理後の `Outcome=failed` では、`FailureStage`・`CredentialReplaced`・`FileUnchanged`・`FileRestored`・`ServiceRestored`・`BackupFile` を確かめる
    - `CredentialReplaced`・`FileUnchanged` が `null` なら、変更の有無が未確認。未変更として再実行せず、控えを保持して認証ファイルと専用サービスの状態の確認を依頼する
    - ファイルが未変更か復元済みで、`ServiceRestored=true` なら手順 3 へ進む。`OldPasswordVerified` は `false` のままで、旧認証でのログイン成功は未確認
@@ -474,9 +474,9 @@
 
 ## AlmaLinux 10 の共通パスワード変更で失敗したとき
 
-- [共通パスワードの設定・変更](../ai-agents.md#grok-build-のブラウザ操作-codeg-の共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
+- [共通パスワードの設定・変更](../ai-agents.md#codeg-共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
 - 旧設定の退避はファイル名だけを表示する。認証ファイルや退避の本文を開かず、パスワードをエージェントや復旧担当へ渡さない
-- 失敗時の復帰は公開 fixture で検証した。実ホストでの失敗からの復帰と、旧認証によるログインは未確認（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)）
+- 失敗時の復帰は公開 fixture で検証した。実ホストでの失敗からの復帰と、旧認証によるログインは未確認（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)）
 
 1. 本人の端末で、今回の終了コードと表示された結果を確認する。
 
@@ -496,7 +496,7 @@
 
 #### アクセストークンの重み
 
-- トークンを知っている人は、ブラウザから、そのホストでそのユーザーとして有効なエージェントを動かせる（Grok Build・Claude Code・Codex によるファイルの読み書きとコマンドの実行）
+- トークンを知っている人は、ブラウザから、そのホストでそのユーザーとして有効なエージェントを動かせる（Grok Build・Claude Code・Codex CLI・Antigravity によるファイルの読み書きとコマンドの実行）
 - AlmaLinux 10 の初期設定は NOPASSWD の sudo を入れる。そのホストでは、トークンが root と同じ重みになる
 - Codeg の画面には、端末のパネルを開くボタンがある（開いての確認はしていない）
 - トークンは 1 つで、利用者ごとの区別や、有効期限は無い
@@ -504,13 +504,13 @@
 
 #### スマートフォンを失くしたとき
 
-- トークンのファイルを消して作り直し（AlmaLinux 10 は「Codeg のサーバーを入れて localhost で起動する」の手順 5、Windows 11 は「Windows 11 で Codeg のサーバーを入れて起動する」の手順 5）、サービス（Windows 11 はタスク）を起動し直す
+- トークンのファイルを消して作り直し（AlmaLinux 10 は「Codeg: サーバーを入れて localhost で起動する」の手順 5、Windows 11 は「Codeg: Windows 11 でサーバーを入れて起動する」の手順 5）、サービス（Windows 11 はタスク）を起動し直す
 - 新しいトークンで起動し直すと、前のトークンは使えなくなる（使い捨てのインスタンスで確かめた。検証記録）
 - WireGuard のクライアントの登録も消す（[WireGuard VPN の「クライアントを削除する」](../wireguard.md#wireguard-クライアントを削除する)）
 
 #### 権限モードと承認の確認
 
-- Codeg の「権限モード」は、Grok Build の `config.toml` の `permission_mode` を書き換える。端末の `grok` と同じ設定になる
+- Grok Build を使うとき、Codeg の「権限モード」は、Grok Build の `config.toml` の `permission_mode` を書き換える。端末の `grok` と同じ設定になる
 - 承認を減らして使う本書の用途では「スマート自動承認」（`auto`）を選ぶ。Grok の自動審査が許可しない操作は、確認が出るか拒否される。設定の保存と、新しい会話での応答が未確認なら、その部分は未完了として扱う
 - 「常に許可」のとき、Codeg は Grok Build を `--permission-mode bypassPermissions` で起動する。承認の確認は出ない
 - 「毎回確認」のとき、ファイルの変更と `rm` は確認が出た。**`mkdir` は確認なしで実行された**（Grok Build が確認を求めなかった）。確認が出ることを、安全の境界にしない
@@ -519,7 +519,7 @@
 
 #### Claude Code・Codex の共有設定と履歴
 
-- 任意節（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
+- 任意節（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
 - 認証方法を変える前に、本人が既存の方式と必要な設定を確かめる。既に「公式サブスクリプション」なら保存し直さない。別のアカウントへのログインも、端末の CLI に影響する
 - 既存の API 用の項目がある場合は、認証方法の保存で削除・変更されることがある。エージェントへ設定ファイルの全文やログイン情報を渡さない
 - 接続アダプターには別のランタイムが入る。CLI と同じホームの設定・MCP・フックなどを使い得るので、Codeg に追加しただけで既存設定から隔離されたとは扱わない
@@ -581,9 +581,9 @@
 
 #### そのほか
 
-- Codeg は Grok Build を `--no-auto-update` で起動する。Grok Build は、端末で `grok update` を実行して上げる
+- Grok Build を使うとき、Codeg は `--no-auto-update` で起動する。Grok Build は、端末で `grok update` を実行して上げる
 - Codeg の画面の「エージェント」の設定にある「アップグレード」（Codeg が勧める版の Grok Build への入れ替え）は使っていない
 - 「ファイルとコマンドをエージェント自身に処理させる」は、既定の無効のまま使う。有効にしても、`mkdir` が確認なしで実行される結果は変わらなかった
 - 取り込みの画面は、そのホストのほかのエージェントとプロジェクトのセッションの題名も一覧に出す
 - Codeg の子プロセス（`codeg-mcp`）の引数に、内部用の値（`--token <UUID>`）が出る。アクセストークンとは別のもの
-- Claude Code・Codex も使う場合は、任意節（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する
+- Claude Code・Codex を使う場合は、任意の項（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する
