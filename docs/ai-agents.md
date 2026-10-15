@@ -301,13 +301,14 @@
 
 > [!IMPORTANT]
 > - 前提: [Windows 11 のセットアップ](windows-setup.md)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
-> - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ
+> - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ。Antigravity CLI（Windows 11 だけ）は個人の Google アカウント
 > - **この PC のデスクトップで行う**。SSH のセッションには貼らない
 > - PowerShell のブロックは、管理者ではない **Windows PowerShell 5.1** に貼る（窓の開き方は、[Windows 11 のセットアップの「WSL の AlmaLinux 10 と自動サインイン」](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1）
 
 - 上から順にコードブロックを貼る。[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 の変数は、その項の中で新しい窓を開いたら貼り直す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
+- Google の Antigravity CLI（`agy`）は、Windows 11 だけで扱う（[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)）。Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)で入れる
 
 ### Windows 11 で Claude Code を入れる
 
@@ -576,6 +577,88 @@
    - 終了するときは `/quit` を入力する
    - **次の手順は、Grok を終了して PowerShell のプロンプトに戻ってから貼る**
 
+### Windows 11 で Antigravity CLI を入れる
+
+1. 既存の Antigravity が入っていないか確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command agy, antigravity -All -ErrorAction SilentlyContinue
+   Test-Path "$env:LOCALAPPDATA\agy"
+   Test-Path "$env:USERPROFILE\.gemini"
+   ```
+
+   - 新規の PC なら、`False` だけが出る
+   - パスか `True` が出たら、元の導入方法を確かめてから進める（Antigravity の IDE が入れた `agy`・`antigravity` は、エディターを開くだけのコマンドで、この CLI ではない）
+
+1. 公式のインストーラーで Antigravity CLI を入れる。
+
+   ```powershell
+   & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://antigravity.google/cli/install.ps1')))
+   ```
+
+   - `✅ Antigravity CLI binary placed successfully at C:\Users\<WIN_USER>\AppData\Local\agy\bin\agy.exe` を確かめる
+   - 初回は `Successfully added %LOCALAPPDATA%\agy\bin to User PATH registry variable.` も出る
+   - `ERROR: logging before google.Init: I…` の行は、`I` で始まる情報の行で、エラーではない
+   - `Security Halt: Checksum verification failed.` が出たら、入っていない。進まない
+   - `Notice: 'agy.exe' is already installed at …` が出たら、既に入っていて、何も変わっていない。この項の手順 1 の分岐を確かめる
+   - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
+
+1. インストーラーが残した一時ファイルを消し、実行ファイルと版を確かめる。
+
+   ```powershell
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\antigravity\staging\agy.exe" -ErrorAction SilentlyContinue
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command "$env:LOCALAPPDATA\agy\bin\agy.exe"
+   & "$env:LOCALAPPDATA\agy\bin\agy.exe" --version
+   ```
+
+   - `Source` がこの項の手順 2 の場所で、`1.3.5` のような版が出ることを確かめる
+
+1. 開いている Windows PowerShell を閉じ、新しく開き直す。
+
+   - [WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1 と同じように、管理者ではない Windows PowerShell（5.1）を開く
+   - 新しい窓でも `agy --version` が通ることを確かめる
+   - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
+   - **次の手順は、開き直した PowerShell に貼る**
+
+1. 確認用のディレクトリで Antigravity CLI を起動し、ログインを始める。
+
+   ```powershell
+   New-Item -ItemType Directory -Path "$env:USERPROFILE\agy-sandbox" -Force | Out-Null
+   Set-Location "$env:USERPROFILE\agy-sandbox"
+   git init
+   agy
+   ```
+
+   - `You are currently not signed in.` と `Select login method:` が出たら、`1. Google OAuth` を選んで Enter を押す
+   - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
+
+1. ブラウザで個人の Google アカウントにログインし、Antigravity CLI を承認する。
+
+   - 使うアカウントと、許可する内容を確かめてから承認する
+   - 端末の起動画面に `Antigravity CLI 1.3.5` のような版、ログインしたアカウントとプラン、モデル名が出ればよい
+   - フォルダーを信頼するか聞かれたら、`agy-sandbox` であることを確かめて信頼する
+
+1. Antigravity の入力欄で `/config` を開き、設定を確かめてから終了する。
+
+   - `Enable Telemetry`（利用データの送信）を確かめ、送らないなら `off` にする
+   - `Tool Permission` が `request-review`、`Non-Workspace Access` が `off` であることを確かめる（`off` でも、1 回だけの実行は `%TEMP%` に書ける。[Antigravity CLI の設定ファイル](#antigravity-cli-の設定ファイル)）
+   - `Esc` で設定を閉じ、`/quit` で終了する
+   - **次の手順は、Antigravity を終了して PowerShell のプロンプトに戻ってから貼る**
+
+1. ログインと、1 回だけの実行（`-p`）を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   agy models
+   agy -p 'ツールやファイルを使わずに、接続確認ができたと一文で答えてください。' --output-format json --print-timeout 300s
+   ```
+
+   - モデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
+   - JSON の `"status":"SUCCESS"` と、`"response"` に一文が出ればよい
+   - 日本語の応答が化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
+
 ### Windows 11 で Codex・Grok のプラグインを入れる
 
 1. Node.js 18.18 以上があるか確かめ、無いときだけ scoop で入れる（プラグインが使う）。
@@ -791,6 +874,29 @@
 - そのディレクトリで読まれる設定・指示書（AGENTS.md など）・MCP サーバーは、`grok inspect` で見られる（ログインしていなくても動く）
 - 初回の導入のために `config.toml` を書く必要は無い（インストーラーが `[cli]` の 2 行を書く）
 - 自動の更新を止めるときは、`config.toml` の `[cli]` の下に `auto_update = false` の行を足す。止めたら、[更新](#更新)の手順 4 で上げる
+
+---
+
+## Antigravity CLI の設定ファイル
+
+- 対象: Windows 11
+
+| 用途 | Windows 11 |
+|---|---|
+| 実行ファイル | `%LOCALAPPDATA%\agy\bin\agy.exe` |
+| ユーザー設定（`/config` の値・信頼したフォルダー `trustedWorkspaces`・許可の規則 `permissions`） | `%USERPROFILE%\.gemini\antigravity-cli\settings.json` |
+| 共有の設定（MCP サーバーなど） | `%USERPROFILE%\.gemini\config\`（`mcp_config.json`） |
+| ログイン情報 | Windows の資格情報マネージャーの `gemini:antigravity` |
+| 会話の記録とログ | `%USERPROFILE%\.gemini\antigravity-cli\conversations\`・`log\` |
+| 自動の更新の状態 | `%USERPROFILE%\.gemini\antigravity-cli\updater\` |
+| すべてのフォルダーに効く指示書 | `%USERPROFILE%\.gemini\AGENTS.md`・`GEMINI.md`（初めは無い） |
+| Codeg の Antigravity（別の製品） | `%USERPROFILE%\.gemini\antigravity-acp\`（[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)） |
+
+- 資格情報マネージャーの値はパスワードと同じ扱いにし、表示させない・載せない
+- 作業フォルダーの `AGENTS.md` と `GEMINI.md` を、どちらも指示として読む
+- 初回の導入のために `settings.json` を書く必要は無い（フォルダーを信頼すると `trustedWorkspaces` が書かれる）
+- 1 回だけの実行（`agy -p`）は、作業フォルダーの中の読み書きと `%TEMP%` の中への書き込みを確認なしで行い、シェルのコマンドと、それ以外の場所の読み書きは拒む。拒んでも終了コードは 0 で、JSON の `denied_actions` と stderr の `jetski: no output produced` に出る
+- `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は使わない。`--mode plan` も、読み取り専用の境界には使わない（[参考資料](reference/coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）
 
 ---
 
@@ -1177,10 +1283,12 @@
 ## Windows 11 の更新
 
 - 対象: Windows 11。通常（管理者ではない）の Windows PowerShell 5.1 に貼る
-- Claude Code・Codex・Grok Build は、自分で新しい版に上がる。待たずに上げるときだけ、[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)の手順を行う
+- Claude Code・Codex・Grok Build・Antigravity CLI は、自分で新しい版に上がる。待たずに上げるときだけ、[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)の手順を行う
   - Claude Code は起動時・起動中に更新を取得し、次の起動から新しい版になる。追うチャンネルは[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 で選ぶ
   - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
   - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
+  - Antigravity CLI は、バックグラウンドで自分で上がる（止める設定は確かめていない）
+  - Codeg の Antigravity（ACP サーバー）は自分では上がらない。[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の版のまま使う
 
 ### AI エージェントとプラグインを上げる
 
@@ -1195,10 +1303,10 @@
    - 新しい版があれば `Successfully updated from <古い版> to version <新しい版>`、無ければ `Claude Code is up to date (2.1.288)` のように出る
    - 更新の後に `claude` が見つからなくなったら、[注意点](extra/ai-agents.md#注意点)の `claude.exe.old.*` の項を見る
 
-1. 起動中の Codex と Grok を終了する。
+1. 起動中の Codex・Grok・Antigravity CLI を終了する。
 
-   - 端末の Codex と Grok は `/quit` で閉じる
-   - 知らせを待たずに上げるときだけ、この項の手順 2〜4 を行う
+   - 端末の Codex・Grok・Antigravity CLI は `/quit` で閉じる
+   - 知らせを待たずに上げるときだけ、この項の手順 2〜5 を行う（Antigravity CLI を入れていなければ、手順 5 は飛ばす）
 
 1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
 
@@ -1219,6 +1327,16 @@
    ```
 
    - 新しい版が無ければ `Already up to date (…)` と出る
+
+1. Antigravity CLI を入れたときだけ、新しい版を入れて版を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   agy update
+   agy --version
+   ```
+
+   - 新しい版が無ければ `✓ You are already on the latest version.` と出る
 
 1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
 
@@ -1645,8 +1763,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
 > - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
-> - [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)から[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある
-> - 3 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3（scoop）も必要
+> - [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)から[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある（[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)を含む）
+> - 4 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3（scoop）も必要
 > - リモートがあるなら、push の認証と PR を作る道具も必要。GitHub は[GitHub CLI](windows-setup.md#github-cli)でログインしておく
 > - **この項の手順 9 には対話入力がある**（Claude Code の画面でのフォルダーの信頼と、2 つのプラグインの確かめ）
 
@@ -1654,6 +1772,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後は、両 OS 共通の[使い方の基本](#コーディングエージェントの共同作業-使い方の基本)から、分担・レビュー・取り込み・スマートフォンでの操作へ進む
 - 書くファイル（AGENTS.md・CLAUDE.md）は、BOM の無い UTF-8 と LF の改行にする（AlmaLinux 10 で書いたものと同じ形）
+- Windows 11 では、AlmaLinux 10 の 3 つのエージェントに、4 つ目の Antigravity CLI（`agy`）を足す。Antigravity には、読み取り専用のレビューと調べものだけを[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)で頼む
 
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
 
@@ -1662,7 +1781,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    ```powershell
-   $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 3 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
    'WT_ROOT     = {0}' -f $WT_ROOT
@@ -1672,19 +1791,22 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、git のリポジトリのルートの絶対パス
    - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
 
-1. 3 つの CLI の版とログインを確かめる。
+1. 4 つの CLI の版とログインを確かめる。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude --version
    codex --version
    grok --version
+   agy --version
    codex login status
    grok models
    claude auth status --text
+   agy models
    ```
 
-   - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 2 と同じ
+   - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 2 と同じ。ただし版は 4 行（最後が `1.3.5` のような Antigravity CLI の版）
+   - Antigravity は、最後にモデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
 
@@ -1693,13 +1815,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $PROJECT_DIR rev-parse --show-toplevel
      git -C $PROJECT_DIR status --short --branch
-     Get-ChildItem -LiteralPath $PROJECT_DIR -Force -Name | Where-Object { $_ -in 'AGENTS.md', 'AGENTS.override.md', 'CLAUDE.md', 'CLAUDE.local.md' }
+     Get-ChildItem -LiteralPath $PROJECT_DIR -Force -Name | Where-Object { $_ -in 'AGENTS.md', 'AGENTS.override.md', 'CLAUDE.md', 'CLAUDE.local.md', 'GEMINI.md' }
      Test-Path -LiteralPath $WT_ROOT
    }
    ```
 
    - 1 行目は `C:/Users/<WIN_USER>/src/myproject` のように `/` で出る（`PROJECT_DIR` と同じ場所ならよい）
    - 2 行目以降と指示書のファイルの名前の見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 3 と同じ
+   - `GEMINI.md` が出たら、Antigravity は AGENTS.md と一緒にそれも読む。中身が共同作業の規則とぶつからないか確かめる
    - 最後に `False` が出ればよい
 
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
@@ -1716,7 +1839,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      $text = @'
    ## 共同作業の規則
 
-   このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担と `main` への取り込みは人が決める。
+   このリポジトリでは、Claude Code・Codex・Grok Build・Antigravity CLI が同じ規則で作業する。分担と `main` への取り込みは人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
    - 今のブランチにだけコミットする。`main` にはコミットも push もしない
@@ -1762,26 +1885,28 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      git -C $PROJECT_DIR add AGENTS.md CLAUDE.md
-     git -C $PROJECT_DIR commit -m 'Claude Code・Codex・Grok Build の共同作業の規則を足す'
+     git -C $PROJECT_DIR commit -m 'Claude Code・Codex・Grok Build・Antigravity CLI の共同作業の規則を足す'
      git -C $PROJECT_DIR log --oneline -1
    }
    ```
 
    - 見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 6 と同じ
 
-1. 3 つの worktree とブランチを作る。
+1. 4 つの worktree とブランチを作る。
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($a in 'claude', 'codex', 'grok') { git -C $PROJECT_DIR worktree add -b "agent/$a" "$WT_ROOT\$a" main }
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') { git -C $PROJECT_DIR worktree add -b "agent/$a" "$WT_ROOT\$a" main }
      git -C $PROJECT_DIR worktree list
    }
    ```
 
-   - 見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 7 と同じ
+   - `Preparing worktree (new branch 'agent/<名前>')` が 4 回出る
+   - 一覧は `[main]` と、`[agent/antigravity]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]` の 5 行
+   - そのほかの見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 7 と同じ
 
-1. 3 つが規則を読むことを確かめる。
+1. 4 つが規則を読むことを確かめる。
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
@@ -1789,10 +1914,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'; Pop-Location
      codex exec -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
+     Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --print-timeout 300s; Pop-Location
    }
    ```
 
    - 見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 8 と同じ
+   - Antigravity も、最後の行で「起動された worktree（作業ディレクトリ）の中だけ」のように答えればよい
+   - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
@@ -1818,8 +1946,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | Claude Code | 実装の主担当。Codex と Grok にレビューと作業を頼む窓口（スマートフォンからの入口も） | `<WT_ROOT>/claude` | `agent/claude` |
 | Codex | レビュー、別の実装 | `<WT_ROOT>/codex` | `agent/codex` |
 | Grok Build | 調べもの（Web の検索）、別の目のレビュー、別の実装 | `<WT_ROOT>/grok` | `agent/grok` |
+| Antigravity CLI（Windows 11 だけ） | 読み取り専用のレビューと調べもの（書かせない） | 使い捨てのフォルダー（`<WT_ROOT>/antigravity` は規則の確かめだけ） | `agent/antigravity`（コミットしない） |
 
-- 3 つのエージェントは、コミットしたら自分のブランチ（`agent/<名前>`）を push し、`main` への Pull Request を作る（AGENTS.md の規則。リモートがあるとき）
+- 変更を担当する 3 つのエージェント（Claude Code・Codex・Grok Build）は、コミットしたら自分のブランチ（`agent/<名前>`）を push し、`main` への Pull Request を作る（AGENTS.md の規則。リモートがあるとき）
 
 **Claude Code の画面（スマートフォンからも）で打つプラグインのコマンド**
 
@@ -1952,6 +2081,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 対象: 両 OS
 - 書いたものとは別のモデルに、新しい会話でレビューさせる（どれもファイルを変えない）
 - 各ブランチを、ほかの 2 つがレビューする。指摘は人が選んで、担当に直させる
+- Windows 11 では、Antigravity にも読み取り専用でレビューを頼める（[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)）
 - 頼む前に、レビューされる側の変更が自分のブランチにコミットしてあること（[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)の手順 7）
 - Grok の sandbox が起動しなければ、Grok のレビューは未実行と記録し、Claude・Codex のレビューを使う
 - sandbox とソケットの権限は緩めない。Landlock と親ディレクトリの検索権限を確かめ、対応するカーネルで再試行する
@@ -1985,6 +2115,104 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 直させる指摘だけを、担当の窓のエージェントに渡す。Claude Code は `claude -c`、Codex は `codex resume --last`、Grok は `grok -c` で、同じ worktree の前の会話に戻れる
    - 直したら、この節の手順でもう一度レビューさせる
+
+---
+
+### コーディングエージェントの共同作業: Antigravity に読み取り専用で頼む
+
+- 対象: Windows 11
+- 前提: [Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)を通してある
+- 実行場所: 自分のユーザーの、管理者ではない Windows PowerShell 5.1
+- Antigravity にはファイルを書かせない。レビューするブランチの中身と差分を、使い捨てのフォルダー（`%TEMP%` の下）にコピーし、そこを作業フォルダーにして 1 回だけ実行（`agy -p`）する
+- 1 回だけの実行は、作業フォルダーの中の読み書きと `%TEMP%` への書き込みを確認なしで行い、シェルのコマンドと、それ以外の場所の読み書きを拒む。使い捨てのフォルダーの前後のハッシュを比べ、拒んだ操作を読む
+- ハッシュで分かるのは使い捨てのフォルダーの中だけ。`%TEMP%` のほかの場所への書き込みは、確認なしで通り、ハッシュにも出ない
+- `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は付けない。`--mode plan` も境界には使わない
+- ブランチの中身は、Antigravity（Google のモデル）に渡る。秘密情報をコミットしたブランチには使わない
+- 頼む前に、レビューされる側の変更がそのブランチにコミットしてあること
+
+1. 変数を設定する（`PROJECT_DIR` と `BRANCH` は必ず値を入れる）。
+
+   ```powershell
+   $PROJECT_DIR = ''                     # ← 共同作業させるリポジトリ（git のルート）の絶対パスを書く。<PROJECT_DIR>
+   ```
+
+   ```powershell
+   $BRANCH = ''                          # ← レビューさせるブランチを書く（例: agent/claude）。<BRANCH>
+   ```
+
+   ```powershell
+   $REVIEW_DIR = Join-Path $env:TEMP ('agy-review-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))   # 使い捨てのフォルダー。<REVIEW_DIR>
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'PROJECT_DIR = {0}' -f $PROJECT_DIR
+   'BRANCH      = {0}' -f $BRANCH
+   'REVIEW_DIR  = {0}' -f $REVIEW_DIR
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `PROJECT_DIR` は、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 と同じ値
+   - **新しい PowerShell を開いたら**、この 3 つのブロックを貼り直す（`REVIEW_DIR` は新しいフォルダーになる）
+
+1. 使い捨てのフォルダーに、ブランチの中身と `main` との差分を書き出す。
+
+   ```powershell
+   if (-not $PROJECT_DIR -or -not $BRANCH) { Write-Error '中断: 手順 1 の $PROJECT_DIR か $BRANCH が空のまま。値を入れて貼り直す' } else {
+     New-Item -ItemType Directory -Path $REVIEW_DIR -Force | Out-Null
+     git -C $PROJECT_DIR archive --format=zip --output="$REVIEW_DIR.zip" $BRANCH
+     Expand-Archive -LiteralPath "$REVIEW_DIR.zip" -DestinationPath "$REVIEW_DIR\src"
+     Remove-Item -LiteralPath "$REVIEW_DIR.zip"
+     git -C $PROJECT_DIR diff --output="$REVIEW_DIR\review.diff" "main...$BRANCH"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git -C $PROJECT_DIR diff --stat "main...$BRANCH"
+     Get-ChildItem -LiteralPath $REVIEW_DIR -Name
+   }
+   ```
+
+   - 変わったファイルの一覧と、最後に `review.diff` と `src` が出ればよい
+   - 差分の一覧が空なら、ブランチ名と、変更がコミットしてあるかを確かめる
+
+1. Antigravity にレビューを頼み、変わったファイルと拒んだ操作を確かめる。
+
+   ```powershell
+   & {
+     if (-not (Test-Path -LiteralPath "$REVIEW_DIR\review.diff")) { Write-Error '中断: 手順 2 の差分が無い。手順 2 を貼り直す'; return }
+     [Console]::OutputEncoding = [Text.Encoding]::UTF8
+     $hash = { Get-ChildItem -LiteralPath $REVIEW_DIR -Recurse -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { '{0} {1}' -f $_.Hash, $_.Path } }
+     $before = & $hash
+     Push-Location -LiteralPath $REVIEW_DIR
+     try { $out = agy -p 'このフォルダーの review.diff は、src にあるリポジトリの main との差分です。差分をレビューし、指摘を「重大度・場所（ファイル:行）・理由・直し方」で日本語で挙げてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。' --output-format json --print-timeout 1800s } finally { Pop-Location }
+     $res = ($out -join "`n") | ConvertFrom-Json
+     $changed = Compare-Object @($before) @(& $hash) | ForEach-Object { $_.InputObject }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'status         = {0}' -f $res.status
+     'denied_actions = {0}' -f (@($res.denied_actions | ForEach-Object { $_.action }) -join ', ')
+     'changed files  = {0}' -f (@($changed) -join ', ')
+     ''
+     $res.response
+   }
+   ```
+
+   - 終わるまで数分かかる（30 分で打ち切る）
+   - `status = SUCCESS` で、`changed files` が空なら、使い捨てのフォルダーの中は変わっていない
+   - `denied_actions` に出た操作（`command`・`read_file` など）は拒まれた。レビューに要るものが拒まれていたら、そのファイルを手順 2 のフォルダーに足して、この手順を貼り直す
+   - `changed files` に何か出たら、指摘を使う前に、そのファイルと内容を確かめる
+   - 最後に、指摘が「重大度・場所・理由・直し方」で出る
+
+1. 人が指摘を選び、担当のエージェントに直させる。
+
+   - 直させる指摘だけを、担当の窓のエージェントに渡す（[相互にレビューする](#コーディングエージェントの共同作業-相互にレビューする)の手順 4 と同じ）
+   - 指摘は、ほかのレビューと同じく、実物（テスト・実行）で確かめてから直させる
+
+1. 使い捨てのフォルダーを消す。
+
+   ```powershell
+   if ($REVIEW_DIR -notlike "$env:TEMP\agy-review-*") { Write-Error '中断: 手順 1 の $REVIEW_DIR が想定と違う。貼り直す' } else {
+     Remove-Item -LiteralPath $REVIEW_DIR -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Test-Path -LiteralPath $REVIEW_DIR
+   }
+   ```
+
+   - `False` が出ればよい
 
 ---
 
@@ -3552,11 +3780,87 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
+### Grok Build のブラウザ操作: Windows 11 で Antigravity も操作する
+
+- 対象: Windows 11
+- 任意。前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、ブラウザで Codeg にログインしてある（Codeg v0.35.1）
+- 実行場所: ブラウザの Codeg と、Codeg を入れた PC の、管理者ではない Windows PowerShell 5.1。Google への承認は、その PC の普段のブラウザで行う
+- Codeg の「Google Antigravity」は、Google の ACP サーバー（`agy_acp_server`）で、[Antigravity CLI](#windows-11-で-antigravity-cli-を入れる)とは別の製品。ログインも別で、CLI を入れていなくても使える
+
+> [!WARNING]
+> - Codeg の Antigravity は、開いたフォルダーの AGENTS.md（共同作業の規則）を読み込まない。作業フォルダーより先に `%USERPROFILE%\.gemini\antigravity-cli\skills` などが並び、ファイルの書き先をそこと取り違える（ACP サーバー 1.3.0・1.4.0 で同じ）
+> - 質問・調べものに使い、規則に従わせる作業は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)で CLI に頼む。この項の手順 8 で、ファイルを書く承認カードには `Deny` で答える
+
+1. ブラウザで、Antigravity の ACP サーバーを入れる。
+
+   - `/settings/agents` を開き、エージェント一覧の `Google Antigravity` を選ぶ
+   - 「バージョン状態」の「インストール」を押す。Codeg v0.35.1 の推奨版は `1.3.0`
+   - 「再チェック」で `PASS`（`推奨: 1.3.0 · ローカル: 1.3.0`）になればよい
+   - 「未レビューの最新版 … にアップグレード」は押さない。押してしまったら、「カスタムインストール」で `1.3.0` を入れ直す
+   - 「ファイルとコマンドをエージェント自身に処理させる」はオフのままにする
+
+1. ブラウザで、認証の方法を保存する。
+
+   - 同じ画面の「設定管理」の `Authentication method` で `Sign in with Google` を選び、`Save` を押す
+   - API キーや Google Cloud の方法は選ばない
+
+1. Codeg で Antigravity の会話を閉じ、ACP サーバーが動いていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Process agy_acp_server -ErrorAction SilentlyContinue
+   Test-Path "$env:USERPROFILE\.gemini\antigravity-acp\settings.json"
+   ```
+
+   - プロセスの表が出ずに、`True` だけが出ればよい
+   - `agy_acp_server` の表が出たら、Codeg で Antigravity の会話のタブをすべて閉じ、表が出なくなってからこのブロックを貼り直す
+   - `False` なら、この項の手順 2 をやり直す
+
+1. ブラウザで、サインインのリンクを取得して承認する。
+
+   - 設定の `Google Antigravity` の「ブラウザのないマシンでサインイン」で、「サインインリンクを取得」を押す（リンクが出るまで 30〜60 秒かかる）
+   - 出たリンクを、この PC の普段のブラウザで開き、個人の Google アカウントを選んで、許可する内容を確かめてから承認する
+   - 承認の後、ブラウザが `http://127.0.0.1:<PORT>/` へ移る。Codeg を入れた PC のブラウザなら、Codeg がそれを受け取ってサインインが済む
+   - 別の端末のブラウザで承認したときは、アドレスバーのアドレス全体を、Codeg の `http://127.0.0.1:<PORT>/?state=...&code=...` の欄に貼り、「サインインを完了」を押す（この経路は確かめていない）
+   - リンクを取得してから 5 分以内に済ませる。「サインアウト」は押さない（保存したサインインが消える）
+   - **次の手順は、承認を済ませてから貼る**
+
+1. サインインが保存されたことを確かめる。
+
+   ```powershell
+   Test-Path "$env:USERPROFILE\.gemini\antigravity-acp\acp_token.json"
+   ```
+
+   - `True` が出ればよい。Codeg に `Antigravity is no longer listening for this sign-in` と出ていても、`True` ならサインインは済んでいる
+   - `False` なら、この項の手順 3 からやり直す
+
+1. ブラウザで、作業フォルダーの新しい会話を作り、`Google Antigravity` を選ぶ。
+
+   - `/workspace` でフォルダを開き、そのフォルダの「新しい会話」を押す。共同作業では、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)で作った `antigravity` の worktree を選ぶ
+   - エージェントの並びから `Google Antigravity` を選ぶ（幅の狭い画面では、並びの右端の「…」の中にある）
+   - 接続に 30〜60 秒かかる。「接続ハンドシェイクがタイムアウトしました（60 秒以内に応答なし）」と出たら、入力欄を押して接続し直す
+   - 入力欄の下に、モデル（`Gemini 3.8 Flash (High)` など）と Session Mode の `Default` が出ればよい。`Auto Edit`・`YOLO` は選ばない
+   - Google のサインインがブラウザで開いたら、サインインが保存されていない。タブを閉じ、この項の手順 3 からやり直す
+
+1. ブラウザで、接続を確かめる指示を送る。
+
+   - 「ツールやファイルを使わずに、接続確認ができたと一文で答えてください。」と入力して送る
+   - Antigravity から一文の応答があればよい
+
+1. ブラウザで、読み取りの作業を頼み、承認カードに答える。
+
+   - 調べもの・質問・レビューなど、ファイルを変えない作業を頼む
+   - ファイルを書く承認カード（`Run client_create_file?` など）が出たら、作業フォルダーの中でも `Deny` を押す。書き先が `C:/Users/<WIN_USER>/.gemini/antigravity-cli/skills/…` などを指すこともある
+   - `Deny` を押すと、`denied by pre-tool hook: Denied by user` と返り、ファイルは作られない
+
+---
+
 ### Grok Build のブラウザ操作: Codeg のエージェント同士で共同作業する
 
 - 対象: 両 OS
 - 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)（Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 2〜5 で有効にし、接続と応答を確かめておく
 - 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-実施手順)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
+- Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
 
 1. ブラウザの設定で、エージェントへの委譲を有効にする。
 
@@ -3568,8 +3872,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. ブラウザで新しい会話を開き、別のエージェントへの短い委譲を確かめる。
 
    - `/workspace` で担当の worktree を開き、新しい会話を作る
-   - 「Codex に、ツールやファイルを使わずに接続確認の一文を答える作業を委譲して」のように、使う相手を明示して頼む
+   - 「Codex に、ツールやファイルを使わずに接続確認の一文を答える作業を委譲して」のように、使う相手を明示して頼む（Antigravity は「Google Antigravity に、…」）
+   - 親のエージェントの承認カード（`delegate_to_agent`・`get_delegation_status`）が出たら、委譲先と頼む内容を読んでから許可する
    - 委譲先から結果が返ればよい。有効化しただけでは、すべての組合せの接続が確認できたとは扱わない
+   - 委譲先の Session Mode は、設定の `Collaboration` の「サブエージェント設定」で確かめる（Antigravity の既定は `Default`）。委譲先は親と同じ作業ディレクトリで動く
    - 委譲のツールが見つからなければ、設定の保存・使うエージェントの有効化を確かめ、新しい会話でやり直す
 
 1. 共同作業の指示に、担当の worktree・ブランチ・変更する範囲を明示する。

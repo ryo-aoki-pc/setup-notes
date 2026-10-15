@@ -51,6 +51,33 @@
 - Windows 11 の Codeg は、ランダムなトークンをブラウザへ入れずに、共通パスワードで使い始められるよう、分岐の箇条書きを 4 つ足した。コマンドは変えていない
   - Codeg の標準の認証に、トークンと別のパスワード専用設定があるという意味ではない（[Grok Build の調査](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#grok-build-の調査)）
 
+### Windows 11 の Antigravity CLI
+
+- Windows 11 では、Google 公式の [PowerShell のインストーラー](https://antigravity.google/cli/install.ps1)で Antigravity CLI（`agy`）を入れる
+  - WinGet・npm には無いので、公式の配布物を公式のインストーラーで入れる形にした
+- Gemini CLI は、2026-06-18 に個人アカウントへの提供を終え、Antigravity CLI が後継になった
+- AlmaLinux 10 では扱わない。Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする
+- 更新はバックグラウンドの自動更新と `agy update` を使う。公式インストーラーは、既に入っていれば入れ直さず、自動更新を案内する
+- Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](grok-build-remote.md)で分けて扱う
+
+## 補足
+
+### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 2: 補足: 公式インストーラーの照合
+
+- 公式インストーラーは、マニフェストにある URL から本体を取り、SHA-512 を照合して `%LOCALAPPDATA%\agy\bin\agy.exe` に置き、`agy.exe install` を呼ぶ
+- ユーザーの PATH に `%LOCALAPPDATA%\agy\bin` を足す。既に開いている窓の PATH には反映されないため、[Windows 11 で Antigravity CLI を入れる](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)の手順 4 で窓を開き直す
+
+### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 3: 補足: staging の一時ファイル
+
+- 今回、保存したインストーラーを scriptblock の形で実行したところ、`%LOCALAPPDATA%\antigravity\staging\agy.exe` が残った。本体と同じハッシュの一時ファイルだった
+- 残る理由は、scriptblock で実行したとき、`finally` が見る `$stagingPayload` と、関数が書く `$script:stagingPayload` が別の変数になるためと推定した
+- `irm | iex` の形では同じ変数になるはずだが、確認していない
+
+### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 6: 補足: ログインの保存先
+
+- 個人の Google アカウントでブラウザからログインする。CLI の資格情報は Windows の資格情報マネージャーの `gemini:antigravity` に保存される
+- ログイン後の設定・ログ・会話・更新の情報などは `%USERPROFILE%\.gemini\antigravity-cli`、共通の設定は `%USERPROFILE%\.gemini\config` に作られる
+
 ## 以前の参考資料の場所
 
 導入の参考資料は、両 OS の文書の「統合前の参考資料」の節に残してある。任意の構成の参考資料は、旧名のファイルを使う。
