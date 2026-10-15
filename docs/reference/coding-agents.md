@@ -55,6 +55,8 @@
 
 3 つのコーディング用の CLI（Claude Code・Codex・Grok Build）を、1 つのプロジェクトで一緒に使う方法を目的ごとに比べた（2026-10-09 時点）。「この手順書」の列が「採った」のものを、手順書で手順にした。
 
+2026-10-15 に Windows 11 へ足した Antigravity CLI の方針は、[Windows 11 の 4 つ目のエージェントと読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)に分ける。下の比較表は、従来の 3 つを対象にしたもの。
+
 | 目的 | 方法 | この手順書 | 要るもの・制約 |
 |---|---|---|---|
 | 3 つを同じ規則で動かす | AGENTS.md を 1 つ置き、CLAUDE.md に `@AGENTS.md` の 1 行を書く | 採った（実施手順 4〜6） | Codex と Grok は AGENTS.md を読む。Claude Code は、CLAUDE.md か CLAUDE.local.md があると AGENTS.md を自分では読まない |
@@ -81,13 +83,32 @@
 
 ## 選択した方針
 
-- 規則は AGENTS.md 1 つにまとめ、3 つに同じものを読ませる。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
+- 規則は AGENTS.md 1 つにまとめ、同じものを読ませる（AlmaLinux 10 は 3 つ、Windows 11 は Antigravity CLI を含む 4 つ）。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
 - 作業場所は素の `git worktree` で分け、worktree の間の受け渡しはブランチへのコミットで行う。そのための push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
-- エージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
+- 変更を担当するエージェントは、自分のブランチの push と、`main` への Pull Request の作成まで行う（リモートがあるとき）。`main` への取り込み・`main` の push・ブランチの削除は人が行う（AGENTS.md の規則）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
   - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
   - Pull Request は、人がホスティングの画面で取り込んでも、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順で手元で取り込んでもよい
 - GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
+
+### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
+
+- Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
+- CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](grok-build-remote.md)）
+- Windows のコマンドの sandbox は 1.2.17 からあるが、既定の `request-review` では sandbox の中のコマンドにも承認が要る。headless では承認を求められず、コマンドは拒まれる
+- headless は、作業フォルダーと `%TEMP%` の読み書きを確認なしで許す。作業フォルダーを信頼していなくても書けるので、読み取り専用という依頼文だけでは書き込みを防げない
+- [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)では、次の 3 つを境界にする
+  - 入力だけをコピーした使い捨てのフォルダーを作業フォルダーにする
+  - headless の既定で、シェルのコマンドと、作業フォルダー・`%TEMP%` の外の読み書きが拒まれることを使う
+  - 前後のハッシュを比べ、入力が変わっていないか確かめる
+- `--mode plan` は `/plan` の指示を前に付けるだけで、書き込みを禁じない。読み取り専用の境界には使わない
+- `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は使わない
+- 拒まれても JSON の `status` は `SUCCESS`、終了コードは 0 になる。`denied_actions` と stderr の `jetski: no output produced` を見て、拒否と応答の有無を判断する
+
+### Windows 11 で Claude Code から Antigravity を呼ぶ方法
+
+- Claude Code からは、PowerShell で `agy -p` を直接呼ぶ。公式のブリッジのプラグインが無いため、この用途だけのプラグインは作らない
+- Antigravity への依頼は読み取り専用のレビューと調べものに限り、入力のコピーと前後のハッシュの比較を含む手順を使う
 
 ### 実施手順 / 手順 4〜6: 各 CLI が読む指示書
 
@@ -96,6 +117,7 @@
 | Claude Code（2.1.295） | CLAUDE.md・CLAUDE.local.md（作業ディレクトリと親のディレクトリ）、`~/.claude/CLAUDE.md`。AGENTS.md は、CLAUDE.md・CLAUDE.local.md が無いときだけ（2.1.277 から） | CLAUDE.md の `@AGENTS.md` で取り込める。`AGENTS.override.md` は読まない |
 | Codex（0.162.0） | Git のルートから作業ディレクトリまで、階層ごとに `AGENTS.override.md` か `AGENTS.md` を 1 つ（`~/.codex/AGENTS.md` も）。合計 32 KiB まで | `AGENTS.override.md` があると、その階層の AGENTS.md は読まない |
 | Grok Build（1.0.50） | リポジトリのルートから作業ディレクトリまでの AGENTS.md・AGENT.md・CLAUDE.md・CLAUDE.local.md を全部、`.grok/rules/*.md`・`.claude/rules/*.md`、`~/.claude/CLAUDE.md` | 信頼したフォルダーでだけ読む。CLAUDE.md の `@AGENTS.md` は取り込みとしては扱わず、そのまま読む（AGENTS.md は別に読むので、規則は 1 回届く） |
+| Antigravity CLI（1.3.5、Windows 11） | 作業フォルダーの AGENTS.md・GEMINI.md | 使い捨てのリポジトリで両方を読むことを確認した。Codeg の ACP サーバーとは別に扱う |
 
 - skills を 3 つで共有するときは、置き場所が違う（Claude Code は `.claude/skills/`、Codex は `.agents/skills/`、Grok は 3 つとも読む）。この手順書では扱わない
 - テストとリンターのコマンドは、AGENTS.md のほかの節に書いておく（規則の「テストとリンターを通してから」が、それを指す）
@@ -115,7 +137,9 @@
   | Codex | `codex --worktree`（0.154.0 から。0.156.0 から既定で有効） | 文書に書かれていない | — |
   | Grok Build | `grok -w <名前>` | `~/.grok/worktrees/<リポジトリ>/<名前>` | — |
 
-- ブランチは `agent/claude`・`agent/codex`・`agent/grok` に固定した。分担のたびに作り直さず、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で `main` にそろえてから次の作業を始める
+- ブランチは `agent/claude`・`agent/codex`・`agent/grok` に固定した
+  - Windows 11 では、4 つ目の `antigravity` の worktree と `agent/antigravity` のブランチを足す
+  - 分担のたびに作り直さず、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で `main` にそろえてから次の作業を始める
 
 ### main でないブランチを基準にするとき
 

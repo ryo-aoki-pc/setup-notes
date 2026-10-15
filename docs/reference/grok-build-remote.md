@@ -231,6 +231,33 @@
 - 取り込み後に再度アーカイブすると、Codeg の表示や再開に影響する場合がある。取り込み後に自動で元の場所へ戻す手順にはしない
 - 同じ会話を元の CLI・アプリと Codeg で同時に進めない。元の会話を閉じてから再開する。元の履歴が削除された、またはセッションが使えなくなった場合は、一覧にあっても再開できないことがある（[Codeg の会話の取り込み](https://docs.codeg.app/guide/aggregation)）
 
+### Windows 11 で Antigravity も操作する / 補足: CLI と ACP サーバー
+
+- [Windows 11 で Antigravity も操作する](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)では、Codeg 組み込みの「Google Antigravity」を使う
+- Codeg v0.35.1 では、Google 純正の ACP サーバー `agy_acp_server` 1.3.0 を入れる。`agy` 1.3.5 とは別の製品
+- CLI のログインは資格情報マネージャーの `gemini:antigravity` にあり、ACP サーバーはそれを使わない
+- Codeg 用のログインは `%USERPROFILE%\.gemini\antigravity-acp\acp_token.json` に保存される。ファイルの中身は読んでいない
+- 非公式の ACP ラッパーは、利用規約上の注意があるため使わない
+
+### Windows 11 で Antigravity も操作する / 補足: サインインの方式
+
+- 自動のサインインは接続のやり直しのたびにブラウザのタブを開き、5 分で時間切れになる。待っていた古い接続が時間切れで終わるときに、保存済みのトークンが消えた
+- このため、「ブラウザのないマシンでサインイン」を使う。Antigravity の会話のタブを閉じて ACP サーバーを終了してから始めることで、古い接続の待ち手を残さない
+- この PC では、利用者がブラウザで承認した戻り先を Codeg の待ち手が受け取り、トークンが保存された。後から「サインインを完了」に貼る操作で待ち時間切れの表示が出ても、サインインは済んでいた
+
+### Windows 11 で Antigravity も操作する / 補足: 作業フォルダーと規則の制約
+
+- Active Workspaces は `%USERPROFILE%\.gemini\antigravity-cli\skills`・`%USERPROFILE%\.gemini\config\skills`・作業フォルダーの順だった
+- エージェントは先頭を作業フォルダーとみなし、ファイル作成の承認カードも `antigravity-cli\skills` の下を指した
+- 会話のメタデータの `cwd` が正しくても、作業フォルダーの `AGENTS.md` は読み込まれなかった。共同作業の規則を自動で読む前提では使えない
+- Codeg で未レビューの ACP サーバー 1.4.0 でも同じ制約があり、1.3.0 に戻した。同じ worktree の `agy -p` では、Active Workspaces はその worktree だけで、規則も読み込まれた
+- Codeg から Claude Code が Antigravity へ委譲した場合も、作業ディレクトリは親と同じで、別の worktree は作られなかった。CLI の読み取り専用レビューとは分けて扱う
+
+### Windows 11 で Antigravity も操作する / 補足: 初期化の待ち時間
+
+- ACP サーバーは PyInstaller の onefile で、起動のたびに `%TEMP%\codeg-acp\<pid>-<id>\_MEI…` へ展開する。この初期化に時間がかかる
+- Initialize の応答に 32〜56 秒かかり、60 秒の接続ハンドシェイクの制限を超えることもあった。1.4.0 の初回も同じで、その後の再接続で接続できた
+
 ## Claude Code・Codex を遠隔操作する OSS の比較
 
 2026-10-12 に公式資料と実装を比較した。今回は、既に Grok Build で使う Codeg と Caddy を共用できる Codeg を推奨する。CloudCLI と Happy の導入・実機での操作は試していない。既存の表にある Happier と、ここで比べる Happy は別のツール。
