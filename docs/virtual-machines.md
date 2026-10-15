@@ -347,15 +347,15 @@
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
-1. 系列を変えるときは（この項の手順 2 の代わりに）、[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 だけを行う。
+1. 系列を変えるときは（この項の手順 2 の代わりに）、[AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 だけを行う。
 
-   - [ロールバック](extra/virtualbox.md#ロールバック)の手順 2 は `sudo dnf remove VirtualBox-7.2`
+   - [AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 は `sudo dnf remove VirtualBox-7.2`
    - `[y/N]` に答えてから、この項の手順 4 に進む
 
 1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 1 の下見と同じ項の手順 4 からやり直す。
 
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 1・4 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
-   - 以後は、この項の手順 2 と[ロールバック](extra/virtualbox.md#ロールバック)の手順 2 も同じく置き換える
+   - 以後は、この項の手順 2 と[AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 も同じく置き換える
 
 ---
 

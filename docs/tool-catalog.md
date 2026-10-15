@@ -77,7 +77,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
 | Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [AI エージェントの「Codex CLI」](ai-agents.md#codex-cli) |
 | Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [AI エージェントの「Grok Build」](ai-agents.md#grok-build) |
-| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [コーディングエージェントの共同作業: 実施手順](ai-agents.md#コーディングエージェントの共同作業-実施手順) |
+| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [コーディングエージェントの共同作業: AlmaLinux 10 で使う](ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [VS Code](almalinux-setup.md#vs-code) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [VirtualBox](virtual-machines.md#virtualbox) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm) |

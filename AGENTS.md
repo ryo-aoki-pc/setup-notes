@@ -30,7 +30,7 @@ sudo dnf install -y google-noto-sans-cjk-vf-fonts
 python3 -m pip install --user nwdiag seqdiag
 python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
 
-# GUI の動作を確かめる（docs/ai-agents.md の「Claude Code の GNOME 操作: 実施手順」を通したホストで。撮った PNG を開いて見る）
+# GUI の動作を確かめる（docs/ai-agents.md の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」を通したホストで。撮った PNG を開いて見る）
 scripts/gnome-gui.py shot /tmp/gnome-gui.png
 scripts/gnome-gui.py key Escape                 # セッションを始めた直後に開いているアクティビティ画面を閉じる
 scripts/gnome-gui.py launch org.gnome.TextEditor
@@ -39,7 +39,7 @@ scripts/gnome-gui.py click 70 15                # 座標は shot の PNG の画�
 scripts/gnome-gui.py windows
 ```
 
-GUI の動作を確かめるときは、[AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」](docs/ai-agents.md#claude-code-の-gnome-操作-実施手順)（前提は [GNOME のリモート操作の「GNOME のヘッドレスセッション」](docs/gnome-remote.md#gnome-のヘッドレスセッション)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 はリモートログインだけで、ヘッドレスのセッションと仮想モニターのドロップインは無い。使うなら、利用者に確かめてから GNOME のリモート操作の「GNOME のヘッドレスセッション」の手順 1・2 と、AI エージェントの手順書の「Claude Code の GNOME 操作: 実施手順」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
+GUI の動作を確かめるときは、[AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」](docs/ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)（前提は [GNOME のリモート操作の「GNOME のヘッドレスセッション」](docs/gnome-remote.md#gnome-のヘッドレスセッション)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。実機の Raspberry Pi 5 はリモートログインだけで、ヘッドレスのセッションと仮想モニターのドロップインは無い。使うなら、利用者に確かめてから GNOME のリモート操作の「GNOME のヘッドレスセッション」の手順 1・2 と、AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
 
 `wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、非公開側の `docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
 

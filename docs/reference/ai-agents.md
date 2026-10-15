@@ -4,7 +4,7 @@
 
 ## 選択した方針
 
-[AI コーディングエージェント](../ai-agents.md)は両 OS を 1 冊にし、`## 実施手順` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11 の手順を扱う。AI エージェントの状態で分岐する手順は、[Windows 11 のセットアップ](../windows-setup.md)と[GNOME のリモート操作](../gnome-remote.md)で扱う。
+[AI コーディングエージェント](../ai-agents.md)は両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11 の手順を扱う。AI エージェントの状態で分岐する手順は、[Windows 11 のセットアップ](../windows-setup.md)と[GNOME のリモート操作](../gnome-remote.md)で扱う。
 
 ### 長いコードブロックの折りたたみ
 
@@ -43,7 +43,7 @@
 - AlmaLinux 10 でも [Antigravity CLI](../ai-agents.md#antigravity-cli)を使う
 - Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新は `agy update` を使う
   - インストーラーの案内では、バックグラウンドでも自分で上がる。AlmaLinux 10 で確かめたのは、新しい版が無いときの `agy update` だけ（自動の更新と、新しい版への `agy update` は確かめていない）
-- インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
+- インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#almalinux-10-で使う--antigravity-cli--手順-4-補足-path-の行を外す理由)）
 - AlmaLinux 10 の共同作業は、従来の 3 つの構成のまま（[共同作業の参考資料](coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）。Antigravity CLI を 4 つ目に足す手順は、AlmaLinux 10 では書いておらず、確かめてもいない
 - AlmaLinux 10 の headless（`agy -p`）は、信頼したフォルダーでも作業フォルダーの中に書かず、`/tmp` の中には書いた。Windows 11 とは許す範囲が違う（[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)）
   - Windows 11 の実測では、作業フォルダーが `%TEMP%` の下にあった。作業フォルダーの中に書けたのが、`%TEMP%` の下だったからかどうかは、分けて確かめていない
@@ -62,7 +62,7 @@
 
 ## 補足
 
-### 実施手順 / Antigravity CLI / 手順 2: 補足: 公式インストーラーの動き
+### AlmaLinux 10 で使う / Antigravity CLI / 手順 2: 補足: 公式インストーラーの動き
 
 - インストーラーは、マニフェストにある URL から本体（アーキテクチャと libc で `linux_arm64` などを選ぶ）を取り、SHA-512 を照合して `~/.local/bin/agy` に置き、`agy install` を呼ぶ。sudo は使わない
 - `agy install` は、`~/.bashrc` と `~/.bash_profile` の末尾に 4 行を足す。`~/.local/bin` が既に PATH にあっても、実行するたびに足す
@@ -70,7 +70,7 @@
 - 一時ファイルは `~/.cache/antigravity/staging` に置き、終わると消す。空のフォルダーは残る
 - インストーラーの中身では、`~/.local/bin/agy` があれば何もせずに `Notice: 'agy' is already installed at …` を出して終わる
 
-### 実施手順 / Antigravity CLI / 手順 3: 補足: 仮想アドレスが 39 ビットの arm64
+### AlmaLinux 10 で使う / Antigravity CLI / 手順 3: 補足: 仮想アドレスが 39 ビットの arm64
 
 - arm64 のカーネルには、ユーザーの仮想アドレスを 39 ビットにしたもの（`CONFIG_ARM64_VA_BITS=39`）がある。検証した Raspberry Pi 5 の AlmaLinux 10 のカーネルも、そうだった
 - 1.0.4 より前の linux_arm64 版は、48 ビットを前提にした TCMalloc のため、そうしたカーネルで起動時に `MmapAligned() failed` で落ちたと報告されている（[issue #64](https://github.com/google-antigravity/antigravity-cli/issues/64)）
@@ -78,19 +78,19 @@
 - 検証した PC では、1.3.5 が起動し、ログイン・応答・更新の確認まで動いた
 - 落ちる版に当たったら、非公式のバイナリの書き換えはしない。消して、直った版を待つ
 
-### 実施手順 / Antigravity CLI / 手順 4: 補足: PATH の行を外す理由
+### AlmaLinux 10 で使う / Antigravity CLI / 手順 4: 補足: PATH の行を外す理由
 
 - AlmaLinux 10 の既定の `~/.bashrc` は、`~/.local/bin` を PATH に足す。`~/.bash_profile` は `~/.bashrc` を読む。インストーラーが足した行は重なるだけなので外し、`~/.bashrc` を共通の設定の形のままにする
 - 各ツールの手順には `~/.bashrc` を直接書き換えるブロックを置かない決まりなので、エディタで消し、消えたことだけを `grep` で確かめる形にした（Codex の PATH のブロックを外す、extra の手順と同じ）
 - 足された 4 行を消すと、2 つのファイルは入れる前と同じになった。新しいログインシェルでも `agy` が見つかった
 - 新しい版が無いときの `agy update` は、2 つのファイルを変えなかった。新しい版に上がるときに足すかは、確かめていない
 
-### 実施手順 / Antigravity CLI / 手順 6・8: 補足: 画面の文字と `/config` の既定
+### AlmaLinux 10 で使う / Antigravity CLI / 手順 6・8: 補足: 画面の文字と `/config` の既定
 
 - 手順 6 の `You are currently not signed in.`・`Select login method:` と、手順 8 の `/config` の既定（`Tool Permission` が `request-review`、`Non-Workspace Access` が `off`）は、Windows 11 の同じ版で見たもの
 - AlmaLinux 10 では、ログインと `/config` の確かめは利用者が端末で行い、Claude Code は画面を見ていない。`settings.json` には、信頼したフォルダーのほかに値が書かれなかった
 
-### 実施手順 / Antigravity CLI / 手順 7: 補足: ログインの保存先
+### AlmaLinux 10 で使う / Antigravity CLI / 手順 7: 補足: ログインの保存先
 
 - AlmaLinux 10 では、ログイン情報は `~/.gemini/antigravity-cli/antigravity-oauth-token`（権限 600）に保存された。GNOME のキーリングには入らなかった
 - ログイン後の設定・ログ・会話・更新の情報などは `~/.gemini/antigravity-cli`、共通の設定は `~/.gemini/config` に作られる
@@ -111,33 +111,33 @@
 - 個人の Google アカウントでブラウザからログインする。CLI の資格情報は Windows の資格情報マネージャーの `gemini:antigravity` に保存される
 - ログイン後の設定・ログ・会話・更新の情報などは `%USERPROFILE%\.gemini\antigravity-cli`、共通の設定は `%USERPROFILE%\.gemini\config` に作られる
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 2: 補足: 署名と版の確認
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 2: 補足: 署名と版の確認
 
 - ダウンロードの URL には版が入っている。新しい版へ変えるときは、公式のダウンロードのページから、その版の URL を取り直す
 - 実行前に `Get-AuthenticodeSignature` の `Status` と `SignerCertificate.Subject` を見て、有効な Google LLC の署名を持つ配布物であることを確かめる。`VersionInfo` では製品名と版を確かめる
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 5: 補足: CLI とは別のログイン
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 5: 補足: CLI とは別のログイン
 
 - アプリの Google アカウントへのログインは、Antigravity CLI とは別になる。CLI にログイン済みでも、アプリでログインする
 - アプリのログイン画面の細部と、ログイン情報の保存先は確かめていない
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 6: 補足: 設定画面と自動の名前
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 6: 補足: 設定画面と自動の名前
 
 - 公式文書は設定の節を App と書くが、画面の名前は Application。PC のアプリの Remote Control の正確な項目名と Nickname の変え方は、Claude は画面で確かめていない
 - 公式文書の Nickname を変えなかった場合、この PC では `<ホスト名>-<2 語>` の名前が自動で付いた。手順書では設定ファイルから名前を読み、ブラウザで接続先を選ぶときに使う
 - Keep In Menu Bar は、すべての窓を閉じてもアプリを動かす設定。Prevent Sleep は、アプリが動いている間のスリープを防ぐ設定として説明されているが、実際に防ぐかは確かめていない
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 7: 補足: 設定の表示を絞る理由
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 7: 補足: 設定の表示を絞る理由
 
 - 設定ファイル全体には、ログインしたアカウントなども入る。手順書では Remote Control の有効・無効と名前、バックグラウンド動作とスリープ抑止の 4 つの値だけを表示する
 - `%USERPROFILE%\.gemini\config\config.json` は CLI と共有する場所だが、アプリの Remote Control は `userSettings.remoteControlEnabled` と `remoteControlHostname` を使う
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 8: 補足: スタートアップのショートカット
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 8: 補足: スタートアップのショートカット
 
 - この PC では、アプリの導入後に HKCU の Run・スタートアップのフォルダー・タスク スケジューラのいずれにも自動起動が登録されなかった。利用者の決定でスタートアップのショートカットを使う
 - ショートカットからの手動起動では窓が開く。ログオン後に自動で起動し、一覧が Online に戻ることまでは確かめていない
 
-### Antigravity アプリの Remote Control / 実施手順 / 手順 10: 補足: ブラウザとモバイル
+### Antigravity アプリの Remote Control / Windows 11 で使う / 手順 10: 補足: ブラウザとモバイル
 
 - 公式文書では、ブラウザはアプリと同じ Google アカウントでサインインする。`Remote control is not enabled for your account.` は、アカウントや組織で機能が有効でないときの表示として説明されている
 - モバイルでは Web アプリをホーム画面へ追加すると、エージェントの完了時と入力待ちにプッシュ通知を受け取れると公式文書にある。スマートフォンでのアクセス、ホーム画面への追加、プッシュ通知は実機で確かめていない

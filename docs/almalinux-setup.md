@@ -836,7 +836,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](syncthing.md#syncthing)・[Dropbox 公式](#dropbox)・[rclone](#dropbox-と-rclone)
-  - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)
+  - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)
   - [Podman の Quadlet](#podman-quadlet-で自動起動する)で動かすコンテナ
 
 > [!IMPORTANT]
@@ -1151,7 +1151,7 @@
 - 常時動かしておく PC で、GNOME が画面を消したり、ロックしたり、放置で眠ったりしないようにする。ログイン画面・蓋・OS のサスペンドも止める
   - WireGuard・Samba・Syncthing・Dropbox のホストや、RDP で待ち受ける PC は、眠るとサービスが止まる
   - [GNOME のヘッドレスのセッション](gnome-remote.md#gnome-のヘッドレスセッション)はこの項の手順 1・2 が前提。サスペンドできる PC では手順 3・4 も通す
-  - [Claude Code で GUI を確かめる](ai-agents.md#claude-code-の-gnome-操作-実施手順)はこの項の手順 1・2、[GNOME のデスクトップ共有](gnome-remote.md#gnome-のデスクトップ共有)は手順 1〜4 が前提
+  - [Claude Code で GUI を確かめる](ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)はこの項の手順 1・2、[GNOME のデスクトップ共有](gnome-remote.md#gnome-のデスクトップ共有)は手順 1〜4 が前提
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインするユーザー本人の端末（bash）。この項の手順 1 で変数を設定したシェルに貼る
 - **人が触れる場所にある PC では行わない**（画面をロックしないので、前にいる人がそのまま使える）
@@ -3459,7 +3459,7 @@
 - ホストに 1 つの Caddy を置き、`~/.config/caddy/sites/*.caddy` の各サイトを読み、HTTPS（`tls internal`）で受けて同じホストのアプリへ渡す
 - 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)を通してあり、`curl`・`tar`・`sha512sum`・`openssl` が使える
 - 実行場所: Caddy を置く一般ユーザー自身の bash（デスクトップの端末か SSH）。`sudo` は使わない
-- 使う側: [Forgejo](forgejo.md#forgejo)・[Grok Build のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)。アプリと Caddy は同じ一般ユーザーで動かす
+- 使う側: [Forgejo](forgejo.md#forgejo)・[Grok Build のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)。アプリと Caddy は同じ一般ユーザーで動かす
 - [参考資料](reference/caddy.md)・[ロールバックと注意点](extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
 
 #### Caddy: 入れて起動する
@@ -5332,7 +5332,7 @@
 - Firefox・WezTerm・GitHub CLI（それぞれのベンダーの dnf のリポジトリから入れたもの）と git・Node.js も、OS の更新で上がる
   - 1 つだけ上げるなら、名前を指定する（Firefox は言語パックと一緒に `sudo dnf upgrade firefox firefox-l10n-ja`）
   - Firefox の FFmpeg（RPM Fusion の `ffmpeg-libs`）も一緒に上がる。WezTerm の COPR は、`main` ブランチに追従して毎日〜数日おきにビルドされる
-- Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「更新」](ai-agents.md#更新)で上げる（dnf で入れた Claude Code は、OS の更新でも上がる）
+- Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](ai-agents.md#almalinux-10-の更新)で上げる（dnf で入れた Claude Code は、OS の更新でも上がる）
 - VirtualBox・VirtualBox の bootc ゲスト・kvm-container は、仮想マシンのセットアップの[VirtualBox: 更新](virtual-machines.md#virtualbox-更新)・[VirtualBox の bootc ゲスト: 更新](virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)・[kvm-container を更新する](virtual-machines.md#kvm-container-を更新する)、Forgejo は[Forgejo のセットアップの「Forgejo: 更新」](forgejo.md#forgejo-更新)で上げる
 - Syncthing は、[Syncthing のセットアップの「Syncthing: 更新」](syncthing.md#syncthing-更新)で上げる。WireGuard（`wireguard-tools`）・Samba（`samba`・`cifs-utils` など）のパッケージと、GNOME のリモート操作で使う部品は、OS の更新で上がる
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる

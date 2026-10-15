@@ -6,14 +6,14 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 任意の構成のロールバックと注意点は、それぞれの文書にある: [コーディングエージェントの共同作業](coding-agents.md)・[Grok Build のブラウザ操作](grok-build-remote.md)・[Claude Code の GNOME 操作](claude-code-gui.md)・[Claude Code の Remote Control](windows-claude-remote-control.md)
 
-## ロールバック
+## AlmaLinux 10 のロールバック
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 残す項目の手順は飛ばす。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
 - 「Codex CLI」の手順 2 のパッケージは残す
 - Antigravity CLI は、[Antigravity CLI を消す](#antigravity-cli-を消す)で消す（その項の手順は実行していない。未検証）
 - [Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
-- [コーディングエージェントの共同作業](coding-agents.md#ロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
+- [コーディングエージェントの共同作業](coding-agents.md#almalinux-10-のロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
 
 > [!CAUTION]
 > [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 11 は、**`~/.grok`（ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree）を消す**（取り戻せない。入れ直すかもしれないなら、行わない）。Claude Code の設定・履歴（`~/.claude/`・`~/.claude.json`）は、この節では消さない。手で消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える（消す前に中身を確認する）。
@@ -494,7 +494,7 @@
 
    - `False` が出ればよい。`True` なら、実行ファイルが消えていないので、この項の手順 5 へ進まない
    - アンインストールと、その後に残るものは確かめていない。デスクトップとスタートメニューの `Antigravity.lnk`、HKCU の Uninstall の登録、ブラウザの一覧の `Offline` の項目が残ることがある。要らなければ手で消す（一覧の項目は削除のアイコン）
-   - [Antigravity アプリの Remote Control: 実施手順](../ai-agents.md#antigravity-アプリの-remote-control-実施手順)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
+   - [Antigravity アプリの Remote Control: Windows 11 で使う](../ai-agents.md#antigravity-アプリの-remote-control-windows-11-で使う)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
    - アプリのデータを残すなら、この項の手順 5 は飛ばす
 
 1. 完全に消すときだけ、アプリのデータのフォルダーを消す（取り戻せない）。

@@ -1,11 +1,11 @@
 # Grok Build のブラウザ操作のロールバックと注意点
 
-[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-実施手順)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
+[AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 - 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
 - 「Windows 11 のロールバック」の手順 1〜3 は、2026-10-14 に Windows 11 の実機で通した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。パスを残す分岐と、ほかの節は、実機では流していない
 
-## ロールバック
+## AlmaLinux 10 のロールバック
 
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)
 - Grok Build と、そのセッション（`~/.grok`）は消さない。端末の `grok` は、そのまま使える

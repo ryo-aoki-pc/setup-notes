@@ -9,7 +9,7 @@
 > [!CAUTION]
 > **この節の**手順 5 で、秘密鍵（`MOK.priv`）を消す。**消した鍵は取り戻せず**、その鍵で署名したモジュールは、作り直すまで Secure Boot で読み込まれない。
 
-- 先に、この鍵で署名したモジュールを使う手順書のロールバックを行う（[VirtualBox](virtualbox.md#ロールバック)・[VirtualBox Guest Additions](virtualbox-guest-bootc.md#ロールバック)）
+- 先に、この鍵で署名したモジュールを使う手順書のロールバックを行う（[VirtualBox](virtualbox.md#almalinux-10-のロールバック)・[VirtualBox Guest Additions](virtualbox-guest-bootc.md#ロールバック)）
 - この節の手順 3 は、起動の途中の MokManager の画面で行う
 
 1. MOK から鍵を消す予約をする。
