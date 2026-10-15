@@ -4779,6 +4779,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
+- 戻すときは、md-table-excel の[mdtable のロールバック](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 

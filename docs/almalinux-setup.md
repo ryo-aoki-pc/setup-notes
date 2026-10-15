@@ -1970,6 +1970,7 @@
 - `mdtable` を `~/md-table-excel` に clone し、専用の仮想環境に入れて確かめる。更新も、この項の手順 1 で行う
 - 前提: Python 3.9 以上と git が入っている（git は[Homebrew](#homebrew)の手順 1 で入る）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う。更新では、`~/md-table-excel` の手元の変更の確認を省かない
+- 戻すときは、md-table-excel の[mdtable のロールバック](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/extra/readme.md#ロールバック)を行う
 
 1. リポジトリを clone し、導入して確かめる。
 
