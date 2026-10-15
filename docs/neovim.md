@@ -287,10 +287,19 @@
 
 - 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、Neovim で整形を確かめる
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してある
-- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）で開いた Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
+- 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 2 は、手順 1 で開く Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
 - 整形器と依存は md-format の導入先（`~/.local/share/md-format`）にある。Neovim からは入れない。lint の診断用の markdownlint-cli2 は Mason で入る
 
-1. Markdown ファイルで保存と手動整形を確かめる。
+1. 試験用の Markdown を Neovim で開く。
+
+   ```bash
+   nvim /tmp/lazyvim-format-check.md
+   ```
+
+   - Neovim の編集画面が開けばよい
+   - **次の手順は、`i` を押し、挿入モードの本文に貼る**（端末のシェルには貼らない）
+
+1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
 
    ```markdown
    #  動作確認
@@ -317,7 +326,9 @@
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
+   - 貼り終えたら Esc を押し、ノーマルモードに戻る
    - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
+   - 確かめ終えたら `:qa!` で閉じる。試験用の `/tmp/lazyvim-format-check.md` は、要らなければ `rm /tmp/lazyvim-format-check.md` で消す
 
 #### LazyVim のカーソル色を tmux で使う
 
@@ -734,7 +745,7 @@
    ```
 
    - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しの `#` の後の空白が 1 つになり (`# 動作確認`)、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
-   - 初めてなら [安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) を済ませる
+   - 初めてなら [md-format を導入・更新する](windows-setup.md#md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
    - `:qa!` で閉じる。これで導入は終わり

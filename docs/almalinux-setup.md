@@ -2209,16 +2209,18 @@
 
 #### md-format を導入・更新する
 
-- `mdfmt` を `~/md-format` に clone し、リポジトリの外に依存を入れて確かめる。更新も、この項の手順 2 で行う
+- md-format を `~/md-format` に clone し、リポジトリの外に依存を入れて、`mdfmt` コマンドを確かめる。更新も、この項の手順 2 で行う
 - 前提: git が入っている（[Homebrew](#homebrew)の手順 1 で入る）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、この項の手順 1 で Node.js が無いときだけ使う。更新では、`~/md-format` の手元の変更の確認を省かない
 
 1. Node.js が無ければ dnf で入れ、版を確かめる。
 
    ```bash
-   command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
-   printf '\n\033[7m 確認 \033[0m\n'
-   node --version
+   {
+     command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
+     printf '\n\033[7m 確認 \033[0m\n'
+     node --version
+   }
    ```
 
    - `v22.` 以上の版が出ればよい
@@ -2237,7 +2239,8 @@
 
    - 最後に `導入済み: mdfmt` と版、起動コマンドのパスが出ればよい
    - 依存はリポジトリ外の `~/.local/share/md-format` へ入る
-   - 起動コマンド `mdfmt` は `~/.local/bin`。PATH に無いときは案内に従って加える
+   - 起動コマンド `mdfmt` は `~/.local/bin`
+   - `問題:` で始まる行が出たら、その案内に従って直してから `(`〜`)` を貼り直す（`~/.local/bin` が PATH に無いときは、PATH に加えてから端末を開き直す）
    - `--check` は何も変更せず状態を確かめる
    - 更新時は `git -C ~/md-format pull --ff-only` し、この手順の `(`〜`)` の導入・確認を再実行する
    - `ほかの導入が動いています` で止まったら、表示のプロセスが終わるのを待って、`(`〜`)` を貼り直す

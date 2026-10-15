@@ -5131,7 +5131,8 @@
 
    - 最後に `導入済み: mdfmt` と版、起動コマンドのパスが出ればよい
    - 依存はリポジトリ外の `%LOCALAPPDATA%\md-format` へ入る
-   - 起動コマンドは `%USERPROFILE%\.local\bin` の `mdfmt.ps1`（PowerShell）・`mdfmt.cmd`（cmd）・`mdfmt`（Git Bash）。PATH に無いときは案内に従って加える
+   - 起動コマンドは `%USERPROFILE%\.local\bin` の `mdfmt.ps1`（PowerShell）・`mdfmt.cmd`（cmd）・`mdfmt`（Git Bash）
+   - `問題:` で始まる行が出たら、その案内に従って直してから `& { ... }` 部分を貼り直す（`%USERPROFILE%\.local\bin` が PATH に無いときは、PATH に加えてから Windows PowerShell を開き直す）
    - `--check` は何も変更せず状態を確かめる
    - 更新時は `git -C "$env:USERPROFILE\md-format" pull --ff-only` を実行し、この項の手順 3 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
    - `導入先を入れ替えられません` で止まったら、Neovim をすべて閉じてから `& { ... }` 部分を貼り直す
