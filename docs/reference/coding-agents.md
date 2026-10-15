@@ -97,9 +97,16 @@
   - 2026-10-15 に、利用者の決定で Pull Request の取り込みもエージェントが行ってよいことにした。それまでは、取り込みは人が行っていた
   - テストとリンターが通り、Pull Request が競合していなければ取り込める。利用者が取り込まないよう頼んだときは取り込まず、そのことを報告する
   - Pull Request は、ホスティングの画面や `gh pr merge --merge` で取り込める。squash と rebase にせず、各 worktree の `--ff-only` が通る形を保つ
-  - docs とそのサブモジュールの 11 個のリポジトリの AGENTS.md は、`gh pr merge --squash` にした。作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないため、この節の `--ff-only` でそろえる形と分けた
-  - 手元での取り込み（[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順）と `main` の push・ブランチの削除は人が行う
-- GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
+  - 共同作業の手順では、手元での取り込み（[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順）と `main` の push・ブランチの削除は人が行う
+  - `agent/<名前>` を使い続けるので、ホスティングがリモートのブランチを自動で消すことは前提にしない
+- docs とそのサブモジュールの 11 個のリポジトリは、AGENTS.md の規則で共同作業の手順と違う形にした
+  - 作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないので、`gh pr merge --squash` で取り込む
+  - 2026-10-15 に、利用者の決定で、取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す方針にした
+  - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチの削除は人が行う
+  - 取り込んだブランチには、その後コミットも push もしない。push すると、消したリモートのブランチが同じ名前で作り直される
+  - 同日の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。10 個は merge commit が無効で squash だけを許し、md-table-excel だけは merge commit も許す
+  - この 11 個の自動削除と squash は、GitHub の設定に頼る。次の「GitHub の機能には頼らない」は、共同作業の手順書の方針
+- 共同作業の手順書は、GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
 
 ### 既定の分担
 
