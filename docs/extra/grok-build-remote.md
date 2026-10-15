@@ -3,7 +3,92 @@
 [AlmaLinux 10 の手順](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](../reference/grok-build-remote.md)
 
 - 本書の「<項>の手順 N」は、各正本の「Grok Build のブラウザ操作」の該当項を指す
-- 「Windows 11 のロールバック」の手順 1〜3 は、2026-10-14 に Windows 11 の実機で通した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。パスを残す分岐と、ほかの節は、実機では流していない
+- Codeg の撤去の既存部分は、2026-10-14 に Windows 11 の実機で通した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-windows-11-の入れ直しと共通パスワード3-エージェントの接続の検証2026-10-14-jst)）。自動更新に関する撤去・復旧と、パスを残す分岐は実機で未確認
+
+## AlmaLinux 10 で自動更新の控えから前の版と DB に戻す
+
+- 対象: AlmaLinux 10。Windows 11 は [Windows 11 で自動更新の控えから前の版と DB に戻す](#windows-11-で自動更新の控えから前の版と-db-に戻す)
+- 前提: Codeg と自動更新を入れてある。本人の bash で、この節の手順を同じシェルに貼る。トークンのファイルは開かない
+- 終了コード 3 または `in-progress` が残ったときも使う。通常は完成した `bin/` と `db/` の組を選ぶ。`in-progress` があれば目印の `backup` と `new` を指定する。`backing-up`・`restart-failed` は元の DB を保持して旧本体を揃える
+- 復元プログラムが排他・控え・段階を確認してから Codeg を止め、本体と DB を戻して旧版の起動を確認する。前提が一致しなければ、変更せず終了コード 1 で止まる
+- ファイルを移す前に停止に失敗した場合は、元の本体を再開して同じ起動確認を行う。再開できれば目印を解除して終了コード 1。再開できない場合や、復元開始後の失敗は控えを保全して終了コード 3 にする
+
+> [!WARNING]
+> **この節の手順 3 で通常の控えを戻すと、更新後の会話と設定は、控えを取った時点へ戻る。** 現在の本体と DB は `failed-manual-<UTC日時>` に退避する。`backing-up`・`restart-failed` の復旧では元の DB を保持する。復旧が済むまで、控えを消さない。
+
+1. 自動更新を止めて、途中の段階と控えの名前を確かめる。
+
+   ```bash
+   systemctl --user disable --now codeg-auto-update.timer
+   systemctl --user stop codeg-auto-update.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user is-active codeg-auto-update.timer codeg-auto-update.service
+   if [ -f ~/.local/state/codeg-auto-update/in-progress ]; then
+     cat ~/.local/state/codeg-auto-update/in-progress
+   fi
+   find ~/.local/state/codeg-auto-update/backups -mindepth 1 -maxdepth 2 -type d -print
+   tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
+   ```
+
+   - タイマーとサービスが両方 `inactive` ならよい。止まらなければ先へ進まない
+   - `in-progress` があれば `stage`・`backup`・`old`・`new` を確かめる
+   - 控えの名前と問題の起きた版を控える。目印があれば `backup` の末尾の名前と `new` を使う
+   - `backing-up`・`restart-failed` は控えの実体がまだ無くても、目印の予定名を使う
+   - `failed-*` は復元元に選ばない
+
+1. 復元元の名前と保留する版を設定する（両方とも必ず値を入れる）。
+
+   ```bash
+   CODEG_BACKUP_NAME=''               # backups の直下の名前（日時-旧版）
+   ```
+
+   ```bash
+   CODEG_SKIP_VERSION=''              # 問題の起きた版（先頭の v は付けない）
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf '復元元: %s\n保留: %s\n' "${CODEG_BACKUP_NAME}" "${CODEG_SKIP_VERSION}"
+   ```
+
+   - 復元元はこの節の手順 1 で確認した控えにする。保留するのは戻す旧版ではなく、問題の起きた新しい版にする
+
+1. 復元プログラムを実行し、結果と旧版を確かめる。
+
+   ```bash
+   if [ -z "${CODEG_BACKUP_NAME}" ] || [ -z "${CODEG_SKIP_VERSION}" ]; then
+     echo '中断: この節の手順 2 の変数を設定する' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     ~/.local/bin/codeg-auto-update --restore "${CODEG_BACKUP_NAME}" --hold "${CODEG_SKIP_VERSION}"
+     CODEG_RESTORE_RESULT=$?
+     printf '終了コード: %s\n' "${CODEG_RESTORE_RESULT}"
+     tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
+     if [ "${CODEG_RESTORE_RESULT}" -eq 0 ]; then
+       ~/.local/opt/codeg-server/codeg-server --version
+     fi
+   fi
+   ```
+
+   - 終了コード 0 で、表示された版が選んだ旧版ならよい。問題の版は保留され、`in-progress` は解除される
+   - 終了コード 1 は、前提不一致で未変更、または停止失敗後に元の本体を再開できた状態。復元は未完了。この節の手順 4・5 へ進まず、ログの原因に対処して手順 1 からやり直す
+   - 終了コード 3 は、元の本体の再開または復元の完了を確認できない状態。この節の手順 4・5 へ進まず、ログと控えを保持して復旧を依頼する
+
+1. ブラウザで、復元した会話の一覧と再開を確かめる。
+
+   - HTTPS の Codeg で、必要な会話が見つかり再開できればよい。問題があれば手順 5 へ進まない
+
+1. 復旧を確認できた場合だけ、自動更新を再開する。
+
+   ```bash
+   systemctl --user enable --now codeg-auto-update.timer
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user list-timers codeg-auto-update.timer
+   ```
+
+   - 次回の時刻が出ればよい。保留は残す。試し直すときは[AlmaLinux 10 の更新](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-の更新)の保留を解く手順を通す
+
+---
 
 ## AlmaLinux 10 のロールバック
 
@@ -16,20 +101,24 @@
 > [!CAUTION]
 > **この節の手順 3 は、Codeg の会話の履歴と設定（`~/.local/share/codeg`）、アクセストークンを消す。取り戻せない。**
 
-1. Codeg を止めて自動起動を外し、Codeg のサイトだけを共通の Caddy から外す。
+1. 自動更新と Codeg を止め、Codeg のサイトだけを共通の Caddy から外す。
 
    ```bash
+   systemctl --user disable --now codeg-auto-update.timer
+   systemctl --user stop codeg-auto-update.service
    if [ -e ~/.config/caddy/sites/codeg.caddy ] && ! grep -qx '# setup-notes: grok-build-remote' ~/.config/caddy/sites/codeg.caddy; then
      echo '中断: この手順の Codeg サイトではない' >&2
    else
      systemctl --user disable --now codeg-server.service &&
      { [ ! -e ~/.config/caddy/sites/codeg.caddy ] || mv ~/.config/caddy/sites/codeg.caddy ~/.config/caddy/codeg.caddy.removed; }
      printf '\n\033[7m 確認 \033[0m\n'
-     systemctl --user is-active codeg-server.service
+     systemctl --user is-active codeg-server.service codeg-auto-update.timer codeg-auto-update.service
    fi
    ```
 
-   - `inactive` が出ればよい。サイトを外した場合は [Caddy: 設定を検査して起動し直す](../almalinux-setup.md#caddy-設定を検査して起動し直す)を通す
+   - 3 つとも `inactive` ならよい。自動更新を入れていなければ、そのユニットの `not found` は無視してよい
+   - 止まらないユニットがあれば、この節の手順 2・3 へ進まない
+   - サイトを外した場合は [Caddy: 設定を検査して起動し直す](../almalinux-setup.md#caddy-設定を検査して起動し直す)を通す
    - 検査や起動に失敗したら、`mv ~/.config/caddy/codeg.caddy.removed ~/.config/caddy/sites/codeg.caddy` で戻し、同じ項を通し直す
    - Caddy を起動し直した後に、`ss -ltn '( sport = :3080 or sport = :3443 )'` で両ポートの待ち受けが無いことを確かめる。ほかのサイトの Caddy は動かしたままにする
 
@@ -86,16 +175,98 @@
 1. ユニット・本体・トークン・会話の履歴を消す（取り戻せない）。
 
    ```bash
-   rm -f ~/.config/systemd/user/codeg-server.service ~/.config/caddy/codeg.caddy.removed
+   rm -f ~/.config/systemd/user/codeg-server.service ~/.config/systemd/user/codeg-auto-update.service ~/.config/systemd/user/codeg-auto-update.timer ~/.local/bin/codeg-auto-update ~/.config/caddy/codeg.caddy.removed
    systemctl --user daemon-reload
-   rm -rf ~/.local/opt/codeg-server ~/.local/opt/codeg-server.prev ~/.config/codeg-server ~/.local/share/codeg ~/.codeg ~/.cache/codeg-server-dl
+   rm -rf ~/.local/opt/codeg-server ~/.local/opt/.codeg-server.new ~/.config/codeg-server ~/.local/share/codeg ~/.local/state/codeg-auto-update ~/.codeg ~/.cache/codeg-server-dl
    printf '\n\033[7m 確認 \033[0m\n'
-   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
+   ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service ~/.local/state/codeg-auto-update ~/.local/bin/codeg-auto-update ~/.config/systemd/user/codeg-auto-update.service ~/.config/systemd/user/codeg-auto-update.timer
    ```
 
-   - `ls` に残したパスが、すべて `No such file or directory` になればよい（外したパスが無ければ 4 つ）
+   - `ls` に残したパスが、すべて `No such file or directory` になればよい（外したパスが無ければ 8 つ）
    - 端末のルート証明書は残す。共通の Caddy を撤去するときだけ [端末からルート証明書を消す](caddy.md#端末からルート証明書を消す)を通す
    - ブラウザとスマートフォンに残るトークンは、もう使えない
+
+---
+
+## Windows 11 で自動更新の控えから前の版と DB に戻す
+
+- 対象: Windows 11。管理者ではない Windows PowerShell 5.1 の同じ窓に貼る。Codeg と自動更新を入れてあること
+- 終了コード 3 または `in-progress` が残ったときも使う。通常は完成した `bin\` と `db\` の組を選ぶ。`in-progress` があれば目印の `backup` と `new` を指定する。`backing-up`・`restart-failed` は元の DB を保持して旧本体 3 つを揃える
+- 復元プログラムが排他・控え・段階を確認してから Codeg を止め、旧版を起動して待ち受けと HTTP を確認する。前提が一致しなければ変更せず終了コード 1 で止まる。`token.txt` は開かない
+- ファイルを移す前に停止に失敗した場合は、元の本体を再開して同じ起動確認を行う。再開できれば目印を解除して終了コード 1。再開できない場合や、復元開始後の失敗は控えを保全して終了コード 3 にする
+
+> [!WARNING]
+> **この節の手順 3 で通常の控えを戻すと、更新後の会話と設定は、控えを取った時点へ戻る。** 現在の本体 3 つと DB は `failed-manual-<UTC日時>` へ退避する。`backing-up`・`restart-failed` の復旧では元の DB を保持する。復旧が済むまで、控えを消さない。
+
+1. 自動更新を止めて、途中の段階と控えの名前を確かめる。
+
+   ```powershell
+   Disable-ScheduledTask -TaskName 'codeg-auto-update' | Out-Null
+   Stop-ScheduledTask -TaskName 'codeg-auto-update'
+   $CodegState = Join-Path $env:LOCALAPPDATA 'codeg-auto-update'
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTask -TaskName 'codeg-auto-update' | Format-Table TaskName, State
+   $CodegMarker = Join-Path $CodegState 'in-progress'
+   if (Test-Path -LiteralPath $CodegMarker) { Get-Content -LiteralPath $CodegMarker -Encoding UTF8 }
+   Get-ChildItem -LiteralPath (Join-Path $CodegState 'backups') -Directory | Select-Object Name
+   Get-Content -LiteralPath (Join-Path $CodegState 'codeg-auto-update.log') -Encoding UTF8 -Tail 20
+   ```
+
+   - 自動更新のタスクが `Disabled` で `Running` でなければよい
+   - `in-progress` があれば `stage`・`backup`・`old`・`new` を確かめる
+   - 控えの名前と問題の起きた版を控える。目印があれば `backup` の末尾の名前と `new` を使う
+   - `backing-up`・`restart-failed` は控えの実体がまだ無くても、目印の予定名を使う
+   - `failed-*` は復元元に選ばない
+
+1. 復元元の名前と保留する版を設定する（両方とも必ず値を入れる）。
+
+   ```powershell
+   $CodegBackupName = ''              # backups の直下の名前（日時-旧版）
+   ```
+
+   ```powershell
+   $CodegSkipVersion = ''             # 問題の起きた版（先頭の v は付けない）
+   ```
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   "復元元: $CodegBackupName"
+   "保留: $CodegSkipVersion"
+   ```
+
+   - 復元元はこの節の手順 1 で確認した控えにする。保留するのは戻す旧版ではなく、問題の起きた新しい版にする
+
+1. 復元プログラムを実行し、結果と旧版を確かめる。
+
+   ```powershell
+   & {
+     if ([string]::IsNullOrWhiteSpace($CodegBackupName) -or [string]::IsNullOrWhiteSpace($CodegSkipVersion)) { throw '中断: この節の手順 2 の変数を設定する' }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     powershell.exe -NoProfile -File "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.ps1" -Restore $CodegBackupName -Hold $CodegSkipVersion
+     $CodegRestoreResult = $LASTEXITCODE
+     "終了コード: $CodegRestoreResult"
+     Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
+     if ($CodegRestoreResult -eq 0) { & "$env:LOCALAPPDATA\codeg-server\codeg-server.exe" --version }
+   }
+   ```
+
+   - 終了コード 0 で、表示された版が選んだ旧版ならよい。問題の版は保留され、`in-progress` は解除される
+   - 終了コード 1 は、前提不一致で未変更、または停止失敗後に元の本体を再開できた状態。復元は未完了。この節の手順 4・5 へ進まず、ログの原因に対処して手順 1 からやり直す
+   - 終了コード 3 は、元の本体の再開または復元の完了を確認できない状態。この節の手順 4・5 へ進まず、ログと控えを保持して復旧を依頼する
+
+1. ブラウザで、復元した会話の一覧と再開を確かめる。
+
+   - HTTPS の Codeg で、必要な会話が見つかり再開できればよい。問題があれば手順 5 へ進まない
+
+1. 復旧を確認できた場合だけ、自動更新を再開する。
+
+   ```powershell
+   Enable-ScheduledTask -TaskName 'codeg-auto-update' | Out-Null
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Format-List NextRunTime
+   ```
+
+   - 次回の時刻が出ればよい。保留は残す。試し直すときは[Windows 11 の更新](../ai-agents.md#grok-build-のブラウザ操作-windows-11-の更新)の保留を解く手順を通す
 
 ---
 
@@ -104,29 +275,47 @@
 - 手順 1・3 は管理者ではない PowerShell に、手順 2 は管理者の PowerShell に貼る
 - Grok Build と、そのセッション（`%USERPROFILE%\.grok`）は消さない
 - 端末に入れたルート証明書は、[Caddy の「端末からルート証明書を消す」](caddy.md#端末からルート証明書を消す)と同じ操作で消す
-- 手順 1 を貼る前に、ほかの用途の Caddy をこの PC で動かしているなら、2 行目（`Get-Process -Name caddy` の行）を外し、確認の `Get-Process` の名前からも `caddy` を外す
+- 手順 1 を貼る前に、ほかの用途の Caddy をこの PC で動かしているなら、`Get-Process -Name caddy` の行を外し、確認の `Get-Process` の名前からも `caddy` を外す
 - 手順 3 を貼る前に、消してはいけないパスをブロックから外す。ほかの用途と共有している `%LOCALAPPDATA%\codeg-caddy`（本体・設定）・`%APPDATA%\Caddy`（認証局データ）は `Remove-Item` と `Test-Path` の両方から、Codeg のデスクトップアプリをこの PC で使っているときの `%USERPROFILE%\.codeg`（Codeg が置いたスキル）は `Remove-Item` から外す
 
 > [!CAUTION]
 > **この節の手順 3 は、Codeg の会話の履歴と設定（`%APPDATA%\codeg`）、アクセストークン、Caddy の認証局の鍵（`%APPDATA%\Caddy`）を消す。取り戻せない。**
 
-1. Caddy と Codeg を止めて、タスクを消す。
+1. 自動更新が終わっていることを確かめ、Caddy・Codeg を止めてタスクを消す。
 
    ```powershell
-   Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
-   Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
-   Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
-     Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
-     ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
-   Stop-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue
-   Unregister-ScheduledTask -TaskName 'codeg-caddy' -Confirm:$false -ErrorAction SilentlyContinue
-   Unregister-ScheduledTask -TaskName 'codeg-server' -Confirm:$false
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
-   Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   & {
+     $ErrorActionPreference = 'Stop'
+     $updateTask = Get-ScheduledTask -TaskName 'codeg-auto-update' -ErrorAction SilentlyContinue
+     if ($updateTask -and $updateTask.State -eq 'Running') { throw '中断: 自動更新が終わってから、この節の手順 1 をやり直す' }
+     $state = Join-Path $env:LOCALAPPDATA 'codeg-auto-update'
+     $updateLock = $null
+     if (Test-Path -LiteralPath $state) {
+       try { $updateLock = [IO.File]::Open((Join-Path $state 'lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
+       catch { throw '中断: 自動更新のロックを取れない。更新が終わってから、この節の手順 1 をやり直す' }
+     } elseif ($updateTask) { throw '中断: 自動更新の状態フォルダーを確認できない' }
+     try {
+       if ($updateTask) {
+         Stop-ScheduledTask -TaskName 'codeg-auto-update'
+         Unregister-ScheduledTask -TaskName 'codeg-auto-update' -Confirm:$false
+       }
+     } finally { if ($updateLock) { $updateLock.Dispose() } }
+     Stop-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue
+     Get-Process -Name caddy -ErrorAction SilentlyContinue | Stop-Process -Force
+     Get-CimInstance Win32_Process -Filter "Name='codeg-server.exe'" |
+       Where-Object { $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-server\codeg-server.exe') } |
+       ForEach-Object { & "$env:WINDIR\System32\taskkill.exe" /PID $_.ProcessId /T /F | Out-Null }
+     Stop-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue
+     Unregister-ScheduledTask -TaskName 'codeg-caddy' -Confirm:$false -ErrorAction SilentlyContinue
+     Unregister-ScheduledTask -TaskName 'codeg-server' -Confirm:$false
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-Process -Name codeg-server, codeg-mcp, caddy -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+     Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy', 'codeg-auto-update' -ErrorAction SilentlyContinue | Format-Table TaskName, State
+   }
    ```
 
    - 何も出なければよい
+   - `中断` やエラーが出たら、この節の手順 2・3 へ進まない。自動更新が `Running` の間は完了を待ってから、この節の手順 1 をやり直す
 
 1. 管理者の Windows PowerShell で、受信の規則を消す。
 
@@ -146,12 +335,12 @@
 1. 本体・トークン・会話の履歴・認証局を消す（取り戻せない）。
 
    ```powershell
-   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-server.prev", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy" -Recurse -Force -ErrorAction SilentlyContinue
+   Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-auto-update", "$env:APPDATA\codeg", "$env:USERPROFILE\.codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy" -Recurse -Force -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path "$env:LOCALAPPDATA\codeg-server", "$env:APPDATA\codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy"
+   Test-Path "$env:LOCALAPPDATA\codeg-server", "$env:LOCALAPPDATA\codeg-auto-update", "$env:APPDATA\codeg", "$env:LOCALAPPDATA\codeg-caddy", "$env:APPDATA\Caddy"
    ```
 
-   - `Test-Path` に残したパスが、すべて `False` になればよい（外したパスが無ければ 4 行）
+   - `Test-Path` に残したパスが、すべて `False` になればよい（外したパスが無ければ 5 行）
    - Caddy の認証局をほかの用途のために残したときは、端末からのルート証明書の削除も飛ばす
 
 ---
