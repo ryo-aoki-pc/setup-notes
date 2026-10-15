@@ -836,7 +836,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](syncthing.md#syncthing)・[Dropbox 公式](#dropbox)・[rclone](#dropbox-と-rclone)
-  - [Forgejo](forgejo.md#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)
+  - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)
   - [Podman の Quadlet](#podman-quadlet-で自動起動する)で動かすコンテナ
 
 > [!IMPORTANT]
@@ -2977,7 +2977,7 @@
 
 ## ネットワークとリモート操作
 
-- SSH・Wake on LAN・SOCKS トンネル。WireGuard は[WireGuard のセットアップ](wireguard.md)、GNOME のリモートの画面（デスクトップ共有・ヘッドレスセッション・リモートログイン）は[GNOME のリモート操作のセットアップ](gnome-remote.md)で入れる
+- SSH・Wake on LAN・SOCKS トンネル・Caddy。WireGuard は[WireGuard のセットアップ](wireguard.md)、GNOME のリモートの画面（デスクトップ共有・ヘッドレスセッション・リモートログイン）は[GNOME のリモート操作のセットアップ](gnome-remote.md)で入れる
 
 ### SSH を公開鍵だけにする
 
@@ -3290,6 +3290,527 @@
 
    - `ss` は何も出さない
    - 最後の行は `届かない（期待どおり）`
+
+---
+
+### Caddy
+
+- ホストに 1 つの Caddy を置き、`~/.config/caddy/sites/*.caddy` の各サイトを読み、HTTPS（`tls internal`）で受けて同じホストのアプリへ渡す
+- 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)を通してあり、`curl`・`tar`・`sha512sum`・`openssl` が使える
+- 実行場所: Caddy を置く一般ユーザー自身の bash（デスクトップの端末か SSH）。`sudo` は使わない
+- 使う側: [Forgejo](forgejo.md#forgejo)・[Grok Build のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-実施手順)。アプリと Caddy は同じ一般ユーザーで動かす
+- [参考資料](reference/caddy.md)・[ロールバックと注意点](extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
+
+#### Caddy: 入れて起動する
+
+- 本体・共通設定・ユーザーサービスを置き、サイトの無い状態で起動する
+- 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)と、Caddy のリードの道具を用意してある
+- 実行場所: Caddy を置く一般ユーザー自身の bash。`sudo` は使わない
+- `codeg-caddy.service` のあるホストは、この項を通さず[Codeg 専用の Caddy から切り替える](#caddy-codeg-専用の-caddy-から切り替える)へ進む
+
+1. 入れる版を設定する。
+
+   ```bash
+   CADDY_VERSION=2.11.7                 # v を付けない
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'Caddy: %s\n' "${CADDY_VERSION}"
+   ```
+
+   - [最新リリース](https://github.com/caddyserver/caddy/releases)を確かめ、入れる版に変える
+   - 版の番号が出ればよい
+
+1. Caddy がまだ無いことと、前提の道具を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v curl tar sha512sum openssl
+   loginctl show-user "$(id -u)" -p Linger
+   ls -d ~/.local/opt/caddy ~/.config/caddy ~/.config/systemd/user/caddy.service ~/.config/systemd/user/codeg-caddy.service ~/.cache/caddy-dl
+   ```
+
+   - 道具のパスと `Linger=yes` が出て、`ls` は 5 つとも `No such file or directory` ならよい
+   - どれかが在れば中断する。`codeg-caddy.service` が在れば[Codeg 専用の Caddy から切り替える](#caddy-codeg-専用の-caddy-から切り替える)を通す
+
+1. 配布物を取得して SHA-512 を照合し、自分のホームに置く。
+
+   ```bash
+   if [ -z "${CADDY_VERSION}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   elif [ -e ~/.cache/caddy-dl ] || [ -e ~/.local/opt/caddy ]; then
+     echo '中断: ~/.cache/caddy-dl か ~/.local/opt/caddy が既にある。上書きしない' >&2
+   else
+     case "$(uname -m)" in
+       aarch64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_arm64.tar.gz" ;;
+       x86_64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_amd64.tar.gz" ;;
+       *) echo '中断: aarch64 / x86_64 以外は対象外' >&2; false ;;
+     esac &&
+     mkdir -p ~/.cache/caddy-dl &&
+     (
+       cd ~/.cache/caddy-dl &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/${CADDY_ASSET}" &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_checksums.txt" &&
+       printf '\n\033[7m 確認 \033[0m\n' &&
+       grep -E "  ${CADDY_ASSET}\$" "caddy_${CADDY_VERSION}_checksums.txt" | sha512sum -c - &&
+       tar -xzf "${CADDY_ASSET}" &&
+       install -d -m 755 ~/.local/opt/caddy &&
+       install -m 755 caddy ~/.local/opt/caddy/caddy
+     ) &&
+     rm -r ~/.cache/caddy-dl &&
+     ~/.local/opt/caddy/caddy version
+   fi
+   ```
+
+   - `caddy_…_linux_….tar.gz: OK` と、`v` で始まる指定した版が出ればよい
+   - 取得・照合・配置に失敗したら中断する
+
+1. 共通の Caddyfile・サイト用ディレクトリ・ユーザーサービスを置いて検査する。
+
+   ```bash
+   if [ -e ~/.config/caddy ] || [ -L ~/.config/caddy ] ||
+      [ -e ~/.config/systemd/user/caddy.service ] || [ -L ~/.config/systemd/user/caddy.service ] ||
+      [ -e ~/.config/systemd/user/codeg-caddy.service ] || [ -L ~/.config/systemd/user/codeg-caddy.service ]; then
+     echo '中断: 既存の設定またはサービスがある。上書きしない' >&2
+   elif [ ! -x ~/.local/opt/caddy/caddy ]; then
+     echo '中断: この項の手順 3 を通す' >&2
+   else
+     mkdir -p ~/.config/caddy/sites ~/.config/systemd/user &&
+     cat > ~/.config/caddy/Caddyfile <<EOF
+   # setup-notes: caddy
+   {
+       admin off
+       auto_https disable_redirects
+       skip_install_trust
+       pki {
+           ca local {
+               name "Caddy $(hostname -s)"
+           }
+       }
+   }
+
+   (root-crt) {
+       handle /caddy-root.crt {
+           root * "{\$HOME}/.local/share/caddy/pki/authorities/local"
+           rewrite * /root.crt
+           file_server
+       }
+   }
+
+   import sites/*.caddy
+   EOF
+     cat > ~/.config/systemd/user/caddy.service <<'EOF'
+   # setup-notes: caddy
+   [Unit]
+   Description=Caddy (HTTPS for local services)
+
+   [Service]
+   Type=simple
+   ExecStart=%h/.local/opt/caddy/caddy run --config %h/.config/caddy/Caddyfile --adapter caddyfile
+   Restart=on-failure
+   RestartSec=5
+
+   [Install]
+   WantedBy=default.target
+   EOF
+     printf '\n\033[7m 確認 \033[0m\n'
+     ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile
+   fi
+   ```
+
+   - `Valid configuration` が出ればよい。`No files matching import glob pattern`（サイトがまだ無い）と `Caddyfile input is not formatted`（字下げが空白）の警告は、出ても進む
+   - 検査に失敗したら起動せず、設定を直して同じ `validate` を通す
+
+1. 設定を再検査し、Caddy の自動起動を有効にして起動する。
+
+   ```bash
+   if ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile; then
+     systemctl --user daemon-reload &&
+     systemctl --user enable --now caddy.service &&
+     for i in $(seq 1 30); do
+       [ -s ~/.local/share/caddy/pki/authorities/local/root.crt ] && break
+       sleep 1
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active caddy.service
+     openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256
+   else
+     echo '中断: Caddy の設定が検査を通らない' >&2
+   fi
+   ```
+
+   - `active` と、ルート証明書の名前・期限・SHA-256 の指紋が出ればよい
+   - 新しく作った認証局の名前は `Caddy <ホスト名> - <年> ECC Root`。指紋を控える
+   - サイトはまだ無い。使うアプリの手順でサイトを足す
+   - 失敗したら `journalctl --user -u caddy.service -n 30 --no-pager` を見る
+   - **`root.key` は、読まない・写さない・人に渡さない**
+
+#### Caddy: 設定を検査して起動し直す
+
+- サイトを足した・変えた・外した後に、共通の設定を検査して起動し直す
+- 前提: [入れて起動する](#caddy-入れて起動する)か[Codeg 専用の Caddy から切り替える](#caddy-codeg-専用の-caddy-から切り替える)を通してある
+- 実行場所: Caddy を動かす一般ユーザー自身の bash。`sudo` は使わない
+
+1. 設定が検査を通ったときだけ、Caddy を起動し直す。
+
+   ```bash
+   if ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile; then
+     systemctl --user restart caddy.service &&
+     sleep 2
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active caddy.service
+     ss -ltnp | awk 'NR == 1 || /caddy/'
+   else
+     echo '中断: 設定を直してから貼り直す。起動し直していない' >&2
+   fi
+   ```
+
+   - `active` と、足したサイトの待ち受けが出ればよい。すべてのサイトを外した後は見出しだけでよい
+   - `中断:` が出たら、設定の検査が通っていない。`Caddyfile input is not formatted` の警告は、出ても進む
+   - 起動し直すと、同じホストのほかのサイトも数秒切れる
+   - 失敗したら `journalctl --user -u caddy.service -n 30 --no-pager` を見る
+
+#### Caddy: Codeg 専用の Caddy から切り替える
+
+- 旧手順で `codeg-caddy.service` と 1 枚の Caddyfile を作ったホストを、共通の Caddy に切り替える
+- 前提: 旧 Codeg が HTTPS で動いている
+- 実行場所: Codeg と Caddy を動かす一般ユーザー自身の bash。`sudo` は使わない。途中でシェルを変えない
+- **認証局の `~/.local/share/caddy` には手を触れない**。今の `name "Codeg <ホスト名>"` をそのまま写し、端末に入れたルート証明書を引き継ぐ
+- この項の手順 5 で Codeg の HTTPS が数秒切れる。戻すときは[切り替えのロールバック](extra/caddy.md#codeg-専用の-caddy-に戻す)を使う
+
+1. 変数を設定する（`SERVER_IP` は必ず値を入れる）。
+
+   ```bash
+   SERVER_IP=''                       # 今の Codeg のサイトで使っている IPv4
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'Codeg の IP: %s\n' "${SERVER_IP}"
+   ```
+
+   - 旧 Codeg の `https://<SERVER_IP>:3443` と同じ IP にする
+
+1. 既存の設定を確かめ、認証局の名前と指紋を控える。
+
+   ```bash
+   unset CADDY_ROOT_BEFORE CADDY_MIGRATION_READY
+   if [ -z "${SERVER_IP}" ]; then
+     echo '中断: この項の手順 1 の変数を設定する' >&2
+   elif [ ! -f ~/.config/systemd/user/codeg-caddy.service ] ||
+        [ -e ~/.config/systemd/user/caddy.service ] || [ -L ~/.config/systemd/user/caddy.service ] ||
+        [ -e ~/.config/caddy/sites ] || [ -L ~/.config/caddy/sites ] ||
+        [ -e ~/.config/caddy/Caddyfile.codeg-only ] || [ -L ~/.config/caddy/Caddyfile.codeg-only ]; then
+     echo '中断: 旧サービス・新サービス・サイト・控えの状態が一致しない' >&2
+   elif ! grep -Fqx "https://${SERVER_IP}:3443 {" ~/.config/caddy/Caddyfile ||
+        [ "$(grep -Ec '^\s*name "[^"]+"\s*$' ~/.config/caddy/Caddyfile)" -ne 1 ]; then
+     echo '中断: 旧サイトの IP または認証局名の行が一致しない' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active codeg-caddy.service
+     openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256 &&
+     CADDY_ROOT_BEFORE=$(openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -fingerprint -sha256)
+   fi
+   ```
+
+   - `active` と、今のルート証明書の名前・期限・指紋が出ればよい。指紋を控える
+   - 中断・失敗が出たら先へ進まない
+
+1. 旧 Caddyfile を控えて、共通設定・Codeg のサイト・新しいサービスを書く。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${CADDY_ROOT_BEFORE:-}" ]; then
+     echo '中断: 同じシェルでこの項の手順 1・2 を通す' >&2
+   else
+     /usr/bin/python3 - "${SERVER_IP}" <<'PYCODE'
+   from pathlib import Path
+   import ipaddress
+   import re
+   import sys
+
+   address = str(ipaddress.IPv4Address(sys.argv[1]))
+   config = Path.home() / '.config/caddy'
+   path = config / 'Caddyfile'
+   backup = config / 'Caddyfile.codeg-only'
+   service = Path.home() / '.config/systemd/user/caddy.service'
+   old_service = service.with_name('codeg-caddy.service')
+   if not old_service.is_file() or any(p.exists() or p.is_symlink() for p in [backup, config / 'sites', service]):
+       raise SystemExit('中断: 既存の控え・サイト・新サービス、または旧サービスの状態を確認する')
+   text = path.read_text()
+   names = re.findall(r'^\s*name ("[^"\n]+")\s*$', text, re.M)
+   if len(names) != 1 or text.splitlines().count(f'https://{address}:3443 {{') != 1:
+       raise SystemExit('中断: 旧 Caddyfile のサイトまたは name が一致しない')
+   with backup.open('x') as stream:
+       stream.write(text)
+   (config / 'sites').mkdir()
+   new_config = '''# setup-notes: caddy
+   {
+       admin off
+       auto_https disable_redirects
+       skip_install_trust
+       pki {
+           ca local {
+               name __CA_NAME__
+           }
+       }
+   }
+
+   (root-crt) {
+       handle /caddy-root.crt {
+           root * "{$HOME}/.local/share/caddy/pki/authorities/local"
+           rewrite * /root.crt
+           file_server
+       }
+   }
+
+   import sites/*.caddy
+   '''
+   path.write_text(new_config.replace('__CA_NAME__', names[0]))
+   (config / 'sites/codeg.caddy').write_text('''# setup-notes: grok-build-remote
+   https://__SERVER_IP__:3443 {
+       bind __SERVER_IP__
+       tls internal
+       import root-crt
+       handle {
+           reverse_proxy 127.0.0.1:3080
+       }
+   }
+   '''.replace('__SERVER_IP__', address))
+   service.write_text('''# setup-notes: caddy
+   [Unit]
+   Description=Caddy (HTTPS for local services)
+
+   [Service]
+   Type=simple
+   ExecStart=%h/.local/opt/caddy/caddy run --config %h/.config/caddy/Caddyfile --adapter caddyfile
+   Restart=on-failure
+   RestartSec=5
+
+   [Install]
+   WantedBy=default.target
+   ''')
+   print('共通設定・Codeg のサイト・caddy.service: 作成済み')
+   PYCODE
+   fi
+   ```
+
+   - 作成済みの行が出て、`Caddyfile.codeg-only` に旧設定が残ればよい
+   - 認証局の鍵や証明書は写さない
+
+1. 新しい設定を検査する。
+
+   ```bash
+   unset CADDY_MIGRATION_READY
+   if [ -n "${CADDY_ROOT_BEFORE:-}" ] &&
+      ~/.local/opt/caddy/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile; then
+     CADDY_MIGRATION_READY=yes
+   else
+     echo '中断: 新しい設定が検査を通らない。旧サービスは止めない' >&2
+   fi
+   ```
+
+   - `Valid configuration` が出ればよい。失敗したら旧サービスを止めず設定を直す
+
+1. 旧サービスを無効にして外し、共通の Caddy を起動する。
+
+   ```bash
+   if [ "${CADDY_MIGRATION_READY:-}" != yes ]; then
+     echo '中断: 同じシェルでこの項の手順 4 を通す' >&2
+   else
+     systemctl --user disable --now codeg-caddy.service &&
+     rm ~/.config/systemd/user/codeg-caddy.service &&
+     systemctl --user daemon-reload &&
+     systemctl --user enable --now caddy.service
+   fi
+   ```
+
+   - 新しいサービスの作成・起動でエラーが無ければよい。失敗したら[切り替えのロールバック](extra/caddy.md#codeg-専用の-caddy-に戻す)を使う
+
+1. 待ち受け・認証局の引き継ぎ・Codeg の HTTPS を確かめる。
+
+   ```bash
+   if [ -z "${SERVER_IP}" ] || [ -z "${CADDY_ROOT_BEFORE:-}" ]; then
+     echo '中断: 同じシェルでこの項の手順を通す' >&2
+   else
+     for i in $(seq 1 30); do
+       ss -ltn '( sport = :3443 )' | grep -q LISTEN && break
+       sleep 1
+     done
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-active caddy.service
+     test ! -e ~/.config/systemd/user/codeg-caddy.service && echo '旧ユニット: 無し'
+     systemctl --user list-unit-files codeg-caddy.service --no-pager
+     ss -ltn '( sport = :3443 )'
+     openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256
+     if [ "${CADDY_ROOT_BEFORE}" = "$(openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -fingerprint -sha256)" ]; then
+       echo 'ルート証明書の指紋: 一致'
+     else
+       echo '中断: ルート証明書の指紋が変わった' >&2
+     fi
+     curl -s --cacert ~/.local/share/caddy/pki/authorities/local/root.crt -o /dev/null -w '%{http_code}\n' -X POST "https://${SERVER_IP}:3443/api/health"
+   fi
+   ```
+
+   - `active`・`旧ユニット: 無し`・`0 unit files listed.` と、`<SERVER_IP>:3443` の待ち受け・`指紋: 一致`・`401` が出ればよい
+   - 名前は `Codeg <ホスト名>` のままでよい。控えた指紋と一致すれば端末で入れ直さない
+
+#### Caddy: 端末にルート証明書を入れる
+
+- AlmaLinux 10 のホストの認証局のルート証明書を、接続する Android・Windows の PC に入れる
+- 前提: Caddy を起動し、Forgejo か Codeg のサイトを HTTPS で公開してある
+- 実行場所: この項の手順 1 は Caddy を動かす一般ユーザーの bash。手順 2〜5 は接続する端末（Windows は管理者ではない Windows PowerShell 5.1）
+- 認証局はホストに 1 つ。同じホストの別のサイトのために入れた端末には、もう一度入れなくてよい
+- 配る URL は、そのホストのどのサイトでもよい。`https://<SERVER_IP>:<サイトのポート>/caddy-root.crt`（Forgejo は既定 3000、Codeg は 3443）を使う
+- **必ず指紋を照合する**。この項の手順 1 でホストに出した指紋と、端末に出た指紋が同じことを確かめる
+
+1. ホストで、ルート証明書の名前と指紋を表示する。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   openssl x509 -in ~/.local/share/caddy/pki/authorities/local/root.crt -noout -subject -enddate -fingerprint -sha256
+   ```
+
+   - 名前・期限・`sha256 Fingerprint=` の 3 行が出る。名前は `Caddy <ホスト名> - <年> ECC Root`（移行したホストは先頭が `Codeg`）。指紋を控える
+
+1. スマートフォン（Android）で、ルート証明書を取り込む。
+
+   - ブラウザで `https://<SERVER_IP>:<サイトのポート>/caddy-root.crt` を開く。警告が出たら「詳細設定」から進む（この 1 回だけ）。証明書のファイルがダウンロードされる
+   - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、ダウンロードしたファイルを選ぶ（メニューの名前は機種で少し違う）
+   - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの項の手順 1 のものと同じことを確かめる
+   - 違っていたら、その証明書を削除する
+
+1. Windows の PC で、ルート証明書を取得して、名前と指紋を表示する。
+
+   ```powershell
+   $CADDY_URL = ''                       # ホストの URL（例: https://192.168.1.10:3443）。<CADDY_URL>
+   ```
+
+   ```powershell
+   if (-not $CADDY_URL) { Write-Error '中断: $CADDY_URL が空のまま' } else {
+     $crt = Join-Path $env:TEMP ('caddy-root-' + ([Uri]$CADDY_URL).Host + '.crt')
+     & "$env:WINDIR\System32\curl.exe" -sk -o $crt "$CADDY_URL/caddy-root.crt"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $c = New-Object Security.Cryptography.X509Certificates.X509Certificate2($crt)
+     $c.Subject
+     (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
+   }
+   ```
+
+   - 管理者ではない Windows PowerShell に貼る。同じホストのサイトを使う Windows の PC に入れる
+   - 名前と指紋が、この項の手順 1 でホストに出したものと同じなら、手順 4 へ進む
+   - **違っていたら、取り込まない**（途中で差し替えられている）
+   - ホストが 2 台あるときは、この項の手順 3・4 を、`$CADDY_URL` を変えて 2 回通す
+
+1. Windows の PC で、指紋が同じだったルート証明書を取り込む。
+
+   ```powershell
+   Import-Certificate -FilePath $crt -CertStoreLocation Cert:\CurrentUser\Root
+   ```
+
+   - 「セキュリティ警告」の画面が出たら、拇印を確かめて「はい」を押す
+   - 取り込んだ証明書の `Thumbprint` と `Subject` が出ればよい
+   - 取り込む先は、このユーザーの「信頼されたルート証明機関」。PC のほかのユーザーには効かない
+
+1. 端末のブラウザを開き直して、警告が出ずに開けることを確かめる。
+
+   - `https://<SERVER_IP>:<サイトのポート>` を開き、警告が出ずにサイトが開けばよい
+   - 警告が出るときは、入れたルート証明書が、そのホストのものかを確かめる
+   - AlmaLinux 10 のホストは、URL の IP が、ホストの待ち受けの IP と同じかも確かめる（証明書は、その IP 宛てに作られる）
+
+#### Caddy: 設定ファイル
+
+| 場所 | 内容 |
+|---|---|
+| `~/.local/opt/caddy/caddy` | 共通の Caddy の実行ファイル |
+| `~/.config/caddy/Caddyfile` | 共通設定・ルート証明書を配るスニペット・サイトの読み込み |
+| `~/.config/caddy/sites/*.caddy` | アプリごとの HTTPS サイト |
+| `~/.config/systemd/user/caddy.service` | 共通のユーザーサービス |
+| `~/.local/share/caddy/` | 認証局とサーバーの証明書。`pki/authorities/local/root.crt` は配布用。**`root.key` は、読まない・写さない・人に渡さない** |
+| `~/.config/caddy/autosave.json` | Caddy が保存した設定。サービスは Caddyfile を指定して起動する |
+| `~/.config/caddy/Caddyfile.codeg-only` | Codeg 専用から切り替える前の控え（移行したホストだけ） |
+
+#### Caddy: 更新
+
+- 新しい版を取得・照合し、本体を置き換えて共通のサービスを起動し直す
+- 前提: [入れて起動する](#caddy-入れて起動する)か[Codeg 専用の Caddy から切り替える](#caddy-codeg-専用の-caddy-から切り替える)を通してある
+- 実行場所: Caddy を動かす一般ユーザー自身の bash。`sudo` は使わない
+- この項の手順 3 で、そのホストの全サイトが数秒切れる
+
+1. 上げる版を設定する。
+
+   ```bash
+   CADDY_VERSION=2.11.7                 # 最新リリースを確かめて変える。v を付けない
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'Caddy: %s\n' "${CADDY_VERSION}"
+   ```
+
+   - [最新リリース](https://github.com/caddyserver/caddy/releases)を確かめ、版の番号を読み戻す
+
+1. 新しい配布物を取得して、SHA-512 を照合する。
+
+   ```bash
+   if [ -z "${CADDY_VERSION}" ]; then
+     echo '中断: この項の手順 1 の版を設定する' >&2
+   elif [ -e ~/.cache/caddy-dl ] || [ -L ~/.cache/caddy-dl ]; then
+     echo '中断: ~/.cache/caddy-dl が既にある。上書きしない' >&2
+   else
+     case "$(uname -m)" in
+       aarch64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_arm64.tar.gz" ;;
+       x86_64) CADDY_ASSET="caddy_${CADDY_VERSION}_linux_amd64.tar.gz" ;;
+       *) echo '中断: aarch64 / x86_64 以外は対象外' >&2; false ;;
+     esac &&
+     mkdir -p ~/.cache/caddy-dl &&
+     (
+       cd ~/.cache/caddy-dl &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/${CADDY_ASSET}" &&
+       curl -fsSL -O "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_checksums.txt" &&
+       printf '\n\033[7m 確認 \033[0m\n' &&
+       grep -E "  ${CADDY_ASSET}\$" "caddy_${CADDY_VERSION}_checksums.txt" | sha512sum -c - &&
+       tar -xzf "${CADDY_ASSET}" &&
+       ./caddy version
+     )
+   fi
+   ```
+
+   - `OK` と指定した版が出ればよい。失敗したら本体を置き換えない
+
+1. 現行の本体を控え、新しい本体で設定を検査してから置き換える。
+
+   ```bash
+   if [ ! -x ~/.cache/caddy-dl/caddy ] || [ -e ~/.local/opt/caddy/caddy.prev ] || [ -L ~/.local/opt/caddy/caddy.prev ]; then
+     echo '中断: 取得した本体または前の版の控えを確認する' >&2
+   elif ~/.cache/caddy-dl/caddy validate --config ~/.config/caddy/Caddyfile --adapter caddyfile; then
+     cp -p ~/.local/opt/caddy/caddy ~/.local/opt/caddy/caddy.prev &&
+     install -m 755 ~/.cache/caddy-dl/caddy ~/.local/opt/caddy/caddy.next &&
+     mv ~/.local/opt/caddy/caddy.next ~/.local/opt/caddy/caddy &&
+     systemctl --user restart caddy.service &&
+     sleep 2
+   else
+     echo '中断: 新しい版で設定を検査できない' >&2
+   fi
+   ```
+
+   - エラー無く終わればよい。失敗したら `caddy.prev` を残したまま原因を確かめる
+   - 新しい版で起動しなければ `caddy.prev` を `caddy` に戻し、[設定を検査して起動し直す](#caddy-設定を検査して起動し直す)を通す
+
+1. 版・サービス・各サイトの HTTPS を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   ~/.local/opt/caddy/caddy version
+   systemctl --user is-active caddy.service
+   ss -ltnp | awk 'NR == 1 || /caddy/'
+   ```
+
+   - 指定した版・`active`・今までと同じ待ち受けが出ればよい
+   - 接続する端末で、Forgejo・Codeg など各サイトが警告なしで開くことを確かめる
+   - **次の手順は、すべてのサイトを確かめてから貼る**
+
+1. 前の本体と取得用ディレクトリを消す。
+
+   ```bash
+   rm -r ~/.cache/caddy-dl && rm ~/.local/opt/caddy/caddy.prev
+   ```
+
+   - エラー無く終わればよい
 
 ---
 
@@ -4829,6 +5350,7 @@
 
 ## 更新
 
+- 共通の Caddy は、[Caddy: 更新](#caddy-更新)で上げる
 - OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5 を、ファームウェアは同じ項の手順 2・3 を貼り直す
 - [dnf-automatic で自動で更新する](#dnf-automatic-で自動で更新する)を通したなら、OS の更新は毎日自動で入る（再起動は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で行う）
 - EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1）
