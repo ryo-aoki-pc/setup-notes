@@ -14,6 +14,7 @@
 - 設定を更新するときは[更新](#更新)、戻すときは[ロールバック](extra/windows-setup.md#ロールバック)を使う
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップの「Windows 11 で使う」](ai-agents.md#windows-11-で使う)で入れる
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で入れる
+- フォント（HackGen Console NF）・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイルは、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で入れる
 - WireGuard・Neovim・Samba のクライアント・Syncthing は、[WireGuard のセットアップ](wireguard.md#windows-11-で使う)・[Neovim のセットアップ](neovim.md#windows-11-で使う)・[Samba のセットアップ](samba.md#windows-11-で使う)・[Syncthing のセットアップ](syncthing.md#windows-11-で使う)の「Windows 11 で使う」で入れる
 
 > [!WARNING]
@@ -350,7 +351,7 @@
 
 ## 基本の設定
 
-- 更新・貼り付け・アプリの導入・PC 全体の設定・サインイン・WSL と、プライバシー・Edge
+- 更新・貼り付け・アプリと Git for Windows の導入・PC 全体の設定・サインイン・WSL と、プライバシー・Edge
 
 ### Windows Update
 
@@ -800,6 +801,46 @@
    - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい
    - 管理者の確認（UAC）は出ないはず
    - この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+
+---
+
+### Git for Windows
+
+- Git for Windows を PC 全体に入れる
+- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - ユーザーアカウント制御（UAC）の確認は「はい」
+
+1. Git for Windows がまだ入っていないことを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
+   Test-Path 'C:\Program Files\Git\bin\bash.exe'
+   winget list --exact --id Git.Git --accept-source-agreements --source winget
+   ```
+
+   - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
+   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
+   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
+   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3）
+
+1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
+   winget list --exact --id Git.Git --source winget
+   ```
+
+   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
+   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
+   - この窓では `git` は見つからない。再起動後、[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)の手順 2 で確かめる
 
 ---
 
@@ -1342,7 +1383,7 @@
 
 ## デスクトップ
 
-- エクスプローラー・表示・入力・音・ストレージ、自動起動と標準アプリ、フォント、クリップボード、PowerToys、ホットキー、Windows Terminal と、再起動の後の確認
+- エクスプローラー・表示・入力・音・ストレージ、自動起動と標準アプリ、クリップボード、PowerToys、ホットキーと、再起動の後の確認。フォント（HackGen Console NF）と Windows Terminal は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で整える
 
 ### 表示と入力
 
@@ -1954,69 +1995,6 @@
 
 ---
 
-### HackGen Console NF
-
-- HackGen Console NF を自分のユーザーのフォントに入れる
-- 前提: 無し
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. HackGen がまだ入っていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -ErrorAction SilentlyContinue | ForEach-Object { $_.Property -like 'HackGen*' }
-   Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts", "$env:WINDIR\Fonts" -Filter 'HackGen*' -ErrorAction SilentlyContinue | Format-Table Name, DirectoryName
-   ```
-
-   - どちらも何も出なければ、入っていない
-   - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っている（ほかの方法で入れたもの）。この項は要らない
-
-1. HackGen Console NF の zip を取り、sha256 を確かめて自分のユーザーのフォントに入れる。
-
-   ```powershell
-   & {
-     $ver = '2.10.0'
-     $sha256 = 'F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428'
-     $fonts = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
-     $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
-     $tmp = "$env:TEMP\hackgen-setup"
-     $zip = "$tmp\HackGen_NF_v$ver.zip"
-     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
-     New-Item -ItemType Directory -Path $tmp | Out-Null
-     & "$env:WINDIR\System32\curl.exe" -fsSL -o $zip "https://github.com/yuru7/HackGen/releases/download/v$ver/HackGen_NF_v$ver.zip"
-     if ($LASTEXITCODE -ne 0) { Write-Error "中断: HackGen_NF_v$ver.zip を取れない"; return }
-     if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sha256) { Write-Error "中断: HackGen_NF_v$ver.zip の sha256 が一致しない"; return }
-     Expand-Archive -LiteralPath $zip -DestinationPath $tmp -Force
-     $ttf = @(Get-ChildItem -LiteralPath "$tmp\HackGen_NF_v$ver" -Filter '*.ttf')
-     if ($ttf.Count -ne 4) { Write-Error "中断: zip の中の ttf が 4 つではない（$($ttf.Count)）"; return }
-     New-Item -ItemType Directory -Force -Path $fonts | Out-Null
-     icacls.exe $fonts /grant '*S-1-15-2-1:(OI)(CI)(RX)' '*S-1-15-2-2:(OI)(CI)(RX)' | Out-Null
-     if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key | Out-Null }
-     foreach ($f in $ttf) {
-       $dst = Join-Path $fonts $f.Name
-       if (-not (Test-Path -LiteralPath $dst) -or (Get-FileHash -LiteralPath $dst).Hash -ne (Get-FileHash -LiteralPath $f.FullName).Hash) {
-         try { Copy-Item -LiteralPath $f.FullName -Destination $dst -Force -ErrorAction Stop } catch { Write-Error "中断: $($f.Name) を置けない（$($_.Exception.Message)）"; return }
-       }
-       New-ItemProperty -Path $key -Name "$($f.BaseName) (TrueType)" -Value $dst -PropertyType String -Force | Out-Null
-     }
-     Remove-Item -LiteralPath $tmp -Recurse -Force
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-ItemProperty -LiteralPath $key | Select-Object -Property 'HackGen*' | Format-List
-   }
-   ```
-
-   - `HackGen35ConsoleNF-Bold (TrueType) : C:\Users\<WIN_USER>\AppData\Local\Microsoft\Windows\Fonts\HackGen35ConsoleNF-Bold.ttf` の形の行が 4 つ出ればよい
-   - `中断:` で始まるエラーが出たら、そこで止まっている
-   - 何度貼ってもよい
-   - アプリで使えるのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 5）
-
----
-
 ### CopyQ を使う
 
 - Windows のクリップボードの履歴を CopyQ に持たせる
@@ -2211,7 +2189,7 @@
    - 同じことは、ユーティリティごとのスイッチでもできる（すぐに効く）
    - Peek は「Space で開く」をオンのままにする
    - Find My Mouse を使うなら、起動の方法を「マウスを振る」にする
-   - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の印は付かない）
+   - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の印は付かない）
    - 見終わったら、設定の窓を閉じる
 
 1. 元に戻すときは、通知領域の PowerToys を右クリックし、「終了」で閉じる。
@@ -2241,126 +2219,6 @@
    - 新しい窓では、先にこの項の手順 2 を貼る
    - 控えた後に画面で変えた PowerToys の設定も、控えたときの値に戻る
    - `中断: 控えが無い` が出たら、スタートメニューから PowerToys を起動し、設定の画面で、切ったユーティリティのスイッチをオンにする
-   - 控えのファイルは消える（もう一度この項を通すと、そのときの設定を控え直す）
-
----
-
-### Windows Terminal のフォントと貼り付けの警告を変える
-
-- Windows Terminal のフォントを HackGen にし、必要なら複数行の貼り付けの警告を切る
-- 前提: [HackGen Console NF](#hackgen-console-nf)を通し、サインインし直してある。Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
-- 実行場所: 管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブ。この項の手順 1 で開く
-
-- **この項の手順 5 は Windows Terminal の設定の画面で行う**
-- 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
-- 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
-- コマンドで書くのは `settings.json` だけ。既定のプロファイル（Windows PowerShell）と、選んだらコピーする設定（`copyOnSelect`）は変えない
-- 戻すときは、この項の手順 6
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ（Windows PowerShell 5.1 のタブ）
-
-1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     $bak = "$path.windows-setup.bak"
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い。Windows Terminal を 1 度開いてから貼り直す: $path"; return }
-     $text = [IO.File]::ReadAllText($path)
-     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある。この項の手順 5 の画面で変える: $path"; return }
-     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない。この項の手順 5 の画面で変える: $path"; return }
-     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）。この項の手順 5 の画面で変える'; return }
-     if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
-     [pscustomobject]@{
-       Version          = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
-       DefaultsFontFace = $s.profiles.defaults.font.face
-       MultiLinePaste   = $s.'warning.multiLinePaste'
-       DefaultProfile   = $s.defaultProfile
-       CopyOnSelect     = $s.copyOnSelect
-     } | Format-List
-     $s.profiles.list | Where-Object { $_.font.face } | Format-Table name, @{ Name = 'face'; Expression = { $_.font.face } }
-   }
-   ```
-
-   - `控えた:`（2 回目からは `控えはもうある`）の行と、`Version : 1.25.…` の形の 5 行が出ればよい。`DefaultsFontFace` が空なら、既定のフォント（Cascadia Mono）
-   - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る（この項の手順 6 で使い、書き戻すと消える）
-   - 最後に表が出たら、そのプロファイルは自分のフォントを持つので、この項の手順 3 の値は効かない（この項の手順 5 の画面で、そのプロファイルを変える）
-   - `中断:` が出たら、何も書いていない。この項の手順 5 の画面で変える
-   - `Version` が 1.24 より前なら、この項の手順 4 は飛ばす
-
-1. 全プロファイルのフォントを HackGen Console NF にする。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この項の手順 2 を先に貼る'; return }
-     $text = [IO.File]::ReadAllText($path)
-     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
-     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
-     if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）'; return }
-     if (-not $s.profiles.PSObject.Properties['defaults']) { $s.profiles | Add-Member -NotePropertyName defaults -NotePropertyValue ([pscustomobject]@{}) }
-     if (-not $s.profiles.defaults.PSObject.Properties['font']) { $s.profiles.defaults | Add-Member -NotePropertyName font -NotePropertyValue ([pscustomobject]@{}) }
-     $s.profiles.defaults.font | Add-Member -NotePropertyName face -NotePropertyValue 'HackGen Console NF' -Force
-     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'face: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).profiles.defaults.font.face
-   }
-   ```
-
-   - `face: HackGen Console NF` が出ればよい
-   - 保存した直後に、開いているタブにも効く
-   - フォントが見つからないと、端末に、フォントが見つからない旨が出て、別のフォントで出る（この項の手順 5 で確かめる）
-
-1. Windows Terminal が 1.24 以降で、複数行を貼るたびに出る警告を出さないときだけ、警告を切る。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     $ver = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
-     if (-not $ver -or [version]$ver -lt [version]'1.24') { Write-Error "中断: Windows Terminal の版が 1.24 より前: $ver"; return }
-     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この項の手順 2 を先に貼る'; return }
-     $text = [IO.File]::ReadAllText($path)
-     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
-     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
-     $s | Add-Member -NotePropertyName 'warning.multiLinePaste' -NotePropertyValue 'never' -Force
-     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'warning.multiLinePaste: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).'warning.multiLinePaste'
-   }
-   ```
-
-   - `warning.multiLinePaste: never` が出ればよい
-   - **注意**: 信用できない複数行の文字も、確かめずにそのまま貼られて動く
-   - 5 KiB を超える文字を貼るときは、別の警告が出ることがある
-
-1. Windows Terminal の設定の画面で、フォントが見つかっていることを確かめる。
-
-   - Windows Terminal の窓で Ctrl+, を押し、「既定値」→「外観」の「フォント スタイル」が `HackGen Console NF` で、「見つからないフォント:」が出ていない
-   - 新しいタブを開くと、文字が HackGen になっている
-   - この項の手順 2〜4 が `中断:` で止まったときは、この画面でフォント スタイルを選んで「保存」を押す（一覧に無ければ「すべてのフォントの表示」をオン）。警告は「操作」の「改行を貼り付ける際に警告する」を「なし」にする
-   - **次の手順は、設定の画面を閉じてから貼る**
-
-1. 元に戻すときは、控えた設定ファイルを書き戻す。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     $bak = "$path.windows-setup.bak"
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
-     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
-     Remove-Item -LiteralPath $bak
-     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
-     'face: {0} / warning.multiLinePaste: {1}' -f $s.profiles.defaults.font.face, $s.'warning.multiLinePaste'
-   }
-   ```
-
-   - 控えたときの値（ふつうは 2 つとも空）が出ればよい。開いているタブにもすぐ効く
-   - 控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻る。残すなら、このブロックは貼らず、この項の手順 5 の画面でフォント スタイルと警告を戻す
-   - `中断: 控えが無い` が出たら、この項の手順 5 の画面で戻す
    - 控えのファイルは消える（もう一度この項を通すと、そのときの設定を控え直す）
 
 ---
@@ -2645,7 +2503,7 @@
 ### 再起動の後に確かめる
 
 - 通した項の設定が再起動後にも効いていることを画面で確かめる
-- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[アプリを入れる](#アプリを入れる)・[HackGen Console NF](#hackgen-console-nf)のうち、確かめたい項を通し、再起動してサインインしてある
+- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[アプリを入れる](#アプリを入れる)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)のうち、確かめたい項を通し、再起動してサインインしてある
 - 実行場所: この PC のデスクトップ（メモ帳・エクスプローラー・設定・UniGet UI）
 
 1. キーボードで、Caps Lock・Ctrl+Space・配列を確かめる。
@@ -2678,9 +2536,9 @@
    - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）（[アプリを入れる](#アプリを入れる)を通したとき）
    - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 4 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る（[アプリを入れる](#アプリを入れる)を通したとき）
 
-1. [HackGen Console NF](#hackgen-console-nf)を通したときだけ、フォントの一覧で、HackGen Console NF が出ることを確かめる。
+1. [HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通したときだけ、フォントの一覧で、HackGen Console NF が出ることを確かめる。
 
-   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）（[HackGen Console NF](#hackgen-console-nf)を通したとき）
+   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）（[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通したとき）
    - ライセンス認証していない Windows では、フォントの画面の検索欄が使えないことがある。そのときは一覧をスクロールして探す
    - メモ帳のフォントの一覧に出ても同じ
    - 端末のフォントにするなら、アプリの設定にファミリー名 `HackGen Console NF` を書く（WezTerm は `config.font = wezterm.font 'HackGen Console NF'`。自分用の設定（`ryo-aoki-pc/wezterm`）は、もうこのフォントを使う）
@@ -3324,707 +3182,6 @@
 
 ---
 
-## シェルと端末
-
-- Git for Windows（Git Bash）・WezTerm・共通の bash 設定・シェルのツール・PowerShell 7
-
-### Git for Windows
-
-- Git for Windows を PC 全体に入れる
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
-   - ユーザーアカウント制御（UAC）の確認は「はい」
-
-1. Git for Windows がまだ入っていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
-   Test-Path 'C:\Program Files\Git\bin\bash.exe'
-   winget list --exact --id Git.Git --accept-source-agreements --source winget
-   ```
-
-   - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
-   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
-   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
-   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3）
-
-1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Git.Git --source winget
-   ```
-
-   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
-   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
-   - この窓では `git` は見つからない。再起動後、[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2 で確かめる
-
----
-
-### WezTerm
-
-- WezTerm nightly と、必要な Visual C++ ランタイムを PC 全体に入れる
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
-   - ユーザーアカウント制御（UAC）の確認は「はい」
-
-1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
-
-   ```powershell
-   $u = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     Admin     = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Version   = $u.DisplayVersion
-     Location  = $u.InstallLocation
-     OnPath    = (Get-Command wezterm.exe -All -ErrorAction SilentlyContinue).Source -join ' '
-     Running   = (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue).ProcessName -join ' '
-     VCRuntime = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-   } | Format-List
-   ```
-
-   - `Admin : True` であること（`False` なら、この項の手順 1 で管理者の窓を開き直してから、このブロックを貼る）
-   - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
-   - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
-     - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
-   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
-   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
-   - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
-
-1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget install --exact --id Microsoft.VCRedist.2015+.x64 --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-   ```
-
-   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と、`True` が出ればよい
-   - 最後が `True` ならこの項の手順 4へ進む
-   - 最後の行が `False` なら、Windows を再起動してデスクトップにサインインし、この項の手順 1 から行う
-   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-
-1. nightly のインストーラを取り、sha256 を確かめて、黙って入れる。
-
-   ```powershell
-   & {
-     $dir = 'C:\Program Files\WezTerm'
-     $curl = "$env:WINDIR\System32\curl.exe"
-     $url = 'https://github.com/wezterm/wezterm/releases/download/nightly/WezTerm-nightly-setup.exe'
-     $tmp = "$env:TEMP\wezterm-setup"
-     $setup = "$tmp\WezTerm-nightly-setup.exe"
-     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない'; return }
-     if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（この項の手順 3）'; return }
-     if (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue) { Write-Error '中断: WezTerm が動いている（窓をすべて閉じる）'; return }
-     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
-     New-Item -ItemType Directory -Path $tmp | Out-Null
-     & $curl -fsSL -o "$setup.sha256" "$url.sha256"
-     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 を取れない'; return }
-     & $curl -fsSL -o $setup $url
-     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe を取れない'; return }
-     $m = Select-String -LiteralPath "$setup.sha256" -Pattern '^([0-9a-f]{64})  WezTerm-nightly-setup\.exe$' | Select-Object -First 1
-     if (-not $m) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い'; return }
-     if ((Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash -ne $m.Matches[0].Groups[1].Value) { Write-Error '中断: WezTerm-nightly-setup.exe の sha256 が一致しない'; return }
-     $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG=`"$tmp\setup.log`"" -Wait -PassThru
-     if ($p.ExitCode -ne 0) { Write-Error "中断: インストーラが終了コード $($p.ExitCode) で終わった（ログは $tmp\setup.log）"; return }
-     Remove-Item -LiteralPath $tmp -Recurse -Force
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0'
-     & "$dir\wezterm.exe" --version
-   }
-   ```
-
-   - `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と、`wezterm 20260929-043349-cab25161` の形の 1 行が出ればよい
-   - インストーラの画面は出ない。終わるまでプロンプトが戻らない
-   - `中断:` で始まるエラーが出たら、そこで止まっている
-   - `取れない` と `sha256 が一致しない` は、nightly が入れ替わる最中に取ったときにも出る。少し待って貼り直す
-   - 何度貼ってもよい
-
-1. 入ったものと、`PATH`・スタートメニューを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' | Format-List DisplayName, DisplayVersion, InstallLocation, UninstallString
-   & 'C:\Program Files\WezTerm\wezterm.exe' --version
-   [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -like '*\WezTerm*' }
-   Test-Path -LiteralPath "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\WezTerm.lnk"
-   Get-ChildItem -LiteralPath 'C:\Program Files\WezTerm' -Name
-   ```
-
-   - `DisplayVersion` と `wezterm --version` の版が同じ（`20260929-043349-cab25161` の形）
-   - `UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"`
-   - PC 全体の `PATH` に `C:\Program Files\WezTerm` が 1 行と、スタートメニューの `True` が出る
-   - 最後に `wezterm.exe`・`wezterm-gui.exe`・`unins000.exe` などのファイルの名前が並ぶ
-   - 開いていた PowerShell の `PATH` には入らない。新しく開いた窓（WezTerm の中も）では、`wezterm` を名前で呼べる
-
-1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
-
-   - スタートメニューで「WezTerm」を探し、クリックして開く
-   - 窓が開き、中でシェルが動けばよい。設定ファイルが無ければ `cmd.exe` が開く（自分用の設定では Git Bash。[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 7 で入れる）
-   - 窓の中で `wezterm --version` を打つと、この項の手順 5 と同じ版が出る
-   - キー操作だけ動かない場合は、[ホットキーを使用しているアプリの調査](#windows-のホットキー競合)で対象キーを調べる
-   - 窓が開かずに終わったら、`%USERPROFILE%\.local\share\wezterm\wezterm-gui.exe-log-<番号>.txt` を見る
-     - `The OpenGL implementation is too old to work with glium` なら、3D の描画の無い VM などで OpenGL が使えない
-     - その場で開くなら、Win+R の「ファイル名を指定して実行」に `"C:\Program Files\WezTerm\wezterm-gui.exe" --config prefer_egl=true` を入れて開く（管理者の窓からは起動しない）
-     - いつも開くようにするなら、設定の `config` に `config.prefer_egl = true` を足す。設定ファイルが無ければ、`%USERPROFILE%\.wezterm.lua` に `local wezterm = require 'wezterm'`・`local config = wezterm.config_builder()`・`config.prefer_egl = true`・`return config` の 4 行を書く
-     - 自分用の設定（`~/.config/wezterm`）を使うなら、`~/.wezterm.lua` は作らない（[AlmaLinux 10 の初期設定の「WezTerm の設定ファイル」](almalinux-setup.md#wezterm-の設定ファイル)のとおり、clone した設定が読まれなくなる）
-   - **注意**: 管理者の PowerShell から `wezterm-gui.exe` を起動しない（WezTerm と中のシェルが管理者で動く）
-
----
-
-### Git Bash と WezTerm の設定
-
-- Git の共通設定・共通の bash 設定と、自分用の WezTerm の設定を入れる
-- 前提: [Git for Windows](#git-for-windows)・[WezTerm](#wezterm)を通してある。導入後に Windows を再起動するか、サインアウトしてサインインし直し、PATH を読み直してある。GitHub のアカウントがある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3 からは Git Bash の窓、最後は WezTerm の Git Bash のタブ
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. Git for Windows の git の場所と版と、Git Bash があることを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Command git -All | Format-Table Source
-   git --version
-   Test-Path 'C:\Program Files\Git\bin\bash.exe', 'C:\Program Files\Git\git-bash.exe'
-   ```
-
-   - 1 行目の一番上に `C:\Program Files\Git\cmd\git.exe` が出ればよい
-   - `git version 2.55.0.windows.5` の形の行と、`True` が 2 行出ればよい
-
-1. スタートメニューから Git Bash を開く。
-
-   - スタートメニューで「Git Bash」を探して開く（管理者でなくてよい）
-   - `<WIN_USER>@<HOSTNAME> MINGW64 ~` のような行と、`$` のプロンプトの窓が開く
-   - Git Bash の窓に貼るときは、窓の中を右クリックして出るメニューの「Paste」を選ぶ。最後の行は、貼った後に Enter を押す
-   - **次の手順は、この Git Bash に貼る**
-
-1. Git Bash に、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 1〜10 を上から順に貼る。
-
-   - `~/.gitconfig`（`C:\Users\<WIN_USER>\.gitconfig`）に、AlmaLinux 10 と同じ基本の設定を書く。成功の条件は、同書のそれぞれの手順と同じ
-   - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
-   - **この手順は、この項の手順 6・7 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
-   - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
-   - 戻すときは、[Git Bash の設定を戻す](extra/windows-setup.md#git-bash-の設定を戻す)で行う。共通設定に加え、この項の手順 5 で変更した Windows 専用 `core.longpaths` も記録に合わせて戻す
-
-1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
-
-   ```bash
-   printf '変更前の core.longpaths（スコープ・ファイル・値）:\n'
-   git config --show-scope --show-origin --get-all core.longpaths
-   if [ "$(git config --global --includes --type=bool --get core.longpaths)" != true ]; then
-     git config --global core.longpaths true
-   fi
-   printf '\n\033[7m 確認 \033[0m\n'
-   git config --global --includes --type=bool --get core.longpaths
-   git config --type=bool --show-scope --show-origin --get core.longpaths
-   ```
-
-   - 「変更前」の値・スコープ・ファイルを控える。include 先も `global` の行に出る。`global` が無ければ「未設定」と控える
-   - 最後の `global` の値が `true`（`yes`・`on`・`1` も同じ）なら「変更なし」、それ以外は今回変更したことも控える。変更しなかったキーは復元で触らない
-   - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
-   - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
-   - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く
-   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)の手順 2・5・6 で行う
-
-1. 同じ Git Bash で、共通の bash 設定を入れる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
-     bash ~/.config/bash/install.sh
-   ```
-
-   - [README の「共通の bash 設定を先に入れる」](../README.md#共通の-bash-設定を先に入れる)と、[AlmaLinux 10 の初期設定の「共通の bash 設定」](almalinux-setup.md#共通の-bash-設定)の手順 1 と同じブロック
-   - `~/.bashrc: 設定済み（元の内容: ~/.bashrc.before-bash）` と `完了: 端末を開き直す。…` が出ればよい
-   - すでに clone してあるなら `fatal: destination path … already exists` で止まる。そのときは `git -C ~/.config/bash pull --ff-only` で更新し、`bash ~/.config/bash/install.sh` を貼る
-
-1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
-
-   - [WezTerm の設定を導入する](#wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 6 で導入済み
-   - その項の手順 5 で WezTerm を起動し、同じ項の手順 6 を新しい Git Bash のタブに貼って確かめる
-   - Git Bash の窓は閉じてよい
-   - CRLF に変換して clone 済みのリポジトリは、WezTerm の Git Bash のタブで[改行を変換して clone したリポジトリを直す](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を通す
-
-#### 共通の bash 設定を更新する
-
-- 共通の bash 設定のリポジトリを更新し、端末を開き直して反映する
-- 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
-- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
-- 手元の変更は `git -C ~/.config/bash status` で確認してから進む
-
-1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
-
-   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
-   - `MINGW64` と `$` のプロンプトが出ればよい
-   - **次の手順は、この Git Bash のタブに貼る**
-
-1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
-
-   ```bash
-   git -C ~/.config/bash remote set-url origin https://github.com/ryo-aoki-pc/bash.git
-   git -C ~/.config/bash pull --ff-only
-   printf '\n\033[7m 確認 \033[0m\n'
-   git -C ~/.config/bash log -1 --oneline
-   ```
-
-   - 新しいコミットが無ければ `Already up to date.` と出て、最後にいちばん新しいコミットが 1 行出る
-   - `set-url` は、HTTPS で clone したホストでは何も変えない。SSH で clone したホストを HTTPS にそろえる
-   - インターネットに出られないホストは、[SSH の SOCKS トンネル](almalinux-setup.md#ssh-の-socks-トンネル)を張ったシェルで貼る
-   - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/bash status` で見る
-   - 開いている端末には効かない。端末を開き直す
-
-#### 共通の bash 設定を手動で移行する
-
-- 通常の共通 bash 設定の導入が中断したときに、設定を手動で移行する
-- 前提: [Git for Windows](#git-for-windows)を通してある
-- 実行場所: この PC のデスクトップの、自分のユーザーの Git Bash の窓
-- [AlmaLinux 10 の共通の bash 設定を手動で移行する](almalinux-setup.md#共通の-bash-設定を手動で移行する)の全手順を Git Bash で行う。WSL は WSL 側で別に行う
-
-#### WezTerm の設定を導入する
-
-- 自分用の WezTerm の設定を入れ、シェル統合を確かめる
-- 前提: [WezTerm](#wezterm)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜6 を通し、Git と共通の bash 設定を入れてある。HackGen Console NF は任意
-- 実行場所: この項の手順 1〜5 は、WezTerm の外の、自分のユーザーの Git Bash の窓。この項の手順 6・7 は、起動し直した WezTerm の Git Bash のタブ
-- この項の手順 1 で WezTerm の窓をすべて閉じる。既存設定の確認と、この項の手順 3 の退避を省かない
-- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
-
-1. WezTerm の窓をすべて閉じ、スタートメニューから Git Bash を開く。
-
-   - スタートメニューで「Git Bash」を探して開く（管理者として実行しない）
-   - `MINGW64` と `$` のプロンプトが出ればよい
-   - **次の手順は、この Git Bash の窓に貼る**
-
-1. 既存の WezTerm の設定があるか確かめる。
-
-   ```bash
-   ls -ld ~/.wezterm.lua ~/.config/wezterm
-   ```
-
-   - どちらかが出たら、この項の手順 3 で退避する
-   - 2 行とも `No such file or directory` なら、設定は無い。この項の手順 3 は飛ばす
-   - `~/.wezterm.lua` が残っていると、この設定は読まれない
-
-1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
-
-   ```bash
-   (
-     for f in ~/.wezterm.lua ~/.config/wezterm; do
-       if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
-         echo "中断: $f.bak が既にある。何も退避していない" >&2
-         exit 1
-       fi
-     done
-     for f in ~/.wezterm.lua ~/.config/wezterm; do
-       if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
-     done
-     ls -ld ~/.wezterm.lua ~/.config/wezterm
-   )
-   ```
-
-   - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
-   - 最後の `ls` が 2 行とも `No such file or directory` ならよい
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。この項の手順 4 へ進まず、中身を確かめて片付けてからこの項の手順 3 を貼り直す
-   - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
-
-1. この設定を `~/.config/wezterm` に clone する。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
-   printf '\n\033[7m 確認 \033[0m\n'
-   git -C ~/.config/wezterm log -1 --oneline
-   ```
-
-   - `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
-   - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、この項の手順 2 から見直す
-
-1. WezTerm がこの設定を読めるか確かめる。
-
-   ```bash
-   wezterm ls-fonts --text 'aあ'
-   ```
-
-   - `ERROR  wezterm_gui >` が無ければ設定を読めている。終了コードは誤りがあっても `0` なので使わない
-   - `show-keys` は読み込み確認に使わず、`| head` も付けない
-   - HackGen Console NF があればそのフォントで描く。無ければフォント警告が出て代替フォントを使う。画面なしでは通知の dbus エラーが出る場合もある
-   - Windows でコマンドが無ければ `"/c/Program Files/WezTerm/wezterm.exe" ls-fonts --text 'aあ'` を使う
-
-1. WezTerm のウィンドウをすべて閉じてから、起動し直す。
-
-   - WezTerm を開いていなければ、起動するだけでよい
-   - AlmaLinux 10 はアプリ一覧の「WezTerm」から、Windows 11 はスタートメニューの「WezTerm」から起動する
-   - シェル統合とウィンドウ装飾は起動し直して反映する
-   - **次の手順は、起動し直した WezTerm のタブで貼る**（開いていたタブで貼ると、この項の手順 7 の確かめが外れる）
-
-1. 起動し直した WezTerm のタブで、シェル統合が読まれたか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   echo "$TERM_PROGRAM"
-   echo "$WEZTERM_SHELL_INTEGRATION"
-   declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
-   ```
-
-   - 1 行目は `WezTerm`、2 行目は `.config/wezterm/shell/wezterm.sh` で終わるパス
-   - 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
-     - AlmaLinux 10（COPR の公式統合）: `__wezterm_set_user_var`・`__wezterm_notify_done`・`__wz_mouse_off` の 3 行
-     - 公式の統合が無いとき（Windows の Git Bash など）: `__wezterm_notify_done` と `__wz_mouse_off` の 2 行
-   - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、この項の手順 6 の前から開いていたタブで貼っている
-   - `__wz_mouse_off` が出なければ、`~/.bashrc` の行が読まれていない。共通の bash 設定を見直す
-
-#### WezTerm のシェル統合を WSL で使う
-
-- WSL の bash で Windows 側の WezTerm のシェル統合を読む
-- 前提: [WezTerm の設定を導入する](#wezterm-の設定を導入する)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)と、WSL 側の[共通の bash 設定](almalinux-setup.md#共通の-bash-設定)を通してある
-- 実行場所: この PC のデスクトップの WezTerm の WSL の bash のタブ。この項の手順 1 で開く
-- WSL の `~/.bashrc` の既存の変更を確かめ、Windows 側の統合を共通の bash 設定の読み込み行より後ろで読む
-
-1. スタートメニューから WezTerm を開き、WSL のタブを用意する。
-
-   - WezTerm の Ctrl+Shift+M の起動メニューで「AlmaLinux-10」を選ぶ
-   - WSL の自分のユーザーの bash のプロンプトが出ればよい
-   - **次の手順は、この WSL のタブに貼る**
-
-1. WSL のシェルで、Windows のホームを調べ、シェル統合のスクリプトが見えるか確かめる。
-
-   ```bash
-   WIN_HOME=$(wslpath "$(cd /mnt/c && cmd.exe /c 'echo %USERPROFILE%' | tr -d '\r')")
-   printf '\n\033[7m 確認 \033[0m\n'
-   ls -l "$WIN_HOME/.config/wezterm/shell/wezterm.sh"
-   ```
-
-   - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` の 1 行が出ればよい
-   - `No such file or directory` なら、Windows 側の[WezTerm 設定の導入](#wezterm-の設定を導入する)を先に済ませる
-
-1. この項の手順 2 と同じシェルで、WSL の `~/.bashrc` に読み込む行を足す。
-
-   ```bash
-   if [ -z "${WIN_HOME}" ]; then echo '中断: この項の手順 2 の WIN_HOME が空のまま' >&2; else
-     echo "[ -r '$WIN_HOME/.config/wezterm/shell/wezterm.sh' ] && . '$WIN_HOME/.config/wezterm/shell/wezterm.sh'" >> ~/.bashrc
-     printf '\n\033[7m 確認 \033[0m\n'
-     tail -1 ~/.bashrc
-   fi
-   ```
-
-   - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` を 2 回含む 1 行が出る
-   - WSL の `$HOME` は Linux 側なので、Windows 側の統合をこのパスで読む
-
-1. WezTerm の起動メニューから、WSL のタブを開き直す。
-
-   - `Ctrl+Shift+M` の起動メニューで、WSL のディストリビューションを選ぶ
-   - **次の手順は、開き直した WSL のタブで貼る**
-
-1. 開き直した WSL のタブで、シェル統合が読まれたか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   echo "$TERM_PROGRAM"
-   declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
-   ```
-
-   - `TERM_PROGRAM` が `WezTerm`、`__wezterm_notify_done` と `__wz_mouse_off` が出ればよい。WSL に COPR の公式統合があれば `__wezterm_set_user_var` も出る
-
-#### WezTerm の設定を更新する
-
-- WezTerm の設定のリポジトリを更新する
-- 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
-- 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
-- 手元の変更は `git -C ~/.config/wezterm status` で確認してから進む
-- WezTerm 本体は[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)で更新する
-
-1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
-
-   - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
-   - `MINGW64` と `$` のプロンプトが出ればよい
-   - **次の手順は、この Git Bash のタブに貼る**
-
-1. 設定のリポジトリを pull する。
-
-   ```bash
-   git -C ~/.config/wezterm pull
-   printf '\n\033[7m 確認 \033[0m\n'
-   git -C ~/.config/wezterm log -1 --oneline
-   ```
-
-   - 新しいコミットが無ければ、`Already up to date.` と出る
-   - 起動中の WezTerm は、ファイルが変わると設定を読み直す（効かなければ `Ctrl+Shift+R`）
-   - シェル統合（`shell/`）とウィンドウの装飾の変更は、WezTerm を起動し直すまで効かない
-   - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/wezterm status` で見る
-
----
-
-### シェルのツールを入れる
-
-- scoop で fzf・zoxide・starship・eza・bat を入れ、Git Bash で確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     BashConfig = Test-Path -LiteralPath "$env:USERPROFILE\.config\bash\bashrc"
-     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-     Tools      = (Get-Command fzf, zoxide, starship, eza, bat -All -ErrorAction SilentlyContinue).Source -join ', '
-     Zoxide     = if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) { zoxide --version } else { '' }
-   } | Format-List
-   ```
-
-   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` が空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 を通す
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)を通す
-   - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 を通す
-   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
-   - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
-   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
-   - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 3 は飛ばす
-
-1. scoop の zoxide が 0.9.9 でないときだけ、外す。
-
-   ```powershell
-   scoop uninstall zoxide
-   ```
-
-   - `'zoxide' was uninstalled.` が出ればよい
-
-1. scoop を上げてから 5 つを入れ、zoxide を 0.9.9 に止める。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop update
-   scoop install fzf starship eza bat
-   scoop install zoxide@0.9.9
-   scoop hold zoxide
-   ```
-
-   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
-   - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
-   - zoxide の 0.9.9 は、scoop が main のバケットの git の履歴から定義を取り出して入れる（`Resolving historical manifest for 'zoxide' (0.9.9)` の行が出る）
-   - 2 行目は、もう入っているものを、何も出さずに飛ばす
-   - zoxide の 0.9.9 がもう入っていれば、3 行目は `'zoxide' (0.9.9) is already installed.` の警告だけを出す
-   - もう止めてあれば、`'zoxide' is already held.` が出る
-   - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
-   - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
-   - `Notes` の starship のプロファイル追記と、`suggests installing` の VC++ ランタイム・less の導入は行わない
-   - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](#scoopwingetwsl-を上げる)の手順 7・8、ほかのツールは同じ項の手順 2・3 で上げる
-
-1. 版と場所と、zoxide を止めたことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   fzf --version
-   zoxide --version
-   starship --version
-   eza --version
-   bat --version
-   (Get-Command fzf, zoxide, starship, eza, bat -All).Source
-   scoop list zoxide
-   ```
-
-   - それぞれの版が出ればよい（`zoxide 0.9.9`・`starship 1.26.0`・`v0.23.5 [+git]`・`bat 0.26.1` の形）
-   - `bat --version` が何も出さないか、DLL が見つからない旨のエラーになったら、VC++ ランタイムが無い（この項の手順 2 の `VCRuntime`）
-   - 場所は、`C:\Users\<WIN_USER>\scoop\shims\` の下の `fzf.exe`・`zoxide.exe`・`eza.exe`・`bat.exe` と、`C:\Users\<WIN_USER>\scoop\apps\starship\current\starship.exe` の 5 行だけ
-   - `scoop list` の `zoxide` の行は、`Version` が `0.9.9`、`Source` が `<auto-generated>`（前から main のバケットで入れた 0.9.9 なら `main`）、`Info` が `Held package`
-
-1. bat の設定ファイル（`BAT_CONFIG_DIR` の下の `config`）に、3 行の設定を書く（中身があれば書き換えない）。
-
-   ```powershell
-   $BAT_THEME_NAME = 'ansi'   # 使うテーマ。ansi は端末の 16 色にそのまま従う（一覧は bat --list-themes）。<BAT_THEME_NAME>
-   ```
-
-   ```powershell
-   & {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not $BAT_THEME_NAME) { Write-Error '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す'; return }
-     $f = if ($env:BAT_CONFIG_PATH) { $env:BAT_CONFIG_PATH } elseif ($env:BAT_CONFIG_DIR) { Join-Path $env:BAT_CONFIG_DIR 'config' } else { '' }
-     if (-not $f) { Write-Error '中断: BAT_CONFIG_DIR が無い。この項の手順 4 で bat を入れたかを確かめる'; return }
-     if ((Test-Path -LiteralPath $f) -and [IO.File]::ReadAllText($f).Trim()) { "中身がある（書き換えない）: $f" } else {
-       Set-Content -LiteralPath $f -Encoding ASCII -Value "--theme=`"$BAT_THEME_NAME`"", '--style="numbers,changes,header"', '--paging=never' -ErrorAction Stop
-       "書いた: $f"
-     }
-     Get-Content -LiteralPath $f
-   }
-   ```
-
-   - `書いた: C:\Users\<WIN_USER>\scoop\apps\bat\current\config` と、`--theme="ansi"`・`--style="numbers,changes,header"`・`--paging=never` の 3 行が出ればよい
-   - 書いた中身は、scoop の控え（`~\scoop\persist\bat\config`）に残り、bat を上げても消えない
-   - `中身がある（書き換えない）:` が出たら、前からの設定（`%APPDATA%\bat\config` から scoop が写したものなど）がある。何も変えていない
-   - `中断:` が出たら、何も書いていない
-
-1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「シェルのツール」の手順 4〜7・9・10](almalinux-setup.md#シェルのツール)のブロックを貼る。
-
-   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[同書の「シェルのツール」の手順 2](almalinux-setup.md#シェルのツール)の補足と同じ）
-   - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
-   - 成功の条件は、同書のそれぞれの手順と同じ。違うのは次のところ
-     - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 5 と同じ
-     - 同書の「シェルのツール」の手順 5 の `bind -X` は、`"\C-r" "__fzf_history__"` のようにコロンの無い形で出る（Git Bash の bash 5.3）。WezTerm のシェル統合を読んでいれば、マウス報告よけの行も出る（そのままでよい）
-     - 同書の「シェルのツール」の手順 6 の見出しは、`Permissions` が `Mode` になり、`User` の列が無い。`Git` の列が出ればよい。`ll` は、Git for Windows の `ls -l` ではなく eza になる
-     - 同書の「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
-     - 同書の「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。同書の「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
-   - 同書の「シェルのツール」の手順 8（tmux）は行わない
-   - `~/.bashrc` には追記しない。Windows PowerShell 5.1 には読み込まない
-
-1. 同じタブで、[同書の「キー操作を試す」の手順 2〜5](almalinux-setup.md#キー操作を試す)のキーを押して、fzf を確かめる。
-
-   - 同書の「キー操作を試す」の手順 2 の `fzf --version` は、この項の手順 7 で Git Bash の履歴に入っている
-   - 同書の「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
-   - 同書の「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
-   - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
-   - [fzf で fd と bat を候補とプレビューに使う](almalinux-setup.md#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
-   - bat の設定にはこの項の手順 6を使う
-
----
-
-### PowerShell 7 のプロファイルを設定する
-
-- PowerShell 7 に貼り付け・↑/↓ の履歴検索と、導入済みの zoxide・starship を読む設定を足す
-- 前提: [貼り付けの設定](#貼り付けの設定)の手順 1〜5 と[アプリを入れる](#アプリを入れる)の手順 6 を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
-- 対象は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`。Windows PowerShell 5.1 のプロファイルとは別
-- 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
-- zoxide と starship は、入れていなければ読まない。入れた後に PowerShell 7 を開き直せば読む
-- Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない
-- 戻すときは、この項の手順 7・8（行った手順のものだけ）
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. PowerShell 7 のプロファイルに、貼り付けと履歴の検索のキーと、zoxide・starship を読む行を足す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     $lines = @(
-       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
-       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward }  # windows-setup.md'
-       'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward }  # windows-setup.md'
-       'if (Get-Command -Name zoxide -CommandType Application -ErrorAction Ignore) { Invoke-Expression (& { (zoxide init powershell | Out-String) }) }  # windows-setup.md'
-       'if (Get-Command -Name starship -CommandType Application -ErrorAction Ignore) { function global:Invoke-Starship-PreCommand { if (Test-Path -Path Function:\__zoxide_hook) { $null = __zoxide_hook } }; Invoke-Expression (& starship init powershell) }  # windows-setup.md'
-     )
-     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($line in $lines) {
-       $text = Get-Content -LiteralPath $p -Raw
-       if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
-         $add = $line
-         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
-         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
-         "足した: $line"
-       }
-     }
-     "--- $p"
-     Get-Content -LiteralPath $p
-   }
-   ```
-
-   - 5 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
-   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）
-   - 何度貼ってもよい
-   - 開いている PowerShell 7 の窓には、開き直すまで効かない
-
-1. Tab で補完の候補の一覧を出すときだけ、Tab の行を足す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete }  # windows-setup.md'
-     if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。この項の手順 2 を先に貼る: $p"; return }
-     $text = Get-Content -LiteralPath $p -Raw
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
-       $add = $line
-       if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
-       Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
-       "足した: $line"
-     }
-   }
-   ```
-
-   - `足した:` か `すでにある:` が出ればよい
-   - Tab で、候補が一覧で出る（矢印で選んで Enter、Esc で取り消す）
-
-1. PowerShell 7 で、実行ポリシーとキーの割り当てを確かめる。
-
-   ```powershell
-   pwsh.exe -NoLogo -NoProfile -Command { Get-ExecutionPolicy -List | Out-String -Width 120; Import-Module PSReadLine; . $PROFILE; Get-PSReadLineKeyHandler -Bound | Where-Object Key -in 'Ctrl+Enter', 'UpArrow', 'DownArrow', 'Tab' | Format-Table Key, Function -AutoSize | Out-String -Width 120 }
-   ```
-
-   - 次のとおりならよい
-     - 実行ポリシーの表の `LocalMachine` か `CurrentUser` が `RemoteSigned`
-     - キーの表の `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`（この項の手順 3 を行ったなら、`Tab` が `MenuComplete`）
-   - `pwsh.exe` が見つからない旨が出たら、[アプリを入れる](#アプリを入れる)の手順 6 を確かめる
-   - 実行ポリシーがどれも `Undefined` なら、プロファイルは読まれず、キーは既定のまま（`Ctrl+Enter` が `InsertLineAbove`）。そうでなければ、この項の手順 5 は飛ばす
-
-1. 実行ポリシーがどれも `Undefined` のときだけ、PowerShell 7 の CurrentUser を RemoteSigned にする。
-
-   ```powershell
-   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
-   ```
-
-   - 表の `CurrentUser` が `RemoteSigned` になればよい
-   - この項の手順 4 をもう一度貼って、キーの割り当てを確かめる
-
-1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
-
-   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
-   - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
-   - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）
-   - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
-   - Ctrl+Alt+? で、キーの割り当ての一覧が出る
-   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
-
-1. 元に戻すときは、PowerShell 7 のプロファイルから、この項で足した行を消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [System.IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # windows-setup\.md\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
-   - 開いている PowerShell 7 の窓には、閉じるまで設定が残る
-
-1. 元に戻すときは（この項の手順 5 を行ったとき）、PowerShell 7 の CurrentUser の実行ポリシーを戻す。
-
-   ```powershell
-   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
-   ```
-
-   - 表の `CurrentUser` が `Undefined` ならよい
-
----
-
 ## SSH
 
 - OpenSSH のサーバーとクライアント、SSH の認証とログインのシェル
@@ -4363,7 +3520,7 @@
 ### SSH の既定のシェルを Git Bash にする
 
 - SSH でログインしたときとコマンドを実行するときのシェルを、cmd.exe から Git Bash に変える
-- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
 - 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3・5 は Windows
 
 1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
@@ -4434,7 +3591,7 @@
 ### scoop のツールを SSH のセッションで使う
 
 - SSH で起動できない scoop のツールのジャンクションを、管理者で同じ向き先に作り直す
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
 - 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
 - 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448
 - `scoop install`・`scoop update` の後は、この項の手順 3 を貼り直す
@@ -4502,7 +3659,7 @@
 ### SSH で管理者・非管理者の PowerShell を使う
 
 - WezTerm からこの Windows の PC に SSH で入り、管理者と同じユーザーの非管理者の PowerShell を切り替える
-- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)を通してある。接続元も WezTerm の設定を入れてある（Windows は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)、Linux は[WezTerm の設定の導入](almalinux-setup.md#wezterm-の設定を導入する)）
+- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)を通してある。接続元も WezTerm の設定を入れてある（Windows は[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)、Linux は[WezTerm の設定の導入](shell-terminal.md#wezterm-の設定を導入する)）
 - 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
 - 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
 - **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
@@ -4514,8 +3671,8 @@
 1. 接続元と Windows の WezTerm の設定を更新し、接続元の bash のタブを開く。
 
    - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
-   - Windows では[WezTerm の設定を更新する](#wezterm-の設定を更新する)、Linux では[同書の WezTerm の設定の更新](almalinux-setup.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
-   - 貼り付けの前提と停止条件は[WezTerm の SSH 貼り付け](almalinux-setup.md#wezterm-windows-の-ssh-先で-powershell-に貼り付ける)を先に確認する
+   - Windows では[シェルと端末のセットアップの「Windows 11 で WezTerm の設定を更新する」](shell-terminal.md#windows-11-で-wezterm-の設定を更新する)、Linux では[同じ文書の「WezTerm の設定を更新する」](shell-terminal.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
+   - 貼り付けの前提と停止条件は[WezTerm の SSH 貼り付け](shell-terminal.md#wezterm-windows-の-ssh-先で-powershell-に貼り付ける)を先に確認する
    - Linux の Wayland は `wl-paste`、X11 は `xclip` が必要。導入は同じ項の手順 2 に従う
    - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
    - Windows の接続元はスタートメニューから「WezTerm」、Linux の接続元は GUI セッションのアプリ一覧から「WezTerm」を開く。新しい bash のタブのプロンプトが出ればよい
@@ -4698,7 +3855,7 @@
 ### Windows の OpenSSH クライアント
 
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
-- 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)も通してある
+- 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
@@ -4938,7 +4095,7 @@
 ### git-delta
 
 - scoop で delta を入れ、Git の差分表示を設定する
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -4962,7 +4119,7 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](#wezterm)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
+   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める
 
 1. scoop で delta を入れ、版と場所を確かめる。
@@ -5000,7 +4157,7 @@
 ### GitHub CLI
 
 - scoop で GitHub CLI を入れ、GitHub にログインする
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5086,7 +4243,7 @@
 ### lazygit
 
 - scoop で lazygit を入れ、自分用の設定と起動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5176,7 +4333,7 @@
 #### lazygit の設定を導入する
 
 - Windows の lazygit の既存設定を退避し、自分用の設定を入れる
-- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](#hackgen-console-nf)も通し、Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)も通し、Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
@@ -5415,7 +4572,7 @@
 ### yazi
 
 - scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](#wezterm)で入れてある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -5456,7 +4613,7 @@
    - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](#wezterm)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、外してから始める
    - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きし、ロールバックで戻す
 
@@ -5618,7 +4775,7 @@
 #### mdtable を導入・更新する
 
 - Markdown と Excel を往復する mdtable を入れ、導入状態を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
@@ -5842,8 +4999,8 @@
 - WezTerm は自分では更新しない。nightly の新しい版が出ても知らせない（WezTerm の更新の確認が見るのは stable のリリースだけで、nightly の版の方が新しいので何も出ない）
   - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2・6〜8 で、設定を残して `C:\Program Files\WezTerm` に上書きする
   - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
-- フォントは[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)に従い、この文書の版と sha256 を確かめて直してから入れ直す
-- 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)を通して上げる
+- フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、その文書の版と sha256 を確かめて直してから入れ直す
+- 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
 - 自分用の設定（WezTerm・Neovim・lazygit・yazi）は、それぞれのリポジトリの更新で上げる
   - yazi の自分用の設定は上流の版に合わせてある。yazi の版が上がったら、その [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)で設定も追う
 - SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
@@ -5857,7 +5014,7 @@
 ### scoop・winget・WSL を上げる
 
 - scoop・winget のアプリと WSL・AlmaLinux 10 を上げる
-- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)を通してある。zoxide を上げるときは、[シェルのツールを入れる](#シェルのツールを入れる)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)を通してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。zoxide のリリースはブラウザ、上げた後の確認は WezTerm の Git Bash のタブ
 - PSWindowsUpdate は、[Windows Update](#windows-update)を通してこの文書で入れたときだけ上げる
 
@@ -5952,40 +5109,14 @@
    - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
    - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
    - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - WezTerm の新しいタブで、[AlmaLinux 10 の初期設定の「シェルのツール」](almalinux-setup.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、[シェルのツールを入れる](#シェルのツールを入れる)の手順 7 の箇条書き）
-
----
-
-### HackGen Console NF を上げる
-
-- HackGen Console NF の新しい版を確かめ、必要なときに入れ直す
-- 前提: [HackGen Console NF](#hackgen-console-nf)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。削除・再導入・確認は、リンク先の項に指定した窓で行う
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
-
-1. HackGen の新しい版が出ているかを確かめる。
-
-   ```powershell
-   (Invoke-RestMethod -Uri https://api.github.com/repos/yuru7/HackGen/releases/latest).tag_name
-   ```
-
-   - `v2.10.0` なら、新しい版は無い。この項の手順 3 は行わない
-   - 違う版なら、[HackGen Console NF](#hackgen-console-nf)の手順 3 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
-
-1. 新しい版にするときだけ、今の版を外してから入れ直す。
-
-   - [ロールバックの「HackGen Console NF を消す」](extra/windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3（登録を消し、サインインし直してから、ファイルを消す）を行う
-   - 続けて、直した[HackGen Console NF](#hackgen-console-nf)の手順 3 を貼り、サインアウトしてサインインし直してから、[再起動の後に確かめる](#再起動の後に確かめる)の手順 5 で確かめる
+   - WezTerm の新しいタブで、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、同じ文書の[「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)の手順 7 の箇条書き）
 
 ---
 
 ### Git for Windows・Firefox・WezTerm を上げる
 
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
-- 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](#wezterm)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
+- 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
 - Claude Code の Remote Control のタスクを動かしているときは、この項で止めてから、更新後に始め直す
 
@@ -6045,7 +5176,7 @@
    - 1 行目に今の版が出る
    - プロセスが出たら、その WezTerm の窓をすべて閉じる
 
-1. [WezTerm](#wezterm)の手順 4 のブロックを貼る。
+1. [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロックを貼る。
 
    - 最後に出る `wezterm <版>` が、この項の手順 6 の版より新しければ上がった
    - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）

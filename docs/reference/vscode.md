@@ -22,7 +22,7 @@
 根拠は依存の下限。aarch64 向けに要求される glibc のうち最も新しいものが **2.28**（EL8 の版）で、EL10 の 2.39 が余裕で満たす:
 
 - つまり **EL8 を最低ラインにして EL8 / EL9 / EL10 を 1 本でカバーする**作りで、Microsoft の公式ドキュメントも RHEL / CentOS / Fedora のすべてでこの同じリポジトリを案内している
-- [WezTerm](../almalinux-setup.md#wezterm) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
+- [WezTerm](../shell-terminal.md#wezterm) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
 - dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く
 
 ### VS Code / 手順 7: 補足: 設定のディレクトリ

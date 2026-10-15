@@ -956,7 +956,7 @@
 > - **Administrators のユーザーでログインする**。タスク登録に管理者の権限が要る。SSH のセッションは UAC 無しで管理者の権限を持つ
 > - 前提: [OpenSSH サーバー](windows-setup.md#openssh-サーバー)で SSH ログインでき、[Claude Code](#windows-11-で-claude-code-を入れる)を公式の native installer で入れてある
 > - `claude` の `/login` で claude.ai（Pro / Max / Team / Enterprise）にログイン済み。API キーでは Remote Control を使えない
-> - [WezTerm](windows-setup.md#wezterm)は `C:\Program Files\WezTerm` に入れ、[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通す。SSH の PowerShell も同じプロファイルを読む
+> - [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)は `C:\Program Files\WezTerm` に入れ、[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通す。SSH の PowerShell も同じプロファイルを読む
 > - **デスクトップにログインしたままにする**。タスクはそのセッションで WezTerm を開くので、ログオフすると動かない（[注意点](extra/windows-claude-remote-control.md#注意点)）
 > - 再起動後の自動サインインは[WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 で設定する
 > - **手順 4 には対話入力がある**（ディレクトリの信頼のダイアログと、初回の Remote Control の確認。URL が出たら Ctrl+C）
@@ -1125,7 +1125,7 @@
   - **dnf 版の Claude Code は `claude update` では上がらない**。[Claude Code](#claude-code)の手順 4 で版を確かめる
 - Codex に `Update available!` が出たら `1. Update now` を選ぶ。`Update ran successfully! Please restart Codex.` の後に `codex` を起動し直す
 - Grok は起動時に自動更新し、次の起動から新しい版を使う。手動更新は `grok update`。更新では `~/.bashrc` は変わらない
-- この節の手順は、[AlmaLinux 10 のセットアップの「シェルのツール」](almalinux-setup.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
+- この節の手順は、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 1. 起動中の Codex と Grok を終了する。
 
@@ -1644,7 +1644,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!IMPORTANT]
 > - 自分のユーザーの **管理者ではない Windows PowerShell 5.1** で行う
-> - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](windows-setup.md#git-bash-と-wezterm-の設定)を通してある
+> - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 > - [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)から[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)までも通してある
 > - 3 つのエージェントにログイン済み。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3（scoop）も必要
 > - リモートがあるなら、push の認証と PR を作る道具も必要。GitHub は[GitHub CLI](windows-setup.md#github-cli)でログインしておく
@@ -1881,7 +1881,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    ```
 
-   - 下の行に `0:main`・`1:claude`・`2:codex`・`3:grok` のウィンドウが出る。`Ctrl+b` → 数字で切り替える（tmux のキーは [AlmaLinux 10 の初期設定の tmux の使い方の基本](almalinux-setup.md#tmux-の使い方の基本)）
+   - 下の行に `0:main`・`1:claude`・`2:codex`・`3:grok` のウィンドウが出る。`Ctrl+b` → 数字で切り替える（tmux のキーは [シェルと端末のセットアップの「tmux の使い方の基本」](shell-terminal.md#tmux-の使い方の基本)）
    - 各ウィンドウのシェルは、それぞれの worktree（`main` はプロジェクト）から始まる
    - SSH を切っても残る。スマートフォンの SSH のアプリからも `tmux attach -t agents` で戻れる
    - **次の手順からは、tmux の中の、手順に書いたウィンドウに貼る**
