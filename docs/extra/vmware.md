@@ -1,4 +1,4 @@
-# VMware Workstation Pro のインストールと VM の作成（Windows 11）のロールバックと注意点
+# VMware Workstation Pro のロールバックと注意点
 
 [手順書](../virtual-machines.md#vmware-workstation-pro)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](../reference/vmware.md)
 

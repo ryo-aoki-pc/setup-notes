@@ -1,16 +1,16 @@
-# Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）のロールバックと注意点
+# コーディングエージェントの共同作業のロールバックと注意点
 
-[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](../reference/coding-agents.md)
 
-- 「手順 N」は[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
-## ロールバック
+## AlmaLinux 10 のロールバック
 
 - Windows 11 は [Windows 11 のロールバック](#windows-11-のロールバック)へ進む
 - この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、この節の手順 5）
 - 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AI エージェントのロールバックの「AI エージェントとプラグインを消す」](ai-agents.md#ai-エージェントとプラグインを消す)の手順 1 と、AlmaLinux 10 の初期設定のロールバックの「端末とエディタを消す」の手順 5
-- 実施手順の手順 1 の変数を設定したシェルで行う
+- 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の変数を設定したシェルで行う
 
 > [!CAUTION]
 > **この節の手順 4 は、取り込んでいない作業ごと、3 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
@@ -28,7 +28,7 @@
 1. 消す前に、コミットしていない変更と、取り込んでいないコミットを確かめる。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        echo "== ${a}"
@@ -44,7 +44,7 @@
 1. 3 つの worktree とブランチを消す。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        if [ -d "${WT_ROOT}/${a}" ]; then git -C "${PROJECT_DIR}" worktree remove "${WT_ROOT}/${a}"; fi
@@ -62,7 +62,7 @@
 1. 取り込んでいない作業も捨てるときだけ、強制で消す（取り戻せない）。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 実施手順の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      for a in claude codex grok; do
        git -C "${PROJECT_DIR}" worktree remove --force "${WT_ROOT}/${a}"
@@ -86,7 +86,7 @@
 
 ## Windows 11 のロールバック
 
-- この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、[ロールバック](#ロールバック)の手順 5 と同じ）
+- この節では、worktree とブランチを外す。AGENTS.md と CLAUDE.md の規則は残る（要らなければ、[AlmaLinux 10 のロールバック](#almalinux-10-のロールバック)の手順 5 と同じ）
 - 2 つのプラグインと Node.js は、PC ごとに入れるもの。外すなら、この節の後に[AI エージェントのロールバックの「Windows 11 で AI エージェントとプラグインを消す」](ai-agents.md#windows-11-で-ai-エージェントとプラグインを消す)の手順 1 と、Windows 11 の初期設定のロールバックの「エディタとシェルのツールを消す」の手順 6
 - [Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 の変数を設定した PowerShell で行う
 
@@ -96,7 +96,7 @@
 1. 動いているエージェントと Remote Control を終える。
 
    - 開いている窓のエージェントを終え（Claude Code は `/exit`、Codex と Grok は `/quit`）、その窓を閉じる
-   - Remote Control のタスクを使っているなら、[windows-claude-remote-control.md のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
+   - Remote Control のタスクを使っているなら、[Windows 11 で Claude Code の Remote Control を使う のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
 
 1. 消す前に、コミットしていない変更と、取り込んでいないコミットを確かめる。
 
@@ -107,7 +107,7 @@
    }
    ```
 
-   - 見方は、[ロールバック](#ロールバック)の手順 2 と同じ
+   - 見方は、[AlmaLinux 10 のロールバック](#almalinux-10-のロールバック)の手順 2 と同じ
 
 1. 3 つの worktree とブランチを消す。
 
@@ -123,7 +123,7 @@
    }
    ```
 
-   - 見方と、断られたときの分かれ方は、[ロールバック](#ロールバック)の手順 3 と同じ（捨ててよいなら、この節の手順 4）
+   - 見方と、断られたときの分かれ方は、[AlmaLinux 10 のロールバック](#almalinux-10-のロールバック)の手順 3 と同じ（捨ててよいなら、この節の手順 4）
 
 1. 取り込んでいない作業も捨てるときだけ、強制で消す（取り戻せない）。
 
@@ -229,6 +229,6 @@
 - **Codex のレビューの関門は使わない**: `/codex:setup --enable-review-gate` にすると、Claude Code が終わるたびに Codex のレビューを待つ（Stop の hook）。使用量が増え、指摘が続くと止まらない
 - **プラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントのロールバック](ai-agents.md#ai-エージェントとプラグインを消す)）
 - **エージェントの push と Pull Request には、そのホストの認証が要る**: エージェントは、動いているユーザーの git の認証で push し、Pull Request は gh で作る。GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](../almalinux-setup.md#github-cli)・[Windows 11 の初期設定の「GitHub CLI」](../windows-setup.md#github-cli)でログインしておく（git の HTTPS の認証は、AlmaLinux 10 は gh の `Authenticate Git with your GitHub credentials?`、Windows 11 は Git Credential Manager）。Codex は、push と Pull Request の作成にも sandbox の外での実行の承認が要る
-- **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[forgejo.md の使い方の基本](../forgejo.md#forgejo-使い方の基本)）
+- **Forgejo では、Pull Request は人が作る**: この手順書では、Forgejo の Pull Request を作る道具を入れていない（トークンは秘密情報なので、エージェントに API を使わせない）。エージェントは push までにし、Pull Request は人がブラウザで作る（[Forgejo: 使い方の基本](../forgejo.md#forgejo-使い方の基本)）
 - **画面で取り込むときは merge commit で**: squash と rebase で取り込むと、各 worktree の `git merge --ff-only main` が通らなくなる（[参考資料](../reference/coding-agents.md#main-に取り込む-画面で取り込むとき)）
 - **規則を変えるのは `main` で**: AGENTS.md を変えたら `main` にコミットし、各 worktree を[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 でそろえる（エージェントは起動したときの worktree の AGENTS.md を読む）

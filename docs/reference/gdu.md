@@ -1,4 +1,4 @@
-# gdu インストール手順（AlmaLinux 10 / Homebrew）の参考資料
+# gdu の参考資料
 
 [手順書](../almalinux-setup.md#gdu)・[ロールバックと注意点](../extra/gdu.md)
 

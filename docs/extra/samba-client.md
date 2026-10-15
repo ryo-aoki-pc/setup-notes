@@ -1,11 +1,11 @@
-# Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）のロールバックと注意点
+# Samba クライアントのロールバックと注意点
 
 [手順書](../samba.md#samba-クライアント)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](../reference/samba-client.md)
 
 - 「手順 N」は[手順書](../samba.md#samba-クライアント)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
-## ロールバック
+## AlmaLinux 10 のロールバック
 
 - この節は AlmaLinux 10 のもの。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 手順 1 の変数を設定したシェルで、上から順に貼る（新しいシェルなら、手順 1 の 2 つのブロックを貼り直してから）
@@ -90,7 +90,7 @@
 
 - [Windows 11 で使う](../samba.md#windows-11-で-samba-クライアントを使う)の手順 2 の変数を設定した、管理者ではない Windows PowerShell（5.1）に、上から順に貼る。新しい窓なら、その手順 2 のブロックを貼り直してから貼る
 - `[root]`・`[home]` も割り当てたなら、その手順 2 の 3 つ目のブロックの `DRIVE` をその文字に書き換えて貼り、この節の手順 1 を文字ごとに貼る
-- 共有の中のファイルと、サーバーの Samba ユーザーは変わらない（サーバーを戻すのは [samba.md のロールバック](samba.md#ロールバック)）
+- 共有の中のファイルと、サーバーの Samba ユーザーは変わらない（サーバーを戻すのは [Samba サーバー のロールバック](samba.md#ロールバック)）
 
 1. ドライブの割り当てを外し、サインインのときにつなぎ直さないようにする。
 
@@ -135,7 +135,7 @@
   - **マウントしている間に届かなくなると、ファイルを開くコマンドが長時間止まることがある**。サーバーへの接続を確認してからアクセスし直す
   - 使っていなければ、届かなくても 1 分の idle-timeout で外れた
 - **外出先から WireGuard 越しに使うとき**: トンネルを張ってからアクセスする
-  - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[wireguard.md の「AlmaLinux 10 の PC からつなぐ」](../wireguard.md#wireguard-almalinux-10-の-pc-からつなぐ)で取り込む conf の `AllowedIPs` に、拠点の LAN が入っているため
+  - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[WireGuard: AlmaLinux 10 の PC からつなぐ](../wireguard.md#wireguard-almalinux-10-の-pc-からつなぐ)で取り込む conf の `AllowedIPs` に、拠点の LAN が入っているため
 - **サーバーで直接変えたもの**（サーバーのシェルや Syncthing などで、Samba を通さずに）
   - samba.md の今のサーバー（`smb3 directory leases = no`）なら、`ls` にすぐ出る。消したファイルを `stat` で引くと、約 1 秒はまだあるように見える（`actimeo=1`）
   - サーバーを変えられないときは、マウントのオプションに `nohandlecache` を足す

@@ -1,4 +1,4 @@
-# Syncthing インストール手順（AlmaLinux 10 は Homebrew + systemd ユーザーサービス / Windows 11 は公式の zip + タスク スケジューラ）の参考資料
+# Syncthing の参考資料
 
 [手順書](../syncthing.md#syncthing)・[ロールバックと注意点](../extra/syncthing.md)
 
@@ -9,7 +9,7 @@
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#実施手順--手順-1-補足-変数について)
 
 - `ST_GUI_USER` は **Syncthing の Web GUI にログインするための名前**で、OS のアカウントとも Samba のユーザーとも無関係。自動で OS と同じ名前が入るだけなので、別の名前にしてもよい
-- `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[samba.md](../samba.md#samba-サーバー) の `SERVER_IP` と同じ扱い）
+- `ST_LAN_IP` は設定には使わず、手順 8 の案内と、手順 9 のブラウザの URL にしか使わない。間違っていても Syncthing の設定は壊れない（[Samba サーバー](../samba.md#samba-サーバー) の `SERVER_IP` と同じ扱い）
 - `ST_GUI_ADDR` を `0.0.0.0:8384` にすると**すべての NIC で待ち受ける**
 - 特定の 1 本に絞りたいなら `192.168.1.10:8384` のように IP を直接書く（その場合 firewalld は手順 7 のままでよい）
 - パスワードは変数に置かない。手順 3 でその場で読み取り、設定したら `unset` する
@@ -103,7 +103,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 - 保存先の `~/syncthing-backup`（0700）と、スクリプト `~/.local/bin/syncthing-backup` ができる
 - スクリプトは保存先のディレクトリが無いと、作らずに失敗する
-- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#設定を自動でバックアップする任意--手順-1-補足-スクリプトの作り)）
+- 使うのは `tar`・`gzip`・`sha256sum` だけ（`cmp` は使わない。理由は[検証記録の同じ手順の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md#設定を自動でバックアップする--手順-1-補足-スクリプトの作り)）
 
 ### 設定を自動でバックアップする / 手順 2: 補足: ユニットの役割
 
@@ -199,7 +199,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 - **`-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries`**: ノート PC で、電池のときも起動し、電池になっても止めない（公式の説明の任意の設定）
 - **`-MultipleInstances IgnoreNew`**: 既に動いていれば、二重に起動しない
 - **`-Force`**: 同じ名前のタスクがあれば、上書きする
-- **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-実施手順)の手順 5 の補足）
+- **`[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`**: `<HOSTNAME>\<WIN_USER>`。SSH のセッションでも空にならない（[Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 5 の補足）
 
 ### Windows 11 の Syncthing / 手順 9: 補足: 2 つのプロセス
 

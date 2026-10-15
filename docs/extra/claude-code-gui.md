@@ -1,14 +1,14 @@
-# Claude Code から GNOME の GUI を撮って操作する手順（ヘッドレスのセッション）のロールバックと注意点
+# Claude Code の GNOME 操作のロールバックと注意点
 
-[手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
+[手順書](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](../reference/claude-code-gui.md)
 
-- 「手順 N」は[手順書](../ai-agents.md#claude-code-の-gnome-操作-実施手順)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - この手順書で足したもの（ドロップイン）だけを戻す。ヘッドレスのセッションは、仮想モニターの無い形で動き続ける
-- セッションも止めるなら、続けて [gnome-headless-session.md のロールバック](gnome-headless-session.md#ロールバック)
+- セッションも止めるなら、続けて [GNOME のヘッドレスセッション のロールバック](gnome-headless-session.md#ロールバック)
 - ヘッドレスのセッションをやめてリモートログインだけにするなら、この節ではなく [GNOME のヘッドレスセッションの「リモートログインだけにする（併用をやめる）」](../gnome-remote.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)（この節の手順 2 はヘッドレスのセッションを起動し直すため）
 - 手順 1 の変数は要らない。Claude Code が動くユーザーのシェルで、上から順に貼る
 
@@ -42,7 +42,7 @@
 
    - `stop` と `start` は何も出さない。動いていたアプリは閉じる
    - `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）が出ればよい
-   - `systemctl restart` は使わない（[手順 3](../ai-agents.md#claude-code-の-gnome-操作-実施手順) の補足）
+   - `systemctl restart` は使わない（[手順 3](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う) の補足）
    - 確かめ用の PNG が残っていれば `rm ~/gnome-gui-*.png` で消す
 
 ---

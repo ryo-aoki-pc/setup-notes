@@ -1,4 +1,4 @@
-# Windows Sandbox で配布物を試す（Windows 11）の参考資料
+# Windows Sandbox で配布物を試すの参考資料
 
 [手順書](../virtual-machines.md#windows-sandbox-で配布物を試す)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)・[ロールバックと注意点](../extra/windows-sandbox.md)
 
@@ -6,7 +6,7 @@
 
 ### Windows Sandbox で配布物を試す / 手順 2: 補足: 対応環境
 
-- クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後に、要るときだけ通す項にした（2026-10-14 からは「仮想マシン」のカテゴリ）
+- クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後に、要るときだけ通す項にした
 - Microsoft の導入手順は、Windows 11 Pro・Enterprise・Education などの対応エディションを対象とし、Home は対象外としている。AMD64 と、Windows 11 22H2 以降の ARM64 に対応する
 - 最低要件は、UEFI / BIOS で有効にした仮想化、RAM 4 GB、ディスクの空き 1 GB、CPU 2 コア。Microsoft は RAM 8 GB、SSD、ハイパースレッディングを含む 4 コアを推奨している
 - Windows の VM の中で使う場合は入れ子の仮想化が要る。この項は、前提を満たす PC を対象にしており、VM 側の仮想化設定を変える手順は含めない

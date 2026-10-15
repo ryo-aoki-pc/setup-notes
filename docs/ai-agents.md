@@ -1,22 +1,22 @@
 # AI コーディングエージェントのセットアップ（AlmaLinux 10・Windows 11）
 
-## 実施手順
+## AlmaLinux 10 で使う
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で使う](#windows-11-で使う)から始める
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
-> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること（2026-10-14 からは、これらの項はカテゴリに分かれている）
+> - 前提: [AlmaLinux 10 のセットアップ](almalinux-setup.md)の初期設定の項を、少なくとも[ログインと sudo](almalinux-setup.md#ログインと-sudo)から[yazi](almalinux-setup.md#yazi)まで通してあること
 > - AI エージェントのアカウントを用意する。Claude Code は Pro / Max / Team / Enterprise か Console（無料の claude.ai プラン不可）
 > - Codex は Codex を利用できる ChatGPT アカウント（API キーは従量課金）、Grok は利用対象の grok.com アカウント。Grok の現在の対象は xAI の案内で確認する。Antigravity CLI は個人の Google アカウント
 > - **GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build-実施手順--手順-2-インストーラーが置くものと-bashrc)）
-> - **[Antigravity CLI](#antigravity-cli)の手順 2 は、`~/.bashrc` と `~/.bash_profile` に PATH の行を足す**。同じ項の手順 4・5 で外す（[理由](reference/ai-agents.md#実施手順--antigravity-cli--手順-4-補足-path-の行を外す理由)）
+> - **[Grok Build](#grok-build)の手順 2 は、共通設定とは別に `~/.bashrc` へ PATH と補完を足す**（[配置の説明](reference/almalinux-setup.md#grok-build--手順-2-補足-インストーラーが置くものと-bashrc)）
+> - **[Antigravity CLI](#antigravity-cli)の手順 2 は、`~/.bashrc` と `~/.bash_profile` に PATH の行を足す**。同じ項の手順 4・5 で外す（[理由](reference/ai-agents.md#almalinux-10-で使う--antigravity-cli--手順-4-補足-path-の行を外す理由)）
 
 - 必要な項を上から順に通す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
-- 任意の構成（tmux の中で動かす・GNOME 操作・共同作業・ブラウザ操作）は後ろの節。Remote Control の節は Windows 11 のもの。以後は[更新](#更新)を通す
+- 任意の構成（tmux の中で動かす・GNOME 操作・共同作業・ブラウザ操作）は後ろの節。Remote Control の節は Windows 11 のもの。以後は[AlmaLinux 10 の更新](#almalinux-10-の更新)を通す
 
 ### Claude Code
 
@@ -297,7 +297,7 @@
    ```
 
    - 自分のホームの `.local/bin/agy` と、`1.3.5` のような版が出る
-   - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#実施手順--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
+   - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#almalinux-10-で使う--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
    - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる。この項の手順 6 からは、その端末に貼る
 
 1. この項の手順 3 で `agy` が見つかったときだけ、インストーラーが足した PATH の行をエディタで消す。
@@ -392,12 +392,12 @@
 
 ## Windows 11 で使う
 
-- 対象: Windows 11。AlmaLinux 10 は[実施手順](#実施手順)
+- 対象: Windows 11。AlmaLinux 10 は[AlmaLinux 10 で使う](#almalinux-10-で使う)から始める
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
 
 > [!IMPORTANT]
 > - 前提: [Windows 11 のセットアップ](windows-setup.md)の実施手順を、少なくとも[yazi](windows-setup.md#yazi)まで通してあること
-> - AI エージェントのアカウントは、[実施手順](#実施手順)のリードと同じ（Antigravity CLI は個人の Google アカウント）
+> - AI エージェントのアカウントは、[AlmaLinux 10 で使う](#almalinux-10-で使う)のリードと同じ（Antigravity CLI は個人の Google アカウント）
 > - **この PC のデスクトップで行う**。SSH のセッションには貼らない
 > - PowerShell のブロックは、管理者ではない **Windows PowerShell 5.1** に貼る（窓の開き方は、[Windows 11 のセットアップの「WSL の AlmaLinux 10 と自動サインイン」](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1）
 
@@ -801,7 +801,7 @@
 
 - 対象: 両 OS
 - 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
-- SSH を切っても動かす場合は[tmux の任意節](#claude-code-を-tmux-の中で動かす任意)を通す。Windows 11 は[Remote Control](#claude-code-の-remote-control-実施手順)（タスク スケジューラと WezTerm）
+- SSH を切っても動かす場合は[tmux の任意節](#claude-code-を-tmux-の中で動かす任意)を通す。Windows 11 は[Remote Control](#claude-code-の-remote-control-windows-11-で使う)（タスク スケジューラと WezTerm）
 
 | コマンド | すること |
 |---|---|
@@ -872,8 +872,8 @@
 | `claude mcp list` | MCP サーバーの一覧（つながるかも確かめる） |
 | `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
 | `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
-| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[更新](#更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の更新](#windows-11-の更新)） |
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](#claude-code-の-remote-control-実施手順)） |
+| `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[AlmaLinux 10 の更新](#almalinux-10-の更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の更新](#windows-11-の更新)） |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](#claude-code-の-remote-control-windows-11-で使う)） |
 
 - `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
 - **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
@@ -972,7 +972,7 @@
 - `auth.json` はパスワードと同じ扱いにし、Git・共有フォルダー・チャットへ載せない
 - そのディレクトリで読まれる設定・指示書（AGENTS.md など）・MCP サーバーは、`grok inspect` で見られる（ログインしていなくても動く）
 - 初回の導入のために `config.toml` を書く必要は無い（インストーラーが `[cli]` の 2 行を書く）
-- 自動の更新を止めるときは、`config.toml` の `[cli]` の下に `auto_update = false` の行を足す。止めたら、[更新](#更新)の手順 4 で上げる
+- 自動の更新を止めるときは、`config.toml` の `[cli]` の下に `auto_update = false` の行を足す。止めたら、[AlmaLinux 10 の更新](#almalinux-10-の更新)の手順 4 で上げる
 
 ---
 
@@ -1067,7 +1067,7 @@
 - Remote Control（`claude remote-control`）で始めると、SSH を切った後も、スマートフォンの Claude のアプリや claude.ai/code のブラウザから続けて使える
 - 前提: [Claude Code](#claude-code)で入れ、`claude` で claude.ai のアカウント（Pro / Max / Team / Enterprise）にログインしてあること。API キーでは Remote Control を使えない（公式ドキュメント）
 - **この節の手順 4 には対話入力がある**（ディレクトリの信頼と、初回の Remote Control の確認）
-- Windows の PC は [Claude Code の Remote Control（Windows）](#claude-code-の-remote-control-実施手順)（Windows には tmux が無いので、タスク スケジューラと WezTerm を使う）
+- Windows の PC は [Claude Code の Remote Control（Windows）](#claude-code-の-remote-control-windows-11-で使う)（Windows には tmux が無いので、タスク スケジューラと WezTerm を使う）
 - Remote Control でなく、対話の `claude` を動かし続けるときは、この節の手順 4 で `claude` だけを打つ。別の SSH から `tmux attach -t claude` で戻れる
 
 1. Claude Code と tmux が使えることと、ログインを確かめる。
@@ -1157,7 +1157,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
 - [ロールバックと注意点](extra/windows-claude-remote-control.md)
 
-### Claude Code の Remote Control: 実施手順
+### Claude Code の Remote Control: Windows 11 で使う
 
 > [!IMPORTANT]
 > - **すべて、SSH でログインした Windows で行う**。この項の手順 1 で起動する Windows PowerShell 5.1 に貼る。停止・ロールバックも同じ窓を使い、デスクトップの PowerShell には貼らない
@@ -1341,7 +1341,7 @@
 > - プロジェクトの中のファイルは確認なしで書き換わり、承認したコマンドはこのユーザーとして実行される。「常に許可」を選ぶと、選んだ範囲では以後の確認が無くなる
 > - アプリを開いている間はつながり、窓を閉じてもトレイで動いている間はつながる
 
-### Antigravity アプリの Remote Control: 実施手順
+### Antigravity アプリの Remote Control: Windows 11 で使う
 
 1. 既存のアプリと CLI のコマンドを確かめ、導入前の状態を控える。
 
@@ -1563,7 +1563,7 @@
    ```
 
    - `False` が出ればよい
-   - 自動起動を戻すときは、[Antigravity アプリの Remote Control: 実施手順](#antigravity-アプリの-remote-control-実施手順)の手順 8 を通す
+   - 自動起動を戻すときは、[Antigravity アプリの Remote Control: Windows 11 で使う](#antigravity-アプリの-remote-control-windows-11-で使う)の手順 8 を通す
 
 ---
 
@@ -1584,7 +1584,7 @@
 
 ---
 
-## 更新
+## AlmaLinux 10 の更新
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 の更新](#windows-11-の更新)
 - dnf のリポジトリから入れた Claude Code は、[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)で OS を更新すると上がる。1 つだけ上げるなら、`sudo dnf upgrade claude-code` のように名前を指定する
@@ -1722,7 +1722,7 @@
    claude plugin list
    ```
 
-   - 見方は、[AlmaLinux 10 の更新](#更新)の手順 5 と同じ
+   - 見方は、[AlmaLinux 10 の更新](#almalinux-10-の更新)の手順 5 と同じ
 
 ---
 
@@ -1733,7 +1733,7 @@
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
 
-### Claude Code の GNOME 操作: 実施手順
+### Claude Code の GNOME 操作: AlmaLinux 10 で使う
 
 
 > [!IMPORTANT]
@@ -1907,15 +1907,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ### Claude Code の GNOME 操作: 仮想モニターの大きさを変える（任意）
 
-- 大きさの値は、[実施手順](#claude-code-の-gnome-操作-実施手順)の手順 1 の `VIRTUAL_MONITOR` だけに置く（この項で別に設定しない）
+- 大きさの値は、[AlmaLinux 10 で使う](#claude-code-の-gnome-操作-almalinux-10-で使う)の手順 1 の `VIRTUAL_MONITOR` だけに置く（この項で別に設定しない）
 
 > [!WARNING]
 > **この節の手順 1 は、セッションを起動し直す**。動いているアプリは閉じ、保存していない内容は失われる。
 
-1. [手順 1](#claude-code-の-gnome-操作-実施手順) の `VIRTUAL_MONITOR` を新しい大きさに書き換えて、[手順 1〜3](#claude-code-の-gnome-操作-実施手順) のブロックを貼り直す。
+1. [手順 1](#claude-code-の-gnome-操作-almalinux-10-で使う) の `VIRTUAL_MONITOR` を新しい大きさに書き換えて、[手順 1〜3](#claude-code-の-gnome-操作-almalinux-10-で使う) のブロックを貼り直す。
 
    - 手順 1 の読み戻しに新しい大きさが出て、手順 2 の最後の行が `ExecStart=/usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>`（新しい大きさ）になればよい
-   - **次の手順は、[手順 3](#claude-code-の-gnome-操作-実施手順) が終わってから貼る**（手順 3 の `sudo` が、続けて貼った行を読んで捨てる）
+   - **次の手順は、[手順 3](#claude-code-の-gnome-操作-almalinux-10-で使う) が終わってから貼る**（手順 3 の `sudo` が、続けて貼った行を読んで捨てる）
 
 1. 新しい大きさで撮れるかを確かめる。
 
@@ -1933,19 +1933,19 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `PNG image data, <幅> x <高さ>` が新しい大きさになっていればよい
-   - PNG の画面も開いて確かめてから使う。撮れなかったときの再試行は[実施手順 4](#claude-code-の-gnome-操作-実施手順)と同じ
+   - PNG の画面も開いて確かめてから使う。撮れなかったときの再試行は[AlmaLinux 10 で使う](#claude-code-の-gnome-操作-almalinux-10-で使う)の手順 4 と同じ
 
 
 ---
 
 ## コーディングエージェントの共同作業（任意）
 
-- 対象: 両 OS。AlmaLinux 10 は[実施手順](#コーディングエージェントの共同作業-実施手順)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
+- 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
 
-### コーディングエージェントの共同作業: 実施手順
+### コーディングエージェントの共同作業: AlmaLinux 10 で使う
 
 - 対象: AlmaLinux 10
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
@@ -2100,7 +2100,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - `Preparing worktree (new branch 'agent/claude')` などが 3 回出て、最後の一覧に 4 行（`[main]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]`）が出る
-   - `already exists` と出たら、前に作ったブランチか worktree が残っている。[ロールバック](extra/coding-agents.md#ロールバック)の手順 2・3 で片付けてから貼り直す
+   - `already exists` と出たら、前に作ったブランチか worktree が残っている。[AlmaLinux 10 のロールバック](extra/coding-agents.md#almalinux-10-のロールバック)の手順 2・3 で片付けてから貼り直す
 
 1. 3 つが規則を読むことを確かめる。
 
@@ -2180,7 +2180,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    agy models
    ```
 
-   - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 2 と同じ。ただし版は 4 行（最後が `1.3.5` のような Antigravity CLI の版）
+   - 確かめることは、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 2 と同じ。ただし版は 4 行（最後が `1.3.5` のような Antigravity CLI の版）
    - Antigravity は、最後にモデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
@@ -2196,7 +2196,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    - 1 行目は `C:/Users/<WIN_USER>/src/myproject` のように `/` で出る（`PROJECT_DIR` と同じ場所ならよい）
-   - 2 行目以降と指示書のファイルの名前の見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 3 と同じ
+   - 2 行目以降と指示書のファイルの名前の見方は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 3 と同じ
    - `GEMINI.md` が出たら、Antigravity は AGENTS.md と一緒にそれも読む。中身が共同作業の規則とぶつからないか確かめる
    - 最後に `False` が出ればよい
 
@@ -2267,7 +2267,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
-   - 見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 6 と同じ
+   - 見方は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 6 と同じ
 
 1. 4 つの worktree とブランチを作る。
 
@@ -2281,7 +2281,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Preparing worktree (new branch 'agent/<名前>')` が 4 回出る
    - 一覧は `[main]` と、`[agent/antigravity]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]` の 5 行
-   - そのほかの見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 7 と同じ
+   - そのほかの見方は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 7 と同じ
 
 1. 4 つが規則を読むことを確かめる。
 
@@ -2295,7 +2295,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    }
    ```
 
-   - 見方は、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 8 と同じ
+   - 見方は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 8 と同じ
    - Antigravity も、最後の行で「起動された worktree（作業ディレクトリ）の中だけ」のように答えればよい
    - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
@@ -2306,7 +2306,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    if (-not $PROJECT_DIR) { Write-Error '中断: 手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else { Set-Location -LiteralPath "$WT_ROOT\claude"; claude }
    ```
 
-   - 確かめることは、[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 9 と同じ
+   - 確かめることは、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 9 と同じ
    - `/codex:setup` が `node` を見つけられなければ、Git for Windows の入れ直しか、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1・2 を確かめる
    - **[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)より後のコマンドは、Claude Code を終えて PowerShell のプロンプトに戻ってから貼る**
 
@@ -2380,7 +2380,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AlmaLinux 10 のときだけ、tmux に 4 つのウィンドウを作って入る。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 「コーディングエージェントの共同作業: 実施手順」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
+   if [ -z "${PROJECT_DIR}" ]; then echo '中断: 「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
    elif tmux has-session -t agents 2>/dev/null; then tmux attach -t agents
    else
      tmux new-session -d -s agents -n main -c "${PROJECT_DIR}"
@@ -2417,7 +2417,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    claude
    ```
 
-   - 初めての worktree では信頼のダイアログが出る（[実施手順](#コーディングエージェントの共同作業-実施手順)の手順 9、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 9 で信頼してあれば出ない）
+   - 初めての worktree では信頼のダイアログが出る（[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 9、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 9 で信頼してあれば出ない）
    - 頼んだら、その窓は Claude Code に任せる。Claude Code の確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える
 
 1. `codex` の worktree の窓で Codex を起動し、担当の作業を頼む。
@@ -2436,7 +2436,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    grok
    ```
 
-   - [実施手順](#コーディングエージェントの共同作業-実施手順)の手順 8（Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 8）の `--trust` で信頼してあるので、信頼は聞かれない
+   - [AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 8（Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 8）の `--trust` で信頼してあるので、信頼は聞かれない
    - 確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える（この節のリードの `[!WARNING]`）
 
 1. 3 つが終わったら、それぞれの worktree の窓で、コミットと残りの変更を確かめる。
@@ -2644,7 +2644,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      $text = @'
    ## 既定の分担
 
-   利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する（2026-10-15、利用者の決定）。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
+   利用者が Claude Code に、分担を指定せずにファイルを変える作業を頼んだときは、Claude Code が取りまとめて次の 4 つで分担する。「共同作業の規則」の「分担は人が決める」で、人が分担を決めていないときの既定にする。利用者がほかのエージェントに直接頼んだときは、この節は使わず「共同作業の規則」に従う。
 
    - Claude Code だけで行うもの: 利用者の質問への答え、ファイルを変えない調べもの、1 つのファイルの数行で振る舞いを変えない直し（誤字・リンク・値の直しなど）
    - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request・取り込み
@@ -2812,7 +2812,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - claude.ai のアカウント（Pro / Max / Team / Enterprise）のログインが要る。API キーでは使えない
 - PC は動かしたままにする（スリープ・ネットワークの切断で止まる）
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ
-- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、Grok Build のブラウザ操作（[AlmaLinux 10](#grok-build-のブラウザ操作-実施手順)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で使う)。OSS の Codeg の画面）
+- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、Grok Build のブラウザ操作（[AlmaLinux 10](#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で使う)。OSS の Codeg の画面）
 - Claude Code と Codex CLI にも Codeg から直接頼むなら、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）
 - Windows 11 の Antigravity アプリへ直接頼む入口は、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)。この共同作業で CLI に読み取り専用のレビューを頼む使い方とは別で、スマートフォンからの接続は未検証
 
@@ -2827,7 +2827,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. Windows 11 のときだけ、Claude の worktree で Remote Control をタスクで始める。
 
-   - [Claude Code の Remote Control（Windows）](#claude-code-の-remote-control-実施手順)の実施手順を通す
+   - [Claude Code の Remote Control（Windows）](#claude-code-の-remote-control-windows-11-で使う)を通す
    - その手順 2 の `$PROJECT_DIR` は `<WT_ROOT>\claude`、`$RC_NAME` はプロジェクトの名前にする
 
 1. スマートフォンの Claude のアプリで、そのセッションを開く。
@@ -2857,10 +2857,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### コーディングエージェントの共同作業: 更新
+### コーディングエージェントの共同作業: AlmaLinux 10 の更新
 
 - Windows 11 は [Windows 11 の更新](#コーディングエージェントの共同作業-windows-11-の更新)へ進む
-- Claude Code・Codex・Grok Build と 2 つのプラグインは、[更新](#更新)で上げる（プラグインは、その手順 5）。Node.js は OS の更新で上がる
+- Claude Code・Codex・Grok Build と 2 つのプラグインは、[AlmaLinux 10 の更新](#almalinux-10-の更新)で上げる（プラグインは、その手順 5）。Node.js は OS の更新で上がる
 - この手順書で足した AGENTS.md・CLAUDE.md・worktree は、上げるものが無い。規則を変えたときは[main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で各 worktree をそろえる
 
 ---
@@ -2875,21 +2875,21 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ## Grok Build のブラウザ操作（任意）
 
-- 対象: 両 OS。AlmaLinux 10 は[実施手順](#grok-build-のブラウザ操作-実施手順)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
+- 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#grok-build-のブラウザ操作-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - 画面の画像は、Windows 11 の実機の Codeg v0.35.1 で 2026-10-14 に撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
 - Claude Code・Codex を使うときは、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）も通す
 
-### Grok Build のブラウザ操作: 実施手順
+### Grok Build のブラウザ操作: AlmaLinux 10 で使う
 
 
 > [!IMPORTANT]
-> - **この実施手順は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
+> - **この項は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
 > - **Grok Build を使う一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
 > - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
-> - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す。Codeg 専用の Caddy で動いているホストは、[Caddy: Codeg 専用の Caddy から切り替える](almalinux-setup.md#caddy-codeg-専用の-caddy-から切り替える)を使う
+> - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す
 > - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
@@ -2961,7 +2961,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `ss` は見出しの 1 行だけ、`ls` は 4 つとも `No such file or directory` になればよい
    - `caddy.service` が `active` でなければ、先に [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通す
    - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐) を通す
-   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[ロールバック](extra/grok-build-remote.md#ロールバック)で消してからやり直す
+   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)で消してからやり直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
 
 1. 配布物を取得して、SHA-256 を照合する。
@@ -3258,7 +3258,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 送信元ごとに `success` が 2 回ずつ出た後、runtime と permanent に、送信元ごとの 3443/tcp の規則があればよい
    - 3080 番は開けない。Codeg へは、Caddy を通してだけ届く
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない
-   - 追加できた規則を外す場合は[ロールバック](extra/grok-build-remote.md#ロールバック)の手順 2 を使う
+   - 追加できた規則を外す場合は[AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)の手順 2 を使う
 
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
@@ -3311,7 +3311,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 共通パスワードでログインするなら、[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 9 の後で[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1・2 を通し、同じ項の手順 10 へ戻る
   - 共通パスワードの項は、このリポジトリを clone したフォルダーで行う（スクリプトを相対パスで呼ぶ）
 - ルート証明書は、[Windows 11 で HTTPS で LAN・VPN に公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 6 で端末に入れる
-- 以前の手順で `codeg-caddy-in` を作ってあるときだけ、既存の受信規則を[Private の全送信元へ切り替える](#grok-build-のブラウザ操作-windows-11-の既存の受信規則を-private-の全送信元に切り替える)
 - 画面の操作とセッションの取り込みは、AlmaLinux と共通の[使い方の基本](#grok-build-のブラウザ操作-使い方の基本)から行う
 
 > [!WARNING]
@@ -3665,7 +3664,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    ```powershell
    $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-   if (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue) { Write-Error '中断: 既存の規則がある。既存規則の切り替え節を通す' } else {
+   if (-not (Test-Path -LiteralPath $exe)) { Write-Error '中断: caddy.exe が無い（Codeg を入れたユーザーの管理者の窓で開く）' } elseif (Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' -ErrorAction SilentlyContinue) { Write-Error '中断: 既存の規則がある。名前と目的を確かめる' } else {
      New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe -ErrorAction Stop | Out-Null
      try {
        New-NetFirewallRule -Name 'codeg-caddy-in' -DisplayName 'Codeg (HTTPS)' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3443 -RemoteAddress Any -Profile Private -InterfaceType Any -Program $exe -EdgeTraversalPolicy Block -ErrorAction Stop | Out-Null
@@ -3747,7 +3746,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. 別の端末で、受信インターフェースごとに HTTPS の許可と遮断を確かめる。
 
-   - 新規導入はこの項の手順 4、IP 変更後・既存規則の移行後は手順 9 で表示した現在の URL を使う。以前の IP の URL は使わない
+   - 新規導入はこの項の手順 4、IP 変更後は手順 9 で表示した現在の URL を使う。以前の IP の URL は使わない
    - Private の URL ごとに、同じネットワークの別の端末で `curl -sk -o /dev/null -w '%{http_code}\n' <現在の URL>/` を実行し、`200` を確かめる（証明書を入れる前は `-k` を付ける）
    - 有線 LAN・Wi-Fi・VPN は、利用する受信インターフェースごとに確かめる。Private の URL への成功は、そのインターフェースでの許可の確認だけで、Public・Domain での遮断の確認にはならない
    - Public・Domain を試せるなら、手順 4 または手順 9 の表で、対象の受信インターフェースの InterfaceIndex・種類・現在の IPv4 を確かめる。Private の URL は使わない
@@ -4040,7 +4039,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
 
-   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選ぶ。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-実施手順)で作った、その担当の worktree を選ぶ
+   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選ぶ。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った、その担当の worktree を選ぶ
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
    - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
@@ -4294,7 +4293,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS
 - 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)（Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 2〜5 で有効にし、接続と応答を確かめておく
-- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-実施手順)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
+- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-13-補足-委譲と作業ディレクトリ)）
 - Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
 
 1. ブラウザの設定で、エージェントへの委譲を有効にする。
@@ -4381,7 +4380,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ~/.local/bin/claude-agents
    ```
 
-   - [共同作業の手順](#コーディングエージェントの共同作業-実施手順)で作った Claude の worktree で起動する
+   - [共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った Claude の worktree で起動する
    - `/grok-build:check` でプラグインの準備を確かめ、`/grok-build:review --base main --wait` など、読み取り専用の依頼で応答を確かめる
    - 書き込みの依頼や `--write` は拒否されたら続けない
    - `/exit` で終える
@@ -4413,7 +4412,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.config/caddy/sites/codeg.caddy`（共通設定は [Caddy: 設定ファイル](almalinux-setup.md#caddy-設定ファイル)） | `%LOCALAPPDATA%\codeg-caddy\Caddyfile` | HTTPS で待ち受ける IP とポート、Codeg への渡し先（Windows は認証局の名前も） |
 | `~/.config/systemd/user/caddy.service` | `%LOCALAPPDATA%\codeg-caddy\start-caddy-hidden.ps1` と、タスク `codeg-caddy` | Caddy の起動のしかた（AlmaLinux 10 はホストで共通） |
 | — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | 両タスクで使う、コンソールを作らないランチャー |
-| — | `%LOCALAPPDATA%\codeg-server\startup-backup-*\` | 既存のタスクを切り替えるときの XML の控え |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
 | `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
@@ -4522,198 +4520,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
    - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
-   - 公開を止めるときは、送信元を指定しない規則も [ロールバック](extra/grok-build-remote.md#ロールバック)で外す
-
----
-
-### Grok Build のブラウザ操作: Windows 11 の既存の受信規則を Private の全送信元に切り替える
-
-- 以前の手順で `codeg-caddy-in` を作ったときだけ通す。Codeg を入れたユーザーの、管理者の Windows PowerShell（5.1）で行う
-- この項の手順 1 は、Private の全送信元・全接続種別に公開する。名前とプログラムが一致する既知の規則だけを変え、ほかの規則は変更しない
-- XML の控えは `%LOCALAPPDATA%\codeg-caddy` に残す
-
-1. 既存の規則を XML に控え、Private の全送信元へ切り替える。
-
-   <details>
-     <summary>貼るコマンド（PowerShell・42 行）</summary>
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
-     $exe = Join-Path $dir 'caddy.exe'
-     $names = @('codeg-caddy-in', 'codeg-caddy-block-public', 'codeg-caddy-block-wifi')
-     if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw '中断: caddy.exe が無い' }
-     $oldRules = @(Get-NetFirewallRule -Name $names -ErrorAction SilentlyContinue)
-     if (-not ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-in' })) { throw '中断: codeg-caddy-in が無い。新規導入の手順を通す' }
-     $saved = foreach ($rule in $oldRules) {
-       $application = $rule | Get-NetFirewallApplicationFilter
-       if ($application.Program -ne $exe) { throw ('中断: プログラムが一致しない規則: ' + $rule.Name) }
-       $port = $rule | Get-NetFirewallPortFilter
-       if ($rule.Name -eq 'codeg-caddy-block-public' -and ($port.Protocol -ne 'Any' -or ($port.LocalPort -join ',') -ne 'Any' -or ($port.RemotePort -join ',') -ne 'Any')) { throw '中断: 既存の Public・Domain 遮断規則の Protocol・LocalPort・RemotePort がすべて Any ではない' }
-       [pscustomobject]@{
-         Rule = $rule
-         Application = $application
-         Address = $rule | Get-NetFirewallAddressFilter
-         Port = $port
-         InterfaceType = $rule | Get-NetFirewallInterfaceTypeFilter
-         Interface = $rule | Get-NetFirewallInterfaceFilter
-         Service = $rule | Get-NetFirewallServiceFilter
-       }
-     }
-     $backup = Join-Path $dir ('firewall-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '.xml')
-     if (Test-Path -LiteralPath $backup) { throw '中断: XML の控えが既にある' }
-     $saved | Export-Clixml -LiteralPath $backup -Depth 6
-     if ($oldRules | Where-Object { $_.Name -eq 'codeg-caddy-block-public' }) {
-       Set-NetFirewallRule -Name 'codeg-caddy-block-public' -Direction Inbound -Action Block -Enabled True -Profile Public, Domain -Program $exe -Protocol Any -LocalAddress Any -RemoteAddress Any -InterfaceType Any -InterfaceAlias Any
-     } else {
-       New-NetFirewallRule -Name 'codeg-caddy-block-public' -DisplayName 'Codeg (HTTPS) block: public' -Direction Inbound -Action Block -Profile Public, Domain -Program $exe | Out-Null
-     }
-     Set-NetFirewallRule -Name 'codeg-caddy-in' -Direction Inbound -Action Allow -Enabled True -Profile Private -Program $exe -Protocol TCP -LocalPort 3443 -EdgeTraversalPolicy Block
-     Set-NetFirewallRule -Name 'codeg-caddy-in' -LocalAddress Any -RemoteAddress Any -RemotePort Any -InterfaceType Any -InterfaceAlias Any
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $backup
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled, EdgeTraversalPolicy -AutoSize
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Get-NetFirewallApplicationFilter | Format-List Program
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallAddressFilter | Format-List LocalAddress, RemoteAddress
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceTypeFilter | Format-List InterfaceType
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallInterfaceFilter | Format-List InterfaceAlias
-     Get-NetFirewallRule -Name 'codeg-caddy-in' | Get-NetFirewallPortFilter | Format-List Protocol, LocalPort
-   }
-   ```
-
-   </details>
-
-   - XML の控えのパス、`Allow`・`Private` が 1 行と `Block`・`Domain, Public` が 1 行、両方の `Enabled : True` が出ればよい
-   - 両方の `Program` が、この手順書で置いた `caddy.exe` のパスであることを確かめる
-   - Allow の `LocalAddress`・`RemoteAddress`・`InterfaceType`・`InterfaceAlias` が `Any`、`Protocol : TCP`、`LocalPort : 3443`、`EdgeTraversalPolicy : Block` が出ればよい
-   - エラーが出たら中断する。XML の控えと既存の規則を残し、原因を確かめてからやり直す
-   - 既存の Public・Domain 遮断規則は、`Protocol`・`LocalPort`・`RemotePort` がすべて `Any` の場合だけ切り替える。異なる規則では変更前に中断する
-   - 控えは規則と関連フィルターの読み戻し用。`Import-Clixml` だけではファイアウォールへ復元されない
-   - **この項の手順 2 は、以上の読み戻しがすべて一致してから通す**。旧 Wi-Fi 遮断規則は、まだ残してある
-
-1. この項の手順 1 の読み戻しがすべて一致したら、旧 Wi-Fi 遮断規則だけを消す。
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $exe = Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'
-     $oldWifi = Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue
-     if ($oldWifi) {
-       $application = $oldWifi | Get-NetFirewallApplicationFilter
-       if ($application.Program -ne $exe) { throw '中断: 旧 Wi-Fi 遮断規則のプログラムが一致しない' }
-       $oldWifi | Remove-NetFirewallRule
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetFirewallRule -Name 'codeg-caddy-in', 'codeg-caddy-block-public' | Format-Table Name, Action, Profile, Enabled -AutoSize
-     Get-NetFirewallRule -Name 'codeg-caddy-block-wifi' -ErrorAction SilentlyContinue | Format-Table Name
-   }
-   ```
-
-   - 有効な `Allow`・`Private` と `Block`・`Domain, Public` が残り、最後の Wi-Fi 遮断規則の表が出なければよい
-   - 旧規則が無ければ削除は行わない。名前が `codeg-caddy-block-wifi` で、プログラムが一致する規則だけを消す
-   - エラーが出たら中断し、XML の控えと残る規則を保持する
-
-1. 別の端末で、切り替え後の受信インターフェースの許可と遮断を確かめる。
-
-   - [HTTPS で公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 9 で現在の URL と受信インターフェースの表を表示し、同じ項の手順 5 で接続を確かめる
-   - 導入時の手順 4 の古い URL は使わない
-   - Caddy の設定・タスク・認証局・端末に入れたルート証明書は変えない
-   - 終わったら、管理者の窓を閉じる
-
----
-
-### Grok Build のブラウザ操作: Windows 11 の既存のタスクを非表示起動に切り替える
-
-- 以前の手順でタスクを作り、ログオン時に Terminal が開く場合に通す。管理者ではない Windows PowerShell（5.1）で行う
-- この項の手順 3 で、Codeg と Caddy を短時間止める。実行中の会話は中断されるので、作業が終わってから通す
-
-1. ランチャーを用意する。
-
-   - `%LOCALAPPDATA%\codeg-server\codeg-hidden-launcher.exe` が無いときだけ、[Codeg を入れる](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 7 を通す
-   - その項の手順 8 は通さない。既存のタスクは、この項の手順 3 で切り替える
-
-1. Caddy のタスクがあるときだけ、Caddy の起動用スクリプトを用意する。
-
-   ```powershell
-   $script = Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1'
-   if (Test-Path -LiteralPath $script) {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-Item -LiteralPath $script | Select-Object Name, Length
-   } else {
-     [IO.File]::WriteAllText($script, @'
-   $dir = Join-Path $env:LOCALAPPDATA 'codeg-caddy'
-   & (Join-Path $dir 'caddy.exe') run --config (Join-Path $dir 'Caddyfile') --adapter caddyfile
-   exit $LASTEXITCODE
-   '@, (New-Object Text.UTF8Encoding($true)))
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-Item -LiteralPath $script | Select-Object Name, Length
-   }
-   ```
-
-   - `start-caddy-hidden.ps1` の行が出ればよい
-   - 既にファイルがある場合は、Caddy の起動用であることを確かめてから進む。上書きはしない
-
-1. タスクの控えを取り、起動するプログラムだけを切り替えて再開する。
-
-   <details>
-     <summary>貼るコマンド（PowerShell・46 行）</summary>
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $dir = Join-Path $env:LOCALAPPDATA 'codeg-server'
-     $launcher = Join-Path $dir 'codeg-hidden-launcher.exe'
-     $names = @('codeg-server')
-     if (Get-ScheduledTask -TaskName 'codeg-caddy' -ErrorAction SilentlyContinue) { $names += 'codeg-caddy' }
-     $scripts = @{ 'codeg-server' = (Join-Path $dir 'start-codeg-server.ps1'); 'codeg-caddy' = (Join-Path $env:LOCALAPPDATA 'codeg-caddy\start-caddy-hidden.ps1') }
-     if (-not (Test-Path -LiteralPath $launcher)) { Write-Error '中断: ランチャーが無い'; return }
-     $oldActions = @{}
-     foreach ($name in $names) {
-       $oldActions[$name] = (Get-ScheduledTask -TaskName $name).Actions
-       if (-not (Test-Path -LiteralPath $scripts[$name])) { Write-Error "中断: 起動用のスクリプトが無い: $name"; return }
-     }
-     $backup = Join-Path $dir ('startup-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-     New-Item -ItemType Directory -Path $backup | Out-Null
-     foreach ($name in $names) { Export-ScheduledTask -TaskName $name | Set-Content -LiteralPath (Join-Path $backup ($name + '.xml')) -Encoding Unicode }
-     try {
-       $targets = @(Get-CimInstance Win32_Process | Where-Object {
-         ($_.Name -eq 'codeg-server.exe' -and $_.ExecutablePath -eq (Join-Path $dir 'codeg-server.exe')) -or
-         ($names -contains 'codeg-caddy' -and $_.Name -eq 'caddy.exe' -and $_.ExecutablePath -eq (Join-Path $env:LOCALAPPDATA 'codeg-caddy\caddy.exe'))
-       })
-       foreach ($target in $targets) {
-         & "$env:WINDIR\System32\taskkill.exe" /PID $target.ProcessId /T /F | Out-Null
-         if ($LASTEXITCODE -ne 0) { throw "停止に失敗: $($target.Name)" }
-       }
-       foreach ($name in $names) { Stop-ScheduledTask -TaskName $name }
-       foreach ($name in $names) {
-         $action = New-ScheduledTaskAction -Execute $launcher -Argument ('"{0}"' -f $scripts[$name])
-         Set-ScheduledTask -TaskName $name -Action $action | Out-Null
-       }
-       foreach ($name in $names) { Start-ScheduledTask -TaskName $name }
-     } catch {
-       foreach ($name in $names) {
-         Stop-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
-         Set-ScheduledTask -TaskName $name -Action $oldActions[$name] | Out-Null
-         Start-ScheduledTask -TaskName $name
-       }
-       Write-Error "中断: 以前の起動方法へ戻した。$($_.Exception.Message)"
-       return
-     }
-     for ($i = 0; $i -lt 30 -and -not (Get-NetTCPConnection -State Listen -LocalPort 3080 -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Seconds 1 }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $backup
-     Get-ScheduledTask -TaskName $names | Select-Object TaskName, State, @{ Name = 'Execute'; Expression = { $_.Actions.Execute } }
-     Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
-   }
-   ```
-
-   </details>
-
-   - 控えのフォルダー、`Running` とランチャーのパス、`127.0.0.1:3080` が出ればよい
-   - Caddy のタスクもある場合は、`Running` が 2 行と `::` の 3443 の待ち受けも出ればよい
-   - 新しい Terminal のウィンドウが開かないことを確かめ、いつもの URL でブラウザから開く
-   - 控えの XML とランチャーは、ふだんの Codeg の更新では消さない
+   - 公開を止めるときは、送信元を指定しない規則も [AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)で外す
 
 ---
 
@@ -4764,7 +4571,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: 更新
+### Grok Build のブラウザ操作: AlmaLinux 10 の更新
 
 - AlmaLinux 10 の手順。Windows 11 は [Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)
 - 画面の右下に「新バージョン」と出たら、新しい版がある。画面からは入れ替えず、この節の手順で、SHA-256 を照合してから置き換える

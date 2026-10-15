@@ -1,4 +1,4 @@
-# WireGuard VPN 構築手順（site-to-site + road warrior / wg-quick + firewalld）の参考資料
+# WireGuard の参考資料
 
 [手順書](../wireguard.md#wireguard)・[ロールバックと注意点](../extra/wireguard.md)
 
@@ -21,7 +21,6 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 - IP フォワーディング
 - firewalld（LAN 側ゾーンに `${WG_PORT}/udp` と `wg0` を追加し、ゾーン内転送を有効にする）
 - `wg-quick@wg0` の有効化と起動
-- 旧レイアウトの専用ゾーンと policy が残っていれば、先に消す
 - 再実行しても設定は重複しない。`site.env` を変えたときやクライアントを足したときも、`apply` で反映する（最後に必ず restart する）
 
 ### 鍵を作って適用する / 手順 6: 補足: 疎通を確かめる時期
@@ -59,7 +58,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 
 ### 鍵を作る / 手順 1: 補足: 変数について
 
-- 4 つの IP の変数は、使う[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 1 へ移した（2026-10-14。項を単独で通すため）
+- 4 つの IP の変数は、使う[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 1 で設定する
 - `WG_DIR` を WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）と別の名前にしてあるのは、同じ人が両方のマシンを触るときに、ロールバックの `rm` を取り違えても登録簿が消えないようにするため
 
 ### 鍵を作る / 手順 2: 補足: パッケージ
@@ -143,7 +142,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
 ### Windows 11 でトンネルを確かめる / 手順 2: 補足: 変数について
 
 - 変数の名前と意味は、AlmaLinux 10 の[「トンネルを確かめる」の手順 1](../wireguard.md#wireguard-トンネルを確かめる)と同じ（PC 視点。`WG_HOST_*` = 接続先拠点、`PEER_*` = 相手拠点）。拠点 B がクライアントを受ける構成なら、`site.env` の `*_B_*` 側の値を入れる
-- 使うのは、この項の手順 5 の疎通の確認だけ（2026-10-14 に「Windows 11 で WireGuard と鍵を用意する」から移した）
+- 使うのは、この項の手順 5 の疎通の確認だけ
 - 鍵と conf の一時置き場は `%USERPROFILE%\wg-client`（`C:\Users\<WIN_USER>\wg-client`）に決めてあり、変数にしていない。WG ホストの `~/wg`（`site.env` と `clients.list` の置き場）とは別の名前
 
 ### Windows 11 でトンネルを確かめる / 手順 3: 補足: LAN の外につなぐ理由
@@ -340,7 +339,7 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 - `client add` は、帯の重複・名前や IP の重複・拠点の取り違えなどを**何かを書く前に**検査する
 - トンネル IP は、`--ip` が無ければ帯の中で最小の空きを割り当てる
 - クライアント用 conf には、`site.env` の `WG_MTU` に値があれば、同じ `MTU =` を書く（空なら書かない）。書くのは `client add` のときだけで、配布済みの conf は作り直さない
-- `remove A` は `wg0` と待ち受けポートを LAN 側ゾーンから外し（forward は戻さない。旧レイアウトの残骸があればそれも消す）、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）
+- `remove A` は `wg0` と待ち受けポートを LAN 側ゾーンから外し（forward は戻さない）、`--purge` を付けると `clients.list` にあるクライアントの conf も消す（`clients.list` 自体は残す）
 
 `keygen` の動作: `wireguard-tools` が無ければ dnf で入れ、鍵が無ければ生成する。**既存の鍵は上書きしない**（公開鍵だけ表示し直す）。
 
@@ -363,9 +362,9 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 `remove` の動作:
 
-- サービスを `disable --now` し、`wg0` を LAN 側ゾーンから外し、旧レイアウトの policy・専用ゾーンがあれば消し、待ち受けポートを外して reload する
+- サービスを `disable --now` し、`wg0` を LAN 側ゾーンから外し、待ち受けポートを外して reload する
 - ゾーンの forward は戻さない（`apply` 前の状態が分からず、組み込みゾーンでは既定で有効なため）
-- LAN 側ゾーンの `<ゾーン名>.xml.old` は、firewalld がゾーンを書き換えるたびに作る通常のバックアップなので消さない（旧レイアウト由来の `*.xml.old` だけ消す）
+- LAN 側ゾーンの `<ゾーン名>.xml.old` は、firewalld がゾーンを書き換えるたびに作る通常のバックアップなので消さない
 - `/etc/sysctl.d/90-wireguard.conf` を消して、`ip_forward` を 0 に戻す
 - `--purge` を付けたときだけ、`wg0.conf`・鍵・`clients.list` にあるクライアント用 conf を消す
 - `clients.list`・`~/wg`・パッケージは残し、ルーター側は手で戻す
@@ -416,41 +415,7 @@ DHCP 予約  : 192.168.110.2 をこの WG ホストに固定
 
 `clients.list` も失った場合は、各クライアントの公開鍵を端末側の conf から読み出すか、全台を登録し直す。
 
-### 全部消すときの補足
-
-#### 旧レイアウト（専用ゾーン + policy）からの移行
-
-**移行は現在の `apply` が自動で行う。** 両拠点の WG ホストで:
-
-```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env --dry-run apply B   # 消す policy・ゾーンと、LAN 側ゾーンに足すものを確認する
-```
-
-dry-run の出力を確かめてから、本実行する。
-
-```bash
-sudo ./wg-vpn.sh -e ~/wg/site.env apply B
-```
-
-`apply` は次の順に行う（変更は permanent にまとめて入れ、最後に 1 回だけ reload する）。
-
-1. 名前が `site[AB]-to-(site|clients)[AB]` / `clients[AB]-to-site[AB]` に一致する policy を消す（他の policy には触れない）
-1. `${WG_FW_ZONE}` ゾーンを消す（所属していた `wg0` はここで外れる）。旧レイアウト由来の `*.xml.old` も消す
-1. LAN 側ゾーンに `${WG_PORT}/udp`・`wg0`・forward を入れて reload する
-
-```bash
-{
-  for p in $(sudo firewall-cmd --permanent --get-policies | tr ' ' '\n' \
-             | grep -E '^(site[AB]-to-(site|clients)[AB]|clients[AB]-to-site[AB])$'); do
-    sudo firewall-cmd --permanent --delete-policy="$p"
-  done
-  sudo firewall-cmd --permanent --delete-zone=wireguard
-  sudo firewall-cmd --permanent --zone="$LAN_ZONE" --add-interface=wg0 --add-port="$WG_PORT/udp" --add-forward
-  sudo firewall-cmd --reload
-}
-```
-
-**移行は両拠点で行う。**
+### firewalld のポリシーが転送へ与える影響
 
 #### `gateway-lan-to-world` について（LAN 側ゾーンが `internal` / `home` / `trusted` の場合）
 
@@ -488,11 +453,11 @@ Windows 11 で conf を取り込んで張る方法を比べた:
   - `wg0` のネットワークはパブリックのはず（識別されないネットワーク）。プライベートにすると、プライベート向けの受信の規則（[Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)など）が、拠点からトンネル越しに届くようになる
   - 拠点から PC への ping（[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 の最後）は、Windows の既定のファイアウォールが ICMP のエコー要求を受けないので、返らないはず。トンネルが動いているかは、WG ホストの `client list` の `LAST_HANDSHAKE` で見る
 - **Windows 11 ではキルスイッチは出ない**: `AllowedIPs` に `/0` が無いので、窓の編集の「トンネルを通らないトラフィックのブロック（キルスイッチ）」は出ず、ファイアウォールの制限も掛からない（WireGuard の文書の「Network Configuration Quirks」）。全トラフィックを通す構成は、AlmaLinux 10 と同じく対象外
-- **Windows 11 の手順もこの文書に置いた**: 同じツールを AlmaLinux 10 と Windows 11 に入れる手順は、OS ごとにファイルを分けない。手順が OS で違うので、[syncthing.md](../syncthing.md#syncthing) と同じく後ろの節に分けた。WG ホストの手順は共通なので、[クライアントを登録する](../wireguard.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
+- WG ホストの手順は共通なので、[クライアントを登録する](../wireguard.md#wireguard-クライアントを登録する)の手順 1・2・4〜6、[トンネルを確かめる](../wireguard.md#wireguard-トンネルを確かめる)の手順 5 と[AlmaLinux 10 の PC のロールバック](../extra/wireguard.md#almalinux-10-の-pc-のロールバック)の手順 3 をそのまま使う
 
 ### 代替: wg-quick で張る場合
 
-NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+NetworkManager を使わない場合。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-補足の実測)を参照。
 
 - 「鍵を作る」から「conf を取り込む」の手順 3 までは同じで、conf を `/etc/wireguard/wg0.conf` に置いて `wg-quick` で張る
 - NetworkManager の `wg0` プロファイルが無いこと（同じ ifname で併用しない）
@@ -517,7 +482,7 @@ sudo wg-quick up wg0                     # 切るのは sudo wg-quick down wg0
 
 ### 代替: nmcli connection add で組む場合（RHEL のドキュメントの方式）
 
-conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-参考資料から分離した記録)を参照。
+conf を import せず、値を手で写す方式。最初から `autoconnect no` にできるのが利点。実行の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#road-warrior-補足の実測)を参照。
 
 1. `nmcli connection add type wireguard con-name wg0 ifname wg0 autoconnect no`
 1. `nmcli connection modify wg0 ipv4.method manual ipv4.addresses <CLIENT_TUN_IP>/32`

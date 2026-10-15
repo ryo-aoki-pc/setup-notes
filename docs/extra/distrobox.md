@@ -1,4 +1,4 @@
-# distrobox インストール手順（AlmaLinux 10 / EPEL）のロールバックと注意点
+# Distrobox のロールバックと注意点
 
 [手順書](../almalinux-setup.md#distrobox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](../reference/distrobox.md)
 
@@ -61,5 +61,5 @@
 - **書き出したスクリプトの名前が、ホストのコマンドと重なることがある**: `~/.local/bin` は PATH の途中にある
   - 同じ名前のコマンドがほかの場所にもあると、どちらが呼ばれるかは PATH の順で決まる
   - Homebrew の `brew shellenv` は、自分の場所を PATH の先頭に足す
-- **`podman system reset` でボックスも消える**: ボックスは podman のコンテナなので、[podman.md のロールバック](podman.md#ロールバック)の手順 5 で一緒に消える
+- **`podman system reset` でボックスも消える**: ボックスは podman のコンテナなので、[Podman のロールバック](podman.md#ロールバック)の手順 5 で一緒に消える
 - 必要な空き容量は、導入予定のパッケージとトランザクション表で確かめる

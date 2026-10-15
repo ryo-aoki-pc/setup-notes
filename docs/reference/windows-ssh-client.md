@@ -1,4 +1,4 @@
-# Windows 11 で OpenSSH クライアントを使う手順（ed25519 の鍵と ssh の config で AlmaLinux 10 のホストに入る）の参考資料
+# Windows の OpenSSH クライアントの参考資料
 
 [手順書](../windows-setup.md#windows-の-openssh-クライアント)・[ロールバックと注意点](../extra/windows-ssh-client.md)
 
@@ -20,7 +20,7 @@
   - Windows の ssh は、ホームをユーザーのプロファイルのパスから取る（`HOME` を見ない）
   - git は、`HOME` が無ければ `%HOMEDRIVE%%HOMEPATH%`（または `%USERPROFILE%`）を `HOME` にして、Git の ssh を動かす
 - そのため、`HOME` を別の場所にしていると、Git の ssh だけが別の `.ssh` を使う。git が使う ssh は、`GIT_SSH_COMMAND` → `core.sshCommand` → `GIT_SSH` → `PATH` の `ssh` の順に決まるので、手順 3 でこの 3 つも空なことを確かめる
-- ブロックの中では、どちらの ssh もフルパスで呼ぶ。ユーザーの `PATH` の先頭側に Git の `usr\bin` があると、`ssh`・`ssh-keygen` が Git のものになる（[統合前の OpenSSH サーバーの記録の、当時の手順 7 の補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)）
+- ブロックの中では、どちらの ssh もフルパスで呼ぶ。ユーザーの `PATH` の先頭側に Git の `usr\bin` があると、`ssh`・`ssh-keygen` が Git のものになる（[OpenSSH サーバーでフルパスで呼ぶ理由の実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)）
 - 手順 3 の `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](../extra/windows-ssh-client.md#注意点)）
 - 手順 3 の最後の行が `GIT_SSH= GIT_SSH_COMMAND= HOME=` なら、git は Git の ssh を使い、Windows の ssh と同じ `%USERPROFILE%\.ssh` を読む
 
@@ -66,7 +66,7 @@
   - Windows の ssh は UTF-8 の BOM を読み飛ばすが（Win32-OpenSSH のソース）、Git の ssh は読み飛ばさず、`Bad configuration option` で止まる。そのため、BOM のある config には足さずに止める
   - 改行は CR LF になる。ssh は行の末尾の CR を空白として捨てる
 - 同じ `Host` がもうあるかは、`Host <別名>` と `Host=<別名>` の両方の書き方で探す（ssh_config は `=` でも区切れる）。2 つ目の `Host` のブロックを足しても、ssh は最初のものを使い、足した値は効かない
-- `Add-Content` は、末尾に改行の無いファイルに、改行を入れずに続けて書く（このリポジトリの [windows-setup.md の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。そのため、末尾に改行が無ければ、先に空の 1 行（改行）を書く
+- `Add-Content` は、末尾に改行の無いファイルに、改行を入れずに続けて書く（このリポジトリの [Windows 11 のセットアップ の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。そのため、末尾に改行が無ければ、先に空の 1 行（改行）を書く
 - 確かめは、2 つの ssh の `-G`（config を読んだ結果の表示）で行う。Git の ssh のほうが BOM に厳しく、Windows の ssh（9.5p2）は新しい設定を知らないので、両方を必ず確かめる
 - ssh は最初に見つけた値を使うので、config の前の方の `Host *` などにある値が、足した値より先に効く
 
@@ -119,7 +119,7 @@
 
 ### 選択した方針
 
-- **Windows だけの手順書にした**（利用者の選択）。AlmaLinux 10 の SSH クライアントの手順は、この手順書には入れない
+- **Windows だけを対象にする**（利用者の選択）。AlmaLinux 10 の SSH クライアントの手順は、この手順書には入れない
 - **ssh-agent は使わない**（利用者の選択）
   - Windows の ssh-agent のサービスは既定で無効で、有効にするには管理者の権限が要る（Microsoft の文書）
   - 鍵にパスフレーズを付けたら、使うたびに聞かれる。付けなければ聞かれないが、秘密鍵のファイルを持つ人は誰でも入れる（Microsoft は空のパスフレーズを勧めていない）

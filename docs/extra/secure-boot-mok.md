@@ -1,4 +1,4 @@
-# Secure Boot の MOK 登録手順（AlmaLinux 10 / 自分でビルドするカーネルモジュールの署名鍵）のロールバックと注意点
+# Secure Boot の署名鍵のロールバックと注意点
 
 [手順書](../almalinux-setup.md#secure-boot-の署名鍵)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](../reference/secure-boot-mok.md)
 
@@ -9,7 +9,7 @@
 > [!CAUTION]
 > **この節の**手順 5 で、秘密鍵（`MOK.priv`）を消す。**消した鍵は取り戻せず**、その鍵で署名したモジュールは、作り直すまで Secure Boot で読み込まれない。
 
-- 先に、この鍵で署名したモジュールを使う手順書のロールバックを行う（[VirtualBox](virtualbox.md#ロールバック)・[VirtualBox Guest Additions](virtualbox-guest-bootc.md#ロールバック)）
+- 先に、この鍵で署名したモジュールを使う手順書のロールバックを行う（[VirtualBox](virtualbox.md#almalinux-10-のロールバック)・[VirtualBox Guest Additions](virtualbox-guest-bootc.md#ロールバック)）
 - この節の手順 3 は、起動の途中の MokManager の画面で行う
 
 1. MOK から鍵を消す予約をする。
@@ -55,4 +55,4 @@
 ## 注意点
 
 - **MokManager の最初の画面は 10 秒で消える**: 逃すと登録されず、予約も消える（手順 6）
-- **鍵を作り直したら、署名したモジュールも作り直す**: bootc のゲストでは、ビルドに `--no-cache` を足す（[virtualbox-guest-bootc.md の更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
+- **鍵を作り直したら、署名したモジュールも作り直す**: bootc のゲストでは、ビルドに `--no-cache` を足す（[VirtualBox の bootc ゲスト: 更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）

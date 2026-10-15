@@ -1,4 +1,4 @@
-# AlmaLinux 10 の初期設定の手順（インストール直後の更新・sudo・SSH・導入元・日本語入力・GNOME・シェルのツール・Git・Firefox・WezTerm・Neovim）のロールバックと注意点
+# AlmaLinux 10 のセットアップのロールバックと注意点
 
 [手順書](../almalinux-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
 
@@ -20,7 +20,7 @@
 - gsettings の値は、変える前の値ではなく**既定値**に戻る。「日本語入力」の手順 3 と「GNOME の表示と入力」の手順 14 で控えた値に戻すなら、`reset` の代わりに `set` を使う
 - OS とファームウェアの更新、SSH（Workstation の既定のまま）、「Homebrew」の手順 1 の依存パッケージは戻さない。項の中で入れた共通の道具（「HackGen Console NF」の手順 3 の `unzip`、「GitHub CLI」の手順 1 の `dnf-command(config-manager)`、[Neovim のセットアップ](../neovim.md#neovim)の「Neovim」の手順 3 で自分用の設定が入れた外部コマンド〔Node.js を除く〕、「yazi」の手順 2 の `YAZI_EXTRAS`）も残す
 - ロールバックの節の対象でない項で変えたものは、その項の最後の「元に戻すときは」の手順で戻す。[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)を通したなら、先にその項の手順 2 を行う
-- 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#ロールバック)・[コーディングエージェントの共同作業](coding-agents.md#ロールバック)など）は、それぞれの手順書のロールバックで先に戻す
+- 別の手順書で入れたもの（VS Code・Podman・[AI コーディングエージェントのセットアップ](ai-agents.md#almalinux-10-のロールバック)・[コーディングエージェントの共同作業](coding-agents.md#almalinux-10-のロールバック)など）は、それぞれの手順書のロールバックで先に戻す
 - この文書で入れたものは、この節の項を上から順に戻す（Homebrew を消す前に Homebrew のもの、RPM Fusion を消す前に[Firefox を戻す](#firefox-を戻す)の手順 1 の FFmpeg）
   - 自分用の設定は、[Git の道具を消す](#git-の道具を消す)と[端末とエディタを消す](#端末とエディタを消す)の中で戻す（Neovim と WezTerm は、それぞれのリポジトリのロールバックへ案内する。lazygit と yazi は、clone を残すか消すかを箇条書きに書いた）
 
@@ -65,7 +65,7 @@
    ```
 
    - 何も出なければ消えている
-   - lazygit の `git.diffRenderers` に delta の項目を足していた場合は、その項目も消す（ほかの renderer は残す）。以前の `git.paging` を使っていた場合は、そちらの delta 設定を外す
+   - lazygit の `git.diffRenderers` に delta の項目を足していた場合は、その項目も消す（ほかの renderer は残す）
 
 1. このホストの認証情報も外すときだけ、ローカルからログアウトする。
 
@@ -191,7 +191,7 @@
    ```
 
    - [AI エージェントの手順書の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1 と、自分用の Neovim の設定（その導入の手順 3）が入れたもの。プラグイン（[AI エージェントのロールバックの「AI エージェントとプラグインを消す」](ai-agents.md#ai-エージェントとプラグインを消す)の手順 1）と自分用の設定（この項の手順 2）を外してから行う
-   - [npm-offline.md](../almalinux-setup.md#npm-のオフライン導入) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
+   - [npm のオフライン導入](../almalinux-setup.md#npm-のオフライン導入) で Node.js を使っているなら、外さない（自分用の Neovim の設定の Mason も使うが、この項の手順 2 で消えている）
    - bubblewrap は外さない（Flatpak と GNOME のデスクトップも使う）
    - トランザクション表の `Removing:` に `nodejs` と `nodejs-npm`、`Removing unused dependencies:` に一緒に入った `nodejs-libs`・`libuv` などが出る。ほかに使っているパッケージが出たら `N` で止める。よければ `y` と答える
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
@@ -263,7 +263,7 @@
 
    - 「Firefox」の手順 8 で一緒に入った依存も、ほかに使うものが無ければ一緒に消える
    - AAC・H.264 のための FFmpeg だけ外すなら、この手順だけ行う。RPM Fusion 自体も外すなら、続けて[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 5・6 を行う
-   - EPEL は外さない（[btop.md](../almalinux-setup.md#btop) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
+   - EPEL は外さない（[btop](../almalinux-setup.md#btop) などほかの手順書でも使う。外すなら[Flatpak・RPM Fusion・EPEL を消す](#flatpakrpm-fusionepel-を消す)の手順 7・8）
    - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
 
 1. Mozilla の repo ファイルを消す。
@@ -566,7 +566,7 @@
 
 1. 共通の bash 設定も戻すときだけ、bash リポジトリの設定を戻す。
 
-   - `install.sh` で入れたなら [install.sh で入れた共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)、手で移行したなら [共通の bash 設定の手動移行のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/install.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
+   - [共通の bash 設定のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md#ロールバック)を参照する。ほかのツールの共通設定も外れる
    - ツールを消しただけなら、共通設定は残してよい（入っていないツールの設定は読まない）
 
 1. 開いている端末を閉じて、開き直す。
@@ -819,7 +819,7 @@
   - RPM Fusion の free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）。鍵は「EPEL と RPM Fusion」の手順 2 で照合し、`rpmfusion-free-release` の署名も同じ項の手順 4 で確かめる
   - EL10 向けの RPM Fusion は中身が少ない。調べた範囲では、free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）がある（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
   - RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[「Firefox」の手順 9](../almalinux-setup.md#firefox)）
-- **Homebrew と同じ名前の実行ファイルを、EPEL から二重に入れない**: 例えば EPEL の `fd-find` は `/usr/bin/fd` を置く。両方入れると、PATH の先頭の Homebrew 版が使われ、`dnf upgrade` で上がるのは使われないほうになる（[btop.md の注意点](btop.md#注意点)）
+- **Homebrew と同じ名前の実行ファイルを、EPEL から二重に入れない**: 例えば EPEL の `fd-find` は `/usr/bin/fd` を置く。両方入れると、PATH の先頭の Homebrew 版が使われ、`dnf upgrade` で上がるのは使われないほうになる（[btop の注意点](btop.md#注意点)）
 - **ほかの手順書のロールバックでは、EPEL・RPM Fusion を消さない**: 使う手順書が複数ある。消すときはこの文書の[ロールバック](#ロールバック)で行う
 - **Flatpak は容量が大きい**: アプリ本体に加え、runtime・翻訳・GL ドライバ・コーデックの拡張の容量も確保する。`sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **Flatpak のアプリは `dnf upgrade` では上がらない**: [更新](../almalinux-setup.md#更新)の `sudo flatpak update` を別に実行する
@@ -844,7 +844,7 @@
   - 仮想マシンの中では、gnome-settings-daemon は放置によるサスペンドをしない。電源ボタンは `nothing` 以外だと電源オフになる
   - その節の手順 4 の後は、設定アプリに「自動サスペンド」の行が出ない。戻すなら `gsettings` か、その節の手順 6〜9 で行う
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
-- **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#統合前の記録-homebrewもとは-homebrewmd)
+- **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#homebrew-の記録)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu) で実際に問題になる）
   - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 4 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない

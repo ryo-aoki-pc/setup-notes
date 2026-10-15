@@ -1,4 +1,4 @@
-# podman-tui インストール手順（AlmaLinux 10 / EPEL）の参考資料
+# podman-tui の参考資料
 
 [手順書](../almalinux-setup.md#podman-tui)・[ロールバックと注意点](../extra/podman-tui.md)
 
@@ -14,7 +14,7 @@ podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requ
 
 ### podman-tui / 手順 3: 補足: 確認用のコンテナ
 
-- 初回はイメージ（285 MB）を取得する。[podman.md の Quadlet](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
+- 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 - ポートは公開しない（画面から止めるためだけのコンテナ）
 
 ### podman-tui / 手順 4: 補足: 画面の中身と、つながらないとき

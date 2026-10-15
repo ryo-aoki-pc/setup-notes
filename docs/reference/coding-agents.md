@@ -1,31 +1,30 @@
-# Claude Code・Codex・Grok Build を 1 つのプロジェクトで共同作業させる（AlmaLinux 10・Windows 11）の参考資料
+# コーディングエージェントの共同作業の参考資料
 
-[手順書](../ai-agents.md#コーディングエージェントの共同作業-実施手順)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)
 
 ## 補足
 
-- **2026-10-10 の変更**: 実施手順の手順 9・10（Node.js・bubblewrap とプラグイン）は[AlmaLinux 10 の初期設定の「Codex・Grok のプラグイン」](../ai-agents.md#codexgrok-のプラグイン)の手順 1・2 に、Windows 11 で使うの手順 9〜11 は[Windows 11 の初期設定の「Codex・Grok のプラグイン」](../ai-agents.md#windows-11-で-codexgrok-のプラグインを入れる)の手順 1〜3 に、更新の手順 1・2 と Windows 11 の更新の手順 1・2 は、それぞれの初期設定の更新に、ロールバックの手順 5・6 と Windows 11 のロールバックの手順 5・6 は、それぞれの初期設定のロールバックの「AI エージェントとプラグインを消す」などに移した。今の実施手順の手順 9 は当時の手順 11、Windows 11 で使うの手順 9 は当時の手順 12、ロールバックの手順 5 は当時の手順 7。この文書の見出しと本文の「手順 N」は、当時の番号のまま
 
-### 実施手順 / 手順 2: 補足: 版と並べる順
+### AlmaLinux 10 で使う / 手順 2: 補足: 版と並べる順
 
 - 検証時の版は `2.1.295 (Claude Code)`・`codex-cli 0.162.0`・`grok 1.0.50 (…)`
 - `claude auth status` は後ろに貼った行を読んで捨てるので、最後に置いてある
 
-### 実施手順 / 手順 3: 補足: 指示書がすでにあるとき
+### AlmaLinux 10 で使う / 手順 3: 補足: 指示書がすでにあるとき
 
 - 指示書のファイルの名前が出たら、それがすでにある（同じ節の手順 4・5 は、そのファイルへの追記になる）
 
-### 実施手順 / 手順 6: 補足: .gitignore で除いたファイル
+### AlmaLinux 10 で使う / 手順 6: 補足: .gitignore で除いたファイル
 
 - `.gitignore` で除いたファイルは、worktree に届かない
 
-### 実施手順 / 手順 8: 補足: 確かめの問いと信頼
+### AlmaLinux 10 で使う / 手順 8: 補足: 確かめの問いと信頼
 
 - Grok の確かめは AI には聞かないので、使用量は減らない
 - `grok --trust` は、この worktree を信頼したことを `~/.grok/trusted_folders.toml` に残す（Grok の画面で信頼するのと同じ）
 - Claude と Codex への 2 つの問いは、それぞれのプランの使用量を少し使う
 
-### 実施手順 / 手順 9: 補足: Node.js と bubblewrap
+### AlmaLinux 10 で使う / 手順 9: 補足: Node.js と bubblewrap
 
 - 検証時は AppStream の 22.23.2 と BaseOS の 0.10.0
 - npm（`nodejs-npm`）も一緒に入る。この手順書では使わない
@@ -61,26 +60,26 @@
 
 3 つのコーディング用の CLI（Claude Code・Codex・Grok Build）を、1 つのプロジェクトで一緒に使う方法を目的ごとに比べた（2026-10-09 時点）。「この手順書」の列が「採った」のものを、手順書で手順にした。
 
-2026-10-15 に Windows 11 へ足した Antigravity CLI の方針は、[Windows 11 の 4 つ目のエージェントと読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)に分ける。下の比較表は、従来の 3 つを対象にしたもの。
+Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエージェントと読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)に分ける。下の比較表は、Claude Code・Codex・Grok Build の 3 つを対象にする。
 
 | 目的 | 方法 | この手順書 | 要るもの・制約 |
 |---|---|---|---|
-| 3 つを同じ規則で動かす | AGENTS.md を 1 つ置き、CLAUDE.md に `@AGENTS.md` の 1 行を書く | 採った（実施手順 4〜6） | Codex と Grok は AGENTS.md を読む。Claude Code は、CLAUDE.md か CLAUDE.local.md があると AGENTS.md を自分では読まない |
+| 3 つを同じ規則で動かす | AGENTS.md を 1 つ置き、CLAUDE.md に `@AGENTS.md` の 1 行を書く | 採った（「AlmaLinux 10 で使う」の手順 4〜6） | Codex と Grok は AGENTS.md を読む。Claude Code は、CLAUDE.md か CLAUDE.local.md があると AGENTS.md を自分では読まない |
 | 3 つを同じ規則で動かす | CLI ごとに指示書を書く（CLAUDE.md・AGENTS.md・`.grok/rules/`） | 採らない | 同じ規則を 3 か所で直すことになる |
-| 作業場所を分ける | エージェントごとに git の worktree とブランチを 1 つずつ作る | 採った（実施手順 7） | 素の git だけ。3 つの CLI と 2 つの OS で同じ形 |
+| 作業場所を分ける | エージェントごとに git の worktree とブランチを 1 つずつ作る | 採った（「AlmaLinux 10 で使う」の手順 7） | 素の git だけ。3 つの CLI と 2 つの OS で同じ形 |
 | 作業場所を分ける | 各 CLI の worktree の機能（`claude -w`・`codex --worktree`・`grok -w`） | 採らない | 置き場所とブランチの名前がそれぞれ違う（[worktree の置き場所とブランチ](#worktree-の置き場所とブランチ)） |
 | 作業場所を分ける | 1 つのディレクトリで順番に使う | 採らない | 同時に動かすと、同じファイルを書き合う |
-| Claude Code から Codex・Grok を呼ぶ | 公式のプラグイン（OpenAI の codex-plugin-cc、xAI の grok-build-plugin-cc） | 採った（実施手順 9〜11） | Node.js 18.18 以上 |
+| Claude Code から Codex・Grok を呼ぶ | 公式のプラグイン（OpenAI の codex-plugin-cc、xAI の grok-build-plugin-cc） | 採った（「AlmaLinux 10 で使う」の手順 9〜11） | Node.js 18.18 以上 |
 | Claude Code から Codex・Grok を呼ぶ | Claude Code にシェルで `codex review`・`grok -p` を動かさせる | 代わりの方法として載せた（使い方の基本の表） | 依存は増えない。裏で動かして状況を見る機能は無い |
 | Claude Code から Codex・Grok を呼ぶ | MCP で Codex を呼ぶ（`codex mcp-server`） | 使えない | Codex 0.154.0 で削除された |
 | Claude Code から Codex・Grok を呼ぶ | PAL MCP Server（旧 Zen MCP Server） | 採らない | 2025-12 から更新が無い。Grok は API キー（従量課金）が要る |
-| エージェントの変更を人に渡す | エージェントが自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit） | 採った（2026-10-10 から push と作成。2026-10-15 から取り込みも可。いずれも利用者の決定） | リモートと、push の認証・Pull Request を作る道具（GitHub は gh）。リモートが無ければ、ブランチへのコミットまで |
-| エージェントの変更を人に渡す | push も Pull Request も人が行い、エージェントはブランチへのコミットまで | 採らない（2026-10-09 の初版の形） | 人の手間が増える。リモートの無いプロジェクトでは、今の形でも同じになる |
+| エージェントの変更を人に渡す | エージェントが自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit） | 採った（利用者の決定） | リモートと、push の認証・Pull Request を作る道具（GitHub は gh）。リモートが無ければ、ブランチへのコミットまで |
+| エージェントの変更を人に渡す | push も Pull Request も人が行い、エージェントはブランチへのコミットまで | 採らない | 人の手間が増える。リモートの無いプロジェクトでは、今の形でも同じになる |
 | 役割を分けてレビューし合う | 書いたものとは別のモデルが、新しい会話でレビューし、人が指摘を選ぶ | 採った（分担して作業する・相互にレビューする・main に取り込む） | 3 つの契約の使用量を使う |
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
 | スマートフォンから指示する | Codex のリモート接続（ChatGPT のアプリ） | 採らない | ホストは macOS・Windows の ChatGPT のデスクトップアプリだけ（Linux は無い）。Codex CLI からは設定できない |
-| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-実施手順)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる（2026-10-11 に手順書にした） |
+| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる |
 | スマートフォンから指示する | Codeg のブラウザ画面から Claude Code・Codex CLI に直接頼む | OS 別の手順書で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)） | AlmaLinux 10 と Windows 11。使う CLI の導入とログイン、同じホストで動く Codeg が要る |
 | GitHub で分担する | GitHub の Agent HQ（Issue に Claude と Codex を割り当てる） | 採らない | Copilot の有料プラン。Grok はエージェントとしては無く、Copilot のモデルとしてだけ選べる |
 | GitHub で分担する | Pull Request に `@codex review`、`anthropics/claude-code-action` | 採らない | GitHub の App・シークレットの設定。Grok の公式の Action は無い（`grok -p` を API キーで動かす例だけ） |
@@ -93,24 +92,22 @@
 - 作業場所は素の `git worktree` で分け、worktree の間の受け渡しはブランチへのコミットで行う。そのための push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
 - 変更を担当するエージェントは、リモートがあるとき、自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
-  - 2026-10-10 に、利用者の決定で変えた。それまでは、push と Pull Request の作成も人が行っていた
-  - 2026-10-15 に、利用者の決定で Pull Request の取り込みもエージェントが行ってよいことにした。それまでは、取り込みは人が行っていた
   - テストとリンターが通り、Pull Request が競合していなければ取り込める。利用者が取り込まないよう頼んだときは取り込まず、そのことを報告する
   - Pull Request は、ホスティングの画面や `gh pr merge --merge` で取り込める。squash と rebase にせず、各 worktree の `--ff-only` が通る形を保つ
   - 共同作業の手順では、手元での取り込み（[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順）と `main` の push・ブランチの削除は人が行う
   - `agent/<名前>` を使い続けるので、ホスティングがリモートのブランチを自動で消すことは前提にしない
-- docs とそのサブモジュールの 11 個のリポジトリは、AGENTS.md の規則で共同作業の手順と違う形にした
+- docs とそのサブモジュールの 11 個のリポジトリは、AGENTS.md の規則で共同作業の手順と違う形にする
   - 作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないので、`gh pr merge --squash` で取り込む
-  - 2026-10-15 に、利用者の決定で、取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す方針にした
+  - 取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す
   - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチの削除は人が行う
   - 取り込んだブランチには、その後コミットも push もしない。push すると、消したリモートのブランチが同じ名前で作り直される
-  - 同日の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。10 個は merge commit が無効で squash だけを許し、md-table-excel だけは merge commit も許す
+  - 2026-10-15 の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。10 個は merge commit が無効で squash だけを許し、md-table-excel だけは merge commit も許す
   - この 11 個の自動削除と squash は、GitHub の設定に頼る。次の「GitHub の機能には頼らない」は、共同作業の手順書の方針
 - 共同作業の手順書は、GitHub の機能には頼らない。setup-notes の手順は、自分の PC と自分のサーバー（[Forgejo](../forgejo.md#forgejo) など）でも同じに使えることを優先した
 
 ### 既定の分担
 
-- 2026-10-15 の利用者の決定で、分担を指定しないファイル変更の依頼も Claude Code が取りまとめる
+- 分担を指定しないファイル変更の依頼も Claude Code が取りまとめる
   - 適用範囲は docs リポジトリとその 10 個のサブモジュールに絞り、11 個のリポジトリの AGENTS.md の末尾に同じ `## 既定の分担` を置く。ほかのプロジェクトへは自動で適用しない
 - ほかのプロジェクトでも同じ既定を入れるための手順を、[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)に残す。手順の対象は Windows 11。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは Claude Code だけで行う
 - Claude Code は計画・実機での確認・依頼・指摘の確認・統合・コミットと Pull Request・取り込みを担当し、Codex は別の clone か worktree で実装と下書きを担当する
@@ -138,7 +135,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 ### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
 
 - Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
-  - 2026-10-15 に AlmaLinux 10 にも Antigravity CLI の[導入の項](../ai-agents.md#antigravity-cli)を足したが、共同作業の構成は変えていない。AlmaLinux 10 の headless は、作業フォルダーの中にも書かなかった（[参考資料](ai-agents.md#almalinux-10-の-antigravity-cli)）
+  - AlmaLinux 10 にも Antigravity CLI の[導入の項](../ai-agents.md#antigravity-cli)はあるが、共同作業は Claude Code・Codex・Grok Build の 3 つで行う。AlmaLinux 10 の headless は、作業フォルダーの中にも書かなかった（[参考資料](ai-agents.md#almalinux-10-の-antigravity-cli)）
 - CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](grok-build-remote.md)）
 - Windows のコマンドの sandbox は 1.2.17 からある（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。実測では、既定の `request-review` のまま `--sandbox` を付けても、headless ではコマンドが拒まれた
 - 実測で、headless は作業フォルダーの中の書き込みと、作業フォルダーの外でも `%TEMP%` の下への書き込みを、確認なしで許した。作業フォルダーと `%TEMP%` の外の読み書きと、シェルのコマンドは拒まれた。作業フォルダーの外の `%TEMP%` を読めるかは測っていない
@@ -156,7 +153,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 - Claude Code からは、PowerShell で `agy -p` を直接呼ぶ。公式のブリッジのプラグインが無いため、この用途だけのプラグインは作らない
 - Antigravity への依頼は読み取り専用のレビューと調べものに限り、入力のコピーと前後のハッシュの比較を含む手順を使う
 
-### 実施手順 / 手順 4〜6: 各 CLI が読む指示書
+### AlmaLinux 10 で使う / 手順 4〜6: 各 CLI が読む指示書
 
 | CLI（検証時の版） | 読む指示書 | 注意 |
 |---|---|---|
@@ -191,12 +188,12 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 
 - この手順書は、基準のブランチを `main` に固定して、コマンドに直接書いた（[AlmaLinux 10 の初期設定の「Git」](../almalinux-setup.md#git)の `init.defaultBranch` が `main` のため）
 - `master` などを基準にするなら、手順書のコマンドと AGENTS.md の規則の `main` を、すべてそのブランチの名前に読み替える
-  - 実施手順の手順 3（`## main` の確かめ）・手順 7（`worktree add … main`）
+  - 「AlmaLinux 10 で使う」の手順 3（`## main` の確かめ）・手順 7（`worktree add … main`）
   - 使い方の基本・相互にレビューするの `--base main`・`main...HEAD`
   - main に取り込むの `main..agent/…`・`git merge --ff-only main`
-  - ロールバックの手順 2 の `main..agent/…`
+  - 「AlmaLinux 10 のロールバック」の手順 2 の `main..agent/…`
 
-### 実施手順 / 手順 9〜11: 公式のプラグイン
+### AlmaLinux 10 で使う / 手順 9〜11: 公式のプラグイン
 
 - **OpenAI の codex-plugin-cc**（`codex@openai-codex`、検証時は 1.0.6）
   - Codex の app server（`codex app-server`）を通して Codex を動かす。レビューは読むだけの sandbox、`rescue` は既定で書き込みのできる sandbox
@@ -241,8 +238,8 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
   - 確認や完了をスマートフォンに知らせるには、Claude Code の `/config` で通知（Push when actions required など）を有効にする
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
-- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-実施手順)（2026-10-11）
-- 同じ Codeg で Claude Code と Codex CLI も選ぶ手順は、OS 別の「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)、2026-10-12）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)を参照する
+- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)
+- 同じ Codeg で Claude Code と Codex CLI も選ぶ手順は、OS 別の「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)を参照する
 
 ### GitHub で分担する（この手順書では使わない）
 

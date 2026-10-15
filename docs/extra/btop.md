@@ -1,4 +1,4 @@
-# btop インストール手順（AlmaLinux 10 / EPEL）のロールバックと注意点
+# btop のロールバックと注意点
 
 [手順書](../almalinux-setup.md#btop)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](../reference/btop.md)
 

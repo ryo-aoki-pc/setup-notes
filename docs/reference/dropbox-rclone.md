@@ -1,8 +1,8 @@
-# Dropbox を rclone で同期する手順（AlmaLinux 10 / Raspberry Pi 5 / Homebrew + systemd ユーザータイマー）の参考資料
+# Dropbox と rclone の参考資料
 
 [手順書](../almalinux-setup.md#dropbox-と-rclone)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#補足の実測)
 
 ## 補足
 

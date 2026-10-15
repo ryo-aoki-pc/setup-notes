@@ -1,8 +1,8 @@
-# VirtualBox インストール手順（AlmaLinux 10 は Oracle 公式 dnf リポジトリ / Windows 11 は winget）の参考資料
+# VirtualBox の参考資料
 
 手順: [AlmaLinux 10](../virtual-machines.md#virtualbox)・[Windows 11](../virtual-machines.md#windows-11-で-virtualbox-を入れる)。[ロールバックと注意点](../extra/virtualbox.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#補足の実測)
 
 ## 補足
 

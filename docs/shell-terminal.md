@@ -18,7 +18,7 @@
   - 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)・[Windows 11 で共通の bash 設定を更新する](#windows-11-で共通の-bash-設定を更新する)で上げる。AlmaLinux 10 で Homebrew・Flatpak とまとめて上げるなら、[AlmaLinux 10 のセットアップの「共通の bash 設定・Homebrew・Flatpak を上げる」](almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)
   - AlmaLinux 10 のシェルのツールと HackGen Console NF は、同じ「共通の bash 設定・Homebrew・Flatpak を上げる」の手順 3（Homebrew）で上がる。Windows 11 のシェルのツールは[Windows 11 のセットアップの「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)、HackGen Console NF は[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)で上げる
   - WezTerm は、AlmaLinux 10 は OS の更新（[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)）で上がる。Windows 11 は[Windows 11 のセットアップの「Git for Windows・Firefox・WezTerm を上げる」](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で上げる。自分用の WezTerm の設定は、[WezTerm の設定を更新する](#wezterm-の設定を更新する)・[Windows 11 で WezTerm の設定を更新する](#windows-11-で-wezterm-の設定を更新する)で上げる
-- Windows 11 の PowerShell 7 のプロファイルの行の印 `# windows-setup.md` と、Windows Terminal の設定の控え `settings.json.windows-setup.bak` は、項がこの文書へ移る前の名前のまま（すでに通した PC の戻す手順と合わせるため）
+- Windows 11 の PowerShell 7 のプロファイルの行には印 `# windows-setup.md` を使い、Windows Terminal の設定の控えには `settings.json.windows-setup.bak` を使う
 
 ## AlmaLinux 10 で使う
 
@@ -94,150 +94,6 @@
    - `beginning-of-line` に `"\e[1~"` が無ければ、`$include /etc/inputrc` の行が読まれていない
    - `中断:` が出たら、既存の `~/.inputrc` の先頭に `$include /etc/inputrc` が無ければ足し、`set` と矢印の各 4 行を足して `bind -f ~/.inputrc` を貼る
 
-#### 共通の bash 設定を手動で移行する
-
-通常は[共通の bash 設定](#共通の-bash-設定)の `install.sh` を使う。この項は、`install.sh` を使わずに、手で確認しながら移行するときだけ行う。
-
-- 前提: 無し（Git は AlmaLinux 10 Workstation に初めから入っている）
-- 実行場所: 自分のユーザーの端末（bash）。Windows 11 も、Git Bash でこの項の手順をすべて行える。WSL は Linux 側で別に行う
-- この項の手順 3 の控えと、手順 4 の既存の行の確認を省かない
-
-[背景説明](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/bash/blob/main/docs/verification/install.md)
-
-1. この設定が既に入っているか確かめる。
-
-   ```bash
-   ls -ld ~/.config/bash
-   grep -n 'config/bash/bashrc' ~/.bashrc
-   ```
-
-   - `ls` が `No such file or directory` で、`grep` が何も出さなければ、まだ入っていない。手順 2 へ進む
-   - `ls` がディレクトリ、`grep` が `if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi` を出せば導入済み
-   - 導入済みなら手順 2〜10 を飛ばし、[更新](#共通の-bash-設定を更新する)を行う
-   - Git Bash で `~/.bashrc` がまだ無ければ、`grep` は `No such file or directory` と出す（手順 3 で作られる）
-
-1. この設定を `~/.config/bash` に clone する。
-
-   ```bash
-   git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash
-   ```
-
-   - `Cloning into '/home/<USER>/.config/bash'...` と出る（Git Bash では `Cloning into 'C:/Users/<WIN_USER>/.config/bash'...`）
-   - 問いは出ない（公開のリポジトリなので、認証は要らない）
-   - インターネットに出られないホストでは、[SSH の SOCKS トンネル](almalinux-setup.md#ssh-の-socks-トンネル)を張ったシェルで貼る
-   - 止まったときは `~/.config/bash` は残らないので、そのまま貼り直せる
-
-1. `~/.bashrc` を控えてから、元の手順書が書いた行を消す。
-
-   ```bash
-   if [ ! -r ~/.config/bash/migrate/remove-old-lines.awk ]; then echo '中断: 手順 2 の clone ができていない' >&2
-   elif [ -e ~/.bashrc.before-bash ]; then echo '中断: ~/.bashrc.before-bash が既にある' >&2
-   else
-     touch ~/.bashrc &&
-       cp -p ~/.bashrc ~/.bashrc.before-bash &&
-       awk -f ~/.config/bash/migrate/remove-old-lines.awk ~/.config/bash/migrate/old-lines.txt ~/.config/bash/migrate/old-y.txt ~/.bashrc.before-bash > ~/.bashrc &&
-       bash -n ~/.bashrc && echo 'bash -n: OK'
-   fi
-   ```
-
-   - `bash -n: OK` と出ればよい
-   - `中断:` と出たら、何も書き換えていない。`~/.bashrc.before-bash` が前の実行の控えなら、手順 4 から続ける
-   - `bash -n` が `syntax error` を出したら、`cp -p ~/.bashrc.before-bash ~/.bashrc` で戻し、手順 4 の `grep` の行をエディタで消す形に切り替える
-   - **行全体が[移行で消す行](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#移行で消す行)と同じ行だけを消す**
-
-1. 手順 3 で消した行と、残った関係の行を見る。
-
-   ```bash
-   git --no-pager diff --no-index ~/.bashrc.before-bash ~/.bashrc
-   grep -n -i -E 'brew|zoxide|starship|yazi|eza|gdu-go|MANPAGER|nvim|DOCKER_HOST|wezterm|HIST|shopt|bash_completion|fzf|FZF_' ~/.bashrc
-   ```
-
-   - `git diff` の `-` で始まる行が、手順 3 で消した行
-   - `grep` が何も出さなければ、手順 6・7 は飛ばす
-   - `grep` が行を出したら、手順 6 でエディタで見る（行の番号が左に出る）
-
-1. `~/.bashrc` の末尾に、この設定を読む 1 行を足す。
-
-   ```bash
-   if ! grep -qxF 'if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi' ~/.bashrc; then
-     [ -z "$(tail -c 1 ~/.bashrc)" ] || echo >> ~/.bashrc
-     echo 'if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi' >> ~/.bashrc
-   fi
-   tail -n 1 ~/.bashrc
-   bash -n ~/.bashrc && echo 'bash -n: OK'
-   ```
-
-   - `if [ -r ~/.config/bash/bashrc ]; then . ~/.config/bash/bashrc; fi` と `bash -n: OK` が出ればよい
-   - 既にその 1 行があれば、足さない（2 度貼っても 1 行のまま）
-   - このホストだけの設定を足すときは、この 1 行より後ろに書く
-
-1. 手順 4 で行が出たときだけ、`~/.bashrc` をエディタで開き、この設定と重なる行を消して、残す行を末尾の 1 行より後ろへ移す。
-
-   - Homebrew の `shellenv`、`EDITOR` / `VISUAL`、`alias vi=nvim`、`MANPAGER`、`DOCKER_HOST`、履歴と `shopt`、`ll` / `la` / `lt`、`alias gdu=gdu-go`、`y()`、Homebrew の補完、fzf と `FZF_` の環境変数、starship、WezTerm の統合、zoxide の行を消す（詳しい条件は[共通設定が読むもの](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読むもの)）
-   - `if … fi` は `fi` まで、`y()` は `function y() {` から `}` まで消す
-   - この設定と違う形で使いたい行（`--cmd cd` の zoxide、手で直した `alias ll` など）は、消さずに、手順 5 で足した末尾の 1 行より後ろへ移す
-   - zoxide の行を残すときは、`--hook none` を足す（例: `eval "$(zoxide init bash --cmd cd --hook none)"`）
-   - Homebrew のコマンドを使う行も、手順 5 の 1 行より後ろへ移す（Homebrew の PATH は、その 1 行で足される）
-   - WSL の WezTerm の行は残す。starship を使うなら手順 5 の 1 行より後ろへ移す（[読む順番](https://github.com/ryo-aoki-pc/bash/blob/main/docs/reference/readme.md#読む順番)）
-   - トークンなど、ホストだけの行は残す（前でも後ろでもよい）
-   - **次の手順は、エディタを閉じてから貼る**
-
-1. 手順 6 でエディタで直したときだけ、構文と並びを確かめる。
-
-   ```bash
-   bash -n ~/.bashrc && echo 'bash -n: OK'
-   grep -n -i -E 'config/bash/bashrc|brew|zoxide|starship|yazi|eza|gdu-go|MANPAGER|nvim|DOCKER_HOST|wezterm' ~/.bashrc
-   ```
-
-   - `bash -n: OK` と出ればよい。`syntax error` と出たら、手順 6 に戻って直す
-   - 手順 6 で残した行の番号が、`config/bash/bashrc` の行（手順 5 の 1 行）の番号より大きければよい
-
-1. ログインシェルの設定ファイルが無いときだけ（新しい Git Bash など）、`~/.bashrc` を読む `~/.bash_profile` を作る。
-
-   ```bash
-   if [ -e ~/.bash_profile ] || [ -e ~/.bash_login ] || [ -e ~/.profile ]; then
-     grep -n 'bashrc' ~/.bash_profile ~/.bash_login ~/.profile 2>/dev/null
-   else
-     printf '%s\n' '# ログインシェルでも ~/.bashrc を読む' 'if [ -f ~/.bashrc ]; then . ~/.bashrc; fi' > ~/.bash_profile
-     cat ~/.bash_profile
-   fi
-   ```
-
-   - AlmaLinux 10 では既存の `~/.bash_profile` の `if [ -f ~/.bashrc ]; then` と `. ~/.bashrc` の 2 行が出る。ファイルは作らない
-   - Git for Windows が作った `~/.bash_profile` のある Git Bash では、`/c/Users/<WIN_USER>/.bash_profile:3:test -f ~/.bashrc && . ~/.bashrc` の 1 行が出る（何も作らない）
-   - ログインシェルの設定ファイルが 1 つも無いホスト（新しい Git Bash）では、作った 2 行が出る
-   - 既にあるファイルが何も出さなければ、そのファイルは `~/.bashrc` を読んでいない。エディタで `if [ -f ~/.bashrc ]; then . ~/.bashrc; fi` を足す
-
-1. 開いている端末をすべて閉じて、開き直す。
-
-   - WezTerm などの端末アプリは、ウィンドウをすべて閉じて起動し直す。ssh で入っているなら、ログアウトして入り直す
-   - 開いたままのシェルには効かない（手順 3 で消した行の関数やフックも、そのシェルには残っている）
-   - **次の手順は、開き直した端末で貼る**
-
-1. 開き直した端末で、この設定が読まれたか確かめる。
-
-   ```bash
-   echo "${__bash_config_loaded-読まれていない}"
-   alias | grep -E "^alias (ll|la|lt|vi|gdu)="
-   type -t y z
-   echo "EDITOR=${EDITOR-} DOCKER_HOST=${DOCKER_HOST-}"
-   echo "HISTSIZE=${HISTSIZE} $(shopt -p autocd globstar | tr '\n' ' ')"
-   bind -X
-   complete -p brew bat 2>/dev/null
-   bash -c '. ~/.bashrc' 2>&1 | wc -c
-   ```
-
-   - 1 行目が `1` なら、対話のシェルでこの設定が最後まで読まれている
-   - `HISTSIZE=100000 shopt -s autocd shopt -s globstar` は、どのホストでも出る（履歴と `shopt`）
-   - fzf があれば `bind -X` に Ctrl+R の `__fzf_history__` と Ctrl+T の `fzf-file-widget` が出る。Git Bash 5.3 ではコロン無しでよい
-   - WezTerm の統合を読む場合はマウス報告よけの行も出る
-   - Homebrew の bat があれば `complete -p` に `complete -F _fzf_path_completion bat`（fzf 無しなら `_bat`）と `brew` の行が出る
-   - 2〜4 行目は導入済みのツールだけ出る。eza は `ll`・`la`・`lt`、yazi は `function`（`y`）、zoxide は `function`（`z`）
-   - Git Bash では eza 無しでも `alias ll='ls -l'` が出てよい。`alias gdu` は出ない
-   - AlmaLinux 10 でも、eza が無いと `alias ll='ls -l --color=auto'` が出る（coreutils-common の `/etc/profile.d/colorls.sh` のもので、この設定のものではない）
-   - 最後が `0` なら、非対話のシェル（`ssh <HOST> <コマンド>`・scp・rsync）で何も出力しない
-   - 1 行目が `読まれていない` なら、手順 5・8 を見直す
-
 #### 共通の bash 設定を root に入れる
 
 root のシェルにも、共通の bash 設定を入れる。一般ユーザーを信用できる自分専用のホストだけで行う。root が一般ユーザーの書き換えられる Homebrew のコマンド・補完を実行し、Homebrew が PATH の先頭になる。
@@ -262,8 +118,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `~` は `/root`。clone 済みなら更新し、`bash ~/.config/bash/install.sh` を実行する
-   - 控えは `/root/.bashrc.before-bash`。既知の Homebrew・DOCKER_HOST の追記も移行する
-   - 控えが既にある状態で変更が必要なら中断する。手動で確認する場合は[共通 bash の手動移行](#共通の-bash-設定を手動で移行する)の手順をすべて root のシェルで行う
+   - 控えは `/root/.bashrc.before-bash`
+   - 控えが既にある状態で変更が必要なら中断する
    - 独自設定は共通設定の読み込み行より後ろに置く。構文エラーなら変更せず中断する
 
 1. `exit` で抜け、自分のユーザーから `sudo -i` で入り直す。
@@ -286,7 +142,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 共通の bash 設定のリポジトリを pull で上げる。更新後は端末を開き直す。
 
-- 前提: [共通の bash 設定](#共通の-bash-設定)か[共通の bash 設定を手動で移行する](#共通の-bash-設定を手動で移行する)を通してある
+- 前提: [共通の bash 設定](#共通の-bash-設定)を通してある
 - 実行場所: 自分のユーザーの端末（bash。Windows 11 は Git Bash）。この項の手順 2 は、`sudo -i` で入った root のシェル
 
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
@@ -1564,7 +1420,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
      - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
    - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
-   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
+   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
    - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
 
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
@@ -1754,13 +1610,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - インターネットに出られないホストは、[SSH の SOCKS トンネル](almalinux-setup.md#ssh-の-socks-トンネル)を張ったシェルで貼る
    - 手元で変えたファイルがあって pull が止まったら、`git -C ~/.config/bash status` で見る
    - 開いている端末には効かない。端末を開き直す
-
-#### Windows 11 で共通の bash 設定を手動で移行する
-
-- 通常の共通 bash 設定の導入が中断したときに、設定を手動で移行する
-- 前提: [Git for Windows](windows-setup.md#git-for-windows)を通してある
-- 実行場所: この PC のデスクトップの、自分のユーザーの Git Bash の窓
-- [AlmaLinux 10 の共通の bash 設定を手動で移行する](#共通の-bash-設定を手動で移行する)の全手順を Git Bash で行う。WSL は WSL 側で別に行う
 
 #### Windows 11 で WezTerm の設定を導入する
 

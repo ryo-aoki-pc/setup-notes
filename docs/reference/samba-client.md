@@ -1,8 +1,8 @@
-# Samba の共有を AlmaLinux 10 と Windows 11 から使う手順（cifs-utils + fstab の自動マウント / GNOME Files / Windows のネットワーク ドライブ）の参考資料
+# Samba クライアントの参考資料
 
 [手順書](../samba.md#samba-クライアント)・[ロールバックと注意点](../extra/samba-client.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#補足の実測)
 
 ## 補足
 
@@ -61,13 +61,13 @@
 
 - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
-### ロールバック / 手順 1: 補足: 2 つのユニットを止める理由
+### AlmaLinux 10 のロールバック / 手順 1: 補足: 2 つのユニットを止める理由
 
 - `.automount` と `.mount` を一緒に止めると、`cifs` と `autofs` の両方が外れる
 - `.mount` だけを止めると、`Stopping 'mnt-<SHARE>.mount', but its triggering units are still active: mnt-<SHARE>.automount` と出て、次のアクセスでまたマウントされる
 - `MOUNT_POINT` が空のまま `$(systemd-escape …)` を使うと、ユニットの名前が `-.mount`（ルートのファイルシステム）になる。先頭の `if` はこれを防ぐ
 
-### ロールバック / 手順 2: 補足: 行の消し方
+### AlmaLinux 10 のロールバック / 手順 2: 補足: 行の消し方
 
 - 行は awk で、2 列目（マウント先）と 3 列目（`cifs`）を文字列として比べて消す。sed の正規表現だと、IP アドレスのドットなどが特別な意味を持つ
 - `tee` で書き戻すので、`/etc/fstab` のモード（0644）とラベル（`etc_t`）は変わらない
@@ -89,7 +89,7 @@
 ### Windows 11 の Samba クライアント / 手順 4: 補足: 資格情報マネージャーに置く
 
 - `cmdkey /add:<SERVER> /user:<SMB_USER> /pass` は、`<SERVER>` を宛先にした Windows の資格情報（資格情報マネージャーの「Windows 資格情報」）を作る。`/pass` に値を書かなければ、`cmdkey` がパスワードを聞く（Microsoft の文書）
-- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[samba.md のサーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 3 と同じ考え）
+- パスワードをコマンドラインに書かないのは、ほかのプロセスから見え、PowerShell の履歴にも残るため（[Samba サーバー: サーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 3 と同じ考え）
 - この節の手順 5 の `New-SmbMapping` に資格情報を渡さないと、Windows はこの資格情報でつなぐ（Microsoft の Azure Files の文書も、`cmdkey /add` の後に資格情報を渡さずに割り当てている）
 - 資格情報はこのユーザーのものなので、ほかのユーザーには使われない。サインインし直しても残る
 
@@ -132,7 +132,7 @@
   - fstab に `password=` を書かない。fstab は誰でも読める（0644）
   - SELinux: systemd から呼ばれた mount.cifs は `mount_t` で動く。EL10 のポリシーでは `mount_t` が制限の無いドメイン（`unconfined_domain_type`）なので、置き場所のファイルの型を選ばない
 - **マウントのオプションは `credentials=`・`uid=`・`gid=`・`file_mode=0600`・`dir_mode=0700` だけにした**
-  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[samba.md のサーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 5 の補足）
+  - `uid=` / `gid=`: 無いと、マウントした側のファイルが root の所有に見える（[Samba サーバー: サーバーの上で動作を確かめる](../samba.md#samba-サーバー-サーバーの上で動作を確かめる)の手順 5 の補足）
   - `file_mode=0600` / `dir_mode=0700`: 既定の 0755 のままだと、この PC のほかのユーザーからも読める。
   - このモードはこの PC での見え方だけで、サーバー側のファイルのモードはサーバーの `create mask`（0644）で決まる
   - `vers=` は書かない。既定でサーバーの最も新しい版を使う

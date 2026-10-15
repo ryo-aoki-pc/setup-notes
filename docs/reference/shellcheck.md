@@ -1,8 +1,8 @@
-# ShellCheck / shfmt インストール手順（AlmaLinux 10 / Homebrew）の参考資料
+# ShellCheck と shfmt の参考資料
 
 [手順書](../almalinux-setup.md#shellcheck-と-shfmt)・[ロールバックと注意点](../extra/shellcheck.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#補足の実測)
 
 ## 補足
 
@@ -69,6 +69,6 @@
 
 ### 参照
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#参考資料から分離した記録)
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md#補足の実測)
 
 ---

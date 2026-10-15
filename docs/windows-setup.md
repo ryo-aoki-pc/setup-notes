@@ -712,11 +712,10 @@
    ```powershell
    & {
      $line = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md'
-     $old = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-powershell-paste.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
      $text = Get-Content -LiteralPath $PROFILE -Raw
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($text -and ($text.Contains($line) -or $text.Contains($old))) { "すでにある: $PROFILE" } else {
+     if ($text -and $text.Contains($line)) { "すでにある: $PROFILE" } else {
        if ($text -and -not $text.EndsWith("`n")) { $line = "`r`n" + $line }
        Add-Content -LiteralPath $PROFILE -Value $line
        "足した: $PROFILE"
@@ -727,7 +726,7 @@
 
    - `足した:` とプロファイルのパス、足した行が出ればよい。OneDrive のバックアップ対象なら、パスは OneDrive の下
    - プロファイルにほかの行があれば、それも出る
-   - 追加済みなら `すでにある:` と出て、重複しない。旧 `windows-powershell-paste.md` で足した行も含む
+   - 追加済みなら `すでにある:` と出て、重複しない
 
 ---
 
@@ -2860,7 +2859,7 @@
 ### リモートから再起動する手段を増やす
 
 - リモートから使える再起動の経路を増やす
-- 前提: [ネットワークとリモート](#ネットワークとリモート)で LAN をプライベートにし、[PC 全体の設定](#pc-全体の設定)で電源・LAN の省電力を設定済み。自動サインインを使うなら[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)、Remote Control の自動起動を使うなら[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-実施手順)を通してある
+- 前提: [ネットワークとリモート](#ネットワークとリモート)で LAN をプライベートにし、[PC 全体の設定](#pc-全体の設定)で電源・LAN の省電力を設定済み。自動サインインを使うなら[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)、Remote Control の自動起動を使うなら[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)を通してある
 - 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。トリガーのコマンドは別の PC で実行する
 
 - 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7・撤去の手順は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
@@ -2870,7 +2869,7 @@
 - 既にある接続からの再起動（この項の手順にはしない）
   - SSH でつながるなら `Restart-Computer`。Administrators のユーザーは UAC 不要で、sshd は再起動後も自動で起動する
   - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 4 で有効。再起動の後はロック画面に戻るが、また入れる）
-  - [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-実施手順) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの項の手順 7
+  - [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの項の手順 7
 - この項で足す手段: クラッシュ時の自動再起動（この項の手順 3）・別の PC からのネットワーク再起動（この項の手順 4・5）・ネットワークが切れたときの自動再起動（この項の手順 6）
 - 戻すときは、この項の手順 8〜12（入れた手段のものだけ）
 
@@ -3071,7 +3070,7 @@
 
 1. 元に戻すときは（この項の手順 7 を行ったとき）、Remote Control のタスクのトリガーを外す。
 
-   - [Claude Code の Remote Control（Windows）](extra/windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、AI エージェントの手順書の[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-実施手順)の手順 5 で入れ直す
+   - [Claude Code の Remote Control（Windows）](extra/windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、AI エージェントの手順書の[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 5 で入れ直す
 
 ---
 
@@ -3663,7 +3662,7 @@
 - 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
 - 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
 - **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う-選択した方針)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
 
 > [!WARNING]
 > **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。

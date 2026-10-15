@@ -1,4 +1,4 @@
-# AI コーディングエージェントのセットアップのロールバックと注意点
+# AI コーディングエージェントのセットアップ（AlmaLinux 10・Windows 11）のロールバックと注意点
 
 [手順書](../ai-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](../reference/ai-agents.md)
 
@@ -6,14 +6,14 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 任意の構成のロールバックと注意点は、それぞれの文書にある: [コーディングエージェントの共同作業](coding-agents.md)・[Grok Build のブラウザ操作](grok-build-remote.md)・[Claude Code の GNOME 操作](claude-code-gui.md)・[Claude Code の Remote Control](windows-claude-remote-control.md)
 
-## ロールバック
+## AlmaLinux 10 のロールバック
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 残す項目の手順は飛ばす。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
 - 「Codex CLI」の手順 2 のパッケージは残す
 - Antigravity CLI は、[Antigravity CLI を消す](#antigravity-cli-を消す)で消す（その項の手順は実行していない。未検証）
 - [Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
-- [コーディングエージェントの共同作業](coding-agents.md#ロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
+- [コーディングエージェントの共同作業](coding-agents.md#almalinux-10-のロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
 
 > [!CAUTION]
 > [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 11 は、**`~/.grok`（ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree）を消す**（取り戻せない。入れ直すかもしれないなら、行わない）。Claude Code の設定・履歴（`~/.claude/`・`~/.claude.json`）は、この節では消さない。手で消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える（消す前に中身を確認する）。
@@ -240,7 +240,7 @@
 
    - どちらも何も出なければよい
    - プロセスが出たら、その Claude Code を `/exit` で終える（動いている `claude.exe` は消せない）
-   - タスクが出たら、[windows-claude-remote-control.md のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
+   - タスクが出たら、[Windows 11 で Claude Code の Remote Control を使う のロールバック](windows-claude-remote-control.md#ロールバック)を先に行う
 
 1. Claude Code の実行ファイルと、版・キャッシュ・ロックのフォルダーを消す。
 
@@ -494,7 +494,7 @@
 
    - `False` が出ればよい。`True` なら、実行ファイルが消えていないので、この項の手順 5 へ進まない
    - アンインストールと、その後に残るものは確かめていない。デスクトップとスタートメニューの `Antigravity.lnk`、HKCU の Uninstall の登録、ブラウザの一覧の `Offline` の項目が残ることがある。要らなければ手で消す（一覧の項目は削除のアイコン）
-   - [Antigravity アプリの Remote Control: 実施手順](../ai-agents.md#antigravity-アプリの-remote-control-実施手順)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
+   - [Antigravity アプリの Remote Control: Windows 11 で使う](../ai-agents.md#antigravity-アプリの-remote-control-windows-11-で使う)の手順 9 の `%USERPROFILE%\agy-rc-test` は残る。要らなければ手で消す
    - アプリのデータを残すなら、この項の手順 5 は飛ばす
 
 1. 完全に消すときだけ、アプリのデータのフォルダーを消す（取り戻せない）。
@@ -554,9 +554,9 @@
 - **Grok Build: `XAI_API_KEY` を設定すると、ログインが無いときに API キーで動く**（API の従量課金になる）。サブスクリプションで使うなら設定しない
 - **Grok Build: sandbox は既定で無効**: `--sandbox workspace`・`--sandbox read-only` などで、書ける場所を絞れる。Linux では Landlock が有効なカーネルと bubblewrap が要る（`sudo dnf install -y bubblewrap`。GNOME のデスクトップの PC には Flatpak と一緒に入っている）。Windows には sandbox が無い（公式の文書は Linux と macOS だけ）
   - `runtime-socket deny path` と `Permission denied (os error 13)` が出たら、ソケットの親ディレクトリの検索権限を確かめる。ソケット本体の権限を緩める必要は無い。このときの Grok のレビューは動いていないので、[コーディングエージェントの共同作業の「相互にレビューする」](../ai-agents.md#コーディングエージェントの共同作業-相互にレビューする)の代替へ進む
-  - カーネルの保護を適用できないエラー（`could not apply the '<プロファイル>' sandbox profile`）が出たら、Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。bubblewrap を入れただけで解決したとは扱わない（[起動できないときの補足](../reference/almalinux-setup.md#grok-build-注意点-linux-の-sandbox-を起動できないとき)）
+  - カーネルの保護を適用できないエラー（`could not apply the '<プロファイル>' sandbox profile`）が出たら、Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。bubblewrap を入れただけで解決したとは扱わない（[起動できないときの補足](../reference/almalinux-setup.md#grok-build--手順-7-補足-linux-の-sandbox-を起動できないとき)）
 - **Grok Build: Claude Code の指示書も読む**: AGENTS.md のほかに、CLAUDE.md・CLAUDE.local.md・`~/.claude/CLAUDE.md` も読む（読み込まれたものは `grok --trust inspect` の `Project Instructions`）。読むのは信頼したフォルダーだけ
-- **Grok Build: 会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](../reference/almalinux-setup.md#grok-build-注意点-会話のデータの扱い)）
+- **Grok Build: 会話のデータの扱い**: 学習と保存に使うかは、Grok の中の `/privacy`（Coding data, retention, and training の Opt in / Opt out）で選ぶ（[参考資料](../reference/almalinux-setup.md#grok-build--手順-7-補足-会話のデータの扱い)）
 - **Codex・Grok のプラグインはどのプロジェクトでも動く**: 自分のユーザーに入るので、どのディレクトリの Claude Code でも、起動と終了のたびに `node` で hook を動かす。外すときは、Node.js より先にプラグインを外す（[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 1 の後に、[端末とエディタを消す](almalinux-setup.md#端末とエディタを消す)の手順 5）
 - **Claude Code: `PATH` は自分で足す**: インストーラも `claude install` も足さない（[「Windows 11 で Claude Code を入れる」の手順 4](../ai-agents.md#windows-11-で-claude-code-を入れる)）。足さないと、開き直した PowerShell でも `claude` が見つからない
 - **Claude Code: Windows PowerShell (x86) では入らない**: `Claude Code does not support 32-bit Windows` で止まる。x86 の付かない「Windows PowerShell」で入れ直す
