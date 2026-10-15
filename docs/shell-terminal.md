@@ -1723,7 +1723,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、WezTerm を起動し直す。
 
    - [WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)を通す。前提の共通の bash 設定は、この項の手順 6 で導入済み
-   - その項の手順 5 で WezTerm を起動し、同じ項の手順 6 を新しい Git Bash のタブに貼って確かめる
+   - その項の手順 6 で WezTerm を起動し直し、同じ項の手順 7 を新しい Git Bash のタブに貼って確かめる
    - Git Bash の窓は閉じてよい
    - CRLF に変換して clone 済みのリポジトリは、WezTerm の Git Bash のタブで[改行を変換して clone したリポジトリを直す](almalinux-setup.md#改行を変換して-clone-したリポジトリを直す)を通す
 
