@@ -11,11 +11,15 @@
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
 - 残す項目の手順は飛ばす。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
 - 「Codex CLI」の手順 2 のパッケージは残す
+- Antigravity CLI は、[Antigravity CLI を消す](#antigravity-cli-を消す)で消す（その項の手順は実行していない。未検証）
 - [Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
 - [コーディングエージェントの共同作業](coding-agents.md#ロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
 
 > [!CAUTION]
 > [AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順 11 は、**`~/.grok`（ログイン情報・会話の記録・設定・信頼したフォルダーの記録・Grok が作った worktree）を消す**（取り戻せない。入れ直すかもしれないなら、行わない）。Claude Code の設定・履歴（`~/.claude/`・`~/.claude.json`）は、この節では消さない。手で消すと、設定・許可済みツール・MCP サーバー定義・セッション履歴がすべて消える（消す前に中身を確認する）。
+>
+> [Antigravity CLI を消す](#antigravity-cli-を消す)の手順 4 は、`~/.gemini/antigravity-cli`（ログイン情報・会話の記録・設定）と `~/.gemini/config` を消す（取り戻せない）。
+> Antigravity のほかの製品（IDE など）も使っているなら、共有の `config` は消さず、`antigravity-cli` だけを消す。
 
 ### AI エージェントとプラグインを消す
 
@@ -140,6 +144,52 @@
 
    - `No such file or directory` になればよい
    - Grok が作った worktree（`~/.grok/worktrees` の下）も消える。中の作業が要るなら、先に取り込む
+
+---
+
+### Antigravity CLI を消す
+
+1. Antigravity CLI が起動するときだけ、起動してログアウトする。
+
+   ```bash
+   agy
+   ```
+
+   - `agy` の中で `/logout` を実行し、`/quit` で終了する（`/logout` は実行していない。未検証）
+   - 起動時に落ちる（`MmapAligned() failed` など）なら、ログアウトせずに、この項の手順 2 へ進む
+   - **次の手順は、Antigravity CLI を終えてシェルのプロンプトに戻ってから貼る**（続けて貼ると CLI への入力になる）
+
+1. Antigravity CLI の実行ファイルと、インストーラーの一時ファイルのフォルダーを消す。
+
+   ```bash
+   rm -f ~/.local/bin/agy
+   rm -rf ~/.cache/antigravity
+   hash -r
+   printf '\n\033[7m 確認 \033[0m\n'
+   command -v agy
+   ```
+
+   - 最後に何も出なければ、PATH 上に Antigravity CLI は無い
+   - パスが出る場合は、別の導入方法の `agy`（Antigravity の IDE など）が残っている
+   - 確認用のディレクトリ `~/agy-sandbox`（[Antigravity CLI](../ai-agents.md#antigravity-cli)の手順 6）も残る。要らなければ手で消す
+
+1. インストーラーが足した PATH の行が残っていれば、エディタで消す。
+
+   - 入れたときに[Antigravity CLI](../ai-agents.md#antigravity-cli)の手順 4・5 を通していれば、何もしない
+   - 残っていれば、[Antigravity CLI](../ai-agents.md#antigravity-cli)の手順 4 のとおりに消す。`~/.local/bin` 自体や、ほかのツールが書いた PATH の行は消さない
+   - **次の手順は、2 つのファイルを保存してエディタを閉じてから貼る**
+
+1. 完全に消すときだけ、Antigravity CLI の設定・ログイン情報・会話の記録のフォルダーを消す（取り戻せない）。
+
+   ```bash
+   rm -rf ~/.gemini/antigravity-cli ~/.gemini/config
+   printf '\n\033[7m 確認 \033[0m\n'
+   ls -A ~/.gemini
+   ```
+
+   - 何も出なければ、`~/.gemini` は空。要らなければ手で消す
+   - 何か出たら、ほかのツール（Gemini CLI など）のデータなので残す
+   - Antigravity のほかの製品（IDE など）も使っているなら、共有の `~/.gemini/config` は消さない。この手順を飛ばすか、`antigravity-cli` だけを消す
 
 ---
 
@@ -519,6 +569,9 @@
 - **Grok Build: Windows には sandbox（`--sandbox`）が無い**: 公式の文書の sandbox は Linux と macOS だけ（[この節の「Grok Build: sandbox は既定で無効」](#注意点)）
 - **Antigravity CLI: `ERROR: logging before google.Init: I…` は情報の行**: `ERROR` で始まっても、後ろの `I` は情報の行を示す
 - **Antigravity CLI: headless は操作を拒んでも終了コード 0**: JSON の `status` も `SUCCESS` になる。拒否は `denied_actions` と標準エラーの `jetski: no output produced` で見分ける
+- **Antigravity CLI: AlmaLinux 10 の `agy install` は、実行するたびに PATH の行を足す**: インストーラーが初回に呼ぶほか、手で実行しても足す
+  - `~/.local/bin` が既に PATH にあっても、`~/.bashrc` と `~/.bash_profile` の末尾に足す。何度も実行すると重なる
+  - 足された行は、[Antigravity CLI](../ai-agents.md#antigravity-cli)の手順 4・5 で外す。`agy` が既にあれば、インストーラーは `agy install` を呼ばずに終わる
 - **Codeg の Antigravity: サインイン中の「サインアウト」は資格情報も消す**: 待ち手を止め、保存済みの資格情報も消す
 - **Antigravity アプリの Remote Control**
   - アプリが動いていないと使えない。Keep In Menu Bar がオンなら、窓を閉じても動く。タスクトレイから終了すると、ブラウザの一覧は `Offline` になる
