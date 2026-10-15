@@ -214,7 +214,7 @@
 1. 試験用の Markdown を開いて、treesitter と Mason の導入を待つ。
 
    ```bash
-   printf '%s\n' '#動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
+   printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
 
@@ -245,13 +245,13 @@
 1. 試験用の Markdown を作って開き、日本語検索・整形・IME 連携を確かめる。
 
    ```bash
-   printf '%s\n' '#動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
+   printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
 
    - `/kensaku` と打って Enter を押す。3 行目の「検索」にカーソルが移り、`[1/1]` と出る
    - `/kensaku` と打って `<Tab>` を押す。入力が「検索」に置き換わる (候補が 1 つなので、すぐ確定する)。`<Esc>` で抜ける
-   - `:w` で保存する。1 行目が `# 動作確認` に直る (glfm_markdownlint の整形)
+   - `:w` で保存する。1 行目の `#` の後の 2 つの空白が 1 つになり、`# 動作確認` になる (glfm_markdownlint の整形)
    - 遅い VM では整形に数秒掛かる。Markdown / MDX の待ち時間の上限は 10 秒で、処理が終わればすぐ戻る
    - `o` で行を開き、`<C-j>` を押す。下の表示が `A` から `あ` に変わる。`<Esc>` で `A` に戻る
    - `<C-j>` を押したときは、カーソルのすぐ下にも `あ` / `A` が約 1 秒出る
@@ -401,7 +401,7 @@
 1. Neovim を開き、上部バーが Neovim の IME の状態に付いてくることを確かめる。
 
    ```bash
-   printf '%s\n' '#動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
+   printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
 
@@ -719,7 +719,7 @@
 1. 試験用の Markdown を開いて、treesitter と Mason の導入を待つ。
 
    ```powershell
-   Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#動作確認', '', '日本語の検索を試す。' -Encoding UTF8
+   Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#  動作確認', '', '日本語の検索を試す。' -Encoding UTF8
    nvim "$env:TEMP\lazyvim-check.md"
    ```
 
@@ -744,7 +744,7 @@
    nvim "$env:TEMP\lazyvim-check.md"
    ```
 
-   - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しが `# 動作確認` に直り、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
+   - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しの `#` の後の空白が 1 つになり (`# 動作確認`)、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
    - 初めてなら [安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) を済ませる
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
