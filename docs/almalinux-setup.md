@@ -4856,12 +4856,13 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
-   git -C ~/.config/bash pull --ff-only &&
-     bash ~/.config/bash/install.sh
+   git -C ~/.config/bash pull --ff-only
    ```
 
    - `Already up to date.`（上がったときは、変わったファイルの一覧）が出る
    - 上がったときは、端末を開き直すと効く
+   - [シェルと端末のセットアップの「共通の bash 設定を更新する」](shell-terminal.md#共通の-bash-設定を更新する)と同じ pull だけを行う。`install.sh` は初回の導入用なので流さない（流し直すと、移す行があるときは、控えの `~/.bashrc.before-bash` が既にあるので止まる）
+   - SSH で clone したホストと、root にも入れたホストは、その項の手順で上げる
 
 1. Homebrew を入れたときだけ、Homebrew 自身と formula の索引を更新し、上げられるものを見る。
 
