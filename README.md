@@ -6,9 +6,9 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 | 手順書 | 対象 | 内容 |
 |---|---|---|
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワーク、SSH、Git、アプリと更新 |
-| [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME、Git、アプリ、ネットワーク、コンテナ、共有・同期と更新 |
-| [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Windows Terminal、PowerShell 7 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
+| [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、コンテナ、ファイルの共有と同期、再起動の後の確認と更新 |
+| [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 |
 | [Neovim のセットアップ](docs/neovim.md) | 両方 | Neovim の導入と設定 |
 | [AI コーディングエージェントのセットアップ](docs/ai-agents.md) | 両方 | Claude Code・Codex CLI・Grok Build・Antigravity CLI、プラグイン、共同作業、ブラウザ操作、Remote Control、GNOME 操作 |
 | [仮想マシンのセットアップ](docs/virtual-machines.md) | 両方 | VirtualBox、bootc ゲスト、kvm-container、Hyper-V、VMware Workstation Pro、Windows Sandbox |
@@ -34,7 +34,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 ### 導入の基盤
 
-- AlmaLinux 10 は RPM に無いか古いものを、CLI とフォントは [Homebrew](docs/almalinux-setup.md#homebrew)、GUI アプリは [Flathub](docs/almalinux-setup.md#flatpak-と-flathub) で入れる（AppStream / BaseOS に無い RPM は [EPEL、Firefox の FFmpeg だけ RPM Fusion](docs/almalinux-setup.md#epel-と-rpm-fusion)）。インターネットに出られないホストは [Homebrew](docs/almalinux-setup.md#homebrew-のオフライン導入)・[npm](docs/almalinux-setup.md#npm-のオフライン導入) の項を通す
+- AlmaLinux 10 は RPM に無いか古いものを、CLI とフォントは [Homebrew](docs/almalinux-setup.md#homebrew)、GUI アプリはベンダーの dnf リポジトリ（[Firefox](docs/almalinux-setup.md#firefox)・[VS Code](docs/almalinux-setup.md#vs-code)）が無ければ [Flathub](docs/almalinux-setup.md#flatpak-と-flathub) で入れる（AppStream / BaseOS に無い RPM は [EPEL、Firefox の FFmpeg だけ RPM Fusion](docs/almalinux-setup.md#epel-と-rpm-fusion)）。インターネットに出られないホストは [Homebrew](docs/almalinux-setup.md#homebrew-のオフライン導入)・[npm](docs/almalinux-setup.md#npm-のオフライン導入) の項を通す
 - Windows 11 では、CLI ツールは scoop、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる（Windows 11 のセットアップの「[アプリを入れる](docs/windows-setup.md#アプリを入れる)」）
 
 ### ほかの手順書が使う仕組み
@@ -62,7 +62,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 ### ファイル・ディスク・リソースを見る
 
-- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」、yazi は [AlmaLinux 10](docs/almalinux-setup.md#yazi)・[Windows 11](docs/windows-setup.md#yazi)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
+- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」（Windows 11 は「[シェルのツールを入れる](docs/shell-terminal.md#シェルのツールを入れる)」）、yazi は [AlmaLinux 10](docs/almalinux-setup.md#yazi)・[Windows 11](docs/windows-setup.md#yazi)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
 
 ### エディタ
 
@@ -70,7 +70,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 ### git と GitHub
 
-- Git・git-delta・lazygit・GitHub CLI は、[AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」と、Windows 11 の「[Git for Windows](docs/windows-setup.md#git-for-windows)」を通す
+- Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](docs/windows-setup.md#git-for-windows)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」で入れる
 - 自分の Git サーバーは Forgejo の「[Forgejo](docs/forgejo.md#forgejo)」で入れ、画面の操作は「[使い方の基本](docs/forgejo.md#forgejo-使い方の基本)」で確かめる
 
 ### 開発の補助と AI エージェント
@@ -109,7 +109,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 ## 記法
 
-- 各手順書の `## 実施手順` と後ろの見出しの手順は番号付きリストにする。各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。ロールバックと注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
+- 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。ロールバックと注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
