@@ -7,7 +7,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 | 手順書 | 対象 | 内容 |
 |---|---|---|
 | [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
-| [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、コンテナ、ファイルの共有と同期、再起動の後の確認と更新 |
+| [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 |
 | [Neovim のセットアップ](docs/neovim.md) | 両方 | Neovim の導入と設定 |
 | [AI コーディングエージェントのセットアップ](docs/ai-agents.md) | 両方 | Claude Code・Codex CLI・Grok Build・Antigravity CLI、プラグイン、共同作業、ブラウザ操作、Remote Control、GNOME 操作 |
@@ -16,6 +16,8 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 | [Samba のセットアップ](docs/samba.md) | 両方 | Samba サーバーと、両 OS のクライアント |
 | [Syncthing のセットアップ](docs/syncthing.md) | 両方 | フォルダの同期と、設定のバックアップ・復元 |
 | [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) | AlmaLinux 10 | デスクトップ共有、ヘッドレスセッション、リモートログイン |
+| [コンテナのセットアップ](docs/containers.md) | AlmaLinux 10 | Podman、podman-compose、podman-tui、lazydocker、Distrobox |
+| [Dropbox のセットアップ](docs/dropbox.md) | AlmaLinux 10 | Dropbox の公式クライアントと、rclone による同期 |
 | [Forgejo のセットアップ](docs/forgejo.md) | AlmaLinux 10 | Git サーバーの導入、公開、使い方、バックアップと更新 |
 
 - 新しく入れた PC では、OS の初期設定（[Windows 11](docs/windows-setup.md) / [AlmaLinux 10](docs/almalinux-setup.md)）→ [シェルと端末](docs/shell-terminal.md) → 要る手順書の順に通す
@@ -54,7 +56,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 ### ファイル共有・同期
 
 - 共有は Samba の[サーバー](docs/samba.md#samba-サーバー)・クライアント（[AlmaLinux 10](docs/samba.md#samba-クライアント) / [Windows 11](docs/samba.md#windows-11-で-samba-クライアントを使う)）、同期は Syncthing（[AlmaLinux 10](docs/syncthing.md#syncthing) / [Windows 11](docs/syncthing.md#windows-11-で-syncthing-を使う)）の手順を通す
-- Dropbox は AlmaLinux 10 の「[Dropbox](docs/almalinux-setup.md#dropbox)」か「[Dropbox と rclone](docs/almalinux-setup.md#dropbox-と-rclone)」で入れる
+- Dropbox は AlmaLinux 10 の「[Dropbox](docs/dropbox.md#dropbox)」か「[Dropbox と rclone](docs/dropbox.md#dropbox-と-rclone)」で入れる
 
 ### 端末とシェル
 
@@ -80,8 +82,8 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 
 ### コンテナ
 
-- AlmaLinux 10 の [Podman](docs/almalinux-setup.md#podman) を入れ、[Quadlet での自動起動](docs/almalinux-setup.md#podman-quadlet-で自動起動する)・[Distrobox](docs/almalinux-setup.md#distrobox)・[podman-compose](docs/almalinux-setup.md#podman-compose)・[イメージの検査](docs/almalinux-setup.md#画像の道具)を用途に合わせて通す
-- 端末の画面からは [podman-tui](docs/almalinux-setup.md#podman-tui)・[lazydocker](docs/almalinux-setup.md#lazydocker) で操作する
+- AlmaLinux 10 の [Podman](docs/containers.md#podman) を入れ、[Quadlet での自動起動](docs/containers.md#podman-quadlet-で自動起動する)・[Distrobox](docs/containers.md#distrobox)・[podman-compose](docs/containers.md#podman-compose)・[イメージの検査](docs/almalinux-setup.md#画像の道具)を用途に合わせて通す
+- 端末の画面からは [podman-tui](docs/containers.md#podman-tui)・[lazydocker](docs/containers.md#lazydocker) で操作する
 
 ### 仮想化
 

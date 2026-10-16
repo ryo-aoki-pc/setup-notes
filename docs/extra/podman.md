@@ -1,18 +1,18 @@
 # Podman のロールバックと注意点
 
-[手順書](../almalinux-setup.md#podman)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](../reference/podman.md)
+[手順書](../containers.md#podman)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](../reference/podman.md)
 
-- 「手順 N」は[手順書](../almalinux-setup.md#podman)の手順 N、「本書」「この文書」は手順書を指す
+- 「手順 N」は[手順書](../containers.md#podman)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 
 ## ロールバック
 
 - 上から順に、通した節の分だけ実行する
 - この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose・[Forgejo](forgejo.md#ロールバック)）で作ったものが要らないか確かめる。Forgejo が動いているときは先に止め、Quadlet の定義も外す
-- Quadlet の節を通し、linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（[Syncthing](../syncthing.md#syncthing)・[Dropbox](../almalinux-setup.md#dropbox)・[Forgejo](../forgejo.md#forgejo) など、ほかに linger を使うものが無いかは、そこで確かめる）
+- Quadlet の節を通し、linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（[Syncthing](../syncthing.md#syncthing)・[Dropbox](../dropbox.md#dropbox)・[Forgejo](../forgejo.md#forgejo) など、ほかに linger を使うものが無いかは、そこで確かめる）
 
 > [!CAUTION]
-> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](../almalinux-setup.md#distrobox) のボックスや [podman-compose](../almalinux-setup.md#podman-compose)・[Forgejo](../forgejo.md#forgejo) のコンテナも含む。Forgejo の bind mount 先の `~/.local/share/forgejo` と Quadlet の定義は残るので、[Forgejo のロールバック](forgejo.md#ロールバック)で扱う。
+> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](../containers.md#distrobox) のボックスや [podman-compose](../containers.md#podman-compose)・[Forgejo](../forgejo.md#forgejo) のコンテナも含む。Forgejo の bind mount 先の `~/.local/share/forgejo` と Quadlet の定義は残るので、[Forgejo のロールバック](forgejo.md#ロールバック)で扱う。
 
 1. Quadlet の節を通したときだけ、確認用のサービスと定義とページを消す。
 
@@ -74,8 +74,8 @@
 ## 注意点
 
 - **イメージは完全な名前で書く**: 短い名前は、端末から実行すると取る場所を聞かれる（参考資料を参照）
-- **`sudo podman` は別の保管場所**: 自分のユーザーのコンテナとイメージは、`sudo podman` からは見えない（[使い方の基本](../almalinux-setup.md#podman-使い方の基本)）
-  - root のコンテナを lazydocker で見るなら、[lazydocker: root でも使う](../almalinux-setup.md#lazydocker-root-でも使う)の節（システムの API ソケットを使う）
+- **`sudo podman` は別の保管場所**: 自分のユーザーのコンテナとイメージは、`sudo podman` からは見えない（[使い方の基本](../containers.md#podman-使い方の基本)）
+  - root のコンテナを lazydocker で見るなら、[lazydocker: root でも使う](../containers.md#lazydocker-root-でも使う)の節（システムの API ソケットを使う）
 - **1024 未満のポートは使えない**: 自分のユーザーで `-p 127.0.0.1:80:8080` のように指定すると、次のように失敗する
   - `Error: pasta failed with exit code 1:` と `Failed to bind port 80 (Permission denied) for option '-t 127.0.0.1/80-80:8080-8080'`
   - `sysctl net.ipv4.ip_unprivileged_port_start` は `1024`。8080 など 1024 以上の番号にする
@@ -87,4 +87,4 @@
 - **Raspberry Pi 5 で使うイメージは arm64 があるか見る**: `podman manifest inspect <イメージ>` に `"architecture": "arm64"` があればよい。本書の例のイメージにはどれもある
 - **Homebrew の formula が podman を連れてくることがある**: podman-compose などを Homebrew で入れると、依存の podman が `/usr/bin/podman` を隠す（[ツール一覧](../tool-catalog.md#注意点)）
   - システムの podman との互換性が要るものや、別の podman を依存で入れるものは RPM を選ぶ
-  - [画像の道具](../almalinux-setup.md#画像の道具) の hadolint・dive と [lazydocker](../almalinux-setup.md#lazydocker) は、RPM の提供状況などを比べて Homebrew を選んでいる
+  - [画像の道具](../almalinux-setup.md#画像の道具) の hadolint・dive と [lazydocker](../containers.md#lazydocker) は、RPM の提供状況などを比べて Homebrew を選んでいる

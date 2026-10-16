@@ -4,7 +4,7 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする。GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル）は、両 OS とも `docs/shell-terminal.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする。GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル）は、両 OS とも `docs/shell-terminal.md` を正本とする。コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は、AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは用途ごとの文書に置き、用途の項のリードから案内する
@@ -13,7 +13,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
 - ai-agents.md は、OS で節を分けた手順書にする。`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節で OS ごとに分ける項は「<節>: AlmaLinux 10 で使う」「<節>: Windows 11 で使う」、更新は「AlmaLinux 10 の更新」「Windows 11 の更新」にする。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
 - 両 OS を載せる手順書と extra では、OS で分かれる「実施手順」「更新」「ロールバック」の見出しに OS 名を入れる（`AlmaLinux 10 で使う`・`AlmaLinux 10 の更新`・`AlmaLinux 10 のロールバック`、`Windows 11 で使う`・`Windows 11 の更新`・`Windows 11 のロールバック`）。OS 名の無い「実施手順」「更新」「ロールバック」は、片方の OS だけの文書か、`## AlmaLinux 10 で使う` などの OS の節の下にだけ置く
 - virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
-- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md・shell-terminal.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
+- gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md・shell-terminal.md・containers.md・dropbox.md も、virtual-machines.md と同じ形にする（gnome-remote.md・containers.md・dropbox.md は `## AlmaLinux 10 で使う` だけ）。2冊のうち対象の OS の手順書からは、冒頭と `## 更新` のリードから案内し、該当カテゴリがあるときはそのリードからも案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
 - Windows の導入前の手順は `## Windows の導入`、bootc など別構成のゲストは virtual-machines.md の `## AlmaLinux 10 で使う` の用途に置く
 
 ### 2 冊の骨格（カテゴリ別）

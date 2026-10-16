@@ -598,7 +598,7 @@
 - 前提:
   - VM の中で[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1〜5 を通してある
   - Secure Boot が有効な VM は、VM の中で[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 3 まで通してある
-  - ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[Podman](almalinux-setup.md#podman)の手順 1〜6）
+  - ホストは、インターネットに出られ、x86_64 の AlmaLinux 10 の rootless の podman が動くこと（[Podman](containers.md#podman)の手順 1〜6）
     - Windows ホストでは WSL の AlmaLinux 10 の端末で行う。既定の NAT でホストオンリーの VM に届くことを確認済み
     - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
 - 実行場所:

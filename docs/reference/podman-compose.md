@@ -1,6 +1,6 @@
 # podman-compose の参考資料
 
-[手順書](../almalinux-setup.md#podman-compose)・[ロールバックと注意点](../extra/podman-compose.md)
+[手順書](../containers.md#podman-compose)・[ロールバックと注意点](../extra/podman-compose.md)
 
 ## 補足
 
@@ -51,7 +51,7 @@ podman-compose は、ディレクトリの名前（`compose-sample`）をプロ�
 - [containers/podman-compose — README](https://github.com/containers/podman-compose) — 対応している compose の機能と、オプション
 - [Compose Specification](https://compose-spec.io/) — compose ファイルの書式
 - `man podman-compose`（podman のパッケージに入っている `podman compose` の説明）/ `podman-compose --help` / `podman-compose <サブコマンド> --help`
-- [Podman](../almalinux-setup.md#podman) — 前提の rootless の podman と、自動起動の Quadlet
+- [Podman](../containers.md#podman) — 前提の rootless の podman と、自動起動の Quadlet
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---
