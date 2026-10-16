@@ -225,6 +225,10 @@
     - 使い捨てのリポジトリで「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（手順 2 は 4 つの CLI の版とログイン）
     - 同じ項の手順 8 は Claude・Codex・Antigravity CLI の規則の読み込みまで。Grok の `--trust inspect` の行と手順 9 は通していない。CLI の headless の権限の確認と Codeg の接続確認だけを、4 エージェントの実分担の成功として扱わない
     - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
+  - Antigravity のモデル（2026-10-16、利用者の決定）: Antigravity に頼む 3 か所（「Windows 11 で使う」の手順 8、「Antigravity に読み取り専用で頼む」の手順 3、「既定で分担する」の手順 5）は、`agy models` から版がいちばん新しい `gemini-<版>-flash-high` を選んで `--model` で渡す。各項の手順 1 の `AGY_MODEL` で替えられる
+    - 2026-10-15 に通した上のブロックは、`--model` を付けない形だった
+    - 2026-10-16 に Windows 11 の実機（Antigravity CLI 1.4.0）で、「Antigravity に読み取り専用で頼む」の手順 1〜3・5 を書いたとおりに Windows PowerShell 5.1 で 3 回通した。3 回とも `gemini-3.8-flash-high` で、`denied_actions` は空、使い捨てのフォルダーの中は変わらなかった
+    - 手順 8・手順 5 は、`$m` の行と Antigravity の行だけを、自動・`AGY_MODEL` を書いたとき・選べないときの 3 通りで流した。ブロックの全体、`AGY_MODEL` を書いたときのレビュー、Flash の上限に達したとき、AlmaLinux 10 は未確認。詳しくは検証記録の 2026-10-16 の付録
 - `docs/ai-agents.md` — 「Codeg」: AlmaLinux 10 と Windows 11 で、ACP のコーディングエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）をブラウザやスマートフォンのチャット画面から動かす任意の構成。使うエージェントと同じホストに OSS の Codeg（Apache-2.0）の `codeg-server` を常駐させる。まず localhost で起動し、ブラウザを開いてフォルダーを選び、使うエージェントの項へ進む。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。AlmaLinux 10 は「ユーザーサービスの常駐」と、使う CLI の導入・ログインを前提にする
   - Codeg は複数のエージェントを使う Web UI として書く（2026-10-16、利用者の決定）。共通の「ブラウザで開いてエージェントを選ぶ」と、Grok 固有の「Grok Build を使う」を分ける。後者は手順 1 が権限モード、2 が Grok・モデルの選択、3 が指示・承認、4 がプロセスの確認
   - エージェント別の項は「Codeg: Grok Build を使う」「Codeg: Claude Code と Codex CLI を使う」「Codeg: Windows 11 で Claude Code と Codex CLI を使う」「Codeg: AlmaLinux 10 で Antigravity を使う」「Codeg: Windows 11 で Antigravity を使う」。AlmaLinux 10 の Antigravity の項は Windows 11 の同項の前に置く
