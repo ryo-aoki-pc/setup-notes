@@ -2566,7 +2566,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 使い捨てのフォルダーに、ブランチの中身と `main` との差分を書き出す。
 
    ```bash
-   if [ -z "${PROJECT_DIR}" ] || [ -z "${BRANCH}" ]; then echo '中断: 手順 1 の PROJECT_DIR か BRANCH が空のまま。値を入れて貼り直す' >&2; else
+   if [ -z "${PROJECT_DIR}" ] || [ -z "${BRANCH}" ] || [ -z "${REVIEW_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR・BRANCH・REVIEW_DIR のどれかが空のまま。手順 1 を貼り直す' >&2; else
      mkdir -p "${REVIEW_DIR}/src"
      git -C "${PROJECT_DIR}" archive "${BRANCH}" | tar -x -C "${REVIEW_DIR}/src"
      git -C "${PROJECT_DIR}" diff --output="${REVIEW_DIR}/review.diff" "main...${BRANCH}"
@@ -2583,7 +2583,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. モデルを選んで Antigravity にレビューを頼み、変わったファイルと拒んだ操作を確かめる。
 
    <details>
-     <summary>貼るコマンド（bash・21 行）</summary>
+     <summary>貼るコマンド（bash・24 行）</summary>
 
    ```bash
    if [ ! -f "${REVIEW_DIR}/review.diff" ]; then echo '中断: 手順 2 の差分が無い。手順 2 を貼り直す' >&2; else
@@ -2597,7 +2597,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
        printf '%s' "${out}" | MODEL="${model}" CHANGED="${changed}" python3 -c '
    import json, os, sys
    text = sys.stdin.read()
-   res = json.loads(text) if text.strip() else {}
+   try:
+       res = json.loads(text) if text.strip() else {}
+   except ValueError:
+       res = {"error": text.strip()}
    print("model          =", os.environ["MODEL"])
    print("status         =", res.get("status", ""))
    print("error          =", res.get("error") or "")
@@ -2620,6 +2623,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 最後に、指摘が「重大度・場所・理由・直し方」で出る
    - `status = ERROR` で `error` に `Individual quota reached` が出たら、そのモデルの上限。`agy -p /quota` で残りと戻る時刻（UTC）を確かめる
      - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 3 を貼り直すか、戻るまで待つ
+   - `status` が空で、`error` に `agy` の出力がそのまま出たら、`agy` が JSON を返さずに終わった。出た文を確かめてから、この手順を貼り直す
    - `中断:` が出たら、レビューは流れていない。メッセージに示された手順を貼り直す
    - `error` に `is not recognized as a known model` が出たら、`AGY_MODEL` の ID が一覧に無い。この項の手順 1 の ID を `agy models` の ID に直して貼り直し、この項の手順 3 を貼り直す
 
@@ -2631,10 +2635,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 使い捨てのフォルダーを消す。
 
    ```bash
-   case "${REVIEW_DIR}" in
-     "${HOME}/.cache/agy-review-"*) rm -rf -- "${REVIEW_DIR}"; printf '\n\033[7m 確認 \033[0m\n'; ls -d "${REVIEW_DIR}" ;;
-     *) echo '中断: 手順 1 の REVIEW_DIR が想定と違う。貼り直す' >&2 ;;
-   esac
+   if ! [[ "${REVIEW_DIR}" =~ ^"${HOME}"/\.cache/agy-review-[0-9]{8}-[0-9]{6}$ ]]; then echo '中断: 手順 1 の REVIEW_DIR が想定と違う。貼り直す' >&2; else
+     rm -rf -- "${REVIEW_DIR}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     ls -d "${REVIEW_DIR}"
+   fi
    ```
 
    - `No such file or directory` が出ればよい
@@ -2769,7 +2774,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 上から順に貼る。貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 追記する文は BOM の無い UTF-8 と LF の改行にする。折りたたまれたブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - Claude Code が 3 つに頼む形（コマンド・変更の移し方・後片付け）と、方針と役割の理由は[参考資料の「既定の分担」](reference/coding-agents.md#既定の分担)
-- AlmaLinux 10 でも、AGENTS.md の節は同じ文にする。この項の手順は Windows 11 用で、AlmaLinux 10 で節を足す手順と、Codex・Grok への頼み方は未検証のため書かない
+- AlmaLinux 10 でも、AGENTS.md の節は同じ文にする。この項の手順は Windows 11 用。AlmaLinux 10 で節を足す手順と、Codex・Grok への頼み方は、確かめるまでこの項に書かない
 - AlmaLinux 10 で Antigravity に頼むときは、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)
 - 既定の分担をやめるとき・文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)
 - この項の手順 6（対話で実際に分担する流れ）は未確認
@@ -2976,6 +2981,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `Fast-forward` か `Already up to date.` が出ればよい。次の分担はここから始める
    - `Not possible to fast-forward` と出たら、その worktree に、`main` に取り込んでいないコミットがある（この節の手順 3〜5 で取り込んでから、もう一度貼る）
    - この節の手順 3〜5 で取り込んだときは、`main` の窓で `git push` する（`main` への push は人が行う）
+   - antigravity の worktree には窓が無いので、`main` の窓で `git -C <WT_ROOT>/antigravity merge --ff-only main`（Windows 11 は `<WT_ROOT>\antigravity`）を打ってそろえる
    - 取り込んだブランチの Pull Request が開いたまま残ったら、閉じる
 
 ---

@@ -8,6 +8,7 @@
 ### AlmaLinux 10 で使う / 手順 2: 補足: 版と並べる順
 
 - 検証時の版は `2.1.295 (Claude Code)`・`codex-cli 0.162.0`・`grok 1.0.50 (…)`
+- Antigravity CLI を足した 4 つの形は、2026-10-16 に `2.1.301 (Claude Code)`・`codex-cli 0.160.0`・`grok 1.0.50 (…)`・`1.4.0` で通した
 - `claude auth status` は後ろに貼った行を読んで捨てるので、最後に置いてある
 
 ### AlmaLinux 10 で使う / 手順 3: 補足: 指示書がすでにあるとき
@@ -22,7 +23,7 @@
 
 - Grok の確かめは AI には聞かないので、使用量は減らない
 - `grok --trust` は、この worktree を信頼したことを `~/.grok/trusted_folders.toml` に残す（Grok の画面で信頼するのと同じ）
-- Claude と Codex への 2 つの問いは、それぞれのプランの使用量を少し使う
+- Claude・Codex・Antigravity への 3 つの問いは、それぞれのプランの使用量を少し使う（Antigravity は Gemini の Flash の組の使用量）
 
 ### AlmaLinux 10 で使う / 手順 9: 補足: Node.js と bubblewrap
 
@@ -155,7 +156,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
 
 Claude Code が 3 つに頼む形は次のとおり。Codex・Grok の行は、Windows 11 の実機で使ったもの（2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52）。Antigravity CLI の行は、両 OS の手順を案内する。
 
-モデルを選ぶ式は、2026-10-16 に Antigravity CLI 1.4.0 と Windows PowerShell 5.1 で確かめた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#付録-antigravity-のモデルの選び方2026-10-16-jst)）。
+モデルを選ぶ式は、2026-10-16 に Antigravity CLI 1.4.0 で、Windows PowerShell 5.1 の式（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#付録-antigravity-のモデルの選び方2026-10-16-jst)）と AlmaLinux 10 の bash の式（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#付録-almalinux-10-の-4-つ目のエージェントantigravity-cliの検証2026-10-16-jst)）を確かめた。
 
 | 頼む相手 | 頼み方 |
 |---|---|
