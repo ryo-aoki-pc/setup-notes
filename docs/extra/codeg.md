@@ -474,7 +474,7 @@
 
 ## AlmaLinux 10 の共通パスワード変更で失敗したとき
 
-- [共通パスワードの設定・変更](../ai-agents.md#codeg-共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
+- [共通パスワードの設定・変更](../ai-agents.md#codeg-almalinux-10-で共通パスワードを設定変更する)の補助スクリプトを実行した本人が確認する。Codeg の削除や Caddy の停止は行わない
 - 旧設定の退避はファイル名だけを表示する。認証ファイルや退避の本文を開かず、パスワードをエージェントや復旧担当へ渡さない
 - 失敗時の復帰は公開 fixture で検証した。実ホストでの失敗からの復帰と、旧認証によるログインは未確認（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-102-の3エージェント接続と共通パスワードの検証2026-10-13-jst)）
 
@@ -526,7 +526,7 @@
 
 #### Claude Code・Codex の共有設定と履歴
 
-- 任意節（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
+- 任意節（[AlmaLinux 10](../ai-agents.md#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 3 で設定を保存すると、Claude の `~/.claude/settings.json` や Codex の `~/.codex/config.toml` など、端末の CLI と共有する設定も変わる。Windows 11 では同じユーザーの `%USERPROFILE%` 配下
 - 認証方法を変える前に、本人が既存の方式と必要な設定を確かめる。既に「公式サブスクリプション」なら保存し直さない。別のアカウントへのログインも、端末の CLI に影響する
 - 既存の API 用の項目がある場合は、認証方法の保存で削除・変更されることがある。エージェントへ設定ファイルの全文やログイン情報を渡さない
 - 接続アダプターには別のランタイムが入る。CLI と同じホームの設定・MCP・フックなどを使い得るので、Codeg に追加しただけで既存設定から隔離されたとは扱わない
@@ -594,4 +594,4 @@
 - 「ファイルとコマンドをエージェント自身に処理させる」は、既定の無効のまま使う。有効にしても、`mkdir` が確認なしで実行される結果は変わらなかった
 - 取り込みの画面は、そのホストのほかのエージェントとプロジェクトのセッションの題名も一覧に出す
 - Codeg の子プロセス（`codeg-mcp`）の引数に、内部用の値（`--token <UUID>`）が出る。アクセストークンとは別のもの
-- Claude Code・Codex を使う場合は、任意の項（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する
+- Claude Code・Codex を使う場合は、任意の項（[AlmaLinux 10](../ai-agents.md#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）を通す。エージェントごとの実測と未確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)で区別する

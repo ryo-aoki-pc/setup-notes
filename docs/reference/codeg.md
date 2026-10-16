@@ -68,12 +68,12 @@
 - サーバー自身から `SERVER_IP` へつなぐ通信は、firewalld の規則にかからない
 - `curl` の終了コード 60 は、相手の証明書を検証できなかったことを示す
 
-### Codeg / 端末にルート証明書を入れる / 指紋の照合
+### Codeg / Windows 11 で端末にルート証明書を入れる / 指紋の照合
 
 - [Caddy の参考資料](caddy.md#caddy-端末にルート証明書を入れる--指紋の照合)を参照する。AlmaLinux 10 は Forgejo などと同じ認証局を共有し、同じホストのために取り込み済みの端末には入れ直さない
 - Windows 11 の認証局は Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
 
-### Codeg / 端末にルート証明書を入れる / 手順 2・5: 補足: Android のブラウザと Service Worker
+### Codeg / Windows 11 で端末にルート証明書を入れる / 手順 2・5: 補足: Android のブラウザと Service Worker
 
 - Android のブラウザと、警告の画面で進む許可は、[Caddy の補足](caddy.md#caddy-端末にルート証明書を入れる--手順-25-補足-android-のブラウザと警告の許可)を参照する。そこにある観測は、Windows 11 の Codeg 専用の認証局で行った
 - Codeg の画面は Service Worker（`/sw.js`）を登録する。ページの移動は、先にサーバーへ問い合わせる
@@ -83,9 +83,9 @@
 - 証明書に問題が無ければ、Codeg は `/` と同じ画面の HTML を返す。証明書を信頼している PC の内蔵ブラウザ（Chromium）では、ログインしていないときに `/api/` から `/login`（ログインの画面）へ移ることを Codeg 0.35.2 で確かめた
 - ログインしているときの移り先は見ていない。`/sw.js` の説明には、ルートのページは `/workspace` か `/login` に移るとある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)）
 
-### Codeg / 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
+### Codeg / AlmaLinux 10 で接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
-- [AlmaLinux 10 の任意節](../ai-agents.md#codeg-接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま
+- [AlmaLinux 10 の任意節](../ai-agents.md#codeg-almalinux-10-で接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま
 - runtime と permanent の両方へ新規則を追加してから、証明書を検証した未認証の要求が 401 になることを確かめ、元の送信元付き規則だけを外す。認証の共有値や Codeg・Caddy の待ち受けは変更しない
 - 送信元を指定しない規則は、LAN・VPN に属することを判定しない。宛先へ届く経路があれば、ほかのネットワークからも接続の対象になる
 - 自ホストの HTTPS 検査は、証明書と認証の検査で、別の端末からの到達確認ではない。別端末からのログインや、不要な経路を公開していないことの確認とは分ける
@@ -132,7 +132,7 @@
 - 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
 - Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントのエージェントを巻き込まない
 
-### Codeg / 共通パスワードを設定・変更する / 手順 1〜3: 補足: 標準認証
+### Codeg / AlmaLinux 10 で共通パスワードを設定・変更する / 手順 1〜3: 補足: 標準認証
 
 - 本人が決めた共通パスワードを、Codeg の標準認証の `CODEG_TOKEN` の値として使う。[公式の Web Service 設定](https://docs.codeg.app/reference/settings/web-service)と[サーバーの読取箇所](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/bin/codeg_server.rs#L205)を参照
 - 画面のトークン名と、内部の bearer による認証は維持する。[認証の実装](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/web/auth.rs#L21)は、受け取った値を設定値と照合する
@@ -146,9 +146,9 @@
 - 変更処理で結果自体を得られない失敗では、`CredentialReplaced`・`FileUnchanged` は `null`。未変更と断定せず、認証ファイルと専用サービスの状態を確認してから復旧する
 - 旧認証での 200 は確認しないため、`OldPasswordVerified` は `false` のまま。本人がブラウザで確かめる
 
-### Codeg / 共通パスワードを設定・変更する / 手順 1〜4: 補足: AlmaLinux の対話スクリプト
+### Codeg / AlmaLinux 10 で共通パスワードを設定・変更する / 手順 1〜4: 補足: AlmaLinux の対話スクリプト
 
-- [AlmaLinux 10 の共通パスワード手順](../ai-agents.md#codeg-共通パスワードを設定変更する)は、`scripts/codeg/set-codeg-password.py` を本人の端末で使う。Python の `getpass` で 2 回入力し、Windows と同じ文字条件と一致を確かめる
+- [AlmaLinux 10 の共通パスワード手順](../ai-agents.md#codeg-almalinux-10-で共通パスワードを設定変更する)は、`scripts/codeg/set-codeg-password.py` を本人の端末で使う。Python の `getpass` で 2 回入力し、Windows と同じ文字条件と一致を確かめる
 - `--check` は認証ファイルの本文を読まない。所有者と権限、`EnvironmentFile` の参照先、`StandardError=null`、専用サービスの実行ファイルと待ち受け、未認証 401 を確認する
 - 入力値は本人のローカルプロセスのメモリ内で扱う。コマンド引数・ログ・結果の表示には出さない。保存時は systemd の `EnvironmentFile` に合わせて引用し、`\` と `"` をエスケープする
 - `~/.config/codeg-server/` は 0700、`token.env` と新規の一時ファイル・控えは 0600。既存ファイルをハードリンクで控え、本文を読み出さずに新ファイルへ原子的に置き換える
@@ -156,9 +156,9 @@
 - Codeg の `--supervise` の MainPID と、3080 番を待ち受ける worker は別になる。サービスの cgroup 内の worker を特定し、PID・開始時刻・実行ファイルと socket inode を各要求の前後で照合する
 - 新しい値での 200 と `status=ok`、未認証 401、誤った値 401 を同じ worker で確認する。失敗後の旧認証による 200 と、本人の HTTPS ログインは自動では確認しない
 
-### Codeg / Claude Code のプラグインから Grok に読み取り専用で頼む / 手順 1〜5: 補足: 外側の sandbox
+### Codeg / AlmaLinux 10 で Claude Code のプラグインから Grok に読み取り専用で頼む / 手順 1〜5: 補足: 外側の sandbox
 
-- [AlmaLinux 10 の任意節](../ai-agents.md#codeg-claude-code-のプラグインから-grok-に読み取り専用で頼む)は、Grok の内側の sandbox が Landlock 非対応で起動しないホストを対象にする。通常の Grok の起動先や、Codeg の native Grok ACP の起動方法は置き換えない
+- [AlmaLinux 10 の任意節](../ai-agents.md#codeg-almalinux-10-で-claude-code-のプラグインから-grok-に読み取り専用で頼む)は、Grok の内側の sandbox が Landlock 非対応で起動しないホストを対象にする。通常の Grok の起動先や、Codeg の native Grok ACP の起動方法は置き換えない
 - xAI の [Grok Build プラグイン](https://github.com/xai-org/grok-build-plugin-cc)が参照する `GROK_BINARY` に、`codeg-grok-readonly` を指定する。Codeg の Claude の接続はサービスの環境から、端末の Claude は `claude-agents` から、この値を継承する
 - 起動用スクリプトは読み取り専用の非対話依頼だけを受け付ける。`--sandbox read-only` を必須にし、書き込み用の指定・worktree の作成・コードの復元・外部 leader socket の指定を拒否する
 - 外側では bubblewrap の読み取り専用マウント、user/PID namespace、能力の削除を使う。この境界の内側でだけ Grok の sandbox を `off` にし、Landlock と Podman のソケットのエラーを回避する。bubblewrap が起動できなければ Grok も起動しない
@@ -185,11 +185,11 @@
 
 設定の保存と、各エージェントの組合せでの応答・承認は別に確認する。Windows 11 で Grok を親にした委譲とモードの確認範囲は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-grok-を親にした委譲と委譲先の既定のモード2026-10-16-jst)に分ける。
 
-### Codeg / Claude Code と Codex CLI を使う / 補足
+### Codeg / AlmaLinux 10 で Claude Code と Codex CLI を使う / 補足
 
-「Codeg: Claude Code と Codex CLI を使う」（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）は、構築済みの Codeg で使うエージェントを設定する任意の項。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
+「Codeg: AlmaLinux 10 で Claude Code と Codex CLI を使う」と「Codeg: Windows 11 で Claude Code と Codex CLI を使う」（[AlmaLinux 10](../ai-agents.md#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）は、構築済みの Codeg で使うエージェントを設定する任意の項。Caddy・アクセストークン・公開範囲は変えない。以下は 2026-10-12 に公式資料と Codeg v0.35.1 のソースを確認した内容。
 
-### Codeg / Claude Code と Codex CLI を使う / 手順 2: 補足: 接続アダプターとランタイム
+### Codeg / AlmaLinux 10 で Claude Code と Codex CLI を使う / 手順 2: 補足: 接続アダプターとランタイム
 
 | エージェント | Codeg v0.35.1 の対応アダプター | アダプターが使うランタイム |
 |---|---|---|
@@ -206,7 +206,7 @@ Codeg v0.35.2 の AlmaLinux 10 の実機では、Claude Code の推奨アダプ�
 
 表の対応版は [Codeg v0.35.1 のレジストリ](https://github.com/spacering-net/codeg/blob/e21eb6b38eea9405cdfa3b2d99df216d101d1344/src-tauri/src/acp/registry.rs)で確認した。実際に導入した版と試験条件は[今回の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)に分ける。
 
-### Codeg / Claude Code と Codex CLI を使う / 手順 3: 補足: 本人の契約と共有設定
+### Codeg / AlmaLinux 10 で Claude Code と Codex CLI を使う / 手順 3: 補足: 本人の契約と共有設定
 
 - Codeg の「公式サブスクリプション」は、Claude の既存の CLI ログイン、Codex の本人の ChatGPT ログインを使う方式。Codeg 用の API キーは追加しない（[Codeg の認証方式](https://docs.codeg.app/guide/authentication)）
 - Claude の公式案内（2026-10-07 更新）では、Claude Agent SDK・`claude -p`・第三者のアプリを契約の利用枠で引き続き使える。この手順はその方式を使う（[Claude の契約での SDK 利用](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan)）
@@ -215,7 +215,7 @@ Codeg v0.35.2 の AlmaLinux 10 の実機では、Claude Code の推奨アダプ�
 - Codeg で Claude の設定を保存すると `~/.claude/settings.json`、Codex の設定を保存すると `~/.codex/config.toml` など、端末の CLI と共有する設定にも反映される。認証方法の変更では、以前の API 用の設定が削除・変更されることもある
 - ログインのやり直しも同じユーザーの CLI に効く。別のアカウントへ切り替える操作は、Codeg の会話だけに閉じない（[共有設定と履歴の注意](../extra/codeg.md#claude-codecodex-の共有設定と履歴)）
 
-### Codeg / Claude Code と Codex CLI を使う / 手順 4〜7: 補足: モードと中断
+### Codeg / AlmaLinux 10 で Claude Code と Codex CLI を使う / 手順 4〜7: 補足: モードと中断
 
 - Claude のアダプターが返すモードは `Manual`・`Accept edits`・`Plan`・`Auto`。環境・管理設定などで許可される場合にだけ `Bypass permissions` も出る。手順では `Auto` を選ぶ
 - モデルが対応せず「Auto mode unavailable」になったときは、`Accept edits` に切り替わる実装がある
@@ -230,7 +230,7 @@ Codeg v0.35.2 の AlmaLinux 10 の実機では、Claude Code の推奨アダプ�
 
 表示名と切り替えの条件は、[Claude のモードの実装](https://github.com/agentclientprotocol/claude-agent-acp/blob/4e1fc1e8df2b9af3b1b2d6880ba90c5862283ba8/src/session-mode.ts)と [Codex のモードの実装](https://github.com/agentclientprotocol/codex-acp/blob/202e66e63343ec4f5a5e35ab590251d813d129ca/src/AgentMode.ts)で確認した。Codeg の画面での自動審査・拒否・中断の実測とは区別する。
 
-### Codeg / Claude Code と Codex CLI を使う / 手順 8〜10: 補足: 履歴の取り込みと再開
+### Codeg / AlmaLinux 10 で Claude Code と Codex CLI を使う / 手順 8〜10: 補足: 履歴の取り込みと再開
 
 - ブラウザで操作していても、取り込むのは Codeg のサーバーが動くホストの履歴。ブラウザを開く PC の履歴や、もう一方の OS の履歴は同期されない
 - 一覧は、開いたフォルダだけでなく、このホストの各エージェント・各プロジェクトの履歴を走査する。全プロジェクトを対象にする場合も、一覧の作業ディレクトリごとに本人の終了済みセッションを選別する

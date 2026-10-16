@@ -12,7 +12,7 @@
 - 残す項目の手順は飛ばす。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
 - 「Codex CLI」の手順 2 のパッケージは残す
 - Antigravity CLI は、[Antigravity CLI を消す](#antigravity-cli-を消す)で消す（その項の手順は実行していない。未検証）
-- [Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
+- [AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)で Remote Control を動かしているなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の前に、その節の手順 8 で止める
 - [コーディングエージェントの共同作業](coding-agents.md#almalinux-10-のロールバック)など、任意の構成で入れたものは、それぞれのロールバックで先に戻す
 
 > [!CAUTION]
@@ -536,11 +536,11 @@
 - **Remote Control の性質**（公式ドキュメント。[Windows 11 の Remote Control の注意点](windows-claude-remote-control.md#注意点)にも同じ内容）
   - このホストからは外向きの HTTPS だけで、受信のポートは開けない
   - つないでいる間、会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される
-  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる。tmux の中のシェルは残るので、[Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)の手順 8 で入り、その節の手順 4 のコマンドを打ち直す
+  - ネットワークが約 10 分切れると、`claude remote-control` は自分で終わる。tmux の中のシェルは残るので、[AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)の手順 8 で入り、その節の手順 4 のコマンドを打ち直す
   - 止めてから約 4 時間以内なら、`claude remote-control` で同じセッションが戻る
   - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`・`DISABLE_GROWTHBOOK`・`ANTHROPIC_BASE_URL`（`api.anthropic.com` 以外）があると使えない
 - **tmux でマウスを on にすると、Claude Code の画面でもホイールは tmux が受け取る**: コンテナの Claude Code（ログインしていない最初の画面）は、マウスの報告も代替画面も使っていなかった（`#{mouse_any_flag}` と `#{alternate_on}` が 0）。ホイールは tmux のコピーモードに入る
-- **Claude Code: `latest` は不具合のある版もそのまま届く**: `stable` なら飛ばされる版も入る。困ったら [Claude Code を stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)
+- **Claude Code: `latest` は不具合のある版もそのまま届く**: `stable` なら飛ばされる版も入る。困ったら [AlmaLinux 10 で Claude Code を stable チャンネルに切り替える（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-stable-チャンネルに切り替える任意)
 - **Claude Code: 自動更新しない**: ネイティブインストーラ版と違い、dnf 版は自分では更新しない
   - `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` は Homebrew / WinGet 向けで、apt / dnf / apk は root 権限が要るため対象外
 - **Claude Code: 更新の通知が先に来ることがある**: リポジトリに新しい版が届く前に「更新がある」と言われることがある。その場合は時間をおいて `sudo dnf upgrade claude-code`
@@ -548,7 +548,7 @@
 - **Claude Code: アカウントが要る**: 無料の claude.ai プランでは使えない
 - **Claude Code: 設定ファイルは残る**: `dnf remove` しても `~/.claude` は消えない
 - **Claude Code: `-p` は許可を聞けない**: 許可の要るツールは断られ、JSON の `permission_denials` に残る。要るものは `--allowedTools` で渡す（[Claude Code の使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
-- **Claude Code: SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[Claude Code を tmux の中で動かす（任意）](../ai-agents.md#claude-code-を-tmux-の中で動かす任意)）
+- **Claude Code: SSH を切ると止まる**: SSH のシェルで起動した `claude` は、切断で止まる。動かし続けるなら tmux の中で起動する（[AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)）
 - **Grok Build: 非公式の grok-cli と名前がぶつかる**: npm の `grok-dev`（もとは `@vibe-kit/grok-cli`）も `grok` のコマンドと `~/.grok` を使う。両方は入れない
 - **Grok Build: `agent` のコマンドも入る**: 中身は `grok` と同じ。インストーラーは、`~/.local/bin` に `agent` があっても `ln -sf` で置き換える（Cursor の CLI など、ほかの `agent` を使っているなら、入れた後に確かめる）
 - **Grok Build: `XAI_API_KEY` を設定すると、ログインが無いときに API キーで動く**（API の従量課金になる）。サブスクリプションで使うなら設定しない

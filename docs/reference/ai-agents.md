@@ -57,7 +57,7 @@
 
 ### Windows 11 の Antigravity アプリの Remote Control
 
-- Windows 11 ではデスクトップアプリの [Remote Control](../ai-agents.md#antigravity-アプリの-remote-control任意) を使う。Antigravity CLI は前提にしない
+- Windows 11 ではデスクトップアプリの [Remote Control](../ai-agents.md#windows-11-で-antigravity-アプリの-remote-control-を使う任意) を使う。Antigravity CLI は前提にしない
 - 公式文書には、CLI の常駐デーモン（`agy remote-control start`）という別の方法もある。この PC では登録しておらず、使っていない
   - アプリは動いている間だけ接続できる。CLI のデーモンは、公式文書で説明されている常駐する別の入口
   - 共有の `%USERPROFILE%\.gemini\config\config.json` でも、アプリの名前は `userSettings.remoteControlHostname`、CLI のデーモンの名前は `cliRemoteControlHostname` と、別のキーを使う

@@ -160,16 +160,16 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 - 既存・新規のどちらの設定ファイルも、起動時と同じ順で読み込む。既存セッションのマウス設定にも反映する
 - tmux の中でホイールを上へ回すと、さかのぼって読める（右上に `[5/258]` のような位置が出る）。下まで回すか `q` で戻る
 
-### Claude Code を tmux の中で動かす（任意） / 手順 1: 補足: claude auth status を最後に置く理由
+### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 1: 補足: claude auth status を最後に置く理由
 
 - ブラケットペースト無しで貼ると、`claude auth status --text` は、端末に残っていた後ろの行を読んで捨てた（後ろの `tmux -V` や `echo` が実行されなかった）
 
-### Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
+### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
 
 - ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 2）
 - 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
 
-### Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
+### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
 
 - tmux のセッションと、その中の Claude Code は、このホストで動き続ける
 

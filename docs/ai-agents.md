@@ -409,7 +409,7 @@
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - Google の Antigravity CLI（`agy`）は、[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)で入れる（AlmaLinux 10 は[Antigravity CLI](#antigravity-cli)）
 - Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)で入れる
-- デスクトップアプリをブラウザから使うときは、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)を通す
+- デスクトップアプリをブラウザから使うときは、[Windows 11 で Antigravity アプリの Remote Control を使う](#windows-11-で-antigravity-アプリの-remote-control-を使う任意)を通す
 
 ### Windows 11 で Claude Code を入れる
 
@@ -691,7 +691,7 @@
 
    - 新規の PC なら、`False` だけが出る
    - パスか `True` が出たら、元の導入方法を確かめてから進める（Antigravity の IDE が入れた `agy`・`antigravity` は、エディターを開くだけのコマンドで、この CLI ではない）
-   - [Antigravity アプリ](#antigravity-アプリの-remote-control任意)を先に入れた PC では、`%USERPROFILE%\.gemini` が `True` になる。アプリは `agy`・`antigravity` を足さないので、アプリのデータを残して進める
+   - [Antigravity アプリ](#windows-11-で-antigravity-アプリの-remote-control-を使う任意)を先に入れた PC では、`%USERPROFILE%\.gemini` が `True` になる。アプリは `agy`・`antigravity` を足さないので、アプリのデータを残して進める
 
 1. 公式のインストーラーで Antigravity CLI を入れる。
 
@@ -805,7 +805,7 @@
 
 - 対象: 両 OS
 - 全部のオプションとサブコマンドは `claude --help`（サブコマンドの中は `claude mcp --help` など）。`--max-turns` のように `--help` に出ないものもある
-- SSH を切っても動かす場合は[tmux の任意節](#claude-code-を-tmux-の中で動かす任意)を通す。Windows 11 は[Remote Control](#claude-code-の-remote-control-windows-11-で使う)（タスク スケジューラと WezTerm）
+- SSH を切っても動かす場合は[tmux の任意節](#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)を通す。Windows 11 は[Remote Control](#claude-code-の-remote-control-windows-11-で使う)（タスク スケジューラと WezTerm）
 
 | コマンド | すること |
 | --- | --- |
@@ -877,7 +877,7 @@
 | `claude mcp get <名前>` | 1 つの MCP サーバーの詳細とスコープ |
 | `claude mcp remove <名前> -s <スコープ>` | MCP サーバーを消す |
 | `claude update` | dnf で入れた版では更新しない（`Claude is managed by a package manager.`）。[AlmaLinux 10 の更新](#almalinux-10-の更新)の `sudo dnf upgrade claude-code` を使う。native installer の版（Windows 11）は、すぐに更新する（[Windows 11 の更新](#windows-11-の更新)） |
-| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](#claude-code-の-remote-control-windows-11-で使う)） |
+| `claude remote-control --name <名前> --spawn same-dir` | Remote Control のサーバーを始める（[AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)。Windows は [Claude Code の Remote Control](#claude-code-の-remote-control-windows-11-で使う)） |
 
 - `local` と `user` の MCP サーバーは `~/.claude.json`（Windows では `%USERPROFILE%\.claude.json`）に書かれる（`local` はディレクトリごとの欄）
 - **`claude auth status` は、端末に残った後ろの行を読んで捨てる**: ブラケットペースト無しで、ほかのコマンドと続けて貼るときは最後に置く（`claude --version` と `claude doctor` では捨てなかった）
@@ -1006,7 +1006,7 @@
 
 ---
 
-## Claude Code を stable チャンネルに切り替える（任意）
+## AlmaLinux 10 で Claude Code を stable チャンネルに切り替える（任意）
 
 - 対象: AlmaLinux 10
 - `latest` で不具合に当たったときに、1 週間ほど遅れて大きな不具合のある版を飛ばす `stable` へ移る
@@ -1064,7 +1064,7 @@
 
 ---
 
-## Claude Code を tmux の中で動かす（任意）
+## AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）
 
 - 対象: AlmaLinux 10
 - SSH でログインしたシェルから、tmux の中で Claude Code を動かすと、SSH を切っても Claude Code が動き続ける
@@ -1154,7 +1154,7 @@
 
 ---
 
-## Claude Code の Remote Control（任意）
+## Windows 11 で Claude Code の Remote Control を使う（任意）
 
 - 対象: Windows 11
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
@@ -1330,7 +1330,7 @@
 
 ---
 
-## Antigravity アプリの Remote Control（任意）
+## Windows 11 で Antigravity アプリの Remote Control を使う（任意）
 
 - 対象: Windows 11
 - この節だけを実施するときは、次の前提と実行場所を先に確認する。Antigravity CLI の導入は要らない
@@ -1665,7 +1665,7 @@
   - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）
   - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
   - Antigravity CLI は、バックグラウンドで自分で上がる（止める設定は確かめていない）
-  - Antigravity アプリ（[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)）の更新の動きは確かめていない。`%LOCALAPPDATA%\antigravity-updater` はあるが、上げる手順は置かない
+  - Antigravity アプリ（[Windows 11 で Antigravity アプリの Remote Control を使う](#windows-11-で-antigravity-アプリの-remote-control-を使う任意)）の更新の動きは確かめていない。`%LOCALAPPDATA%\antigravity-updater` はあるが、上げる手順は置かない
   - Codeg の Antigravity（ACP サーバー）は自分では上がらない。[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)の版のまま使う
 
 ### AI エージェントとプラグインを上げる
@@ -1731,7 +1731,7 @@
 
 ---
 
-## Claude Code の GNOME 操作（任意）
+## AlmaLinux 10 で Claude Code の GNOME 操作を使う（任意）
 
 - 対象: AlmaLinux 10
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
@@ -2349,7 +2349,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS
 - 役割は、この手順書の既定。入れ替えてよい（AGENTS.md の規則は、どの役割でも同じ）
-- AGENTS.md に `## 既定の分担` があるプロジェクトでは、利用者が Claude Code に分担を言わずに頼むと、下の表ではなく[既定で分担する](#コーディングエージェントの共同作業-既定で分担する)の分担になる（Codex が下書きし、Claude Code が確かめて `agent/claude` にコミットする。Grok と Antigravity は読み取り専用のレビュー）
+- AGENTS.md に `## 既定の分担` があるプロジェクトでは、利用者が Claude Code に分担を言わずに頼むと、下の表ではなく[Windows 11 で既定で分担する](#コーディングエージェントの共同作業-windows-11-で既定で分担する)の分担になる（Codex が下書きし、Claude Code が確かめて `agent/claude` にコミットする。Grok と Antigravity は読み取り専用のレビュー）
 
 | だれ | 主な役割 | 作業する場所 | ブランチ |
 | --- | --- | --- | --- |
@@ -2769,7 +2769,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### コーディングエージェントの共同作業: 既定で分担する
+### コーディングエージェントの共同作業: Windows 11 で既定で分担する
 
 - 対象: Windows 11
 - AGENTS.md の末尾に `## 既定の分担` を足し、利用者が Claude Code に分担を言わずにファイルを変える作業を頼んでも、Claude Code が取りまとめて 4 つで分担するようにする。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは、分担しない
@@ -2834,7 +2834,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
    - レビューの指摘は、実物で確かめてから採る。採らなかった指摘は、理由を付けて報告する
    - 使えないエージェント（入っていない・ログインが切れた）は飛ばし、そのことを報告する
-   - 頼み方は、[setup-notes](https://github.com/ryo-aoki-pc/setup-notes) の `docs/ai-agents.md` の「コーディングエージェントの共同作業: 既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
+   - 頼み方は、[setup-notes](https://github.com/ryo-aoki-pc/setup-notes) の `docs/ai-agents.md` の「コーディングエージェントの共同作業: Windows 11 で既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
    '@
      $prefix = if ($old.Length -eq 0) { '' } elseif ($old.EndsWith("`n")) { "`n" } else { "`n`n" }
      [IO.File]::AppendAllText($path, $prefix + ($text -replace "`r`n", "`n") + "`n", (New-Object Text.UTF8Encoding $false))
@@ -2998,15 +2998,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - PC は動かしたままにする（スリープ・ネットワークの切断で止まる）
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ
 - Grok Build・Claude Code・Codex CLI などに、スマートフォンや PC のブラウザから直接頼むなら、[Codeg](#codeg)の OS 別の導入（[AlmaLinux 10](#codeg-almalinux-10-で使う)・[Windows 11](#codeg-windows-11-で使う)）を通す
-- Claude Code と Codex CLI を使うときは、エージェントの操作手順（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）
-- Windows 11 の Antigravity アプリへ直接頼む入口は、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)。この共同作業で CLI に読み取り専用のレビューを頼む使い方とは別で、スマートフォンからの接続は未検証
+- Claude Code と Codex CLI を使うときは、エージェントの操作手順（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）
+- Antigravity アプリへ直接頼む入口は、[Windows 11 で Antigravity アプリの Remote Control を使う](#windows-11-で-antigravity-アプリの-remote-control-を使う任意)。この共同作業で CLI に読み取り専用のレビューを頼む使い方とは別で、スマートフォンからの接続は未検証
 
 > [!WARNING]
 > **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザから、この PC の Claude の worktree で Claude Code を動かせる**（ファイルの読み書きとコマンドの実行）。プラグインを通して Codex と Grok も動く。会話は Anthropic のサーバーに保存される。
 
 1. AlmaLinux 10 のときだけ、Claude の worktree で Remote Control を tmux の中で始める。
 
-   - [Claude Code を tmux の中で動かす（任意）](#claude-code-を-tmux-の中で動かす任意)の手順 1〜6 を通す
+   - [AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)の手順 1〜6 を通す
    - その節の手順 2 では、`cd <WT_ROOT>/claude` で Claude の worktree に移る
    - セッションの名前は worktree のディレクトリの名前（`claude`）になる。分かりにくければ、スマートフォンから `/rename <名前>` で変えられる
 
@@ -3066,7 +3066,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 画面の画像は、Windows 11 の実機の Codeg v0.35.1（2026-10-14）と、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2（2026-10-16）で撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](reference/codeg.md)・[ロールバックと注意点](extra/codeg.md)
-- サーバーの導入後は、使うエージェントの項へ進む。[Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）を選ぶ
+- サーバーの導入後は、使うエージェントの項へ進む。[Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）を選ぶ
 
 ### Codeg: AlmaLinux 10 で使う
 
@@ -3368,7 +3368,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 左の「フォルダを開く」を押し、「フォルダーを開く」の入力欄にホストの作業ディレクトリを入れ、「次へ」「完了」と進む
    - 新しい会話では、入力欄の下のフォルダーの選択（はじめは「チャットモード」）で、開いたフォルダーを選ぶ
-   - [Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）の項で設定・接続を確かめる
+   - [Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）の項で設定・接続を確かめる
 
 #### Codeg: HTTPS で LAN・VPN に公開する
 
@@ -4047,7 +4047,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. スマートフォンと PC に、この PC のルート証明書を入れる。
 
-   - [端末にルート証明書を入れる](#codeg-端末にルート証明書を入れる)を通す。スマートフォン（Android）は同じ項の手順 1・2・5、Windows の PC は同じ項の手順 1・3・4・5
+   - [Windows 11 で端末にルート証明書を入れる](#codeg-windows-11-で端末にルート証明書を入れる)を通す。スマートフォン（Android）は同じ項の手順 1・2・5、Windows の PC は同じ項の手順 1・3・4・5
    - この PC 自身のブラウザで HTTPS を開くなら、この PC にも入れる
 
 1. 共通パスワードを設定していないときは、トークンをスマートフォンに渡す。
@@ -4062,7 +4062,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. スマートフォンで、ブラウザで開いてトークンを入れ、指示を送る。
 
    - Chrome で、この項の手順 4 または手順 9 に出た現在の Private の URL（`https://<PC の IP>:3443`）を開く。警告が出ずに、ログインの画面が出ればよい
-   - 警告が出たら進まない。警告か「Connection lost」が出たら、[Codeg: 端末にルート証明書を入れる](#codeg-端末にルート証明書を入れる)の手順 5 で確かめる
+   - 警告が出たら進まない。警告か「Connection lost」が出たら、[Codeg: Windows 11 で端末にルート証明書を入れる](#codeg-windows-11-で端末にルート証明書を入れる)の手順 5 で確かめる
    - 「アクセストークン」に、共通パスワード（設定していなければ、この項の手順 7 でコピーした 64 文字）を入れ、「接続」を押す
    - [ブラウザで開いてエージェントを選ぶ](#codeg-ブラウザで開いてエージェントを選ぶ)の手順 4 から使うエージェントの項へ進み、会話を開いて指示を送る（参照先は AlmaLinux 10 の項だが、ブラウザの操作は同じ）
    - この PC 自身のブラウザからも、同じ URL で開ける
@@ -4172,12 +4172,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Codeg: 端末にルート証明書を入れる
+### Codeg: Windows 11 で端末にルート証明書を入れる
 
 - 対象: Windows 11 のホストの Codeg 専用 Caddy。AlmaLinux 10 のホストは [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す
 - Codeg を置いた Windows のホストごとに、認証局のルート証明書を接続する端末に入れる
 - ルート証明書は `https://<ホストの IP>:3443/caddy-root.crt` で配る。入れる前か後に、この項の手順 1 の指紋と必ず照合する
-- Android のスマートフォンでは、Codeg を Chrome で開く。Android の Firefox は使わない（[補足](reference/codeg.md#codeg--端末にルート証明書を入れる--手順-25-補足-android-のブラウザと-service-worker)）
+- Android のスマートフォンでは、Codeg を Chrome で開く。Android の Firefox は使わない（[補足](reference/codeg.md#codeg--windows-11-で端末にルート証明書を入れる--手順-25-補足-android-のブラウザと-service-worker)）
 
 1. Windows 11 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
 
@@ -4243,10 +4243,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Codeg: 共通パスワードを設定・変更する
+### Codeg: AlmaLinux 10 で共通パスワードを設定・変更する
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で共通パスワードを設定・変更する](#codeg-windows-11-で共通パスワードを設定変更する)
-- 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/codeg.md#codeg--共通パスワードを設定変更する--手順-13-補足-標準認証)）
+- 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/codeg.md#codeg--almalinux-10-で共通パスワードを設定変更する--手順-13-補足-標準認証)）
 - `scripts/codeg/set-codeg-password.py` を含むこのリポジトリのルートで、Codeg を入れた本人の bash に貼る。`sudo` は使わない
 - この節の手順 3 で Codeg だけを短時間止めて起動し直す。進行中の会話を終えてから行う。Caddy は止めない
 - パスワードはエージェントに渡さず、本人が端末の非表示入力で指定する
@@ -4348,7 +4348,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | 確認の出方を変える | 会話の入力欄の下で、選んだエージェントのモードを選ぶ。Grok を使うときは [Grok Build を使う](#codeg-grok-build-を使う)の手順 1 |
 | 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#codeg-端末の-grok-のセッションを取り込む) |
 | Grok を使うとき、ブラウザで始めた会話を端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
-| Claude Code・Codex CLI で会話し、端末の履歴を取り込む | [Claude Code と Codex CLI を使う](#codeg-claude-code-と-codex-cli-を使う)（[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。Claude は `Auto`、Codex は `Auto review` を選ぶ |
+| Claude Code・Codex CLI で会話し、端末の履歴を取り込む | [AlmaLinux 10 で Claude Code と Codex CLI を使う](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)（[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。Claude は `Auto`、Codex は `Auto review` を選ぶ |
 | Antigravity を使う | [AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)ではカーネルの仮想アドレスの幅を先に確かめる。[Windows 11](#codeg-windows-11-で-antigravity-を使う)では ACP サーバーを入れて別にログインする |
 | 止める・始める | `systemctl --user stop codeg-server.service`・`systemctl --user start codeg-server.service`（共有する `caddy.service` は動かしたままにする）（Windows 11 は [Windows 11 で止める・もう一度始める](#codeg-windows-11-で止めるもう一度始める)） |
 
@@ -4429,13 +4429,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Codeg: Claude Code と Codex CLI を使う
+### Codeg: AlmaLinux 10 で Claude Code と Codex CLI を使う
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)
 
 任意。Codeg を構築したホストに [Claude Code](#claude-code)・[Codex CLI](#codex-cli) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1）。
 
-ブラウザでログイン済みの Codeg を使う。導入途中は[SSH のトンネル](#codeg-ブラウザで開いてエージェントを選ぶ)の URL、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-10-で-claude-codecodexantigravity-を設定した記録2026-10-16-jst)）。
+ブラウザでログイン済みの Codeg を使う。導入途中は[SSH のトンネル](#codeg-ブラウザで開いてエージェントを選ぶ)の URL、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--almalinux-10-で-claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-10-で-claude-codecodexantigravity-を設定した記録2026-10-16-jst)）。
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
 
@@ -4548,7 +4548,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 任意。Codeg を構築したホストに [Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1）。
 
-ブラウザでログイン済みの Codeg を使う。導入途中は `http://127.0.0.1:3080`、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
+ブラウザでログイン済みの Codeg を使う。導入途中は `http://127.0.0.1:3080`、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--almalinux-10-で-claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
 
@@ -4592,7 +4592,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
    - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
-   - モードは、入力欄の下の左端で選ぶ（並びの意味は[参考資料](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--手順-47-補足-モードと中断)）
+   - モードは、入力欄の下の左端で選ぶ（並びの意味は[参考資料](reference/codeg.md#codeg--almalinux-10-で-claude-code-と-codex-cli-を使う--手順-47-補足-モードと中断)）
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
    - ![codeg-demo の新しい会話。Claude Code、Auto、Opus 5.5 を選んで指示を入力した画面](images/ai-agents/codeg-send-check-v0.35.1.png)
 
@@ -4759,7 +4759,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 ### Codeg: エージェント同士で共同作業する
 
 - 対象: 両 OS
-- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI を使う](#codeg-claude-code-と-codex-cli-を使う)（Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 2〜5 で有効にし、接続と応答を確かめておく
+- 任意。Codeg で使うエージェントを [AlmaLinux 10 で Claude Code と Codex CLI を使う](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)（Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 2〜5 で有効にし、接続と応答を確かめておく
 - 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/codeg.md#codeg--エージェント同士で共同作業する--手順-14-補足-委譲と作業ディレクトリ)）
 - Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
 - Windows 11 で Grok を親にするときは、Grok のコマンドが cmd.exe で動き、`"` が正しく渡らない。この項の手順 4 の親への依頼に、次の注意を含める
@@ -4798,13 +4798,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Codeg: Claude Code のプラグインから Grok に読み取り専用で頼む
+### Codeg: AlmaLinux 10 で Claude Code のプラグインから Grok に読み取り専用で頼む
 
 - 対象: AlmaLinux 10
-- 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#codeg-claude-code-と-codex-cli-を使う)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
+- 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
 - このリポジトリのルートで、Codeg を入れた本人の bash に貼る。Grok にログイン済みで、`~/.grok/sessions/`・`~/.grok/logs/` が存在することを前提にする
 - この節の手順 3 で Codeg を起動し直す。進行中の会話を終えてから行う。Grok にはレビューや調査だけを頼み、`--write` は使わない
-- Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/codeg.md#codeg--claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
+- Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/codeg.md#codeg--almalinux-10-で-claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
 
 1. 本人のホストで、2 つの起動用スクリプトを置く。
 
@@ -4907,7 +4907,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Codeg: 接続元の制限を外す
+### Codeg: AlmaLinux 10 で接続元の制限を外す
 
 - 対象: AlmaLinux 10
 - 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
