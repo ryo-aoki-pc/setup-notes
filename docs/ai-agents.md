@@ -353,6 +353,7 @@
 
    - モデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
    - JSON の `"status":"SUCCESS"` と、`"response"` に一文が出ればよい
+   - JSON が `"status":"ERROR"` で `Individual quota reached` なら、ログインはできていて、`--model` を付けないときのモデルの上限。`agy -p /quota` で残りを確かめる
    - ログインの情報は `~/.gemini/antigravity-cli/antigravity-oauth-token` に入る。中身を表示・共有しない
 
 ### Codex・Grok のプラグイン
@@ -1954,7 +1955,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > [!IMPORTANT]
 > - **Windows 11 は、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める**
 > - この節は AlmaLinux 10 の bash に、自分のユーザーで貼る
-> - 前提: [Git](almalinux-setup.md#git)と、[Claude Code](#claude-code)から[Codex・Grok のプラグイン](#codexgrok-のプラグイン)までを通し、3 つにログインしてある
+> - 前提: [Git](almalinux-setup.md#git)と、[Claude Code](#claude-code)から[Codex・Grok のプラグイン](#codexgrok-のプラグイン)までを通し（[Antigravity CLI](#antigravity-cli)を含む）、4 つ（Claude Code・Codex・Grok Build・Antigravity CLI）にログインしてある
 > - `init.defaultBranch` は `main`。2 つのプラグインと Node.js・bubblewrap も導入済み
 > - 前提: 共同作業させるプロジェクトが git のリポジトリで、基準のブランチが `main`（ほかの名前のときの読み替えは[参考資料](reference/coding-agents.md#main-でないブランチを基準にするとき)）
 > - 前提: リモートがあるなら、そこへ push できる認証と、Pull Request を作る道具がある（GitHub は、[AlmaLinux 10 の初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)の gh でログインしてある）
@@ -1965,6 +1966,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 人は `main`、各エージェントは自分の worktree とブランチで作業し、共通の AGENTS.md を読む
 - エージェントは自分のブランチを push して Pull Request を作り、取り込んでよい（リモートがある場合。merge commit にする）。手元での取り込みとブランチの削除は人が行う
 - Claude Code の公式プラグインから Codex と Grok にレビューや作業を頼める
+- AlmaLinux 10 でも、4 つ目の Antigravity CLI（`agy`）を使う。Antigravity には、読み取り専用のレビューと調べものだけを[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)で頼む
 
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
 
@@ -1973,31 +1975,38 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    ```bash
-   WT_ROOT="${PROJECT_DIR%/}.worktrees"   # 3 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
+   AGY_MODEL=''                    # ← 空のままなら、版がいちばん新しい Gemini の Flash（High）を使う。ほかのモデルにするときは agy models の ID を書く。<AGY_MODEL>
+   ```
+
+   ```bash
+   WT_ROOT="${PROJECT_DIR%/}.worktrees"   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
    printf '\n\033[7m 確認 \033[0m\n'
-   printf 'PROJECT_DIR = %s\nWT_ROOT     = %s\n' "${PROJECT_DIR}" "${WT_ROOT}"
+   printf 'PROJECT_DIR = %s\nAGY_MODEL   = %s\nWT_ROOT     = %s\n' "${PROJECT_DIR}" "${AGY_MODEL}" "${WT_ROOT}"
    ```
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`/home/<USER>/src/myproject` のような、git のリポジトリのルートの絶対パス
    - `WT_ROOT` の既定は、プロジェクトと同じ階層の `<プロジェクト名>.worktrees`。プロジェクトの中には置かない
-   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの 2 つのブロックを貼り直す
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこの 3 つのブロックを貼り直す
 
-1. 3 つの CLI の版とログインを確かめる。
+1. 4 つの CLI の版とログインを確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    claude --version
    codex --version
    grok --version
+   agy --version
    codex login status
    grok models
+   agy models
    claude auth status --text
    ```
 
-   - 3 つの版が出る
+   - 4 つの版が出る
    - `codex login status` が ChatGPT でログイン済みを示す（`Not logged in` なら [「Codex CLI」の手順 5](#codex-cli) から）
    - `grok models` に `You are not authenticated.` が出ない（出たら [「Grok Build」の手順 4](#grok-build) から）
+   - `agy models` にモデルの一覧（`gemini-3.8-flash-high` など）が出る（出なければ [「Antigravity CLI」の手順 6](#antigravity-cli) から）
    - `claude auth status --text` に `Login method: …` の行が出る（`Not logged in.` なら [「Claude Code」の手順 5](#claude-code)）
 
 1. プロジェクトの状態と、すでにある指示書を確かめる。
@@ -2007,7 +2016,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      printf '\n\033[7m 確認 \033[0m\n'
      git -C "${PROJECT_DIR}" rev-parse --show-toplevel
      git -C "${PROJECT_DIR}" status --short --branch
-     for f in AGENTS.md AGENTS.override.md CLAUDE.md CLAUDE.local.md; do
+     for f in AGENTS.md AGENTS.override.md CLAUDE.md CLAUDE.local.md GEMINI.md; do
        if [ -e "${PROJECT_DIR}/${f}" ]; then echo "${f}"; fi
      done
      ls -d "${WT_ROOT}"
@@ -2017,6 +2026,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 1 行目に `PROJECT_DIR` と同じパスが出る。違えば、`PROJECT_DIR` をリポジトリのルートに直して手順 1 から貼り直す
    - 2 行目が `## main`（追跡先があれば `## main...origin/main`）で、その後に何も出ない（変更が無い）。ほかのブランチなら `git switch main`、変更があればコミットしてから進む
    - `AGENTS.override.md` が出たら、中身を AGENTS.md に移して消してから進む
+   - `GEMINI.md` が出たら、Antigravity は AGENTS.md と一緒にそれも読む。中身が共同作業の規則とぶつからないか確かめる
    - 最後に `No such file or directory` が出ればよい。`WT_ROOT` がすでにあれば、中身を確かめる（別の場所にするなら、手順 1 の `WT_ROOT` を変える）
 
 1. AGENTS.md に共同作業の規則を足す（無ければ作る）。
@@ -2035,7 +2045,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      cat >> "${PROJECT_DIR}/AGENTS.md" <<'EOF'
    ## 共同作業の規則
 
-   このリポジトリでは、Claude Code・Codex・Grok Build が同じ規則で作業する。分担は人が決める。
+   このリポジトリでは、Claude Code・Codex・Grok Build・Antigravity CLI が同じ規則で作業する。分担は人が決める。
 
    - 起動された worktree（作業ディレクトリ）の中だけでファイルを変える。ほかの worktree のファイルは変えない
    - 今のブランチにだけコミットする。`main` にはコミットも push もしない
@@ -2080,7 +2090,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      git -C "${PROJECT_DIR}" add AGENTS.md CLAUDE.md
-     git -C "${PROJECT_DIR}" commit -m 'Claude Code・Codex・Grok Build の共同作業の規則を足す'
+     git -C "${PROJECT_DIR}" commit -m 'Claude Code・Codex・Grok Build・Antigravity CLI の共同作業の規則を足す'
      git -C "${PROJECT_DIR}" log --oneline -1
    fi
    ```
@@ -2088,22 +2098,23 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 最後に、今のコミットが出る
    - `The following paths are ignored by one of your .gitignore files` と出たら、`.gitignore` で除いている。`.gitignore` から外してから貼り直す
 
-1. 3 つの worktree とブランチを作る。
+1. 4 つの worktree とブランチを作る。
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
-     for a in claude codex grok; do
+     for a in claude codex grok antigravity; do
        git -C "${PROJECT_DIR}" worktree add -b "agent/${a}" "${WT_ROOT}/${a}" main
      done
      git -C "${PROJECT_DIR}" worktree list
    fi
    ```
 
-   - `Preparing worktree (new branch 'agent/claude')` などが 3 回出て、最後の一覧に 4 行（`[main]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]`）が出る
+   - `Preparing worktree (new branch 'agent/<名前>')` が 4 回出る
+   - 一覧は `[main]` と、`[agent/antigravity]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]` の 5 行
    - `already exists` と出たら、前に作ったブランチか worktree が残っている。[AlmaLinux 10 のロールバック](extra/coding-agents.md#almalinux-10-のロールバック)の手順 2・3 で片付けてから貼り直す
 
-1. 3 つが規則を読むことを確かめる。
+1. 4 つが規則を読むことを確かめる。
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
@@ -2111,11 +2122,18 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      (cd "${WT_ROOT}/claude" && claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で')
      codex exec -C "${WT_ROOT}/codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      (cd "${WT_ROOT}/grok" && grok --trust inspect | grep -e 'Project trusted' -e 'AGENTS.md' -e 'CLAUDE.md')
+     m="${AGY_MODEL:-$(agy models | awk '$1 ~ /^gemini-[0-9]+(\.[0-9]+)*-flash-high$/ { print $1 }' | sort -V | tail -n 1)}"
+     if [ -z "${m}" ]; then echo '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の AGY_MODEL に書き、手順 8 を貼り直す' >&2; else (cd "${WT_ROOT}/antigravity" && agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --model "${m}" --print-timeout 300s); fi
    fi
    ```
 
    - Claude と Codex が、「起動された worktree の中だけ」という趣旨の 1 行を答える。「分からない」と答えたら、手順 4・5 のファイルと手順 6 のコミットを確かめる
    - Grok は `Project trusted: yes` と、`AGENTS.md (project, …)`・`CLAUDE.md (project, …)` の行が出る
+   - Antigravity も、最後の行で「起動された worktree（作業ディレクトリ）の中だけ」のように答えればよい
+   - Antigravity の行が `Individual quota reached` で答えなかったら、そのモデルの上限。`agy -p /quota` で残りを確かめる
+     - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 8 を貼り直すか、戻るまで待つ
+   - `中断: agy models に Gemini の Flash（High）が無い` が出たら、Antigravity の行は流れていない。ログインと `agy models` の一覧を確かめ、使う ID をこの項の手順 1 の `AGY_MODEL` に書いて、この項の手順 8 を貼り直す
+   - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)
    - Codex の `could not find bubblewrap on PATH` は、同梱のものを使えるため正常。[プラグイン](#codexgrok-のプラグイン)の手順 1 で bubblewrap を入れると出なくなる
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
@@ -2148,7 +2166,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 手順の後は、両 OS 共通の[使い方の基本](#コーディングエージェントの共同作業-使い方の基本)から、分担・レビュー・取り込み・スマートフォンでの操作へ進む
 - 書くファイル（AGENTS.md・CLAUDE.md）は、BOM の無い UTF-8 と LF の改行にする（AlmaLinux 10 で書いたものと同じ形）
-- Windows 11 では、AlmaLinux 10 の 3 つのエージェントに、4 つ目の Antigravity CLI（`agy`）を足す。Antigravity には、読み取り専用のレビューと調べものだけを[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)で頼む
+- Windows 11 でも、4 つ目の Antigravity CLI（`agy`）を使う。Antigravity には、読み取り専用のレビューと調べものだけを[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)で頼む
 
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
 
@@ -2307,7 +2325,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Antigravity の行が `Individual quota reached` で答えなかったら、そのモデルの上限。`agy -p /quota` で残りを確かめる
      - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 8 を貼り直すか、戻るまで待つ
    - `中断: agy models に Gemini の Flash（High）が無い` が出たら、Antigravity の行は流れていない。ログインと `agy models` の一覧を確かめ、使う ID をこの項の手順 1 の `AGY_MODEL` に書いて、この項の手順 8 を貼り直す
-   - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)
+   - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
 
 1. Claude の worktree で Claude Code を起動し、2 つのプラグインの準備を確かめる。
@@ -2334,7 +2352,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | Claude Code | 実装の主担当。Codex と Grok にレビューと作業を頼む窓口（スマートフォンからの入口も） | `<WT_ROOT>/claude` | `agent/claude` |
 | Codex | レビュー、別の実装 | `<WT_ROOT>/codex` | `agent/codex` |
 | Grok Build | 調べもの（Web の検索）、別の目のレビュー、別の実装 | `<WT_ROOT>/grok` | `agent/grok` |
-| Antigravity CLI（Windows 11 だけ） | 読み取り専用のレビューと調べもの（書かせない） | 使い捨てのフォルダー（`<WT_ROOT>/antigravity` は規則の確かめだけ） | `agent/antigravity`（コミットしない） |
+| Antigravity CLI | 読み取り専用のレビューと調べもの（書かせない） | 使い捨てのフォルダー（`<WT_ROOT>/antigravity` は規則の確かめだけ） | `agent/antigravity`（コミットしない） |
 
 - 変更を担当する 3 つのエージェント（Claude Code・Codex・Grok Build）は、コミットしたら自分のブランチ（`agent/<名前>`）を push し、`main` への Pull Request を作る（AGENTS.md の規則。リモートがあるとき）
 - その Pull Request は、テストとリンターが通り、競合していなければ、エージェントが merge commit で取り込んでよい。利用者が止めたときは取り込まない
@@ -2470,7 +2488,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 対象: 両 OS
 - 書いたものとは別のモデルに、新しい会話でレビューさせる（どれもファイルを変えない）
 - 各ブランチを、ほかの 2 つがレビューする。指摘は人が選んで、担当に直させる
-- Windows 11 では、Antigravity にも読み取り専用でレビューを頼める（[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)）
+- Antigravity にも読み取り専用でレビューを頼める（[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)・[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)）
 - 頼む前に、レビューされる側の変更が自分のブランチにコミットしてあること（[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)の手順 7）
 - Grok の sandbox が起動しなければ、Grok のレビューは未実行と記録し、Claude・Codex のレビューを使う
 - sandbox とソケットの権限は緩めない。Landlock と親ディレクトリの検索権限を確かめ、対応するカーネルで再試行する
@@ -2507,7 +2525,129 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### コーディングエージェントの共同作業: Antigravity に読み取り専用で頼む
+### コーディングエージェントの共同作業: AlmaLinux 10 で Antigravity に読み取り専用で頼む
+
+- 対象: AlmaLinux 10
+- 前提: [AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)を通してある
+- 実行場所: AlmaLinux 10 の bash に、自分のユーザーで貼る
+- Antigravity にはファイルを書かせない。レビューするブランチの中身と差分を、使い捨てのフォルダー（`~/.cache/agy-review-<時刻>`）にコピーし、そこを作業フォルダーにして 1 回だけ実行（`agy -p`）する。`/tmp` の下には置かない
+- 1 回だけの実行は、作業フォルダーの中と `/tmp` の中を読み、`/tmp` の中へ書くことを確認なしで行う。作業フォルダーの中への書き込み、ホームのほかの場所の読み取り、シェルのコマンドは拒み、拒んだところで応答なしで終わる。使い捨てのフォルダーの前後のハッシュを比べ、拒んだ操作を読む
+- ハッシュで分かるのは使い捨てのフォルダーの中だけ。`/tmp` への書き込みは、確認なしで通り、ハッシュにも出ない
+- `--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` は付けない。`--mode plan` も境界には使わない
+- ブランチの中身は、Antigravity（Google のモデル）に渡る。秘密情報をコミットしたブランチには使わない
+- 頼む前に、レビューされる側の変更がそのブランチにコミットしてあること
+- 使うモデルは、頼むたびに `agy models` から選ぶ版がいちばん新しい Gemini の Flash（High）。ほかのモデルにするときだけ、この項の手順 1 の `AGY_MODEL` に ID を書く
+- 折りたたまれたブロックは、「貼るコマンド」を開いてからコピーボタンで写す
+
+1. 変数を設定する（`PROJECT_DIR` と `BRANCH` は必ず値を入れる）。
+
+   ```bash
+   PROJECT_DIR=''                  # ← 共同作業させるリポジトリ（git のルート）の絶対パスを書く。<PROJECT_DIR>
+   ```
+
+   ```bash
+   BRANCH=''                       # ← レビューさせるブランチを書く（例: agent/claude）。<BRANCH>
+   ```
+
+   ```bash
+   AGY_MODEL=''                    # ← 空のままなら、版がいちばん新しい Gemini の Flash（High）を使う。ほかのモデルにするときは agy models の ID を書く。<AGY_MODEL>
+   ```
+
+   ```bash
+   REVIEW_DIR="${HOME}/.cache/agy-review-$(date +%Y%m%d-%H%M%S)"   # 使い捨てのフォルダー（/tmp の下には置かない）。<REVIEW_DIR>
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'PROJECT_DIR = %s\nBRANCH      = %s\nAGY_MODEL   = %s\nREVIEW_DIR  = %s\n' "${PROJECT_DIR}" "${BRANCH}" "${AGY_MODEL}" "${REVIEW_DIR}"
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - `PROJECT_DIR` は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 1 と同じ値
+   - **新しいシェルを開いたら**（SSH を張り直したあとも）、この 4 つのブロックを貼り直す（`REVIEW_DIR` は新しいフォルダーになる）
+
+1. 使い捨てのフォルダーに、ブランチの中身と `main` との差分を書き出す。
+
+   ```bash
+   if [ -z "${PROJECT_DIR}" ] || [ -z "${BRANCH}" ] || [ -z "${REVIEW_DIR}" ]; then echo '中断: 手順 1 の PROJECT_DIR・BRANCH・REVIEW_DIR のどれかが空のまま。手順 1 を貼り直す' >&2; else
+     mkdir -p "${REVIEW_DIR}/src"
+     git -C "${PROJECT_DIR}" archive "${BRANCH}" | tar -x -C "${REVIEW_DIR}/src"
+     git -C "${PROJECT_DIR}" diff --output="${REVIEW_DIR}/review.diff" "main...${BRANCH}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     git -C "${PROJECT_DIR}" diff --stat "main...${BRANCH}"
+     ls "${REVIEW_DIR}"
+   fi
+   ```
+
+   - 変わったファイルの一覧と、最後に `review.diff` と `src` が出ればよい
+   - 差分の一覧が空なら、ブランチ名と、変更がコミットしてあるかを確かめる
+   - `中断:` が出たら、何も書き出していない。この項の手順 1 の値を入れて貼り直す
+
+1. モデルを選んで Antigravity にレビューを頼み、変わったファイルと拒んだ操作を確かめる。
+
+   <details>
+     <summary>貼るコマンド（bash・24 行）</summary>
+
+   ```bash
+   if [ ! -f "${REVIEW_DIR}/review.diff" ]; then echo '中断: 手順 2 の差分が無い。手順 2 を貼り直す' >&2; else
+     model="${AGY_MODEL:-$(agy models | awk '$1 ~ /^gemini-[0-9]+(\.[0-9]+)*-flash-high$/ { print $1 }' | sort -V | tail -n 1)}"
+     if [ -z "${model}" ]; then echo '中断: agy models に Gemini の Flash（High）が無い。ログインと agy models の一覧を確かめ、使う ID を手順 1 の AGY_MODEL に書き、手順 3 を貼り直す' >&2; else
+       before=$(cd "${REVIEW_DIR}" && find . -type f -exec sha256sum {} + | sort)
+       out=$(cd "${REVIEW_DIR}" && agy -p 'このフォルダーの review.diff は、src にあるリポジトリの main との差分です。差分をレビューし、指摘を「重大度・場所（ファイル:行）・理由・直し方」で日本語で挙げてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。' --model "${model}" --output-format json --print-timeout 1800s)
+       after=$(cd "${REVIEW_DIR}" && find . -type f -exec sha256sum {} + | sort)
+       changed=$(diff <(printf '%s\n' "${before}") <(printf '%s\n' "${after}") | sed -n 's/^[<>] [0-9a-f]*  //p' | sort -u | paste -sd ' ')
+       printf '\n\033[7m 確認 \033[0m\n'
+       printf '%s' "${out}" | MODEL="${model}" CHANGED="${changed}" python3 -c '
+   import json, os, sys
+   text = sys.stdin.read()
+   try:
+       res = json.loads(text) if text.strip() else {}
+   except ValueError:
+       res = {"error": text.strip()}
+   print("model          =", os.environ["MODEL"])
+   print("status         =", res.get("status", ""))
+   print("error          =", res.get("error") or "")
+   print("denied_actions =", ", ".join(d.get("action", "") for d in res.get("denied_actions") or []))
+   print("changed files  =", os.environ["CHANGED"])
+   print()
+   print(res.get("response") or "")'
+     fi
+   fi
+   ```
+
+   </details>
+
+   - 終わるまで数分かかる（30 分で打ち切る）
+   - `model` に、使ったモデルの ID（`gemini-3.8-flash-high` など）が出る
+   - `status = SUCCESS` で、`changed files` が空なら、使い捨てのフォルダーの中は変わっていない
+   - `denied_actions` に出た操作（`command`・`read_file` など）は拒まれた。レビューに要るものが拒まれていたら、そのファイルを手順 2 のフォルダーに足して、この手順を貼り直す
+   - `changed files` に何か出たら、指摘を使う前に、そのファイルと内容を確かめる
+   - 拒まれると `response` が空になり、stderr に `jetski: no output produced` が出て、その場で応答なしで終わる。`status = SUCCESS` でも、`denied_actions` に何か出ていれば先へ進まず、拒まれた操作を確かめる
+   - 最後に、指摘が「重大度・場所・理由・直し方」で出る
+   - `status = ERROR` で `error` に `Individual quota reached` が出たら、そのモデルの上限。`agy -p /quota` で残りと戻る時刻（UTC）を確かめる
+     - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 3 を貼り直すか、戻るまで待つ
+   - `status` が空で、`error` に `agy` の出力がそのまま出たら、`agy` が JSON を返さずに終わった。出た文を確かめてから、この手順を貼り直す
+   - `中断:` が出たら、レビューは流れていない。メッセージに示された手順を貼り直す
+   - `error` に `is not recognized as a known model` が出たら、`AGY_MODEL` の ID が一覧に無い。この項の手順 1 の ID を `agy models` の ID に直して貼り直し、この項の手順 3 を貼り直す
+
+1. 人が指摘を選び、担当のエージェントに直させる。
+
+   - 直させる指摘だけを、担当の窓のエージェントに渡す（[相互にレビューする](#コーディングエージェントの共同作業-相互にレビューする)の手順 4 と同じ）
+   - 指摘は、ほかのレビューと同じく、実物（テスト・実行）で確かめてから直させる
+
+1. 使い捨てのフォルダーを消す。
+
+   ```bash
+   if ! [[ "${REVIEW_DIR}" =~ ^"${HOME}"/\.cache/agy-review-[0-9]{8}-[0-9]{6}$ ]]; then echo '中断: 手順 1 の REVIEW_DIR が想定と違う。貼り直す' >&2; else
+     rm -rf -- "${REVIEW_DIR}"
+     printf '\n\033[7m 確認 \033[0m\n'
+     ls -d "${REVIEW_DIR}"
+   fi
+   ```
+
+   - `No such file or directory` が出ればよい
+   - `中断:` が出たら、何も消していない。この項の手順 1 の `REVIEW_DIR` を確かめる
+
+---
+
+### コーディングエージェントの共同作業: Windows 11 で Antigravity に読み取り専用で頼む
 
 - 対象: Windows 11
 - 前提: [Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)を通してある
@@ -2634,7 +2774,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 上から順に貼る。貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 追記する文は BOM の無い UTF-8 と LF の改行にする。折りたたまれたブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - Claude Code が 3 つに頼む形（コマンド・変更の移し方・後片付け）と、方針と役割の理由は[参考資料の「既定の分担」](reference/coding-agents.md#既定の分担)
-- AlmaLinux 10 では、AGENTS.md の節は同じ文のままで、Antigravity CLI を飛ばす。AlmaLinux 10 での頼み方は未検証で、この項には書かない
+- AlmaLinux 10 でも、AGENTS.md の節は同じ文にする。この項の手順は Windows 11 用。AlmaLinux 10 で節を足す手順と、Codex・Grok への頼み方は、確かめるまでこの項に書かない
+- AlmaLinux 10 で Antigravity に頼むときは、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)
 - 既定の分担をやめるとき・文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)
 - この項の手順 6（対話で実際に分担する流れ）は未確認
 
@@ -2666,7 +2807,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. AGENTS.md の末尾に既定の分担を足す。
 
    <details>
-   <summary>貼るコマンド（PowerShell・26 行）</summary>
+     <summary>貼るコマンド（PowerShell・26 行）</summary>
 
    ```powershell
    & {
@@ -2684,10 +2825,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Claude Code: 計画・実機での確かめ・ほかの 3 つへの依頼・指摘の確かめ・統合・コミットと Pull Request・取り込み
    - Codex: 実装と下書き。Claude Code が用意した別の clone か worktree の中だけで書く。この分担で頼まれたときは、「共同作業の規則」のコミット・push・Pull Request・取り込みを行わず、変更を残して報告する（Claude Code が確かめ、自分の worktree に移してからコミットする）
    - Grok Build: 差分の読み取り専用のレビュー。ファイルを変えない（Windows 11 では、Claude Code は `--always-approve` を付けずに頼む）
-   - Antigravity CLI（Windows 11 だけ）: 差分の読み取り専用のレビューと、その作業のための調べもの。ファイルを変えない（Claude Code は、入力を写した使い捨てのフォルダーで 1 回だけ実行し、`--dangerously-skip-permissions`・`--mode` を付けない）
+   - Antigravity CLI: 差分の読み取り専用のレビューと、その作業のための調べもの。ファイルを変えない（Claude Code は、入力を写した使い捨てのフォルダーで 1 回だけ実行し、`--dangerously-skip-permissions`・`--mode` を付けない）
    - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
    - レビューの指摘は、実物で確かめてから採る。採らなかった指摘は、理由を付けて報告する
-   - 使えないエージェント（入っていない・ログインが切れた・AlmaLinux 10 の Antigravity CLI）は飛ばし、そのことを報告する
+   - 使えないエージェント（入っていない・ログインが切れた）は飛ばし、そのことを報告する
    - 頼み方は、[setup-notes](https://github.com/ryo-aoki-pc/setup-notes) の `docs/ai-agents.md` の「コーディングエージェントの共同作業: 既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
    '@
      $prefix = if ($old.Length -eq 0) { '' } elseif ($old.EndsWith("`n")) { "`n" } else { "`n`n" }
@@ -2754,7 +2895,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `分からない` や違う役割を答えたら、この項の手順 2 の追記・手順 3 のコミット・手順 4 の同期を確かめ、先へ進まない
    - Grok は `Project trusted: yes` と、AGENTS.md・CLAUDE.md の `(project, …)` の行が出る（名前は `Agents.md`・`Claude.md` のように出ることがある）。AGENTS.md の行が出なければ、先へ進まない
    - 最後の `git status --short` に何も出なければ、Antigravity は antigravity の worktree を変えていない。何か出たら、中身を確かめてから消す
-   - Antigravity の行は、規則を読むことの確かめだけ。レビューと調べものは、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使う
+   - Antigravity の行は、規則を読むことの確かめだけ。レビューと調べものは、[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)の手順を使う
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、この項の手順 5 を貼り直す
 
 1. Claude Code の worktree で、分担を言わずにファイルを変える依頼をする。
@@ -2840,6 +2981,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `Fast-forward` か `Already up to date.` が出ればよい。次の分担はここから始める
    - `Not possible to fast-forward` と出たら、その worktree に、`main` に取り込んでいないコミットがある（この節の手順 3〜5 で取り込んでから、もう一度貼る）
    - この節の手順 3〜5 で取り込んだときは、`main` の窓で `git push` する（`main` への push は人が行う）
+   - antigravity の worktree には窓が無いので、`main` の窓で `git -C <WT_ROOT>/antigravity merge --ff-only main`（Windows 11 は `<WT_ROOT>\antigravity`）を打ってそろえる
    - 取り込んだブランチの Pull Request が開いたまま残ったら、閉じる
 
 ---
@@ -4530,7 +4672,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 > [!WARNING]
 > - Codeg の Antigravity は、開いたフォルダーの AGENTS.md（共同作業の規則）を読み込まない。作業フォルダーより先に `%USERPROFILE%\.gemini\antigravity-cli\skills` などが並び、ファイルの書き先をそこと取り違える（ACP サーバー 1.3.0・1.4.0 で同じ）
-> - 質問・調べものに使い、規則に従わせる作業は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)で CLI に頼む。この項の手順 8 で、ファイルを書く承認カードには `Deny` で答える
+> - 質問・調べものに使い、規則に従わせる作業は、[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)で CLI に頼む。この項の手順 8 で、ファイルを書く承認カードには `Deny` で答える
 
 1. ブラウザで、Antigravity の ACP サーバーを入れる。
 
