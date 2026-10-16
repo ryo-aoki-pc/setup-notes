@@ -5,7 +5,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 ## 手順書
 
 | 手順書 | 対象 | 内容 |
-|---|---|---|
+| --- | --- | --- |
 | [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、コンテナ、ファイルの共有と同期、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 |
@@ -100,7 +100,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 ## 置き場所
 
 | 置くもの | 場所 |
-|---|---|
+| --- | --- |
 | 理由・比較・資料 | `docs/reference/<手順書名>.md` |
 | ロールバックと注意点 | `docs/extra/<手順書名>.md` |
 | 実施日・環境・結果 | 非公開の `setup-notes-verification` の `docs/verification/<手順書名>.md` |
