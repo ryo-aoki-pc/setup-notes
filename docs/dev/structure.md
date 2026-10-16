@@ -17,8 +17,14 @@
     - この項の手順 1〜5 のブロックを、使い捨てのリポジトリと 4 つの worktree で Windows PowerShell 5.1 に通した。規則の文が AGENTS.md の節と一字一句同じこと、BOM と CR が無いこと、既に節があるときの中断も確かめた
     - 手順 5 で、Claude Code と Codex が実装と下書きの担当を Codex と答え、Antigravity が自分の役割を答え、Grok の `--trust inspect` が AGENTS.md を読み込んだ。docs の worktree でも、分担を言わずに聞いた Claude Code が 4 つの役割を答えた。Grok は信頼していないフォルダーでは AGENTS.md を読まなかった
     - extra の「Windows 11 で既定の分担をやめる」の手順 1〜4 を、同じ使い捨てのリポジトリで通し、AGENTS.md が足す前と同じに戻ることを確かめた
-    - 対話の Claude Code で、分担を言わずにファイルを変える依頼をしたとき、実際に分担する流れになること（手順 6）、9 つのサブモジュールのリポジトリを単独で開いたときの応答、AlmaLinux 10 は未確認
+    - 対話の Claude Code で、分担を言わずにファイルを変える依頼をしたとき、実際に分担する流れになること（手順 6）、9 つのサブモジュールのリポジトリを単独で開いたときの応答、AlmaLinux 10 は、この日は未確認（手順 6 は次の 2026-10-16 の項）
     - scene-browser の main で、分担を言わずに聞いた Claude Code が 4 つの役割を、Codex が自分の役割を答えた。共同作業と既定の分担の規則の対象は docs とその 10 個のサブモジュール、11 個のリポジトリ
+  - 既定の分担の手順 6 の検証（2026-10-16、Windows 11）: headless の Claude Code 2.1.296 に、分担を言わずにファイルを変える依頼をした
+    - AGENTS.md に同じ節がある setup-notes の clone で、`claude -p --permission-mode auto` を PowerShell 7 から起動した
+    - Claude Code が 4 つで進めると判断し、Codex に下書きを、Grok と Antigravity に読み取り専用のレビューを頼んだ。指摘を実物で確かめ、採らなかった指摘の理由を報告し、自分でコミットした（push と Pull Request は頼む文で止めた）
+    - 後片付けで、Codex のブローカーのコマンドラインのパスが `/` 区切りで、`\` 区切りで探すと見落とした
+    - 対話の画面（デスクトップアプリ・端末）、手順 1〜5 の `<WT_ROOT>` の 4 つの worktree、Windows PowerShell 5.1 からの起動、push・Pull Request・取り込み、setup-notes 以外のサブモジュール、使えないエージェントを飛ばす流れ、AlmaLinux 10 は未確認
+    - 詳しくは検証記録の付録「手順 6: headless で分担を言わずに頼んだ流れ（2026-10-16 JST）」
   - Antigravity CLI の検証（2026-10-15、Windows 11）: 導入・設定ファイル・更新、Codeg の Antigravity、共同作業の 4 つ目の worktree と読み取り専用の依頼を対象にした
     - Windows 11 / x64 の実機で CLI 1.3.5 を管理者ではない Windows PowerShell 5.1 から導入し、SHA-512・署名・版・PATH、個人の Google アカウントのログイン、`agy models`・JSON の応答、AGENTS.md・GEMINI.md の読み込みを確認した
     - 新規の導入は、保存して中身を確かめたインストーラーを scriptblock にして行った。手順 2 の `Invoke-RestMethod` の形は、入った後に流し、「既に入っている」の分岐までを確かめた

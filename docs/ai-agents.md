@@ -2782,7 +2782,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - AlmaLinux 10 でも、AGENTS.md の節は同じ文にする。この項の手順は Windows 11 用。AlmaLinux 10 で節を足す手順と、Codex・Grok への頼み方は、確かめるまでこの項に書かない
 - AlmaLinux 10 で Antigravity に頼むときは、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)
 - 既定の分担をやめるとき・文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)
-- この項の手順 6（対話で実際に分担する流れ）は未確認
+- この項の手順 6 は、AGENTS.md に同じ節がある setup-notes の clone で、headless の Claude Code（`claude -p --permission-mode auto`）に分担を言わずに頼み、4 つで分担する流れを確かめた
+- デスクトップアプリ（Code タブ）と端末の対話の Claude Code の画面での流れは未確認
 
 > [!WARNING]
 > この項の手順 6 で Claude Code が依頼するときも、Grok に `--always-approve` を付けない。呼ぶ前に `~/.grok/config.toml` の `permission_mode` を確かめる。Antigravity に `--dangerously-skip-permissions`・`--mode` を付けない。
@@ -2909,7 +2910,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Claude Code が Codex に実装と下書きを頼み、Grok と Antigravity に読み取り専用のレビューを頼む流れになることを確かめる
    - Claude Code が指摘を実物で確かめ、採らなかった指摘は理由とともに報告することを確かめる
    - 使えないエージェントがあれば、飛ばした相手と理由の報告を確かめる
-   - この項の手順 6 の対話での流れは未確認
+   - headless の Claude Code では、AGENTS.md に同じ節がある setup-notes の clone で、この流れを確かめた
+   - デスクトップアプリ（Code タブ）と端末の対話の画面での流れは未確認
 
 ---
 
