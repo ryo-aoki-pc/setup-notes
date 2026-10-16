@@ -2297,8 +2297,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'; Pop-Location
      codex exec -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
-     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
-     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --model $m --print-timeout 300s; Pop-Location }
+     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)(?:\s|$)') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書き、手順 8 を貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --model $m --print-timeout 300s; Pop-Location }
    }
    ```
 
@@ -2545,7 +2545,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 と同じ値
-   - **新しい PowerShell を開いたら**、この項の手順 1 の 4 つのブロックを貼り直す（`REVIEW_DIR` は新しいフォルダーになる）
+   - **新しい PowerShell を開いたら**、この 4 つのブロックを貼り直す（`REVIEW_DIR` は新しいフォルダーになる）
 
 1. 使い捨てのフォルダーに、ブランチの中身と `main` との差分を書き出す。
 
@@ -2573,8 +2573,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```powershell
    & {
      if (-not (Test-Path -LiteralPath "$REVIEW_DIR\review.diff")) { Write-Error '中断: 手順 2 の差分が無い。手順 2 を貼り直す'; return }
-     $model = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
-     if (-not $model) { Write-Error '中断: agy models に Gemini の Flash（High）が無い。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す'; return }
+     $model = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)(?:\s|$)') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     if (-not $model) { Write-Error '中断: agy models に Gemini の Flash（High）が無い。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書き、手順 3 を貼り直す'; return }
      [Console]::OutputEncoding = [Text.Encoding]::UTF8
      $hash = { Get-ChildItem -LiteralPath $REVIEW_DIR -Recurse -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { '{0} {1}' -f $_.Hash, $_.Path } }
      $before = & $hash
@@ -2740,8 +2740,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'; Pop-Location
      codex exec --sandbox read-only -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
-     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
-     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、Antigravity CLI が担当する役割は何か。1 行で' --model $m --print-timeout 300s; Pop-Location }
+     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)(?:\s|$)') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書き、手順 5 を貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、Antigravity CLI が担当する役割は何か。1 行で' --model $m --print-timeout 300s; Pop-Location }
      git -C "$WT_ROOT\antigravity" status --short
    }
    ```
