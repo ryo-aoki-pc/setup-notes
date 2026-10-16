@@ -58,7 +58,8 @@
 - Gemini の Flash は、Argon の別枠に左右されず、レビューを書いた Claude Code と別の系統のモデルにするために使う。High は、レビューで深く考えさせるために選ぶ
 - モデルの版が上がると ID が変わるため、頼むたびに `agy models` から選ぶ
   - `gemini-<版>-flash-high` の形の中で版を数として比べる（`3.10` は `3.8` より新しい）。`flash-lite` などほかの形は選ばない
-- 形に合う ID が無ければ、[Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順 3 は止まる。手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
+  - `[version]` は「数.数」から「数.数.数.数」までしか受け付けないので、数が 1 つの版（`4`）だけ `4.0` にして比べる
+- 形に合う ID が無ければ、[Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順 3 は止まり、規則の読み込みを確かめる[Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 8 と[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 5 は Antigravity の行を飛ばす。どれも、その項の手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
 - 一覧に無い ID を `--model` に渡すと、1 回だけの実行は終了コード 1 で止まり、ほかのモデルに黙って替わらない
 - CLI の保存済みの既定（`/model <name>`）は変えない。保存すると、利用者が対話で使う Antigravity の既定も変わるため
 - `-p /quota` は AI に聞かないので使用量を使わない（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。表示される時刻は UTC

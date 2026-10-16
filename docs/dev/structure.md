@@ -222,10 +222,12 @@
   - 11 個のリポジトリの規則では、リモートのブランチは GitHub が自動で消す（設定は人が保つ）。取り込んだブランチには push しない。手元のブランチは人が消す
     - 2026-10-15 に GitHub API で、11 個とも自動削除が有効、10 個は squash だけを許す（md-table-excel は merge commit も許す）ことを確かめた
   - Windows 11 の Antigravity CLI の共同作業の検証（2026-10-15）: `antigravity` と `agent/antigravity` を 4 つ目の worktree・ブランチにし、読み取り専用のレビューと調べものを頼む。AlmaLinux 10 は 3 つ
-    - Antigravity に頼むときは、`agy models` から版がいちばん新しい `gemini-<版>-flash-high` を選んで `--model` で渡す（2026-10-16、利用者の決定。`AGY_MODEL` で替えられる）。検証の範囲は検証記録の 2026-10-16 の付録
     - 使い捨てのリポジトリで「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1〜8 のブロックを、書いたとおりに Windows PowerShell 5.1 で通した（手順 2 は 4 つの CLI の版とログイン）
     - 同じ項の手順 8 は Claude・Codex・Antigravity CLI の規則の読み込みまで。Grok の `--trust inspect` の行と手順 9 は通していない。CLI の headless の権限の確認と Codeg の接続確認だけを、4 エージェントの実分担の成功として扱わない
     - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
+  - Antigravity のモデル（2026-10-16、利用者の決定）: Antigravity に頼む 3 か所（「Windows 11 で使う」の手順 8、「Antigravity に読み取り専用で頼む」の手順 3、「既定で分担する」の手順 5）は、`agy models` から版がいちばん新しい `gemini-<版>-flash-high` を選んで `--model` で渡す。各項の手順 1 の `AGY_MODEL` で替えられる
+    - 2026-10-15 に通した上のブロックは、`--model` を付けない形だった
+    - 検証の範囲は検証記録の 2026-10-16 の付録（後で書く）
 - `docs/ai-agents.md` — 「Codeg」: AlmaLinux 10 と Windows 11 で、ACP のコーディングエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）をブラウザやスマートフォンのチャット画面から動かす任意の構成。使うエージェントと同じホストに OSS の Codeg（Apache-2.0）の `codeg-server` を常駐させる。まず localhost で起動し、ブラウザを開いてフォルダーを選び、使うエージェントの項へ進む。外から届く口は、同じホストの Caddy（Apache-2.0）が受ける HTTPS（3443/tcp）だけ。AlmaLinux 10 は「ユーザーサービスの常駐」と、使う CLI の導入・ログインを前提にする
   - Codeg は複数のエージェントを使う Web UI として書く（2026-10-16、利用者の決定）。共通の「ブラウザで開いてエージェントを選ぶ」と、Grok 固有の「Grok Build を使う」を分ける。後者は手順 1 が権限モード、2 が Grok・モデルの選択、3 が指示・承認、4 がプロセスの確認
   - エージェント別の項は「Codeg: Grok Build を使う」「Codeg: Claude Code と Codex CLI を使う」「Codeg: Windows 11 で Claude Code と Codex CLI を使う」「Codeg: AlmaLinux 10 で Antigravity を使う」「Codeg: Windows 11 で Antigravity を使う」。AlmaLinux 10 の Antigravity の項は Windows 11 の同項の前に置く

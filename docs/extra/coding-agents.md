@@ -219,7 +219,7 @@
 ## 注意点
 
 - **3 つの契約の使用量を使う**: レビュー・委任・確かめの問いのたびに、Claude（claude.ai）・Codex（ChatGPT）・Grok（grok.com）それぞれのプランの使用量が減る
-- **Antigravity の使用量はモデルの組ごとにある**: Gemini 4 Argon には別の週の上限がある。残りは `agy -p /quota`（使用量を使わない）で見る。手順書では版がいちばん新しい Gemini の Flash を使う（[モデルの選び方](../reference/coding-agents.md#antigravity-に読み取り専用で頼む--手順-3-補足-モデルの選び方)）
+- **Antigravity の使用量はモデルの組ごとにある**: Gemini 4 Argon には別の週の上限がある。残りは `agy -p /quota`（使用量を使わない）で見る。手順書では版がいちばん新しい Gemini の Flash（High）を使う（[モデルの選び方](../reference/coding-agents.md#antigravity-に読み取り専用で頼む--手順-3-補足-モデルの選び方)）
 - **`/codex:rescue` と `/grok-build:delegate` は、Claude の worktree で動く**: Codex と Grok が Claude の worktree のファイルを変える。Claude 自身の作業と同じファイルを頼まない
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
 - **`/codex:cancel` の後も、Codex が始めたコマンドは動き続けることがある**: cancel はターンを中断するが、その中で始めたコマンドは裏に残ることがある。残ったコマンドは、Claude Code のセッションを終えてプラグインが Codex の共有のプロセスを止めると消える（プラグイン 1.0.6 と Codex 0.160.0。スクリプトを直接呼んだ確認。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#codex-の実行中のターンの中断を伴う-cancel)）

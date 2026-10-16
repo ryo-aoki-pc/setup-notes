@@ -2157,15 +2157,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    ```powershell
+   $AGY_MODEL = ''                       # ← 空のままなら、版がいちばん新しい Gemini の Flash（High）を使う。ほかのモデルにするときは agy models の ID を書く。<AGY_MODEL>
+   ```
+
+   ```powershell
    $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
+   'AGY_MODEL   = {0}' -f $AGY_MODEL
    'WT_ROOT     = {0}' -f $WT_ROOT
    ```
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、git のリポジトリのルートの絶対パス
-   - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
+   - **新しい PowerShell を開いたら**、この 3 つのブロックを貼り直してから先へ進む
 
 1. 4 つの CLI の版とログインを確かめる。
 
@@ -2292,12 +2297,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'; Pop-Location
      codex exec -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
-     Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --print-timeout 300s; Pop-Location
+     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 共同作業の規則で、ファイルを変えてよい場所はどこか。1 行で' --model $m --print-timeout 300s; Pop-Location }
    }
    ```
 
    - 見方は、[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 8 と同じ
    - Antigravity も、最後の行で「起動された worktree（作業ディレクトリ）の中だけ」のように答えればよい
+   - Antigravity の行が `Individual quota reached` で答えなかったら、そのモデルの上限。`agy -p /quota` で残りを確かめる
+     - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 8 を貼り直すか、戻るまで待つ
+   - `中断: agy models に Gemini の Flash（High）が無い` が出たら、Antigravity の行は流れていない。ログインと `agy models` の一覧を確かめ、使う ID をこの項の手順 1 の `AGY_MODEL` に書いて、この項の手順 8 を貼り直す
    - Antigravity の行は、規則を読むことの確かめだけ。ファイルを変えさせない頼み方は、[Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)
    - 日本語の答えが化けて読めなければ、`[Console]::OutputEncoding = [Text.Encoding]::UTF8` を貼ってから、このブロックを貼り直す
 
@@ -2564,7 +2573,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```powershell
    & {
      if (-not (Test-Path -LiteralPath "$REVIEW_DIR\review.diff")) { Write-Error '中断: 手順 2 の差分が無い。手順 2 を貼り直す'; return }
-     $model = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] + '.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     $model = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
      if (-not $model) { Write-Error '中断: agy models に Gemini の Flash（High）が無い。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す'; return }
      [Console]::OutputEncoding = [Text.Encoding]::UTF8
      $hash = { Get-ChildItem -LiteralPath $REVIEW_DIR -Recurse -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { '{0} {1}' -f $_.Hash, $_.Path } }
@@ -2639,15 +2648,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    ```
 
    ```powershell
+   $AGY_MODEL = ''                       # ← 空のままなら、版がいちばん新しい Gemini の Flash（High）を使う。ほかのモデルにするときは agy models の ID を書く。<AGY_MODEL>
+   ```
+
+   ```powershell
    $WT_ROOT = if ($PROJECT_DIR) { $PROJECT_DIR.TrimEnd('\') + '.worktrees' }   # 4 つの worktree を置くディレクトリ（プロジェクトの隣）。<WT_ROOT>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
+   'AGY_MODEL   = {0}' -f $AGY_MODEL
    'WT_ROOT     = {0}' -f $WT_ROOT
    ```
 
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、git のリポジトリのルートの絶対パス
-   - **新しい PowerShell を開いたら**、この 2 つのブロックを貼り直してから先へ進む
+   - **新しい PowerShell を開いたら**、この 3 つのブロックを貼り直してから先へ進む
 
 1. AGENTS.md の末尾に既定の分担を足す。
 
@@ -2726,15 +2740,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Push-Location -LiteralPath "$WT_ROOT\claude"; claude -p --permission-mode plan 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'; Pop-Location
      codex exec --sandbox read-only -C "$WT_ROOT\codex" 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、ファイルを変える依頼の実装と下書きはだれが担当するか。1 行で'
      Push-Location -LiteralPath "$WT_ROOT\grok"; grok --trust inspect | Select-String -SimpleMatch -Pattern 'Project trusted', 'AGENTS.md', 'CLAUDE.md'; Pop-Location
-     $m = agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] + '.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id
-     Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、Antigravity CLI が担当する役割は何か。1 行で' --model $m --print-timeout 300s; Pop-Location
+     $m = if ($AGY_MODEL) { $AGY_MODEL } else { agy models | ForEach-Object { if ($_ -match '^(gemini-(\d+(?:\.\d+)*)-flash-high)\t') { [pscustomobject]@{ Id = $Matches[1]; Ver = [version]($Matches[2] -replace '^\d+$', '$0.0') } } } | Sort-Object Ver -Descending | Select-Object -First 1 -ExpandProperty Id }
+     if (-not $m) { Write-Error '中断: agy models に Gemini の Flash（High）が無いので、Antigravity の行を飛ばした。ログインと agy models の一覧を確かめ、使う ID を手順 1 の $AGY_MODEL に書いて貼り直す' } else { Push-Location -LiteralPath "$WT_ROOT\antigravity"; agy -p 'ファイルやツールを使わずに、読み込まれている指示だけから答えて: 既定の分担で、Antigravity CLI が担当する役割は何か。1 行で' --model $m --print-timeout 300s; Pop-Location }
      git -C "$WT_ROOT\antigravity" status --short
    }
    ```
 
    - Claude Code と Codex が、実装と下書きの担当を `Codex` と答える
    - Antigravity が、自分の役割を「読み取り専用のレビューと調べもの」と答える
-   - Antigravity の行が `Individual quota reached` で答えなかったら、そのモデルの上限。`agy -p /quota` で残りを確かめ、戻ってからこの項の手順 5 を貼り直す
+   - Antigravity の行が `Individual quota reached` で答えなかったら、そのモデルの上限。`agy -p /quota` で残りを確かめる
+     - この項の手順 1 の `AGY_MODEL` のブロックだけを、ほかのモデルの ID を書いて貼り直し、この項の手順 5 を貼り直すか、戻るまで待つ
+   - `中断: agy models に Gemini の Flash（High）が無い` が出たら、Antigravity の行は流れていない。ログインと `agy models` の一覧を確かめ、使う ID をこの項の手順 1 の `AGY_MODEL` に書いて、この項の手順 5 を貼り直す
    - `分からない` や違う役割を答えたら、この項の手順 2 の追記・手順 3 のコミット・手順 4 の同期を確かめ、先へ進まない
    - Grok は `Project trusted: yes` と、AGENTS.md・CLAUDE.md の `(project, …)` の行が出る（名前は `Agents.md`・`Claude.md` のように出ることがある）。AGENTS.md の行が出なければ、先へ進まない
    - 最後の `git status --short` に何も出なければ、Antigravity は antigravity の worktree を変えていない。何か出たら、中身を確かめてから消す
