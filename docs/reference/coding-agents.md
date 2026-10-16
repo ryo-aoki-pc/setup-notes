@@ -76,12 +76,12 @@
 - モデルの版が上がると ID が変わるため、頼むたびに `agy models` から選ぶ
   - `gemini-<版>-flash-high` の形の中で版を数として比べる（`3.10` は `3.8` より新しい）。`flash-lite` などほかの形は選ばない
   - `[version]` は「数.数」から「数.数.数.数」までしか受け付けないので、数が 1 つの版（`4`）だけ `4.0` にして比べる
-- 形に合う ID が無ければ、[Windows 11 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)の手順 3 は止まり、規則の読み込みを確かめる[Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 8 と[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 5 は Antigravity の行を飛ばす。どれも、その項の手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
+- 形に合う ID が無ければ、[Windows 11 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)の手順 3 は止まり、規則の読み込みを確かめる[Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 8 と[Windows 11 で既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で既定で分担する)の手順 5 は Antigravity の行を飛ばす。どれも、その項の手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
 - 一覧に無い ID を `--model` に渡すと、1 回だけの実行は終了コード 1 で止まり、ほかのモデルに黙って替わらない
 - CLI の保存済みの既定（`/model <name>`）は変えない。保存すると、利用者が対話で使う Antigravity の既定も変わるため
 - `-p /quota` は AI に聞かないので使用量を使わない（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。表示される時刻は UTC
 
-### 既定で分担する / 手順 5: 補足: 読み込まれた指示の確かめ
+### Windows 11 で既定で分担する / 手順 5: 補足: 読み込まれた指示の確かめ
 
 - Claude Code と Codex の問いは、実装と下書きの担当が Codex かどうかで判定する。Antigravity には自分の役割を問い、Grok は `--trust inspect` で AGENTS.md の読み込みを確かめる
 - この項の手順 5 は指示の読み込みの確認で、実際に 4 つで分担する流れの確認にはならない
@@ -111,7 +111,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
 | スマートフォンから指示する | Codex のリモート接続（ChatGPT のアプリ） | 採らない | ホストは macOS・Windows の ChatGPT のデスクトップアプリだけ（Linux は無い）。Codex CLI からは設定できない |
 | スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Codeg の手順](../ai-agents.md#codeg-almalinux-10-で使う)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。Codeg は複数の ACP エージェントをブラウザから動かす OSS。使うエージェントと同じホストに置く |
-| スマートフォンから指示する | Codeg のブラウザ画面から Claude Code・Codex CLI に直接頼む | OS 別の手順書で扱う（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)） | AlmaLinux 10 と Windows 11。使う CLI の導入とログイン、同じホストで動く Codeg が要る |
+| スマートフォンから指示する | Codeg のブラウザ画面から Claude Code・Codex CLI に直接頼む | OS 別の手順書で扱う（[AlmaLinux 10](../ai-agents.md#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)） | AlmaLinux 10 と Windows 11。使う CLI の導入とログイン、同じホストで動く Codeg が要る |
 | GitHub で分担する | GitHub の Agent HQ（Issue に Claude と Codex を割り当てる） | 採らない | Copilot の有料プラン。Grok はエージェントとしては無く、Copilot のモデルとしてだけ選べる |
 | GitHub で分担する | Pull Request に `@codex review`、`anthropics/claude-code-action` | 採らない | GitHub の App・シークレットの設定。Grok の公式の Action は無い（`grok -p` を API キーで動かす例だけ） |
 | 並べて動かす道具を使う | Zed の Parallel Agents（ACP） | 採らない | 3 つとも ACP のレジストリにある。エディタを Zed にすることになる |
@@ -130,7 +130,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
 - docs とそのサブモジュールの 11 個のリポジトリは、AGENTS.md の規則で共同作業の手順と違う形にする
   - 作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないので、`gh pr merge --squash` で取り込む
   - 取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す
-  - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチの削除は人が行う
+  - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチは、エージェントが自分の作ったものだけを消す（取り込まれたことと、どの worktree でも使っていないことを確かめてから `git branch -D`。squash で取り込むので `-d` は通らない）
   - 取り込んだブランチには、その後コミットも push もしない。push すると、消したリモートのブランチが同じ名前で作り直される
   - 2026-10-15 の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。10 個は merge commit が無効で squash だけを許し、md-table-excel だけは merge commit も許す
   - この 11 個の自動削除と squash は、GitHub の設定に頼る。次の「GitHub の機能には頼らない」は、共同作業の手順書の方針
@@ -140,7 +140,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
 
 - 分担を指定しないファイル変更の依頼も Claude Code が取りまとめる
   - 適用範囲は docs リポジトリとその 10 個のサブモジュールに絞り、11 個のリポジトリの AGENTS.md の末尾に同じ `## 既定の分担` を置く。ほかのプロジェクトへは自動で適用しない
-- ほかのプロジェクトでも同じ既定を入れるための手順を、[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)に残す。手順の対象は Windows 11。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは Claude Code だけで行う
+- ほかのプロジェクトでも同じ既定を入れるための手順を、[Windows 11 で既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で既定で分担する)に残す。手順の対象は Windows 11。質問への答え・ファイルを変えない調べもの・1 つのファイルの数行で振る舞いを変えない直しは Claude Code だけで行う
 - Claude Code は計画・実機での確認・依頼・指摘の確認・統合・コミットと Pull Request・取り込みを担当し、Codex は別の clone か worktree で実装と下書きを担当する
   - Codex の Windows の sandbox では `git add`・`git commit` ができないので、Codex はコミットもステージもせず、Claude Code が確かめてからコミットする
 - Windows 11 の Grok には sandbox が無いので、差分の読み取り専用のレビューを担当させる。`--always-approve` は付けず、入力を専用のフォルダーへ写し、その外を読ませず、前後のハッシュを比べる
@@ -286,7 +286,7 @@ Claude Code が 3 つに頼む形は次のとおり。Codex・Grok の行は、W
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
 - Codeg は、ACP のエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）を、ブラウザやスマートフォンのチャットの画面から動かす OSS。[Codeg の手順](../ai-agents.md#codeg)で、サーバーと使うエージェントを設定する
-- Claude Code と Codex CLI を選ぶ手順は、OS 別の「Claude Code と Codex CLI を使う」（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)を参照する
+- Claude Code と Codex CLI を選ぶ手順は、OS 別の「AlmaLinux 10 で Claude Code と Codex CLI を使う」と「Windows 11 で Claude Code と Codex CLI を使う」（[AlmaLinux 10](../ai-agents.md#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)を参照する
 
 ### GitHub で分担する（この手順書では使わない）
 

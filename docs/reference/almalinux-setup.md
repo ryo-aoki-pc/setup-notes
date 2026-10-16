@@ -516,7 +516,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### Claude Code / 手順 1: 補足: 変数について
 
-- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
+- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
 - ネイティブインストーラ版にある `autoUpdatesChannel` / `minimumVersion` の設定は dnf 版では効かない（更新を行うのが dnf のため）
 
 ### Codex CLI / 手順 3: 補足: インストーラーが置くもの
@@ -608,7 +608,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - その後、ソースコードが Apache-2.0 で公開された（github.com/xai-org/grok-build）
 - 秘密情報のあるディレクトリで `grok` を起動しない。sandbox（`--sandbox read-only` など。Linux と macOS だけ。Linux では有効な Landlock と bubblewrap が要る）で書き込める場所を絞れる
 
-### Claude Code を stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
+### AlmaLinux 10 で Claude Code を stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
 
 - 以後の `sudo dnf upgrade claude-code`（[AlmaLinux 10 の更新](../ai-agents.md#almalinux-10-の更新)）は `stable` の版を追う
 
@@ -811,7 +811,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - `stable` は 1 週間ほど遅れて、大きな不具合のある版を飛ばす
 - `latest` は出た版をすぐ配る
-- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../ai-agents.md#claude-code-を-stable-チャンネルに切り替える任意)）
+- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-stable-チャンネルに切り替える任意)）
 
 **既定を `latest` にした理由**:
 

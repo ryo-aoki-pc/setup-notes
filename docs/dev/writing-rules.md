@@ -10,7 +10,7 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
 - 検証・参考資料・ロールバックは用途ごとの文書に置き、用途の項のリードから案内する
 - 文書を移す・分ける・まとめるときは、移した経緯と、旧ファイル名・旧見出しとの対応を文書に書かない（経緯は git の履歴と Pull Request の本文に残す）。リンクを今の場所へ直す。中身が新しい場所への案内だけになったファイルは消す
 - 2冊には AI エージェントの項・節を置かない。冒頭と `## 更新` のリードから ai-agents.md へ 1 行で案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md）
-- ai-agents.md は、OS で節を分けた手順書にする。`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節で OS ごとに分ける項は「<節>: AlmaLinux 10 で使う」「<節>: Windows 11 で使う」、更新は「AlmaLinux 10 の更新」「Windows 11 の更新」にする。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
+- ai-agents.md は、OS で節を分けた手順書にする。`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11。後ろの節で OS ごとに分ける項は「<節>: AlmaLinux 10 で使う」「<節>: Windows 11 で使う」、更新は「AlmaLinux 10 の更新」「Windows 11 の更新」にする。後ろの節で、片方の OS だけの節・項は、見出しに OS 名を入れる（「AlmaLinux 10 で …」「Windows 11 で …」）。`## AlmaLinux 10 で使う`・`<節>: Windows 11 で使う` などの OS の節の下の項は除く。後ろの節は、リードの最初の箇条書きに「対象: AlmaLinux 10」「対象: Windows 11」「対象: 両 OS」のどれかを書く
 - 両 OS を載せる手順書と extra では、OS で分かれる「実施手順」「更新」「ロールバック」の見出しに OS 名を入れる（`AlmaLinux 10 で使う`・`AlmaLinux 10 の更新`・`AlmaLinux 10 のロールバック`、`Windows 11 で使う`・`Windows 11 の更新`・`Windows 11 のロールバック`）。OS 名の無い「実施手順」「更新」「ロールバック」は、片方の OS だけの文書か、`## AlmaLinux 10 で使う` などの OS の節の下にだけ置く
 - virtual-machines.md は、OS でカテゴリを分けた手順書にする。`## AlmaLinux 10 で使う` と `## Windows 11 で使う` の下に、2冊と同じ `###` 用途 → `####` 手順を置く。forgejo.md は `## サーバー` の下に `### Forgejo` を置く。2冊には項を置かず、冒頭と `## 更新` のリードから 1 行で案内する
 - gnome-remote.md・wireguard.md・neovim.md・samba.md・syncthing.md・shell-terminal.md も、virtual-machines.md と同じ形にする（gnome-remote.md は `## AlmaLinux 10 で使う` だけ）。2冊からは、冒頭・カテゴリ・`## 更新` のリードから案内する。冒頭には、全体の前提と、入れたものを上げる項を置く
