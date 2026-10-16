@@ -13,7 +13,7 @@
 - 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の変数を設定したシェルで行う
 
 > [!CAUTION]
-> **この節の手順 4 は、取り込んでいない作業ごと、3 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
+> **この節の手順 4 は、取り込んでいない作業ごと、4 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
 
 1. 動いているエージェントと Remote Control を終え、tmux のセッションを閉じる。
 
@@ -30,7 +30,7 @@
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
-     for a in claude codex grok; do
+     for a in claude codex grok antigravity; do
        echo "== ${a}"
        git -C "${WT_ROOT}/${a}" status --short
        git -C "${PROJECT_DIR}" log --oneline "main..agent/${a}"
@@ -41,12 +41,12 @@
    - `== claude` などの見出しの下に何も出なければ、消して失うものは無い
    - 出たら、要るものを[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)で取り込んでから進む
 
-1. 3 つの worktree とブランチを消す。
+1. 4 つの worktree とブランチを消す。
 
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
-     for a in claude codex grok; do
+     for a in claude codex grok antigravity; do
        if [ -d "${WT_ROOT}/${a}" ]; then git -C "${PROJECT_DIR}" worktree remove "${WT_ROOT}/${a}"; fi
        git -C "${PROJECT_DIR}" branch -d "agent/${a}"
      done
@@ -55,7 +55,7 @@
    fi
    ```
 
-   - `Deleted branch agent/claude (was …)` などが 3 つ出て、最後の一覧が `[main]` の 1 行だけになればよい
+   - `Deleted branch agent/claude (was …)` などが 4 つ出て、最後の一覧が `[main]` の 1 行だけになればよい
    - `contains modified or untracked files`（worktree に変更が残っている。続けて `used by worktree` でブランチも残る）や `not fully merged`（取り込んでいない）で断られたら、この節の手順 2 に戻り、片付けてからこのブロックを貼り直す。捨ててよいなら、この節の手順 4
    - 貼り直したときは、もう消えたものに `branch 'agent/…' not found` と出る（そのままでよい）。`rmdir` の `Directory not empty` は、worktree が残っているあいだ出る
 
@@ -64,7 +64,7 @@
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 手順書の「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
-     for a in claude codex grok; do
+     for a in claude codex grok antigravity; do
        git -C "${PROJECT_DIR}" worktree remove --force "${WT_ROOT}/${a}"
        git -C "${PROJECT_DIR}" branch -D "agent/${a}"
      done
@@ -91,7 +91,7 @@
 - [Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 1 の変数を設定した PowerShell で行う
 
 > [!CAUTION]
-> **この節の手順 4 は、取り込んでいない作業ごと、3 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
+> **この節の手順 4 は、取り込んでいない作業ごと、4 つの worktree とブランチを消す**（取り戻せない）。この節の手順 3 で断られたときに、捨ててよいと確かめてからだけ行う。
 
 1. 動いているエージェントと Remote Control を終える。
 
@@ -103,18 +103,18 @@
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($a in 'claude', 'codex', 'grok') { "== $a"; git -C "$WT_ROOT\$a" status --short; git -C $PROJECT_DIR log --oneline "main..agent/$a" }
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') { "== $a"; git -C "$WT_ROOT\$a" status --short; git -C $PROJECT_DIR log --oneline "main..agent/$a" }
    }
    ```
 
    - 見方は、[AlmaLinux 10 のロールバック](#almalinux-10-のロールバック)の手順 2 と同じ
 
-1. 3 つの worktree とブランチを消す。
+1. 4 つの worktree とブランチを消す。
 
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($a in 'claude', 'codex', 'grok') {
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') {
        if (Test-Path -LiteralPath "$WT_ROOT\$a") { git -C $PROJECT_DIR worktree remove "$WT_ROOT\$a" }
        git -C $PROJECT_DIR branch -d "agent/$a"
      }
@@ -130,7 +130,7 @@
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: Windows 11 で使うの手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($a in 'claude', 'codex', 'grok') {
+     foreach ($a in 'claude', 'codex', 'grok', 'antigravity') {
        git -C $PROJECT_DIR worktree remove --force "$WT_ROOT\$a"
        git -C $PROJECT_DIR branch -D "agent/$a"
      }
@@ -219,7 +219,7 @@
 ## 注意点
 
 - **3 つの契約の使用量を使う**: レビュー・委任・確かめの問いのたびに、Claude（claude.ai）・Codex（ChatGPT）・Grok（grok.com）それぞれのプランの使用量が減る
-- **Antigravity の使用量はモデルの組ごとにある**: Gemini 4 Argon には別の週の上限がある。残りは `agy -p /quota`（使用量を使わない）で見る。手順書では版がいちばん新しい Gemini の Flash（High）を使う（[モデルの選び方](../reference/coding-agents.md#antigravity-に読み取り専用で頼む--手順-3-補足-モデルの選び方)）
+- **Antigravity の使用量はモデルの組ごとにある**: Gemini 4 Argon には別の週の上限がある。残りは `agy -p /quota`（使用量を使わない）で見る。手順書では版がいちばん新しい Gemini の Flash（High）を使う（[モデルの選び方](../reference/coding-agents.md#windows-11-で-antigravity-に読み取り専用で頼む--手順-3-補足-モデルの選び方)）
 - **`/codex:rescue` と `/grok-build:delegate` は、Claude の worktree で動く**: Codex と Grok が Claude の worktree のファイルを変える。Claude 自身の作業と同じファイルを頼まない
 - **Codex は sandbox の中でコミットできない**: Codex の sandbox は `.git` を読むだけにする（worktree でも、ふつうのチェックアウトでも同じ。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#codex-の-sandbox-と-git)）。コミットは承認するか、人が行う
 - **`/codex:cancel` の後も、Codex が始めたコマンドは動き続けることがある**: cancel はターンを中断するが、その中で始めたコマンドは裏に残ることがある。残ったコマンドは、Claude Code のセッションを終えてプラグインが Codex の共有のプロセスを止めると消える（プラグイン 1.0.6 と Codex 0.160.0。スクリプトを直接呼んだ確認。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#codex-の実行中のターンの中断を伴う-cancel)）

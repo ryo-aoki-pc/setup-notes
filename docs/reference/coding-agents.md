@@ -50,8 +50,24 @@
 
 - プラグインのスクリプトは、Claude Code が Git Bash で動かす
 
-### Antigravity に読み取り専用で頼む / 手順 3: 補足: モデルの選び方
+### AlmaLinux 10 で Antigravity に読み取り専用で頼む / 手順 1: 補足: 使い捨てのフォルダーの場所
 
+- 使い捨てのフォルダーは `~/.cache/agy-review-<時刻>` に置く。AlmaLinux 10 の Antigravity CLI 1.4.0 は、信頼していない作業フォルダーでも、`/tmp` の下なら中への書き込みを許した
+- ホームの下の `~/.cache` に置いた実測では、中のファイルと AGENTS.md の読み取りは通り、中への書き込みとシェルのコマンドは拒まれた。拒まれると、その場で応答なしで終わる
+- どちらの場所でも、作業フォルダーの外の `/tmp` には書けた。`~/.cache` の作業フォルダーからは、`/tmp` のファイルを読めて、ホームのほかの場所のファイルの読み取りは拒まれた
+- 前後のハッシュで分かるのは使い捨てのフォルダーの中だけで、`/tmp` のほかの場所への書き込みは分からない
+
+### AlmaLinux 10 で Antigravity に読み取り専用で頼む / 手順 3: 補足: モデルの選び方
+
+- モデルを選ぶ決まりと理由は、[Windows 11 のモデルの選び方](#windows-11-で-antigravity-に読み取り専用で頼む--手順-3-補足-モデルの選び方)と同じ
+- bash では `awk` の `$1` で ID を取り、`gemini-<版>-flash-high` の形だけを `sort -V` で版の数として比べる。`$1` はタブと空白で区切るので、ID だけの行でも選べる
+- 実機の一覧では `gemini-3.8-flash-high` を選んだ。架空の一覧では `3.10` を `3.8` より、`5` を `4.0` より新しく扱い、数が 1 つの版（`4`・`5`）と 4 段階の版（`3.8.1.1`）も選んだ
+  - `flash-lite` と末尾の `highx` は選ばない。Flash（High）の形に合う ID が無い一覧では空になり、手順は中断する
+- JSON の応答は `python3` で読み、`status`・`error`・`denied_actions`・`response` を表示する
+
+### Windows 11 で Antigravity に読み取り専用で頼む / 手順 3: 補足: モデルの選び方
+
+- モデルを選ぶ決まりと理由は、AlmaLinux 10 と Windows 11 で同じ
 - 使用量はモデルの組ごとに週と 5 時間の上限がある。2026-10-16 の `agy -p /quota` は「Gemini Models」（Gemini Flash・Gemini Pro）・「Claude and GPT models」と、Gemini 4 Argon だけの週の上限を表示した
   - Pro のプランでは Argon は別枠と説明が出る
 - `--model` を付けないと Gemini 4 Argon（Medium）で動く。Argon の週の上限に達すると、ほかの組に残りがあっても `Individual quota reached` で止まる
@@ -59,7 +75,7 @@
 - モデルの版が上がると ID が変わるため、頼むたびに `agy models` から選ぶ
   - `gemini-<版>-flash-high` の形の中で版を数として比べる（`3.10` は `3.8` より新しい）。`flash-lite` などほかの形は選ばない
   - `[version]` は「数.数」から「数.数.数.数」までしか受け付けないので、数が 1 つの版（`4`）だけ `4.0` にして比べる
-- 形に合う ID が無ければ、[Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順 3 は止まり、規則の読み込みを確かめる[Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 8 と[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 5 は Antigravity の行を飛ばす。どれも、その項の手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
+- 形に合う ID が無ければ、[Windows 11 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)の手順 3 は止まり、規則の読み込みを確かめる[Windows 11 で使う](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で使う)の手順 8 と[既定で分担する](../ai-agents.md#コーディングエージェントの共同作業-既定で分担する)の手順 5 は Antigravity の行を飛ばす。どれも、その項の手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
 - 一覧に無い ID を `--model` に渡すと、1 回だけの実行は終了コード 1 で止まり、ほかのモデルに黙って替わらない
 - CLI の保存済みの既定（`/model <name>`）は変えない。保存すると、利用者が対話で使う Antigravity の既定も変わるため
 - `-p /quota` は AI に聞かないので使用量を使わない（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。表示される時刻は UTC
@@ -74,7 +90,7 @@
 
 3 つのコーディング用の CLI（Claude Code・Codex・Grok Build）を、1 つのプロジェクトで一緒に使う方法を目的ごとに比べた（2026-10-09 時点）。「この手順書」の列が「採った」のものを、手順書で手順にした。
 
-Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエージェントと読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)に分ける。下の比較表は、Claude Code・Codex・Grok Build の 3 つを対象にする。
+Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェントと読み取り専用の境界](#almalinux-10-の-4-つ目のエージェントと読み取り専用の境界)と[Windows 11 の 4 つ目のエージェントと読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)に分ける。下の比較表は、Claude Code・Codex・Grok Build の 3 つを対象にする。
 
 | 目的 | 方法 | この手順書 | 要るもの・制約 |
 |---|---|---|---|
@@ -102,7 +118,7 @@ Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエー�
 
 ## 選択した方針
 
-- 規則は AGENTS.md 1 つにまとめ、同じものを読ませる（AlmaLinux 10 は 3 つ、Windows 11 は Antigravity CLI を含む 4 つ）。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
+- 規則は AGENTS.md 1 つにまとめ、同じものを読ませる（両 OS とも Antigravity CLI を含む 4 つ）。Claude Code には CLAUDE.md の `@AGENTS.md` で取り込ませる（どの版でも効き、2 回は読まれない）
 - 作業場所は素の `git worktree` で分け、worktree の間の受け渡しはブランチへのコミットで行う。そのための push は要らない（worktree はオブジェクトを共有するので、あるブランチのコミットはほかの worktree からすぐ見える）
 - Claude Code を窓口にする。スマートフォンから入れる公式の仕組み（Remote Control）があるのは Claude Code だけで、Codex と Grok の公式のプラグインもある
 - 変更を担当するエージェントは、リモートがあるとき、自分のブランチを push し、`main` への Pull Request を作り、取り込んでよい（merge commit）。エージェントの変更は、テストと別のモデルのレビューを通してから入れる
@@ -128,15 +144,16 @@ Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエー�
   - Codex の Windows の sandbox では `git add`・`git commit` ができないので、Codex はコミットもステージもせず、Claude Code が確かめてからコミットする
 - Windows 11 の Grok には sandbox が無いので、差分の読み取り専用のレビューを担当させる。`--always-approve` は付けず、入力を専用のフォルダーへ写し、その外を読ませず、前後のハッシュを比べる
   - 読み取り専用の依頼文とハッシュ比較は、書き込みを禁じる sandbox の代わりにはならない
-- Antigravity CLI は Windows 11 だけで、読み取り専用のレビューと調べものを担当する。headless は作業フォルダーと `%TEMP%` に書けるため、入力のコピーを置いた使い捨てのフォルダーで 1 回だけ実行する
-  - 境界とハッシュで分かる範囲は[読み取り専用の境界](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)のとおり
+- Antigravity CLI は両 OS で、4 つ目のエージェントとして読み取り専用のレビューと調べものを担当する。入力のコピーを置いた使い捨てのフォルダーで 1 回だけ実行する
+  - 境界とハッシュで分かる範囲は、[AlmaLinux 10](#almalinux-10-の-4-つ目のエージェントと読み取り専用の境界)と[Windows 11](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)の項のとおり
 - 過去のレビューでは、指摘の約 3 分の 1 が誤りか直し済みだった経験がある。指摘は実物で確かめてから採り、採らなかった指摘は理由とともに報告する
-- エージェントが入っていない・ログインが切れた場合や AlmaLinux 10 の Antigravity CLI は飛ばし、そのことを報告する
-  - AlmaLinux 10 は、Antigravity CLI を足さない従来の 3 つの構成のまま。AGENTS.md の節は両 OS で同じ文にし、AlmaLinux 10 での頼み方（Grok の sandbox を使うかなど）は実機で通すまで手順にしない
+- エージェントが入っていない・ログインが切れた場合は飛ばし、そのことを報告する
+- AGENTS.md の節は両 OS で同じ文にする。AlmaLinux 10 で節を足す手順と Codex・Grok への頼み方（Grok の sandbox を使うかなど）は、実機で通すまで手順にしない
+  - AlmaLinux 10 で Antigravity に頼むときは、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)を使う
 - Claude Code だけで行う直しを「1 つのファイルの数行で振る舞いを変えない直し」にしたのは、レビューだけで 10〜25 分かかり、誤字やリンクの直しまで 4 つで回すと待ち時間が見合わないため
 - この分担で頼まれた Codex は、「共同作業の規則」のコミット・push・Pull Request・取り込みを行わない。規則と既定の分担がぶつからないよう、節の中に書いた。利用者がほかのエージェントに直接頼んだときは、この節を使わない
 
-Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使ったもの。2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52、Antigravity CLI 1.3.5）。
+Claude Code が 3 つに頼む形は次のとおり。Codex・Grok の行は、Windows 11 の実機で使ったもの（2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52）。Antigravity CLI の行は、両 OS の手順を案内する。
 
 モデルを選ぶ式は、2026-10-16 に Antigravity CLI 1.4.0 と Windows PowerShell 5.1 で確かめた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#付録-antigravity-のモデルの選び方2026-10-16-jst)）。
 
@@ -146,17 +163,29 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 | Codex の変更を移す | `git -C <Codex の場所> diff --binary --output=<ファイル>` で書き出し、`git -C <WT_ROOT>\claude apply <ファイル>` で Claude の worktree に移し、確かめてから `agent/claude` にコミットする。移した後、Codex の場所の変更は消す |
 | Codex の後片付け | 終わった後も `app-server-broker.mjs serve` の node のプロセスが、その場所を使ったまま残る。その worktree か clone を消す前に、コマンドラインにその場所を含むプロセスだけを止める（ほかの場所のものは、ほかのセッションのもの） |
 | Grok Build | 差分・変えたファイル・規則・頼む文（BRIEF.md）を専用のフォルダーへ写し、`grok -p "このフォルダーの BRIEF.md を読み、その指示どおりにレビューしてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。" --cwd <フォルダー> --permission-mode default --output-format plain` を実行する（10〜25 分）。前後のフォルダーのハッシュを比べる。Grok は信頼していないフォルダーでは AGENTS.md を読まないので、役割は頼む文に書く |
-| Antigravity CLI | [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使い、版がいちばん新しい Gemini の Flash（High）を `--model` で渡す。使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
+| Antigravity CLI | [AlmaLinux 10 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)・[Windows 11 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)の手順を使い、版がいちばん新しい Gemini の Flash（High）を `--model` で渡す。使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
+
+### AlmaLinux 10 の 4 つ目のエージェントと読み取り専用の境界
+
+- AlmaLinux 10 でも、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を使う。[AlmaLinux 10 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)に手順を置く
+- CLI 1.4.0 の 1 回だけの実行では、信頼していない作業フォルダーでも AGENTS.md と中のファイルを読んだ
+  - `~/.cache` の下を作業フォルダーにすると、中への書き込み、シェルのコマンド、ホームのほかの場所の読み取りは拒まれた。`/tmp` の読み書きは確認なしで通った
+  - `/tmp` の下を作業フォルダーにすると、中にも、作業フォルダーの外の `/tmp` にも書けた。ホームのファイルの読み取りは拒まれた
+- 拒まれると、その場で応答なしで終わる。`response` は空になり、stderr に `jetski: no output produced` が出る。`status` が `SUCCESS`、終了コードが 0 でも、`denied_actions` と応答の有無を確かめる
+- 入力だけをコピーした使い捨てのフォルダーを `~/.cache/agy-review-<時刻>` に作り、`/tmp` の下には置かない
+  - 前後のハッシュ比較で分かるのは、そのフォルダーの中だけ。`/tmp` への書き込みは、確認なしで通り、比較に出ない
+- `--mode plan` を読み取り専用の境界に使わない理由と、`--dangerously-skip-permissions`・`--mode accept-edits`・`--mode auto` を使わない方針は、[Windows 11](#windows-11-の-4-つ目のエージェントと読み取り専用の境界)と同じ
+- Claude Code からは、AlmaLinux 10 の bash で `agy -p` を直接呼ぶ。入力のコピーと前後のハッシュ比較を含む手順を使い、頼むたびに `agy models` から版がいちばん新しい Gemini の Flash（High）を選んで `--model` で渡す
 
 ### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
 
-- Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
-  - AlmaLinux 10 にも Antigravity CLI の[導入の項](../ai-agents.md#antigravity-cli)はあるが、共同作業は Claude Code・Codex・Grok Build の 3 つで行う。AlmaLinux 10 の headless は、作業フォルダーの中にも書かなかった（[参考資料](ai-agents.md#almalinux-10-の-antigravity-cli)）
+- Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す
+  - AlmaLinux 10 での境界と頼み方は、[AlmaLinux 10 の 4 つ目のエージェントと読み取り専用の境界](#almalinux-10-の-4-つ目のエージェントと読み取り専用の境界)と[AlmaLinux 10 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)を参照する
 - CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の Antigravity の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](codeg.md)）
 - Windows のコマンドの sandbox は 1.2.17 からある（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。実測では、既定の `request-review` のまま `--sandbox` を付けても、headless ではコマンドが拒まれた
 - 実測で、headless は作業フォルダーの中の書き込みと、作業フォルダーの外でも `%TEMP%` の下への書き込みを、確認なしで許した。作業フォルダーと `%TEMP%` の外の読み書きと、シェルのコマンドは拒まれた。作業フォルダーの外の `%TEMP%` を読めるかは測っていない
 - 作業フォルダーを信頼していなくても書けるので、読み取り専用という依頼文だけでは書き込みを防げない
-- [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)では、次の 3 つを境界にする
+- [Windows 11 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)では、次の 3 つを境界にする
   - 入力だけをコピーした使い捨てのフォルダーを作業フォルダーにする
   - headless の既定で、シェルのコマンドと、作業フォルダー・`%TEMP%` の外の読み書きが拒まれることを使う
   - 使い捨てのフォルダーの前後のハッシュを比べる。`%TEMP%` のほかの場所への書き込みは、この比較に出ない
@@ -177,7 +206,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 | Claude Code（2.1.295） | CLAUDE.md・CLAUDE.local.md（作業ディレクトリと親のディレクトリ）、`~/.claude/CLAUDE.md`。AGENTS.md は、CLAUDE.md・CLAUDE.local.md が無いときだけ（2.1.277 から） | CLAUDE.md の `@AGENTS.md` で取り込める。`AGENTS.override.md` は読まない |
 | Codex（0.162.0） | Git のルートから作業ディレクトリまで、階層ごとに `AGENTS.override.md` か `AGENTS.md` を 1 つ（`~/.codex/AGENTS.md` も）。合計 32 KiB まで | `AGENTS.override.md` があると、その階層の AGENTS.md は読まない |
 | Grok Build（1.0.50） | リポジトリのルートから作業ディレクトリまでの AGENTS.md・AGENT.md・CLAUDE.md・CLAUDE.local.md を全部、`.grok/rules/*.md`・`.claude/rules/*.md`、`~/.claude/CLAUDE.md` | 信頼したフォルダーでだけ読む。CLAUDE.md の `@AGENTS.md` は取り込みとしては扱わず、そのまま読む（AGENTS.md は別に読むので、規則は 1 回届く） |
-| Antigravity CLI（1.3.5、Windows 11） | 作業フォルダーの AGENTS.md・GEMINI.md | 使い捨てのリポジトリで両方を読むことを確認した。Codeg の ACP サーバーとは別に扱う |
+| Antigravity CLI（1.3.5、Windows 11 / 1.4.0、AlmaLinux 10） | 作業フォルダーの AGENTS.md・GEMINI.md | Windows 11 は使い捨てのリポジトリで両方を読むことを確認した。AlmaLinux 10 は信頼していないフォルダーでも AGENTS.md を読んだ。Codeg の ACP サーバーとは別に扱う |
 
 - skills を 3 つで共有するときは、置き場所が違う（Claude Code は `.claude/skills/`、Codex は `.agents/skills/`、Grok は 3 つとも読む）。この手順書では扱わない
 - テストとリンターのコマンドは、AGENTS.md のほかの節に書いておく（規則の「テストとリンターを通してから」が、それを指す）
@@ -198,7 +227,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
   | Grok Build | `grok -w <名前>` | `~/.grok/worktrees/<リポジトリ>/<名前>` | — |
 
 - ブランチは `agent/claude`・`agent/codex`・`agent/grok` に固定した
-  - Windows 11 では、4 つ目の `antigravity` の worktree と `agent/antigravity` のブランチを足す
+  - 両 OS で、4 つ目の `antigravity` の worktree と `agent/antigravity` のブランチを足す
   - 分担のたびに作り直さず、[main に取り込む](../ai-agents.md#コーディングエージェントの共同作業-main-に取り込む)の手順 7 で `main` にそろえてから次の作業を始める
 
 ### main でないブランチを基準にするとき

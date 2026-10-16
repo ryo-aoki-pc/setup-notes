@@ -9,7 +9,7 @@
 ### 長いコードブロックの折りたたみ
 
 - ai-agents.md の長いコードブロックを `<details>` で包む。説明と確認の箇条書きが離れるのを避けるため
-  - フェンスを除いて 20 行以上の 18 ブロック（bash 7、PowerShell 11）が対象
+  - フェンスを除いて 20 行以上の 19 ブロック（bash 8、PowerShell 11）が対象
   - 20 行以上が全ブロックの上位 1 割ほどで、既存の唯一の前例（[WireGuard の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)の 21 行）とも合うため、しきい値を 20 行にした
   - 変数のブロック、手で打つ `text` のブロック、1 行の説明に「（取り戻せない）」とある手順のブロックは折りたたまない
 - タグは手順の本文と同じ 3 スペース字下げにし、`</summary>` の後と `</details>` の前後に空行を置く
@@ -48,10 +48,11 @@
 
 - AlmaLinux 10 でも [Antigravity CLI](../ai-agents.md#antigravity-cli)を使う
 - Windows 11 と同じく、Google 公式の [シェルのインストーラー](https://antigravity.google/cli/install.sh)で入れる。更新は `agy update` を使う
-  - インストーラーの案内では、バックグラウンドでも自分で上がる。AlmaLinux 10 で確かめたのは、新しい版が無いときの `agy update` だけ（自動の更新と、新しい版への `agy update` は確かめていない）
+  - インストーラーの案内では、バックグラウンドでも自分で上がる。AlmaLinux 10 では、新しい版が無いときの `agy update` を確かめた。2026-10-16 には、`agy` を何度か動かすうちに 1.3.5 から 1.4.0 に自分で上がった。新しい版への `agy update` は確かめていない
 - インストーラーが `~/.bashrc` と `~/.bash_profile` に足す PATH の行は、入れた直後に外す（[理由](#almalinux-10-で使う--antigravity-cli--手順-4-補足-path-の行を外す理由)）
-- AlmaLinux 10 の共同作業は、従来の 3 つの構成のまま（[共同作業の参考資料](coding-agents.md#windows-11-の-4-つ目のエージェントと読み取り専用の境界)）。Antigravity CLI を 4 つ目に足す手順は、AlmaLinux 10 では書いておらず、確かめてもいない
-- AlmaLinux 10 の headless（`agy -p`）は、信頼したフォルダーでも作業フォルダーの中に書かず、`/tmp` の中には書いた。Windows 11 とは許す範囲が違う（[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)）
+- AlmaLinux 10 の共同作業でも Antigravity CLI を 4 つ目にし、読み取り専用のレビューと調べものを頼む（[共同作業の参考資料の「AlmaLinux 10 の 4 つ目のエージェントと読み取り専用の境界」](coding-agents.md#almalinux-10-の-4-つ目のエージェントと読み取り専用の境界)）
+- AlmaLinux 10 の CLI 1.3.5 の headless（`agy -p`）は、信頼したフォルダーでも作業フォルダーの中に書かず、`/tmp` の中には書いた。Windows 11 とは許す範囲が違う（[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)）
+  - CLI 1.4.0 では、信頼していない作業フォルダーを `/tmp` の下に置くと中にも書けた。`~/.cache` の下では中への書き込みとシェルのコマンドは拒まれ、中の読み取りと AGENTS.md の読み込みは通った。拒まれると、その場で応答なしで終わった
   - Windows 11 の実測では、作業フォルダーが `%TEMP%` の下にあった。作業フォルダーの中に書けたのが、`%TEMP%` の下だったからかどうかは、分けて確かめていない
 
 ### Windows 11 の Antigravity アプリの Remote Control
