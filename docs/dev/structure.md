@@ -22,7 +22,7 @@
   - 既定の分担の手順 6 の検証（2026-10-16、Windows 11）: headless の Claude Code 2.1.296 に、分担を言わずにファイルを変える依頼をした
     - AGENTS.md に同じ節がある setup-notes の clone で、`claude -p --permission-mode auto` を PowerShell 7 から起動した
     - Claude Code が 4 つで進めると判断し、Codex に下書きを、Grok と Antigravity に読み取り専用のレビューを頼んだ。指摘を実物で確かめ、採らなかった指摘の理由を報告し、自分でコミットした（push と Pull Request は頼む文で止めた）
-    - 後片付けで、Codex のブローカーのコマンドラインのパスが `/` 区切りで、`\` 区切りで探すと見落とした。参考資料の頼み方の表に、両方の区切りで探すことを足した
+    - 後片付けで、Codex のブローカーのコマンドラインのパスが `/` 区切りで、`\` 区切りで探すと見落とした
     - 対話の画面（デスクトップアプリ・端末）、手順 1〜5 の `<WT_ROOT>` の 4 つの worktree、Windows PowerShell 5.1 からの起動、push・Pull Request・取り込み、setup-notes 以外のサブモジュール、使えないエージェントを飛ばす流れ、AlmaLinux 10 は未確認
     - 詳しくは検証記録の付録「手順 6: headless で分担を言わずに頼んだ流れ（2026-10-16 JST）」
   - Antigravity CLI の検証（2026-10-15、Windows 11）: 導入・設定ファイル・更新、Codeg の Antigravity、共同作業の 4 つ目の worktree と読み取り専用の依頼を対象にした
