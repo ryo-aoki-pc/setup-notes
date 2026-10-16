@@ -62,6 +62,13 @@
   - Windows 11 の項は「Windows 11 で WireGuard を使う」「Windows 11 で Neovim を入れる」「Windows 11 で Samba クライアントを使う」「Windows 11 で Syncthing を使う」。Neovim の子の LazyVim の 5 項にも「Windows 11 で」を付ける
   - 検証記録・参考資料・extra は、用途ごとに `gnome-desktop-sharing`・`gnome-headless-session`・`gnome-remote-desktop`・`wireguard`・`samba`・`samba-client`・`syncthing`・`neovim` を使う。Neovim のロールバックは、ほかの道具と同じ項にあるので2冊の extra に置く
   - neovim.md の「LazyVim の安全な Markdown 整形を導入する」（両 OS）は、md-format（`mdfmt`）が入っていることを前提に、Neovim で保存と手動整形を確かめる項。Windows 11 の項を、隔離した環境の実際の Neovim で確かめた（2026-10-16。AlmaLinux 10 の項と本物の環境は未確認。検証記録の neovim.md の付録）
+  - neovim.md の LazyVim の headless の手順の状態（2026-10-16。検証記録の neovim.md の付録）
+    - 両 OS の導入・版を揃える・更新の項（「LazyVim の設定を導入する」など 6 項）は、`+qa` の前に、パーサーの更新と導入を待つ Lua を渡す
+    - 両 OS の使い捨ての環境で、手順書のブロックのまま次を通した
+      - 導入: tree-sitter の CLI が無いまっさらな環境から
+      - 版を揃える: 足りない物が無いときと、プラグインがずれたとき
+      - 更新: パーサーの組み直しが要るとき
+    - 本物の環境では、この手順のまま流していない
 - `docs/shell-terminal.md` — シェルと端末の手順書。`## AlmaLinux 10 で使う` が共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm、`## Windows 11 で使う` が HackGen Console NF・Windows Terminal・WezTerm・Git Bash と WezTerm の設定・シェルのツール・PowerShell 7 のプロファイル
   - Windows 11 の項は「Windows 11 で HackGen Console NF を入れる」「Windows 11 で WezTerm を入れる」。「Git Bash と WezTerm の設定」の子の同名の 4 項にも「Windows 11 で」を付ける。「HackGen Console NF を上げる」は、HackGen の項の `####` に置く
   - AlmaLinux 10 の Homebrew とオフライン導入は「基本の設定」、btop・gdu は「アプリ」、Windows 11 の Git for Windows は「基本の設定」に置く。貼り付けの設定と SSH の項は2冊の該当カテゴリに置く

@@ -199,26 +199,31 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```bash
-   nvim --headless +qa
+   ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   nvim --headless "+$ts_wait" +qa
    git -C ~/.config/nvim checkout -- lazy-lock.json
-   nvim --headless "+Lazy! restore" +qa
+   nvim --headless "+Lazy! restore" "+$ts_wait" +qa
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/nvim status --short
    ```
 
-   - 1 行目で lazy.nvim が自分を clone し、プラグイン 38 個を入れる。数分かかる
-   - `Neovim is exiting while packages are still installing.`・`Unmet requirements for **nvim-treesitter**`・`Error in command line` は出ても進んでよい
-   - 未完了の導入は、この項の手順 11 で補完する
+   - 2 行目で lazy.nvim が自分を clone し、プラグイン 38 個を入れる
+   - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
+   - tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
+   - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
+   - Mason の未完了の導入は、この項の手順 11 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 10 のブロックを貼り直す
    - **次の手順は、プロンプトが戻ってから貼る** (最後のメッセージの行末に続けて出ることがある)
 
-1. 試験用の Markdown を開いて、treesitter と Mason の導入を待つ。
+1. 試験用の Markdown を開いて、Mason の導入を待つ。
 
    ```bash
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
 
-   - 画面の下に `Downloading tree-sitter-…` などの通知が流れる
    - `Error running markdownlint-cli2: ENOENT` が 1 回出てもよい (Mason が入れ終わる前に lint が走っただけ)
    - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる。tree-sitter の CLI を別に入れてあれば 10 個)
    - 待ったら `:qa` で閉じる
@@ -272,16 +277,21 @@
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
    ```bash
-   git -C ~/.config/nvim pull --ff-only && nvim --headless "+Lazy! restore" +qa
+   ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   git -C ~/.config/nvim pull --ff-only && nvim --headless "+Lazy! restore" "+$ts_wait" +qa
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/nvim status --short
    ```
 
+   - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - 起動時に `lazy-lock.json` が書き換わり、`git status --short` に `M lazy-lock.json` が出たら、`git -C ~/.config/nvim checkout -- lazy-lock.json` で戻す
-   - 続けて `nvim --headless "+Lazy! restore" +qa` をもう一度貼る
+   - 戻したら、この項の手順 1 のブロックを貼り直す
    - `pull` が `Not possible to fast-forward` で止まったら、このマシンに push していないコミットがある。先に push するか、`git -C ~/.config/nvim log --oneline '@{u}..'` で中身を見る
    - `pull` が `Your local changes to the following files would be overwritten by merge:` と `lazy-lock.json` を出して止まったら、lock の変更を確認する
    - `:Lazy update` の結果として残すのでなければ、`git -C ~/.config/nvim checkout -- lazy-lock.json` で戻して、この手順を貼り直す
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 1 のブロックを貼り直す
 
 #### LazyVim の安全な Markdown 整形を導入する
 
@@ -504,11 +514,16 @@
 1. AlmaLinux 10 では、プラグインを上げて `lazy-lock.json` の差分を見る。
 
    ```bash
-   nvim --headless "+Lazy! update" +qa
+   ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   nvim --headless "+Lazy! update" "+$ts_wait" +qa
+   printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/nvim diff --stat
    ```
 
+   - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
    - 上げた後は、Neovim を起動して使えることを確かめてから、`lazy-lock.json` をコミットして push する
 
 ---
@@ -704,19 +719,25 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```powershell
-   nvim --headless +qa
+   $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   nvim --headless "+$tsWait" +qa
    git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json
-   nvim --headless "+Lazy! restore" +qa
+   nvim --headless "+Lazy! restore" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" status --short
    ```
 
-   - 数分かかる。Mason と treesitter の中断のメッセージは出てよい
+   - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
+   - tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
+   - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
+   - Mason の未完了の導入は、この項の手順 8 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-10-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 7 のブロックを貼り直す
    - **次の手順は、プロンプトが戻ってから貼る**
 
-1. 試験用の Markdown を開いて、treesitter と Mason の導入を待つ。
+1. 試験用の Markdown を開いて、Mason の導入を待つ。
 
    ```powershell
    Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#  動作確認', '', '日本語の検索を試す。' -Encoding UTF8
@@ -766,17 +787,21 @@
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
    ```powershell
-   git -C "$env:LOCALAPPDATA\nvim" pull --ff-only; if ($?) { nvim --headless "+Lazy! restore" +qa }
+   $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   git -C "$env:LOCALAPPDATA\nvim" pull --ff-only; if ($?) { nvim --headless "+Lazy! restore" "+$tsWait" +qa }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" status --short
    ```
 
+   - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - `M lazy-lock.json` なら、導入時に lock が古い版で書き直されている。`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻す
-   - 続いて `nvim --headless "+Lazy! restore" +qa` をもう一度貼る。2 回目は導入も lock の書き直しも無い
+   - 戻したら、この項の手順 2 のブロックを貼り直す
    - `Not possible to fast-forward` なら、`restore` も状態表示も走らない。push していないコミットを先に push するか、`git -C "$env:LOCALAPPDATA\nvim" log --oneline '@{u}..'` で見る
    - `Your local changes to the following files would be overwritten by merge:` が `lazy-lock.json` を挙げたら、手元で lock が変わっている
    - `:Lazy update` の結果として残すのでなければ、`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻してから、この手順を貼り直す
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
 
 #### Windows 11 で LazyVim の安全な Markdown 整形を導入する
 
@@ -906,11 +931,15 @@
 1. Windows 11 では、プラグインを上げて差分を見る。
 
    ```powershell
-   nvim --headless "+Lazy! update" +qa
+   $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
+   nvim --headless "+Lazy! update" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" diff --stat
    ```
 
+   - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 3 のブロックを貼り直す
 
 ---

@@ -11,6 +11,17 @@
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
 
+### LazyVim の設定を導入する / 手順 10: 補足: treesitter のパーサーの導入を待つ理由
+
+- 両 OS の「LazyVim の設定を導入する」「LazyVim の設定とプラグインの版を揃える」「LazyVim の本体・外部コマンド・プラグインを更新する」の計 6 手順に当てはまる
+- `+qa` だけでは、LazyVim が非同期で始めたパーサーの導入・更新を待たずに Neovim が閉じる
+- 待たずに閉じると、Windows 11 では組み立てが途中で終わって鍵が残り、次から `appears stale` で失敗する
+- AlmaLinux 10 では、組み立ては続いて鍵を消すが、パーサーは入らない。組み立ての途中で `tree-sitter build` が殺されたときは、鍵が残る
+- Mason が入れた tree-sitter の CLI は、headless の Neovim では Mason を読み込むまで PATH に無いので、最初に Mason を読み込む
+- tree-sitter の CLI が無ければ、Mason が入れて CLI が使えるようになるまで最大 10 分待つ
+- nvim-treesitter は、ほかで始まった同じ言語の導入を最大 60 秒しか待たないので、パーサーの更新と導入が両方とも成功するまで最大 20 回繰り返す
+- [検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#付録-headless-の-neovim-が-treesitter-のパーサーの導入を途中で止めるのを直したとき2026-10-16)
+
 ### Windows 11 で Neovim を入れる / 手順 2: 補足: 確かめる値の意味
 
 - `Nvim` が空なら、Neovim は入っていない。`C:\Users\<WIN_USER>\scoop\shims\nvim.exe` だけなら、もう scoop で入っている

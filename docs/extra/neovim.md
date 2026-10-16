@@ -19,3 +19,9 @@
 - **Neovim: Windows 11 の SSH のセッションでは、そのままでは scoop の nvim が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
 - **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
   - [「アプリを入れる」の手順 6](../windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、pwsh の中から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
+- **Neovim: treesitter のパーサーが入らない**: `Lock file '…' appears stale` が出たら、次の順で鍵を消す
+  - Neovim をすべて閉じ、tree-sitter が動いていないことを確かめる
+    - AlmaLinux 10 は `pgrep -a tree-sitter`、Windows 11 は `Get-Process tree-sitter -ErrorAction SilentlyContinue` が何も出さなければよい
+  - 鍵は、AlmaLinux 10 は `~/.cache/tree-sitter/lock/`、Windows 11 は `%LOCALAPPDATA%\tree-sitter\lock\` にある。表示された鍵のファイルを消す
+  - 手順書の手順で出たときは、その手順のブロックを貼り直す。それ以外のときは、Neovim を開き、`Language installed` が出るまで閉じない
+  - Windows 11 では、`Compiling parser` が出ている間に Neovim を閉じると、同じ鍵が残ることがある
