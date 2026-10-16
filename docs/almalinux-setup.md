@@ -836,7 +836,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](syncthing.md#syncthing)・[Dropbox 公式](#dropbox)・[rclone](#dropbox-と-rclone)
-  - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Grok のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)
+  - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Codeg](ai-agents.md#codeg-almalinux-10-で使う)
   - [Podman の Quadlet](#podman-quadlet-で自動起動する)で動かすコンテナ
 
 > [!IMPORTANT]
@@ -3539,7 +3539,7 @@
 - ホストに 1 つの Caddy を置き、`~/.config/caddy/sites/*.caddy` の各サイトを読み、HTTPS（`tls internal`）で受けて同じホストのアプリへ渡す
 - 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)を通してあり、`curl`・`tar`・`sha512sum`・`openssl` が使える
 - 実行場所: Caddy を置く一般ユーザー自身の bash（デスクトップの端末か SSH）。`sudo` は使わない
-- 使う側: [Forgejo](forgejo.md#forgejo)・[Grok Build のブラウザ操作](ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)。アプリと Caddy は同じ一般ユーザーで動かす
+- 使う側: [Forgejo](forgejo.md#forgejo)・[複数のエージェントをブラウザから動かす Codeg](ai-agents.md#codeg-almalinux-10-で使う)。アプリと Caddy は同じ一般ユーザーで動かす
 - [参考資料](reference/caddy.md)・[ロールバックと注意点](extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
 
 #### Caddy: 入れて起動する

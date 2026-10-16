@@ -314,6 +314,8 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(marker.read_bytes(), before)
         self.assertFalse(any(call[0] in ("version", "download", "show", "stop") for call in self.calls))
         self.assertIn("前の更新が途中", self.output.getvalue())
+        self.assertIn("docs/extra/codeg.md の「AlmaLinux 10 で自動更新の控えから前の版と DB に戻す」",
+                      self.output.getvalue())
 
     def test_keeps_only_two_automatic_generations_and_never_failed(self):
         self.paths.backups.mkdir()

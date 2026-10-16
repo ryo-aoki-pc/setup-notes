@@ -79,8 +79,8 @@ Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエー�
 | スマートフォンから指示する | Claude Code の Remote Control（Claude のアプリ）で Claude に頼み、Claude がプラグインで Codex・Grok に頼む | 採った（スマートフォンから指示する） | claude.ai の Pro / Max / Team / Enterprise。PC を動かしたまま |
 | スマートフォンから指示する | SSH のアプリから tmux に入り、3 つに直接頼む | 採った（AlmaLinux 10 だけ） | PC に SSH で入れること（LAN か VPN） |
 | スマートフォンから指示する | Codex のリモート接続（ChatGPT のアプリ） | 採らない | ホストは macOS・Windows の ChatGPT のデスクトップアプリだけ（Linux は無い）。Codex CLI からは設定できない |
-| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。ACP で Grok Build を動かす OSS の Codeg を同じホストに置けば、ブラウザから動かせる |
-| スマートフォンから指示する | Codeg のブラウザ画面から Claude Code・Codex CLI に直接頼む | OS 別の手順書で扱う（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)） | AlmaLinux 10 と Windows 11。使う CLI の導入とログイン、同じホストで動く Codeg が要る |
+| スマートフォンから指示する | Grok Build に直接つなぐ | この手順書では扱わない（[Codeg の手順](../ai-agents.md#codeg-almalinux-10-で使う)） | 1.0.50 にスマートフォンからつなぐ公式の機能は無い（同梱の文書）。Codeg は複数の ACP エージェントをブラウザから動かす OSS。使うエージェントと同じホストに置く |
+| スマートフォンから指示する | Codeg のブラウザ画面から Claude Code・Codex CLI に直接頼む | OS 別の手順書で扱う（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)） | AlmaLinux 10 と Windows 11。使う CLI の導入とログイン、同じホストで動く Codeg が要る |
 | GitHub で分担する | GitHub の Agent HQ（Issue に Claude と Codex を割り当てる） | 採らない | Copilot の有料プラン。Grok はエージェントとしては無く、Copilot のモデルとしてだけ選べる |
 | GitHub で分担する | Pull Request に `@codex review`、`anthropics/claude-code-action` | 採らない | GitHub の App・シークレットの設定。Grok の公式の Action は無い（`grok -p` を API キーで動かす例だけ） |
 | 並べて動かす道具を使う | Zed の Parallel Agents（ACP） | 採らない | 3 つとも ACP のレジストリにある。エディタを Zed にすることになる |
@@ -136,7 +136,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 
 - Windows 11 では、レビューと調べものを分担する 4 つ目のエージェントとして Antigravity CLI（`agy`）を足す。AlmaLinux 10 は、従来の 3 つの構成のままにする
   - AlmaLinux 10 にも Antigravity CLI の[導入の項](../ai-agents.md#antigravity-cli)はあるが、共同作業は Claude Code・Codex・Grok Build の 3 つで行う。AlmaLinux 10 の headless は、作業フォルダーの中にも書かなかった（[参考資料](ai-agents.md#almalinux-10-の-antigravity-cli)）
-- CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](grok-build-remote.md)）
+- CLI は作業フォルダーの AGENTS.md を読むので、共同作業の規則をほかの 3 つと共有できる。Codeg の Antigravity の ACP サーバーでは同じ条件にならない（[Codeg の参考資料](codeg.md)）
 - Windows のコマンドの sandbox は 1.2.17 からある（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。実測では、既定の `request-review` のまま `--sandbox` を付けても、headless ではコマンドが拒まれた
 - 実測で、headless は作業フォルダーの中の書き込みと、作業フォルダーの外でも `%TEMP%` の下への書き込みを、確認なしで許した。作業フォルダーと `%TEMP%` の外の読み書きと、シェルのコマンドは拒まれた。作業フォルダーの外の `%TEMP%` を読めるかは測っていない
 - 作業フォルダーを信頼していなくても書けるので、読み取り専用という依頼文だけでは書き込みを防げない
@@ -238,8 +238,8 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
   - 確認や完了をスマートフォンに知らせるには、Claude Code の `/config` で通知（Push when actions required など）を有効にする
 - Codex のリモート接続は、ChatGPT のデスクトップアプリ（macOS・Windows）をホストにする。Linux はホストにできず、Codex CLI や IDE の拡張機能からは設定できない（公式の文書）。Codex CLI 0.162.0 には実験的な `codex remote-control` があるが、スマートフォンとのつなぎ方は公式の文書に無い
 - Grok Build 1.0.50 の同梱の文書に、スマートフォンからつなぐ機能は無い（`cursor-worker` は Cursor のクラウドのエージェントにこの PC を貸す機能で、別のもの）
-- 公式の機能ではないが、Grok Build は ACP のエージェントとして動かせる（`grok agent stdio`）。これを使う OSS の Codeg で、ブラウザから Grok Build を動かす手順は [Grok Build をブラウザから操作する手順書](../ai-agents.md#grok-build-のブラウザ操作-almalinux-10-で使う)
-- 同じ Codeg で Claude Code と Codex CLI も選ぶ手順は、OS 別の「Claude Code と Codex CLI も操作する」（[AlmaLinux 10](../ai-agents.md#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](../ai-agents.md#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)を参照する
+- Codeg は、ACP のエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）を、ブラウザやスマートフォンのチャットの画面から動かす OSS。[Codeg の手順](../ai-agents.md#codeg)で、サーバーと使うエージェントを設定する
+- Claude Code と Codex CLI を選ぶ手順は、OS 別の「Claude Code と Codex CLI を使う」（[AlmaLinux 10](../ai-agents.md#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](../ai-agents.md#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。各エージェントの worktree を使い分け、CLI の導入とログインは初期設定の手順書で行う。検証範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)を参照する
 
 ### GitHub で分担する（この手順書では使わない）
 

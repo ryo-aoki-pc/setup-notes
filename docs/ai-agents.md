@@ -405,7 +405,7 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - Google の Antigravity CLI（`agy`）は、[Windows 11 で Antigravity CLI を入れる](#windows-11-で-antigravity-cli-を入れる)で入れる（AlmaLinux 10 は[Antigravity CLI](#antigravity-cli)）
-- Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)で入れる
+- Codeg で使う Antigravity は別の製品（ACP サーバー）でログインも別なので、[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)で入れる
 - デスクトップアプリをブラウザから使うときは、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)を通す
 
 ### Windows 11 で Claude Code を入れる
@@ -990,7 +990,7 @@
 | 自動の更新の状態 | `~/.gemini/antigravity-cli/updater/` | `%USERPROFILE%\.gemini\antigravity-cli\updater\` |
 | インストーラーの一時ファイル | `~/.cache/antigravity/staging/`（空のフォルダーが残る） | `%LOCALAPPDATA%\antigravity\staging\` |
 | すべてのフォルダーに効く指示書 | `~/.gemini/AGENTS.md`・`GEMINI.md`（初めは無い） | `%USERPROFILE%\.gemini\AGENTS.md`・`GEMINI.md`（初めは無い） |
-| Codeg の Antigravity（別の製品） | 扱わない | `%USERPROFILE%\.gemini\antigravity-acp\`（[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)） |
+| Codeg の Antigravity（別の製品） | 仮想アドレスが 39 ビットの arm64 では ACP サーバー 1.4.0 は使えない（[AlmaLinux 10 で Antigravity を使う](#codeg-almalinux-10-で-antigravity-を使う)） | `%USERPROFILE%\.gemini\antigravity-acp\`（[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)） |
 
 - `antigravity-oauth-token` と資格情報マネージャーの値はパスワードと同じ扱いにし、表示させない・載せない
 - 作業フォルダーの `AGENTS.md` と `GEMINI.md` を、どちらも指示として読む
@@ -1661,7 +1661,7 @@
   - Grok Build は、対話の画面（`grok`）を起動したときに新しい版を確かめ、自分で上がる
   - Antigravity CLI は、バックグラウンドで自分で上がる（止める設定は確かめていない）
   - Antigravity アプリ（[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)）の更新の動きは確かめていない。`%LOCALAPPDATA%\antigravity-updater` はあるが、上げる手順は置かない
-  - Codeg の Antigravity（ACP サーバー）は自分では上がらない。[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の版のまま使う
+  - Codeg の Antigravity（ACP サーバー）は自分では上がらない。[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)の版のまま使う
 
 ### AI エージェントとプラグインを上げる
 
@@ -2812,8 +2812,8 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - claude.ai のアカウント（Pro / Max / Team / Enterprise）のログインが要る。API キーでは使えない
 - PC は動かしたままにする（スリープ・ネットワークの切断で止まる）
 - 両 OS で同じ流れ。この節の手順 1 は AlmaLinux 10、手順 2 は Windows 11 だけ
-- Grok Build に、スマートフォンや PC のブラウザから直接頼むなら、Grok Build のブラウザ操作（[AlmaLinux 10](#grok-build-のブラウザ操作-almalinux-10-で使う)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で使う)。OSS の Codeg の画面）
-- Claude Code と Codex CLI にも Codeg から直接頼むなら、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）
+- Grok Build・Claude Code・Codex CLI などに、スマートフォンや PC のブラウザから直接頼むなら、[Codeg](#codeg)の OS 別の導入（[AlmaLinux 10](#codeg-almalinux-10-で使う)・[Windows 11](#codeg-windows-11-で使う)）を通す
+- Claude Code と Codex CLI を使うときは、エージェントの操作手順（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）
 - Windows 11 の Antigravity アプリへ直接頼む入口は、[Antigravity アプリの Remote Control](#antigravity-アプリの-remote-control任意)。この共同作業で CLI に読み取り専用のレビューを頼む使い方とは別で、スマートフォンからの接続は未検証
 
 > [!WARNING]
@@ -2873,41 +2873,42 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-## Grok Build のブラウザ操作（任意）
+## Codeg
 
-- 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#grok-build-のブラウザ操作-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から始める
+[Codeg](https://github.com/spacering-net/codeg) は、ACP で動くコーディングエージェント（Grok Build・Claude Code・Codex CLI・Google Antigravity など）を、ブラウザやスマートフォンのチャットの画面から動かす OSS。任意の構成で、使うエージェントと同じホストにサーバーを置く。
+
+- 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#codeg-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#codeg-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
-- 画面の画像は、Windows 11 の実機の Codeg v0.35.1 で 2026-10-14 に撮った。フォルダー（`codeg-demo`）と会話は試験用
+- 画面の画像は、Windows 11 の実機の Codeg v0.35.1（2026-10-14）と、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2（2026-10-16）で撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md)・[参考資料](reference/grok-build-remote.md)・[ロールバックと注意点](extra/grok-build-remote.md)
-- Claude Code・Codex を使うときは、追加の操作手順（[AlmaLinux 10](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)・[Windows 11](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）も通す
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](reference/codeg.md)・[ロールバックと注意点](extra/codeg.md)
+- サーバーの導入後は、使うエージェントの項へ進む。[Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）を選ぶ
 
-### Grok Build のブラウザ操作: AlmaLinux 10 で使う
+### Codeg: AlmaLinux 10 で使う
 
 
 > [!IMPORTANT]
-> - **この項は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#grok-build-のブラウザ操作-windows-11-で使う)から通す
-> - **Grok Build を使う一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
-> - 前提: [Grok Build](#grok-build)を導入し、ログインを済ませる。ブラウザの無いホストは[別のログイン手順](#grok-build-をブラウザの無いホストでログインする)を使う
+> - **この項は AlmaLinux 10 のサーバーのもの**。Windows 11 の PC は、[Windows 11 で使う](#codeg-windows-11-で使う)から通す
+> - **使うエージェントの一般ユーザー自身の bash（SSH）で実行する**。`sudo -i` や `sudo -iu` で切り替えたシェルは使わない
+> - 前提: [Claude Code](#claude-code)・[Codex CLI](#codex-cli)・[Grok Build](#grok-build)のいずれかの CLI を導入し、ログインを済ませる。ブラウザの無いホストは Codex CLI・Grok Build の各ログイン手順を使う
 > - [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)も通す
 > - [プラグイン](#codexgrok-のプラグイン)の手順 1 の Node.js、[linger](almalinux-setup.md#ユーザーサービスの常駐)、[sudo](almalinux-setup.md#ログインと-sudo)の手順 3（NOPASSWD）も通す
 > - 別の PC からサーバーの SSH にログインでき、サーバーの IPv4 が固定されていることを前提にする。firewalld と SELinux は有効なまま使う
 > - スマートフォンから使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
-> - [ブラウザ操作](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 1・3〜6 は別の PC とそのブラウザで行う
-> - [HTTPS 公開](#grok-build-のブラウザ操作-https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末、手順 6・8 はスマートフォンと PC で行う
+> - [ブラウザ操作](#codeg-ブラウザで開いてエージェントを選ぶ)の手順 1・3・4 は別の PC とそのブラウザで行う
+> - [HTTPS 公開](#codeg-https-で-lanvpn-に公開する)の手順 5 は LAN の別の端末、手順 6・8 はスマートフォンと PC で行う
 
-- 上から順にコードブロックを貼る。[Codeg のサーバーを入れて localhost で起動する](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 で変数を設定したシェルに貼る
+- 上から順にコードブロックを貼る。[サーバーを入れて localhost で起動する](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 で変数を設定したシェルに貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-- [Codeg](https://github.com/spacering-net/codeg)のサーバーを Grok Build と同じホストに常駐させ、ブラウザから操作する。外部のサーバーは通らない
+- [Codeg](https://github.com/spacering-net/codeg)のサーバーを使うエージェントと同じホストに常駐させ、ブラウザから操作する。外部のサーバーは通らない
 - 通信は HTTPS。OSS の [Caddy](https://caddyserver.com/)（Apache-2.0）の共通のサービスにサイトを足し、ホストに 1 つの認証局の証明書で受けて、Codeg へ渡す。つなぐ端末には、その認証局のルート証明書を入れる
 - 開けるのは 3443/tcp だけで、送信元を指定した帯に絞る。インターネット向けのポート転送は設定しない
 
 > [!WARNING]
-> - **アクセストークンを知る人は、ブラウザからこのサーバーで、このユーザーとして有効なエージェントを動かせる**（ファイルの読み書きとコマンドの実行）。Claude Code・Codex も同じトークンで動かせる
+> - **アクセストークンを知る人は、ブラウザからこのサーバーで、このユーザーとして有効なエージェントを動かせる**（ファイルの読み書きとコマンドの実行）。Claude Code・Codex CLI・Antigravity も同じトークンで動かせる
 > - NOPASSWD の sudo があるホストでは、root と同じ重みになる。待ち受ける IP と送信元を絞り、トークンは人に見せない
-> - **Grok の権限モードが「常に許可」だと、指示は確認なしで実行される**。「毎回確認」でも `mkdir` は確認なしで実行された（[注意点](extra/grok-build-remote.md#注意点)）
 
-#### Grok Build のブラウザ操作: Codeg のサーバーを入れて localhost で起動する
+#### Codeg: サーバーを入れて localhost で起動する
 
 1. 変数を設定する（`SERVER_IP` と `ALLOW_FROM` は必ず値を入れる）。
 
@@ -2958,7 +2959,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 空のままなら先へ進まない
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、この項の手順 1 を貼り直す
 
-1. Grok Build・Node.js・linger・firewalld と、Codeg がまだ無いことを確かめる。
+1. エージェントの CLI・Node.js・linger・firewalld と、Codeg がまだ無いことを確かめる。
+
+   <details>
+     <summary>貼るコマンド（bash・26 行）</summary>
 
    ```bash
    {
@@ -2966,24 +2970,37 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${CODEG_VERSION}" ] || [ -z "${FW_ZONE}" ]; then
        echo '中断: この項の手順 1 の変数を設定する' >&2
      else
-       uname -m
-       grok --version
-       node --version
-       systemctl --user is-active caddy.service
-       loginctl show-user "$(id -u)" -p Linger
-       sudo firewall-cmd --state
-       sudo firewall-cmd --get-active-zones
-       ss -ltn '( sport >= :3080 and sport <= :3090 ) or ( sport = :3443 )'
-       ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
+       CODEG_AGENT_COUNT=0
+       for CODEG_AGENT in claude codex grok; do
+         if command -v "${CODEG_AGENT}" >/dev/null 2>&1; then
+           "${CODEG_AGENT}" --version
+           CODEG_AGENT_COUNT=$((CODEG_AGENT_COUNT + 1))
+         fi
+       done
+       if [ "${CODEG_AGENT_COUNT}" -eq 0 ]; then
+         echo '中断: Claude Code・Codex CLI・Grok Build のいずれかを導入する' >&2
+       else
+         uname -m
+         node --version
+         systemctl --user is-active caddy.service
+         loginctl show-user "$(id -u)" -p Linger
+         sudo firewall-cmd --state
+         sudo firewall-cmd --get-active-zones
+         ss -ltn '( sport >= :3080 and sport <= :3090 ) or ( sport = :3443 )'
+         ls -d ~/.local/opt/codeg-server ~/.local/share/codeg ~/.config/codeg-server ~/.config/systemd/user/codeg-server.service
+       fi
      fi
    }
    ```
 
-   - `aarch64` か `x86_64`、`grok` と `node` の版、`active`、`Linger=yes`、`running` が出ればよい
+   </details>
+
+   - 入っている `claude`・`codex`・`grok` の版、`aarch64` か `x86_64`、`node` の版、`active`、`Linger=yes`、`running` が出ればよい
+   - CLI が 1 つも見つからなければ中断し、使うエージェントを先に入れる
    - `ss` は見出しの 1 行だけ、`ls` は 4 つとも `No such file or directory` になればよい
    - `caddy.service` が `active` でなければ、先に [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通す
    - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐) を通す
-   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)で消してからやり直す
+   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)で消してからやり直す
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
 
 1. 配布物を取得して、SHA-256 を照合する。
@@ -3111,7 +3128,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `active` と、`127.0.0.1:3080` の 1 行だけが出ればよい
    - **`StandardError=null` を外さない**。Codeg は、トークンを指定していても、起動のたびに標準エラーへトークンを出す
-   - **`systemd-analyze --user verify` は使わない**。`systemctl --user` がつながらなくなる（[注意点](extra/grok-build-remote.md#注意点)）
+   - **`systemd-analyze --user verify` は使わない**。`systemctl --user` がつながらなくなる（[注意点](extra/codeg.md#注意点)）
    - 本書の `systemctl --user` が `Failed to connect to user scope bus` で失敗したときは、`--machine="$(id -un)@.host"` を付け、同じ一般ユーザーでそのコマンドを実行し直す
    - 起動に失敗したら `~/.local/share/codeg/logs/` のログを見る。SELinux の拒否は `sudo ausearch -m AVC -ts recent` で確かめ、SELinux を無効にしない
 
@@ -3137,12 +3154,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `0` 以外が出たら、トークンが journal かプロセスの一覧に出ている。中断して、この項の手順 6 のユニットを確かめる
    - **トークンを、コマンドの引数に書かない**（`curl -H "…$TOKEN"` や `grep "$TOKEN"` は、実行中のプロセスの一覧にトークンを出す）
 
-#### Grok Build のブラウザ操作: ブラウザで開いて Grok を動かす
+#### Codeg: ブラウザで開いてエージェントを選ぶ
 
 1. 別の PC で、SSH のトンネルを開く。
 
    - クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3080:127.0.0.1:3080 <OSユーザー>@<SERVER_IP>` を実行する
-   - `<OSユーザー>` はサーバーの Grok Build の一般ユーザー、`<SERVER_IP>` は[サーバー起動](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 の IPv4
+   - `<OSユーザー>` はサーバーで使うエージェントの一般ユーザー、`<SERVER_IP>` は[サーバー起動](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 の IPv4
    - クライアントの 3080 番が使用中なら、`-L` の最初の `3080` を空いている番号（例: `3081`）にし、この項の手順 3 の URL も同じ番号にする
    - トンネルの端末は開いたままにする
 
@@ -3162,52 +3179,19 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 会話の画面（「今日は何をしましょうか？」）が出ればよい
    - ブラウザは、このトークンを覚える。共用の PC のブラウザでは開かない
 
-1. ブラウザで、Grok の権限モードをスマート自動承認にする。
+1. ブラウザで、作業するフォルダーを開き、使うエージェントの項へ進む。
 
-   - アドレス欄の `/workspace` を `/settings/agents` に変えて開き、「エージェント一覧」の `Grok` を選ぶ
-   - 承認を減らして使うこの手順では、「権限モード」で「スマート自動承認」（`auto`）を選び、「Grok 設定を保存」を押す
-   - 保存後に「スマート自動承認」が選ばれていればよい。選べない・保存できない場合は、権限モードの設定は未完了として先へ進まない
-   - **ここで保存すると、`~/.grok/config.toml` の `permission_mode` が書き換わり、端末の `grok` にも効く**
-   - `permission_mode` の行が無い Grok Build（入れたままの状態）は、確認を出すモードで動く
-   - 変えた設定は、新しく開いた会話から効く。この項の手順 5・6 で、そのモードで会話を始め、応答を確かめるまでは利用の確認は未完了
-   - 終わったら、アドレス欄を `/workspace` に戻す
+   - 左の「フォルダを開く」を押し、「フォルダーを開く」の入力欄にホストの作業ディレクトリを入れ、「次へ」「完了」と進む
+   - 新しい会話では、入力欄の下のフォルダーの選択（はじめは「チャットモード」）で、開いたフォルダーを選ぶ
+   - [Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）の項で設定・接続を確かめる
 
-1. ブラウザで、プロジェクトのフォルダを開き、Grok を選ぶ。
-
-   - 左の「フォルダを開く」を押し、サーバーの中のプロジェクトのディレクトリを選んで「次へ」「完了」と進む
-   - 左の一覧に出たフォルダの行の「新しい会話」を押す
-   - 入力欄の上のエージェントの一覧で `Grok` を選ぶ。入力欄の下が「エージェント接続: 接続済み」になり、モデルの名前が出ればよい
-   - **Codeg を起動して最初の会話は、Grok Build の既定と違うモデルで動いた**（検証時は、既定が Grok 4.7 のところ Grok 4.6）。モデルの欄を確かめ、違っていたら「新しい会話」を開き直す
-
-1. ブラウザで、指示を送り、承認の確認に答える。
-
-   - 入力欄に指示を書いて Enter で送る
-   - 承認の確認は、入力欄の上に出る。ファイルの変更は「Edit `<パス>`」に差分が付き、「Yes, allow all edits during this session」「Yes」「No, and tell Grok what to do differently」から選ぶ
-   - 「Execute `<コマンド>`」の確認では、次から選ぶ
-     - 「Yes, and don't ask again for bash commands」
-     - 「Yes, proceed」
-     - 「No, and tell Grok what to do differently」
-     - 「No, and don't ask again for this command」
-   - **中身を読んでから答える**。「Yes, allow all …」「Yes, and don't ask again …」は、以後の確認を省く
-   - 「No, and tell Grok what to do differently」を選ぶと、その操作は実行されず、「1 件失敗」と出てターンが止まる
-   - 終わると、変えたファイルが「変更されたファイル」にまとまって出る
-
-1. サーバーで、Grok Build のプロセスを確かめる。
-
-   ```bash
-   pgrep -af 'grok .*agent stdio'
-   ```
-
-   - `…/.grok/bin/grok --no-auto-update agent stdio` の行が出ればよい。Codeg が、開いている会話ごとに Grok Build を起動する
-   - `--permission-mode bypassPermissions` が付いていたら、「常に許可」で動いている
-
-#### Grok Build のブラウザ操作: HTTPS で LAN・VPN に公開する
+#### Codeg: HTTPS で LAN・VPN に公開する
 
 1. 共通の Caddy に Codeg のサイトを足す。
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
-     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+     echo '中断: 「サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
    elif [ -e ~/.config/caddy/sites/codeg.caddy ] || [ -L ~/.config/caddy/sites/codeg.caddy ]; then
      echo '中断: codeg.caddy が既にある。上書きしない' >&2
    elif ! systemctl --user is-active --quiet caddy.service || [ ! -d ~/.config/caddy/sites ]; then
@@ -3242,7 +3226,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    ```bash
    if [ -z "${SERVER_IP}" ]; then
-     echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+     echo '中断: 「サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
    else
      for i in $(seq 1 30); do ss -ltn '( sport = :3443 )' | grep -q LISTEN && break; sleep 1; done
      printf '\n\033[7m 確認 \033[0m\n'
@@ -3263,7 +3247,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    {
      printf '\n\033[7m 確認 \033[0m\n'
      if [ -z "${SERVER_IP}" ] || [ -z "${ALLOW_FROM}" ] || [ -z "${FW_ZONE}" ]; then
-       echo '中断: 「Codeg のサーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
+       echo '中断: 「サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
      else
        read -r -a CODEG_SRCS <<<"${ALLOW_FROM}"
        for src in "${CODEG_SRCS[@]}"; do
@@ -3280,7 +3264,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 送信元ごとに `success` が 2 回ずつ出た後、runtime と permanent に、送信元ごとの 3443/tcp の規則があればよい
    - 3080 番は開けない。Codeg へは、Caddy を通してだけ届く
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない
-   - 追加できた規則を外す場合は[AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)の手順 2 を使う
+   - 追加できた規則を外す場合は[AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)の手順 2 を使う
 
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
 
@@ -3307,13 +3291,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - ブラウザで `https://<SERVER_IP>:3443` を開く。警告が出ずに、ログインの画面（「アクセストークン」と「接続」）が出ればよい
    - 「アクセストークン」にコピーした 64 文字を貼り、「接続」を押す
-   - [ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る
+   - [ブラウザで開いてエージェントを選ぶ](#codeg-ブラウザで開いてエージェントを選ぶ)の手順 4 から使うエージェントの項へ進み、会話を開いて指示を送る
    - PC のブラウザからも、同じ URL とトークンで開ける。PC で開いた会話も、同じ一覧に出る
 
-#### Grok Build のブラウザ操作: 自動更新を有効にする
+#### Codeg: 自動更新を有効にする
 
 - 対象: AlmaLinux 10
-- 前提: [Codeg のサーバーを入れて localhost で起動する](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)を通し、Codeg を入れてある
+- 前提: [サーバーを入れて localhost で起動する](#codeg-サーバーを入れて-localhost-で起動する)を通し、Codeg を入れてある
 - 実行場所: Codeg を動かす一般ユーザーの bash（デスクトップの端末か SSH）。このリポジトリのルートで行う
 - 毎日 4:30〜5:00（サーバーの時刻）に最新の安定版へ更新する。更新中は数十秒止まり、動いている会話は切れる
 
@@ -3324,7 +3308,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      echo '中断: 先に Codeg を入れる' >&2
    else
      mkdir -p ~/.local/bin
-     install -m 700 scripts/grok-build-remote/codeg-auto-update.py ~/.local/bin/codeg-auto-update
+     install -m 700 scripts/codeg/codeg-auto-update.py ~/.local/bin/codeg-auto-update
      printf '\n\033[7m 確認 \033[0m\n'
      ls -l ~/.local/bin/codeg-auto-update
    fi
@@ -3387,40 +3371,39 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `Result=success`・`ExecMainStatus=0` で、ログの最後に `最新版 <版> を使用中` か `更新: <旧版> → <新版>` が出ればよい
    - `list-timers` の `NEXT` に、次の 4:30〜5:00 の時刻が出る。最後の版がログの版と同じならよい
    - Codeg を止めてあるときは、ログに `止まっているので更新しない` と出ればよい
-   - 失敗したら、ログの最後の行と、[AlmaLinux 10 の更新](#grok-build-のブラウザ操作-almalinux-10-の更新)のリードの終了コードを見る
-   - `更新:` が出たら、[AlmaLinux 10 の更新](#grok-build-のブラウザ操作-almalinux-10-の更新)の手順 3 でブラウザから確かめる
+   - 失敗したら、ログの最後の行と、[AlmaLinux 10 の更新](#codeg-almalinux-10-の更新)のリードの終了コードを見る
+   - `更新:` が出たら、[AlmaLinux 10 の更新](#codeg-almalinux-10-の更新)の手順 3 でブラウザから確かめる
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 で使う
+### Codeg: Windows 11 で使う
 
 > [!IMPORTANT]
-> - **Windows のデスクトップで行う**。[Codeg を入れる](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 1 で開く **管理者ではない Windows PowerShell 5.1** に貼る
-> - [HTTPS で公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 3 だけは、管理者の窓に貼る
-> - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と Grok Build が管理者の権限で動く
-> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の導入・ログイン、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
+> - **Windows のデスクトップで行う**。[Codeg を入れる](#codeg-windows-11-でサーバーを入れて起動する)の手順 1 で開く **管理者ではない Windows PowerShell 5.1** に貼る
+> - [HTTPS で公開する](#codeg-windows-11-で-https-で-lanvpn-に公開する)の手順 3 だけは、管理者の窓に貼る
+> - **SSH でログインしたシェルには貼らない**。Administrators の一員の SSH のセッションは管理者の権限を持つので、そこから始めると Codeg と使うエージェントが管理者の権限で動く
+> - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5、[Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる)・[Grok Build](#windows-11-で-grok-build-を入れる)のいずれかの CLI の導入・ログイン、[Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の Node.js
 > - 拠点ごとに[ネットワークとリモート](windows-setup.md#ネットワークとリモート)の手順 3 で、信頼する有線 LAN・Wi-Fi をプライベートにする
 > - Codeg は、管理者ではない自分のユーザーとして、サインインしている間だけ動く（この節のタスク）
 > - PC の IP は固定でなくてよい。受信するホスト側のインターフェースが Private なら、有線 LAN・Wi-Fi・VPN の全接続種別・全送信元の IPv4・IPv6 を許可する
 > - VPN からでも、実際に受信するホスト側のインターフェースが Private であることが必要。信頼する接続だけを Private にし、公衆 Wi-Fi などは Public のままにする
 > - スマートフォンから LAN の外で使うときは、スマートフォンを [WireGuard VPN の「クライアントを登録する」](wireguard.md#wireguard-クライアントを登録する)でクライアントにしておく
-> - [Windows 11 で HTTPS で LAN・VPN に公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 5 は確認するネットワークの別の端末で、手順 6・8 はスマートフォンと PC で行う
+> - [Windows 11 で HTTPS で LAN・VPN に公開する](#codeg-windows-11-で-https-で-lanvpn-に公開する)の手順 5 は確認するネットワークの別の端末で、手順 6・8 はスマートフォンと PC で行う
 
-- 上から順にコードブロックを貼る。[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 2 で変数を設定した PowerShell に貼る
+- 上から順にコードブロックを貼る。[Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)の手順 2 で変数を設定した PowerShell に貼る
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 通信は HTTPS。AlmaLinux 10 と同じく、Caddy を同じ PC に置いて、Codeg へ渡す
 - Caddy が待ち受ける IP は決めない。受信の規則は Private の全送信元を許可し、Public・Domain を遮断する
-- 共通パスワードでログインするなら、[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 9 の後で[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1・2 を通し、同じ項の手順 10 へ戻る
+- 共通パスワードでログインするなら、[Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)の手順 9 の後で[Windows 11 で共通パスワードを設定・変更する](#codeg-windows-11-で共通パスワードを設定変更する)の手順 1・2 を通し、同じ項の手順 10 へ戻る
   - 共通パスワードの項は、このリポジトリを clone したフォルダーで行う（スクリプトを相対パスで呼ぶ）
-- ルート証明書は、[Windows 11 で HTTPS で LAN・VPN に公開する](#grok-build-のブラウザ操作-windows-11-で-https-で-lanvpn-に公開する)の手順 6 で端末に入れる
-- 画面の操作とセッションの取り込みは、AlmaLinux と共通の[使い方の基本](#grok-build-のブラウザ操作-使い方の基本)から行う
+- ルート証明書は、[Windows 11 で HTTPS で LAN・VPN に公開する](#codeg-windows-11-で-https-で-lanvpn-に公開する)の手順 6 で端末に入れる
+- 画面の操作とセッションの取り込みは、AlmaLinux と共通の[使い方の基本](#codeg-使い方の基本)から行う
 
 > [!WARNING]
-> - **アクセストークンを知る人は、ブラウザからこのPCで、このユーザーとして有効なエージェントを動かせる**（ファイルの読み書きとコマンドの実行）。Claude Code・Codex も同じトークンで動かせる
-> - Windows の Grok Build には sandbox が無い。Private の全送信元が接続画面へ届くので、トークンは人に見せない
-> - **Grok の権限モードが「常に許可」だと、指示は確認なしで実行される**（[注意点](extra/grok-build-remote.md#注意点)）
+> - **アクセストークンを知る人は、ブラウザからこのPCで、このユーザーとして有効なエージェントを動かせる**（ファイルの読み書きとコマンドの実行）。Claude Code・Codex CLI・Antigravity も同じトークンで動かせる
+> - Private の全送信元が接続画面へ届くので、トークンは人に見せない
 
-#### Grok Build のブラウザ操作: Windows 11 で Codeg のサーバーを入れて起動する
+#### Codeg: Windows 11 でサーバーを入れて起動する
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -3460,11 +3443,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `CADDY_VERSION` は[Caddy のリリース](https://github.com/caddyserver/caddy/releases)で新しい版を確かめて変える
    - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
 
-1. Grok Build・Node.js・LAN の接続と、Codeg がまだ無いことを確かめる。
+1. エージェントの CLI・Node.js・LAN の接続と、Codeg がまだ無いことを確かめる。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   grok --version
+   $codegAgents = @(Get-Command -Name claude, codex, grok -CommandType Application -ErrorAction SilentlyContinue)
+   if ($codegAgents.Count -eq 0) { throw '中断: Claude Code・Codex CLI・Grok Build のいずれかを導入する' }
+   $codegAgents | ForEach-Object { & $_.Source --version }
    node --version
    ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
    Get-NetConnectionProfile | Format-Table InterfaceAlias, NetworkCategory -AutoSize
@@ -3473,11 +3458,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    Get-ScheduledTask -TaskName 'codeg-server', 'codeg-caddy' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
 
-   - `grok` と `node` の版、`False`（管理者ではない）、LAN の接続の `Private` が出ればよい
+   - 入っている `claude`・`codex`・`grok` と `node` の版、`False`（管理者ではない）、LAN の接続の `Private` が出ればよい
+   - CLI が 1 つも見つからなければ中断し、使うエージェントを先に入れる
    - その後は、待ち受けの表が出ず、`False` が 3 行出て、タスクの表も出なければよい
    - 最初の `False` が `True` なら、管理者の窓で開いている。この項の手順 1 からやり直す
    - `Public` なら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 3](windows-setup.md#ネットワークとリモート)を通す
-   - 待ち受け・`True`・タスクのどれかが出たら、既存の構築がある。[Windows 11 のロールバック](extra/grok-build-remote.md#windows-11-のロールバック)で消してからやり直す
+   - 待ち受け・`True`・タスクのどれかが出たら、既存の構築がある。[Windows 11 のロールバック](extra/codeg.md#windows-11-のロールバック)で消してからやり直す
 
 1. 配布物を取得して SHA-256 を照合し、自分のユーザーの場所に置く。
 
@@ -3679,18 +3665,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 順に、`401`、`{"status":"ok","version":"…"}`、`False`（どのプロセスのコマンドラインにもトークンが無い）が出ればよい
 
-1. この PC のブラウザで開いてログインし、Grok を動かす。
+1. この PC のブラウザで開いてログインし、使うエージェントを選ぶ。
 
-   - 共通パスワードで使うなら、まだ設定していなければ[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)の手順 1・2 を通してから、この手順の続きを行う。`token.txt` は開かない
+   - 共通パスワードで使うなら、まだ設定していなければ[Windows 11 で共通パスワードを設定・変更する](#codeg-windows-11-で共通パスワードを設定変更する)の手順 1・2 を通してから、この手順の続きを行う。`token.txt` は開かない
    - トークンのまま使うなら、`notepad "$env:LOCALAPPDATA\codeg-server\token.txt"` でトークンを開いてコピーし、保存せずに閉じる
    - ブラウザで `http://127.0.0.1:3080/` を開き、「アクセストークン」に共通パスワード（トークンのまま使うなら、コピーした値）を入れて「接続」を押す
-   - [ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 4〜6 と同じ操作で、権限モードを確かめ、フォルダを開いて、指示を送る
-   - 参照先は AlmaLinux 10 の項だが、ブラウザの操作は同じ。フォルダーはこの PC のもの、Grok の設定ファイルは `%USERPROFILE%\.grok\config.toml`
-   - Windows では、ファイルの変更の確認の見出しが「Write `<パス>`」になる
+   - [ブラウザで開いてエージェントを選ぶ](#codeg-ブラウザで開いてエージェントを選ぶ)の手順 4 と同じ操作で、この PC の作業フォルダーを開き、使うエージェントの項へ進む
+   - 参照先は AlmaLinux 10 の項だが、ブラウザでフォルダーを開く操作は同じ
    - ![Codeg のログイン画面。Codeg、アクセストークン、接続](images/ai-agents/codeg-login-v0.35.1.png)
-   - **次の手順は、ブラウザで Grok が応答してから貼る**
+   - **次の手順は、ブラウザで選んだエージェントが応答してから貼る**
 
-#### Grok Build のブラウザ操作: Windows 11 で HTTPS で LAN・VPN に公開する
+#### Codeg: Windows 11 で HTTPS で LAN・VPN に公開する
 
 1. Caddy の配布物を取得してチェックサムを照合し、自分のユーザーの場所に置く。
 
@@ -3703,7 +3688,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      $dir = "$env:LOCALAPPDATA\codeg-caddy"
      $curl = "$env:WINDIR\System32\curl.exe"
      $tmp = "$env:TEMP\codeg-caddy-setup"
-     if (-not $CADDY_VERSION) { Write-Error '中断: 「Windows 11 で Codeg のサーバーを入れて起動する」の手順 2 の変数を設定する'; return }
+     if (-not $CADDY_VERSION) { Write-Error '中断: 「Windows 11 でサーバーを入れて起動する」の手順 2 の変数を設定する'; return }
      if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { Write-Error "中断: この手順は $env:PROCESSOR_ARCHITECTURE の Windows を扱わない"; return }
      if (Test-Path -LiteralPath $dir) { Write-Error "中断: $dir が既にある。上書きしない"; return }
      if (Test-Path -LiteralPath $tmp) { Write-Error "中断: $tmp が既にある。中を確かめて消してから貼り直す"; return }
@@ -3874,7 +3859,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. スマートフォンと PC に、この PC のルート証明書を入れる。
 
-   - [端末にルート証明書を入れる](#grok-build-のブラウザ操作-端末にルート証明書を入れる)を通す。スマートフォン（Android）は同じ項の手順 1・2・5、Windows の PC は同じ項の手順 1・3・4・5
+   - [端末にルート証明書を入れる](#codeg-端末にルート証明書を入れる)を通す。スマートフォン（Android）は同じ項の手順 1・2・5、Windows の PC は同じ項の手順 1・3・4・5
    - この PC 自身のブラウザで HTTPS を開くなら、この PC にも入れる
 
 1. 共通パスワードを設定していないときは、トークンをスマートフォンに渡す。
@@ -3890,7 +3875,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - ブラウザで、この項の手順 4 または手順 9 に出た現在の Private の URL（`https://<PC の IP>:3443`）を開く。警告が出ずに、ログインの画面が出ればよい
    - 「アクセストークン」に、共通パスワード（設定していなければ、この項の手順 7 でコピーした 64 文字）を入れ、「接続」を押す
-   - [ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 5・6 と同じ操作で、会話を開いて指示を送る（参照先は AlmaLinux 10 の項だが、ブラウザの操作は同じ）
+   - [ブラウザで開いてエージェントを選ぶ](#codeg-ブラウザで開いてエージェントを選ぶ)の手順 4 から使うエージェントの項へ進み、会話を開いて指示を送る（参照先は AlmaLinux 10 の項だが、ブラウザの操作は同じ）
    - この PC 自身のブラウザからも、同じ URL で開ける
 
 1. PC の IP が変わったときは、今の URL を表示して、その URL で開き直す。
@@ -3916,10 +3901,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Caddy の設定・タスク・受信の規則・端末のルート証明書は、変えなくてよい。新しい IP 宛ての証明書は、Caddy がその場で作る
    - ブラウザは、IP が違う URL を別のサイトとして扱う。はじめて開く IP では、トークンを入れ直す
 
-#### Grok Build のブラウザ操作: Windows 11 で自動更新を有効にする
+#### Codeg: Windows 11 で自動更新を有効にする
 
 - 対象: Windows 11
-- 前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、Codeg を入れてある
+- 前提: [Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)を通し、Codeg を入れてある
 - 実行場所: Codeg を使う本人のデスクトップで開いた、管理者ではない Windows PowerShell 5.1。このリポジトリのルートで行う
 - 毎日 4:30（PC の時刻）に最新の安定版へ更新する。スリープなどで逃したら起きた後に動く。更新中は数十秒止まり、動いている会話は切れる
 
@@ -3933,7 +3918,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      if (-not (Test-Path -LiteralPath "$dir\codeg-server.exe") -or -not (Test-Path -LiteralPath "$dir\codeg-hidden-launcher.exe")) { throw '中断: Codeg と隠しランチャーを先に入れる' }
      if (-not (Get-ScheduledTask -TaskName 'codeg-server' -ErrorAction SilentlyContinue)) { throw '中断: codeg-server のタスクが無い' }
      New-Item -ItemType Directory -Path $state -Force | Out-Null
-     Copy-Item -LiteralPath '.\scripts\grok-build-remote\codeg-auto-update.ps1' -Destination "$state\codeg-auto-update.ps1"
+     Copy-Item -LiteralPath '.\scripts\codeg\codeg-auto-update.ps1' -Destination "$state\codeg-auto-update.ps1"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Item -LiteralPath "$state\codeg-auto-update.ps1" | Select-Object Name, Length
    }
@@ -3993,12 +3978,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - ログの最後に `最新版 <版> を使用中` か `更新: <旧版> → <新版>` が出て、最後の版と同じならよい
    - Codeg を止めてあるときは、ログに `止まっているので更新しない` と出ればよい
    - `NextRunTime` は、次の 4:30 になる。タスクが新しいウィンドウを開かないことも確かめる
-   - `LastTaskResult` が `0` 以外なら、ログの最後の行と、[Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)のリードの終了コードを見る
-   - `更新:` が出たら、[Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)の手順 3 でブラウザから確かめる
+   - `LastTaskResult` が `0` 以外なら、ログの最後の行と、[Windows 11 の更新](#codeg-windows-11-の更新)のリードの終了コードを見る
+   - `更新:` が出たら、[Windows 11 の更新](#codeg-windows-11-の更新)の手順 3 でブラウザから確かめる
 
 ---
 
-### Grok Build のブラウザ操作: 端末にルート証明書を入れる
+### Codeg: 端末にルート証明書を入れる
 
 - 対象: Windows 11 のホストの Codeg 専用 Caddy。AlmaLinux 10 のホストは [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す
 - Codeg を置いた Windows のホストごとに、認証局のルート証明書を接続する端末に入れる
@@ -4062,11 +4047,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Codeg の共通パスワードを設定・変更する
+### Codeg: 共通パスワードを設定・変更する
 
-- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Codeg の共通パスワードを設定・変更する](#grok-build-のブラウザ操作-windows-11-で-codeg-の共通パスワードを設定変更する)
-- 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/grok-build-remote.md#codeg-の共通パスワードを設定変更する--手順-13-補足-標準認証)）
-- `scripts/grok-build-remote/set-codeg-password.py` を含むこのリポジトリのルートで、Codeg を入れた本人の bash に貼る。`sudo` は使わない
+- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で共通パスワードを設定・変更する](#codeg-windows-11-で共通パスワードを設定変更する)
+- 任意。構築済みの AlmaLinux 10 の Codeg で、本人が決めた共通パスワードを標準認証の共有値として使う。ブラウザの入力欄の名前は「アクセストークン」のまま（[標準認証と保存](reference/codeg.md#codeg--共通パスワードを設定変更する--手順-13-補足-標準認証)）
+- `scripts/codeg/set-codeg-password.py` を含むこのリポジトリのルートで、Codeg を入れた本人の bash に貼る。`sudo` は使わない
 - この節の手順 3 で Codeg だけを短時間止めて起動し直す。進行中の会話を終えてから行う。Caddy は止めない
 - パスワードはエージェントに渡さず、本人が端末の非表示入力で指定する
 
@@ -4074,7 +4059,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    ```bash
    install -d -m 755 ~/.local/bin &&
-   install -m 755 scripts/grok-build-remote/set-codeg-password.py ~/.local/bin/codeg-set-password
+   install -m 755 scripts/codeg/set-codeg-password.py ~/.local/bin/codeg-set-password
    ```
 
    - エラーが無ければ次へ進む
@@ -4099,7 +4084,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 新しい値の認証 200・未認証 401・誤った値 401 が、同じ Codeg プロセスで確認され、変更完了の表示が出ればよい
    - 旧設定の控えのファイル名を記録する。控えの本文を表示・共有しない
    - 未変更で終了した場合は、原因を直してこの節の手順 2 からやり直す
-   - 変更処理後の失敗や「結果: 不明」では、再実行せずに止める。控えを保持し、[失敗時の対処](extra/grok-build-remote.md#almalinux-10-の共通パスワード変更で失敗したとき)で設定とサービスの状態を分けて確かめる
+   - 変更処理後の失敗や「結果: 不明」では、再実行せずに止める。控えを保持し、[失敗時の対処](extra/codeg.md#almalinux-10-の共通パスワード変更で失敗したとき)で設定とサービスの状態を分けて確かめる
    - **次の手順は、2 回の入力が終わり、変更の成功を確かめてから行う**（続けて貼るとパスワードとして食われる）
 
 1. 本人のブラウザで、共通パスワードを使って HTTPS の Codeg にログインし直す。
@@ -4110,20 +4095,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 で Codeg の共通パスワードを設定・変更する
+### Codeg: Windows 11 で共通パスワードを設定・変更する
 
 任意。Codeg の標準認証の `CODEG_TOKEN` の値として、本人が決めた共通パスワードを使う。ブラウザの入力欄の名前は「アクセストークン」のまま。
 
-- `scripts/grok-build-remote/set-codeg-password.ps1` を含むこのリポジトリのルートで、Codeg を入れた本人の、管理者ではない Windows PowerShell 5.1 で行う
+- `scripts/codeg/set-codeg-password.ps1` を含むこのリポジトリのルートで、Codeg を入れた本人の、管理者ではない Windows PowerShell 5.1 で行う
 - この項の手順 2 で Codeg を短時間止めて起動し直す。進行中の会話を終えてから行う
 - パスワードはエージェントに渡さず、本人が伏せ字の入力で指定する
-- 新規構築の途中で通すなら、[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 9 まで終えてから、この項の手順 1・2 を通し、その項の手順 10 へ戻る
+- 新規構築の途中で通すなら、[Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)の手順 9 まで終えてから、この項の手順 1・2 を通し、その項の手順 10 へ戻る
 - この項の手順 3 と、スクリプトが最後に出す HTTPS の案内は、HTTPS の公開を終えた構成のもの
 
 1. このリポジトリのルートで、共通パスワードの変更に要る前提を、読み取りだけで確かめる。
 
    ```powershell
-   powershell.exe -NoProfile -File .\scripts\grok-build-remote\set-codeg-password.ps1 -CheckOnly
+   powershell.exe -NoProfile -File .\scripts\codeg\set-codeg-password.ps1 -CheckOnly
    ```
 
    - 前提の確認が成功し、エラーが無ければ次へ進む
@@ -4133,14 +4118,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 本人が共通パスワードを入力し、保存と Codeg の起動し直しを行う。
 
    ```powershell
-   powershell.exe -NoProfile -File .\scripts\grok-build-remote\set-codeg-password.ps1
+   powershell.exe -NoProfile -File .\scripts\codeg\set-codeg-password.ps1
    ```
 
    - 空白を含まない表示可能な ASCII 文字で、32〜512 文字のパスワードを 2 回入力する。入力は伏せられる。値をコマンドの引数やチャットに書かない
    - 変更後の認証で 200、認証無しと誤った値で 401 になり、Codeg の起動が成功したことを、秘密を含まない結果で確かめる
    - 前提確認・入力の不一致・文字条件で未変更のまま終了した場合は、問題を直してこの項の手順 1 からやり直す。以前の結果 JSON を使わず、復元へ進まない
-   - 変更処理を始めた後に失敗した場合は、ファイルの復元とサービスの復帰の結果を分けて確かめ、[共通パスワードの復元](extra/grok-build-remote.md#windows-11-の共通パスワードの復元)へ進む。旧認証でのログイン成功は、自動では確かめない
-   - 新規構築の途中なら、変更の成功を確かめた後、この項の手順 3 へ進まず、[Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)の手順 10 へ戻る
+   - 変更処理を始めた後に失敗した場合は、ファイルの復元とサービスの復帰の結果を分けて確かめ、[共通パスワードの復元](extra/codeg.md#windows-11-の共通パスワードの復元)へ進む。旧認証でのログイン成功は、自動では確かめない
+   - 新規構築の途中なら、変更の成功を確かめた後、この項の手順 3 へ進まず、[Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)の手順 10 へ戻る
    - そのときは、スクリプトが最後に出す「いつもの HTTPS URL をブラウザで開き…」の行には従わない
    - **次の手順は、2 回の入力が終わり、変更の成功を確かめてから行う**
 
@@ -4152,27 +4137,79 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: 使い方の基本
+### Codeg: 使い方の基本
 
 - 対象: 両 OS
 
 | したいこと | 操作 |
 |---|---|
 | 開く | ルート証明書を入れた端末のブラウザで `https://<ホストの IP>:3443` |
-| 会話を始める | 左の一覧のフォルダの行の「新しい会話」（どの画面でも `Ctrl+T`）。エージェントの一覧で `Grok` を選ぶ |
+| 会話を始める | 左の一覧のフォルダの行の「新しい会話」（どの画面でも `Ctrl+T`）。使うエージェントを一覧から選ぶ |
 | 別のプロジェクトで使う | 左の「フォルダを開く」で、ホストの中のディレクトリを足す |
 | 前の会話に戻る | 左の一覧の会話を押す。サービスを起動し直しても、会話は残る |
-| 承認の確認に答える | 入力欄の上に出る選択肢から選ぶ（[ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 6） |
+| 承認の確認に答える | 入力欄の上の承認カードで、ファイル・差分・コマンドを読んで選ぶ。Grok を使うときは [Grok Build を使う](#codeg-grok-build-を使う)の手順 3 |
 | 変えたファイルを見る | 会話の中の「変更されたファイル」 |
-| 確認の出方を変える | `/settings/agents` の `Grok` の「権限モード」（[ブラウザで開いて Grok を動かす](#grok-build-のブラウザ操作-ブラウザで開いて-grok-を動かす)の手順 4） |
-| 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#grok-build-のブラウザ操作-端末の-grok-のセッションを取り込む) |
-| ブラウザで始めた会話を、端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
-| Claude Code・Codex で会話し、端末の履歴を取り込む | [追加の操作手順](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)。Claude は `Auto`、Codex は `Auto review` を選ぶ |
-| 止める・始める | `systemctl --user stop codeg-server.service`・`systemctl --user start codeg-server.service`（共有する `caddy.service` は動かしたままにする）（Windows 11 は [Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)） |
+| 確認の出方を変える | 会話の入力欄の下で、選んだエージェントのモードを選ぶ。Grok を使うときは [Grok Build を使う](#codeg-grok-build-を使う)の手順 1 |
+| 端末の `grok` で始めた作業を、ブラウザで続ける | [端末の grok のセッションを取り込む](#codeg-端末の-grok-のセッションを取り込む) |
+| Grok を使うとき、ブラウザで始めた会話を端末で確かめる | そのディレクトリで `grok sessions list`。Codeg で作った会話も一覧に出る |
+| Claude Code・Codex CLI で会話し、端末の履歴を取り込む | [Claude Code と Codex CLI を使う](#codeg-claude-code-と-codex-cli-を使う)（[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）。Claude は `Auto`、Codex は `Auto review` を選ぶ |
+| Antigravity を使う | [AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)ではカーネルの仮想アドレスの幅を先に確かめる。[Windows 11](#codeg-windows-11-で-antigravity-を使う)では ACP サーバーを入れて別にログインする |
+| 止める・始める | `systemctl --user stop codeg-server.service`・`systemctl --user start codeg-server.service`（共有する `caddy.service` は動かしたままにする）（Windows 11 は [Windows 11 で止める・もう一度始める](#codeg-windows-11-で止めるもう一度始める)） |
 
 ---
 
-### Grok Build のブラウザ操作: 端末の grok のセッションを取り込む
+### Codeg: Grok Build を使う
+
+- 対象: 両 OS
+- 前提: Grok Build（[AlmaLinux 10](#grok-build)・[Windows 11](#windows-11-で-grok-build-を入れる)）の導入とログインを済ませ、Codeg のブラウザにログインして作業フォルダーを開いてある
+- 実行場所: ブラウザの Codeg。手順 4 は、Codeg を動かす一般ユーザーの AlmaLinux 10 の bash で行う（Windows 11 では飛ばす）
+
+> [!WARNING]
+> - **Grok の権限モードが「常に許可」だと、指示は確認なしで実行される**。「毎回確認」でも `mkdir` は確認なしで実行された（[注意点](extra/codeg.md#注意点)）
+> - Windows の Grok Build には sandbox が無い。使う権限モードと承認の内容を確かめる
+
+1. ブラウザで、Grok の権限モードをスマート自動承認にする。
+
+   - アドレス欄の `/workspace` を `/settings/agents` に変えて開き、「エージェント一覧」の `Grok` を選ぶ
+   - 承認を減らして使うこの手順では、「権限モード」で「スマート自動承認」（`auto`）を選び、「Grok 設定を保存」を押す
+   - 保存後に「スマート自動承認」が選ばれていればよい。選べない・保存できない場合は、権限モードの設定は未完了として先へ進まない
+   - **ここで保存すると、`~/.grok/config.toml` の `permission_mode` が書き換わり、端末の `grok` にも効く。Windows 11 の設定ファイルは `%USERPROFILE%\.grok\config.toml`**
+   - `permission_mode` の行が無い Grok Build（入れたままの状態）は、確認を出すモードで動く
+   - 変えた設定は、新しく開いた会話から効く。この項の手順 2・3 で、そのモードで会話を始め、応答を確かめるまでは利用の確認は未完了
+   - 終わったら、アドレス欄を `/workspace` に戻す
+
+1. ブラウザで、作業フォルダーの新しい会話で、Grok を選ぶ。
+
+   - 左の一覧に出たフォルダの行の「新しい会話」を押す
+   - 入力欄の上のエージェントの一覧で `Grok` を選ぶ。入力欄の下が「エージェント接続: 接続済み」になり、モデルの名前が出ればよい
+   - **Codeg を起動して最初の会話は、Grok Build の既定と違うモデルで動いた**（検証時は、既定が Grok 4.7 のところ Grok 4.6）。モデルの欄を確かめ、違っていたら「新しい会話」を開き直す
+
+1. ブラウザで、指示を送り、承認の確認に答える。
+
+   - 入力欄に指示を書いて Enter で送る
+   - 承認の確認は、入力欄の上に出る。ファイルの変更は「Edit `<パス>`」に差分が付き、「Yes, allow all edits during this session」「Yes」「No, and tell Grok what to do differently」から選ぶ
+   - Windows 11 では、ファイルの変更の確認の見出しが「Write `<パス>`」になる
+   - 「Execute `<コマンド>`」の確認では、次から選ぶ
+     - 「Yes, and don't ask again for bash commands」
+     - 「Yes, proceed」
+     - 「No, and tell Grok what to do differently」
+     - 「No, and don't ask again for this command」
+   - **中身を読んでから答える**。「Yes, allow all …」「Yes, and don't ask again …」は、以後の確認を省く
+   - 「No, and tell Grok what to do differently」を選ぶと、その操作は実行されず、「1 件失敗」と出てターンが止まる
+   - 終わると、変えたファイルが「変更されたファイル」にまとまって出る
+
+1. サーバーで、Grok Build のプロセスを確かめる。
+
+   ```bash
+   pgrep -af 'grok .*agent stdio'
+   ```
+
+   - `…/.grok/bin/grok --no-auto-update agent stdio` の行が出ればよい。Codeg が、開いている会話ごとに Grok Build を起動する
+   - `--permission-mode bypassPermissions` が付いていたら、「常に許可」で動いている
+
+---
+
+### Codeg: 端末の grok のセッションを取り込む
 
 - 端末の `grok` で始めた会話を、Codeg の画面に取り込んで続ける。両 OS で同じ操作
 - 取り込みの一覧には、このホストのほかのエージェントとプロジェクトのセッションも出る
@@ -4195,15 +4232,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Claude Code と Codex CLI も操作する
+### Codeg: Claude Code と Codex CLI を使う
 
-- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)
+- 対象: AlmaLinux 10。Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)
 
 任意。Codeg を構築したホストに [Claude Code](#claude-code)・[Codex CLI](#codex-cli) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Codex・Grok のプラグイン](#codexgrok-のプラグイン)の手順 1）。
 
-ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
+ブラウザでログイン済みの Codeg を使う。導入途中は[SSH のトンネル](#codeg-ブラウザで開いてエージェントを選ぶ)の URL、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-almalinux-10-で-claude-codecodexantigravity-を設定した記録2026-10-16-jst)）。
 
-**この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/grok-build-remote.md#アクセストークンの重み)）。
+**この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
+
+画像は、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2 で、Claude Code を選んだときのもの（2026-10-16）。`Opus 5.5` はその契約で選べたモデルで、フォルダー（`codeg-demo`）と会話は試験用。
 
 1. AlmaLinux 10 のホストで、一般ユーザーの bash から Node.js と npm の版を確かめる。
 
@@ -4218,37 +4257,44 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
 
-   - `/settings/agents` を開き、エージェント一覧の `Claude Code`・`Codex CLI` で、使うものを有効にする
-   - 「バージョン状態」で対応版を確かめ、「インストール」を押す
-   - インストール完了まで待ち、「再チェック」で対応版が検出され、エラーが無いことを確かめる。既に対応版が入っているものは、入れ直さない
+   - `/settings/agents` を開き、「エージェント一覧」の `Claude Code`・`Codex CLI` から使うものを選び、詳細の右上のスイッチが入っていることを確かめる
+   - 「バージョン状態」が `FAIL` で「ローカル: 未インストール」と出たら、右の「インストール」を押す
+   - インストール完了まで待ち、「バージョン状態」の「ローカル」が「推奨」と同じ版になればよい。既に同じ版が入っているものは、入れ直さない
+   - Claude Code は `PASS`、Codex CLI は「<版>。すでに最新です。」と出た（画像を撮った Codeg v0.35.2 では、Claude Code `0.90.0`、Codex CLI `2.2.2`）
    - npm の導入完了ログだけでは、対応版の検出や接続の成功として扱わない
    - 最新版への「アップグレード」は押さない。既に違う版が入っている場合も、上書きせず、使う版と検証範囲を先に確かめる
    - 入らない・検出されない場合は「診断」を開く。Codeg が使う Node.js と npm の場所・版を確かめ、問題を解消するまで先へ進まない
    - 対応版が検出され、エラーが無ければ、この項の手順 3 以降へ進む
+   - ![エージェント一覧と Claude Code のバージョン状態が FAIL。「推奨: 0.90.0 · ローカル: 未インストール」と右の「インストール」](images/ai-agents/codeg-almalinux-agents-install-v0.35.2.png)
 
 1. ブラウザで、各エージェントの認証方法を確かめる。
 
    - `Claude Code`・`Codex CLI` の「認証方式」で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方式を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
    - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す
-   - Codex は、本人の ChatGPT ログインを確認する。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
+   - Codex CLI は「アカウントにログイン済み」と出ればよい。ログイン切れなら「ChatGPT でログイン」のコードとリンクを本人がブラウザで承認する
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
+   - ![Claude Code の設定管理で「認証方式」が「公式サブスクリプション」](images/ai-agents/codeg-almalinux-agents-auth-v0.35.2.png)
 
 1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
 
-   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選ぶ。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った、その担当の worktree を選ぶ
-   - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
+   - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選び、「次へ」「完了」と進む。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った、その担当の worktree を選ぶ
+   - 「新しい会話」を押し、入力欄の下のフォルダーの選択（はじめは「チャットモード」）で作業フォルダーを選ぶ。ブランチ名と「エージェント接続: 接続済み」が出ればよい
+   - 入力欄の上の一覧で `Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
-   - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
+   - Claude Code のはじめのモードは `Manual` なので、入力欄の下の左端で `Auto` に変える。Codex ははじめから `Auto review`。`Bypass permissions`・`Full access` は選ばない
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
+   - ![codeg-demo の新しい会話。Claude Code・Auto・Opus 5.5 を選び、接続確認の指示を入力した画面](images/ai-agents/codeg-almalinux-send-check-v0.35.2.png)
 
 1. ブラウザで、接続を確かめる指示を送る。
 
    - 「ツールやファイルを使わずに、接続確認ができたと一文で答えて」と入力して送る
-   - 選んだエージェントから応答があり、選んだモデルとモードで会話が続けばよい
+   - Claude Code の「接続を確認できました。」、Codex の「接続確認ができました。」のような応答があり、選んだモデルとモードで会話が続けばよい
+   - フォルダーを切り替えた直後の最初の送信が「会話を作成できませんでした。もう一度お試しください。」になることがある。そのときは、もう一度送る
    - Claude の「Auto mode unavailable」が出る、またはモードが `Accept edits` に変わる場合は、自動審査の設定は未完了。対応するモデルでやり直す。手動運用を選ぶ場合は、`Manual` に変えて個別に承認する
    - 最初の送信後にエージェントを間違えていたと分かったら、新しい会話を作り直す
+   - ![応答「接続を確認できました。」と入力欄の下の Auto・Opus 5.5](images/ai-agents/codeg-almalinux-reply-v0.35.2.png)
 
 1. ブラウザで、作業の指示を送り、必要になった承認に答える。
 
@@ -4301,13 +4347,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 で Claude Code と Codex CLI も操作する
+### Codeg: Windows 11 で Claude Code と Codex CLI を使う
 
 任意。Codeg を構築したホストに [Claude Code](#windows-11-で-claude-code-を入れる)・[Codex CLI](#windows-11-で-codex-cli-を入れる) を入れ、本人の契約でログインしておく。Node.js 22 以上と npm が必要（未導入なら [Windows 11 で Codex・Grok のプラグインを入れる](#windows-11-で-codexgrok-のプラグインを入れる)の手順 1）。
 
-ブラウザでログイン済みの `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/grok-build-remote.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
+ブラウザでログイン済みの Codeg を使う。導入途中は `http://127.0.0.1:3080`、HTTPS の公開後は `https://<ホストの IP>:3443` を使う。アクセストークンと Caddy は既存のものを使い、API キーは追加しない。「公式サブスクリプション」で本人の Claude・ChatGPT の利用枠を使い、上限に達したら契約の案内に従う（[採用理由](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--補足)・[確認範囲](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-claude-codecodex-の操作手順の追加2026-10-12-jst)）。
 
-**この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/grok-build-remote.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/grok-build-remote.md#アクセストークンの重み)）。
+**この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
 
 画像は、Windows 11 の実機の Codeg v0.35.1 で、Claude Code を選んだときのもの（2026-10-14）。`Opus 5.5` はその契約で選べたモデルで、フォルダーと会話は試験用。
 
@@ -4349,7 +4395,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
    - モードは Claude が `Auto`、Codex が `Auto review`。`Bypass permissions`・`Full access` は選ばない
-   - モードは、入力欄の下の左端で選ぶ（並びの意味は[参考資料](reference/grok-build-remote.md#claude-code-と-codex-cli-も操作する--手順-47-補足-モードと中断)）
+   - モードは、入力欄の下の左端で選ぶ（並びの意味は[参考資料](reference/codeg.md#codeg--claude-code-と-codex-cli-を使う--手順-47-補足-モードと中断)）
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
    - ![codeg-demo の新しい会話。Claude Code、Auto、Opus 5.5 を選んで指示を入力した画面](images/ai-agents/codeg-send-check-v0.35.1.png)
 
@@ -4412,10 +4458,35 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 で Antigravity も操作する
+### Codeg: AlmaLinux 10 で Antigravity を使う
+
+- 対象: AlmaLinux 10
+- 前提: 無し。入れる前に、この項の手順 1 でカーネルを確かめる
+- 実行場所: AlmaLinux 10 の一般ユーザーの bash。アンインストールはブラウザの Codeg で行う
+- Codeg の「Google Antigravity」は、Google の ACP サーバー（`agy_acp_server`）で、[Antigravity CLI](#antigravity-cli)とは別の製品
+- 仮想アドレスが 39 ビットの arm64 のカーネル（Raspberry Pi 5 の AlmaLinux 10）では、ACP サーバーの 1.4.0 は使えない。起動時に TCMalloc の `CHECK in AllocSlow: FATAL ERROR: Out of memory trying to allocate internal tcmalloc data` で落ちる
+- それ以外の Linux（x86_64 など）での手順は確かめていない
+
+1. ホストで、カーネルの仮想アドレスの幅を確かめる。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   uname -m
+   grep -E '^CONFIG_ARM64_VA_BITS(_39|_48|_52)?=' /boot/config-"$(uname -r)"
+   ```
+
+   - `CONFIG_ARM64_VA_BITS_39=y` のホストで、設定の「エージェント」の `Google Antigravity` の推奨版が `1.4.0` なら、この項を進めない
+   - この条件で `Google Antigravity` を入れていたら、「アンインストール」を押し、確認の窓で「アンインストールを確認」を押す
+   - 推奨版が `1.4.0` 以外になったときの動作は確かめていない
+   - 起動に失敗したときは「サインインを開始できませんでした: ACP protocol error: Antigravity did not accept `initialize`: the Antigravity process exited before answering. Last output: …」の通知に、`third_party/tcmalloc/arena.cc:115` と `CHECK in AllocSlo…` が出る
+   - 非公式のバイナリの書き換えはせず、直った版を待つ（[39 ビットの arm64 の補足](reference/codeg.md#codeg--almalinux-10-で-antigravity-を使う--手順-1-補足-仮想アドレスが-39-ビットの-arm64)）
+
+---
+
+### Codeg: Windows 11 で Antigravity を使う
 
 - 対象: Windows 11
-- 任意。前提: [Windows 11 で Codeg のサーバーを入れて起動する](#grok-build-のブラウザ操作-windows-11-で-codeg-のサーバーを入れて起動する)を通し、ブラウザで Codeg にログインしてある
+- 任意。前提: [Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)を通し、ブラウザで Codeg にログインしてある
 - 実行場所: ブラウザの Codeg と、Codeg を入れた PC の、管理者ではない Windows PowerShell 5.1。Google への承認は、その PC の普段のブラウザで行う
 - Codeg の「Google Antigravity」は、Google の ACP サーバー（`agy_acp_server`）で、[Antigravity CLI](#windows-11-で-antigravity-cli-を入れる)とは別の製品。ログインも別で、CLI を入れていなくても使える
 
@@ -4487,12 +4558,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Codeg のエージェント同士で共同作業する
+### Codeg: エージェント同士で共同作業する
 
 - 対象: 両 OS
-- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)（Windows 11 は[Windows 11 で Claude Code と Codex CLI も操作する](#grok-build-のブラウザ操作-windows-11-で-claude-code-と-codex-cli-も操作する)）の手順 2〜5 で有効にし、接続と応答を確かめておく
-- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/grok-build-remote.md#codeg-のエージェント同士で共同作業する--手順-14-補足-委譲と作業ディレクトリ)）
-- Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity も操作する](#grok-build-のブラウザ操作-windows-11-で-antigravity-も操作する)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
+- 任意。Codeg で使うエージェントを [Claude Code と Codex CLI を使う](#codeg-claude-code-と-codex-cli-を使う)（Windows 11 は[Windows 11 で Claude Code と Codex CLI を使う](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）の手順 2〜5 で有効にし、接続と応答を確かめておく
+- 委譲先に編集を頼む場合も、共同作業の手順（[AlmaLinux 10](#コーディングエージェントの共同作業-almalinux-10-で使う)・[Windows 11](#コーディングエージェントの共同作業-windows-11-で使う)）で担当の worktree とブランチを用意する。委譲だけで別の worktree に分かれたと扱わない（[委譲の範囲](reference/codeg.md#codeg--エージェント同士で共同作業する--手順-14-補足-委譲と作業ディレクトリ)）
+- Windows 11 で Antigravity に委譲するときは、[Windows 11 で Antigravity を使う](#codeg-windows-11-で-antigravity-を使う)の手順 1〜7 を先に通す。委譲先の Antigravity には読み取りの作業だけを頼み、ファイルを書く承認カードが出たら `Deny` を押す
 - Windows 11 で Grok を親にするときは、Grok のコマンドが cmd.exe で動き、`"` が正しく渡らない。この項の手順 4 の親への依頼に、次の注意を含める
   - 「PowerShell のコマンドと `"` を使わない。コミットメッセージはファイルに書いて `git commit -F` で渡す。この注意は委譲先への依頼文には書かない」
 
@@ -4529,20 +4600,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Claude Code のプラグインから Grok に読み取り専用で頼む
+### Codeg: Claude Code のプラグインから Grok に読み取り専用で頼む
 
 - 対象: AlmaLinux 10
-- 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#grok-build-のブラウザ操作-claude-code-と-codex-cli-も操作する)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
+- 任意。AlmaLinux 10 で、Grok のプラグインの sandbox が Landlock 非対応で起動できないホストに限る。Codeg の [Claude Code と Codex CLI の接続](#codeg-claude-code-と-codex-cli-を使う)と、[Codex・Grok のプラグイン](#codexgrok-のプラグイン)を先に通す
 - このリポジトリのルートで、Codeg を入れた本人の bash に貼る。Grok にログイン済みで、`~/.grok/sessions/`・`~/.grok/logs/` が存在することを前提にする
 - この節の手順 3 で Codeg を起動し直す。進行中の会話を終えてから行う。Grok にはレビューや調査だけを頼み、`--write` は使わない
-- Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/grok-build-remote.md#claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
+- Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/codeg.md#codeg--claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
 
 1. 本人のホストで、2 つの起動用スクリプトを置く。
 
    ```bash
    install -d -m 755 ~/.local/bin &&
-   install -m 755 scripts/grok-build-remote/codeg-grok-readonly.py ~/.local/bin/codeg-grok-readonly &&
-   install -m 755 scripts/grok-build-remote/claude-agents.sh ~/.local/bin/claude-agents
+   install -m 755 scripts/codeg/codeg-grok-readonly.py ~/.local/bin/codeg-grok-readonly &&
+   install -m 755 scripts/codeg/claude-agents.sh ~/.local/bin/claude-agents
    ```
 
    - エラーが無ければ次へ進む
@@ -4604,7 +4675,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: 設定ファイル
+### Codeg: 設定ファイル
 
 - 対象: 両 OS
 
@@ -4613,7 +4684,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | `~/.local/opt/codeg-server/` | `%LOCALAPPDATA%\codeg-server\` | `codeg-server`・`codeg-mcp` と、画面のファイル（`web`） |
 | `~/.config/codeg-server/token.env` | `%LOCALAPPDATA%\codeg-server\token.txt` | アクセストークン。持ち主だけが読める |
 | `~/.config/systemd/user/codeg-server.service` | `%LOCALAPPDATA%\codeg-server\start-codeg-server.ps1` と、タスク `codeg-server` | 待ち受ける IP（`CODEG_HOST`）などの設定と、起動のしかた |
-| `~/.local/bin/codeg-set-password` | リポジトリの `scripts/grok-build-remote/set-codeg-password.ps1` | 本人の端末で共通パスワードを設定・変更するスクリプト |
+| `~/.local/bin/codeg-set-password` | リポジトリの `scripts/codeg/set-codeg-password.ps1` | 本人の端末で共通パスワードを設定・変更するスクリプト |
 | `~/.local/bin/codeg-auto-update` | `%LOCALAPPDATA%\codeg-auto-update\codeg-auto-update.ps1` | 最新の安定版を調べ、照合・退避・入れ替え・確認と失敗時の戻し、指定した控えからの復元をするスクリプト |
 | `~/.local/state/codeg-auto-update/` | `%LOCALAPPDATA%\codeg-auto-update\` | ロック、保留する版（`skip-version`）、入れ替えの段階（`in-progress`）、控え（`backups`）、自動更新のログ（`codeg-auto-update.log`）と作業用の一時ファイル |
 | `~/.config/systemd/user/codeg-auto-update.service` と `codeg-auto-update.timer` | タスク `codeg-auto-update` | 毎日の自動更新の起動設定 |
@@ -4626,9 +4697,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 | — | `%LOCALAPPDATA%\codeg-server\HiddenLauncher.cs` と `codeg-hidden-launcher.exe` | Codeg・Caddy・自動更新のタスクで使う、コンソールを作らないランチャー |
 | `~/.local/share/caddy/` | `%APPDATA%\Caddy\` | Caddy が作る認証局（`pki/authorities/local/` の `root.crt` と `root.key`）と、サーバーの証明書。`root.key` は外に出さない |
 | `~/.codeg/` | `%USERPROFILE%\.codeg\` | Codeg が置くスキル |
-| `~/.grok/` | `%USERPROFILE%\.grok\` | Grok Build の設定・ログイン・セッション（[Grok Build の設定ファイル](#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
+| `~/.grok/` | `%USERPROFILE%\.grok\` | Grok を使うときの設定・ログイン・セッション（[Grok Build の設定ファイル](#grok-build-の設定ファイル)）。Codeg は、ここのセッションをそのまま使う |
 | `~/.claude/` と `~/.claude.json` | `%USERPROFILE%\.claude\` と `%USERPROFILE%\.claude.json` | Claude Code と接続アダプターが共有するログイン・設定・履歴。秘密のファイルは開かない |
 | `~/.codex/` | `%USERPROFILE%\.codex\` | Codex CLI と接続アダプターが共有するログイン・設定・履歴。秘密のファイルは開かない |
+| `~/.gemini/antigravity-acp/` | `%USERPROFILE%\.gemini\antigravity-acp\` | Codeg の Antigravity の設定（`settings.json`）とログイン。Antigravity CLI とは別。秘密のファイルは開かない |
+| `~/.local/share/codeg/acp-binaries/` | `%APPDATA%\codeg\acp-binaries\` | Codeg が入れる ACP サーバーの本体（Antigravity は `antigravity-acp/<版>/<OS・アーキテクチャ>/`） |
 
 - `CODEG_BRIDGE_PORTS=off` は、開発サーバー用の追加のポート（3081〜3090）を開けない設定。`CODEG_BROWSER_TUNNEL=off` は、Codeg のデスクトップアプリからの中継を止める設定
 - トークンを替えるときは、トークンのファイルを作り直して、Codeg のサービス（Windows 11 はタスク）を起動し直す。ブラウザは入り直しになる
@@ -4636,13 +4709,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: 接続元の制限を外す
+### Codeg: 接続元の制限を外す
 
 - 対象: AlmaLinux 10
-- 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#grok-build-のブラウザ操作-codeg-のサーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
+- 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
 - `ALLOW_FROM` は現在許可している送信元の帯に合わせる。ここで指定した既存の規則だけを外し、ほかの用途の規則は変更しない
 - この節の手順 2 から、`SERVER_IP` の 3443/tcp に届くすべての送信元を許可する。LAN・VPN の端末だけに限定されたとは扱わない
-- 元に戻せる既存の規則が分からない場合は始めない。途中で失敗した場合も、追加した規則を保持して止め、[接続元の制限を戻す](extra/grok-build-remote.md#接続元の制限を戻す)の条件を確かめる
+- 元に戻せる既存の規則が分からない場合は始めない。途中で失敗した場合も、追加した規則を保持して止め、[接続元の制限を戻す](extra/codeg.md#接続元の制限を戻す)の条件を確かめる
 
 1. 制限を外す対象の、現在の規則を確かめる。
 
@@ -4732,11 +4805,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
    - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
-   - 公開を止めるときは、送信元を指定しない規則も [AlmaLinux 10 のロールバック](extra/grok-build-remote.md#almalinux-10-のロールバック)で外す
+   - 公開を止めるときは、送信元を指定しない規則も [AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)で外す
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 で止める・もう一度始める
+### Codeg: Windows 11 で止める・もう一度始める
 
 - 管理者ではない PowerShell に貼る。変数は要らない
 - タスクを終了しただけでは、Codeg と Caddy の本体が残る。止めるのはこの項の手順 1
@@ -4764,7 +4837,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - 自動更新が `Running` なら、終わってからこの手順をやり直す
    - プロセスと待ち受けの表は出ず、`Ready` が 2 行出ればよい（公開の項を通していなければ 1 行）
-   - 止めるのは、この手順で置いた Codeg と、その子プロセスだけ。端末や、ほかの ACP クライアントで動かしている `grok` は止めない
+   - 止めるのは、この手順で置いた Codeg と、その子プロセスだけ。端末や、ほかの ACP クライアントで動かしているエージェントは止めない
    - 実行中の会話は中断される。会話の履歴は残る
 
 1. もう一度始めるときは、タスクを開始する。
@@ -4788,10 +4861,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: AlmaLinux 10 の更新
+### Codeg: AlmaLinux 10 の更新
 
-- 対象: AlmaLinux 10。Windows 11 は [Windows 11 の更新](#grok-build-のブラウザ操作-windows-11-の更新)
-- 前提: [自動更新を有効にする](#grok-build-のブラウザ操作-自動更新を有効にする)を通してある
+- 対象: AlmaLinux 10。Windows 11 は [Windows 11 の更新](#codeg-windows-11-の更新)
+- 前提: [自動更新を有効にする](#codeg-自動更新を有効にする)を通してある
 - 実行場所: Codeg を動かす一般ユーザーの bash（デスクトップの端末か SSH）。この節の手順 3 はブラウザ
 - 毎日 4:30〜5:00（サーバーの時刻）に最新の安定版を調べる。今の版が最新なら何もしない
 - 新しい版があれば、取得・SHA-256 と API の digest（あるとき）の照合・展開・版と空き容量の確認を終えてから止め、本体と DB を退避し、入れ替えて起動する。待ち受ける本体・HTTP の応答・再起動の回数・版を確かめる
@@ -4799,17 +4872,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 控えは `~/.local/state/codeg-auto-update/backups/<UTC日時>-<旧版>/` の `bin/` と `db/` に置き、新しい 2 世代を残す。失敗した本体と DB は同じ場所の `failed-<UTC日時>/` に残し、自動では消さない
 - Codeg のサービスが止まっている間は、更新せずに終わる
 - 画面の右下に「新バージョン」と出たら、毎日の自動更新を待つか、この節の手順 2 で動かす。画面からは入れ替えない
-- Grok Build は、Codeg からは上がらない（Codeg は `--no-auto-update` を付けて起動する）。端末で `grok update` を実行して上げる
+- Grok を使うときは、端末で `grok update` を実行して Grok Build を上げる。Codeg からは上がらない
 - この節は Codeg の更新。共通の Caddy は [Caddy: 更新](almalinux-setup.md#caddy-更新)で上げる
 - ログは `~/.local/state/codeg-auto-update/codeg-auto-update.log` に追記する
 - 終了コード
   - `0`: 最新版を使用中、更新した、控えから復元した、または Codeg が止まっているので何もしなかった
   - `1`: 入れ替えずに中断した、または保留中
   - `2`: 更新に失敗し、前の本体と DB に戻して保留した
-  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で復旧する
+  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で復旧する
 
 > [!WARNING]
-> 自動の確認で見つからない不具合に気付いたら、[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
+> 自動の確認で見つからない不具合に気付いたら、[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
 1. 自動更新の結果と、次に動く時刻を確かめる。
 
@@ -4865,10 +4938,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 ---
 
-### Grok Build のブラウザ操作: Windows 11 の更新
+### Codeg: Windows 11 の更新
 
 - 対象: Windows 11
-- 前提: [Windows 11 で自動更新を有効にする](#grok-build-のブラウザ操作-windows-11-で自動更新を有効にする)を通してある
+- 前提: [Windows 11 で自動更新を有効にする](#codeg-windows-11-で自動更新を有効にする)を通してある
 - 実行場所: Codeg を使う本人のデスクトップで開いた、管理者ではない Windows PowerShell 5.1。この節の手順 3 はブラウザ
 - 毎日 4:30（PC の時刻）に最新の安定版を調べる。スリープなどで逃したら起きた後に動く。サインインしている間だけ動き、今の版が最新なら何もしない
 - 新しい版があれば、取得・SHA-256 と API の digest（あるとき）の照合・展開・版と空き容量の確認を終えてから止め、本体と DB を退避し、入れ替えて起動する。待ち受ける本体と起動時刻・HTTP の応答・版を確かめる
@@ -4877,16 +4950,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Codeg のタスクが `Ready`（停止中）なら、更新せずに終わる。起動用のスクリプト・トークン・隠しランチャーは入れ替えない
 - 画面の右下に「新バージョン」と出たら、毎日の自動更新を待つか、この節の手順 2 で動かす。画面からは入れ替えない
 - この節は Codeg の更新。Caddy の更新は、この手順書では確かめていない
-- Grok Build は、Codeg からは上がらない。[Windows 11 で止める・もう一度始める](#grok-build-のブラウザ操作-windows-11-で止めるもう一度始める)の手順 1 で止め、端末で `grok update` を実行して上げる
+- Grok を使うときは、Grok Build は Codeg からは上がらない。[Windows 11 で止める・もう一度始める](#codeg-windows-11-で止めるもう一度始める)の手順 1 で止め、端末で `grok update` を実行して上げる
 - ログは `%LOCALAPPDATA%\codeg-auto-update\codeg-auto-update.log`。1 MB を超えたら `.1` へ回し、2 世代を残す
 - 終了コード（`LastTaskResult`）
   - `0`: 最新版を使用中、更新した、控えから復元した、または Codeg が止まっているので何もしなかった
   - `1`: 入れ替えずに中断した、または保留中
   - `2`: 更新に失敗し、前の本体と DB に戻して保留した
-  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で復旧する
+  - `3`: 戻せなかった、または前の実行の `in-progress` が残っている。[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で復旧する
 
 > [!WARNING]
-> 自動の確認で見つからない不具合に気付いたら、[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/grok-build-remote.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
+> 自動の確認で見つからない不具合に気付いたら、[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
 1. 自動更新の結果と、次に動く時刻を確かめる。
 

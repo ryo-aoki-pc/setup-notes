@@ -29,6 +29,12 @@
 - Windows 11 の Codeg は、ランダムなトークンをブラウザへ入れずに、共通パスワードで使い始められるようにする
   - Codeg の標準の認証に、トークンと別のパスワード専用設定があるという意味ではない（[Grok Build の調査](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#grok-build-の調査)）
 
+### Codeg
+
+- Codeg は、Grok Build・Claude Code・Codex CLI・Google Antigravity など、ACP に対応する複数のコーディングエージェントをブラウザやスマートフォンのチャットの画面から動かす OSS として扱う
+- サーバーは使うエージェントと同じホストに置き、使うエージェントの項を選んで設定する（[Codeg の手順](../ai-agents.md#codeg)・[参考資料](codeg.md)）
+- Raspberry Pi 5 の AlmaLinux 10 では、仮想アドレスが 39 ビットの arm64 のカーネルで Google Antigravity の ACP サーバーの 1.4.0 は使えない。起動時に TCMalloc で落ちた。推奨版がほかの版になったときの動作は確かめていない。端末の Antigravity CLI とは分けて扱う（[補足](codeg.md#codeg--almalinux-10-で-antigravity-を使う--手順-1-補足-仮想アドレスが-39-ビットの-arm64)）
+
 ### Windows 11 の Antigravity CLI
 
 - Windows 11 では、Google 公式の [PowerShell のインストーラー](https://antigravity.google/cli/install.ps1)で Antigravity CLI（`agy`）を入れる
@@ -36,7 +42,7 @@
 - Gemini CLI は、2026-06-18 に個人アカウントへの提供を終え、Antigravity CLI が後継になった
 - Windows 11 の [導入](../ai-agents.md#windows-11-で-antigravity-cli-を入れる)・[設定ファイル](../ai-agents.md#antigravity-cli-の設定ファイル)・更新を対象にする。AlmaLinux 10 でも使える（[AlmaLinux 10 の Antigravity CLI](#almalinux-10-の-antigravity-cli)）
 - 更新はバックグラウンドの自動更新と `agy update` を使う。公式インストーラーは、既に入っていれば入れ直さず、自動更新を案内する
-- Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](grok-build-remote.md)で分けて扱う
+- Codeg の「Google Antigravity」は、CLI とは別の製品の ACP サーバーで、ログインも別になる。[Codeg の参考資料](codeg.md)で分けて扱う
 
 ### AlmaLinux 10 の Antigravity CLI
 
