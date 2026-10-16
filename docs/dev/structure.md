@@ -227,7 +227,8 @@
     - 「Antigravity に読み取り専用で頼む」の手順 1〜5 を、書いたとおりに Windows PowerShell 5.1 で通した。この変更のブランチ（差分約 520 行、約 8 分）と、試験用の小さなブランチ（37 秒）の 2 回で、どちらも `denied_actions` は空、使い捨てのフォルダーの中は変わらなかった（1 回目の後に、手順 3 の `Pop-Location` を `try`/`finally` に直した）
   - AlmaLinux 10 の 4 つ目のエージェント（2026-10-16、利用者の決定）: Antigravity CLI に読み取り専用のレビューと調べものを頼む
     - 「AlmaLinux 10 で Antigravity に読み取り専用で頼む」と「Windows 11 で Antigravity に読み取り専用で頼む」の 2 つの項で、OS ごとの実行方法を扱う
-    - 検証範囲は、検証記録の 2026-10-16 の AlmaLinux 10 の付録
+    - 2026-10-16 に Raspberry Pi 5（AlmaLinux 10.2、Antigravity CLI 1.4.0）で、「AlmaLinux 10 で使う」の手順 1〜8（Grok の `--trust inspect` の行を除く）、AlmaLinux 10 のロールバックの手順 1〜3、「AlmaLinux 10 で Antigravity に読み取り専用で頼む」の手順 1〜3・5 を、手順書のブロックのまま通した
+    - 使い捨てのフォルダーは `~/.cache` の下に置く。`/tmp` の下では作業フォルダーの中にも書けた。手順 9 の対話、AlmaLinux 10 で既定の分担を実際に回す流れ、ほかのホストは未確認。詳しくは検証記録の 2026-10-16 の AlmaLinux 10 の付録
   - Antigravity のモデル（2026-10-16、利用者の決定）: 頼むたびに `agy models` から版がいちばん新しい `gemini-<版>-flash-high` を選んで `--model` で渡す。各項の手順 1 の `AGY_MODEL` で替えられる
     - 対象は 5 か所。「AlmaLinux 10 で使う」と「Windows 11 で使う」の手順 8、「AlmaLinux 10 で Antigravity に読み取り専用で頼む」と「Windows 11 で Antigravity に読み取り専用で頼む」の手順 3、「既定で分担する」の手順 5
     - 2026-10-15 に通した上のブロックは、`--model` を付けない形だった
