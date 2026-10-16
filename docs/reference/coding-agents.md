@@ -144,7 +144,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 |---|---|
 | Codex | Codex の worktree（`<WT_ROOT>\codex`）か別の clone に、頼む文の Markdown（「コミットしない・ステージしない」と書く）を置き、PowerShell から `node "$env:USERPROFILE\.claude\plugins\cache\openai-codex\codex\<版>\scripts\codex-companion.mjs" task --fresh --write --cwd <その場所> --prompt-file <頼む文.md>` を前景で実行する（10〜20 分）。`<版>` は、そのフォルダーの下にあるフォルダーの名前（`1.0.6` など） |
 | Codex の変更を移す | `git -C <Codex の場所> diff --binary --output=<ファイル>` で書き出し、`git -C <WT_ROOT>\claude apply <ファイル>` で Claude の worktree に移し、確かめてから `agent/claude` にコミットする。移した後、Codex の場所の変更は消す |
-| Codex の後片付け | 終わった後も `app-server-broker.mjs serve` の node のプロセスが、その場所を使ったまま残る。その worktree か clone を消す前に、コマンドラインにその場所を含むプロセスだけを止める（ほかの場所のものは、ほかのセッションのもの）。ブローカーのコマンドラインでは、その場所が `C:/Users/...` の `/` 区切りで出ることがあるので、`\` と `/` の両方の区切りで探す |
+| Codex の後片付け | 終わった後も `app-server-broker.mjs serve` の node のプロセスが、その場所を使ったまま残る。その worktree か clone を消す前に、コマンドラインにその場所を含むプロセスだけを止める（ほかの場所のものは、ほかのセッションのもの）。ブローカーのコマンドラインでは、その場所が git のリポジトリなら、`git rev-parse --show-toplevel` が返す `C:/Users/...` の `/` 区切りで出る（プラグイン 1.0.6）。`\` と `/` の両方の区切りで探す |
 | Grok Build | 差分・変えたファイル・規則・頼む文（BRIEF.md）を専用のフォルダーへ写し、`grok -p "このフォルダーの BRIEF.md を読み、その指示どおりにレビューしてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。" --cwd <フォルダー> --permission-mode default --output-format plain` を実行する（10〜25 分）。前後のフォルダーのハッシュを比べる。Grok は信頼していないフォルダーでは AGENTS.md を読まないので、役割は頼む文に書く |
 | Antigravity CLI | [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使い、版がいちばん新しい Gemini の Flash（High）を `--model` で渡す。使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
 
