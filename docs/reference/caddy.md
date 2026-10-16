@@ -47,6 +47,18 @@
 - Windows の取り込み先は `Cert:\CurrentUser\Root`。このユーザーの Edge・Chrome が使う。Firefox の信頼ストアとの連動は設定に依存し、端末ごとに確認する
 - `curl` の終了コード 60 は証明書の検証失敗。既定の信頼ストアに入れていないサーバーでは `--cacert` 付きだけが通ることを確かめる。ホスト自身で信頼させた後は既定の curl も通る
 
+### Caddy: 端末にルート証明書を入れる / 手順 2・5: 補足: Android のブラウザと警告の許可
+
+- Android の Chrome は、Android に入れたユーザーの CA 証明書を信頼する
+- 利用者の Android の Firefox は、Secret Settings の「Use third party CA certificates」をオンにし、強制停止して開き直しても、通常のタブで発行者不明の警告が出た
+- この観測は Windows 11 の Codeg 専用の認証局で行った。ブラウザの版は記録していない。AlmaLinux 10 のホストのルート証明書では確かめていない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)）
+- 警告の画面で進む許可は、そのときのサーバーの証明書に対するもので、Caddy がサーバーの証明書を作り直すと効かなくなると考えられる。利用者の Firefox は、Caddy がサーバーの証明書を作り直した後に接続を拒むようになった（許可が原因かは確かめていない）
+- `tls internal` のサーバーの証明書は、有効期間が 12 時間（[tls](https://caddyserver.com/docs/caddyfile/directives/tls) の `lifetime` の既定）。Windows 11 の Codeg 専用の構成と、AlmaLinux 10 の 2 台のホストの共通の Caddy で、どれも 12 時間だった
+- [AlmaLinux 10 の初期設定の「Caddy: 端末にルート証明書を入れる」の手順 2](../almalinux-setup.md#caddy-端末にルート証明書を入れる)で警告を進むのは、まだ信頼していないルート証明書のファイルを取るため
+- その後の確認が、ルート証明書への信頼ではなく、警告を進んだ許可で通ってしまうおそれがある。同じ項の手順 5 で 12 時間以上たってから確かめ直すのは、作り直された証明書で確かめるため。Chrome の許可が確認に影響するかと、12 時間後の確認は確かめていない
+- プライベートタブは通常のタブと結果が違うことがあるので、確認に使わない。Firefox で新しいプライベートタブがつながった理由は確かめていない。そのセッションの許可の記録が関係する可能性がある
+- Codeg のサイトで証明書の警告が出ずに「Connection lost」だけが出るわけは、[Codeg の Service Worker の補足](codeg.md#codeg--端末にルート証明書を入れる--手順-25-補足-android-のブラウザと-service-worker)にある
+
 ## 参照
 
 - [Caddy のリリース](https://github.com/caddyserver/caddy/releases)

@@ -73,6 +73,16 @@
 - [Caddy の参考資料](caddy.md#caddy-端末にルート証明書を入れる--指紋の照合)を参照する。AlmaLinux 10 は Forgejo などと同じ認証局を共有し、同じホストのために取り込み済みの端末には入れ直さない
 - Windows 11 の認証局は Codeg 専用。信頼先を選ぶ指紋の照合は同じ操作で行う
 
+### Codeg / 端末にルート証明書を入れる / 手順 2・5: 補足: Android のブラウザと Service Worker
+
+- Android のブラウザと、警告の画面で進む許可は、[Caddy の補足](caddy.md#caddy-端末にルート証明書を入れる--手順-25-補足-android-のブラウザと警告の許可)を参照する。そこにある観測は、Windows 11 の Codeg 専用の認証局で行った
+- Codeg の画面は Service Worker（`/sw.js`）を登録する。ページの移動は、先にサーバーへ問い合わせる
+- 取得そのものが失敗したとき（証明書で TLS が失敗したときも含む）か 5xx のときは、保存した画面で答える。証明書の警告が出ずに画面が起動し、「Connection lost」だけが出ることがある
+- 保存した画面が無いとき（その端末ではじめて開くときなど）は、Service Worker は失敗をそのまま返し、ブラウザの警告やエラーになる
+- `/api`・`/api/` の下と `/ws`・`/ws/` の下は Service Worker が手を出さない。`/api/` を開くと、ブラウザがサーバーへ直接つなぎ、証明書に問題があれば警告が出る
+- 証明書に問題が無ければ、Codeg は `/` と同じ画面の HTML を返す。証明書を信頼している PC の内蔵ブラウザ（Chromium）では、ログインしていないときに `/api/` から `/login`（ログインの画面）へ移ることを Codeg 0.35.2 で確かめた
+- ログインしているときの移り先は見ていない。`/sw.js` の説明には、ルートのページは `/workspace` か `/login` に移るとある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)）
+
 ### Codeg / 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
 - [AlmaLinux 10 の任意節](../ai-agents.md#codeg-接続元の制限を外す)は、既存の `ALLOW_FROM` による制限を、宛先 IPv4 と 3443/tcp だけの rich rule へ切り替える。基本の導入手順は送信元を絞ったまま

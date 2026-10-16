@@ -86,6 +86,7 @@
 - Windows の Codeg の共通パスワードは、標準認証の共有値として本人が伏せ字で指定する任意節。入力・保存・Codeg の起動し直し・認証の確認は `scripts/codeg/set-codeg-password.ps1` にまとめる
 - 2026-10-13 の Windows 11 の共通パスワードの変更は、秘密を含まない結果で新認証 200・未認証 401・誤入力 401、Codeg の再起動を確認。本人の HTTPS ログインは完了報告を受けた
 - [共通パスワードの検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-windows-11-の共通パスワード変更スクリプトの検証2026-10-13-jst)と extra で、実ホストと公開 fixture、復元のファイル・サービス・旧認証の確認を分ける
+- 2026-10-16、Windows 11 の Codeg に Android のスマートフォンから WireGuard で接続した。Chrome はルート証明書でつながり、Firefox は Secret Settings の設定をオンにしても発行者不明の警告が出た。「端末にルート証明書を入れる」の手順 2・5 の今の形は通していない。[今回の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)に記録する
 - 2026-10-14 の Windows 11 / x64 の実機で、稼働中の Codeg をロールバックの手順 1〜3 で消し、ai-agents.md の手順で入れ直した
   - 受信規則は Private の全送信元・全接続種別。別拠点から、有線 LAN の IP への 200 と、Public の VPN の IP への接続のタイムアウトを確かめた
   - 本人が共通パスワードを入力し、ブラウザの Codeg で Claude Code（Auto）・Codex（Auto review）・Grok Build の短文の応答を確かめた。Claude Code の応答は今回がはじめて
