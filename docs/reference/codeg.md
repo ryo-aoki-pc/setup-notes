@@ -78,9 +78,10 @@
 - Android のブラウザと、警告の画面で進む許可は、[Caddy の補足](caddy.md#caddy-端末にルート証明書を入れる--手順-25-補足-android-のブラウザと警告の許可)を参照する。そこにある観測は、Windows 11 の Codeg 専用の認証局で行った
 - Codeg の画面は Service Worker（`/sw.js`）を登録する。ページの移動は、先にサーバーへ問い合わせる
 - 取得そのものが失敗したとき（証明書で TLS が失敗したときも含む）か 5xx のときは、保存した画面で答える。証明書の警告が出ずに画面が起動し、「Connection lost」だけが出ることがある
+- 保存した画面が無いとき（その端末ではじめて開くときなど）は、Service Worker は失敗をそのまま返し、ブラウザの警告やエラーになる
 - `/api`・`/api/` の下と `/ws`・`/ws/` の下は Service Worker が手を出さない。`/api/` を開くと、ブラウザがサーバーへ直接つなぎ、証明書に問題があれば警告が出る
-- 証明書に問題が無ければ、Codeg が画面の HTML を返す。証明書を信頼している PC の内蔵ブラウザ（Chromium）では、`/api/` から `/login`（ログインの画面）への移動を Codeg 0.35.2 で確かめた
-- ログイン済みの場合の作業の画面への移動は見ていない。`/sw.js` の説明には、ルートのページは `/workspace` か `/login` に移るとある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)）
+- 証明書に問題が無ければ、Codeg は `/` と同じ画面の HTML を返す。証明書を信頼している PC の内蔵ブラウザ（Chromium）では、ログインしていないときに `/api/` から `/login`（ログインの画面）へ移ることを Codeg 0.35.2 で確かめた
+- ログインしているときの移り先は見ていない。`/sw.js` の説明には、ルートのページは `/workspace` か `/login` に移るとある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md#付録-android-のスマートフォンで-codeg-がconnection-lostになった件2026-10-16-jst)）
 
 ### Codeg / 接続元の制限を外す / 手順 1〜4: 補足: 宛先限定の規則
 
