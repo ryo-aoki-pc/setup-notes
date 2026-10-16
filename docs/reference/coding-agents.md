@@ -130,7 +130,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
 - docs とそのサブモジュールの 11 個のリポジトリは、AGENTS.md の規則で共同作業の手順と違う形にする
   - 作業ごとにブランチを切り、`agent/<名前>` の worktree を使い続けないので、`gh pr merge --squash` で取り込む
   - 取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す
-  - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチの削除は人が行う
+  - 自動で消す設定（Automatically delete head branches）は人が有効にしておき、エージェントは変えない。手元に残ったブランチは、エージェントが自分の作ったものだけを消す（取り込まれたことと、どの worktree でも使っていないことを確かめてから `git branch -D`。squash で取り込むので `-d` は通らない）
   - 取り込んだブランチには、その後コミットも push もしない。push すると、消したリモートのブランチが同じ名前で作り直される
   - 2026-10-15 の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。10 個は merge commit が無効で squash だけを許し、md-table-excel だけは merge commit も許す
   - この 11 個の自動削除と squash は、GitHub の設定に頼る。次の「GitHub の機能には頼らない」は、共同作業の手順書の方針
