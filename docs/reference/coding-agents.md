@@ -50,6 +50,19 @@
 
 - プラグインのスクリプトは、Claude Code が Git Bash で動かす
 
+### Antigravity に読み取り専用で頼む / 手順 3: 補足: モデルの選び方
+
+- 使用量はモデルの組ごとに週と 5 時間の上限がある。2026-10-16 の `agy -p /quota` は「Gemini Models」（Gemini Flash・Gemini Pro）・「Claude and GPT models」と、Gemini 4 Argon だけの週の上限を表示した
+  - Pro のプランでは Argon は別枠と説明が出る
+- `--model` を付けないと Gemini 4 Argon（Medium）で動く。Argon の週の上限に達すると、ほかの組に残りがあっても `Individual quota reached` で止まる
+- Gemini の Flash は、Argon の別枠に左右されず、レビューを書いた Claude Code と別の系統のモデルにするために使う。High は、レビューで深く考えさせるために選ぶ
+- モデルの版が上がると ID が変わるため、頼むたびに `agy models` から選ぶ
+  - `gemini-<版>-flash-high` の形の中で版を数として比べる（`3.10` は `3.8` より新しい）。`flash-lite` などほかの形は選ばない
+- 形に合う ID が無ければ、[Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順 3 は止まる。手順 1 の `AGY_MODEL` に `agy models` の ID を書けば、その ID を使う
+- 一覧に無い ID を `--model` に渡すと、1 回だけの実行は終了コード 1 で止まり、ほかのモデルに黙って替わらない
+- CLI の保存済みの既定（`/model <name>`）は変えない。保存すると、利用者が対話で使う Antigravity の既定も変わるため
+- `-p /quota` は AI に聞かないので使用量を使わない（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。表示される時刻は UTC
+
 ### 既定で分担する / 手順 5: 補足: 読み込まれた指示の確かめ
 
 - Claude Code と Codex の問いは、実装と下書きの担当が Codex かどうかで判定する。Antigravity には自分の役割を問い、Grok は `--trust inspect` で AGENTS.md の読み込みを確かめる
@@ -124,13 +137,15 @@ Windows 11 の Antigravity CLI の方針は、[Windows 11 の 4 つ目のエー�
 
 Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使ったもの。2026-10-15 の codex-cli 0.162.1・Codex のプラグイン 1.0.6、grok 1.0.52、Antigravity CLI 1.3.5）。
 
+モデルを選ぶ式は、2026-10-16 に Antigravity CLI 1.4.0 と Windows PowerShell 5.1 で確かめた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md#付録-antigravity-のモデルの選び方2026-10-16-jst)）。
+
 | 頼む相手 | 頼み方 |
 |---|---|
 | Codex | Codex の worktree（`<WT_ROOT>\codex`）か別の clone に、頼む文の Markdown（「コミットしない・ステージしない」と書く）を置き、PowerShell から `node "$env:USERPROFILE\.claude\plugins\cache\openai-codex\codex\<版>\scripts\codex-companion.mjs" task --fresh --write --cwd <その場所> --prompt-file <頼む文.md>` を前景で実行する（10〜20 分）。`<版>` は、そのフォルダーの下にあるフォルダーの名前（`1.0.6` など） |
 | Codex の変更を移す | `git -C <Codex の場所> diff --binary --output=<ファイル>` で書き出し、`git -C <WT_ROOT>\claude apply <ファイル>` で Claude の worktree に移し、確かめてから `agent/claude` にコミットする。移した後、Codex の場所の変更は消す |
 | Codex の後片付け | 終わった後も `app-server-broker.mjs serve` の node のプロセスが、その場所を使ったまま残る。その worktree か clone を消す前に、コマンドラインにその場所を含むプロセスだけを止める（ほかの場所のものは、ほかのセッションのもの） |
 | Grok Build | 差分・変えたファイル・規則・頼む文（BRIEF.md）を専用のフォルダーへ写し、`grok -p "このフォルダーの BRIEF.md を読み、その指示どおりにレビューしてください。ファイルは変えず、シェルのコマンドは使わず、このフォルダーの外は読まないでください。" --cwd <フォルダー> --permission-mode default --output-format plain` を実行する（10〜25 分）。前後のフォルダーのハッシュを比べる。Grok は信頼していないフォルダーでは AGENTS.md を読まないので、役割は頼む文に書く |
-| Antigravity CLI | [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使い、使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
+| Antigravity CLI | [Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-antigravity-に読み取り専用で頼む)の手順を使い、版がいちばん新しい Gemini の Flash（High）を `--model` で渡す。使い捨てのフォルダーで `agy -p` を 1 回だけ実行し、`status`・`denied_actions`・前後のハッシュを確かめる |
 
 ### Windows 11 の 4 つ目のエージェントと読み取り専用の境界
 
@@ -152,6 +167,7 @@ Claude Code が 3 つに頼む形は次のとおり（Windows 11 の実機で使
 
 - Claude Code からは、PowerShell で `agy -p` を直接呼ぶ。公式のブリッジのプラグインが無いため、この用途だけのプラグインは作らない
 - Antigravity への依頼は読み取り専用のレビューと調べものに限り、入力のコピーと前後のハッシュの比較を含む手順を使う
+- Claude Code が頼むときも、手順書と同じく `agy models` から版がいちばん新しい Gemini の Flash（High）を選び、`--model` で渡す
 
 ### AlmaLinux 10 で使う / 手順 4〜6: 各 CLI が読む指示書
 
