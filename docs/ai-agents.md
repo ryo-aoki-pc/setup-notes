@@ -2758,7 +2758,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 1. 使い捨てのフォルダーを消す。
 
    ```powershell
-   if ($REVIEW_DIR -notmatch ('^' + [regex]::Escape($env:TEMP) + '\\agy-review-[0-9]{8}-[0-9]{6}\z')) { Write-Error '中断: 手順 1 の $REVIEW_DIR が想定と違う。貼り直す' } else {
+   if ($REVIEW_DIR -notmatch ('^' + [regex]::Escape($env:TEMP.TrimEnd('\')) + '\\agy-review-[0-9]{8}-[0-9]{6}\z')) { Write-Error '中断: 手順 1 の $REVIEW_DIR が想定と違う。貼り直す' } else {
      Remove-Item -LiteralPath $REVIEW_DIR -Recurse -Force
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Test-Path -LiteralPath $REVIEW_DIR
