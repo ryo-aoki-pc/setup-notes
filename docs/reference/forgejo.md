@@ -64,7 +64,7 @@
 
 ## 選択した方針
 
-- 既存の [Podman の手順](../almalinux-setup.md#podman)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐)を使う
+- 既存の [Podman の手順](../containers.md#podman)と同じく、ホストの一般ユーザーで rootless Podman を動かす。常駐は Quadlet と [linger](../almalinux-setup.md#ユーザーサービスの常駐)を使う
 - Forgejo は公式の `-rootless` イメージを使い、コンテナ内も UID・GID 1000 で動かす。ホストの一般ユーザーとコンテナのユーザーを `keep-id` で対応させる
 - DB は SQLite にする。小規模で同時操作が多くない構成では外部 DB の導入・保守が不要になる。Forgejo の公式バイナリとイメージは SQLite に対応している。高い同時負荷では PostgreSQL または MySQL / MariaDB を検討するが、既存 DB の変更は単純な設定変更だけではできない
 - 初期設定中は Web と Git 用 SSH を localhost に限定する。管理者作成後も Web は localhost に残し、共通の Caddy が指定した LAN / VPN の IPv4 の HTTPS 3000 で受ける。Git 用 SSH 2222 だけを指定 IPv4 に公開する。ホストの OpenSSH と OS のユーザー認証はそのまま使う
@@ -191,7 +191,7 @@
 - [podman run](https://docs.podman.io/en/latest/markdown/podman-run.1.html) — `--userns=keep-id`、`--user`、bind mount の所有者と SELinux の `:Z`
 - [firewalld rich language](https://firewalld.org/documentation/man-pages/firewalld.richlanguage.html) — 送信元・宛先・ポート・priority と許可の規則
 - [Netavark / firewalld の相互作用](https://github.com/containers/netavark/blob/main/docs/netavark-firewalld.7.md) — rootful の転送経路と rootless との違い
-- [Podman](../almalinux-setup.md#podman)・[linger](../almalinux-setup.md#ユーザーサービスの常駐)・[Git](../almalinux-setup.md#git) — 本書の前提
+- [Podman](../containers.md#podman)・[linger](../almalinux-setup.md#ユーザーサービスの常駐)・[Git](../almalinux-setup.md#git) — 本書の前提
 
 ---
 

@@ -28,7 +28,7 @@
 #### Forgejo: イメージを取得して localhost で起動する
 
 - サーバーで、公式の最新安定版の rootless イメージを取得し、localhost だけで待ち受ける Forgejo を Quadlet で起動する
-- 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)・[Podman](almalinux-setup.md#podman)・[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)（linger）を通してある
+- 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)・[Podman](containers.md#podman)・[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)（linger）を通してある
   - 常時動かす PC は、[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)も通してある
   - 別の PC からホストの SSH にログインでき、サーバーの IPv4 が固定されている
 - 実行場所: サーバーの、Forgejo を動かす一般ユーザーの bash（デスクトップの端末か SSH）

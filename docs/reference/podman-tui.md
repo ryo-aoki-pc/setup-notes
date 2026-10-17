@@ -1,6 +1,6 @@
 # podman-tui の参考資料
 
-[手順書](../almalinux-setup.md#podman-tui)・[ロールバックと注意点](../extra/podman-tui.md)
+[手順書](../containers.md#podman-tui)・[ロールバックと注意点](../extra/podman-tui.md)
 
 ## 補足
 
@@ -14,7 +14,7 @@ podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requ
 
 ### podman-tui / 手順 3: 補足: 確認用のコンテナ
 
-- 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../almalinux-setup.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
+- 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../containers.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 - ポートは公開しない（画面から止めるためだけのコンテナ）
 
 ### podman-tui / 手順 4: 補足: 画面の中身と、つながらないとき
@@ -45,7 +45,7 @@ podman.sock: connect: connection refused
 - [containers/podman-tui — README（v1.10.0）](https://github.com/containers/podman-tui/blob/v1.10.0/docs/README.md) — 互換表、API ソケットの前提、キーの一覧
 - [podman-tui v2.0.0 のリリースノート](https://github.com/containers/podman-tui/releases/tag/v2.0.0) — podman v6 への対応、接続を podman の設定からだけ読むこと
 - `podman-tui --help`、画面の `F1`
-- [Podman](../almalinux-setup.md#podman) — 前提の rootless の podman と API ソケット
+- [Podman](../containers.md#podman) — 前提の rootless の podman と API ソケット
 - [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 前提の EPEL の有効化（「EPEL と RPM Fusion」の手順 1）
 
 ---

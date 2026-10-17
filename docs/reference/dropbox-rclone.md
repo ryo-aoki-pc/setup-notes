@@ -1,6 +1,6 @@
 # Dropbox と rclone の参考資料
 
-[手順書](../almalinux-setup.md#dropbox-と-rclone)・[ロールバックと注意点](../extra/dropbox-rclone.md)
+[手順書](../dropbox.md#dropbox-と-rclone)・[ロールバックと注意点](../extra/dropbox-rclone.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#補足の実測)
 
@@ -24,7 +24,7 @@
 - 前の 6 行は、rclone の bisync の文書にある「Example filters file for Dropbox」の、Dropbox が同期しないファイルの行をそのまま使った（Office の一時ファイル、Windows の `desktop.ini` など）
 - **`- *.partial` は本書で足した**。rclone は転送中のファイルを `<名前>.<16 進>.partial` として書き、終わってから名前を変える
   - `kill -9` や電源断で止まると書きかけが残るため、`*.partial` を除外する
-- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える](../almalinux-setup.md#dropbox-と-rclone-同期するフォルダを変える)）
+- このファイルは、手順 7・8 と手順 9 の timer から、いつも `--filters-file` で渡す。bisync は中身のハッシュを `~/.config/rclone/dropbox-filters.txt.md5` に覚えていて、変えたのに `--resync` をしないと止まる（[同期するフォルダを変える](../dropbox.md#dropbox-と-rclone-同期するフォルダを変える)）
 
 ### Dropbox と rclone / 手順 6: 補足: 最後の行
 

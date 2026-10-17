@@ -21,7 +21,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - EPEL（`sudo dnf install`。AppStream / BaseOS は前提なし）: [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)（EPEL）を通してあること
 - Flathub（`sudo flatpak install`）: [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub)（Flatpak / Flathub）を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
-- コンテナの節の行は、どの導入元でも [Podman](almalinux-setup.md#podman) を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
+- コンテナの節の行は、どの導入元でも [Podman](containers.md#podman) を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
 
 ---
 
@@ -48,7 +48,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 1. **例外として、podman 本体と、システムの podman と組んで使うもの（podman-compose / podman-tui / distrobox / toolbox / buildah / skopeo）は RPM にする**
    - Homebrew 版の podman-compose は podman 6.1.2 を依存として入れ、PATH の先頭でシステムの podman 5.8.2 を隠した（[注意点](#注意点)）
    - Homebrew の podman と skopeo は、設定を `/etc/containers` ではなく `/home/linuxbrew/.linuxbrew/etc/containers` から読む（formula の定義）
-   - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui](almalinux-setup.md#podman-tui) の選択した方針）
+   - Homebrew の podman-tui は 2.x で、上流の互換表では podman 6 向け（[podman-tui](containers.md#podman-tui) の選択した方針）
 
 **GUI** は、次の順で選んだ。[Firefox](almalinux-setup.md#firefox) と [VS Code](almalinux-setup.md#vs-code) を RPM にした判断と同じ。
 
@@ -70,8 +70,8 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | starship / zoxide / fzf / eza / bat / tmux | Homebrew（初期化は共通の bash 設定） | [シェルと端末のセットアップ](shell-terminal.md#シェルのツール)（「シェルのツール」の手順 1） |
 | yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](neovim.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [Syncthing](syncthing.md#syncthing) |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [Dropbox](almalinux-setup.md#dropbox) |
-| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [Dropbox と rclone](almalinux-setup.md#dropbox-と-rclone) |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [Dropbox](dropbox.md#dropbox) |
+| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [Dropbox と rclone](dropbox.md#dropbox-と-rclone) |
 | btop | EPEL | [btop](almalinux-setup.md#btop) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
@@ -83,10 +83,10 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm) |
 | HackGen Console NF（フォント） | Homebrew の cask（`~/.local/share/fonts` に入る） | [シェルと端末のセットアップの「HackGen Console NF」](shell-terminal.md#hackgen-console-nf) |
 | IBus + Anthy（日本語入力） | AppStream（Workstation には最初から入っている） | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「日本語入力」の手順 2・3） |
-| Podman | AppStream（自分のユーザーで動かす rootless） | [Podman](almalinux-setup.md#podman) |
-| distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](almalinux-setup.md#distrobox) / [podman-compose](almalinux-setup.md#podman-compose) / [podman-tui](almalinux-setup.md#podman-tui) |
+| Podman | AppStream（自分のユーザーで動かす rootless） | [Podman](containers.md#podman) |
+| distrobox / podman-compose / podman-tui | EPEL（Podman が前提） | [distrobox](containers.md#distrobox) / [podman-compose](containers.md#podman-compose) / [podman-tui](containers.md#podman-tui) |
 | hadolint / dive / Trivy | Homebrew と Trivy の公式 dnf リポジトリ（Podman が前提） | [画像の道具](almalinux-setup.md#画像の道具) |
-| lazydocker | Homebrew（Podman と、その Docker 向けの節の `DOCKER_HOST` が前提） | [lazydocker](almalinux-setup.md#lazydocker) |
+| lazydocker | Homebrew（Podman と、その Docker 向けの節の `DOCKER_HOST` が前提） | [lazydocker](containers.md#lazydocker) |
 
 ---
 
@@ -130,7 +130,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 ## CLI: コンテナ
 
-- どの行も [Podman](almalinux-setup.md#podman) を通してあることが前提
+- どの行も [Podman](containers.md#podman) を通してあることが前提
 - 手順書のあるもの（Podman・distrobox・podman-compose・hadolint・dive・Trivy・podman-tui・lazydocker）は[文書化済みのツール](#文書化済みのツール)にある
 
 | ツール | 用途 | 推奨 | 導入コマンド | ほかの経路 | aarch64 | 確認 |
@@ -144,7 +144,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 
 - 「起動」は `--version`（cosign は `cosign version`）が版を出したことを示す
 - podman-docker の `docker --version` は、`Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.` と `podman version 5.8.2` を出した
-  - 入れると、lazydocker の `E`（シェル）・`a`（アタッチ）と compose の判定が、既定の設定のまま動いた（[lazydocker](almalinux-setup.md#lazydocker) の選択した方針）
+  - 入れると、lazydocker の `E`（シェル）・`a`（アタッチ）と compose の判定が、既定の設定のまま動いた（[lazydocker](containers.md#lazydocker) の選択した方針）
 - buildah の RPM の版は `1.43.1-6.el10_2` だが、`buildah --version` は `buildah version 1.43.2` を出した
 - podlet は、`podlet podman run --name demo -p 127.0.0.1:8090:8080 <イメージ>` で Quadlet の `[Container]` 節を出した
   - `-d` だけでは指定せず、`--detach=true` と書く
@@ -195,8 +195,8 @@ Meld は GUI の規則の 4 番目にあたる。
 | BoxBuddy | distrobox の GUI | Flathub `io.github.dvlv.boxbuddyrs` 2.6.1（検証済み、GNOME 50） | `sudo flatpak install -y flathub io.github.dvlv.boxbuddyrs` | RPM 無し | 有 | 導入 |
 | Cockpit の podman の画面 | ブラウザからコンテナを操作する | AppStream `cockpit-podman` 121（BaseOS の `cockpit` 356.2 と組む） | `sudo dnf install -y cockpit cockpit-podman` | — | 有 | 導入 |
 
-- Pods と Podman Desktop は podman の API ソケット（[Podman の手順 7](almalinux-setup.md#podman)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
-- BoxBuddy はホストの distrobox（[Distrobox](almalinux-setup.md#distrobox)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
+- Pods と Podman Desktop は podman の API ソケット（[Podman の手順 7](containers.md#podman)）につなぐ。Pods の権限には `xdg-run/podman:ro` がある
+- BoxBuddy はホストの distrobox（[Distrobox](containers.md#distrobox)）を使う。権限は `filesystems=home` と、Flatpak の外のコマンドを呼ぶための `org.freedesktop.Flatpak=talk`
   - `cockpit-podman` だけを入れると、依存は `cockpit-bridge` だけで、Web の画面（`cockpit-ws`）は入らなかった。素のコンテナでは、`cockpit` も入れて 102 パッケージになった
 
 ### GNOME・システム
@@ -267,7 +267,7 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 |---|---|---|
 | Microsoft Edge | 公式 dnf リポジトリ 154.0.4258.37 / Flathub `com.microsoft.Edge` 153.0.4234.48（未検証） | どちらにも無い |
 | VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[VirtualBox](virtual-machines.md#virtualbox)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball（[Dropbox](almalinux-setup.md#dropbox)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[Dropbox と rclone](almalinux-setup.md#dropbox-と-rclone)） |
+| Dropbox（公式クライアント） | Dropbox 公式の tarball（[Dropbox](dropbox.md#dropbox)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[Dropbox と rclone](dropbox.md#dropbox-と-rclone)） |
 
 ---
 
