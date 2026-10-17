@@ -1762,95 +1762,6 @@
    - `e` キーのエディタは `EDITOR` から決まる
    - 一時的に試すなら `lazygit --use-config-file ~/lazygit-config/config.yml` を使う
 
-#### lazygit の Excel 差分表示を導入する
-
-- 設定のリポジトリ（`~/lazygit-config`）のスクリプトで、Git と lazygit が Excel のブックの差分をテキストで出せるようにする
-- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある（`~/lazygit-config` を使う）。Python 3.9 以上と git が要る
-  - 部分ステージ（[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)）には、lazygit 0.66.0 以上・delta 0.20.1 以上も要る
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う
-
-1. 設定リポジトリで Excel の差分表示を導入して確かめる。
-
-   ```bash
-   (
-     cd ~/lazygit-config &&
-       python3 --version &&
-       python3 scripts/setup-excel-diff.py &&
-       python3 scripts/setup-excel-diff.py --check
-   )
-   ```
-
-   - 仮想環境の作成が ensurepip で止まる場合は `sudo dnf install python3-pip` を行って再実行する
-   - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
-   - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する
-   - `--check` は読み取りだけの確認
-
-#### lazygit で Excel の差分を確かめる
-
-- Excel のブックのある Git リポジトリで、ブックの差分がシートとセル番地の付いたテキストで出ることを確かめる
-- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-
-1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
-
-   ```bash
-   git check-attr diff -- "売上表.xlsx"
-   git diff -- "売上表.xlsx"
-   git diff --cached -- "売上表.xlsx"
-   ```
-
-   - 最初に `売上表.xlsx: diff: excel` が出て、差分に `Sheet:` とセル番地が出ればよい
-   - lazygit を開き直してファイルを選ぶと delta で表示する。`|` の内蔵表示でも Excel のテキスト差分が出る
-   - `unset` や別のドライバーが出たら、そのリポジトリの `.gitattributes`・`.git/info/attributes` を確認する
-   - そのリポジトリだけに設定するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
-   - 全体をステージするには、lazygit の**ファイル一覧で `Space`** を押す
-   - **通常差分の `Enter` から行・ハンクのステージや破棄を行わない**。既存 Excel にはパッチを適用できず、新規ファイルはテキストをステージしてしまう場合がある
-   - `diff.excel.binary=true` でも、この操作は禁止されない。部分ステージは[専用画面](#lazygit-で-excel-のセル変更を部分ステージする)の `E` で行う
-   - 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/excel-diff.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md#注意点)を参照する
-
-#### lazygit で Excel のセル変更を部分ステージする
-
-- lazygit の専用画面で、Excel のブックのセルの変更を選んで index に入れる
-- 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
-- 新規ファイルは全体をコミットしてから使う
-
-1. lazygit のファイル一覧で対象を選び、`E` を押す。
-
-   - 端末から開くなら `git excel-stage -- "売上表.xlsx"`。実際のファイル名に置き換える
-   - 専用画面が開くまで待つ。大きいブックでは「Excel を読み込んでいます」と出る
-
-1. 専用画面で `Enter` → `Space` を押してハンクを選ぶ。
-
-   - 左右の矢印で移動し、ステージ済み差分を確認する
-   - 値・通常の数式の変更だけを選べる。置換は削除・追加の両方を選ぶ
-   - 書式・画像・マクロ・行列の挿入や移動を反映する場合は、元のファイル一覧で全体をステージする
-   - 対応できない変更は index を変更せず中断する。[対応条件と制限](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md)を確認する
-
-1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
-
-   - `X` の前に `q` で閉じれば選択を取り消す
-   - 作業中の Excel は変えず、index 側の書式・画像・マクロを保持する
-   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
-   - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
-   - 次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
-
-#### lazygit で大きな Excel の変換を待つ
-
-- 大きなブックの差分を、全セルの変換が終わるまで待ってから出す
-- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-
-1. 全セルの変換を待って差分を表示する（`売上表.xlsx` は実際のファイル名）。
-
-   ```bash
-   EXCEL_TEXTCONV_TIMEOUT=0 git diff -- "売上表.xlsx"
-   ```
-
-   - 通常の変換中のブックは、完了後に選び直すか `R` で表示する
-   - この環境変数は、このコマンドにだけ適用する
-
 #### lazygit の設定を更新する
 
 - 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
@@ -1916,10 +1827,6 @@
    - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている。要るものをエディタで書き直す
    - 書き直したら、`git -C ~/lazygit-config stash drop` で stash を消す
 
-1. Excel の差分表示を導入したときだけ、導入し直す。
-
-   - [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)の手順 1 を貼る
-
 1. 設定の元にした上流の版と、入っている本体の版を比べる。
 
    ```bash
@@ -1930,6 +1837,169 @@
 
    - `lazygit v0.66.0 のデフォルト設定に更新` の版と、その次の行の `version=0.66.0` が同じならよい
    - 本体の方が古ければ、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 で上げる
+
+---
+
+### excel-diff
+
+- Excel のブックの差分表示・セル変更の部分ステージ・2 つのブックのセルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
+
+#### excel-diff を導入・更新する
+
+- Excel のブックの差分をセルのテキストで出す textconv と、`git excel-stage`・`git excel-merge` を Git 全体に入れ、導入状態を確かめる
+- 前提: Python 3.9 以上と git が入っている（git は[Homebrew](#homebrew)の手順 1 で入る）
+  - 部分ステージと lazygit での取り込みには、lazygit 0.66.0 以上・delta 0.20.1 以上も要る
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う
+- 更新時は `git -C ~/excel-diff status` で既存の変更を確かめてから進む
+- 戻すときは、excel-diff の[AlmaLinux 10 のロールバック](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#almalinux-10-のロールバック)を行う
+- スクリプトの更新後の再導入の補足は[参考資料](reference/almalinux-setup.md#excel-diff-を導入更新する--手順-2-補足-スクリプトを更新した後に導入し直す理由)
+
+1. Python の版を確かめる。
+
+   ```bash
+   python3 --version
+   ```
+
+   - `Python 3.9` 以上の版が出ればよい
+   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
+
+1. リポジトリを clone し、導入して確かめる。
+
+   ```bash
+   git clone https://github.com/ryo-aoki-pc/excel-diff.git ~/excel-diff
+   (
+     cd ~/excel-diff || exit
+     printf '\n\033[7m 確認 \033[0m\n'
+     python3 scripts/setup-excel-diff.py &&
+       python3 scripts/setup-excel-diff.py --check
+   )
+   ```
+
+   - 導入時に「Excel 差分と部分ステージをグローバルに設定しました。」、確認時に「Excel 差分と部分ステージの設定を確認しました。」が出ればよい
+   - その後ろに「変換スクリプト:」「部分ステージ:」「取り込み: git excel-merge」「attributes:」の行が出ればよい
+   - 仮想環境の作成が ensurepip で止まる場合は `sudo dnf install python3-pip` を行い、この項の手順 2 の `(`〜`)` 部分を貼り直す
+   - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
+   - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する
+   - `--check` は読み取りだけの確認
+   - 更新時は `git -C ~/excel-diff pull --ff-only` を実行し、この項の手順 2 の `(`〜`)` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
+   - 終わると元の作業ディレクトリへ戻る
+
+#### lazygit で Excel の差分を確かめる
+
+- Excel のブックのある Git リポジトリで、ブックの差分がシートとセル番地の付いたテキストで出ることを確かめる
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
+
+1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
+
+   ```bash
+   git check-attr diff -- "売上表.xlsx"
+   git diff -- "売上表.xlsx"
+   git diff --cached -- "売上表.xlsx"
+   ```
+
+   - 最初に `売上表.xlsx: diff: excel` が出て、差分に `Sheet:` とセル番地が出ればよい
+   - lazygit を開き直してファイルを選ぶと delta で表示する。`|` の内蔵表示でも Excel のテキスト差分が出る
+   - `unset` や別のドライバーが出たら、そのリポジトリの `.gitattributes`・`.git/info/attributes` を確認する
+   - そのリポジトリだけに設定するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
+   - 全体をステージするには、lazygit の**ファイル一覧で `Space`** を押す
+   - **通常差分の `Enter` から行・ハンクのステージや破棄を行わない**。既存 Excel にはパッチを適用できず、新規ファイルはテキストをステージしてしまう場合がある
+   - `diff.excel.binary=true` でも、この操作は禁止されない。部分ステージは[専用画面](#lazygit-で-excel-のセル変更を部分ステージする)の `E` で行う
+   - 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
+
+#### lazygit で Excel のセル変更を部分ステージする
+
+- lazygit の専用画面で、Excel のブックのセルの変更を選んで index に入れる
+- 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
+- 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
+- 新規ファイルは全体をコミットしてから使う
+
+1. lazygit のファイル一覧で対象を選び、`E` を押す。
+
+   - 端末から開くなら `git excel-stage -- "売上表.xlsx"`。実際のファイル名に置き換える
+   - 専用画面が開くまで待つ。大きいブックでは「Excel を読み込んでいます」と出る
+
+1. 専用画面で `Enter` → `Space` を押してハンクを選ぶ。
+
+   - 左右の矢印で移動し、ステージ済み差分を確認する
+   - 値・通常の数式の変更だけを選べる。置換は削除・追加の両方を選ぶ
+   - 書式・画像・マクロ・行列の挿入や移動を反映する場合は、元のファイル一覧で全体をステージする
+   - 対応できない変更は index を変更せず中断する。[対応条件と制限](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md)を確認する
+
+1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
+
+   - `X` の前に `q` で閉じれば選択を取り消す
+   - 作業中の Excel は変えず、index 側の書式・画像・マクロを保持する
+   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
+   - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
+   - 次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
+
+#### lazygit で大きな Excel の変換を待つ
+
+- 大きなブックの差分を、全セルの変換が終わるまで待ってから出す
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、ブックのある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
+
+1. 全セルの変換を待って差分を表示する（`売上表.xlsx` は実際のファイル名）。
+
+   ```bash
+   EXCEL_TEXTCONV_TIMEOUT=0 git diff -- "売上表.xlsx"
+   ```
+
+   - 通常の変換中のブックは、完了後に選び直すか `R` で表示する
+   - この環境変数は、このコマンドにだけ適用する
+
+#### lazygit で 2 つの Excel のセルの変更を取り込む
+
+- 2 つのブックを比べ、取り込み元のセルの値・通常の数式を選んで取り込み先へ書き込む
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)・[lazygit](#lazygit)・[git-delta](#git-delta)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。Git リポジトリの外でも使える
+- 書き換えるのは最初に指定する取り込み先で、`.bak` は作らない。取り込み先を Excel などで開いていたら閉じておく
+- 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` で、シートの構成が同じブック。対応条件と制限は[excel-diff の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を確認する
+
+1. 変数を設定する（`EXCEL_TARGET`・`EXCEL_SOURCE` は必ず値を入れる）。
+
+   ```bash
+   EXCEL_TARGET=''                       # ← 取り込み先（書き換えるブック）の絶対パス
+   ```
+
+   ```bash
+   EXCEL_SOURCE=''                       # ← 取り込み元のブックの絶対パス
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'EXCEL_TARGET = %s\nEXCEL_SOURCE = %s\n' "$EXCEL_TARGET" "$EXCEL_SOURCE"
+   ```
+
+   - 取り込み先と取り込み元の絶対パスを読み戻して確かめる
+   - 新しい端末を開いたら、この項の手順 1 を貼り直してから先へ進む
+
+1. 2 つのブックを比べる専用画面を開く。
+
+   ```bash
+   if [ -z "$EXCEL_TARGET" ] || [ -z "$EXCEL_SOURCE" ]; then
+     echo '中断: この項の手順 1 の EXCEL_TARGET または EXCEL_SOURCE が空のまま' >&2
+   else
+     git excel-merge -- "$EXCEL_TARGET" "$EXCEL_SOURCE"
+   fi
+   ```
+
+   - 端末に「書き換えるファイル: …」「取り込み元: …」が出て、専用画面が開く
+   - 「差分がありません。取り込み先は変えていません。」または「取り込める差分がありません（取り込めない違い N セル）。取り込み先は変えていません。」が出たら、この項の手順 3 は飛ばす
+   - 「取り込めない違い（N セル）: …」が出たら、一覧のセルは選べない
+   - 「Excel の取り込みに失敗しました: …」が出たら、理由を確かめてからやり直す
+   - **次の手順は、専用画面で行う**
+
+1. 専用画面でハンクを選び、取り込み先へ書き込んで閉じる。
+
+   - `Enter` → `Space` を押してハンクを選び、左右の矢印で移動して選択を確かめる。置換は削除・追加の両方を選ぶ
+   - `X` で書き込み、「N セルを取り込み先へ書き込みました。q で元の画面へ戻ってください。」が出たら `q` で閉じる
+   - `X` の前に `q` で閉じれば選択を取り消し、「取り込むセルが選ばれていません。取り込み先は変えていません。」が出る
+   - 「セル変更が選択されていません。Enter・Space でハンクを選び、X で反映してください。」が出たら、ハンクを選んで `X` を押す
+   - 取り込み先を Excel などで開いたために書き込めなければ、閉じて `X` を押し直す
+   - 専用画面を閉じると、端末に「N セルを取り込み先へ書き込みました: …」が出ればよい
 
 ---
 
@@ -3990,6 +4060,7 @@
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と自分用の WezTerm の設定の上げ方は、[シェルと端末のセットアップ](shell-terminal.md)の冒頭にまとめてある
+- excel-diff は、[excel-diff を導入・更新する](#excel-diff-を導入更新する)の更新の箇条書きで上げる
 - 自分用の設定のうち、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 

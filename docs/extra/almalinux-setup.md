@@ -149,6 +149,10 @@
    - 残すと決めたキーと、本書で変更しなかったキーはそのまま。元の設定が空で、今回の設定をすべて外した場合だけ、何も出ない
    - 元は `~/.gitconfig` が無かった場合も、空のファイルが残る（中身が無いので、git の動きは変わらない）
 
+1. excel-diff を入れたときだけ、excel-diff の設定と導入先を消す。
+
+   - [excel-diff の「AlmaLinux 10 のロールバック」](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#almalinux-10-のロールバック)の手順を貼る
+
 ### 端末とエディタを消す
 
 1. brew で yazi を消す。

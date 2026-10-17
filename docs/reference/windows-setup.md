@@ -866,14 +866,14 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - git 2.55.0.windows.5 は、autostash の衝突を `Your local changes are stashed, however applying them` に続く `resulted in conflicts` で知らせる
 - git 2.52.0 の文言とは違うので、手順書では `status` の `UU` の行で見分ける
 
-### lazygit の設定を更新する / 手順 6: 補足: Excel の差分表示を入れ直す理由
+### lazygit の設定を更新する / 手順 6: 補足: Windows PowerShell 5.1 のコンソールの表示
 
-- Excel の変換スクリプトを更新した後に導入し直す理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 5 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-5-補足-excel-の差分表示を入れ直す理由)を参照する
-
-### lazygit の設定を更新する / 手順 7: 補足: Windows PowerShell 5.1 のコンソールの表示
-
-- 版の読み方と `--no-pager` の理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 6 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-6-補足-版の表示と-pager)を参照する
+- 版の読み方と `--no-pager` の理由は、[AlmaLinux 10 側の lazygit の設定を更新する / 手順 5 の補足](almalinux-setup.md#lazygit-の設定を更新する--手順-5-補足-版の表示と-pager)を参照する
 - Windows PowerShell 5.1 のコンソール（コードページ shift_jis）でも、日本語のコミットの題は正しく表示された。Git for Windows がコンソールへ直接書くため
+
+### excel-diff を導入・更新する / 手順 3: 補足: スクリプトを更新した後に導入し直す理由
+
+- Excel の変換スクリプトを更新した後に導入し直す理由は、[AlmaLinux 10 側の excel-diff を導入・更新する / 手順 2 の補足](almalinux-setup.md#excel-diff-を導入更新する--手順-2-補足-スクリプトを更新した後に導入し直す理由)を参照する
 
 ### yazi / 手順 2: 補足: 変数について
 
