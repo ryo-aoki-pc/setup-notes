@@ -22,21 +22,17 @@
 ### Claude Code
 
 1. 変数を設定する。
-
    ```bash
    CC_CHANNEL=latest               # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
    printf '\n\033[7m 確認 \033[0m\n'
    printf 'CC_CHANNEL = %s\n' "${CC_CHANNEL}"
    ```
-
    - **編集が必須の変数は無い**。既定の `latest`（最新版）でよければ、そのまま貼る
    - 大きな不具合のある版を避けたいなら `stable`（1 週間ほど遅れて、そうした版を飛ばすチャンネル）にする
    - 最後に値を読み戻して確かめる
    - `latest` か `stable` 以外が入っていたら、ここで止めて直す
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
-
 1. リポジトリを追加する。
-
    ```bash
    if [ -z "${CC_CHANNEL}" ]; then echo '中断: 「Claude Code」の手順 1 の CC_CHANNEL が空のまま。値を入れて貼り直す' >&2; else
      sudo tee /etc/yum.repos.d/claude-code.repo >/dev/null <<EOF
@@ -51,24 +47,18 @@
      cat /etc/yum.repos.d/claude-code.repo
    fi
    ```
-
    - `baseurl` の末尾がこの項の手順 1 で選んだチャンネル（既定なら `latest`）になっていることを確認する
    - `中断:` と出たら、何も書いていない
-
 1. Claude Code をインストールする。
-
    ```bash
    sudo dnf install claude-code
    ```
-
    - トランザクション表で `claude-code` の版（既定の `latest` なら、その日の最新版）を確かめて `y` と答える
    - 初回は続けて署名鍵の取り込みを聞かれる
    - 表示される fingerprint が `31DD DE24 DDFA B679 F42D 7BD2 BAA9 29FF 1A7E CACE` であることを**目で確かめてから** `y` と答える
    - 違っていれば `N` で中断する
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
-
 1. インストールできたか確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
@@ -76,19 +66,15 @@
    claude --version
    rpm -ql claude-code
    ```
-
    - 1 行目（入っている版）と 2 行目（チャンネルにある一番新しい版）が同じなら、そのチャンネルの最新版が入っている
    - `2.1.283 (Claude Code)` のようにバージョンが出れば動く
    - 入るファイルは実行ファイル 1 つとライセンスだけ（[完了時点の状態](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#claude-code-完了時点の状態)）
-
 1. 確認用のディレクトリで `claude` を起動し、ブラウザでログインする。
-
    ```bash
    mkdir -p ~/claude-sandbox
    cd ~/claude-sandbox
    claude
    ```
-
    - 初めての起動では、テーマの選択と、ログインの方法の選択（`Select login method:`）が先に出る
    - フォルダーを信頼するか聞かれたら、`claude-sandbox` であることを確かめて信頼する
    - 画面の案内に従ってブラウザでログインする
@@ -101,38 +87,28 @@
 ### Codex CLI
 
 1. 既存の Codex が入っていないか確かめる。
-
    ```bash
    command -v codex
    ```
-
    - 前提: Codex を利用できる ChatGPT アカウント。API キーを使う場合は API 側の従量課金
    - 新規の PC なら何も出ず、終了コードは 1 になる
    - パスが出たら、元の導入方法を確認してから進める。npm・Homebrew・standalone を重ねて入れない
    - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入と撤去は既定の場所を使う
    - 入れるのは端末で使う Codex CLI。デスクトップアプリとエディタの拡張機能は別に入れる
-
 1. インストーラーが使う道具を入れる。
-
    ```bash
    sudo dnf install -y curl-minimal ca-certificates tar gzip
    ```
-
    - `curl` が既に入っているときは、`パッケージ curl-… は既にインストールされています。` と出て終わる
    - `curl` が既に入っていて `curl-minimal` と競合するときは、`curl-minimal` を外して実行する
-
 1. 公式の standalone インストーラーで Codex CLI を入れる。
-
    ```bash
    curl -fsSL https://chatgpt.com/codex/install.sh | sh
    ```
-
    - `Codex CLI … installed successfully.` を確認する
    - `Start Codex now?` と聞かれたら `n` で答える
    - **次の手順は、インストーラーが終わり、シェルのプロンプトに戻ってから貼る**
-
 1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
-
    ```bash
    export PATH="$HOME/.local/bin:$PATH"
    hash -r
@@ -140,43 +116,31 @@
    command -v codex
    codex --version
    ```
-
    - 自分のホームの `.local/bin/codex` と `codex-cli …` が出る
    - 新しく開いた端末でも `codex --version` が通ることを確認する
-
 1. ChatGPT でのログインを始める。
-
    ```bash
    codex login
    ```
-
    - ブラウザが開く。自動で開かなければ、端末に出た URL を同じ PC のブラウザで開く
    - コマンドはログインが完了するまで待つ
    - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)を通す
-
 1. ブラウザで ChatGPT にログインし、Codex との接続を承認する。
-
    - 利用するアカウント・ワークスペースを選ぶ
    - **次の手順は、端末でログインの成功を確認し、シェルのプロンプトに戻ってから貼る**
-
 1. ログイン状態を確かめる。
-
    ```bash
    codex login status
    ```
-
    - ChatGPT でログイン済みであることを確認する
    - ログイン情報のファイルの中身を表示・共有する必要は無い
-
 1. 確認用のディレクトリで Codex を起動する。
-
    ```bash
    mkdir -p ~/codex-sandbox
    cd ~/codex-sandbox
    git init
    codex
    ```
-
    - 作業場所の確認が出たら、`codex-sandbox` であることを確認する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確認する
    - 終了するときは `/quit` を入力する
@@ -185,31 +149,24 @@
 ### Grok Build
 
 1. 既存の Grok と、同じ名前のコマンドが無いか確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v grok agent curl
    ls -ld ~/.grok
    ```
-
    - 新規の PC なら `curl` のパスだけが出て、`ls` は `ls: '/home/<USER>/.grok' にアクセスできません: そのようなファイルやディレクトリはありません` になる
    - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
    - `grok` や `~/.grok` があれば、元の導入方法を確かめる。同名の非公式 grok-cli は先に外す
    - `agent` が見つかれば用途を確かめる。`~/.local/bin/agent` はインストーラーで置き換わることがある（[注意点](extra/ai-agents.md#注意点)）
-
 1. 公式のインストーラーで Grok Build を入れる。
-
    ```bash
    curl -fsSL https://x.ai/cli/install.sh | bash
    ```
-
    - `Grok … installed to /home/<USER>/.grok/bin/grok` を確かめる
    - `Updated ... in PATH in .../.bashrc.` を確かめる。PATH・補完のブロックが末尾に追加され、初回は `~/.bashrc.bak.<数字>` に控えられる
    - `~/.local/bin` が PATH にあれば、`Symlinked .../grok -> …` と `…/agent -> …` も出る
    - 質問は出ない
-
 1. 今の端末の PATH を通し、実行ファイルと版を確かめる。
-
    ```bash
    export PATH="$HOME/.grok/bin:$PATH"
    hash -r
@@ -217,44 +174,32 @@
    command -v grok
    grok --version
    ```
-
    - 自分のホームの `.grok/bin/grok` と `grok 1.0.50 (…)` のような版が出る
    - 新しく開いた端末でも `grok --version` が通ることを確かめる
-
 1. ブラウザでのログインを始める。
-
    ```bash
    grok login
    ```
-
    - ブラウザが開く。開かなければ、端末に出た `https://accounts.x.ai/oauth2/device?user_code=…` の URL を同じ PC のブラウザで開く
    - 端末に確認用のコード（`XXXX-XXXX` の形）が出て、`Waiting for authorization...` のまま待つ
    - ブラウザの無いホストでは、この項の手順 4・5 の代わりに[Grok Build をブラウザの無いホストでログインする](#grok-build-をブラウザの無いホストでログインする)を通す
-
 1. ブラウザで grok.com のアカウントにログインし、Grok Build との接続を承認する。
-
    - ブラウザに出たコードが、端末のコードと同じであることを確かめてから承認する
    - **次の手順は、端末でログインの成功を確かめ、シェルのプロンプトに戻ってから貼る**
-
 1. ログインを確かめる。
-
    ```bash
    grok models
    ```
-
    - `You are not authenticated.` が出なければ、ログインできている
    - ログインしていなくても終了コードは 0 で、モデルの一覧は出る。終了コードでは判定しない
    - ログインの情報は `~/.grok/auth.json` に入る。中身を表示・共有しない
-
 1. 確認用のディレクトリで Grok を起動する。
-
    ```bash
    mkdir -p ~/grok-sandbox
    cd ~/grok-sandbox
    git init
    grok
    ```
-
    - `Approve in your browser to finish signing in.` と確認用のコードが出たら、ログインできていない。Ctrl+Q で抜けて（画面に `ctrl+q quit` と出る）、この項の手順 4 からやり直す
    - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
@@ -264,94 +209,71 @@
 ### Antigravity CLI
 
 1. 既存の Antigravity と、インストーラーが使う `curl` を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v agy antigravity curl
    ls -ld ~/.local/bin/agy ~/.gemini
    ```
-
    - 新規の PC なら `curl` のパスだけが出て、`ls` は 2 つとも、そのようなファイルやディレクトリは無いと出る
    - `curl` のパスが出なければ、`sudo dnf install -y curl-minimal` で入れてから進む
    - `agy` か `~/.local/bin/agy` があれば、元の導入方法を確かめてから進める（Antigravity の IDE が入れた `agy`・`antigravity` は、エディターを開くだけのコマンドで、この CLI ではない）
    - `~/.gemini` だけがあれば、ほかのツール（Gemini CLI など）のデータ。消さずに進める
-
 1. 公式のインストーラーで Antigravity CLI を入れる。
-
    ```bash
    curl -fsSL https://antigravity.google/cli/install.sh | bash
    ```
-
    - `✓ Download complete and checksum verified.` と `✅ Antigravity CLI installed successfully at /home/<USER>/.local/bin/agy` を確かめる
    - `Appending PATH export to profile` の行が、`~/.bashrc` と `~/.bash_profile` の 2 つ出る。足された行は、この項の手順 4・5 で外す
    - `ERROR: logging before google.Init: I…` の行は、`I` で始まる情報の行で、エラーではない
    - `Security Halt: …` が出たら、入っていない。進まない
    - `Notice: 'agy' is already installed at …` が出たら、既に入っていて、何も変わっていない。この項の手順 1 の分岐を確かめる
    - 質問は出ない
-
 1. 実行ファイルと版を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v agy
    agy --version
    ```
-
    - 自分のホームの `.local/bin/agy` と、`1.3.5` のような版が出る
    - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#almalinux-10-で使う--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
    - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる。この項の手順 6 からは、その端末に貼る
-
 1. この項の手順 3 で `agy` が見つかったときだけ、インストーラーが足した PATH の行をエディタで消す。
-
    - `~/.bashrc` と `~/.bash_profile` の末尾の、`# Added by Antigravity CLI installer` の行と、次の `export PATH="/home/<USER>/.local/bin:$PATH"` の行を消す
    - その 2 行の前に足された空行 2 つも消す
    - ほかの PATH の行（既定の `~/.bashrc` が `~/.local/bin` を足す行など）は消さない
    - **次の手順は、2 つのファイルを保存してエディタを閉じてから貼る**
-
 1. この項の手順 4 を行ったときだけ、PATH の行が外れたことを確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    grep -cF -e 'Antigravity CLI installer' -e "export PATH=\"$HOME/.local/bin:\$PATH\"" ~/.bashrc ~/.bash_profile
    ```
-
    - 2 行とも、末尾が `:0` ならよい。`:1` 以上なら、コメントか `export PATH=…` の行が残っている。この項の手順 4 に戻る
    - 同じ `export PATH=…` の行を自分で書いていれば、その数も出る。その行は残す
    - 新しく開いた端末でも `agy --version` が通ることを確かめる
-
 1. 確認用のディレクトリで Antigravity CLI を起動し、ログインを始める。
-
    ```bash
    mkdir -p ~/agy-sandbox
    cd ~/agy-sandbox
    git init
    agy
    ```
-
    - `You are currently not signed in.` と `Select login method:` が出たら、`1. Google OAuth` を選んで Enter を押す
    - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
-
 1. ブラウザで個人の Google アカウントにログインし、Antigravity CLI を承認する。
-
    - 使うアカウントと、許可する内容を確かめてから承認する
    - 端末の起動画面に `Antigravity CLI 1.3.5` のような版、ログインしたアカウントとプラン、モデル名が出ればよい
    - フォルダーを信頼するか聞かれたら、`agy-sandbox` であることを確かめて信頼する
-
 1. Antigravity の入力欄で `/config` を開き、設定を確かめてから終了する。
-
    - `Enable Telemetry`（利用データの送信）を確かめ、送らないなら `off` にする
    - `Tool Permission` が `request-review`、`Non-Workspace Access` が `off` であることを確かめる（[Antigravity CLI の設定ファイル](#antigravity-cli-の設定ファイル)）
    - `Esc` で設定を閉じ、`/quit` で終了する
    - **次の手順は、Antigravity を終了してシェルのプロンプトに戻ってから貼る**
-
 1. ログインと、1 回だけの実行（`-p`）を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    agy models
    agy -p 'ツールやファイルを使わずに、接続確認ができたと一文で答えてください。' --output-format json --print-timeout 300s
    ```
-
    - モデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
    - JSON の `"status":"SUCCESS"` と、`"response"` に一文が出ればよい
    - JSON が `"status":"ERROR"` で `Individual quota reached` なら、ログインはできていて、`--model` を付けないときのモデルの上限。`agy -p /quota` で残りを確かめる
@@ -360,7 +282,6 @@
 ### Codex・Grok のプラグイン
 
 1. Node.js と bubblewrap を入れる（プラグインと sandbox が使う）。
-
    ```bash
    {
      sudo dnf install -y nodejs bubblewrap
@@ -369,14 +290,11 @@
      bwrap --version
    }
    ```
-
    - `v22.…` と `bubblewrap 0.…` が出ればよい（プラグインは Node.js 18.18 以上が要る）
    - 導入済みの Node.js の `Package nodejs-… is already installed.` は正常
    - Grok の sandbox は Landlock が有効なカーネルも必要（[条件とエラー](extra/ai-agents.md#注意点)）
    - 導入済みの bubblewrap の `Package bubblewrap-… is already installed.` は正常
-
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    claude plugin marketplace add openai/codex-plugin-cc
@@ -385,7 +303,6 @@
    claude plugin install grok-build@xai-grok-build
    claude plugin list
    ```
-
    - `✔ Successfully added marketplace: openai-codex` と `xai-grok-build`、`✔ Successfully installed plugin: …（scope: user）` が 2 つ出る
    - 最後の一覧に、`codex@openai-codex` と `grok-build@xai-grok-build` が `Status: ✔ enabled` で出る
    - 動いている Claude Code には、起動し直すまで効かない
@@ -414,20 +331,16 @@
 ### Windows 11 で Claude Code を入れる
 
 1. 変数を設定する。
-
    ```powershell
    $CC_CHANNEL = 'latest'                # 追従するチャンネル。latest（出た版をすぐ配る）か stable（約 1 週間遅れ）。<CC_CHANNEL>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'CC_CHANNEL = {0}' -f $CC_CHANNEL
    ```
-
    - **編集が必須の変数は無い**。既定の `latest`（最新版）でよければ、そのまま貼る
    - 大きな不具合のある版を避けたいなら `stable` にする（[AlmaLinux 10 の「Claude Code」](#claude-code)の手順 1 の `CC_CHANNEL` と同じ意味）
    - 最後に値を読み戻して確かめる
    - 変数はその PowerShell の中だけで有効。使うのはこの項の手順 3 だけ
-
 1. Claude Code と Git for Windows があるか、64 ビットの PowerShell かを確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    [Environment]::Is64BitProcess
@@ -436,16 +349,13 @@
    Get-Command git -ErrorAction SilentlyContinue | Format-Table Source
    Test-Path 'C:\Program Files\Git\bin\bash.exe'
    ```
-
    - `True`、（claude は何も出ずに）`False`、`C:\Program Files\Git\cmd\git.exe`、`True` の順に出ればよい
    - 最初が `False` なら窓を閉じ、[WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1 で開き直す。x86 版は使わない
    - claude の場所が `C:\Users\<WIN_USER>\.local\bin\claude.exe` だけで、3 つ目が `True` なら導入済み。この項の手順 3 は設定・ログインを残して入れ直す
    - claude の行にほかの場所（WinGet・npm・scoop で入れたものなど）が出たら、そちらを先に外す（[注意点](extra/ai-agents.md#注意点)）
    - `WindowsApps` の `Claude.exe` が出たら、古い Claude Desktop が `claude` の名前を取っている。Claude Desktop を最新にする（公式の Troubleshoot installation）
    - git が出ず、最後が `False` なら、Git for Windows が無い。先に [Git for Windows](windows-setup.md#git-for-windows)を通す
-
 1. Claude Code を公式の native installer で入れる。
-
    ```powershell
    if (-not $CC_CHANNEL) {
      Write-Error 'この項の手順 1 の $CC_CHANNEL が空'
@@ -454,13 +364,10 @@
      & ([scriptblock]::Create((Invoke-RestMethod -Uri https://claude.ai/install.ps1))) $CC_CHANNEL
    }
    ```
-
    - `Claude Code successfully installed!` と版（`Version: 2.1.288` など）の後に、最後に `Installation complete!`（前に絵文字の ✅ が付く）が出ればよい
    - `Setup notes:` に PATH 不足が出ても、この項の手順 4 で足す。ここでは何もしない
    - 赤いエラー（`Checksum verification failed`、`Failed to download binary` など）が出たら、そこで止まっている。[注意点](extra/ai-agents.md#注意点)と公式の [Troubleshoot installation](https://code.claude.com/docs/en/troubleshoot-install) を見る
-
 1. 自分のユーザーの PATH に `%USERPROFILE%\.local\bin` が無ければ足す。
-
    ```powershell
    & {
      $bin = "$env:USERPROFILE\.local\bin"
@@ -476,18 +383,13 @@
      [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
    }
    ```
-
    - `足した` または `はもうある` と出て、PATH の一覧に `C:\Users\<WIN_USER>\.local\bin` があればよい
    - 何度貼ってもよい（あれば足さない）
-
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
-
    - ウィンドウを閉じ（`exit` と打ってもよい）、[WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1 と同じように、管理者ではない Windows PowerShell を開く（「Windows PowerShell (x86)」は開かない）
    - この項の手順 1 の変数は、この後は使わない
    - **次の手順は、開き直した PowerShell に貼る**（前の PowerShell の `PATH` には、`.local\bin` が無いことがある）
-
 1. Claude Code の場所・版・署名と、導入の状態を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command claude -All | Format-Table Source
@@ -496,18 +398,14 @@
    '{0}  {1}' -f $sig.Status, $sig.SignerCertificate.Subject
    claude doctor
    ```
-
    - `claude` の場所は `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行だけ
    - `2.1.288 (Claude Code)` のように版が出る（`stable` を選んだら、`latest` より古い版）
    - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに、ロールバックの Claude Code の手順で消す
    - `claude doctor` に `Running: native (...)`・`Auto-updates: enabled`・`Auto-update channel: latest`（`stable` を選んだら `stable`）・`No installation issues found.` が出ればよい
-
 1. `claude` を起動し、最初の設定とブラウザでのログインを行う。
-
    ```powershell
    claude
    ```
-
    - 文字の色の組み合わせ（`Choose the text style that looks best with your terminal`）を選んで Enter
    - `Select login method:` で `Claude account with subscription`（Pro / Max / Team / Enterprise）を選ぶ。Console のアカウントなら `Anthropic Console account`
    - 既定のブラウザ（Firefox）が開くので、claude.ai にログインして承認する。ブラウザが開かなければ、`c` で URL をコピーしてブラウザに貼る
@@ -517,13 +415,10 @@
    - `/exit` で終える
    - **認証情報（トークン・コード）はこの文書に載せない**
    - **次の手順は、`/exit` で Claude Code を終えてから貼る**（続けて貼ると Claude Code への入力として食われる）
-
 1. ログインしたかを確かめる。
-
    ```powershell
    claude auth status --text
    ```
-
    - `Login method: Claude Max account` のように、プランの行が出ればよい（ほかにメールアドレスと組織の行も出る）
    - `Not logged in. Run claude auth login to authenticate.` なら、ログインしていない。この項の手順 7 をやり直す
    - このコマンドの後ろに、別のコマンドを続けて貼らない
@@ -531,72 +426,51 @@
 ### Windows 11 で Codex CLI を入れる
 
 1. 既存の Codex が入っていないか確かめる。
-
    ```powershell
    Get-Command codex -All -ErrorAction SilentlyContinue
    ```
-
    - 新規の PC なら何も出ない
    - パスが出たら、元の導入方法を確認してから進める
    - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入・ロールバックは既定の場所を使う
-
 1. 公式の standalone インストーラーで Codex CLI を入れる。
-
    ```powershell
    & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://chatgpt.com/codex/install.ps1')))
    ```
-
    - `Codex CLI … installed successfully.` を確認する
    - `Start Codex now?` と聞かれたら `n` で答える
    - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
-
 1. 実行ファイルと版を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command codex -All
    codex --version
    ```
-
    - `Source` がこの項の手順 2 の場所で、`codex-cli …` が出ることを確認する
-
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
-
    - [WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1と同じように、管理者ではない Windows PowerShell（5.1）を開く
    - 新しい窓でも `codex --version` が通ることを確認する
    - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
-
 1. ChatGPT でのログインを始める。
-
    ```powershell
    codex login
    ```
-
    - ブラウザが開く。自動で開かなければ、端末に出た URL を同じ PC のブラウザで開く
    - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
-
 1. ブラウザで ChatGPT にログインし、Codex との接続を承認する。
-
    - 利用するアカウント・ワークスペースを選ぶ
    - **次の手順は、端末でログインの成功を確認し、PowerShell のプロンプトに戻ってから貼る**
-
 1. ログイン状態を確かめる。
-
    ```powershell
    codex login status
    ```
-
    - ChatGPT でログイン済みであることを確認する
-
 1. 確認用のディレクトリで Codex を起動する。
-
    ```powershell
    New-Item -ItemType Directory -Path "$env:USERPROFILE\codex-sandbox" -Force | Out-Null
    Set-Location "$env:USERPROFILE\codex-sandbox"
    git init
    codex
    ```
-
    - 作業場所の確認が出たら、`codex-sandbox` であることを確認する
    - Windows sandbox の設定を求められたら案内に従う。推奨の `elevated` sandbox の初回設定には管理者の承認が必要（普段の Codex は通常のユーザーで動かす）
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確認する
@@ -606,73 +480,52 @@
 ### Windows 11 で Grok Build を入れる
 
 1. 既存の Grok が入っていないか確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok, agent -All -ErrorAction SilentlyContinue
    Test-Path "$env:USERPROFILE\.grok"
    ```
-
    - 新規の PC なら、`False` だけが出る
    - パスか `True` が出たら、元の導入方法を確かめてから進める（WinGet の `xAI.GrokBuild` で入れた Grok なら、WinGet で更新する）
-
 1. 公式のインストーラーで Grok Build を入れる。
-
    ```powershell
    & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://x.ai/cli/install.ps1')))
    ```
-
    - `Grok … installed to C:\Users\<WIN_USER>\.grok\bin\grok.exe` を確かめる
    - 初回は `Added C:\Users\<WIN_USER>\.grok\bin to your User PATH.` も出る
    - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
-
 1. 実行ファイルと版を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command grok -All
    grok --version
    ```
-
    - `Source` がこの項の手順 2 の場所で、`grok …` の版が出ることを確かめる
-
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
-
    - [WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1と同じように、管理者ではない Windows PowerShell（5.1）を開く
    - 新しい窓でも `grok --version` が通ることを確かめる
    - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
-
 1. ブラウザでのログインを始める。
-
    ```powershell
    grok login
    ```
-
    - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
    - ブラウザの無いホストでは、この項の手順 5・6 の代わりに[Grok Build をブラウザの無いホストでログインする](#grok-build-をブラウザの無いホストでログインする)を通す（同じコマンドを PowerShell に貼る）
-
 1. ブラウザで grok.com のアカウントにログインし、Grok Build との接続を承認する。
-
    - ブラウザに出たコードが、端末のコードと同じであることを確かめてから承認する
    - **次の手順は、端末でログインの成功を確かめ、PowerShell のプロンプトに戻ってから貼る**
-
 1. ログインを確かめる。
-
    ```powershell
    grok models
    ```
-
    - `You are not authenticated.` が出なければ、ログインできている
-
 1. 確認用のディレクトリで Grok を起動する。
-
    ```powershell
    New-Item -ItemType Directory -Path "$env:USERPROFILE\grok-sandbox" -Force | Out-Null
    Set-Location "$env:USERPROFILE\grok-sandbox"
    git init
    grok
    ```
-
    - フォルダーを信頼するか聞かれたら、`grok-sandbox` であることを確かめて信頼する
    - 入力欄に「このディレクトリの状態を説明してください。ファイルは変更しないでください」と入力し、応答を確かめる
    - 終了するときは `/quit` を入力する
@@ -681,82 +534,62 @@
 ### Windows 11 で Antigravity CLI を入れる
 
 1. 既存の Antigravity が入っていないか確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command agy, antigravity -All -ErrorAction SilentlyContinue
    Test-Path "$env:LOCALAPPDATA\agy"
    Test-Path "$env:USERPROFILE\.gemini"
    ```
-
    - 新規の PC なら、`False` だけが出る
    - パスか `True` が出たら、元の導入方法を確かめてから進める（Antigravity の IDE が入れた `agy`・`antigravity` は、エディターを開くだけのコマンドで、この CLI ではない）
    - [Antigravity アプリ](#windows-11-で-antigravity-アプリの-remote-control-を使う任意)を先に入れた PC では、`%USERPROFILE%\.gemini` が `True` になる。アプリは `agy`・`antigravity` を足さないので、アプリのデータを残して進める
-
 1. 公式のインストーラーで Antigravity CLI を入れる。
-
    ```powershell
    & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://antigravity.google/cli/install.ps1')))
    ```
-
    - `✅ Antigravity CLI binary placed successfully at C:\Users\<WIN_USER>\AppData\Local\agy\bin\agy.exe` を確かめる
    - 初回は `Successfully added %LOCALAPPDATA%\agy\bin to User PATH registry variable.` も出る
    - `ERROR: logging before google.Init: I…` の行は、`I` で始まる情報の行で、エラーではない
    - `Security Halt: Checksum verification failed.` が出たら、入っていない。進まない
    - `Notice: 'agy.exe' is already installed at …` が出たら、既に入っていて、何も変わっていない。この項の手順 1 の分岐を確かめる
    - **次の手順は、インストーラーが終わり、PowerShell のプロンプトに戻ってから貼る**
-
 1. インストーラーが残した一時ファイルを消し、実行ファイルと版を確かめる。
-
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\antigravity\staging\agy.exe" -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Command "$env:LOCALAPPDATA\agy\bin\agy.exe"
    & "$env:LOCALAPPDATA\agy\bin\agy.exe" --version
    ```
-
    - `Source` がこの項の手順 2 の場所で、`1.3.5` のような版が出ることを確かめる
-
 1. 開いている Windows PowerShell を閉じ、新しく開き直す。
-
    - [WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 1 と同じように、管理者ではない Windows PowerShell（5.1）を開く
    - 新しい窓でも `agy --version` が通ることを確かめる
    - 見つからない場合は、Windows Terminal など親のアプリも閉じて開き直す
    - **次の手順は、開き直した PowerShell に貼る**
-
 1. 確認用のディレクトリで Antigravity CLI を起動し、ログインを始める。
-
    ```powershell
    New-Item -ItemType Directory -Path "$env:USERPROFILE\agy-sandbox" -Force | Out-Null
    Set-Location "$env:USERPROFILE\agy-sandbox"
    git init
    agy
    ```
-
    - `You are currently not signed in.` と `Select login method:` が出たら、`1. Google OAuth` を選んで Enter を押す
    - ブラウザが開く。開かなければ、端末に出た URL を同じ PC のブラウザで開く
-
 1. ブラウザで個人の Google アカウントにログインし、Antigravity CLI を承認する。
-
    - 使うアカウントと、許可する内容を確かめてから承認する
    - 端末の起動画面に `Antigravity CLI 1.3.5` のような版、ログインしたアカウントとプラン、モデル名が出ればよい
    - フォルダーを信頼するか聞かれたら、`agy-sandbox` であることを確かめて信頼する
-
 1. Antigravity の入力欄で `/config` を開き、設定を確かめてから終了する。
-
    - `Enable Telemetry`（利用データの送信）を確かめ、送らないなら `off` にする
    - `Tool Permission` が `request-review`、`Non-Workspace Access` が `off` であることを確かめる（`off` でも、1 回だけの実行は `%TEMP%` に書ける。[Antigravity CLI の設定ファイル](#antigravity-cli-の設定ファイル)）
    - `Esc` で設定を閉じ、`/quit` で終了する
    - **次の手順は、Antigravity を終了して PowerShell のプロンプトに戻ってから貼る**
-
 1. ログインと、1 回だけの実行（`-p`）を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    agy models
    agy -p 'ツールやファイルを使わずに、接続確認ができたと一文で答えてください。' --output-format json --print-timeout 300s
    ```
-
    - モデルの一覧（`gemini-3.8-flash-high` など）が出れば、ログインできている
    - JSON の `"status":"SUCCESS"` と、`"response"` に一文が出ればよい
    - JSON が `"status":"ERROR"` で `Individual quota reached` なら、ログインはできていて、`--model` を付けないときのモデルの上限。`agy -p /quota` で残りを確かめる
@@ -765,7 +598,6 @@
 ### Windows 11 で Codex・Grok のプラグインを入れる
 
 1. Node.js 18.18 以上があるか確かめ、無いときだけ scoop で入れる（プラグインが使う）。
-
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -777,17 +609,12 @@
      }
    }
    ```
-
    - `Node.js がある:` と版・場所が出たら導入済み。この項の手順 2 は飛ばす
    - 入れたときは、`'nodejs-lts' (…) was installed successfully!` が出ればよい
-
 1. この項の手順 1 で nodejs-lts を入れたときだけ、PowerShell を閉じ、スタートメニューから開き直す。
-
    - 開き直した窓で `node --version` が通ることを確かめる
    - **次の手順は、開き直した PowerShell に貼る**
-
 1. Claude Code に、OpenAI の Codex のプラグインと xAI の Grok Build のプラグインを入れる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude plugin marketplace add openai/codex-plugin-cc
@@ -796,7 +623,6 @@
    claude plugin install grok-build@xai-grok-build
    claude plugin list
    ```
-
    - 見方は、[AlmaLinux 10 の「Codex・Grok のプラグイン」](#codexgrok-のプラグイン)の手順 2 と同じ
 
 ---
@@ -890,28 +716,19 @@
 - [Codex CLI](#codex-cli)の手順 5・6（`codex login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
 
 1. 手元のブラウザで、デバイスコードによるログインを有効にする。
-
    - 個人アカウントは ChatGPT のセキュリティ設定、管理されたワークスペースは管理者の権限設定で許可する
-
 1. Codex を入れたホストでデバイスコード認証を始める。
-
    ```bash
    codex login --device-auth
    ```
-
    - 端末に URL とワンタイムコードが出る
-
 1. 手元のブラウザで表示された URL を開き、コードを入力する。
-
    - 自分で始めたログインのコードだけを入力する
    - **次の手順は、Codex を入れたホストでログインの成功を確認してから貼る**
-
 1. Codex を入れたホストでログイン状態を確かめる。
-
    ```bash
    codex login status
    ```
-
    - 成功したら、[Codex CLI](#codex-cli)の手順 8 へ進む（Windows 11 は、[Windows 11 で Codex CLI を入れる](#windows-11-で-codex-cli-を入れる)の手順 8）
 
 ---
@@ -938,24 +755,17 @@
 - [Grok Build](#grok-build)の手順 4・5（`grok login`）の代わりに行う。ここにある 2 つのコマンドは bash と PowerShell で共通なので、Windows ではそのまま PowerShell に貼る
 
 1. Grok を入れたホストで、デバイスコードでのログインを始める。
-
    ```bash
    grok login --device-auth
    ```
-
    - 端末に URL（`https://accounts.x.ai/oauth2/device?user_code=…`）と確認用のコードが出て、`Waiting for authorization...` のまま待つ
-
 1. 手元のブラウザで表示された URL を開き、コードを確かめて承認する。
-
    - 自分で始めたログインのコードだけを承認する
    - **次の手順は、Grok を入れたホストでログインの成功を確かめてから貼る**
-
 1. Grok を入れたホストでログインを確かめる。
-
    ```bash
    grok models
    ```
-
    - `You are not authenticated.` が出なければ、[Grok Build](#grok-build)の手順 7 へ進む（Windows 11 は、[Windows 11 で Grok Build を入れる](#windows-11-で-grok-build-を入れる)の手順 8）
 
 ---
@@ -1016,7 +826,6 @@
 - この節は AlmaLinux 10 の dnf のもの。Windows 11 でチャンネルを変えるときは、[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 の補足
 
 1. repo ファイルの `baseurl` を `stable` に書き換える。
-
    ```bash
    {
      sudo sed -i 's|/rpm/latest$|/rpm/stable|' /etc/yum.repos.d/claude-code.repo
@@ -1024,31 +833,22 @@
      grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
    }
    ```
-
    - `baseurl` の末尾が `stable` になっていることを確認する
-
 1. 入っている版を `stable` の最新に合わせる。
-
    ```bash
    sudo dnf distro-sync claude-code
    ```
-
    - `stable` がすでに同じ版まで追いついていれば `Nothing to do.` で終わる
    - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
-
 1. 入っている版を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}' claude-code
    dnf -q repoquery --available --latest-limit 1 --qf '%{name} %{version}-%{release} %{reponame}' claude-code
    claude --version
    ```
-
    - 1 行目と 2 行目が同じ版なら、`stable` の最新版に揃っている
-
 1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
-
    ```bash
    {
      sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
@@ -1057,7 +857,6 @@
      sudo dnf upgrade claude-code
    }
    ```
-
    - `baseurl` の末尾が `latest` に戻ったことを確認する
    - トランザクション表が `Upgrading:` になっていることを確かめて `y` と答える
    - 答えた後、[Claude Code](#claude-code)の手順 4 のコマンドで版を確かめる
@@ -1075,79 +874,58 @@
 - Remote Control でなく、対話の `claude` を動かし続けるときは、この節の手順 4 で `claude` だけを打つ。別の SSH から `tmux attach -t claude` で戻れる
 
 1. Claude Code と tmux が使えることと、ログインを確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    claude --version
    tmux -V
    claude auth status --text
    ```
-
    - `claude` の版、`tmux 3.7c`、`Login method: …` の行が出ればよい
    - `Not logged in. Run claude auth login to authenticate.` なら、[Claude Code](#claude-code)の手順 5 でログインしてから続ける
    - `claude doctor` の `Remote Control` の段にも、使えないときは理由が出る（ログインしていないと `Not signed in to claude.ai` など）
-
 1. Claude Code を動かすディレクトリに移る。
-
    - `cd <PROJECT_DIR>` で、Remote Control で作業させたいディレクトリ（プロジェクト）に移る
    - ホームそのものは選ばない
-
 1. tmux のセッションを作って入る。
-
    ```bash
    tmux new-session -A -s claude
    ```
-
    - 左下に `[claude]` が出る。新規セッションのシェルは、この節の手順 2 のディレクトリから始まる
    - 同じ名前のセッションがあれば、そこで動いていたコマンドと作業場所のまま戻る（`-A`）。Claude Code がすでに動いているなら、この節の手順 4 は飛ばしてその画面を使う
    - シェルに戻っている場合は、中で `pwd` を確かめ、必要なら `cd <PROJECT_DIR>` で作業場所へ移る。ほかのコマンドが動いていれば、そこへこの節の手順 4 を貼らない
    - **次の手順は、tmux の中のシェルで作業場所を確かめてから貼る**（動いているアプリへ貼ると、その入力として食われる）
-
 1. tmux の中で Remote Control を始める。
-
    ```bash
    claude remote-control --name "$(basename "$PWD")" --spawn same-dir
    ```
-
    - 信頼のダイアログ（`Is this a project you created or one you trust?`）が出たら、**↓ で `Yes, I trust this folder` を選び Enter**（既定は `No, exit`）
    - 初めて Remote Control を使うときは `Enable Remote Control? (y/n)` が出る。`y`
    - `https://claude.ai/code/<SESSION_ID>` の URL と `space to show QR code` が出れば、始まっている
    - **`Ctrl+b` → `d` でデタッチする**（`Ctrl+C` を押すと Remote Control が止まる）
    - `Error: You must be logged in to use Remote Control.` で終わったら、`exit` で tmux を閉じて、この節の手順 1 からやり直す
    - **次の手順は、デタッチしてシェルに戻ってから貼る**（続けて貼ると、Claude Code への入力として食われる）
-
 1. Remote Control が動いていることを確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    tmux ls
    pgrep -af 'claude remote-control'
    ```
-
    - `claude: 1 windows (created …)` と、`<PID> claude remote-control --name <名前> --spawn same-dir` が出ればよい
    - 2 行目が何も出なければ、`claude` は止まっている。`tmux attach -t claude` で中の表示を見る
-
 1. SSH の接続を切る。
-
    ```bash
    exit
    ```
-
    - クライアントのプロンプトに戻る
-
 1. スマートフォンかブラウザから使う。
-
    - claude.ai/code か、Claude のアプリの **Code** の一覧に、この節の手順 2 のディレクトリの名前のセッションが出る
    - 開いてメッセージを送ると、このホストのそのディレクトリで Claude Code が動いて返事が来る
    - 返事が来なければ、この節の手順 8 でログインし直して、中の表示を見る
    - **次の手順は、SSH でログインし直してから貼る**
-
 1. SSH でログインし直し、tmux のセッションに戻る。
-
    ```bash
    tmux attach -t claude
    ```
-
    - この節の手順 4 の画面に戻る
    - 動かし続けるなら、`Ctrl+b` → `d` で離れる
    - 止めるなら `Ctrl+C`。シェルに戻ったら `exit` で tmux のセッションも閉じる
@@ -1181,31 +959,24 @@
 > **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザからこの PC の `<PROJECT_DIR>` で、このユーザーとして Claude Code を動かせる**（ファイルの読み書きとコマンドの実行。SSH のセッションから登録するので、タスクは管理者の権限を持ちうる）。会話の転写（メッセージ・応答・ツールの動き）は Anthropic のサーバーに保存される（[注意点](extra/windows-claude-remote-control.md#注意点)）。タスクが開く WezTerm の窓はデスクトップに見える。窓を閉じる・中で Ctrl+C すると Claude Code が止まる。
 
 1. クライアントの PC から Windows に SSH でログインし、Windows PowerShell を起動する。
-
    - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](windows-setup.md#ssh-でログインを確かめる)と同じ。スマートフォンの SSH のアプリでもよい）
    - ログインした先のシェルが Git Bash でも cmd でも、`powershell` と打つ
    - プロンプトが `PS C:\Users\<WIN_USER>>` になる
    - **次の手順は、このプロンプトが出てから貼る**（続けて貼ると、ログインした先のシェルへの入力として食われる）
-
 1. 変数を設定する（`PROJECT_DIR` は必ず値を入れる）。
-
    ```powershell
    $PROJECT_DIR = ''                     # ← Remote Control のセッションを動かすディレクトリ（プロジェクト）を書く。<PROJECT_DIR>
    ```
-
    ```powershell
    $RC_NAME = if ($PROJECT_DIR) { Split-Path $PROJECT_DIR -Leaf }   # claude.ai/code とアプリに出るセッション名（既定はディレクトリ名）。<RC_NAME>
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    'PROJECT_DIR = {0}' -f $PROJECT_DIR
    'RC_NAME     = {0}' -f $RC_NAME
    ```
-
    - 最後に値を読み戻して確かめる
    - `PROJECT_DIR` は、`C:\Users\<WIN_USER>\src\myproject` のような、存在するプロジェクトのディレクトリの絶対パス。ホームそのもの（`C:\Users\<WIN_USER>`）は使えない
    - **新しい PowerShell を開いたら**、手順 2 のブロックを貼り直してから先へ進む
-
 1. Claude Code・WezTerm・ログインと、デスクトップのセッションを確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude --version
@@ -1213,14 +984,11 @@
    & 'C:\Program Files\WezTerm\wezterm.exe' --version
    quser
    ```
-
    - `claude` の版と、ログイン済みを示す行、`wezterm 2026…` が出ればよい
    - `quser` に、自分のユーザーの `console` の行が `Active` で出ること。出なければ、この PC にログインしてから続ける
    - RDP で使った後にふつうに切断していると、自分の行のセッション名が空で、状態が `Disc`（切断）になる。RDP でつなぎ直し、[RDP をロックせずに切断する手順](windows-setup.md#rdp-をロックせずに切断)で切ると `console` に戻る
    - `claude remote-control --help` は貼らない
-
 1. 初回だけ、対話で起動して信頼と Remote Control の確認に答え、URL が出たら止める。
-
    ```powershell
    if (-not $PROJECT_DIR) {
      Write-Error '手順 2 の $PROJECT_DIR が空'
@@ -1231,16 +999,13 @@
      claude remote-control --name $RC_NAME --spawn same-dir
    }
    ```
-
    - ディレクトリが無い、ファイルを指定した、または移動できない場合は起動しない。手順 2 の値とディレクトリへのアクセスを確かめてから貼り直す
    - 信頼のダイアログ（`Is this a project you created or one you trust?`）が出たら、**↓ で `Yes, I trust this folder` を選び Enter**（既定は `No, exit`）
    - 初めて Remote Control を使うときは `Enable Remote Control? (y/n)` が出る。`y`
    - `https://claude.ai/code/<SESSION_ID>` の URL と `space to show QR code` が出れば、起動できている
    - **Ctrl+C** で止める
    - **次の手順は、Ctrl+C で止めてプロンプトに戻ってから貼る**（続けて貼ると Claude Code への入力として食われる）
-
 1. タスクを登録する（WezTerm で `claude remote-control` を起動するタスク）。
-
    ```powershell
    if (-not $PROJECT_DIR) {
      Write-Error '手順 2 の $PROJECT_DIR が空'
@@ -1257,11 +1022,8 @@
      Register-ScheduledTask -TaskName 'claude-remote-control' -Action $action -Principal $principal -Settings $settings -Force | Format-List TaskName, State
    }
    ```
-
    - `State : Ready` が出ればよい
-
 1. タスクを開始し、動いていることを確かめる。
-
    ```powershell
    Start-ScheduledTask -TaskName 'claude-remote-control'
    Start-Sleep -Seconds 8
@@ -1269,35 +1031,26 @@
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId, ParentProcessId | Format-Table -AutoSize
    ```
-
    - `Running` と、`claude.exe` のプロセスが出ればよい（親は WezTerm）
    - デスクトップには WezTerm の窓が開き、中で Claude Code が動く
    - 数十秒で claude.ai/code の一覧に `<RC_NAME>` が出る（手順 8 で確かめる）
-
 1. SSH の接続を切る。
-
    ```powershell
    exit
    ```
-
    - ログインした先のシェルに戻る（Git Bash なら `<WIN_USER>@<HOSTNAME> MINGW64 ~`、cmd なら `C:\Users\<WIN_USER>>`）
    - そこでもう 1 度 `exit` と打つと、SSH が切れてクライアントのプロンプトに戻る。SSH のアプリで接続を閉じてもよい
    - タスクで起動した WezTerm と Claude Code は、デスクトップのセッションに残る
-
 1. 切断した後も、スマートフォンかブラウザからセッションが使えることを確かめる。
-
    - claude.ai/code か、Claude のアプリの **Code** の一覧に `<RC_NAME>` が、コンピューターのアイコンと緑の点付きで出る
    - 開いてメッセージを送ると、この PC の `<PROJECT_DIR>` で Claude Code が動いて返事が来る
    - 返事が来なければ、手順 9 でログインし直して確かめる
-
 1. 必要なら SSH でログインし直し、タスクとプロセスが残っていることを確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-ScheduledTask -TaskName 'claude-remote-control').State
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
-
    - `Running` と、手順 6 と同じプロセスが残っている
    - 手順 2 の変数は要らない
 
@@ -1309,22 +1062,17 @@
 - 止めるのはこの項の手順 1、もう一度始めるのは手順 2
 
 1. セッションを止める。
-
    ```powershell
    Stop-ScheduledTask -TaskName 'claude-remote-control'
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-CimInstance Win32_Process -Filter "Name='claude.exe'" | Where-Object CommandLine -like '*--spawn same-dir*' | Select-Object ProcessId | Format-Table -AutoSize
    ```
-
    - `claude.exe` のプロセスが消える（デスクトップで別に動かしている分は残る）
    - WezTerm の窓も閉じる
-
 1. もう一度始めるときは、タスクを開始する。
-
    ```powershell
    Start-ScheduledTask -TaskName 'claude-remote-control'
    ```
-
    - 止めてから約 4 時間以内なら、claude.ai/code の同じセッションが戻る（それを過ぎると新しいセッションになる。公式ドキュメント）
    - ネットワークが約 10 分切れると、Claude Code のサーバーは自分で終わり WezTerm の窓が閉じる（公式ドキュメント）。そのときもこの手順で始め直す
 
@@ -1535,38 +1283,27 @@
 ### Antigravity アプリの Remote Control: 止める・もう一度始める
 
 1. 一時的に止めるときは、PC のアプリで Remote Control をオフにする。
-
    - `Ctrl+,` → `Application` → `Remote Control` をオフにする
    - ブラウザの一覧は `Offline` になり、項目は残る
-
 1. 一時停止から戻すときは、PC のアプリで Remote Control をオンにする。
-
    - `Ctrl+,` → `Application` → `Remote Control` をオンにする
    - ブラウザの一覧が `Online` に戻ることを確かめる
-
 1. アプリごと止めるときは、タスクトレイから終了する。
-
    - タスクトレイの Antigravity のアイコンからアプリを終了する
    - ブラウザの一覧が `Offline` になることを確かめる。窓を閉じるだけでは止まらない
    - **次の手順は、アプリが終わってから貼る**
-
 1. アプリをもう一度始めるときは、スタートアップのショートカットで起動する。
-
    ```powershell
    Start-Process -FilePath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
    ```
-
    - 窓が開き、ブラウザの一覧が同じ名前で `Online` に戻ることを確かめる
    - スタートメニューの `Antigravity` からの起動は確かめていない
-
 1. ログオン時の自動起動をやめるときは、ショートカットを消す。
-
    ```powershell
    Remove-Item -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk') -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
    ```
-
    - `False` が出ればよい
    - 自動起動を戻すときは、[Antigravity アプリの Remote Control: Windows 11 で使う](#antigravity-アプリの-remote-control-windows-11-で使う)の手順 8 を通す
 
@@ -1600,38 +1337,27 @@
 - この節の手順は、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 2 と同じ、開き直した端末に貼る
 
 1. 起動中の Codex・Grok・Antigravity CLI を終了する。
-
    - 端末の Codex・Grok・Antigravity CLI は `/quit` で閉じる
    - 知らせを待たずに上げるときだけ、この節の手順 1〜4 と手順 6 を行う（Antigravity CLI を入れていなければ、手順 6 は飛ばす）
-
 1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
-
    ```bash
    curl -fsSL https://chatgpt.com/codex/install.sh | sh
    ```
-
    - `Start Codex now?` は `n` で答える
    - **次の手順は、シェルのプロンプトに戻ってから貼る**
-
 1. Codex CLI の更新後の版を確かめる。
-
    ```bash
    codex --version
    ```
-
 1. Grok Build の新しい版を入れ、版を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    grok update
    grok --version
    ```
-
    - 新しい版が無ければ `Already up to date (…)` と出る
    - 確かめるだけなら `grok update --check`（`(latest: …)` に最新の版が出る）
-
 1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    claude plugin marketplace update openai-codex
@@ -1640,18 +1366,14 @@
    claude plugin update grok-build@xai-grok-build
    claude plugin list
    ```
-
    - `✔ Successfully updated marketplace: …` が 2 つと、`✔ … updated …` か `✔ … is already at the latest version (…)` が 2 つ出る
    - 上がったプラグインは、Claude Code を起動し直すまで効かない（Remote Control も止めてから始め直す）
-
 1. Antigravity CLI を入れたときだけ、新しい版を入れて版を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    agy update
    agy --version
    ```
-
    - 新しい版が無ければ `✓ You are already on the latest version.` と出る
    - `~/.bashrc` か `~/.bash_profile` に `# Added by Antigravity CLI installer` の行が戻ったら、[Antigravity CLI](#antigravity-cli)の手順 4・5 で外す
 
@@ -1671,53 +1393,38 @@
 ### AI エージェントとプラグインを上げる
 
 1. Claude Code をすぐに上げる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude update
    claude --version
    ```
-
    - 新しい版があれば `Successfully updated from <古い版> to version <新しい版>`、無ければ `Claude Code is up to date (2.1.288)` のように出る
    - 更新の後に `claude` が見つからなくなったら、[注意点](extra/ai-agents.md#注意点)の `claude.exe.old.*` の項を見る
-
 1. 起動中の Codex・Grok・Antigravity CLI を終了する。
-
    - 端末の Codex・Grok・Antigravity CLI は `/quit` で閉じる
    - 知らせを待たずに上げるときだけ、この項の手順 2〜5 を行う（Antigravity CLI を入れていなければ、手順 5 は飛ばす）
-
 1. 公式インストーラーをもう一度実行して、Codex CLI を上げる。
-
    ```powershell
    & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://chatgpt.com/codex/install.ps1')))
    ```
-
    - `Start Codex now?` は `n` で答える
    - **次の手順は、PowerShell のプロンプトに戻ってから貼る**
    - 上げた後の版は、`codex --version` で確かめる
-
 1. Grok Build の新しい版を入れ、版を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    grok update
    grok --version
    ```
-
    - 新しい版が無ければ `Already up to date (…)` と出る
-
 1. Antigravity CLI を入れたときだけ、新しい版を入れて版を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    agy update
    agy --version
    ```
-
    - 新しい版が無ければ `✓ You are already on the latest version.` と出る
-
 1. 2 つのプラグインのマーケットプレイスとプラグインを上げる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    claude plugin marketplace update openai-codex
@@ -1726,7 +1433,6 @@
    claude plugin update grok-build@xai-grok-build
    claude plugin list
    ```
-
    - 見方は、[AlmaLinux 10 の更新](#almalinux-10-の更新)の手順 5 と同じ
 
 ---
@@ -1919,12 +1625,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > **この節の手順 1 は、セッションを起動し直す**。動いているアプリは閉じ、保存していない内容は失われる。
 
 1. [手順 1](#claude-code-の-gnome-操作-almalinux-10-で使う) の `VIRTUAL_MONITOR` を新しい大きさに書き換えて、[手順 1〜3](#claude-code-の-gnome-操作-almalinux-10-で使う) のブロックを貼り直す。
-
    - 手順 1 の読み戻しに新しい大きさが出て、手順 2 の最後の行が `ExecStart=/usr/bin/gnome-shell --virtual-monitor <VIRTUAL_MONITOR>`（新しい大きさ）になればよい
    - **次の手順は、[手順 3](#claude-code-の-gnome-操作-almalinux-10-で使う) が終わってから貼る**（手順 3 の `sudo` が、続けて貼った行を読んで捨てる）
-
 1. 新しい大きさで撮れるかを確かめる。
-
    ```bash
    if [ -z "${REPO}" ]; then echo '中断: 手順 1 の REPO が空のまま。手順 1 を貼り直す' >&2; else
    for i in $(seq 1 30); do busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && break; sleep 1; done
@@ -1937,7 +1640,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    fi
    fi
    ```
-
    - `PNG image data, <幅> x <高さ>` が新しい大きさになっていればよい
    - PNG の画面も開いて確かめてから使う。撮れなかったときの再試行は[AlmaLinux 10 で使う](#claude-code-の-gnome-操作-almalinux-10-で使う)の手順 4 と同じ
 
@@ -2411,7 +2113,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > **Grok Build は既定で sandbox が無く、許可すれば worktree の外のファイルも変えられる**（AGENTS.md の規則で止めるだけ）。この節の手順 6 で、確認の画面には中身を読んでから答える。AlmaLinux 10 では `grok --sandbox workspace` で起動すると、書ける場所を worktree・`~/.grok`・一時ディレクトリに絞れる（Landlock が有効なカーネルと bubblewrap が要る。その場合、コミットは人が行う）。
 
 1. AlmaLinux 10 のときだけ、tmux に 4 つのウィンドウを作って入る。
-
    ```bash
    if [ -z "${PROJECT_DIR}" ]; then echo '中断: 「コーディングエージェントの共同作業: AlmaLinux 10 で使う」の手順 1 の PROJECT_DIR が空のまま。値を入れて貼り直す' >&2
    elif tmux has-session -t agents 2>/dev/null; then tmux attach -t agents
@@ -2421,65 +2122,47 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      tmux attach -t agents
    fi
    ```
-
    - 下の行に `0:main`・`1:claude`・`2:codex`・`3:grok` のウィンドウが出る。`Ctrl+b` → 数字で切り替える（tmux のキーは [シェルと端末のセットアップの「tmux の使い方の基本」](shell-terminal.md#tmux-の使い方の基本)）
    - 各ウィンドウのシェルは、それぞれの worktree（`main` はプロジェクト）から始まる
    - SSH を切っても残る。スマートフォンの SSH のアプリからも `tmux attach -t agents` で戻れる
    - **次の手順からは、tmux の中の、手順に書いたウィンドウに貼る**
-
 1. Windows 11 のときだけ、4 つの PowerShell の窓を開く。
-
    ```powershell
    if (-not $PROJECT_DIR) { Write-Error '中断: 「コーディングエージェントの共同作業: Windows 11 で使う」の手順 1 の $PROJECT_DIR が空のまま。値を入れて貼り直す' } else {
      foreach ($d in $PROJECT_DIR, "$WT_ROOT\claude", "$WT_ROOT\codex", "$WT_ROOT\grok") { Start-Process powershell.exe -WorkingDirectory $d }
    }
    ```
-
    - 4 つの窓が開き、それぞれの場所（プロジェクトと 3 つの worktree）から始まる。どの窓かは `Get-Location` で確かめる
    - **次の手順からは、手順に書いた場所の窓に貼る**
-
 1. 人が分担を決める。
-
    - 3 つに同じファイルを触らせない（モジュールやディレクトリで分ける）
    - 頼む文には、終わりの条件（通すテスト）と、終わったら自分のブランチにコミットし、push して Pull Request を作ることを書く。取り込みまで頼むなら、merge commit で取り込むことも書く
    - 振り方の目安は、[使い方の基本](#コーディングエージェントの共同作業-使い方の基本)の役割の表
-
 1. `claude` の worktree の窓で Claude Code を起動し、担当の作業を頼む。
-
    ```bash
    claude
    ```
-
    - 初めての worktree では信頼のダイアログが出る（[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 9、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 9 で信頼してあれば出ない）
    - 頼んだら、その窓は Claude Code に任せる。Claude Code の確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える
-
 1. `codex` の worktree の窓で Codex を起動し、担当の作業を頼む。
-
    ```bash
    codex
    ```
-
    - 初めての worktree では作業場所の確認が出る。`codex` の worktree であることを確かめて進む
    - **Codex は sandbox の中では `git add` も `git commit` もできない**。sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する。許可しないなら、終わった後に人がその窓でコミットする
    - push と Pull Request の作成も、sandbox の外での実行の承認を求められたら、コマンドを確かめて許可する
-
 1. `grok` の worktree の窓で Grok を起動し、担当の作業を頼む。
-
    ```bash
    grok
    ```
-
    - [AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)の手順 8（Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)の手順 8）の `--trust` で信頼してあるので、信頼は聞かれない
    - 確認の画面（ファイルの変更・コマンドの実行）には、中身を読んでから答える（この節のリードの `[!WARNING]`）
-
 1. 3 つが終わったら、それぞれの worktree の窓で、コミットと残りの変更を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    git log --oneline main..HEAD
    git status --short
    ```
-
    - エージェントを終えてから貼る（Claude Code は `/exit`、Codex と Grok は `/quit`）
    - 1 つ目のコマンドに、この作業のコミットが出る。2 つ目は何も出ない
    - 2 つ目に何か出たら、コミットされていない変更が残っている。エージェントにコミットさせるか、人がコミットする
@@ -2499,32 +2182,23 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - sandbox とソケットの権限は緩めない。Landlock と親ディレクトリの検索権限を確かめ、対応するカーネルで再試行する
 
 1. `claude` の窓の Claude Code で、Claude のブランチを Codex と Grok にレビューさせる。
-
    - `claude` で Claude Code を起動し、`/codex:review --base main --wait` と入力する
    - 続けて `/grok-build:review --base main --wait` と入力する
    - 指摘は、重大度・場所・理由・直し方で会話に出る（AGENTS.md の規則）
-
 1. `codex` の worktree の窓で、Codex のブランチを Claude と Grok にレビューさせる。
-
    ```bash
    claude -p --permission-mode plan "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない"
    grok --trust -p "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない" --sandbox read-only --always-approve
    ```
-
    - Codex を `/quit` で終えてから貼る
    - Windows 11 では、2 行目を貼らずに `grok` を起動し、同じ文で頼む
-
 1. `grok` の worktree の窓で、Grok のブランチを Codex と Claude にレビューさせる。
-
    ```bash
    codex review --base main
    claude -p --permission-mode plan "main との差分（git diff main...HEAD）をレビューして。ファイルは変えない"
    ```
-
    - Grok を `/quit` で終えてから貼る
-
 1. 人が指摘を選び、担当のエージェントに直させる。
-
    - 直させる指摘だけを、担当の窓のエージェントに渡す。Claude Code は `claude -c`、Codex は `codex resume --last`、Grok は `grok -c` で、同じ worktree の前の会話に戻れる
    - 直したら、この節の手順でもう一度レビューさせる
 
@@ -2924,12 +2598,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Pull Request を取り込んだときは、この節の手順 2〜6 の代わりに、`main` の窓で `git pull --ff-only` する
 
 1. それぞれの worktree の窓で、プロジェクトのテストを通す。
-
    - エージェントを終えてから、そのプロジェクトのテストのコマンドを打つ
    - 通らないブランチは取り込まない。担当のエージェントに直させる
-
 1. `main` の窓で、取り込む前の状態を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    git status --short --branch
@@ -2937,53 +2608,37 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    git log --oneline --decorate main..agent/codex
    git log --oneline --decorate main..agent/grok
    ```
-
    - 1 行目が `## main`（追跡先があれば `## main...origin/main`）で、その後に何も出ない
    - それぞれのブランチの、`main` に入っていないコミットが出る（一番新しいものに `(agent/…)` が付く）。何も出ないブランチは、取り込むものが無い
-
 1. `main` の窓で、Claude のブランチを取り込む。
-
    ```bash
    git merge --no-ff --no-edit agent/claude
    ```
-
    - `Merge made by the 'ort' strategy.` か `Already up to date.` が出ればよい
    - `CONFLICT` と出たら、この節の手順 6 へ進む
-
 1. `main` の窓で、Codex のブランチを取り込む。
-
    ```bash
    git merge --no-ff --no-edit agent/codex
    ```
-
    - 出るものと分かれ方は、この節の手順 3 と同じ
-
 1. `main` の窓で、Grok のブランチを取り込む。
-
    ```bash
    git merge --no-ff --no-edit agent/grok
    ```
-
    - 出るものと分かれ方は、この節の手順 3 と同じ
-
 1. 競合したときだけ、その取り込みをやめ、担当のエージェントに直させる。
-
    ```bash
    git merge --abort
    printf '\n\033[7m 確認 \033[0m\n'
    git status --short --branch
    ```
-
    - `## main` の後に何も出なければ、取り込む前に戻っている
    - 担当の窓のエージェントに「`git merge main` で main を取り込み、競合を直してテストを通し、コミットして」と頼む
    - 直したら、この節の手順 2 からやり直す（取り込み済みのブランチは `Already up to date.` になる）
-
 1. それぞれの worktree の窓で、新しい `main` にそろえる。
-
    ```bash
    git merge --ff-only main
    ```
-
    - エージェントを終えてから貼る
    - `Fast-forward` か `Already up to date.` が出ればよい。次の分担はここから始める
    - `Not possible to fast-forward` と出たら、その worktree に、`main` に取り込んでいないコミットがある（この節の手順 3〜5 で取り込んでから、もう一度貼る）
@@ -3007,37 +2662,26 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > **Remote Control をつなぐと、この claude.ai のアカウントで入れる人が、スマートフォンやブラウザから、この PC の Claude の worktree で Claude Code を動かせる**（ファイルの読み書きとコマンドの実行）。プラグインを通して Codex と Grok も動く。会話は Anthropic のサーバーに保存される。
 
 1. AlmaLinux 10 のときだけ、Claude の worktree で Remote Control を tmux の中で始める。
-
    - [AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）](#almalinux-10-で-claude-code-を-tmux-の中で動かす任意)の手順 1〜6 を通す
    - その節の手順 2 では、`cd <WT_ROOT>/claude` で Claude の worktree に移る
    - セッションの名前は worktree のディレクトリの名前（`claude`）になる。分かりにくければ、スマートフォンから `/rename <名前>` で変えられる
-
 1. Windows 11 のときだけ、Claude の worktree で Remote Control をタスクで始める。
-
    - [Claude Code の Remote Control（Windows）](#claude-code-の-remote-control-windows-11-で使う)を通す
    - その手順 2 の `$PROJECT_DIR` は `<WT_ROOT>\claude`、`$RC_NAME` はプロジェクトの名前にする
-
 1. スマートフォンの Claude のアプリで、そのセッションを開く。
-
    - **Code** の一覧に、この節の手順 1・2 のセッションが出る
    - 開いてメッセージを送ると、PC の Claude の worktree で Claude Code が動いて返事が来る
-
 1. Claude に頼む。
-
    - 送る文の例は、[使い方の基本](#コーディングエージェントの共同作業-使い方の基本)の「スマートフォンから Claude に送る文の例」
    - レビューは `/codex:review --base main --wait`・`/grok-build:review --base main --wait` を送る
    - Claude Code の確認（ファイルの変更・コマンドの実行）は、スマートフォンに出る。中身を読んでから答える
    - 長くかかる作業は `--background` を付けて頼み、`/codex:status`・`/grok-build:runs` で状況を見る
    - プラグインのコマンドがスマートフォンから動かなければ、「`codex review --base main` を実行して、結果をまとめて」のように、Claude にシェルのコマンドで頼む
-
 1. AlmaLinux 10 のときだけ、Codex と Grok に直接頼むなら、スマートフォンの SSH のアプリから tmux に入る。
-
    - SSH でログインし、`tmux attach -t agents` を打つ（[分担して作業する](#コーディングエージェントの共同作業-分担して作業する)の手順 1 で作ったセッション）
    - `Ctrl+b` → `2`（codex）・`3`（grok）で切り替え、それぞれのエージェントに頼む
    - 終わるときは `Ctrl+b` → `d` で離れる（エージェントは動き続ける）
-
 1. 手元での取り込みと、取り込んだ後の worktree の同期は、PC か SSH のアプリで行う。
-
    - [main に取り込む](#コーディングエージェントの共同作業-main-に取り込む)の手順を、`main` の窓で行う
    - 取り込んだら、Claude の worktree も同じ節の手順 7 で `main` にそろえる（Remote Control のセッションは動かしたままでよい）
    - Pull Request を画面や `gh pr merge --merge` で取り込んだとき（エージェントが取り込んだときも）は、`main` の窓で `git pull --ff-only` してから、同じ節の手順 7 でそろえる
@@ -3344,30 +2988,22 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 #### Codeg: ブラウザで開いてエージェントを選ぶ
 
 1. 別の PC で、SSH のトンネルを開く。
-
    - クライアントの端末で `ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:3080:127.0.0.1:3080 <OSユーザー>@<SERVER_IP>` を実行する
    - `<OSユーザー>` はサーバーで使うエージェントの一般ユーザー、`<SERVER_IP>` は[サーバー起動](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 の IPv4
    - クライアントの 3080 番が使用中なら、`-L` の最初の `3080` を空いている番号（例: `3081`）にし、この項の手順 3 の URL も同じ番号にする
    - トンネルの端末は開いたままにする
-
 1. サーバーで、トークンを表示する。
-
    ```bash
    sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env
    ```
-
    - 64 文字の 16 進が出る。この項の手順 3 でブラウザに貼る
    - **画面を人に見せない。貼り終えたら `clear` で消す**
-
 1. 別の PC のブラウザで開き、トークンを入れる。
-
    - `http://localhost:3080/` を開く
    - 「アクセストークン」に、この項の手順 2 の 64 文字を貼り、「接続」を押す
    - 会話の画面（「今日は何をしましょうか？」）が出ればよい
    - ブラウザは、このトークンを覚える。共用の PC のブラウザでは開かない
-
 1. ブラウザで、作業するフォルダーを開き、使うエージェントの項へ進む。
-
    - 左の「フォルダを開く」を押し、「フォルダーを開く」の入力欄にホストの作業ディレクトリを入れ、「次へ」「完了」と進む
    - 新しい会話では、入力欄の下のフォルダーの選択（はじめは「チャットモード」）で、開いたフォルダーを選ぶ
    - [Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）の項で設定・接続を確かめる
@@ -3375,7 +3011,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 #### Codeg: HTTPS で LAN・VPN に公開する
 
 1. 共通の Caddy に Codeg のサイトを足す。
-
    ```bash
    if [ -z "${SERVER_IP}" ]; then
      echo '中断: 「サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
@@ -3397,20 +3032,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    EOF
    fi
    ```
-
    - エラー無く終わればよい。Codeg の待ち受けは `127.0.0.1:3080` のままにする
-
 1. Codeg の自動起動を有効にし、共通の Caddy の設定を反映する。
-
    ```bash
    systemctl --user enable codeg-server.service
    ```
-
    - [Caddy: 設定を検査して起動し直す](almalinux-setup.md#caddy-設定を検査して起動し直す)を同じ一般ユーザーの bash で通す
    - 初めて有効にすると `Created symlink …` が 1 回出る。エラーや設定の検査失敗が出たら先へ進まない
-
 1. サービスと待ち受け、サーバー自身からの HTTPS を確かめる。
-
    ```bash
    if [ -z "${SERVER_IP}" ]; then
      echo '中断: 「サーバーを入れて localhost で起動する」の手順 1 の変数を設定する' >&2
@@ -3424,12 +3053,9 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      echo "curl の終了コード: $?"
    fi
    ```
-
    - `active` が 2 行、待ち受けが `127.0.0.1:3080` と `<SERVER_IP>:3443` の 2 行、`401`、`curl の終了コード: 60` が出ればよい
    - 既にホスト自身もこの認証局を信頼させている場合、最後は `0` になる
-
 1. 指定した送信元・宛先・ポートで、この手順専用の firewalld の規則を追加する。
-
    ```bash
    {
      printf '\n\033[7m 確認 \033[0m\n'
@@ -3447,35 +3073,25 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      fi
    }
    ```
-
    - 送信元ごとに `success` が 2 回ずつ出た後、runtime と permanent に、送信元ごとの 3443/tcp の規則があればよい
    - 3080 番は開けない。Codeg へは、Caddy を通してだけ届く
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない
    - 追加できた規則を外す場合は[AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)の手順 2 を使う
-
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
-
    - `ALLOW_FROM` に入っている端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<SERVER_IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
    - `ALLOW_FROM` に入っていない端末があれば、同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることも確かめる
    - `http://<SERVER_IP>:3080/` は、どの端末からも開けない
-
 1. スマートフォンと PC に、このサーバーのルート証明書を入れる。
-
    - [Caddy: 端末にルート証明書を入れる](almalinux-setup.md#caddy-端末にルート証明書を入れる)を通す
    - スマートフォンは、先に WireGuard のアプリでトンネルを有効にする（LAN の Wi-Fi にいて、LAN の帯を `ALLOW_FROM` に入れてあれば要らない）
-
 1. サーバーで、トークンを QR コードで表示する。
-
    ```bash
    sed -n 's/^CODEG_TOKEN=//p' ~/.config/codeg-server/token.env | qrencode -t ansiutf8
    ```
-
    - 端末に QR コードが出る。スマートフォンのカメラで読み、出てきた 64 文字をコピーする
    - `qrencode` が無ければ `brew install qrencode` で入れる（[Homebrew](almalinux-setup.md#homebrew)）
    - **画面を人に見せない。読み終えたら `clear` で消す**
-
 1. スマートフォンで、ブラウザで開いてトークンを入れ、指示を送る。
-
    - Chrome で `https://<SERVER_IP>:3443` を開く。警告が出ずに、ログインの画面（「アクセストークン」と「接続」）が出ればよい
    - 警告が出たら進まない。警告か「Connection lost」が出たら、[AlmaLinux 10 の初期設定の「Caddy: 端末にルート証明書を入れる」の手順 5](almalinux-setup.md#caddy-端末にルート証明書を入れる)で確かめる
    - 「アクセストークン」にコピーした 64 文字を貼り、「接続」を押す
@@ -4182,7 +3798,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Android のスマートフォンでは、Codeg を Chrome で開く。Android の Firefox は使わない（[補足](reference/codeg.md#codeg--windows-11-で端末にルート証明書を入れる--手順-25-補足-android-のブラウザと-service-worker)）
 
 1. Windows 11 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
-
    ```powershell
    $c = New-Object Security.Cryptography.X509Certificates.X509Certificate2("$env:APPDATA\Caddy\pki\authorities\local\root.crt")
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -4190,23 +3805,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    $c.NotAfter
    (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
    ```
-
    - `CN=Codeg <PC の名前> - <年> ECC Root`、期限、`:` で区切った指紋が出る。指紋を控える
-
 1. スマートフォン（Android）で、ルート証明書を取り込む。
-
    - Chrome で `https://<ホストの IP>:3443/caddy-root.crt` を開き、警告が出たら「詳細設定」から進む。証明書のファイルがダウンロードされる
    - 警告を進むのは、このファイルを取るときだけにする（Codeg の画面は、警告を進んで開かない）
    - 設定の「セキュリティ」→「暗号化と認証情報」→「証明書のインストール」→「CA 証明書」で、ダウンロードしたファイルを選ぶ（メニューの名前は機種で少し違う）
    - 設定の「信頼できる認証情報」→「ユーザー」で、入れた証明書を開き、SHA-256 の指紋がこの項の手順 1 のものと同じことを確かめる
    - 違っていたら、その証明書を削除する
-
 1. Windows の PC で、ルート証明書を取得して、名前と指紋を表示する。
-
    ```powershell
    $CODEG_URL = ''                       # ホストの URL（例: https://192.168.1.10:3443）。<CODEG_URL>
    ```
-
    ```powershell
    if (-not $CODEG_URL) { Write-Error '中断: $CODEG_URL が空のまま' } else {
      $crt = Join-Path $env:TEMP ('codeg-root-' + ([Uri]$CODEG_URL).Host + '.crt')
@@ -4217,24 +3826,18 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      (([Security.Cryptography.SHA256]::Create().ComputeHash($c.RawData) | ForEach-Object { $_.ToString('X2') }) -join ':')
    }
    ```
-
    - 管理者ではない Windows PowerShell に貼る。Codeg を置いた PC 自身にも、同じ手順で入れる
    - 名前と指紋が、この項の手順 1 でホストに出したものと同じなら、手順 4 へ進む
    - **違っていたら、取り込まない**（途中で差し替えられている）
    - ホストが 2 台あるときは、この項の手順 3・4 を、`$CODEG_URL` を変えて 2 回通す
-
 1. Windows の PC で、指紋が同じだったルート証明書を取り込む。
-
    ```powershell
    Import-Certificate -FilePath $crt -CertStoreLocation Cert:\CurrentUser\Root
    ```
-
    - 「セキュリティ警告」の画面が出たら、拇印を確かめて「はい」を押す
    - 取り込んだ証明書の `Thumbprint` と `Subject` が出ればよい
    - 取り込む先は、このユーザーの「信頼されたルート証明機関」。PC のほかのユーザーには効かない
-
 1. 端末のブラウザを開き直して、警告が出ずに開けることを確かめる。
-
    - `https://<ホストの IP>:3443/api/` を開き、警告が出ずに Codeg の画面に変わればよい（ログインしていなければログインの画面）
    - Codeg の画面（`/` など）では、警告が出ずに「Connection lost」だけが出ることがある。証明書の確認には `/api/` を使う
    - 通常のタブで開く（スマートフォンは Chrome）
@@ -4254,39 +3857,29 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - パスワードはエージェントに渡さず、本人が端末の非表示入力で指定する
 
 1. 本人のホストで、パスワード変更のスクリプトを置く。
-
    ```bash
    install -d -m 755 ~/.local/bin &&
    install -m 755 scripts/codeg/set-codeg-password.py ~/.local/bin/codeg-set-password
    ```
-
    - エラーが無ければ次へ進む
    - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
-
 1. 秘密の本文を読まず、変更に要る前提を確かめる。
-
    ```bash
    ~/.local/bin/codeg-set-password --check
    ```
-
    - 所有者・権限・サービスと待ち受け・未認証 401 の確認が成功すれば次へ進む
    - 確認に失敗したら、認証ファイルを表示せずに止める。原因を直して、この節の手順 2 からやり直す
-
 1. 本人が共通パスワードを入力し、保存と Codeg の起動し直しを行う。
-
    ```bash
    ~/.local/bin/codeg-set-password
    ```
-
    - 空白を含まない表示可能な ASCII 文字で、32〜512 文字のパスワードを 2 回入力する。入力は画面に出ない。値をコマンドの引数やチャットに書かない
    - 新しい値の認証 200・未認証 401・誤った値 401 が、同じ Codeg プロセスで確認され、変更完了の表示が出ればよい
    - 旧設定の控えのファイル名を記録する。控えの本文を表示・共有しない
    - 未変更で終了した場合は、原因を直してこの節の手順 2 からやり直す
    - 変更処理後の失敗や「結果: 不明」では、再実行せずに止める。控えを保持し、[失敗時の対処](extra/codeg.md#almalinux-10-の共通パスワード変更で失敗したとき)で設定とサービスの状態を分けて確かめる
    - **次の手順は、2 回の入力が終わり、変更の成功を確かめてから行う**（続けて貼るとパスワードとして食われる）
-
 1. 本人のブラウザで、共通パスワードを使って HTTPS の Codeg にログインし直す。
-
    - いま使っている HTTPS の Codeg を開き、「アクセストークン」に、この節の手順 3 で決めた共通パスワードを本人が入れる
    - ログイン後の画面が表示されればよい。以前の値を覚えたほかのブラウザ・端末も、新しい値でログインし直す
    - 入れなければ、この節の手順 3 の結果と入力を確かめ、解消するまで先へ進まない
@@ -4304,21 +3897,16 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - この項の手順 3 と、スクリプトが最後に出す HTTPS の案内は、HTTPS の公開を終えた構成のもの
 
 1. このリポジトリのルートで、共通パスワードの変更に要る前提を、読み取りだけで確かめる。
-
    ```powershell
    powershell.exe -NoProfile -File .\scripts\codeg\set-codeg-password.ps1 -CheckOnly
    ```
-
    - 前提の確認が成功し、エラーが無ければ次へ進む
    - スクリプトが無い、起動中の Codeg と配置先・タスク・待ち受けが一致しないなどのエラーなら、変更せずに止める
    - スクリプトが見つからないときは、リポジトリのルートへ移ってから貼り直す
-
 1. 本人が共通パスワードを入力し、保存と Codeg の起動し直しを行う。
-
    ```powershell
    powershell.exe -NoProfile -File .\scripts\codeg\set-codeg-password.ps1
    ```
-
    - 空白を含まない表示可能な ASCII 文字で、32〜512 文字のパスワードを 2 回入力する。入力は伏せられる。値をコマンドの引数やチャットに書かない
    - 変更後の認証で 200、認証無しと誤った値で 401 になり、Codeg の起動が成功したことを、秘密を含まない結果で確かめる
    - 前提確認・入力の不一致・文字条件で未変更のまま終了した場合は、問題を直してこの項の手順 1 からやり直す。以前の結果 JSON を使わず、復元へ進まない
@@ -4326,9 +3914,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 新規構築の途中なら、変更の成功を確かめた後、この項の手順 3 へ進まず、[Windows 11 でサーバーを入れて起動する](#codeg-windows-11-でサーバーを入れて起動する)の手順 10 へ戻る
    - そのときは、スクリプトが最後に出す「いつもの HTTPS URL をブラウザで開き…」の行には従わない
    - **次の手順は、2 回の入力が終わり、変更の成功を確かめてから行う**
-
 1. HTTPS の公開を終えた構成では、ブラウザで、設定した共通パスワードを使ってログインし直す。
-
    - いま使っている HTTPS の Codeg を開き、「アクセストークン」の欄に、この項で設定した共通パスワードを本人が入れる
    - ログイン後の画面が表示されればよい。以前の値を覚えたほかのブラウザ・端末も、新しい共通パスワードでログインし直す
    - 入れなければ、入力とこの項の手順 2 の結果を確かめ、解消するまで先へ進まない
@@ -4368,7 +3954,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - Windows の Grok Build には sandbox が無い。使う権限モードと承認の内容を確かめる
 
 1. ブラウザで、Grok の権限モードをスマート自動承認にする。
-
    - アドレス欄の `/workspace` を `/settings/agents` に変えて開き、「エージェント一覧」の `Grok` を選ぶ
    - 承認を減らして使うこの手順では、「権限モード」で「スマート自動承認」（`auto`）を選び、「Grok 設定を保存」を押す
    - 保存後に「スマート自動承認」が選ばれていればよい。選べない・保存できない場合は、権限モードの設定は未完了として先へ進まない
@@ -4376,15 +3961,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `permission_mode` の行が無い Grok Build（入れたままの状態）は、確認を出すモードで動く
    - 変えた設定は、新しく開いた会話から効く。この項の手順 2・3 で、そのモードで会話を始め、応答を確かめるまでは利用の確認は未完了
    - 終わったら、アドレス欄を `/workspace` に戻す
-
 1. ブラウザで、作業フォルダーの新しい会話で、Grok を選ぶ。
-
    - 左の一覧に出たフォルダの行の「新しい会話」を押す
    - 入力欄の上のエージェントの一覧で `Grok` を選ぶ。入力欄の下が「エージェント接続: 接続済み」になり、モデルの名前が出ればよい
    - **Codeg を起動して最初の会話は、Grok Build の既定と違うモデルで動いた**（検証時は、既定が Grok 4.7 のところ Grok 4.6）。モデルの欄を確かめ、違っていたら「新しい会話」を開き直す
-
 1. ブラウザで、指示を送り、承認の確認に答える。
-
    - 入力欄に指示を書いて Enter で送る
    - 承認の確認は、入力欄の上に出る。ファイルの変更は「Edit `<パス>`」に差分が付き、「Yes, allow all edits during this session」「Yes」「No, and tell Grok what to do differently」から選ぶ
    - Windows 11 では、ファイルの変更の確認の見出しが「Write `<パス>`」になる
@@ -4396,13 +3977,10 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - **中身を読んでから答える**。「Yes, allow all …」「Yes, and don't ask again …」は、以後の確認を省く
    - 「No, and tell Grok what to do differently」を選ぶと、その操作は実行されず、「1 件失敗」と出てターンが止まる
    - 終わると、変えたファイルが「変更されたファイル」にまとまって出る
-
 1. サーバーで、Grok Build のプロセスを確かめる。
-
    ```bash
    pgrep -af 'grok .*agent stdio'
    ```
-
    - `…/.grok/bin/grok --no-auto-update agent stdio` の行が出ればよい。Codeg が、開いている会話ごとに Grok Build を起動する
    - `--permission-mode bypassPermissions` が付いていたら、「常に許可」で動いている
 
@@ -4414,18 +3992,13 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 取り込みの一覧には、このホストのほかのエージェントとプロジェクトのセッションも出る
 
 1. ブラウザで、取り込みの画面を開く。
-
    - アドレス欄の `/workspace` を `/import-sessions` に変えて開く
    - プロジェクトのディレクトリごとに、取り込めるセッションが並ぶ。Codeg で作った会話には「インポート済み」と出る
-
 1. 取り込むセッションを選んで、取り込む。
-
    - 取り込むセッションの行の先頭を押して選び、右下の「選択項目をインポート」を押す
    - 「インポート完了」に、インポートした件数と「失敗 0」が出ればよい
    - 「すべて選択」は、ほかのプロジェクトのセッションもまとめて取り込む
-
 1. 取り込んだ会話を開いて、続きを送る。
-
    - アドレス欄を `/workspace` に戻し、左の一覧から取り込んだ会話を押す
    - 端末での指示と応答が表示される。続きの指示を送ると、前の応答を踏まえて答える
 
@@ -4444,18 +4017,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 画像は、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2 で、Claude Code を選んだときのもの（2026-10-16）。`Opus 5.5` はその契約で選べたモデルで、フォルダー（`codeg-demo`）と会話は試験用。
 
 1. AlmaLinux 10 のホストで、一般ユーザーの bash から Node.js と npm の版を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    node --version
    npm --version
    ```
-
    - Node.js が `v22` 以上で、npm の版も出ればよい
    - 見つからない、または Node.js が古ければ、[「Codex・Grok のプラグイン」の手順 1](#codexgrok-のプラグイン)を通してからやり直す
-
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
-
    - `/settings/agents` を開き、「エージェント一覧」の `Claude Code`・`Codex CLI` から使うものを選び、詳細の右上のスイッチが入っていることを確かめる
    - 「バージョン状態」が `FAIL` で「ローカル: 未インストール」と出たら、右の「インストール」を押す
    - インストール完了まで待ち、「バージョン状態」の「ローカル」が「推奨」と同じ版になればよい。既に同じ版が入っているものは、入れ直さない
@@ -4465,9 +4034,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 入らない・検出されない場合は「診断」を開く。Codeg が使う Node.js と npm の場所・版を確かめ、問題を解消するまで先へ進まない
    - 対応版が検出され、エラーが無ければ、この項の手順 3 以降へ進む
    - ![エージェント一覧と Claude Code のバージョン状態が FAIL。「推奨: 0.90.0 · ローカル: 未インストール」と右の「インストール」](images/ai-agents/codeg-almalinux-agents-install-v0.35.2.png)
-
 1. ブラウザで、各エージェントの認証方法を確かめる。
-
    - `Claude Code`・`Codex CLI` の「認証方式」で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方式を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
    - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す
@@ -4475,9 +4042,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
    - ![Claude Code の設定管理で「認証方式」が「公式サブスクリプション」](images/ai-agents/codeg-almalinux-agents-auth-v0.35.2.png)
-
 1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
-
    - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選び、「次へ」「完了」と進む。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った、その担当の worktree を選ぶ
    - 「新しい会話」を押し、入力欄の下のフォルダーの選択（はじめは「チャットモード」）で作業フォルダーを選ぶ。ブランチ名と「エージェント接続: 接続済み」が出ればよい
    - 入力欄の上の一覧で `Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
@@ -4485,39 +4050,29 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - Claude Code のはじめのモードは `Manual` なので、入力欄の下の左端で `Auto` に変える。Codex ははじめから `Auto review`。`Bypass permissions`・`Full access` は選ばない
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
    - ![codeg-demo の新しい会話。Claude Code・Auto・Opus 5.5 を選び、接続確認の指示を入力した画面](images/ai-agents/codeg-almalinux-send-check-v0.35.2.png)
-
 1. ブラウザで、接続を確かめる指示を送る。
-
    - 「ツールやファイルを使わずに、接続確認ができたと一文で答えて」と入力して送る
    - Claude Code の「接続を確認できました。」、Codex の「接続確認ができました。」のような応答があり、選んだモデルとモードで会話が続けばよい
    - フォルダーを切り替えた直後の最初の送信が「会話を作成できませんでした。もう一度お試しください。」になることがある。そのときは、もう一度送る
    - Claude の「Auto mode unavailable」が出る、またはモードが `Accept edits` に変わる場合は、自動審査の設定は未完了。対応するモデルでやり直す。手動運用を選ぶ場合は、`Manual` に変えて個別に承認する
    - 最初の送信後にエージェントを間違えていたと分かったら、新しい会話を作り直す
    - ![応答「接続を確認できました。」と入力欄の下の Auto・Opus 5.5](images/ai-agents/codeg-almalinux-reply-v0.35.2.png)
-
 1. ブラウザで、作業の指示を送り、必要になった承認に答える。
-
    - 変更するファイル・成功条件を指示して送る。共同作業では担当の worktree とブランチで作業するよう指示する
    - 承認カードが出たら、対象のファイル・差分・コマンドを読み、その操作だけ許可するか拒否するかを選ぶ
    - 自動審査で許可された操作は、カード無しで進む。拒否・失敗が出たら、その理由を確かめて指示を直す
    - 終了後は「変更されたファイル」で差分を確かめる
-
 1. 作業を中断するときは、ブラウザで送信欄の停止ボタンを押す。
-
    - 応答中の会話で停止を押し、応答が止まったことを確かめる
    - 開き直すときは、左の一覧から同じ会話を開く。既に実行した変更は差分で確かめる
    - 開き直したら、送信前にモデルとモードの表示を確かめる。今回使うものと違えば、この項の手順 4・5 を参照して選び直す
-
 1. 履歴を取り込む前に、接続先ホストの元の CLI・アプリで、対象の会話の終了を確かめる。
-
    - 元の CLI・アプリで作成した会話は、Codeg の会話一覧へ自動では追加されない。進行中の会話は終了を確かめてから、この項の手順 9 で取り込む
    - 同じセッションを端末・IDE・ほかの画面で同時に進めない
    - 取り込む対象は、Codeg が動くホストに保存された履歴。つなぐ PC の履歴ではない
    - 本人の終了済みセッションを対象にし、進行中の会話やほかの人の履歴は選ばない
    - 取り込み画面では、進行中の会話も自動で除外されず、終了済みかを示す印も無い。元の CLI・アプリで終了を確認した対象と、一覧のタイトル・パスを照合する
-
 1. ブラウザで、Claude Code・Codex のローカルセッションを取り込む。
-
    - 対象フォルダの右クリックまたは「⋯」から「ローカルセッションをインポート」を開く（`/import-sessions` からも開ける）
    - 一覧は接続先ホストの全エージェント・全プロジェクトを走査する。読み込みが終わるまで待ち、エージェントと作業ディレクトリごとの一覧を確かめる
    - 全プロジェクトを取り込む場合は、タイトル・パスの検索欄を空にして、すべての作業ディレクトリの対象を確かめる
@@ -4534,9 +4089,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 取り込み後に再アーカイブすると、Codeg の表示・再開に影響する場合がある。取り込みの後に無条件では戻さない
    - 「見つからず」か「失敗」が出たら、対象とエラーを確かめ、接続先ホストに元の履歴が残っているか確認する。原因を直して、その対象だけやり直す
    - 履歴の取り込みだけで終える場合は、この項の手順 10 は飛ばす
-
 1. 履歴を再開するときだけ、ブラウザで取り込んだ会話を同じエージェントで再開する。
-
    - `/workspace` で取り込んだ会話を開き、前の指示・応答を確かめる
    - 送信前に、同じエージェントであることと、表示中のモデル・モードを確かめる。Claude は元の会話のモードを引き継ぐ場合がある
    - この項の手順 4・5 を参照し、今回使うモデルとモードを選んでから、続きを送る
@@ -4557,18 +4110,14 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 画像は、Windows 11 の実機の Codeg v0.35.1 で、Claude Code を選んだときのもの（2026-10-14）。`Opus 5.5` はその契約で選べたモデルで、フォルダーと会話は試験用。
 
 1. Windows 11 のホストで、管理者ではない PowerShell 5.1 から Node.js と npm の版を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    node --version
    npm --version
    ```
-
    - Node.js が `v22` 以上で、npm の版も出ればよい
    - 見つからない、または Node.js が古ければ、[「Windows 11 で Codex・Grok のプラグインを入れる」の手順 1](#windows-11-で-codexgrok-のプラグインを入れる)を通し、新しい PowerShell でやり直す
-
 1. ブラウザで、使うエージェントの接続アダプターを入れて有効にする。
-
    - `/settings/agents` を開き、エージェント一覧の `Claude Code`・`Codex CLI` で、使うものを有効にする
    - 「バージョン状態」で対応版を確かめ、「インストール」を押す
    - インストール完了まで待ち、「再チェック」で対応版が検出され、エラーが無いことを確かめる（「バージョン状態」が `PASS` になる）。既に対応版が入っているものは、入れ直さない
@@ -4577,9 +4126,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 入らない・検出されない場合は「診断」を開く。Codeg が使う Node.js と npm の場所・版を確かめ、問題を解消するまで先へ進まない
    - 対応版が検出され、エラーが無ければ、この項の手順 3 以降へ進む
    - ![「インストール」を押す前の、Codeg の設定の「エージェント」。Claude Code のバージョン状態が FAIL で、右に「インストール」がある](images/ai-agents/codeg-agents-install-v0.35.1.png)
-
 1. ブラウザで、各エージェントの認証方法を確かめる。
-
    - `Claude Code`・`Codex CLI` の「認証方式」で「公式サブスクリプション」を選ぶ。既に選ばれていれば、変更・保存し直さない
    - 認証方式を変更した場合だけ、そのエージェントの設定を保存し、新しい会話から使う
    - Claude のログイン切れは、使う OS の Claude Code の項（[AlmaLinux 10](#claude-code)・[Windows 11](#windows-11-で-claude-code-を入れる)）のログイン手順からやり直す
@@ -4587,9 +4134,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - ブラウザの無い AlmaLinux 10 の Codex は、[Codex CLI をブラウザの無いホストでログインする](#codex-cli-をブラウザの無いホストでログインする)からやり直してもよい
    - API キー・API URL・モデルプロバイダーは追加しない。認証できない場合は、ログインの設定は未完了として止める
    - ![Claude Code の設定管理。認証方式が「公式サブスクリプション」](images/ai-agents/codeg-agents-auth-v0.35.1.png)
-
 1. ブラウザで、作業するフォルダを開き、新しい会話のエージェント・モデル・モードを選ぶ。
-
    - `/workspace` に戻り、「フォルダを開く」で接続先ホストの作業ディレクトリを選び、「次へ」「完了」と進む。共同作業では、[共同作業の手順](#コーディングエージェントの共同作業-windows-11-で使う)で作った、その担当の worktree を選ぶ
    - フォルダの「新しい会話」を押し、`Claude Code` または `Codex` を選ぶ。別のエージェントは別の新しい会話で始める
    - 接続済みになったら、使う契約で選べるモデルを選ぶ。送信前に、選んだエージェントとモデルの表示を確かめる
@@ -4597,38 +4142,28 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - モードは、入力欄の下の左端で選ぶ（並びの意味は[参考資料](reference/codeg.md#codeg--almalinux-10-で-claude-code-と-codex-cli-を使う--手順-47-補足-モードと中断)）
    - 接続できなければ、エラーの内容を読み、再接続を試す。ログイン切れはこの項の手順 3、アダプターの問題はこの項の手順 2 へ戻る
    - ![codeg-demo の新しい会話。Claude Code、Auto、Opus 5.5 を選んで指示を入力した画面](images/ai-agents/codeg-send-check-v0.35.1.png)
-
 1. ブラウザで、接続を確かめる指示を送る。
-
    - 「ツールやファイルを使わずに、接続確認ができたと一文で答えて」と入力して送る
    - 選んだエージェントから応答があり、選んだモデルとモードで会話が続けばよい
    - Claude の「Auto mode unavailable」が出る、またはモードが `Accept edits` に変わる場合は、自動審査の設定は未完了。対応するモデルでやり直す。手動運用を選ぶ場合は、`Manual` に変えて個別に承認する
    - 最初の送信後にエージェントを間違えていたと分かったら、新しい会話を作り直す
    - ![応答「接続確認ができました。」と、入力欄の下の Auto・Opus 5.5](images/ai-agents/codeg-reply-v0.35.1.png)
-
 1. ブラウザで、作業の指示を送り、必要になった承認に答える。
-
    - 変更するファイル・成功条件を指示して送る。共同作業では担当の worktree とブランチで作業するよう指示する
    - 承認カードが出たら、対象のファイル・差分・コマンドを読み、その操作だけ許可するか拒否するかを選ぶ
    - 自動審査で許可された操作は、カード無しで進む。拒否・失敗が出たら、その理由を確かめて指示を直す
    - 終了後は「変更されたファイル」で差分を確かめる
-
 1. 作業を中断するときは、ブラウザで送信欄の停止ボタンを押す。
-
    - 応答中の会話で停止を押し、応答が止まったことを確かめる
    - 開き直すときは、左の一覧から同じ会話を開く。既に実行した変更は差分で確かめる
    - 開き直したら、送信前にモデルとモードの表示を確かめる。今回使うものと違えば、この項の手順 4・5 を参照して選び直す
-
 1. 履歴を取り込む前に、接続先ホストの元の CLI・アプリで、対象の会話の終了を確かめる。
-
    - 元の CLI・アプリで作成した会話は、Codeg の会話一覧へ自動では追加されない。進行中の会話は終了を確かめてから、この項の手順 9 で取り込む
    - 同じセッションを端末・IDE・ほかの画面で同時に進めない
    - 取り込む対象は、Codeg が動くホストに保存された履歴。つなぐ PC の履歴ではない
    - 本人の終了済みセッションを対象にし、進行中の会話やほかの人の履歴は選ばない
    - 取り込み画面では、進行中の会話も自動で除外されず、終了済みかを示す印も無い。元の CLI・アプリで終了を確認した対象と、一覧のタイトル・パスを照合する
-
 1. ブラウザで、Claude Code・Codex のローカルセッションを取り込む。
-
    - 対象フォルダの右クリックまたは「⋯」から「ローカルセッションをインポート」を開く（`/import-sessions` からも開ける）
    - 一覧は接続先ホストの全エージェント・全プロジェクトを走査する。読み込みが終わるまで待ち、エージェントと作業ディレクトリごとの一覧を確かめる
    - 全プロジェクトを取り込む場合は、タイトル・パスの検索欄を空にして、すべての作業ディレクトリの対象を確かめる
@@ -4645,9 +4180,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 取り込み後に再アーカイブすると、Codeg の表示・再開に影響する場合がある。取り込みの後に無条件では戻さない
    - 「見つからず」か「失敗」が出たら、対象とエラーを確かめ、接続先ホストに元の履歴が残っているか確認する。原因を直して、その対象だけやり直す
    - 履歴の取り込みだけで終える場合は、この項の手順 10 は飛ばす
-
 1. 履歴を再開するときだけ、ブラウザで取り込んだ会話を同じエージェントで再開する。
-
    - `/workspace` で取り込んだ会話を開き、前の指示・応答を確かめる
    - 送信前に、同じエージェントであることと、表示中のモデル・モードを確かめる。Claude は元の会話のモードを引き継ぐ場合がある
    - この項の手順 4・5 を参照し、今回使うモデルとモードを選んでから、続きを送る
@@ -4667,13 +4200,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - それ以外の Linux（x86_64 など）での手順は確かめていない
 
 1. ホストで、カーネルの仮想アドレスの幅を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    uname -m
    grep -E '^CONFIG_ARM64_VA_BITS(_39|_48|_52)?=' /boot/config-"$(uname -r)"
    ```
-
    - `CONFIG_ARM64_VA_BITS_39=y` のホストで、設定の「エージェント」の `Google Antigravity` の推奨版が `1.4.0` なら、この項を進めない
    - この条件で `Google Antigravity` を入れていたら、「アンインストール」を押し、確認の窓で「アンインストールを確認」を押す
    - 推奨版が `1.4.0` 以外になったときの動作は確かめていない
@@ -4695,63 +4226,46 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > - 質問・調べものに使い、規則に従わせる作業は、[Windows 11 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-windows-11-で-antigravity-に読み取り専用で頼む)で CLI に頼む。この項の手順 8 で、ファイルを書く承認カードには `Deny` で答える
 
 1. ブラウザで、Antigravity の ACP サーバーを入れる。
-
    - `/settings/agents` を開き、エージェント一覧の `Google Antigravity` を選ぶ
    - 「バージョン状態」で推奨版を確かめ、「インストール」を押す
    - 「再チェック」で `PASS` になり、推奨版とローカルの版が同じならよい
    - 「未レビューの最新版 … にアップグレード」は押さない。押してしまったら、「カスタムインストール」で「バージョン状態」の推奨版を入れ直す
    - 「ファイルとコマンドをエージェント自身に処理させる」はオフのままにする
-
 1. ブラウザで、認証の方法を保存する。
-
    - 同じ画面の「設定管理」の `Authentication method` で `Sign in with Google` を選び、`Save` を押す
    - API キーや Google Cloud の方法は選ばない
-
 1. Codeg で Antigravity の会話を閉じ、ACP サーバーが動いていないことを確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-Process agy_acp_server -ErrorAction SilentlyContinue
    Test-Path "$env:USERPROFILE\.gemini\antigravity-acp\settings.json"
    ```
-
    - プロセスの表が出ずに、`True` だけが出ればよい
    - `agy_acp_server` の表が出たら、Codeg で Antigravity の会話のタブをすべて閉じ、表が出なくなってからこのブロックを貼り直す
    - `False` なら、この項の手順 2 をやり直す
-
 1. ブラウザで、サインインのリンクを取得して承認する。
-
    - 設定の `Google Antigravity` の「ブラウザのないマシンでサインイン」で、「サインインリンクを取得」を押す（リンクが出るまで 30〜60 秒かかる）
    - 出たリンクを、この PC の普段のブラウザで開き、個人の Google アカウントを選んで、許可する内容を確かめてから承認する
    - 承認の後、ブラウザが `http://127.0.0.1:<PORT>/` へ移る。Codeg を入れた PC のブラウザなら、Codeg がそれを受け取ってサインインが済む
    - 別の端末のブラウザで承認したときは、アドレスバーのアドレス全体を、Codeg の `http://127.0.0.1:<PORT>/?state=...&code=...` の欄に貼り、「サインインを完了」を押す（この経路は確かめていない）
    - リンクを取得してから 5 分以内に済ませる。「サインアウト」は押さない（保存したサインインが消える）
    - **次の手順は、承認を済ませてから貼る**
-
 1. サインインが保存されたことを確かめる。
-
    ```powershell
    Test-Path "$env:USERPROFILE\.gemini\antigravity-acp\acp_token.json"
    ```
-
    - `True` が出ればよい。Codeg に `Antigravity is no longer listening for this sign-in` と出ていても、`True` ならサインインは済んでいる
    - `False` なら、この項の手順 3 からやり直す
-
 1. ブラウザで、作業フォルダーの新しい会話を作り、`Google Antigravity` を選ぶ。
-
    - `/workspace` でフォルダを開き、そのフォルダの「新しい会話」を押す。共同作業では、[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)で作った `antigravity` の worktree を選ぶ
    - エージェントの並びから `Google Antigravity` を選ぶ（幅の狭い画面では、並びの右端の「…」の中にある）
    - 接続に 30〜60 秒かかる。「接続ハンドシェイクがタイムアウトしました（60 秒以内に応答なし）」と出たら、入力欄を押して接続し直す
    - 入力欄の下に、モデル（`Gemini 3.8 Flash (High)` など）と Session Mode の `Default` が出ればよい。`Auto Edit`・`YOLO` は選ばない
    - Google のサインインがブラウザで開いたら、サインインが保存されていない。タブを閉じ、この項の手順 3 からやり直す
-
 1. ブラウザで、接続を確かめる指示を送る。
-
    - 「ツールやファイルを使わずに、接続確認ができたと一文で答えてください。」と入力して送る
    - Antigravity から一文の応答があればよい
-
 1. ブラウザで、読み取りの作業を頼み、承認カードに答える。
-
    - 調べもの・質問・レビューなど、ファイルを変えない作業を頼む
    - ファイルを書く承認カード（`Run client_create_file?` など）が出たら、作業フォルダーの中でも `Deny` を押す。書き先が `C:/Users/<WIN_USER>/.gemini/antigravity-cli/skills/…` などを指すこともある
    - `Deny` を押すと、`denied by pre-tool hook: Denied by user` と返り、ファイルは作られない
@@ -4768,22 +4282,17 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
   - 「PowerShell のコマンドと `"` を使わない。コミットメッセージはファイルに書いて `git commit -F` で渡す。この注意は委譲先への依頼文には書かない」
 
 1. ブラウザの設定で、エージェントへの委譲を有効にする。
-
    - 設定の `Collaboration`（コラボレーション）を開き、`Multi-Agent Collaboration` の委譲を有効にする
    - 最大の委譲深度を `1` にし、そのパネルの保存ボタンを押す
    - 保存後も有効と深度 `1` が表示されればよい。保存できなければ先へ進まない
    - 設定は GUI から保存する。認証値を含む DB を直接編集しない
-
 1. ブラウザの設定で、委譲先のエージェントの既定のモードを決める。
-
    - 設定の `Collaboration`（コラボレーション）の「サブエージェント設定」を開き、エージェントのタブを選ぶ
    - Claude Code の `Mode` を `Auto`、Codex の `Mode` を `Auto review` にし、タブごとにそのパネルの保存ボタンを押す
    - Google Antigravity の `Session Mode` は `Default` のままにする
    - `Bypass permissions`・`Full access`・`YOLO` は選ばない
    - 読み込み直しても選んだ値が表示されればよい。表示されなければ先へ進まない
-
 1. ブラウザで新しい会話を開き、別のエージェントへの短い委譲を確かめる。
-
    - `/workspace` で担当の worktree を開き、新しい会話を作る
    - 「Codex に、ツールやファイルを使わずに接続確認の一文を答える作業を委譲して」のように、使う相手を明示して頼む（Antigravity は「Google Antigravity に、…」）
    - 親のエージェントの承認カード（`delegate_to_agent`・`get_delegation_status`）が出たら、委譲先と頼む内容を読んでから許可する
@@ -4791,9 +4300,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 委譲先から結果が返ればよい。有効化しただけでは、すべての組合せの接続が確認できたとは扱わない
    - 委譲先は親と同じ作業ディレクトリで動く。編集を頼む場合は、担当の worktree であることを確かめる
    - 委譲のツールが見つからなければ、設定の保存・使うエージェントの有効化を確かめ、新しい会話でやり直す
-
 1. 共同作業の指示に、担当の worktree・ブランチ・変更する範囲を明示する。
-
    - 初めは読み取り専用のレビューを頼む。編集を頼むときは、担当の worktree を開いた会話から始める
    - 同じ作業ディレクトリを複数のエージェントが同時に編集しない
    - 結果の差分とテストを確かめ、各担当のブランチから Pull Request を作る。Pull Request はエージェントが取り込んでよい（merge commit にする）。手元での取り込みとブランチの削除は人が行う
@@ -4809,27 +4316,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Codeg で直接選ぶ Grok と、Claude Code のプラグインから呼ぶ Grok は別の経路。適用する経路と読み取りの範囲は[参考資料](reference/codeg.md#codeg--almalinux-10-で-claude-code-のプラグインから-grok-に読み取り専用で頼む--手順-15-補足-外側の-sandbox)で確かめる
 
 1. 本人のホストで、2 つの起動用スクリプトを置く。
-
    ```bash
    install -d -m 755 ~/.local/bin &&
    install -m 755 scripts/codeg/codeg-grok-readonly.py ~/.local/bin/codeg-grok-readonly &&
    install -m 755 scripts/codeg/claude-agents.sh ~/.local/bin/claude-agents
    ```
-
    - エラーが無ければ次へ進む
    - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
-
 1. 外側の sandbox が起動し、書き込みの制限が効くことを確かめる。
-
    ```bash
    ~/.local/bin/codeg-grok-readonly --self-test
    ```
-
    - `filesystem_read_only` と `session_storage_writable` がともに `true` なら次へ進む
    - user namespace・bubblewrap・保存先のエラーなら止める。sandbox を外して続けない
-
 1. Codeg のユーザーサービスに、プラグインが使う Grok の起動先を設定する。
-
    ```bash
    if [ -e ~/.config/systemd/user/codeg-server.service.d/20-agent-connections.conf ]; then
      echo '中断: 20-agent-connections.conf が既にある。既存の設定を上書きせず確認する' >&2
@@ -4848,26 +4348,20 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      systemctl --user --machine="$(id -un)@.host" is-active codeg-server.service
    fi
    ```
-
    - `active` が出ればよい
    - `中断:` が出たら、既存のドロップインと導入済みスクリプトを確認する。認証ファイルやサービスの環境全体は表示しない
    - 起動できなければ先へ進まない。`StandardError=null` は外さない
    - ブラウザだけで使う場合は、この節の手順 4 を飛ばす
-
 1. 端末の Claude Code でも使うときは、担当の worktree で専用の起動先から始める。
-
    ```bash
    ~/.local/bin/claude-agents
    ```
-
    - [共同作業の手順](#コーディングエージェントの共同作業-almalinux-10-で使う)で作った Claude の worktree で起動する
    - `/grok-build:check` でプラグインの準備を確かめ、`/grok-build:review --base main --wait` など、読み取り専用の依頼で応答を確かめる
    - 書き込みの依頼や `--write` は拒否されたら続けない
    - `/exit` で終える
    - **次の手順は、Claude Code を終えてシェルのプロンプトに戻ってから行う**
-
 1. ブラウザで新しい Claude Code の会話を開き、Grok への読み取り専用の依頼を確かめる。
-
    - 担当の worktree で新しい `Claude Code` の会話を開く。サービスの再起動前の接続は使わない
    - 「Grok のプラグインを使って、この worktree の変更をレビューして。ファイルは変更しない」と頼む
    - Grok のレビュー結果が返ればよい。接続や sandbox のエラーなら、未完了として止める
@@ -5017,7 +4511,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Codeg を止めてある間は、自動更新は何もしない。止める前に、自動更新が動いていないことを確かめる
 
 1. Caddy と Codeg を止める。
-
    ```powershell
    & {
      if ((Get-ScheduledTask -TaskName 'codeg-auto-update' -ErrorAction SilentlyContinue).State -eq 'Running') { Write-Error '中断: 自動更新が動いている。終わるまで止めない'; return }
@@ -5034,14 +4527,11 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort
    }
    ```
-
    - 自動更新が `Running` なら、終わってからこの手順をやり直す
    - プロセスと待ち受けの表は出ず、`Ready` が 2 行出ればよい（公開の項を通していなければ 1 行）
    - 止めるのは、この手順で置いた Codeg と、その子プロセスだけ。端末や、ほかの ACP クライアントで動かしているエージェントは止めない
    - 実行中の会話は中断される。会話の履歴は残る
-
 1. もう一度始めるときは、タスクを開始する。
-
    ```powershell
    if (Get-Process -Name codeg-server -ErrorAction SilentlyContinue) {
      Write-Error 'Codeg はもう動いている'
@@ -5055,7 +4545,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
      Get-NetTCPConnection -State Listen -LocalPort 3080, 3443 -ErrorAction SilentlyContinue | Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize
    }
    ```
-
    - HTTPS で公開しているときは、`Running` が 2 行と、`127.0.0.1` の 3080 と `::` の 3443 の待ち受けが出ればよい
    - localhost でだけ使っているときは、`Running` が 1 行と、`127.0.0.1:3080` の待ち受けだけでよい
 
@@ -5085,7 +4574,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > 自動の確認で見つからない不具合に気付いたら、[AlmaLinux 10 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#almalinux-10-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
 1. 自動更新の結果と、次に動く時刻を確かめる。
-
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user list-timers codeg-auto-update.timer --no-pager
@@ -5095,35 +4583,27 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    if [ -e ~/.local/state/codeg-auto-update/in-progress ]; then echo '中断: in-progress が残っている。extra の復旧手順を使う'; fi
    ~/.local/opt/codeg-server/codeg-server --version
    ```
-
    - `list-timers` の `NEXT` に、次の 4:30〜5:00 の時刻が出る
    - `Result=success` なら、最後の実行は終了コード `0` で終わった。`exit-code` なら、`ExecMainStatus` とログの最後の行を見る
    - 保留の版が出たら、その版は自動では入らない。試し直すときは、この節の手順 4 を行う
    - `in-progress` の中断が出たら、この節のリードの終了コード `3` の復旧手順を使う
    - 最後の版が、ログの `最新版 <版> を使用中` か `更新: <旧版> → <新版>` の版と同じならよい
-
 1. 次の自動更新を待たないときだけ、今すぐ最新版へ更新する。
-
    ```bash
    systemctl --user start codeg-auto-update.service
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
    tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
    ```
-
    - プログラムが終わるまで戻らない。新しい版があれば、動いている会話は切れる
    - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
    - `ExecMainStatus` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
-
 1. 更新したときは、ブラウザで会話の一覧と応答を確かめる。
-
    - 使っている Codeg の URL を開き直し、会話の一覧と既存の会話の履歴が残っていることを確かめる
    - 新しい会話で Grok などの使うエージェントへ短い指示を送り、応答が返ることを確かめる
    - 右下の「新バージョン」が残るときは、この節の手順 1 の版とログを確かめる
    - 問題があれば、この節のリードの WARNING のとおりに戻して保留する
-
 1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。
-
    ```bash
    rm -f ~/.local/state/codeg-auto-update/skip-version
    systemctl --user start codeg-auto-update.service
@@ -5131,7 +4611,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    systemctl --user show -p Result -p ExecMainStatus codeg-auto-update.service
    tail -n 20 ~/.local/state/codeg-auto-update/codeg-auto-update.log
    ```
-
    - 失敗の原因を直してから行う。また失敗すると、前の版に戻して同じ版を保留する
    - `in-progress` が残っているときは、保留を解く前に、この節のリードの終了コード `3` の復旧手順を使う
    - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
@@ -5162,7 +4641,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 > 自動の確認で見つからない不具合に気付いたら、[Windows 11 で自動更新の控えから前の版と DB に戻す](extra/codeg.md#windows-11-で自動更新の控えから前の版と-db-に戻す)で戻し、新しい版を保留する。戻すと、更新後の会話は失われる。
 
 1. 自動更新の結果と、次に動く時刻を確かめる。
-
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ScheduledTask -TaskName 'codeg-auto-update' | Select-Object TaskName, State | Format-Table -AutoSize
@@ -5172,15 +4650,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    Test-Path -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\in-progress"
    & "$env:LOCALAPPDATA\codeg-server\codeg-server.exe" --version
    ```
-
    - `Ready` で、`NextRunTime` に次の 4:30 が出ればよい。`Running` なら、終わってから貼り直す
    - `LastTaskResult` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
    - 保留の版が出たら、その版は自動では入らない。試し直すときは、この節の手順 4 を行う
    - `Test-Path` は `False` ならよい。`True` なら、この節のリードの終了コード `3` の復旧手順を使う
    - 最後の版が、ログの `最新版 <版> を使用中` か `更新: <旧版> → <新版>` の版と同じならよい
-
 1. 次の自動更新を待たないときだけ、今すぐ最新版へ更新する。
-
    ```powershell
    Start-ScheduledTask -TaskName 'codeg-auto-update'
    Start-Sleep -Seconds 2
@@ -5191,20 +4666,15 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
    Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
    ```
-
    - タスクが `Ready` に戻るまで待つ。新しい版があれば、動いている会話は切れる
    - `LastTaskResult` が `0` 以外なら、この節のリードの終了コードとログの最後の行を見る
    - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
-
 1. 更新したときは、ブラウザで会話の一覧と応答を確かめる。
-
    - 使っている Codeg の URL を開き直し、会話の一覧と既存の会話の履歴が残っていることを確かめる
    - 新しい会話で Grok などの使うエージェントへ短い指示を送り、応答が返ることを確かめる
    - 右下の「新バージョン」が残るときは、この節の手順 1 の版とログを確かめる
    - 問題があれば、この節のリードの WARNING のとおりに戻して保留する
-
 1. 保留した版を試し直すときだけ、保留を解いて自動更新を動かす。
-
    ```powershell
    Remove-Item -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\skip-version" -Force -ErrorAction SilentlyContinue
    Start-ScheduledTask -TaskName 'codeg-auto-update'
@@ -5216,7 +4686,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    Get-ScheduledTaskInfo -TaskName 'codeg-auto-update' | Select-Object LastTaskResult, NextRunTime | Format-Table -AutoSize
    Get-Content -LiteralPath "$env:LOCALAPPDATA\codeg-auto-update\codeg-auto-update.log" -Encoding UTF8 -Tail 20
    ```
-
    - 失敗の原因を直してから行う。また失敗すると、前の版に戻して同じ版を保留する
    - `in-progress` が残っているときは、保留を解く前に、この節のリードの終了コード `3` の復旧手順を使う
    - `更新: <旧版> → <新版>` が出たら、この節の手順 3 を行う
