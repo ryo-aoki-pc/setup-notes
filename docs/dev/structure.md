@@ -85,7 +85,7 @@
   - 検証記録・参考資料・extra は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う
 - `docs/dropbox.md` — Dropbox の手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に「Dropbox」「Dropbox と rclone」の用途の項を置く
   - 検証記録・参考資料・extra は、用途ごとに `dropbox`・`dropbox-rclone` を使う
-- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は各リポジトリに置く
+- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/<リポジトリ名>/` に置く
 - `docs/reference/`・`docs/extra/` はこのリポジトリ、`docs/verification/` は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - [共同 VM 検証の横断報告](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/hypervisor-verification.md) — AS1〜AS4、CL・R・N・FX、C20-FOLLOWUP と正式 B/C の観測値を保持する。R8・V2 は部分確認、Windows導入・後続は未完。新AS-FULLは153手順を134確認/5条件外/4成功条件未達/10未実施で判定し、再起動後GNOME/NeovimのIMEを確認。認証省略と一部順序逸脱を保持する。OFFLINE-FULLの既存継続と、初回試行の旧2/61・5/61、2026-10-13の42通過/4条件外/3部分確認/1失敗/11未実施を分ける。W0派生媒体はセットアップ分岐まで、V2はSDKとGUID/LUN/祖先mappingの追加確認のみ。ホスト作業の重複により性能比較は未完。現在の操作リンクは正本の該当用途へ向け、検証時の版と手順番号は記録で確認する
