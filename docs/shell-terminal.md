@@ -1002,7 +1002,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: 接続元の WezTerm のタブ（Linux では GUI セッションから起動した WezTerm）。この項の手順 4・9 は接続先の Git Bash、手順 5〜8 は接続先の PowerShell
 - 通常の PowerShell プロファイルには追記しない
 - 管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)を使う
-- **この項の手順 3 の `surface` は検証環境の SSH 接続名。貼る前に、自分の設定済み接続名へ置き換える**
 
 [参照情報](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/verification/install.md)
 
@@ -1028,13 +1027,19 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 無ければ接続元の dnf で `wl-clipboard`（Wayland）か `xclip`（X11）を導入し、この項の手順 2 をやり直す。GUI セッションが無い場合も先へ進まない
    - Windows 接続元ではこの手順を飛ばす。標準の Windows PowerShell を `-NoProfile` で使う
 
-1. 接続元の WezTerm の新しいペインで Windows に接続する。
+1. 接続元の WezTerm の新しいペインで Windows に接続する（`SSH_HOST` は必ず値を入れる）。
 
    ```bash
-   ssh surface
+   SSH_HOST=''
    ```
 
-   - `surface` はこの環境の SSH エイリアス。別の接続先では自分のホスト名を使う
+   ```bash
+   if [ -z "${SSH_HOST}" ]; then echo '中断: SSH_HOST が空のまま。値を入れて貼り直す' >&2; else
+     ssh "${SSH_HOST}"
+   fi
+   ```
+
+   - `SSH_HOST` は Windows 接続先の SSH の接続名か、ホスト名を入れる
    - Windows OpenSSH の既定シェルは Git Bash とする
    - **次の手順は、接続先の Git Bash のプロンプトが出てから貼る**
 
