@@ -4664,7 +4664,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
 - 書き換えるのは最初に指定する取り込み先。`.bak` は作らない。取り込み先を Excel などで開いていたら、始める前に閉じておく
 - 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` で、シートの構成が同じブック。対応条件と制限は excel-diff の[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
-- この項の手順 5 の画像は、この PC の実機の WinMerge 2.16.58.2（2026-10-18）で撮った。ブック（`見積.xlsx`・`見積-更新.xlsx`）と値は試験用
+- この項の手順 5 の画像は、Windows 11 の実機の WinMerge 2.16.58.2 で撮った。ブック（`見積.xlsx`・`見積-更新.xlsx`）と値は試験用
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
