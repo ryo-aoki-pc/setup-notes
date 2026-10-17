@@ -1,7 +1,7 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
-- 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal と PowerShell 7 のプロファイルも整える
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う。Windows Terminal・PowerShell 7 と 5.1 のプロファイル・任意の項の設定は、この文書のそれぞれの項の「元に戻すときは」で戻す
+- 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal・PowerShell 7 のプロファイル・PowerShell の開発の設定も整える
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う。Windows Terminal・PowerShell 7 と 5.1 のプロファイル・PowerShell の開発の設定・任意の項の設定は、この文書のそれぞれの項の「元に戻すときは」で戻す
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -18,7 +18,8 @@
   - 共通の bash 設定は、[共通の bash 設定を更新する](#共通の-bash-設定を更新する)・[Windows 11 で共通の bash 設定を更新する](#windows-11-で共通の-bash-設定を更新する)で上げる。AlmaLinux 10 で Homebrew・Flatpak とまとめて上げるなら、[AlmaLinux 10 のセットアップの「共通の bash 設定・Homebrew・Flatpak を上げる」](almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)
   - AlmaLinux 10 のシェルのツールと HackGen Console NF は、同じ「共通の bash 設定・Homebrew・Flatpak を上げる」の手順 3（Homebrew）で上がる。Windows 11 のシェルのツールは[Windows 11 のセットアップの「scoop・winget・WSL を上げる」](windows-setup.md#scoopwingetwsl-を上げる)、HackGen Console NF は[HackGen Console NF を上げる](#hackgen-console-nf-を上げる)で上げる
   - WezTerm は、AlmaLinux 10 は OS の更新（[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)）で上がる。Windows 11 は[Windows 11 のセットアップの「Git for Windows・Firefox・WezTerm を上げる」](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で上げる。自分用の WezTerm の設定は、[WezTerm の設定を更新する](#wezterm-の設定を更新する)・[Windows 11 で WezTerm の設定を更新する](#windows-11-で-wezterm-の設定を更新する)で上げる
-- Windows 11 の PowerShell 7 のプロファイルの行には印 `# windows-setup.md` を使い、Windows Terminal の設定の控えには `settings.json.windows-setup.bak` を使う
+  - PowerShell の開発用モジュールと補完の控えは、[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)で上げる。scoop で道具を上げた後は、補完の控えも作り直す
+- Windows 11 のプロファイルは、PowerShell 7 の基本の設定に印 `# windows-setup.md`、7 と 5.1 のキー操作に `# shell-terminal.md`、開発の設定に `# shell-terminal.md:dev` を使う。Windows Terminal の設定の控えは `settings.json.windows-setup.bak`
 
 ## AlmaLinux 10 で使う
 
@@ -1122,7 +1123,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 ## Windows 11 で使う
 
-- HackGen Console NF・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル
+- HackGen Console NF・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定
 
 ### Windows 11 で HackGen Console NF を入れる
 
@@ -2184,12 +2185,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
    - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
-   - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）
+   - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）。[開発の設定](#powershell-7-のプロファイルに開発の設定を足す)を通してあれば一覧で出る
    - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
    - Ctrl+Alt+? で、キーの割り当ての一覧が出る
    - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
 
-1. 元に戻すときは、PowerShell 7 のプロファイルから、この項と Emacs モードの項の印の行を消す。
+1. 元に戻すときは、PowerShell 7 のプロファイルから、この項・Emacs モード・開発の設定の項の印の行を消す。
 
    ```powershell
    & {
@@ -2198,7 +2199,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $bytes = [System.IO.File]::ReadAllBytes($p)
      $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
      $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # (windows-setup|shell-terminal)\.md\r?(\n|$)', '$1')
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # (windows-setup\.md|shell-terminal\.md(?::dev)?)\r?(\n|$)', '$1')
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
    }
@@ -2328,7 +2329,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - 印の無い行と `# windows-setup.md` の行は残る。モードを変える印の無い行があれば、その設定も残る
+   - 印の無い行・`# windows-setup.md`・開発の設定の `# shell-terminal.md:dev` の行は残る。モードを変える印の無い行があれば、その設定も残る
    - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
    - [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 7 は、この項の行も含めて消す
 
@@ -2454,8 +2455,598 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - 印の無い行と `# windows-setup.md` の行は残る。モードを変える印の無い行があれば、その設定も残る
+   - 印の無い行・`# windows-setup.md`・開発の設定の `# shell-terminal.md:dev` の行は残る。モードを変える印の無い行があれば、その設定も残る
    - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
    - [アプリと貼り付けの設定を外す](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 は、この項の行も含めて消す
+
+---
+
+
+### PowerShell を開発に使う
+
+- PowerShell 7 と Windows PowerShell 5.1 に開発用の検査・テストのモジュールを入れ、7 のテレメトリと更新の通知を止める
+- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6（PowerShell 7）を通してある。外部コマンドは[シェルのツールを入れる](#シェルのツールを入れる)（fzf・eza・bat・starship）・[git-delta](windows-setup.md#git-delta)・[GitHub CLI](windows-setup.md#github-cli)で入れる
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。7 の操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。確認は新しい 7 と 5.1 の窓
+- 無い外部コマンドの補完と関数は飛ばす。rg・fd は、[Windows 11 で LazyVim の設定を導入する](neovim.md#windows-11-で-lazyvim-の設定を導入する)で入れてあれば対象にする
+- エディターは [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で設定する
+- [モジュールの補足](reference/shell-terminal.md#powershell-を開発に使う--手順-3-補足-モジュールの導入元)・[選択した方針](reference/shell-terminal.md#powershell-を開発に使う)・[注意点](extra/shell-terminal.md#注意点)
+- プロファイルは子の項で設定する。元に戻すときは、子の項の行を消してから、この項の手順 10・11（行ったものだけ）を通す
+- この項の手順 10 は、値が `1`・`Off` の変数を消す。この項の手順 2 の前から同じ値だった変数も消えるので、残すときは手順 10 を行わない
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 版・モジュール・環境変数と、補完の控えの有無を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   $PSVersionTable.PSVersion
+   Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object Source | Format-Table -AutoSize
+   Get-Command winget,git,fzf,eza,gh,rg,fd,delta,bat,starship -CommandType Application -ErrorAction SilentlyContinue | Select-Object Name,Source | Format-Table -AutoSize
+   Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,PSReadLine | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
+   pwsh.exe -NoLogo -NoProfile -Command {
+     $PSVersionTable.PSVersion
+     Get-Command Install-PSResource,Save-PSResource,Get-PSResource | Select-Object Name,Source | Out-String -Width 120
+     Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf | Select-Object Name,Version,ModuleBase | Out-String -Width 160
+   }
+   foreach ($n in 'POWERSHELL_TELEMETRY_OPTOUT','POWERSHELL_UPDATECHECK') { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
+   Get-ChildItem -Path "$env:LOCALAPPDATA\PowerShell\completions\*.ps1" -ErrorAction SilentlyContinue | Select-Object Name,Length,FullName | Format-Table -AutoSize
+   ```
+
+   - 5.1 と 7 の版、`pwsh.exe` の場所、PSResourceGet の 3 つのコマンドが出ればよい。`pwsh.exe` が無いときは、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を確かめる
+   - モジュールの名前・版・`ModuleBase` と、2 つの環境変数の値を控える。元からあった版は、元に戻すときも消さない
+   - 補完の控えがあれば、名前と大きさが出る。[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 2 は、同じ名前の控えを作り直す（上書きする）
+   - モジュールや控えが無いときは、その一覧には何も出ない
+
+1. PowerShell 7 に、検査・テスト・予測・fzf のモジュールを入れる。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     Install-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Repository PSGallery -Scope CurrentUser -TrustRepository -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Scope CurrentUser | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - 4 つの名前と版・保存先が出ればよい。`already installed` の警告だけなら、その版を使う
+   - この項の手順 2 に無かった版と保存先を控える。元に戻すときは、この項で追加した版だけを消す
+   - エラーが出たら、この項の手順 4 へ進まない
+
+1. PowerShell 7 から、5.1 用の検査・テストのモジュールを保存する。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     Save-PSResource -Name PSScriptAnalyzer,Pester -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-PSResource -Name PSScriptAnalyzer,Pester -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - 2 つの名前と版・保存先が出ればよい。この項の手順 2 に無かった版と保存先を控える
+   - エラーが出たら、この項の手順 5 へ進まない
+
+1. ユーザーの環境変数で、PowerShell 7 のテレメトリと更新の通知を止める。
+
+   ```powershell
+   & {
+     $wanted = @{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
+     $other = @(foreach ($n in $wanted.Keys) {
+       $v = [Environment]::GetEnvironmentVariable($n,'User')
+       if ($v -and $v -cne $wanted[$n]) { $n }
+     })
+     if ($other.Count) { Write-Error "中断: 別の値がある: $($other -join ', ')。何も変えていない"; return }
+     foreach ($n in $wanted.Keys) { [Environment]::SetEnvironmentVariable($n,$wanted[$n],'User') }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($n in $wanted.Keys) { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
+   }
+   ```
+
+   - `POWERSHELL_TELEMETRY_OPTOUT = 1` と `POWERSHELL_UPDATECHECK = Off` が出ればよい
+   - `中断:` が出たら、既存の値を使うならこの手順は行わない
+   - この項の手順 2 で空だった変数だけを、この項で追加したものとして控える
+
+1. スタートメニューから、新しい PowerShell 7 を開く。
+
+   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
+
+1. 新しい PowerShell 7 で、モジュールと環境変数を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Import-Module PSScriptAnalyzer,Pester -PassThru | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
+   Get-Command Invoke-ScriptAnalyzer,Invoke-Pester | Select-Object Name,Source | Format-Table -AutoSize
+   Invoke-ScriptAnalyzer -ScriptDefinition 'gci; $x = 1' | Select-Object RuleName | Format-Table -AutoSize
+   "POWERSHELL_TELEMETRY_OPTOUT = $env:POWERSHELL_TELEMETRY_OPTOUT"
+   "POWERSHELL_UPDATECHECK = $env:POWERSHELL_UPDATECHECK"
+   ```
+
+   - 保存した版と 2 つのコマンド、`PSAvoidUsingCmdletAliases`・`PSUseDeclaredVarsMoreThanAssignments` が出ればよい
+   - 環境変数は `1`・`Off` ならよい。空なら、Windows Terminal など端末アプリの窓をすべて閉じて開き直し、この項の手順 6・7 をやり直す
+   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから行う**
+
+1. スタートメニューから、新しい Windows PowerShell（5.1）を開く。
+
+   - 「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - **次の手順は、新しく開いた Windows PowerShell（5.1）の窓に貼る**
+
+1. 新しい Windows PowerShell（5.1）で、保存したモジュールを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Import-Module PSScriptAnalyzer,Pester -PassThru | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
+   Get-Command Invoke-ScriptAnalyzer,Invoke-Pester | Select-Object Name,Source | Format-Table -AutoSize
+   Invoke-ScriptAnalyzer -ScriptDefinition 'gci; $x = 1' | Select-Object RuleName | Format-Table -AutoSize
+   ```
+
+   - この項の手順 4 で保存した版と 2 つのコマンド、`PSAvoidUsingCmdletAliases`・`PSUseDeclaredVarsMoreThanAssignments` が出ればよい
+   - これでモジュールの導入は終わり。プロファイルは子の項を選んで通す
+   - **次の手順は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓（閉じた場合は、新しく開いた管理者ではない 5.1 の窓）に貼る**
+
+1. 元に戻すときは、この項で追加した環境変数だけを消す。
+
+   ```powershell
+   & {
+     $wanted = @{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
+     foreach ($n in $wanted.Keys) {
+       if ([Environment]::GetEnvironmentVariable($n,'User') -ceq $wanted[$n]) { [Environment]::SetEnvironmentVariable($n,$null,'User') }
+     }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($n in $wanted.Keys) { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
+   }
+   ```
+
+   - 追加した変数の値が空ならよい。`1`・`Off` 以外に変えた値は消さない
+   - 開いている窓は閉じ、新しい窓で確かめる
+
+1. 元に戻すときは、この項で追加したモジュールの版のフォルダーだけを消す。
+
+   - 7 と 5.1 の窓・SSH のセッションをすべて閉じ（WezTerm・Windows Terminal・VS Code の中の PowerShell も）、エクスプローラーで、この項の手順 3・4 で控えた保存先を開く
+   - 使用中で消せないファイルがあると出たら、そのモジュールを読んだ窓がまだある。その窓を閉じてから、残ったファイルを消す
+   - `Documents\PowerShell\Modules` の `PSScriptAnalyzer`・`Pester`・`CompletionPredictor`・`PSFzf` と、`Documents\WindowsPowerShell\Modules` の `PSScriptAnalyzer`・`Pester` の下で、この項で追加した版のフォルダーだけを消す
+   - 更新で追加した版も消すなら、[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)で控えた版と保存先も使う
+   - この項の手順 2 で既にあった版、同梱のモジュール、`PSWindowsUpdate` などほかのモジュールは残す
+   - 新しい窓で `Get-Module -ListAvailable` を使い、消した版が一覧に無く、残す版があることを確かめる
+
+#### PowerShell 7 のプロファイルに開発の設定を足す
+
+- PowerShell 7 に UTF-8・補完・予測の一覧・PSFzf・短縮の関数を設定する
+- 前提: [PowerShell を開発に使う](#powershell-を開発に使う)と[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)を通してある。Tab の一覧は同じ項の手順 3
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は新しい PowerShell 7 の窓
+- プロファイルに足す 9 行は ASCII だけで、印は `# shell-terminal.md:dev`。`$PROFILE` の読み直しはせず、新しい窓で確かめる
+- 補完の控えは `%LOCALAPPDATA%\PowerShell\completions`。無い道具は飛ばす。道具を上げた後は[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)を通す
+- [設定する行の補足](reference/shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す--手順-3-補足-utf-8-と終了時の復元)・[注意点](extra/shell-terminal.md#注意点)
+
+> [!WARNING]
+> - この項の手順 3 の UTF-8 の行を読む 7 の窓では、`ipconfig`・`whoami` などの出力が英語になる。
+> - この項の手順 3 の PSFzf の行は、Emacs モードの Ctrl+T（文字の入れ替え）・Ctrl+R（履歴の検索）を置き換える。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 入っている道具の補完を生成し、UTF-8 の控えのファイルに保存する。
+
+   ```powershell
+   & {
+     $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
+     New-Item -ItemType Directory -Path $dir -Force | Out-Null
+     $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding
+     $log = @()
+     try {
+       [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
+       foreach ($t in @(@('gh', 'completion', '-s', 'powershell'), @('rg', '--generate', 'complete-powershell'), @('fd', '--gen-completions', 'powershell'), @('delta', '--generate-completion', 'powershell'), @('bat', '--completion', 'ps1'), @('starship', 'completions', 'powershell'))) {
+         $name = $t[0]; $args2 = $t[1..($t.Count - 1)]
+         if (Get-Command -Name $name -CommandType Application -ErrorAction Ignore) {
+           $text = (& $name @args2) -join "`r`n"
+           if ($LASTEXITCODE -eq 0 -and $text) { [IO.File]::WriteAllText((Join-Path $dir "$name.ps1"), $text + "`r`n", (New-Object Text.UTF8Encoding($true))); $log += "wrote $name" } else { $log += "failed $name exit $LASTEXITCODE" }
+         } else { $log += "skip $name" }
+       }
+     } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $log
+     $log = @()
+     $log += (Get-ChildItem -LiteralPath $dir | ForEach-Object { '{0} {1}' -f $_.Name, $_.Length })
+     $log
+   }
+   ```
+
+   - 入っている道具に `wrote <名前>`、無い道具に `skip <名前>` と、保存したファイルの名前・大きさが出ればよい
+   - `failed` が出たら、この項の手順 3 へ進まず、その道具の場所と版を確かめる
+   - 控えは `gh.ps1`・`rg.ps1`・`fd.ps1`・`delta.ps1`・`bat.ps1`・`starship.ps1` のうち、生成したものだけ
+
+1. PowerShell 7 のプロファイルに、開発の設定の 9 行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'if ($Host.Name -eq ''ConsoleHost'') { $global:DevConsoleEncoding = @([Console]::InputEncoding, [Console]::OutputEncoding); $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action { [Console]::InputEncoding = $global:DevConsoleEncoding[0]; [Console]::OutputEncoding = $global:DevConsoleEncoding[1] }; [Console]::InputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) }  # shell-terminal.md:dev'
+       'function Invoke-Utf8Native { param([Parameter(Mandatory)][scriptblock]$ScriptBlock) $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding; try { $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); & $ScriptBlock } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out } }  # shell-terminal.md:dev'
+       'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete.Replace(''"'', ''""''); $a = $commandAst.ToString().Replace(''"'', ''""''); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { [Management.Automation.CompletionResult]::new($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
+       'if (Get-Module -Name PSReadLine) { foreach ($devCompletion in Get-ChildItem -Path "$env:LOCALAPPDATA\PowerShell\completions\*.ps1" -ErrorAction Ignore) { . $devCompletion.FullName } }  # shell-terminal.md:dev'
+       'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -PredictionViewStyle ListView }  # shell-terminal.md:dev'
+       'if (Get-Module -Name PSReadLine) { Import-Module -Name CompletionPredictor -ErrorAction Ignore }  # shell-terminal.md:dev'
+       'if ((Get-Module -Name PSReadLine) -and (Get-Command -Name fzf -CommandType Application -ErrorAction Ignore)) { Set-PSReadLineKeyHandler -Chord Ctrl+t -BriefDescription FzfProvider -Description ''PSFzf: insert paths selected with fzf'' -ScriptBlock { if ((Get-Module -Name PSFzf) -or (Import-Module -Name PSFzf -Global -PassThru -ErrorAction Ignore)) { Invoke-FzfPsReadlineHandlerProvider } }; Set-PSReadLineKeyHandler -Chord Ctrl+r -BriefDescription FzfHistory -Description ''PSFzf: search history with fzf'' -ScriptBlock { if ((Get-Module -Name PSFzf) -or (Import-Module -Name PSFzf -Global -PassThru -ErrorAction Ignore)) { Invoke-FzfPsReadlineHandlerHistory } else { [Microsoft.PowerShell.PSConsoleReadLine]::ReverseSearchHistory() } } }  # shell-terminal.md:dev'
+       'if (Get-Command -Name eza -CommandType Application -ErrorAction Ignore) { function ll { eza --long --group-directories-first @args } }  # shell-terminal.md:dev'
+       'function err { Get-Error -Newest 1 }  # shell-terminal.md:dev'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($line in $lines) {
+       $text = Get-Content -LiteralPath $p -Raw
+       if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+         $add = $line
+         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+         "足した: $line"
+       }
+     }
+     "--- $p"
+     Get-Content -LiteralPath $p
+   }
+   ```
+
+   - 9 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - 開いている窓ではプロファイルを読み直さず、この項の手順 4 で新しい窓を開く
+
+1. スタートメニューから、新しい PowerShell 7 を開く。
+
+   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - 日本語のコミットがあるローカルの Git リポジトリへ `Set-Location` で移る
+   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
+
+1. 新しい PowerShell 7 で、文字コード・補完・予測・関数とキーを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [Console]::InputEncoding.CodePage
+   [Console]::OutputEncoding.CodePage
+   $s = git log -10 --format=%s
+   $s
+   Get-PSReadLineOption | Select-Object PredictionSource,PredictionViewStyle
+   Get-PSReadLineKeyHandler -Chord Ctrl+t,Ctrl+r | Format-Table Key,Function,Description -AutoSize
+   Get-Command Invoke-Utf8Native,ll,err -ErrorAction SilentlyContinue | Select-Object Name,CommandType
+   ```
+
+   - コード ページが 2 つとも `65001` で、`$s` の日本語が化けていなければよい。日本語の件名が無ければ、そのコミットを含む範囲で確かめる
+   - `PredictionSource` が `HistoryAndPlugin`、`PredictionViewStyle` が `ListView` ならよい。`Set-Lo` と打つと履歴の候補、`Get-Process -Na` と打つと補完の予測の一覧が出る。Enter を押さず Ctrl+C で取り消す
+   - `winget ins` と打って Tab を押すと `install` になる。`gh pr ` と打って Tab を押すと候補の一覧が出る。試すたびに Ctrl+C で行を取り消す（一覧が出ているときは、先に Esc で一覧を閉じる。無い道具は飛ばす）
+   - rg・fd・delta・bat・starship の補完も、入っているものだけ Tab で確かめる
+   - fzf があれば、Ctrl+T でファイルの一覧が開き、Enter で選んだパスが行に入る。Ctrl+C で行を取り消し、Ctrl+R で履歴の一覧が開くことも確かめ、Esc で閉じる
+   - eza があれば `ll` で長い一覧が出る。`Write-Error 'PowerShell dev check'` の後に `err` を打ち、そのエラーの中身が出ることを確かめる
+   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
+
+1. 元に戻すときは、PowerShell 7 のプロファイルから開発の設定の印の行だけを消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md:dev\r?(\n|$)', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
+   - `# windows-setup.md`・`# shell-terminal.md` と印の無い行は残る。開いている 7 の窓は閉じ、新しい窓で確かめる
+
+1. 元に戻すときは、この項で生成した補完の控えだけを消す。
+
+   ```powershell
+   & {
+     $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
+     if (-not (Test-Path -LiteralPath $dir)) { "控えのフォルダーは無い: $dir"; return }
+     foreach ($n in 'gh','rg','fd','delta','bat','starship') {
+       $p = Join-Path $dir "$n.ps1"
+       if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -ErrorAction Stop }
+     }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if (@(Get-ChildItem -LiteralPath $dir -Force).Count -eq 0) { Remove-Item -LiteralPath $dir; "空のフォルダーを消した: $dir" } else { Get-ChildItem -LiteralPath $dir -Force | Select-Object Name }
+   }
+   ```
+
+   - 6 つの名前の控えが無く、ほかのファイルがあれば残っていればよい。`PowerShell` の親フォルダーは消さない
+
+#### Windows PowerShell 5.1 のプロファイルに開発の設定を足す
+
+- Windows PowerShell 5.1 に、必要なときだけ UTF-8 にする関数・winget の補完・`ll` を設定する
+- 前提: [PowerShell を開発に使う](#powershell-を開発に使う)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい 5.1 の窓
+- 対象は `Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`。足すのは ASCII の 3 行で、印は `# shell-terminal.md:dev`
+- 5.1 のコード ページは常には変えない。starship・zoxide と、6 つの道具の補完の控えは読まない
+- [設定する行の補足](reference/shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す--手順-2-補足-必要なときだけ-utf-8-にする)・[注意点](extra/shell-terminal.md#注意点)
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Windows PowerShell（5.1）のプロファイルに、開発の設定の 3 行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+     $lines = @(
+       'function Invoke-Utf8Native { param([Parameter(Mandatory)][scriptblock]$ScriptBlock) $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding; try { $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false); & $ScriptBlock } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out } }  # shell-terminal.md:dev'
+       'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete.Replace(''"'', ''""''); $a = $commandAst.ToString().Replace(''"'', ''""''); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { New-Object Management.Automation.CompletionResult($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
+       'if (Get-Command -Name eza -CommandType Application -ErrorAction Ignore) { function ll { eza --long --group-directories-first @args } }  # shell-terminal.md:dev'
+     )
+     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($line in $lines) {
+       $text = Get-Content -LiteralPath $p -Raw
+       if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+         $add = $line
+         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+         "足した: $line"
+       }
+     }
+     "--- $p"
+     Get-Content -LiteralPath $p
+   }
+   ```
+
+   - 3 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - 今開いている窓では読み直さず、新しい窓で確かめる
+
+1. スタートメニューから、新しい Windows PowerShell（5.1）を開く。
+
+   - 「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 日本語のコミットがあるローカルの Git リポジトリへ `Set-Location` で移る
+   - **次の手順は、新しく開いた Windows PowerShell（5.1）の窓に貼る**
+
+1. 新しい Windows PowerShell（5.1）で、文字コード・関数と補完を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   [Console]::InputEncoding.CodePage
+   [Console]::OutputEncoding.CodePage
+   $s = Invoke-Utf8Native { git log -10 --format=%s }
+   $s
+   [Console]::InputEncoding.CodePage
+   [Console]::OutputEncoding.CodePage
+   Get-Command Invoke-Utf8Native,ll -ErrorAction SilentlyContinue | Select-Object Name,CommandType
+   ```
+
+   - 4 つのコード ページが `932` で、`$s` の日本語が化けていなければよい。日本語の件名が無ければ、そのコミットを含む範囲で確かめる
+   - winget があれば、`winget ins` と打って Tab を押すと `install` になる。Ctrl+C で取り消した後、`[Console]::InputEncoding.CodePage`・`[Console]::OutputEncoding.CodePage` が `932` のままであることを確かめる
+   - eza があれば `ll` で長い一覧が出る。`ipconfig` の表示も日本語のままならよい
+   - **次の手順は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
+
+1. 元に戻すときは、Windows PowerShell（5.1）のプロファイルから開発の設定の印の行だけを消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
+     $bytes = [IO.File]::ReadAllBytes($p)
+     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
+     $text = $enc.GetString($bytes)
+     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md:dev\r?(\n|$)', '$1')
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
+   }
+   ```
+
+   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
+   - 貼り付けとキー操作の `# windows-setup.md`・`# shell-terminal.md`、印の無い行は残る
+   - 開いている 5.1 の窓は閉じ、新しい窓で確かめる
+
+#### Windows PowerShell 5.1 の PSReadLine を上げる
+
+- Windows PowerShell 5.1 の PSReadLine を、自分のユーザーのモジュールとして 2.4.5 に上げる
+- 前提: [PowerShell を開発に使う](#powershell-を開発に使う)を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。保存は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。この項の手順 4・5 は新しい 5.1 の窓、この項の手順 7 は 5.1 の窓をすべて閉じた後の新しい PowerShell 7 の窓
+- [版と貼り付けの補足](reference/shell-terminal.md#windows-powershell-51-の-psreadline-を上げる--手順-3-補足-版を指定して保存する理由)・[注意点](extra/shell-terminal.md#注意点)
+- 元から `Documents\WindowsPowerShell\Modules\PSReadLine\2.4.5` がある場合は、この項の手順 3・6・7 は行わない
+
+> [!WARNING]
+> - この項の手順 3 で保存すると、手順書を貼る管理者の窓と SSH のセッションも、次に開いた窓から 2.4.5 を読む。
+> - 予測の候補として、共有の履歴が入力と同じ行に出る。起動は 0.2 秒ほど延びる目安で、環境により異なる。
+> - この項の手順 6・7 で戻す前に、[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)で保存した PSReadLine の新版も消す。同じ項の手順 6 の要領で、この手順書で追加した版だけを対象にする。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 読み込んでいる版と、ユーザーの保存先の版を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-Module PSReadLine | Select-Object Name,Version,ModuleBase
+   Get-Module -ListAvailable PSReadLine | Select-Object Name,Version,ModuleBase
+   Get-ChildItem -LiteralPath (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules\PSReadLine') -ErrorAction SilentlyContinue | Select-Object Name,FullName
+   ```
+
+   - 同梱の版が `2.0.0` で、ユーザーの保存先にほかの版が無いことを確かめ、版と場所を控える
+   - `2.4.5` が既に保存されていれば、この項の手順 3・6・7 は飛ばす
+   - ほかの版があれば、この項は中断して既存の導入元と設定を確かめる
+
+1. PowerShell 7 から、5.1 用の PSReadLine 2.4.5 を保存する。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     $saved = Test-Path -LiteralPath (Join-Path $dir 'PSReadLine\2.4.5')
+     if (-not $saved) { Save-PSResource -Name PSReadLine -Version 2.4.5 -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($saved) { 'すでにある: PSReadLine 2.4.5' } else { '保存した: PSReadLine 2.4.5' }
+     Get-PSResource -Name PSReadLine -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - `保存した:`（貼り直したときは `すでにある:`）と、`PSReadLine` の版 `2.4.5`・保存先 `Documents\WindowsPowerShell\Modules` が出ればよい
+   - 保存した版は上書きしない。2.4.5 を使っている 5.1 の窓があると、上書きできずに失敗するため
+   - 今開いている 5.1 の窓では `Import-Module PSReadLine -Force` を実行せず、新しい窓で確かめる
+
+1. スタートメニューから、新しい Windows PowerShell（5.1）を開く。
+
+   - 「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - **次の手順は、新しく開いた Windows PowerShell（5.1）の窓に貼る**
+
+1. 新しい Windows PowerShell（5.1）で、版・キーと複数行の貼り付けを確かめる。
+
+   ```powershell
+   & {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     '1 行目'
+     '2 行目'
+     '3 行目'
+     if ($true) { '入れ子の行' }
+     Get-Module PSReadLine | Select-Object Name,Version,ModuleBase
+     Get-PSReadLineKeyHandler -Bound | Where-Object { $_.Key -in 'Ctrl+Enter','Ctrl+v','UpArrow','DownArrow' } | Format-Table Key,Function -AutoSize
+     (Get-PSReadLineOption).PredictionSource
+   }
+   ```
+
+   - [PC 全体の設定](windows-setup.md#pc-全体の設定)の手順 4 と同じく、GitHub のコピーボタンでコピーし、右クリックで貼る。最後の `}` で Enter を押す
+   - `1 行目`・`2 行目`・`3 行目`・`入れ子の行` の順に出て、版が `2.4.5`、`Ctrl+Enter` が `AddLine`、予測の元が `History` ならよい
+   - [Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)を通してあれば、`Ctrl+v` が `Paste`、↑/↓ が `HistorySearchBackward`・`HistorySearchForward` のままであることも確かめる
+   - 手順書を貼る管理者の窓と SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
+   - **次の手順は、新しく開いた 5.1 の窓と、この項の手順 3 の後に開いた管理者の窓・SSH のセッションを閉じてから、この項の手順 1 の窓に貼る**
+
+1. 元に戻すときは、Windows PowerShell（5.1）の窓をすべて閉じ、新しい PowerShell 7 を開く。
+
+   - この項の手順 1 の窓、管理者の窓、5.1 の SSH のセッションも閉じる。5.1 の窓は、開いている間 2.4.5 の DLL を使い続けるので、その版のフォルダーを消せない
+   - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
+
+1. 新しい PowerShell 7 で、この項で保存した PSReadLine 2.4.5 の版のフォルダーだけを、名前を変えてから消す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules\PSReadLine\2.4.5'
+     $q = "$p.remove"
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if (Test-Path -LiteralPath $q) { Remove-Item -LiteralPath $q -Recurse -Force -ErrorAction Stop }
+     if (-not (Test-Path -LiteralPath $p)) { "保存した版は無い: $p"; return }
+     try { Rename-Item -LiteralPath $p -NewName (Split-Path -Leaf $q) -ErrorAction Stop } catch { Write-Error '中断: 2.4.5 を使っている Windows PowerShell（5.1）がある。窓とセッションをすべて閉じてから貼り直す。何も消していない'; return }
+     Remove-Item -LiteralPath $q -Recurse -Force -ErrorAction Stop
+     "消した: $p"
+     Test-Path -LiteralPath $p
+   }
+   ```
+
+   - `消した:` と `False` が出ればよい。すでに消してあれば `保存した版は無い:` が出る。`PSReadLine` の親フォルダーや同梱のモジュールは消さない
+   - `中断:` が出たら、何も消していない。残っている 5.1 の窓・SSH のセッションを閉じてから、この手順を貼り直す
+   - 新しい Windows PowerShell（5.1）を開き、`Get-Module PSReadLine` の版が `2.0.0`、`Ctrl+Enter` が `AddLine` で、複数行が元の順に貼れることを、この項の手順 5 の形で確かめる
+
+#### PowerShell の開発の設定を更新する
+
+- 外部コマンドの補完の控えと、7・5.1 の開発用モジュールを上げる
+- 前提: [PowerShell を開発に使う](#powershell-を開発に使う)を通してある。補完は [PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)を通してあるときだけ
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。モジュールの操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う
+- 外部コマンドは、先に [scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)で上げる
+- PSReadLine は [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)を通したときだけ、この項の手順 5 で対象にする
+- [更新の補足](reference/shell-terminal.md#powershell-の開発の設定を更新する--手順-4-補足-51-のモジュールを上げる)・[注意点](extra/shell-terminal.md#注意点)
+
+> [!WARNING]
+> この項の手順 5 で保存する PSReadLine の最新版は、2.4.5 と同じ動作とは限らない。新しい管理者の窓・SSH のセッションにも効くので、保存した後は [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)の手順 5 で版・キー・貼り付けを確かめる。
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 補完の設定を行ったときは、入っている道具の補完の控えを作り直す。
+
+   ```powershell
+   & {
+     $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
+     New-Item -ItemType Directory -Path $dir -Force | Out-Null
+     $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding
+     $log = @()
+     try {
+       [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
+       foreach ($t in @(@('gh', 'completion', '-s', 'powershell'), @('rg', '--generate', 'complete-powershell'), @('fd', '--gen-completions', 'powershell'), @('delta', '--generate-completion', 'powershell'), @('bat', '--completion', 'ps1'), @('starship', 'completions', 'powershell'))) {
+         $name = $t[0]; $args2 = $t[1..($t.Count - 1)]
+         if (Get-Command -Name $name -CommandType Application -ErrorAction Ignore) {
+           $text = (& $name @args2) -join "`r`n"
+           if ($LASTEXITCODE -eq 0 -and $text) { [IO.File]::WriteAllText((Join-Path $dir "$name.ps1"), $text + "`r`n", (New-Object Text.UTF8Encoding($true))); $log += "wrote $name" } else { $log += "failed $name exit $LASTEXITCODE" }
+         } else { $log += "skip $name" }
+       }
+     } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $log
+     $log = @()
+     $log += (Get-ChildItem -LiteralPath $dir | ForEach-Object { '{0} {1}' -f $_.Name, $_.Length })
+     $log
+   }
+   ```
+
+   - 入っている道具に `wrote <名前>`、無い道具に `skip <名前>` と、ファイルの名前・大きさが出ればよい。`failed` が出たら、その道具の場所と版を確かめる
+   - 新しい PowerShell 7 を開き、[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 5 の補完を確かめて閉じる
+
+1. PowerShell 7 の開発用モジュールを上げる。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     Get-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Scope CurrentUser | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+     Update-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Repository PSGallery -Scope CurrentUser -TrustRepository -ErrorAction Stop
+     Get-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Scope CurrentUser | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - 更新前後の版と保存先を控える。新しい版が無ければ、更新のコマンドは何も出さない
+   - 新しい 7 の窓で、[PowerShell を開発に使う](#powershell-を開発に使う)の手順 7 と、プロファイルを設定したときは [PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 5 を確かめ、閉じる
+
+1. 5.1 用の 2 つのモジュールを、公開されている版と比べて保存する。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($n in 'PSScriptAnalyzer','Pester') {
+       $saved = @(Get-PSResource -Name $n -Path $dir -ErrorAction SilentlyContinue)
+       $latest = Find-PSResource -Name $n -Repository PSGallery -ErrorAction Stop
+       $current = $saved | Sort-Object { [version]$_.Version } -Descending | Select-Object -First 1
+       '{0}: saved={1}, PSGallery={2}' -f $n,$current.Version,$latest.Version
+       if (-not $current -or [version]$latest.Version -gt [version]$current.Version) {
+         Save-PSResource -Name $n -Version $latest.Version -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop
+       }
+     }
+     Get-PSResource -Name PSScriptAnalyzer,Pester -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - `saved` と `PSGallery` の比較と、保存した版が出ればよい。既に同じ版以上なら保存しない
+   - 追加した版と保存先を控える。新しい 5.1 の窓で [PowerShell を開発に使う](#powershell-を開発に使う)の手順 9 を確かめ、閉じる
+
+1. 5.1 の PSReadLine を上げる項を通したときだけ、公開されている版と比べて保存する。
+
+   ```powershell
+   pwsh.exe -NoLogo -NoProfile -Command {
+     $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     $saved = @(Get-PSResource -Name PSReadLine -Path $dir -ErrorAction SilentlyContinue)
+     if (-not $saved.Count) { Write-Error '中断: この保存先に PSReadLine が無い'; exit 1 }
+     $latest = Find-PSResource -Name PSReadLine -Repository PSGallery -ErrorAction Stop
+     $current = $saved | Sort-Object { [version]$_.Version } -Descending | Select-Object -First 1
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'PSReadLine: saved={0}, PSGallery={1}' -f $current.Version,$latest.Version
+     if ([version]$latest.Version -gt [version]$current.Version) {
+       Save-PSResource -Name PSReadLine -Version $latest.Version -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop
+     }
+     Get-PSResource -Name PSReadLine -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+   }
+   ```
+
+   - `saved` と `PSGallery` の比較と、保存した版が出ればよい。既に同じ版以上なら保存しない
+   - 追加した版と保存先を控え、新しい 5.1 の窓で [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)の手順 5 を通す。版は、この手順で保存した版と比べる
+   - キーや貼り付けが合わなければ、新しい窓・セッションを閉じ、保存先からこの手順で追加した版のフォルダーだけを消す。以前の版の窓で貼り付けを確かめ直す
+
+1. 新しい版で確かめ終え、古い版が要らなければ、その版のフォルダーだけを消す。
+
+   - 7 と 5.1 の窓・SSH のセッションをすべて閉じ、エクスプローラーで、この項の手順 3〜5 で控えた保存先を開く。更新の前から開いている 5.1 の窓も、古い版の PSReadLine を使っている
+   - この項で扱ったモジュールの名前の下で、使わない古い版のフォルダーだけを消す。新しい版と、元に戻すために残す版は消さない
+   - `Documents\WindowsPowerShell\Modules` の `PSWindowsUpdate` など、ほかのモジュールには触れない
+   - PSReadLine の `2.4.5` を残すかは、戻す版として使うかで決める。同梱の `$PSHOME\Modules` は変えない
+   - 新しい 7 と 5.1 の窓で `Get-Module -ListAvailable` を使い、残した版が見えることを確かめる
 
 ---

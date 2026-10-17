@@ -8,7 +8,7 @@ Windows 11 と AlmaLinux 10 の構築・設定の手順をまとめる。実施�
 | --- | --- | --- |
 | [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
-| [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 |
+| [シェルと端末のセットアップ](docs/shell-terminal.md) | 両方 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
 | [Neovim のセットアップ](docs/neovim.md) | 両方 | Neovim の導入と設定 |
 | [AI コーディングエージェントのセットアップ](docs/ai-agents.md) | 両方 | Claude Code・Codex CLI・Grok Build・Antigravity CLI、プラグイン、共同作業、ブラウザ操作、Remote Control、GNOME 操作 |
 | [仮想マシンのセットアップ](docs/virtual-machines.md) | 両方 | VirtualBox、bootc ゲスト、kvm-container、Hyper-V、VMware Workstation Pro、Windows Sandbox |

@@ -6,7 +6,7 @@
 - ロールバックは、ほかの道具と一緒に「上から順に戻す」並びに入っているので、2 冊のロールバックにある
   - AlmaLinux 10: シェルのツール・`~/.inputrc`・共通の bash 設定は[AlmaLinux 10 のセットアップのロールバックの「シェルのツールと bash の設定を戻す」](almalinux-setup.md#シェルのツールと-bash-の設定を戻す)、デスクトップの等幅のフォントと Ctrl+Alt+T・WezTerm・HackGen Console NF は[「端末とエディタを消す」](almalinux-setup.md#端末とエディタを消す)の手順 6〜10、bash-completion は[「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 4
   - Windows 11: 自分用の WezTerm の設定と共通の bash 設定は[Windows 11 のセットアップのロールバックの「Git Bash の設定を戻す」](windows-setup.md#git-bash-の設定を戻す)の手順 7・8、starship・zoxide・fzf・eza・bat は[「エディタとシェルのツールを消す」](windows-setup.md#エディタとシェルのツールを消す)の手順 7〜9、WezTerm は[「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8、HackGen Console NF は[「HackGen Console NF を消す」](windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3
-  - PowerShell 7 のプロファイルと Windows Terminal の設定は、手順書のそれぞれの項の戻す手順で戻す
+  - PowerShell のプロファイルと開発の設定、Windows Terminal の設定は、手順書のそれぞれの項の戻す手順で戻す
 
 ## 注意点
 
@@ -75,6 +75,12 @@
 - **Windows PowerShell 5.1 のキーは、手順書を貼る管理者の conhost の窓にも効く**: 任意の[キー操作の設定](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
   - Ctrl+V は `Paste`、Ctrl+Enter は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の `AddLine` を使う
   - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。貼り付けの設定の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
+- **PowerShell 7 の開発の設定は、外部コマンドの表示の言語も変える**: コンソールを UTF-8 にすると、`ipconfig`・`whoami` などが英語になる。5.1 は常には変えず、[開発の設定](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)の `Invoke-Utf8Native` の間だけ変える
+- **PSReadLine の予測は履歴を画面に出す**: 5.1 の PSReadLine 2.4.5 は履歴の候補を同じ行に出す。7 の `ListView` は候補を一覧に出す。5.1・7 の履歴のファイルは共通なので、画面を共有するときも対象になる
+- **PowerShell 7 の PSFzf は Emacs モードのキーを置き換える**: Ctrl+T は文字の入れ替えからパスの選択、Ctrl+R は履歴の検索から fzf の履歴の選択になる。選んだ内容は入力の行に入り、その場では実行しない
+- **道具を上げても、PowerShell 7 の補完の控えは変わらない**: scoop で gh・rg・fd・delta・bat・starship を上げた後は、[PowerShell の開発の設定を更新する](../shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
+- **Windows PowerShell 5.1 の PSReadLine 2.4.5 は同じユーザーの窓で使う**: [版を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)と、次に開く管理者の窓と、PSReadLine を読む SSH のセッションにも効く
+- **PowerShell の開発の設定は起動の時間にも影響する**: 7 の追加の行は合わせて約 0.1 秒、5.1 の PSReadLine 2.4.5 は約 0.2 秒の目安。PSFzf は最初に Ctrl+T・Ctrl+R を押したときに読み、モジュールの読み込みには約 0.23 秒掛かる
 - **Windows Terminal の copyOnSelect は、選んだだけでクリップボードを置き換える**: 手順書からコピーしたブロックも消え、右クリックが貼り付けになる。任意の[選択のコピー](../shell-terminal.md#windows-terminal-で選択した文字をコピーする)で true にできる
   - 複数行の警告を切っていると、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
   - キー単位で false に戻しても、親の[設定の戻し](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 を後で行うと、控えの値が戻る
