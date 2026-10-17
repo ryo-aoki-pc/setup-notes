@@ -20,6 +20,7 @@
   - 端末とブラウザ: 自分用の WezTerm の設定は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 7、共通の bash 設定は同じ項の手順 8。OpenSSH サーバーは[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 2・3・9、Firefox は同じ項の手順 5〜7、WezTerm は同じ項の手順 8。HackGen Console NF は[HackGen Console NF を消す](#hackgen-console-nf-を消す)の手順 1〜3
   - 表示と入力: エクスプローラーは[表示と入力を戻す](#表示と入力を戻す)の手順 1、コンテキストメニューは同じ項の手順 2、スタートは同じ項の手順 3 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 6、タスクバーは[表示と入力を戻す](#表示と入力を戻す)の手順 4、ダークモードは同じ項の手順 5、既定の端末は同じ項の手順 6、IME は同じ項の手順 7、キーボードは[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 9・11
   - 整理: 自動で起動するアプリは[表示と入力を戻す](#表示と入力を戻す)の手順 8、標準アプリとウィジェットは同じ項の手順 9、ショートカットのポリシーは[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 7
+  - PowerShell の開発の設定: [PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の手順 10・11 と、下の案内の各項の戻す手順を、PowerShell 7 を外す前に行う
   - 入れたもの: PowerShell 7 は[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1、PowerToys は同じ項の手順 2、UniGet UI は同じ項の手順 3、scoop は同じ項の手順 4・5、WSL は同じ項の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8、Autologon は同じ項の手順 3・4
   - 貼り付けの設定: [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 6・7
   - PC 全体: PC の名前は[ネットワークと PC 全体の設定を戻す](#ネットワークと-pc-全体の設定を戻す)の手順 9、長いパス・開発者モード・sudo は同じ項の手順 8、電源とロックは同じ項の手順 7、アダプターは同じ項の手順 6、時計は[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 10
@@ -40,9 +41,12 @@
   - そのときは、scoop で消す手順（[Git の道具を消す](#git-の道具を消す)の手順 2・4・9、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 2・5〜8）は要らない（止めた zoxide も[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 4 で消え、bat の設定は同じ項の手順 5 で `persist` ごと消える）。lazygit の設定（`%LOCALAPPDATA%\lazygit`）は scoop の外に残る（外すなら[Git の道具を消す](#git-の道具を消す)の手順 1）
   - zoxide の履歴（`%LOCALAPPDATA%\zoxide`）は scoop の外にあって残る。捨てるなら、[エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順 9（scoop を消した後でもよい）
 - この節の対象でない項で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](windows-sandbox.md#windows-sandbox-を無効にする)で、ほかはそれぞれの項の最後の「元に戻すときは、」の手順で戻す
-  - 対象の項: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
+  - 対象の項: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・PowerShell の開発の設定・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
   - [SSH の既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通し、OpenSSH サーバーを残して Git for Windows を外すなら、先にその項の手順 5 で `DefaultShell` を消す
-  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、[アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7・8
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に、開発用の環境変数と追加したモジュールを[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の手順 10・11 で戻す
+  - 開発のプロファイルと補完の控えは[PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)の手順 6・7、5.1 のプロファイルは[Windows PowerShell 5.1 のプロファイルに開発の設定を足す](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)の手順 5 で戻す
+  - 5.1 の PSReadLine は、同じ項の手順 1 の前に（PowerShell 7 の窓で消すので `pwsh.exe` が要る）、[Windows PowerShell 5.1 の PSReadLine を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)の手順 6・7 で戻す
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、同じ項の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7・8
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の手順 6・7
 
 > [!CAUTION]

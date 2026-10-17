@@ -1199,8 +1199,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **シェルとの組み込み方**
   - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[実施手順](../almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
-  - **PowerShell 7 のプロファイルには何も足さない**。[Windows 11 のセットアップの PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ
-  - **Windows PowerShell 5.1 のプロファイルにも足さない**。手順書を貼る窓のプロファイルは、Windows 11 のセットアップの「貼り付けの設定」の手順 4 の 1 行のまま
+  - **PowerShell 7 には補完を足す**。[PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)で、`delta --generate-completion powershell` の出力を控えたファイルから読む。delta を上げた後は、[PowerShell の開発の設定を更新する](../shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
+  - **Windows PowerShell 5.1 には delta の補完を足さない**。git が読む `~/.gitconfig` の設定は、5.1 から使う git にも効く
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[実施手順](../almalinux-setup.md#git-delta)を WSL の中で通す
 - **VC++ ランタイムは前提にした**: [Windows 11 で使う / 手順 2 の補足](#git-delta--手順-2-補足-vc-ランタイム)
 - **scoop の less は入れない**: [Windows 11 で使う / 手順 5 の補足](#git-delta--手順-5-補足-ページャの-less-と-powershell-の-git)
@@ -1225,8 +1225,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **シェルとの組み込み方**
   - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
-  - **PowerShell 7 のプロファイルには何も足さない**: [PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が読むのは starship と zoxide だけ。gh の PowerShell の補完（`gh completion -s powershell`）は、pwsh を開くたびに gh を 1 回動かすので入れない
-  - **Windows PowerShell 5.1 のプロファイルにも足さない**: 手順書を貼る窓のプロファイルは、Windows 11 のセットアップの「貼り付けの設定」の手順 4 の 1 行のまま
+  - **PowerShell 7 には補完を足す**: [PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)で、`gh completion -s powershell` の出力を控えたファイルから読む。gh を上げた後は、[PowerShell の開発の設定を更新する](../shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
+  - **Windows PowerShell 5.1 には gh の補完を足さない**。gh の設定とログインは、5.1 からも共通のものを使う
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[実施手順](../almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
 - **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[Windows 11 で WezTerm を入れる](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を前提にしない
 - **ロールバックは、ログアウトを先にする**: `gh auth logout` が資格情報マネージャーの gh の項目を消す。gh を先に消すと（[Windows 11 のセットアップのロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 4 で scoop ごと外したときも）、その項目が残る

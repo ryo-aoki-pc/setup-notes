@@ -2,7 +2,8 @@
 
 [手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[注意点](../extra/shell-terminal.md)
 
-- PowerShell 7 のプロファイルの行の印は `# windows-setup.md`、Windows Terminal の控えは `settings.json.windows-setup.bak`
+- プロファイルの行の印は、7 の基本の設定が `# windows-setup.md`、任意のキー操作が `# shell-terminal.md`、5.1・7 の開発の設定が `# shell-terminal.md:dev`
+- Windows Terminal の控えは `settings.json.windows-setup.bak`
 - PowerShell 7 のプロファイルと Windows Terminal の資料（文書・コード）は、[Windows 11 の初期設定の参考資料の「参照」](windows-setup.md#参照)にある
 
 ## 補足
@@ -446,7 +447,8 @@ Importing GPG key 0xCEA2757D:
   - 履歴のファイル（`%APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`）は 5.1 と共有する
 - 各行を `if (Get-Module -Name PSReadLine) { … }` で囲むのは、`pwsh -Command`・`-File` では PSReadLine が読み込まれず（`ConsoleHost.cs` の `LoadPSReadline`）、囲まないと `Set-PSReadLineKeyHandler` が PSReadLine を自動で読み込むため。`-NoExit` 付きの起動（WezTerm の起動メニューの PowerShell 7）では読み込まれる
 - 行は ASCII の文字だけにする。5.1 の `Add-Content` は新しいファイルを ANSI で書き、PowerShell 7 は BOM の無いファイルを UTF-8 として読むので、日本語を書くと化ける
-- 予測（Predictive IntelliSense）は書かない。PSReadLine 2.2.6 から既定で有効で、PowerShell 7 では `HistoryAndPlugin`・`InlineView`（`Cmdlets.cs`。about_PSReadLine の「既定で無効」は古い記述）。F2 で一覧（ListView）に切り替わる。予測のプラグインを入れていなければ、候補は履歴だけ
+- 基本の設定では予測（Predictive IntelliSense）は書かない。PSReadLine 2.2.6 から既定で有効で、7 では `HistoryAndPlugin`・`InlineView`（`Cmdlets.cs`）。F2 で一覧へ切り替わる
+  - [PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)では `ListView` にし、CompletionPredictor を読む。プラグインが無ければ候補は履歴だけ
 - EditMode は Windows（既定）のまま。[PowerShell 7 で Emacs モードを使う](../shell-terminal.md#powershell-7-で-emacs-モードを使う)を選ぶときだけ変える
   - `EditMode` を変えると、それより前に `Set-PSReadLineKeyHandler` で付けたキーは既定に戻る。このため、EditMode の行をキーの割り当てより前に置く
   - Emacs の既定のキーには Ctrl+V の `Paste` が無いので、割り当て直す。Ctrl+Enter は、この項の手順 2 の `AddLine` の行を後から読む
@@ -481,7 +483,7 @@ Importing GPG key 0xCEA2757D:
 ### PowerShell 7 のプロファイルを設定する / 手順 7: 補足: 印の行だけを消す
 
 - [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバックの「アプリと貼り付けの設定を外す」の手順 6 の補足](windows-setup.md#ロールバック--アプリと貼り付けの設定を外す--手順-6-補足-文字コードを変えずに消す)）
-- 消すのは、行末が `  # windows-setup.md` または `  # shell-terminal.md` の行。印が行の途中にある行は消さない
+- 消すのは、行末が `  # windows-setup.md`・`  # shell-terminal.md`・`  # shell-terminal.md:dev` の行。印が行の途中にある行は消さない
 - PowerToys の Command Not Found が足した行は、印が無いので残る
 - `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
 
@@ -496,7 +498,8 @@ Importing GPG key 0xCEA2757D:
 
 ### PowerShell 7 で Emacs モードを使う / 手順 5: 補足: この項だけを戻す
 
-- 行末が `  # shell-terminal.md` の行だけを消す。親の[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7 は、`  # windows-setup.md` の行も含めて消す
+- 行末が `  # shell-terminal.md` の行だけを消す。開発の設定の `  # shell-terminal.md:dev` は残す
+- 親の[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7 は、`  # windows-setup.md`・`  # shell-terminal.md:dev` の行も含めて消す
 - 印の無い EditMode の行は残る。利用者が先に Emacs にしていたときは、任意の行を消しても Windows モードへは戻らない
 
 ### Windows PowerShell 5.1 のキー操作を変える / 手順 2: 補足: 適用範囲と貼り付け
@@ -513,9 +516,109 @@ Importing GPG key 0xCEA2757D:
 
 ### Windows PowerShell 5.1 のキー操作を変える / 手順 5: 補足: この項と貼り付けの設定を戻す
 
-- この項では、行末が `  # shell-terminal.md` の行だけを消す。印の無い行と、貼り付けの設定の `  # windows-setup.md` の行は残す
+- この項では、行末が `  # shell-terminal.md` の行だけを消す。印の無い行と、貼り付けの設定の `  # windows-setup.md`、開発の設定の `  # shell-terminal.md:dev` は残す
 - [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 は、両方の印の行を消す。どちらも、既存の文字コードとほかのバイトを変えずに書き戻す
 - プロファイルの変更は、新しく開く窓で効く。開いている窓へ読み直して EditMode を変える確かめ方はしない。実機では確かめていない
+
+### PowerShell を開発に使う / 手順 3: 補足: モジュールの導入元
+
+- PSScriptAnalyzer は PowerShell の静的検査、Pester はテストに使う。7 には PSResourceGet の `Install-PSResource -Scope CurrentUser` で入れる
+- `-TrustRepository` は、この呼び出しで PSGallery の信頼を確かめる問いを出さない指定。PSGallery の `Trusted` は変えない
+- CompletionPredictor と PSFzf は 7 にだけ入れる。プロファイルの行を足すまでは、入れただけで予測やキーは変わらない
+
+### PowerShell を開発に使う / 手順 4: 補足: 5.1 に保存する形
+
+- 7 の `Save-PSResource -IncludeXml` で、ドキュメントの既知のフォルダーの下の `WindowsPowerShell\Modules` に保存する。5.1 の古い PowerShellGet や NuGet の提供者を上げずに済む
+- 保存先は名前・版ごとのフォルダーになる。`Get-PSResource -Path` で版と場所を見る。5.1 の `Get-InstalledModule` には出ない
+- 同じ版の `Save-PSResource` は上書きする。新しい版を保存しても古い版は残る。5.1 に同梱の Pester は消さず、追加した版を先に読む形にする
+- 戻すため、導入前後の名前・版・保存先を控える。ほかの手順で入れた PSWindowsUpdate や、元からあった版は削除の対象にしない
+
+### PowerShell を開発に使う / 手順 5: 補足: 起動前に読む環境変数
+
+- `POWERSHELL_TELEMETRY_OPTOUT=1` と `POWERSHELL_UPDATECHECK=Off` は、ユーザーの環境変数に置く。PowerShell の起動時に使うので、プロファイルには書かない
+- ほかの値があれば止める形は、[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)と同じ。戻す手順では、この項で指定した値のときだけ消す
+- 設定アプリの「詳細設定」→「PowerShell」のスイッチは実行ポリシーを RemoteSigned にするもの。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 と、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 5 で扱う
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 2: 補足: 補完の控え
+
+- gh・rg・fd・delta・bat・starship の補完は、5.1 から生成し、`%LOCALAPPDATA%\PowerShell\completions\<名前>.ps1` に置く。MSIX の 7 も同じ場所を読む
+- 6 つの生成は合わせて約 0.3 秒掛かるので、起動のたびには生成しない。プロファイルでは控えを読み、scoop で道具を上げた後に作り直す
+- 生成中だけコンソールの入出力を UTF-8 にし、`finally` で戻す。ファイルは UTF-8（BOM 付き）で書く。fd の補完には ASCII 以外の文字が含まれる
+- 無い道具は飛ばす。生成に失敗した道具の控えは上書きしないので、失敗したままなら、前に生成した内容が残る
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 3: 補足: UTF-8 と終了時の復元
+
+- `ConsoleHost` のときだけ、コンソールの入出力を UTF-8 にする。元の 2 つの値を `$global:DevConsoleEncoding` に控え、先に `PowerShell.Exiting` のイベントを登録する
+- コンソールの文字コードは親子のプロセスで共有する。5.1 から 7 を開いて終わるときも、終了のイベントで元の値へ戻す。元の値を 932 と決め打ちしない
+- `Invoke-Utf8Native` は、渡したスクリプト ブロックの間だけ、関数内の `$OutputEncoding` とコンソールの入出力を UTF-8 にする。`finally` でコンソールの 2 つの値を戻す
+- `$OutputEncoding` は外部コマンドへ渡す文字の変換に使う。ファイルの `Out-File`・`>`・`Set-Content` の文字コードをそろえる設定ではない（[about_Character_Encoding](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_character_encoding?view=powershell-7.6)）
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 3: 補足: 補完と予測
+
+- winget の行は、Microsoft の補完の例を `Invoke-Utf8Native` で包む。補完のときにだけ `winget complete` を呼び、その間の文字コードを確実に戻す
+- 6 つの控えは、PSReadLine があるときだけ読み込む。`-Command`・`-File` など、対話用の PSReadLine が無い起動では読み込まない
+- 予測の表示は `ListView` にする。7 の予測の元は既定の `HistoryAndPlugin` のまま、CompletionPredictor を読み、履歴と補完から候補を出す
+- Tab の補完と、打っている間に出る予測は別の設定。Tab は、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の `MenuComplete` を使う
+- 履歴の連続した重複を除く `HistoryNoDuplicates` は、5.1・7 とも既定で有効なので、プロファイルには足さない
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 3: 補足: PSFzf と短縮の関数
+
+- PSFzf の読み込みは約 0.23 秒掛かる。Ctrl+T・Ctrl+R のスクリプト ブロックから読み、対応するハンドラーを呼ぶ。起動のときには読み込まない
+- キーから読むモジュールを `-Global` にするのは、その後のキーでも同じモジュールを使うため。PSFzf が無ければ、Ctrl+R は PSReadLine の `ReverseSearchHistory` を呼ぶ
+- `ll` は eza があるときだけ定義し、`--long --group-directories-first` と引数を渡す。`err` は 7 の `Get-Error -Newest 1` を呼ぶ。既存の `ls`・`cat` は置き換えない
+- 追加する行は合わせて約 0.1 秒の目安。負荷で起動の時間がばらつくので、個々の行の内訳と計り方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 6: 補足: 開発の印だけを消す
+
+- 行末が `  # shell-terminal.md:dev` の行だけを消す。ファイルをバイトのまま読み、それ以外の文字コード・改行・BOM は変えない
+- Emacs モードの `  # shell-terminal.md` と、元のプロファイルの `  # windows-setup.md` は残す
+
+### PowerShell 7 のプロファイルに開発の設定を足す / 手順 7: 補足: 補完の控えだけを消す
+
+- 補完の控えは、gh・rg・fd・delta・bat・starship の 6 ファイルだけを削除する
+- `completions` のフォルダーは、空になったときだけ消す。親の `PowerShell` のフォルダーは残す。モジュールと環境変数は、[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の戻す手順で扱う
+
+### Windows PowerShell 5.1 のプロファイルに開発の設定を足す / 手順 2: 補足: 必要なときだけ UTF-8 にする
+
+- 5.1 のコンソールの文字コードは変えず、`Invoke-Utf8Native`・winget の補完・`ll` の 3 行だけを足す。管理者の窓に貼る手順の出力を変えないため
+- `Invoke-Utf8Native` の UTF-8 は `New-Object Text.UTF8Encoding($false)` で作る。winget の補完からもこの関数を呼び、補完した後に元の文字コードへ戻す
+- 5.1 を常に UTF-8 にすると、`ipconfig`・`whoami` などが英語になる。UTF-8 の外部コマンドの出力を取り込むときだけ、関数へスクリプト ブロックを渡す
+- 戻すときは `  # shell-terminal.md:dev` の行だけを消す。貼り付けの設定と、任意の Emacs モードの行は残る
+
+### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 3: 補足: 版を指定して保存する理由
+
+- 7 の `Save-PSResource -Version 2.4.5` で、5.1 のユーザーのモジュールの場所へ保存する。プロファイルへ `Import-Module PSReadLine` の行は足さない
+- 次に開く 5.1 は、ユーザーのモジュールの場所にある新しい版を先に読む。同じユーザーの管理者の窓と、PSReadLine を読む SSH のセッションも対象になる
+- 5.1 の予測の元は `History` だけで、候補は同じ行に出る。7 の CompletionPredictor と `ListView` の設定は 5.1 に足さない
+- 同梱の 2.0.0 は残す。戻す手順では、この項で保存した 2.4.5 の版のフォルダーだけを消す
+- 5.1 の起動は約 0.2 秒延びる目安。計り方と貼り付けの確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
+
+### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 7: 補足: 名前を変えてから消す理由
+
+- 5.1 の窓は、開いている間ずっと PSReadLine の DLL を使う。手順書を貼っている 5.1 の窓からは、読み込んでいる 2.4.5 を消せない（`アクセスが拒否されました`）。このため、5.1 の窓をすべて閉じて、PowerShell 7 の窓で消す。7 は自分の PSReadLine を読み、5.1 のユーザーのモジュールの場所は読まない
+- `Remove-Item -Recurse` は、使っているファイルに当たると、それより前のファイルを消したところで止まる。途中まで消えた版が残ると、次の 5.1 がその版を読もうとする
+- フォルダーの名前の変更は、中に使っているファイルがあると、何も変えずに失敗する。先に名前を変えて確かめ、変えられたときだけ消す。名前を変えたフォルダー（`2.4.5.remove`）は版の名前ではないので、5.1 は読まない
+- `powershell.exe` が動いているかでは決めない。ほかのアプリが `-NoProfile -NonInteractive` で動かす 5.1 は、PSReadLine を読まない
+
+### PowerShell の開発の設定を更新する / 手順 2: 補足: 道具と補完の版をそろえる
+
+- 補完の控えは、生成したときの実行ファイルの内容。scoop で gh・rg・fd・delta・bat・starship を上げた後は、同じ生成のブロックで作り直す
+
+### PowerShell の開発の設定を更新する / 手順 3: 補足: 7 のモジュールを上げる
+
+- 7 のモジュールは `Update-PSResource` で上げる。`-TrustRepository` は、この呼び出しにだけ効く。新しい版が無ければ何も出ない
+
+### PowerShell の開発の設定を更新する / 手順 4: 補足: 5.1 のモジュールを上げる
+
+- 5.1 のモジュールは、PSGallery の `Find-PSResource` と、保存先を指定した `Get-PSResource` の版を比べ、新しい版があれば保存する。同じ版を毎回上書きしないため
+
+### PowerShell の開発の設定を更新する / 手順 5: 補足: PSReadLine を上げる条件
+
+- PSReadLine は、[Windows PowerShell 5.1 の PSReadLine を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)を通した場合だけ、5.1 の更新の対象にする
+
+### PowerShell の開発の設定を更新する / 手順 6: 補足: 古い版を残す理由
+
+- 5.1 の保存で新しい版を足しても、古い版は消えない。追加前後の版と場所を控え、使用中の窓を閉じてから、不要になった版のフォルダーだけを消す
 
 ### Git for Windows・Firefox・WezTerm を上げる / 手順 6: 補足: 窓を閉じる理由
 
@@ -634,9 +737,9 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - **導入元は scoop の main のバケット**（README の「導入の基盤」の、CLI ツールは scoop）
   - 管理者が要らず、[更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
   - zoxide の README は、Windows では winget を勧めている。0.10.0 の不具合は zoxide の初期化（実行ファイルの中）にあるので、どちらで入れても避けられず、版を止められる scoop にそろえた
-- **シェルとの組み込み方は、[PowerShell 7 のプロファイルを設定するの選択した方針](#powershell-7-のプロファイルを設定する)と同じ**: Git Bash が主、PowerShell 7 は補助（starship と zoxide だけ）、Windows PowerShell 5.1 にはシェルのツールを入れない、WSL の AlmaLinux 10 は Linux のホストとして扱う
+- **シェルとの組み込み方は、[PowerShell 7 のプロファイルを設定するの選択した方針](#powershell-7-のプロファイルを設定する)と同じ**: Git Bash は共通の bash 設定を使い、PowerShell は用途ごとに設定する。WSL の AlmaLinux 10 は Linux のホストとして扱う
   - Git Bash では共通の bash 設定が読むので、この節は入れて確かめるだけにし、`~/.bashrc` には書かない
-  - PowerShell 7 の fzf のキー操作（PSFzf）と eza の関数は入れない（主の Git Bash に同じものがある）
+  - 7 の PSFzf と、5.1・7 の eza の `ll` は、[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)で設定する
 - **`XDG_CONFIG_HOME` などの環境変数は足さない**: Windows の bat と eza は `XDG_CONFIG_HOME` を見ない（bat の設定は `BAT_CONFIG_DIR` か `%APPDATA%`、eza のテーマは `%APPDATA%\eza\theme.yml`。eza 0.23.5 の `src/options/theme.rs`）。starship は `STARSHIP_CONFIG` が無ければ `~\.config\starship.toml` を読む（starship 1.26.0 の `src/context.rs`。Git Bash と PowerShell 7 で 1 つ）。zoxide は `%LOCALAPPDATA%\zoxide`。足すと、gh などほかのツールの設定の置き場所まで変わる
 - **bat の設定は AlmaLinux 10 と同じ 3 行**: テーマも同じ名前の変数（`BAT_THEME_NAME`）で決める。書く場所だけが違う
 - **Windows の starship の表示は、任意の[Windows 11 で starship の表示を変える](../shell-terminal.md#windows-11-で-starship-の表示を変える)で設定する**: Windows で動くコマンドだけを置き、Git Bash と PowerShell 7 が共有する `~/.config/starship.toml` に書く。実機では確かめていない
@@ -657,9 +760,9 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - WezTerm の自分用の設定の Windows の `default_prog` は Git Bash（`C:/Program Files/Git/bin/bash.exe -i -l`。`lua/shells.lua`）。PowerShell 7・Windows PowerShell・WSL は、起動メニュー（Ctrl+Shift+M）から開く
   - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
   - Claude Code の Bash ツールと、sshd の `DefaultShell`（[SSH の既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)）も Git Bash なので、bash の設定 1 つで済む
-- **PowerShell 7 は補助**: この節で、starship と zoxide だけを、入っているときだけ読む。PSFzf・eza の関数・gh の補完・yazi の `y` は入れない（主のシェルの Git Bash に同じ機能がある。PSFzf はコミュニティのモジュール）
-- **Windows PowerShell 5.1 は、既定では貼り付けの設定の行だけにする**: 任意の[Windows PowerShell 5.1 のキー操作を変える](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で、Emacs と ↑↓ の履歴検索を足せる
-  - プロファイルは、手順書を貼る管理者の conhost の窓でも読まれ、キーの操作が変わる。実機では確かめていない
+- **PowerShell 7 は用途に合わせて設定する**: この項では starship と zoxide を、入っているときだけ読む。[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)では、補完・予測・PSFzf・eza の `ll` などを足す。yazi の `y` は足さない
+- **Windows PowerShell 5.1 は、貼り付けの設定を土台にする**: 任意の[キー操作](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で Emacs と ↑↓ の履歴検索、[開発の設定](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)で UTF-8 の関数・winget の補完・`ll` を足せる
+  - プロファイルは、手順書を貼る管理者の conhost の窓でも読まれ、キーや補完にも効く
   - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わり、SSH のセッションでは scoop の shim が RedirectionGuard で起動できないことがある
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
 - **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows の OpenSSH サーバーの `Add-WindowsCapability` など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
@@ -667,10 +770,34 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
 | Tab の補完 | 条件付きの手順（この節の手順 3） | 既定で入れる: 好みが分かれる。bash に近い動き（共通する部分まで補完し、もう 1 回で一覧）が好みなら、`MenuComplete` の代わりに `Complete` |
-| 予測 | 既定のまま（F2 で一覧に切り替え） | プロファイルに `-PredictionViewStyle ListView`: 既定で候補が出るので要らない |
+| 予測 | 基本の設定では既定のまま。開発の設定で `ListView` と CompletionPredictor を使う | 基本の設定へ一緒に追加: 開発用のモジュールと設定を別に通せるようにする |
 | EditMode | 既定は Windows のまま。任意の手順で Emacs にできる | 先に付けたキーが既定に戻るので、EditMode の行をキーの割り当てより前に置く。Emacs に Ctrl+V の `Paste` が無いので割り当て直す |
 | 履歴の件数 | 既定（4096） | `-MaximumHistoryCount 100000`（bash の `HISTSIZE` に合わせる）: 窓を開くたびに読む量が増える |
-| 起動の更新の通知・テレメトリ | 変えない | `POWERSHELL_UPDATECHECK`・`POWERSHELL_TELEMETRY_OPTOUT`: プロファイルではなく環境変数。更新の通知はバナーを出す起動だけで、WezTerm の `-NoLogo` の起動には出ない |
+| 起動の更新の通知・テレメトリ | 開発の設定でユーザーの環境変数に置く | プロファイルへの記述: 起動のときに使う設定で、読み込みが間に合わない |
+
+#### PowerShell を開発に使う
+
+- 7 には開発用のモジュールと、補完・予測・PSFzf・短縮の関数を足す。5.1 は必要なときだけ UTF-8 にする関数、winget の補完、`ll` と開発用のモジュールにする
+- プロファイルは ASCII の行だけを、`  # shell-terminal.md:dev` の印付きで足す。ほかの設定と別に戻せるようにする
+- エディターは[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)を使い、同じ設定の手順を書き写さない
+
+| 項目 | 採った方法 | 採らなかった方法と理由 |
+|---|---|---|
+| 7 の外部コマンドの文字コード | ConsoleHost の入出力を UTF-8 にし、元の値を終了のイベントで戻す | 変更したまま終了する: 同じコンソールの親の 5.1 にも残る |
+| 5.1 の外部コマンドの文字コード | `Invoke-Utf8Native` の間だけ UTF-8 にし、`finally` で戻す | 常に UTF-8: `ipconfig`・`whoami` などが英語になり、手順書を貼る窓の出力が変わる |
+| winget の補完 | 5.1・7 とも `Invoke-Utf8Native` で `winget complete` を包む | Microsoft の例のまま文字コードを変える: 5.1 の窓にも変化が残る |
+| 6 つの道具の補完 | 5.1 で控えを生成し、7 のプロファイルで読む | 起動のたびに生成: 6 つで約 0.3 秒掛かる |
+| PSScriptAnalyzer・Pester | 7 に `Install-PSResource`、5.1 の場所へ 7 から `Save-PSResource -IncludeXml` | 5.1 の PowerShellGet と NuGet の提供者を先に更新する: 導入の手順が増える |
+| 7 の予測 | `ListView` と CompletionPredictor。元は既定の `HistoryAndPlugin` | 既定の `InlineView` のまま: 履歴と補完の候補を一覧で見たいという選択 |
+| PSFzf | 7 の Ctrl+T・Ctrl+R を押したときに読む | 起動のときに読む: 約 0.23 秒掛かる |
+| 5.1 の PSReadLine | 2.4.5 を 7 から保存する。元の 2.0.0 は残す | 版を指定せずに導入: 貼り付けとキーの確認をした版にそろえられない |
+| 短縮の関数 | 5.1・7 に eza の `ll`、7 に `err` | `ls`・`cat` を置き換える: 引数や出力の違いに気づきにくい |
+| 更新の通知・テレメトリ | ユーザーの環境変数に `POWERSHELL_UPDATECHECK=Off`・`POWERSHELL_TELEMETRY_OPTOUT=1` | プロファイルに書く: 起動時の設定に間に合わない |
+| 5.1 の starship・zoxide | 足さない | 起動とプロンプトのたびに外部コマンドが動く。SSH では scoop の shim が起動できないことがある |
+| Microsoft.WinGet.CommandNotFound | 入れない | 打ち間違えのたびに winget の検索が走る。PowerToys の Command Not Found と同じもの |
+| posh-git | 入れない | 利用者が選ばなかった。読み込みに時間が掛かり、プロンプトを starship と合わせる必要がある |
+| 履歴の連続した重複の除去 | 既定の `HistoryNoDuplicates` を使う | 同じ設定を追加: 5.1・7 とも既定で有効 |
+| 設定アプリの「詳細設定」→「PowerShell」 | この項では扱わない | 実行ポリシーを RemoteSigned にするスイッチで、貼り付けの設定と 7 のプロファイルの項で扱う |
 
 ### 参照
 
@@ -764,3 +891,17 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - コード: [ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide)（`templates/bash.txt` の v0.9.9・v0.10.0・`main`、`CHANGELOG.md`（`main`）、`src/db/mod.rs`、`.cargo/config.toml`、README の Windows の導入と `_ZO_DATA_DIR`）と、[issue #1259](https://github.com/ajeetdsouza/zoxide/issues/1259)・[PR #1260](https://github.com/ajeetdsouza/zoxide/pull/1260)・[Releases](https://github.com/ajeetdsouza/zoxide/releases)
 - コード: [sharkdp/bat](https://github.com/sharkdp/bat)（v0.26.1 の `src/bin/bat/directories.rs`・`config.rs`）・[eza-community/eza](https://github.com/eza-community/eza)（v0.23.5 の `src/options/theme.rs`・`src/output/table.rs`・`src/fs/feature/git.rs`）・[junegunn/fzf](https://github.com/junegunn/fzf)（v0.74.4 の `CHANGELOG.md`・`src/util/util_windows.go`）・[starship/starship](https://github.com/starship/starship)（v1.26.0 の `src/context.rs`・`src/init/starship.ps1`・`.github/workflows/release.yml`）
 - コード: [wezterm/wezterm](https://github.com/wezterm/wezterm)（`pty/src/cmdbuilder.rs` の `get_base_env`）と、自分用の設定の [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)（`bashrc`・`docs/install.md`・`docs/reference/readme.md` の「Windows 11 の Git Bash での違い」）
+
+#### PowerShell を開発に使う
+
+- [winget の補完 — Microsoft Learn](https://learn.microsoft.com/en-us/windows/package-manager/winget/tab-completion) — `Register-ArgumentCompleter -Native` と `winget complete` の引数
+- [about_Character_Encoding — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_character_encoding?view=powershell-7.6) — 5.1・7 のファイルの文字コードと、外部コマンドへ渡す `$OutputEncoding`
+- [Save-PSResource — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.psresourceget/save-psresource?view=powershellget-3.x) — 保存先・版・`-IncludeXml`・`-TrustRepository`
+- [Get-InstalledPSResource — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.psresourceget/get-installedpsresource?view=powershellget-3.x) — `Get-PSResource` の別名・保存先・範囲の指定
+- [Update-PSResource — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.psresourceget/update-psresource?view=powershellget-3.x) — 最新版の保存・古い版の保持
+- [Set-PSReadLineOption の PredictionViewStyle — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.6#-predictionviewstyle) — `InlineView` と `ListView`
+- [about_Environment_Variables — Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.6#powershell-environment-variables) — テレメトリ・更新の通知を止める値と、PowerShell の起動前の設定
+- [kelleyma49/PSFzf](https://github.com/kelleyma49/PSFzf) — PSReadLine のパスの選択と履歴の選択、キーの割り当て
+- [PowerShell/CompletionPredictor](https://github.com/PowerShell/CompletionPredictor) — PSReadLine の補完の予測のプラグイン。PowerShell 7.2 以降・PSReadLine 2.2.2 以降が対象
+- [pester/Pester](https://github.com/pester/Pester) — PowerShell のテストとモック
+- [PowerShell/PSScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer) — PowerShell の静的検査
