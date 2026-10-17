@@ -132,7 +132,7 @@ Antigravity CLI の方針は、[AlmaLinux 10 の 4 つ目のエージェント�
   - 取り込んだ Pull Request のブランチは GitHub がリモートから自動で消す
   - 自動で消す設定（Automatically delete head branches）は有効にしておく。エージェントは取り込む前に設定を確かめ、無効なら有効にする（人が保つ前提では、設定が無効のリポジトリで、取り込んだブランチがリモートに残った）。取り込んだ後もリモートに残った自分のブランチは、エージェントが `git push origin --delete` で消す
   - 手元に残ったブランチは、エージェントが自分の作ったものだけを消す（取り込まれたことと、どの worktree でも使っていないことを確かめてから `git branch -D`。squash で取り込むので `-d` は通らない）
-  - Claude Code のセッションの worktree は、Pull Request が閉じるとアプリがセッションをアーカイブして消す（設定の Auto-archive sessions when their pull request closes。コミットしていない変更がある worktree は残る。アーカイブで worktree が消えることは、アプリの設定の説明による）。worktree が消えた後に残った `claude/` のブランチは、ほかの担当のブランチを消さない決まりの例外で、Claude Code が、ほかのセッションが作ったものも、取り込まれたことと、どの worktree でも使っていないことを確かめてから消す
+  - Claude Code のセッションの worktree は、Pull Request が閉じるとアプリがセッションをアーカイブして消す（設定の Auto-archive sessions when their pull request closes。コミットしていない変更がある worktree は残る。アーカイブで worktree が消えることは、アプリの設定の説明による）。worktree が消えた後に残った `claude/` のブランチは、ほかの担当のブランチを消さない決まりの例外で、Claude Code が、ほかのセッションが作ったものも、取り込まれたことと、どの worktree でも使っていないことを確かめてから、手元とリモートから消す
   - 取り込んだブランチには、その後コミットも push もしない。push すると、消したリモートのブランチが同じ名前で作り直される
   - 2026-10-17 の GitHub API の確認では、11 個とも `delete_branch_on_merge` が有効だった。9 個は merge commit と rebase が無効で squash だけを許し、md-table-excel と md-format は merge commit と rebase も許す
   - この 11 個の自動削除と squash は、GitHub の設定に頼る。次の「GitHub の機能には頼らない」は、共同作業の手順書の方針
