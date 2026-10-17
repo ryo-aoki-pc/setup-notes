@@ -4360,212 +4360,6 @@
    - 状態ファイルも同じ場所に置くが Git の追跡対象からは除外する
    - 戻すときは [lazygit のロールバック](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/readme.md)を行う
 
-#### lazygit の Excel 差分表示を導入する
-
-- lazygit の設定リポジトリから、Excel 差分表示と部分ステージ用のコマンドを入れる
-- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある。部分ステージには lazygit 0.66.0 以上・delta 0.20.1 以上が要る
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
-- 既存の変更は `git -C "$env:LOCALAPPDATA\lazygit" status` で確認してから進む
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. Python が無ければ scoop で入れ、版を確かめる。
-
-   ```powershell
-   if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   python --version
-   ```
-
-   - `Python 3.9` 以上の版が出ればよい
-   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
-
-1. 設定リポジトリへ移り、Excel の差分表示を導入して確かめる。
-
-   ```powershell
-   & {
-     Push-Location -LiteralPath "$env:LOCALAPPDATA\lazygit" -ErrorAction Stop
-     try {
-       python --version
-       python scripts/setup-excel-diff.py
-       "`n$([char]27)[7m 確認 $([char]27)[0m"
-       python scripts/setup-excel-diff.py --check
-     } finally {
-       Pop-Location
-     }
-   }
-   ```
-
-   - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
-   - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する
-   - `--check` は読み取りだけの確認
-   - 終わると元の作業ディレクトリへ戻る
-
-#### lazygit で Excel の差分を確かめる
-
-- 対象の Git リポジトリの Excel の属性と差分を確かめる
-- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象の Excel が Git のリポジトリにある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- 例の `売上表.xlsx` は実際のファイル名に置き換える
-- 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/excel-diff.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md#注意点)を参照する
-
-> [!CAUTION]
-> - **通常の Excel 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Excel にテキストのパッチは適用できず、新規ファイルでは Excel の代わりに変換後のテキストをステージする場合がある
-> - `diff.excel.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
-> - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)の `E` を使う
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
-
-   ```powershell
-   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
-   ```
-
-   ```powershell
-   'EXCEL_REPO = {0}' -f $EXCEL_REPO
-   ```
-
-   - 最後に値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
-
-1. 対象のリポジトリへ移る。
-
-   ```powershell
-   & {
-     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
-     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     git rev-parse --show-toplevel
-   }
-   ```
-
-   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
-
-1. Excel の属性と、作業中・ステージ済みの差分を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   git check-attr diff -- "売上表.xlsx"
-   git diff -- "売上表.xlsx"
-   git diff --cached -- "売上表.xlsx"
-   ```
-
-   - `売上表.xlsx: diff: excel` と、差分に `Sheet:`・セル番地が出ればよい
-   - lazygit を開き直してファイルを選ぶと、同じ差分を delta で表示する。`|` で内蔵表示にしても同じテキスト差分になる
-   - `unset` や別のドライバーなら、そのリポジトリの `.gitattributes`・`.git/info/attributes` の Excel 用の属性を確かめる
-   - そのリポジトリだけに適用するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
-
-#### lazygit で Excel のセル変更を部分ステージする
-
-- 対象の Git リポジトリで、Excel の値・通常の数式の変更を専用画面から部分ステージする
-- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
-- 例の `売上表.xlsx` は実際のファイル名に置き換える
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
-
-   ```powershell
-   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
-   ```
-
-   ```powershell
-   'EXCEL_REPO = {0}' -f $EXCEL_REPO
-   ```
-
-   - 最後に値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
-
-1. 対象のリポジトリへ移り、lazygit を起動する。
-
-   ```powershell
-   & {
-     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
-     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
-     lazygit
-   }
-   ```
-
-   - lazygit のファイル一覧が開けばよい
-   - **次の手順は、lazygit の画面で行う**
-
-1. lazygit のファイル一覧で対象を選び、`E` を押す。
-
-   - 端末から開くなら `git excel-stage -- "売上表.xlsx"`。実際のファイル名に置き換える
-   - 専用画面が開くまで待つ。大きいブックでは「Excel を読み込んでいます」と出る
-
-1. 専用画面で `Enter` → `Space` を押してハンクを選ぶ。
-
-   - 左右の矢印で移動し、ステージ済み差分を確認する
-   - 値・通常の数式の変更だけを選べる。置換は削除・追加の両方を選ぶ
-   - 書式・画像・マクロ・行列の挿入や移動を反映する場合は、元のファイル一覧で全体をステージする
-   - 対応できない変更は index を変更せず中断する。[対応条件と制限](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/excel-diff.md)を確認する
-
-1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
-
-   - `X` の前に `q` で閉じれば選択を取り消す
-   - 作業中の Excel は変えず、index 側の書式・画像・マクロを保持する
-   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
-   - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
-   - 次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
-   - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
-   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
-
-#### lazygit で大きな Excel の変換を待つ
-
-- 大きい Excel の全セルの変換を待ち、差分を表示する
-- 前提: [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)を通してある。対象の Excel が Git のリポジトリにある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- 例の `売上表.xlsx` は実際のファイル名に置き換える
-- lazygit で変換中のブックは、完了後にファイルを選び直すか `R` で表示する
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
-
-1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
-
-   ```powershell
-   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
-   ```
-
-   ```powershell
-   'EXCEL_REPO = {0}' -f $EXCEL_REPO
-   ```
-
-   - 最後に値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
-
-1. 対象のリポジトリへ移る。
-
-   ```powershell
-   & {
-     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
-     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     git rev-parse --show-toplevel
-   }
-   ```
-
-   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
-
-1. 全セルの変換を待って差分を表示する。
-
-   ```powershell
-   $env:EXCEL_TEXTCONV_TIMEOUT = "0"; git diff -- "売上表.xlsx"
-   ```
-
-   - 環境変数は同じ窓に残る。戻すときは `Remove-Item Env:EXCEL_TEXTCONV_TIMEOUT` を実行する
-
 #### lazygit の設定を更新する
 
 - 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
@@ -4635,10 +4429,6 @@
    - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている。要るものをエディタで書き直す
    - 書き直したら、`git -C "$env:LOCALAPPDATA\lazygit" stash drop` で stash を消す
 
-1. Excel の差分表示を導入したときだけ、導入し直す。
-
-   - [lazygit の Excel 差分表示を導入する](#lazygit-の-excel-差分表示を導入する)の手順 3 を、この項の手順 1 で開いた窓に貼る
-
 1. 設定の元にした上流の版と、入っている本体の版を比べる。
 
    ```powershell
@@ -4649,6 +4439,298 @@
 
    - `lazygit v0.66.0 のデフォルト設定に更新` の版と、その次の行の `version=0.66.0` が同じならよい
    - 本体の方が古ければ、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
+
+---
+
+### excel-diff
+
+- Excel のブックの差分表示・セル変更の部分ステージ・2 つのブックのセルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
+
+#### excel-diff を導入・更新する
+
+- Excel のブックの差分をセルのテキストで出す textconv と、`git excel-stage`・`git excel-merge` を Git 全体に入れ、導入状態を確かめる
+- 前提: [Git for Windows](#git-for-windows)と[アプリを入れる](#アプリを入れる)の手順 2・3 を通してある。部分ステージと lazygit での取り込みには lazygit 0.66.0 以上・delta 0.20.1 以上が要る
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
+- WinMerge での取り込みには WinMerge が要る。[WinMerge で 2 つの Excel のセルの変更を取り込む](#winmerge-で-2-つの-excel-のセルの変更を取り込む)の手順 2 で、無ければ入れる
+- 更新時は `git -C "$env:USERPROFILE\excel-diff" status` で既存の変更を確かめてから進む
+- 戻すときは、excel-diff の[Windows 11 のロールバック](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. Python が無ければ scoop で入れ、版を確かめる。
+
+   ```powershell
+   if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   python --version
+   ```
+
+   - `Python 3.9` 以上の版が出ればよい
+   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
+
+1. リポジトリを clone し、導入して確かめる。
+
+   ```powershell
+   git clone https://github.com/ryo-aoki-pc/excel-diff.git "$env:USERPROFILE\excel-diff"
+   & {
+     Push-Location -LiteralPath "$env:USERPROFILE\excel-diff" -ErrorAction Stop
+     try {
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       python scripts/setup-excel-diff.py
+       python scripts/setup-excel-diff.py --check
+     } finally {
+       Pop-Location
+     }
+   }
+   ```
+
+   - 導入時に `Excel 差分と部分ステージをグローバルに設定しました。`、確認時に `Excel 差分と部分ステージの設定を確認しました。` が出ればよい
+   - その後ろに `変換スクリプト:`・`部分ステージ:`・`取り込み: git excel-merge`・`attributes:` の行が出ればよい
+   - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
+   - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する（[導入し直す理由](reference/windows-setup.md#excel-diff-を導入更新する--手順-3-補足-スクリプトを更新した後に導入し直す理由)）
+   - `--check` は読み取りだけの確認
+   - 更新時は `git -C "$env:USERPROFILE\excel-diff" pull --ff-only` を実行し、この項の手順 3 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
+   - 終わると元の作業ディレクトリへ戻る
+
+#### lazygit で Excel の差分を確かめる
+
+- 対象の Git リポジトリの Excel の属性と差分を確かめる
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Excel が Git のリポジトリにある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+- 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
+
+> [!CAUTION]
+> - **通常の Excel 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Excel にテキストのパッチは適用できず、新規ファイルでは Excel の代わりに変換後のテキストをステージする場合がある
+> - `diff.excel.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
+> - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)の `E` を使う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git rev-parse --show-toplevel
+   }
+   ```
+
+   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
+
+1. Excel の属性と、作業中・ステージ済みの差分を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git check-attr diff -- "売上表.xlsx"
+   git diff -- "売上表.xlsx"
+   git diff --cached -- "売上表.xlsx"
+   ```
+
+   - `売上表.xlsx: diff: excel` と、差分に `Sheet:`・セル番地が出ればよい
+   - lazygit を開き直してファイルを選ぶと、同じ差分を delta で表示する。`|` で内蔵表示にしても同じテキスト差分になる
+   - `unset` や別のドライバーなら、そのリポジトリの `.gitattributes`・`.git/info/attributes` の Excel 用の属性を確かめる
+   - そのリポジトリだけに適用するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
+
+#### lazygit で Excel のセル変更を部分ステージする
+
+- 対象の Git リポジトリで、Excel の値・通常の数式の変更を専用画面から部分ステージする
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`。新規ファイルは全体をコミットしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移り、lazygit を起動する。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     lazygit
+   }
+   ```
+
+   - lazygit のファイル一覧が開けばよい
+   - **次の手順は、lazygit の画面で行う**
+
+1. lazygit のファイル一覧で対象を選び、`E` を押す。
+
+   - 端末から開くなら `git excel-stage -- "売上表.xlsx"`。実際のファイル名に置き換える
+   - 専用画面が開くまで待つ。大きいブックでは「Excel を読み込んでいます」と出る
+
+1. 専用画面で `Enter` → `Space` を押してハンクを選ぶ。
+
+   - 左右の矢印で移動し、ステージ済み差分を確認する
+   - 値・通常の数式の変更だけを選べる。置換は削除・追加の両方を選ぶ
+   - 書式・画像・マクロ・行列の挿入や移動を反映する場合は、元のファイル一覧で全体をステージする
+   - 対応できない変更は index を変更せず中断する。[対応条件と制限](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md)を確認する
+
+1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
+
+   - `X` の前に `q` で閉じれば選択を取り消す
+   - 作業中の Excel は変えず、index 側の書式・画像・マクロを保持する
+   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
+   - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
+   - 次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
+   - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
+   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
+
+#### lazygit で大きな Excel の変換を待つ
+
+- 大きい Excel の全セルの変換を待ち、差分を表示する
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Excel が Git のリポジトリにある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 例の `売上表.xlsx` は実際のファイル名に置き換える
+- lazygit で変換中のブックは、完了後にファイルを選び直すか `R` で表示する
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_REPO = ''                     # ← 対象の Excel がある Git のリポジトリの絶対パス。<EXCEL_REPO>
+   ```
+
+   ```powershell
+   'EXCEL_REPO = {0}' -f $EXCEL_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
+     Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git rev-parse --show-toplevel
+   }
+   ```
+
+   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
+
+1. 全セルの変換を待って差分を表示する。
+
+   ```powershell
+   $env:EXCEL_TEXTCONV_TIMEOUT = "0"; git diff -- "売上表.xlsx"
+   ```
+
+   - 環境変数は同じ窓に残る。戻すときは `Remove-Item Env:EXCEL_TEXTCONV_TIMEOUT` を実行する
+
+#### WinMerge で 2 つの Excel のセルの変更を取り込む
+
+- 2 つのブックを比べ、取り込み元のセルの値・通常の数式を選んで取り込み先へ書き込む
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。WinMerge が要る。この項の手順 2 で、無ければ入れる
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
+- 書き換えるのは最初に指定する取り込み先。`.bak` は作らない。取り込み先を Excel などで開いていたら、始める前に閉じておく
+- 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` で、シートの構成が同じブック。対応条件と制限は excel-diff の[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
+- この項の手順 5 の画像は、この PC の実機の WinMerge 2.16.58.2（2026-10-18）で撮った。ブック（`見積.xlsx`・`見積-更新.xlsx`）と値は試験用
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. WinMerge が無ければ winget で入れ、版を確かめる。
+
+   ```powershell
+   winget list --id WinMerge.WinMerge --exact --accept-source-agreements
+   if ($LASTEXITCODE -ne 0) {
+     winget install --exact --id WinMerge.WinMerge --source winget --scope user --accept-source-agreements --accept-package-agreements
+   }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget list --id WinMerge.WinMerge --exact
+   ```
+
+   - `WinMerge.WinMerge` と版が出ればよい
+   - 導入に失敗したり、最後の一覧に出なかったりしたら、先へ進まず winget の表示を確かめる
+
+1. 変数を設定する（`EXCEL_TARGET`・`EXCEL_SOURCE` は必ず値を入れる）。
+
+   ```powershell
+   $EXCEL_TARGET = ''                   # ← 取り込み先（書き換えるブック）の絶対パス。<EXCEL_TARGET>
+   ```
+
+   ```powershell
+   $EXCEL_SOURCE = ''                   # ← 取り込み元のブックの絶対パス。<EXCEL_SOURCE>
+   ```
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'EXCEL_TARGET = {0}' -f $EXCEL_TARGET
+   'EXCEL_SOURCE = {0}' -f $EXCEL_SOURCE
+   ```
+
+   - 最後に値を読み戻し、取り込み先と取り込み元が意図した絶対パスか確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 3 を貼り直してから先へ進む
+
+1. 取り込み先と取り込み元を指定し、WinMerge を開く。
+
+   ```powershell
+   & {
+     if (-not $EXCEL_TARGET -or -not $EXCEL_SOURCE) { Write-Error '中断: この項の手順 3 の EXCEL_TARGET・EXCEL_SOURCE が空のまま'; return }
+     git excel-merge -- $EXCEL_TARGET $EXCEL_SOURCE
+   }
+   ```
+
+   - `書き換えるファイル: …`・`取り込み元: …` のパスを確かめる。端末は WinMerge を閉じるまで待つ
+   - `取り込めない違い（N セル）: …` が出たら、そのセルは選べない。リードの注意点を確かめる
+   - `差分がありません。取り込み先は変えていません。` か `取り込める差分がありません（取り込めない違い N セル）。取り込み先は変えていません。` なら画面は開かずに終わる
+   - lazygit の専用画面で選ぶときは、この項の手順 4 のコマンドの `--` の前に `--tool lazygit` を付ける。lazygit 0.66.0 以上・delta 0.20.1 以上が要る
+   - 専用画面では `Enter` → `Space` でハンクを選び、`X` で書き込み、`q` で閉じる。置換は削除・追加の両方を選ぶ。`X` の前に `q` なら取り消す
+   - lazygit の専用画面で取り込んだら、この項の手順 5 は飛ばす
+   - WinMerge が開いたら、**次の手順は、WinMerge の画面で行う**
+
+1. WinMerge で取り込む行を右から左へコピーし、上書き保存して窓を閉じる。
+
+   - 左が取り込み先、右が取り込み元。「次の差分」（`Alt+↓`）で移り、取り込む行を「左へコピー」（`Alt+←`）する
+   - 左の見出しの行や値を手で書き換えない
+   - 上書き保存（`Ctrl+S`）してから WinMerge の窓を閉じる。保存せずに閉じれば取り込み先は変わらない
+   - 閉じると端末に `N セルを取り込み先へ書き込みました: …` が出ればよい
+   - 何も選ばなければ `取り込むセルが選ばれていません。取り込み先は変えていません。` と出る
+   - `Excel の取り込みに失敗しました: …` で止まったら、表示された理由を確かめる
+   - `WinMerge を開き直して直しますか [y/N]:` と聞かれたら、直す場合は `y`、中止する場合は `N` か Enter を押す
+   - `取り込み先を閉じてから Enter で再試行します（q で中止）:` と聞かれたら、Excel などを閉じて Enter、取り消すなら `q` を押す
+   - ![WinMerge の取り込みの画面。左の見出しが「取り込み先（書き換える）: 見積.xlsx」、右が「取り込み元: 見積-更新.xlsx」で、違うセルの行が色付きで並ぶ。右下の状態行に「RO」](images/windows-setup/excel-diff-winmerge-merge-v2.16.58.png)
 
 ---
 
@@ -5265,6 +5347,7 @@
 - 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
 - 自分用の設定のうち、WezTerm・Neovim はそれぞれのリポジトリの更新で上げ、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
+- excel-diff は、[excel-diff を導入・更新する](#excel-diff-を導入更新する)の更新の箇条書きで上げる
 - SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する

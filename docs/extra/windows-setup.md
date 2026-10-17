@@ -164,6 +164,10 @@
    - 設定（`config.yml`・`hosts.yml`。平文で置いたトークンも）と、gh の拡張機能・状態が消える
    - フォルダーを消しても、資格情報マネージャーのトークンは消えない（この項の手順 5 で外す）
 
+1. excel-diff を入れたときだけ、excel-diff の設定と導入先を消す。
+
+   - [excel-diff の「Windows 11 のロールバック」](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#windows-11-のロールバック)の手順を貼る
+
 ### エディタとシェルのツールを消す
 
 1. 自分用の yazi の設定を外すときだけ、clone を消して、退避した設定に戻す。

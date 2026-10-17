@@ -421,15 +421,15 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - この状態で使う `reset -q --hard` は、移動先を指定せず、作業ツリー全体を現在の HEAD（新しい `custom`）に戻す。ぶつからなかったファイルの手元の変更も作業ツリーから消えるが、autostash の stash にすべて残り、`stash show -p` で出る
 - 最初から `git reset --hard origin/custom` で合わせる方法は採らない。stash に入っていない未コミットの変更が消え、この clone だけのコミットも新しい `custom` に載らない
 
-### lazygit の設定を更新する / 手順 5: 補足: Excel の差分表示を入れ直す理由
-
-- Excel の変換スクリプトの写しは、中身などから決まる名前で Git の設定に書かれる。`scripts/excel-textconv.py` を変える更新を取り込むと、前の設定では確認が失敗する
-- [lazygit の Excel 差分表示を導入する](../almalinux-setup.md#lazygit-の-excel-差分表示を導入する)の手順 1 を通し直すと、新しい変換スクリプトの名前で設定される
-
-### lazygit の設定を更新する / 手順 6: 補足: 版の表示と pager
+### lazygit の設定を更新する / 手順 5: 補足: 版の表示と pager
 
 - `origin/main` の最後のコミットの題は、上流の既定設定を取り込んだ版を示す。本体の `--version` の `version=` と比べる
 - `git log` は設定済みの pager（delta）を通るので、`--no-pager` を付ける。`status` は pager を使わない
+
+### excel-diff を導入・更新する / 手順 2: 補足: スクリプトを更新した後に導入し直す理由
+
+- Excel の変換スクリプトの写しは、中身などから決まる名前で Git の設定に書かれる。`scripts/excel-textconv.py` を変える更新を取り込むと、前の設定では確認が失敗する
+- [excel-diff を導入・更新する](../almalinux-setup.md#excel-diff-を導入更新する)の手順 2 の導入・確認を通し直すと、新しい変換スクリプトの名前で設定される
 
 ### yazi / 手順 1: 補足: 変数について
 
