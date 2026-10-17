@@ -186,7 +186,7 @@ site.env の SITE_A_PUBKEY に書き、同じ site.env を相手拠点にも置�
   - 既定の 1420 のままだと、回線の MTU が 1454 のとき、中身が 1393 バイト以上のパケットは 1408 以上に詰められ、外側が 1468 以上になって回線の MTU を超える
 - 外側の IPv4 パケットには DF（分割禁止）を立てない（同じく `socket.c` の `send4`）。回線の MTU を超えた分は途中のルーターが分割して送り、送り元には何も返らないので、`wg0` の MTU が自動で下がることは無い
 - 分割された片方でも落ちると、もとの 1 パケットが丸ごと失われる。小さいパケットは分割されないので、ping や ssh のキー入力は通り、TCP の大きいセグメントだけが再送になる
-- `1380` は、実機（回線の MTU が 1454 と 1460 の 2 拠点）で確かめた値（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md#付録-実機の-2-拠点で-wg0-の-mtu-を下げた記録2026-10-10)）
+- `1380` は、実機で確かめた値（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)）
 - `tracepath` の宛先の `1.1.1.1` は、回線の先にあって応答する宛先として選んだだけで、インターネット上のほかの宛先でもよい
 - `Endpoint` が IPv6 のときに 80 を引くのは上の内訳からの計算で、実機では確かめていない
 
@@ -496,7 +496,7 @@ conf を import せず、値を手で写す方式。最初から `autoconnect no
 - [WireGuard: Quick Start](https://www.wireguard.com/quickstart/)
 - [WireGuard: Conceptual Overview](https://www.wireguard.com/#cryptokey-routing)
 - [WireGuard メーリングリスト: Header / MTU sizes for Wireguard](https://lists.zx2c4.com/pipermail/wireguard/2017-December/002201.html) — 外側に足される大きさの内訳（IPv4 は 60、IPv6 は 80 で、MTU 1500 から 80 を引いた 1420 が既定）
-- Linux 6.12 のソース [`drivers/net/wireguard/send.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/send.c)（`calculate_skb_padding`。16 バイトの倍数に詰め、MTU を超えては詰めない）・[`socket.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/socket.c)（`send4`。外側の IPv4 に DF を立てない） — [回線に合わせて MTU を下げる](../wireguard.md#wireguard-回線に合わせて-mtu-を下げる)の補足に使っている（実機のカーネルは 6.12.96）
+- Linux 6.12 のソース [`drivers/net/wireguard/send.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/send.c)（`calculate_skb_padding`。16 バイトの倍数に詰め、MTU を超えては詰めない）・[`socket.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/wireguard/socket.c)（`send4`。外側の IPv4 に DF を立てない） — [回線に合わせて MTU を下げる](../wireguard.md#wireguard-回線に合わせて-mtu-を下げる)の補足に使っている（AlmaLinux 10 のカーネルは 6.12 系）
 - クライアントが conf の `MTU` を読むところ: NetworkManager 1.56.0 の [`src/libnm-client-impl/nm-conn-utils.c`](https://github.com/NetworkManager/NetworkManager/blob/1.56.0/src/libnm-client-impl/nm-conn-utils.c)（`nm_conn_wireguard_import`）、WireGuard for Windows の [`conf/parser.go`](https://github.com/WireGuard/wireguard-windows/blob/master/conf/parser.go)、Android の公式アプリの [`config/Interface.java`](https://github.com/WireGuard/wireguard-android/blob/master/tunnel/src/main/java/com/wireguard/config/Interface.java)
 - [firewalld: Policy Objects](https://firewalld.org/2020/09/policy-objects-introduction)
 - [firewalld ソース `src/firewall/core/io/policy.py`](https://github.com/firewalld/firewalld/blob/v2.4.3/src/firewall/core/io/policy.py) — ingress/egress ゾーンの検証（同一ゾーンを拒否する規則は無い。policy 名の上限は 128 文字）

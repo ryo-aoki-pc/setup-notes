@@ -2710,7 +2710,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 - 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#codeg-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#codeg-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
-- 画面の画像は、Windows 11 の実機の Codeg v0.35.1（2026-10-14）と、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2（2026-10-16）で撮った。フォルダー（`codeg-demo`）と会話は試験用
+- 画面の画像は、Windows 11 の実機の Codeg v0.35.1 と、AlmaLinux 10（aarch64）の実機の Codeg v0.35.2 で撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](reference/codeg.md)・[ロールバックと注意点](extra/codeg.md)
 - サーバーの導入後は、使うエージェントの項へ進む。[Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）を選ぶ
@@ -4015,7 +4015,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
 
-画像は、Raspberry Pi 5（AlmaLinux 10.2、aarch64）の実機の Codeg v0.35.2 で、Claude Code を選んだときのもの（2026-10-16）。`Opus 5.5` はその契約で選べたモデルで、フォルダー（`codeg-demo`）と会話は試験用。
+画像は、AlmaLinux 10（aarch64）の実機の Codeg v0.35.2 で、Claude Code を選んだときのもの。`Opus 5.5` はその契約で選べたモデルで、フォルダー（`codeg-demo`）と会話は試験用。
 
 1. AlmaLinux 10 のホストで、一般ユーザーの bash から Node.js と npm の版を確かめる。
    ```bash
@@ -4108,7 +4108,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
 **この項の手順 3 の保存は、端末の CLI と共有する設定にも効く**。本人が変更前の認証方法と設定を確かめ、必要な項目だけ変える（[共有設定の注意](extra/codeg.md#claude-codecodex-の共有設定と履歴)・[トークンの効力](extra/codeg.md#アクセストークンの重み)）。
 
-画像は、Windows 11 の実機の Codeg v0.35.1 で、Claude Code を選んだときのもの（2026-10-14）。`Opus 5.5` はその契約で選べたモデルで、フォルダーと会話は試験用。
+画像は、Windows 11 の実機の Codeg v0.35.1 で、Claude Code を選んだときのもの。`Opus 5.5` はその契約で選べたモデルで、フォルダーと会話は試験用。
 
 1. Windows 11 のホストで、管理者ではない PowerShell 5.1 から Node.js と npm の版を確かめる。
    ```powershell
