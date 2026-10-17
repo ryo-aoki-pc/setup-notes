@@ -102,6 +102,33 @@
 - AlmaLinux 10 では、ログイン情報は `~/.gemini/antigravity-cli/antigravity-oauth-token`（権限 600）に保存された。GNOME のキーリングには入らなかった
 - ログイン後の設定・ログ・会話・更新の情報などは `~/.gemini/antigravity-cli`、共通の設定は `~/.gemini/config` に作られる
 
+### AlmaLinux 10 で使う / Claude Code のフックを入れる / 手順 1: 補足: NO_COLOR の引き継ぎと判定
+
+- Claude Code の Bash・PowerShell ツールの環境には `NO_COLOR=1` がある。そこから開く端末の窓や TUI に引き継がれると、lazygit や delta の色が消える
+- [フック本体](../../scripts/claude-code/no-color-guard.py)は、ツールの実行前（`PreToolUse`）にコマンドの文字列を調べる。Bash・PowerShell の両方に登録する
+- 止めるのは、`wezterm-gui`、WezTerm の `start`・`cli spawn`・`connect`・`serial`、Windows Terminal の `wt`、`Start-Process` で開く新しいコンソール、lazygit、tmux の起動
+  - `Start-Process` は、同じ文に `pwsh`・`powershell`・`cmd`・`conhost`・`bash`・`mintty`・`git-bash`・`wt` の名前があれば止める。引数の中の名前でも止まるが、止めすぎの側に倒している（理由を出して止めるだけで、`NO_COLOR` と書けば通る）
+  - tmux は、`new-session`・`new`・`new-window`・`neww`・`split-window`・`splitw`・`respawn-pane` を対象にする。`-L`・`-f`・`-2` などの前置きの引数があっても止める
+  - lazygit は、コマンドの先頭（`;`・`&`・`|` などの後ろを含む）で呼ぶときに止める。フルパスで呼ぶときも止める
+- コマンドに `NO_COLOR` と書いてあれば通す。PowerShell の `$env:NO_COLOR = $null`、bash の `unset NO_COLOR`・`env -u NO_COLOR` で外す場合も、意図して無色のまま開く場合も通せる
+- `ssh`・`wsl` のコマンドがある文字列も通す。通常、その先の環境にはツール側の `NO_COLOR` を引き継がない。WezTerm の `ssh` も同じ理由で通す
+- WezTerm の `cli send-text`・`cli get-text`、版の表示、lazygit のヘルプや設定の表示は通す。Git のログやコミット文、`git log -- lazygit` のようなパスの引数、インストールのコマンドに lazygit の名前があるだけでも止めない
+- シェルの構文は解析しない。コメントにある `tmux new-session` も判定するため、手順書では `echo check  # tmux new-session` を使い、端末や TUI を開かずに効き始めを確かめる
+- 止めるときは、標準出力に `hookSpecificOutput.permissionDecision` が `deny` の JSON と日本語の理由を出し、終了コードは 0 にする
+- [導入スクリプト](../../scripts/claude-code/setup-claude-code-hooks.py)は、`CLAUDE_CONFIG_DIR` があればそこ、無ければ `~/.claude` を使う
+  - フック本体を `hooks/no-color-guard.py` に写し、`settings.json` に登録する
+  - AlmaLinux 10 のフックの実行コマンドは `python3` を使う
+- `--check` は、写した本体が同じ中身で、設定に今の形の項目が 1 つだけあることを確かめる。Claude Code が設定を読み直したことは、新しいセッションで別に確かめる
+
+### Windows 11 で使う / Windows 11 で Claude Code のフックを入れる / 手順 2: 補足: Python と Git Bash
+
+- フックの目的と判定は、[AlmaLinux 10 の補足](#almalinux-10-で使う--claude-code-のフックを入れる--手順-1-補足-no_color-の引き継ぎと判定)と同じ。Windows でも `CLAUDE_CONFIG_DIR` があればそこ、無ければ `~/.claude` を使う
+- Windows では、Claude Code はフックのコマンドを Git Bash で動かす。フックを導入する手順は Windows PowerShell 5.1 に貼り、登録されるコマンドには scoop の Python を呼ぶ `python` を使う
+- スクリプトの場所は `/` 区切りのフルパスにし、空白があっても呼べるように二重引用符で囲む。`python "C:/Users/<WIN_USER>/.claude/hooks/no-color-guard.py"` の形になる
+- シェルを通さない `args` の形は、この PC の Claude Code では効かなかったため使わない
+- フックに渡される JSON は UTF-8。Windows の Python は標準入力のパイプを ANSI のコードページで読むため、`json.load(sys.stdin)` では日本語を含むコマンドで読み取りに失敗し、判定せずに通ってしまう
+- フックは `sys.stdin.buffer` からバイト列を読み、UTF-8 として復号してから JSON を読む。止めた理由の JSON も、UTF-8 のバイト列で標準出力に書く
+
 ### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 2: 補足: 公式インストーラーの照合
 
 - 公式インストーラーは、マニフェストにある URL から本体を取り、SHA-512 を照合して `%LOCALAPPDATA%\agy\bin\agy.exe` に置き、`agy.exe install` を呼ぶ

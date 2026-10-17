@@ -309,6 +309,34 @@
 
 ---
 
+### Claude Code のフックを入れる
+
+- Claude Code が `NO_COLOR` を外さずに端末の窓や TUI を開くのを止めるフックを入れる。引き継いだ `NO_COLOR=1` で lazygit や delta の色が消えるのを防ぐ（[補足](reference/ai-agents.md#almalinux-10-で使う--claude-code-のフックを入れる--手順-1-補足-no_color-の引き継ぎと判定)）
+- 前提: [Claude Code](#claude-code)を通してある。Python 3.9 以上（`python3`）がある
+- 実行場所: Claude Code を使うホストの、自分のユーザーの bash。このリポジトリのルートで行う
+- このリポジトリを更新してスクリプトが変わったら、この項を通し直す
+- 外すときは、[Claude Code のフックを外す](extra/ai-agents.md#claude-code-のフックを外す)を通す
+
+1. Claude Code のフックを導入する。
+   ```bash
+   python3 scripts/claude-code/setup-claude-code-hooks.py
+   ```
+   - `フックを導入しました。` と出ればよい
+   - `中断:` と出たら、表示された原因を直してから貼り直す
+   - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
+1. フック本体と設定がそろっていることを確かめる。
+   ```bash
+   python3 scripts/claude-code/setup-claude-code-hooks.py --check
+   ```
+   - `確認しました: フック本体と設定は今の形です。` と出ればよい
+   - `確認失敗:` と出たら、表示された原因を直し、この項の手順 1 からやり直す
+1. Claude Code の新しいセッションで、フックが効き始めたことを確かめる。
+   - Claude Code を起動し直して、新しいセッションを始める
+   - 「`echo check  # tmux new-session` を Bash で実行して」と頼む
+   - `PreToolUse:Bash hook error: このツールの環境には NO_COLOR=1 があり…` と出て、実行が止まればよい
+
+---
+
 ## Windows 11 で使う
 
 - 対象: Windows 11。AlmaLinux 10 は[AlmaLinux 10 で使う](#almalinux-10-で使う)から始める
@@ -624,6 +652,42 @@
    claude plugin list
    ```
    - 見方は、[AlmaLinux 10 の「Codex・Grok のプラグイン」](#codexgrok-のプラグイン)の手順 2 と同じ
+
+---
+
+### Windows 11 で Claude Code のフックを入れる
+
+- Claude Code が `NO_COLOR` を外さずに端末の窓や TUI を開くのを止めるフックを入れる。引き継いだ `NO_COLOR=1` で lazygit や delta の色が消えるのを防ぐ（[補足](reference/ai-agents.md#windows-11-で使う--windows-11-で-claude-code-のフックを入れる--手順-2-補足-python-と-git-bash)）
+- 前提: [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)を通してある。scoop の Python 3.9 以上を使う。無ければ、この項の手順 1 で入れる
+- 実行場所: この PC のデスクトップの、管理者ではない Windows PowerShell（5.1）。このリポジトリのルートで行う
+- このリポジトリを更新してスクリプトが変わったら、この項を通し直す
+- 外すときは、[Windows 11 で Claude Code のフックを外す](extra/ai-agents.md#windows-11-で-claude-code-のフックを外す)を通す
+
+1. Python が無ければ scoop で入れ、版を確かめる。
+   ```powershell
+   if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   python --version
+   ```
+   - `Python 3.9` 以上の版が出ればよい
+   - 3.9 より古い版やエラーが出たら、その Python を更新してから貼り直す
+1. Claude Code のフックを導入する。
+   ```powershell
+   python scripts/claude-code/setup-claude-code-hooks.py
+   ```
+   - `フックを導入しました。` と出ればよい
+   - `中断:` と出たら、表示された原因を直してから貼り直す
+   - スクリプトが見つからなければ、このリポジトリのルートで貼り直す
+1. フック本体と設定がそろっていることを確かめる。
+   ```powershell
+   python scripts/claude-code/setup-claude-code-hooks.py --check
+   ```
+   - `確認しました: フック本体と設定は今の形です。` と出ればよい
+   - `確認失敗:` と出たら、表示された原因を直し、この項の手順 2 からやり直す
+1. Claude Code の新しいセッションで、フックが効き始めたことを確かめる。
+   - Claude Code を起動し直して、新しいセッションを始める
+   - 「`echo check  # tmux new-session` を Bash で実行して」と頼む
+   - `PreToolUse:Bash hook error: このツールの環境には NO_COLOR=1 があり…` と出て、実行が止まればよい
 
 ---
 
@@ -1329,6 +1393,7 @@
 ## AlmaLinux 10 の更新
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 の更新](#windows-11-の更新)
+- このリポジトリを更新してフックのスクリプトが変わったら、[Claude Code のフックを入れる](#claude-code-のフックを入れる)を通し直す
 - dnf のリポジトリから入れた Claude Code は、[AlmaLinux 10 のセットアップの「更新」](almalinux-setup.md#更新)で OS を更新すると上がる。1 つだけ上げるなら、`sudo dnf upgrade claude-code` のように名前を指定する
   - **dnf 版の Claude Code は `claude update` では上がらない**。[Claude Code](#claude-code)の手順 4 で版を確かめる
 - Codex に `Update available!` が出たら `1. Update now` を選ぶ。`Update ran successfully! Please restart Codex.` の後に `codex` を起動し直す
@@ -1382,6 +1447,7 @@
 ## Windows 11 の更新
 
 - 対象: Windows 11。通常（管理者ではない）の Windows PowerShell 5.1 に貼る
+- このリポジトリを更新してフックのスクリプトが変わったら、[Windows 11 で Claude Code のフックを入れる](#windows-11-で-claude-code-のフックを入れる)を通し直す
 - Claude Code・Codex・Grok Build・Antigravity CLI は、自分で新しい版に上がる。待たずに上げるときだけ、[AI エージェントとプラグインを上げる](#ai-エージェントとプラグインを上げる)の手順を行う
   - Claude Code は起動時・起動中に更新を取得し、次の起動から新しい版になる。追うチャンネルは[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 で選ぶ
   - Codex は、起動したときに `Update available!` と出たら、`1. Update now` のまま Enter を押すと上がる（Windows 用の公式インストーラーが動く）

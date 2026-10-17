@@ -9,6 +9,7 @@
 ## AlmaLinux 10 のロールバック
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 のロールバック](#windows-11-のロールバック)
+- Claude Code のフックを入れたときは、[Claude Code のフックを外す](#claude-code-のフックを外す)を先に通す
 - 残す項目の手順は飛ばす。[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜4、Codex CLI は 5〜7、Grok Build は 8〜11
 - 「Codex CLI」の手順 2 のパッケージは残す
 - Antigravity CLI は、[Antigravity CLI を消す](#antigravity-cli-を消す)で消す（その項の手順は実行していない。未検証）
@@ -20,6 +21,30 @@
 >
 > [Antigravity CLI を消す](#antigravity-cli-を消す)の手順 4 は、`~/.gemini/antigravity-cli`（ログイン情報・会話の記録・設定）と `~/.gemini/config` を消す（取り戻せない）。
 > Antigravity のほかの製品（IDE など）も使っているなら、共有の `config` は消さず、`antigravity-cli` だけを消す。
+
+### Claude Code のフックを外す
+
+- Claude Code の `NO_COLOR` のフックを外す
+- 前提: [Claude Code のフックを入れる](../ai-agents.md#claude-code-のフックを入れる)を通してある。Python 3.9 以上（`python3`）がある
+- 実行場所: このリポジトリのルート。自分のユーザーの bash で行う
+- Claude Code 本体も消すなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)より先にこの項を通す
+
+1. 設定からフックを外し、写したフック本体を消す。
+
+   ```bash
+   python3 scripts/claude-code/setup-claude-code-hooks.py --uninstall
+   ```
+
+   - `フックを外しました。` と出ればよい
+   - 既に外してあれば、`消すものがありません。` と出る
+   - `中断:` と出たら、表示された原因を直してから貼り直す
+
+1. Claude Code を使い続けるときだけ、Claude Code を起動し直す。
+
+   - 動いているセッションを `/exit` で終え、Claude Code を起動し直す
+   - 起動し直さずに使うなら、動いているセッションで設定が読み直されるまで待つ
+
+---
 
 ### AI エージェントとプラグインを消す
 
@@ -196,6 +221,7 @@
 ## Windows 11 のロールバック
 
 - 対象: Windows 11
+- Claude Code のフックを入れたときは、[Windows 11 で Claude Code のフックを外す](#windows-11-で-claude-code-のフックを外す)を先に通す
 - [Windows 11 で AI エージェントとプラグインを消す](#windows-11-で-ai-エージェントとプラグインを消す)のすべての手順は、[Windows 11 のセットアップの「Microsoft Store の更新」](../windows-setup.md#microsoft-store-の更新)の手順 1 と同じ管理者ではない Windows PowerShell（5.1）に貼る
 - 残す項目の手順は飛ばす。同じ項の手順で、Codex・Grok のプラグインは 1、Claude Code は 2〜5、Codex CLI は 6〜9、Grok Build は 10〜14
 - [Claude Code の Remote Control（Windows）](windows-claude-remote-control.md#ロールバック)は、Claude Code と WezTerm を使う。同じ項より前に戻す
@@ -213,6 +239,30 @@
 > [Windows 11 で Antigravity アプリを消す](#windows-11-で-antigravity-アプリを消す)の手順 5 は、アプリの会話の記録を含むデータを消す（取り戻せない）。残したいデータがあるなら、その手順は行わない。
 >
 > [Windows 11 で Codeg の Antigravity を消す](#windows-11-で-codeg-の-antigravity-を消す)の手順 2 は、`%USERPROFILE%\.gemini\antigravity-acp` を消す（取り戻せない）。残したい設定・ログイン情報があるなら、その手順は行わない。
+
+### Windows 11 で Claude Code のフックを外す
+
+- Claude Code の `NO_COLOR` のフックを外す
+- 前提: [Windows 11 で Claude Code のフックを入れる](../ai-agents.md#windows-11-で-claude-code-のフックを入れる)を通してある。scoop の Python 3.9 以上がある
+- 実行場所: このリポジトリのルート。この PC のデスクトップの、管理者ではない Windows PowerShell（5.1）で行う
+- Claude Code 本体も消すなら、[Windows 11 で AI エージェントとプラグインを消す](#windows-11-で-ai-エージェントとプラグインを消す)より先にこの項を通す
+
+1. 設定からフックを外し、写したフック本体を消す。
+
+   ```powershell
+   python scripts/claude-code/setup-claude-code-hooks.py --uninstall
+   ```
+
+   - `フックを外しました。` と出ればよい
+   - 既に外してあれば、`消すものがありません。` と出る
+   - `中断:` と出たら、表示された原因を直してから貼り直す
+
+1. Claude Code を使い続けるときだけ、Claude Code を起動し直す。
+
+   - 動いているセッションを `/exit` で終え、Claude Code を起動し直す
+   - 起動し直さずに使うなら、動いているセッションで設定が読み直されるまで待つ
+
+---
 
 ### Windows 11 で AI エージェントとプラグインを消す
 
