@@ -43,9 +43,9 @@
 - この節の対象でない項で変えたものは、この節では戻さない。Windows Sandbox は[Windows Sandbox を無効にする](windows-sandbox.md#windows-sandbox-を無効にする)で、ほかはそれぞれの項の最後の「元に戻すときは、」の手順で戻す
   - 対象の項: Wake on LAN・リモートからの再起動・プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ・PowerToys・PowerShell 7 のプロファイル・PowerShell の開発の設定・Windows Terminal・WSL のネットワーク・OpenSSH サーバーの公開鍵とパスワード認証・SSH の既定のシェル・scoop のツールを SSH のセッションで使う・Neovim を既定のエディタにする
   - [SSH の既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通し、OpenSSH サーバーを残して Git for Windows を外すなら、先にその項の手順 5 で `DefaultShell` を消す
-  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に、開発用の環境変数と追加したモジュールを[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の手順 10・11 で戻す（`pwsh.exe` が要る）
+  - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 の前に、開発用の環境変数と追加したモジュールを[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の手順 10・11 で戻す
   - 開発のプロファイルと補完の控えは[PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)の手順 6・7、5.1 のプロファイルは[Windows PowerShell 5.1 のプロファイルに開発の設定を足す](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)の手順 5 で戻す
-  - 5.1 の PSReadLine は[Windows PowerShell 5.1 の PSReadLine を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)の手順 6・7 で戻す
+  - 5.1 の PSReadLine は、同じ項の手順 1 の前に（PowerShell 7 の窓で消すので `pwsh.exe` が要る）、[Windows PowerShell 5.1 の PSReadLine を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)の手順 6・7 で戻す
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 1 は PowerShell 7 のプロファイルと実行ポリシー（`Documents\PowerShell`）を残す。戻すなら、同じ項の手順 1 の前に（`pwsh.exe` が要る）、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7・8
   - [アプリと貼り付けの設定を外す](#アプリと貼り付けの設定を外す)の手順 8 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 8 で WSL を外す前に `.wslconfig` を戻すなら、[WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の手順 6・7
 

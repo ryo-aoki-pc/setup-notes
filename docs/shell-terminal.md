@@ -2531,7 +2531,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
-     $wanted = @{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
+     $wanted = [ordered]@{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
      $other = @(foreach ($n in $wanted.Keys) {
        $v = [Environment]::GetEnvironmentVariable($n,'User')
        if ($v -and $v -cne $wanted[$n]) { $n }
@@ -2565,7 +2565,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 保存した版と 2 つのコマンド、`PSAvoidUsingCmdletAliases`・`PSUseDeclaredVarsMoreThanAssignments` が出ればよい
    - 環境変数は `1`・`Off` ならよい。空なら、Windows Terminal など端末アプリの窓をすべて閉じて開き直し、この項の手順 6・7 をやり直す
-   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから行う**
+   - 確かめたら、PowerShell 7 の窓を `exit` で閉じる
 
 1. スタートメニューから、新しい Windows PowerShell（5.1）を開く。
 
@@ -2583,13 +2583,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - この項の手順 4 で保存した版と 2 つのコマンド、`PSAvoidUsingCmdletAliases`・`PSUseDeclaredVarsMoreThanAssignments` が出ればよい
    - これでモジュールの導入は終わり。プロファイルは子の項を選んで通す
-   - **次の手順は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓（閉じた場合は、新しく開いた管理者ではない 5.1 の窓）に貼る**
+   - 元に戻すときのこの項の手順 10 は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓（閉じた場合は、新しく開いた管理者ではない 5.1 の窓）に貼る
 
-1. 元に戻すときは、この項で追加した環境変数だけを消す。
+1. 元に戻すときは、値が `1`・`Off` のままの 2 つの環境変数を消す。
 
    ```powershell
    & {
-     $wanted = @{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
+     $wanted = [ordered]@{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
      foreach ($n in $wanted.Keys) {
        if ([Environment]::GetEnvironmentVariable($n,'User') -ceq $wanted[$n]) { [Environment]::SetEnvironmentVariable($n,$null,'User') }
      }
@@ -2598,7 +2598,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    }
    ```
 
-   - 追加した変数の値が空ならよい。`1`・`Off` 以外に変えた値は消さない
+   - 2 つの値が空ならよい。`1`・`Off` 以外に変えた値は消さない
+   - この項の手順 2 の前から同じ値だった変数も消える。残すときは、この手順は行わない
    - 開いている窓は閉じ、新しい窓で確かめる
 
 1. 元に戻すときは、この項で追加したモジュールの版のフォルダーだけを消す。
@@ -2717,7 +2718,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - rg・fd・delta・bat・starship の補完も、入っているものだけ Tab で確かめる
    - fzf があれば、Ctrl+T でファイルの一覧が開き、Enter で選んだパスが行に入る。Ctrl+C で行を取り消し、Ctrl+R で履歴の一覧が開くことも確かめ、Esc で閉じる
    - eza があれば `ll` で長い一覧が出る。`Write-Error 'PowerShell dev check'` の後に `err` を打ち、そのエラーの中身が出ることを確かめる
-   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
+   - 元に戻すときのこの項の手順 6・7 は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る
 
 1. 元に戻すときは、PowerShell 7 のプロファイルから開発の設定の印の行だけを消す。
 
@@ -2818,7 +2819,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 4 つのコード ページが `932` で、`$s` の日本語が化けていなければよい。日本語の件名が無ければ、そのコミットを含む範囲で確かめる
    - winget があれば、`winget ins` と打って Tab を押すと `install` になる。Ctrl+C で取り消した後、`[Console]::InputEncoding.CodePage`・`[Console]::OutputEncoding.CodePage` が `932` のままであることを確かめる
    - eza があれば `ll` で長い一覧が出る。`ipconfig` の表示も日本語のままならよい
-   - **次の手順は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
+   - 元に戻すときのこの項の手順 5 は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る
 
 1. 元に戻すときは、Windows PowerShell（5.1）のプロファイルから開発の設定の印の行だけを消す。
 
@@ -2910,7 +2911,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `1 行目`・`2 行目`・`3 行目`・`入れ子の行` の順に出て、版が `2.4.5`、`Ctrl+Enter` が `AddLine`、予測の元が `History` ならよい
    - [Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)を通してあれば、`Ctrl+v` が `Paste`、↑/↓ が `HistorySearchBackward`・`HistorySearchForward` のままであることも確かめる
    - 手順書を貼る管理者の窓と SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
-   - **次の手順は、新しく開いた 5.1 の窓と、この項の手順 3 の後に開いた管理者の窓・SSH のセッションを閉じてから、この項の手順 1 の窓に貼る**
+   - 元に戻すときは、この項の手順 6・7 を通す（5.1 の窓をすべて閉じ、PowerShell 7 の窓で消す）
 
 1. 元に戻すときは、Windows PowerShell（5.1）の窓をすべて閉じ、新しい PowerShell 7 を開く。
 
@@ -3018,6 +3019,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - `saved` と `PSGallery` の比較と、保存した版が出ればよい。既に同じ版以上なら保存しない
    - 追加した版と保存先を控える。新しい 5.1 の窓で [PowerShell を開発に使う](#powershell-を開発に使う)の手順 9 を確かめ、閉じる
+   - [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)を通していなければ、この項の手順 5 は飛ばす
 
 1. 5.1 の PSReadLine を上げる項を通したときだけ、公開されている版と比べて保存する。
 
