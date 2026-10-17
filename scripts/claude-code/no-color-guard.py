@@ -16,11 +16,17 @@ import sys
 
 LAUNCHES = [
     r"\bwezterm-gui(?:\.exe)?\b",
-    r"\bwezterm(?:\.exe)?['\"]?\s+(?:start|cli\s+spawn|ssh|connect|serial)\b",
+    # "wezterm ssh" is left out: the remote shell does not get NO_COLOR.
+    r"\bwezterm(?:\.exe)?['\"]?\s+(?:start|cli\s+spawn|connect|serial)\b",
     r"(?:^|[;&|({]|\bStart-Process\b)\s*['\"]?wt(?:\.exe)?['\"]?(?=\s|$|[;&|)}])",
     r"\bStart-Process\b[^;\n|]*?\b(?:pwsh|powershell|cmd|conhost|bash|mintty|git-bash|wt)(?:\.exe)?\b",
-    r"\btmux\s+(?:new-session|new|new-window|neww|split-window|splitw|respawn-pane)\b",
-    r"(?:^|[;&|({]|\bexec\b|--)\s*['\"]?lazygit(?:\.exe)?['\"]?(?!\s+(?:--version|-v|--help|-h|--print-config-dir|--print-default-config)\b)(?=\s|$|[;&|)}])",
+    # tmux global options may come before the command (tmux -L name new-session).
+    r"\btmux\b(?:\s+(?:-[LSfcT]\s*(?:'[^']*'|\"[^\"]*\"|[^\s;&|]+)|-[2CDlNuv]+))*\s+"
+    r"(?:new-session|new|new-window|neww|split-window|splitw|respawn-pane)\b",
+    # lazygit at a command position, also by its full path; "-- lazygit" is a
+    # path argument (git log -- lazygit), not a launch.
+    r"(?:^|[;&|({]|\bexec\b)\s*['\"]?(?:[^\s'\";&|()]*[/\\])?lazygit(?:\.exe)?['\"]?"
+    r"(?!\s+(?:--version|-v|--help|-h|--print-config-dir|--print-default-config)\b)(?=\s|$|[;&|)}])",
 ]
 REMOTE = re.compile(r"(?:^|[\s;&|('\"/\\])(?:ssh|wsl)(?:\.exe)?['\"]?\s", re.IGNORECASE | re.MULTILINE)
 

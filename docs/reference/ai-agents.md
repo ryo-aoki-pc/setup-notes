@@ -107,11 +107,12 @@
 - Claude Code の Bash・PowerShell ツールの環境には `NO_COLOR=1` がある。そこから開く端末の窓や TUI に引き継がれると、lazygit や delta の色が消える
 - [フック本体](../../scripts/claude-code/no-color-guard.py)は、ツールの実行前（`PreToolUse`）にコマンドの文字列を調べる。Bash・PowerShell の両方に登録する
 - 止めるのは、`wezterm-gui`、WezTerm の `start`・`cli spawn`・`connect`・`serial`、Windows Terminal の `wt`、`Start-Process` で開く新しいコンソール、lazygit、tmux の起動
-  - `Start-Process` は、`pwsh`・`powershell`・`cmd`・`conhost`・`bash`・`mintty`・`git-bash`・`wt` を対象にする
-  - tmux は、`new-session`・`new`・`new-window`・`neww`・`split-window`・`splitw`・`respawn-pane` を対象にする
+  - `Start-Process` は、同じ文に `pwsh`・`powershell`・`cmd`・`conhost`・`bash`・`mintty`・`git-bash`・`wt` の名前があれば止める。引数の中の名前でも止まるが、止めすぎの側に倒している（理由を出して止めるだけで、`NO_COLOR` と書けば通る）
+  - tmux は、`new-session`・`new`・`new-window`・`neww`・`split-window`・`splitw`・`respawn-pane` を対象にする。`-L`・`-f`・`-2` などの前置きの引数があっても止める
+  - lazygit は、コマンドの先頭（`;`・`&`・`|` などの後ろを含む）で呼ぶときに止める。フルパスで呼ぶときも止める
 - コマンドに `NO_COLOR` と書いてあれば通す。PowerShell の `$env:NO_COLOR = $null`、bash の `unset NO_COLOR`・`env -u NO_COLOR` で外す場合も、意図して無色のまま開く場合も通せる
-- `ssh`・`wsl` のコマンドがある文字列も通す。通常、その先の環境にはツール側の `NO_COLOR` を引き継がない
-- WezTerm の `cli send-text`・`cli get-text`、版の表示、lazygit のヘルプや設定の表示は通す。Git のログやコミット文、インストールのコマンドに lazygit の名前があるだけでも止めない
+- `ssh`・`wsl` のコマンドがある文字列も通す。通常、その先の環境にはツール側の `NO_COLOR` を引き継がない。WezTerm の `ssh` も同じ理由で通す
+- WezTerm の `cli send-text`・`cli get-text`、版の表示、lazygit のヘルプや設定の表示は通す。Git のログやコミット文、`git log -- lazygit` のようなパスの引数、インストールのコマンドに lazygit の名前があるだけでも止めない
 - シェルの構文は解析しない。コメントにある `tmux new-session` も判定するため、手順書では `echo check  # tmux new-session` を使い、端末や TUI を開かずに効き始めを確かめる
 - 止めるときは、標準出力に `hookSpecificOutput.permissionDecision` が `deny` の JSON と日本語の理由を出し、終了コードは 0 にする
 - [導入スクリプト](../../scripts/claude-code/setup-claude-code-hooks.py)は、`CLAUDE_CONFIG_DIR` があればそこ、無ければ `~/.claude` を使う

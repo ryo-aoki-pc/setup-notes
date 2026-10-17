@@ -28,6 +28,12 @@ BLOCK = [
     "Set-Location C:\\x; lazygit",
     "echo 確かめ  # tmux new-session (日本語を含む)",
     "Set-Location C:\\作業\\見積; lazygit",
+    "tmux -2 new-session -d",
+    "tmux -L dev new-session -d -s x",
+    "tmux -u -f ~/.tmux.conf new",
+    "/usr/local/bin/lazygit",
+    "~/.local/bin/lazygit -p ~/repo",
+    r"& 'C:\Users\x\scoop\shims\lazygit.exe'",
 ]
 ALLOW = [
     r"$env:NO_COLOR = $null; Start-Process 'C:\Program Files\WezTerm\wezterm-gui.exe' -PassThru",
@@ -46,6 +52,11 @@ ALLOW = [
     "python scripts/setup-excel-diff.py --check",
     "scoop install lazygit",
     "winget list --id JesseDuffield.lazygit",
+    "git log --oneline -- lazygit",
+    "git diff HEAD~1 -- lazygit",
+    "tmux -L dev send-keys -t x q",
+    "ls ~/.config/lazygit",
+    "/usr/local/bin/lazygit --version",
 ]
 
 
