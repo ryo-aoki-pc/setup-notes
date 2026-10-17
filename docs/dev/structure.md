@@ -230,6 +230,8 @@
     - 「AlmaLinux 10 で Antigravity に読み取り専用で頼む」と「Windows 11 で Antigravity に読み取り専用で頼む」の 2 つの項で、OS ごとの実行方法を扱う
     - 2026-10-16 に Raspberry Pi 5（AlmaLinux 10.2、Antigravity CLI 1.4.0）で、「AlmaLinux 10 で使う」の手順 1〜8（Grok の `--trust inspect` の行を除く）、AlmaLinux 10 のロールバックの手順 1〜3、「AlmaLinux 10 で Antigravity に読み取り専用で頼む」の手順 1〜3・5 を、手順書のブロックのまま通した
     - 使い捨てのフォルダーは `~/.cache` の下に置く。`/tmp` の下では作業フォルダーの中にも書けた。手順 9 の対話、AlmaLinux 10 で既定の分担を実際に回す流れ、ほかのホストは未確認。詳しくは検証記録の 2026-10-16 の AlmaLinux 10 の付録
+  - 使い捨てのフォルダーを消す判定: 両 OS の「Antigravity に読み取り専用で頼む」の手順 5 は、手順 1 で作る形（AlmaLinux 10 は `~/.cache/agy-review-<8 桁>-<6 桁>`、Windows 11 は `%TEMP%\agy-review-<8 桁>-<6 桁>`）だけを消し、ほかの値は消さずに止める
+    - 2026-10-17 に Windows 11 の実機で、「Windows 11 で Antigravity に読み取り専用で頼む」の手順 5 のブロックを手順書のまま、`$env:TEMP` の末尾に `\` が無いとき・あるときのそれぞれで 10 通りの値で Windows PowerShell 5.1 に流し、手順 1 の形の値だけが消えた。同じ項の手順 1〜5 も、手順書のブロックのまま 1 回通した。詳しくは検証記録の 2026-10-17 の付録
   - Antigravity のモデル（2026-10-16、利用者の決定）: 頼むたびに `agy models` から版がいちばん新しい `gemini-<版>-flash-high` を選んで `--model` で渡す。各項の手順 1 の `AGY_MODEL` で替えられる
     - 対象は 5 か所。「AlmaLinux 10 で使う」と「Windows 11 で使う」の手順 8、「AlmaLinux 10 で Antigravity に読み取り専用で頼む」と「Windows 11 で Antigravity に読み取り専用で頼む」の手順 3、「Windows 11 で既定で分担する」の手順 5
     - 2026-10-15 に通した上のブロックは、`--model` を付けない形だった
