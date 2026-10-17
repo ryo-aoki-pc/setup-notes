@@ -12,7 +12,7 @@
 
 共通の bash 設定は、`docs/shell-terminal.md` の「共通の bash 設定」、Windows では同じ文書の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリで扱う。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは各手順書で扱う。
 
-検証範囲と、実施済みと扱わない範囲は、非公開側の各検証記録にある。`docs/dev/structure.md` の状態や検証範囲の記述を変える前に読む。
+検証の状態と範囲（実施済みと扱わない範囲を含む）は、非公開側の各検証記録と、その要約の `docs/verification-status.md` にある。状態や検証範囲の記述を変える前に読む。
 
 ## よく使うコマンド
 
@@ -60,11 +60,11 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 
 ## 文書を書く・直すとき
 
-書き方の規則と文書ごとのメモは大きい（合わせて約 245 KB）ので、`docs/dev/` に分けてある（Codex が読む AGENTS.md は合計 32 KiB まで）。次のときに読む。
+書き方の規則と文書ごとのメモは大きい（合わせて約 180 KB）ので、`docs/dev/` に分けてある（Codex が読む AGENTS.md は合計 32 KiB まで）。次のときに読む。
 
 - 手順書・検証記録・参考資料・extra を書いたり直したりする前に、[docs/dev/writing-rules.md](docs/dev/writing-rules.md)（手順書の構造・手順の形・表現の規則）を読む
-- ある文書やスクリプトを直す前に、[docs/dev/structure.md](docs/dev/structure.md) で、そのファイルの項（`` - `docs/<名前>.md` — `` などで始まる行と、その下の入れ子の行）を読む
-- 文書を足したときや、状態（検証範囲）を変えたときは、`docs/dev/structure.md` の項も直す
+- ある文書やスクリプトを直す前に、[docs/dev/structure.md](docs/dev/structure.md) で、そのファイルの項（`` - `docs/<名前>.md` — `` などで始まる行と、その下の入れ子の行）を読む。検証の状態を変えるときは、非公開側の `docs/verification-status.md` の同じ文書の項も読む
+- 文書を足したときは、`docs/dev/structure.md` の項も直す。状態（検証範囲）を変えたときは、非公開側の `docs/verification-status.md` の同じ文書の項も直す
 
 検証記録を書く・直すときは、非公開の `ryo-aoki-pc/setup-notes-verification` を `gh repo clone ryo-aoki-pc/setup-notes-verification` で clone し、そちらへ Pull Request を作る。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。`docs` リポジトリでは、隣の `setup-notes-verification/` にサブモジュールとして取り出せる。
 
