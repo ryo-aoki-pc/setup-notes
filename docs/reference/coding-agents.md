@@ -81,6 +81,16 @@
 - CLI の保存済みの既定（`/model <name>`）は変えない。保存すると、利用者が対話で使う Antigravity の既定も変わるため
 - `-p /quota` は AI に聞かないので使用量を使わない（[公式の変更履歴](https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md)）。表示される時刻は UTC
 
+### Windows 11 で Antigravity に読み取り専用で頼む / 手順 5: 補足: 消す前の判定
+
+- 手順 1 で作る `$env:TEMP\agy-review-<8 桁>-<6 桁>` の形だけを消す。空・`..` を含む値・後ろに別の階層を足した値・別の場所・別の名前は、消さずに `中断:` で止める
+- [AlmaLinux 10 で Antigravity に読み取り専用で頼む](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)の手順 5（`~/.cache/agy-review-<8 桁>-<6 桁>`）と同じ考え方
+- ワイルドカード（`-like`）ではなく、正規表現で値の全体を比べる。`-like` の `*` は `\` も `..` も含む文字列に合うため、`agy-review-<時刻>\..`（`$env:TEMP` そのもの）や `agy-review-<時刻>\<下の階層>` も通る
+- `$env:TEMP` は `[regex]::Escape` で文字どおりに比べる（`\` や `.` を正規表現の記号として扱わない）
+- 末尾は `$` ではなく `\z` にする。.NET の正規表現の `$` は、末尾の改行の前にも合う
+- 数字は `\d` ではなく `[0-9]` にする。.NET の `\d` は、全角の数字などほかの Unicode の数字にも合う
+- `-notmatch` は大文字と小文字を区別しない（Windows のパスの扱いと同じ）。`$REVIEW_DIR` が無い（新しい PowerShell で手順 1 を貼っていない）ときも、空の文字列として扱われて `中断:` になる
+
 ### Windows 11 で既定で分担する / 手順 5: 補足: 読み込まれた指示の確かめ
 
 - Claude Code と Codex の問いは、実装と下書きの担当が Codex かどうかで判定する。Antigravity には自分の役割を問い、Grok は `--trust inspect` で AGENTS.md の読み込みを確かめる
