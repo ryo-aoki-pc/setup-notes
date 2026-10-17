@@ -39,7 +39,7 @@
   - 検証記録・参考資料・extra は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う
 - `docs/dropbox.md` — Dropbox の手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に「Dropbox」「Dropbox と rclone」の用途の項を置く
   - 検証記録・参考資料・extra は、用途ごとに `dropbox`・`dropbox-rclone` を使う
-- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順・検証記録は各リポジトリに置く
+- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/<リポジトリ名>/` に置く
 - `docs/reference/`・`docs/extra/` はこのリポジトリ、`docs/verification/` は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - [共同 VM 検証の横断報告](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/hypervisor-verification.md)
