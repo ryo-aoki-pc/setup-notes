@@ -1304,7 +1304,7 @@
 
 ## Git と開発の道具
 
-- Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
+- Git・git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
 
 ### Git
 
@@ -1842,11 +1842,11 @@
 
 ### excel-diff
 
-- Excel のブックの差分表示・セル変更の部分ステージ・2 つのブックのセルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
+- Excel のブックと Word の文書の差分表示・部分ステージ・2 つのファイルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
 
 #### excel-diff を導入・更新する
 
-- Excel のブックの差分をセルのテキストで出す textconv と、`git excel-stage`・`git excel-merge` を Git 全体に入れ、導入状態を確かめる
+- Excel のブックと Word の文書の差分をテキストで出す textconv と、`git excel-stage`・`git excel-merge`・`git word-stage`・`git word-merge` を Git 全体に入れ、導入状態を確かめる
 - 前提: Python 3.9 以上と git が入っている（git は[Homebrew](#homebrew)の手順 1 で入る）
   - 部分ステージと lazygit での取り込みには、lazygit 0.66.0 以上・delta 0.20.1 以上も要る
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う
@@ -1875,8 +1875,8 @@
    )
    ```
 
-   - 導入時に「Excel 差分と部分ステージをグローバルに設定しました。」、確認時に「Excel 差分と部分ステージの設定を確認しました。」が出ればよい
-   - その後ろに「変換スクリプト:」「部分ステージ:」「取り込み: git excel-merge」「attributes:」の行が出ればよい
+   - 導入時に「Excel・Word の差分と部分ステージをグローバルに設定しました。」、確認時に「Excel・Word の差分と部分ステージの設定を確認しました。」が出ればよい
+   - その後ろに「変換スクリプト:」「部分ステージ: … (git excel-stage / git word-stage)」「取り込み: git excel-merge / git word-merge」「attributes:」の行が出ればよい
    - 仮想環境の作成が ensurepip で止まる場合は `sudo dnf install python3-pip` を行い、この項の手順 2 の `(`〜`)` 部分を貼り直す
    - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
    - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する
@@ -1893,12 +1893,14 @@
 1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git check-attr diff -- "売上表.xlsx"
    git diff -- "売上表.xlsx"
    git diff --cached -- "売上表.xlsx"
    ```
 
    - 最初に `売上表.xlsx: diff: excel` が出て、差分に `Sheet:` とセル番地が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\345\243\262\344\270\212\350\241\250.xlsx": diff: excel` のように引用符と 8 進数で出る（同じファイル）
    - lazygit を開き直してファイルを選ぶと delta で表示する。`|` の内蔵表示でも Excel のテキスト差分が出る
    - `unset` や別のドライバーが出たら、そのリポジトリの `.gitattributes`・`.git/info/attributes` を確認する
    - そのリポジトリだけに設定するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
@@ -2000,6 +2002,125 @@
    - 「セル変更が選択されていません。Enter・Space でハンクを選び、X で反映してください。」が出たら、ハンクを選んで `X` を押す
    - 取り込み先を Excel などで開いたために書き込めなければ、閉じて `X` を押し直す
    - 専用画面を閉じると、端末に「N セルを取り込み先へ書き込みました: …」が出ればよい
+
+#### lazygit で Word の差分を確かめる
+
+- Word の文書のある Git リポジトリで、文書の差分が段落ごとのテキストで出ることを確かめる
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）の、文書のある Git リポジトリのディレクトリ。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
+- 対象は Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict は表示しない
+
+1. Word のある Git リポジトリで差分を確かめる（`仕様書.docx` は実際のファイル名）。
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   git check-attr diff -- "仕様書.docx"
+   git diff -- "仕様書.docx"
+   git diff --cached -- "仕様書.docx"
+   ```
+
+   - 最初に `仕様書.docx: diff: word` が出て、差分に `# 本文` と段落の行が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\344\273\225\346\247\230\346\233\270.docx": diff: word` のように引用符と 8 進数で出る（同じファイル）
+   - lazygit を開き直してファイルを選ぶと delta で表示する。`|` の内蔵表示でも Word のテキスト差分が出る
+   - `unset` や別のドライバーが出たら、そのリポジトリの `.gitattributes`・`.git/info/attributes` を確認する
+   - そのリポジトリだけに設定するなら、`.git/info/attributes` に `*.[dD][oO][cC][xX] diff=word` を足す
+   - 全体をステージするには、lazygit の**ファイル一覧で `Space`** を押す
+   - **通常差分の `Enter` から行・ハンクのステージや破棄を行わない**。既存 Word にはパッチを適用できず、新規ファイルはテキストをステージしてしまう場合がある
+   - `diff.word.binary=true` でも、この操作は禁止されない。部分ステージは[専用画面](#lazygit-で-word-の変更を部分ステージする)の `E` で行う
+   - 表示する内容は[Word の表示の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の表示)、属性の優先順位は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)、Word の制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
+   - 大きい文書の変換を待つなら、[lazygit で大きな Excel の変換を待つ](#lazygit-で大きな-excel-の変換を待つ)と同じ環境変数 `EXCEL_TEXTCONV_TIMEOUT` を使い、ファイル名を対象の Word に置き換える
+
+#### lazygit で Word の変更を部分ステージする
+
+- lazygit の専用画面で、Word の文書の段落・表・書式などの変更を選んで index に入れる
+- 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、文書のある Git リポジトリを開いた lazygit。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
+- 対象は HEAD と index にある既存 `.docx` / `.docm` / `.dotx` / `.dotm`
+- 新規ファイルは全体をコミットしてから使う
+- 対象は Transitional の OOXML。暗号化・`.doc`・Strict・電子署名付きの文書は部分ステージしない
+- 選べる単位と選べない違いは excel-diff の[Word の部分ステージ](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の部分ステージ)、制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
+
+1. lazygit のファイル一覧で対象を選び、`E` を押す。
+
+   - 端末から開くなら `git word-stage -- "仕様書.docx"`。実際のファイル名に置き換える
+   - 「Word を読み込んでいます。大きい文書では選択画面が開くまで時間がかかります。」が出たら、専用画面が開くまで待つ
+
+1. 専用画面で対象の部分を選び、`Enter` → `Space` を押してハンクを選ぶ。
+
+   - ファイル一覧の `001-本文.word.txt` などから、対象の部分を選ぶ
+   - 左右の矢印で移動し、ステージ済み差分を確認する
+   - 段落・表・セクションの設定・ヘッダーとフッターの段落を選べる。置換は削除・追加の両方を選ぶ
+   - 形が同じ表は、表の形・行・セルごとに選ぶ。行の追加などで形が変わった表と、目次など段落をまたぐフィールドは、まとまりの変更行をすべて選ぶ
+   - 太字や色などの書式だけを反映するなら、書式の目印が異なる行を選ぶ
+   - 「このまとまりの変更行をすべて選んでください。」で止まったら、そのまとまりの変更行をすべて選ぶ
+   - コメント、脚注・文末脚注の参照、グラフ・図形など選べない違いは、元のファイル一覧で全体をステージする
+   - 「段落単位で反映できません」で止まったら、表示された理由を確かめる。index は変わらない
+
+1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
+
+   - 「N か所の変更を Word のままステージしました。q で元の画面へ戻ってください。」が出ればよい
+   - 目次などを選ぶと「目次などの参照先に合わせて、表示が同じ N か所を取り込み元のものにしました。」も出ることがある。表示が同じ段落を取り込み元のものにしただけで、文字は変わらない
+   - `X` の前に `q` で閉じれば選択を取り消す
+   - 作業中の Word は変えない
+   - 「変更が選択されていません。Enter・Space でハンクを選び、X で反映してください。」が出たら、ハンクを選んで `X` を押す
+   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
+   - 目次・相互参照・文書内リンクの参照先が無くなると表示されたら、参照先の段落の変更も選ぶ
+
+#### lazygit で 2 つの Word の変更を取り込む
+
+- 2 つの文書を比べ、取り込み元の段落・表・書式などの変更を選んで取り込み先へ書き込む
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)・[lazygit](#lazygit)・[git-delta](#git-delta)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。Git リポジトリの外でも使える
+- 書き換えるのは最初に指定する取り込み先で、`.bak` は作らない。取り込み先を Word などで開いていたら閉じておく
+- 対象は両方とも Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict・電子署名付きの文書は取り込まない。対応条件と制限は[excel-diff の Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を確認する
+
+1. 変数を設定する（`WORD_TARGET`・`WORD_SOURCE` は必ず値を入れる）。
+
+   ```bash
+   WORD_TARGET=''                       # ← 取り込み先（書き換える文書。例: 仕様書.docx）の絶対パス
+   ```
+
+   ```bash
+   WORD_SOURCE=''                       # ← 取り込み元の文書（例: 仕様書-更新.docx）の絶対パス
+   ```
+
+   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'WORD_TARGET = %s\nWORD_SOURCE = %s\n' "$WORD_TARGET" "$WORD_SOURCE"
+   ```
+
+   - 取り込み先と取り込み元の絶対パスを読み戻して確かめる
+   - 新しい端末を開いたら、この項の手順 1 を貼り直してから先へ進む
+
+1. 2 つの文書を比べる専用画面を開く。
+
+   ```bash
+   if [ -z "$WORD_TARGET" ] || [ -z "$WORD_SOURCE" ]; then
+     echo '中断: この項の手順 1 の WORD_TARGET または WORD_SOURCE が空のまま' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     git word-merge -- "$WORD_TARGET" "$WORD_SOURCE"
+   fi
+   ```
+
+   - 端末に「書き換えるファイル: …」「取り込み元: …」が出て、専用画面が開く
+   - 「Word を読み込んでいます。大きい文書では画面が開くまで時間がかかります。」が出たら、画面が開くまで待つ
+   - 「差分がありません。取り込み先は変えていません。」または「取り込める差分がありません（取り込めない違い N か所）。取り込み先は変えていません。」が出たら、この項の手順 3 は飛ばす
+   - 「取り込めない違い（N か所）: …」が出たら、一覧の違いは選べない。コメント、脚注・文末脚注の参照、グラフ・図形などの違いがあるなら、その表示を確かめる
+   - 「Word の取り込みに失敗しました: …」が出たら、理由を確かめてからやり直す
+   - **次の手順は、専用画面で行う**
+
+1. 専用画面でハンクを選び、取り込み先へ書き込んで閉じる。
+
+   - `Enter` → `Space` を押してハンクを選び、左右の矢印で移動して選択を確かめる。置換は削除・追加の両方を選ぶ
+   - 目次や、行を足した表など、`"2/1"` のように番号に `/` が付く行のまとまりは、まとまりの変更行をすべて選ぶ
+   - `X` で書き込み、「N か所の変更を取り込み先へ書き込みました。q で元の画面へ戻ってください。」が出たら `q` で閉じる
+   - 目次などを選ぶと「目次などの参照先に合わせて、表示が同じ N か所を取り込み元のものにしました。」も出ることがある。表示が同じ段落を取り込み元のものにしただけで、文字は変わらない
+   - `X` の前に `q` で閉じれば選択を取り消し、「取り込む変更が選ばれていません。取り込み先は変えていません。」が出る
+   - 「変更が選択されていません。Enter・Space でハンクを選び、X で反映してください。」が出たら、ハンクを選んで `X` を押す
+   - 「このまとまりの変更行をすべて選んでください。」で止まったら、そのまとまりの変更行をすべて選んで `X` を押し直す
+   - 取り込み先を LibreOffice などで開いたために書き込めなければ、閉じて `X` を押し直す
+   - 専用画面を閉じると、端末に「N か所の変更を取り込み先へ書き込みました: …」が出ればよい
 
 ---
 

@@ -15,7 +15,7 @@
 - PSWindowsUpdate だけを外すなら、[再起動と PSWindowsUpdate](#再起動と-pswindowsupdate)の手順 3・4 を行う（管理者ではない窓）。この文書で初めて入れた場合だけが対象
 - Windows Update や Store の更新を一括で取り消す手順ではない。Store 本体と、ほかのモジュールも使う NuGet のプロバイダーは外さない
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1・2（自分用の設定は 1）、git-delta は 3・4、GitHub CLI は 5〜10。`~/.gitconfig` は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 2〜6、Git for Windows は[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 4
+  - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1・2（自分用の設定は 1）、git-delta は 3・4、GitHub CLI は 5〜10、excel-diff は 11。`~/.gitconfig` は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 2〜6、Git for Windows は[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 4
   - エディタとシェルのツール: [エディタとシェルのツールを消す](#エディタとシェルのツールを消す)の手順で、yazi は 1〜3（自分用の設定は 1）、自分用の Neovim の設定は 4、Neovim は 5、Node.js は 6、starship・zoxide・fzf・eza・bat は 7〜9
   - 端末とブラウザ: 自分用の WezTerm の設定は[Git Bash の設定を戻す](#git-bash-の設定を戻す)の手順 7、共通の bash 設定は同じ項の手順 8。OpenSSH サーバーは[OpenSSH・Git for Windows・Firefox・WezTerm を外す](#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 2・3・9、Firefox は同じ項の手順 5〜7、WezTerm は同じ項の手順 8。HackGen Console NF は[HackGen Console NF を消す](#hackgen-console-nf-を消す)の手順 1〜3
   - 表示と入力: エクスプローラーは[表示と入力を戻す](#表示と入力を戻す)の手順 1、コンテキストメニューは同じ項の手順 2、スタートは同じ項の手順 3 と[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 6、タスクバーは[表示と入力を戻す](#表示と入力を戻す)の手順 4、ダークモードは同じ項の手順 5、既定の端末は同じ項の手順 6、IME は同じ項の手順 7、キーボードは[サインイン・検索・キーボードを戻す](#サインイン検索キーボードを戻す)の手順 9・11

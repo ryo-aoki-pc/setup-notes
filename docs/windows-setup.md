@@ -4089,7 +4089,7 @@
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
+- git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
 
 ### git-delta
 
@@ -4444,15 +4444,15 @@
 
 ### excel-diff
 
-- Excel のブックの差分表示・セル変更の部分ステージ・2 つのブックのセルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
+- Excel のブックと Word の文書の差分表示・部分ステージ・2 つのファイルの取り込みに使う道具（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff)）
 
 #### excel-diff を導入・更新する
 
-- Excel のブックの差分をセルのテキストで出す textconv と、`git excel-stage`・`git excel-merge` を Git 全体に入れ、導入状態を確かめる
+- Excel のブックと Word の文書の差分をテキストで出す textconv と、`git excel-stage`・`git excel-merge`・`git word-stage`・`git word-merge` を Git 全体に入れ、導入状態を確かめる
 - 前提: [Git for Windows](#git-for-windows)と[アプリを入れる](#アプリを入れる)の手順 2・3 を通してある。部分ステージと lazygit での取り込みには lazygit 0.66.0 以上・delta 0.20.1 以上が要る
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
-- WinMerge での取り込みには WinMerge が要る。[WinMerge で 2 つの Excel のセルの変更を取り込む](#winmerge-で-2-つの-excel-のセルの変更を取り込む)の手順 2 で、無ければ入れる
+- WinMerge での取り込みには WinMerge が要る。[WinMerge で 2 つの Excel のセルの変更を取り込む](#winmerge-で-2-つの-excel-のセルの変更を取り込む)の手順 2 か、[WinMerge で 2 つの Word の変更を取り込む](#winmerge-で-2-つの-word-の変更を取り込む)の手順 3 で、無ければ入れる
 - 更新時は `git -C "$env:USERPROFILE\excel-diff" status` で既存の変更を確かめてから進む
 - 戻すときは、excel-diff の[Windows 11 のロールバック](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
 
@@ -4487,8 +4487,8 @@
    }
    ```
 
-   - 導入時に `Excel 差分と部分ステージをグローバルに設定しました。`、確認時に `Excel 差分と部分ステージの設定を確認しました。` が出ればよい
-   - その後ろに `変換スクリプト:`・`部分ステージ:`・`取り込み: git excel-merge`・`attributes:` の行が出ればよい
+   - 導入時に `Excel・Word の差分と部分ステージをグローバルに設定しました。`、確認時に `Excel・Word の差分と部分ステージの設定を確認しました。` が出ればよい
+   - その後ろに `変換スクリプト:`・`部分ステージ: … (git excel-stage / git word-stage)`・`取り込み: git excel-merge / git word-merge`・`attributes:` の行が出ればよい
    - Git 全体の textconv・alias・属性を設定し、依存はリポジトリ外の仮想環境へ入れる
    - 同期したリポジトリでも端末ごとに一度実施し、スクリプトを更新したら再実行する（[導入し直す理由](reference/windows-setup.md#excel-diff-を導入更新する--手順-3-補足-スクリプトを更新した後に導入し直す理由)）
    - `--check` は読み取りだけの確認
@@ -4548,6 +4548,7 @@
    ```
 
    - `売上表.xlsx: diff: excel` と、差分に `Sheet:`・セル番地が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\345\243\262\344\270\212\350\241\250.xlsx": diff: excel` のように引用符と 8 進数で出る（同じファイル）
    - lazygit を開き直してファイルを選ぶと、同じ差分を delta で表示する。`|` で内蔵表示にしても同じテキスト差分になる
    - `unset` や別のドライバーなら、そのリポジトリの `.gitattributes`・`.git/info/attributes` の Excel 用の属性を確かめる
    - そのリポジトリだけに適用するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
@@ -4732,6 +4733,213 @@
    - `WinMerge を開き直して直しますか [y/N]:` と聞かれたら、直す場合は `y`、中止する場合は `N` か Enter を押す
    - `取り込み先を閉じてから Enter で再試行します（q で中止）:` と聞かれたら、Excel などを閉じて Enter、取り消すなら `q` を押す
    - ![WinMerge の取り込みの画面。左の見出しが「取り込み先（書き換える）: 見積.xlsx」、右が「取り込み元: 見積-更新.xlsx」で、違うセルの行が色付きで並ぶ。右下の状態行に「RO」](images/windows-setup/excel-diff-winmerge-merge-v2.16.58.png)
+
+#### lazygit で Word の差分を確かめる
+
+- 対象の Git リポジトリの Word の属性と差分を確かめる
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Word が Git のリポジトリにある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 例の `仕様書.docx` は実際のファイル名に置き換える
+- 対象は Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict は表示しない
+- 表示する内容は[Word の表示の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の表示)、属性の優先順位は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)、Word の制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
+
+> [!CAUTION]
+> - **通常の Word 差分は閲覧用。`Enter` から行・ハンクをステージ・破棄しない**。既存の Word にテキストのパッチは適用できず、新規ファイルでは Word の代わりに変換後のテキストをステージする場合がある
+> - `diff.word.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
+> - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Word の変更を部分ステージする](#lazygit-で-word-の変更を部分ステージする)の `E` を使う
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`WORD_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $WORD_REPO = ''                     # ← 対象の Word がある Git のリポジトリの絶対パス。<WORD_REPO>
+   ```
+
+   ```powershell
+   'WORD_REPO = {0}' -f $WORD_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移る。
+
+   ```powershell
+   & {
+     if (-not $WORD_REPO) { Write-Error '中断: この項の手順 2 の WORD_REPO が空のまま'; return }
+     Set-Location -LiteralPath $WORD_REPO -ErrorAction Stop
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git rev-parse --show-toplevel
+   }
+   ```
+
+   - 対象のリポジトリの場所が出ればよい。エラーが出たら先へ進まず、この項の手順 2 の場所を確かめる
+
+1. Word の属性と、作業中・ステージ済みの差分を確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   git check-attr diff -- "仕様書.docx"
+   git diff -- "仕様書.docx"
+   git diff --cached -- "仕様書.docx"
+   ```
+
+   - `仕様書.docx: diff: word` と、差分に `# 本文` と段落の行が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\344\273\225\346\247\230\346\233\270.docx": diff: word` のように引用符と 8 進数で出る（同じファイル）
+   - lazygit を開き直してファイルを選ぶと、同じ差分を delta で表示する。`|` で内蔵表示にしても同じテキスト差分になる
+   - `unset` や別のドライバーなら、そのリポジトリの `.gitattributes`・`.git/info/attributes` の Word 用の属性を確かめる
+   - そのリポジトリだけに適用するなら、`.git/info/attributes` に `*.[dD][oO][cC][xX] diff=word` を足す
+   - 大きい文書の変換を待つなら、[lazygit で大きな Excel の変換を待つ](#lazygit-で大きな-excel-の変換を待つ)と同じ環境変数 `EXCEL_TEXTCONV_TIMEOUT` を使い、ファイル名を対象の Word に置き換える
+
+#### lazygit で Word の変更を部分ステージする
+
+- 対象の Git リポジトリで、Word の段落・表・書式などの変更を専用画面から部分ステージする
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象は HEAD と index の両方にある既存 `.docx` / `.docm` / `.dotx` / `.dotm`。新規ファイルは全体をコミットしてある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
+- 例の `仕様書.docx` は実際のファイル名に置き換える
+- 対象は Transitional の OOXML。暗号化・`.doc`・Strict・電子署名付きの文書は部分ステージしない
+- 選べる単位と選べない違いは excel-diff の[Word の部分ステージ](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の部分ステージ)、制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 作業場所の変数を設定する（`WORD_REPO` は必ず値を入れる）。
+
+   ```powershell
+   $WORD_REPO = ''                     # ← 対象の Word がある Git のリポジトリの絶対パス。<WORD_REPO>
+   ```
+
+   ```powershell
+   'WORD_REPO = {0}' -f $WORD_REPO
+   ```
+
+   - 最後に値を読み戻して確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. 対象のリポジトリへ移り、lazygit を起動する。
+
+   ```powershell
+   & {
+     if (-not $WORD_REPO) { Write-Error '中断: この項の手順 2 の WORD_REPO が空のまま'; return }
+     Set-Location -LiteralPath $WORD_REPO -ErrorAction Stop
+     lazygit
+   }
+   ```
+
+   - lazygit のファイル一覧が開けばよい
+   - **次の手順は、lazygit の画面で行う**
+
+1. lazygit のファイル一覧で対象を選び、`E` を押す。
+
+   - 端末から開くなら `git word-stage -- "仕様書.docx"`。実際のファイル名に置き換える
+   - 「Word を読み込んでいます。大きい文書では選択画面が開くまで時間がかかります。」が出たら、専用画面が開くまで待つ
+
+1. 専用画面で対象の部分を選び、`Enter` → `Space` を押してハンクを選ぶ。
+
+   - ファイル一覧の `001-本文.word.txt` などから、対象の部分を選ぶ
+   - 左右の矢印で移動し、ステージ済み差分を確認する
+   - 段落・表・セクションの設定・ヘッダーとフッターの段落を選べる。置換は削除・追加の両方を選ぶ
+   - 形が同じ表は、表の形・行・セルごとに選ぶ。行の追加などで形が変わった表と、目次など段落をまたぐフィールドは、まとまりの変更行をすべて選ぶ
+   - 太字や色などの書式だけを反映するなら、書式の目印が異なる行を選ぶ
+   - 「このまとまりの変更行をすべて選んでください。」で止まったら、そのまとまりの変更行をすべて選ぶ
+   - コメント、脚注・文末脚注の参照、グラフ・図形など選べない違いは、元のファイル一覧で全体をステージする
+   - 「段落単位で反映できません」で止まったら、表示された理由を確かめる。index は変わらない
+
+1. 選択を確認して専用画面の `X` で適用し、`q` で戻る。
+
+   - 「N か所の変更を Word のままステージしました。q で元の画面へ戻ってください。」が出ればよい
+   - 目次などを選ぶと「目次などの参照先に合わせて、表示が同じ N か所を取り込み元のものにしました。」も出ることがある。表示が同じ段落を取り込み元のものにしただけで、文字は変わらない
+   - `X` の前に `q` で閉じれば選択を取り消す
+   - 作業中の Word は変えない
+   - 「変更が選択されていません。Enter・Space でハンクを選び、X で反映してください。」が出たら、ハンクを選んで `X` を押す
+   - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
+   - 目次・相互参照・文書内リンクの参照先が無くなると表示されたら、参照先の段落の変更も選ぶ
+   - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
+   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
+
+#### WinMerge で 2 つの Word の変更を取り込む
+
+- 2 つの文書を比べ、取り込み元の段落・表・書式などの変更を選んで取り込み先へ書き込む
+- 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。WinMerge が要る。この項の手順 3 で、無ければ入れる
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
+- 書き換えるのは最初に指定する取り込み先。`.bak` は作らない。取り込み先を Word などで開いていたら、始める前に閉じておく
+- 対象は両方とも Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict・電子署名付きの文書は取り込まない。対応条件と制限は excel-diff の[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
+- この項の手順 5 の画像は、Windows 11 の実機の WinMerge 2.16.58.2 で撮った。文書（`仕様書.docx`・`仕様書-更新.docx`）と値は試験用
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 変数を設定する（`WORD_TARGET`・`WORD_SOURCE` は必ず値を入れる）。
+
+   ```powershell
+   $WORD_TARGET = ''                   # ← 取り込み先（書き換える文書。例: 仕様書.docx）の絶対パス。<WORD_TARGET>
+   ```
+
+   ```powershell
+   $WORD_SOURCE = ''                   # ← 取り込み元の文書（例: 仕様書-更新.docx）の絶対パス。<WORD_SOURCE>
+   ```
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   'WORD_TARGET = {0}' -f $WORD_TARGET
+   'WORD_SOURCE = {0}' -f $WORD_SOURCE
+   ```
+
+   - 最後に値を読み戻し、取り込み先と取り込み元が意図した絶対パスか確かめる
+   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
+
+1. WinMerge が無ければ winget で入れ、版を確かめる。
+
+   ```powershell
+   winget list --id WinMerge.WinMerge --exact --accept-source-agreements
+   if ($LASTEXITCODE -ne 0) {
+     winget install --exact --id WinMerge.WinMerge --source winget --scope user --accept-source-agreements --accept-package-agreements
+   }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   winget list --id WinMerge.WinMerge --exact
+   ```
+
+   - `WinMerge.WinMerge` と版が出ればよい
+   - 導入に失敗したり、最後の一覧に出なかったりしたら、先へ進まず winget の表示を確かめる
+
+1. 取り込み先と取り込み元を指定し、WinMerge を開く。
+
+   ```powershell
+   & {
+     if (-not $WORD_TARGET -or -not $WORD_SOURCE) { Write-Error '中断: この項の手順 2 の WORD_TARGET・WORD_SOURCE が空のまま'; return }
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     git word-merge -- $WORD_TARGET $WORD_SOURCE
+   }
+   ```
+
+   - `書き換えるファイル: …`・`取り込み元: …` のパスを確かめる。端末は WinMerge を閉じるまで待つ
+   - `Word を読み込んでいます。大きい文書では画面が開くまで時間がかかります。` が出たら、画面が開くまで待つ
+   - `取り込めない違い（N か所）: …` が出たら、その違いは選べない。コメント、脚注・文末脚注の参照、グラフ・図形などの違いがあるなら、その表示を確かめる
+   - `差分がありません。取り込み先は変えていません。` か `取り込める差分がありません（取り込めない違い N か所）。取り込み先は変えていません。` なら画面は開かずに終わる。この項の手順 5 は飛ばす
+   - lazygit の専用画面で選ぶときは、この項の手順 4 のコマンドの `--` の前に `--tool lazygit` を付ける。lazygit 0.66.0 以上・delta 0.20.1 以上が要る
+   - 専用画面では `Enter` → `Space` でハンクを選び、`X` で書き込み、`q` で閉じる。置換は削除・追加の両方を選ぶ。`X` の前に `q` なら取り消す
+   - lazygit の専用画面で取り込んだら、この項の手順 5 は飛ばす
+   - WinMerge が開いたら、**次の手順は、WinMerge の画面で行う**
+
+1. WinMerge で取り込む行を右から左へコピーし、上書き保存して窓を閉じる。
+
+   - 左が取り込み先、右が取り込み元（読み取り専用）。「マージ」メニューの「次の差異」（`Alt+↓`）で移り、取り込む行を「左側にコピー」（`Alt+←`）する
+   - 違いを全部取り込むときは、「マージ」メニューの「すべてを左側にコピー」を選び、`本当にすべての差異を他のファイルにコピーしますか?` に「はい」、`選択されたファイルは同一です。` に「OK」を押す。取り込めない違いは、取り込み先のまま残る
+   - 目次や、行を足した表など、`"2/1"` のように番号に `/` が付く行のまとまりは、まとまりの違う行をすべてコピーする
+   - 左の見出しの行や、段落・セルの行を手で書き換えない
+   - 上書き保存（`Ctrl+S`）してから WinMerge の窓を閉じる。保存せずに閉じれば取り込み先は変わらない
+   - 閉じると端末に `N か所の変更を取り込み先へ書き込みました: …` が出ればよい
+   - 目次などを取り込むと、その前に `目次などの参照先に合わせて、表示が同じ N か所を取り込み元のものにしました。` も出ることがある。表示が同じ段落を取り込み元のものにしただけで、文字は変わらない
+   - 何も選ばなければ `取り込む変更が選ばれていません。取り込み先は変えていません。` と出る
+   - `Word の取り込みに失敗しました: …` で止まったら、表示された理由を確かめる
+   - `WinMerge を開き直して直しますか [y/N]:` と聞かれたら、直す場合は `y`、中止する場合は `N` か Enter を押す
+   - `取り込み先を閉じてから Enter で再試行します（q で中止）:` と聞かれたら、Word などを閉じて Enter、取り消すなら `q` を押す
+   - ![WinMerge の Word の取り込みの画面。左の見出しが「取り込み先（書き換える）: 仕様書.docx」、右が「取り込み元: 仕様書-更新.docx」で、「# 部分 1: "本文"」の後ろに違う段落・表のセルの行が色付きで並ぶ。右下の状態行に「RO」](images/windows-setup/excel-diff-winmerge-word-merge-v2.16.58.png)
 
 ---
 
@@ -5395,7 +5603,7 @@
 1. winget で入れたものを上げる。
 
    ```powershell
-   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
+   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ', 'WinMerge.WinMerge') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
    ```
 
    - それぞれ、新しい版が無ければ更新が見つからない旨の行を出して何もしない
