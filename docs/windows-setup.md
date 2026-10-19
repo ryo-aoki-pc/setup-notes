@@ -4089,7 +4089,7 @@
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
+- git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
 
 ### git-delta
 
@@ -4548,6 +4548,7 @@
    ```
 
    - `売上表.xlsx: diff: excel` と、差分に `Sheet:`・セル番地が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\345\243\262\344\270\212\350\241\250.xlsx": diff: excel` のように引用符と 8 進数で出る（同じファイル）
    - lazygit を開き直してファイルを選ぶと、同じ差分を delta で表示する。`|` で内蔵表示にしても同じテキスト差分になる
    - `unset` や別のドライバーなら、そのリポジトリの `.gitattributes`・`.git/info/attributes` の Excel 用の属性を確かめる
    - そのリポジトリだけに適用するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
@@ -5395,7 +5396,7 @@
 1. winget で入れたものを上げる。
 
    ```powershell
-   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
+   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ', 'WinMerge.WinMerge') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
    ```
 
    - それぞれ、新しい版が無ければ更新が見つからない旨の行を出して何もしない

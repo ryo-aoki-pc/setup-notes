@@ -8,7 +8,7 @@
 ## ロールバック
 
 - 残す項目の手順は飛ばす。項目ごとのこの節の手順
-  - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1、git-delta は 2・3、GitHub CLI は 4〜8、Git の設定は 9〜13
+  - Git: [Git の道具を消す](#git-の道具を消す)の手順で、lazygit は 1、git-delta は 2・3、GitHub CLI は 4〜8、Git の設定は 9〜13、excel-diff は 14
   - 端末とエディタ: [端末とエディタを消す](#端末とエディタを消す)の手順で、yazi は 1、自分用の Neovim の設定は 2、Neovim は 3・4、Node.js は 5、デスクトップの等幅のフォントと Ctrl+Alt+T は 6、WezTerm は 7〜9（自分用の設定は 7）、HackGen Console NF は 10
   - ブラウザ: [Firefox を戻す](#firefox-を戻す)の手順 1〜5（AAC・H.264 のための FFmpeg だけなら 1）
   - 表示と入力: [表示と入力を戻す](#表示と入力を戻す)の手順で、ダークモードは 1、ボタンは 2、時計と電池は 3、Files は 4、Alt+Tab は 5、ホットコーナーは 6、Caps Lock は 7、拡大率は 8、Ctrl+Alt+T は 9、Dash のお気に入りは 10、トレイアイコンは 11・12

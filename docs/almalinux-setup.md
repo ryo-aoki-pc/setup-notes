@@ -1304,7 +1304,7 @@
 
 ## Git と開発の道具
 
-- Git・git-delta・GitHub CLI・lazygit・yazi・mdtable・md-format（mdfmt）・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
+- Git・git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
 
 ### Git
 
@@ -1893,12 +1893,14 @@
 1. Excel のある Git リポジトリで差分を確かめる（`売上表.xlsx` は実際のファイル名）。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    git check-attr diff -- "売上表.xlsx"
    git diff -- "売上表.xlsx"
    git diff --cached -- "売上表.xlsx"
    ```
 
    - 最初に `売上表.xlsx: diff: excel` が出て、差分に `Sheet:` とセル番地が出ればよい
+   - Git の `core.quotePath` が既定の `true` なら、日本語のファイル名は `"\345\243\262\344\270\212\350\241\250.xlsx": diff: excel` のように引用符と 8 進数で出る（同じファイル）
    - lazygit を開き直してファイルを選ぶと delta で表示する。`|` の内蔵表示でも Excel のテキスト差分が出る
    - `unset` や別のドライバーが出たら、そのリポジトリの `.gitattributes`・`.git/info/attributes` を確認する
    - そのリポジトリだけに設定するなら、`.git/info/attributes` に `*.[xX][lL][sS][xX] diff=excel` を足す
