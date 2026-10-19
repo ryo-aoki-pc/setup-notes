@@ -8,8 +8,10 @@
 
 - `docs/windows-setup.md` — Windows 11 の手順書。8 のカテゴリ（Windows の導入・基本の設定・デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・アプリ・更新）に置き、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせる
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、WinMerge での 2 つのブックの取り込みを扱う
+    - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「WinMerge で 2 つの Word の変更を取り込む」を置く
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。7 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・再起動の後の確認・更新）に置き、項ごとに前提・実行場所を書いて、変数を項の中に持たせる。実行するホストを区別する
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、lazygit での 2 つのブックの取り込みを扱う
+    - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「lazygit で 2 つの Word の変更を取り込む」を置く
 - `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI）の導入と更新、Remote Control・GNOME 操作・共同作業・Codeg。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11
   - 「Claude Code のフックを入れる」「Windows 11 で Claude Code のフックを入れる」で、端末の窓や TUI への NO_COLOR の引き継ぎを止めるフックを導入・確認する
   - Codeg は常に自動で最新の安定版にする（2026-10-16、利用者の決定）。AlmaLinux 10 と Windows 11 で毎日更新し、失敗時は本体と DB を戻してその版を保留する。復旧は専用 CLI で行い、両 OS の専用ログで結果を確認する。
