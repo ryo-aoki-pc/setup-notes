@@ -5488,11 +5488,11 @@
 
    - [dist/bookmarklet.txt の Raw](https://raw.githubusercontent.com/ryo-aoki-pc/md-table-sticky/main/dist/bookmarklet.txt) を開き、Ctrl+A → Ctrl+C で全部を写す
    - 先頭が `javascript:` の文字列を写せればよい
-   - ブックマークレットはアドレスバーには貼らない（`javascript:` が消される）
+   - ブックマークレットはアドレスバーには貼らない
 
 1. お気に入りの管理を開き、左の「お気に入りバー」を選ぶ。
 
-   - Ctrl+Shift+O を押すと、「お気に入り」のページが開く
+   - アドレスバーに `edge://favorites` と入れて Enter を押すと、「お気に入り」のページが開く
    - 前の版の「GitLab の表を固定」が右の一覧にあれば、その行の右の「×」を押して消す
 
 1. お気に入りを追加する。
@@ -5501,7 +5501,6 @@
    - 「お気に入りの追加」の「名前」に「GitLab の表を固定」と入れ、「URL」にこの項の手順 1 で写した全文を貼って、「保存」を押す
    - 右の一覧に「GitLab の表を固定」が出て、その URL が `javascript:` で始まればよい
    - お気に入りバーが見えなければ、Ctrl+Shift+B で表示する
-   - [GitLab の表を固定して見る](#gitlab-の表を固定して見る)で表示と解除を確かめる
 
 #### GitLab の表を固定して見る
 
@@ -5524,7 +5523,7 @@
    - 0 個なら、[README の「使い方」](https://github.com/ryo-aoki-pc/md-table-sticky#使い方)で対象外の表か確かめる
    - ページを読み込み直したら、この項の手順 2 からやり直す
 
-1. 表の中を縦・横にスクロールし、固定を確認する。
+1. 表の中を縦・横にスクロールし、固定を確かめる。
 
    - 見出しの行と先頭の列が残ればよい
    - 固定されないときは、[README の「使い方」](https://github.com/ryo-aoki-pc/md-table-sticky#使い方)で固定する範囲と対象外の条件を確かめる
