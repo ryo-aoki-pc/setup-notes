@@ -4089,7 +4089,7 @@
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
+- git-delta・GitHub CLI・lazygit・excel-diff・yazi・mdtable・md-format（mdfmt）・md-table-sticky。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
 
 ### git-delta
 
@@ -5473,6 +5473,68 @@
 
 ---
 
+### md-table-sticky
+
+- GitLab の Markdown の表で、先頭行と先頭列を固定してスクロールできるようにするブックマークレット（[md-table-sticky](https://github.com/ryo-aoki-pc/md-table-sticky)）。結合セルがあっても表を崩さずに固定する
+- 見る人はソフトウェアや拡張機能を入れず、ブラウザーにブックマークを 1 つ足す
+
+#### md-table-sticky のブックマークレットを登録する
+
+- この PC の Edge（Microsoft Edge）に「GitLab の表を固定」をお気に入りとして登録する。新しい版が出たときも、この項で作り直す
+- 前提: 無し
+- 実行場所: この PC のデスクトップの Edge（Microsoft Edge）
+
+1. Edge を開き、ブックマークレットの全文をコピーする。
+
+   - [dist/bookmarklet.txt の Raw](https://raw.githubusercontent.com/ryo-aoki-pc/md-table-sticky/main/dist/bookmarklet.txt) を開き、Ctrl+A → Ctrl+C で全部を写す
+   - 先頭が `javascript:` の文字列を写せればよい
+   - ブックマークレットはアドレスバーには貼らない（`javascript:` が消される）
+
+1. お気に入りの管理を開き、左の「お気に入りバー」を選ぶ。
+
+   - Ctrl+Shift+O を押すと、「お気に入り」のページが開く
+   - 前の版の「GitLab の表を固定」が右の一覧にあれば、その行の右の「×」を押して消す
+
+1. お気に入りを追加する。
+
+   - 上の「お気に入りの追加」を押す
+   - 「お気に入りの追加」の「名前」に「GitLab の表を固定」と入れ、「URL」にこの項の手順 1 で写した全文を貼って、「保存」を押す
+   - 右の一覧に「GitLab の表を固定」が出て、その URL が `javascript:` で始まればよい
+   - お気に入りバーが見えなければ、Ctrl+Shift+B で表示する
+   - [GitLab の表を固定して見る](#gitlab-の表を固定して見る)で表示と解除を確かめる
+
+#### GitLab の表を固定して見る
+
+- GitLab の表をスクロールし、見出しの行と先頭の列を残して読む
+- 前提: [md-table-sticky のブックマークレットを登録する](#md-table-sticky-のブックマークレットを登録する)を通してある
+- 実行場所: この PC のデスクトップの Edge（Microsoft Edge）
+- 対象は GitLab 19.5 以降（gitlab.com と self-managed）
+- GitLab 19.5.0 は `thead` のある表で、2 行目以降の見出しと見出しの結合を表示しない
+- 見出しが表示されないときは、[README の「GitLab 19.5.0 の注意」](https://github.com/ryo-aoki-pc/md-table-sticky#gitlab-1950-の注意)を先に確かめる
+
+1. Edge を開き、表のある GitLab のページを表示する。
+
+   - ファイルの画面・Wiki・Issue などを開く
+   - 対象の表が表示されればよい
+
+1. お気に入りバーの「GitLab の表を固定」をクリックする。
+
+   - 右下に「表の固定: N 個の表」と出て、N が 1 以上ならよい
+   - 表示が出なければ、登録したお気に入りの URL が `javascript:` で始まるか確かめる
+   - 0 個なら、[README の「使い方」](https://github.com/ryo-aoki-pc/md-table-sticky#使い方)で対象外の表か確かめる
+   - ページを読み込み直したら、この項の手順 2 からやり直す
+
+1. 表の中を縦・横にスクロールし、固定を確認する。
+
+   - 見出しの行と先頭の列が残ればよい
+   - 固定されないときは、[README の「使い方」](https://github.com/ryo-aoki-pc/md-table-sticky#使い方)で固定する範囲と対象外の条件を確かめる
+
+1. 元に戻すときは、同じお気に入りをもう一度クリックする。
+
+   - 右下に「表の固定を外した」と出ればよい
+
+---
+
 ## アプリ
 
 - Firefox
@@ -5559,6 +5621,7 @@
 - 自分用の設定のうち、WezTerm・Neovim はそれぞれのリポジトリの更新で上げ、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 - excel-diff は、[excel-diff を導入・更新する](#excel-diff-を導入更新する)の更新の箇条書きで上げる
+- md-table-sticky は、[md-table-sticky のブックマークレットを登録する](#md-table-sticky-のブックマークレットを登録する)で、お気に入りを作り直す
 - SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
