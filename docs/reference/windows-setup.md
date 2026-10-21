@@ -1075,6 +1075,18 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
+### GitLab の表を固定して見る / 手順 3: 補足: 全高の表
+
+- GitLab の表の下の「Show full table」は、そのブラウザーで見る全ページの表を全高にし、GitLab がその選択を覚える。全高の表の枠は縦にスクロールしないので、ページを縦にスクロールしても見出しの行は止まらない
+- 「枠に収める」は、その表の枠だけを画面の高さの 70% に収め、枠の中で見出しの行を止める。GitLab の全高の設定は変えない
+- 「Collapse table」で全高を戻すと、「枠に収める」は消える
+- 「枠に収める」「強調」「詰める」は初めはチェックなしで、どれも保存しない
+
+### GitLab の表を固定して見る / 手順 4: 補足: Ctrl+F で探した文字
+
+- 固定した行の高さと列の幅だけ、表の枠に `scroll-padding` を付ける。ブラウザーが検索やフォーカスの移動で枠を動かすとき、固定した部分の下を見える範囲に数えない
+
+[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/md-table-sticky/docs/verification/readme.md)
 ### 選択した方針
 
 #### プライバシーと広告の表示を切る
