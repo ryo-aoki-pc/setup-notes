@@ -221,6 +221,55 @@
    - `END` でページのいちばん下へ、`HOME` でいちばん上へ動く
    - `MOZ_USE_XINPUT2=1` を付けずに起動した Firefox で文字が選ばれるときは、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で閉じ、同じ項の手順 1 で起動し直す
 
+#### Termux の Firefox: ダークテーマにする
+
+- Firefox の画面と、ダーク表示に対応したサイトを暗い色にする
+- 前提: [Termux の Firefox](#termux-の-firefox)を通してある
+- 実行場所: スマートフォンの Termux と Termux:X11
+- 画面は Android のエミュレーター（x86_64、Android 17、Firefox 158.0.1）で撮った。画面内の値は試験用
+- この項の手順 2 は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で Firefox を閉じてから貼る
+- [補足](reference/termux-firefox.md#termux-の-firefox-ダークテーマにする--手順-2-補足-テーマの指定と-userjs)
+
+1. Termux で、変数を設定する。
+
+   ```bash
+   FF_DARK='1'
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'FF_DARK=%s\n' "${FF_DARK}"
+   ```
+
+   - 暗い表示にするときは `FF_DARK='1'` のままでよい。明るい表示に戻すときは `'0'` に変える
+   - `FF_DARK=1`（明るい表示に戻すときは `FF_DARK=0`）と出ればよい
+
+1. Firefox を閉じてから、Termux でダークテーマを設定する。
+
+   ```bash
+   if [ -z "${FF_DARK}" ]; then echo '中断: FF_DARK が空のまま' >&2
+   elif pgrep -x firefox >/dev/null; then echo '中断: Firefox が開いている。Firefox のメニューの Exit で閉じてから貼り直す' >&2
+   else
+     p=$(ls -d ~/.config/mozilla/firefox/*.default-default)
+     if [ ! -d "$p" ]; then echo '中断: Firefox のプロファイルを 1 つに特定できない' >&2; else
+       if [ -f "$p/user.js" ]; then
+         sed -i -e '/^[[:space:]]*user_pref("ui\.systemUsesDarkTheme",/d' "$p/user.js"
+       fi &&
+       printf 'user_pref("ui.systemUsesDarkTheme", %s);\n' "${FF_DARK}" >> "$p/user.js"
+       printf '\n\033[7m 確認 \033[0m\n'
+       grep 'ui.systemUsesDarkTheme' "$p/user.js"
+     fi
+   fi
+   ```
+
+   - `user_pref("ui.systemUsesDarkTheme", 1);` が 1 行出ればよい（明るい表示に戻すときは `user_pref("ui.systemUsesDarkTheme", 0);`）
+   - `中断:` が出たら、Firefox を閉じているかと、この項の手順 1 の値を確かめてから貼り直す
+
+1. Termux:X11 の画面で、Firefox とサイトの色を確かめる。
+
+   - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 か、[Termux の Firefox: ホーム画面のアイコンで起動する](#termux-の-firefox-ホーム画面のアイコンで起動する)で起動する
+   - Firefox のツールバー・タブ・「New Tab」が暗い色になればよい
+   - ダーク表示に対応したサイトは暗い色になる。対応していないサイトは明るいまま
+   - 明るい表示に戻すときは、この項の手順 1 で `FF_DARK='0'` にし、Firefox を閉じてこの項の手順 2 を貼り直してから起動する
+   - ![ツールバー・タブ・「New Tab」が暗い色の Firefox](images/android/termux-firefox-dark-v158.0.1.png)
+
 #### Termux の Firefox: 日本語の表示と入力
 
 - 日本語のフォントとページの優先言語を設定し、Gboard で日本語を入力する
