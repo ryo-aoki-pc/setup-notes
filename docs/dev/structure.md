@@ -47,8 +47,9 @@
 - `docs/dropbox.md` — Dropbox の手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に「Dropbox」「Dropbox と rclone」の用途の項を置く
   - 検証記録・参考資料・extra は、用途ごとに `dropbox`・`dropbox-rclone` を使う
 - `docs/android.md` — Android のスマートフォンの手順書（利用者の決定で足した 14 冊目の正本）。`## Android で使う` の下に「Termux の Firefox」の用途の項を置く
-  - 「Termux の Firefox」は、Termux のネイティブの `firefox`（PC 版）を Termux:X11 に dwm と出す方式だけを扱う（利用者の決定。proot の Debian・Firefox for Android のデスクトップ版サイト・PC の Firefox を RDP で使う形は、参考資料の「選択した方針」）。導入・起動と終了・画面の倍率とタッチ・日本語の表示と入力・音・ルート証明書を入れる・強制終了されたとき・更新の項を置く。ロールバックとブックマークレット・拡張機能は置かない（利用者の選択）
-  - 起動は `termux-x11 :0 -xstartup "sh -c 'dwm & exec firefox'"` を裏で動かし、`am start` で Termux:X11 を前に出す。終了は Firefox のメニューの「Exit」（`termux-x11` と dwm も止まる）。設定は Firefox を閉じてから、プロファイル（`~/.config/mozilla/firefox/*.default-default`）の `user.js` に、同じキーの行を消してから足す
+  - 「Termux の Firefox」は、Termux のネイティブの `firefox`（PC 版）を Termux:X11 に dwm と出す方式だけを扱う（利用者の決定。proot の Debian・Firefox for Android のデスクトップ版サイト・PC の Firefox を RDP で使う形は、参考資料の「選択した方針」）。導入・起動と終了・ホーム画面のアイコンで起動する・画面の倍率とタッチ・日本語の表示と入力・音・ルート証明書を入れる・強制終了されたとき・更新の項を置く。ロールバックとブックマークレット・拡張機能は置かない（利用者の選択）
+  - 起動は `termux-x11 :0 -xstartup "sh -c 'dwm & MOZ_USE_XINPUT2=1 exec firefox'"` を裏で動かし、`am start` で Termux:X11 を前に出す。終了は Firefox のメニューの「Exit」（`termux-x11` と dwm も止まる）。設定は Firefox を閉じてから、プロファイル（`~/.config/mozilla/firefox/*.default-default`）の `user.js` に、同じキーの行を消してから足す
+  - ホーム画面のアイコンは Termux:Widget の `~/.shortcuts/tasks/Firefox` を裏で動かす。スクリプトは `MOZ_USE_XINPUT2=1 GDK_SCALE=2` を付け、`user.js` の倍率があればそちらを優先する
   - ルート証明書は、Termux の `curl -sk` と `openssl` で取って指紋を照合し、`certutil -A -t 'C,,'` で取り込む。ホストの指紋は almalinux-setup.md の「Caddy: 端末にルート証明書を入れる」と ai-agents.md の「Codeg: Windows 11 で端末にルート証明書を入れる」の手順 1
   - 画面の操作の手順に、Android のエミュレーター（x86_64、Android 17）で撮った画面を 1 枚ずつ貼る（`docs/images/android/`、利用者の依頼）
   - 検証記録・参考資料・extra は `termux-firefox` を使う。extra は注意点だけ

@@ -57,7 +57,7 @@
 1. Termux で、Firefox を起動する。
 
    ```bash
-   termux-x11 :0 -xstartup "sh -c 'dwm & exec firefox'" >/dev/null 2>&1 &
+   termux-x11 :0 -xstartup "sh -c 'dwm & MOZ_USE_XINPUT2=1 exec firefox'" >/dev/null 2>&1 &
    sleep 3; am start -n com.termux.x11/.MainActivity
    ```
 
@@ -85,12 +85,13 @@
 1. Termux で、Firefox を起動する。
 
    ```bash
-   termux-x11 :0 -xstartup "sh -c 'dwm & exec firefox'" >/dev/null 2>&1 &
+   termux-x11 :0 -xstartup "sh -c 'dwm & MOZ_USE_XINPUT2=1 exec firefox'" >/dev/null 2>&1 &
    sleep 3; am start -n com.termux.x11/.MainActivity
    ```
 
    - Termux:X11 の画面が前に出て、Firefox が開く
    - 「Make Firefox your default browser?」が出たら「Not now」を押す
+   - ページは 1 本指でなぞってスクロールする（[Termux の Firefox: 画面の倍率とタッチ](#termux-の-firefox-画面の倍率とタッチ)の手順 4）
 
 1. Firefox のメニューで、Firefox を終了する。
 
@@ -99,9 +100,73 @@
    - 終了にはメニューの「Exit」を使い、`pkill` で止めない
    - ![Firefox の「≡」メニューのいちばん下にある「Exit Ctrl+Q」](images/android/termux-firefox-exit-menu-v158.0.1.png)
 
+#### Termux の Firefox: ホーム画面のアイコンで起動する
+
+- ホーム画面のアイコンから、PC 版の Firefox を倍率 2 倍で起動する。`user.js` に倍率を設定してあるときは、そちらが優先される
+- 前提: [Termux の Firefox](#termux-の-firefox)を通してある
+- 実行場所: スマートフォンの Termux・Android の設定・ホーム画面
+- 画面は Android のエミュレーター（x86_64、Android 17、Termux:Widget v0.15.0）で撮った。画面内の値は試験用
+
+> [!WARNING]
+> この項の手順 3 で許可する「他のアプリの上に重ねて表示」は、Termux がほかのアプリの画面に重ねて表示できるようになる権限。要らなくなったら、同じ画面でオフに戻す（[補足](reference/termux-firefox.md#termux-の-firefox-ホーム画面のアイコンで起動する--手順-3-補足-裏からの画面の起動と権限)）。
+
+1. スマートフォンで、GitHub のリリースから Termux:Widget の APK を入れる。
+
+   - [termux-widget のリリース](https://github.com/termux/termux-widget/releases)の `termux-widget-app_v<版>+github.debug.apk` をダウンロードする
+   - F-Droid の Termux を使っているときは、F-Droid の Termux:Widget を入れる
+   - APK の入れ方は、[Termux の Firefox](#termux-の-firefox)の手順 1 と同じ
+
+1. Termux で、起動のスクリプトとアイコンを置く。
+
+   ```bash
+   mkdir -p ~/.shortcuts/tasks ~/.shortcuts/icons
+   cat > ~/.shortcuts/tasks/Firefox <<'EOF'
+   #!/data/data/com.termux/files/usr/bin/sh
+   # ホーム画面のアイコンから、PC 版の Firefox を倍率 2 倍で起動する（setup-notes の docs/android.md）
+   if ! pgrep -f 'termux-x11 com.termux.x11 :0' >/dev/null; then
+     termux-x11 :0 -xstartup "sh -c 'dwm & MOZ_USE_XINPUT2=1 GDK_SCALE=2 exec firefox'" >/dev/null 2>&1 &
+     sleep 3
+   fi
+   am start -n com.termux.x11/.MainActivity >/dev/null
+   EOF
+   cp "$PREFIX/share/icons/hicolor/128x128/apps/firefox.png" ~/.shortcuts/icons/Firefox.png
+   chmod 700 ~/.shortcuts ~/.shortcuts/tasks ~/.shortcuts/tasks/Firefox
+   chmod -R a-x,u=rwX,go-rwx ~/.shortcuts/icons
+   printf '\n\033[7m 確認 \033[0m\n'
+   ls -l ~/.shortcuts/tasks ~/.shortcuts/icons
+   ```
+
+   - `~/.shortcuts/tasks` の `Firefox` が `-rwx------` ならよい
+   - `~/.shortcuts/icons` の `Firefox.png` が `-rw-------` ならよい
+
+1. Android の設定で、Termux に「他のアプリの上に重ねて表示」を許可する。
+
+   - 設定 →「アプリ」→「特別なアプリアクセス」→「他のアプリの上に重ねて表示」→「Termux」→「他のアプリの上に重ねて表示できるようにする」をオンにする
+   - 「アプリはアクセスを拒否されました」が出たら「閉じる」を押し、設定 →「アプリ」→「Termux」（アプリ情報）→ 右上の「︙」→「制限付き設定を許可」を押す
+   - 「制限付き設定を許可」を押した後は、もう一度「他のアプリの上に重ねて表示できるようにする」をオンにする。画面ロックの解除を求められたら解除する
+   - 「他のアプリの上に重ねて表示できるようにする」がオンならよい
+   - ![Termux の「他のアプリの上に重ねて表示できるようにする」がオンになっている画面](images/android/termux-firefox-overlay-android-17.png)
+
+1. ホーム画面に、Firefox のショートカットを置く。
+
+   - ホーム画面の何も無い所を長押し →「ウィジェット」→ 一覧の「Termux:Widget」の右の矢印を押す
+   - 「Termux shortcut」（1 × 1）→「Termux shortcutウィジェットを追加」を押す
+   - スクリプトの選択の画面で「tasks/」→「Firefox」を押す
+   - Firefox のアイコンと「Firefox 1 × 1」が出たら「ホーム画面に追加」→「ホーム画面に追加」を押す
+   - Firefox のロゴに Termux の小さな印が付いた「Firefox」のアイコンがホーム画面にできればよい
+   - ![Termux:Widget の Firefox のアイコンと「Firefox 1 × 1」「ホーム画面に追加」](images/android/termux-firefox-widget-add-v0.15.0.png)
+
+1. ホーム画面の Firefox のアイコンを押し、起動を確認する。
+
+   - Firefox を閉じた状態で押す。Termux:X11 の画面に倍率 2 倍の Firefox の「New Tab」が出ればよい（`user.js` に倍率があれば、その値になる）
+   - Firefox が既に開いているときは、Termux:X11 の画面が前に出ればよい
+   - Termux:X11 の画面が出ないときは、この項の手順 3 の許可を確かめる
+   - 終了は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 のメニューの「Exit」を使う
+   - ![ホーム画面のアイコンの列の右端に、Termux の印が付いた Firefox のロゴの「Firefox」](images/android/termux-firefox-home-icon-v0.15.0.png)
+
 #### Termux の Firefox: 画面の倍率とタッチ
 
-- Firefox の文字の大きさを設定し、画面に触れたときの操作を確かめる
+- Firefox の文字の大きさを設定し、タッチとページのスクロールの操作を確かめる
 - 前提: [Termux の Firefox](#termux-の-firefox)を通してある
 - 実行場所: スマートフォンの Termux と Termux:X11
 - この項の手順 2 は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で Firefox を閉じてから貼る
@@ -145,6 +210,16 @@
    - 横向きにすると、広い幅で表示される
    - 画面の下のキーの帯の右側にあるキーボードのボタンで、Android のキーボードを出す。戻るボタンで隠す
    - ![倍率 2.0 の Firefox の「New Tab」](images/android/termux-firefox-scale-v158.0.1.png)
+
+1. Termux:X11 の画面で、タッチ操作でページをスクロールする。
+
+   - ページの上に 1 本指を置き、上へなぞるとページの下へ進み、下へなぞると上へ戻る（スマートフォンのブラウザと同じ）
+   - 指を離すと、勢いで少し流れる
+   - タップはクリックになり、リンクやボタンを押せる
+   - キーの帯で動かすときは、先にページの本文を一度タップする
+   - 画面の下のキーの帯の `PGDN` で 1 画面下へ、`PGUP` で 1 画面上へ動く
+   - `END` でページのいちばん下へ、`HOME` でいちばん上へ動く
+   - `MOZ_USE_XINPUT2=1` を付けずに起動した Firefox で文字が選ばれるときは、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で閉じ、同じ項の手順 1 で起動し直す
 
 #### Termux の Firefox: 日本語の表示と入力
 
@@ -289,7 +364,7 @@
 
 #### Termux の Firefox: 更新
 
-- Termux のパッケージと Termux:X11 の APK を更新する
+- Termux のパッケージと、Termux:X11・Termux:Widget の APK を更新する
 - 前提: [Termux の Firefox](#termux-の-firefox)を通してある
 - 実行場所: スマートフォンの Termux と Android の画面
 
@@ -306,6 +381,13 @@
 1. スマートフォンで、Termux:X11 の nightly の APK を入れ直して更新する。
 
    - GitHub の nightly から `termux-x11-universal-sharedUid-debug.apk` をダウンロードして開く
+   - 「このアプリを更新しますか？」→「更新」を押す
+   - 「アプリを更新しました」と出ればよい
+
+1. Termux:Widget を入れているときは、スマートフォンで APK を入れ直して更新する。
+
+   - [termux-widget のリリース](https://github.com/termux/termux-widget/releases)から `termux-widget-app_v<版>+github.debug.apk` をダウンロードして開く
+   - F-Droid の Termux を使っているときは、F-Droid の Termux:Widget を入れる
    - 「このアプリを更新しますか？」→「更新」を押す
    - 「アプリを更新しました」と出ればよい
 
