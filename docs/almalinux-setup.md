@@ -3911,6 +3911,7 @@
 - 配る URL は、そのホストのどのサイトでもよい。`https://<SERVER_IP>:<サイトのポート>/caddy-root.crt`（Forgejo は既定 3000、Codeg は 3443）を使う
 - **必ず指紋を照合する**。この項の手順 1 でホストに出した指紋と、端末に出た指紋が同じことを確かめる
 - Android のスマートフォンでは、サイトを Chrome で開く。Android の Firefox は使わない（[補足](reference/caddy.md#caddy-端末にルート証明書を入れる--手順-25-補足-android-のブラウザと警告の許可)）
+- Termux の PC 版の Firefox には、この項の手順 2 ではなく、[Android のセットアップの「Termux の Firefox: ルート証明書を入れる」](android.md#termux-の-firefox-ルート証明書を入れる)で入れる
 
 1. ホストで、ルート証明書の名前と指紋を表示する。
 
