@@ -1914,7 +1914,7 @@
 - lazygit の専用画面で、Excel のブックのセルの変更を選んで index に入れる
 - 前提: [lazygit](#lazygit)・[git-delta](#git-delta)・[excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）で、ブックのある Git リポジトリを開いた lazygit。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm`
+- 対象は HEAD と index にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam` / `.xlsb`
 - 新規ファイルは全体をコミットしてから使う
 
 1. lazygit のファイル一覧で対象を選び、`E` を押す。
@@ -1958,7 +1958,9 @@
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)・[lazygit](#lazygit)・[git-delta](#git-delta)を通してある（lazygit 0.66.0 以上・delta 0.20.1 以上）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。Git リポジトリの外でも使える
 - 書き換えるのは最初に指定する取り込み先で、`.bak` は作らない。取り込み先を Excel などで開いていたら閉じておく
-- 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` で、シートの構成が同じブック。対応条件と制限は[excel-diff の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を確認する
+- 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam` / `.xlsb` で、シートの構成が同じブック
+- xlsb 同士、または xlsx 系（`.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam`）同士を指定する
+- 対応条件と制限は[excel-diff の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を確認する
 
 1. 変数を設定する（`EXCEL_TARGET`・`EXCEL_SOURCE` は必ず値を入れる）。
 
