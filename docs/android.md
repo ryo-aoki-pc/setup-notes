@@ -33,7 +33,7 @@
    - F-Droid の Termux を使っているときは、Termux:X11 は sharedUid の付かない `termux-x11-universal-debug.apk` にする。Google Play の Termux は使わない
    - ダウンロードした APK を開く。提供元の許可を求められたら許可し、「続行」→「インストール」を押す
    - 「Google Play プロテクト」の「安全ではないアプリをブロックしました」が出たら、「詳細」→「インストールする」を押す（2 つとも出る）
-   - Termux:X11 の APK の「アプリで開く」では、「パッケージ インストーラ」→「1 回のみ」を選ぶ
+   - Termux:X11 の APK を開いて、開くアプリを聞かれたら、「パッケージ インストーラ」（「パッケージ インストーラで開く」）の「1 回のみ」を押す
    - ![Google Play プロテクトの「安全ではないアプリをブロックしました」と「インストールする」](images/android/termux-firefox-play-protect-v0.118.3.png)
 
 1. Termux を開き、パッケージを更新する。
@@ -61,11 +61,18 @@
    sleep 3; am start -n com.termux.x11/.MainActivity
    ```
 
-   - Termux:X11 の画面が前に出る
+   - Termux:X11 の画面が前に出て、Firefox の「Welcome to Firefox」が開く
+
+1. Termux:X11 の設定で、タッチの方式を Direct touch にする。
+
+   - Termux:X11 の通知 →「Preferences」→「Pointer」→「Touchscreen input mode」→「Direct touch」を選ぶ
+   - 戻るボタンで Termux:X11 の画面に戻る
+   - ![「Touchscreen input mode」の「Trackpad」「Simulated touchscreen」「Direct touch」](images/android/termux-firefox-x11-touch-mode-v1.03.01.png)
 
 1. Termux:X11 の画面で、Firefox の初めての起動を確かめる。
 
-   - 「Welcome to Firefox」の「Skip this step」を押す
+   - 「Welcome to Firefox」の画面が 5 枚続く。「Skip this step」を押して進め、最後の画面で「Start browsing」を押す
+   - 「New Tab」が開けばよい
    - 文字が小さいときは、[Termux の Firefox: 画面の倍率とタッチ](#termux-の-firefox-画面の倍率とタッチ)を通す
    - ![画面いっぱいの Firefox の「Welcome to Firefox」と「Skip this step」](images/android/termux-firefox-first-start-v158.0.1.png)
 
@@ -94,7 +101,7 @@
 
 #### Termux の Firefox: 画面の倍率とタッチ
 
-- Firefox の文字の大きさと、画面に触れたときの操作を設定する
+- Firefox の文字の大きさを設定し、画面に触れたときの操作を確かめる
 - 前提: [Termux の Firefox](#termux-の-firefox)を通してある
 - 実行場所: スマートフォンの Termux と Termux:X11
 - この項の手順 2 は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で Firefox を閉じてから貼る
@@ -130,15 +137,11 @@
    - `layout.css.devPixelsPerPx` と `browser.shell.checkDefaultBrowser` の行が 1 つずつ出ればよい
    - `中断:` が出たら、Firefox を閉じているかと、この項の手順 1 の値を確かめてから貼り直す
 
-1. Termux:X11 の設定で、Direct touch を選ぶ。
-
-   - Termux:X11 の通知 →「Preferences」→「Pointer」→「Touchscreen input mode」→「Direct touch」を選ぶ
-   - ![「Touchscreen input mode」の「Trackpad」「Simulated touchscreen」「Direct touch」](images/android/termux-firefox-x11-touch-mode-v1.03.01.png)
-
 1. Termux:X11 の画面で、Firefox の大きさとタッチの操作を確かめる。
 
    - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 で起動する
    - Firefox の文字が読める大きさになり、指で押した場所がクリックになればよい
+   - 押した場所と違う所が押されるときは、[Termux の Firefox](#termux-の-firefox)の手順 5 でタッチの方式を Direct touch にする
    - 横向きにすると、広い幅で表示される
    - 画面の下のキーの帯の右側にあるキーボードのボタンで、Android のキーボードを出す。戻るボタンで隠す
    - ![倍率 2.0 の Firefox の「New Tab」](images/android/termux-firefox-scale-v158.0.1.png)
@@ -185,15 +188,21 @@
 - 前提: [Termux の Firefox](#termux-の-firefox)を通してある
 - 実行場所: スマートフォンの Termux と Termux:X11
 
+1. Termux:X11 の画面で、Firefox で音声を再生する。
+
+   - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 で起動する
+   - Firefox で[2 分半の音声ファイル](https://upload.wikimedia.org/wikipedia/commons/9/9d/Bach_-_Cello_Suite_no._1_in_G_major%2C_BWV_1007_-_I._Pr%C3%A9lude.ogg)を開く。再生が始まらなければ、再生のボタンを押す
+   - **次の手順は、再生している間に Termux に切り替えて貼る**
+
 1. Firefox で音声を再生している間に、Termux で出力先を確かめる。
 
    ```bash
    pactl list short sinks
    ```
 
-   - Firefox で [音声ファイル](https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg)を開いている間に貼る
    - `OpenSL_ES_sink` の行が `RUNNING` ならよい
    - PulseAudio を手で起動する必要はない
+   - `RUNNING` なのに音が聞こえないときは、[補足](reference/termux-firefox.md#termux-の-firefox-音--手順-2-補足-pulseaudio-の自動起動)の `module-aaudio-sink` を読む
 
 #### Termux の Firefox: ルート証明書を入れる
 
@@ -220,16 +229,17 @@
 
    ```bash
    if [ -z "${CADDY_URL}" ]; then echo '中断: CADDY_URL が空のまま' >&2; else
-     pkg install -y nss-utils openssl-tool
-     curl -sk -o ~/caddy-root.crt "${CADDY_URL}/caddy-root.crt"
-     printf '\n\033[7m 確認 \033[0m\n'
-     openssl x509 -in ~/caddy-root.crt -noout -subject -enddate -fingerprint -sha256
+     pkg install -y nss-utils openssl-tool &&
+     curl -sSkf -o ~/caddy-root.crt "${CADDY_URL}/caddy-root.crt" && {
+       printf '\n\033[7m 確認 \033[0m\n'
+       openssl x509 -in ~/caddy-root.crt -noout -subject -enddate -fingerprint -sha256
+     }
    fi
    ```
 
    - `subject=`・`notAfter=`・`sha256 Fingerprint=` が出ればよい
    - ホスト側で控えた SHA-256 の指紋と同じなら、この項の手順 3 へ進む。違えば取り込まない
-   - 取得や表示に失敗したら中断する
+   - `curl:` で始まる行が出て「確認」が出ないときは、`CADDY_URL` とつながる道（WireGuard など）を確かめてから貼り直す
 
 1. Firefox を閉じてから、Termux でルート証明書を取り込む。
 
@@ -237,20 +247,24 @@
    if pgrep -x firefox >/dev/null; then echo '中断: Firefox が開いている。Firefox のメニューの Exit で閉じてから貼り直す' >&2; else
      p=$(ls -d ~/.config/mozilla/firefox/*.default-default)
      n=$(openssl x509 -in ~/caddy-root.crt -noout -subject -nameopt multiline | sed -n 's/^ *commonName *= //p')
-     certutil -A -d "sql:$p" -n "$n" -t 'C,,' -i ~/caddy-root.crt
-     printf '\n\033[7m 確認 \033[0m\n'
-     certutil -L -d "sql:$p"
+     if [ ! -d "$p" ]; then echo '中断: Firefox のプロファイルを 1 つに特定できない' >&2
+     elif [ -z "$n" ]; then echo '中断: ルート証明書から名前を取れない。この項の手順 2 を貼り直す' >&2
+     else
+       certutil -A -d "sql:$p" -n "$n" -t 'C,,' -i ~/caddy-root.crt
+       printf '\n\033[7m 確認 \033[0m\n'
+       certutil -L -d "sql:$p"
+     fi
    fi
    ```
 
    - 入れたルート証明書の名前と `C,,` が出ればよい
-   - `中断:` が出たら、Firefox のメニューの「Exit」で閉じてから貼り直す
+   - `中断:` が出たら、その内容に従って直してから貼り直す
 
 1. Firefox を起動し、通常のタブでサイトを開いて確かめる。
 
    - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 で起動する
    - 通常のタブで、この項の手順 1 の URL を開く。Codeg は `https://<SERVER_IP>:3443/api/` を開く
-   - 証明書の警告が出ずにサイトが開けばよい。Codeg はログインの画面（`Login - codeg`）になる
+   - 証明書の警告が出ずにサイトが開けばよい。Codeg はログインの画面（アクセストークンの入力欄）になる
    - 12 時間以上たってから、もう一度通常のタブで開き、警告が出ないことを確かめる
    - 警告が出たら進まず、この項の手順 2 の指紋から確かめ直す
 

@@ -32,7 +32,7 @@
 - どちらの APK も targetSdk は 28。Android 17 の Play プロテクトは「Android の以前のバージョンを対象」としてブロックし、「詳細」の「インストールする」で入った。入れ直し（更新）では止めなかった
 - ブラウザから APK を開いたときの提供元の許可の画面は、エミュレーターでは確かめていない（「ファイル」アプリから開いた）
 
-### Termux の Firefox / 手順 3〜5: 補足: dwm と Firefox の画面
+### Termux の Firefox / 手順 3・4・6: 補足: dwm と Firefox の画面
 
 - ウィンドウマネージャー無しでは、Firefox の窓が画面の左上の一部にしか広がらなかった。dwm を使うと画面いっぱいになり、上に dwm の細い帯が出る
 - 導入の後の Termux の中（`$PREFIX`）は 1.5 GB ほどだった（Firefox の依存の mesa・llvm・gtk3 などを含む）
@@ -51,10 +51,15 @@
 - `user.js` は起動のたびに読まれ、`prefs.js` に写る。`layout.css.devPixelsPerPx` の `2.0` は、縦向きで 540、横向きで 1200 の CSS の画素の幅になる
 - `browser.shell.checkDefaultBrowser` を `false` にすると、起動時の「Make Firefox your default browser?」が出なくなる
 
-### Termux の Firefox: 画面の倍率とタッチ / 手順 3・4: 補足: タッチと画面の向き
+### Termux の Firefox / 手順 5: 補足: タッチの方式
 
-- Termux:X11 の「Touchscreen input mode」は「Trackpad」が既定。「Direct touch」にすると、指で押した場所がそのままクリックになる
+- Termux:X11 の「Touchscreen input mode」は「Trackpad」が既定。画面をタッチパッドとして使うので、押した場所ではなく、ポインターのある場所が押される（初めての起動で、「Skip this step」が押せなかった）
+- 「Direct touch」にすると、指で押した場所がそのままクリックになる
+
+### Termux の Firefox: 画面の倍率とタッチ / 手順 3: 補足: 画面の向き
+
 - 「Output」の「Display resolution mode」は `native`、「Screen orientation」は `auto` が既定。手順ではこの 2 つを変えない
+- 横向きにすると、dwm が窓を広げ直し、倍率 2.0 で 1200 の CSS の画素の幅になった（Wikipedia が横のメニュー付きの形で出た）
 
 ### Termux の Firefox: 日本語の表示と入力 / 手順 1: 補足: フォントと言語
 
@@ -67,11 +72,13 @@
 - Termux のパッケージには、Linux の側の日本語の IME（fcitx5 の mozc・anthy）が無い
 - 「Enforce char based input」の説明は「Suppresses suggestions, predictive typing and CJK languages」。既定はオフで、手順もオフのままにする
 
-### Termux の Firefox: 音 / 手順 1: 補足: PulseAudio の自動起動
+### Termux の Firefox: 音 / 手順 2: 補足: PulseAudio の自動起動
 
 - PulseAudio は Firefox の依存で入る。Termux の既定の設定は、Android に音を出す `module-sles-sink` を読む
+- `pulseaudio` のパッケージは、入れるときに「Android 8 以降で音が出ないときは、`$PREFIX/etc/pulse/default.pa` の `module-sles-sink` を `module-aaudio-sink` に変える」と案内する。エミュレーターでは、変えずに `RUNNING` になった（変えた形は確かめていない）
 - 音声のファイルを開くと、Firefox が `pulseaudio --start --log-target=syslog` で自動で起動した
 - エミュレーターでは、耳で音を聞いていない。出力先の `RUNNING` と、`Firefox Web Browser` の入力を確かめた
+- 6 秒の音声では、Termux に切り替えて貼る間に再生が終わり、`IDLE` になった。手順では 2 分半の音声を使う。Termux:X11 が裏に回っても、再生は続いた
 
 ### Termux の Firefox: ルート証明書を入れる / 手順 1〜4: 補足: 取り込み先と確認の範囲
 
@@ -96,6 +103,6 @@
 - [termux-packages の Firefox](https://github.com/termux/termux-packages/tree/master/x11-packages/firefox)
 - [proot-distro](https://github.com/termux/proot-distro)
 - [agnostic-apollo の Android-Docs（phantom process）](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)
-- [音声の確かめに使う Example.ogg](https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg)
+- [音声の確かめに使うファイル（Wikimedia Commons、2 分 30 秒）](https://commons.wikimedia.org/wiki/File:Bach_-_Cello_Suite_no._1_in_G_major,_BWV_1007_-_I._Pr%C3%A9lude.ogg)
 - [AlmaLinux 10 の「Caddy: 端末にルート証明書を入れる」](../almalinux-setup.md#caddy-端末にルート証明書を入れる)
 - [Codeg: Windows 11 で端末にルート証明書を入れる](../ai-agents.md#codeg-windows-11-で端末にルート証明書を入れる)

@@ -3863,7 +3863,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Codeg を置いた Windows のホストごとに、認証局のルート証明書を接続する端末に入れる
 - ルート証明書は `https://<ホストの IP>:3443/caddy-root.crt` で配る。入れる前か後に、この項の手順 1 の指紋と必ず照合する
 - Android のスマートフォンでは、Codeg を Chrome で開く。Android の Firefox は使わない（[補足](reference/codeg.md#codeg--windows-11-で端末にルート証明書を入れる--手順-25-補足-android-のブラウザと-service-worker)）
-- Termux の PC 版の Firefox には、この項の手順 2 ではなく、[Termux の Firefox: ルート証明書を入れる](android.md#termux-の-firefox-ルート証明書を入れる)で入れる
+- Termux の PC 版の Firefox には、この項の手順 2 ではなく、[Android のセットアップの「Termux の Firefox: ルート証明書を入れる」](android.md#termux-の-firefox-ルート証明書を入れる)で入れる
 
 1. Windows 11 のホストのときだけ、ホストで、ルート証明書の名前と指紋を表示する。
    ```powershell
