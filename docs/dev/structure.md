@@ -46,6 +46,12 @@
   - 検証記録・参考資料・extra は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う
 - `docs/dropbox.md` — Dropbox の手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に「Dropbox」「Dropbox と rclone」の用途の項を置く
   - 検証記録・参考資料・extra は、用途ごとに `dropbox`・`dropbox-rclone` を使う
+- `docs/android.md` — Android のスマートフォンの手順書（利用者の決定で足した 14 冊目の正本）。`## Android で使う` の下に「Termux の Firefox」の用途の項を置く
+  - 「Termux の Firefox」は、Termux のネイティブの `firefox`（PC 版）を Termux:X11 に dwm と出す方式だけを扱う（利用者の決定。proot の Debian・Firefox for Android のデスクトップ版サイト・PC の Firefox を RDP で使う形は、参考資料の「選択した方針」）。導入・起動と終了・画面の倍率とタッチ・日本語の表示と入力・音・ルート証明書を入れる・強制終了されたとき・更新の項を置く。ロールバックとブックマークレット・拡張機能は置かない（利用者の選択）
+  - 起動は `termux-x11 :0 -xstartup "sh -c 'dwm & exec firefox'"` を裏で動かし、`am start` で Termux:X11 を前に出す。終了は Firefox のメニューの「Exit」（`termux-x11` と dwm も止まる）。設定は Firefox を閉じてから、プロファイル（`~/.config/mozilla/firefox/*.default-default`）の `user.js` に、同じキーの行を消してから足す
+  - ルート証明書は、Termux の `curl -sk` と `openssl` で取って指紋を照合し、`certutil -A -t 'C,,'` で取り込む。ホストの指紋は almalinux-setup.md の「Caddy: 端末にルート証明書を入れる」と ai-agents.md の「Codeg: Windows 11 で端末にルート証明書を入れる」の手順 1
+  - 画面の操作の手順に、Android のエミュレーター（x86_64、Android 17）で撮った画面を 1 枚ずつ貼る（`docs/images/android/`、利用者の依頼）
+  - 検証記録・参考資料・extra は `termux-firefox` を使う。extra は注意点だけ
 - 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/<リポジトリ名>/` に置く
 - `docs/reference/`・`docs/extra/` はこのリポジトリ、`docs/verification/` は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法

@@ -1,0 +1,13 @@
+# Android のセットアップの注意点
+
+[手順書の「Termux の Firefox」](../android.md#termux-の-firefox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/termux-firefox.md)・[参考資料](../reference/termux-firefox.md)
+
+- 手順番号は、名前を付けた手順書の項の番号を指す
+
+## 注意点
+
+- Termux の Firefox は、サンドボックスを外してビルドされている。知らないサイトの普段の閲覧には使わず、自分のサイトの確かめなどに使う（[補足](../reference/termux-firefox.md#termux-の-firefox--手順-1-補足-サンドボックスと更新)）
+- Termux と Termux:X11 の入手元（GitHub・F-Droid）を混ぜない。Google Play の Termux は使わない
+- Firefox は、[Termux の Firefox: 起動と終了](../android.md#termux-の-firefox-起動と終了)の手順 2 のメニューの「Exit」で閉じる。`pkill -f termux-x11` で止めると、次の起動で「Restore Session」が出る
+- ルート証明書は、[Termux の Firefox: ルート証明書を入れる](../android.md#termux-の-firefox-ルート証明書を入れる)の手順 2 でホストの指紋と比べる。違えば取り込まない。サイトの警告の画面では進まない
+- 開発者向けオプションをオフにすると、「子プロセスの制限を無効化」も戻るという説明がある（[agnostic-apollo の Android-Docs](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)。確かめていない）
