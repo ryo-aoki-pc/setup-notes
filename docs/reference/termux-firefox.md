@@ -44,6 +44,27 @@
 - `am start` は Termux:X11 の画面を前に出す
 - `pkill -f termux-x11` で止めた後は、次の起動で Firefox が「Restore Session」を出した
 
+### Termux の Firefox: ホーム画面のアイコンで起動する / 手順 2: 補足: スクリプトとアイコン
+
+- Termux:Widget は、`~/.shortcuts/` のスクリプトをターミナルの画面で、`~/.shortcuts/tasks/` のスクリプトを裏で動かす。ホーム画面のアイコンには、裏で動かす `~/.shortcuts/tasks/Firefox` を使う
+- アイコンは `~/.shortcuts/icons/<スクリプトの名前>.png` に置く。`Firefox` には `Firefox.png` を使う。termux-widget の README は、フォルダーを `0700`、アイコンを `0600` にすることを勧めている
+- `termux-x11` の実際のプロセスの名前は `termux-x11 com.termux.x11 :0 -xstartup …`。`$PREFIX/bin/termux-x11` が `--nice-name="termux-x11 com.termux.x11 $*"` を付けて起動する
+- `pgrep -f 'termux-x11 com.termux.x11 :0'` で既に動いているかを見分け、動いていれば 2 つ目を起動せず、`am start` で Termux:X11 の画面を前に出す
+
+### Termux の Firefox: ホーム画面のアイコンで起動する / 手順 2: 補足: 倍率の優先
+
+- `user.js` に `layout.css.devPixelsPerPx` が無いときは、`GDK_SCALE=2` で倍率 2 倍になる
+- `user.js` に `layout.css.devPixelsPerPx` があるときは、その値が優先される。`2.0` と `GDK_SCALE=2` を併用しても 4 倍にはならず、2 倍のまま
+- Firefox は一度使った倍率を `prefs.js` にも残す。`user.js` の行を消しただけでは前の倍率が残るので、`GDK_SCALE=2` だけで確かめるときは `prefs.js` の行も消した
+- この項の手順 2 のスクリプト（`MOZ_USE_XINPUT2=1 GDK_SCALE=2`）で、`user.js`・`prefs.js` に倍率が無い状態からホーム画面のアイコンで起動すると、倍率 2 倍で開き、1 本指でスクロールできた
+
+### Termux の Firefox: ホーム画面のアイコンで起動する / 手順 3: 補足: 裏からの画面の起動と権限
+
+- Android は、裏で動くアプリから画面を出すことを止める。アイコンを押しても、X サーバーと Firefox が裏で起動するだけで、Termux:X11 の画面が出ないことがある
+- Termux に「他のアプリの上に重ねて表示」を許可すると、この制限の例外になる。許可前のログは `Background activity launch blocked! … callingPackage: com.termux`、許可後は `BAL_ALLOW_SAW_PERMISSION` だった
+- Android 17 では、最初は「アプリはアクセスを拒否されました」と出て、権限をオンにできなかった。Termux のアプリ情報で「制限付き設定を許可」を押すと、オンにできた
+- エミュレーターには画面ロックが無く、解除の確認は出なかった。画面ロックのある端末では、解除を求められることがある
+
 ### Termux の Firefox: 画面の倍率とタッチ / 手順 1・2: 補足: プロファイルと user.js
 
 - Firefox 158 のプロファイルは、初めての起動の後に `~/.config/mozilla/firefox/<ランダム>.default-default` にできる。`installs.ini` の `Default=` がその場所を指す
@@ -60,6 +81,12 @@
 
 - 「Output」の「Display resolution mode」は `native`、「Screen orientation」は `auto` が既定。手順ではこの 2 つを変えない
 - 横向きにすると、dwm が窓を広げ直し、倍率 2.0 で 1200 の CSS の画素の幅になった（Wikipedia が横のメニュー付きの形で出た）
+
+### Termux の Firefox: 画面の倍率とタッチ / 手順 4: 補足: XInput2 とスクロール
+
+- `MOZ_USE_XINPUT2=1` は、Firefox に X の XInput2（タッチの入力）を使わせる環境変数。付けずに Direct touch で 1 本指を上下になぞると、マウスのドラッグとして扱われ、文字が選ばれた
+- `MOZ_USE_XINPUT2=1` を付けると、1 本指でスクロールでき、指を離した後も勢いで少し流れた。タップでのリンクの移動と、ツールバーの「≡」のメニューも使えた
+- 2 本指の操作は、エミュレーターで作れないので確かめていない
 
 ### Termux の Firefox: 日本語の表示と入力 / 手順 1: 補足: フォントと言語
 
@@ -96,10 +123,15 @@
 - Android 12 は、adb で `device_config put activity_manager max_phantom_processes 2147483647` を実行する（同じ文書。確かめていない）
 - エミュレーターでは強制終了は起きなかったので、この設定で強制終了が無くなることは確かめていない
 
+### Termux の Firefox: 更新 / 手順 3: 補足: Termux:Widget の更新
+
+- Termux:Widget の更新は確かめていない
+
 ## 参照
 
 - [Termux（termux-app）](https://github.com/termux/termux-app)
 - [Termux:X11](https://github.com/termux/termux-x11)
+- [Termux:Widget（termux-widget）](https://github.com/termux/termux-widget)
 - [termux-packages の Firefox](https://github.com/termux/termux-packages/tree/master/x11-packages/firefox)
 - [proot-distro](https://github.com/termux/proot-distro)
 - [agnostic-apollo の Android-Docs（phantom process）](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)
