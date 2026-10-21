@@ -56,7 +56,7 @@
 - `user.js` に `layout.css.devPixelsPerPx` が無いときは、`GDK_SCALE=2` で倍率 2 倍になる
 - `user.js` に `layout.css.devPixelsPerPx` があるときは、その値が優先される。`2.0` と `GDK_SCALE=2` を併用しても 4 倍にはならず、2 倍のまま
 - Firefox は一度使った倍率を `prefs.js` にも残す。`user.js` の行を消しただけでは前の倍率が残るので、`GDK_SCALE=2` だけで確かめるときは `prefs.js` の行も消した
-- この項の手順 2 のスクリプト（`MOZ_USE_XINPUT2=1 GDK_SCALE=2`）で、`user.js`・`prefs.js` に倍率が無い状態からホーム画面のアイコンで起動すると、倍率 2 倍で開き、1 本指でスクロールできた
+- [手順書の「Termux の Firefox: ホーム画面のアイコンで起動する」の手順 2](../android.md#termux-の-firefox-ホーム画面のアイコンで起動する)のスクリプト（`MOZ_USE_XINPUT2=1 GDK_SCALE=2`）で、`user.js`・`prefs.js` に倍率が無い状態からホーム画面のアイコンで起動すると、倍率 2 倍で開き、1 本指でスクロールできた
 
 ### Termux の Firefox: ホーム画面のアイコンで起動する / 手順 3: 補足: 裏からの画面の起動と権限
 

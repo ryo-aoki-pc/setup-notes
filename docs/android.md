@@ -91,6 +91,7 @@
 
    - Termux:X11 の画面が前に出て、Firefox が開く
    - 「Make Firefox your default browser?」が出たら「Not now」を押す
+   - ページは 1 本指でなぞってスクロールする（[Termux の Firefox: 画面の倍率とタッチ](#termux-の-firefox-画面の倍率とタッチ)の手順 4）
 
 1. Firefox のメニューで、Firefox を終了する。
 
@@ -107,7 +108,7 @@
 - 画面は Android のエミュレーター（x86_64、Android 17、Termux:Widget v0.15.0）で撮った。画面内の値は試験用
 
 > [!WARNING]
-> この項の手順 3 で許可する「他のアプリの上に重ねて表示」は、Termux がほかのアプリの画面に重ねて表示できるようになる権限（[補足](reference/termux-firefox.md#termux-の-firefox-ホーム画面のアイコンで起動する--手順-3-補足-裏からの画面の起動と権限)）。
+> この項の手順 3 で許可する「他のアプリの上に重ねて表示」は、Termux がほかのアプリの画面に重ねて表示できるようになる権限。要らなくなったら、同じ画面でオフに戻す（[補足](reference/termux-firefox.md#termux-の-firefox-ホーム画面のアイコンで起動する--手順-3-補足-裏からの画面の起動と権限)）。
 
 1. スマートフォンで、GitHub のリリースから Termux:Widget の APK を入れる。
 
@@ -161,7 +162,7 @@
    - Firefox が既に開いているときは、Termux:X11 の画面が前に出ればよい
    - Termux:X11 の画面が出ないときは、この項の手順 3 の許可を確かめる
    - 終了は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 のメニューの「Exit」を使う
-   - ![ホーム画面に並ぶ「Termux」「Termux:X11」「Termux:Widget」「Firefox」のアイコン](images/android/termux-firefox-home-icon-v0.15.0.png)
+   - ![ホーム画面のアイコンの列の右端に、Termux の印が付いた Firefox のロゴの「Firefox」](images/android/termux-firefox-home-icon-v0.15.0.png)
 
 #### Termux の Firefox: 画面の倍率とタッチ
 
@@ -210,11 +211,12 @@
    - 画面の下のキーの帯の右側にあるキーボードのボタンで、Android のキーボードを出す。戻るボタンで隠す
    - ![倍率 2.0 の Firefox の「New Tab」](images/android/termux-firefox-scale-v158.0.1.png)
 
-1. Termux:X11 の画面で、ページをスクロールする。
+1. Termux:X11 の画面で、タッチ操作でページをスクロールする。
 
-   - 1 本指で上へなぞるとページの下へ進み、下へなぞると上へ戻る
+   - ページの上に 1 本指を置き、上へなぞるとページの下へ進み、下へなぞると上へ戻る（スマートフォンのブラウザと同じ）
    - 指を離すと、勢いで少し流れる
-   - キーの帯で操作するときは、先にページの本文を一度タップする
+   - タップはクリックになり、リンクやボタンを押せる
+   - キーの帯で動かすときは、先にページの本文を一度タップする
    - 画面の下のキーの帯の `PGDN` で 1 画面下へ、`PGUP` で 1 画面上へ動く
    - `END` でページのいちばん下へ、`HOME` でいちばん上へ動く
    - `MOZ_USE_XINPUT2=1` を付けずに起動した Firefox で文字が選ばれるときは、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で閉じ、同じ項の手順 1 で起動し直す
