@@ -88,6 +88,19 @@
 - `MOZ_USE_XINPUT2=1` を付けると、1 本指でスクロールでき、指を離した後も勢いで少し流れた。タップでのリンクの移動と、ツールバーの「≡」のメニューも使えた
 - 2 本指の操作は、エミュレーターで作れないので確かめていない
 
+### Termux の Firefox: ダークテーマにする / 手順 2: 補足: テーマの指定と user.js
+
+- `ui.systemUsesDarkTheme` は、Firefox にシステムのテーマの明暗を指定する設定。`1` で暗い表示、`0` で明るい表示にする
+- Firefox のテーマは既定の `default-theme@mozilla.org`（システムに合わせる）。Termux:X11 の中には GTK の暗いテーマが無く、そのままでは明るい表示になる
+- `ui.systemUsesDarkTheme` は `prefs.js` にも残る。`user.js` の値が起動のたびに `prefs.js` を上書きするので、明るい表示に戻すときは `user.js` の値を `0` にする
+
+### Termux の Firefox: ダークテーマにする / 手順 3: 補足: サイトの表示と確認の範囲
+
+- 確かめたサイトは、[MDN の日本語版](https://developer.mozilla.org/ja/)と日本語の Wikipedia
+- MDN はダーク表示（`prefers-color-scheme`）に対応し、本文まで暗い色になった
+- 日本語の Wikipedia は、既定の表示では明るいままだった
+- `0` に戻して起動すると、「New Tab」は明るい表示に戻り、MDN の本文も白に戻った
+
 ### Termux の Firefox: 日本語の表示と入力 / 手順 1: 補足: フォントと言語
 
 - Termux の `$PREFIX/etc/fonts/fonts.conf` は `/system/fonts` も読む。エミュレーターでは、Android の `NotoSansCJK-Regular.ttc` で、フォントを入れる前から日本語が出た。機種によって中身が違うので、手順では `otf-noto-sans-cjk` を入れる
