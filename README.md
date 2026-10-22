@@ -8,7 +8,7 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 | --- | --- | --- |
 | [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
-| [Android のセットアップ](docs/android.md) | Android | Termux の Firefox（PC 版） |
+| [Android のセットアップ](docs/android.md) | Android | Termux、Termux の Firefox（PC 版）、Termux の開発環境 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
 | [AI コーディングエージェントのセットアップ](docs/ai-agents.md) | Windows 11・AlmaLinux 10 | Claude Code・Codex CLI・Grok Build・Antigravity CLI、プラグイン、共同作業、ブラウザ操作、Remote Control、GNOME 操作 |
@@ -62,6 +62,11 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 ### 端末とシェル
 
 - シェルと端末の手順書の「[AlmaLinux 10 で使う](docs/shell-terminal.md#almalinux-10-で使う)」・「[Windows 11 で使う](docs/shell-terminal.md#windows-11-で使う)」で、シェルのツール・HackGen Console NF・WezTerm を入れ、Windows Terminal と PowerShell 7 の設定も行う
+
+### Android の Termux の開発環境
+
+- Android のセットアップの「[Termux: 基本の設定](docs/android.md#termux-基本の設定)」で端末を整え、「[Termux のシェル: シェルのツールを入れる](docs/android.md#termux-のシェル-シェルのツールを入れる)」で開発の道具を入れる
+- 編集と AI エージェントは「[Termux の Neovim: LazyVim の設定を導入する](docs/android.md#termux-の-neovim-lazyvim-の設定を導入する)」・「[Termux の AI エージェント: proot の Ubuntu で Claude Code を使う](docs/android.md#termux-の-ai-エージェント-proot-の-ubuntu-で-claude-code-を使う)」を通す
 
 ### ファイル・ディスク・リソースを見る
 

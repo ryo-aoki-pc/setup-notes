@@ -16,23 +16,20 @@
 
 ## 補足
 
-### Termux の Firefox / 手順 1: 補足: サンドボックスと更新
+### Termux の Firefox / 手順 1: 補足: Termux:X11 の APK
+
+- Termux:X11 の sharedUid 版は Termux と同じプロセスの扱いになり、Android が Termux を遅くするのを避けられる。GitHub の Termux でだけ使える（[Termux:X11 の README](https://github.com/termux/termux-x11#setup-instructions)）
+- F-Droid の Termux と通常版の組み合わせは確かめていない
+- Termux:X11 は Android 8 以降（同じ README）。エミュレーターの Android 17 でだけ確かめた
+- Termux:X11 の APK の targetSdk は 28。Android 17 の Play プロテクトで止められたときは、「詳細」の「インストールする」で入った
+
+### Termux の Firefox / 手順 2: 補足: サンドボックスと更新
 
 - termux-packages の `x11-packages/firefox/mozconfig.cfg` は、`--disable-sandbox`・`--disable-hardening`・`--disable-updater` を付けてビルドしている（[mozconfig.cfg](https://github.com/termux/termux-packages/blob/master/x11-packages/firefox/mozconfig.cfg)）
 - サンドボックスが無いので、ページを描く処理が破られたときに、Termux のファイル（ホームの鍵など）まで届くおそれがある。知らないサイトの普段の閲覧には使わない
 - 自分で更新する仕組みも外してあるので、Firefox は Termux の `pkg upgrade` で上げる
 
-### Termux の Firefox / 手順 1: 補足: 署名・入手元・Play プロテクト
-
-- Termux とプラグインは、同じ入手元（GitHub・F-Droid）の APK でそろえる。入手元で署名が違い、混ぜると入らない（[termux-app の README](https://github.com/termux/termux-app#installation)）
-- Termux:X11 の sharedUid 版は Termux と同じプロセスの扱いになり、Android が Termux を遅くするのを避けられる。GitHub の Termux でだけ使える（[Termux:X11 の README](https://github.com/termux/termux-x11#setup-instructions)）。F-Droid の Termux と通常版の組み合わせは確かめていない
-- Google Play の Termux は、機能が欠ける試験版（[termux-app の README](https://github.com/termux/termux-app#google-play-store-experimental-branch)）
-- Termux は Android 7 以降、Termux:X11 は Android 8 以降（各 README）。エミュレーターの Android 17 でだけ確かめた
-- `universal` の APK は、どの CPU でも動く。エミュレーターでは x86_64 の APK でも通した
-- どちらの APK も targetSdk は 28。Android 17 の Play プロテクトは「Android の以前のバージョンを対象」としてブロックし、「詳細」の「インストールする」で入った。入れ直し（更新）では止めなかった
-- ブラウザから APK を開いたときの提供元の許可の画面は、エミュレーターでは確かめていない（「ファイル」アプリから開いた）
-
-### Termux の Firefox / 手順 3・4・6: 補足: dwm と Firefox の画面
+### Termux の Firefox / 手順 2・3・5: 補足: dwm と Firefox の画面
 
 - ウィンドウマネージャー無しでは、Firefox の窓が画面の左上の一部にしか広がらなかった。dwm を使うと画面いっぱいになり、上に dwm の細い帯が出る
 - 導入の後の Termux の中（`$PREFIX`）は 1.5 GB ほどだった（Firefox の依存の mesa・llvm・gtk3 などを含む）
@@ -72,7 +69,7 @@
 - `user.js` は起動のたびに読まれ、`prefs.js` に写る。`layout.css.devPixelsPerPx` の `2.0` は、縦向きで 540、横向きで 1200 の CSS の画素の幅になる
 - `browser.shell.checkDefaultBrowser` を `false` にすると、起動時の「Make Firefox your default browser?」が出なくなる
 
-### Termux の Firefox / 手順 5: 補足: タッチの方式
+### Termux の Firefox / 手順 4: 補足: タッチの方式
 
 - Termux:X11 の「Touchscreen input mode」は「Trackpad」が既定。画面をタッチパッドとして使うので、押した場所ではなく、ポインターのある場所が押される（初めての起動で、「Skip this step」が押せなかった）
 - 「Direct touch」にすると、指で押した場所がそのままクリックになる
@@ -146,15 +143,7 @@
 - Windows 11 の Codeg 専用の Caddy で、ホストと指紋を照合してから取り込み、警告の画面で進まずに `/api/` からログインの画面が開くところまで確かめた
 - AlmaLinux 10 のホストの Caddy と、取り込んでから 12 時間以上たった後は、確かめていない
 
-### Termux の Firefox: 強制終了されたとき / 手順 1・2: 補足: Android の設定
-
-- Android 12 以降は、Termux の子プロセスが多いときや CPU を使いすぎたときに、Android が止める（phantom process killer。[termux-app の README](https://github.com/termux/termux-app#readme)）
-- Android 14 以降は、開発者向けオプションの「子プロセスの制限を無効化」で止める（[agnostic-apollo の Android-Docs](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)）。Android 17 のエミュレーターで、オンにすると `persist.sys.fflag.override.settings_enable_monitor_phantom_procs` が `false` になることを確かめた
-- Android 12L・13 は、PC の adb で `settings put global settings_enable_monitor_phantom_procs false` を実行する（同じ文書。確かめていない）
-- Android 12 は、adb で `device_config put activity_manager max_phantom_processes 2147483647` を実行する（同じ文書。確かめていない）
-- エミュレーターでは強制終了は起きなかったので、この設定で強制終了が無くなることは確かめていない
-
-### Termux の Firefox: 更新 / 手順 3: 補足: Termux:Widget の更新
+### Termux の Firefox: 更新 / 手順 2: 補足: Termux:Widget の更新
 
 - Termux:Widget の更新は確かめていない
 
@@ -166,7 +155,6 @@
 - [termux-packages の Firefox](https://github.com/termux/termux-packages/tree/master/x11-packages/firefox)
 - [Firefox の FFmpegLibWrapper.h](https://github.com/mozilla-firefox/firefox/blob/main/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h)
 - [proot-distro](https://github.com/termux/proot-distro)
-- [agnostic-apollo の Android-Docs（phantom process）](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)
 - [音声の確かめに使うファイル（Wikimedia Commons、2 分 30 秒）](https://commons.wikimedia.org/wiki/File:Bach_-_Cello_Suite_no._1_in_G_major,_BWV_1007_-_I._Pr%C3%A9lude.ogg)
 - [AlmaLinux 10 の「Caddy: 端末にルート証明書を入れる」](../almalinux-setup.md#caddy-端末にルート証明書を入れる)
 - [Codeg: Windows 11 で端末にルート証明書を入れる](../ai-agents.md#codeg-windows-11-で端末にルート証明書を入れる)

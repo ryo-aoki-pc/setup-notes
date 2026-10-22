@@ -4,7 +4,7 @@
 
 ## 手順書の構造
 
-Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする。GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は、両 OS とも `docs/shell-terminal.md` を正本とする。コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は、AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md` を正本とする。Android のスマートフォンの操作（Termux の Firefox）は `docs/android.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
+Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・VPN・リモート操作も、対応する OS のカテゴリの用途に集約する。AI コーディングエージェントの実施手順（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` を正本とする。仮想マシン（VirtualBox・VirtualBox の bootc ゲスト・kvm-container・Hyper-V・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` を正本とする。GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` を正本とする。シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は、両 OS とも `docs/shell-terminal.md` を正本とする。コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は、AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md` を正本とする。Android のスマートフォンの操作（Termux・Termux の Firefox・Termux の開発環境）は、AI エージェントを含めて `docs/android.md` を正本とする。正本を増やすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
 - 検証・参考資料・ロールバックは用途ごとの文書に置き、用途の項のリードから案内する
@@ -188,10 +188,10 @@ Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windo
   - 検証で撮った画面は非公開側の `docs/images/<手順書の名前>/` に PNG で置き、検証記録から相対パスで指す（今は Windows のデュアルブート・GNOME のデスクトップ共有・AlmaLinux の初期設定・AlmaLinux の VM・VirtualBox・Forgejo・Android のエミュレーター）
   - 実施に必要な判定条件は手順書の箇条書きに残す
   - 同じリポジトリの中では、既存の画像ファイルは移動せず、文書側の相対パスを直す
-  - **手順書に貼るのは、コマンドの無い手順で、どこを押すか・何が出れば成功かを画面で示すものに限る**。その手順の最後の箇条書き（「次の手順は、〜してから貼る」があれば、その直前）に 1 枚まで置く（forgejo.md の「Forgejo: 使い方の基本」、ai-agents.md の「Codeg」、windows-setup.md の「WinMerge で 2 つの Excel のセルの変更を取り込む」・「WinMerge で 2 つの Word の変更を取り込む」、android.md の「Termux の Firefox」）
+  - **手順書に貼るのは、コマンドの無い手順で、どこを押すか・何が出れば成功かを画面で示すものに限る**。その手順の最後の箇条書き（「次の手順は、〜してから貼る」があれば、その直前）に 1 枚まで置く（forgejo.md の「Forgejo: 使い方の基本」、ai-agents.md の「Codeg」、windows-setup.md の「WinMerge で 2 つの Excel のセルの変更を取り込む」・「WinMerge で 2 つの Word の変更を取り込む」、android.md の「Termux」・「Termux の Firefox」）
     - 節のリードで、何で撮ったか（実機か VM か、対象の版）と、画面内の値が試験用であることを断る
     - ai-agents.md の画像は `docs/images/ai-agents/<主題>-<内容>-v<版>.png` とし、幅は 1440 px までにする
-    - android.md の画像は `docs/images/android/termux-firefox-<内容>-v<版>.png`（Android の設定の画面は `-android-<版>.png`）とし、状態バーとナビゲーション バーを切り落とす
+    - android.md の画像は `docs/images/android/termux-<内容>-v<版>.png`（Firefox は `termux-firefox-<内容>-v<版>.png`、Android の設定の画面は `-android-<版>.png`）とし、状態バーとナビゲーション バーを切り落とす
     - 入力済みの認証欄、URL のセッション ID、QR コード、証明書の画面（名前に PC 名が入る）も載せない
   - 何で撮った画面か（VM か実機か）を断る。窓の部分だけを切り出す
   - 本当のユーザー名・ホスト名・IP が写るものは載せない（試験用の値にして撮る）
