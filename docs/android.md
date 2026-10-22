@@ -328,6 +328,34 @@
    - PulseAudio を手で起動する必要はない
    - `RUNNING` なのに音が聞こえないときは、[補足](reference/termux-firefox.md#termux-の-firefox-音--手順-2-補足-pulseaudio-の自動起動)の `module-aaudio-sink` を読む
 
+#### Termux の Firefox: H.264 の動画を再生する
+
+- H.264 の動画を再生する。Firefox は Termux の FFmpeg を読み込んで再生するので、設定の変更は要らない（[補足](reference/termux-firefox.md#termux-の-firefox-h264-の動画を再生する--手順-1-補足-ffmpeg-の読み込みと版)）
+- 前提: [Termux の Firefox](#termux-の-firefox)を通してある
+- 実行場所: スマートフォンの Termux と Termux:X11
+- 画面は Android のエミュレーター（x86_64、Android 17、Firefox 158.0.1）で撮った。画面内の値は試験用
+
+1. Termux で、FFmpeg が入っていることと版を確かめる。
+
+   ```bash
+   pkg install -y ffmpeg
+   printf '\n\033[7m 確認 \033[0m\n'
+   dpkg-query -W -f='${Package} ${Version}\n' firefox ffmpeg
+   ls "$PREFIX"/lib/libavcodec.so.*
+   ```
+
+   - 「確認」の後に `ffmpeg 9.…` と `firefox 158.…` などの 2 行と、`libavcodec.so.63` などのファイルが出ればよい
+   - `libavcodec.so.` の後の数字が、Firefox の読める上限（Firefox 158 では 63）以下ならよい
+   - FFmpeg が既に入っていれば、`ffmpeg is already the newest version` と出て、何も入れない
+
+1. Termux:X11 の画面で、H.264 の動画を再生する。
+
+   - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 か、[Termux の Firefox: ホーム画面のアイコンで起動する](#termux-の-firefox-ホーム画面のアイコンで起動する)の手順 5 で起動する
+   - Firefox で[MDN の学習用の動画](https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4)を開く
+   - 白いうさぎの画が出て、最後まで再生されればよい（`0:08 / 0:08`）
+   - 再生されないときは、この項の手順 1 で `libavcodec.so` の版を確かめる
+   - ![Firefox のタブ「rabbit320.mp4」と白いうさぎの画、再生の帯「0:08 / 0:08」](images/android/termux-firefox-h264-v158.0.1.png)
+
 #### Termux の Firefox: ルート証明書を入れる
 
 - Caddy のルート証明書を、Termux の Firefox のプロファイルに入れる
