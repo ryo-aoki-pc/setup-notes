@@ -22,7 +22,7 @@
 - `codex login --device-auth` は、`https://auth.openai.com/codex/device` と 15 分で切れるワンタイムコードを出して待った。`Ctrl+C` で止まり、`codex login status` は `Not logged in` を出した（終了コード 1）
 - ログインと、ログインの後の操作（`codex exec` など）は確かめていない
 
-### Termux の AI エージェント / Termux の AI エージェント: proot の Ubuntu で Claude Code を使う / 手順 3・4: 補足: インストール先と PATH
+### Termux の AI エージェント / Termux の AI エージェント: proot の Ubuntu で Claude Code を使う / 手順 3〜5: 補足: インストール先・PATH・初めての起動
 
 - 公式のインストーラーは `~/.local/bin/claude` にリンクを置く。Ubuntu の中で Claude Code の `--version` が動いた
 - Ubuntu の root のログインシェルでは `~/.local/bin` が PATH に無かった。`~/.bashrc` に PATH の行を置いて、新しいシェルでも見つかるようにする

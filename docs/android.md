@@ -32,8 +32,8 @@
    - 提供元の許可を求められたら許可する。不明なアプリの注意が出たら「続行」を押す
    - 「このアプリをインストールしますか？」では「インストール」を押す
    - 「Google Play プロテクト」の「安全ではないアプリをブロックしました」が出たら、「詳細」→「インストールする」を押す
-   - ![Google Play プロテクトの「安全ではないアプリをブロックしました」と「インストールする」](images/android/termux-firefox-play-protect-v0.118.3.png)
    - 「アプリをインストールしました」と出ればよい
+   - ![Google Play プロテクトの「安全ではないアプリをブロックしました」と「インストールする」](images/android/termux-firefox-play-protect-v0.118.3.png)
 
 1. Termux を開き、パッケージを更新する。
 
@@ -606,7 +606,7 @@
 
 - 共通の bash 設定を入れ、補完と履歴の検索を整える
 - 前提: [Termux](#termux)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/termux-shell.md)・[参考資料](reference/termux-shell.md)・[注意点](extra/termux.md)
 
 1. Termux で、git と bash-completion を入れる。
@@ -685,7 +685,7 @@
 
 - starship・zoxide・fzf・eza・bat・tmux と、シェルスクリプトの検査・整形の道具を入れる
 - 前提: [Termux のシェル](#termux-のシェル)と[Termux: 基本の設定](#termux-基本の設定)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - starship・bat・tmux の設定ファイルを置くときは、この項の後に[シェルと端末の「starship の設定ファイル」](shell-terminal.md#starship-の設定ファイル)・[「bat の設定ファイル」](shell-terminal.md#bat-の設定ファイル)・[「tmux の設定ファイル」](shell-terminal.md#tmux-の設定ファイル)のブロックを Termux の画面に貼る。各項の既存ファイルの確認と退避を省かない。bat の設定ファイルの場所は `/data/data/com.termux/files/home/.config/bat/config` と出る
 
 1. Termux で、シェルの道具を入れる。
@@ -722,7 +722,7 @@
 
 - yazi と自分用の `custom` の設定を入れ、Android 用のキーを確かめる
 - 前提: [Termux のシェル: シェルのツールを入れる](#termux-のシェル-シェルのツールを入れる)と[Termux: 基本の設定](#termux-基本の設定)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）。既存の `~/.config/yazi` の確認と退避を省かない
+- 実行場所: スマートフォンの Termux（bash）。既存の `~/.config/yazi` の確認と退避を省かない
 
 1. Termux で、yazi と依存ツールを入れる。
 
@@ -775,7 +775,7 @@
 
 - 共通の bash 設定と yazi の設定を上げる
 - 前提: [Termux のシェル](#termux-のシェル)を通してある。この項の手順 2 は、[Termux のシェル: yazi を入れる](#termux-のシェル-yazi-を入れる)を通したときだけ行う
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - 道具そのものは[Termux: 更新](#termux-更新)で上げる
 
 1. Termux で、共通の bash 設定を更新する。
@@ -795,7 +795,7 @@
 
 - Git の共通設定を書き、使い捨てのリポジトリで改行・ブランチ・push・pull を確かめる
 - 前提: [Termux のシェル](#termux-のシェル)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/termux-git.md)・[参考資料](reference/termux-git.md)・[注意点](extra/termux.md)
 
 1. Termux で、Git の共通設定と動作の確認を行う。
@@ -809,7 +809,7 @@
 
 - git-delta を入れ、git の差分を色付きで表示する
 - 前提: [Termux の Git](#termux-の-git)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 
 1. Termux で、変数を設定する。
 
@@ -871,7 +871,7 @@
 
 - GitHub CLI（`gh`）を入れ、GitHub にログインする
 - 前提: [Termux の Git](#termux-の-git)を通し、GitHub のアカウントを用意してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）と Android のブラウザ
+- 実行場所: スマートフォンの Termux（bash）と Android のブラウザ
 
 1. Termux で、GitHub CLI を入れる。
 
@@ -911,7 +911,7 @@
 
 - lazygit と自分用の設定を入れ、Git の一覧の画面を確かめる
 - 前提: [Termux の Git: git-delta を入れる](#termux-の-git-git-delta-を入れる)と[Termux: 基本の設定](#termux-基本の設定)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）。この項の手順 2 の前に、既存の `~/.config/lazygit/config.yml` の確認と退避を行う
+- 実行場所: スマートフォンの Termux（bash）。この項の手順 2 の前に、既存の `~/.config/lazygit/config.yml` の確認と退避を行う
 
 > [!CAUTION]
 > - この項の手順 2 は既存の `~/.config/lazygit/config.yml` を置き換える
@@ -963,7 +963,7 @@
 
 - lazygit の設定を上げる
 - 前提: [Termux の Git: lazygit の設定を導入する](#termux-の-git-lazygit-の設定を導入する)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - Git・git-delta・GitHub CLI・lazygit は[Termux: 更新](#termux-更新)で上げる
 
 1. Termux で、lazygit の設定を更新する。
@@ -979,7 +979,7 @@
 
 - Neovim と、LazyVim で使う外部コマンドを Termux のパッケージで入れる
 - 前提: [Termux のシェル: シェルのツールを入れる](#termux-のシェル-シェルのツールを入れる)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/termux-neovim.md)・[参考資料](reference/termux-neovim.md)・[注意点](extra/termux.md)
 
 1. Termux で、Neovim と外部コマンドを入れる。
@@ -1007,7 +1007,7 @@
 
 - md-format を `~/md-format` に clone し、Markdown の整形に使う `mdfmt` を入れる
 - 前提: [Termux の Neovim](#termux-の-neovim)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 
 1. Termux で、md-format を clone して導入する。
 
@@ -1034,7 +1034,7 @@
 
 - 自分用の LazyVim の設定を入れ、プラグインとパーサーを `lazy-lock.json` の版に揃える
 - 前提: [Termux の Neovim: md-format を入れる](#termux-の-neovim-md-format-を入れる)と[Termux: 基本の設定](#termux-基本の設定)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）。この項の手順 1 の既存の設定とデータの退避を省かない
+- 実行場所: スマートフォンの Termux（bash）。この項の手順 1 の既存の設定とデータの退避を省かない
 
 1. Termux で、既存の Neovim の設定とデータがあれば退避する。
 
@@ -1106,7 +1106,7 @@
 
 - md-format と LazyVim のプラグインを上げる
 - 前提: [Termux の Neovim: LazyVim の設定を導入する](#termux-の-neovim-lazyvim-の設定を導入する)を通してある
-- 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- 実行場所: スマートフォンの Termux（bash）
 - Neovim と外部コマンドは[Termux: 更新](#termux-更新)で上げる
 
 1. Termux で、md-format を更新する。
@@ -1244,7 +1244,7 @@
 - 実行場所: スマートフォンの Termux（bash）。この項の手順 6 は PC の端末で行う
 
 > [!WARNING]
-> この項の手順 3 の sshd は、8022 番ポートをすべてのアドレスで待ち受ける。信頼する LAN または WireGuard からだけつなぐ。手順 7 で止めると、PC からの SSH 接続も切れる。
+> この項の手順 3 の sshd は、8022 番ポートをすべてのアドレスで待ち受ける。信頼する LAN または WireGuard からだけつなぐ。この項の手順 7 で止めると、PC からの SSH 接続も切れる。
 
 1. Termux で、PC の公開鍵を登録する（`PC_PUBKEY` は必ず値を入れる）。
 

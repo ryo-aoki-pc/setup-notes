@@ -13,7 +13,6 @@
 
 - Termux の apt は、推奨パッケージ（Recommends）も入れる（`APT::Install-Recommends "1"`）
 - git は openssh を推奨するので、git と一緒に OpenSSH が入る。入れただけでは sshd は起動しない
-- yazi は 7zip・chafa・fd・ffmpeg・fzf・imagemagick・jq・poppler・ripgrep・zoxide を推奨する。手順書の `pkg install` に書いていない chafa と imagemagick も入る
 
 ### Termux のシェル / 手順 2・3: 補足: ログインシェルの読み込み
 
@@ -25,6 +24,10 @@
 
 - Termux の既定の Readline の設定は `$PREFIX/etc/inputrc` にある。`/etc/inputrc` は無いので、`~/.inputrc` から Termux のパスを読み込む
 - `bind -q beginning-of-line` に `"\e[1~"` が出れば、読み込んだ Home キーの割り当てを確かめられる
+
+### Termux のシェル / Termux のシェル: yazi を入れる / 手順 1: 補足: 推奨パッケージ
+
+- yazi は 7zip・chafa・fd・ffmpeg・fzf・imagemagick・jq・poppler・ripgrep・zoxide を推奨する。手順書の `pkg install` に書いていない chafa と imagemagick も入る
 
 ### Termux のシェル / Termux のシェル: yazi を入れる / 手順 3〜5: 補足: Android のキーとゴミ箱
 

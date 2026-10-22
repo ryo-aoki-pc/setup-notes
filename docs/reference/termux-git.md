@@ -14,7 +14,7 @@
 - AlmaLinux 10 の「Git」の手順 1〜10 は Termux でも同じコマンドで通った。`mktemp -d` の場所は Termux の `$PREFIX/tmp` になる
 - 日本語のファイル名、CRLF、初期ブランチ、push・pull の rebase と autostash の試験を通した。細かな出力は検証記録に置く
 
-### Termux の Git / Termux の Git: GitHub CLI を入れる / 手順 2・3: 補足: ブラウザでの認証
+### Termux の Git / Termux の Git: GitHub CLI を入れる / 手順 2〜4: 補足: ブラウザでの認証
 
 - GitHub CLI 2.103.0 の `gh auth login` は、接続先・認証の方法・Git の通信の方式・Git の認証の順に聞き、ワンタイムコードを出して Enter を待った
 - Enter の後のブラウザの起動と、認証の後の `gh auth status` は確かめていない（ログインはしていない）。ログインの前の `gh auth status` は `You are not logged into any GitHub hosts.` を出した
