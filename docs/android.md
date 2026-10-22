@@ -228,7 +228,6 @@
 - 実行場所: スマートフォンの Termux と Termux:X11
 - 画面は Android のエミュレーター（x86_64、Android 17、Firefox 158.0.1）で撮った。画面内の値は試験用
 - この項の手順 2 は、[Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 2 で Firefox を閉じてから貼る
-- [補足](reference/termux-firefox.md#termux-の-firefox-ダークテーマにする--手順-2-補足-テーマの指定と-userjs)
 
 1. Termux で、変数を設定する。
 
@@ -261,12 +260,13 @@
 
    - `user_pref("ui.systemUsesDarkTheme", 1);` が 1 行出ればよい（明るい表示に戻すときは `user_pref("ui.systemUsesDarkTheme", 0);`）
    - `中断:` が出たら、Firefox を閉じているかと、この項の手順 1 の値を確かめてから貼り直す
+   - 設定の意味は[補足](reference/termux-firefox.md#termux-の-firefox-ダークテーマにする--手順-2-補足-テーマの指定と-userjs)
 
 1. Termux:X11 の画面で、Firefox とサイトの色を確かめる。
 
-   - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 か、[Termux の Firefox: ホーム画面のアイコンで起動する](#termux-の-firefox-ホーム画面のアイコンで起動する)で起動する
+   - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 か、[Termux の Firefox: ホーム画面のアイコンで起動する](#termux-の-firefox-ホーム画面のアイコンで起動する)の手順 5 で起動する
    - Firefox のツールバー・タブ・「New Tab」が暗い色になればよい
-   - ダーク表示に対応したサイトは暗い色になる。対応していないサイトは明るいまま
+   - ダーク表示に対応したサイト（[MDN の日本語版](https://developer.mozilla.org/ja/)など）を開くと、本文まで暗い色になる。対応していないサイトは明るいまま
    - 明るい表示に戻すときは、この項の手順 1 で `FF_DARK='0'` にし、Firefox を閉じてこの項の手順 2 を貼り直してから起動する
    - ![ツールバー・タブ・「New Tab」が暗い色の Firefox](images/android/termux-firefox-dark-v158.0.1.png)
 
