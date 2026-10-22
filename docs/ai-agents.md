@@ -1,5 +1,7 @@
 # AI コーディングエージェントのセットアップ（AlmaLinux 10・Windows 11）
 
+Android の Termux で使う Codex CLI と Claude Code は、Android のセットアップの「[Termux の AI エージェント](android.md#termux-の-ai-エージェント)」で入れる。
+
 ## AlmaLinux 10 で使う
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で使う](#windows-11-で使う)から始める

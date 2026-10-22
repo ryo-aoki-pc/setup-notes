@@ -1,6 +1,7 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
 - 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal・PowerShell 7 のプロファイル・PowerShell の開発の設定も整える
+- Android の Termux のシェルは、Android のセットアップの「[Termux のシェル](android.md#termux-のシェル)」で設定する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う。Windows Terminal・PowerShell 7 と 5.1 のプロファイル・PowerShell の開発の設定・任意の項の設定は、この文書のそれぞれの項の「元に戻すときは」で戻す
 
 > [!IMPORTANT]

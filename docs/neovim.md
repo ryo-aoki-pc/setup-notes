@@ -1,6 +1,7 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）
 
 - Neovim を入れ、自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。AlmaLinux 10 は Homebrew、Windows 11 は scoop で入れる
+- Android の Termux で使う Neovim は、Android のセットアップの「[Termux の Neovim](android.md#termux-の-neovim)」で入れる
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#端末とエディタを消す)・[Windows 11](extra/windows-setup.md#エディタとシェルのツールを消す)）で行う
 
 > [!IMPORTANT]
