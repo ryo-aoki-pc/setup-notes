@@ -120,6 +120,24 @@
 - エミュレーターでは、耳で音を聞いていない。出力先の `RUNNING` と、`Firefox Web Browser` の入力を確かめた
 - 6 秒の音声では、Termux に切り替えて貼る間に再生が終わり、`IDLE` になった。手順では 2 分半の音声を使う。Termux:X11 が裏に回っても、再生は続いた
 
+### Termux の Firefox: H.264 の動画を再生する / 手順 1: 補足: FFmpeg の読み込みと版
+
+- Linux の Firefox は、H.264 の復号の仕組みを持たず、システムの FFmpeg（`libavcodec`）を `dlopen` で読み込む
+- Termux の `firefox` は、依存で `ffmpeg` を入れる。termux-packages の `x11-packages/firefox/build.sh` は、FFmpeg と PulseAudio が `dlopen` を通した依存であると記している
+- そのため、手順 1 の `pkg install -y ffmpeg` は、ふつう何も入れず（`ffmpeg is already the newest version`）、`ffmpeg` を手で入れたものとして記録するだけになる（`ffmpeg set to manually installed.`。`apt autoremove` の対象にならない）
+- Firefox 158 の `FFmpegLibWrapper.h` では、`FFMPEG_MAX_MAJOR_VERSION` が `63`。Firefox 158 が読めるのは libavcodec 63（FFmpeg 9）まで
+- `FFmpegRuntimeLinker.cpp` は、`libavcodec.so.63` から `libavcodec.so.53` まで順に探す
+- 確かめたときの版は Firefox 158.0.1 と FFmpeg 9.0.2
+- `$PREFIX/lib` に `libavcodec.so.63`（`libavcodec.so.63.1.102`）・`libavformat.so.63`・`libavutil.so.61` があり、`libx264` も入っていた
+
+### Termux の Firefox: H.264 の動画を再生する / 手順 2: 補足: 動画の形式と確認の範囲
+
+- [MDN の学習用の動画](https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4)は、`ffprobe` で H.264 の Constrained Baseline（320 × 240）と AAC LC、7.8 秒だった
+- Android 17 のエミュレーター（x86_64）で開くと、設定を変えずに再生が自動で始まり、白いうさぎの画が出て、最後まで再生された（`0:08 / 0:08`）
+- 再生時は、Firefox の復号のプロセス（RDD・utility）と本体の `/proc/<pid>/maps` で、`libavcodec.so.63.1.102` の読み込みを確かめた
+- PulseAudio の入力に `Firefox Web Browser` が出た
+- 実機での H.264 の再生・ハードウェアの復号・YouTube などのサイトの動画・FFmpeg 10 以降（libavcodec 64 以降）に上がったときは、確かめていない
+
 ### Termux の Firefox: ルート証明書を入れる / 手順 1〜4: 補足: 取り込み先と確認の範囲
 
 - PC 版の Firefox は、Android の「信頼できる認証情報」ではなく、プロファイルの証明書の保管場所（`cert9.db`）を使う。そこへ `certutil` で取り込む
@@ -146,6 +164,7 @@
 - [Termux:X11](https://github.com/termux/termux-x11)
 - [Termux:Widget（termux-widget）](https://github.com/termux/termux-widget)
 - [termux-packages の Firefox](https://github.com/termux/termux-packages/tree/master/x11-packages/firefox)
+- [Firefox の FFmpegLibWrapper.h](https://github.com/mozilla-firefox/firefox/blob/main/dom/media/platforms/ffmpeg/FFmpegLibWrapper.h)
 - [proot-distro](https://github.com/termux/proot-distro)
 - [agnostic-apollo の Android-Docs（phantom process）](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)
 - [音声の確かめに使うファイル（Wikimedia Commons、2 分 30 秒）](https://commons.wikimedia.org/wiki/File:Bach_-_Cello_Suite_no._1_in_G_major,_BWV_1007_-_I._Pr%C3%A9lude.ogg)

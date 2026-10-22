@@ -10,5 +10,6 @@
 - Termux と Termux:X11 の入手元（GitHub・F-Droid）を混ぜない。Google Play の Termux は使わない
 - [Termux の Firefox: ホーム画面のアイコンで起動する](../android.md#termux-の-firefox-ホーム画面のアイコンで起動する)の手順 3 の「他のアプリの上に重ねて表示」は、Termux がほかのアプリの画面に重ねて表示できるようになる権限。要らなくなったらオフに戻せる
 - Firefox は、[Termux の Firefox: 起動と終了](../android.md#termux-の-firefox-起動と終了)の手順 2 のメニューの「Exit」で閉じる。`pkill -f termux-x11` で止めると、次の起動で「Restore Session」が出る
+- `pkg upgrade` で FFmpeg の版が Firefox の読める上限を超えると、H.264 が再生されなくなるおそれがある（確かめていない）。そのときは、[Termux の Firefox: 更新](../android.md#termux-の-firefox-更新)の手順 1 で Firefox も上げる
 - ルート証明書は、[Termux の Firefox: ルート証明書を入れる](../android.md#termux-の-firefox-ルート証明書を入れる)の手順 2 でホストの指紋と比べる。違えば取り込まない。サイトの警告の画面では進まない
 - 開発者向けオプションをオフにすると、「子プロセスの制限を無効化」も戻るという説明がある（[agnostic-apollo の Android-Docs](https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md)。確かめていない）
